@@ -9,7 +9,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..56\n";
+print "1..72\n";
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -176,20 +176,68 @@ test(defined(@{"unknown_package::ISA"}) ? "defined" : "undefined", "undefined");
     test(A2->foo(), "foo");
 }
 
-{
-    test(do { use Config; eval 'Config->foo()';
-	      $@ =~ /^\QCan't locate object method "foo" via package "Config" at/ ? 1 : $@}, 1);
-    test(do { use Config; eval '$d = bless {}, "Config"; $d->foo()';
-	      $@ =~ /^\QCan't locate object method "foo" via package "Config" at/ ? 1 : $@}, 1);
-}
+## This test was totally misguided.  It passed before only because the
+## code to determine if a package was loaded used to look for the hash
+## %Foo::Bar instead of the package Foo::Bar:: -- and Config.pm just
+## happens to export %Config.
+#  {
+#      test(do { use Config; eval 'Config->foo()';
+#  	      $@ =~ /^\QCan't locate object method "foo" via package "Config" at/ ? 1 : $@}, 1);
+#      test(do { use Config; eval '$d = bless {}, "Config"; $d->foo()';
+#  	      $@ =~ /^\QCan't locate object method "foo" via package "Config" at/ ? 1 : $@}, 1);
+#  }
 
-test(do { eval 'E->foo()';
-	  $@ =~ /^\QCan't locate object method "foo" via package "E" (perhaps / ? 1 : $@}, 1);
-test(do { eval '$e = bless {}, "E"; $e->foo()';
-	  $@ =~ /^\QCan't locate object method "foo" via package "E" (perhaps / ? 1 : $@}, 1);
+
+# test error messages if method loading fails
+test(do { eval '$e = bless {}, "E::A"; E::A->foo()';
+	  $@ =~ /^\QCan't locate object method "foo" via package "E::A" at/ ? 1 : $@}, 1);
+test(do { eval '$e = bless {}, "E::B"; $e->foo()';  
+	  $@ =~ /^\QCan't locate object method "foo" via package "E::B" at/ ? 1 : $@}, 1);
+test(do { eval 'E::C->foo()';
+	  $@ =~ /^\QCan't locate object method "foo" via package "E::C" (perhaps / ? 1 : $@}, 1);
+
+test(do { eval 'UNIVERSAL->E::D::foo()';
+	  $@ =~ /^\QCan't locate object method "foo" via package "E::D" (perhaps / ? 1 : $@}, 1);
+test(do { eval '$e = bless {}, "UNIVERSAL"; $e->E::E::foo()';
+	  $@ =~ /^\QCan't locate object method "foo" via package "E::E" (perhaps / ? 1 : $@}, 1);
+
+$e = bless {}, "E::F";  # force package to exist
+test(do { eval 'UNIVERSAL->E::F::foo()';
+	  $@ =~ /^\QCan't locate object method "foo" via package "E::F" at/ ? 1 : $@}, 1);
+test(do { eval '$e = bless {}, "UNIVERSAL"; $e->E::F::foo()';
+	  $@ =~ /^\QCan't locate object method "foo" via package "E::F" at/ ? 1 : $@}, 1);
+
+# TODO: we need some tests for the SUPER:: pseudoclass
+
+# failed method call or UNIVERSAL::can() should not autovivify packages
+test( $::{"Foo::"} || "none", "none");  # sanity check 1
+test( $::{"Foo::"} || "none", "none");  # sanity check 2
+
+test( UNIVERSAL::can("Foo", "boogie") ? "yes":"no", "no" );
+test( $::{"Foo::"} || "none", "none");  # still missing?
+
+test( Foo->UNIVERSAL::can("boogie")   ? "yes":"no", "no" );
+test( $::{"Foo::"} || "none", "none");  # still missing?
+
+test( Foo->can("boogie")              ? "yes":"no", "no" );
+test( $::{"Foo::"} || "none", "none");  # still missing?
+
+test( eval 'Foo->boogie(); 1'         ? "yes":"no", "no" );
+test( $::{"Foo::"} || "none", "none");  # still missing?
+
+test(do { eval 'Foo->boogie()';
+	  $@ =~ /^\QCan't locate object method "boogie" via package "Foo" (perhaps / ? 1 : $@}, 1);
+
+eval 'sub Foo::boogie { "yes, sir!" }';
+test( $::{"Foo::"} ? "ok" : "none", "ok");  # should exist now
+test( Foo->boogie(), "yes, sir!");
+
+# TODO: universal.t should test NoSuchPackage->isa()/can()
 
 # This is actually testing parsing of indirect objects and undefined subs
 #   print foo("bar") where foo does not exist is not an indirect object.
 #   print foo "bar"  where foo does not exist is an indirect object.
 eval { sub AUTOLOAD { "ok ", shift, "\n"; } };
 print nonsuch(++$cnt);
+
+print "# $cnt tests completed\n";

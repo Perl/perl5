@@ -188,8 +188,13 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
     GV** gvp;
     CV* cv;
 
-    if (!stash)
-	return 0;
+    /* UNIVERSAL methods should be callable without a stash */
+    if (!stash) {
+	level = -1;  /* probably appropriate */
+	if(!(stash = gv_stashpvn("UNIVERSAL", 9, FALSE)))
+	    return 0;
+    }
+
     if (!HvNAME(stash))
         Perl_croak(aTHX_ "Can't use anonymous symbol table for method lookup");
     if ((level > 100) || (level < -100))
@@ -365,12 +370,14 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 	    /* ->SUPER::method should really be looked up in original stash */
 	    SV *tmpstr = sv_2mortal(Perl_newSVpvf(aTHX_ "%s::SUPER",
 						  CopSTASHPV(PL_curcop)));
+	    /* __PACKAGE__::SUPER stash should be autovivified */
 	    stash = gv_stashpvn(SvPVX(tmpstr), SvCUR(tmpstr), TRUE);
 	    DEBUG_o( Perl_deb(aTHX_ "Treating %s as %s::%s\n",
 			 origname, HvNAME(stash), name) );
 	}
 	else
-	    stash = gv_stashpvn(origname, nsplit - origname, TRUE);
+            /* don't autovifify if ->NoSuchStash::method */
+            stash = gv_stashpvn(origname, nsplit - origname, FALSE);
     }
 
     gv = gv_fetchmeth(stash, name, nend - name, 0);
@@ -414,6 +421,8 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
     GV* vargv;
     SV* varsv;
 
+    if (!stash)
+	return Nullgv;	/* UNIVERSAL::AUTOLOAD could cause trouble */
     if (len == autolen && strnEQ(name, autoload, autolen))
 	return Nullgv;
     if (!(gv = gv_fetchmeth(stash, autoload, autolen, FALSE)))
