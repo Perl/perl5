@@ -46,6 +46,8 @@ is the recommended Unicode-aware way of saying
 U8 *
 Perl_uv_to_utf8(pTHX_ U8 *d, UV uv)
 {
+    if (uv < 0x100) 
+    uv = NATIVE_TO_ASCII(uv);
     if (uv < 0x80) {
 	*d++ = uv;
 	return d;
@@ -254,7 +256,7 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
     if (UTF8_IS_ASCII(uv)) {
 	if (retlen)
 	    *retlen = 1;
-	return *s;
+	return ASCII_TO_NATIVE(*s);
     }
 
     if (UTF8_IS_CONTINUATION(uv) &&

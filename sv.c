@@ -7188,6 +7188,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    iv = *vecstr;
 		    ulen = 1;
 		}
+		if (iv <256) 
+		iv = NATIVE_TO_ASCII(iv); /* v-strings are codepoints */
 		vecstr += ulen;
 		veclen -= ulen;
 	    }
@@ -7268,6 +7270,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    uv = *vecstr;
 		    ulen = 1;
 		}
+		if (uv <256) 
+		uv = NATIVE_TO_ASCII(uv); /* v-strings are codepoints */
 		vecstr += ulen;
 		veclen -= ulen;
 	    }
