@@ -1416,6 +1416,17 @@ Implemented via Spawn. (VM/ESA)
 Does not automatically flush output handles on some platforms.
 (SunOS, Solaris, HP-UX)
 
+=item exit EXPR
+
+=item exit
+
+Emulates UNIX exit() (which considers C<exit 1> to indicate an error) by
+mapping the C<1> to SS$_ABORT (C<44>).  This behavior may be overridden
+with the pragma C<use vmsish 'exit'>.  As with the CRTL's exit()
+function, C<exit 0> is also mapped to an exit status of SS$_NORMAL
+(C<1>); this mapping cannot be overridden.  Any other argument to exit()
+is used directly as Perl's exit status. (VMS)
+
 =item fcntl FILEHANDLE,FUNCTION,SCALAR
 
 Not implemented. (Win32, VMS)
@@ -1558,17 +1569,6 @@ Not implemented. (S<Mac OS>, Win32, Plan9)
 =item endservent
 
 Not implemented. (Plan9, Win32)
-
-=item exit EXPR
-
-=item exit
-
-Emulates UNIX exit() (which considers C<exit 1> to indicate an error) by
-mapping the C<1> to SS$_ABORT (C<44>).  This behavior may be overridden
-with the pragma C<use vmsish 'exit'>.  As with the CRTL's exit()
-function, C<exit 0> is also mapped to an exit status of SS$_NORMAL
-(C<1>); this mapping cannot be overridden.  Any other argument to exit()
-is used directly as Perl's exit status. (VMS)
 
 =item getsockopt SOCKET,LEVEL,OPTNAME
 
