@@ -266,9 +266,17 @@ EOCBU
 cat > UU/uselargefiles.cbu <<'EOCBU'
 case "$uselargefiles" in
 ''|$define|true|[yY]*)
+    # Configure should take care of use64bitint and use64bitall being
+    # defined before uselargefiles.cbu is consulted.
+    if test X"$use64bitint:$quadtype" = X"$define:long" -o X"$use64bitall" = Xdefine; then
+# Keep these at the left margin.
+ccflags_uselargefiles="`getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null`"
+ldflags_uselargefiles="`getconf XBS5_LP64_OFF64_LDFLAGS 2>/dev/null`"
+    else
 # Keep these at the left margin.
 ccflags_uselargefiles="`getconf XBS5_ILP32_OFFBIG_CFLAGS 2>/dev/null`"
 ldflags_uselargefiles="`getconf XBS5_ILP32_OFFBIG_LDFLAGS 2>/dev/null`"
+    fi
 	# _Somehow_ in AIX 4.3.1.0 the above getconf call manages to
 	# insert(?) *something* to $ldflags so that later (in Configure) evaluating
 	# $ldflags causes a newline after the '-b64' (the result of the getconf).
@@ -280,8 +288,13 @@ ldflags_uselargefiles="`getconf XBS5_ILP32_OFFBIG_LDFLAGS 2>/dev/null`"
 	# Therefore the line re-evaluating ldflags_uselargefiles: it seems to fix
 	# the whatever it was that AIX managed to break. --jhi
 	ldflags_uselargefiles="`echo $ldflags_uselargefiles`"
+    if test X"$use64bitint:$quadtype" = X"$define:long" -o X"$use64bitall" = Xdefine; then
+# Keep this at the left margin.
+libswanted_uselargefiles="`getconf XBS5_LP64_OFF64_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
+    else
 # Keep this at the left margin.
 libswanted_uselargefiles="`getconf XBS5_ILP32_OFFBIG_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
+    fi
 	case "$ccflags_uselargefiles$ldflags_uselargefiles$libs_uselargefiles" in
 	'');;
 	*) ccflags="$ccflags $ccflags_uselargefiles"
