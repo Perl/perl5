@@ -416,7 +416,8 @@ The atmark() functionality is also exportable as sockatmark() function:
 	use IO::Socket 'sockatmark';
 
 This allows for a more traditional use of sockatmark() as a procedural
-socket function.
+socket function.  If your system does not support sockatmark(), the
+C<use> declaration will fail at compile time.
 
 =item connected
 
