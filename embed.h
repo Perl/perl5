@@ -853,7 +853,6 @@
 #define scan_word		Perl_scan_word
 #define scope			Perl_scope
 #define screaminstr		Perl_screaminstr
-#define seed			Perl_seed
 #define setdefout		Perl_setdefout
 #define setenv_getix		Perl_setenv_getix
 #define share_hek		Perl_share_hek
@@ -2028,7 +2027,6 @@
 #define scan_word		CPerlObj::Perl_scan_word
 #define scope			CPerlObj::Perl_scope
 #define screaminstr		CPerlObj::Perl_screaminstr
-#define seed			CPerlObj::Perl_seed
 #define seed			CPerlObj::Perl_seed
 #define set_csh			CPerlObj::Perl_set_csh
 #define setdefout		CPerlObj::Perl_setdefout

@@ -2853,8 +2853,6 @@
 #define screaminstr		pPerl->Perl_screaminstr
 #undef  seed
 #define seed			pPerl->Perl_seed
-#undef  seed
-#define seed			pPerl->Perl_seed
 #undef  set_csh
 #define set_csh			pPerl->Perl_set_csh
 #undef  setdefout

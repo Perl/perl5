@@ -5050,7 +5050,7 @@ ck_sort(OP *o)
 #endif
 
     if (o->op_flags & OPf_STACKED)
-	    simplify_sort(o);
+	simplify_sort(o);
     if (o->op_flags & OPf_STACKED) {		     /* may have been cleared */
 	OP *kid = cLISTOPo->op_first->op_sibling;	/* get past pushmark */
 	OP *k;
@@ -5096,6 +5096,7 @@ ck_sort(OP *o)
 STATIC void
 simplify_sort(OP *o)
 {
+    dTHR;
     register OP *kid = cLISTOPo->op_first->op_sibling;	/* get past pushmark */
     OP *k;
     int reversed;

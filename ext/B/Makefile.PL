@@ -30,7 +30,7 @@ sub post_constants {
 
 sub postamble {
 '
-B.o : defsubs.h 
+B$(OBJ_EXT) : defsubs.h 
 '
 }
 

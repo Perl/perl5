@@ -500,7 +500,6 @@ scan_trans
 scan_word
 scope
 screaminstr
-seed
 setdefout
 setenv_getix
 share_hek

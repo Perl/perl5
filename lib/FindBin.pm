@@ -74,7 +74,7 @@ package FindBin;
 use Carp;
 require 5.000;
 require Exporter;
-use File::Spec qw(file_name_is_absolute);
+use File::Spec;
 use Cwd qw(getcwd abs_path);
 use Config;
 use File::Basename;
@@ -142,7 +142,7 @@ BEGIN
 
      # Ensure $script contains the complete path incase we C<chdir>
 
-     $script = getcwd() . "/" . $script unless file_name_is_absolute($script);
+     $script = getcwd() . "/" . $script unless File::Spec->file_name_is_absolute($script);
 
      ($Script,$Bin) = fileparse($script);
 
@@ -154,7 +154,7 @@ BEGIN
        ($RealScript,$RealBin) = fileparse($script);
        last unless defined $linktext;
 
-       $script = (file_name_is_absolute($linktext))
+       $script = (File::Spec->file_name_is_absolute($linktext))
                   ? $linktext
                   : $RealBin . "/" . $linktext;
       }
