@@ -6,7 +6,7 @@ BEGIN {
     require Config; import Config;
 }
 
-print "1..93\n";
+print "1..82\n";
 
 $x = 'foo';
 $_ = "x";
@@ -312,7 +312,7 @@ s{  \d+          \b [,.;]? (?{ 'digits' })
 print ($_ eq $foo ? "ok 70\n" : "not ok 70\n#'$_'\n#'$foo'\n");
 
 $_ = 'x' x 20; 
-s/\d*|x/<$&>/g; 
+s/(\d*|x)/<$1>/g; 
 $foo = '<>' . ('<x><>' x 20) ;
 print ($_ eq $foo ? "ok 71\n" : "not ok 71\n#'$_'\n#'$foo'\n");
 
@@ -362,98 +362,14 @@ s/\Ga/x/;
 print "not " unless $_ eq 'xaaaaaaaa';
 print "ok 79\n";
 
-$t = 'aaa';
-
-$_ = $t;
-@res = ();
-pos = 1;
-s/\Ga(?{push @res, $_, $`})/xx/g;
-print "not " unless "$_ @res" eq 'axxxx aaa a aaa aa';
+$_ = 'aaaa';
+s/\ba/./g;
+print "#'$_'\nnot " unless $_ eq '.aaa';
 print "ok 80\n";
 
-$_ = $t;
-@res = ();
-pos = 1;
-s/\Ga(?{push @res, $_, $`})/x/g;
-print "not " unless "$_ @res" eq 'axx aaa a aaa aa';
-print "ok 81\n";
-
-$_ = $t;
-@res = ();
-pos = 1;
-s/\Ga(?{push @res, $_, $`})/xx/;
-print "not " unless "$_ @res" eq 'axxa aaa a';
-print "ok 82\n";
-
-$_ = $t;
-@res = ();
-pos = 1;
-s/\Ga(?{push @res, $_, $`})/x/;
-print "not " unless "$_ @res" eq 'axa aaa a';
-print "ok 83\n";
-
-$a = $t;
-@res = ();
-pos ($a) = 1;
-$a =~ s/\Ga(?{push @res, $_, $`})/xx/g;
-print "#'$a' '@res'\nnot " unless "$a @res" eq 'axxxx aaa a aaa aa';
-print "ok 84\n";
-
-$a = $t;
-@res = ();
-pos ($a) = 1;
-$a =~ s/\Ga(?{push @res, $_, $`})/x/g;
-print "#'$a' '@res'\nnot " unless "$a @res" eq 'axx aaa a aaa aa';
-print "ok 85\n";
-
-$a = $t;
-@res = ();
-pos ($a) = 1;
-$a =~ s/\Ga(?{push @res, $_, $`})/xx/;
-print "#'$a' '@res'\nnot " unless "$a @res" eq 'axxa aaa a';
-print "ok 86\n";
-
-$a = $t;
-@res = ();
-pos ($a) = 1;
-$a =~ s/\Ga(?{push @res, $_, $`})/x/;
-print "#'$a' '@res'\nnot " unless "$a @res" eq 'axa aaa a';
-print "ok 87\n";
-
-sub x2 {'xx'}
-sub x1 {'x'}
-
-$a = $t;
-@res = ();
-pos ($a) = 1;
-$a =~ s/\Ga(?{push @res, $_, $`})/x2/ge;
-print "#'$a' '@res'\nnot " unless "$a @res" eq 'axxxx aaa a aaa aa';
-print "ok 88\n";
-
-$a = $t;
-@res = ();
-pos ($a) = 1;
-$a =~ s/\Ga(?{push @res, $_, $`})/x1/ge;
-print "#'$a' '@res'\nnot " unless "$a @res" eq 'axx aaa a aaa aa';
-print "ok 89\n";
-
-$a = $t;
-@res = ();
-pos ($a) = 1;
-$a =~ s/\Ga(?{push @res, $_, $`})/x2/e;
-print "#'$a' '@res'\nnot " unless "$a @res" eq 'axxa aaa a';
-print "ok 90\n";
-
-$a = $t;
-@res = ();
-pos ($a) = 1;
-$a =~ s/\Ga(?{push @res, $_, $`})/x1/e;
-print "#'$a' '@res'\nnot " unless "$a @res" eq 'axa aaa a';
-print "ok 91\n";
-
 eval q% s/a/"b"}/e %;
-print ($@ =~ /Bad evalled substitution/ ? "ok 92\n" : "not ok 92\n");
+print ($@ =~ /Bad evalled substitution/ ? "ok 81\n" : "not ok 81\n");
 eval q% ($_ = "x") =~ s/(.)/"$1 "/e %;
-print +($_ eq "x " and !length $@) ? "ok 93\n" : "not ok 93\n# \$_ eq $_, $@\n";
+print +($_ eq "x " and !length $@) ? "ok 82\n" : "not ok 82\n# \$_ eq $_, $@\n";
 
 

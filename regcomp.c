@@ -1777,6 +1777,7 @@ tryagain:
 	    break;
 	case 'b':
 	    PL_seen_zerolen++;
+	    PL_regseen |= REG_SEEN_LOOKBEHIND;
 	    ret = reg_node(
 		UTF
 		    ? (LOC ? BOUNDLUTF8 : BOUNDUTF8)
@@ -1788,6 +1789,7 @@ tryagain:
 	    break;
 	case 'B':
 	    PL_seen_zerolen++;
+	    PL_regseen |= REG_SEEN_LOOKBEHIND;
 	    ret = reg_node(
 		UTF
 		    ? (LOC ? NBOUNDLUTF8 : NBOUNDUTF8)
