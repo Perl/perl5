@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.18 $, $Date: 2002/04/09 17:11:16 $)
+perlfaq3 - Programming Tools ($Revision: 1.20 $, $Date: 2002/04/23 23:35:39 $)
 
 =head1 DESCRIPTION
 
@@ -211,6 +211,11 @@ environment for Windows that supports Perl development.
 
 ( http://helpconsulting.net/visiperl/ )
 From Help Consulting, for Windows.
+
+=item OptiPerl
+
+( http://www.optiperl.com/ ) is a Windows IDE with simulated CGI
+environment, including debugger and syntax highlighting editor.
 
 =back
 
