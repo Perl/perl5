@@ -302,6 +302,7 @@ extern  int	kill(int pid, int sig);
 extern  void	*sbrk(int need);
 extern	char *	getlogin(void);
 extern	int	chown(const char *p, uid_t o, gid_t g);
+extern  int	mkstemp(const char *path);
 
 #undef	 Stat
 #define  Stat		win32_stat

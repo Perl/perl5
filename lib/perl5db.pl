@@ -25,7 +25,7 @@ $header = "perl5db.pl version $VERSION";
 # if caller() is called from the package DB, it provides some
 # additional data.
 #
-# The array @{$main::{'_<'.$filename} is the line-by-line contents of
+# The array @{$main::{'_<'.$filename}} is the line-by-line contents of
 # $filename.
 #
 # The hash %{'_<'.$filename} contains breakpoints and action (it is

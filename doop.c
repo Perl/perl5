@@ -968,10 +968,10 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	switch (optype) {
 	case OP_BIT_AND:
 	    while (lulen && rulen) {
-		luc = utf8_to_uv((U8*)lc, lulen, &ulen, UTF8_ALLOW_ANY);
+		luc = utf8_to_uv((U8*)lc, lulen, &ulen, UTF8_ALLOW_ANYUV);
 		lc += ulen;
 		lulen -= ulen;
-		ruc = utf8_to_uv((U8*)rc, rulen, &ulen, UTF8_ALLOW_ANY);
+		ruc = utf8_to_uv((U8*)rc, rulen, &ulen, UTF8_ALLOW_ANYUV);
 		rc += ulen;
 		rulen -= ulen;
 		duc = luc & ruc;
@@ -983,10 +983,10 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	    break;
 	case OP_BIT_XOR:
 	    while (lulen && rulen) {
-		luc = utf8_to_uv((U8*)lc, lulen, &ulen, UTF8_ALLOW_ANY);
+		luc = utf8_to_uv((U8*)lc, lulen, &ulen, UTF8_ALLOW_ANYUV);
 		lc += ulen;
 		lulen -= ulen;
-		ruc = utf8_to_uv((U8*)rc, rulen, &ulen, UTF8_ALLOW_ANY);
+		ruc = utf8_to_uv((U8*)rc, rulen, &ulen, UTF8_ALLOW_ANYUV);
 		rc += ulen;
 		rulen -= ulen;
 		duc = luc ^ ruc;
@@ -995,10 +995,10 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	    goto mop_up_utf;
 	case OP_BIT_OR:
 	    while (lulen && rulen) {
-		luc = utf8_to_uv((U8*)lc, lulen, &ulen, UTF8_ALLOW_ANY);
+		luc = utf8_to_uv((U8*)lc, lulen, &ulen, UTF8_ALLOW_ANYUV);
 		lc += ulen;
 		lulen -= ulen;
-		ruc = utf8_to_uv((U8*)rc, rulen, &ulen, UTF8_ALLOW_ANY);
+		ruc = utf8_to_uv((U8*)rc, rulen, &ulen, UTF8_ALLOW_ANYUV);
 		rc += ulen;
 		rulen -= ulen;
 		duc = luc | ruc;

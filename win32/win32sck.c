@@ -418,6 +418,41 @@ win32_socket(int af, int type, int protocol)
     return s;
 }
 
+/*
+ * close RTL fd while respecting sockets
+ * added as temporary measure until PerlIO has real
+ * Win32 native layer
+ *   -- BKS, 11-11-2000
+*/
+
+int my_close(int fd)
+{
+    int osf;
+    if (!wsock_started)		/* No WinSock? */
+	return(close(fd));	/* Then not a socket. */
+    osf = TO_SOCKET(fd);/* Get it now before it's gone! */
+    if (osf != -1) {
+	int err;
+	err = closesocket(osf);
+	if (err == 0) {
+#if defined(USE_FIXED_OSFHANDLE) || defined(PERL_MSVCRT_READFIX)
+            _set_osfhnd(fd, INVALID_HANDLE_VALUE);
+#endif
+	    (void)close(fd);	/* handle already closed, ignore error */
+	    return 0;
+	}
+	else if (err == SOCKET_ERROR) {
+	    err = WSAGetLastError();
+	    if (err != WSAENOTSOCK) {
+		(void)close(fd);
+		errno = err;
+		return EOF;
+	    }
+	}
+    }
+    return close(fd);
+}
+
 #undef fclose
 int
 my_fclose (FILE *pf)
@@ -425,14 +460,14 @@ my_fclose (FILE *pf)
     int osf;
     if (!wsock_started)		/* No WinSock? */
 	return(fclose(pf));	/* Then not a socket. */
-    osf = TO_SOCKET(fileno(pf));/* Get it now before it's gone! */
+    osf = TO_SOCKET(win32_fileno(pf));/* Get it now before it's gone! */
     if (osf != -1) {
 	int err;
 	win32_fflush(pf);
 	err = closesocket(osf);
 	if (err == 0) {
 #if defined(USE_FIXED_OSFHANDLE) || defined(PERL_MSVCRT_READFIX)
-            _set_osfhnd(fileno(pf), INVALID_HANDLE_VALUE);
+            _set_osfhnd(win32_fileno(pf), INVALID_HANDLE_VALUE);
 #endif
 	    (void)fclose(pf);	/* handle already closed, ignore error */
 	    return 0;

@@ -31,7 +31,7 @@ using C's ftell() function.
 =item $io->setpos
 
 Uses the value of a previous getpos call to return to a previously visited
-position. Returns 0 on success, -1 on failure.
+position. Returns "0 but true" on success, C<undef> on failure.
 
 =back
   

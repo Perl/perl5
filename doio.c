@@ -56,29 +56,6 @@
 #  include <unistd.h>
 #endif
 
-#if defined(HAS_SOCKET) && !defined(VMS) /* VMS handles sockets via vmsish.h */
-# include <sys/socket.h>
-# if defined(USE_SOCKS) && defined(I_SOCKS)
-#   if !defined(INCLUDE_PROTOTYPES)
-#       define INCLUDE_PROTOTYPES /* for <socks.h> */
-#       define PERL_SOCKS_NEED_PROTOTYPES
-#   endif
-#   include <socks.h>
-#   ifdef PERL_SOCKS_NEED_PROTOTYPES /* keep cpp space clean */
-#       undef INCLUDE_PROTOTYPES
-#       undef PERL_SOCKS_NEED_PROTOTYPES
-#   endif 
-# endif 
-# ifdef I_NETBSD
-#  include <netdb.h>
-# endif
-# ifndef ENOTSOCK
-#  ifdef I_NET_ERRNO
-#   include <net/errno.h>
-#  endif
-# endif
-#endif
-
 bool
 Perl_do_open(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	     int rawmode, int rawperm, PerlIO *supplied_fp)

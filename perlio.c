@@ -108,9 +108,9 @@ PerlIO_debug(char *fmt,...)
  static int dbg = 0;
  if (!dbg)
   {
-   char *s = getenv("PERLIO_DEBUG");
+   char *s = PerlEnv_getenv("PERLIO_DEBUG");
    if (s && *s)
-    dbg = open(s,O_WRONLY|O_CREAT|O_APPEND,0666);
+    dbg = PerlLIO_open3(s,O_WRONLY|O_CREAT|O_APPEND,0666);
    else
     dbg = -1;
   }
@@ -129,7 +129,7 @@ PerlIO_debug(char *fmt,...)
    Perl_sv_vcatpvf(aTHX_ sv, fmt, &ap);
 
    s = SvPV(sv,len);
-   write(dbg,s,len);
+   PerlLIO_write(dbg,s,len);
    va_end(ap);
    SvREFCNT_dec(sv);
   }
@@ -284,7 +284,7 @@ PerlIO_default_layer(I32 n)
  int len;
  if (!PerlIO_layer_hv)
   {
-   char *s  = getenv("PERLIO");
+   char *s  = PerlEnv_getenv("PERLIO");
    newXS("perlio::import",XS_perlio_import,__FILE__);
    newXS("perlio::unimport",XS_perlio_unimport,__FILE__);
    PerlIO_layer_hv = get_hv("perlio::layers",GV_ADD|GV_ADDMULTI);
@@ -300,13 +300,13 @@ PerlIO_default_layer(I32 n)
     {
      while (*s)
       {
-       while (*s && isspace((unsigned char)*s))
+       while (*s && isSPACE((unsigned char)*s))
         s++;
        if (*s)
         {
          char *e = s;
          SV *layer;
-         while (*e && !isspace((unsigned char)*e))
+         while (*e && !isSPACE((unsigned char)*e))
           e++;
          layer = PerlIO_find_layer(s,e-s);
          if (layer)
@@ -836,7 +836,7 @@ PerlIOUnix_open(PerlIO_funcs *self, const char *path,const char *mode)
  int oflags = PerlIOUnix_oflags(mode);
  if (oflags != -1)
   {
-   int fd = open(path,oflags,0666);
+   int fd = PerlLIO_open3(path,oflags,0666);
    if (fd >= 0)
     {
      PerlIOUnix *s = PerlIOSelf(PerlIO_push(f = PerlIO_allocate(),self,mode),PerlIOUnix);
@@ -857,7 +857,7 @@ PerlIOUnix_reopen(const char *path, const char *mode, PerlIO *f)
   (*PerlIOBase(f)->tab->Close)(f);
  if (oflags != -1)
   {
-   int fd = open(path,oflags,0666);
+   int fd = PerlLIO_open3(path,oflags,0666);
    if (fd >= 0)
     {
      s->fd = fd;
@@ -877,7 +877,7 @@ PerlIOUnix_read(PerlIO *f, void *vbuf, Size_t count)
   return 0;
  while (1)
   {
-   SSize_t len = read(fd,vbuf,count);
+   SSize_t len = PerlLIO_read(fd,vbuf,count);
    if (len >= 0 || errno != EINTR)
     {
      if (len < 0)
@@ -895,7 +895,7 @@ PerlIOUnix_write(PerlIO *f, const void *vbuf, Size_t count)
  int fd = PerlIOSelf(f,PerlIOUnix)->fd;
  while (1)
   {
-   SSize_t len = write(fd,vbuf,count);
+   SSize_t len = PerlLIO_write(fd,vbuf,count);
    if (len >= 0 || errno != EINTR)
     {
      if (len < 0)
@@ -908,7 +908,7 @@ PerlIOUnix_write(PerlIO *f, const void *vbuf, Size_t count)
 IV
 PerlIOUnix_seek(PerlIO *f, Off_t offset, int whence)
 {
- Off_t new = lseek(PerlIOSelf(f,PerlIOUnix)->fd,offset,whence);
+ Off_t new = PerlLIO_lseek(PerlIOSelf(f,PerlIOUnix)->fd,offset,whence);
  PerlIOBase(f)->flags &= ~PERLIO_F_EOF;
  return (new == (Off_t) -1) ? -1 : 0;
 }
@@ -916,7 +916,7 @@ PerlIOUnix_seek(PerlIO *f, Off_t offset, int whence)
 Off_t
 PerlIOUnix_tell(PerlIO *f)
 {
- return lseek(PerlIOSelf(f,PerlIOUnix)->fd,0,SEEK_CUR);
+ return PerlLIO_lseek(PerlIOSelf(f,PerlIOUnix)->fd,0,SEEK_CUR);
 }
 
 IV
@@ -924,7 +924,7 @@ PerlIOUnix_close(PerlIO *f)
 {
  int fd = PerlIOSelf(f,PerlIOUnix)->fd;
  int code = 0;
- while (close(fd) != 0)
+ while (PerlLIO_close(fd) != 0)
   {
    if (errno != EINTR)
     {
@@ -2168,7 +2168,7 @@ PerlIO_tmpfile(void)
     {
      PerlIOBase(f)->flags |= PERLIO_F_TEMP;
     }
-   unlink(SvPVX(sv));
+   PerlLIO_unlink(SvPVX(sv));
    SvREFCNT_dec(sv);
   }
  return f;

@@ -977,6 +977,31 @@ chown(const char *path, uid_t owner, gid_t group)
     return 0;
 }
 
+/*
+ * XXX this needs strengthening  (for PerlIO)
+ *   -- BKS, 11-11-200
+*/
+int mkstemp(const char *path)
+{
+    dTHX;
+    char buf[MAX_PATH+1];
+    int i = 0, fd = -1;
+
+retry:
+    if (i++ > 10) { /* give up */
+	errno = ENOENT;
+	return -1;
+    }
+    if (!GetTempFileNameA((LPCSTR)path, "plr", 1, buf)) {
+	errno = ENOENT;
+	return -1;
+    }
+    fd = PerlLIO_open3(buf, O_CREAT|O_RDWR|O_EXCL, 0600);
+    if (fd == -1)
+	goto retry;
+    return fd;
+}
+
 static long
 find_pid(int pid)
 {
@@ -2106,7 +2131,6 @@ win32_str_os_error(void *sv, DWORD dwErr)
     }
 }
 
-
 DllExport int
 win32_fprintf(FILE *fp, const char *format, ...)
 {
@@ -2341,9 +2365,11 @@ win32_pipe(int *pfd, unsigned int size, int mode)
 
 /*
  * a popen() clone that respects PERL5SHELL
+ *
+ * changed to return PerlIO* rather than FILE * by BKS, 11-11-2000
  */
 
-DllExport FILE*
+DllExport PerlIO*
 win32_popen(const char *command, const char *mode)
 {
 #ifdef USE_RTL_POPEN
@@ -2417,7 +2443,11 @@ win32_popen(const char *command, const char *mode)
     }
 
     /* we have an fd, return a file stream */
-    return (win32_fdopen(p[parent], (char *)mode));
+#ifdef USE_PERLIO
+    return (PerlIO_fdopen(p[parent], (char *)mode));
+#else
+    return (fdopen(p[parent], (char *)mode));
+#endif
 
 cleanup:
     /* we don't need to check for errors here */
@@ -2437,7 +2467,7 @@ cleanup:
  */
 
 DllExport int
-win32_pclose(FILE *pf)
+win32_pclose(PerlIO *pf)
 {
 #ifdef USE_RTL_POPEN
     return _pclose(pf);
@@ -2447,7 +2477,7 @@ win32_pclose(FILE *pf)
     SV *sv;
 
     LOCK_FDPID_MUTEX;
-    sv = *av_fetch(w32_fdpid, win32_fileno(pf), TRUE);
+    sv = *av_fetch(w32_fdpid, PerlIO_fileno(pf), TRUE);
 
     if (SvIOK(sv))
 	childpid = SvIVX(sv);
@@ -2459,7 +2489,11 @@ win32_pclose(FILE *pf)
         return -1;
     }
 
-    win32_fclose(pf);
+#ifdef USE_PERLIO
+    PerlIO_close(pf);
+#else
+    fclose(pf);
+#endif
     SvIVX(sv) = 0;
     UNLOCK_FDPID_MUTEX;
 
@@ -2721,10 +2755,13 @@ win32_open(const char *path, int flag, ...)
     return open(PerlDir_mapA(path), flag, pmode);
 }
 
+/* close() that understands socket */
+extern int my_close(int);	/* in win32sck.c */
+
 DllExport int
 win32_close(int fd)
 {
-    return close(fd);
+    return my_close(fd);
 }
 
 DllExport int

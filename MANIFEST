@@ -437,6 +437,7 @@ ext/attrs/attrs.xs	attrs extension external subroutines
 ext/re/Makefile.PL	re extension makefile writer
 ext/re/hints/aix.pl	Hints for re for named architecture
 ext/re/hints/mpeix.pl	Hints for re for named architecture
+ext/re/hints/MSWin32.pl	Hints for re for named architecture
 ext/re/re.pm		re extension Perl module
 ext/re/re.xs		re extension external subroutines
 ext/util/make_ext	Used by Makefile to execute extension Makefiles
@@ -1724,6 +1725,7 @@ warnings.h		The warning numbers
 warnings.pl		Program to write warnings.h and lib/warnings.pm
 win32/Makefile		Win32 makefile for NMAKE (Visual C++ build)
 win32/bin/exetype.pl	Set executable type to CONSOLE or WINDOWS
+win32/bin/mdelete.bat	multifile delete
 win32/bin/perlglob.pl	Win32 globbing
 win32/bin/pl2bat.pl	wrap perl scripts into batch files
 win32/bin/runperl.pl	run perl script via batch file namesake

@@ -54,33 +54,10 @@ extern "C" int syscall(unsigned long,...);
 # include <sys/resource.h>
 #endif
 
-#if defined(HAS_SOCKET) && !defined(VMS) /* VMS handles sockets via vmsish.h */
-# include <sys/socket.h>
-# if defined(USE_SOCKS) && defined(I_SOCKS)
-#   if !defined(INCLUDE_PROTOTYPES)
-#       define INCLUDE_PROTOTYPES /* for <socks.h> */
-#       define PERL_SOCKS_NEED_PROTOTYPES
-#   endif
-#   include <socks.h>
-#   ifdef PERL_SOCKS_NEED_PROTOTYPES /* keep cpp space clean */
-#       undef INCLUDE_PROTOTYPES
-#       undef PERL_SOCKS_NEED_PROTOTYPES
-#   endif 
-# endif
-# ifdef I_NETDB
-#  include <netdb.h>
-# endif
-# ifndef ENOTSOCK
-#  ifdef I_NET_ERRNO
-#   include <net/errno.h>
-#  endif
-# endif
-#endif
-
 #ifdef HAS_SELECT
-#ifdef I_SYS_SELECT
-#include <sys/select.h>
-#endif
+# ifdef I_SYS_SELECT
+#  include <sys/select.h>
+# endif
 #endif
 
 /* XXX Configure test needed.

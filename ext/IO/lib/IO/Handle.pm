@@ -157,15 +157,15 @@ operates on the file descriptor (similar to sysread, sysseek and
 systell). This means that any data held at the perlio api level will not
 be synchronized. To synchronize data that is buffered at the perlio api
 level you must use the flush method. C<sync> is not implemented on all
-platforms. Returns 0 on success, -1 on error, -1 for an invalid handle.
-See L<fsync(3c)>.
+platforms. Returns "0 but true" on success, C<undef> on error, C<undef>
+for an invalid handle. See L<fsync(3c)>.
 
 =item $io->flush
 
 C<flush> causes perl to flush any buffered data at the perlio api level.
 Any unread data in the buffer will be discarded, and any unwritten data
-will be written to the underlying file descriptor. Returns 0 on success,
-or a negative value on error.
+will be written to the underlying file descriptor. Returns "0 but true"
+on success, C<undef> on error.
 
 =item $io->printflush ( ARGS )
 
@@ -200,7 +200,8 @@ the order of global destruction is undefined, so even if your buffer
 variable remains in scope until program termination, it may be undefined
 before the file IO::Handle is closed. Note that you need to import the
 constants C<_IOFBF>, C<_IOLBF>, and C<_IONBF> explicitly. Like C, setbuf
-returns nothing, setvbuf returns 0 on success, -1 on failure.
+returns nothing. setvbuf returns "0 but true", on success, C<undef> on
+failure.
 
 Lastly, there is a special method for working under B<-T> and setuid/gid
 scripts:
