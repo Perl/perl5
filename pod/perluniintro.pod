@@ -316,6 +316,11 @@ and on already open streams use C<binmode()>:
     binmode(STDOUT, ":encoding(UTF-8)");
     binmode(STDOUT, ":encoding(shift_jis)");
 
+The matching of encoding names is loose: case does not matter, and
+many encodings have several aliases.  Note that C<:utf8> discipline
+must always be specified exactly like that, it is not subject to the
+loose matching of encoding names.
+
 See L<PerlIO> for the C<:utf8> layer;
 L<PerlIO::encoding> and L<Encode::PerlIO> for the C<:encoding()> layer;
 L<Encode::Supported> for many encodings supported by the C<Encode> module.
