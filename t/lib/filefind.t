@@ -14,24 +14,35 @@ else                   { print "1..61\n"; }
 
 use File::Find;
 
+cleanup();
+
 find(sub { print "ok 1\n" if $_ eq 'filefind.t'; }, ".");
 finddepth(sub { print "ok 2\n" if $_ eq 'filefind.t'; }, ".");
-
 
 my $case = 2;
 my $FastFileTests_OK = 0;
 
+sub cleanup {
+    if (-d 'for_find') {
+	chdir('for_find');
+    }
+    if (-d 'fa') {
+	unlink 'fa/fa_ord', 'fa/fsl', 'fa/faa/faa_ord',
+	'fa/fab/fab_ord', 'fa/fab/faba/faba_ord',
+	'fb/fb_ord', 'fb/fba/fba_ord';
+	rmdir 'fa/faa';
+	rmdir 'fa/fab/faba';
+	rmdir 'fa/fab';
+	rmdir 'fa';
+	rmdir 'fb/fba';
+	rmdir 'fb';
+	chdir '..';
+	rmdir 'for_find';
+    }
+}
+
 END {
-    unlink 'fa/fa_ord','fa/fsl','fa/faa/faa_ord',
-	   'fa/fab/fab_ord','fa/fab/faba/faba_ord','fb/fb_ord','fb/fba/fba_ord';
-    rmdir 'fa/faa';
-    rmdir 'fa/fab/faba';
-    rmdir 'fa/fab';
-    rmdir 'fa';
-    rmdir 'fb/fba';
-    rmdir 'fb';
-    chdir '..';
-    rmdir 'for_find';
+    cleanup();
 }
 
 sub Check($) {
