@@ -618,6 +618,58 @@ $   WRITE CONFIG -
 $   CLOSE CONFIG
 $ ENDIF
 $!
+$ IF F$TYPE(usedevel) .EQS. "" THEN usedevel := n
+$ patchlevel_h = F$SEARCH("[-]patchlevel.h")
+$ IF (patchlevel_h.NES."")
+$ THEN
+$   SEARCH 'patchlevel_h "define","PERL_VERSION","epoch"/match=and/out=[]ver.out
+$   IF .NOT. usedevel
+$   THEN
+$     OPEN/READ CONFIG []ver.out
+$     READ CONFIG line
+$     CLOSE CONFIG
+$     tmp = F$EDIT(line,"TRIM,COMPRESS")
+$     xpatchlevel = F$INTEGER(F$ELEMENT(2," ",tmp))
+$     line = xpatchlevel / 2
+$     tmp = xpatchlevel - ( line * 2 )
+$     IF tmp .NE. 0
+$     THEN
+$       echo4 "patchlevel is " + F$STRING(xpatchlevel)
+$       cat4 SYS$INPUT:
+*** WHOA THERE!!! ***
+
+    This is an UNSTABLE DEVELOPMENT release.
+    (The patchlevel, is odd--as opposed to even,
+     and that signifies a development release.  If you want a
+     maintenance release, you want an even-numbered release.)
+
+    Do ***NOT*** install this into production use.
+    Data corruption and crashes are possible.
+
+    It is most seriously suggested that you do not continue any further
+    unless you want to help in developing and debugging Perl.
+
+$       dflt="n"
+$       rp="Do you really want to continue? [''dflt'] "
+$       IF (fastread) THEN fastread := FALSE
+$       GOSUB myread
+$       IF ans .EQS. "" THEN ans = dflt
+$       IF ans
+$       THEN
+$         echo4 "Okay, continuing."
+$       ELSE
+$         echo4 "Okay, bye."
+$         DELETE/NOLOG/NOCONFIRM []ver.out;
+$         GOTO Clean_up
+$         STOP
+$         exit 0
+$       ENDIF
+$     ENDIF
+$     DELETE/SYMBOL line
+$     DELETE/SYMBOL tmp
+$   ENDIF
+$   DELETE/NOLOG/NOCONFIRM []ver.out;
+$ ENDIF
 $!: general instructions
 $ needman = "true"
 $ firsttime = "true"
@@ -716,16 +768,18 @@ $   IF (configshfound.NES."") THEN GOTO Config_sh_found
 $ ENDIF
 $ IF (i.LT.max) THEN GOTO Config_sh_look
 $! genconfig.pl has "osname='VMS'"
-$ osname = F$EDIT(F$GETSYI("NODE_SWTYPE"),"COLLAPSE") 
+$ osname = F$EDIT(F$GETSYI("NODE_SWTYPE"),"COLLAPSE")
 $ IF (configshfound.EQS."")
 $ THEN
 $   config_sh = "[-]config.sh" ! the fallback default
 $   GOTO Beyond_config_sh
 $ ENDIF
 $Config_sh_found:
+$ IF F$TYPE(osname) .EQS. "" THEN osname = F$EDIT(F$GETSYI("NODE_SWTYPE"),"COLLAPSE")
 $ IF F$TYPE(config_dflt) .EQS. "" THEN config_dflt = "n"
 $ rp = "Shall I @ ''config_sh' for default answers? [''config_dflt'] "
 $ GOSUB myread
+$ IF ans .EQS. "" THEN ans = config_dflt
 $ IF ans
 $ THEN
 $   echo ""
@@ -2494,7 +2548,7 @@ $!
 $ echo ""
 $ echo4 "Checking the C run-time library."
 $!
-$! SUBCONFIGURE.COM
+$! Former SUBCONFIGURE.COM
 $!
 $!  - build a config.sh for VMS Perl.
 $!  - use built config.sh to take config_h.SH -> config.h
@@ -5282,7 +5336,7 @@ $ Deck/Dollar="$EndOfTpl$"
 $!++ Build_Ext.Com
 $!   NOTE: This file is extracted as part of the VMS configuration process.
 $!   Any changes made to it directly will be lost.  If you need to make any
-$!   changes, please edit the template in [.vms]SubConfigure.Com instead.
+$!   changes, please edit the template in Configure.Com instead.
 $    def = F$Environment("Default")
 $    exts1 = F$Edit(p1,"Compress")
 $    p2 = F$Edit(p2,"Upcase,Compress,Trim")
