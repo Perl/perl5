@@ -21,7 +21,7 @@ static int sig_pipe[2];
 #endif
 
 static void
-remove_thread(pTHX_ Thread *t)
+remove_thread(pTHX_ Thread t)
 {
 #ifdef USE_THREADS
     DEBUG_S(WITH_THR(PerlIO_printf(Perl_debug_log,
