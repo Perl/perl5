@@ -246,21 +246,23 @@ sub charinfo {
     my $code = _getcode($arg);
     croak __PACKAGE__, "::charinfo: unknown code '$arg'"
 	unless defined $code;
-    my $hexk = sprintf("%04X", $code);
+    my $hexk = sprintf("%06X", $code);
     my($rcode,$rname,$rdec);
     foreach my $range (@CharinfoRanges){
       if ($range->[0] <= $code && $code <= $range->[1]) {
         $rcode = $hexk;
+	$rcode =~ s/^0+//;
+	$rcode =  sprintf("%04X", hex($rcode));
         $rname = $range->[2] ? $range->[2]->($code) : '';
         $rdec  = $range->[3] ? $range->[3]->($code) : '';
-        $hexk  = sprintf("%04X", $range->[0]); # replace by the first
+        $hexk  = sprintf("%06X", $range->[0]); # replace by the first
         last;
       }
     }
     openunicode(\$UNICODEFH, "Unicode.txt");
     if (defined $UNICODEFH) {
-	use Search::Dict;
-	if (look($UNICODEFH, "$hexk;")) {
+	use Search::Dict 1.02;
+	if (look($UNICODEFH, "$hexk;", { xfrm => sub { $_[0] =~ /^([^;]+);(.+)/; sprintf "%06X;$2", hex($1) } } ) >= 0) {
 	    my $line = <$UNICODEFH>;
 	    chomp $line;
 	    my %prop;
@@ -271,6 +273,8 @@ sub charinfo {
 		     mirrored unicode10 comment
 		     upper lower title
 		    )} = split(/;/, $line, -1);
+	    $hexk =~ s/^0+//;
+	    $hexk =  sprintf("%04X", hex($hexk));
 	    if ($prop{code} eq $hexk) {
 		$prop{block}  = charblock($code);
 		$prop{script} = charscript($code);
