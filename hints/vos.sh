@@ -38,10 +38,6 @@ glibpth="$loclibpth"
 
 # Include library paths
 locincpth="/system/stcp/include_library"
-locincpth="$locincpth /system/stcp/include_library/arpa"
-locincpth="$locincpth /system/stcp/include_library/net"
-locincpth="$locincpth /system/stcp/include_library/netinet"
-locincpth="$locincpth /system/stcp/include_library/protocols"
 locincpth="$locincpth /system/include_library/sysv"
 usrinc="/system/include_library"
 
