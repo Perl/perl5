@@ -4,15 +4,17 @@
 #
 #      You may distribute under the terms of either the GNU General Public
 #      License or the Artistic License, as specified in the README file.
+
 package B::Assembler;
 use Exporter;
 use B qw(ppname);
 use B::Asmdata qw(%insn_data @insn_name);
 use Config qw(%Config);
+require ByteLoader;		# we just need its $VERSIOM
 
 @ISA = qw(Exporter);
-@EXPORT_OK = qw(assemble_fh assemble_insn strip_comments
-		parse_statement uncstring gen_header);
+@EXPORT_OK = qw(assemble_fh newasm endasm assemble);
+$VERSION = 0.02;
 
 use strict;
 my %opnumber;
@@ -21,7 +23,7 @@ for ($i = 0; defined($opname = ppname($i)); $i++) {
     $opnumber{$opname} = $i;
 }
 
-my ($linenum, $errors);
+my($linenum, $errors, $out); #	global state, set up by newasm
 
 sub error {
     my $str = shift;
@@ -58,6 +60,7 @@ sub B::Asmdata::PUT_NV  { sprintf("%s\0", $_[0]) } # "%lf" looses precision and 
 sub B::Asmdata::PUT_objindex { pack("L", $_[0]) } # could allow names here
 sub B::Asmdata::PUT_svindex { &B::Asmdata::PUT_objindex }
 sub B::Asmdata::PUT_opindex { &B::Asmdata::PUT_objindex }
+sub B::Asmdata::PUT_pvindex { &B::Asmdata::PUT_objindex }
 
 sub B::Asmdata::PUT_strconst {
     my $arg = shift;
@@ -140,16 +143,20 @@ sub strip_comments {
     return $stmt;
 }
 
-sub gen_header {	# create the ByteCode header: magic, archname, ivsize, ptrsize, 
-			# byteorder
-			# nvtype irrelevant (floats are stored as strings)
-    my $header = B::Asmdata::PUT_U32(0x43424c50);	# 'PLBC'
-    $header .= B::Asmdata::PUT_strconst(qq["$Config{archname}"]);
+# create the ByteCode header: magic, archname, ByteLoader $VERSION, ivsize,
+# 	ptrsize, byteorder
+# nvtype is irrelevant (floats are stored as strings)
+# byteorder is strconst not U32 because of varying size issues
+
+sub gen_header {
+    my $header = "";
+
+    $header .= B::Asmdata::PUT_U32(0x43424c50);	# 'PLBC'
+    $header .= B::Asmdata::PUT_strconst('"' . $Config{archname}. '"');
+    $header .= B::Asmdata::PUT_strconst(qq["$ByteLoader::VERSION"]);
     $header .= B::Asmdata::PUT_U32($Config{ivsize});
     $header .= B::Asmdata::PUT_U32($Config{ptrsize});
     $header .= B::Asmdata::PUT_strconst(sprintf(qq["0x%s"], $Config{byteorder}));
-							# PV not U32 because 
-							# of varying size
 
     $header;
 }
@@ -199,28 +206,52 @@ sub assemble_insn {
 
 sub assemble_fh {
     my ($fh, $out) = @_;
-    my ($line, $insn, $arg);
-    $linenum = 0;
-    $errors = 0;
-    &$out(gen_header());
+    my $line;
+    my $asm = newasm($out);
     while ($line = <$fh>) {
-	$linenum++;
-	chomp $line;
-	if ($debug) {
-	    my $quotedline = $line;
-	    $quotedline =~ s/\\/\\\\/g;
-	    $quotedline =~ s/"/\\"/g;
-	    &$out(assemble_insn("comment", qq("$quotedline")));
-	}
-	$line = strip_comments($line) or next;
-	($insn, $arg) = parse_statement($line);
-	&$out(assemble_insn($insn, $arg));
-	if ($debug) {
-	    &$out(assemble_insn("nop", undef));
-	}
+	assemble($line);
     }
+    endasm();
+}
+
+sub newasm {
+    my($outsub) = @_;
+
+    die "Invalid printing routine for B::Assembler\n" unless ref $outsub eq 'CODE';
+    die <<EOD if ref $out;
+Can't have multiple byteassembly sessions at once!
+	(perhaps you forgot an endasm()?)
+EOD
+
+    $linenum = $errors = 0;
+    $out = $outsub;
+
+    $out->(gen_header());
+}
+
+sub endasm {
     if ($errors) {
-	die "Assembly failed with $errors error(s)\n";
+	die "There were $errors assembly errors\n";
+    }
+    $linenum = $errors = $out = 0;
+}
+
+sub assemble {
+    my($line) = @_;
+    my ($insn, $arg);
+    $linenum++;
+    chomp $line;
+    if ($debug) {
+	my $quotedline = $line;
+	$quotedline =~ s/\\/\\\\/g;
+	$quotedline =~ s/"/\\"/g;
+	$out->(assemble_insn("comment", qq("$quotedline")));
+    }
+    $line = strip_comments($line) or next;
+    ($insn, $arg) = parse_statement($line);
+    $out->(assemble_insn($insn, $arg));
+    if ($debug) {
+	$out->(assemble_insn("nop", undef));
     }
 }
 
@@ -234,14 +265,21 @@ B::Assembler - Assemble Perl bytecode
 
 =head1 SYNOPSIS
 
-	use Assembler;
+	use B::Assembler qw(newasm endasm assemble);
+	newasm(\&printsub);	# sets up for assembly
+	assemble($buf); 	# assembles one line
+	endasm();		# closes down
+
+	use B::Assembler qw(assemble_fh);
+	assemble_fh($fh, \&printsub);	# assemble everything in $fh
 
 =head1 DESCRIPTION
 
 See F<ext/B/B/Assembler.pm>.
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Malcolm Beattie, C<mbeattie@sable.ox.ac.uk>
+Per-statement interface by Benjamin Stuhl, C<sho_pi@hotmail.com>
 
 =cut

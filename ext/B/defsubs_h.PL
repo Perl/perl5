@@ -7,8 +7,8 @@ $out =~ s/_h$/.h/;
 open(OUT,">$out") || die "Cannot open $file:$!";
 print "Extracting $out...\n";
 foreach my $const (qw(AVf_REAL 
-		      HEf_SVKEY SVphv_SHAREKEYS
-		      SVf_READONLY
+		      HEf_SVKEY
+		      SVf_READONLY SVTYPEMASK
 		      GVf_IMPORTED_AV GVf_IMPORTED_HV
 		      GVf_IMPORTED_SV GVf_IMPORTED_CV
 		      SVf_IOK SVf_IVisUV SVf_NOK SVf_POK

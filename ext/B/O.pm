@@ -1,5 +1,5 @@
 package O;
-use B qw(minus_c);
+use B qw(minus_c save_BEGINs);
 use Carp;    
 
 sub import {

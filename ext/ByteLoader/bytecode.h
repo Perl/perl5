@@ -5,11 +5,12 @@ typedef char *op_tr_array;
 typedef int comment_t;
 typedef SV *svindex;
 typedef OP *opindex;
+typedef char *pvindex;
 typedef IV IV64;
 
 #define BGET_FREAD(argp, len, nelem)	\
-	 PerlIO_read(PL_rsfp,(char*)(argp),(len)*(nelem))
-#define BGET_FGETC() PerlIO_getc(PL_rsfp)
+	 bl_read(bstate->bs_fdata,(char*)(argp),(len),(nelem))
+#define BGET_FGETC() bl_getc(bstate->bs_fdata)
 
 #define BGET_U32(arg)	\
 	BGET_FREAD(&arg, sizeof(U32), 1)
@@ -22,14 +23,14 @@ typedef IV IV64;
 #define BGET_PV(arg)	STMT_START {					\
 	BGET_U32(arg);							\
 	if (arg) {							\
-	    New(666, bytecode_pv.xpv_pv, arg, char);			\
-	    PerlIO_read(PL_rsfp, (void*)bytecode_pv.xpv_pv, arg);	\
-	    bytecode_pv.xpv_len = arg;					\
-	    bytecode_pv.xpv_cur = arg - 1;				\
+	    New(666, bstate->bs_pv.xpv_pv, arg, char);			\
+	    bl_read(bstate->bs_fdata, (void*)bstate->bs_pv.xpv_pv, arg, 1);	\
+	    bstate->bs_pv.xpv_len = arg;				\
+	    bstate->bs_pv.xpv_cur = arg - 1;				\
 	} else {							\
-	    bytecode_pv.xpv_pv = 0;					\
-	    bytecode_pv.xpv_len = 0;					\
-	    bytecode_pv.xpv_cur = 0;					\
+	    bstate->bs_pv.xpv_pv = 0;					\
+	    bstate->bs_pv.xpv_len = 0;					\
+	    bstate->bs_pv.xpv_cur = 0;					\
 	}								\
     } STMT_END
 
@@ -66,7 +67,7 @@ typedef IV IV64;
 	    arg = (I32)lo;				\
 	}						\
 	else {						\
-	    bytecode_iv_overflows++;			\
+	    bstate->bs_iv_overflows++;			\
 	    arg = 0;					\
 	}						\
     } STMT_END
@@ -79,7 +80,7 @@ typedef IV IV64;
 	arg = (char *) ary;				\
     } while (0)
 
-#define BGET_pvcontents(arg)	arg = bytecode_pv.xpv_pv
+#define BGET_pvcontents(arg)	arg = bstate->bs_pv.xpv_pv
 #define BGET_strconst(arg) STMT_START {	\
 	for (arg = PL_tokenbuf; (*arg = BGET_FGETC()); arg++) /* nothing */; \
 	arg = PL_tokenbuf;			\
@@ -92,14 +93,21 @@ typedef IV IV64;
     } STMT_END
 
 #define BGET_objindex(arg, type) STMT_START {	\
-	U32 ix;					\
 	BGET_U32(ix);				\
-	arg = (type)bytecode_obj_list[ix];		\
+	arg = (type)bstate->bs_obj_list[ix];	\
     } STMT_END
 #define BGET_svindex(arg) BGET_objindex(arg, svindex)
 #define BGET_opindex(arg) BGET_objindex(arg, opindex)
+#define BGET_pvindex(arg) STMT_START {			\
+	BGET_objindex(arg, pvindex);			\
+	arg = arg ? savepv(arg) : arg;			\
+    } STMT_END
 
 #define BSET_ldspecsv(sv, arg) sv = specialsv_list[arg]
+#define BSET_stpv(pv, arg) STMT_START {		\
+	BSET_OBJ_STORE(pv, arg);		\
+	SAVEFREEPV(pv);				\
+    } STMT_END
 				    
 #define BSET_sv_refcnt_add(svrefcnt, arg)	svrefcnt += arg
 #define BSET_gp_refcnt_add(gprefcnt, arg)	gprefcnt += arg
@@ -111,22 +119,22 @@ typedef IV IV64;
 #define BSET_gv_fetchpv(sv, arg)	sv = (SV*)gv_fetchpv(arg, TRUE, SVt_PV)
 #define BSET_gv_stashpv(sv, arg)	sv = (SV*)gv_stashpv(arg, TRUE)
 #define BSET_sv_magic(sv, arg)		sv_magic(sv, Nullsv, arg, 0, 0)
-#define BSET_mg_pv(mg, arg)	mg->mg_ptr = arg; mg->mg_len = bytecode_pv.xpv_cur
+#define BSET_mg_pv(mg, arg)	mg->mg_ptr = arg; mg->mg_len = bstate->bs_pv.xpv_cur
 #define BSET_sv_upgrade(sv, arg)	(void)SvUPGRADE(sv, arg)
 #define BSET_xpv(sv)	do {	\
-	SvPV_set(sv, bytecode_pv.xpv_pv);	\
-	SvCUR_set(sv, bytecode_pv.xpv_cur);	\
-	SvLEN_set(sv, bytecode_pv.xpv_len);	\
+	SvPV_set(sv, bstate->bs_pv.xpv_pv);	\
+	SvCUR_set(sv, bstate->bs_pv.xpv_cur);	\
+	SvLEN_set(sv, bstate->bs_pv.xpv_len);	\
     } while (0)
 #define BSET_av_extend(sv, arg)	av_extend((AV*)sv, arg)
 
 #define BSET_av_push(sv, arg)	av_push((AV*)sv, arg)
 #define BSET_hv_store(sv, arg)	\
-	hv_store((HV*)sv, bytecode_pv.xpv_pv, bytecode_pv.xpv_cur, arg, 0)
+	hv_store((HV*)sv, bstate->bs_pv.xpv_pv, bstate->bs_pv.xpv_cur, arg, 0)
 #define BSET_pv_free(pv)	Safefree(pv.xpv_pv)
 #define BSET_pregcomp(o, arg) \
 	((PMOP*)o)->op_pmregexp = arg ? \
-		CALLREGCOMP(aTHX_ arg, arg + bytecode_pv.xpv_cur, ((PMOP*)o)) : 0
+		CALLREGCOMP(aTHX_ arg, arg + bstate->bs_pv.xpv_cur, ((PMOP*)o)) : 0
 #define BSET_newsv(sv, arg)				\
 	STMT_START {					\
 	    sv = (arg == SVt_PVAV ? (SV*)newAV() :	\
@@ -143,9 +151,7 @@ typedef IV IV64;
     } STMT_END
 
 #define BSET_ret(foo) STMT_START {			\
-	if (bytecode_obj_list)				\
-	    Safefree(bytecode_obj_list);		\
-	LEAVE;						\
+	Safefree(bstate->bs_obj_list);			\
 	return;						\
     } STMT_END
 
@@ -198,39 +204,51 @@ typedef IV IV64;
 	    av_store(PL_endav, 0, cv);							\
 	} STMT_END
 #define BSET_OBJ_STORE(obj, ix)			\
-	(I32)ix > bytecode_obj_list_fill ?	\
-	bset_obj_store(aTHXo_ obj, (I32)ix) : (bytecode_obj_list[ix] = obj)
-#define BYTECODE_HEADER_CHECK				\
-	STMT_START {					\
-	    U32 sz;					\
-	    strconst str;				\
-	    char *badpart;				\
-							\
-	    BGET_U32(sz); /* Magic: 'PLBC' */		\
-	    if (sz != 0x43424c50) {			\
-		badpart = "bad magic";			\
-		goto bch_fail;				\
-	    }						\
-	    BGET_strconst(str);	/* archname */		\
-	    if (strNE(str, ARCHNAME)) {			\
-		badpart = "wrong architecture";		\
-		goto bch_fail;				\
-	    }						\
-	    BGET_U32(sz); /* ivsize */			\
-	    if (sz != IVSIZE) {				\
-		badpart = "different IVSIZE";		\
-		goto bch_fail;				\
-	    }						\
-	    BGET_U32(sz); /* ptrsize */			\
-	    if (sz != PTRSIZE) {			\
-		badpart = "different PTRSIZE";		\
-		goto bch_fail;				\
-	    }						\
-	    BGET_strconst(str); /* byteorder */		\
-	    if (strNE(str, STRINGIFY(BYTEORDER))) {	\
-		badpart = "different byteorder";	\
-	bch_fail:					\
-		Perl_croak(aTHX_ "Invalid bytecode for this architecture: %s\n",	\
-				badpart);		\
-	    }						\
+	(I32)ix > bstate->bs_obj_list_fill ?	\
+	bset_obj_store(aTHXo_ bstate, obj, (I32)ix) : (bstate->bs_obj_list[ix] = obj)
+
+/* NOTE: the bytecode header only sanity-checks the bytecode. If a script cares about
+ * what version of Perl it's being called under, it should do a 'require 5.6.0' or
+ * equivalent. However, since the header includes checks requiring an exact match in
+ * ByteLoader versions (we can't guarantee forward compatibility), you don't 
+ * need to specify one:
+ * 	use ByteLoader;
+ * is all you need.
+ *	-- BKS, June 2000
+*/
+
+#define HEADER_FAIL(f, arg1, arg2)	\
+	Perl_croak(aTHX_ "Invalid bytecode for this architecture: " f, arg1, arg2)
+
+#define BYTECODE_HEADER_CHECK					\
+	STMT_START {						\
+	    U32 sz = 0;						\
+	    strconst str;					\
+								\
+	    BGET_U32(sz); /* Magic: 'PLBC' */			\
+	    if (sz != 0x43424c50) {				\
+		HEADER_FAIL("bad magic (want 0x43424c50, got %#x)", sz, 0);		\
+	    }							\
+	    BGET_strconst(str);	/* archname */			\
+	    if (strNE(str, ARCHNAME)) {				\
+		HEADER_FAIL("wrong architecture (want %s, you have %s)",str,ARCHNAME);	\
+	    }							\
+	    BGET_strconst(str); /* ByteLoader version */	\
+	    if (strNE(str, VERSION)) {				\
+		HEADER_FAIL("mismatched ByteLoader versions (want %s, you have %s)",	\
+			str, VERSION);				\
+	    }							\
+	    BGET_U32(sz); /* ivsize */				\
+	    if (sz != IVSIZE) {					\
+		HEADER_FAIL("different IVSIZE", 0, 0);		\
+	    }							\
+	    BGET_U32(sz); /* ptrsize */				\
+	    if (sz != PTRSIZE) {				\
+		HEADER_FAIL("different PTRSIZE", 0, 0);		\
+	    }							\
+	    BGET_strconst(str); /* byteorder */			\
+	    if (strNE(str, STRINGIFY(BYTEORDER))) {		\
+		HEADER_FAIL("different byteorder", 0, 0);	\
+	    }							\
+	    Safefree(str);					\
 	} STMT_END
