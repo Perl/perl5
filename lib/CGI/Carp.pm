@@ -281,7 +281,7 @@ use File::Spec;
 
 $main::SIG{__WARN__}=\&CGI::Carp::warn;
 
-$CGI::Carp::VERSION    = '1.28';
+$CGI::Carp::VERSION    = '1.29';
 $CGI::Carp::CUSTOM_MSG = undef;
 
 
@@ -371,7 +371,7 @@ sub _warn {
 # eval.  These evals don't count when looking at the stack backtrace.
 sub _longmess {
     my $message = Carp::longmess();
-    $message =~ s,eval[^\n]+(ModPerl|Apache)/Registry\w*\.pm.*,,s
+    $message =~ s,eval[^\n]+(ModPerl|Apache)/(?:Registry|Dispatch)\w*\.pm.*,,s
         if exists $ENV{MOD_PERL};
     return $message;
 }
