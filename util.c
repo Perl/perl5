@@ -4235,3 +4235,12 @@ Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
     }
 }
 #endif /* !defined(HAS_SOCKETPAIR) && defined(HAS_SOCKET) */
+#ifdef HAS_SOCKETPAIR
+/* In any case have a stub so that there's code corresponding
+ * to the my_socketpair in global.sym. */
+int
+Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
+    return socketpair(family, type, protocol, fd);
+}
+#endif
+
