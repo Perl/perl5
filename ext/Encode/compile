@@ -38,7 +38,7 @@ sub encode_M
  return &encode_S;
 }
 
-@ARGV = map(glob($_),@ARGV) if $^O eq 'MSWin32';
+eval "\@ARGV = map(glob(\$_),\@ARGV)" if ($^O eq 'MSWin32');
 
 my $cname = shift(@ARGV);
 chmod(0666,$cname) if -f $cname && !-w $cname;
