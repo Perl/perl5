@@ -16166,7 +16166,7 @@ int main()
 	} u;
 
 	if ($uvsize > 4)
-		u.l = (0x08070605L << 32) | 0x04030201L;
+		u.l = (((UV)0x08070605) << 32) | (UV)0x04030201;
 	else
 		u.l = 0x04030201L;
 	for (i = 0; i < $uvsize; i++)
