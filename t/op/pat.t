@@ -1133,8 +1133,6 @@ $test++;
 $_ = "a\x{100}b";
 if (/(.)(\C)(\C)(.)/) {
   print "ok 232\n";
-  # currently \C are still tagged as UTF-8
-  use bytes;
   if ($1 eq "a") {
     print "ok 233\n";
   } else {
@@ -1164,7 +1162,6 @@ $_ = "\x{100}";
 if (/(\C)/g) {
   print "ok 237\n";
   # currently \C are still tagged as UTF-8
-  use bytes;
   if ($1 eq "\xC4") {
     print "ok 238\n";
   } else {
@@ -1178,7 +1175,6 @@ if (/(\C)/g) {
 if (/(\C)/g) {
   print "ok 239\n";
   # currently \C are still tagged as UTF-8
-  use bytes;
   if ($1 eq "\x80") {
     print "ok 240\n";
   } else {
@@ -1231,7 +1227,7 @@ if (ord('i') == 0x89 && ord('J') == 0xd1) { # EBCDIC
   }
 } else {
   for (244..245) {
-    print "ok $_ # Skip: not EBCDIC\n";
+    print "ok $_ # Skip: only in EBCDIC\n";
   }
 }
 
