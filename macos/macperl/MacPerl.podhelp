@@ -3,6 +3,7 @@ pod:pod/perl.pod			Perl Overview (perl)
 pod:pod/perltoc.pod			Table of contents (perltoc)
 pod:pod/macperl.pod			Macintosh specific features (macperl)
 pod:pod/macperldelta.pod		New for MacPerl 5.6 (macperldelta)
+pod:lib/MacPerl.pm			MacPerl built-in routines
 @sub				Macintosh Toolbox Modules
 pod:lib/Mac/Toolbox.pod			Overview
 @sep
