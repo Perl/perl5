@@ -306,8 +306,9 @@ I<assemble> program that produces bytecode.
 
 =item B::Bblock
 
-This module is used by the B::CC back end.  It walks "basic blocks",
-whatever they may be.
+This module is used by the B::CC back end.  It walks "basic blocks".
+A basic block is a series of operations which is known to execute from
+start to finish, with no possiblity of branching or halting.
 
 =item B::Bytecode
 

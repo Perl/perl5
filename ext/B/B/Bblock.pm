@@ -169,7 +169,9 @@ B::Bblock - Walk basic blocks
 
 =head1 DESCRIPTION
 
-See F<ext/B/README>.
+This module is used by the B::CC back end.  It walks "basic blocks".
+A basic block is a series of operations which is known to execute from
+start to finish, with no possiblity of branching or halting.
 
 =head1 AUTHOR
 
