@@ -575,10 +575,11 @@ enables rudimentary switch parsing for switches on the command
 line after the program name but before any filename arguments (or before
 a B<-->).  Any switch found there is removed from @ARGV and sets the
 corresponding variable in the Perl program.  The following program
-prints "true" if and only if the program is invoked with a B<-xyz> switch.
+prints "1" if the program is invoked with a B<-xyz> switch, and "abc"
+if it is invoked with B<-xyz=abc>.
 
     #!/usr/bin/perl -s
-    if ($xyz) { print "true\n" }
+    if ($xyz) { print "$xyz\n" }
 
 =item B<-S>
 
@@ -705,12 +706,12 @@ that.
 
 =item B<-W>
 
-Enables all warnings regardless of 
+Enables all warnings regardless of C<no warnings> or C<$^W>.
 See L<perllexwarn>.
 
 =item B<-X>
 
-Disables all warnings regardless of 
+Disables all warnings regardless of C<use warnings> or C<$^W>.
 See L<perllexwarn>.
 
 =item B<-x> I<directory>
