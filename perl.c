@@ -1086,14 +1086,17 @@ perl_get_sv(name, create)
 char* name;
 I32 create;
 {
+    GV *gv;
 #ifdef USE_THREADS
-    PADOFFSET tmp;
-    if (name[1] == '\0' && !isALPHA(name[0])
-	&& (tmp = find_thread_magical(name)) != NOT_IN_PAD) {
-	return *av_fetch(thr->magicals, tmp, FALSE);
+    if (name[1] == '\0' && !isALPHA(name[0])) {
+	PADOFFSET tmp = find_thread_magical(name);
+    	if (tmp != NOT_IN_PAD) {
+	    dTHR;
+	    return *av_fetch(thr->magicals, tmp, FALSE);
+	}
     }
 #endif /* USE_THREADS */
-    GV* gv = gv_fetchpv(name, create, SVt_PV);
+    gv = gv_fetchpv(name, create, SVt_PV);
     if (gv)
 	return GvSV(gv);
     return Nullsv;
@@ -2846,7 +2849,6 @@ init_main_thread()
     thr->cvcache = newHV();
     thr->magicals = newAV();
     thr->specific = newAV();
-    thr->errsv = newSVpv("", 0);
     thr->errhv = newHV();
     thr->flags = THRf_R_JOINABLE;
     MUTEX_INIT(&thr->mutex);
@@ -2889,6 +2891,7 @@ init_main_thread()
     sv_upgrade(bodytarget, SVt_PVFM);
     sv_setpvn(bodytarget, "", 0);
     formtarget = bodytarget;
+    thr->errsv = newSVpv("", 0);
     return thr;
 }
 #endif /* USE_THREADS */

@@ -349,7 +349,7 @@ typedef enum {
 	OP_GETLOGIN,	/* 342 */
 	OP_SYSCALL,	/* 343 */
 	OP_LOCK,	/* 344 */
-	OP_SPECIFIC,	/* 345 */
+	OP_THREADSV,	/* 345 */
 	OP_max		
 } opcode;
 
@@ -704,7 +704,7 @@ EXT char *op_name[] = {
 	"getlogin",
 	"syscall",
 	"lock",
-	"specific",
+	"threadsv",
 };
 #endif
 
@@ -1057,7 +1057,7 @@ EXT char *op_desc[] = {
 	"getlogin",
 	"syscall",
 	"lock",
-	"thread-specific",
+	"per-thread variable",
 };
 #endif
 
@@ -1439,7 +1439,7 @@ OP *	pp_egrent	_((ARGSproto));
 OP *	pp_getlogin	_((ARGSproto));
 OP *	pp_syscall	_((ARGSproto));
 OP *	pp_lock		_((ARGSproto));
-OP *	pp_specific	_((ARGSproto));
+OP *	pp_threadsv	_((ARGSproto));
 
 #ifndef DOINIT
 EXT OP * (*ppaddr[])();
@@ -1790,7 +1790,7 @@ EXT OP * (*ppaddr[])() = {
 	pp_getlogin,
 	pp_syscall,
 	pp_lock,
-	pp_specific,
+	pp_threadsv,
 };
 #endif
 
@@ -2143,7 +2143,7 @@ EXT OP * (*check[]) _((OP *op)) = {
 	ck_null,	/* getlogin */
 	ck_fun,		/* syscall */
 	ck_rfun,	/* lock */
-	ck_null,	/* specific */
+	ck_null,	/* threadsv */
 };
 #endif
 
@@ -2496,6 +2496,6 @@ EXT U32 opargs[] = {
 	0x0000000c,	/* getlogin */
 	0x0002151d,	/* syscall */
 	0x00001c04,	/* lock */
-	0x00000044,	/* specific */
+	0x00000044,	/* threadsv */
 };
 #endif

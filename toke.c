@@ -1263,7 +1263,7 @@ yylex()
 		&& !isALPHA(tokenbuf[1]) /* Rule out obvious non-magicals */
 		&& (tmp = find_thread_magical(&tokenbuf[1])) != NOT_IN_PAD)
 	    {
-		yylval.opval = newOP(OP_SPECIFIC, 0);
+		yylval.opval = newOP(OP_THREADSV, 0);
 		yylval.opval->op_targ = tmp;
 		return PRIVATEREF;
 	    }
@@ -1404,7 +1404,7 @@ yylex()
 	    nextval[nexttoke].ival = 0;
 	    force_next(',');
 #ifdef USE_THREADS
-	    nextval[nexttoke].opval = newOP(OP_SPECIFIC, 0);
+	    nextval[nexttoke].opval = newOP(OP_THREADSV, 0);
 	    nextval[nexttoke].opval->op_targ = find_thread_magical("\"");
 	    force_next(PRIVATEREF);
 #else

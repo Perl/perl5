@@ -431,7 +431,7 @@ beyond the scope of the compartment.
 
 These ops are related to multi-threading.
 
-    lock specific
+    lock threadsv
 
 =item :default
 
