@@ -3498,7 +3498,7 @@ sub tool_xsubpp {
 XSUBPPDIR = $xsdir
 XSUBPP = \$(XSUBPPDIR)/$xsubpp
 XSPROTOARG = $self->{XSPROTOARG}
-XSUBPPDEPS = @tmdeps
+XSUBPPDEPS = @tmdeps \$(XSUBPP)
 XSUBPPARGS = @tmargs
 };
 };
