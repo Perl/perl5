@@ -975,7 +975,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		 * Fortunately, not getting this right is allowed
 		 * for Unicode Regular Expression Support level 1,
 		 * only one-to-one matching is required. --jhi */
-		if (c1 == c2)
+		if (c1 == c2) {
 		    while (s <= e) {
 			if ( utf8_to_uvchr((U8*)s, &len) == c1
 			     && (ln == len ||
@@ -985,9 +985,13 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 			    goto got_it;
 			s += len;
 		    }
-		else
+		}
+		else {
 		    while (s <= e) {
 			UV c = utf8_to_uvchr((U8*)s, &len);
+			if (c == UNICODE_GREEK_CAPITAL_LETTER_SIGMA ||
+			    c == UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA)
+			    c = UNICODE_GREEK_SMALL_LETTER_SIGMA;
 			if ( (c == c1 || c == c2)
 			     && (ln == len ||
 				 ibcmp_utf8(s, do_utf8, strend - s,
@@ -996,6 +1000,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 			    goto got_it;
 			s += len;
 		    }
+		}
 	    }
 	    else {
 		if (c1 == c2)

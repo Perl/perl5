@@ -3981,9 +3981,21 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		if (prevvalue < value)
 		    Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\t%04"UVxf"\n",
 				   (UV)prevvalue, (UV)value);
-		else if (prevvalue == value)
+		else if (prevvalue == value) {
 		    Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n",
 				   (UV)value);
+		    if (FOLD) {
+			 if (value == UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA) {
+			      Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n",
+					     UNICODE_GREEK_CAPITAL_LETTER_SIGMA);
+			      Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n",
+					     UNICODE_GREEK_SMALL_LETTER_SIGMA);
+			 }
+			 else if (value == UNICODE_GREEK_CAPITAL_LETTER_SIGMA)
+			      Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n",
+					     UNICODE_GREEK_SMALL_LETTER_SIGMA);
+		    }
+		}
 	    }
         }
 

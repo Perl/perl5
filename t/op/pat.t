@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..794\n";
+print "1..812\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2417,4 +2417,36 @@ print "# some Unicode properties\n";
 
     print "!abc!" =~ /a\Cc/ ? "ok 793\n" : "not ok 793\n";
     print "!abc!" =~ /a\Xc/ ? "ok 794\n" : "not ok 794\n";
+}
+
+{
+    print "# FINAL SIGMA\n";
+
+    my $SIGMA = "\x{03A3}"; # CAPITAL
+    my $Sigma = "\x{03C2}"; # SMALL FINAL
+    my $sigma = "\x{03C3}"; # SMALL
+
+    print $SIGMA =~ /$SIGMA/i ? "ok 795\n" : "not ok 795\n";
+    print $SIGMA =~ /$Sigma/i ? "ok 796\n" : "not ok 796\n";
+    print $SIGMA =~ /$sigma/i ? "ok 797\n" : "not ok 797\n";
+
+    print $Sigma =~ /$SIGMA/i ? "ok 798\n" : "not ok 798\n";
+    print $Sigma =~ /$Sigma/i ? "ok 799\n" : "not ok 799\n";
+    print $Sigma =~ /$sigma/i ? "ok 800\n" : "not ok 800\n";
+
+    print $sigma =~ /$SIGMA/i ? "ok 801\n" : "not ok 801\n";
+    print $sigma =~ /$Sigma/i ? "ok 802\n" : "not ok 802\n";
+    print $sigma =~ /$sigma/i ? "ok 803\n" : "not ok 803\n";
+    
+    print $SIGMA =~ /[$SIGMA]/i ? "ok 804\n" : "not ok 804\n";
+    print $SIGMA =~ /[$Sigma]/i ? "ok 805\n" : "not ok 805\n";
+    print $SIGMA =~ /[$sigma]/i ? "ok 806\n" : "not ok 806\n";
+
+    print $Sigma =~ /[$SIGMA]/i ? "ok 807\n" : "not ok 807\n";
+    print $Sigma =~ /[$Sigma]/i ? "ok 808\n" : "not ok 808\n";
+    print $Sigma =~ /[$sigma]/i ? "ok 809\n" : "not ok 809\n";
+
+    print $sigma =~ /[$SIGMA]/i ? "ok 810\n" : "not ok 810\n";
+    print $sigma =~ /[$Sigma]/i ? "ok 811\n" : "not ok 811\n";
+    print $sigma =~ /[$sigma]/i ? "ok 812\n" : "not ok 812\n";
 }
