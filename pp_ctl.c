@@ -1253,8 +1253,10 @@ die_where(char *message)
 			SvGROW(err, SvCUR(err)+sizeof(prefix)+klen);
 			sv_catpvn(err, prefix, sizeof(prefix)-1);
 			sv_catpvn(err, message, klen);
-			if (ckWARN(WARN_UNSAFE))
-			    warner(WARN_UNSAFE, SvPVX(err));
+			if (ckWARN(WARN_UNSAFE)) {
+			    STRLEN start = SvCUR(err)-klen-sizeof(prefix)+1;
+			    warner(WARN_UNSAFE, SvPVX(err)+start);
+			}
 		    }
 		    sv_inc(*svp);
 		}
