@@ -1548,7 +1548,7 @@ Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
 
 		while (*t && isSPACE(*t))
 		    ++t;
-		if (!*t && (dup2(1,2) != -1)) {
+		if (!*t && (PerlLIO_dup2(1,2) != -1)) {
 		    s[-2] = '\0';
 		    break;
 		}
