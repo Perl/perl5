@@ -50,8 +50,8 @@ INST_VER	= \5.005
 
 #
 # uncomment to enable use of PerlCRT.DLL when using the Visual C compiler.
-# Highly recommended.  It has patches that fix known bugs in MSCVRT.DLL.
-# You will need to download it from: http://www.activestate.com/<TBD>
+# Highly recommended.  It has patches that fix known bugs in MSVCRT.DLL.
+# You will need to download it from: http://www.activestate.com/
 # and follow the directions in the package to install.
 #
 #USE_PERLCRT	= define

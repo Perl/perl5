@@ -57,11 +57,10 @@ CCTYPE		*= BORLAND
 #CFG		*= Debug
 
 #
-# uncomment to enable linking with setargv.obj under the Visual C
-# compiler. Setting this options enables perl to expand wildcards in
-# arguments, but it may be harder to use alternate methods like
-# File::DosGlob that are more powerful.  This option is supported only with
-# Visual C.
+# uncomment to enable use of PerlCRT.DLL when using the Visual C compiler.
+# Highly recommended.  It has patches that fix known bugs in MSVCRT.DLL.
+# You will need to download it from: http://www.activestate.com/
+# and follow the directions in the package to install.
 #
 #USE_PERLCRT	*= define
 
