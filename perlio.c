@@ -186,7 +186,12 @@ PerlIO_binmode(pTHX_ PerlIO *fp, int iotype, int mode, const char *names)
 PerlIO *
 PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
 {
-#ifndef PERL_MICRO
+#ifdef PERL_MICRO
+    return NULL;
+#else
+#ifdef PERL_IMPLICIT_SYS
+    return PerlSIO_fdupopen(f); 
+#else
     if (f) {
 	int fd = PerlLIO_dup(PerlIO_fileno(f));
 	if (fd >= 0) {
@@ -206,6 +211,7 @@ PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
     }
 #endif
     return NULL;
+#endif
 }
 
 
