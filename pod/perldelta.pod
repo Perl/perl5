@@ -75,7 +75,7 @@ used because it does not work well with 8-byte pointers.  Also,
 usually the system mallocs on such platforms are much better optimized
 for such large memory models than the Perl malloc.  Some memory-hungry
 Perl applications like the PDL don't work well with Perl's malloc.
-Finally, other applications than Perl (like modperl) tend to prefer
+Finally, other applications than Perl (such as mod_perl) tend to prefer
 the system malloc.  Such platforms include Alpha and 64-bit HPPA,
 MIPS, PPC, and Sparc.
 
@@ -238,7 +238,7 @@ The syntaxes C<< @a->[...] >> and  C<< %h->{...} >> have now been deprecated.
 
 =item *
 
-After years of trying the suidperl is considered to be too complex to
+After years of trying, suidperl is considered to be too complex to
 ever be considered truly secure.  The suidperl functionality is likely
 to be removed in a future release.
 
@@ -658,30 +658,30 @@ See L<Attribute::Handlers>.
 
 =item *
 
-C<B::Concise> is a new compiler backend for walking the Perl syntax
-tree, printing concise info about ops, from Stephen McCamant.  The
-output is highly customisable.  See L<B::Concise>.
+C<B::Concise>, by Stephen McCamant, is a new compiler backend for
+walking the Perl syntax tree, printing concise info about ops.
+The output is highly customisable.  See L<B::Concise>.
 
 =item *
 
-The new bignum, bigint, and bigrat pragmas implement transparent
-bignum support (using the Math::BigInt, Math::BigFloat, and
-Math::BigRat backends), by Tels.
+The new bignum, bigint, and bigrat pragmas, by Tels, implement
+transparent bignum support (using the Math::BigInt, Math::BigFloat,
+and Math::BigRat backends).
 
 =item *
 
-C<Class::ISA> for reporting the search path for a class's ISA tree,
-by Sean Burke, has been added.  See L<Class::ISA>.
+C<Class::ISA>, by Sean Burke, is a module for reporting the search
+path for a class's ISA tree.  See L<Class::ISA>.
 
 =item *
 
-C<Cwd> has now a split personality: if possible, an XS extension is
+C<Cwd> now has a split personality: if possible, an XS extension is
 used, (this will hopefully be faster, more secure, and more robust)
 but if not possible, the familiar Perl implementation is used.
 
 =item *
 
-C<Devel::PPPort>, originally from Kenneth Albanowski and now
+C<Devel::PPPort>, originally by Kenneth Albanowski and now
 maintained by Paul Marquess, has been added.  It is primarily used
 by C<h2xs> to enhance portability of XS modules between different
 versions of Perl.  See L<Devel::PPPort>.
@@ -707,7 +707,7 @@ included since its further use is discouraged.
 
 =item *
 
-C<Encode>, orginally by Nick Ing-Simmons and now maintained by Dan
+C<Encode>, originally by Nick Ing-Simmons and now maintained by Dan
 Kogai, provides a mechanism to translate between different character
 encodings.  Support for Unicode, ISO-8859-1, and ASCII are compiled in
 to the module.  Several other encodings (like the rest of the
@@ -728,24 +728,24 @@ Michael Schwern.)  See L<Hash::Util>.
 
 =item *
 
-C<I18N::Langinfo> can be use to query locale information.
+C<I18N::Langinfo> can be used to query locale information.
 See L<I18N::Langinfo>.
 
 =item *
 
-C<I18N::LangTags> has functions for dealing with RFC3066-style
-language tags, by Sean Burke.  See L<I18N::LangTags>.
+C<I18N::LangTags>, by Sean Burke, has functions for dealing with
+RFC3066-style language tags.  See L<I18N::LangTags>.
 
 =item *
 
-C<ExtUtils::Constant> is a new tool for extension writers for
-generating XS code to import C header constants, by Nicholas Clark.
+C<ExtUtils::Constant>, by Nicholas Clark, is a new tool for extension
+writers for generating XS code to import C header constants.
 See L<ExtUtils::Constant>.
 
 =item *
 
-C<Filter::Simple> is an easy-to-use frontend to Filter::Util::Call,
-from Damian Conway.  See L<Filter::Simple>.
+C<Filter::Simple>, by Damian Conway, is an easy-to-use frontend to
+Filter::Util::Call.  See L<Filter::Simple>.
 
     # in MyFilter.pm:
 
@@ -772,38 +772,40 @@ from Damian Conway.  See L<Filter::Simple>.
 
 =item *
 
-C<File::Temp> allows one to create temporary files and directories in
-an easy, portable, and secure way, by Tim Jenness.  See L<File::Temp>.
+C<File::Temp>, by Tim Jenness, allows one to create temporary files and
+directories in an easy, portable, and secure way.  See L<File::Temp>.
 
 =item *
 
-C<Filter::Util::Call> provides you with the framework to write
-I<Source Filters> in Perl, from Paul Marquess.  For most uses the
+C<Filter::Util::Call>, by Paul Marquess, provides you with the
+framework to write I<source filters> in Perl.  For most uses, the
 frontend Filter::Simple is to be preferred.  See L<Filter::Util::Call>.
 
 =item *
 
-C<if> is a new pragma for conditional inclusion of modules, from
-Ilya Zakharevich.
+C<if>, by Ilya Zakharevich, is a new pragma for conditional inclusion
+of modules.
 
 =item *
 
-L<libnet> is a collection of perl5 modules related to network
-programming, from Graham Barr.  See L<Net::FTP>, L<Net::NNTP>,
-L<Net::Ping> (not part of libnet, but related), L<Net::POP3>,
-L<Net::SMTP>, and L<Net::Time>.
+L<libnet>, by Graham Barr, is a collection of perl5 modules related
+to network programming.  See L<Net::FTP>, L<Net::NNTP>, L<Net::Ping>
+(not part of libnet, but related), L<Net::POP3>, L<Net::SMTP>,
+and L<Net::Time>.
 
-Perl installation leaves libnet unconfigured, use F<libnetcfg> to configure.
+Perl installation leaves libnet unconfigured; use F<libnetcfg>
+to configure it.
 
 =item *
 
-C<List::Util> is a selection of general-utility list subroutines, like
-sum(), min(), first(), and shuffle(), by Graham Barr.  See L<List::Util>.
+C<List::Util>, by Graham Barr, is a selection of general-utility
+list subroutines, such as sum(), min(), first(), and shuffle().
+See L<List::Util>.
 
 =item *
 
 C<Locale::Constants>, C<Locale::Country>, C<Locale::Currency>
-C<Locale::Language>, and L<Locale::Script>, from Neil Bowers, have
+C<Locale::Language>, and L<Locale::Script>, by Neil Bowers, have
 been added.  They provide the codes for various locale standards, such
 as "fr" for France, "usd" for US Dollar, and "ja" for Japanese.
 
@@ -817,10 +819,10 @@ and L<Locale::Language>.
 
 =item *
 
-C<Locale::Maketext> is localization framework from Sean Burke.  See
+C<Locale::Maketext>, by Sean Burke, is a localization framework.  See
 L<Locale::Maketext>, and L<Locale::Maketext::TPJ13>.  The latter is an
 article about software localization, originally published in The Perl
-Journal #13, republished here with kind permission.
+Journal #13, and republished here with kind permission.
 
 =item *
 
@@ -834,7 +836,7 @@ from Mark-Jason Dominus.  See L<Memoize>.
 
 =item *
 
-C<MIME::Base64> allows you to encode data in base64, from Gisle Aas,
+C<MIME::Base64>, by Gisle Aas, allows you to encode data in base64,
 as defined in RFC 2045 - I<MIME (Multipurpose Internet Mail
 Extensions)>.
 
@@ -849,9 +851,9 @@ See L<MIME::Base64>.
 
 =item *
 
-C<MIME::QuotedPrint> allows you to encode data in quoted-printable
-encoding, as defined in RFC 2045 - I<MIME (Multipurpose Internet Mail
-Extensions)>, from Gisle Aas.
+C<MIME::QuotedPrint>, by Gisle Aas, allows you to encode data
+in quoted-printable encoding, as defined in RFC 2045 - I<MIME
+(Multipurpose Internet Mail Extensions)>.
 
     use MIME::QuotedPrint;
 
@@ -870,7 +872,7 @@ See L<MIME::QuotedPrint>.
 
 =item *
 
-C<NEXT> is pseudo-class for method redispatch, from Damian Conway.
+C<NEXT>, by Damian Conway, is a pseudo-class for method redispatch.
 See L<NEXT>.
 
 =item *
@@ -880,17 +882,16 @@ for open().
 
 =item *
 
-C<PerlIO::Scalar> provides the implementation of IO to "in memory"
-Perl scalars as discussed above, from Nick Ing-Simmons.  It also
-serves as an example of a loadable PerlIO layer.  Other future
-possibilities include PerlIO::Array and PerlIO::Code.
-See L<PerlIO::Scalar>.
+C<PerlIO::Scalar>, by Nick Ing-Simmons, provides the implementation
+of IO to "in memory" Perl scalars as discussed above.  It also serves
+as an example of a loadable PerlIO layer.  Other future possibilities
+include PerlIO::Array and PerlIO::Code.  See L<PerlIO::Scalar>.
 
 =item *
 
-C<PerlIO::Via> acts as a PerlIO layer and wraps PerlIO layer
-functionality provided by a class (typically implemented in perl
-code), from Nick Ing-Simmons.
+C<PerlIO::Via>, by Nick Ing-Simmons, acts as a PerlIO layer and wraps
+PerlIO layer functionality provided by a class (typically implemented
+in perl code).
 
     use MIME::QuotedPrint;
     open($fh,">Via(MIME::QuotedPrint)",$path);
@@ -913,7 +914,7 @@ See L<Pod::Text::Overstrike>.
 =item *
 
 C<Scalar::Util> is a selection of general-utility scalar subroutines,
-like blessed(), reftype(), and tainted().  See L<Scalar::Util>.
+such as blessed(), reftype(), and tainted().  See L<Scalar::Util>.
 
 =item *
 
@@ -932,7 +933,7 @@ restricted hashes.  See L<Storable>.
 
 =item *
 
-C<Switch>, from Damian Conway, has been added.  Just by saying
+C<Switch>, by Damian Conway, has been added.  Just by saying
 
     use Switch;
 
@@ -958,18 +959,18 @@ See L<Switch>.
 
 =item *
 
-C<Test::More> is yet another framework for writing test scripts,
-more extensive than Test::Simple, by Michael Schwern.  See L<Test::More>.
+C<Test::More>, by Michael Schwern, is yet another framework for writing
+test scripts, more extensive than Test::Simple.  See L<Test::More>.
 
 =item *
 
-C<Test::Simple> has basic utilities for writing tests, by Michael
-Schwern.   See L<Test::Simple>.
+C<Test::Simple>, by Michael Schwern, has basic utilities for writing
+tests.   See L<Test::Simple>.
 
 =item *
 
-C<Text::Balanced> has been added, for extracting delimited text
-sequences from strings, from Damian Conway.
+C<Text::Balanced>, by Damian Conway, has been added, for extracting
+delimited text sequences from strings.
 
     use Text::Balanced 'extract_delimited';
 
@@ -977,46 +978,46 @@ sequences from strings, from Damian Conway.
 
 $a will be "'never say never'", $b will be ', he never said'.
 
-In addition to extract_delimited() there are also extract_bracketed(),
+In addition to extract_delimited(), there are also extract_bracketed(),
 extract_quotelike(), extract_codeblock(), extract_variable(),
 extract_tagged(), extract_multiple(), gen_delimited_pat(), and
-gen_extract_tagged().  With these you can implement rather advanced
+gen_extract_tagged().  With these, you can implement rather advanced
 parsing algorithms.  See L<Text::Balanced>.
 
 =item *
 
-C<threads> is an interface to interpreter threads, by Arthur Bergman.
+C<threads>, by Arthur Bergman, is an interface to interpreter threads.
 Interpreter threads (ithreads) is the new thread model introduced in
 Perl 5.6 but only available as an internal interface for extension
 writers (and for Win32 Perl for C<fork()> emulation).  See L<threads>.
 
 =item *
 
-C<threads::shared> allows data sharing for interpreter threads, from
-Arthur Bergman.  In the ithreads model any data sharing between
+C<threads::shared>, by Arthur Bergman, allows data sharing for
+interpreter threads.  In the ithreads model any data sharing between
 threads must be explicit, as opposed to the old 5.005 thread model
 where data sharing was implicit.  See L<threads::shared>.
 
 =item *
 
 C<Tie::File>, by Mark-Jason Dominus, associates a Perl array with the
-lines of a file, see L<Tie::File>.
+lines of a file.  See L<Tie::File>.
 
 =item *
 
-C<Tie::Memoize>, by Ilya Zakharevich, provides on-demand loaded hashes,
-see L<Tie::Memoize>.
+C<Tie::Memoize>, by Ilya Zakharevich, provides on-demand loaded hashes.
+See L<Tie::Memoize>.
 
 =item *
 
 C<Tie::RefHash::Nestable>, by Edward Avis, allows storing hash
 references (unlike the standard Tie::RefHash)  The module is contained
-within Tie::RefHash, see L<Tie::RefHash>.
+within Tie::RefHash.  See L<Tie::RefHash>.
 
 =item *
 
-C<Time::HiRes> provides high resolution timing (ualarm, usleep,
-and gettimeofday), from Douglas E. Wegscheid.  See L<Time::HiRes>.
+C<Time::HiRes>, by Douglas E. Wegscheid, provides high resolution
+timing (ualarm, usleep, and gettimeofday).  See L<Time::HiRes>.
 
 =item *
 
@@ -1025,19 +1026,20 @@ Database.  See L<Unicode::UCD>.
 
 =item *
 
-C<Unicode::Collate> implements the UCA (Unicode Collation Algorithm)
-for sorting Unicode strings, by SADAHIRO Tomoyuki.  See L<Unicode::Collate>.
+C<Unicode::Collate>, by SADAHIRO Tomoyuki, implements the UCA
+(Unicode Collation Algorithm) for sorting Unicode strings.
+See L<Unicode::Collate>.
 
 =item *
 
-C<Unicode::Normalize> implements the various Unicode normalization
-forms, by SADAHIRO Tomoyuki.  See L<Unicode::Normalize>.
+C<Unicode::Normalize>, by SADAHIRO Tomoyuki, implements the various
+Unicode normalization forms.  See L<Unicode::Normalize>.
 
 =item *
 
-C<XS::Typemap>, by Tim Jenness, is a test extension that exercises XS
-typemaps.  Nothing gets installed but for extension writers the code
-is worth studying.
+C<XS::Typemap>, by Tim Jenness, is a test extension that exercises
+XS typemaps.  Nothing gets installed, but the code is worth studying
+for extension writers.
 
 =back
 
@@ -1055,7 +1057,7 @@ Term::ANSIColor, Test, Text-Tabs+Wrap.
 
 =item *
 
-The attributes::reftype() now works on tied arguments.
+attributes::reftype() now works on tied arguments.
 
 =item *
 
@@ -1082,11 +1084,11 @@ The return value of Cwd::fastcwd() is now tainted.
 
 =item *
 
-Data::Dumper has now an option to sort hashes.
+Data::Dumper now has an option to sort hashes.
 
 =item *
 
-Data::Dumper has now an option to dump code references
+Data::Dumper now has an option to dump code references
 using B::Deparse.
 
 =item *
@@ -1107,14 +1109,14 @@ hit by saying
 
 	use English '-no_match_vars';
 
-(Assuming, of course, that one doesn't need the troublesome variables
+(Assuming, of course, that you don't need the troublesome variables
 C<$`>, C<$&>, or C<$'>.)  Also, introduced C<@LAST_MATCH_START> and
 C<@LAST_MATCH_END> English aliases for C<@-> and C<@+>.
 
 =item *
 
 ExtUtils::MakeMaker now uses File::Spec internally, which hopefully
-leads into better portability.
+leads to better portability.
 
 =item *
 
@@ -1158,24 +1160,24 @@ IPC::Open3 now allows the use of numeric file descriptors.
 
 =item *
 
-IO::Socket has now atmark() method, which returns true if the socket
+IO::Socket now has an atmark() method, which returns true if the socket
 is positioned at the out-of-band mark.  The method is also exportable
 as a sockatmark() function.
 
 =item *
 
-IO::Socket::INET has support for ReusePort option (if your platform
-supports it).  The Reuse option now has an alias, ReuseAddr.  For clarity
-you may want to prefer ReuseAddr.
+IO::Socket::INET has support for the ReusePort option (if your
+platform supports it).  The Reuse option now has an alias, ReuseAddr.
+For clarity, you may want to prefer ReuseAddr.
 
 =item *
 
-IO::Socket::INET now supports C<LocalPort> of zero (usually meaning
-that the operating system will make one up.)
+IO::Socket::INET now supports a value of zero for C<LocalPort>
+(usually meaning that the operating system will make one up.)
 
 =item *
 
-use lib now works identically to @INC.  Removing directories
+'use lib' now works identically to @INC.  Removing directories
 with 'no lib' now works.
 
 =item *
@@ -1190,7 +1192,7 @@ Math::Complex handles inf, NaN etc., better.
 
 =item *
 
-Net::Ping has been muchly enhanced: multihoming is now supported,
+Net::Ping has been considerably enhanced: multihoming is now supported,
 Win32 functionality is better, there is now time measuring
 functionality (optionally high-resolution using Time::HiRes),
 and there is now "external" protocol which uses Net::Ping::External
@@ -1212,7 +1214,7 @@ handlers, installing new handlers was not atomic.
 
 =item *
 
-In Safe the C<%INC> now localised in a Safe compartment so that
+In Safe, C<%INC> is now localised in a Safe compartment so that
 use/require work.
 
 =item *
@@ -1288,24 +1290,24 @@ C<h2xs> now produces a template README.
 
 =item *
 
-C<h2xs> now uses C<Devel::PPort> for better portability between
+C<h2xs> now uses C<Devel::PPPort> for better portability between
 different versions of Perl.
 
 =item *
 
-C<h2xs> uses the new L<ExtUtils::Constant> module which will affect
-newly created extensions that define constants.  Since the new code is
-more correct (if you have two constants where the first one is a
-prefix of the second one, the first constant B<never> gets defined),
-less lossy (it uses integers for integer constant, as opposed to the
-old code that used floating point numbers even for integer constants),
-and slightly faster, you might want to consider regenerating your
-extension code (the new scheme makes regenerating easy).
-L<h2xs> now also supports C trigraphs.
+C<h2xs> uses the new L<ExtUtils::Constant|ExtUtils::Constant> module
+which will affect newly created extensions that define constants.
+Since the new code is more correct (if you have two constants where the
+first one is a prefix of the second one, the first constant B<never>
+got defined), less lossy (it uses integers for integer constant,
+as opposed to the old code that used floating point numbers even for
+integer constants), and slightly faster, you might want to consider
+regenerating your extension code (the new scheme makes regenerating
+easy).  L<h2xs> now also supports C trigraphs.
 
 =item *
 
-C<libnetcfg> has been added to configure the libnet.
+C<libnetcfg> has been added to configure libnet.
 
 =item *
 
@@ -1355,7 +1357,7 @@ C<xsubpp> now understands POD documentation embedded in the *.xs files.
 
 =item *
 
-C<xsubpp> now supports OUT keyword.
+C<xsubpp> now supports the OUT keyword.
 
 =back
 
@@ -1429,7 +1431,7 @@ perltodo has been updated.
 =item *
 
 perltootc has been renamed as perltooc (to not to conflict
-with perltoot in filesystems restricted to "8.3" names)
+with perltoot in filesystems restricted to "8.3" names).
 
 =item *
 
@@ -1545,7 +1547,7 @@ the original order of appearance in the input array.  So
 
 will yield (4,3,1,1,5,9), guaranteed.  The even and odd numbers
 appear in the output in the same order they appeared in the input.
-Mergesort has worst case O(NlogN) behaviour, the best value
+Mergesort has worst case O(N log N) behaviour, the best value
 attainable.  And, ironically, this mergesort does particularly
 well where quicksort goes quadratic:  mergesort sorts (1..$N, 1..$N)
 in O(N) time.  But quicksort was rescued at the last moment because
@@ -1611,7 +1613,7 @@ own library directories.
 
 =item *
 
-In many platforms the vendor-supplied 'cc' is too stripped-down to
+In many platforms, the vendor-supplied 'cc' is too stripped-down to
 build Perl (basically, 'cc' doesn't do ANSI C).  If this seems
 to be the case and 'cc' does not seem to be the GNU C compiler
 'gcc', an automatic attempt is made to find and use 'gcc' instead.
@@ -1661,15 +1663,15 @@ pointers are 64 bits wide.  (To be exact, the use64bitall is ignored.)
 
 =item *
 
-In AFS installations one can configure the root of the AFS to be
+In AFS installations, one can configure the root of the AFS to be
 somewhere else than the default F</afs> by using the Configure
 parameter C<-Dafsroot=/some/where/else>.
 
 =item *
 
-APPLLIB_EXP, a less-know configuration-time definition, has been
+APPLLIB_EXP, a lesser-known configuration-time definition, has been
 documented.  It can be used to prepend site-specific directories
-to Perl's default search path (@INC), see INSTALL for information.
+to Perl's default search path (@INC); see INSTALL for information.
 
 =item *
 
@@ -1693,14 +1695,14 @@ more details.
 
 =item *
 
-In addition to config.over a new override file, config.arch, is
-available.  That is supposed to be used by hints file writers for
-architecture-wide changes (as opposed to config.over which is for
-site-wide changes).
+In addition to config.over, a new override file, config.arch, is
+available.  This file is supposed to be used by hints file writers
+for architecture-wide changes (as opposed to config.over which is
+for site-wide changes).
 
 =item *
 
-If your file system supports symbolic links you can build Perl outside
+If your file system supports symbolic links, you can build Perl outside
 of the source directory by
 
 	mkdir /tmp/perl/build/directory
@@ -1709,7 +1711,7 @@ of the source directory by
 
 This will create in /tmp/perl/build/directory a tree of symbolic links
 pointing to files in /path/to/perl/source.  The original files are left
-unaffected.  After Configure has finished you can just say
+unaffected.  After Configure has finished, you can just say
 
 	make all test
 
@@ -1717,8 +1719,8 @@ and Perl will be built and tested, all in /tmp/perl/build/directory.
 
 =item *
 
-For Perl developers several new make targets for profiling
-and debugging have been added, see L<perlhack>.
+For Perl developers, several new make targets for profiling
+and debugging have been added; see L<perlhack>.
 
 =over 8
 
@@ -1737,7 +1739,7 @@ L<perlhack>.
 =item *
 
 If you are on IRIX or Tru64 platforms, new profiling/debugging options
-have been added, see L<perlhack> for more information about pixie and
+have been added; see L<perlhack> for more information about pixie and
 Third Degree.
 
 =back
@@ -1800,15 +1802,17 @@ BeOS has been reclaimed.
 
 =item *
 
-DG/UX platform now supports the 5.005-style threads.  See L<perldgux>.
+The DG/UX platform now supports 5.005-style threads.
+See L<perldgux>.
 
 =item *
 
-DYNIX/ptx platform (a.k.a. dynixptx) is supported at or near osvers 4.5.2.
+The DYNIX/ptx platform (a.k.a. dynixptx) is supported at or near
+osvers 4.5.2.
 
 =item *
 
-EBCDIC platforms (z/OS, also known as OS/390, POSIX-BC, and VM/ESA)
+EBCDIC platforms (z/OS (also known as OS/390), POSIX-BC, and VM/ESA)
 have been regained.  Many test suite tests still fail and the
 co-existence of Unicode and EBCDIC isn't quite settled, but the
 situation is much better than with Perl 5.6.  See L<perlos390>,
@@ -1829,7 +1833,8 @@ and MacPerl have been synchronised)
 =item *
 
 MacOS X (or Darwin) should now be able to build Perl even on HFS+
-filesystems.  (The case-insensitivity confused the Perl build process.)
+filesystems.  (The case-insensitivity used to confuse the Perl build
+process.)
 
 =item *
 
@@ -1873,7 +1878,7 @@ available.  See L<perlvos>.
 
 =item *
 
-Amdahl UTS UNIX mainframe platform is now supported.
+The Amdahl UTS UNIX mainframe platform is now supported.
 
 =item *
 
@@ -1881,7 +1886,7 @@ WinCE is now supported.  See L<perlce>.
 
 =item *
 
-z/OS (formerly known as OS/390, formerly known as MVS OE) has now
+z/OS (formerly known as OS/390, formerly known as MVS OE) now has
 support for dynamic loading.  This is not selected by default,
 however, you must specify -Dusedl in the arguments of Configure.
 
@@ -1890,7 +1895,7 @@ however, you must specify -Dusedl in the arguments of Configure.
 =head1 Selected Bug Fixes
 
 Numerous memory leaks and uninitialized memory accesses have been
-hunted down.  Most importantly anonymous subs used to leak quite
+hunted down.  Most importantly, anonymous subs used to leak quite
 a bit.
 
 =over 4
@@ -1922,7 +1927,7 @@ which needs them.
 The behaviour of non-decimal but numeric string constants such as
 "0x23" was platform-dependent: in some platforms that was seen as 35,
 in some as 0, in some as a floating point number (don't ask).  This
-was caused by Perl using the operating system libraries in a situation
+was caused by Perl's using the operating system libraries in a situation
 where the result of the string to number conversion is undefined: now
 Perl consistently handles such strings as zero in numeric contexts.
 
@@ -1934,7 +1939,7 @@ The order of DESTROYs has been made more predictable.
 
 Several debugger fixes: exit code now reflects the script exit code,
 condition C<"0"> now treated correctly, the C<d> command now checks
-line number, the C<$.> no longer gets corrupted, all debugger output
+line number, C<$.> no longer gets corrupted, and all debugger output
 now goes correctly to the socket if RemotePort is set.
 
 =item *
@@ -1995,21 +2000,21 @@ Fixed numerous memory leaks, especially in eval "".
 
 =item *
 
-Localised tied variables no more leak memory
+Localised tied variables no longer leak memory
 
     use Tie::Hash;
     tie my %tied_hash => 'Tie::StdHash';
 
     ...
 
-    # Used to leak memory every time local() was called,
-    # in a loop this added up.
+    # Used to leak memory every time local() was called;
+    # in a loop, this added up.
     local($tied_hash{Foo}) = 1;
 
 =item *
 
-Localised hash elements (and %ENV) are correctly unlocalised to not to
-exist, if that's what they were.
+Localised hash elements (and %ENV) are correctly unlocalised to not
+exist, if they didn't before they were localised.
 
 
     use Tie::Hash;
@@ -2056,7 +2061,7 @@ properly in certain circumstances.
 
 =item *
 
-Attributes (like :shared) didn't work with our().
+Attributes (such as :shared) didn't work with our().
 
 =item *
 
@@ -2092,7 +2097,8 @@ printf() no longer resets the numeric locale to "C".
 
 =item *
 
-C<qw(a\\b)> now parses correctly as C<'a\\b'>.
+C<qw(a\\b)> now parses correctly as C<'a\\b'>: that is, as three
+characters, not four.
 
 =item *
 
@@ -2174,8 +2180,9 @@ data lying around in them.
 
 =item *
 
-readline() on files opened in "slurp" mode could return an extra "" at
-the end in certain situations.  This has been corrected.
+readline() on files opened in "slurp" mode could return an extra
+"" (blank line) at the end in certain situations.  This has been
+corrected.
 
 =item *
 
@@ -2198,11 +2205,11 @@ in multiple threads simultaneously are now thread-safe.
 
 =item *
 
-Tie::ARRAY SPLICE method was broken.
+Tie::Array's SPLICE method was broken.
 
 =item *
 
-Allow read-only string on left hand side of non-modifying tr///.
+Allow a read-only string on the left-hand side of a non-modifying tr///.
 
 =item *
 
@@ -2217,9 +2224,9 @@ Several Unicode fixes.
 
 =item *
 
-BOMs (byte order marks) in the beginning of Perl files
+BOMs (byte order marks) at the beginning of Perl files
 (scripts, modules) should now be transparently skipped.
-UTF-16 (UCS-2) encoded Perl files should now be read correctly.
+UTF-16 and UCS-2 encoded Perl files should now be read correctly.
 
 =item *
 
@@ -2234,7 +2241,7 @@ as UTF-8.)
 
 =item *
 
-Generating illegal Unicode code points like U+FFFE, or the UTF-16
+Generating illegal Unicode code points such as U+FFFE, or the UTF-16
 surrogates, now also generates an optional warning.
 
 =item *
@@ -2263,7 +2270,7 @@ This has been corrected.
 
 =item *
 
-Zero entries were missing from the Unicode classes like C<IsDigit>.
+Zero entries were missing from the Unicode classes such as C<IsDigit>.
 
 =back
 
@@ -2271,6 +2278,12 @@ Zero entries were missing from the Unicode classes like C<IsDigit>.
 
 Large unsigned numbers (those above 2**31) could sometimes lose their
 unsignedness, causing bogus results in arithmetic operations.
+
+=item *
+
+The Perl parser has been stress tested using both random input and
+Markov chain input and the few found crashes and lockups have been
+fixed.
 
 =back
 
@@ -2339,7 +2352,8 @@ Long doubles should now work (see INSTALL).
 =item *
 
 Linux previously had problems related to sockaddrlen when using
-accept(), revcfrom() (in Perl: recv()), getpeername(), and getsockname().
+accept(), recvfrom() (in Perl: recv()), getpeername(), and
+getsockname().
 
 =back
 
@@ -2534,8 +2548,8 @@ Better UNC path handling under ithreads.
 
 =item *
 
-wait(), waitpid() and backticks now return the correct exit status under
-Windows 9x.
+wait(), waitpid(), and backticks now return the correct exit status
+under Windows 9x.
 
 =item *
 
@@ -2544,12 +2558,6 @@ Win64 compilation is now supported.
 =item *
 
 winsock handle leak fixed.
-
-=item *
-
-The Perl parser has been stress tested using both random input and
-Markov chain input and the few found crashes and lockups have been
-fixed.
 
 =back
 
@@ -2765,7 +2773,7 @@ thoroughly tested.
 
 Because of the large number of tests, running the regression suite
 will take considerably longer time than it used to: expect the suite
-to take up to 4-5 times longer to run than in perl 5.6.  In a really
+to take up to 4-5 times longer to run than in perl 5.6.  On a really
 fast machine you can hope to finish the suite in about 6-8 minutes
 (wallclock time).
 
@@ -2781,23 +2789,24 @@ to be closer to the library/extension they are testing.)
 
 =item *
 
-In AIX 4.2 Perl extensions that use C++ functions that use statics
+In AIX 4.2, Perl extensions that use C++ functions that use statics
 may have problems in that the statics are not getting initialized.
-In newer AIX releases this has been solved by linking Perl with
+In newer AIX releases, this has been solved by linking Perl with
 the libC_r library, but unfortunately in AIX 4.2 the said library
 has an obscure bug where the various functions related to time
 (such as time() and gettimeofday()) return broken values, and
-therefore in AIX 4.2 Perl is not linked against the libC_r.
+therefore in AIX 4.2 Perl is not linked against libC_r.
 
 =item *
 
 vac 5.0.0.0 May Produce Buggy Code For Perl
 
 The AIX C compiler vac version 5.0.0.0 may produce buggy code,
-resulting in few random tests failing, but when the failing tests
-are run by hand, they succeed.  We suggest upgrading to at least
-vac version 5.0.1.0, that has been known to compile Perl correctly.
-"lslpp -L|grep vac.C" will tell you the vac version. See README.aix.
+resulting in a few random tests failing when run as part of "make
+test", but when the failing tests are run by hand, they succeed.
+We suggest upgrading to at least vac version 5.0.1.0, that has been
+known to compile Perl correctly.  "lslpp -L|grep vac.C" will tell
+you the vac version.  See README.aix.
 
 =item *
 
@@ -2870,7 +2879,7 @@ Use mod_perl 1.27 or higher.
 
 =head2 lib/ftmp-security tests warn 'system possibly insecure'
 
-Don't panic.  Read INSTALL 'make test' section instead.
+Don't panic.  Read the 'make test' section of INSTALL instead.
 
 =head2 HP-UX lib/posix Subtest 9 Fails When LP64-Configured
 
@@ -2914,22 +2923,23 @@ Also the ext/POSIX/t/posix.t subtest #10 fails but it is skipped for
 now because the failure is Apple's fault, not Perl's (blocked signals
 are lost).
 
-If you Configure with ithreads, ext/threads/t/libc.t will fail, again
-not Perl's fault-- the libc of Mac OS X is not threadsafe (in this
-particular test the localtime() call is found to be threadunsafe.)
+If you Configure with ithreads, ext/threads/t/libc.t will fail. Again,
+this is not Perl's fault-- the libc of Mac OS X is not threadsafe
+(in this particular test, the localtime() call is found to be
+threadunsafe.)
 
 =head2 op/sprintf tests 91, 129, and 130
 
 The op/sprintf tests 91, 129, and 130 are known to fail on some platforms.
 Examples include any platform using sfio, and Compaq/Tandem's NonStop-UX.
 
-The test 91 is known to fail at QNX6 (nto), because C<sprintf '%e',0>
+Test 91 is known to fail on QNX6 (nto), because C<sprintf '%e',0>
 incorrectly produces C<0.000000e+0> instead of C<0.000000e+00>.
 
-For the tests 129 and 130 the failing platforms do not comply with
-the ANSI C Standard, line 19ff on page 134 of ANSI X3.159 1989 to
+For tests 129 and 130, the failing platforms do not comply with
+the ANSI C Standard: lines 19ff on page 134 of ANSI X3.159 1989, to
 be exact.  (They produce something other than "1" and "-1" when
-formatting 0.6 and -0.6 using the printf format "%.0f", most often
+formatting 0.6 and -0.6 using the printf format "%.0f"; most often,
 they produce "0" and "-0".)
 
 =head2 Solaris 2.5
@@ -2951,7 +2961,7 @@ Use Term::ReadKey 2.20 or later.
 =head2 Failure of Thread (5.005-style) tests
 
 B<Note that support for 5.005-style threading is deprecated,
-experimental and practically unsupported.  In 5.10 it is expected
+experimental and practically unsupported.  In 5.10, it is expected
 to be removed.>
 
 The following tests are known to fail due to fundamental problems in
@@ -2965,7 +2975,7 @@ the 5.005 threading implementation. These are not new failures--Perl
  ../lib/autouse.t                                10    1  10.00%  4
  op/flip.t                                       15    1   6.67%  15
 
-These failures are unlikely to get fixed as the 5.005-style threads
+These failures are unlikely to get fixed as 5.005-style threads
 are considered fundamentally broken.  (Basically what happens is that
 competing threads can corrupt shared global state.)
 
@@ -2991,7 +3001,7 @@ In case of failure please try running them manually, for example
 
 The Trig.t failure is caused by the slighly differing (from IEEE)
 floating point implementation of UNICOS.  The warnings.t failure is
-also related: the test assumes a certain floating point output format,
+also related: the test assumes a certain floating point output format;
 this assumption fails in UNICOS.
 
 =head2 UNICOS/mk
@@ -3000,7 +3010,7 @@ this assumption fails in UNICOS.
 
 =item *
 
-During Configure the test
+During Configure, the test
 
     Guessing which symbols your C compiler and preprocessor define...
 
@@ -3015,27 +3025,27 @@ will probably fail with error messages like
     CC-65 cc: ERROR File = try.c, Line = 3
       A semicolon is expected at this point.
 
-This is caused by a bug in awk utility of UNICOS/mk.  You can ignore
+This is caused by a bug in the awk utility of UNICOS/mk.  You can ignore
 the error, but it does cause a slight problem: you cannot fully
 benefit from the h2ph utility (see L<h2ph>) that can be used to
 convert C headers to Perl libraries, mainly used to be able to access
 from Perl the constants defined using C preprocessor, cpp.  Because of
-the above error parts of the converted headers will be invisible.
+the above error, parts of the converted headers will be invisible.
 Luckily, these days the need for h2ph is rare.
 
 =item *
 
-If building Perl with the interpreter threads (ithreads), the
+If building Perl with interpreter threads (ithreads), the
 getgrent(), getgrnam(), and getgrgid() functions cannot return the
 list of the group members due to a bug in the multithreaded support of
-UNICOS/mk.  What this means that in list context the functions will
+UNICOS/mk.  What this means is that in list context the functions will
 return only three values, not four.
 
 =back
 
 =head2 UTS
 
-There are a few known test failures, see L<perluts>.
+There are a few known test failures, see L<perluts> (README.uts).
 
 =head2 VMS
 
@@ -3045,7 +3055,7 @@ needing further debugging and/or porting work.
 
 =head2 Win32
 
-In multi-CPU boxes there are some problems with the I/O buffering:
+In multi-CPU boxes, there are some problems with the I/O buffering:
 some output may appear twice.
 
 =head2 XML::Parser not working
@@ -3055,7 +3065,7 @@ Use XML::Parser 2.31 or later.
 =head2 z/OS (OS/390)
 
 z/OS has rather many test failures but the situation is actually
-better than it was in 5.6.0, it's just that so many new modules and
+better than it was in 5.6.0; it's just that so many new modules and
 tests have been added.
 
  Failed Test                   Stat Wstat Total Fail  Failed  List of Failed
@@ -3074,12 +3084,13 @@ tests have been added.
  uni/fold.t                                 780    6   0.77%  61 169 196 661
                                                               710-711
 
-The dumper.t and downgrade.t are problems in the tests, the io_unix
-and sprintf are problems in the USS (UDP sockets and printf formats).
-The pat, tr, and fold are genuine Perl problems caused by EBCDIC (and
-in the pat and fold cases, combining that with Unicode).  The Constant
-and Embed are probably problems in the tests (since they test Perl's
-ability to build extensions, and that seems to be working reasonably well.)
+The failures in dumper.t and downgrade.t are problems in the tests,
+those in io_unix and sprintf are problems in the USS (UDP sockets
+and printf formats).  The pat, tr, and fold failures are genuine Perl
+problems caused by EBCDIC (and in the pat and fold cases, combining
+that with Unicode).  The Constant and Embed are probably problems
+in the tests (since they test Perl's ability to build extensions,
+and that seems to be working reasonably well.)
 
 =head2 Localising Tied Arrays and Hashes Is Broken
 
@@ -3087,7 +3098,7 @@ ability to build extensions, and that seems to be working reasonably well.)
 
 doesn't work as one would expect: the old value is restored
 incorrectly.  This will be changed in a future release, but we don't
-know yet which the new semantics will exactly be.  In any case the
+know yet what the new semantics will exactly be.  In any case, the
 change will break existing code that relies on the current
 (ill-defined) semantics, so just avoid doing this in general.
 
@@ -3095,8 +3106,8 @@ change will break existing code that relies on the current
 
 Self-tying of arrays and hashes is broken in rather deep and
 hard-to-fix ways.  As a stop-gap measure to avoid people from getting
-frustrated at the mysterious results (core dumps, most often) it is
-for now forbidden (you will get a fatal error even from an attempt).
+frustrated at the mysterious results (core dumps, most often), it is
+forbidden for now (you will get a fatal error even from an attempt).
 
 A change to self-tying of globs has caused them to be recursively
 referenced (see: L<perlobj/"Two-Phased Garbage Collection">).  You
@@ -3110,16 +3121,16 @@ Self-tying of scalars and IO thingies works.
 Some extensions like mod_perl are known to have issues with
 `largefiles', a change brought by Perl 5.6.0 in which file offsets
 default to 64 bits wide, where supported.  Modules may fail to compile
-at all or compile and work incorrectly.  Currently there is no good
-solution for the problem, but Configure now provides appropriate
-non-largefile ccflags, ldflags, libswanted, and libs in the %Config
-hash (e.g., $Config{ccflags_nolargefiles}) so the extensions that are
-having problems can try configuring themselves without the
-largefileness.  This is admittedly not a clean solution, and the
-solution may not even work at all.  One potential failure is whether
-one can (or, if one can, whether it's a good idea) link together at
-all binaries with different ideas about file offsets, all this is
-platform-dependent.
+at all, or they may compile and work incorrectly.  Currently, there
+is no good solution for the problem, but Configure now provides
+appropriate non-largefile ccflags, ldflags, libswanted, and libs
+in the %Config hash (e.g., $Config{ccflags_nolargefiles}) so the
+extensions that are having problems can try configuring themselves
+without the largefileness.  This is admittedly not a clean solution,
+and the solution may not even work at all.  One potential failure is
+whether one can (or, if one can, whether it's a good idea to) link
+together at all binaries with different ideas about file offsets;
+all this is platform-dependent.
 
 =head2 Unicode Support on EBCDIC Still Spotty
 
@@ -3152,8 +3163,8 @@ because it was felt that it didn't have enough value in it to be a
 core module.  It is still a useful module, though, and is available
 from the CPAN.
 
-Perl 5.8 unfortunately does not build anymore on AmigaOS,
-this broke at some point accidentally.  Since there are not that many
+Perl 5.8 unfortunately does not build anymore on AmigaOS;
+this broke accidentally at some point.  Since there are not that many
 Amiga developers available, we could not get this fixed and tested in
 time for 5.8.0.
 
@@ -3161,7 +3172,7 @@ time for 5.8.0.
 
 If you find what you think is a bug, you might check the articles
 recently posted to the comp.lang.perl.misc newsgroup and the perl
-bug database at http://bugs.perl.org/  There may also be
+bug database at http://bugs.perl.org/ .  There may also be
 information at http://www.perl.com/ , the Perl Home Page.
 
 If you believe you have an unreported bug, please run the B<perlbug>
