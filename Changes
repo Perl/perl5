@@ -28,6 +28,125 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 20094] By: jhi                                   on 2003/07/09  11:56:22
+        Log: No Perl malloc for FreeBSD.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20092] By: jhi                                   on 2003/07/09  11:41:01
+        Log: Integrate:
+             [ 20084]
+             Subject: Re: [REPATCH] was Re: [perl #16010] v-strings left of a => don't get quoted.
+             From: John Peacock <jpeacock@rowman.com>
+             Date: Wed, 09 Jul 2003 01:05:38 -0700
+             Message-ID: <3F0BCCD2.1020009@rowman.com>
+             
+             [ 20085]
+             Test the vX => ... fix.
+             
+             [ 20086]
+             Document the v-string change in perldelta.
+             
+             [ 20087]
+             perldelta clarification.
+             
+             [ 20088]
+             Document the vXX => change in perldata, too.
+             
+             [ 20089]
+             Rework the perldata vXX => ... entry a bit.
+     Branch: maint-5.8/perl
+	  !> embed.fnc pod/perlapi.pod pod/perldata.pod t/op/ver.t toke.c
+	  !> util.c
+____________________________________________________________________________
+[ 20091] By: jhi                                   on 2003/07/09  08:23:20
+        Log: Integrate:
+             [ 20074]
+             "Global destruction" doc tweaks from Rafael.
+             
+             [ 20075]
+             perldelta tweaks.
+             
+             [ 20076]
+             Subject: Re: [PATCH] $^VARIABLES in 'perl -Dt' output
+             From: Enache Adrian <enache@rdslink.ro>
+             Date: Tue, 8 Jul 2003 20:47:58 +0300
+             Message-ID: <20030708174758.GA1177@ratsnest.hole>
+             
+             (ByteLoader tweak avoiding a leaked scalar)
+             
+             [ 20077]
+             Don't recommend to upgrade the base.pm in the core with
+             the base.pm from Class::Fields.  They are not the same.
+             
+             [ 20078]
+             Revert #20077.
+             
+             [ 20079]
+             The CHECKOP macro was not invoked on some newly created ops
+             (to match them against the current opmask.) As a consequence,
+             Safe compartments were unable to trap some ops (pattern
+             match, slices, conditionals.) This fixes the holes.
+             
+             [ 20080]
+             Small typo fix from Chris Reinhardt.
+             
+             [ 20081]
+             Subject: [PATCH] Safe signals via POSIX::sigaction
+             From: Chip Salzenberg <chip@pobox.com>
+             Date: Wed, 9 Jul 2003 01:49:10 -0400
+             Message-ID: <20030709054910.GH2021@perlsupport.com>
+             
+             [ 20082]
+             Enable avoiding /System/Library in Mac OS X by
+             doing Configure -Dprefix=/some/where -Uvendorlib.
+             
+             [ 20083]
+             Darwin/Mac OS X: if -Dprefix=/foo, do nothing special
+             for the install dirs.
+             
+             [ 20090]
+             Upgrade to Encode 1.97.
+     Branch: maint-5.8/perl
+	  !> embed.fnc embed.h ext/Encode/Changes ext/Encode/Encode.pm
+	  !> ext/Encode/META.yml ext/Encode/encoding.pm
+	  !> ext/Encode/lib/Encode/Alias.pm
+	  !> ext/Encode/lib/Encode/Encoder.pm
+	  !> ext/Encode/lib/Encode/Guess.pm
+	  !> ext/Encode/lib/Encode/JP/JIS7.pm ext/POSIX/POSIX.pm
+	  !> ext/POSIX/POSIX.pod ext/POSIX/POSIX.xs ext/POSIX/t/sigaction.t
+	  !> hints/darwin.sh lib/CPAN.pm op.c proto.h
+____________________________________________________________________________
+[ 20087] By: jhi                                   on 2003/07/09  08:02:09
+        Log: perldelta clarification.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20086] By: jhi                                   on 2003/07/09  08:00:04
+        Log: Document the v-string change in perldelta.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20080] By: jhi                                   on 2003/07/09  04:52:02
+        Log: Small typo fix from Chris Reinhardt.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20075] By: jhi                                   on 2003/07/08  13:35:37
+        Log: perldelta tweaks.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20074] By: jhi                                   on 2003/07/08  11:01:07
+        Log: "Global destruction" doc tweaks from Rafael.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20073] By: jhi                                   on 2003/07/08  09:41:37
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 20072] By: jhi                                   on 2003/07/08  09:24:42
         Log: Integrate:
              [ 20068]
