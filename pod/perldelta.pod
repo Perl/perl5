@@ -111,10 +111,8 @@ from the change.
 
 =head2 Binary Incompatibilities
 
-The default build of this release can be made binary compatible with the
-5.005 release or its maintenance versions.  Add -DPERL_BINCOMPAT_5005
-to ccflags in config.sh to achieve this.  See INSTALL for further
-information about adding build flags to config.sh.
+The default build of this release is binary compatible with the 5.005
+release or its maintenance versions.
 
 The usethreads or usemultiplicity builds are B<not> binary compatible
 with the corresponding builds in 5.005.
@@ -147,13 +145,34 @@ The length argument of C<syswrite()> is now optional.
 
 =head2 64-bit support
 
-Better 64-bit support -- but full support still a distant goal.  One
-must Configure with -Duse64bits to get Configure to probe for the
-extent of 64-bit support.  Depending on the platform (hints file) more
-or less 64-awareness becomes available.  As of 5.005_54 at least
-somewhat 64-bit aware platforms are HP-UX 11 or better, Solaris 2.6 or
-better, IRIX 6.2 or better.  Naturally 64-bit platforms like Digital
-Unix and UNICOS also have 64-bit support.
+All platforms that have 64-bit integers either (a) natively as longs
+or ints (b) via special compiler flags (c) using long long are able to
+use "quads" (64-integers) as follows:
+
+=over 4
+
+=item constants in the code 
+
+=item arguments to oct() and hex()
+
+=item arguments to print(), printf() and sprintf()
+
+=item pack() and unpack() "q" format
+
+=item in basic arithmetics
+
+=back
+
+Note that unless you have the case (a) you will have to configure
+and compile Perl using the -Duse64bits Configure flag.
+
+Unfortunately, bit operations (&, <<, ...) and vec() do not work,
+they are limited to 32 bits.
+
+Last but not least: note that due to Perl's tendency to always use
+floating point numbers the quads are not true integers.  They may lose
+their precision due to rounding errors, and when they get large their
+less significant digits will fall off.
 
 =head2 Better syntax checks on parenthesized unary operators
 
