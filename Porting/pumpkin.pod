@@ -733,11 +733,13 @@ branches.
 
 =item CHECK_FORMAT
 
-To test the correct use of printf-style arguments, C<Configure> with
-S<-Dccflags='-DCHECK_FORMAT -Wformat'> and run C<make>.  The compiler
-will produce warning of incorrect use of format arguments.  CHECK_FORMAT
-changes perl-defined formats to common formats, so DO NOT USE the executable
-produced by this process. 
+If you have gcc, you can test the correct use of printf-style
+arguments.  Run C<Configure> with S<-Dccflags='-DCHECK_FORMAT
+-Wformat'> (and S<-Dcc=gcc>, if you are not on a system where C<cc>
+is C<gcc>) and run C<make>.  The compiler will produce warnings of
+incorrect use of format arguments.  CHECK_FORMAT changes perl-defined
+formats to common formats, so DO NOT USE the executable produced by
+this process.
 
 A more accurate approach is the following commands:
 
