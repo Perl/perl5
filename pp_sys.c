@@ -2459,7 +2459,6 @@ PP(pp_accept)
     struct sockaddr saddr;	/* use a struct to avoid alignment problems */
     Sock_size_t len = sizeof saddr;
     int fd;
-    int fd2;
 
     ggv = (GV*)POPs;
     ngv = (GV*)POPs;
@@ -2480,11 +2479,7 @@ PP(pp_accept)
     if (IoIFP(nstio))
 	do_close(ngv, FALSE);
     IoIFP(nstio) = PerlIO_fdopen(fd, "r"PIPESOCK_MODE);
-    /* FIXME: we dup(fd) here so that refcounting of fd's does not inhibit
-       fclose of IoOFP's FILE * - and hence leak memory.
-       Special treatment of _this_ case of IoIFP != IoOFP seems wrong.
-     */
-    IoOFP(nstio) = PerlIO_fdopen(fd2 = PerlLIO_dup(fd), "w"PIPESOCK_MODE);
+    IoOFP(nstio) = PerlIO_fdopen(fd, "w"PIPESOCK_MODE);
     IoTYPE(nstio) = IoTYPE_SOCKET;
     if (!IoIFP(nstio) || !IoOFP(nstio)) {
 	if (IoIFP(nstio)) PerlIO_close(IoIFP(nstio));
@@ -2494,7 +2489,6 @@ PP(pp_accept)
     }
 #if defined(HAS_FCNTL) && defined(F_SETFD)
     fcntl(fd, F_SETFD, fd > PL_maxsysfd);	/* ensure close-on-exec */
-    fcntl(fd2, F_SETFD, fd2 > PL_maxsysfd);	/* ensure close-on-exec */
 #endif
 
 #ifdef EPOC
