@@ -163,9 +163,11 @@ set up to use VAXC on a VAX, and does not include socket support.  You can
 either edit the Makefile by hand, using Descrip.MMS as a guide, or use the
 Makefile to build Miniperl.Exe, and then run the Perl script MMS2Make.pl,
 found in the [.VMS] subdirectory, to generate a new Makefile with the options
-appropriate to your site.  If you are using MM[SK], and you decide to rebuild
-Perl with a different set of parameters (e.g. changing the C compiler, or
-adding socket support), be sure to say
+appropriate to your site.
+
+If you are using MM[SK], and you decide to rebuild Perl with a different set
+of parameters (e.g. changing the C compiler, or adding socket support), be
+sure to say
 $ MMK/Descrip=[.VMS] realclean
 first, in order to remove files generated during the previous build.  If
 you omit this step, you risk ending up with a copy of Perl which
@@ -211,7 +213,7 @@ This will build the following files:
   h2xs                - Perl program which generates template files for creating
                         XSUB extensions, optionally beginning with the #defined
                         constants in a C header file.
-  [.pod]perldoc       - A Perl program which locates and displays documentation
+  [.lib.pod]perldoc   - A Perl program which locates and displays documentation
                         for Perl and its extensions.
   [.Lib]Config.pm     - the Perl extension which saves configuration information
                         about Perl and your system.
@@ -253,7 +255,10 @@ a spectrum of possibilities.
 Once the build is complete, you'll need to do the following:
   - Put PerlShr.Exe in a common directory, and make it world-readable.
     If you place it in a location other than Sys$Share, you'll need to
-    define the logical name PerlShr to point to the image.
+    define the logical name PerlShr to point to the image.  (If you're
+    installing on a VMScluster, be sure that each node is using the
+    copy of PerlShr you expect [e.g. if you put PerlShr.Exe in Sys$Share,
+    do they all share Sys$Share?]).
   - Put Perl.Exe in a common directory, and make it world-executable.
   - Define a foreign command to invoke Perl, using a statement like
     $ Perl == "$dev:[dir]Perl.Exe"
@@ -297,7 +302,7 @@ internals, you might want to subscribe to the perl5-porters mailing list.  You
 can do this by sending a message to perl5-porters-request@nicoh.com, containing
 the single line
 subscribe perl5-porters
-This is a moderately high-volume list at the moment (25-50 messages/day).
+This is a high-volume list at the moment (>50 messages/day).
 
 If you're interested in ongoing information about the VMS port, you can
 subscribe to the VMSperl mailing list by sending a request to
@@ -336,8 +341,6 @@ missed someone.  That said, special thanks are due to the following:
      for the getredirection() code
   Rich Salz <rsalz@bbn.com>
      for readdir() and related routines
-  Denis Haskin <DWH@epub.ziff.com>
-     for work on a pod-to-hlp translator for the Perl documentation
   Richard Dyson <dyson@blaze.physics.uiowa.edu> and
   Kent Covert <kacovert@miavx1.acs.muohio.edu>
      for additional testing on the AXP.
