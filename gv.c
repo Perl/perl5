@@ -893,7 +893,6 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     case '\011':	/* $^I, NOT \t in EBCDIC */
     case '\016':        /* $^N */
     case '\020':	/* $^P */
-    case '\024':	/* $^T */
 	if (len > 1)
 	    break;
 	goto magicalize;
@@ -910,6 +909,13 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	if (len > 1)
 	    break;
 	goto ro_magicalize;
+    case '\024':	/* $^T */
+        if (len == 1)
+            goto magicalize;
+        else if (strEQ(name, "\024AINT"))
+            goto ro_magicalize;
+        else
+            break;
     case '\027':	/* $^W & $^WARNING_BITS */
 	if (len > 1 && strNE(name, "\027ARNING_BITS")
 	    && strNE(name, "\027IDE_SYSTEM_CALLS"))

@@ -35,7 +35,7 @@ sub skip {
     return 1;
 }
 
-print "1..41\n";
+print "1..43\n";
 
 $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_NetWare = $^O eq 'NetWare';
@@ -283,3 +283,7 @@ ok ${"!"}{ENOENT};
 ok $^S == 0;
 eval { ok $^S == 1 };
 ok $^S == 0;
+
+ok ${^TAINT} == 0;
+eval { ${^TAINT} = 1 };
+ok ${^TAINT} == 0;

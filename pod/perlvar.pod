@@ -1039,6 +1039,11 @@ The time at which the program began running, in seconds since the
 epoch (beginning of 1970).  The values returned by the B<-M>, B<-A>,
 and B<-C> filetests are based on this value.
 
+=item ${^TAINT}
+
+Reflects if taint mode is on or off (ie. if the program was run with
+B<-T> or not).  True for on, false for off.
+
 =item $PERL_VERSION
 
 =item $^V

@@ -15,6 +15,20 @@ BEGIN {
 use strict;
 use Config;
 
+my $test = 177;
+sub ok {
+    my($ok, $name) = @_;
+
+    # You have to do it this way or VMS will get confused.
+    print $ok ? "ok $test - $name\n" : "not ok $test - $name\n";
+
+    printf "# Failed test at line %d\n", (caller)[2] unless $ok;
+
+    $test++;
+    return $ok;
+}
+
+
 $| = 1;
 
 # We do not want the whole taint.t to fail
@@ -109,7 +123,7 @@ print PROG 'print "@ARGV\n"', "\n";
 close PROG;
 my $echo = "$Invoke_Perl $ECHO";
 
-print "1..176\n";
+print "1..179\n";
 
 # First, let's make sure that Perl is checking the dangerous
 # environment variables. Maybe they aren't set yet, so we'll
@@ -884,4 +898,11 @@ else {
     print "# untainted:\n", @untainted if @untainted; 
 }
 
+
+ok( ${^TAINT},  '$^TAINT is on' );
+
+eval { ${^TAINT} = 0 };
+ok( ${^TAINT},  '$^TAINT is not assignable' );
+ok( $@ =~ /^Modification of a read-only value attempted/,
+                                'Assigning to taint pukes properly' );
 
