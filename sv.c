@@ -5884,10 +5884,23 @@ screamer2:
 	    /* Accomodate broken VAXC compiler, which applies U8 cast to
 	     * both args of ?: operator, causing EOF to change into 255
 	     */
-	    if (cnt > 0) { i = (U8)buf[cnt - 1]; } else { i = EOF; }
+#ifdef DJGPP /* This is basically undoing #17270 for DJGPP.  See below. */
+	    if (cnt)
+#else
+	    if (cnt > 0)
+#endif
+	    {
+		i = (U8)buf[cnt - 1];
+	    }
+	    else {
+		 i = EOF;
+	    }
 	}
 
-	if (cnt > 0) {
+#ifndef DJGPP /* This is basically undoing #17270 for DJGPP.  See above.*/
+	if (cnt > 0)
+#endif
+	{
 	    if (append)
 		sv_catpvn(sv, (char *) buf, cnt);
 	    else
