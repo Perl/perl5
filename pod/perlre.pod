@@ -260,7 +260,8 @@ Any control character.  Usually characters that don't produce output as
 such but instead control the terminal somehow: for example newline and
 backspace are control characters.  All characters with ord() less than
 32 are most often classified as control characters (assuming ASCII,
-the ISO Latin character sets, and Unicode).
+the ISO Latin character sets, and Unicode), as is the character with
+the ord() value of 127 (C<DEL>).
 
 =item graph
 

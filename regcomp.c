@@ -4351,7 +4351,7 @@ Perl_regdump(pTHX_ regexp *r)
 STATIC void
 S_put_byte(pTHX_ SV *sv, int c)
 {
-    if (isCNTRL(c) || c == 127 || c == 255 || !isPRINT(c))
+    if (isCNTRL(c) || c == 255 || !isPRINT(c))
 	Perl_sv_catpvf(aTHX_ sv, "\\%o", c);
     else if (c == '-' || c == ']' || c == '\\' || c == '^')
 	Perl_sv_catpvf(aTHX_ sv, "\\%c", c);
