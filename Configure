@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Jul 25 13:04:13 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Sun Jul 25 13:33:52 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -3171,6 +3171,8 @@ privlibexp="$ansexp"
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
 	installprivlib=`echo $privlibexp | sed 's#^$prefix#$installprefix#'`
+else
+	installprivlib="$privlibexp"
 fi
 
 : set the prefixup variable, to restore leading tilda escape
@@ -3214,6 +3216,8 @@ fi
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
 	installarchlib=`echo $archlibexp | sed 's#^$prefix#$installprefix#'`
+else
+	installarchlib="$archlibexp"
 fi
 
 : make some quick guesses about what we are up against
@@ -4606,7 +4610,9 @@ binexp="$ansexp"
 : Change installation prefix, if necessary.
 : XXX Bug? -- ignores Configure -Dinstallprefix setting.
 if $test X"$prefix" != X"$installprefix"; then
-	installbin=`echo binexp | sed 's#^$prefix#$installprefix#'`
+	installbin=`echo $binexp | sed 's#^$prefix#$installprefix#'`
+else
+	installbin="$binexp"
 fi
 
 : determine whether to install perl also as /usr/bin/perl
@@ -5588,6 +5594,8 @@ esac
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
 	installman1dir=`echo $man1direxp | $sed 's#^$prefix#$installprefix#'`
+else
+	installman1dir="$man1direxp"
 fi
 
 : What suffix to use on installed man pages
@@ -5729,6 +5737,8 @@ esac
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
 	installman3dir=`echo $man3direxp | $sed 's#^$prefix#$installprefix#'`
+else
+	installman3dir="$man3direxp"
 fi
 
 : What suffix to use on installed man pages
@@ -6224,6 +6234,8 @@ sitelibexp="$ansexp"
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
 	installsitelib=`echo $sitelibexp | sed 's#^$prefix#$installprefix#'`
+else
+	installsitelib="$sitelibexp"
 fi
 
 : determine where site specific architecture-dependent libraries go.
@@ -6252,6 +6264,8 @@ sitearchexp="$ansexp"
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
 	installsitearch=`echo $sitearchexp | sed 's#^$prefix#$installprefix#'`
+else
+	installsitearch="$sitearchexp"
 fi
 
 cat <<EOM
