@@ -66,9 +66,9 @@ my $nop3 = *File::Spec::catfile;
 # if you have 5.004_03 (and some slightly older versions?), xsubpp
 # tries to generate line numbers in the C code generated from the .xs.
 # unfortunately, it is a little buggy around #ifdef'd code.
-# my choice is leave it in and have people with old perls complain 
+# my choice is leave it in and have people with old perls complain
 # about the "Usage" bug, or leave it out and be unable to compile myself
-# without changing it, and then I'd always forget to change it before a 
+# without changing it, and then I'd always forget to change it before a
 # release. Sorry, Edward :)
 
 sub TMPDIR {
@@ -131,7 +131,7 @@ sub try_compile_and_link {
 
        if ($^O eq 'mpeix') {
            $cccmd = 'MPEAUTOCONF=1 '.$cccmd;
-       } elsif ($^O eq 'VMS') {                                                
+       } elsif ($^O eq 'VMS') {
 	    open( CMDFILE, ">$tmp.com" );
 	    print CMDFILE "\$ SET MESSAGE/NOFACILITY/NOSEVERITY/NOIDENT/NOTEXT\n";
 	    print CMDFILE "\$ $cccmd\n";
@@ -139,7 +139,7 @@ sub try_compile_and_link {
 	    close CMDFILE;
 	    system("\@ $tmp.com");
 	    $ok = $?==0;
-	    for ("$tmp.c", "$tmp$obj_ext", "$tmp.com", "$tmp$Config{exe_ext}") { 
+	    for ("$tmp.c", "$tmp$obj_ext", "$tmp.com", "$tmp$Config{exe_ext}") {
 		1 while unlink $_;
 	    }
         }
@@ -152,18 +152,18 @@ sub try_compile_and_link {
 	    unlink("$tmp.c", $tmp_exe);
         }
     }
-    
+
     $ok;
 }
 
 sub has_gettimeofday {
     # confusing but true (if condition true ==> -DHAS_GETTIMEOFDAY already)
-    return 0 if $Config{'d_gettimeod'} eq 'define';
+    return 0 if $Config{d_gettimeod} eq 'define';
     return 1 if try_compile_and_link(<<EOM);
-#include "EXTERN.h" 
-#include "perl.h" 
-#include "XSUB.h" 
-#ifdef I_SYS_TYPES 
+#include "EXTERN.h"
+#include "perl.h"
+#include "XSUB.h"
+#ifdef I_SYS_TYPES
 #   include <sys/types.h>
 #endif
 
@@ -232,8 +232,8 @@ sub init {
 
     print "Looking for gettimeofday()... ";
     my $has_gettimeofday;
-    if ($Config{'d_gettimeod'}) {
-	$has_gettimeofday++;
+    if (exists $Config{d_gettimeod}) {
+	$has_gettimeofday++ if $Config{d_gettimeod};
     } elsif (has_gettimeofday()) {
 	$DEFINE .= ' -DHAS_GETTIMEOFDAY';
 	$has_gettimeofday++;
@@ -257,8 +257,8 @@ EOD
 
     print "Looking for setitimer()... ";
     my $has_setitimer;
-    if ($Config{d_setitimer}) {
-        $has_setitimer++;
+    if (exists $Config{d_setitimer}) {
+        $has_setitimer++ if $Config{d_setitimer};
     } elsif (has_x("setitimer(ITIMER_REAL, 0, 0)")) {
         $has_setitimer++;
         $DEFINE .= ' -DHAS_SETITIMER';
@@ -272,8 +272,8 @@ EOD
 
     print "Looking for getitimer()... ";
     my $has_getitimer;
-    if ($Config{d_getitimer}) {
-        $has_getitimer++;
+    if (exists $Config{'d_getitimer'}) {
+        $has_getitimer++ if $Config{'d_getitimer'};
     } elsif (has_x("getitimer(ITIMER_REAL, 0)")) {
         $has_getitimer++;
         $DEFINE .= ' -DHAS_GETITIMER';
@@ -293,8 +293,8 @@ EOD
 
     print "Looking for ualarm()... ";
     my $has_ualarm;
-    if ($Config{d_ualarm}) {
-        $has_ualarm++;
+    if (exists $Config{d_ualarm}) {
+        $has_ualarm++ if $Config{d_ualarm};
     } elsif (has_x ("ualarm (0, 0)")) {
         $has_ualarm++;
 	$DEFINE .= ' -DHAS_UALARM';
@@ -312,8 +312,8 @@ EOD
 
     print "Looking for usleep()... ";
     my $has_usleep;
-    if ($Config{d_usleep}) {
-	$has_usleep++;
+    if (exists $Config{d_usleep}) {
+	$has_usleep++ if $Config{d_usleep};
     } elsif (has_x ("usleep (0)")) {
 	$has_usleep++;
 	$DEFINE .= ' -DHAS_USLEEP';
@@ -335,8 +335,8 @@ EOD
 
     print "Looking for nanosleep()... ";
     my $has_nanosleep;
-    if ($Config{d_nanosleep}) {
-	$has_nanosleep++;
+    if (exists $Config{d_nanosleep}) {
+	$has_nanosleep++ if $Config{d_nanosleep};
 	$DEFINE .= ' -DTIME_HIRES_NANOSLEEP';
     } elsif (has_x ("nanosleep (NULL, NULL)")) {
 	$has_nanosleep++;
@@ -375,15 +375,15 @@ sub doMakefile {
     push (@makefileopts,
 	'NAME'	=> 'Time::HiRes',
 	'VERSION_FROM' => 'HiRes.pm', # finds $VERSION
-	'LIBS'	=> $LIBS,   # e.g., '-lm' 
-	'DEFINE'	=> $DEFINE,     # e.g., '-DHAS_SOMETHING' 
+	'LIBS'	=> $LIBS,   # e.g., '-lm'
+	'DEFINE'	=> $DEFINE,     # e.g., '-DHAS_SOMETHING'
 	'XSOPT'	=> $XSOPT,
     # do not even think about 'INC' => '-I/usr/ucbinclude', Solaris will avenge.
-	'INC'	=> '',     # e.g., '-I/usr/include/other' 
+	'INC'	=> '',     # e.g., '-I/usr/include/other'
 	'INSTALLDIRS' => 'perl',
 	'dist'      => {
 	    'CI'       => 'ci -l',
-	    'COMPRESS' => 'gzip -9f', 
+	    'COMPRESS' => 'gzip -9f',
 	    'SUFFIX'   => 'gz',
 	},
         clean => { FILES => "xdefine" },
