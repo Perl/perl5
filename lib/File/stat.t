@@ -5,68 +5,60 @@ BEGIN {
     @INC = '../lib';
 }
 
+use Test::More;
+
 BEGIN {
     our $hasst;
     eval { my @n = stat "TEST" };
     $hasst = 1 unless $@ && $@ =~ /unimplemented/;
-    unless ($hasst) { print "1..0 # Skip: no stat\n"; exit 0 }
+    unless ($hasst) { plan skip_all => "no stat"; exit 0 }
     use Config;
     $hasst = 0 unless $Config{'i_sysstat'} eq 'define';
-    unless ($hasst) { print "1..0 # Skip: no sys/stat.h\n"; exit 0 }
-}
-
-BEGIN {
+    unless ($hasst) { plan skip_all => "no sys/stat.h"; exit 0 }
     our @stat = stat "TEST"; # This is the function stat.
     unless (@stat) { print "1..0 # Skip: no file TEST\n"; exit 0 }
 }
 
-print "1..14\n";
+plan tests => 16;
 
-use File::stat;
+use_ok( 'File::stat' );
 
-print "ok 1\n";
+my $stat = File::stat::stat( "TEST" ); # This is the OO stat.
+ok( ref($stat), 'should build a stat object' );
 
-my $stat = stat "TEST"; # This is the OO stat.
-
-print "not " unless $stat->dev     == $stat[ 0];
-print "ok 2\n";
+is( $stat->dev, $stat[0], "device number in position 0" );
 
 # On OS/2 (fake) ino is not constant, it is incremented each time
-print "# ino=>@{[$stat->ino]}, 1=>$stat[ 1]\nnot "
-	     unless $stat->ino     == $stat[ 1] or $^O eq 'os2';
-print "ok 3\n";
+SKIP: {
+	skip(1, 'inode number is not constant on OS/2') if $^O eq 'os2';
+	is( $stat->ino, $stat[1], "inode number in position 1" );
+}
 
-print "not " unless $stat->mode    == $stat[ 2];
-print "ok 4\n";
+is( $stat->mode, $stat[2], "file mode in position 2" );
 
-print "not " unless $stat->nlink   == $stat[ 3];
-print "ok 5\n";
+is( $stat->nlink, $stat[3], "number of links in position 3" );
 
-print "not " unless $stat->uid     == $stat[ 4];
-print "ok 6\n";
+is( $stat->uid, $stat[4], "owner uid in position 4" );
 
-print "not " unless $stat->gid     == $stat[ 5];
-print "ok 7\n";
+is( $stat->gid, $stat[5], "group id in position 5" );
 
-print "not " unless $stat->rdev    == $stat[ 6];
-print "ok 8\n";
+is( $stat->rdev, $stat[6], "device identifier in position 6" );
 
-print "not " unless $stat->size    == $stat[ 7];
-print "ok 9\n";
+is( $stat->size, $stat[7], "file size in position 7" );
 
-print "not " unless $stat->atime   == $stat[ 8];
-print "ok 10\n";
+is( $stat->atime, $stat[8], "last access time in position 8" );
 
-print "not " unless $stat->mtime   == $stat[ 9];
-print "ok 11\n";
+is( $stat->mtime, $stat[9], "last modify time in position 9" );
 
-print "not " unless $stat->ctime   == $stat[10];
-print "ok 12\n";
+is( $stat->ctime, $stat[10], "change time in position 10" );
 
-print "not " unless $stat->blksize == $stat[11];
-print "ok 13\n";
+is( $stat->blksize, $stat[11], "IO block size in position 11" );
 
-print "not " unless $stat->blocks  == $stat[12];
-print "ok 14\n";
+is( $stat->blocks, $stat[12], "number of blocks in position 12" );
+
+local $!;
+$stat = stat '/notafile';
+like( $!, qr/^No such file/, 
+	"should leave 'No such file' error in \$! with invalid file" );
 
 # Testing pretty much anything else is unportable.

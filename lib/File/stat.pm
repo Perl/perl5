@@ -48,9 +48,15 @@ sub stat ($) {
     my $arg = shift;
     my $st = populate(CORE::stat $arg);
     return $st if $st;
-    no strict 'refs';
-    require Symbol;
-    return populate(CORE::stat \*{Symbol::qualify($arg)});
+	my $fh;
+    {
+		local $!;
+		no strict 'refs';
+		require Symbol;
+		$fh = \*{Symbol::qualify($arg)};
+		return unless defined fileno $fh;
+	}
+    return populate(CORE::stat $fh);
 }
 
 1;
