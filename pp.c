@@ -2933,6 +2933,8 @@ PP(pp_sprintf)
     dSP; dMARK; dORIGMARK; dTARGET;
     do_sprintf(TARG, SP-MARK, MARK+1);
     TAINT_IF(SvTAINTED(TARG));
+    if (DO_UTF8(*(MARK+1)))
+	SvUTF8_on(TARG);
     SP = ORIGMARK;
     PUSHTARG;
     RETURN;

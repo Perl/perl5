@@ -724,9 +724,14 @@ sub DESTROY {
 EXPECT
 Bar=ARRAY(0x...)
 ########
-printf "%x %x", unpack "U*", sprintf "\x{1234}%s", "\x{5678}"
+# 20010407.008 sprintf removes utf8-ness
+$a = sprintf "\x{1234}";
+printf "%x %d\n", unpack("U*", $a), length($a);
+$a = sprintf "\x{1234}%s", "\x{5678}";
+printf "%x %x %d\n", unpack("U*", $a), length($a);
 EXPECT
-1234 5678
+1234 1
+1234 5678 2
 ########
 # keep this last - doesn't seem to work otherwise?
 eval "a.b.c.d.e.f;sub"
