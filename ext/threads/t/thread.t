@@ -12,7 +12,7 @@ BEGIN {
 
 use ExtUtils::testlib;
 use strict;
-BEGIN { $| = 1; print "1..25\n" };
+BEGIN { $| = 1; print "1..26\n" };
 use threads;
 use threads::shared;
 
@@ -153,5 +153,10 @@ package main;
     ok((keys %rand == 25), "Check that rand works after a new thread");
 }
 
+# bugid #24165
+
+run_perl(prog =>
+    'use threads; sub a{threads->new(shift)} $t = a sub{}; $t->tid; $t->join; $t->tid');
+is($?, 0, 'coredump in global destruction');
 
 
