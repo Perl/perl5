@@ -1,5 +1,5 @@
 # Descrip.MMS for perl5 on VMS
-# Last revised 20-Mar-1997 by Charles Bailey  bailey@genetics.upenn.edu
+# Last revised 23-Dec-1997 by Charles Bailey  bailey@genetics.upenn.edu
 #
 #: This file uses MMS syntax, and can be processed using DEC's MMS product,
 #: or the free MMK clone (available by ftp at ftp.spc.edu).  If you want to
@@ -74,7 +74,7 @@ OBJVAL = $(MMS$TARGET_NAME)$(O)
 .endif
 
 # Updated by fndvers.com -- do not edit by hand
-PERL_VERSION = 5_00454#
+PERL_VERSION = 5_00456#
 
 .ifdef DECC_SOCKETS
 SOCKET=1
@@ -208,18 +208,15 @@ SOCKOBJ =
 SOCKPM =
 .endif
 
-THREADH = 
 THREAD = 
 
 .ifdef THREADED
 THREADDEF = ,USE_THREADS,MULTIPLICITY
-THREADH = thread.h
 THREAD = THREAD
 .endif
 
 .ifdef OLDTHREADED
 THREADDEF = ,USE_THREADS,MULTIPLICITY,OLD_PTHREADS_API
-THREADH = thread.h
 THREAD = THREAD
 LIBS2 = sys$share:cma$lib_shr/share,cma$rtl/share
 .ifdef __AXP__
@@ -229,8 +226,12 @@ LIBS2 = $(LIBS2),sys$share:cma$open_lib_shr/share,cma$open_rtl/share
 
 .ifdef FAKETHREADED
 THREADDEF = ,USE_THREADS,MULTIPLICITY,FAKE_THREADS
-THREADH = thread.h fakethr.h
+THREADH = fakethr.h
+acth = $(ARCHCORE)fakethr.h
 THREAD = THREAD
+.else
+THREADH =
+acth =
 .endif
 
 # C preprocessor manifest "DEBUGGING" ==> perl -D, not the VMS debugger
@@ -274,10 +275,11 @@ extobj = $(myextobj)
 
 
 h1 = EXTERN.h, INTERN.h, XSUB.h, av.h, config.h, cop.h, cv.h
-h2 = embed.h, form.h, gv.h, handy.h, hv.h, keywords.h, mg.h, op.h
+h2 = embed.h, form.h, gv.h, handy.h, hv.h, keywords.h, mg.h, op.h, thread.h
 h3 = opcode.h, patchlevel.h, perl.h, perly.h, pp.h, proto.h, regcomp.h
 h4 = regexp.h, scope.h, sv.h, vmsish.h, util.h, perlio.h, perlsdio.h
-h = $(h1), $(h2), $(h3), $(h4) $(SOCKHLIS) $(THREADH)
+h5 = embedvar.h, intrpvar.h, perlvars.h, thrdvar.h
+h = $(h1), $(h2), $(h3), $(h4), $(h5) $(SOCKHLIS) $(THREADH)
 
 c1 = av.c, scope.c, op.c, doop.c, doio.c, dump.c, hv.c, mg.c, universal.c, perlio.c
 c2 = perl.c, perly.c, pp.c, pp_hot.c, pp_ctl.c, pp_sys.c, regcomp.c, regexec.c
@@ -295,11 +297,12 @@ ac1 = $(ARCHCORE)EXTERN.h $(ARCHCORE)INTERN.h  $(ARCHCORE)XSUB.h $(ARCHCORE)av.h
 ac2 = $(ARCHCORE)config.h $(ARCHCORE)cop.h $(ARCHCORE)cv.h $(ARCHCORE)embed.h
 ac3 = $(ARCHCORE)form.h $(ARCHCORE)gv.h $(ARCHCORE)handy.h $(ARCHCORE)hv.h
 ac4 = $(ARCHCORE)keywords.h $(ARCHCORE)mg.h $(ARCHCORE)op.h $(ARCHCORE)opcode.h
-ac5 = $(ARCHCORE)patchlevel.h $(ARCHCORE)perl.h $(ARCHCORE)perly.h
+ac5 = $(ARCHCORE)patchlevel.h $(ARCHCORE)perl.h $(ARCHCORE)perly.h $(ARCHCORE)thread.h
 ac6 = $(ARCHCORE)pp.h $(ARCHCORE)proto.h $(ARCHCORE)regcomp.h $(ARCHCORE)perlio.h $(ARCHCORE)perlsdio.h
 ac7 = $(ARCHCORE)regexp.h $(ARCHCORE)scope.h $(ARCHCORE)sv.h $(ARCHCORE)util.h
-ac8 = $(ARCHCORE)vmsish.h $(ARCHCORE)$(DBG)libperl$(OLB) $(ARCHCORE)perlshr_attr.opt
-ac9 = $(ARCHCORE)$(DBG)perlshr_bld.opt
+ac8 = $(ARCHCORE)embedvar.h $(ARCHCORE)intrpvar.h $(ARCHCORE)perlvars.h $(ARCHCORE)thrdvar.h
+ac9 = $(ARCHCORE)vmsish.h $(ARCHCORE)$(DBG)libperl$(OLB) $(ARCHCORE)perlshr_attr.opt
+ac10 = $(ARCHCORE)$(DBG)perlshr_bld.opt
 .ifdef SOCKET
 acs = $(ARCHCORE)$(SOCKH)
 .else
@@ -365,7 +368,7 @@ pod8 = [.lib.pod]perltrap.pod [.lib.pod]perlvar.pod [.lib.pod]perlxs.pod [.lib.p
 perlpods : $(pod1) $(pod2) $(pod3) $(pod4) $(pod5) $(pod6) $(pod7) $(pod8) [.lib.pod]perlvms.pod
 	@ $(NOOP)
 
-archcorefiles :  $(ac1) $(ac2) $(ac3) $(ac4) $(ac5) $(ac6) $(ac7) $(ac8) $(ac9) $(acs) $(ARCHAUTO)time.stamp
+archcorefiles :  $(ac1) $(ac2) $(ac3) $(ac4) $(ac5) $(ac6) $(ac7) $(ac8) $(ac9) $(ac10) $(acs) $(acth) $(ARCHAUTO)time.stamp
 	@ $(NOOP)
 
 miniperl : $(DBG)miniperl$(E)
@@ -853,8 +856,6 @@ printconfig :
 
 .ifdef LINK_ONLY
 .else
-$(SOCKOBJ) : $(SOCKC) $(SOCKH)
-
 [.ext.Socket]Socket$(O) : [.ext.Socket]Socket.c
 	$(CC) $(CFLAGS) /Object=$(MMS$TARGET) $(MMS$SOURCE)
 
@@ -863,6 +864,8 @@ $(SOCKOBJ) : $(SOCKC) $(SOCKH)
 .endif # !LINK_ONLY
 
 vmsish.h : $(SOCKH)
+
+$(SOCKOBJ) : $(SOCKC) EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
 
 $(SOCKC) : [.vms]$(SOCKC)
 	Copy/Log/NoConfirm [.vms]$(SOCKC) []$(SOCKC)
@@ -958,6 +961,14 @@ $(ARCHCORE)cv.h : cv.h
 $(ARCHCORE)embed.h : embed.h
 	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)embedvar.h : embedvar.h
+	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+.ifdef FAKETHREADED
+$(ARCHCORE)fakethr.h : fakethr.h
+	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+.endif
 $(ARCHCORE)form.h : form.h
 	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
@@ -968,6 +979,9 @@ $(ARCHCORE)handy.h : handy.h
 	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)hv.h : hv.h
+	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)intrpvar.h : intrpvar.h
 	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)keywords.h : keywords.h
@@ -994,6 +1008,9 @@ $(ARCHCORE)perlio.h : perlio.h
 $(ARCHCORE)perlsdio.h : perlsdio.h
 	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)perlvars.h : perlvars.h
+	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)perly.h : perly.h
 	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
@@ -1013,6 +1030,12 @@ $(ARCHCORE)scope.h : scope.h
 	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)sv.h : sv.h
+	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)thrdvar.h : thrdvar.h
+	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+$(ARCHCORE)thread.h : thread.h
 	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)util.h : util.h
@@ -1046,713 +1069,41 @@ $(ARCHAUTO)time.stamp :
 util$(O) : util.c
 	$(CC) $(CFLAGS) util.c
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
-av$(O) : EXTERN.h
-av$(O) : av.c
-av$(O) : av.h
-av$(O) : config.h
-av$(O) : cop.h
-av$(O) : cv.h
-av$(O) : embed.h
-av$(O) : form.h
-av$(O) : gv.h
-av$(O) : handy.h
-av$(O) : hv.h
-av$(O) : mg.h
-av$(O) : op.h
-av$(O) : opcode.h
-av$(O) : perl.h
-av$(O) : perly.h
-av$(O) : pp.h
-av$(O) : proto.h
-av$(O) : regexp.h
-av$(O) : scope.h
-av$(O) : sv.h
-av$(O) : vmsish.h
-av$(O) : util.h
-scope$(O) : EXTERN.h
-scope$(O) : av.h
-scope$(O) : config.h
-scope$(O) : cop.h
-scope$(O) : cv.h
-scope$(O) : embed.h
-scope$(O) : form.h
-scope$(O) : gv.h
-scope$(O) : handy.h
-scope$(O) : hv.h
-scope$(O) : mg.h
-scope$(O) : op.h
-scope$(O) : opcode.h
-scope$(O) : perl.h
-scope$(O) : perly.h
-scope$(O) : pp.h
-scope$(O) : proto.h
-scope$(O) : regexp.h
-scope$(O) : scope.c
-scope$(O) : scope.h
-scope$(O) : sv.h
-scope$(O) : vmsish.h
-scope$(O) : util.h
-op$(O) : EXTERN.h
-op$(O) : av.h
-op$(O) : config.h
-op$(O) : cop.h
-op$(O) : cv.h
-op$(O) : embed.h
-op$(O) : form.h
-op$(O) : gv.h
-op$(O) : handy.h
-op$(O) : hv.h
-op$(O) : mg.h
-op$(O) : op.c
-op$(O) : op.h
-op$(O) : opcode.h
-op$(O) : perl.h
-op$(O) : perly.h
-op$(O) : pp.h
-op$(O) : proto.h
-op$(O) : regexp.h
-op$(O) : scope.h
-op$(O) : sv.h
-op$(O) : vmsish.h
-op$(O) : util.h
-doop$(O) : EXTERN.h
-doop$(O) : av.h
-doop$(O) : config.h
-doop$(O) : cop.h
-doop$(O) : cv.h
-doop$(O) : doop.c
-doop$(O) : embed.h
-doop$(O) : form.h
-doop$(O) : gv.h
-doop$(O) : handy.h
-doop$(O) : hv.h
-doop$(O) : mg.h
-doop$(O) : op.h
-doop$(O) : opcode.h
-doop$(O) : perl.h
-doop$(O) : perly.h
-doop$(O) : pp.h
-doop$(O) : proto.h
-doop$(O) : regexp.h
-doop$(O) : scope.h
-doop$(O) : sv.h
-doop$(O) : vmsish.h
-doop$(O) : util.h
-doio$(O) : EXTERN.h
-doio$(O) : av.h
-doio$(O) : config.h
-doio$(O) : cop.h
-doio$(O) : cv.h
-doio$(O) : doio.c
-doio$(O) : embed.h
-doio$(O) : form.h
-doio$(O) : gv.h
-doio$(O) : handy.h
-doio$(O) : hv.h
-doio$(O) : mg.h
-doio$(O) : op.h
-doio$(O) : opcode.h
-doio$(O) : perl.h
-doio$(O) : perly.h
-doio$(O) : pp.h
-doio$(O) : proto.h
-doio$(O) : regexp.h
-doio$(O) : scope.h
-doio$(O) : sv.h
-doio$(O) : vmsish.h
-doio$(O) : util.h
-dump$(O) : EXTERN.h
-dump$(O) : av.h
-dump$(O) : config.h
-dump$(O) : cop.h
-dump$(O) : cv.h
-dump$(O) : dump.c
-dump$(O) : embed.h
-dump$(O) : form.h
-dump$(O) : gv.h
-dump$(O) : handy.h
-dump$(O) : hv.h
-dump$(O) : mg.h
-dump$(O) : op.h
-dump$(O) : opcode.h
-dump$(O) : perl.h
-dump$(O) : perly.h
-dump$(O) : pp.h
-dump$(O) : proto.h
-dump$(O) : regexp.h
-dump$(O) : scope.h
-dump$(O) : sv.h
-dump$(O) : vmsish.h
-dump$(O) : util.h
-hv$(O) : EXTERN.h
-hv$(O) : av.h
-hv$(O) : config.h
-hv$(O) : cop.h
-hv$(O) : cv.h
-hv$(O) : embed.h
-hv$(O) : form.h
-hv$(O) : gv.h
-hv$(O) : handy.h
-hv$(O) : hv.c
-hv$(O) : hv.h
-hv$(O) : mg.h
-hv$(O) : op.h
-hv$(O) : opcode.h
-hv$(O) : perl.h
-hv$(O) : perly.h
-hv$(O) : pp.h
-hv$(O) : proto.h
-hv$(O) : regexp.h
-hv$(O) : scope.h
-hv$(O) : sv.h
-hv$(O) : vmsish.h
-hv$(O) : util.h
-mg$(O) : EXTERN.h
-mg$(O) : av.h
-mg$(O) : config.h
-mg$(O) : cop.h
-mg$(O) : cv.h
-mg$(O) : embed.h
-mg$(O) : form.h
-mg$(O) : gv.h
-mg$(O) : handy.h
-mg$(O) : hv.h
-mg$(O) : mg.c
-mg$(O) : mg.h
-mg$(O) : op.h
-mg$(O) : opcode.h
-mg$(O) : perl.h
-mg$(O) : perly.h
-mg$(O) : pp.h
-mg$(O) : proto.h
-mg$(O) : regexp.h
-mg$(O) : scope.h
-mg$(O) : sv.h
-mg$(O) : vmsish.h
-mg$(O) : util.h
-universal$(O) : EXTERN.h
-universal$(O) : av.h
-universal$(O) : config.h
-universal$(O) : cop.h
-universal$(O) : cv.h
-universal$(O) : embed.h
-universal$(O) : form.h
-universal$(O) : gv.h
-universal$(O) : handy.h
-universal$(O) : hv.h
-universal$(O) : mg.h
-universal$(O) : op.h
-universal$(O) : opcode.h
-universal$(O) : perl.h
-universal$(O) : perly.h
-universal$(O) : pp.h
-universal$(O) : proto.h
-universal$(O) : regexp.h
-universal$(O) : scope.h
-universal$(O) : sv.h
-universal$(O) : vmsish.h
-universal$(O) : util.h
-universal$(O) : universal.c
-perl$(O) : EXTERN.h
-perl$(O) : av.h
-perl$(O) : config.h
-perl$(O) : cop.h
-perl$(O) : cv.h
-perl$(O) : embed.h
-perl$(O) : form.h
-perl$(O) : gv.h
-perl$(O) : handy.h
-perl$(O) : hv.h
-perl$(O) : mg.h
-perl$(O) : op.h
-perl$(O) : opcode.h
-perl$(O) : perl.c
-perl$(O) : perl.h
-perl$(O) : perly.h
-perl$(O) : pp.h
-perl$(O) : proto.h
-perl$(O) : regexp.h
-perl$(O) : scope.h
-perl$(O) : sv.h
-perl$(O) : vmsish.h
-perl$(O) : util.h
-perly$(O) : EXTERN.h
-perly$(O) : av.h
-perly$(O) : config.h
-perly$(O) : cop.h
-perly$(O) : cv.h
-perly$(O) : embed.h
-perly$(O) : form.h
-perly$(O) : gv.h
-perly$(O) : handy.h
-perly$(O) : hv.h
-perly$(O) : mg.h
-perly$(O) : op.h
-perly$(O) : opcode.h
-perly$(O) : perl.h
-perly$(O) : perly.h
-perly$(O) : perly.c
-perly$(O) : pp.h
-perly$(O) : proto.h
-perly$(O) : regexp.h
-perly$(O) : scope.h
-perly$(O) : sv.h
-perly$(O) : vmsish.h
-perly$(O) : util.h
-pp$(O) : EXTERN.h
-pp$(O) : av.h
-pp$(O) : config.h
-pp$(O) : cop.h
-pp$(O) : cv.h
-pp$(O) : embed.h
-pp$(O) : form.h
-pp$(O) : gv.h
-pp$(O) : handy.h
-pp$(O) : hv.h
-pp$(O) : mg.h
-pp$(O) : op.h
-pp$(O) : opcode.h
-pp$(O) : perl.h
-pp$(O) : perly.h
-pp$(O) : pp.c
-pp$(O) : pp.h
-pp$(O) : proto.h
-pp$(O) : regexp.h
-pp$(O) : scope.h
-pp$(O) : sv.h
-pp$(O) : vmsish.h
-pp$(O) : util.h
-pp_ctl$(O) : EXTERN.h
-pp_ctl$(O) : av.h
-pp_ctl$(O) : config.h
-pp_ctl$(O) : cop.h
-pp_ctl$(O) : cv.h
-pp_ctl$(O) : embed.h
-pp_ctl$(O) : form.h
-pp_ctl$(O) : gv.h
-pp_ctl$(O) : handy.h
-pp_ctl$(O) : hv.h
-pp_ctl$(O) : mg.h
-pp_ctl$(O) : op.h
-pp_ctl$(O) : opcode.h
-pp_ctl$(O) : perl.h
-pp_ctl$(O) : perly.h
-pp_ctl$(O) : pp_ctl.c
-pp_ctl$(O) : pp.h
-pp_ctl$(O) : proto.h
-pp_ctl$(O) : regexp.h
-pp_ctl$(O) : scope.h
-pp_ctl$(O) : sv.h
-pp_ctl$(O) : vmsish.h
-pp_ctl$(O) : util.h
-pp_hot$(O) : EXTERN.h
-pp_hot$(O) : av.h
-pp_hot$(O) : config.h
-pp_hot$(O) : cop.h
-pp_hot$(O) : cv.h
-pp_hot$(O) : embed.h
-pp_hot$(O) : form.h
-pp_hot$(O) : gv.h
-pp_hot$(O) : handy.h
-pp_hot$(O) : hv.h
-pp_hot$(O) : mg.h
-pp_hot$(O) : op.h
-pp_hot$(O) : opcode.h
-pp_hot$(O) : perl.h
-pp_hot$(O) : perly.h
-pp_hot$(O) : pp_hot.c
-pp_hot$(O) : pp.h
-pp_hot$(O) : proto.h
-pp_hot$(O) : regexp.h
-pp_hot$(O) : scope.h
-pp_hot$(O) : sv.h
-pp_hot$(O) : vmsish.h
-pp_hot$(O) : util.h
-pp_sys$(O) : EXTERN.h
-pp_sys$(O) : av.h
-pp_sys$(O) : config.h
-pp_sys$(O) : cop.h
-pp_sys$(O) : cv.h
-pp_sys$(O) : embed.h
-pp_sys$(O) : form.h
-pp_sys$(O) : gv.h
-pp_sys$(O) : handy.h
-pp_sys$(O) : hv.h
-pp_sys$(O) : mg.h
-pp_sys$(O) : op.h
-pp_sys$(O) : opcode.h
-pp_sys$(O) : perl.h
-pp_sys$(O) : perly.h
-pp_sys$(O) : pp_sys.c
-pp_sys$(O) : pp.h
-pp_sys$(O) : proto.h
-pp_sys$(O) : regexp.h
-pp_sys$(O) : scope.h
-pp_sys$(O) : sv.h
-pp_sys$(O) : vmsish.h
-pp_sys$(O) : util.h
-regcomp$(O) : EXTERN.h
-regcomp$(O) : INTERN.h
-regcomp$(O) : av.h
-regcomp$(O) : config.h
-regcomp$(O) : cop.h
-regcomp$(O) : cv.h
-regcomp$(O) : embed.h
-regcomp$(O) : form.h
-regcomp$(O) : gv.h
-regcomp$(O) : handy.h
-regcomp$(O) : hv.h
-regcomp$(O) : mg.h
-regcomp$(O) : op.h
-regcomp$(O) : opcode.h
-regcomp$(O) : perl.h
-regcomp$(O) : perly.h
-regcomp$(O) : pp.h
-regcomp$(O) : proto.h
-regcomp$(O) : regcomp.c
-regcomp$(O) : regcomp.h
-regcomp$(O) : regexp.h
-regcomp$(O) : scope.h
-regcomp$(O) : sv.h
-regcomp$(O) : vmsish.h
-regcomp$(O) : util.h
-regexec$(O) : EXTERN.h
-regexec$(O) : av.h
-regexec$(O) : config.h
-regexec$(O) : cop.h
-regexec$(O) : cv.h
-regexec$(O) : embed.h
-regexec$(O) : form.h
-regexec$(O) : gv.h
-regexec$(O) : handy.h
-regexec$(O) : hv.h
-regexec$(O) : mg.h
-regexec$(O) : op.h
-regexec$(O) : opcode.h
-regexec$(O) : perl.h
-regexec$(O) : perly.h
-regexec$(O) : pp.h
-regexec$(O) : proto.h
-regexec$(O) : regcomp.h
-regexec$(O) : regexec.c
-regexec$(O) : regexp.h
-regexec$(O) : scope.h
-regexec$(O) : sv.h
-regexec$(O) : vmsish.h
-regexec$(O) : util.h
-gv$(O) : EXTERN.h
-gv$(O) : av.h
-gv$(O) : config.h
-gv$(O) : cop.h
-gv$(O) : cv.h
-gv$(O) : embed.h
-gv$(O) : form.h
-gv$(O) : gv.c
-gv$(O) : gv.h
-gv$(O) : handy.h
-gv$(O) : hv.h
-gv$(O) : mg.h
-gv$(O) : op.h
-gv$(O) : opcode.h
-gv$(O) : perl.h
-gv$(O) : perly.h
-gv$(O) : pp.h
-gv$(O) : proto.h
-gv$(O) : regexp.h
-gv$(O) : scope.h
-gv$(O) : sv.h
-gv$(O) : vmsish.h
-gv$(O) : util.h
-sv$(O) : EXTERN.h
-sv$(O) : av.h
-sv$(O) : config.h
-sv$(O) : cop.h
-sv$(O) : cv.h
-sv$(O) : embed.h
-sv$(O) : form.h
-sv$(O) : gv.h
-sv$(O) : handy.h
-sv$(O) : hv.h
-sv$(O) : mg.h
-sv$(O) : op.h
-sv$(O) : opcode.h
-sv$(O) : perl.h
-sv$(O) : perly.h
-sv$(O) : pp.h
-sv$(O) : proto.h
-sv$(O) : regexp.h
-sv$(O) : scope.h
-sv$(O) : sv.c
-sv$(O) : sv.h
-sv$(O) : vmsish.h
-sv$(O) : util.h
-taint$(O) : EXTERN.h
-taint$(O) : av.h
-taint$(O) : config.h
-taint$(O) : cop.h
-taint$(O) : cv.h
-taint$(O) : embed.h
-taint$(O) : form.h
-taint$(O) : gv.h
-taint$(O) : handy.h
-taint$(O) : hv.h
-taint$(O) : mg.h
-taint$(O) : op.h
-taint$(O) : opcode.h
-taint$(O) : perl.h
-taint$(O) : perly.h
-taint$(O) : pp.h
-taint$(O) : proto.h
-taint$(O) : regexp.h
-taint$(O) : scope.h
-taint$(O) : sv.h
-taint$(O) : taint.c
-taint$(O) : vmsish.h
-taint$(O) : util.h
-toke$(O) : EXTERN.h
-toke$(O) : av.h
-toke$(O) : config.h
-toke$(O) : cop.h
-toke$(O) : cv.h
-toke$(O) : embed.h
-toke$(O) : form.h
-toke$(O) : gv.h
-toke$(O) : handy.h
-toke$(O) : hv.h
-toke$(O) : keywords.h
-toke$(O) : mg.h
-toke$(O) : op.h
-toke$(O) : opcode.h
-toke$(O) : perl.h
-toke$(O) : perly.h
-toke$(O) : pp.h
-toke$(O) : proto.h
-toke$(O) : regexp.h
-toke$(O) : scope.h
-toke$(O) : sv.h
-toke$(O) : toke.c
-toke$(O) : vmsish.h
-toke$(O) : util.h
-util$(O) : EXTERN.h
-util$(O) : av.h
-util$(O) : config.h
-util$(O) : cop.h
-util$(O) : cv.h
-util$(O) : embed.h
-util$(O) : form.h
-util$(O) : gv.h
-util$(O) : handy.h
-util$(O) : hv.h
-util$(O) : mg.h
-util$(O) : op.h
-util$(O) : opcode.h
-util$(O) : perl.h
-util$(O) : perly.h
-util$(O) : pp.h
-util$(O) : proto.h
-util$(O) : regexp.h
-util$(O) : scope.h
-util$(O) : sv.h
-util$(O) : vmsish.h
-util$(O) : util.c
-util$(O) : util.h
-deb$(O) : EXTERN.h
-deb$(O) : av.h
-deb$(O) : config.h
-deb$(O) : cop.h
-deb$(O) : cv.h
-deb$(O) : deb.c
-deb$(O) : embed.h
-deb$(O) : form.h
-deb$(O) : gv.h
-deb$(O) : handy.h
-deb$(O) : hv.h
-deb$(O) : mg.h
-deb$(O) : op.h
-deb$(O) : opcode.h
-deb$(O) : perl.h
-deb$(O) : perly.h
-deb$(O) : pp.h
-deb$(O) : proto.h
-deb$(O) : regexp.h
-deb$(O) : scope.h
-deb$(O) : sv.h
-deb$(O) : vmsish.h
-deb$(O) : util.h
-run$(O) : EXTERN.h
-run$(O) : av.h
-run$(O) : config.h
-run$(O) : cop.h
-run$(O) : cv.h
-run$(O) : embed.h
-run$(O) : form.h
-run$(O) : gv.h
-run$(O) : handy.h
-run$(O) : hv.h
-run$(O) : mg.h
-run$(O) : op.h
-run$(O) : opcode.h
-run$(O) : perl.h
-run$(O) : perly.h
-run$(O) : pp.h
-run$(O) : proto.h
-run$(O) : regexp.h
-run$(O) : run.c
-run$(O) : scope.h
-run$(O) : sv.h
-run$(O) : vmsish.h
-run$(O) : util.h
-vms$(O) : EXTERN.h
-vms$(O) : av.h
-vms$(O) : config.h
-vms$(O) : cop.h
-vms$(O) : cv.h
-vms$(O) : embed.h
-vms$(O) : form.h
-vms$(O) : gv.h
-vms$(O) : handy.h
-vms$(O) : hv.h
-vms$(O) : mg.h
-vms$(O) : op.h
-vms$(O) : opcode.h
-vms$(O) : perl.h
-vms$(O) : perly.h
-vms$(O) : pp.h
-vms$(O) : proto.h
-vms$(O) : regexp.h
-vms$(O) : vms.c
-vms$(O) : scope.h
-vms$(O) : sv.h
-vms$(O) : vmsish.h
-vms$(O) : util.h
-perlio$(O) : EXTERN.h
-perlio$(O) : av.h
-perlio$(O) : config.h
-perlio$(O) : cop.h
-perlio$(O) : cv.h
-perlio$(O) : embed.h
-perlio$(O) : form.h
-perlio$(O) : gv.h
-perlio$(O) : handy.h
-perlio$(O) : hv.h
-perlio$(O) : mg.h
-perlio$(O) : op.h
-perlio$(O) : opcode.h
-perlio$(O) : perl.h
-perlio$(O) : perly.h
-perlio$(O) : pp.h
-perlio$(O) : proto.h
-perlio$(O) : regexp.h
-perlio$(O) : perlio.c
-perlio$(O) : scope.h
-perlio$(O) : sv.h
-perlio$(O) : vmsish.h
-perlio$(O) : util.h
-miniperlmain$(O) : EXTERN.h
-miniperlmain$(O) : av.h
-miniperlmain$(O) : config.h
-miniperlmain$(O) : cop.h
-miniperlmain$(O) : cv.h
-miniperlmain$(O) : embed.h
-miniperlmain$(O) : form.h
-miniperlmain$(O) : gv.h
-miniperlmain$(O) : handy.h
-miniperlmain$(O) : hv.h
-miniperlmain$(O) : mg.h
-miniperlmain$(O) : miniperlmain.c
-miniperlmain$(O) : op.h
-miniperlmain$(O) : opcode.h
-miniperlmain$(O) : perl.h
-miniperlmain$(O) : perly.h
-miniperlmain$(O) : pp.h
-miniperlmain$(O) : proto.h
-miniperlmain$(O) : regexp.h
-miniperlmain$(O) : scope.h
-miniperlmain$(O) : sv.h
-miniperlmain$(O) : vmsish.h
-miniperlmain$(O) : util.h
-perlmain$(O) : EXTERN.h
-perlmain$(O) : av.h
-perlmain$(O) : config.h
-perlmain$(O) : cop.h
-perlmain$(O) : cv.h
-perlmain$(O) : embed.h
-perlmain$(O) : form.h
-perlmain$(O) : gv.h
-perlmain$(O) : handy.h
-perlmain$(O) : hv.h
-perlmain$(O) : mg.h
-perlmain$(O) : op.h
-perlmain$(O) : opcode.h
-perlmain$(O) : perl.h
-perlmain$(O) : perly.h
-perlmain$(O) : perlmain.c
-perlmain$(O) : pp.h
-perlmain$(O) : proto.h
-perlmain$(O) : regexp.h
-perlmain$(O) : scope.h
-perlmain$(O) : sv.h
-perlmain$(O) : vmsish.h
-perlmain$(O) : util.h
-globals$(O) : INTERN.h
-globals$(O) : av.h
-globals$(O) : config.h
-globals$(O) : cop.h
-globals$(O) : cv.h
-globals$(O) : embed.h
-globals$(O) : form.h
-globals$(O) : gv.h
-globals$(O) : handy.h
-globals$(O) : hv.h
-globals$(O) : mg.h
-globals$(O) : op.h
-globals$(O) : opcode.h
-globals$(O) : perl.h
-globals$(O) : perly.h
-globals$(O) : globals.c
-globals$(O) : pp.h
-globals$(O) : proto.h
-globals$(O) : regexp.h
-globals$(O) : scope.h
-globals$(O) : sv.h
-globals$(O) : vmsish.h
-globals$(O) : util.h
-[.x2p]a2p$(O) : [.x2p]a2p.c
-[.x2p]a2p$(O) : [.x2p]a2py.c
-[.x2p]a2p$(O) : [.x2p]INTERN.h
-[.x2p]a2p$(O) : [.x2p]a2p.h
-[.x2p]a2p$(O) : [.x2p]hash.h
-[.x2p]a2p$(O) : [.x2p]str.h
-[.x2p]a2p$(O) : handy.h 
-[.x2p]hash$(O) : [.x2p]hash.c
-[.x2p]hash$(O) : [.x2p]EXTERN.h
-[.x2p]hash$(O) : [.x2p]a2p.h
-[.x2p]hash$(O) : [.x2p]hash.h
-[.x2p]hash$(O) : [.x2p]str.h
-[.x2p]hash$(O) : handy.h
-[.x2p]hash$(O) : [.x2p]util.h
-[.x2p]str$(O) : [.x2p]str.c
-[.x2p]str$(O) : [.x2p]EXTERN.h
-[.x2p]str$(O) : [.x2p]a2p.h
-[.x2p]str$(O) : [.x2p]hash.h
-[.x2p]str$(O) : [.x2p]str.h
-[.x2p]str$(O) : handy.h
-[.x2p]str$(O) : [.x2p]util.h
-[.x2p]util$(O) : [.x2p]util.c
-[.x2p]util$(O) : [.x2p]EXTERN.h
-[.x2p]util$(O) : [.x2p]a2p.h
-[.x2p]util$(O) : [.x2p]hash.h
-[.x2p]util$(O) : [.x2p]str.h
-[.x2p]util$(O) : handy.h
-[.x2p]util$(O) : [.x2p]INTERN.h
-[.x2p]util$(O) : [.x2p]util.h
-[.x2p]walk$(O) : [.x2p]walk.c
-[.x2p]walk$(O) : [.x2p]EXTERN.h
-[.x2p]walk$(O) : [.x2p]a2p.h
-[.x2p]walk$(O) : [.x2p]hash.h
-[.x2p]walk$(O) : [.x2p]str.h
-[.x2p]walk$(O) : handy.h
-[.x2p]walk$(O) : [.x2p]util.h
+av$(O) : av.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
+deb$(O) : deb.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
+doio$(O) : doio.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
+doop$(O) : doop.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
+dump$(O) : dump.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
+globals$(O) : globals.c INTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
+gv$(O) : gv.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
+hv$(O) : hv.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
+malloc$(O) : malloc.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
+mg$(O) : mg.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
+miniperlmain$(O) : miniperlmain.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
+op$(O) : op.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
+perl$(O) : perl.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h patchlevel.h
+perlio$(O) : perlio.c config.h EXTERN.h perl.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
+perlmain$(O) : perlmain.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
+perly$(O) : perly.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
+pp$(O) : pp.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
+pp_ctl$(O) : pp_ctl.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
+pp_hot$(O) : pp_hot.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
+pp_sys$(O) : pp_sys.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
+regcomp$(O) : regcomp.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h INTERN.h regcomp.h
+regexec$(O) : regexec.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h regcomp.h
+run$(O) : run.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
+scope$(O) : scope.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
+sv$(O) : sv.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
+taint$(O) : taint.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
+toke$(O) : toke.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h keywords.h
+universal$(O) : universal.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h XSUB.h
+util$(O) : util.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h
+vms$(O) : vms.c EXTERN.h perl.h config.h embed.h perlio.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h XSUB.h
+[.x2p]a2p$(O) : [.x2p]a2p.c [.x2p]a2py.c [.x2p]INTERN.h [.x2p]a2p.h [.x2p]hash.h [.x2p]str.h config.h handy.h
+[.x2p]hash$(O) : [.x2p]hash.c [.x2p]EXTERN.h [.x2p]a2p.h [.x2p]hash.h [.x2p]str.h [.x2p]util.h config.h handy.h
+[.x2p]str$(O) : [.x2p]str.c [.x2p]EXTERN.h [.x2p]a2p.h [.x2p]hash.h [.x2p]str.h [.x2p]util.h config.h handy.h
+[.x2p]util$(O) : [.x2p]util.c [.x2p]EXTERN.h [.x2p]INTERN.h [.x2p]a2p.h [.x2p]hash.h [.x2p]str.h [.x2p]util.h config.h handy.h
+[.x2p]walk$(O) : [.x2p]walk.c [.x2p]EXTERN.h [.x2p]a2p.h [.x2p]hash.h [.x2p]str.h [.x2p]util.h config.h handy.h
 .endif # !LINK_ONLY
 
 config.h : [.vms]config.vms
