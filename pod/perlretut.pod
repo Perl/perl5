@@ -1750,7 +1750,7 @@ For the full list see L<perlunicode>.
 
 The Unicode has also been separated into blocks of charaters which you
 can test with C<\p{InBlock}> and C<\P{InBlock}>, for example C<\p{InGreek}>
-and C<\P{InKatakana}.  For the full list see L<perlunicode>.
+and C<\P{InKatakana}>.  For the full list see L<perlunicode>.
 
 For the the full and latest information see the latest Unicode standard.
 
