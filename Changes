@@ -28,6 +28,325 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.7.X		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 15372] By: jhi                                   on 2002/03/20  16:54:35
+        Log: Reapply #15336.
+     Branch: perl
+	   ! ext/Encode/lib/Encode/Tcl.pm
+____________________________________________________________________________
+[ 15371] By: jhi                                   on 2002/03/20  15:28:44
+        Log: Upgrade to Encode 0.93, from Dan Kogai.
+     Branch: perl
+	   + ext/Encode/AUTHORS ext/Encode/Changes ext/Encode/t/CJKalias.t
+	   ! MANIFEST ext/Encode/CN/CN.pm ext/Encode/Encode.pm
+	   ! ext/Encode/JP/JP.pm ext/Encode/KR/KR.pm ext/Encode/MANIFEST
+	   ! ext/Encode/README ext/Encode/TW/TW.pm
+	   ! ext/Encode/lib/Encode/CN/HZ.pm
+	   ! ext/Encode/lib/Encode/Encoding.pm
+	   ! ext/Encode/lib/Encode/Internal.pm
+	   ! ext/Encode/lib/Encode/JP/Constants.pm
+	   ! ext/Encode/lib/Encode/JP/H2Z.pm
+	   ! ext/Encode/lib/Encode/JP/ISO_2022_JP.pm
+	   ! ext/Encode/lib/Encode/JP/JIS.pm ext/Encode/lib/Encode/Tcl.pm
+	   ! ext/Encode/lib/Encode/Tcl/Escape.pm
+	   ! ext/Encode/lib/Encode/Tcl/Table.pm
+	   ! ext/Encode/lib/Encode/Unicode.pm ext/Encode/lib/Encode/XS.pm
+	   ! ext/Encode/lib/Encode/iso10646_1.pm
+	   ! ext/Encode/lib/Encode/ucs2_le.pm ext/Encode/lib/Encode/utf8.pm
+	   ! ext/Encode/t/JP.t
+____________________________________________________________________________
+[ 15370] By: jhi                                   on 2002/03/20  15:13:42
+        Log: Subject: patch for syslog
+             From: <Nick.Williams@morganstanley.com>
+             Date: Wed, 20 Mar 2002 15:54:14 +0000 (GMT)
+             Message-ID: <Pine.GSO.4.33.0203201548300.14623-200000@cwit119>
+     Branch: perl
+	   ! ext/Sys/Syslog/Syslog.pm
+____________________________________________________________________________
+[ 15369] By: jhi                                   on 2002/03/20  15:10:17
+        Log: Some failure updates.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 15368] By: jhi                                   on 2002/03/20  15:02:04
+        Log: Getopt::Long 2.29 from Johan Vromans.
+     Branch: perl
+	   ! lib/Getopt/Long.pm lib/Getopt/Long/CHANGES
+____________________________________________________________________________
+[ 15367] By: jhi                                   on 2002/03/20  14:58:56
+        Log: Rename ExtUtils.t to Constant.t, as suggested by
+             Nicholas Clark.
+     Branch: perl
+	   + lib/ExtUtils/t/Constant.t
+	   - lib/ExtUtils/t/ExtUtils.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 15366] By: jhi                                   on 2002/03/20  14:56:27
+        Log: Subject: [PATCH] TODO - Make Schwern Poorer
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Tue, 19 Mar 2002 22:50:28 +0000
+             Message-ID: <20020319225027.GF311@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[ 15365] By: jhi                                   on 2002/03/20  14:47:15
+        Log: Subject: Re: The story of O [PATCH]
+             From: Richard.Foley@t-online.de (Richard Foley)
+             Date: Sun, 17 Mar 2002 08:37:26 +0100
+             Message-ID: <16mUNX-293TDkC@fwd08.sul.t-online.com>
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[ 15364] By: jhi                                   on 2002/03/20  14:43:11
+        Log: Mention the external modules Encode::HanExtra and
+             PadWalker.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 15363] By: jhi                                   on 2002/03/20  14:38:23
+        Log: Subject: [PATCH] List lexicals from debugger
+             From: Peter Scott <Peter@PSDT.com>
+             Date: Tue, 19 Mar 2002 12:28:52 -0800
+             Message-id: <4.3.2.7.2.20020319101746.00aa7aa0@shell2.webquarry.com>
+     Branch: perl
+	   ! lib/dumpvar.pl lib/perl5db.pl pod/perldebug.pod
+____________________________________________________________________________
+[ 15362] By: jhi                                   on 2002/03/20  14:37:05
+        Log: Tweaks from Autrijus Tang: should use euc-tw for Taiwan,
+             and :encoding(xxx) was errorneously parsed.
+     Branch: perl
+	   ! lib/open.pm
+____________________________________________________________________________
+[ 15361] By: jhi                                   on 2002/03/20  14:34:38
+        Log: Subject: [PATCH bleadperl] exec.t tweak
+             From: Nikola Knezevic <indy@tesla.rcub.bg.ac.yu>
+             Date: Wed, 20 Mar 2002 01:21:40 +0100
+             Message-ID: <18918217607.20020320012140@tesla.rcub.bg.ac.yu>
+             
+             4NT returns 2 as error-code for nonexistant file.
+     Branch: perl
+	   ! t/op/exec.t
+____________________________________________________________________________
+[ 15360] By: jhi                                   on 2002/03/20  14:33:09
+        Log: minor Tie::File test patch to make win32 happier, from mjd.
+     Branch: perl
+	   ! lib/Tie/File/t/30_defer.t
+____________________________________________________________________________
+[ 15359] By: jhi                                   on 2002/03/20  14:31:53
+        Log: Subject: [PATCH bleadperl] magic.t tweak
+             From: Nikola Knezevic <indy@tesla.rcub.bg.ac.yu>
+             Date: Wed, 20 Mar 2002 00:39:16 +0100
+             Message-ID: <14415673404.20020320003916@tesla.rcub.bg.ac.yu>
+     Branch: perl
+	   ! t/op/magic.t
+____________________________________________________________________________
+[ 15358] By: jhi                                   on 2002/03/20  14:23:46
+        Log: Typo fix from Andreas Koenig, plus a tweak.
+     Branch: perl
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[ 15357] By: jhi                                   on 2002/03/20  14:21:33
+        Log: Sigh.  The _GNU_SOURCE is needed for the struct crypt_data
+             in Mandrake 8.2.  Now we need to figure out a way not to
+             unbreak Apache.
+     Branch: perl
+	   ! hints/linux.sh
+____________________________________________________________________________
+[ 15356] By: jhi                                   on 2002/03/20  13:59:58
+        Log: Fix for "UTF-8 bug with s///" from Hugo.
+     Branch: perl
+	   ! embed.fnc embed.h proto.h regcomp.c regcomp.h regexec.c sv.c
+	   ! t/op/pat.t
+____________________________________________________________________________
+[ 15355] By: jhi                                   on 2002/03/20  02:23:23
+        Log: metaconfig unit change for #15354.
+     Branch: metaconfig
+	   ! U/threads/usethreads.U
+____________________________________________________________________________
+[ 15354] By: jhi                                   on 2002/03/20  02:23:01
+        Log: Installation updates on threads and perlio.
+     Branch: perl
+	   ! Configure INSTALL
+____________________________________________________________________________
+[ 15353] By: jhi                                   on 2002/03/20  01:17:27
+        Log: Tpo.
+     Branch: perl
+	   ! pod/perlfaq6.pod
+____________________________________________________________________________
+[ 15352] By: jhi                                   on 2002/03/20  01:15:54
+        Log: Regen modlib and toc.
+     Branch: perl
+	   ! pod/perlmodlib.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 15351] By: jhi                                   on 2002/03/20  01:12:28
+        Log: Whitespace tweaks.
+     Branch: perl
+	   ! pod/perldebguts.pod pod/perlfaq5.pod pod/perlfunc.pod
+	   ! pod/perltodo.pod pod/perlunicode.pod
+____________________________________________________________________________
+[ 15350] By: jhi                                   on 2002/03/20  00:55:54
+        Log: If it looks like UTF-8 (either nl_langinfo or locale variables),
+             think UTF-8, embrace your inner UTF-8, as suggested by Larry.
+             (And as suggested by Markus Kuhn.)
+             
+             While we are at it, document also the case of
+             mixed hash keys as a known potential troublemaker.
+             (Since it's locale-related, sometimes.)
+     Branch: perl
+	   ! embedvar.h intrpvar.h lib/open.pm locale.c perl.c perlapi.h
+	   ! pod/perldelta.pod pod/perllocale.pod pod/perlunicode.pod
+	   ! pod/perluniintro.pod
+____________________________________________________________________________
+[ 15349] By: jhi                                   on 2002/03/20  00:47:17
+        Log: Surely a typo.
+     Branch: perl
+	   ! gv.c
+____________________________________________________________________________
+[ 15348] By: jhi                                   on 2002/03/19  22:05:29
+        Log: Take two.
+     Branch: perl
+	   + ext/Encode/t/jisx0208.euc ext/Encode/t/jisx0208.ref
+	   + ext/Encode/t/jisx0212.euc ext/Encode/t/jisx0212.ref
+____________________________________________________________________________
+[ 15347] By: jhi                                   on 2002/03/19  22:04:45
+        Log: Let's try this from scratch.
+     Branch: perl
+	   - ext/Encode/t/jisx0208.euc ext/Encode/t/jisx0208.ref
+	   - ext/Encode/t/jisx0212.euc ext/Encode/t/jisx0212.ref
+____________________________________________________________________________
+[ 15346] By: jhi                                   on 2002/03/19  21:59:14
+        Log: I could do this all day...
+     Branch: perl
+	   ! ext/Encode/t/jisx0208.euc ext/Encode/t/jisx0208.ref
+	   ! ext/Encode/t/jisx0212.euc ext/Encode/t/jisx0212.ref
+____________________________________________________________________________
+[ 15345] By: jhi                                   on 2002/03/19  21:54:20
+        Log: Grrr.
+     Branch: perl
+	   ! ext/Encode/t/jisx0208.euc ext/Encode/t/jisx0208.ref
+	   ! ext/Encode/t/jisx0212.euc ext/Encode/t/jisx0212.ref
+____________________________________________________________________________
+[ 15344] By: jhi                                   on 2002/03/19  21:49:47
+        Log: Subject: Re: Nearly OK for cygwin@15318
+             From: John Peacock <jpeacock@rowman.com>
+             Date: Tue, 19 Mar 2002 15:58:08 -0500
+             Message-ID: <3C97A660.3060302@rowman.com>
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[ 15343] By: jhi                                   on 2002/03/19  21:47:02
+        Log: Subject: Re: Nearly OK for cygwin@15318
+             From: <slaven.rezic@berlin.de>
+             Date: Tue, 19 Mar 2002 21:47:49 +0100
+             Message-Id: <20020319204958.PTWF27460.mailoutvl21@[192.168.139.30]>
+             
+             Subject: Re: Nearly OK for cygwin@15318
+             From: <slaven.rezic@berlin.de>
+             Date: Tue, 19 Mar 2002 21:37:18 +0100
+             Message-Id: <20020319203927.PTPI27460.mailoutvl21@[192.168.139.30]>
+     Branch: perl
+	   ! pod/perlport.pod t/io/fs.t
+____________________________________________________________________________
+[ 15342] By: jhi                                   on 2002/03/19  21:41:12
+        Log: D'oh.
+     Branch: perl
+	   + ext/I18N/Langinfo/fallback/const-c.inc
+	   + ext/I18N/Langinfo/fallback/const-xs.inc
+____________________________________________________________________________
+[ 15341] By: jhi                                   on 2002/03/19  21:40:49
+        Log: Subject: [PATCH] proper fallback for I18N::Langinfo
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Tue, 19 Mar 2002 22:37:08 +0000
+             Message-ID: <20020319223707.GE311@Bagpuss.unfortu.net>
+             
+             Subject: Re: [PATCH] proper fallback for I18N::Langinfo
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Tue, 19 Mar 2002 22:39:55 +0000
+             Message-ID: <20020319223954.G94831@plum.flirble.org>
+     Branch: perl
+	   - ext/I18N/Langinfo/fallback.xs
+	   ! MANIFEST
+____________________________________________________________________________
+[ 15340] By: jhi                                   on 2002/03/19  21:31:16
+        Log: Text, not binary.
+     Branch: perl
+	   ! ext/Encode/t/jisx0208.euc ext/Encode/t/jisx0208.ref
+	   ! ext/Encode/t/jisx0212.euc ext/Encode/t/jisx0212.ref
+____________________________________________________________________________
+[ 15339] By: jhi                                   on 2002/03/19  21:26:10
+        Log: Subject: Re: perl@15244
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Mon, 18 Mar 2002 17:37:31 +0100
+             Message-Id: <20020318173508.8D96.H.M.BRAND@hccnet.nl>
+             
+             (Goedendag: Dutch whitespace police)
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[ 15338] By: jhi                                   on 2002/03/19  21:10:29
+        Log: Subject: [PATCH] Re: [ID 20020305.026] Not OK: perl v5.7.3 +DEVEL15046 on sun4-solaris 2.7
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Tue, 19 Mar 2002 21:52:47 +0000
+             Message-ID: <20020319215246.GC311@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! ext/Fcntl/Makefile.PL ext/File/Glob/Makefile.PL
+	   ! ext/GDBM_File/Makefile.PL ext/I18N/Langinfo/Makefile.PL
+	   ! ext/POSIX/Makefile.PL ext/Socket/Makefile.PL
+	   ! ext/Sys/Syslog/Makefile.PL
+____________________________________________________________________________
+[ 15337] By: jhi                                   on 2002/03/19  20:09:22
+        Log: More pathname portability checks.
+     Branch: perl
+	   ! Porting/check83.pl
+____________________________________________________________________________
+[ 15336] By: jhi                                   on 2002/03/19  18:41:50
+        Log: Begone, Encode::Tcl::Extended.
+     Branch: perl
+	   ! ext/Encode/lib/Encode/Tcl.pm
+____________________________________________________________________________
+[ 15335] By: jhi                                   on 2002/03/19  18:40:10
+        Log: This is like trying to put the shaving cream
+             back to the can...
+     Branch: perl
+	   ! hints/linux.sh
+____________________________________________________________________________
+[ 15334] By: jhi                                   on 2002/03/19  18:31:59
+        Log: With the -D_SVID_SOURCE Debian 2.2 dies on conflicting
+             types of usleep().  Fun, fun. fun.
+     Branch: perl
+	   ! hints/linux.sh
+____________________________________________________________________________
+[ 15333] By: jhi                                   on 2002/03/19  18:25:21
+        Log: Sarathy's new suggestion for Linux threading flags.
+     Branch: perl
+	   ! hints/linux.sh
+____________________________________________________________________________
+[ 15332] By: jhi                                   on 2002/03/19  18:23:30
+        Log: Rename euc-jp-012 as euc-jp, as suggested by Dan Kogai.
+     Branch: perl
+	   - ext/Encode/Encode/euc-jp-0212.ucm
+	   ! MANIFEST ext/Encode/Encode/euc-jp.ucm
+	   ! ext/Encode/JP/Makefile.PL ext/Encode/MANIFEST
+____________________________________________________________________________
+[ 15331] By: jhi                                   on 2002/03/19  18:18:21
+        Log: Subject: [PATCH bleadperl] Add targer _test to win32 makefiles
+             From: Nikola Knezevic <indy@tesla.rcub.bg.ac.yu>
+             Date: Tue, 19 Mar 2002 00:42:22 +0100
+             Message-ID: <1199171923.20020319004222@tesla.rcub.bg.ac.yu>
+     Branch: perl
+	   ! win32/Makefile win32/Makefile.win64 win32/makefile.mk
+____________________________________________________________________________
+[ 15330] By: jhi                                   on 2002/03/19  18:00:48
+        Log: "+" is not a valid filename character in VMS.
+     Branch: perl
+	   + ext/Encode/Encode/euc-jp-0212.ucm
+	   - ext/Encode/Encode/euc-jp+0212.ucm
+	   ! ext/Encode/JP/Makefile.PL ext/Encode/MANIFEST
+____________________________________________________________________________
+[ 15329] By: jhi                                   on 2002/03/19  15:49:12
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 15328] By: jhi                                   on 2002/03/19  15:25:58
         Log: Take away _GNU_SOURCE since that does not seem
              to play well with other software (like Apache),
