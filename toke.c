@@ -256,18 +256,23 @@ S_no_op(pTHX_ char *what, char *s)
     else
 	PL_bufptr = s;
     yywarn(Perl_form(aTHX_ "%s found where operator expected", what));
-    if (is_first)
-	Perl_warn(aTHX_ "\t(Missing semicolon on previous line?)\n");
-    else if (PL_oldoldbufptr && isIDFIRST_lazy_if(PL_oldoldbufptr,UTF)) {
-	char *t;
-	for (t = PL_oldoldbufptr; *t && (isALNUM_lazy_if(t,UTF) || *t == ':'); t++) ;
-	if (t < PL_bufptr && isSPACE(*t))
-	    Perl_warn(aTHX_ "\t(Do you need to predeclare %.*s?)\n",
-		t - PL_oldoldbufptr, PL_oldoldbufptr);
-    }
-    else {
-	assert(s >= oldbp);
-	Perl_warn(aTHX_ "\t(Missing operator before %.*s?)\n", s - oldbp, oldbp);
+    if (ckWARN_d(WARN_SYNTAX)) {
+	if (is_first)
+	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+		    "\t(Missing semicolon on previous line?)\n");
+	else if (PL_oldoldbufptr && isIDFIRST_lazy_if(PL_oldoldbufptr,UTF)) {
+	    char *t;
+	    for (t = PL_oldoldbufptr; *t && (isALNUM_lazy_if(t,UTF) || *t == ':'); t++) ;
+	    if (t < PL_bufptr && isSPACE(*t))
+		Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+			"\t(Do you need to predeclare %.*s?)\n",
+		    t - PL_oldoldbufptr, PL_oldoldbufptr);
+	}
+	else {
+	    assert(s >= oldbp);
+	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+		    "\t(Missing operator before %.*s?)\n", s - oldbp, oldbp);
+	}
     }
     PL_bufptr = oldbp;
 }
@@ -5528,7 +5533,9 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	    break;
 	case 6:
 	    if (strEQ(d,"exists"))		return KEY_exists;
-	    if (strEQ(d,"elseif")) Perl_warn(aTHX_ "elseif should be elsif");
+	    if (strEQ(d,"elseif") && ckWARN_d(WARN_SYNTAX))
+		Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+			"elseif should be elsif");
 	    break;
 	case 8:
 	    if (strEQ(d,"endgrent"))		return -KEY_endgrent;
@@ -7822,8 +7829,8 @@ Perl_yyerror(pTHX_ char *s)
                 (int)PL_multi_open,(int)PL_multi_close,(IV)PL_multi_start);
         PL_multi_end = 0;
     }
-    if (PL_in_eval & EVAL_WARNONLY)
-	Perl_warn(aTHX_ "%"SVf, msg);
+    if (PL_in_eval & EVAL_WARNONLY && ckWARN_d(WARN_SYNTAX))
+	Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "%"SVf, msg);
     else
 	qerror(msg);
     if (PL_error_count >= 10) {
