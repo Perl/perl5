@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..49\n";
+print "1..51\n";
 
 $_ = "abcdefghijklmnopqrstuvwxyz";
 
@@ -287,3 +287,12 @@ print "ok 48\n";
 print "not " unless sprintf("%vd", $a) eq '196.172.200';
 print "ok 49\n";
 
+# UTF8 range
+
+($a = v300.196.172.302.197.172) =~ tr/\x{12c}-\x{130}/\xc0-\xc4/;
+print "not " unless $a eq v192.196.172.194.197.172;
+print "ok 50\n";
+
+($a = v300.196.172.302.197.172) =~ tr/\xc4-\xc8/\x{12c}-\x{130}/;
+print "not " unless $a eq v300.300.172.302.301.172;
+print "ok 51\n";

@@ -182,13 +182,33 @@ must then use C<av_store> to assign values to these new elements.
 =for hackers
 Found in file av.c
 
+=item bytes_from_utf8
+
+Converts a string C<s> of length C<len> from UTF8 into byte encoding.
+Unlike <utf8_to_bytes> but like C<bytes_to_utf8>, returns a pointer to
+the newly-created string, and updates C<len> to contain the new length.
+Returns the original string if no conversion occurs, C<len> and
+C<is_utf8> are unchanged. Do nothing if C<is_utf8> points to 0. Sets
+C<is_utf8> to 0 if C<s> is converted or malformed .
+
+NOTE: this function is experimental and may change or be
+removed without notice.
+
+	U8*	bytes_from_utf8(U8 *s, STRLEN *len, bool *is_utf8)
+
+=for hackers
+Found in file utf8.c
+
 =item bytes_to_utf8
 
 Converts a string C<s> of length C<len> from ASCII into UTF8 encoding.
 Returns a pointer to the newly-created string, and sets C<len> to
 reflect the new length.
 
-	U8 *	bytes_to_utf8(U8 *s, STRLEN *len)
+NOTE: this function is experimental and may change or be
+removed without notice.
+
+	U8*	bytes_to_utf8(U8 *s, STRLEN *len)
 
 =for hackers
 Found in file utf8.c
@@ -999,6 +1019,27 @@ character.
 
 =for hackers
 Found in file handy.h
+
+=item is_utf8_char
+
+Tests if some arbitrary number of bytes begins in a valid UTF-8 character.
+The actual number of bytes in the UTF-8 character will be returned if it
+is valid, otherwise 0. 
+ 
+	STRLEN	is_utf8_char(U8 *p)
+
+=for hackers
+Found in file utf8.c
+
+=item is_utf8_string
+
+Returns true if first C<len> bytes of the given string form valid a UTF8
+string, false otherwise.
+
+	bool	is_utf8_string(U8 *s, STRLEN len)
+
+=for hackers
+Found in file utf8.c
 
 =item items
 
@@ -3168,16 +3209,6 @@ Converts the specified character to uppercase.
 =for hackers
 Found in file handy.h
 
-=item U8 *s
-
-Returns true if first C<len> bytes of the given string form valid a UTF8
-string, false otherwise.
-
-	is_utf8_string	U8 *s(STRLEN len)
-
-=for hackers
-Found in file utf8.c
-
 =item utf8_distance
 
 Returns the number of UTF8 characters between the UTF-8 pointers C<a>
@@ -3223,7 +3254,10 @@ Unlike C<bytes_to_utf8>, this over-writes the original string, and
 updates len to contain the new length.
 Returns zero on failure, setting C<len> to -1.
 
-	U8 *	utf8_to_bytes(U8 *s, STRLEN *len)
+NOTE: this function is experimental and may change or be
+removed without notice.
+
+	U8*	utf8_to_bytes(U8 *s, STRLEN *len)
 
 =for hackers
 Found in file utf8.c
@@ -3245,7 +3279,7 @@ length of the UTF-8 character in bytes, and zero will be returned.
 The C<flags> can also contain various flags to allow deviations from
 the strict UTF-8 encoding (see F<utf8.h>).
 
-	U8* s	utf8_to_uv(STRLEN curlen, STRLEN *retlen, U32 flags)
+	UV	utf8_to_uv(U8 *s, STRLEN curlen, STRLEN* retlen, U32 flags)
 
 =for hackers
 Found in file utf8.c
@@ -3259,7 +3293,25 @@ length, in bytes, of that character.
 If C<s> does not point to a well-formed UTF8 character, zero is
 returned and retlen is set, if possible, to -1.
 
-	U8* s	utf8_to_uv_simple(STRLEN *retlen)
+	UV	utf8_to_uv_simple(U8 *s, STRLEN* retlen)
+
+=for hackers
+Found in file utf8.c
+
+=item uv_to_utf8
+
+Adds the UTF8 representation of the Unicode codepoint C<uv> to the end
+of the string C<d>; C<d> should be have at least C<UTF8_MAXLEN+1> free
+bytes available. The return value is the pointer to the byte after the
+end of the new character. In other words, 
+
+    d = uv_to_utf8(d, uv);
+
+is the recommended Unicode-aware way of saying
+
+    *(d++) = uv;
+
+	U8*	uv_to_utf8(U8 *d, UV uv)
 
 =for hackers
 Found in file utf8.c

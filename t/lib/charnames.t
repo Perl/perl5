@@ -8,7 +8,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..13\n";
+print "1..14\n";
 
 use charnames ':full';
 
@@ -44,8 +44,7 @@ $encoded_alpha = "\316\261";
 $encoded_bet = "\327\221";
 
 sub to_bytes {
-    use bytes;
-    "".shift;
+    pack"a*", shift;
 }
 
 {
@@ -88,5 +87,12 @@ sub to_bytes {
 
     print "not " unless ord($x) == ord($named);
     print "ok 13\n";
+}
+
+{
+   use charnames qw(:full);
+   use utf8;
+   print "not " unless "\x{100}\N{CENT SIGN}" eq "\x{100}"."\N{CENT SIGN}";
+   print "ok 14\n";
 }
 

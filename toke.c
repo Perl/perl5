@@ -1354,8 +1354,7 @@ S_scan_const(pTHX_ char *start)
 			       "Unrecognized escape \\%c passed through",
 			       *s);
 		    /* default action is to copy the quoted character */
-		    *d++ = *s++;
-		    continue;
+		    goto default_action;
 		}
 
 	    /* \132 indicates an octal constant */
@@ -1446,6 +1445,13 @@ S_scan_const(pTHX_ char *start)
 		    if (to_be_utf8 || has_utf8 || uv > 255) {
 		        d = (char*)uv_to_utf8((U8*)d, uv);
 			has_utf8 = TRUE;
+			if (PL_lex_inwhat == OP_TRANS &&
+			    PL_sublex_info.sub_op) {
+			    PL_sublex_info.sub_op->op_private |=
+				(PL_lex_repl ? OPpTRANS_FROM_UTF
+					     : OPpTRANS_TO_UTF);
+			    utf = TRUE;
+			}
                     }
 		    else {
 		        *d++ = (char)uv;
@@ -1473,6 +1479,8 @@ S_scan_const(pTHX_ char *start)
 		    res = newSVpvn(s + 1, e - s - 1);
 		    res = new_constant( Nullch, 0, "charnames",
 					res, Nullsv, "\\N{...}" );
+		    if (has_utf8)
+			sv_utf8_upgrade(res);
 		    str = SvPV(res,len);
 		    if (!has_utf8 && SvUTF8(res)) {
 			char *ostart = SvPVX(sv);
@@ -1555,8 +1563,7 @@ S_scan_const(pTHX_ char *start)
 	    continue;
 	} /* end if (backslash) */
 
-       /* (now in tr/// code again) */
-
+    default_action:
        if (UTF8_IS_CONTINUED(*s) && (this_utf8 || has_utf8)) {
            STRLEN len = (STRLEN) -1;
            UV uv;
@@ -1575,10 +1582,15 @@ S_scan_const(pTHX_ char *start)
                    *d++ = *s++;
            }
            has_utf8 = TRUE;
+	   if (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op) {
+	       PL_sublex_info.sub_op->op_private |=
+		   (PL_lex_repl ? OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF);
+	       utf = TRUE;
+	   }
            continue;
        }
 
-	*d++ = *s++;
+       *d++ = *s++;
     } /* while loop to process each character */
 
     /* terminate the string and set up the sv */

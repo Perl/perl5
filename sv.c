@@ -2959,15 +2959,16 @@ void
 Perl_sv_setpvn(pTHX_ register SV *sv, register const char *ptr, register STRLEN len)
 {
     register char *dptr;
-    {
-        /* len is STRLEN which is unsigned, need to copy to signed */
-	IV iv = len;
-	assert(iv >= 0);
-    }
+
     SV_CHECK_THINKFIRST(sv);
     if (!ptr) {
 	(void)SvOK_off(sv);
 	return;
+    }
+    else {
+        /* len is STRLEN which is unsigned, need to copy to signed */
+	IV iv = len;
+	assert(iv >= 0);
     }
     (void)SvUPGRADE(sv, SVt_PV);
 
@@ -4107,14 +4108,22 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 
     /* do not utf8ize the comparands as a side-effect */
     if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTE) {
-	if (SvUTF8(sv1)) {
-	    pv2 = (char*)bytes_to_utf8((U8*)pv2, &cur2);
-	    pv2tmp = TRUE;
-	}
-	else {
-	    pv1 = (char*)bytes_to_utf8((U8*)pv1, &cur1);
-	    pv1tmp = TRUE;
-	}
+ 	bool is_utf8 = TRUE;
+ 
+  	if (SvUTF8(sv1)) {
+ 	    char *pv = bytes_from_utf8((U8*)pv1, &cur1, &is_utf8);
+ 	    if (is_utf8)
+ 		return 0;
+ 	    pv1tmp = (pv != pv1);
+ 	    pv1 = pv;
+  	}
+  	else {
+ 	    char *pv = bytes_from_utf8((U8*)pv2, &cur2, &is_utf8);
+ 	    if (is_utf8)
+ 		return 0;
+ 	    pv2tmp = (pv != pv2);
+ 	    pv2 = pv;
+  	}
     }
 
     if (cur1 == cur2)
