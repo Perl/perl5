@@ -3427,6 +3427,11 @@ PerlIOBuf_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 	PerlIO_get_base(f);
     if (!(PerlIOBase(f)->flags & PERLIO_F_CANWRITE))
 	return 0;
+    if (PerlIOBase(f)->flags & PERLIO_F_RDBUF) {
+    	if (PerlIO_flush(f) != 0) {
+	    return 0;
+	}
+    }	
     while (count > 0) {
 	SSize_t avail = b->bufsiz - (b->ptr - b->buf);
 	if ((SSize_t) count < avail)
@@ -3485,6 +3490,19 @@ PerlIOBuf_tell(pTHX_ PerlIO *f)
      * b->posn is file position where b->buf was read, or will be written
      */
     Off_t posn = b->posn;
+    if ((PerlIOBase(f)->flags & PERLIO_F_APPEND) && 
+        (PerlIOBase(f)->flags & PERLIO_F_WRBUF)) {
+#if 1
+    	/* As O_APPEND files are normally shared in some sense it is better
+	   to flush :
+	 */  	
+	PerlIO_flush(f);
+#else	
+        /* when file is NOT shared then this is sufficient */ 
+	PerlIO_seek(PerlIONext(f),0, SEEK_END);
+#endif
+	posn = b->posn = PerlIO_tell(PerlIONext(f));
+    }
     if (b->buf) {
 	/*
 	 * If buffer is valid adjust position by amount in buffer
