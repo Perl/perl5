@@ -172,9 +172,11 @@ Follow the messages ... and you're done.
 
 =head2 Using GNU's gcc for building perl
 
-Using gcc-3.0 (tested with 3.0.4) now works out of the box, as does the
-most recent gcc-2.9 available directly from IBM (as part of their Linux
-compatibility packages).
+Using gcc-3.0 (tested with 3.0.4) now works out of the box, as do
+recent gcc-2.9 builds available directly from IBM as part of their Linux
+compatibility packages, available here:
+ 
+  http://www.ibm.com/servers/aix/products/aixos/linux/
 
 =head2 Using Large Files with Perl
 
