@@ -312,11 +312,11 @@ win32_select(int nfds, Perl_fd_set* rd, Perl_fd_set* wr, Perl_fd_set* ex, const 
     for (i = 0; i < nfds; i++) {
 	fd = TO_SOCKET(i);
 	if (PERL_FD_ISSET(i,rd))
-	    FD_SET(fd, &nrd);
+	    FD_SET((unsigned)fd, &nrd);
 	if (PERL_FD_ISSET(i,wr))
-	    FD_SET(fd, &nwr);
+	    FD_SET((unsigned)fd, &nwr);
 	if (PERL_FD_ISSET(i,ex))
-	    FD_SET(fd, &nex);
+	    FD_SET((unsigned)fd, &nex);
     }
 
     errno = save_errno;
