@@ -231,12 +231,13 @@ shextract = Makefile cflags config.h makeaperl makedepend \
 # available.  Dependencies handled manually below (for now).
 
 pl = pod/pod2html.PL pod/pod2latex.PL pod/pod2man.PL pod/pod2text.PL \
-	pod/pod2usage.PL pod/podchecker.PL pod/podselect.PL lib/lib_pm.PL
+	pod/pod2usage.PL pod/podchecker.PL pod/podselect.PL
 
+# lib/lib.pm is not listed here because it has a rule of its own.
 plextract = pod/pod2html pod/pod2latex pod/pod2man pod/pod2text \
-	pod/pod2usage pod/podchecker pod/podselect lib/lib.pm
+	pod/pod2usage pod/podchecker pod/podselect
 
-addedbyconf = UU $(shextract) $(plextract) pstruct
+addedbyconf = UU $(shextract) $(plextract) lib/lib.pm pstruct
 
 h1 = EXTERN.h INTERN.h XSUB.h av.h config.h cop.h cv.h dosish.h
 h2 = embed.h form.h gv.h handy.h hv.h keywords.h mg.h op.h
@@ -286,7 +287,7 @@ compile: all
 translators:	miniperl lib/Config.pm FORCE
 	@echo " "; echo "	Making x2p stuff"; cd x2p; $(LDLIBPTH) $(MAKE) all
 
-utilities:	miniperl lib/Config.pm $(plextract) FORCE
+utilities:	miniperl lib/Config.pm $(plextract) lib/lib.pm FORCE
 	@echo " "; echo "	Making utilities"; cd utils; $(LDLIBPTH) $(MAKE) all
 
 
@@ -525,6 +526,9 @@ lib/re.pm: ext/re/re.pm
 
 $(plextract):	miniperl lib/Config.pm
 	$(LDLIBPTH) ./miniperl -Ilib $@.PL
+
+lib/lib.pm:	miniperl lib/Config.pm
+	$(LDLIBPTH) ./miniperl -Ilib lib/lib_pm.PL
 
 extra.pods: miniperl
 	-@test -f extra.pods && rm -f `cat extra.pods`
