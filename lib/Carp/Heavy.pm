@@ -12,7 +12,7 @@ Carp heavy machinery - no user serviceable parts inside
 # On one line so MakeMaker will see it.
 use Carp;  our $VERSION = $Carp::VERSION;
 
-our ($CarpLevel, $MaxArgNums, $MaxEvalLen, $MaxLenArg, $Verbose);
+our ($CarpLevel, $MaxArgNums, $MaxEvalLen, $MaxArgLen, $Verbose);
 
 sub caller_info {
   my $i = shift(@_) + 1;
@@ -50,7 +50,7 @@ sub format_arg {
       $arg = defined($overload::VERSION) ? overload::StrVal($arg) : "$arg";
   }
   $arg =~ s/'/\\'/g;
-  $arg = str_len_trim($arg, $MaxLenArg);
+  $arg = str_len_trim($arg, $MaxArgLen);
   
   # Quote it?
   $arg = "'$arg'" unless $arg =~ /^-?[\d.]+\z/;
