@@ -38,6 +38,7 @@ open STDOUT, ">", $file1 or die "$file1:$!";
 print $obj->str, "\n";
 $obj->set("テスト文字列");
 print $obj->str, "\n";
+close STDOUT;
 
 my $cmp = compare_text($file0, $file1);
 is($cmp, 0, "encoding vs. STDOUT");
@@ -51,7 +52,6 @@ while(<STDIN>){
     is ($cmp[$i++], $_, "encoding vs. STDIN - $i");
 }
 
-close STDOUT;
 unlink $file1 unless $cmp;
 __END__
 
