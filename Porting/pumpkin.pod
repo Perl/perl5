@@ -280,17 +280,15 @@ change the appropriate metaconfig units instead, and regenerate Configure.
 
 	metaconfig -m
 
-will regenerate Configure and config_h.SH.  More information on
-obtaining and running metaconfig is in the F<U/README> file that comes
-with Perl's metaconfig units.  Perl's metaconfig units should be
-available the same place you found this file.  On CPAN, look under my
-directory F<authors/id/ANDYD/> for a file such as 
-F<mc_units-5.004_70-01.tar.gz>.
-That file should be unpacked in your main perl source directory.  It
-contains the files needed to run B<metaconfig> to reproduce Perl's
-Configure script.  (Those units are for 5.004_70.  There may have been
-changes since then; please contact me if you want more recent
-versions, and I will try to point you in the right direction.)
+will regenerate Configure and config_h.SH.  More information on obtaining
+and running metaconfig is in the F<U/README> file that comes with Perl's
+metaconfig units.  Perl's metaconfig units should be available on CPAN.
+As of perl5.004_70, they were in the file F<mc_units-5.004_70-01.tar.gz>
+under http://www.perl.com/CPAN/authors/id/ANDYD/ .  The mc_units tar
+file should be unpacked in your main perl source directory.  (Note:
+those units were for 5.004_70.  There may have been changes since then.
+Check for later versions or contact perl5-porters@perl.org to obtain a
+pointer to the current version.)
 
 Alternatively, do consider if the F<*ish.h> files might be a better
 place for your changes.
@@ -318,8 +316,9 @@ learned how to use the full suite of tools in the dist distribution.
 All the tests in the t/ directory ought to be executable.  The
 main makefile used to do a 'chmod t/*/*.t', but that resulted in
 a self-modifying distribution--something some users would strongly
-prefer to avoid.  Probably, the F<t/TEST> script should check for this
-and do the chmod if needed, but it doesn't currently.
+prefer to avoid.  The F<t/TEST> script will check for this
+and do the chmod if needed, but the tests still ought to be
+executable.
 
 In all, the following files should probably be executable:
 
@@ -388,7 +387,7 @@ distinguish the file from config.h even on case-insensitive file systems.)
 Simply edit the existing config_H file; keep the first few explanatory
 lines and then copy your new config.h below.
 
-It may also be necessary to update vms/config.vms and
+It may also be necessary to update win32/config.?c, vms/config.vms and
 plan9/config.plan9, though you should be quite careful in doing so if
 you are not familiar with those systems.  You might want to issue your
 patch with a promise to quickly issue a follow-up that handles those
@@ -1308,4 +1307,4 @@ All opinions expressed herein are those of the authorZ<>(s).
 
 =head1 LAST MODIFIED
 
-$Id: pumpkin.pod,v 1.19 1998/07/06 20:48:55 doughera Released $
+$Id: pumpkin.pod,v 1.20 1998/07/08 17:09:06 doughera Released $
