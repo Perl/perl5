@@ -1620,6 +1620,9 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	      return SvUV(tmpstr);
 	  return PTR2UV(SvRV(sv));
 	}
+	if (SvREADONLY(sv) && SvFAKE(sv)) {
+	    sv_force_normal(sv);
+	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    if (ckWARN(WARN_UNINITIALIZED))
 		report_uninit();
@@ -1781,6 +1784,9 @@ Perl_sv_2nv(pTHX_ register SV *sv)
                   (SvRV(tmpstr) != SvRV(sv)))
 	      return SvNV(tmpstr);
 	  return PTR2NV(SvRV(sv));
+	}
+	if (SvREADONLY(sv) && SvFAKE(sv)) {
+	    sv_force_normal(sv);
 	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    if (ckWARN(WARN_UNINITIALIZED))
@@ -2385,7 +2391,7 @@ void
 Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
 {
     char *s, *t;
-    bool hibit;
+    int hibit = FALSE;
 
     if (!sv || !SvPOK(sv) || SvUTF8(sv))
 	return;
@@ -2393,12 +2399,22 @@ Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
     /* This function could be much more efficient if we had a FLAG in SVs
      * to signal if there are any hibit chars in the PV.
      */
-    for (s = t = SvPVX(sv), hibit = FALSE; t < SvEND(sv) && !hibit; t++)
-	if (*t & 0x80)
+    for (s = t = SvPVX(sv); t < SvEND(sv) && !hibit; t++) {
+	if (*t & 0x80) {
 	    hibit = TRUE;
+	    break;
+	}
+    }
 
     if (hibit) {
-	STRLEN len = SvCUR(sv) + 1; /* Plus the \0 */
+	STRLEN len;
+	if (SvREADONLY(sv) && SvFAKE(sv)) {
+	    Perl_warn(aTHX_ "%d s=%p t=%p e=%p",(int)hibit,s,t,SvEND(sv));
+	    sv_dump(sv);
+	    sv_force_normal(sv);
+	    s = SvPVX(sv);
+	}
+	len = SvCUR(sv) + 1; /* Plus the \0 */
 	SvPVX(sv) = (char*)bytes_to_utf8((U8*)s, &len);
 	SvCUR(sv) = len - 1;
 	SvLEN(sv) = len; /* No longer know the real size. */
