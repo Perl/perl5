@@ -30,7 +30,7 @@ END { -f $tmpfile && (open STDERR, '>&SAVERR' and unlink $tmpfile) }
 open(SAVERR, ">&STDERR");
 open(STDERR, ">$tmpfile");
 
-xXx();  # Ok someone could have a program called this :(
+xXx_not_there();  # Ok someone could have a program called this :(
 
 # On os2 the warning is on by default...
 ok(($^O eq 'os2' xor !(-s $tmpfile)), '$Shell::capture_stderr');

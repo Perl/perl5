@@ -850,12 +850,12 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 #define STORE_SCALAR(pv, len)	STORE_PV_LEN(pv, len, SX_SCALAR, SX_LSCALAR)
 
 /*
- * Store undef in arrays and hashes without recursing through store().
+ * Store &PL_sv_undef in arrays without recursing through store().
  */
-#define STORE_UNDEF() 					\
+#define STORE_SV_UNDEF() 					\
   STMT_START {							\
 	cxt->tagnum++;						\
-	PUTMARK(SX_UNDEF);					\
+	PUTMARK(SX_SV_UNDEF);					\
   } STMT_END
 
 /*
@@ -2037,7 +2037,7 @@ static int store_array(stcxt_t *cxt, AV *av)
 		sav = av_fetch(av, i, 0);
 		if (!sav) {
 			TRACEME(("(#%d) undef item", i));
-			STORE_UNDEF();
+			STORE_SV_UNDEF();
 			continue;
 		}
 		TRACEME(("(#%d) item", i));

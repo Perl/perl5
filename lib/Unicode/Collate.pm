@@ -14,7 +14,7 @@ use File::Spec;
 
 require Exporter;
 
-our $VERSION = '0.25';
+our $VERSION = '0.26';
 our $PACKAGE = __PACKAGE__;
 
 our @ISA = qw(Exporter);
@@ -350,16 +350,18 @@ sub parseEntry
     $k = '[.0000.0000.0000.0000]'
 	if defined $self->{ignoreName} && $name =~ /$self->{ignoreName}/;
 
-    my $is_L3_ignorable;
+    my $is_L3_ignorable = TRUE;
 
     foreach my $arr ($k =~ /\[([^\[\]]+)\]/g) { # SPACEs allowed
 	my $var = $arr =~ /\*/; # exactly /^\*/ but be lenient.
 	my @wt = _getHexArray($arr);
 	push @key, pack(VCE_TEMPLATE, $var, @wt);
-	$is_L3_ignorable = TRUE
-	    if $wt[0] + $wt[1] + $wt[2] == 0;
+	$is_L3_ignorable = FALSE
+	    if $wt[0] + $wt[1] + $wt[2] != 0;
 	  # if $arr !~ /[1-9A-Fa-f]/; NG
 	  # Conformance Test shows L3-ignorable is completely ignorable.
+	# For expansion, an entry $is_L3_ignorable
+	# if and only if "all" CEs are [.0000.0000.0000].
     }
 
     $self->{entries}{$entry} = \@key;

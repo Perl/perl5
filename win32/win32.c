@@ -1067,6 +1067,7 @@ win32_kill(int pid, int sig)
     dTHX;
     HANDLE hProcess;
     long child;
+    int retval;
 #ifdef USE_ITHREADS
     if (pid < 0) {
 	/* it is a pseudo-forked child */
@@ -1125,25 +1126,29 @@ win32_kill(int pid, int sig)
 	}
 	else {
 alien_process:
+            retval = -1;
 	    hProcess = OpenProcess(PROCESS_ALL_ACCESS, TRUE,
 				   (IsWin95() ? -pid : pid));
 	    if (hProcess) {
 		switch(sig) {
 		case 0:
 		    /* "Does process exist?" use of kill */
-		    return 0;
+		    retval = 0;
+                    break;
 		case 2:
 		    if (GenerateConsoleCtrlEvent(CTRL_C_EVENT,pid))
-			return 0;
+			retval = 0;
 		    break;
 		default: /* For now be backwards compatible with perl5.6 */
                 case 9:
-		    if (TerminateProcess(hProcess, sig)) {
-			CloseHandle(hProcess);
-			return 0;
-		    }
+		    if (TerminateProcess(hProcess, sig))
+			retval = 0;
+                    break;
 		}
 	    }
+            CloseHandle(hProcess);
+            if (retval == 0)
+                return 0;
 	}
     }
     errno = EINVAL;
@@ -2082,6 +2087,7 @@ alien_process:
 	    if (hProcess) {
 		win32_msgwait(aTHX_ 1, &hProcess, timeout, &waitcode);
 		if (waitcode == WAIT_TIMEOUT) {
+                    CloseHandle(hProcess);
 		    return 0;
 		}
 		else if (waitcode == WAIT_OBJECT_0) {
