@@ -20,11 +20,6 @@ Other encodings can be converted to perl's encoding on input, or from
 perl's encoding on output by use of the ":encoding(...)" layer.
 See L<open>.
 
-In some filesystems (for example Microsoft NTFS and Apple HFS+) the
-filenames are in UTF-8 .  By using opendir() and File::Glob you can
-make readdir() and glob() to return the filenames as Unicode, see
-L<perlfunc/opendir> and L<File::Glob> for details.
-
 To mark the Perl source itself as being in a particular encoding,
 see L<encoding>.
 
