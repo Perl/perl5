@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..66\n";
+print "1..70\n";
 
 my $test = 0;
 sub ok ($$) {
@@ -188,4 +188,13 @@ END { unlink $file; }
     my $x = <$_>;
     ok( $x eq "hello\n", 'reading from <$_> works' );
     close $_;
+}
+
+{
+    $fqdb::_ = 'fqdb';
+    ok( $fqdb::_ eq 'fqdb', 'fully qualified $_ is not in main' );
+    ok( eval q/$fqdb::_/ eq 'fqdb', 'fully qualified, evaled $_ is not in main' );
+    package fqdb;
+    ::ok( $_ ne 'fqdb', 'unqualified $_ is in main' );
+    ::ok( q/$_/ ne 'fqdb', 'unqualified, evaled $_ is in main' );
 }

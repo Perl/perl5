@@ -256,7 +256,8 @@ Perl_allocmy(pTHX_ char *name)
     off = pad_add_name(name,
 		    PL_in_my_stash,
 		    (PL_in_my == KEY_our 
-			? (PL_curstash ? PL_curstash : PL_defstash)
+		        /* $_ is always in main::, even with our */
+			? (PL_curstash && !strEQ(name,"$_") ? PL_curstash : PL_defstash)
 			: Nullhv
 		    ),
 		    0 /*  not fake */
