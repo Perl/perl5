@@ -273,6 +273,7 @@ RE_NLP			= $(AUTODIR)\re\re.nlp
 BYTELOADER_NLP		= $(AUTODIR)\ByteLoader\ByteLoader.nlp
 DPROF_NLP		= $(AUTODIR)\Devel\DProf\DProf.nlp
 GLOB_NLP		= $(AUTODIR)\File\Glob\Glob.nlp
+HOSTNAME_NLP		= $(AUTODIR)\Sys\Hostname\Hostname.nlp
 CWD_NLP			= $(AUTODIR)\Cwd\Cwd.nlp
 STORABLE_NLP		= $(AUTODIR)\Storable\Storable.nlp
 LISTUTIL_NLP		= $(AUTODIR)\List\Util\Util.nlp
@@ -280,7 +281,7 @@ MIMEBASE64_NLP		= $(AUTODIR)\MIME\Base64\Base64.nlp
 XSTYPEMAP_NLP		= $(AUTODIR)\XS\Typemap\Typemap.nlp
 UNICODENORMALIZE_NLP	= $(AUTODIR)\XS\Typemap\Typemap.nlp
 
-EXTENSION_NLP	= 		\
+EXTENSION_NLP	=		\
 		$(FCNTL_NLP)	\
 		$(BYTELOADER_NLP)	\
 		$(IO_NLP)		\
@@ -296,6 +297,7 @@ EXTENSION_NLP	= 		\
 		$(PEEK_NLP)		\
 		$(RE_NLP)	\
 		$(DPROF_NLP)	\
+		$(HOSTNAME_NLP) \
 		$(STORABLE_NLP)	\
 		$(LISTUTIL_NLP)	\
 		$(MIMEBASE64_NLP) \
@@ -328,11 +330,6 @@ TYPE_NLM	= TestNLM\type\type.nlm
 TEST_NLMS	=	\
 			$(ECHO_NLM)	\
 			$(TYPE_NLM)	\
-
-ERRNO_PM_NW	= $(LIBDIR)\Errno.pm
-
-EXTENSION_NPM =	\
-		$(ERRNO_PM_NW)	\
 
 
 !ifndef SCREEN
@@ -767,7 +764,8 @@ X2P_OBJ		= $(X2P_SRC:.c=.obj)
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
 		Storable/Storable List/Util MIME/Base64/Base64 \
-		XS/Typemap/Typemap Unicode/Normalize/Normalize
+		XS/Typemap/Typemap Unicode/Normalize/Normalize Sys/Hostnamees
+
 
 STATIC_EXT	= DynaLoader
 NONXS_EXT	= Errno
@@ -789,6 +787,7 @@ PEEK			= $(EXTDIR)\Devel\Peek\Peek
 BYTELOADER		= $(EXTDIR)\ByteLoader\ByteLoader
 DPROF			= $(EXTDIR)\Devel\DProf\DProf
 GLOB			= $(EXTDIR)\File\Glob\Glob
+HOSTNAME		= $(EXTDIR)\Sys\Hostname\Hostname
 CWD			= $(EXTDIR)\Cwd\Cwd
 STORABLE		= $(EXTDIR)\Storable\Storable
 LISTUTIL		= $(EXTDIR)\List\Util
@@ -796,7 +795,9 @@ MIMEBASE64		= $(EXTDIR)\MIME\Base64\Base64
 XSTYPEMAP		= $(EXTDIR)\XS\Typemap\Typemap
 UNICODENORMALIZE	= $(EXTDIR)\Unicode\Normalize\Normalize
 
-EXTENSION_C	= 		\
+ERRNO_PM_NW	= $(LIBDIR)\Errno.pm
+
+EXTENSION_C	=		\
 		$(SOCKET).c	\
 		$(FCNTL).c	\
 		$(OPCODE).c	\
@@ -812,12 +813,16 @@ EXTENSION_C	= 		\
 		$(BYTELOADER).c	\
 		$(DPROF).c	\
 		$(GLOB).c	\
+		$(HOSTNAME).c \
 		$(CWD).c	\
 		$(STORABLE).c	\
 		$(LISTUTIL).c	\
 		$(MIMEBASE64).c	\
 		$(XSTYPEMAP).c	\
 		$(UNICODENORMALIZE).c	\
+
+EXTENSION_NPM =	\
+		$(ERRNO_PM_NW)	\
 
 POD2HTML	= $(PODDIR)\pod2html
 POD2MAN		= $(PODDIR)\pod2man
@@ -1176,6 +1181,12 @@ $(SOCKET_NLP): $(NLM_NAME) $(SOCKET).xs
 	$(MAKE)
 	cd ..\..\netware
 
+$(HOSTNAME_NLP): $(NLM_NAME) $(HOSTNAME).xs
+	cd $(EXTDIR)\Sys\$(*B)
+	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	$(MAKE)
+	cd ..\..\..\netware
+
 $(FCNTL_NLP):
 	cd $(EXTDIR)\$(*B)
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
@@ -1425,6 +1436,7 @@ utils: $(BLDDIR)\$(NLM_NAME8).$(NLM_EXT) $(X2P)
 distclean: clean nwclean
 	-del /f $(PERLIMPLIB) ..\miniperl.lib $(MINIMOD)
 	-del /f *.def *.map
+	-del /f $(EXTENSION_NPM)
 	-del /f $(EXTENSION_C) $(DYNALOADER).c $(ERRNO).pm
 	-del /f $(EXTDIR)\DynaLoader\dl_netware.xs
 	-del /f $(LIBDIR)\.exists $(LIBDIR)\attrs.pm $(LIBDIR)\DynaLoader.pm

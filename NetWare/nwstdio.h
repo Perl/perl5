@@ -45,7 +45,7 @@
 #define PerlIO_puts(f,s)			(*PL_StdIO->pPuts)(PL_StdIO, (f),(s)) 
 #define PerlIO_read(f,buf,size)		(*PL_StdIO->pRead)(PL_StdIO, (buf), (size), 1, (f))
 #define PerlIO_eof(f)				(*PL_StdIO->pEof)(PL_StdIO, (f)) 
-#define PerlIO_fdupopen(f)			(*PL_StdIO->pFdupopen)(PL_StdIO, (f))
+//#define PerlIO_fdupopen(f)			(*PL_StdIO->pFdupopen)(PL_StdIO, (f))
 #define PerlIO_reopen(p,m,f)		(*PL_StdIO->pReopen)(PL_StdIO, (p), (m), (f))
 #define PerlIO_open(x,y)			(*PL_StdIO->pOpen)(PL_StdIO, (x),(y))
 
