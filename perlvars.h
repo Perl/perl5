@@ -52,12 +52,6 @@ PERLVAR(Gop_mutex,	perl_mutex)	/* Mutex for op refcounting */
 PERLVARI(Grunops_std,	runops_proc_t,	MEMBER_TO_FPTR(Perl_runops_standard))
 PERLVARI(Grunops_dbg,	runops_proc_t,	MEMBER_TO_FPTR(Perl_runops_debug))
 
-/* Hooks to shared SVs and locks. */
-PERLVARI(Gsharehook,	share_proc_t,	MEMBER_TO_FPTR(Perl_sv_nosharing))
-PERLVARI(Glockhook,	share_proc_t,	MEMBER_TO_FPTR(Perl_sv_nolocking))
-PERLVARI(Gunlockhook,	share_proc_t,	MEMBER_TO_FPTR(Perl_sv_nounlocking))
-PERLVARI(Gthreadhook,	thrhook_proc_t,	MEMBER_TO_FPTR(Perl_nothreadhook))
-
 /* Stores the PPID */
 #ifdef THREADS_HAVE_PIDS
 PERLVARI(Gppid,		IV,		0)

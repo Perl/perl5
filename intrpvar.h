@@ -508,6 +508,12 @@ PERLVAR(Istashcache,	HV *)		/* Cache to speed up S_method_common */
 
 PERLVAR(Ireentrant_retint, int)	/* Integer return value from reentrant functions */
 
+/* Hooks to shared SVs and locks. */
+PERLVARI(Isharehook,	share_proc_t,	MEMBER_TO_FPTR(Perl_sv_nosharing))
+PERLVARI(Ilockhook,	share_proc_t,	MEMBER_TO_FPTR(Perl_sv_nolocking))
+PERLVARI(Iunlockhook,	share_proc_t,	MEMBER_TO_FPTR(Perl_sv_nounlocking))
+PERLVARI(Ithreadhook,	thrhook_proc_t,	MEMBER_TO_FPTR(Perl_nothreadhook))
+
 PERLVAR(IDBassertion,   SV *)
 
 /* Don't forget to add your variable also to perl_clone()! */

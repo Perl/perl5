@@ -11217,6 +11217,12 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
      * but do it for consistency's sake. */
     PL_reentrant_retint	= proto_perl->Ireentrant_retint;
 
+    /* Hooks to shared SVs and locks. */
+    PL_sharehook	= proto_perl->Isharehook;
+    PL_lockhook		= proto_perl->Ilockhook;
+    PL_unlockhook	= proto_perl->Iunlockhook;
+    PL_threadhook	= proto_perl->Ithreadhook;
+
     /* swatch cache */
     PL_last_swash_hv	= Nullhv;	/* reinits on demand */
     PL_last_swash_klen	= 0;
