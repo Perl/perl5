@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Jul 29 20:50:18 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Mon Jul 30 05:31:00 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -178,6 +178,7 @@ nonxs_ext=''
 static_ext=''
 useopcode=''
 useposix=''
+extras=''
 d_bsd=''
 d_eunice=''
 d_xenix=''
@@ -6763,6 +6764,57 @@ if $test X"$prefix" != X"$installprefix"; then
 else
 	installbin="$binexp"
 fi
+
+echo " "
+echo "Any extra modules..." >&4
+case "$extras" in
+'') dflt='y';;
+*) dflt='n';;
+esac
+cat <<EOM
+Perl can be built with extra modules or bundles of modules which
+will be fetched from the CPAN and installed alongside Perl.
+
+Notice that you will need access to the CPAN; either via the Internet,
+or a local copy, for example a CD-ROM or a local CPAN mirror.  (You will
+be asked later to configure the CPAN.pm module which will in turn do
+the installation of the rest of the extra modules or bundles.)
+
+Notice also that if the modules require any external software such as
+libraries (the libz library for the Compress::Zlib module, for example)
+you *NEED* to have any such external software already installed, this
+configuration process will not install such things for you.
+
+If this doesn't make any sense to you, just accept the default '$dflt'.
+EOM
+rp='Install any extra modules (y or n) ?'
+. ./myread
+case "$ans" in
+y|Y)
+	cat <<EOM
+
+Please list any extra modules or bundles to be installed from CPAN,
+with spaces between the names.  The names can be in any format the
+'install' command of CPAN.pm will understand.  (Answer 'none' the
+quotes, to install no extra modules or bundles.)
+EOM
+	rp='Extras?'
+	dflt="$extras"
+	. ./myread
+	extras="$ans"
+esac
+case "$extras" in
+''|'none')
+	val=''
+	$rm -f ../extras.lst
+	;;
+*)	echo "(Saving the list of extras for later...)"
+	echo $extras > ../extras.lst
+	;;
+esac
+set extras
+eval $setvar
+echo " "
 
 : Find perl5.005 or later.
 echo "Looking for a previously installed perl5.005 or later... "
@@ -16976,6 +17028,7 @@ eunicefix='$eunicefix'
 exe_ext='$exe_ext'
 expr='$expr'
 extensions='$extensions'
+extras='$extras'
 fflushNULL='$fflushNULL'
 fflushall='$fflushall'
 find='$find'
