@@ -679,7 +679,21 @@ lib/Term/Cap.pm		Perl module supporting termcap usage
 lib/Term/Complete.pm	A command completion subroutine
 lib/Term/ReadLine.pm	Stub readline library
 lib/Test.pm		A simple framework for writing test scripts
-lib/Test/Harness.pm	A test harness
+lib/Test/Harness/Assert.pm	Test::Harness::Assert (internal use only)
+lib/Test/Harness/Changes	Test::Harness
+lib/Test/Harness/Iterator.pm	Test::Harness::Iterator (internal use only)
+lib/Test/Harness.pm		A test harness
+lib/Test/Harness/Straps.pm	Test::Harness::Straps
+lib/Test/Harness/t/00compile.t	Test::Harness test
+lib/Test/Harness/t/assert.t	Test::Harness::Assert test
+lib/Test/Harness/t/base.t	Test::Harness test
+lib/Test/Harness/t/callback.t	Test::Harness test
+lib/Test/Harness/t/nonumbers.t	Test::Harness test
+lib/Test/Harness/t/ok.t		Test::Harness test
+lib/Test/Harness/t/pod.t	Test::Harness test
+lib/Test/Harness/t/strap-analyze.t	Test::Harness::Straps test
+lib/Test/Harness/t/strap.t		Test::Harness::Straps test
+lib/Test/Harness/t/test-harness.t	Test::Harness test
 lib/Text/Abbrev.pm	An abbreviation table builder
 lib/Text/ParseWords.pm	Perl module to split words on arbitrary delimiter
 lib/Text/Soundex.pm	Perl module to implement Soundex
@@ -1415,6 +1429,35 @@ t/lib/tie-stdpush.t	Test for Tie::StdArray
 t/lib/tie-substrhash.t	Test for Tie::SubstrHash
 t/lib/timelocal.t	See if Time::Local works
 t/lib/trig.t		See if Math::Trig works
+t/lib/sample-tests/bailout		Test data for Test::Harness
+t/lib/sample-tests/bignum		Test data for Test::Harness
+t/lib/sample-tests/combined		Test data for Test::Harness
+t/lib/sample-tests/descriptive		Test data for Test::Harness
+t/lib/sample-tests/die			Test data for Test::Harness
+t/lib/sample-tests/die_head_end		Test data for Test::Harness
+t/lib/sample-tests/die_last_minute	Test data for Test::Harness
+t/lib/sample-tests/duplicates		Test data for Test::Harness
+t/lib/sample-tests/head_end		Test data for Test::Harness
+t/lib/sample-tests/head_fail		Test data for Test::Harness
+t/lib/sample-tests/lone_not_bug		Test data for Test::Harness
+t/lib/sample-tests/no_nums		Test data for Test::Harness
+t/lib/sample-tests/no_output		Test data for Test::Harness
+t/lib/sample-tests/out_of_order		Test data for Test::Harness
+t/lib/sample-tests/segfault		Test data for Test::Harness
+t/lib/sample-tests/shbang_misparse	Test data for Test::Harness
+t/lib/sample-tests/simple		Test data for Test::Harness
+t/lib/sample-tests/simple_fail		Test data for Test::Harness
+t/lib/sample-tests/skip			Test data for Test::Harness
+t/lib/sample-tests/skipall		Test data for Test::Harness
+t/lib/sample-tests/skipall_nomsg	Test data for Test::Harness
+t/lib/sample-tests/skip_nomsg		Test data for Test::Harness
+t/lib/sample-tests/switches		Test data for Test::Harness
+t/lib/sample-tests/taint		Test data for Test::Harness
+t/lib/sample-tests/todo			Test data for Test::Harness
+t/lib/sample-tests/todo_inline		Test data for Test::Harness
+t/lib/sample-tests/too_many		Test data for Test::Harness
+t/lib/sample-tests/vms_nit		Test data for Test::Harness
+t/lib/sample-tests/with_comments	Test data for Test::Harness
 t/op/64bitint.t		See if 64 bit integers work
 t/op/anonsub.t		See if anonymous subroutines work
 t/op/append.t		See if . works
