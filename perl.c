@@ -2768,6 +2768,12 @@ S_init_perllib(pTHX)
 #else
     incpush(SITELIB_EXP, FALSE);
 #endif
+#if defined(PERL_VENDORLIB_EXP)
+#if defined(WIN32) 
+    incpush(PERLVENDORLIB_EXP, TRUE);
+#else
+    incpush(PERL_VENDORLIB_EXP, FALSE);
+#endif
 #endif
     if (!PL_tainting)
 	incpush(".", FALSE);

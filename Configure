@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Jul 25 14:54:07 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Sun Jul 25 17:05:01 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -831,6 +831,13 @@ incpath=''
 mips=''
 mips_type=''
 usrinc=''
+d_vendorlib=''
+installvendorlib=''
+vendorlib=''
+vendorlibexp=''
+usevendorprefix=''
+vendorprefix=''
+vendorprefixexp=''
 defvoidused=''
 voidflags=''
 CONFIG=''
@@ -2375,7 +2382,7 @@ EOM
 
 You may give one or more space-separated answers, or "none" if appropriate.
 A well-behaved OS will have no hints, so answering "none" or just "Policy"
-is a good thing.  DO NOT give a wrong version.
+is a good thing.  DO NOT give a wrong version or a wrong OS.
 
 EOM
 
@@ -4583,6 +4590,83 @@ case "$freetype" in
 esac
 echo "Your system uses $freetype free(), it would seem." >&4
 $rm -f malloc.[co]
+$cat <<EOM
+
+The installation process will also create a directory for
+vendor-supplied add-ons.  Vendors who supply perl with their system
+may find it convenient to place all vendor-supplied files in this
+directory rather than in the main distribution directory.  This will
+ease upgrades between binary-compatible maintenance versions of perl.
+
+Of course you may also use these directories in whatever way you see
+fit.  For example, you might use them to access modules shared over a
+company-wide network.
+
+The default answer should be fine for most people.
+This causes further questions about vendor add-ons to be skipped
+and no vendor-specific directories will be configured for perl.
+
+EOM
+rp='Do you want to configure vendor-specific add-on directories?'
+case "$usevendorprefix" in
+define|true|[yY]*) dflt=y ;;
+*) dflt=n ;;
+esac
+. ./myread
+case "$ans" in
+[yY]*)	fn=d~+
+	rp='Installation prefix to use for vendor-supplied add-ons?'
+	case "$vendorprefix" in
+	'') dflt='' ;;
+	*)  dflt=$vendorprefix ;;
+	esac
+	. ./getfile
+	oldvendorprefix=''
+	case "$vendorprefix" in
+	'') ;;
+	*)	case "$ans" in
+		"$prefix") ;;
+		*) oldvendorprefix="$prefix";;
+		esac
+		;;
+	esac
+	usevendorprefix="$define"
+	vendorprefix="$ans"
+	vendorprefixexp="$ansexp"
+	;;
+*)	usevendorprefix="$undef"
+	vendorprefix=''
+	vendorprefixexp=''
+	;;
+esac
+
+case "$vendorprefix" in
+'')	d_vendorlib="$undef"
+	vendorlib=''
+	vendorlibexp=''
+	;;
+*)	d_vendorlib="$define"
+	: determine where vendor-supplied modules go.
+	: Usual default is /usr/local/lib/perl5/vendor_perl
+	prog=`echo $package | $sed 's/-*[0-9.]*$//'`
+	case "$installstyle" in
+	*lib/perl5*) dflt=$vendorprefix/lib/$package/vendor_$prog ;;
+	*)	     dflt=$vendorprefix/lib/vendor_$prog ;;
+	esac
+	fn=d~+
+	rp='Pathname for the vendor-supplied library files?'
+	. ./getfile
+	vendorlib="$ans"
+	vendorlibexp="$ansexp"
+	: Change installation prefix, if necessary.
+	if $test X"$prefix" != X"$installprefix"; then
+		installvendorlib=`echo $vendorlibexp | $sed 's#^$prefix#$installprefix#'`
+	else
+		installvendorlib="$vendorlibexp"
+	fi
+	;;
+esac
+
 : Cruising for prototypes
 echo " "
 echo "Checking out function prototypes..." >&4
@@ -6243,7 +6327,7 @@ siteprefixexp="$ansexp"
 : XXX No longer works with Prefixit stuff.
 prog=`echo $package | $sed 's/-*[0-9.]*$//'`
 case "$installstyle" in
-*lib/perl5*) dflt=$siteprefix/lib/site_$prog/ ;;
+*lib/perl5*) dflt=$siteprefix/lib/site_$prog ;;
 *)	 dflt=$siteprefix/lib/site_$prog ;;
 esac
 $cat <<EOM
@@ -12694,7 +12778,7 @@ find_extensions='
     done'
 tdir=`pwd`
 cd $rsrc/ext
-set
+set X
 shift
 eval $find_extensions
 set X $nonxs_extensions
@@ -13304,6 +13388,7 @@ d_tzname='$d_tzname'
 d_umask='$d_umask'
 d_uname='$d_uname'
 d_union_semun='$d_union_semun'
+d_vendorlib='$d_vendorlib'
 d_vfork='$d_vfork'
 d_void_closedir='$d_void_closedir'
 d_voidsig='$d_voidsig'
@@ -13440,6 +13525,7 @@ installsitearch='$installsitearch'
 installsitelib='$installsitelib'
 installstyle='$installstyle'
 installusrbinperl='$installusrbinperl'
+installvendorlib='$installvendorlib'
 intsize='$intsize'
 known_extensions='$known_extensions'
 ksh='$ksh'
@@ -13622,9 +13708,14 @@ usesfio='$usesfio'
 useshrplib='$useshrplib'
 usesocks='$usesocks'
 usethreads='$usethreads'
+usevendorprefix='$usevendorprefix'
 usevfork='$usevfork'
 usrinc='$usrinc'
 uuname='$uuname'
+vendorlib='$vendorlib'
+vendorlibexp='$vendorlibexp'
+vendorprefix='$vendorprefix'
+vendorprefixexp='$vendorprefixexp'
 version='$version'
 vi='$vi'
 voidflags='$voidflags'

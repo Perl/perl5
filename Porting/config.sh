@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Sun Jul 25 14:08:44 EET DST 1999
+# Configuration time: Sun Jul 25 17:08:22 EET DST 1999
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -55,7 +55,7 @@ ccflags='-pthread -std -DLANGUAGE_C'
 ccsymbols='__LANGUAGE_C__=1 _LONGLONG=1 LANGUAGE_C=1 SYSTYPE_BSD=1'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Sun Jul 25 14:08:44 EET DST 1999'
+cf_time='Sun Jul 25 17:08:22 EET DST 1999'
 chgrp=''
 chmod=''
 chown=''
@@ -358,6 +358,7 @@ d_tzname='define'
 d_umask='define'
 d_uname='define'
 d_union_semun='undef'
+d_vendorlib='undef'
 d_vfork='undef'
 d_void_closedir='undef'
 d_voidsig='define'
@@ -494,6 +495,7 @@ installsitearch='/opt/perl/lib/site_perl/5.00557/alpha-dec_osf-thread'
 installsitelib='/opt/perl/lib/site_perl'
 installstyle='lib'
 installusrbinperl='define'
+installvendorlib=''
 intsize='4'
 known_extensions='B ByteLoader DB_File Data/Dumper Devel/DProf Devel/Peek Fcntl GDBM_File IO IPC/SysV NDBM_File ODBM_File Opcode POSIX SDBM_File Socket Thread attrs re'
 ksh=''
@@ -676,9 +678,14 @@ usesfio='false'
 useshrplib='true'
 usesocks='undef'
 usethreads='define'
+usevendorprefix='undef'
 usevfork='false'
 usrinc='/usr/include'
 uuname=''
+vendorlib=''
+vendorlibexp=''
+vendorprefix=''
+vendorprefixexp=''
 version='5.00557'
 vi=''
 voidflags='15'

@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Sun Jul 25 14:08:44 EET DST 1999
+ * Configuration time: Sun Jul 25 17:08:22 EET DST 1999
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1487,6 +1487,12 @@
  */
 #define SITELIB "/opt/perl/lib/site_perl"		/**/
 #define SITELIB_EXP "/opt/perl/lib/site_perl"		/**/
+
+/* PERL_VENDORLIB_EXP:
+ *	This symbol contains the ~name expanded version of VENDORLIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+/*#define PERL_VENDORLIB_EXP ""		/ **/
 
 /* OSNAME:
  *	This symbol contains the name of the operating system, as determined
