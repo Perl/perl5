@@ -364,6 +364,7 @@ ext/POSIX/hints/netbsd.pl       Hint for POSIX for named architecture
 ext/POSIX/hints/next_3.pl       Hint for POSIX for named architecture
 ext/POSIX/hints/openbsd.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/sunos_4.pl	Hint for POSIX for named architecture
+ext/POSIX/hints/svr4.pl		Hint for POSIX for named architecture
 ext/POSIX/typemap		POSIX extension interface types
 ext/SDBM_File/Makefile.PL	SDBM extension makefile writer
 ext/SDBM_File/SDBM_File.pm	SDBM extension Perl module
