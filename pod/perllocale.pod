@@ -323,18 +323,7 @@ can use POSIX::strcoll() if you don't want this fall-back:
 
 $equal_in_locale will be true if the collation locale specifies a
 dictionary-like ordering which ignores space characters completely, and
-which folds case.  Alternatively, you can use this idiom:
-
-        use locale;
-        $s_a = "space and case ignored";
-        $s_b = "SpaceAndCaseIgnored";
-        $equal_in_locale = $s_a ge $s_b && $s_a le $s_b;
-
-which works because neither C<ne> nor C<ge> falls back to doing a
-byte-by-byte comparison when the operands are equal according to the
-locale.  The idiom may be less efficient than using strcoll(), but,
-unlike that function, it is not confused by strings containing embedded
-nulls.
+which folds case.
 
 If you have a single string which you want to check for "equality in
 locale" against several others, you might think you could gain a little
@@ -808,4 +797,4 @@ L<POSIX (3)/strxfrm>
 Jarkko Hietaniemi's original F<perli18n.pod> heavily hacked by Dominic
 Dunlop, assisted by the perl5-porters.
 
-Last update: Tue Dec 31 01:30:55 EST 1996
+Last update: Wed Jan 22 11:04:58 EST 1997
