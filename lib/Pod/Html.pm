@@ -1112,7 +1112,7 @@ sub process_text {
 	# parse through the string, stopping each time we find a
 	# pod-escape.  once the string has been throughly processed
 	# we can output it.
-	while ($rest) {
+	while (length $rest) {
 	    # check to see if there are any possible pod directives in
 	    # the remaining part of the text.
 	    if ($rest =~ m/[BCEIFLSZ]</) {
