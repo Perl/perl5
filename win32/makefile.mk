@@ -68,18 +68,17 @@ CCLIBDIR	*= $(CCHOME)\lib
 #IS_WIN95	*= define
 
 #
-# if you have the source for des_fcrypt(), uncomment CRYPT_SRC and make sure
-# the file exists (see README.win32).  File should be located in the same
-# directory as this makefile.
+# if you want to have the crypt() builtin function implemented, leave this or
+# CRYPT_LIB uncommented.  The fcrypt.c file named here contains a suitable
+# version of des_fcrypt().
 #
-# If you didn't set CRYPT_SRC and if you have des_fcrypt() available in a
-# library, uncomment CRYPT_LIB, and make sure the library exists (see
-# README.win32).  Specify the full pathname of the library.
+CRYPT_SRC	*= fcrypt.c
+
 #
-# If you don't enable one of these, the crypt() builtin will fail to work.
-# (Generally not critical.)
+# if you didn't set CRYPT_SRC and if you have des_fcrypt() available in a
+# library, uncomment this, and make sure the library exists (see README.win32)
+# Specify the full pathname of the library.
 #
-#CRYPT_SRC	*= fcrypt.c
 #CRYPT_LIB	*= fcrypt.lib
 
 #
