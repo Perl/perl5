@@ -6779,7 +6779,15 @@ Perl_peep(pTHX_ register OP *o)
 	    {
 		PL_curcop = ((COP*)o);
 	    }
-	    goto nothin;
+	    /* XXX: We avoid setting op_seq here to prevent later calls
+	       to peep() from mistakenly concluding that optimisation
+	       has already occurred. This doesn't fix the real problem,
+	       though (See 20010220.007). AMS 20010719 */
+	    if (oldop && o->op_next) {
+		oldop->op_next = o->op_next;
+		continue;
+	    }
+	    break;
 	case OP_SCALAR:
 	case OP_LINESEQ:
 	case OP_SCOPE:
