@@ -40,7 +40,7 @@ optimize='-Wc,-O3 -W0,-xstring'
 # "Sequent has unusual capabilities, taking it above and beyond
 #  the complexity of any other vendor" :-)
 #
-# Jarkko Hietaniemi August 1998
+# Jarkko Hietaniemi November 1998
 
 case "$osvers" in
 4.4*) # configure doesn't find sockets, as they're in libsocket, not libc
