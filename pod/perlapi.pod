@@ -1797,6 +1797,39 @@ wrapper for C<strncmp>).
 =for hackers
 Found in file handy.h
 
+=item sv_nolocking
+
+Dummy routine which "locks" an SV when there is no locking module present.
+Exists to avoid test for a NULL function pointer and because it could potentially warn under
+some level of strict-ness.
+
+	void	sv_nolocking(SV *)
+
+=for hackers
+Found in file util.c
+
+=item sv_nosharing
+
+Dummy routine which "shares" an SV when there is no sharing module present.
+Exists to avoid test for a NULL function pointer and because it could potentially warn under
+some level of strict-ness.
+
+	void	sv_nosharing(SV *)
+
+=for hackers
+Found in file util.c
+
+=item sv_nounlocking
+
+Dummy routine which "unlocks" an SV when there is no locking module present.
+Exists to avoid test for a NULL function pointer and because it could potentially warn under
+some level of strict-ness.
+
+	void	sv_nounlocking(SV *)
+
+=for hackers
+Found in file util.c
+
 
 =back
 
@@ -2594,24 +2627,6 @@ The reference count for the SV is set to 1.
 
 =for hackers
 Found in file sv.c
-
-=item new_vstring
-
-Returns a pointer to the next character after the parsed
-vstring, as well as updating the passed in sv.
-
-Function must be called like
-
-        sv = NEWSV(92,5);
-	s = new_vstring(s,sv);
-
-The sv must already be large enough to store the vstring
-passed in.
-
-	char*	new_vstring(char *vstr, SV *sv)
-
-=for hackers
-Found in file util.c
 
 =item SvCUR
 
@@ -3936,39 +3951,6 @@ instead.
 
 =for hackers
 Found in file sv.c
-
-=item sv_nolocking
-
-Dummy routine which "locks" an SV when there is no locking module present.
-Exists to avoid test for a NULL function pointer and because it could potentially warn under
-some level of strict-ness.
-
-	void	sv_nolocking(SV *)
-
-=for hackers
-Found in file util.c
-
-=item sv_nosharing
-
-Dummy routine which "shares" an SV when there is no sharing module present.
-Exists to avoid test for a NULL function pointer and because it could potentially warn under
-some level of strict-ness.
-
-	void	sv_nosharing(SV *)
-
-=for hackers
-Found in file util.c
-
-=item sv_nounlocking
-
-Dummy routine which "unlocks" an SV when there is no locking module present.
-Exists to avoid test for a NULL function pointer and because it could potentially warn under
-some level of strict-ness.
-
-	void	sv_nounlocking(SV *)
-
-=for hackers
-Found in file util.c
 
 =item sv_nv
 
