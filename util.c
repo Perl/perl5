@@ -3994,7 +3994,7 @@ S_socketpair_udp (int fd[2]) {
     struct sockaddr_in addresses[2];
     int i;
     Sock_size_t size = sizeof (struct sockaddr_in);
-    short port;
+    unsigned short port;
     int got;
 
     memset (&addresses, 0, sizeof (addresses));
@@ -4078,7 +4078,7 @@ S_socketpair_udp (int fd[2]) {
        (hence MSG_DONTWAIT). Or that what arrives was sent by us.  */
     {
         struct sockaddr_in readfrom;
-        short buffer[2];
+        unsigned short buffer[2];
 
         i = 1;
         do {
@@ -4095,7 +4095,7 @@ S_socketpair_udp (int fd[2]) {
             if (got != sizeof(port)
                 || size != sizeof (struct sockaddr_in)
                 /* Check other socket sent us its port.  */
-                || buffer[0] != addresses[!i].sin_port
+                || buffer[0] != (unsigned short) addresses[!i].sin_port
                 /* Check kernel says we got the datagram from that socket.  */
                 || readfrom.sin_family != addresses[!i].sin_family
                 || readfrom.sin_addr.s_addr != addresses[!i].sin_addr.s_addr
