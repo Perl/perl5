@@ -7,7 +7,10 @@ esac
 d_setregid='undef'
 d_setreuid='undef'
 case "$usemymalloc" in
-'') usemymalloc='y'
-    ccflags="$ccflags -DNO_RCHECK"
+'') # The perl malloc.c SHOULD work says Ilya.
+    # But for the time being (5.004_68), alas, it doesn't.
+    # usemymalloc='y'
+    # ccflags="$ccflags -DNO_RCHECK"
+    usemymalloc='n'
     ;;
 esac
