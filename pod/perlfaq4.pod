@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.14 $, $Date: 2002/02/08 22:30:23 $)
+perlfaq4 - Data Manipulation ($Revision: 1.19 $, $Date: 2002/03/11 22:15:19 $)
 
 =head1 DESCRIPTION
 
@@ -346,6 +346,20 @@ random numbers, but this takes quite a while.  If you want a better
 pseudorandom generator than comes with your operating system, look at
 ``Numerical Recipes in C'' at http://www.nr.com/ .
 
+=head2 How do I get a random number between X and Y?
+
+Use the following simple function.  It selects a random integer between
+(and possibly including!) the two given integers, e.g.,
+C<random_int_in(50,120)>
+
+   sub random_int_in ($$) {
+     my($min, $max) = @_;
+      # Assumes that the two arguments are integers themselves!
+     return $min if $min == $max;
+     ($min, $max) = ($max, $min)  if  $min > $max;
+     return $min + int rand(1 + $max - $min);
+   }
+
 =head1 Data: Dates
 
 =head2 How do I find the week-of-the-year/day-of-the-year?
@@ -689,6 +703,11 @@ integers:
     $string = "-9 55 48 -2 23 -76 4 14 -44";
     while ($string =~ /-\d+/g) { $count++ }
     print "There are $count negative numbers in the string";
+
+Another version uses a global match in list context, then assigns the
+result to a scalar, producing a count of the number of matches.
+
+	$count = () = $string =~ /-\d+/g;
 
 =head2 How do I capitalize all the words on one line?
 
@@ -1125,11 +1144,11 @@ designed to answer this question quickly and efficiently.  Arrays aren't.
 
 That being said, there are several ways to approach this.  If you
 are going to make this query many times over arbitrary string values,
-the fastest way is probably to invert the original array and keep an
-associative array lying about whose keys are the first array's values.
+the fastest way is probably to invert the original array and maintain a
+hash whose keys are the first array's values.
 
     @blues = qw/azure cerulean teal turquoise lapis-lazuli/;
-    undef %is_blue;
+    %is_blue = ();
     for (@blues) { $is_blue{$_} = 1 }
 
 Now you can check whether $is_blue{$some_color}.  It might have been a
@@ -1139,7 +1158,7 @@ If the values are all small integers, you could use a simple indexed
 array.  This kind of an array will take up less space:
 
     @primes = (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31);
-    undef @is_tiny_prime;
+    @is_tiny_prime = ();
     for (@primes) { $is_tiny_prime[$_] = 1 }
     # or simply  @istiny_prime[@primes] = (1) x @primes;
 
@@ -1885,9 +1904,9 @@ Assuming that you don't care about IEEE notations like "NaN" or
    if (/^-?\d+$/)       { print "is an integer\n" }
    if (/^[+-]?\d+$/)    { print "is a +/- integer\n" }
    if (/^-?\d+\.?\d*$/) { print "is a real number\n" }
-   if (/^-?(?:\d+(?:\.\d*)?|\.\d+)$/) { print "is a decimal number" }
+   if (/^-?(?:\d+(?:\.\d*)?|\.\d+)$/) { print "is a decimal number\n" }
    if (/^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?$/)
-			{ print "a C float" }
+			{ print "a C float\n" }
 
 If you're on a POSIX system, Perl's supports the C<POSIX::strtod>
 function.  Its semantics are somewhat cumbersome, so here's a C<getnum>

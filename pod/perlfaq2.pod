@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.8 $, $Date: 2002/02/08 22:31:57 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.9 $, $Date: 2002/03/09 21:01:13 $)
 
 =head1 DESCRIPTION
 
@@ -183,7 +183,7 @@ following groups:
 
     comp.infosystems.www.authoring.cgi 	Writing CGI scripts for the Web.
 
-There is also Usenet gateway to Perl mailing lists sponsored by perl.org at 
+There is also a Usenet gateway to Perl mailing lists sponsored by perl.org at 
 nntp://nntp.perl.org, or a web interface to the same lists at
 http://nntp.perl.org/group/.  Other groups are listed at 
 http://lists.perl.org.

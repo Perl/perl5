@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq5 - Files and Formats ($Revision: 1.9 $, $Date: 2002/02/11 19:30:21 $)
+perlfaq5 - Files and Formats ($Revision: 1.12 $, $Date: 2002/03/11 22:25:25 $)
 
 =head1 DESCRIPTION
 
@@ -350,37 +350,23 @@ See L<perlform/"Accessing Formatting Internals"> for an swrite() function.
 
 =head2 How can I output my numbers with commas added?
 
-This one will do it for you:
+This one from Benjamin Goldberg will do it for you:
 
-    sub commify {
-        my $number = shift;
-	1 while ($number =~ s/^([-+]?\d+)(\d{3})/$1,$2/);
-	return $number;
-    }
+   s/(^[-+]?\d+?(?=(?>(?:\d{3})+)(?!\d))|\G\d{3}(?=\d))/$1,/g;
 
-    $n = 23659019423.2331;
-    print "GOT: ", commify($n), "\n";
+or written verbosely:
 
-    GOT: 23,659,019,423.2331
-
-You can't just:
-
-    s/^([-+]?\d+)(\d{3})/$1,$2/g;
-
-because you have to put the comma in and then recalculate your
-position.
-
-Alternatively, this code commifies all numbers in a line regardless of
-whether they have decimal portions, are preceded by + or -, or
-whatever:
-
-    # from Andrew Johnson <ajohnson@gpu.srv.ualberta.ca>
-    sub commify {
-       my $input = shift;
-        $input = reverse $input;
-        $input =~ s<(\d\d\d)(?=\d)(?!\d*\.)><$1,>g;
-        return scalar reverse $input;
-    }
+   s/(
+       ^[-+]?            # beginning of number.
+       \d{1,3}?          # first digits before first comma
+       (?=               # followed by, (but not included in the match) :
+          (?>(?:\d{3})+) # some positive multiple of three digits.
+          (?!\d)         # an *exact* multiple, not x * 3 + 1 or whatever.
+       )
+      |                  # or:
+       \G\d{3}           # after the last group, get three digits
+       (?=\d)            # but they have to have more digits after them.
+   )/$1,/xg;
 
 =head2 How can I translate tildes (~) in a filename?
 
@@ -501,34 +487,23 @@ best therefore to use glob() only in list context.
 
 Normally perl ignores trailing blanks in filenames, and interprets
 certain leading characters (or a trailing "|") to mean something
-special.  To avoid this, you might want to use a routine like the one below.
-It turns incomplete pathnames into explicit relative ones, and tacks a
-trailing null byte on the name to make perl leave it alone:
+special. 
 
-    sub safe_filename {
-	local $_  = shift;
-        s#^([^./])#./$1#;
-        $_ .= "\0";
-	return $_;
-    }
+The three argument form of open() lets you specify the mode
+separately from the filename.  The open() function treats
+special mode characters and whitespace in the filename as 
+literals
 
-    $badpath = "<<<something really wicked   ";
-    $fn = safe_filename($badpath");
-    open(FH, "> $fn") or "couldn't open $badpath: $!";
+	open FILE, "<", "  file  ";  # filename is "   file   "
+	open FILE, ">", ">file";     # filename is ">file"
+	
 
-This assumes that you are using POSIX (portable operating systems
-interface) paths.  If you are on a closed, non-portable, proprietary
-system, you may have to adjust the C<"./"> above.
-
-It would be a lot clearer to use sysopen(), though:
+It may be a lot clearer to use sysopen(), though:
 
     use Fcntl;
     $badpath = "<<<something really wicked   ";
     sysopen (FH, $badpath, O_WRONLY | O_CREAT | O_TRUNC)
 	or die "can't open $badpath: $!";
-
-For more information, see also the new L<perlopentut> if you have it
-(new for 5.6).
 
 =head2 How can I reliably rename a file?
 
@@ -688,14 +663,17 @@ Don't forget them or you'll be quite sorry.
 
 =head2 How do I get a file's timestamp in perl?
 
-If you want to retrieve the time at which the file was last read,
-written, or had its meta-data (owner, etc) changed, you use the B<-M>,
-B<-A>, or B<-C> file test operations as documented in L<perlfunc>.  These
-retrieve the age of the file (measured against the start-time of your
-program) in days as a floating point number.  To retrieve the "raw"
-time in seconds since the epoch, you would call the stat function,
-then use localtime(), gmtime(), or POSIX::strftime() to convert this
-into human-readable form.
+If you want to retrieve the time at which the file was last
+read, written, or had its meta-data (owner, etc) changed,
+you use the B<-M>, B<-A>, or B<-C> file test operations as
+documented in L<perlfunc>.  These retrieve the age of the
+file (measured against the start-time of your program) in
+days as a floating point number. Some platforms may not have
+all of these times.  See L<perlport> for details. To
+retrieve the "raw" time in seconds since the epoch, you
+would call the stat function, then use localtime(),
+gmtime(), or POSIX::strftime() to convert this into
+human-readable form.
 
 Here's an example:
 
