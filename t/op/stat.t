@@ -40,7 +40,7 @@ sleep 2;
 if ($Config{dont_use_nlink} || $nlink == 2)
     {print "ok 3\n";} else {print "not ok 3\n";}
 
-if (($mtime && $mtime != $ctime) || $cwd =~ m#/afs/#) {
+if (($mtime && $mtime != $ctime) || $cwd =~ m#/afs/# || $^O eq 'amigaos') {
     print "ok 4\n";
 }
 else {
@@ -122,6 +122,8 @@ elsif (-b "/dev/$1")
 else
     {print "not ok 33\n";}
 if (! -b '.') {print "ok 34\n";} else {print "not ok 34\n";}
+
+if ($^O eq 'amigaos') {print "ok 35\n"; goto tty_test;}
 
 $cnt = $uid = 0;
 

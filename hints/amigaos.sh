@@ -52,3 +52,11 @@ optimize='-O2 -fomit-frame-pointer'
 # Avoid telldir prototype conflict in pp_sys.c  (AmigaOS uses const DIR *)
 # Configure should test for this.  Volunteers?
 pp_sys_cflags='ccflags="$ccflags -DHAS_TELLDIR_PROTOTYPE"'
+
+# AmigaOS always reports only two links to directories, even if they
+# contain subdirectories.  Consequently, we use this variable to stop
+# File::Find using the link count to determine whether there are
+# subdirectories to be searched.  This will generate a harmless message:
+# Hmm...You had some extra variables I don't know about...I'll try to keep 'em.
+#	Propagating recommended variable dont_use_nlink
+dont_use_nlink='define'
