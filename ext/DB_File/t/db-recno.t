@@ -14,7 +14,7 @@ use Config;
 BEGIN {
     if(-d "lib" && -f "TEST") {
         if ($Config{'extensions'} !~ /\bDB_File\b/ ) {
-            print "1..160 # Skip: DB_File was not built\n";
+            print "1..0 # Skip: DB_File was not built\n";
             exit 0;
         }
     }
