@@ -901,6 +901,9 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 				sv_catsv(data->last_found, last_str);
 				data->last_end += l * (mincount - 1);
 			    }
+			} else {
+			    /* start offset must point into the last copy */
+			    data->last_start_min += minnext * (mincount - 1);
 			}
 		    }
 		    /* It is counted once already... */
