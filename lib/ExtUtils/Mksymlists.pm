@@ -3,7 +3,6 @@ use strict qw[ subs refs ];
 # no strict 'vars';  # until filehandles are exempted
 
 use Carp;
-use Config;
 use Exporter;
 # mention vars twice to prevent single-use warnings
 @ExtUtils::Mksymlists::ISA = @ExtUtils::Mksymlists::ISA = 'Exporter';
@@ -12,7 +11,6 @@ $ExtUtils::Mksymlists::VERSION = $ExtUtils::Mksymlists::VERSION = '1.00';
 
 sub Mksymlists {
     my(%spec) = @_;
-    my($osname) = $Config{'osname'};
 
     croak("Insufficient information specified to Mksymlists")
         unless ( $spec{NAME} or
@@ -46,10 +44,10 @@ sub Mksymlists {
         $spec{DLBASE} = DynaLoader::mod2fname([ split(/::/,$spec{NAME}) ]);
     }
 
-    if    ($osname eq 'aix') { _write_aix(\%spec); }
-    elsif ($osname eq 'VMS') { _write_vms(\%spec) }
-    elsif ($osname =~ m|^os/?2$|i) { _write_os2(\%spec) }
-    else { croak("Don't know how to create linker option file for $osname\n"); }
+    if    ($^O eq 'aix') { _write_aix(\%spec); }
+    elsif ($^O eq 'VMS') { _write_vms(\%spec) }
+    elsif ($^O eq 'os2') { _write_os2(\%spec) }
+    else { croak("Don't know how to create linker option file for $^O\n"); }
 }
 
 
@@ -96,7 +94,10 @@ while (($name, $exp)= each %{$data->{IMPORTS}}) {
 
 sub _write_vms {
     my($data) = @_;
-    my($isvax) = $Config{'arch'} =~ /VAX/i;
+
+    require Config;
+
+    my($isvax) = $Config::Config{'arch'} =~ /VAX/i;
     my($sym);
 
     rename "$data->{FILE}.opt", "$data->{FILE}.opt_old";
@@ -127,7 +128,7 @@ sub _write_vms {
     # extliblist routine.
     open OPT,'>rtls.opt';
     print OPT "PerlShr/Share\n";
-    foreach $rtl (split(/\s+/,$Config{'libs'})) { print OPT "$rtl\n"; }
+    foreach $rtl (split(/\s+/,$Config::Config{'libs'})) { print OPT "$rtl\n"; }
     close OPT;
 }
 
