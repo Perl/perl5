@@ -1871,6 +1871,7 @@ distribution available at http://www.perl.com/CPAN/src/index.html
 	IRIX
 	Linux
 	MachTen
+	ReliantUNIX	(SINIX)
 	OpenVMS		(VMS)
 	OS/2
 	OS X
@@ -1879,12 +1880,13 @@ distribution available at http://www.perl.com/CPAN/src/index.html
 	Tru64 UNIX      (DEC OSF/1, Digital UNIX)
 	UNICOS
 	UNICOS/mk
-	Win32/NT/2K	*)
+	Win32/NT/2K	2)
 
-        *) compilers: Borland, Cygwin, Mingw32 EGCS/GCC, VC++
+        1) in DOS mode either the DOS or OS/2 ports can be used
+        2) compilers: Borland, Cygwin, Mingw32 EGCS/GCC, VC++
 
 The following platforms worked for the previous release (5.6.0),
-but be did not manage to test these in time for the 5.6.1 release.
+but we did not manage to test these in time for the 5.6.1 release.
 There is a very good chance that these will work fine with 5.6.1.
 
 	DomainOS
@@ -1895,17 +1897,15 @@ There is a very good chance that these will work fine with 5.6.1.
 	NetBSD
 	OpenBSD
 	PowerMAX
-	ReliantUNIX	(SINIX)
 	SCO SV
 	SunOS
 	SVR4
 	Unixware
 	VOS
-	Windows 3.1	1)
-	Windows 95	1)
-	Windows 98	1)
-
-        1) in DOS mode either the DOS or OS/2 ports can be used
+	Windows 3.1
+	Windows 95
+	Windows 98
+	Windows M.e.
 
 The following platform worked for the 5.005_03 major release but not 5.6.0.
 Standardization on UTF-8 as the internal string representation
@@ -1916,19 +1916,19 @@ UTF-8 support for this platform may be enabled in a future release:
 
 	OS/390	1)
 
-	1) Previously known as MVS, or OpenEdition MVS, about to become z/OS.
+	1) previously known as MVS, about to become z/OS.
 
 Strongly related to the OS/390 platform by also being EBCDIC-based
 mainframe platforms are the following platforms:
 
-	BS2000	(POSIX-BC)
+	POSIX-BC	(BS2000)
 	VM/ESA
 
 These are also expected to work, albeit with no UTF-8 support, under 5.6.1 
 for the same reasons as OS/390.  Contact the mailing list perl-mvs@perl.org 
 for more details.
 
-MacOS (Classic, pre-X) is almost 5.6.1-ready; building from the source
+Mac OS (Classic, pre-X) is almost 5.6.1-ready; building from the source
 does work with 5.6.1, but additional MacOS specific source code is needed
 for a complete port.  Contact the mailing list macperl-porters@macperl.org
 for more information.
@@ -1988,7 +1988,7 @@ binaries available via http://www.perl.com/CPAN/ports/index.html:
 				Perl release
 
 	Netware			5.003_07
-	OS/400			5.003
+	OS/400			5.005_02
 	Tandem Guardian		5.004
 
 The following platforms have only binaries available via
