@@ -71,7 +71,7 @@ Pod::Parser - base class for creating POD filters and translators
 
 =head1 REQUIRES
 
-perl5.004, Pod::InputObjects, Exporter, FileHandle, Carp
+perl5.004, Pod::InputObjects, Exporter, Carp
 
 =head1 EXPORTS
 
@@ -195,7 +195,6 @@ use strict;
 #use diagnostics;
 use Pod::InputObjects;
 use Carp;
-use FileHandle;
 use Exporter;
 @ISA = qw(Exporter);
 
@@ -1098,7 +1097,7 @@ sub parse_from_file {
     my $self = shift;
     my %opts = (ref $_[0] eq 'HASH') ? %{ shift() } : ();
     my ($infile, $outfile) = @_;
-    my ($in_fh,  $out_fh)  = (undef, undef);
+    my ($in_fh,  $out_fh);
     my ($close_input, $close_output) = (0, 0);
     local *myData = $self;
     local $_;
@@ -1119,7 +1118,7 @@ sub parse_from_file {
     else {
         ## We have a filename, open it for reading
         $myData{_INFILE} = $infile;
-        $in_fh = FileHandle->new("< $infile")  or
+        open($in_fh, "< $infile")  or
              croak "Can't open $infile for reading: $!\n";
         $close_input = 1;
     }
@@ -1155,7 +1154,7 @@ sub parse_from_file {
         else {
             ## We have a filename, open it for writing
             $myData{_OUTFILE} = $outfile;
-            $out_fh = FileHandle->new("> $outfile")  or
+            open($out_fh, "> $outfile")  or
                  croak "Can't open $outfile for writing: $!\n";
             $close_output = 1;
         }

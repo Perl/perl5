@@ -450,7 +450,7 @@ command before running Perl.  The BSD::Resource extension (not
 included with the standard Perl distribution) may also be of use, it
 offers the getrlimit/setrlimit interface that can be used to adjust
 process resource usage limits, including the maximum filesize limit.
- 
+
 =head2 Long doubles
 
 In some systems you may be able to use long doubles to enhance the
