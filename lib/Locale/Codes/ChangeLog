@@ -1,6 +1,13 @@
 
 		ChangeLog for Locale-Codes Distribution
 
+2.03  2002-03-24 neilb
+
+	* Fixed a typo in the alias for the Vatican, reported (with patch)
+	  by Philip Newton.
+	* Added "Moldova" as an alias for "Moldova, Republic of"
+	* Updated Makefile.PL to include AUTHOR and ABSTRACT
+
 2.02  2002-03-09 neilb
 
 	* added semi-private routine rename_country() to Locale::Country,
