@@ -140,6 +140,25 @@ EOM
 signal_t='void'
 d_voidsig='define'
 
+# set libperl.so.X.X for 2.2.X
+case "$osvers" in
+2.2*)
+    # unfortunately this code gets executed before
+    # the equivalent in the main Configure so we copy a little
+    # from Configure XXX Configure should be fixed.
+    if $test -r $src/patchlevel.h;then
+       patchlevel=`awk '/define[       ]+PATCHLEVEL/ {print $3}' $src/patchlevel.h`
+       subversion=`awk '/define[       ]+SUBVERSION/ {print $3}' $src/patchlevel.h`
+    else
+       patchlevel=0
+       subversion=0
+    fi
+    libperl="libperl.so.$patchlevel.$subversion"
+    unset patchlevel
+    unset subversion
+    ;;
+esac
+
 # This script UU/usethreads.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use threads.
 cat > UU/usethreads.cbu <<'EOCBU'
@@ -160,9 +179,9 @@ EOM
 	      fi
 	      ldflags="-pthread $ldflags"
 	      ;;
-        2.2*) 
+        2.2*)
               cat <<EOM >&4
-POSIX threads are not supported well in FreeBSD $osvers.
+POSIX threads are not supported well by FreeBSD $osvers.
 
 Please consider upgrading to at least FreeBSD 2.2.8,
 or preferably to 3.something.
@@ -186,36 +205,16 @@ EOM
 	shift
 	libswanted="$*"
 	# Configure will probably pick the wrong libc to use for nm scan.
-	# The safest quick-fix is just to not use nm at all.
+	# The safest quick-fix is just to not use nm at all...
 	usenm=false
 
         case "$osvers" in
         2.2.8*)
-	    # we are not limiting code below to just useshrplib case
-            # since in general we don't know the final value of it.
-            # However, it's not a problem since the things we change here
-            # will be overriden by Configure if useshrplib==false
-            # (it was easy to miss this one because people rarely
-            # run Configure without -d option :-)
+            # ... but this does not apply for 2.2.8 - we know it's safe
             libc="$lc_r"
-
-            # unfortunately usethreads.cbu gets executed before
-            # the equivalent code in the main Configure, so I duplicated
-            # it here
-            if $test -r $rsrc/patchlevel.h;then
-		patchlevel=`awk '/define[   ]+PATCHLEVEL/ {print $3}' $rsrc/patchlevel.h`
-                subversion=`awk '/define[   ]+SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
-            else
-                patchlevel=0
-                subversion=0
-           fi
-
-           libperl="libperl.so.$patchlevel.$subversion"
-           unset patchlevel
-           unset subversion
-           usenm=true
+            usenm=true
            ;;
-	esac
+        esac
 
         unset lc_r
 esac
