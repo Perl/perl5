@@ -2930,7 +2930,36 @@ sub uninterp {
 # the same, but treat $|, $), $( and $ at the end of the string differently
 sub re_uninterp {
     my($str) = @_;
-    $str =~ s/(^|\G|[^\\])((?:\\\\)*)([\$\@](?!\||\)|\(|$)|\\[uUlLQE])/$1$2\\$3/g;
+
+    use re "eval";
+    # Matches any string which is balanced with respect to {braces}
+    my $bal = qr(
+      (?:
+	[^\\{}]
+      | \\\\
+      | \\[{}]
+      | \{(??{$bal})\}
+      )*
+    )x;
+
+    $str =~ s/
+	  ( ^|\G                  # $1
+          | [^\\]
+          )
+
+          (                       # $2
+            (?:\\\\)*
+          )
+
+          (                       # $3
+            (\(\?\??\{$bal\}\))   # $4
+          | [\$\@]
+            (?!\||\)|\(|$)
+          | \\[uUlLQE]
+          )
+
+	/length($4) ? "$1$2$4" : "$1$2\\$3"/xeg;
+
     return $str;
 }
 
