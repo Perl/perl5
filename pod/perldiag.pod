@@ -2021,6 +2021,10 @@ and then discovered it wasn't a context we know how to do a goto in.
 
 (P) The lexer got into a bad state parsing a string with brackets.
 
+=item panic: kid popen errno read
+
+(F) forked child returned an incomprehensible message about its errno.
+
 =item panic: last
 
 (P) We popped the context stack to a block context, and then discovered

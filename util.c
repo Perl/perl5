@@ -1910,6 +1910,8 @@ my_popen(char *cmd, char *mode)
     register I32 pid;
     SV *sv;
     I32 doexec = strNE(cmd,"-");
+    I32 did_pipes = 0;
+    int pp[2];
 
     PERL_FLUSHALL_FOR_CHILD;
 #ifdef OS2
@@ -1925,9 +1927,15 @@ my_popen(char *cmd, char *mode)
     }
     if (PerlProc_pipe(p) < 0)
 	return Nullfp;
+    if (doexec && PerlProc_pipe(pp) >= 0)
+	did_pipes = 1;
     while ((pid = (doexec?vfork():fork())) < 0) {
 	if (errno != EAGAIN) {
 	    PerlLIO_close(p[This]);
+	    if (did_pipes) {
+		PerlLIO_close(pp[0]);
+		PerlLIO_close(pp[1]);
+	    }
 	    if (!doexec)
 		croak("Can't fork");
 	    return Nullfp;
@@ -1942,6 +1950,12 @@ my_popen(char *cmd, char *mode)
 #define THIS that
 #define THAT This
 	PerlLIO_close(p[THAT]);
+	if (did_pipes) {
+	    PerlLIO_close(pp[0]);
+#if defined(HAS_FCNTL) && defined(F_SETFD)
+	    fcntl(pp[1], F_SETFD, FD_CLOEXEC);
+#endif
+	}
 	if (p[THIS] != (*mode == 'r')) {
 	    PerlLIO_dup2(p[THIS], *mode == 'r');
 	    PerlLIO_close(p[THIS]);
@@ -1954,9 +1968,10 @@ my_popen(char *cmd, char *mode)
 #define NOFILE 20
 #endif
 	    for (fd = PL_maxsysfd + 1; fd < NOFILE; fd++)
-		PerlLIO_close(fd);
+		if (fd != pp[1])
+		    PerlLIO_close(fd);
 #endif
-	    do_exec(cmd);	/* may or may not use the shell */
+	    do_exec3(cmd,pp[1],did_pipes);	/* may or may not use the shell */
 	    PerlProc__exit(1);
 	}
 	/*SUPPRESS 560*/
@@ -1970,6 +1985,8 @@ my_popen(char *cmd, char *mode)
     }
     do_execfree();	/* free any memory malloced by child on vfork */
     PerlLIO_close(p[that]);
+    if (did_pipes)
+	PerlLIO_close(pp[1]);
     if (p[that] < p[This]) {
 	PerlLIO_dup2(p[This], p[that]);
 	PerlLIO_close(p[This]);
@@ -1979,6 +1996,28 @@ my_popen(char *cmd, char *mode)
     (void)SvUPGRADE(sv,SVt_IV);
     SvIVX(sv) = pid;
     PL_forkprocess = pid;
+    if (did_pipes && pid > 0) {
+	int errkid;
+	int n = 0, n1;
+
+	while (n < sizeof(int)) {
+	    n1 = PerlLIO_read(pp[0],
+			      (void*)(((char*)&errkid)+n),
+			      (sizeof(int)) - n);
+	    if (n1 <= 0)
+		break;
+	    n += n1;
+	}
+	if (n) {			/* Error */
+	    if (n != sizeof(int))
+		croak("panic: kid popen errno read");
+	    PerlLIO_close(pp[0]);
+	    errno = errkid;		/* Propagate errno from kid */
+	    return Nullfp;
+	}
+    }
+    if (did_pipes)
+	 PerlLIO_close(pp[0]);
     return PerlIO_fdopen(p[This], mode);
 }
 #else

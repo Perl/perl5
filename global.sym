@@ -98,6 +98,7 @@ do_chop
 do_close
 do_eof
 do_exec
+do_exec3
 do_execfree
 do_hv_dump
 do_gv_dump

@@ -107,6 +107,7 @@
 #define do_close		Perl_do_close
 #define do_eof			Perl_do_eof
 #define do_exec			Perl_do_exec
+#define do_exec3		Perl_do_exec3
 #define do_execfree		Perl_do_execfree
 #define do_gv_dump		Perl_do_gv_dump
 #define do_gvgv_dump		Perl_do_gvgv_dump
@@ -1092,6 +1093,7 @@
 #define do_close		CPerlObj::Perl_do_close
 #define do_eof			CPerlObj::Perl_do_eof
 #define do_exec			CPerlObj::Perl_do_exec
+#define do_exec3		CPerlObj::Perl_do_exec3
 #define do_execfree		CPerlObj::Perl_do_execfree
 #define do_gv_dump		CPerlObj::Perl_do_gv_dump
 #define do_gvgv_dump		CPerlObj::Perl_do_gvgv_dump

@@ -99,6 +99,7 @@ VIRTUAL void    do_chop _((SV* asv, SV* sv));
 VIRTUAL bool	do_close _((GV* gv, bool not_implicit));
 VIRTUAL bool	do_eof _((GV* gv));
 VIRTUAL bool	do_exec _((char* cmd));
+VIRTUAL bool	do_exec3 _((char* cmd, int fd, int flag));
 VIRTUAL void	do_execfree _((void));
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 I32	do_ipcctl _((I32 optype, SV** mark, SV** sp));
