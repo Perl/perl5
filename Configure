@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Jan 21 10:23:50 EET 1999 [metaconfig 3.0 PL70]
+# Generated on Fri Jan 22 10:52:50 EET 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by jhi@iki.fi)
 
 cat >/tmp/c1$$ <<EOF
@@ -7981,6 +7981,10 @@ eval $inlibc
 set fsetpos d_fsetpos
 eval $inlibc
 
+: see if this is a sys/param system
+set sys/param.h i_sysparam
+eval $inhdr
+
 : see if this is a sys/mount.h system
 set sys/mount.h i_sysmount
 eval $inhdr
@@ -7995,7 +7999,7 @@ set fstatfs d_fstatfs
 eval $inlibc
 
 : see if statfs knows about mount flags
-set d_statfsflags statfs f_flags $i_sysmount sys/mount.h
+set d_statfsflags statfs f_flags $i_sysparam sys/param.h $i_sysmount sys/mount.h
 eval $hasfield
 
 
@@ -12072,10 +12076,6 @@ echo "No <sys/ioctl.h> found, assuming ioctl args are defined in <$xxx>." >&4
 fi
 set i_sysioctl
 eval $setvar
-
-: see if this is a sys/param system
-set sys/param.h i_sysparam
-eval $inhdr
 
 : see if sys/resource.h has to be included
 set sys/resource.h i_sysresrc
