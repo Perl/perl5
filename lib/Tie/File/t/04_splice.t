@@ -14,7 +14,6 @@
 my $file = "tf$$.txt";
 $: = Tie::File::_default_recsep();
 my $data = "rec0$:rec1$:rec2$:";
-
 print "1..101\n";
 
 init_file($data);

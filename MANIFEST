@@ -953,15 +953,15 @@ lib/ExtUtils/MM_Cygwin.pm	MakeMaker methods for Cygwin
 lib/ExtUtils/MM_DOS.pm          MakeMaker methods for DOS
 lib/ExtUtils/MM_NW5.pm		MakeMaker methods for NetWare
 lib/ExtUtils/MM_OS2.pm		MakeMaker methods for OS/2
-lib/ExtUtils/MM_UWIN.pm         MakeMaker methods for U/WIN
 lib/ExtUtils/MM_Unix.pm		MakeMaker methods for Unix
+lib/ExtUtils/MM_UWIN.pm         MakeMaker methods for U/WIN
 lib/ExtUtils/MM_VMS.pm		MakeMaker methods for VMS
 lib/ExtUtils/MM_Win32.pm	MakeMaker methods for Win32
 lib/ExtUtils/MM_Win95.pm        MakeMaker methods for Win95
 lib/ExtUtils/MY.pm              MakeMaker user override class
 lib/ExtUtils/Packlist.pm	Manipulates .packlist files
-lib/ExtUtils/t/Big-Fat-Dummy/Makefile.PL              MakeMaker dummy module
 lib/ExtUtils/t/Big-Fat-Dummy/lib/Big/Fat/Dummy.pm     MakeMaker dummy module
+lib/ExtUtils/t/Big-Fat-Dummy/Makefile.PL              MakeMaker dummy module
 lib/ExtUtils/t/Big-Fat-Dummy/t/compile.t              MakeMaker dummy module
 lib/ExtUtils/t/Command.t	See if ExtUtils::Command works (Win32 only)
 lib/ExtUtils/t/Constant.t	See if ExtUtils::Constant works
@@ -1167,8 +1167,8 @@ lib/Memoize/t/array.t		Memoize
 lib/Memoize/t/array_confusion.t		Memoize
 lib/Memoize/t/correctness.t	Memoize
 lib/Memoize/t/errors.t		Memoize
-lib/Memoize/t/expire.t		Memoize
 lib/Memoize/t/expfile.t		Memoize
+lib/Memoize/t/expire.t		Memoize
 lib/Memoize/t/expmod_n.t	Memoize
 lib/Memoize/t/expmod_t.t	Memoize
 lib/Memoize/t/flush.t		Memoize
@@ -1416,34 +1416,36 @@ lib/Tie/Array/push.t		Test for Tie::Array
 lib/Tie/Array/splice.t		Test for Tie::Array::SPLICE
 lib/Tie/Array/std.t		Test for Tie::StdArray
 lib/Tie/Array/stdpush.t		Test for Tie::StdArray
-lib/Tie/File.pm                 Files as tied arrays.
-lib/Tie/File/t/00_version.t     Test for Tie::File.
-lib/Tie/File/t/01_gen.t         Test for Tie::File.
-lib/Tie/File/t/02_fetchsize.t   Test for Tie::File.
-lib/Tie/File/t/03_longfetch.t   Test for Tie::File.
-lib/Tie/File/t/04_splice.t      Test for Tie::File.
-lib/Tie/File/t/05_size.t        Test for Tie::File.
-lib/Tie/File/t/06_fixrec.t      Test for Tie::File.
-lib/Tie/File/t/07_rv_splice.t   Test for Tie::File.
-lib/Tie/File/t/08_ro.t          Test for Tie::File.
-lib/Tie/File/t/09_gen_rs.t      Test for Tie::File.
-lib/Tie/File/t/10_splice_rs.t   Test for Tie::File.
-lib/Tie/File/t/11_rv_splice_rs.t  Test for Tie::File.
-lib/Tie/File/t/12_longfetch_rs.t  Test for Tie::File.
-lib/Tie/File/t/13_size_rs.t     Test for Tie::File.
-lib/Tie/File/t/14_lock.t        Test for Tie::File.
-lib/Tie/File/t/15_pushpop.t     Test for Tie::File.
-lib/Tie/File/t/16_handle.t      Test for Tie::File.
-lib/Tie/File/t/17_misc_meth.t   Test for Tie::File.
-lib/Tie/File/t/18_rs_fixrec.t   Test for Tie::File.
-lib/Tie/File/t/19_cache.t       Test for Tie::File.
-lib/Tie/File/t/20_cache_full.t  Test for Tie::File.
-lib/Tie/File/t/21_win32.t       Test for Tie::File.
-lib/Tie/File/t/22_autochomp.t   Test for Tie::File.
-lib/Tie/File/t/23_rv_ac_splice.t  Test for Tie::File.
-lib/Tie/File/t/30_defer.t       Test for Tie::File.
-lib/Tie/File/t/31_autodefer.t   Test for Tie::File.
-lib/Tie/File/t/32_defer_misc.t  Test for Tie::File.
+lib/Tie/File.pm                 Files as tied arrays
+lib/Tie/File/t/00_version.t     Test for Tie::File
+lib/Tie/File/t/01_gen.t         Test for Tie::File
+lib/Tie/File/t/02_fetchsize.t   Test for Tie::File
+lib/Tie/File/t/03_longfetch.t   Test for Tie::File
+lib/Tie/File/t/04_splice.t      Test for Tie::File
+lib/Tie/File/t/05_size.t        Test for Tie::File
+lib/Tie/File/t/06_fixrec.t      Test for Tie::File
+lib/Tie/File/t/07_rv_splice.t   Test for Tie::File
+lib/Tie/File/t/08_ro.t          Test for Tie::File
+lib/Tie/File/t/09_gen_rs.t      Test for Tie::File
+lib/Tie/File/t/10_splice_rs.t   Test for Tie::File
+lib/Tie/File/t/11_rv_splice_rs.t  Test for Tie::File
+lib/Tie/File/t/12_longfetch_rs.t  Test for Tie::File
+lib/Tie/File/t/13_size_rs.t     Test for Tie::File
+lib/Tie/File/t/14_lock.t        Test for Tie::File
+lib/Tie/File/t/15_pushpop.t     Test for Tie::File
+lib/Tie/File/t/16_handle.t      Test for Tie::File
+lib/Tie/File/t/17_misc_meth.t   Test for Tie::File
+lib/Tie/File/t/18_rs_fixrec.t   Test for Tie::File
+lib/Tie/File/t/19_cache.t       Test for Tie::File
+lib/Tie/File/t/20_cache_full.t  Test for Tie::File
+lib/Tie/File/t/21_win32.t       Test for Tie::File
+lib/Tie/File/t/22_autochomp.t   Test for Tie::File
+lib/Tie/File/t/23_rv_ac_splice.t  Test for Tie::File
+lib/Tie/File/t/30_defer.t       Test for Tie::File
+lib/Tie/File/t/31_autodefer.t   Test for Tie::File
+lib/Tie/File/t/32_defer_misc.t  Test for Tie::File
+lib/Tie/File/t/33_defer_vs.t	Test for Tie::File
+lib/Tie/File/t/40_abs_cache.t	Test for Tie::File
 lib/Tie/Handle.pm		Base class for tied handles
 lib/Tie/Handle/stdhandle.t	Test for Tie::StdHandle
 lib/Tie/Hash.pm			Base class for tied hashes
@@ -1784,8 +1786,8 @@ lib/unicore/NamesList.txt	Unicode character database
 lib/unicore/Number.pl		Unicode character database
 lib/unicore/Properties		Built-in \p{...} / \P{...} property list
 lib/unicore/PropertyAliases.txt	Unicode character database
-lib/unicore/PropValueAliases.txt	Unicode character database
 lib/unicore/PropList.txt	Unicode character database
+lib/unicore/PropValueAliases.txt	Unicode character database
 lib/unicore/README.perl		Unicode character database
 lib/unicore/ReadMe.txt		Unicode character database info
 lib/unicore/Scripts.pl		Unicode character database
@@ -2240,11 +2242,11 @@ t/lib/h2ph.h			Test header file for h2ph
 t/lib/h2ph.pht			Generated output from h2ph.h by h2ph, for comparison
 t/lib/locale/latin1		Part of locale.t in Latin 1
 t/lib/locale/utf8		Part of locale.t in UTF8
+t/lib/MakeMaker/Test/Utils.pm           MakeMaker test utilities
 t/lib/Math/BigFloat/Subclass.pm	Empty subclass of BigFloat for test
 t/lib/Math/BigInt/BareCalc.pm	Bigint's simulation of Calc
 t/lib/Math/BigInt/Subclass.pm	Empty subclass of BigInt for test
 t/lib/Math/BigRat/Test.pm		Math::BigRat test helper
-t/lib/MakeMaker/Test/Utils.pm           MakeMaker test utilities
 t/lib/sample-tests/bailout		Test data for Test::Harness
 t/lib/sample-tests/combined		Test data for Test::Harness
 t/lib/sample-tests/descriptive		Test data for Test::Harness

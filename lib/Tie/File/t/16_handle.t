@@ -22,7 +22,7 @@ sysopen F, $file, O_CREAT | O_RDWR
   or die "Couldn't create temp file $file: $!; aborting";
 binmode F;
 
-my $o = tie @a, 'Tie::File', \*F, autochomp => 0;
+my $o = tie @a, 'Tie::File', \*F, autochomp => 0, autodefer => 0;
 print $o ? "ok $N\n" : "not ok $N\n";
 $N++;
 

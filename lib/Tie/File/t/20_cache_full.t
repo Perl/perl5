@@ -22,7 +22,7 @@ close F;
 # Limit cache size to 30 bytes 
 my $MAX = 30;
 #  -- that's enough space for 3 records, but not 4, on both \n and \r\n systems
-my $o = tie @a, 'Tie::File', $file, memory => $MAX;
+my $o = tie @a, 'Tie::File', $file, memory => $MAX, autodefer => 0;
 print $o ? "ok $N\n" : "not ok $N\n";
 $N++;
 
@@ -31,7 +31,7 @@ my @z = @a;                     # force cache to contain all ten records
 # It should now contain only the *last* three records, 7, 8, and 9
 {
   my $x = "7 8 9";
-  my $a = join " ", sort keys %{$o->{cache}};
+  my $a = join " ", sort $o->{cache}->keys;
   if ($a eq $x) { print "ok $N\n" }
   else { print "not ok $N # cache keys were <$a>; expected <$x>\n" }
   $N++;
@@ -177,12 +177,12 @@ check(); # In 0.18 #107 fails here--STORE was not flushing the cache when
 for (5, 6, 1) { my $z = $a[$_] }
 {
   my $x = "5 6 1";
-  my $a = join " ", @{$o->{lru}};
+  my $a = join " ", $o->{cache}->_produce_lru;
   if ($a eq $x) { print "ok $N\n" }
   else { print "not ok $N # LRU was <$a>; expected <$x>\n" }
   $N++;
   $x = "1 5 6";
-  $a = join " ", sort keys %{$o->{cache}};
+  $a = join " ", sort $o->{cache}->keys;
   if ($a eq $x) { print "ok $N\n" }
   else { print "not ok $N # cache keys were <$a>; expected <$x>\n" }
   $N++;
@@ -203,9 +203,10 @@ sub check {
   print $integrity ? "ok $N\n" : "not ok $N\n";
   $N++;
 
-  print $o->{cached} <= $MAX 
+  my $b = $o->{cache}->bytes;
+  print $b <= $MAX 
     ? "ok $N\n" 
-    : "not ok $N # $o->{cached} bytes cached, should be <= $MAX\n";
+    : "not ok $N # $b bytes cached, should be <= $MAX\n";
   $N++;
 }
 

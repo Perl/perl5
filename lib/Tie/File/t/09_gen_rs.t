@@ -2,13 +2,15 @@
 
 my $file = "tf$$.txt";
 
-print "1..38\n";
+print "1..47\n";
 
 my $N = 1;
 use Tie::File;
 print "ok $N\n"; $N++;
 
-my $o = tie @a, 'Tie::File', $file, recsep => 'blah', autochomp => 0;
+$RECSEP = 'blah';
+my $o = tie @a, 'Tie::File', $file, 
+    recsep => $RECSEP, autochomp => 0, autodefer => 0;
 print $o ? "ok $N\n" : "not ok $N\n";
 $N++;
 
@@ -61,13 +63,36 @@ check_contents("sh0", "sh1", "short2", "", "rec4");
 $a[3] = 'rec3';
 check_contents("sh0", "sh1", "short2", "rec3", "rec4");
 
+# (35-37) zero out file
+@a = ();
+check_contents();
 
-# try inserting a record into the middle of an empty file
+# (38-40) insert into the middle of an empty file
+$a[3] = "rec3";
+check_contents("", "", "", "rec3");
+
+
+# (41-46) 20020326 You thought there would be a bug in STORE where if
+# a cached record was false, STORE wouldn't see it at all.  Yup, there is,
+# and adding the appropriate defined() test fixes the problem.
+undef $o;  untie @a;  1 while unlink $file;
+$RECSEP = '0';
+$o = tie @a, 'Tie::File', $file, 
+    recsep => $RECSEP, autochomp => 0, autodefer => 0;
+print $o ? "ok $N\n" : "not ok $N\n";
+$N++;
+$#a = 2;
+my $z = $a[1];                  # caches "0"
+$a[2] = "oops";
+check_contents("", "", "oops");
+$a[1] = "bah";
+check_contents("", "bah", "oops");
+
 
 use POSIX 'SEEK_SET';
 sub check_contents {
   my @c = @_;
-  my $x = join 'blah', @c, '';
+  my $x = join $RECSEP, @c, '';
   local *FH = $o->{fh};
   seek FH, 0, SEEK_SET;
   my $a;
@@ -86,13 +111,13 @@ sub check_contents {
   # now check FETCH:
   my $good = 1;
   for (0.. $#c) {
-    unless ($a[$_] eq "$c[$_]blah") {
-      $msg = "expected $c[$_]blah, got $a[$_]";
+    unless ($a[$_] eq "$c[$_]$RECSEP") {
+      $msg = "expected $c[$_]$RECSEP, got $a[$_]";
       ctrlfix($msg);
       $good = 0;
     }
   }
-  print $good ? "ok $N\n" : "not ok $N # fetch @c\n";
+  print $good ? "ok $N\n" : "not ok $N # fetch $msg\n";
   $N++;
 }
 
