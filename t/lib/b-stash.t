@@ -39,16 +39,21 @@ if ($Is_VMS) {
     $a =~ s/-uVMS,-uVMS::Filespec,//;
     $a =~ s/-uSocket,//; # Socket is optional/compiler version dependent
 }
-use vars '$OS2::is_aout';
+
+{
+    no strict 'vars';
+    use vars '$OS2::is_aout';
+}
 if (($Config{static_ext} eq ' ' ||
      ($Config{static_ext} eq 'Socket' && $Is_VMS))
     && !($^O eq 'os2' and $OS2::is_aout)
-    ) {
-  if (ord('A') == 193) { # EBCDIC sort order is qw(a A) not qw(A a)
-      $b = join ',', sort split /,/, $b;
-  }
-  print "# [$a]\n# vs.\n# [$b]\nnot " if $a ne $b;
-  ok;
+	) {
+    if (ord('A') == 193) { # EBCDIC sort order is qw(a A) not qw(A a)
+	$b = join ',', sort split /,/, $b;
+    }
+    print "# [$a]\n# vs.\n# [$b]\nnot " if $a ne $b;
+    ok;
 } else {
-  print "ok $test # skipped: one or more static extensions\n"; $test++;
+    print "ok $test # skipped: one or more static extensions\n"; $test++;
 }
+
