@@ -299,10 +299,10 @@ extern PerlIO *	PerlIO_stdout		(void);
 extern PerlIO *	PerlIO_stderr		(void);
 #endif
 #ifndef PerlIO_getpos
-extern int	PerlIO_getpos		(PerlIO *,Fpos_t *);
+extern int	PerlIO_getpos		(PerlIO *,SV *);
 #endif
 #ifndef PerlIO_setpos
-extern int	PerlIO_setpos		(PerlIO *,const Fpos_t *);
+extern int	PerlIO_setpos		(PerlIO *,SV *);
 #endif
 #ifndef PerlIO_fdupopen
 extern PerlIO *	PerlIO_fdupopen		(pTHX_ PerlIO *);

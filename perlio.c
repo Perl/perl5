@@ -233,7 +233,7 @@ PerlIO_allocate(pTHX)
  if (!f)
   {
    return NULL;
-  } 
+  }
  *last = f;
  return f+1;
 }
@@ -312,7 +312,7 @@ PerlIO_find_layer(const char *name, STRLEN len)
  dTHX;
  SV **svp;
  SV *sv;
- if (len <= 0)
+ if ((SSize_t) len <= 0)
   len = strlen(name);
  svp  = hv_fetch(PerlIO_layer_hv,name,len,0);
  if (svp && (sv = *svp) && SvROK(sv))
@@ -637,7 +637,7 @@ PerlIO_fdupopen(pTHX_ PerlIO *f)
    Off_t posn = PerlIO_tell(f);
    PerlIO_seek(new,posn,SEEK_SET);
   }
- return new; 
+ return new;
 }
 
 #undef PerlIO_close
@@ -926,7 +926,7 @@ PerlIO_modestr(PerlIO *f,char *buf)
     {
      *s++ = '+';
     }
-  } 
+  }
  else if (flags & PERLIO_F_CANREAD)
   {
    *s++ = 'r';
@@ -1292,6 +1292,7 @@ Off_t
 PerlIOUnix_tell(PerlIO *f)
 {
  dTHX;
+ Off_t posn = PerlLIO_lseek(PerlIOSelf(f,PerlIOUnix)->fd,0,SEEK_CUR);
  return PerlLIO_lseek(PerlIOSelf(f,PerlIOUnix)->fd,0,SEEK_CUR);
 }
 
@@ -1361,20 +1362,19 @@ PerlIOStdio_fileno(PerlIO *f)
  return PerlSIO_fileno(PerlIOSelf(f,PerlIOStdio)->stdio);
 }
 
-const char *
+char *
 PerlIOStdio_mode(const char *mode,char *tmode)
 {
- const char *ret = mode;
+ char *ret = tmode;
+ while (*mode)
+  {
+   *tmode++ = *mode++;
+  }
  if (O_BINARY != O_TEXT)
   {
-   ret = (const char *) tmode;
-   while (*mode)
-    {
-     *tmode++ = *mode++;
-    }
    *tmode++ = 'b';
-   *tmode = '\0';
   }
+ *tmode = '\0';
  return ret;
 }
 
@@ -3142,46 +3142,69 @@ PerlIO_tmpfile(void)
 #ifndef HAS_FSETPOS
 #undef PerlIO_setpos
 int
-PerlIO_setpos(PerlIO *f, const Fpos_t *pos)
+PerlIO_setpos(PerlIO *f, SV *pos)
 {
- return PerlIO_seek(f,*pos,0);
+ dTHX;
+ if (SvOK(pos))
+  {
+   STRLEN len;
+   Off_t *posn = (Off_t *) SvPV(pos,len);
+   if (f && len == sizeof(Off_t))
+    return PerlIO_seek(f,*posn,SEEK_SET);
+  }
+ errno = EINVAL;
+ return -1;
 }
 #else
-#ifndef PERLIO_IS_STDIO
 #undef PerlIO_setpos
 int
-PerlIO_setpos(PerlIO *f, const Fpos_t *pos)
+PerlIO_setpos(PerlIO *f, SV *pos)
 {
+ dTHX;
+ if (SvOK(pos))
+  {
+   STRLEN len;
+   Fpos_t *fpos = (Fpos_t *) SvPV(pos,len);
+   if (f && len == sizeof(Fpos_t))
+    {
 #if defined(USE_64_BIT_STDIO) && defined(USE_FSETPOS64)
- return fsetpos64(f, pos);
+     return fsetpos64(f, fpos);
 #else
- return fsetpos(f, pos);
+     return fsetpos(f, fpos);
 #endif
+    }
+  }
+ errno = EINVAL;
+ return -1;
 }
-#endif
 #endif
 
 #ifndef HAS_FGETPOS
 #undef PerlIO_getpos
 int
-PerlIO_getpos(PerlIO *f, Fpos_t *pos)
+PerlIO_getpos(PerlIO *f, SV *pos)
 {
- *pos = PerlIO_tell(f);
- return *pos == -1 ? -1 : 0;
+ dTHX;
+ Off_t posn = PerlIO_tell(f);
+ sv_setpvn(pos,(char *)&posn,sizeof(posn));
+ return (posn == (Off_t)-1) ? -1 : 0;
 }
 #else
-#ifndef PERLIO_IS_STDIO
 #undef PerlIO_getpos
 int
-PerlIO_getpos(PerlIO *f, Fpos_t *pos)
+PerlIO_getpos(PerlIO *f, SV *pos)
 {
+ dTHX;
+ Fpos_t fpos;
+ int code;
 #if defined(USE_64_BIT_STDIO) && defined(USE_FSETPOS64)
- return fgetpos64(f, pos);
+ code = fgetpos64(f, &fpos);
 #else
- return fgetpos(f, pos);
+ code = fgetpos(f, &fpos);
 #endif
+ sv_setpvn(pos,(char *)&fpos,sizeof(fpos));
+ return code;
 }
-#endif
 #endif
 
 #if (defined(PERLIO_IS_STDIO) || !defined(USE_SFIO)) && !defined(HAS_VPRINTF)

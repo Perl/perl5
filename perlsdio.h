@@ -60,12 +60,6 @@
 #else
 #  define PerlIO_seek(f,o,w)		fseek(f,o,w)
 #endif
-#ifdef HAS_FGETPOS
-#define PerlIO_getpos(f,p)		fgetpos(f,p)
-#endif
-#ifdef HAS_FSETPOS
-#define PerlIO_setpos(f,p)		fsetpos(f,p)
-#endif
 
 #define PerlIO_rewind(f)		rewind(f)
 #define PerlIO_tmpfile()		tmpfile()
