@@ -31,6 +31,162 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10155] By: jhi                                   on 2001/05/18  11:58:57
+        Log: Integrate change #10144 from maintperl.
+             
+             s/CONFIGDOTSH/PERL_CONFIG_SH/ for Win32, too.
+     Branch: perl
+	  !> win32/config.bc win32/config.gc win32/config.vc
+	  !> win32/config_H.bc win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[ 10154] By: nick                                  on 2001/05/18  07:23:03
+        Log: Integrate mainline.
+     Branch: perlio
+	  +> README.dgux t/lib/i18n-collate.t utils.lst
+	  !> (integrate 49 files)
+____________________________________________________________________________
+[ 10153] By: jhi                                   on 2001/05/18  00:41:51
+        Log: Integrate change #7224 from mainline into maintperl.
+             
+             Allow @+ and @- to be doublequoted, from Simon Cozens. 
+             (Approved by Larry, see Tom's comment in 20000830.005.)
+     Branch: maint-5.6/perl
+	  !> toke.c
+____________________________________________________________________________
+[ 10152] By: jhi                                   on 2001/05/17  23:18:15
+        Log: Subject: [PATCH bleadperl] small lookbehind fix
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Fri, 18 May 2001 00:07:19 +0100
+             Message-Id: <200105172307.AAA06142@crypt.compulink.co.uk>
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 10151] By: jhi                                   on 2001/05/17  22:00:06
+        Log: Detypos.
+     Branch: perl
+	   ! installman utils.lst
+____________________________________________________________________________
+[ 10150] By: jhi                                   on 2001/05/17  20:32:48
+        Log: Add better debug to glob/basic #8 as suggested by Nick Clark
+             in 20001222.001.
+     Branch: perl
+	   ! t/lib/glob-basic.t
+____________________________________________________________________________
+[ 10149] By: jhi                                   on 2001/05/17  20:08:58
+        Log: Subject: [PATCH] Test for bug 20010515.004
+             From: Benjamin Sugars <bsugars@canoe.ca>
+             Date: Thu, 17 May 2001 15:48:18 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0105171544270.9064-100000@marmot.rim.canoe.ca>
+     Branch: perl
+	   ! t/op/misc.t
+____________________________________________________________________________
+[ 10148] By: jhi                                   on 2001/05/17  20:06:23
+        Log: Integrate #10145 from maintperl.
+             
+             fix for ID 20010515.004 (needs test)
+     Branch: perl
+	  !> pp_hot.c
+____________________________________________________________________________
+[ 10147] By: jhi                                   on 2001/05/17  19:10:46
+        Log: Thinko noticed by Doug MacEachern.
+     Branch: perl
+	   ! thread.h
+____________________________________________________________________________
+[ 10146] By: jhi                                   on 2001/05/17  17:30:37
+        Log: Subject: Re: [PATCH] HERE mark in regex
+             From: Ronald J Kimball <rjk@linguist.Thayer.dartmouth.edu>
+             Date: Thu, 17 May 2001 12:20:33 -0400
+             Message-ID: <20010517122033.B1547290@linguist.thayer.dartmouth.edu> 
+     Branch: perl
+	   ! t/op/re_tests
+____________________________________________________________________________
+[ 10145] By: gsar                                  on 2001/05/17  16:59:55
+        Log: fix for ID 20010515.004 (needs test)
+     Branch: maint-5.6/perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[ 10144] By: gsar                                  on 2001/05/17  16:39:02
+        Log: s/CONFIGDOTSH/PERL_CONFIG_SH/g
+     Branch: maint-5.6/perl
+	   ! win32/config.bc win32/config.gc win32/config.vc
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[ 10143] By: jhi                                   on 2001/05/17  14:21:08
+        Log: Macrofy the getspecific (and use it also in util.c)
+     Branch: perl
+	   ! thread.h util.c
+____________________________________________________________________________
+[ 10142] By: jhi                                   on 2001/05/17  01:43:50
+        Log: Use the unchecked thread-specific key fetch also in Tru64.
+     Branch: perl
+	   ! thread.h
+____________________________________________________________________________
+[ 10141] By: jhi                                   on 2001/05/17  01:41:07
+        Log: Subject: [PATCH 5.6.1]Quick thread speedup
+             From: Dan Sugalski <dan@sidhe.org> 
+             Date: Wed, 16 May 2001 18:05:19 -0400
+             Message-Id: <5.1.0.14.0.20010516175826.01afde08@24.8.96.48>
+     Branch: perl
+	   ! thread.h util.c
+____________________________________________________________________________
+[ 10140] By: jhi                                   on 2001/05/16  19:58:29
+        Log: I think this is quite enough testing for a deprecated feature.
+     Branch: perl
+	   + t/lib/i18n-collate.t
+	   ! MANIFEST t/lib/1_compile.t
+____________________________________________________________________________
+[ 10139] By: jhi                                   on 2001/05/16  18:47:03
+        Log: More HP-UX lore from Jeff Okamoto.
+     Branch: perl
+	   ! README.hpux
+____________________________________________________________________________
+[ 10138] By: jhi                                   on 2001/05/16  18:21:04
+        Log: Sort utils.lst for easier maintenance.
+     Branch: perl
+	   ! utils.lst
+____________________________________________________________________________
+[ 10137] By: jhi                                   on 2001/05/16  18:12:01
+        Log: Subject: Re: [PATCH] Abstract "utility" information from installman
+             From: Tim Jenness <t.jenness@jach.hawaii.edu>
+             Date: Wed, 16 May 2001 08:59:59 -1000 (HST)
+             Message-ID: <Pine.LNX.4.33.0105160858480.2488-100000@lapaki.jach.hawaii.edu>
+             
+             Add pod2latex to utils.lst.
+     Branch: perl
+	   ! MANIFEST utils.lst
+____________________________________________________________________________
+[ 10136] By: jhi                                   on 2001/05/16  18:00:00
+        Log: Subject: Re: [PATCH] HERE mark in regex
+             From: Ronald J Kimball <rjk@linguist.Thayer.dartmouth.edu>
+             Date: Wed, 16 May 2001 13:04:43 -0400
+             Message-ID: <20010516130443.E1516273@linguist.thayer.dartmouth.edu> 
+     Branch: perl
+	   ! pod/perldiag.pod regcomp.c t/op/misc.t t/op/re_tests
+	   ! t/op/regmesg.t t/pragma/warn/regcomp
+____________________________________________________________________________
+[ 10135] By: jhi                                   on 2001/05/16  17:51:50
+        Log: Subject: Re: [PATCH] Abstract "utility" information from installman
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Wed, 16 May 2001 18:02:08 +0100
+             Message-ID: <20010516180208.A6458@netthink.co.uk>
+     Branch: perl
+	   ! installman utils.lst
+____________________________________________________________________________
+[ 10134] By: jhi                                   on 2001/05/16  17:47:26
+        Log: Subject: Re: [ID 20010515.001] -DPERL_Y2KWARN doesn't do what it should (Not OK: perl v5.7.1 +DEVEL10104 on i586-linux 2.2.16-22 (UNINST
+             From: "Philip Newton" <pnewton@gmx.de>
+             Date: Tue, 15 May 2001 15:09:30 +0200
+             Message-ID: <3B0146AA.2839.17BFDA6@localhost>
+             
+             Test case for #10128.
+     Branch: perl
+	   ! t/pragma/warn/pp_hot
+____________________________________________________________________________
+[ 10133] By: jhi                                   on 2001/05/16  15:12:52
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10132] By: jhi                                   on 2001/05/16  14:50:55
         Log: Deprecate pseudo-hashes.
      Branch: perl
