@@ -2572,33 +2572,7 @@ Perl_yylex(pTHX)
 	}
 	do {
 	    bof = PL_rsfp ? TRUE : FALSE;
-	    if (bof) {
-#ifdef PERLIO_IS_STDIO
-#  ifdef __GNU_LIBRARY__
-#    if __GNU_LIBRARY__ == 1 /* Linux glibc5 */
-#      define FTELL_FOR_PIPE_IS_BROKEN
-#    endif
-#  else
-#    ifdef __GLIBC__
-#      if __GLIBC__ == 1 /* maybe some glibc5 release had it like this? */
-#        define FTELL_FOR_PIPE_IS_BROKEN
-#      endif
-#    endif
-#  endif
-#endif
-#ifdef FTELL_FOR_PIPE_IS_BROKEN
-		/* This loses the possibility to detect the bof
-		 * situation on perl -P when the libc5 is being used.
-		 * Workaround?  Maybe attach some extra state to PL_rsfp?
-		 */
-		if (!PL_preprocess)
-		    bof = PerlIO_tell(PL_rsfp) == 0;
-#else
-		bof = PerlIO_tell(PL_rsfp) == 0;
-#endif
-	    }
-	    s = filter_gets(PL_linestr, PL_rsfp, 0);
-	    if (s == Nullch) {
+	    if ((s = filter_gets(PL_linestr, PL_rsfp, 0)) == Nullch) {
 	      fake_eof:
 		if (PL_rsfp) {
 		    if (PL_preprocess && !PL_in_eval)
@@ -2621,9 +2595,36 @@ Perl_yylex(pTHX)
 		PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 		sv_setpv(PL_linestr,"");
 		TOKEN(';');	/* not infinite loop because rsfp is NULL now */
-	    } else if (bof) {
-		PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
-		s = swallow_bom((U8*)s);
+	    }
+	    /* if it looks like the start of a BOM, check if it in fact is */
+	    else if (bof && (!*s || *(U8*)s == 0xEF || *(U8*)s >= 0xFE)) {
+#ifdef PERLIO_IS_STDIO
+#  ifdef __GNU_LIBRARY__
+#    if __GNU_LIBRARY__ == 1 /* Linux glibc5 */
+#      define FTELL_FOR_PIPE_IS_BROKEN
+#    endif
+#  else
+#    ifdef __GLIBC__
+#      if __GLIBC__ == 1 /* maybe some glibc5 release had it like this? */
+#        define FTELL_FOR_PIPE_IS_BROKEN
+#      endif
+#    endif
+#  endif
+#endif
+#ifdef FTELL_FOR_PIPE_IS_BROKEN
+		/* This loses the possibility to detect the bof
+		 * situation on perl -P when the libc5 is being used.
+		 * Workaround?  Maybe attach some extra state to PL_rsfp?
+		 */
+		if (!PL_preprocess)
+		    bof = PerlIO_tell(PL_rsfp) == SvCUR(PL_linestr);
+#else
+		bof = PerlIO_tell(PL_rsfp) == SvCUR(PL_linestr);
+#endif
+		if (bof) {
+		    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
+		    s = swallow_bom((U8*)s);
+		}
 	    }
 	    if (PL_doextract) {
 		if (*s == '#' && s[1] == '!' && instr(s,"perl"))
