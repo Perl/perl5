@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq1 - General Questions About Perl ($Revision: 1.3 $, $Date: 2002/01/11 02:31:20 $)
+perlfaq1 - General Questions About Perl ($Revision: 1.4 $, $Date: 2002/01/18 21:00:17 $)
 
 =head1 DESCRIPTION
 
@@ -38,7 +38,7 @@ producing better software for free than you could hope to purchase for
 money.  You may snoop on pending developments via the archives at
 http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/ 
 and http://archive.develooper.com/perl5-porters@perl.org/ 
-or the news gateway news://nntp.perl.org/perl.perl5.porters or
+or the news gateway nntp://nntp.perl.org/perl.perl5.porters or
 its web interface at http://nntp.perl.org/group/perl.perl5.porters ,
 or read the faq at http://perlhacker.org/p5p-faq,
 or you can subscribe to the mailing list by sending

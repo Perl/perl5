@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.4 $, $Date: 2002/01/11 02:31:20 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.5 $, $Date: 2002/01/18 21:00:17 $)
 
 =head1 DESCRIPTION
 
@@ -185,7 +185,7 @@ following groups:
 
 There is also Usenet gateway to the mailing list used by the crack
 Perl development team (perl5-porters) at
-news://nntp.perl.org/perl.perl5.porters or its web interface at
+nntp://nntp.perl.org/perl.perl5.porters or its web interface at
 http://nntp.perl.org/group/perl.perl5.porters .
 
 =head2 Where should I post source code?
@@ -518,7 +518,6 @@ and there are many other sub-domains for special topics, such as
     http://bugs.perl.org/
     http://history.perl.org/
     http://lists.perl.org/
-    http://news.perl.org/
     http://use.perl.org/
 
 http://www.cpan.org/ is the Comprehensive Perl Archive Network,

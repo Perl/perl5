@@ -46,7 +46,7 @@ if ($^O eq 'amigaos' || $^O eq 'os2' || $^O eq 'MSWin32' || $^O eq 'NetWare' || 
 else {
     my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
      $blksize,$blocks) = stat($Dfile);
-    print (($mode & 0777) == 0640 ? "ok 2\n" : "not ok 2\n");
+    print (($mode & 0777) == ($^O eq 'vos' ? 0750 : 0640) ? "ok 2\n" : "not ok 2\n");
 }
 my $i = 0;
 while (my ($key,$value) = each(%h)) {
