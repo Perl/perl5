@@ -100,6 +100,11 @@ function is called with the correct parameters.  This abstraction will
 allow the programmer to create a more Perl-like interface to the C
 function.
 
+It is recommended that the B<h2xs> tool be used when creating new
+extensions.  This tool will generate template source files and Makefiles.
+This is discussed in more detail in the section titled "Creating A New
+Extension" and in the B<h2xs> manpage.
+
 =head2 The Anatomy of an XSUB
 
 The following XSUB allows a Perl program to access a  C  library  function  called  sin().  The XSUB will imitate the C
@@ -277,7 +282,8 @@ its parameters.  The Perl usage is given first.
 
 The XSUB follows. 
 
-    bool_t rpcb_gettime(host,timep)
+     bool_t
+     rpcb_gettime(host,timep)
           char *  host
           time_t  timep
           CODE:
@@ -294,7 +300,7 @@ typemaps and ensures the resulting C code is legal.
 =head2 The NO_INIT Keyword
 
 The NO_INIT keyword is used to indicate that a function
-parameter is being used only as an output value.  The B<xsubpp>
+parameter is being used as only an output value.  The B<xsubpp>
 compiler will normally generate code to read the values of
 all function parameters from the argument stack and assign
 them to C variables upon entry to the function.  NO_INIT
@@ -303,7 +309,7 @@ output rather than for input and that they will be handled
 before the function terminates.
 
 The following example shows a variation of the rpcb_gettime() function.
-This function uses the timep variable only as an output variable and does
+This function uses the timep variable as only an output variable and does
 not care about its initial contents.
 
      bool_t
@@ -382,7 +388,7 @@ create an XSUB which accepts a list of parameters of unknown length.
 The I<host> parameter for the rpcb_gettime() XSUB can be
 optional so the ellipsis can be used to indicate that the
 XSUB will take a variable number of parameters.  Perl should
-be able to call this XSUB with either of the following statments.
+be able to call this XSUB with either of the following statements.
 
      $status = rpcb_gettime( $timep, $host );
 
@@ -409,7 +415,7 @@ The XS code, with ellipsis, follows.
 
 The PPCODE: keyword is an alternate form of the CODE: keyword and is used
 to tell the B<xsubpp> compiler that the programmer is supplying the code to
-control the argument stack for the XSUBs return values.  Occassionally one
+control the argument stack for the XSUBs return values.  Occasionally one
 will want an XSUB to return a list of values rather than a single value.
 In these cases one must use PPCODE: and then explicitly push the list of
 values on the stack.  The PPCODE: and CODE:  keywords are not used
@@ -419,7 +425,8 @@ The following XSUB will call the C rpcb_gettime() function
 and will return its two output values, timep and status, to
 Perl as a single list.
 
-    void rpcb_gettime(host)
+     void
+     rpcb_gettime(host)
           char *  host
           PPCODE:
           {
@@ -454,7 +461,7 @@ the following statement.
 
 =head2 Returning Undef And Empty Lists
 
-Occassionally the programmer will want to simply return
+Occasionally the programmer will want to simply return
 C<undef> or an empty list if a function fails rather than a
 separate status value.  The rpcb_gettime() function offers
 just this situation.  If the function succeeds we would like
@@ -611,7 +618,8 @@ reference.  The result will be another SV which points to the actual Perl
 variable.  This can then be dereferenced with SvPVX(), SvNVX(), or
 SvIVX().  The following XSUB will use SvRV().
 
-    void rpcb_gettime()
+     void
+     rpcb_gettime()
           PPCODE:
           {
           char *host;
@@ -645,7 +653,7 @@ a possibly empty SV.
 XSUBs may use B<perl_get_av()>, B<perl_get_hv()>, and B<perl_get_cv()> to
 access Perl arrays, hashes, and code values.
 
-=head2 Interface Stategy
+=head2 Interface Strategy
 
 When designing an interface between Perl and a C library a straight
 translation from C to XS is often sufficient.  The interface will often be
@@ -658,7 +666,7 @@ Identify the C functions which modify their parameters.  The XSUBs for
 these functions may be able to return lists to Perl, or may be
 candidates to return undef or an empty list in case of failure.
 
-Identify which values are used only by the C and XSUB functions
+Identify which values are used by only the C and XSUB functions
 themselves.  If Perl does not need to access the contents of the value
 then it may not be necessary to provide a translation for that value
 from C to Perl.
@@ -716,7 +724,7 @@ designed to handle pointers to complex objects.  The
 T_PTRREF type will allow the Perl object to be unblessed
 while the T_PTROBJ type requires that the object be blessed.
 By using T_PTROBJ one can achieve a form of type-checking
-since the XSUB will attempt to verify that the Perl object
+because the XSUB will attempt to verify that the Perl object
 is of the expected type.
 
 The following XS code shows the getnetconfigent() function which is used
@@ -947,5 +955,5 @@ File C<rpctest.pl>: Perl test program for the RPC extension.
 
 =head1 AUTHOR
 
-Dean Roehrich C<roehrich@cray.com>
-September 27, 1994
+Dean Roehrich F<E<lt>roehrich@cray.comE<gt>>
+May 3, 1995

@@ -248,7 +248,7 @@ that it is impossible to override the BAZ() method.
 	$a->bar;
 
 Now we try to override the BAZ() method.  We would like FOO::bar() to call
-GOOP::BAZ(), but this cannot happen since FOO::bar() explicitly calls
+GOOP::BAZ(), but this cannot happen because FOO::bar() explicitly calls
 FOO::private::BAZ().
 
 	package FOO;
@@ -365,3 +365,79 @@ method where that data is located.
 	$a->enter;
 	$b->enter;
 
+=head1 INHERITING A CONSTRUCTOR
+
+An inheritable constructor should use the second form of bless() which allows
+blessing directly into a specified class.  Notice in this example that the
+object will be a BAR not a FOO, even though the constructor is in class FOO.
+
+	package FOO;
+
+	sub new {
+		my $type = shift;
+		my $self = {};
+		bless $self, $type;
+	}
+
+	sub baz {
+		print "in FOO::baz()\n";
+	}
+
+	package BAR;
+	@ISA = qw(FOO);
+
+	sub baz {
+		print "in BAR::baz()\n";
+	}
+
+	package main;
+
+	$a = BAR->new;
+	$a->baz;
+
+=head1 DELEGATION
+
+Some classes, such as SDBM_File, cannot be effectively subclassed because
+they create foreign objects.  Such a class can be extended with some sort of
+aggregation technique such as the "using" relationship mentioned earlier or
+by delegation.
+
+The following example demonstrates delegation using an AUTOLOAD() function to
+perform message-forwarding.  This will allow the Mydbm object to behave
+exactly like an SDBM_File object.  The Mydbm class could now extend the
+behavior by adding custom FETCH() and STORE() methods, if this is desired.
+
+	package Mydbm;
+
+	require SDBM_File;
+	require TieHash;
+	@ISA = qw(TieHash);
+
+	sub TIEHASH {
+		my $type = shift;
+		my $ref = SDBM_File->new(@_);
+		bless {'delegate' => $ref};
+	}
+
+	sub AUTOLOAD {
+		my $self = shift;
+
+		# The Perl interpreter places the name of the
+		# message in a variable called $AUTOLOAD.
+
+		# DESTROY messages should never be propagated.
+		return if $AUTOLOAD =~ /::DESTROY$/;
+
+		# Remove the package name.
+		$AUTOLOAD =~ s/^Mydbm:://;
+
+		# Pass the message to the delegate.
+		$self->{'delegate'}->$AUTOLOAD(@_);
+	}
+
+	package main;
+	use Fcntl qw( O_RDWR O_CREAT );
+
+	tie %foo, Mydbm, "adbm", O_RDWR|O_CREAT, 0640;
+	$foo{'bar'} = 123;
+	print "foo-bar = $foo{'bar'}\n";
