@@ -757,6 +757,10 @@ I32 dopoptosub _((I32 startingblock));
 I32 dopoptosub_at _((PERL_CONTEXT* cxstk, I32 startingblock));
 void save_lines _((AV *array, SV *sv));
 OP *doeval _((int gimme, OP** startop));
+I32 sv_ncmp _((SV *a, SV *b));
+I32 sv_i_ncmp _((SV *a, SV *b));
+I32 amagic_ncmp _((SV *a, SV *b));
+I32 amagic_i_ncmp _((SV *a, SV *b));
 I32 amagic_cmp _((SV *str1, SV *str2));
 I32 amagic_cmp_locale _((SV *str1, SV *str2));
 
@@ -890,6 +894,7 @@ void debprof _((OP *o));
 
 void *bset_obj_store _((void *obj, I32 ix));
 OP *new_logop _((I32 type, I32 flags, OP **firstp, OP **otherp));
+void simplify_sort _((OP *o));
 
 I32 do_trans_CC_simple _((SV *sv));
 I32 do_trans_CC_count _((SV *sv));

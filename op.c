@@ -51,7 +51,7 @@ static PADOFFSET pad_findlex _((char* name, PADOFFSET newoff, U32 seq,
 	CV* startcv, I32 cx_ix, I32 saweval));
 static OP *newDEFSVOP _((void));
 static OP *new_logop _((I32 type, I32 flags, OP **firstp, OP **otherp));
-static void simplify_sort(OP *o);
+static void simplify_sort _((OP *o));
 #endif
 
 STATIC char*
@@ -5092,7 +5092,8 @@ ck_sort(OP *o)
 
     return o;
 }
-static void
+
+STATIC void
 simplify_sort(OP *o)
 {
     register OP *kid = cLISTOPo->op_first->op_sibling;	/* get past pushmark */
