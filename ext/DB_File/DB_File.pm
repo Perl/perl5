@@ -841,7 +841,7 @@ contents of the database.
     use vars qw( %h $k $v ) ;
 
     unlink "fruit" ;
-    tie %h, "DB_File", "fruit", O_RDWR|O_CREAT, 0640, $DB_HASH 
+    tie %h, "DB_File", "fruit", O_RDWR|O_CREAT, 0666, $DB_HASH 
         or die "Cannot open file 'fruit': $!\n";
 
     # Add a few key/value pairs to the file
@@ -902,7 +902,7 @@ insensitive compare function will be used.
     $DB_BTREE->{'compare'} = \&Compare ;
 
     unlink "tree" ;
-    tie %h, "DB_File", "tree", O_RDWR|O_CREAT, 0640, $DB_BTREE 
+    tie %h, "DB_File", "tree", O_RDWR|O_CREAT, 0666, $DB_BTREE 
         or die "Cannot open file 'tree': $!\n" ;
 
     # Add a key/value pair to the file
@@ -967,7 +967,7 @@ code:
     # Enable duplicate records
     $DB_BTREE->{'flags'} = R_DUP ;
 
-    tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_BTREE 
+    tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0666, $DB_BTREE 
 	or die "Cannot open $filename: $!\n";
 
     # Add some key/value pairs to the file
@@ -1022,7 +1022,7 @@ Here is the script above rewritten using the C<seq> API method.
     # Enable duplicate records
     $DB_BTREE->{'flags'} = R_DUP ;
 
-    $x = tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_BTREE 
+    $x = tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0666, $DB_BTREE 
 	or die "Cannot open $filename: $!\n";
 
     # Add some key/value pairs to the file
@@ -1093,7 +1093,7 @@ this:
     # Enable duplicate records
     $DB_BTREE->{'flags'} = R_DUP ;
 
-    $x = tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_BTREE 
+    $x = tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0666, $DB_BTREE 
 	or die "Cannot open $filename: $!\n";
 
     my $cnt  = $x->get_dup("Wall") ;
@@ -1143,7 +1143,7 @@ Assuming the database from the previous example:
     # Enable duplicate records
     $DB_BTREE->{'flags'} = R_DUP ;
 
-    $x = tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_BTREE 
+    $x = tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0666, $DB_BTREE 
 	or die "Cannot open $filename: $!\n";
 
     $found = ( $x->find_dup("Wall", "Larry") == 0 ? "" : "not") ; 
@@ -1182,7 +1182,7 @@ Again assuming the existence of the C<tree> database
     # Enable duplicate records
     $DB_BTREE->{'flags'} = R_DUP ;
 
-    $x = tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_BTREE 
+    $x = tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0666, $DB_BTREE 
 	or die "Cannot open $filename: $!\n";
 
     $x->del_dup("Wall", "Larry") ;
@@ -1235,7 +1235,7 @@ and print the first matching key/value pair given a partial key.
     $filename = "tree" ;
     unlink $filename ;
 
-    $x = tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_BTREE
+    $x = tie %h, "DB_File", $filename, O_RDWR|O_CREAT, 0666, $DB_BTREE
         or die "Cannot open $filename: $!\n";
 
     # Add some key/value pairs to the file
@@ -1332,7 +1332,7 @@ L<Extra RECNO Methods> for a workaround).
     unlink $filename ;
 
     my @h ;
-    tie @h, "DB_File", $filename, O_RDWR|O_CREAT, 0640, $DB_RECNO 
+    tie @h, "DB_File", $filename, O_RDWR|O_CREAT, 0666, $DB_RECNO 
         or die "Cannot open file 'text': $!\n" ;
 
     # Add a few key/value pairs to the file
@@ -1428,7 +1428,7 @@ L<THE API INTERFACE>).
 
     unlink $file ;
 
-    $H = tie @h, "DB_File", $file, O_RDWR|O_CREAT, 0640, $DB_RECNO 
+    $H = tie @h, "DB_File", $file, O_RDWR|O_CREAT, 0666, $DB_RECNO 
         or die "Cannot open file $file: $!\n" ;
 
     # first create a text file to play with
@@ -1848,7 +1848,7 @@ peril!
 
 The locking technique went like this. 
 
-    $db = tie(%db, 'DB_File', '/tmp/foo.db', O_CREAT|O_RDWR, 0644)
+    $db = tie(%db, 'DB_File', '/tmp/foo.db', O_CREAT|O_RDWR, 0666)
         || die "dbcreat /tmp/foo.db $!";
     $fd = $db->fd;
     open(DB_FH, "+<&=$fd") || die "dup $!";
