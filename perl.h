@@ -1,3 +1,4 @@
+emacs -nw perl.h
 /*    perl.h
  *
  *    Copyright (c) 1987-2000, Larry Wall
@@ -717,7 +718,18 @@ typedef struct perl_mstats perl_mstats_t;
 #       define INCLUDE_PROTOTYPES /* for <socks.h> */
 #       define PERL_SOCKS_NEED_PROTOTYPES
 #   endif
+#   ifdef USE_THREADS
+#       define PERL_USE_THREADS /* store our value */
+#       undef USE_THREADS
+#   endif
 #   include <socks.h>
+#   ifdef USE_THREADS
+#       undef USE_THREADS /* socks.h does this on its own */
+#   endif
+#   ifdef PERL_USE_THREADS
+#       define USE_THREADS /* restore our value */
+#       undef PERL_USE_THREADS
+#   endif
 #   ifdef PERL_SOCKS_NEED_PROTOTYPES /* keep cpp space clean */
 #       undef INCLUDE_PROTOTYPES
 #       undef PERL_SOCKS_NEED_PROTOTYPES
