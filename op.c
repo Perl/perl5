@@ -1705,18 +1705,16 @@ Perl_scope(pTHX_ OP *o)
 	    o->op_type = OP_LEAVE;
 	    o->op_ppaddr = PL_ppaddr[OP_LEAVE];
 	}
-	else {
-	    if (o->op_type == OP_LINESEQ) {
-		OP *kid;
-		o->op_type = OP_SCOPE;
-		o->op_ppaddr = PL_ppaddr[OP_SCOPE];
-		kid = ((LISTOP*)o)->op_first;
-		if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE)
-		    op_null(kid);
-	    }
-	    else
-		o = newLISTOP(OP_SCOPE, 0, o, Nullop);
+	else if (o->op_type == OP_LINESEQ) {
+	    OP *kid;
+	    o->op_type = OP_SCOPE;
+	    o->op_ppaddr = PL_ppaddr[OP_SCOPE];
+	    kid = ((LISTOP*)o)->op_first;
+	    if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE)
+		op_null(kid);
 	}
+	else
+	    o = newLISTOP(OP_SCOPE, 0, o, Nullop);
     }
     return o;
 }
