@@ -456,3 +456,12 @@ struct loop {
 #define PERL_LOADMOD_DENY		0x1
 #define PERL_LOADMOD_NOIMPORT		0x2
 #define PERL_LOADMOD_IMPORT_OPS		0x4
+
+#ifdef USE_REENTRANT_API
+typedef struct {
+  struct tm* tmbuff;
+} REBUF;
+#define localtime(a)       localtime_r(a,PL_reentrant_buffer->tmbuff)
+#define gmtime(a)          gmtime_r(a,PL_reentrant_buffer->tmbuff)
+#endif
+

@@ -309,6 +309,10 @@ perl_construct(pTHXx)
 #ifdef USE_ITHREADS
         PL_regex_padav = newAV();
 #endif
+#ifdef USE_REENTRANT_API
+    New(31337, PL_reentrant_buffer,1, REBUF);
+    New(31337, PL_reentrant_buffer->tmbuff,1, struct tm);
+#endif
     ENTER;
 }
 
@@ -800,6 +804,11 @@ perl_destruct(pTHXx)
     Safefree(PL_thrsv);
     PL_thrsv = Nullsv;
 #endif /* USE_THREADS */
+
+#ifdef USE_REENTRANT_API
+    Safefree(PL_reentrant_buffer->tmbuff);
+    Safefree(PL_reentrant_buffer);
+#endif
 
     sv_free_arenas();
 

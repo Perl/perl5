@@ -478,6 +478,8 @@ PERLVAR(Inumeric_radix_sv,	SV *)	/* The radix separator if not '.' */
 #if defined(USE_ITHREADS)
 PERLVAR(Iregex_pad,     SV**)    /* All regex objects */
 PERLVAR(Iregex_padav,   AV*)    /* All regex objects */
+
+PERLVAR(Ireentrant_buffer, REBUF*) /* were we store _r buffers */
 #endif
 
 /* New variables must be added to the very end for binary compatibility.

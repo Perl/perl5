@@ -360,6 +360,7 @@
 #define PL_psig_pend		(PERL_GET_INTERP->Ipsig_pend)
 #define PL_psig_ptr		(PERL_GET_INTERP->Ipsig_ptr)
 #define PL_ptr_table		(PERL_GET_INTERP->Iptr_table)
+#define PL_reentrant_buffer	(PERL_GET_INTERP->Ireentrant_buffer)
 #define PL_regex_pad		(PERL_GET_INTERP->Iregex_pad)
 #define PL_regex_padav		(PERL_GET_INTERP->Iregex_padav)
 #define PL_replgv		(PERL_GET_INTERP->Ireplgv)
@@ -644,6 +645,7 @@
 #define PL_psig_pend		(vTHX->Ipsig_pend)
 #define PL_psig_ptr		(vTHX->Ipsig_ptr)
 #define PL_ptr_table		(vTHX->Iptr_table)
+#define PL_reentrant_buffer	(vTHX->Ireentrant_buffer)
 #define PL_regex_pad		(vTHX->Iregex_pad)
 #define PL_regex_padav		(vTHX->Iregex_padav)
 #define PL_replgv		(vTHX->Ireplgv)
@@ -1065,6 +1067,7 @@
 #define PL_psig_pend		(aTHXo->interp.Ipsig_pend)
 #define PL_psig_ptr		(aTHXo->interp.Ipsig_ptr)
 #define PL_ptr_table		(aTHXo->interp.Iptr_table)
+#define PL_reentrant_buffer	(aTHXo->interp.Ireentrant_buffer)
 #define PL_regex_pad		(aTHXo->interp.Iregex_pad)
 #define PL_regex_padav		(aTHXo->interp.Iregex_padav)
 #define PL_replgv		(aTHXo->interp.Ireplgv)
@@ -1350,6 +1353,7 @@
 #define PL_Ipsig_pend		PL_psig_pend
 #define PL_Ipsig_ptr		PL_psig_ptr
 #define PL_Iptr_table		PL_ptr_table
+#define PL_Ireentrant_buffer	PL_reentrant_buffer
 #define PL_Iregex_pad		PL_regex_pad
 #define PL_Iregex_padav		PL_regex_padav
 #define PL_Ireplgv		PL_replgv

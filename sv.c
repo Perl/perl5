@@ -9589,6 +9589,11 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_debug		= proto_perl->Idebug;
 
+#ifdef USE_REENTRANT_API
+    New(31337, PL_reentrant_buffer,1, REBUF);
+    New(31337, PL_reentrant_buffer->tmbuff,1, struct tm);
+#endif
+
     /* create SV map for pointer relocation */
     PL_ptr_table = ptr_table_new();
 
