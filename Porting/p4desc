@@ -65,7 +65,7 @@ my $cur = m|^Affected files| ... m|^Differences|;
 
 # while we are within range
 if ($cur) {
-    if (m|^\.\.\. (//depot/.+?#\d+) (add|branch)$|) {
+    if (m{^\.\.\. (//depot/.+?#\d+) (add|branch)$}) {
 	my $newfile = $1;
 	push @addfiles, $newfile;
 	warn "$newfile add, revision != 1!\n" unless $newfile =~ /#1$/;
