@@ -21,7 +21,7 @@ unlink "errno.c" if -f "errno.c";
 sub process_file {
     my($file) = @_;
 
-    return if !defined $file || $file eq '-';
+    return unless defined $file and -f $file;
 
     local *FH;
     if (($^O eq 'VMS') && ($Config{vms_cc_type} ne 'gnuc')) {
