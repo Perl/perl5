@@ -86,11 +86,13 @@ sub ok ($;$$) {
 	# on a separate line and would not get counted as failures.
 	#print $TESTOUT "not " if !$ok;
 	#print $TESTOUT "ok $ntest\n";
-	# Replace with a single print() as a workaround:
-	my $okline = '';
-	$okline = "not " if !$ok;
-	$okline .= "ok $ntest\n";
-	print $TESTOUT $okline;
+	# Replace with one of a pair of single print()'s as a workaround:
+	if (!$ok) {
+	    print $TESTOUT "not ok $ntest\n";
+        }
+        else {
+	    print $TESTOUT "ok $ntest\n";
+        }
 	
 	if (!$ok) {
 	    my $detail = { 'repetition' => $repetition, 'package' => $pkg,
