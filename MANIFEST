@@ -1124,6 +1124,7 @@ lib/Term/ANSIColor/README	Term::ANSIColor
 lib/Term/ANSIColor/test.pl	See if Term::ANSIColor works
 lib/Term/Cap.pm			Perl module supporting termcap usage
 lib/Term/Complete.pm		A command completion subroutine
+lib/Term/Complete.t		See if Term::Complete works
 lib/Term/ReadLine.pm		Stub readline library
 lib/termcap.pl			Perl library supporting termcap usage
 lib/Test.pm			A simple framework for writing test scripts
