@@ -1638,6 +1638,11 @@ A bug that may have caused data loss when more than one disk block
 happens to be read from the database in a single FETCH() has been
 fixed.
 
+=item Sys::Syslog
+
+Sys::Syslog now uses XSUBs to access facilities from syslog.h so it
+no longer requires syslog.ph to exist. 
+
 =item Time::Local
 
 The timelocal() and timegm() functions used to silently return bogus

@@ -1,11 +1,11 @@
 package byte;
 
 sub import {
-    $^H |= 0x00000010;
+    $^H |= 0x00000008;
 }
 
 sub unimport {
-    $^H &= ~0x00000010;
+    $^H &= ~0x00000008;
 }
 
 sub AUTOLOAD {

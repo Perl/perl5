@@ -153,7 +153,8 @@ List a single line.
 
 =item l subname
 
-List first window of lines from subroutine.
+List first window of lines from subroutine.  I<subname> may
+be a variable which contains a code reference.
 
 =item -
 
@@ -251,7 +252,9 @@ that begin an executable statement.  Conditions don't use B<if>:
 
 =item b subname [condition]
 
-Set a breakpoint at the first line of the named subroutine.
+Set a breakpoint at the first line of the named subroutine.  I<subname> may
+be a variable which contains a code reference (in this case I<condition>
+is not supported).
 
 =item b postpone subname [condition]
 

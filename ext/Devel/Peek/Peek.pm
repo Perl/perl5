@@ -4,14 +4,14 @@
 package Devel::Peek;
 
 # Underscore to allow older Perls to access older version from CPAN
-$VERSION = '1.00_00';
+$VERSION = '1.00_01';
 
 require Exporter;
 use XSLoader ();
 
 @ISA = qw(Exporter);
 @EXPORT = qw(Dump mstat DeadCode DumpArray DumpWithOP DumpProg);
-@EXPORT_OK = qw(SvREFCNT SvREFCNT_inc SvREFCNT_dec);
+@EXPORT_OK = qw(SvREFCNT SvREFCNT_inc SvREFCNT_dec CvGV);
 %EXPORT_TAGS = ('ALL' => [@EXPORT, @EXPORT_OK]);
 
 XSLoader::load 'Devel::Peek';

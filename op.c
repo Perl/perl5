@@ -4084,8 +4084,7 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
     assert(!CvUNIQUE(proto));
 
     ENTER;
-    SAVEVPTR(PL_curpad);
-    SAVESPTR(PL_comppad);
+    SAVECOMPPAD();
     SAVESPTR(PL_comppad_name);
     SAVESPTR(PL_compcv);
 
@@ -4306,13 +4305,25 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 {
     dTHR;
     STRLEN n_a;
-    char *name = o ? SvPVx(cSVOPo->op_sv, n_a) : Nullch;
-    GV *gv = gv_fetchpv(name ? name : "__ANON__",
-			GV_ADDMULTI | ((block || attrs) ? 0 : GV_NOINIT),
-			SVt_PVCV);
+    char *name;
+    char *aname;
+    GV *gv;
     char *ps = proto ? SvPVx(((SVOP*)proto)->op_sv, n_a) : Nullch;
     register CV *cv=0;
     I32 ix;
+
+    name = o ? SvPVx(cSVOPo->op_sv, n_a) : Nullch;
+    if (!name && PERLDB_NAMEANON && CopLINE(PL_curcop)) {
+	SV *sv = sv_newmortal();
+	Perl_sv_setpvf(aTHX_ sv, "__ANON__[%s:%"IVdf"]",
+		       CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
+	aname = SvPVX(sv);
+    }
+    else
+	aname = Nullch;
+    gv = gv_fetchpv(name ? name : (aname ? aname : "__ANON__"),
+		    GV_ADDMULTI | ((block || attrs) ? 0 : GV_NOINIT),
+		    SVt_PVCV);
 
     if (o)
 	SAVEFREEOP(o);
@@ -4365,7 +4376,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 					&& !(CvGV(cv) && GvSTASH(CvGV(cv))
 					&& HvNAME(GvSTASH(CvGV(cv)))
 					&& strEQ(HvNAME(GvSTASH(CvGV(cv))),
-						 "autouse"))) {
+						 "autouse")))
+	    {
 		line_t oldline = CopLINE(PL_curcop);
 		CopLINE_set(PL_curcop, PL_copline);
 		Perl_warner(aTHX_ WARN_REDEFINE,
@@ -4520,15 +4532,17 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	}
     }
 
-    if (name) {
+    if (name || aname) {
 	char *s;
+	char *tname = (name ? name : aname);
 
 	if (PERLDB_SUBLINE && PL_curstash != PL_debstash) {
 	    SV *sv = NEWSV(0,0);
 	    SV *tmpstr = sv_newmortal();
 	    GV *db_postponed = gv_fetchpv("DB::postponed", GV_ADDMULTI, SVt_PVHV);
-	    CV *cv;
+	    CV *pcv;
 	    HV *hv;
+	    char *t;
 
 	    Perl_sv_setpvf(aTHX_ sv, "%s:%ld-%ld",
 			   CopFILE(PL_curcop),
@@ -4537,19 +4551,20 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    hv_store(GvHV(PL_DBsub), SvPVX(tmpstr), SvCUR(tmpstr), sv, 0);
 	    hv = GvHVn(db_postponed);
 	    if (HvFILL(hv) > 0 && hv_exists(hv, SvPVX(tmpstr), SvCUR(tmpstr))
-		  && (cv = GvCV(db_postponed))) {
+		&& (pcv = GvCV(db_postponed)))
+	    {
 		dSP;
 		PUSHMARK(SP);
 		XPUSHs(tmpstr);
 		PUTBACK;
-		call_sv((SV*)cv, G_DISCARD);
+		call_sv((SV*)pcv, G_DISCARD);
 	    }
 	}
 
-	if ((s = strrchr(name,':')))
+	if ((s = strrchr(tname,':')))
 	    s++;
 	else
-	    s = name;
+	    s = tname;
 
 	if (*s != 'B' && *s != 'E' && *s != 'C' && *s != 'I')
 	    goto done;

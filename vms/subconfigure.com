@@ -63,6 +63,7 @@ $ myname = myhostname
 $ if "''myname'" .eqs. "" THEN myname = f$trnlnm("SYS$NODE")
 $!
 $! ##ADD NEW CONSTANTS HERE##
+$ perl_d_nv_preserves_uv = "define"
 $ perl_d_fs_data_s = "undef"
 $ perl_d_getmnt = "undef"
 $ perl_d_sqrtl = "define"
@@ -488,10 +489,13 @@ $ perl_arch = "''perl_arch'-thread"
 $ perl_archname = "''perl_archname'-thread"
 $ perl_d_old_pthread_create_joinable = "undef"
 $ perl_old_pthread_create_joinable = " "
+$ perl_use5005threads = "define"
 $ ELSE
 $ perl_d_old_pthread_create_joinable = "undef"
 $ perl_old_pthread_create_joinable = " "
+$ perl_use5005threads = "undef"
 $ ENDIF
+$ perl_useithreads = "undef"
 $ perl_osvers=f$edit(osvers, "TRIM")
 $ if (perl_subversion + 0).eq.0
 $ THEN
@@ -1587,6 +1591,144 @@ $       perl_d_strtoull="define"
 $     ENDIF
 $   ENDIF
 $ WRITE_RESULT "d_strtoull is ''perl_d_strtoull'"
+$!
+$! Check for strtouq
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <string.h>
+$ WS "int main()
+$ WS "{"
+$ WS "unsigned __int64 result;
+$ WS "result = strtouq(""123123"", NULL, 10);
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_d_strtouq="undef"
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$   ELSE
+$     If (Needs_Opt.eqs."Yes")
+$     THEN
+$       link temp.obj,temp.opt/opt
+$     else
+$       link temp.obj
+$     endif
+$     savedstatus = $status
+$     teststatus = f$extract(9,1,savedstatus)
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$     if (teststatus.nes."1")
+$     THEN
+$       perl_d_strtouq="undef"
+$     ELSE
+$       perl_d_strtouq="define"
+$     ENDIF
+$   ENDIF
+$ WRITE_RESULT "d_strtouq is ''perl_d_strtouq'"
+$!
+$! Check for strtoll
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <string.h>
+$ WS "int main()
+$ WS "{"
+$ WS "__int64 result;
+$ WS "result = strtoll(""123123"", NULL, 10);
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_d_strtoll="undef"
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$   ELSE
+$     If (Needs_Opt.eqs."Yes")
+$     THEN
+$       link temp.obj,temp.opt/opt
+$     else
+$       link temp.obj
+$     endif
+$     savedstatus = $status
+$     teststatus = f$extract(9,1,savedstatus)
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$     if (teststatus.nes."1")
+$     THEN
+$       perl_d_strtoll="undef"
+$     ELSE
+$       perl_d_strtoll="define"
+$     ENDIF
+$   ENDIF
+$ WRITE_RESULT "d_strtoll is ''perl_d_strtoll'"
+$!
+$! Check for strtold
+$!
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <string.h>
+$ WS "int main()
+$ WS "{"
+$ WS "long double result;
+$ WS "result = strtold(""123123"", NULL, 10);
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp.c
+$   savedstatus = $status
+$   teststatus = f$extract(9,1,savedstatus)
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_d_strtold="undef"
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$   ELSE
+$     If (Needs_Opt.eqs."Yes")
+$     THEN
+$       link temp.obj,temp.opt/opt
+$     else
+$       link temp.obj
+$     endif
+$     savedstatus = $status
+$     teststatus = f$extract(9,1,savedstatus)
+$     DEASSIGN SYS$OUTPUT
+$     DEASSIGN SYS$ERROR
+$     if (teststatus.nes."1")
+$     THEN
+$       perl_d_strtold="undef"
+$     ELSE
+$       perl_d_strtold="define"
+$     ENDIF
+$   ENDIF
+$ WRITE_RESULT "d_strtold is ''perl_d_strtold'"
 $!
 $! Check for atoll
 $!
@@ -2941,8 +3083,8 @@ $ perl_i16type="short"
 $ perl_u16type="unsigned short"
 $ perl_i32type="int"
 $ perl_u32type="unsigned int"
-$ perl_i64type="long"
-$ perl_u64type="unsigned long"
+$ perl_i64type="long long"
+$ perl_u64type="unsigned long long"
 $ perl_nvtype="double"
 $!
 $ GOTO beyond_type_size_check
@@ -3117,6 +3259,9 @@ $ WC "# Time: " + perl_cf_time
 $ WC ""
 $ WC "CONFIGDOTSH=true"
 $ WC "package='" + perl_package + "'"
+$ WC "d_nv_preserves_uv='" + perl_d_nv_preserves_uv + "'"
+$ WC "use5005threads='" + perl_use5005threads + "'"
+$ WC "useithreads='" + perl_useithreads + "'"
 $ WC "CONFIG='" + perl_config + "'"
 $ WC "cf_time='" + perl_cf_time + "'"
 $ WC "cf_by='" + perl_cf_by+ "'"
@@ -3574,6 +3719,9 @@ $ WC "crosscompile='" + perl_crosscompile + "'"
 $ WC "multiarch='" + perl_multiarch + "'"
 $ WC "sched_yield='" + perl_sched_yield + "'"
 $ WC "d_strtoull='" + perl_d_strtoull + "'"
+$ WC "d_strtouq='" + perl_d_strtouq + "'"
+$ WC "d_strtoll='" + perl_d_strtoll + "'"
+$ WC "d_strtold='" + perl_d_strtold + "'"
 $ WC "usesocks='" + perl_usesocks + "'"
 $ WC "d_vendorlib='" + perl_d_vendorlib + "'"
 $ WC "vendorlibexp='" + perl_vendorlibexp + "'"

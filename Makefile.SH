@@ -30,7 +30,12 @@ case "$useshrplib" in
 true)
 	# Prefix all runs of 'miniperl' and 'perl' with 
 	# $ldlibpth so that ./perl finds *this* shared libperl.
-	ldlibpth="LD_LIBRARY_PATH=`pwd`:$LD_LIBRARY_PATH"
+	case "$LD_LIBRARY_PATH" in
+	'')
+		ldlibpth="LD_LIBRARY_PATH=`pwd`";;
+	*)
+		ldlibpth="LD_LIBRARY_PATH=`pwd`:${LD_LIBRARY_PATH}";;
+	esac
 
 	pldlflags="$cccdlflags"
 	case "${osname}${osvers}" in
@@ -78,6 +83,8 @@ true)
 		eval "ldlibpth=\"$ldlibpthname=`pwd`:\$$ldlibpthname\""
 		;;
 	    esac
+	    # Strip off any trailing :'s
+	    ldlibpth=`echo $ldlibpth | sed 's/:*$//'`
 	    ;;
         esac
 	;;
@@ -287,7 +294,10 @@ FORCE:
 	@sh -c true
 
 opmini$(OBJ_EXT): op.c
-	$(CCCMD) $(PLDLFLAGS) -DPERL_EXTERNAL_GLOB -o opmini$(OBJ_EXT) op.c
+	$(RMS) opmini.c
+	$(LNS) op.c opmini.c
+	$(CCCMD) $(PLDLFLAGS) -DPERL_EXTERNAL_GLOB opmini.c
+	$(RMS) opmini.c
 
 miniperlmain$(OBJ_EXT): miniperlmain.c
 	$(CCCMD) $(PLDLFLAGS) $*.c

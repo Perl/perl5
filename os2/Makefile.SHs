@@ -41,7 +41,7 @@ CONFIG_ARGS	= $config_args
 !GROK!THIS!
 
 $spitshell >>Makefile <<'!NO!SUBS!'
-$(LIBPERL): perl.imp perl_dll perl5.def
+$(LIBPERL): perl.imp $(PERL_DLL) perl5.def
 	emximp -o $(LIBPERL) perl.imp
 
 $(AOUT_LIBPERL_DLL): perl.imp $(PERL_DLL) perl5.def
@@ -95,9 +95,6 @@ perl.linkexp: perl.exports perl.map  os2/os2.sym
 	cat perl.exports os2/os2.sym perl.map | sort | uniq -d | sed -e 's/\w\+/  "\0"/' > perl.linkexp
 
 # We link miniperl statically, since .DLL depends on $(DYNALOADER) 
-
-opmini$(OBJ_EXT) : op.c
-	$(CCCMD) $(PLDLFLAGS) -DPERL_EXTERNAL_GLOB -o opmini$(OBJ_EXT) op.c
 
 miniperl.map miniperl: $(obj) perl$(OBJ_EXT) miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT)
 	$(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain$(OBJ_EXT) perl$(OBJ_EXT) `echo $(obj)|sed -e 's/\bop\./opmini./g'` $(libs) -Zmap -Zlinker /map/PM:VIO

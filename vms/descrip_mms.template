@@ -230,7 +230,7 @@ NOOP = continue
 # are built using these macros should depend on $(MINIPERL_EXE)
 MINIPERL_EXE = Sys$Disk:[]miniperl$(E)
 MINIPERL = MCR $(MINIPERL_EXE) "-I[.lib]"
-XSUBPP = $(MINIPERL) [.lib.extutils]xsubpp -noprototypes
+XSUBPP = $(MINIPERL) "-I[.ext.re]" [.lib.extutils]xsubpp -noprototypes
 # Macro to invoke a preexisting copy of Perl.  This is used to regenerate
 # some header files when rebuilding Perl, but premade versions are provided
 # in the distribution, so it's OK if this doesn't work; it's here to make
@@ -806,6 +806,7 @@ test : all [.t.lib]vmsfspec.t [.t.lib]vmsish.t
 # install ought not need a source, but it doesn't work if one's not
 # there. Go figure...
 install : $(MINIPERL_EXE)
+	If F$TrnLnm("Sys") .nes. "" Then Deass SYS
 	$(MINIPERL) installperl
 
 archify : all

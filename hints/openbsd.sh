@@ -5,14 +5,14 @@
 #  Andy Dougherty <doughera@lafcol.lafayette.edu>
 #
 # To build with distribution paths, use:
-#	./Configure -des -Dopenbsd_distribution
+#	./Configure -des -Dopenbsd_distribution=defined
 #
 
 # OpenBSD has a better malloc than perl...
 test "$usemymalloc" || usemymalloc='n'
 
 # Currently, vfork(2) is not a real win over fork(2) but this will
-# change in a future release.
+# change starting with OpenBSD 2.7.
 usevfork='true'
 
 # setre?[ug]id() have been replaced by the _POSIX_SAVED_IDS versions
@@ -24,19 +24,20 @@ d_setrgid=$undef
 d_setruid=$undef
 
 #
-# Not all platforms support shared libs...
+# Not all platforms support dynamic loading...
 #
-case `uname -m` in
-alpha|mips|powerpc|vax)
-	d_dlopen=$undef
+case `arch` in
+OpenBSD.alpha|OpenBSD.mips|OpenBSD.powerpc|OpenBSD.vax)
+	usedl=$undef
 	;;
 *)
+	usedl=$define
 	d_dlopen=$define
 	d_dlerror=$define
 	# we use -fPIC here because -fpic is *NOT* enough for some of the
 	# extensions like Tk on some OpenBSD platforms (ie: sparc)
 	cccdlflags="-DPIC -fPIC $cccdlflags"
-	lddlflags="-Bforcearchive -Bshareable $lddlflags"
+	lddlflags="-Bshareable $lddlflags"
 	;;
 esac
 
@@ -74,17 +75,22 @@ EOCBU
 # When building in the OpenBSD tree we use different paths
 # This is only part of the story, the rest comes from config.over
 case "$openbsd_distribution" in
-''|$undef|false|[nN]*) ;;
+''|$undef|false) ;;
 *)
 	# We put things in /usr, not /usr/local
 	prefix='/usr'
 	prefixexp='/usr'
 	sysman='/usr/share/man/man1'
-	# Never look for things in /usr/local
-	glibpth='/usr/lib'
 	libpth='/usr/lib'
-	locincpth=''
-	loclibpth=''
+	glibpth='/usr/lib'
+	# Ports installs non-std libs in /usr/local/lib so look there too
+	locincpth='/usr/local/include'
+	loclibpth='/usr/local/lib'
+	# Link perl with shared libperl
+	if [ "$usedl" = "$define" -a -r shlib_version ]; then
+		useshrplib=true
+		libperl=`. ./shlib_version; echo libperl.so.${major}.${minor}`
+	fi
 	;;
 esac
 

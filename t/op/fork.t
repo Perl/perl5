@@ -24,7 +24,7 @@ print "1..", scalar @prgs, "\n";
 
 $tmpfile = "forktmp000";
 1 while -f ++$tmpfile;
-END { unlink $tmpfile if $tmpfile; }
+END { close TEST; unlink $tmpfile if $tmpfile; }
 
 $CAT = (($^O eq 'MSWin32') ? '.\perl -e "print <>"' : 'cat');
 
@@ -54,6 +54,8 @@ for (@prgs){
 # bison says 'parse error' instead of 'syntax error',
 # various yaccs may or may not capitalize 'syntax'.
     $results =~ s/^(syntax|parse) error/syntax error/mig;
+    $results =~ s/^\n*Process terminated by SIG\w+\n?//mg
+	if $^O eq 'os2';
     my @results = sort split /\n/, $results;
     if ( "@results" ne "@expected" ) {
 	print STDERR "PROG: $switch\n$prog\n";
