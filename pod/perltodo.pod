@@ -787,9 +787,11 @@ Damian Conway's text formatting modules seem to be the Way To Go.
 
 =head2 Generalised want()/caller())
 
+Robin Houston's C<Want> module does this.
+
 =head2 Named prototypes
 
-These both seem to be delayed until Perl 6.
+This seems to be delayed until Perl 6.
 
 =head2 Built-in globbing
 
