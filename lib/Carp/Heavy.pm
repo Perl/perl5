@@ -59,7 +59,7 @@ sub format_arg {
   # The following handling of "control chars" is direct from
   # the original code - I think it is broken on Unicode though.
   # Suggestions?
-  $arg =~ s/([[:cntrl:]]|[[^:ascii:]])/sprintf("\\x{%x}",ord($1))/eg;
+  $arg =~ s/([[:cntrl:]]|[[:^ascii:]])/sprintf("\\x{%x}",ord($1))/eg;
   return $arg;
 }
 

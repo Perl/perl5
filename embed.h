@@ -967,9 +967,11 @@
 #  endif
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
-#define doencodes		S_doencodes
 #define refto			S_refto
 #define seed			S_seed
+#endif
+#if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)
+#define doencodes		S_doencodes
 #define mul128			S_mul128
 #define is_an_int		S_is_an_int
 #define div128			S_div128
@@ -2466,9 +2468,11 @@
 #  endif
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
-#define doencodes(a,b,c)	S_doencodes(aTHX_ a,b,c)
 #define refto(a)		S_refto(aTHX_ a)
 #define seed()			S_seed(aTHX)
+#endif
+#if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)
+#define doencodes(a,b,c)	S_doencodes(aTHX_ a,b,c)
 #define mul128(a,b)		S_mul128(aTHX_ a,b)
 #define is_an_int(a,b)		S_is_an_int(aTHX_ a,b)
 #define div128(a,b)		S_div128(aTHX_ a,b)
@@ -4825,12 +4829,14 @@
 #  endif
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
-#define S_doencodes		CPerlObj::S_doencodes
-#define doencodes		S_doencodes
 #define S_refto			CPerlObj::S_refto
 #define refto			S_refto
 #define S_seed			CPerlObj::S_seed
 #define seed			S_seed
+#endif
+#if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)
+#define S_doencodes		CPerlObj::S_doencodes
+#define doencodes		S_doencodes
 #define S_mul128		CPerlObj::S_mul128
 #define mul128			S_mul128
 #define S_is_an_int		CPerlObj::S_is_an_int

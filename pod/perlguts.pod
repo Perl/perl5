@@ -825,11 +825,11 @@ The C<sv> argument is a pointer to the SV that is to acquire a new magical
 feature.
 
 If C<sv> is not already magical, Perl uses the C<SvUPGRADE> macro to
-set the C<SVt_PVMG> flag for the C<sv>.  Perl then continues by adding
-it to the beginning of the linked list of magical features.  Any prior
-entry of the same type of magic is deleted.  Note that this can be
-overridden, and multiple instances of the same type of magic can be
-associated with an SV.
+convert C<sv> to type C<SVt_PVMG>. Perl then continues by adding new magic
+to the beginning of the linked list of magical features.  Any prior entry
+of the same type of magic is deleted.  Note that this can be overridden,
+and multiple instances of the same type of magic can be associated with an
+SV.
 
 The C<name> and C<namlen> arguments are used to associate a string with
 the magic, typically the name of a variable. C<namlen> is stored in the
@@ -841,14 +841,14 @@ The sv_magic function uses C<how> to determine which, if any, predefined
 See the "Magic Virtual Table" section below.  The C<how> argument is also
 stored in the C<mg_type> field. The value of C<how> should be chosen
 from the set of macros C<PERL_MAGIC_foo> found perl.h. Note that before
-these macros were added, perl internals used to directly use character
+these macros were added, Perl internals used to directly use character
 literals, so you may occasionally come across old code or documentation
 referrring to 'U' magic rather than C<PERL_MAGIC_uvar> for example.
 
 The C<obj> argument is stored in the C<mg_obj> field of the C<MAGIC>
 structure.  If it is not the same as the C<sv> argument, the reference
 count of the C<obj> object is incremented.  If it is the same, or if
-the C<how> argument is C<PERL_MAGIC_arylen>", or if it is a NULL pointer,
+the C<how> argument is C<PERL_MAGIC_arylen>, or if it is a NULL pointer,
 then C<obj> is merely stored, without the reference count being incremented.
 
 There is also a function to add magic to an C<HV>:
@@ -928,7 +928,7 @@ The current kinds of Magic Virtual Tables are:
     L  PERL_MAGIC_dbfile         (none)         Debugger %_<filename
     l  PERL_MAGIC_dbline         vtbl_dbline    Debugger %_<filename element
     m  PERL_MAGIC_mutex          vtbl_mutex     ???
-    o  PERL_MAGIC_collxfrm       vtbl_collxfrm  Locale transformation
+    o  PERL_MAGIC_collxfrm       vtbl_collxfrm  Locale collate transformation
     P  PERL_MAGIC_tied           vtbl_pack      Tied array or hash
     p  PERL_MAGIC_tiedelem       vtbl_packelem  Tied array or hash element
     q  PERL_MAGIC_tiedscalar     vtbl_packelem  Tied scalar or handle

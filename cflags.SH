@@ -99,10 +99,12 @@ for file do
     dump) ;;
     gv) ;;
     hv) ;;
+    locale) ;;
     main) ;;
     malloc) ;;
     mg) ;;
     miniperlmain) ;;
+    numeric) ;;
     op) ;;
     perl) ;;
     perlapi) ;;
@@ -111,6 +113,7 @@ for file do
     pp) ;;
     pp_ctl) ;;
     pp_hot) ;;
+    pp_pack) ;;
     pp_sys) ;;
     regcomp) ;;
     regexec) ;;

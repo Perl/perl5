@@ -1748,13 +1748,20 @@ File::Glob dynamically, for extensions one needs MakeMaker and
 MakeMaker is not yet cross-compilation aware, and neither is
 the main Makefile.
 
+Since the functionality is so lacking, it must be considered
+highly experimental.  It is so experimental that it is not even
+mentioned during an interactive Configure session, a direct comand
+line invocation (detailed shortly) is required to access the
+functionality.
+
     NOTE: Perl is routinely built using cross-compilation
     in the EPOC environment but the solutions from there
-    can't directly be used.
+    can't directly be used elsewhere.
 
 The one environment where cross-compilation has successfully been used
 as of this writing is the Compaq iPAQ running ARM Linux.  The build
-host was Intel Linux, the networking setup was PPP + SSH, see
+host was Intel Linux, the networking setup was PPP + SSH.  The exact
+setup details are beyond the scope of this document, see
 http://www.handhelds.org/ for more information.
 
 To run Configure in cross-compilation mode the basic switch is
@@ -1781,18 +1788,18 @@ happens), supply Configure with
     -Dtargethost=so.me.ho.st -Dtargetdir=/tar/get/dir
 
 The targethost is what e.g. ssh will use as the hostname, the targetdir
-must exists (the scripts won't create it).  You can also specify a
-username to use
+must exist (the scripts won't create it), the targetdir defaults to /tmp.
+You can also specify a username to use for ssh/rsh logins
 
     -Dtargetuser=luser
 
 but in case you don't, "root" will be used.
 
-Because this is a cross-compilation effort, you will also need to
-specify which target environment and which compilation environment to
-use.  This includes the compiler, the header files, and the libraries.
-In the below we will use the usual settings for the iPAQ
-cross-compilation environment:
+Because this is a cross-compilation effort, you will also need to specify
+which target environment and which compilation environment to use.
+This includes the compiler, the header files, and the libraries.
+In the below we use the usual settings for the iPAQ cross-compilation
+environment:
 
     -Dtargetarch=arm-linux
     -Dcc=arm-linux-gcc
@@ -1803,7 +1810,10 @@ cross-compilation environment:
 If the name of the C<cc> has the usual GNU C semantics for cross
 compilers, that is, CPU-OS-gcc, the names of the C<ar>, C<nm>, and
 C<ranlib> will also be automatically chosen to be CPU-OS-ar and so on.
-(The C<ld> requires more thought and will be chosen later by Configure.)
+(The C<ld> requires more thought and will be chosen later by Configure
+as appropriate.)  Also, in this case the incpth, libpth, and usrinc
+will be guessed by Configure (unless explicitly set to something else,
+in which case Configure's guesses with be appended).
 
 In addition to the default execution/transfer methods you can also
 choose B<rsh> for execution, and B<rcp> or B<cp> for transfer,
@@ -1814,13 +1824,21 @@ for example:
 Putting it all together:
 
     sh ./Configure -des -Dusecrosscompile \
-        -Dtargethost=so.me.ho.st -Dtargetdir=/tar/get/dir \
+        -Dtargethost=so.me.ho.st \
+	-Dtargetdir=/tar/get/dir \
         -Dtargetuser=root \
         -Dtargetarch=arm-linux \
         -Dcc=arm-linux-gcc \
         -Dusrinc=/skiff/local/arm-linux/include \
         -Dincpth=/skiff/local/arm-linux/include \
         -Dlibpth=/skiff/local/arm-linux/lib \
+        -D...
+
+or if you are happy with the defaults
+
+    sh ./Configure -des -Dusecrosscompile \
+        -Dtargethost=so.me.ho.st \
+        -Dcc=arm-linux-gcc \
         -D...
 
 =head1 make test

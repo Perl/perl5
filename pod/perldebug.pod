@@ -557,6 +557,10 @@ next option:
 Length to truncate the argument list when the C<frame> option's
 bit 4 is set.
 
+=item C<windowSize>
+
+Change the size of code list window (default is 10 lines).
+
 =back
 
 The following options affect what happens with C<V>, C<X>, and C<x>

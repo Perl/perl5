@@ -361,33 +361,47 @@ fflush(handle)
 	RETVAL
 
 void
-setbuf(handle, buf)
+setbuf(handle, ...)
 	OutputStream	handle
-	char *		buf = SvPOK(ST(1)) ? sv_grow(ST(1), BUFSIZ) : 0;
     CODE:
 	if (handle)
 #ifdef PERLIO_IS_STDIO
+        {
+	    char *buf = items == 2 && SvPOK(ST(1)) ?
+	      sv_grow(ST(1), BUFSIZ) : 0;
 	    setbuf(handle, buf);
+	}
 #else
 	    not_here("IO::Handle::setbuf");
 #endif
 
 SysRet
-setvbuf(handle, buf, type, size)
-	OutputStream	handle
-	char *		buf = SvPOK(ST(1)) ? sv_grow(ST(1), SvIV(ST(3))) : 0;
-	int		type
-	int		size
+setvbuf(...)
     CODE:
+	if (items != 4)
+            Perl_croak(aTHX_ "Usage: IO::Handle::setvbuf(handle, buf, type, size)");
 #if defined(PERLIO_IS_STDIO) && defined(_IOFBF) && defined(HAS_SETVBUF)
+    {
+        OutputStream	handle = 0;
+	char *		buf = SvPOK(ST(1)) ? sv_grow(ST(1), SvIV(ST(3))) : 0;
+	int		type;
+	int		size;
+
+	if (items == 4) {
+	    handle = IoOFP(sv_2io(ST(0)));
+	    buf    = SvPOK(ST(1)) ? sv_grow(ST(1), SvIV(ST(3))) : 0;
+	    type   = (int)SvIV(ST(2));
+	    size   = (int)SvIV(ST(3));
+	}
 	if (!handle)			/* Try input stream. */
 	    handle = IoIFP(sv_2io(ST(0)));
-	if (handle)
+	if (items == 4 && handle)
 	    RETVAL = setvbuf(handle, buf, type, size);
 	else {
 	    RETVAL = -1;
 	    errno = EINVAL;
 	}
+    }
 #else
 	RETVAL = (SysRet) not_here("IO::Handle::setvbuf");
 #endif

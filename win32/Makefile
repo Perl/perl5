@@ -501,7 +501,9 @@ MICROCORE_SRC	=		\
 		..\globals.c	\
 		..\gv.c		\
 		..\hv.c		\
+		..\locale.c	\
 		..\mg.c		\
+		..\numeric.c	\
 		..\op.c		\
 		..\perl.c	\
 		..\perlapi.c	\
@@ -509,6 +511,7 @@ MICROCORE_SRC	=		\
 		..\pp.c		\
 		..\pp_ctl.c	\
 		..\pp_hot.c	\
+		..\pp_pack.c	\
 		..\pp_sys.c	\
 		..\regcomp.c	\
 		..\regexec.c	\

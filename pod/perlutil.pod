@@ -15,11 +15,6 @@ if appropriate.
 
 =over 3
 
-=item L<libnetcfg|libnetcfg>
-
-Starting from Perl 5.8 the libnet has been part of the standard
-distribution.  To configure libnet run the libnetcfg command.
-
 =item L<perldoc|perldoc>
 
 The main interface to Perl's documentation is C<perldoc>, although
@@ -127,6 +122,16 @@ subroutine for C<File::Find>:
 As well as these filters for converting other languages, the
 L<pl2pm|pl2pm> utility will help you convert old-style Perl 4 libraries to 
 new-style Perl5 modules.
+
+=head2 Administration
+
+=over 3
+
+=item L<libnetcfg|libnetcfg>
+
+To display and change the libnet configuration run the libnetcfg command.
+
+=back
 
 =head2 Development
 

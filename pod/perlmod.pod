@@ -443,6 +443,23 @@ the module.  It is the responsibility of the F<.pm> file to load
 although the POSIX module happens to do both dynamic loading and
 autoloading, the user can say just C<use POSIX> to get it all.
 
+=head2 Making your module threadsafe
+
+Perl has since 5.6.0 support for a new type of threads called
+interpreter threads. These threads can be used explicitly and implicitly.
+
+Ithreads work by cloning the data tree so that no data is shared
+between different threads. These threads can be used using the threads
+module or by doing fork() on win32 (fake fork() support). When a thread is
+cloned all perl data is cloned, however non perl data cannot be cloned.
+Perl after 5.7.2 has support for the C<CLONE> keyword. C<CLONE> will be
+executed once for every package that has it defined (or inherits it).
+It will be called in the context of the new thread, so all modifications
+are made in the new area.
+
+If you want to CLONE all objects you will need to keep track of them per
+package. This is simply done using a hash and Scalar::Util::weaken().
+
 =head1 SEE ALSO
 
 See L<perlmodlib> for general style issues related to building Perl

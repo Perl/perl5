@@ -28,6 +28,12 @@ always be set to true, but it needs to be set to false when F<utf8.pm>
 is being compiled. (To stop Perl trying to autoload the C<utf8>
 pragma...)
 
+=head2 Create a char *sv_printify(sv, STRLEN *lenp, UV flags) function
+
+For displaying PVs with control characters, embedded nulls, and Unicode.
+This would be useful for printing warnings, or data and regex dumping,
+not_a_number(), and so on.
+
 =head2 Autoload byte.pm
 
 When the lexer sees, for instance, C<bytes::length>, it should
@@ -770,3 +776,13 @@ done manually, with C<goto &whoami;>. (However, MJD has found that
 C<goto &whoami> introduces a performance penalty, so maybe there should
 be a way to do this after all: C<sub foo {START: ... goto START;> is
 better.)
+
+=head2 Make "use utf8" the default
+
+There is a patch available for this, search p5p archives for
+the Subject "[EXPERIMENTAL PATCH] make unicode (utf8) default"
+but this would be unacceptable because of backward compatibility:
+scripts could not contain B<any legacy eight-bit data>.  Also would
+introduce a measurable slowdown of at least few percentages since all
+regular expression operations would be done in full UTF-8.
+

@@ -10,6 +10,7 @@ For 5.7.1:
           the header, because the perl distribution resets all dates
           to the same value.
      Update "Changes".
+     Update "perl.bind".
 
 For 5.7:
      Updated "build.cm" to build perl using either the alpha or GA

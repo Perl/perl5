@@ -12,10 +12,11 @@ O = uav$(_O) udeb$(_O) udoio$(_O) udoop$(_O) udump$(_O) \
 	uglobals$(_O) ugv$(_O) uhv$(_O) \
 	umg$(_O) uperlmain$(_O) uop$(_O) \
 	uperl$(_O) uperlio$(_O) uperly$(_O) upp$(_O) \
-	upp_ctl$(_O) upp_hot$(_O) upp_sys$(_O) \
+	upp_ctl$(_O) upp_hot$(_O) upp_sys$(_O) upp_pack$(_O) \
 	uregcomp$(_O) uregexec$(_O) urun$(_O) \
 	uscope$(_O) usv$(_O) utaint$(_O) utoke$(_O) \
-	uuniversal$(_O) uutf8$(_O) uutil$(_O) uperlapi$(_O)
+	unumeric$(_O) ulocale$(_O) \
+	uuniversal$(_O) uutf8$(_O) uutil$(_O) uperlapi$(_O) \
 
 microperl:	$(O)
 	$(LD) -o $@ $(O) $(LIBS)
@@ -91,6 +92,9 @@ upp_hot$(_O):	$(HE) pp_hot.c
 upp_sys$(_O):	$(HE) pp_sys.c
 	$(CC) -c -o $@ $(CFLAGS) pp_sys.c
 
+upp_pack$(_O):	$(HE) pp_pack.c
+	$(CC) -c -o $@ $(CFLAGS) pp_pack.c
+
 uregcomp$(_O):	$(HE) regcomp.c regcomp.h regnodes.h INTERN.h
 	$(CC) -c -o $@ $(CFLAGS) regcomp.c
 
@@ -111,6 +115,12 @@ utaint$(_O):	$(HE) taint.c
 
 utoke$(_O):	$(HE) toke.c keywords.h
 	$(CC) -c -o $@ $(CFLAGS) toke.c
+
+ulocale$(_O):	$(HE) locale.c
+	$(CC) -c -o $@ $(CFLAGS) locale.c
+
+unumeric$(_O):	$(HE) numeric.c
+	$(CC) -c -o $@ $(CFLAGS) numeric.c
 
 uuniversal$(_O):	$(HE) universal.c objXSUB.h XSUB.h
 	$(CC) -c -o $@ $(CFLAGS) universal.c
