@@ -672,10 +672,11 @@ VIRTUAL void	watch _((char** addr));
 VIRTUAL I32	whichsig _((char* sig));
 VIRTUAL int	yyerror _((char* s));
 #ifdef USE_PURE_BISON
-VIRTUAL int	yylex _((YYSTYPE* lvalp, int* lcharp));
+# define PERL_YYLEX_PARAM_DECL YYSTYPE *, int *
 #else
-VIRTUAL int	yylex _((void));
+# define PERL_YYLEX_PARAM_DECL
 #endif
+VIRTUAL int	yylex _((PERL_YYLEX_PARAM_DECL));
 VIRTUAL int	yyparse _((void));
 VIRTUAL int	yywarn _((char* s));
 
