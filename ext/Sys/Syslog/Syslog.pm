@@ -26,15 +26,6 @@ my $fail_time = undef;
 use Socket;
 use Sys::Hostname;
 
-# adapted from syslog.pl
-#
-# Tom Christiansen <tchrist@convex.com>
-# modified to use sockets by Larry Wall <lwall@jpl-devvax.jpl.nasa.gov>
-# NOTE: openlog now takes three arguments, just like openlog(3)
-# Modified to add UNIX domain sockets by Sean Robinson <robinson_s@sc.maricopa.edu>
-#  with support from Tim Bunce <Tim.Bunce@ig.co.uk> and the perl5-porters mailing list
-# Modified to use an XS backend instead of syslog.ph by Tom Hughes <tom@compton.nu>
-
 =head1 NAME
 
 Sys::Syslog, openlog, closelog, setlogmask, syslog - Perl interface to the UNIX syslog(3) calls
