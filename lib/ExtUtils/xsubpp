@@ -776,7 +776,7 @@ while (<$FH>) {
 	/^MODULE\s*=\s*([\w:]+)(?:\s+PACKAGE\s*=\s*([\w:]+))?(?:\s+PREFIX\s*=\s*(\S+))?\s*$/;
 
     if ($OBJ) {
-        s/#if(?:def|\s+defined)\s+(\(__cplusplus\)|__cplusplus)/#if defined(__cplusplus) && !defined(PERL_OBJECT)/;
+        s/#if(?:def\s|\s+defined)\s*(\(__cplusplus\)|__cplusplus)/#if defined(__cplusplus) && !defined(PERL_OBJECT)/;
     }
     print $_;
 }
