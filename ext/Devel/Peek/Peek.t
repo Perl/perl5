@@ -251,9 +251,9 @@ do_test(14,
     OUTSIDE_SEQ = \\d+
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
-       \\d+\\. $ADDR<\\d+>      \\(\\d+,\\d+\\) "\\$pattern"
-      \\d+\\. $ADDR<\\d+> FAKE \\(\\d+,\\d+\\) "\\$DEBUG"
-      \\d+\\. $ADDR<\\d+>      \\(\\d+,\\d+\\) "\\$dump"
+       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$pattern"
+      \\d+\\. $ADDR<\\d+> FAKE "\\$DEBUG"
+      \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$dump"
     OUTSIDE = $ADDR \\(MAIN\\)');
 
 do_test(15,
