@@ -160,7 +160,7 @@ foreach my $t (@templates) {
 
 # 57..60: uuencode/decode
 
-$in = join "", map { chr } 0..255;
+$in = pack 'C*', 0 .. 255;
 
 # just to be anal, we do some random tr/`/ /
 $uu = <<'EOUU';
