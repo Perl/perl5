@@ -301,9 +301,6 @@ PP(pp_backtick)
 	if (PL_curcop->cop_io) {
 	    type = SvPV_nolen(PL_curcop->cop_io);
 	}
-	else if (O_BINARY != O_TEXT) {
-	    type = ":crlf";
-	}
 	if (type && *type)
 	    PerlIO_apply_layers(aTHX_ fp,mode,type);
 

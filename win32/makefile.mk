@@ -532,6 +532,13 @@ CONFIGPM	= ..\lib\Config.pm
 MINIMOD		= ..\lib\ExtUtils\Miniperl.pm
 X2P		= ..\x2p\a2p.exe
 
+# Nominate a target which causes extensions to be re-built 
+# This used to be $(PERLEXE), but at worst it is the .dll that they depend
+# on and really only the interface - i.e. the .def file used to export symbols
+# from the .dll
+PERLDEP = perldll.def
+
+
 PL2BAT		= bin\pl2bat.pl
 GLOBBAT		= bin\perlglob.bat
 
@@ -1106,102 +1113,102 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
 
-$(DUMPER_DLL): $(PERLEXE) $(DUMPER).xs
+$(DUMPER_DLL): $(PERLDEP) $(DUMPER).xs
 	cd $(EXTDIR)\Data\$(*B) && \
 	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\Data\$(*B) && $(MAKE)
 
-$(DPROF_DLL): $(PERLEXE) $(DPROF).xs
+$(DPROF_DLL): $(PERLDEP) $(DPROF).xs
 	cd $(EXTDIR)\Devel\$(*B) && \
 	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\Devel\$(*B) && $(MAKE)
 
-$(GLOB_DLL): $(PERLEXE) $(GLOB).xs
+$(GLOB_DLL): $(PERLDEP) $(GLOB).xs
 	cd $(EXTDIR)\File\$(*B) && \
 	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\File\$(*B) && $(MAKE)
 
-$(PEEK_DLL): $(PERLEXE) $(PEEK).xs
+$(PEEK_DLL): $(PERLDEP) $(PEEK).xs
 	cd $(EXTDIR)\Devel\$(*B) && \
 	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\Devel\$(*B) && $(MAKE)
 
-$(RE_DLL): $(PERLEXE) $(RE).xs
+$(RE_DLL): $(PERLDEP) $(RE).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(B_DLL): $(PERLEXE) $(B).xs
+$(B_DLL): $(PERLDEP) $(B).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(THREAD_DLL): $(PERLEXE) $(THREAD).xs
+$(THREAD_DLL): $(PERLDEP) $(THREAD).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(ATTRS_DLL): $(PERLEXE) $(ATTRS).xs
+$(ATTRS_DLL): $(PERLDEP) $(ATTRS).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(POSIX_DLL): $(PERLEXE) $(POSIX).xs
+$(POSIX_DLL): $(PERLDEP) $(POSIX).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(IO_DLL): $(PERLEXE) $(IO).xs
+$(IO_DLL): $(PERLDEP) $(IO).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(SDBM_FILE_DLL) : $(PERLEXE) $(SDBM_FILE).xs
+$(SDBM_FILE_DLL) : $(PERLDEP) $(SDBM_FILE).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(FCNTL_DLL): $(PERLEXE) $(FCNTL).xs
+$(FCNTL_DLL): $(PERLDEP) $(FCNTL).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(OPCODE_DLL): $(PERLEXE) $(OPCODE).xs
+$(OPCODE_DLL): $(PERLDEP) $(OPCODE).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(SOCKET_DLL): $(PERLEXE) $(SOCKET).xs
+$(SOCKET_DLL): $(PERLDEP) $(SOCKET).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(HOSTNAME_DLL): $(PERLEXE) $(HOSTNAME).xs
+$(HOSTNAME_DLL): $(PERLDEP) $(HOSTNAME).xs
 	cd $(EXTDIR)\Sys\$(*B) && \
 	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\Sys\$(*B) && $(MAKE)
 
-$(BYTELOADER_DLL): $(PERLEXE) $(BYTELOADER).xs
+$(BYTELOADER_DLL): $(PERLDEP) $(BYTELOADER).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(ENCODE_DLL): $(PERLEXE) $(ENCODE).xs
+$(ENCODE_DLL): $(PERLDEP) $(ENCODE).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(STORABLE_DLL): $(PERLEXE) $(STORABLE).xs
+$(STORABLE_DLL): $(PERLDEP) $(STORABLE).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(FILTER_DLL): $(PERLEXE) $(FILTER).xs
+$(FILTER_DLL): $(PERLDEP) $(FILTER).xs
 	cd $(EXTDIR)\Filter\Util && \
 	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\Filter\Util && $(MAKE)
 
-$(ERRNO_PM): $(PERLEXE) $(ERRNO)_pm.PL
+$(ERRNO_PM): $(PERLDEP) $(ERRNO)_pm.PL
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
