@@ -184,6 +184,8 @@ $DB::emacs = $DB::emacs;	# To peacify -w
 our @rl_term_set;
 *rl_term_set = \@Term::ReadLine::TermCap::rl_term_set;
 
+sub PERL_UNICODE_STDIN () { 0x0001 }
+
 sub ReadLine {'Term::ReadLine::Stub'}
 sub readline {
   my $self = shift;
@@ -196,6 +198,8 @@ sub readline {
   #$str = scalar <$in>;
   $str = $self->get_line;
   $str =~ s/^\s*\Q$prompt\E// if ($^O eq 'MacOS');
+  utf8::upgrade($str)
+      if ${^UNICODE} & PERL_UNICODE_STDIN || defined ${^ENCODING};
   print $out $rl_term_set[3]; 
   # bug in 5.000: chomping empty string creats length -1:
   chomp $str if defined $str;
