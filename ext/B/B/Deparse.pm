@@ -2756,7 +2756,7 @@ sub method {
     }
     my $args = join(", ", @exprs);	
     $kid = $obj . "->" . $meth;
-    if ($args) {
+    if (length $args) {
 	return $kid . "(" . $args . ")"; # parens mandatory
     } else {
 	return $kid;
