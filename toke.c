@@ -1439,14 +1439,14 @@ S_scan_const(pTHX_ char *start)
 		++s;
 		if (*s == '{') {
 		    char* e = strchr(s, '}');
+		    STRLEN len = 1;		/* allow underscores */
+
 		    if (!e) {
 			yyerror("Missing right brace on \\x{}");
-			e = s;
+			++s;
+			continue;
 		    }
-		    else {
-			STRLEN len = 1;		/* allow underscores */
-			uv = (UV)scan_hex(s + 1, e - s - 1, &len);
-		    }
+		    uv = (UV)scan_hex(s + 1, e - s - 1, &len);
 		    s = e + 1;
 		}
 		else {
