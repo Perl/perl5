@@ -13,6 +13,10 @@ __END__
 
 Time::tm.pm - internal object used by Time::gmtime and Time::localtime
 
+=head1 SYNOPSIS
+
+Don't use this module directly.
+
 =head1 DESCRIPTION
 
 This module is used internally as a base class by Time::localtime And

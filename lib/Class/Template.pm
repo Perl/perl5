@@ -30,6 +30,19 @@ use strict;
 
 Class::Template - struct/member template builder
 
+=head1 SYNOPSIS
+
+    use Class::Template;
+    struct(name => { key1 => type1, key2 => type2 });
+
+    package Myobj;
+    use Class::Template;
+    members Myobj { key1 => type1, key2 => type2 };
+
+=head1 DESCRIPTION
+
+This module uses perl5 classes to create nested data types.
+
 =head1 EXAMPLES
 
 =item * Example 1
