@@ -44,7 +44,7 @@ sub do_test {
 our   $a;
 our   $b;
 my    $c;
-local $d;
+local $d = 0;
 
 do_test( 1,
 	$a = "foo",
@@ -204,12 +204,12 @@ do_test(13,
     ROOT = $ADDR
     XSUB = 0x0
     XSUBANY = 0
-    GVGV::GV = $ADDR\\t"main" :: "__ANON__"
+    GVGV::GV = $ADDR\\t"main" :: "__ANON__[^"]*"
     FILE = ".+\\b(?i:peek\\.t)"
     DEPTH = 0
 (?:    MUTEXP = $ADDR
-    OWNER = $ADDR)?
-    FLAGS = 0x4
+    OWNER = $ADDR
+)?    FLAGS = 0x4
     PADLIST = $ADDR
     OUTSIDE = $ADDR \\(MAIN\\)');
 
@@ -233,8 +233,8 @@ do_test(14,
     FILE = ".+\\b(?i:peek\\.t)"
     DEPTH = 1
 (?:    MUTEXP = $ADDR
-    OWNER = $ADDR)?
-    FLAGS = 0x0
+    OWNER = $ADDR
+)?    FLAGS = 0x0
     PADLIST = $ADDR
       \\d+\\. $ADDR \\("\\$pattern" \\d+-\\d+\\)
      \\d+\\. $ADDR \\(FAKE "\\$DEBUG" 0-\\d+\\)
