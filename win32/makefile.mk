@@ -95,11 +95,11 @@ USE_IMP_SYS	*= define
 # Visual C++ > 2.x and < 6.x
 #CCTYPE		*= MSVC
 # Visual C++ >= 6.x
-#CCTYPE		*= MSVC60
+CCTYPE		*= MSVC60
 # Borland 5.02 or later
 #CCTYPE		*= BORLAND
 # mingw32+gcc-2.95.2 or better
-CCTYPE		*= GCC
+#CCTYPE		*= GCC
 
 #
 # uncomment this if you are compiling under Windows 95/98 and command.com
@@ -292,9 +292,12 @@ ARCHNAME	!:= $(ARCHNAME)-thread
 # run in about 10% less time.
 DELAYLOAD	*= -DELAYLOAD:wsock32.dll -DELAYLOAD:shell32.dll delayimp.lib
 
+.IF "$(CFG)" == "Debug"
+.ELSE
 # VC 6.0 seems capable of compiling perl correctly with optimizations
 # enabled.  Anything earlier fails tests.
 CFG		*= Optimize
+.ENDIF
 .ENDIF
 
 ARCHDIR		= ..\lib\$(ARCHNAME)
