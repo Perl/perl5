@@ -517,6 +517,10 @@ Free_t   Perl_free _((Malloc_t where));
 #   include <netinet/in.h>
 #endif
 
+#ifdef I_ARPA_INET
+#   include <arpa/inet.h>
+#endif
+
 #if defined(SF_APPEND) && defined(USE_SFIO) && defined(I_SFIO)
 /* <sfio.h> defines SF_APPEND and <sys/stat.h> might define SF_APPEND
  * (the neo-BSD seem to do this).  */

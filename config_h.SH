@@ -820,6 +820,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_wctomb HAS_WCTOMB		/**/
 
+/* I_ARPA_INET:
+ *	This symbol, if defined, indicates that <arpa/inet.h> exists and should
+ *	be included.
+ */
+#$i_arpa_inet I_ARPA_INET	/**/
+
 /* I_DBM:
  *	This symbol, if defined, indicates that <dbm.h> exists and should
  *	be included.
@@ -873,7 +879,27 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol, if defined, indicates to the C program that it should
  *	include <grp.h>.
  */
+/* GRPASSWD:
+ *	This symbol, if defined, indicates to the C program that struct group
+ *	contains gr_passwd.
+ */
+/* HAS_SETGRENT:
+ *	This symbol, if defined, indicates that the getgrent routine is
+ *	available for initializing sequential access of the group database.
+ */
+/* HAS_GETGRENT:
+ *	This symbol, if defined, indicates that the getgrent routine is
+ *	available for sequential access of the group database.
+ */
+/* HAS_ENDGRENT:
+ *	This symbol, if defined, indicates that the getgrent routine is
+ *	available for finalizing sequential access of the group database.
+ */
 #$i_grp I_GRP		/**/
+#$d_grpasswd GRPASSWD	/**/
+#$d_setgrent HAS_SETGRENT	/**/
+#$d_getgrent HAS_GETGRENT	/**/
+#$d_endgrent HAS_ENDGRENT	/**/
 
 /* I_LIMITS:
  *	This symbol, if defined, indicates to the C program that it should
@@ -1708,6 +1734,22 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol, if defined, indicates to the C program that struct passwd
  *	contains pw_gecos.
  */
+/* PWPASSWD:
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_passwd.
+ */
+/* HAS_SETPWENT:
+ *	This symbol, if defined, indicates that the getpwrent routine is
+ *	available for initializing sequential access of the passwd database.
+ */
+/* HAS_GETPWENT:
+ *	This symbol, if defined, indicates that the getpwent routine is
+ *	available for sequential access of the password database.
+ */
+/* HAS_ENDPWENT:
+ *	This symbol, if defined, indicates that the getpwent routine is
+ *	available for finalizing sequential access of the passwd database.
+ */
 #$i_pwd I_PWD		/**/
 #$d_pwquota PWQUOTA	/**/
 #$d_pwage PWAGE	/**/
@@ -1716,6 +1758,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_pwexpire PWEXPIRE	/**/
 #$d_pwcomment PWCOMMENT	/**/
 #$d_pwgecos PWGECOS	/**/
+#$d_pwpasswd PWPASSWD	/**/
+#$d_setpwent HAS_SETPWENT	/**/
+#$d_getpwent HAS_GETPWENT	/**/
+#$d_endpwent HAS_ENDPWENT	/**/
 
 /* Free_t:
  *	This variable contains the return type of free().  It is usually

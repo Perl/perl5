@@ -810,6 +810,12 @@
  */
 #define HAS_WCTOMB		/**/
 
+/* I_ARPA_INET:
+ *	This symbol, if defined, indicates that <arpa/inet.h> exists and should
+ *	be included.
+ */
+/#define I_ARPA_INET	/**/
+
 /* I_DBM:
  *	This symbol, if defined, indicates that <dbm.h> exists and should
  *	be included.
@@ -863,7 +869,27 @@
  *	This symbol, if defined, indicates to the C program that it should
  *	include <grp.h>.
  */
-#define I_GRP		/**/
+/* GRPASSWD:
+ *	This symbol, if defined, indicates to the C program that struct group
+ *	contains gr_passwd.
+ */
+/* HAS_SETGRENT:
+ *	This symbol, if defined, indicates that the getgrent routine is
+ *	available for initializing sequential access of the group database.
+ */
+/* HAS_GETGRENT:
+ *	This symbol, if defined, indicates that the getgrent routine is
+ *	available for sequential access of the group database.
+ */
+/* HAS_ENDGRENT:
+ *	This symbol, if defined, indicates that the getgrent routine is
+ *	available for finalizing sequential access of the group database.
+ */
+/*#define I_GRP		/**/
+/*#define GRPASSWD	/**/
+/*#define HAS_SETGRENT	/**/
+/*#define HAS_GETGRENT	/**/
+/*#define HAS_ENDGRENT	/**/
 
 /* I_LIMITS:
  *	This symbol, if defined, indicates to the C program that it should
@@ -1754,6 +1780,26 @@
  *	This symbol, if defined, indicates to the C program that struct passwd
  *	contains pw_gecos.
  */
+/* PWPASSWD:
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_passwd.
+ */
+/* HAS_SETPWENT:
+ *	This symbol, if defined, indicates that the getpwrent routine is
+ *	available for initializing sequential access of the passwd database.
+ */
+/* HAS_GETPWENT:
+ *	This symbol, if defined, indicates that the getpwent routine is
+ *	available for sequential access of the password database.
+ */
+/* HAS_ENDPWENT:
+ *	This symbol, if defined, indicates that the getpwent routine is
+ *	available for finalizing sequential access of the passwd database.
+ */
+/* PWPASSWD:
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_passwd.
+ */
 /*#define I_PWD		/**/
 /*#define PWQUOTA	/**/
 /*#define PWAGE	/**/
@@ -1762,6 +1808,10 @@
 /*#define PWEXPIRE	/**/
 /*#define PWCOMMENT	/**/
 /*#define PWGECOS	/**/
+/*#define PWPASSWD	/**/
+/*#define HAS_SETPWENT	/**/
+/*#define HAS_GETPWENT	/**/
+/*#define HAS_ENDPWENT	/**/
 
 /* PRIVLIB:
  *	This symbol contains the name of the private library for this package.

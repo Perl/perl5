@@ -25,6 +25,7 @@ $startsh
 # makedepend.SH
 #
 MAKE=$make
+trnl='$trnl'
 !GROK!THIS!
 $spitshell >>makedepend <<'!NO!SUBS!'
 
@@ -94,7 +95,7 @@ esac
 $test -d UU || mkdir UU
 
 $MAKE clist || ($echo "Searching for .c files..."; \
-	$echo *.c | $tr ' ' '\012' | $egrep -v '\*' >.clist)
+	$echo *.c | $tr ' ' $trnl | $egrep -v '\*' >.clist)
 for file in `$cat .clist`; do
 # for file in `cat /dev/null`; do
     case "$file" in
@@ -132,16 +133,20 @@ done
 $sed <$mf >$mf.new -e '1,/^# AUTOMATICALLY/!d'
 
 $MAKE shlist || ($echo "Searching for .SH files..."; \
-	$echo *.SH | $tr ' ' '\012' | $egrep -v '\*' >.shlist)
+	$echo *.SH | $tr ' ' $trnl | $egrep -v '\*' >.shlist)
 
 # Now extract the dependencies on makedepend.SH and Makefile.SH
 # (they should reside in the main Makefile):
+rm -f .shlist.old
 mv .shlist .shlist.old
 $egrep -v '^makedepend\.SH' <.shlist.old >.shlist
+rm -f .shlist.old
 mv .shlist .shlist.old
 $egrep -v '^Makefile\.SH' <.shlist.old >.shlist
+rm -f .shlist.old
 mv .shlist .shlist.old
 $egrep -v '^perl_exp\.SH' <.shlist.old >.shlist
+rm -f .shlist.old
 mv .shlist .shlist.old
 $egrep -v '^config_h\.SH' <.shlist.old >.shlist
 rm .shlist.old
@@ -158,7 +163,7 @@ if $test -s .deptmp; then
        >>$mf.new
 else
     $MAKE hlist || ($echo "Searching for .h files..."; \
-	$echo *.h | $tr ' ' '\012' | $egrep -v '\*' >.hlist)
+	$echo *.h | $tr ' ' $trnl | $egrep -v '\*' >.hlist)
     $echo "You don't seem to have a proper C preprocessor.  Using grep instead."
     $egrep '^#include ' `cat .clist` `cat .hlist`  >.deptmp
     $echo "Updating $mf..."

@@ -56,6 +56,30 @@ case "$0" in
 	;;
 esac
 
+: the newline for tr
+if test X"$trnl" = X; then
+	case "`echo foo|tr '\n' x 2>/dev/null`" in
+	foox)
+		trnl='\n'
+		;;
+	esac
+fi
+if test X"$trnl" = X; then
+	case "`echo foo|tr '\012' x 2>/dev/null`" in
+	foox)
+		trnl='\012'
+		;;
+	esac
+fi
+if test X"$trnl" = X; then
+	cat <<EOM >&2
+
+$me: Fatal Error: cannot figure out how to translate newlines with 'tr'.
+
+EOM
+	exit 1
+fi
+
 : Proper separator for the PATH environment variable
 p_=:
 : On OS/2 this directory should exist if this is not floppy only system :-]
@@ -364,6 +388,7 @@ d_getservprotos=''
 d_getsbyname=''
 d_getsbyport=''
 d_gnulibc=''
+i_arpa_inet=''
 d_htonl=''
 d_inetaton=''
 d_isascii=''
@@ -531,6 +556,10 @@ i_dlfcn=''
 i_fcntl=''
 i_float=''
 i_gdbm=''
+d_grpasswd=''
+d_setgrent=''
+d_getgrent=''
+d_endgrent=''
 i_grp=''
 i_limits=''
 i_locale=''
@@ -548,7 +577,11 @@ d_pwclass=''
 d_pwcomment=''
 d_pwexpire=''
 d_pwgecos=''
+d_pwpasswd=''
 d_pwquota=''
+d_setpwent=''
+d_getpwent=''
+d_endpwent=''
 i_pwd=''
 i_sfio=''
 i_stddef=''
@@ -697,6 +730,7 @@ mips_type=''
 usrinc=''
 defvoidused=''
 voidflags=''
+ebcdic=''
 CONFIG=''
 
 define='define'
@@ -1442,7 +1476,7 @@ while expr "X\$ans" : "X!" >/dev/null; do
 		y)
 			echo "*** Substitution done -- please confirm."
 			xxxm="\$ans"
-			ans=\`echo $n "\$ans$c" | tr '\012' ' '\`
+			ans=\`echo $n "\$ans$c" | tr $trnl ' '\`
 			xxxm="\$ans"
 			ans=!
 			;;
@@ -1777,17 +1811,59 @@ $rm -f blurfl sym
 
 : see whether [:lower:] and [:upper:] are supported character classes
 echo " "
-up='[A-Z]'
-low='[a-z]'
 case "`echo AbyZ | $tr '[:lower:]' '[:upper:]' 2>/dev/null`" in
 ABYZ)
 	echo "Good, your tr supports [:lower:] and [:upper:] to convert case." >&4
 	up='[:upper:]'
 	low='[:lower:]'
 	;;
+*)	# There is a discontinuity in EBCDIC between 'I' and 'J'
+        # (0xc9 and 0xd1), therefore that is a nice testing point.
+        if test "X$up" = X -o "X$low" = X; then
+	    case "`echo IJ | tr '[I-J]' '[i-j]' 2>/dev/null`" in
+	    ij) up='[A-Z]'
+	        low='[a-z]'
+		;;
+	    esac
+        fi
+	if test "X$up" = X -o "X$low" = X; then
+	    case "`echo IJ | tr I-J i-j 2>/dev/null`" in
+	    ij) up='A-Z'
+		low='a-z'
+		;;
+	    esac
+        fi
+	if test "X$up" = X -o "X$low" = X; then
+	    case "`echo IJ | od -x 2>/dev/null`" in
+	    *C9D1*|*c9d1*)
+		echo "Hey, this might be EBCDIC." >&4
+		if test "X$up" = X -o "X$low" = X; then
+		    case "`echo IJ | tr '[A-IJ-RS-Z]' '[a-ij-rs-z]' 2>/dev/null`" in
+		    ij) up='[A-IJ-RS-Z]'
+		        low='[a-ij-rs-z]'
+			;;
+		    esac
+		fi
+		if test "X$up" = X -o "X$low" = X; then
+		    case "`echo IJ | tr A-IJ-RS-Z a-ij-rs-z 2>/dev/null`" in
+		    ij) up='A-IJ-RS-Z'
+		        low='a-ij-rs-z'
+			;;
+		    esac
+		fi
+		;;
+	    esac
+	fi
+esac
+case "`echo IJ | tr \"$up\" \"$low\" 2>/dev/null`" in
+ij)
+    echo "Using $up and $low to convert case." >&4
+    ;;
 *)
-	echo "Your tr only supports [a-z] and [A-Z] to convert case." >&4
-	;;
+    echo "I don't know how to translate letters from upper to lower case." >&4
+    echo "Your tr is not acting any way I know of." >&4
+    exit 1
+    ;;
 esac
 : set up the translation script tr, must be called with ./tr of course
 cat >tr <<EOSC
@@ -1805,8 +1881,10 @@ $eunicefix tr
 case "$config_sh" in
 '')
 myuname=`( ($uname -a) 2>/dev/null || hostname) 2>&1`
+# tr '[A-Z]' '[a-z]' would not work in EBCDIC
+# because the A-Z/a-z are not consecutive.
 myuname=`echo $myuname | $sed -e 's/^[^=]*=//' -e 's/\///g' | \
-	./tr '[A-Z]' '[a-z]' | tr '\012' ' '`
+	./tr '[A-Z]' '[a-z]' | tr $trnl ' '`
 newmyuname="$myuname"
 dflt=n
 case "$knowitall" in
@@ -1964,7 +2042,9 @@ EOM
 			*)	osvers="$3" ;;
 			esac
 			;;
-		netbsd*) osname=netbsd 
+		MiNT) osname=mint
+			;;
+		netbsd*) osname=netbsd
 			osvers="$3"
 			;;
 		news-os) osvers="$3"
@@ -2454,7 +2534,7 @@ orig_dflt="$dflt"
 
 case "$fn" in
 *\(*)
-	expr $fn : '.*(\(.*\)).*' | tr ',' '\012' >getfile.ok
+	expr $fn : '.*(\(.*\)).*' | tr ',' $trnl >getfile.ok
 	fn=`echo $fn | sed 's/(.*)//'`
 	;;
 esac
@@ -3913,7 +3993,7 @@ $cat > try.c <<'EOF'
 main() { printf("Ok\n"); exit(0); }
 EOF
 dflt=y
-if sh -c "$cc $optimize $ccflags $ldflags -o try try.c $libs" >>try.msg 2>&1; then
+if sh -c "$cc $optimize $ccflags -o try $ldflags try.c $libs" >>try.msg 2>&1; then
 	if sh -c './try' >>try.msg 2>&1; then
 		xxx=`./try`
 		case "$xxx" in
@@ -4225,6 +4305,28 @@ shift;
 $cc $optimize $ccflags $ldflags -o ${mc_file} $* ${mc_file}.c $libs;'
 
 echo " "
+echo "Determining whether or not we are on an EBCDIC system..." >&4
+cat >tebcdic.c <<EOM
+int main()
+{
+  if ('M'==0xd4) return 0;
+  return 1;
+}
+EOM
+$cc $ccflags $ldflags -o tebcdic tebcdic.c $libs >/dev/null 2>&1
+if ./tebcdic; then
+  echo "You have EBCDIC.  Adding -DEBCDIC to ccflags." >&4
+  ccflags="$ccflags -DEBCDIC"
+  val="$define"
+else
+  echo "Nope, no EBCDIC.  Assuming ASCII or some ISO Latin." >&4
+  val="$undef"
+fi
+rm -f tebcdic.c tebcdic
+set ebcdic
+eval $setvar
+
+echo " "
 echo "Checking for GNU C Library..." >&4
 cat >gnulibc.c <<EOM
 #include <stdio.h>
@@ -4395,7 +4497,7 @@ unknown)
 		: The messy sed command sorts on library version numbers.
 		$test -r $1 || \
 			set `echo blurfl; echo $xxx/libc.$so.[0-9]* | \
-			tr ' ' '\012' | egrep -v '\.[A-Za-z]*$' | $sed -e '
+			tr ' ' $trnl | egrep -v '\.[A-Za-z]*$' | $sed -e '
 				h
 				s/[0-9][0-9]*/0000&/g
 				s/0*\([0-9][0-9][0-9][0-9][0-9]\)/\1/g
@@ -4461,7 +4563,7 @@ compiler, or your machine supports multiple models), you can override it here.
 EOM
 else
 	dflt=''
-	echo $libpth | tr ' ' '\012' | sort | uniq > libpath
+	echo $libpth | tr ' ' $trnl | sort | uniq > libpath
 	cat >&4 <<EOM
 I can't seem to find your C library.  I've looked in the following places:
 
@@ -4479,7 +4581,7 @@ rp='Where is your C library?'
 libc="$ans"
 
 echo " "
-echo $libc $libnames | tr ' ' '\012' | sort | uniq > libnames
+echo $libc $libnames | tr ' ' $trnl | sort | uniq > libnames
 set X `cat libnames`
 shift
 xxx=files
@@ -5894,9 +5996,10 @@ set useperlio
 eval $setvar 
 
 : Check how to convert floats to strings.
-echo " "
-echo "Checking for an efficient way to convert floats to strings."
-$cat >try.c <<'EOP'
+if test "X$d_Gconvert" = X; then
+    echo " "
+    echo "Checking for an efficient way to convert floats to strings."
+    $cat >try.c <<'EOP'
 #ifdef TRY_gconvert
 #define Gconvert(x,n,t,b) gconvert((x),(n),(t),(b))
 char *myname = "gconvert";
@@ -5955,14 +6058,14 @@ main()
 	exit(0);
 }
 EOP
-case "$d_Gconvert" in
-gconvert*) xxx_list='gconvert gcvt sprintf' ;;
-gcvt*) xxx_list='gcvt gconvert sprintf' ;;
-sprintf*) xxx_list='sprintf gconvert gcvt' ;;
-*) xxx_list='gconvert gcvt sprintf' ;;
-esac
+    case "$d_Gconvert" in
+    gconvert*) xxx_list='gconvert gcvt sprintf' ;;
+    gcvt*) xxx_list='gcvt gconvert sprintf' ;;
+    sprintf*) xxx_list='sprintf gconvert gcvt' ;;
+    *) xxx_list='gconvert gcvt sprintf' ;;
+    esac
 
-for xxx_convert in $xxx_list; do
+    for xxx_convert in $xxx_list; do
 	echo "Trying $xxx_convert"
 	$rm -f try try$_o
 	set try -DTRY_$xxx_convert
@@ -5977,13 +6080,14 @@ for xxx_convert in $xxx_list; do
 	else
 		echo "$xxx_convert NOT found." >&4
 	fi
-done
+    done
 		
-case "$xxx_convert" in
-gconvert) d_Gconvert='gconvert((x),(n),(t),(b))' ;;
-gcvt) d_Gconvert='gcvt((x),(n),(b))' ;;
-*) d_Gconvert='sprintf((b),"%.*g",(n),(x))' ;;
-esac
+    case "$xxx_convert" in
+    gconvert) d_Gconvert='gconvert((x),(n),(t),(b))' ;;
+    gcvt) d_Gconvert='gcvt((x),(n),(b))' ;;
+    *) d_Gconvert='sprintf((b),"%.*g",(n),(x))' ;;
+    esac
+fi
 
 : Initialize h_fcntl
 h_fcntl=false
@@ -6754,7 +6858,7 @@ EOM
 	if $cc $ccflags $cccdlflags -c dyna.c > /dev/null 2>&1 && 
 		mv dyna${_o} tmp-dyna${_o} > /dev/null 2>&1 && 
 		$ld $lddlflags -o dyna.$dlext tmp-dyna${_o} > /dev/null 2>&1 && 
-		$cc $ccflags $ldflags $cccdlflags $ccdlflags fred.c -o fred $libs > /dev/null 2>&1; then
+		$cc $ccflags $ldflags $cccdlflags $ccdlflags -o fred fred.c $libs > /dev/null 2>&1; then
 		xxx=`./fred`
 		case $xxx in
 		1)	echo "Test program failed using dlopen." >&4
@@ -7154,7 +7258,6 @@ echo " "
 set d_getprotoprotos getprotoent $i_netdb netdb.h
 eval $hasproto
 
-
 : see if getservbyname exists
 set getservbyname d_getsbyname
 eval $inlibc
@@ -7195,6 +7298,10 @@ esac
 set netinet/in.h i_niin sys/in.h i_sysin
 eval $inhdr
 
+: see if this is an arpa/inet.h
+set arpa/inet.h i_arpa_inet
+eval $inhdr
+
 : see if htonl --and friends-- exists
 val=''
 set htonl val
@@ -7208,11 +7315,15 @@ $undef)
 #include <sys/types.h>
 #$i_niin I_NETINET_IN
 #$i_sysin I_SYS_IN
+#$i_arpainet I_ARPA_INET
 #ifdef I_NETINET_IN
 #include <netinet/in.h>
 #endif
 #ifdef I_SYS_IN
 #include <sys/in.h>
+#endif
+#ifdef I_ARPA_INET
+#include <arpa/inet.h>
 #endif
 #ifdef htonl
 printf("Defined as a macro.");
@@ -7622,6 +7733,18 @@ eval $inhdr
 
 case "$i_pwd" in
 $define)
+	: see if setpwent exists
+	set setpwent d_setpwent
+	eval $inlibc
+
+	: see if getpwent exists
+	set getpwent d_getpwent
+	eval $inlibc
+
+	: see if endpwent exists
+	set endpwent d_endpwent
+	eval $inlibc
+
 	xxx=`./findhdr pwd.h`
 	$cppstdin $cppflags $cppminus < $xxx >$$.h
 
@@ -7681,10 +7804,21 @@ $define)
 	set d_pwgecos
 	eval $setvar
 
+	if $contains 'pw_passwd' $$.h >/dev/null 2>&1; then
+		val="$define"
+	else
+		val="$undef"
+	fi
+	set d_pwpasswd
+	eval $setvar
+
 	$rm -f $$.h
 	;;
-*)
+*)	# Assume all is lost as far as the d_*pw* go.
 	val="$undef"; 
+	set d_setpwent; eval $setvar
+	set d_getpwent; eval $setvar
+	set d_endpwent; eval $setvar
 	set d_pwquota; eval $setvar
 	set d_pwage; eval $setvar
 	set d_pwchange; eval $setvar
@@ -7692,6 +7826,7 @@ $define)
 	set d_pwexpire; eval $setvar
 	set d_pwcomment; eval $setvar
 	set d_pwgecos; eval $setvar
+	set d_pwpasswd; eval $setvar
 	;;
 esac
 
@@ -8628,39 +8763,41 @@ $rm -f try.*
 
 : see if strerror and/or sys_errlist[] exist
 echo " "
-if set strerror val -f d_strerror; eval $csym; $val; then
+if test "X$d_strerror" = X -o "X$d_syserrlst" = X; then
+    if set strerror val -f d_strerror; eval $csym; $val; then
 	echo 'strerror() found.' >&4
 	d_strerror="$define"
 	d_strerrm='strerror(e)'
 	if set sys_errlist val -a d_syserrlst; eval $csym; $val; then	
-		echo "(You also have sys_errlist[], so we could roll our own strerror.)" 
-		d_syserrlst="$define"
+	    echo "(You also have sys_errlist[], so we could roll our own strerror.)" 
+	    d_syserrlst="$define"
 	else
-	echo "(Since you don't have sys_errlist[], sterror() is welcome.)"
-		d_syserrlst="$undef"
+	    echo "(Since you don't have sys_errlist[], sterror() is welcome.)"
+	    d_syserrlst="$undef"
 	fi
-elif xxx=`./findhdr string.h`; test "$xxx" || xxx=`./findhdr strings.h`; \
+    elif xxx=`./findhdr string.h`; test "$xxx" || xxx=`./findhdr strings.h`; \
 	$contains '#[ 	]*define.*strerror' "$xxx" >/dev/null 2>&1; then
 	echo 'strerror() found in string header.' >&4
 	d_strerror="$define"
 	d_strerrm='strerror(e)'
 	if set sys_errlist val -a d_syserrlst; eval $csym; $val; then	
-		echo "(Most probably, strerror() uses sys_errlist[] for descriptions.)"
-		d_syserrlst="$define"
+	echo "(Most probably, strerror() uses sys_errlist[] for descriptions.)"
+	    d_syserrlst="$define"
 	else
-		echo "(You don't appear to have any sys_errlist[], how can this be?)"
-		d_syserrlst="$undef"
+	    echo "(You don't appear to have any sys_errlist[], how can this be?)"
+	d_syserrlst="$undef"
 	fi
-elif set sys_errlist val -a d_syserrlst; eval $csym; $val; then
+    elif set sys_errlist val -a d_syserrlst; eval $csym; $val; then
 echo "strerror() not found, but you have sys_errlist[] so we'll use that." >&4
 	d_strerror="$undef"
 	d_syserrlst="$define"
 	d_strerrm='((e)<0||(e)>=sys_nerr?"unknown":sys_errlist[e])'
-else
+    else
 	echo 'strerror() and sys_errlist[] NOT found.' >&4
 	d_strerror="$undef"
 	d_syserrlst="$undef"
 	d_strerrm='"unknown"'
+    fi
 fi
 
 : see if strtod exists
@@ -9848,9 +9985,10 @@ eval $inhdr
 
 : see if we should include time.h, sys/time.h, or both
 echo " "
-echo "Testing to see if we should include <time.h>, <sys/time.h> or both." >&4
-$echo $n "I'm now running the test program...$c"
-$cat >try.c <<'EOCP'
+if test "X$timeincl" = X; then
+    echo "Testing to see if we should include <time.h>, <sys/time.h> or both." >&4
+    $echo $n "I'm now running the test program...$c"
+    $cat >try.c <<'EOCP'
 #include <sys/types.h>
 #ifdef I_TIME
 #include <time.h>
@@ -9882,13 +10020,13 @@ main()
 	exit(1);
 }
 EOCP
-flags=''
-for s_timezone in '-DS_TIMEZONE' ''; do
-sysselect=''
-for s_timeval in '-DS_TIMEVAL' ''; do
-for i_systimek in '' '-DSYSTIMEKERNEL'; do
-for i_time in '' '-DI_TIME'; do
-for i_systime in '-DI_SYSTIME' ''; do
+    flags=''
+    for s_timezone in '-DS_TIMEZONE' ''; do
+    sysselect=''
+    for s_timeval in '-DS_TIMEVAL' ''; do
+    for i_systimek in '' '-DSYSTIMEKERNEL'; do
+    for i_time in '' '-DI_TIME'; do
+    for i_systime in '-DI_SYSTIME' ''; do
 	case "$flags" in
 	'') $echo $n ".$c"
 		set try $i_time $i_systime $i_systimek $sysselect $s_timeval $s_timezone
@@ -9901,32 +10039,33 @@ for i_systime in '-DI_SYSTIME' ''; do
 		fi
 		;;
 	esac
-done
-done
-done
-done
-done
-timeincl=''
-echo " "
-case "$flags" in
-*SYSTIMEKERNEL*) i_systimek="$define"
+    done
+    done
+    done
+    done
+    done
+    timeincl=''
+    echo " "
+    case "$flags" in
+    *SYSTIMEKERNEL*) i_systimek="$define"
 	timeincl=`./findhdr sys/time.h`
 	echo "We'll include <sys/time.h> with KERNEL defined." >&4;;
-*) i_systimek="$undef";;
-esac
-case "$flags" in
-*I_TIME*) i_time="$define"
+    *) i_systimek="$undef";;
+    esac
+    case "$flags" in
+    *I_TIME*) i_time="$define"
 	timeincl=`./findhdr time.h`" $timeincl"
 	echo "We'll include <time.h>." >&4;;
-*) i_time="$undef";;
-esac
-case "$flags" in
-*I_SYSTIME*) i_systime="$define"
+    *) i_time="$undef";;
+    esac
+    case "$flags" in
+    *I_SYSTIME*) i_systime="$define"
 	timeincl=`./findhdr sys/time.h`" $timeincl"
 	echo "We'll include <sys/time.h>." >&4;;
-*) i_systime="$undef";;
-esac
-$rm -f try.c try
+    *) i_systime="$undef";;
+    esac
+    $rm -f try.c try
+fi
 
 : check for fd_set items
 $cat <<EOM
@@ -10142,7 +10281,7 @@ printf("NSIG %d\n", NSIG);
 
 EOCP
 
-echo $xxx | $tr ' ' '\012' | $sort | $uniq | $awk '
+echo $xxx | $tr ' ' $trnl | $sort | $uniq | $awk '
 {
 	printf "#ifdef SIG"; printf $1; printf "\n"
 	printf "printf(\""; printf $1; printf " %%d\\n\",SIG";
@@ -10211,7 +10350,7 @@ else
 		echo 'NSIG 50' > signal.nsg
 	fi
 	: Now look at all the signal names, one at a time.
-	for xx in `echo $xxx | $tr ' ' '\012' | $sort | $uniq`; do
+	for xx in `echo $xxx | $tr ' ' $trnl | $sort | $uniq`; do
 		$cat > signal.c <<EOCP
 #include <sys/types.h>
 #include <signal.h>
@@ -10246,7 +10385,7 @@ else
 	case $# in
 	0) set HUP INT QUIT ILL TRAP ABRT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM;;
 	esac
-	echo $@ | $tr ' ' '\012' | \
+	echo $@ | $tr ' ' $trnl | \
 		$awk '{ printf $1; printf " %d\n", ++s; }' >signal.lst
 fi
 $rm -f signal.c signal$_exe signal$_o signal.nsg signal.ls1
@@ -10341,19 +10480,21 @@ fi
 
 : see if time exists
 echo " "
-if set time val -f d_time; eval $csym; $val; then
+if test "X$d_time" = X -o X"$timetype" = X; then
+    if set time val -f d_time; eval $csym; $val; then
 	echo 'time() found.' >&4
 	val="$define"
 	rp="What is the type returned by time() on this system?"
 	set time_t timetype long stdio.h sys/types.h
 	eval $typedef_ask
-else
+    else
 	echo 'time() not found, hope that will do.' >&4
 	val="$undef"
 	timetype='int';
+    fi
+    set d_time
+    eval $setvar
 fi
-set d_time
-eval $setvar
 
 : see what type uids are declared as in the kernel
 echo " "
@@ -10466,6 +10607,42 @@ eval $setvar
 set grp.h i_grp
 eval $inhdr
 
+case "$i_grp" in
+$define)
+	: see if setgrent exists
+	set setgrent d_setgrent
+	eval $inlibc
+
+	: see if getgrent exists
+	set getgrent d_getgrent
+	eval $inlibc
+
+	: see if endgrent exists
+	set endgrent d_endgrent
+	eval $inlibc
+
+	xxx=`./findhdr grp.h`
+	$cppstdin $cppflags $cppminus < $xxx >$$.h
+
+	if $contains 'gr_passwd' $$.h >/dev/null 2>&1; then
+		val="$define"
+	else
+		val="$undef"
+	fi
+	set d_grpasswd
+	eval $setvar
+
+	$rm -f $$.h
+	;;
+*)	# Assume all is lost as far as the d_*gr* go.
+	val="$undef"; 
+	set d_setgrent; eval $setvar
+	set d_getgrent; eval $setvar
+	set d_endgrent; eval $setvar
+	set d_grpasswd; eval $setvar
+	;;
+esac
+
 : see if locale.h is available
 set locale.h i_locale
 eval $inhdr
@@ -10526,7 +10703,7 @@ eval $setvar
 : get C preprocessor symbols handy
 echo " "
 $echo $n "Hmm... $c"
-echo $al | $tr ' ' '\012' >Cppsym.know
+echo $al | $tr ' ' $trnl >Cppsym.know
 $cat <<EOSS >Cppsym
 $startsh
 case "\$1" in
@@ -10553,7 +10730,7 @@ esac
 case \$# in
 0) exit 1;;
 esac
-echo \$* | $tr ' ' '\012' | $sed -e 's/\(.*\)/\\
+echo \$* | $tr ' ' $trnl | $sed -e 's/\(.*\)/\\
 #ifdef \1\\
 exit 0; _ _ _ _\1\\	 \1\\
 #endif\\
@@ -11253,9 +11430,11 @@ d_dlopen='$d_dlopen'
 d_dlsymun='$d_dlsymun'
 d_dosuid='$d_dosuid'
 d_dup2='$d_dup2'
+d_endgrent='$d_endgrent'
 d_endhent='$d_endhent'
 d_endnent='$d_endnent'
 d_endpent='$d_endpent'
+d_endpwent='$d_endpwent'
 d_endsent='$d_endsent'
 d_eofnblk='$d_eofnblk'
 d_eunice='$d_eunice'
@@ -11272,6 +11451,7 @@ d_fork='$d_fork'
 d_fpathconf='$d_fpathconf'
 d_fsetpos='$d_fsetpos'
 d_ftime='$d_ftime'
+d_getgrent='$d_getgrent'
 d_getgrps='$d_getgrps'
 d_gethbyaddr='$d_gethbyaddr'
 d_gethbyname='$d_gethbyname'
@@ -11292,12 +11472,14 @@ d_getpgrp='$d_getpgrp'
 d_getppid='$d_getppid'
 d_getprior='$d_getprior'
 d_getprotoprotos='$d_getprotoprotos'
+d_getpwent='$d_getpwent'
 d_getsbyname='$d_getsbyname'
 d_getsbyport='$d_getsbyport'
 d_getsent='$d_getsent'
 d_getservprotos='$d_getservprotos'
 d_gettimeod='$d_gettimeod'
 d_gnulibc='$d_gnulibc'
+d_grpasswd='$d_grpasswd'
 d_htonl='$d_htonl'
 d_index='$d_index'
 d_inetaton='$d_inetaton'
@@ -11345,6 +11527,7 @@ d_pwcomment='$d_pwcomment'
 d_pwexpire='$d_pwexpire'
 d_pwgecos='$d_pwgecos'
 d_pwquota='$d_pwquota'
+d_pwpasswd='$d_pwpasswd'
 d_readdir='$d_readdir'
 d_readlink='$d_readlink'
 d_rename='$d_rename'
@@ -11364,6 +11547,7 @@ d_semget='$d_semget'
 d_semop='$d_semop'
 d_setegid='$d_setegid'
 d_seteuid='$d_seteuid'
+d_setgrent='$d_setgrent'
 d_setgrps='$d_setgrps'
 d_sethent='$d_sethent'
 d_setlinebuf='$d_setlinebuf'
@@ -11374,6 +11558,7 @@ d_setpgid='$d_setpgid'
 d_setpgrp2='$d_setpgrp2'
 d_setpgrp='$d_setpgrp'
 d_setprior='$d_setprior'
+d_setpwent='$d_setpwent'
 d_setregid='$d_setregid'
 d_setresgid='$d_setresgid'
 d_setresuid='$d_setresuid'
@@ -11446,6 +11631,7 @@ dlsrc='$dlsrc'
 doublesize='$doublesize'
 dynamic_ext='$dynamic_ext'
 eagain='$eagain'
+ebcdic='$ebcdic'
 echo='$echo'
 egrep='$egrep'
 emacs='$emacs'
@@ -11472,6 +11658,7 @@ h_sysfile='$h_sysfile'
 hint='$hint'
 hostcat='$hostcat'
 huge='$huge'
+i_arpa_inet='$i_arpa_inet'
 i_bsdioctl='$i_bsdioctl'
 i_db='$i_db'
 i_dbm='$i_dbm'
@@ -11685,6 +11872,7 @@ timeincl='$timeincl'
 timetype='$timetype'
 touch='$touch'
 tr='$tr'
+trnl='$trnl'
 troff='$troff'
 uidtype='$uidtype'
 uname='$uname'
@@ -11772,6 +11960,28 @@ esac
 
 : if this fails, just run all the .SH files by hand
 . ./config.sh
+
+case "$ebcdic" in
+$define)
+    if test -d ebcdic; then
+        echo "This is an EBCDIC system, moving the right parser files in place." >&4
+        # Try to save the ASCII versions, just in case.
+        test -f perly.c.ascii || mv perly.c perly.c.ascii
+        test -f perly.h.ascii || mv perly.h perly.h.ascii
+
+        cp -pf ebcdic/perly.c perly.c
+        cp -pf ebcdic/perly.h perly.h
+
+        test -f x2p/a2p.c.ascii || mv x2p/a2p.c x2p/a2p.c.ascii
+
+        cp -pf ebcdic/a2p.c x2p/a2p.c
+    else
+        echo "This is an EBCDIC system but there's no ebcdic directory." >&4
+        echo "This will not do." >&4
+        exit 1
+    fi
+    ;;
+esac
 
 echo " "
 exec 1>&4

@@ -303,6 +303,14 @@ $ perl_defvoidused="15"
 $ perl_voidflags="15"
 $ perl_d_eunice="undef"
 $ perl_d_pwgecos="define"
+$ perl_d_pwpasswd="define"
+$ perl_d_setpwent="define"
+$ perl_d_getpwent="define"
+$ perl_d_endpwent="define"
+$ perl_d_grpasswd="undef"
+$ perl_d_setgrent="undef"
+$ perl_d_getgrent="undef"
+$ perl_d_endgrent="undef"
 $ IF ("''Use_Threads'".eqs."T").and.("''VMS_VER'".LES."6.2")
 $ THEN
 $ perl_libs="SYS$SHARE:CMA$LIB_SHR.EXE/SHARE SYS$SHARE:CMA$RTL.EXE/SHARE SYS$SHARE:CMA$OPEN_LIB_SHR.exe/SHARE SYS$SHARE:CMA$OPEN_RTL.exe/SHARE"
@@ -1035,6 +1043,53 @@ $ ELSE
 $   perl_i_niin="undef"
 $ ENDIF
 $ WRITE_RESULT "i_niin is ''perl_i_niin'"
+$!
+$! Check for <arpa/inet.h>
+$!
+$ if ("''Has_Dec_C_Sockets'".eqs."T").or.("''Has_Socketshr'".eqs."T")
+$ THEN
+$ OS
+$ WS "#ifdef __DECC
+$ WS "#include <stdlib.h>
+$ WS "#endif
+$ WS "#include <stdio.h>
+$ WS "#include <types.h>
+$ if ("''Has_Socketshr'".eqs."T")
+$ THEN
+$  WS "#include <socketshr.h>"
+$ else
+$  WS "#include <socket.h>
+$ endif
+$ WS "#include <arpa/inet.h>"
+$ WS "int main()
+$ WS "{"
+$ WS "exit(0);
+$ WS "}"
+$ CS
+$   DEFINE SYS$ERROR _NLA0:
+$   DEFINE SYS$OUTPUT _NLA0:
+$   on error then continue
+$   on warning then continue
+$   'Checkcc' temp
+$   If (Needs_Opt.eqs."Yes")
+$   THEN
+$     link temp,temp/opt
+$   else
+$     link temp
+$   endif
+$   teststatus = f$extract(9,1,$status)
+$   DEASSIGN SYS$OUTPUT
+$   DEASSIGN SYS$ERROR
+$   if (teststatus.nes."1")
+$   THEN
+$     perl_i_arpa_inet="undef"
+$   ELSE
+$     perl_i_arpa_inet="define"
+$   ENDIF
+$ ELSE
+$   perl_i_arpa_inet="undef"
+$ ENDIF
+$ WRITE_RESULT "i_arpa_inet is ''perl_i_arpa_inet'"
 $!
 $! Check for endhostent
 $!
@@ -1960,6 +2015,7 @@ $ WC "d_gethent='" + perl_d_gethent + "'"
 $ WC "d_getsent='" + perl_d_getsent + "'"
 $ WC "d_select='" + perl_d_select + "'"
 $ WC "i_niin='" + perl_i_niin + "'"
+$ WC "i_arpa_inet='" + perl_i_arpa_inet + "'"
 $ WC "i_neterrno='" + perl_i_neterrno + "'"
 $ WC "d_stdstdio='" + perl_d_stdstdio + "'"
 $ WC "d_stdio_ptr_lval='" + perl_d_stdio_ptr_lval + "'"
@@ -2274,6 +2330,14 @@ $ WC "d_getnetprotos='" + perl_d_getnetprotos + "'"
 $ WC "d_getprotoprotos='" + perl_d_getprotoprotos + "'"
 $ WC "d_getservprotos='" + perl_d_getservprotos + "'"
 $ WC "d_pwgecos='" + perl_d_pwgecos + "'"
+$ WC "d_pwpasswd='" + perl_d_pwpasswd + "'"
+$ WC "d_setpwent='" + perl_d_setpwent + "'"
+$ WC "d_getpwent='" + perl_d_getpwent + "'"
+$ WC "d_endpwent='" + perl_d_endpwent + "'"
+$ WC "d_grpasswd='" + perl_d_grpasswd + "'"
+$ WC "d_setgrent='" + perl_d_setgrent + "'"
+$ WC "d_getgrent='" + perl_d_getgrent + "'"
+$ WC "d_endgrent='" + perl_d_endgrent + "'"
 $ WC "d_sched_yield='" + perl_d_sched_yield + "'"
 $ WC "d_lchown='" + perl_d_lchown + "'"
 $ WC "d_union_semun='" + perl_d_union_semun + "'"

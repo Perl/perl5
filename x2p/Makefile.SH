@@ -55,6 +55,10 @@ PATH_SEP = $p_
 
 FIRSTMAKEFILE = $firstmakefile
 
+# how to tr(anslate) newlines
+
+TRNL = '$trnl'
+
 .SUFFIXES: .c \$(OBJ_EXT)
 
 !GROK!THIS!
@@ -101,7 +105,7 @@ compile: all
 	$(REALPERL) -I../lib ../utils/perlcc -regex 's/$$/.exe/' $(plextract) -prog -verbose dcf -log ../compilelog;  
 
 a2p: $(obj) a2p$(OBJ_EXT)
-	$(CC) $(LDFLAGS) $(obj) a2p$(OBJ_EXT) $(libs) -o a2p
+	$(CC) $(LDFLAGS) -o a2p $(obj) a2p$(OBJ_EXT) $(libs)
 
 # I now supply a2p.c with the kits, so the following section is
 # used only if you force byacc to run by saying
@@ -110,6 +114,7 @@ a2p: $(obj) a2p$(OBJ_EXT)
 run_byacc:	FORCE
 	@ echo Expect many shift/reduce and reduce/reduce conflicts
 	$(BYACC) a2p.y
+	rm -f a2p.c
 	mv y.tab.c a2p.c
 
 # We don't want to regenerate a2p.c, but it might appear out-of-date
@@ -140,13 +145,13 @@ depend: $(mallocsrc) ../makedepend
 	sh ../makedepend MAKE=$(MAKE)
 
 clist:
-	echo $(c) | tr ' ' '\012' >.clist
+	echo $(c) | tr ' ' $(TRNL) >.clist
 
 hlist:
-	echo $(h) | tr ' ' '\012' >.hlist
+	echo $(h) | tr ' ' $(TRNL) >.hlist
 
 shlist:
-	echo $(sh) | tr ' ' '\012' >.shlist
+	echo $(sh) | tr ' ' $(TRNL) >.shlist
 
 # These should be automatically generated
 

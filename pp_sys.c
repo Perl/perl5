@@ -69,7 +69,9 @@ extern int h_errno;
     struct passwd *getpwnam _((char *));
     struct passwd *getpwuid _((Uid_t));
 # endif
+# ifdef HAS_GETPWENT
   struct passwd *getpwent _((void));
+# endif
 #endif
 
 #ifdef HAS_GROUP
@@ -79,7 +81,9 @@ extern int h_errno;
     struct group *getgrnam _((char *));
     struct group *getgrgid _((Gid_t));
 # endif
+# ifdef HAS_GETGRENT
     struct group *getgrent _((void));
+# endif
 #endif
 
 #ifdef I_UTIME
@@ -4111,7 +4115,7 @@ PP(pp_gpwuid)
 PP(pp_gpwent)
 {
     djSP;
-#ifdef HAS_PASSWD
+#if defined(HAS_PASSWD) && defined(HAS_GETPWENT)
     I32 which = op->op_type;
     register SV *sv;
     struct passwd *pwent;
@@ -4140,7 +4144,9 @@ PP(pp_gpwent)
 	sv_setpv(sv, pwent->pw_name);
 
 	PUSHs(sv = sv_mortalcopy(&sv_no));
+#ifdef PWPASSWD
 	sv_setpv(sv, pwent->pw_passwd);
+#endif
 
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setiv(sv, (IV)pwent->pw_uid);
@@ -4201,7 +4207,7 @@ PP(pp_gpwent)
 PP(pp_spwent)
 {
     djSP;
-#if defined(HAS_PASSWD) && !defined(CYGWIN32)
+#if defined(HAS_PASSWD) && defined(HAS_SETPWENT) && !defined(CYGWIN32)
     setpwent();
     RETPUSHYES;
 #else
@@ -4212,7 +4218,7 @@ PP(pp_spwent)
 PP(pp_epwent)
 {
     djSP;
-#ifdef HAS_PASSWD
+#if defined(HAS_PASSWD) && defined(HAS_ENDPWENT)
     endpwent();
     RETPUSHYES;
 #else
@@ -4241,7 +4247,7 @@ PP(pp_ggrgid)
 PP(pp_ggrent)
 {
     djSP;
-#ifdef HAS_GROUP
+#if defined(HAS_GROUP) && defined(HAS_GETGRENT)
     I32 which = op->op_type;
     register char **elem;
     register SV *sv;
@@ -4269,10 +4275,15 @@ PP(pp_ggrent)
     if (grent) {
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setpv(sv, grent->gr_name);
+
 	PUSHs(sv = sv_mortalcopy(&sv_no));
+#ifdef GRPASSWD
 	sv_setpv(sv, grent->gr_passwd);
+#endif
+
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setiv(sv, (IV)grent->gr_gid);
+
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	for (elem = grent->gr_mem; elem && *elem; elem++) {
 	    sv_catpv(sv, *elem);
@@ -4290,7 +4301,7 @@ PP(pp_ggrent)
 PP(pp_sgrent)
 {
     djSP;
-#ifdef HAS_GROUP
+#if defined(HAS_GROUP) && defined(HAS_SETGRENT)
     setgrent();
     RETPUSHYES;
 #else
@@ -4301,7 +4312,7 @@ PP(pp_sgrent)
 PP(pp_egrent)
 {
     djSP;
-#ifdef HAS_GROUP
+#if defined(HAS_GROUP) && defined(HAS_ENDGRENT)
     endgrent();
     RETPUSHYES;
 #else

@@ -177,6 +177,9 @@ ARCHOBJS = $archobjs
 # grrr
 SHELL = $sh
 
+# how to tr(anslate) newlines
+TRNL = '$trnl'
+
 !GROK!THIS!
 
 ## In the following dollars and backticks do not need the extra backslash.
@@ -300,6 +303,7 @@ $(LIBPERL): $& perl$(OBJ_EXT) $(obj)
 		case "$osname" in
 		aix)
 			$spitshell >>Makefile <<'!NO!SUBS!'
+	rm -f libperl$(OBJ_EXT)
 	mv $@ libperl$(OBJ_EXT)
 	$(AR) qv $(LIBPERL) libperl$(OBJ_EXT)
 !NO!SUBS!
@@ -379,7 +383,7 @@ lib/Config.pm: config.sh miniperl configpm
 	sh mv-if-diff tmp lib/Config.pm
 
 lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl minimod.pl lib/Config.pm
-	$(LDLIBPTH) ./miniperl minimod.pl > tmp && mv tmp $@
+	$(LDLIBPTH) ./miniperl minimod.pl > tmp && ( rm -f $@ ; mv tmp $@ )
 
 lib/re.pm: ext/re/re.pm
 	cat ext/re/re.pm > $@
@@ -600,16 +604,16 @@ nok:	utilities
 	$(LBLIBPTH) ./perl -Ilib utils/perlbug -nok -s '(UNINSTALLED)'
 
 clist:	$(c)
-	echo $(c) | tr ' ' '\012' >.clist
+	echo $(c) | tr ' ' $(TRNL) >.clist
 
 hlist:  $(h)
-	echo $(h) | tr ' ' '\012' >.hlist
+	echo $(h) | tr ' ' $(TRNL) >.hlist
 
 shlist: $(sh)
-	echo $(sh) | tr ' ' '\012' >.shlist
+	echo $(sh) | tr ' ' $(TRNL) >.shlist
 
 pllist: $(pl)
-	echo $(pl) | tr ' ' '\012' >.pllist
+	echo $(pl) | tr ' ' $(TRNL) >.pllist
 
 Makefile: Makefile.SH ./config.sh
 	$(SHELL) Makefile.SH

@@ -2403,6 +2403,7 @@ $(OBJECT) : $(FIRST_MAKEFILE)
 }.$self->{MAKEFILE}.q{ : Makefile.PL $(CONFIGDEP)
 	}.$self->{NOECHO}.q{echo "Makefile out-of-date with respect to $?"
 	}.$self->{NOECHO}.q{echo "Cleaning current config before rebuilding Makefile..."
+	-}.$self->{NOECHO}.q{$(RM_F) }."$self->{MAKEFILE}.old".q{
 	-}.$self->{NOECHO}.q{$(MV) }."$self->{MAKEFILE} $self->{MAKEFILE}.old".q{
 	-$(MAKE) -f }.$self->{MAKEFILE}.q{.old clean $(DEV_NULL) || $(NOOP)
 	$(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" Makefile.PL }.join(" ",map(qq["$_"],@ARGV)).q{
