@@ -1746,7 +1746,7 @@ Whatever it is, it does not manifest itself anywhere else where Perl runs.
 
 =head1 AUTHORS
 
-Raphael Manfredi <F<Raphael_Manfredi@grenoble.hp.com>> and
+Raphael Manfredi <F<Raphael_Manfredi@pobox.com>> and
 Jarkko Hietaniemi <F<jhi@iki.fi>>.
 
 Extensive patches by Daniel S. Lewart <F<d-lewart@uiuc.edu>>.

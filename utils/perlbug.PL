@@ -1121,7 +1121,7 @@ Include verbose configuration data in the report.
 =head1 AUTHORS
 
 Kenneth Albanowski (E<lt>kjahds@kjahds.comE<gt>), subsequently I<doc>tored
-by Gurusamy Sarathy (E<lt>gsar@umich.eduE<gt>), Tom Christiansen
+by Gurusamy Sarathy (E<lt>gsar@activestate.comE<gt>), Tom Christiansen
 (E<lt>tchrist@perl.comE<gt>), Nathan Torkington (E<lt>gnat@frii.comE<gt>),
 Charles F. Randall (E<lt>cfr@pobox.comE<gt>), Mike Guy
 (E<lt>mjtg@cam.a.ukE<gt>), Dominic Dunlop (E<lt>domo@computer.orgE<gt>),

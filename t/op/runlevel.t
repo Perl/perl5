@@ -3,7 +3,7 @@
 ##
 ## Many of these tests are originally from Michael Schroeder
 ## <Michael.Schroeder@informatik.uni-erlangen.de>
-## Adapted and expanded by Gurusamy Sarathy <gsar@umich.edu>
+## Adapted and expanded by Gurusamy Sarathy <gsar@activestate.com>
 ##
 
 chdir 't' if -d 't';

@@ -1029,7 +1029,7 @@ SCALAR objects have the weirdest looking C<bless> workaround.
 
 =head1 AUTHOR
 
-Gurusamy Sarathy        gsar@umich.edu
+Gurusamy Sarathy        gsar@activestate.com
 
 Copyright (c) 1996-98 Gurusamy Sarathy. All rights reserved.
 This program is free software; you can redistribute it and/or
