@@ -1510,15 +1510,10 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
                 EXTEND_MORTAL(len);
 	    }
 	    while (len-- > 0) {
-		if (s + sizeof(Quad_t) > strend) {
-		    /* Surely this should never happen? NWC  */
-		    aquad = 0;
-		}
-		else {
-		    Copy(s, &aquad, 1, Quad_t);
-		    DO_BO_UNPACK(aquad, 64);
-		    s += sizeof(Quad_t);
-		}
+		assert (s + sizeof(Quad_t) <= strend);
+		Copy(s, &aquad, 1, Quad_t);
+		DO_BO_UNPACK(aquad, 64);
+		s += sizeof(Quad_t);
 		if (!checksum) {
                     PUSHs(sv_2mortal((aquad >= IV_MIN && aquad <= IV_MAX) ?
 				     newSViv((IV)aquad) : newSVnv((NV)aquad)));
@@ -1540,13 +1535,10 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
                 EXTEND_MORTAL(len);
 	    }
 	    while (len-- > 0) {
-		if (s + sizeof(Uquad_t) > strend)
-		    auquad = 0;
-		else {
-		    Copy(s, &auquad, 1, Uquad_t);
-		    DO_BO_UNPACK(auquad, 64);
-		    s += sizeof(Uquad_t);
-		}
+		assert (s + sizeof(Uquad_t) <= strend);
+		Copy(s, &auquad, 1, Uquad_t);
+		DO_BO_UNPACK(auquad, 64);
+		s += sizeof(Uquad_t);
 		if (!checksum) {
 		    PUSHs(sv_2mortal((auquad <= UV_MAX) ?
 				     newSVuv((UV)auquad) : newSVnv((NV)auquad)));
