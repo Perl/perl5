@@ -1635,8 +1635,18 @@ PP(pp_caller)
 		(old_warnings == pWARN_STD && (PL_dowarn & G_WARN_ON) == 0))
             mask = newSVpvn(WARN_NONEstring, WARNsize) ;
         else if (old_warnings == pWARN_ALL ||
-		  (old_warnings == pWARN_STD && PL_dowarn & G_WARN_ON))
-            mask = newSVpvn(WARN_ALLstring, WARNsize) ;
+		  (old_warnings == pWARN_STD && PL_dowarn & G_WARN_ON)) {
+	    /* Get the bit mask for $warnings::Bits{all}, because
+	     * it could have been extended by warnings::register */
+	    SV **bits_all;
+	    HV *bits = get_hv("warnings::Bits", FALSE);
+	    if (bits && (bits_all=hv_fetch(bits, "all", 3, FALSE))) {
+		mask = newSVsv(*bits_all);
+	    }
+	    else {
+		mask = newSVpvn(WARN_ALLstring, WARNsize) ;
+	    }
+	}
         else
             mask = newSVsv(old_warnings);
         PUSHs(sv_2mortal(mask));
