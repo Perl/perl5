@@ -22,12 +22,11 @@ with 5.004, but you will need to rebuild and reinstall those extensions
 to use them 5.005.  See L<INSTALL> for detailed instructions on how to
 upgrade.
 
-=head2 Installation structure has changed
+=head2 Default installation structure has changed
 
-Extensions that have with architecture-dependent files are now always
-installed in the architecture-dependent locations.  Previously, they
-were shared will multiple versions of perl, an were therefore liable to
-be overwritten with newer versions that may have subtle incompatibilities.
+The new Configure defaults are designed to allow a smooth upgrade from
+5.004 to 5.005, but you should read L<INSTALL> for a detailed
+discussion of the changes in order to adapt them to your system.
 
 =head2 Perl Source Compatibility
 
@@ -166,9 +165,17 @@ not try to allocate a 1000000-size list anymore.
 
 See L<perllocale>.
 
-=head2 Better support for 64-bit platforms
+=head2 Experimental support for 64-bit platforms
 
-[XXX How?]
+Perl5 has always had 64-bit support on systems with 64-bit longs.
+Starting with 5.005, the beginnings of experimental support for systems
+with 32-bit long and 64-bit 'long long' integers has been added.
+If you add -DUSE_LONG_LONG to your ccflags in config.sh (or manually
+define it in perl.h) then perl will be built with 'long long' support.
+There will be many compiler warnings, and the resultant perl may not
+work on all systems.  There are many other issues related to
+third-party extensions and libraries.  This option exists to allow
+people to work on those issues.
 
 =head2 prototype() returns useful results on builtins
 
@@ -208,8 +215,8 @@ TIEARRAY implementations.  See L<Tie::Array>.
 =head1 Supported Platforms
 
 Configure has many incremental improvements.  Site-wide policy for building
-perl can now be made perlsistent, via Policy.sh.  Configure can also remember
-the arguments used in previous invocations.
+perl can now be made perlsistent, via Policy.sh.  Configure also records
+the command-line arguments used in F<config.sh>.
 
 =head2 New Platforms
 
@@ -320,6 +327,13 @@ specify that site umask() policy should be honored.  There is also
 better support for manipulation of .packlist files, and getting
 information about installed modules.
 
+Extensions that have both architecture-dependent and
+architecture-independent files are now always installed completely in
+the architecture-dependent locations.  Previously, the shareable parts
+were shared both across architectures and across perl versions and were
+therefore liable to be overwritten with newer versions that might have
+subtle incompatibilities.
+
 =item CPAN
 
 [XXX What?]
@@ -336,11 +350,11 @@ Keeps better time.
 
 =head1 Utility Changes
 
-The crude GNU configure emulator is now called configure.gnu.
-
 h2ph and related utilities have been vastly overhauled.
 
 perlcc, a new experimental front end for the compiler is available.
+
+The crude GNU configure emulator is now called configure.gnu.
 
 =head1 API Changes
 
