@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu May 13 16:42:40 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Fri May 14 00:11:18 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -4363,6 +4363,7 @@ while read cline; do
 	name=\`echo \$cline | $awk "\$awkprg" | $tr -d '"'\`
 	case "\$name" in
 	*[/\\\\]\$wanted) echo "\$name"; exit 0;;
+	*[\\\\/]\$wanted) echo "\$name"; exit 0;;
 	*) name='';;
 	esac;
 done;
@@ -10958,12 +10959,18 @@ EOM
 	;;
 esac
 
+# SunOS has a <unistd.h> which we generally avoid, but need for this test.
+# For everyone else, we'll trust i_unistd.
+t_unistd=$i_unistd
+case "$osname" in
+sunos) $test -f /usr/include/unistd.h && t_unistd=$define ;;
+esac
 $cat >&4 <<EOM
 Checking how to flush all pending stdio output...
 EOM
 $cat >try.c <<EOCP
 #include <stdio.h>
-#$i_unistd I_UNISTD
+#$t_unistd I_UNISTD
 #ifdef I_UNISTD
 #include <unistd.h>
 #endif
@@ -11013,7 +11020,7 @@ if $test "X$fflushNULL" = X -o "X$fflushall" = X; then
     output=''
     set try -DTRY_FPUTC
     $rm -f try.out
-    if eval $compile_ok; then
+    if eval $compile; then
  	    ./try$exe_ext 2>/dev/null
 	    if $test ! -s try.out -a "X$?" = X42; then
 		output=-DTRY_FPUTC
@@ -11023,7 +11030,7 @@ if $test "X$fflushNULL" = X -o "X$fflushall" = X; then
     '')
 	    set try -DTRY_FPRINTF
 	    $rm -f try.out
-	    if eval $compile_ok; then
+	    if eval $compile; then
  		    ./try$exe_ext 2>/dev/null
 		    if $test ! -s try.out -a "X$?" = X42; then
 			output=-DTRY_FPRINTF
@@ -11036,7 +11043,7 @@ fi
 case "$fflushNULL" in
 '') 	set try -DTRY_FFLUSH_NULL $output
 	$rm -f try.out
-	if eval $compile_ok; then
+	if eval $compile; then
 	    	./try$exe_ext 2>/dev/null
 		if $test -s try.out -a "X$?" = X42; then
 			fflushNULL="`$cat try.out`"
@@ -11044,17 +11051,17 @@ case "$fflushNULL" in
 	fi
 	$rm -f core try.core core.try.*
 	case "$fflushNULL" in
-	x)	cat >&4 <<EOM
+	x)	$cat >&4 <<EOM
 Your fflush(NULL) works okay.
 EOM
 		fflushNULL=define
 		;;
-	'')	cat >&4 <<EOM
+	'')	$cat >&4 <<EOM
 Your fflush(NULL) isn't working (contrary to ANSI C).
 EOM
 		fflushNULL=undef
 		;;
-	*)	cat >&4 <<EOM
+	*)	$cat >&4 <<EOM
 Cannot figure out whether your fflush(NULL) works or not.
 I'm assuming it doesn't (contrary to ANSI C).
 EOM
@@ -11073,7 +11080,7 @@ esac
 case "$fflushall" in
 '') 	set try -DTRY_FFLUSH_ALL $output
 	$rm -f try.out
-	if eval $compile_ok; then
+	if eval $compile; then
 	    	./try$exe_ext 2>/dev/null
 		if $test -s try.out -a "X$?" = X42; then
 			fflushall="`$cat try.out`"
@@ -11081,21 +11088,28 @@ case "$fflushall" in
 	fi
 	$rm -f core try.core core.try.*
 	case "$fflushall" in
-	x)	cat >&4 <<EOM
+	x)	$cat >&4 <<EOM
 Flushing explicitly all the stdio streams works.
 EOM
 		fflushall=define
 		;;
-	'')	cat >&4 <<EOM
+	'')	$cat >&4 <<EOM
 Flushing explicitly all the stdio streams doesn't work.
 EOM
 		fflushall=undef
 		;;
-	*)	cat >&4 <<EOM
-Cannot figure out whether flushing stdio stream explicitly works or not.
+	*)	$cat >&4 <<EOM
+Cannot figure out whether flushing stdio streams explicitly works or not.
 I'm assuming it doesn't.
 EOM
 		fflushall=undef
+		;;
+	esac
+	case "$fflushall$fflushNULL" in
+	undefdefine)
+                $cat >&4 <<EOM
+(That's ok.  I'll use fflush(NULL) instead.)
+EOM
 		;;
 	esac
 	;;
@@ -11108,7 +11122,7 @@ $define|true|[yY]*)
 esac
 case "$fflushNULL$fflushall" in
 undefundef)
-	cat <<EOM
+	$cat <<EOM
 I cannot figure out how to flush pending stdio output.
 EOM
 	;;
