@@ -390,7 +390,10 @@ foreach my $file (@corefiles) {
 # modules if so needed.
 if ($Config{use5005threads}) {
     for my $m (qw(Queue Semaphore)) {
-        copy("ext/Thread/$m.pmx", "$installprivlib/Thread/$m.pm")
+        my $t = "$installprivlib/Thread/$m.pm";
+        unlink $t;
+        copy("ext/Thread/$m.pmx", $t);
+        chmod(0444, $t);
     }
 }
 
