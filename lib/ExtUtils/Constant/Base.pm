@@ -553,19 +553,18 @@ sub switch_clause {
       if length ($char) != 1;
     confess sprintf "char %#X is out of range", ord $char if ord ($char) > 255;
     $body .= $indent . "case '" . C_stringify ($char) . "':\n";
-    # If this looks evil, maybe it is.
-    # $items is a hashref, and we're doing a hash slice on it
-    my @items = @{$items}{@{$best->{$char}}};
-    # use Data::Dumper; warn Dumper \@items;
     foreach my $thisone (sort {
 	# Deal with the case of an item actually being an array ref to 1 or 2
-	# hashrefs
+	# hashrefs. Don't assign to $a or $b, as they're aliases to the orignal
 	my $l = ref $a eq 'ARRAY' ? ($a->[0] || $->[1]) : $a;
 	my $r = ref $b eq 'ARRAY' ? ($b->[0] || $->[1]) : $b;
-	# Sort by name first
+	# Sort by weight first
 	($r->{weight} || 0) <=> ($l->{weight} || 0)
 	    # Sort equal weights by name
-	    or $l->{name} cmp $r->{name}} @items) {
+	    or $l->{name} cmp $r->{name}}
+			 # If this looks evil, maybe it is.  $items is a
+			 # hashref, and we're doing a hash slice on it
+			 @{$items}{@{$best->{$char}}}) {
       # warn "You are here";
       if ($do_front_chop) {
         $body .= $self->match_clause ({indent => 2 + length $indent,
