@@ -203,7 +203,7 @@ ftok(path, id)
         key_t k = ftok(path, id);
         ST(0) = k == (key_t) -1 ? &PL_sv_undef : sv_2mortal(newSViv(k));
 #else
-        DIE(aTHX_ PL_no_func, "ftok");
+	Perl_die(aTHX_ PL_no_func, "ftok"); return;
 #endif
 
 void
