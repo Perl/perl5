@@ -931,6 +931,7 @@ PerlIOBase_clearerr
 PerlIOBase_setlinebuf
 PerlIOBase_pushed
 PerlIOBase_read
+PerlIOBase_unread
 PerlIOBase_error
 PerlIOBase_eof
 PerlIOBuf_tell
