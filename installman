@@ -131,7 +131,7 @@ sub runpod2man {
     # installed by occult means.)
     my $pod2man = "$downdir/perl -I $downdir/lib $downdir/pod/pod2man --section=$manext --official";
 
-    mkpath($mandir, 1, 0777) unless $opts{notify};  # In File::Path
+    mkpath($mandir, $verbose, 0777) unless $notify;  # In File::Path
     # Make a list of all the .pm and .pod files in the directory.  We will
     # always run pod2man from the lib directory and feed it the full pathname
     # of the pod.  This might be useful for pod2man someday.

@@ -152,7 +152,7 @@ if ($Is_VMS) {  # Hang in there until File::Spec hits the big time
 if ($d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
 
    $installbin		|| die "No installbin directory in config.sh\n";
--d $installbin		|| mkpath($installbin, 1, 0777);
+-d $installbin		|| mkpath($installbin, $verbose, 0777);
 -d $installbin		|| $nonono || die "$installbin is not a directory\n";
 -w $installbin		|| $nonono || die "$installbin is not writable by you\n"
 	unless $installbin =~ m#^/afs/# || $nonono;
@@ -237,10 +237,10 @@ if ($d_dosuid) {
 
 my ($do_installarchlib, $do_installprivlib) = (0, 0);
     
-mkpath($installprivlib, 1, 0777);
-mkpath($installarchlib, 1, 0777);
-mkpath($installsitelib, 1, 0777) if ($installsitelib);
-mkpath($installsitearch, 1, 0777) if ($installsitearch);
+mkpath($installprivlib, $verbose, 0777);
+mkpath($installarchlib, $verbose, 0777);
+mkpath($installsitelib, $verbose, 0777) if ($installsitelib);
+mkpath($installsitearch, $verbose, 0777) if ($installsitearch);
 
 if (chdir "lib") {
     $do_installarchlib = ! samepath($installarchlib, '.');
@@ -257,7 +257,7 @@ else {
 }
 
 # Install header files and libraries.
-mkpath("$installarchlib/CORE", 1, 0777);
+mkpath("$installarchlib/CORE", $verbose, 0777);
 my @corefiles;
 if ($Is_VMS) {  # We did core file selection during build
     my $coredir = "lib/$Config{archname}/$ver/CORE";
@@ -272,7 +272,7 @@ else {
     push(@corefiles,'perl.exp') if $^O eq 'aix';
     if ($^O eq 'mpeix') {
         # MPE needs mpeixish.h installed as well.
-        mkpath("$installarchlib/CORE/mpeix", 1, 0777);
+        mkpath("$installarchlib/CORE/mpeix", $verbose, 0777);
         push(@corefiles,'mpeix/mpeixish.h');
     }
     # If they have built sperl.o...
@@ -367,7 +367,7 @@ if (! $versiononly && (-f 'cppstdin') && (! samepath($installbin, '.'))) {
 
 # Install scripts.
 
-mkpath($installscript, 1, 0777);
+mkpath($installscript, $verbose, 0777);
 
 if (! $versiononly) {
     for (@scripts) {
@@ -393,7 +393,7 @@ if (! $versiononly) {
 
 my $pod = $Is_Cygwin ? 'pods' : 'pod';
 unless ( $versiononly && !($installprivlib =~ m/\Q$ver/)) {
-    mkpath("${installprivlib}/$pod", 1, 0777);
+    mkpath("${installprivlib}/$pod", $verbose, 0777);
 
     # If Perl 5.003's perldiag.pod is there, rename it.
     if (open POD, "${installprivlib}/$pod/perldiag.pod") {
@@ -631,7 +631,7 @@ sub installlib {
         $packlist->{"$installlib/$name"} = { type => 'file' };
 	if (compare($_, "$installlib/$name") || $nonono) {
 	    unlink("$installlib/$name");
-	    mkpath("$installlib/$dir", 1, 0777);
+	    mkpath("$installlib/$dir", $verbose, 0777);
 	    # HP-UX (at least) needs to maintain execute permissions
 	    # on dynamically-loaded libraries.
 	    copy_if_diff($_, "$installlib/$name")
