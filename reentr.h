@@ -24,6 +24,8 @@
 #ifdef __hpux
 #   undef HAS_CRYPT_R
 #   undef HAS_DRAND48_R
+#   undef HAS_ENDGRENT_R
+#   undef HAS_ENDPWENT_R
 #   undef HAS_GETGRENT_R
 #   undef HAS_GETPWENT_R
 #   undef HAS_SETLOCALE_R
