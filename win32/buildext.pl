@@ -29,8 +29,15 @@ if ($perl =~ m#^\.\.#)
   $perl = "$here\\$perl";
  }
 (my $topdir = $perl) =~ s/\\[^\\]+$//;
-$ENV{PATH} = "$topdir;$ENV{PATH}";	# so miniperl can find perlglob.exe
+# miniperl needs to find perlglob and pl2bat
+$ENV{PATH} = "$topdir;$topdir\\win32\\bin;$ENV{PATH}";
 #print "PATH=$ENV{PATH}\n";
+my $pl2bat = "$topdir\\win32\\bin\\pl2bat";
+unless (-f "$pl2bat.bat") {
+    my @args = ($perl, ("$pl2bat.pl") x 2);
+    print "@args\n";
+    system(@args);
+}
 my $make = shift;
 $make .= " ".shift while $ARGV[0]=~/^-/;
 my $dep  = shift;
