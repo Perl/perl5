@@ -6063,8 +6063,10 @@ Perl_peep(pTHX_ register OP *o)
     for (; o; o = o->op_next) {
 	if (o->op_seq)
 	    break;
-	if (!PL_op_seqmax)
-	    PL_op_seqmax++;
+        /* The special value -1 is used by the B::C compiler backend to indicate
+         * that an op is statically defined and should not be freed */
+	if (!PL_op_seqmax || PL_op_seqmax == (U16)-1)
+	    PL_op_seqmax = 1;
 	PL_op = o;
 	switch (o->op_type) {
 	case OP_SETSTATE:
