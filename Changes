@@ -32,6 +32,183 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8890] By: jhi                                   on 2001/02/22  13:22:12
+        Log: Add -stdio to the archname if no perlio selected,
+             no -perlio added since that is now the default.
+             
+             Add few CPUs/architectures to the Cppsym scan.
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  8889] By: jhi                                   on 2001/02/22  13:05:59
+        Log: Metaconfig unit change for #8888.
+     Branch: metaconfig/U/perl
+	   ! useperlio.U
+____________________________________________________________________________
+[  8888] By: jhi                                   on 2001/02/22  13:05:28
+        Log: *drum roll*  Make perlio the default.
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  8887] By: jhi                                   on 2001/02/22  12:50:52
+        Log: Integrate change #8665 from maintperl to mainline,
+             IA64-induced POSIX::SigSet masking with IVs instead of NVs.
+     Branch: perl
+	  !> ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[  8886] By: jhi                                   on 2001/02/22  12:49:24
+        Log: Integrate changes #8883,8884 from mainline to maintperl.
+             
+             Subject: [patch: perl@8867] embed.{h|pl} need not mention ebcdic_control ...
+             Subject: Re: File::Temp::_gettemp warning
+     Branch: maint-5.6/perl
+	  !> embed.h embed.pl lib/File/Temp.pm
+____________________________________________________________________________
+[  8885] By: jhi                                   on 2001/02/22  12:43:59
+        Log: Based on
+             
+             Subject: [ID 20010222.001] POSIX.xs IV vs NV bug
+             From: schwab@suse.de
+             Date: Thu, 22 Feb 2001 13:08:09 +0100
+             Message-Id: <200102221208.f1MC89H09364@sykes.suse.de>
+             
+             but the fix done slightly differently because the other
+             half was already done in #8664.
+     Branch: maint-5.6/perl
+	   ! ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[  8884] By: jhi                                   on 2001/02/22  12:37:15
+        Log: Subject: Re: File::Temp::_gettemp warning
+             From: Tim Jenness <t.jenness@jach.hawaii.edu>
+             Date: Wed, 21 Feb 2001 22:15:32 -1000 (HST)
+             Message-ID: <Pine.LNX.4.30.0102212211190.18964-100000@lapaki.jach.hawaii.edu>
+             
+             This patch to File::Temp does two things:
+             
+             1. Fixes the problem with CGI::Carp when determining
+             the Fcntl constants
+             
+             2. Removes most of the carps and consolidates them so that all the
+             reasons are included in a single die that is caught by the test. This
+             means that the correct skipping behaviour is displayed by the test.
+     Branch: perl
+	   ! lib/File/Temp.pm
+____________________________________________________________________________
+[  8883] By: jhi                                   on 2001/02/22  12:29:19
+        Log: Subject: [patch: perl@8867] embed.{h|pl} need not mention ebcdic_control ...
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Wed, 21 Feb 2001 16:30:06 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10102211624490.12601-100000@aspara.forte.com>
+     Branch: perl
+	   ! embed.h embed.pl
+____________________________________________________________________________
+[  8882] By: jhi                                   on 2001/02/21  19:41:33
+        Log: Integrate change #8881 from mainlin to maintperl.
+             
+             Subject:  [PATCH - perl8585] glob-in-eval memory leak fix
+     Branch: maint-5.6/perl
+	  !> op.c
+____________________________________________________________________________
+[  8881] By: jhi                                   on 2001/02/21  19:38:57
+        Log: Subject:  [PATCH - perl8585] glob-in-eval memory leak fix
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date:     Wed, 21 Feb 2001 13:08:03 EST
+             Message-Id: <010221130721.7a2ab@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  8880] By: jhi                                   on 2001/02/21  19:34:34
+        Log: Retract #8875, cannot let go of the old semantics of unpack U
+             without rethinking utf8decode.t.
+     Branch: perl
+	   ! pp.c t/op/pack.t
+____________________________________________________________________________
+[  8879] By: jhi                                   on 2001/02/21  19:08:02
+        Log: Run run/*.t also in minitest.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  8878] By: nick                                  on 2001/02/21  18:55:37
+        Log: Integrate mainline
+     Branch: perlio
+	  !> (integrate 76 files)
+____________________________________________________________________________
+[  8877] By: jhi                                   on 2001/02/21  15:09:33
+        Log: Fix the sys/fcntl.h problem reported by Peter Prymmer.
+     Branch: metaconfig
+	   ! U/compline/nblock_io.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  8876] By: jhi                                   on 2001/02/21  14:54:45
+        Log: If no sfio, no -lsfio.
+     Branch: metaconfig/U/perl
+	   ! d_sfio.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  8875] By: jhi                                   on 2001/02/21  14:54:00
+        Log: Make unpack C and unpack C truly equivalent.
+     Branch: perl
+	   ! pp.c t/op/pack.t
+____________________________________________________________________________
+[  8874] By: jhi                                   on 2001/02/21  14:26:02
+        Log: Subject: [patch perl@8841] One URL update and a possible OS Version snag for perlport.pod
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Tue, 20 Feb 2001 14:51:55 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10102201447380.501692-100000@aspara.forte.com>
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[  8873] By: jhi                                   on 2001/02/21  14:24:31
+        Log: Subject: [PATCH] fix for charnames above FFFF
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 21 Feb 2001 07:05:45 +0100
+             Message-ID: <m366i44ll2.fsf@ak-71.mind.de>
+     Branch: perl
+	   ! lib/charnames.pm t/lib/charnames.t
+____________________________________________________________________________
+[  8872] By: jhi                                   on 2001/02/21  14:15:25
+        Log: Integrate change #8868 from pureperl to mainline.
+             
+             Fixed reference count loop caused by sv_magic.
+     Branch: perl
+	  !> sv.c
+____________________________________________________________________________
+[  8871] By: jhi                                   on 2001/02/21  14:07:29
+        Log: Integrate change #8868 from pureperl to maintperl.
+             
+             Fixed reference count loop caused by sv_magic.
+     Branch: maint-5.6/perl
+	  !> sv.c
+____________________________________________________________________________
+[  8870] By: jhi                                   on 2001/02/21  14:04:41
+        Log: Put back the #8840, it was innocent.
+     Branch: perl
+	   ! embed.h embed.pl global.sym objXSUB.h perlapi.c
+	   ! pod/perlapi.pod pod/perlfunc.pod pod/perlguts.pod proto.h sv.c
+____________________________________________________________________________
+[  8869] By: jhi                                   on 2001/02/21  14:00:03
+        Log: unpack("C", ...) was left slightly unfinished by #8865.
+     Branch: perl
+	   ! pp.c t/op/pack.t
+____________________________________________________________________________
+[  8868] By: alanbur                               on 2001/02/21  01:33:45
+        Log: Fixed reference count loop caused by sv_magic.  sv_magic is called
+             from gv_fetchpv to create single-character magic variables (e.g. $!),
+             and it is passed a sv and the gv that contains the sv as the mg_obj
+             value.  When sv_magic stores the mg_obj pointer it increments the gv
+             refcount, thus causing a sv-gv pair that can't be freed.  There is
+             already a check for sv == obj which is used to prevent such reference
+             loops.  This change extends the check to cover the case described above.
+     Branch: maint-5.6/pureperl
+	   ! sv.c
+____________________________________________________________________________
+[  8867] By: jhi                                   on 2001/02/21  00:52:39
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  8866] By: jhi                                   on 2001/02/21  00:34:20
         Log: Upgrade to CGI.pm 2.752, from Lincoln Stein.
              (Note: there were some conflicts due to EBCDIC and EPOC
