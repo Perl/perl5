@@ -1,101 +1,13 @@
 package AutoLoader;
+
 use Carp;
-$DB::sub = $DB::sub;	# Avoid warning
+use vars qw(@EXPORT @EXPORT_OK);
 
-=head1 NAME
-
-AutoLoader - load functions only on demand
-
-=head1 SYNOPSIS
-
-    package FOOBAR;
-    use Exporter;
-    use AutoLoader;
-    @ISA = qw(Exporter AutoLoader);
-
-=head1 DESCRIPTION
-
-This module tells its users that functions in the FOOBAR package are
-to be autoloaded from F<auto/$AUTOLOAD.al>.  See
-L<perlsub/"Autoloading"> and L<AutoSplit>.
-
-=head2 __END__
-
-The module using the autoloader should have the special marker C<__END__>
-prior to the actual subroutine declarations. All code that is before the
-marker will be loaded and compiled when the module is used. At the marker,
-perl will cease reading and parsing. See also the B<AutoSplit> module, a
-utility that automatically splits a module into a collection of files for
-autoloading.
-
-When a subroutine not yet in memory is called, the C<AUTOLOAD> function
-attempts to locate it in a directory relative to the location of the module
-file itself. As an example, assume F<POSIX.pm> is located in 
-F</usr/local/lib/perl5/POSIX.pm>. The autoloader will look for perl
-subroutines for this package in F</usr/local/lib/perl5/auto/POSIX/*.al>.
-The C<.al> file is named using the subroutine name, sans package.
-
-=head2 Loading Stubs
-
-The B<AutoLoader> module provide a special import() method that will
-load the stubs (from F<autosplit.ix> file) of the calling module.
-These stubs are needed to make inheritance work correctly for class
-modules.
-
-Modules that inherit from B<AutoLoader> should always ensure that they
-override the AutoLoader->import() method.  If the module inherit from
-B<Exporter> like shown in the I<synopis> section this is already taken
-care of.  For class methods an empty import() would do nicely:
-
-  package MyClass;
-  use AutoLoader;        # load stubs
-  @ISA=qw(AutoLoader);
-  sub import {}          # hide AutoLoader::import
-
-You can also set up autoloading by importing the AUTOLOAD function
-instead of inheriting from B<AutoLoader>:
-
-  package MyClass;
-  use AutoLoader;        # load stubs
-  *AUTOLOAD = \&AutoLoader::AUTOLOAD;
-
-
-=head2 Package Lexicals
-
-Package lexicals declared with C<my> in the main block of a package using
-the B<AutoLoader> will not be visible to auto-loaded functions, due to the
-fact that the given scope ends at the C<__END__> marker. A module using such
-variables as package globals will not work properly under the B<AutoLoader>.
-
-The C<vars> pragma (see L<perlmod/"vars">) may be used in such situations
-as an alternative to explicitly qualifying all globals with the package
-namespace. Variables pre-declared with this pragma will be visible to any
-autoloaded routines (but will not be invisible outside the package,
-unfortunately).
-
-=head2 AutoLoader vs. SelfLoader
-
-The B<AutoLoader> is a counterpart to the B<SelfLoader> module. Both delay
-the loading of subroutines, but the B<SelfLoader> accomplishes the goal via
-the C<__DATA__> marker rather than C<__END__>. While this avoids the use of
-a hierarchy of disk files and the associated open/close for each routine
-loaded, the B<SelfLoader> suffers a disadvantage in the one-time parsing of
-the lines after C<__DATA__>, after which routines are cached. B<SelfLoader>
-can also handle multiple packages in a file.
-
-B<AutoLoader> only reads code as it is requested, and in many cases should be
-faster, but requires a machanism like B<AutoSplit> be used to create the
-individual files.  The B<ExtUtils::MakeMaker> will invoke B<AutoSplit>
-automatically if the B<AutoLoader> is used in a module source file.
-
-=head1 CAVEAT
-
-On systems with restrictions on file name length, the file corresponding to a
-subroutine may have a shorter name that the routine itself. This can lead to
-conflicting file names. The I<AutoSplit> package warns of these potential
-conflicts when used to split a module.
-
-=cut
+BEGIN {
+    require Exporter;
+    @EXPORT = ();
+    @EXPORT_OK = qw(AUTOLOAD);
+}
 
 AUTOLOAD {
     my $name;
@@ -135,13 +47,20 @@ AUTOLOAD {
 	}
     }
     $@ = $save;
-    $DB::sub = $AUTOLOAD;	# Now debugger know where we are.
     goto &$AUTOLOAD;
 }
-                            
+
 sub import {
-    my ($callclass, $callfile, $callline,$path,$callpack) = caller(0);
-    ($callpack = $callclass) =~ s#::#/#;
+    my $pkg = shift;
+    my $callpkg = caller;
+
+    #
+    # Export symbols, but not by accident of inheritance.
+    #
+
+    Exporter::export $pkg, $callpkg, @_ if $pkg eq 'AutoLoader';
+
+    #
     # Try to find the autosplit index file.  Eg., if the call package
     # is POSIX, then $INC{POSIX.pm} is something like
     # '/usr/local/lib/perl5/POSIX.pm', and the autosplit index file is in
@@ -152,13 +71,16 @@ sub import {
     # $INC{POSIX.pm} is 'lib/POSIX.pm', and we want to require
     # 'auto/POSIX/autosplit.ix' (without the leading 'lib').
     #
-    if (defined($path = $INC{$callpack . '.pm'})) {
+
+    (my $calldir = $callpkg) =~ s#::#/#;
+    my $path = $INC{$calldir . '.pm'};
+    if (defined($path)) {
 	# Try absolute path name.
-	$path =~ s#^(.*)$callpack\.pm$#$1auto/$callpack/autosplit.ix#;
+	$path =~ s#^(.*)$calldir\.pm$#$1auto/$calldir/autosplit.ix#;
 	eval { require $path; };
 	# If that failed, try relative path with normal @INC searching.
 	if ($@) {
-	    $path ="auto/$callpack/autosplit.ix";
+	    $path ="auto/$calldir/autosplit.ix";
 	    eval { require $path; };
 	}
 	carp $@ if ($@);  
@@ -166,3 +88,156 @@ sub import {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+AutoLoader - load subroutines only on demand
+
+=head1 SYNOPSIS
+
+    package Foo;
+    use AutoLoader 'AUTOLOAD';   # import the default AUTOLOAD subroutine
+
+    package Bar;
+    use AutoLoader;              # don't import AUTOLOAD, define our own
+    sub AUTOLOAD {
+        ...
+        $AutoLoader::AUTOLOAD = "...";
+        goto &AutoLoader::AUTOLOAD;
+    }
+
+=head1 DESCRIPTION
+
+The B<AutoLoader> module works with the B<AutoSplit> module and the
+C<__END__> token to defer the loading of some subroutines until they are
+used rather than loading them all at once.
+
+To use B<AutoLoader>, the author of a module has to place the
+definitions of subroutines to be autoloaded after an C<__END__> token.
+(See L<perldata>.)  The B<AutoSplit> module can then be run manually to
+extract the definitions into individual files F<auto/funcname.al>.
+
+B<AutoLoader> implements an AUTOLOAD subroutine.  When an undefined
+subroutine in is called in a client module of B<AutoLoader>,
+B<AutoLoader>'s AUTOLOAD subroutine attempts to locate the subroutine in a
+file with a name related to the location of the file from which the
+client module was read.  As an example, if F<POSIX.pm> is located in
+F</usr/local/lib/perl5/POSIX.pm>, B<AutoLoader> will look for perl
+subroutines B<POSIX> in F</usr/local/lib/perl5/auto/POSIX/*.al>, where
+the C<.al> file has the same name as the subroutine, sans package.  If
+such a file exists, AUTOLOAD will read and evaluate it,
+thus (presumably) defining the needed subroutine.  AUTOLOAD will then
+C<goto> the newly defined subroutine.
+
+Once this process completes for a given funtion, it is defined, so
+future calls to the subroutine will bypass the AUTOLOAD mechanism.
+
+=head2 Subroutine Stubs
+
+In order for object method lookup and/or prototype checking to operate
+correctly even when methods have not yet been defined it is necessary to
+"forward declare" each subroutine (as in C<sub NAME;>).  See
+L<perlsub/"SYNOPSIS">.  Such forward declaration creates "subroutine
+stubs", which are place holders with no code.
+
+The AutoSplit and B<AutoLoader> modules automate the creation of forward
+declarations.  The AutoSplit module creates an 'index' file containing
+forward declarations of all the AutoSplit subroutines.  When the
+AutoLoader module is 'use'd it loads these declarations into its callers
+package.
+
+Because of this mechanism it is important that B<AutoLoader> is always
+C<use>d and not C<require>d.
+
+=head2 Using B<AutoLoader>'s AUTOLOAD Subroutine
+
+In order to use B<AutoLoader>'s AUTOLOAD subroutine you I<must>
+explicitly import it:
+
+    use AutoLoader 'AUTOLOAD';
+
+=head2 Overriding B<AutoLoader>'s AUTOLOAD Subroutine
+
+Some modules, mainly extensions, provide their own AUTOLOAD subroutines.
+They typically need to check for some special cases (such as constants)
+and then fallback to B<AutoLoader>'s AUTOLOAD for the rest.
+
+Such modules should I<not> import B<AutoLoader>'s AUTOLOAD subroutine.
+Instead, they should define their own AUTOLOAD subroutines along these
+lines:
+
+    use AutoLoader;
+
+    sub AUTOLOAD {
+        my $constname;
+        ($constname = $AUTOLOAD) =~ s/.*:://;
+        my $val = constant($constname, @_ ? $_[0] : 0);
+        if ($! != 0) {
+            if ($! =~ /Invalid/) {
+                $AutoLoader::AUTOLOAD = $AUTOLOAD;
+                goto &AutoLoader::AUTOLOAD;
+            }
+            else {
+                croak "Your vendor has not defined constant $constname";
+            }
+        }
+        eval "sub $AUTOLOAD { $val }";
+        goto &$AUTOLOAD;
+    }
+
+If any module's own AUTOLOAD subroutine has no need to fallback to the
+AutoLoader's AUTOLOAD subroutine (because it doesn't have any AutoSplit
+subroutines), then that module should not use B<AutoLoader> at all.
+
+=head2 Package Lexicals
+
+Package lexicals declared with C<my> in the main block of a package
+using B<AutoLoader> will not be visible to auto-loaded subroutines, due to
+the fact that the given scope ends at the C<__END__> marker.  A module
+using such variables as package globals will not work properly under the
+B<AutoLoader>.
+
+The C<vars> pragma (see L<perlmod/"vars">) may be used in such
+situations as an alternative to explicitly qualifying all globals with
+the package namespace.  Variables pre-declared with this pragma will be
+visible to any autoloaded routines (but will not be invisible outside
+the package, unfortunately).
+
+=head2 B<AutoLoader> vs. B<SelfLoader>
+
+The B<AutoLoader> is similar in purpose to B<SelfLoader>: both delay the
+loading of subroutines.
+
+B<SelfLoader> uses the C<__DATA__> marker rather than C<__END__>.
+While this avoids the use of a hierarchy of disk files and the
+associated open/close for each routine loaded, B<SelfLoader> suffers a
+startup speed disadvantage in the one-time parsing of the lines after
+C<__DATA__>, after which routines are cached.  B<SelfLoader> can also
+handle multiple packages in a file.
+
+B<AutoLoader> only reads code as it is requested, and in many cases
+should be faster, but requires a machanism like B<AutoSplit> be used to
+create the individual files.  L<ExtUtils::MakeMaker> will invoke
+B<AutoSplit> automatically if B<AutoLoader> is used in a module source
+file.
+
+=head1 CAVEATS
+
+AutoLoaders prior to Perl 5.002 had a slightly different interface.  Any
+old modules which use B<AutoLoader> should be changed to the new calling
+style.  Typically this just means changing a require to a use, adding
+the explicit C<'AUTOLOAD'> import if needed, and removing B<AutoLoader>
+from C<@ISA>.
+
+On systems with restrictions on file name length, the file corresponding
+to a subroutine may have a shorter name that the routine itself.  This
+can lead to conflicting file names.  The I<AutoSplit> package warns of
+these potential conflicts when used to split a module.
+
+=head1 SEE ALSO
+
+L<SelfLoader> - an autoloader that doesn't use external files.
+
+=cut
