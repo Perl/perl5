@@ -106,7 +106,7 @@ test.  Note that outside of a C<while> test, this will not happen.
 
 =over 8
 
-=item $<I<digit>>
+=item $E<lt>I<digit>E<gt>
 
 Contains the subpattern from the corresponding set of parentheses in
 the last pattern matched, not counting patterns matched in nested
@@ -127,7 +127,7 @@ BLOCK).  (Mnemonic: like & in some editors.)  This variable is read-only.
 
 The string preceding whatever was matched by the last successful
 pattern match (not counting any matches hidden within a BLOCK or eval
-enclosed by the current BLOCK).  (Mnemonic: ` often precedes a quoted
+enclosed by the current BLOCK).  (Mnemonic: C<`> often precedes a quoted
 string.)  This variable is read-only.
 
 =item $POSTMATCH
@@ -136,7 +136,7 @@ string.)  This variable is read-only.
 
 The string following whatever was matched by the last successful
 pattern match (not counting any matches hidden within a BLOCK or eval()
-enclosed by the current BLOCK).  (Mnemonic: ' often follows a quoted
+enclosed by the current BLOCK).  (Mnemonic: C<'> often follows a quoted
 string.)  Example:
 
     $_ = 'abcdefghi';
@@ -181,7 +181,7 @@ Use of "C<$*>" is deprecated in Perl 5.
 =item $.
 
 The current input line number for the last file handle from
-which you read (or performed a C<seek> or <tell> on).  An
+which you read (or performed a C<seek> or C<tell> on).  An
 explicit close on a filehandle resets the line number.  Since
 "C<E<lt>E<gt>>" never does an explicit close, line numbers increase
 across ARGV files (but see examples under eof()).  Localizing C<$.> has
@@ -199,7 +199,7 @@ number.)
 
 The input record separator, newline by default.  Works like B<awk>'s RS
 variable, including treating empty lines as delimiters if set to the
-null string.  (Note:  An empty line can not contain any spaces or
+null string.  (Note:  An empty line cannot contain any spaces or
 tabs.) You may set it to a multicharacter string to match a
 multi-character delimiter.  Note that setting it to C<"\n\n"> means
 something slightly different than setting it to C<"">, if the file
@@ -259,7 +259,7 @@ specify, with no trailing newline or record separator assumed.  In
 order to get behavior more like B<awk>, set this variable as you would
 set B<awk>'s ORS variable to specify what is printed at the end of the
 print.  (Mnemonic: you set "C<$\>" instead of adding \n at the end of the
-print.  Also, it's just like /, but it's what you get "back" from
+print.  Also, it's just like C<$/>, but it's what you get "back" from
 Perl.)
 
 =item $LIST_SEPARATOR
@@ -403,6 +403,10 @@ the wait() system call, so the exit value of the subprocess is actually
 if any, the process died from, and whether there was a core dump.
 (Mnemonic: similar to B<sh> and B<ksh>.)
 
+Inside an C<END> subroutine C<$?> contains the value that is going to be
+given to C<exit()>.  You can modify C<$?> in an C<END> subroutine to
+change the exit status of the script.
+
 =item $OS_ERROR
 
 =item $ERRNO
@@ -440,7 +444,8 @@ invoked may have failed in the normal fashion).  (Mnemonic: Where was
 the syntax error "at"?)
 
 Note that warning messages are not collected in this variable.  You can,
-however, set up a routine to process warnings by setting $SIG{__WARN__} below.
+however, set up a routine to process warnings by setting C<$SIG{__WARN__}>
+below.
 
 =item $PROCESS_ID
 
@@ -622,7 +627,7 @@ The name that the Perl binary itself was executed as, from C's C<argv[0]>.
 
 =item $ARGV
 
-contains the name of the current file when reading from <>.
+contains the name of the current file when reading from E<lt>E<gt>.
 
 =item @ARGV
 
@@ -686,10 +691,10 @@ the Perl script.  Here are some other examples:
 The one marked scary is problematic because it's a bareword, which means
 sometimes it's a string representing the function, and sometimes it's 
 going to call the subroutine call right then and there!  Best to be sure
-and quote it or take a reference to it.  *Plumber works too.  See L<perlsubs>.
+and quote it or take a reference to it.  *Plumber works too.  See L<perlsub>.
 
 Certain internal hooks can be also set using the %SIG hash.  The
-routine indicated by $SIG{__WARN__} is called when a warning message is
+routine indicated by C<$SIG{__WARN__}> is called when a warning message is
 about to be printed.  The warning message is passed as the first
 argument.  The presence of a __WARN__ hook causes the ordinary printing
 of warnings to STDERR to be suppressed.  You can use this to save warnings
@@ -698,7 +703,7 @@ in a variable, or turn warnings into fatal errors, like this:
     local $SIG{__WARN__} = sub { die $_[0] };
     eval $proggie;
 
-The routine indicated by $SIG{__DIE__} is called when a fatal exception
+The routine indicated by C<$SIG{__DIE__}> is called when a fatal exception
 is about to be thrown.  The error message is passed as the first
 argument.  When a __DIE__ hook routine returns, the exception
 processing continues as it would have in the absence of the hook,
