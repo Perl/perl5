@@ -64,6 +64,11 @@
 #endif
 #include <fcntl.h>
 
+/* Mac OSX does not include a definition of tzname in a .h file */
+#if defined (HAS_TZNAME) && defined(__APPLE__) && defined(__MACH__)
+extern char *tzname[2];
+#endif
+
 #if defined(__VMS) && !defined(__POSIX_SOURCE)
 #  include <libdef.h>       /* LIB$_INVARG constant */
 #  include <lib$routines.h> /* prototype for lib$ediv() */
