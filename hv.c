@@ -80,6 +80,7 @@ S_more_he(pTHX)
 STATIC HEK *
 S_save_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
 {
+    int flags_masked = flags & HVhek_MASK;
     char *k;
     register HEK *hek;
 
@@ -89,7 +90,10 @@ S_save_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
     HEK_KEY(hek)[len] = 0;
     HEK_LEN(hek) = len;
     HEK_HASH(hek) = hash;
-    HEK_FLAGS(hek) = (unsigned char)flags;
+    HEK_FLAGS(hek) = (unsigned char)flags_masked;
+
+    if (flags & HVhek_FREEKEY)
+	Safefree(str);
     return hek;
 }
 
@@ -2083,7 +2087,7 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
     }
     if (!found) {
 	entry = new_HE();
-	HeKEY_hek(entry) = save_hek_flags(str, len, hash, flags);
+	HeKEY_hek(entry) = save_hek_flags(str, len, hash, flags_masked);
 	HeVAL(entry) = Nullsv;
 	HeNEXT(entry) = *oentry;
 	*oentry = entry;
