@@ -49,7 +49,7 @@ use strict;
 sub paraprint;
 
 
-my($Version) = "1.17";
+my($Version) = "1.18";
 
 # Changed in 1.06 to skip Mail::Send and Mail::Util if not available.
 # Changed in 1.07 to see more sendmail execs, and added pipe output.
@@ -69,14 +69,16 @@ my($Version) = "1.17";
 #                 Also report selected environment variables.
 # Changed in 1.16 to include @INC, and allow user to re-edit if no changes.
 # Changed in 1.17 Win32 support added.  GSAR 97-04-12
+# Changed in 1.18 add '-ok' option for reporting build success. CFR 97-06-18
 
-# TODO: Allow the user to re-name the file on mail failure, and
+# TODO: - Allow the user to re-name the file on mail failure, and
 #       make sure failure (transmission-wise) of Mail::Send is 
 #       accounted for.
+#       - Test -b option
 
 my( $file, $usefile, $cc, $address, $perlbug, $testaddress, $filename,
     $subject, $from, $verbose, $ed, 
-    $fh, $me, $Is_MSWin32, $Is_VMS, $msg, $body, $andcc, %REP);
+    $fh, $me, $Is_MSWin32, $Is_VMS, $msg, $body, $andcc, %REP, $ok);
 
 Init();
 
@@ -106,7 +108,7 @@ sub Init {
 	$Is_MSWin32 = $^O eq 'MSWin32';
 	$Is_VMS = $^O eq 'VMS';
 
-	getopts("dhva:s:b:f:r:e:SCc:t");
+	getopts("dhva:s:b:f:r:e:SCc:to:");
 	
 
 	# This comment is needed to notify metaconfig that we are
@@ -117,6 +119,7 @@ sub Init {
 	
 	# perlbug address
 	$perlbug = 'perlbug@perl.com';
+
 	
 	# Test address
 	$testaddress = 'perlbug-test@perl.com';
@@ -124,13 +127,6 @@ sub Init {
 	# Target address
 	$address = $::opt_a || ($::opt_t ? $testaddress : $perlbug);
 
-	# Possible administrator addresses, in order of confidence
-	# (Note that cf_email is not mentioned to metaconfig, since
-	# we don't really want it. We'll just take it if we have to.)
-	$cc = ($::opt_C ? "" : (
-		$::opt_c || $::Config{perladmin} || $::Config{cf_email} || $::Config{cf_by}
-		));
-	
 	# Users address, used in message and in Reply-To header
 	$from = $::opt_r || "";
 
@@ -154,7 +150,36 @@ sub Init {
 		      ($Is_VMS ? "edit/tpu" : $Is_MSWin32 ? "notepad" : "vi")
 	      );
 	      
+        # OK - send "OK" report for build on this system
+        $ok = 0;
+	if ( $::opt_o ) {
+	    if ( $::opt_o eq 'k' ) {
+		# force these options
+		$::opt_S = 1; # don't prompt for send
+		$::opt_C = 1; # don't send a copy to the local admin
+		$::opt_v = 1; $verbose = 1;
+		$::opt_s = 1; $subject = "OK: perl $] on "
+                                         . $::Config{'osname'} . ' '
+                                         . $::Config{'osvers'};
+		$::opt_b = 1; $body    = "Perl reported to build OK on this system\n";
+		$ok = 1;
+	    }
+	    else {
+		Help();
+		exit();
+	    }
+	}
       
+	# Possible administrator addresses, in order of confidence
+	# (Note that cf_email is not mentioned to metaconfig, since
+	# we don't really want it. We'll just take it if we have to.)
+        #
+        # This has to be after the $ok stuff above because of the way
+        # that $::opt_C is forced.
+	$cc = ($::opt_C ? "" : (
+		$::opt_c || $::Config{perladmin} || $::Config{cf_email} || $::Config{cf_by}
+		));
+	
 	# My username
 	$me = ($Is_MSWin32 ? $ENV{'USERNAME'} : getpwuid($<));
 
@@ -164,7 +189,7 @@ sub Init {
 sub Query {
 
 	# Explain what perlbug is
-	
+    if ( ! $ok ) {
 	paraprint <<EOF;
 This program provides an easy way to create a message reporting a bug
 in perl, and e-mail it to $address.  It is *NOT* intended for
@@ -178,6 +203,7 @@ newsgroup comp.lang.perl.misc.  If you're looking for help with using
 perl with CGI, try posting to comp.infosystems.www.programming.cgi.
 
 EOF
+    }
 
 
 	# Prompt for subject of message, if needed
@@ -239,6 +265,7 @@ EOF
 		$guess = $ENV{"REPLY-TO"} if defined($ENV{'REPLY-TO'});
 	
 		if( $guess ) {
+		    if ( ! $ok ) {
 			paraprint <<EOF;
 
 
@@ -246,6 +273,7 @@ Your e-mail address will be useful if you need to be contacted. If the
 default shown is not your full internet e-mail address, please correct it.
 
 EOF
+                    }
 		} else {
 			paraprint <<EOF;
 
@@ -254,12 +282,20 @@ your full internet e-mail address here.
 
 EOF
 		}
-		print "Your address [$guess]: ";
-	
-		$from = <>;
-		chop $from;
-	
-		if($from eq "") { $from = $guess }
+
+		if ( $ok && $guess ne '' ) {
+		    # use it
+		    $from = $guess;
+		}
+		else {
+		    # verify it
+		    print "Your address [$guess]: ";
+		    
+		    $from = <>;
+		    chop $from;
+		    
+		    if($from eq "") { $from = $guess }
+		}
 	
 	}
 	
@@ -544,6 +580,7 @@ EOF
 		} 
 	}
 
+        return if $ok;
         # Check that we have a report that has some, eh, report in it.
 
         my $unseen = 0;
@@ -768,6 +805,7 @@ Options:
   -d	Data mode (the default if you redirect or pipe output.) 
         This prints out your configuration data, without mailing
         anything. You can use this with -v to get more complete data.
+  -ok   Report successful build on this sytem to perl porters (use alone).
   -h    Print this help message. 
   
 EOF
@@ -802,6 +840,8 @@ B<perlbug> S<[ B<-v> ]> S<[ B<-a> I<address> ]> S<[ B<-s> I<subject> ]>
 S<[ B<-b> I<body> | B<-f> I<file> ]> S<[ B<-r> I<returnaddress> ]>
 S<[ B<-e> I<editor> ]> S<[ B<-c> I<adminaddress> | B<-C> ]>
 S<[ B<-S> ]> S<[ B<-t> ]>  S<[ B<-d> ]>  S<[ B<-h> ]>
+
+B<perlbug> S<[ B<-r> I<returnaddress> ]> B<-ok>
 
 =head1 DESCRIPTION
 
@@ -956,6 +996,13 @@ prepared message.
 
 Prints a brief summary of the options.
 
+=item B<-ok>
+
+Report successful build on this system to perl porters. Forces B<-S>,
+B<-C>, and B<-v>. Forces and supplies values for B<-s> and B<-b>. Only
+prompts for a return address if it cannot guess it (for use with
+B<make>). Honors return address specified with B<-r>.
+
 =item B<-r>
 
 Your return address.  The program will ask you to confirm its default
@@ -984,8 +1031,8 @@ Include verbose configuration data in the report.
 
 Kenneth Albanowski (E<lt>kjahds@kjahds.comE<gt>), subsequently I<doc>tored
 by Gurusamy Sarathy (E<lt>gsar@umich.eduE<gt>), Tom Christiansen
-(E<lt>tchrist@perl.comE<gt>), and Nathan Torkington
-(E<lt>gnat@frii.comE<gt>).
+(E<lt>tchrist@perl.comE<gt>), Nathan Torkington (E<lt>gnat@frii.comE<gt>),
+and Charles F. Randall (E<lt>cfr@pobox.comE<gt>).
 
 =head1 SEE ALSO
 
