@@ -114,6 +114,12 @@ EXPECT
 /[[:digit:]-[:alpha:]]/: false [] range "[:digit:]-" in regexp at - line 12.
 ########
 # regcomp.c [S_regclassutf8]
+BEGIN {
+    if (ord("\t") == 5) {
+        print "SKIPPED\n# ebcdic regular expression ranges differ.";
+        exit 0;
+    }
+}
 use utf8;
 $_ = "";
 use warnings 'unsafe' ;

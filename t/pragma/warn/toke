@@ -462,6 +462,12 @@ EXPECT
 
 ########
 # toke.c
+BEGIN {
+    if (ord("\t") == 5) {
+        print "SKIPPED\n# Ebcdic platforms have different \\x constructs.";
+        exit 0;
+    }
+}
 use warnings 'utf8' ;
 use utf8 ;
 $_ = " \xffe " ;
