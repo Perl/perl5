@@ -3,7 +3,7 @@ package O;
 our $VERSION = '1.00';
 
 use B qw(minus_c save_BEGINs);
-use Carp;    
+use Carp;
 
 sub import {
     my ($class, @options) = @_;
@@ -31,6 +31,11 @@ sub import {
 		open (STDOUT, ">&SAVEOUT");
 		close SAVEOUT;
 	    }
+
+	    # Note: if you change the code after this 'use', please
+	    # change the fudge factors in B::Concise (grep for
+	    # "fragile kludge") so that its output still looks
+	    # nice. Thanks. --smcc
 	    use B::].$backend.q[ ();
 	    if ($@) {
 		croak "use of backend $backend failed: $@";

@@ -499,10 +499,40 @@ sub tree {
            map(" " x (length($name)+$size) . $_, @lines));
 }
 
-# This is a bit of a hack; the 2 and 15 were determined empirically.
-# These need to stay the last things in the module.
-$cop_seq_base = svref_2object(eval 'sub{0;}')->START->cop_seq + 2;
-$seq_base = svref_2object(eval 'sub{}')->START->seq + 15;
+# *** Warning: fragile kludge ahead ***
+# Because the B::* modules run in the same interpreter as the code
+# they're compiling, their presence tends to distort the view we have
+# of the code we're looking at. In particular, perl gives sequence
+# numbers to both OPs in general and COPs in particular. If the
+# program we're looking at were run on its own, these numbers would
+# start at 1. Because all of B::Concise and all the modules it uses
+# are compiled first, though, by the time we get to the user's program
+# the sequence numbers are alreay at pretty high numbers, which would
+# be distracting if you're trying to tell OPs apart. Therefore we'd
+# like to subtract an offset from all the sequence numbers we display,
+# to restore the simpler view of the world. The trick is to know what
+# that offset will be, when we're still compiling B::Concise!  If we
+# hardcoded a value, it would have to change every time B::Concise or
+# other modules we use do. To help a little, what we do here is
+# compile a little code at the end of the module, and compute the base
+# sequence number for the user's program as being a small offset
+# later, so all we have to worry about are changes in the offset.
+
+# When you say "perl -MO=Concise -e '$a'", the output should look like:
+
+# 4  <@> leave[t1] vKP/REFC ->(end)
+# 1     <0> enter ->2
+ #^ smallest OP sequence number should be 1
+# 2     <;> nextstate(main 1 -e:1) v ->3
+ #                         ^ smallest COP sequence number should be 1
+# -     <1> ex-rv2sv vK/1 ->4
+# 3        <$> gvsv(*a) s ->4
+
+# If either of the marked numbers there aren't 1, it means you need to
+# update the corresponding magic number in the next two lines.
+# Reember, these need to stay the last things in the module.
+$cop_seq_base = svref_2object(eval 'sub{0;}')->START->cop_seq + 11;
+$seq_base = svref_2object(eval 'sub{}')->START->seq + 84;
 
 1;
 
