@@ -4018,7 +4018,7 @@ Perl_new_vstring(pTHX_ char *s, SV *sv)
 		 /* this is atoi() that tolerates underscores */
 		 char *end = pos;
 		 UV mult = 1;
-		 if ( *(s-1) == '_') {
+		 if ( s > pos && *(s-1) == '_') {
 		      mult = 10;
 		 }
 		 while (--end >= s) {
