@@ -1,10 +1,12 @@
-#!/usr/bin/perl
-
-print "1..4\n";
+#!./perl
 
 BEGIN {
-	$^O = '';
+    $^O = '';
+    chdir 't' if -d 't';
+    @INC = '../lib';
 }
+
+print "1..4\n";
 
 use File::Spec;
 

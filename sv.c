@@ -1702,7 +1702,7 @@ sv_2pv(register SV *sv, STRLEN *lp)
 		case SVt_PVMG:
 		    if ( ((SvFLAGS(sv) &
 			   (SVs_OBJECT|SVf_OK|SVs_GMG|SVs_SMG|SVs_RMG)) 
-			  == (SVs_OBJECT|SVs_RMG|SVs_SMG))
+			  == (SVs_OBJECT|SVs_RMG))
 			 && strEQ(s=HvNAME(SvSTASH(sv)), "Regexp")
 			 && (mg = mg_find(sv, 'r'))) {
 			regexp *re = (regexp *)mg->mg_obj;
