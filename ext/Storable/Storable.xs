@@ -1237,13 +1237,13 @@ static void clean_store_context(stcxt_t *cxt)
 	if (cxt->hseen) {
 		hv_iterinit(cxt->hseen);
 		while ((he = hv_iternext(cxt->hseen)))	/* Extra () for -Wall, grr.. */
-			HeVAL(he) = &PL_sv_placeholder;
+			HeVAL(he) = &PL_sv_undef;
 	}
 
 	if (cxt->hclass) {
 		hv_iterinit(cxt->hclass);
 		while ((he = hv_iternext(cxt->hclass)))	/* Extra () for -Wall, grr.. */
-			HeVAL(he) = &PL_sv_placeholder;
+			HeVAL(he) = &PL_sv_undef;
 	}
 
 	/*
@@ -4929,7 +4929,7 @@ static SV *retrieve_flag_hash(stcxt_t *cxt, char *cname)
              */
 
 #ifdef HAS_RESTRICTED_HASHES
-            if (hv_store_flags(hv, kbuf, size, sv, 0, flags) == 0)
+            if (hv_store_flags(hv, kbuf, size, sv, 0, store_flags) == 0)
                 return (SV *) 0;
 #else
             if (!(store_flags & HVhek_PLACEHOLD))
