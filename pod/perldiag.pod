@@ -784,6 +784,16 @@ usually double the curlies to get the same effect though, because the
 inner curlies will be considered a block that loops once.  See
 L<perlfunc/last>.
 
+=item Can't load '%s' for module %s
+
+(F) The module you tried to load failed to load a dynamic extension. This
+may either mean that you upgraded your version of perl to one that is
+incompatible with your old dynamic extensions (which is known to happen
+between major versions of perl), or (more likely) that your dynamic
+extension was build against an older version of the library that is
+installed on your system. You may need to rebuild your old dynamic
+extensions.
+
 =item Can't localize lexical variable %s
 
 (F) You used local on a variable name that was previously declared as a
@@ -814,6 +824,12 @@ L<perlfunc/require> and L<lib>.
 autoload, but there is no function to autoload.  Most probable causes
 are a misprint in a function/method name or a failure to C<AutoSplit>
 the file, say, by doing C<make install>.
+
+=item Can't locate loadable object for module %s in @INC
+
+(F) The module you loaded is trying to load an external library, like
+for example, C<foo.so> or C<bar.dll>, but the L<DynaLoader> module was
+unable to locate this library.  See L<DynaLoader>.
 
 =item Can't locate object method "%s" via package "%s"
 
