@@ -564,7 +564,7 @@ sperl$(OBJ_EXT): perl.c $(h)
 # We have to call our ./makedir because Ultrix 4.3 make can't handle the line
 #	test -d lib/auto || mkdir lib/auto
 #
-preplibrary: miniperl lib/Config.pm
+preplibrary: miniperl lib/Config.pm lib/lib.pm lib/re.pm
 	@sh ./makedir lib/auto
 	@echo "	AutoSplitting perl library"
 	$(LDLIBPTH) ./miniperl -Ilib -e 'use AutoSplit; \
