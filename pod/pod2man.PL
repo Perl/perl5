@@ -678,8 +678,8 @@ $indent = 0;
 
 $begun = "";
 
-# Unrolling [^A-Z>]|[A-Z](?!<) gives:    // MRE pp 165.
-my $nonest = '(?:[^A-Z>]*(?:[A-Z](?!<)[^A-Z>]*)*)';
+# Unrolling [^-=A-Z>]|[A-Z](?!<)|[-=][\x00-\xFF] gives:    // MRE pp 165.
+my $nonest = '(?:[^-=A-Z>]*(?:(?:[-=][\x00-\xFF]|[A-Z](?!<))[^-=A-Z>]*)*)';
 
 while (<>) {
     if ($cutting) {
