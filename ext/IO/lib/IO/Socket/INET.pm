@@ -132,7 +132,7 @@ sub configure {
     $proto ||= (getprotobyname('tcp'))[2];
 
     my $pname = (getprotobynumber($proto))[0];
-    $type = $arg->{Type} || $socket_type{$pname};
+    $type = $arg->{Type} || $socket_type{lc $pname};
 
     my @raddr = ();
 
