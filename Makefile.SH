@@ -329,10 +329,9 @@ ext.libs: $(static_ext)
 # patchlevel.h: .patch
 # 	perl fix_pl || (make -f Makefile.micro && ./microperl fix_pl)
 #	$(SHELL) Makefile.SH
-
-!NO!SUBS!
-
-fi
+# fi
+# 
+# !NO!SUBS!
 
 # How to build libperl.  This is still rather convoluted.
 # Load up custom Makefile.SH fragment for shared loading and executables:
