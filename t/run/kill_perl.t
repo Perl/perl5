@@ -796,6 +796,7 @@ package main;
 $test = Foo->new(); # must be package var
 END
 {
+	1 while unlink 'dbmtest';
 	1 while unlink <dbmtest.*>;
 	print "ok\n";
 }
