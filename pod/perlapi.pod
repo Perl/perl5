@@ -2824,7 +2824,7 @@ Found in file sv.h
 
 Returns a boolean indicating whether the SV contains a signed integer.
 
-	void	SvIOK_notUV(SV* sv)
+	bool	SvIOK_notUV(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -2869,7 +2869,7 @@ Found in file sv.h
 
 Returns a boolean indicating whether the SV contains an unsigned integer.
 
-	void	SvIOK_UV(SV* sv)
+	bool	SvIOK_UV(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -3466,7 +3466,7 @@ Found in file sv.h
 
 Returns a boolean indicating whether the SV contains UTF-8 encoded data.
 
-	void	SvUTF8(SV* sv)
+	bool	SvUTF8(SV* sv)
 
 =for hackers
 Found in file sv.h
