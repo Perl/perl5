@@ -196,7 +196,7 @@ See also L<perlrun/PERL_HASH_SEED_DEBUG>.
 =cut
 
 sub hash_seed () {
-    Internals::hash_seed();
+    Internals::new_hash_seed();
 }
 
 =back
