@@ -3102,14 +3102,15 @@ relied upon.
 The only currently recognized attribute is C<unique> which indicates
 that a single copy of the global is to be used by all interpreters
 should the program happen to be running in a multi-interpreter
-environment. (The default behaviour would be for each interpreter to
-have its own copy of the global.)  In such an environment, this
-attribute also has the effect of making the global readonly.
-Examples:
+environment. (The default behaviour would be for each interpreter
+to have its own copy of the global.)  Examples:
 
     our @EXPORT : unique = qw(foo);
     our %EXPORT_TAGS : unique = (bar => [qw(aa bb cc)]);
     our $VERSION : unique = "1.00";
+
+Note that this attribute also has the effect of making the global
+readonly when the first new interpreter is cloned.
 
 Multi-interpreter environments can come to being either through the
 fork() emulation on Windows platforms, or by embedding perl in a
