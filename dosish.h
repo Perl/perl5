@@ -20,7 +20,7 @@ void Perl_DJGPP_init();
 #  endif
 #endif	/* DJGPP */
 
-#define PERL_SYS_TERM()
+#define PERL_SYS_TERM() MALLOC_TERM
 #define dXSUB_SYS
 #define TMPPATH "plXXXXXX"
 

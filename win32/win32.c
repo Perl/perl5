@@ -1736,6 +1736,7 @@ Perl_win32_init(int *argcp, char ***argvp)
 #if !defined(_ALPHA_) && !defined(__GNUC__)
     _control87(MCW_EM, MCW_EM);
 #endif
+    MALLOC_INIT; 
 }
 
 #ifdef USE_BINMODE_SCRIPTS

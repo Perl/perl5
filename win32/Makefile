@@ -10,8 +10,8 @@
 # Set these to wherever you want "nmake install" to put your
 # newly built perl.
 INST_DRV=c:
-INST_TOP=$(INST_DRV)\perl
-BUILDOPT=-DUSE_THREADS
+INST_TOP=$(INST_DRV)\perl5004.5x
+#BUILDOPT=-DUSE_THREADS
 CORECCOPT=
 
 #
@@ -20,7 +20,7 @@ CORECCOPT=
 
 #
 # uncomment next line if you want debug version of perl (big,slow)
-CFG=Debug
+#CFG=Debug
 
 #
 # set the install locations of the compiler include/libraries
@@ -333,9 +333,10 @@ $(MINIPERL) : ..\miniperlmain.obj $(CORE_OBJ) $(WIN32_OBJ)
 	$(LINK_FLAGS) $(LIBFILES) ..\miniperlmain.obj $(CORE_OBJ) $(WIN32_OBJ)
 <<
 
-$(WIN32_OBJ) : $(CORE_H)
-$(CORE_OBJ)  : $(CORE_H)
-$(DLL_OBJ)   : $(CORE_H) 
+$(WIN32_OBJ)  : $(CORE_H)
+$(CORE_OBJ)   : $(CORE_H)
+$(DLL_OBJ)    : $(CORE_H) 
+$(PERL95_OBJ) : $(CORE_H)
 
 perldll.def : $(MINIPERL) $(CONFIGPM) makedef.pl ..\global.sym
 	$(MINIPERL) -w makedef.pl $(DEFINES) $(CCTYPE) > perldll.def
