@@ -124,11 +124,8 @@ sub main {
 	$status = checkequal(\@sorted, $unsorted);
 	is($status, '', "contents ok for size $ts");
     }
-    # P5P: The following test (#58) has been observed failing on
-    # a solaris 2.8 platform.  Failure doesn't mean that sort is
-    # misbehaving, it is just exhibiting an exceedingly unlikely
-    # pattern of breaking ties.  If you see no other failures,
-    # it should be perfectly safe to install.
+    # If the following test (#58) fails, see the comments in pp_sort.c
+    # for Perl_sortsv().
     if ($expect_unstable) {
 	ok($unstable_num > 0, 'Instability ok');
     }
