@@ -273,7 +273,9 @@ sub init {
 
 sub debug { $debug = ($_[1] != 0); }
 
-sub clearcache    { delete $cache{$_[0]}; }
+# The cache needs two branches: 's' for strings and 'c' for code.  The
+# emtpy loop is different in these two cases.
+sub clearcache    { delete $cache{"$_[0]c"}; delete $cache{"$_[0]s"}; }
 sub clearallcache { %cache = (); }
 sub enablecache   { $cache = 1; }
 sub disablecache  { $cache = 0; }
@@ -362,11 +364,18 @@ sub runloop {
     croak "runloop unable to compile '$c': $@\ncode: $subcode\n" if $@;
     print STDERR "runloop $n '$subcode'\n" if $debug;
 
-    $t0 = Benchmark->new(0);
+    # Wait for the user timer to tick.  This makes the error range more like -0.01, +0.  If
+    # we don't wait, then it's more like -0.01, +0.01.  This may not seem important, but it
+    # significantly reduces the chances of getting too low initial $n in the initial, 'find
+    # the minimum' loop in &runfor.  This, in turn, can reduce the number of calls to
+    # &runloop a lot, and thus reduce additive errors.
+    my $tbase = Benchmark->new(0)->[1];
+    do {
+       $t0 = Benchmark->new(0);
+    } while ( $t0->[1] == $tbase ) ;
     &$subref;
     $t1 = Benchmark->new($n);
     $td = &timediff($t1, $t0);
-
     timedebug("runloop:",$td);
     $td;
 }
@@ -377,12 +386,12 @@ sub timeit {
     my($wn, $wc, $wd);
 
     printf STDERR "timeit $n $code\n" if $debug;
-
-    if ($cache && exists $cache{$n}) {
-	$wn = $cache{$n};
+    my $cache_key = $n . ( ref( $code ) ? 'c' : 's' ) ;
+    if ($cache && exists $cache{$cache_key} ) {
+	$wn = $cache{$cache_key};
     } else {
-	$wn = &runloop($n, '');
-	$cache{$n} = $wn;
+	$wn = &runloop($n, ref( $code ) ? sub { undef } : '' );
+	$cache{$cache_key} = $wn;
     }
 
     $wc = &runloop($n, $code);
@@ -414,24 +423,23 @@ sub runfor {
 
     my ($n, $td, $tc, $ntot, $rtot, $utot, $stot, $cutot, $cstot );
 
-    # First find the minimum $n that gives a non-zero timing.
+    # First find the minimum $n that gives a significant timing.
     
     my $nmin;
 
-    for ($n = 1, $tc = 0; $tc <= 0; $n *= 2 ) {
+    for ($n = 1, $tc = 0; ; $n *= 2 ) {
 	$td = timeit($n, $code);
 	$tc = $td->[1] + $td->[2];
+	last if $tc > 0.1 ;
     }
 
     $nmin = $n;
 
     my $ttot = 0;
     my $tpra = 0.05 * $tmax; # Target/time practice.
-
     # Double $n until we have think we have practiced enough.
-    for ( $n = 1; $ttot < $tpra; $n *= 2 ) {
+    for ( ; $ttot < $tpra; $n *= 2 ) {
 	$td = timeit($n, $code);
-	$tc = $td->cpu_p;
 	$ntot += $n;
 	$rtot += $td->[0];
 	$utot += $td->[1];
@@ -446,7 +454,7 @@ sub runfor {
     # Then iterate towards the $tmax.
     while ( $ttot < $tmax ) {
 	$r = $tmax / $ttot - 1; # Linear approximation.
-	$n = int( $r * $n );
+	$n = int( $r * $ntot );
 	$n = $nmin if $n < $nmin;
 	$td = timeit($n, $code);
 	$ntot += $n;

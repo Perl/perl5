@@ -32,6 +32,8 @@
 
   Undefined value assigned to typeglob
 
+  Possible Y2K bug: %d format string following '19'
+
   Reference is already weak			[Perl_sv_rvweaken] <<TODO
 
   Mandatory Warnings
@@ -187,7 +189,7 @@ my $b = 1 + $a;
 no warnings 'numeric' ;
 my $c = 1 + $a;
 EXPECT
-Argument "def" isn't numeric in add at - line 6.
+Argument "def" isn't numeric in addition (+) at - line 6.
 ########
 # sv.c
 use warnings 'numeric' ;
@@ -195,7 +197,7 @@ my $x = 1 + "def" ;
 no warnings 'numeric' ;
 my $z = 1 + "def" ;
 EXPECT
-Argument "def" isn't numeric in add at - line 3.
+Argument "def" isn't numeric in addition (+) at - line 3.
 ########
 # sv.c
 use warnings 'numeric' ;
@@ -204,7 +206,7 @@ my $x = 1 + $a ;
 no warnings 'numeric' ;
 my $y = 1 + $a ;
 EXPECT
-Argument "def" isn't numeric in add at - line 4.
+Argument "def" isn't numeric in addition (+) at - line 4.
 ########
 # sv.c
 use warnings 'numeric' ; use integer ;
@@ -213,7 +215,7 @@ my $x = 1 + $a ;
 no warnings 'numeric' ;
 my $z = 1 + $a ;
 EXPECT
-Argument "def" isn't numeric in i_add at - line 4.
+Argument "def" isn't numeric in integer addition (+) at - line 4.
 ########
 # sv.c
 use warnings 'numeric' ;
@@ -221,7 +223,7 @@ my $x = 1 & "def" ;
 no warnings 'numeric' ;
 my $z = 1 & "def" ;
 EXPECT
-Argument "def" isn't numeric in bit_and at - line 3.
+Argument "def" isn't numeric in bitwise and (&) at - line 3.
 ########
 # sv.c
 use warnings 'redefine' ;
@@ -280,3 +282,37 @@ EXPECT
 \xff will produce malformed UTF-8 character; use \x{ff} for that at - line 6.
 Malformed UTF-8 character at - line 6.
 Malformed UTF-8 character at - line 10.
+########
+# sv.c
+use warnings 'misc';
+use Config;
+BEGIN {
+    unless ($Config{ccflags} =~ /Y2KWARN/) {
+	print "SKIPPED\n# perl not built with -DPERL_Y2KWARN";
+	exit 0;
+    }
+    $|=1;
+}
+my $x;
+my $yy = 78;
+$x     = printf  "19%02d\n", $yy;
+$x     = sprintf "#19%02d\n", $yy;
+$x     = printf  " 19%02d\n", 78;
+$x     = sprintf "19%02d\n", 78;
+$x     = printf  "319%02d\n", $yy;
+$x     = sprintf "319%02d\n", $yy;
+no warnings 'misc';
+$x     = printf  "19%02d\n", $yy;
+$x     = sprintf "19%02d\n", $yy;
+$x     = printf  "19%02d\n", 78;
+$x     = sprintf "19%02d\n", 78;
+EXPECT
+Possible Y2K bug: %d format string following '19' at - line 16.
+Possible Y2K bug: %d format string following '19' at - line 13.
+1978
+Possible Y2K bug: %d format string following '19' at - line 14.
+Possible Y2K bug: %d format string following '19' at - line 15.
+ 1978
+31978
+1978
+1978

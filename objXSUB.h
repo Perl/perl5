@@ -130,10 +130,6 @@
 #define PL_dowarn		(*Perl_Idowarn_ptr(aTHXo))
 #undef  PL_e_script
 #define PL_e_script		(*Perl_Ie_script_ptr(aTHXo))
-#undef  PL_efloatbuf
-#define PL_efloatbuf		(*Perl_Iefloatbuf_ptr(aTHXo))
-#undef  PL_efloatsize
-#define PL_efloatsize		(*Perl_Iefloatsize_ptr(aTHXo))
 #undef  PL_egid
 #define PL_egid			(*Perl_Iegid_ptr(aTHXo))
 #undef  PL_endav
@@ -580,6 +576,10 @@
 #define PL_dirty		(*Perl_Tdirty_ptr(aTHXo))
 #undef  PL_dumpindent
 #define PL_dumpindent		(*Perl_Tdumpindent_ptr(aTHXo))
+#undef  PL_efloatbuf
+#define PL_efloatbuf		(*Perl_Tefloatbuf_ptr(aTHXo))
+#undef  PL_efloatsize
+#define PL_efloatsize		(*Perl_Tefloatsize_ptr(aTHXo))
 #undef  PL_extralen
 #define PL_extralen		(*Perl_Textralen_ptr(aTHXo))
 #undef  PL_firstgv
@@ -2878,6 +2878,14 @@
 #define Perl_sv_2pv		pPerl->Perl_sv_2pv
 #undef  sv_2pv
 #define sv_2pv			Perl_sv_2pv
+#undef  Perl_sv_2pvutf8
+#define Perl_sv_2pvutf8		pPerl->Perl_sv_2pvutf8
+#undef  sv_2pvutf8
+#define sv_2pvutf8		Perl_sv_2pvutf8
+#undef  Perl_sv_2pvbyte
+#define Perl_sv_2pvbyte		pPerl->Perl_sv_2pvbyte
+#undef  sv_2pvbyte
+#define sv_2pvbyte		Perl_sv_2pvbyte
 #undef  Perl_sv_2uv
 #define Perl_sv_2uv		pPerl->Perl_sv_2uv
 #undef  sv_2uv
@@ -2898,6 +2906,14 @@
 #define Perl_sv_pvn		pPerl->Perl_sv_pvn
 #undef  sv_pvn
 #define sv_pvn			Perl_sv_pvn
+#undef  Perl_sv_pvutf8n
+#define Perl_sv_pvutf8n		pPerl->Perl_sv_pvutf8n
+#undef  sv_pvutf8n
+#define sv_pvutf8n		Perl_sv_pvutf8n
+#undef  Perl_sv_pvbyten
+#define Perl_sv_pvbyten		pPerl->Perl_sv_pvbyten
+#undef  sv_pvbyten
+#define sv_pvbyten		Perl_sv_pvbyten
 #undef  Perl_sv_true
 #define Perl_sv_true		pPerl->Perl_sv_true
 #undef  sv_true
@@ -3056,6 +3072,14 @@
 #define Perl_sv_pvn_force	pPerl->Perl_sv_pvn_force
 #undef  sv_pvn_force
 #define sv_pvn_force		Perl_sv_pvn_force
+#undef  Perl_sv_pvutf8n_force
+#define Perl_sv_pvutf8n_force	pPerl->Perl_sv_pvutf8n_force
+#undef  sv_pvutf8n_force
+#define sv_pvutf8n_force	Perl_sv_pvutf8n_force
+#undef  Perl_sv_pvbyten_force
+#define Perl_sv_pvbyten_force	pPerl->Perl_sv_pvbyten_force
+#undef  sv_pvbyten_force
+#define sv_pvbyten_force	Perl_sv_pvbyten_force
 #undef  Perl_sv_reftype
 #define Perl_sv_reftype		pPerl->Perl_sv_reftype
 #undef  sv_reftype
@@ -3489,10 +3513,26 @@
 #define Perl_sv_2pv_nolen	pPerl->Perl_sv_2pv_nolen
 #undef  sv_2pv_nolen
 #define sv_2pv_nolen		Perl_sv_2pv_nolen
+#undef  Perl_sv_2pvutf8_nolen
+#define Perl_sv_2pvutf8_nolen	pPerl->Perl_sv_2pvutf8_nolen
+#undef  sv_2pvutf8_nolen
+#define sv_2pvutf8_nolen	Perl_sv_2pvutf8_nolen
+#undef  Perl_sv_2pvbyte_nolen
+#define Perl_sv_2pvbyte_nolen	pPerl->Perl_sv_2pvbyte_nolen
+#undef  sv_2pvbyte_nolen
+#define sv_2pvbyte_nolen	Perl_sv_2pvbyte_nolen
 #undef  Perl_sv_pv
 #define Perl_sv_pv		pPerl->Perl_sv_pv
 #undef  sv_pv
 #define sv_pv			Perl_sv_pv
+#undef  Perl_sv_pvutf8
+#define Perl_sv_pvutf8		pPerl->Perl_sv_pvutf8
+#undef  sv_pvutf8
+#define sv_pvutf8		Perl_sv_pvutf8
+#undef  Perl_sv_pvbyte
+#define Perl_sv_pvbyte		pPerl->Perl_sv_pvbyte
+#undef  sv_pvbyte
+#define sv_pvbyte		Perl_sv_pvbyte
 #undef  Perl_sv_force_normal
 #define Perl_sv_force_normal	pPerl->Perl_sv_force_normal
 #undef  sv_force_normal

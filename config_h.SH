@@ -1556,9 +1556,14 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	available directly to the user. Note that it may well be different from
  *	the preprocessor used to compile the C program.
  */
+/* CPPLAST:
+ *	This symbol is intended to be used along with CPPRUN in the same manner
+ *	symbol CPPMINUS is used with CPPSTDIN. It contains either "-" or "".
+ */
 #define CPPSTDIN "$cppstdin"
 #define CPPMINUS "$cppminus"
 #define CPPRUN "$cpprun"
+#define CPPLAST "$cpplast"
 
 /* HAS_ACCESS:
  *	This manifest constant lets the C program know that the access()
@@ -1654,6 +1659,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	and HAS_UNAME.	Note that the command uses a fully qualified path,
  *	so that it is safe even if used by a process with super-user
  *	privileges.
+ */
+/* HAS_PHOSTNAME:
+ *	This symbol, if defined, indicates that the C program may use the
+ *	contents of PHOSTNAME as a command to feed to the popen() routine
+ *	to derive the host name.
  */
 #$d_gethname HAS_GETHOSTNAME	/**/
 #$d_uname HAS_UNAME		/**/
@@ -2070,7 +2080,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol, if defined, indicates that <sys/uio.h> exists and
  *	should be included.
  */
+/* HAS_STRUCT_IOVEC:
+ *	This symbol, if defined, indicates that the struct iovec
+ *	to do scatter writes/gather reads is supported.
+ */
 #$i_sysuio	I_SYSUIO		/**/
+#$d_iovec_s	HAS_STRUCT_IOVEC		/**/
 
 /* Free_t:
  *	This variable contains the return type of free().  It is usually
@@ -2596,6 +2611,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *     include <mach/cthreads.h>.
  */
 #$i_machcthr   I_MACH_CTHREADS	/**/
+
+/* I_PTHREAD:
+ *     This symbol, if defined, indicates to the C program that it should
+ *     include <pthread.h>.
+ */
+#$i_pthread   I_PTHREAD	/**/
 
 /* USE_THREADS:
  *	This symbol, if defined, indicates that Perl should

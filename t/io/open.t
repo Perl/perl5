@@ -3,6 +3,7 @@
 # $RCSfile$    
 $|  = 1;
 $^W = 1;
+$Is_VMS = $^O eq 'VMS';
 
 print "1..32\n";
 
@@ -78,7 +79,8 @@ print "ok 23\n";
 
 unlink("afile");     
 }
-{
+if ($Is_VMS) { for (24..46) { print "ok $_ # skipped: not Unix fork\n"; } }
+else {
 print "# \$!='$!'\nnot " unless open(my $f, '-|', <<'EOC');
 ./perl -e "print qq(a row\n); print qq(another row\n)"
 EOC
@@ -89,7 +91,8 @@ print "ok 25\n";
 print "not " unless close($f);
 print "ok 26\n";
 }
-{
+if ($Is_VMS) { for (27..30) { print "OK $_ # skipped: not Unix fork\n"; } }
+else {
 print "# \$!='$!'\nnot " unless open(my $f, '|-', <<'EOC');
 ./perl -pe "s/^not //"
 EOC

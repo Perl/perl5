@@ -612,8 +612,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	pv	= (char*)SvRV(sv);
 	cur	= 0;
 	len	= 0;
-	iv	= (IV)PTR_CAST pv;
-	nv	= (NV)(PTRV)pv;
+	iv	= PTR2IV(pv);
+	nv	= PTR2NV(pv);
 	del_XRV(SvANY(sv));
 	magic	= 0;
 	stash	= 0;
@@ -1034,10 +1034,12 @@ S_not_a_number(pTHX_ SV *sv)
     *d = '\0';
 
     if (PL_op)
-	Perl_warner(aTHX_ WARN_NUMERIC, "Argument \"%s\" isn't numeric in %s", tmpbuf,
-		PL_op_name[PL_op->op_type]);
+	Perl_warner(aTHX_ WARN_NUMERIC,
+		    "Argument \"%s\" isn't numeric in %s", tmpbuf,
+		PL_op_desc[PL_op->op_type]);
     else
-	Perl_warner(aTHX_ WARN_NUMERIC, "Argument \"%s\" isn't numeric", tmpbuf);
+	Perl_warner(aTHX_ WARN_NUMERIC,
+		    "Argument \"%s\" isn't numeric", tmpbuf);
 }
 
 /* the number can be converted to integer with atol() or atoll() */
@@ -1077,7 +1079,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	  SV* tmpstr;
 	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv, numer)))
 	      return SvIV(tmpstr);
-	  return (IV)PTR_CAST SvRV(sv);
+	  return PTR2IV(SvRV(sv));
 	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    dTHR;
@@ -1113,7 +1115,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 #ifdef IV_IS_QUAD
 	    DEBUG_c(PerlIO_printf(Perl_debug_log, 
 				  "0x%" PERL_PRIx64 " 2iv(%" PERL_PRIu64 " => %" PERL_PRId64 ") (as unsigned)\n",
-				  (UV)PTR_CAST sv,
+				  PTR2UV(sv),
 				  (UV)SvUVX(sv), (IV)SvUVX(sv)));
 #else
 	    DEBUG_c(PerlIO_printf(Perl_debug_log, 
@@ -1222,7 +1224,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	  SV* tmpstr;
 	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv, numer)))
 	      return SvUV(tmpstr);
-	  return (UV)PTR_CAST SvRV(sv);
+	  return PTR2UV(SvRV(sv));
 	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    dTHR;
@@ -1393,7 +1395,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	  SV* tmpstr;
 	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)))
 	      return SvNV(tmpstr);
-	  return (NV)(PTRV)SvRV(sv);
+	  return PTR2NV(SvRV(sv));
 	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    dTHR;
@@ -1777,7 +1779,7 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 		else
 		    sv_setpv(tsv, s);
 #ifdef IV_IS_QUAD
-		Perl_sv_catpvf(aTHX_ tsv, "(0x%" PERL_PRIx64")", (UV)PTR_CAST sv);
+		Perl_sv_catpvf(aTHX_ tsv, "(0x%" PERL_PRIx64")", PTR2UV(sv));
 #else
 		Perl_sv_catpvf(aTHX_ tsv, "(0x%lx)", (unsigned long)sv);
 #endif
@@ -3691,7 +3693,7 @@ Perl_sv_inc(pTHX_ register SV *sv)
 	    IV i;
 	    if (SvAMAGIC(sv) && AMG_CALLun(sv,inc))
 		return;
-	    i = (IV)PTR_CAST SvRV(sv);
+	    i = PTR2IV(SvRV(sv));
 	    sv_unref(sv);
 	    sv_setiv(sv, i);
 	}
@@ -3791,7 +3793,7 @@ Perl_sv_dec(pTHX_ register SV *sv)
 	    IV i;
 	    if (SvAMAGIC(sv) && AMG_CALLun(sv,dec))
 		return;
-	    i = (IV)PTR_CAST SvRV(sv);
+	    i = PTR2IV(SvRV(sv));
 	    sv_unref(sv);
 	    sv_setiv(sv, i);
 	}
@@ -4395,7 +4397,7 @@ Perl_sv_setref_pv(pTHX_ SV *rv, const char *classname, void *pv)
 	SvSETMAGIC(rv);
     }
     else
-	sv_setiv(newSVrv(rv,classname), (IV)PTR_CAST pv);
+	sv_setiv(newSVrv(rv,classname), PTR2IV(pv));
     return rv;
 }
 
@@ -4645,14 +4647,14 @@ Perl_sv_vcatpvf_mg(pTHX_ SV *sv, const char* pat, va_list* args)
 }
 
 void
-Perl_sv_vsetpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, bool *used_locale)
+Perl_sv_vsetpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, bool *maybe_tainted)
 {
     sv_setpvn(sv, "", 0);
-    sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale);
+    sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, maybe_tainted);
 }
 
 void
-Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, bool *used_locale)
+Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, bool *maybe_tainted)
 {
     dTHR;
     char *p;
@@ -4898,9 +4900,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	case 'p':
 	    if (args)
-		uv = (UV)PTR_CAST va_arg(*args, void*);
+		uv = PTR2UV(va_arg(*args, void*));
 	    else
-		uv = (svix < svmax) ? (UV)PTR_CAST svargs[svix++] : 0;
+		uv = (svix < svmax) ? PTR2UV(svargs[svix++]) : 0;
 	    base = 16;
 	    goto integer;
 
@@ -5033,10 +5035,25 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    dig = uv & 1;
 		    *--eptr = '0' + dig;
 		} while (uv >>= 1);
-		if (alt && *eptr != '0')
-		    *--eptr = '0';
+		if (alt) {
+		    esignbuf[esignlen++] = '0';
+		    esignbuf[esignlen++] = 'b';
+		}
 		break;
 	    default:		/* it had better be ten or less */
+#if defined(PERL_Y2KWARN)
+		if (ckWARN(WARN_MISC)) {
+		    STRLEN n;
+		    char *s = SvPV(sv,n);
+		    if (n >= 2 && s[n-2] == '1' && s[n-1] == '9'
+			&& (n == 2 || !isDIGIT(s[n-3])))
+		    {
+			Perl_warner(aTHX_ WARN_MISC,
+				    "Possible Y2K bug: %%%c %s",
+				    c, "format string following '19'");
+		    }
+		}
+#endif
 		do {
 		    dig = uv % base;
 		    *--eptr = '0' + dig;
@@ -5086,6 +5103,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		Safefree(PL_efloatbuf);
 		PL_efloatsize = need + 20; /* more fudge */
 		New(906, PL_efloatbuf, PL_efloatsize, char);
+		PL_efloatbuf[0] = '\0';
 	    }
 
 	    eptr = ebuf + sizeof ebuf;
@@ -5125,15 +5143,36 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    eptr = PL_efloatbuf;
 	    elen = strlen(PL_efloatbuf);
 
-#ifdef LC_NUMERIC
+#ifdef USE_LOCALE_NUMERIC
 	    /*
 	     * User-defined locales may include arbitrary characters.
-	     * And, unfortunately, some system may alloc the "C" locale
-	     * to be overridden by a malicious user.
+	     * And, unfortunately, some (broken) systems may allow the
+	     * "C" locale to be overridden by a malicious user.
+	     * XXX This is an extreme way to cope with broken systems.
 	     */
-	    if (used_locale)
-		*used_locale = TRUE;
-#endif /* LC_NUMERIC */
+	    if (maybe_tainted && PL_tainting) {
+		/* safe if it matches /[-+]?\d*(\.\d*)?([eE][-+]?\d*)?/ */
+		if (*eptr == '-' || *eptr == '+')
+		    ++eptr;
+		while (isDIGIT(*eptr))
+		    ++eptr;
+		if (*eptr == '.') {
+		    ++eptr;
+		    while (isDIGIT(*eptr))
+			++eptr;
+		}
+		if (*eptr == 'e' || *eptr == 'E') {
+		    ++eptr;
+		    if (*eptr == '-' || *eptr == '+')
+			++eptr;
+		    while (isDIGIT(*eptr))
+			++eptr;
+		}
+		if (*eptr)
+		    *maybe_tainted = TRUE;	/* results are suspect */
+		eptr = PL_efloatbuf;
+	    }
+#endif /* USE_LOCALE_NUMERIC */
 
 	    break;
 

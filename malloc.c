@@ -384,13 +384,11 @@
 
 #define u_char unsigned char
 #define u_int unsigned int
-
-#ifdef HAS_QUAD
-#  define u_bigint UV			/* Needs to eat *void. */
-#else  /* needed? */
-#  define u_bigint unsigned long	/* Needs to eat *void. */
-#endif
-
+/* 
+ * I removed the definition of u_bigint which appeared to be u_bigint = UV
+ * u_bigint was only used in TWOK_MASKED and TWOK_SHIFT 
+ * where I have used PTR2UV.  RMB
+ */
 #define u_short unsigned short
 
 /* 286 and atarist like big chunks, which gives too much overhead. */
@@ -516,9 +514,9 @@ static u_short buck_size[MAX_BUCKET_BY_TABLE + 1] =
 #  define MAX_PACKED (MAX_PACKED_POW2 * BUCKETS_PER_POW2 + BUCKET_POW2_SHIFT)
 #  define MAX_POW2_ALGO ((1<<(MAX_PACKED_POW2 + 1)) - M_OVERHEAD)
 #  define TWOK_MASK ((1<<LOG_OF_MIN_ARENA) - 1)
-#  define TWOK_MASKED(x) ((u_bigint)PTR_CAST(x) & ~TWOK_MASK)
-#  define TWOK_SHIFT(x) ((u_bigint)PTR_CAST(x) & TWOK_MASK)
-#  define OV_INDEXp(block) ((u_char*)PTR_CAST(TWOK_MASKED(block)))
+#  define TWOK_MASKED(x) (PTR2UV(x) & ~TWOK_MASK)
+#  define TWOK_SHIFT(x) (PTR2UV(x) & TWOK_MASK)
+#  define OV_INDEXp(block) (INT2PTR(u_char*,TWOK_MASKED(block)))
 #  define OV_INDEX(block) (*OV_INDEXp(block))
 #  define OV_MAGIC(block,bucket) (*(OV_INDEXp(block) +			\
 				    (TWOK_SHIFT(block)>>		\
@@ -781,7 +779,7 @@ emergency_sbrk(MEM_SIZE size)
 	/* Got it, now detach SvPV: */
 	pv = SvPV(sv, n_a);
 	/* Check alignment: */
-	if (((UV)PTR_CAST (pv - sizeof(union overhead))) & (NEEDED_ALIGNMENT - 1)) {
+	if ((PTR2UV(pv) - sizeof(union overhead)) & (NEEDED_ALIGNMENT - 1)) {
 	    PerlIO_puts(PerlIO_stderr(),"Bad alignment of $^M!\n");
 	    return (char *)-1;		/* die die die */
 	}
@@ -924,7 +922,7 @@ Perl_malloc(register size_t nbytes)
 
 	/* remove from linked list */
 #if defined(RCHECK)
-	if (((UV)PTR_CAST p) & (MEM_ALIGNBYTES - 1))
+	if ((PTR2UV(p)) & (MEM_ALIGNBYTES - 1))
 	    PerlIO_printf(PerlIO_stderr(), "Corrupt malloc ptr 0x%lx at 0x%lx\n",
 		(unsigned long)*((int*)p),(unsigned long)p);
 #endif
@@ -1121,8 +1119,8 @@ getpages(int needed, int *nblksp, int bucket)
 #  ifndef I286 	/* The sbrk(0) call on the I286 always returns the next segment */
 	/* WANTED_ALIGNMENT may be more than NEEDED_ALIGNMENT, but this may
 	   improve performance of memory access. */
-	if ((UV)PTR_CAST cp & (WANTED_ALIGNMENT - 1)) { /* Not aligned. */
-	    slack = WANTED_ALIGNMENT - ((UV)PTR_CAST cp & (WANTED_ALIGNMENT - 1));
+	if (PTR2UV(cp) & (WANTED_ALIGNMENT - 1)) { /* Not aligned. */
+	    slack = WANTED_ALIGNMENT - (PTR2UV(cp) & (WANTED_ALIGNMENT - 1));
 	    add += slack;
 	}
 #  endif
@@ -1183,16 +1181,16 @@ getpages(int needed, int *nblksp, int bucket)
 	 */
 
 #  if NEEDED_ALIGNMENT > MEM_ALIGNBYTES
-	if ((UV)PTR_CAST ovp & (NEEDED_ALIGNMENT - 1))
+	if (PTR2UV(ovp) & (NEEDED_ALIGNMENT - 1))
 	    fatalcroak("Misalignment of sbrk()\n");
 	else
 #  endif
 #ifndef I286	/* Again, this should always be ok on an 80286 */
-	if ((UV)PTR_CAST ovp & (MEM_ALIGNBYTES - 1)) {
+	if (PTR2UV(ovp) & (MEM_ALIGNBYTES - 1)) {
 	    DEBUG_m(PerlIO_printf(Perl_debug_log, 
 				  "fixing sbrk(): %d bytes off machine alignement\n",
-				  (int)((UV)PTR_CAST ovp & (MEM_ALIGNBYTES - 1))));
-	    ovp = (union overhead *)PTR_CAST (((UV)PTR_CAST ovp + MEM_ALIGNBYTES) &
+				  (int)(PTR2UV(ovp) & (MEM_ALIGNBYTES - 1))));
+	    ovp = INT2PTR(union overhead *,(PTR2UV(ovp) + MEM_ALIGNBYTES) &
 				     (MEM_ALIGNBYTES - 1));
 	    (*nblksp)--;
 # if defined(DEBUGGING_MSTATS)

@@ -21,7 +21,7 @@ JNIEXPORT void JNICALL Java_PerlInterpreter_init
  * Signature: (Ljava/lang/String;)V
  */
 JNIEXPORT void JNICALL Java_PerlInterpreter_eval
-  (void *perl, JNIEnv *, jobject, jstring);
+  (JNIEnv *, jobject, jstring);
 
 #ifdef __cplusplus
 }

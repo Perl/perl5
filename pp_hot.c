@@ -29,7 +29,6 @@
 #include <sys/file.h>
 #endif
 
-#define HOP(pos,off) (IN_UTF8 ? utf8_hop(pos, off) : (pos + off))
 
 /* Hot code. */
 
@@ -164,8 +163,21 @@ PP(pp_concat)
 	s = SvPV_force(TARG, len);
     }
     s = SvPV(right,len);
-    if (SvOK(TARG))
+    if (SvOK(TARG)) {
+#if defined(PERL_Y2KWARN)
+	if ((SvIOK(right) || SvNOK(right)) && ckWARN(WARN_MISC)) {
+	    STRLEN n;
+	    char *s = SvPV(TARG,n);
+	    if (n >= 2 && s[n-2] == '1' && s[n-1] == '9'
+		&& (n == 2 || !isDIGIT(s[n-3])))
+	    {
+		Perl_warner(aTHX_ WARN_MISC, "Possible Y2K bug: %s",
+			    "about to append an integer to '19'");
+	    }
+	}
+#endif
 	sv_catpvn(TARG,s,len);
+    }
     else
 	sv_setpvn(TARG,s,len);	/* suppress warning */
     SETTARG;
@@ -2112,7 +2124,7 @@ S_get_db_sub(pTHX_ SV **svp, CV *cv)
 	SvUPGRADE(dbsv, SVt_PVIV);
 	SvIOK_on(dbsv);
 	SAVEIV(SvIVX(dbsv));
-	SvIVX(dbsv) = (IV)PTR_CAST cv;	/* Do it the quickest way  */
+	SvIVX(dbsv) = PTR2IV(cv);	/* Do it the quickest way  */
     }
 
     if (CvXSUB(cv))

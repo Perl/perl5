@@ -590,11 +590,15 @@
 #define sv_2mortal		Perl_sv_2mortal
 #define sv_2nv			Perl_sv_2nv
 #define sv_2pv			Perl_sv_2pv
+#define sv_2pvutf8		Perl_sv_2pvutf8
+#define sv_2pvbyte		Perl_sv_2pvbyte
 #define sv_2uv			Perl_sv_2uv
 #define sv_iv			Perl_sv_iv
 #define sv_uv			Perl_sv_uv
 #define sv_nv			Perl_sv_nv
 #define sv_pvn			Perl_sv_pvn
+#define sv_pvutf8n		Perl_sv_pvutf8n
+#define sv_pvbyten		Perl_sv_pvbyten
 #define sv_true			Perl_sv_true
 #define sv_add_arena		Perl_sv_add_arena
 #define sv_backoff		Perl_sv_backoff
@@ -636,6 +640,8 @@
 #define sv_pos_u2b		Perl_sv_pos_u2b
 #define sv_pos_b2u		Perl_sv_pos_b2u
 #define sv_pvn_force		Perl_sv_pvn_force
+#define sv_pvutf8n_force	Perl_sv_pvutf8n_force
+#define sv_pvbyten_force	Perl_sv_pvbyten_force
 #define sv_reftype		Perl_sv_reftype
 #define sv_replace		Perl_sv_replace
 #define sv_report_used		Perl_sv_report_used
@@ -750,7 +756,11 @@
 #define vdefault_protect	Perl_vdefault_protect
 #define reginitcolors		Perl_reginitcolors
 #define sv_2pv_nolen		Perl_sv_2pv_nolen
+#define sv_2pvutf8_nolen	Perl_sv_2pvutf8_nolen
+#define sv_2pvbyte_nolen	Perl_sv_2pvbyte_nolen
 #define sv_pv			Perl_sv_pv
+#define sv_pvutf8		Perl_sv_pvutf8
+#define sv_pvbyte		Perl_sv_pvbyte
 #define sv_force_normal		Perl_sv_force_normal
 #define tmps_grow		Perl_tmps_grow
 #define sv_rvweaken		Perl_sv_rvweaken
@@ -1924,11 +1934,15 @@
 #define sv_2mortal(a)		Perl_sv_2mortal(aTHX_ a)
 #define sv_2nv(a)		Perl_sv_2nv(aTHX_ a)
 #define sv_2pv(a,b)		Perl_sv_2pv(aTHX_ a,b)
+#define sv_2pvutf8(a,b)		Perl_sv_2pvutf8(aTHX_ a,b)
+#define sv_2pvbyte(a,b)		Perl_sv_2pvbyte(aTHX_ a,b)
 #define sv_2uv(a)		Perl_sv_2uv(aTHX_ a)
 #define sv_iv(a)		Perl_sv_iv(aTHX_ a)
 #define sv_uv(a)		Perl_sv_uv(aTHX_ a)
 #define sv_nv(a)		Perl_sv_nv(aTHX_ a)
 #define sv_pvn(a,b)		Perl_sv_pvn(aTHX_ a,b)
+#define sv_pvutf8n(a,b)		Perl_sv_pvutf8n(aTHX_ a,b)
+#define sv_pvbyten(a,b)		Perl_sv_pvbyten(aTHX_ a,b)
 #define sv_true(a)		Perl_sv_true(aTHX_ a)
 #define sv_add_arena(a,b,c)	Perl_sv_add_arena(aTHX_ a,b,c)
 #define sv_backoff(a)		Perl_sv_backoff(aTHX_ a)
@@ -1969,6 +1983,8 @@
 #define sv_pos_u2b(a,b,c)	Perl_sv_pos_u2b(aTHX_ a,b,c)
 #define sv_pos_b2u(a,b)		Perl_sv_pos_b2u(aTHX_ a,b)
 #define sv_pvn_force(a,b)	Perl_sv_pvn_force(aTHX_ a,b)
+#define sv_pvutf8n_force(a,b)	Perl_sv_pvutf8n_force(aTHX_ a,b)
+#define sv_pvbyten_force(a,b)	Perl_sv_pvbyten_force(aTHX_ a,b)
 #define sv_reftype(a,b)		Perl_sv_reftype(aTHX_ a,b)
 #define sv_replace(a,b)		Perl_sv_replace(aTHX_ a,b)
 #define sv_report_used()	Perl_sv_report_used(aTHX)
@@ -2076,7 +2092,11 @@
 #define vdefault_protect(a,b,c)	Perl_vdefault_protect(aTHX_ a,b,c)
 #define reginitcolors()		Perl_reginitcolors(aTHX)
 #define sv_2pv_nolen(a)		Perl_sv_2pv_nolen(aTHX_ a)
+#define sv_2pvutf8_nolen(a)	Perl_sv_2pvutf8_nolen(aTHX_ a)
+#define sv_2pvbyte_nolen(a)	Perl_sv_2pvbyte_nolen(aTHX_ a)
 #define sv_pv(a)		Perl_sv_pv(aTHX_ a)
+#define sv_pvutf8(a)		Perl_sv_pvutf8(aTHX_ a)
+#define sv_pvbyte(a)		Perl_sv_pvbyte(aTHX_ a)
 #define sv_force_normal(a)	Perl_sv_force_normal(aTHX_ a)
 #define tmps_grow(a)		Perl_tmps_grow(aTHX_ a)
 #define sv_rvweaken(a)		Perl_sv_rvweaken(aTHX_ a)
@@ -3775,6 +3795,10 @@
 #define sv_2nv			Perl_sv_2nv
 #define Perl_sv_2pv		CPerlObj::Perl_sv_2pv
 #define sv_2pv			Perl_sv_2pv
+#define Perl_sv_2pvutf8		CPerlObj::Perl_sv_2pvutf8
+#define sv_2pvutf8		Perl_sv_2pvutf8
+#define Perl_sv_2pvbyte		CPerlObj::Perl_sv_2pvbyte
+#define sv_2pvbyte		Perl_sv_2pvbyte
 #define Perl_sv_2uv		CPerlObj::Perl_sv_2uv
 #define sv_2uv			Perl_sv_2uv
 #define Perl_sv_iv		CPerlObj::Perl_sv_iv
@@ -3785,6 +3809,10 @@
 #define sv_nv			Perl_sv_nv
 #define Perl_sv_pvn		CPerlObj::Perl_sv_pvn
 #define sv_pvn			Perl_sv_pvn
+#define Perl_sv_pvutf8n		CPerlObj::Perl_sv_pvutf8n
+#define sv_pvutf8n		Perl_sv_pvutf8n
+#define Perl_sv_pvbyten		CPerlObj::Perl_sv_pvbyten
+#define sv_pvbyten		Perl_sv_pvbyten
 #define Perl_sv_true		CPerlObj::Perl_sv_true
 #define sv_true			Perl_sv_true
 #define Perl_sv_add_arena	CPerlObj::Perl_sv_add_arena
@@ -3865,6 +3893,10 @@
 #define sv_pos_b2u		Perl_sv_pos_b2u
 #define Perl_sv_pvn_force	CPerlObj::Perl_sv_pvn_force
 #define sv_pvn_force		Perl_sv_pvn_force
+#define Perl_sv_pvutf8n_force	CPerlObj::Perl_sv_pvutf8n_force
+#define sv_pvutf8n_force	Perl_sv_pvutf8n_force
+#define Perl_sv_pvbyten_force	CPerlObj::Perl_sv_pvbyten_force
+#define sv_pvbyten_force	Perl_sv_pvbyten_force
 #define Perl_sv_reftype		CPerlObj::Perl_sv_reftype
 #define sv_reftype		Perl_sv_reftype
 #define Perl_sv_replace		CPerlObj::Perl_sv_replace
@@ -4088,8 +4120,16 @@
 #define reginitcolors		Perl_reginitcolors
 #define Perl_sv_2pv_nolen	CPerlObj::Perl_sv_2pv_nolen
 #define sv_2pv_nolen		Perl_sv_2pv_nolen
+#define Perl_sv_2pvutf8_nolen	CPerlObj::Perl_sv_2pvutf8_nolen
+#define sv_2pvutf8_nolen	Perl_sv_2pvutf8_nolen
+#define Perl_sv_2pvbyte_nolen	CPerlObj::Perl_sv_2pvbyte_nolen
+#define sv_2pvbyte_nolen	Perl_sv_2pvbyte_nolen
 #define Perl_sv_pv		CPerlObj::Perl_sv_pv
 #define sv_pv			Perl_sv_pv
+#define Perl_sv_pvutf8		CPerlObj::Perl_sv_pvutf8
+#define sv_pvutf8		Perl_sv_pvutf8
+#define Perl_sv_pvbyte		CPerlObj::Perl_sv_pvbyte
+#define sv_pvbyte		Perl_sv_pvbyte
 #define Perl_sv_force_normal	CPerlObj::Perl_sv_force_normal
 #define sv_force_normal		Perl_sv_force_normal
 #define Perl_tmps_grow		CPerlObj::Perl_tmps_grow
@@ -5325,8 +5365,8 @@
  */
 
 #if !defined(PERL_CORE)
-#  define sv_setptrobj(rv,ptr,name)	sv_setref_iv(rv,name,(IV)ptr)
-#  define sv_setptrref(rv,ptr)		sv_setref_iv(rv,Nullch,(IV)ptr)
+#  define sv_setptrobj(rv,ptr,name)	sv_setref_iv(rv,name,PTR2IV(ptr))
+#  define sv_setptrref(rv,ptr)		sv_setref_iv(rv,Nullch,PTR2IV(ptr))
 #endif
 
 #if !defined(PERL_CORE) && !defined(PERL_NOCOMPAT) && !defined(PERL_BINCOMPAT_5005)

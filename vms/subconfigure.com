@@ -63,6 +63,7 @@ $ myname = myhostname
 $ if "''myname'" .eqs. "" THEN myname = f$trnlnm("SYS$NODE")
 $!
 $! ##ADD NEW CONSTANTS HERE##
+$ perl_d_llseek="undef"
 $ perl_d_madvise="undef"
 $ perl_selectminbits=32
 $ perl_d_msync="undef"
@@ -444,7 +445,6 @@ $   perl_sPRIu64 = ""
 $   perl_sPRIo64 = ""
 $   perl_sPRIx64 = ""
 $ ENDIF
-$ perl_d_llsekk="undef"
 $!
 $!
 $! Now some that we build up
@@ -3312,7 +3312,7 @@ $ WC "d_chown='" + perl_d_chown + "'"
 $ WC "d_chroot='" + perl_d_chroot + "'"
 $ WC "d_cuserid='" + perl_d_cuserid + "'"
 $ WC "d_dbl_dig='" + perl_d_dbl_dig + "'"
-$ WC "d_ldbl_dig='" + perl_d_dbl_dig + "'"
+$ WC "d_ldbl_dig='" + perl_d_ldbl_dig + "'"
 $ WC "d_difftime='" + perl_d_difftime + "'"
 $ WC "d_fork='" + perl_d_fork + "'"
 $ WC "d_getlogin='" + perl_d_getlogin + "'"
@@ -3576,7 +3576,7 @@ $!
 $ Close CONFIGSH
 $
 $! Okay, we've gotten here. Build munchconfig and run it
-$ 'Perl_CC'/debug munchconfig.c
+$ 'Perl_CC' munchconfig.c
 $ If (Needs_Opt.eqs."Yes")
 $ THEN
 $   open/write OPTCHAN []munchconfig.opt

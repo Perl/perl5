@@ -36,12 +36,13 @@ while (<>)
  {
   s/~([\w_]+)~/$opt{$1}/g;
   if (/^([\w_]+)=(.*)$/) {
+    my($k,$v) = ($1,$2);
     # this depends on cf_time being empty in the template (or we'll get a loop)
-    if ($1 eq 'cf_time') {
-      $_ = "$1='" . localtime(time) . "'\n" if $2 =~ /^\s*'\s*'/;
+    if ($k eq 'cf_time') {
+      $_ = "$k='" . localtime(time) . "'\n" if $v =~ /^\s*'\s*'/;
     }
-    elsif (exists $opt{$1}) {
-      $_ = "$1='$opt{$1}'\n";
+    elsif (exists $opt{$k}) {
+      $_ = "$k='$opt{$k}'\n";
     }
   }
   print;

@@ -11,6 +11,8 @@
 0530; 058F; Armenian
 0590; 05FF; Hebrew
 0600; 06FF; Arabic
+0700; 074F; Syriac  
+0780; 07BF; Thaana
 0900; 097F; Devanagari
 0980; 09FF; Bengali
 0A00; 0A7F; Gurmukhi
@@ -20,11 +22,20 @@
 0C00; 0C7F; Telugu
 0C80; 0CFF; Kannada
 0D00; 0D7F; Malayalam
+0D80; 0DFF; Sinhala
 0E00; 0E7F; Thai
 0E80; 0EFF; Lao
-0F00; 0FBF; Tibetan
+0F00; 0FFF; Tibetan
+1000; 109F; Myanmar 
 10A0; 10FF; Georgian
 1100; 11FF; Hangul Jamo
+1200; 137F; Ethiopic
+13A0; 13FF; Cherokee
+1400; 167F; Unified Canadian Aboriginal Syllabics
+1680; 169F; Ogham
+16A0; 16FF; Runic
+1780; 17FF; Khmer
+1800; 18AF; Mongolian
 1E00; 1EFF; Latin Extended Additional
 1F00; 1FFF; Greek Extended
 2000; 206F; General Punctuation
@@ -44,15 +55,23 @@
 25A0; 25FF; Geometric Shapes
 2600; 26FF; Miscellaneous Symbols
 2700; 27BF; Dingbats
+2800; 28FF; Braille Patterns
+2E80; 2EFF; CJK Radicals Supplement
+2F00; 2FDF; Kangxi Radicals
+2FF0; 2FFF; Ideographic Description Characters
 3000; 303F; CJK Symbols and Punctuation
 3040; 309F; Hiragana
 30A0; 30FF; Katakana
 3100; 312F; Bopomofo
 3130; 318F; Hangul Compatibility Jamo
 3190; 319F; Kanbun
+31A0; 31BF; Bopomofo Extended
 3200; 32FF; Enclosed CJK Letters and Months
 3300; 33FF; CJK Compatibility
+3400; 4DB5; CJK Unified Ideographs Extension A
 4E00; 9FFF; CJK Unified Ideographs
+A000; A48F; Yi Syllables
+A490; A4CF; Yi Radicals
 AC00; D7A3; Hangul Syllables
 D800; DB7F; High Surrogates
 DB80; DBFF; High Private Use Surrogates
@@ -64,7 +83,8 @@ FB50; FDFF; Arabic Presentation Forms-A
 FE20; FE2F; Combining Half Marks
 FE30; FE4F; CJK Compatibility Forms
 FE50; FE6F; Small Form Variants
-FE70; FEFF; Arabic Presentation Forms-B
-FF00; FFEF; Halfwidth and Fullwidth Forms
+FE70; FEFE; Arabic Presentation Forms-B
 FEFF; FEFF; Specials
-FFF0; FFFF; Specials
+FF00; FFEF; Halfwidth and Fullwidth Forms
+FFF0; FFFD; Specials
+

@@ -3246,7 +3246,7 @@ sigaction(sig, action, oldaction = 0)
 		}
 		else {
 		    New(0, sigset, 1, sigset_t);
-		    sv_setptrobj(*svp, PTR_CAST sigset, "POSIX::SigSet");
+		    sv_setptrobj(*svp, sigset, "POSIX::SigSet");
 		}
 		*sigset = oact.sa_mask;
 
@@ -3274,7 +3274,7 @@ INIT:
 	}
 	else if (sv_derived_from(ST(2), "POSIX::SigSet")) {
 	    IV tmp = SvIV((SV*)SvRV(ST(2)));
-	    oldsigset = (POSIX__SigSet)PTR_CAST tmp;
+	    oldsigset = INT2PTR(POSIX__SigSet,tmp);
 	}
 	else {
 	    New(0, oldsigset, 1, sigset_t);

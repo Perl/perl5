@@ -75,8 +75,8 @@
   /* getenv used for regular logical names */
 #  define getenv(v) my_getenv(v,TRUE)
 #endif
-#if defined(getenv_len)
-#undef getenv_len
+#ifdef getenv_len
+#  undef getenv_len
 #endif
 #define getenv_len(v,l) my_getenv_len(v,l,TRUE)
 

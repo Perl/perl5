@@ -104,7 +104,7 @@ EXPECT
 ########
 %@x=0;
 EXPECT
-Can't modify hash deref in repeat at - line 1, near "0;"
+Can't modify hash dereference in repeat (x) at - line 1, near "0;"
 Execution of - aborted due to compilation errors.
 ########
 $_="foo";

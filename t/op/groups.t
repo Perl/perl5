@@ -79,11 +79,11 @@ if ($groups =~ /groups=(.+)( [ug]id=|$)/) {
     # prefer names over numbers
     for (@g0) {
         # 42(zot me)
-	if (/^(\d+)(?:\(([^)]+)\))?$/) {
+	if (/^(\d+)(?:\(([^)]+)\))?/) {
 	    push @g1, ($2 || $1);
 	}
         # zot me(42)
-	elsif (/^([^(]*)\((\d+)\)$/) {
+	elsif (/^([^(]*)\((\d+)\)/) {
 	    push @g1, ($1 || $2);
 	}
 	else {

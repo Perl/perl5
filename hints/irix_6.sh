@@ -245,7 +245,6 @@ EOM
 		archname64="-n32"
 		;;
 	    esac
-	    ccflags="$ccflags -DUSE_64_BITS"
 	    ;;
 esac
 EOCBU

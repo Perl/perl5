@@ -8,6 +8,37 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+#ifndef PERL_VERSION
+#  include <patchlevel.h>
+#  define PERL_REVISION		5
+#  define PERL_VERSION		PATCHLEVEL
+#  define PERL_SUBVERSION	SUBVERSION
+#endif
+
+#if PERL_REVISION == 5 && (PERL_VERSION < 4 || \
+			   (PERL_VERSION == 4 && PERL_SUBVERSION <= 75))
+#  define PL_na				na
+#  define PL_sv_no			sv_no
+#  define PL_sv_undef			sv_undef
+#  define PL_dowarn			dowarn
+#  define PL_curinterp			curinterp
+#  define PL_do_undump			do_undump
+#  define PL_perl_destruct_level	perl_destruct_level
+#  define ERRSV				GvSV(errgv)
+#endif
+
+#ifndef newSVpvn
+#  define newSVpvn(a,b)	newSVpv(a,b)
+#endif
+
+#ifndef pTHX
+#  define pTHX		void
+#  define pTHX_
+#  define aTHX
+#  define aTHX_
+#  define dTHX		extern int JNI___notused
+#endif
+
 #ifndef EXTERN_C
 #  ifdef __cplusplus
 #    define EXTERN_C extern "C"
@@ -46,6 +77,8 @@ Java_PerlInterpreter_init(JNIEnv *env, jobject obj, jstring js)
     if (PL_curinterp)
 	return;
 
+    perl_init_i18nl10n(1);
+
     if (!PL_do_undump) {
 	my_perl = perl_alloc();
 	if (!my_perl)
@@ -62,21 +95,20 @@ Java_PerlInterpreter_init(JNIEnv *env, jobject obj, jstring js)
 }
 
 JNIEXPORT void JNICALL
-Java_PerlInterpreter_eval(void *perl, JNIEnv *env, jobject obj, jstring js)
+Java_PerlInterpreter_eval(JNIEnv *env, jobject obj, jstring js)
 {
     SV* envsv;
     SV* objsv;
     dSP;
     jbyte* jb;
-    dTHXa(perl);
 
     ENTER;
     SAVETMPS;
 
     jplcurenv = env;
-    envsv = get_sv("JPL::_env_", 1);
+    envsv = perl_get_sv("JPL::_env_", 1);
     sv_setiv(envsv, (IV)(void*)env);
-    objsv = get_sv("JPL::_obj_", 1);
+    objsv = perl_get_sv("JPL::_obj_", 1);
     sv_setiv(objsv, (IV)(void*)obj);
 
     jb = (jbyte*)(*env)->GetStringUTFChars(env,js,0);
@@ -84,7 +116,7 @@ Java_PerlInterpreter_eval(void *perl, JNIEnv *env, jobject obj, jstring js)
     if (jpldebug)
 	fprintf(stderr, "eval %s\n", (char*)jb);
 
-    eval_pv( (char*)jb, 0 );
+    perl_eval_pv( (char*)jb, 0 );
 
     if (SvTRUE(ERRSV)) {
 	jthrowable newExcCls;
@@ -105,9 +137,8 @@ Java_PerlInterpreter_eval(void *perl, JNIEnv *env, jobject obj, jstring js)
 
 /*
 JNIEXPORT jint JNICALL
-Java_PerlInterpreter_eval(void *perl, JNIEnv *env, jobject obj, jint ji)
+Java_PerlInterpreter_eval(JNIEnv *env, jobject obj, jint ji)
 {
-    dTHXa(perl);
     op = (OP*)(void*)ji;
     op = (*op->op_ppaddr)(pTHX);
     return (jint)(void*)op;

@@ -235,7 +235,7 @@ sub rdo {
 
 1;
 
-__DATA__
+__END__
 
 =head1 NAME
 

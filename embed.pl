@@ -452,8 +452,8 @@ print EM <<'END';
  */
 
 #if !defined(PERL_CORE)
-#  define sv_setptrobj(rv,ptr,name)	sv_setref_iv(rv,name,(IV)ptr)
-#  define sv_setptrref(rv,ptr)		sv_setref_iv(rv,Nullch,(IV)ptr)
+#  define sv_setptrobj(rv,ptr,name)	sv_setref_iv(rv,name,PTR2IV(ptr))
+#  define sv_setptrref(rv,ptr)		sv_setref_iv(rv,Nullch,PTR2IV(ptr))
 #endif
 
 #if !defined(PERL_CORE) && !defined(PERL_NOCOMPAT) && !defined(PERL_BINCOMPAT_5005)
@@ -1578,11 +1578,15 @@ p	|IV	|sv_2iv		|SV* sv
 p	|SV*	|sv_2mortal	|SV* sv
 p	|NV	|sv_2nv		|SV* sv
 p	|char*	|sv_2pv		|SV* sv|STRLEN* lp
+p	|char*	|sv_2pvutf8	|SV* sv|STRLEN* lp
+p	|char*	|sv_2pvbyte	|SV* sv|STRLEN* lp
 p	|UV	|sv_2uv		|SV* sv
 p	|IV	|sv_iv		|SV* sv
 p	|UV	|sv_uv		|SV* sv
 p	|NV	|sv_nv		|SV* sv
 p	|char*	|sv_pvn		|SV *sv|STRLEN *len
+p	|char*	|sv_pvutf8n	|SV *sv|STRLEN *len
+p	|char*	|sv_pvbyten	|SV *sv|STRLEN *len
 p	|I32	|sv_true	|SV *sv
 p	|void	|sv_add_arena	|char* ptr|U32 size|U32 flags
 p	|int	|sv_backoff	|SV* sv
@@ -1626,6 +1630,8 @@ p	|char*	|sv_peek	|SV* sv
 p	|void	|sv_pos_u2b	|SV* sv|I32* offsetp|I32* lenp
 p	|void	|sv_pos_b2u	|SV* sv|I32* offsetp
 p	|char*	|sv_pvn_force	|SV* sv|STRLEN* lp
+p	|char*	|sv_pvutf8n_force|SV* sv|STRLEN* lp
+p	|char*	|sv_pvbyten_force|SV* sv|STRLEN* lp
 p	|char*	|sv_reftype	|SV* sv|int ob
 p	|void	|sv_replace	|SV* sv|SV* nsv
 p	|void	|sv_report_used
@@ -1653,10 +1659,10 @@ p	|bool	|sv_upgrade	|SV* sv|U32 mt
 p	|void	|sv_usepvn	|SV* sv|char* ptr|STRLEN len
 p	|void	|sv_vcatpvfn	|SV* sv|const char* pat|STRLEN patlen \
 				|va_list* args|SV** svargs|I32 svmax \
-				|bool *used_locale
+				|bool *maybe_tainted
 p	|void	|sv_vsetpvfn	|SV* sv|const char* pat|STRLEN patlen \
 				|va_list* args|SV** svargs|I32 svmax \
-				|bool *used_locale
+				|bool *maybe_tainted
 p	|SV*	|swash_init	|char* pkg|char* name|SV* listsv \
 				|I32 minbits|I32 none
 p	|UV	|swash_fetch	|SV *sv|U8 *ptr
@@ -1754,7 +1760,11 @@ p	|void*	|default_protect|int *excpt|protect_body_t body|...
 p	|void*	|vdefault_protect|int *excpt|protect_body_t body|va_list *args
 p	|void	|reginitcolors
 p	|char*	|sv_2pv_nolen	|SV* sv
+p	|char*	|sv_2pvutf8_nolen|SV* sv
+p	|char*	|sv_2pvbyte_nolen|SV* sv
 p	|char*	|sv_pv		|SV *sv
+p	|char*	|sv_pvutf8	|SV *sv
+p	|char*	|sv_pvbyte	|SV *sv
 p	|void	|sv_force_normal|SV *sv
 p	|void	|tmps_grow	|I32 n
 p	|SV*	|sv_rvweaken	|SV *sv

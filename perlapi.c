@@ -3648,6 +3648,20 @@ Perl_sv_2pv(pTHXo_ SV* sv, STRLEN* lp)
     return ((CPerlObj*)pPerl)->Perl_sv_2pv(sv, lp);
 }
 
+#undef  Perl_sv_2pvutf8
+char*
+Perl_sv_2pvutf8(pTHXo_ SV* sv, STRLEN* lp)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_2pvutf8(sv, lp);
+}
+
+#undef  Perl_sv_2pvbyte
+char*
+Perl_sv_2pvbyte(pTHXo_ SV* sv, STRLEN* lp)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_2pvbyte(sv, lp);
+}
+
 #undef  Perl_sv_2uv
 UV
 Perl_sv_2uv(pTHXo_ SV* sv)
@@ -3681,6 +3695,20 @@ char*
 Perl_sv_pvn(pTHXo_ SV *sv, STRLEN *len)
 {
     return ((CPerlObj*)pPerl)->Perl_sv_pvn(sv, len);
+}
+
+#undef  Perl_sv_pvutf8n
+char*
+Perl_sv_pvutf8n(pTHXo_ SV *sv, STRLEN *len)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_pvutf8n(sv, len);
+}
+
+#undef  Perl_sv_pvbyten
+char*
+Perl_sv_pvbyten(pTHXo_ SV *sv, STRLEN *len)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_pvbyten(sv, len);
 }
 
 #undef  Perl_sv_true
@@ -3961,6 +3989,20 @@ Perl_sv_pvn_force(pTHXo_ SV* sv, STRLEN* lp)
     return ((CPerlObj*)pPerl)->Perl_sv_pvn_force(sv, lp);
 }
 
+#undef  Perl_sv_pvutf8n_force
+char*
+Perl_sv_pvutf8n_force(pTHXo_ SV* sv, STRLEN* lp)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_pvutf8n_force(sv, lp);
+}
+
+#undef  Perl_sv_pvbyten_force
+char*
+Perl_sv_pvbyten_force(pTHXo_ SV* sv, STRLEN* lp)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_pvbyten_force(sv, lp);
+}
+
 #undef  Perl_sv_reftype
 char*
 Perl_sv_reftype(pTHXo_ SV* sv, int ob)
@@ -4134,16 +4176,16 @@ Perl_sv_usepvn(pTHXo_ SV* sv, char* ptr, STRLEN len)
 
 #undef  Perl_sv_vcatpvfn
 void
-Perl_sv_vcatpvfn(pTHXo_ SV* sv, const char* pat, STRLEN patlen, va_list* args, SV** svargs, I32 svmax, bool *used_locale)
+Perl_sv_vcatpvfn(pTHXo_ SV* sv, const char* pat, STRLEN patlen, va_list* args, SV** svargs, I32 svmax, bool *maybe_tainted)
 {
-    ((CPerlObj*)pPerl)->Perl_sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale);
+    ((CPerlObj*)pPerl)->Perl_sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, maybe_tainted);
 }
 
 #undef  Perl_sv_vsetpvfn
 void
-Perl_sv_vsetpvfn(pTHXo_ SV* sv, const char* pat, STRLEN patlen, va_list* args, SV** svargs, I32 svmax, bool *used_locale)
+Perl_sv_vsetpvfn(pTHXo_ SV* sv, const char* pat, STRLEN patlen, va_list* args, SV** svargs, I32 svmax, bool *maybe_tainted)
 {
-    ((CPerlObj*)pPerl)->Perl_sv_vsetpvfn(sv, pat, patlen, args, svargs, svmax, used_locale);
+    ((CPerlObj*)pPerl)->Perl_sv_vsetpvfn(sv, pat, patlen, args, svargs, svmax, maybe_tainted);
 }
 
 #undef  Perl_swash_init
@@ -4745,11 +4787,39 @@ Perl_sv_2pv_nolen(pTHXo_ SV* sv)
     return ((CPerlObj*)pPerl)->Perl_sv_2pv_nolen(sv);
 }
 
+#undef  Perl_sv_2pvutf8_nolen
+char*
+Perl_sv_2pvutf8_nolen(pTHXo_ SV* sv)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_2pvutf8_nolen(sv);
+}
+
+#undef  Perl_sv_2pvbyte_nolen
+char*
+Perl_sv_2pvbyte_nolen(pTHXo_ SV* sv)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_2pvbyte_nolen(sv);
+}
+
 #undef  Perl_sv_pv
 char*
 Perl_sv_pv(pTHXo_ SV *sv)
 {
     return ((CPerlObj*)pPerl)->Perl_sv_pv(sv);
+}
+
+#undef  Perl_sv_pvutf8
+char*
+Perl_sv_pvutf8(pTHXo_ SV *sv)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_pvutf8(sv);
+}
+
+#undef  Perl_sv_pvbyte
+char*
+Perl_sv_pvbyte(pTHXo_ SV *sv)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_pvbyte(sv);
 }
 
 #undef  Perl_sv_force_normal

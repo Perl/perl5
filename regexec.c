@@ -278,7 +278,16 @@ S_cache_re(pTHX_ regexp *prog)
 /* A failure to find a constant substring means that there is no need to make
    an expensive call to REx engine, thus we celebrate a failure.  Similarly,
    finding a substring too deep into the string means that less calls to
-   regtry() should be needed. */
+   regtry() should be needed.
+
+   REx compiler's optimizer found 4 possible hints:
+	a) Anchored substring;
+	b) Fixed substring;
+	c) Whether we are anchored (beginning-of-line or \G);
+	d) First node (of those at offset 0) which may distingush positions;
+   We use 'a', 'b', multiline-part of 'c', and try to find a position in the
+   string which does not contradict any of them.
+ */
 
 char *
 Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
@@ -293,6 +302,9 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     I32 ml_anch;
     char *tmp;
     register char *other_last = Nullch;
+#ifdef DEBUGGING
+    char *i_strpos = strpos;
+#endif
 
     DEBUG_r( if (!PL_colorset) reginitcolors() );
     DEBUG_r(PerlIO_printf(Perl_debug_log,
@@ -420,7 +432,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	goto fail_finish;
 
     /* Finish the diagnostic message */
-    DEBUG_r(PerlIO_printf(Perl_debug_log, "%ld...\n", (long)(s - strpos)) );
+    DEBUG_r(PerlIO_printf(Perl_debug_log, "%ld...\n", (long)(s - i_strpos)) );
 
     /* Got a candidate.  Check MBOL anchoring, and the *other* substr.
        Start with the other substr.
@@ -431,11 +443,13 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
      */
 
     if (prog->float_substr && prog->anchored_substr) {
-	/* Take into account the anchored substring. */
+	/* Take into account the "other" substring. */
 	/* XXXX May be hopelessly wrong for UTF... */
 	if (!other_last)
 	    other_last = strpos - 1;
 	if (check == prog->float_substr) {
+	  do_other_anchored:
+	    {
 		char *last = s - start_shift, *last1, *last2;
 		char *s1 = s;
 
@@ -446,7 +460,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 			|| (PL_bostr = strpos, /* Used in regcopmaybe() */
 			    (t = reghopmaybe_c(s, -(prog->check_offset_max)))
 			    && t > strpos)))
-		    ;
+		    /* EMPTY */;
 		else
 		    t = strpos;
 		t += prog->anchored_offset;
@@ -478,7 +492,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		    }
 		    DEBUG_r(PerlIO_printf(Perl_debug_log,
 			", trying floating at offset %ld...\n",
-			(long)(s1 + 1 - strpos)));
+			(long)(s1 + 1 - i_strpos)));
 		    PL_regeol = strend;			/* Used in HOP() */
 		    other_last = last1 + prog->anchored_offset;
 		    s = HOPc(last, 1);
@@ -486,14 +500,15 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		}
 		else {
 		    DEBUG_r(PerlIO_printf(Perl_debug_log, " at offset %ld...\n",
-			  (long)(s - strpos)));
+			  (long)(s - i_strpos)));
 		    t = s - prog->anchored_offset;
 		    other_last = s - 1;
+		    s = s1;
 		    if (t == strpos)
 			goto try_at_start;
-		    s = s1;
 		    goto try_at_offset;
 		}
+	    }
 	}
 	else {		/* Take into account the floating substring. */
 		char *last, *last1;
@@ -529,7 +544,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		    }
 		    DEBUG_r(PerlIO_printf(Perl_debug_log,
 			", trying anchored starting at offset %ld...\n",
-			(long)(s1 + 1 - strpos)));
+			(long)(s1 + 1 - i_strpos)));
 		    other_last = last;
 		    PL_regeol = strend;			/* Used in HOP() */
 		    s = HOPc(t, 1);
@@ -537,11 +552,11 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		}
 		else {
 		    DEBUG_r(PerlIO_printf(Perl_debug_log, " at offset %ld...\n",
-			  (long)(s - strpos)));
+			  (long)(s - i_strpos)));
 		    other_last = s - 1;
+		    s = s1;
 		    if (t == strpos)
 			goto try_at_start;
-		    s = s1;
 		    goto try_at_offset;
 		}
 	}
@@ -559,18 +574,36 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	   cannot start at strpos. */
       try_at_offset:
 	if (ml_anch && t[-1] != '\n') {
-	  find_anchor:		/* Eventually fbm_*() should handle this */
+	    /* Eventually fbm_*() should handle this, but often
+	       anchored_offset is not 0, so this check will not be wasted. */
+	    /* XXXX In the code below we prefer to look for "^" even in
+	       presence of anchored substrings.  And we search even
+	       beyond the found float position.  These pessimizations
+	       are historical artefacts only.  */
+	  find_anchor:
 	    while (t < strend - prog->minlen) {
 		if (*t == '\n') {
 		    if (t < s - prog->check_offset_min) {
+			if (prog->anchored_substr) {
+			    /* We definitely contradict the found anchored
+			       substr.  Due to the above check we do not
+			       contradict "check" substr.
+			       Thus we can arrive here only if check substr
+			       is float.  Redo checking for "other"=="fixed".
+			     */
+			    strpos = t + 1;			    
+			    DEBUG_r(PerlIO_printf(Perl_debug_log, "Found /%s^%s/m at offset %ld, rescanning for anchored from offset %ld...\n",
+				PL_colors[0],PL_colors[1], (long)(strpos - i_strpos), (long)(strpos - i_strpos + prog->anchored_offset)));
+			    goto do_other_anchored;
+			}
 			s = t + 1;
 			DEBUG_r(PerlIO_printf(Perl_debug_log, "Found /%s^%s/m at offset %ld...\n",
-			    PL_colors[0],PL_colors[1], (long)(s - strpos)));
+			    PL_colors[0],PL_colors[1], (long)(s - i_strpos)));
 			goto set_useful;
 		    }
 		    DEBUG_r(PerlIO_printf(Perl_debug_log, "Found /%s^%s/m, restarting at offset %ld...\n",
-			PL_colors[0],PL_colors[1], (long)(t + 1 - strpos)));
-		    s = t + 1;
+			PL_colors[0],PL_colors[1], (long)(t + 1 - i_strpos)));
+		    strpos = s = t + 1;
 		    goto restart;
 		}
 		t++;
@@ -596,8 +629,12 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    t = strpos;
 	    goto find_anchor;
 	}
+	DEBUG_r( if (ml_anch)
+	    PerlIO_printf(Perl_debug_log, "Does not contradict /%s^%s/m...\n",
+			PL_colors[0],PL_colors[1]);
+	);
       success_at_start:
-	if (!(prog->reganch & ROPT_NAUGHTY)
+	if (!(prog->reganch & ROPT_NAUGHTY)	/* XXXX If strpos moved? */
 	    && --BmUSEFUL(prog->check_substr) < 0
 	    && prog->check_substr == prog->float_substr) { /* boo */
 	    /* If flags & SOMETHING - do not do it many times on the same match */
@@ -612,7 +649,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     }
 
     DEBUG_r(PerlIO_printf(Perl_debug_log, "%sGuessed:%s match at offset %ld\n",
-			  PL_colors[4], PL_colors[5], (long)(s - strpos)) );
+			  PL_colors[4], PL_colors[5], (long)(s - i_strpos)) );
     return s;
 
   fail_finish:				/* Substring not found */
@@ -642,7 +679,6 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     register I32 tmp;
     I32 minlen;		/* must match at least this many chars */
     I32 dontbother = 0;	/* how many characters not to try at end */
-    CURCUR cc;
     I32 start_shift = 0;		/* Offset of the start to find
 					 constant substr. */		/* CC */
     I32 end_shift = 0;			/* Same for the end. */		/* CC */
@@ -650,9 +686,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     char *scream_olds;
     SV* oreplsv = GvSV(PL_replgv);
 
-    cc.cur = 0;
-    cc.oldcc = 0;
-    PL_regcc = &cc;
+    PL_regcc = 0;
 
     cache_re(prog);
 #ifdef DEBUGGING
@@ -758,9 +792,12 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    end = HOPc(strend, -dontbother) - 1;
 	    /* for multiline we only have to try after newlines */
 	    if (prog->check_substr) {
+		if (s == startpos)
+		    goto after_try;
 		while (1) {
 		    if (regtry(prog, s))
 			goto got_it;
+		  after_try:
 		    if (s >= end)
 			goto phooey;
 		    s = re_intuit_start(prog, sv, s + 1, strend, flags, NULL);
@@ -2109,7 +2146,6 @@ S_regmatch(pTHX_ regnode *prog)
 		    regexp *re;
 		    MAGIC *mg = Null(MAGIC*);
 		    re_cc_state state;
-		    CURCUR cctmp;
 		    CHECKPOINT cp, lastcp;
 
 		    if(SvROK(ret) || SvRMAGICAL(ret)) {
@@ -2152,9 +2188,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    state.cc = PL_regcc;
 		    state.re = PL_reg_re;
 
-		    cctmp.cur = 0;
-		    cctmp.oldcc = 0;
-		    PL_regcc = &cctmp;
+		    PL_regcc = 0;
 		    
 		    cp = regcppush(0);	/* Save *all* the positions. */
 		    REGCP_SET;
@@ -2168,6 +2202,20 @@ S_regmatch(pTHX_ regnode *prog)
 		    PL_reg_maxiter = 0;
 
 		    if (regmatch(re->program + 1)) {
+			/* Even though we succeeded, we need to restore
+			   global variables, since we may be wrapped inside
+			   SUSPEND, thus the match may be not finished yet. */
+
+			/* XXXX Do this only if SUSPENDed? */
+			PL_reg_call_cc = state.prev;
+			PL_regcc = state.cc;
+			PL_reg_re = state.re;
+			cache_re(PL_reg_re);
+
+			/* XXXX This is too dramatic a measure... */
+			PL_reg_maxiter = 0;
+
+			/* These are needed even if not SUSPEND. */
 			ReREFCNT_dec(re);
 			regcpblow(cp);
 			sayYES;
@@ -2227,6 +2275,81 @@ S_regmatch(pTHX_ regnode *prog)
 	case LOGICAL:
 	    logical = scan->flags;
 	    break;
+/*******************************************************************
+ PL_regcc contains infoblock about the innermost (...)* loop, and
+ a pointer to the next outer infoblock.
+
+ Here is how Y(A)*Z is processed (if it is compiled into CURLYX/WHILEM):
+
+   1) After matching X, regnode for CURLYX is processed;
+
+   2) This regnode creates infoblock on the stack, and calls 
+      regmatch() recursively with the starting point at WHILEM node;
+
+   3) Each hit of WHILEM node tries to match A and Z (in the order
+      depending on the current iteration, min/max of {min,max} and
+      greediness).  The information about where are nodes for "A"
+      and "Z" is read from the infoblock, as is info on how many times "A"
+      was already matched, and greediness.
+
+   4) After A matches, the same WHILEM node is hit again.
+
+   5) Each time WHILEM is hit, PL_regcc is the infoblock created by CURLYX
+      of the same pair.  Thus when WHILEM tries to match Z, it temporarily
+      resets PL_regcc, since this Y(A)*Z can be a part of some other loop:
+      as in (Y(A)*Z)*.  If Z matches, the automaton will hit the WHILEM node
+      of the external loop.
+
+ Currently present infoblocks form a tree with a stem formed by PL_curcc
+ and whatever it mentions via ->next, and additional attached trees
+ corresponding to temporarily unset infoblocks as in "5" above.
+
+ In the following picture infoblocks for outer loop of 
+ (Y(A)*?Z)*?T are denoted O, for inner I.  NULL starting block
+ is denoted by x.  The matched string is YAAZYAZT.  Temporarily postponed
+ infoblocks are drawn below the "reset" infoblock.
+
+ In fact in the picture below we do not show failed matches for Z and T
+ by WHILEM blocks.  [We illustrate minimal matches, since for them it is
+ more obvious *why* one needs to *temporary* unset infoblocks.]
+
+  Matched	REx position	InfoBlocks	Comment
+  		(Y(A)*?Z)*?T	x
+  		Y(A)*?Z)*?T	x <- O
+  Y		(A)*?Z)*?T	x <- O
+  Y		A)*?Z)*?T	x <- O <- I
+  YA		)*?Z)*?T	x <- O <- I
+  YA		A)*?Z)*?T	x <- O <- I
+  YAA		)*?Z)*?T	x <- O <- I
+  YAA		Z)*?T		x <- O		# Temporary unset I
+				     I
+
+  YAAZ		Y(A)*?Z)*?T	x <- O
+				     I
+
+  YAAZY		(A)*?Z)*?T	x <- O
+				     I
+
+  YAAZY		A)*?Z)*?T	x <- O <- I
+				     I
+
+  YAAZYA	)*?Z)*?T	x <- O <- I	
+				     I
+
+  YAAZYA	Z)*?T		x <- O		# Temporary unset I
+				     I,I
+
+  YAAZYAZ	)*?T		x <- O
+				     I,I
+
+  YAAZYAZ	T		x		# Temporary unset O
+				O
+				I,I
+
+  YAAZYAZT			x
+				O
+				I,I
+ *******************************************************************/
 	case CURLYX: {
 		CURCUR cc;
 		CHECKPOINT cp = PL_savestack_ix;
@@ -2279,7 +2402,8 @@ S_regmatch(pTHX_ regnode *prog)
 
 		if (locinput == cc->lastloc && n >= cc->min) {
 		    PL_regcc = cc->oldcc;
-		    ln = PL_regcc->cur;
+		    if (PL_regcc)
+			ln = PL_regcc->cur;
 		    DEBUG_r(
 			PerlIO_printf(Perl_debug_log,
 			   "%*s  empty match detected, try continuation...\n",
@@ -2292,7 +2416,8 @@ S_regmatch(pTHX_ regnode *prog)
 				      "%*s  failed...\n",
 				      REPORT_CODE_OFF+PL_regindent*2, "")
 			);
-		    PL_regcc->cur = ln;
+		    if (PL_regcc)
+			PL_regcc->cur = ln;
 		    PL_regcc = cc;
 		    sayNO;
 		}
@@ -2363,7 +2488,8 @@ S_regmatch(pTHX_ regnode *prog)
 
 		if (cc->minmod) {
 		    PL_regcc = cc->oldcc;
-		    ln = PL_regcc->cur;
+		    if (PL_regcc)
+			ln = PL_regcc->cur;
 		    cp = regcppush(cc->parenfloor);
 		    REGCP_SET;
 		    if (regmatch(cc->next)) {
@@ -2372,7 +2498,8 @@ S_regmatch(pTHX_ regnode *prog)
 		    }
 		    REGCP_UNWIND;
 		    regcppop();
-		    PL_regcc->cur = ln;
+		    if (PL_regcc)
+			PL_regcc->cur = ln;
 		    PL_regcc = cc;
 
 		    if (n >= cc->max) {	/* Maximum greed exceeded? */
@@ -2443,14 +2570,16 @@ S_regmatch(pTHX_ regnode *prog)
 
 		/* Failed deeper matches of scan, so see if this one works. */
 		PL_regcc = cc->oldcc;
-		ln = PL_regcc->cur;
+		if (PL_regcc)
+		    ln = PL_regcc->cur;
 		if (regmatch(cc->next))
 		    sayYES;
 		DEBUG_r(
 		    PerlIO_printf(Perl_debug_log, "%*s  failed...\n",
 				  REPORT_CODE_OFF+PL_regindent*2, "")
 		    );
-		PL_regcc->cur = ln;
+		if (PL_regcc)
+		    PL_regcc->cur = ln;
 		PL_regcc = cc;
 		cc->cur = n - 1;
 		cc->lastloc = lastloc;
