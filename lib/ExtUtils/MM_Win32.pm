@@ -510,7 +510,7 @@ pm_to_blib: $(TO_INST_PM)
 	        : $DMAKE ? 'qw[ $(mktmp,pmfiles.dat $(PM_TO_BLIB:s,\\,\\\\,)\n) ],'
 			 : '{ qw[$(PM_TO_BLIB)] },'
 	 ).q{'}.$autodir.q{','$(PM_FILTER)')"
-	}. ($NMAKE ? q{
+}. ($NMAKE ? q{
 $(PM_TO_BLIB)
 <<
 	} : '') . $self->{NOECHO}.q{$(TOUCH) $@

@@ -1522,7 +1522,8 @@ sub init_main {
 	foreach $dir ($Updir,
                       File::Spec->catdir($Updir,$Updir),
                       File::Spec->catdir($Updir,$Updir,$Updir),
-                      File::Spec->catdir($Updir,$Updir,$Updir,$Updir))
+                      File::Spec->catdir($Updir,$Updir,$Updir,$Updir),
+                      File::Spec->catdir($Updir,$Updir,$Updir,$Updir,$Updir))
         {
 	    if (
 		-f File::Spec->catfile($dir,"config_h.SH")
@@ -2862,7 +2863,7 @@ PERL_HDRS = \
 	$(PERL_INC)/warnings.h
 
 $(OBJECT) : $(PERL_HDRS)
-    } if $self->{OBJECT};
+} if $self->{OBJECT};
 
     push @m, join(" ", values %{$self->{XS}})." : \$(XSUBPPDEPS)\n"  if %{$self->{XS}};
 
