@@ -154,15 +154,6 @@ for f in $nonxs_ext; do
     nonxs_list="$nonxs_list ext/$f/pm_to_blib"
 done
 
-# Handle the usage of different yaccs in posix-bc (During Configure we
-# us yacc for perly.y and byacc for a2p.y.  The makefiles must use the
-# same configuration for run_byacc!):
-case "$osname" in
-    posix-bc)
-	byacc=$yacc
-	;;
-esac
-
 echo "Extracting Makefile (with variable substitutions)"
 $spitshell >Makefile <<!GROK!THIS!
 # Makefile.SH
@@ -170,10 +161,7 @@ $spitshell >Makefile <<!GROK!THIS!
 # be lost the next time you run Configure.
 #  Makefile is used to generate $firstmakefile.  The only difference
 #  is that $firstmakefile has the dependencies filled in at the end.
-#
-#
-# I now supply perly.c with the kits, so don't remake perly.c without byacc
-BYACC = $byacc
+
 CC = $cc
 LD = $ld
 
@@ -826,28 +814,18 @@ install.html: all installhtml
 
 
 # I now supply perly.c with the kits, so the following section is
-# used only if you force byacc to run by saying
-# 	make run_byacc
-# Since we patch up the byacc output, the perly.fixer script needs
-# to run with precisely the same version of byacc as I use.  You
-# normally shouldn't remake perly.[ch].
+# used only if you force bison to run by saying
+# 	make regen_perly
+# You normally shouldn't remake perly.[ch].
 
-.PHONY: check_byacc run_byacc
+.PHONY: regen_perly
 
-check_byacc:
-	@$(BYACC) -V 2>&1 | grep 'version 1\.8\.2'
+run_byacc:
+	@echo "run_byacc is obsolete; try 'make regen_perly' instead"
 
-run_byacc:	FORCE check_byacc
-	$(BYACC) -d perly.y
-	-chmod 664 perly.c perly.h
-	sh $(shellflags) ./perly.fixer y.tab.c perly.c
-	sed -e 's/fprintf *( *stderr *,/PerlIO_printf(Perl_debug_log,/g' \
-	    -e 's/y\.tab/perly/g' perly.c >perly.tmp && mv perly.tmp perly.c
-	sed -e '/^extern YYSTYPE yy/D' y.tab.h >yh.tmp && mv yh.tmp y.tab.h
-	cmp -s y.tab.h perly.h && rm -f y.tab.h || mv y.tab.h perly.h
-	perl -i.old perlyline.pl perly.c
-	chmod 664 vms/perly_c.vms vms/perly_h.vms
-	perl vms/vms_yfix.pl perly.c perly.h vms/perly_c.vms vms/perly_h.vms
+# this outputs perly.act and perly.tab
+regen_perly:
+	perl regen_perly.pl
 
 # We don't want to regenerate perly.c and perly.h, but they might
 # appear out-of-date after a patch is applied or a new distribution is
@@ -857,11 +835,6 @@ perly.c: perly.y
 
 perly.h: perly.y
 	-@sh -c true
-
-PERLYVMS = vms/perly_c.vms vms/perly_h.vms
-
-$(PERLYVMS):	perly.c perly.h vms/vms_yfix.pl
-	perl vms/vms_yfix.pl perly.c perly.h vms/perly_c.vms vms/perly_h.vms
 
 # No compat3.sym here since and including the 5.004_50.
 # No interp.sym since 5.005_03.
@@ -904,7 +877,7 @@ regen regen_headers:	FORCE
 regen_pods:	FORCE
 	-cd pod; $(LDLIBPTH) $(MAKE) regen_pods
 
-regen_all: $(PERLYVMS) regen regen_pods
+regen_all: regen regen_pods
 
 .PHONY:	manisort manicheck
 
@@ -1279,44 +1252,6 @@ define)
     echo "This is an EBCDIC system, checking if any parser files need regenerating." >&2
 case "$osname" in
 os390|posix-bc)
-    rm -f y.tab.c y.tab.h
-    # yacc must be a reentrant ("pure") Bison in BS2000 Posix!
-    yacc -d perly.y >/dev/null 2>&1
-    if cmp -s y.tab.c perly.c; then
-        rm -f y.tab.c
-    else
-        echo "perly.y -> perly.c" >&2
-        mv -f y.tab.c perly.c
-        chmod u+w perly.c
-        sed -e '/^#include "perl\.h"/a\
-\
-#define yydebug    PL_yydebug\
-#define yynerrs    PL_yynerrs\
-#define yyerrflag  PL_yyerrflag\
-#define yychar     PL_yychar\
-#define yyval      PL_yyval\
-#define yylval     PL_yylval'				\
-            -e '/YYSTYPE *yyval;/D'			\
-            -e '/YYSTYPE *yylval;/D'			\
-            -e '/int  yychar,/,/yynerrs;/D'		\
-            -e 's/int yydebug = 0;/yydebug = 0;/'	\
-            -e 's/[^_]realloc(/PerlMem_realloc(/g'	\
-            -e 's/fprintf *( *stderr *,/PerlIO_printf(Perl_debug_log,/g' \
-            -e 's/y\.tab/perly/g' perly.c >perly.tmp && mv perly.tmp perly.c
-        xxx="$xxx perly.c"
-    fi
-    case "$osname:$usethreads" in
-    os390:define)
-	sed -e 's@^extern int yychar, yyerrflag;@/* extern int yychar, yyerrflag; */@' perly.c > perly.tmp && mv perly.tmp perly.c
-	;;
-    esac
-    if cmp -s y.tab.h perly.h; then
-        rm -f y.tab.h
-    else
-        echo "perly.y -> perly.h" >&2
-        mv -f y.tab.h perly.h
-        xxx="$xxx perly.h"
-    fi
     if cd x2p
     then
         rm -f y.tab.c y.tab.h

@@ -11468,14 +11468,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_last_swash_tmps	= (U8*)NULL;
     PL_last_swash_slen	= 0;
 
-    /* perly.c globals */
-    PL_yydebug		= proto_perl->Iyydebug;
-    PL_yynerrs		= proto_perl->Iyynerrs;
-    PL_yyerrflag	= proto_perl->Iyyerrflag;
-    PL_yychar		= proto_perl->Iyychar;
-    PL_yyval		= proto_perl->Iyyval;
-    PL_yylval		= proto_perl->Iyylval;
-
     PL_glob_index	= proto_perl->Iglob_index;
     PL_srand_called	= proto_perl->Isrand_called;
     PL_hash_seed	= proto_perl->Ihash_seed;

@@ -414,7 +414,6 @@ In all, the following files should probably be executable:
     keywords.pl
     myconfig
     opcode.pl
-    perly.fixer
     t/TEST
     t/*/*.t
     *.SH
@@ -478,51 +477,27 @@ you are not familiar with those systems.  You might want to issue your
 patch with a promise to quickly issue a follow-up that handles those
 directories.
 
-=head2 make run_byacc
+=head2 make regen_perly
 
-If you have byacc-1.8.2 (available from CPAN as
-http://www.cpan.org/src/misc/perl-byacc1.8.2.tar.gz), and if there have
-been changes to F<perly.y>, you can regenerate the F<perly.c> file.  The
-run_byacc makefile target does this by running byacc and then applying
-some patches so that byacc dynamically allocates space, rather than
-having fixed limits.  This patch is handled by the F<perly.fixer>
-script.  Depending on the nature of the changes to F<perly.y>, you may
-or may not have to hand-edit the patch to apply correctly.  If you do,
-you should include the edited patch in the new distribution.  (If you
-have byacc-1.9, the patch won't apply cleanly, notably changes to the printf
-output statements.  F<perly.fixer> could be fixed to detect this.)
+If perly.y has been edited, it is nessary to run this target to rebuild
+perly.h, perl.act and perl.tab. In fact this target just runs the Perl
+script regen_perly.pl. Note that perl.c is I<not> rebuilt; this is just a
+plain static file now. 
 
-If C<perly.c> or C<perly.h> changes, make sure you run C<perl vms/vms_yfix.pl> 
-to update the corresponding VMS files.  The run_byacc target in the Unix
-Makefile takes care of this.  See also L<VMS-specific updates>.
+This target relies on you having Bison installed on your system. Running
+the target will tell you if you haven't got the right version, and if so,
+where to get the right one. Or if you prefer, you could hack
+regen_perly.pl to work with your version of Bison. The important things
+are that the regexes can still extract out the right chunks of the Bison
+output into perly.act and perl.tab, and that the contents of those two
+files, plus perly.h, are functionally equivalent to those produced by the
+supported version of Bison.
 
-Some additional notes from Larry on this:
-
-Don't forget to regenerate perly_c.diff.
-
-    byacc -d perly.y
-    mv y.tab.c perly.c
-    patch perly.c <perly_c.diff
-    # manually apply any failed hunks
-    diff -u perly.c.orig perly.c >perly_c.diff
-
-One chunk of lines that often fails begins with
-
-    #line 29 "perly.y"
-
-and ends one line before
-
-    #define YYERRCODE 256
-
-This only happens when you add or remove a token type.  I suppose this
-could be automated, but it doesn't happen very often nowadays.
-
-Larry
+Note that in the old days, you had to do C<make run_byacc> instead.
 
 =head2 make regen_all
 
-This target takes care of the PERLYVMS, regen_headers, and regen_pods
-targets.
+This target takes care of the regen_headers, and regen_pods targets.
 
 =head2 make regen_headers
 
@@ -629,10 +604,6 @@ You can also consider the OS/2 diffs as reminders of portability
 things that need to be fixed in Configure.
 
 =head2 VMS-specific updates
-
-If you have changed F<perly.y> or F<perly.c>, then you most probably want
-to update F<vms/perly_{h,c}.vms> by running C<perl vms/vms_yfix.pl>, or
-by running `make regen_all` which will run that script for you.
 
 The Perl revision number appears as "perl5" in configure.com.
 It is courteous to update that if necessary.

@@ -397,13 +397,14 @@ PERLVARA(Ilast_swash_key,10,	U8)
 PERLVAR(Ilast_swash_tmps,	U8 *)
 PERLVAR(Ilast_swash_slen,	STRLEN)
 
-/* perly.c globals */
-PERLVAR(Iyydebug,	int)
-PERLVAR(Iyynerrs,	int)
-PERLVAR(Iyyerrflag,	int)
-PERLVAR(Iyychar,	int)
-PERLVAR(Iyyval,		YYSTYPE)
-PERLVAR(Iyylval,	YYSTYPE)
+/* ex perly.c globals. Now just placeholders for BINCOMPAT in 5.8.x
+ * XXX delete for 5.9.x */
+PERLVAR(IyydebugBINCOMPAT,	int)
+PERLVAR(IyynerrsBINCOMPAT,	int)
+PERLVAR(IyyerrflagBINCOMPAT,	int)
+PERLVAR(IyycharBINCOMPAT,	int)
+PERLVAR(IyyvalBINCOMPAT,	YYSTYPE)
+PERLVAR(IyylvalBINCOMPAT,	YYSTYPE)
 
 PERLVARI(Iglob_index,	int,	0)
 PERLVAR(Isrand_called,	bool)

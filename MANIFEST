@@ -2333,11 +2333,10 @@ perlsdio.h			Fake stdio using perlio
 perlsfio.h			Prototype sfio mapping for PerlIO
 perlsh				A poor man's perl shell
 perlvars.h			Global variables
-perly.c				A byacc'ed perly.y
-perly_c.diff			Fixup perly.c to allow recursion
-perly.fixer			A program to remove yacc stack limitations
-perly.h				The header file for perly.c
-perlyline.pl			Perl code to fix #line directives and gcc warnings in perly.c
+perly.act			parser actions; derived from perly.y
+perly.c				parser code (NOT derived from perly.y)
+perly.h				header file for perly.c; derived from perly.y
+perly.tab			parser state tables; derived from perly.y
 perly.y				Yacc grammar for perl
 plan9/aperl			Shell to make Perl error messages Acme-friendly
 plan9/arpa/inet.h		Plan9 port: replacement C header file
@@ -2559,6 +2558,7 @@ regcomp.h			Private declarations for above
 regcomp.pl			Builder of regnodes.h
 regcomp.sym			Data for regnodes.h
 regen_lib.pl			Common file routines for generator scripts
+regen_perly.pl			generate perly.{act,h,tab} from perly.y
 regen.pl			Run all scripts that (re)generate files
 regexec.c			Regular expression evaluator
 regexp.h			Public declarations for the above
@@ -3007,15 +3007,12 @@ vms/mms2make.pl			convert descrip.mms to make syntax
 vms/munchconfig.c		performs shell $var substitution for VMS
 vms/myconfig.com		record local configuration info for bug report
 vms/perlvms.pod			VMS-specific additions to Perl documentation
-vms/perly_c.vms			perly.c with fixed declarations for global syms
-vms/perly_h.vms			perly.h with fixed declarations for global syms
 vms/sockadapt.c			glue for SockshShr socket support
 vms/sockadapt.h			glue for SockshShr socket support
 vms/test.com			DCL driver for regression tests
 vms/vms.c			VMS-specific C code for Perl core
 vms/vmsish.h			VMS-specific C header for Perl core
 vms/vmspipe.com			VMS-specific piped command helper script
-vms/vms_yfix.pl			convert Unix perly.[ch] to VMS perly_[ch].vms
 vms/writemain.pl		Generate perlmain.c from miniperlmain.c+extensions
 vos/Changes			Changes made to port Perl to the VOS operating system
 vos/compile_full_perl.cm	VOS command macro to build "full" Perl

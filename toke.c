@@ -2189,6 +2189,11 @@ Perl_yylex_r(pTHX_ YYSTYPE *lvalp, int *lcharp)
 	Perl_croak(aTHX_ "panic: YYMAXLEVEL");
 
     r = Perl_yylex(aTHX);
+#  ifdef EBCDIC
+    if (r >= 0 && r < 255) {
+	r = NATIVE_TO_ASCII(r);
+    }
+#  endif
 
     if (yyactlevel > 0)
        yyactlevel--;

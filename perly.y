@@ -1,6 +1,6 @@
 /*    perly.y
  *
- *    Copyright (c) 1991-2002, Larry Wall
+ *    Copyright (c) 1991-2002, 2003, 2004 Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -12,44 +12,11 @@
  * All that is gold does not glitter, not all those who wander are lost.'
  */
 
-%{
-#include "EXTERN.h"
-#define PERL_IN_PERLY_C
-#include "perl.h"
-#ifdef EBCDIC
-#undef YYDEBUG
-#endif
-#define dep() deprecate("\"do\" to call subroutines")
+/*  Make the parser re-entrant. */
 
-/* stuff included here to make perly_c.diff apply better */
-
-#define yydebug	    PL_yydebug
-#define yynerrs	    PL_yynerrs
-#define yyerrflag   PL_yyerrflag
-#define yychar	    PL_yychar
-#define yyval	    PL_yyval
-#define yylval	    PL_yylval
-
-struct ysv {
-    short* yyss;
-    YYSTYPE* yyvs;
-    int oldyydebug;
-    int oldyynerrs;
-    int oldyyerrflag;
-    int oldyychar;
-    YYSTYPE oldyyval;
-    YYSTYPE oldyylval;
-};
-
-static void yydestruct(pTHX_ void *ptr);
-
-%}
+%pure_parser
 
 %start prog
-
-%{
-#if 0 /* get this from perly.h instead */
-%}
 
 %union {
     I32	ival;
@@ -57,16 +24,6 @@ static void yydestruct(pTHX_ void *ptr);
     OP *opval;
     GV *gvval;
 }
-
-%{
-#endif /* 0 */
-
-#ifdef USE_PURE_BISON
-#define YYLEX_PARAM (&yychar)
-#define yylex yylex_r
-#endif
-
-%}
 
 %token <ival> '{'
 
@@ -144,9 +101,6 @@ remember:	/* NULL */	/* start a full lexical scope */
 
 progstart:
 		{
-#if defined(YYDEBUG) && defined(DEBUGGING)
-		    yydebug = (DEBUG_p_TEST);
-#endif
 		    PL_expect = XSTATE; $$ = block_start(TRUE);
 		}
 	;
@@ -792,13 +746,3 @@ indirob	:	WORD
 	|	PRIVATEREF
 			{ $$ = $1; }
 	;
-
-%% /* PROGRAM */
-
-/* more stuff added to make perly_c.diff easier to apply */
-
-#ifdef yyparse
-#undef yyparse
-#endif
-#define yyparse() Perl_yyparse(pTHX)
-

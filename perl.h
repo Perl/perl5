@@ -11,6 +11,12 @@
 #ifndef H_PERL
 #define H_PERL 1
 
+/* XXX DAPM tmp - always do this now - probably nedd to remove all trace
+ * of the define at some pooint. Feb 04 */
+
+#define USE_PURE_BISON 1
+
+
 #ifdef PERL_FOR_X2P
 /*
  * This file is being used for x2p stuff.
@@ -2546,9 +2552,6 @@ Gid_t getegid (void);
 
 #ifdef DEBUGGING
 
-#  undef  YYDEBUG
-#  define YYDEBUG 1
-
 #  define DEBUG_p_TEST DEBUG_p_TEST_
 #  define DEBUG_s_TEST DEBUG_s_TEST_
 #  define DEBUG_l_TEST DEBUG_l_TEST_
@@ -2726,8 +2729,6 @@ Gid_t getegid (void);
 #define PERL_MAGIC_backref	  '<' /* for weak ref data */
 #define PERL_MAGIC_ext		  '~' /* Available for use by extensions */
 
-
-#define YYMAXDEPTH 300
 
 #ifndef assert  /* <assert.h> might have been included somehow */
 #ifdef DEBUGGING

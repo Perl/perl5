@@ -1770,7 +1770,10 @@ Perl_block_start(pTHX_ int full)
 {
     int retval = PL_savestack_ix;
     /* If there were syntax errors, don't try to start a block */
-    if (PL_yynerrs) return retval;
+    /* XXX DAPM 13-Feb-04. This symbol no longer gloabl. Think of a better
+     * way
+     * if (PL_yynerrs) return retval;
+     */
 
     pad_block_start(full);
     SAVEHINTS();
@@ -1794,7 +1797,10 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
     int needblockscope = PL_hints & HINT_BLOCK_SCOPE;
     OP* retval = scalarseq(seq);
     /* If there were syntax errors, don't try to close a block */
-    if (PL_yynerrs) return retval;
+    /* XXX DAPM 13-Feb-04. This symbol no longer gloabl. Think of a better
+     * way
+     * if (PL_yynerrs) return retval;
+     */
     LEAVE_SCOPE(floor);
     PL_compiling.op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
     if (needblockscope)

@@ -674,18 +674,18 @@ END_EXTERN_C
 #define PL_xrv_arenaroot	(*Perl_Ixrv_arenaroot_ptr(aTHX))
 #undef  PL_xrv_root
 #define PL_xrv_root		(*Perl_Ixrv_root_ptr(aTHX))
-#undef  PL_yychar
-#define PL_yychar		(*Perl_Iyychar_ptr(aTHX))
-#undef  PL_yydebug
-#define PL_yydebug		(*Perl_Iyydebug_ptr(aTHX))
-#undef  PL_yyerrflag
-#define PL_yyerrflag		(*Perl_Iyyerrflag_ptr(aTHX))
-#undef  PL_yylval
-#define PL_yylval		(*Perl_Iyylval_ptr(aTHX))
-#undef  PL_yynerrs
-#define PL_yynerrs		(*Perl_Iyynerrs_ptr(aTHX))
-#undef  PL_yyval
-#define PL_yyval		(*Perl_Iyyval_ptr(aTHX))
+#undef  PL_yycharBINCOMPAT
+#define PL_yycharBINCOMPAT	(*Perl_IyycharBINCOMPAT_ptr(aTHX))
+#undef  PL_yydebugBINCOMPAT
+#define PL_yydebugBINCOMPAT	(*Perl_IyydebugBINCOMPAT_ptr(aTHX))
+#undef  PL_yyerrflagBINCOMPAT
+#define PL_yyerrflagBINCOMPAT	(*Perl_IyyerrflagBINCOMPAT_ptr(aTHX))
+#undef  PL_yylvalBINCOMPAT
+#define PL_yylvalBINCOMPAT	(*Perl_IyylvalBINCOMPAT_ptr(aTHX))
+#undef  PL_yynerrsBINCOMPAT
+#define PL_yynerrsBINCOMPAT	(*Perl_IyynerrsBINCOMPAT_ptr(aTHX))
+#undef  PL_yyvalBINCOMPAT
+#define PL_yyvalBINCOMPAT	(*Perl_IyyvalBINCOMPAT_ptr(aTHX))
 #undef  PL_Sv
 #define PL_Sv			(*Perl_TSv_ptr(aTHX))
 #undef  PL_Xpv
