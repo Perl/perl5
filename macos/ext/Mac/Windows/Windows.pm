@@ -560,10 +560,9 @@ Returns whether PANE currently is focused.
 sub has_focus {
 	my($my, $pane) = @_;
 
-	defined ${$my->{focusable}}[$my->{focus}] or return;
-	return ${$my->{focusable}}[$my->{focus}] == $pane
-		if $my->{focus} && $my->{focusable} &&
-		defined ${$my->{focusable}}[$my->{focus}];
+	return $my->{focusable}[ $my->{focus} ] == $pane
+		if defined $my->{focus} && $my->{focusable}
+		&& defined $my->{focusable}[ $my->{focus} ];
 }
 
 =item can_focus 
