@@ -2,6 +2,8 @@ package Shell;
 use 5.006_001;
 use strict;
 use warnings;
+use File::Spec::Functions;
+
 our($capture_stderr, $VERSION, $AUTOLOAD);
 
 $VERSION = '0.5.1';
@@ -28,13 +30,14 @@ sub AUTOLOAD {
     shift if ref $_[0] && $_[0]->isa( 'Shell' );
     my $cmd = $AUTOLOAD;
     $cmd =~ s/^.*:://;
+    my $null = File::Spec::Functions::devnull();
     $Shell::capture_stderr ||= 0;
     eval <<"*END*";
 	sub $AUTOLOAD {
 	    shift if ref \$_[0] && \$_[0]->isa( 'Shell' );
 	    if (\@_ < 1) {
 		\$Shell::capture_stderr ==  1 ? `$cmd 2>&1` : 
-		\$Shell::capture_stderr == -1 ? `$cmd 2>/dev/null` : 
+		\$Shell::capture_stderr == -1 ? `$cmd 2>$null` : 
 		`$cmd`;
 	    } elsif ('$^O' eq 'os2') {
 		local(\*SAVEOUT, \*READ, \*WRITE);
@@ -88,7 +91,7 @@ sub AUTOLOAD {
 		    }
 		}
 		push \@arr, '2>&1'        if \$Shell::capture_stderr ==  1;
-		push \@arr, '2>/dev/null' if \$Shell::capture_stderr == -1;
+		push \@arr, '2>$null' if \$Shell::capture_stderr == -1;
 		open(SUBPROC, join(' ', '$cmd', \@arr, '|'))
 		    or die "Can't exec $cmd: \$!\\n";
 		if (wantarray) {
