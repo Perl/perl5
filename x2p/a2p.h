@@ -362,7 +362,7 @@ EXT char *No INIT("");
 
 #define str_true(str) (Str = (str), (Str->str_pok ? True(Str->str_ptr) : (Str->str_nok ? (Str->str_nval != 0.0) : 0 )))
 
-#define str_peek(str) (Str = (str), (Str->str_pok ? Str->str_ptr : (Str->str_nok ? (sprintf(buf,"num(%g)",Str->str_nval),buf) : "" )))
+#define str_peek(str) (Str = (str), (Str->str_pok ? Str->str_ptr : (Str->str_nok ? (sprintf(buf,"num(%"NVgf")",Str->str_nval),buf) : "" )))
 #define str_get(str) (Str = (str), (Str->str_pok ? Str->str_ptr : str_2ptr(Str)))
 #define str_gnum(str) (Str = (str), (Str->str_nok ? Str->str_nval : str_2num(Str)))
 EXT STR *Str;

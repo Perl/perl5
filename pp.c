@@ -2627,7 +2627,7 @@ PP(pp_log)
       value = POPn;
       if (value <= 0.0) {
 	SET_NUMERIC_STANDARD();
-	DIE(aTHX_ "Can't take log of %g", value);
+	DIE(aTHX_ "Can't take log of %"NVgf, value);
       }
       value = Perl_log(value);
       XPUSHn(value);
@@ -2643,7 +2643,7 @@ PP(pp_sqrt)
       value = POPn;
       if (value < 0.0) {
 	SET_NUMERIC_STANDARD();
-	DIE(aTHX_ "Can't take sqrt of %g", value);
+	DIE(aTHX_ "Can't take sqrt of %"NVgf, value);
       }
       value = Perl_sqrt(value);
       XPUSHn(value);
