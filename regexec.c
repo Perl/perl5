@@ -2211,7 +2211,7 @@ S_regmatch(pTHX_ regnode *prog)
 			    sayNO;
 			if (*((U8*)s) != utf8_to_uvchr((U8*)l, &len))
 			    sayNO;
-			s++;
+			s += len;
 			l += len;
 		    }
 		else
@@ -2220,7 +2220,7 @@ S_regmatch(pTHX_ regnode *prog)
 			    sayNO;
 			if (*((U8*)l) != utf8_to_uvchr((U8*)s, &len))
 			    sayNO;
-			s += len;
+			s++;
 			l++;
 		    }
 		locinput = l;
