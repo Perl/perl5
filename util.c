@@ -2309,6 +2309,13 @@ VTOH(vtohs,short)
 VTOH(vtohl,long)
 #endif
 
+PerlIO *
+Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
+{
+    Perl_croak(aTHX_ "List form of piped open not implemented");
+    return (PerlIO *) NULL;
+}
+
     /* VMS' my_popen() is in VMS.c, same with OS/2. */
 #if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM) && !defined(EPOC) && !defined(MACOS_TRADITIONAL)
 PerlIO *
@@ -3969,14 +3976,14 @@ Perl_ebcdic_control(pTHX_ int ch)
 {
     	if (ch > 'a') {
 	        char *ctlp;
- 
+
  	       if (islower(ch))
   	              ch = toupper(ch);
- 
+
  	       if ((ctlp = strchr(controllablechars, ch)) == 0) {
   	              Perl_die(aTHX_ "unrecognised control character '%c'\n", ch);
      	       }
- 
+
         	if (ctlp == controllablechars)
          	       return('\177'); /* DEL */
         	else
