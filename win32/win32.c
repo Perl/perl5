@@ -1625,5 +1625,7 @@ Perl_win32_init(int *argcp, char ***argvp)
      * want to be at the vendor's whim on the default, we set
      * it explicitly here.
      */
+#if !defined(_ALPHA_)
     _control87(MCW_EM, MCW_EM);
+#endif
 }
