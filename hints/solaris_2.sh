@@ -48,7 +48,7 @@ esac
 test -z "`${cc:-cc} -V 2>&1|grep -i workshop`" || ccisworkshop="$define"
 test -z "`${cc:-cc} -v 2>&1|grep -i gcc`"      || ccisgcc="$define"
 
-cat >UU/workshoplibpth.cbu<<EOCBU
+cat >UU/workshoplibpth.cbu<<'EOCBU'
 case "$workshoplibpth_done" in
 '')	case "$use64bitall" in
 	"$define"|true|[yY]*)
