@@ -87,9 +87,11 @@ These work as in normal strings.
    \l  Lowercase next character
    \u  Uppercase next character
    \L  Lowercase until \E
-   \U  Uppercase until \E
+   \U  Titlecase until \E
    \Q  Disable pattern metacharacters until \E
    \E  End case modification
+
+For Titlecase, see L</Titlecase>.
 
 This one works differently from normal strings:
 
@@ -211,13 +213,24 @@ Captured groups are numbered according to their I<opening> paren.
    lc          Lowercase a string
    lcfirst     Lowercase first char of a string
    uc          Uppercase a string
-   ucfirst     Uppercase first char of a string
+   ucfirst     Titlecase first char of a string
+
    pos         Return or set current match position
    quotemeta   Quote metacharacters
    reset       Reset ?pattern? status
    study       Analyze string for optimizing matching
 
    split       Use regex to split a string into parts
+
+The first four of these are identical to the escape sequences \l, \u,
+\L, and \U.  For Titlecase, see L</Titlecase>.
+
+=head1 Terminology
+
+=head2 Titlecase
+
+Unicode concept which most often is equal to uppercase, but for
+certain characters like the German "sharp s" there is a difference.
 
 =head1 AUTHOR
 
