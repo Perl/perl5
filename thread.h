@@ -32,13 +32,23 @@
 #      define pthread_mutexattr_init(a) pthread_mutexattr_create(a)
 #      define pthread_mutexattr_settype(a,t) pthread_mutexattr_setkind_np(a,t)
 #    endif
+#    if defined(__hpux) && defined(__ux_version) && __ux_version <= 1020
+#      define pthread_attr_init(a) pthread_attr_create(a)
+       /* XXX pthread_setdetach_np() missing in DCE threads on HP-UX 10.20 */
+#      define PTHREAD_CREATE(t,a,s,d) pthread_create(t,a,s,d)
+#      define pthread_key_create(k,d) pthread_keycreate(k,(pthread_destructor_t)(d))
+#      define pthread_mutexattr_init(a) pthread_mutexattr_create(a)
+#      define pthread_mutexattr_settype(a,t) pthread_mutexattr_setkind_np(a,t)
+#    endif
 #    if defined(DJGPP) || defined(__OPEN_VM)
 #      define PTHREAD_ATTR_SETDETACHSTATE(a,s) pthread_attr_setdetachstate(a,&(s))
 #      define YIELD pthread_yield(NULL)
 #    endif
 #  endif
+#  if !defined(__hpux) || !defined(__ux_version) || __ux_version > 1020
 #    define pthread_mutexattr_default NULL
 #    define pthread_condattr_default  NULL
+#  endif
 #endif
 
 #ifndef PTHREAD_CREATE
