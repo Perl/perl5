@@ -23,10 +23,10 @@ T_DATUM_V
 	$var.dsize = (int)PL_na;
 OUTPUT
 T_DATUM_K
-	output_datum($arg, $var.dptr, $var.dsize);
+	output_datum(aTHX_ $arg, $var.dptr, $var.dsize);
 	ckFilter($arg, filter_fetch_key,\"filter_fetch_key\");
 T_DATUM_V
-	output_datum($arg, $var.dptr, $var.dsize);
+	output_datum(aTHX_ $arg, $var.dptr, $var.dsize);
 	ckFilter($arg, filter_fetch_value,\"filter_fetch_value\");
 T_PTROBJ
         sv_setref_pv($arg, dbtype, (void*)$var);

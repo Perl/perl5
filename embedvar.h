@@ -305,11 +305,13 @@
 #define PL_comppad_name_floor	(PL_curinterp->Icomppad_name_floor)
 #define PL_cop_seqmax		(PL_curinterp->Icop_seqmax)
 #define PL_copline		(PL_curinterp->Icopline)
+#define PL_cred_mutex		(PL_curinterp->Icred_mutex)
 #define PL_cryptseen		(PL_curinterp->Icryptseen)
 #define PL_cshlen		(PL_curinterp->Icshlen)
 #define PL_cshname		(PL_curinterp->Icshname)
 #define PL_curcopdb		(PL_curinterp->Icurcopdb)
 #define PL_curstname		(PL_curinterp->Icurstname)
+#define PL_curthr		(PL_curinterp->Icurthr)
 #define PL_dbargs		(PL_curinterp->Idbargs)
 #define PL_debdelim		(PL_curinterp->Idebdelim)
 #define PL_debname		(PL_curinterp->Idebname)
@@ -331,6 +333,9 @@
 #define PL_errgv		(PL_curinterp->Ierrgv)
 #define PL_error_count		(PL_curinterp->Ierror_count)
 #define PL_euid			(PL_curinterp->Ieuid)
+#define PL_eval_cond		(PL_curinterp->Ieval_cond)
+#define PL_eval_mutex		(PL_curinterp->Ieval_mutex)
+#define PL_eval_owner		(PL_curinterp->Ieval_owner)
 #define PL_eval_root		(PL_curinterp->Ieval_root)
 #define PL_eval_start		(PL_curinterp->Ieval_start)
 #define PL_evalseq		(PL_curinterp->Ievalseq)
@@ -394,6 +399,7 @@
 #define PL_main_cv		(PL_curinterp->Imain_cv)
 #define PL_main_root		(PL_curinterp->Imain_root)
 #define PL_main_start		(PL_curinterp->Imain_start)
+#define PL_malloc_mutex		(PL_curinterp->Imalloc_mutex)
 #define PL_max_intro_pending	(PL_curinterp->Imax_intro_pending)
 #define PL_maxo			(PL_curinterp->Imaxo)
 #define PL_maxsysfd		(PL_curinterp->Imaxsysfd)
@@ -418,6 +424,8 @@
 #define PL_nice_chunk		(PL_curinterp->Inice_chunk)
 #define PL_nice_chunk_size	(PL_curinterp->Inice_chunk_size)
 #define PL_nomemok		(PL_curinterp->Inomemok)
+#define PL_nthreads		(PL_curinterp->Inthreads)
+#define PL_nthreads_cond	(PL_curinterp->Inthreads_cond)
 #define PL_numeric_local	(PL_curinterp->Inumeric_local)
 #define PL_numeric_name		(PL_curinterp->Inumeric_name)
 #define PL_numeric_standard	(PL_curinterp->Inumeric_standard)
@@ -474,15 +482,20 @@
 #define PL_subname		(PL_curinterp->Isubname)
 #define PL_sv_arenaroot		(PL_curinterp->Isv_arenaroot)
 #define PL_sv_count		(PL_curinterp->Isv_count)
+#define PL_sv_mutex		(PL_curinterp->Isv_mutex)
 #define PL_sv_no		(PL_curinterp->Isv_no)
 #define PL_sv_objcount		(PL_curinterp->Isv_objcount)
 #define PL_sv_root		(PL_curinterp->Isv_root)
 #define PL_sv_undef		(PL_curinterp->Isv_undef)
 #define PL_sv_yes		(PL_curinterp->Isv_yes)
+#define PL_svref_mutex		(PL_curinterp->Isvref_mutex)
 #define PL_sys_intern		(PL_curinterp->Isys_intern)
 #define PL_tainting		(PL_curinterp->Itainting)
 #define PL_thisexpr		(PL_curinterp->Ithisexpr)
+#define PL_thr_key		(PL_curinterp->Ithr_key)
 #define PL_threadnum		(PL_curinterp->Ithreadnum)
+#define PL_threads_mutex	(PL_curinterp->Ithreads_mutex)
+#define PL_threadsv_names	(PL_curinterp->Ithreadsv_names)
 #define PL_thrsv		(PL_curinterp->Ithrsv)
 #define PL_tokenbuf		(PL_curinterp->Itokenbuf)
 #define PL_uid			(PL_curinterp->Iuid)
@@ -548,11 +561,13 @@
 #define PL_Icomppad_name_floor	PL_comppad_name_floor
 #define PL_Icop_seqmax		PL_cop_seqmax
 #define PL_Icopline		PL_copline
+#define PL_Icred_mutex		PL_cred_mutex
 #define PL_Icryptseen		PL_cryptseen
 #define PL_Icshlen		PL_cshlen
 #define PL_Icshname		PL_cshname
 #define PL_Icurcopdb		PL_curcopdb
 #define PL_Icurstname		PL_curstname
+#define PL_Icurthr		PL_curthr
 #define PL_Idbargs		PL_dbargs
 #define PL_Idebdelim		PL_debdelim
 #define PL_Idebname		PL_debname
@@ -574,6 +589,9 @@
 #define PL_Ierrgv		PL_errgv
 #define PL_Ierror_count		PL_error_count
 #define PL_Ieuid		PL_euid
+#define PL_Ieval_cond		PL_eval_cond
+#define PL_Ieval_mutex		PL_eval_mutex
+#define PL_Ieval_owner		PL_eval_owner
 #define PL_Ieval_root		PL_eval_root
 #define PL_Ieval_start		PL_eval_start
 #define PL_Ievalseq		PL_evalseq
@@ -637,6 +655,7 @@
 #define PL_Imain_cv		PL_main_cv
 #define PL_Imain_root		PL_main_root
 #define PL_Imain_start		PL_main_start
+#define PL_Imalloc_mutex	PL_malloc_mutex
 #define PL_Imax_intro_pending	PL_max_intro_pending
 #define PL_Imaxo		PL_maxo
 #define PL_Imaxsysfd		PL_maxsysfd
@@ -661,6 +680,8 @@
 #define PL_Inice_chunk		PL_nice_chunk
 #define PL_Inice_chunk_size	PL_nice_chunk_size
 #define PL_Inomemok		PL_nomemok
+#define PL_Inthreads		PL_nthreads
+#define PL_Inthreads_cond	PL_nthreads_cond
 #define PL_Inumeric_local	PL_numeric_local
 #define PL_Inumeric_name	PL_numeric_name
 #define PL_Inumeric_standard	PL_numeric_standard
@@ -717,15 +738,20 @@
 #define PL_Isubname		PL_subname
 #define PL_Isv_arenaroot	PL_sv_arenaroot
 #define PL_Isv_count		PL_sv_count
+#define PL_Isv_mutex		PL_sv_mutex
 #define PL_Isv_no		PL_sv_no
 #define PL_Isv_objcount		PL_sv_objcount
 #define PL_Isv_root		PL_sv_root
 #define PL_Isv_undef		PL_sv_undef
 #define PL_Isv_yes		PL_sv_yes
+#define PL_Isvref_mutex		PL_svref_mutex
 #define PL_Isys_intern		PL_sys_intern
 #define PL_Itainting		PL_tainting
 #define PL_Ithisexpr		PL_thisexpr
+#define PL_Ithr_key		PL_thr_key
 #define PL_Ithreadnum		PL_threadnum
+#define PL_Ithreads_mutex	PL_threads_mutex
+#define PL_Ithreadsv_names	PL_threadsv_names
 #define PL_Ithrsv		PL_thrsv
 #define PL_Itokenbuf		PL_tokenbuf
 #define PL_Iuid			PL_uid
@@ -1024,47 +1050,19 @@
 
 #define PL_No			(PL_Vars.GNo)
 #define PL_Yes			(PL_Vars.GYes)
-#define PL_cred_mutex		(PL_Vars.Gcred_mutex)
 #define PL_curinterp		(PL_Vars.Gcurinterp)
-#define PL_curthr		(PL_Vars.Gcurthr)
 #define PL_do_undump		(PL_Vars.Gdo_undump)
-#define PL_eval_cond		(PL_Vars.Geval_cond)
-#define PL_eval_mutex		(PL_Vars.Geval_mutex)
-#define PL_eval_owner		(PL_Vars.Geval_owner)
 #define PL_hexdigit		(PL_Vars.Ghexdigit)
-#define PL_malloc_mutex		(PL_Vars.Gmalloc_mutex)
-#define PL_ninterps		(PL_Vars.Gninterps)
-#define PL_nthreads		(PL_Vars.Gnthreads)
-#define PL_nthreads_cond	(PL_Vars.Gnthreads_cond)
 #define PL_patleave		(PL_Vars.Gpatleave)
-#define PL_sv_mutex		(PL_Vars.Gsv_mutex)
-#define PL_svref_mutex		(PL_Vars.Gsvref_mutex)
-#define PL_thr_key		(PL_Vars.Gthr_key)
-#define PL_threads_mutex	(PL_Vars.Gthreads_mutex)
-#define PL_threadsv_names	(PL_Vars.Gthreadsv_names)
 
 #else /* !PERL_GLOBAL_STRUCT */
 
 #define PL_GNo			PL_No
 #define PL_GYes			PL_Yes
-#define PL_Gcred_mutex		PL_cred_mutex
 #define PL_Gcurinterp		PL_curinterp
-#define PL_Gcurthr		PL_curthr
 #define PL_Gdo_undump		PL_do_undump
-#define PL_Geval_cond		PL_eval_cond
-#define PL_Geval_mutex		PL_eval_mutex
-#define PL_Geval_owner		PL_eval_owner
 #define PL_Ghexdigit		PL_hexdigit
-#define PL_Gmalloc_mutex	PL_malloc_mutex
-#define PL_Gninterps		PL_ninterps
-#define PL_Gnthreads		PL_nthreads
-#define PL_Gnthreads_cond	PL_nthreads_cond
 #define PL_Gpatleave		PL_patleave
-#define PL_Gsv_mutex		PL_sv_mutex
-#define PL_Gsvref_mutex		PL_svref_mutex
-#define PL_Gthr_key		PL_thr_key
-#define PL_Gthreads_mutex	PL_threads_mutex
-#define PL_Gthreadsv_names	PL_threadsv_names
 
 
 #endif /* PERL_GLOBAL_STRUCT */

@@ -142,8 +142,11 @@ else {
   if (-z "Iofs.tmp") {print "ok 24\n"} else {print "not ok 24\n"}
   open(FH, ">Iofs.tmp") or die "Can't create Iofs.tmp";
   { select FH; $| = 1; select STDOUT }
-  print FH "helloworld\n";
-  truncate FH, 5;
+  {
+    use strict;
+    print FH "helloworld\n";
+    truncate FH, 5;
+  }
   if ($^O eq 'dos') {
       close (FH); open (FH, ">>Iofs.tmp") or die "Can't reopen Iofs.tmp";
   }

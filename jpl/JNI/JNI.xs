@@ -20,11 +20,12 @@ extern int jpldebug;
 static void
 call_my_exit(jint status)
 {
+    dTHX;
     my_exit(status);
 }
 
 jvalue*
-makeargs(char *sig, SV** svp, int items)
+makeargs(pTHX_ char *sig, SV** svp, int items)
 {
     jvalue* jv = (jvalue*)safemalloc(sizeof(jvalue) * items);
     int ix = 0;
@@ -399,16 +400,16 @@ makeargs(char *sig, SV** svp, int items)
 	    }
 	    break;
 	case ')':
-	    croak("too many arguments, signature: %s", sig);
+	    Perl_croak(aTHX_ "too many arguments, signature: %s", sig);
 	    goto cleanup;
 	default:
-	    croak("panic: malformed signature: %s", s-1);
+	    Perl_croak(aTHX_ "panic: malformed signature: %s", s-1);
 	    goto cleanup;
 	}
 
     }
     if (*s != ')') {
-	croak("not enough arguments, signature: %s", sig);
+	Perl_croak(aTHX_ "not enough arguments, signature: %s", sig);
 	goto cleanup;
     }
     return jv;
@@ -419,9 +420,9 @@ cleanup:
 }
 
 static int
-not_here(char *s)
+not_here(pTHX_ char *s)
 {
-    croak("%s not implemented on this architecture", s);
+    Perl_croak(aTHX_ "%s not implemented on this architecture", s);
     return -1;
 }
 
@@ -739,7 +740,7 @@ NewObject(clazz,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->NewObjectA(env, clazz,methodID,args);
 	    RESTOREENV;
 	}
@@ -809,7 +810,7 @@ CallObjectMethod(obj,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallObjectMethodA(env, obj,methodID,args);
 	    RESTOREENV;
 	}
@@ -840,7 +841,7 @@ CallBooleanMethod(obj,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallBooleanMethodA(env, obj,methodID,args);
 	    RESTOREENV;
 	}
@@ -871,7 +872,7 @@ CallByteMethod(obj,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallByteMethodA(env, obj,methodID,args);
 	    RESTOREENV;
 	}
@@ -902,7 +903,7 @@ CallCharMethod(obj,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallCharMethodA(env, obj,methodID,args);
 	    RESTOREENV;
 	}
@@ -933,7 +934,7 @@ CallShortMethod(obj,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallShortMethodA(env, obj,methodID,args);
 	    RESTOREENV;
 	}
@@ -964,7 +965,7 @@ CallIntMethod(obj,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallIntMethodA(env, obj,methodID,args);
 	    RESTOREENV;
 	}
@@ -995,7 +996,7 @@ CallLongMethod(obj,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallLongMethodA(env, obj,methodID,args);
 	    RESTOREENV;
 	}
@@ -1026,7 +1027,7 @@ CallFloatMethod(obj,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallFloatMethodA(env, obj,methodID,args);
 	    RESTOREENV;
 	}
@@ -1057,7 +1058,7 @@ CallDoubleMethod(obj,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallDoubleMethodA(env, obj,methodID,args);
 	    RESTOREENV;
 	}
@@ -1088,7 +1089,7 @@ CallVoidMethod(obj,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    (*env)->CallVoidMethodA(env, obj,methodID,args);
 	    RESTOREENV;
 	}
@@ -1116,7 +1117,7 @@ CallNonvirtualObjectMethod(obj,clazz,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallNonvirtualObjectMethodA(env, obj,clazz,methodID,args);
 	    RESTOREENV;
 	}
@@ -1149,7 +1150,7 @@ CallNonvirtualBooleanMethod(obj,clazz,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallNonvirtualBooleanMethodA(env, obj,clazz,methodID,args);
 	    RESTOREENV;
 	}
@@ -1182,7 +1183,7 @@ CallNonvirtualByteMethod(obj,clazz,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallNonvirtualByteMethodA(env, obj,clazz,methodID,args);
 	    RESTOREENV;
 	}
@@ -1215,7 +1216,7 @@ CallNonvirtualCharMethod(obj,clazz,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallNonvirtualCharMethodA(env, obj,clazz,methodID,args);
 	    RESTOREENV;
 	}
@@ -1248,7 +1249,7 @@ CallNonvirtualShortMethod(obj,clazz,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallNonvirtualShortMethodA(env, obj,clazz,methodID,args);
 	    RESTOREENV;
 	}
@@ -1281,7 +1282,7 @@ CallNonvirtualIntMethod(obj,clazz,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallNonvirtualIntMethodA(env, obj,clazz,methodID,args);
 	    RESTOREENV;
 	}
@@ -1314,7 +1315,7 @@ CallNonvirtualLongMethod(obj,clazz,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallNonvirtualLongMethodA(env, obj,clazz,methodID,args);
 	    RESTOREENV;
 	}
@@ -1347,7 +1348,7 @@ CallNonvirtualFloatMethod(obj,clazz,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallNonvirtualFloatMethodA(env, obj,clazz,methodID,args);
 	    RESTOREENV;
 	}
@@ -1380,7 +1381,7 @@ CallNonvirtualDoubleMethod(obj,clazz,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallNonvirtualDoubleMethodA(env, obj,clazz,methodID,args);
 	    RESTOREENV;
 	}
@@ -1413,7 +1414,7 @@ CallNonvirtualVoidMethod(obj,clazz,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    (*env)->CallNonvirtualVoidMethodA(env, obj,clazz,methodID,args);
 	    RESTOREENV;
 	}
@@ -1712,7 +1713,7 @@ CallStaticObjectMethod(clazz,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallStaticObjectMethodA(env, clazz,methodID,args);
 	    RESTOREENV;
 	}
@@ -1743,7 +1744,7 @@ CallStaticBooleanMethod(clazz,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallStaticBooleanMethodA(env, clazz,methodID,args);
 	    RESTOREENV;
 	}
@@ -1774,7 +1775,7 @@ CallStaticByteMethod(clazz,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallStaticByteMethodA(env, clazz,methodID,args);
 	    RESTOREENV;
 	}
@@ -1805,7 +1806,7 @@ CallStaticCharMethod(clazz,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallStaticCharMethodA(env, clazz,methodID,args);
 	    RESTOREENV;
 	}
@@ -1836,7 +1837,7 @@ CallStaticShortMethod(clazz,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallStaticShortMethodA(env, clazz,methodID,args);
 	    RESTOREENV;
 	}
@@ -1867,7 +1868,7 @@ CallStaticIntMethod(clazz,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallStaticIntMethodA(env, clazz,methodID,args);
 	    RESTOREENV;
 	}
@@ -1898,7 +1899,7 @@ CallStaticLongMethod(clazz,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallStaticLongMethodA(env, clazz,methodID,args);
 	    RESTOREENV;
 	}
@@ -1929,7 +1930,7 @@ CallStaticFloatMethod(clazz,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallStaticFloatMethodA(env, clazz,methodID,args);
 	    RESTOREENV;
 	}
@@ -1960,7 +1961,7 @@ CallStaticDoubleMethod(clazz,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    RETVAL = (*env)->CallStaticDoubleMethodA(env, clazz,methodID,args);
 	    RESTOREENV;
 	}
@@ -1991,7 +1992,7 @@ CallStaticVoidMethod(cls,methodID,...)
 	int			argoff = $min_args;
     CODE:
 	{
-	    jvalue * args = makeargs(sig, &ST(argoff), items - argoff);
+	    jvalue * args = makeargs(aTHX_ sig, &ST(argoff), items - argoff);
 	    (*env)->CallStaticVoidMethodA(env, cls,methodID,args);
 	    RESTOREENV;
 	}
@@ -2884,9 +2885,9 @@ SetBooleanArrayRegion(array,start,len,buf)
     CODE:
 	{
 	    if (buf_len_ < len)
-		croak("string is too short");
+		Perl_croak(aTHX_ "string is too short");
 	    else if (buf_len_ > len && PL_dowarn)
-		warn("string is too long");
+		Perl_warn(aTHX_ "string is too long");
 	    (*env)->SetBooleanArrayRegion(env, array,start,len,buf);
 	    RESTOREENV;
 	}
@@ -2903,9 +2904,9 @@ SetByteArrayRegion(array,start,len,buf)
     CODE:
 	{
 	    if (buf_len_ < len)
-		croak("string is too short");
+		Perl_croak(aTHX_ "string is too short");
 	    else if (buf_len_ > len && PL_dowarn)
-		warn("string is too long");
+		Perl_warn(aTHX_ "string is too long");
 	    (*env)->SetByteArrayRegion(env, array,start,len,buf);
 	    RESTOREENV;
 	}
@@ -2922,9 +2923,9 @@ SetCharArrayRegion(array,start,len,buf)
     CODE:
 	{
 	    if (buf_len_ < len)
-		croak("string is too short");
+		Perl_croak(aTHX_ "string is too short");
 	    else if (buf_len_ > len && PL_dowarn)
-		warn("string is too long");
+		Perl_warn(aTHX_ "string is too long");
 	    (*env)->SetCharArrayRegion(env, array,start,len,buf);
 	    RESTOREENV;
 	}
@@ -2941,9 +2942,9 @@ SetShortArrayRegion(array,start,len,buf)
     CODE:
 	{
 	    if (buf_len_ < len)
-		croak("string is too short");
+		Perl_croak(aTHX_ "string is too short");
 	    else if (buf_len_ > len && PL_dowarn)
-		warn("string is too long");
+		Perl_warn(aTHX_ "string is too long");
 	    (*env)->SetShortArrayRegion(env, array,start,len,buf);
 	    RESTOREENV;
 	}
@@ -2960,9 +2961,9 @@ SetIntArrayRegion(array,start,len,buf)
     CODE:
 	{
 	    if (buf_len_ < len)
-		croak("string is too short");
+		Perl_croak(aTHX_ "string is too short");
 	    else if (buf_len_ > len && PL_dowarn)
-		warn("string is too long");
+		Perl_warn(aTHX_ "string is too long");
 	    (*env)->SetIntArrayRegion(env, array,start,len,buf);
 	    RESTOREENV;
 	}
@@ -2979,9 +2980,9 @@ SetLongArrayRegion(array,start,len,buf)
     CODE:
 	{
 	    if (buf_len_ < len)
-		croak("string is too short");
+		Perl_croak(aTHX_ "string is too short");
 	    else if (buf_len_ > len && PL_dowarn)
-		warn("string is too long");
+		Perl_warn(aTHX_ "string is too long");
 	    (*env)->SetLongArrayRegion(env, array,start,len,buf);
 	    RESTOREENV;
 	}
@@ -2998,9 +2999,9 @@ SetFloatArrayRegion(array,start,len,buf)
     CODE:
 	{
 	    if (buf_len_ < len)
-		croak("string is too short");
+		Perl_croak(aTHX_ "string is too short");
 	    else if (buf_len_ > len && PL_dowarn)
-		warn("string is too long");
+		Perl_warn(aTHX_ "string is too long");
 	    (*env)->SetFloatArrayRegion(env, array,start,len,buf);
 	    RESTOREENV;
 	}
@@ -3017,9 +3018,9 @@ SetDoubleArrayRegion(array,start,len,buf)
     CODE:
 	{
 	    if (buf_len_ < len)
-		croak("string is too short");
+		Perl_croak(aTHX_ "string is too short");
 	    else if (buf_len_ > len && PL_dowarn)
-		warn("string is too long");
+		Perl_warn(aTHX_ "string is too long");
 	    (*env)->SetDoubleArrayRegion(env, array,start,len,buf);
 	    RESTOREENV;
 	}
@@ -3092,7 +3093,7 @@ GetJavaVM(...)
 
 		if (!dlopen("libjava.so", RTLD_LAZY|RTLD_GLOBAL)) {
 		    if (lib && !dlopen(lib, RTLD_LAZY|RTLD_GLOBAL))
-			croak("Can't load libjava.so");
+			Perl_croak(aTHX_ "Can't load libjava.so");
 		}
 
 		JNI_GetDefaultJavaVMInitArgs(&vm_args);
@@ -3127,7 +3128,7 @@ GetJavaVM(...)
 		    else if (strEQ(s, "debugPort"))
 			vm_args.debugPort = (jint)SvIV(*++mark);
 		    else
-			croak("unrecognized option: %s", s);
+			Perl_croak(aTHX_ "unrecognized option: %s", s);
 		}
 		JNI_CreateJavaVM(&RETVAL, &jplcurenv, &vm_args);
 	    }

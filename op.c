@@ -5534,9 +5534,12 @@ Perl_ck_trunc(pTHX_ OP *o)
 
 	if (kid->op_type == OP_NULL)
 	    kid = (SVOP*)kid->op_sibling;
-	if (kid &&
-	  kid->op_type == OP_CONST && (kid->op_private & OPpCONST_BARE))
+	if (kid && kid->op_type == OP_CONST &&
+	    (kid->op_private & OPpCONST_BARE))
+	{
 	    o->op_flags |= OPf_SPECIAL;
+	    kid->op_private &= ~OPpCONST_STRICT;
+	}
     }
     return ck_fun(o);
 }

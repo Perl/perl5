@@ -207,6 +207,8 @@ struct regnode_2 {
 #define REG_SEEN_GPOS		4
 #define REG_SEEN_EVAL		8
 
+START_EXTERN_C
+
 #include "regnodes.h"
 
 /* The following have no fixed length. char* since we do strchr on it. */
@@ -234,3 +236,4 @@ EXTCONST char PL_simple[] = {
 };
 #endif
 
+END_EXTERN_C

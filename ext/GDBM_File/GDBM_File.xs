@@ -54,7 +54,7 @@ not_here(char *s)
  * perl free() it when it deallocates the SV, depending on whether
  * perl uses malloc()/free() or not. */
 static void
-output_datum(SV *arg, char *str, int size)
+output_datum(pTHX_ SV *arg, char *str, int size)
 {
 #if !defined(MYMALLOC) || (defined(MYMALLOC) && defined(PERL_POLLUTE_MALLOC))
 	sv_usepvn(arg, str, size);

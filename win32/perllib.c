@@ -28,8 +28,6 @@ RunPerl(int argc, char **argv, char **env, void *iosubsystem)
 
     PERL_SYS_INIT(&argc,&argv);
 
-    init_i18nl10n(1);
-
     if (!(my_perl = perl_alloc()))
 	return (1);
     perl_construct( my_perl );

@@ -485,7 +485,8 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    prog->anchored_substr ? prog->anchored_offset : prog->float_min_offset;
 	I32 delta = back_max - back_min;
 	char *last = HOPc(strend,	/* Cannot start after this */
-			  -(CHR_SVLEN(must) - (SvTAIL(must) != 0) + back_min));
+			  -(I32)(CHR_SVLEN(must)
+				 - (SvTAIL(must) != 0) + back_min));
 	char *last1;		/* Last position checked before */
 
 	if (s > PL_bostr)

@@ -55,13 +55,13 @@ T_JVALUELIST
 	    AV* av = (AV*)SvRV($arg);
 	    if (SvTYPE(av) == SVt_PVAV) {
 		I32 maxarg = AvFILL(av) + 1;
-		$var = makeargs(sig, AvARRAY(av), maxarg);
+		$var = makeargs(aTHX_ sig, AvARRAY(av), maxarg);
 	    }
 	    else
-		croak(\"$var is not an array reference\");
+		Perl_croak(aTHX_ \"$var is not an array reference\");
 	}
 	else
-	    croak(\"$var is not a reference\")
+	    Perl_croak(aTHX_ \"$var is not a reference\")
 T_JIDSIG
 	{
 	    $var = ($type)SvIV($arg);
@@ -73,7 +73,7 @@ T_JPTROBJ
 	    $var = ($type) tmp;
 	}
 	else
-	    croak(\"$var is not of type ${ntype}\")
+	    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
 
 OUTPUT
 T_JMEM
@@ -152,22 +152,22 @@ T_JPTROBJ
 #		if (sv_isa($arg, \"${ntype}\"))
 #		    $var = (SV*)SvRV($arg);
 #		else
-#		    croak(\"$var is not of type ${ntype}\")
+#		    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
 #	T_AVREF
 #		if (sv_isa($arg, \"${ntype}\"))
 #		    $var = (AV*)SvRV($arg);
 #		else
-#		    croak(\"$var is not of type ${ntype}\")
+#		    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
 #	T_HVREF
 #		if (sv_isa($arg, \"${ntype}\"))
 #		    $var = (HV*)SvRV($arg);
 #		else
-#		    croak(\"$var is not of type ${ntype}\")
+#		    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
 #	T_CVREF
 #		if (sv_isa($arg, \"${ntype}\"))
 #		    $var = (CV*)SvRV($arg);
 #		else
-#		    croak(\"$var is not of type ${ntype}\")
+#		    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
 #	T_SYSRET
 #		$var NOT IMPLEMENTED
 #	T_IV
@@ -208,28 +208,28 @@ T_JPTROBJ
 #		    $var = ($type) tmp;
 #		}
 #		else
-#		    croak(\"$var is not a reference\")
+#		    Perl_croak(aTHX_ \"$var is not a reference\")
 #	T_REF_IV_REF
 #		if (sv_isa($arg, \"${type}\")) {
 #		    IV tmp = SvIV((SV*)SvRV($arg));
 #		    $var = *($type *) tmp;
 #		}
 #		else
-#		    croak(\"$var is not of type ${ntype}\")
+#		    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
 #	T_REF_IV_PTR
 #		if (sv_isa($arg, \"${type}\")) {
 #		    IV tmp = SvIV((SV*)SvRV($arg));
 #		    $var = ($type) tmp;
 #		}
 #		else
-#		    croak(\"$var is not of type ${ntype}\")
+#		    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
 #	T_PTROBJ
 #		if (sv_derived_from($arg, \"${ntype}\")) {
 #		    IV tmp = SvIV((SV*)SvRV($arg));
 #		    $var = ($type) tmp;
 #		}
 #		else
-#		    croak(\"$var is not of type ${ntype}\")
+#		    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
 #	T_PTRDESC
 #		if (sv_isa($arg, \"${ntype}\")) {
 #		    IV tmp = SvIV((SV*)SvRV($arg));
@@ -237,21 +237,21 @@ T_JPTROBJ
 #		    $var = ${type}_desc->ptr;
 #		}
 #		else
-#		    croak(\"$var is not of type ${ntype}\")
+#		    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
 #	T_REFREF
 #		if (SvROK($arg)) {
 #		    IV tmp = SvIV((SV*)SvRV($arg));
 #		    $var = *($type) tmp;
 #		}
 #		else
-#		    croak(\"$var is not a reference\")
+#		    Perl_croak(aTHX_ \"$var is not a reference\")
 #	T_REFOBJ
 #		if (sv_isa($arg, \"${ntype}\")) {
 #		    IV tmp = SvIV((SV*)SvRV($arg));
 #		    $var = *($type) tmp;
 #		}
 #		else
-#		    croak(\"$var is not of type ${ntype}\")
+#		    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
 #	T_OPAQUE
 #		$var NOT IMPLEMENTED
 #	T_OPAQUEPTR

@@ -666,6 +666,7 @@ Perl_do_exec(pTHX_ char *cmd)
 DIR *
 win32_opendir(char *filename)
 {
+    dTHX;
     DIR			*p;
     long		len;
     long		idx;
@@ -978,6 +979,7 @@ win32_stat(const char *path, struct stat *buffer)
 	}
     }
     if (USING_WIDE()) {
+	dTHX;
 	A2WHELPER(path, wbuffer, sizeof(wbuffer), GETINTERPMODE());
 	res = _wstat(wbuffer, (struct _stat *)buffer);
     }
@@ -1122,11 +1124,13 @@ win32_longpath(char *path)
 DllExport char *
 win32_getenv(const char *name)
 {
+    dTHX;
     static char *curitem = Nullch;	/* XXX threadead */
     static WCHAR *wCuritem = (WCHAR*)Nullch;	/* XXX threadead */
     static DWORD curlen = 0, wCurlen = 0;/* XXX threadead */
     WCHAR wBuffer[MAX_PATH];
     DWORD needlen;
+
     if (USING_WIDE()) {
 	if (!wCuritem) {
 	    wCurlen = 512;
@@ -1194,8 +1198,9 @@ win32_putenv(const char *name)
     WCHAR* wCuritem;
     WCHAR* wVal;
     int length, relval = -1;
-    if(name) {
+    if (name) {
 	if (USING_WIDE()) {
+	    dTHX;
 	    length = strlen(name)+1;
 	    New(1309,wCuritem,length,WCHAR);
 	    A2WHELPER(name, wCuritem, length*2, GETINTERPMODE());
@@ -1307,6 +1312,7 @@ win32_utime(const char *filename, struct utimbuf *times)
 
     int rc;
     if (USING_WIDE()) {
+	dTHX;
 	A2WHELPER(filename, wbuffer, sizeof(wbuffer), GETINTERPMODE());
 	rc = _wutime(wbuffer, (struct _utimbuf*)times);
     }
@@ -1878,6 +1884,7 @@ win32_fopen(const char *filename, const char *mode)
 	filename = "NUL";
 
     if (USING_WIDE()) {
+	dTHX;
 	A2WHELPER(mode, wMode, sizeof(wMode), GETINTERPMODE());
         A2WHELPER(filename, wBuffer, sizeof(wBuffer), GETINTERPMODE());
 	return _wfopen(wBuffer, wMode);
@@ -1895,6 +1902,7 @@ win32_fdopen(int handle, const char *mode)
 {
     WCHAR wMode[MODE_SIZE];
     if (USING_WIDE()) {
+	dTHX;
 	A2WHELPER(mode, wMode, sizeof(wMode), GETINTERPMODE());
 	return _wfdopen(handle, wMode);
     }
@@ -1909,6 +1917,7 @@ win32_freopen(const char *path, const char *mode, FILE *stream)
 	path = "NUL";
 
     if (USING_WIDE()) {
+	dTHX;
 	A2WHELPER(mode, wMode, sizeof(wMode), GETINTERPMODE());
 	A2WHELPER(path, wBuffer, sizeof(wBuffer), GETINTERPMODE());
 	return _wfreopen(wBuffer, wMode, stream);
@@ -2156,6 +2165,7 @@ win32_rename(const char *oname, const char *newname)
      */
     if (IsWinNT()) {
 	if (USING_WIDE()) {
+	    dTHX;
 	    A2WHELPER(oname, wOldName, sizeof(wOldName), GETINTERPMODE());
 	    A2WHELPER(newname, wNewName, sizeof(wNewName), GETINTERPMODE());
 	    bResult = MoveFileExW(wOldName,wNewName,
@@ -2291,6 +2301,7 @@ win32_open(const char *path, int flag, ...)
 	path = "NUL";
 
     if (USING_WIDE()) {
+	dTHX;
         A2WHELPER(path, wBuffer, sizeof(wBuffer), GETINTERPMODE());
 	return _wopen(wBuffer, flag, pmode);
     }

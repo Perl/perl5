@@ -352,6 +352,28 @@ PERLVAR(Iuudmap[256],	char)
 PERLVAR(Ibitcount,	char *)
 PERLVAR(Ifilter_debug,	int)
 
+#ifdef USE_THREADS
+PERLVAR(Ithr_key,	perl_key)	/* For per-thread struct perl_thread* */
+PERLVAR(Isv_mutex,	perl_mutex)	/* Mutex for allocating SVs in sv.c */
+PERLVAR(Imalloc_mutex,	perl_mutex)	/* Mutex for malloc */
+PERLVAR(Ieval_mutex,	perl_mutex)	/* Mutex for doeval */
+PERLVAR(Ieval_cond,	perl_cond)	/* Condition variable for doeval */
+PERLVAR(Ieval_owner,	struct perl_thread *)
+					/* Owner thread for doeval */
+PERLVAR(Inthreads,	int)		/* Number of threads currently */
+PERLVAR(Ithreads_mutex,	perl_mutex)	/* Mutex for nthreads and thread list */
+PERLVAR(Inthreads_cond,	perl_cond)	/* Condition variable for nthreads */
+PERLVAR(Isvref_mutex,	perl_mutex)	/* Mutex for SvREFCNT_{inc,dec} */
+PERLVARI(Ithreadsv_names,char *,	THREADSV_NAMES)
+#ifdef FAKE_THREADS
+PERLVAR(Icurthr,	struct perl_thread *)
+					/* Currently executing (fake) thread */
+#endif
+
+PERLVAR(Icred_mutex,	perl_mutex)	/* altered credentials in effect */
+
+#endif /* USE_THREADS */
+
 #ifdef PERL_OBJECT
 PERLVARI(piMem,		IPerlMem*,  NULL)
 PERLVARI(piENV,		IPerlEnv*,  NULL)

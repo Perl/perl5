@@ -7,6 +7,8 @@
  *
  */
 
+START_EXTERN_C
+
 #ifdef DOINIT
 EXTCONST unsigned char PL_utf8skip[] = {
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* ascii */
@@ -21,6 +23,8 @@ EXTCONST unsigned char PL_utf8skip[] = {
 #else
 EXTCONST unsigned char PL_utf8skip[];
 #endif
+
+END_EXTERN_C
 
 #define IN_UTF8 (PL_curcop->op_private & HINT_UTF8)
 

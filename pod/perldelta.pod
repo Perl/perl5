@@ -424,6 +424,10 @@ See L<perldbmfilter> for further information.
 
 C<use utf8> to enable UTF-8 and Unicode support.
 
+C<use caller 'encoding'> allows modules to inherit pragmatic attributes
+from the caller's context.  C<encoding> is currently the only supported
+attribute.
+
 Lexical warnings pragma, C<use warning;>, to control optional warnings.
 
 C<use filetest> to control the behaviour of filetests (C<-r> C<-w> ...).
