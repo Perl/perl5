@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Nov  8 18:33:32 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Wed Nov  8 18:52:10 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -11478,7 +11478,28 @@ esac
 
 : see if _ptr and _cnt from stdio act std
 echo " "
-if $contains '_IO_fpos_t' `./findhdr stdio.h` `./findhdr libio.h` >/dev/null 2>&1 ; then
+
+if $contains '_lbfsize' `./findhdr stdio.h` >/dev/null 2>&1 ; then
+	echo "(Looks like you have stdio.h from BSD.)"
+	case "$stdio_ptr" in
+	'') stdio_ptr='((fp)->_p)'
+		ptr_lval=$define
+		;;
+	*)	ptr_lval=$d_stdio_ptr_lval;;
+	esac
+	case "$stdio_cnt" in
+	'') stdio_cnt='((fp)->_r)'
+		cnt_lval=$define
+		;;
+	*)	cnt_lval=$d_stdio_cnt_lval;;
+	esac
+	case "$stdio_base" in
+	'') stdio_base='((fp)->_ub._base ? (fp)->_ub._base : (fp)->_bf._base)';;
+	esac
+	case "$stdio_bufsiz" in
+	'') stdio_bufsiz='((fp)->_ub._base ? (fp)->_ub._size : (fp)->_bf._size)';;
+	esac
+elif $contains '_IO_fpos_t' `./findhdr stdio.h` `./findhdr libio.h` >/dev/null 2>&1 ; then
 	echo "(Looks like you have stdio.h from Linux.)"
 	case "$stdio_ptr" in
 	'') stdio_ptr='((fp)->_IO_read_ptr)'
@@ -11518,6 +11539,7 @@ else
 	'') stdio_bufsiz='((fp)->_cnt + (fp)->_ptr - (fp)->_base)';;
 	esac
 fi
+
 : test whether _ptr and _cnt really work
 echo "Checking how std your stdio is..." >&4
 $cat >try.c <<EOP
