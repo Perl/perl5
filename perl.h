@@ -4101,7 +4101,7 @@ extern void moncontrol(int);
    HAS_STRUCT_CMSGHDR
 
    HAS_NL_LANGINFO
-   
+
    HAS_DIRFD
 
    so that Configure picks them up. */
