@@ -4892,15 +4892,13 @@ S_sv_add_backref(pTHX_ SV *tsv, SV *sv)
 	 * by magic_killbackrefs() when tsv is being freed */
     }
     if (AvFILLp(av) >= AvMAX(av)) {
+        I32 i;
         SV **svp = AvARRAY(av);
-        I32 i = AvFILLp(av);
-        while (i >= 0) {
-            if (svp[i] == &PL_sv_undef) {
+        for (i = AvFILLp(av); i >= 0; i--)
+            if (!svp[i]) {
                 svp[i] = sv;        /* reuse the slot */
                 return;
             }
-            i--;
-        }
         av_extend(av, AvFILLp(av)+1);
     }
     AvARRAY(av)[++AvFILLp(av)] = sv; /* av_push() */
@@ -4922,13 +4920,8 @@ S_sv_del_backref(pTHX_ SV *sv)
 	Perl_croak(aTHX_ "panic: del_backref");
     av = (AV *)mg->mg_obj;
     svp = AvARRAY(av);
-    i = AvFILLp(av);
-    while (i >= 0) {
-	if (svp[i] == sv) {
-	    svp[i] = &PL_sv_undef; /* XXX */
-	}
-	i--;
-    }
+    for (i = AvFILLp(av); i >= 0; i--)
+	if (svp[i] == sv) svp[i] = Nullsv;
 }
 
 /*
@@ -9508,16 +9501,15 @@ Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS* param)
 	    nmg->mg_obj	= (SV*)re_dup((REGEXP*)mg->mg_obj, param);
 	}
 	else if(mg->mg_type == PERL_MAGIC_backref) {
-	     AV *av = (AV*) mg->mg_obj;
-	     SV **svp;
-	     I32 i;
-	     nmg->mg_obj = (SV*)newAV();
-	     svp = AvARRAY(av);
-	     i = AvFILLp(av);
-	     while (i >= 0) {
-		  av_push((AV*)nmg->mg_obj,sv_dup(svp[i],param));
-		  i--;
-	     }
+	    AV *av = (AV*) mg->mg_obj;
+	    SV **svp;
+	    I32 i;
+	    SvREFCNT_inc(nmg->mg_obj = (SV*)newAV());
+	    svp = AvARRAY(av);
+	    for (i = AvFILLp(av); i >= 0; i--) {
+		if (!svp[i] || SvREFCNT(svp[i]) < 2) continue;
+		av_push((AV*)nmg->mg_obj,sv_dup(svp[i],param));
+	    }
 	}
 	else {
 	    nmg->mg_obj	= (mg->mg_flags & MGf_REFCOUNTED)
