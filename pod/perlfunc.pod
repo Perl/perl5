@@ -3312,11 +3312,9 @@ but if you're in the C<FooPack> package, it's
     @articles = sort {$FooPack::b <=> $FooPack::a} @files;
 
 The comparison function is required to behave.  If it returns
-inconsistent results (sometimes saying $x[1] is less than $x[2] and
-sometimes saying the opposite, for example) the Perl interpreter will
-probably crash and dump core.  This is entirely due to and dependent
-upon your system's qsort(3) library routine; this routine often avoids
-sanity checks in the interest of speed.
+inconsistent results (sometimes saying C<$x[1]> is less than C<$x[2]> and
+sometimes saying the opposite, for example) the results are not
+well-defined.
 
 =item splice ARRAY,OFFSET,LENGTH,LIST
 
