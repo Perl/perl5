@@ -109,6 +109,7 @@ sub heavy_export {
 	    @imports = keys %imports;
 	}
 
+        my @carp;
 	foreach $sym (@imports) {
 	    if (!$export_cache->{$sym}) {
 		if ($sym =~ m/^\d/) {
@@ -126,20 +127,16 @@ sub heavy_export {
 			last;
 		    }
 		} elsif ($sym !~ s/^&// || !$export_cache->{$sym}) {
-		    unless ($^S) {
-			# If we are trying to trap import of non-existent
-			# symbols using eval, let's be silent for now and
-			# just croak in the end.
-			require Carp;
-			Carp::carp(qq["$sym" is not exported by the $pkg module]);
-		    }
+		    # accumulate the non-exports
+		    push @carp,
+		        qq["$sym" is not exported by the $pkg module\n];
 		    $oops++;
 		}
 	    }
 	}
 	if ($oops) {
 	    require Carp;
-	    Carp::croak("Can't continue after import errors");
+	    Carp::croak("@{carp}Can't continue after import errors");
 	}
     }
     else {
