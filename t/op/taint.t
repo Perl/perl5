@@ -552,9 +552,9 @@ else {
 	          and not tainted $getpwent[3]
 	          and not tainted $getpwent[4]
 	          and not tainted $getpwent[5]
-	          and     tainted $getpwent[6] # gecos
+	          and     tainted $getpwent[6]		# ge?cos
 	          and not tainted $getpwent[7]
-		  and not tainted $getpwent[8]);
+		  and     tainted $getpwent[8]);	# shell
 	endpwent();
     } else {
 	for (142) { print "ok $_ # Skipped: getpwent() is not available\n" }
