@@ -1,7 +1,3 @@
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl test.pl'
-
-#########################
 
 BEGIN {
     if (ord("A") == 193) {
@@ -10,14 +6,22 @@ BEGIN {
     }
 }
 
+BEGIN {
+    if ($ENV{PERL_CORE}) {
+        chdir('t') if -d 't';
+        @INC = qw(../lib);
+    }
+}
+
 use Test;
-BEGIN { plan tests => 160 };
+BEGIN { plan tests => 183};
 use Unicode::Collate;
-ok(1); # If we made it this far, we're ok.
 
 #########################
 
-my $UCA_Version = "8.0";
+ok(1); # If we made it this far, we're ok.
+
+my $UCA_Version = "9";
 
 ok(Unicode::Collate::UCA_Version, $UCA_Version);
 ok(Unicode::Collate->UCA_Version, $UCA_Version);
@@ -41,14 +45,30 @@ ok(
   ),
 );
 
+ok($Collator->cmp("", ""), 0);
+ok($Collator->eq("", ""));
+ok($Collator->cmp("", "perl"), -1);
+
+##############
+
 my $A_acute = pack('U', 0x00C1);
+my $a_acute = pack('U', 0x00E1);
 my $acute   = pack('U', 0x0301);
 
 ok($Collator->cmp("A$acute", $A_acute), -1);
-ok($Collator->cmp("", ""), 0);
-ok(! $Collator->ne("", "") );
-ok(  $Collator->eq("", "") );
-ok($Collator->cmp("", "perl"), -1);
+ok($Collator->cmp($a_acute, $A_acute), -1);
+
+my %old_level = $Collator->change(level => 1);
+ok($Collator->eq("A$acute", $A_acute));
+ok($Collator->eq("A", $A_acute));
+
+ok($Collator->change(level => 2)->eq($a_acute, $A_acute));
+ok($Collator->lt("A", $A_acute));
+
+ok($Collator->change(%old_level)->lt("A", $A_acute));
+ok($Collator->lt("A", $A_acute));
+ok($Collator->lt("A", $a_acute));
+ok($Collator->lt($a_acute, $A_acute));
 
 ##############
 
@@ -76,8 +96,23 @@ ENTRIES
   ok($NFD->lt("\x{430}\x{3099}B", "\x{430}\x{308}\x{3099}A"));
   ok($NFD->eq("\x{0430}\x{3099}\x{309A}\x{0308}",
               "\x{0430}\x{309A}\x{3099}\x{0308}") );
+
+  my %old_norm = $NFD->change(normalization => undef);
+  ok($NFD->lt("A$acute", $A_acute));
+  ok($NFD->cmp("A$acute", $A_acute), $Collator->cmp("A$acute", $A_acute));
+
+  $NFD->change(%old_norm);
+  ok($NFD->eq("A$acute", $A_acute));
+  ok($NFD->change(normalization => undef)->lt("A$acute", $A_acute));
+  ok($NFD->change(level => 1)->eq("A$acute", $A_acute));
+
 }
 else {
+  ok(1);
+  ok(1);
+  ok(1);
+  ok(1);
+  ok(1);
   ok(1);
   ok(1);
   ok(1);
@@ -120,9 +155,9 @@ ok($trad->eq($katakana, $hiragana));
 
 ##############
 
-my $old_level = $Collator->{level};
+$Collator->change(level => 2);
 
-$Collator->{level} = 2;
+ok($Collator->{level}, 2);
 
 ok( $Collator->cmp("ABC","abc"), 0);
 ok( $Collator->eq("ABC","abc") );
@@ -139,9 +174,9 @@ ok( $Collator->lt("a\x{AC00}b", "a\x{AE00}b") );
 ok( $Collator->gt("a\x{D7A3}b", "a\x{C544}b") );
 ok( $Collator->lt("a\x{C544}b", "a\x{30A2}b") ); # hangul < hiragana
 
-$Collator->{level} = $old_level;
+$Collator->change(%old_level, katakana_before_hiragana => 1);
 
-$Collator->{katakana_before_hiragana} = 1;
+ok($Collator->{level}, 4);
 
 ok( $Collator->cmp("abc", "ABC"), -1);
 ok( $Collator->ne("abc", "ABC") );
@@ -152,7 +187,7 @@ ok( $Collator->ne($hiragana, $katakana) );
 ok( $Collator->gt($hiragana, $katakana) );
 ok( $Collator->ge($hiragana, $katakana) );
 
-$Collator->{upper_before_lower} = 1;
+$Collator->change(upper_before_lower => 1);
 
 ok( $Collator->cmp("abc", "ABC"), 1);
 ok( $Collator->ge("abc", "ABC"), 1);
@@ -161,12 +196,12 @@ ok( $Collator->cmp($hiragana, $katakana), 1);
 ok( $Collator->ge($hiragana, $katakana), 1);
 ok( $Collator->gt($hiragana, $katakana), 1);
 
-$Collator->{katakana_before_hiragana} = 0;
+$Collator->change(katakana_before_hiragana => 0);
 
 ok( $Collator->cmp("abc", "ABC"), 1);
 ok( $Collator->cmp($hiragana, $katakana), -1);
 
-$Collator->{upper_before_lower} = 0;
+$Collator->change(upper_before_lower => 0);
 
 ok( $Collator->cmp("abc", "ABC"), -1);
 ok( $Collator->le("abc", "ABC") );
@@ -219,7 +254,7 @@ ok($Collator->lt("lake","like"));
 
 ##############
 
-$Collator->{level} = 2;
+$Collator->change(level => 2);
 
 my $str;
 
@@ -235,7 +270,7 @@ if (my($pos,$len) = $Collator->index($str, $sub)) {
 
 ok($str, $ret);
 
-$Collator->{level} = $old_level;
+$Collator->change(%old_level);
 
 $str = $orig;
 if (my($pos,$len) = $Collator->index($str, $sub)) {
@@ -248,7 +283,7 @@ ok($str, $orig);
 
 my $match;
 
-$Collator->{level} = 1;
+$Collator->change(level => 1);
 
 $str = "Pe\x{300}rl";
 $sub = "pe";
@@ -266,11 +301,11 @@ if (my($pos, $len) = $Collator->index($str, $sub)) {
 }
 ok($match, "P\x{300}e\x{300}\x{301}\x{303}");
 
-$Collator->{level} = $old_level;
+$Collator->change(%old_level);
 
 ##############
 
-$trad->{level} = 1;
+%old_level = $trad->change(level => 1);
 
 $str = "Ich mu\x{00DF} studieren.";
 $sub = "m\x{00FC}ss";
@@ -280,7 +315,7 @@ if (my($pos, $len) = $trad->index($str, $sub)) {
 }
 ok($match, "mu\x{00DF}");
 
-$trad->{level} = $old_level;
+$trad->change(%old_level);
 
 $str = "Ich mu\x{00DF} studieren.";
 $sub = "m\x{00FC}ss";
@@ -370,21 +405,41 @@ ok($few_entries->eq("\x{AC00}", "\x{1100}\x{1161}"));
 
 ##############
 
-my $all_undef = Unicode::Collate->new(
+my $all_undef_8 = Unicode::Collate->new(
   table => undef,
   normalization => undef,
   overrideCJK => undef,
   overrideHangul => undef,
+  UCA_Version => 8,
 );
 
 # All in the Unicode code point order.
 # No hangul decomposition.
 
-ok($all_undef->lt("\x{3042}", "\x{4E00}"));
-ok($all_undef->lt("\x{4DFF}", "\x{4E00}"));
-ok($all_undef->lt("\x{4E00}", "\x{AC00}"));
-ok($all_undef->gt("\x{AC00}", "\x{1100}\x{1161}"));
-ok($all_undef->gt("\x{AC00}", "\x{ABFF}"));
+ok($all_undef_8->lt("\x{3402}", "\x{4E00}"));
+ok($all_undef_8->lt("\x{4DFF}", "\x{4E00}"));
+ok($all_undef_8->lt("\x{4E00}", "\x{AC00}"));
+ok($all_undef_8->gt("\x{AC00}", "\x{1100}\x{1161}"));
+ok($all_undef_8->gt("\x{AC00}", "\x{ABFF}"));
+
+##############
+
+my $all_undef_9 = Unicode::Collate->new(
+  table => undef,
+  normalization => undef,
+  overrideCJK => undef,
+  overrideHangul => undef,
+  UCA_Version => 9,
+);
+
+# CJK Ideo. < CJK ext A/B < Others.
+# No hangul decomposition.
+
+ok($all_undef_9->lt("\x{4E00}", "\x{3402}"));
+ok($all_undef_9->lt("\x{3402}", "\x{20000}"));
+ok($all_undef_9->lt("\x{20000}", "\x{AC00}"));
+ok($all_undef_9->gt("\x{AC00}", "\x{1100}\x{1161}"));
+ok($all_undef_9->gt("\x{AC00}", "\x{ABFF}"));
 
 ##############
 
@@ -426,59 +481,41 @@ ok($ignoreHangul->lt("Pe\x{AE00}rl", "Perl")); # 'r' is unassigned.
 
 ##############
 
-my $blanked = Unicode::Collate->new(
-  table => 'keys.txt',
-  normalization => undef,
-  alternate => 'Blanked',
-);
+my %origAlter = $Collator->change(alternate => 'Blanked');
 
-ok($blanked->lt("death", "de luge"));
-ok($blanked->lt("de luge", "de-luge"));
-ok($blanked->lt("de-luge", "deluge"));
-ok($blanked->lt("deluge", "de\x{2010}luge"));
-ok($blanked->lt("deluge", "de Luge"));
+ok($Collator->lt("death", "de luge"));
+ok($Collator->lt("de luge", "de-luge"));
+ok($Collator->lt("de-luge", "deluge"));
+ok($Collator->lt("deluge", "de\x{2010}luge"));
+ok($Collator->lt("deluge", "de Luge"));
 
-##############
+$Collator->change(alternate => 'Non-ignorable');
 
-my $nonIgn = Unicode::Collate->new(
-  table => 'keys.txt',
-  normalization => undef,
-  alternate => 'Non-ignorable',
-);
+ok($Collator->lt("de luge", "de Luge"));
+ok($Collator->lt("de Luge", "de-luge"));
+ok($Collator->lt("de-Luge", "de\x{2010}luge"));
+ok($Collator->lt("de-luge", "death"));
+ok($Collator->lt("death", "deluge"));
 
-ok($nonIgn->lt("de luge", "de Luge"));
-ok($nonIgn->lt("de Luge", "de-luge"));
-ok($nonIgn->lt("de-Luge", "de\x{2010}luge"));
-ok($nonIgn->lt("de-luge", "death"));
-ok($nonIgn->lt("death", "deluge"));
+$Collator->change(alternate => 'Shifted');
 
-##############
+ok($Collator->lt("death", "de luge"));
+ok($Collator->lt("de luge", "de-luge"));
+ok($Collator->lt("de-luge", "deluge"));
+ok($Collator->lt("deluge", "de Luge"));
+ok($Collator->lt("de Luge", "deLuge"));
 
-my $shifted = Unicode::Collate->new(
-  table => 'keys.txt',
-  normalization => undef,
-  alternate => 'Shifted',
-);
+$Collator->change(alternate => 'Shift-Trimmed');
 
-ok($shifted->lt("death", "de luge"));
-ok($shifted->lt("de luge", "de-luge"));
-ok($shifted->lt("de-luge", "deluge"));
-ok($shifted->lt("deluge", "de Luge"));
-ok($shifted->lt("de Luge", "deLuge"));
+ok($Collator->lt("death", "deluge"));
+ok($Collator->lt("deluge", "de luge"));
+ok($Collator->lt("de luge", "de-luge"));
+ok($Collator->lt("de-luge", "deLuge"));
+ok($Collator->lt("deLuge", "de Luge"));
 
-##############
+$Collator->change(%origAlter);
 
-my $shTrim = Unicode::Collate->new(
-  table => 'keys.txt',
-  normalization => undef,
-  alternate => 'Shift-Trimmed',
-);
-
-ok($shTrim->lt("death", "deluge"));
-ok($shTrim->lt("deluge", "de luge"));
-ok($shTrim->lt("de luge", "de-luge"));
-ok($shTrim->lt("de-luge", "deLuge"));
-ok($shTrim->lt("deLuge", "de Luge"));
+ok($Collator->{alternate}, 'shifted');
 
 ##############
 
@@ -504,19 +541,29 @@ ok($overCJK->lt("a\x{4E03}", "A\x{4E00}"));
 
 ##############
 
-# rearranged : 0x0E40..0x0E44, 0x0EC0..0x0EC4
+# rearrange : 0x0E40..0x0E44, 0x0EC0..0x0EC4 (default)
 
-ok($Collator->lt("A", "B"));
+my %old_rearrange = $Collator->change(rearrange => undef);
+
+ok($Collator->gt("\x{0E41}A", "\x{0E40}B"));
+ok($Collator->gt("A\x{0E41}A", "A\x{0E40}B"));
+
+$Collator->change(rearrange => [ 0x61 ]); # 'a'
+
+ok($Collator->gt("ab", "AB")); # as 'ba' > 'AB'
+
+$Collator->change(%old_rearrange);
+
+ok($Collator->lt("ab", "AB"));
 ok($Collator->lt("\x{0E40}", "\x{0E41}"));
 ok($Collator->lt("\x{0E40}A", "\x{0E41}B"));
 ok($Collator->lt("\x{0E41}A", "\x{0E40}B"));
 ok($Collator->lt("A\x{0E41}A", "A\x{0E40}B"));
 
-ok($all_undef->lt("A", "B"));
-ok($all_undef->lt("\x{0E40}", "\x{0E41}"));
-ok($all_undef->lt("\x{0E40}A", "\x{0E41}B"));
-ok($all_undef->lt("\x{0E41}A", "\x{0E40}B"));
-ok($all_undef->lt("A\x{0E41}A", "A\x{0E40}B"));
+ok($all_undef_8->lt("\x{0E40}", "\x{0E41}"));
+ok($all_undef_8->lt("\x{0E40}A", "\x{0E41}B"));
+ok($all_undef_8->lt("\x{0E41}A", "\x{0E40}B"));
+ok($all_undef_8->lt("A\x{0E41}A", "A\x{0E40}B"));
 
 ##############
 
@@ -533,8 +580,6 @@ ok($no_rearrange->gt("\x{0E41}A", "\x{0E40}B"));
 ok($no_rearrange->gt("A\x{0E41}A", "A\x{0E40}B"));
 
 ##############
-
-# equivalent to $no_rearrange
 
 my $undef_rearrange = Unicode::Collate->new(
   table => undef,

@@ -1,4 +1,4 @@
-Unicode/Collate version 0.12
+Unicode/Collate version 0.20
 ===============================
 
 Unicode::Collate - Unicode Collation Algorithm
@@ -30,7 +30,7 @@ SYNOPSIS
 
 INSTALLATION
 
-Perl 5.006 or later
+Perl 5.6.1 or better
 
 To install this module type the following:
 
@@ -41,7 +41,7 @@ To install this module type the following:
 
 DEPENDENCIES
 
-  It's better if you have Unicode::Normalize (v 0.10 or later)
+  The conformant collation requires Unicode::Normalize (v 0.10 or later)
   although Unicode::Collate can be used without Unicode::Normalize.
 
 COPYRIGHT AND LICENCE
