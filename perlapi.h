@@ -398,6 +398,10 @@ END_EXTERN_C
 #define PL_multi_start		(*Perl_Imulti_start_ptr(aTHX))
 #undef  PL_multiline
 #define PL_multiline		(*Perl_Imultiline_ptr(aTHX))
+#undef  PL_new_hash_seed
+#define PL_new_hash_seed	(*Perl_Inew_hash_seed_ptr(aTHX))
+#undef  PL_new_hash_seed_set
+#define PL_new_hash_seed_set	(*Perl_Inew_hash_seed_set_ptr(aTHX))
 #undef  PL_nexttoke
 #define PL_nexttoke		(*Perl_Inexttoke_ptr(aTHX))
 #undef  PL_nexttype

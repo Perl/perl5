@@ -89,6 +89,24 @@ struct xpvhv {
 	(hash) = (hash_PeRlHaSh + (hash_PeRlHaSh << 15)); \
     } STMT_END
 
+#ifdef PERL_IN_HV_C
+#define PERL_HASH_INTERNAL(hash,str,len) \
+     STMT_START	{ \
+	register const char *s_PeRlHaSh_tmp = str; \
+	register const unsigned char *s_PeRlHaSh = (const unsigned char *)s_PeRlHaSh_tmp; \
+	register I32 i_PeRlHaSh = len; \
+	register U32 hash_PeRlHaSh = PL_new_hash_seed; \
+	while (i_PeRlHaSh--) { \
+	    hash_PeRlHaSh += *s_PeRlHaSh++; \
+	    hash_PeRlHaSh += (hash_PeRlHaSh << 10); \
+	    hash_PeRlHaSh ^= (hash_PeRlHaSh >> 6); \
+	} \
+	hash_PeRlHaSh += (hash_PeRlHaSh << 3); \
+	hash_PeRlHaSh ^= (hash_PeRlHaSh >> 11); \
+	(hash) = (hash_PeRlHaSh + (hash_PeRlHaSh << 15)); \
+    } STMT_END
+#endif
+
 /*
 =head1 Hash Manipulation Functions
 
@@ -203,6 +221,10 @@ C<SV*>.
 #define HvLAZYDEL_on(hv)	(SvFLAGS(hv) |= SVphv_LAZYDEL)
 #define HvLAZYDEL_off(hv)	(SvFLAGS(hv) &= ~SVphv_LAZYDEL)
 
+#define HvREHASH(hv)		(SvFLAGS(hv) & SVphv_REHASH)
+#define HvREHASH_on(hv)		(SvFLAGS(hv) |= SVphv_REHASH)
+#define HvREHASH_off(hv)	(SvFLAGS(hv) &= ~SVphv_REHASH)
+
 /* Maybe amagical: */
 /* #define HV_AMAGICmb(hv)      (SvFLAGS(hv) & (SVpgv_badAM | SVpgv_AM)) */
 
@@ -224,6 +246,7 @@ C<SV*>.
 #define HeKLEN(he)		HEK_LEN(HeKEY_hek(he))
 #define HeKUTF8(he)  HEK_UTF8(HeKEY_hek(he))
 #define HeKWASUTF8(he)  HEK_WASUTF8(HeKEY_hek(he))
+#define HeKREHASH(he)  HEK_REHASH(HeKEY_hek(he))
 #define HeKLEN_UTF8(he)  (HeKUTF8(he) ? -HeKLEN(he) : HeKLEN(he))
 #define HeKFLAGS(he)  HEK_FLAGS(HeKEY_hek(he))
 #define HeVAL(he)		(he)->hent_val
@@ -254,6 +277,7 @@ C<SV*>.
 
 #define HVhek_UTF8	0x01 /* Key is utf8 encoded. */
 #define HVhek_WASUTF8	0x02 /* Key is bytes here, but was supplied as utf8. */
+#define HVhek_REHASH	0x04 /* This key is in an hv using a custom HASH . */
 #define HVhek_FREEKEY	0x100 /* Internal flag to say key is malloc()ed.  */
 #define HVhek_PLACEHOLD	0x200 /* Internal flag to create placeholder.
                                * (may change, but Storable is a core module) */
@@ -265,6 +289,8 @@ C<SV*>.
 #define HEK_WASUTF8(hek)	(HEK_FLAGS(hek) & HVhek_WASUTF8)
 #define HEK_WASUTF8_on(hek)	(HEK_FLAGS(hek) |= HVhek_WASUTF8)
 #define HEK_WASUTF8_off(hek)	(HEK_FLAGS(hek) &= ~HVhek_WASUTF8)
+#define HEK_REHASH(hek)		(HEK_FLAGS(hek) & HVhek_REHASH)
+#define HEK_REHASH_on(hek)	(HEK_FLAGS(hek) |= HVhek_REHASH)
 
 /* calculate HV array allocation */
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)

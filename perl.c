@@ -918,7 +918,7 @@ setuid perl scripts securely.\n");
      * it is your responsibility to provide a good random seed!
      * You can also define PERL_HASH_SEED in compile time, see hv.h. */
     if (!PL_hash_seed_set)
-	 PL_hash_seed = get_hash_seed();
+	 PL_new_hash_seed = get_hash_seed();
     {
 	 char *s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG");
 
@@ -927,7 +927,7 @@ setuid perl scripts securely.\n");
 
 	      if (i == 1)
 		   PerlIO_printf(Perl_debug_log, "HASH_SEED = %"UVuf"\n",
-				 PL_hash_seed);
+				 PL_new_hash_seed);
 	 }
     }
 #endif /* #if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT) */
