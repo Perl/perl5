@@ -317,7 +317,7 @@ PPCODE:
 
     PUSHMARK(SP);
     perl_call_sv(codesv, GIMME|G_EVAL|G_KEEPERR); /* use callers context */
-    sv_free(dummy_hv);  /* get rid of what save_hash gave us*/
+    sv_free( (SV *) dummy_hv);  /* get rid of what save_hash gave us*/
     SPAGAIN; /* for the PUTBACK added by xsubpp */
     LEAVE;
 
