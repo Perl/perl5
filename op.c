@@ -6052,10 +6052,12 @@ Perl_ck_glob(pTHX_ OP *o)
     if (!gv) {
 	GV *glob_gv;
 	ENTER;
-	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, newSVpvn("File::Glob", 10), Nullsv,
-			 Nullsv, Nullsv);
+	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
+		newSVpvn("File::Glob", 10), Nullsv, Nullsv, Nullsv);
 	gv = gv_fetchpv("CORE::GLOBAL::glob", FALSE, SVt_PVCV);
 	glob_gv = gv_fetchpv("File::Glob::csh_glob", FALSE, SVt_PVCV);
+	if (!glob_gv)
+	    Perl_croak(aTHX_ "Can't locate File::Glob");
 	GvCV(gv) = GvCV(glob_gv);
 	SvREFCNT_inc((SV*)GvCV(gv));
 	GvIMPORTED_CV_on(gv);
