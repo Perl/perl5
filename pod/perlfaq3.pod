@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.6 $, $Date: 2001/10/03 23:06:15 $)
+perlfaq3 - Programming Tools ($Revision: 1.7 $, $Date: 2001/10/09 22:17:53 $)
 
 =head1 DESCRIPTION
 
@@ -236,7 +236,21 @@ and possibly an emacs too, so you may not need to download anything.
 In any emacs the cperl-mode (M-x cperl-mode) gives you perhaps the
 best available Perl editing mode in any editor.
 
-For Windows editors: you can download an Emacs
+If you are using Windows, you can use any editor that lets
+you work with plain text, such as NotePad or WordPad.  Word
+processors, such as Microsoft Word or WordPerfect, typically
+do not work since they insert all sorts of behind-the-scenes
+information, although some allow you to save files as "Text
+Only". You can also download text editors designed
+specifically for programming, such as Textpad
+(http://www.textpad.com/) and UltraEdit
+(http://www.ultraedit.com), among others.
+
+If you are using MacOS, the same concerns apply.  MacPerl
+(for Classic environments) comes with a simple editor.
+Popular external editors are BBEdit (http://www.bbedit.com)
+or Alpha (http://alpha.olm.net/). MacOS X users can use Unix
+editors as well.
 
 =over 4
 
