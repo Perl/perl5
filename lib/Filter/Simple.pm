@@ -44,7 +44,7 @@ my $pod_or_DATA = qr/
 			| ^=pod .*? $CUT
 			| ^=for .*? $EOP
 			| ^=begin \s* (\S+) .*? \n=end \s* \1 .*? $EOP
-			| ^__(DATA|END)__\n.*
+			| ^__(DATA|END)__\r?\n.*
 		    /smx;
 
 my %extractor_for = (
@@ -153,7 +153,7 @@ sub gen_filter_import {
     return sub {
 	my ($imported_class, @args) = @_;
 	my $def_terminator =
-		qr/^(?:\s*no\s+$imported_class\s*;$ows|__(?:END|DATA)__)$/;
+		qr/^(?:\s*no\s+$imported_class\s*;$ows|__(?:END|DATA)__)\r?$/;
 	if (!defined $terminator) {
 	    $terminator{terminator} = $def_terminator;
 	}
