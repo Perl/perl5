@@ -665,6 +665,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_umask HAS_UMASK		/**/
 
+/* HAS_USLEEP:
+ *	This symbol, if defined, indicates that the usleep routine is
+ *	available to let the process sleep on a sub-second accuracy.
+ */
+#$d_usleep HAS_USLEEP		/**/
+
 /* HASVOLATILE:
  *	This symbol, if defined, indicates that this C compiler knows about
  *	the volatile declaration.
@@ -1261,6 +1267,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_void_closedir VOID_CLOSEDIR		/**/
 
+/* HAS_STRUCT_CMSGHDR:
+ *	This symbol, if defined, indicates that the struct cmsghdr
+ *	is supported.
+ */
+#$d_cmsghdr_s HAS_STRUCT_CMSGHDR	/**/
+
 /* HAS_CSH:
  *	This symbol, if defined, indicates that the C-shell exists.
  */
@@ -1481,6 +1493,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	them.  See netdbtype.U for probing for various Netdb_xxx_t types.
  */
 #$d_gethostprotos	HAS_GETHOST_PROTOS	/**/
+
+/* HAS_GETITIMER:
+ *	This symbol, if defined, indicates that the getitimer routine is
+ *	available to return interval timers.
+ */
+#$d_getitimer HAS_GETITIMER		/**/
 
 /* HAS_GETMNT:
  *	This symbol, if defined, indicates that the getmnt routine is
@@ -1790,6 +1808,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_msg HAS_MSG		/**/
 
+/* HAS_STRUCT_MSGHDR:
+ *	This symbol, if defined, indicates that the struct msghdr
+ *	is supported.
+ */
+#$d_msghdr_s HAS_STRUCT_MSGHDR	/**/
+
 /* HAS_OFF64_T:
  *	This symbol will be defined if the C compiler supports off64_t.
  */
@@ -1830,6 +1854,19 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define SCHED_YIELD	$sched_yield	/**/
 #$d_sched_yield HAS_SCHED_YIELD	/**/
 
+/* HAS_READV:
+ *	This symbol, if defined, indicates that the readv routine is
+ *	available to do gather reads.  You will also need <sys/uio.h>
+ *	and there I_SYSUIO.
+ */
+#$d_readv HAS_READV		/**/
+
+/* HAS_RECVMSG:
+ *	This symbol, if defined, indicates that the recvmsg routine is
+ *	available to send structured socket messages.
+ */
+#$d_recvmsg HAS_RECVMSG		/**/
+
 /* HAS_SAFE_BCOPY:
  *	This symbol, if defined, indicates that the bcopy routine is available
  *	to copy potentially overlapping memory blocks. Otherwise you should
@@ -1868,6 +1905,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_sem HAS_SEM		/**/
 
+/* HAS_SENDMSG:
+ *	This symbol, if defined, indicates that the sendmsg routine is
+ *	available to send structured socket messages.
+ */
+#$d_sendmsg HAS_SENDMSG		/**/
+
 /* HAS_SETGRENT:
  *	This symbol, if defined, indicates that the setgrent routine is
  *	available for initializing sequential access of the group database.
@@ -1886,6 +1929,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available.
  */
 #$d_sethent HAS_SETHOSTENT		/**/
+
+/* HAS_SETITIMER:
+ *	This symbol, if defined, indicates that the setitimer routine is
+ *	available to set interval timers.
+ */
+#$d_setitimer HAS_SETITIMER		/**/
 
 /* HAS_SETNETENT:
  *	This symbol, if defined, indicates that the setnetent() routine is
@@ -2222,6 +2271,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_times HAS_TIMES		/**/
 
+/* HAS_UALARM:
+ *	This symbol, if defined, indicates that the ualarm routine is
+ *	available to do alarms with microsecond granularity.
+ */
+#$d_ualarm HAS_UALARM		/**/
+
 /* HAS_UNION_SEMUN:
  *	This symbol, if defined, indicates that the union semun is
  *	defined by including <sys/sem.h>.  If not, the user code
@@ -2276,6 +2331,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_vprintf HAS_VPRINTF	/**/
 #$d_charvspr USE_CHAR_VSPRINTF 	/**/
+
+/* HAS_WRITEV:
+ *	This symbol, if defined, indicates that the writev routine is
+ *	available to do scatter writes.
+ */
+#$d_writev HAS_WRITEV		/**/
 
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
@@ -3284,6 +3345,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to test whether a socket is at the out-of-band mark.
  */
 #$d_sockatmark HAS_SOCKATMARK		/**/
+
+/* U32_ALIGNMENT_REQUIRED:
+ *	This symbol, if defined, indicates that you must access
+ *	character data through U32-aligned pointers.
+ */
+#$d_u32align U32_ALIGNMENT_REQUIRED	/**/
 
 #endif
 !GROK!THIS!

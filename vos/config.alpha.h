@@ -442,6 +442,19 @@
  */
 #define HAS_READLINK		/**/
 
+/* HAS_READV:
+ *	This symbol, if defined, indicates that the readv routine is
+ *	available to do gather reads.  You will also need <sys/uio.h>
+ *	and there I_SYSUIO.
+ */
+/*#define HAS_READV		/**/
+
+/* HAS_RECVMSG:
+ *	This symbol, if defined, indicates that the recvmsg routine is
+ *	available to send structured socket messages.
+ */
+/*#define HAS_RECVMSG		/**/
+
 /* HAS_RENAME:
  *	This symbol, if defined, indicates that the rename routine is available
  *	to rename files.  Otherwise you should do the unlink(), link(), unlink()
@@ -666,6 +679,12 @@
  *	available to set and get the value of the file creation mask.
  */
 #define HAS_UMASK		/**/
+
+/* HAS_USLEEP:
+ *	This symbol, if defined, indicates that the usleep routine is
+ *	available to let the process sleep on a sub-second accuracy.
+ */
+/*#define HAS_USLEEP		/**/
 
 /* HASVOLATILE:
  *	This symbol, if defined, indicates that this C compiler knows about
@@ -1258,6 +1277,12 @@
  */
 /*#define VOID_CLOSEDIR		/**/
 
+/* HAS_STRUCT_CMSGHDR:
+ *	This symbol, if defined, indicates that the struct cmsghdr
+ *	is supported.
+ */
+/*#define HAS_STRUCT_CMSGHDR	/ **/
+
 /* HAS_CSH:
  *	This symbol, if defined, indicates that the C-shell exists.
  */
@@ -1471,6 +1496,12 @@
  *	them.  See netdbtype.U for probing for various Netdb_xxx_t types.
  */
 #define	HAS_GETHOST_PROTOS	/**/
+
+/* HAS_GETITIMER:
+ *	This symbol, if defined, indicates that the getitimer routine is
+ *	available to return interval timers.
+ */
+/*#define HAS_GETITIMER		/**/
 
 /* HAS_GETMNT:
  *	This symbol, if defined, indicates that the getmnt routine is
@@ -1762,6 +1793,12 @@
  */
 /*#define HAS_MSG		/**/
 
+/* HAS_STRUCT_MSGHDR:
+ *	This symbol, if defined, indicates that the struct msghdr
+ *	is supported.
+ */
+/*#define HAS_STRUCT_MSGHDR	/ **/
+
 /* HAS_OFF64_T:
  *	This symbol will be defined if the C compiler supports off64_t.
  */
@@ -1840,6 +1877,12 @@
  */
 /*#define HAS_SEM		/**/
 
+/* HAS_SENDMSG:
+ *	This symbol, if defined, indicates that the sendmsg routine is
+ *	available to send structured socket messages.
+ */
+/*#define HAS_SENDMSG		/**/
+
 /* HAS_SETGRENT:
  *	This symbol, if defined, indicates that the setgrent routine is
  *	available for initializing sequential access of the group database.
@@ -1858,6 +1901,12 @@
  *	available.
  */
 #define HAS_SETHOSTENT		/**/
+
+/* HAS_SETITIMER:
+ *	This symbol, if defined, indicates that the setitimer routine is
+ *	available to set interval timers.
+ */
+/*#define HAS_SETITIMER		/**/
 
 /* HAS_SETNETENT:
  *	This symbol, if defined, indicates that the setnetent() routine is
@@ -2189,6 +2238,12 @@
  */
 #define HAS_TIMES		/**/
 
+/* HAS_UALARM:
+ *	This symbol, if defined, indicates that the ualarm routine is
+ *	available to do alarms with microsecond granularity.
+ */
+/*#define HAS_UALARM		/**/
+
 /* HAS_UNION_SEMUN:
  *	This symbol, if defined, indicates that the union semun is
  *	defined by including <sys/sem.h>.  If not, the user code
@@ -2243,6 +2298,12 @@
  */
 #define HAS_VPRINTF	/**/
 /*#define USE_CHAR_VSPRINTF 	/**/
+
+/* HAS_WRITEV:
+ *	This symbol, if defined, indicates that the writev routine is
+ *	available to do scatter writes.
+ */
+/*#define HAS_WRITEV		/**/
 
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
@@ -3261,5 +3322,11 @@
  *	available to test whether a socket is at the out-of-band mark.
  */
 /*#define HAS_SOCKATMARK		/ **/
+
+/* U32_ALIGNMENT_REQUIRED:
+ *	This symbol, if defined, indicates that you must access
+ *	character data through U32-aligned pointers.
+ */
+#define U32_ALIGNMENT_REQUIRED	/**/
 
 #endif

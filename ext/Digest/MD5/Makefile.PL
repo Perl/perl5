@@ -5,10 +5,9 @@ use ExtUtils::MakeMaker;
 
 my @extra;
 @extra = (DEFINE => "-DU32_ALIGNMENT_REQUIRED")
-    if $Config{'byteorder'} ne '1234' ||
-       $Config{'byteorder'} ne '4321' ||
+    if !($Config{'byteorder'} eq '1234' || $Config{'byteorder'} eq '4321') ||
        $^O eq 'VMS' ||
-       $Config{u32_alignment_required};
+       $Config{d_u32align};
 
 WriteMakefile(
     'NAME'	   => 'Digest::MD5',

@@ -1516,6 +1516,7 @@ t/lib/lc-currency.t	See if Locale::Codes work
 t/lib/lc-language.t	See if Locale::Codes work
 t/lib/lc-uk.t	See if Locale::Codes work
 t/lib/md5-aaa.t	See if Digest::MD5 extension works
+t/lib/md5-align.t	See if Digest::MD5 extension works
 t/lib/md5-badf.t	See if Digest::MD5 extension works
 t/lib/md5-file.t	See if Digest::MD5 extension works
 t/lib/mimeb64.t			see whether MIME::Base64 works
