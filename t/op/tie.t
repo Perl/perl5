@@ -202,3 +202,12 @@ EXPECT
 tie FH, 'main';
 EXPECT
 
+########
+# correct unlocalisation of tied hashes (patch #16431)
+use Tie::Hash ;
+tie %tied, Tie::StdHash;
+{ local $hash{'foo'} } print "exist1\n" if exists $hash{'foo'};
+{ local $tied{'foo'} } print "exist2\n" if exists $tied{'foo'};
+{ local $ENV{'foo'}  } print "exist3\n" if exists $ENV{'foo'};
+EXPECT
+

@@ -544,6 +544,11 @@ errors so consider starting laundering now.
 
 =item *
 
+Tied hash interfaces are now required to have the EXISTS method
+(either own or inherited).
+
+=item *
+
 If tr/// is just counting characters, it doesn't attempt to
 modify its target.
 
@@ -1928,6 +1933,40 @@ Fixed numerous memory leaks, especially in eval "".
 
 =item *
 
+Localised tied variables no more leak memory
+
+    use Tie::Hash;
+    tie my %tied_hash => 'Tie::StdHash';
+
+    ...
+
+    # Used to leak memory every time local() was called,
+    # in a loop this added up.
+    local($tied_hash{Foo}) = 1;
+
+=item *
+
+Localised hash elements are correctly unlocalised to not to exist,
+if that's what they where.
+
+
+    use Tie::Hash;
+    tie my %tied_hash => 'Tie::StdHash';
+
+    ...
+
+    # Nothing has set the FOO element so far
+
+    { local $tied_hash{FOO} = 'Bar' }
+    
+    # Here the FOO element would have been C<undef>,
+    # but no more so. 
+
+As a side effect of this fix, tied hash interfaces B<must> define
+the EXISTS method.
+
+=item *
+
 mkdir() now ignores trailing slashes in the directory name,
 as mandated by POSIX.
 
@@ -2845,18 +2884,6 @@ some output may appear twice.
 =head2 XML::Parser not working
 
 Use XML::Parser 2.31 or later.
-
-=head2 Localising a Tied Variable Leaks Memory
-
-    use Tie::Hash;
-    tie my %tie_hash => 'Tie::StdHash';
-
-    ...
-
-    local($tie_hash{Foo}) = 1; # leaks
-
-Code like the above is known to leak memory every time the local()
-is executed.
 
 =head2 z/OS (OS/390)
 
