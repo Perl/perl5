@@ -3,11 +3,12 @@ package UnicodeCD;
 use strict;
 use warnings;
 
-our $VERSION = '0.1';
+our $VERSION = '0.2';
 
 require Exporter;
 
 our @ISA = qw(Exporter);
+
 our @EXPORT_OK = qw(charinfo
 		    charblock charscript
 		    charblocks charscripts
@@ -137,7 +138,7 @@ sub _getcode {
 sub han_charname {
     my $arg  = shift;
     my $code = _getcode($arg);
-    croak __PACKAGE__, "::charinfo: unknown code '$arg'"
+    croak __PACKAGE__, "::han_charname: unknown code '$arg'"
 	unless defined $code;
     croak __PACKAGE__, "::han_charname: outside CJK Unified Ideographs '$arg'"
         unless 0x3400  <= $code && $code <= 0x4DB5  
@@ -179,7 +180,7 @@ my %HangulConst = (
 sub hangul_charname {
     my $arg  = shift;
     my $code = _getcode($arg);
-    croak __PACKAGE__, "::charinfo: unknown code '$arg'"
+    croak __PACKAGE__, "::hangul_charname: unknown code '$arg'"
 	unless defined $code;
     croak __PACKAGE__, "::hangul_charname: outside Hangul Syllables '$arg'"
         unless $HangulConst{SBase} <= $code && $code <= $HangulConst{Final};
@@ -198,7 +199,7 @@ sub hangul_charname {
 sub hangul_decomp {
     my $arg  = shift;
     my $code = _getcode($arg);
-    croak __PACKAGE__, "::charinfo: unknown code '$arg'"
+    croak __PACKAGE__, "::hangul_decomp: unknown code '$arg'"
 	unless defined $code;
     croak __PACKAGE__, "::hangul_decomp: outside Hangul Syllables '$arg'"
         unless $HangulConst{SBase} <= $code && $code <= $HangulConst{Final};
@@ -240,6 +241,18 @@ my @CharinfoRanges = (
   [ 0x100000, 0x10FFFD, undef,   undef  ],
 );
 
+sub TIEHANDLE {
+    my $class = shift;
+    bless { @_ }, $class;
+}
+
+sub READLINE {
+    warn "READLINE @_\n";
+    my $self = shift;
+    my $fh   = $self->{FH};
+    "00 ". <$fh>;
+}
+
 sub charinfo {
     my $arg  = shift;
     my $code = _getcode($arg);
@@ -248,20 +261,22 @@ sub charinfo {
     my $hexk = sprintf("%04X", $code);
     my($rcode,$rname,$rdec);
     foreach my $range (@CharinfoRanges){
-      if($range->[0] <= $code && $code <= $range->[1]){
+      if ($range->[0] <= $code && $code <= $range->[1]) {
         $rcode = $hexk;
         $rname = $range->[2] ? $range->[2]->($code) : '';
         $rdec  = $range->[3] ? $range->[3]->($code) : '';
-        $hexk  = sprintf("%04X",$range->[0]); # replace by the first
+        $hexk  = sprintf("%04X", $range->[0]); # replace by the first
         last;
       }
     }
-    openunicode(\$UNICODEFH, "Unicode.sort"); # sorted
+    openunicode(\$UNICODEFH, "Unicode.txt");
     if (defined $UNICODEFH) {
 	use Search::Dict;
+	tie *UNICODEFH, __PACKAGE__, FH => *UNICODEFH unless tied *UNICODEFH;
 	if (look($UNICODEFH, "$hexk;") >= 0) {
 	    my $line = <$UNICODEFH>;
 	    chomp $line;
+	    $line =~ s/^0+(\w{4};)/$1/;
 	    my %prop;
 	    @prop{qw(
 		     code name category
@@ -555,6 +570,8 @@ sub _compexcl {
 sub compexcl {
     my $arg  = shift;
     my $code = _getcode($arg);
+    croak __PACKAGE__, "::compexcl: unknown code '$arg'"
+	unless defined $code;
 
     _compexcl() unless %COMPEXCL;
 
@@ -625,6 +642,8 @@ sub _casefold {
 sub casefold {
     my $arg  = shift;
     my $code = _getcode($arg);
+    croak __PACKAGE__, "::casefold: unknown code '$arg'"
+	unless defined $code;
 
     _casefold() unless %CASEFOLD;
 
@@ -700,6 +719,8 @@ sub _casespec {
 sub casespec {
     my $arg  = shift;
     my $code = _getcode($arg);
+    croak __PACKAGE__, "::casespec: unknown code '$arg'"
+	unless defined $code;
 
     _casespec() unless %CASESPEC;
 

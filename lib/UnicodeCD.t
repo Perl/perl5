@@ -3,7 +3,7 @@ use UnicodeCD;
 use Test;
 use strict;
 
-BEGIN { plan tests => 111 + 17 * 3};
+BEGIN { plan tests => 162 };
 
 use UnicodeCD 'charinfo';
 
@@ -93,7 +93,7 @@ ok($charinfo->{title},          '');
 ok($charinfo->{block},          'Hebrew');
 ok($charinfo->{script},         'Hebrew');
 
-# an open syllable in Hangul
+# An open syllable in Hangul.
 
 $charinfo = charinfo(0xAC00);
 
@@ -115,7 +115,7 @@ ok($charinfo->{title},          '');
 ok($charinfo->{block},          'Hangul Syllables');
 ok($charinfo->{script},         'Hangul');
 
-# a close syllable in Hangul
+# A closed syllable in Hangul.
 
 $charinfo = charinfo(0xAE00);
 
