@@ -122,13 +122,18 @@ saferealloc(Malloc_t where,MEM_SIZE size)
 	my_exit(1);
     }
 #endif /* HAS_64K_LIMIT */
+    if (!size) {
+	safefree(where);
+	return NULL;
+    }
+
     if (!where)
-	croak("Null realloc");
+	return safemalloc(size);
 #ifdef DEBUGGING
     if ((long)size < 0)
 	croak("panic: realloc");
 #endif
-    ptr = PerlMem_realloc(where,size?size:1);	/* realloc(0) is NASTY on our system */
+    ptr = PerlMem_realloc(where,size);
 
 #if !(defined(I286) || defined(atarist))
     DEBUG_m( {

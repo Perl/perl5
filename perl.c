@@ -604,10 +604,7 @@ CPerlObj::perl_atexit(void (*fn) (CPerlObj*,void *), void *ptr)
 perl_atexit(void (*fn) (void *), void *ptr)
 #endif
 {
-    if(exitlist)
-	Renew(exitlist, exitlistlen+1, PerlExitListEntry);
-    else
-	New(999, exitlist, 1, PerlExitListEntry);
+    Renew(exitlist, exitlistlen+1, PerlExitListEntry);
     exitlist[exitlistlen].fn = fn;
     exitlist[exitlistlen].ptr = ptr;
     ++exitlistlen;
