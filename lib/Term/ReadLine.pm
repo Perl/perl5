@@ -199,7 +199,8 @@ sub readline {
   $str = $self->get_line;
   $str =~ s/^\s*\Q$prompt\E// if ($^O eq 'MacOS');
   utf8::upgrade($str)
-      if ${^UNICODE} & PERL_UNICODE_STDIN || defined ${^ENCODING};
+      if (${^UNICODE} & PERL_UNICODE_STDIN || defined ${^ENCODING}) &&
+         utf8::valid($str);
   print $out $rl_term_set[3]; 
   # bug in 5.000: chomping empty string creats length -1:
   chomp $str if defined $str;
@@ -289,7 +290,7 @@ sub Features { \%features }
 
 package Term::ReadLine;		# So late to allow the above code be defined?
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 my ($which) = exists $ENV{PERL_RL} ? split /\s+/, $ENV{PERL_RL} : undef;
 if ($which) {
