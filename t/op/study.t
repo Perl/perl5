@@ -1,6 +1,9 @@
 #!./perl
 
-# $RCSfile: study.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:30 $
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
 
 print "1..26\n";
 
@@ -68,32 +71,28 @@ if (/^$_$/) {print "ok 23\n";} else {print "not ok 23\n";}
 $* = 1;		# test 3 only tested the optimized version--this one is for real
 if ("ab\ncd\n" =~ /^cd/) {print "ok 24\n";} else {print "not ok 24\n";}
 
-# [ID 20010618.006] these two may loop
+# [ID 20010618.006] tests 25..26 may loop
 {
     use Config;
-    if ($Config{d_alarm}) {
-	local $SIG{ALRM} = sub { die "timeout\n" };
-	$_ = 'FGF';
-	study;
-	my $ok = eval { alarm(2); my $match = /G.F$/; alarm(0); !$match };
-	if ($ok && !$@) {
-	    print "ok 25\n";
-	} elsif ($@) {
-	    print "not ok 25\t# $@";
-	} else {
-	    print "not ok 25\t# should not match\n";
-	}
-	$ok = eval { alarm(2); my $match = /[F]F$/; alarm(0); !$match };
-	if ($ok && !$@) {
-	    print "ok 26\n";
-	} elsif ($@) {
-	    print "not ok 26\t# $@";
-	} else {
-	    print "not ok 26\t# should not match\n";
-	}
+    my $have_alarm = $Config{d_alarm};
+    local $SIG{ALRM} = sub { die "timeout\n" };
+
+    $_ = 'FGF';
+    study;
+    my $ok = $have_alarm
+	? eval { alarm(2); my $match = /G.F$/; alarm(0); !$match }
+	: eval { !/G.F$/ };
+    if ($ok && !$@) {
+	print "ok 25\n";
     } else {
-	for (25..26) {
-	    print "ok $_ # Skip: no alarm\n";
-        }
+	print "not ok 25\t# " . $@ || "should not match\n";
+    }
+    $ok = $have_alarm
+	? eval { alarm(2); my $match = /[F]F$/; alarm(0); !$match }
+	: eval { !/[F]F$/ };
+    if ($ok && !$@) {
+	print "ok 26\n";
+    } else {
+	print "not ok 26\t# " . $@ || "should not match\n";
     }
 }
