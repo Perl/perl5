@@ -160,7 +160,76 @@ PERLVAR(Imodglobal,	HV *)				/* per-interp module data */
 PERLVAR(Isys_intern,	struct interp_intern)		/* platform internals */
 #endif
 
+/* more statics moved here */
+PERLVAR(Imh,		HE)		/* from hv.c */
+PERLVARI(Igeneration,	int,	100)	/* from op.c */
+PERLVAR(IDBcv,		CV *)		/* from perl.c */
+PERLVAR(Iarchpat_auto,	char*)		/* from perl.c */
+PERLVAR(Isortcxix,	I32)		/* from pp_ctl.c */
+PERLVAR(Ilastgotoprobe,	OP*)		/* from pp_ctl.c */
+PERLVAR(Iregdummy,	regnode)	/* from regcomp.c */
+PERLVAR(Iregparse,	char*)		/* Input-scan pointer. */
+PERLVAR(Iregxend,	char*)		/* End of input for compile */
+PERLVAR(Iregcode,	regnode*)	/* Code-emit pointer; &regdummy = don't. */
+PERLVAR(Iregnaughty,	I32)		/* How bad is this pattern? */
+PERLVAR(Iregsawback,	I32)		/* Did we see \1, ...? */
+
+/* This guys appear both in regcomp.c and regexec.c, */
+PERLVAR(Iregprecomp,	char *)		/* uncompiled string. */
+PERLVAR(Iregnpar,	I32)		/* () count. */
+PERLVAR(Iregsize,	I32)		/* Code size. */
+PERLVAR(Iregflags,	U16)		/* are we folding, multilining? */
+
+PERLVAR(Iregseen,	U32)		/* from regcomp.c */
+PERLVAR(Iseen_zerolen,	I32)		/* from regcomp.c */
+PERLVAR(Irx,		regexp *)	/* from regcomp.c */
+PERLVAR(Iextralen,	I32)		/* from regcomp.c */
+#ifdef DEBUGGING
+PERLVAR(Icolorset,	int)		/* from regcomp.c */
+PERLVAR(Icolors[4],	char *)		/* from regcomp.c */
+#endif 
+
+PERLVAR(Ireginput,	char *)		/* String-input pointer. */
+PERLVAR(Iregbol,	char *)		/* Beginning of input, for ^ check. */
+PERLVAR(Iregeol,	char *)		/* End of input, for $ check. */
+PERLVAR(Iregstartp,	char **)	/* Pointer to startp array. */
+PERLVAR(Iregendp,	char **)	/* Ditto for endp. */
+PERLVAR(Ireglastparen,	U32 *)		/* Similarly for lastparen. */
+PERLVAR(Iregtill,	char *)		/* How far we are required to go. */
+PERLVAR(Iregprev,	char)		/* char before regbol, \n if none */
+
+PERLVAR(Ireg_start_tmp,	char **)	/* from regexec.c */
+PERLVAR(Ireg_start_tmpl,U32)		/* from regexec.c */
+PERLVAR(Iregdata,	struct reg_data *) /* from regexec.c renamed was data */
+PERLVAR(Ibostr,		char *)		/* from regexec.c */
+PERLVAR(Ireg_flags,	U32)		/* from regexec.c */
+PERLVAR(Ireg_eval_set,	I32)		/* from regexec.c */
+
+#ifdef DEBUGGING
+PERLVAR(Iregnarrate,	I32)		/* from regexec.c */
+PERLVAR(Iregprogram,	regnode *)	/* from regexec.c */
+PERLVARI(Iregindent,	int,	    0)	/* from regexec.c */
+#endif
+
+PERLVAR(Iregcc,		CURCUR *)	/* from regexec.c */
+PERLVARI(Iin_clean_objs,bool,	    FALSE)  /* from sv.c */
+PERLVARI(Iin_clean_all,	bool,	    FALSE)  /* from sv.c */
+
+PERLVAR(Ilinestart,	char *)		/* beg. of most recently read line */
+PERLVAR(Ipending_ident,	char)		/* pending identifier lookup */
+PERLVAR(Isublex_info,	SUBLEXINFO)	/* from toke.c */
+
 #ifdef USE_THREADS
 PERLVAR(Ithrsv,		SV *)		/* holds struct perl_thread for main thread */
 PERLVARI(Ithreadnum,	U32,	0)	/* incremented each thread creation */
 #endif /* USE_THREADS */
+
+#ifdef PERL_OBJECT
+PERLVARI(piMem,		IPerlMem*,  NULL)
+PERLVARI(piENV,		IPerlEnv*,  NULL)
+PERLVARI(piStdIO,	IPerlStdIO*, NULL)
+PERLVARI(piLIO,		IPerlLIO*,  NULL)
+PERLVARI(piDir,		IPerlDir*,  NULL)
+PERLVARI(piSock,	IPerlSock*, NULL)
+PERLVARI(piProc,	IPerlProc*, NULL)
+#endif

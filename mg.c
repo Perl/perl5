@@ -30,6 +30,11 @@
  * Use the "DESTRUCTOR" scope cleanup to reinstate magic.
  */
 
+#ifdef PERL_OBJECT
+
+#define VTBL            this->*vtbl
+
+#else
 struct magic_state {
     SV* mgs_sv;
     U32 mgs_flags;
@@ -37,8 +42,11 @@ struct magic_state {
 typedef struct magic_state MGS;
 
 static void restore_magic _((void *p));
+#define VTBL			*vtbl
 
-static void
+#endif
+
+STATIC void
 save_magic(MGS *mgs, SV *sv)
 {
     assert(SvMAGICAL(sv));
@@ -52,7 +60,7 @@ save_magic(MGS *mgs, SV *sv)
     SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
 }
 
-static void
+STATIC void
 restore_magic(void *p)
 {
     MGS* mgs = (MGS*)p;
@@ -76,11 +84,11 @@ mg_magical(SV *sv)
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	MGVTBL* vtbl = mg->mg_virtual;
 	if (vtbl) {
-	    if (vtbl->svt_get && !(mg->mg_flags & MGf_GSKIP))
+	    if ((vtbl->svt_get != NULL) && !(mg->mg_flags & MGf_GSKIP))
 		SvGMAGICAL_on(sv);
 	    if (vtbl->svt_set)
 		SvSMAGICAL_on(sv);
-	    if (!(SvFLAGS(sv) & (SVs_GMG|SVs_SMG)) || vtbl->svt_clear)
+	    if (!(SvFLAGS(sv) & (SVs_GMG|SVs_SMG)) || (vtbl->svt_clear != NULL))
 		SvRMAGICAL_on(sv);
 	}
     }
@@ -100,8 +108,8 @@ mg_get(SV *sv)
     mgp = &SvMAGIC(sv);
     while ((mg = *mgp) != 0) {
 	MGVTBL* vtbl = mg->mg_virtual;
-	if (!(mg->mg_flags & MGf_GSKIP) && vtbl && vtbl->svt_get) {
-	    (*vtbl->svt_get)(sv, mg);
+	if (!(mg->mg_flags & MGf_GSKIP) && vtbl && (vtbl->svt_get != NULL)) {
+	    (VTBL->svt_get)(sv, mg);
 	    /* Ignore this magic if it's been deleted */
 	    if ((mg == (mgp_valid ? *mgp : SvMAGIC(sv))) &&
 		  (mg->mg_flags & MGf_GSKIP))
@@ -137,8 +145,8 @@ mg_set(SV *sv)
 	    mg->mg_flags &= ~MGf_GSKIP;	/* setting requires another read */
 	    mgs.mgs_flags = 0;
 	}
-	if (vtbl && vtbl->svt_set)
-	    (*vtbl->svt_set)(sv, mg);
+	if (vtbl && (vtbl->svt_set != NULL))
+	    (VTBL->svt_set)(sv, mg);
     }
 
     LEAVE;
@@ -146,7 +154,7 @@ mg_set(SV *sv)
 }
 
 U32
-mg_len(SV *sv)
+mg_length(SV *sv)
 {
     MAGIC* mg;
     char *junk;
@@ -154,13 +162,13 @@ mg_len(SV *sv)
 
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	MGVTBL* vtbl = mg->mg_virtual;
-	if (vtbl && vtbl->svt_len) {
+	if (vtbl && (vtbl->svt_len != NULL)) {
 	    MGS mgs;
 
 	    ENTER;
 	    save_magic(&mgs, sv);
 	    /* omit MGf_GSKIP -- not changed here */
-	    len = (*vtbl->svt_len)(sv, mg);
+	    len = (VTBL->svt_len)(sv, mg);
 	    LEAVE;
 	    return len;
 	}
@@ -178,11 +186,11 @@ mg_size(SV *sv)
     
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	MGVTBL* vtbl = mg->mg_virtual;
-	if (vtbl && vtbl->svt_len) {
+	if (vtbl && (vtbl->svt_len != NULL)) {
 	    MGS mgs;
 	    ENTER;
 	    /* omit MGf_GSKIP -- not changed here */
-	    len = (*vtbl->svt_len)(sv, mg);
+	    len = (VTBL->svt_len)(sv, mg);
 	    LEAVE;
 	    return len;
 	}
@@ -214,8 +222,8 @@ mg_clear(SV *sv)
 	MGVTBL* vtbl = mg->mg_virtual;
 	/* omit GSKIP -- never set here */
 	
-	if (vtbl && vtbl->svt_clear)
-	    (*vtbl->svt_clear)(sv, mg);
+	if (vtbl && (vtbl->svt_clear != NULL))
+	    (VTBL->svt_clear)(sv, mg);
     }
 
     LEAVE;
@@ -255,8 +263,8 @@ mg_free(SV *sv)
     for (mg = SvMAGIC(sv); mg; mg = moremagic) {
 	MGVTBL* vtbl = mg->mg_virtual;
 	moremagic = mg->mg_moremagic;
-	if (vtbl && vtbl->svt_free)
-	    (*vtbl->svt_free)(sv, mg);
+	if (vtbl && (vtbl->svt_free != NULL))
+	    (VTBL->svt_free)(sv, mg);
 	if (mg->mg_ptr && mg->mg_type != 'g')
 	    if (mg->mg_len >= 0)
 		Safefree(mg->mg_ptr);
@@ -385,7 +393,17 @@ magic_get(SV *sv, MAGIC *mg)
 	    DWORD dwErr = GetLastError();
 	    sv_setnv(sv, (double)dwErr);
 	    if (dwErr)
+	    {
+#ifdef PERL_OBJECT
+		char *sMsg;
+		DWORD dwLen;
+		PerlProc_GetSysMsg(sMsg, dwLen, dwErr);
+		sv_setpvn(sv, sMsg, dwLen);
+		PerlProc_FreeBuf(sMsg);
+#else
 		win32_str_os_error(sv, dwErr);
+#endif
+	    }
 	    else
 		sv_setpv(sv, "");
 	    SetLastError(dwErr);
@@ -978,7 +996,7 @@ magic_setnkeys(SV *sv, MAGIC *mg)
 }          
 
 /* caller is responsible for stack switching/cleanup */
-static int
+STATIC int
 magic_methcall(MAGIC *mg, char *meth, I32 flags, int n, SV *val)
 {
     dSP;
@@ -1005,7 +1023,7 @@ magic_methcall(MAGIC *mg, char *meth, I32 flags, int n, SV *val)
     return perl_call_method(meth, flags);
 }
 
-static int
+STATIC int
 magic_methpack(SV *sv, MAGIC *mg, char *meth)
 {
     dSP;
@@ -1684,15 +1702,15 @@ magic_set(SV *sv, MAGIC *mg)
       (void)setresuid((Uid_t)uid, (Uid_t)-1, (Uid_t)-1);
 #else
 	if (uid == euid)		/* special case $< = $> */
-	    (void)setuid(uid);
+	    (void)PerlProc_setuid(uid);
 	else {
-	    uid = (I32)getuid();
+	    uid = (I32)PerlProc_getuid();
 	    croak("setruid() not implemented");
 	}
 #endif
 #endif
 #endif
-	uid = (I32)getuid();
+	uid = (I32)PerlProc_getuid();
 	tainting |= (uid && (euid != uid || egid != gid));
 	break;
     case '>':
@@ -1711,15 +1729,15 @@ magic_set(SV *sv, MAGIC *mg)
 	(void)setresuid((Uid_t)-1, (Uid_t)euid, (Uid_t)-1);
 #else
 	if (euid == uid)		/* special case $> = $< */
-	    setuid(euid);
+	    PerlProc_setuid(euid);
 	else {
-	    euid = (I32)geteuid();
+	    euid = (I32)PerlProc_geteuid();
 	    croak("seteuid() not implemented");
 	}
 #endif
 #endif
 #endif
-	euid = (I32)geteuid();
+	euid = (I32)PerlProc_geteuid();
 	tainting |= (uid && (euid != uid || egid != gid));
 	break;
     case '(':
@@ -1738,15 +1756,15 @@ magic_set(SV *sv, MAGIC *mg)
       (void)setresgid((Gid_t)gid, (Gid_t)-1, (Gid_t) 1);
 #else
 	if (gid == egid)			/* special case $( = $) */
-	    (void)setgid(gid);
+	    (void)PerlProc_setgid(gid);
 	else {
-	    gid = (I32)getgid();
+	    gid = (I32)PerlProc_getgid();
 	    croak("setrgid() not implemented");
 	}
 #endif
 #endif
 #endif
-	gid = (I32)getgid();
+	gid = (I32)PerlProc_getgid();
 	tainting |= (uid && (euid != uid || egid != gid));
 	break;
     case ')':
@@ -1788,15 +1806,15 @@ magic_set(SV *sv, MAGIC *mg)
 	(void)setresgid((Gid_t)-1, (Gid_t)egid, (Gid_t)-1);
 #else
 	if (egid == gid)			/* special case $) = $( */
-	    (void)setgid(egid);
+	    (void)PerlProc_setgid(egid);
 	else {
-	    egid = (I32)getegid();
+	    egid = (I32)PerlProc_getegid();
 	    croak("setegid() not implemented");
 	}
 #endif
 #endif
 #endif
-	egid = (I32)getegid();
+	egid = (I32)PerlProc_getegid();
 	tainting |= (uid && (euid != uid || egid != gid));
 	break;
     case ':':
@@ -1900,7 +1918,7 @@ whichsig(char *sig)
 
 static SV* sig_sv;
 
-static void
+STATIC void
 unwind_handler_stack(void *p)
 {
     dTHR;

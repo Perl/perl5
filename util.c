@@ -844,13 +844,13 @@ char *
 mem_collxfrm(const char *s, STRLEN len, STRLEN *xlen)
 {
     char *xbuf;
-    STRLEN xalloc, xin, xout;
+    STRLEN xAlloc, xin, xout; /* xalloc is a reserved word in VC */
 
     /* the first sizeof(collationix) bytes are used by sv_collxfrm(). */
     /* the +1 is for the terminating NUL. */
 
-    xalloc = sizeof(collation_ix) + collxfrm_base + (collxfrm_mult * len) + 1;
-    New(171, xbuf, xalloc, char);
+    xAlloc = sizeof(collation_ix) + collxfrm_base + (collxfrm_mult * len) + 1;
+    New(171, xbuf, xAlloc, char);
     if (! xbuf)
 	goto bad;
 
@@ -860,13 +860,13 @@ mem_collxfrm(const char *s, STRLEN len, STRLEN *xlen)
 	SSize_t xused;
 
 	for (;;) {
-	    xused = strxfrm(xbuf + xout, s + xin, xalloc - xout);
+	    xused = strxfrm(xbuf + xout, s + xin, xAlloc - xout);
 	    if (xused == -1)
 		goto bad;
-	    if (xused < xalloc - xout)
+	    if (xused < xAlloc - xout)
 		break;
-	    xalloc = (2 * xalloc) + 1;
-	    Renew(xbuf, xalloc, char);
+	    xAlloc = (2 * xAlloc) + 1;
+	    Renew(xbuf, xAlloc, char);
 	    if (! xbuf)
 		goto bad;
 	}
@@ -1178,7 +1178,7 @@ savepvn(char *sv, register I32 len)
 
 /* the SV for form() and mess() is not kept in an arena */
 
-static SV *
+STATIC SV *
 mess_alloc(void)
 {
     SV *sv;
@@ -1827,6 +1827,8 @@ my_popen(char *cmd, char *mode)
     if (pid == 0) {
 	GV* tmpgv;
 
+#undef THIS
+#undef THAT
 #define THIS that
 #define THAT This
 	PerlLIO_close(p[THAT]);
@@ -2139,7 +2141,7 @@ wait4pid(int pid, int *statusp, int flags)
 	if (flags)
 	    croak("Can't do waitpid with flags");
 	else {
-	    while ((result = wait(statusp)) != pid && pid > 0 && result >= 0)
+	    while ((result = PerlProc_wait(statusp)) != pid && pid > 0 && result >= 0)
 		pidgone(result,*statusp);
 	    if (result < 0)
 		*statusp = -1;
@@ -2833,4 +2835,16 @@ char **
 get_op_descs(void)
 {
  return op_desc;
+}
+
+char *
+get_no_modify(void)
+{
+ return (char*)no_modify;
+}
+
+U32 *
+get_opargs(void)
+{
+ return opargs;
 }

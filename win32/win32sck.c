@@ -13,10 +13,22 @@
 #define WIN32_LEAN_AND_MEAN
 #ifdef __GNUC__
 #define Win32_Winsock
+#  ifdef __cplusplus
+#undef __attribute__		/* seems broken in 2.8.0 */
+#define __attribute__(p)
+#  endif
 #endif
 #include <windows.h>
 #include "EXTERN.h"
 #include "perl.h"
+
+#if defined(PERL_OBJECT)
+#define NO_XSLOCKS
+extern CPerlObj* pPerl;
+#include "XSUB.h"
+#endif
+
+#include "Win32iop.h"
 #include <sys/socket.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -25,7 +37,7 @@
 
 /* thanks to Beverly Brown	(beverly@datacube.com) */
 #ifdef USE_SOCKETS_AS_HANDLES
-#	define OPEN_SOCKET(x)	_open_osfhandle(x,O_RDWR|O_BINARY)
+#	define OPEN_SOCKET(x)	win32_open_osfhandle(x,O_RDWR|O_BINARY)
 #	define TO_SOCKET(x)	_get_osfhandle(x)
 #else
 #	define OPEN_SOCKET(x)	(x)
@@ -638,7 +650,7 @@ win32_savecopyservent(struct servent*d, struct servent*s, const char *proto)
 	d->s_proto = s->s_proto;
     else
 #endif
-	if (proto && strlen(proto))
+    if (proto && strlen(proto))
 	d->s_proto = (char *)proto;
     else
 	d->s_proto = "tcp";

@@ -207,8 +207,11 @@
 #define freq			Perl_freq
 #define ge_amg			Perl_ge_amg
 #define gen_constant_list	Perl_gen_constant_list
+#define get_no_modify		Perl_get_no_modify
 #define get_op_descs		Perl_get_op_descs
 #define get_op_names		Perl_get_op_names
+#define get_opargs		Perl_get_opargs
+#define get_specialsv_list	Perl_get_specialsv_list
 #define gp_free			Perl_gp_free
 #define gp_ref			Perl_gp_ref
 #define gt_amg			Perl_gt_amg
@@ -332,7 +335,7 @@
 #define mg_find			Perl_mg_find
 #define mg_free			Perl_mg_free
 #define mg_get			Perl_mg_get
-#define mg_len			Perl_mg_len
+#define mg_length		Perl_mg_length
 #define mg_magical		Perl_mg_magical
 #define mg_set			Perl_mg_set
 #define mg_size			Perl_mg_size

@@ -9,9 +9,22 @@
 #ifndef  _INC_WIN32_PERL5
 #define  _INC_WIN32_PERL5
 
+#ifdef PERL_OBJECT
+#  define WIN32IO_IS_STDIO		/* don't pull in custom stdio layer */
+#  ifdef PERL_GLOBAL_STRUCT
+#    error PERL_GLOBAL_STRUCT cannot be defined with PERL_OBJECT
+#  endif
+#  define win32_get_stdlib PerlEnv_lib_path
+#  define win32_get_sitelib PerlEnv_sitelib_path
+#endif
+
 #ifdef __GNUC__
 typedef long long __int64;
 #define Win32_Winsock
+#  ifdef __cplusplus
+#undef __attribute__		/* seems broken in 2.8.0 */
+#define __attribute__(p)
+#  endif
 /* GCC does not do __declspec() - render it a nop 
  * and turn on options to avoid importing data 
  */
@@ -29,10 +42,14 @@ typedef long long __int64;
  * otherwise import it.
  */
 
+#if defined(PERL_OBJECT)
+#define DllExport
+#else
 #if defined(PERLDLL) || defined(WIN95FIX)
 #define DllExport __declspec(dllexport)
 #else 
 #define DllExport __declspec(dllimport)
+#endif
 #endif
 
 #define  WIN32_LEAN_AND_MEAN
@@ -120,6 +137,11 @@ struct tms {
 
 #define USE_RTL_WAIT	/* Borland has a working wait() */
 
+/* Borland is picky about a bare member function name used as its ptr */
+#ifdef PERL_OBJECT
+#define FUNC_NAME_TO_PTR(name)	&(name)
+#endif
+
 #endif
 
 #ifdef _MSC_VER			/* Microsoft Visual C++ */
@@ -137,6 +159,13 @@ typedef long		gid_t;
 #define _environ	environ
 #define flushall	_flushall
 #define fcloseall	_fcloseall
+
+#ifndef _O_NOINHERIT
+#  define _O_NOINHERIT	0x0080
+#  ifndef _NO_OLDNAMES
+#    define O_NOINHERIT	_O_NOINHERIT
+#  endif
+#endif
 
 #ifndef _O_NOINHERIT
 #  define _O_NOINHERIT	0x0080
@@ -183,7 +212,8 @@ extern int		do_aspawn(void *really, void **mark, void **sp);
 extern int		do_spawn(char *cmd);
 extern int		do_spawn_nowait(char *cmd);
 extern char		do_exec(char *cmd);
-extern char *		win32_perllib_path(char *sfx,...);
+extern char *		win32_get_stdlib(char *pl);
+extern char *		win32_get_sitelib(char *pl);
 extern int		IsWin95(void);
 extern int		IsWinNT(void);
 

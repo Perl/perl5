@@ -2,6 +2,7 @@
 use Config;
 use File::Compare qw(compare);
 use File::Copy qw(copy);
+my $OBJ   = 1 if $Config{'ccflags'} =~ /PERL_OBJECT/i;
 my $name = $0;
 $name =~ s#^(.*)\.PL$#../$1.SH#;
 open(SH,"<$name") || die "Cannot open $name:$!";
@@ -36,21 +37,21 @@ while (<SH>)
   munge();
   s/\\\$/\$/g;
   s#/[ *\*]*\*/#/**/#;
-  if (/^\s*#define\s+ARCHLIB_EXP/)
-   {
-     $_ = "#define ARCHLIB_EXP (win32_perllib_path(ARCHNAME,NULL))\t/**/\n";
-   }
+  # if (/^\s*#define\s+ARCHLIB_EXP/)
+  #  {
+  #    $_ = "#define ARCHLIB_EXP (win32_perllib_path(ARCHNAME,NULL))\t/**/\n";
+  #  }
   if (/^\s*#define\s+PRIVLIB_EXP/)
    {
-     $_ = "#define PRIVLIB_EXP (win32_perllib_path(NULL))\t/**/\n"
+     $_ = "#define PRIVLIB_EXP (win32_get_stdlib(patchlevel))\t/**/\n"
    }
-  if (/^\s*#define\s+SITEARCH_EXP/)
-   {
-     $_ = "#define SITEARCH_EXP (win32_perllib_path(\"site\",ARCHNAME,NULL))\t/**/\n";
-   }
+  # if (/^\s*#define\s+SITEARCH_EXP/)
+  #  {
+  #    $_ = "#define SITEARCH_EXP (win32_perllib_path(\"site\",ARCHNAME,NULL))\t/**/\n";
+  #  }
   if (/^\s*#define\s+SITELIB_EXP/)
    {
-     $_ = "#define SITELIB_EXP (win32_perllib_path(\"site\",NULL))\t/**/\n";
+     $_ = "#define SITELIB_EXP (win32_get_sitelib(patchlevel))\t/**/\n";
    }
   print H;
  }
@@ -64,7 +65,7 @@ chmod(0666,"../lib/CORE/config.h");
 copy("$file.new","../lib/CORE/config.h") || die "Cannot copy:$!";
 chmod(0444,"../lib/CORE/config.h");
 
-if (compare("$file.new",$file))
+if (!$OBJ && compare("$file.new",$file))
  {
   warn "$file has changed\n";
   chmod(0666,$file);
@@ -72,6 +73,11 @@ if (compare("$file.new",$file))
   rename("$file.new",$file);
   #chmod(0444,$file);
   exit(1);
+ }
+else
+ {
+  unlink ("$file.new");
+  exit(0);
  }
 
 sub Config

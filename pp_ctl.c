@@ -25,6 +25,10 @@
 
 #define DOCATCH(o) ((CATCH_GET == TRUE) ? docatch(o) : (o))
 
+#ifdef PERL_OBJECT
+#define CALLOP this->*op
+#else
+#define CALLOP *op
 static OP *docatch _((OP *o));
 static OP *dofindlabel _((OP *o, char *label, OP **opstack, OP **oplimit));
 static void doparseform _((SV *sv));
@@ -36,8 +40,7 @@ static void save_lines _((AV *array, SV *sv));
 static I32 sortcv _((SV *a, SV *b));
 static void qsortsv _((SV **array, size_t num_elts, I32 (*fun)(SV *a, SV *b)));
 static OP *doeval _((int gimme, OP** startop));
-
-static I32 sortcxix;
+#endif
 
 PP(pp_wantarray)
 {
@@ -244,7 +247,7 @@ rxres_free(void **rsp)
 PP(pp_formline)
 {
     djSP; dMARK; dORIGMARK;
-    register SV *form = *++MARK;
+    register SV *tmpForm = *++MARK;
     register U16 *fpc;
     register char *t;
     register char *f;
@@ -263,17 +266,17 @@ PP(pp_formline)
     bool gotsome;
     STRLEN len;
 
-    if (!SvMAGICAL(form) || !SvCOMPILED(form)) {
-	SvREADONLY_off(form);
-	doparseform(form);
+    if (!SvMAGICAL(tmpForm) || !SvCOMPILED(tmpForm)) {
+	SvREADONLY_off(tmpForm);
+	doparseform(tmpForm);
     }
 
     SvPV_force(formtarget, len);
-    t = SvGROW(formtarget, len + SvCUR(form) + 1);  /* XXX SvCUR bad */
+    t = SvGROW(formtarget, len + SvCUR(tmpForm) + 1);  /* XXX SvCUR bad */
     t += len;
-    f = SvPV(form, len);
+    f = SvPV(tmpForm, len);
     /* need to jump to the next word */
-    s = f + len + WORD_ALIGN - SvCUR(form) % WORD_ALIGN;
+    s = f + len + WORD_ALIGN - SvCUR(tmpForm) % WORD_ALIGN;
 
     fpc = (U16*)s;
 
@@ -448,7 +451,7 @@ PP(pp_formline)
 		}
 		SvCUR_set(formtarget, t - SvPVX(formtarget));
 		sv_catpvn(formtarget, item, itemsize);
-		SvGROW(formtarget, SvCUR(formtarget) + SvCUR(form) + 1);
+		SvGROW(formtarget, SvCUR(formtarget) + SvCUR(tmpForm) + 1);
 		t = SvPVX(formtarget) + SvCUR(formtarget);
 	    }
 	    break;
@@ -638,7 +641,6 @@ PP(pp_mapwhile)
     }
 }
 
-
 PP(pp_sort)
 {
     djSP; dMARK; dORIGMARK;
@@ -738,8 +740,7 @@ PP(pp_sort)
 		    (void)SvREFCNT_inc(cv); /* in preparation for POPSUB */
 	    }
 	    sortcxix = cxstack_ix;
-
-	    qsortsv(myorigmark+1, max, sortcv);
+	    qsortsv((myorigmark+1), max, FUNC_NAME_TO_PTR(sortcv));
 
 	    POPBLOCK(cx,curpm);
 	    POPSTACK();
@@ -750,7 +751,9 @@ PP(pp_sort)
 	if (max > 1) {
 	    MEXTEND(SP, 20);	/* Can't afford stack realloc on signal. */
 	    qsortsv(ORIGMARK+1, max,
-		  (op->op_private & OPpLOCALE) ? sv_cmp_locale : sv_cmp);
+		    (op->op_private & OPpLOCALE)
+		    ? FUNC_NAME_TO_PTR(sv_cmp_locale)
+		    : FUNC_NAME_TO_PTR(sv_cmp));
 	}
     }
     LEAVE;
@@ -857,7 +860,7 @@ PP(pp_flop)
 
 /* Control. */
 
-static I32
+STATIC I32
 dopoptolabel(char *label)
 {
     dTHR;
@@ -928,7 +931,7 @@ block_gimme(void)
     }
 }
 
-static I32
+STATIC I32
 dopoptosub(I32 startingblock)
 {
     dTHR;
@@ -948,7 +951,7 @@ dopoptosub(I32 startingblock)
     return i;
 }
 
-static I32
+STATIC I32
 dopoptoeval(I32 startingblock)
 {
     dTHR;
@@ -967,7 +970,7 @@ dopoptoeval(I32 startingblock)
     return i;
 }
 
-static I32
+STATIC I32
 dopoptoloop(I32 startingblock)
 {
     dTHR;
@@ -1241,7 +1244,7 @@ PP(pp_caller)
     RETURN;
 }
 
-static I32
+STATIC I32
 sortcv(SV *a, SV *b)
 {
     dTHR;
@@ -1252,7 +1255,7 @@ sortcv(SV *a, SV *b)
     GvSV(secondgv) = b;
     stack_sp = stack_base;
     op = sortcop;
-    runops();
+    CALLRUNOPS();
     if (stack_sp != stack_base + 1)
 	croak("Sort subroutine didn't return single value");
     if (!SvNIOKp(*stack_sp))
@@ -1640,9 +1643,7 @@ PP(pp_redo)
     return cx->blk_loop.redo_op;
 }
 
-static OP* lastgotoprobe;
-
-static OP *
+STATIC OP *
 dofindlabel(OP *o, char *label, OP **opstack, OP **oplimit)
 {
     OP *kid;
@@ -1772,7 +1773,7 @@ PP(pp_goto)
 		}
 		else {
 		    stack_sp--;		/* There is no cv arg. */
-		    (void)(*CvXSUB(cv))(cv);
+		    (void)(*CvXSUB(cv))(cv _THIS);
 		}
 		LEAVE;
 		return pop_return();
@@ -1992,7 +1993,7 @@ PP(pp_goto)
 		if (op->op_type == OP_ENTERITER)
 		    DIE("Can't \"goto\" into the middle of a foreach loop",
 			label);
-		(*op->op_ppaddr)(ARGS);
+		(CALLOP->op_ppaddr)(ARGS);
 	    }
 	    op = oldop;
 	}
@@ -2080,7 +2081,7 @@ PP(pp_cswitch)
 
 /* Eval. */
 
-static void
+STATIC void
 save_lines(AV *array, SV *sv)
 {
     register char *s = SvPVX(sv);
@@ -2104,7 +2105,7 @@ save_lines(AV *array, SV *sv)
     }
 }
 
-static OP *
+STATIC OP *
 docatch(OP *o)
 {
     dTHR;
@@ -2133,7 +2134,7 @@ docatch(OP *o)
 	restartop = 0;
 	/* FALL THROUGH */
     case 0:
-        runops();
+        CALLRUNOPS();
 	break;
     }
     JMPENV_POP;
@@ -2203,7 +2204,7 @@ sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
 }
 
 /* With USE_THREADS, eval_owner must be held on entry to doeval */
-static OP *
+STATIC OP *
 doeval(int gimme, OP** startop)
 {
     dSP;
@@ -2754,7 +2755,7 @@ PP(pp_leavetry)
     RETURN;
 }
 
-static void
+STATIC void
 doparseform(SV *sv)
 {
     STRLEN len;
@@ -3038,8 +3039,13 @@ struct partition_stack_entry {
 
 /* Return < 0 == 0 or > 0 as the value of elt1 is < elt2, == elt2, > elt2
 */
+#ifdef PERL_OBJECT
+#define qsort_cmp(elt1, elt2) \
+   ((this->*compare)(array[elt1], array[elt2]))
+#else
 #define qsort_cmp(elt1, elt2) \
    ((*compare)(array[elt1], array[elt2]))
+#endif
 
 #ifdef QSORT_ORDER_GUESS
 #define QSORT_NOTICE_SWAP swapped++;
@@ -3120,10 +3126,14 @@ doqsort_all_asserts(
 /* ****************************************************************** qsort */
 
 void
+#ifdef PERL_OBJECT
+qsortsv(SV ** array, size_t num_elts, SVCOMPARE compare)
+#else
 qsortsv(
    SV ** array,
    size_t num_elts,
    I32 (*compare)(SV *a, SV *b))
+#endif
 {
    register SV * temp;
 

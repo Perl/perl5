@@ -1,7 +1,11 @@
 #define ST(off) stack_base[ax + (off)]
 
 #ifdef CAN_PROTOTYPE
+#ifdef PERL_OBJECT
+#define XS(name) void name(CV* cv, CPerlObj* pPerl)
+#else
 #define XS(name) void name(CV* cv)
+#endif
 #else
 #define XS(name) void name(cv) CV* cv;
 #endif
@@ -63,3 +67,16 @@
 #else
 # define XS_VERSION_BOOTCHECK
 #endif
+
+#ifdef PERL_OBJECT
+#include "ObjXSub.h"
+#ifndef NO_XSLOCKS
+#ifdef WIN32
+#include "XSLock.h"
+#endif  /* WIN32 */
+#endif  /* NO_XSLOCKS */
+#else
+#ifdef PERL_CAPI
+#include "PerlCAPI.h"
+#endif
+#endif	/* PERL_OBJECT */

@@ -5,6 +5,13 @@
 #define PERLIO_NOT_STDIO 1
 #include "perl.h"
 #include "XSUB.h"
+#ifdef PERL_OBJECT	/* XXX _very_ temporary hacks */
+#  undef signal
+#  undef open
+#  define open PerlLIO_open3
+#  undef TAINT_PROPER
+#  define TAINT_PROPER(a)
+#endif
 #include <ctype.h>
 #ifdef I_DIRENT    /* XXX maybe better to just rely on perl.h? */
 #include <dirent.h>

@@ -40,6 +40,7 @@ safemalloc(MEM_SIZE size)
 	exit(1);
     }
     /*NOTREACHED*/
+    return 0;
 }
 
 /* paranoid version of realloc */
@@ -64,6 +65,7 @@ saferealloc(Malloc_t where, MEM_SIZE size)
 	exit(1);
     }
     /*NOTREACHED*/
+    return 0;
 }
 
 /* safe version of free */

@@ -15,7 +15,9 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+#ifndef PERL_OBJECT
 static void dump(char *pat, ...);
+#endif /* PERL_OBJECT */
 
 void
 dump_all(void)
@@ -399,7 +401,7 @@ dump_pm(PMOP *pm)
 }
 
 
-static void
+STATIC void
 dump(char *pat,...)
 {
 #ifdef DEBUGGING
