@@ -1,4 +1,4 @@
-/* $Header: stab.c,v 4.0 91/03/20 01:39:41 lwall Locked $
+/* $RCSfile: stab.c,v $$Revision: 4.0.1.1 $$Date: 91/04/12 09:10:24 $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	stab.c,v $
+ * Revision 4.0.1.1  91/04/12  09:10:24  lwall
+ * patch1: Configure now differentiates getgroups() type from getgid() type
+ * patch1: you may now use "die" and "caller" in a signal handler
+ * 
  * Revision 4.0  91/03/20  01:39:41  lwall
  * 4.0 baseline.
  * 
@@ -184,7 +188,7 @@ STR *str;
 #define NGROUPS 32
 #endif
 	{
-	    GIDTYPE gary[NGROUPS];
+	    GROUPSTYPE gary[NGROUPS];
 
 	    i = getgroups(NGROUPS,gary);
 	    while (--i >= 0) {
@@ -579,18 +583,15 @@ sighandler(sig)
 int sig;
 {
     STAB *stab;
-    ARRAY *savearray;
     STR *str;
-    CMD *oldcurcmd = curcmd;
     int oldsave = savestack->ary_fill;
-    ARRAY *oldstack = stack;
-    CSV *oldcurcsv = curcsv;
+    int oldtmps_base = tmps_base;
+    register CSV *csv;
     SUBR *sub;
 
 #ifdef OS2		/* or anybody else who requires SIG_ACK */
     signal(sig, SIG_ACK);
 #endif
-    curcsv = Nullcsv;
     stab = stabent(
 	str_get(hfetch(stab_hash(sigstab),sig_name[sig],strlen(sig_name[sig]),
 	  TRUE)), TRUE);
@@ -610,10 +611,23 @@ int sig;
 		sig_name[sig], stab_name(stab) );
 	return;
     }
-    savearray = stab_xarray(defstab);
-    stab_xarray(defstab) = stack = anew(defstab);
+    saveaptr(&stack);
+    str = Str_new(15, sizeof(CSV));
+    str->str_state = SS_SCSV;
+    (void)apush(savestack,str);
+    csv = (CSV*)str->str_ptr;
+    csv->sub = sub;
+    csv->stab = stab;
+    csv->curcsv = curcsv;
+    csv->curcmd = curcmd;
+    csv->depth = sub->depth;
+    csv->wantarray = G_SCALAR;
+    csv->hasargs = TRUE;
+    csv->savearray = stab_xarray(defstab);
+    csv->argarray = stab_xarray(defstab) = stack = anew(defstab);
     stack->ary_flags = 0;
-    str = Str_new(71,0);
+    curcsv = csv;
+    str = str_mortal(&str_undef);
     str_set(str,sig_name[sig]);
     (void)apush(stab_xarray(defstab),str);
     sub->depth++;
@@ -623,18 +637,11 @@ int sig;
 	savelist(sub->tosave->ary_array,sub->tosave->ary_fill);
     }
 
-    (void)cmd_exec(sub->cmd,G_SCALAR,1);		/* so do it already */
+    tmps_base = tmps_max;		/* protect our mortal string */
+    (void)cmd_exec(sub->cmd,G_SCALAR,0);		/* so do it already */
+    tmps_base = oldtmps_base;
 
-    sub->depth--;	/* assuming no longjumps out of here */
-    str_free(stack->ary_array[0]);	/* free the one real string */
-    stack->ary_array[0] = Nullstr;
-    afree(stab_xarray(defstab));  /* put back old $_[] */
-    stab_xarray(defstab) = savearray;
-    stack = oldstack;
-    if (savestack->ary_fill > oldsave)
-	restorelist(oldsave);
-    curcmd = oldcurcmd;
-    curcsv = oldcurcsv;
+    restorelist(oldsave);		/* put everything back */
 }
 
 STAB *

@@ -1,4 +1,4 @@
-/* $Header: util.c,v 4.0 91/03/20 01:56:39 lwall Locked $
+/* $RCSfile: util.c,v $$Revision: 4.0.1.1 $$Date: 91/04/12 09:19:25 $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	util.c,v $
+ * Revision 4.0.1.1  91/04/12  09:19:25  lwall
+ * patch1: random cleanup in cpp namespace
+ * 
  * Revision 4.0  91/03/20  01:56:39  lwall
  * 4.0 baseline.
  * 
@@ -754,7 +757,7 @@ int newlen;
     }
 }
 
-#ifndef VARARGS
+#ifndef I_VARARGS
 /*VARARGS1*/
 mess(pat,a1,a2,a3,a4)
 char *pat;
@@ -955,10 +958,6 @@ va_dcl
 }
 #endif
 
-#ifndef __STDC__
-extern char **environ;
-#endif
-
 void
 setenv(nam,val)
 char *nam, *val;
@@ -1059,7 +1058,7 @@ register int len;
 #endif
 #endif
 
-#ifdef VARARGS
+#ifdef I_VARARGS
 #ifndef HAS_VPRINTF
 
 #ifdef CHARVSPRINTF
@@ -1074,6 +1073,9 @@ char *dest, *pat, *args;
 
     fakebuf._ptr = dest;
     fakebuf._cnt = 32767;
+#ifndef _IOSTRG
+#define _IOSTRG 0
+#endif
     fakebuf._flag = _IOWRT|_IOSTRG;
     _doprnt(pat, args, &fakebuf);	/* what a kludge */
     (void)putc('\0', &fakebuf);
@@ -1095,7 +1097,7 @@ char *pat, *args;
 }
 #endif
 #endif /* HAS_VPRINTF */
-#endif /* VARARGS */
+#endif /* I_VARARGS */
 
 #ifdef MYSWAP
 #if BYTEORDER != 0x4321

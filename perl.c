@@ -1,4 +1,4 @@
-char rcsid[] = "$Header: perl.c,v 4.0 91/03/20 01:37:44 lwall Locked $\nPatch level: ###\n";
+char rcsid[] = "$RCSfile: perl.c,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:49:05 $\nPatch level: ###\n";
 /*
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@ char rcsid[] = "$Header: perl.c,v 4.0 91/03/20 01:37:44 lwall Locked $\nPatch le
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perl.c,v $
+ * Revision 4.0.1.1  91/04/11  17:49:05  lwall
+ * patch1: fixed undefined environ problem
+ * 
  * Revision 4.0  91/03/20  01:37:44  lwall
  * 4.0 baseline.
  * 
@@ -34,9 +37,6 @@ char rcsid[] = "$Header: perl.c,v 4.0 91/03/20 01:37:44 lwall Locked $\nPatch le
 
 static char* moreswitches();
 static char* cddir;
-#ifndef __STDC__
-extern char **environ;
-#endif /* ! __STDC__ */
 static bool minus_c;
 static char patchlevel[6];
 static char *nrs = "\n";

@@ -7,9 +7,12 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $Header: regexec.c,v 4.0 91/03/20 01:39:16 lwall Locked $
+/* $RCSfile: regexec.c,v $$Revision: 4.0.1.1 $$Date: 91/04/12 09:07:39 $
  *
  * $Log:	regexec.c,v $
+ * Revision 4.0.1.1  91/04/12  09:07:39  lwall
+ * patch1: regexec only allocated space for 9 subexpresssions
+ * 
  * Revision 4.0  91/03/20  01:39:16  lwall
  * 4.0 baseline.
  * 
@@ -80,8 +83,9 @@ static char **regendp;		/* Ditto for endp. */
 static char *reglastparen;	/* Similarly for lastparen. */
 static char *regtill;
 
-static char *regmystartp[10];	/* For remembering backreferences. */
-static char *regmyendp[10];
+static int regmyp_size = 0;
+static char **regmystartp = Null(char**);
+static char **regmyendp   = Null(char**);
 
 /*
  * Forwards.
@@ -188,6 +192,24 @@ int safebase;	/* no need to remember string in subbase */
 
 	/* see how far we have to get to not match where we matched before */
 	regtill = string+minend;
+
+	/* Allocate our backreference arrays */
+	if ( regmyp_size < prog->nparens + 1 ) {
+	    /* Allocate or enlarge the arrays */
+	    regmyp_size = prog->nparens + 1;
+	    if ( regmyp_size < 10 ) regmyp_size = 10;	/* minimum */
+	    if ( regmystartp ) {
+		/* reallocate larger */
+		Renew(regmystartp,regmyp_size,char*);
+		Renew(regmyendp,  regmyp_size,char*);
+	    }
+	    else {
+		/* Initial allocation */
+		New(1102,regmystartp,regmyp_size,char*);
+		New(1102,regmyendp,  regmyp_size,char*);
+	    }
+	
+	}
 
 	/* Simplest case:  anchored match need be tried only once. */
 	/*  [unless multiline is set] */

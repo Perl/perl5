@@ -1,4 +1,4 @@
-/* $Header: perl.h,v 4.0 91/03/20 01:37:56 lwall Locked $
+/* $RCSfile: perl.h,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:49:51 $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,12 +6,15 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perl.h,v $
+ * Revision 4.0.1.1  91/04/11  17:49:51  lwall
+ * patch1: hopefully straightened out some of the Xenix mess
+ * 
  * Revision 4.0  91/03/20  01:37:56  lwall
  * 4.0 baseline.
  * 
  */
 
-#define VOIDUSED 1
+#define VOIDWANT 1
 #include "config.h"
 
 #ifdef MSDOS
@@ -148,12 +151,14 @@ extern int errno;     /* ANSI allows errno to be an lvalue expr */
 #endif
 #endif
 
+#ifndef strerror
 #ifdef HAS_STRERROR
 char *strerror();
 #else
 extern int sys_nerr;
 extern char *sys_errlist[];
 #define strerror(e) ((e) < 0 || (e) >= sys_nerr ? "(unknown)" : sys_errlist[e])
+#endif
 #endif
 
 #ifdef I_SYSIOCTL
@@ -221,7 +226,7 @@ EXT int dbmlen;
 #define ntohi ntohl
 #endif
 
-#if defined(I_DIRENT) && !defined(M_XENIX)
+#if defined(I_DIRENT)
 #   include <dirent.h>
 #   define DIRENT dirent
 #else
@@ -592,6 +597,8 @@ ARRAY *saveary();
 EXT char **origargv;
 EXT int origargc;
 EXT char **origenviron;
+extern char **environ;
+
 EXT line_t subline INIT(0);
 EXT STR *subname INIT(Nullstr);
 EXT int arybase INIT(0);

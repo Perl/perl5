@@ -7,9 +7,12 @@
  * blame Henry for some of the lack of readability.
  */
 
-/* $Header: regcomp.c,v 4.0 91/03/20 01:39:01 lwall Locked $
+/* $RCSfile: regcomp.c,v $$Revision: 4.0.1.1 $$Date: 91/04/12 09:04:45 $
  *
  * $Log:	regcomp.c,v $
+ * Revision 4.0.1.1  91/04/12  09:04:45  lwall
+ * patch1: random cleanup in cpp namespace
+ * 
  * Revision 4.0  91/03/20  01:39:01  lwall
  * 4.0 baseline.
  * 
@@ -70,6 +73,9 @@
 	((*s) == '{' && regcurly(s)))
 #define	META	"^$.[()|?+*\\"
 
+#ifdef SPSTART
+#undef SPSTART		/* dratted cpp namespace... */
+#endif
 /*
  * Flags to be passed up and down.
  */

@@ -1,7 +1,10 @@
 .rn '' }`
-''' $Header: perl.man,v 4.0 91/03/20 01:38:08 lwall Locked $
+''' $RCSfile: perl.man,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:50:44 $
 ''' 
 ''' $Log:	perl.man,v $
+''' Revision 4.0.1.1  91/04/11  17:50:44  lwall
+''' patch1: fixed some typos
+''' 
 ''' Revision 4.0  91/03/20  01:38:08  lwall
 ''' 4.0 baseline.
 ''' 
@@ -1372,7 +1375,7 @@ the list.
 
 	print "\et" x ($tab/8), \' \' x ($tab%8);	# tab over
 
-	@ones = (1) x ;			# an array of 80 1's
+	@ones = (1) x 80;		# an array of 80 1's
 	@ones = (5) x @ones;		# set all elements to 5
 
 .fi
@@ -1604,9 +1607,12 @@ Thus, a portable way to find out the home directory might be:
 
 .fi
 ''' Beginning of part 2
-''' $Header: perl.man,v 4.0 91/03/20 01:38:08 lwall Locked $
+''' $RCSfile: perl.man,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:50:44 $
 '''
 ''' $Log:	perl.man,v $
+''' Revision 4.0.1.1  91/04/11  17:50:44  lwall
+''' patch1: fixed some typos
+''' 
 ''' Revision 4.0  91/03/20  01:38:08  lwall
 ''' 4.0 baseline.
 ''' 
@@ -2797,9 +2803,12 @@ the first thing in VAR, and the maximum length of VAR is SIZE plus the
 size of the message type.  Returns true if successful, or false if
 there is an error.
 ''' Beginning of part 3
-''' $Header: perl.man,v 4.0 91/03/20 01:38:08 lwall Locked $
+''' $RCSfile: perl.man,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:50:44 $
 '''
 ''' $Log:	perl.man,v $
+''' Revision 4.0.1.1  91/04/11  17:50:44  lwall
+''' patch1: fixed some typos
+''' 
 ''' Revision 4.0  91/03/20  01:38:08  lwall
 ''' 4.0 baseline.
 ''' 
@@ -4258,9 +4267,12 @@ For more on formats, see the section on formats later on.
 .Sp
 Note that write is NOT the opposite of read.
 ''' Beginning of part 4
-''' $Header: perl.man,v 4.0 91/03/20 01:38:08 lwall Locked $
+''' $RCSfile: perl.man,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:50:44 $
 '''
 ''' $Log:	perl.man,v $
+''' Revision 4.0.1.1  91/04/11  17:50:44  lwall
+''' patch1: fixed some typos
+''' 
 ''' Revision 4.0  91/03/20  01:38:08  lwall
 ''' 4.0 baseline.
 ''' 
@@ -5924,6 +5936,7 @@ such as type casting, atof() and sprintf().
 If your stdio requires an seek or eof between reads and writes on a particular
 stream, so does
 .IR perl .
+(This doesn't apply to sysread() and syswrite().)
 .PP
 While none of the built-in data types have any arbitrary size limits (apart
 from memory size), there are still a few arbitrary limits:

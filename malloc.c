@@ -1,6 +1,9 @@
-/* $Header: malloc.c,v 4.0 91/03/20 01:28:52 lwall Locked $
+/* $RCSfile: malloc.c,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:48:31 $
  *
  * $Log:	malloc.c,v $
+ * Revision 4.0.1.1  91/04/11  17:48:31  lwall
+ * patch1: Configure now figures out malloc ptr type
+ * 
  * Revision 4.0  91/03/20  01:28:52  lwall
  * 4.0 baseline.
  * 
@@ -104,7 +107,7 @@ botch(s)
 #define	ASSERT(p)
 #endif
 
-char *
+MALLOCPTRTYPE *
 malloc(nbytes)
 	register unsigned nbytes;
 {
@@ -273,7 +276,7 @@ free(cp)
  */
 int reall_srchlen = 4;	/* 4 should be plenty, -1 =>'s whole list */
 
-char *
+MALLOCPTRTYPE *
 realloc(cp, nbytes)
 	char *cp; 
 	unsigned nbytes;

@@ -1,4 +1,4 @@
-/* $Header: toke.c,v 4.0 91/03/20 01:42:14 lwall Locked $
+/* $RCSfile: toke.c,v $$Revision: 4.0.1.1 $$Date: 91/04/12 09:18:18 $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	toke.c,v $
+ * Revision 4.0.1.1  91/04/12  09:18:18  lwall
+ * patch1: perl -de "print" wouldn't stop at the first statement
+ * 
  * Revision 4.0  91/03/20  01:42:14  lwall
  * 4.0 baseline.
  * 
@@ -74,7 +77,7 @@ void checkcomma();
 /* This does similarly for list operators, merely by pretending that the
  * paren came before the listop rather than after.
  */
-#define LOP(f) return(*s == '(' || (s = skipspace(s), *s == '(') ? \
+#define LOP(f) return(CLINE, *s == '(' || (s = skipspace(s), *s == '(') ? \
 	(*s = META('('), bufptr = oldbufptr, '(') : \
 	(yylval.ival=f,expectterm = TRUE,bufptr = s,(int)LISTOP))
 /* grandfather return to old style */
@@ -118,6 +121,7 @@ lop(f,s)
 int f;
 char *s;
 {
+    CLINE;
     if (*s != '(')
 	s = skipspace(s);
     if (*s == '(') {

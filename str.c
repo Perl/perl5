@@ -1,5 +1,4 @@
-#undef STDSTDIO
-/* $Header: str.c,v 4.0 91/03/20 01:39:55 lwall Locked $
+/* $RCSfile: str.c,v $$Revision: 4.0.1.1 $$Date: 91/04/12 09:15:30 $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -7,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	str.c,v $
+ * Revision 4.0.1.1  91/04/12  09:15:30  lwall
+ * patch1: fixed undefined environ problem
+ * patch1: substr($ENV{"PATH"},0,0) = "/foo:" didn't modify environment
+ * patch1: $foo .= <BAR> could cause core dump for certain lengths of $foo
+ * 
  * Revision 4.0  91/03/20  01:39:55  lwall
  * 4.0 baseline.
  * 
@@ -15,10 +19,6 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "perly.h"
-
-#ifndef __STDC__
-extern char **environ;
-#endif /* ! __STDC__ */
 
 #ifndef str_get
 char *
@@ -519,10 +519,12 @@ STRLEN littlelen;
 	    *--bigend = *--midend;
 	(void)bcopy(little,big+offset,littlelen);
 	bigstr->str_cur += i;
+	STABSET(bigstr);
 	return;
     }
     else if (i == 0) {
 	(void)bcopy(little,bigstr->str_ptr+offset,len);
+	STABSET(bigstr);
 	return;
     }
 
@@ -734,9 +736,9 @@ int append;
     str->str_nok = 0;			/* invalidate number */
     str->str_pok = 1;			/* validate pointer */
     if (str->str_len <= cnt + 1) {	/* make sure we have the room */
-	if (cnt > 80 && str->str_len > 0) {
-	    shortbuffered = cnt - str->str_len + 1;
-	    cnt = str->str_len - 1;
+	if (cnt > 80 && str->str_len > append) {
+	    shortbuffered = cnt - str->str_len + append + 1;
+	    cnt -= shortbuffered;
 	}
 	else {
 	    shortbuffered = 0;

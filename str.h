@@ -1,4 +1,4 @@
-/* $Header: str.h,v 4.0 91/03/20 01:40:04 lwall Locked $
+/* $RCSfile: str.h,v $$Revision: 4.0.1.1 $$Date: 91/04/12 09:16:12 $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	str.h,v $
+ * Revision 4.0.1.1  91/04/12  09:16:12  lwall
+ * patch1: you may now use "die" and "caller" in a signal handler
+ * 
  * Revision 4.0  91/03/20  01:40:04  lwall
  * 4.0 baseline.
  * 
@@ -92,6 +95,7 @@ struct lstring {
 #define SS_SHPTR	7	/* HASH* on save stack */
 #define SS_SNSTAB	8	/* non-stab on save stack */
 #define SS_SCSV		9	/* callsave structure on save stack */
+#define SS_SAPTR	10	/* ARRAY* on save stack */
 #define SS_HASH		253	/* carrying an hash */
 #define SS_ARY		254	/* carrying an array */
 #define SS_FREE		255	/* in free list */
