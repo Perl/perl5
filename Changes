@@ -31,6 +31,310 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10799] By: jhi                                   on 2001/06/21  20:03:54
+        Log: Subject: Documentation patch for Net::FTP
+             From: Marcel Grunauer <marcel@codewerk.com>
+             Date: Wed, 20 Jun 2001 23:03:26 +0200
+             Message-Id: <20010620210309.DCMT6087.viemta06@localhost>
+     Branch: perl
+	   ! lib/Net/FTP.pm
+____________________________________________________________________________
+[ 10798] By: jhi                                   on 2001/06/21  20:01:14
+        Log: Retract the #10417 mg.c and embed.pl parts because of
+             strange SEGVs in 64bit x86 FreeBSD observed by
+             Nicholas Clark.
+     Branch: perl
+	   ! embed.pl mg.c perlapi.c pod/perlintern.pod proto.h
+____________________________________________________________________________
+[ 10797] By: jhi                                   on 2001/06/21  19:40:34
+        Log: Add fchdir() probe (in non-UNIX systems assume it doesn't exist).
+     Branch: perl
+	   ! Configure NetWare/config.wc NetWare/config_H.wc
+	   ! Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH configure.com epoc/config.sh uconfig.h uconfig.sh
+	   ! vos/config.alpha.def vos/config.alpha.h vos/config.ga.def
+	   ! vos/config.ga.h win32/config.bc win32/config.gc
+	   ! win32/config.vc win32/config_H.bc win32/config_H.gc
+	   ! win32/config_H.vc
+____________________________________________________________________________
+[ 10796] By: jhi                                   on 2001/06/21  19:08:28
+        Log: Cwd tweak from Doug MacEachern.
+     Branch: perl
+	   ! ext/Cwd/Cwd.xs
+____________________________________________________________________________
+[ 10795] By: jhi                                   on 2001/06/21  19:03:48
+        Log: Protect the fchdir() and lstat() with ifdefs.
+             fchdir() needs a Configure probe.
+     Branch: perl
+	   ! ext/Cwd/Cwd.xs
+____________________________________________________________________________
+[ 10794] By: nick                                  on 2001/06/21  17:11:35
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/File/Glob/t/basic.t ext/File/Glob/t/case.t
+	  +> ext/File/Glob/t/global.t ext/File/Glob/t/taint.t
+	  +> lib/Attribute/Handlers/test.pl lib/File/Temp/t/mktemp.t
+	  +> lib/File/Temp/t/posix.t lib/File/Temp/t/security.t
+	  +> lib/File/Temp/t/tempfile.t lib/Getopt/Long/t/basic.t
+	  +> lib/Getopt/Long/t/compat.t lib/Getopt/Long/t/linkage.t
+	  +> lib/Getopt/Long/t/oo.t lib/Text/TabsWrap/t/fill.t
+	  +> lib/Text/TabsWrap/t/tabs.t lib/Text/TabsWrap/t/wrap.t
+	   - lib/Attribute/Handlers.t lib/File/Glob/basic.t
+	   - lib/File/Glob/case.t lib/File/Glob/global.t
+	   - lib/File/Glob/taint.t lib/File/Temp/mktemp.t
+	   - lib/File/Temp/posix.t lib/File/Temp/security.t
+	   - lib/File/Temp/tempfile.t lib/Getopt/Long/basic.t
+	   - lib/Getopt/Long/compat.t lib/Getopt/Long/linkage.t
+	   - lib/Getopt/Long/oo.t lib/Text/Tabs.t lib/Text/Wrap/fill.t
+	   - lib/Text/Wrap/wrap.t
+	  !> (integrate 41 files)
+____________________________________________________________________________
+[ 10793] By: jhi                                   on 2001/06/21  17:01:26
+        Log: Subject: [PATCH perl@10765] fix Cwd.xs for VMS
+             From: "Craig A. Berry" <craig.berry@SignalTreeSolutions.com>
+             Date: Thu, 21 Jun 2001 13:04:54 -0500
+             Message-Id: <5.1.0.14.0.20010621124127.029fe120@exchi01>
+     Branch: perl
+	   ! ext/Cwd/Cwd.xs
+____________________________________________________________________________
+[ 10792] By: jhi                                   on 2001/06/21  16:13:57
+        Log: Subject: [PATCH pod] overlong =item
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Thu, 21 Jun 2001 18:08:04 +0100 (BST)
+             Message-Id: <200106211708.SAA08097@tempest.npl.co.uk>
+     Branch: perl
+	   ! lib/ExtUtils/Constant.pm lib/Locale/Maketext.pod
+	   ! lib/Math/BigFloat.pm lib/Math/BigInt.pm
+____________________________________________________________________________
+[ 10791] By: jhi                                   on 2001/06/21  16:10:51
+        Log: Subject: [PATCH perlio.c] format 
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Thu, 21 Jun 2001 18:05:02 +0100 (BST)
+             Message-Id: <200106211705.SAA08067@tempest.npl.co.uk>
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[ 10790] By: jhi                                   on 2001/06/21  15:52:04
+        Log: Subject: Re: [PATCH 5.7.1] sv.c documentation
+             From: Radu Greab <radu@netsoft.ro>
+             Date: Thu, 21 Jun 2001 19:06:02 +0300
+             Message-ID: <15154.7018.376419.295092@ix.netsoft.ro>
+     Branch: perl
+	   ! pod/perlapi.pod sv.c
+____________________________________________________________________________
+[ 10789] By: jhi                                   on 2001/06/21  14:48:25
+        Log: The metaconfig unit changes for #10788.
+     Branch: metaconfig/U/perl
+	   ! Cross.U fflushall.U
+____________________________________________________________________________
+[ 10788] By: jhi                                   on 2001/06/21  14:47:48
+        Log: Cross-configuration changes: make $from to rm the files
+             before copying them over (this means that he rm can be
+             removed from the fflushall test), create $targetmkdir	
+             (not documented in install since it is supposed to internal
+             use only), make $run to copy over the executable only if
+             a stamp file .xok doesn't already exist (to avoid unnecessary
+             copying of the executable)
+     Branch: perl
+	   ! Configure Makefile.SH
+____________________________________________________________________________
+[ 10787] By: nick                                  on 2001/06/21  14:16:18
+        Log: Integrate mainline
+     Branch: perlio
+	  +> lib/I18N/LangTags/ChangeLog lib/I18N/LangTags/List.pm
+	  +> lib/I18N/LangTags/README lib/Locale/Maketext/ChangeLog
+	  +> lib/Locale/Maketext/README lib/Locale/Maketext/test.pl
+	   - lib/I18N/LangTags/List.pod lib/Locale/Maketext.t
+	  !> (integrate 34 files)
+____________________________________________________________________________
+[ 10786] By: jhi                                   on 2001/06/21  13:59:32
+        Log: Re-add the files as text.
+     Branch: perl
+	   + t/lib/locale/latin1 t/lib/locale/utf8 t/lib/warnings/utf8
+____________________________________________________________________________
+[ 10785] By: jhi                                   on 2001/06/21  13:57:55
+        Log: Delete the binary files.
+     Branch: perl
+	   - t/lib/locale/latin1 t/lib/locale/utf8 t/lib/warnings/utf8
+____________________________________________________________________________
+[ 10784] By: jhi                                   on 2001/06/21  13:49:47
+        Log: Subject: [PATCH 5.7.x] Unnecessary pod2man calls in new extensions
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Thu, 21 Jun 2001 10:44:05 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.10.10106211040180.26439-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! ext/Digest/MD5/Makefile.PL ext/List/Util/Makefile.PL
+	   ! ext/MIME/Base64/Makefile.PL ext/PerlIO/Scalar/Makefile.PL
+	   ! ext/PerlIO/Via/Makefile.PL ext/Time/HiRes/Makefile.PL
+	   ! ext/Time/Piece/Makefile.PL ext/XS/Typemap/Makefile.PL
+____________________________________________________________________________
+[ 10783] By: jhi                                   on 2001/06/21  13:46:50
+        Log: Subject: [ID 20010621.002] UnixWare 7.1.1 and Perl-5.6.1 problems
+             From: 0000-Admin <root@egg.karlov.mff.cuni.cz>(0000)
+             Date: Wed, 20 Jun 2001 14:11:49 +0200 (MET DST) 
+             Message-Id: <200106201211.f5KCBnm24320@egg.karlov.mff.cuni.cz>
+             
+             Setting umask to something friendlier.
+     Branch: perl
+	   ! installman installperl
+____________________________________________________________________________
+[ 10782] By: jhi                                   on 2001/06/21  13:42:17
+        Log: Shuffle around tests to (ext|lib)/.../t/ subdirectories.
+             Resort MANIFEST with sort -f, looks much better.
+     Branch: perl
+	   + ext/File/Glob/t/basic.t ext/File/Glob/t/case.t
+	   + ext/File/Glob/t/global.t ext/File/Glob/t/taint.t
+	   + lib/Attribute/Handlers/test.pl lib/File/Temp/t/mktemp.t
+	   + lib/File/Temp/t/posix.t lib/File/Temp/t/security.t
+	   + lib/File/Temp/t/tempfile.t lib/Getopt/Long/t/basic.t
+	   + lib/Getopt/Long/t/compat.t lib/Getopt/Long/t/linkage.t
+	   + lib/Getopt/Long/t/oo.t lib/Text/TabsWrap/t/fill.t
+	   + lib/Text/TabsWrap/t/tabs.t lib/Text/TabsWrap/t/wrap.t
+	   - lib/Attribute/Handlers.t lib/File/Glob/basic.t
+	   - lib/File/Glob/case.t lib/File/Glob/global.t
+	   - lib/File/Glob/taint.t lib/File/Temp/mktemp.t
+	   - lib/File/Temp/posix.t lib/File/Temp/security.t
+	   - lib/File/Temp/tempfile.t lib/Getopt/Long/basic.t
+	   - lib/Getopt/Long/compat.t lib/Getopt/Long/linkage.t
+	   - lib/Getopt/Long/oo.t lib/Text/Tabs.t lib/Text/Wrap/fill.t
+	   - lib/Text/Wrap/wrap.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 10781] By: jhi                                   on 2001/06/21  13:16:04
+        Log: Upgrade to I18N::LangTags 0.25.
+     Branch: perl
+	   ! lib/I18N/LangTags.pm lib/I18N/LangTags/ChangeLog
+	   ! lib/I18N/LangTags/List.pm
+____________________________________________________________________________
+[ 10780] By: jhi                                   on 2001/06/21  13:12:54
+        Log: Subject: [PATCH] Step 2: Use the new PM_GETRE/SETRE macros everywhere.
+             From: Richard Soderberg <rs@crystalflame.net>
+             Date: Thu, 21 Jun 2001 07:01:22 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0106210657400.1693-100000@oregonnet.com>
+     Branch: perl
+	   ! dump.c ext/B/B.xs ext/B/B/C.pm ext/ByteLoader/bytecode.h mg.c
+	   ! op.c pp.c pp_ctl.c pp_hot.c regexec.c
+____________________________________________________________________________
+[ 10779] By: jhi                                   on 2001/06/21  12:59:57
+        Log: Test obsoleted by change #10777.
+     Branch: perl
+	   ! t/op/sub_lval.t
+____________________________________________________________________________
+[ 10778] By: jhi                                   on 2001/06/21  12:52:37
+        Log: Case of confused test numbering.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[ 10777] By: jhi                                   on 2001/06/21  12:30:57
+        Log: Subject: Re: Opinion on undef lvalue
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Sun, 17 Jun 2001 13:04:46 +0530
+             Message-ID: <20010617130446.B27925@lustre.linux.in>
+             
+             Allow lvalue subs to return undef in array context.
+     Branch: perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[ 10776] By: jhi                                   on 2001/06/21  12:27:48
+        Log: Just a guess that using the same hack for cygwin as
+             for win32 might help.
+     Branch: perl
+	   ! lib/File/Find/find.t
+____________________________________________________________________________
+[ 10775] By: jhi                                   on 2001/06/21  12:25:58
+        Log: NetWare tweaks from Guruprasad.
+     Branch: perl
+	   ! NetWare/Makefile NetWare/Nwmain.c NetWare/config.wc
+	   ! NetWare/config_H.wc NetWare/nw5sck.c NetWare/nw5sck.h
+	   ! NetWare/nwperlsys.c NetWare/t/NWModify.pl
+	   ! NetWare/t/NWScripts.pl NetWare/t/Readme.txt
+____________________________________________________________________________
+[ 10774] By: jhi                                   on 2001/06/21  12:21:17
+        Log: Subject: Re: perl@10722: Bogus warnings on REs 
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Thu, 21 Jun 2001 09:51:17 +0100
+             Message-Id: <200106210851.JAA01942@crypt.compulink.co.uk>
+             
+             Unroll to avoid a UTS compiler bug.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 10773] By: jhi                                   on 2001/06/21  12:13:13
+        Log: Subject: Re: [PATCH] Make /o work under i?threads
+             From: Artur Bergman <artur@contiller.se>
+             Date: Thu, 21 Jun 2001 14:38:03 +0200
+             Message-ID: <B757B74A.184D%artur@contiller.se>
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[ 10772] By: jhi                                   on 2001/06/21  12:12:23
+        Log: Subject: Re: [PATCH] Step 1 of moving regexps to the pad
+             From: Artur Bergman <artur@contiller.se> 
+             Date: Thu, 21 Jun 2001 14:27:33 +0200
+             Message-ID: <B757B4D4.1849%artur@contiller.se>
+             
+             Plus extra parentheses.
+     Branch: perl
+	   ! op.h
+____________________________________________________________________________
+[ 10771] By: jhi                                   on 2001/06/21  12:10:29
+        Log: Subject: [PATCH] Make /o work under i?threads
+             From: Richard Soderberg <rs@crystalflame.net>
+             Date: Thu, 21 Jun 2001 05:21:43 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0106210518210.2479-100000@oregonnet.com>
+     Branch: perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[ 10770] By: jhi                                   on 2001/06/21  12:09:28
+        Log: Subject: Re: [PATCH] Step 1 of moving regexps to the pad
+             From: Artur Bergman <artur@contiller.se>
+             Date: Thu, 21 Jun 2001 14:04:54 +0200
+             Message-ID: <B757AF86.1842%artur@contiller.se>
+     Branch: perl
+	   ! op.h
+____________________________________________________________________________
+[ 10769] By: jhi                                   on 2001/06/21  12:08:03
+        Log: Subject: Re: perl@10765: sv.c not OK on win32
+             From: Artur Bergman <artur@contiller.se>
+             Date: Thu, 21 Jun 2001 10:31:06 +0200
+             Message-ID: <B7577D69.182C%artur@contiller.se>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 10768] By: jhi                                   on 2001/06/21  12:03:56
+        Log: Subject: [PATCH 5.6.1] OS2 getpw*, getgr*
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Thu, 21 Jun 2001 06:23:56 -0400
+             Message-ID: <20010621062356.A8619@math.ohio-state.edu>
+             
+             Subject: Re: [PATCH 5.6.1] OS2 getpw*, getgr*
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Thu, 21 Jun 2001 06:32:21 -0400
+             Message-ID: <20010621063221.A8823@math.ohio-state.edu>
+     Branch: perl
+	   ! lib/File/Glob/basic.t makedef.pl os2/os2.c os2/os2ish.h
+____________________________________________________________________________
+[ 10767] By: jhi                                   on 2001/06/21  12:00:07
+        Log: Subject: [PATCH] make syslog test more verbose
+             From: Robert Spier <rspier@pobox.com>
+             Date: Thu, 21 Jun 2001 00:54:32 -0400
+             Message-ID: <15153.32264.295807.333073@rls.cx>
+     Branch: perl
+	   ! ext/Sys/Syslog/syslog.t
+____________________________________________________________________________
+[ 10766] By: jhi                                   on 2001/06/20  23:27:57
+        Log: Subject: op/study.t refinements
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Thu, 21 Jun 2001 00:29:07 +0100
+             Message-Id: <200106202329.AAA31397@crypt.compulink.co.uk>
+     Branch: perl
+	   ! t/op/study.t
+____________________________________________________________________________
+[ 10765] By: jhi                                   on 2001/06/20  19:51:47
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10764] By: jhi                                   on 2001/06/20  19:00:23
         Log: Subject: Re: [PATCH] djgpp updates
              From: Laszlo Molnar <laszlo.molnar@eth.ericsson.se>
