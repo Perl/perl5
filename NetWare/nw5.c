@@ -838,6 +838,15 @@ Perl_nw5_init(int *argcp, char ***argvp)
     MALLOC_INIT;
 }
 
+#ifdef USE_ITHREADS
+PerlInterpreter *
+perl_clone_host(PerlInterpreter* proto_perl, UV flags)
+{
+	// Perl Clone is not implemented on NetWare.
+    return NULL;
+}
+#endif
+
 // Some more functions:
 
 char *
