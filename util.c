@@ -4348,14 +4348,3 @@ Perl_sv_nounlocking(pTHX_ SV *sv)
 {
 }
 
-void
-Perl_reentrant_init(pTHX)
-{
-#ifdef USE_REENTRANT_API
-    New(31337, PL_reentrant_buffer, 1, REENTBUF);
-    New(31337, PL_reentrant_buffer->tmbuf, 1, struct tm);
-#endif
-}
-
-
-

@@ -131,6 +131,10 @@ $define{PERL_IMPLICIT_CONTEXT} ||=
     $define{USE_5005THREADS}  ||
     $define{MULTIPLICITY} ;
 
+if ($define{USE_ITHREADS} && $PLATFORM ne 'win32' && $^O ne 'darwin') {
+    $define{USE_REENTRANT_API} = 1;
+}
+
 # perl.h logic duplication ends
 
 my $sym_ord = 0;

@@ -118,6 +118,9 @@ archobjs (Unix.U):
 	or other facilities.  For perl on OS/2, for example, this would
 	include os2/os2.obj.
 
+asctime_r_proto (d_asctime_r.U):
+	This variable encodes the prototype of asctime_r.
+
 awk (Loc.U):
 	This variable is used internally by Configure to determine the
 	full pathname (if any) of the awk program.  After Configure runs,
@@ -329,6 +332,9 @@ cppsymbols (Cppsym.U):
 	not in this list, see ccsymbols and cppccsymbols.
 	The list is a space-separated list of symbol=value tokens.
 
+crypt_r_proto (d_crypt_r.U):
+	This variable encodes the prototype of crypt_r.
+
 cryptlib (d_crypt.U):
 	This variable holds -lcrypt or the path to a libcrypt.a archive if
 	the crypt() function is not defined in the standard C library. It is
@@ -338,6 +344,12 @@ csh (Loc.U):
 	This variable is used internally by Configure to determine the
 	full pathname (if any) of the csh program.  After Configure runs,
 	the value is reset to a plain "csh" and is not useful.
+
+ctermid_r_proto (d_ctermid_r.U):
+	This variable encodes the prototype of ctermid_r.
+
+ctime_r_proto (d_ctime_r.U):
+	This variable encodes the prototype of ctime_r.
 
 d__fwalk (d__fwalk.U):
 	This variable conditionally defines HAS__FWALK if _fwalk() is
@@ -359,6 +371,11 @@ d_archlib (archlib.U):
 	This variable conditionally defines ARCHLIB to hold the pathname
 	of architecture-dependent library files for $package.  If
 	$archlib is the same as $privlib, then this is set to undef.
+
+d_asctime_r (d_asctime_r.U):
+	This variable conditionally defines the HAS_ASCTIME_R symbol,
+	which indicates to the C program that the asctime_r()
+	routine is available.
 
 d_atolf (atolf.U):
 	This variable conditionally defines the HAS_ATOLF symbol, which
@@ -453,9 +470,24 @@ d_crypt (d_crypt.U):
 	indicates to the C program that the crypt() routine is available
 	to encrypt passwords and the like.
 
+d_crypt_r (d_crypt_r.U):
+	This variable conditionally defines the HAS_CRYPT_R symbol,
+	which indicates to the C program that the crypt_r()
+	routine is available.
+
 d_csh (d_csh.U):
 	This variable conditionally defines the CSH symbol, which
 	indicates to the C program that the C-shell exists.
+
+d_ctermid_r (d_ctermid_r.U):
+	This variable conditionally defines the HAS_CTERMID_R symbol,
+	which indicates to the C program that the ctermid_r()
+	routine is available.
+
+d_ctime_r (d_ctime_r.U):
+	This variable conditionally defines the HAS_CTIME_R symbol,
+	which indicates to the C program that the ctime_r()
+	routine is available.
 
 d_cuserid (d_cuserid.U):
 	This variable conditionally defines the HAS_CUSERID symbol, which
@@ -505,6 +537,11 @@ d_dosuid (d_dosuid.U):
 	tells the C program that it should insert setuid emulation code
 	on hosts which have setuid #! scripts disabled.
 
+d_drand48_r (d_drand48_r.U):
+	This variable conditionally defines the HAS_DRAND48_R symbol,
+	which indicates to the C program that the drand48_r()
+	routine is available.
+
 d_drand48proto (d_drand48proto.U):
 	This variable conditionally defines the HAS_DRAND48_PROTO symbol,
 	which indicates to the C program that the system provides
@@ -524,26 +561,56 @@ d_endgrent (d_endgrent.U):
 	indicates to the C program that the endgrent() routine is available
 	for sequential access of the group database.
 
+d_endgrent_r (d_endgrent_r.U):
+	This variable conditionally defines the HAS_ENDGRENT_R symbol,
+	which indicates to the C program that the endgrent_r()
+	routine is available.
+
 d_endhent (d_endhent.U):
 	This variable conditionally defines HAS_ENDHOSTENT if endhostent() is
 	available to close whatever was being used for host queries.
+
+d_endhostent_r (d_endhostent_r.U):
+	This variable conditionally defines the HAS_ENDHOSTENT_R symbol,
+	which indicates to the C program that the endhostent_r()
+	routine is available.
 
 d_endnent (d_endnent.U):
 	This variable conditionally defines HAS_ENDNETENT if endnetent() is
 	available to close whatever was being used for network queries.
 
+d_endnetent_r (d_endnetent_r.U):
+	This variable conditionally defines the HAS_ENDNETENT_R symbol,
+	which indicates to the C program that the endnetent_r()
+	routine is available.
+
 d_endpent (d_endpent.U):
 	This variable conditionally defines HAS_ENDPROTOENT if endprotoent() is
 	available to close whatever was being used for protocol queries.
+
+d_endprotoent_r (d_endprotoent_r.U):
+	This variable conditionally defines the HAS_ENDPROTOENT_R symbol,
+	which indicates to the C program that the endprotoent_r()
+	routine is available.
 
 d_endpwent (d_endpwent.U):
 	This variable conditionally defines the HAS_ENDPWENT symbol, which
 	indicates to the C program that the endpwent() routine is available
 	for sequential access of the passwd database.
 
+d_endpwent_r (d_endpwent_r.U):
+	This variable conditionally defines the HAS_ENDPWENT_R symbol,
+	which indicates to the C program that the endpwent_r()
+	routine is available.
+
 d_endsent (d_endsent.U):
 	This variable conditionally defines HAS_ENDSERVENT if endservent() is
 	available to close whatever was being used for service queries.
+
+d_endservent_r (d_endservent_r.U):
+	This variable conditionally defines the HAS_ENDSERVENT_R symbol,
+	which indicates to the C program that the endservent_r()
+	routine is available.
 
 d_eofnblk (nblock_io.U):
 	This variable conditionally defines EOF_NONBLOCK if EOF can be seen
@@ -721,6 +788,21 @@ d_getgrent (d_getgrent.U):
 	indicates to the C program that the getgrent() routine is available
 	for sequential access of the group database.
 
+d_getgrent_r (d_getgrent_r.U):
+	This variable conditionally defines the HAS_GETGRENT_R symbol,
+	which indicates to the C program that the getgrent_r()
+	routine is available.
+
+d_getgrgid_r (d_getgrgid_r.U):
+	This variable conditionally defines the HAS_GETGRGID_R symbol,
+	which indicates to the C program that the getgrgid_r()
+	routine is available.
+
+d_getgrnam_r (d_getgrnam_r.U):
+	This variable conditionally defines the HAS_GETGRNAM_R symbol,
+	which indicates to the C program that the getgrnam_r()
+	routine is available.
+
 d_getgrps (d_getgrps.U):
 	This variable conditionally defines the HAS_GETGROUPS symbol, which
 	indicates to the C program that the getgroups() routine is available
@@ -745,6 +827,21 @@ d_gethname (d_gethname.U):
 	indicates to the C program that the gethostname() routine may be
 	used to derive the host name.
 
+d_gethostbyaddr_r (d_gethostbyaddr_r.U):
+	This variable conditionally defines the HAS_GETHOSTBYADDR_R symbol,
+	which indicates to the C program that the gethostbyaddr_r()
+	routine is available.
+
+d_gethostbyname_r (d_gethostbyname_r.U):
+	This variable conditionally defines the HAS_GETHOSTBYNAME_R symbol,
+	which indicates to the C program that the gethostbyname_r()
+	routine is available.
+
+d_gethostent_r (d_gethostent_r.U):
+	This variable conditionally defines the HAS_GETHOSTENT_R symbol,
+	which indicates to the C program that the gethostent_r()
+	routine is available.
+
 d_gethostprotos (d_gethostprotos.U):
 	This variable conditionally defines the HAS_GETHOST_PROTOS symbol,
 	which indicates to the C program that <netdb.h> supplies
@@ -759,6 +856,11 @@ d_getlogin (d_getlogin.U):
 	This variable conditionally defines the HAS_GETLOGIN symbol, which
 	indicates to the C program that the getlogin() routine is available
 	to get the login name.
+
+d_getlogin_r (d_getlogin_r.U):
+	This variable conditionally defines the HAS_GETLOGIN_R symbol,
+	which indicates to the C program that the getlogin_r()
+	routine is available.
 
 d_getmnt (d_getmnt.U):
 	This variable conditionally defines the HAS_GETMNT symbol, which
@@ -783,6 +885,21 @@ d_getnbyname (d_getnbynm.U):
 d_getnent (d_getnent.U):
 	This variable conditionally defines HAS_GETNETENT if getnetent() is
 	available to look up network names in some data base or another.
+
+d_getnetbyaddr_r (d_getnetbyaddr_r.U):
+	This variable conditionally defines the HAS_GETNETBYADDR_R symbol,
+	which indicates to the C program that the getnetbyaddr_r()
+	routine is available.
+
+d_getnetbyname_r (d_getnetbyname_r.U):
+	This variable conditionally defines the HAS_GETNETBYNAME_R symbol,
+	which indicates to the C program that the getnetbyname_r()
+	routine is available.
+
+d_getnetent_r (d_getnetent_r.U):
+	This variable conditionally defines the HAS_GETNETENT_R symbol,
+	which indicates to the C program that the getnetent_r()
+	routine is available.
 
 d_getnetprotos (d_getnetprotos.U):
 	This variable conditionally defines the HAS_GETNET_PROTOS symbol,
@@ -833,6 +950,21 @@ d_getprior (d_getprior.U):
 	This variable conditionally defines HAS_GETPRIORITY if getpriority()
 	is available to get a process's priority.
 
+d_getprotobyname_r (d_getprotobyname_r.U):
+	This variable conditionally defines the HAS_GETPROTOBYNAME_R symbol,
+	which indicates to the C program that the getprotobyname_r()
+	routine is available.
+
+d_getprotobynumber_r (d_getprotobynumber_r.U):
+	This variable conditionally defines the HAS_GETPROTOBYNUMBER_R symbol,
+	which indicates to the C program that the getprotobynumber_r()
+	routine is available.
+
+d_getprotoent_r (d_getprotoent_r.U):
+	This variable conditionally defines the HAS_GETPROTOENT_R symbol,
+	which indicates to the C program that the getprotoent_r()
+	routine is available.
+
 d_getprotoprotos (d_getprotoprotos.U):
 	This variable conditionally defines the HAS_GETPROTO_PROTOS symbol,
 	which indicates to the C program that <netdb.h> supplies
@@ -847,6 +979,21 @@ d_getpwent (d_getpwent.U):
 	This variable conditionally defines the HAS_GETPWENT symbol, which
 	indicates to the C program that the getpwent() routine is available
 	for sequential access of the passwd database.
+
+d_getpwent_r (d_getpwent_r.U):
+	This variable conditionally defines the HAS_GETPWENT_R symbol,
+	which indicates to the C program that the getpwent_r()
+	routine is available.
+
+d_getpwnam_r (d_getpwnam_r.U):
+	This variable conditionally defines the HAS_GETPWNAM_R symbol,
+	which indicates to the C program that the getpwnam_r()
+	routine is available.
+
+d_getpwuid_r (d_getpwuid_r.U):
+	This variable conditionally defines the HAS_GETPWUID_R symbol,
+	which indicates to the C program that the getpwuid_r()
+	routine is available.
 
 d_getsbyname (d_getsrvby.U):
 	This variable conditionally defines the HAS_GETSERVBYNAME 
@@ -864,6 +1011,21 @@ d_getsent (d_getsent.U):
 	This variable conditionally defines HAS_GETSERVENT if getservent() is
 	available to look up network services in some data base or another.
 
+d_getservbyname_r (d_getservbyname_r.U):
+	This variable conditionally defines the HAS_GETSERVBYNAME_R symbol,
+	which indicates to the C program that the getservbyname_r()
+	routine is available.
+
+d_getservbyport_r (d_getservbyport_r.U):
+	This variable conditionally defines the HAS_GETSERVBYPORT_R symbol,
+	which indicates to the C program that the getservbyport_r()
+	routine is available.
+
+d_getservent_r (d_getservent_r.U):
+	This variable conditionally defines the HAS_GETSERVENT_R symbol,
+	which indicates to the C program that the getservent_r()
+	routine is available.
+
 d_getservprotos (d_getservprotos.U):
 	This variable conditionally defines the HAS_GETSERV_PROTOS symbol,
 	which indicates to the C program that <netdb.h> supplies
@@ -874,10 +1036,20 @@ d_getspnam (d_getspnam.U):
 	This variable conditionally defines HAS_GETSPNAM if getspnam() is
 	available to retrieve SysV shadow password entries by name.
 
+d_getspnam_r (d_getspnam_r.U):
+	This variable conditionally defines the HAS_GETSPNAM_R symbol,
+	which indicates to the C program that the getspnam_r()
+	routine is available.
+
 d_gettimeod (d_ftime.U):
 	This variable conditionally defines the HAS_GETTIMEOFDAY symbol, which
 	indicates that the gettimeofday() system call exists (to obtain a
 	sub-second accuracy clock). You should probably include <sys/resource.h>.
+
+d_gmtime_r (d_gmtime_r.U):
+	This variable conditionally defines the HAS_GMTIME_R symbol,
+	which indicates to the C program that the gmtime_r()
+	routine is available.
 
 d_gnulibc (d_gnulibc.U):
 	Defined if we're dealing with the GNU C Library.
@@ -945,6 +1117,11 @@ d_ldbl_dig (d_ldbl_dig.U):
 d_link (d_link.U):
 	This variable conditionally defines HAS_LINK if link() is
 	available to create hard links.
+
+d_localtime_r (d_localtime_r.U):
+	This variable conditionally defines the HAS_LOCALTIME_R symbol,
+	which indicates to the C program that the localtime_r()
+	routine is available.
 
 d_locconv (d_locconv.U):
 	This variable conditionally defines HAS_LOCALECONV if localeconv() is
@@ -1311,9 +1488,24 @@ d_quad (quadtype.U):
 	This variable, if defined, tells that there's a 64-bit integer type,
 	quadtype.
 
+d_random_r (d_random_r.U):
+	This variable conditionally defines the HAS_RANDOM_R symbol,
+	which indicates to the C program that the random_r()
+	routine is available.
+
+d_readdir64_r (d_readdir64_r.U):
+	This variable conditionally defines the HAS_READDIR64_R symbol,
+	which indicates to the C program that the readdir64_r()
+	routine is available.
+
 d_readdir (d_readdir.U):
 	This variable conditionally defines HAS_READDIR if readdir() is
 	available to read directory entries.
+
+d_readdir_r (d_readdir_r.U):
+	This variable conditionally defines the HAS_READDIR_R symbol,
+	which indicates to the C program that the readdir_r()
+	routine is available.
 
 d_readlink (d_readlink.U):
 	This variable conditionally defines the HAS_READLINK symbol, which
@@ -1428,6 +1620,11 @@ d_setgrent (d_setgrent.U):
 	indicates to the C program that the setgrent() routine is available
 	for initializing sequential access to the group database.
 
+d_setgrent_r (d_setgrent_r.U):
+	This variable conditionally defines the HAS_SETGRENT_R symbol,
+	which indicates to the C program that the setgrent_r()
+	routine is available.
+
 d_setgrps (d_setgrps.U):
 	This variable conditionally defines the HAS_SETGROUPS symbol, which
 	indicates to the C program that the setgroups() routine is available
@@ -1436,6 +1633,11 @@ d_setgrps (d_setgrps.U):
 d_sethent (d_sethent.U):
 	This variable conditionally defines HAS_SETHOSTENT if sethostent() is
 	available.
+
+d_sethostent_r (d_sethostent_r.U):
+	This variable conditionally defines the HAS_SETHOSTENT_R symbol,
+	which indicates to the C program that the sethostent_r()
+	routine is available.
 
 d_setitimer (d_setitimer.U):
 	This variable conditionally defines the HAS_SETITIMER symbol, which
@@ -1451,9 +1653,19 @@ d_setlocale (d_setlocale.U):
 	This variable conditionally defines HAS_SETLOCALE if setlocale() is
 	available to handle locale-specific ctype implementations.
 
+d_setlocale_r (d_setlocale_r.U):
+	This variable conditionally defines the HAS_SETLOCALE_R symbol,
+	which indicates to the C program that the setlocale_r()
+	routine is available.
+
 d_setnent (d_setnent.U):
 	This variable conditionally defines HAS_SETNETENT if setnetent() is
 	available.
+
+d_setnetent_r (d_setnetent_r.U):
+	This variable conditionally defines the HAS_SETNETENT_R symbol,
+	which indicates to the C program that the setnetent_r()
+	routine is available.
 
 d_setpent (d_setpent.U):
 	This variable conditionally defines HAS_SETPROTOENT if setprotoent() is
@@ -1481,10 +1693,20 @@ d_setproctitle (d_setproctitle.U):
 	which indicates to the C program that the setproctitle() routine
 	is available.
 
+d_setprotoent_r (d_setprotoent_r.U):
+	This variable conditionally defines the HAS_SETPROTOENT_R symbol,
+	which indicates to the C program that the setprotoent_r()
+	routine is available.
+
 d_setpwent (d_setpwent.U):
 	This variable conditionally defines the HAS_SETPWENT symbol, which
 	indicates to the C program that the setpwent() routine is available
 	for initializing sequential access to the passwd database.
+
+d_setpwent_r (d_setpwent_r.U):
+	This variable conditionally defines the HAS_SETPWENT_R symbol,
+	which indicates to the C program that the setpwent_r()
+	routine is available.
 
 d_setregid (d_setregid.U):
 	This variable conditionally defines HAS_SETREGID if setregid() is
@@ -1519,6 +1741,11 @@ d_setruid (d_setruid.U):
 d_setsent (d_setsent.U):
 	This variable conditionally defines HAS_SETSERVENT if setservent() is
 	available.
+
+d_setservent_r (d_setservent_r.U):
+	This variable conditionally defines the HAS_SETSERVENT_R symbol,
+	which indicates to the C program that the setservent_r()
+	routine is available.
 
 d_setsid (d_setsid.U):
 	This variable conditionally defines HAS_SETSID if setsid() is
@@ -1600,6 +1827,16 @@ d_socks5_init (d_socks5_init.U):
 d_sqrtl (d_sqrtl.U):
 	This variable conditionally defines the HAS_SQRTL symbol, which
 	indicates to the C program that the sqrtl() routine is available.
+
+d_srand48_r (d_srand48_r.U):
+	This variable conditionally defines the HAS_SRAND48_R symbol,
+	which indicates to the C program that the srand48_r()
+	routine is available.
+
+d_srandom_r (d_srandom_r.U):
+	This variable conditionally defines the HAS_SRANDOM_R symbol,
+	which indicates to the C program that the srandom_r()
+	routine is available.
 
 d_sresgproto (d_sresgproto.U):
 	This variable conditionally defines the HAS_SETRESGID_PROTO symbol,
@@ -1685,6 +1922,11 @@ d_strerrm (d_strerror.U):
 d_strerror (d_strerror.U):
 	This variable conditionally defines HAS_STRERROR if strerror() is
 	available to translate error numbers to strings.
+
+d_strerror_r (d_strerror_r.U):
+	This variable conditionally defines the HAS_STRERROR_R symbol,
+	which indicates to the C program that the strerror_r()
+	routine is available.
 
 d_strftime (d_strftime.U):
 	This variable conditionally defines the HAS_STRFTIME symbol, which
@@ -1803,9 +2045,19 @@ d_tm_tm_zone (i_time.U):
 	This variable conditionally defines HAS_TM_TM_ZONE, which indicates
 	indicates to the C program that the struct tm has the tm_zone field.
 
+d_tmpnam_r (d_tmpnam_r.U):
+	This variable conditionally defines the HAS_TMPNAM_R symbol,
+	which indicates to the C program that the tmpnam_r()
+	routine is available.
+
 d_truncate (d_truncate.U):
 	This variable conditionally defines HAS_TRUNCATE if truncate() is
 	available to truncate files.
+
+d_ttyname_r (d_ttyname_r.U):
+	This variable conditionally defines the HAS_TTYNAME_R symbol,
+	which indicates to the C program that the ttyname_r()
+	routine is available.
 
 d_tzname (d_tzname.U):
 	This variable conditionally defines HAS_TZNAME if tzname[] is
@@ -1971,6 +2223,9 @@ drand01 (randfunc.U):
 	normalize the result.
 	In C programs, the macro 'Drand01' is mapped to drand01.
 
+drand48_r_proto (d_drand48_r.U):
+	This variable encodes the prototype of drand48_r.
+
 dynamic_ext (Extensions.U):
 	This variable holds a list of XS extension files we want to
 	link dynamically into the package.  It is used by Makefile.
@@ -1999,6 +2254,24 @@ egrep (Loc.U):
 emacs (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
+
+endgrent_r_proto (d_endgrent_r.U):
+	This variable encodes the prototype of endgrent_r.
+
+endhostent_r_proto (d_endhostent_r.U):
+	This variable encodes the prototype of endhostent_r.
+
+endnetent_r_proto (d_endnetent_r.U):
+	This variable encodes the prototype of endnetent_r.
+
+endprotoent_r_proto (d_endprotoent_r.U):
+	This variable encodes the prototype of endprotoent_r.
+
+endpwent_r_proto (d_endpwent_r.U):
+	This variable encodes the prototype of endpwent_r.
+
+endservent_r_proto (d_endservent_r.U):
+	This variable encodes the prototype of endservent_r.
 
 eunicefix (Init.U):
 	When running under Eunice this variable contains a command which will
@@ -2093,6 +2366,66 @@ gccversion (gccvers.U):
 	indicate whether the compiler is version 1 or 2.  This is used in
 	setting some of the default cflags.  It is set to '' if not gcc.
 
+getgrent_r_proto (d_getgrent_r.U):
+	This variable encodes the prototype of getgrent_r.
+
+getgrgid_r_proto (d_getgrgid_r.U):
+	This variable encodes the prototype of getgrgid_r.
+
+getgrnam_r_proto (d_getgrnam_r.U):
+	This variable encodes the prototype of getgrnam_r.
+
+gethostbyaddr_r_proto (d_gethostbyaddr_r.U):
+	This variable encodes the prototype of gethostbyaddr_r.
+
+gethostbyname_r_proto (d_gethostbyname_r.U):
+	This variable encodes the prototype of gethostbyname_r.
+
+gethostent_r_proto (d_gethostent_r.U):
+	This variable encodes the prototype of gethostent_r.
+
+getlogin_r_proto (d_getlogin_r.U):
+	This variable encodes the prototype of getlogin_r.
+
+getnetbyaddr_r_proto (d_getnetbyaddr_r.U):
+	This variable encodes the prototype of getnetbyaddr_r.
+
+getnetbyname_r_proto (d_getnetbyname_r.U):
+	This variable encodes the prototype of getnetbyname_r.
+
+getnetent_r_proto (d_getnetent_r.U):
+	This variable encodes the prototype of getnetent_r.
+
+getprotobyname_r_proto (d_getprotobyname_r.U):
+	This variable encodes the prototype of getprotobyname_r.
+
+getprotobynumber_r_proto (d_getprotobynumber_r.U):
+	This variable encodes the prototype of getprotobynumber_r.
+
+getprotoent_r_proto (d_getprotoent_r.U):
+	This variable encodes the prototype of getprotoent_r.
+
+getpwent_r_proto (d_getpwent_r.U):
+	This variable encodes the prototype of getpwent_r.
+
+getpwnam_r_proto (d_getpwnam_r.U):
+	This variable encodes the prototype of getpwnam_r.
+
+getpwuid_r_proto (d_getpwuid_r.U):
+	This variable encodes the prototype of getpwuid_r.
+
+getservbyname_r_proto (d_getservbyname_r.U):
+	This variable encodes the prototype of getservbyname_r.
+
+getservbyport_r_proto (d_getservbyport_r.U):
+	This variable encodes the prototype of getservbyport_r.
+
+getservent_r_proto (d_getservent_r.U):
+	This variable encodes the prototype of getservent_r.
+
+getspnam_r_proto (d_getspnam_r.U):
+	This variable encodes the prototype of getspnam_r.
+
 gidformat (gidf.U):
 	This variable contains the format string used for printing a Gid_t.
 
@@ -2117,6 +2450,9 @@ gmake (Loc.U):
 	This variable is used internally by Configure to determine the
 	full pathname (if any) of the gmake program.  After Configure runs,
 	the value is reset to a plain "gmake" and is not useful.
+
+gmtime_r_proto (d_gmtime_r.U):
+	This variable encodes the prototype of gmtime_r.
 
 grep (Loc.U):
 	This variable is used internally by Configure to determine the
@@ -2192,6 +2528,10 @@ i_bsdioctl (i_sysioctl.U):
 	This variable conditionally defines the I_SYS_BSDIOCTL symbol, which
 	indicates to the C program that <sys/bsdioctl.h> exists and should
 	be included.
+
+i_crypt (i_crypt.U):
+	This variable conditionally defines the I_CRYPT symbol, and indicates
+	whether a C program should include <crypt.h>.
 
 i_db (i_db.U):
 	This variable conditionally defines the I_DB symbol, and indicates
@@ -2786,6 +3126,9 @@ lns (lns.U):
 	symbolic links (if they are supported).  It can be used
 	in the Makefile. It is either 'ln -s' or 'ln'
 
+localtime_r_proto (d_localtime_r.U):
+	This variable encodes the prototype of localtime_r.
+
 locincpth (ccflags.U):
 	This variable contains a list of additional directories to be
 	searched by the compiler.  The appropriate '-I' directives will
@@ -3267,6 +3610,9 @@ randfunc (randfunc.U):
 	the 'Drand01' macro is defined to generate uniformly distributed
 	random numbers over the range [0., 1.[ (see drand01 and nrand).
 
+random_r_proto (d_random_r.U):
+	This variable encodes the prototype of random_r.
+
 randseedtype (randfunc.U):
 	Indicates the type of the argument of the seedfunc.
 
@@ -3280,6 +3626,12 @@ rd_nodata (nblock_io.U):
 	present. It should be -1, but some systems return 0 when O_NDELAY is
 	used, which is a shame because you cannot make the difference between
 	no data and an EOF.. Sigh!
+
+readdir64_r_proto (d_readdir64_r.U):
+	This variable encodes the prototype of readdir64_r.
+
+readdir_r_proto (d_readdir_r.U):
+	This variable encodes the prototype of readdir_r.
 
 revision (patchlevel.U):
 	The value of revision comes from the patchlevel.h file.
@@ -3346,6 +3698,27 @@ selecttype (selecttype.U):
 sendmail (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
+
+setgrent_r_proto (d_setgrent_r.U):
+	This variable encodes the prototype of setgrent_r.
+
+sethostent_r_proto (d_sethostent_r.U):
+	This variable encodes the prototype of sethostent_r.
+
+setlocale_r_proto (d_setlocale_r.U):
+	This variable encodes the prototype of setlocale_r.
+
+setnetent_r_proto (d_setnetent_r.U):
+	This variable encodes the prototype of setnetent_r.
+
+setprotoent_r_proto (d_setprotoent_r.U):
+	This variable encodes the prototype of setprotoent_r.
+
+setpwent_r_proto (d_setpwent_r.U):
+	This variable encodes the prototype of setpwent_r.
+
+setservent_r_proto (d_setservent_r.U):
+	This variable encodes the prototype of setservent_r.
 
 sh (sh.U):
 	This variable contains the full pathname of the shell used
@@ -3589,6 +3962,12 @@ sPRIXU64 (quadfio.U):
 	The 'U' in the name is to separate this from sPRIx64 so that even
 	case-blind systems can see the difference.
 
+srand48_r_proto (d_srand48_r.U):
+	This variable encodes the prototype of srand48_r.
+
+srandom_r_proto (d_srandom_r.U):
+	This variable encodes the prototype of srandom_r.
+
 src (src.U):
 	This variable holds the path to the package source. It is up to
 	the Makefile to use this variable and set VPATH accordingly to
@@ -3657,6 +4036,9 @@ stdio_stream_array (stdio_streams.U):
 	This variable tells the name of the array holding the stdio streams.
 	Usual values include _iob, __iob, and __sF.
 
+strerror_r_proto (d_strerror_r.U):
+	This variable encodes the prototype of strerror_r.
+
 strings (i_string.U):
 	This variable holds the full path of the string header that will be
 	used. Typically /usr/include/string.h or /usr/include/strings.h.
@@ -3711,6 +4093,9 @@ timetype (d_time.U):
 	or time_t on BSD sites (in which case <sys/types.h> should be
 	included). Anyway, the type Time_t should be used.
 
+tmpnam_r_proto (d_tmpnam_r.U):
+	This variable encodes the prototype of tmpnam_r.
+
 to (Cross.U):
 	This variable contains the command used by Configure
 	to copy to from the target host.  Useful and available
@@ -3736,6 +4121,9 @@ trnl (trnl.U):
 troff (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
+
+ttyname_r_proto (d_ttyname_r.U):
+	This variable encodes the prototype of ttyname_r.
 
 u16size (perlxv.U):
 	This variable is the size of an U16 in bytes.

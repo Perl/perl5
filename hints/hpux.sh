@@ -477,7 +477,7 @@ EOM
 		fi
 	else
 	    # 12 may want upping the _POSIX_C_SOURCE datestamp...
-	    ccflags=" -D_POSIX_C_SOURCE=199506L $ccflags"
+	    ccflags=" -D_POSIX_C_SOURCE=199506L -D_REENTRANT $ccflags"
 	    set `echo X "$libswanted "| sed -e 's/ c / pthread c /'`
 	    shift
 	    libswanted="$*"

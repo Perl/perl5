@@ -65,7 +65,11 @@ delete $rfuncs{setlocale_r} if $^O eq 'linux';
 my $netdb_r_obsolete;
 if ($^O eq 'hpux') {
     delete $rfuncs{crypt_r};
+    delete $rfuncs{drand48_r};
+    delete $rfuncs{getgrent_r};
+    delete $rfuncs{getpwent_r};
     delete $rfuncs{setlocale_r};
+    delete $rfuncs{srand48_r};
     delete $rfuncs{strerror_r};
     $netdb_r_obsolete = 1;
 } elsif ($^O eq 'dec_osf') {
@@ -84,8 +88,8 @@ if ($netdb_r_obsolete) {
 		      getnetbyaddr_r
 		      getnetbyname_r
 		      getnetent_r
-		      getprotobynumber_r
 		      getprotobyname_r
+		      getprotobynumber_r
 		      getprotoent_r
 		      getservbyname_r
 		      getservbyport_r

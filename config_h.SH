@@ -1156,6 +1156,16 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_access HAS_ACCESS		/**/
 
+/* HAS_ASCTIME_R:
+ *	This symbol, if defined, indicates that the asctime_r routine
+ *	is available to asctime re-entrantly.
+ */
+/* ASCTIME_R_PROTO:
+ *	This symbol encodes the prototype of asctime_r.
+ */
+#$d_asctime_r HAS_ASCTIME_R	   /**/
+#define ASCTIME_R_PROTO $asctime_r_proto	   /**/
+
 /* CASTI32:
  *	This symbol is defined if the C compiler can cast negative
  *	or large floating point numbers to 32-bit ints.
@@ -1207,6 +1217,16 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_cmsghdr_s HAS_STRUCT_CMSGHDR	/**/
 
+/* HAS_CRYPT_R:
+ *	This symbol, if defined, indicates that the crypt_r routine
+ *	is available to crypt re-entrantly.
+ */
+/* CRYPT_R_PROTO:
+ *	This symbol encodes the prototype of crypt_r.
+ */
+#$d_crypt_r HAS_CRYPT_R	   /**/
+#define CRYPT_R_PROTO $crypt_r_proto	   /**/
+
 /* HAS_CSH:
  *	This symbol, if defined, indicates that the C-shell exists.
  */
@@ -1218,6 +1238,16 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define CSH "$full_csh"	/**/
 #endif
 
+/* HAS_CTIME_R:
+ *	This symbol, if defined, indicates that the ctime_r routine
+ *	is available to ctime re-entrantly.
+ */
+/* CTIME_R_PROTO:
+ *	This symbol encodes the prototype of ctime_r.
+ */
+#$d_ctime_r HAS_CTIME_R	   /**/
+#define CTIME_R_PROTO $ctime_r_proto	   /**/
+
 /* DLSYM_NEEDS_UNDERSCORE:
  *	This symbol, if defined, indicates that we need to prepend an
  *	underscore to the symbol name before calling dlsym().  This only
@@ -1225,6 +1255,16 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	case if you're using dl_dlopen.xs.
  */
 #$d_dlsymun 	DLSYM_NEEDS_UNDERSCORE 	/**/
+
+/* HAS_DRAND48_R:
+ *	This symbol, if defined, indicates that the drand48_r routine
+ *	is available to drand48 re-entrantly.
+ */
+/* DRAND48_R_PROTO:
+ *	This symbol encodes the prototype of drand48_r.
+ */
+#$d_drand48_r HAS_DRAND48_R	   /**/
+#define DRAND48_R_PROTO $drand48_r_proto	   /**/
 
 /* HAS_DRAND48_PROTO:
  *	This symbol, if defined, indicates that the system provides
@@ -1239,6 +1279,16 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available for finalizing sequential access of the group database.
  */
 #$d_endgrent HAS_ENDGRENT		/**/
+
+/* HAS_ENDGRENT_R:
+ *	This symbol, if defined, indicates that the endgrent_r routine
+ *	is available to endgrent re-entrantly.
+ */
+/* ENDGRENT_R_PROTO:
+ *	This symbol encodes the prototype of endgrent_r.
+ */
+#$d_endgrent_r HAS_ENDGRENT_R	   /**/
+#define ENDGRENT_R_PROTO $endgrent_r_proto	   /**/
 
 /* HAS_ENDHOSTENT:
  *	This symbol, if defined, indicates that the endhostent() routine is
@@ -1263,6 +1313,16 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available for finalizing sequential access of the passwd database.
  */
 #$d_endpwent HAS_ENDPWENT		/**/
+
+/* HAS_ENDPWENT_R:
+ *	This symbol, if defined, indicates that the endpwent_r routine
+ *	is available to endpwent re-entrantly.
+ */
+/* ENDPWENT_R_PROTO:
+ *	This symbol encodes the prototype of endpwent_r.
+ */
+#$d_endpwent_r HAS_ENDPWENT_R	   /**/
+#define ENDPWENT_R_PROTO $endpwent_r_proto	   /**/
 
 /* HAS_ENDSERVENT:
  *	This symbol, if defined, indicates that the endservent() routine is
@@ -1442,6 +1502,36 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_getgrent HAS_GETGRENT		/**/
 
+/* HAS_GETGRENT_R:
+ *	This symbol, if defined, indicates that the getgrent_r routine
+ *	is available to getgrent re-entrantly.
+ */
+/* GETGRENT_R_PROTO:
+ *	This symbol encodes the prototype of getgrent_r.
+ */
+#$d_getgrent_r HAS_GETGRENT_R	   /**/
+#define GETGRENT_R_PROTO $getgrent_r_proto	   /**/
+
+/* HAS_GETGRGID_R:
+ *	This symbol, if defined, indicates that the getgrgid_r routine
+ *	is available to getgrgid re-entrantly.
+ */
+/* GETGRGID_R_PROTO:
+ *	This symbol encodes the prototype of getgrgid_r.
+ */
+#$d_getgrgid_r HAS_GETGRGID_R	   /**/
+#define GETGRGID_R_PROTO $getgrgid_r_proto	   /**/
+
+/* HAS_GETGRNAM_R:
+ *	This symbol, if defined, indicates that the getgrnam_r routine
+ *	is available to getgrnam re-entrantly.
+ */
+/* GETGRNAM_R_PROTO:
+ *	This symbol encodes the prototype of getgrnam_r.
+ */
+#$d_getgrnam_r HAS_GETGRNAM_R	   /**/
+#define GETGRNAM_R_PROTO $getgrnam_r_proto	   /**/
+
 /* HAS_GETHOSTBYADDR:
  *	This symbol, if defined, indicates that the gethostbyaddr() routine is
  *	available to look up hosts by their IP addresses.
@@ -1502,6 +1592,16 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to return interval timers.
  */
 #$d_getitimer HAS_GETITIMER		/**/
+
+/* HAS_GETLOGIN_R:
+ *	This symbol, if defined, indicates that the getlogin_r routine
+ *	is available to getlogin re-entrantly.
+ */
+/* GETLOGIN_R_PROTO:
+ *	This symbol encodes the prototype of getlogin_r.
+ */
+#$d_getlogin_r HAS_GETLOGIN_R	   /**/
+#define GETLOGIN_R_PROTO $getlogin_r_proto	   /**/
 
 /* HAS_GETMNT:
  *	This symbol, if defined, indicates that the getmnt routine is
@@ -1597,6 +1697,36 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_getpwent HAS_GETPWENT		/**/
 
+/* HAS_GETPWENT_R:
+ *	This symbol, if defined, indicates that the getpwent_r routine
+ *	is available to getpwent re-entrantly.
+ */
+/* GETPWENT_R_PROTO:
+ *	This symbol encodes the prototype of getpwent_r.
+ */
+#$d_getpwent_r HAS_GETPWENT_R	   /**/
+#define GETPWENT_R_PROTO $getpwent_r_proto	   /**/
+
+/* HAS_GETPWNAM_R:
+ *	This symbol, if defined, indicates that the getpwnam_r routine
+ *	is available to getpwnam re-entrantly.
+ */
+/* GETPWNAM_R_PROTO:
+ *	This symbol encodes the prototype of getpwnam_r.
+ */
+#$d_getpwnam_r HAS_GETPWNAM_R	   /**/
+#define GETPWNAM_R_PROTO $getpwnam_r_proto	   /**/
+
+/* HAS_GETPWUID_R:
+ *	This symbol, if defined, indicates that the getpwuid_r routine
+ *	is available to getpwuid re-entrantly.
+ */
+/* GETPWUID_R_PROTO:
+ *	This symbol encodes the prototype of getpwuid_r.
+ */
+#$d_getpwuid_r HAS_GETPWUID_R	   /**/
+#define GETPWUID_R_PROTO $getpwuid_r_proto	   /**/
+
 /* HAS_GETSERVENT:
  *	This symbol, if defined, indicates that the getservent() routine is
  *	available to look up network services in some data base or another.
@@ -1617,6 +1747,16 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_getspnam HAS_GETSPNAM		/**/
 
+/* HAS_GETSPNAM_R:
+ *	This symbol, if defined, indicates that the getspnam_r routine
+ *	is available to getspnam re-entrantly.
+ */
+/* GETSPNAM_R_PROTO:
+ *	This symbol encodes the prototype of getspnam_r.
+ */
+#$d_getspnam_r HAS_GETSPNAM_R	   /**/
+#define GETSPNAM_R_PROTO $getspnam_r_proto	   /**/
+
 /* HAS_GETSERVBYNAME:
  *	This symbol, if defined, indicates that the getservbyname()
  *	routine is available to look up services by their name.
@@ -1627,6 +1767,16 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_getsbyname HAS_GETSERVBYNAME		/**/
 #$d_getsbyport HAS_GETSERVBYPORT		/**/
+
+/* HAS_GMTIME_R:
+ *	This symbol, if defined, indicates that the gmtime_r routine
+ *	is available to gmtime re-entrantly.
+ */
+/* GMTIME_R_PROTO:
+ *	This symbol encodes the prototype of gmtime_r.
+ */
+#$d_gmtime_r HAS_GMTIME_R	   /**/
+#define GMTIME_R_PROTO $gmtime_r_proto	   /**/
 
 /* HAS_GNULIBC:
  *	This symbol, if defined, indicates to the C program that 
@@ -1718,6 +1868,16 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	for DBL_DIG, there's no good guess for LDBL_DIG if it is undefined.
  */
 #$d_ldbl_dig HAS_LDBL_DIG 	/* */
+
+/* HAS_LOCALTIME_R:
+ *	This symbol, if defined, indicates that the localtime_r routine
+ *	is available to localtime re-entrantly.
+ */
+/* LOCALTIME_R_PROTO:
+ *	This symbol encodes the prototype of localtime_r.
+ */
+#$d_localtime_r HAS_LOCALTIME_R	   /**/
+#define LOCALTIME_R_PROTO $localtime_r_proto	   /**/
 
 /* HAS_LONG_DOUBLE:
  *	This symbol will be defined if the C compiler supports long
@@ -1871,6 +2031,26 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define SCHED_YIELD	$sched_yield	/**/
 #$d_sched_yield HAS_SCHED_YIELD	/**/
 
+/* HAS_RANDOM_R:
+ *	This symbol, if defined, indicates that the random_r routine
+ *	is available to random re-entrantly.
+ */
+/* RANDOM_R_PROTO:
+ *	This symbol encodes the prototype of random_r.
+ */
+#$d_random_r HAS_RANDOM_R	   /**/
+#define RANDOM_R_PROTO $random_r_proto	   /**/
+
+/* HAS_READDIR_R:
+ *	This symbol, if defined, indicates that the readdir_r routine
+ *	is available to readdir re-entrantly.
+ */
+/* READDIR_R_PROTO:
+ *	This symbol encodes the prototype of readdir_r.
+ */
+#$d_readdir_r HAS_READDIR_R	   /**/
+#define READDIR_R_PROTO $readdir_r_proto	   /**/
+
 /* HAS_READV:
  *	This symbol, if defined, indicates that the readv routine is
  *	available to do gather reads.  You will also need <sys/uio.h>
@@ -1934,6 +2114,16 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_setgrent HAS_SETGRENT		/**/
 
+/* HAS_SETGRENT_R:
+ *	This symbol, if defined, indicates that the setgrent_r routine
+ *	is available to setgrent re-entrantly.
+ */
+/* SETGRENT_R_PROTO:
+ *	This symbol encodes the prototype of setgrent_r.
+ */
+#$d_setgrent_r HAS_SETGRENT_R	   /**/
+#define SETGRENT_R_PROTO $setgrent_r_proto	   /**/
+
 /* HAS_SETGROUPS:
  *	This symbol, if defined, indicates that the setgroups() routine is
  *	available to set the list of process groups.  If unavailable, multiple
@@ -1988,6 +2178,16 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available for initializing sequential access of the passwd database.
  */
 #$d_setpwent HAS_SETPWENT		/**/
+
+/* HAS_SETPWENT_R:
+ *	This symbol, if defined, indicates that the setpwent_r routine
+ *	is available to setpwent re-entrantly.
+ */
+/* SETPWENT_R_PROTO:
+ *	This symbol encodes the prototype of setpwent_r.
+ */
+#$d_setpwent_r HAS_SETPWENT_R	   /**/
+#define SETPWENT_R_PROTO $setpwent_r_proto	   /**/
 
 /* HAS_SETSERVENT:
  *	This symbol, if defined, indicates that the setservent() routine is
@@ -2110,6 +2310,26 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_sqrtl HAS_SQRTL		/**/
 
+/* HAS_SRAND48_R:
+ *	This symbol, if defined, indicates that the srand48_r routine
+ *	is available to srand48 re-entrantly.
+ */
+/* SRAND48_R_PROTO:
+ *	This symbol encodes the prototype of srand48_r.
+ */
+#$d_srand48_r HAS_SRAND48_R	   /**/
+#define SRAND48_R_PROTO $srand48_r_proto	   /**/
+
+/* HAS_SRANDOM_R:
+ *	This symbol, if defined, indicates that the srandom_r routine
+ *	is available to srandom re-entrantly.
+ */
+/* SRANDOM_R_PROTO:
+ *	This symbol encodes the prototype of srandom_r.
+ */
+#$d_srandom_r HAS_SRANDOM_R	   /**/
+#define SRANDOM_R_PROTO $srandom_r_proto	   /**/
+
 /* USE_STAT_BLOCKS:
  *	This symbol is defined if this system has a stat structure declaring
  *	st_blksize and st_blocks.
@@ -2230,6 +2450,16 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_syserrlst HAS_SYS_ERRLIST	/**/
 #define Strerror(e) $d_strerrm
 
+/* HAS_STRERROR_R:
+ *	This symbol, if defined, indicates that the strerror_r routine
+ *	is available to strerror re-entrantly.
+ */
+/* STRERROR_R_PROTO:
+ *	This symbol encodes the prototype of strerror_r.
+ */
+#$d_strerror_r HAS_STRERROR_R	   /**/
+#define STRERROR_R_PROTO $strerror_r_proto	   /**/
+
 /* HAS_STRTOLD:
  *	This symbol, if defined, indicates that the strtold routine is
  *	available to convert strings to long doubles.
@@ -2287,6 +2517,16 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  * use getrusage(). It may be necessary to include <sys/times.h>.
  */
 #$d_times HAS_TIMES		/**/
+
+/* HAS_TMPNAM_R:
+ *	This symbol, if defined, indicates that the tmpnam_r routine
+ *	is available to tmpnam re-entrantly.
+ */
+/* TMPNAM_R_PROTO:
+ *	This symbol encodes the prototype of tmpnam_r.
+ */
+#$d_tmpnam_r HAS_TMPNAM_R	   /**/
+#define TMPNAM_R_PROTO $tmpnam_r_proto	   /**/
 
 /* HAS_UALARM:
  *	This symbol, if defined, indicates that the ualarm routine is
@@ -3608,6 +3848,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_usleepproto	HAS_USLEEP_PROTO	/**/
 
+/* I_CRYPT:
+ *	This symbol, if defined, indicates that <crypt.h> exists and
+ *	should be included.
+ */
+#$i_crypt	I_CRYPT		/**/
+
 /* I_FP:
  *	This symbol, if defined, indicates that <fp.h> exists and
  *	should be included.
@@ -3620,11 +3866,251 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_langinfo	I_LANGINFO		/**/
 
+/* HAS_CTERMID_R:
+ *	This symbol, if defined, indicates that the ctermid_r routine
+ *	is available to ctermid re-entrantly.
+ */
+/* CTERMID_R_PROTO:
+ *	This symbol encodes the prototype of ctermid_r.
+ */
+#$d_ctermid_r HAS_CTERMID_R	   /**/
+#define CTERMID_R_PROTO $ctermid_r_proto	   /**/
+
+/* HAS_ENDHOSTENT_R:
+ *	This symbol, if defined, indicates that the endhostent_r routine
+ *	is available to endhostent re-entrantly.
+ */
+/* ENDHOSTENT_R_PROTO:
+ *	This symbol encodes the prototype of endhostent_r.
+ */
+#$d_endhostent_r HAS_ENDHOSTENT_R	   /**/
+#define ENDHOSTENT_R_PROTO $endhostent_r_proto	   /**/
+
+/* HAS_ENDNETENT_R:
+ *	This symbol, if defined, indicates that the endnetent_r routine
+ *	is available to endnetent re-entrantly.
+ */
+/* ENDNETENT_R_PROTO:
+ *	This symbol encodes the prototype of endnetent_r.
+ */
+#$d_endnetent_r HAS_ENDNETENT_R	   /**/
+#define ENDNETENT_R_PROTO $endnetent_r_proto	   /**/
+
+/* HAS_ENDPROTOENT_R:
+ *	This symbol, if defined, indicates that the endprotoent_r routine
+ *	is available to endprotoent re-entrantly.
+ */
+/* ENDPROTOENT_R_PROTO:
+ *	This symbol encodes the prototype of endprotoent_r.
+ */
+#$d_endprotoent_r HAS_ENDPROTOENT_R	   /**/
+#define ENDPROTOENT_R_PROTO $endprotoent_r_proto	   /**/
+
+/* HAS_ENDSERVENT_R:
+ *	This symbol, if defined, indicates that the endservent_r routine
+ *	is available to endservent re-entrantly.
+ */
+/* ENDSERVENT_R_PROTO:
+ *	This symbol encodes the prototype of endservent_r.
+ */
+#$d_endservent_r HAS_ENDSERVENT_R	   /**/
+#define ENDSERVENT_R_PROTO $endservent_r_proto	   /**/
+
+/* HAS_GETHOSTBYADDR_R:
+ *	This symbol, if defined, indicates that the gethostbyaddr_r routine
+ *	is available to gethostbyaddr re-entrantly.
+ */
+/* GETHOSTBYADDR_R_PROTO:
+ *	This symbol encodes the prototype of gethostbyaddr_r.
+ */
+#$d_gethostbyaddr_r HAS_GETHOSTBYADDR_R	   /**/
+#define GETHOSTBYADDR_R_PROTO $gethostbyaddr_r_proto	   /**/
+
+/* HAS_GETHOSTBYNAME_R:
+ *	This symbol, if defined, indicates that the gethostbyname_r routine
+ *	is available to gethostbyname re-entrantly.
+ */
+/* GETHOSTBYNAME_R_PROTO:
+ *	This symbol encodes the prototype of gethostbyname_r.
+ */
+#$d_gethostbyname_r HAS_GETHOSTBYNAME_R	   /**/
+#define GETHOSTBYNAME_R_PROTO $gethostbyname_r_proto	   /**/
+
+/* HAS_GETHOSTENT_R:
+ *	This symbol, if defined, indicates that the gethostent_r routine
+ *	is available to gethostent re-entrantly.
+ */
+/* GETHOSTENT_R_PROTO:
+ *	This symbol encodes the prototype of gethostent_r.
+ */
+#$d_gethostent_r HAS_GETHOSTENT_R	   /**/
+#define GETHOSTENT_R_PROTO $gethostent_r_proto	   /**/
+
+/* HAS_GETNETBYADDR_R:
+ *	This symbol, if defined, indicates that the getnetbyaddr_r routine
+ *	is available to getnetbyaddr re-entrantly.
+ */
+/* GETNETBYADDR_R_PROTO:
+ *	This symbol encodes the prototype of getnetbyaddr_r.
+ */
+#$d_getnetbyaddr_r HAS_GETNETBYADDR_R	   /**/
+#define GETNETBYADDR_R_PROTO $getnetbyaddr_r_proto	   /**/
+
+/* HAS_GETNETBYNAME_R:
+ *	This symbol, if defined, indicates that the getnetbyname_r routine
+ *	is available to getnetbyname re-entrantly.
+ */
+/* GETNETBYNAME_R_PROTO:
+ *	This symbol encodes the prototype of getnetbyname_r.
+ */
+#$d_getnetbyname_r HAS_GETNETBYNAME_R	   /**/
+#define GETNETBYNAME_R_PROTO $getnetbyname_r_proto	   /**/
+
+/* HAS_GETNETENT_R:
+ *	This symbol, if defined, indicates that the getnetent_r routine
+ *	is available to getnetent re-entrantly.
+ */
+/* GETNETENT_R_PROTO:
+ *	This symbol encodes the prototype of getnetent_r.
+ */
+#$d_getnetent_r HAS_GETNETENT_R	   /**/
+#define GETNETENT_R_PROTO $getnetent_r_proto	   /**/
+
+/* HAS_GETPROTOBYNAME_R:
+ *	This symbol, if defined, indicates that the getprotobyname_r routine
+ *	is available to getprotobyname re-entrantly.
+ */
+/* GETPROTOBYNAME_R_PROTO:
+ *	This symbol encodes the prototype of getprotobyname_r.
+ */
+#$d_getprotobyname_r HAS_GETPROTOBYNAME_R	   /**/
+#define GETPROTOBYNAME_R_PROTO $getprotobyname_r_proto	   /**/
+
+/* HAS_GETPROTOBYNUMBER_R:
+ *	This symbol, if defined, indicates that the getprotobynumber_r routine
+ *	is available to getprotobynumber re-entrantly.
+ */
+/* GETPROTOBYNUMBER_R_PROTO:
+ *	This symbol encodes the prototype of getprotobynumber_r.
+ */
+#$d_getprotobynumber_r HAS_GETPROTOBYNUMBER_R	   /**/
+#define GETPROTOBYNUMBER_R_PROTO $getprotobynumber_r_proto	   /**/
+
+/* HAS_GETPROTOENT_R:
+ *	This symbol, if defined, indicates that the getprotoent_r routine
+ *	is available to getprotoent re-entrantly.
+ */
+/* GETPROTOENT_R_PROTO:
+ *	This symbol encodes the prototype of getprotoent_r.
+ */
+#$d_getprotoent_r HAS_GETPROTOENT_R	   /**/
+#define GETPROTOENT_R_PROTO $getprotoent_r_proto	   /**/
+
+/* HAS_GETSERVBYNAME_R:
+ *	This symbol, if defined, indicates that the getservbyname_r routine
+ *	is available to getservbyname re-entrantly.
+ */
+/* GETSERVBYNAME_R_PROTO:
+ *	This symbol encodes the prototype of getservbyname_r.
+ */
+#$d_getservbyname_r HAS_GETSERVBYNAME_R	   /**/
+#define GETSERVBYNAME_R_PROTO $getservbyname_r_proto	   /**/
+
+/* HAS_GETSERVBYPORT_R:
+ *	This symbol, if defined, indicates that the getservbyport_r routine
+ *	is available to getservbyport re-entrantly.
+ */
+/* GETSERVBYPORT_R_PROTO:
+ *	This symbol encodes the prototype of getservbyport_r.
+ */
+#$d_getservbyport_r HAS_GETSERVBYPORT_R	   /**/
+#define GETSERVBYPORT_R_PROTO $getservbyport_r_proto	   /**/
+
+/* HAS_GETSERVENT_R:
+ *	This symbol, if defined, indicates that the getservent_r routine
+ *	is available to getservent re-entrantly.
+ */
+/* GETSERVENT_R_PROTO:
+ *	This symbol encodes the prototype of getservent_r.
+ */
+#$d_getservent_r HAS_GETSERVENT_R	   /**/
+#define GETSERVENT_R_PROTO $getservent_r_proto	   /**/
+
 /* HAS_PTHREAD_ATFORK:
  *	This symbol, if defined, indicates that the pthread_atfork routine
  *	is available setup fork handlers.
  */
 #$d_pthread_atfork HAS_PTHREAD_ATFORK		/**/
+
+/* HAS_READDIR64_R:
+ *	This symbol, if defined, indicates that the readdir64_r routine
+ *	is available to readdir64 re-entrantly.
+ */
+/* READDIR64_R_PROTO:
+ *	This symbol encodes the prototype of readdir64_r.
+ */
+#$d_readdir64_r HAS_READDIR64_R	   /**/
+#define READDIR64_R_PROTO $readdir64_r_proto	   /**/
+
+/* HAS_SETHOSTENT_R:
+ *	This symbol, if defined, indicates that the sethostent_r routine
+ *	is available to sethostent re-entrantly.
+ */
+/* SETHOSTENT_R_PROTO:
+ *	This symbol encodes the prototype of sethostent_r.
+ */
+#$d_sethostent_r HAS_SETHOSTENT_R	   /**/
+#define SETHOSTENT_R_PROTO $sethostent_r_proto	   /**/
+
+/* HAS_SETLOCALE_R:
+ *	This symbol, if defined, indicates that the setlocale_r routine
+ *	is available to setlocale re-entrantly.
+ */
+/* SETLOCALE_R_PROTO:
+ *	This symbol encodes the prototype of setlocale_r.
+ */
+#$d_setlocale_r HAS_SETLOCALE_R	   /**/
+#define SETLOCALE_R_PROTO $setlocale_r_proto	   /**/
+
+/* HAS_SETNETENT_R:
+ *	This symbol, if defined, indicates that the setnetent_r routine
+ *	is available to setnetent re-entrantly.
+ */
+/* SETNETENT_R_PROTO:
+ *	This symbol encodes the prototype of setnetent_r.
+ */
+#$d_setnetent_r HAS_SETNETENT_R	   /**/
+#define SETNETENT_R_PROTO $setnetent_r_proto	   /**/
+
+/* HAS_SETPROTOENT_R:
+ *	This symbol, if defined, indicates that the setprotoent_r routine
+ *	is available to setprotoent re-entrantly.
+ */
+/* SETPROTOENT_R_PROTO:
+ *	This symbol encodes the prototype of setprotoent_r.
+ */
+#$d_setprotoent_r HAS_SETPROTOENT_R	   /**/
+#define SETPROTOENT_R_PROTO $setprotoent_r_proto	   /**/
+
+/* HAS_SETSERVENT_R:
+ *	This symbol, if defined, indicates that the setservent_r routine
+ *	is available to setservent re-entrantly.
+ */
+/* SETSERVENT_R_PROTO:
+ *	This symbol encodes the prototype of setservent_r.
+ */
+#$d_setservent_r HAS_SETSERVENT_R	   /**/
+#define SETSERVENT_R_PROTO $setservent_r_proto	   /**/
+
+/* HAS_TTYNAME_R:
+ *	This symbol, if defined, indicates that the ttyname_r routine
+ *	is available to ttyname re-entrantly.
+ */
+/* TTYNAME_R_PROTO:
+ *	This symbol encodes the prototype of ttyname_r.
+ */
+#$d_ttyname_r HAS_TTYNAME_R	   /**/
+#define TTYNAME_R_PROTO $ttyname_r_proto	   /**/
 
 #endif
 !GROK!THIS!
