@@ -7,7 +7,7 @@ require Exporter;
 use Carp;
 use UNIVERSAL qw(isa);
 
-$VERSION = '1.1';
+$VERSION = '1.1001';
 @ISA = qw(Exporter);
 @EXPORT = qw(compare);
 @EXPORT_OK = qw(cmp);
@@ -27,7 +27,7 @@ sub compare {
     my $to = shift;
     my $closefrom=0;
     my $closeto=0;
-    my ($size, $status, $fr, $tr, $fbuf, $tbuf);
+    my ($size, $fromsize, $status, $fr, $tr, $fbuf, $tbuf);
     local(*FROM, *TO);
     local($\) = '';
 
@@ -42,6 +42,7 @@ sub compare {
 	open(FROM,"<$from") or goto fail_open1;
 	binmode FROM;
 	$closefrom = 1;
+	$fromsize = -s FROM;
     }
 
     if (ref($to) && (isa($to,'GLOB') || isa($to,'IO::Handle'))) {
@@ -54,11 +55,16 @@ sub compare {
 	$closeto = 1;
     }
 
+    if ($closefrom && $closeto) {
+	# If both are opened files we know they differ if their size differ
+	goto fail_inner if $fromsize != -s TO;
+    }
+
     if (@_) {
 	$size = shift(@_) + 0;
 	croak("Bad buffer size for compare: $size\n") unless ($size > 0);
     } else {
-	$size = -s FROM;
+	$size = $fromsize;
 	$size = 1024 if ($size < 512);
 	$size = $Too_Big if ($size > $Too_Big);
     }
