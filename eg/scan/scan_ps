@@ -1,6 +1,6 @@
 #!/usr/bin/perl -P
 
-# $Header: scan_ps,v 2.0 88/06/05 00:17:51 root Exp $
+# $Header: scan_ps,v 3.0 89/10/18 15:15:47 lwall Locked $
 
 # This looks for looping processes.
 

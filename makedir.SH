@@ -15,12 +15,11 @@ esac
 echo "Extracting makedir (with variable substitutions)"
 $spitshell >makedir <<!GROK!THIS!
 $startsh
-# $Header: makedir.SH,v 2.0 88/06/05 00:09:13 root Exp $
+# $Header: makedir.SH,v 3.0 89/10/18 15:20:27 lwall Locked $
 # 
 # $Log:	makedir.SH,v $
-# Revision 2.0  88/06/05  00:09:13  root
-# Baseline version 2.0.
-# 
+# Revision 3.0  89/10/18  15:20:27  lwall
+# 3.0 baseline
 # 
 
 export PATH || (echo "OOPS, this isn't sh.  Desperation time.  I will feed myself to sh."; sh \$0; kill \$\$)

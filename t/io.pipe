@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: io.pipe,v 2.0 88/06/05 00:13:05 root Exp $
+# $Header: io.pipe,v 3.0 89/10/18 15:26:30 lwall Locked $
 
 $| = 1;
 print "1..4\n";
@@ -16,6 +16,6 @@ if (open(PIPE, "-|")) {
     }
 }
 else {
-    print stdout "ok 3\n";
+    print STDOUT "ok 3\n";
     exec 'echo', 'ok 4';
 }

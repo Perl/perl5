@@ -1,8 +1,8 @@
 #!./perl
 
-# $Header: base.lex,v 2.0 88/06/05 00:12:06 root Exp $
+# $Header: base.lex,v 3.0 89/10/18 15:24:24 lwall Locked $
 
-print "1..7\n";
+print "1..18\n";
 
 $ # this is the register <space>
 = 'x';
@@ -35,3 +35,44 @@ eval '$foo = 123+123.4+123e4+123.4E5+123.4e+5+.12;';
 
 $foo = int($foo * 100 + .5);
 if ($foo eq 2591024652) {print "ok 7\n";} else {print "not ok 7\n";}
+
+print <<'EOF';
+ok 8
+EOF
+
+$foo = 'ok 9';
+print <<EOF;
+$foo
+EOF
+
+eval <<\EOE, print $@;
+print <<'EOF';
+ok 10
+EOF
+
+$foo = 'ok 11';
+print <<EOF;
+$foo
+EOF
+EOE
+
+print <<`EOS` . <<\EOF;
+echo ok 12
+EOS
+ok 13
+EOF
+
+print qq/ok 14\n/;
+print qq(ok 15\n);
+
+print qq
+ok 16\n
+;
+
+print q<ok 17
+>;
+
+print <<;   # Yow!
+ok 18
+
+# previous line intentionally left blank.

@@ -1,6 +1,6 @@
 #!./perl -P
 
-# $Header: comp.cpp,v 2.0 88/06/05 00:12:37 root Exp $
+# $Header: comp.cpp,v 3.0 89/10/18 15:25:19 lwall Locked $
 
 print "1..3\n";
 

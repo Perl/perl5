@@ -1,26 +1,32 @@
-/* $Header: util.h,v 2.0 88/06/05 00:15:15 root Exp $
+/* $Header: util.h,v 3.0 89/10/18 15:33:18 lwall Locked $
+ *
+ *    Copyright (c) 1989, Larry Wall
+ *
+ *    You may distribute under the terms of the GNU General Public License
+ *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	util.h,v $
- * Revision 2.0  88/06/05  00:15:15  root
- * Baseline version 2.0.
+ * Revision 3.0  89/10/18  15:33:18  lwall
+ * 3.0 baseline
  * 
  */
 
-int *screamfirst INIT(Null(int*));
-int *screamnext INIT(Null(int*));
-int *screamcount INIT(Null(int*));
+EXT int *screamfirst INIT(Null(int*));
+EXT int *screamnext INIT(Null(int*));
 
 char	*safemalloc();
 char	*saferealloc();
 char	*cpytill();
 char	*instr();
-char	*bminstr();
 char	*fbminstr();
 char	*screaminstr();
-void	bmcompile();
 void	fbmcompile();
-char	*get_a_line();
 char	*savestr();
 void	setenv();
 int	envix();
 void	growstr();
+char	*ninstr();
+char	*rninstr();
+char	*nsavestr();
+FILE	*mypopen();
+int	mypclose();

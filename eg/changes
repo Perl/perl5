@@ -1,6 +1,6 @@
 #!/usr/bin/perl -P
 
-# $Header: changes,v 2.0 88/06/05 00:16:41 root Exp $
+# $Header: changes,v 3.0 89/10/18 15:13:23 lwall Locked $
 
 ($dir, $days) = @ARGV;
 $dir = '/' if $dir eq '';

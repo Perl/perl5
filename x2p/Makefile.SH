@@ -1,3 +1,6 @@
+case "$0" in
+*/*) cd `expr X$0 : 'X\(.*\)/'` ;;
+esac
 case $CONFIG in
 '')
     if test ! -f config.sh; then
@@ -9,18 +12,24 @@ case $CONFIG in
     . ./config.sh
     ;;
 esac
-case "$0" in
-*/*) cd `expr X$0 : 'X\(.*\)/'` ;;
-esac
 case "$mallocsrc" in
 '') ;;
 *) mallocsrc="../$mallocsrc";;
 esac
 echo "Extracting x2p/Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 2.0 88/06/05 00:15:31 root Exp $
+# $Header: Makefile.SH,v 3.0 89/10/18 15:33:52 lwall Locked $
 #
 # $Log:	Makefile.SH,v $
+# Revision 3.0  89/10/18  15:33:52  lwall
+# 3.0 baseline
+# 
+# Revision 2.0.1.2  88/09/07  17:13:30  lwall
+# patch14: added redirection of stderr to /dev/null
+# 
+# Revision 2.0.1.1  88/07/11  23:13:39  root
+# patch2: now expects more shift/reduce errors
+# 
 # Revision 2.0  88/06/05  00:15:31  root
 # Baseline version 2.0.
 # 
@@ -31,14 +40,14 @@ bin = $bin
 lib = $lib
 mansrc = $mansrc
 manext = $manext
-CFLAGS = $ccflags -O
+CFLAGS = $ccflags $optimize
 LDFLAGS = $ldflags
 SMALL = $small
 LARGE = $large $split
 mallocsrc = $mallocsrc
 mallocobj = $mallocobj
 
-libs = $libnm -lm
+libs = $libnm -lm $libs
 !GROK!THIS!
 
 cat >>Makefile <<'!NO!SUBS!'
@@ -73,24 +82,21 @@ all: $(public) $(private) $(util)
 	touch all
 
 a2p: $(obj) a2p.o
-	$(CC) $(LDFLAGS) $(LARGE) $(obj) a2p.o $(libs) -o a2p
+	$(CC) $(LARGE) $(LDFLAGS) $(obj) a2p.o $(libs) -o a2p
 
 a2p.c: a2p.y
-	@ echo Expect 103 shift/reduce errors...
+	@ echo Expect 208 shift/reduce conflicts...
 	yacc a2p.y
 	mv y.tab.c a2p.c
 
 a2p.o: a2p.c a2py.c a2p.h EXTERN.h util.h INTERN.h handy.h ../config.h
 	$(CC) -c $(CFLAGS) $(LARGE) a2p.c
 
-# if a .h file depends on another .h file...
-$(h):
-	touch $@
 install: a2p s2p
 # won't work with csh
 	export PATH || exit 1
 	- mv $(bin)/a2p $(bin)/a2p.old 2>/dev/null
-	- mv $(bin)/s2p $(bin)/s2p.old
+	- mv $(bin)/s2p $(bin)/s2p.old 2>/dev/null
 	- if test `pwd` != $(bin); then cp $(public) $(bin); fi
 	cd $(bin); \
 for pub in $(public); do \

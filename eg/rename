@@ -1,0 +1,13 @@
+#!/usr/bin/perl
+
+($op = shift) || die "Usage: rename perlexpr [filenames]\n";
+if ($#ARGV < 0) {
+    @ARGV = <stdin>;
+    chop(@ARGV);
+}
+for (@ARGV) {
+    $was = $_;
+    eval $op;
+    die $@ if $@;
+    rename($was,$_) unless $was eq $_;
+}

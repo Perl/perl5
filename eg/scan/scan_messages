@@ -1,10 +1,10 @@
 #!/usr/bin/perl -P
 
-# $Header: scan_messages,v 2.0 88/06/05 00:17:46 root Exp $
+# $Header: scan_messages,v 3.0 89/10/18 15:15:38 lwall Locked $
 
 # This prints out extraordinary console messages.  You'll need to customize.
 
-chdir('/usr/adm/private/memories') || die "Can't cd.";
+chdir('/usr/adm/private/memories') || die "Can't cd to memories: $!\n";
 
 $maxpos = `cat oldmsgs 2>&1`;
 
@@ -197,12 +197,12 @@ while (<Msgs>) {
 }
 $max = tell(Msgs);
 
-open(tmp,'|sort >oldmsgs.tmp') || die "Can't create tmp file.";
+open(tmp,'|sort >oldmsgs.tmp') || die "Can't create tmp file: $!\n";
 while ($_ = pop(@seen)) {
     print tmp $_;
 }
 close(tmp);
-open(tmp,'oldmsgs.tmp') || die "Can't reopen tmp file.";
+open(tmp,'oldmsgs.tmp') || die "Can't reopen tmp file: $!\n";
 while (<tmp>) {
     if (/^nd:/) {
 	next if $seen{$_} < 20;

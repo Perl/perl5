@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: op.do,v 2.0 88/06/05 00:13:36 root Exp $
+# $Header: op.do,v 3.0 89/10/18 15:28:43 lwall Locked $
 
 sub foo1
 {

@@ -1,10 +1,10 @@
 #!/usr/bin/perl -P
 
-# $Header: scan_sudo,v 2.0 88/06/05 00:18:01 root Exp $
+# $Header: scan_sudo,v 3.0 89/10/18 15:15:52 lwall Locked $
 
 # Analyze the sudo log.
 
-chdir('/usr/adm/private/memories') || die "Can't cd.";
+chdir('/usr/adm/private/memories') || die "Can't cd to memories: $!\n";
 
 if (open(Oldsudo,'oldsudo')) {
     $maxpos = <Oldsudo>;
@@ -41,12 +41,12 @@ while (<Sudo>) {
 }
 $max = tell(Sudo);
 
-open(tmp,'|sort >oldsudo.tmp') || die "Can't create tmp file.";
+open(tmp,'|sort >oldsudo.tmp') || die "Can't create tmp file: $!\n";
 while ($_ = pop(@seen)) {
     print tmp $_;
 }
 close(tmp);
-open(tmp,'oldsudo.tmp') || die "Can't reopen tmp file.";
+open(tmp,'oldsudo.tmp') || die "Can't reopen tmp file: $!\n";
 while (<tmp>) {
     print $seen{$_},":\t",$_;
 }

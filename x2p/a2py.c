@@ -1,8 +1,13 @@
-/* $Header: a2py.c,v 2.0 88/06/05 00:15:41 root Exp $
+/* $Header: a2py.c,v 3.0 89/10/18 15:34:35 lwall Locked $
+ *
+ *    Copyright (c) 1989, Larry Wall
+ *
+ *    You may distribute under the terms of the GNU General Public License
+ *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	a2py.c,v $
- * Revision 2.0  88/06/05  00:15:41  root
- * Baseline version 2.0.
+ * Revision 3.0  89/10/18  15:34:35  lwall
+ * 3.0 baseline
  * 
  */
 
@@ -12,6 +17,7 @@ char *index();
 char *filename;
 
 int checkers = 0;
+STR *walk();
 
 main(argc,argv,env)
 register int argc;
@@ -21,7 +27,6 @@ register char **env;
     register STR *str;
     register char *s;
     int i;
-    STR *walk();
     STR *tmpstr;
 
     linestr = str_new(80);
@@ -79,6 +84,7 @@ register char **env;
 
     bufptr = str_get(linestr);
     symtab = hnew();
+    curarghash = hnew();
 
     /* now parse the report spec */
 
@@ -114,8 +120,12 @@ register char **env;
 
     /* second pass to produce new program */
 
-    tmpstr = walk(0,0,root,&i);
-    str = str_make("#!/usr/bin/perl\neval \"exec /usr/bin/perl -S $0 $*\"\n\
+    tmpstr = walk(0,0,root,&i,P_MIN);
+    str = str_make("#!");
+    str_cat(str, BIN);
+    str_cat(str, "/perl\neval \"exec ");
+    str_cat(str, BIN);
+    str_cat(str, "/perl -S $0 $*\"\n\
     if $running_under_some_shell;\n\
 			# this emulates #! processing on NIH machines.\n\
 			# (remove #! line above if indigestible)\n\n");
@@ -148,7 +158,9 @@ register char **env;
 #define RETURN(retval) return (bufptr = s,retval)
 #define XTERM(retval) return (expectterm = TRUE,bufptr = s,retval)
 #define XOP(retval) return (expectterm = FALSE,bufptr = s,retval)
-#define ID(x) return (yylval=string(x,0),expectterm = FALSE,bufptr = s,VAR)
+#define ID(x) return (yylval=string(x,0),expectterm = FALSE,bufptr = s,idtype)
+
+int idtype;
 
 yylex()
 {
@@ -203,10 +215,14 @@ yylex()
 	}
 	XTERM(tmp);
     case '(':
+	tmp = *s++;
+	XTERM(tmp);
     case '{':
     case '[':
     case ')':
     case ']':
+    case '?':
+    case ':':
 	tmp = *s++;
 	XOP(tmp);
     case 127:
@@ -237,9 +253,13 @@ yylex()
 	/* FALL THROUGH */
     case '*':
     case '%':
+    case '^':
 	tmp = *s++;
 	if (*s == '=') {
-	    yylval = string(s-1,2);
+	    if (tmp == '^')
+		yylval = string("**=",3);
+	    else
+		yylval = string(s-1,2);
 	    s++;
 	    XTERM(ASGNOP);
 	}
@@ -257,7 +277,12 @@ yylex()
 	if (tmp == '|')
 	    XTERM(OROR);
 	s--;
-	XTERM('|');
+	while (*s == ' ' || *s == '\t')
+	    s++;
+	if (strnEQ(s,"getline",7))
+	    XTERM('p');
+	else
+	    XTERM('|');
     case '=':
 	s++;
 	tmp = *s++;
@@ -289,8 +314,7 @@ yylex()
 	    XTERM(RELOP);
 	}
 	s--;
-	yylval = string("<",1);
-	XTERM(RELOP);
+	XTERM('<');
     case '>':
 	s++;
 	tmp = *s++;
@@ -303,15 +327,18 @@ yylex()
 	    XTERM(RELOP);
 	}
 	s--;
-	yylval = string(">",1);
-	XTERM(RELOP);
+	XTERM('>');
 
 #define SNARFWORD \
 	d = tokenbuf; \
 	while (isalpha(*s) || isdigit(*s) || *s == '_') \
 	    *d++ = *s++; \
 	*d = '\0'; \
-	d = tokenbuf;
+	d = tokenbuf; \
+	if (*s == '(') \
+	    idtype = USERFUN; \
+	else \
+	    idtype = VAR;
 
     case '$':
 	s++;
@@ -319,6 +346,7 @@ yylex()
 	    s++;
 	    do_chop = TRUE;
 	    need_entire = TRUE;
+	    idtype = VAR;
 	    ID("0");
 	}
 	do_split = TRUE;
@@ -347,7 +375,7 @@ yylex()
 	XTERM(tmp);
 
     case '0': case '1': case '2': case '3': case '4':
-    case '5': case '6': case '7': case '8': case '9':
+    case '5': case '6': case '7': case '8': case '9': case '.':
 	s = scannum(s);
 	XOP(NUMBER);
     case '"':
@@ -361,6 +389,16 @@ yylex()
 
     case 'a': case 'A':
 	SNARFWORD;
+	if (strEQ(d,"ARGC"))
+	    set_array_base = TRUE;
+	if (strEQ(d,"ARGV")) {
+	    yylval=numary(string("ARGV",0));
+	    XOP(VAR);
+	}
+	if (strEQ(d,"atan2")) {
+	    yylval = OATAN2;
+	    XTERM(FUNN);
+	}
 	ID(d);
     case 'b': case 'B':
 	SNARFWORD;
@@ -373,9 +411,34 @@ yylex()
 	SNARFWORD;
 	if (strEQ(d,"continue"))
 	    XTERM(CONTINUE);
+	if (strEQ(d,"cos")) {
+	    yylval = OCOS;
+	    XTERM(FUN1);
+	}
+	if (strEQ(d,"close")) {
+	    do_fancy_opens = 1;
+	    yylval = OCLOSE;
+	    XTERM(FUN1);
+	}
+	if (strEQ(d,"chdir"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"crypt"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"chop"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"chmod"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"chown"))
+	    *d = toupper(*d);
 	ID(d);
     case 'd': case 'D':
 	SNARFWORD;
+	if (strEQ(d,"do"))
+	    XTERM(DO);
+	if (strEQ(d,"delete"))
+	    XTERM(DELETE);
+	if (strEQ(d,"die"))
+	    *d = toupper(*d);
 	ID(d);
     case 'e': case 'E':
 	SNARFWORD;
@@ -391,6 +454,18 @@ yylex()
 	    yylval = OEXP;
 	    XTERM(FUN1);
 	}
+	if (strEQ(d,"elsif"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"eq"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"eval"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"eof"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"each"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"exec"))
+	    *d = toupper(*d);
 	ID(d);
     case 'f': case 'F':
 	SNARFWORD;
@@ -406,18 +481,40 @@ yylex()
 	    }
 	    ID(tokenbuf);
 	}
-	if (strEQ(d,"FILENAME"))
-	    d = "ARGV";
 	if (strEQ(d,"for"))
 	    XTERM(FOR);
+	else if (strEQ(d,"function"))
+	    XTERM(FUNCTION);
+	if (strEQ(d,"FILENAME"))
+	    d = "ARGV";
+	if (strEQ(d,"foreach"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"format"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"fork"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"fh"))
+	    *d = toupper(*d);
 	ID(d);
     case 'g': case 'G':
 	SNARFWORD;
 	if (strEQ(d,"getline"))
 	    XTERM(GETLINE);
+	if (strEQ(d,"gsub"))
+	    XTERM(GSUB);
+	if (strEQ(d,"ge"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"gt"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"goto"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"gmtime"))
+	    *d = toupper(*d);
 	ID(d);
     case 'h': case 'H':
 	SNARFWORD;
+	if (strEQ(d,"hex"))
+	    *d = toupper(*d);
 	ID(d);
     case 'i': case 'I':
 	SNARFWORD;
@@ -436,9 +533,15 @@ yylex()
 	ID(d);
     case 'j': case 'J':
 	SNARFWORD;
+	if (strEQ(d,"join"))
+	    *d = toupper(*d);
 	ID(d);
     case 'k': case 'K':
 	SNARFWORD;
+	if (strEQ(d,"keys"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"kill"))
+	    *d = toupper(*d);
 	ID(d);
     case 'l': case 'L':
 	SNARFWORD;
@@ -450,9 +553,27 @@ yylex()
 	    yylval = OLOG;
 	    XTERM(FUN1);
 	}
+	if (strEQ(d,"last"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"local"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"lt"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"le"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"locatime"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"link"))
+	    *d = toupper(*d);
 	ID(d);
     case 'm': case 'M':
 	SNARFWORD;
+	if (strEQ(d,"match")) {
+	    set_array_base = TRUE;
+	    XTERM(MATCH);
+	}
+	if (strEQ(d,"m"))
+	    *d = toupper(*d);
 	ID(d);
     case 'n': case 'N':
 	SNARFWORD;
@@ -462,20 +583,28 @@ yylex()
 	    saw_line_op = TRUE;
 	    XTERM(NEXT);
 	}
+	if (strEQ(d,"ne"))
+	    *d = toupper(*d);
 	ID(d);
     case 'o': case 'O':
 	SNARFWORD;
 	if (strEQ(d,"ORS")) {
 	    saw_ORS = TRUE;
-	    d = "$\\";
+	    d = "\\";
 	}
 	if (strEQ(d,"OFS")) {
 	    saw_OFS = TRUE;
-	    d = "$,";
+	    d = ",";
 	}
 	if (strEQ(d,"OFMT")) {
-	    d = "$#";
+	    d = "#";
 	}
+	if (strEQ(d,"open"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"ord"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"oct"))
+	    *d = toupper(*d);
 	ID(d);
     case 'p': case 'P':
 	SNARFWORD;
@@ -485,6 +614,10 @@ yylex()
 	if (strEQ(d,"printf")) {
 	    XTERM(PRINTF);
 	}
+	if (strEQ(d,"push"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"pop"))
+	    *d = toupper(*d);
 	ID(d);
     case 'q': case 'Q':
 	SNARFWORD;
@@ -492,9 +625,21 @@ yylex()
     case 'r': case 'R':
 	SNARFWORD;
 	if (strEQ(d,"RS")) {
-	    d = "$/";
+	    d = "/";
 	    saw_RS = TRUE;
 	}
+	if (strEQ(d,"rand")) {
+	    yylval = ORAND;
+	    XTERM(FUN1);
+	}
+	if (strEQ(d,"return"))
+	    XTERM(RET);
+	if (strEQ(d,"reset"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"redo"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"rename"))
+	    *d = toupper(*d);
 	ID(d);
     case 's': case 'S':
 	SNARFWORD;
@@ -506,32 +651,97 @@ yylex()
 	    set_array_base = TRUE;
 	    XTERM(SUBSTR);
 	}
+	if (strEQ(d,"sub"))
+	    XTERM(SUB);
 	if (strEQ(d,"sprintf"))
 	    XTERM(SPRINTF);
 	if (strEQ(d,"sqrt")) {
 	    yylval = OSQRT;
 	    XTERM(FUN1);
 	}
+	if (strEQ(d,"SUBSEP")) {
+	    d = ";";
+	}
+	if (strEQ(d,"sin")) {
+	    yylval = OSIN;
+	    XTERM(FUN1);
+	}
+	if (strEQ(d,"srand")) {
+	    yylval = OSRAND;
+	    XTERM(FUN1);
+	}
+	if (strEQ(d,"system")) {
+	    yylval = OSYSTEM;
+	    XTERM(FUN1);
+	}
+	if (strEQ(d,"s"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"shift"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"select"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"seek"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"stat"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"study"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"sleep"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"symlink"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"sort"))
+	    *d = toupper(*d);
 	ID(d);
     case 't': case 'T':
 	SNARFWORD;
+	if (strEQ(d,"tr"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"tell"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"time"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"times"))
+	    *d = toupper(*d);
 	ID(d);
     case 'u': case 'U':
 	SNARFWORD;
+	if (strEQ(d,"until"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"unless"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"umask"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"unshift"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"unlink"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"utime"))
+	    *d = toupper(*d);
 	ID(d);
     case 'v': case 'V':
 	SNARFWORD;
+	if (strEQ(d,"values"))
+	    *d = toupper(*d);
 	ID(d);
     case 'w': case 'W':
 	SNARFWORD;
 	if (strEQ(d,"while"))
 	    XTERM(WHILE);
+	if (strEQ(d,"write"))
+	    *d = toupper(*d);
+	else if (strEQ(d,"wait"))
+	    *d = toupper(*d);
 	ID(d);
     case 'x': case 'X':
 	SNARFWORD;
+	if (strEQ(d,"x"))
+	    *d = toupper(*d);
 	ID(d);
     case 'y': case 'Y':
 	SNARFWORD;
+	if (strEQ(d,"y"))
+	    *d = toupper(*d);
 	ID(d);
     case 'z': case 'Z':
 	SNARFWORD;
@@ -634,6 +844,8 @@ char *ptr;
     ops[mop].cval = safemalloc(len+1);
     strncpy(ops[mop].cval,ptr,len);
     ops[mop++].cval[len] = '\0';
+    if (mop >= OPSMAX)
+	fatal("Recompile a2p with larger OPSMAX\n");
     return retval;
 }
 
@@ -645,6 +857,8 @@ int type;
     if (type > 255)
 	fatal("type > 255 (%d)\n",type);
     ops[mop++].ival = type;
+    if (mop >= OPSMAX)
+	fatal("Recompile a2p with larger OPSMAX\n");
     return retval;
 }
 
@@ -658,6 +872,8 @@ int arg1;
 	fatal("type > 255 (%d)\n",type);
     ops[mop++].ival = type + (1<<8);
     ops[mop++].ival = arg1;
+    if (mop >= OPSMAX)
+	fatal("Recompile a2p with larger OPSMAX\n");
     return retval;
 }
 
@@ -673,6 +889,8 @@ int arg2;
     ops[mop++].ival = type + (2<<8);
     ops[mop++].ival = arg1;
     ops[mop++].ival = arg2;
+    if (mop >= OPSMAX)
+	fatal("Recompile a2p with larger OPSMAX\n");
     return retval;
 }
 
@@ -690,6 +908,8 @@ int arg3;
     ops[mop++].ival = arg1;
     ops[mop++].ival = arg2;
     ops[mop++].ival = arg3;
+    if (mop >= OPSMAX)
+	fatal("Recompile a2p with larger OPSMAX\n");
     return retval;
 }
 
@@ -709,6 +929,8 @@ int arg4;
     ops[mop++].ival = arg2;
     ops[mop++].ival = arg3;
     ops[mop++].ival = arg4;
+    if (mop >= OPSMAX)
+	fatal("Recompile a2p with larger OPSMAX\n");
     return retval;
 }
 
@@ -730,6 +952,8 @@ int arg5;
     ops[mop++].ival = arg3;
     ops[mop++].ival = arg4;
     ops[mop++].ival = arg5;
+    if (mop >= OPSMAX)
+	fatal("Recompile a2p with larger OPSMAX\n");
     return retval;
 }
 
@@ -902,10 +1126,121 @@ int arg;
     STR *key;
     int dummy;
 
-    key = walk(0,0,arg,&dummy);
+    key = walk(0,0,arg,&dummy,P_MIN);
     str_cat(key,"[]");
     hstore(symtab,key->str_ptr,str_make("1"));
     str_free(key);
     set_array_base = TRUE;
     return arg;
 }
+
+rememberargs(arg)
+int arg;
+{
+    int type;
+    STR *str;
+
+    if (!arg)
+	return arg;
+    type = ops[arg].ival & 255;
+    if (type == OCOMMA) {
+	rememberargs(ops[arg+1].ival);
+	rememberargs(ops[arg+3].ival);
+    }
+    else if (type == OVAR) {
+	str = str_new(0);
+	hstore(curarghash,ops[ops[arg+1].ival+1].cval,str);
+    }
+    else
+	fatal("panic: unknown argument type %d, line %d\n",type,line);
+    return arg;
+}
+
+aryrefarg(arg)
+int arg;
+{
+    int type = ops[arg].ival & 255;
+    STR *str;
+
+    if (type != OSTRING)
+	fatal("panic: aryrefarg %d, line %d\n",type,line);
+    str = hfetch(curarghash,ops[arg+1].cval);
+    if (str)
+	str_set(str,"*");
+    return arg;
+}
+
+fixfargs(name,arg,prevargs)
+int name;
+int arg;
+int prevargs;
+{
+    int type;
+    STR *str;
+    int numargs;
+
+    if (!arg)
+	return prevargs;
+    type = ops[arg].ival & 255;
+    if (type == OCOMMA) {
+	numargs = fixfargs(name,ops[arg+1].ival,prevargs);
+	numargs = fixfargs(name,ops[arg+3].ival,numargs);
+    }
+    else if (type == OVAR) {
+	str = hfetch(curarghash,ops[ops[arg+1].ival+1].cval);
+	if (strEQ(str_get(str),"*")) {
+	    char tmpbuf[128];
+
+	    str_set(str,"");		/* in case another routine has this */
+	    ops[arg].ival &= ~255;
+	    ops[arg].ival |= OSTAR;
+	    sprintf(tmpbuf,"%s:%d",ops[name+1].cval,prevargs);
+	    fprintf(stderr,"Adding %s\n",tmpbuf);
+	    str = str_new(0);
+	    str_set(str,"*");
+	    hstore(curarghash,tmpbuf,str);
+	}
+	numargs = prevargs + 1;
+    }
+    else
+	fatal("panic: unknown argument type %d, arg %d, line %d\n",
+	  type,numargs+1,line);
+    return numargs;
+}
+
+fixrargs(name,arg,prevargs)
+char *name;
+int arg;
+int prevargs;
+{
+    int type;
+    STR *str;
+    int numargs;
+
+    if (!arg)
+	return prevargs;
+    type = ops[arg].ival & 255;
+    if (type == OCOMMA) {
+	numargs = fixrargs(name,ops[arg+1].ival,prevargs);
+	numargs = fixrargs(name,ops[arg+3].ival,numargs);
+    }
+    else {
+	char tmpbuf[128];
+
+	sprintf(tmpbuf,"%s:%d",name,prevargs);
+	str = hfetch(curarghash,tmpbuf);
+	fprintf(stderr,"Looking for %s\n",tmpbuf);
+	if (str && strEQ(str->str_ptr,"*")) {
+	    if (type == OVAR || type == OSTAR) {
+		ops[arg].ival &= ~255;
+		ops[arg].ival |= OSTAR;
+	    }
+	    else
+		fatal("Can't pass expression by reference as arg %d of %s\n",
+		    prevargs+1, name);
+	}
+	numargs = prevargs + 1;
+    }
+    return numargs;
+}
+

@@ -1,8 +1,8 @@
 #!./perl
 
-# $Header: cmd.mod,v 2.0 88/06/05 00:12:23 root Exp $
+# $Header: cmd.mod,v 3.0 89/10/18 15:24:48 lwall Locked $
 
-print "1..6\n";
+print "1..7\n";
 
 print "ok 1\n" if 1;
 print "not ok 1\n" unless 1;
@@ -26,3 +26,8 @@ if (join(' ',@x) eq '0 1 2 3 4 5 6 7 8 9 10') {
 $x = 15;
 $x = 10 while $x < 10;
 if ($x == 15) {print "ok 6\n";} else {print "not ok 6\n";}
+
+open(foo,'TEST') || open(foo,'t/TEST');
+$x = 0;
+$x++ while <foo>;
+print $x > 50 && $x < 1000 ? "ok 7\n" : "not ok 7\n";

@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: io.fs,v 2.0 88/06/05 00:12:59 root Exp $
+# $Header: io.fs,v 3.0 89/10/18 15:26:20 lwall Locked $
 
 print "1..22\n";
 
@@ -56,12 +56,13 @@ if (rename('a','b')) {print "ok 14\n";} else {print "not ok 14\n";}
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('a');
 if ($ino == 0) {print "ok 15\n";} else {print "not ok 15\n";}
-$foo = (utime 0,1,'b');
+$foo = (utime 500000000,500000001,'b');
 if ($foo == 1) {print "ok 16\n";} else {print "not ok 16 $foo\n";}
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('b');
 if ($ino) {print "ok 17\n";} else {print "not ok 17\n";}
-if ($atime == 0 && $mtime == 1) {print "ok 18\n";} else {print "not ok 18 $atime $mtime\n";}
+if ($atime == 500000000 && $mtime == 500000001)
+    {print "ok 18\n";} else {print "not ok 18 $atime $mtime\n";}
 
 if ((unlink 'b') == 1) {print "ok 19\n";} else {print "not ok 19\n";}
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,

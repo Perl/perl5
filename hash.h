@@ -1,12 +1,19 @@
-/* $Header: hash.h,v 2.0 88/06/05 00:09:08 root Exp $
+/* $Header: hash.h,v 3.0 89/10/18 15:18:39 lwall Locked $
+ *
+ *    Copyright (c) 1989, Larry Wall
+ *
+ *    You may distribute under the terms of the GNU General Public License
+ *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	hash.h,v $
- * Revision 2.0  88/06/05  00:09:08  root
- * Baseline version 2.0.
+ * Revision 3.0  89/10/18  15:18:39  lwall
+ * 3.0 baseline
  * 
  */
 
-#define FILLPCT 60		/* don't make greater than 99 */
+#define FILLPCT 80		/* don't make greater than 99 */
+#define DBM_CACHE_MAX 63	/* cache 64 entries for dbm file */
+				/* (resident array acts as a write-thru cache)*/
 
 #define COEFFSIZE (16 * 8)	/* size of array below */
 #ifdef DOINIT
@@ -30,14 +37,25 @@ struct hentry {
     char	*hent_key;
     STR		*hent_val;
     int		hent_hash;
+    int		hent_klen;
 };
 
 struct htbl {
     HENT	**tbl_array;
-    int		tbl_max;
-    int		tbl_fill;
+    int		tbl_max;	/* subscript of last element of tbl_array */
+    int		tbl_dosplit;	/* how full to get before splitting */
+    int		tbl_fill;	/* how full tbl_array currently is */
     int		tbl_riter;	/* current root of iterator */
     HENT	*tbl_eiter;	/* current entry of iterator */
+    SPAT 	*tbl_spatroot;	/* list of spats for this package */
+#ifdef SOME_DBM
+#ifdef NDBM
+    DBM		*tbl_dbm;
+#else
+    int		tbl_dbm;
+#endif
+#endif
+    unsigned char tbl_coeffsize;	/* is 0 for symbol tables */
 };
 
 STR *hfetch();
@@ -45,9 +63,11 @@ bool hstore();
 STR *hdelete();
 HASH *hnew();
 void hclear();
-void hfree();
 void hentfree();
 int hiterinit();
 HENT *hiternext();
 char *hiterkey();
 STR *hiterval();
+bool hdbmopen();
+void hdbmclose();
+bool hdbmstore();

@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: op.goto,v 2.0 88/06/05 00:13:58 root Exp $
+# $Header: op.goto,v 3.0 89/10/18 15:29:24 lwall Locked $
 
 print "1..3\n";
 

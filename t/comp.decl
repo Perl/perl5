@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: comp.decl,v 2.0 88/06/05 00:12:40 root Exp $
+# $Header: comp.decl,v 3.0 89/10/18 15:25:25 lwall Locked $
 
 # check to see if subroutine declarations work everwhere
 

@@ -1,4 +1,6 @@
-date support
-case statement
-ioctl() support
-random numbers
+ctime to time support
+better format pictures
+pager?
+built-in cpp
+perl to C translator
+multi-threading

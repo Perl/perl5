@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Header: scanner,v 2.0 88/06/05 00:17:42 root Exp $
+# $Header: scanner,v 3.0 89/10/18 15:16:02 lwall Locked $
 
 # This runs all the scan_* routines on all the machines in /etc/ghosts.
 # We run this every morning at about 6 am:
@@ -20,7 +20,7 @@ $| = 1;		# command buffering on stdout
 
 print "Subject: bizarre happenings\n\n";
 
-(chdir '/usr/adm/private') || die "Can't cd.";
+(chdir '/usr/adm/private') || die "Can't cd to /usr/adm/private: $!\n";
 
 if ($#ARGV >= 0) {
     @scanlist = @ARGV;
@@ -60,7 +60,7 @@ scan: while ($scan = shift(@scanlist)) {
 		$iter = 0;
 		`exec crypt -inquire <$scan >.x 2>/dev/null`;
 		unless (open(scan,'.x')) {
-		    print "Can't run $scan.";
+		    print "Can't run $scan: $!\n";
 		    next scan;
 		}
 		$cmd = <scan>;
@@ -78,7 +78,7 @@ scan: while ($scan = shift(@scanlist)) {
 		    }
 		    close(pipe);
 		} else {
-		    print "(Can't execute rsh.)\n";
+		    print "(Can't execute rsh: $!)\n";
 		}
 		last class;
 	    }

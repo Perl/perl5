@@ -25,24 +25,19 @@ esac
 
 echo "Extracting Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 2.0.1.1 88/06/28 16:26:04 root Exp $
+# $Header: Makefile.SH,v 3.0 89/10/18 15:06:43 lwall Locked $
 #
 # $Log:	Makefile.SH,v $
-# Revision 2.0.1.1  88/06/28  16:26:04  root
-# patch1: support for DOSUID
-# patch1: realclean now knows about ~ extension
-# 
-# Revision 2.0  88/06/05  00:07:54  root
-# Baseline version 2.0.
-# 
+# Revision 3.0  89/10/18  15:06:43  lwall
+# 3.0 baseline
 # 
 
 CC = $cc
 bin = $bin
-lib = $privlib
+privlib = $privlib
 mansrc = $mansrc
 manext = $manext
-CFLAGS = $ccflags -O
+CFLAGS = $ccflags $optimize $sockethdr
 LDFLAGS = $ldflags
 SMALL = $small
 LARGE = $large $split
@@ -50,37 +45,47 @@ mallocsrc = $mallocsrc
 mallocobj = $mallocobj
 SLN = $sln
 
-libs = $libnm -lm
+libs = $libnm -lm $libdbm $libs $libndir $socketlib
 
-public = perl perldb $suidperl
+public = perl taintperl $suidperl
 
 !GROK!THIS!
 
 cat >>Makefile <<'!NO!SUBS!'
 private = 
 
-manpages = perl.man perldb.man
+MAKE = make
+
+manpages = perl.man
 
 util =
 
 sh = Makefile.SH makedepend.SH
 
 h1 = EXTERN.h INTERN.h arg.h array.h cmd.h config.h form.h handy.h
-h2 = hash.h perl.h regexp.h spat.h stab.h str.h util.h
+h2 = hash.h perl.h regcomp.h regexp.h spat.h stab.h str.h util.h
 
 h = $(h1) $(h2)
 
-c1 = arg.c array.c cmd.c dump.c eval.c form.c hash.c $(mallocsrc)
-c2 = perly.c regexp.c stab.c str.c toke.c util.c version.c
+c1 = array.c cmd.c cons.c consarg.c doarg.c doio.c dolist.c dump.c
+c2 = eval.c form.c hash.c $(mallocsrc) perly.c regcomp.c regexec.c
+c3 = stab.c str.c toke.c util.c
 
-c = $(c1) $(c2)
+c = $(c1) $(c2) $(c3)
 
-obj1 = arg.o array.o cmd.o dump.o eval.o form.o hash.o $(mallocobj)
-obj2 = regexp.o stab.o str.o toke.o util.o version.o
+obj1 = array.o cmd.o cons.o consarg.o doarg.o doio.o dolist.o dump.o
+obj2 = eval.o form.o hash.o $(mallocobj) perly.o regcomp.o regexec.o
+obj3 = stab.o str.o toke.o util.o
 
-obj = $(obj1) $(obj2)
+obj = $(obj1) $(obj2) $(obj3)
 
-lintflags = -phbvxac
+tobj1 = tarray.o tcmd.o tcons.o tconsarg.o tdoarg.o tdoio.o tdolist.o tdump.o
+tobj2 = teval.o tform.o thash.o $(mallocobj) tregcomp.o tregexec.o
+tobj3 = tstab.o tstr.o ttoke.o tutil.o
+
+tobj = $(tobj1) $(tobj2) $(tobj3)
+
+lintflags = -hbvxac
 
 addedbyconf = Makefile.old bsd eunice filexp loc pdp11 usg v7
 
@@ -90,57 +95,183 @@ SHELL = /bin/sh
 .c.o:
 	$(CC) -c $(CFLAGS) $(LARGE) $*.c
 
-all: $(public) $(private) $(util)
+all: $(public) $(private) $(util) perl.man x2p/all
 	touch all
 
-perl: perly.o $(obj) perl.o
-	$(CC) $(LDFLAGS) $(LARGE) perly.o $(obj) perl.o $(libs) -o perl
+x2p/all:
+	cd x2p; $(MAKE) all
 
-!NO!SUBS!
+# This is the standard version that contains no "taint" checks and is
+# used for all scripts that aren't set-id or running under something set-id.
 
-case "$d_dosuid" in
-*define*)
-    cat >>Makefile <<'!NO!SUBS!'
+perl: perl.o $(obj)
+	$(CC) $(LARGE) $(LDFLAGS) $(obj) perl.o $(libs) -o perl
 
-suidperl: sperly.o $(obj) perl.o
-	$(CC) $(LDFLAGS) $(LARGE) sperly.o $(obj) perl.o $(libs) -o suidperl
+# This version, if specified in Configure, does ONLY those scripts which need
+# set-id emulation.  Suidperl must be setuid root.  It contains the "taint"
+# checks as well as the special code to validate that the script in question
+# has been invoked correctly.
 
-sperly.o: perly.c
+suidperl: tperl.o sperly.o $(tobj)
+	$(CC) $(LARGE) $(LDFLAGS) sperly.o $(tobj) tperl.o $(libs) -o suidperl
+
+# This version interprets scripts that are already set-id either via a wrapper
+# or through the kernel allowing set-id scripts (bad idea).  Taintperl must
+# NOT be setuid to root or anything else.  The only difference between it
+# and normal perl is the presence of the "taint" checks.
+
+taintperl: tperl.o tperly.o $(tobj)
+	$(CC) $(LARGE) $(LDFLAGS) tperly.o $(tobj) tperl.o $(libs) -o taintperl
+
+# Replicating all this junk is yucky, but I don't see a portable way to fix it.
+
+tperl.o: perl.c perly.h perl.h EXTERN.h regexp.h util.h INTERN.h handy.h \
+    config.h stab.h
+	/bin/rm -f tperl.c
+	$(SLN) perl.c tperl.c
+	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tperl.c
+	/bin/rm -f tperl.c
+
+tperly.o: perly.c
+	/bin/rm -f tperly.c
+	$(SLN) perly.c tperly.c
+	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tperly.c
+	/bin/rm -f tperly.c
+
+sperly.o: perly.c perl.h handy.h perly.h patchlevel.h
 	/bin/rm -f sperly.c
-	ln perly.c sperly.c
-	$(CC) -c -DIAMSUID $(CFLAGS) $(LARGE) sperly.c
+	$(SLN) perly.c sperly.c
+	$(CC) -c -DTAINT -DIAMSUID $(CFLAGS) $(LARGE) sperly.c
 	/bin/rm -f sperly.c
-!NO!SUBS!
-    ;;
-esac
 
-cat >>Makefile <<'!NO!SUBS!'
+tarray.o: array.c
+	/bin/rm -f tarray.c
+	$(SLN) array.c tarray.c
+	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tarray.c
+	/bin/rm -f tarray.c
+
+tcmd.o: cmd.c
+	/bin/rm -f tcmd.c
+	$(SLN) cmd.c tcmd.c
+	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tcmd.c
+	/bin/rm -f tcmd.c
+
+tcons.o: cons.c
+	/bin/rm -f tcons.c
+	$(SLN) cons.c tcons.c
+	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tcons.c
+	/bin/rm -f tcons.c
+
+tconsarg.o: consarg.c
+	/bin/rm -f tconsarg.c
+	$(SLN) consarg.c tconsarg.c
+	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tconsarg.c
+	/bin/rm -f tconsarg.c
+
+tdoarg.o: doarg.c
+	/bin/rm -f tdoarg.c
+	$(SLN) doarg.c tdoarg.c
+	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tdoarg.c
+	/bin/rm -f tdoarg.c
+
+tdoio.o: doio.c
+	/bin/rm -f tdoio.c
+	$(SLN) doio.c tdoio.c
+	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tdoio.c
+	/bin/rm -f tdoio.c
+
+tdolist.o: dolist.c
+	/bin/rm -f tdolist.c
+	$(SLN) dolist.c tdolist.c
+	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tdolist.c
+	/bin/rm -f tdolist.c
+
+tdump.o: dump.c
+	/bin/rm -f tdump.c
+	$(SLN) dump.c tdump.c
+	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tdump.c
+	/bin/rm -f tdump.c
+
+teval.o: eval.c
+	/bin/rm -f teval.c
+	$(SLN) eval.c teval.c
+	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) teval.c
+	/bin/rm -f teval.c
+
+tform.o: form.c
+	/bin/rm -f tform.c
+	$(SLN) form.c tform.c
+	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tform.c
+	/bin/rm -f tform.c
+
+thash.o: hash.c
+	/bin/rm -f thash.c
+	$(SLN) hash.c thash.c
+	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) thash.c
+	/bin/rm -f thash.c
+
+tregcomp.o: regcomp.c
+	/bin/rm -f tregcomp.c
+	$(SLN) regcomp.c tregcomp.c
+	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tregcomp.c
+	/bin/rm -f tregcomp.c
+
+tregexec.o: regexec.c
+	/bin/rm -f tregexec.c
+	$(SLN) regexec.c tregexec.c
+	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tregexec.c
+	/bin/rm -f tregexec.c
+
+tstab.o: stab.c
+	/bin/rm -f tstab.c
+	$(SLN) stab.c tstab.c
+	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tstab.c
+	/bin/rm -f tstab.c
+
+tstr.o: str.c
+	/bin/rm -f tstr.c
+	$(SLN) str.c tstr.c
+	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tstr.c
+	/bin/rm -f tstr.c
+
+ttoke.o: toke.c
+	/bin/rm -f ttoke.c
+	$(SLN) toke.c ttoke.c
+	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) ttoke.c
+	/bin/rm -f ttoke.c
+
+tutil.o: util.c
+	/bin/rm -f tutil.c
+	$(SLN) util.c tutil.c
+	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tutil.c
+	/bin/rm -f tutil.c
 
 perl.c perly.h: perl.y
-	@ echo Expect 37 shift/reduce errors...
+	@ echo Expect 25 shift/reduce errors...
 	yacc -d perl.y
 	mv y.tab.c perl.c
 	mv y.tab.h perly.h
 
-perl.o: perl.c perly.h perl.h EXTERN.h regexp.h util.h INTERN.h handy.h config.h
+perl.o: perl.c perly.h perl.h EXTERN.h regexp.h util.h INTERN.h handy.h \
+    config.h arg.h stab.h
 	$(CC) -c $(CFLAGS) $(LARGE) perl.c
 
-# if a .h file depends on another .h file...
-$(h):
-	touch $@
+perl.man: perl.man.1 perl.man.2 perl.man.3 perl.man.4 patchlevel.h perl
+	./perl  -e '($$r,$$p)=$$]=~/(\d+\.\d+).*\n\D*(\d+)/;' \
+		-e 'print ".ds RP Release $$r Patchlevel $$p\n";' >perl.man
+	cat perl.man.[1-4] >>perl.man
 
-perl.man: perl.man.1 perl.man.2
-	cat perl.man.1 perl.man.2 >perl.man
-
-install: perl perl.man
+install: all
 # won't work with csh
 	export PATH || exit 1
+	- rm -f $(bin)/perl.old $(bin)/suidperl $(bin)/taintperl
 	- mv $(bin)/perl $(bin)/perl.old 2>/dev/null
 	- if test `pwd` != $(bin); then cp $(public) $(bin); fi
 	- cd $(bin); \
 for pub in $(public); do \
 chmod +x `basename $$pub`; \
 done
+	- chmod 755 $(bin)/taintperl 2>/dev/null
 !NO!SUBS!
 
 case "$d_dosuid" in
@@ -154,13 +285,12 @@ esac
 cat >>Makefile <<'!NO!SUBS!'
 	- test $(bin) = /usr/bin || rm -f /usr/bin/perl
 	- test $(bin) = /usr/bin || $(SLN) $(bin)/perl /usr/bin || cp $(bin)/perl /usr/bin
-	chmod +x makedir
-	- ./makedir $(lib)
+	- sh ./makedir $(privlib)
 	- \
-if test `pwd` != $(lib); then \
-cp $(private) lib/*.pl $(lib); \
+if test `pwd` != $(privlib); then \
+cp $(private) lib/*.pl $(privlib); \
 fi
-#	cd $(lib); \
+#	cd $(privlib); \
 #for priv in $(private); do \
 #chmod +x `basename $$priv`; \
 #done
@@ -169,12 +299,17 @@ for page in $(manpages); do \
 cp $$page $(mansrc)/`basename $$page .man`.$(manext); \
 done; \
 fi
+	cd x2p; $(MAKE) install
 
 clean:
-	rm -f *.o
+	rm -f *.o all perl taintperl perl.man
+	cd x2p; $(MAKE) clean
 
 realclean:
-	rm -f perl *.orig */*.orig *~ */*~ *.o core $(addedbyconf)
+	cd x2p; $(MAKE) realclean
+	rm -f perl *.orig */*.orig *~ */*~ *.o core $(addedbyconf) perl.man
+	rm -f perl.c perly.h t/perl Makefile config.h makedepend makedir
+	rm -f x2p/Makefile
 
 # The following lint has practically everything turned on.  Unfortunately,
 # you have to wade through a lot of mumbo jumbo that can't be suppressed.
@@ -188,9 +323,10 @@ depend: makedepend
 	- test -f perly.h || cp /dev/null perly.h
 	./makedepend
 	- test -s perly.h || /bin/rm -f perly.h
+	cd x2p; $(MAKE) depend
 
 test: perl
-	chmod +x t/TEST t/base.* t/comp.* t/cmd.* t/io.* t/op.*
+	- chmod +x t/TEST t/base.* t/comp.* t/cmd.* t/io.* t/op.*; \
 	cd t && (rm -f perl; $(SLN) ../perl .) && ./perl TEST
 
 clist:

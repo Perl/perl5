@@ -1,6 +1,6 @@
 #!/usr/bin/perl -P
 
-# $Header: scan_last,v 2.0 88/06/05 00:17:58 root Exp $
+# $Header: scan_last,v 3.0 89/10/18 15:15:31 lwall Locked $
 
 # This reports who was logged on at weird hours
 

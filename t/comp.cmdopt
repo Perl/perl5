@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: comp.cmdopt,v 2.0 88/06/05 00:12:34 root Exp $
+# $Header: comp.cmdopt,v 3.0 89/10/18 15:25:13 lwall Locked $
 
 print "1..40\n";
 

@@ -1,8 +1,8 @@
 #!./perl
 
-# $Header: op.pat,v 2.0 88/06/05 00:14:20 root Exp $
+# $Header: op.pat,v 3.0 89/10/18 15:30:44 lwall Locked $
 
-print "1..30\n";
+print "1..43\n";
 
 $x = "abc\ndef\n";
 
@@ -93,3 +93,28 @@ $foo = '[^ab]*';
 'cde' =~ /$foo/;
 'xyz' =~ /$null/;
 if ($& eq 'xyz') {print "ok 30\n";} else {print "not ok 30\n";}
+
+$_ = 'abcdefghi';
+/def/;		# optimized up to cmd
+if ("$`:$&:$'" eq 'abc:def:ghi') {print "ok 31\n";} else {print "not ok 31\n";}
+
+/cde/ + 0;	# optimized only to spat
+if ("$`:$&:$'" eq 'ab:cde:fghi') {print "ok 32\n";} else {print "not ok 32\n";}
+
+/[d][e][f]/;	# not optimized
+if ("$`:$&:$'" eq 'abc:def:ghi') {print "ok 33\n";} else {print "not ok 33\n";}
+
+$_ = 'now is the {time for all} good men to come to.';
+/ {([^}]*)}/;
+if ($1 eq 'time for all') {print "ok 34\n";} else {print "not ok 34 $1\n";}
+
+$_ = 'xxx {3,4}  yyy   zzz';
+print /( {3,4})/ ? "ok 35\n" : "not ok 35\n";
+print $1 eq '   ' ? "ok 36\n" : "not ok 36\n";
+print /( {4,})/ ? "not ok 37\n" : "ok 37\n";
+print /( {2,3}.)/ ? "ok 38\n" : "not ok 38\n";
+print $1 eq '  y' ? "ok 39\n" : "not ok 39\n";
+print /(y{2,3}.)/ ? "ok 40\n" : "not ok 40\n";
+print $1 eq 'yyy ' ? "ok 41\n" : "not ok 41\n";
+print /x {3,4}/ ? "not ok 42\n" : "ok 42\n";
+print /^xxx {3,4}/ ? "not ok 43\n" : "ok 43\n";

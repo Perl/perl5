@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: base.pat,v 2.0 88/06/05 00:12:08 root Exp $
+# $Header: base.pat,v 3.0 89/10/18 15:24:30 lwall Locked $
 
 print "1..2\n";
 

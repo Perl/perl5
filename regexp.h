@@ -5,15 +5,13 @@
  * not the System V one.
  */
 
-/* $Header: regexp.h,v 2.0 88/06/05 00:10:53 root Exp $
+/* $Header: regexp.h,v 3.0 89/10/18 15:22:46 lwall Locked $
  *
  * $Log:	regexp.h,v $
- * Revision 2.0  88/06/05  00:10:53  root
- * Baseline version 2.0.
+ * Revision 3.0  89/10/18  15:22:46  lwall
+ * 3.0 baseline
  * 
  */
-
-#define ALIGN
 
 #define NSUBEXP  10
 
@@ -33,7 +31,5 @@ typedef struct regexp {
 	char program[1];	/* Unwarranted chumminess with compiler. */
 } regexp;
 
-extern regexp *regcomp();
-extern int regexec();
-extern void regsub();
-extern void regerror();
+regexp *regcomp();
+int regexec();

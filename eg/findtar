@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Header: findtar,v 2.0 88/06/05 00:16:49 root Exp $
+# $Header: findtar,v 3.0 89/10/18 15:13:52 lwall Locked $
 
 # findtar takes find-style arguments and spits out a tarfile on stdout.
 # It won't work unless your find supports -ls and your tar the I flag.
@@ -8,7 +8,7 @@
 $args = join(' ',@ARGV);
 open(find,"/usr/bin/find $args -ls |") || die "Can't run find for you.";
 
-open(tar,"| /bin/tar cIf - -") || die "Can't run tar for you.";
+open(tar,"| /bin/tar cIf - -") || die "Can't run tar for you: $!";
 
 while (<find>) {
     @x = split(' ');

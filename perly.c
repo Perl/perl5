@@ -1,24 +1,32 @@
-char rcsid[] = "$Header: perly.c,v 2.0.1.1 88/06/28 16:36:49 root Exp $";
+char rcsid[] = "$Header: perly.c,v 3.0 89/10/18 15:22:21 lwall Locked $\nPatch level: ###\n";
 /*
+ *    Copyright (c) 1989, Larry Wall
+ *
+ *    You may distribute under the terms of the GNU General Public License
+ *    as specified in the README file that comes with the perl 3.0 kit.
+ *
  * $Log:	perly.c,v $
- * Revision 2.0.1.1  88/06/28  16:36:49  root
- * patch1: added DOSUID code
- * 
- * Revision 2.0  88/06/05  00:09:56  root
- * Baseline version 2.0.
+ * Revision 3.0  89/10/18  15:22:21  lwall
+ * 3.0 baseline
  * 
  */
 
 #include "EXTERN.h"
 #include "perl.h"
 #include "perly.h"
+#include "patchlevel.h"
 
-extern char *tokename[];
-extern int yychar;
+#ifdef IAMSUID
+#ifndef DOSUID
+#define DOSUID
+#endif
+#endif
 
-static int cmd_tosave();
-static int arg_tosave();
-static int spat_tosave();
+#ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
+#ifdef DOSUID
+#undef DOSUID
+#endif
+#endif
 
 main(argc,argv,env)
 register int argc;
@@ -29,17 +37,37 @@ register char **env;
     register char *s;
     char *index(), *strcpy(), *getenv();
     bool dosearch = FALSE;
-#ifdef DOSUID
     char **origargv = argv;
+#ifdef DOSUID
     char *validarg = "";
+#endif
+
+#ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
+#ifdef IAMSUID
+#undef IAMSUID
+    fatal("suidperl is no longer needed since the kernel can now execute\n\
+setuid perl scripts securely.\n");
+#endif
 #endif
 
     uid = (int)getuid();
     euid = (int)geteuid();
-    linestr = str_new(80);
+    gid = (int)getgid();
+    egid = (int)getegid();
+    if (do_undump) {
+	do_undump = 0;
+	loop_ptr = 0;		/* start label stack again */
+	goto just_doit;
+    }
+    (void)sprintf(index(rcsid,'#'), "%d\n", PATCHLEVEL);
+    linestr = Str_new(65,80);
     str_nset(linestr,"",0);
-    str = str_make("");		/* first used for -I flags */
+    str = str_make("",0);		/* first used for -I flags */
+    curstash = defstash = hnew(0);
+    curstname = str_make("main",4);
+    stab_xhash(stabent("_main",TRUE)) = defstash;
     incstab = aadd(stabent("INC",TRUE));
+    incstab->str_pok |= SP_MULTI;
     for (argc--,argv++; argc; argc--,argv++) {
 	if (argv[0][0] != '-' || !argv[0][1])
 	    break;
@@ -56,8 +84,20 @@ register char **env;
 	    minus_a = TRUE;
 	    s++;
 	    goto reswitch;
+	case 'd':
+#ifdef TAINT
+	    if (euid != uid || egid != gid)
+		fatal("No -d allowed in setuid scripts");
+#endif
+	    perldb = TRUE;
+	    s++;
+	    goto reswitch;
 #ifdef DEBUGGING
 	case 'D':
+#ifdef TAINT
+	    if (euid != uid || egid != gid)
+		fatal("No -D allowed in setuid scripts");
+#endif
 	    debug = atoi(s+1);
 #ifdef YYDEBUG
 	    yydebug = (debug & 1);
@@ -65,14 +105,18 @@ register char **env;
 	    break;
 #endif
 	case 'e':
+#ifdef TAINT
+	    if (euid != uid || egid != gid)
+		fatal("No -e allowed in setuid scripts");
+#endif
 	    if (!e_fp) {
-	        e_tmpname = strcpy(safemalloc(sizeof(TMPPATH)),TMPPATH);
-		mktemp(e_tmpname);
+	        e_tmpname = savestr(TMPPATH);
+		(void)mktemp(e_tmpname);
 		e_fp = fopen(e_tmpname,"w");
 	    }
 	    if (argv[1])
 		fputs(argv[1],e_fp);
-	    putc('\n', e_fp);
+	    (void)putc('\n', e_fp);
 	    argc--,argv++;
 	    break;
 	case 'i':
@@ -80,14 +124,18 @@ register char **env;
 	    argvoutstab = stabent("ARGVOUT",TRUE);
 	    break;
 	case 'I':
+#ifdef TAINT
+	    if (euid != uid || egid != gid)
+		fatal("No -I allowed in setuid scripts");
+#endif
 	    str_cat(str,"-");
 	    str_cat(str,s);
 	    str_cat(str," ");
-	    if (s[1]) {
-		apush(incstab->stab_array,str_make(s+1));
+	    if (*++s) {
+		(void)apush(stab_array(incstab),str_make(s,0));
 	    }
 	    else {
-		apush(incstab->stab_array,str_make(argv[1]));
+		(void)apush(stab_array(incstab),str_make(argv[1],0));
 		str_cat(str,argv[1]);
 		argc--,argv++;
 		str_cat(str," ");
@@ -102,10 +150,18 @@ register char **env;
 	    s++;
 	    goto reswitch;
 	case 'P':
+#ifdef TAINT
+	    if (euid != uid || egid != gid)
+		fatal("No -P allowed in setuid scripts");
+#endif
 	    preprocess = TRUE;
 	    s++;
 	    goto reswitch;
 	case 's':
+#ifdef TAINT
+	    if (euid != uid || egid != gid)
+		fatal("No -s allowed in setuid scripts");
+#endif
 	    doswitches = TRUE;
 	    s++;
 	    goto reswitch;
@@ -113,12 +169,19 @@ register char **env;
 	    dosearch = TRUE;
 	    s++;
 	    goto reswitch;
+	case 'u':
+	    do_undump = TRUE;
+	    s++;
+	    goto reswitch;
 	case 'U':
 	    unsafe = TRUE;
 	    s++;
 	    goto reswitch;
 	case 'v':
-	    version();
+	    fputs(rcsid,stdout);
+	    fputs("\nCopyright (c) 1989, Larry Wall\n\n\
+Perl may be copied only under the terms of the GNU General Public License,\n\
+a copy of which can be found with the Perl 3.0 distribution kit.\n",stdout);
 	    exit(0);
 	case 'w':
 	    dowarn = TRUE;
@@ -135,33 +198,34 @@ register char **env;
     }
   switch_end:
     if (e_fp) {
-	fclose(e_fp);
+	(void)fclose(e_fp);
 	argc++,argv--;
 	argv[0] = e_tmpname;
     }
 #ifndef PRIVLIB
 #define PRIVLIB "/usr/local/lib/perl"
 #endif
-    apush(incstab->stab_array,str_make(PRIVLIB));
+    (void)apush(stab_array(incstab),str_make(PRIVLIB,0));
 
     str_set(&str_no,No);
     str_set(&str_yes,Yes);
-    init_eval();
 
     /* open script */
 
     if (argv[0] == Nullch)
 	argv[0] = "-";
-    if (dosearch && argv[0][0] != '/' && (s = getenv("PATH"))) {
+    if (dosearch && !index(argv[0], '/') && (s = getenv("PATH"))) {
 	char *xfound = Nullch, *xfailed = Nullch;
+	int len;
 
+	bufend = s + strlen(s);
 	while (*s) {
-	    s = cpytill(tokenbuf,s,':');
+	    s = cpytill(tokenbuf,s,bufend,':',&len);
 	    if (*s)
 		s++;
-	    if (tokenbuf[0])
-		strcat(tokenbuf,"/");
-	    strcat(tokenbuf,argv[0]);
+	    if (len)
+		(void)strcat(tokenbuf+len,"/");
+	    (void)strcat(tokenbuf+len,argv[0]);
 #ifdef DEBUGGING
 	    if (debug & 1)
 		fprintf(stderr,"Looking for %s\n",tokenbuf);
@@ -169,7 +233,7 @@ register char **env;
 	    if (stat(tokenbuf,&statbuf) < 0)		/* not there? */
 		continue;
 	    if ((statbuf.st_mode & S_IFMT) == S_IFREG
-	     && cando(S_IREAD,TRUE) && cando(S_IEXEC,TRUE)) {
+	     && cando(S_IREAD,TRUE,&statbuf) && cando(S_IEXEC,TRUE,&statbuf)) {
 		xfound = tokenbuf;              /* bingo! */
 		break;
 	    }
@@ -177,11 +241,14 @@ register char **env;
 		xfailed = savestr(tokenbuf);
 	}
 	if (!xfound)
-	    fatal("Can't execute %s", xfailed);
+	    fatal("Can't execute %s", xfailed ? xfailed : argv[0] );
 	if (xfailed)
-	    safefree(xfailed);
+	    Safefree(xfailed);
 	argv[0] = savestr(xfound);
     }
+
+    pidstatary = anew(Nullstab);	/* for remembering popen pids, status */
+
     filename = savestr(argv[0]);
     origfilename = savestr(filename);
     if (strEQ(filename,"-"))
@@ -189,7 +256,7 @@ register char **env;
     if (preprocess) {
 	str_cat(str,"-I");
 	str_cat(str,PRIVLIB);
-	sprintf(buf, "\
+	(void)sprintf(buf, "\
 /bin/sed -e '/^[^#]/b' \
  -e '/^#[ 	]*include[ 	]/b' \
  -e '/^#[ 	]*define[ 	]/b' \
@@ -201,27 +268,40 @@ register char **env;
  -e 's/^#.*//' \
  %s | %s -C %s %s",
 	  argv[0], CPPSTDIN, str_get(str), CPPMINUS);
-#ifdef IAMSUID
+#ifdef IAMSUID				/* actually, this is caught earlier */
 	if (euid != uid && !euid)	/* if running suidperl */
-	    seteuid(uid);		/* musn't stay setuid root */
+#ifdef SETEUID
+	    (void)seteuid(uid);		/* musn't stay setuid root */
+#else
+#ifdef SETREUID
+	    (void)setreuid(-1, uid);
+#else
+	    setuid(uid);
 #endif
-	rsfp = popen(buf,"r");
+#endif
+#endif /* IAMSUID */
+	rsfp = mypopen(buf,"r");
     }
     else if (!*argv[0])
 	rsfp = stdin;
     else
 	rsfp = fopen(argv[0],"r");
     if (rsfp == Nullfp) {
+	extern char *sys_errlist[];
+	extern int errno;
+
 #ifdef DOSUID
-#ifndef IAMSUID
+#ifndef IAMSUID		/* in case script is not readable before setuid */
 	if (euid && stat(filename,&statbuf) >= 0 &&
 	  statbuf.st_mode & (S_ISUID|S_ISGID)) {
-	    execvp("suidperl", origargv);	/* try again */
+	    (void)sprintf(buf, "%s/%s", BIN, "suidperl");
+	    execv(buf, origargv);	/* try again */
 	    fatal("Can't do setuid\n");
 	}
 #endif
 #endif
-	fatal("Perl script \"%s\" doesn't seem to exist",filename);
+	fatal("Can't open perl script \"%s\": %s\n",
+	  filename, sys_errlist[errno]);
     }
     str_free(str);		/* free -I directories */
 
@@ -242,17 +322,72 @@ register char **env;
      * DOSUID must be defined in both perl and suidperl, and IAMSUID must
      * be defined in suidperl only.  suidperl must be setuid root.  The
      * Configure script will set this up for you if you want it.
+     *
+     * There is also the possibility of have a script which is running
+     * set-id due to a C wrapper.  We want to do the TAINT checks
+     * on these set-id scripts, but don't want to have the overhead of
+     * them in normal perl, and can't use suidperl because it will lose
+     * the effective uid info, so we have an additional non-setuid root
+     * version called taintperl that just does the TAINT checks.
      */
+
 #ifdef DOSUID
     if (fstat(fileno(rsfp),&statbuf) < 0)	/* normal stat is insecure */
 	fatal("Can't stat script \"%s\"",filename);
     if (statbuf.st_mode & (S_ISUID|S_ISGID)) {
 	int len;
 
+#ifdef IAMSUID
+#ifndef SETREUID
+	/* On this access check to make sure the directories are readable,
+	 * there is actually a small window that the user could use to make
+	 * filename point to an accessible directory.  So there is a faint
+	 * chance that someone could execute a setuid script down in a
+	 * non-accessible directory.  I don't know what to do about that.
+	 * But I don't think it's too important.  The manual lies when
+	 * it says access() is useful in setuid programs.
+	 */
 	if (access(filename,1))		/* as a double check */
 	    fatal("Permission denied");
+#else
+	/* If we can swap euid and uid, then we can determine access rights
+	 * with a simple stat of the file, and then compare device and
+	 * inode to make sure we did stat() on the same file we opened.
+	 * Then we just have to make sure he or she can execute it.
+	 */
+	{
+	    struct stat tmpstatbuf;
+
+	    if (setreuid(euid,uid) < 0 || getuid() != euid || geteuid() != uid)
+		fatal("Can't swap uid and euid");	/* really paranoid */
+	    if (stat(filename,&tmpstatbuf) < 0) /* testing full pathname here */
+		fatal("Permission denied");
+	    if (tmpstatbuf.st_dev != statbuf.st_dev ||
+		tmpstatbuf.st_ino != statbuf.st_ino) {
+		(void)fclose(rsfp);
+		if (rsfp = mypopen("/bin/mail root","w")) {	/* heh, heh */
+		    fprintf(rsfp,
+"User %d tried to run dev %d ino %d in place of dev %d ino %d!\n\
+(Filename of set-id script was %s, uid %d gid %d.)\n\nSincerely,\nperl\n",
+			uid,tmpstatbuf.st_dev, tmpstatbuf.st_ino,
+			statbuf.st_dev, statbuf.st_ino,
+			filename, statbuf.st_uid, statbuf.st_gid);
+		    (void)mypclose(rsfp);
+		}
+		fatal("Permission denied\n");
+	    }
+	    if (setreuid(uid,euid) < 0 || getuid() != uid || geteuid() != euid)
+		fatal("Can't reswap uid and euid");
+	    if (!cando(S_IEXEC,FALSE,&statbuf))		/* can real uid exec? */
+		fatal("Permission denied\n");
+	}
+#endif /* SETREUID */
+#endif /* IAMSUID */
+
 	if ((statbuf.st_mode & S_IFMT) != S_IFREG)
 	    fatal("Permission denied");
+	if ((statbuf.st_mode >> 6) & S_IWRITE)
+	    fatal("Setuid/gid script is writable by world");
 	doswitches = FALSE;		/* -s is insecure in suid */
 	line++;
 	if (fgets(tokenbuf,sizeof tokenbuf, rsfp) == Nullch ||
@@ -261,7 +396,7 @@ register char **env;
 	for (s = tokenbuf+2; !isspace(*s); s++) ;
 	if (strnNE(s-4,"perl",4))	/* sanity check */
 	    fatal("Not a perl script");
-	while (*s && isspace(*s)) s++;
+	while (*s == ' ' || *s == '\t') s++;
 	/*
 	 * #! arg must be what we saw above.  They can invoke it by
 	 * mentioning suidperl explicitly, but they may not add any strange
@@ -270,24 +405,59 @@ register char **env;
 	len = strlen(validarg);
 	if (strEQ(validarg," PHOOEY ") ||
 	    strnNE(s,validarg,len) || !isspace(s[len]))
-	    fatal("Arg must be \"%s\"\n",s);
+	    fatal("Args must match #! line");
+
+#ifndef IAMSUID
+	if (euid != uid && (statbuf.st_mode & S_ISUID) &&
+	    euid == statbuf.st_uid)
+	    if (!do_undump)
+		fatal("YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET!\n\
+FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
+#endif /* IAMSUID */
 
 	if (euid) {	/* oops, we're not the setuid root perl */
-	    fclose(rsfp);
+	    (void)fclose(rsfp);
 #ifndef IAMSUID
-	    execvp("suidperl", origargv);	/* try again */
+	    (void)sprintf(buf, "%s/%s", BIN, "suidperl");
+	    execv(buf, origargv);	/* try again */
 #endif
 	    fatal("Can't do setuid\n");
 	}
 
-	if (statbuf.st_mode & S_ISUID && statbuf.st_uid != euid)
-	    seteuid(statbuf.st_uid);	/* all that for this */
-	else if (uid)			/* oops, mustn't run as root */
-	    seteuid(uid);
 	if (statbuf.st_mode & S_ISGID && statbuf.st_gid != getegid())
-	    setegid(statbuf.st_gid);
+#ifdef SETEGID
+	    (void)setegid(statbuf.st_gid);
+#else
+#ifdef SETREGID
+	    (void)setregid((GIDTYPE)-1,statbuf.st_gid);
+#else
+	    setgid(statbuf.st_gid);
+#endif
+#endif
+	if (statbuf.st_mode & S_ISUID) {
+	    if (statbuf.st_uid != euid)
+#ifdef SETEUID
+		(void)seteuid(statbuf.st_uid);	/* all that for this */
+#else
+#ifdef SETREUID
+		(void)setreuid((UIDTYPE)-1,statbuf.st_uid);
+#else
+		setuid(statbuf.st_uid);
+#endif
+#endif
+	}
+	else if (uid)			/* oops, mustn't run as root */
+#ifdef SETEUID
+	    (void)seteuid((UIDTYPE)uid);
+#else
+#ifdef SETREUID
+	    (void)setreuid((UIDTYPE)-1,(UIDTYPE)uid);
+#else
+	    setuid((UIDTYPE)uid);
+#endif
+#endif
 	euid = (int)geteuid();
-	if (!cando(S_IEXEC,TRUE))
+	if (!cando(S_IEXEC,TRUE,&statbuf))
 	    fatal("Permission denied\n");	/* they can't do this */
     }
 #ifdef IAMSUID
@@ -295,30 +465,152 @@ register char **env;
 	fatal("-P not allowed for setuid/setgid script\n");
     else
 	fatal("Script is not setuid/setgid in suidperl\n");
+#else
+#ifndef TAINT		/* we aren't taintperl or suidperl */
+    /* script has a wrapper--can't run suidperl or we lose euid */
+    else if (euid != uid || egid != gid) {
+	(void)fclose(rsfp);
+	(void)sprintf(buf, "%s/%s", BIN, "taintperl");
+	execv(buf, origargv);	/* try again */
+	fatal("Can't run setuid script with taint checks");
+    }
+#endif /* TAINT */
 #endif /* IAMSUID */
+#else /* !DOSUID */
+#ifndef TAINT		/* we aren't taintperl or suidperl */
+    if (euid != uid || egid != gid) {	/* (suidperl doesn't exist, in fact) */
+#ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
+	fstat(fileno(rsfp),&statbuf);	/* may be either wrapped or real suid */
+	if ((euid != uid && euid == statbuf.st_uid && statbuf.st_mode & S_ISUID)
+	    ||
+	    (egid != gid && egid == statbuf.st_gid && statbuf.st_mode & S_ISGID)
+	   )
+	    if (!do_undump)
+		fatal("YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET!\n\
+FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
+#endif /* SETUID_SCRIPTS_ARE_SECURE_NOW */
+	/* not set-id, must be wrapped */
+	(void)fclose(rsfp);
+	(void)sprintf(buf, "%s/%s", BIN, "taintperl");
+	execv(buf, origargv);	/* try again */
+	fatal("Can't run setuid script with taint checks");
+    }
+#endif /* TAINT */
 #endif /* DOSUID */
 
     defstab = stabent("_",TRUE);
 
+    if (perldb) {
+	debstash = hnew(0);
+	stab_xhash(stabent("_DB",TRUE)) = debstash;
+	curstash = debstash;
+	lineary = stab_xarray(aadd((tmpstab = stabent("line",TRUE))));
+	tmpstab->str_pok |= SP_MULTI;
+	subname = str_make("main",4);
+	DBstab = stabent("DB",TRUE);
+	DBstab->str_pok |= SP_MULTI;
+	DBsub = hadd(tmpstab = stabent("sub",TRUE));
+	tmpstab->str_pok |= SP_MULTI;
+	DBsingle = stab_val((tmpstab = stabent("single",TRUE)));
+	tmpstab->str_pok |= SP_MULTI;
+	curstash = defstash;
+    }
+
     /* init tokener */
 
-    bufptr = str_get(linestr);
+    bufend = bufptr = str_get(linestr);
 
-    /* now parse the report spec */
+    savestack = anew(Nullstab);		/* for saving non-local values */
+    stack = anew(Nullstab);		/* for saving non-local values */
+    stack->ary_flags = 0;		/* not a real array */
 
-    if (yyparse())
+    /* now parse the script */
+
+    error_count = 0;
+    if (yyparse() || error_count)
 	fatal("Execution aborted due to compilation errors.\n");
+
+    New(50,loop_stack,128,struct loop);
+    New(51,debname,128,char);
+    New(52,debdelim,128,char);
+    curstash = defstash;
+
+    preprocess = FALSE;
+    if (e_fp) {
+	e_fp = Nullfp;
+	(void)UNLINK(e_tmpname);
+    }
+
+    /* initialize everything that won't change if we undump */
+
+    if (sigstab = stabent("SIG",allstabs)) {
+	sigstab->str_pok |= SP_MULTI;
+	(void)hadd(sigstab);
+    }
+
+    magicalize("!#?^~=-%0123456789.+&*()<>,\\/[|`':");
+
+    amperstab = stabent("&",allstabs);
+    leftstab = stabent("`",allstabs);
+    rightstab = stabent("'",allstabs);
+    sawampersand = (amperstab || leftstab || rightstab);
+    if (tmpstab = stabent(":",allstabs))
+	str_set(STAB_STR(tmpstab),chopset);
+
+    /* these aren't necessarily magical */
+    if (tmpstab = stabent(";",allstabs))
+	str_set(STAB_STR(tmpstab),"\034");
+#ifdef TAINT
+    tainted = 1;
+#endif
+    if (tmpstab = stabent("0",allstabs))
+	str_set(STAB_STR(tmpstab),origfilename);
+#ifdef TAINT
+    tainted = 0;
+#endif
+    if (tmpstab = stabent("]",allstabs))
+	str_set(STAB_STR(tmpstab),rcsid);
+    str_nset(stab_val(stabent("\"", TRUE)), " ", 1);
+
+    stdinstab = stabent("STDIN",TRUE);
+    stdinstab->str_pok |= SP_MULTI;
+    stab_io(stdinstab) = stio_new();
+    stab_io(stdinstab)->ifp = stdin;
+    tmpstab = stabent("stdin",TRUE);
+    stab_io(tmpstab) = stab_io(stdinstab);
+    tmpstab->str_pok |= SP_MULTI;
+
+    tmpstab = stabent("STDOUT",TRUE);
+    tmpstab->str_pok |= SP_MULTI;
+    stab_io(tmpstab) = stio_new();
+    stab_io(tmpstab)->ofp = stab_io(tmpstab)->ifp = stdout;
+    defoutstab = tmpstab;
+    tmpstab = stabent("stdout",TRUE);
+    stab_io(tmpstab) = stab_io(defoutstab);
+    tmpstab->str_pok |= SP_MULTI;
+
+    curoutstab = stabent("STDERR",TRUE);
+    curoutstab->str_pok |= SP_MULTI;
+    stab_io(curoutstab) = stio_new();
+    stab_io(curoutstab)->ofp = stab_io(curoutstab)->ifp = stderr;
+    tmpstab = stabent("stderr",TRUE);
+    stab_io(tmpstab) = stab_io(curoutstab);
+    tmpstab->str_pok |= SP_MULTI;
+    curoutstab = defoutstab;		/* switch back to STDOUT */
+
+    statname = Str_new(66,0);		/* last filename we did stat on */
+
+    perldb = FALSE;		/* don't try to instrument evals */
 
     if (dowarn) {
 	stab_check('A','Z');
 	stab_check('a','z');
     }
 
-    preprocess = FALSE;
-    if (e_fp) {
-	e_fp = Nullfp;
-	UNLINK(e_tmpname);
-    }
+    if (do_undump)
+	abort();
+
+  just_doit:		/* come here if running an undumped a.out */
     argc--,argv++;	/* skip name of script */
     if (doswitches) {
 	for (; argc > 0 && **argv == '-'; argc--,argv++) {
@@ -326,66 +618,54 @@ register char **env;
 		argc--,argv++;
 		break;
 	    }
-	    str_numset(stabent(argv[0]+1,TRUE)->stab_val,(double)1.0);
+	    str_numset(stab_val(stabent(argv[0]+1,TRUE)),(double)1.0);
 	}
     }
+#ifdef TAINT
+    tainted = 1;
+#endif
     if (argvstab = stabent("ARGV",allstabs)) {
-	aadd(argvstab);
+	argvstab->str_pok |= SP_MULTI;
+	(void)aadd(argvstab);
 	for (; argc > 0; argc--,argv++) {
-	    apush(argvstab->stab_array,str_make(argv[0]));
+	    (void)apush(stab_array(argvstab),str_make(argv[0],0));
 	}
     }
+#ifdef TAINT
+    (void) stabent("ENV",TRUE);		/* must test PATH and IFS */
+#endif
     if (envstab = stabent("ENV",allstabs)) {
-	hadd(envstab);
+	envstab->str_pok |= SP_MULTI;
+	(void)hadd(envstab);
 	for (; *env; env++) {
 	    if (!(s = index(*env,'=')))
 		continue;
 	    *s++ = '\0';
-	    str = str_make(s);
-	    str->str_link.str_magic = envstab;
-	    hstore(envstab->stab_hash,*env,str);
-	    *--s = '=';
+	    str = str_make(s--,0);
+	    str_magic(str, envstab, 'E', *env, s - *env);
+	    (void)hstore(stab_hash(envstab), *env, s - *env, str, 0);
+	    *s = '=';
 	}
     }
-    if (sigstab = stabent("SIG",allstabs))
-	hadd(sigstab);
-
-    magicalize("!#?^~=-%0123456789.+&*()<>,\\/[|");
-
-    sawampersand = (stabent("&",FALSE) != Nullstab);
-    if (tmpstab = stabent("0",allstabs))
-	str_set(STAB_STR(tmpstab),origfilename);
+#ifdef TAINT
+    tainted = 0;
+#endif
     if (tmpstab = stabent("$",allstabs))
 	str_numset(STAB_STR(tmpstab),(double)getpid());
 
-    tmpstab = stabent("stdin",TRUE);
-    tmpstab->stab_io = stio_new();
-    tmpstab->stab_io->fp = stdin;
-
-    tmpstab = stabent("stdout",TRUE);
-    tmpstab->stab_io = stio_new();
-    tmpstab->stab_io->fp = stdout;
-    defoutstab = tmpstab;
-    curoutstab = tmpstab;
-
-    tmpstab = stabent("stderr",TRUE);
-    tmpstab->stab_io = stio_new();
-    tmpstab->stab_io->fp = stderr;
-
-    savestack = anew(Nullstab);		/* for saving non-local values */
-
-    setjmp(top_env);	/* sets goto_targ on longjump */
+    if (setjmp(top_env))	/* sets goto_targ on longjump */
+	loop_ptr = 0;		/* start label stack again */
 
 #ifdef DEBUGGING
     if (debug & 1024)
-	dump_cmd(main_root,Nullcmd);
+	dump_all();
     if (debug)
 	fprintf(stderr,"\nEXECUTING...\n\n");
 #endif
 
     /* do it */
 
-    (void) cmd_exec(main_root);
+    (void) cmd_exec(main_root,G_SCALAR,-1);
 
     if (goto_targ)
 	fatal("Can't find label \"%s\"--aborting",goto_targ);
@@ -402,1305 +682,23 @@ register char *list;
     sym[1] = '\0';
     while (*sym = *list++) {
 	if (stab = stabent(sym,allstabs)) {
-	    stab->stab_flags = SF_VMAGIC;
-	    stab->stab_val->str_link.str_magic = stab;
+	    stab_flags(stab) = SF_VMAGIC;
+	    str_magic(stab_val(stab), stab, 0, Nullch, 0);
 	}
     }
-}
-
-ARG *
-make_split(stab,arg)
-register STAB *stab;
-register ARG *arg;
-{
-    register SPAT *spat = (SPAT *) safemalloc(sizeof (SPAT));
-
-    if (arg->arg_type != O_MATCH) {
-	spat = (SPAT *) safemalloc(sizeof (SPAT));
-	bzero((char *)spat, sizeof(SPAT));
-	spat->spat_next = spat_root;	/* link into spat list */
-	spat_root = spat;
-
-	spat->spat_runtime = arg;
-	arg = make_match(O_MATCH,stab2arg(A_STAB,defstab),spat);
-    }
-    arg->arg_type = O_SPLIT;
-    spat = arg[2].arg_ptr.arg_spat;
-    spat->spat_repl = stab2arg(A_STAB,aadd(stab));
-    if (spat->spat_short) {	/* exact match can bypass regexec() */
-	if (!((spat->spat_flags & SPAT_SCANFIRST) &&
-	    (spat->spat_flags & SPAT_ALL) )) {
-	    str_free(spat->spat_short);
-	    spat->spat_short = Nullstr;
-	}
-    }
-    return arg;
-}
-
-SUBR *
-make_sub(name,cmd)
-char *name;
-CMD *cmd;
-{
-    register SUBR *sub = (SUBR *) safemalloc(sizeof (SUBR));
-    STAB *stab = stabent(name,TRUE);
-
-    if (stab->stab_sub) {
-	if (dowarn) {
-	    line_t oldline = line;
-
-	    if (cmd)
-		line = cmd->c_line;
-	    warn("Subroutine %s redefined",name);
-	    line = oldline;
-	}
-	cmd_free(stab->stab_sub->cmd);
-	afree(stab->stab_sub->tosave);
-	safefree((char*)stab->stab_sub);
-    }
-    bzero((char *)sub, sizeof(SUBR));
-    sub->cmd = cmd;
-    sub->filename = filename;
-    tosave = anew(Nullstab);
-    tosave->ary_fill = 0;	/* make 1 based */
-    cmd_tosave(cmd);		/* this builds the tosave array */
-    sub->tosave = tosave;
-    stab->stab_sub = sub;
-}
-
-CMD *
-block_head(tail)
-register CMD *tail;
-{
-    if (tail == Nullcmd) {
-	return tail;
-    }
-    return tail->c_head;
-}
-
-CMD *
-append_line(head,tail)
-register CMD *head;
-register CMD *tail;
-{
-    if (tail == Nullcmd)
-	return head;
-    if (!tail->c_head)			/* make sure tail is well formed */
-	tail->c_head = tail;
-    if (head != Nullcmd) {
-	tail = tail->c_head;		/* get to start of tail list */
-	if (!head->c_head)
-	    head->c_head = head;	/* start a new head list */
-	while (head->c_next) {
-	    head->c_next->c_head = head->c_head;
-	    head = head->c_next;	/* get to end of head list */
-	}
-	head->c_next = tail;		/* link to end of old list */
-	tail->c_head = head->c_head;	/* propagate head pointer */
-    }
-    while (tail->c_next) {
-	tail->c_next->c_head = tail->c_head;
-	tail = tail->c_next;
-    }
-    return tail;
-}
-
-CMD *
-make_acmd(type,stab,cond,arg)
-int type;
-STAB *stab;
-ARG *cond;
-ARG *arg;
-{
-    register CMD *cmd = (CMD *) safemalloc(sizeof (CMD));
-
-    bzero((char *)cmd, sizeof(CMD));
-    cmd->c_type = type;
-    cmd->ucmd.acmd.ac_stab = stab;
-    cmd->ucmd.acmd.ac_expr = arg;
-    cmd->c_expr = cond;
-    if (cond) {
-	opt_arg(cmd,1,1);
-	cmd->c_flags |= CF_COND;
-    }
-    if (cmdline != NOLINE) {
-	cmd->c_line = cmdline;
-	cmdline = NOLINE;
-    }
-    cmd->c_file = filename;
-    return cmd;
-}
-
-CMD *
-make_ccmd(type,arg,cblock)
-int type;
-register ARG *arg;
-struct compcmd cblock;
-{
-    register CMD *cmd = (CMD *) safemalloc(sizeof (CMD));
-
-    bzero((char *)cmd, sizeof(CMD));
-    cmd->c_type = type;
-    cmd->c_expr = arg;
-    cmd->ucmd.ccmd.cc_true = cblock.comp_true;
-    cmd->ucmd.ccmd.cc_alt = cblock.comp_alt;
-    if (arg) {
-	opt_arg(cmd,1,0);
-	cmd->c_flags |= CF_COND;
-    }
-    if (cmdline != NOLINE) {
-	cmd->c_line = cmdline;
-	cmdline = NOLINE;
-    }
-    return cmd;
-}
-
-void
-opt_arg(cmd,fliporflop,acmd)
-register CMD *cmd;
-int fliporflop;
-int acmd;
-{
-    register ARG *arg;
-    int opt = CFT_EVAL;
-    int sure = 0;
-    ARG *arg2;
-    char *tmps;	/* for True macro */
-    int context = 0;	/* 0 = normal, 1 = before &&, 2 = before || */
-    int flp = fliporflop;
-
-    if (!cmd)
-	return;
-    arg = cmd->c_expr;
-
-    /* Can we turn && and || into if and unless? */
-
-    if (acmd && !cmd->ucmd.acmd.ac_expr && 
-      (arg->arg_type == O_AND || arg->arg_type == O_OR) ) {
-	dehoist(arg,1);
-	dehoist(arg,2);
-	cmd->ucmd.acmd.ac_expr = arg[2].arg_ptr.arg_arg;
-	cmd->c_expr = arg[1].arg_ptr.arg_arg;
-	if (arg->arg_type == O_OR)
-	    cmd->c_flags ^= CF_INVERT;		/* || is like unless */
-	arg->arg_len = 0;
-	arg_free(arg);
-	arg = cmd->c_expr;
-    }
-
-    /* Turn "if (!expr)" into "unless (expr)" */
-
-    while (arg->arg_type == O_NOT) {
-	dehoist(arg,1);
-	cmd->c_flags ^= CF_INVERT;		/* flip sense of cmd */
-	cmd->c_expr = arg[1].arg_ptr.arg_arg;	/* hoist the rest of expr */
-	free_arg(arg);
-	arg = cmd->c_expr;			/* here we go again */
-    }
-
-    if (!arg->arg_len) {		/* sanity check */
-	cmd->c_flags |= opt;
-	return;
-    }
-
-    /* for "cond .. cond" we set up for the initial check */
-
-    if (arg->arg_type == O_FLIP)
-	context |= 4;
-
-    /* for "cond && expr" and "cond || expr" we can ignore expr, sort of */
-
-    if (arg->arg_type == O_AND)
-	context |= 1;
-    else if (arg->arg_type == O_OR)
-	context |= 2;
-    if (context && arg[flp].arg_type == A_EXPR) {
-	arg = arg[flp].arg_ptr.arg_arg;
-	flp = 1;
-    }
-
-    if (arg[flp].arg_flags & (AF_PRE|AF_POST)) {
-	cmd->c_flags |= opt;
-	return;				/* side effect, can't optimize */
-    }
-
-    if (arg->arg_type == O_ITEM || arg->arg_type == O_FLIP ||
-      arg->arg_type == O_AND || arg->arg_type == O_OR) {
-	if (arg[flp].arg_type == A_SINGLE) {
-	    opt = (str_true(arg[flp].arg_ptr.arg_str) ? CFT_TRUE : CFT_FALSE);
-	    cmd->c_short = arg[flp].arg_ptr.arg_str;
-	    goto literal;
-	}
-	else if (arg[flp].arg_type == A_STAB || arg[flp].arg_type == A_LVAL) {
-	    cmd->c_stab  = arg[flp].arg_ptr.arg_stab;
-	    opt = CFT_REG;
-	  literal:
-	    if (!context) {	/* no && or ||? */
-		free_arg(arg);
-		cmd->c_expr = Nullarg;
-	    }
-	    if (!(context & 1))
-		cmd->c_flags |= CF_EQSURE;
-	    if (!(context & 2))
-		cmd->c_flags |= CF_NESURE;
-	}
-    }
-    else if (arg->arg_type == O_MATCH || arg->arg_type == O_SUBST ||
-	     arg->arg_type == O_NMATCH || arg->arg_type == O_NSUBST) {
-	if ((arg[1].arg_type == A_STAB || arg[1].arg_type == A_LVAL) &&
-		arg[2].arg_type == A_SPAT &&
-		arg[2].arg_ptr.arg_spat->spat_short ) {
-	    cmd->c_stab  = arg[1].arg_ptr.arg_stab;
-	    cmd->c_short = arg[2].arg_ptr.arg_spat->spat_short;
-	    cmd->c_slen  = arg[2].arg_ptr.arg_spat->spat_slen;
-	    if (arg[2].arg_ptr.arg_spat->spat_flags & SPAT_ALL &&
-		!(arg[2].arg_ptr.arg_spat->spat_flags & SPAT_ONCE) &&
-		(arg->arg_type == O_MATCH || arg->arg_type == O_NMATCH) )
-		sure |= CF_EQSURE;		/* (SUBST must be forced even */
-						/* if we know it will work.) */
-	    arg[2].arg_ptr.arg_spat->spat_short = Nullstr;
-	    arg[2].arg_ptr.arg_spat->spat_slen = 0; /* only one chk */
-	    sure |= CF_NESURE;		/* normally only sure if it fails */
-	    if (arg->arg_type == O_NMATCH || arg->arg_type == O_NSUBST)
-		cmd->c_flags |= CF_FIRSTNEG;
-	    if (context & 1) {		/* only sure if thing is false */
-		if (cmd->c_flags & CF_FIRSTNEG)
-		    sure &= ~CF_NESURE;
-		else
-		    sure &= ~CF_EQSURE;
-	    }
-	    else if (context & 2) {	/* only sure if thing is true */
-		if (cmd->c_flags & CF_FIRSTNEG)
-		    sure &= ~CF_EQSURE;
-		else
-		    sure &= ~CF_NESURE;
-	    }
-	    if (sure & (CF_EQSURE|CF_NESURE)) {	/* if we know anything*/
-		if (arg[2].arg_ptr.arg_spat->spat_flags & SPAT_SCANFIRST)
-		    opt = CFT_SCAN;
-		else
-		    opt = CFT_ANCHOR;
-		if (sure == (CF_EQSURE|CF_NESURE)	/* really sure? */
-		    && arg->arg_type == O_MATCH
-		    && context & 4
-		    && fliporflop == 1) {
-		    spat_free(arg[2].arg_ptr.arg_spat);
-		    arg[2].arg_ptr.arg_spat = Nullspat;	/* don't do twice */
-		}
-		cmd->c_flags |= sure;
-	    }
-	}
-    }
-    else if (arg->arg_type == O_SEQ || arg->arg_type == O_SNE ||
-	     arg->arg_type == O_SLT || arg->arg_type == O_SGT) {
-	if (arg[1].arg_type == A_STAB || arg[1].arg_type == A_LVAL) {
-	    if (arg[2].arg_type == A_SINGLE) {
-		cmd->c_stab  = arg[1].arg_ptr.arg_stab;
-		cmd->c_short = arg[2].arg_ptr.arg_str;
-		cmd->c_slen  = 30000;
-		switch (arg->arg_type) {
-		case O_SLT: case O_SGT:
-		    sure |= CF_EQSURE;
-		    cmd->c_flags |= CF_FIRSTNEG;
-		    break;
-		case O_SNE:
-		    cmd->c_flags |= CF_FIRSTNEG;
-		    /* FALL THROUGH */
-		case O_SEQ:
-		    sure |= CF_NESURE|CF_EQSURE;
-		    break;
-		}
-		if (context & 1) {	/* only sure if thing is false */
-		    if (cmd->c_flags & CF_FIRSTNEG)
-			sure &= ~CF_NESURE;
-		    else
-			sure &= ~CF_EQSURE;
-		}
-		else if (context & 2) { /* only sure if thing is true */
-		    if (cmd->c_flags & CF_FIRSTNEG)
-			sure &= ~CF_EQSURE;
-		    else
-			sure &= ~CF_NESURE;
-		}
-		if (sure & (CF_EQSURE|CF_NESURE)) {
-		    opt = CFT_STROP;
-		    cmd->c_flags |= sure;
-		}
-	    }
-	}
-    }
-    else if (arg->arg_type == O_EQ || arg->arg_type == O_NE ||
-	     arg->arg_type == O_LE || arg->arg_type == O_GE ||
-	     arg->arg_type == O_LT || arg->arg_type == O_GT) {
-	if (arg[1].arg_type == A_STAB || arg[1].arg_type == A_LVAL) {
-	    if (arg[2].arg_type == A_SINGLE) {
-		cmd->c_stab  = arg[1].arg_ptr.arg_stab;
-		cmd->c_short = str_nmake(str_gnum(arg[2].arg_ptr.arg_str));
-		cmd->c_slen = arg->arg_type;
-		sure |= CF_NESURE|CF_EQSURE;
-		if (context & 1) {	/* only sure if thing is false */
-		    sure &= ~CF_EQSURE;
-		}
-		else if (context & 2) { /* only sure if thing is true */
-		    sure &= ~CF_NESURE;
-		}
-		if (sure & (CF_EQSURE|CF_NESURE)) {
-		    opt = CFT_NUMOP;
-		    cmd->c_flags |= sure;
-		}
-	    }
-	}
-    }
-    else if (arg->arg_type == O_ASSIGN &&
-	     (arg[1].arg_type == A_STAB || arg[1].arg_type == A_LVAL) &&
-	     arg[1].arg_ptr.arg_stab == defstab &&
-	     arg[2].arg_type == A_EXPR ) {
-	arg2 = arg[2].arg_ptr.arg_arg;
-	if (arg2->arg_type == O_ITEM && arg2[1].arg_type == A_READ) {
-	    opt = CFT_GETS;
-	    cmd->c_stab = arg2[1].arg_ptr.arg_stab;
-	    if (!(arg2[1].arg_ptr.arg_stab->stab_io->flags & IOF_ARGV)) {
-		free_arg(arg2);
-		free_arg(arg);
-		cmd->c_expr = Nullarg;
-	    }
-	}
-    }
-    else if (arg->arg_type == O_CHOP &&
-	     (arg[1].arg_type == A_STAB || arg[1].arg_type == A_LVAL) ) {
-	opt = CFT_CHOP;
-	cmd->c_stab = arg[1].arg_ptr.arg_stab;
-	free_arg(arg);
-	cmd->c_expr = Nullarg;
-    }
-    if (context & 4)
-	opt |= CF_FLIP;
-    cmd->c_flags |= opt;
-
-    if (cmd->c_flags & CF_FLIP) {
-	if (fliporflop == 1) {
-	    arg = cmd->c_expr;	/* get back to O_FLIP arg */
-	    arg[3].arg_ptr.arg_cmd = (CMD*)safemalloc(sizeof(CMD));
-	    bcopy((char *)cmd, (char *)arg[3].arg_ptr.arg_cmd, sizeof(CMD));
-	    arg[4].arg_ptr.arg_cmd = (CMD*)safemalloc(sizeof(CMD));
-	    bcopy((char *)cmd, (char *)arg[4].arg_ptr.arg_cmd, sizeof(CMD));
-	    opt_arg(arg[4].arg_ptr.arg_cmd,2,acmd);
-	    arg->arg_len = 2;		/* this is a lie */
-	}
-	else {
-	    if ((opt & CF_OPTIMIZE) == CFT_EVAL)
-		cmd->c_flags = (cmd->c_flags & ~CF_OPTIMIZE) | CFT_UNFLIP;
-	}
-    }
-}
-
-ARG *
-mod_match(type,left,pat)
-register ARG *left;
-register ARG *pat;
-{
-
-    register SPAT *spat;
-    register ARG *newarg;
-
-    if ((pat->arg_type == O_MATCH ||
-	 pat->arg_type == O_SUBST ||
-	 pat->arg_type == O_TRANS ||
-	 pat->arg_type == O_SPLIT
-	) &&
-	pat[1].arg_ptr.arg_stab == defstab ) {
-	switch (pat->arg_type) {
-	case O_MATCH:
-	    newarg = make_op(type == O_MATCH ? O_MATCH : O_NMATCH,
-		pat->arg_len,
-		left,Nullarg,Nullarg,0);
-	    break;
-	case O_SUBST:
-	    newarg = l(make_op(type == O_MATCH ? O_SUBST : O_NSUBST,
-		pat->arg_len,
-		left,Nullarg,Nullarg,0));
-	    break;
-	case O_TRANS:
-	    newarg = l(make_op(type == O_MATCH ? O_TRANS : O_NTRANS,
-		pat->arg_len,
-		left,Nullarg,Nullarg,0));
-	    break;
-	case O_SPLIT:
-	    newarg = make_op(type == O_MATCH ? O_SPLIT : O_SPLIT,
-		pat->arg_len,
-		left,Nullarg,Nullarg,0);
-	    break;
-	}
-	if (pat->arg_len >= 2) {
-	    newarg[2].arg_type = pat[2].arg_type;
-	    newarg[2].arg_ptr = pat[2].arg_ptr;
-	    newarg[2].arg_flags = pat[2].arg_flags;
-	    if (pat->arg_len >= 3) {
-		newarg[3].arg_type = pat[3].arg_type;
-		newarg[3].arg_ptr = pat[3].arg_ptr;
-		newarg[3].arg_flags = pat[3].arg_flags;
-	    }
-	}
-	safefree((char*)pat);
-    }
-    else {
-	spat = (SPAT *) safemalloc(sizeof (SPAT));
-	bzero((char *)spat, sizeof(SPAT));
-	spat->spat_next = spat_root;	/* link into spat list */
-	spat_root = spat;
-
-	spat->spat_runtime = pat;
-	newarg = make_op(type,2,left,Nullarg,Nullarg,0);
-	newarg[2].arg_type = A_SPAT;
-	newarg[2].arg_ptr.arg_spat = spat;
-	newarg[2].arg_flags = AF_SPECIAL;
-    }
-
-    return newarg;
-}
-
-CMD *
-add_label(lbl,cmd)
-char *lbl;
-register CMD *cmd;
-{
-    if (cmd)
-	cmd->c_label = lbl;
-    return cmd;
-}
-
-CMD *
-addcond(cmd, arg)
-register CMD *cmd;
-register ARG *arg;
-{
-    cmd->c_expr = arg;
-    opt_arg(cmd,1,0);
-    cmd->c_flags |= CF_COND;
-    return cmd;
-}
-
-CMD *
-addloop(cmd, arg)
-register CMD *cmd;
-register ARG *arg;
-{
-    cmd->c_expr = arg;
-    opt_arg(cmd,1,0);
-    cmd->c_flags |= CF_COND|CF_LOOP;
-    if (cmd->c_type == C_BLOCK)
-	cmd->c_flags &= ~CF_COND;
-    else {
-	arg = cmd->ucmd.acmd.ac_expr;
-	if (arg && arg->arg_type == O_ITEM && arg[1].arg_type == A_CMD)
-	    cmd->c_flags &= ~CF_COND;  /* "do {} while" happens at least once */
-	if (arg && arg->arg_type == O_SUBR)
-	    cmd->c_flags &= ~CF_COND;  /* likewise for "do subr() while" */
-    }
-    return cmd;
-}
-
-CMD *
-invert(cmd)
-register CMD *cmd;
-{
-    cmd->c_flags ^= CF_INVERT;
-    return cmd;
-}
-
-yyerror(s)
-char *s;
-{
-    char tmpbuf[128];
-    char *tname = tmpbuf;
-
-    if (yychar > 256) {
-	tname = tokename[yychar-256];
-	if (strEQ(tname,"word"))
-	    strcpy(tname,tokenbuf);
-	else if (strEQ(tname,"register"))
-	    sprintf(tname,"$%s",tokenbuf);
-	else if (strEQ(tname,"array_length"))
-	    sprintf(tname,"$#%s",tokenbuf);
-    }
-    else if (!yychar)
-	strcpy(tname,"EOF");
-    else if (yychar < 32)
-	sprintf(tname,"^%c",yychar+64);
-    else if (yychar == 127)
-	strcpy(tname,"^?");
-    else
-	sprintf(tname,"%c",yychar);
-    sprintf(tokenbuf, "%s in file %s at line %d, next token \"%s\"\n",
-      s,filename,line,tname);
-    if (in_eval)
-	str_set(stabent("@",TRUE)->stab_val,tokenbuf);
-    else
-	fputs(tokenbuf,stderr);
-}
-
-ARG *
-make_op(type,newlen,arg1,arg2,arg3,dolist)
-int type;
-int newlen;
-ARG *arg1;
-ARG *arg2;
-ARG *arg3;
-int dolist;
-{
-    register ARG *arg;
-    register ARG *chld;
-    register int doarg;
-
-    arg = op_new(newlen);
-    arg->arg_type = type;
-    doarg = opargs[type];
-    if (chld = arg1) {
-	if (!(doarg & 1))
-	    arg[1].arg_flags |= AF_SPECIAL;
-	if (doarg & 16)
-	    arg[1].arg_flags |= AF_NUMERIC;
-	if (chld->arg_type == O_ITEM &&
-	    (hoistable[chld[1].arg_type] || chld[1].arg_type == A_LVAL) ) {
-	    arg[1].arg_type = chld[1].arg_type;
-	    arg[1].arg_ptr = chld[1].arg_ptr;
-	    arg[1].arg_flags |= chld[1].arg_flags;
-	    free_arg(chld);
-	}
-	else {
-	    arg[1].arg_type = A_EXPR;
-	    arg[1].arg_ptr.arg_arg = chld;
-	    if (dolist & 1) {
-		if (chld->arg_type == O_LIST) {
-		    if (newlen == 1) {	/* we can hoist entire list */
-			chld->arg_type = type;
-			free_arg(arg);
-			arg = chld;
-		    }
-		    else {
-			arg[1].arg_flags |= AF_SPECIAL;
-		    }
-		}
-		else {
-		    switch (chld->arg_type) {
-		    case O_ARRAY:
-			if (chld->arg_len == 1)
-			    arg[1].arg_flags |= AF_SPECIAL;
-			break;
-		    case O_ITEM:
-			if (chld[1].arg_type == A_READ ||
-			    chld[1].arg_type == A_INDREAD ||
-			    chld[1].arg_type == A_GLOB)
-			    arg[1].arg_flags |= AF_SPECIAL;
-			break;
-		    case O_SPLIT:
-		    case O_TMS:
-		    case O_EACH:
-		    case O_VALUES:
-		    case O_KEYS:
-		    case O_SORT:
-			arg[1].arg_flags |= AF_SPECIAL;
-			break;
-		    }
-		}
-	    }
-	}
-    }
-    if (chld = arg2) {
-	if (!(doarg & 2))
-	    arg[2].arg_flags |= AF_SPECIAL;
-	if (doarg & 32)
-	    arg[2].arg_flags |= AF_NUMERIC;
-	if (chld->arg_type == O_ITEM && 
-	    (hoistable[chld[1].arg_type] || 
-	     (type == O_ASSIGN && 
-	      ((chld[1].arg_type == A_READ && !(arg[1].arg_flags & AF_SPECIAL))
-		||
-	       (chld[1].arg_type == A_INDREAD && !(arg[1].arg_flags & AF_SPECIAL))
-		||
-	       (chld[1].arg_type == A_GLOB && !(arg[1].arg_flags & AF_SPECIAL))
-		||
-	       chld[1].arg_type == A_BACKTICK ) ) ) ) {
-	    arg[2].arg_type = chld[1].arg_type;
-	    arg[2].arg_ptr = chld[1].arg_ptr;
-	    free_arg(chld);
-	}
-	else {
-	    arg[2].arg_type = A_EXPR;
-	    arg[2].arg_ptr.arg_arg = chld;
-	    if ((dolist & 2) &&
-	      (chld->arg_type == O_LIST ||
-	       (chld->arg_type == O_ARRAY && chld->arg_len == 1) ))
-		arg[2].arg_flags |= AF_SPECIAL;
-	}
-    }
-    if (chld = arg3) {
-	if (!(doarg & 4))
-	    arg[3].arg_flags |= AF_SPECIAL;
-	if (doarg & 64)
-	    arg[3].arg_flags |= AF_NUMERIC;
-	if (chld->arg_type == O_ITEM && hoistable[chld[1].arg_type]) {
-	    arg[3].arg_type = chld[1].arg_type;
-	    arg[3].arg_ptr = chld[1].arg_ptr;
-	    free_arg(chld);
-	}
-	else {
-	    arg[3].arg_type = A_EXPR;
-	    arg[3].arg_ptr.arg_arg = chld;
-	    if ((dolist & 4) &&
-	      (chld->arg_type == O_LIST ||
-	       (chld->arg_type == O_ARRAY && chld->arg_len == 1) ))
-		arg[3].arg_flags |= AF_SPECIAL;
-	}
-    }
-#ifdef DEBUGGING
-    if (debug & 16) {
-	fprintf(stderr,"%lx <= make_op(%s",arg,opname[arg->arg_type]);
-	if (arg1)
-	    fprintf(stderr,",%s=%lx",
-		argname[arg[1].arg_type],arg[1].arg_ptr.arg_arg);
-	if (arg2)
-	    fprintf(stderr,",%s=%lx",
-		argname[arg[2].arg_type],arg[2].arg_ptr.arg_arg);
-	if (arg3)
-	    fprintf(stderr,",%s=%lx",
-		argname[arg[3].arg_type],arg[3].arg_ptr.arg_arg);
-	fprintf(stderr,")\n");
-    }
-#endif
-    evalstatic(arg);		/* see if we can consolidate anything */
-    return arg;
-}
-
-/* turn 123 into 123 == $. */
-
-ARG *
-flipflip(arg)
-register ARG *arg;
-{
-    if (arg && arg->arg_type == O_ITEM && arg[1].arg_type == A_SINGLE) {
-	arg = (ARG*)saferealloc((char*)arg,3*sizeof(ARG));
-	arg->arg_type = O_EQ;
-	arg->arg_len = 2;
-	arg[2].arg_type = A_STAB;
-	arg[2].arg_flags = 0;
-	arg[2].arg_ptr.arg_stab = stabent(".",TRUE);
-    }
-    return arg;
-}
-
-void
-evalstatic(arg)
-register ARG *arg;
-{
-    register STR *str;
-    register STR *s1;
-    register STR *s2;
-    double value;		/* must not be register */
-    register char *tmps;
-    int i;
-    unsigned long tmplong;
-    double exp(), log(), sqrt(), modf();
-    char *crypt();
-
-    if (!arg || !arg->arg_len)
-	return;
-
-    if (arg[1].arg_type == A_SINGLE &&
-        (arg->arg_len == 1 || arg[2].arg_type == A_SINGLE) ) {
-	str = str_new(0);
-	s1 = arg[1].arg_ptr.arg_str;
-	if (arg->arg_len > 1)
-	    s2 = arg[2].arg_ptr.arg_str;
-	else
-	    s2 = Nullstr;
-	switch (arg->arg_type) {
-	default:
-	    str_free(str);
-	    str = Nullstr;		/* can't be evaluated yet */
-	    break;
-	case O_CONCAT:
-	    str_sset(str,s1);
-	    str_scat(str,s2);
-	    break;
-	case O_REPEAT:
-	    i = (int)str_gnum(s2);
-	    while (i-- > 0)
-		str_scat(str,s1);
-	    break;
-	case O_MULTIPLY:
-	    value = str_gnum(s1);
-	    str_numset(str,value * str_gnum(s2));
-	    break;
-	case O_DIVIDE:
-	    value = str_gnum(s2);
-	    if (value == 0.0)
-		fatal("Illegal division by constant zero");
-	    str_numset(str,str_gnum(s1) / value);
-	    break;
-	case O_MODULO:
-	    tmplong = (unsigned long)str_gnum(s2);
-	    if (tmplong == 0L)
-		fatal("Illegal modulus of constant zero");
-	    str_numset(str,(double)(((unsigned long)str_gnum(s1)) % tmplong));
-	    break;
-	case O_ADD:
-	    value = str_gnum(s1);
-	    str_numset(str,value + str_gnum(s2));
-	    break;
-	case O_SUBTRACT:
-	    value = str_gnum(s1);
-	    str_numset(str,value - str_gnum(s2));
-	    break;
-	case O_LEFT_SHIFT:
-	    value = str_gnum(s1);
-	    i = (int)str_gnum(s2);
-	    str_numset(str,(double)(((unsigned long)value) << i));
-	    break;
-	case O_RIGHT_SHIFT:
-	    value = str_gnum(s1);
-	    i = (int)str_gnum(s2);
-	    str_numset(str,(double)(((unsigned long)value) >> i));
-	    break;
-	case O_LT:
-	    value = str_gnum(s1);
-	    str_numset(str,(double)(value < str_gnum(s2)));
-	    break;
-	case O_GT:
-	    value = str_gnum(s1);
-	    str_numset(str,(double)(value > str_gnum(s2)));
-	    break;
-	case O_LE:
-	    value = str_gnum(s1);
-	    str_numset(str,(double)(value <= str_gnum(s2)));
-	    break;
-	case O_GE:
-	    value = str_gnum(s1);
-	    str_numset(str,(double)(value >= str_gnum(s2)));
-	    break;
-	case O_EQ:
-	    value = str_gnum(s1);
-	    str_numset(str,(double)(value == str_gnum(s2)));
-	    break;
-	case O_NE:
-	    value = str_gnum(s1);
-	    str_numset(str,(double)(value != str_gnum(s2)));
-	    break;
-	case O_BIT_AND:
-	    value = str_gnum(s1);
-	    str_numset(str,(double)(((unsigned long)value) &
-		((unsigned long)str_gnum(s2))));
-	    break;
-	case O_XOR:
-	    value = str_gnum(s1);
-	    str_numset(str,(double)(((unsigned long)value) ^
-		((unsigned long)str_gnum(s2))));
-	    break;
-	case O_BIT_OR:
-	    value = str_gnum(s1);
-	    str_numset(str,(double)(((unsigned long)value) |
-		((unsigned long)str_gnum(s2))));
-	    break;
-	case O_AND:
-	    if (str_true(s1))
-		str = str_make(str_get(s2));
-	    else
-		str = str_make(str_get(s1));
-	    break;
-	case O_OR:
-	    if (str_true(s1))
-		str = str_make(str_get(s1));
-	    else
-		str = str_make(str_get(s2));
-	    break;
-	case O_COND_EXPR:
-	    if (arg[3].arg_type != A_SINGLE) {
-		str_free(str);
-		str = Nullstr;
-	    }
-	    else {
-		str = str_make(str_get(str_true(s1) ? s2 : arg[3].arg_ptr.arg_str));
-		str_free(arg[3].arg_ptr.arg_str);
-	    }
-	    break;
-	case O_NEGATE:
-	    str_numset(str,(double)(-str_gnum(s1)));
-	    break;
-	case O_NOT:
-	    str_numset(str,(double)(!str_true(s1)));
-	    break;
-	case O_COMPLEMENT:
-	    str_numset(str,(double)(~(long)str_gnum(s1)));
-	    break;
-	case O_LENGTH:
-	    str_numset(str, (double)str_len(s1));
-	    break;
-	case O_SUBSTR:
-	    if (arg[3].arg_type != A_SINGLE || stabent("[",allstabs)) {
-		str_free(str);		/* making the fallacious assumption */
-		str = Nullstr;		/* that any $[ occurs before substr()*/
-	    }
-	    else {
-		char *beg;
-		int len = (int)str_gnum(s2);
-		int tmp;
-
-		for (beg = str_get(s1); *beg && len > 0; beg++,len--) ;
-		len = (int)str_gnum(arg[3].arg_ptr.arg_str);
-		str_free(arg[3].arg_ptr.arg_str);
-		if (len > (tmp = strlen(beg)))
-		    len = tmp;
-		str_nset(str,beg,len);
-	    }
-	    break;
-	case O_SLT:
-	    tmps = str_get(s1);
-	    str_numset(str,(double)(strLT(tmps,str_get(s2))));
-	    break;
-	case O_SGT:
-	    tmps = str_get(s1);
-	    str_numset(str,(double)(strGT(tmps,str_get(s2))));
-	    break;
-	case O_SLE:
-	    tmps = str_get(s1);
-	    str_numset(str,(double)(strLE(tmps,str_get(s2))));
-	    break;
-	case O_SGE:
-	    tmps = str_get(s1);
-	    str_numset(str,(double)(strGE(tmps,str_get(s2))));
-	    break;
-	case O_SEQ:
-	    tmps = str_get(s1);
-	    str_numset(str,(double)(strEQ(tmps,str_get(s2))));
-	    break;
-	case O_SNE:
-	    tmps = str_get(s1);
-	    str_numset(str,(double)(strNE(tmps,str_get(s2))));
-	    break;
-	case O_CRYPT:
-#ifdef CRYPT
-	    tmps = str_get(s1);
-	    str_set(str,crypt(tmps,str_get(s2)));
-#else
-	    fatal(
-	    "The crypt() function is unimplemented due to excessive paranoia.");
-#endif
-	    break;
-	case O_EXP:
-	    str_numset(str,exp(str_gnum(s1)));
-	    break;
-	case O_LOG:
-	    str_numset(str,log(str_gnum(s1)));
-	    break;
-	case O_SQRT:
-	    str_numset(str,sqrt(str_gnum(s1)));
-	    break;
-	case O_INT:
-	    value = str_gnum(s1);
-	    if (value >= 0.0)
-		modf(value,&value);
-	    else {
-		modf(-value,&value);
-		value = -value;
-	    }
-	    str_numset(str,value);
-	    break;
-	case O_ORD:
-	    str_numset(str,(double)(*str_get(s1)));
-	    break;
-	}
-	if (str) {
-	    arg->arg_type = O_ITEM;	/* note arg1 type is already SINGLE */
-	    str_free(s1);
-	    str_free(s2);
-	    arg[1].arg_ptr.arg_str = str;
-	}
-    }
-}
-
-ARG *
-l(arg)
-register ARG *arg;
-{
-    register int i;
-    register ARG *arg1;
-    ARG *tmparg;
-
-    arg->arg_flags |= AF_COMMON;	/* XXX should cross-match */
-					/* this does unnecessary copying */
-
-    if (arg[1].arg_type == A_ARYLEN) {
-	arg[1].arg_type = A_LARYLEN;
-	return arg;
-    }
-
-    /* see if it's an array reference */
-
-    if (arg[1].arg_type == A_EXPR) {
-	arg1 = arg[1].arg_ptr.arg_arg;
-
-	if (arg1->arg_type == O_LIST && arg->arg_type != O_ITEM) {
-						/* assign to list */
-	    arg[1].arg_flags |= AF_SPECIAL;
-	    dehoist(arg,2);
-	    arg[2].arg_flags |= AF_SPECIAL;
-	    for (i = arg1->arg_len; i >= 1; i--) {
-		switch (arg1[i].arg_type) {
-		case A_STAB: case A_LVAL:
-		    arg1[i].arg_type = A_LVAL;
-		    break;
-		case A_EXPR: case A_LEXPR:
-		    arg1[i].arg_type = A_LEXPR;
-		    if (arg1[i].arg_ptr.arg_arg->arg_type == O_ARRAY)
-			arg1[i].arg_ptr.arg_arg->arg_type = O_LARRAY;
-		    else if (arg1[i].arg_ptr.arg_arg->arg_type == O_HASH)
-			arg1[i].arg_ptr.arg_arg->arg_type = O_LHASH;
-		    if (arg1[i].arg_ptr.arg_arg->arg_type == O_LARRAY)
-			break;
-		    if (arg1[i].arg_ptr.arg_arg->arg_type == O_LHASH)
-			break;
-		    /* FALL THROUGH */
-		default:
-		    sprintf(tokenbuf,
-		      "Illegal item (%s) as lvalue",argname[arg1[i].arg_type]);
-		    yyerror(tokenbuf);
-		}
-	    }
-	}
-	else if (arg1->arg_type == O_ARRAY) {
-	    if (arg1->arg_len == 1 && arg->arg_type != O_ITEM) {
-						/* assign to array */
-		arg[1].arg_flags |= AF_SPECIAL;
-		dehoist(arg,2);
-		arg[2].arg_flags |= AF_SPECIAL;
-	    }
-	    else
-		arg1->arg_type = O_LARRAY;	/* assign to array elem */
-	}
-	else if (arg1->arg_type == O_HASH)
-	    arg1->arg_type = O_LHASH;
-	else if (arg1->arg_type != O_ASSIGN) {
-	    sprintf(tokenbuf,
-	      "Illegal expression (%s) as lvalue",opname[arg1->arg_type]);
-	    yyerror(tokenbuf);
-	}
-	arg[1].arg_type = A_LEXPR;
-#ifdef DEBUGGING
-	if (debug & 16)
-	    fprintf(stderr,"lval LEXPR\n");
-#endif
-	return arg;
-    }
-
-    /* not an array reference, should be a register name */
-
-    if (arg[1].arg_type != A_STAB && arg[1].arg_type != A_LVAL) {
-	sprintf(tokenbuf,
-	  "Illegal item (%s) as lvalue",argname[arg[1].arg_type]);
-	yyerror(tokenbuf);
-    }
-    arg[1].arg_type = A_LVAL;
-#ifdef DEBUGGING
-    if (debug & 16)
-	fprintf(stderr,"lval LVAL\n");
-#endif
-    return arg;
-}
-
-dehoist(arg,i)
-ARG *arg;
-{
-    ARG *tmparg;
-
-    if (arg[i].arg_type != A_EXPR) {	/* dehoist */
-	tmparg = make_op(O_ITEM,1,Nullarg,Nullarg,Nullarg,0);
-	tmparg[1] = arg[i];
-	arg[i].arg_ptr.arg_arg = tmparg;
-	arg[i].arg_type = A_EXPR;
-    }
-}
-
-ARG *
-addflags(i,flags,arg)
-register ARG *arg;
-{
-    arg[i].arg_flags |= flags;
-    return arg;
-}
-
-ARG *
-hide_ary(arg)
-ARG *arg;
-{
-    if (arg->arg_type == O_ARRAY)
-	return make_op(O_ITEM,1,arg,Nullarg,Nullarg,0);
-    return arg;
-}
-
-ARG *
-make_list(arg)
-register ARG *arg;
-{
-    register int i;
-    register ARG *node;
-    register ARG *nxtnode;
-    register int j;
-    STR *tmpstr;
-
-    if (!arg) {
-	arg = op_new(0);
-	arg->arg_type = O_LIST;
-    }
-    if (arg->arg_type != O_COMMA) {
-	arg->arg_flags |= AF_LISTISH;	/* see listish() below */
-	return arg;
-    }
-    for (i = 2, node = arg; ; i++) {
-	if (node->arg_len < 2)
-	    break;
-        if (node[2].arg_type != A_EXPR)
-	    break;
-	node = node[2].arg_ptr.arg_arg;
-	if (node->arg_type != O_COMMA)
-	    break;
-    }
-    if (i > 2) {
-	node = arg;
-	arg = op_new(i);
-	tmpstr = arg->arg_ptr.arg_str;
-	*arg = *node;		/* copy everything except the STR */
-	arg->arg_ptr.arg_str = tmpstr;
-	for (j = 1; ; ) {
-	    arg[j] = node[1];
-	    ++j;		/* Bug in Xenix compiler */
-	    if (j >= i) {
-		arg[j] = node[2];
-		free_arg(node);
-		break;
-	    }
-	    nxtnode = node[2].arg_ptr.arg_arg;
-	    free_arg(node);
-	    node = nxtnode;
-	}
-    }
-    arg->arg_type = O_LIST;
-    arg->arg_len = i;
-    return arg;
-}
-
-/* turn a single item into a list */
-
-ARG *
-listish(arg)
-ARG *arg;
-{
-    if (arg->arg_flags & AF_LISTISH) {
-	arg = make_op(O_LIST,1,arg,Nullarg,Nullarg,0);
-	arg[1].arg_flags &= ~AF_SPECIAL;
-    }
-    return arg;
-}
-
-/* mark list of local variables */
-
-ARG *
-localize(arg)
-ARG *arg;
-{
-    arg->arg_flags |= AF_LOCAL;
-    return arg;
-}
-
-ARG *
-stab2arg(atype,stab)
-int atype;
-register STAB *stab;
-{
-    register ARG *arg;
-
-    arg = op_new(1);
-    arg->arg_type = O_ITEM;
-    arg[1].arg_type = atype;
-    arg[1].arg_ptr.arg_stab = stab;
-    return arg;
-}
-
-ARG *
-cval_to_arg(cval)
-register char *cval;
-{
-    register ARG *arg;
-
-    arg = op_new(1);
-    arg->arg_type = O_ITEM;
-    arg[1].arg_type = A_SINGLE;
-    arg[1].arg_ptr.arg_str = str_make(cval);
-    safefree(cval);
-    return arg;
-}
-
-ARG *
-op_new(numargs)
-int numargs;
-{
-    register ARG *arg;
-
-    arg = (ARG*)safemalloc((numargs + 1) * sizeof (ARG));
-    bzero((char *)arg, (numargs + 1) * sizeof (ARG));
-    arg->arg_ptr.arg_str = str_new(0);
-    arg->arg_len = numargs;
-    return arg;
-}
-
-void
-free_arg(arg)
-ARG *arg;
-{
-    str_free(arg->arg_ptr.arg_str);
-    safefree((char*)arg);
-}
-
-ARG *
-make_match(type,expr,spat)
-int type;
-ARG *expr;
-SPAT *spat;
-{
-    register ARG *arg;
-
-    arg = make_op(type,2,expr,Nullarg,Nullarg,0);
-
-    arg[2].arg_type = A_SPAT;
-    arg[2].arg_ptr.arg_spat = spat;
-#ifdef DEBUGGING
-    if (debug & 16)
-	fprintf(stderr,"make_match SPAT=%lx\n",(long)spat);
-#endif
-
-    if (type == O_SUBST || type == O_NSUBST) {
-	if (arg[1].arg_type != A_STAB)
-	    yyerror("Illegal lvalue");
-	arg[1].arg_type = A_LVAL;
-    }
-    return arg;
-}
-
-ARG *
-cmd_to_arg(cmd)
-CMD *cmd;
-{
-    register ARG *arg;
-
-    arg = op_new(1);
-    arg->arg_type = O_ITEM;
-    arg[1].arg_type = A_CMD;
-    arg[1].arg_ptr.arg_cmd = cmd;
-    return arg;
-}
-
-CMD *
-wopt(cmd)
-register CMD *cmd;
-{
-    register CMD *tail;
-    register ARG *arg = cmd->c_expr;
-    STAB *asgnstab;
-
-    /* hoist "while (<channel>)" up into command block */
-
-    if (arg && arg->arg_type == O_ITEM && arg[1].arg_type == A_READ) {
-	cmd->c_flags &= ~CF_OPTIMIZE;	/* clear optimization type */
-	cmd->c_flags |= CFT_GETS;	/* and set it to do the input */
-	cmd->c_stab = arg[1].arg_ptr.arg_stab;
-	if (arg[1].arg_ptr.arg_stab->stab_io->flags & IOF_ARGV) {
-	    cmd->c_expr = l(make_op(O_ASSIGN, 2,	/* fake up "$_ =" */
-	       stab2arg(A_LVAL,defstab), arg, Nullarg,1 ));
-	}
-	else {
-	    free_arg(arg);
-	    cmd->c_expr = Nullarg;
-	}
-    }
-    else if (arg && arg->arg_type == O_ITEM && arg[1].arg_type == A_INDREAD) {
-	cmd->c_flags &= ~CF_OPTIMIZE;	/* clear optimization type */
-	cmd->c_flags |= CFT_INDGETS;	/* and set it to do the input */
-	cmd->c_stab = arg[1].arg_ptr.arg_stab;
-	free_arg(arg);
-	cmd->c_expr = Nullarg;
-    }
-    else if (arg && arg->arg_type == O_ITEM && arg[1].arg_type == A_GLOB) {
-	if ((cmd->c_flags & CF_OPTIMIZE) == CFT_ARRAY)
-	    asgnstab = cmd->c_stab;
-	else
-	    asgnstab = defstab;
-	cmd->c_expr = l(make_op(O_ASSIGN, 2,	/* fake up "$foo =" */
-	   stab2arg(A_LVAL,asgnstab), arg, Nullarg,1 ));
-	cmd->c_flags &= ~CF_OPTIMIZE;	/* clear optimization type */
-    }
-
-    /* First find the end of the true list */
-
-    if (cmd->ucmd.ccmd.cc_true == Nullcmd)
-	return cmd;
-    for (tail = cmd->ucmd.ccmd.cc_true; tail->c_next; tail = tail->c_next) ;
-
-    /* if there's a continue block, link it to true block and find end */
-
-    if (cmd->ucmd.ccmd.cc_alt != Nullcmd) {
-	tail->c_next = cmd->ucmd.ccmd.cc_alt;
-	for ( ; tail->c_next; tail = tail->c_next) ;
-    }
-
-    /* Here's the real trick: link the end of the list back to the beginning,
-     * inserting a "last" block to break out of the loop.  This saves one or
-     * two procedure calls every time through the loop, because of how cmd_exec
-     * does tail recursion.
-     */
-
-    tail->c_next = (CMD *) safemalloc(sizeof (CMD));
-    tail = tail->c_next;
-    if (!cmd->ucmd.ccmd.cc_alt)
-	cmd->ucmd.ccmd.cc_alt = tail;	/* every loop has a continue now */
-
-    bcopy((char *)cmd, (char *)tail, sizeof(CMD));
-    tail->c_type = C_EXPR;
-    tail->c_flags ^= CF_INVERT;		/* turn into "last unless" */
-    tail->c_next = tail->ucmd.ccmd.cc_true;	/* loop directly back to top */
-    tail->ucmd.acmd.ac_expr = make_op(O_LAST,0,Nullarg,Nullarg,Nullarg,0);
-    tail->ucmd.acmd.ac_stab = Nullstab;
-    return cmd;
-}
-
-CMD *
-over(eachstab,cmd)
-STAB *eachstab;
-register CMD *cmd;
-{
-    /* hoist "for $foo (@bar)" up into command block */
-
-    cmd->c_flags &= ~CF_OPTIMIZE;	/* clear optimization type */
-    cmd->c_flags |= CFT_ARRAY;		/* and set it to do the iteration */
-    cmd->c_stab = eachstab;
-
-    return cmd;
-}
-
-static int gensym = 0;
-
-STAB *
-genstab()
-{
-    sprintf(tokenbuf,"_GEN_%d",gensym++);
-    return stabent(tokenbuf,TRUE);
 }
 
 /* this routine is in perly.c by virtue of being sort of an alternate main() */
 
-STR *
-do_eval(str,optype)
+int
+do_eval(str,optype,stash,gimme,arglast)
 STR *str;
 int optype;
+HASH *stash;
+int gimme;
+int *arglast;
 {
+    STR **st = stack->ary_array;
     int retval;
     CMD *myroot;
     ARRAY *ar;
@@ -1709,26 +707,39 @@ int optype;
     line_t oldline = line;
     int oldtmps_base = tmps_base;
     int oldsave = savestack->ary_fill;
+    SPAT *oldspat = curspat;
+    static char *last_eval = Nullch;
+    static CMD *last_root = Nullcmd;
+    int sp = arglast[0];
 
     tmps_base = tmps_max;
-    str_set(stabent("@",TRUE)->stab_val,"");
+    if (curstash != stash) {
+	(void)savehptr(&curstash);
+	curstash = stash;
+    }
+    str_set(stab_val(stabent("@",TRUE)),"");
     if (optype != O_DOFILE) {	/* normal eval */
 	filename = "(eval)";
 	line = 1;
 	str_sset(linestr,str);
+	str_cat(linestr,";");		/* be kind to them */
     }
     else {
+	if (last_root) {
+	    Safefree(last_eval);
+	    cmd_free(last_root);
+	    last_root = Nullcmd;
+	}
 	filename = savestr(str_get(str));	/* can't free this easily */
 	str_set(linestr,"");
 	rsfp = fopen(filename,"r");
-	ar = incstab->stab_array;
+	ar = stab_array(incstab);
 	if (!rsfp && *filename != '/') {
 	    for (i = 0; i <= ar->ary_fill; i++) {
-		sprintf(tokenbuf,"%s/%s",str_get(afetch(ar,i)),filename);
-		rsfp = fopen(tokenbuf,"r");
+		(void)sprintf(buf,"%s/%s",str_get(afetch(ar,i,TRUE)),filename);
+		rsfp = fopen(buf,"r");
 		if (rsfp) {
-		    free(filename);
-		    filename = savestr(tokenbuf);
+		    filename = savestr(buf);
 		    break;
 		}
 	    }
@@ -1736,230 +747,65 @@ int optype;
 	if (!rsfp) {
 	    filename = oldfile;
 	    tmps_base = oldtmps_base;
-	    return &str_no;
+	    if (gimme != G_ARRAY)
+		st[++sp] = &str_undef;
+	    return sp;
 	}
 	line = 0;
     }
     in_eval++;
-    bufptr = str_get(linestr);
-    if (setjmp(eval_env))
+    oldoldbufptr = oldbufptr = bufptr = str_get(linestr);
+    bufend = bufptr + linestr->str_cur;
+    if (setjmp(eval_env)) {
 	retval = 1;
-    else
-	retval = yyparse();
-    myroot = eval_root;		/* in case cmd_exec does another eval! */
-    if (retval)
-	str = &str_no;
+	last_root = Nullcmd;
+    }
     else {
-	str = str_static(cmd_exec(eval_root));
-				/* if we don't save str, free zaps it */
-	cmd_free(myroot);	/* can't free on error, for some reason */
+	error_count = 0;
+	if (rsfp)
+	    retval = yyparse();
+	else if (last_root && *bufptr == *last_eval && strEQ(bufptr,last_eval)){
+	    retval = 0;
+	    eval_root = last_root;	/* no point in reparsing */
+	}
+	else if (in_eval == 1) {
+	    if (last_root) {
+		Safefree(last_eval);
+		cmd_free(last_root);
+	    }
+	    last_eval = savestr(bufptr);
+	    last_root = Nullcmd;
+	    retval = yyparse();
+	    if (!retval)
+		last_root = eval_root;
+	}
+	else
+	    retval = yyparse();
+    }
+    myroot = eval_root;		/* in case cmd_exec does another eval! */
+    if (retval || error_count) {
+	str = &str_undef;
+	last_root = Nullcmd;	/* can't free on error, for some reason */
+	if (rsfp) {
+	    fclose(rsfp);
+	    rsfp = 0;
+	}
+    }
+    else {
+	sp = cmd_exec(eval_root,gimme,sp);
+	st = stack->ary_array;
+	for (i = arglast[0] + 1; i <= sp; i++)
+	    st[i] = str_static(st[i]);
+				/* if we don't save result, free zaps it */
+	if (in_eval != 1 && myroot != last_root)
+	    cmd_free(myroot);
     }
     in_eval--;
     filename = oldfile;
     line = oldline;
     tmps_base = oldtmps_base;
+    curspat = oldspat;
     if (savestack->ary_fill > oldsave)	/* let them use local() */
 	restorelist(oldsave);
-    return str;
-}
-
-cmd_free(cmd)
-register CMD *cmd;
-{
-    register CMD *tofree;
-    register CMD *head = cmd;
-
-    while (cmd) {
-	if (cmd->c_type != C_WHILE) {	/* WHILE block is duplicated */
-	    if (cmd->c_label)
-		safefree(cmd->c_label);
-	    if (cmd->c_short)
-		str_free(cmd->c_short);
-	    if (cmd->c_spat)
-		spat_free(cmd->c_spat);
-	    if (cmd->c_expr)
-		arg_free(cmd->c_expr);
-	}
-	switch (cmd->c_type) {
-	case C_WHILE:
-	case C_BLOCK:
-	case C_IF:
-	    if (cmd->ucmd.ccmd.cc_true)
-		cmd_free(cmd->ucmd.ccmd.cc_true);
-	    if (cmd->c_type == C_IF && cmd->ucmd.ccmd.cc_alt)
-		cmd_free(cmd->ucmd.ccmd.cc_alt);
-	    break;
-	case C_EXPR:
-	    if (cmd->ucmd.acmd.ac_expr)
-		arg_free(cmd->ucmd.acmd.ac_expr);
-	    break;
-	}
-	tofree = cmd;
-	cmd = cmd->c_next;
-	safefree((char*)tofree);
-	if (cmd && cmd == head)		/* reached end of while loop */
-	    break;
-    }
-}
-
-arg_free(arg)
-register ARG *arg;
-{
-    register int i;
-
-    for (i = 1; i <= arg->arg_len; i++) {
-	switch (arg[i].arg_type) {
-	case A_NULL:
-	    break;
-	case A_LEXPR:
-	case A_EXPR:
-	    arg_free(arg[i].arg_ptr.arg_arg);
-	    break;
-	case A_CMD:
-	    cmd_free(arg[i].arg_ptr.arg_cmd);
-	    break;
-	case A_WORD:
-	case A_STAB:
-	case A_LVAL:
-	case A_READ:
-	case A_GLOB:
-	case A_ARYLEN:
-	    break;
-	case A_SINGLE:
-	case A_DOUBLE:
-	case A_BACKTICK:
-	    str_free(arg[i].arg_ptr.arg_str);
-	    break;
-	case A_SPAT:
-	    spat_free(arg[i].arg_ptr.arg_spat);
-	    break;
-	case A_NUMBER:
-	    break;
-	}
-    }
-    free_arg(arg);
-}
-
-spat_free(spat)
-register SPAT *spat;
-{
-    register SPAT *sp;
-
-    if (spat->spat_runtime)
-	arg_free(spat->spat_runtime);
-    if (spat->spat_repl) {
-	arg_free(spat->spat_repl);
-    }
-    if (spat->spat_short) {
-	str_free(spat->spat_short);
-    }
-    if (spat->spat_regexp) {
-	regfree(spat->spat_regexp);
-    }
-
-    /* now unlink from spat list */
-    if (spat_root == spat)
-	spat_root = spat->spat_next;
-    else {
-	for (sp = spat_root; sp->spat_next != spat; sp = sp->spat_next) ;
-	sp->spat_next = spat->spat_next;
-    }
-
-    safefree((char*)spat);
-}
-
-/* Recursively descend a command sequence and push the address of any string
- * that needs saving on recursion onto the tosave array.
- */
-
-static int
-cmd_tosave(cmd)
-register CMD *cmd;
-{
-    register CMD *head = cmd;
-
-    while (cmd) {
-	if (cmd->c_spat)
-	    spat_tosave(cmd->c_spat);
-	if (cmd->c_expr)
-	    arg_tosave(cmd->c_expr);
-	switch (cmd->c_type) {
-	case C_WHILE:
-	case C_BLOCK:
-	case C_IF:
-	    if (cmd->ucmd.ccmd.cc_true)
-		cmd_tosave(cmd->ucmd.ccmd.cc_true);
-	    if (cmd->c_type == C_IF && cmd->ucmd.ccmd.cc_alt)
-		cmd_tosave(cmd->ucmd.ccmd.cc_alt);
-	    break;
-	case C_EXPR:
-	    if (cmd->ucmd.acmd.ac_expr)
-		arg_tosave(cmd->ucmd.acmd.ac_expr);
-	    break;
-	}
-	cmd = cmd->c_next;
-	if (cmd && cmd == head)		/* reached end of while loop */
-	    break;
-    }
-}
-
-static int
-arg_tosave(arg)
-register ARG *arg;
-{
-    register int i;
-    int saving = FALSE;
-
-    for (i = 1; i <= arg->arg_len; i++) {
-	switch (arg[i].arg_type) {
-	case A_NULL:
-	    break;
-	case A_LEXPR:
-	case A_EXPR:
-	    saving |= arg_tosave(arg[i].arg_ptr.arg_arg);
-	    break;
-	case A_CMD:
-	    cmd_tosave(arg[i].arg_ptr.arg_cmd);
-	    saving = TRUE;	/* assume hanky panky */
-	    break;
-	case A_WORD:
-	case A_STAB:
-	case A_LVAL:
-	case A_READ:
-	case A_GLOB:
-	case A_ARYLEN:
-	case A_SINGLE:
-	case A_DOUBLE:
-	case A_BACKTICK:
-	    break;
-	case A_SPAT:
-	    saving |= spat_tosave(arg[i].arg_ptr.arg_spat);
-	    break;
-	case A_NUMBER:
-	    break;
-	}
-    }
-    switch (arg->arg_type) {
-    case O_EVAL:
-    case O_SUBR:
-	saving = TRUE;
-    }
-    if (saving)
-	apush(tosave,arg->arg_ptr.arg_str);
-    return saving;
-}
-
-static int
-spat_tosave(spat)
-register SPAT *spat;
-{
-    int saving = FALSE;
-
-    if (spat->spat_runtime)
-	saving |= arg_tosave(spat->spat_runtime);
-    if (spat->spat_repl) {
-	saving |= arg_tosave(spat->spat_repl);
-    }
-
-    return saving;
+    return sp;
 }

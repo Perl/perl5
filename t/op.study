@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: op.study,v 2.0 88/06/05 00:14:45 root Exp $
+# $Header: op.study,v 3.0 89/10/18 15:31:38 lwall Locked $
 
 print "1..24\n";
 

@@ -1,8 +1,42 @@
-#!/usr/bin/perl
+: This forces SH files to create target in same directory as SH file.
+: This is so that make depend always knows where to find SH derivatives.
+case "$0" in
+*/*) cd `expr X$0 : 'X\(.*\)/'` ;;
+esac
+case $CONFIG in
+'')
+    if test ! -f config.sh; then
+	ln ../config.sh . || \
+	ln ../../config.sh . || \
+	ln ../../../config.sh . || \
+	(echo "Can't find config.sh."; exit 1)
+    fi
+    . config.sh
+    ;;
+esac
+echo "Extracting s2p (with variable substitutions)"
+: This section of the file will have variable substitutions done on it.
+: Move anything that needs config subs from !NO!SUBS! section to !GROK!THIS!.
+: Protect any dollar signs and backticks that you do not want interpreted
+: by putting a backslash in front.  You may delete these comments.
+$spitshell >s2p <<!GROK!THIS!
+#!$bin/perl
 
-# $Header: s2p,v 2.0 88/06/05 00:15:55 root Exp $
+\$bin = '$bin';
+!GROK!THIS!
+
+: In the following dollars and backticks do not need the extra backslash.
+$spitshell >>s2p <<'!NO!SUBS!'
+
+# $Header: s2p.SH,v 3.0 89/10/18 15:35:02 lwall Locked $
 #
-# $Log:	s2p,v $
+# $Log:	s2p.SH,v $
+# Revision 3.0  89/10/18  15:35:02  lwall
+# 3.0 baseline
+# 
+# Revision 2.0.1.1  88/07/11  23:26:23  root
+# patch2: s2p didn't put a proper prologue on output script
+# 
 # Revision 2.0  88/06/05  00:15:55  root
 # Baseline version 2.0.
 # 
@@ -89,25 +123,7 @@ line: while (<>) {
 	$addr1 = 'eof()';
     }
     elsif (s|^/||) {
-	$addr1 = '/';
-	delim: while (s:^([^(|)\\/]*)([(|)\\/])::) {
-	    $prefix = $1;
-	    $delim = $2;
-	    if ($delim eq '\\') {
-		s/(.)(.*)/$2/;
-		$ch = $1;
-		$delim = '' if index("(|)",$ch) >= 0;
-		$delim .= $1;
-	    }
-	    elsif ($delim ne '/') {
-		$delim = '\\' . $delim;
-	    }
-	    $addr1 .= $prefix;
-	    $addr1 .= $delim;
-	    if ($delim eq '/') {
-		last delim;
-	    }
-	}
+	$addr1 = do fetchpat('/');
     }
     if (s/^,//) {
 	if (s/^([0-9]+)//) {
@@ -115,25 +131,7 @@ line: while (<>) {
 	} elsif (s/^\$//) {
 	    $addr2 = "eof()";
 	} elsif (s|^/||) {
-	    $addr2 = '/';
-	    delim: while (s:^([^(|)\\/]*)([(|)\\/])::) {
-		$prefix = $1;
-		$delim = $2;
-		if ($delim eq '\\') {
-		    s/(.)(.*)/$2/;
-		    $ch = $1;
-		    $delim = '' if index("(|)",$ch) >= 0;
-		    $delim .= $1;
-		}
-		elsif ($delim ne '/') {
-		    $delim = '\\' . $delim;
-		}
-		$addr2 .= $prefix;
-		$addr2 .= $delim;
-		if ($delim eq '/') {
-		    last delim;
-		}
-	    }
+	    $addr2 = do fetchpat('/');
 	} else {
 	    do Die("Invalid second address at line $.\n");
 	}
@@ -160,7 +158,7 @@ line: while (<>) {
     } else {
 	$rmaybe = "\n$r";
 	if ($addr2 || $addr1) {
-	    $space = substr('        ',0,$shiftwidth);
+	    $space = ' ' x $shiftwidth;
 	} else {
 	    $space = '';
 	}
@@ -184,8 +182,7 @@ line: while (<>) {
     while ($#lines >= 0) {
 	$_ = shift(lines);
 	unless (s/^ *<<--//) {
-	    print body substr("\t\t\t\t\t\t\t\t\t\t\t\t",0,$indent / 8),
-		substr('        ',0,$indent % 8);
+	    print body "\t" x ($indent / 8), ' ' x ($indent % 8);
 	}
 	print body $_, "\n";
     }
@@ -243,7 +240,11 @@ unless ($debug) {
     }
     close head;
 
-    print "#!/bin/perl\n\n";
+    print "#!$bin/perl
+eval \"exec $bin/perl -S \$0 \$*\"
+	if \$running_under_some_shell;
+
+";
     open(body,"cc -E /tmp/sperl2$$.c |") ||
 	do Die("Can't reopen temp file");
     while (<body>) {
@@ -281,10 +282,10 @@ sub make_label {
     $label =~ s/[^a-zA-Z0-9]/_/g;
     if ($label =~ /^[0-9_]/) { $label = 'L' . $label; }
     $label = substr($label,0,8);
-    if ($label =~ /^([a-z])([a-z]*)$/) {
+    if ($label =~ /^([a-z])([a-z]*)$/) {	# could be reserved word
 	$first = $1;
 	$rest = $2;
-	$first =~ y/a-z/A-Z/;
+	$first =~ y/a-z/A-Z/;			# so capitalize it
 	$label = $first . $rest;
     }
     $label;
@@ -377,9 +378,25 @@ ${space}next line;";
 	    $delim = substr($_,1,1);
 	    $len = length($_);
 	    $repl = $end = 0;
+	    $inbracket = 0;
 	    for ($i = 2; $i < $len; $i++) {
 		$c = substr($_,$i,1);
-		if ($c eq '\\') {
+		if ($c eq $delim) {
+		    if ($inbracket) {
+			$_ = substr($_,0,$i) . '\\' . substr($_,$i,10000);
+			$i++;
+			$len++;
+		    }
+		    else {
+			if ($repl) {
+			    $end = $i;
+			    last;
+			} else {
+			    $repl = $i;
+			}
+		    }
+		}
+		elsif ($c eq '\\') {
 		    $i++;
 		    if ($i >= $len) {
 			$_ .= 'n';
@@ -387,21 +404,21 @@ ${space}next line;";
 			$len = length($_);
 			$_ = substr($_,0,--$len);
 		    }
-		    elsif (!$repl && index("(|)",substr($_,$i,1)) >= 0) {
+		    elsif (!$repl && substr($_,$i,1) =~ /^[(){}\w]$/) {
 			$i--;
 			$len--;
 			$_ = substr($_,0,$i) . substr($_,$i+1,10000);
 		    }
 		}
-		elsif ($c eq $delim) {
-		    if ($repl) {
-			$end = $i;
-			last;
-		    } else {
-			$repl = $i;
-		    }
+		elsif ($c eq '[' && !$repl) {
+		    $i++ if substr($_,$i,1) eq '^';
+		    $i++ if substr($_,$i,1) eq ']';
+		    $inbracket = 1;
 		}
-		elsif (!$repl && index("(|)",$c) >= 0) {
+		elsif ($c eq ']') {
+		    $inbracket = 0;
+		}
+		elsif (!$repl && index("()",$c) >= 0) {
 		    $_ = substr($_,0,$i) . '\\' . substr($_,$i,10000);
 		    $i++;
 		    $len++;
@@ -428,7 +445,12 @@ ${space}next line;";
 		}
 		do Die("Unrecognized substitution command ($end) at line $.\n");
 	    }
-	    $_ = $subst . $cmd . ';';
+	    $_ =
+"<<--#ifdef TSEEN
+$subst && \$tflag++$cmd;
+<<--#else
+$subst$cmd;
+<<--#endif";
 	    next;
 	}
 
@@ -453,17 +475,14 @@ ${space}next line;";
 	}
 
 	if (/^P/) {
-	    $_ =
-'if (/(^[^\n]*\n)/) {
-    print $1;
-}';
+	    $_ = 'print $1 if /(^.*\n)/;';
 	    next;
 	}
 
 	if (/^D/) {
 	    $_ =
-'s/^[^\n]*\n//;
-if ($_) {redo line;}
+'s/^.*\n//;
+redo line if $_;
 next line;';
 	    next;
 	}
@@ -558,3 +577,44 @@ next line;';
     $_;
 }
 
+sub fetchpat {
+    local($outer) = @_;
+    local($addr) = $outer;
+    local($inbracket);
+    local($prefix,$delim,$ch);
+
+    delim: while (s:^([^\](|)[\\/]*)([](|)[\\/])::) {
+	$prefix = $1;
+	$delim = $2;
+	print "$prefix\t$delim\t$_\n";
+	if ($delim eq '\\') {
+	    s/(.)//;
+	    $ch = $1;
+	    $delim = '' if $ch =~ /^[(){}\w]$/;
+	    $delim .= $1;
+	}
+	elsif ($delim eq '[') {
+	    $inbracket = 1;
+	    s/^\^// && ($delim .= '^');
+	    s/^]// && ($delim .= ']');
+	    print "$prefix\t$delim\t$_\n";
+	}
+	elsif ($delim eq ']') {
+	    $inbracket = 0;
+	}
+	elsif ($inbracket || $delim ne $outer) {
+	    print "Adding\n";
+	    $delim = '\\' . $delim;
+	}
+	$addr .= $prefix;
+	$addr .= $delim;
+	if ($delim eq $outer && !$inbracket) {
+	    last delim;
+	}
+    }
+    $addr;
+}
+
+!NO!SUBS!
+chmod 755 s2p
+$eunicefix s2p

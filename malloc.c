@@ -1,16 +1,17 @@
-/* $Header: malloc.c,v 2.0 88/06/05 00:09:16 root Exp $
+/* $Header: malloc.c,v 3.0 89/10/18 15:20:39 lwall Locked $
  *
  * $Log:	malloc.c,v $
- * Revision 2.0  88/06/05  00:09:16  root
- * Baseline version 2.0.
+ * Revision 3.0  89/10/18  15:20:39  lwall
+ * 3.0 baseline
  * 
  */
 
 #ifndef lint
 static char sccsid[] = "@(#)malloc.c	4.3 (Berkeley) 9/16/83";
-#endif
 
+#ifdef DEBUGGING
 #define RCHECK
+#endif
 /*
  * malloc.c (Caltech) 2/21/82
  * Chris Kingsley, kingsley@cit-20.
@@ -43,6 +44,9 @@ static char sccsid[] = "@(#)malloc.c	4.3 (Berkeley) 9/16/83";
  */
 union	overhead {
 	union	overhead *ov_next;	/* when free */
+#ifdef mips
+	double  strut;			/* alignment problems */
+#endif
 	struct {
 		u_char	ovu_magic;	/* magic number */
 		u_char	ovu_index;	/* bucket # */
@@ -128,7 +132,11 @@ malloc(nbytes)
   		return (NULL);
 	/* remove from linked list */
 	if (*((int*)p) > 0x10000000)
+#ifndef I286
 	    fprintf(stderr,"Corrupt malloc ptr 0x%x at 0x%x\n",*((int*)p),p);
+#else
+	    fprintf(stderr,"Corrupt malloc ptr 0x%lx at 0x%lx\n",*((int*)p),p);
+#endif
   	nextf[bucket] = nextf[bucket]->ov_next;
 	p->ov_magic = MAGIC;
 	p->ov_index= bucket;
@@ -153,7 +161,7 @@ malloc(nbytes)
  */
 static
 morecore(bucket)
-	register bucket;
+	register int bucket;
 {
   	register union overhead *op;
   	register int rnu;       /* 2^rnu bytes will be requested */
@@ -168,10 +176,21 @@ morecore(bucket)
 	 * make getpageize call?
 	 */
   	op = (union overhead *)sbrk(0);
+#ifndef I286
   	if ((int)op & 0x3ff)
-  		sbrk(1024 - ((int)op & 0x3ff));
+  		(void)sbrk(1024 - ((int)op & 0x3ff));
+#else
+	/* The sbrk(0) call on the I286 always returns the next segment */
+#endif
+
+#ifndef I286
 	/* take 2k unless the block is bigger than that */
   	rnu = (bucket <= 8) ? 11 : bucket + 3;
+#else
+	/* take 16k unless the block is bigger than that 
+	   (80286s like large segments!)		*/
+  	rnu = (bucket <= 11) ? 14 : bucket + 3;
+#endif
   	nblks = 1 << (rnu - (bucket + 3));  /* how many blocks to get */
   	if (rnu < bucket)
 		rnu = bucket;
@@ -183,10 +202,14 @@ morecore(bucket)
 	 * Round up to minimum allocation size boundary
 	 * and deduct from block count to reflect.
 	 */
+#ifndef I286
   	if ((int)op & 7) {
   		op = (union overhead *)(((int)op + 8) &~ 7);
   		nblks--;
   	}
+#else
+	/* Again, this should always be ok on an 80286 */
+#endif
 	/*
 	 * Add new memory allocated to that on
 	 * free list for this hash bucket.
@@ -212,7 +235,7 @@ free(cp)
   	ASSERT(op->ov_magic == MAGIC);		/* make sure it was in use */
 #else
 	if (op->ov_magic != MAGIC) {
-		fprintf(stderr,"%s free() ignored\n",
+		warn("%s free() ignored",
 		    op->ov_magic == OLDMAGIC ? "Duplicate" : "Bad");
 		return;				/* sanity */
 	}
@@ -281,12 +304,31 @@ realloc(cp, nbytes)
 	onb = (1 << (i + 3)) - sizeof (*op) - RSLOP;
 	/* avoid the copy if same size block */
 	if (was_alloced &&
-	    nbytes <= onb && nbytes > (onb >> 1) - sizeof(*op) - RSLOP)
+	    nbytes <= onb && nbytes > (onb >> 1) - sizeof(*op) - RSLOP) {
+#ifdef RCHECK
+		/*
+		 * Record new allocated size of block and
+		 * bound space with magic numbers.
+		 */
+		if (op->ov_index <= 13) {
+			/*
+			 * Convert amount of memory requested into
+			 * closest block size stored in hash buckets
+			 * which satisfies request.  Account for
+			 * space used per block for accounting.
+			 */
+			nbytes += sizeof (union overhead) + RSLOP;
+			nbytes = (nbytes + 3) &~ 3; 
+			op->ov_size = nbytes - 1;
+			*((u_int *)((caddr_t)op + nbytes - RSLOP)) = RMAGIC;
+		}
+#endif
 		return(cp);
+	}
   	if ((res = malloc(nbytes)) == NULL)
   		return (NULL);
   	if (cp != res)			/* common optimization */
-		bcopy(cp, res, (nbytes < onb) ? nbytes : onb);
+		(void)bcopy(cp, res, (int)((nbytes < onb) ? nbytes : onb));
   	if (was_alloced)
 		free(cp);
   	return (res);
@@ -348,3 +390,4 @@ mstats(s)
 	    totused, totfree);
 }
 #endif
+#endif /* lint */

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Header: gcp,v 2.0 88/06/05 00:17:02 root Exp $
+# $Header: gcp,v 3.0 89/10/18 15:13:59 lwall Locked $
 
 # Here is a script to do global rcps.  See man page.
 
@@ -98,7 +98,7 @@ line: while (<>) {
 
 if ($remainder) {
     chop($remainder);
-    open(grem,">.grem") || (printf stderr "Can't create .grem\n");
+    open(grem,">.grem") || (printf stderr "Can't create .grem: $!\n");
     print grem 'rem=', $remainder, "\n";
     close(grem);
     print 'rem=', $remainder, "\n";

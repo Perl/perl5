@@ -1,11 +1,13 @@
-/* $Header: toke.c,v 2.0.1.1 88/06/28 16:39:50 root Exp $
+/* $Header: toke.c,v 3.0 89/10/18 15:32:33 lwall Locked $
+ *
+ *    Copyright (c) 1989, Larry Wall
+ *
+ *    You may distribute under the terms of the GNU General Public License
+ *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	toke.c,v $
- * Revision 2.0.1.1  88/06/28  16:39:50  root
- * patch1: tr/x/y/ can dump core if y is shorter than x
- * 
- * Revision 2.0  88/06/05  00:11:16  root
- * Baseline version 2.0.
+ * Revision 3.0  89/10/18  15:32:33  lwall
+ * 3.0 baseline
  * 
  */
 
@@ -13,20 +15,59 @@
 #include "perl.h"
 #include "perly.h"
 
+char *reparse;		/* if non-null, scanreg found ${foo[$bar]} */
+
 #define CLINE (cmdline = (line < cmdline ? line : cmdline))
+
+#define META(c) ((c) | 128)
 
 #define RETURN(retval) return (bufptr = s,(int)retval)
 #define OPERATOR(retval) return (expectterm = TRUE,bufptr = s,(int)retval)
 #define TERM(retval) return (CLINE, expectterm = FALSE,bufptr = s,(int)retval)
 #define LOOPX(f) return(yylval.ival=f,expectterm = FALSE,bufptr = s,(int)LOOPEX)
-#define UNI(f) return(yylval.ival = f,expectterm = TRUE,bufptr = s,(int)UNIOP)
 #define FTST(f) return(yylval.ival=f,expectterm = TRUE,bufptr = s,(int)FILETEST)
 #define FUN0(f) return(yylval.ival = f,expectterm = FALSE,bufptr = s,(int)FUNC0)
 #define FUN1(f) return(yylval.ival = f,expectterm = FALSE,bufptr = s,(int)FUNC1)
 #define FUN2(f) return(yylval.ival = f,expectterm = FALSE,bufptr = s,(int)FUNC2)
 #define FUN3(f) return(yylval.ival = f,expectterm = FALSE,bufptr = s,(int)FUNC3)
-#define SFUN(f) return(yylval.ival=f,expectterm = FALSE,bufptr = s,(int)STABFUN)
-#define LFUN(f) return(yylval.ival=f,expectterm = FALSE,bufptr = s,(int)LVALFUN)
+#define FL(f) return(yylval.ival=f,expectterm = FALSE,bufptr = s,(int)FLIST)
+#define FL2(f) return(yylval.ival=f,expectterm = FALSE,bufptr = s,(int)FLIST2)
+#define HFUN(f) return(yylval.ival=f,expectterm = TRUE,bufptr = s,(int)HSHFUN)
+#define HFUN3(f) return(yylval.ival=f,expectterm = FALSE,bufptr = s,(int)HSHFUN3)
+#define LFUN(f) return(yylval.ival=f,expectterm = TRUE,bufptr = s,(int)LVALFUN)
+#define LFUN4(f) return(yylval.ival = f,expectterm = FALSE,bufptr = s,(int)LFUNC4)
+#define AOP(f) return(yylval.ival=f,expectterm = TRUE,bufptr = s,(int)ADDOP)
+#define MOP(f) return(yylval.ival=f,expectterm = TRUE,bufptr = s,(int)MULOP)
+#define EOP(f) return(yylval.ival=f,expectterm = TRUE,bufptr = s,(int)EQOP)
+#define ROP(f) return(yylval.ival=f,expectterm = TRUE,bufptr = s,(int)RELOP)
+#define FOP(f) return(yylval.ival=f,expectterm = FALSE,bufptr = s,(int)FILOP)
+#define FOP2(f) return(yylval.ival=f,expectterm = FALSE,bufptr = s,(int)FILOP2)
+#define FOP3(f) return(yylval.ival=f,expectterm = FALSE,bufptr = s,(int)FILOP3)
+#define FOP4(f) return(yylval.ival=f,expectterm = FALSE,bufptr = s,(int)FILOP4)
+#define FOP22(f) return(yylval.ival=f,expectterm = FALSE,bufptr = s,(int)FILOP22)
+#define FOP25(f) return(yylval.ival=f,expectterm = FALSE,bufptr = s,(int)FILOP25)
+
+/* This bit of chicanery makes a unary function followed by
+ * a parenthesis into a function with one argument, highest precedence.
+ */
+#define UNI(f) return(yylval.ival = f,expectterm = TRUE,bufptr = s, \
+	(*s == '(' || (s = skipspace(s), *s == '(') ? (int)FUNC1 : (int)UNIOP) )
+
+/* This does similarly for list operators, merely by pretending that the
+ * paren came before the listop rather than after.
+ */
+#define LOP(f) return(*s == '(' || (s = skipspace(s), *s == '(') ? \
+	(*s = META('('), bufptr = oldbufptr, '(') : \
+	(yylval.ival=f,expectterm = TRUE,bufptr = s,(int)LISTOP))
+
+char *
+skipspace(s)
+register char *s;
+{
+    while (s < bufend && isascii(*s) && isspace(*s))
+	s++;
+    return s;
+}
 
 yylex()
 {
@@ -35,6 +76,10 @@ yylex()
     register int tmp;
     static bool in_format = FALSE;
     static bool firstline = TRUE;
+    extern int yychar;		/* last token */
+
+    oldoldbufptr = oldbufptr;
+    oldbufptr = s;
 
   retry:
 #ifdef YYDEBUG
@@ -46,51 +91,71 @@ yylex()
 #endif
     switch (*s) {
     default:
-	fprintf(stderr,
-	    "Unrecognized character %c in file %s line %ld--ignoring.\n",
-	     *s++,filename,(long)line);
+	if ((*s & 127) == '(')
+	    *s++ = '(';
+	else
+	    warn("Unrecognized character \\%03o ignored", *s++);
 	goto retry;
     case 0:
-	s = str_get(linestr);
-	*s = '\0';
-	if (firstline && (minus_n || minus_p)) {
-	    firstline = FALSE;
-	    str_set(linestr,"line: while (<>) {");
-	    if (minus_a)
-		str_cat(linestr,"@F=split(' ');");
-	    s = str_get(linestr);
-	    goto retry;
-	}
 	if (!rsfp)
 	    RETURN(0);
+	if (s++ < bufend)
+	    goto retry;			/* ignore stray nulls */
+	if (firstline) {
+	    firstline = FALSE;
+	    if (minus_n || minus_p || perldb) {
+		str_set(linestr,"");
+		if (perldb)
+		    str_cat(linestr,"do 'perldb.pl'; print $@;");
+		if (minus_n || minus_p) {
+		    str_cat(linestr,"line: while (<>) {");
+		    if (minus_a)
+			str_cat(linestr,"@F=split(' ');");
+		}
+		oldoldbufptr = oldbufptr = s = str_get(linestr);
+		bufend = linestr->str_ptr + linestr->str_cur;
+		goto retry;
+	    }
+	}
 	if (in_format) {
-	    yylval.formval = load_format();	/* leaves . in buffer */
+	    yylval.formval = load_format();
 	    in_format = FALSE;
-	    s = str_get(linestr);
+	    oldoldbufptr = oldbufptr = s = str_get(linestr) + 1;
+	    bufend = linestr->str_ptr + linestr->str_cur;
 	    TERM(FORMLIST);
 	}
 	line++;
-	if ((s = str_gets(linestr, rsfp)) == Nullch) {
+	if ((s = str_gets(linestr, rsfp, 0)) == Nullch) {
 	    if (preprocess)
-		pclose(rsfp);
+		(void)mypclose(rsfp);
 	    else if (rsfp != stdin)
-		fclose(rsfp);
+		(void)fclose(rsfp);
 	    rsfp = Nullfp;
 	    if (minus_n || minus_p) {
 		str_set(linestr,minus_p ? "}continue{print;" : "");
 		str_cat(linestr,"}");
-		s = str_get(linestr);
+		oldoldbufptr = oldbufptr = s = str_get(linestr);
+		bufend = linestr->str_ptr + linestr->str_cur;
 		goto retry;
 	    }
-	    s = str_get(linestr);
+	    oldoldbufptr = oldbufptr = s = str_get(linestr);
+	    str_set(linestr,"");
 	    RETURN(0);
 	}
+	oldoldbufptr = oldbufptr = bufptr = s;
+	if (perldb) {
+	    STR *str = Str_new(85,0);
+
+	    str_sset(str,linestr);
+	    astore(lineary,(int)line,str);
+	}
 #ifdef DEBUG
-	else if (firstline) {
+	if (firstline) {
 	    char *showinput();
 	    s = showinput();
 	}
 #endif
+	bufend = linestr->str_ptr + linestr->str_cur;
 	firstline = FALSE;
 	goto retry;
     case ' ': case '\t': case '\f':
@@ -102,9 +167,10 @@ yylex()
 	       s[1] == ' ' && isdigit(s[2])) {
 	    line = atoi(s+2)-1;
 	    for (s += 2; isdigit(*s); s++) ;
-	    while (*s && isspace(*s)) s++;
+	    d = bufend;
+	    while (s < d && isspace(*s)) s++;
 	    if (filename)
-		safefree(filename);
+		Safefree(filename);
 	    s[strlen(s)-1] = '\0';	/* wipe out newline */
 	    if (*s == '"') {
 		s++;
@@ -114,19 +180,21 @@ yylex()
 		filename = savestr(s);
 	    else
 		filename = savestr(origfilename);
-	    s = str_get(linestr);
+	    oldoldbufptr = oldbufptr = s = str_get(linestr);
 	}
-	if (in_eval) {
-	    while (*s && *s != '\n')
+	if (in_eval && !rsfp) {
+	    d = bufend;
+	    while (s < d && *s != '\n')
 		s++;
-	    if (*s)
+	    if (s < d) {
 		s++;
-	    line++;
+		line++;
+	    }
 	}
-	else
+	else {
 	    *s = '\0';
-	if (lex_newlines)
-	    RETURN('\n');
+	    bufend = s;
+	}
 	goto retry;
     case '-':
 	if (s[1] && isalpha(s[1]) && !isalpha(s[2])) {
@@ -161,18 +229,47 @@ yylex()
 		break;
 	    }
 	}
-	/*FALL THROUGH*/
-    case '+':
-	if (s[1] == *s) {
+	tmp = *s++;
+	if (*s == tmp) {
 	    s++;
-	    if (*s++ == '+')
-		RETURN(INC);
-	    else
-		RETURN(DEC);
+	    RETURN(DEC);
 	}
-	/* FALL THROUGH */
+	if (expectterm)
+	    OPERATOR('-');
+	else
+	    AOP(O_SUBTRACT);
+    case '+':
+	tmp = *s++;
+	if (*s == tmp) {
+	    s++;
+	    RETURN(INC);
+	}
+	if (expectterm)
+	    OPERATOR('+');
+	else
+	    AOP(O_ADD);
+
     case '*':
+	if (expectterm) {
+	    s = scanreg(s,bufend,tokenbuf);
+	    yylval.stabval = stabent(tokenbuf,TRUE);
+	    TERM(STAR);
+	}
+	tmp = *s++;
+	if (*s == tmp) {
+	    s++;
+	    OPERATOR(POW);
+	}
+	MOP(O_MULTIPLY);
     case '%':
+	if (expectterm) {
+	    s = scanreg(s,bufend,tokenbuf);
+	    yylval.stabval = stabent(tokenbuf,TRUE);
+	    TERM(HSH);
+	}
+	s++;
+	MOP(O_MODULO);
+
     case '^':
     case '~':
     case '(':
@@ -208,6 +305,14 @@ yylex()
 	if (tmp == '&')
 	    OPERATOR(ANDAND);
 	s--;
+	if (expectterm) {
+	    d = bufend;
+	    while (s < d && isspace(*s))
+		s++;
+	    if (isalpha(*s) || *s == '_' || *s == '\'')
+		*(--s) = '\\';	/* force next ident to WORD */
+	    OPERATOR(AMPER);
+	}
 	OPERATOR('&');
     case '|':
 	s++;
@@ -220,7 +325,7 @@ yylex()
 	s++;
 	tmp = *s++;
 	if (tmp == '=')
-	    OPERATOR(EQ);
+	    EOP(O_EQ);
 	if (tmp == '~')
 	    OPERATOR(MATCH);
 	s--;
@@ -229,7 +334,7 @@ yylex()
 	s++;
 	tmp = *s++;
 	if (tmp == '=')
-	    OPERATOR(NE);
+	    EOP(O_NE);
 	if (tmp == '~')
 	    OPERATOR(NMATCH);
 	s--;
@@ -244,40 +349,55 @@ yylex()
 	if (tmp == '<')
 	    OPERATOR(LS);
 	if (tmp == '=')
-	    OPERATOR(LE);
+	    ROP(O_LE);
 	s--;
-	OPERATOR('<');
+	ROP(O_LT);
     case '>':
 	s++;
 	tmp = *s++;
 	if (tmp == '>')
 	    OPERATOR(RS);
 	if (tmp == '=')
-	    OPERATOR(GE);
+	    ROP(O_GE);
 	s--;
-	OPERATOR('>');
+	ROP(O_GT);
 
 #define SNARFWORD \
 	d = tokenbuf; \
-	while (isalpha(*s) || isdigit(*s) || *s == '_') \
+	while (isascii(*s) && \
+	  (isalpha(*s) || isdigit(*s) || *s == '_' || *s == '\'')) \
 	    *d++ = *s++; \
+	if (d[-1] == '\'') \
+	    d--,s--; \
 	*d = '\0'; \
 	d = tokenbuf;
 
     case '$':
 	if (s[1] == '#' && (isalpha(s[2]) || s[2] == '_')) {
 	    s++;
-	    s = scanreg(s,tokenbuf);
+	    s = scanreg(s,bufend,tokenbuf);
 	    yylval.stabval = aadd(stabent(tokenbuf,TRUE));
 	    TERM(ARYLEN);
 	}
-	s = scanreg(s,tokenbuf);
+	d = s;
+	s = scanreg(s,bufend,tokenbuf);
+	if (reparse) {		/* turn ${foo[bar]} into ($foo[bar]) */
+	  do_reparse:
+	    s[-1] = ')';
+	    s = d;
+	    s[1] = s[0];
+	    s[0] = '(';
+	    goto retry;
+	}
 	yylval.stabval = stabent(tokenbuf,TRUE);
 	TERM(REG);
 
     case '@':
-	s = scanreg(s,tokenbuf);
-	yylval.stabval = aadd(stabent(tokenbuf,TRUE));
+	d = s;
+	s = scanreg(s,bufend,tokenbuf);
+	if (reparse)
+	    goto do_reparse;
+	yylval.stabval = stabent(tokenbuf,TRUE);
 	TERM(ARY);
 
     case '/':			/* may either be division or pattern */
@@ -287,16 +407,18 @@ yylex()
 	    TERM(PATTERN);
 	}
 	tmp = *s++;
+	if (tmp == '/')
+	    MOP(O_DIVIDE);
 	OPERATOR(tmp);
 
     case '.':
 	if (!expectterm || !isdigit(s[1])) {
-	    s++;
 	    tmp = *s++;
-	    if (tmp == '.')
+	    if (*s == tmp) {
+		s++;
 		OPERATOR(DOTDOT);
-	    s--;
-	    OPERATOR('.');
+	    }
+	    AOP(O_CONCAT);
 	}
 	/* FALL THROUGH */
     case '0': case '1': case '2': case '3': case '4':
@@ -305,50 +427,76 @@ yylex()
 	s = scanstr(s);
 	TERM(RSTRING);
 
+    case '\\':	/* some magic to force next word to be a WORD */
+	s++;	/* used by do and sub to force a separate namespace */
+	/* FALL THROUGH */
     case '_':
 	SNARFWORD;
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	break;
     case 'a': case 'A':
 	SNARFWORD;
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	if (strEQ(d,"accept"))
+	    FOP22(O_ACCEPT);
+	if (strEQ(d,"atan2"))
+	    FUN2(O_ATAN2);
+	break;
     case 'b': case 'B':
 	SNARFWORD;
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	if (strEQ(d,"bind"))
+	    FOP2(O_BIND);
+	break;
     case 'c': case 'C':
 	SNARFWORD;
+	if (strEQ(d,"chop"))
+	    LFUN(O_CHOP);
 	if (strEQ(d,"continue"))
 	    OPERATOR(CONTINUE);
 	if (strEQ(d,"chdir"))
 	    UNI(O_CHDIR);
 	if (strEQ(d,"close"))
-	    OPERATOR(CLOSE);
-	if (strEQ(d,"crypt"))
+	    FOP(O_CLOSE);
+	if (strEQ(d,"closedir"))
+	    FOP(O_CLOSEDIR);
+	if (strEQ(d,"crypt")) {
+#ifdef FCRYPT
+	    init_des();
+#endif
 	    FUN2(O_CRYPT);
-	if (strEQ(d,"chop"))
-	    LFUN(O_CHOP);
-	if (strEQ(d,"chmod")) {
-	    yylval.ival = O_CHMOD;
-	    OPERATOR(LISTOP);
 	}
-	if (strEQ(d,"chown")) {
-	    yylval.ival = O_CHOWN;
-	    OPERATOR(LISTOP);
-	}
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	if (strEQ(d,"chmod"))
+	    LOP(O_CHMOD);
+	if (strEQ(d,"chown"))
+	    LOP(O_CHOWN);
+	if (strEQ(d,"connect"))
+	    FOP2(O_CONNECT);
+	if (strEQ(d,"cos"))
+	    UNI(O_COS);
+	if (strEQ(d,"chroot"))
+	    UNI(O_CHROOT);
+	break;
     case 'd': case 'D':
 	SNARFWORD;
-	if (strEQ(d,"do"))
+	if (strEQ(d,"do")) {
+	    d = bufend;
+	    while (s < d && isspace(*s))
+		s++;
+	    if (isalpha(*s) || *s == '_')
+		*(--s) = '\\';	/* force next ident to WORD */
 	    OPERATOR(DO);
+	}
 	if (strEQ(d,"die"))
-	    UNI(O_DIE);
+	    LOP(O_DIE);
+	if (strEQ(d,"defined"))
+	    LFUN(O_DEFINED);
 	if (strEQ(d,"delete"))
 	    OPERATOR(DELETE);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	if (strEQ(d,"dbmopen"))
+	    HFUN3(O_DBMOPEN);
+	if (strEQ(d,"dbmclose"))
+	    HFUN(O_DBMCLOSE);
+	if (strEQ(d,"dump"))
+	    LOOPX(O_DUMP);
+	break;
     case 'e': case 'E':
 	SNARFWORD;
 	if (strEQ(d,"else"))
@@ -358,7 +506,7 @@ yylex()
 	    OPERATOR(ELSIF);
 	}
 	if (strEQ(d,"eq") || strEQ(d,"EQ"))
-	    OPERATOR(SEQ);
+	    EOP(O_SEQ);
 	if (strEQ(d,"exit"))
 	    UNI(O_EXIT);
 	if (strEQ(d,"eval")) {
@@ -366,17 +514,28 @@ yylex()
 	    UNI(O_EVAL);		/* we don't know what will be used */
 	}
 	if (strEQ(d,"eof"))
-	    TERM(FEOF);
+	    FOP(O_EOF);
 	if (strEQ(d,"exp"))
-	    FUN1(O_EXP);
+	    UNI(O_EXP);
 	if (strEQ(d,"each"))
-	    SFUN(O_EACH);
+	    HFUN(O_EACH);
 	if (strEQ(d,"exec")) {
-	    yylval.ival = O_EXEC;
-	    OPERATOR(LISTOP);
+	    set_csh();
+	    LOP(O_EXEC);
 	}
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	if (strEQ(d,"endhostent"))
+	    FUN0(O_EHOSTENT);
+	if (strEQ(d,"endnetent"))
+	    FUN0(O_ENETENT);
+	if (strEQ(d,"endservent"))
+	    FUN0(O_ESERVENT);
+	if (strEQ(d,"endprotoent"))
+	    FUN0(O_EPROTOENT);
+	if (strEQ(d,"endpwent"))
+	    FUN0(O_EPWENT);
+	if (strEQ(d,"endgrent"))
+	    FUN0(O_EGRENT);
+	break;
     case 'f': case 'F':
 	SNARFWORD;
 	if (strEQ(d,"for"))
@@ -384,31 +543,110 @@ yylex()
 	if (strEQ(d,"foreach"))
 	    OPERATOR(FOR);
 	if (strEQ(d,"format")) {
+	    d = bufend;
+	    while (s < d && isspace(*s))
+		s++;
+	    if (isalpha(*s) || *s == '_')
+		*(--s) = '\\';	/* force next ident to WORD */
 	    in_format = TRUE;
-	    OPERATOR(FORMAT);
+	    allstabs = TRUE;		/* must initialize everything since */
+	    OPERATOR(FORMAT);		/* we don't know what will be used */
 	}
 	if (strEQ(d,"fork"))
 	    FUN0(O_FORK);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	if (strEQ(d,"fcntl"))
+	    FOP3(O_FCNTL);
+	if (strEQ(d,"fileno"))
+	    FOP(O_FILENO);
+	if (strEQ(d,"flock"))
+	    FOP2(O_FLOCK);
+	break;
     case 'g': case 'G':
 	SNARFWORD;
 	if (strEQ(d,"gt") || strEQ(d,"GT"))
-	    OPERATOR(SGT);
+	    ROP(O_SGT);
 	if (strEQ(d,"ge") || strEQ(d,"GE"))
-	    OPERATOR(SGE);
+	    ROP(O_SGE);
+	if (strEQ(d,"grep"))
+	    FL2(O_GREP);
 	if (strEQ(d,"goto"))
 	    LOOPX(O_GOTO);
 	if (strEQ(d,"gmtime"))
-	    FUN1(O_GMTIME);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	    UNI(O_GMTIME);
+	if (strEQ(d,"getc"))
+	    FOP(O_GETC);
+	if (strnEQ(d,"get",3)) {
+	    d += 3;
+	    if (*d == 'p') {
+		if (strEQ(d,"ppid"))
+		    FUN0(O_GETPPID);
+		if (strEQ(d,"pgrp"))
+		    UNI(O_GETPGRP);
+		if (strEQ(d,"priority"))
+		    FUN2(O_GETPRIORITY);
+		if (strEQ(d,"protobyname"))
+		    UNI(O_GPBYNAME);
+		if (strEQ(d,"protobynumber"))
+		    FUN1(O_GPBYNUMBER);
+		if (strEQ(d,"protoent"))
+		    FUN0(O_GPROTOENT);
+		if (strEQ(d,"pwent"))
+		    FUN0(O_GPWENT);
+		if (strEQ(d,"pwnam"))
+		    FUN1(O_GPWNAM);
+		if (strEQ(d,"pwuid"))
+		    FUN1(O_GPWUID);
+		if (strEQ(d,"peername"))
+		    FOP(O_GETPEERNAME);
+	    }
+	    else if (*d == 'h') {
+		if (strEQ(d,"hostbyname"))
+		    UNI(O_GHBYNAME);
+		if (strEQ(d,"hostbyaddr"))
+		    FUN2(O_GHBYADDR);
+		if (strEQ(d,"hostent"))
+		    FUN0(O_GHOSTENT);
+	    }
+	    else if (*d == 'n') {
+		if (strEQ(d,"netbyname"))
+		    UNI(O_GNBYNAME);
+		if (strEQ(d,"netbyaddr"))
+		    FUN2(O_GNBYADDR);
+		if (strEQ(d,"netent"))
+		    FUN0(O_GNETENT);
+	    }
+	    else if (*d == 's') {
+		if (strEQ(d,"servbyname"))
+		    FUN2(O_GSBYNAME);
+		if (strEQ(d,"servbyport"))
+		    FUN2(O_GSBYPORT);
+		if (strEQ(d,"servent"))
+		    FUN0(O_GSERVENT);
+		if (strEQ(d,"sockname"))
+		    FOP(O_GETSOCKNAME);
+		if (strEQ(d,"sockopt"))
+		    FOP3(O_GSOCKOPT);
+	    }
+	    else if (*d == 'g') {
+		if (strEQ(d,"grent"))
+		    FUN0(O_GGRENT);
+		if (strEQ(d,"grnam"))
+		    FUN1(O_GGRNAM);
+		if (strEQ(d,"grgid"))
+		    FUN1(O_GGRGID);
+	    }
+	    else if (*d == 'l') {
+		if (strEQ(d,"login"))
+		    FUN0(O_GETLOGIN);
+	    }
+	    d -= 3;
+	}
+	break;
     case 'h': case 'H':
 	SNARFWORD;
 	if (strEQ(d,"hex"))
-	    FUN1(O_HEX);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	    UNI(O_HEX);
+	break;
     case 'i': case 'I':
 	SNARFWORD;
 	if (strEQ(d,"if")) {
@@ -418,25 +656,22 @@ yylex()
 	if (strEQ(d,"index"))
 	    FUN2(O_INDEX);
 	if (strEQ(d,"int"))
-	    FUN1(O_INT);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	    UNI(O_INT);
+	if (strEQ(d,"ioctl"))
+	    FOP3(O_IOCTL);
+	break;
     case 'j': case 'J':
 	SNARFWORD;
 	if (strEQ(d,"join"))
-	    OPERATOR(JOIN);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	    FL2(O_JOIN);
+	break;
     case 'k': case 'K':
 	SNARFWORD;
 	if (strEQ(d,"keys"))
-	    SFUN(O_KEYS);
-	if (strEQ(d,"kill")) {
-	    yylval.ival = O_KILL;
-	    OPERATOR(LISTOP);
-	}
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	    HFUN(O_KEYS);
+	if (strEQ(d,"kill"))
+	    LOP(O_KILL);
+	break;
     case 'l': case 'L':
 	SNARFWORD;
 	if (strEQ(d,"last"))
@@ -444,54 +679,61 @@ yylex()
 	if (strEQ(d,"local"))
 	    OPERATOR(LOCAL);
 	if (strEQ(d,"length"))
-	    FUN1(O_LENGTH);
+	    UNI(O_LENGTH);
 	if (strEQ(d,"lt") || strEQ(d,"LT"))
-	    OPERATOR(SLT);
+	    ROP(O_SLT);
 	if (strEQ(d,"le") || strEQ(d,"LE"))
-	    OPERATOR(SLE);
+	    ROP(O_SLE);
 	if (strEQ(d,"localtime"))
-	    FUN1(O_LOCALTIME);
+	    UNI(O_LOCALTIME);
 	if (strEQ(d,"log"))
-	    FUN1(O_LOG);
+	    UNI(O_LOG);
 	if (strEQ(d,"link"))
 	    FUN2(O_LINK);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	if (strEQ(d,"listen"))
+	    FOP2(O_LISTEN);
+	if (strEQ(d,"lstat"))
+	    FOP(O_LSTAT);
+	break;
     case 'm': case 'M':
 	SNARFWORD;
 	if (strEQ(d,"m")) {
 	    s = scanpat(s-1);
-	    TERM(PATTERN);
+	    if (yylval.arg)
+		TERM(PATTERN);
+	    else
+		RETURN(1);	/* force error */
 	}
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	if (strEQ(d,"mkdir"))
+	    FUN2(O_MKDIR);
+	break;
     case 'n': case 'N':
 	SNARFWORD;
 	if (strEQ(d,"next"))
 	    LOOPX(O_NEXT);
 	if (strEQ(d,"ne") || strEQ(d,"NE"))
-	    OPERATOR(SNE);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	    EOP(O_SNE);
+	break;
     case 'o': case 'O':
 	SNARFWORD;
 	if (strEQ(d,"open"))
 	    OPERATOR(OPEN);
 	if (strEQ(d,"ord"))
-	    FUN1(O_ORD);
+	    UNI(O_ORD);
 	if (strEQ(d,"oct"))
-	    FUN1(O_OCT);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	    UNI(O_OCT);
+	if (strEQ(d,"opendir"))
+	    FOP2(O_OPENDIR);
+	break;
     case 'p': case 'P':
 	SNARFWORD;
 	if (strEQ(d,"print")) {
-	    yylval.ival = O_PRINT;
-	    OPERATOR(LISTOP);
+	    checkcomma(s,"filehandle");
+	    LOP(O_PRINT);
 	}
 	if (strEQ(d,"printf")) {
-	    yylval.ival = O_PRTF;
-	    OPERATOR(LISTOP);
+	    checkcomma(s,"filehandle");
+	    LOP(O_PRTF);
 	}
 	if (strEQ(d,"push")) {
 	    yylval.ival = O_PUSH;
@@ -499,78 +741,222 @@ yylex()
 	}
 	if (strEQ(d,"pop"))
 	    OPERATOR(POP);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	if (strEQ(d,"pack"))
+	    FL2(O_PACK);
+	if (strEQ(d,"package"))
+	    OPERATOR(PACKAGE);
+	break;
     case 'q': case 'Q':
 	SNARFWORD;
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	if (strEQ(d,"q")) {
+	    s = scanstr(s-1);
+	    TERM(RSTRING);
+	}
+	if (strEQ(d,"qq")) {
+	    s = scanstr(s-2);
+	    TERM(RSTRING);
+	}
+	break;
     case 'r': case 'R':
 	SNARFWORD;
+	if (strEQ(d,"return"))
+	    LOP(O_RETURN);
 	if (strEQ(d,"reset"))
 	    UNI(O_RESET);
 	if (strEQ(d,"redo"))
 	    LOOPX(O_REDO);
 	if (strEQ(d,"rename"))
 	    FUN2(O_RENAME);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	if (strEQ(d,"rand"))
+	    UNI(O_RAND);
+	if (strEQ(d,"rmdir"))
+	    UNI(O_RMDIR);
+	if (strEQ(d,"rindex"))
+	    FUN2(O_RINDEX);
+	if (strEQ(d,"read"))
+	    FOP3(O_READ);
+	if (strEQ(d,"readdir"))
+	    FOP(O_READDIR);
+	if (strEQ(d,"rewinddir"))
+	    FOP(O_REWINDDIR);
+	if (strEQ(d,"recv"))
+	    FOP4(O_RECV);
+	if (strEQ(d,"reverse"))
+	    LOP(O_REVERSE);
+	if (strEQ(d,"readlink"))
+	    UNI(O_READLINK);
+	break;
     case 's': case 'S':
 	SNARFWORD;
 	if (strEQ(d,"s")) {
 	    s = scansubst(s);
-	    TERM(SUBST);
+	    if (yylval.arg)
+		TERM(SUBST);
+	    else
+		RETURN(1);	/* force error */
 	}
-	if (strEQ(d,"shift"))
-	    TERM(SHIFT);
-	if (strEQ(d,"split"))
-	    TERM(SPLIT);
-	if (strEQ(d,"substr"))
-	    FUN3(O_SUBSTR);
-	if (strEQ(d,"sprintf"))
-	    OPERATOR(SPRINTF);
-	if (strEQ(d,"sub"))
-	    OPERATOR(SUB);
-	if (strEQ(d,"select"))
-	    OPERATOR(SELECT);
-	if (strEQ(d,"seek"))
-	    OPERATOR(SEEK);
-	if (strEQ(d,"stat"))
-	    OPERATOR(STAT);
-	if (strEQ(d,"study")) {
-	    sawstudy++;
-	    LFUN(O_STUDY);
+	switch (d[1]) {
+	case 'a':
+	case 'b':
+	case 'c':
+	case 'd':
+	    break;
+	case 'e':
+	    if (strEQ(d,"select"))
+		OPERATOR(SELECT);
+	    if (strEQ(d,"seek"))
+		FOP3(O_SEEK);
+	    if (strEQ(d,"send"))
+		FOP3(O_SEND);
+	    if (strEQ(d,"setpgrp"))
+		FUN2(O_SETPGRP);
+	    if (strEQ(d,"setpriority"))
+		FUN3(O_SETPRIORITY);
+	    if (strEQ(d,"sethostent"))
+		FUN1(O_SHOSTENT);
+	    if (strEQ(d,"setnetent"))
+		FUN1(O_SNETENT);
+	    if (strEQ(d,"setservent"))
+		FUN1(O_SSERVENT);
+	    if (strEQ(d,"setprotoent"))
+		FUN1(O_SPROTOENT);
+	    if (strEQ(d,"setpwent"))
+		FUN0(O_SPWENT);
+	    if (strEQ(d,"setgrent"))
+		FUN0(O_SGRENT);
+	    if (strEQ(d,"seekdir"))
+		FOP2(O_SEEKDIR);
+	    if (strEQ(d,"setsockopt"))
+		FOP4(O_SSOCKOPT);
+	    break;
+	case 'f':
+	case 'g':
+	    break;
+	case 'h':
+	    if (strEQ(d,"shift"))
+		TERM(SHIFT);
+	    if (strEQ(d,"shutdown"))
+		FOP2(O_SHUTDOWN);
+	    break;
+	case 'i':
+	    if (strEQ(d,"sin"))
+		UNI(O_SIN);
+	    break;
+	case 'j':
+	case 'k':
+	    break;
+	case 'l':
+	    if (strEQ(d,"sleep"))
+		UNI(O_SLEEP);
+	    break;
+	case 'm':
+	case 'n':
+	    break;
+	case 'o':
+	    if (strEQ(d,"socket"))
+		FOP4(O_SOCKET);
+	    if (strEQ(d,"socketpair"))
+		FOP25(O_SOCKETPAIR);
+	    if (strEQ(d,"sort")) {
+		checkcomma(s,"subroutine name");
+		d = bufend;
+		while (s < d && isascii(*s) && isspace(*s)) s++;
+		if (*s == ';' || *s == ')')		/* probably a close */
+		    fatal("sort is now a reserved word");
+		if (isascii(*s) && (isalpha(*s) || *s == '_')) {
+		    for (d = s; isalpha(*d) || isdigit(*d) || *d == '_'; d++) ;
+		    if (d >= bufend || isspace(*d))
+			*(--s) = '\\';	/* force next ident to WORD */
+		}
+		LOP(O_SORT);
+	    }
+	    break;
+	case 'p':
+	    if (strEQ(d,"split"))
+		TERM(SPLIT);
+	    if (strEQ(d,"sprintf"))
+		FL(O_SPRINTF);
+	    break;
+	case 'q':
+	    if (strEQ(d,"sqrt"))
+		UNI(O_SQRT);
+	    break;
+	case 'r':
+	    if (strEQ(d,"srand"))
+		UNI(O_SRAND);
+	    break;
+	case 's':
+	    break;
+	case 't':
+	    if (strEQ(d,"stat"))
+		FOP(O_STAT);
+	    if (strEQ(d,"study")) {
+		sawstudy++;
+		LFUN(O_STUDY);
+	    }
+	    break;
+	case 'u':
+	    if (strEQ(d,"substr"))
+		FUN3(O_SUBSTR);
+	    if (strEQ(d,"sub")) {
+		subline = line;
+		d = bufend;
+		while (s < d && isspace(*s))
+		    s++;
+		if (isalpha(*s) || *s == '_' || *s == '\'') {
+		    if (perldb) {
+			str_sset(subname,curstname);
+			str_ncat(subname,"'",1);
+			for (d = s+1;
+			  isalpha(*d) || isdigit(*d) || *d == '_' || *d == '\'';
+			  d++);
+			if (d[-1] == '\'')
+			    d--;
+			str_ncat(subname,s,d-s);
+		    }
+		    *(--s) = '\\';	/* force next ident to WORD */
+		}
+		else if (perldb)
+		    str_set(subname,"?");
+		OPERATOR(SUB);
+	    }
+	    break;
+	case 'v':
+	case 'w':
+	case 'x':
+	    break;
+	case 'y':
+	    if (strEQ(d,"system")) {
+		set_csh();
+		LOP(O_SYSTEM);
+	    }
+	    if (strEQ(d,"symlink"))
+		FUN2(O_SYMLINK);
+	    if (strEQ(d,"syscall"))
+		LOP(O_SYSCALL);
+	    break;
+	case 'z':
+	    break;
 	}
-	if (strEQ(d,"sqrt"))
-	    FUN1(O_SQRT);
-	if (strEQ(d,"sleep"))
-	    UNI(O_SLEEP);
-	if (strEQ(d,"system")) {
-	    yylval.ival = O_SYSTEM;
-	    OPERATOR(LISTOP);
-	}
-	if (strEQ(d,"symlink"))
-	    FUN2(O_SYMLINK);
-	if (strEQ(d,"sort")) {
-	    yylval.ival = O_SORT;
-	    OPERATOR(LISTOP);
-	}
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	break;
     case 't': case 'T':
 	SNARFWORD;
 	if (strEQ(d,"tr")) {
 	    s = scantrans(s);
-	    TERM(TRANS);
+	    if (yylval.arg)
+		TERM(TRANS);
+	    else
+		RETURN(1);	/* force error */
 	}
 	if (strEQ(d,"tell"))
-	    TERM(TELL);
+	    FOP(O_TELL);
+	if (strEQ(d,"telldir"))
+	    FOP(O_TELLDIR);
 	if (strEQ(d,"time"))
 	    FUN0(O_TIME);
 	if (strEQ(d,"times"))
 	    FUN0(O_TMS);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	break;
     case 'u': case 'U':
 	SNARFWORD;
 	if (strEQ(d,"using"))
@@ -583,90 +969,149 @@ yylex()
 	    yylval.ival = line;
 	    OPERATOR(UNLESS);
 	}
+	if (strEQ(d,"unlink"))
+	    LOP(O_UNLINK);
+	if (strEQ(d,"undef"))
+	    LFUN(O_UNDEF);
+	if (strEQ(d,"unpack"))
+	    FUN2(O_UNPACK);
+	if (strEQ(d,"utime"))
+	    LOP(O_UTIME);
 	if (strEQ(d,"umask"))
-	    FUN1(O_UMASK);
+	    UNI(O_UMASK);
 	if (strEQ(d,"unshift")) {
 	    yylval.ival = O_UNSHIFT;
 	    OPERATOR(PUSH);
 	}
-	if (strEQ(d,"unlink")) {
-	    yylval.ival = O_UNLINK;
-	    OPERATOR(LISTOP);
-	}
-	if (strEQ(d,"utime")) {
-	    yylval.ival = O_UTIME;
-	    OPERATOR(LISTOP);
-	}
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	break;
     case 'v': case 'V':
 	SNARFWORD;
 	if (strEQ(d,"values"))
-	    SFUN(O_VALUES);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	    HFUN(O_VALUES);
+	if (strEQ(d,"vec")) {
+	    sawvec = TRUE;
+	    FUN3(O_VEC);
+	}
+	break;
     case 'w': case 'W':
 	SNARFWORD;
-	if (strEQ(d,"write"))
-	    TERM(WRITE);
 	if (strEQ(d,"while")) {
 	    yylval.ival = line;
 	    OPERATOR(WHILE);
 	}
+	if (strEQ(d,"warn"))
+	    LOP(O_WARN);
 	if (strEQ(d,"wait"))
 	    FUN0(O_WAIT);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	if (strEQ(d,"wantarray")) {
+	    yylval.arg = op_new(1);
+	    yylval.arg->arg_type = O_ITEM;
+	    yylval.arg[1].arg_type = A_WANTARRAY;
+	    TERM(RSTRING);
+	}
+	if (strEQ(d,"write"))
+	    FOP(O_WRITE);
+	break;
     case 'x': case 'X':
 	SNARFWORD;
 	if (!expectterm && strEQ(d,"x"))
-	    OPERATOR('x');
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	    MOP(O_REPEAT);
+	break;
     case 'y': case 'Y':
 	SNARFWORD;
 	if (strEQ(d,"y")) {
 	    s = scantrans(s);
 	    TERM(TRANS);
 	}
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	break;
     case 'z': case 'Z':
 	SNARFWORD;
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
+	break;
+    }
+    yylval.cval = savestr(d);
+    expectterm = FALSE;
+    if (oldoldbufptr && oldoldbufptr < bufptr) {
+	while (isspace(*oldoldbufptr))
+	    oldoldbufptr++;
+	if (*oldoldbufptr == 'p' && strnEQ(oldoldbufptr,"print",5))
+	    expectterm = TRUE;
+	else if (*oldoldbufptr == 's' && strnEQ(oldoldbufptr,"sort",4))
+	    expectterm = TRUE;
+    }
+    return (CLINE, bufptr = s, (int)WORD);
+}
+
+int
+checkcomma(s,what)
+register char *s;
+char *what;
+{
+    if (*s == '(')
+	s++;
+    while (s < bufend && isascii(*s) && isspace(*s))
+	s++;
+    if (isascii(*s) && (isalpha(*s) || *s == '_')) {
+	s++;
+	while (isalpha(*s) || isdigit(*s) || *s == '_')
+	    s++;
+	while (s < bufend && isspace(*s))
+	    s++;
+	if (*s == ',')
+	    fatal("No comma allowed after %s", what);
     }
 }
 
 char *
-scanreg(s,dest)
+scanreg(s,send,dest)
 register char *s;
+register char *send;
 char *dest;
 {
     register char *d;
+    int brackets = 0;
 
+    reparse = Nullch;
     s++;
     d = dest;
     if (isdigit(*s)) {
-	while (isdigit(*s) || *s == '_')
+	while (isdigit(*s))
 	    *d++ = *s++;
     }
     else {
-	while (isalpha(*s) || isdigit(*s) || *s == '_')
+	while (isalpha(*s) || isdigit(*s) || *s == '_' || *s == '\'')
 	    *d++ = *s++;
     }
+    if (d > dest+1 && d[-1] == '\'')
+	d--,s--;
     *d = '\0';
     d = dest;
     if (!*d) {
 	*d = *s++;
-	if (*d == '{') {
+	if (*d == '{' /* } */ ) {
 	    d = dest;
-	    while (*s && *s != '}')
-		*d++ = *s++;
+	    brackets++;
+	    while (s < send && brackets) {
+		if (!reparse && (d == dest || (*s && isascii(*s) &&
+		  (isalpha(*s) || isdigit(*s) || *s == '_') ))) {
+		    *d++ = *s++;
+		    continue;
+		}
+		else if (!reparse)
+		    reparse = s;
+		switch (*s++) {
+		/* { */
+		case '}':
+		    brackets--;
+		    if (reparse && reparse == s - 1)
+			reparse = Nullch;
+		    break;
+		case '{':   /* } */
+		    brackets++;
+		    break;
+		}
+	    }
 	    *d = '\0';
 	    d = dest;
-	    if (*s)
-		s++;
 	}
 	else
 	    d[1] = '\0';
@@ -677,30 +1122,41 @@ char *dest;
 }
 
 STR *
-scanconst(string)
+scanconst(string,len)
 char *string;
+int len;
 {
     register STR *retstr;
     register char *t;
     register char *d;
+    register char *e;
 
     if (index(string,'|')) {
 	return Nullstr;
     }
-    retstr = str_make(string);
+    retstr = Str_new(86,len);
+    str_nset(retstr,string,len);
     t = str_get(retstr);
-    *(long*)&retstr->str_nval = 100;
-    for (d=t; *d; ) {
+    e = t + len;
+    retstr->str_u.str_useful = 100;
+    for (d=t; d < e; ) {
 	switch (*d) {
-	case '.': case '[': case '$': case '(': case ')': case '|':
-	    *d = '\0';
+	case '{':
+	    if (isdigit(d[1]))
+		e = d;
+	    else
+		goto defchar;
+	    break;
+	case '.': case '[': case '$': case '(': case ')': case '|': case '+':
+	    e = d;
 	    break;
 	case '\\':
-	    if (index("wWbB0123456789sSdD",d[1])) {
-		*d = '\0';
+	    if (d[1] && index("wWbB0123456789sSdD",d[1])) {
+		e = d;
 		break;
 	    }
-	    strcpy(d,d+1);
+	    (void)bcopy(d+1,d,e-d);
+	    e--;
 	    switch(*d) {
 	    case 'n':
 		*d = '\n';
@@ -717,18 +1173,20 @@ char *string;
 	    }
 	    /* FALL THROUGH */
 	default:
-	    if (d[1] == '*' || d[1] == '+' || d[1] == '?') {
-		*d = '\0';
+	  defchar:
+	    if (d[1] == '*' || (d[1] == '{' && d[2] == '0') || d[1] == '?') {
+		e = d;
 		break;
 	    }
 	    d++;
 	}
     }
-    if (!*t) {
+    if (d == t) {
 	str_free(retstr);
 	return Nullstr;
     }
-    retstr->str_cur = strlen(retstr->str_ptr);
+    *d = '\0';
+    retstr->str_cur = d - t;
     return retstr;
 }
 
@@ -736,12 +1194,15 @@ char *
 scanpat(s)
 register char *s;
 {
-    register SPAT *spat = (SPAT *) safemalloc(sizeof (SPAT));
+    register SPAT *spat;
     register char *d;
+    register char *e;
+    int len;
+    SPAT savespat;
 
-    bzero((char *)spat, sizeof(SPAT));
-    spat->spat_next = spat_root;	/* link into spat list */
-    spat_root = spat;
+    Newz(801,spat,1,SPAT);
+    spat->spat_next = curstash->tbl_spatroot;	/* link into spat list */
+    curstash->tbl_spatroot = spat;
 
     switch (*s++) {
     case 'm':
@@ -755,46 +1216,96 @@ register char *s;
     default:
 	fatal("panic: scanpat");
     }
-    s = cpytill(tokenbuf,s,s[-1]);
-    if (!*s)
-	fatal("Search pattern not terminated");
-    s++;
-    if (*s == 'i') {
-	s++;
-	spat->spat_flags |= SPAT_FOLD;
+    s = cpytill(tokenbuf,s,bufend,s[-1],&len);
+    if (s >= bufend) {
+	yyerror("Search pattern not terminated");
+	yylval.arg = Nullarg;
+	return s;
     }
-    for (d=tokenbuf; *d; d++) {
-	if (*d == '$' && d[1] && d[-1] != '\\' && d[1] != '|') {
+    s++;
+    while (*s == 'i' || *s == 'o') {
+	if (*s == 'i') {
+	    s++;
+	    sawi = TRUE;
+	    spat->spat_flags |= SPAT_FOLD;
+	}
+	if (*s == 'o') {
+	    s++;
+	    spat->spat_flags |= SPAT_KEEP;
+	}
+    }
+    e = tokenbuf + len;
+    for (d=tokenbuf; d < e; d++) {
+	if ((*d == '$' && d[1] && d[-1] != '\\' && d[1] != '|') ||
+	    (*d == '@' && d[-1] != '\\')) {
 	    register ARG *arg;
 
 	    spat->spat_runtime = arg = op_new(1);
 	    arg->arg_type = O_ITEM;
 	    arg[1].arg_type = A_DOUBLE;
-	    arg[1].arg_ptr.arg_str = str_make(tokenbuf);
+	    arg[1].arg_ptr.arg_str = str_make(tokenbuf,len);
+	    arg[1].arg_ptr.arg_str->str_u.str_hash = curstash;
+	    d = scanreg(d,bufend,buf);
+	    (void)stabent(buf,TRUE);		/* make sure it's created */
+	    for (; d < e; d++) {
+		if (*d == '$' && d[1] && d[-1] != '\\' && d[1] != '|') {
+		    d = scanreg(d,bufend,buf);
+		    (void)stabent(buf,TRUE);
+		}
+		else if (*d == '@' && d[-1] != '\\') {
+		    d = scanreg(d,bufend,buf);
+		    if (strEQ(buf,"ARGV") || strEQ(buf,"ENV") ||
+		      strEQ(buf,"SIG") || strEQ(buf,"INC"))
+			(void)stabent(buf,TRUE);
+		}
+	    }
 	    goto got_pat;		/* skip compiling for now */
 	}
     }
-    if (!(spat->spat_flags & SPAT_FOLD)) {
-	if (*tokenbuf == '^') {
-	    spat->spat_short = scanconst(tokenbuf+1);
-	    if (spat->spat_short) {
-		spat->spat_slen = strlen(spat->spat_short->str_ptr);
-		if (spat->spat_slen == strlen(tokenbuf+1))
-		    spat->spat_flags |= SPAT_ALL;
-	    }
+    if (spat->spat_flags & SPAT_FOLD)
+#ifdef STRUCTCOPY
+	savespat = *spat;
+#else
+	(void)bcopy((char *)spat, (char *)&savespat, sizeof(SPAT));
+#endif
+    if (*tokenbuf == '^') {
+	spat->spat_short = scanconst(tokenbuf+1,len-1);
+	if (spat->spat_short) {
+	    spat->spat_slen = spat->spat_short->str_cur;
+	    if (spat->spat_slen == len - 1)
+		spat->spat_flags |= SPAT_ALL;
 	}
-	else {
-	    spat->spat_flags |= SPAT_SCANFIRST;
-	    spat->spat_short = scanconst(tokenbuf);
-	    if (spat->spat_short) {
-		spat->spat_slen = strlen(spat->spat_short->str_ptr);
-		if (spat->spat_slen == strlen(tokenbuf))
-		    spat->spat_flags |= SPAT_ALL;
-	    }
-	}	
     }
-    spat->spat_regexp = regcomp(tokenbuf,spat->spat_flags & SPAT_FOLD,1);
-    hoistmust(spat);
+    else {
+	spat->spat_flags |= SPAT_SCANFIRST;
+	spat->spat_short = scanconst(tokenbuf,len);
+	if (spat->spat_short) {
+	    spat->spat_slen = spat->spat_short->str_cur;
+	    if (spat->spat_slen == len)
+		spat->spat_flags |= SPAT_ALL;
+	}
+    }	
+    if ((spat->spat_flags & SPAT_ALL) && (spat->spat_flags & SPAT_SCANFIRST)) {
+	fbmcompile(spat->spat_short, spat->spat_flags & SPAT_FOLD);
+	spat->spat_regexp = regcomp(tokenbuf,tokenbuf+len,
+	    spat->spat_flags & SPAT_FOLD,1);
+		/* Note that this regexp can still be used if someone says
+		 * something like /a/ && s//b/;  so we can't delete it.
+		 */
+    }
+    else {
+	if (spat->spat_flags & SPAT_FOLD)
+#ifdef STRUCTCOPY
+	    *spat = savespat;
+#else
+	    (void)bcopy((char *)&savespat, (char *)spat, sizeof(SPAT));
+#endif
+	if (spat->spat_short)
+	    fbmcompile(spat->spat_short, spat->spat_flags & SPAT_FOLD);
+	spat->spat_regexp = regcomp(tokenbuf,tokenbuf+len,
+	    spat->spat_flags & SPAT_FOLD,1);
+	hoistmust(spat);
+    }
   got_pat:
     yylval.arg = make_match(O_MATCH,stab2arg(A_STAB,defstab),spat);
     return s;
@@ -804,64 +1315,120 @@ char *
 scansubst(s)
 register char *s;
 {
-    register SPAT *spat = (SPAT *) safemalloc(sizeof (SPAT));
+    register SPAT *spat;
     register char *d;
+    register char *e;
+    int len;
 
-    bzero((char *)spat, sizeof(SPAT));
-    spat->spat_next = spat_root;	/* link into spat list */
-    spat_root = spat;
+    Newz(802,spat,1,SPAT);
+    spat->spat_next = curstash->tbl_spatroot;	/* link into spat list */
+    curstash->tbl_spatroot = spat;
 
-    s = cpytill(tokenbuf,s+1,*s);
-    if (!*s)
-	fatal("Substitution pattern not terminated");
-    for (d=tokenbuf; *d; d++) {
-	if (*d == '$' && d[1] && d[-1] != '\\' && d[1] != '|') {
+    s = cpytill(tokenbuf,s+1,bufend,*s,&len);
+    if (s >= bufend) {
+	yyerror("Substitution pattern not terminated");
+	yylval.arg = Nullarg;
+	return s;
+    }
+    e = tokenbuf + len;
+    for (d=tokenbuf; d < e; d++) {
+	if ((*d == '$' && d[1] && d[-1] != '\\' && d[1] != '|') ||
+	    (*d == '@' && d[-1] != '\\')) {
 	    register ARG *arg;
 
 	    spat->spat_runtime = arg = op_new(1);
 	    arg->arg_type = O_ITEM;
 	    arg[1].arg_type = A_DOUBLE;
-	    arg[1].arg_ptr.arg_str = str_make(tokenbuf);
+	    arg[1].arg_ptr.arg_str = str_make(tokenbuf,len);
+	    arg[1].arg_ptr.arg_str->str_u.str_hash = curstash;
+	    d = scanreg(d,bufend,buf);
+	    (void)stabent(buf,TRUE);		/* make sure it's created */
+	    for (; *d; d++) {
+		if (*d == '$' && d[1] && d[-1] != '\\' && d[1] != '|') {
+		    d = scanreg(d,bufend,buf);
+		    (void)stabent(buf,TRUE);
+		}
+		else if (*d == '@' && d[-1] != '\\') {
+		    d = scanreg(d,bufend,buf);
+		    if (strEQ(buf,"ARGV") || strEQ(buf,"ENV") ||
+		      strEQ(buf,"SIG") || strEQ(buf,"INC"))
+			(void)stabent(buf,TRUE);
+		}
+	    }
 	    goto get_repl;		/* skip compiling for now */
 	}
     }
     if (*tokenbuf == '^') {
-	spat->spat_short = scanconst(tokenbuf+1);
+	spat->spat_short = scanconst(tokenbuf+1,len-1);
 	if (spat->spat_short)
-	    spat->spat_slen = strlen(spat->spat_short->str_ptr);
+	    spat->spat_slen = spat->spat_short->str_cur;
     }
     else {
 	spat->spat_flags |= SPAT_SCANFIRST;
-	spat->spat_short = scanconst(tokenbuf);
+	spat->spat_short = scanconst(tokenbuf,len);
 	if (spat->spat_short)
-	    spat->spat_slen = strlen(spat->spat_short->str_ptr);
-    }	
-    d = savestr(tokenbuf);
+	    spat->spat_slen = spat->spat_short->str_cur;
+    }
+    d = nsavestr(tokenbuf,len);
 get_repl:
     s = scanstr(s);
-    if (!*s)
-	fatal("Substitution replacement not terminated");
+    if (s >= bufend) {
+	yyerror("Substitution replacement not terminated");
+	yylval.arg = Nullarg;
+	return s;
+    }
     spat->spat_repl = yylval.arg;
     spat->spat_flags |= SPAT_ONCE;
-    while (*s == 'g' || *s == 'i') {
+    if ((spat->spat_repl[1].arg_type & A_MASK) == A_SINGLE)
+	spat->spat_flags |= SPAT_CONST;
+    else if ((spat->spat_repl[1].arg_type & A_MASK) == A_DOUBLE) {
+	STR *tmpstr;
+	register char *t;
+
+	spat->spat_flags |= SPAT_CONST;
+	tmpstr = spat->spat_repl[1].arg_ptr.arg_str;
+	e = tmpstr->str_ptr + tmpstr->str_cur;
+	for (t = tmpstr->str_ptr; t < e; t++) {
+	    if (*t == '$' && t[1] && index("`'&+0123456789",t[1]))
+		spat->spat_flags &= ~SPAT_CONST;
+	}
+    }
+    while (*s == 'g' || *s == 'i' || *s == 'e' || *s == 'o') {
+	if (*s == 'e') {
+	    s++;
+	    if ((spat->spat_repl[1].arg_type & A_MASK) == A_DOUBLE)
+		spat->spat_repl[1].arg_type = A_SINGLE;
+	    spat->spat_repl = fixeval(make_op(O_EVAL,2,
+		spat->spat_repl,
+		Nullarg,
+		Nullarg));
+	    spat->spat_flags &= ~SPAT_CONST;
+	}
 	if (*s == 'g') {
 	    s++;
 	    spat->spat_flags &= ~SPAT_ONCE;
 	}
 	if (*s == 'i') {
 	    s++;
+	    sawi = TRUE;
 	    spat->spat_flags |= SPAT_FOLD;
+	    if (!(spat->spat_flags & SPAT_SCANFIRST)) {
+		str_free(spat->spat_short);	/* anchored opt doesn't do */
+		spat->spat_short = Nullstr;	/* case insensitive match */
+		spat->spat_slen = 0;
+	    }
+	}
+	if (*s == 'o') {
+	    s++;
+	    spat->spat_flags |= SPAT_KEEP;
 	}
     }
+    if (spat->spat_short && (spat->spat_flags & SPAT_SCANFIRST))
+	fbmcompile(spat->spat_short, spat->spat_flags & SPAT_FOLD);
     if (!spat->spat_runtime) {
-	spat->spat_regexp = regcomp(d, spat->spat_flags & SPAT_FOLD,1);
+	spat->spat_regexp = regcomp(d,d+len,spat->spat_flags & SPAT_FOLD,1);
 	hoistmust(spat);
-	safefree(d);
-    }
-    if (spat->spat_flags & SPAT_FOLD) {		/* Oops, disable optimization */
-	str_free(spat->spat_short);
-	spat->spat_short = Nullstr;
-	spat->spat_slen = 0;
+	Safefree(d);
     }
     yylval.arg = make_match(O_SUBST,stab2arg(A_STAB,defstab),spat);
     return s;
@@ -872,7 +1439,8 @@ register SPAT *spat;
 {
     if (spat->spat_regexp->regmust) {	/* is there a better short-circuit? */
 	if (spat->spat_short &&
-	  strEQ(spat->spat_short->str_ptr,spat->spat_regexp->regmust->str_ptr)){
+	  str_eq(spat->spat_short,spat->spat_regexp->regmust))
+	{
 	    if (spat->spat_flags & SPAT_SCANFIRST) {
 		str_free(spat->spat_short);
 		spat->spat_short = Nullstr;
@@ -895,15 +1463,18 @@ register SPAT *spat;
 }
 
 char *
-expand_charset(s)
+expand_charset(s,len,retlen)
 register char *s;
+int len;
+int *retlen;
 {
     char t[512];
     register char *d = t;
     register int i;
+    register char *send = s + len;
 
-    while (*s) {
-	if (s[1] == '-' && s[2]) {
+    while (s < send) {
+	if (s[1] == '-' && s+2 < send) {
 	    for (i = s[0]; i <= s[2]; i++)
 		*d++ = i;
 	    s += 3;
@@ -912,7 +1483,8 @@ register char *s;
 	    *d++ = *s++;
     }
     *d = '\0';
-    return savestr(t);
+    *retlen = d - t;
+    return nsavestr(t,d-t);
 }
 
 char *
@@ -920,40 +1492,48 @@ scantrans(s)
 register char *s;
 {
     ARG *arg =
-	l(make_op(O_TRANS,2,stab2arg(A_STAB,defstab),Nullarg,Nullarg,0));
+	l(make_op(O_TRANS,2,stab2arg(A_STAB,defstab),Nullarg,Nullarg));
     register char *t;
     register char *r;
-    register char *tbl = safemalloc(256);
+    register char *tbl;
     register int i;
     register int j;
+    int tlen, rlen;
 
+    Newz(803,tbl,256,char);
     arg[2].arg_type = A_NULL;
     arg[2].arg_ptr.arg_cval = tbl;
-    for (i=0; i<256; i++)
-	tbl[i] = 0;
     s = scanstr(s);
-    if (!*s)
-	fatal("Translation pattern not terminated");
-    t = expand_charset(str_get(yylval.arg[1].arg_ptr.arg_str));
+    if (s >= bufend) {
+	yyerror("Translation pattern not terminated");
+	yylval.arg = Nullarg;
+	return s;
+    }
+    t = expand_charset(yylval.arg[1].arg_ptr.arg_str->str_ptr,
+	yylval.arg[1].arg_ptr.arg_str->str_cur,&tlen);
     free_arg(yylval.arg);
     s = scanstr(s-1);
-    if (!*s)
-	fatal("Translation replacement not terminated");
-    r = expand_charset(str_get(yylval.arg[1].arg_ptr.arg_str));
+    if (s >= bufend) {
+	yyerror("Translation replacement not terminated");
+	yylval.arg = Nullarg;
+	return s;
+    }
+    r = expand_charset(yylval.arg[1].arg_ptr.arg_str->str_ptr,
+	yylval.arg[1].arg_ptr.arg_str->str_cur,&rlen);
     free_arg(yylval.arg);
     yylval.arg = arg;
     if (!*r) {
-	safefree(r);
+	Safefree(r);
 	r = t;
     }
-    for (i = 0, j = 0; t[i]; i++,j++) {
-	if (!r[j])
+    for (i = 0, j = 0; i < tlen; i++,j++) {
+	if (j >= rlen)
 	    --j;
 	tbl[t[i] & 0377] = r[j];
     }
     if (r != t)
-	safefree(r);
-    safefree(t);
+	Safefree(r);
+    Safefree(t);
     return s;
 }
 
@@ -964,9 +1544,14 @@ register char *s;
     register char term;
     register char *d;
     register ARG *arg;
+    register char *send;
     register bool makesingle = FALSE;
     register STAB *stab;
-    char *leave = "\\$nrtfb0123456789";	/* which backslash sequences to keep */
+    bool alwaysdollar = FALSE;
+    bool hereis = FALSE;
+    STR *herewas;
+    char *leave = "\\$@nrtfb0123456789[{]}"; /* which backslash sequences to keep */
+    int len;
 
     arg = op_new(1);
     yylval.arg = arg;
@@ -1001,7 +1586,7 @@ register char *s;
 		    goto out;
 		case '8': case '9':
 		    if (shift != 4)
-			fatal("Illegal octal digit");
+			yyerror("Illegal octal digit");
 		    /* FALL THROUGH */
 		case '0': case '1': case '2': case '3': case '4':
 		case '5': case '6': case '7':
@@ -1018,8 +1603,9 @@ register char *s;
 		}
 	    }
 	  out:
-	    sprintf(tokenbuf,"%ld",i);
-	    arg[1].arg_ptr.arg_str = str_make(tokenbuf);
+	    (void)sprintf(tokenbuf,"%ld",i);
+	    arg[1].arg_ptr.arg_str = str_make(tokenbuf,strlen(tokenbuf));
+	    (void)str_2num(arg[1].arg_ptr.arg_str);
 	}
 	break;
     case '1': case '2': case '3': case '4': case '5':
@@ -1033,7 +1619,7 @@ register char *s;
 	    else
 		*d++ = *s++;
 	}
-	if (*s == '.' && index("0123456789eE",s[1])) {
+	if (*s == '.' && s[1] && index("0123456789eE ;",s[1])) {
 	    *d++ = *s++;
 	    while (isdigit(*s) || *s == '_') {
 		if (*s == '_')
@@ -1042,7 +1628,7 @@ register char *s;
 		    *d++ = *s++;
 	    }
 	}
-	if (index("eE",*s) && index("+-0123456789",s[1])) {
+	if (*s && index("eE",*s) && index("+-0123456789",s[1])) {
 	    *d++ = *s++;
 	    if (*s == '+' || *s == '-')
 		*d++ = *s++;
@@ -1050,122 +1636,240 @@ register char *s;
 		*d++ = *s++;
 	}
 	*d = '\0';
-	arg[1].arg_ptr.arg_str = str_make(tokenbuf);
+	arg[1].arg_ptr.arg_str = str_make(tokenbuf, d - tokenbuf);
+	(void)str_2num(arg[1].arg_ptr.arg_str);
 	break;
-    case '\'':
-	arg[1].arg_type = A_SINGLE;
-	term = *s;
-	leave = Nullch;
-	goto snarf_it;
-
     case '<':
+	if (*++s == '<') {
+	    hereis = TRUE;
+	    d = tokenbuf;
+	    if (!rsfp)
+		*d++ = '\n';
+	    if (*++s && index("`'\"",*s)) {
+		term = *s++;
+		s = cpytill(d,s,bufend,term,&len);
+		if (s < bufend)
+		    s++;
+		d += len;
+	    }
+	    else {
+		if (*s == '\\')
+		    s++, term = '\'';
+		else
+		    term = '"';
+		while (isascii(*s) && (isalpha(*s) || isdigit(*s) || *s == '_'))
+		    *d++ = *s++;
+	    }				/* assuming tokenbuf won't clobber */
+	    *d++ = '\n';
+	    *d = '\0';
+	    len = d - tokenbuf;
+	    d = "\n";
+	    if (rsfp || !(d=ninstr(s,bufend,d,d+1)))
+		herewas = str_make(s,bufend-s);
+	    else
+		s--, herewas = str_make(s,d-s);
+	    s += herewas->str_cur;
+	    if (term == '\'')
+		goto do_single;
+	    if (term == '`')
+		goto do_back;
+	    goto do_double;
+	}
 	d = tokenbuf;
-	s = cpytill(d,s+1,'>');
-	if (*s)
+	s = cpytill(d,s,bufend,'>',&len);
+	if (s < bufend)
 	    s++;
 	if (*d == '$') d++;
-	while (*d && (isalpha(*d) || isdigit(*d) || *d == '_')) d++;
-	if (*d) {
+	while (*d &&
+	  (isalpha(*d) || isdigit(*d) || *d == '_' || *d == '\''))
+	    d++;
+	if (d - tokenbuf != len) {
 	    d = tokenbuf;
 	    arg[1].arg_type = A_GLOB;
-	    d = savestr(d);
+	    d = nsavestr(d,len);
 	    arg[1].arg_ptr.arg_stab = stab = genstab();
-	    stab->stab_io = stio_new();
-	    stab->stab_val = str_make(d);
+	    stab_io(stab) = stio_new();
+	    stab_val(stab) = str_make(d,len);
+	    stab_val(stab)->str_u.str_hash = curstash;
+	    Safefree(d);
+	    set_csh();
 	}
 	else {
 	    d = tokenbuf;
-	    if (!*d)
-		strcpy(d,"ARGV");
+	    if (!len)
+		(void)strcpy(d,"ARGV");
 	    if (*d == '$') {
 		arg[1].arg_type = A_INDREAD;
 		arg[1].arg_ptr.arg_stab = stabent(d+1,TRUE);
 	    }
 	    else {
 		arg[1].arg_type = A_READ;
-		if (rsfp == stdin && strEQ(d,"stdin"))
-		    fatal("Can't get both program and data from <stdin>");
+		if (rsfp == stdin && (strEQ(d,"stdin") || strEQ(d,"STDIN")))
+		    yyerror("Can't get both program and data from <STDIN>");
 		arg[1].arg_ptr.arg_stab = stabent(d,TRUE);
-		arg[1].arg_ptr.arg_stab->stab_io = stio_new();
+		if (!stab_io(arg[1].arg_ptr.arg_stab))
+		    stab_io(arg[1].arg_ptr.arg_stab) = stio_new();
 		if (strEQ(d,"ARGV")) {
-		    aadd(arg[1].arg_ptr.arg_stab);
-		    arg[1].arg_ptr.arg_stab->stab_io->flags |=
+		    (void)aadd(arg[1].arg_ptr.arg_stab);
+		    stab_io(arg[1].arg_ptr.arg_stab)->flags |=
 		      IOF_ARGV|IOF_START;
 		}
 	    }
 	}
 	break;
+
+    case 'q':
+	s++;
+	if (*s == 'q') {
+	    s++;
+	    goto do_double;
+	}
+	/* FALL THROUGH */
+    case '\'':
+      do_single:
+	term = *s;
+	arg[1].arg_type = A_SINGLE;
+	leave = Nullch;
+	goto snarf_it;
+
     case '"': 
+      do_double:
+	term = *s;
 	arg[1].arg_type = A_DOUBLE;
 	makesingle = TRUE;	/* maybe disable runtime scanning */
-	term = *s;
+	alwaysdollar = TRUE;	/* treat $) and $| as variables */
 	goto snarf_it;
     case '`':
-	arg[1].arg_type = A_BACKTICK;
+      do_back:
 	term = *s;
+	arg[1].arg_type = A_BACKTICK;
+	set_csh();
+	alwaysdollar = TRUE;	/* treat $) and $| as variables */
       snarf_it:
 	{
 	    STR *tmpstr;
-	    int sqstart = line;
 	    char *tmps;
 
-	    tmpstr = str_new(strlen(s));
-	    s = str_append_till(tmpstr,s+1,term,leave);
-	    while (!*s) {	/* multiple line string? */
-		s = str_gets(linestr, rsfp);
-		if (!s) {
-		    line = sqstart;
+	    multi_start = line;
+	    if (hereis)
+		multi_open = multi_close = '<';
+	    else {
+		multi_open = term;
+		if (tmps = index("([{< )]}> )]}>",term))
+		    term = tmps[5];
+		multi_close = term;
+	    }
+	    tmpstr = Str_new(87,0);
+	    if (hereis) {
+		term = *tokenbuf;
+		if (!rsfp) {
+		    d = s;
+		    while (s < bufend &&
+		      (*s != term || bcmp(s,tokenbuf,len) != 0) ) {
+			if (*s++ == '\n')
+			    line++;
+		    }
+		    if (s >= bufend) {
+			line = multi_start;
+			fatal("EOF in string");
+		    }
+		    str_nset(tmpstr,d+1,s-d);
+		    s += len - 1;
+		    str_ncat(herewas,s,bufend-s);
+		    str_replace(linestr,herewas);
+		    oldoldbufptr = oldbufptr = bufptr = s = str_get(linestr);
+		    bufend = linestr->str_ptr + linestr->str_cur;
+		    hereis = FALSE;
+		}
+	    }
+	    else
+		s = str_append_till(tmpstr,s+1,bufend,term,leave);
+	    while (s >= bufend) {	/* multiple line string? */
+		if (!rsfp ||
+		 !(oldoldbufptr = oldbufptr = s = str_gets(linestr, rsfp, 0))) {
+		    line = multi_start;
 		    fatal("EOF in string");
 		}
 		line++;
-		s = str_append_till(tmpstr,s,term,leave);
+		if (perldb) {
+		    STR *str = Str_new(88,0);
+
+		    str_sset(str,linestr);
+		    astore(lineary,(int)line,str);
+		}
+		bufend = linestr->str_ptr + linestr->str_cur;
+		if (hereis) {
+		    if (*s == term && bcmp(s,tokenbuf,len) == 0) {
+			s = bufend - 1;
+			*s = ' ';
+			str_scat(linestr,herewas);
+			bufend = linestr->str_ptr + linestr->str_cur;
+		    }
+		    else {
+			s = bufend;
+			str_scat(tmpstr,linestr);
+		    }
+		}
+		else
+		    s = str_append_till(tmpstr,s,bufend,term,leave);
 	    }
+	    multi_end = line;
 	    s++;
-	    if (term == '\'') {
+	    if (tmpstr->str_cur + 5 < tmpstr->str_len) {
+		tmpstr->str_len = tmpstr->str_cur + 1;
+		Renew(tmpstr->str_ptr, tmpstr->str_len, char);
+	    }
+	    if ((arg[1].arg_type & A_MASK) == A_SINGLE) {
 		arg[1].arg_ptr.arg_str = tmpstr;
 		break;
 	    }
 	    tmps = s;
 	    s = tmpstr->str_ptr;
-	    while (*s) {		/* see if we can make SINGLE */
+	    send = s + tmpstr->str_cur;
+	    while (s < send) {		/* see if we can make SINGLE */
 		if (*s == '\\' && s[1] && isdigit(s[1]) && !isdigit(s[2]) &&
-		  !index("`\"",term) )
+		  !alwaysdollar )
 		    *s = '$';		/* grandfather \digit in subst */
-		if (*s == '$' && s[1] && s[1] != ')' && s[1] != '|') {
+		if ((*s == '$' || *s == '@') && s+1 < send &&
+		  (alwaysdollar || (s[1] != ')' && s[1] != '|'))) {
 		    makesingle = FALSE;	/* force interpretation */
 		}
-		else if (*s == '\\' && s[1]) {
+		else if (*s == '\\' && s+1 < send) {
 		    s++;
 		}
 		s++;
 	    }
 	    s = d = tmpstr->str_ptr;	/* assuming shrinkage only */
-	    while (*s) {
-		if (*s == '$' && s[1] && s[1] != ')' && s[1] != '|') {
-		    int len;
-
-		    len = scanreg(s,tokenbuf) - s;
-		    stabent(tokenbuf,TRUE);	/* make sure it's created */
+	    while (s < send) {
+		if ((*s == '$' && s+1 < send &&
+		    (alwaysdollar || /*(*/ (s[1] != ')' && s[1] != '|')) ) ||
+		    (*s == '@' && s+1 < send) ) {
+		    len = scanreg(s,bufend,tokenbuf) - s;
+		    if (*s == '$' || strEQ(tokenbuf,"ARGV")
+		      || strEQ(tokenbuf,"ENV")
+		      || strEQ(tokenbuf,"SIG")
+		      || strEQ(tokenbuf,"INC") )
+			(void)stabent(tokenbuf,TRUE); /* make sure it exists */
 		    while (len--)
 			*d++ = *s++;
 		    continue;
 		}
-		else if (*s == '\\' && s[1]) {
+		else if (*s == '\\' && s+1 < send) {
 		    s++;
 		    switch (*s) {
 		    default:
-			if (!makesingle && (!leave || index(leave,*s)))
+			if (!makesingle && (!leave || (*s && index(leave,*s))))
 			    *d++ = '\\';
 			*d++ = *s++;
 			continue;
 		    case '0': case '1': case '2': case '3':
 		    case '4': case '5': case '6': case '7':
 			*d = *s++ - '0';
-			if (index("01234567",*s)) {
+			if (s < send && *s && index("01234567",*s)) {
 			    *d <<= 3;
 			    *d += *s++ - '0';
 			}
-			if (index("01234567",*s)) {
+			if (s < send && *s && index("01234567",*s)) {
 			    *d <<= 3;
 			    *d += *s++ - '0';
 			}
@@ -1194,15 +1898,19 @@ register char *s;
 	    }
 	    *d = '\0';
 
-	    if (arg[1].arg_type == A_DOUBLE && makesingle)
-		arg[1].arg_type = A_SINGLE;	/* now we can optimize on it */
+	    if ((arg[1].arg_type & A_MASK) == A_DOUBLE && makesingle)
+		    arg[1].arg_type = A_SINGLE;	/* now we can optimize on it */
 
-	    tmpstr->str_cur = d - tmpstr->str_ptr;	/* XXX cheat */
+	    tmpstr->str_u.str_hash = curstash;	/* so interp knows package */
+
+	    tmpstr->str_cur = d - tmpstr->str_ptr;
 	    arg[1].arg_ptr.arg_str = tmpstr;
 	    s = tmps;
 	    break;
 	}
     }
+    if (hereis)
+	str_free(herewas);
     return s;
 }
 
@@ -1215,11 +1923,20 @@ load_format()
     register FCMD *fcmd;
     register char *s;
     register char *t;
-    register char tmpchar;
+    register STR *str;
     bool noblank;
+    bool repeater;
 
-    while ((s = str_gets(linestr,rsfp)) != Nullch) {
+    Zero(&froot, 1, FCMD);
+    while ((s = str_gets(linestr,rsfp, 0)) != Nullch) {
 	line++;
+	if (perldb) {
+	    STR *tmpstr = Str_new(89,0);
+
+	    str_sset(tmpstr,linestr);
+	    astore(lineary,(int)line,tmpstr);
+	}
+	bufend = linestr->str_ptr + linestr->str_cur;
 	if (strEQ(s,".\n")) {
 	    bufptr = s;
 	    return froot.f_next;
@@ -1228,26 +1945,29 @@ load_format()
 	    continue;
 	flinebeg = Nullfcmd;
 	noblank = FALSE;
-	while (*s) {
-	    fcmd = (FCMD *)safemalloc(sizeof (FCMD));
-	    bzero((char*)fcmd, sizeof (FCMD));
+	repeater = FALSE;
+	while (s < bufend) {
+	    Newz(804,fcmd,1,FCMD);
 	    fprev->f_next = fcmd;
 	    fprev = fcmd;
-	    for (t=s; *t && *t != '@' && *t != '^'; t++) {
+	    for (t=s; t < bufend && *t != '@' && *t != '^'; t++) {
 		if (*t == '~') {
 		    noblank = TRUE;
 		    *t = ' ';
+		    if (t[1] == '~') {
+			repeater = TRUE;
+			t[1] = ' ';
+		    }
 		}
 	    }
-	    tmpchar = *t;
-	    *t = '\0';
-	    fcmd->f_pre = savestr(s);
-	    fcmd->f_presize = strlen(s);
-	    *t = tmpchar;
+	    fcmd->f_pre = nsavestr(s, t-s);
+	    fcmd->f_presize = t-s;
 	    s = t;
-	    if (!*s) {
+	    if (s >= bufend) {
 		if (noblank)
 		    fcmd->f_flags |= FC_NOBLANK;
+		if (repeater)
+		    fcmd->f_flags |= FC_REPEAT;
 		break;
 	    }
 	    if (!flinebeg)
@@ -1287,49 +2007,86 @@ load_format()
 	}
 	if (flinebeg) {
 	  again:
-	    if ((bufptr = str_gets(linestr ,rsfp)) == Nullch)
+	    if ((s = str_gets(linestr, rsfp, 0)) == Nullch)
 		goto badform;
 	    line++;
-	    if (strEQ(bufptr,".\n")) {
+	    if (perldb) {
+		STR *tmpstr = Str_new(90,0);
+
+		str_sset(tmpstr,linestr);
+		astore(lineary,(int)line,tmpstr);
+	    }
+	    if (strEQ(s,".\n")) {
+		bufptr = s;
 		yyerror("Missing values line");
 		return froot.f_next;
 	    }
-	    if (*bufptr == '#')
+	    if (*s == '#')
 		goto again;
-	    lex_newlines = TRUE;
-	    while (flinebeg || *bufptr) {
-		switch(yylex()) {
-		default:
-		    yyerror("Bad value in format");
-		    *bufptr = '\0';
-		    break;
-		case '\n':
-		    if (flinebeg)
-			yyerror("Missing value in format");
-		    *bufptr = '\0';
-		    break;
-		case REG:
-		    yylval.arg = stab2arg(A_LVAL,yylval.stabval);
-		    /* FALL THROUGH */
-		case RSTRING:
-		    if (!flinebeg)
-			yyerror("Extra value in format");
-		    else {
-			flinebeg->f_expr = yylval.arg;
-			do {
-			    flinebeg = flinebeg->f_next;
-			} while (flinebeg && flinebeg->f_size == 0);
-		    }
-		    break;
-		case ',': case ';':
-		    continue;
-		}
+	    bufend = linestr->str_ptr + linestr->str_cur;
+	    str = flinebeg->f_unparsed = Str_new(91,bufend - bufptr);
+	    str->str_u.str_hash = curstash;
+	    str_nset(str,"(",1);
+	    flinebeg->f_line = line;
+	    if (!flinebeg->f_next->f_type || index(linestr->str_ptr, ',')) {
+		str_scat(str,linestr);
+		str_ncat(str,",$$);",5);
 	    }
-	    lex_newlines = FALSE;
+	    else {
+		while (s < bufend && isspace(*s))
+		    s++;
+		t = s;
+		while (s < bufend) {
+		    switch (*s) {
+		    case ' ': case '\t': case '\n': case ';':
+			str_ncat(str, t, s - t);
+			str_ncat(str, "," ,1);
+			while (s < bufend && (isspace(*s) || *s == ';'))
+			    s++;
+			t = s;
+			break;
+		    case '$':
+			str_ncat(str, t, s - t);
+			t = s;
+			s = scanreg(s,bufend,tokenbuf);
+			str_ncat(str, t, s - t);
+			t = s;
+			if (s < bufend && *s && index("$'\"",*s))
+			    str_ncat(str, ",", 1);
+			break;
+		    case '"': case '\'':
+			str_ncat(str, t, s - t);
+			t = s;
+			s++;
+			while (s < bufend && (*s != *t || s[-1] == '\\'))
+			    s++;
+			if (s < bufend)
+			    s++;
+			str_ncat(str, t, s - t);
+			t = s;
+			if (s < bufend && *s && index("$'\"",*s))
+			    str_ncat(str, ",", 1);
+			break;
+		    default:
+			yyerror("Please use commas to separate fields");
+		    }
+		}
+		str_ncat(str,"$$);",4);
+	    }
 	}
     }
   badform:
     bufptr = str_get(linestr);
     yyerror("Format not terminated");
     return froot.f_next;
+}
+
+set_csh()
+{
+    if (!csh) {
+	if (stat("/bin/csh",&statbuf) < 0)
+	    csh = -1;
+	else
+	    csh = 1;
+    }
 }

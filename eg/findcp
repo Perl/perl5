@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Header: findcp,v 2.0 88/06/05 00:16:47 root Exp $
+# $Header: findcp,v 3.0 89/10/18 15:13:47 lwall Locked $
 
 # This is a wrapper around the find command that pretends find has a switch
 # of the form -cp host:destination.  It presumes your find implements -ls.
@@ -14,7 +14,7 @@ sub copy {
 $sourcedir = $ARGV[0];
 if ($sourcedir =~ /^\//) {
     $ARGV[0] = '.';
-    unless (chdir($sourcedir)) { die "Can't find directory: $sourcedir"; }
+    unless (chdir($sourcedir)) { die "Can't find directory $sourcedir: $!"; }
 }
 
 $args = join(' ',@ARGV);
@@ -32,7 +32,7 @@ else {
     die("No destination specified");
 }
 
-open(find,"find $args |") || die "Can't run find for you.";
+open(find,"find $args |") || die "Can't run find for you: $!";
 
 while (<find>) {
     @x = split(' ');

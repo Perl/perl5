@@ -1,9 +1,10 @@
 #!./perl
 
-# $Header: op.stat,v 2.0 88/06/05 00:14:43 root Exp $
+# $Header: op.stat,v 3.0 89/10/18 15:31:33 lwall Locked $
 
 print "1..56\n";
 
+unlink "Op.stat.tmp";
 open(foo, ">Op.stat.tmp");
 
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
@@ -98,14 +99,14 @@ while (</usr/bin/*>) {
 if ($uid > 0 && $uid < $cnt) {print "ok 35\n";} else {print "not ok 35\n";}
 
 unless (open(tty,"/dev/tty")) {
-    print stderr "Can't open /dev/tty--run t/TEST outside of make.\n";
+    print STDERR "Can't open /dev/tty--run t/TEST outside of make.\n";
 }
 if (-t tty) {print "ok 36\n";} else {print "not ok 36\n";}
 if (-c tty) {print "ok 37\n";} else {print "not ok 37\n";}
 close(tty);
 if (! -t tty) {print "ok 38\n";} else {print "not ok 38\n";}
 open(null,"/dev/null");
-if (! -t null) {print "ok 39\n";} else {print "not ok 39\n";}
+if (! -t null || -e '/xenix') {print "ok 39\n";} else {print "not ok 39\n";}
 close(null);
 if (-t) {print "ok 40\n";} else {print "not ok 40\n";}
 

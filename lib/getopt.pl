@@ -1,4 +1,4 @@
-;# $Header: getopt.pl,v 2.0 88/06/05 00:16:22 root Exp $
+;# $Header: getopt.pl,v 3.0 89/10/18 15:19:26 lwall Locked $
 
 ;# Process single-character switches with switch clustering.  Pass one argument
 ;# which is a string containing all switches that take an argument.  For each
@@ -17,11 +17,11 @@ sub Getopt {
 	($first,$rest) = ($1,$2);
 	if (index($argumentative,$first) >= $[) {
 	    if ($rest ne '') {
-		shift;
+		shift(@ARGV);
 	    }
 	    else {
-		shift;
-		$rest = shift;
+		shift(@ARGV);
+		$rest = shift(@ARGV);
 	    }
 	    eval "\$opt_$first = \$rest;";
 	}
@@ -31,8 +31,10 @@ sub Getopt {
 		$ARGV[0] = "-$rest";
 	    }
 	    else {
-		shift;
+		shift(@ARGV);
 	    }
 	}
     }
 }
+
+1;

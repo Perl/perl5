@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Header: vanish,v 2.0 88/06/05 00:17:36 root Exp $
+# $Header: vanish,v 3.0 89/10/18 15:16:46 lwall Locked $
 
 sub it {
     if ($olddir ne '.') {
@@ -20,7 +20,7 @@ sub it {
 	print `/bin/mv $startfiles$filelist .deleted$force`;
     }
     if ($olddir ne '.') {
-	(chdir $pwd) || die "Can't get back to original directory: $pwd";
+	(chdir $pwd) || die "Can't get back to original directory $pwd: $!\n";
     }
 }
 

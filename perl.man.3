@@ -1,0 +1,1084 @@
+''' Beginning of part 3
+''' $Header: perl.man.3,v 3.0 89/10/18 15:21:46 lwall Locked $
+'''
+''' $Log:	perl.man.3,v $
+''' Revision 3.0  89/10/18  15:21:46  lwall
+''' 3.0 baseline
+''' 
+.Ip "next LABEL" 8 8
+.Ip "next" 8
+The
+.I next
+command is like the
+.I continue
+statement in C; it starts the next iteration of the loop:
+.nf
+
+.ne 4
+	line: while (<STDIN>) {
+		next line if /\|^#/;	# discard comments
+		.\|.\|.
+	}
+
+.fi
+Note that if there were a
+.I continue
+block on the above, it would get executed even on discarded lines.
+If the LABEL is omitted, the command refers to the innermost enclosing loop.
+.Ip "oct(EXPR)" 8 4
+.Ip "oct EXPR" 8
+Returns the decimal value of EXPR interpreted as an octal string.
+(If EXPR happens to start off with 0x, interprets it as a hex string instead.)
+The following will handle decimal, octal and hex in the standard notation:
+.nf
+
+	$val = oct($val) if $val =~ /^0/;
+
+.fi
+If EXPR is omitted, uses $_.
+.Ip "open(FILEHANDLE,EXPR)" 8 8
+.Ip "open(FILEHANDLE)" 8
+.Ip "open FILEHANDLE" 8
+Opens the file whose filename is given by EXPR, and associates it with
+FILEHANDLE.
+If FILEHANDLE is an expression, its value is used as the name of the
+real filehandle wanted.
+If EXPR is omitted, the scalar variable of the same name as the FILEHANDLE
+contains the filename.
+If the filename begins with \*(L"<\*(R" or nothing, the file is opened for
+input.
+If the filename begins with \*(L">\*(R", the file is opened for output.
+If the filename begins with \*(L">>\*(R", the file is opened for appending.
+(You can put a \'+\' in front of the \'>\' or \'<\' to indicate that you
+want both read and write access to the file.)
+If the filename begins with \*(L"|\*(R", the filename is interpreted
+as a command to which output is to be piped, and if the filename ends
+with a \*(L"|\*(R", the filename is interpreted as command which pipes
+input to us.
+(You may not have a command that pipes both in and out.)
+Opening \'\-\' opens
+.I STDIN
+and opening \'>\-\' opens
+.IR STDOUT .
+Open returns non-zero upon success, the undefined value otherwise.
+If the open involved a pipe, the return value happens to be the pid
+of the subprocess.
+Examples:
+.nf
+    
+.ne 3
+	$article = 100;
+	open article || die "Can't find article $article: $!\en";
+	while (<article>) {\|.\|.\|.
+
+	open(LOG, \'>>/usr/spool/news/twitlog\'\|);	# (log is reserved)
+
+	open(article, "caesar <$article |"\|);		# decrypt article
+
+	open(extract, "|sort >/tmp/Tmp$$"\|);		# $$ is our process#
+
+.ne 7
+	# process argument list of files along with any includes
+
+	foreach $file (@ARGV) {
+		do process($file, \'fh00\');	# no pun intended
+	}
+
+	sub process {
+		local($filename, $input) = @_;
+		$input++;		# this is a string increment
+		unless (open($input, $filename)) {
+			print STDERR "Can't open $filename: $!\en";
+			return;
+		}
+		while (<$input>) {		# note the use of indirection
+			if (/^#include "(.*)"/) {
+				do process($1, $input);
+				next;
+			}
+			.\|.\|.		# whatever
+		}
+	}
+
+.fi
+You may also, in the Bourne shell tradition, specify an EXPR beginning
+with \*(L">&\*(R", in which case the rest of the string
+is interpreted as the name of a filehandle
+(or file descriptor, if numeric) which is to be duped and opened.
+Here is a script that saves, redirects, and restores
+.I STDOUT
+and
+.IR STDIN :
+.nf
+
+.ne 21
+	#!/usr/bin/perl
+	open(SAVEOUT, ">&STDOUT");
+	open(SAVEERR, ">&STDERR");
+
+	open(STDOUT, ">foo.out") || die "Can't redirect stdout";
+	open(STDERR, ">&STDOUT") || die "Can't dup stdout";
+
+	select(STDERR); $| = 1;		# make unbuffered
+	select(STDOUT); $| = 1;		# make unbuffered
+
+	print STDOUT "stdout 1\en";	# this works for
+	print STDERR "stderr 1\en"; 	# subprocesses too
+
+	close(STDOUT);
+	close(STDERR);
+
+	open(STDOUT, ">&SAVEOUT");
+	open(STDERR, ">&SAVEERR");
+
+	print STDOUT "stdout 2\en";
+	print STDERR "stderr 2\en";
+
+.fi
+If you open a pipe on the command \*(L"\-\*(R", i.e. either \*(L"|\-\*(R" or \*(L"\-|\*(R",
+then there is an implicit fork done, and the return value of open
+is the pid of the child within the parent process, and 0 within the child
+process.
+(Use defined($pid) to determine if the open was successful.)
+The filehandle behaves normally for the parent, but i/o to that
+filehandle is piped from/to the
+.IR STDOUT / STDIN
+of the child process.
+In the child process the filehandle isn't opened\*(--i/o happens from/to
+the new
+.I STDOUT
+or
+.IR STDIN .
+Typically this is used like the normal piped open when you want to exercise
+more control over just how the pipe command gets executed, such as when
+you are running setuid, and don't want to have to scan shell commands
+for metacharacters.
+The following pairs are equivalent:
+.nf
+
+.ne 5
+	open(FOO, "|tr \'[a\-z]\' \'[A\-Z]\'");
+	open(FOO, "|\-") || exec \'tr\', \'[a\-z]\', \'[A\-Z]\';
+
+	open(FOO, "cat \-n $file|");
+	open(FOO, "\-|") || exec \'cat\', \'\-n\', $file;
+
+.fi
+Explicitly closing any piped filehandle causes the parent process to wait for the
+child to finish, and returns the status value in $?.
+.Ip "opendir(DIRHANDLE,EXPR)" 8 3
+Opens a directory named EXPR for processing by readdir(), telldir(), seekdir(),
+rewinddir() and closedir().
+Returns true if successful.
+DIRHANDLEs have their own namespace separate from FILEHANDLEs.
+.Ip "ord(EXPR)" 8 4
+.Ip "ord EXPR" 8
+Returns the ascii value of the first character of EXPR.
+If EXPR is omitted, uses $_.
+.Ip "pack(TEMPLATE,LIST)" 8 4
+Takes an array or list of values and packs it into a binary structure,
+returning the string containing the structure.
+The TEMPLATE is a sequence of characters that give the order and type
+of values, as follows:
+.nf
+
+	A	An ascii string, will be space padded.
+	a	An ascii string, will be null padded.
+	c	A native char value.
+	C	An unsigned char value.
+	s	A signed short value.
+	S	An unsigned short value.
+	i	A signed integer value.
+	I	An unsigned integer value.
+	l	A signed long value.
+	L	An unsigned long value.
+	n	A short in \*(L"network\*(R" order.
+	N	A long in \*(L"network\*(R" order.
+	p	A pointer to a string.
+	x	A null byte.
+
+.fi
+Each letter may optionally be followed by a number which gives a repeat
+count.
+With all types except "a" and "A" the pack function will gobble up that many values
+from the LIST.
+The "a" and "A" types gobble just one value, but pack it as a string that long,
+padding with nulls or spaces as necessary.
+(When unpacking, "A" strips trailing spaces and nulls, but "a" does not.)
+Examples:
+.nf
+
+	$foo = pack("cccc",65,66,67,68);
+	# foo eq "ABCD"
+	$foo = pack("c4",65,66,67,68);
+	# same thing
+
+	$foo = pack("ccxxcc",65,66,67,68);
+	# foo eq "AB\e0\e0CD"
+
+	$foo = pack("s2",1,2);
+	# "\e1\e0\e2\e0" on little-endian
+	# "\e0\e1\e0\e2" on big-endian
+
+	$foo = pack("a4","abcd","x","y","z");
+	# "abcd"
+
+	$foo = pack("aaaa","abcd","x","y","z");
+	# "axyz"
+
+	$foo = pack("a14","abcdefg");
+	# "abcdefg\e0\e0\e0\e0\e0\e0\e0"
+
+	$foo = pack("i9pl", gmtime());
+	# a real struct tm (on my system anyway)
+
+.fi
+The same template may generally also be used in the unpack function.
+.Ip "pop(ARRAY)" 8
+.Ip "pop ARRAY" 8 6
+Pops and returns the last value of the array, shortening the array by 1.
+Has the same effect as
+.nf
+
+	$tmp = $ARRAY[$#ARRAY\-\|\-];
+
+.fi
+If there are no elements in the array, returns the undefined value.
+.Ip "print(FILEHANDLE LIST)" 8 10
+.Ip "print(LIST)" 8
+.Ip "print FILEHANDLE LIST" 8
+.Ip "print LIST" 8
+.Ip "print" 8
+Prints a string or a comma-separated list of strings.
+Returns non-zero if successful.
+FILEHANDLE may be a scalar variable name, in which case the variable contains
+the name of the filehandle, thus introducing one level of indirection.
+If FILEHANDLE is omitted, prints by default to standard output (or to the
+last selected output channel\*(--see select()).
+If LIST is also omitted, prints $_ to
+.IR STDOUT .
+To set the default output channel to something other than
+.I STDOUT
+use the select operation.
+.Ip "printf(FILEHANDLE LIST)" 8 10
+.Ip "printf(LIST)" 8
+.Ip "printf FILEHANDLE LIST" 8
+.Ip "printf LIST" 8
+Equivalent to a \*(L"print FILEHANDLE sprintf(LIST)\*(R".
+.Ip "push(ARRAY,LIST)" 8 7
+Treats ARRAY (@ is optional) as a stack, and pushes the values of LIST
+onto the end of ARRAY.
+The length of ARRAY increases by the length of LIST.
+Has the same effect as
+.nf
+
+    for $value (LIST) {
+	    $ARRAY[++$#ARRAY] = $value;
+    }
+
+.fi
+but is more efficient.
+.Ip "q/STRING/" 8 5
+.Ip "qq/STRING/" 8
+These are not really functions, but simply syntactic sugar to let you
+avoid putting too many backslashes into quoted strings.
+The q operator is a generalized single quote, and the qq operator a
+generalized double quote.
+Any delimiter can be used in place of /, including newline.
+If the delimiter is an opening bracket or parenthesis, the final delimiter
+will be the corresponding closing bracket or parenthesis.
+(Embedded occurrences of the closing bracket need to be backslashed as usual.)
+Examples:
+.nf
+
+.ne 5
+	$foo = q!I said, "You said, \'She said it.\'"!;
+	$bar = q(\'This is it.\');
+	$_ .= qq
+*** The previous line contains the naughty word "$&".\en
+		if /(ibm|apple|awk)/;      # :-)
+
+.fi
+.Ip "rand(EXPR)" 8 8
+.Ip "rand EXPR" 8
+.Ip "rand" 8
+Returns a random fractional number between 0 and the value of EXPR.
+(EXPR should be positive.)
+If EXPR is omitted, returns a value between 0 and 1.
+See also srand().
+.Ip "read(FILEHANDLE,SCALAR,LENGTH)" 8 5
+Attempts to read LENGTH bytes of data into variable SCALAR from the specified
+FILEHANDLE.
+Returns the number of bytes actually read.
+SCALAR will be grown or shrunk to the length actually read.
+.Ip "readdir(DIRHANDLE)" 8 3
+Returns the next directory entry for a directory opened by opendir().
+If used in an array context, returns all the rest of the entries in the
+directory.
+If there are no more entries, returns an undefined value in a scalar context
+or a null list in an array context.
+.Ip "readlink(EXPR)" 8 6
+.Ip "readlink EXPR" 8
+Returns the value of a symbolic link, if symbolic links are implemented.
+If not, gives a fatal error.
+If there is some system error, returns the undefined value and sets $! (errno).
+If EXPR is omitted, uses $_.
+.Ip "recv(SOCKET,SCALAR,LEN,FLAGS)" 8 4
+Receives a message on a socket.
+Attempts to receive LENGTH bytes of data into variable SCALAR from the specified
+SOCKET filehandle.
+Returns the address of the sender, or the undefined value if there's an error.
+SCALAR will be grown or shrunk to the length actually read.
+Takes the same flags as the system call of the same name.
+.Ip "redo LABEL" 8 8
+.Ip "redo" 8
+The
+.I redo
+command restarts the loop block without evaluating the conditional again.
+The
+.I continue
+block, if any, is not executed.
+If the LABEL is omitted, the command refers to the innermost enclosing loop.
+This command is normally used by programs that want to lie to themselves
+about what was just input:
+.nf
+
+.ne 16
+	# a simpleminded Pascal comment stripper
+	# (warning: assumes no { or } in strings)
+	line: while (<STDIN>) {
+		while (s|\|({.*}.*\|){.*}|$1 \||) {}
+		s|{.*}| \||;
+		if (s|{.*| \||) {
+			$front = $_;
+			while (<STDIN>) {
+				if (\|/\|}/\|) {	# end of comment?
+					s|^|$front{|;
+					redo line;
+				}
+			}
+		}
+		print;
+	}
+
+.fi
+.Ip "rename(OLDNAME,NEWNAME)" 8 2
+Changes the name of a file.
+Returns 1 for success, 0 otherwise.
+Will not work across filesystem boundaries.
+.Ip "reset(EXPR)" 8 6
+.Ip "reset EXPR" 8
+.Ip "reset" 8
+Generally used in a
+.I continue
+block at the end of a loop to clear variables and reset ?? searches
+so that they work again.
+The expression is interpreted as a list of single characters (hyphens allowed
+for ranges).
+All variables and arrays beginning with one of those letters are reset to
+their pristine state.
+If the expression is omitted, one-match searches (?pattern?) are reset to
+match again.
+Only resets variables or searches in the current package.
+Always returns 1.
+Examples:
+.nf
+
+.ne 3
+    reset \'X\';	\h'|2i'# reset all X variables
+    reset \'a\-z\';\h'|2i'# reset lower case variables
+    reset;	\h'|2i'# just reset ?? searches
+
+.fi
+Note: resetting \*(L"A\-Z\*(R" is not recommended since you'll wipe out your ARGV and ENV
+arrays.
+.Sp
+The use of reset on dbm associative arrays does not change the dbm file.
+(It does, however, flush any entries cached by perl, which may be useful if
+you are sharing the dbm file.
+Then again, maybe not.)
+.Ip "return LIST" 8 3
+Returns from a subroutine with the value specified.
+(Note that a subroutine can automatically return
+the value of the last expression evaluated.
+That's the preferred method\*(--use of an explicit
+.I return
+is a bit slower.)
+.Ip "reverse(LIST)" 8 4
+.Ip "reverse LIST" 8
+Returns an array value consisting of the elements of LIST in the opposite order.
+.Ip "rewinddir(DIRHANDLE)" 8 5
+.Ip "rewinddir DIRHANDLE" 8
+Sets the current position to the beginning of the directory for the readdir() routine on DIRHANDLE.
+.Ip "rindex(STR,SUBSTR)" 8 4
+Works just like index except that it
+returns the position of the LAST occurrence of SUBSTR in STR.
+.Ip "rmdir(FILENAME)" 8 4
+.Ip "rmdir FILENAME" 8
+Deletes the directory specified by FILENAME if it is empty.
+If it succeeds it returns 1, otherwise it returns 0 and sets $! (errno).
+If FILENAME is omitted, uses $_.
+.Ip "s/PATTERN/REPLACEMENT/gieo" 8 3
+Searches a string for a pattern, and if found, replaces that pattern with the
+replacement text and returns the number of substitutions made.
+Otherwise it returns false (0).
+The \*(L"g\*(R" is optional, and if present, indicates that all occurrences
+of the pattern are to be replaced.
+The \*(L"i\*(R" is also optional, and if present, indicates that matching
+is to be done in a case-insensitive manner.
+The \*(L"e\*(R" is likewise optional, and if present, indicates that
+the replacement string is to be evaluated as an expression rather than just
+as a double-quoted string.
+Any delimiter may replace the slashes; if single quotes are used, no
+interpretation is done on the replacement string (the e modifier overrides
+this, however).
+If no string is specified via the =~ or !~ operator,
+the $_ string is searched and modified.
+(The string specified with =~ must be a scalar variable, an array element,
+or an assignment to one of those, i.e. an lvalue.)
+If the pattern contains a $ that looks like a variable rather than an
+end-of-string test, the variable will be interpolated into the pattern at
+run-time.
+If you only want the pattern compiled once the first time the variable is
+interpolated, add an \*(L"o\*(R" at the end.
+See also the section on regular expressions.
+Examples:
+.nf
+
+    s/\|\e\|bgreen\e\|b/mauve/g;		# don't change wintergreen
+
+    $path \|=~ \|s|\|/usr/bin|\|/usr/local/bin|;
+
+    s/Login: $foo/Login: $bar/; # run-time pattern
+
+    ($foo = $bar) =~ s/bar/foo/;
+
+    $_ = \'abc123xyz\';
+    s/\ed+/$&*2/e;		# yields \*(L'abc246xyz\*(R'
+    s/\ed+/sprintf("%5d",$&)/e;	# yields \*(L'abc  246xyz\*(R'
+    s/\ew/$& x 2/eg;		# yields \*(L'aabbcc  224466xxyyzz\*(R'
+
+    s/\|([^ \|]*\|) *\|([^ \|]*\|)\|/\|$2 $1/;	# reverse 1st two fields
+
+.fi
+(Note the use of $ instead of \|\e\| in the last example.  See section
+on regular expressions.)
+.Ip "seek(FILEHANDLE,POSITION,WHENCE)" 8 3
+Randomly positions the file pointer for FILEHANDLE, just like the fseek()
+call of stdio.
+FILEHANDLE may be an expression whose value gives the name of the filehandle.
+Returns 1 upon success, 0 otherwise.
+.Ip "seekdir(DIRHANDLE,POS)" 8 3
+Sets the current position for the readdir() routine on DIRHANDLE.
+POS must be a value returned by seekdir().
+Has the same caveats about possible directory compaction as the corresponding
+system library routine.
+.Ip "select(FILEHANDLE)" 8 3
+.Ip "select" 8 3
+Returns the currently selected filehandle.
+Sets the current default filehandle for output, if FILEHANDLE is supplied.
+This has two effects: first, a
+.I write
+or a
+.I print
+without a filehandle will default to this FILEHANDLE.
+Second, references to variables related to output will refer to this output
+channel.
+For example, if you have to set the top of form format for more than
+one output channel, you might do the following:
+.nf
+
+.ne 4
+	select(REPORT1);
+	$^ = \'report1_top\';
+	select(REPORT2);
+	$^ = \'report2_top\';
+
+.fi
+FILEHANDLE may be an expression whose value gives the name of the actual filehandle.
+Thus:
+.nf
+
+	$oldfh = select(STDERR); $| = 1; select($oldfh);
+
+.fi
+.Ip "select(RBITS,WBITS,EBITS,TIMEOUT)" 8 3
+This calls the select system call with the bitmasks specified, which can
+be constructed using fileno() and vec(), along these lines:
+.nf
+
+	$rin = $win = $ein = '';
+	vec($rin,fileno(STDIN),1) = 1;
+	vec($win,fileno(STDOUT),1) = 1;
+	$ein = $rin | $win;
+
+.fi
+If you want to select on many filehandles you might wish to write a subroutine:
+.nf
+
+	sub fhbits {
+	    local(@fhlist) = split(' ',$_[0]);
+	    local($bits);
+	    for (@fhlist) {
+		vec($bits,fileno($_),1) = 1;
+	    }
+	    $bits;
+	}
+	$rin = &fhbits('STDIN TTY SOCK');
+
+.fi
+The usual idiom is:
+.nf
+
+	($nfound,$timeleft) =
+	  select($rout=$rin, $wout=$win, $eout=$ein, $timeout);
+
+or to block until something becomes ready:
+
+	$nfound = select($rout=$rin, $wout=$win, $eout=$ein, undef);
+
+.fi
+Any of the bitmasks can also be undef.
+The timeout, if specified, is in seconds, which may be fractional.
+.Ip "setpgrp(PID,PGRP)" 8 4
+Sets the current process group for the specified PID, 0 for the current
+process.
+Will produce a fatal error if used on a machine that doesn't implement
+setpgrp(2).
+.Ip "send(SOCKET,MSG,FLAGS,TO)" 8 4
+.Ip "send(SOCKET,MSG,FLAGS)" 8
+Sends a message on a socket.
+Takes the same flags as the system call of the same name.
+On unconnected sockets you must specify a destination to send TO.
+Returns the number of characters sent, or the undefined value if
+there is an error.
+.Ip "setpriority(WHICH,WHO,PRIORITY)" 8 4
+Sets the current priority for a process, a process group, or a user.
+(See setpriority(2).)
+Will produce a fatal error if used on a machine that doesn't implement
+setpriority(2).
+.Ip "setsockopt(SOCKET,LEVEL,OPTNAME,OPTVAL)" 8 3
+Sets the socket option requested.
+Returns undefined if there is an error.
+OPTVAL may be specified as undef if you don't want to pass an argument.
+.Ip "shift(ARRAY)" 8 6
+.Ip "shift ARRAY" 8
+.Ip "shift" 8
+Shifts the first value of the array off and returns it,
+shortening the array by 1 and moving everything down.
+If there are no elements in the array, returns the undefined value.
+If ARRAY is omitted, shifts the @ARGV array in the main program, and the @_
+array in subroutines.
+See also unshift(), push() and pop().
+Shift() and unshift() do the same thing to the left end of an array that push()
+and pop() do to the right end.
+.Ip "shutdown(SOCKET,HOW)" 8 3
+Shuts down a socket connection in the manner indicated by HOW, which has
+the same interpretation as in the system call of the same name.
+.Ip "sin(EXPR)" 8 4
+.Ip "sin EXPR" 8
+Returns the sine of EXPR (expressed in radians).
+If EXPR is omitted, returns sine of $_.
+.Ip "sleep(EXPR)" 8 6
+.Ip "sleep EXPR" 8
+.Ip "sleep" 8
+Causes the script to sleep for EXPR seconds, or forever if no EXPR.
+May be interrupted by sending the process a SIGALARM.
+Returns the number of seconds actually slept.
+.Ip "socket(SOCKET,DOMAIN,TYPE,PROTOCOL)" 8 3
+Opens a socket of the specified kind and attaches it to filehandle SOCKET.
+DOMAIN, TYPE and PROTOCOL are specified the same as for the system call
+of the same name.
+You may need to run makelib on sys/socket.h to get the proper values handy
+in a perl library file.
+Return true if successful.
+See the example in the section on Interprocess Communication.
+.Ip "socketpair(SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL)" 8 3
+Creates an unnamed pair of sockets in the specified domain, of the specified
+type.
+DOMAIN, TYPE and PROTOCOL are specified the same as for the system call
+of the same name.
+If unimplemented, yields a fatal error.
+Return true if successful.
+.Ip "sort(SUBROUTINE LIST)" 8 9
+.Ip "sort(LIST)" 8
+.Ip "sort SUBROUTINE LIST" 8
+.Ip "sort LIST" 8
+Sorts the LIST and returns the sorted array value.
+Nonexistent values of arrays are stripped out.
+If SUBROUTINE is omitted, sorts in standard string comparison order.
+If SUBROUTINE is specified, gives the name of a subroutine that returns
+an integer less than, equal to, or greater than 0,
+depending on how the elements of the array are to be ordered.
+In the interests of efficiency the normal calling code for subroutines
+is bypassed, with the following effects: the subroutine may not be a recursive
+subroutine, and the two elements to be compared are passed into the subroutine
+not via @_ but as $a and $b (see example below).
+They are passed by reference so don't modify $a and $b.
+SUBROUTINE may be a scalar variable name, in which case the value provides
+the name of the subroutine to use.
+Examples:
+.nf
+
+.ne 4
+	sub byage {
+	    $age{$a} - $age{$b};	# presuming integers
+	}
+	@sortedclass = sort byage @class;
+
+.ne 9
+	sub reverse { $a lt $b ? 1 : $a gt $b ? \-1 : 0; }
+	@harry = (\'dog\',\'cat\',\'x\',\'Cain\',\'Abel\');
+	@george = (\'gone\',\'chased\',\'yz\',\'Punished\',\'Axed\');
+	print sort @harry;
+		# prints AbelCaincatdogx
+	print sort reverse @harry;
+		# prints xdogcatCainAbel
+	print sort @george, \'to\', @harry;
+		# prints AbelAxedCainPunishedcatchaseddoggonetoxyz
+
+.fi
+.Ip "split(/PATTERN/,EXPR,LIMIT)" 8 8
+.Ip "split(/PATTERN/,EXPR)" 8 8
+.Ip "split(/PATTERN/)" 8
+.Ip "split" 8
+Splits a string into an array of strings, and returns it.
+(If not in an array context, returns the number of fields found and splits
+into the @_ array.)
+If EXPR is omitted, splits the $_ string.
+If PATTERN is also omitted, splits on whitespace (/[\ \et\en]+/).
+Anything matching PATTERN is taken to be a delimiter separating the fields.
+(Note that the delimiter may be longer than one character.)
+If LIMIT is specified, splits into no more than that many fields (though it
+may split into fewer).
+If LIMIT is unspecified, trailing null fields are stripped (which
+potential users of pop() would do well to remember).
+A pattern matching the null string (not to be confused with a null pattern,
+which is one member of the set of patterns matching a null string)
+will split the value of EXPR into separate characters at each point it
+matches that way.
+For example:
+.nf
+
+	print join(\':\', split(/ */, \'hi there\'));
+
+.fi
+produces the output \*(L'h:i:t:h:e:r:e\*(R'.
+.P
+The NUM parameter can be used to partially split a line
+.nf
+
+	($login, $passwd, $remainder) = split(\|/\|:\|/\|, $_, 3);
+
+.fi
+(When assigning to a list, if NUM is omitted, perl supplies a NUM one
+larger than the number of variables in the list, to avoid unnecessary work.
+For the list above NUM would have been 4 by default.
+In time critical applications it behooves you not to split into
+more fields than you really need.)
+.Sp
+If the PATTERN contains parentheses, additional array elements are created
+from each matching substring in the delimiter.
+.Sp
+	split(/([,-])/,"1-10,20");
+.Sp
+produces the array value
+.Sp
+	(1,'-',10,',',20)
+.Sp
+The pattern /PATTERN/ may be replaced with an expression to specify patterns
+that vary at runtime.
+(To do runtime compilation only once, use /$variable/o.)
+As a special case, specifying a space (\'\ \') will split on white space
+just as split with no arguments does, but leading white space does NOT
+produce a null first field.
+Thus, split(\'\ \') can be used to emulate
+.IR awk 's
+default behavior, whereas
+split(/\ /) will give you as many null initial fields as there are
+leading spaces.
+.Sp
+Example:
+.nf
+
+.ne 5
+	open(passwd, \'/etc/passwd\');
+	while (<passwd>) {
+.ie t \{\
+		($login, $passwd, $uid, $gid, $gcos, $home, $shell) = split(\|/\|:\|/\|);
+'br\}
+.el \{\
+		($login, $passwd, $uid, $gid, $gcos, $home, $shell)
+			= split(\|/\|:\|/\|);
+'br\}
+		.\|.\|.
+	}
+
+.fi
+(Note that $shell above will still have a newline on it.  See chop().)
+See also
+.IR join .
+.Ip "sprintf(FORMAT,LIST)" 8 4
+Returns a string formatted by the usual printf conventions.
+The * character is not supported.
+.Ip "sqrt(EXPR)" 8 4
+.Ip "sqrt EXPR" 8
+Return the square root of EXPR.
+If EXPR is omitted, returns square root of $_.
+.Ip "srand(EXPR)" 8 4
+.Ip "srand EXPR" 8
+Sets the random number seed for the
+.I rand
+operator.
+If EXPR is omitted, does srand(time).
+.Ip "stat(FILEHANDLE)" 8 6
+.Ip "stat FILEHANDLE" 8
+.Ip "stat(EXPR)" 8
+Returns a 13-element array giving the statistics for a file, either the file
+opened via FILEHANDLE, or named by EXPR.
+Typically used as follows:
+.nf
+
+.ne 3
+    ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+       $atime,$mtime,$ctime,$blksize,$blocks)
+           = stat($filename);
+
+.fi
+If stat is passed the special filehandle consisting of an underline,
+no stat is done, but the current contents of the stat structure from
+the last stat or filetest are returned.
+Example:
+.nf
+
+.ne 3
+	if (-x $file && (($d) = stat(_)) && $d < 0) {
+		print "$file is executable NFS file\en";
+	}
+
+.fi
+.Ip "study(SCALAR)" 8 6
+.Ip "study SCALAR" 8
+.Ip "study"
+Takes extra time to study SCALAR ($_ if unspecified) in anticipation of
+doing many pattern matches on the string before it is next modified.
+This may or may not save time, depending on the nature and number of patterns
+you are searching on, and on the distribution of character frequencies in
+the string to be searched\*(--you probably want to compare runtimes with and
+without it to see which runs faster.
+Those loops which scan for many short constant strings (including the constant
+parts of more complex patterns) will benefit most.
+You may have only one study active at a time\*(--if you study a different
+scalar the first is \*(L"unstudied\*(R".
+(The way study works is this: a linked list of every character in the string
+to be searched is made, so we know, for example, where all the \*(L'k\*(R' characters
+are.
+From each search string, the rarest character is selected, based on some
+static frequency tables constructed from some C programs and English text.
+Only those places that contain this \*(L"rarest\*(R" character are examined.)
+.Sp
+For example, here is a loop which inserts index producing entries before any line
+containing a certain pattern:
+.nf
+
+.ne 8
+	while (<>) {
+		study;
+		print ".IX foo\en" if /\ebfoo\eb/;
+		print ".IX bar\en" if /\ebbar\eb/;
+		print ".IX blurfl\en" if /\ebblurfl\eb/;
+		.\|.\|.
+		print;
+	}
+
+.fi
+In searching for /\ebfoo\eb/, only those locations in $_ that contain \*(L'f\*(R'
+will be looked at, because \*(L'f\*(R' is rarer than \*(L'o\*(R'.
+In general, this is a big win except in pathological cases.
+The only question is whether it saves you more time than it took to build
+the linked list in the first place.
+.Sp
+Note that if you have to look for strings that you don't know till runtime,
+you can build an entire loop as a string and eval that to avoid recompiling
+all your patterns all the time.
+Together with setting $/ to input entire files as one record, this can
+be very fast, often faster than specialized programs like fgrep.
+The following scans a list of files (@files)
+for a list of words (@words), and prints out the names of those files that
+contain a match:
+.nf
+
+.ne 12
+	$search = \'while (<>) { study;\';
+	foreach $word (@words) {
+	    $search .= "++\e$seen{\e$ARGV} if /\eb$word\eb/;\en";
+	}
+	$search .= "}";
+	@ARGV = @files;
+	$/ = "\e177";		# something that doesn't occur
+	eval $search;		# this screams
+	$/ = "\en";		# put back to normal input delim
+	foreach $file (sort keys(%seen)) {
+	    print $file, "\en";
+	}
+
+.fi
+.Ip "substr(EXPR,OFFSET,LEN)" 8 2
+Extracts a substring out of EXPR and returns it.
+First character is at offset 0, or whatever you've set $[ to.
+If OFFSET is negative, starts that far from the end of the string.
+You can use the substr() function as an lvalue, in which case EXPR must
+be an lvalue.
+If you assign something shorter than LEN, the string will shrink, and
+if you assign something longer than LEN, the string will grow to accomodate it.
+To keep the string the same length you may need to pad or chop your value using
+sprintf().
+.Ip "syscall(LIST)" 8 6
+.Ip "syscall LIST" 8
+Calls the system call specified as the first element of the list, passing
+the remaining elements as arguments to the system call.
+If unimplemented, produces a fatal error.
+The arguments are interpreted as follows: if a given argument is numeric,
+the argument is passed as an int.
+If not, the pointer to the string value is passed.
+You are responsible to make sure a string is pre-extended long enough
+to receive any result that might be written into a string.
+If your integer arguments are not literals and have never been interpreted
+in a numeric context, you may need to add 0 to them to force them to look
+like numbers.
+.nf
+
+	do 'syscall.h';		# may need to run makelib
+	syscall(&SYS_write, fileno(STDOUT), "hi there\en", 9);
+
+.fi
+.Ip "system(LIST)" 8 6
+.Ip "system LIST" 8
+Does exactly the same thing as \*(L"exec LIST\*(R" except that a fork
+is done first, and the parent process waits for the child process to complete.
+Note that argument processing varies depending on the number of arguments.
+The return value is the exit status of the program as returned by the wait()
+call.
+To get the actual exit value divide by 256.
+See also
+.IR exec .
+.Ip "symlink(OLDFILE,NEWFILE)" 8 2
+Creates a new filename symbolically linked to the old filename.
+Returns 1 for success, 0 otherwise.
+On systems that don't support symbolic links, produces a fatal error at
+run time.
+To check for that, use eval:
+.nf
+
+	$symlink_exists = (eval \'symlink("","");\', $@ eq \'\');
+
+.fi
+.Ip "tell(FILEHANDLE)" 8 6
+.Ip "tell FILEHANDLE" 8 6
+.Ip "tell" 8
+Returns the current file position for FILEHANDLE.
+FILEHANDLE may be an expression whose value gives the name of the actual
+filehandle.
+If FILEHANDLE is omitted, assumes the file last read.
+.Ip "telldir(DIRHANDLE)" 8 5
+.Ip "telldir DIRHANDLE" 8
+Returns the current position of the readdir() routines on DIRHANDLE.
+Value may be given to seekdir() to access a particular location in
+a directory.
+Has the same caveats about possible directory compaction as the corresponding
+system library routine.
+.Ip "time" 8 4
+Returns the number of non-leap seconds since January 1, 1970, UTC.
+Suitable for feeding to gmtime() and localtime().
+.Ip "times" 8 4
+Returns a four-element array giving the user and system times, in seconds, for this
+process and the children of this process.
+.Sp
+    ($user,$system,$cuser,$csystem) = times;
+.Sp
+.Ip "tr/SEARCHLIST/REPLACEMENTLIST/" 8 5
+.Ip "y/SEARCHLIST/REPLACEMENTLIST/" 8
+Translates all occurrences of the characters found in the search list with
+the corresponding character in the replacement list.
+It returns the number of characters replaced.
+If no string is specified via the =~ or !~ operator,
+the $_ string is translated.
+(The string specified with =~ must be a scalar variable, an array element,
+or an assignment to one of those, i.e. an lvalue.)
+For
+.I sed
+devotees,
+.I y
+is provided as a synonym for
+.IR tr .
+Examples:
+.nf
+
+    $ARGV[1] \|=~ \|y/A\-Z/a\-z/;	\h'|3i'# canonicalize to lower case
+
+    $cnt = tr/*/*/;		\h'|3i'# count the stars in $_
+
+    ($HOST = $host) =~ tr/a\-z/A\-Z/;
+
+    y/\e001\-@[\-_{\-\e177/ /;	\h'|3i'# change non-alphas to space
+
+.fi
+.Ip "umask(EXPR)" 8 4
+.Ip "umask EXPR" 8
+Sets the umask for the process and returns the old one.
+If EXPR is omitted, merely returns current umask.
+.Ip "undef(EXPR)" 8 6
+.Ip "undef EXPR" 8
+.Ip "undef" 8
+Undefines the value of EXPR, which must be an lvalue.
+Use only on a scalar value, an entire array, or a subroutine name (using &).
+(Undef will probably not do what you expect on most predefined variables or
+dbm array values.)
+Always returns the undefined value.
+You can omit the EXPR, in which case nothing is undefined, but you still
+get an undefined value that you could, for instance, return from a subroutine.
+Examples:
+.nf
+
+.ne 6
+	undef $foo;
+	undef $bar{'blurfl'};
+	undef @ary;
+	undef %assoc;
+	undef &mysub;
+	return (wantarray ? () : undef) if $they_blew_it;
+
+.fi
+.Ip "unlink(LIST)" 8 4
+.Ip "unlink LIST" 8
+Deletes a list of files.
+Returns the number of files successfully deleted.
+.nf
+
+.ne 2
+	$cnt = unlink \'a\', \'b\', \'c\';
+	unlink @goners;
+	unlink <*.bak>;
+
+.fi
+Note: unlink will not delete directories unless you are superuser and the
+.B \-U
+flag is supplied to
+.IR perl .
+Even if these conditions are met, be warned that unlinking a directory
+can inflict damage on your filesystem.
+Use rmdir instead.
+.Ip "unpack(TEMPLATE,EXPR)" 8 4
+Unpack does the reverse of pack: it takes a string representing
+a structure and expands it out into an array value, returning the array
+value.
+The TEMPLATE has the same format as in the pack function.
+Here's a subroutine that does substring:
+.nf
+
+.ne 4
+	sub substr {
+		local($what,$where,$howmuch) = @_;
+		unpack("x$where a$howmuch", $what);
+	}
+
+.ne 3
+and then there's
+
+	sub ord { unpack("c",$_[0]); }
+
+.fi
+.Ip "unshift(ARRAY,LIST)" 8 4
+Does the opposite of a
+.IR shift .
+Or the opposite of a
+.IR push ,
+depending on how you look at it.
+Prepends list to the front of the array, and returns the number of elements
+in the new array.
+.nf
+
+	unshift(ARGV, \'\-e\') unless $ARGV[0] =~ /^\-/;
+
+.fi
+.Ip "utime(LIST)" 8 2
+.Ip "utime LIST" 8 2
+Changes the access and modification times on each file of a list of files.
+The first two elements of the list must be the NUMERICAL access and
+modification times, in that order.
+Returns the number of files successfully changed.
+The inode modification time of each file is set to the current time.
+Example of a \*(L"touch\*(R" command:
+.nf
+
+.ne 3
+	#!/usr/bin/perl
+	$now = time;
+	utime $now, $now, @ARGV;
+
+.fi
+.Ip "values(ASSOC_ARRAY)" 8 6
+.Ip "values ASSOC_ARRAY" 8
+Returns a normal array consisting of all the values of the named associative
+array.
+The values are returned in an apparently random order, but it is the same order
+as either the keys() or each() function would produce on the same array.
+See also keys() and each().
+.Ip "vec(EXPR,OFFSET,BITS)" 8 2
+Treats a string as a vector of unsigned integers, and returns the value
+of the bitfield specified.
+May also be assigned to.
+BITS must be a power of two from 1 to 32.
+.Sp
+Vectors created with vec() can also be manipulated with the logical operators
+|, & and ^,
+which will assume a bit vector operation is desired when both operands are
+strings.
+This interpretation is not enabled unless there is at least one vec() in
+your program, to protect older programs.
+.Ip "wait" 8 6
+Waits for a child process to terminate and returns the pid of the deceased
+process.
+The status is returned in $?.
+.Ip "wantarray" 8 4
+Returns true if the context of the currently executing subroutine
+is looking for an array value.
+Returns false if the context is looking for a scalar.
+.nf
+
+	return wantarray ? () : undef;
+
+.fi
+.Ip "warn(LIST)" 8 4
+.Ip "warn LIST" 8
+Produces a message on STDERR just like \*(L"die\*(R", but doesn't exit.
+.Ip "write(FILEHANDLE)" 8 6
+.Ip "write(EXPR)" 8
+.Ip "write(\|)" 8
+Writes a formatted record (possibly multi-line) to the specified file,
+using the format associated with that file.
+By default the format for a file is the one having the same name is the
+filehandle, but the format for the current output channel (see
+.IR select )
+may be set explicitly
+by assigning the name of the format to the $~ variable.
+.Sp
+Top of form processing is handled automatically:
+if there is insufficient room on the current page for the formatted 
+record, the page is advanced, a special top-of-page format is used
+to format the new page header, and then the record is written.
+By default the top-of-page format is \*(L"top\*(R", but it
+may be set to the
+format of your choice by assigning the name to the $^ variable.
+.Sp
+If FILEHANDLE is unspecified, output goes to the current default output channel,
+which starts out as
+.I STDOUT
+but may be changed by the
+.I select
+operator.
+If the FILEHANDLE is an EXPR, then the expression is evaluated and the
+resulting string is used to look up the name of the FILEHANDLE at run time.
+For more on formats, see the section on formats later on.
+.Sp
+Note that write is NOT the opposite of read.

@@ -1,8 +1,13 @@
-/* $Header: a2p.h,v 2.0 88/06/05 00:15:33 root Exp $
+/* $Header: a2p.h,v 3.0 89/10/18 15:34:14 lwall Locked $
+ *
+ *    Copyright (c) 1989, Larry Wall
+ *
+ *    You may distribute under the terms of the GNU General Public License
+ *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	a2p.h,v $
- * Revision 2.0  88/06/05  00:15:33  root
- * Baseline version 2.0.
+ * Revision 3.0  89/10/18  15:34:14  lwall
+ * 3.0 baseline
  * 
  */
 
@@ -38,7 +43,7 @@
 #define OCONCAT		19
 #define OASSIGN		20
 #define OADD		21
-#define OSUB		22
+#define OSUBTRACT	22
 #define OMULT		23
 #define ODIV		24
 #define OMOD		25
@@ -86,6 +91,25 @@
 #define OEXP		67
 #define OSQRT		68
 #define OINT		69
+#define ODO		70
+#define OPOW		71
+#define OSUB		72
+#define OGSUB		73
+#define OMATCH		74
+#define OUSERFUN	75
+#define OUSERDEF	76
+#define OCLOSE		77
+#define OATAN2		78
+#define OSIN		79
+#define OCOS		80
+#define ORAND		81
+#define OSRAND		82
+#define ODELETE		83
+#define OSYSTEM		84
+#define OCOND		85
+#define ORETURN		86
+#define ODEFINED	87
+#define OSTAR		88
 
 #ifdef DOINIT
 char *opname[] = {
@@ -111,7 +135,7 @@ char *opname[] = {
     "CONCAT",
     "ASSIGN",
     "ADD",
-    "SUB",
+    "SUBTRACT",
     "MULT",
     "DIV",
     "MOD",
@@ -159,18 +183,38 @@ char *opname[] = {
     "EXP",
     "SQRT",
     "INT",
-    "70"
+    "DO",
+    "POW",
+    "SUB",
+    "GSUB",
+    "MATCH",
+    "USERFUN",
+    "USERDEF",
+    "CLOSE",
+    "ATAN2",
+    "SIN",
+    "COS",
+    "RAND",
+    "SRAND",
+    "DELETE",
+    "SYSTEM",
+    "COND",
+    "RETURN",
+    "DEFINED",
+    "STAR",
+    "89"
 };
 #else
 extern char *opname[];
 #endif
 
+EXT int mop INIT(1);
+
+#define OPSMAX 50000
 union {
     int ival;
     char *cval;
-} ops[50000];		/* hope they have 200k to spare */
-
-EXT int mop INIT(1);
+} ops[OPSMAX];		/* hope they have 200k to spare */
 
 #define DEBUGGING
 
@@ -241,6 +285,7 @@ EXT bool lval_field INIT(FALSE);
 EXT bool do_chop INIT(FALSE);
 EXT bool need_entire INIT(FALSE);
 EXT bool absmaxfld INIT(FALSE);
+EXT bool saw_altinput INIT(FALSE);
 
 EXT char const_FS INIT(0);
 EXT char *namelist INIT(Nullch);
@@ -254,3 +299,27 @@ char *nameary[100];
 EXT STR *opens;
 
 EXT HASH *symtab;
+EXT HASH *curarghash;
+
+#define P_MIN		0
+#define P_LISTOP	5
+#define P_COMMA		10
+#define P_ASSIGN	15
+#define P_COND		20
+#define P_DOTDOT	25
+#define P_OROR		30
+#define P_ANDAND	35
+#define P_OR		40
+#define P_AND		45
+#define P_EQ		50
+#define P_REL		55
+#define P_UNI		60
+#define P_FILETEST	65
+#define P_SHIFT		70
+#define P_ADD		75
+#define P_MUL		80
+#define P_MATCH		85
+#define P_UNARY		90
+#define P_POW		95
+#define P_AUTO		100
+#define P_MAX		999

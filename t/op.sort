@@ -1,0 +1,19 @@
+#!./perl
+
+# $Header: op.sort,v 3.0 89/10/18 15:31:19 lwall Locked $
+
+print "1..3\n";
+
+sub reverse { $a lt $b ? 1 : $a gt $b ? -1 : 0; }
+
+@harry = ('dog','cat','x','Cain','Abel');
+@george = ('gone','chased','yz','Punished','Axed');
+
+$x = join('', sort @harry);
+print ($x eq 'AbelCaincatdogx' ? "ok 1\n" : "not ok 1\n");
+
+$x = join('', sort reverse @harry);
+print ($x eq 'xdogcatCainAbel' ? "ok 2\n" : "not ok 2\n");
+
+$x = join('', sort @george, 'to', @harry);
+print ($x eq 'AbelAxedCainPunishedcatchaseddoggonetoxyz'?"ok 3\n":"not ok 3\n");

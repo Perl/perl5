@@ -1,10 +1,10 @@
 #!/usr/bin/perl
 
-# $Header: scan_passwd,v 2.0 88/06/05 00:17:49 root Exp $
+# $Header: scan_passwd,v 3.0 89/10/18 15:15:43 lwall Locked $
 
 # This scans passwd file for security holes.
 
-open(Pass,'/etc/passwd') || die "Can't open passwd file";
+open(Pass,'/etc/passwd') || die "Can't open passwd file: $!\n";
 # $dotriv = (`date` =~ /^Mon/);
 $dotriv = 1;
 

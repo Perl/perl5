@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: cmd.for,v 2.0 88/06/05 00:12:19 root Exp $
+# $Header: cmd.for,v 3.0 89/10/18 15:24:43 lwall Locked $
 
 print "1..7\n";
 
@@ -42,7 +42,7 @@ print $ary[1];
 for (split(' ','a b c d e')) {
 	$foo .= $_;
 }
-if ($foo eq '3210abcde') {print "ok 5\n";} else {print "not ok 5\n";}
+if ($foo eq '3210abcde') {print "ok 5\n";} else {print "not ok 5 $foo\n";}
 
 foreach $foo (("ok 6\n","ok 7\n")) {
 	print $foo;

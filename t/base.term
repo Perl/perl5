@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: base.term,v 2.0 88/06/05 00:12:13 root Exp $
+# $Header: base.term,v 3.0 89/10/18 15:24:34 lwall Locked $
 
 print "1..6\n";
 

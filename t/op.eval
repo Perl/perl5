@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: op.eval,v 2.0 88/06/05 00:13:40 root Exp $
+# $Header: op.eval,v 3.0 89/10/18 15:28:53 lwall Locked $
 
 print "1..10\n";
 
@@ -31,7 +31,7 @@ $ans = eval $fact;
 if ($ans == 120) {print "ok 8\n";} else {print "not ok 8\n";}
 
 $foo = 5;
-$fact = 'local($foo); $foo <= 1 ? 1 : $foo-- * (eval $fact);';
+$fact = 'local($foo)=$foo; $foo <= 1 ? 1 : $foo-- * (eval $fact);';
 $ans = eval $fact;
 if ($ans == 120) {print "ok 9\n";} else {print "not ok 9 $ans\n";}
 

@@ -1,8 +1,13 @@
-/* $Header: array.c,v 2.0 88/06/05 00:08:17 root Exp $
+/* $Header: array.c,v 3.0 89/10/18 15:08:33 lwall Locked $
+ *
+ *    Copyright (c) 1989, Larry Wall
+ *
+ *    You may distribute under the terms of the GNU General Public License
+ *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	array.c,v $
- * Revision 2.0  88/06/05  00:08:17  root
- * Baseline version 2.0.
+ * Revision 3.0  89/10/18  15:08:33  lwall
+ * 3.0 baseline
  * 
  */
 
@@ -10,12 +15,30 @@
 #include "perl.h"
 
 STR *
-afetch(ar,key)
+afetch(ar,key,lval)
 register ARRAY *ar;
 int key;
+int lval;
 {
-    if (key < 0 || key > ar->ary_fill)
-	return Nullstr;
+    STR *str;
+
+    if (key < 0 || key > ar->ary_fill) {
+	if (lval && key >= 0) {
+	    if (ar->ary_flags & ARF_REAL)
+		str = Str_new(5,0);
+	    else
+		str = str_static(&str_undef);
+	    (void)astore(ar,key,str);
+	    return str;
+	}
+	else
+	    return Nullstr;
+    }
+    if (lval && !ar->ary_array[key]) {
+	str = Str_new(6,0);
+	(void)astore(ar,key,str);
+	return str;
+    }
     return ar->ary_array[key];
 }
 
@@ -25,60 +48,84 @@ register ARRAY *ar;
 int key;
 STR *val;
 {
-    bool retval;
+    int retval;
 
     if (key < 0)
 	return FALSE;
     if (key > ar->ary_max) {
-	int newmax = key + ar->ary_max / 5;
+	int newmax;
 
-	ar->ary_array = (STR**)saferealloc((char*)ar->ary_array,
-	    (newmax+1) * sizeof(STR*));
-	bzero((char*)&ar->ary_array[ar->ary_max+1],
-	    (newmax - ar->ary_max) * sizeof(STR*));
-	ar->ary_max = newmax;
+	if (ar->ary_alloc != ar->ary_array) {
+	    retval = ar->ary_array - ar->ary_alloc;
+	    Copy(ar->ary_array, ar->ary_alloc, ar->ary_max+1, STR*);
+	    Zero(ar->ary_alloc+ar->ary_max+1, retval, STR*);
+	    ar->ary_max += retval;
+	    ar->ary_array -= retval;
+	    if (key > ar->ary_max - 10) {
+		newmax = key + ar->ary_max;
+		goto resize;
+	    }
+	}
+	else {
+	    newmax = key + ar->ary_max / 5;
+	  resize:
+	    Renew(ar->ary_alloc,newmax+1, STR*);
+	    Zero(&ar->ary_alloc[ar->ary_max+1], newmax - ar->ary_max, STR*);
+	    ar->ary_array = ar->ary_alloc;
+	    ar->ary_max = newmax;
+	}
     }
-    while (ar->ary_fill < key) {
-	if (++ar->ary_fill < key && ar->ary_array[ar->ary_fill] != Nullstr) {
-	    str_free(ar->ary_array[ar->ary_fill]);
-	    ar->ary_array[ar->ary_fill] = Nullstr;
+    if ((ar->ary_flags & ARF_REAL) && ar->ary_fill < key) {
+	while (++ar->ary_fill < key) {
+	    if (ar->ary_array[ar->ary_fill] != Nullstr) {
+		str_free(ar->ary_array[ar->ary_fill]);
+		ar->ary_array[ar->ary_fill] = Nullstr;
+	    }
 	}
     }
     retval = (ar->ary_array[key] != Nullstr);
-    if (retval)
+    if (retval && (ar->ary_flags & ARF_REAL))
 	str_free(ar->ary_array[key]);
     ar->ary_array[key] = val;
     return retval;
-}
-
-bool
-adelete(ar,key)
-register ARRAY *ar;
-int key;
-{
-    if (key < 0 || key > ar->ary_max)
-	return FALSE;
-    if (ar->ary_array[key]) {
-	str_free(ar->ary_array[key]);
-	ar->ary_array[key] = Nullstr;
-	return TRUE;
-    }
-    return FALSE;
 }
 
 ARRAY *
 anew(stab)
 STAB *stab;
 {
-    register ARRAY *ar = (ARRAY*)safemalloc(sizeof(ARRAY));
+    register ARRAY *ar;
 
-    ar->ary_array = (STR**) safemalloc(5 * sizeof(STR*));
-    ar->ary_magic = str_new(0);
-    ar->ary_magic->str_link.str_magic = stab;
+    New(1,ar,1,ARRAY);
+    Newz(2,ar->ary_alloc,5,STR*);
+    ar->ary_array = ar->ary_alloc;
+    ar->ary_magic = Str_new(7,0);
+    str_magic(ar->ary_magic, stab, '#', Nullch, 0);
     ar->ary_fill = -1;
     ar->ary_index = -1;
     ar->ary_max = 4;
-    bzero((char*)ar->ary_array, 5 * sizeof(STR*));
+    ar->ary_flags = ARF_REAL;
+    return ar;
+}
+
+ARRAY *
+afake(stab,size,strp)
+STAB *stab;
+int size;
+STR **strp;
+{
+    register ARRAY *ar;
+
+    New(3,ar,1,ARRAY);
+    New(4,ar->ary_alloc,size+1,STR*);
+    Copy(strp,ar->ary_alloc,size,STR*);
+    ar->ary_array = ar->ary_alloc;
+    ar->ary_magic = Str_new(8,0);
+    str_magic(ar->ary_magic, stab, '#', Nullch, 0);
+    ar->ary_fill = size - 1;
+    ar->ary_index = -1;
+    ar->ary_max = size - 1;
+    ar->ary_flags = 0;
     return ar;
 }
 
@@ -88,12 +135,16 @@ register ARRAY *ar;
 {
     register int key;
 
-    if (!ar)
+    if (!ar || !(ar->ary_flags & ARF_REAL))
 	return;
+    if (key = ar->ary_array - ar->ary_alloc) {
+	ar->ary_max += key;
+	ar->ary_array -= key;
+    }
     for (key = 0; key <= ar->ary_max; key++)
 	str_free(ar->ary_array[key]);
     ar->ary_fill = -1;
-    bzero((char*)ar->ary_array, (ar->ary_max+1) * sizeof(STR*));
+    Zero(ar->ary_array, ar->ary_max+1, STR*);
 }
 
 void
@@ -104,11 +155,17 @@ register ARRAY *ar;
 
     if (!ar)
 	return;
-    for (key = 0; key <= ar->ary_max; key++)
-	str_free(ar->ary_array[key]);
+    if (key = ar->ary_array - ar->ary_alloc) {
+	ar->ary_max += key;
+	ar->ary_array -= key;
+    }
+    if (ar->ary_flags & ARF_REAL) {
+	for (key = 0; key <= ar->ary_max; key++)
+	    str_free(ar->ary_array[key]);
+    }
     str_free(ar->ary_magic);
-    safefree((char*)ar->ary_array);
-    safefree((char*)ar);
+    Safefree(ar->ary_alloc);
+    Safefree(ar);
 }
 
 bool
@@ -141,13 +198,21 @@ register int num;
 
     if (num <= 0)
 	return;
-    astore(ar,ar->ary_fill+num,(STR*)0);	/* maybe extend array */
-    dstr = ar->ary_array + ar->ary_fill;
-    sstr = dstr - num;
-    for (i = ar->ary_fill; i >= 0; i--) {
-	*dstr-- = *sstr--;
+    if (ar->ary_array - ar->ary_alloc >= num) {
+	ar->ary_max += num;
+	ar->ary_fill += num;
+	while (num--)
+	    *--ar->ary_array = Nullstr;
     }
-    bzero((char*)(ar->ary_array), num * sizeof(STR*));
+    else {
+	(void)astore(ar,ar->ary_fill+num,(STR*)0);	/* maybe extend array */
+	dstr = ar->ary_array + ar->ary_fill;
+	sstr = dstr - num;
+	for (i = ar->ary_fill; i >= 0; i--) {
+	    *dstr-- = *sstr--;
+	}
+	Zero(ar->ary_array, num, STR*);
+    }
 }
 
 STR *
@@ -158,10 +223,10 @@ register ARRAY *ar;
 
     if (ar->ary_fill < 0)
 	return Nullstr;
-    retval = ar->ary_array[0];
-    bcopy((char*)(ar->ary_array+1),(char*)ar->ary_array,
-      ar->ary_fill * sizeof(STR*));
-    ar->ary_array[ar->ary_fill--] = Nullstr;
+    retval = *ar->ary_array;
+    *(ar->ary_array++) = Nullstr;
+    ar->ary_max--;
+    ar->ary_fill--;
     return retval;
 }
 
@@ -181,33 +246,5 @@ int fill;
     if (fill <= ar->ary_max)
 	ar->ary_fill = fill;
     else
-	astore(ar,fill,Nullstr);
-}
-
-void
-ajoin(ar,delim,str)
-register ARRAY *ar;
-char *delim;
-register STR *str;
-{
-    register int i;
-    register int len;
-    register int dlen;
-
-    if (ar->ary_fill < 0) {
-	str_set(str,"");
-	STABSET(str);
-	return;
-    }
-    dlen = strlen(delim);
-    len = ar->ary_fill * dlen;		/* account for delimiters */
-    for (i = ar->ary_fill; i >= 0; i--)
-	len += str_len(ar->ary_array[i]);
-    str_grow(str,len);			/* preallocate for efficiency */
-    str_sset(str,ar->ary_array[0]);
-    for (i = 1; i <= ar->ary_fill; i++) {
-	str_ncat(str,delim,dlen);
-	str_scat(str,ar->ary_array[i]);
-    }
-    STABSET(str);
+	(void)astore(ar,fill,Nullstr);
 }

@@ -1,8 +1,8 @@
 #!./perl
 
-# $Header: op.split,v 2.0 88/06/05 00:14:37 root Exp $
+# $Header: op.split,v 3.0 89/10/18 15:31:24 lwall Locked $
 
-print "1..7\n";
+print "1..12\n";
 
 $FS = ':';
 
@@ -16,7 +16,7 @@ if (join(';',$a,$b,$c) eq 'a;b;c') {print "ok 1\n";} else {print "not ok 1\n";}
 if (join("$_",@ary) eq 'aa:b:cc') {print "ok 2\n";} else {print "not ok 2\n";}
 
 $_ = "abc\n";
-@ary = split(//);
+@xyz = (@ary = split(//));
 if (join(".",@ary) eq "a.b.c.\n") {print "ok 3\n";} else {print "not ok 3\n";}
 
 $_ = "a:b:c::::";
@@ -32,4 +32,26 @@ if ($_ eq "f:o:o:b:a:r:b:i:e:\t:d:o:l:l")
 
 $_ = join(':', 'foo', split(/ /,'a b  c'), 'bar');
 if ($_ eq "foo:a:b::c:bar") {print "ok 7\n";} else {print "not ok 7 $_\n";}
+
+# Can we say how many fields to split to?
+$_ = join(':', split(' ','1 2 3 4 5 6', 3));
+print $_ eq '1:2:3 4 5 6' ? "ok 8\n" : "not ok 8 $_\n";
+
+# Can we do it as a variable?
+$x = 4;
+$_ = join(':', split(' ','1 2 3 4 5 6', $x));
+print $_ eq '1:2:3:4 5 6' ? "ok 9\n" : "not ok 9 $_\n";
+
+# Does the 999 suppress null field chopping?
+$_ = join(':', split(/:/,'1:2:3:4:5:6:::', 999));
+print $_ eq '1:2:3:4:5:6:::' ? "ok 10\n" : "not ok 10 $_\n";
+
+# Does assignment to a list imply split to one more field than that?
+$foo = `./perl -D1024 -e '(\$a,\$b) = split;' 2>&1`;
+print $foo eq '' || $foo =~ /num\(3\)/ ? "ok 11\n" : "not ok 11\n";
+
+# Can we say how many fields to split to when assigning to a list?
+($a,$b) = split(' ','1 2 3 4 5 6', 2);
+$_ = join(':',$a,$b);
+print $_ eq '1:2 3 4 5 6' ? "ok 12\n" : "not ok 12 $_\n";
 

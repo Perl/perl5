@@ -1,7 +1,10 @@
 .rn '' }`
-''' $Header: s2p.man,v 2.0 88/06/05 00:15:59 root Exp $
+''' $Header: s2p.man,v 3.0 89/10/18 15:35:09 lwall Locked $
 ''' 
 ''' $Log:	s2p.man,v $
+''' Revision 3.0  89/10/18  15:35:09  lwall
+''' 3.0 baseline
+''' 
 ''' Revision 2.0  88/06/05  00:15:59  root
 ''' Baseline version 2.0.
 ''' 

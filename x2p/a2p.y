@@ -1,9 +1,14 @@
 %{
-/* $Header: a2p.y,v 2.0 88/06/05 00:15:38 root Exp $
+/* $Header: a2p.y,v 3.0 89/10/18 15:34:29 lwall Locked $
+ *
+ *    Copyright (c) 1989, Larry Wall
+ *
+ *    You may distribute under the terms of the GNU General Public License
+ *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	a2p.y,v $
- * Revision 2.0  88/06/05  00:15:38  root
- * Baseline version 2.0.
+ * Revision 3.0  89/10/18  15:34:29  lwall
+ * 3.0 baseline
  * 
  */
 
@@ -11,49 +16,53 @@
 #include "a2p.h"
 
 int root;
+int begins = Nullop;
+int ends = Nullop;
 
 %}
 %token BEGIN END
 %token REGEX
 %token SEMINEW NEWLINE COMMENT
-%token FUN1 GRGR
+%token FUN1 FUNN GRGR
 %token PRINT PRINTF SPRINTF SPLIT
 %token IF ELSE WHILE FOR IN
-%token EXIT NEXT BREAK CONTINUE
+%token EXIT NEXT BREAK CONTINUE RET
+%token GETLINE DO SUB GSUB MATCH
+%token FUNCTION USERFUN DELETE
 
 %right ASGNOP
+%right '?' ':'
 %left OROR
 %left ANDAND
-%left NOT
+%left IN
 %left NUMBER VAR SUBSTR INDEX
-%left GETLINE
-%nonassoc RELOP MATCHOP
+%left MATCHOP
+%left RELOP '<' '>'
 %left OR
 %left STRING
 %left '+' '-'
 %left '*' '/' '%'
 %right UMINUS
+%left NOT
+%right '^'
 %left INCR DECR
 %left FIELD VFIELD
 
 %%
 
-program	: junk begin hunks end
-		{ root = oper4(OPROG,$1,$2,$3,$4); }
+program	: junk hunks
+		{ root = oper4(OPROG,$1,begins,$2,ends); }
 	;
 
 begin	: BEGIN '{' maybe states '}' junk
-		{ $$ = oper3(OJUNK,$3,$4,$6); in_begin = FALSE; }
-	| /* NULL */
-		{ $$ = Nullop; }
+		{ begins = oper4(OJUNK,begins,$3,$4,$6); in_begin = FALSE;
+		    $$ = Nullop; }
 	;
 
 end	: END '{' maybe states '}'
-		{ $$ = oper2(OJUNK,$3,$4); }
+		{ ends = oper3(OJUNK,ends,$3,$4); $$ = Nullop; }
 	| end NEWLINE
 		{ $$ = $1; }
-	| /* NULL */
-		{ $$ = Nullop; }
 	;
 
 hunks	: hunks hunk junk
@@ -66,8 +75,16 @@ hunk	: patpat
 		{ $$ = oper1(OHUNK,$1); need_entire = TRUE; }
 	| patpat '{' maybe states '}'
 		{ $$ = oper2(OHUNK,$1,oper2(OJUNK,$3,$4)); }
+	| FUNCTION USERFUN '(' arg_list ')' maybe '{' maybe states '}'
+		{ fixfargs($2,$4,0); $$ = oper5(OUSERDEF,$2,$4,$6,$8,$9); }
 	| '{' maybe states '}'
 		{ $$ = oper2(OHUNK,Nullop,oper2(OJUNK,$2,$3)); }
+	| begin
+	| end
+	;
+
+arg_list: expr_list
+		{ $$ = rememberargs($$); }
 	;
 
 patpat	: pat
@@ -76,9 +93,7 @@ patpat	: pat
 		{ $$ = oper2(ORANGE,$1,$3); }
 	;
 
-pat	: REGEX
-		{ $$ = oper1(OREGEX,$1); }
-	| match
+pat	: match
 	| rel
 	| compound_pat
 	;
@@ -86,10 +101,10 @@ pat	: REGEX
 compound_pat
 	: '(' compound_pat ')'
 		{ $$ = oper1(OPPAREN,$2); }
-	| pat ANDAND pat
-		{ $$ = oper2(OPANDAND,$1,$3); }
-	| pat OROR pat
-		{ $$ = oper2(OPOROR,$1,$3); }
+	| pat ANDAND maybe pat
+		{ $$ = oper3(OPANDAND,$1,$3,$4); }
+	| pat OROR maybe pat
+		{ $$ = oper3(OPOROR,$1,$3,$4); }
 	| NOT pat
 		{ $$ = oper1(OPNOT,$2); }
 	;
@@ -103,22 +118,30 @@ cond	: expr
 compound_cond
 	: '(' compound_cond ')'
 		{ $$ = oper1(OCPAREN,$2); }
-	| cond ANDAND cond
-		{ $$ = oper2(OCANDAND,$1,$3); }
-	| cond OROR cond
-		{ $$ = oper2(OCOROR,$1,$3); }
+	| cond ANDAND maybe cond
+		{ $$ = oper3(OCANDAND,$1,$3,$4); }
+	| cond OROR maybe cond
+		{ $$ = oper3(OCOROR,$1,$3,$4); }
 	| NOT cond
 		{ $$ = oper1(OCNOT,$2); }
 	;
 
 rel	: expr RELOP expr
 		{ $$ = oper3(ORELOP,$2,$1,$3); }
+	| expr '>' expr
+		{ $$ = oper3(ORELOP,string(">",1),$1,$3); }
+	| expr '<' expr
+		{ $$ = oper3(ORELOP,string("<",1),$1,$3); }
 	| '(' rel ')'
 		{ $$ = oper1(ORPAREN,$2); }
 	;
 
-match	: expr MATCHOP REGEX
+match	: expr MATCHOP expr
+		{ $$ = oper3(OMATCHOP,$2,$1,$3); }
+	| expr MATCHOP REGEX
 		{ $$ = oper3(OMATCHOP,$2,$1,oper1(OREGEX,$3)); }
+	| REGEX		%prec MATCHOP
+		{ $$ = oper1(OREGEX,$1); }
 	| '(' match ')'
 		{ $$ = oper1(OMPAREN,$2); }
 	;
@@ -138,16 +161,26 @@ expr	: term
 
 term	: variable
 		{ $$ = $1; }
+	| NUMBER
+		{ $$ = oper1(ONUM,$1); }
+	| STRING
+		{ $$ = oper1(OSTR,$1); }
 	| term '+' term
 		{ $$ = oper2(OADD,$1,$3); }
 	| term '-' term
-		{ $$ = oper2(OSUB,$1,$3); }
+		{ $$ = oper2(OSUBTRACT,$1,$3); }
 	| term '*' term
 		{ $$ = oper2(OMULT,$1,$3); }
 	| term '/' term
 		{ $$ = oper2(ODIV,$1,$3); }
 	| term '%' term
 		{ $$ = oper2(OMOD,$1,$3); }
+	| term '^' term
+		{ $$ = oper2(OPOW,$1,$3); }
+	| term IN VAR
+		{ $$ = oper2(ODEFINED,aryrefarg($3),$1); }
+	| term '?' term ':' term
+		{ $$ = oper2(OCOND,$1,$3,$5); }
 	| variable INCR
 		{ $$ = oper1(OPOSTINCR,$1); }
 	| variable DECR
@@ -164,51 +197,85 @@ term	: variable
 		{ $$ = oper1(OPAREN,$2); }
 	| GETLINE
 		{ $$ = oper0(OGETLINE); }
+	| GETLINE VAR
+		{ $$ = oper1(OGETLINE,$2); }
+	| GETLINE '<' expr
+		{ $$ = oper3(OGETLINE,Nullop,string("<",1),$3);
+		    if (ops[$3].ival != OSTR + (1<<8)) do_fancy_opens = TRUE; }
+	| GETLINE VAR '<' expr
+		{ $$ = oper3(OGETLINE,$2,string("<",1),$4);
+		    if (ops[$4].ival != OSTR + (1<<8)) do_fancy_opens = TRUE; }
+	| term 'p' GETLINE
+		{ $$ = oper3(OGETLINE,Nullop,string("|",1),$1);
+		    if (ops[$1].ival != OSTR + (1<<8)) do_fancy_opens = TRUE; }
+	| term 'p' GETLINE VAR
+		{ $$ = oper3(OGETLINE,$4,string("|",1),$1);
+		    if (ops[$1].ival != OSTR + (1<<8)) do_fancy_opens = TRUE; }
 	| FUN1
 		{ $$ = oper0($1); need_entire = do_chop = TRUE; }
 	| FUN1 '(' ')'
 		{ $$ = oper1($1,Nullop); need_entire = do_chop = TRUE; }
 	| FUN1 '(' expr ')'
 		{ $$ = oper1($1,$3); }
-	| SPRINTF print_list
+	| FUNN '(' expr_list ')'
+		{ $$ = oper1($1,$3); }
+	| USERFUN '(' expr_list ')'
+		{ $$ = oper2(OUSERFUN,$1,$3); }
+	| SPRINTF expr_list
 		{ $$ = oper1(OSPRINTF,$2); }
 	| SUBSTR '(' expr ',' expr ',' expr ')'
 		{ $$ = oper3(OSUBSTR,$3,$5,$7); }
 	| SUBSTR '(' expr ',' expr ')'
 		{ $$ = oper2(OSUBSTR,$3,$5); }
 	| SPLIT '(' expr ',' VAR ',' expr ')'
-		{ $$ = oper3(OSPLIT,$3,numary($5),$7); }
+		{ $$ = oper3(OSPLIT,$3,aryrefarg(numary($5)),$7); }
 	| SPLIT '(' expr ',' VAR ')'
-		{ $$ = oper2(OSPLIT,$3,numary($5)); }
+		{ $$ = oper2(OSPLIT,$3,aryrefarg(numary($5))); }
 	| INDEX '(' expr ',' expr ')'
 		{ $$ = oper2(OINDEX,$3,$5); }
+	| MATCH '(' expr ',' REGEX ')'
+		{ $$ = oper2(OMATCH,$3,oper1(OREGEX,$5)); }
+	| MATCH '(' expr ',' expr ')'
+		{ $$ = oper2(OMATCH,$3,$5); }
+	| SUB '(' expr ',' expr ')'
+		{ $$ = oper2(OSUB,$3,$5); }
+	| SUB '(' REGEX ',' expr ')'
+		{ $$ = oper2(OSUB,oper1(OREGEX,$3),$5); }
+	| GSUB '(' expr ',' expr ')'
+		{ $$ = oper2(OGSUB,$3,$5); }
+	| GSUB '(' REGEX ',' expr ')'
+		{ $$ = oper2(OGSUB,oper1(OREGEX,$3),$5); }
+	| SUB '(' expr ',' expr ',' expr ')'
+		{ $$ = oper3(OSUB,$3,$5,$7); }
+	| SUB '(' REGEX ',' expr ',' expr ')'
+		{ $$ = oper3(OSUB,oper1(OREGEX,$3),$5,$7); }
+	| GSUB '(' expr ',' expr ',' expr ')'
+		{ $$ = oper3(OGSUB,$3,$5,$7); }
+	| GSUB '(' REGEX ',' expr ',' expr ')'
+		{ $$ = oper3(OGSUB,oper1(OREGEX,$3),$5,$7); }
 	;
 
-variable: NUMBER
-		{ $$ = oper1(ONUM,$1); }
-	| STRING
-		{ $$ = oper1(OSTR,$1); }
-	| VAR
+variable: VAR
 		{ $$ = oper1(OVAR,$1); }
-	| VAR '[' expr ']'
-		{ $$ = oper2(OVAR,$1,$3); }
+	| VAR '[' expr_list ']'
+		{ $$ = oper2(OVAR,aryrefarg($1),$3); }
 	| FIELD
 		{ $$ = oper1(OFLD,$1); }
 	| VFIELD term
 		{ $$ = oper1(OVFLD,$2); }
 	;
 
-print_list
+expr_list
 	: expr
 	| clist
 	| /* NULL */
 		{ $$ = Nullop; }
 	;
 
-clist	: expr ',' expr
-		{ $$ = oper2(OCOMMA,$1,$3); }
-	| clist ',' expr
-		{ $$ = oper2(OCOMMA,$1,$3); }
+clist	: expr ',' maybe expr
+		{ $$ = oper3(OCOMMA,$1,$3,$4); }
+	| clist ',' maybe expr
+		{ $$ = oper3(OCOMMA,$1,$3,$4); }
 	| '(' clist ')'		/* these parens are invisible */
 		{ $$ = $2; }
 	;
@@ -220,9 +287,9 @@ junk	: junk hunksep
 	;
 
 hunksep : ';'
-		{ $$ = oper0(OSEMICOLON); }
+		{ $$ = oper2(OJUNK,oper0(OSEMICOLON),oper0(ONEWLINE)); }
 	| SEMINEW
-		{ $$ = oper0(OSEMICOLON); }
+		{ $$ = oper2(OJUNK,oper0(OSEMICOLON),oper0(ONEWLINE)); }
 	| NEWLINE
 		{ $$ = oper0(ONEWLINE); }
 	| COMMENT
@@ -275,23 +342,23 @@ simpnull: simple
 
 simple
 	: expr
-	| PRINT print_list redir expr
+	| PRINT expr_list redir expr
 		{ $$ = oper3(OPRINT,$2,$3,$4);
 		    do_opens = TRUE;
 		    saw_ORS = saw_OFS = TRUE;
 		    if (!$2) need_entire = TRUE;
 		    if (ops[$4].ival != OSTR + (1<<8)) do_fancy_opens = TRUE; }
-	| PRINT print_list
+	| PRINT expr_list
 		{ $$ = oper1(OPRINT,$2);
 		    if (!$2) need_entire = TRUE;
 		    saw_ORS = saw_OFS = TRUE;
 		}
-	| PRINTF print_list redir expr
+	| PRINTF expr_list redir expr
 		{ $$ = oper3(OPRINTF,$2,$3,$4);
 		    do_opens = TRUE;
 		    if (!$2) need_entire = TRUE;
 		    if (ops[$4].ival != OSTR + (1<<8)) do_fancy_opens = TRUE; }
-	| PRINTF print_list
+	| PRINTF expr_list
 		{ $$ = oper1(OPRINTF,$2);
 		    if (!$2) need_entire = TRUE;
 		}
@@ -305,10 +372,16 @@ simple
 		{ $$ = oper1(OEXIT,$2); }
 	| CONTINUE
 		{ $$ = oper0(OCONTINUE); }
+	| RET
+		{ $$ = oper0(ORETURN); }
+	| RET expr
+		{ $$ = oper1(ORETURN,$2); }
+	| DELETE VAR '[' expr ']'
+		{ $$ = oper2(ODELETE,aryrefarg($2),$4); }
 	;
 
-redir	: RELOP
-		{ $$ = oper1(OREDIR,string(">",1)); }
+redir	: '>'	%prec FIELD
+		{ $$ = oper1(OREDIR,$1); }
 	| GRGR
 		{ $$ = oper1(OREDIR,string(">>",2)); }
 	| '|'
@@ -322,12 +395,14 @@ compound
 		{ $$ = oper3(OIF,$3,bl($6,$5),bl($9,$8)); }
 	| WHILE '(' cond ')' maybe statement
 		{ $$ = oper2(OWHILE,$3,bl($6,$5)); }
+	| DO maybe statement WHILE '(' cond ')'
+		{ $$ = oper2(ODO,bl($3,$2),$6); }
 	| FOR '(' simpnull ';' cond ';' simpnull ')' maybe statement
 		{ $$ = oper4(OFOR,$3,$5,$7,bl($10,$9)); }
 	| FOR '(' simpnull ';'  ';' simpnull ')' maybe statement
 		{ $$ = oper4(OFOR,$3,string("",0),$6,bl($9,$8)); }
-	| FOR '(' VAR IN VAR ')' maybe statement
-		{ $$ = oper3(OFORIN,$3,$5,bl($8,$7)); }
+	| FOR '(' expr ')' maybe statement
+		{ $$ = oper2(OFORIN,$3,bl($6,$5)); }
 	| '{' maybe states '}' maybe
 		{ $$ = oper3(OBLOCK,oper2(OJUNK,$2,$3),Nullop,$5); }
 	;

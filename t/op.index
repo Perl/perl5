@@ -1,0 +1,26 @@
+#!./perl
+
+# $Header: op.index,v 3.0 89/10/18 15:29:29 lwall Locked $
+
+print "1..6\n";
+
+
+$foo = 'Now is the time for all good men to come to the aid of their country.';
+
+$first = substr($foo,0,index($foo,'the'));
+print ($first eq "Now is " ? "ok 1\n" : "not ok 1\n");
+
+$last = substr($foo,rindex($foo,'the'),100);
+print ($last eq "their country." ? "ok 2\n" : "not ok 2\n");
+
+$last = substr($foo,index($foo,'Now'),2);
+print ($last eq "No" ? "ok 3\n" : "not ok 3\n");
+
+$last = substr($foo,rindex($foo,'Now'),2);
+print ($last eq "No" ? "ok 4\n" : "not ok 4\n");
+
+$last = substr($foo,index($foo,'.'),100);
+print ($last eq "." ? "ok 5\n" : "not ok 5\n");
+
+$last = substr($foo,rindex($foo,'.'),100);
+print ($last eq "." ? "ok 6\n" : "not ok 6\n");

@@ -1,14 +1,14 @@
 #!./perl
 
-# $Header: io.print,v 2.0 88/06/05 00:13:11 root Exp $
+# $Header: io.print,v 3.0 89/10/18 15:26:36 lwall Locked $
 
 print "1..16\n";
 
-$foo = 'stdout';
+$foo = 'STDOUT';
 print $foo "ok 1\n";
 
 print "ok 2\n","ok 3\n","ok 4\n";
-print stdout "ok 5\n";
+print STDOUT "ok 5\n";
 
 open(foo,">-");
 print foo "ok 6\n";
@@ -20,7 +20,7 @@ printf("ok %d\n",8);
 printf @a;
 
 $a[1] = 10;
-printf stdout @a;
+printf STDOUT @a;
 
 $, = ' ';
 $\ = "\n";

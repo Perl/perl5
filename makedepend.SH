@@ -15,18 +15,17 @@ esac
 echo "Extracting makedepend (with variable substitutions)"
 $spitshell >makedepend <<!GROK!THIS!
 $startsh
-# $Header: makedepend.SH,v 2.0 88/06/05 00:09:11 root Exp $
+# $Header: makedepend.SH,v 3.0 89/10/18 15:20:19 lwall Locked $
 #
 # $Log:	makedepend.SH,v $
-# Revision 2.0  88/06/05  00:09:11  root
-# Baseline version 2.0.
-# 
+# Revision 3.0  89/10/18  15:20:19  lwall
+# 3.0 baseline
 # 
 
 export PATH || (echo "OOPS, this isn't sh.  Desperation time.  I will feed myself to sh."; sh \$0; kill \$\$)
 
 cat='$cat'
-ccflags='$ccflags'
+ccflags='$ccflags $sockethdr'
 cp='$cp'
 cpp='$cppstdin'
 echo='$echo'
@@ -82,7 +81,7 @@ case "$defrule" in
 esac
 
 make clist || ($echo "Searching for .c files..."; \
-	$echo *.c */*.c | $tr ' ' '\012' | $egrep -v '\*' >.clist)
+	$echo *.c | $tr ' ' '\012' | $egrep -v '\*' >.clist)
 for file in `$cat .clist`; do
 # for file in `cat /dev/null`; do
     case "$file" in
@@ -109,7 +108,7 @@ done
 $sed <Makefile >Makefile.new -e '1,/^# AUTOMATICALLY/!d'
 
 make shlist || ($echo "Searching for .SH files..."; \
-	$echo *.SH */*.SH | $tr ' ' '\012' | $egrep -v '\*' >.shlist)
+	$echo *.SH | $tr ' ' '\012' | $egrep -v '\*' >.shlist)
 if $test -s .deptmp; then
     for file in `cat .shlist`; do
 	$echo `$expr X$file : 'X\(.*\).SH`: $file config.sh \; \
@@ -122,7 +121,7 @@ if $test -s .deptmp; then
        >>Makefile.new
 else
     make hlist || ($echo "Searching for .h files..."; \
-	$echo *.h */*.h | $tr ' ' '\012' | $egrep -v '\*' >.hlist)
+	$echo *.h | $tr ' ' '\012' | $egrep -v '\*' >.hlist)
     $echo "You don't seem to have a proper C preprocessor.  Using grep instead."
     $egrep '^#include ' `cat .clist` `cat .hlist`  >.deptmp
     $echo "Updating Makefile..."

@@ -1,4 +1,4 @@
-;# $Header: stat.pl,v 2.0 88/06/05 00:16:29 root Exp $
+;# $Header: stat.pl,v 3.0 89/10/18 15:19:53 lwall Locked $
 
 ;# Usage:
 ;#	@ary = stat(foo);
@@ -25,3 +25,5 @@ sub Stat {
     ($st_dev,$st_ino,$st_mode,$st_nlink,$st_uid,$st_gid,$st_rdev,$st_size,
 	$st_atime,$st_mtime,$st_ctime,$st_blksize,$st_blocks) = stat(shift(@_));
 }
+
+1;

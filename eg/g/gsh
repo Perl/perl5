@@ -1,6 +1,6 @@
 #!/bin/perl
 
-# $Header: gsh,v 2.0 88/06/05 00:17:20 root Exp $
+# $Header: gsh,v 3.0 89/10/18 15:14:36 lwall Locked $
 
 # Do rsh globally--see man page
 
@@ -85,8 +85,8 @@ line: while (<>) {		# for each line of ghosts
 	    }
 	    close(pipe);
 	} else {
+	    print "(Can't execute rsh: $!)\n";
 	    $SIG{'INT'} = 'cont';
-	    print "(Can't execute rsh.)\n";
 	}
     }
 }
@@ -95,7 +95,7 @@ unlink "/tmp/gsh$$" if $dodist;
 
 if ($remainder) {
     chop($remainder);
-    open(grem,">.grem") || (printf stderr "Can't make a .grem file\n");
+    open(grem,">.grem") || (printf stderr "Can't make a .grem file: $!\n");
     print grem 'rem=', $remainder, "\n";
     close(grem);
     print 'rem=', $remainder, "\n";

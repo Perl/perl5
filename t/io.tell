@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: io.tell,v 2.0 88/06/05 00:13:14 root Exp $
+# $Header: io.tell,v 3.0 89/10/18 15:26:45 lwall Locked $
 
 print "1..13\n";
 

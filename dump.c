@@ -1,8 +1,13 @@
-/* $Header: dump.c,v 2.0 88/06/05 00:08:44 root Exp $
+/* $Header: dump.c,v 3.0 89/10/18 15:11:16 lwall Locked $
+ *
+ *    Copyright (c) 1989, Larry Wall
+ *
+ *    You may distribute under the terms of the GNU General Public License
+ *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	dump.c,v $
- * Revision 2.0  88/06/05  00:08:44  root
- * Baseline version 2.0.
+ * Revision 3.0  89/10/18  15:11:16  lwall
+ * 3.0 baseline
  * 
  */
 
@@ -12,6 +17,24 @@
 #ifdef DEBUGGING
 static int dumplvl = 0;
 
+dump_all()
+{
+    register int i;
+    register STAB *stab;
+    register HENT *entry;
+
+    dump_cmd(main_root,Nullcmd);
+    for (i = 0; i <= 127; i++) {
+	for (entry = defstash->tbl_array[i]; entry; entry = entry->hent_next) {
+	    stab = (STAB*)entry->hent_val;
+	    if (stab_sub(stab)) {
+		dump("\nSUB %s = ", stab_name(stab));
+		dump_cmd(stab_sub(stab)->cmd,Nullcmd);
+	    }
+	}
+    }
+}
+
 dump_cmd(cmd,alt)
 register CMD *cmd;
 register CMD *alt;
@@ -20,28 +43,32 @@ register CMD *alt;
     while (cmd) {
 	dumplvl++;
 	dump("C_TYPE = %s\n",cmdname[cmd->c_type]);
+	dump("C_ADDR = 0x%lx\n",cmd);
+	dump("C_NEXT = 0x%lx\n",cmd->c_next);
 	if (cmd->c_line)
-	    dump("C_LINE = %d\n",cmd->c_line);
+	    dump("C_LINE = %d (0x%lx)\n",cmd->c_line,cmd);
 	if (cmd->c_label)
 	    dump("C_LABEL = \"%s\"\n",cmd->c_label);
 	dump("C_OPT = CFT_%s\n",cmdopt[cmd->c_flags & CF_OPTIMIZE]);
 	*buf = '\0';
 	if (cmd->c_flags & CF_FIRSTNEG)
-	    strcat(buf,"FIRSTNEG,");
+	    (void)strcat(buf,"FIRSTNEG,");
 	if (cmd->c_flags & CF_NESURE)
-	    strcat(buf,"NESURE,");
+	    (void)strcat(buf,"NESURE,");
 	if (cmd->c_flags & CF_EQSURE)
-	    strcat(buf,"EQSURE,");
+	    (void)strcat(buf,"EQSURE,");
 	if (cmd->c_flags & CF_COND)
-	    strcat(buf,"COND,");
+	    (void)strcat(buf,"COND,");
 	if (cmd->c_flags & CF_LOOP)
-	    strcat(buf,"LOOP,");
+	    (void)strcat(buf,"LOOP,");
 	if (cmd->c_flags & CF_INVERT)
-	    strcat(buf,"INVERT,");
+	    (void)strcat(buf,"INVERT,");
 	if (cmd->c_flags & CF_ONCE)
-	    strcat(buf,"ONCE,");
+	    (void)strcat(buf,"ONCE,");
 	if (cmd->c_flags & CF_FLIP)
-	    strcat(buf,"FLIP,");
+	    (void)strcat(buf,"FLIP,");
+	if (cmd->c_flags & CF_TERM)
+	    (void)strcat(buf,"TERM,");
 	if (*buf)
 	    buf[strlen(buf)-1] = '\0';
 	dump("C_FLAGS = (%s)\n",buf);
@@ -63,18 +90,24 @@ register CMD *alt;
 	} else
 	    dump("C_EXPR = NULL\n");
 	switch (cmd->c_type) {
+	case C_NEXT:
 	case C_WHILE:
 	case C_BLOCK:
+	case C_ELSE:
 	case C_IF:
 	    if (cmd->ucmd.ccmd.cc_true) {
 		dump("CC_TRUE = ");
 		dump_cmd(cmd->ucmd.ccmd.cc_true,cmd->ucmd.ccmd.cc_alt);
-	    } else
+	    }
+	    else
 		dump("CC_TRUE = NULL\n");
 	    if (cmd->c_type == C_IF && cmd->ucmd.ccmd.cc_alt) {
-		dump("CC_ELSE = ");
-		dump_cmd(cmd->ucmd.ccmd.cc_alt,Nullcmd);
-	    } else
+		dump("CC_ENDELSE = 0x%lx\n",cmd->ucmd.ccmd.cc_alt);
+	    }
+	    else if (cmd->c_type == C_NEXT && cmd->ucmd.ccmd.cc_alt) {
+		dump("CC_NEXT = 0x%lx\n",cmd->ucmd.ccmd.cc_alt);
+	    }
+	    else
 		dump("CC_ALT = NULL\n");
 	    break;
 	case C_EXPR:
@@ -89,6 +122,21 @@ register CMD *alt;
 	    } else
 		dump("AC_EXPR = NULL\n");
 	    break;
+	case C_CSWITCH:
+	case C_NSWITCH:
+	    {
+		int max, i;
+
+		max = cmd->ucmd.scmd.sc_max;
+		dump("SC_MIN = (%d)\n",cmd->ucmd.scmd.sc_offset + 1);
+		dump("SC_MAX = (%d)\n", max + cmd->ucmd.scmd.sc_offset - 1);
+		dump("SC_NEXT[LT] = 0x%lx\n", cmd->ucmd.scmd.sc_next[0]);
+		for (i = 1; i < max; i++)
+		    dump("SC_NEXT[%d] = 0x%lx\n", i + cmd->ucmd.scmd.sc_offset,
+		      cmd->ucmd.scmd.sc_next[i]);
+		dump("SC_NEXT[GT] = 0x%lx\n", cmd->ucmd.scmd.sc_next[max]);
+	    }
+	    break;
 	}
 	cmd = cmd->c_next;
 	if (cmd && cmd->c_head == cmd) {	/* reached end of while loop */
@@ -101,7 +149,7 @@ register CMD *alt;
 	dump("}\n");
 	if (cmd)
 	    if (cmd == alt)
-		dump("CONT{\n");
+		dump("CONT 0x%lx {\n",cmd);
 	    else
 		dump("{\n");
     }
@@ -121,14 +169,15 @@ register ARG *arg;
 	dump("OP_FLAGS = (%s)\n",buf);
     }
     for (i = 1; i <= arg->arg_len; i++) {
-	dump("[%d]ARG_TYPE = %s\n",i,argname[arg[i].arg_type]);
+	dump("[%d]ARG_TYPE = %s%s\n",i,argname[arg[i].arg_type & A_MASK],
+	    arg[i].arg_type & A_DONT ? " (unevaluated)" : "");
 	if (arg[i].arg_len)
 	    dump("[%d]ARG_LEN = %d\n",i,arg[i].arg_len);
 	if (arg[i].arg_flags) {
 	    dump_flags(buf,arg[i].arg_flags);
 	    dump("[%d]ARG_FLAGS = (%s)\n",i,buf);
 	}
-	switch (arg[i].arg_type) {
+	switch (arg[i].arg_type & A_MASK) {
 	case A_NULL:
 	    break;
 	case A_LEXPR:
@@ -146,6 +195,8 @@ register ARG *arg;
 	case A_READ:
 	case A_GLOB:
 	case A_ARYLEN:
+	case A_ARYSTAB:
+	case A_LARYSTAB:
 	    dump("[%d]ARG_STAB = ",i);
 	    dump_stab(arg[i].arg_ptr.arg_stab);
 	    break;
@@ -158,9 +209,6 @@ register ARG *arg;
 	    dump("[%d]ARG_SPAT = ",i);
 	    dump_spat(arg[i].arg_ptr.arg_spat);
 	    break;
-	case A_NUMBER:
-	    dump("[%d]ARG_NVAL = %f\n",i,arg[i].arg_ptr.arg_nval);
-	    break;
 	}
     }
     dumplvl--;
@@ -172,22 +220,22 @@ char *b;
 unsigned flags;
 {
     *b = '\0';
-    if (flags & AF_SPECIAL)
-	strcat(b,"SPECIAL,");
+    if (flags & AF_ARYOK)
+	(void)strcat(b,"ARYOK,");
     if (flags & AF_POST)
-	strcat(b,"POST,");
+	(void)strcat(b,"POST,");
     if (flags & AF_PRE)
-	strcat(b,"PRE,");
+	(void)strcat(b,"PRE,");
     if (flags & AF_UP)
-	strcat(b,"UP,");
+	(void)strcat(b,"UP,");
     if (flags & AF_COMMON)
-	strcat(b,"COMMON,");
-    if (flags & AF_NUMERIC)
-	strcat(b,"NUMERIC,");
+	(void)strcat(b,"COMMON,");
+    if (flags & AF_UNUSED)
+	(void)strcat(b,"UNUSED,");
     if (flags & AF_LISTISH)
-	strcat(b,"LISTISH,");
+	(void)strcat(b,"LISTISH,");
     if (flags & AF_LOCAL)
-	strcat(b,"LOCAL,");
+	(void)strcat(b,"LOCAL,");
     if (*b)
 	b[strlen(b)-1] = '\0';
 }
@@ -201,7 +249,7 @@ register STAB *stab;
     }
     dumplvl++;
     fprintf(stderr,"{\n");
-    dump("STAB_NAME = %s\n",stab->stab_name);
+    dump("STAB_NAME = %s\n",stab_name(stab));
     dumplvl--;
     dump("}\n");
 }
@@ -246,7 +294,7 @@ long arg2, arg3, arg4, arg5;
     int i;
 
     for (i = dumplvl*4; i; i--)
-	putc(' ',stderr);
+	(void)putc(' ',stderr);
     fprintf(stderr,arg1, arg2, arg3, arg4, arg5);
 }
 #endif
@@ -267,15 +315,15 @@ showinput()
 	if (*s & 0200) {
 	    fd = creat("/tmp/.foo",0600);
 	    write(fd,str_get(linestr),linestr->str_cur);
-	    while(s = str_gets(linestr,rsfp)) {
+	    while(s = str_gets(linestr,rsfp,0)) {
 		write(fd,s,linestr->str_cur);
 	    }
-	    close(fd);
+	    (void)close(fd);
 	    for (s=cmd; *s; s++)
 		if (*s < ' ')
 		    *s += 96;
-	    rsfp = popen(cmd,"r");
-	    s = str_gets(linestr,rsfp);
+	    rsfp = mypopen(cmd,"r");
+	    s = str_gets(linestr,rsfp,0);
 	    return s;
 	}
     }

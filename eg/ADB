@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Header: ADB,v 2.0 88/06/05 00:16:39 root Exp $
+# $Header: ADB,v 3.0 89/10/18 15:13:04 lwall Locked $
 
 # This script is only useful when used in your crash directory.
 

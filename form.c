@@ -1,8 +1,13 @@
-/* $Header: form.c,v 2.0 88/06/05 00:08:57 root Exp $
+/* $Header: form.c,v 3.0 89/10/18 15:17:26 lwall Locked $
+ *
+ *    Copyright (c) 1989, Larry Wall
+ *
+ *    You may distribute under the terms of the GNU General Public License
+ *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	form.c,v $
- * Revision 2.0  88/06/05  00:08:57  root
- * Baseline version 2.0.
+ * Revision 3.0  89/10/18  15:17:26  lwall
+ * 3.0 baseline
  * 
  */
 
@@ -11,22 +16,72 @@
 
 /* Forms stuff */
 
+void
+form_parseargs(fcmd)
+register FCMD *fcmd;
+{
+    register int i;
+    register ARG *arg;
+    register int items;
+    STR *str;
+    ARG *parselist();
+    line_t oldline = line;
+    int oldsave = savestack->ary_fill;
+
+    str = fcmd->f_unparsed;
+    line = fcmd->f_line;
+    fcmd->f_unparsed = Nullstr;
+    (void)savehptr(&curstash);
+    curstash = str->str_u.str_hash;
+    arg = parselist(str);
+    restorelist(oldsave);
+
+    items = arg->arg_len - 1;	/* ignore $$ on end */
+    for (i = 1; i <= items; i++) {
+	if (!fcmd || fcmd->f_type == F_NULL)
+	    fatal("Too many field values");
+	dehoist(arg,i);
+	fcmd->f_expr = make_op(O_ITEM,1,
+	  arg[i].arg_ptr.arg_arg,Nullarg,Nullarg);
+	if (fcmd->f_flags & FC_CHOP) {
+	    if ((fcmd->f_expr[1].arg_type & A_MASK) == A_STAB)
+		fcmd->f_expr[1].arg_type = A_LVAL;
+	    else if ((fcmd->f_expr[1].arg_type & A_MASK) == A_EXPR)
+		fcmd->f_expr[1].arg_type = A_LEXPR;
+	    else
+		fatal("^ field requires scalar lvalue");
+	}
+	fcmd = fcmd->f_next;
+    }
+    if (fcmd && fcmd->f_type)
+	fatal("Not enough field values");
+    line = oldline;
+    Safefree(arg);
+    str_free(str);
+}
+
+int newsize;
+
 #define CHKLEN(allow) \
-if (d - orec->o_str + (allow) >= curlen) { \
+newsize = (d - orec->o_str) + (allow); \
+if (newsize >= curlen) { \
     curlen = d - orec->o_str; \
     GROWSTR(&orec->o_str,&orec->o_len,orec->o_len + (allow)); \
     d = orec->o_str + curlen;	/* in case it moves */ \
     curlen = orec->o_len - 2; \
 }
 
-format(orec,fcmd)
+format(orec,fcmd,sp)
 register struct outrec *orec;
 register FCMD *fcmd;
+int sp;
 {
     register char *d = orec->o_str;
     register char *s;
     register int curlen = orec->o_len - 2;
     register int size;
+    FCMD *nextfcmd;
+    FCMD *linebeg = fcmd;
     char tmpchar;
     char *t;
     CMD mycmd;
@@ -35,36 +90,54 @@ register FCMD *fcmd;
 
     mycmd.c_type = C_NULL;
     orec->o_lines = 0;
-    for (; fcmd; fcmd = fcmd->f_next) {
+    for (; fcmd; fcmd = nextfcmd) {
+	nextfcmd = fcmd->f_next;
 	CHKLEN(fcmd->f_presize);
-	for (s=fcmd->f_pre; *s;) {
-	    if (*s == '\n') {
-		while (d > orec->o_str && (d[-1] == ' ' || d[-1] == '\t'))
-		    d--;
-		if (fcmd->f_flags & FC_NOBLANK &&
-		  (d == orec->o_str || d[-1] == '\n') ) {
-		    orec->o_lines--;		/* don't print blank line */
-		    break;
+	if (s = fcmd->f_pre) {
+	    while (*s) {
+		if (*s == '\n') {
+		    while (d > orec->o_str && (d[-1] == ' ' || d[-1] == '\t'))
+			d--;
+		    if (fcmd->f_flags & FC_NOBLANK) {
+			if (d == orec->o_str || d[-1] == '\n') {
+			    orec->o_lines--;	/* don't print blank line */
+			    linebeg = fcmd->f_next;
+			    break;
+			}
+			else if (fcmd->f_flags & FC_REPEAT)
+			    nextfcmd = linebeg;
+		    }
+		    else
+			linebeg = fcmd->f_next;
 		}
+		*d++ = *s++;
 	    }
-	    *d++ = *s++;
 	}
+	if (fcmd->f_unparsed)
+	    form_parseargs(fcmd);
 	switch (fcmd->f_type) {
 	case F_NULL:
 	    orec->o_lines++;
 	    break;
 	case F_LEFT:
-	    str = eval(fcmd->f_expr,Null(STR***),-1);
+	    (void)eval(fcmd->f_expr,G_SCALAR,sp);
+	    str = stack->ary_array[sp+1];
 	    s = str_get(str);
 	    size = fcmd->f_size;
 	    CHKLEN(size);
 	    chophere = Nullch;
 	    while (size && *s && *s != '\n') {
+		if (*s == '\t')
+		    *s = ' ';
 		size--;
-		if ((*d++ = *s++) == ' ')
+		if (*s && index(chopset,(*d++ = *s++)))
 		    chophere = s;
+		if (*s == '\n' && (fcmd->f_flags & FC_CHOP))
+		    *s = ' ';
 	    }
 	    if (size)
+		chophere = s;
+	    else if (chophere && chophere < s && *s && index(chopset,*s))
 		chophere = s;
 	    if (fcmd->f_flags & FC_CHOP) {
 		if (!chophere)
@@ -85,9 +158,8 @@ register FCMD *fcmd;
 		    *d++ = '.';
 		    *d++ = '.';
 		}
-		s = chophere;
-		while (*chophere == ' ' || *chophere == '\n')
-			chophere++;
+		while (*chophere && index(chopset,*chophere))
+		    chophere++;
 		str_chop(str,chophere);
 	    }
 	    if (fcmd->f_next && fcmd->f_next->f_pre[0] == '\n')
@@ -98,40 +170,32 @@ register FCMD *fcmd;
 	    }
 	    break;
 	case F_RIGHT:
-	    t = s = str_get(eval(fcmd->f_expr,Null(STR***),-1));
+	    (void)eval(fcmd->f_expr,G_SCALAR,sp);
+	    str = stack->ary_array[sp+1];
+	    t = s = str_get(str);
 	    size = fcmd->f_size;
 	    CHKLEN(size);
 	    chophere = Nullch;
 	    while (size && *s && *s != '\n') {
+		if (*s == '\t')
+		    *s = ' ';
 		size--;
-		if (*s++ == ' ')
-			chophere = s;
+		if (*s && index(chopset,*s++))
+		    chophere = s;
+		if (*s == '\n' && (fcmd->f_flags & FC_CHOP))
+		    *s = ' ';
 	    }
 	    if (size)
+		chophere = s;
+	    else if (chophere && chophere < s && *s && index(chopset,*s))
 		chophere = s;
 	    if (fcmd->f_flags & FC_CHOP) {
 		if (!chophere)
 		    chophere = s;
 		size += (s - chophere);
-		d -= (s - chophere);
-		if (fcmd->f_flags & FC_MORE &&
-		  *chophere && strNE(chophere,"\n")) {
-		    while (size < 3) {
-			d--;
-			size++;
-		    }
-		    while (d[-1] == ' ' && size < fcmd->f_size) {
-			d--;
-			size++;
-		    }
-		    *d++ = '.';
-		    *d++ = '.';
-		    *d++ = '.';
-		}
 		s = chophere;
-		while (*chophere == ' ' || *chophere == '\n')
-			chophere++;
-		str_chop(str,chophere);
+		while (*chophere && index(chopset,*chophere))
+		    chophere++;
 	    }
 	    tmpchar = *s;
 	    *s = '\0';
@@ -140,47 +204,41 @@ register FCMD *fcmd;
 		*d++ = ' ';
 	    }
 	    size = s - t;
-	    bcopy(t,d,size);
+	    (void)bcopy(t,d,size);
 	    d += size;
 	    *s = tmpchar;
+	    if (fcmd->f_flags & FC_CHOP)
+		str_chop(str,chophere);
 	    break;
 	case F_CENTER: {
 	    int halfsize;
 
-	    t = s = str_get(eval(fcmd->f_expr,Null(STR***),-1));
+	    (void)eval(fcmd->f_expr,G_SCALAR,sp);
+	    str = stack->ary_array[sp+1];
+	    t = s = str_get(str);
 	    size = fcmd->f_size;
 	    CHKLEN(size);
 	    chophere = Nullch;
 	    while (size && *s && *s != '\n') {
+		if (*s == '\t')
+		    *s = ' ';
 		size--;
-		if (*s++ == ' ')
-			chophere = s;
+		if (*s && index(chopset,*s++))
+		    chophere = s;
+		if (*s == '\n' && (fcmd->f_flags & FC_CHOP))
+		    *s = ' ';
 	    }
 	    if (size)
+		chophere = s;
+	    else if (chophere && chophere < s && *s && index(chopset,*s))
 		chophere = s;
 	    if (fcmd->f_flags & FC_CHOP) {
 		if (!chophere)
 		    chophere = s;
 		size += (s - chophere);
-		d -= (s - chophere);
-		if (fcmd->f_flags & FC_MORE &&
-		  *chophere && strNE(chophere,"\n")) {
-		    while (size < 3) {
-			d--;
-			size++;
-		    }
-		    while (d[-1] == ' ' && size < fcmd->f_size) {
-			d--;
-			size++;
-		    }
-		    *d++ = '.';
-		    *d++ = '.';
-		    *d++ = '.';
-		}
 		s = chophere;
-		while (*chophere == ' ' || *chophere == '\n')
-			chophere++;
-		str_chop(str,chophere);
+		while (*chophere && index(chopset,*chophere))
+		    chophere++;
 	    }
 	    tmpchar = *s;
 	    *s = '\0';
@@ -190,7 +248,7 @@ register FCMD *fcmd;
 		*d++ = ' ';
 	    }
 	    size = s - t;
-	    bcopy(t,d,size);
+	    (void)bcopy(t,d,size);
 	    d += size;
 	    *s = tmpchar;
 	    if (fcmd->f_next && fcmd->f_next->f_pre[0] == '\n')
@@ -201,16 +259,20 @@ register FCMD *fcmd;
 		size--;
 		*d++ = ' ';
 	    }
+	    if (fcmd->f_flags & FC_CHOP)
+		str_chop(str,chophere);
 	    break;
 	}
 	case F_LINES:
-	    str = eval(fcmd->f_expr,Null(STR***),-1);
+	    (void)eval(fcmd->f_expr,G_SCALAR,sp);
+	    str = stack->ary_array[sp+1];
 	    s = str_get(str);
 	    size = str_len(str);
 	    CHKLEN(size);
 	    orec->o_lines += countlines(s);
-	    bcopy(s,d,size);
+	    (void)bcopy(s,d,size);
 	    d += size;
+	    linebeg = fcmd->f_next;
 	    break;
 	}
     }
@@ -229,11 +291,12 @@ register char *s;
     return count;
 }
 
-do_write(orec,stio)
+do_write(orec,stio,sp)
 struct outrec *orec;
 register STIO *stio;
+int sp;
 {
-    FILE *ofp = stio->fp;
+    FILE *ofp = stio->ofp;
 
 #ifdef DEBUGGING
     if (debug & 256)
@@ -247,17 +310,17 @@ register STIO *stio;
 	    if (!stio->top_name)
 		stio->top_name = savestr("top");
 	    topstab = stabent(stio->top_name,FALSE);
-	    if (!topstab || !topstab->stab_form) {
+	    if (!topstab || !stab_form(topstab)) {
 		stio->lines_left = 100000000;
 		goto forget_top;
 	    }
 	    stio->top_stab = topstab;
 	}
-	if (stio->lines_left >= 0)
-	    putc('\f',ofp);
+	if (stio->lines_left >= 0 && stio->page > 0)
+	    (void)putc('\f',ofp);
 	stio->lines_left = stio->page_len;
 	stio->page++;
-	format(&toprec,stio->top_stab->stab_form);
+	format(&toprec,stab_form(stio->top_stab),sp);
 	fputs(toprec.o_str,ofp);
 	stio->lines_left -= toprec.o_lines;
     }

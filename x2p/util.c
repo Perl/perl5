@@ -1,8 +1,13 @@
-/* $Header: util.c,v 2.0 88/06/05 00:16:07 root Exp $
+/* $Header: util.c,v 3.0 89/10/18 15:35:35 lwall Locked $
+ *
+ *    Copyright (c) 1989, Larry Wall
+ *
+ *    You may distribute under the terms of the GNU General Public License
+ *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	util.c,v $
- * Revision 2.0  88/06/05  00:16:07  root
- * Baseline version 2.0.
+ * Revision 3.0  89/10/18  15:35:35  lwall
+ * 3.0 baseline
  * 
  */
 
@@ -226,6 +231,13 @@ char *pat;
 {
     fprintf(stderr,pat,a1,a2,a3,a4);
     exit(1);
+}
+
+/*VARARGS1*/
+warn(pat,a1,a2,a3,a4)
+char *pat;
+{
+    fprintf(stderr,pat,a1,a2,a3,a4);
 }
 
 static bool firstsetenv = TRUE;

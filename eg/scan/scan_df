@@ -1,10 +1,10 @@
 #!/usr/bin/perl -P
 
-# $Header: scan_df,v 2.0 88/06/05 00:17:56 root Exp $
+# $Header: scan_df,v 3.0 89/10/18 15:15:26 lwall Locked $
 
 # This report points out filesystems that are in danger of overflowing.
 
-(chdir '/usr/adm/private/memories') || die "Can't cd.";
+(chdir '/usr/adm/private/memories') || die "Can't cd to memories: $!\n";
 `df >newdf`;
 open(Df, 'olddf');
 

@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: op.exec,v 2.0 88/06/05 00:13:46 root Exp $
+# $Header: op.exec,v 3.0 89/10/18 15:28:57 lwall Locked $
 
 $| = 1;				# flush stdout
 print "1..8\n";

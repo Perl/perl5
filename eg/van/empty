@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Header: empty,v 2.0 88/06/05 00:17:39 root Exp $
+# $Header: empty,v 3.0 89/10/18 15:16:28 lwall Locked $
 
 # This script empties a trashcan.
 
@@ -12,7 +12,7 @@ chop($pwd = `pwd`);
 
 dir: foreach $dir (@ARGV) {
     unless (chdir $dir) {
-	print stderr "Can't find directory $dir\n";
+	print stderr "Can't find directory $dir: $!\n";
 	next dir;
     }
     if ($recursive) {
