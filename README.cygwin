@@ -182,8 +182,8 @@ want to force Perl to build with the system C<malloc()> undefine this symbol.
 
 =item * C<-Uuseperlio>
 
-Undefining this symbol disables the PerlIO abstraction, PerlIO is now the
-default, it is not recommended to disable PerlIO.
+Undefining this symbol disables the PerlIO abstraction.  PerlIO is now the
+default; it is not recommended to disable PerlIO.
 
 =item * C<-Dusemultiplicity>
 
@@ -219,7 +219,7 @@ for internal size and position calculations.
 
 Use this to build perl outside of the source tree.  This works with Cygwin.
 Details can be found in the F<INSTALL> document.  This is the recommended 
-way to build perl form sources.
+way to build perl from sources.
 
 =back
 
