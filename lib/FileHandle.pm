@@ -93,6 +93,11 @@ sub pipe {
     ($r, $w);
 }
 
+# Rebless standard file handles
+bless *STDIN{IO},  "FileHandle";
+bless *STDOUT{IO}, "FileHandle";
+bless *STDERR{IO}, "FileHandle";
+
 1;
 
 __END__
