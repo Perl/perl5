@@ -8,10 +8,6 @@ BEGIN {
 	print "1..0 # Skip: not perlio\n";
 	exit 0;
     }
-    if (exists $ENV{PERLIO} && $ENV{PERLIO} ne 'stdio') {
-	print "1..0 # PERLIO non-stdio\n";
-	exit(0);
-    }
 }
 
 plan tests => 43;
@@ -25,14 +21,20 @@ SKIP: {
     sub check {
 	my ($result, $expected, $id) = @_;
 	my $n = scalar @$expected;
-	is($n, scalar @$expected, "$id layers = $n");
+	is($n, scalar @$expected, "$id - layers = $n");
+	if ($ENV{PERLIO}) {
+	    # Get rid of "unix" and similar OS-specific low lever layer.
+	    shift(@$result);
+	    # Change expectations.
+	    $expected->[0] = "perlio" if $expected->[0] eq "stdio";
+	}
 	for (my $i = 0; $i < $n; $i++) {
 	    my $j = $expected->[$i];
 	    if (ref $j eq 'CODE') {
-		ok($j->($result->[$i]), "$id $i is ok");
+		ok($j->($result->[$i]), "$id - $i is ok");
 	    } else {
 		is($result->[$i], $j,
-		   sprintf("$id $i is %s", defined $j ? $j : "undef"));
+		   sprintf("$id - $i is %s", defined $j ? $j : "undef"));
 	    }
 	}
     }
@@ -91,10 +93,17 @@ SKIP: {
 
     binmode(F, ":raw :encoding(latin1)"); # "latin1" will be canonized
 
-    check([ PerlIO::get_layers(F, details => 1) ],
-	  [ "stdio",    undef,        sub { $_[0] > 0 },
-	    "encoding", "iso-8859-1", sub { $_[0] & PerlIO::F_UTF8() } ],
-	  ":raw:encoding(latin1)");
+    {
+	my @results = PerlIO::get_layers(F, details => 1);
+
+	# Get rid of "unix" and undef.
+	splice(@results, 0, 2) if $ENV{PERLIO};
+
+	check([ @results ],
+	      [ "stdio",    undef,        sub { $_[0] > 0 },
+		"encoding", "iso-8859-1", sub { $_[0] & PerlIO::F_UTF8() } ],
+	      ":raw:encoding(latin1)");
+    }
 
     binmode(F);
 
