@@ -60,57 +60,58 @@ if (-d "pod") {
 }
 
 @pods = qw(
-    perl                
-    perlfaq             
-    perltoc             
+    perl
+    perlfaq
+    perltoc
 
-    perlsyn            
-    perldata            
-    perlop              
-    perlsub             
-    perlfunc            
-    perlreftut          
-    perldsc             
-    perllol             
-    perlrequick         
-    perlretut           
+    perlsyn
+    perldata
+    perlop
+    perlsub
+    perlfunc
+    perlreftut
+    perldsc
+    perlrequick
+    perlpod
+    perlstyle
+    perltrap
 
-    perlrun             
-    perllexwarn         
-    perldebug           
+    perlrun
+    perldiag
+    perllexwarn
+    perldebug
 
-    perlopentut         
-    perlvar             
-    perlmod             
-    perlpod             
+    perlvar
+    perllol
+    perlopentut
+    perlretut
 
-    perlstyle           
-    perlmodlib          
-    perlmodinstall      
-    perlnewmod          
-    perltrap            
-    perlport            
-    perlsec             
+    perlref
+    perlre
+    perlform
+    perllocale
+    perlunicode
 
-    perlref             
-    perlre              
-    perlform            
-    perllocale          
-    perlunicode         
+    perlipc
+    perlfork
+    perlnumber
+    perlthrtut
 
-    perlboot            
-    perltoot            
-    perltootc           
-    perlobj             
-    perlbot             
-    perltie             
+    perlport
+    perlsec
 
-    perlipc             
-    perlnumber          
-    perlfork            
-    perlthrtut          
+    perlboot
+    perltoot
+    perltootc
+    perlobj
+    perlbot
+    perltie
 
-    perldiag            
+    perlmod
+    perlmodlib
+    perlmodinstall
+    perlnewmod
+
     perlfaq1            
     perlfaq2            
     perlfaq3            
