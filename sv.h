@@ -199,6 +199,7 @@ struct xpvnv {
     double	xnv_nv;		/* numeric value, if any */
 };
 
+/* These structure must match the beginning of struct xpvhv in hv.h. */
 struct xpvmg {
     char *	xpv_pv;		/* pointer to malloced string */
     STRLEN	xpv_cur;	/* length of xpv_pv as a C string */

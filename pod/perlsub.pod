@@ -504,6 +504,45 @@ like this:
     }
     [..normal %ENV behavior here..]
 
+It's also worth taking a moment to explain what happens when you
+localize a member of a composite type (i.e. an array or hash element).
+In this case, the element is localized I<by name>. This means that
+when the scope of the C<local()> ends, the saved value will be
+restored to the hash element whose key was named in the C<local()>, or
+the array element whose index was named in the C<local()>.  If that
+element was deleted while the C<local()> was in effect (e.g. by a
+C<delete()> from a hash or a C<shift()> of an array), it will spring
+back into existence, possibly extending an array and filling in the
+skipped elements with C<undef>.  For instance, if you say
+
+    %hash = ( 'This' => 'is', 'a' => 'test' );
+    @ary  = ( 0..5 );
+    {
+         local($ary[5]) = 6;
+         local($hash{'a'}) = 'drill';
+         while (my $e = pop(@ary)) {
+             print "$e . . .\n";
+             last unless $e > 3;
+         }
+         if (@ary) {
+             $hash{'only a'} = 'test';
+             delete $hash{'a'};
+         }
+    }
+    print join(' ', map { "$_ $hash{$_}" } sort keys %hash),".\n";
+    print "The array has ",scalar(@ary)," elements: ",
+          join(', ', map { defined $_ ? $_ : 'undef' } @ary),"\n";
+
+Perl will print
+
+    6 . . .
+    4 . . .
+    3 . . .
+    This is a test only a test.
+    The array has 6 elements: 0, 1, 2, undef, undef, 5
+
+In short, be careful when manipulating the containers for composite types
+whose elements have been localized.
 
 =head2 Passing Symbol Table Entries (typeglobs)
 

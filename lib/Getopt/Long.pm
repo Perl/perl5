@@ -955,6 +955,12 @@ identifier is $opt_ .
 The linkage specifier can be a reference to a scalar, a reference to
 an array, a reference to a hash or a reference to a subroutine.
 
+Note that, if your code is running under the recommended C<use strict
+'vars'> pragma, it may be helpful to declare these package variables
+via C<use vars> perhaps something like this:
+
+    use vars qw/ $opt_size @opt_sizes $opt_bar /;
+
 If a REF SCALAR is supplied, the new value is stored in the referenced
 variable. If the option occurs more than once, the previous value is
 overwritten. 

@@ -1,4 +1,10 @@
-/* Per-thread variables */
+/* Don't forget to re-run embed.pl to propagate changes! */
+
+/* Per-thread variables
+   The 'T' prefix is only needed for vars that need appropriate #defines
+generated when built with or without USE_THREADS.  (It is also used
+to generate the appropriate the export list for win32.) */
+
 /* Important ones in the first cache line (if alignment is done right) */
 
 PERLVAR(Tstack_sp,	SV **)		
@@ -78,9 +84,13 @@ PERLVAR(Tstart_env,	JMPENV)			/* empty startup sigjmp() environment */
 PERLVAR(Tav_fetch_sv,	SV *)
 PERLVAR(Thv_fetch_sv,	SV *)
 PERLVAR(Thv_fetch_ent_mh, HE)
+PERLVAR(Tmodcount, I32)
 
 /* XXX Sort stuff, firstgv secongv and so on? */
 /* XXX What about regexp stuff? */
+
+/* Note that the variables below are all explicitly referenced in the code
+as thr->whatever and therefore don't need the 'T' prefix. */
 
 #ifdef USE_THREADS
 

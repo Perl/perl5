@@ -68,7 +68,9 @@ sub runtests {
 	my $s = $switches;
 	$s .= q[ "-T"] if $first =~ /^#!.*\bperl.*-\w*T/;
 	$fh->close or print "can't close $test. $!\n";
-	my $cmd = "$^X $s $test|";
+	my $cmd = ($ENV{'COMPILE_TEST'})? 
+"./perl -I../lib ../utils/perlcc $test -run -verbose dcf -log ./compilelog |" 
+															:  "$^X $s $test|";
 	$cmd = "MCR $cmd" if $^O eq 'VMS';
 	$fh->open($cmd) or print "can't run $test. $!\n";
 	$ok = $next = $max = 0;

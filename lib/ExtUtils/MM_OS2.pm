@@ -28,7 +28,8 @@ $self->{BASEEXT}.def: Makefile.PL
      '", "DLBASE" => "',$self->{DLBASE},
      '", "DL_FUNCS" => ',neatvalue($funcs),
      ', "IMPORTS" => ',neatvalue($imports),
-     ', "DL_VARS" => ', neatvalue($vars), ');\'
+     ', "VERSION" => "',$self->{VERSION},
+     '", "DL_VARS" => ', neatvalue($vars), ');\'
 ');
     }
     join('',@m);

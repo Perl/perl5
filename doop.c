@@ -474,7 +474,7 @@ do_kv(ARGSproto)
 	RETURN;
 
     if (gimme == G_SCALAR) {
-	I32 i;
+	IV i;
 	dTARGET;
 
 	if (op->op_flags & OPf_MOD) {	/* lvalue */

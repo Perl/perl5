@@ -12,7 +12,7 @@ use Fcntl;
 
 print "1..12\n";
 
-unlink <Op_dbmx.*>;
+unlink <Op_dbmx*>;
 
 umask(0);
 print (tie(%h,AnyDBM_File,'Op_dbmx', O_RDWR|O_CREAT, 0640)
@@ -20,7 +20,7 @@ print (tie(%h,AnyDBM_File,'Op_dbmx', O_RDWR|O_CREAT, 0640)
 
 $Dfile = "Op_dbmx.pag";
 if (! -e $Dfile) {
-	($Dfile) = <Op_dbmx.*>;
+	($Dfile) = <Op_dbmx*>;
 }
 if ($^O eq 'amigaos' || $^O eq 'os2' || $^O eq 'MSWin32' || $^O eq 'dos') {
     print "ok 2 # Skipped: different file permission semantics\n";
@@ -33,7 +33,7 @@ else {
 while (($key,$value) = each(%h)) {
     $i++;
 }
-print (!$i ? "ok 3\n" : "not ok 3\n");
+print (!$i ? "ok 3\n" : "not ok 3 # i=$i\n\n");
 
 $h{'goner1'} = 'snork';
 

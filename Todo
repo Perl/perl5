@@ -21,7 +21,7 @@ Would be nice to have
 	reference to compiled regexp
 	lexically scoped functions: my sub foo { ... }
 	lvalue functions
-	Full 64 bit support
+	Full 64 bit support (i.e. "long long")
 
 Possible pragmas
 	debugger

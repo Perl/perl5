@@ -169,7 +169,7 @@ EOF
     # libswanted. If that fails to be true in future, then this can be
     # changed to add pthread to the very end of libswanted.
     set `echo X "$libswanted "| sed -e 's/ c / pthread /'`
-    ld="cc"
+    ld="${cc:-cc}"
     shift
     libswanted="$*"
     usemymalloc='n'

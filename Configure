@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Apr  2 09:30:50 EST 1998 [metaconfig 3.0 PL70]
+# Generated on Wed May 13 13:35:54 EDT 1998 [metaconfig 3.0 PL70]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -63,7 +63,7 @@ if test -d c:/. ; then
 		p_=\;
 		PATH=`cmd /c "echo %PATH%" | tr '\\\\' / `
 		OS2_SHELL=`cmd /c "echo %OS2_SHELL%" | tr '\\\\' / | tr '[A-Z]' '[a-z]'`
-	elif test -n "$DJDIR"; then
+	elif test -n "$DJGPP"; then
 		p_=\;
 	fi
 fi
@@ -109,7 +109,7 @@ if test -d /usr/lpp -a -f /usr/bin/bsh -a -f /usr/bin/uname; then
 fi
 case "$inksh/$needksh" in
 /[a-z]*)
-		unset ENV
+		ENV=''
 		changesh=true
 		reason="$needksh"
 	;;
@@ -140,7 +140,7 @@ esac
 
 : Configure runs within the UU subdirectory
 test -d UU || mkdir UU
-unset CDPATH
+CDPATH=''
 cd UU && rm -f ./*
 
 dynamic_ext=''
@@ -249,6 +249,7 @@ obj_ext=''
 path_sep=''
 afs=''
 alignbytes=''
+ansi2knr=''
 archlib=''
 archlibexp=''
 d_archlib=''
@@ -532,6 +533,7 @@ d_pwchange=''
 d_pwclass=''
 d_pwcomment=''
 d_pwexpire=''
+d_pwgecos=''
 d_pwquota=''
 i_pwd=''
 i_sfio=''
@@ -1551,8 +1553,12 @@ for dir in \$*; do
 		echo \$thisthing
 		exit 0
 	elif test -f \$dir/\$thing.exe; then
-		: on Eunice apparently
-		echo \$dir/\$thing
+		if test -n "$DJGPP"; then
+			echo \$dir/\$thing.exe
+		else
+			: on Eunice apparently
+			echo \$dir/\$thing
+		fi
 		exit 0
 	fi
 	;;
@@ -1873,6 +1879,12 @@ EOM
 				fi
 			fi
 			;;
+		pc*)
+			if test -n "$DJGPP"; then
+				osname=dos
+				osvers=djgpp
+			fi
+			;;
 		esac
 
 		case "$1" in
@@ -2012,11 +2024,11 @@ EOM
 			*)	if test -f /etc/systemid; then
 					osname=sco
 					set `echo $3 | $sed 's/\./ /g'` $4
-					if $test -f sco_$1_$2_$3.sh; then
+					if $test -f $src/hints/sco_$1_$2_$3.sh; then
 						osvers=$1.$2.$3
-					elif $test -f sco_$1_$2.sh; then
+					elif $test -f $src/hints/sco_$1_$2.sh; then
 						osvers=$1.$2
-					elif $test -f sco_$1.sh; then
+					elif $test -f $src/hints/sco_$1.sh; then
 						osvers=$1
 					fi
 				else
@@ -2049,10 +2061,6 @@ EOM
 			set X $myuname
 			osname=os2
 			osvers="$5"
-			if test -n "$DJDIR"; then
-				osname=dos
-				osvers=djgpp
-			fi
 		fi
 	fi
 	
@@ -3012,38 +3020,6 @@ esac
 set d_dosuid
 eval $setvar
 
-: determine where public executables go
-echo " "
-set dflt bin bin
-eval $prefixit
-fn=d~
-rp='Pathname where the public executables will reside?'
-. ./getfile
-if $test "X$ansexp" != "X$binexp"; then
-	installbin=''
-fi
-bin="$ans"
-binexp="$ansexp"
-if $afs; then
-	$cat <<EOM
-
-Since you are running AFS, I need to distinguish the directory in which
-executables reside from the directory in which they are installed (and from
-which they are presumably copied to the former directory by occult means).
-
-EOM
-	case "$installbin" in
-	'') dflt=`echo $binexp | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installbin";;
-	esac
-	fn=de~
-	rp='Where will public executables be installed?'
-	. ./getfile
-	installbin="$ans"
-else
-	installbin="$binexp"
-fi
-
 : determine where manual pages are on this system
 echo " "
 case "$sysman" in
@@ -3342,6 +3318,144 @@ y)	fn=d/
 	;;
 esac
 
+: see how we invoke the C preprocessor
+echo " "
+echo "Now, how can we feed standard input to your C preprocessor..." >&4
+cat <<'EOT' >testcpp.c
+#define ABC abc
+#define XYZ xyz
+ABC.XYZ
+EOT
+cd ..
+echo 'cat >.$$.c; '"$cc"' -E ${1+"$@"} .$$.c; rm .$$.c' >cppstdin
+chmod 755 cppstdin
+wrapper=`pwd`/cppstdin
+ok='false'
+cd UU
+
+if $test "X$cppstdin" != "X" && \
+	$cppstdin $cppminus <testcpp.c >testcpp.out 2>&1 && \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
+then
+	echo "You used to use $cppstdin $cppminus so we'll use that again."
+	case "$cpprun" in
+	'') echo "But let's see if we can live without a wrapper..." ;;
+	*)
+		if $cpprun $cpplast <testcpp.c >testcpp.out 2>&1 && \
+			$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
+		then
+			echo "(And we'll use $cpprun $cpplast to preprocess directly.)"
+			ok='true'
+		else
+			echo "(However, $cpprun $cpplast does not work, let's see...)"
+		fi
+		;;
+	esac
+else
+	case "$cppstdin" in
+	'') ;;
+	*)
+		echo "Good old $cppstdin $cppminus does not seem to be of any help..."
+		;;
+	esac
+fi
+
+if $ok; then
+	: nothing
+elif echo 'Maybe "'"$cc"' -E" will work...'; \
+	$cc -E <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "Yup, it does."
+	x_cpp="$cc -E"
+	x_minus='';
+elif echo 'Nope...maybe "'"$cc"' -E -" will work...'; \
+	$cc -E - <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "Yup, it does."
+	x_cpp="$cc -E"
+	x_minus='-';
+elif echo 'Nope...maybe "'"$cc"' -P" will work...'; \
+	$cc -P <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "Yipee, that works!"
+	x_cpp="$cc -P"
+	x_minus='';
+elif echo 'Nope...maybe "'"$cc"' -P -" will work...'; \
+	$cc -P - <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "At long last!"
+	x_cpp="$cc -P"
+	x_minus='-';
+elif echo 'No such luck, maybe "'$cpp'" will work...'; \
+	$cpp <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "It works!"
+	x_cpp="$cpp"
+	x_minus='';
+elif echo 'Nixed again...maybe "'$cpp' -" will work...'; \
+	$cpp - <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	echo "Hooray, it works!  I was beginning to wonder."
+	x_cpp="$cpp"
+	x_minus='-';
+elif echo 'Uh-uh.  Time to get fancy.  Trying a wrapper...'; \
+	$wrapper <testcpp.c >testcpp.out 2>&1; \
+	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+	x_cpp="$wrapper"
+	x_minus=''
+	echo "Eureka!"
+else
+	dflt=''
+	rp="No dice.  I can't find a C preprocessor.  Name one:"
+	. ./myread
+	x_cpp="$ans"
+	x_minus=''
+	$x_cpp <testcpp.c >testcpp.out 2>&1
+	if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
+		echo "OK, that will do." >&4
+	else
+echo "Sorry, I can't get that to work.  Go find one and rerun Configure." >&4
+		exit 1
+	fi
+fi
+
+case "$ok" in
+false)
+	cppstdin="$x_cpp"
+	cppminus="$x_minus"
+	cpprun="$x_cpp"
+	cpplast="$x_minus"
+	set X $x_cpp
+	shift
+	case "$1" in
+	"$cpp")
+		echo "Perhaps can we force $cc -E using a wrapper..."
+		if $wrapper <testcpp.c >testcpp.out 2>&1; \
+			$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
+		then
+			echo "Yup, we can."
+			cppstdin="$wrapper"
+			cppminus='';
+		else
+			echo "Nope, we'll have to live without it..."
+		fi
+		;;
+	esac
+	case "$cpprun" in
+	"$wrapper")
+		cpprun=''
+		cpplast=''
+		;;
+	esac
+	;;
+esac
+
+case "$cppstdin" in
+"$wrapper") ;;
+*) $rm -f $wrapper;;
+esac
+$rm -f testcpp.c testcpp.out
+
 : Set private lib path
 case "$plibpth" in
 '') if ./mips; then
@@ -3535,144 +3649,6 @@ case "$ans" in
 none) libs=' ';;
 *) libs="$ans";;
 esac
-
-: see how we invoke the C preprocessor
-echo " "
-echo "Now, how can we feed standard input to your C preprocessor..." >&4
-cat <<'EOT' >testcpp.c
-#define ABC abc
-#define XYZ xyz
-ABC.XYZ
-EOT
-cd ..
-echo 'cat >.$$.c; '"$cc"' -E ${1+"$@"} .$$.c; rm .$$.c' >cppstdin
-chmod 755 cppstdin
-wrapper=`pwd`/cppstdin
-ok='false'
-cd UU
-
-if $test "X$cppstdin" != "X" && \
-	$cppstdin $cppminus <testcpp.c >testcpp.out 2>&1 && \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
-then
-	echo "You used to use $cppstdin $cppminus so we'll use that again."
-	case "$cpprun" in
-	'') echo "But let's see if we can live without a wrapper..." ;;
-	*)
-		if $cpprun $cpplast <testcpp.c >testcpp.out 2>&1 && \
-			$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
-		then
-			echo "(And we'll use $cpprun $cpplast to preprocess directly.)"
-			ok='true'
-		else
-			echo "(However, $cpprun $cpplast does not work, let's see...)"
-		fi
-		;;
-	esac
-else
-	case "$cppstdin" in
-	'') ;;
-	*)
-		echo "Good old $cppstdin $cppminus does not seem to be of any help..."
-		;;
-	esac
-fi
-
-if $ok; then
-	: nothing
-elif echo 'Maybe "'"$cc"' -E" will work...'; \
-	$cc -E <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "Yup, it does."
-	x_cpp="$cc -E"
-	x_minus='';
-elif echo 'Nope...maybe "'"$cc"' -E -" will work...'; \
-	$cc -E - <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "Yup, it does."
-	x_cpp="$cc -E"
-	x_minus='-';
-elif echo 'Nope...maybe "'"$cc"' -P" will work...'; \
-	$cc -P <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "Yipee, that works!"
-	x_cpp="$cc -P"
-	x_minus='';
-elif echo 'Nope...maybe "'"$cc"' -P -" will work...'; \
-	$cc -P - <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "At long last!"
-	x_cpp="$cc -P"
-	x_minus='-';
-elif echo 'No such luck, maybe "'$cpp'" will work...'; \
-	$cpp <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "It works!"
-	x_cpp="$cpp"
-	x_minus='';
-elif echo 'Nixed again...maybe "'$cpp' -" will work...'; \
-	$cpp - <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	echo "Hooray, it works!  I was beginning to wonder."
-	x_cpp="$cpp"
-	x_minus='-';
-elif echo 'Uh-uh.  Time to get fancy.  Trying a wrapper...'; \
-	$wrapper <testcpp.c >testcpp.out 2>&1; \
-	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-	x_cpp="$wrapper"
-	x_minus=''
-	echo "Eureka!"
-else
-	dflt=''
-	rp="No dice.  I can't find a C preprocessor.  Name one:"
-	. ./myread
-	x_cpp="$ans"
-	x_minus=''
-	$x_cpp <testcpp.c >testcpp.out 2>&1
-	if $contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
-		echo "OK, that will do." >&4
-	else
-echo "Sorry, I can't get that to work.  Go find one and rerun Configure." >&4
-		exit 1
-	fi
-fi
-
-case "$ok" in
-false)
-	cppstdin="$x_cpp"
-	cppminus="$x_minus"
-	cpprun="$x_cpp"
-	cpplast="$x_minus"
-	set X $x_cpp
-	shift
-	case "$1" in
-	"$cpp")
-		echo "Perhaps can we force $cc -E using a wrapper..."
-		if $wrapper <testcpp.c >testcpp.out 2>&1; \
-			$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1
-		then
-			echo "Yup, we can."
-			cppstdin="$wrapper"
-			cppminus='';
-		else
-			echo "Nope, we'll have to live without it..."
-		fi
-		;;
-	esac
-	case "$cpprun" in
-	"$wrapper")
-		cpprun=''
-		cpplast=''
-		;;
-	esac
-	;;
-esac
-
-case "$cppstdin" in
-"$wrapper") ;;
-*) $rm -f $wrapper;;
-esac
-$rm -f testcpp.c testcpp.out
 
 : determine optimize, if desired, or use for debug flag also
 case "$optimize" in
@@ -3957,16 +3933,89 @@ n) echo "OK, that should do.";;
 esac
 $rm -f try try.* core
 
+: Cruising for prototypes
+echo " "
+echo "Checking out function prototypes..." >&4
+$cat >prototype.c <<'EOCP'
+main(int argc, char *argv[]) {
+	exit(0);}
+EOCP
+if $cc $ccflags -c prototype.c >prototype.out 2>&1 ; then
+	echo "Your C compiler appears to support function prototypes."
+	val="$define"
+else
+	echo "Your C compiler doesn't seem to understand function prototypes."
+	val="$undef"
+fi
+set prototype
+eval $setvar
+$rm -f prototype*
+
+case "$prototype" in
+"$define") ;;
+*)	ansi2knr='ansi2knr'
+	echo " "
+	cat <<EOM >&4
+
+$me:  FATAL ERROR:
+This version of $package can only be compiled by a compiler that 
+understands function prototypes.  Unfortunately, your C compiler 
+	$cc $ccflags
+doesn't seem to understand them.  Sorry about that.
+
+If GNU cc is avaiable for your system, perhaps you could try that instead.  
+
+Eventually, we hope to support building Perl with pre-ANSI compilers.
+If you would like to help in that effort, please contact <perlbug@perl.org>.
+
+Aborting Configure now.
+EOM
+	exit 2
+	;;
+esac
+
+: determine where public executables go
+echo " "
+set dflt bin bin
+eval $prefixit
+fn=d~
+rp='Pathname where the public executables will reside?'
+. ./getfile
+if $test "X$ansexp" != "X$binexp"; then
+	installbin=''
+fi
+bin="$ans"
+binexp="$ansexp"
+if $afs; then
+	$cat <<EOM
+
+Since you are running AFS, I need to distinguish the directory in which
+executables reside from the directory in which they are installed (and from
+which they are presumably copied to the former directory by occult means).
+
+EOM
+	case "$installbin" in
+	'') dflt=`echo $binexp | sed 's#^/afs/#/afs/.#'`;;
+	*) dflt="$installbin";;
+	esac
+	fn=de~
+	rp='Where will public executables be installed?'
+	. ./getfile
+	installbin="$ans"
+else
+	installbin="$binexp"
+fi
+
 : define a shorthand compile call
 compile='
 mc_file=$1;
 shift;
-$cc $optimize $ccflags $ldflags -o ${mc_file}$_exe $* ${mc_file}.c $libs > /dev/null 2>&1;'
+$cc $optimize $ccflags $ldflags -o ${mc_file} $* ${mc_file}.c $libs > /dev/null 2>&1;'
 : define a shorthand compile call for compilations that should be ok.
 compile_ok='
 mc_file=$1;
 shift;
-$cc $optimize $ccflags $ldflags -o ${mc_file}$_exe $* ${mc_file}.c $libs;'
+$cc $optimize $ccflags $ldflags -o ${mc_file} $* ${mc_file}.c $libs;'
 
 echo " "
 echo "Checking for GNU C Library..." >&4
@@ -4012,7 +4061,7 @@ case "$usenm" in
 		;;
 	esac
 	case "$dflt" in
-	'') dflt=`egrep 'inlibc|csym' ../Configure | wc -l 2>/dev/null`
+	'') dflt=`$egrep 'inlibc|csym' $rsrc/Configure | wc -l 2>/dev/null`
 		if $test $dflt -gt 20; then
 			dflt=y
 		else
@@ -4757,10 +4806,6 @@ $undef)
 			*)	dflt=n
 				;;
 			esac
-			;;
-		sunos)
-			dflt=n
-			also='Building a shared libperl will definitely not work on SunOS 4.'
 			;;
 		*)	dflt=n
 			;;
@@ -6504,7 +6549,7 @@ $define|y|true)
 	$cat << EOM
 
 On a few systems, the dynamically loaded modules that perl generates and uses
-will need a different extension then shared libs. The default will probably
+will need a different extension than shared libs. The default will probably
 be appropriate.
 
 EOM
@@ -7185,13 +7230,13 @@ main()
 }
 EOCP
 	set try
-	if eval $compile_ok; then
+	if eval $compile; then
 		longdblsize=`./try`
 		$echo " $longdblsize bytes." >&4
 	else
 		dflt='8'
 		echo " "
-		echo "(I can't seem to compile the test program.  Guessing...)"
+		echo "(I can't seem to compile the test program.  Guessing...)" >&4
 		rp="What is the size of a long double (in bytes)?"
 		. ./myread
 		longdblsize="$ans"
@@ -7558,6 +7603,14 @@ $define)
 	set d_pwcomment
 	eval $setvar
 
+	if $contains 'pw_gecos' $$.h >/dev/null 2>&1; then
+		val="$define"
+	else
+		val="$undef"
+	fi
+	set d_pwgecos
+	eval $setvar
+
 	$rm -f $$.h
 	;;
 *)
@@ -7568,6 +7621,7 @@ $define)
 	set d_pwclass; eval $setvar
 	set d_pwexpire; eval $setvar
 	set d_pwcomment; eval $setvar
+	set d_pwgecos; eval $setvar
 	;;
 esac
 
@@ -8432,6 +8486,9 @@ case "$varval" in
 	for inc in $inclist; do
 		echo "#include <$inc>" >>temp.c;
 	done;
+	echo "#ifdef $type" >> temp.c;
+	echo "printf(\"We have $type\");" >> temp.c;
+	echo "#endif" >> temp.c;
 	$cppstdin $cppflags $cppminus < temp.c >temp.E 2>/dev/null;
 	if $contains $type temp.E >/dev/null 2>&1; then
 		eval "$var=\$type";
@@ -8454,6 +8511,9 @@ case "$varval" in
 	for inc in $inclist; do
 		echo "#include <$inc>" >>temp.c;
 	done;
+	echo "#ifdef $type" >> temp.c;
+	echo "printf(\"We have $type\");" >> temp.c;
+	echo "#endif" >> temp.c;
 	$cppstdin $cppflags $cppminus < temp.c >temp.E 2>/dev/null;
 	echo " " ;
 	echo "$rp" | $sed -e "s/What is/Looking for/" -e "s/?/./";
@@ -9105,7 +9165,7 @@ EOCP
 	set try
 	if eval $compile_ok; then
 		doublesize=`./try`
-		$echo $doublesize >&4
+		$echo " $doublesize bytes." >&4
 	else
 		dflt='8'
 		echo "(I can't seem to compile the test program.  Guessing...)"
@@ -9219,24 +9279,6 @@ esac
 rp="What is the type used for file modes for system calls (e.g. fchmod())?"
 set mode_t modetype int stdio.h sys/types.h
 eval $typedef_ask
-
-: Cruising for prototypes
-echo " "
-echo "Checking out function prototypes..." >&4
-$cat >prototype.c <<'EOCP'
-main(int argc, char *argv[]) {
-	exit(0);}
-EOCP
-if $cc $ccflags -c prototype.c >prototype.out 2>&1 ; then
-	echo "Your C compiler appears to support function prototypes."
-	val="$define"
-else
-	echo "Your C compiler doesn't seem to understand function prototypes."
-	val="$undef"
-fi
-set prototype
-eval $setvar
-$rm -f prototype*
 
 : define a fucntion to check prototypes
 $cat > protochk <<EOSH
@@ -10699,7 +10741,7 @@ EOM
 		# Perhaps we are reusing an old out-of-date config.sh.
 		case "$hint" in
 		previous)
-			if test X"$dynamic_ext" != X$"avail_ext"; then
+			if test X"$dynamic_ext" != X"$avail_ext"; then
 				$cat <<EOM
 NOTICE:  Your previous config.sh list may be incorrect. 
 The extensions now available to you are 
@@ -10764,7 +10806,7 @@ EOM
 		# Perhaps we are reusing an old out-of-date config.sh.
 		case "$hint" in
 		previous)
-			if test X"$static_ext" != X$"avail_ext"; then
+			if test X"$static_ext" != X"$avail_ext"; then
 				$cat <<EOM
 NOTICE:  Your previous config.sh list may be incorrect. 
 The extensions now available to you are 
@@ -10837,7 +10879,9 @@ case "$d_portable" in
 	echo " "
 	echo "Stripping down executable paths..." >&4
 	for file in $loclist $trylist; do
-		eval $file="\$file"
+		if test X$file != Xln -a X$file != Xar -o X$osname != Xos2; then
+			eval $file="\$file"
+		fi
 	done
 	;;
 esac
@@ -10876,6 +10920,7 @@ _exe='$_exe'
 _o='$_o'
 afs='$afs'
 alignbytes='$alignbytes'
+ansi2knr='$ansi2knr'
 aphostname='$aphostname'
 ar='$ar'
 archlib='$archlib'
@@ -11038,6 +11083,7 @@ d_pwchange='$d_pwchange'
 d_pwclass='$d_pwclass'
 d_pwcomment='$d_pwcomment'
 d_pwexpire='$d_pwexpire'
+d_pwgecos='$d_pwgecos'
 d_pwquota='$d_pwquota'
 d_readdir='$d_readdir'
 d_readlink='$d_readlink'

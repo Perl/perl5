@@ -290,6 +290,14 @@ For example, this will print out C<$foo> every time line
 
 Delete all installed actions.
 
+=item W [expr]
+
+Add a global watch-expression.
+
+=item W
+
+Delete all watch-expressions.
+
 =item O [opt[=val]] [opt"val"] [opt?]...
 
 Set or query values of options.  val defaults to 1.  opt can
@@ -391,6 +399,10 @@ Dump arrays holding debugged files.
 =item C<DumpPackages>
 
 Dump symbol tables of packages.
+
+=item C<DumpReused>
+
+Dump contents of "reused" addresses.
 
 =item C<quote>, C<HighBit>, C<undefPrint>
 

@@ -38,12 +38,34 @@ else {
     close(CONFIG);
 }
 
-$bad = 0;
-$good = 0;
-$total = @ARGV;
-$files  = 0;
-$totmax = 0;
-while ($test = shift) {
+%infinite = ( 'comp/require.t', 1, 'op/bop.t', 1, 'lib/hostname.t', 1 ); 
+
+_testprogs('perl', @ARGV);
+_testprogs('compile', @ARGV) if (-e "../testcompile"); 
+
+sub _testprogs
+{
+	$type = shift @_;
+	@tests = @_;
+
+
+	print "
+--------------------------------------------------------------------------------
+TESTING COMPILER
+--------------------------------------------------------------------------------
+" if ($type eq 'compile');
+
+	$bad = 0;
+	$good = 0;
+	$total = @tests;
+	$files  = 0;
+	$totmax = 0;
+while ($test = shift @tests) {
+
+    if ( $infinite{$test} && $type eq 'compile' ) {
+		print STDERR "$test creates infinite loop! Skipping.\n"; 
+        next;
+	}
     if ($test =~ /^$/) {
 	next;
     }
@@ -52,7 +74,14 @@ while ($test = shift) {
     print "$te" . '.' x (18 - length($te));
     if ($sharpbang) {
 	-x $test || (print "isn't executable.\n");
-	open(RESULTS,"./$test |") || (print "can't run.\n");
+
+	if ($type eq 'perl')
+		{ open(RESULTS, "./$test |") || (print "can't run.\n"); }
+	else
+	{ 
+		open(RESULTS, "./perl -I../lib ../utils/perlcc ./$test -run -verbose dcf -log ../compilelog |") 
+											|| (print "can't compile.\n");
+	}
     } else {
 	open(SCRIPT,"$test") || die "Can't run $test.\n";
 	$_ = <SCRIPT>;
@@ -66,7 +95,16 @@ while ($test = shift) {
 	} else {
 	    $switch = '';
 	}
-	open(RESULTS,"./perl$switch $test |") || (print "can't run.\n");
+
+	if ($type eq 'perl')
+	{
+		open(RESULTS,"./perl$switch $test |") || (print "can't run.\n");
+	}
+	else
+	{
+		open(RESULTS, "./perl -I../lib ../utils/perlcc ./$test -run -verbose dcf -log ../compilelog |") 
+											|| (print "can't compile.\n");
+	}
     }
     $ok = 0;
     $next = 0;
@@ -129,16 +167,21 @@ if ($bad == 0) {
    ### Since not all tests were successful, you may want to run some
    ### of them individually and examine any diagnostic messages they
    ### produce.  See the INSTALL document's section on "make test".
+   ### If you are testing the compiler, then ignore this message 
+   ### and run 
+   ###      ./perl harness
+   ### in the directory ./t.
 SHRDLU
        warn <<'SHRDLU' if $good / $total > 0.8;
    ###
    ### Since most tests were successful, you have a good chance to
    ### get information with better granularity by running
-   ###     ./perl harness
+   ###     ./perl harness 
    ### in directory ./t.
 SHRDLU
 }
 ($user,$sys,$cuser,$csys) = times;
 print sprintf("u=%g  s=%g  cu=%g  cs=%g  scripts=%d  tests=%d\n",
     $user,$sys,$cuser,$csys,$files,$totmax);
+}
 exit ($bad != 0);

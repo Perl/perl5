@@ -46,7 +46,7 @@ typedef unsigned UBW;
  * have an integral type (except char) small enough to be represented
  * in a double without loss; that is, it has no 32-bit type.
  */
-#if BYTEORDER > 0xFFFF && defined(_CRAY) && !defined(_CRAYMPP)
+#if LONGSIZE > 4  && defined(_CRAY) && !defined(_CRAYMPP)
 #  define BW_BITS  32
 #  define BW_MASK  ((1 << BW_BITS) - 1)
 #  define BW_SIGN  (1 << (BW_BITS - 1))
