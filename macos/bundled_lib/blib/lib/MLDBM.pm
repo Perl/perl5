@@ -92,7 +92,11 @@ use Carp;
 # you might want to change this default to something more efficient
 # like DB_File (you can always override it in the use list)
 #
-$MLDBM::UseDB		= "SDBM_File"		unless $MLDBM::UseDB;
+if ($^O eq 'MacOS') {
+    $MLDBM::UseDB	= "DB_File"		unless $MLDBM::UseDB;
+} else {
+    $MLDBM::UseDB	= "SDBM_File"		unless $MLDBM::UseDB;
+}
 $MLDBM::Serializer	= 'Data::Dumper'	unless $MLDBM::Serializer;
 $MLDBM::Key		= '$MlDbM'		unless $MLDBM::Key;
 $MLDBM::DumpMeth	= ""			unless $MLDBM::DumpMeth;
