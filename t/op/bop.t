@@ -94,20 +94,37 @@ my $a = v120.300;
 my $b = v200.400;
 $a |= $b;
 print "ok 35\n" if sprintf("%vd", $a) eq '248.444';
+
 #
 # UTF8 ~ behaviour
-for (0x100...0xFFF) {
+#
+
+my @not36;
+
+for (0, 0x100...0xFFF) {
   $a = ~(chr $_);
-  print "not" if $a ne chr(~$_) or length($a) != 1 or ~$a ne chr($_);
+  push @not36, sprintf("%#03X", $_)
+      if $a ne chr(~$_) or length($a) != 1 or ~$a ne chr($_);
+}
+if (@not36) {
+    print "# test 36 failed: @not36\n";
+    print "not ";
 }
 print "ok 36\n";
+
+my @not37;
 
 for my $i (0xEEE...0xF00) {
   for my $j (0x0..0x120) {
     $a = ~(chr ($i) . chr $j);
-    print "not" if $a ne chr(~$i).chr(~$j) 
-                or length($a) != 2 
-		or ~$a ne chr($i).chr($j);
+    push @not37, sprintf("%#03X %#03X", $i, $j)
+	if $a ne chr(~$i).chr(~$j) or
+	   length($a) != 2 or 
+	   ~$a ne chr($i).chr($j);
   }
+}
+if (@not37) {
+    print "# test 37 failed: @not37\n";
+    print "not ";
 }
 print "ok 37\n";
