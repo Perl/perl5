@@ -1760,7 +1760,7 @@ PP(pp_entersub)
     }
 
     gimme = GIMME;
-    if ((op->op_private & OPpENTERSUB_DB)) {
+    if ((op->op_private & OPpENTERSUB_DB) && !CvNODEBUG(cv)) {
 	SV *oldsv = sv;
 	sv = GvSV(DBsub);
 	save_item(sv);
