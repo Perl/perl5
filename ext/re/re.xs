@@ -1,9 +1,3 @@
-/* We need access to debugger hooks */
-#ifndef DEBUGGING
-#  define DEBUGGING
-#  define WAS_NOT_DEBUGGING
-#endif
-
 #define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
 #include "perl.h"
