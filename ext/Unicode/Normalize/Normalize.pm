@@ -11,7 +11,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '0.17';
+our $VERSION = '0.20';
 our $PACKAGE = __PACKAGE__;
 
 require Exporter;
@@ -173,7 +173,7 @@ you can get its NFC/NFKC string, saying
 
 =head2 Quick Check
 
-(see Annex 8, UAX #15; F<DerivedNormalizationProps.txt>)
+(see Annex 8, UAX #15, and F<DerivedNormalizationProps.txt>)
 
 The following functions check whether the string is in that normalization form.
 
@@ -275,7 +275,7 @@ is a composition exclusion.
 Returns a boolean whether the character of the specified codepoint is
 a singleton.
 
-=item C<$is_non_startar_decomposition = isNonStDecomp($codepoint)>
+=item C<$is_non_starter_decomposition = isNonStDecomp($codepoint)>
 
 Returns a boolean whether the canonical decomposition
 of the character of the specified codepoint
@@ -302,10 +302,10 @@ SADAHIRO Tomoyuki, E<lt>SADAHIRO@cpan.orgE<gt>
 
   http://homepage1.nifty.com/nomenclator/perl/
 
-  Copyright(C) 2001-2002, SADAHIRO Tomoyuki. Japan. All rights reserved.
+  Copyright(C) 2001-2003, SADAHIRO Tomoyuki. Japan. All rights reserved.
 
-  This program is free software; you can redistribute it and/or 
-  modify it under the same terms as Perl itself.
+  This module is free software; you can redistribute it
+  and/or modify it under the same terms as Perl itself.
 
 =head1 SEE ALSO
 

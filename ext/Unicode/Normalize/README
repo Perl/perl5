@@ -1,4 +1,4 @@
-Unicode/Normalize version 0.17
+Unicode/Normalize version 0.20
 ===================================
 
 Unicode::Normalize - Unicode Normalization Forms
@@ -12,9 +12,7 @@ SYNOPSIS
   $NFKD_string = NFKD($string); # Normalization Form KD
   $NFKC_string = NFKC($string); # Normalization Form KC
 
-
   or
-
 
   use Unicode::Normalize 'normalize';
 
@@ -70,13 +68,13 @@ CAVEAT
 (1) In the perl-current, unicore/CompExcl.txt
   is renamed unicore/CompositionExclusions.txt.
 
-(2) When these unicore/*.* files are updated;
+(2) After these unicore/*.* files are updated.
 
-  in the case of an XS version:
+  In the case of an XS version:
     You must rebuild the module,
     as the data will be compiled on building.
 
-  in the case of a NoXS version:
+  In the case of a NoXS version:
     Rebuilding is not necessary,
     as the data will be read on requirement.
 
@@ -88,7 +86,7 @@ COPYRIGHT AND LICENCE
 
   http://homepage1.nifty.com/nomenclator/perl/
 
-  Copyright(C) 2001-2002, SADAHIRO Tomoyuki. Japan. All rights reserved.
+  Copyright(C) 2001-2003, SADAHIRO Tomoyuki. Japan. All rights reserved.
 
-  This program is free software; you can redistribute it and/or
-  modify it under the same terms as Perl itself.
+  This module is free software; you can redistribute it
+  and/or modify it under the same terms as Perl itself.

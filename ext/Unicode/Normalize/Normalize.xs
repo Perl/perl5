@@ -13,12 +13,12 @@
 /* Perl 5.6.1 ? */
 #ifndef uvuni_to_utf8
 #define uvuni_to_utf8   uv_to_utf8
-#endif /* uvuni_to_utf8 */ 
+#endif /* uvuni_to_utf8 */
 
 /* Perl 5.6.1 ? */
 #ifndef utf8n_to_uvuni
 #define utf8n_to_uvuni  utf8_to_uv
-#endif /* utf8n_to_uvuni */ 
+#endif /* utf8n_to_uvuni */
 
 /* At present, char > 0x10ffff are unaffected without complaint, right? */
 #define VALID_UTF_MAX    (0x10ffff)
@@ -58,13 +58,15 @@ typedef struct {
     STRLEN pos; /* position */
 } UNF_cc;
 
-int compare_cc(const void *a, const void *b)
+int compare_cc (const void *a, const void *b)
 {
     int ret_cc;
-    ret_cc = (*(UNF_cc*)a).cc - (*(UNF_cc*)b).cc;
+    ret_cc = ((UNF_cc*) a)->cc - ((UNF_cc*) b)->cc;
     if (ret_cc)
 	return ret_cc;
-    return (*(UNF_cc*)a).pos - (*(UNF_cc*)b).pos;
+
+    return ( ((UNF_cc*) a)->pos > ((UNF_cc*) b)->pos )
+	 - ( ((UNF_cc*) a)->pos < ((UNF_cc*) b)->pos );
 }
 
 U8* dec_canonical (UV uv)
@@ -460,13 +462,10 @@ checkNFC(arg)
 	    isMAYBE = TRUE;
 	else if (ix) {
 	    char *canon, *compat;
-	 /*
-	  * NFKC_NO when having compatibility mapping;
-	  * i.e. dec_compat(uv) defined & different with dec_canonical(uv).
-	  */
+	  /* NFKC_NO when having compatibility mapping. */
 	    canon  = (char *) dec_canonical(uv);
 	    compat = (char *) dec_compat(uv);
-	    if (compat && (!canon || strNE(canon, compat)))
+	    if (compat && !(canon && strEQ(canon, compat)))
 		XSRETURN_NO;
 	} /* end of get NFC/NFKC property */
 
