@@ -2820,7 +2820,7 @@ parsimonious of file descriptors.  For example:
 or
     open(FILEHANDLE, "<&=", $fd)
 
-Note that if perl is using the standard C libaries fdopen() then on many UNIX systems,
+Note that if perl is using the standard C libraries fdopen() then on many UNIX systems,
 fdopen() is known to fail when file descriptors
 exceed a certain value, typically 255. If you need more file
 descriptors than that, consider rebuilding Perl to use the C<PerlIO>.
@@ -5510,7 +5510,7 @@ Does the opposite of a C<shift>.  Or the opposite of a C<push>,
 depending on how you look at it.  Prepends list to the front of the
 array, and returns the new number of elements in the array.
 
-    unshift(ARGV, '-e') unless $ARGV[0] =~ /^-/;
+    unshift(@ARGV, '-e') unless $ARGV[0] =~ /^-/;
 
 Note the LIST is prepended whole, not one element at a time, so the
 prepended elements stay in the same order.  Use C<reverse> to do the
