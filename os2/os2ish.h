@@ -357,6 +357,8 @@ void *emx_realloc (void *, size_t);
 
 #include <stdlib.h>	/* before the following definitions */
 #include <unistd.h>	/* before the following definitions */
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #define chdir	_chdir2
 #define getcwd	_getcwd2
