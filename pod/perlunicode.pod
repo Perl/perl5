@@ -732,13 +732,13 @@ Level 1 - Basic Unicode Support
              or user-defined character properties [b] to emulate subtraction
         [ 7] include Letters in word characters
         [ 8] note that Perl does Full case-folding in matching, not Simple:
-             for example U+1F88 is equivalent with U+1F000 U+03B9,
+             for example U+1F88 is equivalent with U+1F00 U+03B9,
              not with 1F80.  This difference matters for certain Greek
              capital letters with certain modifiers: the Full case-folding
              decomposes the letter, while the Simple case-folding would map
              it to a single character.
         [ 9] see UTR#13 Unicode Newline Guidelines
-        [10] should do ^ and $ also on \x{85}, \x{2028} and \x{2029})
+        [10] should do ^ and $ also on \x{85}, \x{2028} and \x{2029}
              (should also affect <>, $., and script line numbers)
              (the \x{85}, \x{2028} and \x{2029} do match \s)
 
