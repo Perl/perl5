@@ -1885,14 +1885,14 @@ PP(pp_hex)
     STRLEN n_a;
 
     tmps = POPpx;
-    XPUSHu(scan_hex(tmps, sizeof(UV) * 2 + 1, &argtype));
+    XPUSHn(scan_hex(tmps, 99, &argtype));
     RETURN;
 }
 
 PP(pp_oct)
 {
     djSP; dTARGET;
-    UV value;
+    NV value;
     I32 argtype;
     char *tmps;
     STRLEN n_a;
@@ -1900,15 +1900,15 @@ PP(pp_oct)
     tmps = POPpx;
     while (*tmps && isSPACE(*tmps))
 	tmps++;
-    /* Do not eat the leading 0[bx] because we need them
-     * to detect malformed binary and hexadecimal numbers. */
-    if ((tmps[0] == '0' && tmps[1] == 'x') || tmps[0] == 'x')
-	value = scan_hex(tmps, sizeof(UV) * 2 + 1, &argtype);
-    else if ((tmps[0] == '0' && tmps[1] == 'b') || tmps[0] == 'b')
-	value = scan_bin(tmps, sizeof(UV) * 8 + 1, &argtype);
+    if (*tmps == '0')
+	tmps++;
+    if (*tmps == 'x')
+	value = scan_hex(++tmps, 99, &argtype);
+    else if (*tmps == 'b')
+	value = scan_bin(++tmps, 99, &argtype);
     else
-	value = scan_oct(tmps, sizeof(UV) * 4 + 1, &argtype);
-    XPUSHu(value);
+	value = scan_oct(tmps, 99, &argtype);
+    XPUSHn(value);
     RETURN;
 }
 
