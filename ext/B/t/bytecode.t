@@ -1,4 +1,6 @@
 #!./perl
+my $keep_plc      = 0;	# set it to keep the bytecode files
+my $keep_plc_fail = 1;	# set it to keep the bytecode files on failures
 
 BEGIN {
     if ($^O eq 'VMS') {
@@ -16,33 +18,32 @@ BEGIN {
 }
 use strict;
 
-my $test = 'bytecode.pl';
-END { 1 while unlink $test, "${test}c" }
-
 undef $/;
 my @tests = split /\n###+\n/, <DATA>;
 
 print "1..".($#tests+1)."\n";
 
 my $cnt = 1;
+my $test;
 
 for (@tests) {
     my $got;
     my ($script, $expect) = split />>>+\n/;
     $expect =~ s/\n$//;
+    $test = "bytecode$cnt.pl";
     open T, ">$test"; print T $script; close T;
     $got = run_perl(switches => [ "-MO=Bytecode,-H,-o${test}c" ],
 		    verbose  => 0, # for debugging
 		    stderr   => 1, # to capture the "bytecode.pl syntax ok"
 		    progfile => $test);
     unless ($?) {
-	1 while unlink($test); # nuke the .pl
 	$got = run_perl(progfile => "${test}c"); # run the .plc
 	unless ($?) {
 	    if ($got =~ /^$expect$/) {
 		print "ok $cnt\n";
 		next;
 	    } else {
+		$keep_plc = $keep_plc_fail unless $keep_plc;
 		print <<"EOT"; next;
 not ok $cnt
 --------- SCRIPT
@@ -64,6 +65,7 @@ $script
 $got
 EOT
 } continue {
+    1 while unlink($test, $keep_plc ? () : "${test}c");
     $cnt++;
 }
 
