@@ -997,7 +997,9 @@ PP(pp_flop)
 	    mg_get(right);
 
 	if (SvNIOKp(left) || !SvPOKp(left) ||
-	  (looks_like_number(left) && *SvPVX(left) != '0') )
+	    SvNIOKp(right) || !SvPOKp(right) ||
+	    (looks_like_number(left) && *SvPVX(left) != '0' &&
+	     looks_like_number(right) && *SvPVX(right) != '0'))
 	{
 	    if (SvNV(left) < IV_MIN || SvNV(right) > IV_MAX)
 		DIE(aTHX_ "Range iterator outside integer range");
@@ -1674,7 +1676,11 @@ PP(pp_enteriter)
 	if (SvTYPE(cx->blk_loop.iterary) != SVt_PVAV) {
 	    dPOPss;
 	    if (SvNIOKp(sv) || !SvPOKp(sv) ||
-		(looks_like_number(sv) && *SvPVX(sv) != '0')) {
+		SvNIOKp(cx->blk_loop.iterary) || !SvPOKp(cx->blk_loop.iterary) ||
+		(looks_like_number(sv) && *SvPVX(sv) != '0' &&
+		 looks_like_number((SV*)cx->blk_loop.iterary) &&
+		 *SvPVX(cx->blk_loop.iterary) != '0'))
+	    {
 		 if (SvNV(sv) < IV_MIN ||
 		     SvNV((SV*)cx->blk_loop.iterary) >= IV_MAX)
 		     DIE(aTHX_ "Range iterator outside integer range");
