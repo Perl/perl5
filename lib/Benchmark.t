@@ -583,7 +583,7 @@ is_deeply ([keys %Benchmark::Cache], \@before_keys,
 
     foreach my $func (@takes_no_args) {
         eval "$func(42)";
-        is( $@, $usage{$func}, "$func usage: with args" );
+        like( $@, qr/Too many arguments for Benchmark::$func/, "$func usage: with args" );
     }
 }
 

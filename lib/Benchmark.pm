@@ -440,7 +440,7 @@ my $hirestime;
 
 sub mytime () { time }
 
-&init;
+init();
 
 sub BEGIN {
     if (eval 'require Time::HiRes') {
@@ -470,8 +470,8 @@ sub init {
     # The cache can cause a slight loss of sys time accuracy. If a
     # user does many tests (>10) with *very* large counts (>10000)
     # or works on a very slow machine the cache may be useful.
-    &disablecache;
-    &clearallcache;
+    disablecache();
+    clearallcache();
 }
 
 sub debug { $Debug = ($_[1] != 0); }
@@ -482,43 +482,22 @@ sub usage {
     return $_Usage{$calling_sub} || '';
 }
 
-
 # The cache needs two branches: 's' for strings and 'c' for code.  The
-# emtpy loop is different in these two cases.
+# empty loop is different in these two cases.
 
-$_Usage{clearcache} = <<'USAGE';
-usage: clearcache($count);
-USAGE
-
-sub clearcache    { 
-    die usage unless @_ == 1;
+sub clearcache ($) {
     delete $Cache{"$_[0]c"}; delete $Cache{"$_[0]s"}; 
 }
 
-$_Usage{clearallcache} = <<'USAGE';
-usage: clearallcache();
-USAGE
-
-sub clearallcache { 
-    die usage if @_;
+sub clearallcache () { 
     %Cache = (); 
 }
 
-$_Usage{enablecache} = <<'USAGE';
-usage: enablecache();
-USAGE
-
-sub enablecache   {
-    die usage if @_;
+sub enablecache () {
     $Do_Cache = 1; 
 }
 
-$_Usage{disablecache} = <<'USAGE';
-usage: disablecache();
-USAGE
-
-sub disablecache  {
-    die usage if @_;
+sub disablecache  () {
     $Do_Cache = 0; 
 }
 
