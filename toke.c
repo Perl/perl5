@@ -2266,35 +2266,40 @@ Perl_yylex(pTHX)
 	    DEBUG_T({ PerlIO_printf(Perl_debug_log,
               "### Saw case modifier at '%s'\n", PL_bufptr); });
 	    s = PL_bufptr + 1;
-	    if (strnEQ(s, "L\\u", 3) || strnEQ(s, "U\\l", 3))
-		tmp = *s, *s = s[2], s[2] = (char)tmp;	/* misordered... */
-	    if (strchr("LU", *s) &&
-		(strchr(PL_lex_casestack, 'L') || strchr(PL_lex_casestack, 'U')))
-	    {
-		PL_lex_casestack[--PL_lex_casemods] = '\0';
-		return ')';
+	    if (s[1] == '\\' && s[2] == 'E') {
+	        PL_bufptr = s + 3;
+		PL_lex_state = LEX_INTERPCONCAT;
+		return yylex();
 	    }
-	    if (PL_lex_casemods > 10) {
-		Renew(PL_lex_casestack, PL_lex_casemods + 2, char);
+	    else {
+	        if (strnEQ(s, "L\\u", 3) || strnEQ(s, "U\\l", 3))
+		    tmp = *s, *s = s[2], s[2] = (char)tmp;	/* misordered... */
+		if (strchr("LU", *s) &&
+		    (strchr(PL_lex_casestack, 'L') || strchr(PL_lex_casestack, 'U'))) {
+		    PL_lex_casestack[--PL_lex_casemods] = '\0';
+		    return ')';
+		}
+		if (PL_lex_casemods > 10)
+		    Renew(PL_lex_casestack, PL_lex_casemods + 2, char);
+		PL_lex_casestack[PL_lex_casemods++] = *s;
+		PL_lex_casestack[PL_lex_casemods] = '\0';
+		PL_lex_state = LEX_INTERPCONCAT;
+		PL_nextval[PL_nexttoke].ival = 0;
+		force_next('(');
+		if (*s == 'l')
+		    PL_nextval[PL_nexttoke].ival = OP_LCFIRST;
+		else if (*s == 'u')
+		    PL_nextval[PL_nexttoke].ival = OP_UCFIRST;
+		else if (*s == 'L')
+		    PL_nextval[PL_nexttoke].ival = OP_LC;
+		else if (*s == 'U')
+		    PL_nextval[PL_nexttoke].ival = OP_UC;
+		else if (*s == 'Q')
+		    PL_nextval[PL_nexttoke].ival = OP_QUOTEMETA;
+		else
+		    Perl_croak(aTHX_ "panic: yylex");
+		PL_bufptr = s + 1;
 	    }
-	    PL_lex_casestack[PL_lex_casemods++] = *s;
-	    PL_lex_casestack[PL_lex_casemods] = '\0';
-	    PL_lex_state = LEX_INTERPCONCAT;
-	    PL_nextval[PL_nexttoke].ival = 0;
-	    force_next('(');
-	    if (*s == 'l')
-		PL_nextval[PL_nexttoke].ival = OP_LCFIRST;
-	    else if (*s == 'u')
-		PL_nextval[PL_nexttoke].ival = OP_UCFIRST;
-	    else if (*s == 'L')
-		PL_nextval[PL_nexttoke].ival = OP_LC;
-	    else if (*s == 'U')
-		PL_nextval[PL_nexttoke].ival = OP_UC;
-	    else if (*s == 'Q')
-		PL_nextval[PL_nexttoke].ival = OP_QUOTEMETA;
-	    else
-		Perl_croak(aTHX_ "panic: yylex");
-	    PL_bufptr = s + 1;
 	    force_next(FUNC);
 	    if (PL_lex_starts) {
 		s = PL_bufptr;
