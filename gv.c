@@ -159,18 +159,18 @@ S_gv_init_sv(pTHX_ GV *gv, I32 sv_type)
 
 Returns the glob with the given C<name> and a defined subroutine or
 C<NULL>.  The glob lives in the given C<stash>, or in the stashes
-accessible via @ISA and @UNIVERSAL. 
+accessible via @ISA and @UNIVERSAL.
 
 The argument C<level> should be either 0 or -1.  If C<level==0>, as a
 side-effect creates a glob with the given C<name> in the given C<stash>
 which in the case of success contains an alias for the subroutine, and sets
-up caching info for this glob.  Similarly for all the searched stashes. 
+up caching info for this glob.  Similarly for all the searched stashes.
 
 This function grants C<"SUPER"> token as a postfix of the stash name. The
 GV returned from C<gv_fetchmeth> may be a method cache entry, which is not
 visible to Perl code.  So when calling C<call_sv>, you should not use
 the GV directly; instead, you should use the method's CV, which can be
-obtained from the GV with the C<GvCV> macro. 
+obtained from the GV with the C<GvCV> macro.
 
 =cut
 */
@@ -317,24 +317,24 @@ Perl_gv_fetchmethod(pTHX_ HV *stash, const char *name)
 Returns the glob which contains the subroutine to call to invoke the method
 on the C<stash>.  In fact in the presence of autoloading this may be the
 glob for "AUTOLOAD".  In this case the corresponding variable $AUTOLOAD is
-already setup. 
+already setup.
 
 The third parameter of C<gv_fetchmethod_autoload> determines whether
 AUTOLOAD lookup is performed if the given method is not present: non-zero
-means yes, look for AUTOLOAD; zero means no, don't look for AUTOLOAD. 
+means yes, look for AUTOLOAD; zero means no, don't look for AUTOLOAD.
 Calling C<gv_fetchmethod> is equivalent to calling C<gv_fetchmethod_autoload>
-with a non-zero C<autoload> parameter. 
+with a non-zero C<autoload> parameter.
 
 These functions grant C<"SUPER"> token as a prefix of the method name. Note
 that if you want to keep the returned glob for a long time, you need to
 check for it being "AUTOLOAD", since at the later time the call may load a
 different subroutine due to $AUTOLOAD changing its value. Use the glob
-created via a side effect to do this. 
+created via a side effect to do this.
 
 These functions have the same side-effects and as C<gv_fetchmeth> with
 C<level==0>.  C<name> should be writable if contains C<':'> or C<'
 ''>. The warning against passing the GV returned by C<gv_fetchmeth> to
-C<call_sv> apply equally to these functions. 
+C<call_sv> apply equally to these functions.
 
 =cut
 */
@@ -346,7 +346,7 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
     register const char *nend;
     const char *nsplit = 0;
     GV* gv;
-    
+
     for (nend = name; *nend; nend++) {
 	if (*nend == '\'')
 	    nsplit = nend;
@@ -424,7 +424,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
     /*
      * Inheriting AUTOLOAD for non-methods works ... for now.
      */
-    if (ckWARN(WARN_DEPRECATED) && !method && 
+    if (ckWARN(WARN_DEPRECATED) && !method &&
 	(GvCVGEN(gv) || GvSTASH(gv) != stash))
 	Perl_warner(aTHX_ WARN_DEPRECATED,
 	  "Use of inherited AUTOLOAD for non-method %s::%.*s() is deprecated",
@@ -1088,7 +1088,7 @@ Perl_gp_ref(pTHX_ GP *gp)
 void
 Perl_gp_free(pTHX_ GV *gv)
 {
-    dTHR;  
+    dTHR;
     GP* gp;
 
     if (!gv || !(gp = GvGP(gv)))
@@ -1128,7 +1128,7 @@ Perl_gp_free(pTHX_ GV *gv)
 AV *GvAVn(gv)
 register GV *gv;
 {
-    if (GvGP(gv)->gp_av) 
+    if (GvGP(gv)->gp_av)
 	return GvGP(gv)->gp_av;
     else
 	return GvGP(gv_AVadd(gv))->gp_av;
@@ -1200,7 +1200,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
     for (i = 1; i < NofAMmeth; i++) {
       cv = 0;
       cp = (char *)PL_AMG_names[i];
-      
+
         svp = (SV**)hv_fetch(hv, cp, strlen(cp), FALSE);
         if (svp && ((sv = *svp) != &PL_sv_undef)) {
           switch (SvTYPE(sv)) {
@@ -1270,19 +1270,19 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 		/* GvSV contains the name of the method. */
 		GV *ngv;
 		
-		DEBUG_o( Perl_deb(aTHX_ "Resolving method `%.256s' for overloaded `%s' in package `%.256s'\n", 
+		DEBUG_o( Perl_deb(aTHX_ "Resolving method `%.256s' for overloaded `%s' in package `%.256s'\n",
 			     SvPV(GvSV(gv), n_a), cp, HvNAME(stash)) );
-		if (!SvPOK(GvSV(gv)) 
+		if (!SvPOK(GvSV(gv))
 		    || !(ngv = gv_fetchmethod_autoload(stash, SvPVX(GvSV(gv)),
 						       FALSE)))
 		{
 		    /* Can be an import stub (created by `can'). */
 		    if (GvCVGEN(gv)) {
-			Perl_croak(aTHX_ "Stub found while resolving method `%.256s' overloading `%s' in package `%.256s'", 
+			Perl_croak(aTHX_ "Stub found while resolving method `%.256s' overloading `%s' in package `%.256s'",
 			      (SvPOK(GvSV(gv)) ?  SvPVX(GvSV(gv)) : "???" ),
 			      cp, HvNAME(stash));
 		    } else
-			Perl_croak(aTHX_ "Can't resolve method `%.256s' overloading `%s' in package `%.256s'", 
+			Perl_croak(aTHX_ "Can't resolve method `%.256s' overloading `%s' in package `%.256s'",
 			      (SvPOK(GvSV(gv)) ?  SvPVX(GvSV(gv)) : "???" ),
 			      cp, HvNAME(stash));
 		}
@@ -1293,7 +1293,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 			 GvNAME(CvGV(cv))) );
 	    filled = 1;
 	}
-#endif 
+#endif
 	amt.table[i]=(CV*)SvREFCNT_inc(cv);
     }
     if (filled) {
@@ -1313,8 +1313,8 @@ SV*
 Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 {
   dTHR;
-  MAGIC *mg; 
-  CV *cv; 
+  MAGIC *mg;
+  CV *cv;
   CV **cvp=NULL, **ocvp=NULL;
   AMT *amtp, *oamtp;
   int fl=0, off, off1, lr=0, assign=AMGf_assign & flags, notfound=0;
@@ -1322,10 +1322,10 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
   HV* stash;
   if (!(AMGf_noleft & flags) && SvAMAGIC(left)
       && (mg = mg_find((SV*)(stash=SvSTASH(SvRV(left))),'c'))
-      && (ocvp = cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr) 
+      && (ocvp = cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr)
 			? (oamtp = amtp = (AMT*)mg->mg_ptr)->table
 			: (CV **) NULL))
-      && ((cv = cvp[off=method+assignshift]) 
+      && ((cv = cvp[off=method+assignshift])
 	  || (assign && amtp->fallback > AMGfallNEVER && /* fallback to
 						          * usual method */
 		  (fl = 1, cv = cvp[off=method])))) {
@@ -1361,7 +1361,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	   (void)((cv = cvp[off=numer_amg]) || (cv = cvp[off=bool__amg]));
 	   break;
  case not_amg:
-   (void)((cv = cvp[off=bool__amg]) 
+   (void)((cv = cvp[off=bool__amg])
 	  || (cv = cvp[off=numer_amg])
 	  || (cv = cvp[off=string_amg]));
    postpr = 1;
@@ -1386,7 +1386,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	   }
 	   break;
 	 case abs_amg:
-	   if ((cvp[off1=lt_amg] || cvp[off1=ncmp_amg]) 
+	   if ((cvp[off1=lt_amg] || cvp[off1=ncmp_amg])
 	       && ((cv = cvp[off=neg_amg]) || (cv = cvp[off=subtr_amg]))) {
 	     SV* nullsv=sv_2mortal(newSViv(0));
 	     if (off1==lt_amg) {
@@ -1417,13 +1417,16 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	   }
 	   break;
 	 case iter_amg:			/* XXXX Eventually should do to_gv. */
+	     /* FAIL safe */
+	     return NULL;	/* Delegate operation to standard mechanisms. */
+	     break;
 	 case to_sv_amg:
 	 case to_av_amg:
 	 case to_hv_amg:
 	 case to_gv_amg:
 	 case to_cv_amg:
 	     /* FAIL safe */
-	     return NULL;	/* Delegate operation to standard mechanisms. */
+	     return left;	/* Delegate operation to standard mechanisms. */
 	     break;
 	 default:
 	   goto not_found;
@@ -1431,14 +1434,14 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	 if (!cv) goto not_found;
     } else if (!(AMGf_noright & flags) && SvAMAGIC(right)
 	       && (mg = mg_find((SV*)(stash=SvSTASH(SvRV(right))),'c'))
-	       && (cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr) 
+	       && (cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr)
 			  ? (amtp = (AMT*)mg->mg_ptr)->table
 			  : (CV **) NULL))
 	       && (cv = cvp[off=method])) { /* Method for right
 					     * argument found */
       lr=1;
-    } else if (((ocvp && oamtp->fallback > AMGfallNEVER 
-		 && (cvp=ocvp) && (lr = -1)) 
+    } else if (((ocvp && oamtp->fallback > AMGfallNEVER
+		 && (cvp=ocvp) && (lr = -1))
 		|| (cvp && amtp->fallback > AMGfallNEVER && (lr=1)))
 	       && !(flags & AMGf_unary)) {
 				/* We look for substitution for
@@ -1471,6 +1474,16 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
       }
     } else {
     not_found:			/* No method found, either report or croak */
+      switch (method) {
+	 case to_sv_amg:
+	 case to_av_amg:
+	 case to_hv_amg:
+	 case to_gv_amg:
+	 case to_cv_amg:
+	     /* FAIL safe */
+	     return left;	/* Delegate operation to standard mechanisms. */
+	     break;
+      }
       if (ocvp && (cv=ocvp[nomethod_amg])) { /* Call report method */
 	notfound = 1; lr = -1;
       } else if (cvp && (cv=cvp[nomethod_amg])) {
@@ -1478,22 +1491,22 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
       } else {
 	SV *msg;
 	if (off==-1) off=method;
-	msg = sv_2mortal(Perl_newSVpvf(aTHX_ 
+	msg = sv_2mortal(Perl_newSVpvf(aTHX_
 		      "Operation `%s': no method found,%sargument %s%s%s%s",
 		      PL_AMG_names[method + assignshift],
 		      (flags & AMGf_unary ? " " : "\n\tleft "),
-		      SvAMAGIC(left)? 
+		      SvAMAGIC(left)?
 		        "in overloaded package ":
 		        "has no overloaded magic",
-		      SvAMAGIC(left)? 
+		      SvAMAGIC(left)?
 		        HvNAME(SvSTASH(SvRV(left))):
 		        "",
-		      SvAMAGIC(right)? 
+		      SvAMAGIC(right)?
 		        ",\n\tright argument in overloaded package ":
-		        (flags & AMGf_unary 
+		        (flags & AMGf_unary
 			 ? ""
 			 : ",\n\tright argument has no overloaded magic"),
-		      SvAMAGIC(right)? 
+		      SvAMAGIC(right)?
 		        HvNAME(SvSTASH(SvRV(right))):
 		        ""));
 	if (amtp && amtp->fallback >= AMGfallYES) {
@@ -1507,7 +1520,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     }
   }
   if (!notfound) {
-    DEBUG_o( Perl_deb(aTHX_ 
+    DEBUG_o( Perl_deb(aTHX_
   "Overloaded operator `%s'%s%s%s:\n\tmethod%s found%s in package %s%s\n",
 		 PL_AMG_names[off],
 		 method+assignshift==off? "" :
@@ -1518,7 +1531,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 		 flags & AMGf_unary? "" :
 		   lr==1 ? " for right argument": " for left argument",
 		 flags & AMGf_unary? " for argument" : "",
-		 HvNAME(stash), 
+		 HvNAME(stash),
 		 fl? ",\n\tassignment variant used": "") );
   }
     /* Since we use shallow copy during assignment, we need
@@ -1531,10 +1544,10 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
      * b) Increment or decrement, called directly.
      * 		assignshift==0,  assign==0, method + 0 == off
      * c) Increment or decrement, translated to assignment add/subtr.
-     * 		assignshift==0,  assign==T, 
+     * 		assignshift==0,  assign==T,
      *		force_cpy == T
      * d) Increment or decrement, translated to nomethod.
-     * 		assignshift==0,  assign==0, 
+     * 		assignshift==0,  assign==0,
      *		force_cpy == T
      * e) Assignment form translated to nomethod.
      * 		assignshift==1,  assign==T, method + 1 != off
