@@ -727,10 +727,6 @@ S_mulexp10(NV value, I32 exponent)
 
     if (exponent == 0)
 	return value;
-    else if (exponent < 0) {
-	negative = 1;
-	exponent = -exponent;
-    }
 
     /* On OpenVMS VAX we by default use the D_FLOAT double format,
      * and that format does not have *easy* capabilities [1] for
@@ -743,11 +739,6 @@ S_mulexp10(NV value, I32 exponent)
      *
      * [1] Trying to establish a condition handler to trap floating point
      *     exceptions is not a good idea. */
-    /* UNICOS fp is similarly non-IEEE. */
-#if ((defined(VMS) && !defined(__IEEE_FP)) || defined(_UNICOS)) && defined(NV_MAX_10_EXP)
-    if ((log10(value) + exponent) >= (NV_MAX_10_EXP))
-        return negative ? 0.0 : NV_MAX;
-#endif
 
     /* In UNICOS and in certain Cray models (such as T90) there is no
      * IEEE fp, and no way at all from C to catch fp overflows gracefully.
@@ -756,12 +747,28 @@ S_mulexp10(NV value, I32 exponent)
      * disable *all* floating point interrupts, a little bit too large
      * a hammer.  Therefore we need to catch potential overflows before
      * it's too late. */
-#if defined(_UNICOS) && defined(NV_MAX_10_EXP)
-    if (!negative &&
-	(log10(value) + exponent) >= NV_MAX_10_EXP)
-        return NV_MAX;
+
+#if ((defined(VMS) && !defined(__IEEE_FP)) || defined(_UNICOS)) && defined(NV_MAX_10_EXP)
+    STMT_START {
+	NV exp_v = log10(value);
+	if (exponent >= NV_MAX_10_EXP || exponent + exp_v >= NV_MAX_10_EXP)
+	    return NV_MAX;
+	if (exponent < 0) {
+	    if (-(exponent + exp_v) >= NV_MAX_10_EXP)
+		return 0.0;
+	    while (-exponent >= NV_MAX_10_EXP) {
+		/* combination does not overflow, but 10^(-exponent) does */
+		value /= 10;
+		++exponent;
+	    }
+	}
+    } STMT_END;
 #endif
 
+    if (exponent < 0) {
+	negative = 1;
+	exponent = -exponent;
+    }
     for (bit = 1; exponent; bit <<= 1) {
 	if (exponent & bit) {
 	    exponent ^= bit;

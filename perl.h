@@ -25,7 +25,11 @@
 #include <sys/fcntl.h>
 #endif
 
+#ifdef VOIDUSED
+#   undef VOIDUSED
+#endif 
 #define VOIDUSED 1
+
 #ifdef PERL_MICRO
 #   include "uconfig.h"
 #else

@@ -328,9 +328,9 @@ to change during one "get".)
 
 	Size_t fsize;
 
-Size of the function table. This is compared against the value PerlIO code "knows"
-as a compatibility check. Future versions I<may> be able to tolerate layers
-compiled against an old version of the headers.
+Size of the function table. This is compared against the value PerlIO
+code "knows" as a compatibility check. Future versions I<may> be able
+to tolerate layers compiled against an old version of the headers.
 
 =item name
 
@@ -352,9 +352,9 @@ The size of the per-instance data structure, e.g.:
 
   sizeof(PerlIOAPR)
 
-If this field is zero then C<PerlIO_pushed> does not malloc anything and assumes
-layer's Pushed function will do any required layer stack manipulation - used
-to avoid malloc/free overhead for dummy layers.
+If this field is zero then C<PerlIO_pushed> does not malloc anything
+and assumes layer's Pushed function will do any required layer stack
+manipulation - used to avoid malloc/free overhead for dummy layers.
 If the field is non-zero it must be at least the size of C<PerlIOl>,
 C<PerlIO_pushed> will allocate memory for the layer's data structures
 and link new layer onto the stream's stack. (If the layer's Pushed
@@ -454,10 +454,10 @@ special C<PerlIO_fdopen> calls; the C<'#'> prefix means that this is
 C<sysopen> and that I<imode> and I<perm> should be passed to
 C<PerlLIO_open3>; C<'r'> means B<r>ead, C<'w'> means B<w>rite and
 C<'a'> means B<a>ppend. The C<'+'> suffix means that both reading and
-writing/appending are permitted. The C<'b'> suffix means file should
-be binary, and C<'t'> means it is text. (Binary/Text should be ignored
-by almost all layers and binary IO done, with PerlIO. The C<:crlf>
-layer should be pushed to handle the distinction.)
+writing/appending are permitted.  The C<'b'> suffix means file should
+be binary, and C<'t'> means it is text. (Almost all layers should do
+the IO in binary mode, and ignore the b/t bits. The C<:crlf> layer
+should be pushed to handle the distinction.)
 
 If I<old> is not C<NULL> then this is a C<PerlIO_reopen>. Perl itself
 does not use this (yet?) and semantics are a little vague.
@@ -509,8 +509,8 @@ Returns the Unix/Posix numeric file descriptor for the handle. Normally
 C<PerlIOBase_fileno()> (which just asks next layer down) will suffice
 for this.
 
-Returns -1 on error, which is considered to include the case where the layer cannot
-provide such a file descriptor.
+Returns -1 on error, which is considered to include the case where the
+layer cannot provide such a file descriptor.
 
 =item Dup
 
@@ -519,8 +519,9 @@ provide such a file descriptor.
 
 XXX: Needs more docs.
 
-Used as part of the "clone" process when a thread is spawned (in which case
-param will be non-NULL) and when a stream is being duplicated via '&' in the C<open>.
+Used as part of the "clone" process when a thread is spawned (in which
+case param will be non-NULL) and when a stream is being duplicated via
+'&' in the C<open>.
 
 Similar to C<Open>, returns PerlIO* on success, C<NULL> on failure.
 

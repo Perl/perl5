@@ -7,6 +7,7 @@ archname='m68k-amigaos'
 cc='gcc'
 firstmakefile='GNUmakefile'
 usenm='true'
+d_fork='undef' # available but ENOSYS
 
 usemymalloc='n'
 useperlio='true'

@@ -385,7 +385,7 @@ integer value less than or equal to the numerical argument.
 
 This is identical to the C function C<fmod()>.
 
-	$r = modf($x, $y);
+	$r = fmod($x, $y);
 
 It returns the remainder C<$r = $x - $n*$y>, where C<$n = trunc($x/$y)>.
 The C<$r> has the same sign as C<$x> and magnitude (absolute value)

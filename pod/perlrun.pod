@@ -950,7 +950,7 @@ default. (To turn off that behaviour use C<:bytes> layer.)
 
 =item :win32
 
-On Win32 platfroms this I<experimental> layer uses native "handle" IO
+On Win32 platforms this I<experimental> layer uses native "handle" IO
 rather than unix-like numeric file descriptor layer. Known to be
 buggy in this release.
 
@@ -958,7 +958,7 @@ buggy in this release.
 
 On all platforms the default set of layers should give acceptable results.
 
-For UNIX platfroms that will equivalent of "unix perlio" or "stdio".
+For UNIX platforms that will equivalent of "unix perlio" or "stdio".
 Configure is setup to prefer "stdio" implementation if system's library
 provides for fast access to the buffer, otherwise it uses the "unix perlio"
 implementation.

@@ -960,8 +960,8 @@ subname [condition], b postpone subname [condition], b load filename, b
 compile subname, B line, B *, a [line] command, A line, A *, w expr, W
 expr, W *, o, o booloption .., o anyoption? .., o option=value .., < ?, < [
 command ], << command, > ?, > command, >> command, { ?, { [ command ], {{
-command, ! number, ! -number, ! pattern, !! cmd, @ file, H -number, q or
-^D, R, |dbcmd, ||dbcmd, command, m expr, M, man [manpage]
+command, ! number, ! -number, ! pattern, !! cmd, source file, H -number, q
+or ^D, R, |dbcmd, ||dbcmd, command, m expr, M, man [manpage]
 
 =item Configurable Options
 
@@ -4661,10 +4661,11 @@ PERLIO_F_TEMP, PERLIO_F_OPEN, PERLIO_F_FASTGETS
 
 =item Methods in Detail
 
-name, size, kind, PERLIO_K_BUFFERED, PERLIO_K_CANCRLF, PERLIO_K_FASTGETS,
-PERLIO_K_MULTIARG, PERLIO_K_RAW, Pushed, Popped, Open, Getarg, Fileno, Dup,
-Read, Write, Seek, Tell, Close, Flush, Fill, Eof, Error,  Clearerr,
-Setlinebuf, Get_base, Get_bufsiz, Get_ptr, Get_cnt, Set_ptrcnt
+size, name, size, kind, PERLIO_K_BUFFERED, PERLIO_K_RAW, PERLIO_K_CANCRLF,
+PERLIO_K_FASTGETS, PERLIO_K_MULTIARG, Pushed, Popped, Open, Binmode,
+Getarg, Fileno, Dup, Read, Write, Seek, Tell, Close, Flush, Fill, Eof,
+Error,	Clearerr, Setlinebuf, Get_base, Get_bufsiz, Get_ptr, Get_cnt,
+Set_ptrcnt
 
 =item Core Layers
 
@@ -5351,7 +5352,7 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item FreeBSD built with ithreads coredumps reading large directories
 
-=item FreeBSD Failing locale Test 117 For ISO8859-15 Locales
+=item FreeBSD Failing locale Test 117 For ISO 8859-15 Locales
 
 =item IRIX fails ext/List/Util/t/shuffle.t
 
@@ -5388,6 +5389,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item Failure of Thread (5.005-style) tests
 
 =item Timing problems
+
+=item Unicode in package/class and subroutine names does not work
 
 =item UNICOS/mk
 
@@ -7441,7 +7444,7 @@ DJGPP, Pthreads
 
 =item Malloc in Irix
 
-=item Building with threads
+=item Building with threads in Irix
 
 =back
 
@@ -9129,6 +9132,8 @@ utf8::encode($string), $flag = utf8::decode($string), $flag =
 utf8::valid(STRING)
 
 =back
+
+=item BUGS
 
 =item SEE ALSO
 
@@ -12980,15 +12985,15 @@ INSTALLDIRS, INSTALLMAN1DIR, INSTALLMAN3DIR, INSTALLPRIVLIB, INSTALLSCRIPT,
 INSTALLSITEARCH, INSTALLSITEBIN, INSTALLSITELIB, INSTALLSITEMAN1DIR,
 INSTALLSITEMAN3DIR, INSTALLVENDORARCH, INSTALLVENDORBIN, INSTALLVENDORLIB,
 INSTALLVENDORMAN1DIR, INSTALLVENDORMAN3DIR, INST_ARCHLIB, INST_BIN,
-INST_LIB, INST_MAN1DIR, INST_MAN3DIR, INST_SCRIPT, LDFROM, LIB, LIBPERL_A,
-LIBS, LINKTYPE, MAKEAPERL, MAKEFILE, MAN1PODS, MAN3PODS, MAP_TARGET,
-MYEXTLIB, NAME, NEEDS_LINKING, NOECHO, NORECURS, NO_VC, OBJECT, OPTIMIZE,
-PERL, PERL_CORE, PERLMAINCC, PERL_ARCHLIB, PERL_LIB, PERL_MALLOC_OK,
-PERLRUN, PERLRUNINST, PERL_SRC, PERM_RW, PERM_RWX, PL_FILES, PM, PMLIBDIRS,
-PM_FILTER, POLLUTE, PPM_INSTALL_EXEC, PPM_INSTALL_SCRIPT, PREFIX,
-PREREQ_FATAL, PREREQ_PM, PREREQ_PRINT, PRINT_PREREQ, SITEPREFIX, SKIP,
-TYPEMAPS, VENDORPREFIX, VERBINST, VERSION, VERSION_FROM, XS, XSOPT,
-XSPROTOARG, XS_VERSION
+INST_LIB, INST_MAN1DIR, INST_MAN3DIR, INST_SCRIPT, LDDLFLAGS, LDFROM, LIB,
+LIBPERL_A, LIBS, LINKTYPE, MAKEAPERL, MAKEFILE, MAN1PODS, MAN3PODS,
+MAP_TARGET, MYEXTLIB, NAME, NEEDS_LINKING, NOECHO, NORECURS, NO_VC, OBJECT,
+OPTIMIZE, PERL, PERL_CORE, PERLMAINCC, PERL_ARCHLIB, PERL_LIB,
+PERL_MALLOC_OK, PERLRUN, PERLRUNINST, PERL_SRC, PERM_RW, PERM_RWX,
+PL_FILES, PM, PMLIBDIRS, PM_FILTER, POLLUTE, PPM_INSTALL_EXEC,
+PPM_INSTALL_SCRIPT, PREFIX, PREREQ_FATAL, PREREQ_PM, PREREQ_PRINT,
+PRINT_PREREQ, SITEPREFIX, SKIP, TYPEMAPS, VENDORPREFIX, VERBINST, VERSION,
+VERSION_FROM, XS, XSOPT, XSPROTOARG, XS_VERSION
 
 =item Additional lowercase attributes
 
@@ -12996,6 +13001,10 @@ clean, depend, dist, dynamic_lib, linkext, macro, realclean, test,
 tool_autosplit
 
 =item Overriding MakeMaker Methods
+
+=item The End Of Cargo Cult Programming
+
+C<<MAN3PODS => ' '>>
 
 =item Hintsfile support
 
@@ -13421,36 +13430,6 @@ rel2abs
 
 =back
 
-=head2 File::Spec::NW5 - methods for NW5 file specs
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-devnull
-
-=back
-
-tmpdir
-
-catfile
-
-canonpath
-
-splitpath
-
-splitdir
-
-catpath
-
-=over 4
-
-=item SEE ALSO
-
-=back
-
 canonpath
 
 splitpath
@@ -13605,6 +13584,12 @@ splitpath
 splitdir
 
 catpath
+
+=over 4
+
+=item Note For File::Spec::Win32 Maintainers
+
+=back
 
 =over 4
 
@@ -13913,6 +13898,8 @@ B<$_>, B<$status>, B<filter_read> and B<filter_read_exact>, B<filter_del>
 =over 4
 
 =item Object oriented interface
+
+=item Thread Safety
 
 =item Documentation and help texts
 
@@ -16563,6 +16550,8 @@ unix, stdio, perlio, crlf, utf8, bytes, raw
 
 =over 4
 
+=item Alternatives to raw
+
 =item Defaults and how to override them
 
 =back
@@ -16592,12 +16581,13 @@ unix, stdio, perlio, crlf, utf8, bytes, raw
 =item DESCRIPTION
 
 $class->PUSHED([$mode[,$fh]]), $obj->POPPED([$fh]),
-$class->OPEN($path,$mode[,$fh]), $class->FDOPEN($fd),
-$class->SYSOPEN($path,$imode,$perm,$fh), $obj->FILENO($fh),
-$obj->READ($buffer,$len,$fh), $obj->WRITE($buffer,$fh), $obj->FILL($fh),
-$obj->CLOSE($fh), $obj->SEEK($posn,$whence,$fh), $obj->TELL($fh),
-$obj->UNREAD($buffer,$fh), $obj->FLUSH($fh), $obj->SETLINEBUF($fh),
-$obj->CLEARERR($fh), $obj->ERROR($fh), $obj->EOF($fh)
+$class->OPEN($path,$mode[,$fh]), $obj->BINMODE([,$fh]),
+$class->FDOPEN($fd), $class->SYSOPEN($path,$imode,$perm,$fh),
+$obj->FILENO($fh), $obj->READ($buffer,$len,$fh), $obj->WRITE($buffer,$fh),
+$obj->FILL($fh), $obj->CLOSE($fh), $obj->SEEK($posn,$whence,$fh),
+$obj->TELL($fh), $obj->UNREAD($buffer,$fh), $obj->FLUSH($fh),
+$obj->SETLINEBUF($fh), $obj->CLEARERR($fh), $obj->ERROR($fh),
+$obj->EOF($fh)
 
 =over 4
 
@@ -18409,6 +18399,8 @@ B<_my_exit>
 
 =over 4
 
+=item THREADS
+
 =item EXAMPLES
 
 =item SEE ALSO
@@ -18670,6 +18662,8 @@ B<SKIP: BLOCK>
 =back
 
 B<TODO: BLOCK>, B<todo_skip>
+
+When do I use SKIP vs. TODO?
 
 =over 4
 

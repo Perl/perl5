@@ -567,10 +567,6 @@ Portably perform operations on file names
 
 File::Spec for Mac OS (Classic)
 
-=item File::Spec::NW5
-
-Methods for NW5 file specs
-
 =item File::Spec::OS2
 
 Methods for OS/2 file specs

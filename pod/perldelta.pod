@@ -1052,7 +1052,7 @@ C<sort> is a new pragma for controlling the behaviour of sort().
 C<Storable> gives persistence to Perl data structures by allowing the
 storage and retrieval of Perl data to and from files in a fast and
 compact binary format.  Because in effect Storable does serialisation
-of Perl data structues, with it you can also clone deep, hierarchical
+of Perl data structures, with it you can also clone deep, hierarchical
 datastructures.  Storable was originally created by Raphael Manfredi,
 but it is now maintained by Abhijit Menon-Sen.  Storable has been
 enhanced to understand the two new hash features, Unicode keys and
@@ -1265,7 +1265,7 @@ enjoy the fixes.
 
 The arguments of WriteMakefile() in Makefile.PL are now checked
 for sanity much more carefully than before.  This may cause new
-warnings when modules are being insalled.  See L<ExtUtils::MakeMaker>
+warnings when modules are being installed.  See L<ExtUtils::MakeMaker>
 for more details.
 
 =item *
@@ -1982,8 +1982,8 @@ See L<perldgux>.
 
 =item *
 
-The DYNIX/ptx platform (a.k.a. dynixptx) is supported at or near
-osvers 4.5.2.
+The DYNIX/ptx platform (also known as dynixptx) is supported at or
+near osvers 4.5.2.
 
 =item *
 
