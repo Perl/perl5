@@ -974,7 +974,6 @@ pp_tied
 pp_time
 pp_tms
 pp_trans
-pp_threadsv
 pp_truncate
 pp_uc
 pp_ucfirst
