@@ -103,6 +103,90 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6918] By: jhi                                   on 2000/08/30  14:48:34
+        Log: NVs not necessarily doubles, as pointed out by Yitzchak.
+     Branch: perl
+	   ! lib/ExtUtils/typemap
+____________________________________________________________________________
+[  6917] By: jhi                                   on 2000/08/30  14:46:34
+        Log: Subject: typos in pods
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 30 Aug 2000 01:12:50 +0100
+             Message-ID: <20000830011249.A61388@plum.flirble.org>
+     Branch: perl
+	   ! pod/perldbmfilter.pod pod/perldebtut.pod pod/perldebug.pod
+	   ! pod/perldiag.pod pod/perlebcdic.pod pod/perlfunc.pod
+	   ! pod/perlguts.pod pod/perlhack.pod pod/perlmodlib.pod
+	   ! pod/perlnewmod.pod pod/perlport.pod pod/perltoc.pod
+____________________________________________________________________________
+[  6916] By: jhi                                   on 2000/08/30  14:19:09
+        Log: Document Storable problems on Crays.  (Will have
+             to document all the other Storable problems, too.)
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  6915] By: jhi                                   on 2000/08/30  14:06:02
+        Log: Subject: [PATCH] fix misc cast warnings
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Tue, 29 Aug 2000 23:16:14 -0700
+             Message-ID: <uaKr5gzkgGwQ092yn@efn.org>
+     Branch: perl
+	   ! lib/ExtUtils/typemap os2/OS2/ExtAttr/ExtAttr.xs
+	   ! os2/OS2/ExtAttr/typemap os2/OS2/REXX/REXX.xs os2/os2.c
+	   ! os2/os2ish.h
+____________________________________________________________________________
+[  6914] By: jhi                                   on 2000/08/30  14:03:45
+        Log: Timestamp mismatch again.  Need to fix this dependence on
+             config_h.SH timestamp, since it's the contents of config_h.SH
+             that matter.
+     Branch: perl
+	   ! uconfig.h uconfig.sh
+____________________________________________________________________________
+[  6913] By: jhi                                   on 2000/08/30  13:54:06
+        Log: Don't say "Perl 5.0 source kit".
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[  6912] By: jhi                                   on 2000/08/30  13:51:24
+        Log: Reset archname and archname64 always, forcing them be
+             recomputed at each Configure run, make Configure and
+             the hints files agree on the naming of largefiles variables.
+     Branch: metaconfig
+	   ! U/threads/archname.U
+     Branch: metaconfig/U/perl
+	   ! use64bits.U
+     Branch: perl
+	   ! Configure config_h.SH configpm hints/aix.sh hints/hpux.sh
+	   ! hints/linux.sh hints/solaris_2.sh
+____________________________________________________________________________
+[  6911] By: jhi                                   on 2000/08/30  13:30:13
+        Log: Put back the slice accidentally removed by #6907.
+     Branch: perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[  6910] By: jhi                                   on 2000/08/30  01:24:26
+        Log: Be consistent: other Net::get* do export theirs.
+             
+             Subject: Re: Net::protoent does not export 'getproto'
+             From: Yasushi Nakajima <sey@jkc.co.jp>
+             Date: Wed, 30 Aug 2000 09:53:14 +0900
+             Message-Id: <200008300051.DAA24700@taku.hut.fi>
+     Branch: perl
+	   ! lib/Net/protoent.pm
+____________________________________________________________________________
+[  6909] By: jhi                                   on 2000/08/30  01:17:25
+        Log: Subject: Re: [ID 20000829.020] perl -e 'package; print __PACKAGE__' core dumps 
+             From: Gurusamy Sarathy <gsar@ActiveState.com>
+             Date: Tue, 29 Aug 2000 17:17:07 -0700
+             Message-Id: <200008300017.RAA25382@smtp3.ActiveState.com>
+     Branch: perl
+	   ! cop.h
+____________________________________________________________________________
+[  6908] By: jhi                                   on 2000/08/30  00:58:05
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6907] By: jhi                                   on 2000/08/30  00:57:22
         Log: Introduce ccname to keep track of what compiler kind of we have.
      Branch: metaconfig/U/perl
