@@ -1796,7 +1796,7 @@ The compiler emitted code for these lines, but the code was unexecuted.
 
 Unexecuted procedures.
 
-=over4
+=back
 
 For further information, see your system's manual pages for pixie and prof.
 

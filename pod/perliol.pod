@@ -128,13 +128,21 @@ layer), then follow the functions which fall into four basic groups:
 
 =over 4
 
-=item 1. Opening and setup functions
+=item 1.
 
-=item 2. Basic IO operations
+Opening and setup functions
 
-=item 3. Stdio class buffering options.
+=item 2.
 
-=item 4. Functions to support Perl's traditional "fast" access to the buffer.
+Basic IO operations
+
+=item 3.
+
+Stdio class buffering options.
+
+=item 4.
+
+Functions to support Perl's traditional "fast" access to the buffer.
 
 =back
 
