@@ -774,14 +774,14 @@ regmatch(regnode *prog)
 		      ? (5 + taill) - pref_len : regeol - locinput);
 	    regprop(prop, scan);
 	    PerlIO_printf(Perl_debug_log, 
-			  "%4i <%s%.*s%s%s%s%.*s%s>%*s|%*s%2d%s\n",
+			  "%4i <%s%.*s%s%s%s%.*s%s>%*s|%3d:%*s%s\n",
 			  locinput - bostr, 
 			  colors[2], pref_len, locinput - pref_len, colors[3],
 			  (docolor ? "" : "> <"),
 			  colors[0], l, locinput, colors[1],
 			  15 - l - pref_len + 1,
 			  "",
-			  regindent*2, "", scan - regprogram,
+			  scan - regprogram, regindent*2, "",
 			  SvPVX(prop));
 	} );
 

@@ -2246,7 +2246,7 @@ dumpuntil(regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 	if (OP(node) == OPTIMIZED)
 	    goto after_print;
 	regprop(sv, node);
-	PerlIO_printf(Perl_debug_log, "%4d%*s%s", node - start, 
+	PerlIO_printf(Perl_debug_log, "%4d:%*s%s", node - start, 
 		      2*l + 1, "", SvPVX(sv));
 	if (next == NULL)		/* Next ptr. */
 	    PerlIO_printf(Perl_debug_log, "(0)");
@@ -2364,7 +2364,7 @@ regprop(SV *sv, regnode *o)
 #ifdef DEBUGGING
     register char *p = 0;
 
-    sv_setpv(sv, ":");
+    sv_setpvn(sv, "", 0);
     switch (OP(o)) {
     case BOL:
 	p = "BOL";
