@@ -476,6 +476,15 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    SV *sv;
 
 	    PerlLIO_dup2(PerlIO_fileno(fp), fd);
+#ifdef VMS
+	    if (fd != PerlIO_fileno(PerlIO_stdin())) {
+	      char newname[FILENAME_MAX+1];
+	      if (fgetname(fp, newname)) {
+	        if (fd == PerlIO_fileno(PerlIO_stdout())) Perl_vmssetuserlnm("SYS$OUTPUT", newname);
+	        if (fd == PerlIO_fileno(PerlIO_stderr())) Perl_vmssetuserlnm("SYS$ERROR",  newname);
+	      }
+	    }
+#endif
 	    LOCK_FDPID_MUTEX;
 	    sv = *av_fetch(PL_fdpid,PerlIO_fileno(fp),TRUE);
 	    (void)SvUPGRADE(sv, SVt_IV);

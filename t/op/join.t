@@ -45,33 +45,23 @@ if ($f eq 'baeak') {print "ok 6\n";} else {print "# '$f'\nnot ok 6\n";}
   print "ok 10\n";
 };
 
-{ my $s = join("", chr(1234),chr(255));
-  print "not " unless length($s) == 2 &&
-                      ord(substr($s,0,1)) == 1234 &&
-                      ord(substr($s,1,1)) ==  255;
+{ my $s = join("", chr(0x1234), chr(0xff));
+  print "not " unless length($s) == 2 && $s eq "\x{1234}\x{ff}";
   print "ok 11\n";
 }
 
-{ my $s = join(chr(2345), chr(1234),chr(255));
-  print "not " unless length($s) == 3 &&
-                      ord(substr($s,0,1)) == 1234 &&
-                      ord(substr($s,1,1)) == 2345 &&
-                      ord(substr($s,2,1)) ==  255;
+{ my $s = join(chr(0xff), chr(0x1234), "");
+  print "not " unless length($s) == 2 && $s eq "\x{1234}\x{ff}";
   print "ok 12\n";
 }
 
-{ my $s = join(chr(2345), chr(1234),chr(3456));
-  print "not " unless length($s) == 3 &&
-                      ord(substr($s,0,1)) == 1234 &&
-                      ord(substr($s,1,1)) == 2345 &&
-                      ord(substr($s,2,1)) == 3456;
+{ my $s = join(chr(0x1234), chr(0xff), chr(0x2345));
+  print "not " unless length($s) == 3 && $s eq "\x{ff}\x{1234}\x{2345}";
   print "ok 13\n";
 }
 
-{ my $s = join(chr(255), chr(1234),chr(2345));
-  print "not " unless length($s) == 3 &&
-                      ord(substr($s,0,1)) == 1234 &&
-                      ord(substr($s,1,1)) ==  255 &&
-                      ord(substr($s,2,1)) == 2345;
+{ my $s = join(chr(0xff), chr(0x1234), chr(0xfe));
+  print "not " unless length($s) == 3 && $s eq "\x{1234}\x{ff}\x{fe}";
   print "ok 14\n";
 }
+

@@ -733,6 +733,30 @@ Perl_my_setenv(pTHX_ char *lnm,char *eqv)
 }
 /*}}}*/
 
+/*{{{static void vmssetuserlnm(char *name, char *eqv);
+/*  vmssetuserlnm
+ *  sets a user-mode logical in the process logical name table
+ *  used for redirection of sys$error
+ */
+void
+Perl_vmssetuserlnm(char *name, char *eqv)
+{
+    $DESCRIPTOR(d_tab, "LNM$PROCESS");
+    struct dsc$descriptor_d d_name = {0,DSC$K_DTYPE_T,DSC$K_CLASS_D,0};
+    unsigned long int iss, attr = 0;
+    unsigned char acmode = PSL$C_USER;
+    struct itmlst_3 lnmlst[2] = {{0, LNM$_STRING, 0, 0},
+                                 {0, 0, 0, 0}};
+    d_name.dsc$a_pointer = name;
+    d_name.dsc$w_length = strlen(name);
+
+    lnmlst[0].buflen = strlen(eqv);
+    lnmlst[0].bufadr = eqv;
+
+    iss = sys$crelnm(&attr,&d_tab,&d_name,&acmode,lnmlst);
+    if (!(iss&1)) lib$signal(iss);
+}
+/*}}}*/
 
 
 /*{{{ char *my_crypt(const char *textpasswd, const char *usrname)*/
@@ -1846,17 +1870,19 @@ vmspipe_tempfile(void)
     fprintf(fp,"$ perl_del    = \"delete\"\n");
     fprintf(fp,"$ pif         = \"if\"\n");
     fprintf(fp,"$!  --- define i/o redirection (sys$output set by lib$spawn)\n");
-    fprintf(fp,"$ pif perl_popen_in  .nes. \"\" then perl_define sys$input  'perl_popen_in'\n");
-    fprintf(fp,"$ pif perl_popen_err .nes. \"\" then perl_define sys$error  'perl_popen_err'\n");
+    fprintf(fp,"$ pif perl_popen_in  .nes. \"\" then perl_define/user sys$input  'perl_popen_in'\n");
+    fprintf(fp,"$ pif perl_popen_err .nes. \"\" then perl_define/user sys$error  'perl_popen_err'\n");
+    fprintf(fp,"$ pif perl_popen_out .nes. \"\" then perl_define      sys$output 'perl_popen_out'\n");
     fprintf(fp,"$ cmd = perl_popen_cmd\n");
     fprintf(fp,"$!  --- get rid of global symbols\n");
     fprintf(fp,"$ perl_del/symbol/global perl_popen_in\n");
     fprintf(fp,"$ perl_del/symbol/global perl_popen_err\n");
+    fprintf(fp,"$ perl_del/symbol/global perl_popen_out\n");
     fprintf(fp,"$ perl_del/symbol/global perl_popen_cmd\n");
     fprintf(fp,"$ perl_on\n");
     fprintf(fp,"$ 'cmd\n");
     fprintf(fp,"$ perl_status = $STATUS\n");
-    fprintf(fp,"$ perl_del 'perl_cfile'\n");
+    fprintf(fp,"$ perl_del  'perl_cfile'\n");
     fprintf(fp,"$ perl_exit 'perl_status'\n");
     fsync(fileno(fp));
 
@@ -1895,12 +1921,12 @@ safe_popen(char *cmd, char *mode)
     pInfo info;
     struct dsc$descriptor_s d_symbol= {0, DSC$K_DTYPE_T,
                                       DSC$K_CLASS_S, symbol};
-    struct dsc$descriptor_s d_out = {0, DSC$K_DTYPE_T,
-                                      DSC$K_CLASS_S, out};
     struct dsc$descriptor_s vmspipedsc = {0, DSC$K_DTYPE_T,
                                       DSC$K_CLASS_S, 0};
+
     $DESCRIPTOR(d_sym_cmd,"PERL_POPEN_CMD");
     $DESCRIPTOR(d_sym_in ,"PERL_POPEN_IN");
+    $DESCRIPTOR(d_sym_out,"PERL_POPEN_OUT");
     $DESCRIPTOR(d_sym_err,"PERL_POPEN_ERR");
                             
     /* once-per-program initialization...
@@ -1961,9 +1987,9 @@ safe_popen(char *cmd, char *mode)
     info->in_done    = TRUE;
     info->out_done   = TRUE;
     info->err_done   = TRUE;
+    in[0] = out[0] = err[0] = '\0';
 
     if (*mode == 'r') {             /* piping from subroutine */
-        in[0] = '\0';
 
         info->out = pipe_infromchild_setup(mbx,out);
         if (info->out) {
@@ -1982,13 +2008,13 @@ safe_popen(char *cmd, char *mode)
                 if (!done) _ckvmssts(sys$clref(pipe_ef));
                 _ckvmssts(sys$setast(1));
                 if (!done) _ckvmssts(sys$waitfr(pipe_ef));
-    }
+            }
 
             if (info->out->buf) Safefree(info->out->buf);
             Safefree(info->out);
             Safefree(info);
             return Nullfp;
-    }
+        }
 
         info->err = pipe_mbxtofd_setup(fileno(stderr), err);
         if (info->err) {
@@ -1998,7 +2024,6 @@ safe_popen(char *cmd, char *mode)
         }
 
     } else {                        /* piping to subroutine , mode=w*/
-        int melded;
 
         info->in = pipe_tochild_setup(in,mbx);
         info->fp  = PerlIO_open(mbx, mode);
@@ -2026,21 +2051,9 @@ safe_popen(char *cmd, char *mode)
             if (info->in->buf) Safefree(info->in->buf);
             Safefree(info->in);
             Safefree(info);
-        return Nullfp;
+            return Nullfp;
         }
         
-        /* if SYS$ERROR == SYS$OUTPUT, use only one mbx */
-        
-        melded = FALSE;
-        fgetname(stderr, err);
-        if (strncmp(err,"SYS$ERROR:",10) == 0) {
-            fgetname(stdout, out);
-            if (strncmp(out,"SYS$OUTPUT:",11) == 0) {
-                if (popen_translate("SYS$OUTPUT",out) == popen_translate("SYS$ERROR",err)) {
-                    melded = TRUE;
-                }
-    }
-    }
 
         info->out = pipe_mbxtofd_setup(fileno(stdout), out);
         if (info->out) {
@@ -2048,18 +2061,14 @@ safe_popen(char *cmd, char *mode)
             info->out_done = FALSE;
             info->out->info = info;
         }
-        if (!melded) {
-            info->err = pipe_mbxtofd_setup(fileno(stderr), err);
-            if (info->err) {
-                info->err->pipe_done = &info->err_done;
-                info->err_done = FALSE;
-                info->err->info = info;
+
+        info->err = pipe_mbxtofd_setup(fileno(stderr), err);
+        if (info->err) {
+            info->err->pipe_done = &info->err_done;
+            info->err_done = FALSE;
+            info->err->info = info;
+        }
     }
-        } else {
-            err[0] = '\0';
-    }
-    }
-    d_out.dsc$w_length = strlen(out);   /* lib$spawn sets SYS$OUTPUT so can meld*/
 
     symbol[MAX_DCL_SYMBOL] = '\0';
 
@@ -2071,6 +2080,9 @@ safe_popen(char *cmd, char *mode)
     d_symbol.dsc$w_length = strlen(symbol);
     _ckvmssts(lib$set_symbol(&d_sym_err, &d_symbol, &table));
 
+    strncpy(symbol, out, MAX_DCL_SYMBOL);
+    d_symbol.dsc$w_length = strlen(symbol);
+    _ckvmssts(lib$set_symbol(&d_sym_out, &d_symbol, &table));
 
     p = VMScmd.dsc$a_pointer;
     while (*p && *p != '\n') p++;
@@ -2087,7 +2099,7 @@ safe_popen(char *cmd, char *mode)
     info->next=open_pipes;  /* prepend to list */
     open_pipes=info;
     _ckvmssts(sys$setast(1));
-    _ckvmssts(lib$spawn(&vmspipedsc, &nl_desc, &d_out, &flags,
+    _ckvmssts(lib$spawn(&vmspipedsc, &nl_desc, &nl_desc, &flags,
                       0, &info->pid, &info->completion,
                       0, popen_completion_ast,info,0,0,0));
 
@@ -2101,7 +2113,7 @@ safe_popen(char *cmd, char *mode)
     _ckvmssts(lib$delete_symbol(&d_sym_cmd, &table));
     _ckvmssts(lib$delete_symbol(&d_sym_in,  &table));
     _ckvmssts(lib$delete_symbol(&d_sym_err, &table));
-
+    _ckvmssts(lib$delete_symbol(&d_sym_out, &table));
     vms_execfree(aTHX);
         
     PL_forkprocess = info->pid;
@@ -3575,9 +3587,12 @@ mp_getredirection(pTHX_ int *ac, char ***av)
 	PerlIO_printf(Perl_debug_log,"Can't open output file %s as stdout",out);
 	exit(vaxc$errno);
 	}
+	if (out != NULL) Perl_vmssetuserlnm("SYS$OUTPUT",out);
+
     if (err != NULL) {
         if (strcmp(err,"&1") == 0) {
             dup2(fileno(stdout), fileno(Perl_debug_log));
+            Perl_vmssetuserlnm("SYS$ERROR","SYS$OUTPUT");
         } else {
 	FILE *tmperr;
 	if (NULL == (tmperr = fopen(err, errmode, "mbc=32", "mbf=2")))
@@ -3590,6 +3605,7 @@ mp_getredirection(pTHX_ int *ac, char ***av)
 		{
 		exit(vaxc$errno);
 		}
+	    Perl_vmssetuserlnm("SYS$ERROR",err);
 	}
         }
 #ifdef ARGPROC_DEBUG
