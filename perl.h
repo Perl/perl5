@@ -548,17 +548,6 @@ Free_t   Perl_mfree (Malloc_t where);
 
 typedef struct perl_mstats perl_mstats_t;
 
-struct perl_mstats {
-    unsigned long *nfree;
-    unsigned long *ntotal;
-    long topbucket, topbucket_ev, topbucket_odd, totfree, total, total_chain;
-    long total_sbrk, sbrks, sbrk_good, sbrk_slack, start_slack, sbrked_remains;
-    long minbucket;
-    /* Level 1 info */
-    unsigned long *bucket_mem_size;
-    unsigned long *bucket_available_size;
-};
-
 #  define safemalloc  Perl_malloc
 #  define safecalloc  Perl_calloc
 #  define saferealloc Perl_realloc
@@ -1439,6 +1428,18 @@ typedef NVTYPE NV;
 #    define PERL_QUAD_MIN 	(-PERL_QUAD_MAX - ((3 & -1) == 3))
 
 #endif
+
+struct perl_mstats {
+    UV *nfree;
+    UV *ntotal;
+    IV topbucket, topbucket_ev, topbucket_odd, totfree, total, total_chain;
+    IV total_sbrk, sbrks, sbrk_good, sbrk_slack, start_slack, sbrked_remains;
+    IV minbucket;
+    /* Level 1 info */
+    UV *bucket_mem_size;
+    UV *bucket_available_size;
+    UV nbuckets;
+};
 
 typedef MEM_SIZE STRLEN;
 
