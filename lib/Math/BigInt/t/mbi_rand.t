@@ -7,6 +7,7 @@ my $count;
   
 BEGIN
   {
+  if ($^O eq 'os390') { print "1..0\n"; exit(0) }
   $| = 1;
   unshift @INC, '../lib'; # for running manually
   my $location = $0; $location =~ s/mbi_rand.t//;
