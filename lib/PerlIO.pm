@@ -165,8 +165,9 @@ in Perl using the latter) come with the Perl distribution.
 
 Use C<:encoding(ENCODING)> either in open() or binmode() to install
 a layer that does transparently character set and encoding transformations,
-for example from Shift-JIS to Unicode.  Note that an C<:encoding> also
-enables C<:utf8>.  See L<PerlIO::encoding> for more information.
+for example from Shift-JIS to Unicode.  Note that under C<stdio>
+an C<:encoding> also enables C<:utf8>.  See L<PerlIO::encoding>
+for more information.
 
 =item :via
 
@@ -230,8 +231,9 @@ The following returns the B<names> of the PerlIO layers on a filehandle.
    my @layers = PerlIO::get_layers(FH);
 
 The layers are returned in the order an open() or binmode() call would
-use them.  Note that the stack begings (normally) from C<stdio>, the
-platform specific low-level I/O (like C<unix>) is not part of the stack.
+use them.  Note that the stack begins (normally) from C<stdio> or from
+C<perlio>.  Under C<stdio> the platform specific low-level I/O (like
+C<unix>) is not part of the stack, but under C<perlio> it is.
 
 By default the layers from the input side of the filehandle is
 returned, to get the output side use the optional C<output> argument:

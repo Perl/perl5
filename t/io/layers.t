@@ -8,6 +8,10 @@ BEGIN {
 	print "1..0 # Skip: not perlio\n";
 	exit 0;
     }
+    if (exists $ENV{PERLIO} && $ENV{PERLIO} ne 'stdio') {
+	print "1..0 # PERLIO non-stdio\n";
+	exit(0);
+    }
 }
 
 plan tests => 43;
