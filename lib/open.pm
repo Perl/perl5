@@ -10,7 +10,8 @@ sub in_locale { $^H & $locale::hint_bits }
 
 sub _get_locale_encoding {
     unless (defined $locale_encoding) {
-	eval { use I18N::Langinfo qw(langinfo CODESET) };
+	eval { require I18N::Langinfo;
+	       import I18N::Langinfo qw(langinfo CODESET) };
 	unless ($@) {
 	    $locale_encoding = langinfo(CODESET);
 	}
@@ -32,11 +33,11 @@ sub _get_locale_encoding {
 	if (defined $locale_encoding &&
 	    $locale_encoding eq 'euc' &&
 	    defined $country_language) {
-	    if ($country_language =~ /^ja_JP|japan(?:ese)$/i) {
+	    if ($country_language =~ /^ja_JP|japan(?:ese)?$/i) {
 		$locale_encoding = 'eucjp';
-	    } elsif ($country_language =~ /^ko_KR|korea(?:n)$/i) {
+	    } elsif ($country_language =~ /^ko_KR|korea(?:n)?$/i) {
 		$locale_encoding = 'euckr';
-	    } elsif ($country_language =~ /^zh_TW|taiwan(?:ese)$/i) {
+	    } elsif ($country_language =~ /^zh_TW|taiwan(?:ese)?$/i) {
 		$locale_encoding = 'euctw';
 	    }
 	    croak "Locale encoding 'euc' too ambiguous"
