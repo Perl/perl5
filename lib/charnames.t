@@ -193,7 +193,7 @@ print "ok 30\n";
 print "not " unless "\N{NEL}" =~ $nel;
 print "ok 31\n";
 
-print "not " unless "\N{BYTE ORDER MARK}" eq chr(0xFFFE);
+print "not " unless "\N{BYTE ORDER MARK}" eq chr(0xFEFF);
 print "ok 32\n";
 
 print "not " unless "\N{BOM}" eq chr(0xFEFF);
@@ -217,6 +217,6 @@ print "ok 33\n";
     print "ok 37\n";
 }
 
-print "not " unless charnames::viacode(0xFEFF) eq "BYTE ORDER MARK";
+print "not " unless charnames::viacode(0xFEFF) eq "ZERO WIDTH NO-BREAK SPACE";
 print "ok 38\n";
 

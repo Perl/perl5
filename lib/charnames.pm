@@ -104,7 +104,7 @@ sub charnames
       
       ##
       ## Now know where in the string the name starts.
-      ## The code, in hex, is befor that.
+      ## The code, in hex, is before that.
       ##
       ## The code can be 4-6 characters long, so we've got to sort of
       ## go look for it, just after the newline that comes before $off[0].
@@ -181,7 +181,7 @@ my %viacode;
 sub viacode
 {
     if (@_ != 1) {
-        carp "charnames::viacode() expects one numeric argument";
+        carp "charnames::viacode() expects one argument";
         return ()
     }
 
@@ -208,8 +208,6 @@ sub viacode
 
     if ($txt =~ m/^$hex\t\t(.+)/m) {
         return $viacode{$hex} = $1;
-    } elsif ($hex eq 'FEFF') {
-        return $viacode{$hex} = "BYTE ORDER MARK";
     } else {
 	carp "Unknown charcode '$hex'";
         return "\x{FFFD}";
@@ -244,7 +242,7 @@ __END__
 
 =head1 NAME
 
-charnames - define character names for C<\N{named}> string literal escapes.
+charnames - define character names for C<\N{named}> string literal escapes
 
 =head1 SYNOPSIS
 
@@ -336,8 +334,11 @@ prints "FOUR TEARDROP-SPOKED ASTERISK".
 
 Returns undef if no name is known for the code.
 
-This works only for the standard names, and does not yet aply 
+This works only for the standard names, and does not yet apply 
 to custom translators.
+
+Notice that the name returned for of U+FEFF is "ZERO WIDTH NO-BREAK
+SPACE", not "BYTE ORDER MARK".
 
 =head1 charnames::vianame(code)
 
