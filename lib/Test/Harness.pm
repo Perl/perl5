@@ -300,7 +300,7 @@ sub runtests {
 	    die "Failed $bad/$total test scripts, $pct% okay.$subpct\n";
 	}
     }
-    printf("Files=%d,  Tests=%d, %s\n", $files, $totmax, timestr($t_total, 'nop'));
+    printf("Files=%d, Tests=%d, %s\n", $files, $totmax, timestr($t_total, 'nop'));
 
     return ($bad == 0 && $totmax) ;
 }

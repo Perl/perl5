@@ -3255,17 +3255,19 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 		    TOKEN(NOAMP);
 		}
 
-		if (PL_hints & HINT_STRICT_SUBS)
-		    yylval.opval->op_private |= OPpCONST_STRICT;
-
 		/* Call it a bare word */
 
-	    bareword:
-		if (ckWARN(WARN_RESERVED)) {
-		    if (lastchar != '-') {
-			for (d = PL_tokenbuf; *d && isLOWER(*d); d++) ;
-			if (!*d)
-			    warner(WARN_RESERVED, PL_warn_reserved, PL_tokenbuf);
+		if (PL_hints & HINT_STRICT_SUBS)
+		    yylval.opval->op_private |= OPpCONST_STRICT;
+		else {
+		bareword:
+		    if (ckWARN(WARN_RESERVED)) {
+			if (lastchar != '-') {
+			    for (d = PL_tokenbuf; *d && isLOWER(*d); d++) ;
+			    if (!*d)
+				warner(WARN_RESERVED, PL_warn_reserved,
+				       PL_tokenbuf);
+			}
 		    }
 		}
 
