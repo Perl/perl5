@@ -16,11 +16,6 @@
 #endif
 #define PAGFEXT	".pag"
 
-#ifdef WIN32
-#undef	__declspec
-#define	__declspec(t)			/* kludge for EXTCONST below */
-#endif
-
 typedef struct {
 	int dirf;		       /* directory file descriptor */
 	int pagf;		       /* page file descriptor */
