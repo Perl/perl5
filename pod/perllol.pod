@@ -55,7 +55,7 @@ instead of having to write these:
 
 Well, that's because the rule is that on adjacent brackets only (whether
 square or curly), you are free to omit the pointer dereferencing array.
-But you need not do so for the very first one if it's a scalar containing
+But you cannot do so for the very first one if it's a scalar containing
 a reference, which means that $ref_to_LoL always needs it.
 
 =head1 Growing Your Own
@@ -128,7 +128,7 @@ or even just
 	$LoL[$i] = [ split ' ', <> ];
     } 
 
-You should in general be leary of using potential list functions
+You should in general be leery of using potential list functions
 in a scalar context without explicitly stating such.  
 This would be clearer to the casual reader:
 
@@ -243,7 +243,7 @@ Hm... that's still a bit ugly.  How about this:
 
 =head1 Slices
 
-If you want to get at a slide (part of a row) in a multidimensional
+If you want to get at a slice (part of a row) in a multidimensional
 array, you're going to have to do some fancy subscripting.  That's
 because while we have a nice synonym for single elements via the
 pointer arrow for dereferencing, no such convenience exists for slices.
