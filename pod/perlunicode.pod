@@ -644,7 +644,7 @@ Level 1 - Basic Unicode Support
         [ 9] see UTR#13 Unicode Newline Guidelines
         [10] should do ^ and $ also on \x{85}, \x{2028} and \x{2029})
              (should also affect <>, $., and script line numbers)
-  
+
 (*) You can mimic class subtraction using lookahead.
 For example, what TR18 might write as
 

@@ -218,10 +218,10 @@ longer than the original, you can use this code, by Jeff Pinyan:
   sub preserve_case {
     my ($from, $to) = @_;
     my ($lf, $lt) = map length, @_;
-    
+
     if ($lt < $lf) { $from = substr $from, 0, $lt }
     else { $from .= substr $to, $lf }
-    
+
     return uc $to | ($from ^ uc $from);
   }
 

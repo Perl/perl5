@@ -601,7 +601,7 @@ send() works from within a pseudo-process.
 
 Unless specifically qualified otherwise, the remainder of this document
 covers changes between the 5.005 and 5.6.0 releases.
- 
+
 =head1 Core Enhancements
 
 =head2 Interpreter cloning, threads, and concurrency

@@ -706,7 +706,7 @@ many more tests than there used to be.
 Here are the known failures from some compiler/platform combinations.
 
 DEC C V5.3-006 on OpenVMS VAX V6.2
- 
+
   [-.ext.list.util.t]tainted..............FAILED on test 3
   [-.ext.posix]sigaction..................FAILED on test 7
   [-.ext.time.hires]hires.................FAILED on test 14

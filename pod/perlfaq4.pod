@@ -142,7 +142,7 @@ Using perl's built in conversion of 0x notation:
 
     $int = 0xDEADBEEF;
     $dec = sprintf("%d", $int);
- 
+
 Using the hex function:
 
     $int = hex("DEADBEEF");

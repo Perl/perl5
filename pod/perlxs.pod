@@ -1722,20 +1722,20 @@ Below is an example module that makes use of the macros.
     #include "EXTERN.h"
     #include "perl.h"
     #include "XSUB.h"
- 
+
     /* Global Data */
- 
+
     #define MY_CXT_KEY "BlindMice::_guts" XS_VERSION
- 
+
     typedef struct {
         int count;
         char name[3][100];
     } my_cxt_t;
- 
+
     START_MY_CXT
- 
+
     MODULE = BlindMice           PACKAGE = BlindMice
- 
+
     BOOT:
     {
         MY_CXT_INIT;

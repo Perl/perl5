@@ -170,7 +170,7 @@ you should study L<perlxstut>.
 The C<h2xs> program will create stubs for all the important stuff for you:
 
   % h2xs -XA -n My::Module
-  
+
 The C<-X> switch tells C<h2xs> that you are not using C<XS> extension
 code.  The C<-A> switch tells C<h2xs> that you are not using the
 AutoLoader, and the C<-n> switch specifies the name of the module.

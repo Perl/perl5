@@ -2752,7 +2752,7 @@ and opening C<< '>-' >> opens STDOUT.
 You may use the three-argument form of open to specify
 I<I/O disciplines> that affect how the input and output
 are processed: see L</binmode> and L<open>.  For example
-  
+
   open(FH, "<:utf8", "file")
 
 will open the UTF-8 encoded file containing Unicode characters,

@@ -3919,9 +3919,9 @@ Perl_getcwd_sv(pTHX_ register SV *sv)
 
 Returns a pointer to the next character after the parsed
 vstring, as well as updating the passed in sv.
- *
+
 Function must be called like
- 	
+
         sv = NEWSV(92,5);
 	s = new_vstring(s,sv);
 

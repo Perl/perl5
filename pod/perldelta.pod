@@ -2493,9 +2493,9 @@ There are a few known test failures, see L<perluts>.
 =head2 VMS
 
 There is one known test failure with a default configuration:
- 
+
   [.run]switches..........................FAILED on test 1
-  
+
 =head2 Win32
 
 In multi-CPU boxes there are some problems with the I/O buffering:
