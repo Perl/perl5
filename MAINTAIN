@@ -24,7 +24,7 @@ Changes5.002
 Changes5.003	
 Changes5.004	
 Changes5.005	
-Configure		cfg
+Configure			cfg
 Copying	
 EXTERN.h	
 INSTALL	
@@ -33,7 +33,7 @@ MANIFEST
 Makefile.SH	
 objXSUB.h	
 Policy_sh.SH	
-Porting/*		cfg
+Porting/*			cfg
 Porting/Contract	
 Porting/Glossary	
 Porting/config.sh	
@@ -49,44 +49,44 @@ Porting/patching.pod
 Porting/patchls	
 Porting/pumpkin.pod	
 README	
-README.amiga		amiga
-README.beos		beos
-README.cygwin32		cygwin32
-README.dos		dos
-README.lexwarn		lexwarn
-README.mpeix		mpeix
-README.os2		os2
-README.os390		mvs
-README.plan9		plan9
-README.posix-bc		posix-bc
-README.qnx		qnx
+README.amiga			amiga
+README.beos			beos
+README.cygwin32			cygwin32
+README.dos			dos
+README.lexwarn			lexwarn
+README.mpeix			mpeix
+README.os2			os2
+README.os390			mvs
+README.plan9			plan9
+README.posix-bc			posix-bc
+README.qnx			qnx
 README.threads	
-README.vmesa		vmesa
-README.vms		vms
-README.vos		vos
-README.win32		win32
+README.vmesa			vmesa
+README.vms			vms
+README.vos			vos
+README.win32			win32
 Todo	
 Todo-5.005	
 XSlock.h	
 XSUB.h	
 av.c	
 av.h	
-beos/nm.c		beos
+beos/*				beos
 bytecode.h	
 bytecode.pl	
 byterun.c	
 byterun.h	
 cc_runtime.h	
 cflags.SH	
-config_h.SH		cfg
+config_h.SH			cfg
 configpm	
-configure.com		vms
+configure.com			vms
 configure.gnu	
 cop.h	
 cv.h	
-cygwin32/*		cygwin32
+cygwin32/*			cygwin32
 deb.c	
-djgpp/*			dos
+djgpp/*				dos
 doio.c	
 doop.c	
 dosish.h	
@@ -421,79 +421,83 @@ lib/CPAN*		cpan
 lib/Carp.pm	
 lib/Class/Struct.pm	tchrist
 lib/Cwd.pm	
-lib/Devel/SelfStubber.pm Generate stubs for SelfLoader.pm
+lib/Devel/SelfStubber.pm	
 lib/DirHandle.pm	
 lib/English.pm	
 lib/Env.pm	
 lib/Exporter.pm	
-lib/ExtUtils/*			extutils
-lib/ExtUtils/MM*		mm
+lib/ExtUtils/*			mm
+lib/ExtUtils/Command.pm		nik
+lib/ExtUtils/Embed.pm		doug
+lib/ExtUtils/Installed.pm	alan.burlison
+lib/ExtUtils/Mksymlists.pm	cbail
 lib/ExtUtils/MM_OS2.pm		os2
 lib/ExtUtils/MM_VMS.pm		vms
 lib/ExtUtils/MM_Win32.pm	win32
+lib/ExtUtils/Packlist.pm	alan.burlison
 lib/Fatal.pm	
 lib/File/Basename.pm	
 lib/File/CheckTree.pm	
-lib/File/Compare.pm	
-lib/File/Copy.pm	
-lib/File/DosGlob.pm	
+lib/File/Compare.pm		nik
+lib/File/Copy.pm		cbail
+lib/File/DosGlob.pm		gsar
 lib/File/Find.pm	
-lib/File/Path.pm	
-lib/File/Spec*		kjahds
-lib/File/Spec/Mac.pm	schinder
-lib/File/Spec/OS2.pm	ilya
-lib/File/Spec/VMS.pm	vms
-lib/File/Spec/Win32.pm	win32
-lib/File/stat.pm	
+lib/File/Path.pm		timb,cbail
+lib/File/Spec*			kjahds
+lib/File/Spec/Mac.pm		schinder
+lib/File/Spec/OS2.pm		ilya
+lib/File/Spec/VMS.pm		vms
+lib/File/Spec/Win32.pm		win32
+lib/File/stat.pm		tchrist
 lib/FileCache.pm	
 lib/FileHandle.pm	
 lib/FindBin.pm	
-lib/Getopt/Long.pm	jvromans
-lib/I18N/Collate.pm	jhi
+lib/Getopt/Long.pm		jvromans
+lib/I18N/Collate.pm		jhi
 lib/IPC/Open2.pm	
 lib/IPC/Open3.pm	
-lib/Math/BigFloat.pm	
-lib/Math/BigInt.pm	
-lib/Math/Complex.pm	complex
-lib/Math/Trig.pm	complex
+lib/Math/BigFloat.pm		mbiggar
+lib/Math/BigInt.pm		mbiggar
+lib/Math/Complex.pm		complex
+lib/Math/Trig.pm		complex
 lib/Net/Ping.pm	
-lib/Net/hostent.pm	
-lib/Net/netent.pm	
-lib/Net/protoent.pm	
-lib/Net/servent.pm	
+lib/Net/hostent.pm		tchrist
+lib/Net/netent.pm		tchrist
+lib/Net/protoent.pm		tchrist
+lib/Net/servent.pm		tchrist
 lib/Pod/Functions.pm	
-lib/Pod/Html.pm		tchrist
-lib/Pod/Text.pm		tchrist
+lib/Pod/Html.pm			tchrist
+lib/Pod/Text.pm			tchrist
 lib/Search/Dict.pm	
 lib/SelectSaver.pm	
 lib/SelfLoader.pm	
 lib/Shell.pm	
 lib/Symbol.pm	
-lib/Sys/Hostname.pm	
-lib/Sys/Syslog.pm	
+lib/Sys/Hostname.pm		sundstrom
+lib/Sys/Syslog.pm		tchrist
 lib/Term/Cap.pm	
-lib/Term/Complete.pm	
+lib/Term/Complete.pm		wayne.thompson
 lib/Term/ReadLine.pm	
 lib/Test.pm	
-lib/Test/Harness.pm	
+lib/Test/Harness.pm		k
 lib/Text/Abbrev.pm	
-lib/Text/ParseWords.pm	pomeranz
-lib/Text/Soundex.pm	stok
-lib/Text/Tabs.pm	
-lib/Text/Wrap.pm	muir
-lib/Tie/Array.pm	
+lib/Text/ParseWords.pm		pomeranz
+lib/Text/Soundex.pm		stok
+lib/Text/Tabs.pm		muir
+lib/Text/Wrap.pm		muir
+lib/Tie/Array.pm		nik
 lib/Tie/Handle.pm	
 lib/Tie/Hash.pm	
-lib/Tie/RefHash.pm	
+lib/Tie/RefHash.pm		gsar
 lib/Tie/Scalar.pm	
 lib/Tie/SubstrHash.pm	
-lib/Time/Local.pm	pomeranz
-lib/Time/gmtime.pm	tchrist
-lib/Time/localtime.pm	tchrist
-lib/Time/tm.pm		tchrist
+lib/Time/Local.pm		pomeranz
+lib/Time/gmtime.pm		tchrist
+lib/Time/localtime.pm		tchrist
+lib/Time/tm.pm			tchrist
 lib/UNIVERSAL.pm	
-lib/User/grent.pm	tchrist
-lib/User/pwent.pm	tchrist
+lib/User/grent.pm		tchrist
+lib/User/pwent.pm		tchrist
 lib/abbrev.pl	
 lib/assert.pl	
 lib/autouse.pm	
@@ -507,7 +511,7 @@ lib/chat2.pl
 lib/complete.pl	
 lib/constant.pm	
 lib/ctime.pl	
-lib/diagnostics.pm	doc
+lib/diagnostics.pm		doc
 lib/dotsh.pl	
 lib/dumpvar.pl	
 lib/exceptions.pl	
@@ -526,13 +530,13 @@ lib/importenv.pl
 lib/integer.pm	
 lib/less.pm	
 lib/lib.pm	
-lib/locale.pm		locale
+lib/locale.pm			locale
 lib/look.pl	
 lib/newgetopt.pl	
 lib/open2.pl	
 lib/open3.pl	
-lib/overload.pm		ilya
-lib/perl5db.pl		ilya
+lib/overload.pm			ilya
+lib/perl5db.pl			ilya
 lib/pwd.pl	
 lib/shellwords.pl	
 lib/sigtrap.pm	
@@ -543,20 +547,20 @@ lib/syslog.pl
 lib/tainted.pl	
 lib/termcap.pl	
 lib/timelocal.pl	
-lib/unicode*		lwall
-lib/utf8*		lwall
+lib/unicode*			lwall
+lib/utf8*			lwall
 lib/validate.pl	
 lib/vars.pm	
-lib/warning.pm		lexwarn
+lib/warning.pm			lexwarn
 makeaperl.SH	
 makedepend.SH	
 makedir.SH	
-malloc.c		ilya
+malloc.c			ilya
 mg.c	
 mg.h	
 minimod.pl	
 miniperlmain.c	
-mpeix/*			mpeix
+mpeix/*				mpeix
 mv-if-diff	
 myconfig	
 nostdio.h	
@@ -564,7 +568,7 @@ op.c
 op.h	
 opcode.h	
 opcode.pl	
-os2/*			ilya
+os2/*				ilya
 patchlevel.h	
 perl.c	
 perl.h	
@@ -581,53 +585,53 @@ perly_c.diff
 perly.fixer	
 perly.h	
 perly.y	
-plan9/*			plan9
-pod/*			doc
+plan9/*				plan9
+pod/*				doc
 pod/buildtoc	
 pod/checkpods.PL	
 pod/perl.pod	
 pod/perlapio.pod	
 pod/perlbook.pod	
 pod/perlbot.pod	
-pod/perlcall.pod	
+pod/perlcall.pod		pmarquess
 pod/perldata.pod	
 pod/perldebug.pod	
 pod/perldelta.pod	
 pod/perl5005delta.pod	
 pod/perl5004delta.pod	
 pod/perldiag.pod	
-pod/perldsc.pod	
-pod/perlembed.pod	
-pod/perlfaq*		gnat
+pod/perldsc.pod			tchrist
+pod/perlembed.pod		doug,jon
+pod/perlfaq*			gnat
 pod/perlform.pod	
 pod/perlfunc.pod	
 pod/perlguts.pod	
-pod/perlhist.pod	jhi
-pod/perlipc.pod	
-pod/perllocale.pod	locale
-pod/perllol.pod	
+pod/perlhist.pod		jhi
+pod/perlipc.pod			tchrist
+pod/perllocale.pod		locale
+pod/perllol.pod			tchrist
 pod/perlmod.pod	
-pod/perlmodinstall.pod	
+pod/perlmodinstall.pod		jon
 pod/perlmodlib.pod	
 pod/perlobj.pod	
 pod/perlop.pod	
-pod/perlpod.pod	
-pod/perlport.pod	pudge
-pod/perlre.pod		regex
+pod/perlpod.pod			lwall
+pod/perlport.pod		pudge
+pod/perlre.pod			regex
 pod/perlref.pod	
-pod/perlreftut.pod	
+pod/perlreftut.pod		mjd
 pod/perlrun.pod	
 pod/perlsec.pod	
 pod/perlstyle.pod	
 pod/perlsub.pod	
 pod/perlsyn.pod	
-pod/perltie.pod	
+pod/perltie.pod			tchrist
 pod/perltoc.pod	
-pod/perltoot.pod	
+pod/perltoot.pod		tchrist
 pod/perltrap.pod	
 pod/perlvar.pod	
-pod/perlxs.pod	
-pod/perlxstut.pod	
+pod/perlxs.pod			roehrich
+pod/perlxstut.pod		okamoto
 pod/pod2html.PL	
 pod/pod2latex.PL	
 pod/pod2man.PL	
@@ -644,14 +648,14 @@ pp_hot.c
 pp_proto.h	
 pp_sys.c	
 proto.h	
-qnx/*		qnx
-regcomp.c	regex
-regcomp.h	regex
-regcomp.pl	regex
-regcomp.sym	regex
-regexec.c	regex
-regexp.h	regex
-regnodes.h	regex
+qnx/*				qnx
+regcomp.c			regex
+regcomp.h			regex
+regcomp.pl			regex
+regcomp.sym			regex
+regexec.c			regex
+regexp.h			regex
+regnodes.h			regex
 run.c	
 scope.c	
 scope.h	
@@ -706,31 +710,31 @@ t/lib/cgi-function.t
 t/lib/cgi-html.t	
 t/lib/cgi-request.t	
 t/lib/checktree.t	
-t/lib/complex.t		complex
-t/lib/db-btree.t	pmarquess
-t/lib/db-hash.t		pmarquess
-t/lib/db-recno.t	pmarquess
+t/lib/complex.t			complex
+t/lib/db-btree.t		pmarquess
+t/lib/db-hash.t			pmarquess
+t/lib/db-recno.t		pmarquess
 t/lib/dirhand.t	
 t/lib/dosglob.t	
-t/lib/dumper-ovl.t	gsar
-t/lib/dumper.t		gsar
+t/lib/dumper-ovl.t		gsar
+t/lib/dumper.t			gsar
 t/lib/english.t	
 t/lib/env.t	
-t/lib/errno.t		gbarr
+t/lib/errno.t			gbarr
 t/lib/fields.t	
 t/lib/filecache.t	
 t/lib/filecopy.t	
 t/lib/filefind.t	
 t/lib/filehand.t	
 t/lib/filepath.t	
-t/lib/filespec.t	kjahds
+t/lib/filespec.t		kjahds
 t/lib/findbin.t	
 t/lib/gdbm.t	
-t/lib/getopt.t		jvromans
-t/lib/h2ph*		kstar
+t/lib/getopt.t			jvromans
+t/lib/h2ph*			kstar
 t/lib/hostname.t	
-t/lib/io_*		gbarr
-t/lib/ipc_sysv.t	gbarr
+t/lib/io_*			gbarr
+t/lib/ipc_sysv.t		gbarr
 t/lib/ndbm.t	
 t/lib/odbm.t	
 t/lib/opcode.t	
@@ -738,7 +742,7 @@ t/lib/open2.t
 t/lib/open3.t	
 t/lib/ops.t	
 t/lib/parsewords.t	
-t/lib/ph.t		kstar
+t/lib/ph.t			kstar
 t/lib/posix.t	
 t/lib/safe1.t	
 t/lib/safe2.t	
@@ -748,8 +752,8 @@ t/lib/selectsaver.t
 t/lib/socket.t	
 t/lib/soundex.t	
 t/lib/symbol.t	
-t/lib/texttabs.t	muir
-t/lib/textfill.t	muir
+t/lib/texttabs.t		muir
+t/lib/textfill.t		muir
 t/lib/textwrap.t	
 t/lib/thread.t	
 t/lib/tie-push.t	
@@ -811,13 +815,13 @@ t/op/pwent.t
 t/op/quotemeta.t	
 t/op/rand.t	
 t/op/range.t	
-t/op/re_tests		regex
+t/op/re_tests			regex
 t/op/read.t	
 t/op/readdir.t	
 t/op/recurse.t	
 t/op/ref.t	
-t/op/regexp.t		regex
-t/op/regexp_noamp.t	regex
+t/op/regexp.t			regex
+t/op/regexp_noamp.t		regex
 t/op/repeat.t	
 t/op/runlevel.t	
 t/op/sleep.t	
@@ -843,38 +847,38 @@ t/op/vec.t
 t/op/wantarray.t	
 t/op/write.t	
 t/pragma/constant.t	
-t/pragma/locale.t	locale
-t/pragma/overload.t	ilya
+t/pragma/locale.t		locale
+t/pragma/overload.t		ilya
 t/pragma/strict-refs	
 t/pragma/strict-subs	
 t/pragma/strict-vars	
 t/pragma/strict.t	
 t/pragma/subs.t	
-t/pragma/warn/*		lexwarn
-t/pragma/warn/regcomp	regex
-t/pragma/warn/regexec	regex
-t/pragma/warning.t	lexwarn
+t/pragma/warn/*			lexwarn
+t/pragma/warn/regcomp		regex
+t/pragma/warn/regexec		regex
+t/pragma/warning.t		lexwarn
 taint.c	
 thrdvar.h	
 thread.h	
 toke.c	
 universal.c	
 unixish.h	
-utf*			lwall
+utf*				lwall
 utils/Makefile	
 utils/c2ph.PL	
-utils/h2ph.PL		kstar
+utils/h2ph.PL			kstar
 utils/h2xs.PL	
 utils/perlbug.PL	
 utils/perlcc.PL	
 utils/perldoc.PL	
 utils/pl2pm.PL	
-utils/splain.PL		doc
-vmesa/*			vmesa
-vms/*			vms
-vos/*			vos
-warning.h		lexwarn
-warning.pl		lexwarn
+utils/splain.PL			doc
+vmesa/*				vmesa
+vms/*				vms
+vos/*				vos
+warning.h			lexwarn
+warning.pl			lexwarn
 win32/*
 writemain.SH	
 x2p/EXTERN.h	
