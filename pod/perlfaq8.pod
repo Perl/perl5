@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq8 - System Interaction ($Revision: 1.1 $, $Date: 2001/09/20 03:03:00 $)
+perlfaq8 - System Interaction ($Revision: 1.2 $, $Date: 2001/10/16 13:27:22 $)
 
 =head1 DESCRIPTION
 
@@ -294,7 +294,7 @@ of code just because you're afraid of a little $| variable:
     DEV->autoflush(1);
 
 As mentioned in the previous item, this still doesn't work when using
-socket I/O between Unix and Macintosh.  You'll need to hardcode your
+socket I/O between Unix and Macintosh.  You'll need to hard code your
 line terminators, in that case.
 
 =item non-blocking input
@@ -435,7 +435,7 @@ program.  (There is no way to set the time and date on a per-process
 basis.)  This mechanism will work for Unix, MS-DOS, Windows, and NT;
 the VMS equivalent is C<set time>.
 
-However, if all you want to do is change your timezone, you can
+However, if all you want to do is change your time zone, you can
 probably get away with setting an environment variable:
 
     $ENV{TZ} = "MST7MDT";		   # unixish

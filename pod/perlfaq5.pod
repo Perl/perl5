@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq5 - Files and Formats ($Revision: 1.2 $, $Date: 2001/09/26 10:44:41 $)
+perlfaq5 - Files and Formats ($Revision: 1.3 $, $Date: 2001/10/16 13:27:22 $)
 
 =head1 DESCRIPTION
 
@@ -67,7 +67,7 @@ or even this:
     $document = join('', <$sock>);
     print "DOC IS: $document\n";
 
-Note the bizarrely hardcoded carriage return and newline in their octal
+Note the bizarrely hard coded carriage return and newline in their octal
 equivalents.  This is the ONLY way (currently) to assure a proper flush
 on all platforms, including Macintosh.  That's the way things work in
 network programming: you really should specify the exact bit pattern
@@ -242,7 +242,7 @@ Berkeley-style ps:
 
 We've used C<$$var> in a way that forbidden by C<use strict 'refs'>.
 That is, we've promoted a string to a scalar variable reference using
-symbolic references.  This is ok in small programs, but doesn't scale
+symbolic references.  This is okay in small programs, but doesn't scale
 well.   It also only works on global variables, not lexicals.
 
 =head2 How can I make a filehandle local to a subroutine?  How do I pass filehandles between subroutines?  How do I make an array of filehandles?
@@ -376,7 +376,7 @@ In the examples above, we assigned the filehandle to a scalar variable
 before using it.  That is because only simple scalar variables, not
 expressions or subscripts of hashes or arrays, can be used with
 built-ins like C<print>, C<printf>, or the diamond operator.  Using
-something other than a simple scalar varaible as a filehandle is
+something other than a simple scalar variable as a filehandle is
 illegal and won't even compile:
 
     @fd = (*STDIN, *STDOUT, *STDERR);
@@ -733,7 +733,7 @@ If you know you are only writing code to run on an OS and filesystem that
 does implement append mode correctly (a local filesystem on a modern
 Unix for example), and you keep the file in block-buffered mode and you
 write less than one buffer-full of output between each manual flushing
-of the buffer then each bufferload is almost garanteed to be written to
+of the buffer then each bufferload is almost guaranteed to be written to
 the end of the file in one chunk without getting intermingled with
 anyone else's output. You can also use the syswrite() function which is
 simply a wrapper around your systems write(2) system call.
@@ -771,7 +771,7 @@ Don't forget them or you'll be quite sorry.
 
 If you want to retrieve the time at which the file was last read,
 written, or had its meta-data (owner, etc) changed, you use the B<-M>,
-B<-A>, or B<-C> filetest operations as documented in L<perlfunc>.  These
+B<-A>, or B<-C> file test operations as documented in L<perlfunc>.  These
 retrieve the age of the file (measured against the start-time of your
 program) in days as a floating point number.  To retrieve the "raw"
 time in seconds since the epoch, you would call the stat function,
@@ -1024,7 +1024,7 @@ Or write a small C program using the editor of champions:
     % ./fionread
     0x4004667f
 
-And then hard-code it, leaving porting as an exercise to your successor.
+And then hard code it, leaving porting as an exercise to your successor.
 
     $FIONREAD = 0x4004667f;         # XXX: opsys dependent
 

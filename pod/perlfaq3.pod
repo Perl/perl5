@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.7 $, $Date: 2001/10/09 22:17:53 $)
+perlfaq3 - Programming Tools ($Revision: 1.8 $, $Date: 2001/10/17 14:14:20 $)
 
 =head1 DESCRIPTION
 
@@ -869,30 +869,11 @@ For modules, get the CGI or LWP modules from CPAN.  For textbooks,
 see the two especially dedicated to web stuff in the question on
 books.  For problems and questions related to the web, like ``Why
 do I get 500 Errors'' or ``Why doesn't it run from the browser right
-when it runs fine on the command line'', see these sources:
+when it runs fine on the command line'', see the troubleshooting
+guides and references in L<perlfaq9> or in the CGI MetaFAQ:
 
-    WWW Security FAQ
-        http://www.w3.org/Security/Faq/
-
-    Web FAQ
-        http://www.boutell.com/faq/
-
-    CGI FAQ
-        http://www.webthing.com/tutorials/cgifaq.html
-
-    HTTP Spec
-        http://www.w3.org/pub/WWW/Protocols/HTTP/
-
-    HTML Spec
-        http://www.w3.org/TR/REC-html40/
-        http://www.w3.org/pub/WWW/MarkUp/
-
-    CGI Spec
-        http://www.w3.org/CGI/
-
-    CGI Security FAQ
-        http://www.go2net.com/people/paulp/cgi-security/safe-cgi.txt
-
+	http://www.perl.org/CGI_MetaFAQ.html
+	
 =head2 Where can I learn about object-oriented Perl programming?
 
 A good place to start is L<perltoot>, and you can use L<perlobj>,

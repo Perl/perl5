@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.1 $, $Date: 2001/09/20 03:03:00 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.2 $, $Date: 2001/10/16 13:27:22 $)
 
 =head1 DESCRIPTION
 
@@ -440,7 +440,7 @@ in releases and comes in well-defined packages. There is a very large
 user community and an extensive literature.  The comp.lang.perl.*
 newsgroups and several of the mailing lists provide free answers to your
 questions in near real-time.  Perl has traditionally been supported by
-Larry, scores of software designers and developers, and myriads of
+Larry, scores of software designers and developers, and myriad
 programmers, all working for free to create a useful thing to make life
 better for everyone.
 
