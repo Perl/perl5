@@ -278,6 +278,7 @@ Translate Unix filepaths and shell globs to Mac style.
 sub patternify {
     my($unix) = @_;
     my(@mac);
+    use bytes; # Non-UTF-8 high bytes in the below.
     
     foreach (split(/[ \t\n]+/, $unix)) {
 	if (m|/|) {
