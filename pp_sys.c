@@ -4351,26 +4351,6 @@ PP(pp_time)
     RETURN;
 }
 
-/* XXX The POSIX name is CLK_TCK; it is to be preferred
-   to HZ.  Probably.  For now, assume that if the system
-   defines HZ, it does so correctly.  (Will this break
-   on VMS?)
-   Probably we ought to use _sysconf(_SC_CLK_TCK), if
-   it's supported.    --AD  9/96.
-*/
-
-#ifdef __BEOS__
-#  define HZ 1000000
-#endif
-
-#ifndef HZ
-#  ifdef CLK_TCK
-#    define HZ CLK_TCK
-#  else
-#    define HZ 60
-#  endif
-#endif
-
 PP(pp_tms)
 {
 #ifdef HAS_TIMES
@@ -4384,11 +4364,11 @@ PP(pp_tms)
                                                    /* is returned.                   */
 #endif
 
-    PUSHs(sv_2mortal(newSVnv(((NV)PL_timesbuf.tms_utime)/HZ)));
+    PUSHs(sv_2mortal(newSVnv(((NV)PL_timesbuf.tms_utime)/(NV)PL_clocktick)));
     if (GIMME == G_ARRAY) {
-	PUSHs(sv_2mortal(newSVnv(((NV)PL_timesbuf.tms_stime)/HZ)));
-	PUSHs(sv_2mortal(newSVnv(((NV)PL_timesbuf.tms_cutime)/HZ)));
-	PUSHs(sv_2mortal(newSVnv(((NV)PL_timesbuf.tms_cstime)/HZ)));
+	PUSHs(sv_2mortal(newSVnv(((NV)PL_timesbuf.tms_stime)/(NV)PL_clocktick)));
+	PUSHs(sv_2mortal(newSVnv(((NV)PL_timesbuf.tms_cutime)/(NV)PL_clocktick)));
+	PUSHs(sv_2mortal(newSVnv(((NV)PL_timesbuf.tms_cstime)/(NV)PL_clocktick)));
     }
     RETURN;
 #else

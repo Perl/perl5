@@ -26,6 +26,18 @@ char *nw_get_sitelib(const char *pl);
 #include <unistd.h>
 #endif
 
+#ifdef __BEOS__
+#  define HZ 1000000
+#endif
+
+#ifndef HZ
+#  ifdef CLK_TCK
+#    define HZ CLK_TCK
+#  else
+#    define HZ 60
+#  endif
+#endif
+
 #if !defined(STANDARD_C) && !defined(HAS_GETENV_PROTOTYPE) && !defined(PERL_MICRO)
 char *getenv (char *); /* Usually in <stdlib.h> */
 #endif
@@ -294,6 +306,14 @@ perl_construct(pTHXx)
 #ifdef  USE_ENVIRON_ARRAY
     PL_origenviron = environ;
 #endif
+
+    /* Use sysconf(_SC_CLK_TCK) if available, if not
+     * available or if the sysconf() fails, use the HZ. */
+#if defined(HAS_SYSCONF) && defined(_SC_CLK_TCK)
+    PL_clocktick = sysconf(_SC_CLK_TCK);
+    if (PL_clocktick <= 0)
+#endif
+	 PL_clocktick = HZ;
 
     ENTER;
 }
