@@ -271,7 +271,7 @@ FILE *fp;
 	    {
 		svindex arg;
 		BGET_objindex(arg);
-		IoTOP_GV(sv) = arg;
+		*(SV**)&IoTOP_GV(sv) = arg;
 		break;
 	    }
 	  case INSN_XIO_FMT_NAME:		/* 37 */
@@ -285,7 +285,7 @@ FILE *fp;
 	    {
 		svindex arg;
 		BGET_objindex(arg);
-		IoFMT_GV(sv) = arg;
+		*(SV**)&IoFMT_GV(sv) = arg;
 		break;
 	    }
 	  case INSN_XIO_BOTTOM_NAME:		/* 39 */
@@ -299,7 +299,7 @@ FILE *fp;
 	    {
 		svindex arg;
 		BGET_objindex(arg);
-		IoBOTTOM_GV(sv) = arg;
+		*(SV**)&IoBOTTOM_GV(sv) = arg;
 		break;
 	    }
 	  case INSN_XIO_SUBPROCESS:		/* 41 */
@@ -348,14 +348,14 @@ FILE *fp;
 	    {
 		svindex arg;
 		BGET_objindex(arg);
-		CvGV(sv) = arg;
+		*(SV**)&CvGV(sv) = arg;
 		break;
 	    }
 	  case INSN_XCV_FILEGV:		/* 48 */
 	    {
 		svindex arg;
 		BGET_objindex(arg);
-		CvFILEGV(sv) = arg;
+		*(SV**)&CvFILEGV(sv) = arg;
 		break;
 	    }
 	  case INSN_XCV_DEPTH:		/* 49 */
@@ -761,7 +761,7 @@ FILE *fp;
 	    {
 		svindex arg;
 		BGET_objindex(arg);
-		cGVOP->op_gv = arg;
+		*(SV**)&cGVOP->op_gv = arg;
 		break;
 	    }
 	  case INSN_OP_PV:		/* 107 */
@@ -817,7 +817,7 @@ FILE *fp;
 	    {
 		svindex arg;
 		BGET_objindex(arg);
-		cCOP->cop_filegv = arg;
+		*(SV**)&cCOP->cop_filegv = arg;
 		break;
 	    }
 	  case INSN_COP_SEQ:		/* 115 */

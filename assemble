@@ -1,4 +1,3 @@
-#!./bperl
 use B::Assembler qw(assemble_fh);
 use FileHandle;
 

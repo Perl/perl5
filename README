@@ -1,6 +1,6 @@
-		  Perl Compiler Kit, Version alpha3
+		  Perl Compiler Kit, Version alpha4
 
-		 Copyright (c) 1996, Malcolm Beattie
+		 Copyright (c) 1996, 1997, Malcolm Beattie
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of either:
@@ -25,6 +25,14 @@
 
 CHANGES
 
+New since alpha3
+    Anonymous subs work properly with C and CC.
+    Heuristics for forcing compilation of apparently unused subs/methods.
+    Subs which use the AutoLoader module are forcibly loaded at compile-time.
+    Slightly faster compilation.
+    Handles slightly more complex code within a BEGIN { }.
+    Minor bug fixes.
+
 New since alpha2
     CC backend now supports ".." and s//e.
     Xref backend generates cross-reference reports
@@ -38,7 +46,7 @@ New since alpha1
 
 INSTALLATION
 
-(1) You need perl5.002 or perl5.003.
+(1) You need perl5.002 or later.
 
 (2) If you want to compile and run programs with the C or CC backends
 which undefine (or redefine) subroutines, then you need to apply a
@@ -61,14 +69,14 @@ I haven't tested this option yet with an old pre-Standard compiler.
 (4) If your platform supports dynamic loading then just type
     make
 and you can then use
-    perl -Iblib/arch -MO=foo bar baz
+    perl -Iblib/arch -MO=foo bar
 to use the compiler modules (see later for details).
 If you need/want instead to make a statically linked perl which
 contains the appropriate modules, then type
-    make bperl
+    make perl
     make byteperl
 and you can then use
-    ./bperl -MO=foo bar baz
+    ./perl -MO=foo bar
 to use the compiler modules.    
 In both cases, the byteperl executable is required for running standalone
 bytecode programs. It is *not* a standard perl+XSUB perl executable.
@@ -84,7 +92,7 @@ In the following examples, you'll need to replace "perl" by
 if you have built the extensions for a dynamic loading platform but
 haven't installed the extensions completely. You'll need to replace
 "perl" by
-    ./bperl
+    ./perl
 if you have built the extensions into a statically linked perl binary.
 
 (1) To compile perl program foo.pl with the C backend, do
@@ -149,7 +157,7 @@ it. For example, with Digital UNIX, do something like
     ld -shared -o libperl.so -all libperl.a -none -lc
 and with Linux/ELF, rebuild the perl .c files with -fPIC (and I
 also suggest -fomit-frame-pointer for Linux on Intel architetcures),
-do "Make libperl.a" and then do
+do "make libperl.a" and then do
     gcc -shared -Wl,-soname,libperl.so.5 -o libperl.so.5.3 `ar t libperl.a`
 and then
     # cp libperl.so.5.3 /usr/lib

@@ -1,12 +1,14 @@
 package B::Debug;
 use strict;
-use B qw(peekop class ad walkoptree walkoptree_exec
+use B qw(peekop class walkoptree walkoptree_exec
          main_start main_root cstring sv_undef);
 use B::Asmdata qw(@specialsv_name);
 
+my %done_gv;
+
 sub B::OP::debug {
     my ($op) = @_;
-    printf <<'EOT', class($op), ad($op), ad($op->next), ad($op->sibling), $op->ppaddr, $op->targ, $op->type, $op->seq, $op->flags, $op->private;
+    printf <<'EOT', class($op), $$op, ${$op->next}, ${$op->sibling}, $op->ppaddr, $op->targ, $op->type, $op->seq, $op->flags, $op->private;
 %s (0x%lx)
 	op_next		0x%x
 	op_sibling	0x%x
@@ -22,26 +24,26 @@ EOT
 sub B::UNOP::debug {
     my ($op) = @_;
     $op->B::OP::debug();
-    printf "\top_first\t0x%x\n", ad($op->first);
+    printf "\top_first\t0x%x\n", ${$op->first};
 }
 
 sub B::BINOP::debug {
     my ($op) = @_;
     $op->B::UNOP::debug();
-    printf "\top_last\t\t0x%x\n", ad($op->last);
+    printf "\top_last\t\t0x%x\n", ${$op->last};
 }
 
 sub B::LOGOP::debug {
     my ($op) = @_;
     $op->B::UNOP::debug();
-    printf "\top_other\t0x%x\n", ad($op->other);
+    printf "\top_other\t0x%x\n", ${$op->other};
 }
 
 sub B::CONDOP::debug {
     my ($op) = @_;
     $op->B::UNOP::debug();
-    printf "\top_true\t0x%x\n", ad($op->true);
-    printf "\top_false\t0x%x\n", ad($op->false);
+    printf "\top_true\t0x%x\n", ${$op->true};
+    printf "\top_false\t0x%x\n", ${$op->false};
 }
 
 sub B::LISTOP::debug {
@@ -53,11 +55,11 @@ sub B::LISTOP::debug {
 sub B::PMOP::debug {
     my ($op) = @_;
     $op->B::LISTOP::debug();
-    printf "\top_pmreplroot\t0x%x\n", ad($op->pmreplroot);
-    printf "\top_pmreplstart\t0x%x\n", ad($op->pmreplstart);
-    printf "\top_pmnext\t0x%x\n", ad($op->pmnext);
+    printf "\top_pmreplroot\t0x%x\n", ${$op->pmreplroot};
+    printf "\top_pmreplstart\t0x%x\n", ${$op->pmreplstart};
+    printf "\top_pmnext\t0x%x\n", ${$op->pmnext};
     printf "\top_pmregexp->precomp\t%s\n", cstring($op->precomp);
-    printf "\top_pmshort\t0x%x\n", ad($op->pmshort);
+    printf "\top_pmshort\t0x%x\n", ${$op->pmshort};
     printf "\top_pmflags\t0x%x\n", $op->pmflags;
     printf "\top_pmslen\t%d\n", $op->pmslen;
     $op->pmshort->debug;
@@ -68,7 +70,7 @@ sub B::COP::debug {
     my ($op) = @_;
     $op->B::OP::debug();
     my ($filegv) = $op->filegv;
-    printf <<'EOT', $op->label, ad($op->stash), ad($filegv), $op->seq, $op->arybase, $op->line;
+    printf <<'EOT', $op->label, ${$op->stash}, $$filegv, $op->seq, $op->arybase, $op->line;
 	cop_label	%s
 	cop_stash	0x%x
 	cop_filegv	0x%x
@@ -82,7 +84,7 @@ EOT
 sub B::SVOP::debug {
     my ($op) = @_;
     $op->B::OP::debug();
-    printf "\top_sv\t\t0x%x\n", ad($op->sv);
+    printf "\top_sv\t\t0x%x\n", ${$op->sv};
     $op->sv->debug;
 }
 
@@ -95,21 +97,22 @@ sub B::PVOP::debug {
 sub B::GVOP::debug {
     my ($op) = @_;
     $op->B::OP::debug();
-    printf "\top_gv\t\t0x%x\n", ad($op->gv);
+    printf "\top_gv\t\t0x%x\n", ${$op->gv};
+    $op->gv->debug;
 }
 
 sub B::CVOP::debug {
     my ($op) = @_;
     $op->B::OP::debug();
-    printf "\top_cv\t\t0x%x\n", ad($op->cv);
+    printf "\top_cv\t\t0x%x\n", ${$op->cv};
 }
 
 sub B::NULL::debug {
     my ($sv) = @_;
-    if (ad($sv) == ad(sv_undef())) {
+    if ($$sv == ${sv_undef()}) {
 	print "&sv_undef\n";
     } else {
-	printf "NULL (0x%x)\n", ad($sv);
+	printf "NULL (0x%x)\n", $$sv;
     }
 }
 
@@ -119,7 +122,7 @@ sub B::SV::debug {
 	print class($sv), " = NULL\n";
 	return;
     }
-    printf <<'EOT', class($sv), ad($sv), $sv->REFCNT, $sv->FLAGS;
+    printf <<'EOT', class($sv), $$sv, $sv->REFCNT, $sv->FLAGS;
 %s (0x%x)
 	REFCNT		%d
 	FLAGS		0x%x
@@ -185,7 +188,7 @@ sub B::CV::debug {
     my ($padlist) = $sv->PADLIST;
     my ($gv) = $sv->GV;
     my ($filegv) = $sv->FILEGV;
-    printf <<'EOT', ad($stash), ad($start), ad($root), ad($gv), ad($filegv), $sv->DEPTH, $padlist, ad($sv->OUTSIDE);
+    printf <<'EOT', $$stash, $$start, $$root, $$gv, $$filegv, $sv->DEPTH, $padlist, ${$sv->OUTSIDE};
 	STASH		0x%x
 	START		0x%x
 	ROOT		0x%x
@@ -206,7 +209,7 @@ sub B::AV::debug {
     my ($av) = @_;
     $av->B::SV::debug;
     my(@array) = $av->ARRAY;
-    print "\tARRAY\t\t(", join(", ", map("0x" . ad($_), @array)), ")\n";
+    print "\tARRAY\t\t(", join(", ", map("0x" . $$_, @array)), ")\n";
     printf <<'EOT', scalar(@array), $av->MAX, $av->OFF, $av->AvFLAGS;
 	FILL		%d    
 	MAX		%d
@@ -217,13 +220,17 @@ EOT
     
 sub B::GV::debug {
     my ($gv) = @_;
+    if ($done_gv{$$gv}++) {
+	printf "GV %s::%s\n", $gv->STASH->NAME, $gv->NAME;
+	return;
+    }
     my ($sv) = $gv->SV;
     my ($av) = $gv->AV;
     my ($cv) = $gv->CV;
     $gv->B::SV::debug;
-    printf <<'EOT', $gv->NAME, $gv->STASH, ad($sv), $gv->GvREFCNT, $gv->FORM, ad($av), ad($gv->HV), ad($gv->EGV), ad($cv), $gv->CVGEN, $gv->LINE, $gv->FILEGV, $gv->GvFLAGS;
+    printf <<'EOT', $gv->NAME, $gv->STASH->NAME, $gv->STASH, $$sv, $gv->GvREFCNT, $gv->FORM, $$av, ${$gv->HV}, ${$gv->EGV}, $$cv, $gv->CVGEN, $gv->LINE, $gv->FILEGV, $gv->GvFLAGS;
 	NAME		%s
-	STASH		0x%x
+	STASH		%s (0x%x)
 	SV		0x%x
 	GvREFCNT	%d
 	FORM		0x%x

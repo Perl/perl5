@@ -10,10 +10,10 @@ require DynaLoader;
 require Exporter;
 @ISA = qw(Exporter DynaLoader);
 @EXPORT_OK = qw(byteload_fh byteload_string minus_c ppname
-		class peekop cast_I32 ad cstring cchar hash
+		class peekop cast_I32 cstring cchar hash
 		main_root main_start main_cv svref_2object
-		walkoptree walkoptree_exec walksymtable
-		comppadlist sv_undef compile_stats timing_info);
+		walkoptree walkoptree_slow walkoptree_exec walksymtable
+		parents comppadlist sv_undef compile_stats timing_info);
 
 use strict;
 @B::SV::ISA = 'B::OBJECT';
@@ -56,6 +56,7 @@ use strict;
 
 my $debug;
 my $op_count = 0;
+my @parents = ();
 
 sub debug {
     my ($class, $value) = @_;
@@ -66,11 +67,6 @@ sub debug {
 # add to .xs for perl5.002
 sub OPf_KIDS () { 4 }
 
-sub ad {
-    my $obj = shift;
-    return $$obj;
-}
-
 sub class {
     my $obj = shift;
     my $name = ref $obj;
@@ -78,23 +74,27 @@ sub class {
     return $name;
 }
 
+sub parents { \@parents }
+
 # For debugging
 sub peekop {
     my $op = shift;
     return sprintf("%s (0x%x) %s", class($op), $$op, $op->ppaddr);
 }
 
-sub walkoptree {
+sub walkoptree_slow {
     my($op, $method, $level) = @_;
     $op_count++; # just for statistics
     $level ||= 0;
     warn(sprintf("walkoptree: %d. %s\n", $level, peekop($op))) if $debug;
     $op->$method($level);
-    if (ad($op) && ($op->flags & OPf_KIDS)) {
+    if ($$op && ($op->flags & OPf_KIDS)) {
 	my $kid;
+	unshift(@parents, $op);
 	for ($kid = $op->first; $$kid; $kid = $kid->sibling) {
-	    walkoptree($kid, $method, $level + 1);
+	    walkoptree_slow($kid, $method, $level + 1);
 	}
+	shift @parents;
     }
 }
 
@@ -112,13 +112,13 @@ sub timing_info {
 my %symtable;
 sub savesym {
     my ($obj, $value) = @_;
-#    warn(sprintf("savesym: sym_%x => %s\n", ad($obj), $value)); # debug
-    $symtable{sprintf("sym_%x", ad($obj))} = $value;
+#    warn(sprintf("savesym: sym_%x => %s\n", $$obj, $value)); # debug
+    $symtable{sprintf("sym_%x", $$obj)} = $value;
 }
 
 sub objsym {
     my $obj = shift;
-    return $symtable{sprintf("sym_%x", ad($obj))};
+    return $symtable{sprintf("sym_%x", $$obj)};
 }
 
 sub walkoptree_exec {
@@ -131,7 +131,7 @@ sub walkoptree_exec {
 	    print $prefix, "goto $sym\n";
 	    return;
 	}
-	savesym($op, sprintf("%s (0x%lx)", class($op), ad($op)));
+	savesym($op, sprintf("%s (0x%lx)", class($op), $$op));
 	$op->$method($level);
 	$ppname = $op->ppaddr;
 	if ($ppname =~ /^pp_(or|and|mapwhile|grepwhile|entertry)$/) {
@@ -140,7 +140,7 @@ sub walkoptree_exec {
 	    print $prefix, "}\n";
 	} elsif ($ppname eq "pp_match" || $ppname eq "pp_subst") {
 	    my $pmreplstart = $op->pmreplstart;
-	    if (ad($pmreplstart)) {
+	    if ($$pmreplstart) {
 		print $prefix, "PMREPLSTART => {\n";
 		walkoptree_exec($pmreplstart, $method, $level + 1);
 		print $prefix, "}\n";
@@ -173,7 +173,7 @@ sub walkoptree_exec {
 	    print $prefix, "}\n";
 	} elsif ($ppname eq "pp_subst") {
 	    my $replstart = $op->pmreplstart;
-	    if (ad($replstart)) {
+	    if ($$replstart) {
 		print $prefix, "SUBST => {\n";
 		walkoptree_exec($replstart, $method, $level + 1);
 		print $prefix, "}\n";
@@ -183,14 +183,15 @@ sub walkoptree_exec {
 }
 
 sub walksymtable {
-    my ($symref, $method, $recurse) = @_;
+    my ($symref, $method, $recurse, $prefix) = @_;
     my $sym;
     no strict 'vars';
     local(*glob);
     while (($sym, *glob) = each %$symref) {
 	if ($sym =~ /::$/) {
+	    $sym = $prefix . $sym;
 	    if ($sym ne "main::" && &$recurse($sym)) {
-		walksymtable(\%glob, $method, $recurse);
+		walksymtable(\%glob, $method, $recurse, $sym);
 	    }
 	} else {
 	    svref_2object(\*glob)->EGV->$method();

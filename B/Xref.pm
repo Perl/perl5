@@ -85,7 +85,7 @@ Malcolm Beattie, mbeattie@sable.ox.ac.uk.
 =cut
 
 use strict;
-use B qw(peekop class ad comppadlist main_start svref_2object walksymtable);
+use B qw(peekop class comppadlist main_start svref_2object walksymtable);
 
 # Constants (should probably be elsewhere)
 sub OPpLVAL_INTRO () { 128 }
@@ -275,7 +275,7 @@ sub pp_entersub {
 sub B::GV::xref {
     my $gv = shift;
     my $cv = $gv->CV;
-    if (ad($cv)) {
+    if ($$cv) {
 	#return if $done{$$cv}++;
 	$file = $gv->FILEGV->SV->PV;
 	$line = $gv->LINE;
@@ -283,7 +283,7 @@ sub B::GV::xref {
 	push(@todo, $cv);
     }
     my $form = $gv->FORM;
-    if (ad($form)) {
+    if ($$form) {
 	return if $done{$$form}++;
 	$file = $gv->FILEGV->SV->PV;
 	$line = $gv->LINE;

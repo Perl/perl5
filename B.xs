@@ -255,6 +255,31 @@ char *str;
 }    
 #endif /* INDIRECT_BGET_MACROS */
 
+void
+walkoptree(opsv, method)
+SV *opsv;
+char *method;
+{
+    dSP;
+    OP *o;
+    
+    if (!SvROK(opsv))
+	croak("opsv is not a reference");
+    opsv = sv_mortalcopy(opsv);
+    o = (OP*)SvIV((SV*)SvRV(opsv));
+    PUSHMARK(sp);
+    XPUSHs(opsv);
+    PUTBACK;
+    perl_call_method(method, G_DISCARD);
+    if (o && (o->op_flags & OPf_KIDS)) {
+	OP *kid;
+	for (kid = ((UNOP*)o)->op_first; kid; kid = kid->op_sibling) {
+	    /* Use the same opsv. Rely on methods not to mess it up. */
+	    sv_setiv(newSVrv(opsv, cc_opclassname(kid)), (IV)kid);
+	    walkoptree(opsv, method);
+	}
+    }
+}
 
 typedef OP	*B__OP;
 typedef UNOP	*B__UNOP;
@@ -322,8 +347,18 @@ MODULE = B	PACKAGE = B
 
 
 void
+walkoptree(opsv, method)
+	SV *	opsv
+	char *	method
+
+int
 byteload_fh(fp)
 	FILE *	fp
+    CODE:
+	byteload_fh(fp);
+	RETVAL = 1;
+    OUTPUT:
+	RETVAL
 
 void
 byteload_string(str)
@@ -388,6 +423,7 @@ cchar(sv)
 #define OP_next(o)	o->op_next
 #define OP_sibling(o)	o->op_sibling
 #define OP_ppaddr(o)	ppnames[o->op_type]
+#define OP_desc(o)	op_desc[o->op_type]
 #define OP_targ(o)	o->op_targ
 #define OP_type(o)	o->op_type
 #define OP_seq(o)	o->op_seq
@@ -406,6 +442,10 @@ OP_sibling(o)
 
 char *
 OP_ppaddr(o)
+	B::OP		o
+
+char *
+OP_desc(o)
 	B::OP		o
 
 U16

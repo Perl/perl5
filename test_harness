@@ -1,4 +1,5 @@
 #!/bin/sh
+cwd=`pwd`
 if [ -f bperl ]; then
     perl=./bperl
 else
@@ -10,5 +11,5 @@ do
     $perl -MO=C,-obtest.tc $pl			\
 	&& mv btest.tc btest.c			\
 	&& $perl cc_harness -o btest btest.c	\
-	&& ./btest
+	&& (cd t; $cwd/btest)
 done

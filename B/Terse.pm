@@ -1,6 +1,6 @@
 package B::Terse;
 use strict;
-use B qw(peekop class ad walkoptree walkoptree_exec
+use B qw(peekop class walkoptree_slow walkoptree_exec
 	 main_start main_root cstring svref_2object);
 use B::Asmdata qw(@specialsv_name);
 
@@ -10,7 +10,7 @@ sub terse {
     if ($order eq "exec") {
 	walkoptree_exec($cv->START, "terse");
     } else {
-	walkoptree($cv->ROOT, "terse");
+	walkoptree_slow($cv->ROOT, "terse");
     }
 }
 
@@ -30,7 +30,7 @@ sub compile {
 	if ($order eq "exec") {
 	    return sub { walkoptree_exec(main_start, "terse") }
 	} else {
-	    return sub { walkoptree(main_root, "terse") }
+	    return sub { walkoptree_slow(main_root, "terse") }
 	}
     }
 }
@@ -84,13 +84,13 @@ sub B::COP::terse {
 sub B::PV::terse {
     my ($sv, $level) = @_;
     print indent($level);
-    printf "%s (0x%lx) %s\n", class($sv), ad($sv), cstring($sv->PV);
+    printf "%s (0x%lx) %s\n", class($sv), $$sv, cstring($sv->PV);
 }
 
 sub B::AV::terse {
     my ($sv, $level) = @_;
     print indent($level);
-    printf "%s (0x%lx) FILL %d\n", class($sv), ad($sv), $sv->FILL;
+    printf "%s (0x%lx) FILL %d\n", class($sv), $$sv, $sv->FILL;
 }
 
 sub B::GV::terse {
@@ -102,25 +102,25 @@ sub B::GV::terse {
 	$stash = $stash . "::";
     }
     print indent($level);
-    printf "%s (0x%lx) *%s%s\n", class($gv), ad($gv), $stash, $gv->NAME;
+    printf "%s (0x%lx) *%s%s\n", class($gv), $$gv, $stash, $gv->NAME;
 }
 
 sub B::IV::terse {
     my ($sv, $level) = @_;
     print indent($level);
-    printf "%s (0x%lx) %d\n", class($sv), ad($sv), $sv->IV;
+    printf "%s (0x%lx) %d\n", class($sv), $$sv, $sv->IV;
 }
 
 sub B::NV::terse {
     my ($sv, $level) = @_;
     print indent($level);
-    printf "%s (0x%lx) %s\n", class($sv), ad($sv), $sv->NV;
+    printf "%s (0x%lx) %s\n", class($sv), $$sv, $sv->NV;
 }
 
 sub B::NULL::terse {
     my ($sv, $level) = @_;
     print indent($level);
-    printf "%s (0x%lx)\n", class($sv), ad($sv);
+    printf "%s (0x%lx)\n", class($sv), $$sv;
 }
     
 sub B::SPECIAL::terse {

@@ -3,15 +3,14 @@ use Config;
 
 WriteMakefile(
     NAME	=> "B",
-    VERSION	=> "a2",
-    MAP_TARGET	=> "bperl",
+    VERSION	=> "a4",
     OBJECT	=> "B.o ccop.o byterun.o",
     depend	=> {
 	"B.o"		=> "B.c ccop.h bytecode.h byterun.h",
 	"ccop.o"	=> "ccop.c ccop.h"
     },
     clean	=> {
-	FILES		=> "bperl byteperl btest btest.c *.o B.c *~"
+	FILES		=> "perl byteperl btest btest.c *.o B.c *~"
     }
 );
 

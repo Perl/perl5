@@ -3,7 +3,7 @@ use Exporter ();
 @ISA = "Exporter";
 @EXPORT_OK = qw(find_leaders);
 
-use B qw(ad peekop walkoptree walkoptree_exec
+use B qw(peekop walkoptree walkoptree_exec
 	 main_root main_start svref_2object);
 use B::Terse;
 use strict;
@@ -13,8 +13,8 @@ my @bblock_ends;
 
 sub mark_leader {
     my $op = shift;
-    if (ad($op)) {
-	$bblock->{ad($op)} = $op;
+    if ($$op) {
+	$bblock->{$$op} = $op;
     }
 }
 
@@ -37,8 +37,8 @@ sub walk_bblocks {
     while ($leader = shift @leaders) {
 	$lastop = $leader;
 	$op = $leader->next;
-	while (ad($op) && !exists($bblock->{ad($op)})) {
-	    $bblock->{ad($op)} = $leader;
+	while ($$op && !exists($bblock->{$$op})) {
+	    $bblock->{$$op} = $leader;
 	    $lastop = $op;
 	    $op = $op->next;
 	}
@@ -47,7 +47,7 @@ sub walk_bblocks {
     foreach $bb (@bblock_ends) {
 	($leader, $lastop) = @$bb;
 	printf "%s .. %s\n", peekop($leader), peekop($lastop);
-	for ($op = $leader; ad($op) != ad($lastop); $op = $op->next) {
+	for ($op = $leader; $$op != $$lastop; $op = $op->next) {
 	    printf "    %s\n", peekop($op);
 	}
 	printf "    %s\n", peekop($lastop);
@@ -108,7 +108,7 @@ sub B::PMOP::mark_if_leader {
     my $op = shift;
     if ($op->ppaddr ne "pp_pushre") {
 	my $replroot = $op->pmreplroot;
-	if (ad($replroot)) {
+	if ($$replroot) {
 	    mark_leader($replroot);
 	    mark_leader($op->next);
 	    mark_leader($op->pmreplstart);

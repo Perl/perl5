@@ -9,7 +9,7 @@ package B::Bytecode;
 use strict;
 use Carp;
 
-use B qw(ad minus_c main_cv main_root main_start comppadlist
+use B qw(minus_c main_cv main_root main_start comppadlist
 	 class peekop walkoptree svref_2object cstring walksymtable);
 use B::Asmdata qw(@optype @specialsv_name);
 use B::Assembler qw(assemble_fh);
@@ -97,9 +97,9 @@ sub pvstring {
     }
 }
 
-sub saved { $saved{ad($_[0])} }
-sub mark_saved { $saved{ad($_[0])} = 1 }
-sub unmark_saved { $saved{ad($_[0])} = 0 }
+sub saved { $saved{${$_[0]}} }
+sub mark_saved { $saved{${$_[0]}} = 1 }
+sub unmark_saved { $saved{${$_[0]}} = 0 }
 
 my $debug = 0;
 sub debug { $debug = shift }
@@ -107,7 +107,7 @@ sub debug { $debug = shift }
 sub B::OBJECT::nyi {
     my $obj = shift;
     warn sprintf("bytecode save method for %s (0x%x) not yet implemented\n",
-		 class($obj), ad($obj));
+		 class($obj), $$obj);
 }
 
 #
@@ -178,7 +178,7 @@ sub B::OP::bytecode {
     my $type = $op->type;
 
     if ($bypass_nullops) {
-	$next = $next->next while ad($next) && $next->type == 0;
+	$next = $next->next while $$next && $next->type == 0;
     }
     $nextix = $next->objix;
 
@@ -315,7 +315,7 @@ sub B::PMOP::bytecode {
     #my $pmnextix = $op->pmnext->objix;
 
     $short->bytecode;
-    if (ad($replroot)) {
+    if ($$replroot) {
 	# OP_PUSHRE (a mutated version of OP_MATCH for the regexp
 	# argument to a split) stores a GV in op_pmreplroot instead
 	# of a substitution syntax tree. We don't want to walk that...
@@ -379,7 +379,9 @@ sub B::NV::bytecode {
 sub B::RV::bytecode {
     my $sv = shift;
     return if saved($sv);
-    my $rvix = $sv->RV->objix;
+    my $rv = $sv->RV;
+    my $rvix = $rv->objix;
+    $rv->bytecode;
     $sv->B::SV::bytecode;
     print "xrv $rvix\n";
 }
@@ -512,9 +514,19 @@ sub B::HV::bytecode {
     if (!$name) {
 	# It's an ordinary HV. Stashes have NAME set and need no further
 	# saving beyond the gv_stashpv that $hv->objix already ensures.
-	#
-	# XXX We don't yet save the contents of non-empty HVs
+	my @contents = $hv->ARRAY;
+	my ($i, @ixes);
+	for ($i = 1; $i < @contents; $i += 2) {
+	    push(@ixes, $contents[$i]->objix);
+	}
+	for ($i = 1; $i < @contents; $i += 2) {
+	    $contents[$i]->bytecode;
+	}
 	ldsv($ix);
+	for ($i = 0; $i < @contents; $i += 2) {
+	    printf("newpv %s\nhv_store %d\n",
+		   pvstring($contents[$i]), $ixes[$i / 2]);
+	}
 	printf "sv_refcnt %d\nsv_flags 0x%x\n", $hv->REFCNT, $hv->FLAGS;
     }
 }
@@ -564,7 +576,7 @@ sub B::CV::bytecode {
     my @ixes = map($_->objix, @subfields);
     # Save OP tree from CvROOT (first element of @subfields)
     my $root = shift @subfields;
-    if (ad($root)) {
+    if ($$root) {
 	walkoptree($root, "bytecode");
     }
     # Reset sv register for $cv (since above ->objix calls stomped on it)
@@ -625,10 +637,10 @@ sub bytecompile_object {
 sub B::GV::bytecodecv {
     my $gv = shift;
     my $cv = $gv->CV;
-    if (ad($cv) && !saved($cv)) {
+    if ($$cv && !saved($cv)) {
 	if ($debug_cv) {
 	    warn sprintf("saving extra CV &%s::%s (0x%x) from GV 0x%x\n",
-			 $gv->STASH->NAME, $gv->NAME, ad($cv), ad($gv));
+			 $gv->STASH->NAME, $gv->NAME, $$cv, $$gv);
 	}
 	$gv->bytecode;
     }
@@ -698,7 +710,7 @@ sub compile {
 		    B->debug(1);
 		} elsif ($arg eq "a") {
 		    B::Assembler::debug(1);
-		} elsif ($arg eq "D") {
+		} elsif ($arg eq "C") {
 		    $debug_cv = 1;
 		}
 	    }

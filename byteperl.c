@@ -4,6 +4,9 @@ extern "C" {
 
 #include "EXTERN.h"
 #include "perl.h"
+#ifndef PATCHLEVEL
+#include "patchlevel.h"
+#endif
 #include "byterun.h"
 
 #ifdef __cplusplus

@@ -1,4 +1,3 @@
-#!./bperl
 use B::Disassembler qw(disassemble_fh);
 use FileHandle;
 

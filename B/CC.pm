@@ -7,7 +7,7 @@
 #
 package B::CC;
 use strict;
-use B qw(main_start main_root class comppadlist peekop svref_2object ad
+use B qw(main_start main_root class comppadlist peekop svref_2object
 	timing_info);
 use B::C qw(push_decl init_init push_init save_unused_subs objsym
 	    output_all output_boilerplate output_main);
@@ -36,6 +36,7 @@ sub CXt_LOOP () { 3 }
 sub CXt_SUBST () { 4 }
 sub CXt_BLOCK () { 5 }
 
+my $module;		# module name (when compiled with -m)
 my %done;		# hash keyed by $$op of leaders of basic blocks
 			# which have already been done.
 my $leaders;		# ref to hash of basic block leaders. Keys are $$op
@@ -53,7 +54,7 @@ my @padlist;		# Copy of current padlist so PMOP repl code can find it
 my @cxstack;		# Shadows the (compile-time) cxstack for next,last,redo
 my $jmpbuf_ix = 0;	# Next free index for dynamically allocated jmpbufs
 my %constobj;		# OP_CONST constants as Stackobj-derived objects
-			# keyed by ad($sv).
+			# keyed by $$sv.
 my $need_freetmps = 0;	# We may postpone FREETMPS to the end of each basic
 			# block or even to the end of each loop of blocks,
 			# depending on optimisation options.
@@ -550,9 +551,9 @@ sub pp_padsv {
 sub pp_const {
     my $op = shift;
     my $sv = $op->sv;
-    my $obj = $constobj{ad($sv)};
+    my $obj = $constobj{$$sv};
     if (!defined($obj)) {
-	$obj = $constobj{ad($sv)} = new B::Stackobj::Const ($sv);
+	$obj = $constobj{$$sv} = new B::Stackobj::Const ($sv);
     }
     push(@stack, $obj);
     return $op->next;
@@ -948,6 +949,25 @@ sub pp_entersub {
     return $op->next;
 }
 
+sub pp_enterwrite {
+    my $op = shift;
+    pp_entersub($op);
+}
+
+sub pp_leavewrite {
+    my $op = shift;
+    write_back_lexicals(REGISTER|TEMPORARY);
+    write_back_stack();
+    my $sym = doop($op);
+    # XXX Is this the right way to distinguish between it returning
+    # CvSTART(cv) (via doform) and pop_return()?
+    runtime("if (op) op = (*op->op_ppaddr)();");
+    runtime("SPAGAIN;");
+    $know_op = 0;
+    invalidate_lexicals(REGISTER|TEMPORARY);
+    return $op->next;
+}
+
 sub doeval {
     my $op = shift;
     $curcop->write_back;
@@ -1212,7 +1232,7 @@ sub pp_subst {
     write_back_stack();
     my $sym = doop($op);
     my $replroot = $op->pmreplroot;
-    if (ad($replroot)) {
+    if ($$replroot) {
 	runtime sprintf("if (op == ((PMOP*)(%s))->op_pmreplroot) goto %s;",
 			$sym, label($replroot));
 	$op->pmreplstart->save;
@@ -1228,7 +1248,11 @@ sub pp_substcont {
     write_back_stack();
     doop($op);
     my $pmop = $op->other;
-    my $pmopsym = objsym($pmop);
+    warn sprintf("substcont: op = %s, pmop = %s\n",
+		 peekop($op), peekop($pmop));#debug
+#    my $pmopsym = objsym($pmop);
+    my $pmopsym = $pmop->save; # XXX can this recurse?
+    warn "pmopsym = $pmopsym\n";#debug
     runtime sprintf("if (op == ((PMOP*)(%s))->op_pmreplstart) goto %s;",
 		    $pmopsym, label($pmop->pmreplstart));
     invalidate_lexicals();
@@ -1349,21 +1373,45 @@ sub cc_main {
     my @comppadlist = comppadlist->ARRAY;
     my $curpad_sym = $comppadlist[1]->save;
     my $start = cc_recurse("pp_main", main_root, main_start, @comppadlist);
-    if (@unused_sub_packages) {
-	save_unused_subs(@unused_sub_packages);
-	# That only queues them. Now we need to generate code for them.
-	cc_recurse();
-    }
+    save_unused_subs(@unused_sub_packages);
+    cc_recurse();
+
     return if $errors;
-    push_init(sprintf("main_root = sym_%x;", ad(main_root)),
-	      "main_start = $start;",
-	      "curpad = AvARRAY($curpad_sym);");
+    if (!defined($module)) {
+	push_init(sprintf("main_root = sym_%x;", ${main_root()}),
+		  "main_start = $start;",
+		  "curpad = AvARRAY($curpad_sym);");
+    }
     output_boilerplate();
     print "\n";
     output_all("perl_init");
     output_runtime();
     print "\n";
     output_main();
+    if (defined($module)) {
+	my $cmodule = $module;
+	$cmodule =~ s/::/__/g;
+	print <<"EOT";
+
+#include "XSUB.h"
+XS(boot_$cmodule)
+{
+    dXSARGS;
+    perl_init();
+    ENTER;
+    SAVETMPS;
+    SAVESPTR(curpad);
+    SAVESPTR(op);
+    curpad = AvARRAY($curpad_sym);
+    op = $start;
+    pp_main(ARGS);
+    FREETMPS;
+    LEAVE;
+    ST(0) = &sv_yes;
+    XSRETURN(1);
+}
+EOT
+    }
     if ($debug_timings) {
 	warn sprintf("Done at %s\n", timing_info);
     }
@@ -1415,6 +1463,8 @@ sub compile {
 	    if ($arg >= 1) {
 		$freetmps_each_bblock = 1 unless $freetmps_each_loop;
 	    }
+	} elsif ($opt eq "m") {
+	    $module = $arg;
 	} elsif ($opt eq "D") {
             $arg ||= shift @options;
 	    foreach $arg (split(//, $arg)) {

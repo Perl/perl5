@@ -12,7 +12,7 @@ use Exporter ();
 	       output_main set_callback save_unused_subs objsym);
 
 use B qw(minus_c sv_undef walkoptree walksymtable main_root main_start
-	 ad peekop class cstring cchar svref_2object compile_stats
+	 peekop class cstring cchar svref_2object compile_stats
 	 comppadlist hash);
 use B::Asmdata qw(@specialsv_name);
 
@@ -78,13 +78,13 @@ sub AVf_REAL () { 1 }
 
 sub savesym {
     my ($obj, $value) = @_;
-#    warn(sprintf("savesym: sym_%x => %s\n", ad($obj), $value)); # debug
-    $symtable{sprintf("sym_%x", ad($obj))} = $value;
+#    warn(sprintf("savesym: sym_%x => %s\n", $$obj, $value)); # debug
+    $symtable{sprintf("sym_%x", $$obj)} = $value;
 }
 
 sub objsym {
     my $obj = shift;
-    return $symtable{sprintf("sym_%x", ad($obj))};
+    return $symtable{sprintf("sym_%x", $$obj)};
 }
 
 sub getsym {
@@ -127,7 +127,7 @@ sub B::OP::save {
     $nullop_count++ unless $type;
     push(@op_list,
 	 sprintf("sym_%x, sym_%x, %s, %u, %u, %u, 0x%x, 0x%x",
-		 ad($op->next), ad($op->sibling), $op->ppaddr, $op->targ,
+		 ${$op->next}, ${$op->sibling}, $op->ppaddr, $op->targ,
 		 $type, $op_seq, $op->flags, $op->private));
     savesym($op, "&op_list[$#op_list]");
 }
@@ -158,8 +158,8 @@ sub B::UNOP::save {
     my ($op, $level) = @_;
     push(@unop_list,
 	 sprintf("sym_%x, sym_%x, %s, %u, %u, %u, 0x%x, 0x%x, sym_%x",
-		 ad($op->next), ad($op->sibling), $op->ppaddr, $op->targ,
-		 $op->type, $op_seq, $op->flags,$op->private,ad($op->first)));
+		 ${$op->next}, ${$op->sibling}, $op->ppaddr, $op->targ,
+		 $op->type, $op_seq, $op->flags,$op->private,${$op->first}));
     savesym($op, "(OP*)&unop_list[$#unop_list]");
 }
 
@@ -167,9 +167,9 @@ sub B::BINOP::save {
     my ($op, $level) = @_;
     push(@binop_list,
 	 sprintf("sym_%x, sym_%x, %s, %u, %u, %u, 0x%x, 0x%x, sym_%x, sym_%x",
-		 ad($op->next), ad($op->sibling), $op->ppaddr, $op->targ,
+		 ${$op->next}, ${$op->sibling}, $op->ppaddr, $op->targ,
 		 $op->type, $op_seq, $op->flags, $op->private,
-		 ad($op->first), ad($op->last)));
+		 ${$op->first}, ${$op->last}));
     savesym($op, "(OP*)&binop_list[$#binop_list]");
 }
 
@@ -177,9 +177,9 @@ sub B::LISTOP::save {
     my ($op, $level) = @_;
     push(@listop_list, sprintf(
 	"sym_%x, sym_%x, %s, %u, %u, %u, 0x%x, 0x%x, sym_%x, sym_%x, %u",
-	ad($op->next), ad($op->sibling), $op->ppaddr, $op->targ,
-	$op->type, $op_seq, $op->flags, $op->private, ad($op->first),
-	ad($op->last), $op->children));
+	${$op->next}, ${$op->sibling}, $op->ppaddr, $op->targ,
+	$op->type, $op_seq, $op->flags, $op->private, ${$op->first},
+	${$op->last}, $op->children));
     savesym($op, "(OP*)&listop_list[$#listop_list]");
 }
 
@@ -187,9 +187,9 @@ sub B::LOGOP::save {
     my ($op, $level) = @_;
     push(@logop_list,
 	 sprintf("sym_%x, sym_%x, %s, %u, %u, %u, 0x%x, 0x%x, sym_%x, sym_%x",
-		 ad($op->next), ad($op->sibling), $op->ppaddr, $op->targ,
+		 ${$op->next}, ${$op->sibling}, $op->ppaddr, $op->targ,
 		 $op->type, $op_seq, $op->flags, $op->private,
-		 ad($op->first), ad($op->other)));
+		 ${$op->first}, ${$op->other}));
     savesym($op, "(OP*)&logop_list[$#logop_list]");
 }
 
@@ -197,9 +197,9 @@ sub B::CONDOP::save {
     my ($op, $level) = @_;
     push(@condop_list, sprintf(
 	"sym_%x, sym_%x, %s, %u, %u, %u, 0x%x, 0x%x, sym_%x, sym_%x, sym_%x",
-	ad($op->next), ad($op->sibling), $op->ppaddr, $op->targ,
-	$op->type, $op_seq, $op->flags, $op->private, ad($op->first),
-	ad($op->true), ad($op->false)));
+	${$op->next}, ${$op->sibling}, $op->ppaddr, $op->targ,
+	$op->type, $op_seq, $op->flags, $op->private, ${$op->first},
+	${$op->true}, ${$op->false}));
     savesym($op, "(OP*)&condop_list[$#condop_list]");
 }
 
@@ -211,9 +211,9 @@ sub B::LOOP::save {
     push(@loop_list, sprintf(
 	"sym_%x, sym_%x, %s, %u, %u, %u, 0x%x, 0x%x, "
 	."sym_%x, sym_%x, %u, sym_%x, sym_%x, sym_%x",
-	ad($op->next), ad($op->sibling), $op->ppaddr, $op->targ, $op->type,
-	$op_seq, $op->flags, $op->private, ad($op->first), ad($op->last),
-	$op->children, ad($op->redoop), ad($op->nextop), ad($op->lastop)));
+	${$op->next}, ${$op->sibling}, $op->ppaddr, $op->targ, $op->type,
+	$op_seq, $op->flags, $op->private, ${$op->first}, ${$op->last},
+	$op->children, ${$op->redoop}, ${$op->nextop}, ${$op->lastop}));
     savesym($op, "(OP*)&loop_list[$#loop_list]");
 }
 
@@ -221,7 +221,7 @@ sub B::PVOP::save {
     my ($op, $level) = @_;
     push(@pvop_list,
 	 sprintf("sym_%x, sym_%x, %s, %u, %u, %u, 0x%x, 0x%x, %s",
-		 ad($op->next), ad($op->sibling), $op->ppaddr, $op->targ,
+		 ${$op->next}, ${$op->sibling}, $op->ppaddr, $op->targ,
 		 $op->type, $op_seq, $op->flags, $op->private,
 		 cstring($op->pv)));
     savesym($op, "(OP*)&pvop_list[$#pvop_list]");
@@ -229,13 +229,13 @@ sub B::PVOP::save {
 
 sub B::SVOP::save {
     my ($op, $level) = @_;
+    my $svsym = $op->sv->save;
     push(@svop_list,
-	 sprintf("sym_%x, sym_%x, %s, %u, %u, %u, 0x%x, 0x%x, (SV*)sym_%x",
-		 ad($op->next), ad($op->sibling), $op->ppaddr, $op->targ,
-		 $op->type, $op_seq, $op->flags, $op->private, ad($op->sv)));
+	 sprintf("sym_%x, sym_%x, %s, %u, %u, %u, 0x%x, 0x%x, %s",
+		 ${$op->next}, ${$op->sibling}, $op->ppaddr, $op->targ,
+		 $op->type, $op_seq, $op->flags, $op->private, "(SV*)$svsym"));
     savesym($op, "(OP*)&svop_list[$#svop_list]");
-#    warn sprintf("svop saving sv %s 0x%x\n", ref($op->sv), ad($op->sv));#debug
-    $op->sv->save;
+#    warn sprintf("svop saving sv %s 0x%x\n", ref($op->sv), ${$op->sv});#debug
 }
 
 sub B::GVOP::save {
@@ -243,7 +243,7 @@ sub B::GVOP::save {
     my $gvsym = $op->gv->save;
     push(@gvop_list,
 	 sprintf("sym_%x, sym_%x, %s, %u, %u, %u, 0x%x, 0x%x, Nullgv",
-		 ad($op->next), ad($op->sibling), $op->ppaddr, $op->targ,
+		 ${$op->next}, ${$op->sibling}, $op->ppaddr, $op->targ,
 		 $op->type, $op_seq, $op->flags, $op->private));
     push_init(sprintf("gvop_list[$#gvop_list].op_gv = %s;", $gvsym));
     savesym($op, "(OP*)&gvop_list[$#gvop_list]");
@@ -258,7 +258,7 @@ sub B::COP::save {
     push(@cop_list,
 	 sprintf("sym_%x, sym_%x, %s, %u, %u, %u, 0x%x, 0x%x, %s, "
 		 ."Nullhv, Nullgv, %u, %d, %u",
-		 ad($op->next), ad($op->sibling), $op->ppaddr, $op->targ,
+		 ${$op->next}, ${$op->sibling}, $op->ppaddr, $op->targ,
 		 $op->type, $op_seq, $op->flags, $op->private,
 		 cstring($op->label), $op->cop_seq, $op->arybase, $op->line));
     push_init(sprintf("cop_list[$#cop_list].cop_filegv = %s;", $gvsym),
@@ -271,11 +271,11 @@ sub B::PMOP::save {
     my $shortsym = $op->pmshort->save;
     my $replroot = $op->pmreplroot;
     my $replstart = $op->pmreplstart;
-    my $replrootfield = sprintf("sym_%x", ad($replroot));
-    my $replstartfield = sprintf("sym_%x", ad($replstart));
+    my $replrootfield = sprintf("sym_%x", $$replroot);
+    my $replstartfield = sprintf("sym_%x", $$replstart);
     my $gvsym;
     my $ppaddr = $op->ppaddr;
-    if (ad($replroot)) {
+    if ($$replroot) {
 	# OP_PUSHRE (a mutated version of OP_MATCH for the regexp
 	# argument to a split) stores a GV in op_pmreplroot instead
 	# of a substitution syntax tree. We don't want to walk that...
@@ -293,9 +293,9 @@ sub B::PMOP::save {
     push(@pmop_list,
 	 sprintf("sym_%x, sym_%x, %s, %u, %u, %u, 0x%x, 0x%x, sym_%x, sym_%x,"
 		 ." %u, %s, %s, 0, 0, %s, 0x%x, 0x%x, %u",
-		 ad($op->next), ad($op->sibling), $ppaddr, $op->targ,
+		 ${$op->next}, ${$op->sibling}, $ppaddr, $op->targ,
 		 $op->type, $op_seq, $op->flags, $op->private,
-		 ad($op->first), ad($op->last), $op->children,
+		 ${$op->first}, ${$op->last}, $op->children,
 		 $replrootfield, $replstartfield,
 		 $shortsym, $op->pmflags, $op->pmpermflags, $op->pmslen));
     my $pm = "pmop_list[$#pmop_list]";
@@ -474,13 +474,13 @@ sub B::PVMG::save {
 
 sub B::PVMG::save_magic {
     my ($sv) = @_;
-    #warn sprintf("saving magic for %s (0x%x)\n", class($sv), ad($sv)); # debug
+    #warn sprintf("saving magic for %s (0x%x)\n", class($sv), $$sv); # debug
     my $stash = $sv->SvSTASH;
-    if (ad($stash)) {
-	warn sprintf("xmg_stash = %s (0x%x)\n", $stash->NAME, ad($stash))
+    if ($$stash) {
+	warn sprintf("xmg_stash = %s (0x%x)\n", $stash->NAME, $$stash)
 	    if $debug_mg;
 	# XXX Hope stash is already going to be saved.
-	push_init(sprintf("SvSTASH(sym_%x) = sym_%x;", ad($sv), ad($stash)));
+	push_init(sprintf("SvSTASH(sym_%x) = sym_%x;", $$sv, $$stash));
     }
     my @mgchain = $sv->MAGIC;
     my ($mg, $type, $obj, $ptr);
@@ -491,11 +491,11 @@ sub B::PVMG::save_magic {
 	my $len = defined($ptr) ? length($ptr) : 0;
 	if ($debug_mg) {
 	    warn sprintf("magic %s (0x%x), obj %s (0x%x), type %s, ptr %s\n",
-			 class($sv), ad($sv), class($obj), ad($obj),
+			 class($sv), $$sv, class($obj), $$obj,
 			 cchar($type), cstring($ptr));
 	}
 	push_init(sprintf("sv_magic((SV*)sym_%x, (SV*)sym_%x, %s, %s, %d);",
-			  ad($sv), ad($obj), cchar($type),cstring($ptr),$len));
+			  $$sv, $$obj, cchar($type),cstring($ptr),$len));
     }
 }
 
@@ -509,11 +509,33 @@ sub B::RV::save {
     return savesym($sv, "&sv_list[$#sv_list]");
 }
 
+sub try_autoload {
+    my ($cvstashname, $cvname) = @_;
+    warn sprintf("No definition for sub %s::%s\n", $cvstashname, $cvname);
+    # Handle AutoLoader classes explicitly. Any more general AUTOLOAD
+    # use should be handled by the class itself.
+    no strict 'refs';
+    my $isa = \@{"$cvstashname\::ISA"};
+    if (grep($_ eq "AutoLoader", @$isa)) {
+	warn "Forcing immediate load of sub derived from AutoLoader\n";
+	# Tweaked version of AutoLoader::AUTOLOAD
+	my $dir = $cvstashname;
+	$dir =~ s(::)(/)g;
+	eval { require "auto/$dir/$cvname.al" };
+	if ($@) {
+	    warn qq(failed require "auto/$dir/$cvname.al": $@\n);
+	    return 0;
+	} else {
+	    return 1;
+	}
+    }
+}
+
 sub B::CV::save {
     my ($cv) = @_;
     my $sym = objsym($cv);
     if (defined($sym)) {
-#	warn sprintf("CV 0x%x already saved as $sym\n", ad($cv)); # debug
+#	warn sprintf("CV 0x%x already saved as $sym\n", $$cv); # debug
 	return $sym;
     }
     # Reserve a place on sv_list and xpvcv_list and record indices
@@ -523,72 +545,96 @@ sub B::CV::save {
     my $xpvcv_ix = $#xpvcv_list;
     # Save symbol now so that GvCV() doesn't recurse back to us via CvGV()
     $sym = savesym($cv, "&sv_list[$sv_ix]");
-    warn sprintf("saving CV 0x%x as $sym\n", ad($cv)) if $debug_cv;
+    warn sprintf("saving CV 0x%x as $sym\n", $$cv) if $debug_cv;
     my $gv = $cv->GV;
+    my $cvstashname = $gv->STASH->NAME;
+    my $cvname = $gv->NAME;
     my $root = $cv->ROOT;
+    my $cvxsub = $cv->XSUB;
+    if (!$$root && !$cvxsub) {
+	if (try_autoload($cvstashname, $cvname)) {
+	    # Recalculate root and xsub
+	    $root = $cv->ROOT;
+	    $cvxsub = $cv->XSUB;
+	    if ($$root || $cvxsub) {
+		warn "Successful forced autoload\n";
+	    }
+	}
+    }
     my $startfield = 0;
     my $padlist = $cv->PADLIST;
-    if (ad($root)) {
+    my $pv = $cv->PV;
+    my $xsub = 0;
+    my $xsubany = "Nullany";
+    if ($$root) {
 	warn sprintf("saving op tree for CV 0x%x, root = 0x%x\n",
-		     ad($cv), ad($root)) if $debug_cv;
+		     $$cv, $$root) if $debug_cv;
 	my $ppname;
-	if (ad($gv)) {
+	if ($$gv) {
 	    my $stashname = $gv->STASH->NAME;
 	    my $gvname = $gv->NAME;
-	    $ppname = "pp_sub_";
-	    $ppname .= $stashname eq "main" ? $gvname : "$stashname\::$gvname";
-	    $ppname =~ s/::/__/g;
-	} else {
+	    my $ppname = "";
+	    if ($gvname ne "__ANON__") {
+		$ppname = (${$gv->FORM} == $$cv) ? "pp_form_" : "pp_sub_";
+		$ppname .= ($stashname eq "main") ?
+			    $gvname : "$stashname\::$gvname";
+		$ppname =~ s/::/__/g;
+	    }
+	}
+	if (!$ppname) {
 	    $ppname = "pp_anonsub_$anonsub_index";
 	    $anonsub_index++;
 	}
 	$startfield = saveoptree($ppname, $root, $cv->START, $padlist->ARRAY);
 	warn sprintf("done saving op tree for CV 0x%x, name %s, root 0x%x\n",
-		     ad($cv), $ppname, ad($root)) if $debug_cv;
+		     $$cv, $ppname, $$root) if $debug_cv;
+	if ($$padlist) {
+	    warn sprintf("saving PADLIST 0x%x for CV 0x%x\n",
+			 $$padlist, $$cv) if $debug_cv;
+	    $padlist->save;
+	    warn sprintf("done saving PADLIST 0x%x for CV 0x%x\n",
+			 $$padlist, $$cv) if $debug_cv;
+	}
     }
-    if (ad($padlist)) {
-	warn sprintf("saving PADLIST 0x%x for CV 0x%x\n",
-		     ad($padlist), ad($cv)) if $debug_cv;
-	$padlist->save;
-	warn sprintf("done saving PADLIST 0x%x for CV 0x%x\n",
-		     ad($padlist), ad($cv)) if $debug_cv;
-    }
-    my $pv = $cv->PV;
-    my $xsub = 0;
-    my $xsubany = "Nullany";
-    if ($cv->XSUB) {
+    elsif ($cvxsub) {
 	$xsubany = sprintf("ANYINIT((void*)0x%x)", $cv->XSUBANY);
-	# Find out canonical name of XSUB function from EGV (I hope)
+	# Try to find out canonical name of XSUB function from EGV.
+	# XXX Doesn't work for XSUBs with PREFIX set (or anyone who
+	# calls newXS() manually with weird arguments).
 	my $egv = $gv->EGV;
 	my $stashname = $egv->STASH->NAME;
 	$stashname =~ s/::/__/g;
 	$xsub = sprintf("XS_%s_%s", $stashname, $egv->NAME);
 	push(@decl_list, "void $xsub _((CV*));");
     }
+    else {
+	warn "No definition for sub %s::%s (unable to autoload)\n",
+	    $cvstashname, $cvname; # debug
+    }
     $xpvcv_list[$xpvcv_ix] = sprintf(
 	"%s, %u, 0, %d, %s, 0, Nullhv, Nullhv, %s, sym_%lx, $xsub, $xsubany,".
 	" Nullgv, Nullgv, %d, sym_%lx, (CV*)sym_%lx, 0",
 	cstring($pv), length($pv), $cv->IVX, $cv->NVX, $startfield,
-	ad($cv->ROOT), $cv->DEPTH, ad($padlist), ad($cv->OUTSIDE));
-    if (ad($gv)) {
+	${$cv->ROOT}, $cv->DEPTH, $$padlist, ${$cv->OUTSIDE});
+    if ($$gv) {
 	$gv->save;
-	push_init(sprintf("CvGV(sym_%lx) = sym_%lx;",ad($cv),ad($gv)));
+	push_init(sprintf("CvGV(sym_%lx) = sym_%lx;",$$cv,$$gv));
 	warn sprintf("done saving GV 0x%x for CV 0x%x\n",
-		     ad($gv), ad($cv)) if $debug_cv;
+		     $$gv, $$cv) if $debug_cv;
     }
     my $filegv = $cv->FILEGV;
-    if (ad($filegv)) {
+    if ($$filegv) {
 	$filegv->save;
-	push_init(sprintf("CvFILEGV(sym_%lx) = sym_%lx;",ad($cv),ad($filegv)));
+	push_init(sprintf("CvFILEGV(sym_%lx) = sym_%lx;",$$cv,$$filegv));
 	warn sprintf("done saving FILEGV 0x%x for CV 0x%x\n",
-		     ad($filegv), ad($cv)) if $debug_cv;
+		     $$filegv, $$cv) if $debug_cv;
     }
     my $stash = $cv->STASH;
-    if (ad($stash)) {
+    if ($$stash) {
 	$stash->save;
-	push_init(sprintf("CvSTASH(sym_%lx) = sym_%lx;", ad($cv), ad($stash)));
+	push_init(sprintf("CvSTASH(sym_%lx) = sym_%lx;", $$cv, $$stash));
 	warn sprintf("done saving STASH 0x%x for CV 0x%x\n",
-		     ad($stash), ad($cv)) if $debug_cv;
+		     $$stash, $$cv) if $debug_cv;
     }
     $sv_list[$sv_ix] = sprintf("(XPVCV*)&xpvcv_list[%u], %lu, 0x%x",
 			       $xpvcv_ix, $cv->REFCNT + 1, $cv->FLAGS);
@@ -599,19 +645,19 @@ sub B::GV::save {
     my ($gv) = @_;
     my $sym = objsym($gv);
     if (defined($sym)) {
-	#warn sprintf("GV 0x%x already saved as $sym\n", ad($gv)); # debug
+	#warn sprintf("GV 0x%x already saved as $sym\n", $$gv); # debug
 	return $sym;
     } else {
 	my $ix = $gv_index++;
 	$sym = savesym($gv, "gv_list[$ix]");
-	#warn sprintf("Saving GV 0x%x as $sym\n", ad($gv)); # debug
+	#warn sprintf("Saving GV 0x%x as $sym\n", $$gv); # debug
     }
     my $gvname = $gv->NAME;
     my $name = cstring($gv->STASH->NAME . "::" . $gvname);
     #warn "GV name is $name\n"; # debug
     my $egv = $gv->EGV;
     my $egvsym;
-    if (ad($gv) != ad($egv)) {
+    if ($$gv != $$egv) {
 	#warn(sprintf("EGV name is %s, saving it now\n",
 	#	     $egv->STASH->NAME . "::" . $egv->NAME)); # debug
 	$egvsym = $egv->save;
@@ -636,44 +682,44 @@ sub B::GV::save {
 	# Don't save subfields of special GVs (*_, *1, *# and so on)
 #	warn "GV::save saving subfields\n"; # debug
 	my $gvsv = $gv->SV;
-	if (ad($gvsv)) {
-	    push_init(sprintf("GvSV($sym) = sym_%x;", ad($gvsv)));
+	if ($$gvsv) {
+	    push_init(sprintf("GvSV($sym) = sym_%x;", $$gvsv));
 #	    warn "GV::save \$$name\n"; # debug
 	    $gvsv->save;
 	}
 	my $gvav = $gv->AV;
-	if (ad($gvav)) {
-	    push_init(sprintf("GvAV($sym) = sym_%x;", ad($gvav)));
+	if ($$gvav) {
+	    push_init(sprintf("GvAV($sym) = sym_%x;", $$gvav));
 #	    warn "GV::save \@$name\n"; # debug
 	    $gvav->save;
 	}
 	my $gvhv = $gv->HV;
-	if (ad($gvhv)) {
-	    push_init(sprintf("GvHV($sym) = sym_%x;", ad($gvhv)));
+	if ($$gvhv) {
+	    push_init(sprintf("GvHV($sym) = sym_%x;", $$gvhv));
 #	    warn "GV::save \%$name\n"; # debug
 	    $gvhv->save;
 	}
 	my $gvcv = $gv->CV;
-	if (ad($gvcv)) {
-	    push_init(sprintf("GvCV($sym) = (CV*)sym_%x;", ad($gvcv)));
+	if ($$gvcv) {
+	    push_init(sprintf("GvCV($sym) = (CV*)sym_%x;", $$gvcv));
 #	    warn "GV::save &$name\n"; # debug
 	    $gvcv->save;
 	}
 	my $gvfilegv = $gv->FILEGV;
-	if (ad($gvfilegv)) {
-	    push_init(sprintf("GvFILEGV($sym) = sym_%x;",ad($gvfilegv)));
+	if ($$gvfilegv) {
+	    push_init(sprintf("GvFILEGV($sym) = sym_%x;",$$gvfilegv));
 #	    warn "GV::save GvFILEGV(*$name)\n"; # debug
 	    $gvfilegv->save;
 	}
 	my $gvform = $gv->FORM;
-	if (ad($gvform)) {
-	    push_init(sprintf("GvFORM($sym) = (CV*)sym_%x;", ad($gvform)));
+	if ($$gvform) {
+	    push_init(sprintf("GvFORM($sym) = (CV*)sym_%x;", $$gvform));
 #	    warn "GV::save GvFORM(*$name)\n"; # debug
 	    $gvform->save;
 	}
 	my $gvio = $gv->IO;
-	if (ad($gvio)) {
-	    push_init(sprintf("GvIOp($sym) = sym_%x;", ad($gvio)));
+	if ($$gvio) {
+	    push_init(sprintf("GvIOp($sym) = sym_%x;", $$gvio));
 #	    warn "GV::save GvIO(*$name)\n"; # debug
 	    $gvio->save;
 	}
@@ -692,7 +738,7 @@ sub B::AV::save {
     my $sv_list_index = $#sv_list;
     my $fill = $av->FILL;
     $av->save_magic;
-    warn sprintf("saving AV 0x%x FILL=$fill AvFLAGS=0x%x", ad($av), $avflags)
+    warn sprintf("saving AV 0x%x FILL=$fill AvFLAGS=0x%x", $$av, $avflags)
 	if $debug_av;
     # XXX AVf_REAL is wrong test: need to save comppadlist but not stack
     #if ($fill > -1 && ($avflags & AVf_REAL)) {
@@ -703,7 +749,7 @@ sub B::AV::save {
 	    my $i = 0;
 	    foreach $el (@array) {
 		warn sprintf("AV 0x%x[%d] = %s 0x%x\n",
-			     ad($av), $i++, class($el), ad($el));
+			     $$av, $i++, class($el), $$el);
 	    }
 	}
 	my @names = map($_->save, @array);
@@ -737,7 +783,7 @@ sub B::HV::save {
 	# A perl bug means HvPMROOT isn't altered when a PMOP is freed. Usually
 	# the only symptom is that sv_reset tries to reset the PMf_USED flag of
 	# a trashed op but we look at the trashed op_type and segfault.
-	#my $adpmroot = ad($hv->PMROOT);
+	#my $adpmroot = ${$hv->PMROOT};
 	my $adpmroot = 0;
 	push(@decl_list, "static HV *hv$hv_index;");
 	# XXX Beware of weird package names containing double-quotes, \n, ...?
@@ -794,8 +840,8 @@ sub B::IO::save {
     my ($field, $fsym);
     foreach $field (qw(TOP_GV FMT_GV BOTTOM_GV)) {
       	$fsym = $io->$field();
-	if (ad($fsym)) {
-	    push_init(sprintf("Io$field($sym) = (GV*)sym_%x;", ad($fsym)));
+	if ($$fsym) {
+	    push_init(sprintf("Io$field($sym) = (GV*)sym_%x;", $$fsym));
 	    $fsym->save;
 	}
     }
@@ -807,9 +853,9 @@ sub B::SV::save {
     my $sv = shift;
     # This is where we catch an honest-to-goodness Nullsv (which gets
     # blessed into B::SV explicitly) and any stray erroneous SVs.
-    return 0 unless ad($sv);
+    return 0 unless $$sv;
     confess sprintf("cannot save that type of SV: %s (0x%x)\n",
-		    class($sv), ad($sv));
+		    class($sv), $$sv);
 }
 
 sub output_all {
@@ -972,6 +1018,9 @@ extern "C" {
 
 #include "EXTERN.h"
 #include "perl.h"
+#ifndef PATCHLEVEL
+#include "patchlevel.h"
+#endif
 
 #ifdef __cplusplus
 }
@@ -1088,10 +1137,10 @@ sub B::GV::savecv {
     my $gv = shift;
     my $cv = $gv->CV;
     my $name = $gv->NAME;
-    if (ad($cv) && !objsym($cv) && !($name eq "bootstrap" && $cv->XSUB)) {
+    if ($$cv && !objsym($cv) && !($name eq "bootstrap" && $cv->XSUB)) {
 	if ($debug_cv) {
 	    warn sprintf("saving extra CV &%s::%s (0x%x) from GV 0x%x\n",
-			 $gv->STASH->NAME, $name, ad($cv), ad($gv));
+			 $gv->STASH->NAME, $name, $$cv, $$gv);
 	}
 	$gv->save;
     }
@@ -1099,20 +1148,41 @@ sub B::GV::savecv {
 
 sub save_unused_subs {
     my %search_pack;
-    map { $search_pack{"$_\::"} = 1 } @_;
+    map { $search_pack{$_} = 1 } @_;
     no strict qw(vars refs);
-    walksymtable(\%{"main::"}, "savecv", sub { exists($search_pack{$_[0]}) });
+    walksymtable(\%{"main::"}, "savecv", sub {
+	my $package = shift;
+	$package =~ s/::$//;
+	#warn "Considering $package\n";#debug
+	return 1 if exists $search_pack{$package};
+	#warn "    (nothing explicit)\n";#debug
+	# Omit the packages which we use (and which cause grief
+	# because of fancy "goto &$AUTOLOAD" stuff).
+	# XXX Surely there must be a nicer way to do this.
+	if ($package eq "FileHandle"
+	    || $package eq "Config"
+	    || $package eq "SelectSaver") {
+	    return 0;
+	}
+	my $m;
+	foreach $m (qw(new DESTROY TIESCALAR TIEARRAY TIEHASH)) {
+	    if (defined(&{$package."::$m"})) {
+		warn "$package has method $m: -u$package assumed\n";#debug
+		return 1;
+	    }
+	}
+	return 0;
+    });
 }
 
 sub save_main {
     my $curpad_sym = (comppadlist->ARRAY)[1]->save;
     walkoptree(main_root, "save");
-    if (@unused_sub_packages) {
-	warn "done main optree, walking symtable for extras\n" if $debug_cv;
-	save_unused_subs(@unused_sub_packages);
-    }
-    push_init(sprintf("main_root = sym_%x;", ad(main_root)),
-	      sprintf("main_start = sym_%x;", ad(main_start)),
+    warn "done main optree, walking symtable for extras\n" if $debug_cv;
+    save_unused_subs(@unused_sub_packages);
+
+    push_init(sprintf("main_root = sym_%x;", ${main_root()}),
+	      sprintf("main_start = sym_%x;", ${main_start()}),
 	      "curpad = AvARRAY($curpad_sym);");
     output_boilerplate();
     print "\n";

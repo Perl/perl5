@@ -35,7 +35,6 @@
 	SPAGAIN;		\
     } while(0)
 
-#include "patchlevel.h"
 #if PATCHLEVEL < 3
 #define RUN() run()
 #else
