@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Jan 21 16:11:32 MET 2005 [metaconfig 3.0 PL70]
+# Generated on Mon Jan 31 12:56:14 CET 2005 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -7105,7 +7105,7 @@ esac
 : for archive libraries.  Thank you, Linux.
 case "$nm_so_opt" in
 '')	case "$myuname" in
-	*linux*)
+	*linux*|gnu*)
 		if $nm --help | $grep 'dynamic' > /dev/null 2>&1; then
 			nm_so_opt='--dynamic'
 		fi
@@ -7627,7 +7627,7 @@ EOM
 			      '') dflt="$dflt +vnocompatwarnings" ;;
 			      esac
 			      ;;	
-			linux|irix*)	dflt='-shared' ;;
+			linux|irix*|gnu*)	dflt='-shared' ;;
 			next)  dflt='none' ;;
 			solaris) dflt='-G' ;;
 			sunos) dflt='-assert nodefinitions' ;;
@@ -7674,7 +7674,7 @@ say "none".
 EOM
     case "$ccdlflags" in
     '') case "$osname" in
-	    linux|hpux)	dflt='-Wl,-E' ;;
+	    linux|hpux|gnu*)	dflt='-Wl,-E' ;;
 	    next|sunos)	dflt='none' ;;
 	    *)		dflt='none' ;;
 	    esac ;;
@@ -7771,7 +7771,7 @@ true)
 			dflt=libperl.5.$so
 			# XXX How handle the --version stuff for MAB?
 			;;
-		linux*)  # ld won't link with a bare -lperl otherwise.
+		linux*|gnu*)  # ld won't link with a bare -lperl otherwise.
 			dflt=libperl.$so
 			;;
 		cygwin*) # ld links against an importlib
@@ -7858,7 +7858,7 @@ if "$useshrplib"; then
 	freebsd|netbsd|openbsd|interix)
 		xxx="-Wl,-R$shrpdir"
 		;;
-	bsdos|linux|irix*|dec_osf)
+	bsdos|linux|irix*|dec_osf|gnu*)
 		xxx="-Wl,-rpath,$shrpdir"
 		;;
 	next)
