@@ -1638,7 +1638,7 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 	*/
 	if (PL_in_my) {
 	    if (strchr(PL_tokenbuf,':'))
-		croak(PL_no_myglob,PL_tokenbuf);
+		yyerror(form(PL_no_myglob,PL_tokenbuf));
 
 	    yylval.opval = newOP(OP_PADANY, 0);
 	    yylval.opval->op_targ = pad_allocmy(PL_tokenbuf);

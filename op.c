@@ -147,7 +147,7 @@ pad_allocmy(char *name)
 	    name[2] = toCTRL(name[1]);
 	    name[1] = '^';
 	}
-	croak("Can't use global %s in \"my\"",name);
+	yyerror(form("Can't use global %s in \"my\"",name));
     }
     if (ckWARN(WARN_UNSAFE) && AvFILLp(PL_comppad_name) >= 0) {
 	SV **svp = AvARRAY(PL_comppad_name);
@@ -170,7 +170,8 @@ pad_allocmy(char *name)
     sv_setpv(sv, name);
     if (PL_in_my_stash) {
 	if (*name != '$')
-	    croak("Can't declare class for non-scalar %s in \"my\"",name);
+	    yyerror(form("Can't declare class for non-scalar %s in \"my\"",
+			 name));
 	SvOBJECT_on(sv);
 	(void)SvUPGRADE(sv, SVt_PVMG);
 	SvSTASH(sv) = (HV*)SvREFCNT_inc(PL_in_my_stash);
