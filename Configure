@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.8 1995/07/25 13:40:02 ram Exp $
 #
-# Generated on Thu Jan  4 11:13:27 EST 1996 [metaconfig 3.0 PL60]
+# Generated on Thu Jan 11 17:07:56 EST 1996 [metaconfig 3.0 PL60]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -4308,7 +4308,17 @@ $sed 's/^/	/' libnames >&4
 echo " "
 $echo $n "This may take a while...$c" >&4
 
-nm $nm_opt $* 2>/dev/null >libc.tmp
+: Linux may need the special Dynamic option to nm for shared libraries.
+if test -f /vmlinuz && $nm -D $nm_opt $libc > /dev/null 2>&1; then
+  cat /dev/null >libc.tmp
+  for nm_libs_ext in $*; do
+    case $nm_libs_ext in *.so*) nm_opt_here=-D ;; *) nm_opt_here='' ;; esac
+    nm $nm_opt_here $nm_opt $nm_libs_ext 2>/dev/null >>libc.tmp
+  done
+else
+  nm $nm_opt $* 2>/dev/null >libc.tmp
+fi
+
 $echo $n ".$c"
 $grep fprintf libc.tmp > libc.ptf
 xscan='eval "<libc.ptf $com >libc.list"; $echo $n ".$c" >&4'
