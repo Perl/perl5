@@ -26,8 +26,8 @@ $tests += 4 if $EXTRA_ABSPATH_TESTS;
 plan tests => $tests;
 
 SKIP: {
-    skip "not suitable for core perl testing", 1 if $ENV{PERL_CORE};
-    like $INC{'Cwd.pm'}, qr{blib}i, "Cwd should be loaded from blib/ during testing";
+  skip "no need to check for blib/ in the core", 1 if $ENV{PERL_CORE};
+  like $INC{'Cwd.pm'}, qr{blib}i, "Cwd should be loaded from blib/ during testing";
 }
 
 my $IsVMS = $^O eq 'VMS';

@@ -170,7 +170,7 @@ use strict;
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 
-$VERSION = '3.04_01';
+$VERSION = '3.05';
 
 @ISA = qw/ Exporter /;
 @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
@@ -199,15 +199,16 @@ if ($^O eq 'os2') {
     return 1;
 }
 
+# If loading the XS stuff doesn't work, we can fall back to pure perl
 eval {
-if ( $] >= 5.006 ) {
-  require XSLoader;
-  XSLoader::load( __PACKAGE__, $VERSION );
-} else {
-  require DynaLoader;
-  push @ISA, 'DynaLoader';
-  __PACKAGE__->bootstrap( $VERSION );
-}
+  if ( $] >= 5.006 ) {
+    require XSLoader;
+    XSLoader::load( __PACKAGE__, $VERSION );
+  } else {
+    require DynaLoader;
+    push @ISA, 'DynaLoader';
+    __PACKAGE__->bootstrap( $VERSION );
+  }
 };
 
 # Must be after the DynaLoader stuff:

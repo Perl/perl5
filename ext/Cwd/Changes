@@ -1,5 +1,18 @@
 Revision history for Perl distribution PathTools.
 
+3.05  Mon Feb 28 07:22:58 CST 2005
+
+ - Fixed a bug in fast_abs_path() on Win32 in which forward- and
+   backward-slashes were confusing things. [demerphq]
+
+ - Failure to load the XS code in Cwd is no longer a fatal error
+   (though failure to compile it is still a fatal error in the build
+   process).  This lets Cwd work under miniperl in the core. [Rafael
+   Garcia-Suarez]
+
+ - In the t/cwd.t test, don't enforce loading from blib/ if we're
+   testing in the perl core. [Rafael Garcia-Suarez]
+
 3.04  Sun Feb  6 17:27:38 CST 2005
 
  - For perls older than 5.006, the HAS_GETCWD symbol is not available,
