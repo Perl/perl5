@@ -89,6 +89,11 @@ extern int h_errno;
 #if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 static int dooneliner _((char *cmd, char *filename));
 #endif
+
+#ifdef HAS_CHSIZE
+# define my_chsize chsize
+#endif
+
 /* Pushy I/O. */
 
 PP(pp_backtick)
@@ -376,8 +381,16 @@ PP(pp_binmode)
 	RETPUSHUNDEF;
 #endif
 #else
+#if defined(USEMYBINMODE)
+    if (my_binmode(fp,IoTYPE(io)) != NULL)
+	RETPUSHYES;
+	else
+	RETPUSHUNDEF;
+#else
     RETPUSHYES;
 #endif
+#endif
+
 }
 
 PP(pp_tie)
@@ -415,8 +428,10 @@ PP(pp_tie)
     ENTER;
     SAVESPTR(op);
     op = (OP *) &myop;
+    if (perldb && curstash != debstash)
+	op->op_private |= OPpENTERSUB_DB;
 
-    XPUSHs(gv);
+    XPUSHs((SV*)gv);
     PUTBACK;
 
     if (op = pp_entersub())
@@ -443,10 +458,28 @@ PP(pp_tie)
 PP(pp_untie)
 {
     dSP;
-    if (SvTYPE(TOPs) == SVt_PVHV || SvTYPE(TOPs) == SVt_PVAV)
-	sv_unmagic(TOPs, 'P');
+    SV * sv ;
+
+    sv = POPs;
+    if (hints & HINT_STRICT_UNTIE)
+    {
+        MAGIC * mg ;
+        if (SvMAGICAL(sv)) {
+            if (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
+                mg = mg_find(sv, 'P') ;
+            else
+                mg = mg_find(sv, 'q') ;
+    
+            if (mg && SvREFCNT(SvRV(mg->mg_obj)) > 1)  
+		croak("Can't untie: %d inner references still exist", 
+			SvREFCNT(SvRV(mg->mg_obj)) - 1 ) ;
+        }
+    }
+ 
+    if (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
+	sv_unmagic(sv, 'P');
     else
-	sv_unmagic(TOPs, 'q');
+	sv_unmagic(sv, 'q');
     RETSETYES;
 }
 
@@ -503,6 +536,8 @@ PP(pp_dbmopen)
     ENTER;
     SAVESPTR(op);
     op = (OP *) &myop;
+    if (perldb && curstash != debstash)
+	op->op_private |= OPpENTERSUB_DB;
     PUTBACK;
     pp_pushmark();
 
@@ -514,7 +549,7 @@ PP(pp_dbmopen)
     else
 	PUSHs(sv_2mortal(newSViv(O_RDWR)));
     PUSHs(right);
-    PUSHs(gv);
+    PUSHs((SV*)gv);
     PUTBACK;
 
     if (op = pp_entersub())
@@ -531,7 +566,7 @@ PP(pp_dbmopen)
 	PUSHs(left);
 	PUSHs(sv_2mortal(newSViv(O_RDONLY)));
 	PUSHs(right);
-	PUSHs(gv);
+	PUSHs((SV*)gv);
 	PUTBACK;
 
 	if (op = pp_entersub())
@@ -710,11 +745,11 @@ PP(pp_select)
     if (! hv)
 	XPUSHs(&sv_undef);
     else {
-	GV **gvp = hv_fetch(hv, GvNAME(egv), GvNAMELEN(egv), FALSE);
+	GV **gvp = (GV**)hv_fetch(hv, GvNAME(egv), GvNAMELEN(egv), FALSE);
 	if (gvp && *gvp == egv)
 	    gv_efullname(TARG, defoutgv);
 	else
-	    sv_setsv(TARG, sv_2mortal(newRV(egv)));
+	    sv_setsv(TARG, sv_2mortal(newRV((SV*)egv)));
 	XPUSHTARG;
     }
 
@@ -827,7 +862,7 @@ PP(pp_leavewrite)
     I32 gimme;
     register CONTEXT *cx;
 
-    DEBUG_f(fprintf(stderr,"left=%ld, todo=%ld\n",
+    DEBUG_f(fprintf(Perl_debug_log,"left=%ld, todo=%ld\n",
 	  (long)IoLINES_LEFT(io), (long)FmLINES(formtarget)));
     if (IoLINES_LEFT(io) < FmLINES(formtarget) &&
 	formtarget != toptarget)
@@ -1211,34 +1246,44 @@ PP(pp_truncate)
 
     SETERRNO(0,0);
 #if defined(HAS_TRUNCATE) || defined(HAS_CHSIZE) || defined(F_FREESP)
+    if (op->op_flags & OPf_SPECIAL) {
+	tmpgv = gv_fetchpv(POPp,FALSE, SVt_PVIO);
+    do_ftruncate:
+	if (!GvIO(tmpgv) || !IoIFP(GvIOp(tmpgv)) ||
 #ifdef HAS_TRUNCATE
-    if (op->op_flags & OPf_SPECIAL) {
-	tmpgv = gv_fetchpv(POPp,FALSE, SVt_PVIO);
-	if (!GvIO(tmpgv) || !IoIFP(GvIOp(tmpgv)) ||
 	  ftruncate(fileno(IoIFP(GvIOn(tmpgv))), len) < 0)
-	    result = 0;
-    }
-    else if (truncate(POPp, len) < 0)
-	result = 0;
-#else
-    if (op->op_flags & OPf_SPECIAL) {
-	tmpgv = gv_fetchpv(POPp,FALSE, SVt_PVIO);
-	if (!GvIO(tmpgv) || !IoIFP(GvIOp(tmpgv)) ||
-	  chsize(fileno(IoIFP(GvIOn(tmpgv))), len) < 0)
+#else 
+	  my_chsize(fileno(IoIFP(GvIOn(tmpgv))), len) < 0)
+#endif
 	    result = 0;
     }
     else {
-	int tmpfd;
-
-	if ((tmpfd = open(POPp, 0)) < 0)
-	    result = 0;
-	else {
-	    if (chsize(tmpfd, len) < 0)
-		result = 0;
-	    close(tmpfd);
+	SV *sv = POPs;
+	if (SvTYPE(sv) == SVt_PVGV) {
+	    tmpgv = (GV*)sv;		/* *main::FRED for example */
+	    goto do_ftruncate;
 	}
-    }
+	else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV) {
+	    tmpgv = (GV*) SvRV(sv);	/* \*main::FRED for example */
+	    goto do_ftruncate;
+	}
+#ifdef HAS_TRUNCATE
+	if (truncate (SvPV (sv, na), len) < 0)
+	    result = 0;
+#else
+	{
+	    int tmpfd;
+
+	    if ((tmpfd = open(SvPV (sv, na), 0)) < 0)
+	        result = 0;
+	    else {
+		if (my_chsize(tmpfd, len) < 0)
+		    result = 0;
+		close(tmpfd);
+	    }
+	}
 #endif
+    }
 
     if (result)
 	RETPUSHYES;
@@ -1831,11 +1876,21 @@ PP(pp_stat)
 	PUSHs(sv_2mortal(newSViv((I32)statcache.st_nlink)));
 	PUSHs(sv_2mortal(newSViv((I32)statcache.st_uid)));
 	PUSHs(sv_2mortal(newSViv((I32)statcache.st_gid)));
+#ifdef USE_STAT_RDEV
 	PUSHs(sv_2mortal(newSViv((I32)statcache.st_rdev)));
+#else
+	PUSHs(sv_2mortal(newSVpv("", 0)));
+#endif
 	PUSHs(sv_2mortal(newSViv((I32)statcache.st_size)));
+#ifdef BIG_TIME
+	PUSHs(sv_2mortal(newSVnv((U32)statcache.st_atime)));
+	PUSHs(sv_2mortal(newSVnv((U32)statcache.st_mtime)));
+	PUSHs(sv_2mortal(newSVnv((U32)statcache.st_ctime)));
+#else
 	PUSHs(sv_2mortal(newSViv((I32)statcache.st_atime)));
 	PUSHs(sv_2mortal(newSViv((I32)statcache.st_mtime)));
 	PUSHs(sv_2mortal(newSViv((I32)statcache.st_ctime)));
+#endif
 #ifdef USE_STAT_BLOCKS
 	PUSHs(sv_2mortal(newSViv((I32)statcache.st_blksize)));
 	PUSHs(sv_2mortal(newSViv((I32)statcache.st_blocks)));
@@ -2984,7 +3039,11 @@ PP(pp_setpriority)
 PP(pp_time)
 {
     dSP; dTARGET;
+#ifdef BIG_TIME
+    XPUSHn( time(Null(Time_t*)) );
+#else
     XPUSHi( time(Null(Time_t*)) );
+#endif
     RETURN;
 }
 
@@ -3038,7 +3097,11 @@ PP(pp_gmtime)
     if (MAXARG < 1)
 	(void)time(&when);
     else
+#ifdef BIG_TIME
+	when = (Time_t)SvNVx(POPs);
+#else
 	when = (Time_t)SvIVx(POPs);
+#endif
 
     if (op->op_type == OP_LOCALTIME)
 	tmbuf = localtime(&when);
