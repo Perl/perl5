@@ -226,7 +226,7 @@ reorder(arg)
 
     dstlen = srclen + 1;
     dst = newSV(dstlen);
-    sv_setpvn(dst,s,srclen);
+    sv_setpvn(dst,(const char*)s,srclen);
     SvUTF8_on(dst);
 
     stk_cc_max = 10; /* enough as an initial value? */
