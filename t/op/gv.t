@@ -111,7 +111,7 @@ print {*x{IO}} "ok 23\n";
 		$warn .= $_[0];
 	};
 	my $val = *x{FILEHANDLE};
-	print {*x{IO}} ($warn =~ /is deprecated/ ? "ok 42\n" : "not ok 42\n");
+	print {*x{IO}} ($warn =~ /is deprecated/ ? "ok 24\n" : "not ok 24\n");
 	
 }
 
