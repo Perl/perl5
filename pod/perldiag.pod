@@ -49,7 +49,7 @@ letter.
 (W) When using threaded Perl, a thread (not necessarily the main
 thread) exited while there were still other threads running.
 Usually it's a good idea to first collect the return values of the
-created threads by joining them, and only then exit from then main
+created threads by joining them, and only then exit from the main
 thread.  See L<threads>.
 
 =item accept() on closed socket %s

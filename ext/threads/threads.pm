@@ -1,6 +1,6 @@
 package threads;
 
-use 5.007_003;
+use 5.008;
 use strict;
 use warnings;
 use Config;
@@ -111,7 +111,7 @@ threads - Perl extension allowing use of interpreter based threads from perl
 Perl 5.6 introduced something called interpreter threads.  Interpreter
 threads are different from "5005threads" (the thread model of Perl
 5.005) by creating a new perl interpreter per thread and not sharing
-any data or state between threads.
+any data or state between threads by default.
 
 Prior to perl 5.8 this has only been available to people embedding
 perl and for emulating fork() on windows.
@@ -138,18 +138,18 @@ object. The new() method is an alias for create().
 
 =item $thread->join
 
-This will wait for the corresponding thread to join. When the thread finishes,
-join() will return the return values of the entry point function. If the
-thread has been detached, an error will be thrown. If the program
-exits without all other threads having been either joined or detached,
-then a warning will be issued. (A program exits either because one of its
-threads explicitly calls exit(), or in the case of the main thread, reaches
-the end of the main program file.)
+This will wait for the corresponding thread to join. When the thread
+finishes, join() will return the return values of the entry point
+function. If the thread has been detached, an error will be thrown.
+If the program exits without all other threads having been either
+joined or detached, then a warning will be issued. (A program exits
+either because one of its threads explicitly calls exit(), or in the
+case of the main thread, reaches the end of the main program file.)
 
 =item $thread->detach
 
-Will make the thread unjoinable, and cause any eventual return value to be
-discarded.
+Will make the thread unjoinable, and cause any eventual return value
+to be discarded.
 
 =item threads->self
 
@@ -157,11 +157,11 @@ This will return the thread object for the current thread.
 
 =item $thread->tid
 
-This will return the id of the thread.  Thread IDs are integers, with the
-main thread in a program being 0.  Currently Perl assigns a unique tid to
-every thread ever created in your program, assigning the first thread to
-be created a tid of 1, and increasing the tid by 1 for each new thread
-that's created.
+This will return the id of the thread.  Thread IDs are integers, with
+the main thread in a program being 0.  Currently Perl assigns a unique
+tid to every thread ever created in your program, assigning the first
+thread to be created a tid of 1, and increasing the tid by 1 for each
+new thread that's created.
 
 NB the class method C<< threads->tid() >> is a quick way to get the
 current thread id if you don't have your thread object handy.
@@ -197,7 +197,7 @@ returns a thread object.
 A thread (not necessarily the main thread) exited while there were
 still other threads running.  Usually it's a good idea to first collect
 the return values of the created threads by joining them, and only then
-exit from then main thread.
+exit from the main thread.
 
 =back
 
@@ -223,14 +223,14 @@ This will be possibly be fixed in later versions of perl.
 
 =item tid is I32
 
-The tid is a 32 bit integer, it can potentially overflow. 
+The thread id is a 32 bit integer, it can potentially overflow.
 This might be fixed in a later version of perl.
 
 =item Returning objects
 
 When you return an object the entire stash that the object is blessed
-as well. This will lead to a large memory usage.
-The ideal situation would be to detect the original stash if it existed.
+as well.  This will lead to a large memory usage.  The ideal situation
+would be to detect the original stash if it existed.
 
 =item PERL_OLD_SIGNALS are not threadsafe, will not be.
 
