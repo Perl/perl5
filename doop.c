@@ -103,7 +103,7 @@ register SV **sp;
 	sv_upgrade(sv, SVt_PV);
     if (SvLEN(sv) < len + items) {	/* current length is way too short */
 	while (items-- > 0) {
-	    if (*mark && !SvGMAGIC(*mark) && SvOK(*mark)) {
+	    if (*mark && !SvGMAGICAL(*mark) && SvOK(*mark)) {
 		SvPV(*mark, tmplen);
 		len += tmplen;
 	    }
@@ -486,7 +486,11 @@ dARGS
 		sv_magic(TARG, Nullsv, 'k', Nullch, 0);
 	    }
 	    LvTYPE(TARG) = 'k';
-	    LvTARG(TARG) = (SV*)hv;
+	    if (LvTARG(TARG) != (SV*)hv) {
+		if (LvTARG(TARG))
+		    SvREFCNT_dec(LvTARG(TARG));
+		LvTARG(TARG) = SvREFCNT_inc(hv);
+	    }
 	    PUSHs(TARG);
 	    RETURN;
 	}

@@ -1973,13 +1973,15 @@ EXT MGVTBL vtbl_glob =	{magic_getglob,
 					0,	0,	0};
 EXT MGVTBL vtbl_mglob =	{0,	magic_setmglob,
 					0,	0,	0};
-EXT MGVTBL vtbl_nkeys =	{0,	magic_setnkeys,
+EXT MGVTBL vtbl_nkeys =	{magic_getnkeys,
+				magic_setnkeys,
 					0,	0,	0};
 EXT MGVTBL vtbl_taint =	{magic_gettaint,magic_settaint,
 					0,	0,	0};
-EXT MGVTBL vtbl_substr =	{0,	magic_setsubstr,
+EXT MGVTBL vtbl_substr =	{magic_getsubstr, magic_setsubstr,
 					0,	0,	0};
-EXT MGVTBL vtbl_vec =	{0,	magic_setvec,
+EXT MGVTBL vtbl_vec =	{magic_getvec,
+				magic_setvec,
 					0,	0,	0};
 EXT MGVTBL vtbl_pos =	{magic_getpos,
 				magic_setpos,

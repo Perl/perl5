@@ -297,7 +297,11 @@ PP(pp_pos)
 	}
 
 	LvTYPE(TARG) = '.';
-	LvTARG(TARG) = sv;
+	if (LvTARG(TARG) != sv) {
+	    if (LvTARG(TARG))
+		SvREFCNT_dec(LvTARG(TARG));
+	    LvTARG(TARG) = SvREFCNT_inc(sv);
+	}
 	PUSHs(TARG);	/* no SvSETMAGIC */
 	RETURN;
     }
@@ -1796,7 +1800,11 @@ PP(pp_substr)
 	    }
 
 	    LvTYPE(TARG) = 'x';
-	    LvTARG(TARG) = sv;
+	    if (LvTARG(TARG) != sv) {
+		if (LvTARG(TARG))
+		    SvREFCNT_dec(LvTARG(TARG));
+		LvTARG(TARG) = SvREFCNT_inc(sv);
+	    }
 	    LvTARGOFF(TARG) = pos;
 	    LvTARGLEN(TARG) = rem; 
 	}
@@ -1833,7 +1841,11 @@ PP(pp_vec)
 	    }
 
 	    LvTYPE(TARG) = 'v';
-	    LvTARG(TARG) = src;
+	    if (LvTARG(TARG) != src) {
+		if (LvTARG(TARG))
+		    SvREFCNT_dec(LvTARG(TARG));
+		LvTARG(TARG) = SvREFCNT_inc(src);
+	    }
 	    LvTARGOFF(TARG) = offset; 
 	    LvTARGLEN(TARG) = size; 
 	}
