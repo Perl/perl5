@@ -504,7 +504,7 @@ Yet another way would be to use the Devel::Peek module:
 
 That shows the UTF8 flag in FLAGS and both the UTF-8 bytes
 and Unicode characters in C<PV>.  See also later in this document
-the discussion about the C<is_utf8> function of the C<Encode> module.
+the discussion about the C<utf8::is_utf8()> function.
 
 =back
 
@@ -625,8 +625,7 @@ didn't get the transparency of Unicode quite right.
 
 Okay, if you insist:
 
-    use Encode 'is_utf8';
-    print is_utf8($string) ? 1 : 0, "\n";
+    print utf8::is_utf8($string) ? 1 : 0, "\n";
 
 But note that this doesn't mean that any of the characters in the
 string are necessary UTF-8 encoded, or that any of the characters have

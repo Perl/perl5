@@ -14,6 +14,8 @@ my $DEFINE;
 my $LIBS;
 my $XSOPT;
 
+my $ld_exeext = ($^O eq 'os2' and $Config{ldflags} =~ /-Zexe\b/) ? '.exe' : '';
+
 unless($ENV{PERL_CORE}) {
     $ENV{PERL_CORE} = 1 if grep { $_ eq 'PERL_CORE=1' } @ARGV;
 }
@@ -139,10 +141,11 @@ sub try_compile_and_link {
         }
         else
         {
+	    my $tmp_exe = "$tmp$ld_exeext";
 	    printf "cccmd = $cccmd\n" if $VERBOSE;
-	    system($cccmd);
-	    $ok = -s $tmp && -x _;
-	    unlink("$tmp.c", $tmp);
+	    my $res = system($cccmd);
+	    $ok = defined($res) && $res==0 && -s $tmp_exe && -x _;
+	    unlink("$tmp.c", $tmp_exe);
         }
     }
     
@@ -367,7 +370,8 @@ EOD
         print "You can mix subsecond sleeps with signals.\n";
     } else {
 	print "NOT found.\n";
-        print "You cannot mix subsecond sleeps with signals.\n";
+	my $nt = ($^O eq 'os2' ? '' : 'not');
+        print "You can$nt mix subsecond sleeps with signals.\n";
     }
 
     if ($DEFINE) {

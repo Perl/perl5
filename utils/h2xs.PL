@@ -879,8 +879,9 @@ if( @path_h ){
         close(CH);
       }
       else {
-        use Fcntl qw/SEEK_SET/;
-        seek CH, 0, SEEK_SET;
+	# Work from miniperl too - on "normal" systems
+        my $SEEK_SET = eval 'use Fcntl qw/SEEK_SET/; SEEK_SET' or 0;
+        seek CH, 0, $SEEK_SET;
         my $src = do { local $/; <CH> };
         close CH;
         no warnings 'uninitialized';

@@ -263,8 +263,8 @@ is( $mm->{PERL_ARCHIVE}, '$(PERL_INC)/libperl$(LIB_EXT)', 'PERL_ARCHIVE' );
 	isnt( $mm->{PERL_ARCHIVE_AFTER}, '',
 		'PERL_ARCHIVE_AFTER should be empty without $is_aout set' );
 	$aout = 1;
-	is( $mm->{PERL_ARCHIVE_AFTER}, '', 
-		'... and blank string if it is set' );
+	is( $mm->{PERL_ARCHIVE_AFTER}, '$(PERL_INC)/libperl_override$(LIB_EXT)', 
+		'... and `$(PERL_INC)/libperl_override$(LIB_EXT)\' if it is set' );
 }
 
 # EXPORT_LIST

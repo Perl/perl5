@@ -165,6 +165,7 @@ Perl_sv_derived_from(pTHX_ SV *sv, const char *name)
 void XS_UNIVERSAL_isa(pTHX_ CV *cv);
 void XS_UNIVERSAL_can(pTHX_ CV *cv);
 void XS_UNIVERSAL_VERSION(pTHX_ CV *cv);
+XS(XS_utf8_is_utf8);
 XS(XS_utf8_valid);
 XS(XS_utf8_encode);
 XS(XS_utf8_decode);
@@ -185,6 +186,7 @@ Perl_boot_core_UNIVERSAL(pTHX)
     newXS("UNIVERSAL::isa",             XS_UNIVERSAL_isa,         file);
     newXS("UNIVERSAL::can",             XS_UNIVERSAL_can,         file);
     newXS("UNIVERSAL::VERSION", 	XS_UNIVERSAL_VERSION, 	  file);
+    newXS("utf8::is_utf8", XS_utf8_is_utf8, file);
     newXS("utf8::valid", XS_utf8_valid, file);
     newXS("utf8::encode", XS_utf8_encode, file);
     newXS("utf8::decode", XS_utf8_decode, file);
@@ -364,23 +366,40 @@ finish:
     XSRETURN(1);
 }
 
+XS(XS_utf8_is_utf8)
+{
+     dXSARGS;
+     if (items != 1)
+	  Perl_croak(aTHX_ "Usage: utf8::is_utf8(sv)");
+     {
+	  SV *	sv = ST(0);
+	  {
+	       if (SvUTF8(sv))
+		    XSRETURN_YES;
+	       else
+		    XSRETURN_NO;
+	  }
+     }
+     XSRETURN_EMPTY;
+}
+
 XS(XS_utf8_valid)
 {
-    dXSARGS;
-    if (items != 1)
-	Perl_croak(aTHX_ "Usage: utf8::valid(sv)");
-    {
-	SV *	sv = ST(0);
- {
-  STRLEN len;
-  char *s = SvPV(sv,len);
-  if (!SvUTF8(sv) || is_utf8_string((U8*)s,len))
-   XSRETURN_YES;
-  else
-   XSRETURN_NO;
- }
-    }
-    XSRETURN_EMPTY;
+     dXSARGS;
+     if (items != 1)
+	  Perl_croak(aTHX_ "Usage: utf8::valid(sv)");
+     {
+	  SV *	sv = ST(0);
+	  {
+	       STRLEN len;
+	       char *s = SvPV(sv,len);
+	       if (!SvUTF8(sv) || is_utf8_string((U8*)s,len))
+		    XSRETURN_YES;
+	       else
+		    XSRETURN_NO;
+	  }
+     }
+     XSRETURN_EMPTY;
 }
 
 XS(XS_utf8_encode)

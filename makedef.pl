@@ -389,6 +389,8 @@ elsif ($PLATFORM eq 'os2') {
 		    my_getpwent
 		    my_setpwent
 		    my_endpwent
+		    fork_with_resources
+		    croak_with_os2error
 		    setgrent
 		    endgrent
 		    getgrent

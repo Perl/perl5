@@ -37,7 +37,7 @@ no utf8; # Ironic, no?
 #
 #
 
-plan tests => 99;
+plan tests => 143;
 
 {
     # bug id 20001009.001
@@ -331,4 +331,81 @@ SKIP: {
     use utf8;
     eval qq{is(q \xc3\xbc test \xc3\xbc, qq\xc2\xb7 test \xc2\xb7,
 	       "utf8 quote delimiters [perl #16823]");};
+}
+
+# Test the "internals".
+
+{
+    my $a = "A";
+    my $b = chr(0x0FF);
+    my $c = chr(0x100);
+
+    ok( utf8::valid($a), "utf8::valid basic");
+    ok( utf8::valid($b), "utf8::valid beyond");
+    ok( utf8::valid($c), "utf8::valid unicode");
+
+    ok(!utf8::is_utf8($a), "!utf8::is_utf8 basic");
+    ok(!utf8::is_utf8($b), "!utf8::is_utf8 beyond");
+    ok( utf8::is_utf8($c), "utf8::is_utf8 unicode");
+
+    is(utf8::upgrade($a), 1, "utf8::upgrade basic");
+    is(utf8::upgrade($b), 2, "utf8::upgrade beyond");
+    is(utf8::upgrade($c), 2, "utf8::upgrade unicode");
+
+    is($a, "A",       "basic");
+    is($b, "\xFF",    "beyond");
+    is($c, "\x{100}", "unicode");
+
+    ok( utf8::valid($a), "utf8::valid basic");
+    ok( utf8::valid($b), "utf8::valid beyond");
+    ok( utf8::valid($c), "utf8::valid unicode");
+
+    ok( utf8::is_utf8($a), "utf8::is_utf8 basic");
+    ok( utf8::is_utf8($b), "utf8::is_utf8 beyond");
+    ok( utf8::is_utf8($c), "utf8::is_utf8 unicode");
+
+    is(utf8::downgrade($a), 1, "utf8::downgrade basic");
+    is(utf8::downgrade($b), 1, "utf8::downgrade beyond");
+
+    is($a, "A",       "basic");
+    is($b, "\xFF",    "beyond");
+
+    ok( utf8::valid($a), "utf8::valid basic");
+    ok( utf8::valid($b), "utf8::valid beyond");
+
+    ok(!utf8::is_utf8($a), "!utf8::is_utf8 basic");
+    ok(!utf8::is_utf8($b), "!utf8::is_utf8 beyond");
+
+    utf8::encode($a);
+    utf8::encode($b);
+    utf8::encode($c);
+
+    is($a, "A",       "basic");
+    is(length($b), 2, "beyond length");
+    is(length($c), 2, "unicode length");
+
+    ok(utf8::valid($a), "utf8::valid basic");
+    ok(utf8::valid($b), "utf8::valid beyond");
+    ok(utf8::valid($c), "utf8::valid unicode");
+
+    # encode() clears the UTF-8 flag (unlike upgrade()).
+    ok(!utf8::is_utf8($a), "!utf8::is_utf8 basic");
+    ok(!utf8::is_utf8($b), "!utf8::is_utf8 beyond");
+    ok(!utf8::is_utf8($c), "!utf8::is_utf8 unicode");
+
+    utf8::decode($a);
+    utf8::decode($b);
+    utf8::decode($c);
+
+    is($a, "A",       "basic");
+    is($b, "\xFF",    "beyond");
+    is($c, "\x{100}", "unicode");
+
+    ok(utf8::valid($a), "!utf8::valid basic");
+    ok(utf8::valid($b), "!utf8::valid beyond");
+    ok(utf8::valid($c), " utf8::valid unicode");
+
+    ok(!utf8::is_utf8($a), "!utf8::is_utf8 basic");
+    ok( utf8::is_utf8($b), " utf8::is_utf8 beyond"); # $b stays in UTF-8.
+    ok( utf8::is_utf8($c), " utf8::is_utf8 unicode");
 }
