@@ -79,6 +79,53 @@ Version 5.005_58        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  3697] By: gsar                                  on 1999/07/18  05:22:36
+        Log: From: pvhp@forte.com (Peter Prymmer)
+             Date: Thu, 1 Jul 99 19:31:24 PDT
+             Message-Id: <9907020231.AA16942@forte.com>
+             Subject: [ID 19990701.031] 4 ctl chars on EBCDIC not asciiish enough
+     Branch: perl
+           + t/op/chars.t
+           ! MANIFEST ebcdic.c t/op/ord.t
+____________________________________________________________________________
+[  3696] By: gsar                                  on 1999/07/18  05:11:02
+        Log: display thread id in diagnostics (suggested by Dan Sugalski)
+     Branch: perl
+           ! lib/Carp.pm util.c
+____________________________________________________________________________
+[  3695] By: gsar                                  on 1999/07/18  04:57:47
+        Log: missing perldiag entry (from Dan Sugalski <sugalskd@osshe.edu>)
+     Branch: perl
+           ! pod/perldiag.pod
+____________________________________________________________________________
+[  3694] By: gsar                                  on 1999/07/18  04:56:28
+        Log: cache [NIUP]V conversions of defined READONLY values
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sun, 11 Jul 1999 04:39:44 -0400
+             Message-ID: <19990711043944.A25944@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.005_57] Allow caching of numeric/string conversion
+     Branch: perl
+           ! sv.c
+____________________________________________________________________________
+[  3693] By: gsar                                  on 1999/07/18  03:53:38
+        Log: From: jan.dubois@ibm.net (Jan Dubois)
+             Date: Sat, 17 Jul 1999 10:58:29 +0200
+             Message-ID: <379144ad.13616689@smtp1.ibm.net>
+             Subject: [PATCH 5.005] Some lib/ExtUtils/Manifest.pm POD fixes
+     Branch: perl
+           ! lib/ExtUtils/Manifest.pm
+____________________________________________________________________________
+[  3692] By: gsar                                  on 1999/07/18  03:51:03
+        Log: remove spurious newSTATEOP() that causes goto to enter one too many
+             contexts when jumping between if and elsif blocks
+     Branch: perl
+           ! perly.c perly.y pp_ctl.c t/op/goto.t
+____________________________________________________________________________
+[  3691] By: gsar                                  on 1999/07/18  01:49:59
+        Log: detypo, update Changes
+     Branch: perl
+           ! Changes doio.c
+____________________________________________________________________________
 [  3690] By: gsar                                  on 1999/07/18  01:16:59
         Log: mention the -Minteger effect on modulus (from Nathan Torkington)
      Branch: perl

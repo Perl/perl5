@@ -1802,12 +1802,14 @@ win32_str_os_error(void *sv, DWORD dwErr)
 			  |FORMAT_MESSAGE_IGNORE_INSERTS
 			  |FORMAT_MESSAGE_FROM_SYSTEM, NULL,
 			   dwErr, 0, (char *)&sMsg, 1, NULL);
+    /* strip trailing whitespace and period */
     if (0 < dwLen) {
-	while (0 < dwLen  &&  isSPACE(sMsg[--dwLen]))
-	    ;
+	do {
+	    --dwLen;	/* dwLen doesn't include trailing null */
+	} while (0 < dwLen && isSPACE(sMsg[dwLen]));
 	if ('.' != sMsg[dwLen])
 	    dwLen++;
-	sMsg[dwLen]= '\0';
+	sMsg[dwLen] = '\0';
     }
     if (0 == dwLen) {
 	sMsg = (char*)LocalAlloc(0, 64/**sizeof(TCHAR)*/);
