@@ -182,8 +182,10 @@ information on how to use this function on tied hashes.
 =cut
 */
 
-#define HV_FETCH_LVALUE  0x01
-#define HV_FETCH_JUST_SV 0x02
+#define HV_FETCH_ISSTORE   0x01
+#define HV_FETCH_ISEXISTS  0x02
+#define HV_FETCH_LVALUE    0x04
+#define HV_FETCH_JUST_SV   0x08
 
 SV**
 Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 lval)
@@ -226,8 +228,8 @@ information on how to use this function on tied hashes.
 HE *
 Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 {
-    return hv_fetch_common(hv, keysv, NULL, 0, 0, lval ? HV_FETCH_LVALUE : 0,
-			   hash);
+    return hv_fetch_common(hv, keysv, NULL, 0, 0, 
+			   (lval ? HV_FETCH_LVALUE : 0), hash);
 }
 
 HE *
@@ -238,7 +240,6 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     register HE *entry;
     SV *sv;
     bool is_utf8;
-    const char *keysave;
     int masked_flags;
 
     if (!hv)
@@ -251,69 +252,107 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     } else {
 	is_utf8 = ((flags & HVhek_UTF8) ? TRUE : FALSE);
     }
-    keysave = key;
 
-    if (SvRMAGICAL(hv)) {
-	if (mg_find((SV*)hv, PERL_MAGIC_tied) || SvGMAGICAL((SV*)hv)) {
-	    sv = sv_newmortal();
+    if (SvMAGICAL(hv)) {
+	if (SvRMAGICAL(hv) && !(action & (HV_FETCH_ISSTORE|HV_FETCH_ISEXISTS)))
+	  {
+	    if (mg_find((SV*)hv, PERL_MAGIC_tied) || SvGMAGICAL((SV*)hv)) {
+		sv = sv_newmortal();
 
-	    /* XXX should be able to skimp on the HE/HEK here when
-	       HV_FETCH_JUST_SV is true.  */
+		/* XXX should be able to skimp on the HE/HEK here when
+		   HV_FETCH_JUST_SV is true.  */
 
-	    if (!keysv) {
-		keysv = newSVpvn(key, klen);
-		if (is_utf8) {
-		    SvUTF8_on(keysv);
+		if (!keysv) {
+		    keysv = newSVpvn(key, klen);
+		    if (is_utf8) {
+			SvUTF8_on(keysv);
+		    }
+		} else {
+		    keysv = newSVsv(keysv);
 		}
-	    } else {
-		keysv = newSVsv(keysv);
+		mg_copy((SV*)hv, sv, (char *)keysv, HEf_SVKEY);
+
+		/* grab a fake HE/HEK pair from the pool or make a new one */
+		entry = PL_hv_fetch_ent_mh;
+		if (entry)
+		    PL_hv_fetch_ent_mh = HeNEXT(entry);
+		else {
+		    char *k;
+		    entry = new_HE();
+		    New(54, k, HEK_BASESIZE + sizeof(SV*), char);
+		    HeKEY_hek(entry) = (HEK*)k;
+		}
+		HeNEXT(entry) = Nullhe;
+		HeSVKEY_set(entry, keysv);
+		HeVAL(entry) = sv;
+		sv_upgrade(sv, SVt_PVLV);
+		LvTYPE(sv) = 'T';
+		 /* so we can free entry when freeing sv */
+		LvTARG(sv) = (SV*)entry;
+
+		/* XXX remove at some point? */
+		if (flags & HVhek_FREEKEY)
+		    Safefree(key);
+
+		return entry;
 	    }
-	    mg_copy((SV*)hv, sv, (char *)keysv, HEf_SVKEY);
-
-
-	    /* grab a fake HE/HEK pair from the pool or make a new one */
-	    entry = PL_hv_fetch_ent_mh;
-	    if (entry)
-		PL_hv_fetch_ent_mh = HeNEXT(entry);
-	    else {
-		char *k;
-		entry = new_HE();
-		New(54, k, HEK_BASESIZE + sizeof(SV*), char);
-		HeKEY_hek(entry) = (HEK*)k;
-	    }
-	    HeNEXT(entry) = Nullhe;
-	    HeSVKEY_set(entry, keysv);
-	    HeVAL(entry) = sv;
-	    sv_upgrade(sv, SVt_PVLV);
-	    LvTYPE(sv) = 'T';
-	    LvTARG(sv) = (SV*)entry; /* so we can free entry when freeing sv */
-
-	    /* XXX remove at some point? */
-            if (flags & HVhek_FREEKEY)
-                Safefree(key);
-
-	    return entry;
- 	}
 #ifdef ENV_IS_CASELESS
-	else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
-	    U32 i;
-	    for (i = 0; i < klen; ++i)
-		if (isLOWER(key[i])) {
-		    SV *nkeysv = sv_2mortal(newSVpvn(key,klen));
-		    (void)strupr(SvPVX(nkeysv));
-		    entry = hv_fetch_common(hv, nkeysv, NULL, 0, 0, 0);
-		    if (!entry && (action & HV_FETCH_LVALUE))
-			entry = hv_store_ent(hv, keysv, NEWSV(61,0), hash);
+	    else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
+		U32 i;
+		for (i = 0; i < klen; ++i)
+		    if (isLOWER(key[i])) {
+			SV *nkeysv = sv_2mortal(newSVpvn(key,klen));
+			(void)strupr(SvPVX(nkeysv));
+			entry = hv_fetch_common(hv, nkeysv, NULL, 0, 0, 0);
+			if (!entry && (action & HV_FETCH_LVALUE))
+			    entry = hv_store_ent(hv, keysv, NEWSV(61,0), hash);
 
-		    /* XXX remove at some point? */
-		    if (flags & HVhek_FREEKEY)
-			Safefree(key);
+			/* XXX remove at some point? */
+			if (flags & HVhek_FREEKEY)
+			    Safefree(key);
 
-		    return entry;
-		}
-	}
+			return entry;
+		    }
+	    }
 #endif
-    }
+	} /* ISFETCH */
+	else if (SvRMAGICAL(hv) && (action & HV_FETCH_ISEXISTS)) {
+	    if (mg_find((SV*)hv, PERL_MAGIC_tied) || SvGMAGICAL((SV*)hv)) {
+		SV* svret;
+
+		if (keysv || is_utf8) {
+		    if (!keysv) {
+			keysv = newSVpvn(key, klen);
+			SvUTF8_on(keysv);
+		    } else {
+			keysv = newSVsv(keysv);
+		    }
+		    key = (char *)sv_2mortal(keysv);
+		    klen = HEf_SVKEY;
+		}
+
+		/* I don't understand why hv_exists_ent has svret and sv,
+		   whereas hv_exists only had one.  */
+		svret = sv_newmortal();
+		sv = sv_newmortal();
+		mg_copy((SV*)hv, sv, key, klen);
+		magic_existspack(svret, mg_find(sv, PERL_MAGIC_tiedelem));
+		/* This cast somewhat evil, but I'm merely using NULL/
+		   not NULL to return the boolean exists.
+		   And I know hv is not NULL.  */
+		return SvTRUE(svret) ? (HE *)hv : NULL;
+		}
+#ifdef ENV_IS_CASELESS
+	    else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
+		/* XXX This code isn't UTF8 clean.  */
+		keysv = sv_2mortal(newSVpvn(key,klen));
+		key = strupr(SvPVX(keysv));
+		is_utf8 = 0;
+		hash = 0;
+	    }
+#endif
+	} /* ISEXISTS */
+    } /* SvMAGICAL */
 
     xhv = (XPVHV*)SvANY(hv);
     if (!xhv->xhv_array /* !HvARRAY(hv) */) {
@@ -325,6 +364,12 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    Newz(503, xhv->xhv_array /* HvARRAY(hv) */,
 		 PERL_HV_ARRAY_ALLOC_BYTES(xhv->xhv_max+1 /* HvMAX(hv)+1 */),
 		 char);
+#ifdef DYNAMIC_ENV_FETCH
+	else if (action & HV_FETCH_ISEXISTS) {
+	    /* for an %ENV exists, if we do an insert it's by a recursive
+	       store call, so avoid creating HvARRAY(hv) right now.  */
+	}
+#endif
 	else {
 	    /* XXX remove at some point? */
             if (flags & HVhek_FREEKEY)
@@ -335,17 +380,17 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     }
 
     if (is_utf8) {
-	int oldflags = flags;
+	const char *keysave = key;
 	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
         if (is_utf8)
 	    flags |= HVhek_UTF8;
 	else
 	    flags &= ~HVhek_UTF8;
-        if (key != keysave)
+        if (key != keysave) {
+	    if (flags & HVhek_FREEKEY)
+		Safefree(keysave);
             flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
-	if (oldflags & HVhek_FREEKEY)
-	    Safefree(keysave);
-
+	}
     }
 
     if (HvREHASH(hv)) {
@@ -364,6 +409,10 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
     masked_flags = (flags & HVhek_MASK);
 
+#ifdef DYNAMIC_ENV_FETCH
+    if (!xhv->xhv_array /* !HvARRAY(hv) */) entry = Null(HE*);
+    else
+#endif
     /* entry = (HvARRAY(hv))[hash & (I32) HvMAX(hv)]; */
     entry = ((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     for (; entry; entry = HeNEXT(entry)) {
@@ -418,7 +467,8 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	}
     }
 #endif
-    if (!entry && SvREADONLY(hv)) {
+
+    if (!entry && SvREADONLY(hv) && !(action & HV_FETCH_ISEXISTS)) {
 	S_hv_notallowed(aTHX_ flags, key, klen,
 			"access disallowed key '%"SVf"' in"
 			);
@@ -555,7 +605,6 @@ S_hv_store_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     HE *entry;
     HE **oentry;
     bool is_utf8;
-    const char *keysave;
     int masked_flags;
 
     if (!hv)
@@ -568,7 +617,6 @@ S_hv_store_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     } else {
 	is_utf8 = ((flags & HVhek_UTF8) ? TRUE : FALSE);
     }
-    keysave = key;
 
     xhv = (XPVHV*)SvANY(hv);
     if (SvMAGICAL(hv)) {
@@ -598,13 +646,15 @@ S_hv_store_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    }
 #ifdef ENV_IS_CASELESS
 	    else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
+		const char *keysave = key;
 		key = savepvn(key,klen);
 		key = (const char*)strupr((char*)key);
 		hash = 0;
 
-                if (flags & HVhek_FREEKEY)
+                if (flags & HVhek_FREEKEY) {
                     Safefree(keysave);
-		keysave = key;
+		    flags &= ~HVhek_FREEKEY;
+		}
 	    }
 #endif
 	}
@@ -618,20 +668,21 @@ S_hv_store_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     }
 
     if (is_utf8) {
+	const char *keysave = key;
 	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
-
-	if (flags & HVhek_FREEKEY) {
-	    /* This shouldn't happen if our caller does what we expect,
-	       but strictly the API allows it.  */
-	    Safefree(keysave);
-	}
 
         if (is_utf8)
 	    flags |= HVhek_UTF8;
 	else
 	    flags &= ~HVhek_UTF8;
-        if (key != keysave)
+        if (key != keysave) {
+	    if (flags & HVhek_FREEKEY) {
+		/* This shouldn't happen if our caller does what we expect,
+		   but strictly the API allows it.  */
+		Safefree(keysave);
+	    }
             flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
+	}
         HvHASKFLAGS_on((SV*)hv);
     }
 
@@ -787,7 +838,6 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     register HE **oentry;
     SV *sv;
     bool is_utf8;
-    const char *keysave;
     int masked_flags;
 
     if (!hv)
@@ -800,7 +850,6 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     } else {
 	is_utf8 = ((k_flags & HVhek_UTF8) ? TRUE : FALSE);
     }
-    keysave = key;
 
     if (SvRMAGICAL(hv)) {
 	bool needs_copy;
@@ -829,7 +878,12 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
 		/* XXX This code isn't UTF8 clean.  */
 		keysv = sv_2mortal(newSVpvn(key,klen));
-		keysave = key = strupr(SvPVX(keysv));
+		key = strupr(SvPVX(keysv));
+
+                if (k_flags & HVhek_FREEKEY) {
+                    Safefree(keysave);
+		}
+
 		is_utf8 = 0;
 		k_flags = 0;
 		hash = 0;
@@ -842,20 +896,21 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	return Nullsv;
 
     if (is_utf8) {
-	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
-
-	if (k_flags & HVhek_FREEKEY) {
-	    /* This shouldn't happen if our caller does what we expect,
-	       but strictly the API allows it.  */
-	    Safefree(keysave);
-	}
+    const char *keysave = key;
+    key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
 
         if (is_utf8)
             k_flags |= HVhek_UTF8;
 	else
             k_flags &= ~HVhek_UTF8;
-        if (key != keysave)
-            k_flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
+        if (key != keysave) {
+	    if (k_flags & HVhek_FREEKEY) {
+		/* This shouldn't happen if our caller does what we expect,
+		   but strictly the API allows it.  */
+		Safefree(keysave);
+	    }
+	    k_flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
+	}
         HvHASKFLAGS_on((SV*)hv);
     }
 
@@ -979,7 +1034,8 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen_i32)
 	klen = klen_i32;
 	flags = 0;
     }
-    return hv_exists_common(hv, NULL, key, klen, flags, 0);
+    return hv_fetch_common(hv, NULL, key, klen, flags, HV_FETCH_ISEXISTS, 0)
+	? TRUE : FALSE;
 }
 
 /*
@@ -995,137 +1051,9 @@ computed.
 bool
 Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 {
-    return hv_exists_common(hv, keysv, NULL, 0, 0, hash);
+    return hv_fetch_common(hv, keysv, NULL, 0, 0, HV_FETCH_ISEXISTS, hash)
+	? TRUE : FALSE;
 }
-
-bool
-S_hv_exists_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
-		   int k_flags, U32 hash)
-{
-    register XPVHV* xhv;
-    register HE *entry;
-    SV *sv;
-    bool is_utf8;
-    const char *keysave;
-    int masked_flags;
-
-    if (!hv)
-	return 0;
-
-    if (keysv) {
-	key = SvPV(keysv, klen);
-	k_flags = 0;
-	is_utf8 = (SvUTF8(keysv) != 0);
-    } else {
-	is_utf8 = ((k_flags & HVhek_UTF8) ? TRUE : FALSE);
-    }
-    keysave = key;
-
-    if (SvRMAGICAL(hv)) {
-	if (mg_find((SV*)hv, PERL_MAGIC_tied) || SvGMAGICAL((SV*)hv)) {
-	    SV* svret;
-
-	    if (keysv || is_utf8) {
-		if (!keysv) {
-		    keysv = newSVpvn(key, klen);
-		    SvUTF8_on(keysv);
-		} else {
-		    keysv = newSVsv(keysv);
-		}
-		key = (char *)sv_2mortal(keysv);
-		klen = HEf_SVKEY;
-	    }
-
-	    /* I don't understand why hv_exists_ent has svret and sv,
-	       whereas hv_exists only had one.  */
-	    svret = sv_newmortal();
-	    sv = sv_newmortal();
-	    mg_copy((SV*)hv, sv, key, klen);
-	    magic_existspack(svret, mg_find(sv, PERL_MAGIC_tiedelem));
-	    return (bool)SvTRUE(svret);
-	}
-#ifdef ENV_IS_CASELESS
-	else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
-	    /* XXX This code isn't UTF8 clean.  */
-	    keysv = sv_2mortal(newSVpvn(key,klen));
-	    keysave = key = strupr(SvPVX(keysv));
-	    is_utf8 = 0;
-	    hash = 0;
-	}
-#endif
-    }
-
-    xhv = (XPVHV*)SvANY(hv);
-#ifndef DYNAMIC_ENV_FETCH
-    if (!xhv->xhv_array /* !HvARRAY(hv) */)
-	return 0;
-#endif
-
-    if (is_utf8) {
-	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
-
-	if (k_flags & HVhek_FREEKEY) {
-	    /* This shouldn't happen if our caller does what we expect,
-	       but strictly the API allows it.  */
-	    Safefree(keysave);
-	}
-
-        if (is_utf8)
-            k_flags |= HVhek_UTF8;
-	else
-            k_flags &= ~HVhek_UTF8;
-        if (key != keysave)
-            k_flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
-    }
-
-    if (HvREHASH(hv)) {
-	PERL_HASH_INTERNAL(hash, key, klen);
-    } else if (!hash)
-	PERL_HASH(hash, key, klen);
-
-    masked_flags = (k_flags & HVhek_MASK);
-
-#ifdef DYNAMIC_ENV_FETCH
-    if (!xhv->xhv_array /* !HvARRAY(hv) */) entry = Null(HE*);
-    else
-#endif
-    /* entry = (HvARRAY(hv))[hash & (I32) HvMAX(hv)]; */
-    entry = ((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
-    for (; entry; entry = HeNEXT(entry)) {
-	if (HeHASH(entry) != hash)		/* strings can't be equal */
-	    continue;
-	if (HeKLEN(entry) != (I32)klen)
-	    continue;
-	if (HeKEY(entry) != key && memNE(HeKEY(entry),key,klen))	/* is this it? */
-	    continue;
-	if ((HeKFLAGS(entry) ^ masked_flags) & HVhek_UTF8)
-	    continue;
-	if (k_flags & HVhek_FREEKEY)
-	    Safefree(key);
-	/* If we find the key, but the value is a placeholder, return false. */
-	if (HeVAL(entry) == &PL_sv_placeholder)
-	    return FALSE;
-	return TRUE;
-    }
-#ifdef DYNAMIC_ENV_FETCH  /* is it out there? */
-    if (SvRMAGICAL((SV*)hv) && mg_find((SV*)hv, PERL_MAGIC_env)) {
-	unsigned long len;
-	char *env = PerlEnv_ENVgetenv_len(key,&len);
-	if (env) {
-	    sv = newSVpvn(env,len);
-	    SvTAINTED_on(sv);
-	    (void)hv_store_ent(hv,keysv,sv,hash);
-            if (k_flags & HVhek_FREEKEY)
-                Safefree(key);
-	    return TRUE;
-	}
-    }
-#endif
-    if (k_flags & HVhek_FREEKEY)
-        Safefree(key);
-    return FALSE;
-}
-
 
 STATIC void
 S_hsplit(pTHX_ HV *hv)
