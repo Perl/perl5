@@ -28,3 +28,327 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.5		Maintenance release working toward v5.8.5
 --------------
 ____________________________________________________________________________
+[ 22834] By: nicholas                              on 2004/05/20  13:13:45
+        Log: Integrate:
+             [ 22827]
+             Subject: [PATCH] Re: Smoke [5.9.2] 22818 FAIL(F) MSWin32 WinXP/.Net SP1 (x86/1 cpu)
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Date: Fri, 14 May 2004 17:33:17 +0100
+             Message-ID: <40A4F4CD.2000003@uk.radan.com>
+     Branch: maint-5.8/perl
+	  !> t/comp/utf.t
+____________________________________________________________________________
+[ 22832] By: nicholas                              on 2004/05/20  08:18:58
+        Log: Integrate:
+             [ 22818]
+             Subject: BOM-marked and (BOMless) UTF-16 scripts not working
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Message-ID: <40A26D75.8080406@iki.fi>
+             Date: Wed, 12 May 2004 21:31:17 +0300
+     Branch: maint-5.8/perl
+	  +> t/comp/utf.t
+	  !> MANIFEST pod/perldiag.pod pod/perlunicode.pod toke.c
+____________________________________________________________________________
+[ 22813] By: nicholas                              on 2004/05/12  10:16:45
+        Log: (only the fix, not the tests, as they incorporate the variable names)
+             
+             Integrate:
+             [ 22796]
+             [perl #29346] Double warning for int(undef) and abs(undef)
+             Remove the duplicate warnings and update tests.
+     Branch: maint-5.8/perl
+	  !> pp.c
+____________________________________________________________________________
+[ 22805] By: nicholas                              on 2004/05/10  21:22:15
+        Log: Integrate:
+             [ 22797]
+             Document that select() on Windows doesn't work on non-socket filehandles.
+             
+             [ 22799]
+             Subject: [perl #29397] Change in pod2man arguments
+             From: Thorsten Glaser (via RT) <perlbug-followup@perl.org>
+             Date: 6 May 2004 22:08:10 -0000
+             Message-Id: <rt-3.0.9-29397-86929.5.37563386041974@perl.org>
+             
+             [ 22800]
+             Windows issues with select() are already documented in perlport.
+             
+             [ 22803]
+             Subject: [PATCH] File::Copy Pod
+             From: slaven@rezic.de
+             Date: Mon, 10 May 2004 09:57:37 +0000
+             Message-Id: <1084183057.10822@devpc01.iconmobile.de>
+             
+             [ 22804]
+             Remove stray '.
+     Branch: maint-5.8/perl
+	  !> lib/File/Copy.pm pod/perlfunc.pod pod/pod2man.PL
+____________________________________________________________________________
+[ 22795] By: nicholas                              on 2004/05/06  16:06:17
+        Log: Integrate:
+             [ 22696]
+             #24121: Configure under turkish locale fails
+             toupper (i) != I  in turkish, but U+0130
+             \N{LATIN CAPITAL LETTER I WITH DOT ABOVE}
+             Patch supplied by Rafael
+             
+             [ 22743]
+             usemallocwrap works on AIX, but not with vac-5
+             Date: Mon, 26 Apr 2004 15:35:23 +0200
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Subject: Re: Perl 5.8.4 "panic: memory wrap" in miniperl on AIX 5.1
+             Message-Id: <20040426152951.A6C4.H.M.BRAND@hccnet.nl>
+             
+             [ 22750]
+             When configuring for 64-bit support, check that the
+             C library functions for casting floating point values
+             to 64-bit integer values are not broken.
+             
+             [ 22752]
+             The openbsd 64-bit test should use $uquadtype rather
+             than hardcoding unsigned long long.
+             
+             [ 22753]
+             CXUX_BROKEN_CONSTANT_CONVERT isn't used anymore.
+             Remove all associated code.
+             
+             [ 22759]
+             mktables requires post 5.005
+             
+             [ 22773]
+             Subject: Re: "fuzzy" in mktables
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Message-ID: <4093A82B.6040609@iki.fi>
+             Date: Sat, 01 May 2004 16:37:47 +0300
+     Branch: maint-5.8/perl
+	  !> Configure hints/aix.sh hints/aix_4.sh hints/cxux.sh
+	  !> hints/openbsd.sh lib/unicore/mktables pp_pack.c
+____________________________________________________________________________
+[ 22794] By: nicholas                              on 2004/05/06  15:43:41
+        Log: Integrate:
+             [ 22681]
+             find2perl should not default to -print when -eval is specified.
+             Noticed by David Dyck.
+             
+             [ 22733]
+             Missing copyright in the README.
+             
+             [ 22735]
+             Subject: [PATCH] Where to find nmake for windows
+             From: Abe Timmerman <abe@ztreet.demon.nl>
+             Date: Thu, 22 Apr 2004 23:57:40 +0200
+             Message-Id: <200404222357.40508.abe@ztreet.demon.nl>
+             Changed download URL references for nmake
+             
+             [ 22747]
+             Subject: [perl #29033] typo in description of sleep in documentation of POSIX module 
+             Date: 21 Apr 2004 11:07:22 -0000
+             From: "bob@starlabs.net (via RT)" <perlbug-followup@perl.org>
+             Message-ID: <rt-3.0.8-29033-85811.17.0452776199501@perl.org>
+             
+             [ 22748]
+             Subject: [PATCH] Add diagnostics section to base.pm
+             From: "Jos I. Boumans" <kane@dwim.org>
+             Date: Wed, 28 Apr 2004 13:04:47 +0200
+             Message-Id: <DC9B4A9C-9903-11D8-BA95-000A956B0E06@dwim.org>
+             
+             [ 22749]
+             Fix for [perl #28963]: find2perl was sometimes generating
+             invalid code.
+             
+             [ 22768]
+             It seems daft to me that we have a synopis example that will fail if
+             gcc happened to be invoked via the name cc, and completely ignores
+             the far more reliable 'gccversion' variable
+             So here's one using 'usethreads' that ought to work everywhere.
+             
+             [ 22782]
+             Subject: Problem with h2xs
+             From: David Cannings <lists@edeca.net>
+             Date: Mon, 3 May 2004 13:44:33 +0100
+             Message-Id: <200405031344.33723.lists@edeca.net>
+             (Second patch only)
+             
+             [ 22789]
+             Subject: Problem with system() on Win9x and command.com (perl 5.8.x-5.9.x)
+             From: bilbo@ua.fm
+             Date: Wed, 28 Apr 2004 00:19:55 +0300
+             Message-ID: <611491036.20040428001955@ua.fm>
+             
+             [ 22793]
+             Add a small script to check whether a perl source tree
+             (with or without generated files) is friendly with
+             case-insensitive filesystems.
+             Adapted from :
+             Subject: Re: STerm.pl vs Sterm.pl
+             From: James Mastros <james@mastros.biz>
+             Date: Thu, 06 May 2004 14:45:53 +0200
+             Message-ID: <20040506124556.2402.qmail@onion.perl.org>
+     Branch: maint-5.8/perl
+	  +> Porting/checkcase.pl
+	  !> MANIFEST README README.win32 configpm ext/POSIX/POSIX.pod
+	  !> lib/base.pm pod/perlmodinstall.pod utils/h2xs.PL win32/win32.c
+	  !> x2p/find2perl.PL
+____________________________________________________________________________
+[ 22792] By: nicholas                              on 2004/05/06  14:15:56
+        Log: Integrate:
+             [ 22715]
+             Upgrade to FileCache 1.04.
+             
+             [ 22717]
+             Subject: [PATCH] Sync Term::Cap with CPAN version
+             From: Jonathan Stowe <jns@gellyfish.com>
+             Date: Tue, 20 Apr 2004 12:37:28 +0100
+             Message-Id: <1082461047.2736.96.camel@localhost>
+             
+             [ 22751]
+             Update to Test.pm 1.25 (from SBURKE).
+     Branch: maint-5.8/perl
+	  +> lib/Test/t/05_about_verbose.t lib/Test/t/multiline.t
+	  !> MANIFEST lib/FileCache.pm lib/Term/Cap.pm lib/Test.pm
+____________________________________________________________________________
+[ 22791] By: nicholas                              on 2004/05/06  13:55:34
+        Log: Integrate:
+             [ 21935]
+             Upgrade to Time::Local 1.07_94
+             
+             [ 22670]
+             Disable the edge case tests for timegm and timelocal on
+             AIX-4.3 since the OS is obsoleted, and fixes are not to
+             be expected
+             
+             [ 22671]
+             Integrated Time-Local-1.09 from Dave Rolsky
+             Corrected a wrap error from the CPAN version to match #22670
+             Tested on AIX to make sure the skip is still needed
+     Branch: maint-5.8/perl
+	  !> lib/Time/Local.pm lib/Time/Local.t
+____________________________________________________________________________
+[ 22790] By: nicholas                              on 2004/05/06  13:36:23
+        Log: Integrate:
+             [ 22686]
+             Sync with libnet 1.18
+             
+             (plus revert the relevant parts of 22643)
+     Branch: maint-5.8/perl
+	  +> lib/Net/Changes.libnet lib/Net/t/datasend.t
+	   - lib/Net/ChangeLog.libnet
+	   ! lib/Net/NNTP.pm lib/Net/POP3.pm lib/Net/SMTP.pm
+	  !> MANIFEST lib/Net/Cmd.pm lib/Net/FTP.pm lib/Net/README.libnet
+	  !> lib/Net/Time.pm lib/Net/t/hostname.t
+____________________________________________________________________________
+[ 22785] By: nicholas                              on 2004/05/06  08:16:42
+        Log: Fix typo
+     Branch: maint-5.8/perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 22784] By: nicholas                              on 2004/05/05  21:43:32
+        Log: Integrate:
+             [ 22641]
+             Fix bug #27940 : \cX escapes weren't working correctly in regular
+             expression ranges.
+             
+             [ 22652]
+             Subject: sv_pvutf8n_force and sv_pvbyten_force
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Wed, 24 Mar 2004 00:16:52 +0900
+             Message-Id: <20040324001126.098F.BQW10602@nifty.com>
+             
+             [ 22667]
+             The optree builder was looping when constructing the ops
+             for a map/grep block containing a while(1).
+             (Bug reported by Pixel.)
+             
+             [ 22687]
+             Make global cleanup fractionally faster by giving S_visit()
+             flags/mask to compare SVs against.
+             
+             [ 22712]
+             Subject: Re: [perl #28532] optional match of an anchor gets ignored 
+             From: hv@crypt.org
+             Date: Wed, 14 Apr 2004 19:30:46 +0100
+             Message-Id: <200404141830.i3EIUko03728@zen.crypt.org>
+             
+             [ 22721]
+             Subject: [patch] log the interpreter id in warnings
+             From: Stas Bekman <stas@stason.org>
+             Date: Mon, 19 Apr 2004 18:10:01 -0700
+             Message-ID: <40847869.1000906@stason.org>
+             
+             [ 22746]
+             fix a coredump caused by rv2gv not fully converting a PV to an RV
+             
+             [ 22755]
+             Fix 29149 - another UTF8 cache bug hit by substr.
+             Regression test from:
+             
+             Subject: Re: [perl #29149] substr/UTF8 related problem with perl 5.8.3 on linux
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Message-Id: <20040429103926.5BA6.BQW10602@nifty.com>
+             Date: Thu, 29 Apr 2004 10:53:17 +0900
+             
+             [ 22764]
+             Save some repeated strlen()s in Perl_swash_init
+             
+             [ 22774]
+             [perl #28938] split could leave an array without &PL_sv_undef
+             in the unused elements
+             
+             [ 22775]
+             [perl #29127] scalar delete of empty slice returned garbage
+             
+             [ 22776]
+             [perl #28986] perl -e "open m" crashes Perl
+             
+             [ 22777]
+             add test for change #22776 ("open m" crashes Perl)
+             
+             [ 22778]
+             add test for change #22746 ([perl #29102] Crash on assign to lex fh)
+             
+             [ 22781]
+             [perl #29340] Bizarre copy of ARRAY
+             make sure a pad op's flags are updated after optimising away
+             the assignment in my @a = () (see change 22520).
+     Branch: maint-5.8/perl
+	   ! t/op/substr.t
+	  !> embed.fnc embed.h gv.c handy.h hv.c op.c perl.c pp.c proto.h
+	  !> regcomp.c regexec.c sv.c t/io/open.t t/op/delete.t t/op/grep.t
+	  !> t/op/my.t t/op/pat.t t/op/split.t toke.c utf8.c
+____________________________________________________________________________
+[ 22766] By: nicholas                              on 2004/05/02  20:26:29
+        Log: Ready for more Changes
+     Branch: maint-5.8/perl
+	  +> Changes5.8.4
+	   ! Changes MANIFEST
+____________________________________________________________________________
+[ 22740] By: nicholas                              on 2004/04/23  14:14:11
+        Log: Subject: [PATCH] unfork the debugger (patch for 5.8.4)
+             From: Richard.Foley@t-online.de (Richard Foley)
+             Message-Id: <200404230633.29186.richard.foley@rfi.net>
+             Date: Fri, 23 Apr 2004 06:33:29 +0200
+     Branch: maint-5.8/perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[ 22738] By: nicholas                              on 2004/04/23  13:13:24
+        Log: Create perl585delta.pod
+     Branch: maint-5.8/perl
+	   + pod/perl585delta.pod
+	   ! MANIFEST pod.lst pod/perl.pod pod/perltoc.pod
+	   ! vms/descrip_mms.template win32/Makefile win32/makefile.mk
+	   ! win32/pod.mak
+____________________________________________________________________________
+[ 22732] By: nicholas                              on 2004/04/22  09:21:28
+        Log: That was 5.8.4
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 22731] By: nicholas                              on 2004/04/21  19:37:51
+        Log: Oink, oink, flap, flap!
+     Branch: maint-5.8/perl
+	   ! patchlevel.h pod/perlhist.pod
+____________________________________________________________________________
+[ 22730] By: nicholas                              on 2004/04/21  18:55:58
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
