@@ -36,6 +36,7 @@ if ($archive =~ /$re/) {
     my @files = $tar->list_files;
 
     foreach my $file (@files) {
+        $file .= "/" unless $file =~ /\//;
         my $dir = ':' . dirname(Archive::Tar::_munge_file($file));
         die "$dir already exists, will not overwrite\n"
             if -e $dir;
