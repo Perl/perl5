@@ -189,7 +189,7 @@ fi
 
 rm -f try.c a.out
 
-if /bin/bash -c exit; then
+if /bin/sh -c exit; then
   echo ''
   echo 'You appear to have a working bash.  Good.'
 else
