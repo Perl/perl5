@@ -1506,7 +1506,7 @@ additional complications for conditionals).  These optimizations are
 done in the subroutine peep().  Optimizations performed at this stage
 are subject to the same restrictions as in the pass 2.
 
-=head1 The Perl API
+=head1 The Perl Internal API
 
 WARNING: This information is subject to radical changes prior to
 the Perl 5.6 release.  Use with caution.
@@ -1529,9 +1529,7 @@ data structure under USE_THREADS, and the PERL_OBJECT build has a C++
 class to maintain interpreter state.  In all three cases,
 PERL_IMPLICIT_CONTEXT is also normally defined, and enables the
 support for passing in a "hidden" first argument that represents all three
-data structures.  (The traditional MULTIPLICITY and USE_THREADS builds
-built without PERL_IMPLICIT_CONTEXT may also be supported, but this is
-currently somewhat broken.)
+data structures.
 
 All this obviously requires a way for the Perl internal functions to be
 C++ methods, subroutines taking some kind of structure as the first
@@ -1560,7 +1558,8 @@ function used within the Perl guts:
 
 STATIC becomes "static" in C, and is #define'd to nothing in C++.
 
-A public function (i.e. part of the API) begins like this:
+A public function (i.e. part of the internal API, but not necessarily
+sanctioned for use in extensions) begins like this:
 
   void
   Perl_sv_setsv(pTHX_ SV* dsv, SV* ssv)
@@ -1734,9 +1733,9 @@ call, since it is always passed as an extra argument.  Depending on
 your needs for simplicity or efficiency, you may mix the previous
 two approaches freely.
 
-Never say C<pTHX,> yourself--always use the form of the macro with the
-underscore for functions that take explicit arguments, or the form
-without the argument for functions with no explicit arguments.
+Never add a comma after C<pTHX> yourself--always use the form of the
+macro with the underscore for functions that take explicit arguments,
+or the form without the argument for functions with no explicit arguments.
 
 =head2 Future Plans and PERL_IMPLICIT_SYS
 
@@ -1764,7 +1763,9 @@ more "hosts", with free association between them.
 =head1 API LISTING
 
 This is a listing of functions, macros, flags, and variables that may be
-useful to extension writers or that may be found while reading other
+used by extension writers.  The interfaces of any functions that are not
+listed here are subject to change without notice.  For this reason,
+blindly using functions listed in proto.h is to be avoided when writing
 extensions.
 
 Note that all Perl API global variables must be referenced with the C<PL_>

@@ -1,6 +1,6 @@
 =head1 NAME
 
-perldelta - what's new for perl v5.6 (as of v5.005_58)
+perldelta - what's new for perl v5.6 (as of v5.005_61)
 
 =head1 DESCRIPTION
 
@@ -50,9 +50,8 @@ Note that the above issue is not relevant to the default build of
 Perl, whose interfaces continue to match those of prior versions
 (but subject to the other options described here).
 
-For testing purposes, the 5.005_58 release automatically enables
-PERL_IMPLICIT_CONTEXT whenever Perl is built with -Dusethreads or
--Dusemultiplicity.
+PERL_IMPLICIT_CONTEXT is automatically enabled whenever Perl is built
+with one of -Dusethreads, -Dusemultiplicity, or both.
 
 See L<perlguts/"The Perl API"> for detailed information on the
 ramifications of building Perl using this option.

@@ -26,7 +26,6 @@
 /* See L<perlguts/"The Perl API"> for detailed notes on
  * PERL_IMPLICIT_CONTEXT and PERL_IMPLICIT_SYS */
 
-/* XXXXXX testing threads via implicit pointer */
 #ifdef USE_THREADS
 #  ifndef PERL_IMPLICIT_CONTEXT
 #    define PERL_IMPLICIT_CONTEXT
@@ -36,7 +35,6 @@
 #  endif
 #endif
 
-/* XXXXXX testing multiplicity via implicit pointer */
 #if defined(MULTIPLICITY)
 #  ifndef PERL_IMPLICIT_CONTEXT
 #    define PERL_IMPLICIT_CONTEXT
@@ -1672,6 +1670,10 @@ typedef pthread_key_t	perl_key;
 # endif
 #endif
 
+/* the traditional thread-unsafe notion of "current interpreter".
+ * XXX todo: a thread-safe version that fetches it from TLS (akin to THR)
+ * needs to be defined elsewhere (conditional on pthread_getspecific()
+ * availability). */
 #ifndef PERL_SET_INTERP
 #  define PERL_SET_INTERP(i)		(PL_curinterp = (PerlInterpreter*)(i))
 #endif
