@@ -2200,6 +2200,8 @@ PP(pp_bit_and)
     dSP; dATARGET; tryAMAGICbin(band,opASSIGN);
     {
       dPOPTOPssrl;
+      if (SvGMAGICAL(left)) mg_get(left);
+      if (SvGMAGICAL(right)) mg_get(right);
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	if (PL_op->op_private & HINT_INTEGER) {
 	  IV i = SvIV(left) & SvIV(right);
@@ -2223,6 +2225,8 @@ PP(pp_bit_xor)
     dSP; dATARGET; tryAMAGICbin(bxor,opASSIGN);
     {
       dPOPTOPssrl;
+      if (SvGMAGICAL(left)) mg_get(left);
+      if (SvGMAGICAL(right)) mg_get(right);
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	if (PL_op->op_private & HINT_INTEGER) {
 	  IV i = (USE_LEFT(left) ? SvIV(left) : 0) ^ SvIV(right);
@@ -2246,6 +2250,8 @@ PP(pp_bit_or)
     dSP; dATARGET; tryAMAGICbin(bor,opASSIGN);
     {
       dPOPTOPssrl;
+      if (SvGMAGICAL(left)) mg_get(left);
+      if (SvGMAGICAL(right)) mg_get(right);
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	if (PL_op->op_private & HINT_INTEGER) {
 	  IV i = (USE_LEFT(left) ? SvIV(left) : 0) | SvIV(right);
@@ -2347,6 +2353,8 @@ PP(pp_complement)
     dSP; dTARGET; tryAMAGICun(compl);
     {
       dTOPss;
+      if (SvGMAGICAL(sv))
+	  mg_get(sv);
       if (SvNIOKp(sv)) {
 	if (PL_op->op_private & HINT_INTEGER) {
 	  IV i = ~SvIV(sv);
