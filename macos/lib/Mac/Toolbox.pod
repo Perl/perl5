@@ -1,0 +1,154 @@
+=head1 NAME
+
+Mac::Toolbox - Introduction to the Macintosh Toolbox Modules
+
+=head1 SYNOPSIS
+
+=over 4
+
+=item Mac::AppleEvents
+
+Apple Event Manager.
+
+=item Mac::Components
+
+Component Manager.
+
+=item Mac::Controls
+
+Control Manager.
+
+=item Mac::Dialogs
+
+Dialog Manager.
+
+=item Mac::Events
+
+Event Manager.
+
+=item Mac::Files
+
+File Manager.
+
+=item Mac::Fonts
+
+Font Manager.
+
+=item Mac::Gestalt
+
+Gestalt Manager.
+
+=item Mac::InternetConfig
+
+InternetConfig System.
+
+=item Mac::Lists
+
+List Manager.
+
+=item Mac::Memory
+
+Memory Manager.
+
+=item Mac::Menus
+
+Menu Manager.
+
+=item Mac::MoreFiles
+
+More File Manager related routines.
+
+=item Mac::Movies
+
+Movie Manager.
+
+=item Mac::OSA
+
+Open Scripting Architecture.
+
+=item Mac::Processes
+
+Processe Manager.
+
+=item Mac::QDOffscreen
+
+Offscreen QuickDraw.
+
+=item Mac::QuickDraw
+
+QuickDraw.
+
+=item Mac::Resources
+
+Resource Manager.
+
+=item Mac::Speech
+
+Speech Manager.
+
+=item Mac::SpeechRecognition
+
+Speech Recognition Manager.
+
+=item Mac::StandardFile
+
+Standard File Dialogs.
+
+=item Mac::Types
+
+Toolbox Types.
+
+=item Mac::Windows
+
+Window Manager.
+
+=back
+
+=head1 DESCRIPTION
+
+The Macintosh Operating System provides a rich API with thousands of I<toolbox>
+calls. The MacPerl toolbox modules aim to make as much as possible of this
+functionality available to MacPerl programmers. The mapping of the toolbox 
+interfaces into MacPerl is intended to be
+
+=over 4
+
+=item 1.
+
+Convenient to use for Perl programmers.
+
+=item 2.
+
+As close as possible to the C interfaces.
+
+=back
+
+This translates into a mapping strategy which is discussed in the following 
+sections.
+
+=head2 Function mappings
+
+MacPerl toolbox calls take their input arguments in the same order as the 
+corresponding toolbox functions. Output arguments are never passed by reference, 
+but returned from the calls. If there are several output arguments, a list is
+returned. If an error occurs, the function returns C<undef> or C<()> and the 
+error code is available in the C<$^E> variable.
+
+	$port = GetPort;
+	SetPort $port;
+	$desc = AECreateDesc("TEXT", "Hello, World") or die $^E;
+
+=head2 Data structure mappings
+
+Complex data structures are mapped into blessed references. Data fields are 
+available through member functions which return the value of a field if called
+without an argument and change the value if called with an argument.
+
+	$rect = new Rect(10, 20, 110, 220);
+	$rect->top;
+	$rect->right(250);
+
+=head1 AUTHOR(S)
+
+Matthias Ulrich Neeracher <neeri@iis.ee.ethz.ch> 
+

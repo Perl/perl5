@@ -125,11 +125,16 @@ RMS = delete -y
 public		=	perl translators sitelib_install 
 Dynamic_Ext_Mac	=	Mac
 Dynamic_Ext_Std	=	
-Dynamic_Ext_Xtr =	
+Dynamic_Ext_Xtr =
+# this should be rewritten some, eh?
 Static_Lib_Mac	= \
 	ExtUtils:MM_MacOS ExtUtils:Miniperl Config Errno \
-	Mac:Hooks Mac:Pane Mac::LowMem \
-	Mac:AppleEvents:Simple Mac:BuildTools Mac:Apps:Launch
+	Mac:Hooks Mac:Pane Mac:LowMem \
+	Mac:AppleEvents:Simple Mac:OSA:Simple \
+	Mac:BuildTools Mac:Apps:Launch Mac:Toolbox \
+	Mac:AETE:App Mac:AETE:Dialect Mac:AETE:Parser \
+	Mac:AETE:Format:Converter Mac:AETE:Format:Dictionary \
+	Mac:AETE:Format:Glue Mac:Glue
 
 ########
 # sync all extensions with both config.sh and macperl/Makefile.mk!
@@ -254,7 +259,7 @@ sitelib_install:
 	Directory :lib:
 	$(MACPERL_SRC)InstallBLIB "" ¶
 		"::perl -I: -I:::lib: -e 'use File::Path; mkpath(\@ARGV, 1);'" ¶
-		$(Static_Lib_Mac:^":":+".pm")
+		$(Static_Lib_Mac:^":":+".pm") $(Static_Lib_Mac:^":":+".pod")
 	$(MACPERL_SRC)PerlInstall -l :::lib: 
 	Directory ::bundled_lib:
 	$(MACPERL_SRC)PerlInstall -l :::lib:
