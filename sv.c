@@ -1320,6 +1320,14 @@ See C<sv_setuv_mg>.
 void
 Perl_sv_setuv(pTHX_ register SV *sv, UV u)
 {
+    /* With these two if statements:
+       u=1.49  s=0.52  cu=72.49  cs=10.64  scripts=270  tests=20865
+       
+       without
+       u=1.35  s=0.47  cu=73.45  cs=11.43  scripts=270  tests=20865
+       
+       If you wish to remove them, please benchmark to see what the effect is
+    */
     if (u <= (UV)IV_MAX) {
        sv_setiv(sv, (IV)u);
        return;
@@ -1340,6 +1348,14 @@ Like C<sv_setuv>, but also handles 'set' magic.
 void
 Perl_sv_setuv_mg(pTHX_ register SV *sv, UV u)
 {
+    /* With these two if statements:
+       u=1.49  s=0.52  cu=72.49  cs=10.64  scripts=270  tests=20865
+       
+       without
+       u=1.35  s=0.47  cu=73.45  cs=11.43  scripts=270  tests=20865
+       
+       If you wish to remove them, please benchmark to see what the effect is
+    */
     if (u <= (UV)IV_MAX) {
        sv_setiv(sv, (IV)u);
     } else {
