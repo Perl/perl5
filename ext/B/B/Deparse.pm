@@ -2710,9 +2710,15 @@ sub re_dq {
     my $op = shift;
     my $type = $op->name;
     if ($type eq "const") {
-	return uninterp($self->const_sv($op)->PV);
+	return re_uninterp($self->const_sv($op)->PV);
     } elsif ($type eq "concat") {
-	return $self->re_dq($op->first) . $self->re_dq($op->last);
+	my $first = $self->re_dq($op->first);
+	my $last  = $self->re_dq($op->last);
+	# Disambiguate "${foo}bar", "${foo}{bar}", "${foo}[1]"
+	if ($last =~ /^[{\[\w]/) {
+	    $first =~ s/([%\$@])([A-Za-z_]\w*)$/${1}{$2}/;
+	}
+	return $first . $last;
     } elsif ($type eq "uc") {
 	return '\U' . $self->re_dq($op->first->sibling) . '\E';
     } elsif ($type eq "lc") {
