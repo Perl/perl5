@@ -229,6 +229,7 @@
 #define PL_doextract		(PERL_GET_INTERP->Idoextract)
 #define PL_doswitches		(PERL_GET_INTERP->Idoswitches)
 #define PL_dowarn		(PERL_GET_INTERP->Idowarn)
+#define PL_dummy1_bincompat	(PERL_GET_INTERP->Idummy1_bincompat)
 #define PL_e_script		(PERL_GET_INTERP->Ie_script)
 #define PL_egid			(PERL_GET_INTERP->Iegid)
 #define PL_endav		(PERL_GET_INTERP->Iendav)
@@ -328,7 +329,7 @@
 #define PL_nullstash		(PERL_GET_INTERP->Inullstash)
 #define PL_numeric_local	(PERL_GET_INTERP->Inumeric_local)
 #define PL_numeric_name		(PERL_GET_INTERP->Inumeric_name)
-#define PL_numeric_radix	(PERL_GET_INTERP->Inumeric_radix)
+#define PL_numeric_radix_sv	(PERL_GET_INTERP->Inumeric_radix_sv)
 #define PL_numeric_standard	(PERL_GET_INTERP->Inumeric_standard)
 #define PL_ofmt			(PERL_GET_INTERP->Iofmt)
 #define PL_oldbufptr		(PERL_GET_INTERP->Ioldbufptr)
@@ -509,6 +510,7 @@
 #define PL_doextract		(vTHX->Idoextract)
 #define PL_doswitches		(vTHX->Idoswitches)
 #define PL_dowarn		(vTHX->Idowarn)
+#define PL_dummy1_bincompat	(vTHX->Idummy1_bincompat)
 #define PL_e_script		(vTHX->Ie_script)
 #define PL_egid			(vTHX->Iegid)
 #define PL_endav		(vTHX->Iendav)
@@ -608,7 +610,7 @@
 #define PL_nullstash		(vTHX->Inullstash)
 #define PL_numeric_local	(vTHX->Inumeric_local)
 #define PL_numeric_name		(vTHX->Inumeric_name)
-#define PL_numeric_radix	(vTHX->Inumeric_radix)
+#define PL_numeric_radix_sv	(vTHX->Inumeric_radix_sv)
 #define PL_numeric_standard	(vTHX->Inumeric_standard)
 #define PL_ofmt			(vTHX->Iofmt)
 #define PL_oldbufptr		(vTHX->Ioldbufptr)
@@ -926,6 +928,7 @@
 #define PL_doextract		(aTHXo->interp.Idoextract)
 #define PL_doswitches		(aTHXo->interp.Idoswitches)
 #define PL_dowarn		(aTHXo->interp.Idowarn)
+#define PL_dummy1_bincompat	(aTHXo->interp.Idummy1_bincompat)
 #define PL_e_script		(aTHXo->interp.Ie_script)
 #define PL_egid			(aTHXo->interp.Iegid)
 #define PL_endav		(aTHXo->interp.Iendav)
@@ -1025,7 +1028,7 @@
 #define PL_nullstash		(aTHXo->interp.Inullstash)
 #define PL_numeric_local	(aTHXo->interp.Inumeric_local)
 #define PL_numeric_name		(aTHXo->interp.Inumeric_name)
-#define PL_numeric_radix	(aTHXo->interp.Inumeric_radix)
+#define PL_numeric_radix_sv	(aTHXo->interp.Inumeric_radix_sv)
 #define PL_numeric_standard	(aTHXo->interp.Inumeric_standard)
 #define PL_ofmt			(aTHXo->interp.Iofmt)
 #define PL_oldbufptr		(aTHXo->interp.Ioldbufptr)
@@ -1207,6 +1210,7 @@
 #define PL_Idoextract		PL_doextract
 #define PL_Idoswitches		PL_doswitches
 #define PL_Idowarn		PL_dowarn
+#define PL_Idummy1_bincompat	PL_dummy1_bincompat
 #define PL_Ie_script		PL_e_script
 #define PL_Iegid		PL_egid
 #define PL_Iendav		PL_endav
@@ -1306,7 +1310,7 @@
 #define PL_Inullstash		PL_nullstash
 #define PL_Inumeric_local	PL_numeric_local
 #define PL_Inumeric_name	PL_numeric_name
-#define PL_Inumeric_radix	PL_numeric_radix
+#define PL_Inumeric_radix_sv	PL_numeric_radix_sv
 #define PL_Inumeric_standard	PL_numeric_standard
 #define PL_Iofmt		PL_ofmt
 #define PL_Ioldbufptr		PL_oldbufptr

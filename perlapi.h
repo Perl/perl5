@@ -196,6 +196,8 @@ START_EXTERN_C
 #define PL_doswitches		(*Perl_Idoswitches_ptr(aTHXo))
 #undef  PL_dowarn
 #define PL_dowarn		(*Perl_Idowarn_ptr(aTHXo))
+#undef  PL_dummy1_bincompat
+#define PL_dummy1_bincompat	(*Perl_Idummy1_bincompat_ptr(aTHXo))
 #undef  PL_e_script
 #define PL_e_script		(*Perl_Ie_script_ptr(aTHXo))
 #undef  PL_egid
@@ -394,8 +396,8 @@ START_EXTERN_C
 #define PL_numeric_local	(*Perl_Inumeric_local_ptr(aTHXo))
 #undef  PL_numeric_name
 #define PL_numeric_name		(*Perl_Inumeric_name_ptr(aTHXo))
-#undef  PL_numeric_radix
-#define PL_numeric_radix	(*Perl_Inumeric_radix_ptr(aTHXo))
+#undef  PL_numeric_radix_sv
+#define PL_numeric_radix_sv	(*Perl_Inumeric_radix_sv_ptr(aTHXo))
 #undef  PL_numeric_standard
 #define PL_numeric_standard	(*Perl_Inumeric_standard_ptr(aTHXo))
 #undef  PL_ofmt

@@ -1907,6 +1907,7 @@ Perl_looks_like_number(pTHX_ SV *sv)
     I32 numtype = 0;
     I32 sawinf  = 0;
     STRLEN len;
+    bool specialradix = FALSE;
 
     if (SvPOK(sv)) {
 	sbegin = SvPVX(sv); 
@@ -1947,22 +1948,28 @@ Perl_looks_like_number(pTHX_ SV *sv)
 	    numtype |= IS_NUMBER_TO_INT_BY_ATOL;
 
         if (*s == '.'
-#ifdef USE_LOCALE_NUMERIC 
-	    || IS_NUMERIC_RADIX(*s)
+#ifdef USE_LOCALE_NUMERIC
+	    || (specialradix = IS_NUMERIC_RADIX(s))
 #endif
 	    ) {
-	    s++;
+	    if (specialradix)
+		s += SvCUR(PL_numeric_radix_sv);
+	    else
+		s++;
 	    numtype |= IS_NUMBER_NOT_IV;
             while (isDIGIT(*s))  /* optional digits after the radix */
                 s++;
         }
     }
     else if (*s == '.'
-#ifdef USE_LOCALE_NUMERIC 
-	    || IS_NUMERIC_RADIX(*s)
+#ifdef USE_LOCALE_NUMERIC
+	    || (specialradix = IS_NUMERIC_RADIX(s))
 #endif
 	    ) {
-        s++;
+	if (specialradix)
+	    s += SvCUR(PL_numeric_radix_sv);
+	else
+	    s++;
 	numtype |= IS_NUMBER_TO_INT_BY_ATOL | IS_NUMBER_NOT_IV;
         /* no digits before the radix means we need digits after it */
         if (isDIGIT(*s)) {
@@ -8014,7 +8021,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_numeric_name	= SAVEPV(proto_perl->Inumeric_name);
     PL_numeric_standard	= proto_perl->Inumeric_standard;
     PL_numeric_local	= proto_perl->Inumeric_local;
-    PL_numeric_radix	= proto_perl->Inumeric_radix;
+    PL_numeric_radix	= proto_perl->Inumeric_radix_sv;
 #endif /* !USE_LOCALE_NUMERIC */
 
     /* utf8 character classes */
