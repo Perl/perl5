@@ -326,7 +326,7 @@ static SV * newRV_noinc (SV * sv)
 }
 #    else
 #      define newRV_noinc(sv)    \
-        ((PL_Sv=(SV*)newRV(sv), SvREFCNT_dec(sv), (SV*)PL_Sv)
+        (PL_Sv=(SV*)newRV(sv), SvREFCNT_dec(sv), (SV*)PL_Sv)
 #    endif
 #  endif
 #endif
