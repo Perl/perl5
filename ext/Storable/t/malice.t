@@ -32,17 +32,13 @@ sub BEGIN {
 use strict;
 use vars qw($file_magic_str $other_magic $network_magic $major $minor
            $C_visible_byteorder);
-$file_magic_str = 'pst0';
-$other_magic = 7 + $Config{longsize};
-$network_magic = 2;
-$major = 2;
-$minor = 5;
 
+BEGIN {
 # Config.pm does games to figure out byteorder dynamically. In the process
 # it creates an 8 digit entry on long long builds on 32 bit long systems.
 # config.sh, config.h and therefore Storable.xs have a 4 digit entry.
 $C_visible_byteorder = $Config{byteorder};
-if ($Config{longsize} != $Config{ivsize}) {
+if ($^O ne 'MSWin32' and $Config{longsize} != $Config{ivsize}) {
   if ($C_visible_byteorder =~ /^1234/) {
     # Little endian
     substr ($C_visible_byteorder, $Config{longsize}) = '';
@@ -53,9 +49,17 @@ if ($Config{longsize} != $Config{ivsize}) {
     die "longs are $Config{longsize} bytes, IVs are $Config{ivsize}, byte order $C_visible_byteorder not regonised";
   }
 }
+}
+
+# header size depends on the size of the byteorder string
+$file_magic_str = 'pst0';
+$other_magic = 7 + length($C_visible_byteorder);
+$network_magic = 2;
+$major = 2;
+$minor = 5;
 
 use Test;
-BEGIN { plan tests => 334 + $Config{longsize} * 4}
+BEGIN { plan tests => 334 + length($C_visible_byteorder) * 4}
 
 use Storable qw (store retrieve freeze thaw nstore nfreeze);
 
