@@ -69,7 +69,7 @@ Perl_uv_to_utf8(pTHX_ U8 *d, UV uv)
 	return d;
     }
 #ifdef HAS_QUAD
-    if (uv < 0x1000000000LL)
+    if (uv < UTF8_QUAD_MAX)
 #endif
     {
 	*d++ =                        0xfe;	/* Can't match U+FEFF! */
