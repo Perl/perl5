@@ -1,3 +1,22 @@
+Change 830 on 2003/09/25 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP
+	- documentation fixes
+
+Change 829 on 2003/09/25 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP
+	- Allow spaces after the file size in the response to SIZE
+
+Change 828 on 2003/09/25 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::Domain
+	- Avoid infinite loop
+
+Change 821 on 2003/06/18 by <gbarr@pobox.com> (Graham Barr)
+
+	Release 1.16
+
 Change 820 on 2003/06/17 by <gbarr@pobox.com> (Graham Barr)
 
 	Net::FTP

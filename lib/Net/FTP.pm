@@ -22,7 +22,7 @@ use Net::Config;
 use Fcntl qw(O_WRONLY O_RDONLY O_APPEND O_CREAT O_TRUNC);
 # use AutoLoader qw(AUTOLOAD);
 
-$VERSION = "2.71"; # $Id: //depot/libnet/Net/FTP.pm#78 $
+$VERSION = "2.72"; # $Id: //depot/libnet/Net/FTP.pm#80 $
 @ISA     = qw(Exporter Net::Cmd IO::Socket::INET);
 
 # Someday I will "use constant", when I am not bothered to much about
@@ -206,7 +206,7 @@ sub size {
   my $io;
   if($ftp->supported("SIZE")) {
     return $ftp->_SIZE($file)
-	? ($ftp->message =~ /(\d+)$/)[0]
+	? ($ftp->message =~ /(\d+)\s*$/)[0]
 	: undef;
  }
  elsif($ftp->supported("STAT")) {
@@ -216,14 +216,14 @@ sub size {
    my $line;
    foreach $line (@msg) {
      return (split(/\s+/,$line))[4]
-	 if $line =~ /^[-rwx]{10}/
+	 if $line =~ /^[-rwxSsTt]{10}/
    }
  }
  else {
    my @files = $ftp->dir($file);
    if(@files) {
      return (split(/\s+/,$1))[4]
-	 if $files[0] =~ /^([-rwx]{10}.*)$/;
+	 if $files[0] =~ /^([-rwxSsTt]{10}.*)$/;
    }
  }
  undef;
@@ -1362,17 +1362,16 @@ Send a SITE command to the remote server and wait for a response.
 
 Returns most significant digit of the response code.
 
-=item type (TYPE [, ARGS])
+=item ascii
 
-This method will send the TYPE command to the remote FTP server
-to change the type of data transfer. The return value is the previous
-value.
+Transfer file in ASCII. CRLF translation will be done if required
 
-=item ascii ([ARGS]) binary([ARGS]) ebcdic([ARGS]) byte([ARGS])
+=item binary
 
-Synonyms for C<type> with the first arguments set correctly
+Transfer file in binary mode. No transformation will be done.
 
-B<NOTE> ebcdic and byte are not fully supported.
+B<Hint>: If both server and client machines use the same line ending for
+text files, then it will be faster to transfer all files in binary mode.
 
 =item rename ( OLDNAME, NEWNAME )
 
@@ -1405,9 +1404,10 @@ records this value and uses it when during the next data transfer. For this
 reason this method will not return an error, but setting it may cause
 a subsequent data transfer to fail.
 
-=item rmdir ( DIR )
+=item rmdir ( DIR [, RECURSE ])
 
-Remove the directory with the name C<DIR>.
+Remove the directory with the name C<DIR>. If C<RECURSE> is I<true> then
+C<rmdir> will attempt to delete everything inside the directory.
 
 =item mkdir ( DIR [, RECURSE ])
 
@@ -1743,7 +1743,7 @@ For an example of the use of Net::FTP see
 
 =over 4
 
-=item http://www.csh.rit.edu/~adam/Progs/autoftp-2.0.tar.gz
+=item http://www.csh.rit.edu/~adam/Progs/
 
 C<autoftp> is a program that can retrieve, send, or list files via
 the FTP protocol in a non-interactive manner.
@@ -1767,6 +1767,6 @@ under the same terms as Perl itself.
 
 =for html <hr>
 
-I<$Id: //depot/libnet/Net/FTP.pm#78 $>
+I<$Id: //depot/libnet/Net/FTP.pm#80 $>
 
 =cut
