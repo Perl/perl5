@@ -683,6 +683,13 @@ for all APIs by defining at compile time the cpp define PERL_NO_SHORT_NAMES.
 
 Perl_save_bool() has been added.
 
+Regexp objects (those created with C<qr>) now have S-magic rather than
+R-magic.  This fixed regexps of the form /...(??{...;$x})/ to no
+longer ignore changes made to $x.  The S-magic avoids avoid dropping
+the caching optimization and making (??{...}) constructs obscenely
+slow (and consequently useless).  See also L<perlguts/"Magic Variables">.
+Regexp::Copy was affected by this change.
+
 C<-DL> removed (the leaktest had been broken and unsupported for years,
 use alternative debugging mallocs or tools like valgrind and Purify).
 
