@@ -481,7 +481,7 @@ aslice		array slice		ck_null		m@	A L
 
 # Hashes.
 
-each		each			ck_fun		t%	H
+each		each			ck_fun		%	H
 values		values			ck_fun		t%	H
 keys		keys			ck_fun		t%	H
 delete		delete			ck_delete	%	S
