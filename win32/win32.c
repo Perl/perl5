@@ -1175,6 +1175,7 @@ win32_crypt(const char *txt, const char *salt)
     return des_fcrypt(crypt_buffer, txt, salt);
 #else
     die("The crypt() function is unimplemented due to excessive paranoia.");
+    return Nullch;
 #endif
 }
 #endif

@@ -11,8 +11,6 @@
  *   "It all comes from here, the stench and the peril."  --Frodo
  */
 
-#define TMP_CRLF_PATCH
-
 #include "EXTERN.h"
 #include "perl.h"
 
@@ -1988,7 +1986,7 @@ yylex(void)
 	}
 	goto retry;
     case '\r':
-#ifndef TMP_CRLF_PATCH
+#ifdef PERL_STRICT_CR
 	warn("Illegal character \\%03o (carriage return)", '\r');
 	croak(
       "(Maybe you didn't strip carriage returns after a network transfer?)\n");
@@ -5168,7 +5166,7 @@ scan_heredoc(register char *s)
     *d++ = '\n';
     *d = '\0';
     len = d - PL_tokenbuf;
-#ifdef TMP_CRLF_PATCH
+#ifndef PERL_STRICT_CR
     d = strchr(s, '\r');
     if (d) {
 	char *olds = s;
@@ -5244,7 +5242,7 @@ scan_heredoc(register char *s)
 	}
 	PL_curcop->cop_line++;
 	PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
-#ifdef TMP_CRLF_PATCH
+#ifndef PERL_STRICT_CR
 	if (PL_bufend - PL_linestart >= 2) {
 	    if ((PL_bufend[-2] == '\r' && PL_bufend[-1] == '\n') ||
 		(PL_bufend[-2] == '\n' && PL_bufend[-1] == '\r'))
@@ -5543,7 +5541,7 @@ scan_str(char *start)
 
   	if (s < PL_bufend) break;	/* handle case where we are done yet :-) */
 
-#ifdef TMP_CRLF_PATCH
+#ifndef PERL_STRICT_CR
 	if (to - SvPVX(sv) >= 2) {
 	    if ((to[-2] == '\r' && to[-1] == '\n') ||
 		(to[-2] == '\n' && to[-1] == '\r'))
