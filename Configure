@@ -6439,7 +6439,7 @@ EOCP
 		*) echo "However, your read() returns '$status' on EOF??";;
 		esac
 		val="$define"
-		if test "$status" -eq "$rd_nodata"; then
+		if test "$status" = "$rd_nodata"; then
 			echo "WARNING: you can't distinguish between EOF and no data!"
 			val="$undef"
 		fi
