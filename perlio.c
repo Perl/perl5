@@ -2867,7 +2867,7 @@ PerlIOBuf_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 	if (f) {
 	    PerlIO_push(aTHX_ f, self, mode, PerlIOArg);
 	    fd = PerlIO_fileno(f);
-#if O_BINARY != O_TEXT
+#if (O_BINARY != O_TEXT) && !defined(__BEOS__)
 	    /*
 	     * do something about failing setmode()? --jhi
 	     */

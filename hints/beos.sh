@@ -38,17 +38,16 @@ d_syserrlst='undef'
 # the array syserrlst[] is useless for the most part.
 # large negative numbers really kind of suck in arrays.
 
-d_socket='undef'
-d_gethbyaddr='undef'
-d_gethbyname='undef'
-d_getsbyname='undef'
+# Sockets didn't use to be real sockets but BONE changes this.
+# How does one test for BONEness?
+if [ ! -f /some/bone/file.h ]; then
+    d_socket='undef'
+    d_gethbyaddr='undef'
+    d_gethbyname='undef'
+    d_getsbyname='undef'
+fi
 
 ld='gcc'
-
-# Sockets really don't work with the current version of perl and the
-# current BeOS sockets; I suspect that a new module a la GSAR's WIN32 port
-# will be required.
-# Of course, this may also change with R5.
 
 export PATH="$PATH:$PWD/beos"
 
