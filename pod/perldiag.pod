@@ -3586,6 +3586,10 @@ F<PERL_ENV_TABLES> (see L<perlvms>) so that the environ array isn't the
 target of the change to
 %ENV which produced the warning.
 
+=item thread failed to start: %s
+
+(F) The entry point function of threads->create() failed for some reason.
+
 =item times not implemented
 
 (F) Your version of the C library apparently doesn't do times().  I

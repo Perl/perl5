@@ -280,7 +280,7 @@ Perl_ithread_run(void * arg) {
 		}
 		PUTBACK;
 		if (SvTRUE(ERRSV)) {
-		    Perl_warn(aTHX_ "Died:%" SVf,ERRSV);
+		    Perl_warn(aTHX_ "thread failed to start: %" SVf, ERRSV);
 		}
 		FREETMPS;
 		LEAVE;
