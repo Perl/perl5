@@ -891,10 +891,6 @@ C<Storable::drop_utf8> is a blunt tool.  There is no facility either to
 return B<all> strings as utf8 sequences, or to attempt to convert utf8
 data back to 8 bit and C<croak()> if the conversion fails.
 
-Future compatibility does not yet extend to having the option of loading
-serialized data with higher than current minor version numbers.  This
-ought to be fixed pronto.
-
 =head1 CREDITS
 
 Thank you to (in chronological order):
@@ -933,7 +929,13 @@ courtesy of Kawai, Takanori <kawai@nippon-rad.co.jp>.
 
 =head1 AUTHOR
 
-Raphael Manfredi F<E<lt>Raphael_Manfredi@pobox.comE<gt>>
+Storable was written by Raphael Manfredi F<E<lt>Raphael_Manfredi@pobox.comE<gt>>
+Maitainance is now done by the perl5-porters F<E<lt>perl5-porters@perl.orgE<gt>>
+
+Please e-mail us with problems, bug fixes, comments and complaints,
+although if you have complements you should send them to Raphael.
+Please don't e-mail Raphael with problems, as he no longer works on
+Storable, and your message will be delayed while he forwards it to us.
 
 =head1 SEE ALSO
 
