@@ -837,13 +837,14 @@ as the extension is sufficient.  For '~' magic, it may also be
 appropriate to add an I32 'signature' at the top of the private data
 area and check that.
 
-Also note that most of the C<sv_set*()> functions that modify scalars do
-B<not> invoke 'set' magic on their targets.  This must be done by the user
-either by calling the C<SvSETMAGIC()> macro after calling these functions,
-or by using one of the C<SvSetMagic*()> macros.  Similarly, generic C code
-must call the C<SvGETMAGIC()> macro to invoke any 'get' magic if they use
-an SV obtained from external sources in functions that don't handle magic.
-L<API LISTING> later in this document identifies such macros and functions.
+Also note that the C<sv_set*()> and C<sv_cat*()> functions described
+earlier do B<not> invoke 'set' magic on their targets.  This must
+be done by the user either by calling the C<SvSETMAGIC()> macro after
+calling these functions, or by using one of the C<sv_set*_mg()> or
+C<sv_cat*_mg()> functions.  Similarly, generic C code must call the
+C<SvGETMAGIC()> macro to invoke any 'get' magic if they use an SV
+obtained from external sources in functions that don't handle magic.
+L<API LISTING> later in this document identifies such functions.
 For example, calls to the C<sv_cat*()> functions typically need to be
 followed by C<SvSETMAGIC()>, but they don't need a prior C<SvGETMAGIC()>
 since their implementation handles 'get' magic.
@@ -1428,14 +1429,14 @@ Same as C<av_len>.
 Clears an array, making it empty.  Does not free the memory used by the
 array itself.
 
-	void	av_clear _((AV* ar));
+	void	av_clear (AV* ar)
 
 =item av_extend
 
 Pre-extend an array.  The C<key> is the index to which the array should be
 extended.
 
-	void	av_extend _((AV* ar, I32 key));
+	void	av_extend (AV* ar, I32 key)
 
 =item av_fetch
 
@@ -1446,13 +1447,13 @@ that the return value is non-null before dereferencing it to a C<SV*>.
 See L<Understanding the Magic of Tied Hashes and Arrays> for more
 information on how to use this function on tied arrays.
 
-	SV**	av_fetch _((AV* ar, I32 key, I32 lval));
+	SV**	av_fetch (AV* ar, I32 key, I32 lval)
 
 =item av_len
 
 Returns the highest index in the array.  Returns -1 if the array is empty.
 
-	I32	av_len _((AV* ar));
+	I32	av_len (AV* ar)
 
 =item av_make
 
@@ -1460,27 +1461,27 @@ Creates a new AV and populates it with a list of SVs.  The SVs are copied
 into the array, so they may be freed after the call to av_make.  The new AV
 will have a reference count of 1.
 
-	AV*	av_make _((I32 size, SV** svp));
+	AV*	av_make (I32 size, SV** svp)
 
 =item av_pop
 
 Pops an SV off the end of the array.  Returns C<&sv_undef> if the array is
 empty.
 
-	SV*	av_pop _((AV* ar));
+	SV*	av_pop (AV* ar)
 
 =item av_push
 
 Pushes an SV onto the end of the array.  The array will grow automatically
 to accommodate the addition.
 
-	void	av_push _((AV* ar, SV* val));
+	void	av_push (AV* ar, SV* val)
 
 =item av_shift
 
 Shifts an SV off the beginning of the array.
 
-	SV*	av_shift _((AV* ar));
+	SV*	av_shift (AV* ar)
 
 =item av_store
 
@@ -1494,13 +1495,13 @@ before the call, and decrementing it if the function returned NULL.
 See L<Understanding the Magic of Tied Hashes and Arrays> for more
 information on how to use this function on tied arrays.
 
-	SV**	av_store _((AV* ar, I32 key, SV* val));
+	SV**	av_store (AV* ar, I32 key, SV* val)
 
 =item av_undef
 
 Undefines the array.  Frees the memory used by the array itself.
 
-	void	av_undef _((AV* ar));
+	void	av_undef (AV* ar)
 
 =item av_unshift
 
@@ -1508,7 +1509,7 @@ Unshift the given number of C<undef> values onto the beginning of the
 array.  The array will grow automatically to accommodate the addition.
 You must then use C<av_store> to assign values to these new elements.
 
-	void	av_unshift _((AV* ar, I32 num));
+	void	av_unshift (AV* ar, I32 num)
 
 =item CLASS
 
@@ -1522,7 +1523,7 @@ The XSUB-writer's interface to the C C<memcpy> function.  The C<s> is the
 source, C<d> is the destination, C<n> is the number of items, and C<t> is
 the type.  May fail on overlapping copies.  See also C<Move>.
 
-	(void) Copy( s, d, n, t );
+	(void) Copy( s, d, n, t )
 
 =item croak
 
@@ -1595,7 +1596,7 @@ Opening bracket on a callback.  See C<LEAVE> and L<perlcall>.
 
 Used to extend the argument stack for an XSUB's return values.
 
-	EXTEND( sp, int x );
+	EXTEND( sp, int x )
 
 =item FREETMPS
 
@@ -1659,7 +1660,7 @@ which is not visible to Perl code.  So when calling C<perl_call_sv>,
 you should not use the GV directly; instead, you should use the
 method's CV, which can be obtained from the GV with the C<GvCV> macro.
 
-        GV*     gv_fetchmeth _((HV* stash, char* name, STRLEN len, I32 level));
+        GV*     gv_fetchmeth (HV* stash, char* name, STRLEN len, I32 level)
 
 =item gv_fetchmethod
 
@@ -1688,9 +1689,8 @@ C<level==0>.  C<name> should be writable if contains C<':'> or C<'\''>.
 The warning against passing the GV returned by C<gv_fetchmeth> to
 C<perl_call_sv> apply equally to these functions.
 
-        GV*     gv_fetchmethod _((HV* stash, char* name));
-        GV*     gv_fetchmethod_autoload _((HV* stash, char* name,
-                                           I32 autoload));
+        GV*     gv_fetchmethod (HV* stash, char* name)
+        GV*     gv_fetchmethod_autoload (HV* stash, char* name, I32 autoload)
 
 =item gv_stashpv
 
@@ -1698,13 +1698,13 @@ Returns a pointer to the stash for a specified package.  If C<create> is set
 then the package will be created if it does not already exist.  If C<create>
 is not set and the package does not exist then NULL is returned.
 
-	HV*	gv_stashpv _((char* name, I32 create));
+	HV*	gv_stashpv (char* name, I32 create)
 
 =item gv_stashsv
 
 Returns a pointer to the stash for a specified package.  See C<gv_stashpv>.
 
-	HV*	gv_stashsv _((SV* sv, I32 create));
+	HV*	gv_stashsv (SV* sv, I32 create)
 
 =item GvSV
 
@@ -1785,7 +1785,7 @@ Returns the value slot (type C<SV*>) stored in the hash entry.
 
 Clears a hash, making it empty.
 
-	void	hv_clear _((HV* tb));
+	void	hv_clear (HV* tb)
 
 =item hv_delayfree_ent
 
@@ -1794,7 +1794,7 @@ delays actual freeing of key and value until the end of the current
 statement (or thereabouts) with C<sv_2mortal>.  See C<hv_iternext>
 and C<hv_free_ent>.
 
-	void    hv_delayfree_ent _((HV* hv, HE* entry));
+	void    hv_delayfree_ent (HV* hv, HE* entry)
 
 =item hv_delete
 
@@ -1803,7 +1803,7 @@ and returned to the caller.  The C<klen> is the length of the key.  The
 C<flags> value will normally be zero; if set to G_DISCARD then NULL will be
 returned.
 
-	SV*	hv_delete _((HV* tb, char* key, U32 klen, I32 flags));
+	SV*	hv_delete (HV* tb, char* key, U32 klen, I32 flags)
 
 =item hv_delete_ent
 
@@ -1812,21 +1812,21 @@ and returned to the caller.  The C<flags> value will normally be zero; if set
 to G_DISCARD then NULL will be returned.  C<hash> can be a valid precomputed
 hash value, or 0 to ask for it to be computed.
 
-	SV*     hv_delete_ent _((HV* tb, SV* key, I32 flags, U32 hash));
+	SV*     hv_delete_ent (HV* tb, SV* key, I32 flags, U32 hash)
 
 =item hv_exists
 
 Returns a boolean indicating whether the specified hash key exists.  The
 C<klen> is the length of the key.
 
-	bool	hv_exists _((HV* tb, char* key, U32 klen));
+	bool	hv_exists (HV* tb, char* key, U32 klen)
 
 =item hv_exists_ent
 
 Returns a boolean indicating whether the specified hash key exists. C<hash>
 can be a valid precomputed hash value, or 0 to ask for it to be computed.
 
-	bool    hv_exists_ent _((HV* tb, SV* key, U32 hash));
+	bool    hv_exists_ent (HV* tb, SV* key, U32 hash)
 
 =item hv_fetch
 
@@ -1838,7 +1838,7 @@ dereferencing it to a C<SV*>.
 See L<Understanding the Magic of Tied Hashes and Arrays> for more
 information on how to use this function on tied hashes.
 
-	SV**	hv_fetch _((HV* tb, char* key, U32 klen, I32 lval));
+	SV**	hv_fetch (HV* tb, char* key, U32 klen, I32 lval)
 
 =item hv_fetch_ent
 
@@ -1853,20 +1853,20 @@ structure if you need to store it somewhere.
 See L<Understanding the Magic of Tied Hashes and Arrays> for more
 information on how to use this function on tied hashes.
 
-	HE*     hv_fetch_ent  _((HV* tb, SV* key, I32 lval, U32 hash));
+	HE*     hv_fetch_ent  (HV* tb, SV* key, I32 lval, U32 hash)
 
 =item hv_free_ent
 
 Releases a hash entry, such as while iterating though the hash.  See
 C<hv_iternext> and C<hv_delayfree_ent>.
 
-	void    hv_free_ent _((HV* hv, HE* entry));
+	void    hv_free_ent (HV* hv, HE* entry)
 
 =item hv_iterinit
 
 Prepares a starting point to traverse a hash table.
 
-	I32	hv_iterinit _((HV* tb));
+	I32	hv_iterinit (HV* tb)
 
 Note that hv_iterinit I<currently> returns the number of I<buckets> in
 the hash and I<not> the number of keys (as indicated in the Advanced
@@ -1878,7 +1878,7 @@ macro to find the number of keys in a hash.
 Returns the key from the current position of the hash iterator.  See
 C<hv_iterinit>.
 
-	char*	hv_iterkey _((HE* entry, I32* retlen));
+	char*	hv_iterkey (HE* entry, I32* retlen)
 
 =item hv_iterkeysv
 
@@ -1886,33 +1886,33 @@ Returns the key as an C<SV*> from the current position of the hash
 iterator.  The return value will always be a mortal copy of the
 key.  Also see C<hv_iterinit>.
 
-	SV*     hv_iterkeysv  _((HE* entry));
+	SV*     hv_iterkeysv  (HE* entry)
 
 =item hv_iternext
 
 Returns entries from a hash iterator.  See C<hv_iterinit>.
 
-	HE*	hv_iternext _((HV* tb));
+	HE*	hv_iternext (HV* tb)
 
 =item hv_iternextsv
 
 Performs an C<hv_iternext>, C<hv_iterkey>, and C<hv_iterval> in one
 operation.
 
-	SV *	hv_iternextsv _((HV* hv, char** key, I32* retlen));
+	SV *	hv_iternextsv (HV* hv, char** key, I32* retlen)
 
 =item hv_iterval
 
 Returns the value from the current position of the hash iterator.  See
 C<hv_iterkey>.
 
-	SV*	hv_iterval _((HV* tb, HE* entry));
+	SV*	hv_iterval (HV* tb, HE* entry)
 
 =item hv_magic
 
 Adds magic to a hash.  See C<sv_magic>.
 
-	void	hv_magic _((HV* hv, GV* gv, int how));
+	void	hv_magic (HV* hv, GV* gv, int how)
 
 =item HvNAME
 
@@ -1934,7 +1934,7 @@ before the call, and decrementing it if the function returned NULL.
 See L<Understanding the Magic of Tied Hashes and Arrays> for more
 information on how to use this function on tied hashes.
 
-	SV**	hv_store _((HV* tb, char* key, U32 klen, SV* val, U32 hash));
+	SV**	hv_store (HV* tb, char* key, U32 klen, SV* val, U32 hash)
 
 =item hv_store_ent
 
@@ -1951,13 +1951,13 @@ it if the function returned NULL.
 See L<Understanding the Magic of Tied Hashes and Arrays> for more
 information on how to use this function on tied hashes.
 
-	HE*     hv_store_ent  _((HV* tb, SV* key, SV* val, U32 hash));
+	HE*     hv_store_ent  (HV* tb, SV* key, SV* val, U32 hash)
 
 =item hv_undef
 
 Undefines the hash.
 
-	void	hv_undef _((HV* tb));
+	void	hv_undef (HV* tb)
 
 =item isALNUM
 
@@ -2021,49 +2021,49 @@ Stack marker variable for the XSUB.  See C<dMARK>.
 
 Clear something magical that the SV represents.  See C<sv_magic>.
 
-	int	mg_clear _((SV* sv));
+	int	mg_clear (SV* sv)
 
 =item mg_copy
 
 Copies the magic from one SV to another.  See C<sv_magic>.
 
-	int	mg_copy _((SV *, SV *, char *, STRLEN));
+	int	mg_copy (SV *, SV *, char *, STRLEN)
 
 =item mg_find
 
 Finds the magic pointer for type matching the SV.  See C<sv_magic>.
 
-	MAGIC*	mg_find _((SV* sv, int type));
+	MAGIC*	mg_find (SV* sv, int type)
 
 =item mg_free
 
 Free any magic storage used by the SV.  See C<sv_magic>.
 
-	int	mg_free _((SV* sv));
+	int	mg_free (SV* sv)
 
 =item mg_get
 
 Do magic after a value is retrieved from the SV.  See C<sv_magic>.
 
-	int	mg_get _((SV* sv));
+	int	mg_get (SV* sv)
 
 =item mg_len
 
 Report on the SV's length.  See C<sv_magic>.
 
-	U32	mg_len _((SV* sv));
+	U32	mg_len (SV* sv)
 
 =item mg_magical
 
 Turns on the magical status of an SV.  See C<sv_magic>.
 
-	void	mg_magical _((SV* sv));
+	void	mg_magical (SV* sv)
 
 =item mg_set
 
 Do magic after a value is assigned to the SV.  See C<sv_magic>.
 
-	int	mg_set _((SV* sv));
+	int	mg_set (SV* sv)
 
 =item Move
 
@@ -2071,7 +2071,7 @@ The XSUB-writer's interface to the C C<memmove> function.  The C<s> is the
 source, C<d> is the destination, C<n> is the number of items, and C<t> is
 the type.  Can do overlapping moves.  See also C<Copy>.
 
-	(void) Move( s, d, n, t );
+	(void) Move( s, d, n, t )
 
 =item na
 
@@ -2101,20 +2101,20 @@ memory is zeroed with C<memzero>.
 
 Creates a new AV.  The reference count is set to 1.
 
-	AV*	newAV _((void));
+	AV*	newAV (void)
 
 =item newHV
 
 Creates a new HV.  The reference count is set to 1.
 
-	HV*	newHV _((void));
+	HV*	newHV (void)
 
 =item newRV_inc
 
 Creates an RV wrapper for an SV.  The reference count for the original SV is
 incremented.
 
-	SV*	newRV_inc _((SV* ref));
+	SV*	newRV_inc (SV* ref)
 
 For historical reasons, "newRV" is a synonym for "newRV_inc".
 
@@ -2123,7 +2123,7 @@ For historical reasons, "newRV" is a synonym for "newRV_inc".
 Creates an RV wrapper for an SV.  The reference count for the original
 SV is B<not> incremented.
 
-	SV*     newRV_noinc _((SV* ref));
+	SV*     newRV_noinc (SV* ref)
 
 =item NEWSV
 
@@ -2132,28 +2132,28 @@ preallocated string space the SV should have.  The reference count for the
 new SV is set to 1.  C<id> is an integer id between 0 and 1299 (used to
 identify leaks).
 
-	SV*	NEWSV _((int id, STRLEN len));
+	SV*	NEWSV (int id, STRLEN len)
 
 =item newSViv
 
 Creates a new SV and copies an integer into it.  The reference count for the
 SV is set to 1.
 
-	SV*	newSViv _((IV i));
+	SV*	newSViv (IV i)
 
 =item newSVnv
 
 Creates a new SV and copies a double into it.  The reference count for the
 SV is set to 1.
 
-	SV*	newSVnv _((NV i));
+	SV*	newSVnv (NV i)
 
 =item newSVpv
 
 Creates a new SV and copies a string into it.  The reference count for the
 SV is set to 1.  If C<len> is zero then Perl will compute the length.
 
-	SV*	newSVpv _((char* s, STRLEN len));
+	SV*	newSVpv (char* s, STRLEN len)
 
 =item newSVpvn
 
@@ -2161,7 +2161,7 @@ Creates a new SV and copies a string into it.  The reference count for the
 SV is set to 1.  If C<len> is zero then Perl will create a zero length 
 string.
 
-	SV*	newSVpvn _((char* s, STRLEN len));
+	SV*	newSVpvn (char* s, STRLEN len)
 
 =item newSVrv
 
@@ -2170,13 +2170,13 @@ it will be upgraded to one.  If C<classname> is non-null then the new SV will
 be blessed in the specified package.  The new SV is returned and its
 reference count is 1.
 
-	SV*	newSVrv _((SV* rv, char* classname));
+	SV*	newSVrv (SV* rv, char* classname)
 
 =item newSVsv
 
 Creates a new SV which is an exact duplicate of the original SV.
 
-	SV*	newSVsv _((SV* old));
+	SV*	newSVsv (SV* old)
 
 =item newXS
 
@@ -2219,27 +2219,27 @@ Allocates a new Perl interpreter.  See L<perlembed>.
 
 Performs a callback to the specified Perl sub.  See L<perlcall>.
 
-	I32	perl_call_argv _((char* subname, I32 flags, char** argv));
+	I32	perl_call_argv (char* subname, I32 flags, char** argv)
 
 =item perl_call_method
 
 Performs a callback to the specified Perl method.  The blessed object must
 be on the stack.  See L<perlcall>.
 
-	I32	perl_call_method _((char* methname, I32 flags));
+	I32	perl_call_method (char* methname, I32 flags)
 
 =item perl_call_pv
 
 Performs a callback to the specified Perl sub.  See L<perlcall>.
 
-	I32	perl_call_pv _((char* subname, I32 flags));
+	I32	perl_call_pv (char* subname, I32 flags)
 
 =item perl_call_sv
 
 Performs a callback to the Perl sub whose name is in the SV.  See
 L<perlcall>.
 
-	I32	perl_call_sv _((SV* sv, I32 flags));
+	I32	perl_call_sv (SV* sv, I32 flags)
 
 =item perl_construct
 
@@ -2253,13 +2253,13 @@ Shuts down a Perl interpreter.  See L<perlembed>.
 
 Tells Perl to C<eval> the string in the SV.
 
-	I32	perl_eval_sv _((SV* sv, I32 flags));
+	I32	perl_eval_sv (SV* sv, I32 flags)
 
 =item perl_eval_pv
 
 Tells Perl to C<eval> the given string and return an SV* result.
 
-	SV*	perl_eval_pv _((char* p, I32 croak_on_error));
+	SV*	perl_eval_pv (char* p, I32 croak_on_error)
 
 =item perl_free
 
@@ -2271,7 +2271,7 @@ Returns the AV of the specified Perl array.  If C<create> is set and the
 Perl variable does not exist then it will be created.  If C<create> is not
 set and the variable does not exist then NULL is returned.
 
-	AV*	perl_get_av _((char* name, I32 create));
+	AV*	perl_get_av (char* name, I32 create)
 
 =item perl_get_cv
 
@@ -2279,7 +2279,7 @@ Returns the CV of the specified Perl sub.  If C<create> is set and the Perl
 variable does not exist then it will be created.  If C<create> is not
 set and the variable does not exist then NULL is returned.
 
-	CV*	perl_get_cv _((char* name, I32 create));
+	CV*	perl_get_cv (char* name, I32 create)
 
 =item perl_get_hv
 
@@ -2287,7 +2287,7 @@ Returns the HV of the specified Perl hash.  If C<create> is set and the Perl
 variable does not exist then it will be created.  If C<create> is not
 set and the variable does not exist then NULL is returned.
 
-	HV*	perl_get_hv _((char* name, I32 create));
+	HV*	perl_get_hv (char* name, I32 create)
 
 =item perl_get_sv
 
@@ -2295,7 +2295,7 @@ Returns the SV of the specified Perl scalar.  If C<create> is set and the
 Perl variable does not exist then it will be created.  If C<create> is not
 set and the variable does not exist then NULL is returned.
 
-	SV*	perl_get_sv _((char* name, I32 create));
+	SV*	perl_get_sv (char* name, I32 create)
 
 =item perl_parse
 
@@ -2305,7 +2305,7 @@ Tells a Perl interpreter to parse a Perl script.  See L<perlembed>.
 
 Tells Perl to C<require> a module.
 
-	void	perl_require_pv _((char* pv));
+	void	perl_require_pv (char* pv)
 
 =item perl_run
 
@@ -2315,31 +2315,31 @@ Tells a Perl interpreter to run.  See L<perlembed>.
 
 Pops an integer off the stack.
 
-	int POPi();
+	int POPi()
 
 =item POPl
 
 Pops a long off the stack.
 
-	long POPl();
+	long POPl()
 
 =item POPp
 
 Pops a string off the stack.
 
-	char * POPp();
+	char * POPp()
 
 =item POPn
 
 Pops a double off the stack.
 
-	double POPn();
+	double POPn()
 
 =item POPs
 
 Pops an SV off the stack.
 
-	SV* POPs();
+	SV* POPs()
 
 =item PUSHMARK
 
@@ -2417,14 +2417,14 @@ The XSUB-writer's interface to the C C<realloc> function.
 
 Copy a string to a safe spot.  This does not use an SV.
 
-	char*	savepv _((char* sv));
+	char*	savepv (char* sv)
 
 =item savepvn
 
 Copy a string to a safe spot.  The C<len> indicates number of bytes to
 copy.  This does not use an SV.
 
-	char*	savepvn _((char* sv, I32 len));
+	char*	savepvn (char* sv, I32 len)
 
 =item SAVETMPS
 
@@ -2509,7 +2509,7 @@ indicates the number of bytes to compare.  Returns true or false.
 Marks an SV as mortal.  The SV will be destroyed when the current context
 ends.
 
-	SV*	sv_2mortal _((SV* sv));
+	SV*	sv_2mortal (SV* sv)
 
 =item sv_bless
 
@@ -2517,28 +2517,34 @@ Blesses an SV into a specified package.  The SV must be an RV.  The package
 must be designated by its stash (see C<gv_stashpv()>).  The reference count
 of the SV is unaffected.
 
-	SV*	sv_bless _((SV* sv, HV* stash));
-
-=item SvCatMagicPV
-
-=item SvCatMagicPVN
-
-=item SvCatMagicSV
+	SV*	sv_bless (SV* sv, HV* stash)
 
 =item sv_catpv
 
 Concatenates the string onto the end of the string which is in the SV.
-Handles 'get' magic, but not 'set' magic.  See C<SvCatMagicPV>.
+Handles 'get' magic, but not 'set' magic.  See C<sv_catpv_mg>.
 
-	void	sv_catpv _((SV* sv, char* ptr));
+	void	sv_catpv (SV* sv, char* ptr)
+
+=item sv_catpv_mg
+
+Like C<sv_catpv>, but also handles 'set' magic.
+
+	void	sv_catpvn (SV* sv, char* ptr)
 
 =item sv_catpvn
 
 Concatenates the string onto the end of the string which is in the SV.  The
 C<len> indicates number of bytes to copy.  Handles 'get' magic, but not
-'set' magic.  See C<SvCatMagicPVN).
+'set' magic.  See C<sv_catpvn_mg>.
 
-	void	sv_catpvn _((SV* sv, char* ptr, STRLEN len));
+	void	sv_catpvn (SV* sv, char* ptr, STRLEN len)
+
+=item sv_catpvn_mg
+
+Like C<sv_catpvn>, but also handles 'set' magic.
+
+	void	sv_catpvn_mg (SV* sv, char* ptr, STRLEN len)
 
 =item sv_catpvf
 
@@ -2546,14 +2552,26 @@ Processes its arguments like C<sprintf> and appends the formatted output
 to an SV.  Handles 'get' magic, but not 'set' magic.  C<SvSETMAGIC()> must
 typically be called after calling this function to handle 'set' magic.
 
-	void	sv_catpvf _((SV* sv, const char* pat, ...));
+	void	sv_catpvf (SV* sv, const char* pat, ...)
+
+=item sv_catpvf_mg
+
+Like C<sv_catpvf>, but also handles 'set' magic.
+
+	void	sv_catpvf_mg (SV* sv, const char* pat, ...)
 
 =item sv_catsv
 
 Concatenates the string from SV C<ssv> onto the end of the string in SV
-C<dsv>.  Handles 'get' magic, but not 'set' magic.  See C<SvCatMagicSV).
+C<dsv>.  Handles 'get' magic, but not 'set' magic.  See C<sv_catsv_mg>.
 
-	void	sv_catsv _((SV* dsv, SV* ssv));
+	void	sv_catsv (SV* dsv, SV* ssv)
+
+=item sv_catsv_mg
+
+Like C<sv_catsv>, but also handles 'set' magic.
+
+	void	sv_catsv_mg (SV* dsv, SV* ssv)
 
 =item sv_cmp
 
@@ -2561,7 +2579,7 @@ Compares the strings in two SVs.  Returns -1, 0, or 1 indicating whether the
 string in C<sv1> is less than, equal to, or greater than the string in
 C<sv2>.
 
-	I32	sv_cmp _((SV* sv1, SV* sv2));
+	I32	sv_cmp (SV* sv1, SV* sv2)
 
 =item SvCUR
 
@@ -2579,7 +2597,7 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 
 Auto-decrement of the value in the SV.
 
-	void	sv_dec _((SV* sv));
+	void	sv_dec (SV* sv)
 
 =item SvEND
 
@@ -2593,7 +2611,7 @@ See C<SvCUR>.  Access the character as
 Returns a boolean indicating whether the strings in the two SVs are
 identical.
 
-	I32	sv_eq _((SV* sv1, SV* sv2));
+	I32	sv_eq (SV* sv1, SV* sv2)
 
 =item SvGETMAGIC
 
@@ -2619,7 +2637,7 @@ Use C<SvGROW>.
 
 Auto-increment of the value in the SV.
 
-	void	sv_inc _((SV* sv));
+	void	sv_inc (SV* sv)
 
 =item SvIOK
 
@@ -2658,7 +2676,7 @@ Returns a boolean indicating whether the SV is blessed into the specified
 class.  This does not know how to check for subtype, so it doesn't work in
 an inheritance relationship.
 
-	int	sv_isa _((SV* sv, char* name));
+	int	sv_isa (SV* sv, char* name)
 
 =item SvIV
 
@@ -2672,13 +2690,13 @@ Returns a boolean indicating whether the SV is an RV pointing to a blessed
 object.  If the SV is not an RV, or if the object is not blessed, then this
 will return false.
 
-	int	sv_isobject _((SV* sv));
+	int	sv_isobject (SV* sv)
 
 =item SvIVX
 
 Returns the integer which is stored in the SV.
 
-	int  SvIVX (SV* sv);
+	int  SvIVX (SV* sv)
 
 =item SvLEN
 
@@ -2690,20 +2708,20 @@ Returns the size of the string buffer in the SV.  See C<SvCUR>.
 
 Returns the length of the string in the SV.  Use C<SvCUR>.
 
-	STRLEN	sv_len _((SV* sv));
+	STRLEN	sv_len (SV* sv)
 
 =item sv_magic
 
 Adds magic to an SV.
 
-	void	sv_magic _((SV* sv, SV* obj, int how, char* name, I32 namlen));
+	void	sv_magic (SV* sv, SV* obj, int how, char* name, I32 namlen)
 
 =item sv_mortalcopy
 
 Creates a new SV which is a copy of the original SV.  The new SV is marked
 as mortal.
 
-	SV*	sv_mortalcopy _((SV* oldsv));
+	SV*	sv_mortalcopy (SV* oldsv)
 
 =item SvOK
 
@@ -2715,7 +2733,7 @@ Returns a boolean indicating whether the value is an SV.
 
 Creates a new SV which is mortal.  The reference count of the SV is set to 1.
 
-	SV*	sv_newmortal _((void));
+	SV*	sv_newmortal (void)
 
 =item sv_no
 
@@ -2776,13 +2794,13 @@ B<private> setting.  Use C<SvNOK>.
 
 Returns the double which is stored in the SV.
 
-	double SvNV (SV* sv);
+	double SvNV (SV* sv)
 
 =item SvNVX
 
 Returns the double which is stored in the SV.
 
-	double SvNVX (SV* sv);
+	double SvNVX (SV* sv)
 
 =item SvPOK
 
@@ -2833,7 +2851,7 @@ Returns a pointer to the string in the SV.  The SV must contain a string.
 
 Returns the value of the object's reference count.
 
-	int SvREFCNT (SV* sv);
+	int SvREFCNT (SV* sv)
 
 =item SvREFCNT_dec
 
@@ -2869,7 +2887,7 @@ Tells an SV that it is an RV.
 
 Dereferences an RV to return the SV.
 
-	SV*	SvRV (SV* sv);
+	SV*	SvRV (SV* sv)
 
 =item SvSETMAGIC
 
@@ -2882,13 +2900,13 @@ its argument more than once.
 
 Taints an SV if tainting is enabled
 
-	SvTAINT (SV* sv);
+	SvTAINT (SV* sv)
 
 =item SvTAINTED
 
 Checks to see if an SV is tainted. Returns TRUE if it is, FALSE if not.
 
-	SvTAINTED (SV* sv);
+	SvTAINTED (SV* sv)
 
 =item SvTAINTED_off
 
@@ -2899,112 +2917,91 @@ of unconditionally untainting the value. Untainting should be done in
 the standard perl fashion, via a carefully crafted regexp, rather than
 directly untainting variables.
 
-	SvTAINTED_off (SV* sv);
+	SvTAINTED_off (SV* sv)
 
 =item SvTAINTED_on
 
 Marks an SV as tainted.
 
-	SvTAINTED_on (SV* sv);
-
-=item SvSetMagicIV
-
-A macro that calls C<sv_setiv>, and invokes 'set' magic on the SV.
-May evaluate arguments more than once.
-
-	void	SvSetMagicIV (SV* sv, IV num)
-
-=item SvSetMagicNV
-
-A macro that calls C<sv_setnv>, and invokes 'set' magic on the SV.
-May evaluate arguments more than once.
-
-	void	SvSetMagicNV (SV* sv, double num)
-
-=item SvSetMagicPV
-
-A macro that calls C<sv_setpv>, and invokes 'set' magic on the SV.
-May evaluate arguments more than once.
-
-	void	SvSetMagicPV (SV* sv, char *ptr)
-
-=item SvSetMagicPVIV
-
-A macro that calls C<sv_setpviv>, and invokes 'set' magic on the SV.
-May evaluate arguments more than once.
-
-	void	SvSetMagicPVIV (SV* sv, IV num)
-
-=item SvSetMagicPVN
-
-A macro that calls C<sv_setpvn>, and invokes 'set' magic on the SV.
-May evaluate arguments more than once.
-
-	void	SvSetMagicPVN (SV* sv, char* ptr, STRLEN len)
-
-=item SvSetMagicSV
-
-Same as C<SvSetSV>, but also invokes 'set' magic on the SV.
-May evaluate arguments more than once.
-
-	void	SvSetMagicSV (SV* dsv, SV* ssv)
-
-=item SvSetMagicSV_nosteal
-
-Same as C<SvSetSV_nosteal>, but also invokes 'set' magic on the SV.
-May evaluate arguments more than once.
-
-	void	SvSetMagicSV_nosteal (SV* dsv, SV* ssv)
-
-=item SvSetMagicUV
-
-A macro that calls C<sv_setuv>, and invokes 'set' magic on the SV.
-May evaluate arguments more than once.
-
-	void	SvSetMagicUV (SV* sv, UV num)
+	SvTAINTED_on (SV* sv)
 
 =item sv_setiv
 
 Copies an integer into the given SV.  Does not handle 'set' magic.
-See C<SvSetMagicIV>.
+See C<sv_setiv_mg>.
 
-	void	sv_setiv _((SV* sv, IV num));
+	void	sv_setiv (SV* sv, IV num)
+
+=item sv_setiv_mg
+
+Like C<sv_setiv>, but also handles 'set' magic.
+
+	void	sv_setiv_mg (SV* sv, IV num)
 
 =item sv_setnv
 
 Copies a double into the given SV.  Does not handle 'set' magic.
-See C<SvSetMagicNV>.
+See C<sv_setnv_mg>.
 
-	void	sv_setnv _((SV* sv, double num));
+	void	sv_setnv (SV* sv, double num)
+
+=item sv_setnv_mg
+
+Like C<sv_setnv>, but also handles 'set' magic.
+
+	void	sv_setnv_mg (SV* sv, double num)
 
 =item sv_setpv
 
 Copies a string into an SV.  The string must be null-terminated.
-Does not handle 'set' magic.  See C<SvSetMagicPV>.
+Does not handle 'set' magic.  See C<sv_setpv_mg>.
 
-	void	sv_setpv _((SV* sv, char* ptr));
+	void	sv_setpv (SV* sv, char* ptr)
+
+=item sv_setpv_mg
+
+Like C<sv_setpv>, but also handles 'set' magic.
+
+	void	sv_setpv_mg (SV* sv, char* ptr)
 
 =item sv_setpviv
 
 Copies an integer into the given SV, also updating its string value.
-Does not handle 'set' magic.  See C<SvSetMagicPVIV>.
+Does not handle 'set' magic.  See C<sv_setpviv_mg>.
 
-	void	sv_setpviv _((SV* sv, IV num));
+	void	sv_setpviv (SV* sv, IV num)
+
+=item sv_setpviv_mg
+
+Like C<sv_setpviv>, but also handles 'set' magic.
+
+	void	sv_setpviv_mg (SV* sv, IV num)
 
 =item sv_setpvn
 
 Copies a string into an SV.  The C<len> parameter indicates the number of
-bytes to be copied.  Does not handle 'set' magic.  See C<SvSetMagicPVN>.
+bytes to be copied.  Does not handle 'set' magic.  See C<sv_setpvn_mg>.
 
-	void	sv_setpvn _((SV* sv, char* ptr, STRLEN len));
+	void	sv_setpvn (SV* sv, char* ptr, STRLEN len)
+
+=item sv_setpvn_mg
+
+Like C<sv_setpvn>, but also handles 'set' magic.
+
+	void	sv_setpvn_mg (SV* sv, char* ptr, STRLEN len)
 
 =item sv_setpvf
 
 Processes its arguments like C<sprintf> and sets an SV to the formatted
-output.  Does not handle 'set' magic.  C<SvSETMAGIC()> must typically
-be called after calling this function to handle 'set' magic.
+output.  Does not handle 'set' magic.  See C<sv_setpvf_mg>.
 
-	void	sv_setpvf _((SV* sv, const char* pat, ...));
+	void	sv_setpvf (SV* sv, const char* pat, ...)
+
+=item sv_setpvf_mg
+
+Like C<sv_setpvf>, but also handles 'set' magic.
+
+	void	sv_setpvf_mg (SV* sv, const char* pat, ...)
 
 =item sv_setref_iv
 
@@ -3014,7 +3011,7 @@ the new SV.  The C<classname> argument indicates the package for the
 blessing.  Set C<classname> to C<Nullch> to avoid the blessing.  The new SV
 will be returned and will have a reference count of 1.
 
-	SV*	sv_setref_iv _((SV *rv, char *classname, IV iv));
+	SV*	sv_setref_iv (SV *rv, char *classname, IV iv)
 
 =item sv_setref_nv
 
@@ -3024,7 +3021,7 @@ the new SV.  The C<classname> argument indicates the package for the
 blessing.  Set C<classname> to C<Nullch> to avoid the blessing.  The new SV
 will be returned and will have a reference count of 1.
 
-	SV*	sv_setref_nv _((SV *rv, char *classname, double nv));
+	SV*	sv_setref_nv (SV *rv, char *classname, double nv)
 
 =item sv_setref_pv
 
@@ -3035,7 +3032,7 @@ into the SV.  The C<classname> argument indicates the package for the
 blessing.  Set C<classname> to C<Nullch> to avoid the blessing.  The new SV
 will be returned and will have a reference count of 1.
 
-	SV*	sv_setref_pv _((SV *rv, char *classname, void* pv));
+	SV*	sv_setref_pv (SV *rv, char *classname, void* pv)
 
 Do not use with integral Perl types such as HV, AV, SV, CV, because those
 objects will become corrupted by the pointer copy process.
@@ -3051,7 +3048,7 @@ argument indicates the package for the blessing.  Set C<classname> to
 C<Nullch> to avoid the blessing.  The new SV will be returned and will have
 a reference count of 1.
 
-	SV*	sv_setref_pvn _((SV *rv, char *classname, char* pv, I32 n));
+	SV*	sv_setref_pvn (SV *rv, char *classname, char* pv, I32 n)
 
 Note that C<sv_setref_pv> copies the pointer while this copies the string.
 
@@ -3073,17 +3070,28 @@ May evaluate arguments more than once.
 
 Copies the contents of the source SV C<ssv> into the destination SV C<dsv>.
 The source SV may be destroyed if it is mortal.  Does not handle 'set' magic.
-See the macro forms C<SvSetSV>, C<SvSetSV_nosteal>, C<SvSetMagicSV> and
-C<SvSetMagicSV_nosteal>.
+See the macro forms C<SvSetSV>, C<SvSetSV_nosteal> and C<sv_setsv_mg>.
 
-	void	sv_setsv _((SV* dsv, SV* ssv));
+	void	sv_setsv (SV* dsv, SV* ssv)
+
+=item sv_setsv_mg
+
+Like C<sv_setsv>, but also handles 'set' magic.
+
+	void	sv_setsv_mg (SV* dsv, SV* ssv)
 
 =item sv_setuv
 
 Copies an unsigned integer into the given SV.  Does not handle 'set' magic.
-See C<SvSetMagicUV>.
+See C<sv_setuv_mg>.
 
-	void	sv_setuv _((SV* sv, UV num));
+	void	sv_setuv (SV* sv, UV num)
+
+=item sv_setuv_mg
+
+Like C<sv_setuv>, but also handles 'set' magic.
+
+	void	sv_setuv_mg (SV* sv, UV num)
 
 =item SvSTASH
 
@@ -3142,7 +3150,7 @@ C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 Used to upgrade an SV to a more complex form.  Uses C<sv_upgrade> to perform
 the upgrade if necessary.  See C<svtype>.
 
-	bool    SvUPGRADE _((SV* sv, svtype mt));
+	bool    SvUPGRADE (SV* sv, svtype mt)
 
 =item sv_upgrade
 
@@ -3158,9 +3166,7 @@ Unsets the RV status of the SV, and decrements the reference count of
 whatever was being referenced by the RV.  This can almost be thought of
 as a reversal of C<newSVrv>.  See C<SvROK_off>.
 
-	void    sv_unref _((SV* sv));
-
-=item SvUseMagicPVN
+	void    sv_unref (SV* sv)
 
 =item sv_usepvn
 
@@ -3170,9 +3176,15 @@ The C<ptr> should point to memory that was allocated by C<malloc>.  The
 string length, C<len>, must be supplied.  This function will realloc the
 memory pointed to by C<ptr>, so that pointer should not be freed or used by
 the programmer after giving it to sv_usepvn.  Does not handle 'set' magic.
-See C<SvUseMagicPVN>.
+See C<sv_usepvn_mg>.
 
-	void	sv_usepvn _((SV* sv, char* ptr, STRLEN len));
+	void	sv_usepvn (SV* sv, char* ptr, STRLEN len)
+
+=item sv_usepvn_mg
+
+Like C<sv_usepvn>, but also handles 'set' magic.
+
+	void	sv_usepvn_mg (SV* sv, char* ptr, STRLEN len)
 
 =item sv_yes
 
@@ -3239,7 +3251,7 @@ C<xsubpp>.
 Return from XSUB, indicating number of items on the stack.  This is usually
 handled by C<xsubpp>.
 
-	XSRETURN(int x);
+	XSRETURN(int x)
 
 =item XSRETURN_EMPTY
 
@@ -3251,7 +3263,7 @@ Return an empty list from an XSUB immediately.
 
 Return an integer from an XSUB immediately.  Uses C<XST_mIV>.
 
-	XSRETURN_IV(IV v);
+	XSRETURN_IV(IV v)
 
 =item XSRETURN_NO
 
@@ -3263,13 +3275,13 @@ Return C<&sv_no> from an XSUB immediately.  Uses C<XST_mNO>.
 
 Return an double from an XSUB immediately.  Uses C<XST_mNV>.
 
-	XSRETURN_NV(NV v);
+	XSRETURN_NV(NV v)
 
 =item XSRETURN_PV
 
 Return a copy of a string from an XSUB immediately.  Uses C<XST_mPV>.
 
-	XSRETURN_PV(char *v);
+	XSRETURN_PV(char *v)
 
 =item XSRETURN_UNDEF
 
@@ -3288,39 +3300,39 @@ Return C<&sv_yes> from an XSUB immediately.  Uses C<XST_mYES>.
 Place an integer into the specified position C<i> on the stack.  The value is
 stored in a new mortal SV.
 
-	XST_mIV( int i, IV v );
+	XST_mIV( int i, IV v )
 
 =item XST_mNV
 
 Place a double into the specified position C<i> on the stack.  The value is
 stored in a new mortal SV.
 
-	XST_mNV( int i, NV v );
+	XST_mNV( int i, NV v )
 
 =item XST_mNO
 
 Place C<&sv_no> into the specified position C<i> on the stack.
 
-	XST_mNO( int i );
+	XST_mNO( int i )
 
 =item XST_mPV
 
 Place a copy of a string into the specified position C<i> on the stack.  The
 value is stored in a new mortal SV.
 
-	XST_mPV( int i, char *v );
+	XST_mPV( int i, char *v )
 
 =item XST_mUNDEF
 
 Place C<&sv_undef> into the specified position C<i> on the stack.
 
-	XST_mUNDEF( int i );
+	XST_mUNDEF( int i )
 
 =item XST_mYES
 
 Place C<&sv_yes> into the specified position C<i> on the stack.
 
-	XST_mYES( int i );
+	XST_mYES( int i )
 
 =item XS_VERSION
 
@@ -3338,7 +3350,7 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 The XSUB-writer's interface to the C C<memzero> function.  The C<d> is the
 destination, C<n> is the number of items, and C<t> is the type.
 
-	(void) Zero( d, n, t );
+	(void) Zero( d, n, t )
 
 =back
 
