@@ -720,6 +720,7 @@ foreach $Locale (@Locale) {
 	} else {
 	    use locale;
 	    no utf8;
+            my $re = qr/[\[\(\{\*\+\?\|\^\$\\]/;
 
 	    my @f = ();
 	    foreach my $x (keys %UPPER) {
@@ -728,6 +729,23 @@ foreach $Locale (@Locale) {
 		print "# UPPER $x lc $y ",
 			$x =~ /$y/i ? 1 : 0, " ",
 			$y =~ /$x/i ? 1 : 0, "\n" if 0;
+		# If $x and $y contain regular expression characters
+		# AND THEY lowercase (/i) to regular expression characters,
+		# regcomp() will be mightily confused.  No, the \Q doesn't
+		# help here (maybe regex engine internal lowercasing
+		# is done after the \Q?)  An example of this happening is
+		# the bg_BG (Bulgarian) locale under EBCDIC (OS/390 USS):
+		# the chr(173) (the "[") is the lowercase of the chr(235).
+		# Similarly losing EBCDIC locales include cs_cz, cs_CZ,
+		# el_gr, el_GR, en_us.IBM-037 (!), en_US.IBM-037,
+		# et_ee, et_EE, hr_hr, hr_HR, hu_hu, hu_HU, lt_LT,
+		# mk_mk, mk_MK, nl_nl.IBM-037, nl_NL.IBM-037,
+		# pl_pl, pl_PL, ro_ro, ro_RO, ru_ru, ru_RU,
+		# sk_sk, sk_SK, sl_si, sl_SI, tr_tr, tr_TR,
+		if ($x =~ $re || $y =~ $re) {
+		    print "# Regex characters in '$x' or '$y', skipping test 117 for locale '$Locale'\n";
+		    next;
+		}
 		# With utf8 both will fail since the locale concept
 		# of upper/lower does not work well in Unicode.
 		push @f, $x unless $x =~ /$y/i == $y =~ /$x/i;
@@ -738,6 +756,10 @@ foreach $Locale (@Locale) {
 		print "# lower $x uc $y ",
 			$x =~ /$y/i ? 1 : 0, " ",
 			$y =~ /$x/i ? 1 : 0, "\n" if 0;
+		if ($x =~ $re || $y =~ $re) { # See above.
+		    print "# Regex characters in '$x' or '$y', skipping test 117 for locale '$Locale'\n";
+		    next;
+		}
 		# With utf8 both will fail since the locale concept
 		# of upper/lower does not work well in Unicode.
 		push @f, $x unless $x =~ /$y/i == $y =~ /$x/i;
