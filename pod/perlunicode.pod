@@ -840,7 +840,13 @@ transport/storage is not eight-bit safe.  Defined by RFC 2152.
 
 =back
 
-=head2 Security Implications of Malformed UTF-8
+=head2 Security Implications of Unicode
+
+=over 4
+
+=item *
+
+Malformed UTF-8
 
 Unfortunately, the specification of UTF-8 leaves some room for
 interpretation of how many bytes of encoded output one should generate
@@ -852,6 +858,37 @@ shortest length UTF-8, and with warnings on (C<-w> or C<use
 warnings;>) Perl will warn about non-shortest length UTF-8 (and other
 malformations, too, such as the surrogates, which are not real
 Unicode code points.)
+
+=item *
+
+Regular expressions behave slightly differently between byte data and
+character (Unicode data).  For example, the "word character" character
+class C<\w> will work differently when the data is all eight-bit bytes
+or when the data is Unicode.
+
+In the first case, the set of C<\w> characters is either small (the
+default set of alphabetic characters, digits, and the "_"), or, if you
+are using a locale (see L<perllocale>), the C<\w> might contain a few
+more letters according to your language and country.
+
+In the second case, the C<\w> set of characters is much, much larger,
+and most importantly, even in the set of the first 256 characters, it
+will most probably be different: as opposed to most locales (which are
+specific to a language and country pair) Unicode classifies all the
+characters that are letters as C<\w>.  For example: your locale might
+not think that LATIN SMALL LETTER ETH is a letter (unless you happen
+to speak Icelandic), but Unicode does.
+
+As discussed elswhere, Perl tries to stand one leg (two legs, being
+a quadruped camel?) in two worlds: the old worlds of byte and the new
+world of characters, upgrading from bytes to characters when necessary.
+If your legacy code is not explicitly using Unicode, no automatic
+switchover to characters should happen, and characters shouldn't get
+downgraded back to bytes, either.  It is possible to accidentally mix
+bytes and characters, however (see L<perluniintro>), in which case the
+C<\w> might start behaving differently.  Review your code.
+
+=back
 
 =head2 Unicode in Perl on EBCDIC
 

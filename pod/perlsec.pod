@@ -390,6 +390,13 @@ Your access to it does not give you permission to use it blah blah
 blah."  You should see a lawyer to be sure your licence's wording will
 stand up in court.
 
+=head2 Unicode
+
+Unicode is a new and complex technology and one may easily overlook
+certain security pitfalls.  See L<perluniintro> for an overview and
+L<perlunicode> for details, and L<perlunicode/"Security Implications
+of Unicode"> for security implications in particular.
+
 =head1 SEE ALSO
 
 L<perlrun> for its description of cleaning up environment variables.
