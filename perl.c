@@ -132,7 +132,8 @@ register PerlInterpreter *sv_interp;
 	nthreads = 1;
 	cvcache = newHV();
 	curcop = &compiling;
-	thr->flags = THRf_NORMAL;
+	thr->flags = THRf_R_JOINABLE;
+	MUTEX_INIT(&thr->mutex);
 	thr->next = thr;
 	thr->prev = thr;
 #ifdef FAKE_THREADS
@@ -240,16 +241,25 @@ register PerlInterpreter *sv_interp;
 
 #ifdef USE_THREADS
 #ifndef FAKE_THREADS
-    /* Detach any remaining joinable threads apart from ourself */
+    /* Join with any remaining non-detached threads */
     MUTEX_LOCK(&threads_mutex);
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
-			  "perl_destruct: detaching remaining %d threads\n",
+			  "perl_destruct: waiting for %d threads\n",
 			  nthreads - 1));
     for (t = thr->next; t != thr; t = t->next) {
-	if (ThrSTATE(t) == THRf_NORMAL) {
-	    DETACH(t);
-	    ThrSETSTATE(t, THRf_DETACHED);
-	    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "...detached %p\n", t));
+	MUTEX_LOCK(&t->mutex);
+	switch (ThrSTATE(t)) {
+	    AV *av;
+	case R_ZOMBIE:
+	    ThrSETSTATE(t, THRf_DEAD);
+	    MUTEX_UNLOCK(&t->mutex);
+	    nthreads--;
+	    MUTEX_UNLOCK(&threads_mutex);
+	    if (pthread_join(t->Tself, (void**)&av))
+		croak("panic: pthread_join failed during global destruction");
+	    SvREFCNT_dec((SV*)av);
+	    break;
+	case XXXX:
 	}
     }
     /* Now wait for the thread count nthreads to drop to one */

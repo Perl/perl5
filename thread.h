@@ -159,9 +159,9 @@ struct thread {
 
     perl_thread	Tself;
     SV *	Toursv;
-    perl_mutex *Tthreadstart_mutexp;
     HV *	Tcvcache;
     U32		flags;
+    perl_mutex	mutex;
     U32		tid;
     struct thread *next, *prev;		/* Circular linked list of threads */
 
@@ -176,20 +176,23 @@ struct thread {
 typedef struct thread *Thread;
 
 /* Values and macros for thr->flags */
-#define THRf_STATE_MASK	3
-#define THRf_NORMAL	0
-#define THRf_DETACHED	1
-#define THRf_JOINED	2
-#define THRf_DEAD	3
+#define THRf_STATE_MASK	7
+#define THRf_R_JOINABLE	0
+#define THRf_R_JOINED	1
+#define THRf_R_DETACHED	2
+#define THRf_ZOMBIE	3
+#define THRf_DEAD	4
 
-#define THRf_DIE_FATAL	4
+#define THRf_DIE_FATAL	8
 
-#define ThrSTATE(t)	(t->flags & THRf_STATE_MASK)
+#define ThrSTATE(t) ((t)->flags)
 #define ThrSETSTATE(t, s) STMT_START {		\
-	(t)->flags &= ~THRf_STATE_MASK;	\
+	MUTEX_LOCK(&(t)->mutex);		\
+	(t)->flags &= ~THRf_STATE_MASK;		\
 	(t)->flags |= (s);			\
-	DEBUG_L(fprintf(stderr, "thread 0x%lx set to state %d\n", \
-			(unsigned long)(t), (s))); \
+	MUTEX_UNLOCK(&(t)->mutex);		\
+	DEBUG_L(PerlIO_printf(PerlIO_stderr(),	\
+			      "thread %p set to state %d\n", (t), (s))); \
     } STMT_END
 
 typedef struct condpair {
@@ -300,6 +303,5 @@ typedef struct condpair {
 #define	top_env		(thr->Ttop_env)
 #define	runlevel	(thr->Trunlevel)
 
-#define	threadstart_mutexp	(thr->Tthreadstart_mutexp)
 #define	cvcache		(thr->Tcvcache)
 #endif /* USE_THREADS */
