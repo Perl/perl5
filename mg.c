@@ -990,11 +990,16 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
 #if defined(VMS) || defined(EPOC)
     Perl_die(aTHX_ "Can't make list assignment to %%ENV on this system");
 #else
-#   if defined(PERL_IMPLICIT_SYS) || defined(WIN32)
+#  if defined(PERL_IMPLICIT_SYS) || defined(WIN32)
     PerlEnv_clearenv();
-#   else
-#       ifdef USE_ENVIRON_ARRAY
-#	    ifndef PERL_USE_SAFE_PUTENV
+#  else
+#    ifdef USE_ENVIRON_ARRAY
+#      if defined(USE_ITHREADS)
+    /* only the parent thread can clobber the process environment */
+    if (PL_curinterp == aTHX)
+#      endif
+    {
+#      ifndef PERL_USE_SAFE_PUTENV
     I32 i;
 
     if (environ == PL_origenviron)
@@ -1002,11 +1007,11 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
     else
 	for (i = 0; environ[i]; i++)
 	    safesysfree(environ[i]);
-#	    endif /* PERL_USE_SAFE_PUTENV */
+#      endif /* PERL_USE_SAFE_PUTENV */
 
     environ[0] = Nullch;
-
-#       endif /* USE_ENVIRON_ARRAY */
+    }
+#    endif /* USE_ENVIRON_ARRAY */
 #   endif /* PERL_IMPLICIT_SYS || WIN32 */
 #endif /* VMS || EPC */
     return 0;
@@ -2239,7 +2244,12 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 		    break;
 	    }
 	    /* can grab env area too? */
-	    if (PL_origenviron && (PL_origenviron[0] == s + 1)) {
+	    if (PL_origenviron
+#ifdef USE_ITHREADS
+		&& PL_curinterp == aTHX
+#endif
+		&& (PL_origenviron[0] == s + 1))
+	    {
 		my_setenv("NoNe  SuCh", Nullch);
 					    /* force copy of environment */
 		for (i = 0; PL_origenviron[i]; i++)

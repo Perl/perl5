@@ -498,7 +498,13 @@ perl_destruct(pTHXx)
      * so we certainly shouldn't free it here
      */
 #if defined(USE_ENVIRON_ARRAY) && !defined(PERL_USE_SAFE_PUTENV)
-    if (environ != PL_origenviron) {
+    if (environ != PL_origenviron
+#ifdef USE_ITHREADS
+	/* only main thread can free environ[0] contents */
+	&& PL_curinterp == aTHX
+#endif
+	)
+    {
 	I32 i;
 
 	for (i = 0; environ[i]; i++)
@@ -3576,8 +3582,14 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	*/
 	if (!env)
 	    env = environ;
-	if (env != environ)
+	if (env != environ
+#  ifdef USE_ITHREADS
+	    && PL_curinterp == aTHX
+#  endif
+	   )
+	{
 	    environ[0] = Nullch;
+	}
 	if (env)
 	  for (; *env; env++) {
 	    if (!(s = strchr(*env,'=')))
