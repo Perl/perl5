@@ -694,7 +694,14 @@ os390|posix-bc)
     fi
     cd x2p
     rm -f y.tab.c
-    yacc -d a2p.y >/dev/null 2>&1
+    case "$osname" in
+    os390)
+	yacc -d a2p.y >/dev/null 2>&1
+        ;;
+    *) # e.g. posix-bc
+	yacc a2p.y >/dev/null 2>&1
+        ;;
+    esac
     if cmp -s y.tab.c a2p.c
     then
         rm -f y.tab.c
@@ -718,6 +725,9 @@ os390|posix-bc)
     ;;
 vmesa)
     # Do nothing in VM/ESA.
+    ;;
+*)
+    echo "'$osname' is an EBCDIC system I don't know well." >&4
     ;;
 esac
     case "$xxx" in
