@@ -381,8 +381,33 @@ __DATA__
 /* Replace: 0 */
 #endif
 
+#ifdef HASATTRIBUTE
+#  if defined(__GNUC__) && defined(__cplusplus)
+#    define PERL_UNUSED_DECL
+#  else
+#    define PERL_UNUSED_DECL __attribute__((unused))
+#  endif
+#else
+#  define PERL_UNUSED_DECL
+#endif
+
+#ifndef dNOOP
+#  define NOOP (void)0
+#  define dNOOP extern int Perl___notused PERL_UNUSED_DECL
+#endif
+
+#ifndef dTHR
+#  define dTHR          dNOOP
+#endif
+
+#ifndef dTHX
+#  define dTHX          dNOOP
+#  define dTHXa(x)      dNOOP
+#  define dTHXoa(x)     dNOOP
+#endif
+
 #ifndef pTHX
-#    define pTHX
+#    define pTHX	void
 #    define pTHX_
 #    define aTHX
 #    define aTHX_
@@ -394,14 +419,6 @@ __DATA__
  
 #ifndef INT2PTR
 #    define INT2PTR(any,d)      (any)(d)
-#endif
-
-#ifndef dTHR
-#  ifdef WIN32
-#	define dTHR extern int Perl___notused
-#  else
-#	define dTHR extern int errno
-#  endif
 #endif
 
 #ifndef boolSV
@@ -510,20 +527,6 @@ SV *sv;
 #endif
 
 #endif /* newCONSTSUB */
-
-#ifndef NOOP
-#  define NOOP (void)0
-#endif
-
-#ifdef HASATTRIBUTE
-#  define PERL_UNUSED_DECL __attribute__((unused))
-#else
-#  define PERL_UNUSED_DECL
-#endif    
-
-#ifndef dNOOP
-#  define dNOOP extern int Perl___notused PERL_UNUSED_DECL
-#endif
 
 #ifndef START_MY_CXT
 
