@@ -3331,7 +3331,7 @@ S_regmatch(pTHX_ regnode *prog)
 			    c1 = c2 = -1000;
 			    goto assume_ok_easy;
 			}
-			s = PL_bostr + ln;
+			s = (U8*)PL_bostr + ln;
 		    }
 		    else { s = (U8*)STRING(text_node); }
 
