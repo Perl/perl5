@@ -1446,6 +1446,9 @@ lib/Tie/File/t/20_cache_full.t  Test for Tie::File.
 lib/Tie/File/t/21_win32.t       Test for Tie::File.
 lib/Tie/File/t/22_autochomp.t   Test for Tie::File.
 lib/Tie/File/t/23_rv_ac_splice.t  Test for Tie::File.
+lib/Tie/File/t/30_defer.t       Test for Tie::File.
+lib/Tie/File/t/31_autodefer.t   Test for Tie::File.
+lib/Tie/File/t/32_defer_misc.t  Test for Tie::File.
 lib/Tie/Handle.pm		Base class for tied handles
 lib/Tie/Handle/stdhandle.t	Test for Tie::StdHandle
 lib/Tie/Hash.pm			Base class for tied hashes
