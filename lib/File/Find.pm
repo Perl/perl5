@@ -150,7 +150,22 @@ C<$File::Find::dir> contains the current directory name, and C<$_> the
 current filename within that directory.  C<$File::Find::name> contains
 the complete pathname to the file. You are chdir()'d to
 C<$File::Find::dir> when the function is called, unless C<no_chdir>
-was specified.  When C<follow> or C<follow_fast> are in effect, there is
+was specified. Note that when changing to directories is in effect
+the root directory (F</>) is a somewhat special case inasmuch as the
+concatenation of C<$File::Find::dir>, C<'/'> and  C<$_> is not literally
+equal to C<$File::Find::name>. The table below summarizes all variants:
+
+              $File::Find::name  $File::Find::dir  $_
+ default      /                  /                 .
+ no_chdir=>0  /etc               /                 etc
+              /etc/x             /etc              x
+     
+ no_chdir=>1  /                  /                 /
+              /etc               /                 /etc
+              /etc/x             /etc              /etc/x
+
+
+When <follow> or <follow_fast> are in effect, there is
 also a C<$File::Find::fullname>.  The function may set
 C<$File::Find::prune> to prune the tree unless C<bydepth> was
 specified.  Unless C<follow> or C<follow_fast> is specified, for
@@ -863,12 +878,12 @@ sub _find_dir($$$) {
 		}
 		else {
 		    if ( substr($name,-2) eq '/.' ) {
-			$name =~ s|/\.$||;
+			substr($name, length($name) == 2 ? -1 : -2) = '';
 		    }
 		    $dir = $p_dir;
 		    $_ = ($no_chdir ? $dir_name : $dir_rel );
 		    if ( substr($_,-2) eq '/.' ) {
-			s|/\.$||;
+			substr($_, length($_) == 2 ? -1 : -2) = '';
 		    }
 		}
                 # guarantee lstat at return to directory
