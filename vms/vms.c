@@ -2,8 +2,8 @@
  *
  * VMS-specific routines for perl5
  *
- * Last revised: 20-Mar-1996 by Charles Bailey  bailey@genetics.upenn.edu
- * Version: 5.2.1
+ * Last revised: 24-Jun-1996 by Charles Bailey  bailey@genetics.upenn.edu
+ * Version: 5.3.0
  */
 
 #include <acedef.h>
@@ -56,6 +56,12 @@ struct itmlst_3 {
   void *bufadr;
   unsigned short int *retlen;
 };
+
+static char *__mystrtolower(char *str)
+{
+  if (str) for (; *str; ++str) *str= tolower(*str);
+  return str;
+}
 
 int
 my_trnlnm(char *lnm, char *eqv, unsigned long int idx)
@@ -768,11 +774,10 @@ my_gconvert(double val, int ndig, int trail, char *buf)
 **   tovmsspec() - convert any file spec into a VMS-style spec.
 **
 ** Copyright 1996 by Charles Bailey  <bailey@genetics.upenn.edu>
-** Permission is given for non-commercial use of this code according
-** to the terms of the GNU General Public License or the Perl
-** Artistic License.  Copies of each may be found in the Perl
-** standard distribution.  This software is supplied without any
-** warranty whatsoever.
+** Permission is given to distribute this code as part of the Perl
+** standard distribution under the terms of the GNU General Public
+** License or the Perl Artistic License.  Copies of each may be
+** found in the Perl standard distribution.
  */
 
 static char *do_tounixspec(char *, char *, int);
@@ -789,7 +794,7 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
       set_errno(EINVAL); set_vaxc_errno(SS$_BADPARAM); return NULL;
     }
     dirlen = strlen(dir);
-    if (dir[dirlen-1] == '/') dir[--dirlen] = '\0';
+    if (dir[dirlen-1] == '/') --dirlen;
     if (!dirlen) {
       set_errno(ENOTDIR);
       set_vaxc_errno(RMS$_DIR);
@@ -800,6 +805,11 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
       while (!strpbrk(trndir,"/]>:>") && my_trnlnm(trndir,trndir,0)) ;
       dir = trndir;
       dirlen = strlen(dir);
+    }
+    else {
+      strncpy(trndir,dir,dirlen);
+      trndir[dirlen] = '\0';
+      dir = trndir;
     }
     /* If we were handed a rooted logical name or spec, treat it like a
      * simple directory, so that
@@ -824,22 +834,19 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
         dirlen -= 1;                 /* to last element */
         lastdir = strrchr(dir,'/');
       }
-      else if ((cp1 = strstr(trndir,"/.")) != NULL) {
+      else if ((cp1 = strstr(dir,"/.")) != NULL) {
+        /* If we have "/." or "/..", VMSify it and let the VMS code
+         * below expand it, rather than repeating the code to handle
+         * relative components of a filespec here */
         do {
           if (*(cp1+2) == '.') cp1++;
           if (*(cp1+2) == '/' || *(cp1+2) == '\0') {
-            addmfd = 1;
-            break;
+            if (do_tovmsspec(dir,vmsdir,0) == NULL) return NULL;
+            if (do_fileify_dirspec(vmsdir,trndir,0) == NULL) return NULL;
+            return do_tounixspec(trndir,buf,ts);
           }
           cp1++;
         } while ((cp1 = strstr(cp1,"/.")) != NULL);
-        /* If we have a relative path, VMSify it and let the VMS code
-         * below expand it, rather than repeating the code here */
-        if (addmfd) {
-          if (do_tovmsspec(trndir,vmsdir,0) == NULL) return NULL;
-          if (do_fileify_dirspec(vmsdir,trndir,0) == NULL) return NULL;
-          return do_tounixspec(trndir,buf,ts);
-        }
       }
       else {
         if (!(lastdir = cp1 = strrchr(dir,'/'))) cp1 = dir;
@@ -856,8 +863,8 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
             }
             dirlen = cp2 - dir;
           }
-          else {  /* There's a type, and it's not .dir.  Bzzt. */
-            set_errno(ENOTDIR);
+          else {   /* There's a type, and it's not .dir.  Bzzt. */
+            set_errno(ENOTDIR); 
             set_vaxc_errno(RMS$_DIR);
             return NULL;
           }
@@ -894,8 +901,8 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
       return retspec;
     }
     else {  /* VMS-style directory spec */
-      char esa[NAM$C_MAXRSS+1], term;
-      unsigned long int sts, cmplen, hasdev, hasdir, hastype, hasver;
+      char esa[NAM$C_MAXRSS+1], term, *cp;
+      unsigned long int sts, cmplen, haslower = 0;
       struct FAB dirfab = cc$rms_fab;
       struct NAM savnam, dirnam = cc$rms_nam;
 
@@ -906,6 +913,9 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
       dirfab.fab$b_dns = 6;
       dirnam.nam$b_ess = NAM$C_MAXRSS;
       dirnam.nam$l_esa = esa;
+
+      for (cp = dir; *cp; cp++)
+        if (islower(*cp)) { haslower = 1; break; }
       if (!((sts = sys$parse(&dirfab))&1)) {
         if (dirfab.fab$l_sts == RMS$_DIR) {
           dirnam.nam$b_nop |= NAM$M_SYNCHK;
@@ -1029,6 +1039,10 @@ static char *do_fileify_dirspec(char *dir,char *buf,int ts)
       /* We've set up the string up through the filename.  Add the
          type and version, and we're done. */
       strcat(retspec,".DIR;1");
+
+      /* $PARSE may have upcased filespec, so convert output to lower
+       * case if input contained any lowercase characters. */
+      if (haslower) __mystrtolower(retspec);
       return retspec;
     }
 }  /* end of do_fileify_dirspec() */
@@ -1074,7 +1088,7 @@ static char *do_pathify_dirspec(char *dir,char *buf, int ts)
         retlen = 2 + (*(dir+1) != '\0');
       else {
         if (!(cp1 = strrchr(dir,'/'))) cp1 = dir;
-        if ((cp2 = strchr(cp1,'.')) && *(cp2+1) != '.') {
+        if ((cp2 = strchr(cp1,'.')) && (*(cp2+1) != '.' && *(cp2+1) != '\0')) {
           if (toupper(*(cp2+1)) == 'D' &&  /* They specified .dir. */
               toupper(*(cp2+2)) == 'I' &&  /* Trim it off. */
               toupper(*(cp2+3)) == 'R') {
@@ -1101,8 +1115,8 @@ static char *do_pathify_dirspec(char *dir,char *buf, int ts)
       else retpath[retlen-1] = '\0';
     }
     else {  /* VMS-style directory spec */
-      char esa[NAM$C_MAXRSS+1];
-      unsigned long int sts, cmplen;
+      char esa[NAM$C_MAXRSS+1], *cp;
+      unsigned long int sts, cmplen, haslower;
       struct FAB dirfab = cc$rms_fab;
       struct NAM savnam, dirnam = cc$rms_nam;
 
@@ -1122,7 +1136,11 @@ static char *do_pathify_dirspec(char *dir,char *buf, int ts)
       dirfab.fab$l_nam = &dirnam;
       dirnam.nam$b_ess = (unsigned char) sizeof esa - 1;
       dirnam.nam$l_esa = esa;
-      if (!((sts = sys$parse(&dirfab))&1)) {
+
+      for (cp = dir; *cp; cp++)
+        if (islower(*cp)) { haslower = 1; break; }
+
+      if (!(sts = (sys$parse(&dirfab)&1))) {
         if (dirfab.fab$l_sts == RMS$_DIR) {
           dirnam.nam$b_nop |= NAM$M_SYNCHK;
           sts = sys$parse(&dirfab) & 1;
@@ -1168,6 +1186,9 @@ static char *do_pathify_dirspec(char *dir,char *buf, int ts)
       else if (ts) New(7014,retpath,retlen,char);
       else retpath = __pathify_retbuf;
       strcpy(retpath,esa);
+      /* $PARSE may have upcased filespec, so convert output to lower
+       * case if input contained any lowercase characters. */
+      if (haslower) __mystrtolower(retpath);
     }
 
     return retpath;
@@ -1222,20 +1243,8 @@ static char *do_tounixspec(char *spec, char *buf, int ts)
       strcpy(rslt,"./");
       return rslt;
     }
-    else if (*cp2 == '-') {
-      while (*cp2 == '-') {
-        *(cp1++) = '.'; *(cp1++) = '.'; *(cp1++) = '/';
-        cp2++;
-      }
-      if (*cp2 != '.' && *cp2 != ']' && *cp2 != '>') { /* we don't allow */
-        if (ts) Safefree(rslt);                        /* filespecs like */
-        set_errno(EINVAL); set_vaxc_errno(RMS$_SYN);   /* [--foo.bar] */
-        return NULL;
-      }
-      cp2++;
-    }
-    else if ( *(cp2) != '.') { /* add the implied device into the Unix spec */
-      *(cp1++) = '/';
+    else if ( *cp2 != '.' && *cp2 != '-') {
+      *(cp1++) = '/';           /* add the implied device into the Unix spec */
       if (getcwd(tmp,sizeof tmp,1) == NULL) {
         if (ts) Safefree(rslt);
         return NULL;
@@ -1258,7 +1267,7 @@ static char *do_tounixspec(char *spec, char *buf, int ts)
         cp1 = rslt + offset;
       }
     }
-    else cp2++;
+    else if (*cp2 == '.') cp2++;
   }
   for (; cp2 <= dirend; cp2++) {
     if (*cp2 == ':') {
@@ -1283,10 +1292,9 @@ static char *do_tounixspec(char *spec, char *buf, int ts)
         }
         if (*cp2 != '.' && *cp2 != ']' && *cp2 != '>') { /* we don't allow */
           if (ts) Safefree(rslt);                        /* filespecs like */
-          set_errno(EINVAL); set_vaxc_errno(RMS$_SYN);   /* [--foo.bar] */
+          set_errno(EINVAL); set_vaxc_errno(RMS$_SYN);   /* [fred.--foo.bar] */
           return NULL;
         }
-        cp2++;
       }
       else *(cp1++) = *cp2;
     }
@@ -1335,6 +1343,7 @@ static char *do_tovmsspec(char *path, char *buf, int ts) {
     int islnm, rooted;
     STRLEN trnend;
 
+    while (*(++cp2) == '/') ;  /* Skip multiple /s */
     while (*(++cp2) != '/' && *cp2) *(cp1++) = *cp2;
     *cp1 = '\0';
     islnm =  my_trnlnm(rslt,trndev,0);
@@ -1380,12 +1389,13 @@ static char *do_tovmsspec(char *path, char *buf, int ts) {
   }
   for (; cp2 < dirend; cp2++) {
     if (*cp2 == '/') {
+      if (*(cp2-1) == '/') continue;
       if (*(cp1-1) != '.') *(cp1++) = '.';
       infront = 0;
     }
     else if (!infront && *cp2 == '.') {
-      if (*(cp2+1) == '/') cp2++;   /* skip over "./" - it's redundant */
-      else if (*(cp2+1) == '\0') { cp2++; break; }
+      if (cp2+1 == dirend || *(cp2+1) == '\0') { cp2++; break; }
+      else if (*(cp2+1) == '/') cp2++;   /* skip over "./" - it's redundant */
       else if (*(cp2+1) == '.' && (*(cp2+2) == '/' || *(cp2+2) == '\0')) {
         if (*(cp1-1) == '-' || *(cp1-1) == '[') *(cp1++) = '-'; /* handle "../" */
         else if (*(cp1-2) == '[') *(cp1-1) = '-';
@@ -1398,17 +1408,13 @@ static char *do_tovmsspec(char *path, char *buf, int ts) {
           }
         }
         cp2 += 2;
-        if (cp2 == dirend) {
-          if (*(cp1-1) == '.') cp1--;
-          break;
-        }
+        if (cp2 == dirend) break;
       }
       else *(cp1++) = '_';  /* fix up syntax - '.' in name not allowed */
     }
     else {
       if (!infront && *(cp1-1) == '-')  *(cp1++) = '.';
-      if (*cp2 == '/')      *(cp1++) = '.';
-      else if (*cp2 == '.') *(cp1++) = '_';
+      if (*cp2 == '.')      *(cp1++) = '_';
       else                  *(cp1++) =  *cp2;
       infront = 1;
     }
@@ -2655,12 +2661,6 @@ static int contxt= 0;
 static struct passwd __pwdcache;
 static char __pw_namecache[UAI$S_IDENT+1];
 
-static char *_mystrtolower(char *str)
-{
-  if (str) for (; *str; ++str) *str= tolower(*str);
-  return str;
-}
-
 /*
  * This routine does most of the work extracting the user information.
  */
@@ -2737,7 +2737,7 @@ static int fillpasswd (const char *name, struct passwd *pwd)
     }
     else
         strcpy(pwd->pw_unixdir, pwd->pw_dir);
-    _mystrtolower(pwd->pw_unixdir);
+    __mystrtolower(pwd->pw_unixdir);
     return 1;
 }
 
@@ -2817,7 +2817,7 @@ struct passwd *my_getpwuid(Uid_t uid)
       else { _ckvmssts(status); }
     }
     __pw_namecache[lname]= '\0';
-    _mystrtolower(__pw_namecache);
+    __mystrtolower(__pw_namecache);
 
     __pwdcache = __passwd_empty;
     __pwdcache.pw_name = __pw_namecache;
@@ -3067,6 +3067,12 @@ cando_by_name(I32 bit, I32 effective, char *fname)
          {0,0,0,0}};
 
   if (!fname || !*fname) return FALSE;
+  /* Make sure we expand logical names, since sys$check_access doesn't */
+  if (!strpbrk(fname,"/]>:")) {
+    strcpy(fileified,fname);
+    while (!strpbrk(fileified,"/]>:>") && my_trnlnm(fileified,fileified,0)) ;
+    fname = fileified;
+  }
   if (!do_tovmsspec(fname,vmsname,1)) return FALSE;
   retlen = namdsc.dsc$w_length = strlen(vmsname);
   namdsc.dsc$a_pointer = vmsname;
@@ -3231,10 +3237,10 @@ my_getlogin()
  *
  *  Copyright 1996 by Charles Bailey <bailey@genetics.upenn.edu>.
  *  Incorporates, with permission, some code from EZCOPY by Tim Adye
- *  <T.J.Adye@rl.ac.uk>.  Permission is given to use and distribute this
- *  code under the same terms as Perl itself.  (See the GNU General Public
- *  License or the Perl Artistic License supplied as part of the Perl
- *  distribution.)
+ *  <T.J.Adye@rl.ac.uk>.  Permission is given to distribute this code
+ * as part of the Perl standard distribution under the terms of the
+ * GNU General Public License or the Perl Artistic License.  Copies
+ * of each may be found in the Perl standard distribution.
  */
 /*{{{int rmscopy(char *src, char *dst, int preserve_dates)*/
 int
@@ -3403,6 +3409,55 @@ rmscopy(char *spec_in, char *spec_out, int preserve_dates)
  */
 
 void
+rmsexpand_fromperl(CV *cv)
+{
+  dXSARGS;
+  char esa[NAM$C_MAXRSS], rsa[NAM$C_MAXRSS], *cp, *out;
+  struct FAB myfab = cc$rms_fab;
+  struct NAM mynam = cc$rms_nam;
+  STRLEN speclen;
+  unsigned long int retsts, haslower = 0;
+
+  myfab.fab$l_fna = SvPV(ST(0),speclen);
+  myfab.fab$b_fns = speclen;
+  myfab.fab$l_nam = &mynam;
+
+  mynam.nam$l_esa = esa;
+  mynam.nam$b_ess = sizeof esa;
+  mynam.nam$l_rsa = rsa;
+  mynam.nam$b_rss = sizeof rsa;
+
+  retsts = sys$parse(&myfab,0,0);
+  if (!(retsts & 1)) {
+    set_vaxc_errno(retsts);
+    if      (retsts == RMS$_PRV) set_errno(EACCES);
+    else if (retsts == RMS$_DEV) set_errno(ENODEV);
+    else if (retsts == RMS$_DIR) set_errno(ENOTDIR);
+    else                         set_errno(EVMSERR);
+    XSRETURN_UNDEF;
+  }
+  retsts = sys$search(&myfab,0,0);
+  if (!(retsts & 1) && retsts != RMS$_FNF) {
+    set_vaxc_errno(retsts);
+    if      (retsts == RMS$_PRV) set_errno(EACCES);
+    else                         set_errno(EVMSERR);
+    XSRETURN_UNDEF;
+  }
+  /* If the input filespec contained any lowercase characters,
+   * downcase the result for compatibility with Unix-minded code. */
+  for (out = myfab.fab$l_fna; *out; out++)
+    if (islower(*out)) { haslower = 1; break; }
+  if (mynam.nam$b_rsl) { out = rsa; speclen = mynam.nam$b_rsl; }
+  else                 { out = esa; speclen = mynam.nam$b_esl; }
+  if (!(mynam.nam$l_fnb & NAM$M_EXP_VER))
+    speclen = mynam.nam$l_type - out;
+  out[speclen] = '\0';
+  if (haslower) __mystrtolower(out);
+
+  ST(0) = sv_2mortal(newSVpv(out, speclen));
+}
+
+void
 vmsify_fromperl(CV *cv)
 {
   dXSARGS;
@@ -3569,6 +3624,7 @@ init_os_extras()
 {
   char* file = __FILE__;
 
+  newXSproto("VMS::Filespec::rmsexpand",rmsexpand_fromperl,file,"$");
   newXSproto("VMS::Filespec::vmsify",vmsify_fromperl,file,"$");
   newXSproto("VMS::Filespec::unixify",unixify_fromperl,file,"$");
   newXSproto("VMS::Filespec::pathify",pathify_fromperl,file,"$");
