@@ -75,9 +75,253 @@ indicator:
 
 
 ----------------
-Version 5.005_62        Development release working toward 5.006
+Version 5.005_63        Development release working toward 5.6
 ----------------
 
+____________________________________________________________________________
+[  4475] By: gsar                                  on 1999/10/27  21:32:30
+        Log: integrate cfgperl contents into mainline; merge conflicts
+     Branch: perl
+	  !> (integrate 46 files)
+____________________________________________________________________________
+[  4474] By: gsar                                  on 1999/10/27  21:15:07
+        Log: patch up egcs-1.1.2-mingw32 build (builds a working miniperl, but not
+             perl; stdout/stderr redirects seem broken as well)
+     Branch: perl
+	   ! iperlsys.h makedef.pl perl.h win32/makefile.mk win32/win32.h
+____________________________________________________________________________
+[  4473] By: jhi                                   on 1999/10/27  21:11:11
+        Log: Do not block if no message queues available.
+     Branch: cfgperl
+	   ! t/lib/ipc_sysv.t
+____________________________________________________________________________
+[  4472] By: jhi                                   on 1999/10/27  18:27:40
+        Log: Remove unused "squatter" symbols; regen Configure.
+     Branch: cfgperl
+	   ! Configure Makefile.SH Porting/Glossary Porting/config.sh
+	   ! Porting/config_H config_h.SH epoc/config.h iperlsys.h perl.h
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[  4471] By: jhi                                   on 1999/10/27  18:26:55
+        Log: metaconfig; split socket; fix output.
+     Branch: metaconfig
+	   ! U/modified/d_socket.U U/modified/d_statblks.U
+     Branch: metaconfig/U/perl
+	   + d_cmsghdr_s.U d_msghdr_s.U d_recvmsg.U d_sendmsg.U
+	   ! i_sysstatfs.U i_sysvfs.U
+____________________________________________________________________________
+[  4470] By: jhi                                   on 1999/10/27  17:19:06
+        Log: Regen Configure.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH perl.c perl.h
+____________________________________________________________________________
+[  4469] By: jhi                                   on 1999/10/27  17:18:41
+        Log: metaconfig; split statfs.
+     Branch: metaconfig/U/perl
+	   + d_fs_data_s.U d_statfs_f_flags.U d_statfs_s.U
+	   ! d_statfs.U
+____________________________________________________________________________
+[  4468] By: jhi                                   on 1999/10/27  14:06:44
+        Log: Integrate with Sarathy; manual resolve on regcomp.c conflicts
+             (Ilya's changes won).
+     Branch: cfgperl
+	  +> os2/OS2/REXX/DLL/Changes os2/OS2/REXX/DLL/DLL.pm
+	  +> os2/OS2/REXX/DLL/DLL.xs os2/OS2/REXX/DLL/MANIFEST
+	  +> os2/OS2/REXX/DLL/Makefile.PL os2/OS2/REXX/t/rx_emxrv.t
+	  !> (integrate 65 files)
+____________________________________________________________________________
+[  4467] By: jhi                                   on 1999/10/27  13:38:41
+        Log: Regen Configure.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH
+____________________________________________________________________________
+[  4466] By: jhi                                   on 1999/10/27  13:18:06
+        Log: metaconfig fixes from Andy.
+     Branch: metaconfig
+	   + U/modified/libnlist.U U/modified/usrinc.U
+	   ! U/Glossary.patch U/mkglossary U/modified/libpth.U
+____________________________________________________________________________
+[  4465] By: jhi                                   on 1999/10/27  13:06:27
+        Log: Nosuid checking for statfs() people.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH perl.c perl.h pod/perldiag.pod
+____________________________________________________________________________
+[  4464] By: jhi                                   on 1999/10/27  13:04:20
+        Log: metaconfig maintenance; fix Hasfield, statfs;
+             add Hasstruct, statfs3, statfs4, ustat, sysvfs;
+             split fstatfs away from statfs.
+     Branch: metaconfig
+	   + U/protos/Hasstruct.U
+	   ! U/protos/Hasfield.U
+     Branch: metaconfig/U/perl
+	   + d_fstatfs.U d_statfs3.U d_statfs4.U d_ustat.U i_sysvfs.U
+	   + i_ustat.U
+	   ! d_statfs.U
+____________________________________________________________________________
+[  4463] By: jhi                                   on 1999/10/27  07:55:53
+        Log: We need cc to be able to test for cc -v.
+     Branch: cfgperl
+	   ! hints/dec_osf.sh
+____________________________________________________________________________
+[  4462] By: gsar                                  on 1999/10/27  01:31:41
+        Log: more GCC v2.95 induced adjustments
+     Branch: perl
+	   ! globals.c mg.c opcode.h opcode.pl perl.h sv.c
+	   ! win32/makefile.mk win32/win32.c x2p/walk.c
+____________________________________________________________________________
+[  4461] By: gsar                                  on 1999/10/26  21:42:59
+        Log: warnings and const violations identified by compiling in C++ mode
+             with GCC v2.95
+     Branch: perl
+	   ! doio.c embed.pl mg.c op.c perl.c perlapi.c proto.h regcomp.c
+	   ! sv.c taint.c toke.c win32/win32.c
+____________________________________________________________________________
+[  4459] By: jhi                                   on 1999/10/26  10:15:58
+        Log: Regen Configure.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH
+____________________________________________________________________________
+[  4458] By: jhi                                   on 1999/10/26  09:48:37
+        Log: Minor rewordings.
+     Branch: metaconfig/U/perl
+	   ! d_getmnt.U d_getmntent.U d_statfs.U d_statvfs.U
+____________________________________________________________________________
+[  4456] By: jhi                                   on 1999/10/26  09:11:49
+        Log: Fix d_statfsflags; add d_getmnt.
+     Branch: metaconfig/U/perl
+	   + d_getmnt.U
+	   ! d_statfs.U
+____________________________________________________________________________
+[  4455] By: jhi                                   on 1999/10/26  08:12:27
+        Log: Massive multitypo in #4446.
+     Branch: cfgperl
+	   ! hints/dec_osf.sh
+____________________________________________________________________________
+[  4454] By: jhi                                   on 1999/10/25  08:28:45
+        Log: From: Laszlo Molnar <laszlo.molnar@eth.ericsson.se>
+             To: Perl 5 Porters <perl5-porters@perl.org>
+             Subject: [PATCH 5.005_62] dos-djgpp update
+             Date: Mon, 25 Oct 1999 10:11:30 +0200
+             Message-ID: <19991025101130.K459@crater.eth.ericsson.se>
+     Branch: cfgperl
+	   ! djgpp/config.over djgpp/configure.bat djgpp/djgppsed.sh
+	   ! pod/perldelta.pod t/lib/io_unix.t
+____________________________________________________________________________
+[  4453] By: jhi                                   on 1999/10/25  08:25:50
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             To: perl5-porters@perl.org (Mailing list Perl5)
+             Subject: [PATCH 5.005_62] Remove the last regnode<==>char*
+             Date: Mon, 25 Oct 1999 03:06:21 -0400 (EDT)
+             Message-Id: <199910250706.DAA16825@monk.mps.ohio-state.edu>
+     Branch: cfgperl
+	   ! embed.h embed.pl proto.h regcomp.c regcomp.h regexec.c
+____________________________________________________________________________
+[  4452] By: jhi                                   on 1999/10/25  08:16:55
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             To: perl5-porters@perl.org (Mailing list Perl5)
+             Subject: [PATCH 5.005_62] Missing REx engine patch
+             Date: Sun, 24 Oct 1999 23:47:45 -0400 (EDT)
+             Message-Id: <199910250347.XAA16094@monk.mps.ohio-state.edu>
+     Branch: cfgperl
+	   ! pod/perldiag.pod regcomp.c regexec.c
+____________________________________________________________________________
+[  4451] By: jhi                                   on 1999/10/25  08:13:06
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             To: perl5-porters@perl.org (Mailing list Perl5)
+             Subject: [PATCH 5.005_62] charnames and UTEST
+             Date: Sun, 24 Oct 1999 23:39:49 -0400 (EDT)
+             Message-Id: <199910250339.XAA16058@monk.mps.ohio-state.edu>
+     Branch: cfgperl
+	   ! t/lib/charnames.t
+____________________________________________________________________________
+[  4450] By: gsar                                  on 1999/10/25  07:38:15
+        Log: win32 tweak
+     Branch: perl
+	   ! win32/perllib.c
+____________________________________________________________________________
+[  4449] By: gsar                                  on 1999/10/24  23:20:10
+        Log: remove inconsistent tainting behavior of sprintf("%e",...)
+             (all bets are off is "C" locale is compromised)
+     Branch: perl
+	   ! pod/perlfunc.pod pod/perllocale.pod sv.c
+____________________________________________________________________________
+[  4448] By: gsar                                  on 1999/10/24  22:20:42
+        Log: remove unused interpreter globals
+     Branch: perl
+	   ! deb.c dump.c embed.h embed.pl embedvar.h ext/POSIX/POSIX.xs
+	   ! global.sym gv.c gv.h intrpvar.h objXSUB.h perl.c perlapi.c
+	   ! proto.h toke.c
+____________________________________________________________________________
+[  4447] By: jhi                                   on 1999/10/24  21:49:52
+        Log: Another hints tweak.
+     Branch: cfgperl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[  4446] By: jhi                                   on 1999/10/24  21:48:02
+        Log: Hints tweak.
+     Branch: cfgperl
+	   ! hints/dec_osf.sh
+____________________________________________________________________________
+[  4445] By: nick                                  on 1999/10/24  21:03:28
+        Log: Integrate own changes to mainline.
+     Branch: utfperl
+	  !> installperl pp.c
+____________________________________________________________________________
+[  4444] By: nick                                  on 1999/10/24  20:54:06
+        Log: Avoid creating GV with NULL name when vivifying nameless scalars.
+             (Fix/workround for [ID19991024.001])
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[  4443] By: nick                                  on 1999/10/24  15:09:51
+        Log: Follow that camel ... another sync.
+     Branch: utfperl
+	  +> os2/OS2/REXX/DLL/Changes os2/OS2/REXX/DLL/DLL.pm
+	  +> os2/OS2/REXX/DLL/DLL.xs os2/OS2/REXX/DLL/MANIFEST
+	  +> os2/OS2/REXX/DLL/Makefile.PL os2/OS2/REXX/t/rx_emxrv.t
+	  !> (integrate 36 files)
+____________________________________________________________________________
+[  4442] By: gsar                                  on 1999/10/24  14:40:01
+        Log: typo in installperl (from Paul Moore <gustav@morpheus.demon.co.uk>)
+     Branch: perl
+	   ! installperl
+____________________________________________________________________________
+[  4441] By: gsar                                  on 1999/10/24  14:33:11
+        Log: test in change#4428 needs strict interpretation of C modulus
+     Branch: perl
+	   ! t/op/int.t
+____________________________________________________________________________
+[  4440] By: gsar                                  on 1999/10/24  13:47:17
+        Log: don't allow SIGCHLD to be ignored at startup, or wait*() and
+             $? break
+     Branch: perl
+	   ! perl.c pod/perldelta.pod pod/perldiag.pod
+____________________________________________________________________________
+[  4439] By: jhi                                   on 1999/10/24  13:19:17
+        Log: test for #2835 (yeah, better later than never)
+     Branch: cfgperl
+	   ! t/op/array.t
+____________________________________________________________________________
+[  4438] By: gsar                                  on 1999/10/24  12:59:12
+        Log: typo, doc tweak
+     Branch: perl
+	   ! lib/attributes.pm pod/perlop.pod
+____________________________________________________________________________
+[  4437] By: gsar                                  on 1999/10/24  11:59:55
+        Log: allow get() and reftype() functions to be imported (from
+             Spider Boardman)
+     Branch: perl
+	   ! lib/attributes.pm
+____________________________________________________________________________
+[  4436] By: gsar                                  on 1999/10/24  11:52:53
+        Log: suppress scalar leak messages for known leaks (from
+             Robin Barker <rmb1@cise.npl.co.uk>)
+     Branch: perl
+	   ! Changes t/op/lex_assign.t t/pragma/warn/op
 ____________________________________________________________________________
 [  4435] By: gsar                                  on 1999/10/24  11:39:42
         Log: VMS tweak (suggested by Craig A. Berry <craig.berry@metamor.com>)
@@ -358,6 +602,11 @@ ____________________________________________________________________________
 	  !> Changes MANIFEST Makefile.SH Porting/makerel lib/Pod/Man.pm
 	  !> lib/Pod/Parser.pm op.c pod/perldelta.pod pod/perlopentut.pod
 	  !> win32/Makefile win32/makefile.mk
+
+----------------
+Version 5.005_62
+----------------
+
 ____________________________________________________________________________
 [  4391] By: gsar                                  on 1999/10/15  10:12:42
         Log: here be 5.005_62

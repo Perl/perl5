@@ -17,16 +17,30 @@ while (@ARGV && $ARGV[0] =~ /^([\w_]+)=(.*)$/)
   shift(@ARGV);
  }
 
+my $pl_h = '../patchlevel.h';
+
 $opt{VERSION} = $];
 $opt{INST_VER} =~ s|~VERSION~|$]|g;
-if ($] =~ /^(\d+)\.(\d\d\d)?(\d\d)?$/) { # should always be true
+if (-e $pl_h) {
+    open PL, "<$pl_h" or die "Can't open $pl_h: $!";
+    while (<PL>) {
+	if (/^#\s*define\s+(PERL_\w+)\s+([\d.]+)/) {
+	    $opt{$1} = $2;
+	}
+    }
+    close PL;
+}
+elsif ($] =~ /^(\d+)\.(\d\d\d)?(\d\d)?$/) { # should always be true
   $opt{PERL_REVISION} = $1;
   $opt{PERL_VERSION} = int($2 || 0);
-  $opt{PERL_SUBVERSION} = $3 || '00';
+  $opt{PERL_SUBVERSION} = $3;
+  $opt{PERL_APIVERSION} = $];
 }
 else {
   die "Can't parse perl version ($])";
 }
+
+$opt{PERL_SUBVERSION} ||= '00';
 
 $opt{'cf_by'} = $ENV{USERNAME} unless $opt{'cf_by'};
 $opt{'cf_email'} = $opt{'cf_by'} . '@' . (gethostbyname('localhost'))[0]

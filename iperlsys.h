@@ -74,6 +74,10 @@
 extern void PerlIO_init (void);
 #endif
 
+#ifndef Sighandler_t
+typedef Signal_t (*Sighandler_t) (int);
+#endif
+
 #if defined(PERL_IMPLICIT_SYS)
 
 #ifndef PerlIO
@@ -865,9 +869,6 @@ struct IPerlMemInfo
 
 #if defined(PERL_IMPLICIT_SYS)
 
-#ifndef Sighandler_t
-typedef Signal_t (*Sighandler_t) (int);
-#endif
 #ifndef jmp_buf
 #include <setjmp.h>
 #endif
