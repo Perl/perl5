@@ -9,8 +9,14 @@ our $VERSION = '1.01';
 # Exporter.  It's bad enough that all classes have a import() method
 # whenever UNIVERSAL.pm is loaded.
 require Exporter;
-*import = \&Exporter::import;
 @EXPORT_OK = qw(isa can VERSION);
+
+# Make sure that even though the import method is called, it doesn't do
+# anything unless its called on UNIVERSAL
+sub import {
+    return unless $_[0] eq __PACKAGE__;
+    goto &Exporter::import;
+}
 
 1;
 __END__
