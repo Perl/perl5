@@ -16,8 +16,7 @@ while (@ARGV) {
 
 umask 022;
 
-@scripts = qw(cppstdin
-		utils/c2ph utils/h2ph utils/h2xs utils/pstruct
+@scripts = qw(	utils/c2ph utils/h2ph utils/h2xs utils/pstruct
 		utils/perlbug utils/perldoc
 		x2p/s2p x2p/find2perl
 		pod/pod2man pod/pod2html pod/pod2latex pod/pod2text);
@@ -109,15 +108,23 @@ if (! &samepath($installbin, 'x2p')) {
     &chmod(0755, "$installbin/a2p$exe_ext");
 }
 
+# cppstdin is just a script, but it is architecture-dependent, so
+# it can't safely be shared.  Place it in $installbin.
+# Note that Configure doesn't build cppstin if it isn't needed, so
+# we skip this if cppstdin doesn't exist.
+if ((-f cppstdin) && (! &samepath($installbin, '.'))) {
+    &safe_unlink("$installbin/cppstdin");
+    &cmd("cp cppstdin $installbin/cppstdin");
+    &chmod(0755, "$installbin/cppstdin");
+}
+
 # Install scripts.
 
 mkpath($installscript, 1, 0777);
 
 for (@scripts) {
-    if (-f $_) {   # cppstdin might not exist on this system.
-	&cmd("cp $_ $installscript");
-	s#.*/##; &chmod(0755, "$installscript/$_");
-    }
+    &cmd("cp $_ $installscript");
+    s#.*/##; &chmod(0755, "$installscript/$_");
 }
 
 # Install pod pages.  Where? I guess in $installprivlib/pod.
@@ -175,16 +182,15 @@ else {
 
 # Install header files and libraries.
 mkpath("$installarchlib/CORE", 1, 0777);
-foreach $file (<*.h libperl*.*>) {
-    cp_if_diff($file,"$installarchlib/CORE/$file");
-    &chmod(0444,"$installarchlib/CORE/$file");
-}
+@corefiles = <*.h libperl*.*>;
 # AIX needs perl.exp installed as well.
-cp_if_diff("perl.exp" ,"$installarchlib/CORE/perl.exp") if ($^O eq 'aix');
-
+push(@corefiles,'perl.exp') if $^O eq 'aix';
 # If they have built sperl.o...
-cp_if_diff("sperl.o" ,"$installarchlib/CORE/sperl.o") if (-f 'sperl.o');
-
+push(@corefiles,'sperl.o') if -f 'sperl.o';
+foreach $file (@corefiles) {
+    cp_if_diff($file,"$installarchlib/CORE/$file");
+    &chmod($file =~ /^libperl/ ? 0555 : 0444,"$installarchlib/CORE/$file");
+}
 
 # Offer to install perl in a "standard" location
 
