@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Thu Nov  5 13:03:49 EET 1998
+ * Configuration time: Sun Nov 22 19:19:34 EET 1998
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1717,8 +1717,68 @@
  *	This symbol, if defined, indicates that the BSD socketpair() call is
  *	supported.
  */
-#define HAS_SOCKET		/**/
-#define HAS_SOCKETPAIR	/**/
+/* HAS_MSG_CTRUNC:
+ *	This symbol, if defined, indicates that the MSG_CTRUNC is supported.
+ *	Checking just with #ifdef might not be enough because this symbol
+ *	has been known to be an enum.
+ */
+/* HAS_MSG_DONTROUTE:
+ *	This symbol, if defined, indicates that the MSG_DONTROUTE is supported.
+ *	Checking just with #ifdef might not be enough because this symbol
+ *	has been known to be an enum.
+ */
+/* HAS_MSG_OOB:
+ *	This symbol, if defined, indicates that the MSG_OOB is supported.
+ *	Checking just with #ifdef might not be enough because this symbol
+ *	has been known to be an enum.
+ */
+/* HAS_MSG_PEEK:
+ *	This symbol, if defined, indicates that the MSG_PEEK is supported.
+ *	Checking just with #ifdef might not be enough because this symbol
+ *	has been known to be an enum.
+ */
+/* HAS_MSG_PROXY:
+ *	This symbol, if defined, indicates that the MSG_PROXY is supported.
+ *	Checking just with #ifdef might not be enough because this symbol
+ *	has been known to be an enum.
+ */
+/* HAS_SCM_RIGHTS:
+ *	This symbol, if defined, indicates that the SCM_RIGHTS is supported.
+ *	Checking just with #ifdef might not be enough because this symbol
+ *	has been known to be an enum.
+ */
+/* HAS_SENDMSG:
+ *	This symbol, if defined, indicates that the sendmsg is supported
+ *	to send messages between sockets.  You will also need struct
+ *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
+ */
+/* HAS_RECVMSG:
+ *	This symbol, if defined, indicates that the recvmsg is supported
+ *	to send messages between sockets.  You will also need struct
+ *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
+ */
+/* HAS_STRUCT_MSGHDR:
+ *	This symbol, if defined, indicates that the struct msghdr
+ *	(BSD 4.3 or 4.4) is supported.  You will also need struct
+ *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
+ */
+/* HAS_STRUCT_CMSGHDR:
+ *	This symbol, if defined, indicates that the struct cmsghdr
+ *	(BSD 4.4) is supported.  You will also need struct
+ *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
+ */
+#define	HAS_SOCKET		/**/
+#define	HAS_SOCKETPAIR	/**/
+#define	HAS_MSG_CTRUNC	/**/
+#define	HAS_MSG_DONTROUTE	/**/
+#define	HAS_MSG_OOB	/**/
+#define	HAS_MSG_PEEK	/**/
+/*#define	HAS_MSG_PROXY	/ **/
+#define	HAS_SCM_RIGHTS	/**/
+#define	HAS_SENDMSG	/**/
+#define	HAS_RECVMSG	/**/
+#define	HAS_STRUCT_MSGHDR	/**/
+#define	HAS_STRUCT_CMSGHDR	/**/
 
 /* USE_STAT_BLOCKS:
  *	This symbol is defined if this system has a stat structure declaring
@@ -1851,6 +1911,12 @@
 #define PWGECOS	/**/
 #define PWPASSWD	/**/
 
+/* I_SYSUIO:
+ *	This symbol, if defined, indicates that <sys/uio.h> exists and
+ *	should be included.
+ */
+#define	I_SYSUIO		/**/
+
 /* Free_t:
  *	This variable contains the return type of free().  It is usually
  * void, but occasionally int.
@@ -1958,11 +2024,24 @@
  */
 /*#define HAS_FTELLO		/ **/
 
+/* HAS_READV:
+ *	This symbol, if defined, indicates that the readv routine is
+ *	available to do gather reads.  You will also need <sys/uio.h>
+ *	and there I_SYSUIO.
+ */
+#define HAS_READV		/**/
+
 /* USE_SFIO:
  *	This symbol, if defined, indicates that sfio should
  *	be used.
  */
 /*#define	USE_SFIO		/ **/
+
+/* HAS_WRITEV:
+ *	This symbol, if defined, indicates that the writev routine is
+ *	available to do scatter writes.
+ */
+#define HAS_WRITEV		/**/
 
 /* HAS_DBMINIT64:
  *	This symbol, if defined, indicates that the dbminit64 routine is

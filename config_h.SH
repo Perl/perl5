@@ -1731,8 +1731,68 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol, if defined, indicates that the BSD socketpair() call is
  *	supported.
  */
-#$d_socket HAS_SOCKET		/**/
-#$d_sockpair HAS_SOCKETPAIR	/**/
+/* HAS_MSG_CTRUNC:
+ *	This symbol, if defined, indicates that the MSG_CTRUNC is supported.
+ *	Checking just with #ifdef might not be enough because this symbol
+ *	has been known to be an enum.
+ */
+/* HAS_MSG_DONTROUTE:
+ *	This symbol, if defined, indicates that the MSG_DONTROUTE is supported.
+ *	Checking just with #ifdef might not be enough because this symbol
+ *	has been known to be an enum.
+ */
+/* HAS_MSG_OOB:
+ *	This symbol, if defined, indicates that the MSG_OOB is supported.
+ *	Checking just with #ifdef might not be enough because this symbol
+ *	has been known to be an enum.
+ */
+/* HAS_MSG_PEEK:
+ *	This symbol, if defined, indicates that the MSG_PEEK is supported.
+ *	Checking just with #ifdef might not be enough because this symbol
+ *	has been known to be an enum.
+ */
+/* HAS_MSG_PROXY:
+ *	This symbol, if defined, indicates that the MSG_PROXY is supported.
+ *	Checking just with #ifdef might not be enough because this symbol
+ *	has been known to be an enum.
+ */
+/* HAS_SCM_RIGHTS:
+ *	This symbol, if defined, indicates that the SCM_RIGHTS is supported.
+ *	Checking just with #ifdef might not be enough because this symbol
+ *	has been known to be an enum.
+ */
+/* HAS_SENDMSG:
+ *	This symbol, if defined, indicates that the sendmsg is supported
+ *	to send messages between sockets.  You will also need struct
+ *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
+ */
+/* HAS_RECVMSG:
+ *	This symbol, if defined, indicates that the recvmsg is supported
+ *	to send messages between sockets.  You will also need struct
+ *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
+ */
+/* HAS_STRUCT_MSGHDR:
+ *	This symbol, if defined, indicates that the struct msghdr
+ *	(BSD 4.3 or 4.4) is supported.  You will also need struct
+ *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
+ */
+/* HAS_STRUCT_CMSGHDR:
+ *	This symbol, if defined, indicates that the struct cmsghdr
+ *	(BSD 4.4) is supported.  You will also need struct
+ *	iovec from <sys/uio.h>, HAS_STRUCT_IOVEC and I_SYSUIO.
+ */
+#$d_socket	HAS_SOCKET		/**/
+#$d_sockpair	HAS_SOCKETPAIR	/**/
+#$d_msg_ctrunc	HAS_MSG_CTRUNC	/**/
+#$d_msg_dontroute	HAS_MSG_DONTROUTE	/**/
+#$d_msg_oob	HAS_MSG_OOB	/**/
+#$d_msg_peek	HAS_MSG_PEEK	/**/
+#$d_msg_proxy	HAS_MSG_PROXY	/**/
+#$d_scm_rights	HAS_SCM_RIGHTS	/**/
+#$d_sendmsg	HAS_SENDMSG	/**/
+#$d_recvmsg	HAS_RECVMSG	/**/
+#$d_msghdr_s	HAS_STRUCT_MSGHDR	/**/
+#$d_cmsghdr_s	HAS_STRUCT_CMSGHDR	/**/
 
 /* USE_STAT_BLOCKS:
  *	This symbol is defined if this system has a stat structure declaring
@@ -1865,6 +1925,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_pwgecos PWGECOS	/**/
 #$d_pwpasswd PWPASSWD	/**/
 
+/* I_SYSUIO:
+ *	This symbol, if defined, indicates that <sys/uio.h> exists and
+ *	should be included.
+ */
+#$i_sysuio	I_SYSUIO		/**/
+
 /* Free_t:
  *	This variable contains the return type of free().  It is usually
  * void, but occasionally int.
@@ -1972,11 +2038,24 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_ftello HAS_FTELLO		/**/
 
+/* HAS_READV:
+ *	This symbol, if defined, indicates that the readv routine is
+ *	available to do gather reads.  You will also need <sys/uio.h>
+ *	and there I_SYSUIO.
+ */
+#$d_readv HAS_READV		/**/
+
 /* USE_SFIO:
  *	This symbol, if defined, indicates that sfio should
  *	be used.
  */
 #$d_sfio	USE_SFIO		/**/
+
+/* HAS_WRITEV:
+ *	This symbol, if defined, indicates that the writev routine is
+ *	available to do scatter writes.
+ */
+#$d_writev HAS_WRITEV		/**/
 
 /* HAS_DBMINIT64:
  *	This symbol, if defined, indicates that the dbminit64 routine is
@@ -2107,7 +2186,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_telldir64   HAS_TELLDIR64	/**/
 #$d_truncate64  HAS_TRUNCATE64	/**/
 #$d_off64t      HAS_OFF64_T    	/**/
-#$d_dirent64s   HAS_STRUCT_DIRENT64 	/**/
+#$d_dirent64_s   HAS_STRUCT_DIRENT64 	/**/
 
 /* PRIVLIB:
  *	This symbol contains the name of the private library for this package.
