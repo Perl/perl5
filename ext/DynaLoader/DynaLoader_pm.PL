@@ -27,7 +27,9 @@ package DynaLoader;
 #
 # Tim.Bunce@ig.co.uk, August 1994
 
-$VERSION = "1.04";	# avoid typo warning
+use vars qw($VERSION *AUTOLOAD);
+
+$VERSION = 1.04;	# avoid typo warning
 
 require AutoLoader;
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;
@@ -59,6 +61,14 @@ sub dl_load_flags { 0x00 }
 #         = @Config::Config{'dlext', 'dlsrc'};
 EOT
 
+
+if (!$ENV{PERL_BUILD_EXPAND_CONFIG_VARS}) {
+    print OUT <<EOT;
+use Config;
+
+EOT
+}
+
 print OUT "  (\$dl_dlext, \$dlsrc) = (",
           to_string($Config::Config{'dlext'}), ",",
           to_string($Config::Config{'dlsrc'}), ")\n;" ;
@@ -69,13 +79,15 @@ print OUT <<'EOT';
 # (VMS support by Charles Bailey <bailey@HMIVAX.HUMGEN.UPENN.EDU>)
 # See dl_expandspec() for more details. Should be harmless but
 # inefficient to define on systems that don't need it.
-$do_expand = $Is_VMS = $^O eq 'VMS';
+$Is_VMS    = $^O eq 'VMS';
+$do_expand = $Is_VMS;
+$Is_MacOS  = $^O eq 'MacOS';
 
 @dl_require_symbols = ();       # names of symbols we need
 @dl_resolve_using   = ();       # names of files to link with
 @dl_library_path    = ();       # path to look for files
-#@dl_librefs         = ();       # things we have loaded
-#@dl_modules         = ();       # Modules we have loaded
+@dl_librefs         = ();       # things we have loaded
+@dl_modules         = ();       # Modules we have loaded
 
 # This is a fix to support DLD's unfortunate desire to relink -lc
 @dl_resolve_using = dl_findfile('-lc') if $dlsrc eq "dl_dld.xs";
@@ -83,7 +95,7 @@ $do_expand = $Is_VMS = $^O eq 'VMS';
 EOT
 
 my $cfg_dl_library_path = <<'EOT';
-push(@dl_library_path, split(' ', $Config::Config{'libpth'}));
+push(@dl_library_path, split(' ', $Config::Config{libpth}));
 EOT
 
 sub dquoted_comma_list {
@@ -132,7 +144,7 @@ EOT
 
 
 my $env_dl_library_path = <<EOT;
-if (exists \$ENV{$ldlibpthname}) {
+if (exists \$ENV{$ldlibpthname} && \$ENV{$ldlibpthname} ne '') {
     push(\@dl_library_path, split(/\$pthsep/, \$ENV{$ldlibpthname}));
 }
 
