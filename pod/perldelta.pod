@@ -775,6 +775,12 @@ on C<NEW> will return the same data as the corresponding operation
 on C<OLD>.  Formerly, it would have returned the data from the start
 of the following disk block instead.
 
+=head2 eof() has the same old magic as <>
+
+C<eof()> would return true if no attempt to read from C<E<lt>E<gt>> had
+yet been made.  C<eof()> has been changed to have a little magic of its
+own, it now opens the C<E<lt>E<gt>> files.
+
 =head2 system(), backticks and pipe open now reflect exec() failure
 
 On Unix and similar platforms, system(), qx() and open(FOO, "cmd |")

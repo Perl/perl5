@@ -1172,13 +1172,17 @@ interactive context.)  Do not read from a terminal file (or call
 C<eof(FILEHANDLE)> on it) after end-of-file is reached.  File types such
 as terminals may lose the end-of-file condition if you do.
 
-An C<eof> without an argument uses the last file read as argument.
-Using C<eof()> with empty parentheses is very different.  It indicates
-the pseudo file formed of the files listed on the command line,
-i.e., C<eof()> is reasonable to use inside a C<while (E<lt>E<gt>)>
-loop to detect the end of only the last file.  Use C<eof(ARGV)> or
-C<eof> without the parentheses to test I<each> file in a while
-(E<lt>E<gt>) loop.  Examples:
+An C<eof> without an argument uses the last file read.  Using C<eof()>
+with empty parentheses is very different.  It refers to the pseudo file
+formed from the files listed on the command line and accessed via the
+C<E<lt>E<gt>> operator.  Since C<E<lt>E<gt>> isn't explicitly opened,
+as a normal filehandle is, an C<eof()> before C<E<lt>E<gt>> has been
+used will cause C<@ARGV> to be examined to determine if input is
+available.
+
+In a C<while (E<lt>E<gt>)> loop, C<eof> or C<eof(ARGV)> can be used to
+detect the end of each file, C<eof()> will only detect the end of the
+last file.  Examples:
 
     # reset line numbering on each input file
     while (<>) {

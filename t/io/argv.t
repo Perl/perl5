@@ -1,6 +1,15 @@
 #!./perl
 
-print "1..6\n";
+BEGIN {
+    chdir 't' if -d 't';
+    unshift @INC, '../lib';
+}
+
+print "1..14\n";
+
+use File::Spec;
+
+my $devnull = File::Spec->devnull;
 
 open(try, '>Io.argv.tmp') || (die "Can't open temp file: $!");
 print try "a line\n";
@@ -30,7 +39,7 @@ else {
 }
 if ($x eq "foo\n") {print "ok 3\n";} else {print "not ok 3 :$x:\n";}
 
-@ARGV = ('Io.argv.tmp', 'Io.argv.tmp', '/dev/null', 'Io.argv.tmp');
+@ARGV = ('Io.argv.tmp', 'Io.argv.tmp', $devnull, 'Io.argv.tmp');
 while (<>) {
     $y .= $. . $_;
     if (eof()) {
@@ -55,5 +64,37 @@ while (<>) {
 open(try, '<Io.argv.tmp') or die "Can't open temp file: $!";
 print while <try>;
 close try;
+undef $^I;
+
+eof try or print 'not ';
+print "ok 7\n";
+
+eof NEVEROPENED or print 'not ';
+print "ok 8\n";
+
+open STDIN, 'Io.argv.tmp' or die $!;
+@ARGV = ();
+!eof() or print 'not ';
+print "ok 9\n";
+
+<> eq "ok 6\n" or print 'not ';
+print "ok 10\n";
+
+open STDIN, $devnull or die $!;
+@ARGV = ();
+eof() or print 'not ';
+print "ok 11\n";
+
+@ARGV = ('Io.argv.tmp');
+!eof() or print 'not ';
+print "ok 12\n";
+
+@ARGV = ($devnull, $devnull);
+!eof() or print 'not ';
+print "ok 13\n";
+
+close ARGV or die $!;
+eof() or print 'not ';
+print "ok 14\n";
 
 END { unlink 'Io.argv.tmp', 'Io.argv.tmp.bak' }
