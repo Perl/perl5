@@ -78,6 +78,37 @@ Version 5.005_03        Third maintenance release of 5.005
 ----------------
 
 ____________________________________________________________________________
+[  3084] By: gbarr                                 on 1999/03/05  01:34:07
+        Log: Don't process - as a file in Errno_pm.PL
+             
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Thu, 4 Mar 1999 13:29:23 +0200 (EET)
+             Message-ID: <14046.28307.561693.849859@alpha.hut.fi>
+             Subject: Re: maint-5.005
+     Branch: maint-5.005/perl
+           ! ext/Errno/Errno_pm.PL
+____________________________________________________________________________
+[  3081] By: gsar                                  on 1999/03/05  00:14:33
+        Log: protect against doubled backslashes
+     Branch: maint-5.005/perl
+           ! ext/Errno/Errno_pm.PL
+____________________________________________________________________________
+[  3080] By: gsar                                  on 1999/03/04  23:37:20
+        Log: pick up AIX hints from mainline
+     Branch: maint-5.005/perl
+          !> hints/aix.sh
+____________________________________________________________________________
+[  3079] By: gsar                                  on 1999/03/04  21:09:43
+        Log: tweak cast and crew
+     Branch: maint-5.005/perl
+           ! Changes
+____________________________________________________________________________
+[  3078] By: gsar                                  on 1999/03/04  21:03:04
+        Log: update patchlevel, Changes
+     Branch: maint-5.005/perl
+           ! Changes README.win32 patchlevel.h
+          !> pod/perlhist.pod
+____________________________________________________________________________
 [  3075] By: gsar                                  on 1999/03/04  07:36:53
         Log: integrate changes#3037,3041 from mainline
              
