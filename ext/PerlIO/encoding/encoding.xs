@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ */
+
 #define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
 #include "perl.h"
@@ -40,7 +44,12 @@ typedef struct {
     SV *bufsv;			/* buffer seen by layers above */
     SV *dataSV;			/* data we have read from layer below */
     SV *enc;			/* the encoding object */
+    SV *chk;                    /* CHECK in Encode methods */
 } PerlIOEncode;
+
+
+#define ENCODE_FB_QUIET "Encode::FB_QUIET"
+
 
 SV *
 PerlIOEncode_getarg(pTHX_ PerlIO * f, CLONE_PARAMS * param, int flags)
@@ -54,7 +63,7 @@ PerlIOEncode_getarg(pTHX_ PerlIO * f, CLONE_PARAMS * param, int flags)
 	PUSHMARK(sp);
 	XPUSHs(e->enc);
 	PUTBACK;
-	if (perl_call_method("name", G_SCALAR) == 1) {
+	if (call_method("name", G_SCALAR) == 1) {
 	    SPAGAIN;
 	    sv = newSVsv(POPs);
 	    PUTBACK;
@@ -72,10 +81,21 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg)
     code = PerlIOBuf_pushed(aTHX_ f, mode, Nullsv);
     ENTER;
     SAVETMPS;
+
+    PUSHMARK(sp);
+    PUTBACK;
+    if (call_pv(ENCODE_FB_QUIET, G_SCALAR|G_NOARGS) != 1) {
+	Perl_die(aTHX_ "Call to Encode::FB_QUIET failed!");
+	code = -1;
+    }
+    SPAGAIN;
+    e->chk = newSVsv(POPs);
+    PUTBACK;
+
     PUSHMARK(sp);
     XPUSHs(arg);
     PUTBACK;
-    if (perl_call_pv("Encode::find_encoding", G_SCALAR) != 1) {
+    if (call_pv("Encode::find_encoding", G_SCALAR) != 1) {
 	/* should never happen */
 	Perl_die(aTHX_ "Encode::find_encoding did not return a value");
 	return -1;
@@ -83,6 +103,7 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg)
     SPAGAIN;
     e->enc = POPs;
     PUTBACK;
+
     if (!SvROK(e->enc)) {
 	e->enc = Nullsv;
 	errno = EINVAL;
@@ -228,9 +249,9 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	PUSHMARK(sp);
 	XPUSHs(e->enc);
 	XPUSHs(e->dataSV);
-	XPUSHs(&PL_sv_yes);
+	XPUSHs(e->chk);
 	PUTBACK;
-	if (perl_call_method("decode", G_SCALAR) != 1) {
+	if (call_method("decode", G_SCALAR) != 1) {
 	    Perl_die(aTHX_ "panic: decode did not return a value");
 	}
 	SPAGAIN;
@@ -307,9 +328,9 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 	    SvCUR_set(e->bufsv, e->base.ptr - e->base.buf);
 	    SvUTF8_on(e->bufsv);
 	    XPUSHs(e->bufsv);
-	    XPUSHs(&PL_sv_yes);
+	    XPUSHs(e->chk);
 	    PUTBACK;
-	    if (perl_call_method("encode", G_SCALAR) != 1) {
+	    if (call_method("encode", G_SCALAR) != 1) {
 		Perl_die(aTHX_ "panic: encode did not return a value");
 	    }
 	    SPAGAIN;
@@ -358,9 +379,9 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 		PUSHMARK(sp);
 		XPUSHs(e->enc);
 		XPUSHs(str);
-		XPUSHs(&PL_sv_yes);
+		XPUSHs(e->chk);
 		PUTBACK;
-		if (perl_call_method("encode", G_SCALAR) != 1) {
+		if (call_method("encode", G_SCALAR) != 1) {
 		     Perl_die(aTHX_ "panic: encode did not return a value");
 		}
 		SPAGAIN;
