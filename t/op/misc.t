@@ -558,3 +558,7 @@ eval "C";
 M(C);
 EXPECT
 Modification of a read-only value attempted at - line 2.
+########
+print qw(ab a\b a\\b);
+EXPECT
+aba\ba\b
