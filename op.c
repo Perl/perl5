@@ -4933,6 +4933,11 @@ Perl_ck_ftst(pTHX_ OP *o)
 	    op_free(o);
 	    o = newop;
 	}
+	else {
+	  if ((PL_hints & HINT_FILETEST_ACCESS) &&
+	      OP_IS_FILETEST_ACCESS(o))
+	    o->op_private |= OPpFT_ACCESS;
+	}
     }
     else {
 	op_free(o);

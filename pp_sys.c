@@ -2850,7 +2850,7 @@ PP(pp_ftrread)
     dSP;
 #if defined(HAS_ACCESS) && defined(R_OK)
     STRLEN n_a;
-    if ((PL_hints & HINT_FILETEST_ACCESS) && SvPOK(TOPs)) {
+    if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
 	result = access(TOPpx, R_OK);
 	if (result == 0)
 	    RETPUSHYES;
@@ -2877,7 +2877,7 @@ PP(pp_ftrwrite)
     dSP;
 #if defined(HAS_ACCESS) && defined(W_OK)
     STRLEN n_a;
-    if ((PL_hints & HINT_FILETEST_ACCESS) && SvPOK(TOPs)) {
+    if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
 	result = access(TOPpx, W_OK);
 	if (result == 0)
 	    RETPUSHYES;
@@ -2904,7 +2904,7 @@ PP(pp_ftrexec)
     dSP;
 #if defined(HAS_ACCESS) && defined(X_OK)
     STRLEN n_a;
-    if ((PL_hints & HINT_FILETEST_ACCESS) && SvPOK(TOPs)) {
+    if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
 	result = access(TOPpx, X_OK);
 	if (result == 0)
 	    RETPUSHYES;
@@ -2931,7 +2931,7 @@ PP(pp_fteread)
     dSP;
 #ifdef PERL_EFF_ACCESS_R_OK
     STRLEN n_a;
-    if ((PL_hints & HINT_FILETEST_ACCESS) && SvPOK(TOPs)) {
+    if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
 	result = PERL_EFF_ACCESS_R_OK(TOPpx);
 	if (result == 0)
 	    RETPUSHYES;
@@ -2958,7 +2958,7 @@ PP(pp_ftewrite)
     dSP;
 #ifdef PERL_EFF_ACCESS_W_OK
     STRLEN n_a;
-    if ((PL_hints & HINT_FILETEST_ACCESS) && SvPOK(TOPs)) {
+    if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
 	result = PERL_EFF_ACCESS_W_OK(TOPpx);
 	if (result == 0)
 	    RETPUSHYES;
@@ -2985,7 +2985,7 @@ PP(pp_fteexec)
     dSP;
 #ifdef PERL_EFF_ACCESS_X_OK
     STRLEN n_a;
-    if ((PL_hints & HINT_FILETEST_ACCESS) && SvPOK(TOPs)) {
+    if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
 	result = PERL_EFF_ACCESS_X_OK(TOPpx);
 	if (result == 0)
 	    RETPUSHYES;

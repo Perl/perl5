@@ -205,6 +205,16 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpHUSH_VMSISH		64	/* hush DCL exit msg vmsish mode*/
 #define OPpEXIT_VMSISH		128	/* exit(0) vs. exit(1) vmsish mode*/
 
+/* Private of OP_FTXXX */
+#define OPpFT_ACCESS		2	/* use filetest 'access' */
+#define OP_IS_FILETEST_ACCESS(op) 		\
+	(((op)->op_type) == OP_FTRREAD  ||	\
+	 ((op)->op_type) == OP_FTRWRITE ||	\
+	 ((op)->op_type) == OP_FTREXEC  ||	\
+	 ((op)->op_type) == OP_FTEREAD  ||	\
+	 ((op)->op_type) == OP_FTEWRITE ||	\
+	 ((op)->op_type) == OP_FTEEXEC)
+
 struct op {
     BASEOP
 };
