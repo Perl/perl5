@@ -3,12 +3,12 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess <Paul.Marquess@btinternet.com>
- last modified 17 December 2000
- version 1.75
+ last modified 26th April 2001
+ version 1.77
 
  All comments/suggestions/problems are welcome
 
-     Copyright (c) 1995-2000 Paul Marquess. All rights reserved.
+     Copyright (c) 1995-2001 Paul Marquess. All rights reserved.
      This program is free software; you can redistribute it and/or
      modify it under the same terms as Perl itself.
 
@@ -90,6 +90,8 @@
 		Added suppport to allow DB_File to be built with 
 		Berkeley DB 3.2 -- btree_compare, btree_prefix and hash_cb
 		needed to be changed.
+        1.76 -  No change to DB_File.xs
+        1.77 -  Tidied up a few types used in calling newSVpvn.
 
 */
 
@@ -517,12 +519,12 @@ const DBT * key2 ;
     dTHX;
 #endif    
     dSP ;
-    void * data1, * data2 ;
+    char * data1, * data2 ;
     int retval ;
     int count ;
     
-    data1 = key1->data ;
-    data2 = key2->data ;
+    data1 = (char *) key1->data ;
+    data2 = (char *) key2->data ;
 
 #ifndef newSVpvn
     /* As newSVpv will assume that the data pointer is a null terminated C 
@@ -588,12 +590,12 @@ const DBT * key2 ;
     dTHX;
 #endif    
     dSP ;
-    void * data1, * data2 ;
+    char * data1, * data2 ;
     int retval ;
     int count ;
     
-    data1 = key1->data ;
-    data2 = key2->data ;
+    data1 = (char *) key1->data ;
+    data2 = (char *) key2->data ;
 
 #ifndef newSVpvn
     /* As newSVpv will assume that the data pointer is a null terminated C 

@@ -334,3 +334,24 @@
    * Updated dbinfo to support Berkeley DB 3.2 file format changes.
 
 
+1.76 15th January 2001
+
+   * Added instructions for using LD_PRELOAD to get Berkeley DB 2.x to work
+     with DB_File on Linux. Thanks to Norbert Bollow for sending details of
+     this approach.
+
+
+1.77 26th April 2001
+
+   * AIX is reported to need -lpthreads, so Makefile.PL now checks for AIX and
+     adds it to the link options.
+
+   * Minor documentation updates.
+
+   * Merged Core patch 9176
+
+   * Added a patch from Edward Avis that adds support for splice with
+     recno databases.
+
+   * Modified Makefile.PL to only enable the warnings pragma if using perl
+     5.6.1 or better.    
