@@ -39,28 +39,44 @@ after the 1st of January, 2038 on most machines.
 
 =cut
 
-@epoch = localtime(0);
-$tzmin = $epoch[2] * 60 + $epoch[1];	# minutes east of GMT
-if ($tzmin > 0) {
-    $tzmin = 24 * 60 - $tzmin;		# minutes west of GMT
-    $tzmin -= 24 * 60 if $epoch[5] == 70;	# account for the date line
-}
+BEGIN {
+    @epoch = localtime(0);
 
-$SEC = 1;
-$MIN = 60 * $SEC;
-$HR = 60 * $MIN;
-$DAYS = 24 * $HR;
-$YearFix = ((gmtime(946684800))[5] == 100) ? 100 : 0;
+    $SEC  = 1;
+    $MIN  = 60 * $SEC;
+    $HR   = 60 * $MIN;
+    $DAY  = 24 * $HR;
+    $YearFix = ((gmtime(946684800))[5] == 100) ? 100 : 0;
+
+    my $t = time;
+    my @lt = localtime($t);
+    my @gt = gmtime($t);
+
+    $tzsec = ($gt[1] - $lt[1]) * $MIN + ($gt[2] - $lt[2]) * $HR;
+
+    my($lday,$gday) = ($lt[7],$gt[7]);
+    if($lt[5] > $gt[5]) {
+	$tzsec -= $DAY;
+    }
+    elsif($gt[5] > $lt[5]) {
+	$tzsec += $DAY;
+    }
+    else {
+	$tzsec += ($gt[7] - $lt[7]) * $DAY;
+    }
+
+  $tzsec += $HR if($lt[8]);
+}
 
 sub timegm {
     $ym = pack(C2, @_[5,4]);
     $cheat = $cheat{$ym} || &cheat;
     return -1 if $cheat<0;
-    $cheat + $_[0] * $SEC + $_[1] * $MIN + $_[2] * $HR + ($_[3]-1) * $DAYS;
+    $cheat + $_[0] * $SEC + $_[1] * $MIN + $_[2] * $HR + ($_[3]-1) * $DAY;
 }
 
 sub timelocal {
-    $time = &timegm + $tzmin*$MIN;
+    $time = &timegm + $tzsec;
     return -1 if $cheat<0;
     @test = localtime($time);
     $time -= $HR if $test[2] != $_[2];
@@ -69,6 +85,8 @@ sub timelocal {
 
 sub cheat {
     $year = $_[5];
+    $year -= 1900
+    	if $year > 1900;
     $month = $_[4];
     croak "Month out of range 0..11 in timelocal.pl" 
 	if $month > 11 || $month < 0;
@@ -85,7 +103,7 @@ sub cheat {
     $year += $YearFix if $year < $epoch[5];
     $lastguess = "";
     while ($diff = $year - $g[5]) {
-	$guess += $diff * (363 * $DAYS);
+	$guess += $diff * (363 * $DAY);
 	@g = gmtime($guess);
 	if (($thisguess = "@g") eq $lastguess){
 	    return -1; #date beyond this machine's integer limit
@@ -93,7 +111,7 @@ sub cheat {
 	$lastguess = $thisguess;
     }
     while ($diff = $month - $g[4]) {
-	$guess += $diff * (27 * $DAYS);
+	$guess += $diff * (27 * $DAY);
 	@g = gmtime($guess);
 	if (($thisguess = "@g") eq $lastguess){
 	    return -1; #date beyond this machine's integer limit
@@ -105,7 +123,7 @@ sub cheat {
 	return -1; #date beyond this machine's integer limit
     }
     $g[3]--;
-    $guess -= $g[0] * $SEC + $g[1] * $MIN + $g[2] * $HR + $g[3] * $DAYS;
+    $guess -= $g[0] * $SEC + $g[1] * $MIN + $g[2] * $HR + $g[3] * $DAY;
     $cheat{$ym} = $guess;
 }
 
