@@ -2145,6 +2145,15 @@ Perl_whichsig(pTHX_ char *sig)
     return 0;
 }
 
+void
+Perl_despatch_signals(pTHX)
+{
+#ifndef PERL_OLD_SIGNALS
+ /* This is just a dummy for now */
+#endif
+ PL_sig_pending = 0;
+}
+
 static SV* sig_sv;
 
 Signal_t

@@ -355,6 +355,7 @@
 #define PL_preprocess		(PERL_GET_INTERP->Ipreprocess)
 #define PL_profiledata		(PERL_GET_INTERP->Iprofiledata)
 #define PL_psig_name		(PERL_GET_INTERP->Ipsig_name)
+#define PL_psig_pend		(PERL_GET_INTERP->Ipsig_pend)
 #define PL_psig_ptr		(PERL_GET_INTERP->Ipsig_ptr)
 #define PL_ptr_table		(PERL_GET_INTERP->Iptr_table)
 #define PL_replgv		(PERL_GET_INTERP->Ireplgv)
@@ -363,6 +364,7 @@
 #define PL_runops		(PERL_GET_INTERP->Irunops)
 #define PL_sawampersand		(PERL_GET_INTERP->Isawampersand)
 #define PL_sh_path		(PERL_GET_INTERP->Ish_path)
+#define PL_sig_pending		(PERL_GET_INTERP->Isig_pending)
 #define PL_sighandlerp		(PERL_GET_INTERP->Isighandlerp)
 #define PL_splitstr		(PERL_GET_INTERP->Isplitstr)
 #define PL_srand_called		(PERL_GET_INTERP->Isrand_called)
@@ -634,6 +636,7 @@
 #define PL_preprocess		(vTHX->Ipreprocess)
 #define PL_profiledata		(vTHX->Iprofiledata)
 #define PL_psig_name		(vTHX->Ipsig_name)
+#define PL_psig_pend		(vTHX->Ipsig_pend)
 #define PL_psig_ptr		(vTHX->Ipsig_ptr)
 #define PL_ptr_table		(vTHX->Iptr_table)
 #define PL_replgv		(vTHX->Ireplgv)
@@ -642,6 +645,7 @@
 #define PL_runops		(vTHX->Irunops)
 #define PL_sawampersand		(vTHX->Isawampersand)
 #define PL_sh_path		(vTHX->Ish_path)
+#define PL_sig_pending		(vTHX->Isig_pending)
 #define PL_sighandlerp		(vTHX->Isighandlerp)
 #define PL_splitstr		(vTHX->Isplitstr)
 #define PL_srand_called		(vTHX->Isrand_called)
@@ -1049,6 +1053,7 @@
 #define PL_preprocess		(aTHXo->interp.Ipreprocess)
 #define PL_profiledata		(aTHXo->interp.Iprofiledata)
 #define PL_psig_name		(aTHXo->interp.Ipsig_name)
+#define PL_psig_pend		(aTHXo->interp.Ipsig_pend)
 #define PL_psig_ptr		(aTHXo->interp.Ipsig_ptr)
 #define PL_ptr_table		(aTHXo->interp.Iptr_table)
 #define PL_replgv		(aTHXo->interp.Ireplgv)
@@ -1057,6 +1062,7 @@
 #define PL_runops		(aTHXo->interp.Irunops)
 #define PL_sawampersand		(aTHXo->interp.Isawampersand)
 #define PL_sh_path		(aTHXo->interp.Ish_path)
+#define PL_sig_pending		(aTHXo->interp.Isig_pending)
 #define PL_sighandlerp		(aTHXo->interp.Isighandlerp)
 #define PL_splitstr		(aTHXo->interp.Isplitstr)
 #define PL_srand_called		(aTHXo->interp.Isrand_called)
@@ -1329,6 +1335,7 @@
 #define PL_Ipreprocess		PL_preprocess
 #define PL_Iprofiledata		PL_profiledata
 #define PL_Ipsig_name		PL_psig_name
+#define PL_Ipsig_pend		PL_psig_pend
 #define PL_Ipsig_ptr		PL_psig_ptr
 #define PL_Iptr_table		PL_ptr_table
 #define PL_Ireplgv		PL_replgv
@@ -1337,6 +1344,7 @@
 #define PL_Irunops		PL_runops
 #define PL_Isawampersand	PL_sawampersand
 #define PL_Ish_path		PL_sh_path
+#define PL_Isig_pending		PL_sig_pending
 #define PL_Isighandlerp		PL_sighandlerp
 #define PL_Isplitstr		PL_splitstr
 #define PL_Isrand_called	PL_srand_called

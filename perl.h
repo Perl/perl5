@@ -3338,6 +3338,11 @@ typedef struct am_table_short AMTS;
  * Keep this check simple, or it may slow down execution
  * massively.
  */
+
+#ifndef PERL_OLD_SIGNALS
+#define PERL_ASYNC_CHECK() if (PL_sig_pending) despatch_signals()
+#endif
+
 #ifndef PERL_ASYNC_CHECK
 #define PERL_ASYNC_CHECK()  NOOP
 #endif
