@@ -21,8 +21,10 @@
 # Don't assume every OS != 10 is < 10, (e.g., 11).
 # From: Chuck Phillips <cdp@fc.hp.com>
 # HP-UX 10 pthreads hints: Matthew T Harden <mthard@mthard1.monsanto.com>
+# From: Dominic Dunlop <domo@computer.org>
+# Abort and offer advice if bundled (non-ANSI) C compiler selected
 
-# This version: August 15, 1997
+# This version: March 8, 2000
 # Current maintainer: Jeff Okamoto <okamoto@corp.hp.com>
 
 #--------------------------------------------------------------------
@@ -64,21 +66,19 @@
 ccflags="$ccflags -D_HPUX_SOURCE"
 
 # Check if you're using the bundled C compiler.  This compiler doesn't support
-# ANSI C (the -Aa flag) nor can it produce shared libraries.  Thus we have
-# to turn off dynamic loading.
+# ANSI C (the -Aa flag) and so is not suitable for perl 5.5 and later.
 case "$cc" in
 '') if cc $ccflags -Aa 2>&1 | $contains 'option' >/dev/null
     then
-	case "$usedl" in
-	 '') usedl="$undef"
 	     cat <<'EOM' >&4
 
-The bundled C compiler can not produce shared libraries, so you will
-not be able to use dynamic loading. 
+The bundled C compiler is not ANSI-compliant, and so cannot be used to
+build perl.  Please see the file README.hpux for advice on alternative
+compilers.
 
+Cannot continue, aborting.
 EOM
-	     ;;
-	esac
+	exit 1
     else
 	ccflags="$ccflags -Aa"	# The add-on compiler supports ANSI C
 	# cppstdin and cpprun need the -Aa option if you use the unbundled 
