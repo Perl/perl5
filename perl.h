@@ -3154,12 +3154,21 @@ typedef struct am_table_short AMTS;
 #   include <sys/sem.h>
 #   ifndef HAS_UNION_SEMUN	/* Provide the union semun. */
     union semun {
-	int val;
-	struct semid_ds *buf;
-	unsigned short *array;
+	int		val;
+	struct semid_ds	*buf;
+	unsigned short	*array;
     };
 #   endif
 #   ifdef USE_SEMCTL_SEMUN
+#	ifdef IRIX32_SEMUN_BROKEN_BY_GCC
+            union gccbug_semun {
+		int             val;
+		struct semid_ds *buf;
+		unsigned short  *array;
+		char            __dummy[5];
+	    };
+#           define semun gccbug_semun
+#	endif
 #       define Semctl(id, num, cmd, semun) semctl(id, num, cmd, semun)
 #   else
 #       ifdef USE_SEMCTL_SEMID_DS
