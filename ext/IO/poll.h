@@ -41,7 +41,7 @@ typedef struct pollfd {
 #define	POLLHUP		0x0010
 #define	POLLNVAL	0x0020
 
-int poll _((struct pollfd *, unsigned long, int));
+int poll (struct pollfd *, unsigned long, int);
 
 #ifndef HAS_POLL
 #  define HAS_POLL

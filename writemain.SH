@@ -65,7 +65,7 @@ if test X"$args" != "X" ; then
 mname=`echo $ext   | sed 's!/!::!g'`
 cname=`echo $mname | sed 's!:!_!g'`
 
-echo "EXTERN_C void boot_${cname} _((CV* cv));"
+echo "EXTERN_C void boot_${cname} (CV* cv);"
     done
 fi
 

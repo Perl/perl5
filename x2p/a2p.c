@@ -2074,7 +2074,7 @@ YYSTYPE yyvs[YYSTACKSIZE];
 #define yystacksize YYSTACKSIZE
 #line 401 "a2p.y"
 
-int yyparse _((void));
+int yyparse (void);
 
 #include "a2py.c"
 #line 2081 "y.tab.c"

@@ -7,10 +7,10 @@
 #include "perl.h"
 #include "XSUB.h"
 
-extern regexp*	my_regcomp _((char* exp, char* xend, PMOP* pm));
-extern I32	my_regexec _((regexp* prog, char* stringarg, char* strend,
-			      char* strbeg, I32 minend, SV* screamer,
-			      void* data, U32 flags));
+extern regexp*	my_regcomp (char* exp, char* xend, PMOP* pm);
+extern I32	my_regexec (regexp* prog, char* stringarg, char* strend,
+			    char* strbeg, I32 minend, SV* screamer,
+			    void* data, U32 flags);
 
 static int oldfl;
 

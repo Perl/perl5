@@ -12,7 +12,7 @@
 	}					\
     } STMT_END
 #    define THR getTHR()
-struct perl_thread *getTHR _((void));
+struct perl_thread *getTHR (void);
 #    define PTHREAD_GETSPECIFIC_INT
 #    ifdef DJGPP
 #      define pthread_addr_t any_t

@@ -30,7 +30,7 @@
 #  define VTBL            this->*vtbl
 #else
 #  define VTBL			*vtbl
-static void restore_magic _((void *p));
+static void restore_magic (void *p);
 static int magic_methcall(SV *sv, MAGIC *mg, char *meth, I32 f, int n, SV *val);
 #endif
 
@@ -434,8 +434,7 @@ magic_len(SV *sv, MAGIC *mg)
 
 #if 0
 static char * 
-printW(sv)
-SV * sv ;
+printW(SV *sv)
 {
 #if 1
     return "" ;

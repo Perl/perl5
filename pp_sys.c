@@ -76,11 +76,11 @@ extern int h_errno;
 # ifdef I_PWD
 #  include <pwd.h>
 # else
-    struct passwd *getpwnam _((char *));
-    struct passwd *getpwuid _((Uid_t));
+    struct passwd *getpwnam (char *);
+    struct passwd *getpwuid (Uid_t);
 # endif
 # ifdef HAS_GETPWENT
-  struct passwd *getpwent _((void));
+  struct passwd *getpwent (void);
 # endif
 #endif
 
@@ -88,11 +88,11 @@ extern int h_errno;
 # ifdef I_GRP
 #  include <grp.h>
 # else
-    struct group *getgrnam _((char *));
-    struct group *getgrgid _((Gid_t));
+    struct group *getgrnam (char *);
+    struct group *getgrgid (Gid_t);
 # endif
 # ifdef HAS_GETGRENT
-    struct group *getgrent _((void));
+    struct group *getgrent (void);
 # endif
 #endif
 
@@ -125,7 +125,7 @@ extern int h_errno;
 #endif
 
 #if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
-static int dooneliner _((char *cmd, char *filename));
+static int dooneliner (char *cmd, char *filename);
 #endif
 
 #ifdef HAS_CHSIZE
@@ -158,7 +158,7 @@ static int dooneliner _((char *cmd, char *filename));
 #  endif /* no flock() or fcntl(F_SETLK,...) */
 
 #  ifdef FLOCK
-     static int FLOCK _((int, int));
+     static int FLOCK (int, int);
 
     /*
      * These are the flock() constants.  Since this sytems doesn't have
@@ -230,7 +230,8 @@ static char zero_but_true[ZBTLEN + 1] = "0 but true";
 	|| defined(HAS_SETREGID) || defined(HAS_SETRESGID))
 /* The Hard Way. */
 STATIC int
-emulate_eaccess (const char* path, int mode) {
+emulate_eaccess (const char* path, int mode)
+{
     Uid_t ruid = getuid();
     Uid_t euid = geteuid();
     Gid_t rgid = getgid();
@@ -294,7 +295,8 @@ emulate_eaccess (const char* path, int mode) {
 
 #if !defined(PERL_EFF_ACCESS_R_OK)
 STATIC int
-emulate_eaccess (const char* path, int mode) {
+emulate_eaccess (const char* path, int mode)
+{
     croak("switching effective uid is not implemented");
     /*NOTREACHED*/
     return -1;
@@ -3175,10 +3177,8 @@ PP(pp_readlink)
 }
 
 #if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
-static int
-dooneliner(cmd, filename)
-char *cmd;
-char *filename;
+STATIC int
+dooneliner(char *cmd, char *filename)
 {
     char *save_filename = filename;
     char *cmdline;
@@ -3335,7 +3335,7 @@ PP(pp_readdir)
     djSP;
 #if defined(Direntry_t) && defined(HAS_READDIR)
 #ifndef I_DIRENT
-    Direntry_t *readdir _((DIR *));
+    Direntry_t *readdir (DIR *);
 #endif
     register Direntry_t *dp;
     GV *gv = (GV*)POPs;
@@ -3395,7 +3395,7 @@ PP(pp_telldir)
     XXX HAS_TELLDIR_PROTO is new style, NEED_TELLDIR_PROTO is old style.
     --JHI 1999-Feb-02 */
 # if !defined(HAS_TELLDIR_PROTO) || defined(NEED_TELLDIR_PROTO)
-    long telldir _((DIR *));
+    long telldir (DIR *);
 # endif
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
@@ -4556,7 +4556,7 @@ PP(pp_gpwent)
     struct passwd *pwent;
     STRLEN n_a;
 #ifdef HAS_GETSPENT
-    struct spwd *spwent;
+    struct spwd *spwent = NULL;
 #endif
 
     if (which == OP_GPWNAM)
@@ -4567,14 +4567,18 @@ PP(pp_gpwent)
 	pwent = (struct passwd *)getpwent();
 
 #ifdef HAS_GETSPNAM
-   if (which == OP_GPWNAM)
-      spwent = getspnam(pwent->pw_name);
+    if (which == OP_GPWNAM) {
+	if (pwent)
+	    spwent = getspnam(pwent->pw_name);
+    }
 #  ifdef HAS_GETSPUID /* AFAIK there isn't any anywhere. --jhi */ 
-   else if (which == OP_GPWUID)
-      spwent = getspnam(pwent->pw_name);
+    else if (which == OP_GPWUID) {
+	if (pwent)
+	    spwent = getspnam(pwent->pw_name);
+    }
 #  endif
-   else
-      spwent = (struct spwd *)getspent();
+    else
+	spwent = (struct spwd *)getspent();
 #endif
 
     EXTEND(SP, 10);
@@ -4962,10 +4966,8 @@ fcntl_emulate_flock(int fd, int operation)
 #  define F_TEST	3	/* Test a region for other processes locks */
 # endif
 
-static int
-lockf_emulate_flock (fd, operation)
-int fd;
-int operation;
+STATIC int
+lockf_emulate_flock (int fd, int operation)
 {
     int i;
     int save_errno;

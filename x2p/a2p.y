@@ -399,6 +399,6 @@ compound
 
 %%
 
-int yyparse _((void));
+int yyparse (void);
 
 #include "a2py.c"

@@ -98,18 +98,18 @@ typedef I32 CHECKPOINT;
  * Forwards.
  */
 
-static I32 regmatch _((regnode *prog));
-static I32 regrepeat _((regnode *p, I32 max));
-static I32 regrepeat_hard _((regnode *p, I32 max, I32 *lp));
-static I32 regtry _((regexp *prog, char *startpos));
+static I32 regmatch (regnode *prog);
+static I32 regrepeat (regnode *p, I32 max);
+static I32 regrepeat_hard (regnode *p, I32 max, I32 *lp);
+static I32 regtry (regexp *prog, char *startpos);
 
-static bool reginclass _((char *p, I32 c));
-static bool reginclassutf8 _((regnode *f, U8* p));
-static CHECKPOINT regcppush _((I32 parenfloor));
-static char * regcppop _((void));
-static char * regcp_set_to _((I32 ss));
-static void cache_re _((regexp *prog));
-static void restore_pos _((void *arg));
+static bool reginclass (char *p, I32 c);
+static bool reginclassutf8 (regnode *f, U8* p);
+static CHECKPOINT regcppush (I32 parenfloor);
+static char * regcppop (void);
+static char * regcp_set_to (I32 ss);
+static void cache_re (regexp *prog);
+static void restore_pos (void *arg);
 #endif
 
 #define REGINCLASS(p,c)  (*(p) ? reginclass(p,c) : ANYOF_TEST(p,c))
@@ -119,8 +119,8 @@ static void restore_pos _((void *arg));
 #define CHR_DIST(a,b) (UTF ? utf8_distance(a,b) : a - b)
 
 #ifndef PERL_OBJECT
-static U8 * reghop _((U8 *pos, I32 off));
-static U8 * reghopmaybe _((U8 *pos, I32 off));
+static U8 * reghop (U8 *pos, I32 off);
+static U8 * reghopmaybe (U8 *pos, I32 off);
 #endif
 #define reghop_c(pos,off) ((char*)reghop((U8*)pos, off))
 #define reghopmaybe_c(pos,off) ((char*)reghopmaybe((U8*)pos, off))

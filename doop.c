@@ -19,16 +19,16 @@
 #endif
 
 #ifndef PERL_OBJECT
-static I32 do_trans_CC_simple _((SV *sv));
-static I32 do_trans_CC_count _((SV *sv));
-static I32 do_trans_CC_complex _((SV *sv));
-static I32 do_trans_UU_simple _((SV *sv));
-static I32 do_trans_UU_count _((SV *sv));
-static I32 do_trans_UU_complex _((SV *sv));
-static I32 do_trans_UC_simple _((SV *sv));
-static I32 do_trans_CU_simple _((SV *sv));
-static I32 do_trans_UC_trivial _((SV *sv));
-static I32 do_trans_CU_trivial _((SV *sv));
+static I32 do_trans_CC_simple (SV *sv);
+static I32 do_trans_CC_count (SV *sv);
+static I32 do_trans_CC_complex (SV *sv);
+static I32 do_trans_UU_simple (SV *sv);
+static I32 do_trans_UU_count (SV *sv);
+static I32 do_trans_UU_complex (SV *sv);
+static I32 do_trans_UC_simple (SV *sv);
+static I32 do_trans_CU_simple (SV *sv);
+static I32 do_trans_UC_trivial (SV *sv);
+static I32 do_trans_CU_trivial (SV *sv);
 #endif
 
 STATIC I32

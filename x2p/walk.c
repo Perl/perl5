@@ -26,14 +26,14 @@ char *limit;
 STR *subs;
 STR *curargs = Nullstr;
 
-static void addsemi _(( STR *str ));
-static void emit_split _(( STR *str, int level ));
-static void fixtab _(( STR *str, int lvl ));
-static void numericize _(( int node ));
-static void tab _(( STR *str, int lvl ));
+static void addsemi ( STR *str );
+static void emit_split ( STR *str, int level );
+static void fixtab ( STR *str, int lvl );
+static void numericize ( int node );
+static void tab ( STR *str, int lvl );
 
-int prewalk _(( int numit, int level, int node, int *numericptr ));
-STR * walk _(( int useval, int level, int node, int *numericptr, int minprec ));
+int prewalk ( int numit, int level, int node, int *numericptr );
+STR * walk ( int useval, int level, int node, int *numericptr, int minprec );
 
 
 STR *

@@ -102,9 +102,18 @@ dl_load_file(filename,flags=0)
     int			flags
     PREINIT:
     CODE:
+  {
+    WCHAR wfilename[MAX_PATH];
     DLDEBUG(1,PerlIO_printf(PerlIO_stderr(),"dl_load_file(%s):\n", filename));
-    if (dl_static_linked(filename) == 0)
-	RETVAL = (void*) LoadLibraryEx(filename, NULL, LOAD_WITH_ALTERED_SEARCH_PATH ) ;
+    if (dl_static_linked(filename) == 0) {
+	if (USING_WIDE()) {
+	    A2WHELPER(filename, wfilename, sizeof(wfilename), GETINTERPMODE());
+	    RETVAL = (void*) LoadLibraryExW(wfilename, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+	}
+	else {
+	    RETVAL = (void*) LoadLibraryExA(filename, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+	}
+    }
     else
 	RETVAL = (void*) GetModuleHandle(NULL);
     DLDEBUG(2,PerlIO_printf(PerlIO_stderr()," libref=%x\n", RETVAL));
@@ -114,7 +123,7 @@ dl_load_file(filename,flags=0)
 		  OS_Error_String(PERL_OBJECT_THIS)) ;
     else
 	sv_setiv( ST(0), (IV)RETVAL);
-
+  }
 
 void *
 dl_find_symbol(libhandle, symbolname)

@@ -319,7 +319,7 @@ newthread (SV *startsv, AV *initargs, char *classname)
 #endif
 }
 
-static Signal_t handle_thread_signal _((int sig));
+static Signal_t handle_thread_signal (int sig);
 
 static Signal_t
 handle_thread_signal(int sig)

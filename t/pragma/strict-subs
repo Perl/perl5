@@ -277,3 +277,25 @@ my $a = Fred ;
 EXPECT
 Bareword "Fred" not allowed while "strict subs" in use at - line 8.
 Execution of - aborted due to compilation errors.
+########
+
+# see if Foo->Bar(...) etc work under strictures
+use strict;
+package Foo; sub Bar { print "@_\n" }
+Foo->Bar('a',1);
+Bar Foo ('b',2);
+Foo->Bar(qw/c 3/);
+Bar Foo (qw/d 4/);
+Foo::->Bar('A',1);
+Bar Foo:: ('B',2);
+Foo::->Bar(qw/C 3/);
+Bar Foo:: (qw/D 4/);
+EXPECT
+Foo a 1
+Foo b 2
+Foo c 3
+Foo d 4
+Foo A 1
+Foo B 2
+Foo C 3
+Foo D 4

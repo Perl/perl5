@@ -2775,7 +2775,7 @@ Returns a boolean indicating whether the SV is derived from the specified
 class.  This is the function that implements C<UNIVERSAL::isa>.  It works
 for class names as well as for objects.
 
-	bool	sv_derived_from _((SV* sv, const char* name));
+	bool	sv_derived_from (SV* sv, const char* name);
 
 =item SvEND
 
@@ -3402,18 +3402,18 @@ Processes its arguments like C<vsprintf> and appends the formatted output
 to an SV.  Uses an array of SVs if the C style variable argument list is
 missing (NULL).  Indicates if locale information has been used for formatting.
 
-	void	sv_catpvfn _((SV* sv, const char* pat, STRLEN patlen,
-			      va_list *args, SV **svargs, I32 svmax,
-			      bool *used_locale));
+	void	sv_catpvfn (SV* sv, const char* pat, STRLEN patlen,
+			    va_list *args, SV **svargs, I32 svmax,
+			    bool *used_locale);
 
 =item sv_vsetpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 
 Works like C<vcatpvfn> but copies the text into the SV instead of
 appending it.
 
-	void	sv_setpvfn _((SV* sv, const char* pat, STRLEN patlen,
-			      va_list *args, SV **svargs, I32 svmax,
-			      bool *used_locale));
+	void	sv_setpvfn (SV* sv, const char* pat, STRLEN patlen,
+			    va_list *args, SV **svargs, I32 svmax,
+			    bool *used_locale);
 
 =item SvUV
 

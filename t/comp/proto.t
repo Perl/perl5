@@ -419,6 +419,7 @@ print "ok ", $i++, "\n";
 sub star (*&) { &{$_[1]} }
 sub star2 (**&) { &{$_[2]} }
 sub BAR { "quux" }
+sub Bar::BAZ { "quuz" }
 my $star = 'FOO';
 star FOO, sub { print "ok $i\n" if $_[0] eq 'FOO' }; $i++;
 star(FOO, sub { print "ok $i\n" if $_[0] eq 'FOO' }); $i++;
@@ -432,8 +433,8 @@ star \*FOO, sub { print "ok $i\n" if $_[0] eq \*FOO }; $i++;
 star(\*FOO, sub { print "ok $i\n" if $_[0] eq \*FOO }); $i++;
 star2 FOO, BAR, sub { print "ok $i\n"
 			if $_[0] eq 'FOO' and $_[1] eq 'BAR' }; $i++;
-star2(BAR, FOO, sub { print "ok $i\n"
-			if $_[0] eq 'BAR' and $_[1] eq 'FOO' }); $i++;
+star2(Bar::BAZ, FOO, sub { print "ok $i\n"
+			if $_[0] eq 'Bar::BAZ' and $_[1] eq 'FOO' }); $i++;
 star2 BAR(), FOO, sub { print "ok $i\n"
 			if $_[0] eq 'quux' and $_[1] eq 'FOO' }; $i++;
 star2(FOO, BAR(), sub { print "ok $i\n"

@@ -258,6 +258,7 @@ my @staticfuncs = qw(
     dopoptoloop
     dopoptosub
     dopoptosub_at
+    free_closures
     save_lines
     doeval
     doopen_pmc

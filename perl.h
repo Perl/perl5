@@ -393,12 +393,12 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #  else
 #    define EMBEDMYMALLOC	/* for compatibility */
 #  endif
-Malloc_t Perl_malloc _((MEM_SIZE nbytes));
-Malloc_t Perl_calloc _((MEM_SIZE elements, MEM_SIZE size));
-Malloc_t Perl_realloc _((Malloc_t where, MEM_SIZE nbytes));
+Malloc_t Perl_malloc (MEM_SIZE nbytes);
+Malloc_t Perl_calloc (MEM_SIZE elements, MEM_SIZE size);
+Malloc_t Perl_realloc (Malloc_t where, MEM_SIZE nbytes);
 /* 'mfree' rather than 'free', since there is already a 'perl_free'
  * that causes clashes with case-insensitive linkers */
-Free_t   Perl_mfree _((Malloc_t where));
+Free_t   Perl_mfree (Malloc_t where);
 
 #  define safemalloc  Perl_malloc
 #  define safecalloc  Perl_calloc
@@ -436,7 +436,7 @@ Free_t   Perl_mfree _((Malloc_t where));
 #ifdef HAS_MEMCPY
 #  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
 #    ifndef memcpy
-        extern char * memcpy _((char*, char*, int));
+        extern char * memcpy (char*, char*, int);
 #    endif
 #  endif
 #else
@@ -452,7 +452,7 @@ Free_t   Perl_mfree _((Malloc_t where));
 #ifdef HAS_MEMSET
 #  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
 #    ifndef memset
-	extern char *memset _((char*, int, int));
+	extern char *memset (char*, int, int);
 #    endif
 #  endif
 #else
@@ -478,7 +478,7 @@ Free_t   Perl_mfree _((Malloc_t where));
 #if defined(HAS_MEMCMP) && defined(HAS_SANE_MEMCMP)
 #  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
 #    ifndef memcmp
-	extern int memcmp _((char*, char*, int));
+	extern int memcmp (char*, char*, int);
 #    endif
 #  endif
 #  ifdef BUGGY_MSC
@@ -611,10 +611,10 @@ Free_t   Perl_mfree _((Malloc_t where));
 
 #ifdef HAS_STRERROR
 #       ifdef VMS
-	char *strerror _((int,...));
+	char *strerror (int,...);
 #       else
 #ifndef DONT_DECLARE_STD
-	char *strerror _((int));
+	char *strerror (int);
 #endif
 #       endif
 #       ifndef Strerror
@@ -1300,9 +1300,9 @@ typedef union any ANY;
 #endif
 
 #ifdef PERL_OBJECT
-typedef I32 (*filter_t) _((CPerlObj*, int, SV *, int));
+typedef I32 (*filter_t) (CPerlObj*, int, SV *, int);
 #else
-typedef I32 (*filter_t) _((int, SV *, int));
+typedef I32 (*filter_t) (int, SV *, int);
 #endif
 
 #define FILTER_READ(idx, sv, len)  filter_read(idx, sv, len)
@@ -1500,7 +1500,7 @@ union any {
     I32		any_i32;
     IV		any_iv;
     long	any_long;
-    void	(CPERLscope(*any_dptr)) _((void*));
+    void	(CPERLscope(*any_dptr)) (void*);
 };
 #endif
 
@@ -1685,10 +1685,10 @@ struct Outrec {
 #endif
 
 #ifndef __cplusplus
-Uid_t getuid _((void));
-Uid_t geteuid _((void));
-Gid_t getgid _((void));
-Gid_t getegid _((void));
+Uid_t getuid (void);
+Uid_t geteuid (void);
+Gid_t getgid (void);
+Gid_t getegid (void);
 #endif
 
 #ifndef Perl_debug_log
@@ -1758,15 +1758,15 @@ Gid_t getegid _((void));
 #endif
 
 struct ufuncs {
-    I32 (*uf_val)_((IV, SV*));
-    I32 (*uf_set)_((IV, SV*));
+    I32 (*uf_val)(IV, SV*);
+    I32 (*uf_set)(IV, SV*);
     IV uf_index;
 };
 
 /* Fix these up for __STDC__ */
 #ifndef DONT_DECLARE_STD
-char *mktemp _((char*));
-double atof _((const char*));
+char *mktemp (char*);
+double atof (const char*);
 #endif
 
 #ifndef STANDARD_C
@@ -1787,17 +1787,17 @@ char *strcpy(), *strcat();
 #    include <math.h>
 #else
 START_EXTERN_C
-	    double exp _((double));
-	    double log _((double));
-	    double log10 _((double));
-	    double sqrt _((double));
-	    double frexp _((double,int*));
-	    double ldexp _((double,int));
-	    double modf _((double,double*));
-	    double sin _((double));
-	    double cos _((double));
-	    double atan2 _((double,double));
-	    double pow _((double,double));
+	    double exp (double);
+	    double log (double);
+	    double log10 (double);
+	    double sqrt (double);
+	    double frexp (double,int*);
+	    double ldexp (double,int);
+	    double modf (double,double*);
+	    double sin (double);
+	    double cos (double);
+	    double atan2 (double,double);
+	    double pow (double,double);
 END_EXTERN_C
 #endif
 
@@ -1806,21 +1806,21 @@ END_EXTERN_C
 char *crypt ();       /* Maybe more hosts will need the unprototyped version */
 #  else
 #    if !defined(WIN32) || !defined(HAVE_DES_FCRYPT)
-char *crypt _((const char*, const char*));
+char *crypt (const char*, const char*);
 #    endif /* !WIN32 && !HAVE_CRYPT_SOURCE */
 #  endif /* !NeXT && !__NeXT__ */
 #  ifndef DONT_DECLARE_STD
 #    ifndef getenv
-char *getenv _((const char*));
+char *getenv (const char*);
 #    endif /* !getenv */
-Off_t lseek _((int,Off_t,int));
+Off_t lseek (int,Off_t,int);
 #  endif /* !DONT_DECLARE_STD */
-char *getlogin _((void));
+char *getlogin (void);
 #endif /* !__cplusplus */
 
 #ifdef UNLINK_ALL_VERSIONS /* Currently only makes sense for VMS */
 #define UNLINK unlnk
-I32 unlnk _((char*));
+I32 unlnk (char*);
 #else
 #define UNLINK PerlLIO_unlink
 #endif
@@ -1838,7 +1838,7 @@ I32 unlnk _((char*));
 #  endif
 #endif
 
-typedef Signal_t (*Sighandler_t) _((int));
+typedef Signal_t (*Sighandler_t) (int);
 
 #ifdef HAS_SIGACTION
 typedef struct sigaction Sigsave_t;
@@ -1890,10 +1890,10 @@ typedef Sighandler_t Sigsave_t;
  */
 
 #ifndef PERL_OBJECT
-typedef int (*runops_proc_t) _((void));
-int runops_standard _((void));
+typedef int (*runops_proc_t) (void);
+int runops_standard (void);
 #ifdef DEBUGGING
-int runops_debug _((void));
+int runops_debug (void);
 #endif
 #endif
 
@@ -2270,16 +2270,16 @@ enum {		/* pass one of these to get_vtbl */
 
 /* Enable variables which are pointers to functions */
 #ifdef PERL_OBJECT
-typedef regexp*(CPerlObj::*regcomp_t) _((char* exp, char* xend, PMOP* pm));
-typedef I32 (CPerlObj::*regexec_t) _((regexp* prog, char* stringarg,
-				      char* strend, char* strbeg,
-				      I32 minend, SV* screamer, void* data,
-				      U32 flags));
+typedef regexp*(CPerlObj::*regcomp_t) (char* exp, char* xend, PMOP* pm);
+typedef I32 (CPerlObj::*regexec_t) (regexp* prog, char* stringarg,
+				    char* strend, char* strbeg,
+				    I32 minend, SV* screamer, void* data,
+				    U32 flags);
 #else
-typedef regexp*(*regcomp_t) _((char* exp, char* xend, PMOP* pm));
-typedef I32 (*regexec_t) _((regexp* prog, char* stringarg, char* strend, char*
-			    strbeg, I32 minend, SV* screamer, void* data, 
-			    U32 flags));
+typedef regexp*(*regcomp_t) (char* exp, char* xend, PMOP* pm);
+typedef I32 (*regexec_t) (regexp* prog, char* stringarg, char* strend, char*
+			  strbeg, I32 minend, SV* screamer, void* data, 
+			  U32 flags);
 
 #endif
 
@@ -2291,18 +2291,18 @@ typedef I32 (*regexec_t) _((regexp* prog, char* stringarg, char* strend, char*
 /* Interpreter exitlist entry */
 typedef struct exitlistentry {
 #ifdef PERL_OBJECT
-    void (*fn) _((CPerlObj*, void*));
+    void (*fn) (CPerlObj*, void*);
 #else
-    void (*fn) _((void*));
+    void (*fn) (void*);
 #endif
     void *ptr;
 } PerlExitListEntry;
 
 #ifdef PERL_OBJECT
-extern "C" CPerlObj* perl_alloc _((IPerlMem*, IPerlEnv*, IPerlStdIO*, IPerlLIO*, IPerlDir*, IPerlSock*, IPerlProc*));
+extern "C" CPerlObj* perl_alloc (IPerlMem*, IPerlEnv*, IPerlStdIO*, IPerlLIO*, IPerlDir*, IPerlSock*, IPerlProc*);
 
 #ifdef PERL_OBJECT
-typedef int (CPerlObj::*runops_proc_t) _((void));
+typedef int (CPerlObj::*runops_proc_t) (void);
 #endif  /* PERL_OBJECT */
 
 #undef EXT

@@ -19,14 +19,14 @@
 #  endif
 #endif
 
-static I32 num_q _((char *s, STRLEN slen));
-static I32 esc_q _((char *dest, char *src, STRLEN slen));
-static SV *sv_x _((SV *sv, char *str, STRLEN len, I32 n));
-static I32 DD_dump _((SV *val, char *name, STRLEN namelen, SV *retval,
-		      HV *seenhv, AV *postav, I32 *levelp, I32 indent,
-		      SV *pad, SV *xpad, SV *apad, SV *sep,
-		      SV *freezer, SV *toaster,
-		      I32 purity, I32 deepcopy, I32 quotekeys, SV *bless));
+static I32 num_q (char *s, STRLEN slen);
+static I32 esc_q (char *dest, char *src, STRLEN slen);
+static SV *sv_x (SV *sv, char *str, STRLEN len, I32 n);
+static I32 DD_dump (SV *val, char *name, STRLEN namelen, SV *retval,
+		    HV *seenhv, AV *postav, I32 *levelp, I32 indent,
+		    SV *pad, SV *xpad, SV *apad, SV *sep,
+		    SV *freezer, SV *toaster,
+		    I32 purity, I32 deepcopy, I32 quotekeys, SV *bless);
 
 /* does a string need to be protected? */
 static I32

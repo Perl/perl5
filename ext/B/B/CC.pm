@@ -149,7 +149,7 @@ sub init_pp {
     declare("SV", "**svp");
     map { declare("SV", "*$_") } qw(sv src dst left right);
     declare("MAGIC", "*mg");
-    $decl->add("static OP * $ppname _((ARGSproto));");
+    $decl->add("static OP * $ppname (ARGSproto);");
     debug "init_pp: $ppname\n" if $debug_queue;
 }
 

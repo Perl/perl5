@@ -10,7 +10,7 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-static void xs_init _((void));
+static void xs_init (void);
 static PerlInterpreter *my_perl;
 
 #if defined (__MINT__) || defined (atarist)

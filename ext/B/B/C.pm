@@ -671,7 +671,7 @@ sub B::CV::save {
 	my $stashname = $egv->STASH->NAME;
 	$stashname =~ s/::/__/g;
 	$xsub = sprintf("XS_%s_%s", $stashname, $egv->NAME);
-	$decl->add("void $xsub _((CV*));");
+	$decl->add("void $xsub (CV*));";
     }
     else {
 	warn sprintf("No definition for sub %s::%s (unable to autoload)\n",
@@ -1002,7 +1002,7 @@ typedef struct {
     HV *	xcv_stash;
     OP *	xcv_start;
     OP *	xcv_root;
-    void      (*xcv_xsub) _((CV*));
+    void      (*xcv_xsub) (CV*);
     void *	xcv_xsubany;
     GV *	xcv_gv;
     GV *	xcv_filegv;
@@ -1040,9 +1040,9 @@ sub output_boilerplate {
 #undef pp_mapstart
 #define pp_mapstart pp_grepstart
 #define XS_DynaLoader_boot_DynaLoader boot_DynaLoader
-EXTERN_C void boot_DynaLoader _((CV* cv));
+EXTERN_C void boot_DynaLoader (CV* cv);
 
-static void xs_init _((void));
+static void xs_init (void);
 static PerlInterpreter *my_perl;
 EOT
 }

@@ -50,7 +50,7 @@ if (@exts) {
   foreach $ext (@exts) {
     my($subname) = $ext;
     $subname =~ s/::/__/g;
-    print OUT "extern void	boot_${subname} _((CV* cv));\n"
+    print OUT "extern void	boot_${subname} (CV* cv);\n"
   }
   # May not actually be a declaration, so put after other declarations
   print OUT "  dXSUB_SYS;\n";

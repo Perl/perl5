@@ -20,7 +20,7 @@
 #endif
 
 #if !defined(STANDARD_C) && !defined(HAS_GETENV_PROTOTYPE)
-char *getenv _((char *)); /* Usually in <stdlib.h> */
+char *getenv (char *); /* Usually in <stdlib.h> */
 #endif
 
 #ifdef I_FCNTL
@@ -43,36 +43,36 @@ char *getenv _((char *)); /* Usually in <stdlib.h> */
 #endif
 
 #ifdef PERL_OBJECT
-static I32 read_e_script _((CPerlObj* pPerl, int idx, SV *buf_sv, int maxlen));
+static I32 read_e_script (CPerlObj* pPerl, int idx, SV *buf_sv, int maxlen);
 #else
-static void find_beginning _((void));
-static void forbid_setid _((char *));
-static void incpush _((char *, int));
-static void init_interp _((void));
-static void init_ids _((void));
-static void init_debugger _((void));
-static void init_lexer _((void));
-static void init_main_stash _((void));
-static void *perl_parse_body _((va_list args));
-static void *perl_run_body _((va_list args));
-static void *perl_call_body _((va_list args));
-static void perl_call_xbody _((OP *myop, int is_eval));
-static void *call_list_body _((va_list args));
+static void find_beginning (void);
+static void forbid_setid (char *);
+static void incpush (char *, int);
+static void init_interp (void);
+static void init_ids (void);
+static void init_debugger (void);
+static void init_lexer (void);
+static void init_main_stash (void);
+static void *perl_parse_body (va_list args);
+static void *perl_run_body (va_list args);
+static void *perl_call_body (va_list args);
+static void perl_call_xbody (OP *myop, int is_eval);
+static void *call_list_body (va_list args);
 #ifdef USE_THREADS
-static struct perl_thread * init_main_thread _((void));
+static struct perl_thread * init_main_thread (void);
 #endif /* USE_THREADS */
-static void init_perllib _((void));
-static void init_postdump_symbols _((int, char **, char **));
-static void init_predump_symbols _((void));
-static void my_exit_jump _((void)) __attribute__((noreturn));
-static void nuke_stacks _((void));
-static void open_script _((char *, bool, SV *, int *fd));
-static void usage _((char *));
+static void init_perllib (void);
+static void init_postdump_symbols (int, char **, char **);
+static void init_predump_symbols (void);
+static void my_exit_jump (void) __attribute__((noreturn));
+static void nuke_stacks (void);
+static void open_script (char *, bool, SV *, int *fd);
+static void usage (char *);
 #ifdef IAMSUID
-static int  fd_on_nosuid_fs _((int));
+static int  fd_on_nosuid_fs (int);
 #endif
-static void validate_suid _((char *, char*, int));
-static I32 read_e_script _((int idx, SV *buf_sv, int maxlen));
+static void validate_suid (char *, char*, int);
+static I32 read_e_script (int idx, SV *buf_sv, int maxlen);
 #endif
 
 #ifdef PERL_OBJECT
@@ -1550,25 +1550,25 @@ usage(char *name)		/* XXX move this out into a module ? */
 "-0[octal]       specify record separator (\\0, if no argument)",
 "-a              autosplit mode with -n or -p (splits $_ into @F)",
 "-c              check syntax only (runs BEGIN and END blocks)",
-"-d[:debugger]   run scripts under debugger",
-"-D[number/list] set debugging flags (argument is a bit mask or flags)",
-"-e 'command'    one line of script. Several -e's allowed. Omit [programfile].",
-"-F/pattern/     split() pattern for autosplit (-a). The //'s are optional.",
-"-i[extension]   edit <> files in place (make backup if extension supplied)",
-"-Idirectory     specify @INC/#include directory (may be used more than once)",
+"-d[:debugger]   run program under debugger",
+"-D[number/list] set debugging flags (argument is a bit mask or alphabets)",
+"-e 'command'    one line of program (several -e's allowed, omit programfile)",
+"-F/pattern/     split() pattern for -a switch (//'s are optional)",
+"-i[extension]   edit <> files in place (makes backup if extension supplied)",
+"-Idirectory     specify @INC/#include directory (several -I's allowed)",
 "-l[octal]       enable line ending processing, specifies line terminator",
-"-[mM][-]module.. executes `use/no module...' before executing your script.",
-"-n              assume 'while (<>) { ... }' loop around your script",
-"-p              assume loop like -n but print line also like sed",
-"-P              run script through C preprocessor before compilation",
-"-s              enable some switch parsing for switches after script name",
-"-S              look for the script using PATH environment variable",
-"-T              turn on tainting checks",
-"-u              dump core after parsing script",
+"-[mM][-]module  execute `use/no module...' before executing program",
+"-n              assume 'while (<>) { ... }' loop around program",
+"-p              assume loop like -n but print line also, like sed",
+"-P              run program through C preprocessor before compilation",
+"-s              enable rudimentary parsing for switches after programfile",
+"-S              look for programfile using PATH environment variable",
+"-T              enable tainting checks",
+"-u              dump core after parsing program",
 "-U              allow unsafe operations",
-"-v              print version number, patchlevel plus VERY IMPORTANT perl info",
-"-V[:variable]   print perl configuration information",
-"-w              TURN WARNINGS ON FOR COMPILATION OF YOUR SCRIPT. Recommended.",
+"-v              print version, subversion (includes VERY IMPORTANT perl info)",
+"-V[:variable]   print configuration summary (or a single Config.pm variable)",
+"-w              enable many useful warnings (RECOMMENDED)",
 "-x[directory]   strip off text before #!perl line and perhaps cd to directory",
 "\n",
 NULL

@@ -29,26 +29,27 @@
 #define CALLOP this->*PL_op
 #else
 #define CALLOP *PL_op
-static void *docatch_body _((va_list args));
-static OP *docatch _((OP *o));
-static OP *dofindlabel _((OP *o, char *label, OP **opstack, OP **oplimit));
-static void doparseform _((SV *sv));
-static I32 dopoptoeval _((I32 startingblock));
-static I32 dopoptolabel _((char *label));
-static I32 dopoptoloop _((I32 startingblock));
-static I32 dopoptosub _((I32 startingblock));
-static I32 dopoptosub_at _((PERL_CONTEXT *cxstk, I32 startingblock));
-static void save_lines _((AV *array, SV *sv));
-static I32 sortcv _((SV *a, SV *b));
-static void qsortsv _((SV **array, size_t num_elts, I32 (*fun)(SV *a, SV *b)));
-static OP *doeval _((int gimme, OP** startop));
-static PerlIO *doopen_pmc _((const char *name, const char *mode));
-static I32 sv_ncmp _((SV *a, SV *b));
-static I32 sv_i_ncmp _((SV *a, SV *b));
-static I32 amagic_ncmp _((SV *a, SV *b));
-static I32 amagic_i_ncmp _((SV *a, SV *b));
-static I32 amagic_cmp _((SV *str1, SV *str2));
-static I32 amagic_cmp_locale _((SV *str1, SV *str2));
+static void *docatch_body (va_list args);
+static OP *docatch (OP *o);
+static OP *dofindlabel (OP *o, char *label, OP **opstack, OP **oplimit);
+static void doparseform (SV *sv);
+static I32 dopoptoeval (I32 startingblock);
+static I32 dopoptolabel (char *label);
+static I32 dopoptoloop (I32 startingblock);
+static I32 dopoptosub (I32 startingblock);
+static I32 dopoptosub_at (PERL_CONTEXT *cxstk, I32 startingblock);
+static void save_lines (AV *array, SV *sv);
+static I32 sortcv (SV *a, SV *b);
+static void qsortsv (SV **array, size_t num_elts, I32 (*fun)(SV *a, SV *b));
+static OP *doeval (int gimme, OP** startop);
+static PerlIO *doopen_pmc (const char *name, const char *mode);
+static I32 sv_ncmp (SV *a, SV *b);
+static I32 sv_i_ncmp (SV *a, SV *b);
+static I32 amagic_ncmp (SV *a, SV *b);
+static I32 amagic_i_ncmp (SV *a, SV *b);
+static I32 amagic_cmp (SV *str1, SV *str2);
+static I32 amagic_cmp_locale (SV *str1, SV *str2);
+static void free_closures (void);
 #endif
 
 PP(pp_wantarray)
@@ -1324,6 +1325,42 @@ dounwind(I32 cxix)
     }
 }
 
+/*
+ * Closures mentioned at top level of eval cannot be referenced
+ * again, and their presence indirectly causes a memory leak.
+ * (Note that the fact that compcv and friends are still set here
+ * is, AFAIK, an accident.)  --Chip
+ *
+ * XXX need to get comppad et al from eval's cv rather than
+ * relying on the incidental global values.
+ */
+STATIC void
+free_closures(void)
+{
+    dTHR;
+    SV **svp = AvARRAY(PL_comppad_name);
+    I32 ix;
+    for (ix = AvFILLp(PL_comppad_name); ix >= 0; ix--) {
+	SV *sv = svp[ix];
+	if (sv && sv != &PL_sv_undef && *SvPVX(sv) == '&') {
+	    SvREFCNT_dec(sv);
+	    svp[ix] = &PL_sv_undef;
+
+	    sv = PL_curpad[ix];
+	    if (CvCLONE(sv)) {
+		SvREFCNT_dec(CvOUTSIDE(sv));
+		CvOUTSIDE(sv) = Nullcv;
+	    }
+	    else {
+		SvREFCNT_dec(sv);
+		sv = NEWSV(0,0);
+		SvPADTMP_on(sv);
+		PL_curpad[ix] = sv;
+	    }
+	}
+    }
+}
+
 OP *
 die_where(char *message, STRLEN msglen)
 {
@@ -1804,6 +1841,9 @@ PP(pp_return)
 	break;
     case CXt_EVAL:
 	POPEVAL(cx);
+	if (AvFILLp(PL_comppad_name) >= 0)
+	    free_closures();
+	lex_end();
 	if (optype == OP_REQUIRE &&
 	    (MARK == SP || (gimme == G_SCALAR && !SvTRUE(*SP))) )
 	{
@@ -2138,12 +2178,12 @@ PP(pp_goto)
 	    if (CvXSUB(cv)) {
 #ifdef PERL_XSUB_OLDSTYLE
 		if (CvOLDSTYLE(cv)) {
-		    I32 (*fp3)_((int,int,int));
+		    I32 (*fp3)(int,int,int);
 		    while (SP > mark) {
 			SP[1] = SP[0];
 			SP--;
 		    }
-		    fp3 = (I32(*)_((int,int,int)))CvXSUB(cv);
+		    fp3 = (I32(*)(int,int,int)))CvXSUB(cv;
 		    items = (*fp3)(CvXSUBANY(cv).any_i32,
 		                   mark - PL_stack_base + 1,
 				   items);
@@ -3083,35 +3123,8 @@ PP(pp_leaveeval)
     }
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
-    /*
-     * Closures mentioned at top level of eval cannot be referenced
-     * again, and their presence indirectly causes a memory leak.
-     * (Note that the fact that compcv and friends are still set here
-     * is, AFAIK, an accident.)  --Chip
-     */
-    if (AvFILLp(PL_comppad_name) >= 0) {
-	SV **svp = AvARRAY(PL_comppad_name);
-	I32 ix;
-	for (ix = AvFILLp(PL_comppad_name); ix >= 0; ix--) {
-	    SV *sv = svp[ix];
-	    if (sv && sv != &PL_sv_undef && *SvPVX(sv) == '&') {
-		SvREFCNT_dec(sv);
-		svp[ix] = &PL_sv_undef;
-
-		sv = PL_curpad[ix];
-		if (CvCLONE(sv)) {
-		    SvREFCNT_dec(CvOUTSIDE(sv));
-		    CvOUTSIDE(sv) = Nullcv;
-		}
-		else {
-		    SvREFCNT_dec(sv);
-		    sv = NEWSV(0,0);
-		    SvPADTMP_on(sv);
-		    PL_curpad[ix] = sv;
-		}
-	    }
-	}
-    }
+    if (AvFILLp(PL_comppad_name) >= 0)
+	free_closures();
 
 #ifdef DEBUGGING
     assert(CvDEPTH(PL_compcv) == 1);
@@ -3578,10 +3591,7 @@ STATIC void
 #ifdef PERL_OBJECT
 qsortsv(SV ** array, size_t num_elts, SVCOMPARE compare)
 #else
-qsortsv(
-   SV ** array,
-   size_t num_elts,
-   I32 (*compare)(SV *a, SV *b))
+qsortsv(SV ** array, size_t num_elts, I32 (*compare)(SV *a, SV *b))
 #endif
 {
    register SV * temp;

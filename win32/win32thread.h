@@ -149,12 +149,12 @@ extern __declspec(thread) struct perl_thread *Perl_current_thread;
 #endif
 struct perl_thread;
 
-void Perl_alloc_thread_key _((void));
-int Perl_thread_create _((struct perl_thread *thr, thread_func_t *fn));
-void Perl_set_thread_self _((struct perl_thread *thr));
-struct perl_thread *Perl_getTHR _((void));
-void Perl_setTHR _((struct perl_thread *t));
-void Perl_init_thread_intern _((struct perl_thread *t));
+void Perl_alloc_thread_key (void);
+int Perl_thread_create (struct perl_thread *thr, thread_func_t *fn);
+void Perl_set_thread_self (struct perl_thread *thr);
+struct perl_thread *Perl_getTHR (void);
+void Perl_setTHR (struct perl_thread *t);
+void Perl_init_thread_intern (struct perl_thread *t);
 
 END_EXTERN_C
 

@@ -42,30 +42,30 @@
 
 #else /* !PERL_OBJECT */
 
-static IV asIV _((SV* sv));
-static UV asUV _((SV* sv));
-static SV *more_sv _((void));
-static void more_xiv _((void));
-static void more_xnv _((void));
-static void more_xpv _((void));
-static void more_xrv _((void));
-static XPVIV *new_xiv _((void));
-static XPVNV *new_xnv _((void));
-static XPV *new_xpv _((void));
-static XRV *new_xrv _((void));
-static void del_xiv _((XPVIV* p));
-static void del_xnv _((XPVNV* p));
-static void del_xpv _((XPV* p));
-static void del_xrv _((XRV* p));
-static void sv_unglob _((SV* sv));
-static void sv_add_backref _((SV *tsv, SV *sv));
-static void sv_del_backref _((SV *sv));
+static IV asIV (SV* sv);
+static UV asUV (SV* sv);
+static SV *more_sv (void);
+static void more_xiv (void);
+static void more_xnv (void);
+static void more_xpv (void);
+static void more_xrv (void);
+static XPVIV *new_xiv (void);
+static XPVNV *new_xnv (void);
+static XPV *new_xpv (void);
+static XRV *new_xrv (void);
+static void del_xiv (XPVIV* p);
+static void del_xnv (XPVNV* p);
+static void del_xpv (XPV* p);
+static void del_xrv (XRV* p);
+static void sv_unglob (SV* sv);
+static void sv_add_backref (SV *tsv, SV *sv);
+static void sv_del_backref (SV *sv);
 
 #ifndef PURIFY
 static void *my_safemalloc(MEM_SIZE size);
 #endif
 
-typedef void (*SVFUNC) _((SV*));
+typedef void (*SVFUNC) (SV*);
 #define VTBL *vtbl
 #define FCALL *f
 
@@ -116,9 +116,8 @@ static I32 registry_size;
 #define REG_ADD(sv)	REG_REPLACE(sv,Nullsv,sv)
 #define REG_REMOVE(sv)	REG_REPLACE(sv,sv,Nullsv)
 
-static void
-reg_add(sv)
-SV* sv;
+STATIC void
+reg_add(SV *sv)
 {
     if (PL_sv_count >= (registry_size >> 1))
     {
@@ -144,17 +143,15 @@ SV* sv;
     ++PL_sv_count;
 }
 
-static void
-reg_remove(sv)
-SV* sv;
+STATIC void
+reg_remove(SV *sv)
 {
     REG_REMOVE(sv);
     --PL_sv_count;
 }
 
-static void
-visit(f)
-SVFUNC f;
+STATIC void
+visit(SVFUNC f)
 {
     I32 i;
 
@@ -166,10 +163,7 @@ SVFUNC f;
 }
 
 void
-sv_add_arena(ptr, size, flags)
-char* ptr;
-U32 size;
-U32 flags;
+sv_add_arena(char *ptr, U32 size, U32 flags)
 {
     if (!(flags & SVf_FAKE))
 	Safefree(ptr);

@@ -16,7 +16,7 @@ char *staticlinkmodules[] = {
     NULL,
 };
 
-EXTERN_C void boot_DynaLoader _((CV* cv _CPERLarg));
+EXTERN_C void boot_DynaLoader (CV* cv _CPERLarg);
 
 static void
 xs_init(CPERLarg)

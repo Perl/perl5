@@ -75,7 +75,7 @@ sub xsinit {
     @mods = grep(!$seen{$_}++, @mods);
 
     print $fh &xsi_header();
-    print $fh "EXTERN_C void xs_init _(($xsinit_proto));\n\n";     
+    print $fh "EXTERN_C void xs_init ($xsinit_proto);\n\n";     
     print $fh &xsi_protos(@mods);
 
     print $fh "\nEXTERN_C void\nxs_init($xsinit_proto)\n{\n";
@@ -127,7 +127,7 @@ sub xsi_protos {
         my($mname, $cname);
         ($mname = $pname) =~ s!/!::!g;
         ($cname = $pname) =~ s!/!__!g;
-	my($ccode) = "EXTERN_C void boot_${cname} _(($boot_proto));\n";
+	my($ccode) = "EXTERN_C void boot_${cname} ($boot_proto);\n";
 	next if $seen{$ccode}++;
         push(@retval, $ccode);
     }

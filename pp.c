@@ -111,9 +111,9 @@ typedef unsigned UBW;
 #endif
 
 #ifndef PERL_OBJECT
-static void doencodes _((SV* sv, char* s, I32 len));
-static SV* refto _((SV* sv));
-static U32 seed _((void));
+static void doencodes (SV* sv, char* s, I32 len);
+static SV* refto (SV* sv);
+static U32 seed (void);
 #endif
 
 /* variations on pp_null */
@@ -1670,7 +1670,7 @@ PP(pp_cos)
  */
 
 #ifndef HAS_DRAND48_PROTO
-extern double drand48 _((void));
+extern double drand48 (void);
 #endif
 
 PP(pp_rand)
