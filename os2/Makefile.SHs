@@ -57,8 +57,9 @@ AOUT_EXTRA_LIBS	= $aout_extra_libs
 $spitshell >>Makefile <<'!NO!SUBS!'
 $(LIBPERL): perl.imp $(PERL_DLL) perl5.def libperl_override.lib
 	emximp -o $(LIBPERL) perl.imp
+	cp $(LIBPERL) perl.lib
 
-libperl_override.imp: os2/os2add.sym
+libperl_override.imp: os2/os2add.sym miniperl
 	./miniperl -wnle 'print "$$_\t$(PERL_DLL_BASE)\t$$_\t?"' os2/os2add.sym > tmp.imp
 	echo	'strdup	$(PERL_DLL_BASE)	Perl_strdup	?' >> tmp.imp
 	echo	'putenv	$(PERL_DLL_BASE)	Perl_putenv	?' >> tmp.imp
@@ -198,6 +199,7 @@ $(DYNALOADER_OBJ) : $(DYNALOADER)
 $(AOUT_LIBPERL) : $(aout_obj) perl$(AOUT_OBJ_EXT)
 	rm -f $@
 	$(AOUT_AR) rcu $@ perl$(AOUT_OBJ_EXT) $(aout_obj)
+	cp $@ perl.a
 
 .c$(AOUT_OBJ_EXT):
 	$(AOUT_CCCMD) $(PLDLFLAGS) -c $*.c
@@ -219,7 +221,10 @@ miniperl_: $& miniperlmain$(AOUT_OBJ_EXT) $(AOUT_LIBPERL) opmini$(AOUT_OBJ_EXT) 
 
 # Forking statically loaded perl
 
-perl_$(EXE_EXT) perl_: $& aout_perlmain$(AOUT_OBJ_EXT) $(AOUT_LIBPERL) $(AOUT_DYNALOADER) $(aout_static_ext) ext.libs
+# Need a miniperl_ dependency, since $(AOUT_DYNALOADER) is build via implicit
+# rules, thus would not rebuild miniperl_ via an explicit rule
+
+perl_$(EXE_EXT) perl_: $& miniperl_ aout_perlmain$(AOUT_OBJ_EXT) $(AOUT_LIBPERL) $(AOUT_DYNALOADER) $(aout_static_ext) ext.libs
 	$(CC) $(AOUT_CLDFLAGS) $(CCDLFLAGS) -o perl_ aout_perlmain$(AOUT_OBJ_EXT) $(AOUT_DYNALOADER) $(aout_static_ext) $(AOUT_LIBPERL) `cat ext.libs` $(libs)
 
 # Remove -Zcrtdll
@@ -448,7 +453,7 @@ lib/auto/*/%.a : ext/%/Makefile.aout
 	@cd ext/$(basename $(notdir $@)) ; make -f Makefile.aout config || echo "\$(MAKE) config failed, continuing anyway..."
 	cd ext/$(basename $(notdir $@)) ; make -f Makefile.aout LINKTYPE=static CCCDLFLAGS=
 
-ext/%/Makefile.aout : miniperl_ \$(_preplibrary) \$(AOUT_EXTENSIONS_FORCE)
+ext/%/Makefile.aout : miniperl_ $(_preplibrary) $(AOUT_EXTENSIONS_FORCE)
 	cd $(dir $@) ; ../../miniperl_ -I ../../lib Makefile.PL FIRST_MAKEFILE=Makefile.aout INSTALLDIRS=perl 
 
 !NO!SUBS!

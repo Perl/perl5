@@ -386,14 +386,16 @@ value of $^F.  See L<perlvar/$^F>.
 =item alarm
 
 Arranges to have a SIGALRM delivered to this process after the
-specified number of seconds have elapsed.  If SECONDS is not specified,
-the value stored in C<$_> is used. (On some machines,
-unfortunately, the elapsed time may be up to one second less than you
-specified because of how seconds are counted.)  Only one timer may be
-counting at once.  Each call disables the previous timer, and an
-argument of C<0> may be supplied to cancel the previous timer without
-starting a new one.  The returned value is the amount of time remaining
-on the previous timer.
+specified number of wallclock seconds have elapsed.  If SECONDS is not
+specified, the value stored in C<$_> is used. (On some machines,
+unfortunately, the elapsed time may be up to one second less or more
+than you specified because of how seconds are counted, and process
+scheduling may delay the delivery of the signal even further.)
+
+Only one timer may be counting at once.  Each call disables the
+previous timer, and an argument of C<0> may be supplied to cancel the
+previous timer without starting a new one.  The returned value is the
+amount of time remaining on the previous timer.
 
 For delays of finer granularity than one second, you may use Perl's
 four-argument version of select() leaving the first three arguments

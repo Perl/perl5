@@ -160,9 +160,8 @@ sub uncstring {
 sub strip_comments {
     my $stmt = shift;
     # Comments only allowed in instructions which don't take string arguments
+    # Treat string as a single line so .* eats \n characters.
     $stmt =~ s{
-	(?sx)	# Snazzy extended regexp coming up. Also, treat
-		# string as a single line so .* eats \n characters.
 	^\s*	# Ignore leading whitespace
 	(
 	  [^"]*	# A double quote '"' indicates a string argument. If we
@@ -170,7 +169,7 @@ sub strip_comments {
 	)
 	\s*\#	# Any amount of whitespace plus the comment marker...
 	.*$	# ...which carries on to end-of-string.
-    }{$1};	# Keep only the instruction and optional argument.
+    }{$1}sx;	# Keep only the instruction and optional argument.
     return $stmt;
 }
 

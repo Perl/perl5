@@ -31,6 +31,307 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 13810] By: jhi                                   on 2001/12/19  16:50:12
+        Log: Subject: Re: [BUG] bleadperl regexp (was ok in 5.6.0)
+             From: Wolfgang Laun <Wolfgang.Laun@alcatel.at>
+             Date: Wed, 19 Dec 2001 12:35:07 +0100
+             Message-ID: <3C207B6B.A687A8EC@alcatel.at>
+             
+             Subject: Re: [BUG] bleadperl regexp (was ok in 5.6.0)
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Wed, 19 Dec 2001 17:34:51 +0000
+             Message-Id: <200112191734.fBJHYpd30715@crypt.compulink.co.uk>
+     Branch: perl
+	   ! pod/perlre.pod
+____________________________________________________________________________
+[ 13809] By: jhi                                   on 2001/12/19  16:47:11
+        Log: Integrate perlio.
+     Branch: perl
+	  !> ext/Encode/Encode.xs ext/PerlIO/Scalar/Scalar.xs
+	  !> ext/PerlIO/Via/Via.xs perlio.c perliol.h
+____________________________________________________________________________
+[ 13807] By: jhi                                   on 2001/12/19  15:59:02
+        Log: One more embedded (?sx) de-embedded, from Wolfgang Laun.
+     Branch: perl
+	   ! ext/B/B/Assembler.pm
+____________________________________________________________________________
+[ 13806] By: jhi                                   on 2001/12/19  15:08:29
+        Log: Reword the alarm explanation.
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 13805] By: jhi                                   on 2001/12/19  15:04:03
+        Log: Subject: [PATCH @13746] OS/2 build
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu> 
+             Date: Wed, 19 Dec 2001 02:45:41 -0500
+             Message-ID: <20011219024541.A29803@math.ohio-state.edu>        
+             
+             (skipped the t/TEST change)
+     Branch: perl
+	   ! lib/English.t lib/ExtUtils/t/Embed.t lib/File/stat.t
+	   ! lib/Shell.t os2/Makefile.SHs os2/OS2/REXX/DLL/Makefile.PL
+	   ! os2/os2.c os2/perlrexx.c t/op/alarm.t util.c
+____________________________________________________________________________
+[ 13804] By: jhi                                   on 2001/12/19  14:55:26
+        Log: Upgrade to Net::Ping 2.09.
+     Branch: perl
+	   + lib/Net/Ping/CHANGES lib/Net/Ping/README
+	   + lib/Net/Ping/t/100_load.t lib/Net/Ping/t/110_icmp_inst.t
+	   + lib/Net/Ping/t/120_udp_inst.t lib/Net/Ping/t/130_tcp_inst.t
+	   + lib/Net/Ping/t/140_stream_inst.t lib/Net/Ping/t/200_ping_tcp.t
+	   + lib/Net/Ping/t/300_ping_stream.t
+	   ! MANIFEST lib/Net/Ping.pm
+____________________________________________________________________________
+[ 13802] By: jhi                                   on 2001/12/19  14:25:27
+        Log: B::Assembler/B::Disassembler patches and test;
+             from Wolfgang Laun.
+             
+             TODO: getting perlcc working.
+     Branch: perl
+	   + ext/B/t/assembler.t
+	   ! MANIFEST ext/B/B/Assembler.pm ext/B/B/Disassembler.pm
+____________________________________________________________________________
+[ 13801] By: jhi                                   on 2001/12/19  14:18:10
+        Log: Can't printf U8s as UVs.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 13800] By: jhi                                   on 2001/12/19  14:12:02
+        Log: Subject: Re: [PATCH] ...while $var = glob(...)
+             From: Robin Houston <robin@kitsite.com> 
+             Date: Wed, 19 Dec 2001 13:48:55 +0000
+             Message-ID: <20011219134855.A20452@puffinry.freeserve.co.uk>        
+             
+             Not exactly a glob test but internal-logically correct.
+     Branch: perl
+	   ! t/op/glob.t
+____________________________________________________________________________
+[ 13799] By: jhi                                   on 2001/12/19  13:51:37
+        Log: Subject: [PATCH lib/lib_pm.PL lib/lib.t] portability snag
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Wed, 19 Dec 2001 07:42:54 -0500
+             Message-ID: <20011219124254.GF8630@blackrider>
+     Branch: perl
+	   + lib/lib.t
+	   ! MANIFEST lib/lib_pm.PL
+____________________________________________________________________________
+[ 13798] By: jhi                                   on 2001/12/19  13:35:59
+        Log: Integrate with perlio.
+     Branch: perl
+	  !> hv.c hv.h scope.c util.c
+____________________________________________________________________________
+[ 13793] By: jhi                                   on 2001/12/19  04:58:51
+        Log: Regen toc.
+     Branch: perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 13792] By: jhi                                   on 2001/12/19  04:56:42
+        Log: FAQ sync.
+     Branch: perl
+	   ! pod/perlfaq5.pod
+____________________________________________________________________________
+[ 13791] By: jhi                                   on 2001/12/19  04:38:47
+        Log: Reformat round.
+     Branch: perl
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[ 13790] By: jhi                                   on 2001/12/19  04:32:06
+        Log: Subject: [PATCH] pod/perlunicode.pod
+             From: Jeffrey Friedl <jfriedl@yahoo.com>
+             Date: Tue, 18 Dec 2001 21:31:13 -0800 (PST) 
+             Message-Id: <200112190531.fBJ5VDp57308@ventrue.corp.yahoo.com> 
+     Branch: perl
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[ 13789] By: jhi                                   on 2001/12/19  04:16:39
+        Log: Subject: Re: [PATCH] pod/perluniintro.pod (removes unnecessary UTF-8 references)
+             From: Jeffrey Friedl <jfriedl@yahoo.com>
+             Date: Tue, 18 Dec 2001 21:13:59 -0800 (PST) 
+             Message-Id: <200112190513.fBJ5DxN56315@ventrue.corp.yahoo.com> 
+     Branch: perl
+	   ! pod/perluniintro.pod
+____________________________________________________________________________
+[ 13788] By: jhi                                   on 2001/12/19  03:54:08
+        Log: Slight pod reformatting.
+     Branch: perl
+	   ! pod/perluniintro.pod
+____________________________________________________________________________
+[ 13787] By: jhi                                   on 2001/12/19  03:41:45
+        Log: Subject: [PATCH] pod/perluniintro.pod (removes unnecessary UTF-8 references)
+             From: Jeffrey Friedl <jfriedl@yahoo.com>    
+             Date: Tue, 18 Dec 2001 20:27:42 -0800 (PST)
+             Message-Id: <200112190427.fBJ4RgP53458@ventrue.corp.yahoo.com>
+     Branch: perl
+	   ! pod/perluniintro.pod
+____________________________________________________________________________
+[ 13786] By: jhi                                   on 2001/12/19  01:14:04
+        Log: Subject: Re: [ID 20011213.001] Segfault with overload and Test
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Wed, 19 Dec 2001 01:45:23 +0000
+             Message-Id: <200112190145.fBJ1jNt23668@crypt.compulink.co.uk>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 13785] By: jhi                                   on 2001/12/19  01:11:45
+        Log: Subject: Porting/checkURL.pl
+             From: abigail@foad.org
+             Date: Tue, 18 Dec 2001 19:03:22 +0100          
+             Message-ID: <20011218180322.8278.qmail@foad.org> 
+     Branch: perl
+	   ! Porting/checkURL.pl
+____________________________________________________________________________
+[ 13783] By: jhi                                   on 2001/12/19  00:26:34
+        Log: A bit too oversweeping matching in #13778.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 13782] By: jhi                                   on 2001/12/19  00:09:10
+        Log: Re-gen Configure based on #13778..13781.
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[ 13767] By: jhi                                   on 2001/12/18  22:13:14
+        Log: Subject: Re: Benchmark.t failure on Linux
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Tue, 18 Dec 2001 22:51:25 +0000
+             Message-ID: <20011218225124.N21702@plum.flirble.org>
+     Branch: perl
+	   ! lib/Benchmark.t
+____________________________________________________________________________
+[ 13766] By: jhi                                   on 2001/12/18  22:07:35
+        Log: Re-applying #13752 until a better solution can be found.
+     Branch: perl
+	   ! lib/ExtUtils/t/MM_Unix.t
+____________________________________________________________________________
+[ 13765] By: jhi                                   on 2001/12/18  21:05:13
+        Log: Subject: [PATCH] Suggested doc enhancement(?) to Exporter.pm
+             From: "Giroux, Mike (Exchange)" <mgiroux@bear.com>
+             Date: Tue, 18 Dec 2001 12:05:40 -0500
+             Message-ID: <03CF7D5B2CFFD211990300A0C95DEA0C080BEB5A@whmsx18.is.bear.com>
+     Branch: perl
+	   ! lib/Exporter.pm
+____________________________________________________________________________
+[ 13764] By: jhi                                   on 2001/12/18  20:58:44
+        Log: %g -> NVgf cleanup, based on Schwern's RedHat 7.1/Alpha
+             findings -- some of the warnings I can't explain except
+             by NVgf being detected wrong, though.
+     Branch: perl
+	   ! dump.c pp.c sv.c x2p/a2p.h x2p/str.c
+____________________________________________________________________________
+[ 13763] By: jhi                                   on 2001/12/18  20:54:28
+        Log: Subject: [PATCH] pod/perluniintro.pod
+             From: Jeffrey Friedl <jfriedl@yahoo.com>
+             Date: Tue, 18 Dec 2001 10:27:45 -0800 (PST)
+             Message-Id: <200112181827.fBIIRjv16547@ventrue.corp.yahoo.com>
+     Branch: perl
+	   ! pod/perluniintro.pod
+____________________________________________________________________________
+[ 13762] By: jhi                                   on 2001/12/18  17:49:07
+        Log: ".pm" is the native executable suffix in VOS.
+     Branch: perl
+	   ! hints/vos.sh
+____________________________________________________________________________
+[ 13761] By: jhi                                   on 2001/12/18  15:57:39
+        Log: Integrate perlio;
+             Tidied version of Jeffrey Friedl's <jfriedl@yahoo.com> restricted hashes
+     Branch: perl
+	  !> ext/Devel/Peek/Peek.t hv.c hv.h scope.c sv.c t/lib/access.t
+____________________________________________________________________________
+[ 13759] By: jhi                                   on 2001/12/18  15:54:19
+        Log: (Undone by #13766.)
+             Retract #13752.
+     Branch: perl
+	   ! lib/ExtUtils/t/MM_Unix.t
+____________________________________________________________________________
+[ 13758] By: jhi                                   on 2001/12/18  15:26:18
+        Log: Echoes of #13757.
+     Branch: perl
+	   ! t/lib/warnings/utf8
+____________________________________________________________________________
+[ 13757] By: jhi                                   on 2001/12/18  15:24:50
+        Log: Make the utf8 malformedness messages more verbose.
+     Branch: perl
+	   ! lib/utf8.t utf8.c
+____________________________________________________________________________
+[ 13755] By: jhi                                   on 2001/12/18  14:05:26
+        Log: README.aix updates from Jens-Uwe Mager.
+     Branch: perl
+	   ! README.aix
+____________________________________________________________________________
+[ 13754] By: jhi                                   on 2001/12/18  14:03:31
+        Log: Subject: [PATCH lib/Benchmark.t] Show value of $fastslow on failure
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 18 Dec 2001 00:58:18 -0500
+             Message-ID: <20011218055818.GC4362@blackrider>
+     Branch: perl
+	   ! lib/Benchmark.t
+____________________________________________________________________________
+[ 13753] By: jhi                                   on 2001/12/18  14:02:49
+        Log: Subject: [PATCH lib/ExtUtils/t/Installed.t] Making it somewhat more portable
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 18 Dec 2001 00:40:38 -0500
+             Message-ID: <20011218054038.GB4362@blackrider>
+     Branch: perl
+	   ! lib/ExtUtils/Installed.pm lib/ExtUtils/t/Installed.t
+____________________________________________________________________________
+[ 13752] By: jhi                                   on 2001/12/18  14:01:44
+        Log: (reintroduced by #13766)
+             (retracted by #13759)
+             
+             Subject: [PATCH lib/ExtUtils/t/MM_Unix.t] All the world's not a Unix
+             From: Michael G Schwern <schwern@pobox.com>  
+             Date: Tue, 18 Dec 2001 00:00:23 -0500
+             Message-ID: <20011218050023.GA27893@blackrider>
+     Branch: perl
+	   ! lib/ExtUtils/t/MM_Unix.t
+____________________________________________________________________________
+[ 13751] By: jhi                                   on 2001/12/18  13:59:32
+        Log: Re-patch #13749.
+     Branch: perl
+	   ! t/op/glob.t
+____________________________________________________________________________
+[ 13750] By: jhi                                   on 2001/12/18  13:56:34
+        Log: Subject: [doc patch] s{(?<=perldeb)ug}{guts}
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Tue, 18 Dec 2001 12:55:43 +0000
+             Message-Id: <200112181255.fBICthb09977@crypt.compulink.co.uk>
+     Branch: perl
+	   ! ext/Devel/Peek/Peek.pm
+____________________________________________________________________________
+[ 13749] By: jhi                                   on 2001/12/18  13:55:12
+        Log: Subject: Third time lucky? (Re: [PATCH] ...while $var = glob(...))
+             From: Robin Houston <robin@kitsite.com> 
+             Date: Tue, 18 Dec 2001 14:54:33 +0000
+             Message-ID: <20011218145433.A18835@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! t/op/glob.t
+____________________________________________________________________________
+[ 13748] By: jhi                                   on 2001/12/17  23:54:41
+        Log: Subject: [PATCH] slightly more for Exporter.pm
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Tue, 18 Dec 2001 00:22:03 +0000
+             Message-ID: <20011218002203.M21702@plum.flirble.org>
+     Branch: perl
+	   ! lib/Exporter.pm
+____________________________________________________________________________
+[ 13747] By: jhi                                   on 2001/12/17  21:59:07
+        Log: Subject: [PATCH] Re: chomp/chop prototype changed?
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Mon, 17 Dec 2001 16:37:18 +0100
+             Message-ID: <20011217163718.A2292@rafael>
+             
+             Subject: Re: [PATCH] Re: chomp/chop prototype changed?
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Mon, 17 Dec 2001 23:17:06 +0100
+             Message-ID: <20011217231706.A730@rafael>
+     Branch: perl
+	   ! pod/perlsub.pod pp.c toke.c
+____________________________________________________________________________
+[ 13746] By: jhi                                   on 2001/12/17  20:22:08
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 13745] By: jhi                                   on 2001/12/17  20:12:37
         Log: New test warrants a MANIFEST entry.
      Branch: perl

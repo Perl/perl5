@@ -1,6 +1,6 @@
 package Net::Ping;
 
-# $Id: Ping.pm,v 1.11 2001/12/04 02:41:51 rob Exp $
+# $Id: Ping.pm,v 1.13 2001/12/07 02:18:44 rob Exp $
 
 require 5.002;
 require Exporter;
@@ -15,7 +15,7 @@ use Carp;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(pingecho);
-$VERSION = 2.07;
+$VERSION = 2.09;
 
 # Constants
 
@@ -371,7 +371,7 @@ sub tcp_connect
         $child = waitpid($pid, &POSIX::WNOHANG);
         $! = $? >> 8;
         $@ = $!;
-        sleep 1;
+        select(undef, undef, undef, 0.1);
       } while time < $patience && $child != $pid;
 
       if ($child == $pid) {
@@ -595,7 +595,7 @@ __END__
 
 Net::Ping - check a remote host for reachability
 
-$Id: Ping.pm,v 1.11 2001/12/04 02:41:51 rob Exp $
+$Id: Ping.pm,v 1.13 2001/12/07 02:18:44 rob Exp $
 
 =head1 SYNOPSIS
 

@@ -2459,9 +2459,11 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 	goto hard_way;
 #  endif
     result = PerlProc_waitpid(pid,statusp,flags);
+    goto finish;
 #endif
 #if !defined(HAS_WAITPID) && defined(HAS_WAIT4)
     result = wait4((pid==-1)?0:pid,statusp,flags,Null(struct rusage *));
+    goto finish;
 #endif
 #if !defined(HAS_WAITPID) && !defined(HAS_WAIT4) || defined(HAS_WAITPID_RUNTIME)
   hard_way:
@@ -2476,6 +2478,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 	}
     }
 #endif
+  finish:
     if (result < 0 && errno == EINTR) {
 	PERL_ASYNC_CHECK();
     }

@@ -273,6 +273,9 @@
 #define invert			Perl_invert
 #define is_gv_magical		Perl_is_gv_magical
 #define is_lvalue_sub		Perl_is_lvalue_sub
+#define to_uni_upper_lc		Perl_to_uni_upper_lc
+#define to_uni_title_lc		Perl_to_uni_title_lc
+#define to_uni_lower_lc		Perl_to_uni_lower_lc
 #define is_uni_alnum		Perl_is_uni_alnum
 #define is_uni_alnumc		Perl_is_uni_alnumc
 #define is_uni_idfirst		Perl_is_uni_idfirst
@@ -1794,6 +1797,9 @@
 #define invert(a)		Perl_invert(aTHX_ a)
 #define is_gv_magical(a,b,c)	Perl_is_gv_magical(aTHX_ a,b,c)
 #define is_lvalue_sub()		Perl_is_lvalue_sub(aTHX)
+#define to_uni_upper_lc(a)	Perl_to_uni_upper_lc(aTHX_ a)
+#define to_uni_title_lc(a)	Perl_to_uni_title_lc(aTHX_ a)
+#define to_uni_lower_lc(a)	Perl_to_uni_lower_lc(aTHX_ a)
 #define is_uni_alnum(a)		Perl_is_uni_alnum(aTHX_ a)
 #define is_uni_alnumc(a)	Perl_is_uni_alnumc(aTHX_ a)
 #define is_uni_idfirst(a)	Perl_is_uni_idfirst(aTHX_ a)
