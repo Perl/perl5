@@ -936,7 +936,6 @@
 #define apply_attrs_my		S_apply_attrs_my
 #  if defined(PL_OP_SLAB_ALLOC)
 #define Slab_Alloc		S_Slab_Alloc
-#define Slab_Free		S_Slab_Free
 #  endif
 #endif
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
@@ -2478,7 +2477,6 @@
 #define apply_attrs_my(a,b,c,d)	S_apply_attrs_my(aTHX_ a,b,c,d)
 #  if defined(PL_OP_SLAB_ALLOC)
 #define Slab_Alloc(a,b)		S_Slab_Alloc(aTHX_ a,b)
-#define Slab_Free(a)		S_Slab_Free(aTHX_ a)
 #  endif
 #endif
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)

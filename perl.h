@@ -9,8 +9,6 @@
 #ifndef H_PERL
 #define H_PERL 1
 
-#define PL_OP_SLAB_ALLOC
-
 #ifdef PERL_FOR_X2P
 /*
  * This file is being used for x2p stuff.
