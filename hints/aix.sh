@@ -53,13 +53,21 @@ esac
 
 # AIX 4.3.* and above default to using nm for symbol extraction
 case "$osvers" in
-   3.*|4.1.*|4.2.*|4.3.0.*)
-      usenm='undef'
-      usenativedlopen='false'
+   3.*|4.1.*|4.2.*)
+      case "$usenm" in
+	  '') usenm='undef'
+	  esac
+      case "$usenativedlopen" in
+	  '') usenativedlopen='false'
+	  esac
       ;;
    *)
-      usenm='true'
-      usenativedlopen='true'
+      case "$usenm" in
+	  '') usenm='true'
+	  esac
+      case "$usenativedlopen" in
+	  '') usenativedlopen='true'
+	  esac
       ;;
 esac
 
