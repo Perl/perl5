@@ -43,6 +43,8 @@ print $q eq $data ? "ok $N\n" : "not ok $N # n=$n\n";
 $N++;
 
 END {
+  undef $o;
+  untie @a;
   1 while unlink $file;
 }
 

@@ -7,11 +7,13 @@
 my $file = "tf$$.txt";
 my $data = "rec0$/rec1$/rec2$/";
 
-print "1..48\n";
+print "1..50\n";
 
 my $N = 1;
 use Tie::File;
 print "ok $N\n"; $N++;  # partial credit just for showing up
+
+init_file($data);
 
 my $o = tie @a, 'Tie::File', $file;
 print $o ? "ok $N\n" : "not ok $N\n";
@@ -20,8 +22,6 @@ $N++;
 my $n;
 
 # (3-12) splicing at the beginning
-init_file($data);
-
 @r = splice(@a, 0, 0, "rec4");
 check_result();
 @r = splice(@a, 0, 1, "rec5");       # same length
@@ -145,6 +145,12 @@ $r = splice(@a, 0, 2);
 print $r eq "like$/" ? "ok $N\n" : "not ok $N \# return should have been 'like'\n";
 $N++;
 
+# (49-50) Test default arguments
+splice @a, 0, 0, (0..11);
+@r = splice @a, 4;
+check_result(4..11);
+@r = splice @a;
+check_result(0..3);
 
 sub init_file {
   my $data = shift;
@@ -169,6 +175,8 @@ sub check_result {
 }
 
 END {
+  undef $o;
+  untie @a;
   1 while unlink $file;
 }
 

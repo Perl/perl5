@@ -64,28 +64,40 @@ check_contents("sh0", "sh1", "short2", "rec3", "rec4");
 
 # try inserting a record into the middle of an empty file
 
-
+use POSIX 'SEEK_SET';
 sub check_contents {
   my @c = @_;
   my $x = join 'blah', @c, '';
-  local *FH;
-  my $open = open FH, "< $file";
-  binmode FH;
+  local *FH = $o->{fh};
+  seek FH, 0, SEEK_SET;
   my $a;
   { local $/; $a = <FH> }
-  print (($open && $a eq $x) ? "ok $N\n" : "not ok $N # file @c\n");
+
+  $a = "" unless defined $a;
+  if ($a eq $x) {
+    print "ok $N\n";
+  } else {
+    s{$/}{\\n}g for $a, $x;
+    print "not ok $N\n# expected <$x>, got <$a>\n";
+  }
   $N++;
 
   # now check FETCH:
   my $good = 1;
   for (0.. $#c) {
-    $good = 0 unless $a[$_] eq "$c[$_]blah";
+    unless ($a[$_] eq "$c[$_]blah") {
+      $msg = "expected $c[$_]blah, got $a[$_]";
+      $msg =~ s{$/}{\\n}g;
+      $good = 0;
+    }
   }
-  print (($open && $good) ? "ok $N\n" : "not ok $N # fetch @c\n");
+  print $good ? "ok $N\n" : "not ok $N # fetch @c\n";
   $N++;
 }
 
 END {
+  undef $o;
+  untie @a;
   1 while unlink $file;
 }
 

@@ -7,11 +7,13 @@
 my $file = "tf$$.txt";
 my $data = "rec0blahrec1blahrec2blah";
 
-print "1..45\n";
+print "1..50\n";
 
 my $N = 1;
 use Tie::File;
 print "ok $N\n"; $N++;  # partial credit just for showing up
+
+init_file($data);
 
 my $o = tie @a, 'Tie::File', $file, recsep => 'blah';
 print $o ? "ok $N\n" : "not ok $N\n";
@@ -20,8 +22,6 @@ $N++;
 my $n;
 
 # (3-12) splicing at the beginning
-init_file($data);
-
 @r = splice(@a, 0, 0, "rec4");
 check_result();
 @r = splice(@a, 0, 1, "rec5");       # same length
@@ -130,6 +130,28 @@ check_result();
 @r = splice(@a, 0, 17);
 check_result('rec0', 'rec1');
 
+# (46-48) Now check the scalar context return
+splice(@a, 0, 0, qw(I like pie));
+my $r;
+$r = splice(@a, 0, 0);
+print !defined($r) ? "ok $N\n" : "not ok $N \# return should have been undef\n";
+$N++;
+
+$r = splice(@a, 2, 1);
+print $r eq "pieblah" ? "ok $N\n" : "not ok $N \# return should have been 'pie'\n";
+$N++;
+
+$r = splice(@a, 0, 2);
+print $r eq "likeblah" ? "ok $N\n" : "not ok $N \# return should have been 'like'\n";
+$N++;
+
+# (49-50) Test default arguments
+splice @a, 0, 0, (0..11);
+@r = splice @a, 4;
+check_result(4..11);
+@r = splice @a;
+check_result(0..3);
+
 sub init_file {
   my $data = shift;
   open F, "> $file" or die $!;
@@ -153,6 +175,8 @@ sub check_result {
 }
 
 END {
+  undef $o;
+  untie @a;
   1 while unlink $file;
 }
 

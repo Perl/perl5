@@ -5,7 +5,7 @@ use POSIX 'SEEK_SET';
 use Fcntl 'O_CREAT', 'O_RDWR', 'LOCK_EX';
 require 5.005;
 
-$VERSION = "0.14";
+$VERSION = "0.15";
 
 # Idea: The object will always contain an array of byte offsets
 # this will be filled in as is necessary and convenient.
@@ -153,7 +153,10 @@ sub PUSH {
 
 sub POP {
   my $self = shift;
-  scalar $self->SPLICE(-1, 1);
+  my $size = $self->FETCHSIZE;
+  return if $size == 0;
+#  print STDERR "# POPPITY POP POP POP\n";
+  scalar $self->SPLICE($size-1, 1);
 }
 
 sub SHIFT {
@@ -207,8 +210,13 @@ sub SPLICE {
   my ($self, $pos, $nrecs, @data) = @_;
   my @result;
 
+  $pos = 0 unless defined $pos;
+
+  # Deal with negative and other out-of-range positions
+  # Also set default for $nrecs 
   {
     my $oldsize = $self->FETCHSIZE;
+    $nrecs = $oldsize unless defined $nrecs;
     my $oldpos = $pos;
 
     if ($pos < 0) {
@@ -525,9 +533,10 @@ sub flock {
 sub _check_integrity {
   my ($self, $file, $warn) = @_;
   my $good = 1; 
-  local *F;
-  open F, $file or die "Couldn't open file $file: $!";
-  binmode F;
+  local *F = $self->{fh};
+  seek F, 0, SEEK_SET;
+#  open F, $file or die "Couldn't open file $file: $!";
+#  binmode F;
   local $/ = $self->{recsep};
   unless ($self->{offsets}[0] == 0) {
     $warn && print STDERR "# rec 0: offset <$self->{offsets}[0]> s/b 0!\n";
@@ -592,7 +601,7 @@ Tie::File - Access the lines of a disk file via a Perl array
 
 =head1 SYNOPSIS
 
-	# This file documents Tie::File version 0.14
+	# This file documents Tie::File version 0.15
 
 	tie @array, 'Tie::File', filename or die ...;
 
@@ -660,7 +669,7 @@ is C<"\n">, then the following two lines do exactly the same thing:
 
 The result is that the contents of line 17 of the file will be
 replaced with "Cherry pie"; a newline character will separate line 17
-from line 18.  This means that inparticular, this will do nothing:
+from line 18.  This means that in particular, this will do nothing:
 
 	chomp $array[17];
 
@@ -778,9 +787,9 @@ lines 1 through 999,999; the second iteration must relocate lines 2
 through 999,999, and so on.  The relocation is done using block
 writes, however, so it's not as slow as it might be.
 
-A future version of this module will provide some mechanism for
-getting better performance in such cases, by deferring the writing
-until it can be done all at once.
+A future version of this module will provide a mechanism for getting
+better performance in such cases, by deferring the writing until it
+can be done all at once.
 
 =head2 Efficiency Note 2
 
@@ -829,22 +838,25 @@ C<mjd-perl-tiefile-subscribe@plover.com>.
 
 =head1 LICENSE
 
-C<Tie::File> version 0.14 is copyright (C) 2002 Mark Jason Dominus.
+C<Tie::File> version 0.15 is copyright (C) 2002 Mark Jason Dominus.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or (at
-your option) any later version.
+This library is free software; you may redistribute it and/or modify
+it under the same terms as Perl itself.
 
-This program is distributed in the hope that it will be useful,
+These terms include your choice of (1) the Perl Artistic Licence, or
+(2) version 2 of the GNU General Public License as published by the
+Free Software Foundation, or (3) any later version of the GNU General
+Public License.
+
+This library is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program; it should be in the file C<COPYING>.  If not,
-write to the Free Software Foundation, Inc., 59 Temple Place, Suite
-330, Boston, MA 02111 USA
+along with this library program; it should be in the file C<COPYING>.
+If not, write to the Free Software Foundation, Inc., 59 Temple Place,
+Suite 330, Boston, MA 02111 USA
 
 For licensing inquiries, contact the author at:
 
@@ -854,10 +866,12 @@ For licensing inquiries, contact the author at:
 
 =head1 WARRANTY
 
-C<Tie::File> version 0.14 comes with ABSOLUTELY NO WARRANTY.
+C<Tie::File> version 0.15 comes with ABSOLUTELY NO WARRANTY.
 For details, see the license.
 
 =head1 TODO
+
+Allow tie to seekable filehandle rather than named file.
 
 Tests for default arguments to SPLICE.  Tests for CLEAR/EXTEND.
 Tests for DELETE/EXISTS.

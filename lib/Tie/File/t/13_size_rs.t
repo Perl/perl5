@@ -4,6 +4,8 @@
 # PUSH POP SHIFT UNSHIFT
 #
 
+use POSIX 'SEEK_SET';
+
 my $file = "tf$$.txt";
 my $data = "rec0blahrec1blahrec2blah";
 my ($o, $n);
@@ -63,16 +65,24 @@ check_contents('');
 
 sub check_contents {
   my $x = shift;
-  local *FH;
-  my $open = open FH, "< $file";
+  local *FH = $o->{fh};
+  seek FH, 0, SEEK_SET;
   my $a;
   { local $/; $a = <FH> }
-  print (($open && $a eq $x) ? "ok $N\n" : "not ok $N\n");
+  $a = "" unless defined $a;
+  if ($a eq $x) {
+    print "ok $N\n";
+  } else {
+    s{$/}{\\n}g for $a, $x;
+    print "not ok $N\n# expected <$x>, got <$a>\n";
+  }
   $N++;
 }
 
 
 END {
+  undef $o;
+  untie @a;
   1 while unlink $file;
 }
 
