@@ -805,6 +805,20 @@ S_avhv_index_sv(pTHX_ SV* sv)
     return index;    
 }
 
+STATIC I32
+S_avhv_index(pTHX_ AV *av, SV *keysv, U32 hash)
+{
+    HV *keys;
+    HE *he;
+    STRLEN n_a;
+
+    keys = avhv_keys(av);
+    he = hv_fetch_ent(keys, keysv, FALSE, hash);
+    if (!he)
+        Perl_croak(aTHX_ "No such pseudo-hash field \"%s\"", SvPV(keysv,n_a));
+    return avhv_index_sv(HeVAL(he));
+}
+
 HV*
 Perl_avhv_keys(pTHX_ AV *av)
 {
@@ -824,17 +838,15 @@ Perl_avhv_keys(pTHX_ AV *av)
 }
 
 SV**
+Perl_avhv_store_ent(pTHX_ AV *av, SV *keysv, SV *val, U32 hash)
+{
+    return av_store(av, avhv_index(av, keysv, hash), val);
+}
+
+SV**
 Perl_avhv_fetch_ent(pTHX_ AV *av, SV *keysv, I32 lval, U32 hash)
 {
-    SV **indsvp;
-    HV *keys = avhv_keys(av);
-    HE *he;
-    STRLEN n_a;
-   
-    he = hv_fetch_ent(keys, keysv, FALSE, hash);
-    if (!he)
-        Perl_croak(aTHX_ "No such pseudo-hash field \"%s\"", SvPV(keysv,n_a));
-    return av_fetch(av, avhv_index_sv(HeVAL(he)), lval);
+    return av_fetch(av, avhv_index(av, keysv, hash), lval);
 }
 
 SV *

@@ -118,6 +118,7 @@ Deprecated.  Use C<GIMME_V> instead.
 
 /* Private for OP_AASSIGN */
 #define OPpASSIGN_COMMON	64	/* Left & right have syms in common. */
+#define OPpASSIGN_HASH		32	/* Assigning to possible pseudohash. */
 
 /* Private for OP_SASSIGN */
 #define OPpASSIGN_BACKWARDS	64	/* Left & right switched. */

@@ -64,6 +64,7 @@ PERL_CALLCONV I32	Perl_apply(pTHX_ I32 type, SV** mark, SV** sp);
 PERL_CALLCONV SV*	Perl_avhv_delete_ent(pTHX_ AV *ar, SV* keysv, I32 flags, U32 hash);
 PERL_CALLCONV bool	Perl_avhv_exists_ent(pTHX_ AV *ar, SV* keysv, U32 hash);
 PERL_CALLCONV SV**	Perl_avhv_fetch_ent(pTHX_ AV *ar, SV* keysv, I32 lval, U32 hash);
+PERL_CALLCONV SV**	Perl_avhv_store_ent(pTHX_ AV *ar, SV* keysv, SV* val, U32 hash);
 PERL_CALLCONV HE*	Perl_avhv_iternext(pTHX_ AV *ar);
 PERL_CALLCONV SV*	Perl_avhv_iterval(pTHX_ AV *ar, HE* entry);
 PERL_CALLCONV HV*	Perl_avhv_keys(pTHX_ AV *ar);
@@ -932,6 +933,7 @@ END_EXTERN_C
 
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
 STATIC I32	S_avhv_index_sv(pTHX_ SV* sv);
+STATIC I32	S_avhv_index(pTHX_ AV* av, SV* sv, U32 hash);
 #endif
 
 #if defined(PERL_IN_DOOP_C) || defined(PERL_DECL_PROT)
@@ -1061,6 +1063,8 @@ STATIC void	S_qsortsv(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t f);
 #endif
 
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
+STATIC int	S_do_maybe_phash(pTHX_ AV *ary, SV **lelem, SV **firstlelem, SV **relem, SV **lastrelem);
+STATIC void	S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem);
 STATIC CV*	S_get_db_sub(pTHX_ SV **svp, CV *cv);
 STATIC SV*	S_method_common(pTHX_ SV* meth, U32* hashp);
 #endif
