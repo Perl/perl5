@@ -1,62 +1,77 @@
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl test.pl'
 
+
+#
+# The reason this does not use a Test module is that
+# they mess up test numbers between threads
+#
+# And even when that will be fixed, this is a basic
+# test and should not rely on shared variables
+# 
+#
 #########################
 
-# change 'tests => 1' to 'tests => last_test_to_print';
+
 use ExtUtils::testlib;
-use Test;
 use strict;
-BEGIN { plan tests => 16 };
+BEGIN { print "1..12\n" };
 use threads;
 
 
-ok(1); # If we made it this far, we're ok.
+
+print "ok 1\n";
+
 
 #########################
 
 # Insert your test code below, the Test module is use()ed here so read
 # its man page ( perldoc Test ) for help writing this test script.
 #my $bar;
+sub ok {	
+    my ($id, $ok, $name) = @_;
+    
+    # You have to do it this way or VMS will get confused.
+    print $ok ? "ok $id - $name\n" : "not ok $id - $name\n";
 
-skip('The ignores are here to keep test numbers correct','The ignores are here to keep test numbers correct');
+    printf "# Failed test at line %d\n", (caller)[2] unless $ok;
+    
+    return $ok;
+}
+
+
+
 
 #test passing of simple argument
-my $thread = threads->create(sub { ok('bar',$_[0]) },"bar");
+my $thread = threads->create(sub { ok(2, 'bar' eq $_[0]),"" },"bar");
 $thread->join();
-skip('Ignore','Ignore');
+
 
 #test passing of complex argument
 
-$thread = threads->create(sub { ok('bar',$_[0]->[0]->{foo})},[{foo => 'bar'}]);
+$thread = threads->create(sub { ok(3, 'bar' eq $_[0]->[0]->{foo})},[{foo => 'bar'}]);
 
 $thread->join();
-skip('Ignore','Ignore');
+
 
 #test execuion of normal sub
-sub bar { ok(1,shift()) }
+sub bar { ok(4,shift() == 1,"") }
 threads->create(\&bar,1)->join();
-skip('Ignore','Ignore');
+
 
 #check Config
-ok("1", "$Config::threads");
+ok(5, 1 == $Config::threads,"");
 
 #test trying to detach thread
 
-my $thread1 = threads->create(sub {ok(1);});
+my $thread1 = threads->create(sub {ok(6,1,"")});
 
 $thread1->detach();
-skip('Ignore','Ignore');
 sleep 1;
-ok(1);
+ok(7,1,"");
 #create nested threads
 unless($^O eq 'MSWin32') {
 	my $thread3 = threads->create(sub { threads->create(sub {})})->join();
-	ok(1);
-} else {
-	skip('thread trees are unsafe under win32','thread trees are unsafe under win32');
 }
-skip('Ignore','Ignore');
+
 
 my @threads;
 my $i;
@@ -68,21 +83,19 @@ foreach my $thread (@threads) {
 	$thread->join();
 }
 }
-ok(1);
+ok(8,1,"");
 threads->create(sub { 
     my $self = threads->self();
-    ok($self->tid(),57);
+    ok(9,$self->tid() == 57,"");
 })->join();
-skip('Ignore','Ignore');
 threads->create(sub { 
     my $self = threads->self();
-    ok($self->tid(),58);
+    ok(10,$self->tid() == 58,"");
 })->join();
-skip('Ignore','Ignore');
 
 #check support for threads->self() in main thread
-ok(0,threads->self->tid());
-ok(0,threads->tid());
+ok(11, 0 == threads->self->tid(),"");
+ok(12, 0 == threads->tid(),"Check so that tid for threads work for current tid");
 
 
 
