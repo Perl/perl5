@@ -288,7 +288,7 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	    }
 	    else if (avail > 0) {
 		/* No line, but not EOF - append avail to the pending data */
-		sv_catpvn(e->dataSV, ptr, use);
+		sv_catpvn(e->dataSV, (char*)ptr, use);
 		PerlIO_set_ptrcnt(n, ptr+use, 0);
 		goto retry;
 	    }
