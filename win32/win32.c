@@ -4618,6 +4618,9 @@ XS(w32_GetOSVersion)
                 XSRETURN_EMPTY;
             }
 	}
+	if (GIMME_V == G_SCALAR) {
+	    XSRETURN_IV(osverw.dwPlatformId);
+	}
 	W2AHELPER(osverw.szCSDVersion, szCSDVersion, sizeof(szCSDVersion));
 	XPUSHs(newSVpvn(szCSDVersion, strlen(szCSDVersion)));
         osver.dwMajorVersion    = osverw.dwMajorVersion;
@@ -4637,6 +4640,9 @@ XS(w32_GetOSVersion)
             if (!GetVersionExA((OSVERSIONINFOA*)&osver)) {
                 XSRETURN_EMPTY;
             }
+	}
+	if (GIMME_V == G_SCALAR) {
+	    XSRETURN_IV(osver.dwPlatformId);
 	}
 	XPUSHs(newSVpvn(osver.szCSDVersion, strlen(osver.szCSDVersion)));
     }
