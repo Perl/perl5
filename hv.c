@@ -163,7 +163,7 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval)
     }
 
     if (SvRMAGICAL(hv)) {
-	if (mg_find((SV*)hv,'P')) {
+	if (mg_find((SV*)hv,'P') || SvGMAGICAL((SV*)hv)) {
 	    sv = sv_newmortal();
 	    mg_copy((SV*)hv, sv, key, klen);
 	    PL_hv_fetch_sv = sv;
@@ -283,7 +283,7 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 	return 0;
 
     if (SvRMAGICAL(hv)) {
-	if (mg_find((SV*)hv,'P')) {
+	if (mg_find((SV*)hv,'P') || SvGMAGICAL((SV*)hv)) {
 	    sv = sv_newmortal();
 	    keysv = sv_2mortal(newSVsv(keysv));
 	    mg_copy((SV*)hv, sv, (char*)keysv, HEf_SVKEY);
@@ -836,7 +836,7 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, I32 klen)
     }
 
     if (SvRMAGICAL(hv)) {
-	if (mg_find((SV*)hv,'P')) {
+	if (mg_find((SV*)hv,'P') || SvGMAGICAL((SV*)gv)) {
 	    sv = sv_newmortal();
 	    mg_copy((SV*)hv, sv, key, klen);
 	    magic_existspack(sv, mg_find(sv, 'p'));
@@ -926,7 +926,7 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 	return 0;
 
     if (SvRMAGICAL(hv)) {
-	if (mg_find((SV*)hv,'P')) {
+	if (mg_find((SV*)hv,'P') || SvGMAGICAL((SV*)hv)) {
            SV* svret = sv_newmortal();
 	    sv = sv_newmortal();
 	    keysv = sv_2mortal(newSVsv(keysv));
