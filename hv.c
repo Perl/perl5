@@ -768,9 +768,6 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 	    Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave);
 	}
 
-	*oentry = HeNEXT(entry);
-	if (i && !*oentry)
-	    xhv->xhv_fill--; /* HvFILL(hv)-- */
 	if (flags & G_DISCARD)
 	    sv = Nullsv;
 	else {
@@ -790,6 +787,9 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen, I32 flags)
 	     * doesn't go down, but the number placeholders goes up */
 	    xhv->xhv_placeholders++; /* HvPLACEHOLDERS(hv)++ */
 	} else {
+	    *oentry = HeNEXT(entry);
+	    if (i && !*oentry)
+		xhv->xhv_fill--; /* HvFILL(hv)-- */
 	    if (entry == xhv->xhv_eiter /* HvEITER(hv) */)
 		HvLAZYDEL_on(hv);
 	    else
@@ -911,9 +911,6 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 	    Perl_hv_notallowed(aTHX_ is_utf8, key, klen, keysave);
 	}
 
-	*oentry = HeNEXT(entry);
-	if (i && !*oentry)
-	    xhv->xhv_fill--; /* HvFILL(hv)-- */
 	if (flags & G_DISCARD)
 	    sv = Nullsv;
 	else {
@@ -933,6 +930,9 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 	     * doesn't go down, but the number placeholders goes up */
 	    xhv->xhv_placeholders++; /* HvPLACEHOLDERS(hv)++ */
 	} else {
+	    *oentry = HeNEXT(entry);
+	    if (i && !*oentry)
+		xhv->xhv_fill--; /* HvFILL(hv)-- */
 	    if (entry == xhv->xhv_eiter /* HvEITER(hv) */)
 		HvLAZYDEL_on(hv);
 	    else

@@ -136,7 +136,7 @@ C<SV*>.
 #define XHvTOTALKEYS(xhv)	((xhv)->xhv_keys)
 
 /* The number of placeholders in the enumerated-keys hash */
-#define XHvPLACEHOLDERS(xhv)	((IV)((xhv)->xhv_placeholders))
+#define XHvPLACEHOLDERS(xhv)	((xhv)->xhv_placeholders)
 
 /* the number of keys that exist() (i.e. excluding placeholers) */
 #define XHvUSEDKEYS(xhv)      (XHvTOTALKEYS(xhv) - XHvPLACEHOLDERS(xhv))
