@@ -1905,6 +1905,7 @@ sub installbin {
 EXE_FILES = @{$self->{EXE_FILES}}
 
 all :: @to
+	$self->{NOECHO}\$(NOOP)
 
 realclean ::
 	$self->{RM_F} @to
@@ -2632,6 +2633,7 @@ sub processPL {
     foreach $plfile (sort keys %{$self->{PL_FILES}}) {
 	push @m, "
 all :: $self->{PL_FILES}->{$plfile}
+	$self->{NOECHO}\$(NOOP)
 
 $self->{PL_FILES}->{$plfile} :: $plfile
 	\$(PERL) -I\$(INST_ARCHLIB) -I\$(INST_LIB) -I\$(PERL_ARCHLIB) -I\$(PERL_LIB) $plfile
