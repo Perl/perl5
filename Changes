@@ -103,6 +103,75 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7012] By: nick                                  on 2000/09/02  17:25:20
+        Log: More %{} and other deref special casing - do not pass to 'nomethod'.
+     Branch: perl
+	   ! gv.c lib/overload.pm
+____________________________________________________________________________
+[  7011] By: jhi                                   on 2000/09/02  17:16:25
+        Log: Update perlhist.
+     Branch: perl
+	   ! pod/perlhist.pod
+____________________________________________________________________________
+[  7010] By: jhi                                   on 2000/09/02  17:01:35
+        Log: perldelta nits.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  7009] By: nick                                  on 2000/09/02  16:48:35
+        Log: If overloaded %{} etc. return the object do not loop.
+             Thus  sub deref { $_[0] } functions if object is wanted type.
+     Branch: perl
+	   ! pp.h
+____________________________________________________________________________
+[  7008] By: jhi                                   on 2000/09/02  16:26:11
+        Log: Retab MANIFEST.
+     Branch: perl
+	   ! ext/Storable/MANIFEST
+____________________________________________________________________________
+[  7007] By: jhi                                   on 2000/09/02  16:23:02
+        Log: Make certain cc is set before trying to run it.
+     Branch: perl
+	   ! hints/hpux.sh hints/irix_6.sh hints/solaris_2.sh
+____________________________________________________________________________
+[  7006] By: jhi                                   on 2000/09/02  15:45:41
+        Log: Unicode notes.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  7005] By: jhi                                   on 2000/09/02  15:42:11
+        Log: Various Configure nits by Philip Newton,
+             plus the ebcdic one by me.
+     Branch: metaconfig
+	   + U/modified/pager.U
+	   ! U/ebcdic/ebcdic.U U/modified/Finish.U U/modified/Guess.U
+     Branch: metaconfig/U/perl
+	   ! Devel.U quadfio.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  7004] By: jhi                                   on 2000/09/02  15:06:14
+        Log: Apparently avoiding the swapping is too costly.
+             
+             From: "Ben Tilly" <ben_tilly@hotmail.com>
+             Subject: Re: the door is closed.
+             Date: Fri, 01 Sep 2000 20:23:16 EDT
+             Message-ID: <LAW2-F2963JkUwWpSWe00000904@hotmail.com>
+     Branch: perl
+	   ! pod/perlfaq4.pod
+____________________________________________________________________________
+[  7003] By: nick                                  on 2000/09/02  12:26:04
+        Log: Undo part of change 6489 which looks like a bulk edit which
+             changed _all_ gv_efullname3() calls to gv_efullname4() calls.
+             The supressing of main:: on return from select() is undesirable.
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[  7002] By: jhi                                   on 2000/09/01  23:08:54
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7001] By: jhi                                   on 2000/09/01  23:00:13
         Log: Subject: [PATCH: 6996] minimal removal of 8 bit chrs from perlebcdic.pod
              From: Peter Prymmer <pvhp@forte.com>
