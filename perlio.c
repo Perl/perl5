@@ -2079,7 +2079,17 @@ IV
 PerlIOBuf_pushed(PerlIO *f, const char *mode, const char *arg, STRLEN len)
 {
  PerlIOBuf *b = PerlIOSelf(f,PerlIOBuf);
- b->posn = PerlIO_tell(PerlIONext(f));
+ int fd  = PerlIO_fileno(f);
+ Off_t posn;
+ if (fd >= 0 && PerlLIO_isatty(fd))
+  {
+   PerlIOBase(f)->flags |= PERLIO_F_LINEBUF;
+  }
+ posn = PerlIO_tell(PerlIONext(f));
+ if (posn != (Off_t) -1)
+  {
+   b->posn = posn;
+  }
  return PerlIOBase_pushed(f,mode,arg,len);
 }
 
@@ -2610,8 +2620,12 @@ PerlIOPending_read(PerlIO *f, void *vbuf, Size_t count)
   avail = count;
  if (avail > 0)
   got = PerlIOBuf_read(f,vbuf,avail);
- if (got < count)
-  got += PerlIO_read(f,((STDCHAR *) vbuf)+got,count-got);
+ if (got >= 0 && got < count)
+  {
+   SSize_t more = PerlIO_read(f,((STDCHAR *) vbuf)+got,count-got);
+   if (more >= 0 || got == 0)
+    got += more;
+  }
  return got;
 }
 
