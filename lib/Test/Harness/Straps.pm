@@ -315,8 +315,8 @@ sub _switches {
     my $s = '';
     $s .= " $ENV{'HARNESS_PERL_SWITCHES'}"
       if exists $ENV{'HARNESS_PERL_SWITCHES'};
-    $s .= join " ", qq[ "-$1"], map {qq["-I$_"]} $self->_filtered_INC
-      if $first =~ /^#!.*\bperl.*\s-\w*([Tt]+)/;
+    $s .= qq[ "-$1" ] if $first =~ /^#!.*\bperl.*\s-\w*([Tt]+)/;
+    $s .= join " ", map {qq["-I$_"]} $self->_filtered_INC;
 
     close(TEST) or print "can't close $file. $!\n";
 

@@ -99,7 +99,7 @@ $path .= " -MMac::err=unix" if $Is_MacOS;
 my $redir = $Is_MacOS ? "" : "2>&1";
 
 $a = `$^X $path "-MO=Deparse" -anlwi.bak -e 1 $redir`;
-$a =~ s/(?:# )?-e syntax OK\n//g;  # "# " for Mac OS
+$a =~ s/-e syntax OK\n//g;
 $a =~ s/.*possible typo.*\n//;	   # Remove warning line
 $a =~ s{\\340\\242}{\\s} if (ord("\\") == 224); # EBCDIC, cp 1047 or 037
 $a =~ s{\\274\\242}{\\s} if (ord("\\") == 188); # $^O eq 'posix-bc'
@@ -113,6 +113,12 @@ LINE: while (defined($_ = <ARGV>)) {
     '???';
 }
 EOF
+$b =~ s/(LINE:)/sub BEGIN {
+    'MacPerl'->bootstrap;
+    'OSA'->bootstrap;
+    'XL'->bootstrap;
+}
+$1/ if $Is_MacOS;
 print "# [$a]\n\# vs expected\n# [$b]\nnot " if $a ne $b;
 print "ok " . $i++ . "\n";
 

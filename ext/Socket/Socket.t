@@ -26,7 +26,8 @@ if (socket(T,PF_INET,SOCK_STREAM,6)) {
   print "ok 1\n";
   
   arm(5);
-  if ($has_echo && connect(T,pack_sockaddr_in(7,inet_aton("localhost")))){
+  my $host = $^O eq 'MacOS' ? '127.0.0.1' : 'localhost';
+  if ($has_echo && connect(T,pack_sockaddr_in(7,inet_aton($host)))){
 	arm(0);
 
 	print "ok 2\n";

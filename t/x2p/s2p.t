@@ -798,6 +798,9 @@ my $sedcmd = [ $psed, '-f', $script, $stdin ];
 my $s2pcmd = [ $s2p,  '-f', $script ];
 my $plcmd  = [ $plsed, $stdin ];
 
+my $switches = '';
+$switches = ['-x'] if $^O eq 'MacOS';
+
 # psed: we create a local copy as linking may not work on some systems.
 copy( $s2p, $psed );
 push( @aux, $psed );
@@ -841,19 +844,19 @@ for my $tc ( sort keys %testcase ){
 
     # run and compare
     #
-    $psedres = runperl( args => $sedcmd );
+    $psedres = runperl( args => $sedcmd, switches => $switches );
     is( $psedres, $testcase{$tc}{expect}, "psed $tc" );
 
     # 2nd test: run s2p
     # translate the sed script to a Perl program
-    
-    my $perlprog = runperl( args => $s2pcmd );
+
+    my $perlprog = runperl( args => $s2pcmd, switches => $switches );
     open( PP, ">$plsed" ) || goto FAIL_S2P;
     print PP $perlprog;
     close( PP ) || goto FAIL_S2P;
 
     # execute generated Perl program, compare
-    $s2pres = runperl( args => $plcmd );
+    $s2pres = runperl( args => $plcmd, switches => $switches );
     is( $s2pres, $testcase{$tc}{expect}, "s2p $tc" );
     next;
 

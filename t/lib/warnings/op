@@ -809,6 +809,15 @@ EXPECT
 Hash %FRED missing the % in argument 1 of keys() at - line 3.
 ########
 # op.c
+BEGIN {
+    if ($^O eq 'MacOS') {
+	print <<EOM;
+SKIPPED
+# no exec on Mac OS
+EOM
+	exit;
+    }
+}
 use warnings 'syntax' ;
 exec "$^X -e 1" ; 
 my $a
@@ -838,6 +847,15 @@ defined(%hash) is deprecated at - line 3.
 	(Maybe you should just omit the defined()?)
 ########
 # op.c
+BEGIN {
+    if ($^O eq 'MacOS') {
+	print <<EOM;
+SKIPPED
+# no exec on Mac OS
+EOM
+	exit;
+    }
+}
 no warnings 'syntax' ;
 exec "$^X -e 1" ; 
 my $a

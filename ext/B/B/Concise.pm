@@ -530,9 +530,13 @@ sub tree {
 
 # If either of the marked numbers there aren't 1, it means you need to
 # update the corresponding magic number in the next two lines.
-# Reember, these need to stay the last things in the module.
-$cop_seq_base = svref_2object(eval 'sub{0;}')->START->cop_seq + 11;
-$seq_base = svref_2object(eval 'sub{}')->START->seq + 84;
+# Remember, these need to stay the last things in the module.
+
+# Why these are different for MacOS?  Does it matter?
+my $cop_seq_mnum = $^O eq 'MacOS' ? 12 : 11;
+my $seq_mnum = $^O eq 'MacOS' ? 100 : 84;
+$cop_seq_base = svref_2object(eval 'sub{0;}')->START->cop_seq + $cop_seq_mnum;
+$seq_base = svref_2object(eval 'sub{}')->START->seq + $seq_mnum;
 
 1;
 

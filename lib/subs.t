@@ -14,9 +14,10 @@ print "1..", scalar @prgs, "\n";
 my $Is_VMS = $^O eq 'VMS';
 my $Is_MSWin32 = $^O eq 'MSWin32';
 my $Is_NetWare = $^O eq 'NetWare';
+my $Is_MacOS = $^O eq 'MacOS';
 my $tmpfile = "tmp0000";
 my $i = 0 ;
-1 while -f ++$tmpfile;
+1 while -e ++$tmpfile;
 END {  if ($tmpfile) { 1 while unlink $tmpfile} }
 
 for (@prgs){

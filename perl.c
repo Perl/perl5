@@ -1648,7 +1648,9 @@ S_run_body(pTHX_ I32 oldscope)
 
 	if (PL_minus_c) {
 #ifdef MACOS_TRADITIONAL
-	    PerlIO_printf(Perl_error_log, "# %s syntax OK\n", MacPerl_MPWFileName(PL_origfilename));
+	    PerlIO_printf(Perl_error_log, "%s%s syntax OK\n",
+		(gMacPerl_ErrorFormat ? "# " : ""),
+		MacPerl_MPWFileName(PL_origfilename));
 #else
 	    PerlIO_printf(Perl_error_log, "%s syntax OK\n", PL_origfilename);
 #endif
@@ -3787,8 +3789,11 @@ S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers)
 	    p = Nullch;	/* break out */
 	}
 #ifdef MACOS_TRADITIONAL
-	if (!strchr(SvPVX(libdir), ':'))
-	    sv_insert(libdir, 0, 0, ":", 1);
+	if (!strchr(SvPVX(libdir), ':')) {
+	    char buf[256];
+
+	    sv_setpv(libdir, MacPerl_CanonDir(SvPVX(libdir), buf, 0));
+	}
 	if (SvPVX(libdir)[SvCUR(libdir)-1] != ':')
 	    sv_catpv(libdir, ":");
 #endif
