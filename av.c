@@ -759,13 +759,6 @@ avhv_delete_ent(AV *av, SV *keysv, I32 flags, U32 hash)
     return sv;
 }
 
-I32
-avhv_iterinit(AV *av)
-{
-    HV *keys = avhv_keys(av);
-    return hv_iterinit(keys);
-}
-
 HE *
 avhv_iternext(AV *av)
 {

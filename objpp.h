@@ -67,8 +67,6 @@
 #define avhv_delete       CPerlObj::Perl_avhv_delete
 #undef  avhv_delete_ent
 #define avhv_delete_ent   CPerlObj::Perl_avhv_delete_ent
-#undef  avhv_iterinit
-#define avhv_iterinit     CPerlObj::Perl_avhv_iterinit
 #undef  avhv_iternext
 #define avhv_iternext     CPerlObj::Perl_avhv_iternext
 #undef  avhv_iterval

@@ -34,7 +34,6 @@ VIRTUAL bool	avhv_exists _((AV *ar, char* key, U32 klen));
 VIRTUAL bool	avhv_exists_ent _((AV *ar, SV* keysv, U32 hash));
 VIRTUAL SV**	avhv_fetch _((AV *ar, char* key, U32 klen, I32 lval));
 VIRTUAL SV**	avhv_fetch_ent _((AV *ar, SV* keysv, I32 lval, U32 hash));
-VIRTUAL I32	avhv_iterinit _((AV *ar));
 VIRTUAL HE*	avhv_iternext _((AV *ar));
 VIRTUAL SV *	avhv_iternextsv _((AV *ar, char** key, I32* retlen));
 VIRTUAL SV*	avhv_iterval _((AV *ar, HE* entry));

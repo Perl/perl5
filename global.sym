@@ -187,7 +187,6 @@ avhv_exists
 avhv_exists_ent
 avhv_fetch
 avhv_fetch_ent
-avhv_iterinit
 avhv_iternext
 avhv_iternextsv
 avhv_iterval

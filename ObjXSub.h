@@ -723,8 +723,6 @@
 #define avhv_fetch          pPerl->Perl_avhv_fetch
 #undef  avhv_fetch_ent
 #define avhv_fetch_ent      pPerl->Perl_avhv_fetch_ent
-#undef  avhv_iterinit
-#define avhv_iterinit       pPerl->Perl_avhv_iterinit
 #undef  avhv_iternext
 #define avhv_iternext       pPerl->Perl_avhv_iternext
 #undef  avhv_iternextsv

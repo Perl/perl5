@@ -52,7 +52,6 @@
 #define avhv_exists_ent		Perl_avhv_exists_ent
 #define avhv_fetch		Perl_avhv_fetch
 #define avhv_fetch_ent		Perl_avhv_fetch_ent
-#define avhv_iterinit		Perl_avhv_iterinit
 #define avhv_iternext		Perl_avhv_iternext
 #define avhv_iternextsv		Perl_avhv_iternextsv
 #define avhv_iterval		Perl_avhv_iterval
