@@ -2666,7 +2666,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 /* NV_PRESERVES_UV:
  *	This symbol, if defined, indicates that a variable of type NVTYPE
- *	can preserve all the bit of a variable of type UVSIZE.
+ *	can preserve all the bits of a variable of type UVTYPE.
  */
 #define	IVTYPE		$ivtype		/**/
 #define	UVTYPE		$uvtype		/**/
