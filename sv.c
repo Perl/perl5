@@ -9791,7 +9791,10 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	SV** regexen = AvARRAY((AV*)proto_perl->Iregex_padav);
 	for(i = 0; i <= len; i++) {                             
 	    av_push(PL_regex_padav,
-		    newSViv((IV)re_dup((REGEXP *)SvIV(regexen[i]), param)));
+            SvREFCNT_inc(
+                        newSViv((IV)re_dup((REGEXP *)
+                             SvIVX(regexen[i]), param))
+                    ));
 	}
     }
     PL_regex_pad = AvARRAY(PL_regex_padav);
