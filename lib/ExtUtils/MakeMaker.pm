@@ -150,8 +150,9 @@ sub prompt ($;$) {
 sub eval_in_subdirs {
     my($self) = @_;
     my($dir);
-    use Cwd 'cwd';
+    use Cwd qw(cwd abs_path);
     my $pwd = cwd();
+    local @INC = map abs_path($_), @INC;
 
     foreach $dir (@{$self->{DIR}}){
 	my($abs) = $self->catdir($pwd,$dir);
@@ -543,14 +544,20 @@ END
 }
 
 sub WriteEmptyMakefile {
-  if (-f 'Makefile.old') {
-    chmod 0666, 'Makefile.old';
-    unlink 'Makefile.old' or warn "unlink Makefile.old: $!";
-  }
-  rename 'Makefile', 'Makefile.old' or warn "rename Makefile Makefile.old: $!"
-    if -f 'Makefile';
-  open MF, '> Makefile' or die "open Makefile for write: $!";
-  print MF <<'EOP';
+    Carp::croak "WriteEmptyMakefile: Need even number of args" if @_ % 2;
+    local $SIG{__WARN__} = \&warnhandler;
+
+    my %att = @_;
+    my $self = MM->new(\%att);
+    if (-f "$self->{MAKEFILE}.old") {
+      chmod 0666, "$self->{MAKEFILE}.old";
+      unlink "$self->{MAKEFILE}.old" or warn "unlink $self->{MAKEFILE}.old: $!";
+    }
+    rename $self->{MAKEFILE}, "$self->{MAKEFILE}.old"
+      or warn "rename $self->{MAKEFILE} $self->{MAKEFILE}.old: $!"
+        if -f $self->{MAKEFILE};
+    open MF, '>', $self->{MAKEFILE} or die "open $self->{MAKEFILE} for write: $!";
+    print MF <<'EOP';
 all:
 
 clean:
@@ -562,7 +569,7 @@ makemakerdflt:
 test:
 
 EOP
-  close MF or die "close Makefile for write: $!";
+    close MF or die "close $self->{MAKEFILE} for write: $!";
 }
 
 sub check_manifest {
