@@ -4,7 +4,7 @@ package DB;
 # Ray Lischner (uunet!mntgfx!lisch) as of 5 Nov 1990
 # Johan Vromans -- upgrade to 4.0 pl 10
 
-$header = '$RCSfile: perldb.pl,v $$Revision: 4.0.1.2 $$Date: 91/11/05 17:55:58 $';
+$header = '$RCSfile: perldb.pl,v $$Revision: 4.0.1.3 $$Date: 92/06/08 13:43:57 $';
 #
 # This file is automatically included if you do perl -d.
 # It's probably not useful to include this yourself.
@@ -14,6 +14,10 @@ $header = '$RCSfile: perldb.pl,v $$Revision: 4.0.1.2 $$Date: 91/11/05 17:55:58 $
 # have a breakpoint.  It also inserts a do 'perldb.pl' before the first line.
 #
 # $Log:	perldb.pl,v $
+# Revision 4.0.1.3  92/06/08  13:43:57  lwall
+# patch20: support for MSDOS folded into perldb.pl
+# patch20: perldb couldn't debug file containing '-', such as STDIN designator
+# 
 # Revision 4.0.1.2  91/11/05  17:55:58  lwall
 # patch11: perldb.pl modified to run within emacs in perldb-mode
 # 
@@ -56,8 +60,17 @@ $header = '$RCSfile: perldb.pl,v $$Revision: 4.0.1.2 $$Date: 91/11/05 17:55:58 $
 # 
 #
 
-open(IN, "</dev/tty") || open(IN,  "<&STDIN");	# so we don't dingle stdin
-open(OUT,">/dev/tty") || open(OUT, ">&STDOUT");	# so we don't dongle stdout
+if (-e "/dev/tty") {
+    $console = "/dev/tty";
+    $rcfile=".perldb";
+}
+else {
+    $console = "con";
+    $rcfile="perldb.ini";
+}
+
+open(IN, "<$console") || open(IN,  "<&STDIN");	# so we don't dingle stdin
+open(OUT,">$console") || open(OUT, ">&STDOUT");	# so we don't dongle stdout
 select(OUT);
 $| = 1;				# for DB'OUT
 select(STDOUT);
@@ -304,7 +317,8 @@ command		Execute as a perl statement in current package.
 		    $cond = $2 || '1';
 		    $subname = "$package'" . $subname unless $subname =~ /'/;
 		    $subname = "main" . $subname if substr($subname,0,1) eq "'";
-		    ($filename,$i) = split(/[:-]/, $sub{$subname});
+		    ($filename,$i) = split(/:/, $sub{$subname});
+		    $i += 0;
 		    if ($i) {
 			*dbline = "_<$filename";
 			++$i while $dbline[$i] == 0 && $i < $#dbline;
@@ -568,14 +582,14 @@ for (@args) {
     s/(.*)/'$1'/ unless /^-?[\d.]+$/;
 }
 
-if (-f '.perldb') {
-    do './.perldb';
+if (-f $rcfile) {
+    do "./$rcfile";
 }
-elsif (-f "$ENV{'LOGDIR'}/.perldb") {
-    do "$ENV{'LOGDIR'}/.perldb";
+elsif (-f "$ENV{'LOGDIR'}/$rcfile") {
+    do "$ENV{'LOGDIR'}/$rcfile";
 }
-elsif (-f "$ENV{'HOME'}/.perldb") {
-    do "$ENV{'HOME'}/.perldb";
+elsif (-f "$ENV{'HOME'}/$rcfile") {
+    do "$ENV{'HOME'}/$rcfile";
 }
 
 1;

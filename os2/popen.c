@@ -65,7 +65,7 @@ FILE *mypopen(char *cmd, char *mode)
         if ( _osmode == DOS_MODE )
           return dos_popen(cmd, mode);
 
-	if (DosMakePipe((PHFILE) &p[0], (PHFILE) &p[1], 4096) < 0)
+        if ( _pipe(p, 4096, 0) )
                 return NULL;
 
         myside = tst(p[WRITEH], p[READH]);
@@ -124,7 +124,7 @@ int pipe(int *filedes)
 {
   int res;
 
-  if ( res = DosMakePipe((PHFILE) &filedes[0], (PHFILE) &filedes[1], 4096) )
+  if ( res = _pipe(filedes, 4096, 0) )
     return res;
 
   DosSetFHandState(filedes[0], OPEN_FLAGS_NOINHERIT);
@@ -149,6 +149,7 @@ static FILE *dos_popen(const char *command, const char *mode)
 {
     FILE *current;
     char name[128];
+    char *tmp = getenv("TMP");
     int cur;
     pipemode curmode;
 
@@ -165,8 +166,11 @@ static FILE *dos_popen(const char *command, const char *mode)
     /*
     ** get a name to use.
     */
-    strcpy(name, "piXXXXXX");
-    Mktemp(name);
+    strcpy(name, tmp ? tmp : "\\");
+    if ( name[strlen(name) - 1] != '\\' )
+      strcat(name, "\\");
+    strcat(name, "piXXXXXX");
+    mktemp(name);
 
     /*
     ** If we're reading, just call system to get a file filled with

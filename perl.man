@@ -1,7 +1,18 @@
 .rn '' }`
-''' $RCSfile: perl.man,v $$Revision: 4.0.1.5 $$Date: 91/11/11 16:42:00 $
+''' $RCSfile: perl.man,v $$Revision: 4.0.1.6 $$Date: 92/06/08 15:07:29 $
 ''' 
 ''' $Log:	perl.man,v $
+''' Revision 4.0.1.6  92/06/08  15:07:29  lwall
+''' patch20: documented that numbers may contain underline
+''' patch20: clarified that DATA may only be read from main script
+''' patch20: relaxed requirement for semicolon at the end of a block
+''' patch20: added ... as variant on ..
+''' patch20: documented need for 1; at the end of a required file
+''' patch20: extended bracket-style quotes to two-arg operators: s()() and tr()()
+''' patch20: paragraph mode now skips extra newlines automatically
+''' patch20: documented PERLLIB and PERLDB
+''' patch20: documented limit on size of regexp
+''' 
 ''' Revision 4.0.1.5  91/11/11  16:42:00  lwall
 ''' patch19: added little-endian pack/unpack options
 ''' 
@@ -623,12 +634,13 @@ Numeric literals are specified in any of the usual floating point or
 integer formats:
 .nf
 
-.ne 5
+.ne 6
     12345
     12345.67
     .23E-10
     0xffff	# hex
     0377	# octal
+    4_294_967_296
 
 .fi
 String literals are delimited by either single or double quotes.
@@ -687,7 +699,9 @@ They may only be used as separate tokens; they will not be interpolated
 into strings.
 In addition, the token _\|_END_\|_ may be used to indicate the logical end of the
 script before the actual end of file.
-Any following text is ignored (but may be read via the DATA filehandle).
+Any following text is ignored, but may be read via the DATA filehandle.
+(The DATA filehandle may read data only from the main script, but not from
+any required file or evaluated string.)
 The two control characters ^D and ^Z are synonyms for _\|_END_\|_.
 .PP
 A word that doesn't have any other interpretation in the grammar will be
@@ -944,7 +958,7 @@ The loop
 	}
 
 .ne 10
-is equivalent to
+is equivalent to the following Perl-like pseudo code:
 
 	unshift(@ARGV, \'\-\') \|if \|$#ARGV < $[;
 	while ($ARGV = shift) {
@@ -955,12 +969,15 @@ is equivalent to
 	}
 
 .fi
-except that it isn't as cumbersome to say.
+except that it isn't as cumbersome to say, and will actually work.
 It really does shift array ARGV and put the current filename into
 variable ARGV.
-It also uses filehandle ARGV internally.
-You can modify @ARGV before the first <> as long as you leave the first
-filename at the beginning of the array.
+It also uses filehandle ARGV internally\*(--<> is just a synonym for
+<ARGV>, which is magical.
+(The pseudo code above doesn't work because it treats <ARGV> as non-magical.)
+.PP
+You can modify @ARGV before the first <> as long as the array ends up
+containing the list of filenames you really want.
 Line numbers ($.) continue as if the input was one big happy file.
 (But see example under eof for how to reset line numbers on each file.)
 .PP
@@ -1288,9 +1305,9 @@ before execution.)
 .Sh "Simple statements"
 The only kind of simple statement is an expression evaluated for its side
 effects.
-Every expression (simple statement) must be terminated with a semicolon.
-Note that this is like C, but unlike Pascal (and
-.IR awk ).
+Every simple statement must be terminated with a semicolon, unless it is the
+final statement in a block, in which case the semicolon is optional.
+(Semicolon is still encouraged there if the block takes up more than one line).
 .PP
 Any simple statement may optionally be followed by a
 single modifier, just before the terminating semicolon.
@@ -1416,20 +1433,20 @@ This is useful for writing \*(L"for (1..10)\*(R" loops and for doing
 slice operations on arrays.
 .Sp
 In a scalar context, .\|. returns a boolean value.
-The operator is bistable, like a flip-flop..
+The operator is bistable, like a flip-flop, and
+emulates the line-range (comma) operator of sed, awk, and various editors.
 Each .\|. operator maintains its own boolean state.
 It is false as long as its left operand is false.
 Once the left operand is true, the range operator stays true
 until the right operand is true,
 AFTER which the range operator becomes false again.
 (It doesn't become false till the next time the range operator is evaluated.
-It can become false on the same evaluation it became true, but it still returns
-true once.)
+It can test the right operand and become false on the
+same evaluation it became true (as in awk), but it still returns true once.
+If you don't want it to test the right operand till the next
+evaluation (as in sed), use three dots (.\|.\|.) instead of two.)
 The right operand is not evaluated while the operator is in the \*(L"false\*(R" state,
 and the left operand is not evaluated while the operator is in the \*(L"true\*(R" state.
-The scalar .\|. operator is primarily intended for doing line number ranges
-after
-the fashion of \fIsed\fR or \fIawk\fR.
 The precedence is a little lower than || and &&.
 The value returned is either the null string for false, or a sequence number
 (beginning with 1) for true.
@@ -1472,13 +1489,13 @@ Precedence is higher than logical and relational operators, but lower than
 arithmetic operators.
 The operator may be any of:
 .nf
-	\-r	File is readable by effective uid.
-	\-w	File is writable by effective uid.
-	\-x	File is executable by effective uid.
+	\-r	File is readable by effective uid/gid.
+	\-w	File is writable by effective uid/gid.
+	\-x	File is executable by effective uid/gid.
 	\-o	File is owned by effective uid.
-	\-R	File is readable by real uid.
-	\-W	File is writable by real uid.
-	\-X	File is executable by real uid.
+	\-R	File is readable by real uid/gid.
+	\-W	File is writable by real uid/gid.
+	\-X	File is executable by real uid/gid.
 	\-O	File is owned by real uid.
 	\-e	File exists.
 	\-z	File has zero size.
@@ -1655,6 +1672,20 @@ LIST operators have lowest precedence.
 All other unary operators have a precedence greater than relational operators
 but less than arithmetic operators.
 See the section on Precedence.
+.PP
+For operators that can be used in either a scalar or array context,
+failure is generally indicated in a scalar context by returning
+the undefined value, and in an array context by returning the null list.
+Remember though that
+THERE IS NO GENERAL RULE FOR CONVERTING A LIST INTO A SCALAR.
+Each operator decides which sort of scalar it would be most
+appropriate to return.
+Some operators return the length of the list
+that would have been returned in an array context.
+Some operators return the first value in the list.
+Some operators return the last value in the list.
+Some operators return a count of successful operations.
+In general, they do what you want, unless you want consistency.
 .Ip "/PATTERN/" 8 4
 See m/PATTERN/.
 .Ip "?PATTERN?" 8 4
@@ -2389,7 +2420,8 @@ getpriority(2).
 .Ip "endservent" 8
 These routines perform the same functions as their counterparts in the
 system library.
-The return values from the various get routines are as follows:
+Within an array context,
+the return values from the various get routines are as follows:
 .nf
 
 	($name,$passwd,$uid,$gid,
@@ -2401,10 +2433,29 @@ The return values from the various get routines are as follows:
 	($name,$aliases,$port,$proto) = getserv.\|.\|.
 
 .fi
+(If the entry doesn't exist you get a null list.)
+.Sp
+Within a scalar context, you get the name, unless the function was a
+lookup by name, in which case you get the other thing, whatever it is.
+(If the entry doesn't exist you get the undefined value.)
+For example:
+.nf
+
+	$uid = getpwnam
+	$name = getpwuid
+	$name = getpwent
+	$gid = getgrnam
+	$name = getgrgid
+	$name = getgrent
+	etc.
+
+.fi
 The $members value returned by getgr.\|.\|. is a space separated list
 of the login names of the members of the group.
 .Sp
-The @addrs value returned by the gethost.\|.\|. functions is a list of the
+For the gethost.\|.\|. functions, if the h_errno variable is supported in C,
+it will be returned to you via $? if the function call fails.
+The @addrs value returned by a successful call is a list of the
 raw addresses returned by the corresponding system library call.
 In the Internet domain, each address is four bytes long and you can unpack
 it by saying something like:
@@ -2807,7 +2858,7 @@ you should be using s///g for such modifications.)  Examples:
 	($one,$five,$fifteen) = (\`uptime\` =~ /(\ed+\e.\ed+)/g);
 
 	# scalar context
-	$/ = 1; $* = 1;
+	$/ = ""; $* = 1;
 	while ($paragraph = <>) {
 	    while ($paragraph =~ /[a-z][\'")]*[.!?]+[\'")]*\es/g) {
 		$sentences++;
@@ -3330,6 +3381,9 @@ Has semantics similar to the following subroutine:
 
 .fi
 Note that the file will not be included twice under the same specified name.
+The file must return true as the last statement to indicate successful
+execution of any initialization code, so it's customary to end
+such a file with \*(L"1;\*(R" unless you're sure it'll return true otherwise.
 .Ip "reset(EXPR)" 8 6
 .Ip "reset EXPR" 8
 .Ip "reset" 8
@@ -3404,6 +3458,9 @@ if single quotes are used, no
 interpretation is done on the replacement string (the e modifier overrides
 this, however); if backquotes are used, the replacement string is a command
 to execute whose output will be used as the actual replacement text.
+If the PATTERN is delimited by bracketing quotes, the REPLACEMENT
+has its own pair of quotes, which may or may not be bracketing quotes, e.g.
+s(foo)(bar) or s<foo>/bar/.
 If no string is specified via the =~ or !~ operator,
 the $_ string is searched and modified.
 (The string specified with =~ must be a scalar variable, an array element,
@@ -3661,19 +3718,19 @@ Examples:
 
 .ne 2
 	# same thing, but with explicit sort routine
-	@articles = sort {$a cmp $b;} @files;
+	@articles = sort {$a cmp $b} @files;
 
 .ne 2
 	# same thing in reversed order
-	@articles = sort {$b cmp $a;} @files;
+	@articles = sort {$b cmp $a} @files;
 
 .ne 2
 	# sort numerically ascending
-	@articles = sort {$a <=> $b;} @files;
+	@articles = sort {$a <=> $b} @files;
 
 .ne 2
 	# sort numerically descending
-	@articles = sort {$b <=> $a;} @files;
+	@articles = sort {$b <=> $a} @files;
 
 .ne 5
 	# sort using explicit subroutine name
@@ -3826,6 +3883,7 @@ If EXPR is omitted, does srand(time).
 .Ip "stat SCALARVARIABLE" 8
 Returns a 13-element array giving the statistics for a file, either the file
 opened via FILEHANDLE, or named by EXPR.
+Returns a null list if the stat fails.
 Typically used as follows:
 .nf
 
@@ -3902,7 +3960,7 @@ contain a match:
 .ne 12
 	$search = \'while (<>) { study;\';
 	foreach $word (@words) {
-	    $search .= "++\e$seen{\e$ARGV} if /\eb$word\eb/;\en";
+	    $search .= "++\e$seen{\e$ARGV} if /\e\eb$word\e\eb/;\en";
 	}
 	$search .= "}";
 	@ARGV = @files;
@@ -4023,6 +4081,9 @@ devotees,
 .I y
 is provided as a synonym for
 .IR tr .
+If the SEARCHLIST is delimited by bracketing quotes, the REPLACEMENTLIST
+has its own pair of quotes, which may or may not be bracketing quotes, e.g.
+tr[A-Z][a-z] or tr(+-*/)/ABCD/.
 .Sp
 If the c modifier is specified, the SEARCHLIST character set is complemented.
 If the d modifier is specified, any characters specified by SEARCHLIST that
@@ -4880,6 +4941,12 @@ RS variable, including treating blank lines as delimiters
 if set to the null string.
 You may set it to a multicharacter string to match a multi-character
 delimiter.
+Note that setting it to "\en\en" means something slightly different
+than setting it to "", if the file contains consecutive blank lines.
+Setting it to "" will treat two or more consecutive blank lines as a single
+blank line.
+Setting it to "\en\en" will blindly assume that the next input character
+belongs to the next paragraph, even if it's a newline.
 (Mnemonic: / is used to delimit line boundaries when quoting poetry.)
 .Ip $, 8
 The output field separator for the print operator.
@@ -4974,16 +5041,17 @@ $? & 255 gives which signal, if any, the process died from, and whether
 there was a core dump.
 (Mnemonic: similar to sh and ksh.)
 .Ip $& 8 4
-The string matched by the last pattern match (not counting any matches hidden
+The string matched by the last successful pattern match
+(not counting any matches hidden
 within a BLOCK or eval enclosed by the current BLOCK).
 (Mnemonic: like & in some editors.)
 .Ip $\` 8 4
-The string preceding whatever was matched by the last pattern match
+The string preceding whatever was matched by the last successful pattern match
 (not counting any matches hidden within a BLOCK or eval enclosed by the current
 BLOCK).
 (Mnemonic: \` often precedes a quoted string.)
 .Ip $\' 8 4
-The string following whatever was matched by the last pattern match
+The string following whatever was matched by the last successful pattern match
 (not counting any matches hidden within a BLOCK or eval enclosed by the current
 BLOCK).
 (Mnemonic: \' often follows a quoted string.)
@@ -5158,6 +5226,8 @@ Use undef to disable inplace editing.
 (Mnemonic: value of
 .B \-i
 switch.)
+.Ip $^L 8 2
+What formats output to perform a formfeed.  Default is \ef.
 .Ip $^P 8 2
 The internal flag that the debugger clears so that it doesn't
 debug itself.  You could conceivable disable debugging yourself
@@ -5635,14 +5705,26 @@ careful what you print out.
 The tainting mechanism is intended to prevent stupid mistakes, not to remove
 the need for thought.
 .SH ENVIRONMENT
-.I Perl
-uses PATH in executing subprocesses, and in finding the script if \-S
+.Ip HOME 12 4
+Used if chdir has no argument.
+.Ip LOGDIR 12 4
+Used if chdir has no argument and HOME is not set.
+.Ip PATH 12 4
+Used in executing subprocesses, and in finding the script if \-S
 is used.
-HOME or LOGDIR are used if chdir has no argument.
+.Ip PERLLIB 12 4
+A colon-separated list of directories in which to look for Perl library
+files before looking in the standard library and the current directory.
+.Ip PERLDB 12 4
+The command used to get the debugger code.  If unset, uses
+.br
+
+	require 'perldb.pl'
+
 .PP
 Apart from these,
 .I perl
-uses no environment variables, except to make them available
+uses no other environment variables, except to make them available
 to the script being executed, and to child processes.
 However, scripts running setuid would do well to execute the following lines
 before doing anything else, just to keep people honest:
@@ -5686,9 +5768,9 @@ Accustomed
 users should take special note of the following:
 .Ip * 4 2
 Semicolons are required after all simple statements in
-.IR perl .
-Newline
-is not a statement delimiter.
+.I perl
+(except at the end of a block).
+Newline is not a statement delimiter.
 .Ip * 4 2
 Curly brackets are required on ifs and whiles.
 .Ip * 4 2
@@ -5917,6 +5999,7 @@ While none of the built-in data types have any arbitrary size limits (apart
 from memory size), there are still a few arbitrary limits:
 a given identifier may not be longer than 255 characters,
 and no component of your PATH may be longer than 255 if you use \-S.
+A regular expression may not compile to more than 32767 bytes internally.
 .PP
 .I Perl
 actually stands for Pathologically Eclectic Rubbish Lister, but don't tell

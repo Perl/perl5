@@ -1,4 +1,4 @@
-char rcsid[] = "$RCSfile: perl.c,v $$Revision: 4.0.1.6 $$Date: 91/11/11 16:38:45 $\nPatch level: ###\n";
+char rcsid[] = "$RCSfile: perl.c,v $$Revision: 4.0.1.7 $$Date: 92/06/08 14:50:39 $\nPatch level: ###\n";
 /*
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,17 @@ char rcsid[] = "$RCSfile: perl.c,v $$Revision: 4.0.1.6 $$Date: 91/11/11 16:38:45
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	perl.c,v $
+ * Revision 4.0.1.7  92/06/08  14:50:39  lwall
+ * patch20: PERLLIB now supports multiple directories
+ * patch20: running taintperl explicitly now does checks even if $< == $>
+ * patch20: -e 'cmd' no longer fails silently if /tmp runs out of space
+ * patch20: perl -P now uses location of sed determined by Configure
+ * patch20: form feed for formats is now specifiable via $^L
+ * patch20: paragraph mode now skips extra newlines automatically
+ * patch20: eval "1 #comment" didn't work
+ * patch20: couldn't require . files
+ * patch20: semantic compilation errors didn't abort execution
+ * 
  * Revision 4.0.1.6  91/11/11  16:38:45  lwall
  * patch19: default arg for shift was wrong after first subroutine definition
  * patch19: op/regexp.t failed from missing arg to bcmp()
@@ -44,11 +55,7 @@ char rcsid[] = "$RCSfile: perl.c,v $$Revision: 4.0.1.6 $$Date: 91/11/11 16:38:45
 #include "EXTERN.h"
 #include "perl.h"
 #include "perly.h"
-#ifdef MSDOS
-#include "patchlev.h"
-#else
 #include "patchlevel.h"
-#endif
 
 char *getenv();
 
@@ -65,6 +72,7 @@ char *getenv();
 #endif
 
 static char* moreswitches();
+static void incpush();
 static char* cddir;
 static bool minus_c;
 static char patchlevel[6];
@@ -117,6 +125,12 @@ setuid perl scripts securely.\n");
 	loop_ptr = -1;		/* start label stack again */
 	goto just_doit;
     }
+#ifdef TAINT
+#ifndef DOSUID
+    if (uid == euid && gid == egid)
+	taintanyway == TRUE;		/* running taintperl explicitly */
+#endif
+#endif
     (void)sprintf(index(rcsid,'#'), "%d\n", PATCHLEVEL);
     linestr = Str_new(65,80);
     str_nset(linestr,"",0);
@@ -164,6 +178,8 @@ setuid perl scripts securely.\n");
 	    if (!e_fp) {
 	        e_tmpname = savestr(TMPPATH);
 		(void)mktemp(e_tmpname);
+		if (!*e_tmpname)
+		    fatal("Can't mktemp()");
 		e_fp = fopen(e_tmpname,"w");
 		if (!e_fp)
 		    fatal("Cannot open temporary file");
@@ -234,45 +250,25 @@ setuid perl scripts securely.\n");
   switch_end:
     scriptname = argv[0];
     if (e_fp) {
-	(void)fclose(e_fp);
+	if (fflush(e_fp) || ferror(e_fp) || fclose(e_fp))
+	    fatal("Can't write to temp file for -e: %s", strerror(errno));
 	argc++,argv--;
 	scriptname = e_tmpname;
     }
 
-#ifdef MSDOS
+#ifdef DOSISH
 #define PERLLIB_SEP ';'
 #else
 #define PERLLIB_SEP ':'
 #endif
 #ifndef TAINT		/* Can't allow arbitrary PERLLIB in setuid script */
-    {
-	char * s2 = getenv("PERLLIB");
-
-	if ( s2 ) {
-	    /* Break at all separators */
-	    while ( *s2 ) {
-		/* First, skip any consecutive separators */
-		while ( *s2 == PERLLIB_SEP ) {
-		    /* Uncomment the next line for PATH semantics */
-		    /* (void)apush(stab_array(incstab),str_make(".",1)); */
-		    s2++;
-		}
-		if ( (s = index(s2,PERLLIB_SEP)) != Nullch ) {
-		    (void)apush(stab_array(incstab),str_make(s2,(int)(s-s2)));
-		    s2 = s+1;
-		} else {
-		    (void)apush(stab_array(incstab),str_make(s2,0));
-		    break;
-		}
-	    }
-	}
-    }
+    incpush(getenv("PERLLIB"));
 #endif /* TAINT */
 
 #ifndef PRIVLIB
 #define PRIVLIB "/usr/local/lib/perl"
 #endif
-    (void)apush(stab_array(incstab),str_make(PRIVLIB,0));
+    incpush(PRIVLIB);
     (void)apush(stab_array(incstab),str_make(".",1));
 
     str_set(&str_no,No);
@@ -296,18 +292,27 @@ setuid perl scripts securely.\n");
 
 	bufend = s + strlen(s);
 	while (*s) {
-#ifndef MSDOS
+#ifndef DOSISH
 	    s = cpytill(tokenbuf,s,bufend,':',&len);
+#else
+#ifdef atarist
+	    for (len = 0; *s && *s != ',' && *s != ';'; tokenbuf[len++] = *s++);
+	    tokenbuf[len] = '\0';
 #else
 	    for (len = 0; *s && *s != ';'; tokenbuf[len++] = *s++);
 	    tokenbuf[len] = '\0';
 #endif
+#endif
 	    if (*s)
 		s++;
-#ifndef MSDOS
+#ifndef DOSISH
 	    if (len && tokenbuf[len-1] != '/')
 #else
+#ifdef atarist
+	    if (len && ((tokenbuf[len-1] != '\\') && (tokenbuf[len-1] != '/')))
+#else
 	    if (len && tokenbuf[len-1] != '\\')
+#endif
 #endif
 		(void)strcat(tokenbuf+len,"/");
 	    (void)strcat(tokenbuf+len,scriptname);
@@ -348,8 +353,24 @@ setuid perl scripts securely.\n");
 	    sprintf(tokenbuf, "%s", cpp);
 	str_cat(str,"-I");
 	str_cat(str,PRIVLIB);
+#ifdef MSDOS
 	(void)sprintf(buf, "\
-%ssed %s -e '/^[^#]/b' \
+sed %s -e \"/^[^#]/b\" \
+ -e \"/^#[ 	]*include[ 	]/b\" \
+ -e \"/^#[ 	]*define[ 	]/b\" \
+ -e \"/^#[ 	]*if[ 	]/b\" \
+ -e \"/^#[ 	]*ifdef[ 	]/b\" \
+ -e \"/^#[ 	]*ifndef[ 	]/b\" \
+ -e \"/^#[ 	]*else/b\" \
+ -e \"/^#[ 	]*elif[ 	]/b\" \
+ -e \"/^#[ 	]*undef[ 	]/b\" \
+ -e \"/^#[ 	]*endif/b\" \
+ -e \"s/^#.*//\" \
+ %s | %s -C %s %s",
+	  (doextract ? "-e \"1,/^#/d\n\"" : ""),
+#else
+	(void)sprintf(buf, "\
+%s %s -e '/^[^#]/b' \
  -e '/^#[ 	]*include[ 	]/b' \
  -e '/^#[ 	]*define[ 	]/b' \
  -e '/^#[ 	]*if[ 	]/b' \
@@ -361,12 +382,13 @@ setuid perl scripts securely.\n");
  -e '/^#[ 	]*endif/b' \
  -e 's/^[ 	]*#.*//' \
  %s | %s -C %s %s",
-#ifdef MSDOS
-	  "",
+#ifdef LOC_SED
+	  LOC_SED,
 #else
-	  "/bin/",
+	  "sed",
 #endif
 	  (doextract ? "-e '1,/^#/d\n'" : ""),
+#endif
 	  scriptname, tokenbuf, str_get(str), CPPMINUS);
 #ifdef DEBUGGING
 	if (debug & 64) {
@@ -376,7 +398,7 @@ setuid perl scripts securely.\n");
 #endif
 	doextract = FALSE;
 #ifdef IAMSUID				/* actually, this is caught earlier */
-	if (euid != uid && !euid)	/* if running suidperl */
+	if (euid != uid && !euid) {	/* if running suidperl */
 #ifdef HAS_SETEUID
 	    (void)seteuid(uid);		/* musn't stay setuid root */
 #else
@@ -386,6 +408,9 @@ setuid perl scripts securely.\n");
 	    setuid(uid);
 #endif
 #endif
+	    if (geteuid() != uid)
+		fatal("Can't do seteuid!\n");
+	}
 #endif /* IAMSUID */
 	rsfp = mypopen(buf,"r");
     }
@@ -538,7 +563,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	    fatal("Can't do setuid\n");
 	}
 
-	if (statbuf.st_mode & S_ISGID && statbuf.st_gid != egid)
+	if (statbuf.st_mode & S_ISGID && statbuf.st_gid != egid) {
 #ifdef HAS_SETEGID
 	    (void)setegid(statbuf.st_gid);
 #else
@@ -548,6 +573,9 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	    setgid(statbuf.st_gid);
 #endif
 #endif
+	    if (getegid() != statbuf.st_gid)
+		fatal("Can't do setegid!\n");
+	}
 	if (statbuf.st_mode & S_ISUID) {
 	    if (statbuf.st_uid != euid)
 #ifdef HAS_SETEUID
@@ -559,8 +587,10 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 		setuid(statbuf.st_uid);
 #endif
 #endif
+	    if (geteuid() != statbuf.st_uid)
+		fatal("Can't do seteuid!\n");
 	}
-	else if (uid)			/* oops, mustn't run as root */
+	else if (uid) {			/* oops, mustn't run as root */
 #ifdef HAS_SETEUID
 	    (void)seteuid((UIDTYPE)uid);
 #else
@@ -570,6 +600,9 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	    setuid((UIDTYPE)uid);
 #endif
 #endif
+	    if (geteuid() != uid)
+		fatal("Can't do seteuid!\n");
+	}
 	uid = (int)getuid();
 	euid = (int)geteuid();
 	gid = (int)getgid();
@@ -713,11 +746,15 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
     rightstab = stabent("'",allstabs);
     sawampersand = (amperstab || leftstab || rightstab);
     if (tmpstab = stabent(":",allstabs))
-	str_set(STAB_STR(tmpstab),chopset);
+	str_set(stab_val(tmpstab),chopset);
     if (tmpstab = stabent("\024",allstabs))
 	time(&basetime);
 
     /* these aren't necessarily magical */
+    if (tmpstab = stabent("\014",allstabs)) {
+	str_set(stab_val(tmpstab),"\f");
+	formfeed = stab_val(tmpstab);
+    }
     if (tmpstab = stabent(";",allstabs))
 	str_set(STAB_STR(tmpstab),"\034");
     if (tmpstab = stabent("]",allstabs)) {
@@ -730,7 +767,8 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 
     stdinstab = stabent("STDIN",TRUE);
     stdinstab->str_pok |= SP_MULTI;
-    stab_io(stdinstab) = stio_new();
+    if (!stab_io(stdinstab))
+	stab_io(stdinstab) = stio_new();
     stab_io(stdinstab)->ifp = stdin;
     tmpstab = stabent("stdin",TRUE);
     stab_io(tmpstab) = stab_io(stdinstab);
@@ -738,7 +776,8 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 
     tmpstab = stabent("STDOUT",TRUE);
     tmpstab->str_pok |= SP_MULTI;
-    stab_io(tmpstab) = stio_new();
+    if (!stab_io(tmpstab))
+	stab_io(tmpstab) = stio_new();
     stab_io(tmpstab)->ofp = stab_io(tmpstab)->ifp = stdout;
     defoutstab = tmpstab;
     tmpstab = stabent("stdout",TRUE);
@@ -747,7 +786,8 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 
     curoutstab = stabent("STDERR",TRUE);
     curoutstab->str_pok |= SP_MULTI;
-    stab_io(curoutstab) = stio_new();
+    if (!stab_io(curoutstab))
+	stab_io(curoutstab) = stio_new();
     stab_io(curoutstab)->ofp = stab_io(curoutstab)->ifp = stderr;
     tmpstab = stabent("stderr",TRUE);
     stab_io(tmpstab) = stab_io(curoutstab);
@@ -761,6 +801,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
     rs = nrs;
     rslen = nrslen;
     rschar = nrschar;
+    rspara = (nrslen == 2);
     str_nset(stab_val(stabent("/", TRUE)), rs, rslen);
 
     if (do_undump)
@@ -879,6 +920,33 @@ int namlen;
     }
 }
 
+static void
+incpush(p)
+char *p;
+{
+    char *s;
+
+    if (!p)
+	return;
+
+    /* Break at all separators */
+    while (*p) {
+	/* First, skip any consecutive separators */
+	while ( *p == PERLLIB_SEP ) {
+	    /* Uncomment the next line for PATH semantics */
+	    /* (void)apush(stab_array(incstab), str_make(".", 1)); */
+	    p++;
+	}
+	if ( (s = index(p, PERLLIB_SEP)) != Nullch ) {
+	    (void)apush(stab_array(incstab), str_make(p, (int)(s - p)));
+	    p = s + 1;
+	} else {
+	    (void)apush(stab_array(incstab), str_make(p, 0));
+	    break;
+	}
+    }
+}
+
 void
 savelines(array, str)
 ARRAY *array;
@@ -947,7 +1015,7 @@ int *arglast;
 	curcmd->c_filestab = fstab("(eval)");
 	curcmd->c_line = 1;
 	str_sset(linestr,str);
-	str_cat(linestr,";\n");		/* be kind to them */
+	str_cat(linestr,";\n;\n");	/* be kind to them */
 	if (perldb)
 	    savelines(stab_xarray(curcmd->c_filestab), linestr);
     }
@@ -969,8 +1037,13 @@ int *arglast;
 	    return sp;
 	}
 	tmpfilename = savestr(specfilename);
-	if (index("/.", *tmpfilename))
+	if (*tmpfilename == '/' ||
+	    (*tmpfilename == '.' && 
+		(tmpfilename[1] == '/' ||
+		 (tmpfilename[1] == '.' && tmpfilename[2] == '/'))))
+	{
 	    rsfp = fopen(tmpfilename,"r");
+	}
 	else {
 	    ar = stab_array(incstab);
 	    for (i = 0; i <= ar->ary_fill; i++) {
@@ -1061,7 +1134,7 @@ int *arglast;
     }
     myroot = eval_root;		/* in case cmd_exec does another eval! */
 
-    if (retval) {
+    if (retval || error_count) {
 	st = stack->ary_array;
 	sp = arglast[0];
 	if (gimme != G_ARRAY)
@@ -1074,6 +1147,7 @@ int *arglast;
 #endif
 	    cmd_free(eval_root);
 #endif
+	    /*SUPPRESS 29*/ /*SUPPRESS 30*/
 	    if ((CMD*)eval_root == last_root)
 		last_root = Nullcmd;
 	    eval_root = myroot = Nullcmd;
@@ -1301,9 +1375,12 @@ char *s;
 	fputs("MS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n",
 	stdout);
 #ifdef OS2
-        fputs("OS/2 port Copyright (c) 1990, Raymond Chen, Kai Uwe Rommel\n",
+        fputs("OS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n",
         stdout);
 #endif
+#endif
+#ifdef atarist
+        fputs("atariST series port, ++jrb  bammi@cadence.com\n", stdout);
 #endif
 	fputs("\n\
 Perl may be copied only under the terms of either the Artistic License or the\n\
@@ -1330,6 +1407,7 @@ GNU General Public License, which may be found in the Perl 4.0 source kit.\n",st
 
 /* unexec() can be found in the Gnu emacs distribution */
 
+void
 my_unexec()
 {
 #ifdef UNEXEC
@@ -1346,7 +1424,7 @@ my_unexec()
 	fprintf(stderr, "unexec of %s into %s failed!\n", perlpath, dumpname);
     exit(status);
 #else
-#ifdef MSDOS
+#ifdef DOSISH
     abort();	/* nothing else to do */
 #else /* ! MSDOS */
 #   ifndef SIGABRT

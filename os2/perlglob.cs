@@ -1,9 +1,9 @@
 os2\glob.c
-(-DPERLGLOB os2\director.c)
 
 setargv.obj
-os2\perlglob.def
-os2\perlglob.bad
+
+os2\perl.def
+os2\perl.bad
 perlglob.exe
 
 -AS -LB -S0x1000
