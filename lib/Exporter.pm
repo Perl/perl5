@@ -326,9 +326,9 @@ The Exporter module supplies a default require_version method which
 checks the value of $VERSION in the exporting module.
 
 Since the default require_version method treats the $VERSION number as
-a simple numeric value it will regard version 1.10 and being lower
-than 1.9. For this reason it is strongly recommended that you use
-numbers with at least two decimal places, e.g., 1.09.
+a simple numeric value it will regard version 1.10 as lower than
+1.9. For this reason it is strongly recommended that you use numbers
+with at least two decimal places, e.g., 1.09.
 
 =head2 Managing Unknown Symbols
 
@@ -370,7 +370,7 @@ you to easily add tagged sets of symbols to @EXPORT or @EXPORT_OK:
   Exporter::export_ok_tags('bar');  # add aa, cc and dd to @EXPORT_OK
 
 Any names which are not tags are added to @EXPORT or @EXPORT_OK
-unchanged but will trigger a warning (with -w) to avoid misspelt tags
+unchanged but will trigger a warning (with C<-w>) to avoid misspelt tags
 names being silently added to @EXPORT or @EXPORT_OK. Future versions
 may make this a fatal error.
 
