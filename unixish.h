@@ -129,7 +129,11 @@
 #  ifdef POSIX_BC
 #    define PERL_SYS_INIT(c,v)	sigignore(SIGFPE); MALLOC_INIT
 #  else
-#    define PERL_SYS_INIT(c,v) MALLOC_INIT
+#    ifdef UTS
+#      define PERL_SYS_INIT(c,v)	signal(SIGFPE, SIG_IGN); MALLOC_INIT
+#    else
+#      define PERL_SYS_INIT(c,v) MALLOC_INIT
+#    endif
 #  endif
 #endif
 #endif
