@@ -336,6 +336,7 @@ a2p.def           linker definition file for a2p
 makefile          Makefile, not tested
 
 perlsh.cmd        the converted perlsh
+perldb.dif        changes required for perldb.pl (change for your needs)
 selfrun.cmd       sample selfrunning perl script for OS/2
 selfrun.bat       sample selfrunning perl script for DOS mode
 
@@ -353,4 +354,28 @@ especially not with -DDEBUGGING
                                 rommel@lan.informatik.tu-muenchen.dbp.de
                                 Breslauer Str. 25
                                 D-8756 Kahl/Main
-                                West (yes, still!) Germany
+  
++ I have verified with patchlevel 37, that the OS/2 port compiles,
+  after doing two minor changes. HPFS filenames support was also added.
+  Some bugs were fixed.
++ To compile,
+  - you need the bison parser generator
+  - copy config.h from os2 into the main perl directory (important !)
+  - copy perl.cs and perlglob.cs from the os2 subdir to the main dir
+  - copy a2p.cs from os2 to x2p
+  - say "bison -d perl.y"
+      "ren perl_tab.c perl.c" and
+      "ren perl_tab.h perly.h"	in the main directory
+  - say "cs perl" and
+      "cs perlglob" in the main directory
+  - say "cs a2p" in the x2p subdir
++ If you don't have CS or don't want to use it, you have to
+  construct a makefile ...
++ If you have GNU gdbm, you can define NDBM in config.h and link with a
+  large model library of gdbm.
++ I am not shure if I can verify the OS/2 port with each release
+  from Larry Wall. Therefore, in future releases there may be
+  changes required to compile perl for OS/2.
+ 				October 1990
+				Kai Uwe Rommel
+				rommel@lan.informatik.tu-muenchen.dbp.de

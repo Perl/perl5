@@ -18,9 +18,12 @@ case "$mallocsrc" in
 esac
 echo "Extracting x2p/Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 3.0.1.6 90/10/16 11:28:18 lwall Locked $
+# $Header: Makefile.SH,v 3.0.1.7 90/11/10 02:20:15 lwall Locked $
 #
 # $Log:	Makefile.SH,v $
+# Revision 3.0.1.7  90/11/10  02:20:15  lwall
+# patch38: random cleanup
+# 
 # Revision 3.0.1.6  90/10/16  11:28:18  lwall
 # patch29: various portability fixes
 # 
@@ -138,10 +141,10 @@ done; \
 fi
 
 clean:
-	rm -f *.o
+	rm -f a2p *.o
 
 realclean: clean
-	rm -f a2p *.orig */*.orig core $(addedbyconf) a2p.c s2p all
+	rm -f *.orig */*.orig core $(addedbyconf) a2p.c s2p all
 
 # The following lint has practically everything turned on.  Unfortunately,
 # you have to wade through a lot of mumbo jumbo that can't be suppressed.

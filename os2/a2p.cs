@@ -2,7 +2,7 @@
 (-W1 -Od -Ocgelt hash.c str.c util.c walk.c)
 
 setargv.obj
-a2p.def
+..\os2\a2p.def
 a2p.exe
 
 -AL -LB -S0xA000

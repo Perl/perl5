@@ -8,7 +8,7 @@
 # and edit it to reflect your system.  Some packages may include samples
 # of config.h for certain machines, so you might look for one of those.)
 #
-# $Header: Configure,v 3.0.1.11 90/10/20 01:55:30 lwall Locked $
+# $Header: Configure,v 3.0.1.12 90/11/10 00:57:30 lwall Locked $
 #
 # Yes, you may rip this off to use in other distribution packages.
 # (Note: this Configure script was generated automatically.  Rather than
@@ -1404,6 +1404,9 @@ if test -f "$1"; then
     libc="$1"
 elif test -f $libc; then
     echo "Your C library is in $libc, like you said before."
+    if test $libc = "/lib/libc"; then
+	libc="$libc /lib/clib"
+    fi
 elif test -f /lib/libc.a; then
     echo "Your C library is in /lib/libc.a.  You're normal."
     libc=/lib/libc.a
@@ -1449,7 +1452,7 @@ echo " "
 set `echo $libc $libnames | tr ' ' '\012' | sort | uniq`
 $echo $n "Extracting names from $* for later perusal...$c"
 nm $* 2>/dev/null >libc.tmp
-$sed -n -e 's/^.* [ATD]  *_[_.]*//p' -e 's/^.* [ATD] //p' <libc.tmp >libc.list
+$sed -n -e 's/^.* [ATDS]  *_[_.]*//p' -e 's/^.* [ATDS] //p' <libc.tmp >libc.list
 if $contains '^printf$' libc.list >/dev/null 2>&1; then
     echo "done"
 else

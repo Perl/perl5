@@ -1,4 +1,4 @@
-/* $Header: cons.c,v 3.0.1.8 90/10/15 15:41:09 lwall Locked $
+/* $Header: cons.c,v 3.0.1.9 90/11/10 01:10:50 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cons.c,v $
+ * Revision 3.0.1.9  90/11/10  01:10:50  lwall
+ * patch38: random cleanup
+ * 
  * Revision 3.0.1.8  90/10/15  15:41:09  lwall
  * patch29: added caller
  * patch29: scripts now run at almost full speed under the debugger
@@ -449,7 +452,6 @@ CMD *cur;
 {
     register CMD *cmd;
     register CMD *head = cur->c_head;
-    register ARG *arg;
     STR *str;
 
     if (!head)

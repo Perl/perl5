@@ -85,6 +85,9 @@ hash.c			Associative arrays
 hash.h			Public declarations for the above
 ioctl.pl		Sample ioctl.pl
 lib/abbrev.pl		An abbreviation table builder
+lib/bigfloat.pl		An arbitrary precision floating point package
+lib/bigint.pl		An arbitrary precision integer arithmetic package
+lib/bigrat.pl		An arbitrary precision rational arithmetic package
 lib/cacheout.pl		Manages output filehandles when you need too many
 lib/complete.pl		A command completion subroutine
 lib/ctime.pl		A ctime workalike
@@ -132,6 +135,7 @@ os2/os2.c		Unix compatibility functions
 os2/perl.bad		names of protect-only API calls for BIND
 os2/perl.cs		Compiler script for perl
 os2/perl.def		Linker defs for perl
+os2/perldb.dif		Changes to make the debugger work
 os2/perlglob.cs		Compiler script for perlglob
 os2/perlglob.def	Linker defs for perlglob
 os2/perlsh.cmd		Poor man's shell for os2
@@ -184,6 +188,7 @@ t/io.inplace		See if inplace editing works
 t/io.pipe		See if secure pipes work
 t/io.print		See if print commands work
 t/io.tell		See if file seeking works
+t/lib.big		See if lib/bigint.pl works
 t/op.append		See if . works
 t/op.array		See if array operations work
 t/op.auto		See if autoincrement et all work
@@ -257,3 +262,4 @@ x2p/str.h		Public declarations for the above
 x2p/util.c		Utility routines
 x2p/util.h		Public declarations for the above
 x2p/walk.c		Parse tree walker
+config_h.SH	Produces config.h.

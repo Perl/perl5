@@ -1,4 +1,4 @@
-/* $Header: arg.h,v 3.0.1.7 90/10/15 14:53:59 lwall Locked $
+/* $Header: arg.h,v 3.0.1.8 90/11/10 01:04:36 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	arg.h,v $
+ * Revision 3.0.1.8  90/11/10  01:04:36  lwall
+ * patch38: added alarm function
+ * patch38: socket, recv, select, socketpair, setsockopt didn't eval all args
+ * 
  * Revision 3.0.1.7  90/10/15  14:53:59  lwall
  * patch29: added SysV IPC
  * patch29: added waitpid
@@ -310,7 +314,8 @@
 #define O_FTATIME 264
 #define O_FTCTIME 265
 #define O_WAITPID 266
-#define MAXO 267
+#define O_ALARM 267
+#define MAXO 268
 
 #ifndef DOINIT
 extern char *opname[];
@@ -583,7 +588,8 @@ char *opname[] = {
     "FTATIME",
     "FTCTIME",
     "WAITPID",
-    "264"
+    "ALARM",
+    "268"
 };
 #endif
 
@@ -889,15 +895,15 @@ unsigned short opargs[MAXO+1] = {
 	A(0,0,0),	/* DUMP */
 	A(0,3,0),	/* REVERSE */
 	A(1,0,0),	/* ADDROF */
-	A(1,1,1),	/* SOCKET */
+	A5(1,1,1,1,0),	/* SOCKET */
 	A(1,1,0),	/* BIND */
 	A(1,1,0),	/* CONNECT */
 	A(1,1,0),	/* LISTEN */
 	A(1,1,0),	/* ACCEPT */
 	A(1,1,3),	/* SEND */
-	A(1,1,3),	/* RECV */
-	A(1,1,1),	/* SSELECT */
-	A(1,1,1),	/* SOCKPAIR */
+	A5(1,1,1,1,0),	/* RECV */
+	A5(1,1,1,1,0),	/* SSELECT */
+	A5(1,1,1,1,1),	/* SOCKPAIR */
 	A(0,3,0),	/* DBSUBR */
 	A(1,0,0),	/* DEFINED */
 	A(1,0,0),	/* UNDEF */
@@ -952,7 +958,7 @@ unsigned short opargs[MAXO+1] = {
 	A(0,0,0),	/* GETLOGIN */
 	A(1,3,0),	/* SYSCALL */
 	A(1,1,1),	/* GSOCKOPT */
-	A(1,1,1),	/* SSOCKOPT */
+	A5(1,1,1,1,0),	/* SSOCKOPT */
 	A(1,0,0),	/* GETSOCKNAME */
 	A(1,0,0),	/* GETPEERNAME */
 	A(0,3,3),	/* LSLICE */
@@ -981,6 +987,7 @@ unsigned short opargs[MAXO+1] = {
 	A(1,0,0),	/* FTATIME */
 	A(1,0,0),	/* FTCTIME */
 	A(1,1,0),	/* WAITPID */
+	A(1,0,0),	/* ALARM */
 	0
 };
 #undef A

@@ -25,9 +25,12 @@ esac
 
 echo "Extracting Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 3.0.1.10 90/10/20 01:59:21 lwall Locked $
+# $Header: Makefile.SH,v 3.0.1.11 90/11/10 01:25:51 lwall Locked $
 #
 # $Log:	Makefile.SH,v $
+# Revision 3.0.1.11  90/11/10  01:25:51  lwall
+# patch38: new arbitrary precision libraries from Mark Biggar
+# 
 # Revision 3.0.1.10  90/10/20  01:59:21  lwall
 # patch37: added cryptlib support to Makefile
 # 
@@ -377,7 +380,7 @@ depend: makedepend
 	cd x2p; $(MAKE) depend
 
 test: perl
-	- chmod +x t/TEST t/base.* t/comp.* t/cmd.* t/io.* t/op.*; \
+	- chmod +x t/TEST t/base.* t/comp.* t/cmd.* t/io.* t/op.* t/lib.*; \
 	cd t && (rm -f perl; $(SLN) ../perl .) && ./perl TEST
 
 clist:

@@ -1,6 +1,6 @@
 #!./perl -P
 
-# $Header: comp.cpp,v 3.0.1.1 90/08/09 05:25:34 lwall Locked $
+# $Header: comp.cpp,v 3.0.1.2 90/11/10 02:10:17 lwall Locked $
 
 print "1..3\n";
 
@@ -15,21 +15,25 @@ print MESS;
 	print "not ok 2\n";
 #endif
 
-open(try,">Comp.cpp.tmp") || die "Can't open temp perl file.";
-print try '$ok = "not ok 3\n";'; print try "\n";
-print try "#include <Comp.cpp.inc>\n";
-print try "#ifdef OK\n";
-print try '$ok = OK;'; print try "\n";
-print try "#endif\n";
-print try 'print $ok;'; print try "\n";
-close try;
+open(TRY,">Comp.cpp.tmp") || die "Can't open temp perl file.";
 
-open(try,">Comp.cpp.inc") || (die "Can't open temp include file.");
-print try '#define OK "ok 3\n"'; print try "\n";
-close try;
+($prog = <<'END') =~ s/X//g;
+X$ok = "not ok 3\n";
+X#include "Comp.cpp.inc"
+X#ifdef OK
+X$ok = OK;
+X#endif
+Xprint $ok;
+END
+print TRY $prog;
+close TRY;
+
+open(TRY,">Comp.cpp.inc") || (die "Can't open temp include file.");
+print TRY '#define OK "ok 3\n"' . "\n";
+close TRY;
 
 $pwd=`pwd`;
 $pwd =~ s/\n//;
-$x = `./perl -P -I$pwd Comp.cpp.tmp`;
+$x = `./perl -P Comp.cpp.tmp`;
 print $x;
 unlink "Comp.cpp.tmp", "Comp.cpp.inc";
