@@ -930,6 +930,7 @@ lib/ExtUtils/Embed.t		See if ExtUtils::Embed and embedding works
 lib/ExtUtils/inst		Give information about installed extensions
 lib/ExtUtils/Install.pm		Handles 'make install' on extensions
 lib/ExtUtils/Installed.pm	Information on installed extensions
+lib/ExtUtils/Installed.t	See if ExtUtils::Installed works
 lib/ExtUtils/Liblist.pm		Locates libraries
 lib/ExtUtils/MakeMaker.pm	Write Makefiles for extensions
 lib/ExtUtils/Manifest.pm	Utilities to write MANIFEST files
