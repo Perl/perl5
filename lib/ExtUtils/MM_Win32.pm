@@ -490,14 +490,14 @@ sub escape_newlines {
 
 =item max_exec_len
 
-Using 31K, a safe number gotten from Windows 2000.
+nmake 1.50 limits command length to 2048 characters.
 
 =cut
 
 sub max_exec_len {
     my $self = shift;
 
-    return $self->{_MAX_EXEC_LEN} ||= 31 * 1024;
+    return $self->{_MAX_EXEC_LEN} ||= 2 * 1024;
 }
 
 

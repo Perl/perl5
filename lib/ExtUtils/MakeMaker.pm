@@ -2,8 +2,8 @@ package ExtUtils::MakeMaker;
 
 BEGIN {require 5.005_03;}
 
-$VERSION = '6.15';
-($Revision) = q$Revision: 1.130 $ =~ /Revision:\s+(\S+)/;
+$VERSION = '6.16';
+($Revision) = q$Revision: 1.131 $ =~ /Revision:\s+(\S+)/;
 
 require Exporter;
 use Config;
@@ -359,7 +359,8 @@ sub new {
 
     # PRINT_PREREQ is RedHatism.
     if ("@ARGV" =~ /\bPRINT_PREREQ\b/) {
-        print join(" ", map { "perl($_)>=$self->{PREREQ_PM}->{$_} " } sort keys %{$self->{PREREQ_PM}}), "\n";
+        print join(" ", map { "perl($_)>=$self->{PREREQ_PM}->{$_} " } 
+                        sort keys %{$self->{PREREQ_PM}}), "\n";
         exit 0;
    }
 
@@ -1966,7 +1967,8 @@ only check if any version is installed already.
 =item PREREQ_PRINT
 
 Bool.  If this parameter is true, the prerequisites will be printed to
-stdout and MakeMaker will exit.  The output format is
+stdout and MakeMaker will exit.  The output format is an evalable hash
+ref.
 
 $PREREQ_PM = {
                'A::B' => Vers1,
@@ -2039,7 +2041,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    $VERSION = sprintf "%d.%03d", q$Revision: 1.130 $ =~ /(\d+)/g;
+    $VERSION = sprintf "%d.%03d", q$Revision: 1.131 $ =~ /(\d+)/g;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;       # new for perl5.6.0 

@@ -1,3 +1,14 @@
+6.16 Mon Aug 18 01:39:51 PDT 2003
+    * Fixing the max exec length for Windows to account for old
+      versions of nmake (the one you can download for free from MS).
+    - Hack to normalize //foo//bar paths in ExtUtils::Installed.
+      [Sreeji K Das]
+    * Adding Module::Build utility files to MANIFEST.SKIP
+    - PREREQ_PRINT is supposed to exit after dumping. (Wolfgang Friebel
+      bleadperl@20530)
+    - maniadd() was trying to open the MANIFEST even if it didn't need to
+      causing unnecessary errors for read-only MANIFESTs (rt.cpan.org 3180)
+
 6.15 Sun Aug  3 16:41:05 PDT 2003
     - Make FIXIN on Win32 use the new pl2bat rather than an already
       installed one when building the core (Mattia Barbon)

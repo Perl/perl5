@@ -1146,6 +1146,7 @@ lib/ExtUtils/t/oneliner.t	See if MM can generate perl one-liners
 lib/ExtUtils/t/Packlist.t	See if Packlist works
 lib/ExtUtils/t/postamble.t	See if postamble works
 lib/ExtUtils/t/prefixify.t	See if MakeMaker can apply a PREFIX
+lib/ExtUtils/t/prereq_print.t	See if PREREQ_PRINT works
 lib/ExtUtils/t/problems.t	How MakeMaker reacts to build problems
 lib/ExtUtils/t/prompt.t		See if E::MM::prompt() works
 lib/ExtUtils/t/recurs.t		See if recursive builds work

@@ -192,19 +192,6 @@ RCLEAN
 }
 
 
-=item max_exec_len
-
-Setting to 2500, a value obtained by experimentation.
-
-=cut
-
-sub max_exec_len {
-    my $self = shift;
-
-    return $self->{_MAX_EXEC_LEN} ||= 2500;
-}
-
-
 =item os_flavor
 
 Win95 and Win98 and WinME are collectively Win9x and Win32

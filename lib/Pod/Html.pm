@@ -3,7 +3,7 @@ use strict;
 require Exporter;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION = 1.05;
+$VERSION = 1.0501;
 @ISA = qw(Exporter);
 @EXPORT = qw(pod2html htmlify);
 @EXPORT_OK = qw(anchorify);
@@ -202,105 +202,97 @@ This program is distributed under the Artistic License.
 
 =cut
 
-my $cachedir = ".";		# The directory to which item and directory
+
+my($cachedir);
+my($dircache, $itemcache);
+my @begin_stack;
+my @libpods;
+my($htmlroot, $htmldir, $htmlfile, $htmlfileurl);
+my($podfile, @podpath, $podroot);
+my $css;
+
+my $recurse;
+my $quiet;
+my $verbose;
+my $doindex;
+
+my $backlink;
+my($listlevel, @listend);
+my $after_lpar;
+my $ignore;
+
+my(%items_named, @items_seen);
+my($title, $header);
+
+my $top;
+my $paragraph;
+
+my %sections;
+
+# Caches
+my %pages = ();			# associative array used to find the location
+				#   of pages referenced by L<> links.
+my %items = ();			# associative array used to find the location
+				#   of =item directives referenced by C<> links
+
+my %local_items;
+my $Is83;
+my $ptQuote;
+
+my $Curdir = File::Spec->curdir;
+
+init_globals();
+
+sub init_globals {
+    $cachedir = ".";		# The directory to which item and directory
 				# caches will be written.
-my $cache_ext = $^O eq 'VMS' ? ".tmp" : ".x~~";
-my $dircache = "pod2htmd$cache_ext";
-my $itemcache = "pod2htmi$cache_ext";
 
-my @begin_stack = ();		# begin/end stack
+    $dircache = "pod2htmd.tmp";
+    $itemcache = "pod2htmi.tmp";
 
-my @libpods = ();	    	# files to search for links from C<> directives
-my $htmlroot = "/";	    	# http-server base directory from which all
+    @begin_stack = ();		# begin/end stack
+
+    @libpods = ();	    	# files to search for links from C<> directives
+    $htmlroot = "/";	    	# http-server base directory from which all
 				#   relative paths in $podpath stem.
-my $htmldir = "";		# The directory to which the html pages
+    $htmldir = "";	    	# The directory to which the html pages
 				# will (eventually) be written.
-my $htmlfile = "";		# write to stdout by default
-my $htmlfileurl = "" ;		# The url that other files would use to
+    $htmlfile = "";		# write to stdout by default
+    $htmlfileurl = "" ;		# The url that other files would use to
 				# refer to this file.  This is only used
 				# to make relative urls that point to
 				# other files.
-my $podfile = "";		# read from stdin by default
-my @podpath = ();		# list of directories containing library pods.
-my $podroot = File::Spec->curdir;		# filesystem base directory from which all
+
+    $podfile = "";		# read from stdin by default
+    @podpath = ();		# list of directories containing library pods.
+    $podroot = $Curdir;	        # filesystem base directory from which all
 				#   relative paths in $podpath stem.
-my $css = '';                   # Cascading style sheet
-my $recurse = 1;		# recurse on subdirectories in $podpath.
-my $quiet = 0;			# not quiet by default
-my $verbose = 0;		# not verbose by default
-my $doindex = 1;   	    	# non-zero if we should generate an index
-my $backlink = '';              # text for "back to top" links
-my $listlevel = 0;		# current list depth
-my @listend = ();		# the text to use to end the list.
-my $after_lpar = 0;             # set to true after a par in an =item
-my $ignore = 1;			# whether or not to format text.  we don't
+    $css = '';                  # Cascading style sheet
+    $recurse = 1;		# recurse on subdirectories in $podpath.
+    $quiet = 0;		        # not quiet by default
+    $verbose = 0;		# not verbose by default
+    $doindex = 1;   	    	# non-zero if we should generate an index
+    $backlink = '';		# text for "back to top" links
+    $listlevel = 0;		# current list depth
+    @listend = ();		# the text to use to end the list.
+    $after_lpar = 0;            # set to true after a par in an =item
+    $ignore = 1;		# whether or not to format text.  we don't
 				#   format text until we hit our first pod
 				#   directive.
 
-my %items_named = ();		# for the multiples of the same item in perlfunc
-my @items_seen = ();
-my $title;			# title to give the pod(s)
-my $header = 0;			# produce block header/footer
-my $top = 1;			# true if we are at the top of the doc.  used
+    @items_seen = ();	        # for multiples of the same item in perlfunc
+    %items_named = ();
+    $header = 0;		# produce block header/footer
+    $title = '';		# title to give the pod(s)
+    $top = 1;			# true if we are at the top of the doc.  used
 				#   to prevent the first <hr /> directive.
-my $paragraph;			# which paragraph we're processing (used
+    $paragraph = '';		# which paragraph we're processing (used
 				#   for error messages)
-my $ptQuote = 0;                # status of double-quote conversion
-my %pages = ();			# associative array used to find the location
-				#   of pages referenced by L<> links.
-my %sections = ();		# sections within this page
-my %items = ();			# associative array used to find the location
-				#   of =item directives referenced by C<> links
-my %local_items = ();           # local items - avoid destruction of %items
-my $Is83;                       # is dos with short filenames (8.3)
+    $ptQuote = 0;               # status of double-quote conversion
+    %sections = ();		# sections within this page
 
-sub init_globals {
-$dircache = "pod2htmd$cache_ext";
-$itemcache = "pod2htmi$cache_ext";
-
-@begin_stack = ();		# begin/end stack
-
-@libpods = ();	    	# files to search for links from C<> directives
-$htmlroot = "/";	    	# http-server base directory from which all
-				#   relative paths in $podpath stem.
-$htmldir = "";	    	# The directory to which the html pages
-				# will (eventually) be written.
-$htmlfile = "";		# write to stdout by default
-$podfile = "";		# read from stdin by default
-@podpath = ();		# list of directories containing library pods.
-$podroot = File::Spec->curdir;		# filesystem base directory from which all
-				#   relative paths in $podpath stem.
-$css = '';                   # Cascading style sheet
-$recurse = 1;		# recurse on subdirectories in $podpath.
-$quiet = 0;		# not quiet by default
-$verbose = 0;		# not verbose by default
-$doindex = 1;   	    	# non-zero if we should generate an index
-$backlink = '';		# text for "back to top" links
-$listlevel = 0;		# current list depth
-@listend = ();		# the text to use to end the list.
-$after_lpar = 0;        # set to true after a par in an =item
-$ignore = 1;			# whether or not to format text.  we don't
-				#   format text until we hit our first pod
-				#   directive.
-
-@items_seen = ();
-%items_named = ();
-$header = 0;			# produce block header/footer
-$title = '';			# title to give the pod(s)
-$top = 1;			# true if we are at the top of the doc.  used
-				#   to prevent the first <hr /> directive.
-$paragraph = '';			# which paragraph we're processing (used
-				#   for error messages)
-%sections = ();		# sections within this page
-
-# These are not reinitialised here but are kept as a cache.
-# See get_cache and related cache management code.
-#%pages = ();			# associative array used to find the location
-				#   of pages referenced by L<> links.
-#%items = ();			# associative array used to find the location
-				#   of =item directives referenced by C<> links
-%local_items = ();
-$Is83=$^O eq 'dos';
+    %local_items = ();
+    $Is83 = $^O eq 'dos';       # Is it an 8.3 filesystem?
 }
 
 #
@@ -695,9 +687,11 @@ sub parse_command_line {
 
     warn "Flushing item and directory caches\n"
 	if $opt_verbose && defined $opt_flush;
-    $dircache = "$cachedir/pod2htmd$cache_ext";
-    $itemcache = "$cachedir/pod2htmi$cache_ext";
-    unlink($dircache, $itemcache) if defined $opt_flush;
+    $dircache = "$cachedir/pod2htmd.tmp";
+    $itemcache = "$cachedir/pod2htmi.tmp";
+    if (defined $opt_flush) {
+	1 while unlink($dircache, $itemcache);
+    }
 }
 
 

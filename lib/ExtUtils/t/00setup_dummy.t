@@ -51,7 +51,8 @@ END
              'Big-Dummy/Makefile.PL'          => <<'END',
 use ExtUtils::MakeMaker;
 
-printf "Current package is: %s\n", __PACKAGE__;
+# This will interfere with the PREREQ_PRINT tests.
+printf "Current package is: %s\n", __PACKAGE__ unless "@ARGV" =~ /PREREQ/;
 
 WriteMakefile(
     NAME          => 'Big::Dummy',
