@@ -91,6 +91,10 @@ static struct dsc$descriptor_s *defenv[] = { &fildevdsc, &crtlenvdsc, NULL };
 static struct dsc$descriptor_s **env_tables = defenv;
 static bool will_taint = FALSE;  /* tainting active, but no PL_curinterp yet */
 
+/* True if we shouldn't treat barewords as logicals during directory */
+/* munching */ 
+static int no_translate_barewords;
+
 /*{{{int vmstrnenv(const char *lnm, char *eqv, unsigned long int idx, struct dsc$descriptor_s **tabvec, unsigned long int flags) */
 int
 vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
@@ -109,7 +113,7 @@ vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
 #if defined(USE_THREADS)
     /* We jump through these hoops because we can be called at */
     /* platform-specific initialization time, which is before anything is */
-    /* set up--we can't even do a plain dTHR since that relies on the */
+    /* set up--we can't even do a plain dTHX since that relies on the */
     /* interpreter structure to be initialized */
     struct perl_thread *thr;
     if (PL_curinterp) {
@@ -142,7 +146,7 @@ vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
           int i;
           if (!environ) {
             ivenv = 1; 
-            warn("Can't read CRTL environ\n");
+            Perl_warn(aTHX_ "Can't read CRTL environ\n");
             continue;
           }
           retsts = SS$_NOLOGNAM;
@@ -179,11 +183,11 @@ vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
 	      if (thr && PL_curcop) {
 #endif
 		if (ckWARN(WARN_MISC)) {
-		  warner(WARN_MISC,"Value of CLI symbol \"%s\" too long",lnm);
+		  Perl_warner(aTHX_ WARN_MISC,"Value of CLI symbol \"%s\" too long",lnm);
 		}
 #if defined(USE_THREADS)
 	      } else {
-		  warner(WARN_MISC,"Value of CLI symbol \"%s\" too long",lnm);
+		  Perl_warner(aTHX_ WARN_MISC,"Value of CLI symbol \"%s\" too long",lnm);
 	      }
 #endif
 	      
@@ -238,7 +242,7 @@ int my_trnlnm(const char *lnm, char *eqv, unsigned long int idx)
  */
 /*{{{ char *my_getenv(const char *lnm, bool sys)*/
 char *
-my_getenv(const char *lnm, bool sys)
+Perl_my_getenv(pTHX_ const char *lnm, bool sys)
 {
     static char __my_getenv_eqv[LNM$C_NAMLENGTH+1];
     char uplnm[LNM$C_NAMLENGTH+1], *cp1, *cp2, *eqv;
@@ -285,6 +289,7 @@ my_getenv(const char *lnm, bool sys)
 char *
 my_getenv_len(const char *lnm, unsigned long *len, bool sys)
 {
+    dTHX;
     char *buf, *cp1, *cp2;
     unsigned long idx = 0;
     static char __my_getenv_len_eqv[LNM$C_NAMLENGTH+1];
@@ -338,7 +343,7 @@ prime_env_iter(void)
  * find, in preparation for iterating over it.
  */
 {
-  dTHR;
+  dTHX;
   static int primed = 0;
   HV *seenhv = NULL, *envhv;
   char cmd[LNM$C_NAMLENGTH+24], mbxnam[LNM$C_NAMLENGTH], *buf = Nullch;
@@ -387,7 +392,7 @@ prime_env_iter(void)
       for (j = 0; environ[j]; j++) { 
         if (!(start = strchr(environ[j],'='))) {
           if (ckWARN(WARN_INTERNAL)) 
-            warner(WARN_INTERNAL,"Ill-formed CRTL environ value \"%s\"\n",environ[j]);
+            Perl_warner(aTHX_ WARN_INTERNAL,"Ill-formed CRTL environ value \"%s\"\n",environ[j]);
         }
         else {
           start++;
@@ -451,12 +456,12 @@ prime_env_iter(void)
       buf[retlen] = '\0';
       if (iosb[1] != subpid) {
         if (iosb[1]) {
-          croak("Unknown process %x sent message to prime_env_iter: %s",buf);
+          Perl_croak(aTHX_ "Unknown process %x sent message to prime_env_iter: %s",buf);
         }
         continue;
       }
       if (sts == SS$_BUFFEROVF && ckWARN(WARN_INTERNAL))
-        warner(WARN_INTERNAL,"Buffer overflow in prime_env_iter: %s",buf);
+        Perl_warner(aTHX_ WARN_INTERNAL,"Buffer overflow in prime_env_iter: %s",buf);
 
       for (cp1 = buf; *cp1 && isspace(*cp1); cp1++) ;
       if (*cp1 == '(' || /* Logical name table name */
@@ -477,7 +482,7 @@ prime_env_iter(void)
         cp1--;  /* stop on last non-space char */
       }
       if ((!keylen || (cp1 - cp2 < -1)) && ckWARN(WARN_INTERNAL)) {
-        warner(WARN_INTERNAL,"Ill-formed message in prime_env_iter: |%s|",buf);
+        Perl_warner(aTHX_ WARN_INTERNAL,"Ill-formed message in prime_env_iter: |%s|",buf);
         continue;
       }
       PERL_HASH(hash,key,keylen);
@@ -524,6 +529,7 @@ vmssetenv(char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
                             tmpdsc = {6,DSC$K_DTYPE_T,DSC$K_CLASS_S,0};
     $DESCRIPTOR(crtlenv,"CRTL_ENV");  $DESCRIPTOR(clisym,"CLISYM");
     $DESCRIPTOR(local,"_LOCAL");
+    dTHX;
 
     for (cp1 = lnm, cp2 = uplnm; *cp1; cp1++, cp2++) {
       *cp2 = _toupper(*cp1);
@@ -549,7 +555,7 @@ vmssetenv(char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
           ivenv = 1; retsts = SS$_NOLOGNAM;
 #else
               if (ckWARN(WARN_INTERNAL))
-                warner(WARN_INTERNAL,"This Perl can't reset CRTL environ elements (%s)",lnm);
+                Perl_warner(aTHX_ WARN_INTERNAL,"This Perl can't reset CRTL environ elements (%s)",lnm);
               ivenv = 1; retsts = SS$_NOSUCHPGM;
               break;
             }
@@ -584,7 +590,7 @@ vmssetenv(char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
         return setenv(lnm,eqv,1) ? vaxc$errno : 0;
 #else
         if (ckWARN(WARN_INTERNAL))
-          warner(WARN_INTERNAL,"This Perl can't set CRTL environ elements (%s=%s)",lnm,eqv);
+          Perl_warner(aTHX_ WARN_INTERNAL,"This Perl can't set CRTL environ elements (%s=%s)",lnm,eqv);
         retsts = SS$_NOSUCHPGM;
 #endif
       }
@@ -643,7 +649,7 @@ vmssetenv(char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
 /*{{{ void  my_setenv(char *lnm, char *eqv)*/
 /* This has to be a function since there's a prototype for it in proto.h */
 void
-my_setenv(char *lnm,char *eqv)
+Perl_my_setenv(pTHX_ char *lnm,char *eqv)
 {
   if (lnm && *lnm && strlen(lnm) == 7) {
     char uplnm[8];
@@ -757,6 +763,7 @@ kill_file(char *name)
     char vmsname[NAM$C_MAXRSS+1], rspec[NAM$C_MAXRSS+1];
     unsigned long int jpicode = JPI$_UIC, type = ACL$C_FILE;
     unsigned long int cxt = 0, aclsts, fndsts, rmsts = -1;
+    dTHX;
     struct dsc$descriptor_s fildsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
     struct myacedef {
       unsigned char myace$b_length;
@@ -858,6 +865,7 @@ int
 my_mkdir(char *dir, Mode_t mode)
 {
   STRLEN dirlen = strlen(dir);
+  dTHX;
 
   /* CRTL mkdir() doesn't tolerate trailing /, since that implies
    * null file name/type.  However, it's commonplace under Unix,
@@ -879,6 +887,7 @@ create_mbx(unsigned short int *chan, struct dsc$descriptor_s *namdsc)
 {
   static unsigned long int mbxbufsiz;
   long int syiitm = SYI$_MAXBUF, dviitm = DVI$_DEVNAM;
+  dTHX;
   
   if (!mbxbufsiz) {
     /*
@@ -929,6 +938,7 @@ pipe_eof(FILE *fp, int immediate)
   char devnam[NAM$C_MAXRSS+1], *cp;
   unsigned long int chan, iosb[2], retsts, retsts2;
   struct dsc$descriptor devdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, devnam};
+  dTHX;
 
   if (fgetname(fp,devnam,1)) {
     /* It oughta be a mailbox, so fgetname should give just the device
@@ -954,6 +964,7 @@ pipe_exit_routine()
     struct pipe_details *info;
     unsigned long int retsts = SS$_NORMAL, abort = SS$_TIMEOUT;
     int sts, did_stuff;
+    dTHX;
 
     /* 
      first we try sending an EOF...ignore if doesn't work, make sure we
@@ -1021,6 +1032,7 @@ safe_popen(char *cmd, char *mode)
     char mbxname[64];
     unsigned short int chan;
     unsigned long int flags=1;  /* nowait - gnu c doesn't allow &1 */
+    dTHX;
     struct pipe_details *info;
     struct dsc$descriptor_s namdsc = {sizeof mbxname, DSC$K_DTYPE_T,
                                       DSC$K_CLASS_S, mbxname},
@@ -1078,7 +1090,7 @@ safe_popen(char *cmd, char *mode)
 
 /*{{{  FILE *my_popen(char *cmd, char *mode)*/
 FILE *
-my_popen(char *cmd, char *mode)
+Perl_my_popen(pTHX_ char *cmd, char *mode)
 {
     TAINT_ENV();
     TAINT_PROPER("popen");
@@ -1089,7 +1101,7 @@ my_popen(char *cmd, char *mode)
 /*}}}*/
 
 /*{{{  I32 my_pclose(FILE *fp)*/
-I32 my_pclose(FILE *fp)
+I32 Perl_my_pclose(pTHX_ FILE *fp)
 {
     struct pipe_details *info, *last = NULL;
     unsigned long int retsts;
@@ -1127,7 +1139,7 @@ Pid_t
 my_waitpid(Pid_t pid, int *statusp, int flags)
 {
     struct pipe_details *info;
-    dTHR;
+    dTHX;
     
     for (info = open_pipes; info != NULL; info = info->next)
         if (info->pid == pid) break;
@@ -1150,7 +1162,7 @@ my_waitpid(Pid_t pid, int *statusp, int flags)
         _ckvmssts(lib$getjpi(&ownercode,&pid,0,&ownerpid,0,0));
         _ckvmssts(lib$getjpi(&ownercode,0,0,&mypid,0,0));
         if (ownerpid != mypid)
-          warner(WARN_EXEC,"pid %x not a child",pid);
+          Perl_warner(aTHX_ WARN_EXEC,"pid %x not a child",pid);
       }
 
       _ckvmssts(sys$bintim(&intdsc,interval));
@@ -1713,7 +1725,8 @@ static char *do_pathify_dirspec(char *dir,char *buf, int ts)
     if (*dir) strcpy(trndir,dir);
     else getcwd(trndir,sizeof trndir - 1);
 
-    while (!strpbrk(trndir,"/]:>") && my_trnlnm(trndir,trndir,0)) {
+    while (!strpbrk(trndir,"/]:>") && !no_translate_barewords
+	   && my_trnlnm(trndir,trndir,0)) {
       STRLEN trnlen = strlen(trndir);
 
       /* Trap simple rooted lnms, and return lnm:[000000] */
@@ -2746,6 +2759,7 @@ vms_image_init(int *argcp, char ***argvp)
   unsigned long int iprv[(sizeof(union prvdef) + sizeof(unsigned long int) - 1) / sizeof(unsigned long int)];
   unsigned short int dummy, rlen;
   struct dsc$descriptor_s **tabvec;
+  dTHX;
   struct itmlst_3 jpilist[4] = { {sizeof iprv,    JPI$_IMAGPRIV, iprv, &dummy},
                                  {sizeof rlst,  JPI$_RIGHTSLIST, rlst,  &rlen},
                                  { sizeof rsz, JPI$_RIGHTS_SIZE, &rsz, &dummy},
@@ -3093,6 +3107,7 @@ collectversions(dd)
     char *p, *text, buff[sizeof dd->entry.d_name];
     int i;
     unsigned long context, tmpsts;
+    dTHX;
 
     /* Convenient shorthand. */
     e = &dd->entry;
@@ -3208,6 +3223,7 @@ void
 seekdir(DIR *dd, long count)
 {
     int vms_wantversions;
+    dTHX;
 
     /* If we haven't done anything yet... */
     if (dd->count == 0)
@@ -3288,7 +3304,7 @@ vms_execfree() {
 static char *
 setup_argstr(SV *really, SV **mark, SV **sp)
 {
-  dTHR;
+  dTHX;
   char *junk, *tmps = Nullch;
   register size_t cmdlen = 0;
   size_t rlen;
@@ -3340,6 +3356,7 @@ setup_cmddsc(char *cmd, int check_img)
   unsigned long int cxt = 0, flags = 1, retsts = SS$_NORMAL;
   register char *s, *rest, *cp;
   register int isdcl = 0;
+  dTHX;
 
   s = cmd;
   while (*s && isspace(*s)) s++;
@@ -3402,12 +3419,12 @@ setup_cmddsc(char *cmd, int check_img)
 bool
 vms_do_aexec(SV *really,SV **mark,SV **sp)
 {
-  dTHR;
+  dTHX;
   if (sp > mark) {
     if (vfork_called) {           /* this follows a vfork - act Unixish */
       vfork_called--;
       if (vfork_called < 0) {
-        warn("Internal inconsistency in tracking vforks");
+        Perl_warn(aTHX_ "Internal inconsistency in tracking vforks");
         vfork_called = 0;
       }
       else return do_aexec(really,mark,sp);
@@ -3426,11 +3443,11 @@ bool
 vms_do_exec(char *cmd)
 {
 
-  dTHR;
+  dTHX;
   if (vfork_called) {             /* this follows a vfork - act Unixish */
     vfork_called--;
     if (vfork_called < 0) {
-      warn("Internal inconsistency in tracking vforks");
+      Perl_warn(aTHX_ "Internal inconsistency in tracking vforks");
       vfork_called = 0;
     }
     else return do_exec(cmd);
@@ -3462,7 +3479,7 @@ vms_do_exec(char *cmd)
     }
     set_vaxc_errno(retsts);
     if (ckWARN(WARN_EXEC)) {
-      warner(WARN_EXEC,"Can't exec \"%*s\": %s",
+      Perl_warner(aTHX_ WARN_EXEC,"Can't exec \"%*s\": %s",
              VMScmd.dsc$w_length, VMScmd.dsc$a_pointer, Strerror(errno));
     }
     vms_execfree();
@@ -3479,7 +3496,7 @@ unsigned long int do_spawn(char *);
 unsigned long int
 do_aspawn(void *really,void **mark,void **sp)
 {
-  dTHR;
+  dTHX;
   if (sp > mark) return do_spawn(setup_argstr((SV *)really,(SV **)mark,(SV **)sp));
 
   return SS$_ABORT;
@@ -3491,7 +3508,7 @@ unsigned long int
 do_spawn(char *cmd)
 {
   unsigned long int sts, substs, hadcmd = 1;
-  dTHR;
+  dTHX;
 
   TAINT_ENV();
   TAINT_PROPER("spawn");
@@ -3522,7 +3539,7 @@ do_spawn(char *cmd)
     }
     set_vaxc_errno(sts);
     if (ckWARN(WARN_EXEC)) {
-      warner(WARN_EXEC,"Can't spawn \"%*s\": %s",
+      Perl_warner(aTHX_ WARN_EXEC,"Can't spawn \"%*s\": %s",
              hadcmd ? VMScmd.dsc$w_length :  0,
              hadcmd ? VMScmd.dsc$a_pointer : "",
              Strerror(errno));
@@ -3564,7 +3581,7 @@ int
 my_flush(FILE *fp)
 {
     int res;
-    if ((res = fflush(fp)) == 0) {
+    if ((res = fflush(fp)) == 0 && fp) {
 #ifdef VMS_DO_SOCKETS
 	Stat_t s;
 	if (Fstat(fileno(fp), &s) == 0 && !S_ISSOCK(s.st_mode))
@@ -3637,6 +3654,7 @@ static char __pw_namecache[UAI$S_IDENT+1];
  */
 static int fillpasswd (const char *name, struct passwd *pwd)
 {
+    dTHX;
     static struct {
         unsigned char length;
         char pw_gecos[UAI$S_OWNER+1];
@@ -3695,7 +3713,7 @@ static int fillpasswd (const char *name, struct passwd *pwd)
         pwd->pw_gid= uic.uic$v_group;
     }
     else
-      warn("getpwnam returned invalid UIC %#o for user \"%s\"");
+      Perl_warn(aTHX_ "getpwnam returned invalid UIC %#o for user \"%s\"");
     pwd->pw_passwd=  pw_passwd;
     pwd->pw_gecos=   owner.pw_gecos;
     pwd->pw_dir=     defdev.pw_dir;
@@ -3721,6 +3739,7 @@ struct passwd *my_getpwnam(char *name)
     struct dsc$descriptor_s name_desc;
     union uicdef uic;
     unsigned long int status, sts;
+    dTHX;
                                   
     __pwdcache = __passwd_empty;
     if (!fillpasswd(name, &__pwdcache)) {
@@ -3760,6 +3779,7 @@ struct passwd *my_getpwuid(Uid_t uid)
     unsigned short lname;
     union uicdef uic;
     unsigned long int status;
+    dTHX;
 
     if (uid == (unsigned int) -1) {
       do {
@@ -3821,6 +3841,7 @@ struct passwd *my_getpwent()
 /*{{{void my_endpwent()*/
 void my_endpwent()
 {
+    dTHX;
     if (contxt) {
       _ckvmssts(sys$finish_rdb(&contxt));
       contxt= 0;
@@ -3990,7 +4011,7 @@ static time_t toloc_dst(time_t utc) {
 /*{{{time_t my_time(time_t *timep)*/
 time_t my_time(time_t *timep)
 {
-  dTHR;
+  dTHX;
   time_t when;
   struct tm *tm_p;
 
@@ -4007,7 +4028,7 @@ time_t my_time(time_t *timep)
       gmtime_emulation_type++;
       if (!vmstrnenv("SYS$TIMEZONE_DIFFERENTIAL",off,0,fildev,0)) {
         gmtime_emulation_type++;
-        warn("no UTC offset information; assuming local time is UTC");
+        Perl_warn(aTHX_ "no UTC offset information; assuming local time is UTC");
       }
       else { utc_offset_secs = atol(off); }
     }
@@ -4043,7 +4064,7 @@ time_t my_time(time_t *timep)
 struct tm *
 my_gmtime(const time_t *timep)
 {
-  dTHR;
+  dTHX;
   char *p;
   time_t when;
   struct tm *rsltmp;
@@ -4074,7 +4095,7 @@ my_gmtime(const time_t *timep)
 struct tm *
 my_localtime(const time_t *timep)
 {
-  dTHR;
+  dTHX;
   time_t when;
   struct tm *rsltmp;
 
@@ -4131,7 +4152,7 @@ static const long int utime_baseadjust[2] = { 0x4beb4000, 0x7c9567 };
 /*{{{int my_utime(char *path, struct utimbuf *utimes)*/
 int my_utime(char *file, struct utimbuf *utimes)
 {
-  dTHR;
+  dTHX;
   register int i;
   long int bintime[2], len = 2, lowbit, unixtime,
            secscale = 10000000; /* seconds --> 100 ns intervals */
@@ -4315,6 +4336,7 @@ static mydev_t encode_dev (const char *dev)
   mydev_t enc;
   char c;
   const char *q;
+  dTHX;
 
   if (!dev || !dev[0]) return 0;
 
@@ -4360,6 +4382,7 @@ static int
 is_null_device(name)
     const char *name;
 {
+    dTHX;
     /* The VMS null device is named "_NLA0:", usually abbreviated as "NL:".
        The underscore prefix, controller letter, and unit number are
        independently optional; for our purposes, the colon punctuation
@@ -4380,9 +4403,8 @@ is_null_device(name)
  */
 /*{{{I32 cando(I32 bit, I32 effective, struct stat *statbufp)*/
 I32
-cando(I32 bit, I32 effective, Stat_t *statbufp)
+Perl_cando(pTHX_ I32 bit, I32 effective, Stat_t *statbufp)
 {
-  dTHR;
   if (statbufp == &PL_statcache) return cando_by_name(bit,effective,namecache);
   else {
     char fname[NAM$C_MAXRSS+1];
@@ -4404,7 +4426,7 @@ cando(I32 bit, I32 effective, Stat_t *statbufp)
       return cando_by_name(bit,effective,fname);
     }
     else if (retsts == SS$_NOSUCHDEV || retsts == SS$_NOSUCHFILE) {
-      warn("Can't get filespec - stale stat buffer?\n");
+      Perl_warn(aTHX_ "Can't get filespec - stale stat buffer?\n");
       return FALSE;
     }
     _ckvmssts(retsts);
@@ -4424,6 +4446,7 @@ cando_by_name(I32 bit, I32 effective, char *fname)
   char vmsname[NAM$C_MAXRSS+1], fileified[NAM$C_MAXRSS+1];
   unsigned long int objtyp = ACL$C_FILE, access, retsts, privused, iosb[2];
   unsigned short int retlen;
+  dTHX;
   struct dsc$descriptor_s namdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
   union prvdef curprv;
   struct itmlst_3 armlst[3] = {{sizeof access, CHP$_ACCESS, &access, &retlen},
@@ -4516,7 +4539,7 @@ cando_by_name(I32 bit, I32 effective, char *fname)
 int
 flex_fstat(int fd, Stat_t *statbufp)
 {
-  dTHR;
+  dTHX;
   if (!fstat(fd,(stat_t *) statbufp)) {
     if (statbufp == (Stat_t *) &PL_statcache) *namecache == '\0';
     statbufp->st_dev = encode_dev(statbufp->st_devnam);
@@ -4550,7 +4573,7 @@ flex_fstat(int fd, Stat_t *statbufp)
 int
 flex_stat(const char *fspec, Stat_t *statbufp)
 {
-    dTHR;
+    dTHX;
     char fileified[NAM$C_MAXRSS+1];
     char temp_fspec[NAM$C_MAXRSS+300];
     int retval = -1;
@@ -4819,14 +4842,14 @@ rmscopy(char *spec_in, char *spec_out, int preserve_dates)
  */
 
 void
-rmsexpand_fromperl(CV *cv)
+rmsexpand_fromperl(pTHX_ CV *cv)
 {
   dXSARGS;
   char *fspec, *defspec = NULL, *rslt;
   STRLEN n_a;
 
   if (!items || items > 2)
-    croak("Usage: VMS::Filespec::rmsexpand(spec[,defspec])");
+    Perl_croak(aTHX_ "Usage: VMS::Filespec::rmsexpand(spec[,defspec])");
   fspec = SvPV(ST(0),n_a);
   if (!fspec || !*fspec) XSRETURN_UNDEF;
   if (items == 2) defspec = SvPV(ST(1),n_a);
@@ -4838,13 +4861,13 @@ rmsexpand_fromperl(CV *cv)
 }
 
 void
-vmsify_fromperl(CV *cv)
+vmsify_fromperl(pTHX_ CV *cv)
 {
   dXSARGS;
   char *vmsified;
   STRLEN n_a;
 
-  if (items != 1) croak("Usage: VMS::Filespec::vmsify(spec)");
+  if (items != 1) Perl_croak(aTHX_ "Usage: VMS::Filespec::vmsify(spec)");
   vmsified = do_tovmsspec(SvPV(ST(0),n_a),NULL,1);
   ST(0) = sv_newmortal();
   if (vmsified != NULL) sv_usepvn(ST(0),vmsified,strlen(vmsified));
@@ -4852,13 +4875,13 @@ vmsify_fromperl(CV *cv)
 }
 
 void
-unixify_fromperl(CV *cv)
+unixify_fromperl(pTHX_ CV *cv)
 {
   dXSARGS;
   char *unixified;
   STRLEN n_a;
 
-  if (items != 1) croak("Usage: VMS::Filespec::unixify(spec)");
+  if (items != 1) Perl_croak(aTHX_ "Usage: VMS::Filespec::unixify(spec)");
   unixified = do_tounixspec(SvPV(ST(0),n_a),NULL,1);
   ST(0) = sv_newmortal();
   if (unixified != NULL) sv_usepvn(ST(0),unixified,strlen(unixified));
@@ -4866,13 +4889,13 @@ unixify_fromperl(CV *cv)
 }
 
 void
-fileify_fromperl(CV *cv)
+fileify_fromperl(pTHX_ CV *cv)
 {
   dXSARGS;
   char *fileified;
   STRLEN n_a;
 
-  if (items != 1) croak("Usage: VMS::Filespec::fileify(spec)");
+  if (items != 1) Perl_croak(aTHX_ "Usage: VMS::Filespec::fileify(spec)");
   fileified = do_fileify_dirspec(SvPV(ST(0),n_a),NULL,1);
   ST(0) = sv_newmortal();
   if (fileified != NULL) sv_usepvn(ST(0),fileified,strlen(fileified));
@@ -4880,13 +4903,13 @@ fileify_fromperl(CV *cv)
 }
 
 void
-pathify_fromperl(CV *cv)
+pathify_fromperl(pTHX_ CV *cv)
 {
   dXSARGS;
   char *pathified;
   STRLEN n_a;
 
-  if (items != 1) croak("Usage: VMS::Filespec::pathify(spec)");
+  if (items != 1) Perl_croak(aTHX_ "Usage: VMS::Filespec::pathify(spec)");
   pathified = do_pathify_dirspec(SvPV(ST(0),n_a),NULL,1);
   ST(0) = sv_newmortal();
   if (pathified != NULL) sv_usepvn(ST(0),pathified,strlen(pathified));
@@ -4894,13 +4917,13 @@ pathify_fromperl(CV *cv)
 }
 
 void
-vmspath_fromperl(CV *cv)
+vmspath_fromperl(pTHX_ CV *cv)
 {
   dXSARGS;
   char *vmspath;
   STRLEN n_a;
 
-  if (items != 1) croak("Usage: VMS::Filespec::vmspath(spec)");
+  if (items != 1) Perl_croak(aTHX_ "Usage: VMS::Filespec::vmspath(spec)");
   vmspath = do_tovmspath(SvPV(ST(0),n_a),NULL,1);
   ST(0) = sv_newmortal();
   if (vmspath != NULL) sv_usepvn(ST(0),vmspath,strlen(vmspath));
@@ -4908,13 +4931,13 @@ vmspath_fromperl(CV *cv)
 }
 
 void
-unixpath_fromperl(CV *cv)
+unixpath_fromperl(pTHX_ CV *cv)
 {
   dXSARGS;
   char *unixpath;
   STRLEN n_a;
 
-  if (items != 1) croak("Usage: VMS::Filespec::unixpath(spec)");
+  if (items != 1) Perl_croak(aTHX_ "Usage: VMS::Filespec::unixpath(spec)");
   unixpath = do_tounixpath(SvPV(ST(0),n_a),NULL,1);
   ST(0) = sv_newmortal();
   if (unixpath != NULL) sv_usepvn(ST(0),unixpath,strlen(unixpath));
@@ -4922,7 +4945,7 @@ unixpath_fromperl(CV *cv)
 }
 
 void
-candelete_fromperl(CV *cv)
+candelete_fromperl(pTHX_ CV *cv)
 {
   dXSARGS;
   char fspec[NAM$C_MAXRSS+1], *fsp;
@@ -4930,7 +4953,7 @@ candelete_fromperl(CV *cv)
   IO *io;
   STRLEN n_a;
 
-  if (items != 1) croak("Usage: VMS::Filespec::candelete(spec)");
+  if (items != 1) Perl_croak(aTHX_ "Usage: VMS::Filespec::candelete(spec)");
 
   mysv = SvROK(ST(0)) ? SvRV(ST(0)) : ST(0);
   if (SvTYPE(mysv) == SVt_PVGV) {
@@ -4954,7 +4977,7 @@ candelete_fromperl(CV *cv)
 }
 
 void
-rmscopy_fromperl(CV *cv)
+rmscopy_fromperl(pTHX_ CV *cv)
 {
   dXSARGS;
   char inspec[NAM$C_MAXRSS+1], outspec[NAM$C_MAXRSS+1], *inp, *outp;
@@ -4967,7 +4990,7 @@ rmscopy_fromperl(CV *cv)
   STRLEN n_a;
 
   if (items < 2 || items > 3)
-    croak("Usage: File::Copy::rmscopy(from,to[,date_flag])");
+    Perl_croak(aTHX_ "Usage: File::Copy::rmscopy(from,to[,date_flag])");
 
   mysv = SvROK(ST(0)) ? SvRV(ST(0)) : ST(0);
   if (SvTYPE(mysv) == SVt_PVGV) {
@@ -5011,6 +5034,13 @@ void
 init_os_extras()
 {
   char* file = __FILE__;
+  dTHX;
+  char temp_buff[512];
+  if (my_trnlnm("DECC$DISABLE_TO_VMS_LOGNAME_TRANSLATION", temp_buff, 0)) {
+    no_translate_barewords = TRUE;
+  } else {
+    no_translate_barewords = FALSE;
+  }
 
   newXSproto("VMS::Filespec::rmsexpand",rmsexpand_fromperl,file,"$;$");
   newXSproto("VMS::Filespec::vmsify",vmsify_fromperl,file,"$");

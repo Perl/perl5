@@ -230,7 +230,7 @@ static char zero_but_true[ZBTLEN + 1] = "0 but true";
 	|| defined(HAS_SETREGID) || defined(HAS_SETRESGID))
 /* The Hard Way. */
 STATIC int
-S_emulate_eaccess(pTHX_ const char* path, int mode)
+S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 {
     Uid_t ruid = getuid();
     Uid_t euid = geteuid();
@@ -295,7 +295,7 @@ S_emulate_eaccess(pTHX_ const char* path, int mode)
 
 #if !defined(PERL_EFF_ACCESS_R_OK)
 STATIC int
-S_emulate_eaccess(pTHX_ const char* path, int mode)
+S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 {
     Perl_croak(aTHX_ "switching effective uid is not implemented");
     /*NOTREACHED*/
@@ -1667,6 +1667,7 @@ PP(pp_send)
 	else
 #endif
 	{
+	    /* See the note at doio.c:do_print about filesize limits. --jhi */
 	    length = PerlLIO_write(PerlIO_fileno(IoIFP(io)),
 				   buffer+offset, length);
 	}
@@ -1764,7 +1765,7 @@ PP(pp_sysseek)
     djSP;
     GV *gv;
     int whence = POPi;
-    Off_t offset = POPl;
+    Off_t offset = (Off_t)SvIVx(POPs);
     MAGIC *mg;
 
     gv = PL_last_in_gv = (GV*)POPs;
@@ -2472,30 +2473,30 @@ PP(pp_stat)
     if (max) {
 	EXTEND(SP, max);
 	EXTEND_MORTAL(max);
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_dev)));
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_ino)));
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_mode)));
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_nlink)));
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_uid)));
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_gid)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_dev)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_ino)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_mode)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_nlink)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_uid)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_gid)));
 #ifdef USE_STAT_RDEV
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_rdev)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_rdev)));
 #else
 	PUSHs(sv_2mortal(newSVpvn("", 0)));
 #endif
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_size)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_size)));
 #ifdef BIG_TIME
-	PUSHs(sv_2mortal(newSVnv((U32)PL_statcache.st_atime)));
-	PUSHs(sv_2mortal(newSVnv((U32)PL_statcache.st_mtime)));
-	PUSHs(sv_2mortal(newSVnv((U32)PL_statcache.st_ctime)));
+	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_atime)));
+	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_mtime)));
+	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_ctime)));
 #else
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_atime)));
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_mtime)));
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_ctime)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_atime)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_mtime)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_ctime)));
 #endif
 #ifdef USE_STAT_BLOCKS
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_blksize)));
-	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_blocks)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_blksize)));
+	PUSHs(sv_2mortal(newSViv(PL_statcache.st_blocks)));
 #else
 	PUSHs(sv_2mortal(newSVpvn("", 0)));
 	PUSHs(sv_2mortal(newSVpvn("", 0)));
@@ -2718,7 +2719,7 @@ PP(pp_ftmtime)
     djSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
-    PUSHn( ((I32)PL_basetime - (I32)PL_statcache.st_mtime) / 86400.0 );
+    PUSHn( (PL_basetime - PL_statcache.st_mtime) / 86400.0 );
     RETURN;
 }
 
@@ -2728,7 +2729,7 @@ PP(pp_ftatime)
     djSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
-    PUSHn( ((I32)PL_basetime - (I32)PL_statcache.st_atime) / 86400.0 );
+    PUSHn( (PL_basetime - PL_statcache.st_atime) / 86400.0 );
     RETURN;
 }
 
@@ -2738,7 +2739,7 @@ PP(pp_ftctime)
     djSP; dTARGET;
     if (result < 0)
 	RETPUSHUNDEF;
-    PUSHn( ((I32)PL_basetime - (I32)PL_statcache.st_ctime) / 86400.0 );
+    PUSHn( (PL_basetime - PL_statcache.st_ctime) / 86400.0 );
     RETURN;
 }
 
@@ -3764,21 +3765,21 @@ PP(pp_getpgrp)
 {
 #ifdef HAS_GETPGRP
     djSP; dTARGET;
-    int pid;
-    I32 value;
+    Pid_t pid;
+    Pid_t pgrp;
 
     if (MAXARG < 1)
 	pid = 0;
     else
 	pid = SvIVx(POPs);
 #ifdef BSD_GETPGRP
-    value = (I32)BSD_GETPGRP(pid);
+    pgrp = (I32)BSD_GETPGRP(pid);
 #else
     if (pid != 0 && pid != getpid())
 	DIE(aTHX_ "POSIX getpgrp can't take an argument");
-    value = (I32)getpgrp();
+    pgrp = getpgrp();
 #endif
-    XPUSHi(value);
+    XPUSHi(pgrp);
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, "getpgrp()");
@@ -3789,8 +3790,8 @@ PP(pp_setpgrp)
 {
 #ifdef HAS_SETPGRP
     djSP; dTARGET;
-    int pgrp;
-    int pid;
+    Pid_t pgrp;
+    Pid_t pid;
     if (MAXARG < 2) {
 	pgrp = 0;
 	pid = 0;
@@ -3949,15 +3950,15 @@ PP(pp_gmtime)
 	PUSHs(sv_2mortal(tsv));
     }
     else if (tmbuf) {
-	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_sec)));
-	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_min)));
-	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_hour)));
-	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_mday)));
-	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_mon)));
-	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_year)));
-	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_wday)));
-	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_yday)));
-	PUSHs(sv_2mortal(newSViv((I32)tmbuf->tm_isdst)));
+	PUSHs(sv_2mortal(newSViv(tmbuf->tm_sec)));
+	PUSHs(sv_2mortal(newSViv(tmbuf->tm_min)));
+	PUSHs(sv_2mortal(newSViv(tmbuf->tm_hour)));
+	PUSHs(sv_2mortal(newSViv(tmbuf->tm_mday)));
+	PUSHs(sv_2mortal(newSViv(tmbuf->tm_mon)));
+	PUSHs(sv_2mortal(newSViv(tmbuf->tm_year)));
+	PUSHs(sv_2mortal(newSViv(tmbuf->tm_wday)));
+	PUSHs(sv_2mortal(newSViv(tmbuf->tm_yday)));
+	PUSHs(sv_2mortal(newSViv(tmbuf->tm_isdst)));
     }
     RETURN;
 }
@@ -3972,7 +3973,7 @@ PP(pp_alarm)
     EXTEND(SP, 1);
     if (anum < 0)
 	RETPUSHUNDEF;
-    PUSHi((I32)anum);
+    PUSHi(anum);
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, "Unsupported function alarm");
@@ -5000,7 +5001,7 @@ fcntl_emulate_flock(int fd, int operation)
 	return -1;
     }
     flock.l_whence = SEEK_SET;
-    flock.l_start = flock.l_len = 0L;
+    flock.l_start = flock.l_len = (Off_t)0;
  
     return fcntl(fd, (operation & LOCK_NB) ? F_SETLK : F_SETLKW, &flock);
 }

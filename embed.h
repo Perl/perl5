@@ -160,6 +160,7 @@
 #define do_sysseek		Perl_do_sysseek
 #define do_tell			Perl_do_tell
 #define do_trans		Perl_do_trans
+#define do_vecget		Perl_do_vecget
 #define do_vecset		Perl_do_vecset
 #define do_vop			Perl_do_vop
 #define dofile			Perl_dofile
@@ -1486,6 +1487,7 @@
 #define do_sysseek(a,b,c)	Perl_do_sysseek(aTHX_ a,b,c)
 #define do_tell(a)		Perl_do_tell(aTHX_ a)
 #define do_trans(a)		Perl_do_trans(aTHX_ a)
+#define do_vecget(a,b,c)	Perl_do_vecget(aTHX_ a,b,c)
 #define do_vecset(a)		Perl_do_vecset(aTHX_ a)
 #define do_vop(a,b,c,d)		Perl_do_vop(aTHX_ a,b,c,d)
 #define dofile(a)		Perl_dofile(aTHX_ a)
@@ -2925,6 +2927,8 @@
 #define do_tell			Perl_do_tell
 #define Perl_do_trans		CPerlObj::Perl_do_trans
 #define do_trans		Perl_do_trans
+#define Perl_do_vecget		CPerlObj::Perl_do_vecget
+#define do_vecget		Perl_do_vecget
 #define Perl_do_vecset		CPerlObj::Perl_do_vecset
 #define do_vecset		Perl_do_vecset
 #define Perl_do_vop		CPerlObj::Perl_do_vop

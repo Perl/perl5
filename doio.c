@@ -141,7 +141,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     }
 
     if (as_raw) {
-#if defined(O_LARGEFILE)
+#if defined(USE_64_BIT_OFFSETS) && defined(O_LARGEFILE)
 	rawmode |= O_LARGEFILE;
 #endif
 
@@ -282,7 +282,19 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 			    goto say_false;
 			}
 			if (IoIFP(thatio)) {
-			    fd = PerlIO_fileno(IoIFP(thatio));
+			    PerlIO *fp = IoIFP(thatio);
+			    /* Flush stdio buffer before dup. --mjd
+			     * Unfortunately SEEK_CURing 0 seems to
+			     * be optimized away on most platforms;
+			     * only Solaris and Linux seem to flush
+			     * on that. --jhi */
+			    PerlIO_seek(fp, 0, SEEK_CUR);
+			    /* On the other hand, do all platforms
+			     * take gracefully to flushing a read-only
+			     * filehandle?  Perhaps we should do
+			     * fsetpos(src)+fgetpos(dst)?  --nik */
+			    PerlIO_flush(fp);
+			    fd = PerlIO_fileno(fp);
 			    if (IoTYPE(thatio) == 's')
 				IoTYPE(io) = 's';
 			}
@@ -413,7 +425,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    }
 	}
 	if (fd != PerlIO_fileno(fp)) {
-	    int pid;
+	    Pid_t pid;
 	    SV *sv;
 
 	    PerlLIO_dup2(PerlIO_fileno(fp), fd);
@@ -873,7 +885,7 @@ Perl_do_sysseek(pTHX_ GV *gv, Off_t pos, int whence)
 	    Perl_warner(aTHX_ WARN_UNOPENED, "sysseek() on unopened file");
     }
     SETERRNO(EBADF,RMS$_IFI);
-    return -1L;
+    return (Off_t)-1;
 }
 
 int
@@ -1019,6 +1031,12 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 	tmps = SvPV(sv, len);
 	break;
     }
+    /* To detect whether the process is about to overstep its
+     * filesize limit we would need getrlimit().  We could then
+     * also transparently raise the limit with setrlimit() --
+     * but only until the system hard limit/the filesystem limit,
+     * at which we would get EPERM.  Note that when using buffered
+     * io the write failure can be delayed until the flush/close. --jhi */
     if (len && (PerlIO_write(fp,tmps,len) == 0 || PerlIO_error(fp)))
 	return FALSE;
     return !PerlIO_error(fp);
@@ -1487,8 +1505,10 @@ nothing in the core.
 
 /* Do the permissions allow some operation?  Assumes statcache already set. */
 #ifndef VMS /* VMS' cando is in vms.c */
-I32
-Perl_cando(pTHX_ I32 bit, I32 effective, register struct stat *statbufp)
+bool
+Perl_cando(pTHX_ Mode_t mode, Uid_t effective, register Stat_t *statbufp)
+/* Note: we use `effective' both for uids and gids.
+ * Here we are betting on Uid_t being equal or wider than Gid_t.  */
 {
 #ifdef DOSISH
     /* [Comments and code from Len Reed]
@@ -1512,11 +1532,11 @@ Perl_cando(pTHX_ I32 bit, I32 effective, register struct stat *statbufp)
      /* Atari stat() does pretty much the same thing. we set x_bit_set_in_stat
       * too so it will actually look into the files for magic numbers
       */
-     return (bit & statbufp->st_mode) ? TRUE : FALSE;
+     return (mode & statbufp->st_mode) ? TRUE : FALSE;
 
 #else /* ! DOSISH */
     if ((effective ? PL_euid : PL_uid) == 0) {	/* root is special */
-	if (bit == S_IXUSR) {
+	if (mode == S_IXUSR) {
 	    if (statbufp->st_mode & 0111 || S_ISDIR(statbufp->st_mode))
 		return TRUE;
 	}
@@ -1525,22 +1545,22 @@ Perl_cando(pTHX_ I32 bit, I32 effective, register struct stat *statbufp)
 	return FALSE;
     }
     if (statbufp->st_uid == (effective ? PL_euid : PL_uid) ) {
-	if (statbufp->st_mode & bit)
+	if (statbufp->st_mode & mode)
 	    return TRUE;	/* ok as "user" */
     }
-    else if (ingroup((I32)statbufp->st_gid,effective)) {
-	if (statbufp->st_mode & bit >> 3)
+    else if (ingroup(statbufp->st_gid,effective)) {
+	if (statbufp->st_mode & mode >> 3)
 	    return TRUE;	/* ok as "group" */
     }
-    else if (statbufp->st_mode & bit >> 6)
+    else if (statbufp->st_mode & mode >> 6)
 	return TRUE;	/* ok as "other" */
     return FALSE;
 #endif /* ! DOSISH */
 }
 #endif /* ! VMS */
 
-I32
-Perl_ingroup(pTHX_ I32 testgid, I32 effective)
+bool
+Perl_ingroup(pTHX_ Gid_t testgid, Uid_t effective)
 {
     if (testgid == (effective ? PL_egid : PL_gid))
 	return TRUE;

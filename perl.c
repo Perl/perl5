@@ -2472,10 +2472,10 @@ S_find_beginning(pTHX)
 STATIC void
 S_init_ids(pTHX)
 {
-    PL_uid = (int)PerlProc_getuid();
-    PL_euid = (int)PerlProc_geteuid();
-    PL_gid = (int)PerlProc_getgid();
-    PL_egid = (int)PerlProc_getegid();
+    PL_uid = PerlProc_getuid();
+    PL_euid = PerlProc_geteuid();
+    PL_gid = PerlProc_getgid();
+    PL_egid = PerlProc_getegid();
 #ifdef VMS
     PL_uid |= PL_gid << 16;
     PL_euid |= PL_egid << 16;

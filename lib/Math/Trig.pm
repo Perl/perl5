@@ -409,7 +409,16 @@ To calculate the distance between London (51.3N 0.5W) and Tokyo (35.7N
         $km = great_circle_distance(@L, @T, 6378);
 
 The answer may be off by few percentages because of the irregular
-(slightly aspherical) form of the Earth.
+(slightly aspherical) form of the Earth.  The used formula
+
+	lat0 = 90 degrees - phi0
+	lat1 = 90 degrees - phi1
+	d = R * arccos(cos(lat0) * cos(lat1) * cos(lon1 - lon01) +
+                       sin(lat0) * sin(lat1))
+
+is also somewhat unreliable for small distances (for locations
+separated less than about five degrees) because it uses arc cosine
+which is rather ill-conditioned for values close to zero.
 
 =head1 BUGS
 

@@ -3496,10 +3496,12 @@ See L<perlop> for more details on unary operators and the comma operator.
 Sets FILEHANDLE's position, just like the C<fseek> call of C<stdio>.
 FILEHANDLE may be an expression whose value gives the name of the
 filehandle.  The values for WHENCE are C<0> to set the new position to
-POSITION, C<1> to set it to the current position plus POSITION, and C<2> to
-set it to EOF plus POSITION (typically negative).  For WHENCE you may
-use the constants C<SEEK_SET>, C<SEEK_CUR>, and C<SEEK_END> from either the
-C<IO::Seekable> or the POSIX module.  Returns C<1> upon success, C<0> otherwise.
+POSITION, C<1> to set it to the current position plus POSITION, and
+C<2> to set it to EOF plus POSITION (typically negative).  For WHENCE
+you may use the constants C<SEEK_SET>, C<SEEK_CUR>, and C<SEEK_END>
+(start of the file, current position, end of the file) from any of the
+modules Fcntl, C<IO::Seekable>, or POSIX.  Returns C<1> upon success,
+C<0> otherwise.
 
 If you want to position file for C<sysread> or C<syswrite>, don't use
 C<seek>--buffering makes its effect on the file's system position
@@ -4433,11 +4435,20 @@ FILENAME, MODE, PERMS.
 
 The possible values and flag bits of the MODE parameter are
 system-dependent; they are available via the standard module C<Fcntl>.
+See the documentation of your operating system's C<open> to see which
+values and flag bits are available.  You may combine several flags
+using the C<|>-operator.
+
+Some of the most common values are C<O_RDONLY> for opening the file in
+read-only mode, C<O_WRONLY> for opening the file in write-only mode,
+and C<O_RDWR> for opening the file in read-write mode, and.
+
 For historical reasons, some values work on almost every system
 supported by perl: zero means read-only, one means write-only, and two
 means read/write.  We know that these values do I<not> work under
 OS/390 & VM/ESA Unix and on the Macintosh; you probably don't want to
-use them in new code.
+se them in new code, use thhe constants discussed in the preceding
+paragraph.
 
 If the file named by FILENAME does not exist and the C<open> call creates
 it (typically because MODE includes the C<O_CREAT> flag), then the value of
@@ -4445,6 +4456,13 @@ PERMS specifies the permissions of the newly created file.  If you omit
 the PERMS argument to C<sysopen>, Perl uses the octal value C<0666>.
 These permission values need to be in octal, and are modified by your
 process's current C<umask>.
+
+In many systems the C<O_EXCL> flag is available for opening files in
+exclusive mode.  This is B<not> locking: exclusiveness means here that
+if the file already exists, sysopen() fails.  The C<O_EXCL> wins
+C<O_TRUNC>.
+
+Sometimes you may want to truncate an already-existing file: C<O_TRUNC>.
 
 You should seldom if ever use C<0644> as argument to C<sysopen>, because
 that takes away the user's option to have a more permissive umask.
@@ -4481,13 +4499,14 @@ for a return value for 0 to decide whether you're done.
 
 Sets FILEHANDLE's system position using the system call lseek(2).  It
 bypasses stdio, so mixing this with reads (other than C<sysread>),
-C<print>, C<write>, C<seek>, C<tell>, or C<eof> may cause
-confusion.  FILEHANDLE may be an expression whose value gives the name
-of the filehandle.  The values for WHENCE are C<0> to set the new
-position to POSITION, C<1> to set the it to the current position plus
-POSITION, and C<2> to set it to EOF plus POSITION (typically negative).
-For WHENCE, you may use the constants C<SEEK_SET>, C<SEEK_CUR>, and
-C<SEEK_END> from either the C<IO::Seekable> or the POSIX module.
+C<print>, C<write>, C<seek>, C<tell>, or C<eof> may cause confusion.
+FILEHANDLE may be an expression whose value gives the name of the
+filehandle.  The values for WHENCE are C<0> to set the new position to
+POSITION, C<1> to set the it to the current position plus POSITION,
+and C<2> to set it to EOF plus POSITION (typically negative).  For
+WHENCE, you may also use the constants C<SEEK_SET>, C<SEEK_CUR>, and
+C<SEEK_END> (start of the file, current position, end of the file)
+from any of the modules Fcntl, C<IO::Seekable>, or POSIX.
 
 Returns the new position, or the undefined value on failure.  A position
 of zero is returned as the string C<"0 but true">; thus C<sysseek> returns
@@ -4969,11 +4988,11 @@ See also C<keys>, C<each>, and C<sort>.
 =item vec EXPR,OFFSET,BITS
 
 Treats the string in EXPR as a vector of unsigned integers, and
-returns the value of the bit field specified by OFFSET.  BITS specifies
-the number of bits that are reserved for each entry in the bit
-vector.  This must be a power of two from 1 to 32.  C<vec> may also be
-assigned to, in which case parentheses are needed to give the expression
-the correct precedence as in
+returns the value of the bit field specified by OFFSET.  BITS
+specifies the number of bits that are reserved for each entry in the
+bit vector.  This must be a power of two from 1 to 32.
+C<vec> may also be assigned to, in which case parentheses are needed
+to give the expression the correct precedence as in
 
     vec($image, $max_x * $x + $y, 8) = 3;
 

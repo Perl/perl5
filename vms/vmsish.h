@@ -75,6 +75,9 @@
   /* getenv used for regular logical names */
 #  define getenv(v) my_getenv(v,TRUE)
 #endif
+#if defined(getenv_len)
+#undef getenv_len
+#endif
 #define getenv_len(v,l) my_getenv_len(v,l,TRUE)
 
 /* DECC introduces this routine in the RTL as of VMS 7.0; for now,
@@ -90,11 +93,16 @@
 /* Our own contribution to PerlShr's global symbols . . . */
 #define vmstrnenv		Perl_vmstrnenv
 #define my_trnlnm		Perl_my_trnlnm
-#define my_getenv		Perl_my_getenv
 #define my_getenv_len		Perl_my_getenv_len
 #define prime_env_iter	Perl_prime_env_iter
 #define vmssetenv		Perl_vmssetenv
+#if !defined(PERL_IMPLICIT_CONTEXT)
 #define my_setenv		Perl_my_setenv
+#define my_getenv		Perl_my_getenv
+#else
+#define my_setenv(a,b)		Perl_my_setenv(aTHX_ a,b)
+#define my_getenv(a,b)		Perl_my_getenv(aTHX_ a,b)
+#endif
 #define my_crypt		Perl_my_crypt
 #define my_waitpid		Perl_my_waitpid
 #define my_gconvert		Perl_my_gconvert
@@ -222,7 +230,7 @@
 #define _ckvmssts(call) STMT_START { register unsigned long int __ckvms_sts; \
   if (!((__ckvms_sts=(call))&1)) { \
   set_errno(EVMSERR); set_vaxc_errno(__ckvms_sts); \
-  croak("Fatal VMS error (status=%d) at %s, line %d", \
+  Perl_croak(aTHX_ "Fatal VMS error (status=%d) at %s, line %d", \
   __ckvms_sts,__FILE__,__LINE__); } } STMT_END
 
 /* Same thing, but don't call back to Perl's croak(); useful for errors
@@ -581,7 +589,11 @@ void	init_os_extras ();
 typedef char  __VMS_PROTOTYPES__;
 int	vmstrnenv (const char *, char *, unsigned long int, struct dsc$descriptor_s **, unsigned long int);
 int	my_trnlnm (const char *, char *, unsigned long int);
-char *	my_getenv (const char *, bool);
+#if !defined(PERL_IMPLICIT_CONTEXT)
+char *	Perl_my_getenv (const char *, bool);
+#else
+char *	Perl_my_getenv (pTHX_ const char *, bool);
+#endif
 char *	my_getenv_len (const char *, unsigned long *, bool);
 int	vmssetenv (char *, char *, struct dsc$descriptor_s **);
 char *	my_crypt (const char *, const char *);

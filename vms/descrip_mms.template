@@ -279,7 +279,7 @@ FULLLIBS2 = $(LIBS2)|$(THRLIBS1)|$(THRLIBS2)
 #### End of system configuration section. ####
 
 
-h1 = EXTERN.h, INTERN.h, XSUB.h, av.h, bytecode.h, byterun.h, config.h, cop.h, cv.h
+h1 = EXTERN.h, INTERN.h, XSUB.h, av.h, config.h, cop.h, cv.h
 h2 = embed.h, form.h, gv.h, handy.h, hv.h, keywords.h, mg.h, op.h, thread.h
 h3 = opcode.h, patchlevel.h, perl.h, perly.h, pp.h, proto.h, regcomp.h
 h4 = regexp.h, scope.h, sv.h, vmsish.h, util.h, perlsdio.h, perlio.h
@@ -289,13 +289,13 @@ h = $(h1), $(h2), $(h3), $(h4), $(h5), $(h6) $(SOCKHLIS) $(THREADH)
 
 c1 = av.c, scope.c, op.c, doop.c, doio.c, dump.c, hv.c, mg.c, universal.c, perlio.c, utf8.c
 c2 = perl.c, perly.c, pp.c, pp_hot.c, pp_ctl.c, pp_sys.c, regcomp.c, regexec.c $(MALLOC_C)
-c3 = gv.c, sv.c, taint.c, toke.c, utf8.c, util.c, deb.c, run.c, globals.c, vms.c, byterun.c $(SOCKCLIS)
+c3 = gv.c, sv.c, taint.c, toke.c, utf8.c, util.c, deb.c, run.c, globals.c, vms.c $(SOCKCLIS)
 
-c = $(c1), $(c2), $(c3), miniperlmain.c, perlmain.c, byteperl.c
+c = $(c1), $(c2), $(c3), miniperlmain.c, perlmain.c
 
 obj1 = perl$(O), gv$(O), toke$(O), perly$(O), op$(O), regcomp$(O), dump$(O), utf8$(O), util$(O), mg$(O), perlio$(O) $(MALLOC_O)
 obj2 = hv$(O), av$(O), run$(O), pp_hot$(O), sv$(O), pp$(O), scope$(O), pp_ctl$(O), pp_sys$(O), utf8$(O)
-obj3 = doop$(O), doio$(O), regexec$(O), taint$(O), deb$(O), universal$(O), globals$(O), vms$(O), byterun$(O) $(SOCKOBJ)
+obj3 = doop$(O), doio$(O), regexec$(O), taint$(O), deb$(O), universal$(O), globals$(O), vms$(O) $(SOCKOBJ)
 
 obj = $(obj1), $(obj2), $(obj3)
 
@@ -308,7 +308,7 @@ ac6 = $(ARCHCORE)pp.h $(ARCHCORE)pp_proto.h $(ARCHCORE)proto.h $(ARCHCORE)regcom
 ac7 = $(ARCHCORE)regexp.h $(ARCHCORE)scope.h $(ARCHCORE)sv.h $(ARCHCORE)util.h
 ac8  = $(ARCHCORE)embedvar.h $(ARCHCORE)intrpvar.h $(ARCHCORE)perlvars.h $(ARCHCORE)thrdvar.h
 ac9  = $(ARCHCORE)vmsish.h $(ARCHCORE)warning.h $(ARCHCORE)$(DBG)libperl$(OLB) $(ARCHCORE)perlshr_attr.opt
-ac10 = $(ARCHCORE)$(DBG)perlshr_bld.opt $(ARCHCORE)bytecode.h $(ARCHCORE)byterun.h
+ac10 = $(ARCHCORE)$(DBG)perlshr_bld.opt  
 ac11 = $(ARCHCORE)cc_runtime.h
 .ifdef SOCKET
 acs = $(ARCHCORE)$(SOCKH)
@@ -395,16 +395,13 @@ $(DBG)libperl$(OLB) : $(obj)
 perlmain.c : miniperlmain.c $(MINIPERL_EXE) [.vms]writemain.pl
 	$(MINIPERL) [.VMS]Writemain.pl "$(EXT)"
 
-byteperl.c : [.ext.B]byteperl.c
-	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 
 .ifdef __DEBUG__
 # Link an extra perl that doesn't invoke the debugger
-perl : $(DBG)perl$(E) $(DBG)byteperl$(E)
+perl : $(DBG)perl$(E)
 	Link $(LINKFLAGS)/NoDebug/Trace/NoMap/NoCross/NoFull/Exe=N$(DBG)perl$(E) perlmain$(O), perlshr.opt/Option, perlshr_attr.opt/Option $(CRTLOPTS)
-	Link $(LINKFLAGS)/NoDebug/Trace/NoMap/NoCross/NoFull/Exe=N$(DBG)byteperl$(E) byteperl$(O), perlshr.opt/Option, perlshr_attr.opt/Option $(CRTLOPTS)
 .else
-perl : $(DBG)perl$(E) $(DBG)byteperl$(E)
+perl : $(DBG)perl$(E)
 	@ Continue
 .endif
 
@@ -415,10 +412,6 @@ $(DBG)perl$(E) : perlmain$(O), $(DBG)perlshr$(E), $(MINIPERL_EXE)
 .else
 	Link $(LINKFLAGS)/Exe=$(MMS$TARGET) perlmain$(O), perlshr.opt/Option, perlshr_attr.opt/Option $(CRTLOPTS)
 .endif
-
-$(DBG)byteperl$(E) : byteperl$(O), $(DBG)perlshr$(E), $(MINIPERL_EXE)
-	@ @[.vms]genopt "PerlShr.Opt/Write" "|" "''F$Environment("Default")'$(DBG)PerlShr$(E)/Share"
-	Link $(LINKFLAGS)/Exe=$(MMS$TARGET) byteperl$(O), perlshr.opt/Option, perlshr_attr.opt/Option $(CRTLOPTS)
 
 $(DBG)perlshr$(E) : $(DBG)libperl$(OLB) $(extobj) $(DBG)perlshr_xtras.ts
 	Link $(LINKFLAGS)/Share=$(MMS$TARGET) $(extobj) []$(DBG)perlshr_bld.opt/Option, perlshr_attr.opt/Option
@@ -822,12 +815,6 @@ $(ARCHCORE)INTERN.h : INTERN.h
 $(ARCHCORE)XSUB.h : XSUB.h
 	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
-$(ARCHCORE)bytecode.h : bytecode.h
-	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
-	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
-$(ARCHCORE)byterun.h : byterun.h
-	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
-	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
 $(ARCHCORE)av.h : av.h
 	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
@@ -966,103 +953,97 @@ $(ARCHAUTO)time.stamp :
 #util$(O) : util.c
 #	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
-av$(O) : av.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
+av$(O) : av.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-byterun$(O) : byterun.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
+deb$(O) : deb.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-deb$(O) : deb.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
+doio$(O) : doio.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-doio$(O) : doio.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
+doop$(O) : doop.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-doop$(O) : doop.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
+dump$(O) : dump.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-dump$(O) : dump.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
+globals$(O) : globals.c INTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-globals$(O) : globals.c INTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
+gv$(O) : gv.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-gv$(O) : gv.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
+hv$(O) : hv.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-hv$(O) : hv.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
+malloc$(O) : malloc.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-malloc$(O) : malloc.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
+mg$(O) : mg.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-mg$(O) : mg.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
+miniperlmain$(O) : miniperlmain.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-miniperlmain$(O) : miniperlmain.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
+op$(O) : op.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-op$(O) : op.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
+perl$(O) : perl.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h patchlevel.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-perl$(O) : perl.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h patchlevel.h iperlsys.h pp_proto.h warning.h
+perlio$(O) : perlio.c config.h EXTERN.h perl.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-perlio$(O) : perlio.c config.h EXTERN.h perl.h bytecode.h byterun.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
+perlmain$(O) : perlmain.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-perlmain$(O) : perlmain.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
+perly$(O) : perly.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-byteperl$(O) : byteperl.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
+pp$(O) : pp.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-perly$(O) : perly.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
+pp_ctl$(O) : pp_ctl.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-pp$(O) : pp.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
+pp_hot$(O) : pp_hot.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-pp_ctl$(O) : pp_ctl.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
+pp_sys$(O) : pp_sys.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-pp_hot$(O) : pp_hot.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
+regcomp$(O) : regcomp.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h INTERN.h regcomp.h regnodes.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-pp_sys$(O) : pp_sys.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
+regexec$(O) : regexec.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h regcomp.h regnodes.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-regcomp$(O) : regcomp.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h INTERN.h regcomp.h regnodes.h iperlsys.h pp_proto.h warning.h
+run$(O) : run.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-regexec$(O) : regexec.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h regcomp.h regnodes.h iperlsys.h pp_proto.h warning.h
+scope$(O) : scope.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-run$(O) : run.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
+sv$(O) : sv.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-scope$(O) : scope.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
+taint$(O) : taint.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-sv$(O) : sv.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
+toke$(O) : toke.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h keywords.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-taint$(O) : taint.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
+universal$(O) : universal.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h XSUB.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-toke$(O) : toke.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h keywords.h iperlsys.h pp_proto.h warning.h
+utf8$(O) : utf8.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-universal$(O) : universal.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h XSUB.h iperlsys.h pp_proto.h warning.h
+util$(O) : util.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-utf8$(O) : utf8.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
-	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
-
-util$(O) : util.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h iperlsys.h pp_proto.h warning.h
-	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
-
-vms$(O) : vms.c EXTERN.h perl.h bytecode.h byterun.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h XSUB.h iperlsys.h pp_proto.h warning.h
+vms$(O) : vms.c EXTERN.h perl.h config.h embed.h perlsdio.h handy.h vmsish.h regexp.h sv.h util.h form.h gv.h cv.h opcode.h op.h cop.h av.h hv.h mg.h scope.h perly.h thread.h pp.h proto.h embedvar.h perlvars.h thrdvar.h intrpvar.h XSUB.h iperlsys.h pp_proto.h warning.h
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
 #[.x2p]a2p$(O) : [.x2p]a2p.c [.x2p]a2py.c [.x2p]INTERN.h [.x2p]a2p.h [.x2p]hash.h [.x2p]str.h config.h handy.h
@@ -1109,7 +1090,6 @@ tidy : cleanlis
 	- If F$Search("VMSish.H;-1").nes."" Then Purge/NoConfirm/Log VMSish.H
 	- If F$Search("VMS.C;-1")   .nes."" Then Purge/NoConfirm/Log VMS.C
 	- If F$Search("Perlmain.C;-1")   .nes."" Then Purge/NoConfirm/Log Perlmain.C
-	- If F$Search("byteperl.C;-1")   .nes."" Then Purge/NoConfirm/Log byteperl.C
 	- If F$Search("Perlshr_Gbl*.Mar;-1")   .nes."" Then Purge/NoConfirm/Log Perlshr_Gbl*.Mar
 	- If F$Search("[.Ext.DynaLoader]DL_VMS$(O);-1").nes."" Then Purge/NoConfirm/Log [.Ext.DynaLoader]DL_VMS$(O)
 	- If F$Search("[.Ext.DynaLoader]DL_VMS.C;-1").nes."" Then Purge/NoConfirm/Log [.Ext.DynaLoader]DL_VMS.C
@@ -1145,7 +1125,6 @@ clean : tidy
 	- If F$Search("VMSish.H").nes."" Then Delete/NoConfirm/Log VMSish.H;*
 	- If F$Search("VMS.C")   .nes."" Then Delete/NoConfirm/Log VMS.C;*
 	- If F$Search("Perlmain.C")   .nes."" Then Delete/NoConfirm/Log Perlmain.C;*
-	- If F$Search("byteperl.C")   .nes."" Then Delete/NoConfirm/Log byteperl.C;*
 	- If F$Search("Perlshr_Gbl*.Mar")   .nes."" Then Delete/NoConfirm/Log Perlshr_Gbl*.Mar;*
 	- If F$Search("*.TS").nes."" Then Delete/NoConfirm/Log *.TS;*
 	- If F$Search("[.Ext.DynaLoader]DL_VMS$(O)").nes."" Then Delete/NoConfirm/Log [.Ext.DynaLoader]DL_VMS$(O);*

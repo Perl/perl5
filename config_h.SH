@@ -2213,6 +2213,14 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_hasmntopt HAS_HASMNTOPT		/**/
 
+/* HAS_LDBL_DIG:
+ *	This symbol, if defined, indicates that this system's <float.h>
+ *	or <limits.h> defines the symbol LDBL_DIG, which is the number
+ *	of significant digits in a long double precision number. Unlike
+ *	for DBL_DIG, there's no good guess for LDBL_DIG if it is undefined.
+ */
+#$d_ldbl_dig HAS_LDBL_DIG 	/* */
+
 /* HAS_MADVISE:
  *	This symbol, if defined, indicates that the madvise system call is
  *	available to map a file into memory.
@@ -2277,42 +2285,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	available to do scatter writes.
  */
 #$d_writev HAS_WRITEV		/**/
-
-/* HAS_DBMINIT64:
- *	This symbol, if defined, indicates that the dbminit64 routine is
- *	available to open dbm files larger than 2 gigabytes.
- */
-/* HAS_DBMCLOSE64:
- *	This symbol, if defined, indicates that the dbmclose64 routine is
- *	available to close dbm files larger than 2 gigabytes.
- */
-/* HAS_FETCH64:
- *	This symbol, if defined, indicates that the fetch64 routine is
- *	available to fetch from dbm files larger than 2 gigabytes.
- */
-/* HAS_STORE64:
- *	This symbol, if defined, indicates that the store64 routine is
- *	available to store to dbm files larger than 2 gigabytes.
- */
-/* HAS_DELETE64:
- *	This symbol, if defined, indicates that the delete64 routine is
- *	available to delete from dbm files larger than 2 gigabytes.
- */
-/* HAS_FIRSTKEY64:
- *	This symbol, if defined, indicates that the firstkey64 routine is
- *	available to firstkey in dbm files larger than 2 gigabytes.
- */
-/* HAS_NEXTKEY64:
- *	This symbol, if defined, indicates that the nextkey64 routine is
- *	available to nextkey in dbm files larger than 2 gigabytes.
- */
-#$d_dbminit64   HAS_DBMINIT64	/**/
-#$d_dbmclose64  HAS_DBMCLOSE64	/**/
-#$d_fetch64     HAS_FETCH64		/**/
-#$d_store64     HAS_STORE64		/**/
-#$d_delete64    HAS_DELETE64		/**/
-#$d_firstkey64  HAS_FIRSTKEY64	/**/
-#$d_nextkey64   HAS_NEXTKEY64	/**/
 
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
@@ -2407,69 +2379,14 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$i_sysstatvfs	I_SYS_STATVFS		/**/
 
-/* HAS_FSTAT64:
- *	This symbol, if defined, indicates that the fstat64 routine is
- *	available to stat files (fds) larger than 2 gigabytes.
- */
-/* HAS_FTRUNCATE64:
- *	This symbol, if defined, indicates that the ftruncate64 routine is
- *	available to tell files larger than 2 gigabytes.
- */
-/* HAS_LSEEK64:
- *	This symbol, if defined, indicates that the lseek64 routine is
- *	available to seek files larger than 2 gigabytes.
- */
-/* HAS_LSTAT64:
- *	This symbol, if defined, indicates that the lstat64 routine is
- *	available to stat files (symlinks) larger than 2 gigabytes.
- */
-/* HAS_OPEN64:
- *	This symbol, if defined, indicates that the open64 routine is
- *	available to open files larger than 2 gigabytes.
- */
-/* HAS_OPENDIR64:
- *	This symbol, if defined, indicates that the opendir64 routine is
- *	available to opendir files larger than 2 gigabytes.
- */
-/* HAS_READDIR64:
- *	This symbol, if defined, indicates that the readdir64 routine is
- *	available to readdir files larger than 2 gigabytes.
- */
-/* HAS_SEEKDIR64:
- *	This symbol, if defined, indicates that the seekdir64 routine is
- *	available to seekdir files larger than 2 gigabytes.
- */
-/* HAS_STAT64:
- *	This symbol, if defined, indicates that the stat64 routine is
- *	available to stat files larger than 2 gigabytes.
- */
-/* HAS_TELLDIR64:
- *	This symbol, if defined, indicates that the telldir64 routine is
- *	available to telldir files larger than 2 gigabytes.
- */
-/* HAS_TRUNCATE64:
- *	This symbol, if defined, indicates that the truncate64 routine is
- *	available to truncate files larger than 2 gigabytes.
- */
 /* HAS_OFF64_T:
  *	This symbol will be defined if the C compiler supports off64_t.
  */
-/* HAS_STRUCT_DIRENT64:
- *	This symbol will be defined if the C compiler supports struct dirent64.
+/* HAS_FPOS64_T:
+ *	This symbol will be defined if the C compiler supports fpos64_t.
  */
-#$d_fstat64     HAS_FSTAT64		/**/
-#$d_ftruncate64 HAS_FTRUNCATE64	/**/
-#$d_lseek64     HAS_LSEEK64		/**/
-#$d_lstat64     HAS_LSTAT64		/**/
-#$d_open64      HAS_OPEN64		/**/
-#$d_opendir64   HAS_OPENDIR64	/**/
-#$d_readdir64   HAS_READDIR64	/**/
-#$d_seekdir64   HAS_SEEKDIR64	/**/
-#$d_stat64      HAS_STAT64		/**/
-#$d_telldir64   HAS_TELLDIR64	/**/
-#$d_truncate64  HAS_TRUNCATE64	/**/
-#$d_off64_t      HAS_OFF64_T    	/**/
-#$d_dirent64_s   HAS_STRUCT_DIRENT64 	/**/
+#$d_off64_t	HAS_OFF64_T    		/**/
+#$d_fpos64_t	HAS_FPOS64_T    	/**/
 
 /* PERL_PRIfldbl:
  *	This symbol, if defined, contains the string used by stdio to
@@ -2519,52 +2436,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define STARTPERL "$startperl"		/**/
 
-/* HAS_FGETPOS64:
- *	This symbol, if defined, indicates that the fgetpos64 routine is
- *	available to getpos files larger than 2 gigabytes.
- */
-/* HAS_FOPEN64:
- *	This symbol, if defined, indicates that the fopen64 routine is
- *	available to open files larger than 2 gigabytes.
- */
-/* HAS_FREOPEN64:
- *	This symbol, if defined, indicates that the freopen64 routine is
- *	available to reopen files larger than 2 gigabytes.
- */
-/* HAS_FSEEK64:
- *	This symbol, if defined, indicates that the fseek64 routine is
- *	available to seek files larger than 2 gigabytes.
- */
-/* HAS_FSEEKO64:
- *	This symbol, if defined, indicates that the fseeko64 routine is
- *	available to seek files larger than 2 gigabytes.
- */
-/* HAS_FSETPOS64:
- *	This symbol, if defined, indicates that the fsetpos64 routine is
- *	available to setpos files larger than 2 gigabytes.
- */
-/* HAS_FTELL64:
- *	This symbol, if defined, indicates that the ftell64 routine is
- *	available to tell files larger than 2 gigabytes.
- */
-/* HAS_FTELLO64:
- *	This symbol, if defined, indicates that the ftello64 routine is
- *	available to tell files larger than 2 gigabytes.
- */
-/* HAS_TMPFILE64:
- *	This symbol, if defined, indicates that the tmpfile64 routine is
- *	available to tmpfile files larger than 2 gigabytes.
- */
-#$d_fgetpos64   HAS_FGETPOS64	/**/
-#$d_fopen64     HAS_FOPEN64		/**/
-#$d_freopen64   HAS_FREOPEN64	/**/
-#$d_fseek64     HAS_FSEEK64		/**/
-#$d_fseeko64    HAS_FSEEKO64		/**/
-#$d_fsetpos64   HAS_FSETPOS64	/**/
-#$d_ftell64     HAS_FTELL64		/**/
-#$d_ftello64    HAS_FTELLO64		/**/
-#$d_tmpfile64   HAS_TMPFILE64	/**/
-
 /* HAS_STDIO_STREAM_ARRAY:
  *	This symbol, if defined, tells that there is an array
  *	holding the stdio streams.
@@ -2588,6 +2459,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	will be used (be they 32 or 64 bits).
  */
 #$use64bits	USE_64_BITS		/**/
+
+/* USE_LONG_DOUBLE:
+ *	This symbol, if defined, indicates that long doubles should
+ *	be used when available.
+ */
+#$uselongdouble	USE_LONG_DOUBLE		/**/
 
 /* MULTIPLICITY:
  *	This symbol, if defined, indicates that Perl should

@@ -339,7 +339,7 @@ confusing precedence problems, as in these next two lines:
 Those actually parse as the very surprising:
 
     $obj->move->{FIELD};                # Well, lookee here
-    $ary->move->[$i];                   # Didn't expect this one, eh?
+    $ary->move([$i]);                   # Didn't expect this one, eh?
 
 Rather than what you might have expected:
 

@@ -81,6 +81,7 @@
    /* The non-POSIX CRTL times() has void return type, so we just get the
       current time directly */
    clock_t vms_times(struct tms *PL_bufptr) {
+	dTHX;
 	clock_t retval;
 	/* Get wall time and convert to 10 ms intervals to
 	 * produce the return value that the POSIX standard expects */

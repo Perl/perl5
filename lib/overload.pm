@@ -113,9 +113,9 @@ sub mycan {				# Real can would leave stubs.
 
 %ops = ( with_assign	  => "+ - * / % ** << >> x .",
 	 assign		  => "+= -= *= /= %= **= <<= >>= x= .=",
-	 str_comparison	  => "< <= >  >= == !=",
+	 num_comparison	  => "< <= >  >= == !=",
 	 '3way_comparison'=> "<=> cmp",
-	 num_comparison	  => "lt le gt ge eq ne",
+	 str_comparison	  => "lt le gt ge eq ne",
 	 binary		  => "& | ^",
 	 unary		  => "neg ! ~",
 	 mutators	  => '++ --',
@@ -396,9 +396,9 @@ A computer-readable form of the above table is available in the hash
 
  with_assign	  => '+ - * / % ** << >> x .',
  assign		  => '+= -= *= /= %= **= <<= >>= x= .=',
- str_comparison	  => '< <= > >= == !=',
+ num_comparison	  => '< <= > >= == !=',
  '3way_comparison'=> '<=> cmp',
- num_comparison	  => 'lt le gt ge eq ne',
+ str_comparison	  => 'lt le gt ge eq ne',
  binary		  => '& | ^',
  unary		  => 'neg ! ~',
  mutators	  => '++ --',

@@ -548,6 +548,7 @@ SYMH = perlvars.h intrpvar.h thrdvar.h
 #	ext/ByteLoader/byterun.h:	bytecode.pl
 #	ext/ByteLoader/byterun.c:	bytecode.pl
 #	ext/B/Asmdata.pm:	bytecode.pl
+#	global.sym:	embed.pl
 #	regnodes.h:	regcomp.pl
 #	warning.h lib/warning.pm:	warning.pl
 # The correct versions should be already supplied with the perl kit,
@@ -621,7 +622,7 @@ _cleaner:
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
 	$(LDLIBPTH) sh ext/util/make_ext realclean $$x MAKE=$(MAKE) ; \
 	done
-	rm -f *.orig */*.orig *~ */*~ core core.perl.*.? core.miniperl.*.? perl.core miniperl.core t/core t/core.perl.*.? t/perl.core t/tmp???? t/c t/perl so_locations t/nonexistent1 $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
+	rm -f *.orig */*.orig *~ */*~ core core.*perl.*.? *perl.core t/core t/core.perl.*.? t/*perl.core t/misctmp* t/tmp* t/Io.dup t/tmon.out t/big t/c t/perl t/nonexistent1 so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
 	rm -rf $(addedbyconf)
 	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old
 	rm -f $(private)

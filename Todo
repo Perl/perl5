@@ -46,6 +46,9 @@ Would be nice to have
 	    an extension (Devel::MProf?) that would return the malloc
 	    stats in a nice Perl datastructure (also a simple interface
 	    to return just the grand total would be good)
+	Unicode: [=bar=], combining characters equivalence
+	    (U+4001 + U+0308 should be equal to U+00C4, in other words
+             A+diaereres should equal Ä), Unicode collation
 
 Possible pragmas
 	debugger

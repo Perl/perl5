@@ -192,9 +192,13 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 #define OOB_CHAR8		1234
 #define OOB_UTF8		123456
+#define OOB_NAMEDCLASS		-1
 
 #define CHR_SVLEN(sv) (UTF ? sv_len_utf8(sv) : SvCUR(sv))
 #define CHR_DIST(a,b) (UTF ? utf8_distance(a,b) : a - b)
+
+/* Allow for side effects in s */
+#define REGC(c,s) STMT_START { if (!SIZE_ONLY) *(s) = (c); else (s);} STMT_END
 
 static void clear_re(pTHXo_ void *r);
 
@@ -260,7 +264,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 	    regnode *stop = scan;
 #endif 
 
-	    next = scan + (*OPERAND(scan) + 2 - 1)/sizeof(regnode) + 2;
+	    next = scan + NODE_SZ_STR(scan);
 	    /* Skip NOTHING, merge EXACT*. */
 	    while (n &&
 		   ( PL_regkind[(U8)OP(n)] == NOTHING || 
@@ -279,17 +283,17 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		    n = regnext(n);
 		}
 		else {
-		    int oldl = *OPERAND(scan);
+		    int oldl = STR_LEN(scan);
 		    regnode *nnext = regnext(n);
 		    
-		    if (oldl + *OPERAND(n) > U8_MAX) 
+		    if (oldl + STR_LEN(n) > U8_MAX) 
 			break;
 		    NEXT_OFF(scan) += NEXT_OFF(n);
-		    *OPERAND(scan) += *OPERAND(n);
-		    next = n + (*OPERAND(n) + 2 - 1)/sizeof(regnode) + 2;
+		    STR_LEN(scan) += STR_LEN(n);
+		    next = n + NODE_SZ_STR(n);
 		    /* Now we can overwrite *n : */
-		    Move(OPERAND(n) + 1, OPERAND(scan) + oldl + 1,
-			 *OPERAND(n) + 1, char);
+		    Move(STRING(n), STRING(scan) + oldl,
+			 STR_LEN(n), char);
 #ifdef DEBUGGING
 		    if (stringok)
 			stop = next - 1;
@@ -299,7 +303,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 	    }
 #ifdef DEBUGGING
 	    /* Allow dumping */
-	    n = scan + (*OPERAND(scan) + 2 - 1)/sizeof(regnode) + 2;
+	    n = scan + NODE_SZ_STR(scan);
 	    while (n <= stop) {
 		/* Purify reports a benign UMR here sometimes, because we
 		 * don't initialize the OP() slot of a node when that node
@@ -392,9 +396,9 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 	    continue;
 	}
 	else if (OP(scan) == EXACT) {
-	    I32 l = *OPERAND(scan);
+	    I32 l = STR_LEN(scan);
 	    if (UTF) {
-		unsigned char *s = (unsigned char *)(OPERAND(scan)+1);
+		unsigned char *s = (unsigned char *)STRING(scan);
 		unsigned char *e = s + l;
 		I32 newl = 0;
 		while (s < e) {
@@ -412,18 +416,18 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
  		    data->last_start_max = is_inf
  			? I32_MAX : data->pos_min + data->pos_delta; 
 		}
-		sv_catpvn(data->last_found, (char *)(OPERAND(scan)+1), *OPERAND(scan));
+		sv_catpvn(data->last_found, STRING(scan), STR_LEN(scan));
 		data->last_end = data->pos_min + l;
 		data->pos_min += l; /* As in the first entry. */
 		data->flags &= ~SF_BEFORE_EOL;
 	    }
 	}
 	else if (PL_regkind[(U8)OP(scan)] == EXACT) {
-	    I32 l = *OPERAND(scan);
+	    I32 l = STR_LEN(scan);
 	    if (flags & SCF_DO_SUBSTR) 
 		scan_commit(data);
 	    if (UTF) {
-		unsigned char *s = (unsigned char *)(OPERAND(scan)+1);
+		unsigned char *s = (unsigned char *)STRING(scan);
 		unsigned char *e = s + l;
 		I32 newl = 0;
 		while (s < e) {
@@ -514,7 +518,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		    nxt = regnext(nxt);
 		    if (!strchr((char*)PL_simple,OP(nxt))
 			&& !(PL_regkind[(U8)OP(nxt)] == EXACT
-			     && *OPERAND(nxt) == 1)) 
+			     && STR_LEN(nxt) == 1)) 
 			goto nogo;
 		    nxt2 = nxt;
 		    nxt = regnext(nxt);
@@ -861,7 +865,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     PL_regsize = 0L;
     PL_regcode = &PL_regdummy;
     PL_reg_whilem_seen = 0;
-    regc((U8)REG_MAGIC, (char*)PL_regcode);
+    REGC((U8)REG_MAGIC, (char*)PL_regcode);
     if (reg(0, &flags) == NULL) {
 	Safefree(PL_regprecomp);
 	PL_regprecomp = Nullch;
@@ -904,7 +908,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     PL_regcode = r->program;
     /* Store the count of eval-groups for security checks: */
     PL_regcode->next_off = ((PL_seen_evals > U16_MAX) ? U16_MAX : PL_seen_evals);
-    regc((U8)REG_MAGIC, (char*) PL_regcode++);
+    REGC((U8)REG_MAGIC, (char*) PL_regcode++);
     r->data = 0;
     if (reg(0, &flags) == NULL)
 	return(NULL);
@@ -1776,7 +1780,7 @@ tryagain:
 	    PL_seen_zerolen++;		/* Do not optimize RE away */
 	    nextchar();
 	    break;
-	case 'C':
+	case 'O':
 	    ret = reg_node(SANY);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar();
@@ -1953,8 +1957,7 @@ tryagain:
 	    ret = reg_node(FOLD
 			  ? (LOC ? EXACTFL : EXACTF)
 			  : EXACT);
-	    s = (char *) OPERAND(ret);
-	    regc(0, s++);		/* save spot for len */
+	    s = STRING(ret);
 	    for (len = 0, p = PL_regcomp_parse - 1;
 	      len < 127 && p < PL_regxend;
 	      len++)
@@ -2094,7 +2097,7 @@ tryagain:
 		    }
 		    else {
 			len++;
-			regc(ender, s++);
+			REGC(ender, s++);
 		    }
 		    break;
 		}
@@ -2104,7 +2107,7 @@ tryagain:
 		    len += numlen - 1;
 		}
 		else
-		    regc(ender, s++);
+		    REGC(ender, s++);
 	    }
 	loopdone:
 	    PL_regcomp_parse = p - 1;
@@ -2116,14 +2119,11 @@ tryagain:
 	    if (len == 1)
 		*flagp |= SIMPLE;
 	    if (!SIZE_ONLY)
-		*OPERAND(ret) = len;
-	    regc('\0', s++);
-	    if (SIZE_ONLY) {
-		PL_regsize += (len + 2 + sizeof(regnode) - 1) / sizeof(regnode);
-	    }
-	    else {
-		PL_regcode += (len + 2 + sizeof(regnode) - 1) / sizeof(regnode);
-	    }
+		STR_LEN(ret) = len;
+	    if (SIZE_ONLY)
+		PL_regsize += STR_SZ(len);
+	    else
+		PL_regcode += STR_SZ(len);
 	}
 	break;
     }
@@ -2247,7 +2247,7 @@ S_regpposixcc(pTHX_ I32 value)
 			}
 			break;
 		    }
-		    if ((namedclass == -1 ||
+		    if ((namedclass == OOB_NAMEDCLASS ||
 			 !(posixcc + skip + 2 < PL_regxend &&
 			   (posixcc[skip] == ':' &&
 			    posixcc[skip + 1] == ']'))))
@@ -2276,7 +2276,7 @@ S_checkposixcc(pTHX)
 	 *PL_regcomp_parse == '=' ||
 	 *PL_regcomp_parse == '.')) {
 	char *s = PL_regcomp_parse;
-	char  c = *s++;
+ 	char  c = *s++;
 
 	while(*s && isALNUM(*s))
 	    s++;
@@ -2303,10 +2303,10 @@ S_regclass(pTHX)
     I32 numlen;
     I32 namedclass;
 
-    s = opnd = (char *) OPERAND(PL_regcode);
+    s = opnd = MASK(PL_regcode);
     ret = reg_node(ANYOF);
     for (value = 0; value < ANYOF_SIZE; value++)
-	regc(0, s++);
+	REGC(0, s++);
     if (*PL_regcomp_parse == '^') {	/* Complement of range. */
 	PL_regnaughty++;
 	PL_regcomp_parse++;
@@ -2330,7 +2330,7 @@ S_regclass(pTHX)
 	goto skipcond;		/* allow 1st char to be ] or - */
     while (PL_regcomp_parse < PL_regxend && *PL_regcomp_parse != ']') {
        skipcond:
-	namedclass = -1;
+	namedclass = OOB_NAMEDCLASS;
 	value = UCHARAT(PL_regcomp_parse++);
 	if (value == '[')
 	    namedclass = regpposixcc(value);
@@ -2365,7 +2365,9 @@ S_regclass(pTHX)
 		break;
 	    }
 	}
-	if (!SIZE_ONLY && namedclass > -1) {
+	if (!SIZE_ONLY && namedclass > OOB_NAMEDCLASS) {
+	    if (range)
+		FAIL("invalid [] range in regexp"); /* [a-\w], [a-[:word:]] */
 	    switch (namedclass) {
 	    case ANYOF_ALNUM:
 		if (LOC)
@@ -2606,25 +2608,27 @@ S_regclass(pTHX)
 	    }
 	    if (LOC)
 		ANYOF_FLAGS(opnd) |= ANYOF_CLASS;
-	    lastvalue = OOB_CHAR8;
+	    continue;
 	}
-        else
 	if (range) {
 	    if (lastvalue > value)
-		FAIL("invalid [] range in regexp");
+		FAIL("invalid [] range in regexp"); /* [b-a] */
 	    range = 0;
 	}
 	else {
 	    lastvalue = value;
 	    if (*PL_regcomp_parse == '-' && PL_regcomp_parse+1 < PL_regxend &&
-	      PL_regcomp_parse[1] != ']') {
+		PL_regcomp_parse[1] != ']') {
+		if (namedclass > OOB_NAMEDCLASS)
+		    FAIL("invalid [] range in regexp"); /* [\w-a] */
 		PL_regcomp_parse++;
 		range = 1;
 		continue;	/* do it next time */
 	    }
 	}
+	/* now is the next time */
 	if (!SIZE_ONLY) {
-#ifndef ASCIIish
+#ifndef ASCIIish /* EBCDIC, for example. */
 	    if ((isLOWER(lastvalue) && isLOWER(value)) ||
 		(isUPPER(lastvalue) && isUPPER(value)))
 	    {
@@ -2644,7 +2648,7 @@ S_regclass(pTHX)
 		for ( ; lastvalue <= value; lastvalue++)
 		    ANYOF_BITMAP_SET(opnd, lastvalue);
         }
-	lastvalue = value;
+	range = 0;
     }
     /* optimize case-insensitive simple patterns (e.g. /[a-z]/i) */
     if (!SIZE_ONLY &&
@@ -2702,7 +2706,7 @@ S_regclassutf8(pTHX)
 
     while (PL_regcomp_parse < PL_regxend && *PL_regcomp_parse != ']') {
        skipcond:
-	namedclass = -1;
+	namedclass = OOB_NAMEDCLASS;
 	value = utf8_to_uv((U8*)PL_regcomp_parse, &numlen);
 	PL_regcomp_parse += numlen;
 
@@ -2774,7 +2778,9 @@ S_regclassutf8(pTHX)
 		break;
 	    }
 	}
-	if (!SIZE_ONLY && namedclass > -1) {
+	if (!SIZE_ONLY && namedclass > OOB_NAMEDCLASS) {
+	    if (range)
+		FAIL("invalid [] range in regexp"); /* [a-\w], [a-[:word:]] */
 	    switch (namedclass) {
 	    case ANYOF_ALNUM:
 		Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsWord\n");	break;
@@ -2829,11 +2835,11 @@ S_regclassutf8(pTHX)
 	    case ANYOF_NXDIGIT:
 		Perl_sv_catpvf(aTHX_ listsv, "!utf8::IsXDigit\n");	break;
 	    }
+	    continue;
 	}
-        else
         if (range) {
 	    if (lastvalue > value)
-		FAIL("invalid [] range in regexp");
+		FAIL("invalid [] range in regexp"); /* [b-a] */
 #ifdef UV_IS_QUAD
 	    if (!SIZE_ONLY)
                 Perl_sv_catpvf(aTHX_ listsv, "%04" PERL_PRIx64 "\t%04" PERL_PRIx64 "\n", (UV)lastvalue, (UV)value);
@@ -2841,25 +2847,28 @@ S_regclassutf8(pTHX)
 	    if (!SIZE_ONLY)
 	        Perl_sv_catpvf(aTHX_ listsv, "%04x\t%04x\n", lastvalue, value);
 #endif
-	    lastvalue = value;
 	    range = 0;
 	}
 	else {
 	    lastvalue = value;
 	    if (*PL_regcomp_parse == '-' && PL_regcomp_parse+1 < PL_regxend &&
-	      PL_regcomp_parse[1] != ']') {
+		PL_regcomp_parse[1] != ']') {
+		if (namedclass > OOB_NAMEDCLASS)
+		    FAIL("invalid [] range in regexp"); /* [\w-a] */
 		PL_regcomp_parse++;
 		range = 1;
 		continue;	/* do it next time */
 	    }
-#ifdef UV_IS_QUAD
-	    if (!SIZE_ONLY)
-		Perl_sv_catpvf(aTHX_ listsv, "%04" PERL_PRIx64 "\n", (UV)value);
-#else
-	    if (!SIZE_ONLY)
-		Perl_sv_catpvf(aTHX_ listsv, "%04x\n", value);
-#endif
 	}
+	/* now is the next time */
+#ifdef UV_IS_QUAD
+	if (!SIZE_ONLY)
+	    Perl_sv_catpvf(aTHX_ listsv, "%04" PERL_PRIx64 "\n", (UV)value);
+#else
+	if (!SIZE_ONLY)
+	    Perl_sv_catpvf(aTHX_ listsv, "%04x\n", value);
+#endif
+	range = 0;
     }
 
     ret = reganode(ANYOFUTF8, 0);
@@ -2957,7 +2966,7 @@ S_reganode(pTHX_ U8 op, U32 arg)
 }
 
 /*
-- regc - emit (if appropriate) a Unicode character
+- reguni - emit (if appropriate) a Unicode character
 */
 STATIC void
 S_reguni(pTHX_ UV uv, char* s, I32* lenp)
@@ -2970,17 +2979,6 @@ S_reguni(pTHX_ UV uv, char* s, I32* lenp)
     else
 	*lenp = uv_to_utf8((U8*)s, uv) - (U8*)s;
 
-}
-
-/*
-- regc - emit (if appropriate) a byte of code
-*/
-STATIC void
-S_regc(pTHX_ U8 b, char* s)
-{
-    dTHR;
-    if (!SIZE_ONLY)
-	*s = b;
 }
 
 /*
@@ -3144,7 +3142,7 @@ S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 	}
 	else if (PL_regkind[(U8)op] == EXACT) {
             /* Literal string, where present. */
-	    node += ((*OPERAND(node)) + 2 + sizeof(regnode) - 1) / sizeof(regnode);
+	    node += NODE_SZ_STR(node) - 1;
 	    node = NEXTOPER(node);
 	}
 	else {
@@ -3247,7 +3245,8 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
     k = PL_regkind[(U8)OP(o)];
 
     if (k == EXACT)
-	Perl_sv_catpvf(aTHX_ sv, " <%s%s%s>", PL_colors[0], OPERAND(o) + 1, PL_colors[1]);
+	Perl_sv_catpvf(aTHX_ sv, " <%s%*s%s>", PL_colors[0],
+		       STR_LEN(o), STRING(o), PL_colors[1]);
     else if (k == CURLY) {
 	if (OP(o) == CURLYM || OP(o) == CURLYN)
 	    Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags); /* Parenth number */

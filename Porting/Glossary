@@ -398,24 +398,9 @@ d_dbl_dig (d_dbl_dig.U):
 	header files provide DBL_DIG, which is the number of significant
 	digits in a double precision number.
 
-d_dbmclose64 (dbm64.U):
-	This variable conditionally defines the HAS_DBMCLOSE64 symbol, which
-	indicates to the C program that the dbmclose64() routine is available.
-
-d_dbminit64 (dbm64.U):
-	This variable conditionally defines the HAS_DBMINIT64 symbol, which
-	indicates to the C program that the dbminit64() routine is available.
-
-d_delete64 (dbm64.U):
-	This variable conditionally defines the HAS_DELETE64 symbol, which
-	indicates to the C program that the delete64() routine is available.
-
 d_difftime (d_difftime.U):
 	This variable conditionally defines the HAS_DIFFTIME symbol, which
 	indicates to the C program that the difftime() routine is available.
-
-d_dirent64_s (io64.U):
-	This symbol will be defined if the C compiler supports struct dirent64.
 
 d_dirnamlen (i_dirent.U):
 	This variable conditionally defines DIRNAMLEN, which indicates
@@ -522,36 +507,17 @@ d_fds_bits (d_fd_set.U):
 	a half-fast job and neglected to provide the macros to manipulate
 	an fd_set, HAS_FDS_BITS will let us know how to fix the gaffe.
 
-d_fetch64 (dbm64.U):
-	This variable conditionally defines the HAS_FETCH64 symbol, which
-	indicates to the C program that the fetch64() routine is available.
-
-d_fgetpos64 (stdio64.U):
-	This variable conditionally defines the HAS_FGETPOS64 symbol, which
-	indicates to the C program that the fgetpos64() routine is available.
-
 d_fgetpos (d_fgetpos.U):
 	This variable conditionally defines HAS_FGETPOS if fgetpos() is
 	available to get the file position indicator.
-
-d_firstkey64 (dbm64.U):
-	This variable conditionally defines the HAS_FIRSTKEY64 symbol, which
-	indicates to the C program that the firstkey64() routine is available.
 
 d_flexfnam (d_flexfnam.U):
 	This variable conditionally defines the FLEXFILENAMES symbol, which
 	indicates that the system supports filenames longer than 14 characters.
 
-d_flock64_s (io64.U):
-	This symbol will be defined if the C compiler supports struct flock64.
-
 d_flock (d_flock.U):
 	This variable conditionally defines HAS_FLOCK if flock() is
 	available to do file locking.
-
-d_fopen64 (stdio64.U):
-	This variable conditionally defines the HAS_FOPEN64 symbol, which
-	indicates to the C program that the fopen64() routine is available.
 
 d_fork (d_fork.U):
 	This variable conditionally defines the HAS_FORK symbol, which
@@ -563,33 +529,16 @@ d_fpathconf (d_pathconf.U):
 	to determine file-system related limits and options associated
 	with a given open file descriptor.
 
-d_freopen64 (stdio64.U):
-	This variable conditionally defines the HAS_FREOPEN64 symbol, which
-	indicates to the C program that the freopen64() routine is available.
-
-d_fseek64 (stdio64.U):
-	This variable conditionally defines the HAS_FSEEK64 symbol, which
-	indicates to the C program that the fseek64() routine is available.
-
-d_fseeko64 (stdio64.U):
-	This variable conditionally defines the HAS_FSEEKO64 symbol, which
-	indicates to the C program that the fseeko64() routine is available.
+d_fpos64_t (io64.U):
+	This symbol will be defined if the C compiler supports fpos64_t.
 
 d_fseeko (d_fseeko.U):
 	This variable conditionally defines the HAS_FSEEKO symbol, which
 	indicates to the C program that the fseeko() routine is available.
 
-d_fsetpos64 (stdio64.U):
-	This variable conditionally defines the HAS_FSETPOS64 symbol, which
-	indicates to the C program that the fsetpos64() routine is available.
-
 d_fsetpos (d_fsetpos.U):
 	This variable conditionally defines HAS_FSETPOS if fsetpos() is
 	available to set the file position indicator.
-
-d_fstat64 (io64.U):
-	This variable conditionally defines the HAS_FSTAT64 symbol, which
-	indicates to the C program that the fstat64() routine is available.
 
 d_fstatfs (d_statfs.U):
 	This variable conditionally defines the HAS_FSTATFS symbol, which
@@ -599,14 +548,6 @@ d_fstatvfs (d_statvfs.U):
 	This variable conditionally defines the HAS_FSTATVFS symbol, which
 	indicates to the C program that the fstatvfs() routine is available.
 
-d_ftell64 (stdio64.U):
-	This variable conditionally defines the HAS_FTELL64 symbol, which
-	indicates to the C program that the ftell64() routine is available.
-
-d_ftello64 (stdio64.U):
-	This variable conditionally defines the HAS_FTELLO64 symbol, which
-	indicates to the C program that the ftello64() routine is available.
-
 d_ftello (d_ftello.U):
 	This variable conditionally defines the HAS_FTELLO symbol, which
 	indicates to the C program that the ftello() routine is available.
@@ -615,10 +556,6 @@ d_ftime (d_ftime.U):
 	This variable conditionally defines the HAS_FTIME symbol, which indicates
 	that the ftime() routine exists.  The ftime() routine is basically
 	a sub-second accuracy clock.
-
-d_ftruncate64 (io64.U):
-	This variable conditionally defines the HAS_FTRUNCATE64 symbol, which
-	indicates to the C program that the ftruncate64() routine is available.
 
 d_Gconvert (d_gconvert.U):
 	This variable holds what Gconvert is defined as to convert
@@ -804,9 +741,6 @@ d_inetaton (d_inetaton.U):
 	indicates to the C program that the inet_aton() function is available
 	to parse IP address "dotted-quad" strings.
 
-d_ino64_t (io64.U):
-	This symbol will be defined if the C compiler supports ino64_t.
-
 d_int64t (i_inttypes.U):
 	This symbol will be defined if the C compiler supports int64_t.
 
@@ -828,6 +762,11 @@ d_lchown (d_lchown.U):
 	indicates to the C program that the lchown() routine is available
 	to operate on a symbolic link (instead of following the link).
 
+d_ldbl_dig (d_ldbl_dig.U):
+	This variable conditionally defines d_ldbl_dig if this system's
+	header files provide LDBL_DIG, which is the number of significant
+	digits in a long double precision number.
+
 d_link (d_link.U):
 	This variable conditionally defines HAS_LINK if link() is
 	available to create hard links.
@@ -840,10 +779,6 @@ d_locconv (d_locconv.U):
 	This variable conditionally defines HAS_LOCALECONV if localeconv() is
 	available for numeric and monetary formatting conventions.
 
-d_lockf64 (io64.U):
-	This variable conditionally defines the HAS_LOCKF64 symbol, which
-	indicates to the C program that the lockf64() routine is available.
-
 d_lockf (d_lockf.U):
 	This variable conditionally defines HAS_LOCKF if lockf() is
 	available to do file locking.
@@ -855,14 +790,6 @@ d_longdbl (d_longdbl.U):
 d_longlong (d_longlong.U):
 	This variable conditionally defines HAS_LONG_LONG if 
 	the long long type is supported.
-
-d_lseek64 (io64.U):
-	This variable conditionally defines the HAS_LSEEK64 symbol, which
-	indicates to the C program that the lseek64() routine is available.
-
-d_lstat64 (io64.U):
-	This variable conditionally defines the HAS_LSTAT64 symbol, which
-	indicates to the C program that the lstat64() routine is available.
 
 d_lstat (d_lstat.U):
 	This variable conditionally defines HAS_LSTAT if lstat() is
@@ -995,19 +922,12 @@ d_mymalloc (mallocsrc.U):
 	of the source want to take special action if MYMALLOC is used.
 	This may include different sorts of profiling or error detection.
 
-d_nextkey64 (dbm64.U):
-	This variable conditionally defines the HAS_NEXTKEY64 symbol, which
-	indicates to the C program that the nextkey64() routine is available.
-
 d_nice (d_nice.U):
 	This variable conditionally defines the HAS_NICE symbol, which
 	indicates to the C program that the nice() routine is available.
 
 d_off64_t (io64.U):
 	This symbol will be defined if the C compiler supports off64_t.
-
-d_offset_t (io64.U):
-	This symbol will be defined if the C compiler supports offset_t.
 
 d_old_pthread_create_joinable (d_pthrattrj.U):
 	This variable conditionally defines pthread_create_joinable.
@@ -1027,14 +947,6 @@ d_open3 (d_open3.U):
 	This variable conditionally defines the HAS_OPEN3 manifest constant,
 	which indicates to the C program that the 3 argument version of
 	the open(2) function is available.
-
-d_open64 (io64.U):
-	This variable conditionally defines the HAS_OPEN64 symbol, which
-	indicates to the C program that the open64() routine is available.
-
-d_opendir64 (io64.U):
-	This variable conditionally defines the HAS_OPENDIR64 symbol, which
-	indicates to the C program that the opendir64() routine is available.
 
 d_pathconf (d_pathconf.U):
 	This variable conditionally defines the HAS_PATHCONF symbol, which
@@ -1153,10 +1065,6 @@ d_pwquota (i_pwd.U):
 	This variable conditionally defines PWQUOTA, which indicates
 	that struct passwd contains pw_quota.
 
-d_readdir64 (io64.U):
-	This variable conditionally defines the HAS_READDIR64 symbol, which
-	indicates to the C program that the readdir64() routine is available.
-
 d_readdir (d_readdir.U):
 	This variable conditionally defines HAS_READDIR if readdir() is
 	available to read directory entries.
@@ -1209,10 +1117,6 @@ d_scm_rights (d_socket.U):
 	This variable conditionally defines the HAS_SCM_RIGHTS symbol,
 	which indicates that the SCM_RIGHTS is available.  #ifdef is
 	not enough because it may be an enum, glibc has been known to do this.
-
-d_seekdir64 (io64.U):
-	This variable conditionally defines the HAS_SEEKDIR64 symbol, which
-	indicates to the C program that the seekdir64() routine is available.
 
 d_seekdir (d_readdir.U):
 	This variable conditionally defines HAS_SEEKDIR if seekdir() is
@@ -1408,10 +1312,6 @@ d_sockpair (d_socket.U):
 	This variable conditionally defines the HAS_SOCKETPAIR symbol, which
 	indicates that the BSD socketpair() is supported.
 
-d_stat64 (io64.U):
-	This variable conditionally defines the HAS_STAT64 symbol, which
-	indicates to the C program that the stat64() routine is available.
-
 d_statblks (d_statblks.U):
 	This variable conditionally defines USE_STAT_BLOCKS
 	if this system has a stat structure declaring
@@ -1452,10 +1352,6 @@ d_stdstdio (d_stdstdio.U):
 	This variable conditionally defines USE_STDIO_PTR if this system
 	has a FILE structure declaring usable _ptr and _cnt fields (or
 	equivalent) in stdio.h.
-
-d_store64 (dbm64.U):
-	This variable conditionally defines the HAS_STORE64 symbol, which
-	indicates to the C program that the store64() routine is available.
 
 d_strchr (d_strchr.U):
 	This variable conditionally defines HAS_STRCHR if strchr() and
@@ -1543,10 +1439,6 @@ d_tcsetpgrp (d_tcstpgrp.U):
 	indicates to the C program that the tcsetpgrp() routine is available
 	to set foreground process group ID.
 
-d_telldir64 (io64.U):
-	This variable conditionally defines the HAS_TELLDIR64 symbol, which
-	indicates to the C program that the telldir64() routine is available.
-
 d_telldir (d_readdir.U):
 	This variable conditionally defines HAS_TELLDIR if telldir() is
 	available.
@@ -1566,14 +1458,6 @@ d_times (d_times.U):
 	This variable conditionally defines the HAS_TIMES symbol, which indicates
 	that the times() routine exists.  The times() routine is normaly
 	provided on UNIX systems. You may have to include <sys/times.h>.
-
-d_tmpfile64 (stdio64.U):
-	This variable conditionally defines the HAS_TMPFILE64 symbol, which
-	indicates to the C program that the tmpfile64() routine is available.
-
-d_truncate64 (io64.U):
-	This variable conditionally defines the HAS_TRUNCATE64 symbol, which
-	indicates to the C program that the truncate64() routine is available.
 
 d_truncate (d_truncate.U):
 	This variable conditionally defines HAS_TRUNCATE if truncate() is
@@ -3146,6 +3030,10 @@ use64bits (use64bits.U):
 usedl (dlsrc.U):
 	This variable indicates if the the system supports dynamic
 	loading of some sort.  See also dlsrc and dlobj.
+
+uselongdouble (uselongdbl.U):
+	This variable conditionally defines the USE_LONG_DOUBLE symbol,
+	and indicates that long doubles should be used when available.
 
 usemultiplicity (usemultiplicity.U):
 	This variable conditionally defines the MULTIPLICITY symbol,

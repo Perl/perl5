@@ -1,10 +1,13 @@
 #!../../miniperl
 
+$UnicodeData = "UnicodeData-Latest.txt";
+
 # Note: we try to keep filenames unique within first 8 chars.  Using
 # subdirectories for the following helps.
 mkdir "In", 0777;
 mkdir "Is", 0777;
 mkdir "To", 0777;
+mkdir "Eq", 0777;
 
 @todo = (
 # typical
@@ -149,6 +152,21 @@ mkdir "To", 0777;
 # Jamo
 
     ['JamoShort',	'1',		'$short'],
+
+# Syllables
+
+    ['IsSylV',	'$syl eq "V"',		''],
+    ['IsSylU',	'$syl eq "U"',		''],
+    ['IsSylI',	'$syl eq "I"',		''],
+    ['IsSylA',	'$syl eq "A"',		''],
+    ['IsSylE',	'$syl eq "E"',		''],
+    ['IsSylC',	'$syl eq "C"',		''],
+    ['IsSylO',	'$syl eq "O"',		''],
+    ['IsSylWV',	'$syl eq "V"',		''],
+    ['IsSylWI',	'$syl eq "I"',		''],
+    ['IsSylWA',	'$syl eq "A"',		''],
+    ['IsSylWE',	'$syl eq "E"',		''],
+    ['IsSylWC',	'$syl eq "C"',		''],
 );
 
 # This is not written for speed...
@@ -220,8 +238,13 @@ sub proplist {
 
 	$split = '($code, $short, $name) = split(/; */); $code =~ s/^U\+//;';
     }
+    elsif ($table =~ /^IsSyl/) {
+	open(UD, "syllables.txt") or warn "Can't open $table: $!";
+
+	$split = '($code, $short, $syl) = split(/; */); $code =~ s/^U\+//;';
+    }
     else {
-	open(UD, "UnicodeData-Latest.txt") or warn "Can't open $table: $!";
+	open(UD, $UnicodeData) or warn "Can't open $UnicodeData: $!";
 
 	$split = '($code, $name, $cat, $comb, $bid, $decomp, $dec, $dig, $num, $mir, $uni1,
 		$comment, $up, $down, $title) = split(/;/);';
@@ -298,3 +321,52 @@ END
     }
     $out;
 }
+
+# Create the equivalence mappings.
+
+open(UNICODEDATA, $UnicodeData) || die "$0: $UnicodeData: $!\n";
+
+while (<UNICODEDATA>) {
+    ($code, $name) = split /;/;
+    
+    $code{$name} = $code;
+    $name{$code} = $name;
+
+    next unless $name =~ /^(.+? LETTER .+?) WITH .+( \w+ FORM)?$/;
+
+    push @base, [ $code, $1 ];
+    push @base, [ $code, $1.$2 ] if $2 ne '';
+}
+
+foreach my $b (@base) {
+    ($code, $base) = @$b;
+    next unless exists $code{$base};
+    push @{$unicode{$code{$base}}}, $code;
+#   print "$code: $name{$code} -> $base\n",
+}
+
+@unicode = sort keys %unicode;
+
+print "EqUnicode\n";
+if (open(EQ_UNICODE, ">Eq/Unicode")) {
+    foreach my $c (@unicode) {
+	print EQ_UNICODE "$c @{$unicode{$c}}\n";
+    }
+    close EQ_UNICODE;
+} else {
+    die "$0: failed to open Eq/Unicode for writing: $!\n";
+}
+
+print "EqLatin1\n";
+if (open(EQ_LATIN1, ">Eq/Latin1")) {
+    foreach my $c (@unicode) {
+	last if hex($c) > 255;
+	my @c = grep { hex($_) <= 255 } @{$unicode{$c}};
+	next unless @c;
+	print EQ_LATIN1 "$c @c\n";
+    }
+    close EQ_LATIN1;
+} else {
+    die "$0: failed to open Eq/Latin1 for writing: $!\n";
+}
+  

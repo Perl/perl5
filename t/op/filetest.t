@@ -48,10 +48,12 @@ else {
 
 # Scripts are not -x everywhere so cannot test that.
 
+eval '$> = $oldeuid';	# switch uid back (may not be implemented)
+
+# this would fail for the euid 1
+# (unless we have unpacked the source code as uid 1...)
 print "not " unless -r 'op';
 print "ok 7\n";
-
-eval '$> = $oldeuid';	# switch uid back (may not be implemented)
 
 # this would fail for the euid 1
 # (unless we have unpacked the source code as uid 1...)

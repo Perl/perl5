@@ -884,7 +884,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	/* We know what class it must start with. */
 	switch (OP(c)) {
 	case ANYOFUTF8:
-	    cc = (char *) OPERAND(c);
+	    cc = MASK(c);
 	    while (s < strend) {
 		if (REGINCLASSUTF8(c, (U8*)s)) {
 		    if (tmp && regtry(prog, s))
@@ -898,7 +898,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    }
 	    break;
 	case ANYOF:
-	    cc = (char *) OPERAND(c);
+	    cc = MASK(c);
 	    while (s < strend) {
 		if (REGINCLASS(cc, *s)) {
 		    if (tmp && regtry(prog, s))
@@ -1697,8 +1697,8 @@ S_regmatch(pTHX_ regnode *prog)
 	    nextchr = UCHARAT(++locinput);
 	    break;
 	case EXACT:
-	    s = (char *) OPERAND(scan);
-	    ln = UCHARAT(s++);
+	    s = STRING(scan);
+	    ln = STR_LEN(scan);
 	    /* Inline the first character, for speed. */
 	    if (UCHARAT(s) != nextchr)
 		sayNO;
@@ -1713,8 +1713,8 @@ S_regmatch(pTHX_ regnode *prog)
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case EXACTF:
-	    s = (char *) OPERAND(scan);
-	    ln = UCHARAT(s++);
+	    s = STRING(scan);
+	    ln = STR_LEN(scan);
 
 	    if (UTF) {
 		char *l = locinput;
@@ -1752,7 +1752,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    nextchr = UCHARAT(locinput);
 	    break;
 	case ANYOFUTF8:
-	    s = (char *) OPERAND(scan);
+	    s = MASK(scan);
 	    if (!REGINCLASSUTF8(scan, (U8*)locinput))
 		sayNO;
 	    if (locinput >= PL_regeol)
@@ -1761,7 +1761,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    nextchr = UCHARAT(locinput);
 	    break;
 	case ANYOF:
-	    s = (char *) OPERAND(scan);
+	    s = MASK(scan);
 	    if (nextchr < 0)
 		nextchr = UCHARAT(locinput);
 	    if (!REGINCLASS(s, nextchr))
@@ -2535,7 +2535,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    ln = n;
 		locinput = PL_reginput;
 		if (PL_regkind[(U8)OP(next)] == EXACT) {
-		    c1 = UCHARAT(OPERAND(next) + 1);
+		    c1 = (U8)*STRING(next);
 		    if (OP(next) == EXACTF)
 			c2 = PL_fold[c1];
 		    else if (OP(next) == EXACTFL)
@@ -2592,7 +2592,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    );
 		if (n >= ln) {
 		    if (PL_regkind[(U8)OP(next)] == EXACT) {
-			c1 = UCHARAT(OPERAND(next) + 1);
+			c1 = (U8)*STRING(next);
 			if (OP(next) == EXACTF)
 			    c2 = PL_fold[c1];
 			else if (OP(next) == EXACTFL)
@@ -2669,7 +2669,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    * when we know what character comes next.
 	    */
 	    if (PL_regkind[(U8)OP(next)] == EXACT) {
-		c1 = UCHARAT(OPERAND(next) + 1);
+		c1 = (U8)*STRING(next);
 		if (OP(next) == EXACTF)
 		    c2 = PL_fold[c1];
 		else if (OP(next) == EXACTFL)
@@ -2975,7 +2975,6 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
     scan = PL_reginput;
     if (max != REG_INFTY && max < loceol - scan)
       loceol = scan + max;
-    opnd = (char *) OPERAND(p);
     switch (OP(p)) {
     case REG_ANY:
 	while (scan < loceol && *scan != '\n')
@@ -2999,19 +2998,19 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
 	}
 	break;
     case EXACT:		/* length of string is 1 */
-	c = UCHARAT(++opnd);
+	c = (U8)*STRING(p);
 	while (scan < loceol && UCHARAT(scan) == c)
 	    scan++;
 	break;
     case EXACTF:	/* length of string is 1 */
-	c = UCHARAT(++opnd);
+	c = (U8)*STRING(p);
 	while (scan < loceol &&
 	       (UCHARAT(scan) == c || UCHARAT(scan) == PL_fold[c]))
 	    scan++;
 	break;
     case EXACTFL:	/* length of string is 1 */
 	PL_reg_flags |= RF_tainted;
-	c = UCHARAT(++opnd);
+	c = (U8)*STRING(p);
 	while (scan < loceol &&
 	       (UCHARAT(scan) == c || UCHARAT(scan) == PL_fold_locale[c]))
 	    scan++;
@@ -3024,6 +3023,7 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
 	}
 	break;
     case ANYOF:
+	opnd = MASK(p);
 	while (scan < loceol && REGINCLASS(opnd, *scan))
 	    scan++;
 	break;

@@ -697,6 +697,69 @@ Perl_do_sprintf(pTHX_ SV *sv, I32 len, SV **sarg)
 	SvTAINTED_on(sv);
 }
 
+UV
+Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
+{
+    STRLEN srclen, len;
+    unsigned char *s = (unsigned char *) SvPV(sv, srclen);
+    UV retnum = 0;
+
+    if (offset < 0)
+	return retnum;
+    if (size < 1 || (size & (size-1))) /* size < 1 or not a power of two */ 
+	Perl_croak(aTHX_ "Illegal number of bits in vec");
+    offset *= size;	/* turn into bit offset */
+    len = (offset + size + 7) / 8;	/* required number of bytes */
+    if (len > srclen) {
+	if (size <= 8)
+	    retnum = 0;
+	else {
+	    offset >>= 3;	/* turn into byte offset */
+	    if (size == 16) {
+		if (offset >= srclen)
+		    retnum = 0;
+		else
+		    retnum = (UV) s[offset] << 8;
+	    }
+	    else if (size == 32) {
+		if (offset >= srclen)
+		    retnum = 0;
+		else if (offset + 1 >= srclen)
+		    retnum =
+			((UV) s[offset    ] << 24);
+		else if (offset + 2 >= srclen)
+		    retnum =
+			((UV) s[offset    ] << 24) +
+			((UV) s[offset + 1] << 16);
+		else
+		    retnum =
+			((UV) s[offset    ] << 24) +
+			((UV) s[offset + 1] << 16) +
+			(     s[offset + 2] <<  8);
+	    }
+	}
+    }
+    else if (size < 8)
+	retnum = (s[offset >> 3] >> (offset & 7)) & ((1 << size) - 1);
+    else {
+	offset >>= 3;	/* turn into byte offset */
+	if (size == 8)
+	    retnum = s[offset];
+	else if (size == 16)
+	    retnum =
+		((UV) s[offset] <<  8) +
+		      s[offset + 1];
+	else if (size == 32)
+	    retnum =
+		((UV) s[offset    ] << 24) +
+		((UV) s[offset + 1] << 16) +
+		(     s[offset + 2] <<  8) +
+		      s[offset + 3];
+    }
+
+    return retnum;
+}
+
 void
 Perl_do_vecset(pTHX_ SV *sv)
 {
@@ -704,7 +767,7 @@ Perl_do_vecset(pTHX_ SV *sv)
     register I32 offset;
     register I32 size;
     register unsigned char *s;
-    register unsigned long lval;
+    register UV lval;
     I32 mask;
     STRLEN targlen;
     STRLEN len;
@@ -712,11 +775,14 @@ Perl_do_vecset(pTHX_ SV *sv)
     if (!targ)
 	return;
     s = (unsigned char*)SvPV_force(targ, targlen);
-    lval = U_L(SvNV(sv));
+    lval = SvUV(sv);
     offset = LvTARGOFF(sv);
     size = LvTARGLEN(sv);
+    if (size < 1 || (size & (size-1))) /* size < 1 or not a power of two */ 
+	Perl_croak(aTHX_ "Illegal number of bits in vec");
     
-    len = (offset + size + 7) / 8;
+    offset *= size;			/* turn into bit offset */
+    len = (offset + size + 7) / 8;	/* required number of bytes */
     if (len > targlen) {
 	s = (unsigned char*)SvGROW(targ, len + 1);
 	(void)memzero(s + targlen, len - targlen + 1);
@@ -727,12 +793,12 @@ Perl_do_vecset(pTHX_ SV *sv)
 	mask = (1 << size) - 1;
 	size = offset & 7;
 	lval &= mask;
-	offset >>= 3;
+	offset >>= 3;			/* turn into byte offset */
 	s[offset] &= ~(mask << size);
 	s[offset] |= lval << size;
     }
     else {
-	offset >>= 3;
+	offset >>= 3;			/* turn into byte offset */
 	if (size == 8)
 	    s[offset] = lval & 255;
 	else if (size == 16) {

@@ -35,6 +35,7 @@ static U32 dprof_ticks;
 #  include <starlet.h>  /* prototype for sys$gettim() */
    clock_t dprof_times(struct tms *bufptr) {
         clock_t retval;
+	dTHX;
         /* Get wall time and convert to 10 ms intervals to
          * produce the return value dprof expects */
 #  if defined(__DECC) && defined (__ALPHA)

@@ -1026,7 +1026,7 @@ p	|I32	|block_gimme
 p	|int	|block_start	|int full
 p	|void	|boot_core_UNIVERSAL
 p	|void	|call_list	|I32 oldscope|AV* av_list
-p	|I32	|cando		|I32 bit|I32 effective|Stat_t* statbufp
+p	|bool	|cando		|Mode_t mode|Uid_t effective|Stat_t* statbufp
 p	|U32	|cast_ulong	|NV f
 p	|I32	|cast_i32	|NV f
 p	|IV	|cast_iv	|NV f
@@ -1118,6 +1118,7 @@ p	|void	|do_sprintf	|SV* sv|I32 len|SV** sarg
 p	|Off_t	|do_sysseek	|GV* gv|Off_t pos|int whence
 p	|Off_t	|do_tell	|GV* gv
 p	|I32	|do_trans	|SV* sv
+p	|UV	|do_vecget	|SV* sv|I32 offset|I32 size
 p	|void	|do_vecset	|SV* sv
 p	|void	|do_vop		|I32 optype|SV* sv|SV* left|SV* right
 p	|OP*	|dofile		|OP* term
@@ -1197,7 +1198,7 @@ p	|HE*	|hv_store_ent	|HV* tb|SV* key|SV* val|U32 hash
 p	|void	|hv_undef	|HV* tb
 p	|I32	|ibcmp		|const char* a|const char* b|I32 len
 p	|I32	|ibcmp_locale	|const char* a|const char* b|I32 len
-p	|I32	|ingroup	|I32 testgid|I32 effective
+p	|bool	|ingroup	|Gid_t testgid|Uid_t effective
 p	|void	|init_debugger
 p	|void	|init_stacks
 p	|U32	|intro_my
@@ -1471,7 +1472,7 @@ p	|void	|set_numeric_local
 p	|void	|set_numeric_radix
 p	|void	|set_numeric_standard
 p	|void	|require_pv	|const char* pv
-p	|void	|pidgone	|int pid|int status
+p	|void	|pidgone	|Pid_t pid|int status
 p	|void	|pmflag		|U16* pmfl|int ch
 p	|OP*	|pmruntime	|OP* pm|OP* expr|OP* repl
 p	|OP*	|pmtrans	|OP* o|OP* expr|OP* repl
@@ -1677,7 +1678,7 @@ p	|UV	|utf8_to_uv	|U8 *s|I32* retlen
 p	|U8*	|uv_to_utf8	|U8 *d|UV uv
 p	|void	|vivify_defelem	|SV* sv
 p	|void	|vivify_ref	|SV* sv|U32 to_what
-p	|I32	|wait4pid	|int pid|int* statusp|int flags
+p	|I32	|wait4pid	|Pid_t pid|int* statusp|int flags
 p	|void	|warn		|const char* pat|...
 p	|void	|vwarn		|const char* pat|va_list* args
 p	|void	|warner		|U32 err|const char* pat|...
@@ -1884,7 +1885,7 @@ s	|SV*	|method_common	|SV* meth|U32* hashp
 
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
 s	|OP*	|doform		|CV *cv|GV *gv|OP *retop
-s	|int	|emulate_eaccess|const char* path|int mode
+s	|int	|emulate_eaccess|const char* path|Mode_t mode
 #  if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 s	|int	|dooneliner	|char *cmd|char *filename
 #  endif
@@ -1895,7 +1896,6 @@ s	|regnode*|reg		|I32|I32 *
 s	|regnode*|reganode	|U8|U32
 s	|regnode*|regatom	|I32 *
 s	|regnode*|regbranch	|I32 *|I32
-s	|void	|regc		|U8|char *
 s	|void	|reguni		|UV|char *|I32*
 s	|regnode*|regclass
 s	|regnode*|regclassutf8

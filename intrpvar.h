@@ -200,10 +200,10 @@ PERLVARI(Ithreadnum,	U32,	0)	/* incremented each thread creation */
 PERLVAR(Istrtab_mutex,	perl_mutex)	/* Mutex for string table access */
 #endif /* USE_THREADS */
 
-PERLVAR(Iuid,		int)		/* current real user id */
-PERLVAR(Ieuid,		int)		/* current effective user id */
-PERLVAR(Igid,		int)		/* current real group id */
-PERLVAR(Iegid,		int)		/* current effective group id */
+PERLVAR(Iuid,		Uid_t)		/* current real user id */
+PERLVAR(Ieuid,		Uid_t)		/* current effective user id */
+PERLVAR(Igid,		Gid_t)		/* current real group id */
+PERLVAR(Iegid,		Gid_t)		/* current effective group id */
 PERLVAR(Inomemok,	bool)		/* let malloc context handle nomem */
 PERLVAR(Ian,		U32)		/* malloc sequence number */
 PERLVAR(Icop_seqmax,	U32)		/* statement sequence number */

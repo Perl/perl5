@@ -17,10 +17,6 @@
 #include "perl.h"
 #include "regcomp.h"
 
-#ifndef DBL_DIG
-#define DBL_DIG	15   /* A guess that works lots of places */
-#endif
-
 void
 Perl_dump_indent(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
 {
@@ -923,7 +919,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     if (type >= SVt_PVNV || type == SVt_NV) {
 	RESTORE_NUMERIC_STANDARD();
 #ifdef USE_LONG_DOUBLE
-	Perl_dump_indent(aTHX_ level, file, "  NV = %.*" PERL_PRIgldbl "\n", DBL_DIG, SvNVX(sv));
+	Perl_dump_indent(aTHX_ level, file, "  NV = %.*" PERL_PRIgldbl "\n", LDBL_DIG, SvNVX(sv));
 #else
 	Perl_dump_indent(aTHX_ level, file, "  NV = %.*g\n", DBL_DIG, SvNVX(sv));
 #endif

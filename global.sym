@@ -112,6 +112,7 @@ Perl_do_sprintf
 Perl_do_sysseek
 Perl_do_tell
 Perl_do_trans
+Perl_do_vecget
 Perl_do_vecset
 Perl_do_vop
 Perl_dofile

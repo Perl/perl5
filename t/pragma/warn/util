@@ -11,25 +11,25 @@
 
 __END__
 # util.c
-use warning 'octal' ;
+use warning 'digit' ;
 my $a = oct "029" ;
-no warning 'octal' ;
+no warning 'digit' ;
 my $a = oct "029" ;
 EXPECT
 Illegal octal digit '9' ignored at - line 3.
 ########
 # util.c
-use warning 'unsafe' ;
+use warning 'digit' ;
 *a =  hex "0xv9" ;
-no warning 'unsafe' ;
+no warning 'digit' ;
 *a =  hex "0xv9" ;
 EXPECT
 Illegal hexadecimal digit 'v' ignored at - line 3.
 ########
 # util.c
-use warning 'unsafe' ;
+use warning 'digit' ;
 *a =  oct "0b9" ;
-no warning 'unsafe' ;
+no warning 'digit' ;
 *a =  oct "0b9" ;
 EXPECT
 Illegal binary digit '9' ignored at - line 3.

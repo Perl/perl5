@@ -767,8 +767,8 @@ PP(pp_aassign)
 	    }
 #  endif /* HAS_SETREUID */
 #endif /* HAS_SETRESUID */
-	    PL_uid = (int)PerlProc_getuid();
-	    PL_euid = (int)PerlProc_geteuid();
+	    PL_uid = PerlProc_getuid();
+	    PL_euid = PerlProc_geteuid();
 	}
 	if (PL_delaymagic & DM_GID) {
 #ifdef HAS_SETRESGID
@@ -796,8 +796,8 @@ PP(pp_aassign)
 	    }
 #  endif /* HAS_SETREGID */
 #endif /* HAS_SETRESGID */
-	    PL_gid = (int)PerlProc_getgid();
-	    PL_egid = (int)PerlProc_getegid();
+	    PL_gid = PerlProc_getgid();
+	    PL_egid = PerlProc_getegid();
 	}
 	PL_tainting |= (PL_uid && (PL_euid != PL_uid || PL_egid != PL_gid));
     }

@@ -41,6 +41,7 @@ $ ans = ""
 $ macros = ""
 $ use_vmsdebug_perl = "N"
 $ use_debugging_perl = "Y"
+$ use_64bit = "N"
 $ C_Compiler_Replace = "CC="
 $ Thread_Live_Dangerously = "MT="
 $ use_two_pot_malloc = "N"
@@ -1707,6 +1708,27 @@ $   use_multiplicity="Y"
 $ ELSE
 $   use_multiplicity="N"
 $ ENDIF
+$!
+$! Ask if they want to build with 64-bit support
+$ if (Archname.eqs."VMS_AXP").and.("''f$extract(1,3, f$getsyi(""version""))'".ges."7.1")
+$ THEN
+$   echo "This version of perl has experimental support for building wtih
+$   echo "64 bit integers and 128 bit floating point variables. This gives
+$   echo "a much larger range for perl's mathematical operations. (Note that
+$   echo "does *not* enable 64-bit fileops at the moment, as Dec C doesn't
+$   echo "do that yet)"
+$   echo ""
+$   dflt = use_64bit
+$   rp = "Build with 64 bits? [''dflt'] "
+$   GOSUB myread
+$     if ans.eqs."" then ans = dflt
+$   if (f$extract(0, 1, "''ans'").eqs."Y").or.(f$extract(0, 1, "''ans'").eqs."y")
+$   THEN
+$     use_64bit="Y"
+$   ELSE
+$     use_64bit="N"
+$   ENDIF
+$ ENDIF
 $! Ask about threads, if appropriate
 $ if (Using_Dec_C.eqs."Yes")
 $ THEN
@@ -1837,7 +1859,8 @@ $ echo "you might, for example, want to build GDBM_File instead of
 $ echo "SDBM_File if you have the GDBM library built on your machine
 $ echo "
 $ echo "Which modules do you want to build into perl?"
-$ dflt = "Fcntl Errno IO Opcode Byteloader Devel::Peek Devel::DProf Data::Dumper attrs re VMS::Stdio VMS::DCLsym B SDBM_File"
+$! dflt = "Fcntl Errno IO Opcode Byteloader Devel::Peek Devel::DProf Data::Dumper attrs re VMS::Stdio VMS::DCLsym B SDBM_File"
+$ dflt = "Fcntl Errno IO Opcode Devel::Peek Devel::DProf Data::Dumper attrs re VMS::Stdio VMS::DCLsym B SDBM_File"
 $ if Using_Dec_C.eqs."Yes"
 $ THEN
 $   dflt = dflt + " POSIX"

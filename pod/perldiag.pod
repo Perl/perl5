@@ -90,6 +90,16 @@ See L<perlfunc/pack>.
 checksumming process loses information, and you can't go the other
 way.  See L<perlfunc/unpack>.
 
+=item Repeat count in pack overflows
+
+(F) You can't specify a repeat count so large that it overflows
+your signed integers.  See L<perlfunc/pack>.
+
+=item Repeat count in unpack overflows
+
+(F) You can't specify a repeat count so large that it overflows
+your signed integers.  See L<perlfunc/unpack>.
+
 =item /%s/: Unrecognized escape \\%c passed through
 
 (W) You used a backslash-character combination which is not recognized
@@ -1133,6 +1143,16 @@ workarounds.
 inlining.  See L<perlsub/"Constant Functions"> for commentary and
 workarounds.
 
+=item constant(%s): %%^H is not localized
+
+(F) When setting compile-time-lexicalized hash %^H one should set the 
+corresponding bit of $^H as well.
+
+=item constant(%s): %s
+
+(F) Compile-time-substitutions (such as overloaded constants and
+character names) were not correctly set up.
+
 =item Copy method did not return a reference
 
 (F) The method which overloads "=" is buggy. See L<overload/Copy Constructor>.
@@ -1503,6 +1523,11 @@ of the octal number stopped before the 8 or 9.
 in a hexadecimal number.  Interpretation of the hexadecimal number stopped
 before the illegal character.
 
+=item Illegal number of bits in vec
+
+(F) The number of bits in vec() (the third argument) must be a power of
+two from 1 to 32.
+ 
 =item Illegal switch in PERL5OPT: %s
 
 (X) The PERL5OPT environment variable may only be used to set the
@@ -1589,7 +1614,8 @@ rebuild Perl.
 =item invalid [] range in regexp
 
 (F) The range specified in a character class had a minimum character
-greater than the maximum character.  See L<perlre>.
+greater than the maximum character, or the range didn't start/end with
+a literal character.  See L<perlre>.
 
 =item Invalid conversion in %s: "%s"
 
@@ -1665,6 +1691,11 @@ ended earlier on the current line.
 (F) Apparently you've been programming in B<csh> too much.  Variables are always
 mentioned with the $ in Perl, unlike in the shells, where it can vary from
 one line to the next.
+
+=item Missing %sbrace%s on \C{}
+
+(F) Wrong syntax of character name literal C<\C{charname}> within
+double-quotish context.
 
 =item Missing comma after first argument to %s function
 
@@ -2580,6 +2611,10 @@ See L<perlfunc/sort>.
 
 (F) A sort comparison subroutine may not return a list value with more
 or less than one element.  See L<perlfunc/sort>.
+
+=item split /^/ better written as split /^/m
+
+(W) Implicit translation of /^/ to mean /^/m in split is deprecated.
 
 =item Split loop
 

@@ -64,6 +64,11 @@
 #define POPi		((IV)SvIVx(POPs))
 #define POPu		((UV)SvUVx(POPs))
 #define POPl		((long)SvIVx(POPs))
+#define POPul		((unsigned long)SvIVx(POPs))
+#ifdef HAS_QUAD
+#define POPq		((Quad_t)SvIVx(POPs))
+#define POPuq		((Uquad_t)SvIVx(POPs))
+#endif
 
 #define TOPs		(*sp)
 #define TOPp		(SvPV(TOPs, PL_na))		/* deprecated */
@@ -72,6 +77,11 @@
 #define TOPi		((IV)SvIV(TOPs))
 #define TOPu		((UV)SvUV(TOPs))
 #define TOPl		((long)SvIV(TOPs))
+#define TOPul		((unsigned long)SvIV(TOPs))
+#ifdef HAS_QUAD
+#define TOPq		((Quad_t)SvIV(TOPs))
+#define TOPuq		((Uquad_t)SvIV(TOPs))
+#endif
 
 /* Go to some pains in the rare event that we must extend the stack. */
 #define EXTEND(p,n)	STMT_START { if (PL_stack_max - p < (n)) {		\
@@ -115,6 +125,12 @@
 #define dPOPiv		IV value = POPi
 #define dTOPuv		UV value = TOPu
 #define dPOPuv		UV value = POPu
+#ifdef HAS_QUAD
+#define dTOPqv		Quad_t value = TOPu
+#define dPOPqv		Quad_t value = POPu
+#define dTOPuqv		Uquad_t value = TOPuq
+#define dPOPuqv		Uquad_t value = POPuq
+#endif
 
 #define dPOPXssrl(X)	SV *right = POPs; SV *left = CAT2(X,s)
 #define dPOPXnnrl(X)	NV right = POPn; NV left = CAT2(X,n)

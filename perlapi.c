@@ -253,10 +253,10 @@ Perl_call_list(pTHXo_ I32 oldscope, AV* av_list)
 }
 
 #undef  Perl_cando
-I32
-Perl_cando(pTHXo_ I32 bit, I32 effective, Stat_t* statbufp)
+bool
+Perl_cando(pTHXo_ Mode_t mode, Uid_t effective, Stat_t* statbufp)
 {
-    return ((CPerlObj*)pPerl)->Perl_cando(bit, effective, statbufp);
+    return ((CPerlObj*)pPerl)->Perl_cando(mode, effective, statbufp);
 }
 
 #undef  Perl_cast_ulong
@@ -868,6 +868,13 @@ Perl_do_trans(pTHXo_ SV* sv)
     return ((CPerlObj*)pPerl)->Perl_do_trans(sv);
 }
 
+#undef  Perl_do_vecget
+UV
+Perl_do_vecget(pTHXo_ SV* sv, I32 offset, I32 size)
+{
+    return ((CPerlObj*)pPerl)->Perl_do_vecget(sv, offset, size);
+}
+
 #undef  Perl_do_vecset
 void
 Perl_do_vecset(pTHXo_ SV* sv)
@@ -1343,8 +1350,8 @@ Perl_ibcmp_locale(pTHXo_ const char* a, const char* b, I32 len)
 }
 
 #undef  Perl_ingroup
-I32
-Perl_ingroup(pTHXo_ I32 testgid, I32 effective)
+bool
+Perl_ingroup(pTHXo_ Gid_t testgid, Uid_t effective)
 {
     return ((CPerlObj*)pPerl)->Perl_ingroup(testgid, effective);
 }
@@ -3008,7 +3015,7 @@ Perl_require_pv(pTHXo_ const char* pv)
 
 #undef  Perl_pidgone
 void
-Perl_pidgone(pTHXo_ int pid, int status)
+Perl_pidgone(pTHXo_ Pid_t pid, int status)
 {
     ((CPerlObj*)pPerl)->Perl_pidgone(pid, status);
 }
@@ -4285,7 +4292,7 @@ Perl_vivify_ref(pTHXo_ SV* sv, U32 to_what)
 
 #undef  Perl_wait4pid
 I32
-Perl_wait4pid(pTHXo_ int pid, int* statusp, int flags)
+Perl_wait4pid(pTHXo_ Pid_t pid, int* statusp, int flags)
 {
     return ((CPerlObj*)pPerl)->Perl_wait4pid(pid, statusp, flags);
 }

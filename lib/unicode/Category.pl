@@ -35,7 +35,7 @@ return <<'END';
 00a8		Sk
 00a9		So
 00aa		Ll
-00ab		Ps
+00ab		Pi
 00ac		Sm
 00ad		Pd
 00ae		So
@@ -50,7 +50,7 @@ return <<'END';
 00b8		Sk
 00b9		No
 00ba		Ll
-00bb		Pe
+00bb		Pf
 00bc	00be	No
 00bf		Po
 00c0	00d6	Lu
@@ -223,7 +223,9 @@ return <<'END';
 01bb		Lo
 01bc		Lu
 01bd		Ll
-01be	01c3	Lo
+01be		Lo
+01bf		Ll
+01c0	01c3	Lo
 01c4		Lu
 01c5		Lt
 01c6		Ll
@@ -272,6 +274,8 @@ return <<'END';
 01f3		Ll
 01f4		Lu
 01f5		Ll
+01f6	01f8	Lu
+01f9		Ll
 01fa		Lu
 01fb		Ll
 01fc		Lu
@@ -302,18 +306,45 @@ return <<'END';
 0215		Ll
 0216		Lu
 0217		Ll
-0250	02a8	Ll
+0218		Lu
+0219		Ll
+021a		Lu
+021b		Ll
+021c		Lu
+021d		Ll
+021e		Lu
+021f		Ll
+0222		Lu
+0223		Ll
+0224		Lu
+0225		Ll
+0226		Lu
+0227		Ll
+0228		Lu
+0229		Ll
+022a		Lu
+022b		Ll
+022c		Lu
+022d		Ll
+022e		Lu
+022f		Ll
+0230		Lu
+0231		Ll
+0232		Lu
+0233		Ll
+0250	02ad	Ll
 02b0	02b8	Lm
 02b9	02ba	Sk
 02bb	02c1	Lm
 02c2	02cf	Sk
 02d0	02d1	Lm
-02d2	02de	Sk
+02d2	02df	Sk
 02e0	02e4	Lm
-02e5	02e9	Sk
-0300	0345	Mn
-0360	0361	Mn
-0374	0375	Po
+02e5	02ed	Sk
+02ee		Lm
+0300	034e	Mn
+0360	0362	Mn
+0374	0375	Sk
 037a		Lm
 037e		Po
 0384	0385	Sk
@@ -328,11 +359,15 @@ return <<'END';
 03ac	03ce	Ll
 03d0	03d1	Ll
 03d2	03d4	Lu
-03d5	03d6	Ll
+03d5	03d7	Ll
 03da		Lu
+03db		Ll
 03dc		Lu
+03dd		Ll
 03de		Lu
+03df		Ll
 03e0		Lu
+03e1		Ll
 03e2		Lu
 03e3		Ll
 03e4		Lu
@@ -348,11 +383,8 @@ return <<'END';
 03ee		Lu
 03ef	03f2	Ll
 03f3		Lo
-0401	040c	Lu
-040e	042f	Lu
-0430	044f	Ll
-0451	045c	Ll
-045e	045f	Ll
+0400	042f	Lu
+0430	045f	Ll
 0460		Lu
 0461		Ll
 0462		Lu
@@ -389,6 +421,11 @@ return <<'END';
 0481		Ll
 0482		So
 0483	0486	Mn
+0488	0489	Me
+048c		Lu
+048d		Ll
+048e		Lu
+048f		Ll
 0490		Lu
 0491		Ll
 0492		Lu
@@ -474,6 +511,8 @@ return <<'END';
 04e9		Ll
 04ea		Lu
 04eb		Ll
+04ec		Lu
+04ed		Ll
 04ee		Lu
 04ef		Ll
 04f0		Lu
@@ -489,6 +528,7 @@ return <<'END';
 055a	055f	Po
 0561	0587	Ll
 0589		Po
+058a		Pd
 0591	05a1	Mn
 05a3	05b9	Mn
 05bb	05bd	Mn
@@ -507,14 +547,11 @@ return <<'END';
 0621	063a	Lo
 0640		Lm
 0641	064a	Lo
-064b	0652	Mn
+064b	0655	Mn
 0660	0669	Nd
 066a	066d	Po
 0670		Mn
-0671	06b7	Lo
-06ba	06be	Lo
-06c0	06ce	Lo
-06d0	06d3	Lo
+0671	06d3	Lo
 06d4		Po
 06d5		Lo
 06d6	06dc	Mn
@@ -525,6 +562,16 @@ return <<'END';
 06e9		So
 06ea	06ed	Mn
 06f0	06f9	Nd
+06fa	06fc	Lo
+06fd	06fe	So
+0700	070d	Po
+070f		Cf
+0710		Lo
+0711		Mn
+0712	072c	Lo
+0730	074a	Mn
+0780	07a5	Lo
+07a6	07b0	Mn
 0901	0902	Mn
 0903		Mc
 0905	0939	Lo
@@ -534,7 +581,7 @@ return <<'END';
 0941	0948	Mn
 0949	094c	Mc
 094d		Mn
-0950		So
+0950		Lo
 0951	0954	Mn
 0958	0961	Lo
 0962	0963	Mn
@@ -599,7 +646,7 @@ return <<'END';
 0ac9		Mc
 0acb	0acc	Mc
 0acd		Mn
-0ad0		So
+0ad0		Lo
 0ae0		Lo
 0ae6	0aef	Nd
 0b01		Mn
@@ -689,9 +736,20 @@ return <<'END';
 0d57		Mc
 0d60	0d61	Lo
 0d66	0d6f	Nd
-0e01	0e2e	Lo
-0e2f		Po
-0e30		Lo
+0d82	0d83	Mc
+0d85	0d96	Lo
+0d9a	0db1	Lo
+0db3	0dbb	Lo
+0dbd		Lo
+0dc0	0dc6	Lo
+0dca		Mn
+0dcf	0dd1	Mc
+0dd2	0dd4	Mn
+0dd6		Mn
+0dd8	0ddf	Mc
+0df2	0df3	Mc
+0df4		Po
+0e01	0e30	Lo
 0e31		Mn
 0e32	0e33	Lo
 0e34	0e3a	Mn
@@ -699,7 +757,7 @@ return <<'END';
 0e40	0e45	Lo
 0e46		Lm
 0e47	0e4e	Mn
-0e4f		So
+0e4f		Po
 0e50	0e59	Nd
 0e5a	0e5b	Po
 0e81	0e82	Lo
@@ -713,9 +771,7 @@ return <<'END';
 0ea5		Lo
 0ea7		Lo
 0eaa	0eab	Lo
-0ead	0eae	Lo
-0eaf		Po
-0eb0		Lo
+0ead	0eb0	Lo
 0eb1		Mn
 0eb2	0eb3	Lo
 0eb4	0eb9	Mn
@@ -726,7 +782,8 @@ return <<'END';
 0ec8	0ecd	Mn
 0ed0	0ed9	Nd
 0edc	0edd	Lo
-0f00	0f03	So
+0f00		Lo
+0f01	0f03	So
 0f04	0f12	Po
 0f13	0f17	So
 0f18	0f19	Mn
@@ -745,19 +802,36 @@ return <<'END';
 0f3d		Pe
 0f3e	0f3f	Mc
 0f40	0f47	Lo
-0f49	0f69	Lo
+0f49	0f6a	Lo
 0f71	0f7e	Mn
 0f7f		Mc
 0f80	0f84	Mn
 0f85		Po
-0f86	0f8b	Mn
-0f90	0f95	Mn
-0f97		Mn
-0f99	0fad	Mn
-0fb1	0fb7	Mn
-0fb9		Mn
+0f86	0f87	Mn
+0f88	0f8b	Lo
+0f90	0f97	Mn
+0f99	0fbc	Mn
+0fbe	0fc5	So
+0fc6		Mn
+0fc7	0fcc	So
+0fcf		So
+1000	1021	Lo
+1023	1027	Lo
+1029	102a	Lo
+102c		Mc
+102d	1030	Mn
+1031		Mc
+1032		Mn
+1036	1037	Mn
+1038		Mc
+1039		Mn
+1040	1049	Nd
+104a	104f	Po
+1050	1055	Lo
+1056	1057	Mc
+1058	1059	Mn
 10a0	10c5	Lu
-10d0	10f6	Ll
+10d0	10f6	Lo
 10fb		Po
 1100	1159	Lo
 115f	11a2	Lo
@@ -790,6 +864,36 @@ return <<'END';
 1361	1368	Po
 1369	1371	Nd
 1372	137c	No
+13a0	13f4	Lo
+1401	166c	Lo
+166d	166e	Po
+166f	1676	Lo
+1680		Zs
+1681	169a	Lo
+169b		Ps
+169c		Pe
+16a0	16ea	Lo
+16eb	16ed	Po
+16ee	16f0	No
+1780	17b3	Lo
+17b4	17b6	Mc
+17b7	17bd	Mn
+17be	17c5	Mc
+17c6		Mn
+17c7	17c8	Mc
+17c9	17d3	Mn
+17d4	17da	Po
+17db		Sc
+17dc		Po
+17e0	17e9	Nd
+1800	180a	Po
+180b	180e	Cf
+1810	1819	Nd
+1820	1842	Lo
+1843		Lm
+1844	1877	Lo
+1880	18a8	Lo
+18a9		Mn
 1e00		Lu
 1e01		Ll
 1e02		Lu
@@ -1049,20 +1153,22 @@ return <<'END';
 1f68	1f6f	Lu
 1f70	1f7d	Ll
 1f80	1f87	Ll
-1f88	1f8f	Lu
+1f88	1f8f	Lt
 1f90	1f97	Ll
-1f98	1f9f	Lu
+1f98	1f9f	Lt
 1fa0	1fa7	Ll
-1fa8	1faf	Lu
+1fa8	1faf	Lt
 1fb0	1fb4	Ll
 1fb6	1fb7	Ll
-1fb8	1fbc	Lu
+1fb8	1fbb	Lu
+1fbc		Lt
 1fbd		Sk
-1fbe		Lu
+1fbe		Ll
 1fbf	1fc1	Sk
 1fc2	1fc4	Ll
 1fc6	1fc7	Ll
-1fc8	1fcc	Lu
+1fc8	1fcb	Lu
+1fcc		Lt
 1fcd	1fcf	Sk
 1fd0	1fd3	Ll
 1fd6	1fd7	Ll
@@ -1073,30 +1179,35 @@ return <<'END';
 1fed	1fef	Sk
 1ff2	1ff4	Ll
 1ff6	1ff7	Ll
-1ff8	1ffc	Lu
+1ff8	1ffb	Lu
+1ffc		Lt
 1ffd	1ffe	Sk
 2000	200b	Zs
 200c	200f	Cf
 2010	2015	Pd
 2016	2017	Po
-2018		Ps
-2019		Pe
-201a	201c	Ps
-201d		Pe
-201e	201f	Ps
+2018		Pi
+2019		Pf
+201a		Ps
+201b	201c	Pi
+201d		Pf
+201e		Ps
+201f		Pi
 2020	2027	Po
 2028		Zl
 2029		Zp
 202a	202e	Cf
+202f		Zs
 2030	2038	Po
-2039		Ps
-203a		Pe
+2039		Pi
+203a		Pf
 203b	203e	Po
 203f	2040	Pc
 2041	2043	Po
 2044		Sm
 2045		Ps
 2046		Pe
+2048	204d	Po
 206a	206f	Cf
 2070		No
 2074	2079	No
@@ -1108,10 +1219,11 @@ return <<'END';
 208a	208c	Sm
 208d		Ps
 208e		Pe
-20a0	20ac	Sc
+20a0	20af	Sc
 20d0	20dc	Mn
 20dd	20e0	Me
 20e1		Mn
+20e2	20e3	Me
 2100	2101	So
 2102		Lu
 2103	2106	So
@@ -1124,8 +1236,8 @@ return <<'END';
 2113		Ll
 2114		So
 2115		Lu
-2116	2117	So
-2118	211d	Lu
+2116	2118	So
+2119	211d	Lu
 211e	2123	So
 2124		Lu
 2125		So
@@ -1134,39 +1246,42 @@ return <<'END';
 2128		Lu
 2129		So
 212a	212d	Lu
-212e	212f	Ll
+212e		So
+212f		Ll
 2130	2131	Lu
 2132		So
 2133		Lu
 2134		Ll
 2135	2138	Lo
+2139		Ll
+213a		So
 2153	215f	No
-2160	2182	Nl
+2160	2183	Nl
 2190	2194	Sm
 2195	21d1	So
 21d2		Sm
 21d3		So
 21d4		Sm
-21d5	21ea	So
+21d5	21f3	So
 2200	22f1	Sm
-2300		So
-2302	2307	So
+2300	2307	So
 2308	230b	Sm
 230c	231f	So
 2320	2321	Sm
 2322	2328	So
 2329		Ps
 232a		Pe
-232b	237a	So
-2400	2424	So
+232b	237b	So
+237d	239a	So
+2400	2426	So
 2440	244a	So
 2460	249b	No
 249c	24e9	So
 24ea		No
 2500	2595	So
-25a0	25ef	So
+25a0	25f7	So
 2600	2613	So
-261a	266f	So
+2619	2671	So
 2701	2704	So
 2706	2709	So
 270c	2727	So
@@ -1180,11 +1295,16 @@ return <<'END';
 2794		So
 2798	27af	So
 27b1	27be	So
+2800	28ff	So
+2e80	2e99	So
+2e9b	2ef3	So
+2f00	2fd5	So
+2ff0	2ffb	So
 3000		Zs
 3001	3003	Po
 3004		So
 3005		Lm
-3006		Po
+3006		Lo
 3007		Nl
 3008		Ps
 3009		Pe
@@ -1214,18 +1334,21 @@ return <<'END';
 3030		Pd
 3031	3035	Lm
 3036	3037	So
-303f		So
+3038	303a	Nl
+303e	303f	So
 3041	3094	Lo
 3099	309a	Mn
-309b	309e	Lm
+309b	309c	Sk
+309d	309e	Lm
 30a1	30fa	Lo
-30fb		Po
+30fb		Pc
 30fc	30fe	Lm
 3105	312c	Lo
 3131	318e	Lo
 3190	3191	So
 3192	3195	No
 3196	319f	So
+31a0	31b7	Lo
 3200	321c	So
 3220	3229	No
 322a	3243	So
@@ -1238,7 +1361,14 @@ return <<'END';
 3300	3376	So
 337b	33dd	So
 33e0	33fe	So
+3400	4db5	Lo
 4e00	9fa5	Lo
+a000	a48c	Lo
+a490	a4a1	Lo
+a4a4	a4b3	Lo
+a4b5	a4c0	Lo
+a4c2	a4c4	Lo
+a4c6		Lo
 ac00	d7a3	Lo
 d800	db7f	Cs
 db80	dbff	Cs
@@ -1247,6 +1377,7 @@ e000	f8ff	Co
 f900	fa2d	Lo
 fb00	fb06	Ll
 fb13	fb17	Ll
+fb1d		Lo
 fb1e		Mn
 fb1f	fb28	Lo
 fb29		Sm
@@ -1333,7 +1464,8 @@ ff5e		Sm
 ff61		Po
 ff62		Ps
 ff63		Pe
-ff64	ff65	Po
+ff64		Po
+ff65		Pc
 ff66	ff6f	Lo
 ff70		Lm
 ff71	ff9d	Lo
@@ -1348,7 +1480,9 @@ ffe2		Sm
 ffe3		Sk
 ffe4		So
 ffe5	ffe6	Sc
-ffe8	ffec	Sm
+ffe8		So
+ffe9	ffec	Sm
 ffed	ffee	So
+fff9	fffb	Cf
 fffc	fffd	So
 END

@@ -1,4 +1,19 @@
 package Carp;
+
+=head1 NAME
+
+Carp::Heavy - Carp guts
+
+=head1 SYNOPIS
+
+(internal use only)
+
+=head1 DESCRIPTION
+
+No user-serviceable parts inside.
+ 
+=cut
+
 # This package is heavily used. Be small. Be fast. Be good.
 
 # Comments added by Andy Wardley <abw@kfs.org> 09-Apr-98, based on an

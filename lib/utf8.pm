@@ -58,7 +58,7 @@ C<\x>.  For instance, a Unicode smiley face is C<\x{263A}>.  A
 character in the Latin-1 range (128..255) should be written C<\x{ab}>
 rather than C<\xab>, since the former will turn into a two-byte UTF-8
 code, while the latter will continue to be interpreted as generating a
-8-bit byte rather than a character.  In fact, if -w is turned on, it will
+8-bit byte rather than a character.  In fact, if C<-w> is turned on, it will
 produce a warning that you might be generating invalid UTF-8.
 
 =item *
@@ -71,9 +71,8 @@ attempt to canonicalize variable names for you.)
 =item *
 
 Regular expressions match characters instead of bytes.  For instance,
-"." matches a character instead of a byte.  (However, the C<\C> pattern
-is provided to force a match a single byte ("C<char>" in C, hence
-C<\C>).)
+"." matches a character instead of a byte.  (However, the C<\O> pattern
+is provided to force a match a single byte ("octet", hence C<\O>).)
 
 =item *
 

@@ -169,11 +169,31 @@ and compile Perl using the -Duse64bits Configure flag.
 Unfortunately, bit operations (&, <<, ...) and vec() do not work,
 they are limited to 32 bits.
 
-Last but not least: note that due to Perl's tendency to always use
-floating point numbers the quads are not true integers.  They may lose
-their precision due to rounding errors, and when they get large their
-less significant digits will fall off.
+Last but not least: note that due to Perl's habit of always using
+floating point numbers the quads are still not true integers.  When
+quads overflow their limits (18446744073709551615 unsigned,
+-9223372036854775808...9223372036854775807 signed), they are silently
+promoted to floating point numbers, after which they will 
+start losing precision (their lower digits).
 
+=head2 Large file support
+
+If you have filesystems that support "large files" (files larger than
+2 gigabytes), you may now also be able to create and access them from Perl.
+
+Note that in addition to requiring a proper file system to do this you
+may also need to adjust your per-process (or even your per-system)
+maximum filesize limits before running Perl scripts that try to handle
+large files, especially if you intend to write such files.
+
+Adjusting your file system/system limits is outside the scope of Perl.
+For process limits, you may try to increase the limits using your
+shell's limit/ulimit command before running Perl.  The BSD::Resource
+extension (not included with the standard Perl distribution) may also
+be of use.
+ 
+(Large file support is also related to 64-bit support, for obvious reasons)
+ 
 =head2 Better syntax checks on parenthesized unary operators
 
 Expressions such as:
@@ -300,6 +320,14 @@ Constructs such as C<open(E<lt>FHE<gt>)> and C<close(E<lt>FHE<gt>)>
 are compile time errors.  Attempting to read from filehandles that
 were opened only for writing will now produce warnings (just as
 writing to read-only filehandles does).
+
+=head2 Buffered data discarded from input filehandle when dup'ed.
+
+C<open(NEW, "E<lt>&OLD")> now discards any data that was previously
+read and buffered in C<OLD>.  The next read operation on C<NEW> will
+return the same data as the corresponding operation on C<OLD>.
+Formerly, it would have returned the data from the start of the
+following disk block instead.
 
 =head1 Supported Platforms
 

@@ -52,7 +52,7 @@ sub eliminate_macros {
 	print "eliminate_macros('') = ||\n" if $Verbose >= 3;
 	return '';
     }
-    my($npath) = unixify($path);
+    my($npath) = join(' ', map(unixify($_), split(/\s+/, $path)));
     my($complex) = 0;
     my($head,$macro,$tail);
 
@@ -67,7 +67,7 @@ sub eliminate_macros {
                 }
                 else {
                     print "Note: can't expand macro \$($macro) containing ",ref($self->{$macro}),
-                          "\n\t(using MMK-specific deferred substitutuon; MMS will break)\n";
+                          "\n\t(using MMK-specific deferred substitution; MMS will break)\n";
                     $macro = "\cB$macro\cB";
                     $complex = 1;
                 }
@@ -107,10 +107,11 @@ sub fixpath {
 
     if ($path =~ m#^\$\([^\)]+\)$# || $path =~ m#[/:>\]]#) { 
         if ($force_path or $path =~ /(?:DIR\)|\])$/) {
-            $fixedpath = vmspath($self->eliminate_macros($path));
+            $fixedpath = join(' ', map(vmspath($_),split(/\s+/, $self->eliminate_macros($path))));
         }
         else {
-            $fixedpath = vmsify($self->eliminate_macros($path));
+            $fixedpath = join(' ', map(vmsify($_),split(/\s+/, $self->eliminate_macros($path))));
+
         }
     }
     elsif ((($prefix,$name) = ($path =~ m#^\$\(([^\)]+)\)(.+)#)) && $self->{$prefix}) {
