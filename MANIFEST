@@ -1048,10 +1048,14 @@ lib/constant.t			See if compile-time constants work
 lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
 lib/CPAN/bin/cpan		easily interact with CPAN from the command line
 lib/CPAN/FirstTime.pm		Utility for creating CPAN config files
+lib/CPAN/META.yml		CPAN metainfo
 lib/CPAN/Nox.pm			Runs CPAN while avoiding compiled extensions
+lib/CPAN/PAUSE2003.pub		CPAN public key
+lib/CPAN/SIGNATURE		CPAN signature
 lib/CPAN/t/loadme.t		See if CPAN the module works
 lib/CPAN/t/mirroredby.t		See if CPAN::Mirrored::By works
 lib/CPAN/t/Nox.t		See if CPAN::Nox works
+lib/CPAN/t/signature.t		CPAN signature test
 lib/CPAN/t/vcmp.t		See if CPAN the module works
 lib/ctime.pl			A ctime workalike
 lib/Cwd.pm			Various cwd routines (getcwd, fastcwd, chdir)
@@ -2400,10 +2404,10 @@ Porting/fixCORE		Find and fix modules that generate warnings
 Porting/fixvars		Find undeclared variables with C compiler and fix em
 Porting/genlog		Generate formatted changelogs by querying p4d
 Porting/Glossary	Glossary of config.sh variables
-Porting/makerel		Release making utility
-Porting/manicheck	Check against MANIFEST
 Porting/Maintainers	Program to pretty print info in Maintainers.pl
 Porting/Maintainers.pl	Information about maintainers
+Porting/makerel		Release making utility
+Porting/manicheck	Check against MANIFEST
 Porting/p4d2p		Generate patch from p4 diff
 Porting/p4genpatch	Generate patch from p4 change in repository (obsoletes p4desc)
 Porting/patching.pod	How to report changes made to Perl

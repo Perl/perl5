@@ -1,11 +1,11 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN;
 $VERSION = '1.76';
-# $Id: CPAN.pm,v 1.405 2003/07/04 08:06:11 k Exp $
+# $Id: CPAN.pm,v 1.412 2003/07/31 14:53:04 k Exp $
 
 # only used during development:
 $Revision = "";
-# $Revision = "[".substr(q$Revision: 1.405 $, 10)."]";
+# $Revision = "[".substr(q$Revision: 1.412 $, 10)."]";
 
 use Carp ();
 use Config ();
@@ -3961,7 +3961,7 @@ sub get {
     }
 
     $self->{'build_dir'} = $packagedir;
-    $self->safe_chdir(File::Spec->updir);
+    $self->safe_chdir($builddir);
     File::Path::rmtree("tmp");
 
     my($mpl) = File::Spec->catfile($packagedir,"Makefile.PL");
