@@ -469,6 +469,12 @@ unless ($define{'PERL_FLEXIBLE_EXCEPTIONS'}) {
 		    )];
 }
 
+unless ($define{'USE_REENTRANT_API'}) {
+    skip_symbols [qw(
+		    PL_reentrant_buffer
+		    )];
+}
+
 if ($define{'MYMALLOC'}) {
     emit_symbols [qw(
 		    Perl_dump_mstats
