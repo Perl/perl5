@@ -132,6 +132,9 @@ $a =~ s/-uCwd,// if $^O eq 'cygwin';
 if ($Config{static_ext} eq ' ') {
   $b = '-uCarp,-uCarp::Heavy,-uDB,-uExporter,-uExporter::Heavy,-uattributes,'
      . '-umain,-ustrict,-uwarnings';
+  if (ord('A') == 193) { # EBCDIC sort order is qw(a A) not qw(A a)
+      $b = join ',', sort split /,/, $b;
+  }
   print "# [$a] vs [$b]\nnot " if $a ne $b;
   ok;
 } else {
