@@ -1137,6 +1137,7 @@ d_oldpthreads=''
 use5005threads=''
 useithreads=''
 usereentrant=''
+userelocatableinc=undef
 usethreads=''
 incpath=''
 mips_type=''
