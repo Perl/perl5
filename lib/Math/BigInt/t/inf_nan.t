@@ -1,17 +1,21 @@
 #!/usr/bin/perl -w
 
+# test inf/NaN handling all in one place
+# Thanx to Jarkko for the excellent explanations and the tables
+
 use Test;
 use strict;
 
 BEGIN
   {
-  $| = 1;
-  plan tests => 7*6*4;
+  $| = 1;	# 7 values  6 groups 4 oprators 2 classes
+  plan tests =>   7       * 6      * 4        * 2;
   chdir 't' if -d 't';
   unshift @INC, '../lib';
   }
 
 use Math::BigInt;
+use Math::BigFloat;
 
 my (@args,$x,$y,$z);
 
@@ -67,11 +71,14 @@ foreach (qw/
   /)
   {
   @args = split /:/,$_;
-  $x = Math::BigInt->new($args[0]);
-  $y = Math::BigInt->new($args[1]);
-  $args[2] = '0' if $args[2] eq '-0';	# BigInt hasn't got -0
-  print "# $args[0] + $args[1] should be $args[2] but is ",$x->bstr(),"\n"
-    if !ok ($x->badd($y)->bstr(),$args[2]);
+  for my $class (qw/Math::BigInt Math::BigFloat/)
+    {
+    $x = $class->new($args[0]);
+    $y = $class->new($args[1]);
+    $args[2] = '0' if $args[2] eq '-0';		# BigInt/Float hasn't got -0
+    print "# $class $args[0] + $args[1] should be $args[2] but is $x\n",
+      if !ok ($x->badd($y)->bstr(),$args[2]);
+    }
   }
 
 # -
@@ -126,11 +133,14 @@ foreach (qw/
   /)
   {
   @args = split /:/,$_;
-  $x = Math::BigInt->new($args[0]);
-  $y = Math::BigInt->new($args[1]);
-  $args[2] = '0' if $args[2] eq '-0';	# BigInt hasn't got -0
-  print "# $args[0] - $args[1] should be $args[2] but is $x\n"
-   if !ok ($x->bsub($y)->bstr(),$args[2]);
+  for my $class (qw/Math::BigInt Math::BigFloat/)
+    {
+    $x = $class->new($args[0]);
+    $y = $class->new($args[1]);
+    $args[2] = '0' if $args[2] eq '-0';		# BigInt/Float hasn't got -0
+    print "# $class $args[0] - $args[1] should be $args[2] but is $x\n"
+      if !ok ($x->bsub($y)->bstr(),$args[2]);
+    }
   }
 
 # *
@@ -185,11 +195,15 @@ foreach (qw/
   /)
   {
   @args = split /:/,$_;
-  $x = Math::BigInt->new($args[0]);
-  $y = Math::BigInt->new($args[1]);
-  $args[2] = '0' if $args[2] eq '-0';	# BigInt hasn't got -0
-  print "# $args[0] * $args[1] should be $args[2] but is $x\n"
-   if !ok ($x->bmul($y)->bstr(),$args[2]);
+  for my $class (qw/Math::BigInt Math::BigFloat/)
+    {
+    $x = $class->new($args[0]);
+    $y = $class->new($args[1]);
+    $args[2] = '0' if $args[2] eq '-0';		# BigInt/Float hasn't got -0
+    $args[2] = '0' if $args[2] eq '-0';	# BigInt hasn't got -0
+    print "# $class $args[0] * $args[1] should be $args[2] but is $x\n"
+      if !ok ($x->bmul($y)->bstr(),$args[2]);
+    }
   }
 
 # /
@@ -244,12 +258,13 @@ foreach (qw/
   /)
   {
   @args = split /:/,$_;
-  $x = Math::BigInt->new($args[0]);
-  $y = Math::BigInt->new($args[1]);
-  $args[2] = '0' if $args[2] eq '-0';	# BigInt hasn't got -0
-  print "# $args[0] / $args[1] should be $args[2] but is $x\n"
-   if !ok ($x->bdiv($y)->bstr(),$args[2]);
-
+  for my $class (qw/Math::BigInt Math::BigFloat/)
+    {
+    $x = $class->new($args[0]);
+    $y = $class->new($args[1]);
+    $args[2] = '0' if $args[2] eq '-0';		# BigInt/Float hasn't got -0
+    print "# $class $args[0] / $args[1] should be $args[2] but is $x\n"
+      if !ok ($x->bdiv($y)->bstr(),$args[2]);
+    }
   }
-
 

@@ -8,7 +8,7 @@ require Exporter;
 use vars qw/@ISA $VERSION/;
 @ISA = qw(Exporter);
 
-$VERSION = '0.22';
+$VERSION = '0.23';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -564,7 +564,7 @@ sub _div_use_mul
 
   if (@$x == 1 && @$yorg == 1)
     {
-    # shortcut, $y is smaller than $x
+    # shortcut, $yorg and $x are two small numbers
     if (wantarray)
       {
       my $r = [ $x->[0] % $yorg->[0] ];
@@ -577,6 +577,12 @@ sub _div_use_mul
       return $x; 
       }
     }
+  #if (@$yorg == 1)
+  #  {
+  #  # shortcut, $y is < $BASE
+  #
+  #  }
+
 
   my $y = [ @$yorg ];
   if ($LEN_CONVERT != 0)
@@ -686,7 +692,7 @@ sub _div_use_div
 
   if (@$x == 1 && @$yorg == 1)
     {
-    # shortcut, $y is smaller than $x
+    # shortcut, $yorg and $x are two small numbers
     if (wantarray)
       {
       my $r = [ $x->[0] % $yorg->[0] ];
@@ -699,6 +705,11 @@ sub _div_use_div
       return $x; 
       }
     }
+#  if (@$yorg == 1)
+#    {
+#    # shortcut, $y is < $BASE
+#
+#    }
 
   my $y = [ @$yorg ];
   if ($LEN_CONVERT != 0)
@@ -1450,6 +1461,16 @@ sub _from_bin
   # convert a hex number to decimal (ref to string, return ref to array)
   my ($c,$bs) = @_;
 
+  # instead of converting 8 bit at a time, it is faster to convert the
+  # number to hex, and then call _from_hex.
+
+  my $hs = $$bs;
+  $hs =~ s/^[+-]?0b//;					# remove sign and 0b
+  my $l = length($hs);					# bits
+  $hs = '0' x (8-($l % 8)) . $hs if ($l % 8) != 0;	# padd left side w/ 0
+  my $h = unpack('H*', pack ('B*', $hs));		# repack as hex
+  return $c->_from_hex(\('0x'.$h));
+ 
   my $mul = _one();
   my $m = [ 0x100 ];				# 8 bit at a time
   my $x = _zero();

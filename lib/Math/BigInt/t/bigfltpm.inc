@@ -174,6 +174,13 @@ $class->precision(undef); $x = $class->new(12); $x->fsqrt(3); ok ($x,'3.46');
 
 $class->accuracy(undef); $class->precision(undef); # reset for further tests
 
+###############################################################################
+# can we call objectify (broken until v1.52)
+
+$try = '@args' . " = $class" . "::objectify(2,$class,4,5);".'join(" ",@args);';
+$ans = eval $try;
+ok ($ans,"$class 4 5");
+
 1; # all done
 
 ###############################################################################
@@ -752,8 +759,8 @@ fincNaN:NaN
 abc:abc:NaN
 abc:+0:NaN
 +0:abc:NaN
-+inf:-inf:0
--inf:+inf:0
++inf:-inf:NaN
+-inf:+inf:NaN
 +inf:+inf:inf
 -inf:-inf:-inf
 baddNaN:+inf:NaN
@@ -801,8 +808,8 @@ abc:+0:NaN
 +0:abc:NaN
 +inf:-inf:inf
 -inf:+inf:-inf
-+inf:+inf:0
--inf:-inf:0
++inf:+inf:NaN
+-inf:-inf:NaN
 baddNaN:+inf:NaN
 baddNaN:+inf:NaN
 +inf:baddNaN:NaN

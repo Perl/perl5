@@ -1,3 +1,9 @@
+package Math::BigFloat;
+
+# 
+# Mike grinned. 'Two down, infinity to go' - Mike Nostrus in Before and After
+#
+
 # The following hash values are internally used:
 #   _e: exponent (BigInt)
 #   _m: mantissa (absolute BigInt)
@@ -6,9 +12,7 @@
 #   _p: precision
 #   _f: flags, used to signal MBI not to touch our private parts
 
-package Math::BigFloat;
-
-$VERSION = '1.28';
+$VERSION = '1.29';
 require 5.005;
 use Exporter;
 use Math::BigInt qw/objectify/;
@@ -24,7 +28,6 @@ use overload
                       ref($_[0])->bcmp($_[1],$_[0]) : 
                       ref($_[0])->bcmp($_[0],$_[1])},
 'int'	=>	sub { $_[0]->as_number() },		# 'trunc' to bigint
-'log'	=>	sub { $_[0]->blog() },
 ;
 
 ##############################################################################
@@ -72,6 +75,8 @@ BEGIN { tie $rnd_mode, 'Math::BigFloat'; }
   my %hand_ups = map { $_ => 1 }  
    qw / is_nan is_inf is_negative is_positive
         accuracy precision div_scale round_mode fneg fabs babs fnot
+        objectify
+	bone binf bnan bzero
       /;
 
   sub method_alias { return exists $methods{$_[0]||''}; } 
@@ -137,84 +142,36 @@ sub new
   $self->bnorm()->round(@r);		# first normalize, then round
   }
 
-sub bnan
+sub _bnan
   {
-  # create a bigfloat 'NaN', if given a BigFloat, set it to 'NaN'
+  # used by parent class bone() to initialize number to 1
   my $self = shift;
-  $self = $class if !defined $self;
-  if (!ref($self))
-    {
-    my $c = $self; $self = {}; bless $self, $c;
-    }
   $self->{_m} = Math::BigInt->bzero();
   $self->{_e} = Math::BigInt->bzero();
-  $self->{sign} = $nan;
-  $self->{_a} = undef; $self->{_p} = undef;
-  $self;
   }
 
-sub binf
+sub _binf
   {
-  # create a bigfloat '+-inf', if given a BigFloat, set it to '+-inf'
+  # used by parent class bone() to initialize number to 1
   my $self = shift;
-  my $sign = shift; $sign = '+' if !defined $sign || $sign ne '-';
-
-  $self = $class if !defined $self;
-  if (!ref($self))
-    {
-    my $c = $self; $self = {}; bless $self, $c;
-    }
   $self->{_m} = Math::BigInt->bzero();
   $self->{_e} = Math::BigInt->bzero();
-  $self->{sign} = $sign.'inf';
-  $self->{_a} = undef; $self->{_p} = undef;
-  $self;
   }
 
-sub bone
+sub _bone
   {
-  # create a bigfloat '+-1', if given a BigFloat, set it to '+-1'
+  # used by parent class bone() to initialize number to 1
   my $self = shift;
-  my $sign = shift; $sign = '+' if !defined $sign || $sign ne '-';
-
-  $self = $class if !defined $self;
-  if (!ref($self))
-    {
-    my $c = $self; $self = {}; bless $self, $c;
-    }
   $self->{_m} = Math::BigInt->bone();
   $self->{_e} = Math::BigInt->bzero();
-  $self->{sign} = $sign;
-  if (@_ > 0)
-    {
-    $self->{_a} = $_[0]
-     if (defined $self->{_a} && defined $_[0] && $_[0] > $self->{_a});
-    $self->{_p} = $_[1]
-     if (defined $self->{_p} && defined $_[1] && $_[1] < $self->{_p});
-    }
-  return $self;
   }
 
-sub bzero
+sub _bzero
   {
-  # create a bigfloat '+0', if given a BigFloat, set it to 0
+  # used by parent class bone() to initialize number to 1
   my $self = shift;
-  $self = $class if !defined $self;
-  if (!ref($self))
-    {
-    my $c = $self; $self = {}; bless $self, $c;
-    }
   $self->{_m} = Math::BigInt->bzero();
   $self->{_e} = Math::BigInt->bone();
-  $self->{sign} = '+';
-  if (@_ > 0)
-    {
-    $self->{_a} = $_[0]
-     if (defined $self->{_a} && defined $_[0] && $_[0] > $self->{_a});
-    $self->{_p} = $_[1]
-     if (defined $self->{_p} && defined $_[1] && $_[1] < $self->{_p});
-    }
-  return $self;
   }
 
 ##############################################################################
@@ -439,12 +396,12 @@ sub badd
     {
     # NaN first
     return $x->bnan() if (($x->{sign} eq $nan) || ($y->{sign} eq $nan));
-    # inf handline
+    # inf handling
     if (($x->{sign} =~ /^[+-]inf$/) && ($y->{sign} =~ /^[+-]inf$/))
       {
-      # + and + => +, - and - => -, + and - => 0, - and + => 0
-      return $x->bzero() if $x->{sign} ne $y->{sign};
-      return $x;
+      # +inf++inf or -inf+-inf => same, rest is NaN
+      return $x if $x->{sign} eq $y->{sign};
+      return $x->bnan();
       }
     # +-inf + something => +inf
     # something +-inf => +-inf
@@ -735,7 +692,6 @@ sub is_even
   my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
 
   return 0 if $x->{sign} !~ /^[+-]$/;			# NaN & +-inf aren't
-#  return 1 if $x->{_m}->is_zero();			# 0e1 is even
   return 1 if ($x->{_e}->{sign} eq '+' 			# 123.45 is never
      && $x->{_m}->is_even()); 				# but 1200 is
   0;
@@ -747,14 +703,12 @@ sub bmul
   # (BINT or num_str, BINT or num_str) return BINT
   my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
 
-  # print "mbf bmul $x->{_m}e$x->{_e} $y->{_m}e$y->{_e}\n";
   return $x->bnan() if (($x->{sign} eq $nan) || ($y->{sign} eq $nan));
 
-  # handle result = 0
-  return $x->bzero() if $x->is_zero() || $y->is_zero();
   # inf handling
   if (($x->{sign} =~ /^[+-]inf$/) || ($y->{sign} =~ /^[+-]inf$/))
     {
+    return $x->bnan() if $x->is_zero() || $y->is_zero(); 
     # result will always be +-inf:
     # +inf * +/+inf => +inf, -inf * -/-inf => +inf
     # +inf * -/-inf => -inf, -inf * +/+inf => -inf
@@ -762,6 +716,8 @@ sub bmul
     return $x->binf() if ($x->{sign} =~ /^-/ && $y->{sign} =~ /^-/);
     return $x->binf('-');
     }
+  # handle result = 0
+  return $x->bzero() if $x->is_zero() || $y->is_zero();
 
   # aEb * cEd = (a*c)E(b+d)
   $x->{_m}->bmul($y->{_m});
@@ -777,22 +733,14 @@ sub bdiv
   # (BFLOAT,BFLOAT) (quo,rem) or BINT (only rem)
   my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
 
-  # x / +-inf => 0, reminder x
-  return wantarray ? ($x->bzero(),$x->copy()) : $x->bzero()
-   if $y->{sign} =~ /^[+-]inf$/;
+  return $self->_div_inf($x,$y)
+   if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/) || $y->is_zero());
 
-  # NaN if x == NaN or y == NaN or x==y==0
-  return wantarray ? ($x->bnan(),bnan()) : $x->bnan()
-   if (($x->is_nan() || $y->is_nan()) ||
-      ($x->is_zero() && $y->is_zero()));
-
-  # 5 / 0 => +inf, -6 / 0 => -inf
-  return wantarray
-   ? ($x->binf($x->{sign}),$self->bnan()) : $x->binf($x->{sign})
-   if ($x->{sign} =~ /^[+-]$/ && $y->is_zero());
-
-  # x== 0 or y == 1 or y == -1
+  # x== 0 # also: or y == 1 or y == -1
   return wantarray ? ($x,$self->bzero()) : $x if $x->is_zero();
+
+  # upgrade 
+  return $upgrade->bdiv($x,$y,$a,$p,$r) if defined $upgrade;
 
   # we need to limit the accuracy to protect against overflow
   my $fallback = 0;

@@ -1,3 +1,10 @@
+package Math::BigInt;
+
+#
+# "Mike had an infinite amount to do and a negative amount of time in which
+# to do it." - Before and After
+#
+
 # The following hash values are used:
 #   value: unsigned int with actual value (as a Math::BigInt::Calc or similiar)
 #   sign : +,-,NaN,+inf,-inf
@@ -8,11 +15,10 @@
 # Remember not to take shortcuts ala $xs = $x->{value}; $CALC->foo($xs); since
 # underlying lib might change the reference!
 
-package Math::BigInt;
 my $class = "Math::BigInt";
 require 5.005;
 
-$VERSION = '1.51';
+$VERSION = '1.52';
 use Exporter;
 @ISA =       qw( Exporter );
 @EXPORT_OK = qw( objectify _swap bgcd blcm); 
@@ -468,6 +474,17 @@ sub bnan
     }
   $self->import() if $IMPORT == 0;		# make require work
   return if $self->modify('bnan');
+  my $c = ref($self);
+  if ($self->can('_bnan'))
+    {
+    # use subclass to initialize
+    $self->_bnan();
+    }
+  else
+    {
+    # otherwise do our own thing
+    $self->{value} = $CALC->_zero();
+    }
   $self->{value} = $CALC->_zero();
   $self->{sign} = $nan;
   delete $self->{_a}; delete $self->{_p};	# rounding NaN is silly
@@ -487,7 +504,17 @@ sub binf
     }
   $self->import() if $IMPORT == 0;		# make require work
   return if $self->modify('binf');
-  $self->{value} = $CALC->_zero();
+  my $c = ref($self);
+  if ($self->can('_binf'))
+    {
+    # use subclass to initialize
+    $self->_binf();
+    }
+  else
+    {
+    # otherwise do our own thing
+    $self->{value} = $CALC->_zero();
+    }
   $self->{sign} = $sign.'inf';
   ($self->{_a},$self->{_p}) = @_;		# take over requested rounding
   return $self;
@@ -505,7 +532,17 @@ sub bzero
     }
   $self->import() if $IMPORT == 0;		# make require work
   return if $self->modify('bzero');
-  $self->{value} = $CALC->_zero();
+
+  if ($self->can('_bzero'))
+    {
+    # use subclass to initialize
+    $self->_bzero();
+    }
+  else
+    {
+    # otherwise do our own thing
+    $self->{value} = $CALC->_zero();
+    }
   $self->{sign} = '+';
   if (@_ > 0)
     {
@@ -531,7 +568,17 @@ sub bone
     }
   $self->import() if $IMPORT == 0;		# make require work
   return if $self->modify('bone');
-  $self->{value} = $CALC->_one();
+
+  if ($self->can('_bone'))
+    {
+    # use subclass to initialize
+    $self->_bone();
+    }
+  else
+    {
+    # otherwise do our own thing
+    $self->{value} = $CALC->_one();
+    }
   $self->{sign} = $sign;
   if (@_ > 0)
     {
@@ -830,8 +877,8 @@ sub badd
     {
     # NaN first
     return $x->bnan() if (($x->{sign} eq $nan) || ($y->{sign} eq $nan));
-    # inf handline
-   if (($x->{sign} =~ /^[+-]inf$/) && ($y->{sign} =~ /^[+-]inf$/))
+    # inf handling
+    if (($x->{sign} =~ /^[+-]inf$/) && ($y->{sign} =~ /^[+-]inf$/))
       {
       # +inf++inf or -inf+-inf => same, rest is NaN
       return $x if $x->{sign} eq $y->{sign};
@@ -1238,7 +1285,6 @@ sub bdiv
     return wantarray ? ($x->round(@r),$self->bzero(@r)) : $x->round(@r); 
     }
 
-  my $rem;
   if (wantarray)
     {
     my $rem = $self->bzero(); 
@@ -1261,7 +1307,6 @@ sub bdiv
   $x->{value} = $CALC->_div($x->{value},$y->{value});
   $x->{sign} = '+' if $CALC->_is_zero($x->{value});
   $x->round(@r); 
-  $x;
   }
 
 sub bmod 
@@ -2137,8 +2182,8 @@ sub __from_hex
       $mul *= $x65536 if $len >= 0;		# skip last mul
       }
     }
-  $x->{sign} = $sign if !$x->is_zero();		# no '-0'
-  return $x;
+  $x->{sign} = $sign unless $CALC->_is_zero($x->{value}); 	# no '-0'
+  $x;
   }
 
 sub __from_bin
@@ -2152,9 +2197,6 @@ sub __from_bin
   $$bs =~ s/([01])_([01])/$1$2/g;	
   return $x->bnan() if $$bs !~ /^[+-]?0b[01]+$/;
 
-  my $mul = Math::BigInt->bzero(); $mul++;
-  my $x256 = Math::BigInt->new(256);
-
   my $sign = '+'; $sign = '-' if ($$bs =~ /^\-/);
   $$bs =~ s/^[+-]//;				# strip sign
   if ($CALC->can('_from_bin'))
@@ -2163,6 +2205,8 @@ sub __from_bin
     }
   else
     {
+    my $mul = Math::BigInt->bzero(); $mul++;
+    my $x256 = Math::BigInt->new(256);
     my $len = CORE::length($$bs)-2;
     $len = int($len/8);				# 8-digit parts, w/o '0b'
     my $val; my $i = -8;
@@ -2179,8 +2223,8 @@ sub __from_bin
       $mul *= $x256 if $len >= 0;		# skip last mul
       }
     }
-  $x->{sign} = $sign if !$x->is_zero();
-  return $x;
+  $x->{sign} = $sign unless $CALC->_is_zero($x->{value}); 	# no '-0'
+  $x;
   }
 
 sub _split
@@ -2509,6 +2553,34 @@ return either undef, <0, 0 or >0 and are suited for sort.
 Each of the methods below accepts three additional parameters. These arguments
 $A, $P and $R are accuracy, precision and round_mode. Please see more in the
 section about ACCURACY and ROUNDIND.
+
+=head2 accuracy
+
+	$x->accuracy(5);		# local for $x
+	$class->accuracy(5);		# global for all members of $class
+
+Set or get the global or local accuracy, aka how many significant digits the
+results have. Please see the section about L<ACCURACY AND PRECISION> for
+further details.
+
+Value must be greater than zero. Pass an undef value to disable it:
+
+	$x->accuracy(undef);
+	Math::BigInt->accuracy(undef);
+
+Returns the current accuracy. For C<$x->accuracy()> it will return either the
+local accuracy, or if not defined, the global. This means the return value
+represents the accuracy that will be in effect for $x:
+
+	$y = Math::BigInt->new(1234567);	# unrounded
+	print Math::BigInt->accuracy(4),"\n";	# set 4, print 4
+	$x = Math::BigInt->new(123456);		# will be automatically rounded
+	print "$x $y\n";			# '123500 1234567'
+	print $x->accuracy(),"\n";		# will be 4
+	print $y->accuracy(),"\n";		# also 4, since global is 4
+	print Math::BigInt->accuracy(5),"\n";	# set to 5, print 5
+	print $x->accuracy(),"\n";		# still 4
+	print $y->accuracy(),"\n";		# 5, since global is 5
 
 =head2 brsft
 

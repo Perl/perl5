@@ -36,4 +36,9 @@ sub new
         return $self;
 }
 
+BEGIN
+  {
+  *objectify = \&Math::BigInt::objectify;
+  }
+
 1;
