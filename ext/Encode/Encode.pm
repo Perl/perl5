@@ -264,7 +264,7 @@ sub encode_utf8
 sub decode_utf8
 {
  my ($str) = @_;
- return $str if is_utf8($str);
+ return pack("C*", unpack("U*", $str)) if is_utf8($str);
  return undef unless utf8::decode($str);
  return $str;
 }
