@@ -134,7 +134,7 @@ sub gencat {
       	                    ||= [],  $code);
     # 005F: SPACING UNDERSCORE
     $op->($Cat->{Word}       ||= [], $code)
-	if $cat =~ /^[LMN]/ or $code eq "005F";
+	if $cat =~ /^[LMN]/ || $code eq "005F";
     $op->($Cat->{Alnum}      ||= [], $code)
 	if $cat =~ /^[LMN]/;
     $op->($Cat->{Alpha}      ||= [], $code)
@@ -149,7 +149,7 @@ sub gencat {
 	if $cat  =~ /^Z/ ||
 	    $code =~ /^(0009|000A|000B|000C|000D)$/;
     $op->($Cat->{SpacePerl}  ||= [], $code)
-	if $cat  =~ /^Z/ ||
+	if $cat  =~ /^Z/ || $code =~ /^(?:0085|2028|2029)$/ ||
 	    $code =~ /^(0009|000A|000C|000D)$/;
     $op->($Cat->{Blank}      ||= [], $code)
 	if $code =~ /^(0020|0009)$/ ||
