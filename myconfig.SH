@@ -44,7 +44,7 @@ Summary of my $package (revision $baserev $version_patchlevel_string) configurat
     intsize=$intsize, longsize=$longsize, ptrsize=$ptrsize, doublesize=$doublesize, byteorder=$byteorder
     d_longlong=$d_longlong, longlongsize=$longlongsize, d_longdbl=$d_longdbl, longdblsize=$longdblsize
     ivtype='$ivtype', ivsize=$ivsize, nvtype='$nvtype', nvsize=$nvsize, Off_t='$lseektype', lseeksize=$lseeksize
-    alignbytes=$alignbytes, usemymalloc=$usemymalloc, prototype=$prototype
+    alignbytes=$alignbytes, usemymalloc=$usemymalloc, prototype=$prototype, bincompat5005=$d_bincompat5005
   Linker and Libraries:
     ld='$ld', ldflags ='$ldflags'
     libpth=$libpth
