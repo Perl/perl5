@@ -131,6 +131,7 @@ static void regset _((char *, I32));
 static void regtail _((regnode *, regnode *));
 static char* regwhite _((char *, char *));
 static char* nextchar _((void));
+static void re_croak2 _((const char* pat1,const char* pat2,...)) __attribute__((noreturn));
 
 static U32 regseen;
 static I32 seen_zerolen;
@@ -2621,11 +2622,11 @@ regnext(register regnode *p)
 }
 
 #ifdef I_STDARG
-void	
+static void	
 re_croak2(const char* pat1,const char* pat2,...)
 #else
 /*VARARGS0*/
-void	
+static void	
 re_croak2(const char* pat1,const char* pat2, va_alist)
     const char* pat1;
     const char* pat2;
