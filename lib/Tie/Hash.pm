@@ -133,7 +133,7 @@ The accessor methods assume that the actual storage for the data in the tied
 hash is in the hash referenced by C<(tied(%tiedhash))[0]>.  Thus overwritten
 C<TIEHANDLE> method should return an array reference with the first
 element being a hash reference, and the remaining methods should operate on the
-hash C<< %{ $_[0]->[0] }>>:
+hash C<< %{ $_[0]->[0] } >>:
 
   package ReportHash;
   our @ISA = 'Tie::StdHash';
