@@ -404,6 +404,9 @@ glob (which may require a stringification).  The same overloading
 happens both for the I<read-filehandle> syntax C<E<lt>$varE<gt>> and
 I<globbing> syntax C<E<lt>${var}E<gt>>.
 
+B<BUGS> Even in list context, the iterator is currently called only
+once and with scalar context.
+
 =item * I<Dereferencing>
 
     '${}', '@{}', '%{}', '&{}', '*{}'.
