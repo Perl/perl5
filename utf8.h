@@ -9,8 +9,6 @@
 
 START_EXTERN_C
 
-#include "handy.h"
-
 #ifdef DOINIT
 EXTCONST unsigned char PL_utf8skip[] = {
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* ascii */

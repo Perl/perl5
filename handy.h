@@ -114,6 +114,10 @@ Null SV pointer.
 
 */
 
+#ifdef I_INTTYPES /* e.g. Linux has int64_t without <inttypes.h> */
+#   include <inttypes.h>
+#endif
+
 typedef I8TYPE I8;
 typedef U8TYPE U8;
 typedef I16TYPE I16;
@@ -122,24 +126,25 @@ typedef I32TYPE I32;
 typedef U32TYPE U32;
 #ifdef PERL_CORE
 #   ifdef HAS_QUAD
-#       if QUADKIND == QUAD_IS_INT64_T
-#           include <sys/types.h>
-#           ifdef I_INTTYPES /* e.g. Linux has int64_t without <inttypes.h> */
-#               include <inttypes.h>
-#           endif
-#       endif
 typedef I64TYPE I64;
 typedef U64TYPE U64;
 #   endif
 #endif /* PERL_CORE */
 
-#ifndef UINT64_C /* usually from <inttypes.h> */
-#   ifdef HAS_LONG_LONG 
-#       define INT64_C(c)	CAT2(c,LL)
-#       define UINT64_C(c)	CAT2(c,ULL)
-#   else
-#       define INT64_C(c)	((I64TYPE)(c))
-#       define UINT64_C(c)	((U64TYPE)(c))
+#if defined(HAS_QUAD) && defined(USE_64_BIT_INT)
+#   ifndef UINT64_C /* usually from <inttypes.h> */
+#       if defined(HAS_LONG_LONG) && QUADKIND == QUAD_IS_LONG_LONG
+#           define INT64_C(c)	CAT2(c,LL)
+#           define UINT64_C(c)	CAT2(c,ULL)
+#       else
+#           if LONGSIZE == 8 && QUADKIND == QUAD_IS_LONG
+#               define INT64_C(c)	CAT2(c,L)
+#               define UINT64_C(c)	CAT2(c,UL)
+#           else
+#               define INT64_C(c)	((I64TYPE)(c))
+#               define UINT64_C(c)	((U64TYPE)(c))
+#           endif
+#       endif
 #   endif
 #endif
 

@@ -1,4 +1,3 @@
-emacs -nw perl.h
 /*    perl.h
  *
  *    Copyright (c) 1987-2000, Larry Wall
