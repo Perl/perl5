@@ -339,7 +339,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 		    scan = next;
 		    if (data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
 			pars++;
-		    if (data_fake.flags & SF_HAS_EVAL)
+		    if (data && (data_fake.flags & SF_HAS_EVAL))
 			data->flags |= SF_HAS_EVAL;
 		    if (code == SUSPEND) 
 			break;
@@ -585,7 +585,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 			data->longest = &(data->longest_float);
 		    }
 		}
-		if (fl & SF_HAS_EVAL)
+		if (data && (fl & SF_HAS_EVAL))
 		    data->flags |= SF_HAS_EVAL;
 	      optimize_curly_tail:
 #ifdef REGALIGN
@@ -634,7 +634,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 	    }
 	    if (data && data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
 		pars++;
-	    if (data_fake.flags & SF_HAS_EVAL)
+	    if (data && (data_fake.flags & SF_HAS_EVAL))
 		data->flags |= SF_HAS_EVAL;
 	} else if (OP(scan) == OPEN) {
 	    pars++;
