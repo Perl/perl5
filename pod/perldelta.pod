@@ -874,16 +874,17 @@ however.
 A decision was made to stick with the system malloc, regardless
 of the performance problems.
 
-=head2 HP-UX: HP cc warnings about sendfile
+=head2 HP-UX: HP cc warnings about sendfile and sendpath
 
 With certain HP C compiler releases (e.g. B.11.11.02) you will
 get many warnings like this:
 
     cc: "/usr/include/sys/socket.h", line 504: warning 562: Redeclaration of "sendfile" with a different storage class specifier: "sendfile" will have internal linkage.
+    cc: "/usr/include/sys/socket.h", line 505: warning 562: Redeclaration of "sendfile" with a different storage class specifier: "sendfile" will have internal linkage.
 
 The warnings show up both during the build of Perl and during certain
-lib/ExtUtils tests that invoke the compiler.  The warning, however, is
-not serious and can be ignored.
+lib/ExtUtils tests that invoke the C compiler.  The warning, however,
+is not serious and can be ignored.
 
 =head2 IRIX: t/uni/tr_7jis.t falsely failing
 
