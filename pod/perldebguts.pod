@@ -639,7 +639,7 @@ than 32 bytes (all these examples assume 32-bit architectures, the
 result are quite a bit worse on 64-bit architectures).  If a variable
 is accessed in two of three different ways (which require an integer,
 a float, or a string), the memory footprint may increase yet another
-20 bytes.  A sloppy malloc(3) implementation can make inflate these
+20 bytes.  A sloppy malloc(3) implementation can inflate these
 numbers dramatically.
 
 On the opposite end of the scale, a declaration like
@@ -686,7 +686,7 @@ the following example:
   Total sbrk(): 215040/47:145. Odd ends: pad+heads+chain+tail: 0+2192+0+6144.
 
 It is possible to ask for such a statistic at arbitrary points in
-your execution using the mstats() function out of the standard
+your execution using the mstat() function out of the standard
 Devel::Peek module.
 
 Here is some explanation of that format:
