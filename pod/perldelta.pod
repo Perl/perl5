@@ -222,10 +222,15 @@ between hash keys and values.
 
 DB_File
 
+Devel::PPPort
+
 Digest::MD5
 
 Encode - significant updates on the encoding pragma functionality
-(tr/// and DATA, formats)
+(tr/// and the DATA filehandle, formats).  The ISO 8859-6 conversion
+table has been corrected (the 0x30..0x39 errorneously mapped to
+U+0660..U+0669, instead of U+0030..U+0039), the UTF7 encoding has
+been added.
 
 libnet
 
