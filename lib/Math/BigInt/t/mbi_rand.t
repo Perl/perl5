@@ -25,7 +25,8 @@ my $length = 128;
 # If you get a failure here, please re-run the test with the printed seed
 # value as input: perl t/mbi_rand.t seed
 
-my $seed = int(rand(65537)); print "# seed: $seed\n"; srand($seed);
+my $seed = ($#ARGV == 0) ? $ARGV[0] : int(rand(65537));
+print "# seed: $seed\n"; srand($seed);
 
 my ($A,$B,$As,$Bs,$ADB,$AMB,$la,$lb);
 my $two = Math::BigInt->new(2);
@@ -40,8 +41,12 @@ for (my $i = 0; $i < $count; $i++)
   # together digits, we would end up with "1272398823211223" etc.
   while (length($As) < $la) { $As .= int(rand(100)) x int(rand(16)); }
   while (length($Bs) < $lb) { $Bs .= int(rand(100)) x int(rand(16)); }
+  # Strip leading zeros, but don't let As and Bs end up empty.
   $As =~ s/^0+//; $Bs =~ s/^0+//;
+  $As = '0' if $As eq '';
+  $Bs = '0' if $Bs eq '';
   $A = $c->new($As); $B = $c->new($Bs);
+  # print "# As $As\n# Bs $Bs\n";
   # print "# A $A\n# B $B\n";
   if ($A->is_zero() || $B->is_zero())
     {
@@ -58,4 +63,5 @@ for (my $i = 0; $i < $count; $i++)
   print "# ". join(' ',Math::BigInt::Calc->_base_len()),"\n"
    unless ok ($ADB*$A+$two*$AMB-$AMB,$Bs);
   }
+
 
