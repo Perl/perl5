@@ -172,7 +172,7 @@ to see the order in which Perl searches these directories.
 
 =head1 USING PERL IN VOS
 
-=head2 Unimplemented Features
+=head2 Unimplemented Features of Perl on VOS
 
 If perl is built with the alpha version of VOS POSIX.1 support
 and if it attempts to call an unimplemented VOS POSIX.1
@@ -182,7 +182,7 @@ a list of the unimplemented POSIX.1 functions.  To see what
 functions are unimplemented and what the error message looks
 like, compile and execute "test_vos_dummies.c".
 
-=head2 Restrictions
+=head2 Restrictions of Perl on VOS
 
 This port of Perl version 5 to VOS prefers Unix-style,
 slash-separated pathnames over VOS-style greater-than-separated

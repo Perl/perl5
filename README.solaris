@@ -73,7 +73,7 @@ All Solaris documentation is available on-line at L<http://docs.sun.com>.
 
 =head1 SETTING UP
 
-=head2 File Extraction Problems.
+=head2 File Extraction Problems on Solaris.
 
 Be sure to use a tar program compiled under Solaris (not SunOS 4.x)
 to extract the perl-5.x.x.tar.gz file.  Do not use GNU tar compiled
@@ -85,7 +85,7 @@ If you found this advice it too late and used a SunOS4-compiled tar
 anyway, you must find the incorrectly renamed file and move it back
 to lib/locale.pm.
 
-=head2 Compiler and Related Tools.
+=head2 Compiler and Related Tools on Solaris.
 
 You must use an ANSI C compiler to build perl.  Perl can be compiled
 with either Sun's add-on C compiler or with gcc.  The C compiler that
@@ -197,7 +197,7 @@ Normally this is not a problem since the solaris hints file prevents
 Configure from even looking in /usr/ucblib for libraries, and also
 explicitly omits -lucb.
 
-=head2 Environment
+=head2 Environment for Compiling Perl on Solaris
 
 =head3 PATH
 
@@ -234,7 +234,7 @@ See the INSTALL file for general information regarding Configure.
 Only Solaris-specific issues are discussed here.  Usually, the
 defaults should be fine.
 
-=head2 64-bit Issues.
+=head2 64-bit Issues with Perl on Solaris.
 
 See the INSTALL file for general information regarding 64-bit compiles.
 In general, the defaults should be fine for most people.
@@ -362,7 +362,7 @@ requested.
 
 As of 5.6.0, long doubles are not working.
 
-=head2 Threads.
+=head2 Threads in Perl on Solaris.
 
 It is possible to build a threaded version of perl on Solaris.  The entire
 perl thread implementation is still experimental, however, so beware.
@@ -370,7 +370,7 @@ Perl uses the sched_yield(3RT) function.  In versions of Solaris up
 to 2.6, that function is in -lposix4.  Starting with Solaris 7, it is
 in -lrt.  The hints file should handle adding this automatically.
 
-=head2 Malloc Issues.
+=head2 Malloc Issues with Perl on Solaris.
 
 Starting from Perl 5.7.1 Perl uses the Solaris malloc, since the perl
 malloc breaks when dealing with more than 2GB of memory, and the Solaris
@@ -431,14 +431,14 @@ directory.
 
 =head1 MAKE TEST
 
-=head2 op/stat.t test 4
+=head2 op/stat.t test 4 in Solaris
 
 op/stat.t test 4 may fail if you are on a tmpfs of some sort.
 Building in /tmp sometimes shows this behavior.  The
 test suite detects if you are building in /tmp, but it may not be able
 to catch all tmpfs situations.
 
-=head1 PREBUILT BINARIES.
+=head1 PREBUILT BINARIES OF PERL FOR SOLARIS.
 
 You can pick up prebuilt binaries for Solaris from
 L<http://www.sunfreeware.com/>, ActiveState L<http://www.activestate.com/>,
@@ -446,9 +446,9 @@ and L<http://www.perl.com/> under the Binaries list at the top of the page.
 There are probably other sources as well.  Please note that these sites
 are under the control of their respective owners, not the perl developers.
 
-=head1 RUNTIME ISSUES.
+=head1 RUNTIME ISSUES FOR PERL ON SOLARIS.
 
-=head2 Limits on Numbers of Open Files.
+=head2 Limits on Numbers of Open Files on Solaris.
 
 The stdio(3C) manpage notes that only 255 files may be opened using
 fopen(), and only file descriptors 0 through 255 can be used in a
@@ -463,7 +463,7 @@ L<http://www.cpan.org/modules/by-module/Solaris/>.
 
 =head1 SOLARIS-SPECIFIC PROBLEMS WITH MODULES.
 
-=head2 Proc::ProcessTable
+=head2 Proc::ProcessTable on Solaris
 
 Proc::ProcessTable does not compile on Solaris with perl5.6.0 and higher
 if you have LARGEFILES defined.  Since largefile support is the
@@ -483,13 +483,13 @@ under the correct environment.  Everything should then be OK as long as
 Proc::ProcessTable doesn't try to share off_t's with the rest of perl,
 or if it does they should be explicitly specified as off64_t.
 
-=head2 BSD::Resource
+=head2 BSD::Resource on Solairs
 
 BSD::Resource versions earlier than 1.09 do not compile on Solaris
 with perl 5.6.0 and higher, for the same reasons as Proc::ProcessTable.
 BSD::Resource versions starting from 1.09 have a workaround for the problem.
 
-=head2 Net::SSLeay
+=head2 Net::SSLeay on Soalris
 
 Net::SSLeay requires a /dev/urandom to be present. This device is not
 part of Solaris. You can either get the package SUNWski (packaged with

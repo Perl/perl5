@@ -1086,17 +1086,23 @@ utils: $(PERLEXE) $(X2P)
 	cd ..\utils && $(MAKE) PERL=$(MINIPERL)
 	copy ..\README.aix	..\pod\perlaix.pod
 	copy ..\README.amiga	..\pod\perlamiga.pod
+	copy ..\README.apollo	..\pod\perlapollo.pod
+	copy ..\README.beos	..\pod\perlbeos.pod
 	copy ..\README.bs2000	..\pod\perlbs2000.pod
 	copy ..\README.cygwin	..\pod\perlcygwin.pod
 	copy ..\README.dgux	..\pod\perldgux.pod
 	copy ..\README.dos	..\pod\perldos.pod
 	copy ..\README.epoc	..\pod\perlepoc.pod
 	copy ..\README.hpux	..\pod\perlhpux.pod
+	copy ..\README.hurd	..\pod\perlhurd.pod
 	copy ..\README.machten	..\pod\perlmachten.pod
 	copy ..\README.macos	..\pod\perlmacos.pod
+	copy ..\README.mint	..\pod\perlmint.pod
 	copy ..\README.mpeix	..\pod\perlmpeix.pod
 	copy ..\README.os2	..\pod\perlos2.pod
 	copy ..\README.os390	..\pod\perlos390.pod
+	copy ..\README.plan9	..\pod\perlplan9.pod
+	copy ..\README.qnx	..\pod\perlqnx.pod
 	copy ..\README.solaris	..\pod\perlsolaris.pod
 	copy ..\README.tru64	..\pod\perltru64.pod
 	copy ..\README.vmesa	..\pod\perlvmesa.pod
@@ -1142,9 +1148,12 @@ distclean: clean
 	-if exist $(LIBDIR)\List rmdir /s /q $(LIBDIR)\List || rmdir /s $(LIBDIR)\List
 	-if exist $(LIBDIR)\Scalar rmdir /s /q $(LIBDIR)\Scalar || rmdir /s $(LIBDIR)\Scalar
 	-cd $(PODDIR) && del /f *.html *.bat checkpods \
-	    perlaix.pod perlamiga.pod perlbs2000.pod perlcygwin.pod \
-	    perldos.pod perlepoc.pod perlhpux.pod perlmachten.pod \
+	    perlaix.pod perlamiga.pod perlapollo.pod \
+	    perlbeos.pod perlbs2000.pod perlcygwin.pod perldgux.pod \
+	    perldos.pod perlepoc.pod perlhpux.pod perlhurd.pod \
+	    perlmachten.pod perlmint.pod \
 	    perlmacos.pod perlmpeix.pod perlos2.pod perlos390.pod \
+	    perlplan9.pod perlqnx.pod \
 	    perlsolaris.pod perlvmesa.pod perlvms.pod perlvos.pod \
 	    perlwin32.pod pod2html pod2latex pod2man pod2text pod2usage \
 	    podchecker podselect

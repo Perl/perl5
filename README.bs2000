@@ -20,12 +20,12 @@ and testing it with 3.1A and are currently using Version V4.0A.
 
 You may need the following GNU programs in order to install perl:
 
-=head2 gzip
+=head2 gzip on BS2000
 
 We used version 1.2.4, which could be installed out of the box with
 one failure during 'make check'.
 
-=head2 bison
+=head2 bison on BS2000
 
 The yacc coming with BS2000 POSIX didn't work for us.  So we had to
 use bison.  We had to make a few changes to perl in order to use the
@@ -33,7 +33,7 @@ pure (reentrant) parser of bison.  We used version 1.25, but we had to
 add a few changes due to EBCDIC.  See below for more details
 concerning yacc.
 
-=head2 Unpacking
+=head2 Unpacking Perl Distribution on BS2000
 
 To extract an ASCII tar archive on BS2000 POSIX you need an ASCII
 filesystem (we used the mountpoint /usr/local/ascii for this).  Now
@@ -55,7 +55,7 @@ cd /usr/local/src
 IO_CONVERSION=YES
 cp -r /usr/local/ascii/perl5.005_02 ./
 
-=head2 Compiling
+=head2 Compiling Perl on BS2000
 
 There is a "hints" file for BS2000 called hints.posix-bc (because
 posix-bc is the OS name given by `uname`) that specifies the correct
@@ -102,7 +102,7 @@ ln -s /usr/bin/yacc /usr/local/bin/byacc
 We build perl using GNU make.  We tried the native make once and it
 worked too.
 
-=head2 Testing
+=head2 Testing Perl on BS2000
 
 We still got a few errors during C<make test>.  Some of them are the
 result of using bison.  Bison prints I<parser error> instead of I<syntax
@@ -120,13 +120,13 @@ lib/complex.........FAILED tests 267, 487
 lib/dumper..........FAILED tests 43, 45
 Failed 11/231 test scripts, 95.24% okay. 57/10595 subtests failed, 99.46% okay.
 
-=head2 Install
+=head2 Installing Perl on BS2000
 
 We have no nroff on BS2000 POSIX (yet), so we ignored any errors while
 installing the documentation.
 
 
-=head2 Using Perl in the Posix-Shell
+=head2 Using Perl in the Posix-Shell of BS2000
 
 BS2000 POSIX doesn't support the shebang notation
 (C<#!/usr/local/bin/perl>), so you have to use the following lines
@@ -158,7 +158,7 @@ checkfiles.pl %*.c>).  Read your C/C++ manual for additional
 possibilities of the commandline prompt (look for
 PARAMETER-PROMPTING).
 
-=head2 Floating point anomalies
+=head2 Floating point anomalies on BS2000
 
 There appears to be a bug in the floating point implementation on BS2000 POSIX
 systems such that calling int() on the product of a number and a small

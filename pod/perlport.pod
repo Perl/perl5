@@ -2043,9 +2043,12 @@ http://www.perl.com/CPAN/ports/index.html for binary distributions.
 
 =head1 SEE ALSO
 
-L<perlaix>, L<perlamiga>, L<perlcygwin>, L<perldos>, L<perlepoc>,
-L<perlebcdic>, L<perlhpux>, L<perlos2>, L<perlos390>, L<perlbs2000>,
-L<perlwin32>, L<perlvms>, L<perlvos>, and L<Win32>.
+L<perlaix>, L<perlapollo>, L<perlamiga>, L<perlbeos>, L<perlbs200>,
+L<perlcygwin>, L<perldgux>, L<perldos>, L<perlepoc>, L<perlebcdic>,
+L<perlhurd>, L<perlhpux>, L<perlmachten>, L<perlmacos>, L<perlmint>,
+L<perlmpeix>, L<perlos2>, L<perlos390>, L<perlplan9>, L<perlqnx>,
+L<perlsolaris>, L<perltru64>, L<perlunicode>, L<perlvmesa>,
+L<perlvms>, L<perlvos>, L<perlwin32>, and L<Win32>.
 
 =head1 AUTHORS / CONTRIBUTORS
 
@@ -2087,4 +2090,4 @@ This document is maintained by Chris Nandor
 
 =head1 VERSION
 
-Version 1.48, last modified 24 April 2001
+Version 1.49, last modified 07 Jun 2001

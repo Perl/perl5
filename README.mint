@@ -1,6 +1,12 @@
-##########################################################################
-# *** README.mint
-##########################################################################
+If you read this file _as_is_, just ignore the funny characters you see.
+It is written in the POD format (see pod/perlpod.pod) which is specially
+designed to be readable as is.
+
+=head1 NAME
+
+README.mint - Perl version 5 on Atari MiNT
+
+=head1 DESCRIPTION
 
 If you want to build perl yourself on MiNT (or maybe on an Atari without
 MiNT) you may want to accept some advice from somebody who already did it...
@@ -23,8 +29,7 @@ provided that the user has a Eunuchs-like environment (i.e. the
 standard envariables like $PATH, $HOME, ... are set, there is a
 POSIX compliant shell in /bin/sh, and...)
 
-Known problems
-==============
+=head1 Known problems with Perl on MiNT
 
 The problems you may encounter when building perl on your machine
 are most probably due to deficiencies in MiNT resp. the Atari
@@ -210,7 +215,10 @@ OK, this was my motto while working on Perl for MiNT, especially rule (1)...
 
 Have fun with Perl!
 
+=head1 AUTHOR
+
 Guido Flohr
---
-mailto:gufl0000@stud.uni-sb.de
-http://stud.uni-sb.de/~gufl0000
+
+	mailto:gufl0000@stud.uni-sb.de
+	http://stud.uni-sb.de/~gufl0000
+

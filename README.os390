@@ -1,9 +1,7 @@
-
 This document is written in pod format hence there are punctuation
-characters in odd places.  Do not worry, you've apparently got
-the ASCII->EBCDIC translation worked out correctly.  You can read
-more about pod in pod/perlpod.pod or the short summary in the
-INSTALL file.
+characters in odd places.  Do not worry, you've apparently got the
+ASCII->EBCDIC translation worked out correctly.  You can read more
+about pod in pod/perlpod.pod or the short summary in the INSTALL file.
 
 =head1 NAME
 
@@ -23,7 +21,7 @@ the ones we've tested it on.
 You may need to carry out some system configuration tasks before
 running the Configure script for Perl.
 
-=head2 Unpacking
+=head2 Unpacking Perl distribution on OS/390
 
 Gunzip/gzip for OS/390 is discussed at:
 
@@ -33,7 +31,7 @@ to extract an ASCII tar archive on OS/390, try this:
 
    pax -o to=IBM-1047,from=ISO8859-1 -r < latest.tar
 
-=head2 Setup and utilities
+=head2 Setup and utilities for Perl on OS/390
 
 Be sure that your yacc installation is in place including any necessary
 parser template files. If you have not already done so then be sure to:
@@ -87,7 +85,7 @@ to build its "Socket" extension.
 For successful testing you may need to turn on the sticky bit for your
 world readable /tmp directory if you have not already done so (see man chmod).
 
-=head2 Configure
+=head2 Configure Perl on OS/390
 
 Once you've unpacked the distribution, run "sh Configure" (see INSTALL
 for a full discussion of the Configure options).  There is a "hints" file
@@ -156,7 +154,7 @@ properly set up your /etc networking files.
 
 =back
 
-=head2 Build, test, install
+=head2 Build, Test, Install Perl on OS/390
 
 Simply put:
 
@@ -172,7 +170,7 @@ this last step may or may not require UID=0 privileges depending
 on how you answered the questions that Configure asked and whether
 or not you have write access to the directories you specified.
 
-=head2 build anomalies
+=head2 Build Anomalies with Perl on OS/390
 
 "Out of memory!" messages during the build of Perl are most often fixed
 by re building the GNU make utility for OS/390 from a source code kit.
@@ -196,7 +194,7 @@ If the c89 compiler complains of syntax errors during the build of the
 Socket extension then be sure to fix the syntax error in the system
 header /usr/include/sys/socket.h.
 
-=head2 testing anomalies
+=head2 Testing Anomalies with Perl on OS/390
 
 The `make test` step runs a Perl Verification Procedure, usually before
 installation.  You might encounter STDERR messages even during a successful
@@ -279,13 +277,13 @@ is needed to get through the test suite.
 
 =back
 
-=head2 installation anomalies
+=head2 Installation Anomalies with Perl on OS/390
 
 The installman script will try to run on OS/390.  There will be fewer errors
 if you have a roff utility installed.  You can obtain GNU groff from the
 Redbook SG24-5944-00 ftp site.
 
-=head2 Usage Hints
+=head2 Usage Hints for Perl on OS/390
 
 When using perl on OS/390 please keep in mind that the EBCDIC and ASCII
 character sets are different.  See perlebcdic.pod for more on such character
@@ -307,7 +305,7 @@ If you are having trouble with square brackets then consider switching your
 rlogin or telnet client.  Try to avoid older 3270 emulators and ISHELL for
 working with Perl on USS.
 
-=head2 Floating point anomalies
+=head2 Floating Point Anomalies with Perl on OS/390
 
 There appears to be a bug in the floating point implementation on S/390
 systems such that calling int() on the product of a number and a small
@@ -341,7 +339,7 @@ The problem can be further examined in a roughly equivalent C program:
     /* y is 0.000000e+00 and z is 1.000000e+05 (with c89) */
     }
 
-=head2 Modules and Extensions
+=head2 Modules and Extensions for Perl on OS/390
 
 Pure pure (that is non xs) modules may be installed via the usual:
 
@@ -402,7 +400,7 @@ L<INSTALL>, L<perlport>, L<perlebcdic>, L<ExtUtils::MakeMaker>.
 
     http://publibz.boulder.ibm.com:80/cgi-bin/bookmgr_OS390/BOOKS/CBCUG030/
 
-=head2 Mailing list
+=head2 Mailing list for Perl on OS/390
 
 The Perl Institute (http://www.perl.org/) maintains a perl-mvs
 mailing list of interest to all folks building and/or

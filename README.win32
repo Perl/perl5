@@ -51,9 +51,9 @@ not to work.)
 This port currently supports MakeMaker (the set of modules that
 is used to build extensions to perl).  Therefore, you should be
 able to build and install most extensions found in the CPAN sites.
-See L<Usage Hints> below for general hints about this.
+See L<Usage Hints for Perl on Win32> below for general hints about this.
 
-=head2 Setting Up
+=head2 Setting Up Perl on Win32
 
 =over 4
 
@@ -226,7 +226,7 @@ sure you have done the previous steps correctly.
 
 =back
 
-=head2 Testing
+=head2 Testing Perl on Win32
 
 Type "dmake test" (or "nmake test").  This will run most of the tests from
 the testsuite (many tests will be skipped).
@@ -258,7 +258,7 @@ search algorithm  to locate header files.
 
 Please report any other failures as described under L<BUGS AND CAVEATS>.
 
-=head2 Installation
+=head2 Installation of Perl on Win32
 
 Type "dmake install" (or "nmake install").  This will put the newly
 built perl and the libraries under whatever C<INST_TOP> points to in the
@@ -277,7 +277,7 @@ sufficient to add a single entry to the path, for instance:
 
     set PATH c:\perl\bin;%PATH%
 
-=head2 Usage Hints
+=head2 Usage Hints for Perl on Win32
 
 =over 4
 

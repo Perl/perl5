@@ -51,7 +51,7 @@ Contents
 
 =head1 DESCRIPTION
 
-=head2 Prerequisites
+=head2 Prerequisites for Compiling Perl on AmigaOS
 
 =over 6
 
@@ -131,7 +131,7 @@ For installation of the Unix emulation, read the appropriate docs.
 
 =head1 Accessing documentation
 
-=head2 Manpages
+=head2 Manpages for Perl on AmigaOS
 
 If you have C<man> installed on your system, and you installed perl
 manpages, use something like this:
@@ -153,7 +153,7 @@ for packages, and as usual, sometimes you need to give the section - C<3>
 above - to avoid shadowing by the I<less(1) manpage>.
 
 
-=head2 B<HTML>
+=head2 Perl HTML Documentation on AmigaOS
 
 If you have some WWW browser available, you can build B<HTML> docs.
 Cd to directory with F<.pod> files, and do like this
@@ -166,26 +166,26 @@ directory, and go ahead with reading docs.
 
 Alternatively you may be able to get these docs prebuilt from C<CPAN>.
 
-=head2 B<GNU> C<info> files
+=head2 Perl GNU Info Files on AmigaOS
 
 Users of C<Emacs> would appreciate it very much, especially with
 C<CPerl> mode loaded. You need to get latest C<pod2info> from C<CPAN>,
 or, alternately, prebuilt info pages.
 
-=head2 C<LaTeX> docs
+=head2 Perl LaTeX Documentation on AmigaOS
 
-can be constructed using C<pod2latex>.
+Can be constructed using C<pod2latex>.
 
-=head1 BUILD
+=head1 BUILDING PERL ON AMIGAOS
 
 Here we discuss how to build Perl under AmigaOS.
 
-=head2 Build Prerequisites
+=head2 Build Prerequisites for Perl on AmigaOS
 
 You need to have the latest B<ixemul> (Unix emulation for Amiga)
 from Aminet.
 
-=head2 Getting the perl source
+=head2 Getting the Perl Source for AmigaOS
 
 You can either get the latest perl-for-amiga source from Ninemoons
 and extract it with:
@@ -204,7 +204,7 @@ You will see a message about errors while extracting F<Configure>. This
 is normal and expected. (There is a conflict with a similarly-named file
 F<configure>, but it causes no harm.)
 
-=head2 Making
+=head2 Making Perl on AmigaOS
 
 Remember to use a hefty wad of stack (I use 2000000)
 
@@ -218,7 +218,7 @@ Now!
 
   make
 
-=head2 Testing
+=head2 Testing Perl on AmigaOS
 
 Now run
 
@@ -229,7 +229,7 @@ Some tests will be skipped because they need the fork() function:
 F<io/pipe.t>, F<op/fork.t>, F<lib/filehand.t>, F<lib/open2.t>, F<lib/open3.t>, 
 F<lib/io_pipe.t>, F<lib/io_sock.t>
 
-=head2 Installing the built perl
+=head2 Installing the built Perl on AmigaOS
 
 Run
 

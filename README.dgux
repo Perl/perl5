@@ -39,14 +39,14 @@ Contents
 
 Perl 5.7/8.x for DG/UX ix86 R4.20MU0x
 
-=head1 BUILD
+=head1 BUILDING PERL ON DG/UX
 
-=head2 Non-threaded Case
+=head2 Non-threaded Perl on DG/UX
 
 Just run ./Configure script from the top directory.
 Then give "make" to compile.
 
-=head2 Threaded Case
+=head2 Threaded Perl on DG/UX
 
 If you are using as compiler GCC-2.95.x rev(DG/UX)
 an easy solution for configuring perl in your DG/UX
@@ -77,7 +77,7 @@ that comes with the DG/UX OS does NOT know the -pthread
 switch. So your build will fail if you choose the defaults.
 After configuration is done correctly give "make" to compile.
 
-=head2 Testing
+=head2 Testing Perl on DG/UX
 
 Issuing a "make test"  will run all the tests. 
 If the test lib/ftmp-security gives you as a result
@@ -95,7 +95,7 @@ chmod +t /tmp (=set the sticky bit to /tmp).
 
 Then rerun the tests. This time all must be OK.
 
-=head2 Installing the built perl
+=head2 Installing the built perl on DG/UX
 
 Run the command "make install"
 
