@@ -743,7 +743,7 @@ typedef struct {
 	size_t	_ttyname_size;
 #endif /* HAS_TTYNAME_R */
 
-    int dummy; /* just in case */
+    int dummy; /* cannot have empty structs */
 } REENTR;
 
 /* The wrappers. */
