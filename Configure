@@ -9756,7 +9756,7 @@ echo 'int main() { long long x = 7; return 0; }' > try.c
 set try
 if eval $compile; then
 	val="$define"
-	echo "You have have long long."
+	echo "You have long long."
 else
 	val="$undef"
 	echo "You do not have long long."
