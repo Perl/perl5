@@ -4357,7 +4357,7 @@ Perl_parse_unicode_opts(pTHX_ char **popt)
        opt = PERL_UNICODE_DEFAULT_FLAGS;
 
   if (opt & ~PERL_UNICODE_ALL_FLAGS)
-       Perl_croak(aTHX_ "Unknown Unicode option value 0x%"IVdf,
+       Perl_croak(aTHX_ "Unknown Unicode option value 0x%"UVuf,
 		  (UV) (opt & ~PERL_UNICODE_ALL_FLAGS));
 
   *popt = p;
