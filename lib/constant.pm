@@ -35,7 +35,7 @@ sub import {
     my $pkg = caller;
 
     # Normal constant name
-    if ($name =~ /^(?:[A-Z]\w|_[A-Z])\w*\z/ and !$forbidden{$name}) {
+    if ($name =~ /^_?[^\W_0-9]\w*\z/ and !$forbidden{$name}) {
         # Everything is okay
 
     # Name forced into main, but we're not in main. Fatal.
@@ -58,11 +58,6 @@ sub import {
 	    } elsif ($forced_into_main{$name}) {
 		Carp::carp("Constant name '$name' is " .
 		    "forced into package main::");
-	    } elsif (1 == length $name) {
-		Carp::carp("Constant name '$name' is too short");
-	    } elsif ($name =~ /^_?[a-z\d]/) {
-		Carp::carp("Constant name '$name' should " .
-		    "have an initial capital letter");
 	    } else {
 		# Catch-all - what did I miss? If you get this error,
 		# please let me know what your constant's name was.

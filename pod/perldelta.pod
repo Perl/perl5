@@ -1630,6 +1630,15 @@ a connect attempt.  This allows you to configure its options
 A bug that prevented the IO::Socket::protocol() accessor
 from ever returning the correct value has been corrected.
 
+IO::Socket::connect now uses non-blocking IO instead of alarm()
+to do connect timeouts.
+
+IO::Socket::accept now uses select() instead of alarm() for doing
+timeouts.
+
+IO::Socket::INET->new now sets $! correctly on failure. $@ is
+still set for backwards compatability.
+
 =item JPL
 
 Java Perl Lingo is now distributed with Perl.  See jpl/README

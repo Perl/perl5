@@ -370,7 +370,7 @@ print "ok $test\n";
 $test++;
 
 my $matched;
-$matched = qr/\((?:(?>[^()]+)|(?p{$matched}))*\)/;
+$matched = qr/\((?:(?>[^()]+)|(??{$matched}))*\)/;
 
 @ans = @ans1 = ();
 push(@ans, $res), push(@ans1, $&) while $res = m/$matched/g;
@@ -866,7 +866,7 @@ print "ok $test\n";
 $test++;
 
 $brackets = qr{
-	         {  (?> [^{}]+ | (?p{ $brackets }) )* }
+	         {  (?> [^{}]+ | (??{ $brackets }) )* }
 	      }x;
 
 "{{}" =~ $brackets;
@@ -877,7 +877,7 @@ $test++;
 print "ok $test\n";		# Did we survive?
 $test++;
 
-"something { long { and } hairy" =~ m/((?p{ $brackets }))/;
+"something { long { and } hairy" =~ m/((??{ $brackets }))/;
 print "not " unless $1 eq "{ and }";
 print "ok $test\n";
 $test++;

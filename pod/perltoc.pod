@@ -1648,7 +1648,7 @@ cntrl, graph, print, punct, xdigit
 
 C<(?#text)>, C<(?imsx-imsx)>, C<(?:pattern)>, C<(?imsx-imsx:pattern)>,
 C<(?=pattern)>, C<(?!pattern)>, C<(?E<lt>=pattern)>, C<(?<!pattern)>, C<(?{
-code })>, C<(?p{ code })>, C<(?E<gt>pattern)>,
+code })>, C<(??{ code })>, C<(?E<gt>pattern)>,
 C<(?(condition)yes-pattern|no-pattern)>, C<(?(condition)yes-pattern)>
 
 =item Backtracking
@@ -1663,7 +1663,7 @@ C<(?(condition)yes-pattern|no-pattern)>, C<(?(condition)yes-pattern)>
 
 C<ST>, C<S|T>, C<S{REPEAT_COUNT}>, C<S{min,max}>, C<S{min,max}?>, C<S?>,
 C<S*>, C<S+>, C<S??>, C<S*?>, C<S+?>, C<(?E<gt>S)>, C<(?=S)>, C<(?<=S)>,
-C<(?!S)>, C<(?<!S)>, C<(?p{ EXPR })>,
+C<(?!S)>, C<(?<!S)>, C<(??{ EXPR })>,
 C<(?(condition)yes-pattern|no-pattern)>
 
 =item Creating custom RE engines
