@@ -799,3 +799,8 @@ tie FOO, "Foo";
 EXPECT
 Can't modify constant item in tie at - line 1, near ""Foo";"
 Execution of - aborted due to compilation errors.
+######## undefing constant causes a segfault in 5.6.1 [ID 20010906.019]
+undef foo;
+EXPECT
+Can't modify constant item in undef operator at - line 1, near "foo;"
+Execution of - aborted due to compilation errors.
