@@ -25,6 +25,7 @@ $subdump = 1;
 
 sub main::dumpValue {
   local %address;
+  local $^W=0;
   (print "undef\n"), return unless defined $_[0];
   (print &stringify($_[0]), "\n"), return unless ref $_[0];
   dumpvar::unwrap($_[0],0);
@@ -222,8 +223,8 @@ sub unwrap {
 
 sub matchvar {
   $_[0] eq $_[1] or 
-    ($_[1] =~ /^([!~])(.)/) and 
-      ($1 eq '!') ^ (eval {($_[2] . "::" . $_[0]) =~ /$2$'/});
+    ($_[1] =~ /^([!~])(.)([\x00-\xff]*)/) and 
+      ($1 eq '!') ^ (eval {($_[2] . "::" . $_[0]) =~ /$2$3/});
 }
 
 sub compactDump {
@@ -319,7 +320,7 @@ sub findsubs {
 
 sub main::dumpvar {
     my ($package,@vars) = @_;
-    local(%address,$key,$val);
+    local(%address,$key,$val,$^W);
     $package .= "::" unless $package =~ /::$/;
     *stab = *{"main::"};
     while ($package =~ /(\w+?::)/g){
