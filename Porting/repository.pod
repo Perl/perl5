@@ -2,8 +2,16 @@
 
 repository - Using the Perl repository
 
-This document describes what a Perl Porter needs to do
-to start using the Perl repository.
+=head1 Synopsis
+
+First, we assume here that you have already decided that you will
+need B<write> access to the repository.  If all you need is B<read>
+access, there are much better ways to access the most current state of
+the perl repository, or explore individual files and patches therein.
+See L<perlhack> for details.
+
+This document describes what a Perl Porter needs to do to start using
+the Perl repository.
 
 =head1 Prerequisites
 
