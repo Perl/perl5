@@ -1784,7 +1784,7 @@ lib/unicore/NamesList.txt	Unicode character database
 lib/unicore/Number.pl		Unicode character database
 lib/unicore/Properties		Built-in \p{...} / \P{...} property list
 lib/unicore/PropertyAliases.txt	Unicode character database
-lib/unicore/PropertyValueAliases.txt	Unicode character database
+lib/unicore/PropValueAliases.txt	Unicode character database
 lib/unicore/PropList.txt	Unicode character database
 lib/unicore/README.perl		Unicode character database
 lib/unicore/ReadMe.txt		Unicode character database info
