@@ -3,6 +3,7 @@
 BEGIN {
     chdir( 't' ) if -d 't';
     @INC = '../lib';
+    require './test.pl';      # for which_perl() etc
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bDevel\/DProf\b/){
       print "1..0 # Skip: Devel::DProf was not built\n";
@@ -27,7 +28,7 @@ getopts('vI:p:');
 
 $path_sep = $Config{path_sep} || ':';
 $perl5lib = $opt_I || join( $path_sep, @INC );
-$perl = $opt_p || $^X;
+$perl = $opt_p || which_perl();
 
 if( $opt_v ){
 	print "tests: @tests\n";
