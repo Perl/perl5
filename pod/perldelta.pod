@@ -380,8 +380,8 @@ building and installing from source, the defaults should be fine.
 =head2 Unicode and UTF-8 support
 
 Perl can optionally use UTF-8 as its internal representation for character
-strings.  The C<utf8> and C<byte> pragmas are used to control this support
-in the current lexical scope.  See L<perlunicode>, L<utf8> and L<byte> for
+strings.  The C<utf8> and C<bytes> pragmas are used to control this support
+in the current lexical scope.  See L<perlunicode>, L<utf8> and L<bytes> for
 more information.
 
 =head2 Interpreter cloning, threads, and concurrency

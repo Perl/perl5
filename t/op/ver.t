@@ -26,7 +26,7 @@ print "not " unless sprintf("%v", v1.22.333.4444) eq '1.22.333.4444';
 print "ok $test\n";  ++$test;
 
 {
-    use byte;
+    use bytes;
     print "not " unless
         sprintf("%v", v1.22.333.4444) eq '1.22.197.141.225.133.156';
     print "ok $test\n";  ++$test;

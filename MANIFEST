@@ -681,8 +681,8 @@ lib/bigfloat.pl		An arbitrary precision floating point package
 lib/bigint.pl		An arbitrary precision integer arithmetic package
 lib/bigrat.pl		An arbitrary precision rational arithmetic package
 lib/blib.pm		For "use blib"
-lib/byte.pm		Pragma to enable byte operations
-lib/byte_heavy.pl	Support routines for byte pragma
+lib/bytes.pm		Pragma to enable byte operations
+lib/bytes_heavy.pl	Support routines for byte pragma
 lib/cacheout.pl		Manages output filehandles when you need too many
 lib/charnames.pm	Character names
 lib/chat2.pl            Obsolete ipc library (use Comm.pm etc instead)

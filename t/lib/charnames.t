@@ -16,7 +16,7 @@ print "not " unless "Here\N{EXCLAMATION MARK}?" eq "Here\041?";
 print "ok 1\n";
 
 {
-  use byte;			# UTEST can switch utf8 on
+  use bytes;			# UTEST can switch utf8 on
 
   print "# \$res=$res \$\@='$@'\nnot "
     if $res = eval <<'EOE'
