@@ -3150,8 +3150,22 @@ realclean purge ::  clean
         push(@m, "	$self->{RM_F} \$(INST_DYNAMIC) \$(INST_BOOT)\n");
         push(@m, "	$self->{RM_F} \$(INST_STATIC)\n");
     }
-    push(@m, "	$self->{RM_F} " . join(" ", values %{$self->{PM}}) . "\n")
-	if keys %{$self->{PM}};
+    # Issue a several little RM_F commands rather than risk creating a
+    # very long command line (useful for extensions such as Encode
+    # that have many files).
+    if (keys %{$self->{PM}}) {
+	my $line = "";
+	foreach (values %{$self->{PM}}) {
+	    if (length($line) + length($_) > 80) {
+		push @m, "\t$self->{RM_F} $line\n";
+		$line = $_;
+	    }
+	    else {
+		$line .= " $_"; 
+	    }
+	}
+    push @m, "\t$self->{RM_F} $line\n" if $line;
+    }
     my(@otherfiles) = ($self->{MAKEFILE},
 		       "$self->{MAKEFILE}.old"); # Makefiles last
     push(@otherfiles, $attribs{FILES}) if $attribs{FILES};
