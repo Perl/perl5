@@ -20,9 +20,10 @@ if ($Config{useperlio}) {
  ok(print FOO 'a'.((('a' x 14).qq{\n}) x 2000) || close(FOO));
  ok(open(FOO,"<:crlf",$file));
  my $seen = 0;
+ my $cr = "\r";
  while (<FOO>)
   {
-   $seen++ if (/\r/);
+   $seen += tr/[\015]//;
   }
  is($seen,0);
  binmode(FOO);
@@ -30,7 +31,7 @@ if ($Config{useperlio}) {
  $seen = 0;
  while (<FOO>)
   {
-   $seen++ if (/\r/);
+   $seen += tr/[\015]//;
   }
  is($seen,2000);
  ok(close(FOO));
