@@ -3,7 +3,7 @@ package SelfLoader;
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(AUTOLOAD);
-$VERSION = "1.0902";
+$VERSION = "1.0903";
 sub Version {$VERSION}
 $DEBUG = 0;
 

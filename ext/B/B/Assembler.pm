@@ -14,7 +14,7 @@ require ByteLoader;		# we just need its $VERSIOM
 
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(assemble_fh newasm endasm assemble);
-$VERSION = 0.02;
+$VERSION = 0.03;
 
 use strict;
 my %opnumber;

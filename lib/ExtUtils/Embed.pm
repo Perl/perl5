@@ -18,7 +18,7 @@ use vars qw(@ISA @EXPORT $VERSION
 	    );
 use strict;
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.2505_00 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.2506_00 $ =~ /(\d+)\.(\d+)/);
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&xsinit &ldopts 

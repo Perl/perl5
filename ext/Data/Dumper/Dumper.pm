@@ -9,7 +9,7 @@
 
 package Data::Dumper;
 
-$VERSION = '2.102';
+$VERSION = '2.103';
 
 #$| = 1;
 

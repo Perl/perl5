@@ -8,7 +8,7 @@ use ExtUtils::MakeMaker;
 use Config;
 use File::Find;
 use File::Basename;
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 my $DOSISH = ($^O =~ /^(MSWin\d\d|os2|dos|mint)$/);
 
