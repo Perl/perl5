@@ -10,7 +10,7 @@ use warnings;
 use strict;
 use Config;
 
-print "1..13\n";
+print "1..15\n";
 
 my $test = 1;
 
@@ -34,21 +34,21 @@ ok;
 my $a = <<'EOF';
 {
     $test = sub : lvalue {
-        1;
+        my $x;
     }
     ;
 }
 EOF
 chomp $a;
-print "not " if $deparse->coderef2text(sub{$test = sub : lvalue { 1 }}) ne $a;
+print "not " if $deparse->coderef2text(sub{$test = sub : lvalue{my $x}}) ne $a;
 ok;
 
 $a =~ s/lvalue/method/;
-print "not " if $deparse->coderef2text(sub{$test = sub : method { 1 }}) ne $a;
+print "not " if $deparse->coderef2text(sub{$test = sub : method{my $x}}) ne $a;
 ok;
 
 $a =~ s/method/locked method/;
-print "not " if $deparse->coderef2text(sub{$test = sub : method locked { 1 }})
+print "not " if $deparse->coderef2text(sub{$test = sub : method locked {my $x}})
                                      ne $a;
 ok;
 }
@@ -62,10 +62,7 @@ $b = <<'EOF';
 LINE: while (defined($_ = <ARGV>)) {
     chomp $_;
     @F = split(/\s+/, $_, 0);
-    '???'
-}
-continue {
-    '???'
+    '???';
 }
 
 EOF
@@ -81,7 +78,7 @@ ok;
 #7
 $a = `$^X "-I../lib" "-MO=Terse" -e 1 2>&1`;
 print "not " unless $a =~
-/\bLISTOP\b.*leave.*\bOP\b.*enter.*\bCOP\b.*nextstate.*\bOP\b.*null/s;
+/\bLISTOP\b.*leave.*\n    OP\b.*enter.*\n    COP\b.*nextstate.*\n    OP\b.*null/s;
 ok;
 
 $a = `$^X "-I../lib" "-MO=Terse" -ane "s/foo/bar/" 2>&1`;
@@ -119,7 +116,7 @@ $a =~ s/-u(Cwd|File|File::Copy|OS2),//g if $^O eq 'os2';
 $a =~ s/-uCwd,// if $^O eq 'cygwin';
 if ($Config{static_ext} eq ' ') {
   $b = '-uCarp,-uCarp::Heavy,-uDB,-uExporter,-uExporter::Heavy,-uattributes,'
-     . '-umain,-uwarnings';
+     . '-umain,-ustrict,-uwarnings';
   print "# [$a] vs [$b]\nnot " if $a ne $b;
   ok;
 } else {
@@ -133,3 +130,14 @@ if ($is_thread) {
     print "# [$a]\nnot " unless $a =~ /sv_undef.*PVNV.*%one.*sv_undef.*HV/s;
 }
 ok;
+
+# Bug 20001204.07
+{
+my $foo = $deparse->coderef2text(sub { { 234; }});
+# Constants don't get optimised here.
+print "not " unless $foo =~ /{.*{.*234;.*}.*}/sm;
+ok;
+$foo = $deparse->coderef2text(sub { { 234; } continue { 123; } });
+print "not " unless $foo =~ /{.*{.*234;.*}.*continue.*{.*123.*}/sm; 
+ok;
+}

@@ -55,6 +55,7 @@ S_Slab_Alloc(pTHX_ int m, size_t sz)
      : CALL_FPTR(PL_check[type])(aTHX_ (OP*)o))
 
 #define PAD_MAX 999999999
+#define RETURN_UNLIMITED_NUMBER (PERL_INT_MAX / 2)
 
 STATIC char*
 S_gv_ename(pTHX_ GV *gv)
@@ -1350,6 +1351,31 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	PL_modcount++;
 	return o;
     case OP_CONST:
+        if (o->op_private & (OPpCONST_BARE) && 
+                !(type == OP_GREPSTART || type == OP_ENTERSUB || type == OP_REFGEN)) {
+            SV *sv = ((SVOP*)o)->op_sv;
+            GV *gv;
+
+            /* Could be a filehandle */
+            if (gv = gv_fetchpv(SvPV_nolen(sv), FALSE, SVt_PVIO)) {
+                OP* gvio = newUNOP(OP_RV2GV, 0, newGVOP(OP_GV, 0, gv));
+                op_free(o);
+                o = gvio;
+            } else {
+                /* OK, it's a sub */
+                OP* enter;
+                gv = gv_fetchpv(SvPV_nolen(sv), TRUE, SVt_PVCV);
+
+                enter = newUNOP(OP_ENTERSUB,0, 
+                        newUNOP(OP_RV2CV, 0, 
+                            newGVOP(OP_GV, 0, gv)
+                        ));
+                enter->op_private |= OPpLVAL_INTRO;
+                op_free(o);
+                o = enter;
+            }
+            break;
+        }
 	if (!(o->op_private & (OPpCONST_ARYBASE)))
 	    goto nomod;
 	if (PL_eval_start && PL_eval_start->op_type == OP_CONST) {
@@ -1380,6 +1406,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	}
 	else {				/* lvalue subroutine call */
 	    o->op_private |= OPpLVAL_INTRO;
+	    PL_modcount = RETURN_UNLIMITED_NUMBER;
 	    if (type == OP_GREPSTART || type == OP_ENTERSUB || type == OP_REFGEN) {
 		/* Backward compatibility mode: */
 		o->op_private |= OPpENTERSUB_INARGS;
@@ -1514,7 +1541,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	if (!type && cUNOPo->op_first->op_type != OP_GV)
 	    Perl_croak(aTHX_ "Can't localize through a reference");
 	if (type == OP_REFGEN && o->op_flags & OPf_PARENS) {
-	    PL_modcount = 10000;
+           PL_modcount = RETURN_UNLIMITED_NUMBER;
 	    return o;		/* Treat \(@foo) like ordinary list. */
 	}
 	/* FALL THROUGH */
@@ -1523,14 +1550,16 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	    goto nomod;
 	ref(cUNOPo->op_first, o->op_type);
 	/* FALL THROUGH */
-    case OP_AASSIGN:
     case OP_ASLICE:
     case OP_HSLICE:
+	if (type == OP_LEAVESUBLV)
+	    o->op_private |= OPpMAYBE_LVSUB;
+	/* FALL THROUGH */
+    case OP_AASSIGN:
     case OP_NEXTSTATE:
     case OP_DBSTATE:
-    case OP_REFGEN:
     case OP_CHOMP:
-	PL_modcount = 10000;
+       PL_modcount = RETURN_UNLIMITED_NUMBER;
 	break;
     case OP_RV2SV:
 	if (!type && cUNOPo->op_first->op_type != OP_GV)
@@ -1549,11 +1578,13 @@ Perl_mod(pTHX_ OP *o, I32 type)
 
     case OP_PADAV:
     case OP_PADHV:
-	PL_modcount = 10000;
+       PL_modcount = RETURN_UNLIMITED_NUMBER;
 	if (type == OP_REFGEN && o->op_flags & OPf_PARENS)
 	    return o;		/* Treat \(@foo) like ordinary list. */
 	if (scalar_mod_type(o, type))
 	    goto nomod;
+	if (type == OP_LEAVESUBLV)
+	    o->op_private |= OPpMAYBE_LVSUB;
 	/* FALL THROUGH */
     case OP_PADSV:
 	PL_modcount++;
@@ -1581,6 +1612,8 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	/* FALL THROUGH */
     case OP_POS:
     case OP_VEC:
+	if (type == OP_LEAVESUBLV)
+	    o->op_private |= OPpMAYBE_LVSUB;
       lvalue_func:
 	pad_free(o->op_targ);
 	o->op_targ = pad_alloc(o->op_type, SVs_PADMY);
@@ -1595,12 +1628,15 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	if (type == OP_ENTERSUB &&
 	     !(o->op_private & (OPpLVAL_INTRO | OPpDEREF)))
 	    o->op_private |= OPpLVAL_DEFER;
+	if (type == OP_LEAVESUBLV)
+	    o->op_private |= OPpMAYBE_LVSUB;
 	PL_modcount++;
 	break;
 
     case OP_SCOPE:
     case OP_LEAVE:
     case OP_ENTER:
+    case OP_LINESEQ:
 	if (o->op_flags & OPf_KIDS)
 	    mod(cLISTOPo->op_last, type);
 	break;
@@ -1619,8 +1655,14 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	for (kid = cLISTOPo->op_first; kid; kid = kid->op_sibling)
 	    mod(kid, type);
 	break;
+
+    case OP_RETURN:
+	if (type != OP_LEAVESUBLV)
+	    goto nomod;
+	break; /* mod()ing was handled by ck_return() */
     }
-    o->op_flags |= OPf_MOD;
+    if (type != OP_LEAVESUBLV)
+        o->op_flags |= OPf_MOD;
 
     if (type == OP_AASSIGN || type == OP_SASSIGN)
 	o->op_flags |= OPf_SPECIAL|OPf_REF;
@@ -1629,7 +1671,8 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	o->op_flags &= ~OPf_SPECIAL;
 	PL_hints |= HINT_BLOCK_SCOPE;
     }
-    else if (type != OP_GREPSTART && type != OP_ENTERSUB)
+    else if (type != OP_GREPSTART && type != OP_ENTERSUB
+             && type != OP_LEAVESUBLV)
 	o->op_flags |= OPf_REF;
     return o;
 }
@@ -3462,7 +3505,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		    }
 		}
 		else {
-		    if (PL_modcount < 10000 &&
+                   if (PL_modcount < RETURN_UNLIMITED_NUMBER &&
 		      ((LISTOP*)right)->op_last->op_type == OP_CONST)
 		    {
 			SV *sv = ((SVOP*)((LISTOP*)right)->op_last)->op_sv;
@@ -3890,7 +3933,6 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *
 
     if (cont) {
 	next = LINKLIST(cont);
-	loopflags |= OPpLOOP_CONTINUE;
     }
     if (expr) {
 	OP *unstack = newOP(OP_UNSTACK, 0);
@@ -4581,7 +4623,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	av_store(PL_comppad_name, AvFILLp(PL_comppad), Nullsv);
 
     if (CvLVALUE(cv)) {
-	CvROOT(cv) = newUNOP(OP_LEAVESUBLV, 0, scalarseq(block));
+	CvROOT(cv) = newUNOP(OP_LEAVESUBLV, 0,
+			     mod(scalarseq(block), OP_LEAVESUBLV));
     }
     else {
 	CvROOT(cv) = newUNOP(OP_LEAVESUB, 0, scalarseq(block));
@@ -5365,6 +5408,7 @@ Perl_ck_rvconst(pTHX_ register OP *o)
 #else
 	    kid->op_sv = SvREFCNT_inc(gv);
 #endif
+	    kid->op_private = 0;
 	    kid->op_ppaddr = PL_ppaddr[OP_GV];
 	}
     }
@@ -5973,6 +6017,17 @@ Perl_ck_require(pTHX_ OP *o)
     return ck_fun(o);
 }
 
+OP *
+Perl_ck_return(pTHX_ OP *o)
+{
+    OP *kid;
+    if (CvLVALUE(PL_compcv)) {
+	for (kid = cLISTOPo->op_first->op_sibling; kid; kid = kid->op_sibling)
+	    mod(kid, OP_LEAVESUBLV);
+    }
+    return o;
+}
+
 #if 0
 OP *
 Perl_ck_retarget(pTHX_ OP *o)
@@ -6452,7 +6507,6 @@ Perl_peep(pTHX_ register OP *o)
 {
     register OP* oldop = 0;
     STRLEN n_a;
-    OP *last_composite = Nullop;
 
     if (!o || o->op_seq)
 	return;
@@ -6471,7 +6525,6 @@ Perl_peep(pTHX_ register OP *o)
 	case OP_DBSTATE:
 	    PL_curcop = ((COP*)o);		/* for warnings */
 	    o->op_seq = PL_op_seqmax++;
-	    last_composite = Nullop;
 	    break;
 
 	case OP_CONST:
@@ -6562,7 +6615,7 @@ Perl_peep(pTHX_ register OP *o)
 		    (PL_op = pop->op_next) &&
 		    pop->op_next->op_type == OP_AELEM &&
 		    !(pop->op_next->op_private &
-		      (OPpLVAL_INTRO|OPpLVAL_DEFER|OPpDEREF)) &&
+		      (OPpLVAL_INTRO|OPpLVAL_DEFER|OPpDEREF|OPpMAYBE_LVSUB)) &&
 		    (i = SvIV(((SVOP*)pop)->op_sv) - PL_compiling.cop_arybase)
 				<= 255 &&
 		    i >= 0)
@@ -6611,8 +6664,14 @@ Perl_peep(pTHX_ register OP *o)
 
 	case OP_ENTERLOOP:
 	    o->op_seq = PL_op_seqmax++;
+	    while (cLOOP->op_redoop->op_type == OP_NULL)
+		cLOOP->op_redoop = cLOOP->op_redoop->op_next;
 	    peep(cLOOP->op_redoop);
+	    while (cLOOP->op_nextop->op_type == OP_NULL)
+		cLOOP->op_nextop = cLOOP->op_nextop->op_next;
 	    peep(cLOOP->op_nextop);
+	    while (cLOOP->op_lastop->op_type == OP_NULL)
+		cLOOP->op_lastop = cLOOP->op_lastop->op_next;
 	    peep(cLOOP->op_lastop);
 	    break;
 
@@ -6620,6 +6679,9 @@ Perl_peep(pTHX_ register OP *o)
 	case OP_MATCH:
 	case OP_SUBST:
 	    o->op_seq = PL_op_seqmax++;
+	    while (cPMOP->op_pmreplstart && 
+		   cPMOP->op_pmreplstart->op_type == OP_NULL)
+		cPMOP->op_pmreplstart = cPMOP->op_pmreplstart->op_next;
 	    peep(cPMOP->op_pmreplstart);
 	    break;
 
@@ -6751,42 +6813,6 @@ Perl_peep(pTHX_ register OP *o)
 	    }
 	    break;
 	}
-
-	case OP_RV2AV:
-	case OP_RV2HV:
-	    if (!(o->op_flags & OPf_WANT)
-		|| (o->op_flags & OPf_WANT) == OPf_WANT_LIST)
-	    {
-		last_composite = o;
-	    }
-	    o->op_seq = PL_op_seqmax++;
-	    break;
-
-	case OP_RETURN:
-	    if (o->op_next && o->op_next->op_type != OP_LEAVESUBLV) {
-		o->op_seq = PL_op_seqmax++;
-		break;
-	    }
-	    /* FALL THROUGH */
-
-	case OP_LEAVESUBLV:
-	    if (last_composite) {
-		OP *r = last_composite;
-
-		while (r->op_sibling)
-		   r = r->op_sibling;
-		if (r->op_next == o 
-		    || (r->op_next->op_type == OP_LIST
-			&& r->op_next->op_next == o))
-		{
-		    if (last_composite->op_type == OP_RV2AV)
-			yyerror("Lvalue subs returning arrays not implemented yet");
-		    else
-			yyerror("Lvalue subs returning hashes not implemented yet");
-			;
-		}		
-	    }
-	    /* FALL THROUGH */
 
 	default:
 	    o->op_seq = PL_op_seqmax++;

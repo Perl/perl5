@@ -1,6 +1,6 @@
 package B::Terse;
 use strict;
-use B qw(peekop class walkoptree_slow walkoptree_exec
+use B qw(peekop class walkoptree walkoptree_exec walkoptree_slow
 	 main_start main_root cstring svref_2object);
 use B::Asmdata qw(@specialsv_name);
 

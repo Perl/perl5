@@ -9,12 +9,17 @@ package B;
 use XSLoader ();
 require Exporter;
 @ISA = qw(Exporter);
+
+# walkoptree_slow comes from B.pm (you are there),
+# walkoptree comes from B.xs
 @EXPORT_OK = qw(minus_c ppname save_BEGINs
 		class peekop cast_I32 cstring cchar hash threadsv_names
-		main_root main_start main_cv svref_2object opnumber amagic_generation
-		walkoptree walkoptree_slow walkoptree_exec walksymtable
+		main_root main_start main_cv svref_2object opnumber
+		amagic_generation
+		walkoptree_slow walkoptree walkoptree_exec walksymtable
 		parents comppadlist sv_undef compile_stats timing_info
 		begin_av init_av end_av);
+
 sub OPf_KIDS ();
 use strict;
 @B::SV::ISA = 'B::OBJECT';

@@ -447,11 +447,24 @@ PP(pp_rv2av)
 	    SETs((SV*)av);
 	    RETURN;
 	}
+	else if (LVRET) {
+	    if (GIMME == G_SCALAR)
+		Perl_croak(aTHX_ "Can't return array to lvalue scalar context");
+	    SETs((SV*)av);
+	    RETURN;
+	}
     }
     else {
 	if (SvTYPE(sv) == SVt_PVAV) {
 	    av = (AV*)sv;
 	    if (PL_op->op_flags & OPf_REF) {
+		SETs((SV*)av);
+		RETURN;
+	    }
+	    else if (LVRET) {
+		if (GIMME == G_SCALAR)
+		    Perl_croak(aTHX_ "Can't return array to lvalue"
+			       " scalar context");
 		SETs((SV*)av);
 		RETURN;
 	    }
@@ -508,6 +521,13 @@ PP(pp_rv2av)
 		SETs((SV*)av);
 		RETURN;
 	    }
+	    else if (LVRET) {
+		if (GIMME == G_SCALAR)
+		    Perl_croak(aTHX_ "Can't return array to lvalue"
+			       " scalar context");
+		SETs((SV*)av);
+		RETURN;
+	    }
 	}
     }
 
@@ -551,11 +571,24 @@ PP(pp_rv2hv)
 	    SETs((SV*)hv);
 	    RETURN;
 	}
+	else if (LVRET) {
+	    if (GIMME == G_SCALAR)
+		Perl_croak(aTHX_ "Can't return hash to lvalue scalar context");
+	    SETs((SV*)hv);
+	    RETURN;
+	}
     }
     else {
 	if (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV) {
 	    hv = (HV*)sv;
 	    if (PL_op->op_flags & OPf_REF) {
+		SETs((SV*)hv);
+		RETURN;
+	    }
+	    else if (LVRET) {
+		if (GIMME == G_SCALAR)
+		    Perl_croak(aTHX_ "Can't return hash to lvalue"
+			       " scalar context");
 		SETs((SV*)hv);
 		RETURN;
 	    }
@@ -609,6 +642,13 @@ PP(pp_rv2hv)
 	    if (PL_op->op_private & OPpLVAL_INTRO)
 		hv = save_hash(gv);
 	    if (PL_op->op_flags & OPf_REF) {
+		SETs((SV*)hv);
+		RETURN;
+	    }
+	    else if (LVRET) {
+		if (GIMME == G_SCALAR)
+		    Perl_croak(aTHX_ "Can't return hash to lvalue"
+			       " scalar context");
 		SETs((SV*)hv);
 		RETURN;
 	    }
@@ -1507,7 +1547,7 @@ PP(pp_helem)
     SV **svp;
     SV *keysv = POPs;
     HV *hv = (HV*)POPs;
-    U32 lval = PL_op->op_flags & OPf_MOD;
+    U32 lval = PL_op->op_flags & OPf_MOD || LVRET;
     U32 defer = PL_op->op_private & OPpLVAL_DEFER;
     SV *sv;
 
@@ -2745,7 +2785,7 @@ PP(pp_aelem)
     SV** svp;
     IV elem = POPi;
     AV* av = (AV*)POPs;
-    U32 lval = PL_op->op_flags & OPf_MOD;
+    U32 lval = PL_op->op_flags & OPf_MOD || LVRET;
     U32 defer = (PL_op->op_private & OPpLVAL_DEFER) && (elem > AvFILL(av));
     SV *sv;
 
