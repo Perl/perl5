@@ -1,4 +1,7 @@
-mode_t		T_INT
-pid_t		T_INT
-fd		T_INT
-FILE *		T_PTR
+mode_t			T_INT
+pid_t			T_INT
+fd			T_INT
+FILE *			T_PTR
+FileHandle		T_PTROBJ
+POSIX::SigSet		T_PTROBJ
+POSIX::SigAction	T_HVOBJ

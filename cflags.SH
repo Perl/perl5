@@ -65,48 +65,36 @@ for file do
     : or customize here
 
     case "$file" in
-    array) ;;
-    cmd) ;;
-    cons) ;;
-    consarg) ;;
-    doarg) ;;
+    NDBM_File) ;;
+    ODBM_File) ;;
+    POSIX) ;;
+    SDBM_File) ;;
+    av) ;;
+    deb) ;;
+    dl) ;;
     doio) ;;
-    dolist) ;;
+    doop) ;;
     dump) ;;
-    eval) ;;
-    form) ;;
-    hash) ;;
+    gv) ;;
+    hv) ;;
+    main) ;;
     malloc) ;;
+    mg) ;;
+    miniperlmain) ;;
+    op) ;;
     perl) ;;
+    perlmain) ;;
     perly) ;;
+    pp) ;;
     regcomp) ;;
     regexec) ;;
-    stab) ;;
-    str) ;;
+    run) ;;
+    scope) ;;
+    sv) ;;
+    taint) ;;
     toke) ;;
     usersub) ;;
     util) ;;
-    tarray) ;;
-    tcmd) ;;
-    tcons) ;;
-    tconsarg) ;;
-    tdoarg) ;;
-    tdoio) ;;
-    tdolist) ;;
-    tdump) ;;
-    teval) ;;
-    tform) ;;
-    thash) ;;
-    tmalloc) ;;
-    tperl) ;;
-    tperly) ;;
-    tregcomp) ;;
-    tregexec) ;;
-    tstab) ;;
-    tstr) ;;
-    ttoke) ;;
-    tusersub) ;;
-    tutil) ;;
     *) ;;
     esac
 

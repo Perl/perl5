@@ -1,0 +1,132 @@
+?X:  These units are based on the ones supplied with dist-3.0
+?X:  patchlevel 22.  They have been changed or enhanced to work with
+?X:  perl5alpha.  I would appreciate hearing about any changes,
+?X:  corrections, or enhancements.
+?X:	Andy Dougherty			doughera@lafcol.lafayette.edu
+?X:	Dept. of Physics 		
+?X:	Lafayette College	
+?X:	Easton, PA  18042-1782
+?X:     Sat Apr  2 15:45:17 EST 1994
+?RCS: $Id: libs.U,v 3.0.1.1 1993/08/25 14:02:31 ram Exp $
+?RCS:
+?RCS: Copyright (c) 1991-1993, Raphael Manfredi
+?RCS: 
+?RCS: You may redistribute only under the terms of the Artistic Licence,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic Licence; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?RCS: $Log: libs.U,v $
+?RCS: Revision 3.0.1.1  1993/08/25  14:02:31  ram
+?RCS: patch6: added default for libs
+?RCS:
+?RCS: Revision 3.0  1993/08/18  12:09:03  ram
+?RCS: Baseline for dist 3.0 netwide release.
+?RCS:
+?MAKE:libs: test cat Myread Oldconfig Loc libpth package xlibpth
+?MAKE:	-pick add $@ %<
+?S:libs:
+?S:	This variable holds the additional libraries we want to use.
+?S: It is up to the Makefile to deal with it.
+?S:.
+?T:xxx yyy zzz thislib thatlib libswanted
+?D:libs=''
+?X:
+?X: This order is chosen so that libraries  -lndir, -ldir, -lucb, -lbsd,
+?X: -lBSD, -lPW, and -lx only get used if there are unresolved
+?X: routines at link time.  Usually, these are backwards compatability
+?X: libraries, and may not be as reliable as the standard c library.
+?X: The ordering of c_s, posix, and cposix is a guess and almost
+?X: certainly wrong on about half of all systems.
+?INIT:libswanted="net socket nsl inet nm sdbm gdbm ndbm dbm malloc dl dld sun m c_s posix cposix ndir dir ucb bsd BSD PW x"
+?INIT:
+: Looking for optional libraries
+echo " "
+echo "Checking for optional libraries..." >&4
+case "$libs" in
+' '|'') dflt='';;
+*) dflt="$libs";;
+esac
+case "$libswanted" in
+'') libswanted='c_s';;
+esac
+for thislib in $libswanted; do
+	case "$thislib" in
+	dbm) thatlib=ndbm;;
+	*_s) thatlib=NONE;;
+	*) thatlib="${thislib}_s";;
+	esac
+	xxx=`./loc lib$thislib.a X $libpth`
+	yyy=`./loc lib$thatlib.a X $libpth`
+	zzz=`./loc lib$thislib.so.[0-9]'*' $libpth`
+	if $test -f $xxx; then
+		echo "Found -l$thislib."
+		case "$dflt" in
+		"*-l$thislib *.*"|"*-l$thatlib *.*") ;;
+		*) dflt="$dflt -l$thislib";;
+		esac
+	elif $test -f $yyy; then
+		echo "Found -l$thatlib."
+		case "$dflt" in
+		"*-l$thislib *.*"|"*-l$thatlib *.*") ;;
+		*) dflt="$dflt -l$thatlib";;
+		esac
+	elif $test -f $zzz; then
+		echo "Found -$thislib."
+		case "$dflt" in
+		"*-l$thislib *.*"|"*-l$thatlib *.*") ;;
+		*) dflt="$dflt -l$thislib";;
+		esac
+	else
+		xxx=`./loc Slib$thislib.a X $xlibpth`
+		yyy=`./loc Slib$thatlib.a X $xlibpth`
+		if $test -f $xxx; then
+			echo "Found -l$thislib."
+			case "$dflt" in
+			"*-l$thislib *.*"|"*-l$thatlib *.*") ;;
+			*) dflt="$dflt -l$thislib";;
+			esac
+		elif $test -f $yyy; then
+			echo "Found -l$thatlib."
+			case "$dflt" in
+			"*-l$thislib *.*"|"*-l$thatlib *.*") ;;
+			*) dflt="$dflt -l$thatlib";;
+			esac
+		else
+			echo "No -l$thislib."
+		fi
+	fi
+done
+set X $dflt
+shift
+dflt="$*"
+case "$libs" in
+'') dflt="$dflt";;
+*) dflt="$libs";;
+esac
+case "$dflt" in
+' '|'') dflt='none';;
+esac
+
+$cat <<EOM
+ 
+Some versions of Unix support shared libraries, which make executables smaller
+but make load time slightly longer.
+
+On some systems, mostly newer Unix System V's, the shared library is included
+by putting the option "-lc_s" as the last thing on the cc command line when
+linking.  Other systems use shared libraries by default.  There may be other
+libraries needed to compile $package on your machine as well.  If your system
+needs the "-lc_s" option, include it here.  Include any other special libraries
+here as well.  Say "none" for none.
+EOM
+
+echo " "
+rp="Any additional libraries?"
+. ./myread
+case "$ans" in
+none) libs=' ';;
+*) libs="$ans";;
+esac
+

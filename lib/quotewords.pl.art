@@ -1,0 +1,146 @@
+Article 20075 of comp.lang.perl:
+Newsgroups: comp.lang.perl
+Path: netlabs!news.cerf.net!ihnp4.ucsd.edu!swrinde!sgiblab!rpal.rockwell.com!imagen!pomeranz
+From: pomeranz@imagen.com (Hal Pomeranz)
+Subject: quotewords.pl [REVISED]
+Message-ID: <1994Mar23.071634.23171@aqm.com>
+Sender: usenet@aqm.com
+Nntp-Posting-Host: imagen
+Organization: QMS Inc., Santa Clara
+Date: Wed, 23 Mar 1994 07:16:34 GMT
+Lines: 132
+
+
+ARRGH!  The version I posted earlier tonight contained an error, so
+I've sent out a cancel to chase it down and kill it.  Please use this
+version dated "23 March 1994".
+
+quotewords.pl is a generic replacement for shellwords.pl.
+&quotewords() allows you to specify a delimiter, which may be a
+regular expression, and returns a list of words broken on that
+delimiter ignoring any instances of the delimiter which may appear
+within a quoted string.  There's a boolean flag to tell the function
+whether or not you want it to strip quotes and backslashes or retain
+them.
+
+I've also included a revised version of &shellwords() (written in
+terms of &quotewords() of course) which is 99% the same as the
+original version.  The only difference is that the new version will
+not default to using $_ if no arguments are supplied.
+
+Share and enjoy...
+
+==============================================================================
+     Hal Pomeranz       pomeranz@sclara.qms.com     pomeranz@cs.swarthmore.edu
+System/Network Manager  "All I can say is that my life is pretty plain.
+   QMS Santa Clara       I like watchin' the puddles gather rain." Blind Melon
+==============================================================================
+
+# quotewords.pl
+#
+# Usage:
+#	require 'quotes.pl';
+#	@words = &quotewords($delim, $keep, @lines);
+#	@words = &shellwords(@lines);
+
+# Hal Pomeranz (pomeranz@netcom.com), 23 March 1994
+# Permission to use and distribute under the same terms as Perl.
+# No warranty expressed or implied.
+
+# Basically an update and generalization of the old shellwords.pl.
+# Much code shamelessly stolen from the old version (author unknown).
+#
+# &quotewords() accepts a delimiter (which can be a regular expression)
+# and a list of lines and then breaks those lines up into a list of
+# words ignoring delimiters that appear inside quotes.
+#
+# The $keep argument is a boolean flag.  If true, the quotes are kept
+# with each word, otherwise quotes are stripped in the splitting process.
+# $keep also defines whether unprotected backslashes are retained.
+#
+# A &shellwords() replacement is included to demonstrate the new package.
+# This version differs from the original in that it will _NOT_ default
+# to using $_ if no arguments are given.  I personally find the old behavior
+# to be a mis-feature.
+
+package quotewords;
+
+sub main'shellwords {
+    local(@lines) = @_;
+    $lines[$#lines] =~ s/\s+$//;
+    &main'quotewords('\s+', 0, @lines);
+}
+
+
+# &quotewords() works by simply jamming all of @lines into a single
+# string in $_ and then pulling off words a bit at a time until $_
+# is exhausted.
+#
+# The inner "for" loop builds up each word (or $field) one $snippet
+# at a time.  A $snippet is a quoted string, a backslashed character,
+# or an unquoted string.  We fall out of the "for" loop when we reach
+# the end of $_ or when we hit a delimiter.  Falling out of the "for"
+# loop, we push the $field we've been building up onto the list of
+# @words we'll be returning, and then loop back and pull another word
+# off of $_.
+#
+# The first two cases inside the "for" loop deal with quoted strings.
+# The first case matches a double quoted string, removes it from $_,
+# and assigns the double quoted string to $snippet in the body of the
+# conditional.  The second case handles single quoted strings.  In
+# the third case we've found a quote at the current beginning of $_,
+# but it didn't match the quoted string regexps in the first two cases,
+# so it must be an unbalanced quote and we die with an error (which can
+# be caught by eval()).
+#
+# The next case handles backslashed characters, and the next case is the
+# exit case on reaching the end of the string or finding a delimiter.
+#
+# Otherwise, we've found an unquoted thing and we pull of characters one
+# at a time until we reach something that could start another $snippet--
+# a quote of some sort, a backslash, or the delimiter.  This one character
+# at a time behavior was necessary if the delimiter was going to be a
+# regexp (love to hear it if you can figure out a better way).
+
+sub main'quotewords {
+    local($delim, $keep, @lines) = @_;
+    local(@words,$snippet,$field,$_);
+
+    $_ = join('', @lines);
+    while ($_) {
+	$field = '';
+	for (;;) {
+            $snippet = '';
+	    if (s/^"(([^"\\]|\\[\\"])*)"//) {
+		$snippet = $1;
+                $snippet = "\"$snippet\"" if ($keep);
+	    }
+	    elsif (s/^'(([^'\\]|\\[\\'])*)'//) {
+		$snippet = $1;
+                $snippet = "'$snippet'" if ($keep);
+	    }
+	    elsif (/^["']/) {
+		die "Unmatched quote\n";
+	    }
+            elsif (s/^\\(.)//) {
+                $snippet = $1;
+                $snippet = "\\$snippet" if ($keep);
+            }
+	    elsif (!$_ || s/^$delim//) {
+               last;
+	    }
+	    else {
+                while ($_ && !(/^$delim/ || /^['"\\]/)) {
+		   $snippet .=  substr($_, 0, 1);
+                   substr($_, 0, 1) = '';
+                }
+	    }
+	    $field .= $snippet;
+	}
+	push(@words, $field);
+    }
+    @words;
+}
+1;
+
+

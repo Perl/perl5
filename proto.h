@@ -167,10 +167,10 @@ void	magicalize P((char* list));
 void	magicname P((char* sym, char* name, I32 namlen));
 int	main P((int argc, char** argv, char** env));
 #ifndef STANDARD_C
-MALLOCPTRTYPE*	malloc P((MEM_SIZE nbytes));
+Malloc_t	malloc P((MEM_SIZE nbytes));
 #endif
 OP*	maybeforcelist P((I32 optype, OP* arg));
-char*	mess P((char* pat, ...));
+char*	mess P((char* pat, va_list* args));
 int	mg_clear P((SV* sv));
 MAGIC*	mg_find P((SV* sv, char type));
 int	mg_free P((SV* sv));
@@ -226,6 +226,7 @@ IO*	newIO P((void));
 OP*	newLISTOP P((I32 type, I32 flags, OP* first, OP* last));
 OP*	newPMOP P((I32 type, I32 flags));
 OP*	newPVOP P((I32 type, I32 flags, char* pv));
+SV*	newRV P((SV* ref));
 #ifdef LEAKTEST
 SV*	newSV P((I32 x, STRLEN len));
 #else
@@ -262,7 +263,7 @@ void	peep P((OP* op));
 PerlInterpreter*	perl_alloc P((void));
 I32	perl_callargv P((char* subname, I32 sp, I32 gimme, char** argv));
 I32	perl_callpv P((char* subname, I32 sp, I32 gimme, I32 hasargs, I32 numargs));
-I32	perl_callsv P((CV* cv, I32 sp, I32 gimme, I32 hasargs, I32 numargs));
+I32	perl_callsv P((SV* sv, I32 sp, I32 gimme, I32 hasargs, I32 numargs));
 void	perl_construct P((PerlInterpreter* sv_interp));
 void	perl_destruct P((PerlInterpreter* sv_interp));
 void	perl_free P((PerlInterpreter* sv_interp));
@@ -335,6 +336,7 @@ char*	scan_word P((char* s, char* dest, int allow_package, STRLEN *slp));
 OP*	scope P((OP* o));
 char*	screaminstr P((SV* bigsv, SV* littlesv));
 I32	setenv_getix P((char* nam));
+VOIDRET sighandler P((I32 sig));
 char*	skipspace P((char* s));
 int	start_subparse P((void));
 bool	sv_2bool P((SV* sv));

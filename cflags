@@ -38,7 +38,36 @@ for file do
     : or customize here
 
     case "$file" in
-    SDBM*) ccflags="$ccflags -pic";;
+    NDBM_File) ;;
+    ODBM_File) ;;
+    POSIX) ;;
+    SDBM_File) ;;
+    av) ;;
+    deb) ;;
+    dl) ;;
+    doio) ;;
+    doop) ;;
+    dump) ;;
+    gv) ;;
+    hv) ;;
+    main) ;;
+    malloc) ;;
+    mg) ;;
+    miniperlmain) ;;
+    op) ;;
+    perl) ;;
+    perlmain) ;;
+    perly) ;;
+    pp) ;;
+    regcomp) ;;
+    regexec) ;;
+    run) ;;
+    scope) ;;
+    sv) ;;
+    taint) ;;
+    toke) ;;
+    usersub) ;;
+    util) ;;
     *) ;;
     esac
 

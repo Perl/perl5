@@ -389,7 +389,7 @@ register GV *gv;
 #ifndef DOSISH
 		    if (rename(oldname,SvPVX(sv)) < 0) {
 			warn("Can't rename %s to %s: %s, skipping file",
-			  oldname, SvPVX(sv), strerror(errno) );
+			  oldname, SvPVX(sv), Strerror(errno) );
 			do_close(gv,FALSE);
 			continue;
 		    }
@@ -403,7 +403,7 @@ register GV *gv;
 		    (void)UNLINK(SvPVX(sv));
 		    if (link(oldname,SvPVX(sv)) < 0) {
 			warn("Can't rename %s to %s: %s, skipping file",
-			  oldname, SvPVX(sv), strerror(errno) );
+			  oldname, SvPVX(sv), Strerror(errno) );
 			do_close(gv,FALSE);
 			continue;
 		    }
@@ -414,7 +414,7 @@ register GV *gv;
 #ifndef DOSISH
 		    if (UNLINK(oldname) < 0) {
 			warn("Can't rename %s to %s: %s, skipping file",
-			  oldname, SvPVX(sv), strerror(errno) );
+			  oldname, SvPVX(sv), Strerror(errno) );
 			do_close(gv,FALSE);
 			continue;
 		    }
@@ -428,7 +428,7 @@ register GV *gv;
 		errno = 0;		/* in case sprintf set errno */
 		if (!do_open(argvoutgv,SvPVX(sv),SvCUR(sv))) {
 		    warn("Can't do inplace edit on %s: %s",
-		      oldname, strerror(errno) );
+		      oldname, Strerror(errno) );
 		    do_close(gv,FALSE);
 		    continue;
 		}
@@ -453,7 +453,7 @@ register GV *gv;
 	    return IoIFP(GvIO(gv));
 	}
 	else
-	    fprintf(stderr,"Can't open %s: %s\n",SvPV(sv, na), strerror(errno));
+	    fprintf(stderr,"Can't open %s: %s\n",SvPV(sv, na), Strerror(errno));
     }
     if (inplace) {
 	(void)do_close(argvoutgv,FALSE);

@@ -471,7 +471,7 @@ HV* stash;
 		curcop->cop_filegv = GvFILEGV(gv);
 		if (SvMULTI(GvFILEGV(gv)))	/* Filename began with slash */
 		    continue;
-		warn("Possible typo: \"%s::%s\"", HvNAME(stash), GvNAME(gv));
+		warn("Identifier \"%s::%s\" used only once: possible typo", HvNAME(stash), GvNAME(gv));
 	    }
 	    else if (*entry->hent_key == '_' &&
 		(gv = (GV*)entry->hent_val) &&

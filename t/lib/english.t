@@ -8,14 +8,14 @@ require English; import English;
 print $PID == $$ ? "ok 1\n" : "not ok 1\n";
 
 $_ = 1;
-print $MAGIC == $_ ? "ok 2\n" : "not ok 2\n";
+print $ARG == $_ ? "ok 2\n" : "not ok 2\n";
 
 sub foo {
     print $ARG[0] == $_[0] ? "ok 3\n" : "not ok 3\n";
 }
 &foo(1);
 
-$MAGIC = "ok 4\nok 5\nok 6\n";
+$ARG = "ok 4\nok 5\nok 6\n";
 /ok 5\n/;
 print $PREMATCH, $MATCH, $POSTMATCH;
 

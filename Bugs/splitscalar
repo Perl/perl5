@@ -1,0 +1,1 @@
+$_ = "a b c" ; $a = ( @b = split ) ; print "$a\n@b\n"

@@ -1,4 +1,4 @@
-#!./perl
+#!./miniperl
 
 @ARGV = "./config.sh";
 

@@ -24,14 +24,23 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-#ifdef DEBUGGING
+#ifndef DEBUGGING
+void
+dump_all()
+{
+}
+#else  /* Rest of file is for DEBUGGING */
 
 static void dump();
 
 void
 dump_all()
 {
+#ifdef HAS_SETLINEBUF
     setlinebuf(stderr);
+#else
+    setvbuf(stderr, Nullch, _IOLBF, 0);
+#endif
     if (main_root)
 	dump_op(main_root);
     dump_packsubs(defstash);

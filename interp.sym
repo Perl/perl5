@@ -76,6 +76,7 @@ main_start
 mainstack
 maxscream
 maxsysfd
+minus_F
 minus_a
 minus_c
 minus_l
@@ -125,6 +126,7 @@ signalstack
 sortcop
 sortstack
 sortstash
+splitstr
 stack
 statcache
 statgv

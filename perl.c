@@ -100,6 +100,8 @@ void
 perl_construct( sv_interp )
 register PerlInterpreter *sv_interp;
 {
+    char* s;
+
     if (!(curinterp = sv_interp))
 	return;
 
@@ -158,9 +160,10 @@ register PerlInterpreter *sv_interp;
     gid = (int)getgid();
     egid = (int)getegid();
     tainting = (euid != uid || egid != gid);
-    sprintf(patchlevel,"%3.3s%2.2d", strchr(rcsid,'5'), PATCHLEVEL);
-
-    (void)sprintf(strchr(rcsid,'#'), "%d\n", PATCHLEVEL);
+    if (s = strchr(rcsid,'#')) {
+	(void)sprintf(s, "%d\n", PATCHLEVEL);
+	sprintf(patchlevel,"%3.3s%2.2d", strchr(rcsid,'5'), PATCHLEVEL);
+    }
 
     fdpid = newAV();	/* for remembering popen pids by fd */
     pidstatus = newHV();/* for remembering status of dead pids */
@@ -200,6 +203,7 @@ register PerlInterpreter *sv_interp;
      * ones.  If so, the code below will clean up, but any destructors
      * may fail to find what they're looking for.
      */
+    dirty = TRUE;
     if (sv_count != 0)
 	sv_clean_refs();
 
@@ -223,10 +227,6 @@ register PerlInterpreter *sv_interp;
 #endif
 
     /* Now absolutely destruct everything, somehow or other, loops or no. */
-#ifdef APPARENTLY_UNNECESSARY
-    if (sv_count != 0)
-	sv_clean_magic();
-#endif
     last_sv_count = 0;
     while (sv_count != 0 && sv_count != last_sv_count) {
 	last_sv_count = sv_count;
@@ -319,6 +319,7 @@ setuid perl scripts securely.\n");
       reswitch:
 	switch (*s) {
 	case '0':
+	case 'F':
 	case 'a':
 	case 'c':
 	case 'd':
@@ -399,7 +400,7 @@ setuid perl scripts securely.\n");
     scriptname = argv[0];
     if (e_fp) {
 	if (fflush(e_fp) || ferror(e_fp) || fclose(e_fp))
-	    croak("Can't write to temp file for -e: %s", strerror(errno));
+	    croak("Can't write to temp file for -e: %s", Strerror(errno));
 	argc++,argv--;
 	scriptname = e_tmpname;
     }
@@ -677,6 +678,11 @@ char *s;
 	    nrschar = '\n';
 	}
 	return s + numlen;
+    case 'F':
+	minus_F = TRUE;
+	splitstr = savestr(s + 1);
+	s += strlen(s);
+	return s;
     case 'a':
 	minus_a = TRUE;
 	s++;
@@ -767,7 +773,7 @@ char *s;
 	s++;
 	return s;
     case 'v':
-	fputs("\nThis is perl, version 5.0, Alpha 6 (unsupported)\n\n",stdout);
+	fputs("\nThis is perl, version 5.0, Alpha 8 (unsupported)\n\n",stdout);
 	fputs(rcsid,stdout);
 	fputs("\nCopyright (c) 1989, 1990, 1991, 1992, 1993, 1994 Larry Wall\n",stdout);
 #ifdef MSDOS
@@ -989,7 +995,7 @@ sed %s -e \"/^[^#]/b\" \
 #endif
 #endif
 	croak("Can't open perl script \"%s\": %s\n",
-	  SvPVX(GvSV(curcop->cop_filegv)), strerror(errno));
+	  SvPVX(GvSV(curcop->cop_filegv)), Strerror(errno));
     }
 }
 

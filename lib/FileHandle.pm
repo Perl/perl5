@@ -3,15 +3,32 @@ package FileHandle;
 BEGIN {
     require 5.000;
     require English; import English;
+    require Exporter;
 }
-@ISA = ();
+
+@ISA = (Exporter);
+@EXPORT = qw(
+    print
+    autoflush
+    output_field_separator
+    output_record_separator
+    input_record_separator
+    input_line_number
+    format_page_number
+    format_lines_per_page
+    format_lines_left
+    format_name
+    format_top_name
+    format_line_break_characters
+    format_formfeed
+);
 
 sub print {
     local($this) = shift;
     print $this @_;
 }
 
-sub output_autoflush {
+sub autoflush {
     local($old) = select($_[0]);
     local($prev) = $OUTPUT_AUTOFLUSH;
     $OUTPUT_AUTOFLUSH = @_ > 1 ? $_[1] : 1;

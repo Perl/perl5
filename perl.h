@@ -209,10 +209,10 @@ char Error[1];
 #endif /* HAS_BCMP */
 
 #ifndef HAS_MEMMOVE
-#   if defined(HAS_BCOPY) && defined(SAFE_BCOPY)
+#   if defined(HAS_BCOPY) && defined(HAS_SAFE_BCOPY)
 #	define memmove(d,s,l) bcopy(s,d,l)
 #   else
-#	if defined(HAS_MEMCPY) && defined(SAFE_MEMCPY)
+#	if defined(HAS_MEMCPY) && defined(HAS_SAFE_MEMCPY)
 #	    define memmove(d,s,l) memcpy(d,s,l)
 #	else
 #	    define memmove(d,s,l) my_bcopy(s,d,l)
@@ -284,18 +284,23 @@ char Error[1];
 #   endif
 #endif
 
-#ifndef strerror
-#   ifdef HAS_STRERROR
+#ifdef HAS_STRERROR
 	char *strerror P((int));
-#   else
+#       ifndef Strerror
+#           define Strerror strerror
+#       endif
+#else
+#    ifdef HAS_SYS_ERRLIST
 	extern int sys_nerr;
 	extern char *sys_errlist[];
-#       define strerror(e) \
+#       ifndef Strerror
+#           define Strerror(e) \
 		((e) < 0 || (e) >= sys_nerr ? "(unknown)" : sys_errlist[e])
+#       endif
 #   endif
 #endif
 
-#ifdef I_SYSIOCTL
+#ifdef I_SYS_IOCTL
 #   ifndef _IOCTL_
 #	include <sys/ioctl.h>
 #   endif
@@ -305,8 +310,8 @@ char Error[1];
 #   ifdef HAS_SOCKETPAIR
 #	undef HAS_SOCKETPAIR
 #   endif
-#   ifdef HAS_NDBM
-#	undef HAS_NDBM
+#   ifdef I_NDBM
+#	undef I_NDBM
 #   endif
 #endif
 
@@ -746,7 +751,7 @@ char *strcpy(), *strcat();
 	    double exp P((double));
 	    double log P((double));
 	    double sqrt P((double));
-	    double modf P((double,int*));
+	    double modf P((double,double*));
 	    double sin P((double));
 	    double cos P((double));
 	    double atan2 P((double,double));
@@ -759,7 +764,7 @@ char *strcpy(), *strcat();
 
 char *crypt P((const char*, const char*));
 char *getenv P((const char*));
-long lseek P((int,int,int));
+long lseek P((int,off_t,int));
 char *getlogin P((void));
 
 #ifdef EUNICE
@@ -1108,11 +1113,13 @@ IEXT char	Ipatchlevel[6];
 IEXT char *	Inrs IINIT("\n");
 IEXT U32	Inrschar IINIT('\n');   /* final char of rs, or 0777 if none */
 IEXT I32	Inrslen IINIT(1);
+IEXT char *	Isplitstr IINIT(" ");
 IEXT bool	Ipreprocess;
 IEXT bool	Iminus_n;
 IEXT bool	Iminus_p;
 IEXT bool	Iminus_l;
 IEXT bool	Iminus_a;
+IEXT bool	Iminus_F;
 IEXT bool	Idoswitches;
 IEXT bool	Idowarn;
 IEXT bool	Idoextract;
@@ -1212,7 +1219,7 @@ IEXT HV *	Ipidstatus;	/* keep pid-to-status mappings for waitpid */
 IEXT VOL int	Iin_eval;	/* trap "fatal" errors? */
 IEXT OP *	Irestartop;	/* Are we propagating an error from croak? */
 IEXT int	Idelaymagic;	/* ($<,$>) = ... */
-IEXT bool	Idirty;		/* clean before rerunning */
+IEXT bool	Idirty;		/* In the middle of tearing things down? */
 IEXT bool	Ilocalizing;	/* are we processing a local() list? */
 IEXT bool	Itainted;	/* using variables controlled by $< */
 IEXT bool	Itainting;	/* doing taint checks */
@@ -1285,6 +1292,14 @@ struct interpreter {
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+#ifdef STANDARD_C
+#  include <stdarg.h>
+#else
+#  ifdef I_VARARGS
+#    include <varargs.h>
+#  endif
 #endif
 
 #include "proto.h"

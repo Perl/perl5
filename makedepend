@@ -1,5 +1,5 @@
 #!/bin/sh
-# : makedepend.SH,v 15738Revision: 4.1 15738Date: 92/08/07 18:24:20 $
+# $RCSfile: makedepend.SH,v 28453Revision: 4.1 28453Date: 92/08/07 18:24:20 $
 #
 # $Log:	makedepend.SH,v $
 # Revision 4.1  92/08/07  18:24:20  lwall
@@ -23,21 +23,21 @@
 
 export PATH || (echo "OOPS, this isn't sh.  Desperation time.  I will feed myself to sh."; sh $0; kill $$)
 
-cat='/bin/cat'
-cppflags=' -I/usr/include/sun -I/usr/ucbinclude -DDEBUGGING'
-cp='/bin/cp'
-cppstdin='/usr/lib/cpp'
+cat='cat'
+cppflags=' -DDEBUGGING'
+cp='cp'
+cppstdin='/tmp_mnt/vol/src/local/lwall/perl5/cppstdin'
 cppminus=''
-echo='/bin/echo'
-egrep='/bin/egrep'
-expr='/bin/expr'
-mv='/bin/mv'
-rm='/bin/rm'
-sed='/bin/sed'
-sort='/bin/sort'
+echo='echo'
+egrep='egrep'
+expr='expr'
+mv='mv'
+rm='rm'
+sed='sed'
+sort='sort'
 test='test'
-tr='/bin/tr'
-uniq='/bin/uniq'
+tr='tr'
+uniq='uniq'
 
 PATH="$PATH:."
 export PATH
@@ -82,6 +82,7 @@ for file in `$cat .clist`; do
     ( $echo "#line 1 \"$file\""; \
       $sed -n <$file \
 	-e "/^${filebase}_init(/q" \
+	-e '/^#line/d' \
 	-e '/^#/{' \
 	-e 's|/\*.*$||' \
 	-e 's|\\$||' \

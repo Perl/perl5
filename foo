@@ -1,11 +1,17 @@
 #!./perl
 
-#   Multiple Inheritence (get rich quick :-)
-	{
-	    package OBJ2; sub abc { print "abc\n"; }
-	    package OBJ3; sub def { print "def\n"; }
-	    package OBJ4; @ISA = ("OBJ2", "OBJ3");
-	    $x = bless { foo => bar };
-	    $x->abc;					# prints ``abc''
-	    $x->def;					# prints ``def''
-	}
+$foo = <<EOF;
+Subject: foobar
+From: baz
+EOF
+
+$* = 1;
+
+$pat = '^([*+&!]*)(Subject:)';
+#$pat =~ s/([a-zA-Z])/[\u$1\l$1]/g;
+#print $pat;
+
+$foo =~ /$pat/ig;
+
+print $', "\n";
+

@@ -5,9 +5,9 @@
 #include "XSUB.h"
 
 static int
-XS_DynamicLoader_bootstrap(ix, sp, items)
+XS_DynamicLoader_bootstrap(ix, ax, items)
 register int ix;
-register int sp;
+register int ax;
 register int items;
 {
     if (items < 1 || items > 1) {
@@ -39,7 +39,7 @@ register int items;
 
 	ST(0) = sv_mortalcopy(&sv_yes);
     }
-    return sp;
+    return ax;
 }
 
 int

@@ -89,12 +89,12 @@ struct io {
 
 #define SvREFCNT(sv)	(sv)->sv_refcnt
 #ifdef CRIPPLED_CC
-#define SvREFCNT_inc(sv)	sv_newref(sv)
-#define SvREFCNT_dec(sv)	sv_free(sv)
+#define SvREFCNT_inc(sv)	sv_newref((SV*)sv)
+#define SvREFCNT_dec(sv)	sv_free((SV*)sv)
 #else
 #define SvREFCNT_inc(sv)	((Sv = (SV*)(sv)), \
 				    (Sv && ++SvREFCNT(Sv)), (SV*)Sv)
-#define SvREFCNT_dec(sv)	sv_free(sv)
+#define SvREFCNT_dec(sv)	sv_free((SV*)sv)
 #endif
 
 #define SVTYPEMASK	0xff

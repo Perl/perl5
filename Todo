@@ -12,6 +12,8 @@ Bugs
 	Make yyparse recursion longjmp() proof.
 	Make "delete $array{$key} while ($key) = each %array" safe
 	Wrong line reported for runtime elsif condition error
+	TOOSTRICT is not too strict
+	recv and sysread should taint
 
 Regexp extensions
 	/m  for multiline
@@ -35,8 +37,11 @@ Would be nice to have
 	format BOTTOM
 	willcall()
 	-iprefix.
+	-i rename file only when successfully changed
 	All ARGV input should act like <>
 	Multiple levels of warning
+	.= shouldn't complain about undefined under -w
+	report HANDLE [formats].
 
 Pragmas ("assume" maybe?)
 	integer, float
@@ -55,11 +60,11 @@ Optimizations
 	Optimize away @_ where possible
 	sfio?
 	"one pass" global destruction
+	Optimize sort by { $a <=> $b }
 
 Need to think more about
 	ref function in list context
 	Populate %SIG at startup if appropriate
-	write HANDLE [formats].
 
 Vague possibilities
 	sub mysplice(@, $, $, ...)

@@ -79,6 +79,12 @@ typedef unsigned long	U32;
 #define strnNE(s1,s2,l) (strncmp(s1,s2,l))
 #define strnEQ(s1,s2,l) (!strncmp(s1,s2,l))
 
+#ifdef HAS_SETLOCALE  /* XXX Is there a better test for this? */
+#  ifndef CTYPE256
+#    define CTYPE256
+#  endif
+#endif
+
 #if defined(CTYPE256) || (!defined(isascii) && !defined(HAS_ISASCII))
 #define isALNUM(c)   (isalpha(c) || isdigit(c) || c == '_')
 #define isIDFIRST(c) (isalpha(c) || (c) == '_')
@@ -159,7 +165,7 @@ long lastxcount[MAXXCOUNT];
 #define Safefree(d) d = d
 #endif /* lint */
 
-#ifdef STRUCTCOPY
+#ifdef USE_STRUCT_COPY
 #define StructCopy(s,d,t) *((t*)(d)) = *((t*)(s))
 #else
 #define StructCopy(s,d,t) Copy(s,d,1,t)

@@ -1,4 +1,4 @@
-# : Makefile.SH,v 15738Revision: 4.1 15738Date: 92/08/07 18:29:07 $
+# $RCSfile: Makefile.SH,v 28453Revision: 4.1 28453Date: 92/08/07 18:29:07 $
 #
 # $Log:	Makefile.SH,v $
 # Revision 4.1  92/08/07  18:29:07  lwall
@@ -20,11 +20,11 @@
 # 
 
 CC = cc
-YACC = /bin/yacc
+YACC = yacc
 bin = /usr/local/bin
-lib = 
-mansrc = /usr/man/manl
-manext = l
+lib = /usr/local/lib
+mansrc = /usr/local/man/man1
+manext = 1
 LDFLAGS = 
 SMALL = 
 LARGE =  
@@ -32,7 +32,7 @@ mallocsrc = malloc.c
 mallocobj = malloc.o
 shellflags = 
 
-libs = -ldbm -lm -lposix
+libs = -ldl -lm -lposix
 
 CCCMD = `sh $(shellflags) cflags $@`
 
@@ -129,10 +129,9 @@ malloc.c: ../malloc.c
 
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 # If this runs make out of memory, delete /usr/include lines.
-hash.o: 
 hash.o: ../config.h
-hash.o: /usr/ucbinclude/ctype.h
-hash.o: /usr/ucbinclude/stdio.h
+hash.o: /usr/include/ctype.h
+hash.o: /usr/include/stdio.h
 hash.o: EXTERN.h
 hash.o: a2p.h
 hash.o: handy.h
@@ -140,60 +139,60 @@ hash.o: hash.c
 hash.o: hash.h
 hash.o: str.h
 hash.o: util.h
-malloc.o: 
 malloc.o: ../av.h
 malloc.o: ../config.h
 malloc.o: ../cop.h
+malloc.o: ../cv.h
 malloc.o: ../embed.h
 malloc.o: ../form.h
 malloc.o: ../gv.h
 malloc.o: ../handy.h
 malloc.o: ../hv.h
+malloc.o: ../mg.h
 malloc.o: ../op.h
 malloc.o: ../opcode.h
 malloc.o: ../perl.h
-malloc.o: ../pm.h
 malloc.o: ../pp.h
 malloc.o: ../proto.h
 malloc.o: ../regexp.h
+malloc.o: ../scope.h
 malloc.o: ../sv.h
 malloc.o: ../unixish.h
 malloc.o: ../util.h
-malloc.o: /usr/ucbinclude/ctype.h
-malloc.o: /usr/ucbinclude/dirent.h
-malloc.o: /usr/ucbinclude/errno.h
-malloc.o: /usr/ucbinclude/machine/param.h
-malloc.o: /usr/ucbinclude/machine/setjmp.h
-malloc.o: /usr/ucbinclude/ndbm.h
-malloc.o: /usr/ucbinclude/netinet/in.h
-malloc.o: /usr/ucbinclude/setjmp.h
-malloc.o: /usr/ucbinclude/stdio.h
-malloc.o: /usr/ucbinclude/sys/dirent.h
-malloc.o: /usr/ucbinclude/sys/errno.h
-malloc.o: /usr/ucbinclude/sys/filio.h
-malloc.o: /usr/ucbinclude/sys/ioccom.h
-malloc.o: /usr/ucbinclude/sys/ioctl.h
-malloc.o: /usr/ucbinclude/sys/param.h
-malloc.o: /usr/ucbinclude/sys/signal.h
-malloc.o: /usr/ucbinclude/sys/sockio.h
-malloc.o: /usr/ucbinclude/sys/stat.h
-malloc.o: /usr/ucbinclude/sys/stdtypes.h
-malloc.o: /usr/ucbinclude/sys/sysmacros.h
-malloc.o: /usr/ucbinclude/sys/time.h
-malloc.o: /usr/ucbinclude/sys/times.h
-malloc.o: /usr/ucbinclude/sys/ttold.h
-malloc.o: /usr/ucbinclude/sys/ttychars.h
-malloc.o: /usr/ucbinclude/sys/ttycom.h
-malloc.o: /usr/ucbinclude/sys/ttydev.h
-malloc.o: /usr/ucbinclude/sys/types.h
-malloc.o: /usr/ucbinclude/time.h
-malloc.o: /usr/ucbinclude/vm/faultcode.h
+malloc.o: /usr/include/ctype.h
+malloc.o: /usr/include/dirent.h
+malloc.o: /usr/include/errno.h
+malloc.o: /usr/include/machine/param.h
+malloc.o: /usr/include/machine/setjmp.h
+malloc.o: /usr/include/netinet/in.h
+malloc.o: /usr/include/setjmp.h
+malloc.o: /usr/include/stdio.h
+malloc.o: /usr/include/sys/dirent.h
+malloc.o: /usr/include/sys/errno.h
+malloc.o: /usr/include/sys/filio.h
+malloc.o: /usr/include/sys/ioccom.h
+malloc.o: /usr/include/sys/ioctl.h
+malloc.o: /usr/include/sys/param.h
+malloc.o: /usr/include/sys/signal.h
+malloc.o: /usr/include/sys/sockio.h
+malloc.o: /usr/include/sys/stat.h
+malloc.o: /usr/include/sys/stdtypes.h
+malloc.o: /usr/include/sys/sysmacros.h
+malloc.o: /usr/include/sys/time.h
+malloc.o: /usr/include/sys/times.h
+malloc.o: /usr/include/sys/ttold.h
+malloc.o: /usr/include/sys/ttychars.h
+malloc.o: /usr/include/sys/ttycom.h
+malloc.o: /usr/include/sys/ttydev.h
+malloc.o: /usr/include/sys/types.h
+malloc.o: /usr/include/time.h
+malloc.o: /usr/include/varargs.h
+malloc.o: /usr/include/vm/faultcode.h
 malloc.o: EXTERN.h
 malloc.o: malloc.c
-str.o: 
 str.o: ../config.h
-str.o: /usr/ucbinclude/ctype.h
-str.o: /usr/ucbinclude/stdio.h
+str.o: /usr/include/ctype.h
+str.o: /usr/include/stdio.h
 str.o: EXTERN.h
 str.o: a2p.h
 str.o: handy.h
@@ -201,10 +200,9 @@ str.o: hash.h
 str.o: str.c
 str.o: str.h
 str.o: util.h
-util.o: 
 util.o: ../config.h
-util.o: /usr/ucbinclude/ctype.h
-util.o: /usr/ucbinclude/stdio.h
+util.o: /usr/include/ctype.h
+util.o: /usr/include/stdio.h
 util.o: EXTERN.h
 util.o: INTERN.h
 util.o: a2p.h
@@ -213,10 +211,9 @@ util.o: hash.h
 util.o: str.h
 util.o: util.c
 util.o: util.h
-walk.o: 
 walk.o: ../config.h
-walk.o: /usr/ucbinclude/ctype.h
-walk.o: /usr/ucbinclude/stdio.h
+walk.o: /usr/include/ctype.h
+walk.o: /usr/include/stdio.h
 walk.o: EXTERN.h
 walk.o: a2p.h
 walk.o: handy.h

@@ -102,6 +102,7 @@ for file in `$cat .clist`; do
     ( $echo "#line 1 \"$file\""; \
       $sed -n <$file \
 	-e "/^${filebase}_init(/q" \
+	-e '/^#line/d' \
 	-e '/^#/{' \
 	-e 's|/\*.*$||' \
 	-e 's|\\$||' \

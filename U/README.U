@@ -1,0 +1,15 @@
+?X:  These units are based on the ones supplied with dist-3.0
+?X:  patchlevel 22.  They have been changed or enhanced to work with
+?X:  perl5alpha.  I would appreciate hearing about any changes,
+?X:  corrections, or enhancements.
+?X:	Andy Dougherty			doughera@lafcol.lafayette.edu
+?X:	Dept. of Physics 		
+?X:	Lafayette College	
+?X:	Easton, PA  18042-1782
+?X:     Sat Apr  2 15:45:17 EST 1994
+?RCS: 
+?RCS: You may redistribute only under the terms of the Artistic Licence,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic Licence; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0, or in the perl distribution.

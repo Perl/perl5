@@ -1,0 +1,1 @@
+sub foo { my $i; for $i (@bar) { } }

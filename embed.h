@@ -959,6 +959,7 @@
 #define mainstack	(curinterp->Imainstack)
 #define maxscream	(curinterp->Imaxscream)
 #define maxsysfd	(curinterp->Imaxsysfd)
+#define minus_F		(curinterp->Iminus_F)
 #define minus_a		(curinterp->Iminus_a)
 #define minus_c		(curinterp->Iminus_c)
 #define minus_l		(curinterp->Iminus_l)
@@ -1008,6 +1009,7 @@
 #define sortcop		(curinterp->Isortcop)
 #define sortstack	(curinterp->Isortstack)
 #define sortstash	(curinterp->Isortstash)
+#define splitstr	(curinterp->Isplitstr)
 #define stack		(curinterp->Istack)
 #define statcache	(curinterp->Istatcache)
 #define statgv		(curinterp->Istatgv)
@@ -1109,6 +1111,7 @@
 #define Imainstack	mainstack
 #define Imaxscream	maxscream
 #define Imaxsysfd	maxsysfd
+#define Iminus_F	minus_F
 #define Iminus_a	minus_a
 #define Iminus_c	minus_c
 #define Iminus_l	minus_l
@@ -1158,6 +1161,7 @@
 #define Isortcop	sortcop
 #define Isortstack	sortstack
 #define Isortstash	sortstash
+#define Isplitstr	splitstr
 #define Istack		stack
 #define Istatcache	statcache
 #define Istatgv		statgv

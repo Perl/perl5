@@ -10,11 +10,11 @@
 #   define dbm_firstkey(db) (croak("dbz doesn't implement traversal"),fetch())
 #   define nextkey() (croak("dbz doesn't implement traversal"),fetch())
 #   define dbm_nextkey(db) (croak("dbz doesn't implement traversal"),fetch())
-#   ifdef HAS_NDBM
-#	undef HAS_NDBM
+#   ifdef I_NDBM
+#	undef I_NDBM
 #   endif
-#   ifndef HAS_ODBM
-#	define HAS_ODBM
+#   ifndef I_DBM
+#	define I_DBM
 #   endif
 #else
 #   ifdef HAS_GDBM
@@ -22,21 +22,21 @@
 #	    include <gdbm.h>
 #	endif
 #	define SOME_DBM
-#	ifdef HAS_NDBM
-#	    undef HAS_NDBM
+#	ifdef I_NDBM
+#	    undef I_NDBM
 #	endif
-#	ifdef HAS_ODBM
-#	    undef HAS_ODBM
+#	ifdef I_DBM
+#	    undef I_DBM
 #	endif
 #   else
-#	ifdef HAS_NDBM
+#	ifdef I_NDBM
 #	    include <ndbm.h>
 #	    define SOME_DBM
-#	    ifdef HAS_ODBM
-#		undef HAS_ODBM
+#	    ifdef I_DBM
+#		undef I_DBM
 #	    endif
 #	else
-#	    ifdef HAS_ODBM
+#	    ifdef I_DBM
 #		ifdef NULL
 #		    undef NULL		/* suppress redefinition message */
 #		endif
@@ -51,8 +51,8 @@
 #		define dbm_store(db,dkey,dcontent,flags) store(dkey,dcontent)
 #		define dbm_close(db) dbmclose()
 #		define dbm_firstkey(db) firstkey()
-#	    endif /* HAS_ODBM */
-#	endif /* HAS_NDBM */
+#	    endif /* I_DBM */
+#	endif /* I_NDBM */
 #   endif /* HAS_GDBM */
 #endif /* WANT_DBZ */
 

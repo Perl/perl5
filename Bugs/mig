@@ -1,0 +1,17 @@
+#!./perl
+
+$foo = <<EOF;
+Subject: foobar
+From: baz
+EOF
+
+$* = 1;
+
+$pat = '^([*+&!]*)(Subject:)';
+#$pat =~ s/([a-zA-Z])/[\u$1\l$1]/g;
+#print $pat;
+
+$foo =~ /$pat/g;
+
+print $', "\n";
+

@@ -59,14 +59,6 @@
 #  include <vfork.h>
 #endif
 
-#ifdef STANDARD_C
-#  include <stdarg.h>
-#else
-#  ifdef I_VARARGS
-#    include <varargs.h>
-#  endif
-#endif
-
 #ifdef I_FCNTL
 #  include <fcntl.h>
 #endif
@@ -93,7 +85,7 @@ unsigned long size;
 MEM_SIZE size;
 #endif /* MSDOS */
 {
-    char *ptr;
+    char  *ptr;
 #ifndef STANDARD_C
     char *malloc();
 #endif /* ! STANDARD_C */
@@ -741,21 +733,25 @@ long a1, a2, a3, a4;
     }
 
     if (s[-1] != '\n') {
-	if (curcop->cop_line) {
-	    (void)sprintf(s," at %s line %ld",
-	      SvPVX(GvSV(curcop->cop_filegv)), (long)curcop->cop_line);
-	    s += strlen(s);
+	if (dirty)
+	    strcpy(s, " during global destruction.\n");
+	else {
+	    if (curcop->cop_line) {
+		(void)sprintf(s," at %s line %ld",
+		  SvPVX(GvSV(curcop->cop_filegv)), (long)curcop->cop_line);
+		s += strlen(s);
+	    }
+	    if (last_in_gv &&
+		GvIO(last_in_gv) &&
+		IoLINES(GvIO(last_in_gv)) ) {
+		(void)sprintf(s,", <%s> %s %ld",
+		  last_in_gv == argvgv ? "" : GvENAME(last_in_gv),
+		  strEQ(rs,"\n") ? "line" : "chunk", 
+		  (long)IoLINES(GvIO(last_in_gv)));
+		s += strlen(s);
+	    }
+	    (void)strcpy(s,".\n");
 	}
-	if (last_in_gv &&
-	    GvIO(last_in_gv) &&
-	    IoLINES(GvIO(last_in_gv)) ) {
-	    (void)sprintf(s,", <%s> %s %ld",
-	      last_in_gv == argvgv ? "" : GvENAME(last_in_gv),
-	      strEQ(rs,"\n") ? "line" : "chunk", 
-	      (long)IoLINES(GvIO(last_in_gv)));
-	    s += strlen(s);
-	}
-	(void)strcpy(s,".\n");
 	if (usermess)
 	    sv_catpv(tmpstr,buf+1);
     }
@@ -801,13 +797,13 @@ long a1, a2, a3, a4;
 
 #ifdef STANDARD_C
 char *
-mess(char *pat, va_list args)
+mess(char *pat, va_list *args)
 #else
 /*VARARGS0*/
 char *
 mess(pat, args)
     char *pat;
-    va_list args;
+    va_list *args;
 #endif
 {
     char *s;
@@ -825,31 +821,35 @@ mess(pat, args)
     usermess = strEQ(pat, "%s");
     if (usermess) {
 	tmpstr = sv_newmortal();
-	sv_setpv(tmpstr, va_arg(args, char *));
+	sv_setpv(tmpstr, va_arg(*args, char *));
 	*s++ = SvPVX(tmpstr)[SvCUR(tmpstr)-1];
     }
     else {
-	(void) vsprintf(s,pat,args);
+	(void) vsprintf(s,pat,*args);
 	s += strlen(s);
     }
-    va_end(args);
+    va_end(*args);
 
     if (s[-1] != '\n') {
-	if (curcop->cop_line) {
-	    (void)sprintf(s," at %s line %ld",
-	      SvPVX(GvSV(curcop->cop_filegv)), (long)curcop->cop_line);
-	    s += strlen(s);
+	if (dirty)
+	    strcpy(s, " during global destruction.\n");
+	else {
+	    if (curcop->cop_line) {
+		(void)sprintf(s," at %s line %ld",
+		  SvPVX(GvSV(curcop->cop_filegv)), (long)curcop->cop_line);
+		s += strlen(s);
+	    }
+	    if (last_in_gv &&
+		GvIO(last_in_gv) &&
+		IoLINES(GvIO(last_in_gv)) ) {
+		(void)sprintf(s,", <%s> %s %ld",
+		  last_in_gv == argvgv ? "" : GvNAME(last_in_gv),
+		  strEQ(rs,"\n") ? "line" : "chunk", 
+		  (long)IoLINES(GvIO(last_in_gv)));
+		s += strlen(s);
+	    }
+	    (void)strcpy(s,".\n");
 	}
-	if (last_in_gv &&
-	    GvIO(last_in_gv) &&
-	    IoLINES(GvIO(last_in_gv)) ) {
-	    (void)sprintf(s,", <%s> %s %ld",
-	      last_in_gv == argvgv ? "" : GvNAME(last_in_gv),
-	      strEQ(rs,"\n") ? "line" : "chunk", 
-	      (long)IoLINES(GvIO(last_in_gv)));
-	    s += strlen(s);
-	}
-	(void)strcpy(s,".\n");
 	if (usermess)
 	    sv_catpv(tmpstr,buf+1);
     }
@@ -880,7 +880,7 @@ croak(pat, va_alist)
 #else
     va_start(args);
 #endif
-    message = mess(pat, args);
+    message = mess(pat, &args);
     va_end(args);
     if (restartop = die_where(message))
 	longjmp(top_env, 3);
@@ -910,7 +910,7 @@ warn(pat,va_alist)
 #else
     va_start(args);
 #endif
-    message = mess(pat, args);
+    message = mess(pat, &args);
     va_end(args);
 
     fputs(message,stderr);
@@ -1283,7 +1283,7 @@ char	*mode;
 		close(fd);
 #endif
 	    do_exec(cmd);	/* may or may not use the shell */
-	    warn("Can't exec \"%s\": %s", cmd, strerror(errno));
+	    warn("Can't exec \"%s\": %s", cmd, Strerror(errno));
 	    _exit(1);
 	}
 	/*SUPPRESS 560*/

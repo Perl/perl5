@@ -1,0 +1,500 @@
+
+SUB main::BEGIN = {
+8   TYPE = subroutine exit  ===> DONE
+    FLAGS = (UNKNOWN,KIDS)
+    {
+        TYPE = line sequence  ===> (8)
+        FLAGS = (UNKNOWN,KIDS,PARENS)
+        {
+1           TYPE = next statement  ===> 2
+            FLAGS = (SCALAR)
+            LINE = 4
+        }
+        {
+3           TYPE = require  ===> 4
+            FLAGS = (SCALAR,KIDS)
+            {
+                TYPE = scalar  ===> (3)
+                FLAGS = (SCALAR,KIDS)
+                {
+                    TYPE = null operation  ===> (2)
+                      (was pushmark)
+                    FLAGS = (SCALAR)
+                }
+                {
+2                   TYPE = constant item  ===> 3
+                    FLAGS = (SCALAR)
+                    SV = PV("stat.pl")
+                }
+            }
+        }
+        {
+4           TYPE = next statement  ===> 5
+            FLAGS = (SCALAR)
+            LINE = 5
+        }
+        {
+7           TYPE = print  ===> 8
+            FLAGS = (SCALAR,KIDS)
+            {
+5               TYPE = pushmark  ===> 6
+                FLAGS = (SCALAR)
+            }
+            {
+                TYPE = scalar  ===> (7)
+                FLAGS = (SCALAR,KIDS)
+                {
+                    TYPE = null operation  ===> (6)
+                      (was pushmark)
+                    FLAGS = (SCALAR)
+                }
+                {
+6                   TYPE = constant item  ===> 7
+                    FLAGS = (SCALAR)
+                    SV = PV("here
+")
+                }
+            }
+        }
+    }
+}
+{
+111 TYPE = eval exit  ===> DONE
+    FLAGS = (UNKNOWN,KIDS)
+    {
+        TYPE = line sequence  ===> (111)
+        FLAGS = (UNKNOWN,KIDS)
+        {
+31          TYPE = next statement  ===> 32
+            LINE = 8
+        }
+        {
+36          TYPE = scalar assignment  ===> 37
+            FLAGS = (SCALAR,KIDS,STACKED)
+            {
+34              TYPE = addition  ===> 35
+                TARG = 1
+                FLAGS = (SCALAR,KIDS)
+                {
+32                  TYPE = constant item  ===> 33
+                    FLAGS = (SCALAR)
+                    SV = IV(0)
+                }
+                {
+                    TYPE = null operation  ===> (34)
+                      (was ref-to-scalar cast)
+                    FLAGS = (SCALAR,KIDS)
+                    {
+33                      TYPE = scalar variable  ===> 34
+                        FLAGS = (SCALAR)
+                        GV = main::[
+                    }
+                }
+            }
+            {
+                TYPE = null operation  ===> (36)
+                  (was ref-to-scalar cast)
+                FLAGS = (SCALAR,KIDS,LVAL,SPECIAL)
+                {
+35                  TYPE = scalar variable  ===> 36
+                    FLAGS = (SCALAR)
+                    GV = main::ST_DEV
+                }
+            }
+        }
+        {
+37          TYPE = next statement  ===> 38
+            LINE = 9
+        }
+        {
+42          TYPE = scalar assignment  ===> 43
+            FLAGS = (SCALAR,KIDS,STACKED)
+            {
+40              TYPE = addition  ===> 41
+                TARG = 1
+                FLAGS = (SCALAR,KIDS)
+                {
+38                  TYPE = constant item  ===> 39
+                    FLAGS = (SCALAR)
+                    SV = IV(1)
+                }
+                {
+                    TYPE = null operation  ===> (40)
+                      (was ref-to-scalar cast)
+                    FLAGS = (SCALAR,KIDS)
+                    {
+39                      TYPE = scalar variable  ===> 40
+                        FLAGS = (SCALAR)
+                        GV = main::[
+                    }
+                }
+            }
+            {
+                TYPE = null operation  ===> (42)
+                  (was ref-to-scalar cast)
+                FLAGS = (SCALAR,KIDS,LVAL,SPECIAL)
+                {
+41                  TYPE = scalar variable  ===> 42
+                    FLAGS = (SCALAR)
+                    GV = main::ST_INO
+                }
+            }
+        }
+        {
+43          TYPE = next statement  ===> 44
+            LINE = 10
+        }
+        {
+48          TYPE = scalar assignment  ===> 49
+            FLAGS = (SCALAR,KIDS,STACKED)
+            {
+46              TYPE = addition  ===> 47
+                TARG = 1
+                FLAGS = (SCALAR,KIDS)
+                {
+44                  TYPE = constant item  ===> 45
+                    FLAGS = (SCALAR)
+                    SV = IV(2)
+                }
+                {
+                    TYPE = null operation  ===> (46)
+                      (was ref-to-scalar cast)
+                    FLAGS = (SCALAR,KIDS)
+                    {
+45                      TYPE = scalar variable  ===> 46
+                        FLAGS = (SCALAR)
+                        GV = main::[
+                    }
+                }
+            }
+            {
+                TYPE = null operation  ===> (48)
+                  (was ref-to-scalar cast)
+                FLAGS = (SCALAR,KIDS,LVAL,SPECIAL)
+                {
+47                  TYPE = scalar variable  ===> 48
+                    FLAGS = (SCALAR)
+                    GV = main::ST_MODE
+                }
+            }
+        }
+        {
+49          TYPE = next statement  ===> 50
+            LINE = 11
+        }
+        {
+54          TYPE = scalar assignment  ===> 55
+            FLAGS = (SCALAR,KIDS,STACKED)
+            {
+52              TYPE = addition  ===> 53
+                TARG = 1
+                FLAGS = (SCALAR,KIDS)
+                {
+50                  TYPE = constant item  ===> 51
+                    FLAGS = (SCALAR)
+                    SV = IV(3)
+                }
+                {
+                    TYPE = null operation  ===> (52)
+                      (was ref-to-scalar cast)
+                    FLAGS = (SCALAR,KIDS)
+                    {
+51                      TYPE = scalar variable  ===> 52
+                        FLAGS = (SCALAR)
+                        GV = main::[
+                    }
+                }
+            }
+            {
+                TYPE = null operation  ===> (54)
+                  (was ref-to-scalar cast)
+                FLAGS = (SCALAR,KIDS,LVAL,SPECIAL)
+                {
+53                  TYPE = scalar variable  ===> 54
+                    FLAGS = (SCALAR)
+                    GV = main::ST_NLINK
+                }
+            }
+        }
+        {
+55          TYPE = next statement  ===> 56
+            LINE = 12
+        }
+        {
+60          TYPE = scalar assignment  ===> 61
+            FLAGS = (SCALAR,KIDS,STACKED)
+            {
+58              TYPE = addition  ===> 59
+                TARG = 1
+                FLAGS = (SCALAR,KIDS)
+                {
+56                  TYPE = constant item  ===> 57
+                    FLAGS = (SCALAR)
+                    SV = IV(4)
+                }
+                {
+                    TYPE = null operation  ===> (58)
+                      (was ref-to-scalar cast)
+                    FLAGS = (SCALAR,KIDS)
+                    {
+57                      TYPE = scalar variable  ===> 58
+                        FLAGS = (SCALAR)
+                        GV = main::[
+                    }
+                }
+            }
+            {
+                TYPE = null operation  ===> (60)
+                  (was ref-to-scalar cast)
+                FLAGS = (SCALAR,KIDS,LVAL,SPECIAL)
+                {
+59                  TYPE = scalar variable  ===> 60
+                    FLAGS = (SCALAR)
+                    GV = main::ST_UID
+                }
+            }
+        }
+        {
+61          TYPE = next statement  ===> 62
+            LINE = 13
+        }
+        {
+66          TYPE = scalar assignment  ===> 67
+            FLAGS = (SCALAR,KIDS,STACKED)
+            {
+64              TYPE = addition  ===> 65
+                TARG = 1
+                FLAGS = (SCALAR,KIDS)
+                {
+62                  TYPE = constant item  ===> 63
+                    FLAGS = (SCALAR)
+                    SV = IV(5)
+                }
+                {
+                    TYPE = null operation  ===> (64)
+                      (was ref-to-scalar cast)
+                    FLAGS = (SCALAR,KIDS)
+                    {
+63                      TYPE = scalar variable  ===> 64
+                        FLAGS = (SCALAR)
+                        GV = main::[
+                    }
+                }
+            }
+            {
+                TYPE = null operation  ===> (66)
+                  (was ref-to-scalar cast)
+                FLAGS = (SCALAR,KIDS,LVAL,SPECIAL)
+                {
+65                  TYPE = scalar variable  ===> 66
+                    FLAGS = (SCALAR)
+                    GV = main::ST_GID
+                }
+            }
+        }
+        {
+67          TYPE = next statement  ===> 68
+            LINE = 14
+        }
+        {
+72          TYPE = scalar assignment  ===> 73
+            FLAGS = (SCALAR,KIDS,STACKED)
+            {
+70              TYPE = addition  ===> 71
+                TARG = 1
+                FLAGS = (SCALAR,KIDS)
+                {
+68                  TYPE = constant item  ===> 69
+                    FLAGS = (SCALAR)
+                    SV = IV(6)
+                }
+                {
+                    TYPE = null operation  ===> (70)
+                      (was ref-to-scalar cast)
+                    FLAGS = (SCALAR,KIDS)
+                    {
+69                      TYPE = scalar variable  ===> 70
+                        FLAGS = (SCALAR)
+                        GV = main::[
+                    }
+                }
+            }
+            {
+                TYPE = null operation  ===> (72)
+                  (was ref-to-scalar cast)
+                FLAGS = (SCALAR,KIDS,LVAL,SPECIAL)
+                {
+71                  TYPE = scalar variable  ===> 72
+                    FLAGS = (SCALAR)
+                    GV = main::ST_RDEV
+                }
+            }
+        }
+        {
+73          TYPE = next statement  ===> 74
+            LINE = 15
+        }
+        {
+78          TYPE = scalar assignment  ===> 79
+            FLAGS = (SCALAR,KIDS,STACKED)
+            {
+76              TYPE = addition  ===> 77
+                TARG = 1
+                FLAGS = (SCALAR,KIDS)
+                {
+74                  TYPE = constant item  ===> 75
+                    FLAGS = (SCALAR)
+                    SV = IV(7)
+                }
+                {
+                    TYPE = null operation  ===> (76)
+                      (was ref-to-scalar cast)
+                    FLAGS = (SCALAR,KIDS)
+                    {
+75                      TYPE = scalar variable  ===> 76
+                        FLAGS = (SCALAR)
+                        GV = main::[
+                    }
+                }
+            }
+            {
+                TYPE = null operation  ===> (78)
+                  (was ref-to-scalar cast)
+                FLAGS = (SCALAR,KIDS,LVAL,SPECIAL)
+                {
+77                  TYPE = scalar variable  ===> 78
+                    FLAGS = (SCALAR)
+                    GV = main::ST_SIZE
+                }
+            }
+        }
+        {
+79          TYPE = next statement  ===> 80
+            LINE = 16
+        }
+        {
+84          TYPE = scalar assignment  ===> 85
+            FLAGS = (SCALAR,KIDS,STACKED)
+            {
+82              TYPE = addition  ===> 83
+                TARG = 1
+                FLAGS = (SCALAR,KIDS)
+                {
+80                  TYPE = constant item  ===> 81
+                    FLAGS = (SCALAR)
+                    SV = IV(8)
+                }
+                {
+                    TYPE = null operation  ===> (82)
+                      (was ref-to-scalar cast)
+                    FLAGS = (SCALAR,KIDS)
+                    {
+81                      TYPE = scalar variable  ===> 82
+                        FLAGS = (SCALAR)
+                        GV = main::[
+                    }
+                }
+            }
+            {
+                TYPE = null operation  ===> (84)
+                  (was ref-to-scalar cast)
+                FLAGS = (SCALAR,KIDS,LVAL,SPECIAL)
+                {
+83                  TYPE = scalar variable  ===> 84
+                    FLAGS = (SCALAR)
+                    GV = main::ST_ATIME
+                }
+            }
+        }
+        {
+85          TYPE = next statement  ===> 86
+            LINE = 17
+        }
+        {
+90          TYPE = scalar assignment  ===> 91
+            FLAGS = (SCALAR,KIDS,STACKED)
+            {
+88              TYPE = addition  ===> 89
+                TARG = 1
+                FLAGS = (SCALAR,KIDS)
+                {
+86                  TYPE = constant item  ===> 87
+                    FLAGS = (SCALAR)
+                    SV = IV(9)
+                }
+                {
+                    TYPE = null operation  ===> (88)
+                      (was ref-to-scalar cast)
+                    FLAGS = (SCALAR,KIDS)
+                    {
+87                      TYPE = scalar variable  ===> 88
+                        FLAGS = (SCALAR)
+                        GV = main::[
+                    }
+                }
+            }
+            {
+                TYPE = null operation  ===> (90)
+                  (was ref-to-scalar cast)
+                FLAGS = (SCALAR,KIDS,LVAL,SPECIAL)
+                {
+89                  TYPE = scalar variable  ===> 90
+                    FLAGS = (SCALAR)
+                    GV = main::ST_MTIME
+                }
+            }
+        }
+        {
+91          TYPE = next statement  ===> 92
+            LINE = 18
+        }
+        {
+96          TYPE = scalar assignment  ===> 97
+            FLAGS = (SCALAR,KIDS,STACKED)
+            {
+94              TYPE = addition  ===> 95
+                TARG = 1
+                FLAGS = (SCALAR,KIDS)
+                {
+92                  TYPE = constant item  ===> 93
+                    FLAGS = (SCALAR)
+                    SV = IV(10)
+                }
+                {
+                    TYPE = null operation  ===> (94)
+                      (was ref-to-scalar cast)
+                    FLAGS = (SCALAR,KIDS)
+                    {
+93                      TYPE = scalar variable  ===> 94
+                        FLAGS = (SCALAR)
+                        GV = main::[
+                    }
+                }
+            }
+            {
+                TYPE = null operation  ===> (96)
+                  (was ref-to-scalar cast)
+                FLAGS = (SCALAR,KIDS,LVAL,SPECIAL)
+                {
+95                  TYPE = scalar variable  ===> 96
+                    FLAGS = (SCALAR)
+                    GV = main::ST_CTIME
+                }
+            }
+        }
+        {
+97          TYPE = next statement  ===> 98
+            LINE = 19
+        }
+        {
+102         TYPE = scalar assignment  ===> 103
+            FLAGS = (SCALAR,KIDS,STACKED)
+            {
+100             TYPE = addition  ===> 101
+                TARG = 1
+                FLAGS = (SCALAR,KIDS)
+                {
+98                  TYPE = constant item  ===> 99
+                    FLAGS = (SCALAR)
+                    SV = IV(11)
+                }

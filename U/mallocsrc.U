@@ -1,0 +1,101 @@
+?X:  These units are based on the ones supplied with dist-3.0
+?X:  patchlevel 22.  They have been changed or enhanced to work with
+?X:  perl5alpha.  I would appreciate hearing about any changes,
+?X:  corrections, or enhancements.
+?X:	Andy Dougherty			doughera@lafcol.lafayette.edu
+?X:	Dept. of Physics 		
+?X:	Lafayette College	
+?X:	Easton, PA  18042-1782
+?X:     Sat Apr  2 15:45:17 EST 1994
+?RCS: $Id: mallocsrc.U,v 3.0 1993/08/18 12:09:12 ram Exp $
+?RCS:
+?RCS: Copyright (c) 1991-1993, Raphael Manfredi
+?RCS: 
+?RCS: You may redistribute only under the terms of the Artistic Licence,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic Licence; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?RCS: $Log: mallocsrc.U,v $
+?RCS: Revision 3.0  1993/08/18  12:09:12  ram
+?RCS: Baseline for dist 3.0 netwide release.
+?RCS:
+?MAKE:mallocsrc mallocobj usemymalloc malloctype: Myread Oldconfig package \
+	Guess test rm cat +cc +ccflags Findhdr
+?MAKE:	-pick add $@ %<
+?S:usemymalloc:
+?S:	This variable contains y if the malloc that comes with this package
+?S:	is desired over the system's version of malloc.  People often include
+?S:	special versions of malloc for effiency, but such versions are often
+?S:	less portable.  See also mallocsrc and mallocobj.
+?S:.
+?S:mallocsrc:
+?S:	This variable contains the name of the malloc.c that comes with
+?S:	the package, if that malloc.c is preferred over the system malloc.
+?S:	Otherwise the value is null.  This variable is intended for generating
+?S:	Makefiles.
+?S:.
+?S:mallocobj:
+?S:	This variable contains the name of the malloc.o that this package
+?S:	generates, if that malloc.o is preferred over the system malloc.
+?S:	Otherwise the value is null.  This variable is intended for generating
+?S:	Makefiles.  See mallocsrc.
+?S:.
+?S:malloctype:
+?S:	This variable contains the kind of ptr returned by malloc and realloc.
+?S:.
+?C:Malloc_t (MALLOCPTRTYPE):
+?C:	This symbol is the type of pointer returned by malloc and realloc.
+?C:.
+?H:#define Malloc_t $malloctype			/**/
+?H:.
+?X: Cannot test for mallocsrc; it is the unit's name and there is a bug in
+?X: the interpreter which defines all the names, even though they are not used.
+@if mallocobj
+: determine which malloc to compile in
+:  Old versions had dflt='y' only for bsd or v7.
+echo " "
+case "$usemymalloc" in
+'')
+	if bsd || v7; then
+		dflt='y'
+	else
+		dflt='y'
+	fi
+	;;
+*)  dflt="$usemymalloc"
+	;;
+esac
+rp="Do you wish to attempt to use the malloc that comes with $package?"
+. ./myread
+usemymalloc="$ans"
+case "$ans" in
+y*) mallocsrc='malloc.c'; mallocobj='malloc.o';;
+*) mallocsrc=''; mallocobj='';;
+esac
+
+@end
+@if MALLOCPTRTYPE || Malloc_t
+: compute the type returned by malloc
+echo " "
+case "$malloctype" in
+'')
+	if $test `./findhdr malloc.h`; then
+		echo "#include <malloc.h>" > malloc.c
+	fi
+#include <malloc.h>
+	$cat >>malloc.c <<'END'
+void *malloc();
+END
+	if $cc $ccflags -c malloc.c >/dev/null 2>&1; then
+		malloctype='void *'
+	else
+		malloctype='char *'
+	fi
+	$rm -f malloc.[co]
+	;;
+esac
+echo "Your system wants malloc to return '$malloctype', it would seem." >&4
+
+@end

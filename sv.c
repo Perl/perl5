@@ -134,26 +134,6 @@ sv_clean_refs()
 }
 
 void
-sv_clean_magic()
-{
-    register SV* sv;
-    register SV* svend;
-
-    for (sv = sv_arenaroot; sv; sv = SvANY(sv)) {
-	svend = &sv[1008 / sizeof(SV)];
-	while (sv < svend) {
-	    if (SvTYPE(sv) != SVTYPEMASK && SvMAGICAL(sv)) {
-		DEBUG_D((fprintf(stderr, "Cleaning magic:\n "), sv_dump(sv));)
-		SvFLAGS(sv) |= SVf_BREAK;
-		sv_unmagic(sv);
-		SvREFCNT_dec(sv);
-	    }
-	    ++sv;
-	}
-    }
-}
-
-void
 sv_clean_all()
 {
     register SV* sv;
@@ -597,7 +577,7 @@ U32 mt;
 	SvANY(sv) = new_XPVAV();
 	if (pv)
 	    Safefree(pv);
-	AvARRAY(sv)	= 0;
+	SvPVX(sv)	= 0;
 	AvMAX(sv)	= 0;
 	AvFILL(sv)	= 0;
 	SvIVX(sv)	= 0;
@@ -804,9 +784,9 @@ register SV *sv;
 	if (!SvPVX(sv))
 	    return "(null)";
 	if (SvOOK(sv))
-	    sprintf(t,"(%ld+\"%0.127s\")",(long)SvIVX(sv),SvPVX(sv));
+	    sprintf(t,"(%ld+\"%.127s\")",(long)SvIVX(sv),SvPVX(sv));
 	else
-	    sprintf(t,"(\"%0.127s\")",SvPVX(sv));
+	    sprintf(t,"(\"%.127s\")",SvPVX(sv));
     }
     else if (SvNOK(sv))
 	sprintf(t,"(%g)",SvNVX(sv));
@@ -946,7 +926,6 @@ register SV *sv;
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv))
 	    return (I32)SvRV(sv);
-#ifdef TOOSTRICT
 	if (SvREADONLY(sv)) {
 	    if (SvNOK(sv))
 		return (I32)SvNVX(sv);
@@ -956,7 +935,6 @@ register SV *sv;
 		warn(warn_uninit);
 	    return 0;
 	}
-#endif
     }
     switch (SvTYPE(sv)) {
     case SVt_NULL:
@@ -1010,7 +988,6 @@ register SV *sv;
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv))
 	    return (double)(unsigned long)SvRV(sv);
-#ifdef TOOSTRICT
 	if (SvREADONLY(sv)) {
 	    if (SvPOK(sv) && SvLEN(sv))
 		return atof(SvPVX(sv));
@@ -1020,7 +997,6 @@ register SV *sv;
 		warn(warn_uninit);
 	    return 0.0;
 	}
-#endif
     }
     if (SvTYPE(sv) < SVt_NV) {
 	if (SvTYPE(sv) == SVt_IV)
@@ -1121,7 +1097,6 @@ STRLEN *lp;
 	    *lp = strlen(s);
 	    return s;
 	}
-#ifdef TOOSTRICT
 	if (SvREADONLY(sv)) {
 	    if (SvIOK(sv)) {
 		(void)sprintf(tokenbuf,"%ld",SvIVX(sv));
@@ -1138,7 +1113,6 @@ STRLEN *lp;
 	    *lp = 0;
 	    return "";
 	}
-#endif
     }
     if (!SvUPGRADE(sv, SVt_PV))
 	return 0;
@@ -2524,6 +2498,23 @@ I32 i;
     return sv;
 }
 
+SV *
+newRV(ref)
+SV *ref;
+{
+    register SV *sv;
+
+    new_SV();
+    SvANY(sv) = 0;
+    SvREFCNT(sv) = 1;
+    SvFLAGS(sv) = 0;
+    sv_upgrade(sv, SVt_RV);
+    SvRV(sv) = SvREFCNT_inc(ref);
+    SvROK_on(sv);
+    ++sv_rvcount;
+    return sv;
+}
+
 /* make an exact duplicate of old */
 
 SV *
@@ -2994,5 +2985,11 @@ SV* sv;
 	fprintf(stderr, "  FLAGS = 0x%lx\n", IoFLAGS(sv));
 	break;
     }
+}
+#else
+void
+sv_dump(sv)
+SV* sv;
+{
 }
 #endif

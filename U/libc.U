@@ -1,0 +1,297 @@
+?X:  These units are based on the ones supplied with dist-3.0
+?X:  patchlevel 22.  They have been changed or enhanced to work with
+?X:  perl5alpha.  I would appreciate hearing about any changes,
+?X:  corrections, or enhancements.
+?X:	Andy Dougherty			doughera@lafcol.lafayette.edu
+?X:	Dept. of Physics 		
+?X:	Lafayette College	
+?X:	Easton, PA  18042-1782
+?X:     Sat Apr  2 15:45:17 EST 1994
+?RCS: $Id: libc.U,v 3.0.1.3 1994/01/24 14:12:17 ram Exp $
+?RCS:
+?RCS: Copyright (c) 1991-1993, Raphael Manfredi
+?RCS: 
+?RCS: You may redistribute only under the terms of the Artistic Licence,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic Licence; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?RCS: $Log: libc.U,v $
+?RCS: Revision 3.0.1.3  1994/01/24  14:12:17  ram
+?RCS: patch16: can now export nm_extract as an internal-use only variable
+?RCS:
+?RCS: Revision 3.0.1.2  1993/09/13  16:09:03  ram
+?RCS: patch10: added special handling for Apollo systems (WAD)
+?RCS:
+?RCS: Revision 3.0.1.1  1993/08/27  14:40:03  ram
+?RCS: patch7: added entry for /usr/shlib/libc.so (OSF/1 machines)
+?RCS:
+?RCS: Revision 3.0  1993/08/18  12:08:57  ram
+?RCS: Baseline for dist 3.0 netwide release.
+?RCS:
+?MAKE:libc +nm_extract: echo n c rm test grep Getfile Myread Oldconfig Loc \
+	sed libs incpath libpth runnm nm_opt contains plibpth xlibpth
+?MAKE:	-pick add $@ %<
+?S:libc:
+?S:	This variable contains the location of the C library.
+?S:.
+?S:nm_extract:
+?S:	This variable holds the name of the extraction command used to process
+?S:	the output of nm and yield the list of defined symbols. It is used
+?S:	internally by Configure.
+?S:.
+?T:thislib try libnames xxx xscan xrun thisname com tans
+?LINT:change libpth nm_opt
+case "$runnm" in
+true)
+?X: indentation is wrong on purpose--RAM
+: get list of predefined functions in a handy place
+echo " "
+case "$libc" in
+'') libc=unknown
+	case "$libs" in
+	*-lc_s*) libc=`./loc libc_s.a $libc $libpth`
+	esac
+	;;
+esac
+libpth="$plibpth $libpth"
+libnames='';
+case "$libs" in
+'') ;;
+*)  for thislib in $libs; do
+	case "$thislib" in
+	-l*)
+		thislib=`expr X$thislib : 'X-l\(.*\)'`
+		try=`./loc lib$thislib.a blurfl/dyick $libpth`
+		if test ! -f $try; then
+			try=`./loc lib$thislib blurfl/dyick $libpth`
+			if test ! -f $try; then
+				try=`./loc lib$thislib.so.'*' blurfl/dyick $libpth`
+				if test ! -f $try; then
+					try=`./loc $thislib blurfl/dyick $libpth`
+					if test ! -f $try; then
+						try=`./loc Slib$thislib.a blurfl/dyick $xlibpth`
+						if test ! -f $try; then
+							try=''
+						fi
+					fi
+				fi
+			fi
+		fi
+		libnames="$libnames $try"
+		;;
+	*) libnames="$libnames $thislib" ;;
+	esac
+	done
+	;;
+esac
+?X:
+?X: Some systems (e.g. DG/UX) use "environmental" links, which make the test
+?X: -f fail. Ditto for symbolic links. So in order to reliably check the
+?X: existence of a file, we use test -r. It will still fail with DG/UX links 
+?X: though, but at least it will detect symbolic links. At some strategic
+?X: points, we make use of (test -h), using a sub-shell in case builtin test
+?X: does not implement the -h check for symbolic links. This makes it
+?X: possible to preset libc in a hint file for instance and have it show up
+?X: as-is in the question.
+?X:
+xxx=normal
+case "$libc" in
+unknown)
+	set /usr/ccs/lib/libc.so
+	$test -r $1 || set /usr/lib/libc.so
+	$test -r $1 || set /usr/shlib/libc.so
+	$test -r $1 || set /usr/lib/libc.so.[0-9]*
+	$test -r $1 || set /lib/libsys_s.a
+	eval set \$$#
+	;;
+*)
+?X: ensure the test below for the (shared) C library will fail
+	set blurfl
+	;;
+esac
+if $test -r "$1"; then
+	echo "Your (shared) C library seems to be in $1."
+	libc="$1"
+elif $test -r /lib/libc && $test -r /lib/clib; then
+?X:
+?X: Apollo has its C library in /lib/clib AND /lib/libc
+?X: not to mention its math library in /lib/syslib...
+?X:
+	echo "Your C library seems to be in both /lib/clib and /lib/libc."
+	xxx=apollo
+	libc='/lib/clib /lib/libc'
+	if $test -r /lib/syslib; then
+		echo "(Your math library is in /lib/syslib.)"
+?X: Put syslib in libc -- not quite right, but won't hurt
+		libc="$libc /lib/syslib"
+	fi
+elif $test -r "$libc" || (test -h "$libc") >/dev/null 2>&1; then
+	echo "Your C library seems to be in $libc, as you said before."
+?X: For mips, and...
+elif $test -r $incpath/usr/lib/libc.a; then
+	libc=$incpath/usr/lib/libc.a;
+	echo "Your C library seems to be in $libc.  That's fine."
+elif $test -r /lib/libc.a; then
+	libc=/lib/libc.a;
+	echo "Your C library seems to be in $libc.  You're normal."
+else
+	if tans=`./loc libc.a blurfl/dyick $libpth`; $test -r "$tans"; then
+		:
+	elif tans=`./loc libc blurfl/dyick $libpth`; $test -r "$tans"; then
+		libnames="$libnames "`./loc clib blurfl/dyick $libpth`
+	elif tans=`./loc clib blurfl/dyick $libpth`; $test -r "$tans"; then
+		:
+	elif tans=`./loc Slibc.a blurfl/dyick $xlibpth`; $test -r "$tans"; then
+		:
+	elif tans=`./loc Mlibc.a blurfl/dyick $xlibpth`; $test -r "$tans"; then
+		:
+	else
+		tans=`./loc Llibc.a blurfl/dyick $xlibpth`
+	fi
+	if $test -r "$tans"; then
+		echo "Your C library seems to be in $tans, of all places."
+		libc=$tans
+	else
+		libc='blurfl'
+	fi
+fi
+if $test $xxx = apollo -o -r "$libc" || (test -h "$libc") >/dev/null 2>&1; then
+	dflt="$libc"
+	cat <<EOM
+
+If the guess above is wrong (which it might be if you're using a strange
+compiler, or your machine supports multiple models), you can override it here.
+
+EOM
+else
+	dflt=''
+	echo $libpth | tr ' ' '\012' | sort | uniq > libpath
+	cat >&4 <<EOM
+I can't seem to find your C library.  I've looked in the following places:
+
+EOM
+	$sed 's/^/	/' libpath
+	cat <<EOM
+
+None of these seems to contain your C library. I need to get its name...
+
+EOM
+fi
+fn=f
+rp='Where is your C library?'
+. ./getfile
+libc="$ans"
+
+echo " "
+echo $libc $libnames | tr ' ' '\012' | sort | uniq > libnames
+set X `cat libnames`
+shift
+xxx=files
+case $# in 1) xxx=file; esac
+echo "Extracting names from the following $xxx for later perusal:" >&4
+echo " "
+$sed 's/^/	/' libnames >&4
+echo " "
+$echo $n "This may take a while...$c" >&4
+
+nm $nm_opt $* 2>/dev/null >libc.tmp
+$echo $n ".$c"
+?X:
+?X: To accelerate processing, we look at the correct 'sed' command
+?X:	by using a small subset of libc.tmp, i.e. fprintf function.
+?X: When we know which sed command to use, do the name extraction
+?X:
+$grep fprintf libc.tmp > libc.ptf
+?X:
+?X: In order to ehance readability and save some space, we define
+?X:	some variables that will be "eval"ed.
+?X:
+xscan='eval "<libc.ptf $com >libc.list"; $echo $n ".$c" >&4'
+xrun='eval "<libc.tmp $com >libc.list"; echo "done" >&4'
+?X: BSD-like output
+if com="$sed -n -e 's/^.* [ADTS]  *_[_.]*//p' -e 's/^.* [ADTS] //p'";\
+	eval $xscan;\
+	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
+		eval $xrun
+?X: SYSV-like output
+elif com="$sed -n -e 's/^__*//' -e 's/^\([a-zA-Z_0-9$]*\).*xtern.*/\1/p'";\
+	eval $xscan;\
+	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
+		eval $xrun
+elif com="$sed -n -e '/|UNDEF/d' -e '/FUNC..GL/s/^.*|__*//p'";\
+	eval $xscan;\
+	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
+		eval $xrun
+elif com="$sed -n -e 's/^.* D __*//p' -e 's/^.* D //p'";\
+	eval $xscan;\
+	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
+		eval $xrun
+elif com="$sed -n -e 's/^_//' -e 's/^\([a-zA-Z_0-9]*\).*xtern.*text.*/\1/p'";\
+	eval $xscan;\
+	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
+		eval $xrun
+elif com="$sed -n -e 's/^.*|FUNC |GLOB .*|//p'";\
+	eval $xscan;\
+	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
+		eval $xrun
+elif com="$grep '|' | $sed -n -e '/|COMMON/d' -e '/|DATA/d' \
+				-e '/ file/d' -e 's/^\([^ 	]*\).*/\1/p'";\
+	eval $xscan;\
+	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
+		eval $xrun
+elif com="$sed -n -e 's/^.*|FUNC |GLOB .*|//p' -e 's/^.*|FUNC |WEAK .*|//p'";\
+	eval $xscan;\
+	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
+		eval $xrun
+?X: mips nm output (sysV)
+elif com="$sed -n -e 's/^__//' -e '/|Undef/d' -e '/|Proc/s/ .*//p'";\
+	eval $xscan;\
+	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
+		eval $xrun
+else
+	nm -p $* 2>/dev/null >libc.tmp
+	com="$sed -n -e 's/^.* [ADTS]  *_[_.]*//p' -e 's/^.* [ADTS] //p'";\
+	eval "<libc.tmp $com >libc.list"
+	if $contains '^fprintf$' libc.list >/dev/null 2>&1; then
+		nm_opt='-p'
+		echo "done" >&4
+	else
+		echo " "
+		echo "nm didn't seem to work right. Trying ar instead..." >&4
+		com=''
+		if ar t $libc > libc.tmp; then
+			for thisname in $libnames; do
+				ar t $thisname >>libc.tmp
+			done
+			$sed -e 's/\.o$//' < libc.tmp > libc.list
+			echo "Ok." >&4
+		else
+			echo "ar didn't seem to work right." >&4
+			echo "Maybe this is a Cray...trying bld instead..." >&4
+			if bld t $libc | $sed -e 's/.*\///' -e 's/\.o:.*$//' > libc.list; then
+				for thisname in $libnames; do
+					bld t $libnames | \
+					$sed -e 's/.*\///' -e 's/\.o:.*$//' >>libc.list
+					ar t $thisname >>libc.tmp
+				done
+				echo "Ok." >&4
+			else
+				echo "That didn't work either.  Giving up." >&4
+				exit 1
+			fi
+		fi
+	fi
+fi
+nm_extract="$com"
+if $test -f /lib/syscalls.exp; then
+	echo " "
+	echo "Also extracting names from /lib/syscalls.exp for good ole AIX..." >&4
+	$sed -n 's/^\([^ 	]*\)[ 	]*syscall$/\1/p' /lib/syscalls.exp >>libc.list
+fi
+?X: remember, indentation is wrong on purpose--RAM
+;;
+esac
+$rm -f libnames libpath
+

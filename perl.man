@@ -6080,7 +6080,7 @@ very small files.  To do larger files, use
 .nf
 
 	undef $/;
-	$checksum = unpack("%32C*",<>) % 32767;
+	$checksum = unpack("%32C*",<>) % 65535;
 
 .fi
 .PP

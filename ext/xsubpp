@@ -1,4 +1,4 @@
-#!./perl
+#!./miniperl
 # $Header$ 
 
 $usage = "Usage: xsubpp [-ansi] [-C++] [-except] [-tm typemap] file.xs\n";
@@ -68,6 +68,8 @@ foreach $key (keys %input_expr) {
 sub Q {
     local $text = shift;
     $text =~ tr/#//d;
+    $text =~ s/\[\[/{/g;
+    $text =~ s/\]\]/}/g;
     $text;
 }
 
@@ -75,149 +77,176 @@ open(F, $filename) || die "cannot open $filename\n";
 
 while (<F>) {
 	last if ($Module, $foo, $Package, $foo1, $Prefix) =
-		/^MODULE\s*=\s*(\w+)(\s+PACKAGE\s*=\s*(\w+))?(\s+PREFIX\s*=\s*(.+))?$/;
+		/^MODULE\s*=\s*(\w+)(\s+PACKAGE\s*=\s*([\w:]+))?(\s+PREFIX\s*=\s*(\S+))?$/;
 	print $_;
 }
-$Pack = $Package;
-$Package .= "::" if defined $Package && $Package ne "";
-$/ = "";
+exit 0 if $_ eq "";
+$lastline = $_;
 
-while (<F>) {
-	# parse paragraph
-	chop;
-	next if /^\s*$/;
-	next if /^(#.*\n?)+$/;
-	if (/^MODULE\s*=\s*(\w+)(\s+PACKAGE\s*=\s*(\w+))?(\s+PREFIX\s*=\s*(.+))?$/) {
-		$Module = $1;
-		$foo = $2;
-		$Package = $3;
-		$Pack = $Package;
-		$foo1 = $4;
-		$Prefix = $5;
-		$Package .= "::" if defined $Package && $Package ne "";
-		next;
-	}
-	@line = split(/[\t ]*\n/);
-
-	# initialize info arrays
-	undef(%args_match);
-	undef(%var_types);
-	undef(%var_addr);
-	undef(%defaults);
-	undef($class);
-	undef($static);
-	undef($elipsis);
-
-	# extract return type, function name and arguments
-	$ret_type = shift(@line);
-	if ($ret_type =~ /^static\s+(.*)$/) {
-		$static = 1;
-		$ret_type = $1;
-	}
-	$func_header = shift(@line);
-	($func_name, $orig_args) =  $func_header =~ /^([\w:]+)\s*\((.*)\)$/;
-	if ($func_name =~ /(.*)::(.*)/) {
-		$class = $1;
-		$func_name = $2;
-	}
-	($pname = $func_name) =~ s/^($Prefix)?/$Package/;
-	push(@Func_name, "${Pack}_$func_name");
-	push(@Func_pname, $pname);
-	@args = split(/\s*,\s*/, $orig_args);
-	if (defined($class) && !defined($static)) {
-		unshift(@args, "THIS");
-		$orig_args = "THIS, $orig_args";
-		$orig_args =~ s/^THIS, $/THIS/;
-	}
-	$orig_args =~ s/"/\\"/g;
-	$min_args = $num_args = @args;
-	foreach $i (0..$num_args-1) {
-		if ($args[$i] =~ s/\.\.\.//) {
-			$elipsis = 1;
-			$min_args--;
-			if ($args[i] eq '' && $i == $num_args - 1) {
-			    pop(@args);
-			    last;
-			}
-		}
-		if ($args[$i] =~ /([^=]*\S)\s*=\s*(.*)/) {
-			$min_args--;
-			$args[$i] = $1;
-			$defaults{$args[$i]} = $2;
-			$defaults{$args[$i]} =~ s/"/\\"/g;
-		}
-	}
-	if (defined($class) && !defined($static)) {
-		$func_args = join(", ", @args[1..$#args]);
-	} else {
-		$func_args = join(", ", @args);
-	}
-	@args_match{@args} = 1..@args;
-
-	# print function header
-	if ($ansiflag) {
-	    print Q<<"EOF";
-#static int
-#XS_${Pack}_$func_name(int, int ax, int items)
-EOF
+sub fetch_para {
+    # parse paragraph
+    @line = ();
+    if ($lastline ne "") {
+	if ($lastline =~
+    /^MODULE\s*=\s*(\w+)(\s+PACKAGE\s*=\s*([\w:]+))?(\s+PREFIX\s*=\s*(\S+))?$/) {
+	    $Module = $1;
+	    $foo = $2;
+	    $Package = $3;
+	    $foo1 = $4;
+	    $Prefix = $5;
+	    ($Packid = $Package) =~ s/:/_/g;
+	    $Packprefix = $Package;
+	    $Packprefix .= "::" if defined $Packprefix && $Packprefix ne "";
+	    while (<F>) {
+		chop;
+		last if /^\S/;
+	    }
+	    push(@line, $_) if $_ ne "";
 	}
 	else {
-	    print Q<<"EOF";
+	    push(@line, $lastline);
+	}
+	$lastline = "";
+	while (<F>) {
+	    next if /^#/ && !/^#(if|ifdef|else|elif|endif|define|undef)\b/;
+	    chop;
+	    if (/^\S/ && @line && $line[-1] eq "") {
+		$lastline = $_;
+		last;
+	    }
+	    else {
+		push(@line, $_);
+	    }
+	}
+	pop(@line) while @line && $line[-1] eq "";
+    }
+    scalar @line;
+}
+
+while (&fetch_para) {
+    # initialize info arrays
+    undef(%args_match);
+    undef(%var_types);
+    undef(%var_addr);
+    undef(%defaults);
+    undef($class);
+    undef($static);
+    undef($elipsis);
+
+    # extract return type, function name and arguments
+    $ret_type = shift(@line);
+    if ($ret_type =~ /^static\s+(.*)$/) {
+	    $static = 1;
+	    $ret_type = $1;
+    }
+    $func_header = shift(@line);
+    ($func_name, $orig_args) =  $func_header =~ /^([\w:]+)\s*\((.*)\)$/;
+    if ($func_name =~ /(.*)::(.*)/) {
+	    $class = $1;
+	    $func_name = $2;
+    }
+    ($pname = $func_name) =~ s/^($Prefix)?/$Packprefix/;
+    push(@Func_name, "${Packid}_$func_name");
+    push(@Func_pname, $pname);
+    @args = split(/\s*,\s*/, $orig_args);
+    if (defined($class) && !defined($static)) {
+	    unshift(@args, "THIS");
+	    $orig_args = "THIS, $orig_args";
+	    $orig_args =~ s/^THIS, $/THIS/;
+    }
+    $orig_args =~ s/"/\\"/g;
+    $min_args = $num_args = @args;
+    foreach $i (0..$num_args-1) {
+	    if ($args[$i] =~ s/\.\.\.//) {
+		    $elipsis = 1;
+		    $min_args--;
+		    if ($args[i] eq '' && $i == $num_args - 1) {
+			pop(@args);
+			last;
+		    }
+	    }
+	    if ($args[$i] =~ /([^=]*\S)\s*=\s*(.*)/) {
+		    $min_args--;
+		    $args[$i] = $1;
+		    $defaults{$args[$i]} = $2;
+		    $defaults{$args[$i]} =~ s/"/\\"/g;
+	    }
+    }
+    if (defined($class) && !defined($static)) {
+	    $func_args = join(", ", @args[1..$#args]);
+    } else {
+	    $func_args = join(", ", @args);
+    }
+    @args_match{@args} = 1..@args;
+
+    # print function header
+    if ($ansiflag) {
+	print Q<<"EOF";
 #static int
-#XS_${Pack}_$func_name(ix, ax, items)
+#XS_${Packid}_$func_name(int, int ax, int items)
+#[[
+EOF
+    }
+    else {
+	print Q<<"EOF";
+#static int
+#XS_${Packid}_$func_name(ix, ax, items)
 #register int ix;
 #register int ax;
 #register int items;
+#[[
 EOF
-	}
-	if ($elipsis) {
-	    $cond = qq(items < $min_args);
-	}
-	elsif ($min_args == $num_args) {
-	    $cond = qq(items != $min_args);
-	}
-	else {
-	    $cond = qq(items < $min_args || items > $num_args);
-	}
+    }
+    if ($elipsis) {
+	$cond = qq(items < $min_args);
+    }
+    elsif ($min_args == $num_args) {
+	$cond = qq(items != $min_args);
+    }
+    else {
+	$cond = qq(items < $min_args || items > $num_args);
+    }
 
-print Q<<"EOF";
-#{
+    print Q<<"EOF" if $except;
+#    char errbuf[1024];
+#    *errbuf = '\0';
+EOF
+
+    print Q<<"EOF";
 #    if ($cond) {
 #	croak("Usage: $pname($orig_args)");
 #    }
 EOF
 
-# Now do a block of some sort.
+    # Now do a block of some sort.
 
-$condnum = 0;
-if (!@line) {
-    @line = "CLEANUP:";
-}
-while (@line) {
+    $condnum = 0;
+    if (!@line) {
+	@line = "CLEANUP:";
+    }
+    while (@line) {
 	if ($_[0] =~ s/^\s*CASE\s*:\s*//) {
-		$cond = shift(@line);
-		if ($condnum == 0) {
-		    print "    if ($cond)\n";
-		}
-		elsif ($cond ne '') {
-		    print "    else if ($cond)\n";
-		}
-		else {
-		    print "    else\n";
-		}
-		$condnum++;
+	    $cond = shift(@line);
+	    if ($condnum == 0) {
+		print "    if ($cond)\n";
+	    }
+	    elsif ($cond ne '') {
+		print "    else if ($cond)\n";
+	    }
+	    else {
+		print "    else\n";
+	    }
+	    $condnum++;
 	}
 
 	if ($except) {
 	    print Q<<"EOF";
-#    char errbuf[1024];
-#    *errbuf = '\0';
-#    TRY {
+#    TRY [[
 EOF
 	}
 	else {
 	    print Q<<"EOF";
-#    {
+#    [[
 EOF
 	}
 
@@ -225,9 +254,10 @@ EOF
 	$thisdone = 0;
 	$retvaldone = 0;
 	$deferred = "";
-	while ($_ = shift(@line)) {
+	while (@line) {
+		$_ = shift(@line);
 		last if /^\s*NOT_IMPLEMENTED_YET/;
-		last if /^\s*(CODE|OUTPUT|CLEANUP|CASE)\s*:/;
+		last if /^\s*(PPCODE|CODE|OUTPUT|CLEANUP|CASE)\s*:/;
 		($var_type, $var_name, $var_init) =
 		    /\s*([^\t]+)\s*([^\s=]+)\s*(=.*)?/;
 		if ($var_name =~ /^&/) {
@@ -272,13 +302,24 @@ EOF
 			$args_match{"RETVAL"} = 0;
 			$var_types{"RETVAL"} = $ret_type;
 		}
-		print $deferred;
-		if (/^\s*CODE:/) {
-			while ($_ = shift(@line)) {
+		if (/^\s*PPCODE:/) {
+			print "\tdSP;\n";
+			print $deferred;
+			while (@line) {
+				$_ = shift(@line);
+				last if /^\s*(OUTPUT|CLEANUP|CASE)\s*:/;
+				print "$_\n";
+			}
+			print "\tax = sp - stack_base;\n";
+		} elsif (/^\s*CODE:/) {
+			print $deferred;
+			while (@line) {
+				$_ = shift(@line);
 				last if /^\s*(OUTPUT|CLEANUP|CASE)\s*:/;
 				print "$_\n";
 			}
 		} else {
+			print $deferred;
 			print "\n\t";
 			if ($ret_type ne "void") {
 				print "RETVAL = ";
@@ -299,7 +340,8 @@ EOF
 
 	# do output variables
 	if (/^\s*OUTPUT\s*:/) {
-		while ($_ = shift(@line)) {
+		while (@line) {
+			$_ = shift(@line);
 			last if /^\s*CLEANUP\s*:/;
 			s/^\s+//;
 			($outarg, $outcode) = split(/\t+/);
@@ -316,7 +358,8 @@ EOF
 	}
 	# do cleanup
 	if (/^\s*CLEANUP\s*:/) {
-	    while ($_ = shift(@line)) {
+	    while (@line) {
+		    $_ = shift(@line);
 		    last if /^\s*CASE\s*:/;
 		    print "$_\n";
 	    }
@@ -324,27 +367,29 @@ EOF
 	# print function trailer
 	if ($except) {
 	    print Q<<EOF;
-#    }
+#    ]]
 #    BEGHANDLERS
 #    CATCHALL
 #	sprintf(errbuf, "%s: %s\\tpropagated", Xname, Xreason);
 #    ENDHANDLERS
-#    if (errbuf[0])
-#	croak(errbuf);
 EOF
 	}
 	else {
 	    print Q<<EOF;
-#    }
+#    ]]
 EOF
 	}
 	if (/^\s*CASE\s*:/) {
 	    unshift(@line, $_);
 	}
-}
-	print Q<<EOF;
+    }
+    print Q<<EOF if $except;
+#    if (errbuf[0])
+#	croak(errbuf);
+EOF
+    print Q<<EOF;
 #    return ax;
-#}
+#]]
 #
 EOF
 }
@@ -356,103 +401,112 @@ print Q<<"EOF";
 #int ix;
 #int ax;
 #int items;
-#{
+#[[
 #    char* file = __FILE__;
 #
 EOF
 
 for (@Func_name) {
-	$pname = shift(@Func_pname);
-	print "    newXSUB(\"$pname\", 0, XS_$_, file);\n";
+    $pname = shift(@Func_pname);
+    print "    newXSUB(\"$pname\", 0, XS_$_, file);\n";
 }
 print "}\n";
 
 sub output_init {
-	local($type, $num, $init) = @_;
-	local($arg) = "ST($num)";
+    local($type, $num, $init) = @_;
+    local($arg) = "ST($num)";
 
-	eval qq/print " $init\\\n"/;
+    eval qq/print " $init\\\n"/;
 }
 
 sub blurt { warn @_; $errors++ }
 
 sub generate_init {
-	local($type, $num, $var) = @_;
-	local($arg) = "ST($num)";
-	local($argoff) = $num - 1;
-	local($ntype);
-	local($tk);
+    local($type, $num, $var) = @_;
+    local($arg) = "ST($num)";
+    local($argoff) = $num - 1;
+    local($ntype);
+    local($tk);
 
-	blurt("$type not in typemap"), return unless defined($type_kind{$type});
-	($ntype = $type) =~ s/\s*\*/Ptr/g;
-	$subtype = $ntype;
-	$subtype =~ s/Ptr$//;
-	$subtype =~ s/Array$//;
-	$tk = $type_kind{$type};
-	$tk =~ s/OBJ$/REF/ if $func_name =~ /DESTROY$/;
-	$expr = $input_expr{$tk};
-	if ($expr =~ /DO_ARRAY_ELEM/) {
-	    $subexpr = $input_expr{$type_kind{$subtype}};
-	    $subexpr =~ s/ntype/subtype/g;
-	    $subexpr =~ s/\$arg/ST(ix_$var)/g;
-	    $subexpr =~ s/\n\t/\n\t\t/g;
-	    $subexpr =~ s/is not of (.*")/[arg %d] is not of $1, ix_$var + 1/g;
-	    $subexpr =~ s/\$var/$var[ix_$var - $argoff]/;
-	    $expr =~ s/DO_ARRAY_ELEM/$subexpr/;
-	}
-	if (defined($defaults{$var})) {
-		$expr =~ s/(\t+)/$1    /g;
-		$expr =~ s/        /\t/g;
-		eval qq/print "\\t$var;\\n"/;
-		$deferred .= eval qq/"\\n\\tif (items < $num)\\n\\t    $var = $defaults{$var};\\n\\telse {\\n$expr;\\n\\t}\\n"/;
-	} elsif ($expr !~ /^\t\$var =/) {
-		eval qq/print "\\t$var;\\n"/;
-		$deferred .= eval qq/"\\n$expr;\\n"/;
-	} else {
-		eval qq/print "$expr;\\n"/;
-	}
+    blurt("$type not in typemap"), return unless defined($type_kind{$type});
+    ($ntype = $type) =~ s/\s*\*/Ptr/g;
+    $subtype = $ntype;
+    $subtype =~ s/Ptr$//;
+    $subtype =~ s/Array$//;
+    $tk = $type_kind{$type};
+    $tk =~ s/OBJ$/REF/ if $func_name =~ /DESTROY$/;
+    $type =~ s/:/_/g;
+    $expr = $input_expr{$tk};
+    if ($expr =~ /DO_ARRAY_ELEM/) {
+	$subexpr = $input_expr{$type_kind{$subtype}};
+	$subexpr =~ s/ntype/subtype/g;
+	$subexpr =~ s/\$arg/ST(ix_$var)/g;
+	$subexpr =~ s/\n\t/\n\t\t/g;
+	$subexpr =~ s/is not of (.*")/[arg %d] is not of $1, ix_$var + 1/g;
+	$subexpr =~ s/\$var/$var[ix_$var - $argoff]/;
+	$expr =~ s/DO_ARRAY_ELEM/$subexpr/;
+    }
+    if (defined($defaults{$var})) {
+	    $expr =~ s/(\t+)/$1    /g;
+	    $expr =~ s/        /\t/g;
+	    eval qq/print "\\t$var;\\n"/;
+	    $deferred .= eval qq/"\\n\\tif (items < $num)\\n\\t    $var = $defaults{$var};\\n\\telse {\\n$expr;\\n\\t}\\n"/;
+    } elsif ($expr !~ /^\t\$var =/) {
+	    eval qq/print "\\t$var;\\n"/;
+	    $deferred .= eval qq/"\\n$expr;\\n"/;
+    } else {
+	    eval qq/print "$expr;\\n"/;
+    }
 }
 
 sub generate_output {
-	local($type, $num, $var) = @_;
-	local($arg) = "ST($num)";
-	local($argoff) = $num - 1;
-	local($ntype);
+    local($type, $num, $var) = @_;
+    local($arg) = "ST($num)";
+    local($argoff) = $num - 1;
+    local($ntype);
 
-	if ($type =~ /^array\(([^,]*),(.*)\)/) {
-		print "\tsv_setpvn($arg, (char *)$var, $2 * sizeof($1)), XFree((char *)$var);\n";
-	} else {
-		blurt("$type not in typemap"), return
-		    unless defined($type_kind{$type});
-		($ntype = $type) =~ s/\s*\*/Ptr/g;
-		$ntype =~ s/\(\)//g;
-		$subtype = $ntype;
-		$subtype =~ s/Ptr$//;
-		$subtype =~ s/Array$//;
-		$expr = $output_expr{$type_kind{$type}};
-		if ($expr =~ /DO_ARRAY_ELEM/) {
-		    $subexpr = $output_expr{$type_kind{$subtype}};
-		    $subexpr =~ s/ntype/subtype/g;
-		    $subexpr =~ s/\$arg/ST(ix_$var)/g;
-		    $subexpr =~ s/\$var/${var}[ix_$var]/g;
-		    $subexpr =~ s/\n\t/\n\t\t/g;
-		    $expr =~ s/DO_ARRAY_ELEM\n/$subexpr/;
-		}
-		elsif ($arg eq 'ST(0)') {
-		    print "\tST(0) = sv_newmortal();\n";
-		}
+    if ($type =~ /^array\(([^,]*),(.*)\)/) {
+	    print "\tsv_setpvn($arg, (char *)$var, $2 * sizeof($1)), XFree((char *)$var);\n";
+    } else {
+	    blurt("$type not in typemap"), return
+		unless defined($type_kind{$type});
+	    ($ntype = $type) =~ s/\s*\*/Ptr/g;
+	    $ntype =~ s/\(\)//g;
+	    $subtype = $ntype;
+	    $subtype =~ s/Ptr$//;
+	    $subtype =~ s/Array$//;
+	    $expr = $output_expr{$type_kind{$type}};
+	    if ($expr =~ /DO_ARRAY_ELEM/) {
+		$subexpr = $output_expr{$type_kind{$subtype}};
+		$subexpr =~ s/ntype/subtype/g;
+		$subexpr =~ s/\$arg/ST(ix_$var)/g;
+		$subexpr =~ s/\$var/${var}[ix_$var]/g;
+		$subexpr =~ s/\n\t/\n\t\t/g;
+		$expr =~ s/DO_ARRAY_ELEM\n/$subexpr/;
 		eval "print qq\f$expr\f";
-	}
+	    }
+	    elsif ($arg eq 'ST(0)') {
+		if ($expr =~ /^\t\$arg = /) {
+		    eval "print qq\f$expr\f";
+		    print "\tsv_2mortal(ST(0));\n";
+		}
+		else {
+		    print "\tST(0) = sv_newmortal();\n";
+		    eval "print qq\f$expr\f";
+		}
+	    }
+    }
 }
 
 sub map_type {
-	local($type) = @_;
+    local($type) = @_;
 
-	if ($type =~ /^array\(([^,]*),(.*)\)/) {
-		return "$1 *";
-	} else {
-		return $type;
-	}
+    $type =~ s/:/_/g;
+    if ($type =~ /^array\(([^,]*),(.*)\)/) {
+	    return "$1 *";
+    } else {
+	    return $type;
+    }
 }
 
 exit $errors;

@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # $Header$ 
 
-$usage = "Usage: tuv [-a] [-c] typemap file.uv\n";
+$usage = "Usage: xvar [-a] [-c] typemap file.xv\n";
 die $usage unless (@ARGV >= 2 && @ARGV <= 4);
 
 SWITCH: while ($ARGV[0] =~ /^-/) {

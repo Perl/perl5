@@ -188,14 +188,6 @@ SV* sv;
 #include <signal.h>
 #endif
 
-#ifdef VOIDSIG
-#define handlertype void
-#else
-#define handlertype int
-#endif
-
-static handlertype sighandler();
-
 U32
 magic_len(sv, mg)
 SV *sv;
@@ -405,7 +397,7 @@ MAGIC *mg;
 	break;
     case '!':
 	sv_setnv(sv,(double)errno);
-	sv_setpv(sv, errno ? strerror(errno) : "");
+	sv_setpv(sv, errno ? Strerror(errno) : "");
 	SvNOK_on(sv);	/* what a wonderful hack! */
 	break;
     case '<':
@@ -506,8 +498,8 @@ MAGIC* mg;
 	(void)signal(i,SIG_DFL);
     else {
 	(void)signal(i,sighandler);
-	if (!strchr(s,'\'')) {
-	    sprintf(tokenbuf, "main'%s",s);
+	if (!strchr(s,':') && !strchr(s,'\'')) {
+	    sprintf(tokenbuf, "main::%s",s);
 	    sv_setpv(sv,tokenbuf);
 	}
     }
@@ -896,6 +888,8 @@ MAGIC* mg;
     case '.':
 	if (localizing)
 	    save_sptr((SV**)&last_in_gv);
+	else if (SvOK(sv))
+	    IoLINES(GvIO(last_in_gv)) = (long)SvIV(sv);
 	break;
     case '^':
 	Safefree(IoTOP_NAME(GvIO(defoutgv)));
@@ -1117,7 +1111,7 @@ char *sig;
     return 0;
 }
 
-static handlertype
+VOIDRET
 sighandler(sig)
 I32 sig;
 {

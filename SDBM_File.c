@@ -8,12 +8,12 @@ typedef DBM* SDBM_File;
 #define nextkey(db,key) sdbm_nextkey(db)
 
 static int
-XS_SDBM_File_sdbm_new(ix, sp, items)
+XS_SDBM_File_sdbm_new(ix, ax, items)
 register int ix;
-register int sp;
+register int ax;
 register int items;
 {
-    if (items < 4 || items > 4) {
+    if (items != 4) {
 	croak("Usage: SDBM_File::new(dbtype, filename, flags, mode)");
     }
     {
@@ -27,16 +27,16 @@ register int items;
 	ST(0) = sv_newmortal();
 	sv_setptrobj(ST(0), RETVAL, "SDBM_File");
     }
-    return sp;
+    return ax;
 }
 
 static int
-XS_SDBM_File_sdbm_DESTROY(ix, sp, items)
+XS_SDBM_File_sdbm_DESTROY(ix, ax, items)
 register int ix;
-register int sp;
+register int ax;
 register int items;
 {
-    if (items < 1 || items > 1) {
+    if (items != 1) {
 	croak("Usage: SDBM_File::DESTROY(db)");
     }
     {
@@ -48,16 +48,16 @@ register int items;
 	    croak("db is not a reference");
 	sdbm_close(db);
     }
-    return sp;
+    return ax;
 }
 
 static int
-XS_SDBM_File_sdbm_fetch(ix, sp, items)
+XS_SDBM_File_sdbm_fetch(ix, ax, items)
 register int ix;
-register int sp;
+register int ax;
 register int items;
 {
-    if (items < 2 || items > 2) {
+    if (items != 2) {
 	croak("Usage: SDBM_File::fetch(db, key)");
     }
     {
@@ -70,19 +70,20 @@ register int items;
 	else
 	    croak("db is not of type SDBM_File");
 
-	key.dptr = SvPV(ST(2), key.dsize);;
+	key.dptr = SvPV(ST(2), na);
+	key.dsize = (int)na;;
 
 	RETVAL = sdbm_fetch(db, key);
 	ST(0) = sv_newmortal();
 	sv_setpvn(ST(0), RETVAL.dptr, RETVAL.dsize);
     }
-    return sp;
+    return ax;
 }
 
 static int
-XS_SDBM_File_sdbm_store(ix, sp, items)
+XS_SDBM_File_sdbm_store(ix, ax, items)
 register int ix;
-register int sp;
+register int ax;
 register int items;
 {
     if (items < 3 || items > 4) {
@@ -100,9 +101,11 @@ register int items;
 	else
 	    croak("db is not of type SDBM_File");
 
-	key.dptr = SvPV(ST(2), key.dsize);;
+	key.dptr = SvPV(ST(2), na);
+	key.dsize = (int)na;;
 
-	value.dptr = SvPV(ST(3), value.dsize);;
+	value.dptr = SvPV(ST(3), na);
+	value.dsize = (int)na;;
 
 	if (items < 4)
 	    flags = DBM_REPLACE;
@@ -114,16 +117,16 @@ register int items;
 	ST(0) = sv_newmortal();
 	sv_setiv(ST(0), (I32)RETVAL);
     }
-    return sp;
+    return ax;
 }
 
 static int
-XS_SDBM_File_sdbm_delete(ix, sp, items)
+XS_SDBM_File_sdbm_delete(ix, ax, items)
 register int ix;
-register int sp;
+register int ax;
 register int items;
 {
-    if (items < 2 || items > 2) {
+    if (items != 2) {
 	croak("Usage: SDBM_File::delete(db, key)");
     }
     {
@@ -136,22 +139,23 @@ register int items;
 	else
 	    croak("db is not of type SDBM_File");
 
-	key.dptr = SvPV(ST(2), key.dsize);;
+	key.dptr = SvPV(ST(2), na);
+	key.dsize = (int)na;;
 
 	RETVAL = sdbm_delete(db, key);
 	ST(0) = sv_newmortal();
 	sv_setiv(ST(0), (I32)RETVAL);
     }
-    return sp;
+    return ax;
 }
 
 static int
-XS_SDBM_File_sdbm_firstkey(ix, sp, items)
+XS_SDBM_File_sdbm_firstkey(ix, ax, items)
 register int ix;
-register int sp;
+register int ax;
 register int items;
 {
-    if (items < 1 || items > 1) {
+    if (items != 1) {
 	croak("Usage: SDBM_File::firstkey(db)");
     }
     {
@@ -167,16 +171,16 @@ register int items;
 	ST(0) = sv_newmortal();
 	sv_setpvn(ST(0), RETVAL.dptr, RETVAL.dsize);
     }
-    return sp;
+    return ax;
 }
 
 static int
-XS_SDBM_File_nextkey(ix, sp, items)
+XS_SDBM_File_nextkey(ix, ax, items)
 register int ix;
-register int sp;
+register int ax;
 register int items;
 {
-    if (items < 2 || items > 2) {
+    if (items != 2) {
 	croak("Usage: SDBM_File::nextkey(db, key)");
     }
     {
@@ -189,22 +193,23 @@ register int items;
 	else
 	    croak("db is not of type SDBM_File");
 
-	key.dptr = SvPV(ST(2), key.dsize);;
+	key.dptr = SvPV(ST(2), na);
+	key.dsize = (int)na;;
 
 	RETVAL = nextkey(db, key);
 	ST(0) = sv_newmortal();
 	sv_setpvn(ST(0), RETVAL.dptr, RETVAL.dsize);
     }
-    return sp;
+    return ax;
 }
 
 static int
-XS_SDBM_File_sdbm_error(ix, sp, items)
+XS_SDBM_File_sdbm_error(ix, ax, items)
 register int ix;
-register int sp;
+register int ax;
 register int items;
 {
-    if (items < 1 || items > 1) {
+    if (items != 1) {
 	croak("Usage: SDBM_File::error(db)");
     }
     {
@@ -220,16 +225,16 @@ register int items;
 	ST(0) = sv_newmortal();
 	sv_setiv(ST(0), (I32)RETVAL);
     }
-    return sp;
+    return ax;
 }
 
 static int
-XS_SDBM_File_sdbm_clearerr(ix, sp, items)
+XS_SDBM_File_sdbm_clearerr(ix, ax, items)
 register int ix;
-register int sp;
+register int ax;
 register int items;
 {
-    if (items < 1 || items > 1) {
+    if (items != 1) {
 	croak("Usage: SDBM_File::clearerr(db)");
     }
     {
@@ -245,12 +250,12 @@ register int items;
 	ST(0) = sv_newmortal();
 	sv_setiv(ST(0), (I32)RETVAL);
     }
-    return sp;
+    return ax;
 }
 
-int boot_SDBM_File(ix,sp,items)
+int boot_SDBM_File(ix,ax,items)
 int ix;
-int sp;
+int ax;
 int items;
 {
     char* file = __FILE__;

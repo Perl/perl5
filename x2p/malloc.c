@@ -82,7 +82,6 @@ union	overhead {
 };
 
 #define	MAGIC		0xff		/* magic # on accounting info */
-#define OLDMAGIC	0x7f		/* same after a free() */
 #define RMAGIC		0x55555555	/* magic # on range info */
 #ifdef RCHECK
 #define	RSLOP		sizeof (u_int)
@@ -122,7 +121,7 @@ botch(s)
 #define	ASSERT(p)
 #endif
 
-MALLOCPTRTYPE *
+Malloc_t
 malloc(nbytes)
 	register MEM_SIZE nbytes;
 {
@@ -143,7 +142,7 @@ malloc(nbytes)
 #endif /* MSDOS */
 #ifdef DEBUGGING
 	if ((long)nbytes < 0)
-	    fatal("panic: malloc");
+	    croak("panic: malloc");
 #endif
 #endif /* safemalloc */
 
@@ -177,14 +176,10 @@ malloc(nbytes)
 	}
 
 #ifdef safemalloc
-#ifdef DEBUGGING
-#  if !(defined(I286) || defined(atarist))
-    if (debug & 128)
-        fprintf(stderr,"0x%x: (%05d) malloc %ld bytes\n",p+1,an++,(long)size);
-#  else
-    if (debug & 128)
-        fprintf(stderr,"0x%lx: (%05d) malloc %ld bytes\n",p+1,an++,(long)size);
-#  endif
+#if !(defined(I286) || defined(atarist))
+    DEBUG_m(fprintf(stderr,"0x%x: (%05d) malloc %ld bytes\n",p+1,an++,(long)size));
+#else
+    DEBUG_m(fprintf(stderr,"0x%lx: (%05d) malloc %ld bytes\n",p+1,an++,(long)size));
 #endif
 #endif /* safemalloc */
 
@@ -213,7 +208,7 @@ malloc(nbytes)
 	p->ov_rmagic = RMAGIC;
   	*((u_int *)((caddr_t)p + nbytes - RSLOP)) = RMAGIC;
 #endif
-  	return ((MALLOCPTRTYPE *)(p + 1));
+  	return ((Malloc_t)(p + 1));
 }
 
 /*
@@ -286,21 +281,17 @@ morecore(bucket)
 
 void
 free(mp)
-	MALLOCPTRTYPE *mp;
+	Malloc_t mp;
 {   
   	register MEM_SIZE size;
 	register union overhead *op;
 	char *cp = (char*)mp;
 
 #ifdef safemalloc
-#ifdef DEBUGGING
-#  if !(defined(I286) || defined(atarist))
-	if (debug & 128)
-		fprintf(stderr,"0x%x: (%05d) free\n",cp,an++);
-#  else
-	if (debug & 128)
-		fprintf(stderr,"0x%lx: (%05d) free\n",cp,an++);
-#  endif
+#if !(defined(I286) || defined(atarist))
+	DEBUG_m(fprintf(stderr,"0x%x: (%05d) free\n",cp,an++));
+#else
+	DEBUG_m(fprintf(stderr,"0x%lx: (%05d) free\n",cp,an++));
 #endif
 #endif /* safemalloc */
 
@@ -311,16 +302,20 @@ free(mp)
   	ASSERT(op->ov_magic == MAGIC);		/* make sure it was in use */
 #else
 	if (op->ov_magic != MAGIC) {
+#ifdef RCHECK
 		warn("%s free() ignored",
-		    op->ov_magic == OLDMAGIC ? "Duplicate" : "Bad");
+		    op->ov_rmagic == RMAGIC - 1 ? "Duplicate" : "Bad");
+#else
+		warn("Bad free() ignored");
+#endif
 		return;				/* sanity */
 	}
-	op->ov_magic = OLDMAGIC;
 #endif
 #ifdef RCHECK
   	ASSERT(op->ov_rmagic == RMAGIC);
 	if (op->ov_index <= 13)
 		ASSERT(*(u_int *)((caddr_t)op + op->ov_size + 1 - RSLOP) == RMAGIC);
+	op->ov_rmagic = RMAGIC - 1;
 #endif
   	ASSERT(op->ov_index < NBUCKETS);
   	size = op->ov_index;
@@ -344,9 +339,9 @@ free(mp)
  */
 int reall_srchlen = 4;	/* 4 should be plenty, -1 =>'s whole list */
 
-MALLOCPTRTYPE *
+Malloc_t
 realloc(mp, nbytes)
-	MALLOCPTRTYPE *mp; 
+	Malloc_t mp; 
 	MEM_SIZE nbytes;
 {   
   	register MEM_SIZE onb;
@@ -371,7 +366,7 @@ realloc(mp, nbytes)
 		return malloc(nbytes);
 #ifdef DEBUGGING
 	if ((long)nbytes < 0)
-		fatal("panic: realloc");
+		croak("panic: realloc");
 #endif
 #endif /* safemalloc */
 
@@ -443,7 +438,7 @@ realloc(mp, nbytes)
 #  endif
 #endif
 #endif /* safemalloc */
-  	return ((MALLOCPTRTYPE*)res);
+  	return ((Malloc_t)res);
 }
 
 /*

@@ -27,32 +27,32 @@
 # 
 
 # I now supply perly.c with the kits, so don't remake perly.c without byacc
-BYACC = ../perl-byacc1.8.2/byacc
-
+BYACC = byacc
 CC = cc
 bin = /usr/local/bin
 scriptdir = /usr/local/bin
 privlib = /usr/local/lib/perl
-mansrc = /usr/man/manl
-manext = l
+mansrc = /usr/local/man/man1
+manext = 1
 LDFLAGS = 
 CLDFLAGS = 
 SMALL = 
 LARGE =  
 mallocsrc = malloc.c
 mallocobj = malloc.o
+dlsrc = dl.c
+dlobj = dl.o
 SLN = ln -s
 RMS = rm -f
 
-libs = -ldbm -lm -lposix -Bdynamic -ldl
+libs = -ldbm -ldl -lm -lposix 
 
-public = perl
+public = perl 
 
 shellflags = 
 
 # To use an alternate make, set  in config.sh.
 MAKE = make
-
 
 CCCMD = `sh $(shellflags) cflags $@`
 
@@ -69,25 +69,29 @@ sh = Makefile.SH makedepend.SH h2ph.SH
 h1 = EXTERN.h INTERN.h av.h cop.h config.h embed.h form.h handy.h
 h2 = hv.h op.h opcode.h perl.h regcomp.h regexp.h gv.h sv.h util.h
 
-h = $(h1) $(h2)
+h1 = EXTERN.h INTERN.h XSUB.h av.h config.h cop.h cv.h dosish.h 
+h2 = embed.h form.h gv.h handy.h hv.h hvdbm.h keywords.h mg.h op.h
+h3 = opcode.h patchlevel.h perl.h perly.h pp.h proto.h regcomp.h
+h4 = regexp.h scope.h sv.h unixish.h util.h
+h = $(h1) $(h2) $(h3) $(h4)
 
-c1 = av.c cop.c cons.c consop.c doop.c doio.c
-c2 = eval.c hv.c main.c $(mallocsrc) perl.c pp.c regcomp.c regexec.c
-c3 = gv.c sv.c taint.c toke.c util.c usersub.c
+c1 = av.c scope.c op.c doop.c doio.c dump.c hv.c
+c2 = $(mallocsrc) mg.c perly.c pp.c regcomp.c regexec.c
+c3 = gv.c sv.c taint.c toke.c util.c deb.c run.c
 
 c = $(c1) $(c2) $(c3)
 
-s1 = av.c cop.c cons.c consop.c doop.c doio.c
-s2 = eval.c hv.c main.c perl.c pp.c regcomp.c regexec.c
-s3 = gv.c sv.c taint.c toke.c util.c usersub.c perly.c
+s1 = av.c scope.c op.c doop.c doio.c dump.c hv.c
+s2 = $(mallocobj) mg.c perly.c pp.c regcomp.c regexec.c
+s3 = gv.c sv.c taint.c toke.c util.c deb.c run.c perly.c
 
 saber = $(s1) $(s2) $(s3)
 
 obj1 = av.o scope.o op.o doop.o doio.o dump.o hv.o
-obj2 = $(mallocobj) mg.o pp.o regcomp.o regexec.o
+obj2 = $(mallocobj) mg.o perly.o pp.o regcomp.o regexec.o
 obj3 = gv.o sv.o taint.o toke.o util.o deb.o run.o
 
-obj = $(obj1) $(obj2) $(obj3) NDBM_File.o ODBM_File.o POSIX.o dl.o
+obj = $(obj1) $(obj2) $(obj3) $(dlobj)
 
 lintflags = -hbvxac
 
@@ -96,29 +100,89 @@ addedbyconf = Makefile.old bsd eunice filexp loc pdp11 usg v7
 # grrr
 SHELL = /bin/sh
 
+.SUFFIXES: .x
+
 .c.o:
 	$(CCCMD) $*.c
 
+.x.c:
+	sh writemain $*.x >$*.c
 
-all: perl lib/Config.pm
+all: miniperl perl lib/Config.pm
 
 #all: $(public) $(private) $(util) $(scripts)
 #	cd x2p; $(MAKE) all
 #	touch all
 
+# NDBM_File extension
+NDBM_File.c:	ext/dbm/NDBM_File.xs ext/xsubpp ext/typemap
+	test -f miniperl || make miniperl
+	ext/xsubpp ext/dbm/NDBM_File.xs >tmp
+	mv tmp NDBM_File.c
+
+NDBM_File.o: NDBM_File.c
+
+# ODBM_File extension
+ODBM_File.c:	ext/dbm/ODBM_File.xs ext/xsubpp ext/typemap
+	test -f miniperl || make miniperl
+	ext/xsubpp ext/dbm/ODBM_File.xs >tmp
+	mv tmp ODBM_File.c
+
+ODBM_File.o: ODBM_File.c
+
+# GDBM_File extension
+GDBM_File.c:	ext/dbm/GDBM_File.xs ext/xsubpp ext/typemap
+	test -f miniperl || make miniperl
+	ext/xsubpp ext/dbm/GDBM_File.xs >tmp
+	mv tmp GDBM_File.c
+
+GDBM_File.o: GDBM_File.c
+
+# SDBM_File extension
+SDBM_File.c:	ext/dbm/SDBM_File.xs ext/xsubpp ext/typemap
+	test -f miniperl || make miniperl
+	ext/xsubpp ext/dbm/SDBM_File.xs >tmp
+	mv tmp SDBM_File.c
+
+SDBM_File.o: SDBM_File.c
+
+lib/auto/SDBM_File/SDBM_File.so: SDBM_File.o ext/dbm/sdbm/libsdbm.a
+	@- mkdir lib/auto/SDBM_File 2>/dev/null
+	ld -o lib/auto/SDBM_File/SDBM_File.so SDBM_File.o ext/dbm/sdbm/libsdbm.a
+
+ext/dbm/sdbm/libsdbm.a: ext/dbm/sdbm/sdbm.c ext/dbm/sdbm/sdbm.h
+	cd ext/dbm/sdbm; $(MAKE) sdbm
+
+# POSIX extension
+POSIX.c:	ext/posix/POSIX.xs ext/xsubpp ext/typemap
+	test -f miniperl || make miniperl
+	ext/xsubpp ext/posix/POSIX.xs >tmp
+	mv tmp POSIX.c
+
+POSIX.o: POSIX.c
+lib/auto/POSIX/POSIX.so: POSIX.o ext/dbm/sdbm/libsdbm.a
+	@- mkdir lib/auto/POSIX 2>/dev/null
+	ld -o lib/auto/POSIX/POSIX.so POSIX.o ext/dbm/sdbm/libsdbm.a
+extobjs=  ext/dbm/NDBM_File.xs.o ext/dbm/ODBM_File.xs.o ext/dbm/GDBM_File.xs.o ext/dbm/SDBM_File.xs.o ext/posix/POSIX.xs.o
 # The $& notation tells Sequent machines that it can do a parallel make,
 # and is harmless otherwise.
 
-perl: $& main.o perly.o perl.o $(obj)
-	$(CC) -Bstatic $(LARGE) $(CLDFLAGS) main.o perly.o perl.o $(obj) $(libs) -Bstatic  -o perl
-	echo ""
+miniperlmain.c: miniperlmain.x
+miniperlmain.o: miniperlmain.c
+miniperl: $& miniperlmain.o perl.o $(obj)
+	$(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain.o perl.o $(obj) $(libs)
+
+perlmain.c: perlmain.x
+perlmain.o: perlmain.c
+perl: $& perlmain.o perl.o $(obj) NDBM_File.o ODBM_File.o POSIX.o
+	$(CC) $(LARGE) $(CLDFLAGS) -o perl perlmain.o perl.o $(obj) NDBM_File.o ODBM_File.o POSIX.o $(libs)
 
 libperl.rlb: libperl.a
 	ranlib libperl.a
 	touch libperl.rlb
 
-libperl.a: $& perly.o perl.o $(obj)
-	ar rcuv libperl.a $(obj) perly.o
+libperl.a: $& perl.o $(obj)
+	ar rcuv libperl.a $(obj)
 
 # This version, if specified in Configure, does ONLY those scripts which need
 # set-id emulation.  Suidperl must be setuid root.  It contains the "taint"
@@ -138,64 +202,14 @@ saber: $(saber)
 sperl.o: perl.c perly.h patchlevel.h $(h)
 	$(RMS) sperl.c
 	$(SLN) perl.c sperl.c
-	$(CCCMD) -DTAINT -DIAMSUID sperl.c
+	$(CCCMD) -DIAMSUID sperl.c
 	$(RMS) sperl.c
 
 dl.o: ext/dl/dl.c
 	cp ext/dl/dl.c dl.c
 	$(CC) -c dl.c
 
-# ODBM_File extension
-
-ODBM_File.c: ext/dbm/ODBM_File.xs ext/xsubpp ext/typemap
-	ext/xsubpp ext/dbm/ODBM_File.xs >tmp
-	mv tmp ODBM_File.c
-
-ODBM_File.o: ODBM_File.c
-
-# NDBM_File extension
-
-NDBM_File.c: ext/dbm/NDBM_File.xs ext/xsubpp ext/typemap
-	ext/xsubpp ext/dbm/NDBM_File.xs >tmp
-	mv tmp NDBM_File.c
-
-NDBM_File.o: NDBM_File.c
-
-# SDBM_File extension
-
-SDBM_File.c: ext/dbm/SDBM_File.xs ext/xsubpp ext/typemap
-	ext/xsubpp ext/dbm/SDBM_File.xs > tmp
-	mv tmp SDBM_File.c
-
-SDBM_File.o: SDBM_File.c
-
-lib/auto/SDBM_File/SDBM_File.so: SDBM_File.o ext/dbm/sdbm/libsdbm.a
-	@- mkdir lib/auto/SDBM_File 2>/dev/null
-	ld -o lib/auto/SDBM_File/SDBM_File.so SDBM_File.o ext/dbm/sdbm/libsdbm.a
-
-ext/dbm/sdbm/libsdbm.a: ext/dbm/sdbm/sdbm.c ext/dbm/sdbm/sdbm.h
-	cd ext/dbm/sdbm; $(MAKE) sdbm
-
-# GDBM_File extension
-
-GDBM_File.c: ext/dbm/GDBM_File.xs ext/xsubpp ext/typemap
-	ext/xsubpp ext/dbm/GDBM_File.xs >tmp
-	mv tmp GDBM_File.c
-
-GDBM_File.o: GDBM_File.c
-
-# POSIX extension
-
-POSIX.c: ext/posix/POSIX.xs ext/xsubpp ext/typemap
-	ext/xsubpp ext/posix/POSIX.xs > tmp
-	mv tmp POSIX.c
-
-POSIX.o: POSIX.c
-
-lib/auto/POSIX/POSIX.so: POSIX.o
-	@- mkdir lib/auto/POSIX 2>/dev/null
-	ld -o lib/auto/POSIX/POSIX.so POSIX.o ext/dbm/sdbm/libsdbm.a
-
+    
 perly.h: perly.c
 	@ echo Dummy dependency for dumb parallel make
 	touch perly.h
@@ -207,7 +221,7 @@ embed.h: embed_h.SH global.sym interp.sym
 	sh embed_h.SH
 
 perly.c:
-	@ echo 'Expect' 62 shift/reduce and 62 reduce/reduce conflicts
+	@ echo 'Expect' 80 shift/reduce and 62 reduce/reduce conflicts
 	$(BYACC) -d perly.y
 	sh $(shellflags) ./perly.fixer y.tab.c perly.c
 	mv y.tab.h perly.h
@@ -220,13 +234,13 @@ install: all
 	./perl installperl
 
 clean:
-	rm -f *.o all perl taintperl suidperl perly.c
+	rm -f *.o all perl taintperl suidperl miniperl
 	cd x2p; $(MAKE) clean
 
 realclean: clean
 	cd x2p; $(MAKE) realclean
 	rm -f *.orig */*.orig *~ */*~ core $(addedbyconf) h2ph h2ph.man
-	rm -f perly.c perly.h t/perl Makefile config.h makedepend makedir
+	rm -f perly.h t/perl Makefile config.h makedepend makedir
 	rm -f makefile x2p/Makefile x2p/makefile cflags x2p/cflags
 	rm -f c2ph pstruct
 
@@ -259,737 +273,575 @@ shlist:
 
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 # If this runs make out of memory, delete /usr/include lines.
-av.o: 
-av.o: /usr/ucbinclude/ctype.h
-av.o: /usr/ucbinclude/dirent.h
-av.o: /usr/ucbinclude/errno.h
-av.o: /usr/ucbinclude/machine/param.h
-av.o: /usr/ucbinclude/machine/setjmp.h
-av.o: /usr/ucbinclude/ndbm.h
-av.o: /usr/ucbinclude/netinet/in.h
-av.o: /usr/ucbinclude/setjmp.h
-av.o: /usr/ucbinclude/stdio.h
-av.o: /usr/ucbinclude/sys/dirent.h
-av.o: /usr/ucbinclude/sys/errno.h
-av.o: /usr/ucbinclude/sys/filio.h
-av.o: /usr/ucbinclude/sys/ioccom.h
-av.o: /usr/ucbinclude/sys/ioctl.h
-av.o: /usr/ucbinclude/sys/param.h
-av.o: /usr/ucbinclude/sys/signal.h
-av.o: /usr/ucbinclude/sys/sockio.h
-av.o: /usr/ucbinclude/sys/stat.h
-av.o: /usr/ucbinclude/sys/stdtypes.h
-av.o: /usr/ucbinclude/sys/sysmacros.h
-av.o: /usr/ucbinclude/sys/time.h
-av.o: /usr/ucbinclude/sys/times.h
-av.o: /usr/ucbinclude/sys/ttold.h
-av.o: /usr/ucbinclude/sys/ttychars.h
-av.o: /usr/ucbinclude/sys/ttycom.h
-av.o: /usr/ucbinclude/sys/ttydev.h
-av.o: /usr/ucbinclude/sys/types.h
-av.o: /usr/ucbinclude/time.h
-av.o: /usr/ucbinclude/vm/faultcode.h
+av.o: /usr/include/ctype.h
+av.o: /usr/include/dirent.h
+av.o: /usr/include/errno.h
+av.o: /usr/include/machine/param.h
+av.o: /usr/include/machine/setjmp.h
+av.o: /usr/include/netinet/in.h
+av.o: /usr/include/setjmp.h
+av.o: /usr/include/stdio.h
+av.o: /usr/include/sys/dirent.h
+av.o: /usr/include/sys/errno.h
+av.o: /usr/include/sys/filio.h
+av.o: /usr/include/sys/ioccom.h
+av.o: /usr/include/sys/ioctl.h
+av.o: /usr/include/sys/param.h
+av.o: /usr/include/sys/signal.h
+av.o: /usr/include/sys/sockio.h
+av.o: /usr/include/sys/stat.h
+av.o: /usr/include/sys/stdtypes.h
+av.o: /usr/include/sys/sysmacros.h
+av.o: /usr/include/sys/time.h
+av.o: /usr/include/sys/times.h
+av.o: /usr/include/sys/ttold.h
+av.o: /usr/include/sys/ttychars.h
+av.o: /usr/include/sys/ttycom.h
+av.o: /usr/include/sys/ttydev.h
+av.o: /usr/include/sys/types.h
+av.o: /usr/include/time.h
+av.o: /usr/include/varargs.h
+av.o: /usr/include/vm/faultcode.h
 av.o: EXTERN.h
 av.o: av.c
 av.o: av.h
 av.o: config.h
 av.o: cop.h
+av.o: cv.h
 av.o: embed.h
 av.o: form.h
 av.o: gv.h
 av.o: handy.h
 av.o: hv.h
+av.o: mg.h
 av.o: op.h
 av.o: opcode.h
 av.o: perl.h
 av.o: pp.h
 av.o: proto.h
 av.o: regexp.h
+av.o: scope.h
 av.o: sv.h
 av.o: unixish.h
 av.o: util.h
-cop.o: 
-cop.o: /usr/ucbinclude/ctype.h
-cop.o: /usr/ucbinclude/dirent.h
-cop.o: /usr/ucbinclude/errno.h
-cop.o: /usr/ucbinclude/machine/param.h
-cop.o: /usr/ucbinclude/machine/setjmp.h
-cop.o: /usr/ucbinclude/ndbm.h
-cop.o: /usr/ucbinclude/netinet/in.h
-cop.o: /usr/ucbinclude/setjmp.h
-cop.o: /usr/ucbinclude/stdio.h
-cop.o: /usr/ucbinclude/sys/dirent.h
-cop.o: /usr/ucbinclude/sys/errno.h
-cop.o: /usr/ucbinclude/sys/filio.h
-cop.o: /usr/ucbinclude/sys/ioccom.h
-cop.o: /usr/ucbinclude/sys/ioctl.h
-cop.o: /usr/ucbinclude/sys/param.h
-cop.o: /usr/ucbinclude/sys/signal.h
-cop.o: /usr/ucbinclude/sys/sockio.h
-cop.o: /usr/ucbinclude/sys/stat.h
-cop.o: /usr/ucbinclude/sys/stdtypes.h
-cop.o: /usr/ucbinclude/sys/sysmacros.h
-cop.o: /usr/ucbinclude/sys/time.h
-cop.o: /usr/ucbinclude/sys/times.h
-cop.o: /usr/ucbinclude/sys/ttold.h
-cop.o: /usr/ucbinclude/sys/ttychars.h
-cop.o: /usr/ucbinclude/sys/ttycom.h
-cop.o: /usr/ucbinclude/sys/ttydev.h
-cop.o: /usr/ucbinclude/sys/types.h
-cop.o: /usr/ucbinclude/time.h
-cop.o: /usr/ucbinclude/varargs.h
-cop.o: /usr/ucbinclude/vm/faultcode.h
-cop.o: EXTERN.h
-cop.o: av.h
-cop.o: config.h
-cop.o: cop.c
-cop.o: cop.h
-cop.o: embed.h
-cop.o: form.h
-cop.o: gv.h
-cop.o: handy.h
-cop.o: hv.h
-cop.o: op.h
-cop.o: opcode.h
-cop.o: perl.h
-cop.o: pp.h
-cop.o: proto.h
-cop.o: regexp.h
-cop.o: sv.h
-cop.o: unixish.h
-cop.o: util.h
-cons.o: 
-cons.o: /usr/ucbinclude/ctype.h
-cons.o: /usr/ucbinclude/dirent.h
-cons.o: /usr/ucbinclude/errno.h
-cons.o: /usr/ucbinclude/machine/param.h
-cons.o: /usr/ucbinclude/machine/setjmp.h
-cons.o: /usr/ucbinclude/ndbm.h
-cons.o: /usr/ucbinclude/netinet/in.h
-cons.o: /usr/ucbinclude/setjmp.h
-cons.o: /usr/ucbinclude/stdio.h
-cons.o: /usr/ucbinclude/sys/dirent.h
-cons.o: /usr/ucbinclude/sys/errno.h
-cons.o: /usr/ucbinclude/sys/filio.h
-cons.o: /usr/ucbinclude/sys/ioccom.h
-cons.o: /usr/ucbinclude/sys/ioctl.h
-cons.o: /usr/ucbinclude/sys/param.h
-cons.o: /usr/ucbinclude/sys/signal.h
-cons.o: /usr/ucbinclude/sys/sockio.h
-cons.o: /usr/ucbinclude/sys/stat.h
-cons.o: /usr/ucbinclude/sys/stdtypes.h
-cons.o: /usr/ucbinclude/sys/sysmacros.h
-cons.o: /usr/ucbinclude/sys/time.h
-cons.o: /usr/ucbinclude/sys/times.h
-cons.o: /usr/ucbinclude/sys/ttold.h
-cons.o: /usr/ucbinclude/sys/ttychars.h
-cons.o: /usr/ucbinclude/sys/ttycom.h
-cons.o: /usr/ucbinclude/sys/ttydev.h
-cons.o: /usr/ucbinclude/sys/types.h
-cons.o: /usr/ucbinclude/time.h
-cons.o: /usr/ucbinclude/vm/faultcode.h
-cons.o: EXTERN.h
-cons.o: av.h
-cons.o: config.h
-cons.o: cons.c
-cons.o: cop.h
-cons.o: embed.h
-cons.o: form.h
-cons.o: gv.h
-cons.o: handy.h
-cons.o: hv.h
-cons.o: op.h
-cons.o: opcode.h
-cons.o: perl.h
-cons.o: perly.h
-cons.o: pp.h
-cons.o: proto.h
-cons.o: regexp.h
-cons.o: sv.h
-cons.o: unixish.h
-cons.o: util.h
-consop.o: 
-consop.o: /usr/ucbinclude/ctype.h
-consop.o: /usr/ucbinclude/dirent.h
-consop.o: /usr/ucbinclude/errno.h
-consop.o: /usr/ucbinclude/machine/param.h
-consop.o: /usr/ucbinclude/machine/setjmp.h
-consop.o: /usr/ucbinclude/ndbm.h
-consop.o: /usr/ucbinclude/netinet/in.h
-consop.o: /usr/ucbinclude/setjmp.h
-consop.o: /usr/ucbinclude/stdio.h
-consop.o: /usr/ucbinclude/sys/dirent.h
-consop.o: /usr/ucbinclude/sys/errno.h
-consop.o: /usr/ucbinclude/sys/filio.h
-consop.o: /usr/ucbinclude/sys/ioccom.h
-consop.o: /usr/ucbinclude/sys/ioctl.h
-consop.o: /usr/ucbinclude/sys/param.h
-consop.o: /usr/ucbinclude/sys/signal.h
-consop.o: /usr/ucbinclude/sys/sockio.h
-consop.o: /usr/ucbinclude/sys/stat.h
-consop.o: /usr/ucbinclude/sys/stdtypes.h
-consop.o: /usr/ucbinclude/sys/sysmacros.h
-consop.o: /usr/ucbinclude/sys/time.h
-consop.o: /usr/ucbinclude/sys/times.h
-consop.o: /usr/ucbinclude/sys/ttold.h
-consop.o: /usr/ucbinclude/sys/ttychars.h
-consop.o: /usr/ucbinclude/sys/ttycom.h
-consop.o: /usr/ucbinclude/sys/ttydev.h
-consop.o: /usr/ucbinclude/sys/types.h
-consop.o: /usr/ucbinclude/time.h
-consop.o: /usr/ucbinclude/vm/faultcode.h
-consop.o: EXTERN.h
-consop.o: av.h
-consop.o: config.h
-consop.o: consop.c
-consop.o: cop.h
-consop.o: embed.h
-consop.o: form.h
-consop.o: gv.h
-consop.o: handy.h
-consop.o: hv.h
-consop.o: op.h
-consop.o: opcode.h
-consop.o: perl.h
-consop.o: pp.h
-consop.o: proto.h
-consop.o: regexp.h
-consop.o: sv.h
-consop.o: unixish.h
-consop.o: util.h
+scope.o: /usr/include/ctype.h
+scope.o: /usr/include/dirent.h
+scope.o: /usr/include/errno.h
+scope.o: /usr/include/machine/param.h
+scope.o: /usr/include/machine/setjmp.h
+scope.o: /usr/include/netinet/in.h
+scope.o: /usr/include/setjmp.h
+scope.o: /usr/include/stdio.h
+scope.o: /usr/include/sys/dirent.h
+scope.o: /usr/include/sys/errno.h
+scope.o: /usr/include/sys/filio.h
+scope.o: /usr/include/sys/ioccom.h
+scope.o: /usr/include/sys/ioctl.h
+scope.o: /usr/include/sys/param.h
+scope.o: /usr/include/sys/signal.h
+scope.o: /usr/include/sys/sockio.h
+scope.o: /usr/include/sys/stat.h
+scope.o: /usr/include/sys/stdtypes.h
+scope.o: /usr/include/sys/sysmacros.h
+scope.o: /usr/include/sys/time.h
+scope.o: /usr/include/sys/times.h
+scope.o: /usr/include/sys/ttold.h
+scope.o: /usr/include/sys/ttychars.h
+scope.o: /usr/include/sys/ttycom.h
+scope.o: /usr/include/sys/ttydev.h
+scope.o: /usr/include/sys/types.h
+scope.o: /usr/include/time.h
+scope.o: /usr/include/varargs.h
+scope.o: /usr/include/vm/faultcode.h
 scope.o: EXTERN.h
 scope.o: av.h
 scope.o: config.h
 scope.o: cop.h
-scope.o: doop.c
+scope.o: cv.h
 scope.o: embed.h
 scope.o: form.h
 scope.o: gv.h
 scope.o: handy.h
 scope.o: hv.h
+scope.o: mg.h
 scope.o: op.h
 scope.o: opcode.h
 scope.o: perl.h
 scope.o: pp.h
 scope.o: proto.h
 scope.o: regexp.h
+scope.o: scope.c
+scope.o: scope.h
 scope.o: sv.h
 scope.o: unixish.h
 scope.o: util.h
+op.o: /usr/include/ctype.h
+op.o: /usr/include/dirent.h
+op.o: /usr/include/errno.h
+op.o: /usr/include/machine/param.h
+op.o: /usr/include/machine/setjmp.h
+op.o: /usr/include/netinet/in.h
+op.o: /usr/include/setjmp.h
+op.o: /usr/include/stdio.h
+op.o: /usr/include/sys/dirent.h
+op.o: /usr/include/sys/errno.h
+op.o: /usr/include/sys/filio.h
+op.o: /usr/include/sys/ioccom.h
+op.o: /usr/include/sys/ioctl.h
+op.o: /usr/include/sys/param.h
+op.o: /usr/include/sys/signal.h
+op.o: /usr/include/sys/sockio.h
+op.o: /usr/include/sys/stat.h
+op.o: /usr/include/sys/stdtypes.h
+op.o: /usr/include/sys/sysmacros.h
+op.o: /usr/include/sys/time.h
+op.o: /usr/include/sys/times.h
+op.o: /usr/include/sys/ttold.h
+op.o: /usr/include/sys/ttychars.h
+op.o: /usr/include/sys/ttycom.h
+op.o: /usr/include/sys/ttydev.h
+op.o: /usr/include/sys/types.h
+op.o: /usr/include/time.h
+op.o: /usr/include/varargs.h
+op.o: /usr/include/vm/faultcode.h
 op.o: EXTERN.h
 op.o: av.h
 op.o: config.h
 op.o: cop.h
-op.o: doop.c
+op.o: cv.h
 op.o: embed.h
 op.o: form.h
 op.o: gv.h
 op.o: handy.h
 op.o: hv.h
+op.o: mg.h
+op.o: op.c
 op.o: op.h
 op.o: opcode.h
 op.o: perl.h
 op.o: pp.h
 op.o: proto.h
 op.o: regexp.h
+op.o: scope.h
 op.o: sv.h
 op.o: unixish.h
 op.o: util.h
-run.o: EXTERN.h
-run.o: av.h
-run.o: config.h
-run.o: cop.h
-run.o: doop.c
-run.o: embed.h
-run.o: form.h
-run.o: gv.h
-run.o: handy.h
-run.o: hv.h
-run.o: op.h
-run.o: opcode.h
-run.o: perl.h
-run.o: pp.h
-run.o: proto.h
-run.o: regexp.h
-run.o: sv.h
-run.o: unixish.h
-run.o: util.h
-deb.o: EXTERN.h
-deb.o: av.h
-deb.o: config.h
-deb.o: cop.h
-deb.o: doop.c
-deb.o: embed.h
-deb.o: form.h
-deb.o: gv.h
-deb.o: handy.h
-deb.o: hv.h
-deb.o: op.h
-deb.o: opcode.h
-deb.o: perl.h
-deb.o: pp.h
-deb.o: proto.h
-deb.o: regexp.h
-deb.o: sv.h
-deb.o: unixish.h
-deb.o: util.h
-doop.o: 
-doop.o: /usr/ucbinclude/ctype.h
-doop.o: /usr/ucbinclude/dirent.h
-doop.o: /usr/ucbinclude/errno.h
-doop.o: /usr/ucbinclude/machine/param.h
-doop.o: /usr/ucbinclude/machine/setjmp.h
-doop.o: /usr/ucbinclude/ndbm.h
-doop.o: /usr/ucbinclude/netinet/in.h
-doop.o: /usr/ucbinclude/setjmp.h
-doop.o: /usr/ucbinclude/stdio.h
-doop.o: /usr/ucbinclude/sys/dirent.h
-doop.o: /usr/ucbinclude/sys/errno.h
-doop.o: /usr/ucbinclude/sys/filio.h
-doop.o: /usr/ucbinclude/sys/ioccom.h
-doop.o: /usr/ucbinclude/sys/ioctl.h
-doop.o: /usr/ucbinclude/sys/param.h
-doop.o: /usr/ucbinclude/sys/signal.h
-doop.o: /usr/ucbinclude/sys/sockio.h
-doop.o: /usr/ucbinclude/sys/stat.h
-doop.o: /usr/ucbinclude/sys/stdtypes.h
-doop.o: /usr/ucbinclude/sys/sysmacros.h
-doop.o: /usr/ucbinclude/sys/time.h
-doop.o: /usr/ucbinclude/sys/times.h
-doop.o: /usr/ucbinclude/sys/ttold.h
-doop.o: /usr/ucbinclude/sys/ttychars.h
-doop.o: /usr/ucbinclude/sys/ttycom.h
-doop.o: /usr/ucbinclude/sys/ttydev.h
-doop.o: /usr/ucbinclude/sys/types.h
-doop.o: /usr/ucbinclude/time.h
-doop.o: /usr/ucbinclude/vm/faultcode.h
+doop.o: /usr/include/ctype.h
+doop.o: /usr/include/dirent.h
+doop.o: /usr/include/errno.h
+doop.o: /usr/include/machine/param.h
+doop.o: /usr/include/machine/setjmp.h
+doop.o: /usr/include/netinet/in.h
+doop.o: /usr/include/setjmp.h
+doop.o: /usr/include/stdio.h
+doop.o: /usr/include/sys/dirent.h
+doop.o: /usr/include/sys/errno.h
+doop.o: /usr/include/sys/filio.h
+doop.o: /usr/include/sys/ioccom.h
+doop.o: /usr/include/sys/ioctl.h
+doop.o: /usr/include/sys/param.h
+doop.o: /usr/include/sys/signal.h
+doop.o: /usr/include/sys/sockio.h
+doop.o: /usr/include/sys/stat.h
+doop.o: /usr/include/sys/stdtypes.h
+doop.o: /usr/include/sys/sysmacros.h
+doop.o: /usr/include/sys/time.h
+doop.o: /usr/include/sys/times.h
+doop.o: /usr/include/sys/ttold.h
+doop.o: /usr/include/sys/ttychars.h
+doop.o: /usr/include/sys/ttycom.h
+doop.o: /usr/include/sys/ttydev.h
+doop.o: /usr/include/sys/types.h
+doop.o: /usr/include/time.h
+doop.o: /usr/include/varargs.h
+doop.o: /usr/include/vm/faultcode.h
 doop.o: EXTERN.h
 doop.o: av.h
 doop.o: config.h
 doop.o: cop.h
+doop.o: cv.h
 doop.o: doop.c
 doop.o: embed.h
 doop.o: form.h
 doop.o: gv.h
 doop.o: handy.h
 doop.o: hv.h
+doop.o: mg.h
 doop.o: op.h
 doop.o: opcode.h
 doop.o: perl.h
 doop.o: pp.h
 doop.o: proto.h
 doop.o: regexp.h
+doop.o: scope.h
 doop.o: sv.h
 doop.o: unixish.h
 doop.o: util.h
-doio.o: 
-doio.o: /usr/ucbinclude/ctype.h
-doio.o: /usr/ucbinclude/debug/debug.h
-doio.o: /usr/ucbinclude/dirent.h
-doio.o: /usr/ucbinclude/errno.h
-doio.o: /usr/ucbinclude/machine/mmu.h
-doio.o: /usr/ucbinclude/machine/param.h
-doio.o: /usr/ucbinclude/machine/setjmp.h
-doio.o: /usr/ucbinclude/mon/obpdefs.h
-doio.o: /usr/ucbinclude/mon/openprom.h
-doio.o: /usr/ucbinclude/mon/sunromvec.h
-doio.o: /usr/ucbinclude/ndbm.h
-doio.o: /usr/ucbinclude/netinet/in.h
-doio.o: /usr/ucbinclude/setjmp.h
-doio.o: /usr/ucbinclude/stdio.h
-doio.o: /usr/ucbinclude/sys/dirent.h
-doio.o: /usr/ucbinclude/sys/errno.h
-doio.o: /usr/ucbinclude/sys/fcntlcom.h
-doio.o: /usr/ucbinclude/sys/file.h
-doio.o: /usr/ucbinclude/sys/filio.h
-doio.o: /usr/ucbinclude/sys/ioccom.h
-doio.o: /usr/ucbinclude/sys/ioctl.h
-doio.o: /usr/ucbinclude/sys/ipc.h
-doio.o: /usr/ucbinclude/sys/msg.h
-doio.o: /usr/ucbinclude/sys/param.h
-doio.o: /usr/ucbinclude/sys/sem.h
-doio.o: /usr/ucbinclude/sys/shm.h
-doio.o: /usr/ucbinclude/sys/signal.h
-doio.o: /usr/ucbinclude/sys/sockio.h
-doio.o: /usr/ucbinclude/sys/stat.h
-doio.o: /usr/ucbinclude/sys/stdtypes.h
-doio.o: /usr/ucbinclude/sys/sysmacros.h
-doio.o: /usr/ucbinclude/sys/time.h
-doio.o: /usr/ucbinclude/sys/times.h
-doio.o: /usr/ucbinclude/sys/ttold.h
-doio.o: /usr/ucbinclude/sys/ttychars.h
-doio.o: /usr/ucbinclude/sys/ttycom.h
-doio.o: /usr/ucbinclude/sys/ttydev.h
-doio.o: /usr/ucbinclude/sys/types.h
-doio.o: /usr/ucbinclude/time.h
-doio.o: /usr/ucbinclude/utime.h
-doio.o: /usr/ucbinclude/vm/faultcode.h
+doio.o: /usr/include/ctype.h
+doio.o: /usr/include/debug/debug.h
+doio.o: /usr/include/dirent.h
+doio.o: /usr/include/errno.h
+doio.o: /usr/include/machine/mmu.h
+doio.o: /usr/include/machine/param.h
+doio.o: /usr/include/machine/setjmp.h
+doio.o: /usr/include/mon/obpdefs.h
+doio.o: /usr/include/mon/openprom.h
+doio.o: /usr/include/mon/sunromvec.h
+doio.o: /usr/include/netinet/in.h
+doio.o: /usr/include/setjmp.h
+doio.o: /usr/include/stdio.h
+doio.o: /usr/include/sys/dirent.h
+doio.o: /usr/include/sys/errno.h
+doio.o: /usr/include/sys/fcntlcom.h
+doio.o: /usr/include/sys/file.h
+doio.o: /usr/include/sys/filio.h
+doio.o: /usr/include/sys/ioccom.h
+doio.o: /usr/include/sys/ioctl.h
+doio.o: /usr/include/sys/ipc.h
+doio.o: /usr/include/sys/msg.h
+doio.o: /usr/include/sys/param.h
+doio.o: /usr/include/sys/sem.h
+doio.o: /usr/include/sys/shm.h
+doio.o: /usr/include/sys/signal.h
+doio.o: /usr/include/sys/sockio.h
+doio.o: /usr/include/sys/stat.h
+doio.o: /usr/include/sys/stdtypes.h
+doio.o: /usr/include/sys/sysmacros.h
+doio.o: /usr/include/sys/time.h
+doio.o: /usr/include/sys/times.h
+doio.o: /usr/include/sys/ttold.h
+doio.o: /usr/include/sys/ttychars.h
+doio.o: /usr/include/sys/ttycom.h
+doio.o: /usr/include/sys/ttydev.h
+doio.o: /usr/include/sys/types.h
+doio.o: /usr/include/time.h
+doio.o: /usr/include/utime.h
+doio.o: /usr/include/varargs.h
+doio.o: /usr/include/vm/faultcode.h
 doio.o: EXTERN.h
 doio.o: av.h
 doio.o: config.h
 doio.o: cop.h
+doio.o: cv.h
 doio.o: doio.c
 doio.o: embed.h
 doio.o: form.h
 doio.o: gv.h
 doio.o: handy.h
 doio.o: hv.h
+doio.o: mg.h
 doio.o: op.h
 doio.o: opcode.h
 doio.o: perl.h
 doio.o: pp.h
 doio.o: proto.h
 doio.o: regexp.h
+doio.o: scope.h
 doio.o: sv.h
 doio.o: unixish.h
 doio.o: util.h
-dump.o: 
-dump.o: /usr/ucbinclude/ctype.h
-dump.o: /usr/ucbinclude/dirent.h
-dump.o: /usr/ucbinclude/errno.h
-dump.o: /usr/ucbinclude/machine/param.h
-dump.o: /usr/ucbinclude/machine/setjmp.h
-dump.o: /usr/ucbinclude/ndbm.h
-dump.o: /usr/ucbinclude/netinet/in.h
-dump.o: /usr/ucbinclude/setjmp.h
-dump.o: /usr/ucbinclude/stdio.h
-dump.o: /usr/ucbinclude/sys/dirent.h
-dump.o: /usr/ucbinclude/sys/errno.h
-dump.o: /usr/ucbinclude/sys/filio.h
-dump.o: /usr/ucbinclude/sys/ioccom.h
-dump.o: /usr/ucbinclude/sys/ioctl.h
-dump.o: /usr/ucbinclude/sys/param.h
-dump.o: /usr/ucbinclude/sys/signal.h
-dump.o: /usr/ucbinclude/sys/sockio.h
-dump.o: /usr/ucbinclude/sys/stat.h
-dump.o: /usr/ucbinclude/sys/stdtypes.h
-dump.o: /usr/ucbinclude/sys/sysmacros.h
-dump.o: /usr/ucbinclude/sys/time.h
-dump.o: /usr/ucbinclude/sys/times.h
-dump.o: /usr/ucbinclude/sys/ttold.h
-dump.o: /usr/ucbinclude/sys/ttychars.h
-dump.o: /usr/ucbinclude/sys/ttycom.h
-dump.o: /usr/ucbinclude/sys/ttydev.h
-dump.o: /usr/ucbinclude/sys/types.h
-dump.o: /usr/ucbinclude/time.h
-dump.o: /usr/ucbinclude/vm/faultcode.h
+dump.o: /usr/include/ctype.h
+dump.o: /usr/include/dirent.h
+dump.o: /usr/include/errno.h
+dump.o: /usr/include/machine/param.h
+dump.o: /usr/include/machine/setjmp.h
+dump.o: /usr/include/netinet/in.h
+dump.o: /usr/include/setjmp.h
+dump.o: /usr/include/stdio.h
+dump.o: /usr/include/sys/dirent.h
+dump.o: /usr/include/sys/errno.h
+dump.o: /usr/include/sys/filio.h
+dump.o: /usr/include/sys/ioccom.h
+dump.o: /usr/include/sys/ioctl.h
+dump.o: /usr/include/sys/param.h
+dump.o: /usr/include/sys/signal.h
+dump.o: /usr/include/sys/sockio.h
+dump.o: /usr/include/sys/stat.h
+dump.o: /usr/include/sys/stdtypes.h
+dump.o: /usr/include/sys/sysmacros.h
+dump.o: /usr/include/sys/time.h
+dump.o: /usr/include/sys/times.h
+dump.o: /usr/include/sys/ttold.h
+dump.o: /usr/include/sys/ttychars.h
+dump.o: /usr/include/sys/ttycom.h
+dump.o: /usr/include/sys/ttydev.h
+dump.o: /usr/include/sys/types.h
+dump.o: /usr/include/time.h
+dump.o: /usr/include/varargs.h
+dump.o: /usr/include/vm/faultcode.h
 dump.o: EXTERN.h
 dump.o: av.h
 dump.o: config.h
 dump.o: cop.h
+dump.o: cv.h
 dump.o: dump.c
 dump.o: embed.h
 dump.o: form.h
 dump.o: gv.h
 dump.o: handy.h
 dump.o: hv.h
+dump.o: mg.h
 dump.o: op.h
 dump.o: opcode.h
 dump.o: perl.h
 dump.o: pp.h
 dump.o: proto.h
 dump.o: regexp.h
+dump.o: scope.h
 dump.o: sv.h
 dump.o: unixish.h
 dump.o: util.h
-eval.o: 
-eval.o: /usr/ucbinclude/ctype.h
-eval.o: /usr/ucbinclude/dirent.h
-eval.o: /usr/ucbinclude/errno.h
-eval.o: /usr/ucbinclude/machine/param.h
-eval.o: /usr/ucbinclude/machine/setjmp.h
-eval.o: /usr/ucbinclude/ndbm.h
-eval.o: /usr/ucbinclude/netinet/in.h
-eval.o: /usr/ucbinclude/setjmp.h
-eval.o: /usr/ucbinclude/stdio.h
-eval.o: /usr/ucbinclude/sys/dirent.h
-eval.o: /usr/ucbinclude/sys/errno.h
-eval.o: /usr/ucbinclude/sys/fcntlcom.h
-eval.o: /usr/ucbinclude/sys/file.h
-eval.o: /usr/ucbinclude/sys/filio.h
-eval.o: /usr/ucbinclude/sys/ioccom.h
-eval.o: /usr/ucbinclude/sys/ioctl.h
-eval.o: /usr/ucbinclude/sys/param.h
-eval.o: /usr/ucbinclude/sys/signal.h
-eval.o: /usr/ucbinclude/sys/sockio.h
-eval.o: /usr/ucbinclude/sys/stat.h
-eval.o: /usr/ucbinclude/sys/stdtypes.h
-eval.o: /usr/ucbinclude/sys/sysmacros.h
-eval.o: /usr/ucbinclude/sys/time.h
-eval.o: /usr/ucbinclude/sys/times.h
-eval.o: /usr/ucbinclude/sys/ttold.h
-eval.o: /usr/ucbinclude/sys/ttychars.h
-eval.o: /usr/ucbinclude/sys/ttycom.h
-eval.o: /usr/ucbinclude/sys/ttydev.h
-eval.o: /usr/ucbinclude/sys/types.h
-eval.o: /usr/ucbinclude/time.h
-eval.o: /usr/ucbinclude/vfork.h
-eval.o: /usr/ucbinclude/vm/faultcode.h
-eval.o: EXTERN.h
-eval.o: av.h
-eval.o: config.h
-eval.o: cop.h
-eval.o: embed.h
-eval.o: eval.c
-eval.o: form.h
-eval.o: gv.h
-eval.o: handy.h
-eval.o: hv.h
-eval.o: op.h
-eval.o: opcode.h
-eval.o: perl.h
-eval.o: pp.h
-eval.o: proto.h
-eval.o: regexp.h
-eval.o: sv.h
-eval.o: unixish.h
-eval.o: util.h
-hv.o: 
-hv.o: /usr/ucbinclude/ctype.h
-hv.o: /usr/ucbinclude/dirent.h
-hv.o: /usr/ucbinclude/errno.h
-hv.o: /usr/ucbinclude/machine/param.h
-hv.o: /usr/ucbinclude/machine/setjmp.h
-hv.o: /usr/ucbinclude/ndbm.h
-hv.o: /usr/ucbinclude/netinet/in.h
-hv.o: /usr/ucbinclude/setjmp.h
-hv.o: /usr/ucbinclude/stdio.h
-hv.o: /usr/ucbinclude/sys/dirent.h
-hv.o: /usr/ucbinclude/sys/errno.h
-hv.o: /usr/ucbinclude/sys/fcntlcom.h
-hv.o: /usr/ucbinclude/sys/file.h
-hv.o: /usr/ucbinclude/sys/filio.h
-hv.o: /usr/ucbinclude/sys/ioccom.h
-hv.o: /usr/ucbinclude/sys/ioctl.h
-hv.o: /usr/ucbinclude/sys/param.h
-hv.o: /usr/ucbinclude/sys/signal.h
-hv.o: /usr/ucbinclude/sys/sockio.h
-hv.o: /usr/ucbinclude/sys/stat.h
-hv.o: /usr/ucbinclude/sys/stdtypes.h
-hv.o: /usr/ucbinclude/sys/sysmacros.h
-hv.o: /usr/ucbinclude/sys/time.h
-hv.o: /usr/ucbinclude/sys/times.h
-hv.o: /usr/ucbinclude/sys/ttold.h
-hv.o: /usr/ucbinclude/sys/ttychars.h
-hv.o: /usr/ucbinclude/sys/ttycom.h
-hv.o: /usr/ucbinclude/sys/ttydev.h
-hv.o: /usr/ucbinclude/sys/types.h
-hv.o: /usr/ucbinclude/time.h
-hv.o: /usr/ucbinclude/vm/faultcode.h
+hv.o: /usr/include/ctype.h
+hv.o: /usr/include/dirent.h
+hv.o: /usr/include/errno.h
+hv.o: /usr/include/machine/param.h
+hv.o: /usr/include/machine/setjmp.h
+hv.o: /usr/include/netinet/in.h
+hv.o: /usr/include/setjmp.h
+hv.o: /usr/include/stdio.h
+hv.o: /usr/include/sys/dirent.h
+hv.o: /usr/include/sys/errno.h
+hv.o: /usr/include/sys/filio.h
+hv.o: /usr/include/sys/ioccom.h
+hv.o: /usr/include/sys/ioctl.h
+hv.o: /usr/include/sys/param.h
+hv.o: /usr/include/sys/signal.h
+hv.o: /usr/include/sys/sockio.h
+hv.o: /usr/include/sys/stat.h
+hv.o: /usr/include/sys/stdtypes.h
+hv.o: /usr/include/sys/sysmacros.h
+hv.o: /usr/include/sys/time.h
+hv.o: /usr/include/sys/times.h
+hv.o: /usr/include/sys/ttold.h
+hv.o: /usr/include/sys/ttychars.h
+hv.o: /usr/include/sys/ttycom.h
+hv.o: /usr/include/sys/ttydev.h
+hv.o: /usr/include/sys/types.h
+hv.o: /usr/include/time.h
+hv.o: /usr/include/varargs.h
+hv.o: /usr/include/vm/faultcode.h
 hv.o: EXTERN.h
 hv.o: av.h
 hv.o: config.h
 hv.o: cop.h
+hv.o: cv.h
 hv.o: embed.h
 hv.o: form.h
 hv.o: gv.h
 hv.o: handy.h
 hv.o: hv.c
 hv.o: hv.h
+hv.o: mg.h
 hv.o: op.h
 hv.o: opcode.h
 hv.o: perl.h
 hv.o: pp.h
 hv.o: proto.h
 hv.o: regexp.h
+hv.o: scope.h
 hv.o: sv.h
 hv.o: unixish.h
 hv.o: util.h
-main.o: 
-main.o: /usr/ucbinclude/ctype.h
-main.o: /usr/ucbinclude/dirent.h
-main.o: /usr/ucbinclude/errno.h
-main.o: /usr/ucbinclude/machine/param.h
-main.o: /usr/ucbinclude/machine/setjmp.h
-main.o: /usr/ucbinclude/ndbm.h
-main.o: /usr/ucbinclude/netinet/in.h
-main.o: /usr/ucbinclude/setjmp.h
-main.o: /usr/ucbinclude/stdio.h
-main.o: /usr/ucbinclude/sys/dirent.h
-main.o: /usr/ucbinclude/sys/errno.h
-main.o: /usr/ucbinclude/sys/filio.h
-main.o: /usr/ucbinclude/sys/ioccom.h
-main.o: /usr/ucbinclude/sys/ioctl.h
-main.o: /usr/ucbinclude/sys/param.h
-main.o: /usr/ucbinclude/sys/signal.h
-main.o: /usr/ucbinclude/sys/sockio.h
-main.o: /usr/ucbinclude/sys/stat.h
-main.o: /usr/ucbinclude/sys/stdtypes.h
-main.o: /usr/ucbinclude/sys/sysmacros.h
-main.o: /usr/ucbinclude/sys/time.h
-main.o: /usr/ucbinclude/sys/times.h
-main.o: /usr/ucbinclude/sys/ttold.h
-main.o: /usr/ucbinclude/sys/ttychars.h
-main.o: /usr/ucbinclude/sys/ttycom.h
-main.o: /usr/ucbinclude/sys/ttydev.h
-main.o: /usr/ucbinclude/sys/types.h
-main.o: /usr/ucbinclude/time.h
-main.o: /usr/ucbinclude/vm/faultcode.h
-main.o: INTERN.h
-main.o: av.h
-main.o: config.h
-main.o: cop.h
-main.o: embed.h
-main.o: form.h
-main.o: gv.h
-main.o: handy.h
-main.o: hv.h
-main.o: main.c
-main.o: op.h
-main.o: opcode.h
-main.o: perl.h
-main.o: pp.h
-main.o: proto.h
-main.o: regexp.h
-main.o: sv.h
-main.o: unixish.h
-main.o: util.h
-malloc.o: 
-malloc.o: /usr/ucbinclude/ctype.h
-malloc.o: /usr/ucbinclude/dirent.h
-malloc.o: /usr/ucbinclude/errno.h
-malloc.o: /usr/ucbinclude/machine/param.h
-malloc.o: /usr/ucbinclude/machine/setjmp.h
-malloc.o: /usr/ucbinclude/ndbm.h
-malloc.o: /usr/ucbinclude/netinet/in.h
-malloc.o: /usr/ucbinclude/setjmp.h
-malloc.o: /usr/ucbinclude/stdio.h
-malloc.o: /usr/ucbinclude/sys/dirent.h
-malloc.o: /usr/ucbinclude/sys/errno.h
-malloc.o: /usr/ucbinclude/sys/filio.h
-malloc.o: /usr/ucbinclude/sys/ioccom.h
-malloc.o: /usr/ucbinclude/sys/ioctl.h
-malloc.o: /usr/ucbinclude/sys/param.h
-malloc.o: /usr/ucbinclude/sys/signal.h
-malloc.o: /usr/ucbinclude/sys/sockio.h
-malloc.o: /usr/ucbinclude/sys/stat.h
-malloc.o: /usr/ucbinclude/sys/stdtypes.h
-malloc.o: /usr/ucbinclude/sys/sysmacros.h
-malloc.o: /usr/ucbinclude/sys/time.h
-malloc.o: /usr/ucbinclude/sys/times.h
-malloc.o: /usr/ucbinclude/sys/ttold.h
-malloc.o: /usr/ucbinclude/sys/ttychars.h
-malloc.o: /usr/ucbinclude/sys/ttycom.h
-malloc.o: /usr/ucbinclude/sys/ttydev.h
-malloc.o: /usr/ucbinclude/sys/types.h
-malloc.o: /usr/ucbinclude/time.h
-malloc.o: /usr/ucbinclude/vm/faultcode.h
+malloc.o: /usr/include/ctype.h
+malloc.o: /usr/include/dirent.h
+malloc.o: /usr/include/errno.h
+malloc.o: /usr/include/machine/param.h
+malloc.o: /usr/include/machine/setjmp.h
+malloc.o: /usr/include/netinet/in.h
+malloc.o: /usr/include/setjmp.h
+malloc.o: /usr/include/stdio.h
+malloc.o: /usr/include/sys/dirent.h
+malloc.o: /usr/include/sys/errno.h
+malloc.o: /usr/include/sys/filio.h
+malloc.o: /usr/include/sys/ioccom.h
+malloc.o: /usr/include/sys/ioctl.h
+malloc.o: /usr/include/sys/param.h
+malloc.o: /usr/include/sys/signal.h
+malloc.o: /usr/include/sys/sockio.h
+malloc.o: /usr/include/sys/stat.h
+malloc.o: /usr/include/sys/stdtypes.h
+malloc.o: /usr/include/sys/sysmacros.h
+malloc.o: /usr/include/sys/time.h
+malloc.o: /usr/include/sys/times.h
+malloc.o: /usr/include/sys/ttold.h
+malloc.o: /usr/include/sys/ttychars.h
+malloc.o: /usr/include/sys/ttycom.h
+malloc.o: /usr/include/sys/ttydev.h
+malloc.o: /usr/include/sys/types.h
+malloc.o: /usr/include/time.h
+malloc.o: /usr/include/varargs.h
+malloc.o: /usr/include/vm/faultcode.h
 malloc.o: EXTERN.h
 malloc.o: av.h
 malloc.o: config.h
 malloc.o: cop.h
+malloc.o: cv.h
 malloc.o: embed.h
 malloc.o: form.h
 malloc.o: gv.h
 malloc.o: handy.h
 malloc.o: hv.h
 malloc.o: malloc.c
+malloc.o: mg.h
 malloc.o: op.h
 malloc.o: opcode.h
 malloc.o: perl.h
 malloc.o: pp.h
 malloc.o: proto.h
 malloc.o: regexp.h
+malloc.o: scope.h
 malloc.o: sv.h
 malloc.o: unixish.h
 malloc.o: util.h
-perl.o: 
-perl.o: /usr/ucbinclude/ctype.h
-perl.o: /usr/ucbinclude/dirent.h
-perl.o: /usr/ucbinclude/errno.h
-perl.o: /usr/ucbinclude/machine/param.h
-perl.o: /usr/ucbinclude/machine/setjmp.h
-perl.o: /usr/ucbinclude/ndbm.h
-perl.o: /usr/ucbinclude/netinet/in.h
-perl.o: /usr/ucbinclude/setjmp.h
-perl.o: /usr/ucbinclude/stdio.h
-perl.o: /usr/ucbinclude/sys/dirent.h
-perl.o: /usr/ucbinclude/sys/errno.h
-perl.o: /usr/ucbinclude/sys/filio.h
-perl.o: /usr/ucbinclude/sys/ioccom.h
-perl.o: /usr/ucbinclude/sys/ioctl.h
-perl.o: /usr/ucbinclude/sys/param.h
-perl.o: /usr/ucbinclude/sys/signal.h
-perl.o: /usr/ucbinclude/sys/sockio.h
-perl.o: /usr/ucbinclude/sys/stat.h
-perl.o: /usr/ucbinclude/sys/stdtypes.h
-perl.o: /usr/ucbinclude/sys/sysmacros.h
-perl.o: /usr/ucbinclude/sys/time.h
-perl.o: /usr/ucbinclude/sys/times.h
-perl.o: /usr/ucbinclude/sys/ttold.h
-perl.o: /usr/ucbinclude/sys/ttychars.h
-perl.o: /usr/ucbinclude/sys/ttycom.h
-perl.o: /usr/ucbinclude/sys/ttydev.h
-perl.o: /usr/ucbinclude/sys/types.h
-perl.o: /usr/ucbinclude/time.h
-perl.o: /usr/ucbinclude/vm/faultcode.h
-perl.o: EXTERN.h
-perl.o: av.h
-perl.o: config.h
-perl.o: cop.h
-perl.o: embed.h
-perl.o: form.h
-perl.o: gv.h
-perl.o: handy.h
-perl.o: hv.h
-perl.o: op.h
-perl.o: opcode.h
-perl.o: patchlevel.h
-perl.o: perl.c
-perl.o: perl.h
-perl.o: perly.h
-perl.o: pp.h
-perl.o: proto.h
-perl.o: regexp.h
-perl.o: sv.h
-perl.o: unixish.h
-perl.o: util.h
-pp.o: 
-pp.o: /usr/ucbinclude/ctype.h
-pp.o: /usr/ucbinclude/dirent.h
-pp.o: /usr/ucbinclude/errno.h
-pp.o: /usr/ucbinclude/grp.h
-pp.o: /usr/ucbinclude/machine/param.h
-pp.o: /usr/ucbinclude/machine/setjmp.h
-pp.o: /usr/ucbinclude/ndbm.h
-pp.o: /usr/ucbinclude/netdb.h
-pp.o: /usr/ucbinclude/netinet/in.h
-pp.o: /usr/ucbinclude/pwd.h
-pp.o: /usr/ucbinclude/setjmp.h
-pp.o: /usr/ucbinclude/stdio.h
-pp.o: /usr/ucbinclude/sys/dirent.h
-pp.o: /usr/ucbinclude/sys/errno.h
-pp.o: /usr/ucbinclude/sys/fcntlcom.h
-pp.o: /usr/ucbinclude/sys/file.h
-pp.o: /usr/ucbinclude/sys/filio.h
-pp.o: /usr/ucbinclude/sys/ioccom.h
-pp.o: /usr/ucbinclude/sys/ioctl.h
-pp.o: /usr/ucbinclude/sys/param.h
-pp.o: /usr/ucbinclude/sys/signal.h
-pp.o: /usr/ucbinclude/sys/socket.h
-pp.o: /usr/ucbinclude/sys/sockio.h
-pp.o: /usr/ucbinclude/sys/stat.h
-pp.o: /usr/ucbinclude/sys/stdtypes.h
-pp.o: /usr/ucbinclude/sys/sysmacros.h
-pp.o: /usr/ucbinclude/sys/time.h
-pp.o: /usr/ucbinclude/sys/times.h
-pp.o: /usr/ucbinclude/sys/ttold.h
-pp.o: /usr/ucbinclude/sys/ttychars.h
-pp.o: /usr/ucbinclude/sys/ttycom.h
-pp.o: /usr/ucbinclude/sys/ttydev.h
-pp.o: /usr/ucbinclude/sys/types.h
-pp.o: /usr/ucbinclude/time.h
-pp.o: /usr/ucbinclude/utime.h
-pp.o: /usr/ucbinclude/vm/faultcode.h
+mg.o: /usr/include/ctype.h
+mg.o: /usr/include/dirent.h
+mg.o: /usr/include/errno.h
+mg.o: /usr/include/machine/param.h
+mg.o: /usr/include/machine/setjmp.h
+mg.o: /usr/include/netinet/in.h
+mg.o: /usr/include/setjmp.h
+mg.o: /usr/include/stdio.h
+mg.o: /usr/include/sys/dirent.h
+mg.o: /usr/include/sys/errno.h
+mg.o: /usr/include/sys/filio.h
+mg.o: /usr/include/sys/ioccom.h
+mg.o: /usr/include/sys/ioctl.h
+mg.o: /usr/include/sys/param.h
+mg.o: /usr/include/sys/signal.h
+mg.o: /usr/include/sys/sockio.h
+mg.o: /usr/include/sys/stat.h
+mg.o: /usr/include/sys/stdtypes.h
+mg.o: /usr/include/sys/sysmacros.h
+mg.o: /usr/include/sys/time.h
+mg.o: /usr/include/sys/times.h
+mg.o: /usr/include/sys/ttold.h
+mg.o: /usr/include/sys/ttychars.h
+mg.o: /usr/include/sys/ttycom.h
+mg.o: /usr/include/sys/ttydev.h
+mg.o: /usr/include/sys/types.h
+mg.o: /usr/include/time.h
+mg.o: /usr/include/varargs.h
+mg.o: /usr/include/vm/faultcode.h
+mg.o: EXTERN.h
+mg.o: av.h
+mg.o: config.h
+mg.o: cop.h
+mg.o: cv.h
+mg.o: embed.h
+mg.o: form.h
+mg.o: gv.h
+mg.o: handy.h
+mg.o: hv.h
+mg.o: mg.c
+mg.o: mg.h
+mg.o: op.h
+mg.o: opcode.h
+mg.o: perl.h
+mg.o: pp.h
+mg.o: proto.h
+mg.o: regexp.h
+mg.o: scope.h
+mg.o: sv.h
+mg.o: unixish.h
+mg.o: util.h
+perly.o: /usr/include/ctype.h
+perly.o: /usr/include/dirent.h
+perly.o: /usr/include/errno.h
+perly.o: /usr/include/machine/param.h
+perly.o: /usr/include/machine/setjmp.h
+perly.o: /usr/include/netinet/in.h
+perly.o: /usr/include/setjmp.h
+perly.o: /usr/include/stdio.h
+perly.o: /usr/include/sys/dirent.h
+perly.o: /usr/include/sys/errno.h
+perly.o: /usr/include/sys/filio.h
+perly.o: /usr/include/sys/ioccom.h
+perly.o: /usr/include/sys/ioctl.h
+perly.o: /usr/include/sys/param.h
+perly.o: /usr/include/sys/signal.h
+perly.o: /usr/include/sys/sockio.h
+perly.o: /usr/include/sys/stat.h
+perly.o: /usr/include/sys/stdtypes.h
+perly.o: /usr/include/sys/sysmacros.h
+perly.o: /usr/include/sys/time.h
+perly.o: /usr/include/sys/times.h
+perly.o: /usr/include/sys/ttold.h
+perly.o: /usr/include/sys/ttychars.h
+perly.o: /usr/include/sys/ttycom.h
+perly.o: /usr/include/sys/ttydev.h
+perly.o: /usr/include/sys/types.h
+perly.o: /usr/include/time.h
+perly.o: /usr/include/varargs.h
+perly.o: /usr/include/vm/faultcode.h
+perly.o: EXTERN.h
+perly.o: av.h
+perly.o: config.h
+perly.o: cop.h
+perly.o: cv.h
+perly.o: embed.h
+perly.o: form.h
+perly.o: gv.h
+perly.o: handy.h
+perly.o: hv.h
+perly.o: mg.h
+perly.o: op.h
+perly.o: opcode.h
+perly.o: perl.h
+perly.o: perly.c
+perly.o: pp.h
+perly.o: proto.h
+perly.o: regexp.h
+perly.o: scope.h
+perly.o: sv.h
+perly.o: unixish.h
+perly.o: util.h
+pp.o: /usr/include/ctype.h
+pp.o: /usr/include/dirent.h
+pp.o: /usr/include/errno.h
+pp.o: /usr/include/grp.h
+pp.o: /usr/include/machine/param.h
+pp.o: /usr/include/machine/setjmp.h
+pp.o: /usr/include/netdb.h
+pp.o: /usr/include/netinet/in.h
+pp.o: /usr/include/pwd.h
+pp.o: /usr/include/setjmp.h
+pp.o: /usr/include/stdio.h
+pp.o: /usr/include/sys/dirent.h
+pp.o: /usr/include/sys/errno.h
+pp.o: /usr/include/sys/fcntlcom.h
+pp.o: /usr/include/sys/file.h
+pp.o: /usr/include/sys/filio.h
+pp.o: /usr/include/sys/ioccom.h
+pp.o: /usr/include/sys/ioctl.h
+pp.o: /usr/include/sys/param.h
+pp.o: /usr/include/sys/signal.h
+pp.o: /usr/include/sys/socket.h
+pp.o: /usr/include/sys/sockio.h
+pp.o: /usr/include/sys/stat.h
+pp.o: /usr/include/sys/stdtypes.h
+pp.o: /usr/include/sys/sysmacros.h
+pp.o: /usr/include/sys/time.h
+pp.o: /usr/include/sys/times.h
+pp.o: /usr/include/sys/ttold.h
+pp.o: /usr/include/sys/ttychars.h
+pp.o: /usr/include/sys/ttycom.h
+pp.o: /usr/include/sys/ttydev.h
+pp.o: /usr/include/sys/types.h
+pp.o: /usr/include/time.h
+pp.o: /usr/include/utime.h
+pp.o: /usr/include/varargs.h
+pp.o: /usr/include/vm/faultcode.h
 pp.o: EXTERN.h
 pp.o: av.h
 pp.o: config.h
 pp.o: cop.h
+pp.o: cv.h
 pp.o: embed.h
 pp.o: form.h
 pp.o: gv.h
 pp.o: handy.h
 pp.o: hv.h
+pp.o: mg.h
 pp.o: op.h
 pp.o: opcode.h
 pp.o: perl.h
@@ -997,49 +849,51 @@ pp.o: pp.c
 pp.o: pp.h
 pp.o: proto.h
 pp.o: regexp.h
+pp.o: scope.h
 pp.o: sv.h
 pp.o: unixish.h
 pp.o: util.h
-regcomp.o: 
-regcomp.o: /usr/ucbinclude/ctype.h
-regcomp.o: /usr/ucbinclude/dirent.h
-regcomp.o: /usr/ucbinclude/errno.h
-regcomp.o: /usr/ucbinclude/machine/param.h
-regcomp.o: /usr/ucbinclude/machine/setjmp.h
-regcomp.o: /usr/ucbinclude/ndbm.h
-regcomp.o: /usr/ucbinclude/netinet/in.h
-regcomp.o: /usr/ucbinclude/setjmp.h
-regcomp.o: /usr/ucbinclude/stdio.h
-regcomp.o: /usr/ucbinclude/sys/dirent.h
-regcomp.o: /usr/ucbinclude/sys/errno.h
-regcomp.o: /usr/ucbinclude/sys/filio.h
-regcomp.o: /usr/ucbinclude/sys/ioccom.h
-regcomp.o: /usr/ucbinclude/sys/ioctl.h
-regcomp.o: /usr/ucbinclude/sys/param.h
-regcomp.o: /usr/ucbinclude/sys/signal.h
-regcomp.o: /usr/ucbinclude/sys/sockio.h
-regcomp.o: /usr/ucbinclude/sys/stat.h
-regcomp.o: /usr/ucbinclude/sys/stdtypes.h
-regcomp.o: /usr/ucbinclude/sys/sysmacros.h
-regcomp.o: /usr/ucbinclude/sys/time.h
-regcomp.o: /usr/ucbinclude/sys/times.h
-regcomp.o: /usr/ucbinclude/sys/ttold.h
-regcomp.o: /usr/ucbinclude/sys/ttychars.h
-regcomp.o: /usr/ucbinclude/sys/ttycom.h
-regcomp.o: /usr/ucbinclude/sys/ttydev.h
-regcomp.o: /usr/ucbinclude/sys/types.h
-regcomp.o: /usr/ucbinclude/time.h
-regcomp.o: /usr/ucbinclude/vm/faultcode.h
+regcomp.o: /usr/include/ctype.h
+regcomp.o: /usr/include/dirent.h
+regcomp.o: /usr/include/errno.h
+regcomp.o: /usr/include/machine/param.h
+regcomp.o: /usr/include/machine/setjmp.h
+regcomp.o: /usr/include/netinet/in.h
+regcomp.o: /usr/include/setjmp.h
+regcomp.o: /usr/include/stdio.h
+regcomp.o: /usr/include/sys/dirent.h
+regcomp.o: /usr/include/sys/errno.h
+regcomp.o: /usr/include/sys/filio.h
+regcomp.o: /usr/include/sys/ioccom.h
+regcomp.o: /usr/include/sys/ioctl.h
+regcomp.o: /usr/include/sys/param.h
+regcomp.o: /usr/include/sys/signal.h
+regcomp.o: /usr/include/sys/sockio.h
+regcomp.o: /usr/include/sys/stat.h
+regcomp.o: /usr/include/sys/stdtypes.h
+regcomp.o: /usr/include/sys/sysmacros.h
+regcomp.o: /usr/include/sys/time.h
+regcomp.o: /usr/include/sys/times.h
+regcomp.o: /usr/include/sys/ttold.h
+regcomp.o: /usr/include/sys/ttychars.h
+regcomp.o: /usr/include/sys/ttycom.h
+regcomp.o: /usr/include/sys/ttydev.h
+regcomp.o: /usr/include/sys/types.h
+regcomp.o: /usr/include/time.h
+regcomp.o: /usr/include/varargs.h
+regcomp.o: /usr/include/vm/faultcode.h
 regcomp.o: EXTERN.h
 regcomp.o: INTERN.h
 regcomp.o: av.h
 regcomp.o: config.h
 regcomp.o: cop.h
+regcomp.o: cv.h
 regcomp.o: embed.h
 regcomp.o: form.h
 regcomp.o: gv.h
 regcomp.o: handy.h
 regcomp.o: hv.h
+regcomp.o: mg.h
 regcomp.o: op.h
 regcomp.o: opcode.h
 regcomp.o: perl.h
@@ -1048,48 +902,50 @@ regcomp.o: proto.h
 regcomp.o: regcomp.c
 regcomp.o: regcomp.h
 regcomp.o: regexp.h
+regcomp.o: scope.h
 regcomp.o: sv.h
 regcomp.o: unixish.h
 regcomp.o: util.h
-regexec.o: 
-regexec.o: /usr/ucbinclude/ctype.h
-regexec.o: /usr/ucbinclude/dirent.h
-regexec.o: /usr/ucbinclude/errno.h
-regexec.o: /usr/ucbinclude/machine/param.h
-regexec.o: /usr/ucbinclude/machine/setjmp.h
-regexec.o: /usr/ucbinclude/ndbm.h
-regexec.o: /usr/ucbinclude/netinet/in.h
-regexec.o: /usr/ucbinclude/setjmp.h
-regexec.o: /usr/ucbinclude/stdio.h
-regexec.o: /usr/ucbinclude/sys/dirent.h
-regexec.o: /usr/ucbinclude/sys/errno.h
-regexec.o: /usr/ucbinclude/sys/filio.h
-regexec.o: /usr/ucbinclude/sys/ioccom.h
-regexec.o: /usr/ucbinclude/sys/ioctl.h
-regexec.o: /usr/ucbinclude/sys/param.h
-regexec.o: /usr/ucbinclude/sys/signal.h
-regexec.o: /usr/ucbinclude/sys/sockio.h
-regexec.o: /usr/ucbinclude/sys/stat.h
-regexec.o: /usr/ucbinclude/sys/stdtypes.h
-regexec.o: /usr/ucbinclude/sys/sysmacros.h
-regexec.o: /usr/ucbinclude/sys/time.h
-regexec.o: /usr/ucbinclude/sys/times.h
-regexec.o: /usr/ucbinclude/sys/ttold.h
-regexec.o: /usr/ucbinclude/sys/ttychars.h
-regexec.o: /usr/ucbinclude/sys/ttycom.h
-regexec.o: /usr/ucbinclude/sys/ttydev.h
-regexec.o: /usr/ucbinclude/sys/types.h
-regexec.o: /usr/ucbinclude/time.h
-regexec.o: /usr/ucbinclude/vm/faultcode.h
+regexec.o: /usr/include/ctype.h
+regexec.o: /usr/include/dirent.h
+regexec.o: /usr/include/errno.h
+regexec.o: /usr/include/machine/param.h
+regexec.o: /usr/include/machine/setjmp.h
+regexec.o: /usr/include/netinet/in.h
+regexec.o: /usr/include/setjmp.h
+regexec.o: /usr/include/stdio.h
+regexec.o: /usr/include/sys/dirent.h
+regexec.o: /usr/include/sys/errno.h
+regexec.o: /usr/include/sys/filio.h
+regexec.o: /usr/include/sys/ioccom.h
+regexec.o: /usr/include/sys/ioctl.h
+regexec.o: /usr/include/sys/param.h
+regexec.o: /usr/include/sys/signal.h
+regexec.o: /usr/include/sys/sockio.h
+regexec.o: /usr/include/sys/stat.h
+regexec.o: /usr/include/sys/stdtypes.h
+regexec.o: /usr/include/sys/sysmacros.h
+regexec.o: /usr/include/sys/time.h
+regexec.o: /usr/include/sys/times.h
+regexec.o: /usr/include/sys/ttold.h
+regexec.o: /usr/include/sys/ttychars.h
+regexec.o: /usr/include/sys/ttycom.h
+regexec.o: /usr/include/sys/ttydev.h
+regexec.o: /usr/include/sys/types.h
+regexec.o: /usr/include/time.h
+regexec.o: /usr/include/varargs.h
+regexec.o: /usr/include/vm/faultcode.h
 regexec.o: EXTERN.h
 regexec.o: av.h
 regexec.o: config.h
 regexec.o: cop.h
+regexec.o: cv.h
 regexec.o: embed.h
 regexec.o: form.h
 regexec.o: gv.h
 regexec.o: handy.h
 regexec.o: hv.h
+regexec.o: mg.h
 regexec.o: op.h
 regexec.o: opcode.h
 regexec.o: perl.h
@@ -1098,97 +954,101 @@ regexec.o: proto.h
 regexec.o: regcomp.h
 regexec.o: regexec.c
 regexec.o: regexp.h
+regexec.o: scope.h
 regexec.o: sv.h
 regexec.o: unixish.h
 regexec.o: util.h
-gv.o: 
-gv.o: /usr/ucbinclude/ctype.h
-gv.o: /usr/ucbinclude/dirent.h
-gv.o: /usr/ucbinclude/errno.h
-gv.o: /usr/ucbinclude/machine/param.h
-gv.o: /usr/ucbinclude/machine/setjmp.h
-gv.o: /usr/ucbinclude/ndbm.h
-gv.o: /usr/ucbinclude/netinet/in.h
-gv.o: /usr/ucbinclude/setjmp.h
-gv.o: /usr/ucbinclude/stdio.h
-gv.o: /usr/ucbinclude/sys/dirent.h
-gv.o: /usr/ucbinclude/sys/errno.h
-gv.o: /usr/ucbinclude/sys/filio.h
-gv.o: /usr/ucbinclude/sys/ioccom.h
-gv.o: /usr/ucbinclude/sys/ioctl.h
-gv.o: /usr/ucbinclude/sys/param.h
-gv.o: /usr/ucbinclude/sys/signal.h
-gv.o: /usr/ucbinclude/sys/sockio.h
-gv.o: /usr/ucbinclude/sys/stat.h
-gv.o: /usr/ucbinclude/sys/stdtypes.h
-gv.o: /usr/ucbinclude/sys/sysmacros.h
-gv.o: /usr/ucbinclude/sys/time.h
-gv.o: /usr/ucbinclude/sys/times.h
-gv.o: /usr/ucbinclude/sys/ttold.h
-gv.o: /usr/ucbinclude/sys/ttychars.h
-gv.o: /usr/ucbinclude/sys/ttycom.h
-gv.o: /usr/ucbinclude/sys/ttydev.h
-gv.o: /usr/ucbinclude/sys/types.h
-gv.o: /usr/ucbinclude/time.h
-gv.o: /usr/ucbinclude/vm/faultcode.h
+gv.o: /usr/include/ctype.h
+gv.o: /usr/include/dirent.h
+gv.o: /usr/include/errno.h
+gv.o: /usr/include/machine/param.h
+gv.o: /usr/include/machine/setjmp.h
+gv.o: /usr/include/netinet/in.h
+gv.o: /usr/include/setjmp.h
+gv.o: /usr/include/stdio.h
+gv.o: /usr/include/sys/dirent.h
+gv.o: /usr/include/sys/errno.h
+gv.o: /usr/include/sys/filio.h
+gv.o: /usr/include/sys/ioccom.h
+gv.o: /usr/include/sys/ioctl.h
+gv.o: /usr/include/sys/param.h
+gv.o: /usr/include/sys/signal.h
+gv.o: /usr/include/sys/sockio.h
+gv.o: /usr/include/sys/stat.h
+gv.o: /usr/include/sys/stdtypes.h
+gv.o: /usr/include/sys/sysmacros.h
+gv.o: /usr/include/sys/time.h
+gv.o: /usr/include/sys/times.h
+gv.o: /usr/include/sys/ttold.h
+gv.o: /usr/include/sys/ttychars.h
+gv.o: /usr/include/sys/ttycom.h
+gv.o: /usr/include/sys/ttydev.h
+gv.o: /usr/include/sys/types.h
+gv.o: /usr/include/time.h
+gv.o: /usr/include/varargs.h
+gv.o: /usr/include/vm/faultcode.h
 gv.o: EXTERN.h
 gv.o: av.h
 gv.o: config.h
 gv.o: cop.h
+gv.o: cv.h
 gv.o: embed.h
 gv.o: form.h
 gv.o: gv.c
 gv.o: gv.h
 gv.o: handy.h
 gv.o: hv.h
+gv.o: mg.h
 gv.o: op.h
 gv.o: opcode.h
 gv.o: perl.h
 gv.o: pp.h
 gv.o: proto.h
 gv.o: regexp.h
+gv.o: scope.h
 gv.o: sv.h
 gv.o: unixish.h
 gv.o: util.h
-sv.o: 
-sv.o: /usr/ucbinclude/ctype.h
-sv.o: /usr/ucbinclude/dirent.h
-sv.o: /usr/ucbinclude/errno.h
-sv.o: /usr/ucbinclude/machine/param.h
-sv.o: /usr/ucbinclude/machine/setjmp.h
-sv.o: /usr/ucbinclude/ndbm.h
-sv.o: /usr/ucbinclude/netinet/in.h
-sv.o: /usr/ucbinclude/setjmp.h
-sv.o: /usr/ucbinclude/stdio.h
-sv.o: /usr/ucbinclude/sys/dirent.h
-sv.o: /usr/ucbinclude/sys/errno.h
-sv.o: /usr/ucbinclude/sys/filio.h
-sv.o: /usr/ucbinclude/sys/ioccom.h
-sv.o: /usr/ucbinclude/sys/ioctl.h
-sv.o: /usr/ucbinclude/sys/param.h
-sv.o: /usr/ucbinclude/sys/signal.h
-sv.o: /usr/ucbinclude/sys/sockio.h
-sv.o: /usr/ucbinclude/sys/stat.h
-sv.o: /usr/ucbinclude/sys/stdtypes.h
-sv.o: /usr/ucbinclude/sys/sysmacros.h
-sv.o: /usr/ucbinclude/sys/time.h
-sv.o: /usr/ucbinclude/sys/times.h
-sv.o: /usr/ucbinclude/sys/ttold.h
-sv.o: /usr/ucbinclude/sys/ttychars.h
-sv.o: /usr/ucbinclude/sys/ttycom.h
-sv.o: /usr/ucbinclude/sys/ttydev.h
-sv.o: /usr/ucbinclude/sys/types.h
-sv.o: /usr/ucbinclude/time.h
-sv.o: /usr/ucbinclude/vm/faultcode.h
+sv.o: /usr/include/ctype.h
+sv.o: /usr/include/dirent.h
+sv.o: /usr/include/errno.h
+sv.o: /usr/include/machine/param.h
+sv.o: /usr/include/machine/setjmp.h
+sv.o: /usr/include/netinet/in.h
+sv.o: /usr/include/setjmp.h
+sv.o: /usr/include/stdio.h
+sv.o: /usr/include/sys/dirent.h
+sv.o: /usr/include/sys/errno.h
+sv.o: /usr/include/sys/filio.h
+sv.o: /usr/include/sys/ioccom.h
+sv.o: /usr/include/sys/ioctl.h
+sv.o: /usr/include/sys/param.h
+sv.o: /usr/include/sys/signal.h
+sv.o: /usr/include/sys/sockio.h
+sv.o: /usr/include/sys/stat.h
+sv.o: /usr/include/sys/stdtypes.h
+sv.o: /usr/include/sys/sysmacros.h
+sv.o: /usr/include/sys/time.h
+sv.o: /usr/include/sys/times.h
+sv.o: /usr/include/sys/ttold.h
+sv.o: /usr/include/sys/ttychars.h
+sv.o: /usr/include/sys/ttycom.h
+sv.o: /usr/include/sys/ttydev.h
+sv.o: /usr/include/sys/types.h
+sv.o: /usr/include/time.h
+sv.o: /usr/include/varargs.h
+sv.o: /usr/include/vm/faultcode.h
 sv.o: EXTERN.h
 sv.o: av.h
 sv.o: config.h
 sv.o: cop.h
+sv.o: cv.h
 sv.o: embed.h
 sv.o: form.h
 sv.o: gv.h
 sv.o: handy.h
 sv.o: hv.h
+sv.o: mg.h
 sv.o: op.h
 sv.o: opcode.h
 sv.o: perl.h
@@ -1196,52 +1056,105 @@ sv.o: perly.h
 sv.o: pp.h
 sv.o: proto.h
 sv.o: regexp.h
+sv.o: scope.h
 sv.o: sv.c
 sv.o: sv.h
 sv.o: unixish.h
 sv.o: util.h
-toke.o: 
-toke.o: /usr/ucbinclude/ctype.h
-toke.o: /usr/ucbinclude/dirent.h
-toke.o: /usr/ucbinclude/errno.h
-toke.o: /usr/ucbinclude/machine/param.h
-toke.o: /usr/ucbinclude/machine/setjmp.h
-toke.o: /usr/ucbinclude/ndbm.h
-toke.o: /usr/ucbinclude/netinet/in.h
-toke.o: /usr/ucbinclude/setjmp.h
-toke.o: /usr/ucbinclude/stdio.h
-toke.o: /usr/ucbinclude/sys/dirent.h
-toke.o: /usr/ucbinclude/sys/errno.h
-toke.o: /usr/ucbinclude/sys/fcntlcom.h
-toke.o: /usr/ucbinclude/sys/file.h
-toke.o: /usr/ucbinclude/sys/filio.h
-toke.o: /usr/ucbinclude/sys/ioccom.h
-toke.o: /usr/ucbinclude/sys/ioctl.h
-toke.o: /usr/ucbinclude/sys/param.h
-toke.o: /usr/ucbinclude/sys/signal.h
-toke.o: /usr/ucbinclude/sys/sockio.h
-toke.o: /usr/ucbinclude/sys/stat.h
-toke.o: /usr/ucbinclude/sys/stdtypes.h
-toke.o: /usr/ucbinclude/sys/sysmacros.h
-toke.o: /usr/ucbinclude/sys/time.h
-toke.o: /usr/ucbinclude/sys/times.h
-toke.o: /usr/ucbinclude/sys/ttold.h
-toke.o: /usr/ucbinclude/sys/ttychars.h
-toke.o: /usr/ucbinclude/sys/ttycom.h
-toke.o: /usr/ucbinclude/sys/ttydev.h
-toke.o: /usr/ucbinclude/sys/types.h
-toke.o: /usr/ucbinclude/time.h
-toke.o: /usr/ucbinclude/vm/faultcode.h
+taint.o: /usr/include/ctype.h
+taint.o: /usr/include/dirent.h
+taint.o: /usr/include/errno.h
+taint.o: /usr/include/machine/param.h
+taint.o: /usr/include/machine/setjmp.h
+taint.o: /usr/include/netinet/in.h
+taint.o: /usr/include/setjmp.h
+taint.o: /usr/include/stdio.h
+taint.o: /usr/include/sys/dirent.h
+taint.o: /usr/include/sys/errno.h
+taint.o: /usr/include/sys/filio.h
+taint.o: /usr/include/sys/ioccom.h
+taint.o: /usr/include/sys/ioctl.h
+taint.o: /usr/include/sys/param.h
+taint.o: /usr/include/sys/signal.h
+taint.o: /usr/include/sys/sockio.h
+taint.o: /usr/include/sys/stat.h
+taint.o: /usr/include/sys/stdtypes.h
+taint.o: /usr/include/sys/sysmacros.h
+taint.o: /usr/include/sys/time.h
+taint.o: /usr/include/sys/times.h
+taint.o: /usr/include/sys/ttold.h
+taint.o: /usr/include/sys/ttychars.h
+taint.o: /usr/include/sys/ttycom.h
+taint.o: /usr/include/sys/ttydev.h
+taint.o: /usr/include/sys/types.h
+taint.o: /usr/include/time.h
+taint.o: /usr/include/varargs.h
+taint.o: /usr/include/vm/faultcode.h
+taint.o: EXTERN.h
+taint.o: av.h
+taint.o: config.h
+taint.o: cop.h
+taint.o: cv.h
+taint.o: embed.h
+taint.o: form.h
+taint.o: gv.h
+taint.o: handy.h
+taint.o: hv.h
+taint.o: mg.h
+taint.o: op.h
+taint.o: opcode.h
+taint.o: perl.h
+taint.o: pp.h
+taint.o: proto.h
+taint.o: regexp.h
+taint.o: scope.h
+taint.o: sv.h
+taint.o: taint.c
+taint.o: unixish.h
+taint.o: util.h
+toke.o: /usr/include/ctype.h
+toke.o: /usr/include/dirent.h
+toke.o: /usr/include/errno.h
+toke.o: /usr/include/machine/param.h
+toke.o: /usr/include/machine/setjmp.h
+toke.o: /usr/include/netinet/in.h
+toke.o: /usr/include/setjmp.h
+toke.o: /usr/include/stdio.h
+toke.o: /usr/include/sys/dirent.h
+toke.o: /usr/include/sys/errno.h
+toke.o: /usr/include/sys/fcntlcom.h
+toke.o: /usr/include/sys/file.h
+toke.o: /usr/include/sys/filio.h
+toke.o: /usr/include/sys/ioccom.h
+toke.o: /usr/include/sys/ioctl.h
+toke.o: /usr/include/sys/param.h
+toke.o: /usr/include/sys/signal.h
+toke.o: /usr/include/sys/sockio.h
+toke.o: /usr/include/sys/stat.h
+toke.o: /usr/include/sys/stdtypes.h
+toke.o: /usr/include/sys/sysmacros.h
+toke.o: /usr/include/sys/time.h
+toke.o: /usr/include/sys/times.h
+toke.o: /usr/include/sys/ttold.h
+toke.o: /usr/include/sys/ttychars.h
+toke.o: /usr/include/sys/ttycom.h
+toke.o: /usr/include/sys/ttydev.h
+toke.o: /usr/include/sys/types.h
+toke.o: /usr/include/time.h
+toke.o: /usr/include/varargs.h
+toke.o: /usr/include/vm/faultcode.h
 toke.o: EXTERN.h
 toke.o: av.h
 toke.o: config.h
 toke.o: cop.h
+toke.o: cv.h
 toke.o: embed.h
 toke.o: form.h
 toke.o: gv.h
 toke.o: handy.h
 toke.o: hv.h
 toke.o: keywords.h
+toke.o: mg.h
 toke.o: op.h
 toke.o: opcode.h
 toke.o: perl.h
@@ -1249,131 +1162,167 @@ toke.o: perly.h
 toke.o: pp.h
 toke.o: proto.h
 toke.o: regexp.h
+toke.o: scope.h
 toke.o: sv.h
 toke.o: toke.c
 toke.o: unixish.h
 toke.o: util.h
-util.o: 
-util.o: /usr/ucbinclude/ctype.h
-util.o: /usr/ucbinclude/dirent.h
-util.o: /usr/ucbinclude/errno.h
-util.o: /usr/ucbinclude/machine/param.h
-util.o: /usr/ucbinclude/machine/setjmp.h
-util.o: /usr/ucbinclude/ndbm.h
-util.o: /usr/ucbinclude/netinet/in.h
-util.o: /usr/ucbinclude/setjmp.h
-util.o: /usr/ucbinclude/stdio.h
-util.o: /usr/ucbinclude/sys/dirent.h
-util.o: /usr/ucbinclude/sys/errno.h
-util.o: /usr/ucbinclude/sys/fcntlcom.h
-util.o: /usr/ucbinclude/sys/file.h
-util.o: /usr/ucbinclude/sys/filio.h
-util.o: /usr/ucbinclude/sys/ioccom.h
-util.o: /usr/ucbinclude/sys/ioctl.h
-util.o: /usr/ucbinclude/sys/param.h
-util.o: /usr/ucbinclude/sys/signal.h
-util.o: /usr/ucbinclude/sys/sockio.h
-util.o: /usr/ucbinclude/sys/stat.h
-util.o: /usr/ucbinclude/sys/stdtypes.h
-util.o: /usr/ucbinclude/sys/sysmacros.h
-util.o: /usr/ucbinclude/sys/time.h
-util.o: /usr/ucbinclude/sys/times.h
-util.o: /usr/ucbinclude/sys/ttold.h
-util.o: /usr/ucbinclude/sys/ttychars.h
-util.o: /usr/ucbinclude/sys/ttycom.h
-util.o: /usr/ucbinclude/sys/ttydev.h
-util.o: /usr/ucbinclude/sys/types.h
-util.o: /usr/ucbinclude/time.h
-util.o: /usr/ucbinclude/varargs.h
-util.o: /usr/ucbinclude/vfork.h
-util.o: /usr/ucbinclude/vm/faultcode.h
+util.o: /usr/include/ctype.h
+util.o: /usr/include/dirent.h
+util.o: /usr/include/errno.h
+util.o: /usr/include/machine/param.h
+util.o: /usr/include/machine/setjmp.h
+util.o: /usr/include/netinet/in.h
+util.o: /usr/include/setjmp.h
+util.o: /usr/include/stdio.h
+util.o: /usr/include/sys/dirent.h
+util.o: /usr/include/sys/errno.h
+util.o: /usr/include/sys/fcntlcom.h
+util.o: /usr/include/sys/file.h
+util.o: /usr/include/sys/filio.h
+util.o: /usr/include/sys/ioccom.h
+util.o: /usr/include/sys/ioctl.h
+util.o: /usr/include/sys/param.h
+util.o: /usr/include/sys/signal.h
+util.o: /usr/include/sys/sockio.h
+util.o: /usr/include/sys/stat.h
+util.o: /usr/include/sys/stdtypes.h
+util.o: /usr/include/sys/sysmacros.h
+util.o: /usr/include/sys/time.h
+util.o: /usr/include/sys/times.h
+util.o: /usr/include/sys/ttold.h
+util.o: /usr/include/sys/ttychars.h
+util.o: /usr/include/sys/ttycom.h
+util.o: /usr/include/sys/ttydev.h
+util.o: /usr/include/sys/types.h
+util.o: /usr/include/time.h
+util.o: /usr/include/varargs.h
+util.o: /usr/include/vfork.h
+util.o: /usr/include/vm/faultcode.h
 util.o: EXTERN.h
 util.o: av.h
 util.o: config.h
 util.o: cop.h
+util.o: cv.h
 util.o: embed.h
 util.o: form.h
 util.o: gv.h
 util.o: handy.h
 util.o: hv.h
+util.o: mg.h
 util.o: op.h
 util.o: opcode.h
 util.o: perl.h
 util.o: pp.h
 util.o: proto.h
 util.o: regexp.h
+util.o: scope.h
 util.o: sv.h
 util.o: unixish.h
 util.o: util.c
 util.o: util.h
-usersub.o: 
-usersub.o: /usr/ucbinclude/ctype.h
-usersub.o: /usr/ucbinclude/dirent.h
-usersub.o: /usr/ucbinclude/errno.h
-usersub.o: /usr/ucbinclude/machine/param.h
-usersub.o: /usr/ucbinclude/machine/setjmp.h
-usersub.o: /usr/ucbinclude/ndbm.h
-usersub.o: /usr/ucbinclude/netinet/in.h
-usersub.o: /usr/ucbinclude/setjmp.h
-usersub.o: /usr/ucbinclude/stdio.h
-usersub.o: /usr/ucbinclude/sys/dirent.h
-usersub.o: /usr/ucbinclude/sys/errno.h
-usersub.o: /usr/ucbinclude/sys/filio.h
-usersub.o: /usr/ucbinclude/sys/ioccom.h
-usersub.o: /usr/ucbinclude/sys/ioctl.h
-usersub.o: /usr/ucbinclude/sys/param.h
-usersub.o: /usr/ucbinclude/sys/signal.h
-usersub.o: /usr/ucbinclude/sys/sockio.h
-usersub.o: /usr/ucbinclude/sys/stat.h
-usersub.o: /usr/ucbinclude/sys/stdtypes.h
-usersub.o: /usr/ucbinclude/sys/sysmacros.h
-usersub.o: /usr/ucbinclude/sys/time.h
-usersub.o: /usr/ucbinclude/sys/times.h
-usersub.o: /usr/ucbinclude/sys/ttold.h
-usersub.o: /usr/ucbinclude/sys/ttychars.h
-usersub.o: /usr/ucbinclude/sys/ttycom.h
-usersub.o: /usr/ucbinclude/sys/ttydev.h
-usersub.o: /usr/ucbinclude/sys/types.h
-usersub.o: /usr/ucbinclude/time.h
-usersub.o: /usr/ucbinclude/vm/faultcode.h
-usersub.o: EXTERN.h
-usersub.o: av.h
-usersub.o: config.h
-usersub.o: cop.h
-usersub.o: embed.h
-usersub.o: form.h
-usersub.o: gv.h
-usersub.o: handy.h
-usersub.o: hv.h
-usersub.o: op.h
-usersub.o: opcode.h
-usersub.o: perl.h
-usersub.o: pp.h
-usersub.o: proto.h
-usersub.o: regexp.h
-usersub.o: sv.h
-usersub.o: unixish.h
-usersub.o: usersub.c
-usersub.o: util.h
-mg.o: EXTERN.h
-mg.o: av.h
-mg.o: config.h
-mg.o: cop.h
-mg.o: embed.h
-mg.o: form.h
-mg.o: gv.h
-mg.o: handy.h
-mg.o: mg.c
-mg.o: hv.h
-mg.o: op.h
-mg.o: opcode.h
-mg.o: perl.h
-mg.o: pp.h
-mg.o: proto.h
-mg.o: regexp.h
-mg.o: sv.h
-mg.o: unixish.h
-mg.o: util.h
+deb.o: /usr/include/ctype.h
+deb.o: /usr/include/dirent.h
+deb.o: /usr/include/errno.h
+deb.o: /usr/include/machine/param.h
+deb.o: /usr/include/machine/setjmp.h
+deb.o: /usr/include/netinet/in.h
+deb.o: /usr/include/setjmp.h
+deb.o: /usr/include/stdio.h
+deb.o: /usr/include/sys/dirent.h
+deb.o: /usr/include/sys/errno.h
+deb.o: /usr/include/sys/filio.h
+deb.o: /usr/include/sys/ioccom.h
+deb.o: /usr/include/sys/ioctl.h
+deb.o: /usr/include/sys/param.h
+deb.o: /usr/include/sys/signal.h
+deb.o: /usr/include/sys/sockio.h
+deb.o: /usr/include/sys/stat.h
+deb.o: /usr/include/sys/stdtypes.h
+deb.o: /usr/include/sys/sysmacros.h
+deb.o: /usr/include/sys/time.h
+deb.o: /usr/include/sys/times.h
+deb.o: /usr/include/sys/ttold.h
+deb.o: /usr/include/sys/ttychars.h
+deb.o: /usr/include/sys/ttycom.h
+deb.o: /usr/include/sys/ttydev.h
+deb.o: /usr/include/sys/types.h
+deb.o: /usr/include/time.h
+deb.o: /usr/include/varargs.h
+deb.o: /usr/include/vm/faultcode.h
+deb.o: EXTERN.h
+deb.o: av.h
+deb.o: config.h
+deb.o: cop.h
+deb.o: cv.h
+deb.o: deb.c
+deb.o: embed.h
+deb.o: form.h
+deb.o: gv.h
+deb.o: handy.h
+deb.o: hv.h
+deb.o: mg.h
+deb.o: op.h
+deb.o: opcode.h
+deb.o: perl.h
+deb.o: pp.h
+deb.o: proto.h
+deb.o: regexp.h
+deb.o: scope.h
+deb.o: sv.h
+deb.o: unixish.h
+deb.o: util.h
+run.o: /usr/include/ctype.h
+run.o: /usr/include/dirent.h
+run.o: /usr/include/errno.h
+run.o: /usr/include/machine/param.h
+run.o: /usr/include/machine/setjmp.h
+run.o: /usr/include/netinet/in.h
+run.o: /usr/include/setjmp.h
+run.o: /usr/include/stdio.h
+run.o: /usr/include/sys/dirent.h
+run.o: /usr/include/sys/errno.h
+run.o: /usr/include/sys/filio.h
+run.o: /usr/include/sys/ioccom.h
+run.o: /usr/include/sys/ioctl.h
+run.o: /usr/include/sys/param.h
+run.o: /usr/include/sys/signal.h
+run.o: /usr/include/sys/sockio.h
+run.o: /usr/include/sys/stat.h
+run.o: /usr/include/sys/stdtypes.h
+run.o: /usr/include/sys/sysmacros.h
+run.o: /usr/include/sys/time.h
+run.o: /usr/include/sys/times.h
+run.o: /usr/include/sys/ttold.h
+run.o: /usr/include/sys/ttychars.h
+run.o: /usr/include/sys/ttycom.h
+run.o: /usr/include/sys/ttydev.h
+run.o: /usr/include/sys/types.h
+run.o: /usr/include/time.h
+run.o: /usr/include/varargs.h
+run.o: /usr/include/vm/faultcode.h
+run.o: EXTERN.h
+run.o: av.h
+run.o: config.h
+run.o: cop.h
+run.o: cv.h
+run.o: embed.h
+run.o: form.h
+run.o: gv.h
+run.o: handy.h
+run.o: hv.h
+run.o: mg.h
+run.o: op.h
+run.o: opcode.h
+run.o: perl.h
+run.o: pp.h
+run.o: proto.h
+run.o: regexp.h
+run.o: run.c
+run.o: scope.h
+run.o: sv.h
+run.o: unixish.h
+run.o: util.h
 Makefile: Makefile.SH config.sh ; /bin/sh Makefile.SH
 makedepend: makedepend.SH config.sh ; /bin/sh makedepend.SH
 h2ph: h2ph.SH config.sh ; /bin/sh h2ph.SH

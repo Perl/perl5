@@ -508,7 +508,6 @@ OP *op;
     case OP_HSLICE:
     case OP_UNPACK:
     case OP_PACK:
-    case OP_SPLIT:
     case OP_JOIN:
     case OP_LSLICE:
     case OP_ANONLIST:
@@ -3137,7 +3136,7 @@ OP *op;
 {
     if (op->op_flags & OPf_KIDS) {
 	OP *kid = cLISTOP->op_first->op_sibling;	/* get past pushmark */
-	if (kid->op_sibling) {
+	if (kid && kid->op_sibling) {
 	    op->op_type = OP_SSELECT;
 	    op->op_ppaddr = ppaddr[OP_SSELECT];
 	    op = ck_fun(op);

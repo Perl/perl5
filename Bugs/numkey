@@ -1,0 +1,12 @@
+$zz = { 1, 9 };
+print %$zz;                     # wrong; outputs 9
+
+print "\n";
+
+$zz = { "1", 9 };
+print %$zz;                     # ok; outputs 19
+
+print "\n";
+
+%xx = ( 1, 9 );
+print %xx;                      # ok; outputs 19

@@ -105,6 +105,8 @@ cond	: expr
 	| match
 	| rel
 	| compound_cond
+	| cond '?' expr ':' expr
+		{ $$ = oper3(OCOND,$1,$3,$5); }
 	;
 
 compound_cond
@@ -370,7 +372,7 @@ simple
 		{ $$ = oper0(ORETURN); }
 	| RET expr
 		{ $$ = oper1(ORETURN,$2); }
-	| DELETE VAR '[' expr ']'
+	| DELETE VAR '[' expr_list ']'
 		{ $$ = oper2(ODELETE,aryrefarg($2),$4); }
 	;
 

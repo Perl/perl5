@@ -1,0 +1,29 @@
+#!./miniperl
+
+chdir "lib" if -d "lib";
+
+$package = shift;
+
+$filename = "$package.pm";
+open(IN, $filename) || die "Can't open $filename: $!\n";
+while (<IN>) {
+    last if /^__END__/;
+}
+$_ or die "Can't find __END__ in $filename\n";
+
+mkdir "auto/$package", 0777 unless -d "auto/$package";
+while (<IN>) {
+    if (/^sub ([\w:]+)/) {
+	$name = $1;
+	print OUT "1;\n";
+	$newname = "auto/$package/$name.al";
+	open(OUT, ">$newname") or warn "Can't create $newname: $!\n";
+	print OUT <<"END";
+# NOTE:  Derived from $package.pm.  Changes made here will be lost.
+package $package;
+
+END
+    }
+    print OUT $_;
+}
+print OUT "1;\n";

@@ -5,7 +5,6 @@ require Exporter;
 
 @EXPORT = qw(
 	*ARG
-	$MAGIC
 	$MATCH
 	$PREMATCH
 	$POSTMATCH
@@ -58,7 +57,6 @@ require Exporter;
 
 # The ground of all being.
 
-	*MAGIC					= \$_	;
 	*ARG					= *_	;
 
 # Matching.

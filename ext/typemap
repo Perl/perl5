@@ -14,6 +14,11 @@ caddr_t			T_STRING
 unsigned long *		T_OPAQUEPTR
 char **			T_PACKED
 void *			T_PTR
+SV *			T_SV
+SV *			T_SVOBJ
+AV *			T_AVOBJ
+HV *			T_HVOBJ
+CV *			T_CVOBJ
 
 I32			T_LONG
 I16			T_SHORT
@@ -22,9 +27,34 @@ U16			T_U_SHORT
 Result			T_U_CHAR
 Boolean			T_U_CHAR
 double			T_DOUBLE
+SysRet			T_SYSRET
 
 #############################################################################
 INPUT
+T_SV
+	$var = $arg;
+T_SVOBJ
+	if (sv_isa($arg, \"${ntype}\"))
+	    $var = (AV*)SvRV($arg);
+	else
+	    croak(\"$var is not of type ${ntype}\")
+T_AVOBJ
+	if (sv_isa($arg, \"${ntype}\"))
+	    $var = (AV*)SvRV($arg);
+	else
+	    croak(\"$var is not of type ${ntype}\")
+T_HVOBJ
+	if (sv_isa($arg, \"${ntype}\"))
+	    $var = (HV*)SvRV($arg);
+	else
+	    croak(\"$var is not of type ${ntype}\")
+T_CVOBJ
+	if (sv_isa($arg, \"${ntype}\"))
+	    $var = (CV*)SvRV($arg);
+	else
+	    croak(\"$var is not of type ${ntype}\")
+T_SYSRET
+	$var NOT IMPLEMENTED
 T_INT
 	$var = (int)SvIV($arg)
 T_ENUM
@@ -96,8 +126,25 @@ T_ARRAY
 	}
 #############################################################################
 OUTPUT
+T_SV
+	$arg = $var;
+T_SVOBJ
+	$arg = newRV((SV*)$var);
+T_AVOBJ
+	$arg = newRV((SV*)$var);
+T_HVOBJ
+	$arg = newRV((SV*)$var);
+T_CVOBJ
+	$arg = newRV((SV*)$var);
 T_INT
 	sv_setiv($arg, (I32)$var);
+T_SYSRET
+	if ($var != -1) {
+	    if ($var == 0)
+		sv_setpvn($arg, "0 but true", 10);
+	    else
+		sv_setiv($arg, (I32)$var);
+	}
 T_ENUM
 	sv_setiv($arg, (I32)$var);
 T_U_INT

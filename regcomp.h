@@ -180,10 +180,10 @@ EXT char regdummy;
  * Utility definitions.
  */
 #ifndef lint
-#ifndef CHARBITS
+#ifndef CHARMASK
 #define	UCHARAT(p)	((int)*(unsigned char *)(p))
 #else
-#define	UCHARAT(p)	((int)*(p)&CHARBITS)
+#define	UCHARAT(p)	((int)*(p)&CHARMASK)
 #endif
 #else /* lint */
 #define UCHARAT(p)	regdummy

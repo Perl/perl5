@@ -432,10 +432,12 @@ I32 safebase;	/* no need to remember string in subbase */
 	prog->subend = strend;
 	if ((!safebase && (prog->nparens || sawampersand)) || prog->do_folding){
 		strend += dontbother;	/* uncheat */
-		if (safebase)			/* no need for $digit later */
+		i = strend - string + (stringarg - strbeg);
+		if (safebase) {			/* no need for $digit later */
 		    s = strbeg;
+		    prog->subend = s+i;
+		}
 		else if (strbeg != prog->subbase) {
-		    i = strend - string + (stringarg - strbeg);
 		    s = nsavestr(strbeg,i);	/* so $digit will work later */
 		    if (prog->subbase)
 			    Safefree(prog->subbase);
@@ -443,7 +445,6 @@ I32 safebase;	/* no need to remember string in subbase */
 		    prog->subend = s+i;
 		}
 		else {
-		    i = strend - string + (stringarg - strbeg);
 		    prog->subbeg = s = prog->subbase;
 		    prog->subend = s+i;
 		}

@@ -121,7 +121,7 @@ botch(s)
 #define	ASSERT(p)
 #endif
 
-MALLOCPTRTYPE *
+Malloc_t
 malloc(nbytes)
 	register MEM_SIZE nbytes;
 {
@@ -208,7 +208,7 @@ malloc(nbytes)
 	p->ov_rmagic = RMAGIC;
   	*((u_int *)((caddr_t)p + nbytes - RSLOP)) = RMAGIC;
 #endif
-  	return ((MALLOCPTRTYPE *)(p + 1));
+  	return ((Malloc_t)(p + 1));
 }
 
 /*
@@ -281,7 +281,7 @@ morecore(bucket)
 
 void
 free(mp)
-	MALLOCPTRTYPE *mp;
+	Malloc_t mp;
 {   
   	register MEM_SIZE size;
 	register union overhead *op;
@@ -339,9 +339,9 @@ free(mp)
  */
 int reall_srchlen = 4;	/* 4 should be plenty, -1 =>'s whole list */
 
-MALLOCPTRTYPE *
+Malloc_t
 realloc(mp, nbytes)
-	MALLOCPTRTYPE *mp; 
+	Malloc_t mp; 
 	MEM_SIZE nbytes;
 {   
   	register MEM_SIZE onb;
@@ -438,7 +438,7 @@ realloc(mp, nbytes)
 #  endif
 #endif
 #endif /* safemalloc */
-  	return ((MALLOCPTRTYPE*)res);
+  	return ((Malloc_t)res);
 }
 
 /*

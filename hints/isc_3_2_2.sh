@@ -1,5 +1,5 @@
-set `echo $libswanted | sed -e 's/ x / /' -e 's/ PW / /' -e 's/ malloc / /'`
-libswanted="inet malloc $*"
+set `echo $libswanted | sed -e 's/ x / /' -e 's/ PW / /'`
+libswanted="$*"
 doio_cflags='ccflags="$ccflags -DENOTSOCK=103"'
 tdoio_cflags='ccflags="$ccflags -DENOTSOCK=103"'
 echo "<net/errno.h> defines error numbers for network calls, but"

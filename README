@@ -1,11 +1,4 @@
-This is an unsupported, pre-release version of Perl 5.0.  It is expected
-to work only on a Sparc architecture machine.  NO CONFIGURE SUPPORT IS
-PROVIDED, despite what it says below.  In fact, if you succeed in
-configuring and making a new makefile, you'll probably overwrite the
-only makefile that works.  Note that a SunOS executable comes with the
-kit, so you may not need to compile at all.  See file Changes for a
-list of new features.  If you look at t/op/ref.t you'll see some of
-them in use.  perl -Dxst is also fun.
+[This is an unsupported, pre-release version of Perl 5.0.]
 
 			   Perl Kit, Version 5.0
 

@@ -1099,8 +1099,20 @@ yylex()
 		sv_catpv(linestr, "LINE: while (<>) {");
 		if (minus_l)
 		    sv_catpv(linestr,"chop;");
-		if (minus_a)
-		    sv_catpv(linestr,"@F=split(' ');");
+		if (minus_a){
+		    if (minus_F){
+		      char tmpbuf1[50];
+		      if ( splitstr[0] == '/' || 
+		           splitstr[0] == '\'' || 
+		           splitstr[0] == '"' )
+			    sprintf( tmpbuf1, "@F=split(%s);", splitstr );
+		        else
+			    sprintf( tmpbuf1, "@F=split('%s');", splitstr );
+		        sv_catpv(linestr,tmpbuf1);
+		    }
+		    else
+		        sv_catpv(linestr,"@F=split(' ');");
+		}
 	    }
 	    oldoldbufptr = oldbufptr = s = SvPVX(linestr);
 	    bufend = SvPVX(linestr) + SvCUR(linestr);
@@ -1152,7 +1164,8 @@ yylex()
 	    if (*s == ':')	/* for csh's that have to exec sh scripts */
 		s++;
 	    if (*s == '#' && s[1] == '!') {
-		if (!in_eval && !instr(s,"perl") && instr(origargv[0],"perl")) {
+		if (!in_eval && !instr(s,"perl") && !instr(s,"indir") &&
+			instr(origargv[0],"perl")) {
 		    char **newargv;
 		    char *cmd;
 
@@ -1398,8 +1411,8 @@ yylex()
 	if (expect == XTERM)
 	    OPERATOR(HASHBRACK);
 	else if (expect == XBLOCK || expect == XOPERATOR) {
-	    lex_brackstack[lex_brackets-1] = XBLOCK;
-	    expect = XBLOCK;
+	    lex_brackstack[lex_brackets-1] = XSTATE;
+	    expect = XSTATE;
 	}
 	else {
 	    char *t;

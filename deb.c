@@ -37,14 +37,6 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-#ifdef STANDARD_C
-#  include <stdarg.h>
-#else
-#  ifdef I_VARARGS
-#    include <varargs.h>
-#  endif
-#endif
-
 void deb_growlevel();
 
 #if !defined(STANDARD_C) && !defined(I_VARARGS)

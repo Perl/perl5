@@ -1,4 +1,4 @@
-# : Makefile.SH,v 15738Revision: 4.1 15738Date: 92/08/07 18:29:07 $
+# $RCSfile: Makefile.SH,v 28453Revision: 4.1 28453Date: 92/08/07 18:29:07 $
 #
 # $Log:	Makefile.SH,v $
 # Revision 4.1  92/08/07  18:29:07  lwall
@@ -20,11 +20,11 @@
 # 
 
 CC = cc
-YACC = /bin/yacc
+YACC = yacc
 bin = /usr/local/bin
-lib = 
-mansrc = /usr/man/manl
-manext = l
+lib = /usr/local/lib
+mansrc = /usr/local/man/man1
+manext = 1
 LDFLAGS = 
 SMALL = 
 LARGE =  
@@ -32,7 +32,7 @@ mallocsrc = malloc.c
 mallocobj = malloc.o
 shellflags = 
 
-libs = -ldbm -lm -lposix
+libs = -ldl -lm -lposix
 
 CCCMD = `sh $(shellflags) cflags $@`
 

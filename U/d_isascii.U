@@ -1,0 +1,59 @@
+?X:  These units are based on the ones supplied with dist-3.0
+?X:  patchlevel 22.  They have been changed or enhanced to work with
+?X:  perl5alpha.  I would appreciate hearing about any changes,
+?X:  corrections, or enhancements.
+?X:	Andy Dougherty			doughera@lafcol.lafayette.edu
+?X:	Dept. of Physics 		
+?X:	Lafayette College	
+?X:	Easton, PA  18042-1782
+?X:     Sat Apr  2 15:45:17 EST 1994
+?RCS: $Id: d_isascii.U,v 3.0 1993/08/18 12:06:44 ram Exp $
+?RCS:
+?RCS: Copyright (c) 1991-1993, Raphael Manfredi
+?RCS: 
+?RCS: You may redistribute only under the terms of the Artistic Licence,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic Licence; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?RCS: $Log: d_isascii.U,v $
+?RCS: Revision 3.0  1993/08/18  12:06:44  ram
+?RCS: Baseline for dist 3.0 netwide release.
+?RCS:
+?MAKE:d_isascii: test cc cat cppflags libs rm Setvar Findhdr
+?MAKE:	-pick add $@ %<
+?S:d_isascii:
+?S:	This variable conditionally defines the HAS_ISASCII manifest constant,
+?S:	which indicates to the C program that isascii() is available.
+?S:.
+?C:HAS_ISASCII (ISASCII):
+?C:	This manifest constant lets the C program know that the
+?C:	isascii is available.
+?C:.
+?H:#$d_isascii HAS_ISASCII		/**/
+?H:.
+?LINT:set d_isascii
+: Look for isascii
+echo " "
+$cat >isascii.c <<'EOCP'
+#include <stdio.h>
+#include <ctype.h>
+main() {
+        int c = 'A';
+	if (isascii(c))
+	    exit(0);
+	else
+	    exit(1);
+}
+EOCP
+if $cc $cppflags -o isascii isascii.c >/dev/null 2>&1 ; then
+    echo "isascii() found."
+    val="$define"
+else
+    echo "isascii() NOT found."
+    val="$undef"
+fi
+set d_isascii
+eval $setvar
+$rm -f isascii*

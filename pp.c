@@ -58,14 +58,6 @@ extern int h_errno;
 #include <sys/file.h>
 #endif
 
-#ifdef STANDARD_C
-#  include <stdarg.h>
-#else
-#  ifdef I_VARARGS
-#    include <varargs.h>
-#  endif
-#endif
-
 static I32 dopoptosub P((I32 startingblock));
 
 /* Nothing. */
@@ -2038,7 +2030,7 @@ PP(pp_log)
     else
 	value = POPn;
     if (value <= 0.0)
-	DIE("Can't take log of %g\n", value);
+	DIE("Can't take log of %g", value);
     value = log(value);
     XPUSHn(value);
     RETURN;
@@ -2053,7 +2045,7 @@ PP(pp_sqrt)
     else
 	value = POPn;
     if (value < 0.0)
-	DIE("Can't take sqrt of %g\n", value);
+	DIE("Can't take sqrt of %g", value);
     value = sqrt(value);
     XPUSHn(value);
     RETURN;
@@ -2159,8 +2151,11 @@ PP(pp_substr)
     tmps = SvPV(sv, curlen);		/* force conversion to string */
     if (pos < 0)
 	pos += curlen + arybase;
-    if (pos < 0 || pos > curlen)
-	sv_setpvn(TARG, "", 0);
+    if (pos < 0 || pos > curlen) {
+	if (dowarn)
+	    warn("substr outside of string");
+	RETPUSHUNDEF;
+    }
     else {
 	if (MAXARG < 3)
 	    len = curlen;
@@ -2742,7 +2737,7 @@ PP(pp_formline)
 		    MARK = markmark;
 		    if (lines == 200) {
 			arg = t - linemark;
-			if (strnEQ(linemark, linemark - t, arg))
+			if (strnEQ(linemark, linemark - arg, arg))
 			    DIE("Runaway format");
 		    }
 		    arg = t - SvPVX(formtarget);
@@ -3953,7 +3948,7 @@ PP(pp_pack)
 	default:
 	    break;
 	case '%':
-	    DIE("% may only be used in unpack");
+	    DIE("%% may only be used in unpack");
 	case '@':
 	    len -= SvCUR(cat);
 	    if (len > 0)
@@ -4665,7 +4660,7 @@ PP(pp_splice)
 		    *dst-- = *src--;
 	    }
 	    Zero(AvARRAY(ary), -diff, SV*);
-	    AvARRAY(ary) -= diff;		/* diff is negative */
+	    SvPVX(ary) = (char*)(AvARRAY(ary) - diff); /* diff is negative */
 	    AvMAX(ary) += diff;
 	}
 	else {
@@ -4702,7 +4697,7 @@ PP(pp_splice)
 		    dst = src - diff;
 		    Move(src, dst, offset, SV*);
 		}
-		AvARRAY(ary) -= diff;		/* diff is positive */
+		SvPVX(ary) = (char*)(AvARRAY(ary) - diff);/* diff is positive */
 		AvMAX(ary) += diff;
 		AvFILL(ary) += diff;
 	    }
@@ -5294,7 +5289,7 @@ die(pat, va_alist)
 #else
     va_start(args);
 #endif
-    message = mess(pat, args);
+    message = mess(pat, &args);
     va_end(args);
     restartop = die_where(message);
     if (stack != mainstack)
@@ -7376,7 +7371,7 @@ PP(pp_eof)
     if (MAXARG <= 0)
 	gv = last_in_gv;
     else
-	gv = (GV*)POPs;
+	gv = last_in_gv = (GV*)POPs;
     PUSHs(!gv || do_eof(gv) ? &sv_yes : &sv_no);
     RETURN;
 }
@@ -7389,7 +7384,7 @@ PP(pp_tell)
     if (MAXARG <= 0)
 	gv = last_in_gv;
     else
-	gv = (GV*)POPs;
+	gv = last_in_gv = (GV*)POPs;
     PUSHi( do_tell(gv) );
     RETURN;
 }
@@ -7401,7 +7396,7 @@ PP(pp_seek)
     int whence = POPi;
     long offset = POPl;
 
-    gv = (GV*)POPs;
+    gv = last_in_gv = (GV*)POPs;
     PUSHs( do_seek(gv, offset, whence) ? &sv_yes : &sv_no );
     RETURN;
 }

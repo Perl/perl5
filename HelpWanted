@@ -1,0 +1,13 @@
+Anything in Todo that strikes your fancy and I agree to the design of
+
+Configure support
+    Dynamic loading
+    libperl.so
+    Drop-in module directories
+
+Test suite enhancement
+    POSIX
+
+Extension interface
+    Documentation
+    xvarpp

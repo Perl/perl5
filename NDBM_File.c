@@ -70,7 +70,8 @@ register int items;
 	else
 	    croak("db is not of type NDBM_File");
 
-	key.dptr = SvPV(ST(2), key.dsize);;
+	key.dptr = SvPV(ST(2), na);
+	key.dsize = (int)na;;
 
 	RETVAL = dbm_fetch(db, key);
 	ST(0) = sv_newmortal();
@@ -100,9 +101,11 @@ register int items;
 	else
 	    croak("db is not of type NDBM_File");
 
-	key.dptr = SvPV(ST(2), key.dsize);;
+	key.dptr = SvPV(ST(2), na);
+	key.dsize = (int)na;;
 
-	value.dptr = SvPV(ST(3), value.dsize);;
+	value.dptr = SvPV(ST(3), na);
+	value.dsize = (int)na;;
 
 	if (items < 4)
 	    flags = DBM_REPLACE;
@@ -136,7 +139,8 @@ register int items;
 	else
 	    croak("db is not of type NDBM_File");
 
-	key.dptr = SvPV(ST(2), key.dsize);;
+	key.dptr = SvPV(ST(2), na);
+	key.dsize = (int)na;;
 
 	RETVAL = dbm_delete(db, key);
 	ST(0) = sv_newmortal();
@@ -189,7 +193,8 @@ register int items;
 	else
 	    croak("db is not of type NDBM_File");
 
-	key.dptr = SvPV(ST(2), key.dsize);;
+	key.dptr = SvPV(ST(2), na);
+	key.dsize = (int)na;;
 
 	RETVAL = nextkey(db, key);
 	ST(0) = sv_newmortal();
