@@ -393,8 +393,10 @@ PerlIO_list_push(PerlIO_list_t *list,PerlIO_funcs *funcs,SV *arg)
   }
  p = &(list->array[list->cur++]);
  p->funcs = funcs;
- if ((p->arg = arg))
+ if ((p->arg = arg)) {
+  dTHX; 
   SvREFCNT_inc(arg);
+ }
 }
 
 
@@ -4010,6 +4012,7 @@ PerlIO_sprintf(char *s, int n, const char *fmt,...)
  return result;
 }
 #endif
+
 
 
 

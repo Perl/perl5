@@ -671,6 +671,8 @@ MICROCORE_SRC	=		\
 		..\universal.c	\
 		..\utf8.c	\
 		..\util.c	\
+		..\numeric.c	\
+		..\locale.c	\
 		..\xsutils.c
 
 EXTRACORE_SRC	+= perllib.c
