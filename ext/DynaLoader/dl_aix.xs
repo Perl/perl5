@@ -26,6 +26,8 @@
 #include "XSUB.h"
 #include <dlfcn.h>
 
+#include "dlutils.c"	/* SaveError() etc	*/
+
 #else
 
 /*

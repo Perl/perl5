@@ -58,8 +58,8 @@ dl_load_file(filename, flags=0)
     PREINIT:
     shl_t obj = NULL;
     int	i, max, bind_type;
-    CODE:
     dMY_CXT;
+    CODE:
     DLDEBUG(1,PerlIO_printf(Perl_debug_log, "dl_load_file(%s,%x):\n", filename,flags));
     if (flags & 0x01)
 	Perl_warn(aTHX_ "Can't make loaded symbols global on this platform while loading %s",filename);
