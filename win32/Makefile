@@ -147,6 +147,14 @@ CCTYPE		= MSVC60
 #PERL_MALLOC	= define
 
 #
+# set this to enable debugging mstats
+# This must be enabled to use the Devel::Peek::mstat() function.  This cannot
+# be enabled without PERL_MALLOC as well.
+#
+#DEBUG_MSTATS  = define
+
+#
+#
 # set the install locations of the compiler include/libraries
 # Running VCVARS32.BAT is *required* when using Visual C.
 # Some versions of Visual C don't define MSVCDIR in the environment,
@@ -210,6 +218,15 @@ CRYPT_FLAG	= -DHAVE_DES_FCRYPT
 
 !IF "$(PERL_MALLOC)" == ""
 PERL_MALLOC	= undef
+DEBUG_MSTATS   = undef
+!ENDIF
+
+!IF "$(DEBUG_MSTATS)" == ""
+DEBUG_MSTATS   = undef
+!ENDIF
+
+!IF "$(DEBUG_MSTATS)" == "define"
+BUILDOPT       = $(BUILDOPT) -DPERL_DEBUGGING_MSTATS
 !ENDIF
 
 !IF "$(USE_5005THREADS)" == ""

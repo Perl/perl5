@@ -1,7 +1,7 @@
 
 require 5.004;
 package Test;
-# Time-stamp: "2002-10-11 17:38:48 MDT"
+# Time-stamp: "2003-04-18 21:48:01 AHDT"
 
 use strict;
 
@@ -21,7 +21,7 @@ sub _reset_globals {
     $planned    = 0;
 }
 
-$VERSION = '1.23';
+$VERSION = '1.24';
 require Exporter;
 @ISA=('Exporter');
 
@@ -183,7 +183,7 @@ sub plan {
     print $TESTOUT "# Win32::BuildNumber ", &Win32::BuildNumber(), "\n"
       if defined(&Win32::BuildNumber) and defined &Win32::BuildNumber();
 
-    print $TESTOUT "# MacPerl verison $MacPerl::Version\n"
+    print $TESTOUT "# MacPerl version $MacPerl::Version\n"
       if defined $MacPerl::Version;
 
     printf $TESTOUT
@@ -205,7 +205,7 @@ sub _read_program {
   close(SOURCEFILE);
   
   foreach my $x (@{$Program_Lines{$file}})
-   { $x =~ tr/[\cm\cj\n\r]//d }
+   { $x =~ tr/\cm\cj\n\r//d }
   
   unshift @{$Program_Lines{$file}}, '';
   return 1;
@@ -744,7 +744,7 @@ Copyright (c) 1998-2000 Joshua Nathaniel Pritikin.  All rights reserved.
 
 Copyright (c) 2001-2002 Michael G. Schwern.
 
-Copyright (c) 2002 Sean M. Burke.
+Copyright (c) 2002-2003 Sean M. Burke.
 
 Current maintainer: Sean M. Burke. E<lt>sburke@cpan.orgE<gt>
 

@@ -9,7 +9,7 @@ BEGIN {
 }
 
 require "./test.pl";
-plan( tests => 21 );
+plan( tests => 37 );
 
 eval '%@x=0;';
 like( $@, qr/^Can't modify hash dereference in repeat \(x\)/, '%@x=0' );
@@ -97,3 +97,23 @@ print "#";
 print(
 $data{foo});
 pass();
+
+# Bug #21875
+# { q.* => ... } should be interpreted as hash, not block
+
+foreach my $line (split /\n/, <<'EOF')
+1 { foo => 'bar' }
+1 { qoo => 'bar' }
+1 { q   => 'bar' }
+1 { qq  => 'bar' }
+0 { q,'bar', }
+0 { q=bar= }
+0 { qq=bar= }
+1 { q=bar= => 'bar' }
+EOF
+{
+    my ($expect, $eval) = split / /, $line, 2;
+    my $result = eval $eval;
+    ok($@ eq  '', "eval $eval");
+    is(ref $result, $expect ? 'HASH' : '', $eval);
+}

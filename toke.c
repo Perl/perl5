@@ -3204,12 +3204,17 @@ Perl_yylex(pTHX)
 			    || ((*t == 'q' || *t == 'x') && ++t < PL_bufend
 				&& !isALNUM(*t))))
 		    {
+			/* skip q//-like construct */
 			char *tmps;
 			char open, close, term;
 			I32 brackets = 1;
 
 			while (t < PL_bufend && isSPACE(*t))
 			    t++;
+			/* check for q => */
+			if (t+1 < PL_bufend && t[0] == '=' && t[1] == '>') {
+			    OPERATOR(HASHBRACK);
+			}
 			term = *t;
 			open = term;
 			if (term && (tmps = strchr("([{< )]}> )]}>",term)))
@@ -3222,7 +3227,7 @@ Perl_yylex(pTHX)
 				else if (*t == open)
 				    break;
 			    }
-			else
+			else {
 			    for (t++; t < PL_bufend; t++) {
 				if (*t == '\\' && t+1 < PL_bufend)
 				    t++;
@@ -3231,8 +3236,13 @@ Perl_yylex(pTHX)
 				else if (*t == open)
 				    brackets++;
 			    }
+			}
+			t++;
 		    }
-		    t++;
+		    else
+			/* skip plain q word */
+			while (t < PL_bufend && isALNUM_lazy_if(t,UTF))
+			     t += UTF8SKIP(t);
 		}
 		else if (isALNUM_lazy_if(t,UTF)) {
 		    t += UTF8SKIP(t);
