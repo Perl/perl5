@@ -1,36 +1,9 @@
-Incompatibilities
------------------
-    s'$lhs'$rhs' now does no interpolation on either side.  It used to
-    interplolate $lhs but not $rhs.
-
-    The second and third arguments of splice are now evaluated in scalar
-    context (like the book says) rather than list context.
-
-    Saying "shift @foo + 20" is now a semantic error because of precedence.
-
-    "open FOO || die" is now incorrect.  You need parens around the filehandle.
-
-    The elements of argument lists for formats are now evaluated in list
-    context.  This means you can interpolate list values now.
-
-    You can't do a goto into a block that is optimized away.  Darn.
-
-    It is no longer syntactically legal to use whitespace as the name
-    of a variable.
-
-    Some error messages will be different.
-
-    The caller function now a false value in a scalar context if there is
-    no caller.  This lets library files determine if they're being required.
-
-    m//g now attaches its state to the searched string rather than the
-    regular expression.
-
 New things
 ----------
     The -w switch is much more informative.
 
-    References.  See t/op/ref.t for examples.
+    References.  See t/op/ref.t for examples.  All entities in Perl 5 are
+    reference counted so that it knows when each item should be destroyed.
 
     Objects.  See t/op/ref.t for examples.
 
@@ -42,7 +15,9 @@ New things
     meaning the parens are optional.  Even subroutines may be called as
     list operators if they've already been declared.
 
-    More embeddible.  See main.c and embed_h.SH.
+    More embeddible.  See main.c and embed_h.SH.  Multiple interpreters
+    in the same process are supported (though not with interleaved
+    execution yet).
 
     The interpreter is now flattened out.  Compare Perl 4's eval.c with
     the perl 5's pp.c.  Compare Perl 4's 900 line interpreter loop in cmd.c
@@ -73,3 +48,51 @@ New things
     variables.
 
     Saying "package;" requires explicit package name on global symbols.
+
+    The preferred package delimiter is now :: rather than '.
+
+    tie/untie are now preferred to dbmopen/dbmclose.  Multiple DBM
+    implementations are allowed in the same executable, so you can
+    write scripts to interchange data among different formats.
+
+    New "and" and "or" operators work just like && and || but with
+    a precedence lower than comma, so they work better with list operators.
+
+    New functions include: abs(), chr(), uc(), ucfirst(), lc(), lcfirst()
+
+Incompatibilities
+-----------------
+    @ now always interpolates an array in double-quotish strings.  Some programs
+    may now need to use backslash to protect any @ that shouldn't interpolate.
+
+    s'$lhs'$rhs' now does no interpolation on either side.  It used to
+    interplolate $lhs but not $rhs.
+
+    The second and third arguments of splice are now evaluated in scalar
+    context (like the book says) rather than list context.
+
+    Saying "shift @foo + 20" is now a semantic error because of precedence.
+
+    "open FOO || die" is now incorrect.  You need parens around the filehandle.
+
+    The elements of argument lists for formats are now evaluated in list
+    context.  This means you can interpolate list values now.
+
+    You can't do a goto into a block that is optimized away.  Darn.
+
+    It is no longer syntactically legal to use whitespace as the name
+    of a variable.
+
+    Some error messages will be different.
+
+    The caller function now returns a false value in a scalar context if there
+    is no caller.  This lets library files determine if they're being required.
+
+    m//g now attaches its state to the searched string rather than the
+    regular expression.
+
+    "reverse" is no longer allowed as the name of a sort subroutine.
+
+    taintperl is no longer a separate executable.  There is now a -T
+    switch to turn on tainting when it isn't turned on automatically.
+

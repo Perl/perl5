@@ -1,0 +1,20 @@
+#!./perl
+
+# $RCSfile: dbm.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:43 $
+{
+    package SOMEPACK;
+    sub new { local($x); bless \$x }
+    sub fetch { warn "fetch @_\n"; ${$_[0]} }
+    sub store { warn "store @_\n"; ${$_[0]} = $_[1] }
+    sub DESTROY { warn "DESTROY @_\n" }
+}
+
+tie $h, SOMEPACK;
+
+$h = 'bar';
+print $h, "\n";
+
+untie $h;
+1;
+
+

@@ -157,7 +157,9 @@ script you must explicitly specify a \- for the script name.
 After locating your script,
 .I perl
 compiles it to an internal form.
-If the script is syntactically correct, it is executed.
+If the script is syntactically correct, it is executed.  If the script
+runs off the end without hitting an exit or die operator, an implicit
+exit(0) is provided to indicate successful completion.
 .Sh "Options"
 Note: on first reading this section may not make much sense to you.  It's here
 at the front for easy reference.
@@ -1650,6 +1652,23 @@ Thus, a portable way to find out the home directory might be:
 	    (getpwuid($<))[7] || die "You're homeless!\en";
 
 .fi
+As more readable alternatives to && and ||, Perl provides "and" and "or"
+operators.  The short-circuit behavior is identical.  The precedence of
+"and" and "or" is much lower, however, so that you can safely use them
+after a list operator without the need for parentheses:
+.nf
+
+	unlink "alpha", "beta", "gamma"
+		or gripe(), next LINE;
+
+.fi
+With the old-style operators that would have been written like this:
+.nf
+
+	unlink("alpha", "beta", "gamma")
+		|| (gripe(), next LINE);
+
+.fi
 .PP
 Along with the literals and variables mentioned earlier,
 the operations in the following section can serve as terms in an expression.
@@ -1698,9 +1717,11 @@ operator.
 This is a useful optimization when you only want to see the first occurrence of
 something in each file of a set of files, for instance.
 Only ?? patterns local to the current package are reset.
+.Ip "abs(VALUE)" 8 4
+Returns the absolute value of its argument.
 .Ip "accept(NEWSOCKET,GENERICSOCKET)" 8 2
 Does the same thing that the accept system call does.
-Returns true if it succeeded, false otherwise.
+Returns the packed address if it succeeded, false otherwise.
 See example in section on Interprocess Communication.
 .Ip "alarm(SECONDS)" 8 4
 .Ip "alarm SECONDS" 8
@@ -1832,6 +1853,9 @@ Here's an example that looks up non-numeric uids in the passwd file:
 	}
 
 .fi
+.Ip "chr(NUMBER)" 8 5
+Returns the character represented by that NUMBER in the character set.
+For example, chr(65) is "A".
 .Ip "chroot(FILENAME)" 8 5
 .Ip "chroot FILENAME" 8
 Does the same as the system call of that name.
@@ -1881,11 +1905,15 @@ Useful for checking the password file for lousy passwords.
 Only the guys wearing white hats should do this.
 .Ip "dbmclose(ASSOC_ARRAY)" 8 6
 .Ip "dbmclose ASSOC_ARRAY" 8
+[This function has be superseded by the untie() function.]
+.Sp
 Breaks the binding between a dbm file and an associative array.
 The values remaining in the associative array are meaningless unless
 you happen to want to know what was in the cache for the dbm file.
 This function is only useful if you have ndbm.
 .Ip "dbmopen(ASSOC,DBNAME,MODE)" 8 6
+[This function has be superseded by the tie() function.]
+.Sp
 This binds a dbm or ndbm file to an associative array.
 ASSOC is the name of the associative array.
 (Unlike normal open, the first argument is NOT a filehandle, even though
@@ -1917,11 +1945,11 @@ Example:
 
 .ne 6
 	# print out history file offsets
-	dbmopen(HIST,'/usr/lib/news/history',0666);
+	dbmopen(%HIST,'/usr/lib/news/history',0666);
 	while (($key,$val) = each %HIST) {
 		print $key, ' = ', unpack('L',$val), "\en";
 	}
-	dbmclose(HIST);
+	dbmclose(%HIST);
 
 .fi
 .Ip "defined(EXPR)" 8 6
@@ -3129,7 +3157,8 @@ of values, as follows:
 	N	A long in \*(L"network\*(R" order.
 	f	A single-precision float in the native format.
 	d	A double-precision float in the native format.
-	p	A pointer to a string.
+	p	A pointer to a null-terminated string.
+	P	A pointer to a structure.
 	v	A short in \*(L"VAX\*(R" (little-endian) order.
 	V	A long in \*(L"VAX\*(R" (little-endian) order.
 	x	A null byte.
@@ -3144,7 +3173,7 @@ of values, as follows:
 .fi
 Each letter may optionally be followed by a number which gives a repeat
 count.
-With all types except "a", "A", "b", "B", "h" and "H",
+With all types except "a", "A", "b", "B", "h" and "H", and "P"
 the pack function will gobble up that many values
 from the LIST.
 A * for the repeat count means to use however many items are left.
@@ -3154,6 +3183,7 @@ padding with nulls or spaces as necessary.
 (When unpacking, "A" strips trailing spaces and nulls, but "a" does not.)
 Likewise, the "b" and "B" fields pack a string that many bits long.
 The "h" and "H" fields pack a string that many nybbles long.
+The "P" packs a pointer to a structure of the size indicated by the length.
 Real numbers (floats and doubles) are in the native machine format
 only; due to the multiplicity of floating formats around, and the lack
 of a standard \*(L"network\*(R" representation, no facility for
@@ -3421,12 +3451,9 @@ The use of reset on dbm associative arrays does not change the dbm file.
 you are sharing the dbm file.
 Then again, maybe not.)
 .Ip "return LIST" 8 3
-Returns from a subroutine with the value specified.
-(Note that a subroutine can automatically return
-the value of the last expression evaluated.
-That's the preferred method\*(--use of an explicit
-.I return
-is a bit slower.)
+Returns from a subroutine or eval with the value specified.
+(Note that in the absence of a return a subroutine will automatically return
+the value of the last expression evaluated.)
 .Ip "reverse(LIST)" 8 4
 .Ip "reverse LIST" 8
 In an array context, returns an array value consisting of the elements
@@ -4062,6 +4089,64 @@ Value may be given to seekdir() to access a particular location in
 a directory.
 Has the same caveats about possible directory compaction as the corresponding
 system library routine.
+.Ip "tie VARIABLE,PACKAGENAME,LIST" 8 6
+This function binds a variable to a package that will provide the
+implementation for the variable.
+VARIABLE is the name of the variable to be enchanted.
+PACKAGENAME is the name of a package implementing objects of correct type.
+Any additional arguments are passed to the "new" method of the package.
+Typically these are arguments such as might be passed to the dbm_open()
+function of C.
+.Sp
+Note that functions such as keys() and values() may return huge array values
+when used on large dbm files.
+You may prefer to use the each() function to iterate over large dbm files.
+Example:
+.nf
+
+.ne 6
+	# print out history file offsets
+	tie(%HIST, NDBM_File, '/usr/lib/news/history', 1, 0);
+	while (($key,$val) = each %HIST) {
+		print $key, ' = ', unpack('L',$val), "\en";
+	}
+	untie(%HIST);
+
+.fi
+A package implementing an associative array should have the following methods:
+.nf
+
+.ne 7
+	new objectname, LIST
+	DESTROY this
+	fetch this, key
+	store this, key, value
+	delete this, key
+	firstkey this
+	nextkey this, lastkey
+
+.fi
+A package implementing an ordinary array should have the following methods:
+.nf
+
+.ne 7
+	new objectname, LIST
+	DESTROY this
+	fetch this, key
+	store this, key, value
+	[others TBD]
+
+.fi
+A package implementing a scalar should have the following methods:
+.nf
+
+.ne 4
+	new objectname, LIST
+	DESTROY this
+	fetch this, 
+	store this, value
+
+.fi
 .Ip "time" 8 4
 Returns the number of non-leap seconds since 00:00:00 UTC, January 1, 1970.
 Suitable for feeding to gmtime() and localtime().
@@ -4216,6 +4301,8 @@ The following efficiently counts the number of set bits in a bit vector:
 	$setbits = unpack("%32b*", $selectmask);
 
 .fi
+.Ip "untie VARIABLE" 8 6
+Breaks the binding between a variable and a package.  (See tie.)
 .Ip "unshift(ARRAY,LIST)" 8 4
 Does the opposite of a
 .IR shift .
@@ -4918,6 +5005,7 @@ out.
 You'll just have to suffer along with these silly symbols.
 Most of them have reasonable mnemonics, or analogues in one of the shells.
 .Ip $_ 8
+''' UNDER
 The default input and pattern-searching space.
 The following pairs are equivalent:
 .nf
@@ -4941,6 +5029,7 @@ The following pairs are equivalent:
 .fi 
 (Mnemonic: underline is understood in certain operations.)
 .Ip $. 8
+''' INPUT_LINE
 The current input line number of the last filehandle that was read.
 Readonly.
 Remember that only an explicit close on the filehandle resets the line number.
@@ -4948,6 +5037,7 @@ Since <> never does an explicit close, line numbers increase across ARGV files
 (but see examples under eof).
 (Mnemonic: many programs use . to mean the current line number.)
 .Ip $/ 8
+''' RS or INPUT_RECORD_SEPARATOR
 The input record separator, newline by default.
 Works like
 .IR awk 's
@@ -4963,6 +5053,7 @@ Setting it to "\en\en" will blindly assume that the next input character
 belongs to the next paragraph, even if it's a newline.
 (Mnemonic: / is used to delimit line boundaries when quoting poetry.)
 .Ip $, 8
+''' OFS or OUTPUT_FIELD_SEPARATOR
 The output field separator for the print operator.
 Ordinarily the print operator simply prints out the comma separated fields
 you specify.
@@ -4973,11 +5064,13 @@ set this variable as you would set
 OFS variable to specify what is printed between fields.
 (Mnemonic: what is printed when there is a , in your print statement.)
 .Ip $"" 8
+''' LIST_SEPARATOR
 This is like $, except that it applies to array values interpolated into
 a double-quoted string (or similar interpreted string).
 Default is a space.
 (Mnemonic: obvious, I think.)
 .Ip $\e 8
+''' ORS or OUTPUT_RECORD_SEPARATOR
 The output record separator for the print operator.
 Ordinarily the print operator simply prints out the comma separated fields
 you specify, with no trailing newline or record separator assumed.
@@ -4990,6 +5083,7 @@ ORS variable to specify what is printed at the end of the print.
 Also, it's just like /, but it's what you get \*(L"back\*(R" from
 .IR perl .)
 .Ip $# 8
+''' OFMT or OUTPUT_FORMAT
 The output format for printed numbers.
 This variable is a half-hearted attempt to emulate
 .IR awk 's
@@ -5006,27 +5100,33 @@ explicitly to get
 value.
 (Mnemonic: # is the number sign.)
 .Ip $% 8
+''' PAGE
 The current page number of the currently selected output channel.
 (Mnemonic: % is page number in nroff.)
 .Ip $= 8
+''' PRINTABLE_LINES
 The current page length (printable lines) of the currently selected output
 channel.
 Default is 60.
 (Mnemonic: = has horizontal lines.)
 .Ip $\- 8
+''' LINES_REMAINING
 The number of lines left on the page of the currently selected output channel.
 (Mnemonic: lines_on_page \- lines_printed.)
 .Ip $~ 8
+''' FORMAT_NAME
 The name of the current report format for the currently selected output
 channel.
 Default is name of the filehandle.
 (Mnemonic: brother to $^.)
 .Ip $^ 8
+''' TOP_FORMAT_NAME
 The name of the current top-of-page format for the currently selected output
 channel.
 Default is name of the filehandle with \*(L"_TOP\*(R" appended.
 (Mnemonic: points to top of page.)
 .Ip $| 8
+''' AUTOFLUSH
 If set to nonzero, forces a flush after every write or print on the currently
 selected output channel.
 Default is 0.
@@ -5041,11 +5141,13 @@ script under rsh and want to see the
 output as it's happening.
 (Mnemonic: when you want your pipes to be piping hot.)
 .Ip $$ 8
+''' PID
 The process number of the
 .I perl
 running this script.
 (Mnemonic: same as shells.)
 .Ip $? 8
+''' STATUS
 The status returned by the last pipe close, backtick (\`\`) command or
 .I system
 operator.
@@ -5055,16 +5157,19 @@ $? & 255 gives which signal, if any, the process died from, and whether
 there was a core dump.
 (Mnemonic: similar to sh and ksh.)
 .Ip $& 8 4
+''' MATCH
 The string matched by the last successful pattern match
 (not counting any matches hidden
 within a BLOCK or eval enclosed by the current BLOCK).
 (Mnemonic: like & in some editors.)
 .Ip $\` 8 4
+''' LEFT
 The string preceding whatever was matched by the last successful pattern match
 (not counting any matches hidden within a BLOCK or eval enclosed by the current
 BLOCK).
 (Mnemonic: \` often precedes a quoted string.)
 .Ip $\' 8 4
+''' RIGHT
 The string following whatever was matched by the last successful pattern match
 (not counting any matches hidden within a BLOCK or eval enclosed by the current
 BLOCK).
@@ -5079,6 +5184,7 @@ Example:
 
 .fi
 .Ip $+ 8 4
+''' LAST_PAREN_MATCH
 The last bracket matched by the last search pattern.
 This is useful if you don't know which of a set of alternative patterns
 matched.
@@ -5090,6 +5196,7 @@ For example:
 .fi
 (Mnemonic: be positive and forward looking.)
 .Ip $* 8 2
+''' MULTILINE_MATCHING
 Set to 1 to do multiline matching within a string, 0 to tell
 .I perl
 that it can assume that strings contain a single line, for the purpose
@@ -5101,6 +5208,7 @@ Default is 0.
 Note that this variable only influences the interpretation of ^ and $.
 A literal newline can be searched for even when $* == 0.
 .Ip $0 8
+''' PROGRAM_NAME
 Contains the name of the file containing the
 .I perl
 script being executed.
@@ -5112,6 +5220,7 @@ pattern matched, not counting patterns matched in nested blocks that have
 been exited already.
 (Mnemonic: like \edigit.)
 .Ip $[ 8 2
+''' ARRAY_BASE
 The index of the first element in an array, and of the first character in
 a substring.
 Default is 0, but you could set it to 1 to make
@@ -5122,6 +5231,7 @@ behave more like
 when subscripting and when evaluating the index() and substr() functions.
 (Mnemonic: [ begins subscripts.)
 .Ip $] 8 2
+''' PERL_VERSION
 The string printed out when you say \*(L"perl -v\*(R".
 It can be used to determine at the beginning of a script whether the perl
 interpreter executing the script is in the right range of versions.
@@ -5143,6 +5253,7 @@ or, used numerically,
 .fi
 (Mnemonic: Is this version of perl in the right bracket?)
 .Ip $; 8 2
+''' SUBSEP or SUBSCRIPT_SEPARATOR
 The subscript separator for multi-dimensional array emulation.
 If you refer to an associative array element as
 .nf
@@ -5169,6 +5280,7 @@ value for $;.
 Yeah, I know, it's pretty lame, but $, is already taken for something more
 important.)
 .Ip $! 8 2
+''' ERRNO
 If used in a numeric context, yields the current value of errno, with all the
 usual caveats.
 (This means that you shouldn't depend on the value of $! to be anything
@@ -5180,14 +5292,17 @@ if, for instance, you want $! to return the string for error n, or you want
 to set the exit value for the die operator.
 (Mnemonic: What just went bang?)
 .Ip $@ 8 2
+''' EVAL_ERROR
 The perl syntax error message from the last eval command.
 If null, the last eval parsed and executed correctly (although the operations
 you invoked may have failed in the normal fashion).
 (Mnemonic: Where was the syntax error \*(L"at\*(R"?)
 .Ip $< 8 2
+''' UID or REAL_USER_ID
 The real uid of this process.
 (Mnemonic: it's the uid you came FROM, if you're running setuid.)
 .Ip $> 8 2
+''' EUID or EFFECTIVE_USER_ID
 The effective uid of this process.
 Example:
 .nf
@@ -5200,6 +5315,7 @@ Example:
 (Mnemonic: it's the uid you went TO, if you're running setuid.)
 Note: $< and $> can only be swapped on machines supporting setreuid().
 .Ip $( 8 2
+''' GID or REAL_GROUP_ID
 The real gid of this process.
 If you are on a machine that supports membership in multiple groups
 simultaneously, gives a space separated list of groups you are in.
@@ -5208,6 +5324,7 @@ by getgroups(), one of which may be the same as the first number.
 (Mnemonic: parentheses are used to GROUP things.
 The real gid is the group you LEFT, if you're running setgid.)
 .Ip $) 8 2
+''' EGID or EFFECTIVE_GROUP_ID
 The effective gid of this process.
 If you are on a machine that supports membership in multiple groups
 simultaneously, gives a space separated list of groups you are in.
@@ -5220,33 +5337,40 @@ Note: $<, $>, $( and $) can only be set on machines that support the
 corresponding set[re][ug]id() routine.
 $( and $) can only be swapped on machines supporting setregid().
 .Ip $: 8 2
+''' LINE_BREAK_CHARACTERS
 The current set of characters after which a string may be broken to
 fill continuation fields (starting with ^) in a format.
 Default is "\ \en-", to break on whitespace or hyphens.
 (Mnemonic: a \*(L"colon\*(R" in poetry is a part of a line.)
 .Ip $^D 8 2
+''' DEBUGGING
 The current value of the debugging flags.
 (Mnemonic: value of
 .B \-D
 switch.)
 .Ip $^F 8 2
+''' SYSTEM_FD_MAX
 The maximum system file descriptor, ordinarily 2.  System file descriptors
 are passed to subprocesses, while higher file descriptors are not.
 During an open, system file descriptors are preserved even if the open
 fails.  Ordinary file descriptors are closed before the open is attempted.
 .Ip $^I 8 2
+''' INPLACE_EDIT
 The current value of the inplace-edit extension.
 Use undef to disable inplace editing.
 (Mnemonic: value of
 .B \-i
 switch.)
 .Ip $^L 8 2
+''' FORMFEED
 What formats output to perform a formfeed.  Default is \ef.
 .Ip $^P 8 2
+''' PERLDB
 The internal flag that the debugger clears so that it doesn't
 debug itself.  You could conceivable disable debugging yourself
 by clearing it.
 .Ip $^T 8 2
+''' BASETIME
 The time at which the script began running, in seconds since the epoch.
 The values returned by the
 .B \-M ,
@@ -5255,11 +5379,13 @@ and
 .B \-C
 filetests are based on this value.
 .Ip $^W 8 2
+''' WARNING
 The current value of the warning switch.
 (Mnemonic: related to the
 .B \-w
 switch.)
 .Ip $^X 8 2
+''' EXECUTABLE_NAME
 The name that Perl itself was executed as, from argv[0].
 .Ip $ARGV 8 3
 contains the name of the current file when reading from <>.

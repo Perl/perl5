@@ -1,31 +1,61 @@
-POSIX compatibility
-hash binding
-pack(P)
-fix gv refcnts
+Must-have external packages
+	POSIX
+	X/Motif/whatever
 
-/\Afoo/ (beginning of string, or where previous g match left off)
-/foo\Z/ (end of string only)
-Make specialized allocators
-Optimize switch statements
-Optimize foreach on array
-Optimize foreach (1..1000000)
-Set KEEP on constant split
-Cache eval tree (unless lexical outer scope used (mark in &compiling?))
-rcatmaybe
-Cache method lookup
-Shrink opcode tables via multiple implementations selected in peep
-Straighten out the RS stuff in BEGIN
-Make yyparse recursion longjmp() proof.
+Bugs
+	BEGIN { require 'perldb.pl' }
+	Make yyparse recursion longjmp() proof.
+	perl -c shell_script bug
+	fix the need for double ^D on $x
+	STDOUT->print("howdy\n");
 
-sub mysplice(@, $, $, ...)?
-pretty function?  (or is it, as I suspect, a lib routine?)
-perlex function?
-X Perl?  Motif Perl?
-give DOG $bone?
-Nested destructors?
-make tr/// return histogram in list context?
-Implement eval once?  (Unnecessary with cache?)
-When does split() go to @_?
-undef wantarray in void context?
-goto &coroutine?
-filehandle references?
+Regexp extensions
+	/m  for multiline
+	/\Afoo/ (beginning of string, or where previous g match left off)
+	/foo\Z/ (end of string only)
+	negative regexp assertions?
+	/<>/x for grouping?
+	/f for fixed variable interpolation?
+	Rewrite regexp parser for better integrated optimization
+
+Nice to have
+	Profiler
+	pack "(stuff)*"
+	lexperl
+	Bundled perl preprocessor
+	FILEHANDLE methods
+
+Optimizations
+	Make specialized allocators
+	Optimize switch statements
+	Optimize foreach on array
+	Optimize foreach (1..1000000)
+	Set KEEP on constant split
+	Cache eval tree (unless lexical outer scope used (mark in &compiling?))
+	rcatmaybe
+	Shrink opcode tables via multiple implementations selected in peep
+	Cache hash value?
+	sfio?
+
+Need to think more about
+	ref in list context
+	When does split() go to @_?
+	Figure out BEGIN { ... @ARGV ... }
+	Implement eval once?  (Unnecessary with cache?)
+	detect inconsistent linkage when using -DDEBUGGING?
+
+Vague possibilities
+	sub mysplice(@, $, $, ...)
+	data prettyprint function?  (or is it, as I suspect, a lib routine?)
+	Nested destructors
+	make tr/// return histogram in list context?
+	undef wantarray in void context
+	goto &replacement_routine
+	filehandle references
+	Loop control on do{} et al
+	Explicit switch statements
+	perl to C translator
+	multi-thread scheduling
+	built-in globbing
+	compile to real threaded code
+	structured types

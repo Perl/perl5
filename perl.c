@@ -1,6 +1,5 @@
-char rcsid[] = "$RCSfile: perl.c,v $$Revision: 5.0 $$Date: 92/08/07 18:25:50 $\nPatch level: ###\n";
 /*
- *    Copyright (c) 1991, Larry Wall
+ *    Copyright (c) 1991, 1992, 1993, 1994 Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -59,6 +58,8 @@ char rcsid[] = "$RCSfile: perl.c,v $$Revision: 5.0 $$Date: 92/08/07 18:25:50 $\n
 #include "perly.h"
 #include "patchlevel.h"
 
+char rcsid[] = "$RCSfile: perl.c,v $$Revision: 5.0 $$Date: 92/08/07 18:25:50 $\nPatch level: ###\n";
+
 #ifdef IAMSUID
 #ifndef DOSUID
 #define DOSUID
@@ -112,11 +113,11 @@ register PerlInterpreter *sv_interp;
 	SvREADONLY_on(&sv_undef);
 
 	sv_setpv(&sv_no,No);
-	SvNVn(&sv_no);
+	SvNV(&sv_no);
 	SvREADONLY_on(&sv_no);
 
 	sv_setpv(&sv_yes,Yes);
-	SvNVn(&sv_yes);
+	SvNV(&sv_yes);
 	SvREADONLY_on(&sv_yes);
 
 #ifdef MSDOS
@@ -132,7 +133,7 @@ register PerlInterpreter *sv_interp;
 
 #ifdef EMBEDDED
     chopset	= " \n-";
-    cmdline	= NOLINE;
+    copline	= NOLINE;
     curcop	= &compiling;
     cxstack_ix	= -1;
     cxstack_max	= 128;
@@ -148,7 +149,7 @@ register PerlInterpreter *sv_interp;
     rschar	= '\n';
     rsfp	= Nullfp;
     rslen	= 1;
-    statname	= Nullstr;
+    statname	= Nullsv;
     tmps_floor	= -1;
     tmps_ix	= -1;
     tmps_max	= -1;
@@ -158,20 +159,13 @@ register PerlInterpreter *sv_interp;
     euid = (int)geteuid();
     gid = (int)getgid();
     egid = (int)getegid();
-    sprintf(patchlevel,"%3.3s%2.2d", strchr(rcsid,'4'), PATCHLEVEL);
+    tainting = (euid != uid || egid != gid);
+    sprintf(patchlevel,"%3.3s%2.2d", strchr(rcsid,'5'), PATCHLEVEL);
 
     (void)sprintf(strchr(rcsid,'#'), "%d\n", PATCHLEVEL);
 
     fdpid = newAV();	/* for remembering popen pids by fd */
-    pidstatus = newHV(COEFFSIZE);/* for remembering status of dead pids */
-
-#ifdef TAINT
-#ifndef DOSUID
-    if (uid == euid && gid == egid)
-	taintanyway = TRUE;		/* running taintperl explicitly */
-#endif
-#endif
-
+    pidstatus = newHV();/* for remembering status of dead pids */
 }
 
 void
@@ -213,7 +207,7 @@ char **env;
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
 #ifdef IAMSUID
 #undef IAMSUID
-    fatal("suidperl is no longer needed since the kernel can now execute\n\
+    croak("suidperl is no longer needed since the kernel can now execute\n\
 setuid perl scripts securely.\n");
 #endif
 #endif
@@ -270,6 +264,7 @@ setuid perl scripts securely.\n");
 	case 'n':
 	case 'p':
 	case 's':
+	case 'T':
 	case 'u':
 	case 'U':
 	case 'v':
@@ -279,18 +274,16 @@ setuid perl scripts securely.\n");
 	    break;
 
 	case 'e':
-#ifdef TAINT
 	    if (euid != uid || egid != gid)
-		fatal("No -e allowed in setuid scripts");
-#endif
+		croak("No -e allowed in setuid scripts");
 	    if (!e_fp) {
 	        e_tmpname = savestr(TMPPATH);
 		(void)mktemp(e_tmpname);
 		if (!*e_tmpname)
-		    fatal("Can't mktemp()");
+		    croak("Can't mktemp()");
 		e_fp = fopen(e_tmpname,"w");
 		if (!e_fp)
-		    fatal("Cannot open temporary file");
+		    croak("Cannot open temporary file");
 	    }
 	    if (argv[1]) {
 		fputs(argv[1],e_fp);
@@ -299,10 +292,7 @@ setuid perl scripts securely.\n");
 	    (void)putc('\n', e_fp);
 	    break;
 	case 'I':
-#ifdef TAINT
-	    if (euid != uid || egid != gid)
-		fatal("No -I allowed in setuid scripts");
-#endif
+	    taint_not("-I");
 	    sv_catpv(sv,"-");
 	    sv_catpv(sv,s);
 	    sv_catpv(sv," ");
@@ -317,18 +307,12 @@ setuid perl scripts securely.\n");
 	    }
 	    break;
 	case 'P':
-#ifdef TAINT
-	    if (euid != uid || egid != gid)
-		fatal("No -P allowed in setuid scripts");
-#endif
+	    taint_not("-P");
 	    preprocess = TRUE;
 	    s++;
 	    goto reswitch;
 	case 'S':
-#ifdef TAINT
-	    if (euid != uid || egid != gid)
-		fatal("No -S allowed in setuid scripts");
-#endif
+	    taint_not("-S");
 	    dosearch = TRUE;
 	    s++;
 	    goto reswitch;
@@ -344,14 +328,14 @@ setuid perl scripts securely.\n");
 	case 0:
 	    break;
 	default:
-	    fatal("Unrecognized switch: -%s",s);
+	    croak("Unrecognized switch: -%s",s);
 	}
     }
   switch_end:
     scriptname = argv[0];
     if (e_fp) {
 	if (fflush(e_fp) || ferror(e_fp) || fclose(e_fp))
-	    fatal("Can't write to temp file for -e: %s", strerror(errno));
+	    croak("Can't write to temp file for -e: %s", strerror(errno));
 	argc++,argv--;
 	scriptname = e_tmpname;
     }
@@ -391,9 +375,8 @@ setuid perl scripts securely.\n");
 
     init_context_stack();
 
-    userinit();		/* in case linked C routines want magical variables */
+    perl_init_ext();	/* in case linked C routines want magical variables */
 
-    allgvs = TRUE;
     init_predump_symbols();
 
     init_lexer();
@@ -403,9 +386,9 @@ setuid perl scripts securely.\n");
     error_count = 0;
     if (yyparse() || error_count) {
 	if (minus_c)
-	    fatal("%s had compilation errors.\n", origfilename);
+	    croak("%s had compilation errors.\n", origfilename);
 	else {
-	    fatal("Execution of %s aborted due to compilation errors.\n",
+	    croak("Execution of %s aborted due to compilation errors.\n",
 		origfilename);
 	}
     }
@@ -508,19 +491,25 @@ I32 numargs;		/* how many args are pushed on the stack */
     BINOP myop;		/* fake syntax tree node */
     
     ENTER;
+    SAVETMPS;
     SAVESPTR(op);
     stack_base = AvARRAY(stack);
     stack_sp = stack_base + sp - numargs - 1;
     op = (OP*)&myop;
+    Zero(op, 1, BINOP);
     pp_pushmark();	/* doesn't look at op, actually, except to return */
     *++stack_sp = (SV*)gv_fetchpv(subname, FALSE);
     stack_sp += numargs;
 
-    myop.op_last = hasargs ? (OP*)&myop : Nullop;
+    if (hasargs) {
+	myop.op_flags = OPf_STACKED;
+	myop.op_last = (OP*)&myop;
+    }
     myop.op_next = Nullop;
 
-    op = pp_entersubr();
-    run();
+    if (op = pp_entersubr())
+	run();
+    free_tmps();
     LEAVE;
     return stack_sp - stack_base;
 }
@@ -554,7 +543,7 @@ I32 namlen;
 {
     register GV *gv;
 
-    if (gv = gv_fetchpv(sym,allgvs))
+    if (gv = gv_fetchpv(sym,TRUE))
 	sv_magic(GvSV(gv), (SV*)gv, 0, name, namlen);
 }
 
@@ -623,19 +612,13 @@ char *s;
 	s++;
 	return s;
     case 'd':
-#ifdef TAINT
-	if (euid != uid || egid != gid)
-	    fatal("No -d allowed in setuid scripts");
-#endif
+	taint_not("-d");
 	perldb = TRUE;
 	s++;
 	return s;
     case 'D':
 #ifdef DEBUGGING
-#ifdef TAINT
-	if (euid != uid || egid != gid)
-	    fatal("No -D allowed in setuid scripts");
-#endif
+	taint_not("-D");
 	if (isALPHA(s[1])) {
 	    static char debopts[] = "psltocPmfrxuLHX";
 	    char *d;
@@ -663,15 +646,12 @@ char *s;
 	*s = '\0';
 	break;
     case 'I':
-#ifdef TAINT
-	if (euid != uid || egid != gid)
-	    fatal("No -I allowed in setuid scripts");
-#endif
+	taint_not("-I");
 	if (*++s) {
 	    (void)av_push(GvAVn(incgv),newSVpv(s,0));
 	}
 	else
-	    fatal("No space allowed after -I");
+	    croak("No space allowed after -I");
 	break;
     case 'l':
 	minus_l = TRUE;
@@ -696,11 +676,12 @@ char *s;
 	s++;
 	return s;
     case 's':
-#ifdef TAINT
-	if (euid != uid || egid != gid)
-	    fatal("No -s allowed in setuid scripts");
-#endif
+	taint_not("-s");
 	doswitches = TRUE;
+	s++;
+	return s;
+    case 'T':
+	tainting = TRUE;
 	s++;
 	return s;
     case 'u':
@@ -712,9 +693,9 @@ char *s;
 	s++;
 	return s;
     case 'v':
-	fputs("\nThis is perl, version 5.0, Alpha 2 (unsupported)\n\n",stdout);
+	fputs("\nThis is perl, version 5.0, Alpha 4 (unsupported)\n\n",stdout);
 	fputs(rcsid,stdout);
-	fputs("\nCopyright (c) 1989, 1990, 1991, 1992, 1993 Larry Wall\n",stdout);
+	fputs("\nCopyright (c) 1989, 1990, 1991, 1992, 1993, 1994 Larry Wall\n",stdout);
 #ifdef MSDOS
 	fputs("MS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n",
 	stdout);
@@ -746,7 +727,7 @@ GNU General Public License, which may be found in the Perl 5.0 source kit.\n",st
     case '\t':
 	break;
     default:
-	fatal("Switch meaningless after -x: -%s",s);
+	croak("Switch meaningless after -x: -%s",s);
     }
     return Nullch;
 }
@@ -777,9 +758,11 @@ my_unexec()
 static void
 init_main_stash()
 {
-    curstash = defstash = newHV(0);
+    GV *gv;
+    curstash = defstash = newHV();
     curstname = newSVpv("main",4);
-    GvHV(gv_fetchpv("_main",TRUE)) = defstash;
+    GvHV(gv = gv_fetchpv("_main",TRUE)) = defstash;
+    SvREADONLY_on(gv);
     HvNAME(defstash) = "main";
     incgv = gv_HVadd(gv_AVadd(gv_fetchpv("INC",TRUE)));
     SvMULTI_on(incgv);
@@ -837,7 +820,7 @@ SV *sv;
 		xfailed = savestr(tokenbuf);
 	}
 	if (!xfound)
-	    fatal("Can't execute %s", xfailed ? xfailed : scriptname );
+	    croak("Can't execute %s", xfailed ? xfailed : scriptname );
 	if (xfailed)
 	    Safefree(xfailed);
 	scriptname = xfound;
@@ -892,7 +875,7 @@ sed %s -e \"/^[^#]/b\" \
 #endif
 	  (doextract ? "-e '1,/^#/d\n'" : ""),
 #endif
-	  scriptname, tokenbuf, SvPVn(sv), CPPMINUS);
+	  scriptname, tokenbuf, SvPV(sv, na), CPPMINUS);
 	DEBUG_P(fprintf(stderr, "%s\n", buf));
 	doextract = FALSE;
 #ifdef IAMSUID				/* actually, this is caught earlier */
@@ -907,16 +890,13 @@ sed %s -e \"/^[^#]/b\" \
 #endif
 #endif
 	    if (geteuid() != uid)
-		fatal("Can't do seteuid!\n");
+		croak("Can't do seteuid!\n");
 	}
 #endif /* IAMSUID */
 	rsfp = my_popen(buf,"r");
     }
     else if (!*scriptname) {
-#ifdef TAINT
-	if (euid != uid || egid != gid)
-	    fatal("Can't take set-id script from stdin");
-#endif
+	taint_not("program input from stdin");
 	rsfp = stdin;
     }
     else
@@ -924,16 +904,16 @@ sed %s -e \"/^[^#]/b\" \
     if ((FILE*)rsfp == Nullfp) {
 #ifdef DOSUID
 #ifndef IAMSUID		/* in case script is not readable before setuid */
-	if (euid && stat(SvPV(GvSV(curcop->cop_filegv)),&statbuf) >= 0 &&
+	if (euid && stat(SvPVX(GvSV(curcop->cop_filegv)),&statbuf) >= 0 &&
 	  statbuf.st_mode & (S_ISUID|S_ISGID)) {
 	    (void)sprintf(buf, "%s/sperl%s", BIN, patchlevel);
 	    execv(buf, origargv);	/* try again */
-	    fatal("Can't do setuid\n");
+	    croak("Can't do setuid\n");
 	}
 #endif
 #endif
-	fatal("Can't open perl script \"%s\": %s\n",
-	  SvPV(GvSV(curcop->cop_filegv)), strerror(errno));
+	croak("Can't open perl script \"%s\": %s\n",
+	  SvPVX(GvSV(curcop->cop_filegv)), strerror(errno));
     }
 }
 
@@ -960,18 +940,11 @@ char *validarg;
      * DOSUID must be defined in both perl and suidperl, and IAMSUID must
      * be defined in suidperl only.  suidperl must be setuid root.  The
      * Configure script will set this up for you if you want it.
-     *
-     * There is also the possibility of have a script which is running
-     * set-id due to a C wrapper.  We want to do the TAINT checks
-     * on these set-id scripts, but don't want to have the overhead of
-     * them in normal perl, and can't use suidperl because it will lose
-     * the effective uid info, so we have an additional non-setuid root
-     * version called taintperl or tperlN.NNN that just does the TAINT checks.
      */
 
 #ifdef DOSUID
     if (fstat(fileno(rsfp),&statbuf) < 0)	/* normal stat is insecure */
-	fatal("Can't stat script \"%s\"",origfilename);
+	croak("Can't stat script \"%s\"",origfilename);
     if (statbuf.st_mode & (S_ISUID|S_ISGID)) {
 	I32 len;
 
@@ -985,8 +958,8 @@ char *validarg;
 	 * But I don't think it's too important.  The manual lies when
 	 * it says access() is useful in setuid programs.
 	 */
-	if (access(SvPV(GvSV(curcop->cop_filegv)),1))	/*double check*/
-	    fatal("Permission denied");
+	if (access(SvPVX(GvSV(curcop->cop_filegv)),1))	/*double check*/
+	    croak("Permission denied");
 #else
 	/* If we can swap euid and uid, then we can determine access rights
 	 * with a simple stat of the file, and then compare device and
@@ -997,9 +970,9 @@ char *validarg;
 	    struct stat tmpstatbuf;
 
 	    if (setreuid(euid,uid) < 0 || getuid() != euid || geteuid() != uid)
-		fatal("Can't swap uid and euid");	/* really paranoid */
-	    if (stat(SvPV(GvSV(curcop->cop_filegv)),&tmpstatbuf) < 0)
-		fatal("Permission denied");	/* testing full pathname here */
+		croak("Can't swap uid and euid");	/* really paranoid */
+	    if (stat(SvPVX(GvSV(curcop->cop_filegv)),&tmpstatbuf) < 0)
+		croak("Permission denied");	/* testing full pathname here */
 	    if (tmpstatbuf.st_dev != statbuf.st_dev ||
 		tmpstatbuf.st_ino != statbuf.st_ino) {
 		(void)fclose(rsfp);
@@ -1009,34 +982,34 @@ char *validarg;
 (Filename of set-id script was %s, uid %d gid %d.)\n\nSincerely,\nperl\n",
 			uid,tmpstatbuf.st_dev, tmpstatbuf.st_ino,
 			statbuf.st_dev, statbuf.st_ino,
-			SvPV(GvSV(curcop->cop_filegv)),
+			SvPVX(GvSV(curcop->cop_filegv)),
 			statbuf.st_uid, statbuf.st_gid);
 		    (void)my_pclose(rsfp);
 		}
-		fatal("Permission denied\n");
+		croak("Permission denied\n");
 	    }
 	    if (setreuid(uid,euid) < 0 || getuid() != uid || geteuid() != euid)
-		fatal("Can't reswap uid and euid");
+		croak("Can't reswap uid and euid");
 	    if (!cando(S_IXUSR,FALSE,&statbuf))		/* can real uid exec? */
-		fatal("Permission denied\n");
+		croak("Permission denied\n");
 	}
 #endif /* HAS_SETREUID */
 #endif /* IAMSUID */
 
 	if (!S_ISREG(statbuf.st_mode))
-	    fatal("Permission denied");
+	    croak("Permission denied");
 	if (statbuf.st_mode & S_IWOTH)
-	    fatal("Setuid/gid script is writable by world");
+	    croak("Setuid/gid script is writable by world");
 	doswitches = FALSE;		/* -s is insecure in suid */
 	curcop->cop_line++;
 	if (fgets(tokenbuf,sizeof tokenbuf, rsfp) == Nullch ||
 	  strnNE(tokenbuf,"#!",2) )	/* required even on Sys V */
-	    fatal("No #! line");
+	    croak("No #! line");
 	s = tokenbuf+2;
 	if (*s == ' ') s++;
 	while (!isSPACE(*s)) s++;
 	if (strnNE(s-4,"perl",4) && strnNE(s-9,"perl",4))  /* sanity check */
-	    fatal("Not a perl script");
+	    croak("Not a perl script");
 	while (*s == ' ' || *s == '\t') s++;
 	/*
 	 * #! arg must be what we saw above.  They can invoke it by
@@ -1046,13 +1019,13 @@ char *validarg;
 	len = strlen(validarg);
 	if (strEQ(validarg," PHOOEY ") ||
 	    strnNE(s,validarg,len) || !isSPACE(s[len]))
-	    fatal("Args must match #! line");
+	    croak("Args must match #! line");
 
 #ifndef IAMSUID
 	if (euid != uid && (statbuf.st_mode & S_ISUID) &&
 	    euid == statbuf.st_uid)
 	    if (!do_undump)
-		fatal("YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET!\n\
+		croak("YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET!\n\
 FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 #endif /* IAMSUID */
 
@@ -1062,7 +1035,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	    (void)sprintf(buf, "%s/sperl%s", BIN, patchlevel);
 	    execv(buf, origargv);	/* try again */
 #endif
-	    fatal("Can't do setuid\n");
+	    croak("Can't do setuid\n");
 	}
 
 	if (statbuf.st_mode & S_ISGID && statbuf.st_gid != egid) {
@@ -1076,7 +1049,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 #endif
 #endif
 	    if (getegid() != statbuf.st_gid)
-		fatal("Can't do setegid!\n");
+		croak("Can't do setegid!\n");
 	}
 	if (statbuf.st_mode & S_ISUID) {
 	    if (statbuf.st_uid != euid)
@@ -1090,7 +1063,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 #endif
 #endif
 	    if (geteuid() != statbuf.st_uid)
-		fatal("Can't do seteuid!\n");
+		croak("Can't do seteuid!\n");
 	}
 	else if (uid) {			/* oops, mustn't run as root */
 #ifdef HAS_SETEUID
@@ -1103,33 +1076,23 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 #endif
 #endif
 	    if (geteuid() != uid)
-		fatal("Can't do seteuid!\n");
+		croak("Can't do seteuid!\n");
 	}
 	uid = (int)getuid();
 	euid = (int)geteuid();
 	gid = (int)getgid();
 	egid = (int)getegid();
+	tainting |= (euid != uid || egid != gid);
 	if (!cando(S_IXUSR,TRUE,&statbuf))
-	    fatal("Permission denied\n");	/* they can't do this */
+	    croak("Permission denied\n");	/* they can't do this */
     }
 #ifdef IAMSUID
     else if (preprocess)
-	fatal("-P not allowed for setuid/setgid script\n");
+	croak("-P not allowed for setuid/setgid script\n");
     else
-	fatal("Script is not setuid/setgid in suidperl\n");
-#else
-#ifndef TAINT		/* we aren't taintperl or suidperl */
-    /* script has a wrapper--can't run suidperl or we lose euid */
-    else if (euid != uid || egid != gid) {
-	(void)fclose(rsfp);
-	(void)sprintf(buf, "%s/tperl%s", BIN, patchlevel);
-	execv(buf, origargv);	/* try again */
-	fatal("Can't run setuid script with taint checks");
-    }
-#endif /* TAINT */
+	croak("Script is not setuid/setgid in suidperl\n");
 #endif /* IAMSUID */
 #else /* !DOSUID */
-#ifndef TAINT		/* we aren't taintperl or suidperl */
     if (euid != uid || egid != gid) {	/* (suidperl doesn't exist, in fact) */
 #ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
 	fstat(fileno(rsfp),&statbuf);	/* may be either wrapped or real suid */
@@ -1138,30 +1101,25 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	    (egid != gid && egid == statbuf.st_gid && statbuf.st_mode & S_ISGID)
 	   )
 	    if (!do_undump)
-		fatal("YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET!\n\
+		croak("YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET!\n\
 FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 #endif /* SETUID_SCRIPTS_ARE_SECURE_NOW */
 	/* not set-id, must be wrapped */
-	(void)fclose(rsfp);
-	(void)sprintf(buf, "%s/tperl%s", BIN, patchlevel);
-	execv(buf, origargv);	/* try again */
-	fatal("Can't run setuid script with taint checks");
     }
-#endif /* TAINT */
 #endif /* DOSUID */
 }
 
 static void
 find_beginning()
 {
-#if !defined(IAMSUID) && !defined(TAINT)
     register char *s;
 
     /* skip forward in input to the real script? */
 
+    taint_not("-x");
     while (doextract) {
 	if ((s = sv_gets(linestr, rsfp, 0)) == Nullch)
-	    fatal("No Perl script found in input\n");
+	    croak("No Perl script found in input\n");
 	if (*s == '#' && s[1] == '!' && instr(s,"perl")) {
 	    ungetc('\n',rsfp);		/* to keep line count right */
 	    doextract = FALSE;
@@ -1171,10 +1129,9 @@ find_beginning()
 		while (s = moreswitches(s)) ;
 	    }
 	    if (cddir && chdir(cddir) < 0)
-		fatal("Can't chdir to %s",cddir);
+		croak("Can't chdir to %s",cddir);
 	}
     }
-#endif /* !defined(IAMSUID) && !defined(TAINT) */
 }
 
 static void
@@ -1182,7 +1139,7 @@ init_debugger()
 {
     GV* tmpgv;
 
-    debstash = newHV(0);
+    debstash = newHV();
     GvHV(gv_fetchpv("_DB",TRUE)) = debstash;
     curstash = debstash;
     dbargs = GvAV(gv_AVadd((tmpgv = gv_fetchpv("args",TRUE))));
@@ -1235,8 +1192,9 @@ init_stack()
 static void
 init_lexer()
 {
-    bufend = bufptr = SvPVn(linestr);
+    bufend = bufptr = SvPV(linestr, na);
     subname = newSVpv("main",4);
+    lex_start();		/* we never leave */
 }
 
 static void
@@ -1323,18 +1281,16 @@ register char **env;
     sv_setpvn(bodytarget, "", 0);
     formtarget = bodytarget;
 
-#ifdef TAINT
     tainted = 1;
-#endif
-    if (tmpgv = gv_fetchpv("0",allgvs)) {
+    if (tmpgv = gv_fetchpv("0",TRUE)) {
 	sv_setpv(GvSV(tmpgv),origfilename);
 	magicname("0", "0", 1);
     }
-    if (tmpgv = gv_fetchpv("\024",allgvs))
+    if (tmpgv = gv_fetchpv("\024",TRUE))
 	time(&basetime);
-    if (tmpgv = gv_fetchpv("\030",allgvs))
+    if (tmpgv = gv_fetchpv("\030",TRUE))
 	sv_setpv(GvSV(tmpgv),origargv[0]);
-    if (argvgv = gv_fetchpv("ARGV",allgvs)) {
+    if (argvgv = gv_fetchpv("ARGV",TRUE)) {
 	SvMULTI_on(argvgv);
 	(void)gv_AVadd(argvgv);
 	av_clear(GvAVn(argvgv));
@@ -1342,14 +1298,11 @@ register char **env;
 	    (void)av_push(GvAVn(argvgv),newSVpv(argv[0],0));
 	}
     }
-#ifdef TAINT
-    (void) gv_fetchpv("ENV",TRUE);		/* must test PATH and IFS */
-#endif
-    if (envgv = gv_fetchpv("ENV",allgvs)) {
+    if (envgv = gv_fetchpv("ENV",TRUE)) {
 	HV *hv;
 	SvMULTI_on(envgv);
 	hv = GvHVn(envgv);
-	hv_clear(hv, FALSE);
+	hv_clear(hv);
 	hv_magic(hv, envgv, 'E');
 	if (env != environ)
 	    environ[0] = Nullch;
@@ -1362,24 +1315,19 @@ register char **env;
 	    *s = '=';
 	}
     }
-#ifdef TAINT
     tainted = 0;
-#endif
-    if (tmpgv = gv_fetchpv("$",allgvs))
+    if (tmpgv = gv_fetchpv("$",TRUE))
 	sv_setiv(GvSV(tmpgv),(I32)getpid());
 
-    if (dowarn) {
-	gv_check('A','Z');
-	gv_check('a','z');
-    }
+    if (dowarn)
+	gv_check(defstash);
 }
 
 static void
 init_perllib()
 {
-#ifndef TAINT		/* Can't allow arbitrary PERLLIB in setuid script */
-    incpush(getenv("PERLLIB"));
-#endif /* TAINT */
+    if (!tainting)
+	incpush(getenv("PERLLIB"));
 
 #ifndef PRIVLIB
 #define PRIVLIB "/usr/local/lib/perl"
@@ -1412,7 +1360,7 @@ AV* list;
 		    exit(1);
 	    }
 	    else {
-		perl_callback(SvPV(tmpsv), sp, G_SCALAR, 0, 0);
+		perl_callback(SvPVX(tmpsv), sp, G_SCALAR, 0, 0);
 	    }
 	}
 	sv_free(tmpsv);

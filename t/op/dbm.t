@@ -10,11 +10,13 @@ if (!-r '/usr/include/dbm.h' && !-r '/usr/include/ndbm.h'
 
 print "1..12\n";
 
+init SDBM_File;
+
 unlink <Op.dbmx.*>;
 unlink Op.dbmx;		# in case we're running gdbm
 
 umask(0);
-print (dbmopen(h,'Op.dbmx',0640) ? "ok 1\n" : "not ok 1\n");
+print (tie(%h,SDBM_File,'Op.dbmx', 0x202, 0640) ? "ok 1\n" : "not ok 1\n");
 
 $Dfile = "Op.dbmx.pag";
 if (! -e $Dfile) {
@@ -24,7 +26,7 @@ if (! -e $Dfile) {
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
    $blksize,$blocks) = stat($Dfile);
 print (($mode & 0777) == 0640 ? "ok 2\n" : "not ok 2\n");
-while (($key,$value) = each(h)) {
+while (($key,$value) = each(%h)) {
     $i++;
 }
 print (!$i ? "ok 3\n" : "not ok 3\n");
@@ -48,8 +50,8 @@ $h{'i'} = 'I';
 $h{'goner2'} = 'snork';
 delete $h{'goner2'};
 
-dbmclose(h);
-print (dbmopen(h,'Op.dbmx',0640) ? "ok 4\n" : "not ok 4\n");
+untie(%h);
+print (tie(%h,SDBM_File,'Op.dbmx', 0x2, 0640) ? "ok 4\n" : "not ok 4\n");
 
 $h{'j'} = 'J';
 $h{'k'} = 'K';

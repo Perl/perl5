@@ -57,7 +57,7 @@ now @<<the@>>>> for all@|||||men to come @<<<<
 'i' . 's', "time\n", $good, 'to'
 .
 
-open(OUT2, '>Op.write.tmp') || die "Can't create Op.write.tmp";
+open OUT2, '>Op.write.tmp' or die "Can't create Op.write.tmp";
 
 $fox = 'foxiness';
 $good = 'good';

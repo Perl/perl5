@@ -24,5 +24,5 @@ struct magic {
     U8		mg_flags;
     SV*		mg_obj;
     char*	mg_ptr;
-    U32		mg_len;
+    I32		mg_len;
 };

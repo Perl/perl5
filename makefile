@@ -27,7 +27,7 @@
 # 
 
 # I now supply perly.c with the kits, so don't remake perly.c without byacc
-YACC = ../perl-byacc1.8.2/byacc
+BYACC = ../perl-byacc1.8.2/byacc
 
 CC = cc
 bin = /usr/local/bin
@@ -44,7 +44,7 @@ mallocobj = malloc.o
 SLN = ln -s
 RMS = rm -f
 
-libs = -ldbm -lm -lposix 
+libs = -ldbm -lm -lposix ext/dbm/sdbm/libsdbm.a
 
 public = perl
 
@@ -71,29 +71,23 @@ h2 = hv.h op.h opcode.h perl.h regcomp.h regexp.h gv.h sv.h util.h
 
 h = $(h1) $(h2)
 
-c1 = av.c cop.c cons.c consop.c doop.c doio.c dolist.c
+c1 = av.c cop.c cons.c consop.c doop.c doio.c
 c2 = eval.c hv.c main.c $(mallocsrc) perl.c pp.c regcomp.c regexec.c
-c3 = gv.c sv.c toke.c util.c usersub.c
+c3 = gv.c sv.c taint.c toke.c util.c usersub.c
 
 c = $(c1) $(c2) $(c3)
 
-s1 = av.c cop.c cons.c consop.c doop.c doio.c dolist.c
+s1 = av.c cop.c cons.c consop.c doop.c doio.c
 s2 = eval.c hv.c main.c perl.c pp.c regcomp.c regexec.c
-s3 = gv.c sv.c toke.c util.c usersub.c perly.c
+s3 = gv.c sv.c taint.c toke.c util.c usersub.c perly.c
 
 saber = $(s1) $(s2) $(s3)
 
-obj1 = av.o scope.o op.o doop.o doio.o dolist.o dump.o
+obj1 = av.o scope.o op.o doop.o doio.o dump.o hv.o
 obj2 = $(mallocobj) mg.o pp.o regcomp.o regexec.o
-obj3 = gv.o sv.o toke.o util.o deb.o run.o
+obj3 = gv.o sv.o taint.o toke.o util.o deb.o run.o
 
-obj = $(obj1) $(obj2) $(obj3)
-
-tobj1 = tav.o tcop.o tcons.o tconsop.o tdoop.o tdoio.o tdolist.o tdump.o
-tobj2 = teval.o thv.o $(mallocobj) tpp.o tregcomp.o tregexec.o
-tobj3 = tgv.o tsv.o ttoke.o tutil.o
-
-tobj = $(tobj1) $(tobj2) $(tobj3)
+obj = $(obj1) $(obj2) $(obj3) NDBM_File.o ODBM_File.o SDBM_File.o
 
 lintflags = -hbvxac
 
@@ -108,80 +102,35 @@ SHELL = /bin/sh
 
 all: perl
 
-#all: $(public) $(private) $(util) uperl.o $(scripts)
+#all: $(public) $(private) $(util) $(scripts)
 #	cd x2p; $(MAKE) all
 #	touch all
 
-# This is the standard version that contains no "taint" checks and is
-# used for all scripts that aren't set-id or running under something set-id.
-# The $& notation is tells Sequent machines that it can do a parallel make,
+# The $& notation tells Sequent machines that it can do a parallel make,
 # and is harmless otherwise.
 
-perl: $& main.o perly.o perl.o $(obj) hv.o usersub.o
-	$(CC) -Bstatic $(LARGE) $(CLDFLAGS) main.o perly.o perl.o $(obj) hv.o usersub.o $(libs) -o perl
+perl: $& main.o perly.o perl.o $(obj)
+	$(CC) -Bstatic $(LARGE) $(CLDFLAGS) main.o perly.o perl.o $(obj) $(libs) -o perl
 	echo ""
 
 libperl.rlb: libperl.a
 	ranlib libperl.a
 	touch libperl.rlb
 
-libperl.a: $& perly.o perl.o $(obj) hv.o usersub.o
-	ar rcuv libperl.a $(obj) hv.o perly.o usersub.o
+libperl.a: $& perly.o perl.o $(obj)
+	ar rcuv libperl.a $(obj) perly.o
 
 # This version, if specified in Configure, does ONLY those scripts which need
 # set-id emulation.  Suidperl must be setuid root.  It contains the "taint"
 # checks as well as the special code to validate that the script in question
 # has been invoked correctly.
 
-suidperl: $& sperl.o tmain.o libtperl.rlb
-	$(CC) $(LARGE) $(CLDFLAGS) sperl.o tmain.o libtperl.a $(libs) -o suidperl
-
-# This version interprets scripts that are already set-id either via a wrapper
-# or through the kernel allowing set-id scripts (bad idea).  Taintperl must
-# NOT be setuid to root or anything else.  The only difference between it
-# and normal perl is the presence of the "taint" checks.
-
-taintperl: $& tmain.o libtperl.rlb
-	$(CC) $(LARGE) $(CLDFLAGS) tmain.o libtperl.a $(libs) -o taintperl
-
-libtperl.rlb: libtperl.a
-	ranlib libtperl.a
-	touch libtperl.rlb
-
-libtperl.a: $& tperly.o tperl.o $(tobj) thv.o usersub.o
-	ar rcuv libtperl.a $(tobj) thv.o tperly.o usersub.o tperl.o
-
-# This command assumes that /usr/include/dbz.h and /usr/lib/dbz.o exist.
-
-dbzperl: $& main.o zhv.o libperl.rlb
-	$(CC) $(LARGE) $(CLDFLAGS) main.o zhv.o /usr/lib/dbz.o libperl.a $(libs) -o dbzperl
-
-zhv.o: hv.c $(h)
-	$(RMS) zhv.c
-	$(SLN) hv.c zhv.c
-	$(CCCMD) -DWANT_DBZ zhv.c
-	$(RMS) zhv.c
-
-uperl.o: $& $(obj) main.o hv.o perly.o
-	-ld $(LARGE) $(LDFLAGS) -r $(obj) main.o hv.o perly.o -o uperl.o
+suidperl: $& sperl.o main.o libperl.rlb
+	$(CC) $(LARGE) $(CLDFLAGS) sperl.o main.o libperl.a $(libs) -o suidperl
 
 saber: $(saber)
 	# load $(saber)
 	# load /lib/libm.a
-
-# Replicating all this junk is yucky, but I don't see a portable way to fix it.
-
-tperly.o: perly.c perly.h $(h)
-	$(RMS) tperly.c
-	$(SLN) perly.c tperly.c
-	$(CCCMD) -DTAINT tperly.c
-	$(RMS) tperly.c
-
-tperl.o: perl.c perly.h patchlevel.h perl.h $(h)
-	$(RMS) tperl.c
-	$(SLN) perl.c tperl.c
-	$(CCCMD) -DTAINT tperl.c
-	$(RMS) tperl.c
 
 sperl.o: perl.c perly.h patchlevel.h $(h)
 	$(RMS) sperl.c
@@ -189,128 +138,50 @@ sperl.o: perl.c perly.h patchlevel.h $(h)
 	$(CCCMD) -DTAINT -DIAMSUID sperl.c
 	$(RMS) sperl.c
 
-tav.o: av.c $(h)
-	$(RMS) tav.c
-	$(SLN) av.c tav.c
-	$(CCCMD) -DTAINT tav.c
-	$(RMS) tav.c
+ODBM_File.c: ext/dbm/ODBM_File.xs
+	ext/xsubpp ext/typemap ext/dbm/ODBM_File.xs >tmp
+	mv tmp ODBM_File.c
 
-tcop.o: cop.c $(h)
-	$(RMS) tcop.c
-	$(SLN) cop.c tcop.c
-	$(CCCMD) -DTAINT tcop.c
-	$(RMS) tcop.c
+NDBM_File.c: ext/dbm/NDBM_File.xs
+	ext/xsubpp ext/typemap ext/dbm/NDBM_File.xs >tmp
+	mv tmp NDBM_File.c
 
-tcons.o: cons.c $(h) perly.h
-	$(RMS) tcons.c
-	$(SLN) cons.c tcons.c
-	$(CCCMD) -DTAINT tcons.c
-	$(RMS) tcons.c
+SDBM_File.c: ext/dbm/SDBM_File.xs
+	ext/xsubpp ext/typemap ext/dbm/SDBM_File.xs > tmp
+	mv tmp SDBM_File.c
 
-tconsop.o: consop.c $(h)
-	$(RMS) tconsop.c
-	$(SLN) consop.c tconsop.c
-	$(CCCMD) -DTAINT tconsop.c
-	$(RMS) tconsop.c
+GDBM_File.c: ext/dbm/GDBM_File.xs
+	ext/xsubpp ext/typemap ext/dbm/GDBM_File.xs >tmp
+	mv tmp GDBM_File.c
 
-tdoop.o: doop.c $(h)
-	$(RMS) tdoop.c
-	$(SLN) doop.c tdoop.c
-	$(CCCMD) -DTAINT tdoop.c
-	$(RMS) tdoop.c
+ODBM_File.o: ODBM_File.c
+	$(CCCMD) ODBM_File.c
 
-tdoio.o: doio.c $(h)
-	$(RMS) tdoio.c
-	$(SLN) doio.c tdoio.c
-	$(CCCMD) -DTAINT tdoio.c
-	$(RMS) tdoio.c
+NDBM_File.o: NDBM_File.c
+	$(CCCMD) NDBM_File.c
 
-tdolist.o: dolist.c $(h)
-	$(RMS) tdolist.c
-	$(SLN) dolist.c tdolist.c
-	$(CCCMD) -DTAINT tdolist.c
-	$(RMS) tdolist.c
+SDBM_File.o: SDBM_File.c
+	$(CCCMD) SDBM_File.c
 
-tdump.o: dump.c $(h)
-	$(RMS) tdump.c
-	$(SLN) dump.c tdump.c
-	$(CCCMD) -DTAINT tdump.c
-	$(RMS) tdump.c
+GDBM_File.o: GDBM_File.c
+	$(CCCMD) GDBM_File.c
 
-teval.o: eval.c $(h)
-	$(RMS) teval.c
-	$(SLN) eval.c teval.c
-	$(CCCMD) -DTAINT teval.c
-	$(RMS) teval.c
-
-thv.o: hv.c $(h)
-	$(RMS) thv.c
-	$(SLN) hv.c thv.c
-	$(CCCMD) -DTAINT thv.c
-	$(RMS) thv.c
-
-tmain.o: main.c $(h)
-	$(RMS) tmain.c
-	$(SLN) main.c tmain.c
-	$(CCCMD) -DTAINT tmain.c
-	$(RMS) tmain.c
-
-tpp.o: pp.c $(h)
-	$(RMS) tpp.c
-	$(SLN) pp.c tpp.c
-	$(CCCMD) -DTAINT tpp.c
-	$(RMS) tpp.c
-
-tregcomp.o: regcomp.c $(h)
-	$(RMS) tregcomp.c
-	$(SLN) regcomp.c tregcomp.c
-	$(CCCMD) -DTAINT tregcomp.c
-	$(RMS) tregcomp.c
-
-tregexec.o: regexec.c $(h)
-	$(RMS) tregexec.c
-	$(SLN) regexec.c tregexec.c
-	$(CCCMD) -DTAINT tregexec.c
-	$(RMS) tregexec.c
-
-tgv.o: gv.c $(h)
-	$(RMS) tgv.c
-	$(SLN) gv.c tgv.c
-	$(CCCMD) -DTAINT tgv.c
-	$(RMS) tgv.c
-
-tsv.o: sv.c $(h) perly.h
-	$(RMS) tsv.c
-	$(SLN) sv.c tsv.c
-	$(CCCMD) -DTAINT tsv.c
-	$(RMS) tsv.c
-
-ttoke.o: toke.c $(h) perly.h
-	$(RMS) ttoke.c
-	$(SLN) toke.c ttoke.c
-	$(CCCMD) -DTAINT ttoke.c
-	$(RMS) ttoke.c
-
-tutil.o: util.c $(h)
-	$(RMS) tutil.c
-	$(SLN) util.c tutil.c
-	$(CCCMD) -DTAINT tutil.c
-	$(RMS) tutil.c
+ext/dbm/sdbm/libsdbm.a: ext/dbm/sdbm/sdbm.c ext/dbm/sdbm/sdbm.h
+	cd ext/dbm/sdbm; $(MAKE) sdbm
 
 perly.h: perly.c
 	@ echo Dummy dependency for dumb parallel make
 	touch perly.h
 
+opcode.h: opcode.pl
+	- opcode.pl
+
 embed.h: embed_h.SH global.var interp.var
 	sh embed_h.SH
 
 perly.c:
-	@ \
-case "$(YACC)" in \
-    *bison*) echo 'Expect' 19 shift/reduce and 58 reduce/reduce conflicts;; \
-    *) echo 'Expect' 21 shift/reduce and 56 reduce/reduce conflicts;; \
-esac
-	$(YACC) -d perly.y
+	@ echo 'Expect' 62 shift/reduce and 62 reduce/reduce conflicts
+	$(BYACC) -d perly.y
 	sh $(shellflags) ./perly.fixer y.tab.c perly.c
 	mv y.tab.h perly.h
 	echo 'extern YYSTYPE yylval;' >>perly.h
@@ -745,55 +616,6 @@ doio.o: regexp.h
 doio.o: sv.h
 doio.o: unixish.h
 doio.o: util.h
-dolist.o: 
-dolist.o: /usr/ucbinclude/ctype.h
-dolist.o: /usr/ucbinclude/dirent.h
-dolist.o: /usr/ucbinclude/errno.h
-dolist.o: /usr/ucbinclude/machine/param.h
-dolist.o: /usr/ucbinclude/machine/setjmp.h
-dolist.o: /usr/ucbinclude/ndbm.h
-dolist.o: /usr/ucbinclude/netinet/in.h
-dolist.o: /usr/ucbinclude/setjmp.h
-dolist.o: /usr/ucbinclude/stdio.h
-dolist.o: /usr/ucbinclude/sys/dirent.h
-dolist.o: /usr/ucbinclude/sys/errno.h
-dolist.o: /usr/ucbinclude/sys/filio.h
-dolist.o: /usr/ucbinclude/sys/ioccom.h
-dolist.o: /usr/ucbinclude/sys/ioctl.h
-dolist.o: /usr/ucbinclude/sys/param.h
-dolist.o: /usr/ucbinclude/sys/signal.h
-dolist.o: /usr/ucbinclude/sys/sockio.h
-dolist.o: /usr/ucbinclude/sys/stat.h
-dolist.o: /usr/ucbinclude/sys/stdtypes.h
-dolist.o: /usr/ucbinclude/sys/sysmacros.h
-dolist.o: /usr/ucbinclude/sys/time.h
-dolist.o: /usr/ucbinclude/sys/times.h
-dolist.o: /usr/ucbinclude/sys/ttold.h
-dolist.o: /usr/ucbinclude/sys/ttychars.h
-dolist.o: /usr/ucbinclude/sys/ttycom.h
-dolist.o: /usr/ucbinclude/sys/ttydev.h
-dolist.o: /usr/ucbinclude/sys/types.h
-dolist.o: /usr/ucbinclude/time.h
-dolist.o: /usr/ucbinclude/vm/faultcode.h
-dolist.o: EXTERN.h
-dolist.o: av.h
-dolist.o: config.h
-dolist.o: cop.h
-dolist.o: dolist.c
-dolist.o: embed.h
-dolist.o: form.h
-dolist.o: gv.h
-dolist.o: handy.h
-dolist.o: hv.h
-dolist.o: op.h
-dolist.o: opcode.h
-dolist.o: perl.h
-dolist.o: pp.h
-dolist.o: proto.h
-dolist.o: regexp.h
-dolist.o: sv.h
-dolist.o: unixish.h
-dolist.o: util.h
 dump.o: 
 dump.o: /usr/ucbinclude/ctype.h
 dump.o: /usr/ucbinclude/dirent.h

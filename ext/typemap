@@ -1,0 +1,241 @@
+# $Header$ 
+# basic C types
+int			T_INT
+unsigned		T_U_INT
+unsigned int		T_U_INT
+long			T_LONG
+unsigned long		T_U_LONG
+short			T_SHORT
+unsigned short		T_U_SHORT
+char			T_CHAR
+char *			T_STRING
+unsigned char *		T_STRING
+caddr_t			T_STRING
+unsigned long *		T_OPAQUEPTR
+char **			T_PACKED
+void *			T_PTR
+
+I32			T_LONG
+I16			T_SHORT
+U32			T_U_LONG
+U16			T_U_SHORT
+Result			T_U_CHAR
+Boolean			T_U_CHAR
+double			T_DOUBLE
+
+#
+#################################### XLIB SECTION
+#
+
+# basic X types
+Atom			T_U_LONG
+Atom *			T_OPAQUEPTR
+Bool			T_INT
+KeyCode			T_U_LONG
+Status			T_INT
+Time			T_U_LONG
+VisualID		T_U_LONG
+XID			T_U_LONG
+GC			T_PTR
+Display *		T_PTR
+Screen *		T_PTR
+Visual *		T_PTR
+XImage *		T_PTR
+Region			T_PTR
+
+# things that are XIDs
+Colormap		T_U_LONG
+Cursor			T_U_LONG
+Drawable		T_U_LONG
+Font			T_U_LONG
+GContext		T_U_LONG
+KeySym			T_U_LONG
+KeySym *		T_OPAQUEPTR
+Pixmap			T_U_LONG
+Pixmap *		T_OPAQUEPTR
+Window			T_U_LONG
+Window *		T_OPAQUEPTR
+
+# X resource manager types
+XrmDatabase		T_PTR
+XrmQuark		T_INT
+XrmQuarkList		T_OPAQUEPTR
+XrmName			T_INT
+XrmNameList		T_OPAQUEPTR
+XrmClass		T_INT
+XrmClassList		T_OPAQUEPTR
+XrmRepresentation	T_INT
+XrmString		T_STRING
+XrmBinding		T_ENUM
+XrmBindingList		T_OPAQUEPTR
+XrmOptionKind		T_ENUM
+XrmSearchList		T_OPAQUEPTR
+
+# context manager types
+XContext		T_INT
+
+# Xlib data structures
+XArc *			T_OPAQUEPTR
+XCharStruct		T_OPAQUE
+XCharStruct *		T_OPAQUEPTR
+XColor			T_OPAQUE
+XColor *		T_OPAQUEPTR
+XComposeStatus *	T_OPAQUEPTR
+XEvent			T_OPAQUE
+XEvent *		T_OPAQUEPTR
+XFontStruct		T_OPAQUE
+XFontStruct *		T_PTR
+XGCValues *		T_OPAQUEPTR
+XIconSize *		T_OPAQUEPTR
+XKeyboardControl *	T_OPAQUEPTR
+XKeyboardState		T_OPAQUE
+XModifierKeymap *	T_PTR
+XPoint			T_OPAQUE
+XPoint *		T_OPAQUEPTR
+XRectangle		T_OPAQUE
+XRectangle *		T_OPAQUEPTR
+XSegment *		T_OPAQUEPTR
+XSetWindowAttributes *	T_OPAQUEPTR
+XSizeHints		T_OPAQUE
+XSizeHints *		T_OPAQUEPTR
+XStandardColormap	T_OPAQUE
+XStandardColormap *	T_OPAQUEPTR
+XTimeCoord *		T_OPAQUEPTR
+XVisualInfo		T_OPAQUE
+XVisualInfo *		T_OPAQUEPTR
+XWindowAttributes	T_OPAQUE
+XWindowAttributes *	T_OPAQUEPTR
+XWindowChanges *	T_OPAQUEPTR
+XWMHints *		T_OPAQUEPTR
+
+# these data types must be handled specially
+#XrmValue		T_OPAQUE
+#XrmValue *		T_OPAQUEPTR
+#XrmOptionDescList	T_OPAQUEPTR
+#XClassHint		T_OPAQUE
+#XClassHint *		T_OPAQUEPTR
+#XHostAddress *		T_OPAQUEPTR
+#XTextItem *		T_OPAQUEPTR
+#XTextItem16 *		T_OPAQUEPTR
+#XTextProperty		T_OPAQUE
+#XTextProperty *	T_OPAQUEPTR
+
+#
+#################################### PARCPLACE OI SECTION
+#
+
+# basic OI types
+OI_alignment		T_ENUM
+OI_bevel_style		T_ENUM
+OI_bool			T_ENUM
+OI_charset		T_ENUM
+OI_char_encode_type	T_ENUM
+OI_configure_mask	T_ENUM
+OI_drop_type		T_ENUM
+OI_ef_char_chk_status	T_ENUM
+OI_ef_entry_chk_status	T_ENUM
+OI_ef_mode		T_ENUM
+OI_enhance		T_ENUM
+OI_gravity		T_ENUM
+OI_gauge_ends		T_ENUM
+OI_gauge_ticks		T_ENUM
+OI_layout		T_INT
+OI_menu_cell_type	T_ENUM
+OI_mnemonic_style	T_ENUM
+OI_model_type		T_ENUM
+OI_mt_char_chk_status	T_ENUM
+OI_mt_entry_chk_status	T_ENUM
+OI_mt_mode		T_ENUM
+OI_number		T_SHORT
+OI_number *		T_OPAQUEPTR
+OI_orient		T_ENUM
+OI_pic_type		T_ENUM
+OI_pic_pixel		T_ENUM
+OI_psn_type		T_ENUM
+OI_rm_db		T_ENUM
+OI_sav_rst_typ		T_ENUM
+OI_scroll_event		T_ENUM
+OI_size_track		T_ENUM
+OI_slider_current	T_ENUM
+OI_slider_ends		T_ENUM
+OI_slider_ticks		T_ENUM
+OI_stat			T_ENUM
+OI_state		T_ENUM
+OI_wm_state		T_ENUM
+PIXEL			T_LONG
+
+# OI classes
+OI_abbr_menu *		T_PTR
+OI_animate_item *	T_PTR
+OI_app_window *		T_PTR
+OI_base_text *		T_PTR
+OI_box *		T_PTR
+OI_button_menu *	T_PTR
+OI_command_dialog_box *	T_PTR
+OI_excl_menu *		T_PTR
+OI_excl_check_menu *	T_PTR
+OI_excl_rect_menu *	T_PTR
+OI_basic_menu *		T_PTR
+OI_class *		T_PTR
+OI_connection *		T_PTR
+OI_ctlr_1d *		T_PTR
+OI_d_tech *		T_PTR
+OI_d_tech **		T_OPAQUEPTR
+OI_dialog_box *		T_PTR
+OI_display_1d *		T_PTR
+OI_entry_field *	T_PTR
+OI_error_dialog_box *	T_PTR
+OI_excl_menu *		T_PTR
+OI_file_dialog_box *	T_PTR
+OI_gauge *		T_PTR
+OI_glyph *		T_PTR
+OI_help *		T_PTR
+OI_info_dialog_box *	T_PTR
+OI_menu *		T_PTR
+OI_menu_cell *		T_PTR
+OI_menu_cell **		T_OPAQUEPTR
+OI_menu_spec *		T_PACKED
+OI_message_dialog_box *	T_PTR
+OI_ms_dialog_box *	T_PTR
+OI_multi_text *		T_PTR
+OI_panner *		T_PTR
+OI_pic_spec_mask *	T_PTR
+OI_pic_spec_mask **	T_OPAQUEPTR
+OI_poly_menu *		T_PTR
+OI_poly_check_menu *	T_PTR
+OI_poly_rect_menu *	T_PTR
+OI_prompt_dialog_box *	T_PTR
+OI_question_dialog_box *	T_PTR
+OI_scroll_bar *		T_PTR
+OI_scroll_box *		T_PTR
+OI_scroll_menu *	T_PTR
+OI_scroll_text *	T_PTR
+OI_select_dialog_box *	T_PTR
+OI_separator *		T_PTR
+OI_seq_entry_field *	T_PTR
+OI_slider *		T_PTR
+OI_static_text *	T_PTR
+OI_translation_table *	T_PTR
+OI_warn_dialog_box *	T_PTR
+OI_work_dialog_box *	T_PTR
+
+#
+#################################### XPM SECTION
+#
+XpmAttributes *		T_PACKED
+XpmColorSymbol *	T_PACKED
+XpmExtension *		T_PACKED
+
+#
+#################################### DBM SECTION
+#
+
+datum			T_DATUM
+gdatum			T_GDATUM
+NDBM_File		T_PTROBJ
+GDBM_File		T_PTROBJ
+SDBM_File		T_PTROBJ
+ODBM_File		T_PTROBJ
+DB_File			T_PTROBJ
+DBZ_File		T_PTROBJ
+FATALFUNC		T_OPAQUEPTR

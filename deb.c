@@ -57,8 +57,12 @@ char *pat;
 }
 #  else
 /*VARARGS1*/
+#ifdef __STDC__
+void deb(char *pat,...)
+#else
 void deb(va_alist)
 va_dcl
+#endif
 {
     va_list args;
     char *pat;

@@ -16,11 +16,23 @@ mg_get(sv)
 SV* sv;
 {
     MAGIC* mg;
+
+    SvMAGICAL_off(sv);
+    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+    SvFLAGS(sv) |= SvPRIVATE(sv) & (SVf_IOK|SVf_NOK|SVf_POK);
+    SvPRIVATE(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	MGVTBL* vtbl = mg->mg_virtual;
 	if (vtbl && vtbl->svt_get)
 	    (*vtbl->svt_get)(sv, mg);
     }
+
+    SvMAGICAL_on(sv);
+    SvPRIVATE(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+    SvPRIVATE(sv) |= SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK);
+    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+
     return 0;
 }
 
@@ -29,11 +41,24 @@ mg_set(sv)
 SV* sv;
 {
     MAGIC* mg;
-    for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
+    MAGIC* nextmg;
+
+    SvMAGICAL_off(sv);
+
+    for (mg = SvMAGIC(sv); mg; mg = nextmg) {
 	MGVTBL* vtbl = mg->mg_virtual;
+	nextmg = mg->mg_moremagic;	/* it may delete itself */
 	if (vtbl && vtbl->svt_set)
 	    (*vtbl->svt_set)(sv, mg);
     }
+
+    if (SvMAGIC(sv)) {
+	SvMAGICAL_on(sv);
+/*	SvPRIVATE(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);  */
+	SvPRIVATE(sv) |= SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK);
+	SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+    }
+
     return 0;
 }
 
@@ -42,17 +67,28 @@ mg_len(sv)
 SV* sv;
 {
     MAGIC* mg;
+    char *s;
+    STRLEN len;
+
+    SvMAGICAL_off(sv);
+    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+    SvFLAGS(sv) |= SvPRIVATE(sv) & (SVf_IOK|SVf_NOK|SVf_POK);
+    SvPRIVATE(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	MGVTBL* vtbl = mg->mg_virtual;
 	if (vtbl && vtbl->svt_len)
 	    return (*vtbl->svt_len)(sv, mg);
     }
     mg_get(sv);
-    if (!SvPOK(sv) && SvNIOK(sv))
-	sv_2pv(sv);
-    if (SvPOK(sv))
-	return SvCUR(sv);
-    return 0;
+    s = SvPV(sv, len);
+
+    SvMAGICAL_on(sv);
+    SvPRIVATE(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+    SvPRIVATE(sv) |= SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK);
+    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+
+    return len;
 }
 
 int
@@ -60,11 +96,23 @@ mg_clear(sv)
 SV* sv;
 {
     MAGIC* mg;
+
+    SvMAGICAL_off(sv);
+    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+    SvFLAGS(sv) |= SvPRIVATE(sv) & (SVf_IOK|SVf_NOK|SVf_POK);
+    SvPRIVATE(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	MGVTBL* vtbl = mg->mg_virtual;
 	if (vtbl && vtbl->svt_clear)
 	    (*vtbl->svt_clear)(sv, mg);
     }
+
+    SvMAGICAL_on(sv);
+    SvPRIVATE(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+    SvPRIVATE(sv) |= SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK);
+    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+
     return 0;
 }
 
@@ -74,7 +122,6 @@ SV* sv;
 char type;
 {
     MAGIC* mg;
-    MAGIC** mgp = &SvMAGIC(sv);
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	if (mg->mg_type == type)
 	    return mg;
@@ -83,30 +130,25 @@ char type;
 }
 
 int
-mg_free(sv, type)
+mg_copy(sv, nsv, key, klen)
 SV* sv;
-char type;
+SV* nsv;
+char *key;
+STRLEN klen;
 {
+    int count = 0;
     MAGIC* mg;
-    MAGIC** mgp = &SvMAGIC(sv);
-    for (mg = *mgp; mg; mg = *mgp) {
-	if (mg->mg_type == type) {
-	    MGVTBL* vtbl = mg->mg_virtual;
-	    *mgp = mg->mg_moremagic;
-	    if (vtbl && vtbl->svt_free)
-		(*vtbl->svt_free)(sv, mg);
-	    if (mg->mg_ptr && mg->mg_type != 'g')
-		Safefree(mg->mg_ptr);
-	    Safefree(mg);
+    for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
+	if (isUPPER(mg->mg_type)) {
+	    sv_magic(nsv, mg->mg_obj, tolower(mg->mg_type), key, klen);
+	    count++;
 	}
-	else
-	    mgp = &mg->mg_moremagic;
     }
-    return 0;
+    return count;
 }
 
 int
-mg_freeall(sv)
+mg_free(sv)
 SV* sv;
 {
     MAGIC* mg;
@@ -118,6 +160,7 @@ SV* sv;
 	    (*vtbl->svt_free)(sv, mg);
 	if (mg->mg_ptr && mg->mg_type != 'g')
 	    Safefree(mg->mg_ptr);
+	sv_free(mg->mg_obj);
 	Safefree(mg);
     }
     SvMAGIC(sv) = 0;
@@ -201,7 +244,7 @@ MAGIC *mg;
     }
     magic_get(sv,mg);
     if (!SvPOK(sv) && SvNIOK(sv))
-	sv_2pv(sv);
+	sv_2pv(sv, &na);
     if (SvPOK(sv))
 	return SvCUR(sv);
     return 0;
@@ -405,23 +448,23 @@ MAGIC* mg;
 {
     register char *s;
     I32 i;
-    s = SvPV(sv);
+    s = SvPVX(sv);
     my_setenv(mg->mg_ptr,s);
 			    /* And you'll never guess what the dog had */
 			    /*   in its mouth... */
-#ifdef TAINT
-    if (s && strEQ(mg->mg_ptr,"PATH")) {
-	char *strend = SvEND(sv);
+    if (tainting) {
+	if (s && strEQ(mg->mg_ptr,"PATH")) {
+	    char *strend = SvEND(sv);
 
-	while (s < strend) {
-	    s = cpytill(tokenbuf,s,strend,':',&i);
-	    s++;
-	    if (*tokenbuf != '/'
-	      || (stat(tokenbuf,&statbuf) && (statbuf.st_mode & 2)) )
-		sv->sv_tainted = 2;
+	    while (s < strend) {
+		s = cpytill(tokenbuf,s,strend,':',&i);
+		s++;
+		if (*tokenbuf != '/'
+		  || (stat(tokenbuf,&statbuf) && (statbuf.st_mode & 2)) )
+		    SvPRIVATE(sv) |= SVp_TAINTEDDIR;
+	    }
 	}
     }
-#endif
     return 0;
 }
 
@@ -432,7 +475,7 @@ MAGIC* mg;
 {
     register char *s;
     I32 i;
-    s = SvPV(sv);
+    s = SvPVX(sv);
     i = whichsig(mg->mg_ptr);	/* ...no, a brick */
     if (!i && (dowarn || strEQ(mg->mg_ptr,"ALARM")))
 	warn("No such signal: SIG%s", mg->mg_ptr);
@@ -455,12 +498,195 @@ MAGIC* mg;
 }
 
 int
-magic_setdbm(sv,mg)
+magic_setisa(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
-    HV* hv = (HV*)mg->mg_obj;
-    hv_dbmstore(hv,mg->mg_ptr,mg->mg_len,sv);	/* XXX slurp? */
+    sub_generation++;
+    return 0;
+}
+
+int
+magic_getpack(sv,mg)
+SV* sv;
+MAGIC* mg;
+{
+    SV* rv = mg->mg_obj;
+    HV* stash = SvSTASH((SV*)SvANY(rv));
+    GV* gv = gv_fetchmethod(stash, "fetch");
+    dSP;
+    BINOP myop;
+
+    if (!gv || !GvCV(gv)) {
+	croak("No fetch method for magical variable in package \"%s\"",
+	    HvNAME(stash));
+    }
+    Zero(&myop, 1, BINOP);
+    myop.op_last = (OP *) &myop;
+    myop.op_next = Nullop;
+    myop.op_flags = OPf_STACKED;
+
+    ENTER;
+    SAVESPTR(op);
+    op = (OP *) &myop;
+    PUTBACK;
+    pp_pushmark();
+
+    EXTEND(sp, 4);
+    PUSHs(gv);
+    PUSHs(rv);
+    if (mg->mg_ptr)
+	PUSHs(sv_mortalcopy(newSVpv(mg->mg_ptr, mg->mg_len)));
+    else if (mg->mg_len >= 0)
+	PUSHs(sv_mortalcopy(newSViv(mg->mg_len)));
+    PUTBACK;
+
+    if (op = pp_entersubr())
+	run();
+    LEAVE;
+    SPAGAIN;
+
+    sv_setsv(sv, POPs);
+    PUTBACK;
+
+    return 0;
+}
+
+int
+magic_setpack(sv,mg)
+SV* sv;
+MAGIC* mg;
+{
+    SV* rv = mg->mg_obj;
+    HV* stash = SvSTASH((SV*)SvANY(rv));
+    GV* gv = gv_fetchmethod(stash, "store");
+    dSP;
+    BINOP myop;
+
+    if (!gv || !GvCV(gv)) {
+	croak("No store method for magical variable in package \"%s\"",
+	    HvNAME(stash));
+    }
+    Zero(&myop, 1, BINOP);
+    myop.op_last = (OP *) &myop;
+    myop.op_next = Nullop;
+    myop.op_flags = OPf_STACKED;
+
+    ENTER;
+    SAVESPTR(op);
+    op = (OP *) &myop;
+    PUTBACK;
+    pp_pushmark();
+
+    EXTEND(sp, 4);
+    PUSHs(gv);
+    PUSHs(rv);
+    if (mg->mg_ptr)
+	PUSHs(sv_mortalcopy(newSVpv(mg->mg_ptr, mg->mg_len)));
+    else if (mg->mg_len >= 0)
+	PUSHs(sv_mortalcopy(newSViv(mg->mg_len)));
+    PUSHs(sv);
+    PUTBACK;
+
+    if (op = pp_entersubr())
+	run();
+    LEAVE;
+    SPAGAIN;
+
+    POPs;
+    PUTBACK;
+
+    return 0;
+}
+
+int
+magic_clearpack(sv,mg)
+SV* sv;
+MAGIC* mg;
+{
+    SV* rv = mg->mg_obj;
+    HV* stash = SvSTASH((SV*)SvANY(rv));
+    GV* gv = gv_fetchmethod(stash, "delete");
+    dSP;
+    BINOP myop;
+
+    if (!gv || !GvCV(gv)) {
+	croak("No delete method for magical variable in package \"%s\"",
+	    HvNAME(stash));
+    }
+    Zero(&myop, 1, BINOP);
+    myop.op_last = (OP *) &myop;
+    myop.op_next = Nullop;
+    myop.op_flags = OPf_STACKED;
+
+    ENTER;
+    SAVESPTR(op);
+    op = (OP *) &myop;
+    PUTBACK;
+    pp_pushmark();
+
+    EXTEND(sp, 4);
+    PUSHs(gv);
+    PUSHs(rv);
+    if (mg->mg_ptr)
+	PUSHs(sv_mortalcopy(newSVpv(mg->mg_ptr, mg->mg_len)));
+    else
+	PUSHs(sv_mortalcopy(newSViv(mg->mg_len)));
+    PUTBACK;
+
+    if (op = pp_entersubr())
+	run();
+    LEAVE;
+    SPAGAIN;
+
+    sv_setsv(sv, POPs);
+    PUTBACK;
+
+    return 0;
+}
+
+int
+magic_nextpack(sv,mg,key)
+SV* sv;
+MAGIC* mg;
+SV* key;
+{
+    SV* rv = mg->mg_obj;
+    HV* stash = SvSTASH((SV*)SvANY(rv));
+    GV* gv = gv_fetchmethod(stash, SvOK(key) ? "nextkey" : "firstkey");
+    dSP;
+    BINOP myop;
+
+    if (!gv || !GvCV(gv)) {
+	croak("No fetch method for magical variable in package \"%s\"",
+	    HvNAME(stash));
+    }
+    Zero(&myop, 1, BINOP);
+    myop.op_last = (OP *) &myop;
+    myop.op_next = Nullop;
+    myop.op_flags = OPf_STACKED;
+
+    ENTER;
+    SAVESPTR(op);
+    op = (OP *) &myop;
+    PUTBACK;
+    pp_pushmark();
+
+    EXTEND(sp, 4);
+    PUSHs(gv);
+    PUSHs(rv);
+    if (SvOK(key))
+	PUSHs(key);
+    PUTBACK;
+
+    if (op = pp_entersubr())
+	run();
+    LEAVE;
+    SPAGAIN;
+
+    sv_setsv(key, POPs);
+    PUTBACK;
+
     return 0;
 }
 
@@ -498,7 +724,7 @@ magic_setarylen(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
-    av_fill((AV*)mg->mg_obj, (SvIOK(sv) ? SvIV(sv) : sv_2iv(sv)) - arybase);
+    av_fill((AV*)mg->mg_obj, (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv)) - arybase);
     return 0;
 }
 
@@ -521,7 +747,7 @@ MAGIC* mg;
 
     if (!SvOK(sv))
 	return 0;
-    s = SvPOK(sv) ? SvPV(sv) : sv_2pv(sv);
+    s = SvPV(sv, na);
     if (*s == '*' && s[1])
 	s++;
     gv = gv_fetchpv(s,TRUE);
@@ -544,10 +770,29 @@ magic_setsubstr(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
-    char *tmps = SvPV(sv);
+    char *tmps = SvPVX(sv);
     if (!tmps)
 	tmps = "";
     sv_insert(LvTARG(sv),LvTARGOFF(sv),LvTARGLEN(sv), tmps,SvCUR(sv));
+    return 0;
+}
+
+int
+magic_gettaint(sv,mg)
+SV* sv;
+MAGIC* mg;
+{
+    tainted = TRUE;
+    return 0;
+}
+
+int
+magic_settaint(sv,mg)
+SV* sv;
+MAGIC* mg;
+{
+    if (!tainted)
+	sv_unmagic(sv, 't');
     return 0;
 }
 
@@ -575,7 +820,7 @@ magic_setbm(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
-    mg_free(sv, 'B');
+    sv_unmagic(sv, 'B');
     SvVALID_off(sv);
     return 0;
 }
@@ -601,22 +846,22 @@ MAGIC* mg;
     I32 i;
     switch (*mg->mg_ptr) {
     case '\004':	/* ^D */
-	debug = (SvIOK(sv) ? SvIV(sv) : sv_2iv(sv)) | 32768;
+	debug = (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv)) | 32768;
 	DEBUG_x(dump_all());
 	break;
     case '\006':	/* ^F */
-	maxsysfd = SvIOK(sv) ? SvIV(sv) : sv_2iv(sv);
+	maxsysfd = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 	break;
     case '\t':	/* ^I */
 	if (inplace)
 	    Safefree(inplace);
 	if (SvOK(sv))
-	    inplace = savestr(SvPV(sv));
+	    inplace = savestr(SvPVX(sv));
 	else
 	    inplace = Nullch;
 	break;
     case '\020':	/* ^P */
-	i = SvIOK(sv) ? SvIV(sv) : sv_2iv(sv);
+	i = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 	if (i != perldb) {
 	    if (perldb)
 		oldlastpm = curpm;
@@ -626,10 +871,10 @@ MAGIC* mg;
 	perldb = i;
 	break;
     case '\024':	/* ^T */
-	basetime = (time_t)(SvIOK(sv) ? SvIV(sv) : sv_2iv(sv));
+	basetime = (time_t)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	break;
     case '\027':	/* ^W */
-	dowarn = (bool)(SvIOK(sv) ? SvIV(sv) : sv_2iv(sv));
+	dowarn = (bool)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	break;
     case '.':
 	if (localizing)
@@ -637,40 +882,40 @@ MAGIC* mg;
 	break;
     case '^':
 	Safefree(GvIO(defoutgv)->top_name);
-	GvIO(defoutgv)->top_name = s = savestr(SvPV(sv));
+	GvIO(defoutgv)->top_name = s = savestr(SvPVX(sv));
 	GvIO(defoutgv)->top_gv = gv_fetchpv(s,TRUE);
 	break;
     case '~':
 	Safefree(GvIO(defoutgv)->fmt_name);
-	GvIO(defoutgv)->fmt_name = s = savestr(SvPV(sv));
+	GvIO(defoutgv)->fmt_name = s = savestr(SvPVX(sv));
 	GvIO(defoutgv)->fmt_gv = gv_fetchpv(s,TRUE);
 	break;
     case '=':
-	GvIO(defoutgv)->page_len = (long)(SvIOK(sv) ? SvIV(sv) : sv_2iv(sv));
+	GvIO(defoutgv)->page_len = (long)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	break;
     case '-':
-	GvIO(defoutgv)->lines_left = (long)(SvIOK(sv) ? SvIV(sv) : sv_2iv(sv));
+	GvIO(defoutgv)->lines_left = (long)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	if (GvIO(defoutgv)->lines_left < 0L)
 	    GvIO(defoutgv)->lines_left = 0L;
 	break;
     case '%':
-	GvIO(defoutgv)->page = (long)(SvIOK(sv) ? SvIV(sv) : sv_2iv(sv));
+	GvIO(defoutgv)->page = (long)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	break;
     case '|':
 	if (!GvIO(defoutgv))
 	    GvIO(defoutgv) = newIO();
 	GvIO(defoutgv)->flags &= ~IOf_FLUSH;
-	if ((SvIOK(sv) ? SvIV(sv) : sv_2iv(sv)) != 0) {
+	if ((SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv)) != 0) {
 	    GvIO(defoutgv)->flags |= IOf_FLUSH;
 	}
 	break;
     case '*':
-	i = SvIOK(sv) ? SvIV(sv) : sv_2iv(sv);
+	i = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 	multiline = (i != 0);
 	break;
     case '/':
 	if (SvPOK(sv)) {
-	    nrs = rs = SvPV(sv);
+	    nrs = rs = SvPVX(sv);
 	    nrslen = rslen = SvCUR(sv);
 	    if (rspara = !rslen) {
 		nrs = rs = "\n\n";
@@ -686,31 +931,31 @@ MAGIC* mg;
     case '\\':
 	if (ors)
 	    Safefree(ors);
-	ors = savestr(SvPV(sv));
+	ors = savestr(SvPVX(sv));
 	orslen = SvCUR(sv);
 	break;
     case ',':
 	if (ofs)
 	    Safefree(ofs);
-	ofs = savestr(SvPV(sv));
+	ofs = savestr(SvPVX(sv));
 	ofslen = SvCUR(sv);
 	break;
     case '#':
 	if (ofmt)
 	    Safefree(ofmt);
-	ofmt = savestr(SvPV(sv));
+	ofmt = savestr(SvPVX(sv));
 	break;
     case '[':
-	arybase = SvIOK(sv) ? SvIV(sv) : sv_2iv(sv);
+	arybase = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 	break;
     case '?':
-	statusvalue = U_S(SvIOK(sv) ? SvIV(sv) : sv_2iv(sv));
+	statusvalue = U_S(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	break;
     case '!':
-	errno = SvIOK(sv) ? SvIV(sv) : sv_2iv(sv);		/* will anyone ever use this? */
+	errno = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);		/* will anyone ever use this? */
 	break;
     case '<':
-	uid = SvIOK(sv) ? SvIV(sv) : sv_2iv(sv);
+	uid = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 	if (delaymagic) {
 	    delaymagic |= DM_RUID;
 	    break;				/* don't do magic till later */
@@ -724,13 +969,14 @@ MAGIC* mg;
 	if (uid == euid)		/* special case $< = $> */
 	    (void)setuid(uid);
 	else
-	    fatal("setruid() not implemented");
+	    croak("setruid() not implemented");
 #endif
 #endif
-	uid = SvIOK(sv) ? SvIV(sv) : sv_2iv(sv);
+	uid = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
+	tainting |= (euid != uid || egid != gid);
 	break;
     case '>':
-	euid = SvIOK(sv) ? SvIV(sv) : sv_2iv(sv);
+	euid = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 	if (delaymagic) {
 	    delaymagic |= DM_EUID;
 	    break;				/* don't do magic till later */
@@ -744,13 +990,14 @@ MAGIC* mg;
 	if (euid == uid)		/* special case $> = $< */
 	    setuid(euid);
 	else
-	    fatal("seteuid() not implemented");
+	    croak("seteuid() not implemented");
 #endif
 #endif
 	euid = (I32)geteuid();
+	tainting |= (euid != uid || egid != gid);
 	break;
     case '(':
-	gid = SvIOK(sv) ? SvIV(sv) : sv_2iv(sv);
+	gid = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 	if (delaymagic) {
 	    delaymagic |= DM_RGID;
 	    break;				/* don't do magic till later */
@@ -764,13 +1011,14 @@ MAGIC* mg;
 	if (gid == egid)			/* special case $( = $) */
 	    (void)setgid(gid);
 	else
-	    fatal("setrgid() not implemented");
+	    croak("setrgid() not implemented");
 #endif
 #endif
 	gid = (I32)getgid();
+	tainting |= (euid != uid || egid != gid);
 	break;
     case ')':
-	egid = SvIOK(sv) ? SvIV(sv) : sv_2iv(sv);
+	egid = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 	if (delaymagic) {
 	    delaymagic |= DM_EGID;
 	    break;				/* don't do magic till later */
@@ -784,13 +1032,14 @@ MAGIC* mg;
 	if (egid == gid)			/* special case $) = $( */
 	    (void)setgid(egid);
 	else
-	    fatal("setegid() not implemented");
+	    croak("setegid() not implemented");
 #endif
 #endif
 	egid = (I32)getegid();
+	tainting |= (euid != uid || egid != gid);
 	break;
     case ':':
-	chopset = SvPV(sv);
+	chopset = SvPVX(sv);
 	break;
     case '0':
 	if (!origalen) {
@@ -810,7 +1059,7 @@ MAGIC* mg;
 	    }
 	    origalen = s - origargv[0];
 	}
-	s = SvPV(sv);
+	s = SvPVX(sv);
 	i = SvCUR(sv);
 	if (i >= origalen) {
 	    i = origalen;
@@ -869,15 +1118,15 @@ I32 sig;
 #endif
 
     gv = gv_fetchpv(
-	SvPVnx(*hv_fetch(GvHVn(siggv),sig_name[sig],strlen(sig_name[sig]),
-	  TRUE)), TRUE);
+	SvPVx(*hv_fetch(GvHVn(siggv),sig_name[sig],strlen(sig_name[sig]),
+	  TRUE), na), TRUE);
     cv = GvCV(gv);
     if (!cv && *sig_name[sig] == 'C' && instr(sig_name[sig],"LD")) {
 	if (sig_name[sig][1] == 'H')
-	    gv = gv_fetchpv(SvPVnx(*hv_fetch(GvHVn(siggv),"CLD",3,TRUE)),
+	    gv = gv_fetchpv(SvPVx(*hv_fetch(GvHVn(siggv),"CLD",3,TRUE), na),
 	      TRUE);
 	else
-	    gv = gv_fetchpv(SvPVnx(*hv_fetch(GvHVn(siggv),"CHLD",4,TRUE)),
+	    gv = gv_fetchpv(SvPVx(*hv_fetch(GvHVn(siggv),"CHLD",4,TRUE), na),
 	      TRUE);
 	cv = GvCV(gv);	/* gag */
     }

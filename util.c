@@ -98,7 +98,7 @@ MEM_SIZE size;
 #endif /* MSDOS */
 #ifdef DEBUGGING
     if ((long)size < 0)
-	fatal("panic: malloc");
+	croak("panic: malloc");
 #endif
     ptr = malloc(size?size:1);	/* malloc(0) is NASTY on our system */
 #if !(defined(I286) || defined(atarist))
@@ -140,10 +140,10 @@ unsigned long size;
 	}
 #endif /* MSDOS */
     if (!where)
-	fatal("Null realloc");
+	croak("Null realloc");
 #ifdef DEBUGGING
     if ((long)size < 0)
-	fatal("panic: realloc");
+	croak("panic: realloc");
 #endif
     ptr = realloc(where,size?size:1);	/* realloc(0) is NASTY on our system */
 
@@ -384,13 +384,13 @@ I32 iflag;
     U32 frequency = 256;
 
     Sv_Grow(sv,len+258);
-    table = (unsigned char*)(SvPV(sv) + len + 1);
+    table = (unsigned char*)(SvPVX(sv) + len + 1);
     s = table - 2;
     for (i = 0; i < 256; i++) {
 	table[i] = len;
     }
     i = 0;
-    while (s >= (unsigned char*)(SvPV(sv)))
+    while (s >= (unsigned char*)(SvPVX(sv)))
     {
 	if (table[*s] == len) {
 #ifndef pdp11
@@ -413,7 +413,7 @@ I32 iflag;
     sv_magic(sv, 0, 'B', 0, 0);			/* deep magic */
     SvVALID_on(sv);
 
-    s = (unsigned char*)(SvPV(sv));		/* deeper magic */
+    s = (unsigned char*)(SvPVX(sv));		/* deeper magic */
     if (iflag) {
 	register U32 tmp, foldtmp;
 	SvCASEFOLD_on(sv);
@@ -455,17 +455,17 @@ SV *littlestr;
     register unsigned char *oldlittle;
 
     if (SvTYPE(littlestr) != SVt_PVBM || !SvVALID(littlestr)) {
-	if (!SvPOK(littlestr) || !SvPV(littlestr))
+	if (!SvPOK(littlestr) || !SvPVX(littlestr))
 	    return (char*)big;
 	return ninstr((char*)big,(char*)bigend,
-		SvPV(littlestr), SvPV(littlestr) + SvCUR(littlestr));
+		SvPVX(littlestr), SvPVX(littlestr) + SvCUR(littlestr));
     }
 
     littlelen = SvCUR(littlestr);
     if (SvTAIL(littlestr) && !multiline) {	/* tail anchored? */
 	if (littlelen > bigend - big)
 	    return Nullch;
-	little = (unsigned char*)SvPV(littlestr);
+	little = (unsigned char*)SvPVX(littlestr);
 	if (SvCASEFOLD(littlestr)) {	/* oops, fake it */
 	    big = bigend - littlelen;		/* just start near end */
 	    if (bigend[-1] == '\n' && little[littlelen-1] != '\n')
@@ -484,7 +484,7 @@ SV *littlestr;
 	    return Nullch;
 	}
     }
-    table = (unsigned char*)(SvPV(littlestr) + littlelen + 1);
+    table = (unsigned char*)(SvPVX(littlestr) + littlelen + 1);
     if (--littlelen >= bigend - big)
 	return Nullch;
     s = big + littlelen;
@@ -572,11 +572,11 @@ SV *littlestr;
 
     if ((pos = screamfirst[BmRARE(littlestr)]) < 0) 
 	return Nullch;
-    little = (unsigned char *)(SvPV(littlestr));
+    little = (unsigned char *)(SvPVX(littlestr));
     littleend = little + SvCUR(littlestr);
     first = *little++;
     previous = BmPREVIOUS(littlestr);
-    big = (unsigned char *)(SvPV(bigstr));
+    big = (unsigned char *)(SvPVX(bigstr));
     bigend = big + SvCUR(bigstr);
     while (pos < previous) {
 	if (!(pos += screamnext[pos]))
@@ -737,7 +737,7 @@ long a1, a2, a3, a4;
     if (usermess) {
 	tmpstr = sv_mortalcopy(&sv_undef);
 	sv_setpv(tmpstr, (char*)a1);
-	*s++ = SvPV(tmpstr)[SvCUR(tmpstr)-1];
+	*s++ = SvPVX(tmpstr)[SvCUR(tmpstr)-1];
     }
     else {
 	(void)sprintf(s,pat,a1,a2,a3,a4);
@@ -747,7 +747,7 @@ long a1, a2, a3, a4;
     if (s[-1] != '\n') {
 	if (curcop->cop_line) {
 	    (void)sprintf(s," at %s line %ld",
-	      SvPV(GvSV(curcop->cop_filegv)), (long)curcop->cop_line);
+	      SvPVX(GvSV(curcop->cop_filegv)), (long)curcop->cop_line);
 	    s += strlen(s);
 	}
 	if (last_in_gv &&
@@ -764,13 +764,13 @@ long a1, a2, a3, a4;
 	    sv_catpv(tmpstr,buf+1);
     }
     if (usermess)
-	return SvPV(tmpstr);
+	return SvPVX(tmpstr);
     else
 	return buf;
 }
 
 /*VARARGS1*/
-void fatal(pat,a1,a2,a3,a4)
+void croak(pat,a1,a2,a3,a4)
 char *pat;
 long a1, a2, a3, a4;
 {
@@ -778,7 +778,6 @@ long a1, a2, a3, a4;
     char *message;
 
     message = mess(pat,a1,a2,a3,a4);
-    XXX
     fputs(message,stderr);
     (void)fflush(stderr);
     if (e_fp)
@@ -825,7 +824,7 @@ va_list args;
     if (usermess) {
 	tmpstr = sv_mortalcopy(&sv_undef);
 	sv_setpv(tmpstr, va_arg(args, char *));
-	*s++ = SvPV(tmpstr)[SvCUR(tmpstr)-1];
+	*s++ = SvPVX(tmpstr)[SvCUR(tmpstr)-1];
     }
     else {
 	(void) vsprintf(s,pat,args);
@@ -835,7 +834,7 @@ va_list args;
     if (s[-1] != '\n') {
 	if (curcop->cop_line) {
 	    (void)sprintf(s," at %s line %ld",
-	      SvPV(GvSV(curcop->cop_filegv)), (long)curcop->cop_line);
+	      SvPVX(GvSV(curcop->cop_filegv)), (long)curcop->cop_line);
 	    s += strlen(s);
 	}
 	if (last_in_gv &&
@@ -853,15 +852,19 @@ va_list args;
     }
 
     if (usermess)
-	return SvPV(tmpstr);
+	return SvPVX(tmpstr);
     else
 	return buf;
 }
 
 /*VARARGS0*/
 void
-fatal(va_alist)
+#ifdef __STDC__
+croak(char* pat,...)
+#else
+croak(va_alist)
 va_dcl
+#endif
 {
     va_list args;
     char *tmps;
@@ -881,8 +884,12 @@ va_dcl
 }
 
 /*VARARGS0*/
+#ifdef __STDC__
+void warn(char* pat,...)
+#else
 void warn(va_alist)
 va_dcl
+#endif
 {
     va_list args;
     char *message;
@@ -1104,7 +1111,7 @@ register long l;
     return u.result;
 #else
 #if ((BYTEORDER - 0x1111) & 0x444) || !(BYTEORDER & 0xf)
-    fatal("Unknown BYTEORDER\n");
+    croak("Unknown BYTEORDER\n");
 #else
     register I32 o;
     register I32 s;
@@ -1134,7 +1141,7 @@ register long l;
     return u.l;
 #else
 #if ((BYTEORDER - 0x1111) & 0x444) || !(BYTEORDER & 0xf)
-    fatal("Unknown BYTEORDER\n");
+    croak("Unknown BYTEORDER\n");
 #else
     register I32 o;
     register I32 s;
@@ -1225,17 +1232,17 @@ char	*mode;
 	return Nullfp;
     this = (*mode == 'w');
     that = !this;
-#ifdef TAINT
-    if (doexec) {
-	taint_env();
-	TAINT_PROPER("exec");
+    if (tainting) {
+	if (doexec) {
+	    taint_env();
+	    taint_proper("Insecure %s%s", "EXEC");
+	}
     }
-#endif
     while ((pid = (doexec?vfork():fork())) < 0) {
 	if (errno != EAGAIN) {
 	    close(p[this]);
 	    if (!doexec)
-		fatal("Can't fork");
+		croak("Can't fork");
 	    return Nullfp;
 	}
 	sleep(5);
@@ -1265,10 +1272,10 @@ char	*mode;
 	    _exit(1);
 	}
 	/*SUPPRESS 560*/
-	if (tmpgv = gv_fetchpv("$",allgvs))
+	if (tmpgv = gv_fetchpv("$",TRUE))
 	    sv_setiv(GvSV(tmpgv),(I32)getpid());
 	forkprocess = 0;
-	hv_clear(pidstatus, FALSE);	/* we have no children */
+	hv_clear(pidstatus);	/* we have no children */
 	return Nullfp;
 #undef THIS
 #undef THAT
@@ -1282,7 +1289,7 @@ char	*mode;
     }
     sv = *av_fetch(fdpid,p[this],TRUE);
     SvUPGRADE(sv,SVt_IV);
-    SvIV(sv) = pid;
+    SvIVX(sv) = pid;
     forkprocess = pid;
     return fdopen(p[this], mode);
 }
@@ -1355,7 +1362,7 @@ FILE *ptr;
     int pid;
 
     sv = *av_fetch(fdpid,fileno(ptr),TRUE);
-    pid = SvIV(sv);
+    pid = SvIVX(sv);
     av_store(fdpid,fileno(ptr),Nullsv);
     fclose(ptr);
 #ifdef UTS
@@ -1388,7 +1395,7 @@ int flags;
 	sprintf(spid, "%d", pid);
 	svp = hv_fetch(pidstatus,spid,strlen(spid),FALSE);
 	if (svp && *svp != &sv_undef) {
-	    *statusp = SvIV(*svp);
+	    *statusp = SvIVX(*svp);
 	    hv_delete(pidstatus,spid,strlen(spid));
 	    return pid;
 	}
@@ -1400,7 +1407,7 @@ int flags;
 	if (entry = hv_iternext(pidstatus)) {
 	    pid = atoi(hv_iterkey(entry,statusp));
 	    sv = hv_iterval(pidstatus,entry);
-	    *statusp = SvIV(sv);
+	    *statusp = SvIVX(sv);
 	    sprintf(spid, "%d", pid);
 	    hv_delete(pidstatus,spid,strlen(spid));
 	    return pid;
@@ -1413,7 +1420,7 @@ int flags;
     return waitpid(pid,statusp,flags);
 #else
     if (flags)
-	fatal("Can't do waitpid with flags");
+	croak("Can't do waitpid with flags");
     else {
 	while ((result = wait(statusp)) != pid && pid > 0 && result >= 0)
 	    pidgone(result,*statusp);
@@ -1438,7 +1445,7 @@ int status;
     sprintf(spid, "%d", pid);
     sv = *hv_fetch(pidstatus,spid,strlen(spid),TRUE);
     SvUPGRADE(sv,SVt_IV);
-    SvIV(sv) = status;
+    SvIVX(sv) = status;
     return;
 }
 
@@ -1477,7 +1484,7 @@ register I32 count;
 }
 
 #ifndef CASTNEGFLOAT
-unsigned long
+U32
 cast_ulong(f)
 double f;
 {

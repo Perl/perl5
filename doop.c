@@ -86,12 +86,13 @@ OP *arg;
     register char *send;
     register char *d;
     register I32 squash = op->op_private & OPpTRANS_SQUASH;
+    STRLEN len;
 
     tbl = (short*) cPVOP->op_pv;
-    s = SvPVn(sv);
-    send = s + SvCUROK(sv);
+    s = SvPV(sv, len);
+    send = s + len;
     if (!tbl || !s)
-	fatal("panic: do_trans");
+	croak("panic: do_trans");
     DEBUG_t( deb("2.TBL\n"));
     if (!op->op_private) {
 	while (s < send) {
@@ -122,7 +123,7 @@ OP *arg;
 	}
 	matches += send - d;	/* account for disappeared chars */
 	*d = '\0';
-	SvCUR_set(sv, d - SvPV(sv));
+	SvCUR_set(sv, d - SvPVX(sv));
     }
     SvSETMAGIC(sv);
     return matches;
@@ -137,9 +138,10 @@ register SV **sp;
 {
     SV **oldmark = mark;
     register I32 items = sp - mark;
-    register char *delim = SvPVn(del);
     register STRLEN len;
-    I32 delimlen = SvCUROK(del);
+    STRLEN delimlen;
+    register char *delim = SvPV(del, delimlen);
+    STRLEN tmplen;
 
     mark++;
     len = (items > 0 ? (delimlen * (items - 1) ) : 0);
@@ -148,12 +150,8 @@ register SV **sp;
     if (SvLEN(sv) < len + items) {	/* current length is way too short */
 	while (items-- > 0) {
 	    if (*mark) {
-		if (!SvPOK(*mark)) {
-		    sv_2pv(*mark);
-		    if (!SvPOK(*mark))
-			*mark = &sv_no;
-		}
-		len += SvCUR((*mark));
+		SvPV(*mark, tmplen);
+		len += tmplen;
 	    }
 	    mark++;
 	}
@@ -164,8 +162,11 @@ register SV **sp;
 	++mark;
     }
 
-    if (items-- > 0)
-	sv_setsv(sv, *mark++);
+    if (items-- > 0) {
+	char *s = SvPV(*mark, tmplen);
+	sv_setpvn(sv, s, tmplen);
+	mark++;
+    }
     else
 	sv_setpv(sv,"");
     len = delimlen;
@@ -203,11 +204,12 @@ register SV **sarg;
     I32 pre;
     I32 post;
     double value;
+    STRLEN arglen;
 
     sv_setpv(sv,"");
     len--;			/* don't count pattern string */
-    t = s = SvPVn(*sarg);
-    send = s + SvCUROK(*sarg);
+    t = s = SvPV(*sarg, arglen);
+    send = s + arglen;
     sarg++;
     for ( ; ; len--) {
 
@@ -240,7 +242,7 @@ register SV **sarg;
 	    case '5': case '6': case '7': case '8': case '9': 
 	    case '.': case '#': case '-': case '+': case ' ':
 		continue;
-	    case 'lXXX':
+	    case 'l':
 #ifdef QUAD
 		if (dolong) {
 		    dolong = FALSE;
@@ -252,7 +254,7 @@ register SV **sarg;
 	    case 'c':
 		ch = *(++t);
 		*t = '\0';
-		xlen = SvIVn(arg);
+		xlen = SvIV(arg);
 		if (strEQ(f,"%c")) { /* some printfs fail on null chars */
 		    *xs = xlen;
 		    xs[1] = '\0';
@@ -271,13 +273,13 @@ register SV **sarg;
 		*t = '\0';
 #ifdef QUAD
 		if (doquad)
-		    (void)sprintf(buf,s,(quad)SvNVn(arg));
+		    (void)sprintf(buf,s,(quad)SvNV(arg));
 		else
 #endif
 		if (dolong)
-		    (void)sprintf(xs,f,(long)SvNVn(arg));
+		    (void)sprintf(xs,f,(long)SvNV(arg));
 		else
-		    (void)sprintf(xs,f,SvIVn(arg));
+		    (void)sprintf(xs,f,SvIV(arg));
 		xlen = strlen(xs);
 		break;
 	    case 'X': case 'O':
@@ -286,7 +288,7 @@ register SV **sarg;
 	    case 'x': case 'o': case 'u':
 		ch = *(++t);
 		*t = '\0';
-		value = SvNVn(arg);
+		value = SvNV(arg);
 #ifdef QUAD
 		if (doquad)
 		    (void)sprintf(buf,s,(unsigned quad)value);
@@ -301,17 +303,14 @@ register SV **sarg;
 	    case 'E': case 'e': case 'f': case 'G': case 'g':
 		ch = *(++t);
 		*t = '\0';
-		(void)sprintf(xs,f,SvNVn(arg));
+		(void)sprintf(xs,f,SvNV(arg));
 		xlen = strlen(xs);
 		break;
 	    case 's':
 		ch = *(++t);
 		*t = '\0';
-		xs = SvPVn(arg);
-		if (SvPOK(arg))
-		    xlen = SvCUR(arg);
-		else
-		    xlen = strlen(xs);
+		xs = SvPV(arg, arglen);
+		xlen = (I32)arglen;
 		if (strEQ(f,"%s")) {	/* some printfs fail on >128 chars */
 		    break;		/* so handle simple cases */
 		}
@@ -355,12 +354,12 @@ register SV **sarg;
 	    SvGROW(sv, SvCUR(sv) + (f - s) + xlen + 1 + pre + post);
 	    sv_catpvn(sv, s, f - s);
 	    if (pre) {
-		repeatcpy(SvPV(sv) + SvCUR(sv), " ", 1, pre);
+		repeatcpy(SvPVX(sv) + SvCUR(sv), " ", 1, pre);
 		SvCUR(sv) += pre;
 	    }
 	    sv_catpvn(sv, xs, xlen);
 	    if (post) {
-		repeatcpy(SvPV(sv) + SvCUR(sv), " ", 1, post);
+		repeatcpy(SvPVX(sv) + SvCUR(sv), " ", 1, post);
 		SvCUR(sv) += post;
 	    }
 	    s = t;
@@ -378,8 +377,8 @@ SV *sv;
     SV *targ = LvTARG(sv);
     register I32 offset;
     register I32 size;
-    register unsigned char *s = (unsigned char*)SvPV(targ);
-    register unsigned long lval = U_L(SvNVn(sv));
+    register unsigned char *s = (unsigned char*)SvPVX(targ);
+    register unsigned long lval = U_L(SvNV(sv));
     I32 mask;
 
     offset = LvTARGOFF(sv);
@@ -416,11 +415,14 @@ register SV *sv;
     register char *tmps;
     register I32 i;
     AV *ary;
-    HV *hash;
+    HV *hv;
     HE *entry;
+    STRLEN len;
 
     if (!sv)
 	return;
+    if (SvREADONLY(sv))
+	croak("Can't chop readonly value");
     if (SvTYPE(sv) == SVt_PVAV) {
 	I32 max;
 	SV **array = AvARRAY(sv);
@@ -430,19 +432,19 @@ register SV *sv;
 	return;
     }
     if (SvTYPE(sv) == SVt_PVHV) {
-	hash = (HV*)sv;
-	(void)hv_iterinit(hash);
+	hv = (HV*)sv;
+	(void)hv_iterinit(hv);
 	/*SUPPRESS 560*/
-	while (entry = hv_iternext(hash))
-	    do_chop(astr,hv_iterval(hash,entry));
+	while (entry = hv_iternext(hv))
+	    do_chop(astr,hv_iterval(hv,entry));
 	return;
     }
-    tmps = SvPVn(sv);
-    if (tmps && SvCUROK(sv)) {
-	tmps += SvCUR(sv) - 1;
+    tmps = SvPV(sv, len);
+    if (tmps && len) {
+	tmps += len - 1;
 	sv_setpvn(astr,tmps,1);	/* remember last char */
 	*tmps = '\0';				/* wipe it out */
-	SvCUR_set(sv, tmps - SvPV(sv));
+	SvCUR_set(sv, tmps - SvPVX(sv));
 	SvNOK_off(sv);
 	SvSETMAGIC(sv);
     }
@@ -463,12 +465,14 @@ SV *right;
     register long *rl;
 #endif
     register char *dc;
-    register char *lc = SvPVn(left);
-    register char *rc = SvPVn(right);
+    STRLEN leftlen;
+    STRLEN rightlen;
+    register char *lc = SvPV(left, leftlen);
+    register char *rc = SvPV(right, rightlen);
     register I32 len;
-    I32 leftlen = SvCUROK(left);
-    I32 rightlen = SvCUROK(right);
 
+    if (SvREADONLY(sv))
+	croak("Can't do %s to readonly value", op_name[optype]);
     len = leftlen < rightlen ? leftlen : rightlen;
     if (SvTYPE(sv) < SVt_PV)
 	sv_upgrade(sv, SVt_PV);
@@ -476,14 +480,14 @@ SV *right;
 	SvCUR_set(sv, len);
     else if (SvCUR(sv) < len) {
 	SvGROW(sv,len);
-	(void)memzero(SvPV(sv) + SvCUR(sv), len - SvCUR(sv));
+	(void)memzero(SvPVX(sv) + SvCUR(sv), len - SvCUR(sv));
 	SvCUR_set(sv, len);
     }
     SvPOK_only(sv);
-    dc = SvPV(sv);
+    dc = SvPVX(sv);
     if (!dc) {
 	sv_setpvn(sv,"",0);
-	dc = SvPV(sv);
+	dc = SvPVX(sv);
     }
 #ifdef LIBERAL
     if (len >= sizeof(long)*4 &&
@@ -546,9 +550,74 @@ SV *right;
       mop_up:
 	len = SvCUR(sv);
 	if (rightlen > len)
-	    sv_catpvn(sv, SvPV(right) + len, rightlen - len);
+	    sv_catpvn(sv, SvPVX(right) + len, rightlen - len);
 	else if (leftlen > len)
-	    sv_catpvn(sv, SvPV(left) + len, leftlen - len);
+	    sv_catpvn(sv, SvPVX(left) + len, leftlen - len);
 	break;
     }
 }
+
+OP *
+do_kv(ARGS)
+dARGS
+{
+    dSP;
+    HV *hv = (HV*)POPs;
+    register AV *ary = stack;
+    I32 i;
+    register HE *entry;
+    char *tmps;
+    SV *tmpstr;
+    I32 dokeys =   (op->op_type == OP_KEYS   || op->op_type == OP_RV2HV);
+    I32 dovalues = (op->op_type == OP_VALUES || op->op_type == OP_RV2HV);
+
+    if (!hv)
+	RETURN;
+    if (GIMME != G_ARRAY) {
+	dTARGET;
+
+	if (!SvMAGICAL(hv) || !mg_find((SV*)hv,'P'))
+	    i = HvKEYS(hv);
+	else {
+	    i = 0;
+	    (void)hv_iterinit(hv);
+	    /*SUPPRESS 560*/
+	    while (entry = hv_iternext(hv)) {
+		i++;
+	    }
+	}
+	PUSHi( i );
+	RETURN;
+    }
+
+    /* Guess how much room we need.  hv_max may be a few too many.  Oh well. */
+    EXTEND(sp, HvMAX(hv) * (dokeys + dovalues));
+
+    (void)hv_iterinit(hv);
+
+    PUTBACK;	/* hv_iternext and hv_iterval might clobber stack_sp */
+    while (entry = hv_iternext(hv)) {
+	SPAGAIN;
+	if (dokeys) {
+	    tmps = hv_iterkey(entry,&i);	/* won't clobber stack_sp */
+	    if (!i)
+		tmps = "";
+	    XPUSHs(sv_2mortal(newSVpv(tmps,i)));
+	}
+	if (dovalues) {
+	    tmpstr = NEWSV(45,0);
+	    PUTBACK;
+	    sv_setsv(tmpstr,hv_iterval(hv,entry));
+	    SPAGAIN;
+	    DEBUG_H( {
+		sprintf(buf,"%d%%%d=%d\n",entry->hent_hash,
+		    HvMAX(hv)+1,entry->hent_hash & HvMAX(hv));
+		sv_setpv(tmpstr,buf);
+	    } )
+	    XPUSHs(sv_2mortal(tmpstr));
+	}
+	PUTBACK;
+    }
+    return NORMAL;
+}
+

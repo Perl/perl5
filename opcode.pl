@@ -56,7 +56,7 @@ for (sort keys %ckname) {
 print "\n";
 
 for (@ops) {
-    print "OP *\t", &tab(3, "pp_\L$_"), "P((ARGSproto));\n";
+    print "OP *\t", &tab(3, "pp_\L$_"), "P((void));\n";
 }
 
 # Emit ppcode switch array.
@@ -182,8 +182,8 @@ rv2sv		ref-to-scalar cast	ck_rvconst	ds
 av2arylen	array length		ck_null		is	
 rv2cv		subroutine reference	ck_rvconst	d
 refgen		backslash reference	ck_null		fst	L
-ref		reference-type operator	ck_fun		st	S
-bless		bless			ck_fun		s	S
+ref		reference-type operator	ck_fun		st	S?
+bless		bless			ck_fun		s	S S?
 
 # Pushy I/O.
 
@@ -194,6 +194,7 @@ rcatline	append I/O operator	ck_null		t
 
 # Bindable operators.
 
+regcmaybe	regexp comp once	ck_fun		s	S
 regcomp		regexp compilation	ck_null		s	S
 match		pattern match		ck_match	d
 subst		substitution		ck_null		dis	S
@@ -271,6 +272,7 @@ sqrt		sqrt			ck_fun		fst	S?
 int		int			ck_fun		fst	S?
 hex		hex			ck_fun		ist	S?
 oct		oct			ck_fun		ist	S?
+abs		abs			ck_fun		fst	S?
 
 # String stuff.
 
@@ -284,6 +286,7 @@ rindex		rindex			ck_index	ist	S S S?
 sprintf		sprintf			ck_fun		mst	S L
 formline	formline		ck_formline	ms	S L
 ord		ord			ck_fun		ifst	S?
+chr		chr			ck_fun		fst	S?
 crypt		crypt			ck_fun		fst	S S
 ucfirst		upper case first	ck_fun		ft	S
 lcfirst		lower case first	ck_fun		ft	S
@@ -346,7 +349,7 @@ cond_expr	conditional expression	ck_null		0
 andassign	logical and assignment	ck_null		s	
 orassign	logical or assignment	ck_null		s	
 
-method		method lookup		ck_null		dt
+method		method lookup		ck_null		d
 entersubr	subroutine entry	ck_subr		dm	L
 leavesubr	subroutine exit		ck_null		0	
 caller		caller			ck_fun		t	S?
@@ -360,6 +363,7 @@ dbstate		debug next statement	ck_null		s
 unstack		unstack			ck_null		s
 enter		block entry		ck_null		0	
 leave		block exit		ck_null		0	
+scope		block			ck_null		0	
 enteriter	foreach loop entry	ck_null		d	
 iter		foreach loop iterator	ck_null		0	
 enterloop	loop entry		ck_null		d	
@@ -385,7 +389,9 @@ fileno		fileno			ck_fun		ist	F
 umask		umask			ck_fun		ist	S?
 binmode		binmode			ck_fun		s	F
 
-dbmopen		dbmopen			ck_fun		ist	H S S
+tie		tie			ck_fun		idms	R S L
+untie		untie			ck_fun		is	R
+dbmopen		dbmopen			ck_fun		is	H S S
 dbmclose	dbmclose		ck_fun		is	H
 
 sselect		select system call	ck_select	t	S S S S
@@ -396,7 +402,7 @@ read		read			ck_fun		imst	F R S S?
 enterwrite	write			ck_fun		dis	F?
 leavewrite	write exit		ck_null		0	
 
-prtf		prtf			ck_listiob	ims	F? L
+prtf		printf			ck_listiob	ims	F? L
 print		print			ck_listiob	ims	F? L
 
 sysread		sysread			ck_fun		imst	F R S S?

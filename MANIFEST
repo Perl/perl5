@@ -59,7 +59,7 @@ consarg.c		Routines to construct arg nodes of a parse tree
 doSH			Script to run all the *.SH files
 doarg.c			Scalar expression evaluation
 doio.c			I/O operations
-dolist.c		Array expression evaluation
+doop.c			Support code for various operations
 dosish.h
 dump.c			Debugging output
 eg/ADB			An adb wrapper to put in your crash dir

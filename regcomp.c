@@ -163,7 +163,7 @@ I32 fold;
 	I32 sawopen = 0;
 
 	if (exp == NULL)
-		fatal("NULL regexp argument");
+		croak("NULL regexp argument");
 
 	/* First pass: determine size, legality. */
 	regfold = fold;
@@ -349,8 +349,8 @@ I32 fold;
 		    &&
 		    (!r->regstart
 		     ||
-		     !fbm_instr((unsigned char*) SvPV(r->regstart),
-			  (unsigned char *) SvPV(r->regstart)
+		     !fbm_instr((unsigned char*) SvPVX(r->regstart),
+			  (unsigned char *) SvPVX(r->regstart)
 			    + SvCUR(r->regstart),
 			  longest)
 		    )
@@ -564,7 +564,7 @@ I32 *flagp;
 		    if (!tmp && *max != '0')
 			tmp = 32767;		/* meaning "infinity" */
 		    if (tmp && tmp < iter)
-			fatal("Can't do {n,m} with n > m");
+			croak("Can't do {n,m} with n > m");
 		    if (regcode != &regdummy) {
 #ifdef REGALIGN
 			*(unsigned short *)(ret+3) = iter;
@@ -584,7 +584,7 @@ I32 *flagp;
 		    *max = ch;
 		    if (*max == ',' && max[1] != '}') {
 			if (atoi(max+1) <= 0)
-			    fatal("Can't do {n,m} with n > m");
+			    croak("Can't do {n,m} with n > m");
 			ch = *next;
 			sprintf(max+1,"%.*d", next-(max+1), atoi(max+1) - 1);
 			*next = ch;
@@ -620,10 +620,10 @@ I32 *flagp;
 			}
 		    }
 		    else
-			fatal("Can't do {n,0}");
+			croak("Can't do {n,0}");
 		}
 		else
-		    fatal("Can't do {0}");
+		    croak("Can't do {0}");
 	    }
 	}
 
@@ -1324,7 +1324,7 @@ regexp *r;
 
 	/* Header fields of interest. */
 	if (r->regstart)
-		fprintf(stderr,"start `%s' ", SvPV(r->regstart));
+		fprintf(stderr,"start `%s' ", SvPVX(r->regstart));
 	if (r->regstclass)
 		fprintf(stderr,"stclass `%s' ", regprop(r->regstclass));
 	if (r->reganch & ROPT_ANCH)
@@ -1334,7 +1334,7 @@ regexp *r;
 	if (r->reganch & ROPT_IMPLICIT)
 		fprintf(stderr,"implicit ");
 	if (r->regmust != NULL)
-		fprintf(stderr,"must have \"%s\" back %d ", SvPV(r->regmust),
+		fprintf(stderr,"must have \"%s\" back %d ", SvPVX(r->regmust),
 		  r->regback);
 	fprintf(stderr, "minlen %d ", r->minlen);
 	fprintf(stderr,"\n");

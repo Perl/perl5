@@ -50,6 +50,246 @@
 static void ucase();
 static void lcase();
 
+static SV* sv_root;
+
+static SV* more_sv();
+
+static SV*
+new_sv()
+{
+    SV* sv;
+    if (sv_root) {
+	sv = sv_root;
+	sv_root = (SV*)SvANY(sv);
+	return sv;
+    }
+    return more_sv();
+}
+
+static void
+del_sv(p)
+SV* p;
+{
+    SvANY(p) = sv_root;
+    sv_root = p;
+}
+
+static SV*
+more_sv()
+{
+    register int i;
+    register SV* sv;
+    register SV* svend;
+    sv_root = (SV*)malloc(1008);
+    sv = sv_root;
+    svend = &sv[1008 / sizeof(SV) - 1];
+    while (sv < svend) {
+	SvANY(sv) = (SV*)(sv + 1);
+	sv++;
+    }
+    SvANY(sv) = 0;
+    return new_sv();
+}
+
+static I32* xiv_root;
+
+static XPVIV* more_xiv();
+
+static XPVIV*
+new_xiv()
+{
+    I32* xiv;
+    if (xiv_root) {
+	xiv = xiv_root;
+	xiv_root = *(I32**)xiv;
+	return (XPVIV*)((char*)xiv - sizeof(XPV));
+    }
+    return more_xiv();
+}
+
+static void
+del_xiv(p)
+XPVIV* p;
+{
+    I32* xiv = (I32*)((char*)(p) + sizeof(XPV));
+    *(I32**)xiv = xiv_root;
+    xiv_root = xiv;
+}
+
+static XPVIV*
+more_xiv()
+{
+    register int i;
+    register I32* xiv;
+    register I32* xivend;
+    xiv = (I32*)malloc(1008);
+    xivend = &xiv[1008 / sizeof(I32) - 1];
+    xiv += (sizeof(XPV) - 1) / sizeof(I32) + 1;   /* fudge by size of XPV */
+    xiv_root = xiv;
+    while (xiv < xivend) {
+	*(I32**)xiv = (I32*)(xiv + 1); /* XXX busted on Alpha? */
+	xiv++;
+    }
+    *(I32**)xiv = 0;
+    return new_xiv();
+}
+
+static double* xnv_root;
+
+static XPVNV* more_xnv();
+
+static XPVNV*
+new_xnv()
+{
+    double* xnv;
+    if (xnv_root) {
+	xnv = xnv_root;
+	xnv_root = *(double**)xnv;
+	return (XPVNV*)((char*)xnv - sizeof(XPVIV));
+    }
+    return more_xnv();
+}
+
+static void
+del_xnv(p)
+XPVNV* p;
+{
+    double* xnv = (double*)((char*)(p) + sizeof(XPVIV));
+    *(double**)xnv = xnv_root;
+    xnv_root = xnv;
+}
+
+static XPVNV*
+more_xnv()
+{
+    register int i;
+    register double* xnv;
+    register double* xnvend;
+    xnv = (double*)malloc(1008);
+    xnvend = &xnv[1008 / sizeof(double) - 1];
+    xnv += (sizeof(XPVIV) - 1) / sizeof(double) + 1; /* fudge by sizeof XPVIV */
+    xnv_root = xnv;
+    while (xnv < xnvend) {
+	*(double**)xnv = (double*)(xnv + 1);
+	xnv++;
+    }
+    *(double**)xnv = 0;
+    return new_xnv();
+}
+
+static XPV* xpv_root;
+
+static XPV* more_xpv();
+
+static XPV*
+new_xpv()
+{
+    XPV* xpv;
+    if (xpv_root) {
+	xpv = xpv_root;
+	xpv_root = (XPV*)xpv->xpv_pv;
+	return xpv;
+    }
+    return more_xpv();
+}
+
+static void
+del_xpv(p)
+XPV* p;
+{
+    p->xpv_pv = (char*)xpv_root;
+    xpv_root = p;
+}
+
+static XPV*
+more_xpv()
+{
+    register int i;
+    register XPV* xpv;
+    register XPV* xpvend;
+    xpv_root = (XPV*)malloc(1008);
+    xpv = xpv_root;
+    xpvend = &xpv[1008 / sizeof(XPV) - 1];
+    while (xpv < xpvend) {
+	xpv->xpv_pv = (char*)(xpv + 1);
+	xpv++;
+    }
+    xpv->xpv_pv = 0;
+    return new_xpv();
+}
+
+#ifdef PURIFY
+
+#define new_SV() sv = (SV*)malloc(sizeof(SV))
+#define del_SV(p) free((char*)p)
+
+#else
+
+#define new_SV()			\
+    if (sv_root) {			\
+	sv = sv_root;			\
+	sv_root = (SV*)SvANY(sv);	\
+    }					\
+    else				\
+	sv = more_sv();
+#define del_SV(p) del_sv(p)
+
+#endif
+
+#ifdef PURIFY
+#define new_XIV() (void*)malloc(sizeof(XPVIV))
+#define del_XIV(p) free((char*)p)
+#else
+#define new_XIV() new_xiv()
+#define del_XIV(p) del_xiv(p)
+#endif
+
+#ifdef PURIFY
+#define new_XNV() (void*)malloc(sizeof(XPVNV))
+#define del_XNV(p) free((char*)p)
+#else
+#define new_XNV() new_xnv()
+#define del_XNV(p) del_xnv(p)
+#endif
+
+#ifdef PURIFY
+#define new_XPV() (void*)malloc(sizeof(XPV))
+#define del_XPV(p) free((char*)p)
+#else
+#define new_XPV() new_xpv()
+#define del_XPV(p) del_xpv(p)
+#endif
+
+#define new_XPVIV() (void*)malloc(sizeof(XPVIV))
+#define del_XPVIV(p) free((char*)p)
+
+#define new_XPVNV() (void*)malloc(sizeof(XPVNV))
+#define del_XPVNV(p) free((char*)p)
+
+#define new_XPVMG() (void*)malloc(sizeof(XPVMG))
+#define del_XPVMG(p) free((char*)p)
+
+#define new_XPVLV() (void*)malloc(sizeof(XPVLV))
+#define del_XPVLV(p) free((char*)p)
+
+#define new_XPVAV() (void*)malloc(sizeof(XPVAV))
+#define del_XPVAV(p) free((char*)p)
+
+#define new_XPVHV() (void*)malloc(sizeof(XPVHV))
+#define del_XPVHV(p) free((char*)p)
+
+#define new_XPVCV() (void*)malloc(sizeof(XPVCV))
+#define del_XPVCV(p) free((char*)p)
+
+#define new_XPVGV() (void*)malloc(sizeof(XPVGV))
+#define del_XPVGV(p) free((char*)p)
+
+#define new_XPVBM() (void*)malloc(sizeof(XPVBM))
+#define del_XPVBM(p) free((char*)p)
+
+#define new_XPVFM() (void*)malloc(sizeof(XPVFM))
+#define del_XPVFM(p) free((char*)p)
+
 bool
 sv_upgrade(sv, mt)
 register SV* sv;
@@ -81,8 +321,8 @@ U32 mt;
 	pv	= 0;
 	cur	= 0;
 	len	= 0;
-	iv	= SvANYI32(sv);
-	nv	= (double)SvANYI32(sv);
+	iv	= (I32)SvANY(sv);
+	nv	= (double)(unsigned long)SvANY(sv);
 	SvNOK_only(sv);
 	magic	= 0;
 	stash	= 0;
@@ -93,23 +333,22 @@ U32 mt;
 	pv	= 0;
 	cur	= 0;
 	len	= 0;
-	iv	= SvIV(sv);
-	nv	= (double)SvIV(sv);
+	iv	= SvIVX(sv);
+	nv	= (double)SvIVX(sv);
 	del_XIV(SvANY(sv));
 	magic	= 0;
 	stash	= 0;
 	if (mt == SVt_PV)
 	    mt = SVt_PVIV;
+	else if (mt == SVt_NV)
+	    mt = SVt_PVNV;
 	break;
     case SVt_NV:
 	pv	= 0;
 	cur	= 0;
 	len	= 0;
-	if (SvIOK(sv))
-	    iv	= SvIV(sv);
-	else
-	    iv	= (I32)SvNV(sv);
-	nv	= SvNV(sv);
+	nv	= SvNVX(sv);
+	iv	= (I32)nv;
 	magic	= 0;
 	stash	= 0;
 	del_XNV(SvANY(sv));
@@ -119,7 +358,7 @@ U32 mt;
 	break;
     case SVt_PV:
 	nv = 0.0;
-	pv	= SvPV(sv);
+	pv	= SvPVX(sv);
 	cur	= SvCUR(sv);
 	len	= SvLEN(sv);
 	iv	= 0;
@@ -130,96 +369,95 @@ U32 mt;
 	break;
     case SVt_PVIV:
 	nv = 0.0;
-	pv	= SvPV(sv);
+	pv	= SvPVX(sv);
 	cur	= SvCUR(sv);
 	len	= SvLEN(sv);
-	iv	= SvIV(sv);
+	iv	= SvIVX(sv);
 	nv	= 0.0;
 	magic	= 0;
 	stash	= 0;
 	del_XPVIV(SvANY(sv));
 	break;
     case SVt_PVNV:
-	nv = SvNV(sv);
-	pv	= SvPV(sv);
+	nv = SvNVX(sv);
+	pv	= SvPVX(sv);
 	cur	= SvCUR(sv);
 	len	= SvLEN(sv);
-	iv	= SvIV(sv);
-	nv	= SvNV(sv);
+	iv	= SvIVX(sv);
+	nv	= SvNVX(sv);
 	magic	= 0;
 	stash	= 0;
 	del_XPVNV(SvANY(sv));
 	break;
     case SVt_PVMG:
-	pv	= SvPV(sv);
+	pv	= SvPVX(sv);
 	cur	= SvCUR(sv);
 	len	= SvLEN(sv);
-	iv	= SvIV(sv);
-	nv	= SvNV(sv);
+	iv	= SvIVX(sv);
+	nv	= SvNVX(sv);
 	magic	= SvMAGIC(sv);
 	stash	= SvSTASH(sv);
 	del_XPVMG(SvANY(sv));
 	break;
     default:
-	fatal("Can't upgrade that kind of scalar");
+	croak("Can't upgrade that kind of scalar");
     }
 
     switch (mt) {
     case SVt_NULL:
-	fatal("Can't upgrade to undef");
+	croak("Can't upgrade to undef");
     case SVt_REF:
-	SvIOK_on(sv);
+	SvOK_on(sv);
 	break;
     case SVt_IV:
 	SvANY(sv) = new_XIV();
-	SvIV(sv)	= iv;
+	SvIVX(sv)	= iv;
 	break;
     case SVt_NV:
 	SvANY(sv) = new_XNV();
-	SvIV(sv)	= iv;
-	SvNV(sv)	= nv;
+	SvNVX(sv)	= nv;
 	break;
     case SVt_PV:
 	SvANY(sv) = new_XPV();
-	SvPV(sv)	= pv;
+	SvPVX(sv)	= pv;
 	SvCUR(sv)	= cur;
 	SvLEN(sv)	= len;
 	break;
     case SVt_PVIV:
 	SvANY(sv) = new_XPVIV();
-	SvPV(sv)	= pv;
+	SvPVX(sv)	= pv;
 	SvCUR(sv)	= cur;
 	SvLEN(sv)	= len;
-	SvIV(sv)	= iv;
+	SvIVX(sv)	= iv;
 	if (SvNIOK(sv))
 	    SvIOK_on(sv);
 	SvNOK_off(sv);
 	break;
     case SVt_PVNV:
 	SvANY(sv) = new_XPVNV();
-	SvPV(sv)	= pv;
+	SvPVX(sv)	= pv;
 	SvCUR(sv)	= cur;
 	SvLEN(sv)	= len;
-	SvIV(sv)	= iv;
-	SvNV(sv)	= nv;
+	SvIVX(sv)	= iv;
+	SvNVX(sv)	= nv;
 	break;
     case SVt_PVMG:
 	SvANY(sv) = new_XPVMG();
-	SvPV(sv)	= pv;
+	SvPVX(sv)	= pv;
 	SvCUR(sv)	= cur;
 	SvLEN(sv)	= len;
-	SvIV(sv)	= iv;
-	SvNV(sv)	= nv;
+	SvIVX(sv)	= iv;
+	SvNVX(sv)	= nv;
 	SvMAGIC(sv)	= magic;
 	SvSTASH(sv)	= stash;
 	break;
     case SVt_PVLV:
 	SvANY(sv) = new_XPVLV();
-	SvPV(sv)	= pv;
+	SvPVX(sv)	= pv;
 	SvCUR(sv)	= cur;
 	SvLEN(sv)	= len;
-	SvIV(sv)	= iv;
-	SvNV(sv)	= nv;
+	SvIVX(sv)	= iv;
+	SvNVX(sv)	= nv;
 	SvMAGIC(sv)	= magic;
 	SvSTASH(sv)	= stash;
 	LvTARGOFF(sv)	= 0;
@@ -229,49 +467,42 @@ U32 mt;
 	break;
     case SVt_PVAV:
 	SvANY(sv) = new_XPVAV();
-	SvPV(sv)	= pv;
-	SvCUR(sv)	= cur;
-	SvLEN(sv)	= len;
-	SvIV(sv)	= iv;
-	SvNV(sv)	= nv;
-	SvMAGIC(sv)	= magic;
-	SvSTASH(sv)	= stash;
-	AvMAGIC(sv)	= 0;
+	if (pv)
+	    Safefree(pv);
 	AvARRAY(sv)	= 0;
-	AvALLOC(sv)	= 0;
 	AvMAX(sv)	= 0;
 	AvFILL(sv)	= 0;
+	SvIVX(sv)	= 0;
+	SvNVX(sv)	= 0.0;
+	SvMAGIC(sv)	= magic;
+	SvSTASH(sv)	= stash;
+	AvALLOC(sv)	= 0;
 	AvARYLEN(sv)	= 0;
 	AvFLAGS(sv)	= 0;
 	break;
     case SVt_PVHV:
 	SvANY(sv) = new_XPVHV();
-	SvPV(sv)	= pv;
-	SvCUR(sv)	= cur;
-	SvLEN(sv)	= len;
-	SvIV(sv)	= iv;
-	SvNV(sv)	= nv;
+	if (pv)
+	    Safefree(pv);
+	SvPVX(sv)	= 0;
+	HvFILL(sv)	= 0;
+	HvMAX(sv)	= 0;
+	HvKEYS(sv)	= 0;
+	SvNVX(sv)	= 0.0;
 	SvMAGIC(sv)	= magic;
 	SvSTASH(sv)	= stash;
-	HvMAGIC(sv)	= 0;
-	HvARRAY(sv)	= 0;
-	HvMAX(sv)	= 0;
-	HvDOSPLIT(sv)	= 0;
-	HvFILL(sv)	= 0;
 	HvRITER(sv)	= 0;
 	HvEITER(sv)	= 0;
 	HvPMROOT(sv)	= 0;
 	HvNAME(sv)	= 0;
-	HvDBM(sv)	= 0;
-	HvCOEFFSIZE(sv)	= 0;
 	break;
     case SVt_PVCV:
 	SvANY(sv) = new_XPVCV();
-	SvPV(sv)	= pv;
+	SvPVX(sv)	= pv;
 	SvCUR(sv)	= cur;
 	SvLEN(sv)	= len;
-	SvIV(sv)	= iv;
-	SvNV(sv)	= nv;
+	SvIVX(sv)	= iv;
+	SvNVX(sv)	= nv;
 	SvMAGIC(sv)	= magic;
 	SvSTASH(sv)	= stash;
 	CvSTASH(sv)	= 0;
@@ -286,11 +517,11 @@ U32 mt;
 	break;
     case SVt_PVGV:
 	SvANY(sv) = new_XPVGV();
-	SvPV(sv)	= pv;
+	SvPVX(sv)	= pv;
 	SvCUR(sv)	= cur;
 	SvLEN(sv)	= len;
-	SvIV(sv)	= iv;
-	SvNV(sv)	= nv;
+	SvIVX(sv)	= iv;
+	SvNVX(sv)	= nv;
 	SvMAGIC(sv)	= magic;
 	SvSTASH(sv)	= stash;
 	GvGP(sv)	= 0;
@@ -300,11 +531,11 @@ U32 mt;
 	break;
     case SVt_PVBM:
 	SvANY(sv) = new_XPVBM();
-	SvPV(sv)	= pv;
+	SvPVX(sv)	= pv;
 	SvCUR(sv)	= cur;
 	SvLEN(sv)	= len;
-	SvIV(sv)	= iv;
-	SvNV(sv)	= nv;
+	SvIVX(sv)	= iv;
+	SvNVX(sv)	= nv;
 	SvMAGIC(sv)	= magic;
 	SvSTASH(sv)	= stash;
 	BmRARE(sv)	= 0;
@@ -313,11 +544,11 @@ U32 mt;
 	break;
     case SVt_PVFM:
 	SvANY(sv) = new_XPVFM();
-	SvPV(sv)	= pv;
+	SvPVX(sv)	= pv;
 	SvCUR(sv)	= cur;
 	SvLEN(sv)	= len;
-	SvIV(sv)	= iv;
-	SvNV(sv)	= nv;
+	SvIVX(sv)	= iv;
+	SvNVX(sv)	= nv;
 	SvMAGIC(sv)	= magic;
 	SvSTASH(sv)	= stash;
 	FmLINES(sv)	= 0;
@@ -409,17 +640,17 @@ register SV *sv;
     t += strlen(t);
 
     if (SvPOK(sv)) {
-	if (!SvPV(sv))
+	if (!SvPVX(sv))
 	    return "(null)";
 	if (SvOOK(sv))
-	    sprintf(t,"(%d+\"%0.127s\")",SvIV(sv),SvPV(sv));
+	    sprintf(t,"(%d+\"%0.127s\")",SvIVX(sv),SvPVX(sv));
 	else
-	    sprintf(t,"(\"%0.127s\")",SvPV(sv));
+	    sprintf(t,"(\"%0.127s\")",SvPVX(sv));
     }
     else if (SvNOK(sv))
-	sprintf(t,"(%g)",SvNV(sv));
+	sprintf(t,"(%g)",SvNVX(sv));
     else if (SvIOK(sv))
-	sprintf(t,"(%ld)",(long)SvIV(sv));
+	sprintf(t,"(%ld)",(long)SvIVX(sv));
     else
 	strcpy(t,"()");
     return tokenbuf;
@@ -430,12 +661,12 @@ sv_backoff(sv)
 register SV *sv;
 {
     assert(SvOOK(sv));
-    if (SvIV(sv)) {
-	char *s = SvPV(sv);
-	SvLEN(sv) += SvIV(sv);
-	SvPV(sv) -= SvIV(sv);
+    if (SvIVX(sv)) {
+	char *s = SvPVX(sv);
+	SvLEN(sv) += SvIVX(sv);
+	SvPVX(sv) -= SvIVX(sv);
 	SvIV_set(sv, 0);
-	Move(s, SvPV(sv), SvCUR(sv)+1, char);
+	Move(s, SvPVX(sv), SvCUR(sv)+1, char);
     }
     SvFLAGS(sv) &= ~SVf_OOK;
 }
@@ -458,19 +689,19 @@ unsigned long newlen;
     }
 #endif /* MSDOS */
     if (SvREADONLY(sv))
-	fatal(no_modify);
+	croak(no_modify);
     if (SvTYPE(sv) < SVt_PV) {
 	sv_upgrade(sv, SVt_PV);
-	s = SvPV(sv);
+	s = SvPVX(sv);
     }
     else if (SvOOK(sv)) {	/* pv is offset? */
 	sv_backoff(sv);
-	s = SvPV(sv);
+	s = SvPVX(sv);
 	if (newlen > SvLEN(sv))
 	    newlen += 10 * (newlen - SvCUR(sv)); /* avoid copy each time */
     }
     else
-	s = SvPV(sv);
+	s = SvPVX(sv);
     if (newlen > SvLEN(sv)) {		/* need more room? */
         if (SvLEN(sv))
 	    Renew(s,newlen,char);
@@ -488,14 +719,22 @@ register SV *sv;
 I32 i;
 {
     if (SvREADONLY(sv))
-	fatal(no_modify);
-    if (SvTYPE(sv) < SVt_IV)
+	croak(no_modify);
+    switch (SvTYPE(sv)) {
+    case SVt_NULL:
+    case SVt_REF:
 	sv_upgrade(sv, SVt_IV);
-    else if (SvTYPE(sv) == SVt_PV)
+	break;
+    case SVt_NV:
+	sv_upgrade(sv, SVt_PVNV);
+	break;
+    case SVt_PV:
 	sv_upgrade(sv, SVt_PVIV);
-    SvIV(sv) = i;
+	break;
+    }
+    SvIVX(sv) = i;
     SvIOK_only(sv);			/* validate number */
-    SvTDOWN(sv);
+    SvTAINT(sv);
 }
 
 void
@@ -504,7 +743,7 @@ register SV *sv;
 double num;
 {
     if (SvREADONLY(sv))
-	fatal(no_modify);
+	croak(no_modify);
     if (SvTYPE(sv) < SVt_NV)
 	sv_upgrade(sv, SVt_NV);
     else if (SvTYPE(sv) < SVt_PVNV)
@@ -512,9 +751,9 @@ double num;
     else if (SvPOK(sv)) {
 	SvOOK_off(sv);
     }
-    SvNV(sv) = num;
+    SvNVX(sv) = num;
     SvNOK_only(sv);			/* validate number */
-    SvTDOWN(sv);
+    SvTAINT(sv);
 }
 
 I32
@@ -523,26 +762,40 @@ register SV *sv;
 {
     if (!sv)
 	return 0;
+    if (SvMAGICAL(sv)) {
+	mg_get(sv);
+	if (SvIOKp(sv))
+	    return SvIVX(sv);
+	if (SvNOKp(sv))
+	    return (I32)SvNVX(sv);
+	if (SvPOKp(sv) && SvLEN(sv))
+	    return (I32)atol(SvPVX(sv));
+	return 0;
+    }
     if (SvREADONLY(sv)) {
 	if (SvNOK(sv))
-	    return (I32)SvNV(sv);
+	    return (I32)SvNVX(sv);
 	if (SvPOK(sv) && SvLEN(sv))
-	    return atof(SvPV(sv));
+	    return (I32)atol(SvPVX(sv));
 	if (dowarn)
 	    warn("Use of uninitialized variable");
 	return 0;
     }
-    if (SvTYPE(sv) < SVt_IV) {
-	if (SvTYPE(sv) == SVt_REF)
-	    return (I32)SvANYI32(sv);
+    switch (SvTYPE(sv)) {
+    case SVt_REF:
+	return (I32)SvANY(sv);
+    case SVt_NULL:
 	sv_upgrade(sv, SVt_IV);
-	DEBUG_c((stderr,"0x%lx num(%g)\n",sv,SvIV(sv)));
-	return SvIV(sv);
-    }
-    else if (SvTYPE(sv) == SVt_PV)
+	return SvIVX(sv);
+    case SVt_PV:
 	sv_upgrade(sv, SVt_PVIV);
+	break;
+    case SVt_NV:
+	sv_upgrade(sv, SVt_PVNV);
+	break;
+    }
     if (SvNOK(sv))
-	SvIV(sv) = (I32)SvNV(sv);
+	SvIVX(sv) = (I32)SvNVX(sv);
     else if (SvPOK(sv) && SvLEN(sv)) {
 	if (dowarn && !looks_like_number(sv)) {
 	    if (op)
@@ -550,17 +803,17 @@ register SV *sv;
 	    else
 		warn("Argument wasn't numeric");
 	}
-	SvIV(sv) = atol(SvPV(sv));
+	SvIVX(sv) = (I32)atol(SvPVX(sv));
     }
     else  {
 	if (dowarn)
 	    warn("Use of uninitialized variable");
 	SvUPGRADE(sv, SVt_IV);
-	SvIV(sv) = 0;
+	SvIVX(sv) = 0;
     }
     SvIOK_on(sv);
-    DEBUG_c((stderr,"0x%lx 2iv(%d)\n",sv,SvIV(sv)));
-    return SvIV(sv);
+    DEBUG_c((stderr,"0x%lx 2iv(%d)\n",sv,SvIVX(sv)));
+    return SvIVX(sv);
 }
 
 double
@@ -569,26 +822,39 @@ register SV *sv;
 {
     if (!sv)
 	return 0.0;
+    if (SvMAGICAL(sv)) {
+	mg_get(sv);
+	if (SvNOKp(sv))
+	    return SvNVX(sv);
+	if (SvPOKp(sv) && SvLEN(sv))
+	    return atof(SvPVX(sv));
+	if (SvIOKp(sv))
+	    return (double)SvIVX(sv);
+	return 0;
+    }
     if (SvREADONLY(sv)) {
 	if (SvPOK(sv) && SvLEN(sv))
-	    return atof(SvPV(sv));
+	    return atof(SvPVX(sv));
 	if (dowarn)
 	    warn("Use of uninitialized variable");
 	return 0.0;
     }
     if (SvTYPE(sv) < SVt_NV) {
 	if (SvTYPE(sv) == SVt_REF)
-	    return (double)SvANYI32(sv);
-	sv_upgrade(sv, SVt_NV);
-	DEBUG_c((stderr,"0x%lx num(%g)\n",sv,SvNV(sv)));
-	return SvNV(sv);
+	    return (double)(unsigned long)SvANY(sv);
+	if (SvTYPE(sv) == SVt_IV)
+	    sv_upgrade(sv, SVt_PVNV);
+	else
+	    sv_upgrade(sv, SVt_NV);
+	DEBUG_c((stderr,"0x%lx num(%g)\n",sv,SvNVX(sv)));
+	return SvNVX(sv);
     }
     else if (SvTYPE(sv) < SVt_PVNV)
 	sv_upgrade(sv, SVt_PVNV);
     if (SvIOK(sv) &&
-	    (!SvPOK(sv) || !strchr(SvPV(sv),'.') || !looks_like_number(sv)))
+	    (!SvPOK(sv) || !strchr(SvPVX(sv),'.') || !looks_like_number(sv)))
     {
-	SvNV(sv) = (double)SvIV(sv);
+	SvNVX(sv) = (double)SvIVX(sv);
     }
     else if (SvPOK(sv) && SvLEN(sv)) {
 	if (dowarn && !SvIOK(sv) && !looks_like_number(sv)) {
@@ -597,63 +863,96 @@ register SV *sv;
 	    else
 		warn("Argument wasn't numeric");
 	}
-	SvNV(sv) = atof(SvPV(sv));
+	SvNVX(sv) = atof(SvPVX(sv));
     }
     else  {
 	if (dowarn)
 	    warn("Use of uninitialized variable");
-	SvNV(sv) = 0.0;
+	SvNVX(sv) = 0.0;
     }
     SvNOK_on(sv);
-    DEBUG_c((stderr,"0x%lx 2nv(%g)\n",sv,SvNV(sv)));
-    return SvNV(sv);
+    DEBUG_c((stderr,"0x%lx 2nv(%g)\n",sv,SvNVX(sv)));
+    return SvNVX(sv);
 }
 
 char *
-sv_2pv(sv)
+sv_2pv(sv, lp)
 register SV *sv;
+STRLEN *lp;
 {
     register char *s;
     int olderrno;
 
-    if (!sv)
+    if (!sv) {
+	*lp = 0;
 	return "";
+    }
+    if (SvMAGICAL(sv)) {
+	mg_get(sv);
+	if (SvPOKp(sv)) {
+	    *lp = SvCUR(sv);
+	    return SvPVX(sv);
+	}
+	if (SvIOKp(sv)) {
+	    (void)sprintf(tokenbuf,"%ld",SvIVX(sv));
+	    *lp = strlen(tokenbuf);
+	    return tokenbuf;
+	}
+	if (SvNOKp(sv)) {
+	    (void)sprintf(tokenbuf,"%.20g",SvNVX(sv));
+	    *lp = strlen(tokenbuf);
+	    return tokenbuf;
+	}
+	*lp = 0;
+	return "";
+    }
     if (SvTYPE(sv) == SVt_REF) {
 	sv = (SV*)SvANY(sv);
 	if (!sv)
-	    return "<Empty reference>";
-	switch (SvTYPE(sv)) {
-	case SVt_NULL:	s = "an undefined value";		break;
-	case SVt_REF:	s = "a reference";			break;
-	case SVt_IV:	s = "an integer value";			break;
-	case SVt_NV:	s = "a numeric value";			break;
-	case SVt_PV:	s = "a string value";			break;
-	case SVt_PVIV:	s = "a string+integer value";		break;
-	case SVt_PVNV:	s = "a scalar value";			break;
-	case SVt_PVMG:	s = "a magic value";			break;
-	case SVt_PVLV:	s = "an lvalue";			break;
-	case SVt_PVAV:	s = "an array value";			break;
-	case SVt_PVHV:	s = "an associative array value";	break;
-	case SVt_PVCV:	s = "a code value";			break;
-	case SVt_PVGV:	s = "a glob value";			break;
-	case SVt_PVBM:	s = "a search string";			break;
-	case SVt_PVFM:	s = "a formatline";			break;
-	default:	s = "something weird";			break;
+	    s = "NULLREF";
+	else {
+	    switch (SvTYPE(sv)) {
+	    case SVt_NULL:
+	    case SVt_REF:
+	    case SVt_IV:
+	    case SVt_NV:
+	    case SVt_PV:
+	    case SVt_PVIV:
+	    case SVt_PVNV:
+	    case SVt_PVMG:	s = "SCALAR";			break;
+	    case SVt_PVLV:	s = "LVALUE";			break;
+	    case SVt_PVAV:	s = "ARRAY";			break;
+	    case SVt_PVHV:	s = "HASH";			break;
+	    case SVt_PVCV:	s = "CODE";			break;
+	    case SVt_PVGV:	s = "GLOB";			break;
+	    case SVt_PVBM:	s = "SEARCHSTRING";			break;
+	    case SVt_PVFM:	s = "FORMATLINE";			break;
+	    default:		s = "UNKNOWN";			break;
+	    }
+	    if (SvSTORAGE(sv) == 'O')
+		sprintf(tokenbuf, "%s=%s(0x%lx)",
+			    HvNAME(SvSTASH(sv)), s, (unsigned long)sv);
+	    else
+		sprintf(tokenbuf, "%s(0x%lx)", s, (unsigned long)sv);
+	    s = tokenbuf;
 	}
-	sprintf(tokenbuf,"<Reference to %s at 0x%lx>", s, (unsigned long)sv);
-	return tokenbuf;
+	*lp = strlen(s);
+	return s;
     }
     if (SvREADONLY(sv)) {
 	if (SvIOK(sv)) {
-	    (void)sprintf(tokenbuf,"%ld",SvIV(sv));
+	    (void)sprintf(tokenbuf,"%ld",SvIVX(sv));
+	    *lp = strlen(tokenbuf);
 	    return tokenbuf;
 	}
 	if (SvNOK(sv)) {
-	    (void)sprintf(tokenbuf,"%.20g",SvNV(sv));
+	    (void)sprintf(tokenbuf,"%.20g",SvNVX(sv));
+	    *lp = strlen(tokenbuf);
 	    return tokenbuf;
 	}
 	if (dowarn)
 	    warn("Use of uninitialized variable");
+	*lp = 0;
 	return "";
     }
     if (!SvUPGRADE(sv, SVt_PV))
@@ -662,17 +961,17 @@ register SV *sv;
 	if (SvTYPE(sv) < SVt_PVNV)
 	    sv_upgrade(sv, SVt_PVNV);
 	SvGROW(sv, 28);
-	s = SvPV(sv);
+	s = SvPVX(sv);
 	olderrno = errno;	/* some Xenix systems wipe out errno here */
 #if defined(scs) && defined(ns32000)
-	gcvt(SvNV(sv),20,s);
+	gcvt(SvNVX(sv),20,s);
 #else
 #ifdef apollo
-	if (SvNV(sv) == 0.0)
+	if (SvNVX(sv) == 0.0)
 	    (void)strcpy(s,"0");
 	else
 #endif /*apollo*/
-	(void)sprintf(s,"%.20g",SvNV(sv));
+	(void)sprintf(s,"%.20g",SvNVX(sv));
 #endif /*scs*/
 	errno = olderrno;
 	while (*s) s++;
@@ -685,9 +984,9 @@ register SV *sv;
 	if (SvTYPE(sv) < SVt_PVIV)
 	    sv_upgrade(sv, SVt_PVIV);
 	SvGROW(sv, 11);
-	s = SvPV(sv);
+	s = SvPVX(sv);
 	olderrno = errno;	/* some Xenix systems wipe out errno here */
-	(void)sprintf(s,"%ld",SvIV(sv));
+	(void)sprintf(s,"%ld",SvIVX(sv));
 	errno = olderrno;
 	while (*s) s++;
     }
@@ -695,17 +994,50 @@ register SV *sv;
 	if (dowarn)
 	    warn("Use of uninitialized variable");
 	sv_grow(sv, 1);
-	s = SvPV(sv);
+	s = SvPVX(sv);
     }
     *s = '\0';
-    SvCUR_set(sv, s - SvPV(sv));
+    *lp = s - SvPVX(sv);
+    SvCUR_set(sv, *lp);
     SvPOK_on(sv);
-    DEBUG_c((stderr,"0x%lx 2pv(%s)\n",sv,SvPV(sv)));
-    return SvPV(sv);
+    DEBUG_c((stderr,"0x%lx 2pv(%s)\n",sv,SvPVX(sv)));
+    return SvPVX(sv);
+}
+
+/* This function is only called on magical items */
+bool
+sv_2bool(sv)
+register SV *sv;
+{
+    if (SvMAGICAL(sv))
+	mg_get(sv);
+
+    if (SvTYPE(sv) == SVt_REF)
+	return SvANY(sv) != 0;
+    if (SvPOKp(sv)) {
+	register XPV* Xpv;
+	if ((Xpv = (XPV*)SvANY(sv)) &&
+		(*Xpv->xpv_pv > '0' ||
+		Xpv->xpv_cur > 1 ||
+		(Xpv->xpv_cur && *Xpv->xpv_pv != '0')))
+	    return 1;
+	else
+	    return 0;
+    }
+    else {
+	if (SvIOKp(sv))
+	    return SvIVX(sv) != 0;
+	else {
+	    if (SvNOKp(sv))
+		return SvNVX(sv) != 0.0;
+	    else
+		return FALSE;
+	}
+    }
 }
 
 /* Note: sv_setsv() should not be called with a source string that needs
- * be reused, since it may destroy the source string if it is marked
+ * to be reused, since it may destroy the source string if it is marked
  * as temporary.
  */
 
@@ -714,23 +1046,16 @@ sv_setsv(dstr,sstr)
 SV *dstr;
 register SV *sstr;
 {
+    int flags;
+
     if (sstr == dstr)
 	return;
     if (SvREADONLY(dstr))
-	fatal(no_modify);
+	croak(no_modify);
     if (!sstr)
 	sstr = &sv_undef;
 
-    if (SvTYPE(dstr) < SvTYPE(sstr))
-	sv_upgrade(dstr, SvTYPE(sstr));
-    else if (SvTYPE(dstr) == SVt_PV && SvTYPE(sstr) <= SVt_NV) {
-	if (SvTYPE(sstr) <= SVt_IV)
-	    sv_upgrade(dstr, SVt_PVIV);		/* handle discontinuities */
-	else
-	    sv_upgrade(dstr, SVt_PVNV);
-    }
-    else if (SvTYPE(dstr) == SVt_PVIV && SvTYPE(sstr) == SVt_NV)
-	sv_upgrade(dstr, SVt_PVNV);
+    /* There's a lot of redundancy below but we're going for speed here */
 
     switch (SvTYPE(sstr)) {
     case SVt_NULL:
@@ -743,23 +1068,63 @@ register SV *sstr;
 	    SvOK_off(dstr);
 	return;
     case SVt_REF:
-	SvTUP(sstr);
+	if (SvTYPE(dstr) < SVt_REF)
+	    sv_upgrade(dstr, SVt_REF);
 	if (SvTYPE(dstr) == SVt_REF) {
+	    sv_free((SV*)SvANY(dstr));
+	    SvANY(dstr) = 0;
 	    SvANY(dstr) = (void*)sv_ref((SV*)SvANY(sstr));
 	}
 	else {
 	    if (SvMAGICAL(dstr))
-		fatal("Can't assign a reference to a magical variable");
+		croak("Can't assign a reference to a magical variable");
+	    if (SvREFCNT(dstr) != 1)
+		warn("Reference miscount in sv_setsv()");
+	    SvREFCNT(dstr) = 0;
 	    sv_clear(dstr);
 	    SvTYPE(dstr) = SVt_REF;
 	    SvANY(dstr) = (void*)sv_ref((SV*)SvANY(sstr));
 	    SvOK_off(dstr);
 	}
-	SvTDOWN(sstr);
+	SvTAINT(sstr);
 	return;
+    case SVt_IV:
+	if (SvTYPE(dstr) < SVt_IV)
+	    sv_upgrade(dstr, SVt_IV);
+	else if (SvTYPE(dstr) == SVt_PV)
+	    sv_upgrade(dstr, SVt_PVIV);
+	else if (SvTYPE(dstr) == SVt_NV)
+	    sv_upgrade(dstr, SVt_PVNV);
+	flags = SvFLAGS(sstr);
+	break;
+    case SVt_NV:
+	if (SvTYPE(dstr) < SVt_NV)
+	    sv_upgrade(dstr, SVt_NV);
+	else if (SvTYPE(dstr) == SVt_PV)
+	    sv_upgrade(dstr, SVt_PVNV);
+	else if (SvTYPE(dstr) == SVt_PVIV)
+	    sv_upgrade(dstr, SVt_PVNV);
+	flags = SvFLAGS(sstr);
+	break;
+    case SVt_PV:
+	if (SvTYPE(dstr) < SVt_PV)
+	    sv_upgrade(dstr, SVt_PV);
+	flags = SvFLAGS(sstr);
+	break;
+    case SVt_PVIV:
+	if (SvTYPE(dstr) < SVt_PVIV)
+	    sv_upgrade(dstr, SVt_PVIV);
+	flags = SvFLAGS(sstr);
+	break;
+    case SVt_PVNV:
+	if (SvTYPE(dstr) < SVt_PVNV)
+	    sv_upgrade(dstr, SVt_PVNV);
+	flags = SvFLAGS(sstr);
+	break;
     case SVt_PVGV:
-	SvTUP(sstr);
-	if (SvTYPE(dstr) == SVt_PVGV) {
+	if (SvTYPE(dstr) <= SVt_PVGV) {
+	    if (SvTYPE(dstr) < SVt_PVGV)
+		sv_upgrade(dstr, SVt_PVGV);
 	    SvOK_off(dstr);
 	    if (!GvAV(sstr))
 		gv_AVadd(sstr);
@@ -770,83 +1135,81 @@ register SV *sstr;
 	    if (GvGP(dstr))
 		gp_free(dstr);
 	    GvGP(dstr) = gp_ref(GvGP(sstr));
-	    SvTDOWN(sstr);
+	    SvTAINT(sstr);
 	    return;
 	}
 	/* FALL THROUGH */
 
     default:
-	if (SvMAGICAL(sstr))
+	if (SvTYPE(dstr) < SvTYPE(sstr))
+	    sv_upgrade(dstr, SvTYPE(sstr));
+	if (SvMAGICAL(sstr)) {
 	    mg_get(sstr);
-	/* XXX */
-	break;
+	    flags = SvPRIVATE(sstr);
+	}
+	else
+	    flags = SvFLAGS(sstr);
     }
 
-    SvPRIVATE(dstr)	= SvPRIVATE(sstr);
-    SvSTORAGE(dstr)	= SvSTORAGE(sstr);
 
-    if (SvPOK(sstr)) {
+    SvPRIVATE(dstr)	= SvPRIVATE(sstr) & ~(SVf_IOK|SVf_POK|SVf_NOK);
 
-	SvTUP(sstr);
+    if (flags & SVf_POK) {
 
 	/*
 	 * Check to see if we can just swipe the string.  If so, it's a
 	 * possible small lose on short strings, but a big win on long ones.
-	 * It might even be a win on short strings if SvPV(dstr)
-	 * has to be allocated and SvPV(sstr) has to be freed.
+	 * It might even be a win on short strings if SvPVX(dstr)
+	 * has to be allocated and SvPVX(sstr) has to be freed.
 	 */
 
 	if (SvTEMP(sstr)) {		/* slated for free anyway? */
 	    if (SvPOK(dstr)) {
 		SvOOK_off(dstr);
-		Safefree(SvPV(dstr));
+		Safefree(SvPVX(dstr));
 	    }
-	    SvPV_set(dstr, SvPV(sstr));
+	    SvPV_set(dstr, SvPVX(sstr));
 	    SvLEN_set(dstr, SvLEN(sstr));
 	    SvCUR_set(dstr, SvCUR(sstr));
-	    SvTYPE(dstr) = SvTYPE(sstr);
 	    SvPOK_only(dstr);
 	    SvTEMP_off(dstr);
 	    SvPV_set(sstr, Nullch);
 	    SvLEN_set(sstr, 0);
 	    SvPOK_off(sstr);			/* wipe out any weird flags */
-	    SvTYPE(sstr) = 0;			/* so sstr frees uneventfully */
+	    SvPVX(sstr) = 0;			/* so sstr frees uneventfully */
 	}
 	else {					/* have to copy actual string */
-	    if (SvPV(dstr)) { /* XXX ck type */
+	    if (SvPVX(dstr)) { /* XXX ck type */
 		SvOOK_off(dstr);
 	    }
-	    sv_setpvn(dstr,SvPV(sstr),SvCUR(sstr));
+	    sv_setpvn(dstr,SvPVX(sstr),SvCUR(sstr));
 	}
 	/*SUPPRESS 560*/
-	if (SvNOK(sstr)) {
+	if (flags & SVf_NOK) {
 	    SvNOK_on(dstr);
-	    SvNV(dstr) = SvNV(sstr);
+	    SvNVX(dstr) = SvNVX(sstr);
 	}
-	if (SvIOK(sstr)) {
+	if (flags & SVf_IOK) {
 	    SvIOK_on(dstr);
-	    SvIV(dstr) = SvIV(sstr);
+	    SvIVX(dstr) = SvIVX(sstr);
 	}
     }
-    else if (SvNOK(sstr)) {
-	SvTUP(sstr);
-	SvNV(dstr) = SvNV(sstr);
+    else if (flags & SVf_NOK) {
+	SvNVX(dstr) = SvNVX(sstr);
 	SvNOK_only(dstr);
 	if (SvIOK(sstr)) {
 	    SvIOK_on(dstr);
-	    SvIV(dstr) = SvIV(sstr);
+	    SvIVX(dstr) = SvIVX(sstr);
 	}
     }
-    else if (SvIOK(sstr)) {
-	SvTUP(sstr);
+    else if (flags & SVf_IOK) {
 	SvIOK_only(dstr);
-	SvIV(dstr) = SvIV(sstr);
+	SvIVX(dstr) = SvIVX(sstr);
     }
     else {
-	SvTUP(sstr);
 	SvOK_off(dstr);
     }
-    SvTDOWN(dstr);
+    SvTAINT(dstr);
 }
 
 void
@@ -855,15 +1218,21 @@ register SV *sv;
 register char *ptr;
 register STRLEN len;
 {
+    if (SvREADONLY(sv))
+	croak(no_modify);
+    if (!ptr) {
+	SvOK_off(sv);
+	return;
+    }
     if (!SvUPGRADE(sv, SVt_PV))
 	return;
     SvGROW(sv, len + 1);
     if (ptr)
-	Move(ptr,SvPV(sv),len,char);
+	Move(ptr,SvPVX(sv),len,char);
     SvCUR_set(sv, len);
     *SvEND(sv) = '\0';
     SvPOK_only(sv);		/* validate pointer */
-    SvTDOWN(sv);
+    SvTAINT(sv);
 }
 
 void
@@ -874,17 +1243,44 @@ register char *ptr;
     register STRLEN len;
 
     if (SvREADONLY(sv))
-	fatal(no_modify);
-    if (!ptr)
-	ptr = "";
+	croak(no_modify);
+    if (!ptr) {
+	SvOK_off(sv);
+	return;
+    }
     len = strlen(ptr);
     if (!SvUPGRADE(sv, SVt_PV))
 	return;
     SvGROW(sv, len + 1);
-    Move(ptr,SvPV(sv),len+1,char);
+    Move(ptr,SvPVX(sv),len+1,char);
     SvCUR_set(sv, len);
     SvPOK_only(sv);		/* validate pointer */
-    SvTDOWN(sv);
+    SvTAINT(sv);
+}
+
+void
+sv_usepvn(sv,ptr,len)
+register SV *sv;
+register char *ptr;
+register STRLEN len;
+{
+    if (SvREADONLY(sv))
+	croak(no_modify);
+    if (!SvUPGRADE(sv, SVt_PV))
+	return;
+    if (!ptr) {
+	SvOK_off(sv);
+	return;
+    }
+    if (SvPVX(sv))
+	Safefree(SvPVX(sv));
+    Renew(ptr, len+1, char);
+    SvPVX(sv) = ptr;
+    SvCUR_set(sv, len);
+    SvLEN_set(sv, len+1);
+    *SvEND(sv) = '\0';
+    SvPOK_only(sv);		/* validate pointer */
+    SvTAINT(sv);
 }
 
 void
@@ -897,20 +1293,20 @@ register char *ptr;
     if (!ptr || !SvPOK(sv))
 	return;
     if (SvREADONLY(sv))
-	fatal(no_modify);
+	croak(no_modify);
     if (SvTYPE(sv) < SVt_PVIV)
 	sv_upgrade(sv,SVt_PVIV);
 
     if (!SvOOK(sv)) {
-	SvIV(sv) = 0;
+	SvIVX(sv) = 0;
 	SvFLAGS(sv) |= SVf_OOK;
     }
     SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK);
-    delta = ptr - SvPV(sv);
+    delta = ptr - SvPVX(sv);
     SvLEN(sv) -= delta;
     SvCUR(sv) -= delta;
-    SvPV(sv) += delta;
-    SvIV(sv) += delta;
+    SvPVX(sv) += delta;
+    SvIVX(sv) += delta;
 }
 
 void
@@ -919,16 +1315,17 @@ register SV *sv;
 register char *ptr;
 register STRLEN len;
 {
+    STRLEN tlen;
+    char *s;
     if (SvREADONLY(sv))
-	fatal(no_modify);
-    if (!(SvPOK(sv)))
-	(void)sv_2pv(sv);
-    SvGROW(sv, SvCUR(sv) + len + 1);
-    Move(ptr,SvPV(sv)+SvCUR(sv),len,char);
+	croak(no_modify);
+    s = SvPV(sv, tlen);
+    SvGROW(sv, tlen + len + 1);
+    Move(ptr,SvPVX(sv)+tlen,len,char);
     SvCUR(sv) += len;
     *SvEND(sv) = '\0';
     SvPOK_only(sv);		/* validate pointer */
-    SvTDOWN(sv);
+    SvTAINT(sv);
 }
 
 void
@@ -937,14 +1334,11 @@ SV *dstr;
 register SV *sstr;
 {
     char *s;
+    STRLEN len;
     if (!sstr)
 	return;
-    if (s = SvPVn(sstr)) {
-	if (SvPOK(sstr))
-	    sv_catpvn(dstr,s,SvCUR(sstr));
-	else
-	    sv_catpv(dstr,s);
-    }
+    if (s = SvPV(sstr, len))
+	sv_catpvn(dstr,s,len);
 }
 
 void
@@ -953,19 +1347,20 @@ register SV *sv;
 register char *ptr;
 {
     register STRLEN len;
+    STRLEN tlen;
+    char *s;
 
     if (SvREADONLY(sv))
-	fatal(no_modify);
+	croak(no_modify);
     if (!ptr)
 	return;
-    if (!(SvPOK(sv)))
-	(void)sv_2pv(sv);
+    s = SvPV(sv, tlen);
     len = strlen(ptr);
-    SvGROW(sv, SvCUR(sv) + len + 1);
-    Move(ptr,SvPV(sv)+SvCUR(sv),len+1,char);
+    SvGROW(sv, tlen + len + 1);
+    Move(ptr,SvPVX(sv)+tlen,len+1,char);
     SvCUR(sv) += len;
     SvPOK_only(sv);		/* validate pointer */
-    SvTDOWN(sv);
+    SvTAINT(sv);
 }
 
 SV *
@@ -979,7 +1374,7 @@ STRLEN len;
 {
     register SV *sv;
     
-    sv = (SV*)new_SV();
+    new_SV();
     Zero(sv, 1, SV);
     SvREFCNT(sv)++;
     if (len) {
@@ -995,36 +1390,39 @@ register SV *sv;
 SV *obj;
 char how;
 char *name;
-STRLEN namlen;
+I32 namlen;
 {
     MAGIC* mg;
     
     if (SvREADONLY(sv))
-	fatal(no_modify);
-    if (!SvUPGRADE(sv, SVt_PVMG))
-	return;
+	croak(no_modify);
+    if (SvMAGICAL(sv)) {
+	if (SvMAGIC(sv) && mg_find(sv, how))
+	    return;
+    }
+    else {
+	if (!SvUPGRADE(sv, SVt_PVMG))
+	    return;
+	SvMAGICAL_on(sv);
+	SvPRIVATE(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+	SvPRIVATE(sv) |= SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK);
+	SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+    }
     Newz(702,mg, 1, MAGIC);
     mg->mg_moremagic = SvMAGIC(sv);
-    SvMAGICAL_on(sv);
+
     SvMAGIC(sv) = mg;
-    mg->mg_obj = obj;
+    mg->mg_obj = sv_ref(obj);
     mg->mg_type = how;
-    if (name) {
+    mg->mg_len = namlen;
+    if (name && namlen >= 0)
 	mg->mg_ptr = nsavestr(name, namlen);
-	mg->mg_len = namlen;
-    }
     switch (how) {
     case 0:
 	mg->mg_virtual = &vtbl_sv;
 	break;
     case 'B':
 	mg->mg_virtual = &vtbl_bm;
-	break;
-    case 'D':
-	mg->mg_virtual = &vtbl_dbm;
-	break;
-    case 'd':
-	mg->mg_virtual = &vtbl_dbmelem;
 	break;
     case 'E':
 	mg->mg_virtual = &vtbl_env;
@@ -1035,17 +1433,32 @@ STRLEN namlen;
     case 'g':
 	mg->mg_virtual = &vtbl_mglob;
 	break;
+    case 'I':
+	mg->mg_virtual = &vtbl_isa;
+	break;
+    case 'i':
+	mg->mg_virtual = &vtbl_isaelem;
+	break;
     case 'L':
 	mg->mg_virtual = 0;
 	break;
     case 'l':
 	mg->mg_virtual = &vtbl_dbline;
 	break;
+    case 'P':
+	mg->mg_virtual = &vtbl_pack;
+	break;
+    case 'p':
+	mg->mg_virtual = &vtbl_packelem;
+	break;
     case 'S':
 	mg->mg_virtual = &vtbl_sig;
 	break;
     case 's':
 	mg->mg_virtual = &vtbl_sigelem;
+	break;
+    case 't':
+	mg->mg_virtual = &vtbl_taint;
 	break;
     case 'U':
 	mg->mg_virtual = &vtbl_uvar;
@@ -1063,8 +1476,42 @@ STRLEN namlen;
 	mg->mg_virtual = &vtbl_arylen;
 	break;
     default:
-	fatal("Don't know how to handle magic of type '%c'", how);
+	croak("Don't know how to handle magic of type '%c'", how);
     }
+}
+
+int
+sv_unmagic(sv, type)
+SV* sv;
+char type;
+{
+    MAGIC* mg;
+    MAGIC** mgp;
+    if (!SvMAGICAL(sv))
+	return 0;
+    mgp = &SvMAGIC(sv);
+    for (mg = *mgp; mg; mg = *mgp) {
+	if (mg->mg_type == type) {
+	    MGVTBL* vtbl = mg->mg_virtual;
+	    *mgp = mg->mg_moremagic;
+	    if (vtbl && vtbl->svt_free)
+		(*vtbl->svt_free)(sv, mg);
+	    if (mg->mg_ptr && mg->mg_type != 'g')
+		Safefree(mg->mg_ptr);
+	    sv_free(mg->mg_obj);
+	    Safefree(mg);
+	}
+	else
+	    mgp = &mg->mg_moremagic;
+    }
+    if (!SvMAGIC(sv)) {
+	SvMAGICAL_off(sv);
+	SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+	SvFLAGS(sv) |= SvPRIVATE(sv) & (SVf_IOK|SVf_NOK|SVf_POK);
+	SvPRIVATE(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+    }
+
+    return 0;
 }
 
 void
@@ -1082,7 +1529,7 @@ STRLEN littlelen;
     register I32 i;
 
     if (SvREADONLY(bigstr))
-	fatal(no_modify);
+	croak(no_modify);
     SvPOK_only(bigstr);
 
     i = littlelen - len;
@@ -1090,7 +1537,7 @@ STRLEN littlelen;
 	if (!SvUPGRADE(bigstr, SVt_PV))
 	    return;
 	SvGROW(bigstr, SvCUR(bigstr) + i + 1);
-	big = SvPV(bigstr);
+	big = SvPVX(bigstr);
 	mid = big + offset + len;
 	midend = bigend = big + SvCUR(bigstr);
 	bigend += i;
@@ -1103,18 +1550,18 @@ STRLEN littlelen;
 	return;
     }
     else if (i == 0) {
-	Move(little,SvPV(bigstr)+offset,len,char);
+	Move(little,SvPVX(bigstr)+offset,len,char);
 	SvSETMAGIC(bigstr);
 	return;
     }
 
-    big = SvPV(bigstr);
+    big = SvPVX(bigstr);
     mid = big + offset;
     midend = mid + len;
     bigend = big + SvCUR(bigstr);
 
     if (midend > bigend)
-	fatal("panic: sv_insert");
+	croak("panic: sv_insert");
 
     if (mid - big > bigend - midend) {	/* faster to shorten from end */
 	if (littlelen) {
@@ -1160,7 +1607,7 @@ register SV *nsv;
 {
     U32 refcnt = SvREFCNT(sv);
     if (SvREADONLY(sv))
-	fatal(no_modify);
+	croak(no_modify);
     if (SvREFCNT(nsv) != 1)
 	warn("Reference miscount in sv_replace()");
     if (SvMAGICAL(sv)) {
@@ -1174,7 +1621,7 @@ register SV *nsv;
     sv_clear(sv);
     StructCopy(nsv,sv,SV);
     SvREFCNT(sv) = refcnt;
-    Safefree(nsv);
+    del_SV(nsv);
 }
 
 void
@@ -1184,6 +1631,47 @@ register SV *sv;
     assert(sv);
     assert(SvREFCNT(sv) == 0);
 
+    if (SvSTORAGE(sv) == 'O') {
+	dSP;
+	BINOP myop;		/* fake syntax tree node */
+	GV* destructor;
+
+	SvSTORAGE(sv) = 0;		/* Curse the object. */
+
+	ENTER;
+	SAVETMPS;
+	SAVESPTR(curcop);
+	SAVESPTR(op);
+	curcop = &compiling;
+	curstash = SvSTASH(sv);
+	destructor = gv_fetchpv("DESTROY", FALSE);
+
+	if (destructor && GvCV(destructor)) {
+	    SV* ref = sv_mortalcopy(&sv_undef);
+	    sv_upgrade(ref, SVt_REF);
+	    SvANY(ref) = (void*)sv_ref(sv);
+
+	    op = (OP*)&myop;
+	    Zero(op, 1, OP);
+	    myop.op_last = (OP*)&myop;
+	    myop.op_flags = OPf_STACKED;
+	    myop.op_next = Nullop;
+
+	    EXTEND(SP, 2);
+	    PUSHs((SV*)destructor);
+	    pp_pushmark();
+	    PUSHs(ref);
+	    PUTBACK;
+	    op = pp_entersubr();
+	    if (op)
+		run();
+	    stack_sp--;
+	    SvREFCNT(sv) = 0;
+	    SvTYPE(ref) = SVt_NULL;
+	    free_tmps();
+	}
+	LEAVE;
+    }
     switch (SvTYPE(sv)) {
     case SVt_PVFM:
 	goto freemagic;
@@ -1193,27 +1681,27 @@ register SV *sv;
 	gp_free(sv);
 	goto freemagic;
     case SVt_PVCV:
-	op_free(CvSTART(sv));
+	cv_clear((CV*)sv);
 	goto freemagic;
     case SVt_PVHV:
-	hv_clear(sv, FALSE);
+	hv_clear((HV*)sv);
 	goto freemagic;
     case SVt_PVAV:
-	av_clear(sv);
+	av_clear((AV*)sv);
 	goto freemagic;
     case SVt_PVLV:
 	goto freemagic;
     case SVt_PVMG:
       freemagic:
 	if (SvMAGICAL(sv))
-	    mg_freeall(sv);
+	    mg_free(sv);
     case SVt_PVNV:
     case SVt_PVIV:
 	SvOOK_off(sv);
 	/* FALL THROUGH */
     case SVt_PV:
-	if (SvPV(sv))
-	    Safefree(SvPV(sv));
+	if (SvPVX(sv))
+	    Safefree(SvPVX(sv));
 	break;
     case SVt_NV:
 	break;
@@ -1278,7 +1766,8 @@ SV *
 sv_ref(sv)
 SV* sv;
 {
-    SvREFCNT(sv)++;
+    if (sv)
+	SvREFCNT(sv)++;
     return sv;
 }
 
@@ -1296,47 +1785,14 @@ SV *sv;
 	warn("Attempt to free unreferenced scalar");
 	return;
     }
+#ifdef DEBUGGING
+    if (SvTEMP(sv)) {
+	warn("Attempt to free temp prematurely");
+	return;
+    }
+#endif
     if (--SvREFCNT(sv) > 0)
 	return;
-    if (SvSTORAGE(sv) == 'O') {
-	dSP;
-	BINOP myop;		/* fake syntax tree node */
-	GV* destructor;
-
-	SvSTORAGE(sv) = 0;		/* Curse the object. */
-
-	ENTER;
-	SAVESPTR(curcop);
-	SAVESPTR(op);
-	curcop = &compiling;
-	curstash = SvSTASH(sv);
-	destructor = gv_fetchpv("DESTROY", FALSE);
-
-	if (GvCV(destructor)) {
-	    SV* ref = sv_mortalcopy(&sv_undef);
-	    SvREFCNT(ref) = 1;
-	    sv_upgrade(ref, SVt_REF);
-	    SvANY(ref) = (void*)sv_ref(sv);
-
-	    op = (OP*)&myop;
-	    Zero(op, 1, OP);
-	    myop.op_last = (OP*)&myop;
-	    myop.op_flags = OPf_STACKED;
-	    myop.op_next = Nullop;
-
-	    EXTEND(SP, 2);
-	    PUSHs((SV*)destructor);
-	    pp_pushmark();
-	    PUSHs(ref);
-	    PUTBACK;
-	    op = pp_entersubr();
-	    run();
-	    stack_sp--;
-	    LEAVE;	/* Will eventually free sv as ordinary item. */
-	    return;	
-	}
-	LEAVE;
-    }
     sv_clear(sv);
     DEB(SvTYPE(sv) = 0xff;)
     del_SV(sv);
@@ -1346,25 +1802,14 @@ STRLEN
 sv_len(sv)
 register SV *sv;
 {
-    I32 paren;
-    I32 i;
     char *s;
+    STRLEN len;
 
     if (!sv)
 	return 0;
 
-    if (SvMAGICAL(sv))
-	return mg_len(sv);
-
-    if (!(SvPOK(sv))) {
-	(void)sv_2pv(sv);
-	if (!SvOK(sv))
-	    return 0;
-    }
-    if (SvPV(sv))
-	return SvCUR(sv);
-    else
-	return 0;
+    s = SvPV(sv, len);
+    return len;
 }
 
 I32
@@ -1373,39 +1818,21 @@ register SV *str1;
 register SV *str2;
 {
     char *pv1;
-    U32 cur1;
+    STRLEN cur1;
     char *pv2;
-    U32 cur2;
+    STRLEN cur2;
 
     if (!str1) {
 	pv1 = "";
 	cur1 = 0;
     }
-    else {
-	if (SvMAGICAL(str1))
-	    mg_get(str1);
-	if (!SvPOK(str1)) {
-	    (void)sv_2pv(str1);
-	    if (!SvPOK(str1))
-		str1 = &sv_no;
-	}
-	pv1 = SvPV(str1);
-	cur1 = SvCUR(str1);
-    }
+    else
+	pv1 = SvPV(str1, cur1);
 
     if (!str2)
 	return !cur1;
-    else {
-	if (SvMAGICAL(str2))
-	    mg_get(str2);
-	if (!SvPOK(str2)) {
-	    (void)sv_2pv(str2);
-	    if (!SvPOK(str2))
-		return !cur1;
-	}
-	pv2 = SvPV(str2);
-	cur2 = SvCUR(str2);
-    }
+    else
+	pv2 = SvPV(str2, cur2);
 
     if (cur1 != cur2)
 	return 0;
@@ -1420,41 +1847,23 @@ register SV *str2;
 {
     I32 retval;
     char *pv1;
-    U32 cur1;
+    STRLEN cur1;
     char *pv2;
-    U32 cur2;
+    STRLEN cur2;
 
     if (!str1) {
 	pv1 = "";
 	cur1 = 0;
     }
-    else {
-	if (SvMAGICAL(str1))
-	    mg_get(str1);
-	if (!SvPOK(str1)) {
-	    (void)sv_2pv(str1);
-	    if (!SvPOK(str1))
-		str1 = &sv_no;
-	}
-	pv1 = SvPV(str1);
-	cur1 = SvCUR(str1);
-    }
+    else
+	pv1 = SvPV(str1, cur1);
 
     if (!str2) {
 	pv2 = "";
 	cur2 = 0;
     }
-    else {
-	if (SvMAGICAL(str2))
-	    mg_get(str2);
-	if (!SvPOK(str2)) {
-	    (void)sv_2pv(str2);
-	    if (!SvPOK(str2))
-		str2 = &sv_no;
-	}
-	pv2 = SvPV(str2);
-	cur2 = SvCUR(str2);
-    }
+    else
+	pv2 = SvPV(str2, cur2);
 
     if (!cur1)
 	return cur2 ? -1 : 0;
@@ -1492,7 +1901,7 @@ I32 append;
     I32 shortbuffered;
 
     if (SvREADONLY(sv))
-	fatal(no_modify);
+	croak(no_modify);
     if (!SvUPGRADE(sv, SVt_PV))
 	return;
     if (rspara) {		/* have to do this both before and after */
@@ -1519,7 +1928,7 @@ I32 append;
     }
     else
 	shortbuffered = 0;
-    bp = SvPV(sv) + append;		/* move these two too to registers */
+    bp = SvPVX(sv) + append;		/* move these two too to registers */
     ptr = fp->_ptr;
     for (;;) {
       screamer:
@@ -1533,10 +1942,10 @@ I32 append;
 	if (shortbuffered) {			/* oh well, must extend */
 	    cnt = shortbuffered;
 	    shortbuffered = 0;
-	    bpx = bp - SvPV(sv);	/* prepare for possible relocation */
+	    bpx = bp - SvPVX(sv);	/* prepare for possible relocation */
 	    SvCUR_set(sv, bpx);
 	    SvGROW(sv, SvLEN(sv) + append + cnt + 2);
-	    bp = SvPV(sv) + bpx;	/* reconstitute our pointer */
+	    bp = SvPVX(sv) + bpx;	/* reconstitute our pointer */
 	    continue;
 	}
 
@@ -1546,10 +1955,10 @@ I32 append;
 	cnt = fp->_cnt;
 	ptr = fp->_ptr;			/* reregisterize cnt and ptr */
 
-	bpx = bp - SvPV(sv);	/* prepare for possible relocation */
+	bpx = bp - SvPVX(sv);	/* prepare for possible relocation */
 	SvCUR_set(sv, bpx);
 	SvGROW(sv, bpx + cnt + 2);
-	bp = SvPV(sv) + bpx;	/* reconstitute our pointer */
+	bp = SvPVX(sv) + bpx;	/* reconstitute our pointer */
 
 	if (i == newline) {		/* all done for now? */
 	    *bp++ = i;
@@ -1561,7 +1970,7 @@ I32 append;
     }
 
 thats_all_folks:
-    if (rslen > 1 && (bp - SvPV(sv) < rslen || bcmp(bp - rslen, rs, rslen)))
+    if (rslen > 1 && (bp - SvPVX(sv) < rslen || bcmp(bp - rslen, rs, rslen)))
 	goto screamer;	/* go back to the fray */
 thats_really_all_folks:
     if (shortbuffered)
@@ -1569,7 +1978,7 @@ thats_really_all_folks:
     fp->_cnt = cnt;			/* put these back or we're in trouble */
     fp->_ptr = ptr;
     *bp = '\0';
-    SvCUR_set(sv, bp - SvPV(sv));	/* set length */
+    SvCUR_set(sv, bp - SvPVX(sv));	/* set length */
 
 #else /* !STDSTDIO */	/* The big, slow, and stupid way */
 
@@ -1593,7 +2002,7 @@ screamer:
 	      &&
 	      (SvCUR(sv) < rslen
 	       ||
-	       bcmp(SvPV(sv) + SvCUR(sv) - rslen, rs, rslen)
+	       bcmp(SvPVX(sv) + SvCUR(sv) - rslen, rs, rslen)
 	      )
 	     )
 	    )
@@ -1615,7 +2024,7 @@ screamer:
 	    }
 	}
     }
-    return SvCUR(sv) - append ? SvPV(sv) : Nullch;
+    return SvCUR(sv) - append ? SvPVX(sv) : Nullch;
 }
 
 void
@@ -1623,39 +2032,44 @@ sv_inc(sv)
 register SV *sv;
 {
     register char *d;
+    int flags;
 
     if (!sv)
 	return;
     if (SvREADONLY(sv))
-	fatal(no_modify);
-    if (SvMAGICAL(sv))
+	croak(no_modify);
+    if (SvMAGICAL(sv)) {
 	mg_get(sv);
-    if (SvIOK(sv)) {
-	++SvIV(sv);
+	flags = SvPRIVATE(sv);
+    }
+    else
+	flags = SvFLAGS(sv);
+    if (flags & SVf_IOK) {
+	++SvIVX(sv);
 	SvIOK_only(sv);
 	return;
     }
-    if (SvNOK(sv)) {
-	SvNV(sv) += 1.0;
+    if (flags & SVf_NOK) {
+	SvNVX(sv) += 1.0;
 	SvNOK_only(sv);
 	return;
     }
-    if (!SvPOK(sv) || !*SvPV(sv)) {
+    if (!(flags & SVf_POK) || !*SvPVX(sv)) {
 	if (!SvUPGRADE(sv, SVt_NV))
 	    return;
-	SvNV(sv) = 1.0;
+	SvNVX(sv) = 1.0;
 	SvNOK_only(sv);
 	return;
     }
-    d = SvPV(sv);
+    d = SvPVX(sv);
     while (isALPHA(*d)) d++;
     while (isDIGIT(*d)) d++;
     if (*d) {
-        sv_setnv(sv,atof(SvPV(sv)) + 1.0);  /* punt */
+        sv_setnv(sv,atof(SvPVX(sv)) + 1.0);  /* punt */
 	return;
     }
     d--;
-    while (d >= SvPV(sv)) {
+    while (d >= SvPVX(sv)) {
 	if (isDIGIT(*d)) {
 	    if (++*d <= '9')
 		return;
@@ -1671,7 +2085,7 @@ register SV *sv;
     /* oh,oh, the number grew */
     SvGROW(sv, SvCUR(sv) + 2);
     SvCUR(sv)++;
-    for (d = SvPV(sv) + SvCUR(sv); d > SvPV(sv); d--)
+    for (d = SvPVX(sv) + SvCUR(sv); d > SvPVX(sv); d--)
 	*d = d[-1];
     if (isDIGIT(d[1]))
 	*d = '1';
@@ -1683,30 +2097,36 @@ void
 sv_dec(sv)
 register SV *sv;
 {
+    int flags;
+
     if (!sv)
 	return;
     if (SvREADONLY(sv))
-	fatal(no_modify);
-    if (SvMAGICAL(sv))
+	croak(no_modify);
+    if (SvMAGICAL(sv)) {
 	mg_get(sv);
-    if (SvIOK(sv)) {
-	--SvIV(sv);
+	flags = SvPRIVATE(sv);
+    }
+    else
+	flags = SvFLAGS(sv);
+    if (flags & SVf_IOK) {
+	--SvIVX(sv);
 	SvIOK_only(sv);
 	return;
     }
-    if (SvNOK(sv)) {
-	SvNV(sv) -= 1.0;
+    if (flags & SVf_NOK) {
+	SvNVX(sv) -= 1.0;
 	SvNOK_only(sv);
 	return;
     }
-    if (!SvPOK(sv)) {
+    if (!(flags & SVf_POK)) {
 	if (!SvUPGRADE(sv, SVt_NV))
 	    return;
-	SvNV(sv) = -1.0;
+	SvNVX(sv) = -1.0;
 	SvNOK_only(sv);
 	return;
     }
-    sv_setnv(sv,atof(SvPV(sv)) - 1.0);
+    sv_setnv(sv,atof(SvPVX(sv)) - 1.0);
 }
 
 /* Make a string that will exist for the duration of the expression
@@ -1718,8 +2138,11 @@ SV *
 sv_mortalcopy(oldstr)
 SV *oldstr;
 {
-    register SV *sv = NEWSV(78,0);
+    register SV *sv;
 
+    new_SV();
+    Zero(sv, 1, SV);
+    SvREFCNT(sv)++;
     sv_setsv(sv,oldstr);
     if (++tmps_ix > tmps_max) {
 	tmps_max = tmps_ix;
@@ -1745,7 +2168,7 @@ register SV *sv;
     if (!sv)
 	return sv;
     if (SvREADONLY(sv))
-	fatal(no_modify);
+	croak(no_modify);
     if (++tmps_ix > tmps_max) {
 	tmps_max = tmps_ix;
 	if (!(tmps_max & 127)) {
@@ -1766,8 +2189,11 @@ newSVpv(s,len)
 char *s;
 STRLEN len;
 {
-    register SV *sv = NEWSV(79,0);
+    register SV *sv;
 
+    new_SV();
+    Zero(sv, 1, SV);
+    SvREFCNT(sv)++;
     if (!len)
 	len = strlen(s);
     sv_setpvn(sv,s,len);
@@ -1778,8 +2204,11 @@ SV *
 newSVnv(n)
 double n;
 {
-    register SV *sv = NEWSV(80,0);
+    register SV *sv;
 
+    new_SV();
+    Zero(sv, 1, SV);
+    SvREFCNT(sv)++;
     sv_setnv(sv,n);
     return sv;
 }
@@ -1788,8 +2217,11 @@ SV *
 newSViv(i)
 I32 i;
 {
-    register SV *sv = NEWSV(80,0);
+    register SV *sv;
 
+    new_SV();
+    Zero(sv, 1, SV);
+    SvREFCNT(sv)++;
     sv_setiv(sv,i);
     return sv;
 }
@@ -1800,7 +2232,7 @@ SV *
 newSVsv(old)
 register SV *old;
 {
-    register SV *new;
+    register SV *sv;
 
     if (!old)
 	return Nullsv;
@@ -1808,15 +2240,17 @@ register SV *old;
 	warn("semi-panic: attempt to dup freed string");
 	return Nullsv;
     }
-    new = NEWSV(80,0);
+    new_SV();
+    Zero(sv, 1, SV);
+    SvREFCNT(sv)++;
     if (SvTEMP(old)) {
 	SvTEMP_off(old);
-	sv_setsv(new,old);
+	sv_setsv(sv,old);
 	SvTEMP_on(old);
     }
     else
-	sv_setsv(new,old);
-    return new;
+	sv_setsv(sv,old);
+    return sv;
 }
 
 void
@@ -1830,6 +2264,7 @@ HV *stash;
     register I32 i;
     register PMOP *pm;
     register I32 max;
+    char todo[256];
 
     if (!*s) {		/* reset ?? searches */
 	for (pm = HvPMROOT(stash); pm; pm = pm->op_pmnext) {
@@ -1842,6 +2277,8 @@ HV *stash;
 
     if (!HvARRAY(stash))
 	return;
+
+    Zero(todo, 256, char);
     while (*s) {
 	i = *s;
 	if (s[1] == '-') {
@@ -1849,23 +2286,28 @@ HV *stash;
 	}
 	max = *s++;
 	for ( ; i <= max; i++) {
+	    todo[i] = 1;
+	}
+	for (i = 0; i <= HvMAX(stash); i++) {
 	    for (entry = HvARRAY(stash)[i];
 	      entry;
 	      entry = entry->hent_next) {
+		if (!todo[(U8)*entry->hent_key])
+		    continue;
 		gv = (GV*)entry->hent_val;
 		sv = GvSV(gv);
 		SvOK_off(sv);
 		if (SvTYPE(sv) >= SVt_PV) {
 		    SvCUR_set(sv, 0);
-		    SvTDOWN(sv);
-		    if (SvPV(sv) != Nullch)
-			*SvPV(sv) = '\0';
+		    SvTAINT(sv);
+		    if (SvPVX(sv) != Nullch)
+			*SvPVX(sv) = '\0';
 		}
 		if (GvAV(gv)) {
 		    av_clear(GvAV(gv));
 		}
 		if (GvHV(gv)) {
-		    hv_clear(GvHV(gv), FALSE);
+		    hv_clear(GvHV(gv));
 		    if (gv == envgv)
 			environ[0] = Nullch;
 		}
@@ -1873,76 +2315,6 @@ HV *stash;
 	}
     }
 }
-
-#ifdef OLD
-AV *
-sv_2av(sv, st, gvp, lref)
-SV *sv;
-HV **st;
-GV **gvp;
-I32 lref;
-{
-    GV *gv;
-
-    switch (SvTYPE(sv)) {
-    case SVt_PVAV:
-	*st = sv->sv_u.sv_stash;
-	*gvp = Nullgv;
-	return sv->sv_u.sv_av;
-    case SVt_PVHV:
-    case SVt_PVCV:
-	*gvp = Nullgv;
-	return Nullav;
-    default:
-	if (isGV(sv))
-	    gv = (GV*)sv;
-	else
-	    gv = gv_fetchpv(SvPVn(sv), lref);
-	*gvp = gv;
-	if (!gv)
-	    return Nullav;
-	*st = GvESTASH(gv);
-	if (lref)
-	    return GvAVn(gv);
-	else
-	    return GvAV(gv);
-    }
-}
-
-HV *
-sv_2hv(sv, st, gvp, lref)
-SV *sv;
-HV **st;
-GV **gvp;
-I32 lref;
-{
-    GV *gv;
-
-    switch (SvTYPE(sv)) {
-    case SVt_PVHV:
-	*st = sv->sv_u.sv_stash;
-	*gvp = Nullgv;
-	return sv->sv_u.sv_hv;
-    case SVt_PVAV:
-    case SVt_PVCV:
-	*gvp = Nullgv;
-	return Nullhv;
-    default:
-	if (isGV(sv))
-	    gv = (GV*)sv;
-	else
-	    gv = gv_fetchpv(SvPVn(sv), lref);
-	*gvp = gv;
-	if (!gv)
-	    return Nullhv;
-	*st = GvESTASH(gv);
-	if (lref)
-	    return GvHVn(gv);
-	else
-	    return GvHV(gv);
-    }
-}
-#endif;
 
 CV *
 sv_2cv(sv, st, gvp, lref)
@@ -1960,7 +2332,7 @@ I32 lref;
     case SVt_REF:
 	cv = (CV*)SvANY(sv);
 	if (SvTYPE(cv) != SVt_PVCV)
-	    fatal("Not a subroutine reference");
+	    croak("Not a subroutine reference");
 	*gvp = Nullgv;
 	*st = CvSTASH(cv);
 	return cv;
@@ -1976,7 +2348,7 @@ I32 lref;
 	if (isGV(sv))
 	    gv = (GV*)sv;
 	else
-	    gv = gv_fetchpv(SvPVn(sv), lref);
+	    gv = gv_fetchpv(SvPV(sv, na), lref);
 	*gvp = gv;
 	if (!gv)
 	    return Nullcv;
@@ -2004,41 +2376,79 @@ register SV *sv;
     }
     else {
 	if (SvIOK(sv))
-	    return SvIV(sv) != 0;
+	    return SvIVX(sv) != 0;
 	else {
 	    if (SvNOK(sv))
-		return SvNV(sv) != 0.0;
+		return SvNVX(sv) != 0.0;
 	    else
-		return 0;
+		return sv_2bool(sv);
 	}
     }
 }
 #endif /* SvTRUE */
 
-#ifndef SvNVn
-double SvNVn(Sv)
+#ifndef SvNV
+double SvNV(Sv)
 register SV *Sv;
 {
-    SvTUP(Sv);
-    if (SvMAGICAL(sv))
-	mg_get(sv);
     if (SvNOK(Sv))
-	return SvNV(Sv);
+	return SvNVX(Sv);
     if (SvIOK(Sv))
-	return (double)SvIV(Sv);
+	return (double)SvIVX(Sv);
     return sv_2nv(Sv);
 }
-#endif /* SvNVn */
+#endif /* SvNV */
 
-#ifndef SvPVn
+#ifdef CRIPPLED_CC
 char *
-SvPVn(sv)
+sv_pvn(sv, lp)
 SV *sv;
+STRLEN *lp;
 {
-    SvTUP(sv);
-    if (SvMAGICAL(sv))
-	mg_get(sv);
-    return SvPOK(sv) ? SvPV(sv) : sv_2pv(sv);
+    if (SvPOK(sv))
+	return SvPVX(sv)
+    return sv_2pv(sv, lp);
 }
 #endif
+
+int
+sv_isa(sv, name)
+SV *sv;
+char *name;
+{
+    if (SvTYPE(sv) != SVt_REF)
+	return 0;
+    sv = (SV*)SvANY(sv);
+    if (SvSTORAGE(sv) != 'O')
+	return 0;
+
+    return strEQ(HvNAME(SvSTASH(sv)), name);
+}
+
+SV*
+sv_setptrobj(rv, ptr, name)
+SV *rv;
+void *ptr;
+char *name;
+{
+    HV *stash;
+    SV *sv;
+
+    if (!ptr)
+	return rv;
+
+    new_SV();
+    Zero(sv, 1, SV);
+    SvREFCNT(sv)++;
+    sv_setnv(sv, (double)(unsigned long)ptr);
+    sv_upgrade(rv, SVt_REF);
+    SvANY(rv) = (void*)sv_ref(sv);
+
+    stash = fetch_stash(newSVpv(name,0), TRUE);
+    SvSTORAGE(sv) = 'O';
+    SvUPGRADE(sv, SVt_PVMG);
+    SvSTASH(sv) = stash;
+
+    return rv;
+}
 

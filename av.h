@@ -21,21 +21,16 @@
  */
 
 struct xpvav {
-    char *	xpv_pv;		/* pointer to malloced string */
-    STRLEN	xpv_cur;	/* length of xp_pv as a C string */
-    STRLEN	xpv_len;	/* allocated size */
-    STRLEN	xof_off;	/* ptr is incremented by offset */
+    char *	xav_array;	/* pointer to malloced string */
+    int		xav_fill;
+    int		xav_max;
+    int		xof_off;	/* ptr is incremented by offset */
     double	xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* magic for scalar array */
     HV*		xmg_stash;	/* class package */
 
-    MAGIC*      xav_magic;	/* magic for elements */
-
-    SV**	xav_array;
     SV**	xav_alloc;
     SV*		xav_arylen;
-    I32		xav_max;
-    I32		xav_fill;
     U8		xav_flags;
 };
 
@@ -43,8 +38,7 @@ struct xpvav {
 
 #define Nullav Null(AV*)
 
-#define AvMAGIC(av)	((XPVAV*)  SvANY(av))->xav_magic
-#define AvARRAY(av)	((XPVAV*)  SvANY(av))->xav_array
+#define AvARRAY(av)	((SV**)((XPVAV*)  SvANY(av))->xav_array)
 #define AvALLOC(av)	((XPVAV*)  SvANY(av))->xav_alloc
 #define AvMAX(av)	((XPVAV*)  SvANY(av))->xav_max
 #define AvFILL(av)	((XPVAV*)  SvANY(av))->xav_fill

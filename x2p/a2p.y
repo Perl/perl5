@@ -171,7 +171,7 @@ term	: variable
 		{ $$ = oper2(OPOW,$1,$3); }
 	| term IN VAR
 		{ $$ = oper2(ODEFINED,aryrefarg($3),$1); }
-	| term '?' term ':' term
+	| cond '?' expr ':' expr
 		{ $$ = oper3(OCOND,$1,$3,$5); }
 	| variable INCR
 		{ $$ = oper1(OPOSTINCR,$1); }

@@ -189,4 +189,4 @@ EXT char regdummy;
 #define UCHARAT(p)	regdummy
 #endif /* lint */
 
-#define	FAIL(m)	fatal("/%s/: %s",regprecomp,m)
+#define	FAIL(m)	croak("/%s/: %s",regprecomp,m)

@@ -1,4 +1,5 @@
 #!./perl
 
-BEGIN { $/ = "" }
-print while <>;
+# Test the singlequoted eval optimizer
+
+for (1..1) { }

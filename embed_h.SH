@@ -5,7 +5,7 @@ cat <<'END' >embed.h
 
 /* (Doing namespace management portably in C is really gross.) */
 
-#ifdef EMBEDDED
+#ifdef EMBED
 
 /* globals we need to hide from the world */
 END
@@ -18,7 +18,11 @@ sed <global.var >>embed.h						\
 
 cat <<'END' >> embed.h
 
-/* interpreter specific variables */
+#endif /* EMBEDDED */
+
+/* Put interpreter specific variables into a struct? */
+
+#ifdef MULTIPLICITY
 
 END
 
@@ -31,7 +35,7 @@ sed <interp.var >>embed.h						\
 
 cat <<'END' >> embed.h
 
-#else	/* not embedded, so translate interpreter variables the other way... */
+#else	/* not multiple, so translate interpreter variables the other way... */
 
 END
 
@@ -43,6 +47,6 @@ sed <interp.var >>embed.h						\
 
 cat <<'END' >> embed.h
 
-#endif
+#endif /* MULTIPLE_INTERPRETERS */
 END
 

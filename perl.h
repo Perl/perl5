@@ -79,7 +79,6 @@
 #endif
 
 /* work around some libPW problems */
-#define fatal Myfatal
 #ifdef DOINIT
 char Error[1];
 #endif
@@ -109,22 +108,10 @@ char Error[1];
 #   define VOL
 #endif
 
-#ifdef IAMSUID
-#   ifndef TAINT
-#	define TAINT
-#   endif
-#endif
-#ifdef TAINT
-#   define TAINT_IF(c)		(tainted |= (c))
-#   define TAINT_NOT		(tainted = 0)
-#   define TAINT_PROPER(s)	taint_proper(no_security, s)
-#   define TAINT_ENV()		taint_env()
-#else
-#   define TAINT_IF(c)
-#   define TAINT_NOT
-#   define TAINT_PROPER(s)
-#   define TAINT_ENV()
-#endif
+#define TAINT_IF(c)	(tainted |= (c))
+#define TAINT_NOT	(tainted = 0)
+#define TAINT_PROPER(s)	if (tainting) taint_proper(no_security, s)
+#define TAINT_ENV()	if (tainting) taint_env()
 
 #ifndef HAS_VFORK
 #   define vfork fork
@@ -316,62 +303,6 @@ char Error[1];
 #	undef HAS_NDBM
 #   endif
 #endif
-
-#ifdef WANT_DBZ
-#   include <dbz.h>
-#   define SOME_DBM
-#   define dbm_fetch(db,dkey) fetch(dkey)
-#   define dbm_delete(db,dkey) fatal("dbz doesn't implement delete")
-#   define dbm_store(db,dkey,dcontent,flags) store(dkey,dcontent)
-#   define dbm_close(db) dbmclose()
-#   define dbm_firstkey(db) (fatal("dbz doesn't implement traversal"),fetch())
-#   define nextkey() (fatal("dbz doesn't implement traversal"),fetch())
-#   define dbm_nextkey(db) (fatal("dbz doesn't implement traversal"),fetch())
-#   ifdef HAS_NDBM
-#	undef HAS_NDBM
-#   endif
-#   ifndef HAS_ODBM
-#	define HAS_ODBM
-#   endif
-#else
-#   ifdef HAS_GDBM
-#	ifdef I_GDBM
-#	    include <gdbm.h>
-#	endif
-#	define SOME_DBM
-#	ifdef HAS_NDBM
-#	    undef HAS_NDBM
-#	endif
-#	ifdef HAS_ODBM
-#	    undef HAS_ODBM
-#	endif
-#   else
-#	ifdef HAS_NDBM
-#	    include <ndbm.h>
-#	    define SOME_DBM
-#	    ifdef HAS_ODBM
-#		undef HAS_ODBM
-#	    endif
-#	else
-#	    ifdef HAS_ODBM
-#		ifdef NULL
-#		    undef NULL		/* suppress redefinition message */
-#		endif
-#		include <dbm.h>
-#		ifdef NULL
-#		    undef NULL
-#		endif
-#		define NULL 0	/* silly thing is, we don't even use this... */
-#		define SOME_DBM
-#		define dbm_fetch(db,dkey) fetch(dkey)
-#		define dbm_delete(db,dkey) delete(dkey)
-#		define dbm_store(db,dkey,dcontent,flags) store(dkey,dcontent)
-#		define dbm_close(db) dbmclose()
-#		define dbm_firstkey(db) firstkey()
-#	    endif /* HAS_ODBM */
-#	endif /* HAS_NDBM */
-#   endif /* HAS_GDBM */
-#endif /* WANT_DBZ */
 
 #if INTSIZE == 2
 #   define htoni htons
@@ -765,7 +696,7 @@ GIDTYPE getegid P(());
 
 #define assert(what)	DEB( {						\
 	if (!(what)) {							\
-	    fatal("Assertion failed: file \"%s\", line %d",		\
+	    croak("Assertion failed: file \"%s\", line %d",		\
 		__FILE__, __LINE__);					\
 	    exit(1);							\
 	}})
@@ -857,8 +788,9 @@ EXT int		gid;		/* current real group id */
 EXT int		egid;		/* current effective group id */
 EXT bool	nomemok;	/* let malloc context handle nomem */
 EXT U32		an;		/* malloc sequence number */
-EXT U32		cop_seq;	/* statement sequence number */
-EXT U32		op_seq;		/* op sequence number */
+EXT U32		cop_seqmax;	/* statement sequence number */
+EXT U32		op_seqmax;	/* op sequence number */
+EXT U32		sub_generation;	/* inc to force methods to be looked up again */
 EXT char **	origenviron;
 EXT U32		origalen;
 
@@ -898,6 +830,7 @@ EXT struct stat	statbuf;
 #ifndef MSDOS
 EXT struct tms	timesbuf;
 #endif
+EXT STRLEN na;		/* for use in SvPV when length is Not Applicable */
 
 /* for tmp use in stupid debuggers */
 EXT int *	di;
@@ -911,7 +844,11 @@ EXT char *	hexdigit INIT("0123456789abcdef0123456789ABCDEFx");
 EXT char *	patleave INIT("\\.^$@dDwWsSbB+*?|()-nrtfeaxc0123456789[{]}");
 EXT char *	vert INIT("|");
 
-EXT char *	warn_nl
+EXT char	warn_nosemi[]
+  INIT("Semicolon seems to be missing");
+EXT char	warn_reserved[]
+  INIT("Unquoted string \"%s\" may clash with future reserved word");
+EXT char	warn_nl[]
   INIT("Unsuccessful %s on filename containing newline");
 EXT char	no_usym[]
   INIT("Can't use an undefined value to create a symbol");
@@ -924,7 +861,7 @@ EXT char	no_modify[]
 EXT char	no_mem[]
   INIT("Out of memory!\n");
 EXT char	no_security[]
-  INIT("Insecure dependency in %s");
+  INIT("Insecure dependency in %s%s");
 EXT char	no_sock_func[]
   INIT("Unsupported socket function \"%s\" called");
 EXT char	no_dir_func[]
@@ -946,20 +883,6 @@ EXT char *sig_name[] = {
 };
 #else
 EXT char *sig_name[];
-#endif
-
-#ifdef DOINIT
-    EXT char	coeff[] = {	/* hash function coefficients */
-                61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1,
-                61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1,
-                61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1,
-                61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1,
-                61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1,
-                61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1,
-                61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1,
-                61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1};
-#else
-    EXT char	coeff[];
 #endif
 
 #ifdef DOINIT
@@ -1081,6 +1004,7 @@ EXT char *	last_uni;	/* position of last named-unary operator */
 EXT char *	last_lop;	/* position of last list operator */
 EXT bool	in_format;	/* we're compiling a run_format */
 EXT bool	in_my;		/* we're compiling a "my" declaration */
+EXT I32		needblockscope INIT(TRUE);	/* block overhead needed? */
 #ifdef FCRYPT
 EXT I32		cryptseen;	/* has fast crypt() been initialized? */
 #endif
@@ -1147,7 +1071,6 @@ IEXT bool	Iminus_a;
 IEXT bool	Idoswitches;
 IEXT bool	Idowarn;
 IEXT bool	Idoextract;
-IEXT bool	Iallgvs;	/* init all customary symbols in symbol table?*/
 IEXT bool	Isawampersand;	/* must save all match strings */
 IEXT bool	Isawstudy;	/* do fbm_instr on all strings */
 IEXT bool	Isawi;		/* study must assume case insensitive */
@@ -1238,15 +1161,13 @@ IEXT AV *	Ifdpid;		/* keep fd-to-pid mappings for my_popen */
 IEXT HV *	Ipidstatus;	/* keep pid-to-status mappings for waitpid */
 
 /* internal state */
-IEXT VOL int	Iin_eval;	/* trap fatal errors? */
-IEXT OP *	Irestartop;	/* Are we propagating an error from fatal? */
+IEXT VOL int	Iin_eval;	/* trap "fatal" errors? */
+IEXT OP *	Irestartop;	/* Are we propagating an error from croak? */
 IEXT int	Idelaymagic;	/* ($<,$>) = ... */
 IEXT bool	Idirty;		/* clean before rerunning */
 IEXT bool	Ilocalizing;	/* are we processing a local() list? */
-#ifdef TAINT
 IEXT bool	Itainted;	/* using variables controlled by $< */
-IEXT bool	Itaintanyway;	/* force taint checks when !set?id */
-#endif
+IEXT bool	Itainting;	/* doing taint checks */
 
 /* trace state */
 IEXT I32	Idlevel;
@@ -1255,10 +1176,10 @@ IEXT char *	Idebname;
 IEXT char *	Idebdelim;
 
 /* current interpreter roots */
-IEXT OP * VOL	Imain_root;
-IEXT OP * VOL	Imain_start;
-IEXT OP * VOL	Ieval_root;
-IEXT OP * VOL	Ieval_start;
+IEXT OP *	Imain_root;
+IEXT OP *	Imain_start;
+IEXT OP *	Ieval_root;
+IEXT OP *	Ieval_start;
 
 /* runtime control stuff */
 IEXT COP * VOL	Icurcop IINIT(&compiling);
@@ -1276,9 +1197,9 @@ IEXT SV **	Imystack_sp;	/* stack pointer now */
 IEXT SV **	Imystack_max;	/* stack->array_ary + stack->array_max */
 
 /* format accumulators */
-IEXT SV *	formtarget;
-IEXT SV *	bodytarget;
-IEXT SV *	toptarget;
+IEXT SV *	Iformtarget;
+IEXT SV *	Ibodytarget;
+IEXT SV *	Itoptarget;
 
 /* statics moved here for shared library purposes */
 IEXT SV		Istrchop;	/* return value from chop */
@@ -1295,7 +1216,6 @@ IEXT AV *	Isortstack;	/* temp stack during pp_sort() */
 IEXT AV *	Isignalstack;	/* temp stack during sighandler() */
 IEXT SV *	Imystrk;	/* temp key string for do_each() */
 IEXT I32	Idumplvl;	/* indentation level on syntax tree dump */
-IEXT I32	Idbmrefcnt;	/* safety check for old dbm */
 IEXT PMOP *	Ioldlastpm;	/* for saving regexp context during debugger */
 IEXT I32	Igensym;	/* next symbol for getsym() to define */
 IEXT bool	Ipreambled;
@@ -1328,33 +1248,62 @@ extern "C" {
 /* The following must follow proto.h */
 
 #ifdef DOINIT
-MGVTBL vtbl_sv =	{magic_get, magic_set, magic_len, 0, 0};
-MGVTBL vtbl_env =	{0,		0,		 0, 0, 0};
-MGVTBL vtbl_envelem =	{0,		magic_setenv,    0, 0, 0};
-MGVTBL vtbl_sig =	{0,		0,		 0, 0, 0};
-MGVTBL vtbl_sigelem =	{0,		magic_setsig,    0, 0, 0};
-MGVTBL vtbl_dbm =	{0,		0,		 0, 0, 0};
-MGVTBL vtbl_dbmelem =	{0,		magic_setdbm,    0, 0, 0};
-MGVTBL vtbl_dbline =	{0,		magic_setdbline, 0, 0, 0};
-MGVTBL vtbl_arylen =	{magic_getarylen,magic_setarylen, 0, 0, 0};
-MGVTBL vtbl_glob =	{magic_getglob,	magic_setglob,   0, 0, 0};
-MGVTBL vtbl_mglob =	{0,		magic_setmglob,  0, 0, 0};
-MGVTBL vtbl_substr =	{0,		magic_setsubstr, 0, 0, 0};
-MGVTBL vtbl_vec =	{0,		magic_setvec,    0, 0, 0};
-MGVTBL vtbl_bm =	{0,		magic_setbm,     0, 0, 0};
-MGVTBL vtbl_uvar =	{magic_getuvar, magic_setuvar,   0, 0, 0};
+MGVTBL vtbl_sv =	{magic_get,
+				magic_set,
+					magic_len,
+						0,	0};
+MGVTBL vtbl_env =	{0,	0,	0,	0,	0};
+MGVTBL vtbl_envelem =	{0,	magic_setenv,
+					0,	0,	0};
+MGVTBL vtbl_sig =	{0,	0,		 0, 0, 0};
+MGVTBL vtbl_sigelem =	{0,	magic_setsig,
+					0,	0,	0};
+MGVTBL vtbl_pack =	{0,	0,
+					0,	0,	0};
+MGVTBL vtbl_packelem =	{magic_getpack,
+				magic_setpack,
+					0,	magic_clearpack,
+							0};
+MGVTBL vtbl_dbline =	{0,	magic_setdbline,
+					0,	0,	0};
+MGVTBL vtbl_isa =	{0,	magic_setisa,
+					0,	0,	0};
+MGVTBL vtbl_isaelem =	{0,	magic_setisa,
+					0,	0,	0};
+MGVTBL vtbl_arylen =	{magic_getarylen,
+				magic_setarylen,
+					0,	0,	0};
+MGVTBL vtbl_glob =	{magic_getglob,
+				magic_setglob,
+					0,	0,	0};
+MGVTBL vtbl_mglob =	{0,	magic_setmglob,
+					0,	0,	0};
+MGVTBL vtbl_taint =	{magic_gettaint,magic_settaint,
+					0,	0,	0};
+MGVTBL vtbl_substr =	{0,	magic_setsubstr,
+					0,	0,	0};
+MGVTBL vtbl_vec =	{0,	magic_setvec,
+					0,	0,	0};
+MGVTBL vtbl_bm =	{0,	magic_setbm,
+					0,	0,	0};
+MGVTBL vtbl_uvar =	{magic_getuvar,
+				magic_setuvar,
+					0,	0,	0};
 #else
 EXT MGVTBL vtbl_sv;
 EXT MGVTBL vtbl_env;
 EXT MGVTBL vtbl_envelem;
 EXT MGVTBL vtbl_sig;
 EXT MGVTBL vtbl_sigelem;
-EXT MGVTBL vtbl_dbm;
-EXT MGVTBL vtbl_dbmelem;
+EXT MGVTBL vtbl_pack;
+EXT MGVTBL vtbl_packelem;
 EXT MGVTBL vtbl_dbline;
+EXT MGVTBL vtbl_isa;
+EXT MGVTBL vtbl_isaelem;
 EXT MGVTBL vtbl_arylen;
 EXT MGVTBL vtbl_glob;
 EXT MGVTBL vtbl_mglob;
+EXT MGVTBL vtbl_taint;
 EXT MGVTBL vtbl_substr;
 EXT MGVTBL vtbl_vec;
 EXT MGVTBL vtbl_bm;

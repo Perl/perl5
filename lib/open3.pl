@@ -1,6 +1,8 @@
 # &open3: Marc Horowitz <marc@mit.edu>
 # derived mostly from &open2 by tom christiansen, <tchrist@convex.com>
 #
+# $Id: open3.pl,v 1.1 1993/11/23 06:26:15 marc Exp $
+#
 # usage: $pid = open3('wtr', 'rdr', 'err' 'some cmd and args', 'optarg', ...);
 #
 # spawn the given $cmd and connect rdr for

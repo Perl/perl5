@@ -43,7 +43,7 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-extern char* rcsid;
+extern char rcsid[];
 
 GV *
 gv_AVadd(gv)
@@ -59,7 +59,7 @@ gv_HVadd(gv)
 register GV *gv;
 {
     if (!GvHV(gv))
-	GvHV(gv) = newHV(COEFFSIZE);
+	GvHV(gv) = newHV();
     return gv;
 }
 
@@ -78,16 +78,55 @@ char *name;
     return gv;
 }
 
+void
+gv_init(gv, stash, name, len, multi)
+GV *gv;
+HV *stash;
+char *name;
+STRLEN len;
+int multi;
+{
+    register GP *gp;
+
+    sv_upgrade(gv, SVt_PVGV);
+    if (SvLEN(gv))
+	Safefree(SvPVX(gv));
+    Newz(602,gp, 1, GP);
+    GvGP(gv) = gp;
+    GvREFCNT(gv) = 1;
+    GvSV(gv) = NEWSV(72,0);
+    GvLINE(gv) = curcop->cop_line;
+    GvEGV(gv) = gv;
+    sv_magic((SV*)gv, (SV*)gv, '*', name, len);
+    GvSTASH(gv) = stash;
+    GvNAME(gv) = nsavestr(name, len);
+    GvNAMELEN(gv) = len;
+    if (multi)
+	SvMULTI_on(gv);
+}
+
 GV *
-gv_fetchmethod(stash, name)
+gv_fetchmeth(stash, name, len)
 HV* stash;
 char* name;
+STRLEN len;
 {
     AV* av;
+    GV* topgv;
     GV* gv;
-    GV** gvp = (GV**)hv_fetch(stash,name,strlen(name),FALSE);
-    if (gvp && (gv = *gvp) != (GV*)&sv_undef && GvCV(gv))
-	return gv;
+    GV** gvp;
+
+    gvp = (GV**)hv_fetch(stash, name, len, TRUE);
+
+    DEBUG_o( deb("Looking for method %s in package %s\n",name,HvNAME(stash)) );
+    topgv = *gvp;
+    if (SvTYPE(topgv) != SVt_PVGV)
+	gv_init(topgv, stash, name, len, TRUE);
+
+    if (GvCV(topgv)) {
+	if (!GvCVGEN(topgv) || GvCVGEN(topgv) >= sub_generation)
+	    return topgv;
+    }
 
     gvp = (GV**)hv_fetch(stash,"ISA",3,FALSE);
     if (gvp && (gv = *gvp) != (GV*)&sv_undef && (av = GvAV(gv))) {
@@ -98,101 +137,136 @@ char* name;
 	    SV* sv = *svp++;
 	    *tmpbuf = '_';
 	    SvUPGRADE(sv, SVt_PV);
-	    strcpy(tmpbuf+1,SvPVn(sv));
+	    strcpy(tmpbuf+1, SvPV(sv, na));
 	    gv = gv_fetchpv(tmpbuf,FALSE);
 	    if (!gv || !(stash = GvHV(gv))) {
 		if (dowarn)
 		    warn("Can't locate package %s for @%s'ISA",
-			SvPV(sv), HvNAME(stash));
+			SvPVX(sv), HvNAME(stash));
 		continue;
 	    }
-	    gv = gv_fetchmethod(stash, name);
-	    if (gv)
+	    gv = gv_fetchmeth(stash, name, len);
+	    if (gv) {
+		GvCV(topgv) = GvCV(gv);			/* cache the CV */
+		GvCVGEN(topgv) = sub_generation;	/* valid for now */
 		return gv;
+	    }
 	}
     }
     return 0;
 }
 
 GV *
-gv_fetchpv(name,add)
-register char *name;
+gv_fetchmethod(stash, name)
+HV* stash;
+char* name;
+{
+    register char *nend;
+    
+    for (nend = name; *nend; nend++) {
+	if (*nend == ':' || *nend == '\'') {
+	    return gv_fetchpv(name, FALSE);
+	}
+    }
+    return gv_fetchmeth(stash, name, nend - name);
+}
+
+GV *
+gv_fetchpv(nambeg,add)
+char *nambeg;
 I32 add;
 {
-    register GV *gv;
+    register char *name = nambeg;
+    register GV *gv = 0;
     GV**gvp;
-    register GP *gp;
     I32 len;
     register char *namend;
-    HV *stash;
-    char *sawquote = Nullch;
-    char *prevquote = Nullch;
+    HV *stash = 0;
     bool global = FALSE;
+    char tmpbuf[256];
 
-    if (isUPPER(*name)) {
-	if (*name > 'I') {
-	    if (*name == 'S' && (
-	      strEQ(name, "SIG") ||
-	      strEQ(name, "STDIN") ||
-	      strEQ(name, "STDOUT") ||
-	      strEQ(name, "STDERR") ))
-		global = TRUE;
-	}
-	else if (*name > 'E') {
-	    if (*name == 'I' && strEQ(name, "INC"))
-		global = TRUE;
-	}
-	else if (*name > 'A') {
-	    if (*name == 'E' && strEQ(name, "ENV"))
-		global = TRUE;
-	}
-	else if (*name == 'A' && (
-	  strEQ(name, "ARGV") ||
-	  strEQ(name, "ARGVOUT") ))
-	    global = TRUE;
-    }
     for (namend = name; *namend; namend++) {
-	if (*namend == '\'' && namend[1])
-	    prevquote = sawquote, sawquote = namend;
-    }
-    if (sawquote == name && name[1]) {
-	stash = defstash;
-	sawquote = Nullch;
-	name++;
-    }
-    else if (!isALPHA(*name) || global)
-	stash = defstash;
-    else if ((COP*)curcop == &compiling)
-	stash = curstash;
-    else
-	stash = curcop->cop_stash;
-    if (sawquote) {
-	char tmpbuf[256];
-	char *s, *d;
-
-	*sawquote = '\0';
-	/*SUPPRESS 560*/
-	if (s = prevquote) {
-	    strncpy(tmpbuf,name,s-name+1);
-	    d = tmpbuf+(s-name+1);
-	    *d++ = '_';
-	    strcpy(d,s+1);
-	}
-	else {
+	if ((*namend == '\'' && namend[1]) ||
+	    (*namend == ':' && namend[1] == ':'))
+	{
+	    len = namend - name;
 	    *tmpbuf = '_';
-	    strcpy(tmpbuf+1,name);
+	    Copy(name, tmpbuf+1, len, char);
+	    len++;
+	    tmpbuf[len] = '\0';
+	    if (!stash)
+		stash = defstash;
+
+	    if (len > 1) {
+		gvp = (GV**)hv_fetch(stash,tmpbuf,len,add);
+		if (!gvp || *gvp == (GV*)&sv_undef)
+		    return Nullgv;
+		gv = *gvp;
+		if (SvTYPE(gv) == SVt_PVGV)
+		    SvMULTI_on(gv);
+		else
+		    gv_init(gv, stash, nambeg, namend - nambeg, (add & 2));
+		if (!(stash = GvHV(gv)))
+		    stash = GvHV(gv) = newHV();
+		if (!HvNAME(stash))
+		    HvNAME(stash) = nsavestr(nambeg, namend - nambeg);
+	    }
+
+	    if (*namend == ':')
+		namend++;
+	    namend++;
+	    name = namend;
+	    if (!*name)
+		return gv ? gv : defgv;
 	}
-	gv = gv_fetchpv(tmpbuf,TRUE);
-	if (!(stash = GvHV(gv)))
-	    stash = GvHV(gv) = newHV(0);
-	if (!HvNAME(stash))
-	    HvNAME(stash) = savestr(name);
-	name = sawquote+1;
-	*sawquote = '\'';
     }
+
+    /* No stash in name, so see how we can default */
+
+    if (!stash) {
+	if (isIDFIRST(*name)) {
+	    if (isUPPER(*name)) {
+		if (*name > 'I') {
+		    if (*name == 'S' && (
+		      strEQ(name, "SIG") ||
+		      strEQ(name, "STDIN") ||
+		      strEQ(name, "STDOUT") ||
+		      strEQ(name, "STDERR") ))
+			global = TRUE;
+		}
+		else if (*name > 'E') {
+		    if (*name == 'I' && strEQ(name, "INC"))
+			global = TRUE;
+		}
+		else if (*name > 'A') {
+		    if (*name == 'E' && strEQ(name, "ENV"))
+			global = TRUE;
+		}
+		else if (*name == 'A' && (
+		  strEQ(name, "ARGV") ||
+		  strEQ(name, "ARGVOUT") ))
+		    global = TRUE;
+	    }
+	    else if (*name == '_' && !name[1])
+		global = TRUE;
+	    if (global)
+		stash = defstash;
+	    else if ((COP*)curcop == &compiling)
+		stash = curstash;
+	    else
+		stash = curcop->cop_stash;
+	}
+	else
+	    stash = defstash;
+    }
+
+    /* By this point we should have a stash and a name */
+
     if (!stash)
-	fatal("Global symbol \"%s\" requires explicit package name", name);
+	croak("Global symbol \"%s\" requires explicit package name", name);
     len = namend - name;
+    if (!len)
+	len = 1;
     gvp = (GV**)hv_fetch(stash,name,len,add);
     if (!gvp || *gvp == (GV*)&sv_undef)
 	return Nullgv;
@@ -204,26 +278,16 @@ I32 add;
 
     /* Adding a new symbol */
 
-    sv_upgrade(gv, SVt_PVGV);
-    if (SvLEN(gv))
-	Safefree(SvPV(gv));
-    Newz(602,gp, 1, GP);
-    GvGP(gv) = gp;
-    GvREFCNT(gv) = 1;
-    GvSV(gv) = NEWSV(72,0);
-    GvLINE(gv) = curcop->cop_line;
-    GvEGV(gv) = gv;
-    sv_magic((SV*)gv, (SV*)gv, '*', name, len);
-    GvSTASH(gv) = stash;
-    GvNAME(gv) = nsavestr(name, len);
-    GvNAMELEN(gv) = len;
-    if (isDIGIT(*name) && *name != '0')
-	sv_magic(GvSV(gv), (SV*)gv, 0, name, len);
-    if (add & 2)
-	SvMULTI_on(gv);
+    gv_init(gv, stash, name, len, add & 2);
 
     /* set up magic where warranted */
     switch (*name) {
+    case 'I':
+	if (strEQ(name, "ISA")) {
+	    AV* av = GvAVn(gv);
+	    sv_magic((SV*)av, (SV*)gv, 'I', 0, 0);
+	}
+	break;
     case 'S':
 	if (strEQ(name, "SIG")) {
 	    HV *hv;
@@ -241,21 +305,29 @@ I32 add;
 	break;
 
     case '&':
+	if (len > 1)
+	    break;
 	ampergv = gv;
 	sawampersand = TRUE;
 	goto magicalize;
 
     case '`':
+	if (len > 1)
+	    break;
 	leftgv = gv;
 	sawampersand = TRUE;
 	goto magicalize;
 
     case '\'':
+	if (len > 1)
+	    break;
 	rightgv = gv;
 	sawampersand = TRUE;
 	goto magicalize;
 
     case ':':
+	if (len > 1)
+	    break;
 	sv_setpv(GvSV(gv),chopset);
 	goto magicalize;
 
@@ -285,23 +357,41 @@ I32 add;
     case '\024':
     case '\027':
     case '\006':
+	if (len > 1)
+	    break;
+	goto magicalize;
+
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
       magicalize:
-	sv_magic(GvSV(gv), (SV*)gv, 0, name, 1);
+	sv_magic(GvSV(gv), (SV*)gv, 0, name, len);
 	break;
 
     case '\014':
+	if (len > 1)
+	    break;
 	sv_setpv(GvSV(gv),"\f");
 	formfeed = GvSV(gv);
 	break;
     case ';':
+	if (len > 1)
+	    break;
 	sv_setpv(GvSV(gv),"\034");
 	break;
-    case ']': {
+    case ']':
+	if (len == 1) {
 	    SV *sv;
 	    sv = GvSV(gv);
 	    sv_upgrade(sv, SVt_PVNV);
 	    sv_setpv(sv,rcsid);
-	    SvNV(sv) = atof(patchlevel);
+	    SvNVX(sv) = atof(patchlevel);
 	    SvNOK_on(sv);
 	}
 	break;
@@ -320,7 +410,7 @@ GV *gv;
 	return;
     sv_setpv(sv, sv == (SV*)gv ? "*" : "");
     sv_catpv(sv,HvNAME(hv));
-    sv_catpvn(sv,"'", 1);
+    sv_catpvn(sv,"::", 2);
     sv_catpvn(sv,GvNAME(gv),GvNAMELEN(gv));
 }
 
@@ -336,7 +426,7 @@ GV *gv;
 	return;
     sv_setpv(sv, sv == (SV*)gv ? "*" : "");
     sv_catpv(sv,HvNAME(hv));
-    sv_catpvn(sv,"'", 1);
+    sv_catpvn(sv,"::", 2);
     sv_catpvn(sv,GvNAME(egv),GvNAMELEN(egv));
 }
 
@@ -351,21 +441,28 @@ newIO()
 }
 
 void
-gv_check(min,max)
-I32 min;
-register I32 max;
+gv_check(stash)
+HV* stash;
 {
     register HE *entry;
     register I32 i;
     register GV *gv;
+    HV *hv;
 
-    for (i = min; i <= max; i++) {
-	for (entry = HvARRAY(defstash)[i]; entry; entry = entry->hent_next) {
-	    gv = (GV*)entry->hent_val;
-	    if (SvMULTI(gv))
-		continue;
-	    curcop->cop_line = GvLINE(gv);
-	    warn("Possible typo: \"%s\"", GvNAME(gv));
+    for (i = 0; i <= HvMAX(stash); i++) {
+	for (entry = HvARRAY(stash)[i]; entry; entry = entry->hent_next) {
+	    if (isALPHA(*entry->hent_key)) {
+		gv = (GV*)entry->hent_val;
+		if (SvMULTI(gv))
+		    continue;
+		curcop->cop_line = GvLINE(gv);
+		warn("Possible typo: \"%s::%s\"", HvNAME(stash), GvNAME(gv));
+	    }
+	    else if (*entry->hent_key == '_' &&
+		(gv = (GV*)entry->hent_val) &&
+		(hv = GvHV(gv)) && HvNAME(hv) && hv != defstash)
+		     gv_check(hv);              /* nested package */
+						      
 	}
     }
 }
@@ -405,9 +502,9 @@ GV* gv;
     if (--gp->gp_refcnt > 0)
         return;
 
-    sv_free(gp->gp_sv);
-    sv_free(gp->gp_av);
-    sv_free(gp->gp_hv);
+    sv_free((SV*)gp->gp_sv);
+    sv_free((SV*)gp->gp_av);
+    sv_free((SV*)gp->gp_hv);
     if (io = gp->gp_io) {
 	do_close(gv,FALSE);
 	Safefree(io->top_name);
@@ -415,7 +512,7 @@ GV* gv;
 	Safefree(io);
     }
     if (cv = gp->gp_cv)
-	sv_free(cv);
+	sv_free((SV*)cv);
     Safefree(gp);
     GvGP(gv) = 0;
 }
@@ -452,7 +549,7 @@ I32 num;
     if (op->op_private < num)
 	return 0;
     if (op->op_flags & OPf_STACKED)
-        return gv_fetchpv(SvPVnx(*(stack_sp--)),TRUE);
+        return gv_fetchpv(SvPVx(*(stack_sp--), na),TRUE);
     else
         return cGVOP->op_gv;
 }
@@ -467,7 +564,7 @@ I32 num;
     if (op->op_private < num)
 	return 0;
     if (op->op_flags & OPf_STACKED)
-        gv = gv_fetchpv(SvPVnx(*(stack_sp--)),TRUE);
+        gv = gv_fetchpv(SvPVx(*(stack_sp--), na),TRUE);
     else
         gv = cGVOP->op_gv;
 

@@ -1,0 +1,3 @@
+This version of sdbm merely has all the dbm_* names translated to sdbm_*
+so that we can link ndbm and sdbm into the same executable.  (It also has
+the bad() macro redefined to allow a zero-length key.)

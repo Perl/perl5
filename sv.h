@@ -55,7 +55,7 @@ typedef enum {
 /* Using C's structural equivalence to help emulate C++ inheritance here... */
 
 struct sv {
-    ANY		sv_any;		/* pointer to something */
+    void*	sv_any;		/* pointer to something */
     U32		sv_refcnt;	/* how many references to us */
     SVTYPE	sv_type;	/* what sort of thing pointer points to */
     U8		sv_flags;	/* extra flags, some depending on type */
@@ -64,7 +64,7 @@ struct sv {
 };
 
 struct gv {
-    ANY		sv_any;		/* pointer to something */
+    XPVGV*	sv_any;		/* pointer to something */
     U32		sv_refcnt;	/* how many references to us */
     SVTYPE	sv_type;	/* what sort of thing pointer points to */
     U8		sv_flags;	/* extra flags, some depending on type */
@@ -73,7 +73,7 @@ struct gv {
 };
 
 struct cv {
-    ANY		sv_any;		/* pointer to something */
+    XPVGV*	sv_any;		/* pointer to something */
     U32		sv_refcnt;	/* how many references to us */
     SVTYPE	sv_type;	/* what sort of thing pointer points to */
     U8		sv_flags;	/* extra flags, some depending on type */
@@ -82,7 +82,7 @@ struct cv {
 };
 
 struct av {
-    ANY		sv_any;		/* pointer to something */
+    XPVAV*	sv_any;		/* pointer to something */
     U32		sv_refcnt;	/* how many references to us */
     SVTYPE	sv_type;	/* what sort of thing pointer points to */
     U8		sv_flags;	/* extra flags, some depending on type */
@@ -91,7 +91,7 @@ struct av {
 };
 
 struct hv {
-    ANY		sv_any;		/* pointer to something */
+    XPVHV*	sv_any;		/* pointer to something */
     U32		sv_refcnt;	/* how many references to us */
     SVTYPE	sv_type;	/* what sort of thing pointer points to */
     U8		sv_flags;	/* extra flags, some depending on type */
@@ -99,8 +99,7 @@ struct hv {
     U8		sv_private;	/* extra value, depending on type */
 };
 
-#define SvANY(sv)	(sv)->sv_any.any_ptr
-#define SvANYI32(sv)	(sv)->sv_any.any_i32
+#define SvANY(sv)	(sv)->sv_any
 #define SvTYPE(sv)	(sv)->sv_type
 #define SvREFCNT(sv)	(sv)->sv_refcnt
 #define SvFLAGS(sv)	(sv)->sv_flags
@@ -114,19 +113,23 @@ struct hv {
 #define SVf_POK		4		/* has valid pointer value */
 #define SVf_OOK		8		/* has valid offset value */
 #define SVf_MAGICAL	16		/* has special methods */
-#define SVf_SCREAM	32		/* eventually in sv_private? */
+#define SVf_OK		32		/* has defined value */
 #define SVf_TEMP	64		/* eventually in sv_private? */
 #define SVf_READONLY	128		/* may not be modified */
 
-#define SVp_TAINTED	128		/* is a security risk */
+#define SVp_IOK		1		/* has valid non-public integer value */
+#define SVp_NOK		2		/* has valid non-public numeric value */
+#define SVp_POK		4		/* has valid non-public pointer value */
+#define SVp_SCREAM	8		/* has been studied? */
+#define SVp_TAINTEDDIR	16		/* PATH component is a security risk */
 
-#define SVpfm_COMPILED	1
+#define SVpfm_COMPILED	128
 
-#define SVpbm_TAIL	1
-#define SVpbm_CASEFOLD	2
-#define SVpbm_VALID	4
+#define SVpbm_VALID	128
+#define SVpbm_CASEFOLD	64
+#define SVpbm_TAIL	32
 
-#define SVpgv_MULTI	1
+#define SVpgv_MULTI	128
 
 struct xpv {
     char *      xpv_pv;		/* pointer to malloced string */
@@ -220,74 +223,40 @@ struct xpvfm {
     I32		xfm_lines;
 };
 
-/* XXX need to write custom routines for some of these */
-#define new_SV() (void*)malloc(sizeof(SV))
-#define del_SV(p) free((char*)p)
-
-#define new_XIV() (void*)malloc(sizeof(XPVIV))
-#define del_XIV(p) free((char*)p)
-
-#define new_XNV() (void*)malloc(sizeof(XPVNV))
-#define del_XNV(p) free((char*)p)
-
-#define new_XPV() (void*)malloc(sizeof(XPV))
-#define del_XPV(p) free((char*)p)
-
-#define new_XPVIV() (void*)malloc(sizeof(XPVIV))
-#define del_XPVIV(p) free((char*)p)
-
-#define new_XPVNV() (void*)malloc(sizeof(XPVNV))
-#define del_XPVNV(p) free((char*)p)
-
-#define new_XPVMG() (void*)malloc(sizeof(XPVMG))
-#define del_XPVMG(p) free((char*)p)
-
-#define new_XPVLV() (void*)malloc(sizeof(XPVLV))
-#define del_XPVLV(p) free((char*)p)
-
-#define new_XPVAV() (void*)malloc(sizeof(XPVAV))
-#define del_XPVAV(p) free((char*)p)
-
-#define new_XPVHV() (void*)malloc(sizeof(XPVHV))
-#define del_XPVHV(p) free((char*)p)
-
-#define new_XPVCV() (void*)malloc(sizeof(XPVCV))
-#define del_XPVCV(p) free((char*)p)
-
-#define new_XPVGV() (void*)malloc(sizeof(XPVGV))
-#define del_XPVGV(p) free((char*)p)
-
-#define new_XPVBM() (void*)malloc(sizeof(XPVBM))
-#define del_XPVBM(p) free((char*)p)
-
-#define new_XPVFM() (void*)malloc(sizeof(XPVFM))
-#define del_XPVFM(p) free((char*)p)
-
 #define SvNIOK(sv)		(SvFLAGS(sv) & (SVf_IOK|SVf_NOK))
 
-#define SvOK(sv)		(SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK))
-#define SvOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK), \
+#define SvOK(sv)		(SvFLAGS(sv) & SVf_OK)
+#define SvOK_on(sv)		(SvFLAGS(sv) |= SVf_OK)
+#define SvOK_off(sv)		(SvFLAGS(sv) &=				   \
+					~(SVf_IOK|SVf_NOK|SVf_POK|SVf_OK), \
 					SvOOK_off(sv))
 
+#define SvOKp(sv)		(SvPRIVATE(sv) & (SVp_IOK|SVp_NOK|SVp_POK))
+#define SvIOKp(sv)		(SvPRIVATE(sv) & SVp_IOK)
+#define SvIOKp_on(sv)		(SvOOK_off(sv), SvPRIVATE(sv) |= SVp_IOK)
+#define SvNOKp(sv)		(SvPRIVATE(sv) & SVp_NOK)
+#define SvNOKp_on(sv)		(SvPRIVATE(sv) |= SVp_NOK)
+#define SvPOKp(sv)		(SvPRIVATE(sv) & SVp_POK)
+#define SvPOKp_on(sv)		(SvPRIVATE(sv) |= SVp_POK)
+
 #define SvIOK(sv)		(SvFLAGS(sv) & SVf_IOK)
-#define SvIOK_on(sv)		(SvOOK_off(sv), SvFLAGS(sv) |= SVf_IOK)
+#define SvIOK_on(sv)		(SvOOK_off(sv), SvFLAGS(sv) |= (SVf_IOK|SVf_OK))
 #define SvIOK_off(sv)		(SvFLAGS(sv) &= ~SVf_IOK)
-#define SvIOK_only(sv)		(SvOK_off(sv), SvFLAGS(sv) |= SVf_IOK)
+#define SvIOK_only(sv)		(SvOK_off(sv), SvFLAGS(sv) |= (SVf_IOK|SVf_OK))
 
 #define SvNOK(sv)		(SvFLAGS(sv) & SVf_NOK)
-#define SvNOK_on(sv)		(SvFLAGS(sv) |= SVf_NOK)
+#define SvNOK_on(sv)		(SvFLAGS(sv) |= (SVf_NOK|SVf_OK))
 #define SvNOK_off(sv)		(SvFLAGS(sv) &= ~SVf_NOK)
-#define SvNOK_only(sv)		(SvOK_off(sv), SvFLAGS(sv) |= SVf_NOK)
+#define SvNOK_only(sv)		(SvOK_off(sv), SvFLAGS(sv) |= (SVf_NOK|SVf_OK))
 
 #define SvPOK(sv)		(SvFLAGS(sv) & SVf_POK)
-#define SvPOK_on(sv)		(SvFLAGS(sv) |= SVf_POK)
+#define SvPOK_on(sv)		(SvFLAGS(sv) |= (SVf_POK|SVf_OK))
 #define SvPOK_off(sv)		(SvFLAGS(sv) &= ~SVf_POK)
-#define SvPOK_only(sv)		(SvOK_off(sv), SvFLAGS(sv) |= SVf_POK)
+#define SvPOK_only(sv)		(SvOK_off(sv), SvFLAGS(sv) |= (SVf_POK|SVf_OK))
 
 #define SvOOK(sv)		(SvFLAGS(sv) & SVf_OOK)
 #define SvOOK_on(sv)		(SvIOK_off(sv), SvFLAGS(sv) |= SVf_OOK)
 #define SvOOK_off(sv)		(SvOOK(sv) && sv_backoff(sv))
-#define SvOOK_only(sv)		(SvOK_off(sv), SvFLAGS(sv) |= SVf_OOK)
 
 #define SvREADONLY(sv)		(SvFLAGS(sv) & SVf_READONLY)
 #define SvREADONLY_on(sv)	(SvFLAGS(sv) |= SVf_READONLY)
@@ -297,17 +266,13 @@ struct xpvfm {
 #define SvMAGICAL_on(sv)	(SvFLAGS(sv) |= SVf_MAGICAL)
 #define SvMAGICAL_off(sv)	(SvFLAGS(sv) &= ~SVf_MAGICAL)
 
-#define SvSCREAM(sv)		(SvFLAGS(sv) & SVf_SCREAM)
-#define SvSCREAM_on(sv)		(SvFLAGS(sv) |= SVf_SCREAM)
-#define SvSCREAM_off(sv)	(SvFLAGS(sv) &= ~SVf_SCREAM)
+#define SvSCREAM(sv)		(SvPRIVATE(sv) & SVp_SCREAM)
+#define SvSCREAM_on(sv)		(SvPRIVATE(sv) |= SVp_SCREAM)
+#define SvSCREAM_off(sv)	(SvPRIVATE(sv) &= ~SVp_SCREAM)
 
 #define SvTEMP(sv)		(SvFLAGS(sv) & SVf_TEMP)
 #define SvTEMP_on(sv)		(SvFLAGS(sv) |= SVf_TEMP)
 #define SvTEMP_off(sv)		(SvFLAGS(sv) &= ~SVf_TEMP)
-
-#define SvTAINTED(sv)		(SvPRIVATE(sv) & SVp_TAINTED)
-#define SvTAINTED_on(sv)	(SvPRIVATE(sv) |= SVp_TAINTED)
-#define SvTAINTED_off(sv)	(SvPRIVATE(sv) &= ~SVp_TAINTED)
 
 #define SvCOMPILED(sv)		(SvPRIVATE(sv) & SVpfm_COMPILED)
 #define SvCOMPILED_on(sv)	(SvPRIVATE(sv) |= SVpfm_COMPILED)
@@ -329,14 +294,13 @@ struct xpvfm {
 #define SvMULTI_on(sv)		(SvPRIVATE(sv) |= SVpgv_MULTI)
 #define SvMULTI_off(sv)		(SvPRIVATE(sv) &= ~SVpgv_MULTI)
 
-#define SvIV(sv) ((XPVIV*)  SvANY(sv))->xiv_iv
-#define SvIVx(sv) SvIV(sv)
-#define SvNV(sv)  ((XPVNV*)SvANY(sv))->xnv_nv
-#define SvNVx(sv) SvNV(sv)
-#define SvPV(sv)  ((XPV*)  SvANY(sv))->xpv_pv
-#define SvPVx(sv) SvPV(sv)
+#define SvIVX(sv) ((XPVIV*)  SvANY(sv))->xiv_iv
+#define SvIVXx(sv) SvIVX(sv)
+#define SvNVX(sv)  ((XPVNV*)SvANY(sv))->xnv_nv
+#define SvNVXx(sv) SvNVX(sv)
+#define SvPVX(sv)  ((XPV*)  SvANY(sv))->xpv_pv
+#define SvPVXx(sv) SvPVX(sv)
 #define SvCUR(sv) ((XPV*)  SvANY(sv))->xpv_cur
-#define SvCURx(sv) SvCUR(sv)
 #define SvLEN(sv) ((XPV*)  SvANY(sv))->xpv_len
 #define SvLENx(sv) SvLEN(sv)
 #define SvEND(sv)(((XPV*)  SvANY(sv))->xpv_pv + ((XPV*)SvANY(sv))->xpv_cur)
@@ -361,7 +325,7 @@ struct xpvfm {
 		(((XPV*)  SvANY(sv))->xpv_len = val); } while (0)
 #define SvEND_set(sv, val) \
 	do { assert(SvTYPE(sv) >= SVt_PV); \
-		(((XPV*)  SvANY(sv))->xpv_cur = val - SvPV(sv)); } while (0)
+		(((XPV*)  SvANY(sv))->xpv_cur = val - SvPVX(sv)); } while (0)
 
 #define SvCUROK(sv) (SvPOK(sv) ? SvCUR(sv) : 0)
 
@@ -376,42 +340,30 @@ struct xpvfm {
 #define LvTARGOFF(sv)	((XPVLV*)  SvANY(sv))->xlv_targoff
 #define LvTARGLEN(sv)	((XPVLV*)  SvANY(sv))->xlv_targlen
 
-#ifdef TAINT
-#define SvTUP(sv)  (tainted |= (SvPRIVATE(sv) & SVp_TAINTED))
-#define SvTUPc(sv) (tainted |= (SvPRIVATE(sv) & SVp_TAINTED)),
-#define SvTDOWN(sv)  (SvPRIVATE(sv) |= tainted ? SVp_TAINTED : 0)
-#define SvTDOWNc(sv) (SvPRIVATE(sv) |= tainted ? SVp_TAINTED : 0),
-#else
-#define SvTUP(sv)
-#define SvTUPc(sv) 
-#define SvTDOWN(sv)
-#define SvTDOWNc(sv)
-#endif
+#define SvTAINT(sv) if (tainting && tainted) sv_magic(sv, 0, 't', 0, 0)
 
 #ifdef CRIPPLED_CC
 
-double SvIVn();
-double SvNVn();
-char *SvPVn();
+double SvIV();
+double SvNV();
+#define SvPV(sv, lp) sv_pvn(sv, &lp)
+char *sv_pvn();
 I32 SvTRUE();
 
-#define SvIVnx(sv) SvIVn(sv)
-#define SvNVnx(sv) SvNVn(sv)
-#define SvPVnx(sv) SvPVn(sv)
+#define SvIVx(sv) SvIV(sv)
+#define SvNVx(sv) SvNV(sv)
+#define SvPVx(sv, lp) sv_pvn(sv, &lp)
 #define SvTRUEx(sv) SvTRUE(sv)
 
 #else /* !CRIPPLED_CC */
 
-#define SvIVn(sv) (SvTUPc(sv) (SvMAGICAL(sv) && mg_get(sv)),	\
-			    SvIOK(sv) ? SvIV(sv) : sv_2iv(sv))
+#define SvIV(sv) (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv))
 
-#define SvNVn(sv) (SvTUPc(sv) (SvMAGICAL(sv) && mg_get(sv)),	\
-			    SvNOK(sv) ? SvNV(sv) : sv_2nv(sv))
+#define SvNV(sv) (SvNOK(sv) ? SvNVX(sv) : sv_2nv(sv))
 
-#define SvPVn(sv) (SvTUPc(sv) (SvMAGICAL(sv) && mg_get(sv)),	\
-			    SvPOK(sv) ? SvPV(sv) : sv_2pv(sv))
+#define SvPV(sv, lp) (SvPOK(sv) ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pv(sv, &lp))
 
-#define SvTRUE(sv) ((SvMAGICAL(sv) && mg_get(sv)),		\
+#define SvTRUE(sv) (						\
 	SvPOK(sv)						\
 	?   ((Xpv = (XPV*)SvANY(sv)) &&				\
 	     (*Xpv->xpv_pv > '0' ||				\
@@ -421,28 +373,21 @@ I32 SvTRUE();
 	     : 0)						\
 	:							\
 	    SvIOK(sv)						\
-	    ? SvIV(sv) != 0					\
+	    ? SvIVX(sv) != 0					\
 	    :   SvNOK(sv)					\
-		? SvNV(sv) != 0.0				\
-		: 0 )
+		? SvNVX(sv) != 0.0				\
+		: sv_2bool(sv) )
 
-#define SvIVnx(sv) ((Sv = sv), SvIVn(Sv))
-#define SvNVnx(sv) ((Sv = sv), SvNVn(Sv))
-#define SvPVnx(sv) ((Sv = sv), SvPVn(Sv))
+#define SvIVx(sv) ((Sv = sv), SvIV(Sv))
+#define SvNVx(sv) ((Sv = sv), SvNV(Sv))
+#define SvPVx(sv, lp) ((Sv = sv), SvPV(Sv, lp))
 #define SvTRUEx(sv) ((Sv = sv), SvTRUE(Sv))
 
 #endif /* CRIPPLED_CC */
 
 /* the following macro updates any magic values this sv is associated with */
 
-#define SvGETMAGIC(x)						\
-    SvTUP(x);							\
-    if (SvMAGICAL(x)) mg_get(x)
-
-#define SvSETMAGIC(x)						\
-    SvTDOWN(x);							\
-    if (SvMAGICAL(x))						\
-	mg_set(x)
+#define SvSETMAGIC(x) if (SvMAGICAL(x)) mg_set(x)
 
 #define SvSetSV(dst,src) if (dst != src) sv_setsv(dst,src)
 
@@ -461,4 +406,3 @@ I32 SvTRUE();
 		sv_grow(sv,(unsigned long)len)
 #  define Sv_Grow(sv,len) sv_grow(sv,(unsigned long)(len))
 #endif /* DOSISH */
-

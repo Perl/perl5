@@ -1,0 +1,529 @@
+#!/usr/bin/perl
+# $Header$ 
+
+$usage = "Usage: xsubpp [-a] [-s] [-c] typemap file.xs\n";
+die $usage unless (@ARGV >= 2 && @ARGV <= 6);
+
+SWITCH: while ($ARGV[0] =~ /^-/) {
+    $flag = shift @ARGV;
+    $aflag = 1, next SWITCH if $flag =~ /^-a$/;
+    $spat = $1, next SWITCH if $flag =~ /^-s(.*)$/;
+    $cflag = 1, next SWITCH if $flag =~ /^-c$/;
+    $eflag = 1, next SWITCH if $flag =~ /^-e$/;
+    die $usage;
+}
+
+$typemap = shift @ARGV;
+open(TYPEMAP, $typemap) || die "cannot open $typemap\n";
+while (<TYPEMAP>) {
+	next if /^\s*$/ || /^#/;
+	chop;
+	($typename, $kind) = split(/\t+/, $_, 2);
+	$type_kind{$typename} = $kind;
+}
+close(TYPEMAP);
+
+%input_expr = (JUNK, split(/\n(T_\w*)\s*\n/, <<'T_END'));
+
+T_INT
+	$var = (int)SvIVn($arg)
+T_ENUM
+	$var = ($type)SvIVn($arg)
+T_U_INT
+	$var = (unsigned int)SvIVn($arg)
+T_SHORT
+	$var = (short)SvIVn($arg)
+T_U_SHORT
+	$var = (unsigned short)SvIVn($arg)
+T_LONG
+	$var = (long)SvIVn($arg)
+T_U_LONG
+	$var = (unsigned long)SvIVn($arg)
+T_CHAR
+	$var = (char)*SvPVn($arg,na)
+T_U_CHAR
+	$var = (unsigned char)SvIVn($arg)
+T_FLOAT
+	$var = (float)SvNVn($arg)
+T_DOUBLE
+	$var = SvNVn($arg)
+T_STRING
+	$var = SvPVn($arg,na)
+T_PTR
+	$var = ($type)(unsigned long)SvNVn($arg)
+T_PTRREF
+	if (SvTYPE($arg) == SVt_REF)
+	    $var = ($type)(unsigned long)SvNVn((SV*)SvANY($arg));
+	else
+	    croak(\"$var is not a reference\")
+T_PTROBJ
+	if (sv_isa($arg, \"${ntype}\"))
+	    $var = ($type)(unsigned long)SvNVn((SV*)SvANY($arg));
+	else
+	    croak(\"$var is not of type ${ntype}\")
+T_PTRDESC
+	if (sv_isa($arg, \"${ntype}\")) {
+	    ${type}_desc = (\U${type}_DESC\E*)(unsigned long)SvNVn((SV*)SvANY($arg));
+	    $var = ${type}_desc->ptr;
+	}
+	else
+	    croak(\"$var is not of type ${ntype}\")
+T_REFREF
+	if (SvTYPE($arg) == SVt_REF)
+	    $var = *($type)(unsigned long)SvNVn((SV*)SvANY($arg));
+	else
+	    croak(\"$var is not a reference\")
+T_REFOBJ
+	if (sv_isa($arg, \"${ntype}\"))
+	    $var = *($type)(unsigned long)SvNVn((SV*)SvANY($arg));
+	else
+	    croak(\"$var is not of type ${ntype}\")
+T_OPAQUE
+	$var NOT IMPLEMENTED
+T_OPAQUEPTR
+	$var = ($type)SvPVn($arg,na)
+T_PACKED
+	$var = XS_unpack_$ntype($arg)
+T_PACKEDARRAY
+	$var = XS_unpack_$ntype($arg)
+T_CALLBACK
+	$var = make_perl_cb_$type($arg)
+T_ARRAY
+	$var = $ntype(items -= $argoff);
+	U32 ix_$var = $argoff;
+	while (items--) {
+	    DO_ARRAY_ELEM;
+	}
+T_DATUM
+	$var.dptr = SvPVn($arg, $var.dsize);
+T_GDATUM
+	UNIMPLEMENTED
+T_PLACEHOLDER
+T_END
+
+$* = 1; %output_expr = (JUNK, split(/^(T_\w*)\s*\n/, <<'T_END')); $* = 0;
+T_INT
+	sv_setiv($arg, (I32)$var);
+T_ENUM
+	sv_setiv($arg, (I32)$var);
+T_U_INT
+	sv_setiv($arg, (I32)$var);
+T_SHORT
+	sv_setiv($arg, (I32)$var);
+T_U_SHORT
+	sv_setiv($arg, (I32)$var);
+T_LONG
+	sv_setiv($arg, (I32)$var);
+T_U_LONG
+	sv_setiv($arg, (I32)$var);
+T_CHAR
+	sv_setpvn($arg, (char *)&$var, 1);
+T_U_CHAR
+	sv_setiv($arg, (I32)$var);
+T_FLOAT
+	sv_setnv($arg, (double)$var);
+T_DOUBLE
+	sv_setnv($arg, $var);
+T_STRING
+	sv_setpv($arg, $var);
+T_PTR
+	sv_setnv($arg, (double)(unsigned long)$var);
+T_PTRREF
+	sv_setptrref($arg, $var);
+T_PTROBJ
+	sv_setptrobj($arg, $var, \"${ntype}\");
+T_PTRDESC
+	sv_setptrobj($arg, (void*)new\U${type}_DESC\E($var), \"${ntype}\");
+T_REFREF
+	sv_setrefref($arg, \"${ntype}\", XS_service_$ntype,
+		    ($var ? (void*)new $ntype($var) : 0));
+T_REFOBJ
+	NOT IMPLEMENTED
+T_OPAQUE
+	sv_setpvn($arg, (char *)&$var, sizeof($var));
+T_OPAQUEPTR
+	sv_setpvn($arg, (char *)$var, sizeof(*$var)), XFree((char *)$var);
+T_PACKED
+	XS_pack_$ntype($arg, $var);
+T_PACKEDARRAY
+	XS_pack_$ntype($arg, $var, count_$ntype);
+T_DATAUNIT	
+	sv_setpvn($arg, $var.chp(), $var.size());
+T_CALLBACK
+	sv_setpvn($arg, $var.context.value().chp(),
+		$var.context.value().size());
+T_ARRAY
+	ST_EXTEND($var.size);
+	for (U32 ix_$var = 0; ix_$var < $var.size; ix_$var++) {
+		ST(ix_$var) = sv_mortalcopy(&sv_undef);
+	DO_ARRAY_ELEM
+	}
+	sp += $var.size - 1;
+T_DATUM
+	sv_setpvn($arg, $var.dptr, $var.dsize);
+T_GDATUM
+	sv_usepvn($arg, $var.dptr, $var.dsize);
+T_END
+
+$uvfile = shift @ARGV;
+open(F, $uvfile) || die "cannot open $uvfile\n";
+
+if ($eflag) {
+	print qq|#include "cfm/basic.h"\n|;
+}
+
+while (<F>) {
+	last if ($Module, $foo, $Package, $foo1, $Prefix) =
+		/^MODULE\s*=\s*(\w+)(\s+PACKAGE\s*=\s*(\w+))?(\s+PREFIX\s*=\s*(.+))?$/;
+	print $_;
+}
+$Pack = $Package;
+$Package .= "::" if defined $Package && $Package ne "";
+$/ = "";
+
+while (<F>) {
+	# parse paragraph
+	chop;
+	next if /^\s*$/;
+	next if /^(#.*\n?)+$/;
+	if (/^MODULE\s*=\s*(\w+)(\s+PACKAGE\s*=\s*(\w+))?(\s+PREFIX\s*=\s*(.+))?$/) {
+		$Module = $1;
+		$foo = $2;
+		$Package = $3;
+		$Pack = $Package;
+		$foo1 = $4;
+		$Prefix = $5;
+		$Package .= "::" if defined $Package && $Package ne "";
+		next;
+	}
+	split(/[\t ]*\n/);
+
+	# initialize info arrays
+	undef(%args_match);
+	undef(%var_types);
+	undef(%var_addr);
+	undef(%defaults);
+	undef($class);
+	undef($static);
+	undef($elipsis);
+
+	# extract return type, function name and arguments
+	$ret_type = shift(@_);
+	if ($ret_type =~ /^static\s+(.*)$/) {
+		$static = 1;
+		$ret_type = $1;
+	}
+	$func_header = shift(@_);
+	($func_name, $orig_args) =  $func_header =~ /^([\w:]+)\s*\((.*)\)$/;
+	if ($func_name =~ /(.*)::(.*)/) {
+		$class = $1;
+		$func_name = $2;
+	}
+	($pname = $func_name) =~ s/^($Prefix)?/$Package/;
+	push(@Func_name, "${Pack}_$func_name");
+	push(@Func_pname, $pname);
+	@args = split(/\s*,\s*/, $orig_args);
+	if (defined($class) && !defined($static)) {
+		unshift(@args, "THIS");
+		$orig_args = "THIS, $orig_args";
+		$orig_args =~ s/^THIS, $/THIS/;
+	}
+	$orig_args =~ s/"/\\"/g;
+	$min_args = $num_args = @args;
+	foreach $i (0..$num_args-1) {
+		if ($args[$i] =~ s/\.\.\.//) {
+			$elipsis = 1;
+			$min_args--;
+			if ($args[i] eq '' && $i == $num_args - 1) {
+			    pop(@args);
+			    last;
+			}
+		}
+		if ($args[$i] =~ /([^=]*\S)\s*=\s*(.*)/) {
+			$min_args--;
+			$args[$i] = $1;
+			$defaults{$args[$i]} = $2;
+			$defaults{$args[$i]} =~ s/"/\\"/g;
+		}
+	}
+	if (defined($class) && !defined($static)) {
+		$func_args = join(", ", @args[1..$#args]);
+	} else {
+		$func_args = join(", ", @args);
+	}
+	@args_match{@args} = 1..@args;
+
+	# print function header
+	print <<"EOF" if $aflag;
+static int
+XS_${Pack}_$func_name(int, int sp, int items)
+EOF
+	print <<"EOF" if !$aflag;
+static int
+XS_${Pack}_$func_name(ix, sp, items)
+register int ix;
+register int sp;
+register int items;
+EOF
+	print <<"EOF" if $elipsis;
+{
+    if (items < $min_args) {
+	croak("Usage: $pname($orig_args)");
+    }
+EOF
+	print <<"EOF" if !$elipsis;
+{
+    if (items < $min_args || items > $num_args) {
+	croak("Usage: $pname($orig_args)");
+    }
+EOF
+
+# Now do a block of some sort.
+
+$condnum = 0;
+if (!@_) {
+    @_ = "CLEANUP:";
+}
+while (@_) {
+	if ($_[0] =~ s/^\s*CASE\s*:\s*//) {
+		$cond = shift(@_);
+		if ($condnum == 0) {
+		    print "    if ($cond)\n";
+		}
+		elsif ($cond ne '') {
+		    print "    else if ($cond)\n";
+		}
+		else {
+		    print "    else\n";
+		}
+		$condnum++;
+	}
+
+	print 		<<"EOF" if $eflag;
+    TRY {
+EOF
+	print 		<<"EOF" if !$eflag;
+    {
+EOF
+
+	# do initialization of input variables
+	$thisdone = 0;
+	$retvaldone = 0;
+	$deferred = "";
+	while ($_ = shift(@_)) {
+		last if /^\s*NOT_IMPLEMENTED_YET/;
+		last if /^\s*(CODE|OUTPUT|CLEANUP|CASE)\s*:/;
+		($var_type, $var_name, $var_init) =
+		    /\s*([^\t]+)\s*([^\s=]+)\s*(=.*)?/;
+		if ($var_name =~ /^&/) {
+			$var_name =~ s/^&//;
+			$var_addr{$var_name} = 1;
+		}
+		$thisdone |= $var_name eq "THIS";
+		$retvaldone |= $var_name eq "RETVAL";
+		$var_types{$var_name} = $var_type;
+		print "\t" . &map_type($var_type);
+		$var_num = $args_match{$var_name};
+		if ($var_addr{$var_name}) {
+			$func_args =~ s/\b($var_name)\b/&\1/;
+		}
+		if ($var_init !~ /^=\s*NO_INIT\s*$/) {
+			if ($var_init !~ /^\s*$/) {
+				&output_init($var_type, $var_num,
+				    "$var_name $var_init");
+			} elsif ($var_num) {
+				# generate initialization code
+				&generate_init($var_type, $var_num, $var_name);
+			} else {
+				print ";\n";
+			}
+		} else {
+			print "\t$var_name;\n";
+		}
+	}
+	if (!$thisdone && defined($class) && !defined($static)) {
+		print "\t$class *";
+		$var_types{"THIS"} = "$class *";
+		&generate_init("$class *", 1, "THIS");
+	}
+
+	# do code
+	if (/^\s*NOT_IMPLEMENTED_YET/) {
+		print "\ncroak(\"$pname: not implemented yet\");\n";
+	} else {
+		if ($ret_type ne "void") {
+			print "\t" . &map_type($ret_type) . "\tRETVAL;\n"
+				if !$retvaldone;
+			$args_match{"RETVAL"} = 0;
+			$var_types{"RETVAL"} = $ret_type;
+		}
+		print $deferred;
+		if (/^\s*CODE:/) {
+			while ($_ = shift(@_)) {
+				last if /^\s*(OUTPUT|CLEANUP|CASE)\s*:/;
+				print "$_\n";
+			}
+		} else {
+			print "\n\t";
+			if ($ret_type ne "void") {
+				print "RETVAL = ";
+			}
+			if (defined($static)) {
+				print "$class::";
+			} elsif (defined($class)) {
+				print "THIS->";
+			}
+			if (defined($spat) && $func_name =~ /^($spat)(.*)$/) {
+				$func_name = $2;
+			}
+			print "$func_name($func_args);\n";
+			&generate_output($ret_type, 0, "RETVAL")
+			    unless $ret_type eq "void";
+		}
+	}
+
+	# do output variables
+	if (/^\s*OUTPUT\s*:/) {
+		while ($_ = shift(@_)) {
+			last if /^\s*CLEANUP\s*:/;
+			s/^\s+//;
+			($outarg, $outcode) = split(/\t+/);
+			if ($outcode) {
+			print "\t$outcode\n";
+			} else {
+				die "$outarg not an argument"
+				    unless defined($args_match{$outarg});
+				$var_num = $args_match{$outarg};
+				&generate_output($var_types{$outarg}, $var_num,
+				    $outarg); 
+			}
+		}
+	}
+	# do cleanup
+	if (/^\s*CLEANUP\s*:/) {
+	    while ($_ = shift(@_)) {
+		    last if /^\s*CASE\s*:/;
+		    print "$_\n";
+	    }
+	}
+	# print function trailer
+	print <<EOF if $eflag;
+    }
+    BEGHANDLERS
+    CATCHALL
+	croak("%s: %s\\tpropagated", Xname, Xreason);
+    ENDHANDLERS
+EOF
+	print <<EOF if !$eflag;
+    }
+EOF
+	if (/^\s*CASE\s*:/) {
+	    unshift(@_, $_);
+	}
+}
+	print <<EOF;
+    return sp;
+}
+
+EOF
+}
+
+# print initialization routine
+print qq/extern "C"\n/ if $cflag;
+print <<"EOF";
+int init_$Module(ix,sp,items)
+int ix;
+int sp;
+int items;
+{
+    char* file = __FILE__;
+
+EOF
+
+for (@Func_name) {
+	$pname = shift(@Func_pname);
+	print "    newXSUB(\"$pname\", 0, XS_$_, file);\n";
+}
+print "}\n";
+
+sub output_init {
+	local($type, $num, $init) = @_;
+	local($arg) = "ST($num)";
+
+	eval qq/print " $init\\\n"/;
+}
+
+sub generate_init {
+	local($type, $num, $var) = @_;
+	local($arg) = "ST($num)";
+	local($argoff) = $num - 1;
+	local($ntype);
+
+	die "$type not in typemap" if !defined($type_kind{$type});
+	($ntype = $type) =~ s/\s*\*/Ptr/g;
+	$subtype = $ntype;
+	$subtype =~ s/Ptr$//;
+	$subtype =~ s/Array$//;
+	$expr = $input_expr{$type_kind{$type}};
+	if ($expr =~ /DO_ARRAY_ELEM/) {
+	    $subexpr = $input_expr{$type_kind{$subtype}};
+	    $subexpr =~ s/ntype/subtype/g;
+	    $subexpr =~ s/\$arg/ST(ix_$var)/g;
+	    $subexpr =~ s/\n\t/\n\t\t/g;
+	    $subexpr =~ s/is not of (.*")/[arg %d] is not of $1, ix_$var + 1/g;
+	    $subexpr =~ s/\$var/$var[ix_$var - $argoff]/;
+	    $expr =~ s/DO_ARRAY_ELEM/$subexpr/;
+	}
+	if (defined($defaults{$var})) {
+		$expr =~ s/(\t+)/$1    /g;
+		$expr =~ s/        /\t/g;
+		eval qq/print "\\t$var;\\n"/;
+		$deferred .= eval qq/"\\n\\tif (items < $num)\\n\\t    $var = $defaults{$var};\\n\\telse {\\n$expr;\\n\\t}\\n"/;
+	} elsif ($expr !~ /^\t\$var =/) {
+		eval qq/print "\\t$var;\\n"/;
+		$deferred .= eval qq/"\\n$expr;\\n"/;
+	} else {
+		eval qq/print "$expr;\\n"/;
+	}
+}
+
+sub generate_output {
+	local($type, $num, $var) = @_;
+	local($arg) = "ST($num)";
+	local($argoff) = $num - 1;
+	local($ntype);
+
+	if ($type =~ /^array\(([^,]*),(.*)\)/) {
+		print "\tsv_setpvn($arg, (char *)$var, $2 * sizeof($1)), XFree((char *)$var);\n";
+	} else {
+		die "$type not in typemap" if !defined($type_kind{$type});
+		($ntype = $type) =~ s/\s*\*/Ptr/g;
+		$ntype =~ s/\(\)//g;
+		$subtype = $ntype;
+		$subtype =~ s/Ptr$//;
+		$subtype =~ s/Array$//;
+		$expr = $output_expr{$type_kind{$type}};
+		if ($expr =~ /DO_ARRAY_ELEM/) {
+		    $subexpr = $output_expr{$type_kind{$subtype}};
+		    $subexpr =~ s/ntype/subtype/g;
+		    $subexpr =~ s/\$arg/ST(ix_$var)/g;
+		    $subexpr =~ s/\$var/${var}[ix_$var]/g;
+		    $subexpr =~ s/\n\t/\n\t\t/g;
+		    $expr =~ s/DO_ARRAY_ELEM\n/$subexpr/;
+		}
+		elsif ($arg eq 'ST(0)') {
+		    print "\tST(0) = sv_mortalcopy(&sv_undef);\n";
+		}
+		eval "print qq\f$expr\f";
+	}
+}
+
+sub map_type {
+	local($type) = @_;
+
+	if ($type =~ /^array\(([^,]*),(.*)\)/) {
+		return "$1 *";
+	} else {
+		return $type;
+	}
+}

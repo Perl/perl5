@@ -73,8 +73,12 @@ free_tmps()
     while (tmps_ix > myfloor) {      /* clean up after last statement */
 	SV* sv = tmps_stack[tmps_ix];
 	tmps_stack[tmps_ix--] = Nullsv;
-	if (sv)
+	if (sv) {
+#ifdef DEBUGGING
+	    SvTEMP_off(sv);
+#endif
 	    sv_free(sv);		/* note, can modify tmps_ix!!! */
+	}
     }
 }
 
@@ -275,7 +279,7 @@ I32 base;
     register void* ptr;
 
     if (base < -1)
-	fatal("panic: corrupt saved stack index");
+	croak("panic: corrupt saved stack index");
     while (savestack_ix > base) {
 	switch (SSPOPINT) {
 	case SAVEt_ITEM:			/* normal string */
@@ -312,7 +316,7 @@ I32 base;
         case SAVEt_HV:				/* hash reference */
 	    hv = (HV*)SSPOPPTR;
 	    gv = (GV*)SSPOPPTR;
-            (void)hv_free(GvHV(gv), FALSE);
+            (void)hv_free(GvHV(gv));
             GvHV(gv) = hv;
             break;
 	case SAVEt_INT:				/* int reference */
@@ -346,7 +350,7 @@ I32 base;
             GvGP(gv) = (GP*)ptr;
             break;
 	default:
-	    fatal("panic: leave_scope inconsistency");
+	    croak("panic: leave_scope inconsistency");
 	}
     }
 }

@@ -31,15 +31,29 @@ static void dump();
 void
 dump_all()
 {
-    register I32 i;
-    register HE *entry;
-
     setlinebuf(stderr);
     if (main_root)
 	dump_op(main_root);
-    for (i = 0; i <= 127; i++) {
-	for (entry = HvARRAY(defstash)[i]; entry; entry = entry->hent_next)
-	    dump_sub((GV*)entry->hent_val);
+    dump_packsubs(defstash);
+}
+
+void
+dump_packsubs(stash)
+HV* stash;
+{
+    U32	i;
+    HE	*entry;
+
+    for (i = 0; i <= HvMAX(stash); i++) {
+	for (entry = HvARRAY(stash)[i]; entry; entry = entry->hent_next) {
+	    GV *gv = (GV*)entry->hent_val;
+	    HV *hv;
+	    if (GvCV(gv))
+		dump_sub(gv);
+	    if (*entry->hent_key == '_' && (hv = GvHV(gv)) && HvNAME(hv) &&
+	      hv != defstash)
+		dump_packsubs(hv);		/* nested package */
+	}
     }
 }
 
@@ -50,7 +64,7 @@ GV* gv;
     SV *sv = sv_mortalcopy(&sv_undef);
     if (GvCV(gv)) {
 	gv_fullname(sv,gv);
-	dump("\nSUB %s = ", SvPV(sv));
+	dump("\nSUB %s = ", SvPVX(sv));
 	if (CvUSERSUB(GvCV(gv)))
 	    dump("(usersub 0x%x %d)\n",
 		(long)CvUSERSUB(GvCV(gv)),
@@ -170,7 +184,7 @@ register OP *op;
 	if (cGVOP->op_gv) {
 	    tmpsv = NEWSV(0,0);
 	    gv_fullname(tmpsv,cGVOP->op_gv);
-	    dump("GV = %s\n", SvPVn(tmpsv));
+	    dump("GV = %s\n", SvPV(tmpsv, na));
 	    sv_free(tmpsv);
 	}
 	else
@@ -228,7 +242,7 @@ register OP *op;
     case OP_PUSHRE:
     case OP_MATCH:
     case OP_SUBST:
-	dump_pm(op);
+	dump_pm((PMOP*)op);
 	break;
     }
     if (op->op_flags & OPf_KIDS) {
@@ -254,10 +268,10 @@ register GV *gv;
     dumplvl++;
     fprintf(stderr,"{\n");
     gv_fullname(sv,gv);
-    dump("GV_NAME = %s", SvPV(sv));
+    dump("GV_NAME = %s", SvPVX(sv));
     if (gv != GvEGV(gv)) {
 	gv_efullname(sv,GvEGV(gv));
-	dump("-> %s", SvPV(sv));
+	dump("-> %s", SvPVX(sv));
     }
     dump("\n");
     dumplvl--;

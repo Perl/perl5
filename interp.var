@@ -28,7 +28,6 @@ cxstack
 cxstack_ix
 cxstack_max
 dbargs
-dbmrefcnt
 debdelim
 debname
 debstash
@@ -134,8 +133,8 @@ statname
 statusvalue
 stdingv
 strchop
-taintanyway
 tainted
+tainting
 tmps_floor
 tmps_ix
 tmps_max

@@ -68,7 +68,7 @@ struct cop {
 struct block_sub {
     CV *	cv;
     GV *	gv;
-    GV *	defgv;
+    GV *	dfoutgv;
     AV *	savearray;
     AV *	argarray;
     AV *	comppad;
@@ -85,7 +85,7 @@ struct block_sub {
 #define PUSHFORMAT(cx)							\
 	cx->blk_sub.cv = cv;						\
 	cx->blk_sub.gv = gv;						\
-	cx->blk_sub.defgv = defoutgv;					\
+	cx->blk_sub.dfoutgv = defoutgv;					\
 	cx->blk_sub.hasargs = 0;
 
 #define POPSUB(cx)							\
@@ -95,11 +95,11 @@ struct block_sub {
 	}								\
 	if (!(CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth)) {	\
 	    if (CvDELETED(cx->blk_sub.cv))				\
-		cv_free(cx->blk_sub.cv);				\
+		sv_free((SV*)cx->blk_sub.cv);				\
 	}
 
 #define POPFORMAT(cx)							\
-	defoutgv = cx->blk_sub.defgv;
+	defoutgv = cx->blk_sub.dfoutgv;
 
 /* eval context */
 struct block_eval {

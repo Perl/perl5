@@ -143,7 +143,7 @@ malloc(nbytes)
 #endif /* MSDOS */
 #ifdef DEBUGGING
 	if ((long)nbytes < 0)
-	    fatal("panic: malloc");
+	    croak("panic: malloc");
 #endif
 #endif /* safemalloc */
 
@@ -363,7 +363,7 @@ realloc(mp, nbytes)
 		return malloc(nbytes);
 #ifdef DEBUGGING
 	if ((long)nbytes < 0)
-		fatal("panic: realloc");
+		croak("panic: realloc");
 #endif
 #endif /* safemalloc */
 

@@ -49,6 +49,7 @@ typedef U16 PADOFFSET;
 #define OPf_KNOW	2	/* Context is known. */
 #define OPf_KIDS	4	/* There is a firstborn child. */
 #define OPf_PARENS	8	/* This operator was parenthesized. */
+				/*  (Or block needs explicit scope entry.) */
 #define OPf_STACKED	16	/* Some arg is arriving on the stack. */
 #define OPf_LVAL	32	/* Certified reference (lvalue). */
 #define OPf_INTRO	64	/* Lvalue must be localized */

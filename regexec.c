@@ -110,7 +110,7 @@ I32 safebase;	/* no need to remember string in subbase */
 
 	/* Be paranoid... */
 	if (prog == NULL || string == NULL) {
-		fatal("NULL regexp parameter");
+		croak("NULL regexp parameter");
 		return(0);
 	}
 
@@ -228,7 +228,7 @@ I32 safebase;	/* no need to remember string in subbase */
 	if (prog->regstart) {
 		if (prog->reganch & ROPT_SKIP) {  /* we have /x+whatever/ */
 		    /* it must be a one character string */
-		    i = SvPV(prog->regstart)[0];
+		    i = SvPVX(prog->regstart)[0];
 		    while (s < strend) {
 			    if (*s == i) {
 				    if (regtry(prog, s))
@@ -255,7 +255,7 @@ I32 safebase;	/* no need to remember string in subbase */
 		    }
 		}
 		else {
-		    c = SvPV(prog->regstart);
+		    c = SvPVX(prog->regstart);
 		    while ((s = ninstr(s, strend,
 		      c, c + SvCUR(prog->regstart) )) != NULL) {
 			    if (regtry(prog, s))

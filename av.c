@@ -28,37 +28,52 @@
 #include "perl.h"
 
 SV**
-av_fetch(ar,key,lval)
-register AV *ar;
+av_fetch(av,key,lval)
+register AV *av;
 I32 key;
 I32 lval;
 {
     SV *sv;
 
-    if (key < 0 || key > AvFILL(ar)) {
+    if (SvMAGICAL(av)) {
+	if (mg_find((SV*)av,'P')) {
+	    if (key < 0)
+		return 0;
+	    sv = sv_2mortal(NEWSV(61,0));
+	    mg_copy((SV*)av, sv, 0, key);
+	    if (!lval) {
+		mg_get((SV*)sv);
+		sv_unmagic(sv,'p');
+	    }
+	    Sv = sv;
+	    return &Sv;
+	}
+    }
+
+    if (key < 0 || key > AvFILL(av)) {
 	if (lval && key >= 0) {
-	    if (AvREAL(ar))
+	    if (AvREAL(av))
 		sv = NEWSV(5,0);
 	    else
 		sv = sv_mortalcopy(&sv_undef);
-	    return av_store(ar,key,sv);
+	    return av_store(av,key,sv);
 	}
 	else
 	    return 0;
     }
-    if (!AvARRAY(ar)[key]) {
+    if (!AvARRAY(av)[key]) {
 	if (lval) {
 	    sv = NEWSV(6,0);
-	    return av_store(ar,key,sv);
+	    return av_store(av,key,sv);
 	}
 	return 0;
     }
-    return &AvARRAY(ar)[key];
+    return &AvARRAY(av)[key];
 }
 
 SV**
-av_store(ar,key,val)
-register AV *ar;
+av_store(av,key,val)
+register AV *av;
 I32 key;
 SV *val;
 {
@@ -67,42 +82,50 @@ SV *val;
 
     if (key < 0)
 	return 0;
-    if (key > AvMAX(ar)) {
+
+    if (SvMAGICAL(av)) {
+	if (mg_find((SV*)av,'P')) {
+	    mg_copy((SV*)av, val, 0, key);
+	    return 0;
+	}
+    }
+
+    if (key > AvMAX(av)) {
 	I32 newmax;
 
-	if (AvALLOC(ar) != AvARRAY(ar)) {
-	    tmp = AvARRAY(ar) - AvALLOC(ar);
-	    Move(AvARRAY(ar), AvALLOC(ar), AvMAX(ar)+1, SV*);
-	    Zero(AvALLOC(ar)+AvMAX(ar)+1, tmp, SV*);
-	    AvMAX(ar) += tmp;
-	    AvARRAY(ar) -= tmp;
-	    if (key > AvMAX(ar) - 10) {
-		newmax = key + AvMAX(ar);
+	if (AvALLOC(av) != AvARRAY(av)) {
+	    tmp = AvARRAY(av) - AvALLOC(av);
+	    Move(AvARRAY(av), AvALLOC(av), AvMAX(av)+1, SV*);
+	    Zero(AvALLOC(av)+AvMAX(av)+1, tmp, SV*);
+	    AvMAX(av) += tmp;
+	    SvPVX(av) = (char*)(AvARRAY(av) - tmp);
+	    if (key > AvMAX(av) - 10) {
+		newmax = key + AvMAX(av);
 		goto resize;
 	    }
 	}
 	else {
-	    if (AvALLOC(ar)) {
-		newmax = key + AvMAX(ar) / 5;
+	    if (AvALLOC(av)) {
+		newmax = key + AvMAX(av) / 5;
 	      resize:
-		Renew(AvALLOC(ar),newmax+1, SV*);
-		Zero(&AvALLOC(ar)[AvMAX(ar)+1], newmax - AvMAX(ar), SV*);
+		Renew(AvALLOC(av),newmax+1, SV*);
+		Zero(&AvALLOC(av)[AvMAX(av)+1], newmax - AvMAX(av), SV*);
 	    }
 	    else {
 		newmax = key < 4 ? 4 : key;
-		Newz(2,AvALLOC(ar), newmax+1, SV*);
+		Newz(2,AvALLOC(av), newmax+1, SV*);
 	    }
-	    AvARRAY(ar) = AvALLOC(ar);
-	    AvMAX(ar) = newmax;
+	    SvPVX(av) = (char*)AvALLOC(av);
+	    AvMAX(av) = newmax;
 	}
     }
-    ary = AvARRAY(ar);
-    if (AvREAL(ar)) {
-	if (AvFILL(ar) < key) {
-	    while (++AvFILL(ar) < key) {
-		if (ary[AvFILL(ar)] != Nullsv) {
-		    sv_free(ary[AvFILL(ar)]);
-		    ary[AvFILL(ar)] = Nullsv;
+    ary = AvARRAY(av);
+    if (AvREAL(av)) {
+	if (AvFILL(av) < key) {
+	    while (++AvFILL(av) < key) {
+		if (ary[AvFILL(av)] != Nullsv) {
+		    sv_free(ary[AvFILL(av)]);
+		    ary[AvFILL(av)] = Nullsv;
 		}
 	    }
 	}
@@ -110,21 +133,27 @@ SV *val;
 	    sv_free(ary[key]);
     }
     ary[key] = val;
+    if (SvMAGICAL(av)) {
+	MAGIC* mg = SvMAGIC(av);
+	sv_magic(val, (SV*)av, tolower(mg->mg_type), 0, key);
+	mg_set((SV*)av);
+    }
     return &ary[key];
 }
 
 AV *
 newAV()
 {
-    register AV *ar;
+    register AV *av;
 
-    Newz(1,ar,1,AV);
-    SvREFCNT(ar) = 1;
-    sv_upgrade(ar,SVt_PVAV);
-    AvREAL_on(ar);
-    AvALLOC(ar) = AvARRAY(ar) = 0;
-    AvMAX(ar) = AvFILL(ar) = -1;
-    return ar;
+    Newz(1,av,1,AV);
+    SvREFCNT(av) = 1;
+    sv_upgrade(av,SVt_PVAV);
+    AvREAL_on(av);
+    AvALLOC(av) = 0;
+    SvPVX(av) = 0;
+    AvMAX(av) = AvFILL(av) = -1;
+    return av;
 }
 
 AV *
@@ -132,19 +161,19 @@ av_make(size,strp)
 register I32 size;
 register SV **strp;
 {
-    register AV *ar;
+    register AV *av;
     register I32 i;
     register SV** ary;
 
-    Newz(3,ar,1,AV);
-    sv_upgrade(ar,SVt_PVAV);
+    Newz(3,av,1,AV);
+    sv_upgrade(av,SVt_PVAV);
     New(4,ary,size+1,SV*);
-    AvALLOC(ar) = ary;
+    AvALLOC(av) = ary;
     Zero(ary,size,SV*);
-    AvREAL_on(ar);
-    AvARRAY(ar) = ary;
-    AvFILL(ar) = size - 1;
-    AvMAX(ar) = size - 1;
+    AvREAL_on(av);
+    SvPVX(av) = (char*)ary;
+    AvFILL(av) = size - 1;
+    AvMAX(av) = size - 1;
     for (i = 0; i < size; i++) {
 	if (*strp) {
 	    ary[i] = NEWSV(7,0);
@@ -152,7 +181,7 @@ register SV **strp;
 	}
 	strp++;
     }
-    return ar;
+    return av;
 }
 
 AV *
@@ -160,111 +189,114 @@ av_fake(size,strp)
 register I32 size;
 register SV **strp;
 {
-    register AV *ar;
+    register AV *av;
     register SV** ary;
 
-    Newz(3,ar,1,AV);
-    SvREFCNT(ar) = 1;
-    sv_upgrade(ar,SVt_PVAV);
+    Newz(3,av,1,AV);
+    SvREFCNT(av) = 1;
+    sv_upgrade(av,SVt_PVAV);
     New(4,ary,size+1,SV*);
-    AvALLOC(ar) = ary;
+    AvALLOC(av) = ary;
     Copy(strp,ary,size,SV*);
-    AvREAL_off(ar);
-    AvARRAY(ar) = ary;
-    AvFILL(ar) = size - 1;
-    AvMAX(ar) = size - 1;
+    AvREAL_off(av);
+    SvPVX(av) = (char*)ary;
+    AvFILL(av) = size - 1;
+    AvMAX(av) = size - 1;
     while (size--) {
 	if (*strp)
 	    SvTEMP_off(*strp);
 	strp++;
     }
-    return ar;
+    return av;
 }
 
 void
-av_clear(ar)
-register AV *ar;
+av_clear(av)
+register AV *av;
 {
     register I32 key;
 
-    if (!ar || !AvREAL(ar) || AvMAX(ar) < 0)
+    if (!av || !AvREAL(av) || AvMAX(av) < 0)
 	return;
     /*SUPPRESS 560*/
-    if (key = AvARRAY(ar) - AvALLOC(ar)) {
-	AvMAX(ar) += key;
-	AvARRAY(ar) -= key;
+    if (key = AvARRAY(av) - AvALLOC(av)) {
+	AvMAX(av) += key;
+	SvPVX(av) = (char*)(AvARRAY(av) - key);
     }
-    for (key = 0; key <= AvMAX(ar); key++)
-	sv_free(AvARRAY(ar)[key]);
-    AvFILL(ar) = -1;
-    Zero(AvARRAY(ar), AvMAX(ar)+1, SV*);
+    for (key = 0; key <= AvMAX(av); key++)
+	sv_free(AvARRAY(av)[key]);
+    AvFILL(av) = -1;
+    Zero(AvARRAY(av), AvMAX(av)+1, SV*);
 }
 
 void
-av_undef(ar)
-register AV *ar;
+av_undef(av)
+register AV *av;
 {
     register I32 key;
 
-    if (!ar)
+    if (!av)
 	return;
     /*SUPPRESS 560*/
-    if (key = AvARRAY(ar) - AvALLOC(ar)) {
-	AvMAX(ar) += key;
-	AvARRAY(ar) -= key;
+    if (key = AvARRAY(av) - AvALLOC(av)) {
+	AvMAX(av) += key;
+	SvPVX(av) = (char*)(AvARRAY(av) - key);
     }
-    if (AvREAL(ar)) {
-	for (key = 0; key <= AvMAX(ar); key++)
-	    sv_free(AvARRAY(ar)[key]);
+    if (AvREAL(av)) {
+	for (key = 0; key <= AvMAX(av); key++)
+	    sv_free(AvARRAY(av)[key]);
     }
-    Safefree(AvALLOC(ar));
-    AvALLOC(ar) = AvARRAY(ar) = 0;
-    AvMAX(ar) = AvFILL(ar) = -1;
+    Safefree(AvALLOC(av));
+    AvALLOC(av) = 0;
+    SvPVX(av) = 0;
+    AvMAX(av) = AvFILL(av) = -1;
 }
 
 void
-av_free(ar)
-AV *ar;
+av_free(av)
+AV *av;
 {
-    av_undef(ar);
-    Safefree(ar);
+    av_undef(av);
+    Safefree(av);
 }
 
 bool
-av_push(ar,val)
-register AV *ar;
+av_push(av,val)
+register AV *av;
 SV *val;
 {
-    return av_store(ar,++(AvFILL(ar)),val) != 0;
+    return av_store(av,++(AvFILL(av)),val) != 0;
 }
 
 SV *
-av_pop(ar)
-register AV *ar;
+av_pop(av)
+register AV *av;
 {
     SV *retval;
 
-    if (AvFILL(ar) < 0)
+    if (AvFILL(av) < 0)
 	return Nullsv;
-    retval = AvARRAY(ar)[AvFILL(ar)];
-    AvARRAY(ar)[AvFILL(ar)--] = Nullsv;
+    retval = AvARRAY(av)[AvFILL(av)];
+    AvARRAY(av)[AvFILL(av)--] = Nullsv;
+    if (SvMAGICAL(av))
+	mg_set((SV*)av);
     return retval;
 }
 
 void
-av_popnulls(ar)
-register AV *ar;
+av_popnulls(av)
+register AV *av;
 {
-    register I32 fill = AvFILL(ar);
+    register I32 fill = AvFILL(av);
 
-    while (fill >= 0 && !AvARRAY(ar)[fill])
+    while (fill >= 0 && !AvARRAY(av)[fill])
 	fill--;
-    AvFILL(ar) = fill;
+    AvFILL(av) = fill;
 }
 
 void
-av_unshift(ar,num)
-register AV *ar;
+av_unshift(av,num)
+register AV *av;
 register I32 num;
 {
     register I32 i;
@@ -272,62 +304,70 @@ register I32 num;
 
     if (num <= 0)
 	return;
-    if (AvARRAY(ar) - AvALLOC(ar) >= num) {
-	AvMAX(ar) += num;
-	AvFILL(ar) += num;
-	while (num--)
-	    *--AvARRAY(ar) = Nullsv;
+    if (AvARRAY(av) - AvALLOC(av) >= num) {
+	AvMAX(av) += num;
+	AvFILL(av) += num;
+	while (num--) {
+	    SvPVX(av) = (char*)(AvARRAY(av) - 1);
+	    *AvARRAY(av) = Nullsv;
+	}
     }
     else {
-	(void)av_store(ar,AvFILL(ar)+num,(SV*)0);	/* maybe extend array */
-	dstr = AvARRAY(ar) + AvFILL(ar);
+	(void)av_store(av,AvFILL(av)+num,(SV*)0);	/* maybe extend array */
+	dstr = AvARRAY(av) + AvFILL(av);
 	sstr = dstr - num;
 #ifdef BUGGY_MSC5
  # pragma loop_opt(off)	/* don't loop-optimize the following code */
 #endif /* BUGGY_MSC5 */
-	for (i = AvFILL(ar) - num; i >= 0; i--) {
+	for (i = AvFILL(av) - num; i >= 0; i--) {
 	    *dstr-- = *sstr--;
 #ifdef BUGGY_MSC5
  # pragma loop_opt()	/* loop-optimization back to command-line setting */
 #endif /* BUGGY_MSC5 */
 	}
-	Zero(AvARRAY(ar), num, SV*);
+	Zero(AvARRAY(av), num, SV*);
     }
 }
 
 SV *
-av_shift(ar)
-register AV *ar;
+av_shift(av)
+register AV *av;
 {
     SV *retval;
 
-    if (AvFILL(ar) < 0)
+    if (AvFILL(av) < 0)
 	return Nullsv;
-    retval = *AvARRAY(ar);
-    *(AvARRAY(ar)++) = Nullsv;
-    AvMAX(ar)--;
-    AvFILL(ar)--;
+    retval = *AvARRAY(av);
+    *AvARRAY(av) = Nullsv;
+    SvPVX(av) = (char*)(AvARRAY(av) + 1);
+    AvMAX(av)--;
+    AvFILL(av)--;
+    if (SvMAGICAL(av))
+	mg_set((SV*)av);
     return retval;
 }
 
 I32
-av_len(ar)
-register AV *ar;
+av_len(av)
+register AV *av;
 {
-    return AvFILL(ar);
+    return AvFILL(av);
 }
 
 void
-av_fill(ar, fill)
-register AV *ar;
+av_fill(av, fill)
+register AV *av;
 I32 fill;
 {
     if (fill < 0)
 	fill = -1;
-    if (fill <= AvMAX(ar))
-	AvFILL(ar) = fill;
+    if (fill <= AvMAX(av)) {
+	AvFILL(av) = fill;
+	if (SvMAGICAL(av))
+	    mg_set((SV*)av);
+    }
     else {
-	AvFILL(ar) = fill - 1;		/* don't clobber in-between values */
-	(void)av_store(ar,fill,Nullsv);
+	AvFILL(av) = fill - 1;		/* don't clobber in-between values */
+	(void)av_store(av,fill,Nullsv);
     }
 }

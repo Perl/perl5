@@ -8,7 +8,7 @@ print "1..5\n";
 
 $beg = time;
 
-while (($now = time) == $beg) {}
+while (($now = time) == $beg) { sleep 1 }
 
 if ($now > $beg && $now - $beg < 10){print "ok 1\n";} else {print "not ok 1\n";}
 

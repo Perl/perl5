@@ -33,6 +33,7 @@ struct gp {
     HV *	gp_hv;		/* associative array value */
     GV *	gp_egv;		/* effective gv, if *glob */
     CV *	gp_cv;		/* subroutine value */
+    U32		gp_cvgen;	/* generational validity of cached gv_cv */
     I32		gp_lastexpr;	/* used by nothing_in_common() */
     line_t	gp_line;	/* line first declared at (for -w) */
     char	gp_flags;
@@ -73,6 +74,7 @@ HV *GvHVn();
 #endif			/* Microport 2.4 hack */
 
 #define GvCV(gv)	(GvGP(gv)->gp_cv)
+#define GvCVGEN(gv)	(GvGP(gv)->gp_cvgen)
 
 #define GvLASTEXPR(gv)	(GvGP(gv)->gp_lastexpr)
 
@@ -104,6 +106,7 @@ struct io {
     GV *	top_gv;		/* $^ */
     char *	fmt_name;	/* $~ */
     GV *	fmt_gv;		/* $~ */
+    SV *	object;
     short	subprocess;	/* -| or |- */
     char	type;
     char	flags;

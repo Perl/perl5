@@ -20,7 +20,7 @@
  **********************************************************/
 
 #define ARGS
-#define ARGSproto
+#define ARGSproto void
 #define dARGS
 #define PP(s) OP* s(ARGS) dARGS
 
@@ -70,16 +70,16 @@
 #define RETURNX(x)	return x, PUTBACK, NORMAL
 
 #define POPs		(*sp--)
-#define POPp		(SvPVnx(POPs))
-#define POPn		(SvNVnx(POPs))
-#define POPi		((int)SvIVnx(POPs))
-#define POPl		((long)SvIVnx(POPs))
+#define POPp		(SvPVx(POPs, na))
+#define POPn		(SvNVx(POPs))
+#define POPi		((int)SvIVx(POPs))
+#define POPl		((long)SvIVx(POPs))
 
 #define TOPs		(*sp)
-#define TOPp		(SvPVn(TOPs))
-#define TOPn		(SvNVn(TOPs))
-#define TOPi		((int)SvIVn(TOPs))
-#define TOPl		((long)SvIVn(TOPs))
+#define TOPp		(SvPV(TOPs, na))
+#define TOPn		(SvNV(TOPs))
+#define TOPi		((int)SvIV(TOPs))
+#define TOPl		((long)SvIV(TOPs))
 
 /* Go to some pains in the rare event that we must extend the stack. */
 #define EXTEND(p,n)	do { if (stack_max - p < (n)) {		  	    \

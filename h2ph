@@ -67,7 +67,7 @@ foreach $file (@ARGV) {
 			$args = "local($args) = \@_;\n$t    ";
 		    }
 		    s/^\s+//;
-		    do expr();
+		    &expr();
 		    $new =~ s/(["\\])/\\$1/g;
 		    if ($t ne '') {
 			$new =~ s/(['\\])/\\$1/g;
@@ -81,7 +81,7 @@ foreach $file (@ARGV) {
 		}
 		else {
 		    s/^\s+//;
-		    do expr();
+		    &expr();
 		    $new = 1 if $new eq '';
 		    if ($t ne '') {
 			$new =~ s/(['\\])/\\$1/g;
@@ -108,14 +108,14 @@ foreach $file (@ARGV) {
 	    }
 	    elsif (s/^if\s+//) {
 		$new = '';
-		do expr();
+		&expr();
 		print OUT $t,"if ($new) {\n";
 		$tab += 4;
 		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
 	    }
 	    elsif (s/^elif\s+//) {
 		$new = '';
-		do expr();
+		&expr();
 		$tab -= 4;
 		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
 		print OUT $t,"}\n${t}elsif ($new) {\n";
@@ -193,7 +193,7 @@ sub expr {
 		}
 	    }
 	    else {
-		$new .= ' &' . $id;
+		$new .= ' eval{&' . $id . '}';
 	    }
 	    next;
 	};

@@ -85,7 +85,7 @@ VOID	(*func)();
 
     if (pipe(p) < 0) {
 	fclose( fil );
-	fatal("Can't get pipe for decrypt");
+	croak("Can't get pipe for decrypt");
     }
 
     /* make sure that the child doesn't get anything extra */
@@ -97,7 +97,7 @@ VOID	(*func)();
 	    close(p[0]);
 	    close(p[1]);
 	    fclose( fil );
-	    fatal("Can't fork for decrypt");
+	    croak("Can't fork for decrypt");
 	}
 	sleep(5);
     }
@@ -132,12 +132,12 @@ cryptswitch()
     ch = getc(rsfp);
     if (ch == CRYPT_MAGIC_1) {
 	if (getc(rsfp) == CRYPT_MAGIC_2) {
-	    if( perldb ) fatal("can't debug an encrypted script");
+	    if( perldb ) croak("can't debug an encrypted script");
 	    rsfp = my_pfiopen( rsfp, cryptfilter );
 	    preprocess = 1;	/* force call to pclose when done */
 	}
 	else
-	    fatal( "bad encryption run_format" );
+	    croak( "bad encryption run_format" );
     }
     else
 	ungetc(ch,rsfp);

@@ -62,6 +62,8 @@ extern int h_errno;
 #  include <varargs.h>
 #endif
 
+static I32 dopoptosub P((I32 startingblock));
+
 /* Nothing. */
 
 PP(pp_null)
@@ -183,7 +185,7 @@ PP(pp_padav)
     dSP; dTARGET;
     XPUSHs(TARG);
     if ((op->op_flags & (OPf_INTRO|OPf_SPECIAL)) == OPf_INTRO)
-	av_clear(TARG);
+	av_clear((AV*)TARG);
     if (op->op_flags & OPf_LVAL)
 	RETURN;
     PUTBACK;
@@ -195,7 +197,7 @@ PP(pp_padhv)
     dSP; dTARGET;
     XPUSHs(TARG);
     if ((op->op_flags & (OPf_INTRO|OPf_SPECIAL)) == OPf_INTRO)
-	hv_clear(TARG, FALSE);
+	hv_clear((HV*)TARG);
     if (op->op_flags & OPf_LVAL)
 	RETURN;
     PUTBACK;
@@ -223,7 +225,7 @@ PP(pp_rv2gv)
 	if (SvTYPE(sv) != SVt_PVGV) {
 	    if (!SvOK(sv))
 		DIE(no_usym);
-	    sv = (SV*)gv_fetchpv(SvPVn(sv), TRUE);
+	    sv = (SV*)gv_fetchpv(SvPV(sv, na), TRUE);
 	}
     }
     if (op->op_flags & OPf_INTRO) {
@@ -272,12 +274,29 @@ PP(pp_rv2sv)
 	}
     }
     else {
-	if (SvTYPE(sv) != SVt_PVGV) {
+	GV *gv = sv;
+	if (SvTYPE(gv) != SVt_PVGV) {
 	    if (!SvOK(sv))
 		DIE(no_usym);
-	    sv = (SV*)gv_fetchpv(SvPVn(sv), TRUE);
+	    gv = (SV*)gv_fetchpv(SvPV(sv, na), TRUE);
 	}
-	sv = GvSV(sv);
+	sv = GvSV(gv);
+	if (op->op_private == OP_RV2HV &&
+	  (SvTYPE(sv) != SVt_REF || SvTYPE((SV*)SvANY(sv)) != SVt_PVHV)) {
+	    sv_free(sv);
+	    sv = NEWSV(0,0);
+	    sv_upgrade(sv, SVt_REF);
+	    SvANY(sv) = (void*)sv_ref((SV*)newHV());
+	    GvSV(gv) = sv;
+	}
+	else if (op->op_private == OP_RV2AV &&
+	  (SvTYPE(sv) != SVt_REF || SvTYPE((SV*)SvANY(sv)) != SVt_PVAV)) {
+	    sv_free(sv);
+	    sv = NEWSV(0,0);
+	    sv_upgrade(sv, SVt_REF);
+	    SvANY(sv) = (void*)sv_ref((SV*)newAV());
+	    GvSV(gv) = sv;
+	}
     }
     if (op->op_flags & OPf_INTRO)
 	SETs(save_scalar((GV*)TOPs));
@@ -327,11 +346,18 @@ PP(pp_refgen)
 
 PP(pp_ref)
 {
-    dSP; dTARGET; dTOPss;
+    dSP; dTARGET;
+    SV *sv;
     char *pv;
 
+    if (MAXARG < 1) {
+	sv = GvSV(defgv);
+	EXTEND(SP, 1);
+    }
+    else
+	sv = POPs;
     if (SvTYPE(sv) != SVt_REF)
-	RETSETUNDEF;
+	RETPUSHUNDEF;
 
     sv = (SV*)SvANY(sv);
     if (SvSTORAGE(sv) == 'O')
@@ -356,24 +382,31 @@ PP(pp_ref)
 	default:		pv = "UNKNOWN";		break;
 	}
     }
-    SETp(pv, strlen(pv));
+    PUSHp(pv, strlen(pv));
     RETURN;
 }
 
 PP(pp_bless)
 {
-    dSP; dTOPss;
+    dSP;
     register SV* ref;
+    SV *sv;
+    HV *stash;
 
+    if (MAXARG == 1)
+	stash = curcop->cop_stash;
+    else
+	stash = fetch_stash(POPs, TRUE);
+
+    sv = TOPs;
     if (SvTYPE(sv) != SVt_REF)
-	RETSETUNDEF;
-
+	DIE("Can't bless non-reference value");
     ref = (SV*)SvANY(sv);
     if (SvSTORAGE(ref) && SvSTORAGE(ref) != 'O')
 	DIE("Can't bless temporary scalar");
     SvSTORAGE(ref) = 'O';
     SvUPGRADE(ref, SVt_PVMG);
-    SvSTASH(ref) = curcop->cop_stash;
+    SvSTASH(ref) = stash;
     RETURN;
 }
 
@@ -384,9 +417,7 @@ PP(pp_backtick)
     dSP; dTARGET;
     FILE *fp;
     char *tmps = POPp;
-#ifdef TAINT
     TAINT_PROPER("``");
-#endif
     fp = my_popen(tmps, "r");
     if (fp) {
 	sv_setpv(TARG, "");	/* note that this preserves previous buffer */
@@ -408,7 +439,7 @@ PP(pp_backtick)
 		XPUSHs(sv_2mortal(sv));
 		if (SvLEN(sv) - SvCUR(sv) > 20) {
 		    SvLEN_set(sv, SvCUR(sv)+1);
-		    Renew(SvPV(sv), SvLEN(sv), char);
+		    Renew(SvPVX(sv), SvLEN(sv), char);
 		}
 	    }
 	}
@@ -472,7 +503,7 @@ do_readline()
 		sv_catpv(tmpcmd, "|tr -s ' \t\f\r' '\\012\\012\\012\\012'|");
 #endif /* !CSH */
 #endif /* !MSDOS */
-		(void)do_open(last_in_gv, SvPV(tmpcmd), SvCUR(tmpcmd));
+		(void)do_open(last_in_gv, SvPVX(tmpcmd), SvCUR(tmpcmd));
 		fp = io->ifp;
 		sv_free(tmpcmd);
 	    }
@@ -521,9 +552,10 @@ do_readline()
 	}
 	io->lines++;
 	XPUSHs(sv);
-#ifdef TAINT
-	sv->sv_tainted = 1; /* Anything from the outside world...*/
-#endif
+	if (tainting) {
+	    tainted = TRUE;
+	    SvTAINT(sv); /* Anything from the outside world...*/
+	}
 	if (type == OP_GLOB) {
 	    char *tmps;
 
@@ -533,11 +565,11 @@ do_readline()
 		*SvEND(sv) = '\0';
 	    else
 		SvCUR(sv)++;
-	    for (tmps = SvPV(sv); *tmps; tmps++)
+	    for (tmps = SvPVX(sv); *tmps; tmps++)
 		if (!isALPHA(*tmps) && !isDIGIT(*tmps) &&
 		    strchr("$&*(){}[]'\";\\|?<>~`", *tmps))
 			break;
-	    if (*tmps && stat(SvPV(sv), &statbuf) < 0) {
+	    if (*tmps && stat(SvPVX(sv), &statbuf) < 0) {
 		POPs;		/* Unmatched wildcard?  Chuck it... */
 		continue;
 	    }
@@ -545,7 +577,7 @@ do_readline()
 	if (GIMME == G_ARRAY) {
 	    if (SvLEN(sv) - SvCUR(sv) > 20) {
 		SvLEN_set(sv, SvCUR(sv)+1);
-		Renew(SvPV(sv), SvLEN(sv), char);
+		Renew(SvPVX(sv), SvLEN(sv), char);
 	    }
 	    sv = sv_2mortal(NEWSV(58, 80));
 	    continue;
@@ -556,7 +588,7 @@ do_readline()
 		SvLEN_set(sv, 80);
 	    else
 		SvLEN_set(sv, SvCUR(sv)+40);	/* allow some slop */
-	    Renew(SvPV(sv), SvLEN(sv), char);
+	    Renew(SvPVX(sv), SvLEN(sv), char);
 	}
 	RETURN;
     }
@@ -595,7 +627,7 @@ PP(pp_readline)
 
 PP(pp_indread)
 {
-    last_in_gv = gv_fetchpv(SvPVnx(GvSV((GV*)(*stack_sp--))), TRUE);
+    last_in_gv = gv_fetchpv(SvPVx(GvSV((GV*)(*stack_sp--)), na), TRUE);
     return do_readline();
 }
 
@@ -605,6 +637,11 @@ PP(pp_rcatline)
     return do_readline();
 }
 
+PP(pp_regcmaybe)
+{
+    return NORMAL;
+}
+
 PP(pp_regcomp) {
     dSP;
     register PMOP *pm = (PMOP*)cLOGOP->op_other;
@@ -612,14 +649,15 @@ PP(pp_regcomp) {
     I32 global;
     SV *tmpstr;
     register REGEXP *rx = pm->op_pmregexp;
+    STRLEN len;
 
     global = pm->op_pmflags & PMf_GLOBAL;
     tmpstr = POPs;
-    t = SvPVn(tmpstr);
+    t = SvPV(tmpstr, len);
     if (!global && rx)
 	regfree(rx);
     pm->op_pmregexp = Null(REGEXP*);	/* crucial if regcomp aborts */
-    pm->op_pmregexp = regcomp(t, t + SvCUROK(tmpstr),
+    pm->op_pmregexp = regcomp(t, t + len,
 	pm->op_pmflags & PMf_FOLD);
     if (!pm->op_pmregexp->prelen && curpm)
 	pm = curpm;
@@ -629,8 +667,7 @@ PP(pp_regcomp) {
 		pm->op_pmregexp->prelen);
 	pm->op_pmflags &= ~PMf_RUNTIME;	/* no point compiling again */
 	hoistmust(pm);
-	op->op_type = OP_NULL;
-	op->op_ppaddr = ppaddr[OP_NULL];
+	cLOGOP->op_first->op_next = op->op_next;
 	/* XXX delete push code */
     }
     RETURN;
@@ -649,6 +686,7 @@ PP(pp_match)
     char *truebase;
     register REGEXP *rx = pm->op_pmregexp;
     I32 gimme = GIMME;
+    STRLEN len;
 
     if (op->op_flags & OPf_STACKED)
 	TARG = POPs;
@@ -656,8 +694,8 @@ PP(pp_match)
 	TARG = GvSV(defgv);
 	EXTEND(SP,1);
     }
-    s = SvPVn(TARG);
-    strend = s + SvCUROK(TARG);
+    s = SvPV(TARG, len);
+    strend = s + len;
     if (!s)
 	DIE("panic: do_match");
 
@@ -717,10 +755,10 @@ play_it_again:
 		s = t;
 	}
 	else if (!multiline) {
-	    if (*SvPV(pm->op_pmshort) != *s ||
-	      bcmp(SvPV(pm->op_pmshort), s, pm->op_pmslen) ) {
+	    if (*SvPVX(pm->op_pmshort) != *s ||
+	      bcmp(SvPVX(pm->op_pmshort), s, pm->op_pmslen) ) {
 		if (pm->op_pmflags & PMf_FOLD) {
-		    if (ibcmp(SvPV(pm->op_pmshort), s, pm->op_pmslen) )
+		    if (ibcmp(SvPVX(pm->op_pmshort), s, pm->op_pmslen) )
 			goto nope;
 		}
 		else
@@ -843,7 +881,7 @@ PP(pp_subst)
     register char *m;
     char *c;
     register char *d;
-    I32 clen;
+    STRLEN clen;
     I32 iters = 0;
     I32 maxiters;
     register I32 i;
@@ -851,6 +889,7 @@ PP(pp_subst)
     char *orig;
     I32 safebase;
     register REGEXP *rx = pm->op_pmregexp;
+    STRLEN len;
 
     if (pm->op_pmflags & PMf_CONST)	/* known replacement string? */
 	dstr = POPs;
@@ -860,11 +899,11 @@ PP(pp_subst)
 	TARG = GvSV(defgv);
 	EXTEND(SP,1);
     }
-    s = SvPVn(TARG);
+    s = SvPV(TARG, len);
     if (!pm || !s)
 	DIE("panic: do_subst");
 
-    strend = s + SvCUROK(TARG);
+    strend = s + len;
     maxiters = (strend - s) + 10;
 
     if (!rx->prelen && curpm) {
@@ -894,10 +933,10 @@ PP(pp_subst)
 		s = m;
 	}
 	else if (!multiline) {
-	    if (*SvPV(pm->op_pmshort) != *s ||
-	      bcmp(SvPV(pm->op_pmshort), s, pm->op_pmslen) ) {
+	    if (*SvPVX(pm->op_pmshort) != *s ||
+	      bcmp(SvPVX(pm->op_pmshort), s, pm->op_pmslen) ) {
 		if (pm->op_pmflags & PMf_FOLD) {
-		    if (ibcmp(SvPV(pm->op_pmshort), s, pm->op_pmslen) )
+		    if (ibcmp(SvPVX(pm->op_pmshort), s, pm->op_pmslen) )
 			goto nope;
 		}
 		else
@@ -911,8 +950,7 @@ PP(pp_subst)
     }
     once = !(rpm->op_pmflags & PMf_GLOBAL);
     if (rpm->op_pmflags & PMf_CONST) {	/* known replacement string? */
-	c = SvPVn(dstr);
-	clen = SvCUROK(dstr);
+	c = SvPV(dstr, clen);
 	if (clen <= rx->minlen) {
 					/* can do inplace substitution */
 	    if (regexec(rx, s, strend, orig, 0,
@@ -938,7 +976,7 @@ PP(pp_subst)
 			}
 			*m = '\0';
 			SvCUR_set(TARG, m - s);
-			SvNOK_off(TARG);
+			SvPOK_only(TARG);
 			SvSETMAGIC(TARG);
 			PUSHs(&sv_yes);
 			RETURN;
@@ -953,7 +991,7 @@ PP(pp_subst)
 			    *--d = *--s;
 			if (clen)
 			    Copy(c, m, clen, char);
-			SvNOK_off(TARG);
+			SvPOK_only(TARG);
 			SvSETMAGIC(TARG);
 			PUSHs(&sv_yes);
 			RETURN;
@@ -962,14 +1000,14 @@ PP(pp_subst)
 			d -= clen;
 			sv_chop(TARG, d);
 			Copy(c, d, clen, char);
-			SvNOK_off(TARG);
+			SvPOK_only(TARG);
 			SvSETMAGIC(TARG);
 			PUSHs(&sv_yes);
 			RETURN;
 		    }
 		    else {
 			sv_chop(TARG, d);
-			SvNOK_off(TARG);
+			SvPOK_only(TARG);
 			SvSETMAGIC(TARG);
 			PUSHs(&sv_yes);
 			RETURN;
@@ -995,10 +1033,10 @@ PP(pp_subst)
 		    Nullsv, TRUE));	/* (don't match same null twice) */
 		if (s != d) {
 		    i = strend - s;
-		    SvCUR_set(TARG, d - SvPV(TARG) + i);
+		    SvCUR_set(TARG, d - SvPVX(TARG) + i);
 		    Move(s, d, i+1, char);		/* include the Null */
 		}
-		SvNOK_off(TARG);
+		SvPOK_only(TARG);
 		SvSETMAGIC(TARG);
 		PUSHs(sv_2mortal(newSVnv((double)iters)));
 		RETURN;
@@ -1041,7 +1079,7 @@ PP(pp_subst)
 	    safebase));
 	sv_catpvn(dstr, s, strend - s);
 	sv_replace(TARG, dstr);
-	SvNOK_off(TARG);
+	SvPOK_only(TARG);
 	SvSETMAGIC(TARG);
 	PUSHs(sv_2mortal(newSVnv((double)iters)));
 	RETURN;
@@ -1082,7 +1120,7 @@ PP(pp_substcont)
 	    SV *targ = cx->sb_targ;
 	    sv_catpvn(dstr, s, cx->sb_strend - s);
 	    sv_replace(targ, dstr);
-	    SvNOK_off(targ);
+	    SvPOK_only(targ);
 	    SvSETMAGIC(targ);
 	    PUSHs(sv_2mortal(newSVnv((double)(cx->sb_iters - 1))));
 	    POPSUBST(cx);
@@ -1126,10 +1164,9 @@ PP(pp_trans)
 PP(pp_sassign)
 {
     dSP; dPOPTOPssrl;
-#ifdef TAINT
-    if (tainted && !lstr->sv_tainted)
+    if (tainting && tainted && (!SvMAGICAL(lstr) || !mg_find(lstr, 't'))) {
 	TAINT_NOT;
-#endif
+    }
     SvSetSV(rstr, lstr);
     SvSETMAGIC(rstr);
     SETs(rstr);
@@ -1152,6 +1189,7 @@ PP(pp_aassign)
 
     HV *hash;
     I32 i;
+    int magic;
 
     delaymagic = DM_DELAY;		/* catch simultaneous items */
 
@@ -1176,6 +1214,7 @@ PP(pp_aassign)
 	switch (SvTYPE(sv)) {
 	case SVt_PVAV:
 	    ary = (AV*)sv;
+	    magic = SvMAGICAL(ary) != 0;
 	    AvREAL_on(ary);
 	    AvFILL(ary) = -1;
 	    i = 0;
@@ -1185,28 +1224,32 @@ PP(pp_aassign)
 		    sv_setsv(sv,*relem);
 		*(relem++) = sv;
 		(void)av_store(ary,i++,sv);
+		if (magic)
+		    mg_set(sv);
 	    }
 	    break;
 	case SVt_PVHV: {
 		char *tmps;
 		SV *tmpstr;
-		MAGIC* magic = 0;
-		I32 magictype;
 
 		hash = (HV*)sv;
-		hv_clear(hash, TRUE);		/* wipe any dbm file too */
+		magic = SvMAGICAL(hash) != 0;
+		hv_clear(hash);
 
 		while (relem < lastrelem) {	/* gobble up all the rest */
+		    STRLEN len;
 		    if (*relem)
 			sv = *(relem++);
 		    else
 			sv = &sv_no, relem++;
-		    tmps = SvPVn(sv);
+		    tmps = SvPV(sv, len);
 		    tmpstr = NEWSV(29,0);
 		    if (*relem)
 			sv_setsv(tmpstr,*relem);	/* value */
 		    *(relem++) = tmpstr;
-		    (void)hv_store(hash,tmps,SvCUROK(sv),tmpstr,0);
+		    (void)hv_store(hash,tmps,len,tmpstr,0);
+		    if (magic)
+			mg_set(tmpstr);
 		}
 	    }
 	    break;
@@ -1279,6 +1322,7 @@ PP(pp_aassign)
 	    gid = (int)getgid();
 	    egid = (int)getegid();
 	}
+	tainting |= (euid != uid || egid != gid);
     }
     delaymagic = 0;
     if (GIMME == G_ARRAY) {
@@ -1367,23 +1411,26 @@ PP(pp_undef)
     switch (SvTYPE(sv)) {
     case SVt_NULL:
 	break;
+    case SVt_REF:
+	sv_free((SV*)SvANY(sv));
+	SvANY(sv) = 0;
+	SvTYPE(sv) = SVt_NULL;
+	break;
     case SVt_PVAV:
 	av_undef((AV*)sv);
 	break;
     case SVt_PVHV:
-	hv_undef((HV*)sv, TRUE);
+	hv_undef((HV*)sv);
 	break;
-    case SVt_PVCV: {
-	CV *cv = (CV*)sv;
-	op_free(CvROOT(cv));
-	CvROOT(cv) = 0;
+    case SVt_PVCV:
+	sub_generation++;
+	cv_clear((CV*)sv);
 	break;
-    }
     default:
 	if (sv != GvSV(defgv)) {
 	    if (SvPOK(sv) && SvLEN(sv)) {
 		SvOOK_off(sv);
-		Safefree(SvPV(sv));
+		Safefree(SvPVX(sv));
 		SvPV_set(sv, Nullch);
 		SvLEN_set(sv, 0);
 	    }
@@ -1404,9 +1451,10 @@ PP(pp_study)
     register I32 *sfirst;
     register I32 *snext;
     I32 retval;
+    STRLEN len;
 
-    s = (unsigned char*)(SvPVn(TARG));
-    pos = SvCUROK(TARG);
+    s = (unsigned char*)(SvPV(TARG, len));
+    pos = len;
     if (lastscream)
 	SvSCREAM_off(lastscream);
     lastscream = TARG;
@@ -1576,7 +1624,8 @@ PP(pp_repeat)
 		SP--;
 	    }
 	    MARK++;
-	    repeatcpy(MARK + items, MARK, items * sizeof(SV*), count - 1);
+	    repeatcpy((char*)(MARK + items), (char*)MARK,
+		items * sizeof(SV*), count - 1);
 	}
 	SP += max;
     }
@@ -1585,17 +1634,21 @@ PP(pp_repeat)
 	char *tmps;
 
 	tmpstr = POPs;
+	if (SvREADONLY(tmpstr))
+	    DIE("Can't x= to readonly value");
 	SvSetSV(TARG, tmpstr);
 	if (count >= 1) {
+	    STRLEN len;
+	    STRLEN tlen;
 	    tmpstr = NEWSV(50, 0);
-	    tmps = SvPVn(TARG);
-	    sv_setpvn(tmpstr, tmps, SvCUR(TARG));
-	    tmps = SvPVn(tmpstr);	/* force to be string */
-	    SvGROW(TARG, (count * SvCUR(TARG)) + 1);
-	    repeatcpy(SvPV(TARG), tmps, SvCUR(tmpstr), count);
+	    tmps = SvPV(TARG, len);
+	    sv_setpvn(tmpstr, tmps, len);
+	    tmps = SvPV(tmpstr, tlen);	/* force to be string */
+	    SvGROW(TARG, (count * len) + 1);
+	    repeatcpy((char*)SvPVX(TARG), tmps, tlen, count);
 	    SvCUR(TARG) *= count;
 	    *SvEND(TARG) = '\0';
-	    SvNOK_off(TARG);
+	    SvPOK_only(TARG);
 	    sv_free(tmpstr);
 	}
 	else
@@ -1764,8 +1817,8 @@ PP(pp_bit_and)
 {
     dSP; dATARGET; dPOPTOPssrl;
     if (SvNIOK(lstr) || SvNIOK(rstr)) {
-	I32 value = SvIVn(lstr);
-	value = value & SvIVn(rstr);
+	I32 value = SvIV(lstr);
+	value = value & SvIV(rstr);
 	SETi(value);
     }
     else {
@@ -1779,8 +1832,8 @@ PP(pp_xor)
 {
     dSP; dATARGET; dPOPTOPssrl;
     if (SvNIOK(lstr) || SvNIOK(rstr)) {
-	I32 value = SvIVn(lstr);
-	value = value ^ SvIVn(rstr);
+	I32 value = SvIV(lstr);
+	value = value ^ SvIV(rstr);
 	SETi(value);
     }
     else {
@@ -1794,8 +1847,8 @@ PP(pp_bit_or)
 {
     dSP; dATARGET; dPOPTOPssrl;
     if (SvNIOK(lstr) || SvNIOK(rstr)) {
-	I32 value = SvIVn(lstr);
-	value = value | SvIVn(rstr);
+	I32 value = SvIV(lstr);
+	value = value | SvIV(rstr);
 	SETi(value);
     }
     else {
@@ -1824,15 +1877,16 @@ PP(pp_complement)
     register I32 anum;
 
     if (SvNIOK(sv)) {
-	SETi(  ~SvIVn(sv) );
+	SETi(  ~SvIV(sv) );
     }
     else {
 	register char *tmps;
 	register long *tmpl;
+	STRLEN len;
 
 	SvSetSV(TARG, sv);
-	tmps = SvPVn(TARG);
-	anum = SvCUR(TARG);
+	tmps = SvPV(TARG, len);
+	anum = len;
 #ifdef LIBERAL
 	for ( ; anum && (unsigned long)tmps % sizeof(long); anum--, tmps++)
 	    *tmps = ~*tmps;
@@ -1863,7 +1917,7 @@ PP(pp_sin)
     dSP; dTARGET;
     double value;
     if (MAXARG < 1)
-	value = SvNVnx(GvSV(defgv));
+	value = SvNVx(GvSV(defgv));
     else
 	value = POPn;
     value = sin(value);
@@ -1876,7 +1930,7 @@ PP(pp_cos)
     dSP; dTARGET;
     double value;
     if (MAXARG < 1)
-	value = SvNVnx(GvSV(defgv));
+	value = SvNVx(GvSV(defgv));
     else
 	value = POPn;
     value = cos(value);
@@ -1933,7 +1987,7 @@ PP(pp_exp)
     dSP; dTARGET;
     double value;
     if (MAXARG < 1)
-	value = SvNVnx(GvSV(defgv));
+	value = SvNVx(GvSV(defgv));
     else
 	value = POPn;
     value = exp(value);
@@ -1946,7 +2000,7 @@ PP(pp_log)
     dSP; dTARGET;
     double value;
     if (MAXARG < 1)
-	value = SvNVnx(GvSV(defgv));
+	value = SvNVx(GvSV(defgv));
     else
 	value = POPn;
     if (value <= 0.0)
@@ -1961,7 +2015,7 @@ PP(pp_sqrt)
     dSP; dTARGET;
     double value;
     if (MAXARG < 1)
-	value = SvNVnx(GvSV(defgv));
+	value = SvNVx(GvSV(defgv));
     else
 	value = POPn;
     if (value < 0.0)
@@ -1976,7 +2030,7 @@ PP(pp_int)
     dSP; dTARGET;
     double value;
     if (MAXARG < 1)
-	value = SvNVnx(GvSV(defgv));
+	value = SvNVx(GvSV(defgv));
     else
 	value = POPn;
     if (value >= 0.0)
@@ -1989,6 +2043,22 @@ PP(pp_int)
     RETURN;
 }
 
+PP(pp_abs)
+{
+    dSP; dTARGET;
+    double value;
+    if (MAXARG < 1)
+	value = SvNVx(GvSV(defgv));
+    else
+	value = POPn;
+
+    if (value < 0.0)
+	value = -value;
+
+    XPUSHn(value);
+    RETURN;
+}
+
 PP(pp_hex)
 {
     dSP; dTARGET;
@@ -1996,7 +2066,7 @@ PP(pp_hex)
     I32 argtype;
 
     if (MAXARG < 1)
-	tmps = SvPVnx(GvSV(defgv));
+	tmps = SvPVx(GvSV(defgv), na);
     else
 	tmps = POPp;
     XPUSHi( scan_hex(tmps, 99, &argtype) );
@@ -2011,7 +2081,7 @@ PP(pp_oct)
     char *tmps;
 
     if (MAXARG < 1)
-	tmps = SvPVnx(GvSV(defgv));
+	tmps = SvPVx(GvSV(defgv), na);
     else
 	tmps = POPp;
     while (*tmps && (isSPACE(*tmps) || *tmps == '0'))
@@ -2042,7 +2112,7 @@ PP(pp_substr)
     dSP; dTARGET;
     SV *sv;
     I32 len;
-    I32 curlen;
+    STRLEN curlen;
     I32 pos;
     I32 rem;
     I32 lvalue = op->op_flags & OPf_LVAL;
@@ -2052,8 +2122,7 @@ PP(pp_substr)
 	len = POPi;
     pos = POPi - arybase;
     sv = POPs;
-    tmps = SvPVn(sv);		/* force conversion to string */
-    curlen = SvCUROK(sv);
+    tmps = SvPV(sv, curlen);		/* force conversion to string */
     if (pos < 0)
 	pos += curlen + arybase;
     if (pos < 0 || pos > curlen)
@@ -2069,9 +2138,11 @@ PP(pp_substr)
 	    rem = len;
 	sv_setpvn(TARG, tmps, rem);
 	if (lvalue) {			/* it's an lvalue! */
+	    if (SvREADONLY(sv))
+		DIE(no_modify);
 	    LvTYPE(TARG) = 's';
 	    LvTARG(TARG) = sv;
-	    LvTARGOFF(TARG) = tmps - SvPVn(sv); 
+	    LvTARGOFF(TARG) = tmps - SvPV(sv, na); 
 	    LvTARGLEN(TARG) = rem; 
 	}
     }
@@ -2086,10 +2157,10 @@ PP(pp_vec)
     register I32 offset = POPi;
     register SV *src = POPs;
     I32 lvalue = op->op_flags & OPf_LVAL;
-    unsigned char *s = (unsigned char*)SvPVn(src);
+    STRLEN srclen;
+    unsigned char *s = (unsigned char*)SvPV(src, srclen);
     unsigned long retnum;
     I32 len;
-    I32 srclen = SvCUROK(src);
 
     offset *= size;		/* turn into bit offset */
     len = (offset + size + 7) / 8;
@@ -2100,10 +2171,10 @@ PP(pp_vec)
     else {
 	if (len > srclen) {
 	    SvGROW(src, len);
-	    (void)memzero(SvPV(src) + srclen, len - srclen);
+	    (void)memzero(SvPVX(src) + srclen, len - srclen);
 	    SvCUR_set(src, len);
 	}
-	s = (unsigned char*)SvPVn(src);
+	s = (unsigned char*)SvPV(src, na);
 	if (size < 8)
 	    retnum = (s[offset >> 3] >> (offset & 7)) & ((1 << size) - 1);
 	else {
@@ -2119,6 +2190,8 @@ PP(pp_vec)
 	}
 
 	if (lvalue) {                      /* it's an lvalue! */
+	    if (SvREADONLY(src))
+		DIE(no_modify);
 	    LvTYPE(TARG) = 'v';
 	    LvTARG(TARG) = src;
 	    LvTARGOFF(TARG) = offset; 
@@ -2140,7 +2213,7 @@ PP(pp_index)
     I32 retval;
     char *tmps;
     char *tmps2;
-    I32 biglen;
+    STRLEN biglen;
 
     if (MAXARG < 3)
 	offset = 0;
@@ -2148,8 +2221,7 @@ PP(pp_index)
 	offset = POPi - arybase;
     little = POPs;
     big = POPs;
-    tmps = SvPVn(big);
-    biglen = SvCUROK(big);
+    tmps = SvPV(big, biglen);
     if (offset < 0)
 	offset = 0;
     else if (offset > biglen)
@@ -2168,6 +2240,8 @@ PP(pp_rindex)
     dSP; dTARGET;
     SV *big;
     SV *little;
+    STRLEN blen;
+    STRLEN llen;
     SV *offstr;
     I32 offset;
     I32 retval;
@@ -2178,18 +2252,18 @@ PP(pp_rindex)
 	offstr = POPs;
     little = POPs;
     big = POPs;
-    tmps2 = SvPVn(little);
-    tmps = SvPVn(big);
+    tmps2 = SvPV(little, llen);
+    tmps = SvPV(big, blen);
     if (MAXARG < 3)
-	offset = SvCUROK(big);
+	offset = blen;
     else
-	offset = SvIVn(offstr) - arybase + SvCUROK(little);
+	offset = SvIV(offstr) - arybase + llen;
     if (offset < 0)
 	offset = 0;
-    else if (offset > SvCUROK(big))
-	offset = SvCUROK(big);
+    else if (offset > blen)
+	offset = blen;
     if (!(tmps2 = rninstr(tmps,  tmps  + offset,
-			  tmps2, tmps2 + SvCUROK(little))))
+			  tmps2, tmps2 + llen)))
 	retval = -1 + arybase;
     else
 	retval = tmps2 - tmps + arybase;
@@ -2210,8 +2284,9 @@ static void
 doparseform(sv)
 SV *sv;
 {
-    register char *s = SvPVn(sv);
-    register char *send = s + SvCUR(sv);
+    STRLEN len;
+    register char *s = SvPV(sv, len);
+    register char *send = s + len;
     register char *base;
     register I32 skipspaces = 0;
     bool noblank;
@@ -2372,7 +2447,7 @@ SV *sv;
     arg = fpc - fops;
     SvGROW(sv, SvCUR(sv) + arg * sizeof(U16) + 4);
 
-    s = SvPV(sv) + SvCUR(sv);
+    s = SvPVX(sv) + SvCUR(sv);
     s += 2 + (SvCUR(sv) & 1);
 
     Copy(fops, s, arg, U16);
@@ -2400,17 +2475,19 @@ PP(pp_formline)
     SV **markmark;
     double value;
     bool gotsome;
+    STRLEN len;
 
     if (!SvCOMPILED(form))
 	doparseform(form);
 
+    SvUPGRADE(formtarget, SVt_PV);
     SvGROW(formtarget, SvCUR(formtarget) + SvCUR(form) + 1);
-    t = SvPVn(formtarget);
-    t += SvCUR(formtarget);
-    f = SvPVn(form);
+    t = SvPV(formtarget, len);
+    t += len;
+    f = SvPV(form, len);
 
-    s = f + SvCUR(form);
-    s += 2 + (SvCUR(form) & 1);
+    s = f + len;
+    s += 2 + (len & 1);
 
     fpc = (U16*)s;
 
@@ -2476,8 +2553,8 @@ PP(pp_formline)
 	    break;
 
 	case FF_CHECKNL:
-	    s = SvPVn(sv);
-	    itemsize = SvCUROK(sv);
+	    s = SvPV(sv, len);
+	    itemsize = len;
 	    if (itemsize > fieldsize)
 		itemsize = fieldsize;
 	    send = chophere = s + itemsize;
@@ -2488,12 +2565,12 @@ PP(pp_formline)
 		    break;
 		s++;
 	    }
-	    itemsize = s - SvPV(sv);
+	    itemsize = s - SvPVX(sv);
 	    break;
 
 	case FF_CHECKCHOP:
-	    s = SvPVn(sv);
-	    itemsize = SvCUROK(sv);
+	    s = SvPV(sv, len);
+	    itemsize = len;
 	    if (itemsize > fieldsize)
 		itemsize = fieldsize;
 	    send = chophere = s + itemsize;
@@ -2512,7 +2589,7 @@ PP(pp_formline)
 		}
 		s++;
 	    }
-	    itemsize = chophere - SvPV(sv);
+	    itemsize = chophere - SvPVX(sv);
 	    break;
 
 	case FF_SPACE:
@@ -2536,7 +2613,7 @@ PP(pp_formline)
 
 	case FF_ITEM:
 	    arg = itemsize;
-	    s = SvPV(sv);
+	    s = SvPVX(sv);
 	    while (arg--) {
 		if ((*t++ = *s++) < ' ')
 		    t[-1] = ' ';
@@ -2553,8 +2630,8 @@ PP(pp_formline)
 	    break;
 
 	case FF_LINEGLOB:
-	    s = SvPVn(sv);
-	    itemsize = SvCUROK(sv);
+	    s = SvPV(sv, len);
+	    itemsize = len;
 	    if (itemsize) {
 		gotsome = TRUE;
 		send = s + itemsize;
@@ -2566,10 +2643,10 @@ PP(pp_formline)
 			    lines++;
 		    }
 		}
-		SvCUR_set(formtarget, t - SvPV(formtarget));
-		sv_catpvn(formtarget, SvPV(sv), itemsize);
+		SvCUR_set(formtarget, t - SvPVX(formtarget));
+		sv_catpvn(formtarget, SvPVX(sv), itemsize);
 		SvGROW(formtarget, SvCUR(formtarget) + SvCUR(form) + 1);
-		t = SvPV(formtarget) + SvCUR(formtarget);
+		t = SvPVX(formtarget) + SvCUR(formtarget);
 	    }
 	    break;
 
@@ -2584,7 +2661,7 @@ PP(pp_formline)
 		break;
 	    }
 	    gotsome = TRUE;
-	    value = SvNVn(sv);
+	    value = SvNV(sv);
 	    if (arg & 256) {
 		sprintf(t, "%#*.*f", fieldsize, arg & 255, value);
 	    } else {
@@ -2612,10 +2689,10 @@ PP(pp_formline)
 			if (strnEQ(linemark, linemark - t, arg))
 			    DIE("Runaway format");
 		    }
-		    arg = t - SvPV(formtarget);
+		    arg = t - SvPVX(formtarget);
 		    SvGROW(formtarget,
-			(t - SvPV(formtarget)) + (f - formmark) + 1);
-		    t = SvPV(formtarget) + arg;
+			(t - SvPVX(formtarget)) + (f - formmark) + 1);
+		    t = SvPVX(formtarget) + arg;
 		}
 	    }
 	    else {
@@ -2634,7 +2711,7 @@ PP(pp_formline)
 		}
 		s = t - 3;
 		if (strnEQ(s,"   ",3)) {
-		    while (s > SvPV(formtarget) && isSPACE(s[-1]))
+		    while (s > SvPVX(formtarget) && isSPACE(s[-1]))
 			s--;
 		}
 		*s++ = '.';
@@ -2645,7 +2722,7 @@ PP(pp_formline)
 
 	case FF_END:
 	    *t = '\0';
-	    SvCUR_set(formtarget, t - SvPV(formtarget));
+	    SvCUR_set(formtarget, t - SvPVX(formtarget));
 	    FmLINES(formtarget) += lines;
 	    SP = ORIGMARK;
 	    RETPUSHYES;
@@ -2661,7 +2738,7 @@ PP(pp_ord)
     I32 anum;
 
     if (MAXARG < 1)
-	tmps = SvPVnx(GvSV(defgv));
+	tmps = SvPVx(GvSV(defgv), na);
     else
 	tmps = POPp;
 #ifndef I286
@@ -2674,15 +2751,35 @@ PP(pp_ord)
     RETURN;
 }
 
+PP(pp_chr)
+{
+    dSP; dTARGET;
+    char *tmps;
+
+    if (SvTYPE(TARG) == SVt_NULL) {
+	sv_upgrade(TARG,SVt_PV);
+	SvGROW(TARG,1);
+    }
+    SvCUR_set(TARG, 1);
+    tmps = SvPVX(TARG);
+    if (MAXARG < 1)
+	*tmps = SvIVx(GvSV(defgv));
+    else
+	*tmps = POPi;
+    SvPOK_only(TARG);
+    XPUSHs(TARG);
+    RETURN;
+}
+
 PP(pp_crypt)
 {
     dSP; dTARGET; dPOPTOPssrl;
 #ifdef HAS_CRYPT
-    char *tmps = SvPVn(lstr);
+    char *tmps = SvPV(lstr, na);
 #ifdef FCRYPT
-    sv_setpv(TARG, fcrypt(tmps, SvPVn(rstr)));
+    sv_setpv(TARG, fcrypt(tmps, SvPV(rstr, na)));
 #else
-    sv_setpv(TARG, crypt(tmps, SvPVn(rstr)));
+    sv_setpv(TARG, crypt(tmps, SvPV(rstr, na)));
 #endif
 #else
     DIE(
@@ -2704,7 +2801,7 @@ PP(pp_ucfirst)
 	sv = TARG;
 	SETs(sv);
     }
-    s = SvPVn(sv);
+    s = SvPV(sv, na);
     if (isascii(*s) && islower(*s))
 	*s = toupper(*s);
 
@@ -2723,7 +2820,7 @@ PP(pp_lcfirst)
 	sv = TARG;
 	SETs(sv);
     }
-    s = SvPVn(sv);
+    s = SvPV(sv, na);
     if (isascii(*s) && isupper(*s))
 	*s = tolower(*s);
 
@@ -2737,6 +2834,7 @@ PP(pp_uc)
     SV *sv = TOPs;
     register char *s;
     register char *send;
+    STRLEN len;
 
     if (SvSTORAGE(sv) != 'T') {
 	dTARGET;
@@ -2744,8 +2842,8 @@ PP(pp_uc)
 	sv = TARG;
 	SETs(sv);
     }
-    s = SvPVn(sv);
-    send = s + SvCUROK(sv);
+    s = SvPV(sv, len);
+    send = s + len;
     while (s < send) {
 	if (isascii(*s) && islower(*s))
 	    *s = toupper(*s);
@@ -2760,6 +2858,7 @@ PP(pp_lc)
     SV *sv = TOPs;
     register char *s;
     register char *send;
+    STRLEN len;
 
     if (SvSTORAGE(sv) != 'T') {
 	dTARGET;
@@ -2767,8 +2866,8 @@ PP(pp_lc)
 	sv = TARG;
 	SETs(sv);
     }
-    s = SvPVn(sv);
-    send = s + SvCUROK(sv);
+    s = SvPV(sv, len);
+    send = s + len;
     while (s < send) {
 	if (isascii(*s) && isupper(*s))
 	    *s = tolower(*s);
@@ -2791,7 +2890,7 @@ PP(pp_rv2av)
 	    DIE("Not an array reference");
 	if (op->op_flags & OPf_LVAL) {
 	    if (op->op_flags & OPf_INTRO)
-		av = (AV*)save_svref(sv);
+		av = (AV*)save_svref((SV**)sv);
 	    PUSHs((SV*)av);
 	    RETURN;
 	}
@@ -2808,7 +2907,7 @@ PP(pp_rv2av)
 	    if (SvTYPE(sv) != SVt_PVGV) {
 		if (!SvOK(sv))
 		    DIE(no_usym);
-		sv = (SV*)gv_fetchpv(SvPVn(sv), TRUE);
+		sv = (SV*)gv_fetchpv(SvPV(sv, na), TRUE);
 	    }
 	    av = GvAVn(sv);
 	    if (op->op_flags & OPf_LVAL) {
@@ -2856,14 +2955,18 @@ PP(pp_aelem)
 	    DIE(no_aelem, elem);
 	if (op->op_flags & OPf_INTRO)
 	    save_svref(svp);
-	else if (SvTYPE(*svp) == SVt_NULL) {
+	else if (!SvOK(*svp)) {
 	    if (op->op_private == OP_RV2HV) {
 		sv_free(*svp);
-		*svp = (SV*)newHV(COEFFSIZE);
+		*svp = NEWSV(0,0);
+		sv_upgrade(*svp, SVt_REF);
+		SvANY(*svp) = (void*)sv_ref((SV*)newHV());
 	    }
 	    else if (op->op_private == OP_RV2AV) {
 		sv_free(*svp);
-		*svp = (SV*)newAV();
+		*svp = NEWSV(0,0);
+		sv_upgrade(*svp, SVt_REF);
+		SvANY(*svp) = (void*)sv_ref((SV*)newAV());
 	    }
 	}
     }
@@ -2882,7 +2985,7 @@ PP(pp_aslice)
     I32 is_something_there = lval;
 
     while (++MARK <= SP) {
-	I32 elem = SvIVnx(*MARK);
+	I32 elem = SvIVx(*MARK);
 
 	if (lval) {
 	    svp = av_fetch(av, elem, TRUE);
@@ -2953,11 +3056,12 @@ PP(pp_delete)
     SV *tmpsv = POPs;
     HV *hv = (HV*)POPs;
     char *tmps;
+    STRLEN len;
     if (!hv) {
 	DIE("Not an associative array reference");
     }
-    tmps = SvPVn(tmpsv);
-    sv = hv_delete(hv, tmps, SvCUROK(tmpsv));
+    tmps = SvPV(tmpsv, len);
+    sv = hv_delete(hv, tmps, len);
     if (!sv)
 	RETPUSHUNDEF;
     PUSHs(sv);
@@ -2977,7 +3081,7 @@ PP(pp_rv2hv)
 	    DIE("Not an associative array reference");
 	if (op->op_flags & OPf_LVAL) {
 	    if (op->op_flags & OPf_INTRO)
-		hv = (HV*)save_svref(sv);
+		hv = (HV*)save_svref((SV**)sv);
 	    SETs((SV*)hv);
 	    RETURN;
 	}
@@ -2994,7 +3098,7 @@ PP(pp_rv2hv)
 	    if (SvTYPE(sv) != SVt_PVGV) {
 		if (!SvOK(sv))
 		    DIE(no_usym);
-		sv = (SV*)gv_fetchpv(SvPVn(sv), TRUE);
+		sv = (SV*)gv_fetchpv(SvPV(sv, na), TRUE);
 	    }
 	    hv = GvHVn(sv);
 	    if (op->op_flags & OPf_LVAL) {
@@ -3015,8 +3119,7 @@ PP(pp_rv2hv)
 	if (HvFILL(hv))
 	    sv_setiv(TARG, 0);
 	else {
-	    sprintf(buf, "%d/%d", HvFILL(hv),
-		HvFILL(hv)+1);
+	    sprintf(buf, "%d/%d", HvFILL(hv), HvMAX(hv)+1);
 	    sv_setpv(TARG, buf);
 	}
 	SETTARG;
@@ -3029,8 +3132,8 @@ PP(pp_helem)
     dSP;
     SV** svp;
     SV *keysv = POPs;
-    char *key = SvPVn(keysv);
-    I32 keylen = SvCUROK(keysv);
+    STRLEN keylen;
+    char *key = SvPV(keysv, keylen);
     HV *hv = (HV*)POPs;
 
     if (op->op_flags & OPf_LVAL) {
@@ -3039,14 +3142,18 @@ PP(pp_helem)
 	    DIE(no_helem, key);
 	if (op->op_flags & OPf_INTRO)
 	    save_svref(svp);
-	else if (SvTYPE(*svp) == SVt_NULL) {
+	else if (!SvOK(*svp)) {
 	    if (op->op_private == OP_RV2HV) {
 		sv_free(*svp);
-		*svp = (SV*)newHV(COEFFSIZE);
+		*svp = NEWSV(0,0);
+		sv_upgrade(*svp, SVt_REF);
+		SvANY(*svp) = (void*)sv_ref((SV*)newHV());
 	    }
 	    else if (op->op_private == OP_RV2AV) {
 		sv_free(*svp);
-		*svp = (SV*)newAV();
+		*svp = NEWSV(0,0);
+		sv_upgrade(*svp, SVt_REF);
+		SvANY(*svp) = (void*)sv_ref((SV*)newAV());
 	    }
 	}
     }
@@ -3065,8 +3172,8 @@ PP(pp_hslice)
     I32 is_something_there = lval;
 
     while (++MARK <= SP) {
-	char *key = SvPVnx(*MARK);
-	I32 keylen = SvCUROK(*MARK);
+	STRLEN keylen;
+	char *key = SvPV(*MARK, keylen);
 
 	if (lval) {
 	    svp = hv_fetch(hv, key, keylen, TRUE);
@@ -3094,11 +3201,13 @@ PP(pp_unpack)
     dSP;
     dPOPPOPssrl;
     SV *sv;
-    register char *pat = SvPVn(lstr);
-    register char *s = SvPVn(rstr);
-    char *strend = s + SvCUROK(rstr);
+    STRLEN llen;
+    STRLEN rlen;
+    register char *pat = SvPV(lstr, llen);
+    register char *s = SvPV(rstr, rlen);
+    char *strend = s + rlen;
     char *strbeg = s;
-    register char *patend = pat + SvCUROK(lstr);
+    register char *patend = pat + llen;
     I32 datumtype;
     register I32 len;
     register I32 bits;
@@ -3189,11 +3298,11 @@ PP(pp_unpack)
 	    s += len;
 	    if (datumtype == 'A') {
 		aptr = s;	/* borrow register */
-		s = SvPV(sv) + len - 1;
-		while (s >= SvPV(sv) && (!*s || isSPACE(*s)))
+		s = SvPVX(sv) + len - 1;
+		while (s >= SvPVX(sv) && (!*s || isSPACE(*s)))
 		    s--;
 		*++s = '\0';
-		SvCUR_set(sv, s - SvPV(sv));
+		SvCUR_set(sv, s - SvPVX(sv));
 		s = aptr;	/* unborrow register */
 	    }
 	    XPUSHs(sv_2mortal(sv));
@@ -3241,7 +3350,7 @@ PP(pp_unpack)
 	    SvCUR_set(sv, len);
 	    SvPOK_on(sv);
 	    aptr = pat;			/* borrow register */
-	    pat = SvPV(sv);
+	    pat = SvPVX(sv);
 	    if (datumtype == 'b') {
 		aint = len;
 		for (len = 0; len < aint; len++) {
@@ -3274,7 +3383,7 @@ PP(pp_unpack)
 	    SvCUR_set(sv, len);
 	    SvPOK_on(sv);
 	    aptr = pat;			/* borrow register */
-	    pat = SvPV(sv);
+	    pat = SvPVX(sv);
 	    if (datumtype == 'h') {
 		aint = len;
 		for (len = 0; len < aint; len++) {
@@ -3540,6 +3649,19 @@ PP(pp_unpack)
 		PUSHs(sv_2mortal(sv));
 	    }
 	    break;
+	case 'P':
+	    EXTEND(SP, 1);
+	    if (sizeof(char*) > strend - s)
+		break;
+	    else {
+		Copy(s, &aptr, 1, char*);
+		s += sizeof(char*);
+	    }
+	    sv = NEWSV(44, 0);
+	    if (aptr)
+		sv_setpvn(sv, aptr, len);
+	    PUSHs(sv_2mortal(sv));
+	    break;
 #ifdef QUAD
 	case 'q':
 	    EXTEND(SP, len);
@@ -3715,7 +3837,7 @@ register I32 len;
 	s += 3;
 	len -= 3;
     }
-    for (s = SvPV(sv); *s; s++) {
+    for (s = SvPVX(sv); *s; s++) {
 	if (*s == ' ')
 	    *s = '`';
     }
@@ -3727,14 +3849,14 @@ PP(pp_pack)
     dSP; dMARK; dORIGMARK; dTARGET;
     register SV *cat = TARG;
     register I32 items;
-    register char *pat = SvPVnx(*++MARK);
-    register char *patend = pat + SvCUROK(*MARK);
+    STRLEN fromlen;
+    register char *pat = SvPVx(*++MARK, fromlen);
+    register char *patend = pat + fromlen;
     register I32 len;
     I32 datumtype;
     SV *fromstr;
-    I32 fromlen;
     /*SUPPRESS 442*/
-    static char *null10 = "\0\0\0\0\0\0\0\0\0\0";
+    static char null10[] = {0,0,0,0,0,0,0,0,0,0};
     static char *space10 = "          ";
 
     /* These must not be in registers: */
@@ -3800,8 +3922,7 @@ PP(pp_pack)
 	case 'A':
 	case 'a':
 	    fromstr = NEXTFROM;
-	    aptr = SvPVn(fromstr);
-	    fromlen = SvCUROK(fromstr);
+	    aptr = SvPV(fromstr, fromlen);
 	    if (pat[-1] == '*')
 		len = fromlen;
 	    if (fromlen > len)
@@ -3833,15 +3954,14 @@ PP(pp_pack)
 
 		fromstr = NEXTFROM;
 		saveitems = items;
-		aptr = SvPVn(fromstr);
-		fromlen = SvCUROK(fromstr);
+		aptr = SvPV(fromstr, fromlen);
 		if (pat[-1] == '*')
 		    len = fromlen;
 		pat = aptr;
 		aint = SvCUR(cat);
 		SvCUR(cat) += (len+7)/8;
 		SvGROW(cat, SvCUR(cat) + 1);
-		aptr = SvPV(cat) + aint;
+		aptr = SvPVX(cat) + aint;
 		if (len > fromlen)
 		    len = fromlen;
 		aint = len;
@@ -3876,7 +3996,7 @@ PP(pp_pack)
 			items >>= 7 - (aint & 7);
 		    *aptr++ = items & 0xff;
 		}
-		pat = SvPV(cat) + SvCUR(cat);
+		pat = SvPVX(cat) + SvCUR(cat);
 		while (aptr <= pat)
 		    *aptr++ = '\0';
 
@@ -3892,15 +4012,14 @@ PP(pp_pack)
 
 		fromstr = NEXTFROM;
 		saveitems = items;
-		aptr = SvPVn(fromstr);
-		fromlen = SvCUROK(fromstr);
+		aptr = SvPV(fromstr, fromlen);
 		if (pat[-1] == '*')
 		    len = fromlen;
 		pat = aptr;
 		aint = SvCUR(cat);
 		SvCUR(cat) += (len+1)/2;
 		SvGROW(cat, SvCUR(cat) + 1);
-		aptr = SvPV(cat) + aint;
+		aptr = SvPVX(cat) + aint;
 		if (len > fromlen)
 		    len = fromlen;
 		aint = len;
@@ -3935,7 +4054,7 @@ PP(pp_pack)
 		}
 		if (aint & 1)
 		    *aptr++ = items & 0xff;
-		pat = SvPV(cat) + SvCUR(cat);
+		pat = SvPVX(cat) + SvCUR(cat);
 		while (aptr <= pat)
 		    *aptr++ = '\0';
 
@@ -3947,7 +4066,7 @@ PP(pp_pack)
 	case 'c':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		aint = SvIVn(fromstr);
+		aint = SvIV(fromstr);
 		achar = aint;
 		sv_catpvn(cat, &achar, sizeof(char));
 	    }
@@ -3957,7 +4076,7 @@ PP(pp_pack)
 	case 'F':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		afloat = (float)SvNVn(fromstr);
+		afloat = (float)SvNV(fromstr);
 		sv_catpvn(cat, (char *)&afloat, sizeof (float));
 	    }
 	    break;
@@ -3965,14 +4084,14 @@ PP(pp_pack)
 	case 'D':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		adouble = (double)SvNVn(fromstr);
+		adouble = (double)SvNV(fromstr);
 		sv_catpvn(cat, (char *)&adouble, sizeof (double));
 	    }
 	    break;
 	case 'n':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		ashort = (I16)SvIVn(fromstr);
+		ashort = (I16)SvIV(fromstr);
 #ifdef HAS_HTONS
 		ashort = htons(ashort);
 #endif
@@ -3982,7 +4101,7 @@ PP(pp_pack)
 	case 'v':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		ashort = (I16)SvIVn(fromstr);
+		ashort = (I16)SvIV(fromstr);
 #ifdef HAS_HTOVS
 		ashort = htovs(ashort);
 #endif
@@ -3993,28 +4112,28 @@ PP(pp_pack)
 	case 's':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		ashort = (I16)SvIVn(fromstr);
+		ashort = (I16)SvIV(fromstr);
 		sv_catpvn(cat, (char*)&ashort, sizeof(I16));
 	    }
 	    break;
 	case 'I':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		auint = U_I(SvNVn(fromstr));
+		auint = U_I(SvNV(fromstr));
 		sv_catpvn(cat, (char*)&auint, sizeof(unsigned int));
 	    }
 	    break;
 	case 'i':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		aint = SvIVn(fromstr);
+		aint = SvIV(fromstr);
 		sv_catpvn(cat, (char*)&aint, sizeof(int));
 	    }
 	    break;
 	case 'N':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		aulong = U_L(SvNVn(fromstr));
+		aulong = U_L(SvNV(fromstr));
 #ifdef HAS_HTONL
 		aulong = htonl(aulong);
 #endif
@@ -4024,7 +4143,7 @@ PP(pp_pack)
 	case 'V':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		aulong = U_L(SvNVn(fromstr));
+		aulong = U_L(SvNV(fromstr));
 #ifdef HAS_HTOVL
 		aulong = htovl(aulong);
 #endif
@@ -4034,14 +4153,14 @@ PP(pp_pack)
 	case 'L':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		aulong = U_L(SvNVn(fromstr));
+		aulong = U_L(SvNV(fromstr));
 		sv_catpvn(cat, (char*)&aulong, sizeof(U32));
 	    }
 	    break;
 	case 'l':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		along = SvIVn(fromstr);
+		along = SvIV(fromstr);
 		sv_catpvn(cat, (char*)&along, sizeof(I32));
 	    }
 	    break;
@@ -4049,29 +4168,31 @@ PP(pp_pack)
 	case 'Q':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		auquad = (unsigned quad)SvNVn(fromstr);
+		auquad = (unsigned quad)SvNV(fromstr);
 		sv_catpvn(cat, (char*)&auquad, sizeof(unsigned quad));
 	    }
 	    break;
 	case 'q':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		aquad = (quad)SvNVn(fromstr);
+		aquad = (quad)SvNV(fromstr);
 		sv_catpvn(cat, (char*)&aquad, sizeof(quad));
 	    }
 	    break;
 #endif /* QUAD */
+	case 'P':
+	    len = 1;		/* assume SV is correct length */
+	    /* FALL THROUGH */
 	case 'p':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		aptr = SvPVn(fromstr);
+		aptr = SvPV(fromstr, na);
 		sv_catpvn(cat, (char*)&aptr, sizeof(char*));
 	    }
 	    break;
 	case 'u':
 	    fromstr = NEXTFROM;
-	    aptr = SvPVn(fromstr);
-	    fromlen = SvCUROK(fromstr);
+	    aptr = SvPV(fromstr, fromlen);
 	    SvGROW(cat, fromlen * 4 / 3);
 	    if (len <= 1)
 		len = 45;
@@ -4104,8 +4225,9 @@ PP(pp_split)
     AV *ary;
     register I32 limit = POPi;			/* note, negative is forever */
     SV *sv = POPs;
-    register char *s = SvPVn(sv);
-    char *strend = s + SvCUROK(sv);
+    STRLEN len;
+    register char *s = SvPV(sv, len);
+    char *strend = s + len;
     register PMOP *pm = (PMOP*)POPs;
     register SV *dstr;
     register char *m;
@@ -4181,7 +4303,7 @@ PP(pp_split)
 	i = SvCUR(pm->op_pmshort);
 	if (i == 1) {
 	    I32 fold = (pm->op_pmflags & PMf_FOLD);
-	    i = *SvPV(pm->op_pmshort);
+	    i = *SvPVX(pm->op_pmshort);
 	    if (fold && isUPPER(i))
 		i = tolower(i);
 	    while (--limit) {
@@ -4327,7 +4449,7 @@ PP(pp_lslice)
     register I32 ix;
 
     if (GIMME != G_ARRAY) {
-	ix = SvIVnx(*lastlelem) - arybase;
+	ix = SvIVx(*lastlelem) - arybase;
 	if (ix < 0 || ix >= max)
 	    *firstlelem = &sv_undef;
 	else
@@ -4337,12 +4459,12 @@ PP(pp_lslice)
     }
 
     if (max == 0) {
-	SP = firstlelem;
+	SP = firstlelem - 1;
 	RETURN;
     }
 
     for (lelem = firstlelem; lelem <= lastlelem; lelem++) {
-	ix = SvIVnx(*lelem) - arybase;
+	ix = SvIVx(*lelem) - arybase;
 	if (ix < 0 || ix >= max || !(*lelem = firstrelem[ix]))
 	    *lelem = &sv_undef;
 	if (!is_something_there && SvOK(*lelem))
@@ -4351,7 +4473,7 @@ PP(pp_lslice)
     if (is_something_there)
 	SP = lastlelem;
     else
-	SP = firstlelem;
+	SP = firstlelem - 1;
     RETURN;
 }
 
@@ -4367,7 +4489,7 @@ PP(pp_anonlist)
 PP(pp_anonhash)
 {
     dSP; dMARK; dORIGMARK;
-    HV* hv = newHV(COEFFSIZE);
+    HV* hv = newHV();
     SvREFCNT(hv) = 0;
     while (MARK < SP) {
 	SV* key = *++MARK;
@@ -4375,7 +4497,7 @@ PP(pp_anonhash)
 	SV *val = NEWSV(46, 0);
 	if (MARK < SP)
 	    sv_setsv(val, *++MARK);
-	tmps = SvPV(key);
+	tmps = SvPVX(key);
 	(void)hv_store(hv,tmps,SvCUROK(key),val,0);
     }
     SP = ORIGMARK;
@@ -4400,13 +4522,13 @@ PP(pp_splice)
     SP++;
 
     if (++MARK < SP) {
-	offset = SvIVnx(*MARK);
+	offset = SvIVx(*MARK);
 	if (offset < 0)
 	    offset += AvFILL(ary) + 1;
 	else
 	    offset -= arybase;
 	if (++MARK < SP) {
-	    length = SvIVnx(*MARK++);
+	    length = SvIVx(*MARK++);
 	    if (length < 0)
 		length = 0;
 	}
@@ -4706,6 +4828,9 @@ PP(pp_grepwhile)
     }
 }
 
+static int sortcmp();
+static int sortcv();
+
 PP(pp_sort)
 {
     dSP; dMARK; dORIGMARK;
@@ -4713,8 +4838,6 @@ PP(pp_sort)
     SV **myorigmark = ORIGMARK;
     register I32 max;
     register I32 i;
-    int sortcmp();
-    int sortcv();
     HV *stash;
     SV *sortcvvar;
     GV *gv;
@@ -4740,9 +4863,9 @@ PP(pp_sort)
 		    SV *tmpstr = sv_mortalcopy(&sv_undef);
 		    gv_efullname(tmpstr, gv);
 		    if (CvUSERSUB(cv))
-			DIE("Usersub \"%s\" called in sort", SvPV(tmpstr));
+			DIE("Usersub \"%s\" called in sort", SvPVX(tmpstr));
 		    DIE("Undefined sort subroutine \"%s\" called",
-			SvPV(tmpstr));
+			SvPVX(tmpstr));
 		}
 		if (cv) {
 		    if (CvUSERSUB(cv))
@@ -4766,7 +4889,7 @@ PP(pp_sort)
 	/*SUPPRESS 560*/
 	if (*up = *++MARK) {			/* Weed out nulls. */
 	    if (!SvPOK(*up))
-		(void)sv_2pv(*up);
+		(void)sv_2pv(*up, &na);
 	    else
 		SvTEMP_off(*up);
 	    up++;
@@ -4833,14 +4956,15 @@ PP(pp_reverse)
 	register char *down;
 	register I32 tmp;
 	dTARGET;
+	STRLEN len;
 
 	if (SP - MARK > 1)
 	    do_join(TARG, &sv_no, MARK, SP);
 	else
 	    sv_setsv(TARG, *SP);
-	up = SvPVn(TARG);
-	if (SvCUROK(TARG) > 1) {
-	    down = SvPV(TARG) + SvCUR(TARG) - 1;
+	up = SvPV(TARG, len);
+	if (len > 1) {
+	    down = SvPVX(TARG) + len - 1;
 	    while (down > up) {
 		tmp = *up;
 		*up++ = *down;
@@ -4875,7 +4999,7 @@ PP(pp_flip)
 	SV *targ = PAD_SV(op->op_targ);
 
 	if ((op->op_private & OPpFLIP_LINENUM)
-	  ? last_in_gv && SvIVn(sv) == GvIO(last_in_gv)->lines
+	  ? last_in_gv && SvIV(sv) == GvIO(last_in_gv)->lines
 	  : SvTRUE(sv) ) {
 	    sv_setiv(PAD_SV(cUNOP->op_first->op_targ), 1);
 	    if (op->op_flags & OPf_SPECIAL) {
@@ -4905,9 +5029,9 @@ PP(pp_flop)
 	I32 max;
 
 	if (SvNIOK(lstr) || !SvPOK(lstr) ||
-	  (looks_like_number(lstr) && *SvPV(lstr) != '0') ) {
-	    i = SvIVn(lstr);
-	    max = SvIVn(rstr);
+	  (looks_like_number(lstr) && *SvPVX(lstr) != '0') ) {
+	    i = SvIV(lstr);
+	    max = SvIV(rstr);
 	    if (max > i)
 		EXTEND(SP, max - i + 1);
 	    while (i <= max) {
@@ -4918,16 +5042,17 @@ PP(pp_flop)
 	}
 	else {
 	    SV *final = sv_mortalcopy(rstr);
-	    char *tmps = SvPVn(final);
+	    STRLEN len;
+	    char *tmps = SvPV(final, len);
 
 	    sv = sv_mortalcopy(lstr);
-	    while (!SvNIOK(sv) && SvCUR(sv) <= SvCUR(final) &&
-		strNE(SvPV(sv),tmps) ) {
+	    while (!SvNIOK(sv) && SvCUR(sv) <= len &&
+		strNE(SvPVX(sv),tmps) ) {
 		XPUSHs(sv);
 		sv = sv_2mortal(newSVsv(sv));
 		sv_inc(sv);
 	    }
-	    if (strEQ(SvPV(sv),tmps))
+	    if (strEQ(SvPVX(sv),tmps))
 		XPUSHs(sv);
 	}
     }
@@ -4936,7 +5061,7 @@ PP(pp_flop)
 	SV *targ = PAD_SV(cUNOP->op_first->op_targ);
 	sv_inc(targ);
 	if ((op->op_private & OPpFLIP_LINENUM)
-	  ? last_in_gv && SvIVn(sv) == GvIO(last_in_gv)->lines
+	  ? last_in_gv && SvIV(sv) == GvIO(last_in_gv)->lines
 	  : SvTRUE(sv) ) {
 	    sv_setiv(PAD_SV(((UNOP*)cUNOP->op_first)->op_first->op_targ), 0);
 	    sv_catpv(targ, "E0");
@@ -5083,8 +5208,12 @@ I32 cxix;
 
 /*VARARGS0*/
 OP *
+#ifdef __STDC__
+die(char* pat,...)
+#else
 die(va_alist)
 va_dcl
+#endif
 {
     va_list args;
     char *tmps;
@@ -5131,7 +5260,7 @@ char *message;
 
 	    LEAVE;
 	    if (optype == OP_REQUIRE)
-		DIE("%s", SvPVnx(GvSV(gv_fetchpv("@",TRUE))));
+		DIE("%s", SvPVx(GvSV(gv_fetchpv("@",TRUE)), na));
 	    return pop_return();
 	}
     }
@@ -5195,32 +5324,65 @@ PP(pp_orassign)
 	
 PP(pp_method)
 {
-    dSP; dPOPss; dTARGET;
+    dSP; dPOPss;
     SV* ob;
     GV* gv;
 
-    if (SvTYPE(sv) != SVt_REF || !(ob = (SV*)SvANY(sv)) || SvSTORAGE(ob) != 'O')
-	DIE("Not an object reference");
+    EXTEND(sp,2);
 
-    if (TARG && SvTYPE(TARG) == SVt_REF) {
-	/* XXX */
-	gv = 0;
+    gv = 0;
+    if (SvTYPE(sv) != SVt_REF) {
+	GV* iogv;
+	IO* io;
+
+	if (!SvOK(sv) ||
+	    !(iogv = gv_fetchpv(SvPVX(sv), FALSE)) ||
+	    !(io=GvIO(iogv)))
+	{
+	    char *name = SvPVX(((SVOP*)cLOGOP->op_other)->op_sv);
+	    char tmpbuf[256];
+	    char* packname = SvPVX(sv);
+	    HV *stash;
+	    if (!isALPHA(*packname))
+DIE("Can't call method \"%s\" without a package or object reference", name);
+	    if (!(stash = fetch_stash(sv, FALSE)))
+		DIE("Can't call method \"%s\" in empty package \"%s\"",
+		    name, packname);
+	    gv = gv_fetchmethod(stash,name);
+	    if (!gv)
+		DIE("Can't locate object method \"%s\" via package \"%s\"",
+		    name, packname);
+	    PUSHs(gv);
+	    PUSHs(sv);
+	    RETURN;
+	}
+	if (!(ob = io->object)) {
+	    ob = sv_ref((SV*)newHV());
+	    SvSTORAGE(ob) = 'O';
+	    SvUPGRADE(ob, SVt_PVMG);
+	    iogv = gv_fetchpv("FILEHANDLE'flush", TRUE);
+	    SvSTASH(ob) = GvSTASH(iogv);
+	    io->object = ob;
+	}
     }
-    else
+    else {
 	gv = 0;
+	ob = (SV*)SvANY(sv);
+    }
+
+    if (!ob || SvSTORAGE(ob) != 'O') {
+	char *name = SvPVX(((SVOP*)cLOGOP->op_other)->op_sv);
+	DIE("Can't call method \"%s\" on unblessed reference", name);
+    }
 
     if (!gv) {		/* nothing cached */
-	char *name = SvPV(((SVOP*)cLOGOP->op_other)->op_sv);
-	if (strchr(name, '\''))
-	    gv = gv_fetchpv(name, FALSE);
-	else
-	    gv = gv_fetchmethod(SvSTASH(ob),name);
+	char *name = SvPVX(((SVOP*)cLOGOP->op_other)->op_sv);
+	gv = gv_fetchmethod(SvSTASH(ob),name);
 	if (!gv)
 	    DIE("Can't locate object method \"%s\" via package \"%s\"",
 		name, HvNAME(SvSTASH(ob)));
     }
 
-    EXTEND(sp,2);
     PUSHs(gv);
     PUSHs(sv);
     RETURN;
@@ -5244,7 +5406,7 @@ PP(pp_entersubr)
 	if (gv) {
 	    SV *tmpstr = sv_mortalcopy(&sv_undef);
 	    gv_efullname(tmpstr, gv);
-	    DIE("Undefined subroutine \"%s\" called",SvPV(tmpstr));
+	    DIE("Undefined subroutine \"%s\" called",SvPVX(tmpstr));
 	}
 	if (cv)
 	    DIE("Undefined subroutine called");
@@ -5260,13 +5422,9 @@ PP(pp_entersubr)
     }
 
     if (CvUSERSUB(cv)) {
-	cx->blk_sub.hasargs = 0;
-	cx->blk_sub.savearray = Null(AV*);;
-	cx->blk_sub.argarray = Null(AV*);
-	if (!hasargs)
-	    items = 0;
-	items = (*CvUSERSUB(cv))(CvUSERINDEX(cv), sp - stack_base, items);
+	items = (*CvUSERSUB(cv))(CvUSERINDEX(cv), MARK - stack_base, items);
 	sp = stack_base + items;
+	LEAVE;
 	RETURN;
     }
     else {
@@ -5291,11 +5449,11 @@ PP(pp_entersubr)
 		svp = AvARRAY(svp[0]);
 		while (ix > 0) {
 		    if (svp[ix]) {
-			char *name = SvPV(svp[ix]);	/* XXX */
+			char *name = SvPVX(svp[ix]);	/* XXX */
 			if (*name == '@')
-			    av_store(newpad, ix--, newAV());
+			    av_store(newpad, ix--, (SV*)newAV());
 			else if (*name == '%')
-			    av_store(newpad, ix--, newHV(COEFFSIZE));
+			    av_store(newpad, ix--, (SV*)newHV());
 			else
 			    av_store(newpad, ix--, NEWSV(0,0));
 		    }
@@ -5391,7 +5549,7 @@ PP(pp_caller)
     }
 
     PUSHs(sv_2mortal(newSVpv(HvNAME(cx->blk_oldcop->cop_stash), 0)));
-    PUSHs(sv_2mortal(newSVpv(SvPV(GvSV(cx->blk_oldcop->cop_filegv)), 0)));
+    PUSHs(sv_2mortal(newSVpv(SvPVX(GvSV(cx->blk_oldcop->cop_filegv)), 0)));
     PUSHs(sv_2mortal(newSVnv((double)cx->blk_oldcop->cop_line)));
     if (!MAXARG)
 	RETURN;
@@ -5418,12 +5576,18 @@ sortcv(str1, str2)
 SV **str1;
 SV **str2;
 {
+    I32 oldscopeix = scopestack_ix;
+    I32 result;
     GvSV(firstgv) = *str1;
     GvSV(secondgv) = *str2;
     stack_sp = stack_base;
     op = sortcop;
     run();
-    return SvIVnx(AvARRAY(stack)[1]);
+    result = SvIVx(AvARRAY(stack)[1]);
+    while (scopestack_ix > oldscopeix) {
+	LEAVE;
+    }
+    return result;
 }
 
 static I32
@@ -5437,13 +5601,13 @@ SV **strp2;
 
     if (SvCUR(str1) < SvCUR(str2)) {
 	/*SUPPRESS 560*/
-	if (retval = memcmp(SvPV(str1), SvPV(str2), SvCUR(str1)))
+	if (retval = memcmp(SvPVX(str1), SvPVX(str2), SvCUR(str1)))
 	    return retval;
 	else
 	    return -1;
     }
     /*SUPPRESS 560*/
-    else if (retval = memcmp(SvPV(str1), SvPV(str2), SvCUR(str2)))
+    else if (retval = memcmp(SvPVX(str1), SvPVX(str2), SvCUR(str2)))
 	return retval;
     else if (SvCUR(str1) == SvCUR(str2))
 	return 0;
@@ -5458,18 +5622,18 @@ PP(pp_warn)
     if (SP - MARK != 1) {
 	dTARGET;
 	do_join(TARG, &sv_no, MARK, SP);
-	tmps = SvPVn(TARG);
+	tmps = SvPV(TARG, na);
 	SP = MARK + 1;
     }
     else {
-	tmps = SvPVn(TOPs);
+	tmps = SvPV(TOPs, na);
     }
     if (!tmps || !*tmps) {
 	SV *error = GvSV(gv_fetchpv("@", TRUE));
 	SvUPGRADE(error, SVt_PV);
-	if (SvCUR(error))
+	if (SvPOK(error) && SvCUR(error))
 	    sv_catpv(error, "\t...caught");
-	tmps = SvPVn(error);
+	tmps = SvPV(error, na);
     }
     if (!tmps || !*tmps)
 	tmps = "Warning: something's wrong";
@@ -5484,18 +5648,18 @@ PP(pp_die)
     if (SP - MARK != 1) {
 	dTARGET;
 	do_join(TARG, &sv_no, MARK, SP);
-	tmps = SvPVn(TARG);
+	tmps = SvPV(TARG, na);
 	SP = MARK + 1;
     }
     else {
-	tmps = SvPVn(TOPs);
+	tmps = SvPV(TOPs, na);
     }
     if (!tmps || !*tmps) {
 	SV *error = GvSV(gv_fetchpv("@", TRUE));
 	SvUPGRADE(error, SVt_PV);
-	if (SvCUR(error))
+	if (SvPOK(error) && SvCUR(error))
 	    sv_catpv(error, "\t...propagated");
-	tmps = SvPVn(error);
+	tmps = SvPV(error, na);
     }
     if (!tmps || !*tmps)
 	tmps = "Died";
@@ -5525,9 +5689,7 @@ PP(pp_lineseq)
 PP(pp_nextstate)
 {
     curcop = (COP*)op;
-#ifdef TAINT
-    tainted = 0;	/* Each statement is presumed innocent */
-#endif
+    TAINT_NOT;		/* Each statement is presumed innocent */
     stack_sp = stack_base + cxstack[cxstack_ix].blk_oldsp;
     free_tmps();
     return NORMAL;
@@ -5536,13 +5698,11 @@ PP(pp_nextstate)
 PP(pp_dbstate)
 {
     curcop = (COP*)op;
-#ifdef TAINT
-    tainted = 0;	/* Each statement is presumed innocent */
-#endif
+    TAINT_NOT;		/* Each statement is presumed innocent */
     stack_sp = stack_base + cxstack[cxstack_ix].blk_oldsp;
     free_tmps();
 
-    if (op->op_private || SvIVn(DBsingle) || SvIVn(DBsignal) || SvIVn(DBtrace))
+    if (op->op_private || SvIV(DBsingle) || SvIV(DBsignal) || SvIV(DBtrace))
     {
 	SV **sp;
 	register CV *cv;
@@ -5580,15 +5740,9 @@ PP(pp_dbstate)
 PP(pp_unstack)
 {
     I32 oldsave;
-#ifdef TAINT
-    tainted = 0;	/* Each statement is presumed innocent */
-#endif
+    TAINT_NOT;		/* Each statement is presumed innocent */
     stack_sp = stack_base + cxstack[cxstack_ix].blk_oldsp;
-    /* XXX should tmps_floor live in cxstack? */
-    while (tmps_ix > tmps_floor) {	/* clean up after last eval */
-	sv_free(tmps_stack[tmps_ix]);
-	tmps_stack[tmps_ix--] = Nullsv;
-    }
+    free_tmps();
     oldsave = scopestack[scopestack_ix - 1];
     if (savestack_ix > oldsave)
         leave_scope(oldsave);
@@ -5619,6 +5773,11 @@ PP(pp_leave)
     LEAVE;
 
     RETURN;
+}
+
+PP(pp_scope)
+{
+    return NORMAL;
 }
 
 PP(pp_enteriter)
@@ -5713,6 +5872,11 @@ PP(pp_return)
     SV **newsp;
     I32 optype = 0;
 
+    if (stack == sortstack) {
+	AvARRAY(stack)[1] = *SP;
+	return 0;
+    }
+
     cxix = dopoptosub(cxstack_ix);
     if (cxix < 0)
 	DIE("Can't return outside a subroutine");
@@ -5738,11 +5902,11 @@ PP(pp_return)
 	else
 	    *++newsp = &sv_undef;
 	if (optype == OP_REQUIRE && !SvTRUE(*newsp))
-	    DIE("%s", SvPVnx(GvSV(gv_fetchpv("@",TRUE))));
+	    DIE("%s", SvPVx(GvSV(gv_fetchpv("@",TRUE)), na));
     }
     else {
 	if (optype == OP_REQUIRE && MARK == SP)
-	    DIE("%s", SvPVnx(GvSV(gv_fetchpv("@",TRUE))));
+	    DIE("%s", SvPVx(GvSV(gv_fetchpv("@",TRUE)), na));
 	while (MARK < SP)
 	    *++newsp = sv_mortalcopy(*++MARK);
     }
@@ -5879,6 +6043,7 @@ OP **opstack;
     OP **ops = opstack;
 
     if (op->op_type == OP_LEAVE ||
+	op->op_type == OP_SCOPE ||
 	op->op_type == OP_LEAVELOOP ||
 	op->op_type == OP_LEAVETRY)
 	    *ops++ = cUNOP->op_first;
@@ -6020,7 +6185,7 @@ PP(pp_exit)
     if (MAXARG < 1)
 	anum = 0;
     else
-	anum = SvIVnx(POPs);
+	anum = SvIVx(POPs);
     my_exit(anum);
     PUSHs(&sv_undef);
     RETURN;
@@ -6029,7 +6194,7 @@ PP(pp_exit)
 PP(pp_nswitch)
 {
     dSP;
-    double value = SvNVnx(GvSV(cCOP->cop_gv));
+    double value = SvNVx(GvSV(cCOP->cop_gv));
     register I32 match = (I32)value;
 
     if (value < 0.0) {
@@ -6053,7 +6218,7 @@ PP(pp_cswitch)
     if (multiline)
 	op = op->op_next;			/* can't assume anything */
     else {
-	match = *(SvPVnx(GvSV(cCOP->cop_gv))) & 255;
+	match = *(SvPVx(GvSV(cCOP->cop_gv), na)) & 255;
 	match -= cCOP->uop.scop.scop_offset;
 	if (match < 0)
 	    match = 0;
@@ -6072,14 +6237,15 @@ PP(pp_open)
     GV *gv;
     SV *sv;
     char *tmps;
+    STRLEN len;
 
     if (MAXARG > 1)
 	sv = POPs;
     else
 	sv = GvSV(TOPs);
     gv = (GV*)POPs;
-    tmps = SvPVn(sv);
-    if (do_open(gv, tmps, SvCUROK(sv))) {
+    tmps = SvPV(sv, len);
+    if (do_open(gv, tmps, len)) {
 	GvIO(gv)->lines = 0;
 	PUSHi( (I32)forkprocess );
     }
@@ -6222,39 +6388,111 @@ PP(pp_binmode)
 #endif
 }
 
+PP(pp_tie)
+{
+    dSP;
+    SV *varsv;
+    HV* stash;
+    GV *gv;
+    BINOP myop;
+    SV *sv;
+    SV **mark = stack_base + *markstack_ptr + 1;	/* reuse in entersubr */
+
+    varsv = mark[0];
+
+    stash = fetch_stash(mark[1], FALSE);
+    if (!stash || !(gv = gv_fetchmethod(stash, "new")) || !GvCV(gv))
+	DIE("Can't tie to package %s", SvPV(mark[1],na));
+
+    Zero(&myop, 1, BINOP);
+    myop.op_last = (OP *) &myop;
+    myop.op_next = Nullop;
+    myop.op_flags = OPf_STACKED;
+
+    ENTER;
+    SAVESPTR(op);
+    op = (OP *) &myop;
+
+    mark[0] = gv;
+    PUTBACK;
+
+    if (op = pp_entersubr())
+        run();
+    SPAGAIN;
+
+    sv = TOPs;
+    if (SvTYPE(varsv) == SVt_PVHV || SvTYPE(varsv) == SVt_PVAV)
+	sv_magic(varsv, sv, 'P', 0, 0);
+    else
+	sv_magic(varsv, sv, 'p', 0, -1);
+    LEAVE;
+    SPAGAIN;
+    RETURN;
+}
+
+PP(pp_untie)
+{
+    dSP;
+    if (SvTYPE(TOPs) == SVt_PVHV || SvTYPE(TOPs) == SVt_PVAV)
+	sv_unmagic(TOPs, 'P');
+    else
+	sv_unmagic(TOPs, 'p');
+    RETSETYES;
+}
+
 PP(pp_dbmopen)
 {
-    dSP; dTARGET;
-    int anum;
+    dSP;
     HV *hv;
     dPOPPOPssrl;
+    HV* stash;
+    GV *gv;
+    BINOP myop;
+    SV *sv;
 
     hv = (HV*)POPs;
-    if (SvOK(rstr))
-	anum = SvIVn(rstr);
+
+    sv = sv_mortalcopy(&sv_no);
+    sv_setpv(sv, "Any_DBM_File");
+    stash = fetch_stash(sv, FALSE);
+    if (!stash || !(gv = gv_fetchmethod(stash, "new")) || !GvCV(gv))
+	DIE("No dbm on this machine");
+
+    Zero(&myop, 1, BINOP);
+    myop.op_last = (OP *) &myop;
+    myop.op_next = Nullop;
+    myop.op_flags = OPf_STACKED;
+
+    ENTER;
+    SAVESPTR(op);
+    op = (OP *) &myop;
+    PUTBACK;
+    pp_pushmark();
+
+    EXTEND(sp, 5);
+    PUSHs(gv);
+    PUSHs(sv);
+    PUSHs(lstr);
+    if (SvIV(rstr))
+	PUSHs(sv_2mortal(newSViv(O_RDWR|O_CREAT)));
     else
-	anum = -1;
-#ifdef SOME_DBM
-    PUSHi( (I32)hv_dbmopen(hv, SvPVn(lstr), anum) );
-#else
-    DIE("No dbm or ndbm on this machine");
-#endif
+	PUSHs(sv_2mortal(newSViv(O_RDWR)));
+    PUSHs(rstr);
+    PUTBACK;
+
+    if (op = pp_entersubr())
+        run();
+    LEAVE;
+    SPAGAIN;
+
+    sv = TOPs;
+    sv_magic((SV*)hv, sv, 'P', 0, 0);
     RETURN;
 }
 
 PP(pp_dbmclose)
 {
-    dSP;
-    I32 anum;
-    HV *hv;
-
-    hv = (HV*)POPs;
-#ifdef SOME_DBM
-    hv_dbmclose(hv);
-    RETPUSHYES;
-#else
-    DIE("No dbm or ndbm on this machine");
-#endif
+    return pp_untie(ARGS);
 }
 
 PP(pp_sselect)
@@ -6313,7 +6551,7 @@ PP(pp_sselect)
 
     sv = SP[4];
     if (SvOK(sv)) {
-	value = SvNVn(sv);
+	value = SvNV(sv);
 	if (value < 0.0)
 	    value = 0.0;
 	timebuf.tv_sec = (long)value;
@@ -6332,20 +6570,20 @@ PP(pp_sselect)
 	j = SvLEN(sv);
 	if (j < growsize) {
 	    Sv_Grow(sv, growsize);
-	    s = SvPVn(sv) + j;
+	    s = SvPV(sv, na) + j;
 	    while (++j <= growsize) {
 		*s++ = '\0';
 	    }
 	}
 #if BYTEORDER != 0x1234 && BYTEORDER != 0x12345678
-	s = SvPV(sv);
+	s = SvPVX(sv);
 	New(403, fd_sets[i], growsize, char);
 	for (offset = 0; offset < growsize; offset += masksize) {
 	    for (j = 0, k=ORDERBYTE; j < masksize; j++, (k >>= 4))
 		fd_sets[i][j+offset] = s[(k % masksize) + offset];
 	}
 #else
-	fd_sets[i] = SvPV(sv);
+	fd_sets[i] = SvPVX(sv);
 #endif
     }
 
@@ -6359,7 +6597,7 @@ PP(pp_sselect)
     for (i = 1; i <= 3; i++) {
 	if (fd_sets[i]) {
 	    sv = SP[i];
-	    s = SvPV(sv);
+	    s = SvPVX(sv);
 	    for (offset = 0; offset < growsize; offset += masksize) {
 		for (j = 0, k=ORDERBYTE; j < masksize; j++, (k >>= 4))
 		    s[(k % masksize) + offset] = fd_sets[i][j+offset];
@@ -6412,7 +6650,7 @@ PP(pp_getc)
 	RETPUSHUNDEF;
     TAINT_IF(1);
     sv_setpv(TARG, " ");
-    *SvPV(TARG) = getc(GvIO(gv)->ifp); /* should never be EOF */
+    *SvPVX(TARG) = getc(GvIO(gv)->ifp); /* should never be EOF */
     PUSHTARG;
     RETURN;
 }
@@ -6473,7 +6711,7 @@ PP(pp_enterwrite)
 	if (fgv) {
 	    SV *tmpstr = sv_mortalcopy(&sv_undef);
 	    gv_efullname(tmpstr, gv);
-	    DIE("Undefined format \"%s\" called",SvPV(tmpstr));
+	    DIE("Undefined format \"%s\" called",SvPVX(tmpstr));
 	}
 	DIE("Not a format reference");
     }
@@ -6520,7 +6758,7 @@ PP(pp_leavewrite)
 	    io->top_gv = topgv;
 	}
 	if (io->lines_left >= 0 && io->page > 0)
-	    fwrite(SvPV(formfeed), SvCUR(formfeed), 1, ofp);
+	    fwrite(SvPVX(formfeed), SvCUR(formfeed), 1, ofp);
 	io->lines_left = io->page_len;
 	io->page++;
 	formtarget = toptarget;
@@ -6547,7 +6785,7 @@ PP(pp_leavewrite)
 	    if (dowarn)
 		warn("page overflow");
 	}
-	if (!fwrite(SvPV(formtarget), 1, SvCUR(formtarget), ofp) ||
+	if (!fwrite(SvPVX(formtarget), 1, SvCUR(formtarget), ofp) ||
 		ferror(fp))
 	    PUSHs(&sv_no);
 	else {
@@ -6693,16 +6931,19 @@ PP(pp_sysread)
     int length;
     int bufsize;
     SV *bufstr;
+    STRLEN blen;
 
     gv = (GV*)*++MARK;
     if (!gv)
 	goto say_undef;
     bufstr = *++MARK;
-    buffer = SvPVn(bufstr);
-    length = SvIVnx(*++MARK);
+    buffer = SvPV(bufstr, blen);
+    length = SvIVx(*++MARK);
+    if (SvREADONLY(bufstr))
+	DIE(no_modify);
     errno = 0;
     if (MARK < SP)
-	offset = SvIVnx(*++MARK);
+	offset = SvIVx(*++MARK);
     else
 	offset = 0;
     if (MARK < SP)
@@ -6713,14 +6954,14 @@ PP(pp_sysread)
 #ifdef HAS_SOCKET
     if (op->op_type == OP_RECV) {
 	bufsize = sizeof buf;
-	SvGROW(bufstr, length+1), (buffer = SvPVn(bufstr));  /* sneaky */
+	SvGROW(bufstr, length+1), (buffer = SvPV(bufstr, blen));  /* sneaky */
 	length = recvfrom(fileno(io->ifp), buffer, length, offset,
 	    buf, &bufsize);
 	if (length < 0)
 	    RETPUSHUNDEF;
 	SvCUR_set(bufstr, length);
 	*SvEND(bufstr) = '\0';
-	SvNOK_off(bufstr);
+	SvPOK_only(bufstr);
 	SP = ORIGMARK;
 	sv_setpvn(TARG, buf, bufsize);
 	PUSHs(TARG);
@@ -6730,7 +6971,7 @@ PP(pp_sysread)
     if (op->op_type == OP_RECV)
 	DIE(no_sock_func, "recv");
 #endif
-    SvGROW(bufstr, length+offset+1), (buffer = SvPVn(bufstr));  /* sneaky */
+    SvGROW(bufstr, length+offset+1), (buffer = SvPV(bufstr, blen));  /* sneaky */
     if (op->op_type == OP_SYSREAD) {
 	length = read(fileno(io->ifp), buffer+offset, length);
     }
@@ -6748,7 +6989,7 @@ PP(pp_sysread)
 	goto say_undef;
     SvCUR_set(bufstr, length+offset);
     *SvEND(bufstr) = '\0';
-    SvNOK_off(bufstr);
+    SvPOK_only(bufstr);
     SP = ORIGMARK;
     PUSHi(length);
     RETURN;
@@ -6772,13 +7013,14 @@ PP(pp_send)
     SV *bufstr;
     char *buffer;
     int length;
+    STRLEN blen;
 
     gv = (GV*)*++MARK;
     if (!gv)
 	goto say_undef;
     bufstr = *++MARK;
-    buffer = SvPVn(bufstr);
-    length = SvIVnx(*++MARK);
+    buffer = SvPV(bufstr, blen);
+    length = SvIVx(*++MARK);
     errno = 0;
     io = GvIO(gv);
     if (!io || !io->ifp) {
@@ -6792,7 +7034,7 @@ PP(pp_send)
     }
     else if (op->op_type == OP_SYSWRITE) {
 	if (MARK < SP)
-	    offset = SvIVnx(*++MARK);
+	    offset = SvIVx(*++MARK);
 	else
 	    offset = 0;
 	if (MARK < SP)
@@ -6801,14 +7043,14 @@ PP(pp_send)
     }
 #ifdef HAS_SOCKET
     else if (SP >= MARK) {
+	STRLEN mlen;
 	if (SP > MARK)
 	    warn("Too many args on send");
-	buffer = SvPVnx(*++MARK);
-	length = sendto(fileno(io->ifp), buffer, SvCUR(bufstr),
-	  length, buffer, SvCUR(*MARK));
+	buffer = SvPVx(*++MARK, mlen);
+	length = sendto(fileno(io->ifp), buffer, blen, length, buffer, mlen);
     }
     else
-	length = send(fileno(io->ifp), buffer, SvCUR(bufstr), length);
+	length = send(fileno(io->ifp), buffer, blen, length);
 #else
     else
 	DIE(no_sock_func, "send");
@@ -6931,33 +7173,34 @@ PP(pp_ioctl)
     GV *gv = (GV*)POPs;
     IO *io = GvIOn(gv);
 
-    TAINT_PROPER(optype == OP_IOCTL ? "ioctl" : "fcntl");
-
     if (!io || !argstr || !io->ifp) {
 	errno = EBADF;	/* well, sort of... */
 	RETPUSHUNDEF;
     }
 
     if (SvPOK(argstr) || !SvNIOK(argstr)) {
+	STRLEN len;
 	if (!SvPOK(argstr))
-	    s = SvPVn(argstr);
+	    s = SvPV(argstr, len);
 	retval = IOCPARM_LEN(func);
-	if (SvCUR(argstr) < retval) {
+	if (len < retval) {
 	    Sv_Grow(argstr, retval+1);
 	    SvCUR_set(argstr, retval);
 	}
 
-	s = SvPV(argstr);
+	s = SvPVX(argstr);
 	s[SvCUR(argstr)] = 17;	/* a little sanity check here */
     }
     else {
-	retval = SvIVn(argstr);
+	retval = SvIV(argstr);
 #ifdef DOSISH
 	s = (char*)(long)retval;	/* ouch */
 #else
 	s = (char*)retval;		/* ouch */
 #endif
     }
+
+    TAINT_PROPER(optype == OP_IOCTL ? "ioctl" : "fcntl");
 
     if (optype == OP_IOCTL)
 	retval = ioctl(fileno(io->ifp), func, s);
@@ -7120,13 +7363,14 @@ PP(pp_bind)
     char *addr;
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
+    STRLEN len;
 
     if (!io || !io->ifp)
 	goto nuts;
 
-    addr = SvPVn(addrstr);
+    addr = SvPV(addrstr, len);
     TAINT_PROPER("bind");
-    if (bind(fileno(io->ifp), addr, SvCUR(addrstr)) >= 0)
+    if (bind(fileno(io->ifp), addr, len) >= 0)
 	RETPUSHYES;
     else
 	RETPUSHUNDEF;
@@ -7149,13 +7393,14 @@ PP(pp_connect)
     char *addr;
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
+    STRLEN len;
 
     if (!io || !io->ifp)
 	goto nuts;
 
-    addr = SvPVn(addrstr);
+    addr = SvPV(addrstr, len);
     TAINT_PROPER("connect");
-    if (connect(fileno(io->ifp), addr, SvCUR(addrstr)) >= 0)
+    if (connect(fileno(io->ifp), addr, len) >= 0)
 	RETPUSHYES;
     else
 	RETPUSHUNDEF;
@@ -7314,12 +7559,12 @@ PP(pp_ssockopt)
     case OP_GSOCKOPT:
 	SvCUR_set(sv, 256);
 	SvPOK_only(sv);
-	if (getsockopt(fd, lvl, optname, SvPV(sv), (int*)&SvCUR(sv)) < 0)
+	if (getsockopt(fd, lvl, optname, SvPVX(sv), (int*)&SvCUR(sv)) < 0)
 	    goto nuts2;
 	PUSHs(sv);
 	break;
     case OP_SSOCKOPT:
-	if (setsockopt(fd, lvl, optname, SvPV(sv), SvCUR(sv)) < 0)
+	if (setsockopt(fd, lvl, optname, SvPVX(sv), SvCUR(sv)) < 0)
 	    goto nuts2;
 	PUSHs(&sv_yes);
 	break;
@@ -7366,11 +7611,11 @@ PP(pp_getpeername)
     fd = fileno(io->ifp);
     switch (optype) {
     case OP_GETSOCKNAME:
-	if (getsockname(fd, SvPV(sv), (int*)&SvCUR(sv)) < 0)
+	if (getsockname(fd, SvPVX(sv), (int*)&SvCUR(sv)) < 0)
 	    goto nuts2;
 	break;
     case OP_GETPEERNAME:
-	if (getpeername(fd, SvPV(sv), (int*)&SvCUR(sv)) < 0)
+	if (getpeername(fd, SvPVX(sv), (int*)&SvCUR(sv)) < 0)
 	    goto nuts2;
 	break;
     }
@@ -7423,12 +7668,12 @@ PP(pp_stat)
 #ifdef HAS_LSTAT
 	laststype = op->op_type;
 	if (op->op_type == OP_LSTAT)
-	    laststatval = lstat(SvPVn(statname), &statcache);
+	    laststatval = lstat(SvPV(statname, na), &statcache);
 	else
 #endif
-	    laststatval = stat(SvPVn(statname), &statcache);
+	    laststatval = stat(SvPV(statname, na), &statcache);
 	if (laststatval < 0) {
-	    if (dowarn && strchr(SvPVn(statname), '\n'))
+	    if (dowarn && strchr(SvPV(statname, na), '\n'))
 		warn(warn_nl, "stat");
 	    max = 0;
 	}
@@ -7806,11 +8051,11 @@ PP(pp_fttext)
     else {
 	sv = POPs;
 	statgv = Nullgv;
-	sv_setpv(statname, SvPVn(sv));
+	sv_setpv(statname, SvPV(sv, na));
       really_filename:
-	i = open(SvPVn(sv), 0);
+	i = open(SvPV(sv, na), 0);
 	if (i < 0) {
-	    if (dowarn && strchr(SvPVn(sv), '\n'))
+	    if (dowarn && strchr(SvPV(sv, na), '\n'))
 		warn(warn_nl, "open");
 	    RETPUSHUNDEF;
 	}
@@ -7867,12 +8112,12 @@ PP(pp_chdir)
     if (!tmps || !*tmps) {
 	svp = hv_fetch(GvHVn(envgv), "HOME", 4, FALSE);
 	if (svp)
-	    tmps = SvPVn(*svp);
+	    tmps = SvPV(*svp, na);
     }
     if (!tmps || !*tmps) {
 	svp = hv_fetch(GvHVn(envgv), "LOGDIR", 6, FALSE);
 	if (svp)
-	    tmps = SvPVn(*svp);
+	    tmps = SvPV(*svp, na);
     }
     TAINT_PROPER("chdir");
     PUSHi( chdir(tmps) >= 0 );
@@ -7899,7 +8144,7 @@ PP(pp_chroot)
     char *tmps;
 #ifdef HAS_CHROOT
     if (MAXARG < 1)
-	tmps = SvPVnx(GvSV(defgv));
+	tmps = SvPVx(GvSV(defgv), na);
     else
 	tmps = POPp;
     TAINT_PROPER("chroot");
@@ -7946,7 +8191,7 @@ PP(pp_rename)
     int anum;
 
     char *tmps2 = POPp;
-    char *tmps = SvPVn(TOPs);
+    char *tmps = SvPV(TOPs, na);
     TAINT_PROPER("rename");
 #ifdef HAS_RENAME
     anum = rename(tmps, tmps2);
@@ -7969,7 +8214,7 @@ PP(pp_link)
     dSP; dTARGET;
 #ifdef HAS_LINK
     char *tmps2 = POPp;
-    char *tmps = SvPVn(TOPs);
+    char *tmps = SvPV(TOPs, na);
     TAINT_PROPER("link");
     SETi( link(tmps, tmps2) >= 0 );
 #else
@@ -7983,7 +8228,7 @@ PP(pp_symlink)
     dSP; dTARGET;
 #ifdef HAS_SYMLINK
     char *tmps2 = POPp;
-    char *tmps = SvPVn(TOPs);
+    char *tmps = SvPV(TOPs, na);
     TAINT_PROPER("symlink");
     SETi( symlink(tmps, tmps2) >= 0 );
     RETURN;
@@ -7999,7 +8244,7 @@ PP(pp_readlink)
     char *tmps;
     int len;
     if (MAXARG < 1)
-	tmps = SvPVnx(GvSV(defgv));
+	tmps = SvPVx(GvSV(defgv), na);
     else
 	tmps = POPp;
     len = readlink(tmps, buf, sizeof buf);
@@ -8065,7 +8310,7 @@ char *filename;
 	    return 0;
 	}
 	else {	/* some mkdirs return no failure indication */
-	    tmps = SvPVnx(st[1]);
+	    tmps = SvPVx(st[1], na);
 	    anum = (stat(tmps, &statbuf) >= 0);
 	    if (op->op_type == OP_RMDIR)
 		anum = !anum;
@@ -8086,7 +8331,7 @@ PP(pp_mkdir)
     dSP; dTARGET;
     int mode = POPi;
     int oldumask;
-    char *tmps = SvPVn(TOPs);
+    char *tmps = SvPV(TOPs, na);
 
     TAINT_PROPER("mkdir");
 #ifdef HAS_MKDIR
@@ -8106,7 +8351,7 @@ PP(pp_rmdir)
     char *tmps;
 
     if (MAXARG < 1)
-	tmps = SvPVnx(GvSV(defgv));
+	tmps = SvPVx(GvSV(defgv), na);
     else
 	tmps = POPp;
     TAINT_PROPER("rmdir");
@@ -8300,9 +8545,9 @@ PP(pp_fork)
 	RETSETUNDEF;
     if (!childpid) {
 	/*SUPPRESS 560*/
-	if (tmpgv = gv_fetchpv("$", allgvs))
+	if (tmpgv = gv_fetchpv("$", TRUE))
 	    sv_setiv(GvSV(tmpgv), (I32)getpid());
-	hv_clear(pidstatus, FALSE);	/* no kids, so don't wait for 'em */
+	hv_clear(pidstatus);	/* no kids, so don't wait for 'em */
     }
     PUSHi(childpid);
     RETURN;
@@ -8365,9 +8610,11 @@ PP(pp_system)
 
 #ifdef HAS_FORK
     if (SP - MARK == 1) {
-	TAINT_ENV();
-	TAINT_IF(TOPs->sv_tainted);
-	TAINT_PROPER("system");
+	if (tainting) {
+	    char *junk = SvPV(TOPs, na);
+	    TAINT_ENV();
+	    TAINT_PROPER("system");
+	}
     }
     while ((childpid = vfork()) == -1) {
 	if (errno != EAGAIN) {
@@ -8402,7 +8649,7 @@ PP(pp_system)
     else if (SP - MARK != 1)
 	value = (I32)do_aexec(Nullsv, MARK, SP);
     else {
-	value = (I32)do_exec(SvPVnx(sv_mortalcopy(*SP)));
+	value = (I32)do_exec(SvPVx(sv_mortalcopy(*SP), na));
     }
     _exit(-1);
 #else /* ! FORK */
@@ -8411,7 +8658,7 @@ PP(pp_system)
     else if (arglast[2] - arglast[1] != 1)
 	value = (I32)do_aspawn(Nullsv, arglast);
     else {
-	value = (I32)do_spawn(SvPVnx(sv_mortalcopy(st[2])));
+	value = (I32)do_spawn(SvPVx(sv_mortalcopy(st[2]), na));
     }
     PUSHi(value);
 #endif /* FORK */
@@ -8430,10 +8677,12 @@ PP(pp_exec)
     else if (SP - MARK != 1)
 	value = (I32)do_aexec(Nullsv, MARK, SP);
     else {
-	TAINT_ENV();
-	TAINT_IF((*SP)->sv_tainted);
-	TAINT_PROPER("exec");
-	value = (I32)do_exec(SvPVnx(sv_mortalcopy(*SP)));
+	if (tainting) {
+	    char *junk = SvPV(*SP, na);
+	    TAINT_ENV();
+	    TAINT_PROPER("exec");
+	}
+	value = (I32)do_exec(SvPVx(sv_mortalcopy(*SP), na));
     }
     SP = ORIGMARK;
     PUSHi(value);
@@ -8475,7 +8724,7 @@ PP(pp_getpgrp)
     if (MAXARG < 1)
 	pid = 0;
     else
-	pid = SvIVnx(POPs);
+	pid = SvIVx(POPs);
 #ifdef _POSIX_SOURCE
     if (pid != 0)
 	DIE("POSIX getpgrp can't take an argument");
@@ -8589,7 +8838,7 @@ PP(pp_gmtime)
     if (MAXARG < 1)
 	(void)time(&when);
     else
-	when = (time_t)SvIVnx(POPs);
+	when = (time_t)SvIVx(POPs);
 
     if (op->op_type == OP_LOCALTIME)
 	tmbuf = localtime(&when);
@@ -8630,15 +8879,12 @@ PP(pp_alarm)
 {
     dSP; dTARGET;
     int anum;
-    char *tmps;
 #ifdef HAS_ALARM
     if (MAXARG < 1)
-	tmps = SvPVnx(GvSV(defgv));
+	anum = SvIVx(GvSV(defgv));
     else
-	tmps = POPp;
-    if (!tmps)
-	tmps = "0";
-    anum = alarm((unsigned int)atoi(tmps));
+	anum = POPi;
+    anum = alarm((unsigned int)anum);
     EXTEND(SP, 1);
     if (anum < 0)
 	RETPUSHUNDEF;
@@ -8795,8 +9041,8 @@ save_lines(array, sv)
 AV *array;
 SV *sv;
 {
-    register char *s = SvPV(sv);
-    register char *send = SvPV(sv) + SvCUR(sv);
+    register char *s = SvPVX(sv);
+    register char *send = SvPVX(sv) + SvCUR(sv);
     register char *t;
     register I32 line = 1;
 
@@ -8824,7 +9070,6 @@ doeval()
     HV *newstash;
 
     in_eval = 1;
-    reinit_lexer();
 
     /* set up a scratch pad */
 
@@ -8859,12 +9104,14 @@ doeval()
     rslen = 1;
     rschar = '\n';
     rspara = 0;
+    lex_start();
     if (yyparse() || error_count || !eval_root) {
 	SV **newsp;
 	I32 gimme;
 	CONTEXT *cx;
 	I32 optype;
 
+	lex_end();
 	op = saveop;
 	POPBLOCK(cx);
 	POPEVAL(cx);
@@ -8875,20 +9122,21 @@ doeval()
 	    eval_root = Nullop;
 	}
 	if (optype == OP_REQUIRE)
-	    DIE("%s", SvPVnx(GvSV(gv_fetchpv("@",TRUE))));
+	    DIE("%s", SvPVx(GvSV(gv_fetchpv("@",TRUE)), na));
 	rs = nrs;
 	rslen = nrslen;
 	rschar = nrschar;
 	rspara = (nrslen == 2);
 	RETPUSHUNDEF;
     }
+    lex_end();
     rs = nrs;
     rslen = nrslen;
     rschar = nrschar;
     rspara = (nrslen == 2);
     compiling.cop_line = 0;
 
-    DEBUG_x(dump_eval(eval_root, eval_start));
+    DEBUG_x(dump_eval());
 
     /* compiled okay, so do it */
 
@@ -8906,7 +9154,7 @@ PP(pp_require)
     dSP;
     register CONTEXT *cx;
     dPOPss;
-    char *name = SvPVn(sv);
+    char *name = SvPV(sv, na);
     char *tmpname;
     SV** svp;
     I32 gimme = G_SCALAR;
@@ -8934,7 +9182,8 @@ PP(pp_require)
 	I32 i;
 
 	for (i = 0; i <= AvFILL(ar); i++) {
-	    (void)sprintf(buf, "%s/%s", SvPVnx(*av_fetch(ar, i, TRUE)), name);
+	    (void)sprintf(buf, "%s/%s",
+		SvPVx(*av_fetch(ar, i, TRUE), na), name);
 	    rsfp = fopen(buf, "r");
 	    if (rsfp) {
 		char *s = buf;
@@ -9178,7 +9427,7 @@ PP(pp_ghostent)
     else if (which == OP_GHBYADDR) {
 	int addrtype = POPi;
 	SV *addrstr = POPs;
-	char *addr = SvPVn(addrstr);
+	char *addr = SvPV(addrstr, na);
 
 	hent = gethostbyaddr(addr, SvCUR(addrstr), addrtype);
     }
@@ -9794,12 +10043,14 @@ PP(pp_syscall)
     register I32 i = 0;
     I32 retval = -1;
 
-#ifdef TAINT
-    while (++MARK <= SP)
-	TAINT_IF((*MARK)->sv_tainted);
-    MARK = ORIGMARK;
-    TAINT_PROPER("syscall");
-#endif
+    if (tainting) {
+	while (++MARK <= SP) {
+	    if (SvMAGICAL(*MARK) && mg_find(*MARK, 't'))
+		tainted = TRUE;
+	}
+	MARK = ORIGMARK;
+	TAINT_PROPER("syscall");
+    }
 
     /* This probably won't work on machines where sizeof(long) != sizeof(int)
      * or where sizeof(long) != sizeof(char*).  But such machines will
@@ -9807,9 +10058,9 @@ PP(pp_syscall)
      */
     while (++MARK <= SP) {
 	if (SvNIOK(*MARK) || !i)
-	    a[i++] = SvIVn(*MARK);
+	    a[i++] = SvIV(*MARK);
 	else
-	    a[i++] = (unsigned long)SvPV(*MARK);
+	    a[i++] = (unsigned long)SvPVX(*MARK);
 	if (i > 15)
 	    break;
     }

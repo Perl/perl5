@@ -1,5 +1,7 @@
 #!./perl
 
-sub foo;
-
-foo;
+$o = {A,1};
+$r = \($o->{A});
+print $$r;
+$$r = foo;
+print $$r;

@@ -283,11 +283,11 @@ I32 len;
 	    dup2(fileno(fp), fd);
 	    sv = *av_fetch(fdpid,fileno(fp),TRUE);
 	    SvUPGRADE(sv, SVt_IV);
-	    pid = SvIV(sv);
-	    SvIV(sv) = 0;
+	    pid = SvIVX(sv);
+	    SvIVX(sv) = 0;
 	    sv = *av_fetch(fdpid,fd,TRUE);
 	    SvUPGRADE(sv, SVt_IV);
-	    SvIV(sv) = pid;
+	    SvIVX(sv) = pid;
 	    fclose(fp);
 
 	}
@@ -344,11 +344,12 @@ register GV *gv;
     }
     filemode = 0;
     while (av_len(GvAV(gv)) >= 0) {
+	STRLEN len;
 	sv = av_shift(GvAV(gv));
 	sv_setsv(GvSV(gv),sv);
 	SvSETMAGIC(GvSV(gv));
-	oldname = SvPVnx(GvSV(gv));
-	if (do_open(gv,oldname,SvCUR(GvSV(gv)))) {
+	oldname = SvPVx(GvSV(gv), len);
+	if (do_open(gv,oldname,len)) {
 	    if (inplace) {
 		TAINT_PROPER("inplace open");
 		if (strEQ(oldname,"-")) {
@@ -377,11 +378,11 @@ register GV *gv;
 		    sv_catpv(sv,inplace);
 #endif
 #ifndef FLEXFILENAMES
-		    if (stat(SvPV(sv),&statbuf) >= 0
+		    if (stat(SvPVX(sv),&statbuf) >= 0
 		      && statbuf.st_dev == filedev
 		      && statbuf.st_ino == fileino ) {
 			warn("Can't do inplace edit: %s > 14 characters",
-			  SvPV(sv) );
+			  SvPVX(sv) );
 			do_close(gv,FALSE);
 			sv_free(sv);
 			continue;
@@ -389,24 +390,24 @@ register GV *gv;
 #endif
 #ifdef HAS_RENAME
 #ifndef DOSISH
-		    if (rename(oldname,SvPV(sv)) < 0) {
+		    if (rename(oldname,SvPVX(sv)) < 0) {
 			warn("Can't rename %s to %s: %s, skipping file",
-			  oldname, SvPV(sv), strerror(errno) );
+			  oldname, SvPVX(sv), strerror(errno) );
 			do_close(gv,FALSE);
 			sv_free(sv);
 			continue;
 		    }
 #else
 		    do_close(gv,FALSE);
-		    (void)unlink(SvPV(sv));
-		    (void)rename(oldname,SvPV(sv));
-		    do_open(gv,SvPV(sv),SvCUR(GvSV(gv)));
+		    (void)unlink(SvPVX(sv));
+		    (void)rename(oldname,SvPVX(sv));
+		    do_open(gv,SvPVX(sv),SvCUR(GvSV(gv)));
 #endif /* MSDOS */
 #else
-		    (void)UNLINK(SvPV(sv));
-		    if (link(oldname,SvPV(sv)) < 0) {
+		    (void)UNLINK(SvPVX(sv));
+		    if (link(oldname,SvPVX(sv)) < 0) {
 			warn("Can't rename %s to %s: %s, skipping file",
-			  oldname, SvPV(sv), strerror(errno) );
+			  oldname, SvPVX(sv), strerror(errno) );
 			do_close(gv,FALSE);
 			sv_free(sv);
 			continue;
@@ -418,20 +419,20 @@ register GV *gv;
 #ifndef DOSISH
 		    if (UNLINK(oldname) < 0) {
 			warn("Can't rename %s to %s: %s, skipping file",
-			  oldname, SvPV(sv), strerror(errno) );
+			  oldname, SvPVX(sv), strerror(errno) );
 			do_close(gv,FALSE);
 			sv_free(sv);
 			continue;
 		    }
 #else
-		    fatal("Can't do inplace edit without backup");
+		    croak("Can't do inplace edit without backup");
 #endif
 		}
 
 		sv_setpvn(sv,">",1);
 		sv_catpv(sv,oldname);
 		errno = 0;		/* in case sprintf set errno */
-		if (!do_open(argvoutgv,SvPV(sv),SvCUR(sv))) {
+		if (!do_open(argvoutgv,SvPVX(sv),SvCUR(sv))) {
 		    warn("Can't do inplace edit on %s: %s",
 		      oldname, strerror(errno) );
 		    do_close(gv,FALSE);
@@ -460,7 +461,7 @@ register GV *gv;
 	    return GvIO(gv)->ifp;
 	}
 	else
-	    fprintf(stderr,"Can't open %s: %s\n",SvPVn(sv), strerror(errno));
+	    fprintf(stderr,"Can't open %s: %s\n",SvPV(sv, na), strerror(errno));
 	sv_free(sv);
     }
     if (inplace) {
@@ -682,7 +683,7 @@ SV *argstr;
 
     if (SvPOK(argstr) || !SvNIOK(argstr)) {
 	if (!SvPOK(argstr))
-	    s = SvPVn(argstr);
+	    s = SvPV(argstr, na);
 
 #ifdef IOCPARM_MASK
 #ifndef IOCPARM_LEN
@@ -699,11 +700,11 @@ SV *argstr;
 	    SvCUR_set(argstr, retval);
 	}
 
-	s = SvPV(argstr);
+	s = SvPVX(argstr);
 	s[SvCUR(argstr)] = 17;	/* a little sanity check here */
     }
     else {
-	retval = SvIVn(argstr);
+	retval = SvIV(argstr);
 #ifdef DOSISH
 	s = (char*)(long)retval;		/* ouch */
 #else
@@ -716,12 +717,12 @@ SV *argstr;
 	retval = ioctl(fileno(io->ifp), func, s);
     else
 #ifdef DOSISH
-	fatal("fcntl is not implemented");
+	croak("fcntl is not implemented");
 #else
 #ifdef HAS_FCNTL
 	retval = fcntl(fileno(io->ifp), func, s);
 #else
-	fatal("fcntl is not implemented");
+	croak("fcntl is not implemented");
 #endif
 #endif
 #else /* lint */
@@ -730,7 +731,7 @@ SV *argstr;
 
     if (SvPOK(argstr)) {
 	if (s[SvCUR(argstr)] != 17)
-	    fatal("Return value overflowed string");
+	    croak("Return value overflowed string");
 	s[SvCUR(argstr)] = 0;		/* put our null back */
     }
     return retval;
@@ -795,10 +796,17 @@ SV *sv;
     register char *s;
     register char *send;
 
-    if (!SvPOK(sv))
-	return TRUE;
-    s = SvPV(sv); 
-    send = s + SvCUR(sv);
+    if (!SvPOK(sv)) {
+	STRLEN len;
+	if (!SvPOKp(sv))
+	    return TRUE;
+	s = SvPV(sv, len);
+	send = s + len;
+    }
+    else {
+	s = SvPVX(sv); 
+	send = s + SvCUR(sv);
+    }
     while (isSPACE(*s))
 	s++;
     if (s >= send)
@@ -811,7 +819,7 @@ SV *sv;
 	return TRUE;
     if (*s == '.') 
 	s++;
-    else if (s == SvPV(sv))
+    else if (s == SvPVX(sv))
 	return FALSE;
     while (isDIGIT(*s))
 	s++;
@@ -838,6 +846,7 @@ FILE *fp;
 {
     register char *tmps;
     SV* tmpstr;
+    STRLEN len;
 
     /* assuming fp is checked earlier */
     if (!sv)
@@ -845,13 +854,13 @@ FILE *fp;
     if (ofmt) {
 	if (SvMAGICAL(sv))
 	    mg_get(sv);
-        if (SvIOK(sv) && SvIV(sv) != 0) {
-	    fprintf(fp, ofmt, (double)SvIV(sv));
+        if (SvIOK(sv) && SvIVX(sv) != 0) {
+	    fprintf(fp, ofmt, (double)SvIVX(sv));
 	    return !ferror(fp);
 	}
-	if (  (SvNOK(sv) && SvNV(sv) != 0.0)
+	if (  (SvNOK(sv) && SvNVX(sv) != 0.0)
 	   || (looks_like_number(sv) && sv_2nv(sv) != 0.0) ) {
-	    fprintf(fp, ofmt, SvNV(sv));
+	    fprintf(fp, ofmt, SvNVX(sv));
 	    return !ferror(fp);
 	}
     }
@@ -859,18 +868,18 @@ FILE *fp;
     case SVt_NULL:
 	return TRUE;
     case SVt_REF:
-	fprintf(fp, "%s", sv_2pv(sv));
+	fprintf(fp, "%s", sv_2pv(sv, &na));
 	return !ferror(fp);
     case SVt_IV:
 	if (SvMAGICAL(sv))
 	    mg_get(sv);
-	fprintf(fp, "%d", SvIV(sv));
+	fprintf(fp, "%d", SvIVX(sv));
 	return !ferror(fp);
     default:
-	tmps = SvPVn(sv);
+	tmps = SvPV(sv, len);
 	break;
     }
-    if (SvCUR(sv) && (fwrite(tmps,1,SvCUR(sv),fp) == 0 || ferror(fp)))
+    if (len && (fwrite(tmps,1,len,fp) == 0 || ferror(fp)))
 	return FALSE;
     return TRUE;
 }
@@ -906,10 +915,10 @@ dARGS
 	dPOPss;
 	PUTBACK;
 	statgv = Nullgv;
-	sv_setpv(statname,SvPVn(sv));
+	sv_setpv(statname,SvPV(sv, na));
 	laststype = OP_STAT;
-	laststatval = stat(SvPVn(sv),&statcache);
-	if (laststatval < 0 && dowarn && strchr(SvPVn(sv), '\n'))
+	laststatval = stat(SvPV(sv, na),&statcache);
+	if (laststatval < 0 && dowarn && strchr(SvPV(sv, na), '\n'))
 	    warn(warn_nl, "stat");
 	return laststatval;
     }
@@ -925,23 +934,23 @@ dARGS
 	EXTEND(sp,1);
 	if (cGVOP->op_gv == defgv) {
 	    if (laststype != OP_LSTAT)
-		fatal("The stat preceding -l _ wasn't an lstat");
+		croak("The stat preceding -l _ wasn't an lstat");
 	    return laststatval;
 	}
-	fatal("You can't use -l on a filehandle");
+	croak("You can't use -l on a filehandle");
     }
 
     laststype = OP_LSTAT;
     statgv = Nullgv;
     sv = POPs;
     PUTBACK;
-    sv_setpv(statname,SvPVn(sv));
+    sv_setpv(statname,SvPV(sv, na));
 #ifdef HAS_LSTAT
-    laststatval = lstat(SvPVn(sv),&statcache);
+    laststatval = lstat(SvPV(sv, na),&statcache);
 #else
-    laststatval = stat(SvPVn(sv),&statcache);
+    laststatval = stat(SvPV(sv, na),&statcache);
 #endif
-    if (laststatval < 0 && dowarn && strchr(SvPVn(sv), '\n'))
+    if (laststatval < 0 && dowarn && strchr(SvPV(sv, na), '\n'))
 	warn(warn_nl, "lstat");
     return laststatval;
 }
@@ -960,14 +969,14 @@ register SV **sp;
 	a = Argv;
 	while (++mark <= sp) {
 	    if (*mark)
-		*a++ = SvPVnx(*mark);
+		*a++ = SvPVx(*mark, na);
 	    else
 		*a++ = "";
 	}
 	*a = Nullch;
 	if (*Argv[0] != '/')	/* will execvp use PATH? */
 	    TAINT_ENV();		/* testing IFS here is overkill, probably */
-	if (really && *(tmps = SvPVn(really)))
+	if (really && *(tmps = SvPV(really, na)))
 	    execvp(tmps,Argv);
 	else
 	    execvp(Argv[0],Argv);
@@ -1078,19 +1087,21 @@ register SV **sp;
     char *s;
     SV **oldmark = mark;
 
-#ifdef TAINT
-    while (++mark <= sp)
-	TAINT_IF((*mark)->sv_tainted);
-    mark = oldmark;
-#endif
+    if (tainting) {
+	while (++mark <= sp) {
+	    if (SvMAGICAL(*mark) && mg_find(*mark, 't'))
+		tainted = TRUE;
+	}
+	mark = oldmark;
+    }
     switch (type) {
     case OP_CHMOD:
 	TAINT_PROPER("chmod");
 	if (++mark <= sp) {
 	    tot = sp - mark;
-	    val = SvIVnx(*mark);
+	    val = SvIVx(*mark);
 	    while (++mark <= sp) {
-		if (chmod(SvPVnx(*mark),val))
+		if (chmod(SvPVx(*mark, na),val))
 		    tot--;
 	    }
 	}
@@ -1100,10 +1111,10 @@ register SV **sp;
 	TAINT_PROPER("chown");
 	if (sp - mark > 2) {
 	    tot = sp - mark;
-	    val = SvIVnx(*++mark);
-	    val2 = SvIVnx(*++mark);
+	    val = SvIVx(*++mark);
+	    val2 = SvIVx(*++mark);
 	    while (++mark <= sp) {
-		if (chown(SvPVnx(*mark),val,val2))
+		if (chown(SvPVx(*mark, na),val,val2))
 		    tot--;
 	    }
 	}
@@ -1112,20 +1123,20 @@ register SV **sp;
 #ifdef HAS_KILL
     case OP_KILL:
 	TAINT_PROPER("kill");
-	s = SvPVnx(*++mark);
+	s = SvPVx(*++mark, na);
 	tot = sp - mark;
 	if (isUPPER(*s)) {
 	    if (*s == 'S' && s[1] == 'I' && s[2] == 'G')
 		s += 3;
 	    if (!(val = whichsig(s)))
-		fatal("Unrecognized signal name \"%s\"",s);
+		croak("Unrecognized signal name \"%s\"",s);
 	}
 	else
-	    val = SvIVnx(*mark);
+	    val = SvIVx(*mark);
 	if (val < 0) {
 	    val = -val;
 	    while (++mark <= sp) {
-		I32 proc = SvIVnx(*mark);
+		I32 proc = SvIVx(*mark);
 #ifdef HAS_KILLPG
 		if (killpg(proc,val))	/* BSD */
 #else
@@ -1136,7 +1147,7 @@ register SV **sp;
 	}
 	else {
 	    while (++mark <= sp) {
-		if (kill(SvIVnx(*mark),val))
+		if (kill(SvIVx(*mark),val))
 		    tot--;
 	    }
 	}
@@ -1146,7 +1157,7 @@ register SV **sp;
 	TAINT_PROPER("unlink");
 	tot = sp - mark;
 	while (++mark <= sp) {
-	    s = SvPVnx(*mark);
+	    s = SvPVx(*mark, na);
 	    if (euid || unsafe) {
 		if (UNLINK(s))
 		    tot--;
@@ -1178,11 +1189,11 @@ register SV **sp;
 #endif
 
 	    Zero(&utbuf, sizeof utbuf, char);
-	    utbuf.actime = SvIVnx(*++mark);    /* time accessed */
-	    utbuf.modtime = SvIVnx(*++mark);    /* time modified */
+	    utbuf.actime = SvIVx(*++mark);    /* time accessed */
+	    utbuf.modtime = SvIVx(*++mark);    /* time modified */
 	    tot = sp - mark;
 	    while (++mark <= sp) {
-		if (utime(SvPVnx(*mark),&utbuf))
+		if (utime(SvPVx(*mark, na),&utbuf))
 		    tot--;
 	    }
 	}
@@ -1284,9 +1295,9 @@ SV **sp;
     key_t key;
     I32 n, flags;
 
-    key = (key_t)SvNVnx(*++mark);
-    n = (optype == OP_MSGGET) ? 0 : SvIVnx(*++mark);
-    flags = SvIVnx(*++mark);
+    key = (key_t)SvNVx(*++mark);
+    n = (optype == OP_MSGGET) ? 0 : SvIVx(*++mark);
+    flags = SvIVx(*++mark);
     errno = 0;
     switch (optype)
     {
@@ -1304,7 +1315,7 @@ SV **sp;
 #endif
 #if !defined(HAS_MSG) || !defined(HAS_SEM) || !defined(HAS_SHM)
     default:
-	fatal("%s not implemented", op_name[optype]);
+	croak("%s not implemented", op_name[optype]);
 #endif
     }
     return -1;			/* should never happen */
@@ -1320,9 +1331,9 @@ SV **sp;
     char *a;
     I32 id, n, cmd, infosize, getinfo, ret;
 
-    id = SvIVnx(*++mark);
-    n = (optype == OP_SEMCTL) ? SvIVnx(*++mark) : 0;
-    cmd = SvIVnx(*++mark);
+    id = SvIVx(*++mark);
+    n = (optype == OP_SEMCTL) ? SvIVx(*++mark) : 0;
+    cmd = SvIVx(*++mark);
     astr = *++mark;
     infosize = 0;
     getinfo = (cmd == IPC_STAT);
@@ -1359,7 +1370,7 @@ SV **sp;
 #endif
 #if !defined(HAS_MSG) || !defined(HAS_SEM) || !defined(HAS_SHM)
     default:
-	fatal("%s not implemented", op_name[optype]);
+	croak("%s not implemented", op_name[optype]);
 #endif
     }
 
@@ -1367,22 +1378,23 @@ SV **sp;
     {
 	if (getinfo)
 	{
+	    if (SvREADONLY(astr))
+		croak("Can't %s to readonly var", op_name[optype]);
 	    SvGROW(astr, infosize+1);
-	    a = SvPVn(astr);
+	    a = SvPV(astr, na);
 	}
 	else
 	{
-	    a = SvPVn(astr);
-	    if (SvCUR(astr) != infosize)
-	    {
-		errno = EINVAL;
-		return -1;
-	    }
+	    STRLEN len;
+	    a = SvPV(astr, len);
+	    if (len != infosize)
+		croak("Bad arg length for %s, is %d, should be %d",
+			op_name[optype], len, infosize);
 	}
     }
     else
     {
-	I32 i = SvIVn(astr);
+	I32 i = SvIV(astr);
 	a = (char *)i;		/* ouch */
     }
     errno = 0;
@@ -1420,19 +1432,18 @@ SV **sp;
     SV *mstr;
     char *mbuf;
     I32 id, msize, flags;
+    STRLEN len;
 
-    id = SvIVnx(*++mark);
+    id = SvIVx(*++mark);
     mstr = *++mark;
-    flags = SvIVnx(*++mark);
-    mbuf = SvPVn(mstr);
-    if ((msize = SvCUR(mstr) - sizeof(long)) < 0) {
-	errno = EINVAL;
-	return -1;
-    }
+    flags = SvIVx(*++mark);
+    mbuf = SvPV(mstr, len);
+    if ((msize = len - sizeof(long)) < 0)
+	croak("Arg too short for msgsnd");
     errno = 0;
     return msgsnd(id, (struct msgbuf *)mbuf, msize, flags);
 #else
-    fatal("msgsnd not implemented");
+    croak("msgsnd not implemented");
 #endif
 }
 
@@ -1446,16 +1457,19 @@ SV **sp;
     char *mbuf;
     long mtype;
     I32 id, msize, flags, ret;
+    STRLEN len;
 
-    id = SvIVnx(*++mark);
+    id = SvIVx(*++mark);
     mstr = *++mark;
-    msize = SvIVnx(*++mark);
-    mtype = (long)SvIVnx(*++mark);
-    flags = SvIVnx(*++mark);
-    mbuf = SvPVn(mstr);
-    if (SvCUR(mstr) < sizeof(long)+msize+1) {
+    msize = SvIVx(*++mark);
+    mtype = (long)SvIVx(*++mark);
+    flags = SvIVx(*++mark);
+    if (SvREADONLY(mstr))
+	croak("Can't msgrcv to readonly var");
+    mbuf = SvPV(mstr, len);
+    if (len < sizeof(long)+msize+1) {
 	SvGROW(mstr, sizeof(long)+msize+1);
-	mbuf = SvPVn(mstr);
+	mbuf = SvPV(mstr, len);
     }
     errno = 0;
     ret = msgrcv(id, (struct msgbuf *)mbuf, msize, mtype, flags);
@@ -1465,7 +1479,7 @@ SV **sp;
     }
     return ret;
 #else
-    fatal("msgrcv not implemented");
+    croak("msgrcv not implemented");
 #endif
 }
 
@@ -1477,12 +1491,12 @@ SV **sp;
 #ifdef HAS_SEM
     SV *opstr;
     char *opbuf;
-    I32 id, opsize;
+    I32 id;
+    STRLEN opsize;
 
-    id = SvIVnx(*++mark);
+    id = SvIVx(*++mark);
     opstr = *++mark;
-    opbuf = SvPVn(opstr);
-    opsize = SvCUR(opstr);
+    opbuf = SvPV(opstr, opsize);
     if (opsize < sizeof(struct sembuf)
 	|| (opsize % sizeof(struct sembuf)) != 0) {
 	errno = EINVAL;
@@ -1491,7 +1505,7 @@ SV **sp;
     errno = 0;
     return semop(id, (struct sembuf *)opbuf, opsize/sizeof(struct sembuf));
 #else
-    fatal("semop not implemented");
+    croak("semop not implemented");
 #endif
 }
 
@@ -1505,15 +1519,16 @@ SV **sp;
     SV *mstr;
     char *mbuf, *shm;
     I32 id, mpos, msize;
+    STRLEN len;
     struct shmid_ds shmds;
 #ifndef VOIDSHMAT
     extern char *shmat();
 #endif
 
-    id = SvIVnx(*++mark);
+    id = SvIVx(*++mark);
     mstr = *++mark;
-    mpos = SvIVnx(*++mark);
-    msize = SvIVnx(*++mark);
+    mpos = SvIVx(*++mark);
+    msize = SvIVx(*++mark);
     errno = 0;
     if (shmctl(id, IPC_STAT, &shmds) == -1)
 	return -1;
@@ -1524,11 +1539,13 @@ SV **sp;
     shm = (char*)shmat(id, (char*)NULL, (optype == OP_SHMREAD) ? SHM_RDONLY : 0);
     if (shm == (char *)-1)	/* I hate System V IPC, I really do */
 	return -1;
-    mbuf = SvPVn(mstr);
+    mbuf = SvPV(mstr, len);
     if (optype == OP_SHMREAD) {
-	if (SvCUR(mstr) < msize) {
+	if (SvREADONLY(mstr))
+	    croak("Can't shmread to readonly var");
+	if (len < msize) {
 	    SvGROW(mstr, msize+1);
-	    mbuf = SvPVn(mstr);
+	    mbuf = SvPV(mstr, len);
 	}
 	Copy(shm + mpos, mbuf, msize, char);
 	SvCUR_set(mstr, msize);
@@ -1537,7 +1554,7 @@ SV **sp;
     else {
 	I32 n;
 
-	if ((n = SvCUR(mstr)) > msize)
+	if ((n = len) > msize)
 	    n = msize;
 	Copy(mbuf, shm + mpos, n, char);
 	if (n < msize)
@@ -1545,7 +1562,7 @@ SV **sp;
     }
     return shmdt(shm);
 #else
-    fatal("shm I/O not implemented");
+    croak("shm I/O not implemented");
 #endif
 }
 

@@ -122,7 +122,7 @@ while (@ARGV) {
 	$out .= &tab . '($ino ' . &n(shift);
     }
     elsif ($_ eq 'size') {
-	$out .= &tab . '(int((-s _ + 511) / 512) ' . &n(shift);
+	$out .= &tab . '(int(((-s _) + 511) / 512) ' . &n(shift);
     }
     elsif ($_ eq 'atime') {
 	$out .= &tab . '(int(-A _) ' . &n(shift);
