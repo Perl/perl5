@@ -5948,10 +5948,6 @@ S_simplify_sort(pTHX_ OP *o)
     else
 	return;
 
-    /* FIXME once we have proper descending support in pp_sort */
-    if (descending)
-      return;
-
     kid = k;						/* back to cmp */
     if (kBINOP->op_last->op_type != OP_RV2SV)
 	return;

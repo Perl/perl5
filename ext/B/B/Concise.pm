@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "0.62";
+our $VERSION   = "0.63";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
@@ -554,7 +554,7 @@ $priv{"exists"}{64} = "SUB";
 $priv{$_}{64} = "LOCALE"
   for ("sort", "prtf", "sprintf", "slt", "sle", "seq", "sne", "sgt", "sge",
        "scmp", "lc", "uc", "lcfirst", "ucfirst");
-@{$priv{"sort"}}{1,2,4,8} = ("NUM", "INT", "REV", "INPLACE");
+@{$priv{"sort"}}{1,2,4,8,16} = ("NUM", "INT", "REV", "INPLACE","DESC");
 $priv{"threadsv"}{64} = "SVREFd";
 @{$priv{$_}}{16,32,64,128} = ("INBIN","INCR","OUTBIN","OUTCR")
   for ("open", "backtick");

@@ -335,8 +335,15 @@ typedef struct {
     IV	runs;		/* how many runs must be combined into 1 */
 } off_runs;		/* pseudo-stack element */
 
+
+static I32
+cmp_desc(pTHX_ gptr a, gptr b)
+{
+    return -PL_sort_RealCmp(aTHX_ a, b);
+}
+
 STATIC void
-S_mergesortsv(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp)
+S_mergesortsv(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 {
     IV i, run, runs, offset;
     I32 sense, level;
@@ -347,8 +354,16 @@ S_mergesortsv(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp)
     gptr small[SMALLSORT];
     gptr *which[3];
     off_runs stack[60], *stackp;
+    SVCOMPARE_t savecmp;
 
     if (nmemb <= 1) return;			/* sorted trivially */
+
+    if (flags) {
+	savecmp = PL_sort_RealCmp;	/* Save current comparison routine, if any */
+	PL_sort_RealCmp = cmp;	/* Put comparison routine where cmp_desc can find it */
+	cmp = cmp_desc;
+    }
+
     if (nmemb <= SMALLSORT) aux = small;	/* use stack for aux array */
     else { New(799,aux,nmemb,gptr); }		/* allocate auxilliary array */
     level = 0;
@@ -531,6 +546,9 @@ S_mergesortsv(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp)
     }
 done:
     if (aux != small) Safefree(aux);	/* free iff allocated */
+    if (flags) {
+	 PL_sort_RealCmp = savecmp;	/* Restore current comparison routine, if any */
+    }
     return;
 }
 
@@ -1300,8 +1318,23 @@ cmpindir(pTHX_ gptr a, gptr b)
     return sense;
 }
 
+static I32
+cmpindir_desc(pTHX_ gptr a, gptr b)
+{
+    I32 sense;
+    gptr *ap = (gptr *)a;
+    gptr *bp = (gptr *)b;
+
+    /* Reverse the default */
+    if ((sense = PL_sort_RealCmp(aTHX_ *ap, *bp)))
+	return -sense;
+    /* But don't reverse the stability test.  */
+    return (ap > bp) ? 1 : ((ap < bp) ? -1 : 0);
+
+}
+
 STATIC void
-S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp)
+S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 {
     SV *hintsv;
 
@@ -1323,7 +1356,8 @@ S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp)
 	 PL_sort_RealCmp = cmp;	/* Put comparison routine where cmpindir can find it */
 
 	 /* sort, with indirection */
-	 S_qsortsvu(aTHX_ (gptr *)indir, nmemb, cmpindir);
+	 S_qsortsvu(aTHX_ (gptr *)indir, nmemb,
+		    flags ? cmpindir_desc : cmpindir);
 
 	 pp = indir;
 	 q = list1;
@@ -1366,6 +1400,13 @@ S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp)
 	 if (indir != small) { Safefree(indir); }
 	 /* restore prevailing comparison routine */
 	 PL_sort_RealCmp = savecmp;
+    } else if (flags) {
+	 SVCOMPARE_t savecmp = PL_sort_RealCmp;	/* Save current comparison routine, if any */
+	 PL_sort_RealCmp = cmp;	/* Put comparison routine where cmp_desc can find it */
+	 cmp = cmp_desc;
+	 S_qsortsvu(aTHX_ list1, nmemb, cmp);
+	 /* restore prevailing comparison routine */
+	 PL_sort_RealCmp = savecmp;
     } else {
 	 S_qsortsvu(aTHX_ list1, nmemb, cmp);
     }
@@ -1388,8 +1429,8 @@ See lib/sort.pm for details about controlling the sorting algorithm.
 void
 Perl_sortsv(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
 {
-    void (*sortsvp)(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp) =
-        S_mergesortsv;
+    void (*sortsvp)(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
+      = S_mergesortsv;
     SV *hintsv;
     I32 hints;
 
@@ -1407,7 +1448,33 @@ Perl_sortsv(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
 	sortsvp = S_mergesortsv;
     }
 
-    sortsvp(aTHX_ array, nmemb, cmp);
+    sortsvp(aTHX_ array, nmemb, cmp, 0);
+}
+
+
+void
+S_sortsv_desc(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
+{
+    void (*sortsvp)(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
+      = S_mergesortsv;
+    SV *hintsv;
+    I32 hints;
+
+    /*  Sun's Compiler (cc: WorkShop Compilers 4.2 30 Oct 1996 C 4.2) used 
+	to miscompile this function under optimization -O.  If you get test 
+	errors related to picking the correct sort() function, try recompiling 
+	this file without optimiziation.  -- A.D.  4/2002.
+    */
+    hints = SORTHINTS(hintsv);
+    if (hints & HINT_SORT_QUICKSORT) {
+	sortsvp = S_qsortsv;
+    }
+    else {
+	/* The default as of 5.8.0 is mergesort */
+	sortsvp = S_mergesortsv;
+    }
+
+    sortsvp(aTHX_ array, nmemb, cmp, 1);
 }
 
 PP(pp_sort)
@@ -1425,6 +1492,8 @@ PP(pp_sort)
     bool hasargs = FALSE;
     I32 is_xsub = 0;
     I32 sorting_av = 0;
+    void (*sortsvp)(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
+      = Perl_sortsv;
 
     if (gimme != G_ARRAY) {
 	SP = MARK;
@@ -1507,6 +1576,10 @@ PP(pp_sort)
 	max = SP - MARK;
    }
 
+    if (PL_op->op_private & OPpSORT_DESCEND) {
+	sortsvp = S_sortsv_desc;
+    }
+
     /* shuffle stack down, removing optional initial cv (p1!=p2), plus any
      * nulls; also stringify any args */
     for (i=max; i > 0 ; i--) {
@@ -1567,8 +1640,8 @@ PP(pp_sort)
 		CX_CURPAD_SAVE(cx->blk_sub);
 		cx->blk_sub.argarray = av;
 	    }
-           sortsv(p1-max, max,
-                  is_xsub ? sortcv_xsub : hasargs ? sortcv_stacked : sortcv);
+           sortsvp(aTHX_ p1-max, max,
+		   is_xsub ? sortcv_xsub : hasargs ? sortcv_stacked : sortcv);
 
 	    POPBLOCK(cx,PL_curpm);
 	    PL_stack_sp = newsp;
@@ -1577,8 +1650,8 @@ PP(pp_sort)
 	}
 	else {
 	    MEXTEND(SP, 20);	/* Can't afford stack realloc on signal. */
-	    sortsv(sorting_av ? AvARRAY(av) : ORIGMARK+1, max,
-                  (PL_op->op_private & OPpSORT_NUMERIC)
+	    sortsvp(aTHX_ sorting_av ? AvARRAY(av) : ORIGMARK+1, max,
+		    (PL_op->op_private & OPpSORT_NUMERIC)
 			? ( (PL_op->op_private & OPpSORT_INTEGER)
 			    ? ( overloading ? amagic_i_ncmp : sv_i_ncmp)
 			    : ( overloading ? amagic_ncmp : sv_ncmp))
