@@ -56,8 +56,8 @@ esac
 
 # Here's another draft of the perl5/solaris/gcc sanity-checker. 
 
-test -z "`{$cc:-cc} -V 2>/dev/null|grep -i workshop`" || ccisworkshop="$define"
-test -z "`{$cc:-cc} -v 2>/dev/null|grep -i gcc`"      || ccisgcc="$define"
+test -z "`${cc:-cc} -V 2>/dev/null|grep -i workshop`" || ccisworkshop="$define"
+test -z "`${cc:-cc} -v 2>/dev/null|grep -i gcc`"      || ccisgcc="$define"
 
 case "$ccisworkshop" in
 "$define")
