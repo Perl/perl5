@@ -1332,7 +1332,7 @@ $(OBJECT) : $(INST_ARCHAUTODIR).exists
 
 $(INST_STATIC) : $(OBJECT) $(MYEXTLIB)
 ';
-    # If this extension has it's own library (eg SDBM_File)
+    # If this extension has its own library (eg SDBM_File)
     # then copy that to $(INST_STATIC) and add $(OBJECT) into it.
     push(@m, "\t",'$(CP) $(MYEXTLIB) $(MMS$TARGET)',"\n") if $self->{MYEXTLIB};
 

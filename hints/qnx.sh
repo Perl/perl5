@@ -24,7 +24,7 @@
 # cpp      Configure and perl need a way to invoke a C
 #          preprocessor. I have created a simple cover
 #          for cc which does the right thing. Without this,
-#          Configure will create it's own wrapper which works,
+#          Configure will create its own wrapper which works,
 #          but it doesn't handle some of the command line arguments
 #          that perl will throw at it.
 # make     You really need GNU make to compile this. GNU make

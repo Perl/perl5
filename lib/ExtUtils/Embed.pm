@@ -466,7 +466,7 @@ This function returns a string of B<boot_$ModuleName> prototypes for each @modul
 This function returns a string of calls to B<newXS()> that glue the module B<bootstrap>
 function to B<boot_ModuleName> for each @modules.
 
-B<xsinit()> uses the xsi_* functions to generate most of it's code.
+B<xsinit()> uses the xsi_* functions to generate most of its code.
 
 =back
 

@@ -206,7 +206,7 @@ Returns the values of the semaphore set as an array.
 =item getncnt ( SEM )
 
 Returns the number of processed waiting for the semaphore C<SEM> to
-become greater than it's current value
+become greater than its current value
 
 =item getpid ( SEM )
 

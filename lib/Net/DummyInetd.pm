@@ -103,7 +103,7 @@ Net::DummyInetd - A dummy Inetd server
 
 =head1 DESCRIPTION
 
-C<Net::DummyInetd> is just what it's name says, it is a dummy inetd server.
+C<Net::DummyInetd> is just what its name says, it is a dummy inetd server.
 Creation of a C<Net::DummyInetd> will cause a child process to be spawned off
 which will listen to a socket. When a connection arrives on this socket
 the specified command is fork'd and exec'd with STDIN and STDOUT file

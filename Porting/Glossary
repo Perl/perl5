@@ -3550,7 +3550,7 @@ stdio_cnt (d_stdstdio.U):
 
 stdio_filbuf (d_stdstdio.U):
 	This variable defines how, given a FILE pointer, fp, to tell
-	stdio to refill it's internal buffers (?).  This will
+	stdio to refill its internal buffers (?).  This will
 	be used to define the macro FILE_filbuf(fp).
 
 stdio_ptr (d_stdstdio.U):

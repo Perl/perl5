@@ -32,8 +32,8 @@ Interactive mode:
 =head1 DESCRIPTION
 
 This package has the same functionality as CPAN.pm, but tries to
-prevent the usage of compiled extensions during it's own
-execution. It's primary purpose is a rescue in case you upgraded perl
+prevent the usage of compiled extensions during its own
+execution. Its primary purpose is a rescue in case you upgraded perl
 and broke binary compatibility somehow.
 
 =head1  SEE ALSO
