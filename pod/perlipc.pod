@@ -667,7 +667,8 @@ instead.
 
     my $port = shift || 2345;
     my $proto = getprotobyname('tcp');
-    $port = $1 if $port =~ /(\d+)/; # untaint port number
+
+    ($port) = $port =~ /^(\d+)$/                        || die "invalid port";
 
     socket(Server, PF_INET, SOCK_STREAM, $proto)	|| die "socket: $!";
     setsockopt(Server, SOL_SOCKET, SO_REUSEADDR,
@@ -710,7 +711,8 @@ go back to service a new client.
 
     my $port = shift || 2345;
     my $proto = getprotobyname('tcp');
-    $port = $1 if $port =~ /(\d+)/; # untaint port number
+
+    ($port) = $port =~ /^(\d+)$/                        || die "invalid port";
 
     socket(Server, PF_INET, SOCK_STREAM, $proto)	|| die "socket: $!";
     setsockopt(Server, SOL_SOCKET, SO_REUSEADDR,
