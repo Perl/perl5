@@ -931,11 +931,15 @@ int sockatmark(int);
 #   define S_IRWXO (S_IROTH|S_IWOTH|S_IXOTH)
 #endif
 
-#ifndef S_IREAD
+/* BeOS 5.0 seems to define S_IREAD and S_IWRITE in <posix/fcntl.h>
+ * which would get included through <sys/file.h >, but that is 3000
+ * lines in the future.  --jhi */
+
+#if !defined(S_IREAD) && !defined(__BEOS__)
 #   define S_IREAD S_IRUSR
 #endif
 
-#ifndef S_IWRITE
+#if !defined(S_IWRITE) && !defined(__BEOS__)
 #   define S_IWRITE S_IWUSR
 #endif
 
