@@ -340,7 +340,8 @@ XS(XS_UNIVERSAL_VERSION)
 	    req = new_version(req);
 
 	if ( vcmp( SvRV(req), SvRV(sv) ) > 0 )
-	    Perl_croak(aTHX_ "%s version %_ required--this is only version %_",
+	    Perl_croak(aTHX_
+		"%s version %"SVf" required--this is only version %"SVf,
 		HvNAME(pkg), req, sv);
     }
 
@@ -352,17 +353,19 @@ XS(XS_UNIVERSAL_VERSION)
 XS(XS_version_new)
 {
     dXSARGS;
-    if (items != 2)
+    if (items > 3)
 	Perl_croak(aTHX_ "Usage: version::new(class, version)");
     SP -= items;
     {
 /*	char *	class = (char *)SvPV_nolen(ST(0)); */
-	SV *	version = ST(1);
+        SV *version = ST(1);
+	if (items == 3 )
+	{
+	    char *vs = savepvn(SvPVX(ST(2)),SvCUR(ST(2)));
+	    version = Perl_newSVpvf(aTHX_ "v%s",vs);
+	}
 
-{
-    PUSHs(new_version(version));
-}
-
+	PUSHs(new_version(version));
 	PUTBACK;
 	return;
     }

@@ -1,7 +1,7 @@
 package Encode::JP::JIS7;
 use strict;
 
-our $VERSION = do { my @r = (q$Revision: 1.9 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.10 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode qw(:fallbacks);
 
@@ -60,9 +60,52 @@ sub encode($$;$)
     return $octet;
 }
 
+#
+# cat_decode
+#
+my $re_scan_jis_g = qr{
+   \G ( ($RE{JIS_0212}) |  $RE{JIS_0208}  |
+        ($RE{ISO_ASC})  | ($RE{JIS_KANA}) | )
+      ([^\e]*)
+}x;
+sub cat_decode { # ($obj, $dst, $src, $pos, $trm, $chk)
+    my ($obj, undef, undef, $pos, $trm) = @_; # currently ignores $chk
+    my ($rdst, $rsrc, $rpos) = \@_[1,2,3];
+    local ${^ENCODING};
+    use bytes;
+    my $opos = pos($$rsrc);
+    pos($$rsrc) = $pos;
+    while ($$rsrc =~ /$re_scan_jis_g/gc) {
+	my ($esc, $esc_0212, $esc_asc, $esc_kana, $chunk) =
+	  ($1, $2, $3, $4, $5);
+
+	unless ($chunk) { $esc or last;  next; }
+
+	if ($esc && !$esc_asc) {
+	    $chunk =~ tr/\x21-\x7e/\xa1-\xfe/;
+	    if ($esc_kana) {
+		$chunk =~ s/([\xa1-\xdf])/\x8e$1/og;
+	    } elsif ($esc_0212) {
+		$chunk =~ s/([\xa1-\xfe][\xa1-\xfe])/\x8f$1/og;
+	    }
+	    $chunk = Encode::decode('euc-jp', $chunk, 0);
+	}
+	elsif ((my $npos = index($chunk, $trm)) >= 0) {
+	    $$rdst .= substr($chunk, 0, $npos + length($trm));
+	    $$rpos += length($esc) + $npos + length($trm);
+	    pos($$rsrc) = $opos;
+	    return 1;
+	}
+	$$rdst .= $chunk;
+	$$rpos = pos($$rsrc);
+    }
+    $$rpos = pos($$rsrc);
+    pos($$rsrc) = $opos;
+    return '';
+}
 
 # JIS<->EUC
-our $re_scan_jis = qr{
+my $re_scan_jis = qr{
    (?:($RE{JIS_0212})|$RE{JIS_0208}|($RE{ISO_ASC})|($RE{JIS_KANA}))([^\e]*)
 }x;
 

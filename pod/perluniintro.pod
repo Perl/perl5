@@ -363,7 +363,7 @@ the C<open> pragma.  See L<open>, or look at the following example.
 
 With the C<open> pragma you can use the C<:locale> layer
 
-    $ENV{LC_ALL} = $ENV{LANG} = 'ru_RU.KOI8-R';
+    BEGIN { $ENV{LC_ALL} = $ENV{LANG} = 'ru_RU.KOI8-R' }
     # the :locale will probe the locale environment variables like LC_ALL
     use open OUT => ':locale'; # russki parusski
     open(O, ">koi8");

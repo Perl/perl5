@@ -22,6 +22,11 @@ BEGIN {
         print "1..0 # Skip: PerlIO required\n";
         exit 0;
     }
+    eval 'use Encode';
+    if ($@ =~ /dynamic loading not available/) {
+        print "1..0 # Skip: no dynamic loading, no Encode\n";
+        exit 0;
+    }
     $| = 1;
 }
 

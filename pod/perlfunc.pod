@@ -4812,13 +4812,13 @@ The pattern C</PATTERN/> may be replaced with an expression to specify
 patterns that vary at runtime.  (To do runtime compilation only once,
 use C</$variable/o>.)
 
-As a special case, specifying a PATTERN of space (C<' '>) will split on
-white space just as C<split> with no arguments does.  Thus, C<split(' ')> can
-be used to emulate B<awk>'s default behavior, whereas C<split(/ /)>
+As a special case, specifying a PATTERN of space (S<C<' '>>) will split on
+white space just as C<split> with no arguments does.  Thus, S<C<split(' ')>> can
+be used to emulate B<awk>'s default behavior, whereas S<C<split(/ /)>>
 will give you as many null initial fields as there are leading spaces.
-A C<split> on C</\s+/> is like a C<split(' ')> except that any leading
+A C<split> on C</\s+/> is like a S<C<split(' ')>> except that any leading
 whitespace produces a null first field.  A C<split> with no arguments
-really does a C<split(' ', $_)> internally.
+really does a S<C<split(' ', $_)>> internally.
 
 A PATTERN of C</^/> is treated as if it were C</^/m>, since it isn't
 much use otherwise.

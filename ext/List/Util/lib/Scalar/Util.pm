@@ -10,7 +10,7 @@ require Exporter;
 require List::Util; # List::Util loads the XS
 
 our @ISA       = qw(Exporter);
-our @EXPORT_OK = qw(blessed dualvar reftype weaken isweak tainted readonly openhandle refaddr isvstring);
+our @EXPORT_OK = qw(blessed dualvar reftype weaken isweak tainted readonly openhandle refaddr isvstring looks_like_number set_prototype);
 our $VERSION   = $List::Util::VERSION;
 
 sub openhandle ($) {
@@ -41,7 +41,7 @@ Scalar::Util - A selection of general-utility scalar subroutines
 
 =head1 SYNOPSIS
 
-    use Scalar::Util qw(blessed dualvar isweak readonly refaddr reftype tainted weaken);
+    use Scalar::Util qw(blessed dualvar isweak readonly refaddr reftype tainted weaken isvstring looks_like_number set_prototype);
 
 =head1 DESCRIPTION
 
@@ -95,6 +95,11 @@ If EXPR is a scalar which is a weak reference the result is true.
     weaken($ref);
     $weak = isweak($ref);               # true
 
+=item looks_like_number EXPR
+
+Returns true if perl thinks EXPR is a number. See
+L<perlapi/looks_like_number>.
+
 =item openhandle FH
 
 Returns FH if FH may be used as a filehandle and is open, or FH is a tied
@@ -137,6 +142,13 @@ is returned. Otherwise C<undef> is returned.
 
     $obj  = bless {}, "Foo";
     $type = reftype $obj;               # HASH
+
+=item set_prototype CODEREF, PROTOTYPE
+
+Sets the prototype of the given function, or deletes it if PROTOTYPE is
+undef. Returns the CODEREF.
+
+    set_prototype \&foo, '$$';
 
 =item tainted EXPR
 

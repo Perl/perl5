@@ -216,7 +216,7 @@ PerlIOScalar_open(pTHX_ PerlIO_funcs * self, PerlIO_list_t * layers, IV n,
 	if (!f) {
 	    f = PerlIO_allocate(aTHX);
 	}
-	if (f = PerlIO_push(aTHX_ f, self, mode, arg)) {
+	if ( (f = PerlIO_push(aTHX_ f, self, mode, arg)) ) {
 	    PerlIOBase(f)->flags |= PERLIO_F_OPEN;
 	}
 	return f;

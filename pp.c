@@ -3094,6 +3094,8 @@ PP(pp_substr)
 		    sv_setpvn(sv,"",0);	/* avoid lexical reincarnation */
 	    }
 
+	    if (SvREFCNT(TARG) > 1)	/* don't share the TARG (#20933) */
+		TARG = sv_newmortal();
 	    if (SvTYPE(TARG) < SVt_PVLV) {
 		sv_upgrade(TARG, SVt_PVLV);
 		sv_magic(TARG, Nullsv, PERL_MAGIC_substr, Nullch, 0);
@@ -3124,6 +3126,8 @@ PP(pp_vec)
 
     SvTAINTED_off(TARG);		/* decontaminate */
     if (lvalue) {			/* it's an lvalue! */
+	if (SvREFCNT(TARG) > 1)	/* don't share the TARG (#20933) */
+	    TARG = sv_newmortal();
 	if (SvTYPE(TARG) < SVt_PVLV) {
 	    sv_upgrade(TARG, SVt_PVLV);
 	    sv_magic(TARG, Nullsv, PERL_MAGIC_vec, Nullch, 0);
@@ -4391,7 +4395,7 @@ PP(pp_split)
     TAINT_IF((pm->op_pmflags & PMf_LOCALE) &&
 	     (pm->op_pmflags & (PMf_WHITE | PMf_SKIPWHITE)));
 
-    PL_reg_match_utf8 = do_utf8;
+    RX_MATCH_UTF8_set(rx, do_utf8);
 
     if (pm->op_pmreplroot) {
 #ifdef USE_ITHREADS
@@ -4423,6 +4427,7 @@ PP(pp_split)
 	    }
 	    /* temporarily switch stacks */
 	    SWITCHSTACK(PL_curstack, ary);
+	    PL_curstackinfo->si_stack = ary;
 	    make_mortal = 0;
 	}
     }
@@ -4620,6 +4625,7 @@ PP(pp_split)
     if (realarray) {
 	if (!mg) {
 	    SWITCHSTACK(ary, oldstack);
+	    PL_curstackinfo->si_stack = oldstack;
 	    if (SvSMAGICAL(ary)) {
 		PUTBACK;
 		mg_set((SV*)ary);

@@ -9,7 +9,7 @@
 
 #ifndef PERL_VERSION
 #    include <patchlevel.h>
-#    ifndef PERL_VERSION
+#    if !(defined(PERL_VERSION) || (SUBVERSION > 0 && defined(PATCHLEVEL)))
 #        include <could_not_find_Perl_patchlevel.h>
 #    endif
 #    define PERL_REVISION	5
@@ -99,8 +99,8 @@ sv_tainted(SV *sv)
 #  endif
 #endif
 
-#ifndef PTR2IV
-#  define PTR2IV(ptr) (IV)(ptr)
+#ifndef PTR2UV
+#  define PTR2UV(ptr) (UV)(ptr)
 #endif
 
 MODULE=List::Util	PACKAGE=List::Util
@@ -472,6 +472,44 @@ CODE:
 	croak("vstrings are not implemented in this release of perl");
 #endif
 
+int
+looks_like_number(sv)
+	SV *sv
+PROTOTYPE: $
+CODE:
+  RETVAL = looks_like_number(sv);
+OUTPUT:
+  RETVAL
+
+SV*
+set_prototype(subref, proto)
+    SV *subref
+    SV *proto
+PROTOTYPE: &$
+CODE:
+{
+    if (SvROK(subref)) {
+	SV *sv = SvRV(subref);
+	if (SvTYPE(sv) != SVt_PVCV) {
+	    /* not a subroutine reference */
+	    croak("set_prototype: not a subroutine reference");
+	}
+	if (SvPOK(proto)) {
+	    /* set the prototype */
+	    STRLEN len;
+	    char *ptr = SvPV(proto, len);
+	    sv_setpvn(sv, ptr, len);
+	}
+	else {
+	    /* delete the prototype */
+	    SvPOK_off(sv);
+	}
+    }
+    else {
+	croak("set_prototype: not a reference");
+    }
+    XSRETURN(1);
+}
 
 BOOT:
 {

@@ -1,8 +1,9 @@
 package encoding;
-our $VERSION = do { my @r = (q$Revision: 1.40 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.41 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use strict;
+our $DEBUG = 0;
 
 BEGIN {
     if (ord("A") == 193) {
@@ -17,15 +18,22 @@ unless ($@){
     $HAS_PERLIO = (PerlIO::encoding->VERSION >= 0.02);
 }
 
-my %utfs = map {$_=>1}
-    qw(utf8 UCS-2BE UCS-2LE UTF-16 UTF-16BE UTF-16LE UTF-32 UTF-32BE UTF-32LE);
+sub _exception{
+    my $name = shift;
+    $] > 5.008 and return 0;             # 5.8.1 then no
+    my %utfs = map {$_=>1}
+	qw(utf8 UCS-2BE UCS-2LE UTF-16 UTF-16BE UTF-16LE
+	   UTF-32 UTF-32BE UTF-32LE);
+    $utfs{$name} or return 0;            # UTFs or no
+    require Config; Config->import(); our %Config;
+    return $Config{perl_patchlevel} == 0 # maintperl then no
+}
 
 sub import {
     my $class = shift;
     my $name  = shift;
     my %arg = @_;
     $name ||= $ENV{PERL_ENCODING};
-
     my $enc = find_encoding($name);
     unless (defined $enc) {
 	require Carp;
@@ -33,45 +41,47 @@ sub import {
     }
     $name = $enc->name; # canonize
     unless ($arg{Filter}) {
-	${^ENCODING} = $enc unless $] <= 5.008 and $utfs{$name};
+	$DEBUG and warn "_exception($name) = ", _exception($name);
+	_exception($name) or ${^ENCODING} = $enc;
 	$HAS_PERLIO or return 1;
-	for my $h (qw(STDIN STDOUT)){
-	    if ($arg{$h}){
-		unless (defined find_encoding($arg{$h})) {
-		    require Carp;
-		    Carp::croak("Unknown encoding for $h, '$arg{$h}'");
-		}
-		eval { binmode($h, ":encoding($arg{$h})") };
-	    }else{
-		unless (exists $arg{$h}){
-		    eval { 
-			no warnings 'uninitialized';
-			binmode($h, ":encoding($name)");
-		    };
-		}
-	    }
-	    if ($@){
-		require Carp;
-		Carp::croak($@);
-	    }
-	}
     }else{
 	defined(${^ENCODING}) and undef ${^ENCODING};
+	# implicitly 'use utf8'
+	require utf8; # to fetch $utf8::hint_bits;
+	$^H |= $utf8::hint_bits;
 	eval {
 	    require Filter::Util::Call ;
 	    Filter::Util::Call->import ;
-	    binmode(STDIN);
-	    binmode(STDOUT);
 	    filter_add(sub{
-			   my $status;
-                           if (($status = filter_read()) > 0){
+			   my $status = filter_read();
+                           if ($status > 0){
+			       # $DEBUG and warn $_;
 			       $_ = $enc->decode($_, 1);
-			       # warn $_;
+			       $DEBUG and warn $_;
 			   }
 			   $status ;
 		       });
 	};
-	# warn "Filter installed";
+    }	$DEBUG and  warn "Filter installed";
+    for my $h (qw(STDIN STDOUT)){
+	if ($arg{$h}){
+	    unless (defined find_encoding($arg{$h})) {
+		require Carp;
+		Carp::croak("Unknown encoding for $h, '$arg{$h}'");
+	    }
+	    eval { binmode($h, ":encoding($arg{$h})") };
+	}else{
+	    unless (exists $arg{$h}){
+		eval { 
+		    no warnings 'uninitialized';
+		    binmode($h, ":encoding($name)");
+		};
+	    }
+	}
+	if ($@){
+	    require Carp;
+	    Carp::croak($@);
+	}
     }
     return 1; # I doubt if we need it, though
 }
@@ -120,7 +130,6 @@ encoding - allows you to write your script in non-ascii or non-utf8
 
   # an alternate way, Filter
   use encoding "euc-jp", Filter=>1;
-  use utf8;
   # now you can use kanji identifiers -- in euc-jp!
 
 =head1 ABSTRACT
@@ -185,10 +194,52 @@ C<< STDIN => I<ENCNAME> >> form.  In this case, you cannot omit the
 first I<ENCNAME>.  C<< STDIN => undef >> turns the IO transcoding
 completely off.
 
+=item use encoding I<ENCNAME> Filter=E<gt>1;
+
+This turns the encoding pragma into a source filter.  While the
+default approach just decodes interpolated literals (in qq() and
+qr()), this will apply a source filter to the entire source code.  See
+L</"The Filter Option"> below for details
+
 =item no encoding;
 
 Unsets the script encoding. The disciplines of STDIN, STDOUT are
 reset to ":raw" (the default unprocessed raw stream of bytes).
+
+=back
+
+=head1 The Filter Option
+
+The magic of C<use encoding> is not applied to the names of
+identifiers.  In order to make C<${"\x{4eba}"}++> ($human++, where human
+is a single Han ideograph) work, you still need to write your script
+in UTF-8 -- or use a source filter.  That's what 'Filter=>1' does.
+
+
+What does this mean?  Your source code behaves as if it is written in
+UTF-8 with 'use utf8' in effect.  So even if your editor only supports
+Shift_JIS, for example, you can still try examples in Chapter 15 of
+C<Programming Perl, 3rd Ed.>.  For instance, you can use UTF-8
+identifiers.
+
+This option is significantly slower and (as of this writing) non-ASCII
+identifiers are not very stable WITHOUT this option and with the
+source code written in UTF-8.
+
+=head2 Filter-related changes at Encode version 1.87
+
+=over
+
+=item *
+
+The Filter option now sets STDIN and STDOUT like non-filter options.
+And C<< STDIN=>I<ENCODING> >> and C<< STDOUT=>I<ENCODING> >> work like
+non-filter version.
+
+=item *
+
+C<use utf8> is implicitly declared so you no longer have to C<use
+utf8> to C<${"\x{4eba}"}++>.
 
 =back
 
@@ -241,10 +292,37 @@ resort to \x{....} just to spell your name in a native encoding.
 So feel free to put your strings in your encoding in quotes and
 regexes.
 
-=head2 tr/// with ranges remain unaffected
+=head2 format doesn't work well
+
+This pragma doesn't work well with format because PerlIO does not
+get along very well with it.  When format contains non-ascii
+characters it prints funny or gets "wide character warnings".
+To understand it, try the code below.
+
+  # Save this one in utf8
+  # replace *non-ascii* with a non-ascii string
+  my $camel;
+  format STDOUT =
+  *non-ascii*@>>>>>>>
+  $camel
+  .
+  $camel = "*non-ascii*";
+  binmode(STDOUT=>':encoding(utf8)'); # bang!
+  write;              # funny 
+  print $camel, "\n"; # fine
+
+Without binmode this happens to work but without binmode, print()
+fails instead of write().
+
+At any rate, the very use of format is questionable when it comes to
+unicode characters since you have to consider such things as character
+width (i.e. double-width for ideographs) and directions (i.e. BIDI for
+Arabic and Hebrew).
+
+=head2 tr/// with ranges
 
 The B<encoding> pragma works by decoding string literals in
-C<q//,qq//,qr//,qw///, qx//> and so forth.  As of perl 5.8.0, this
+C<q//,qq//,qr//,qw///, qx//> and so forth.  In perl 5.8.0, this
 does not apply to C<tr///>.  Therefore,
 
   use encoding 'euc-jp';
@@ -269,12 +347,15 @@ Does not work as
 
 =back
 
+This counterintuitive behavior has been fixed in perl 5.8.1 and up
+by INABA Hirohito.
+
 =head3 workaround to tr///;
 
-You can, however, achieve the same as simply as follows;
+In perl 5.8.0, you can work aroud as follows;
 
   use encoding 'euc-jp';
-  # ....
+  #  ....
   eval qq{ \$kana =~ tr/\xA4\xA1-\xA4\xF3/\xA5\xA1-\xA5\xF3/ };
 
 Note the C<tr//> expression is surronded by C<qq{}>.  The idea behind
@@ -285,42 +366,7 @@ is the same as classic idiom that makes C<tr///> 'interpolate'.
 
 Nevertheless, in case of B<encoding> pragma even C<q//> is affected so
 C<tr///> not being decoded was obviously against the will of Perl5
-Porters.  In future version of perl, this counter-intuitive behaviour
-of C<tr///> will be fixed so C<eval qq{}> trick will be unneccesary.
-
-=head1 Non-ASCII Identifiers and Filter option
-
-The magic of C<use encoding> is not applied to the names of
-identifiers.  In order to make C<${"\x{4eba}"}++> ($human++, where human
-is a single Han ideograph) work, you still need to write your script
-in UTF-8 or use a source filter.
-
-In other words, the same restriction as with Jperl applies.
-
-If you dare to experiment, however, you can try the Filter option.
-
-=over 4
-
-=item use encoding I<ENCNAME> Filter=E<gt>1;
-
-This turns the encoding pragma into a source filter.  While the default
-approach just decodes interpolated literals (in qq() and qr()), this
-will apply a source filter to the entire source code.  In this case,
-STDIN and STDOUT remain untouched.
-
-=back
-
-What does this mean?  Your source code behaves as if it is written in
-UTF-8.  So even if your editor only supports Shift_JIS, for example,
-you can still try examples in Chapter 15 of C<Programming Perl, 3rd
-Ed.>.  For instance, you can use UTF-8 identifiers.
-
-This option is significantly slower and (as of this writing) non-ASCII
-identifiers are not very stable WITHOUT this option and with the
-source code written in UTF-8.
-
-To make your script in legacy encoding work with minimum effort,
-do not use Filter=E<gt>1.
+Porters so it has been fixed.
 
 =head1 EXAMPLE - Greekperl
 
@@ -357,13 +403,21 @@ do not use Filter=E<gt>1.
 
 =head1 KNOWN PROBLEMS
 
+=over
+
+=item *
+
 For native multibyte encodings (either fixed or variable length),
 the current implementation of the regular expressions may introduce
 recoding errors for regular expression literals longer than 127 bytes.
 
+=item *
+
 The encoding pragma is not supported on EBCDIC platforms.
 (Porters who are willing and able to remove this limitation are
 welcome.)
+
+=back
 
 =head1 SEE ALSO
 

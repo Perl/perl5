@@ -15,6 +15,7 @@ if ($^O eq 'VMS') {
     }
 }
 
+push(@extra, 'INSTALLDIRS'  => 'perl') if $] >= 5.008;
 
 WriteMakefile(
     'NAME'	   => 'Digest::MD5',

@@ -125,20 +125,17 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SvFLAGS(sv)	(sv)->sv_flags
 #define SvREFCNT(sv)	(sv)->sv_refcnt
 
-#define ATOMIC_INC(count) (++count)
-#define ATOMIC_DEC_AND_TEST(res, count) (res = (--count == 0))
-
 #if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
 #  define SvREFCNT_inc(sv)		\
     ({					\
 	SV *nsv = (SV*)(sv);		\
 	if (nsv)			\
-	     ATOMIC_INC(SvREFCNT(nsv));	\
+	     (SvREFCNT(nsv))++;		\
 	nsv;				\
     })
 #else
 #  define SvREFCNT_inc(sv)	\
-	((PL_Sv=(SV*)(sv)), (PL_Sv && ATOMIC_INC(SvREFCNT(PL_Sv))), (SV*)PL_Sv)
+	((PL_Sv=(SV*)(sv)), (PL_Sv && ++(SvREFCNT(PL_Sv))), (SV*)PL_Sv)
 #endif
 
 #define SvREFCNT_dec(sv)	sv_free((SV*)(sv))

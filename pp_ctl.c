@@ -158,7 +158,7 @@ PP(pp_substcont)
     register REGEXP *rx = cx->sb_rx;
 
     rxres_restore(&cx->sb_rxres, rx);
-    PL_reg_match_utf8 = SvUTF8(cx->sb_targ) ? 1 : 0;
+    RX_MATCH_UTF8_set(rx, SvUTF8(cx->sb_targ));
 
     if (cx->sb_iters++) {
 	I32 saviters = cx->sb_iters;
@@ -2015,6 +2015,7 @@ S_dofindlabel(pTHX_ OP *o, char *label, OP **opstack, OP **oplimit)
     if (o->op_type == OP_LEAVE ||
 	o->op_type == OP_SCOPE ||
 	o->op_type == OP_LEAVELOOP ||
+	o->op_type == OP_LEAVESUB ||
 	o->op_type == OP_LEAVETRY)
     {
 	*ops++ = cUNOPo->op_first;
@@ -2102,6 +2103,7 @@ PP(pp_goto)
 	    }
 
 	    /* First do some returnish stuff. */
+	    FREETMPS;
 	    cxix = dopoptosub(cxstack_ix);
 	    if (cxix < 0)
 		DIE(aTHX_ "Can't goto subroutine outside a subroutine");
@@ -2272,6 +2274,7 @@ PP(pp_goto)
     if (label && *label) {
 	OP *gotoprobe = 0;
 	bool leaving_eval = FALSE;
+	bool in_block = FALSE;
         PERL_CONTEXT *last_eval_cx = 0;
 
 	/* find label */
@@ -2297,9 +2300,10 @@ PP(pp_goto)
 	    case CXt_SUBST:
 		continue;
 	    case CXt_BLOCK:
-		if (ix)
+		if (ix) {
 		    gotoprobe = cx->blk_oldcop->op_sibling;
-		else
+		    in_block = TRUE;
+		} else
 		    gotoprobe = PL_main_root;
 		break;
 	    case CXt_SUB:
@@ -2356,7 +2360,8 @@ PP(pp_goto)
 
 	if (*enterops && enterops[1]) {
 	    OP *oldop = PL_op;
-	    for (ix = 1; enterops[ix]; ix++) {
+	    ix = enterops[1]->op_type == OP_ENTER && in_block ? 2 : 1;
+	    for (; enterops[ix]; ix++) {
 		PL_op = enterops[ix];
 		/* Eventually we may want to stack the needed arguments
 		 * for each op.  For now, we punt on the hard ones. */

@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..972\n";
+print "1..988\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3061,4 +3061,52 @@ ok(/[^\d]+/, "m/[^\d]/ utf8");
 ok(($a = $_, $_ =~ s/[^\s]+/./g), "s/[^\s]/ utf8");
 ok(($a = $_, $a =~ s/[^\d]+/./g), "s/[^\s]/ utf8");
 
-# last test 972
+ok("\x{100}" =~ /\x{100}/, "[perl #15397]");
+ok("\x{100}" =~ /(\x{100})/, "[perl #15397]");
+ok("\x{100}" =~ /(\x{100}){1}/, "[perl #15397]");
+ok("\x{100}\x{100}" =~ /(\x{100}){2}/, "[perl #15397]");
+ok("\x{100}\x{100}" =~ /(\x{100})(\x{100})/, "[perl #15397]");
+
+$x = "CD";
+$x =~ /(AB)*?CD/;
+ok(!defined $1, "[perl #7471]");
+
+$x = "CD";
+$x =~ /(AB)*CD/;
+ok(!defined $1, "[perl #7471]");
+
+$pattern = "^(b+?|a){1,2}c";
+ok("bac"    =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
+ok("bbac"   =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
+ok("bbbac"  =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
+ok("bbbbac" =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
+
+{
+    # [perl #18232]
+    "\x{100}" =~ /(.)/;
+    ok( $1 eq "\x{100}", '$1 is utf-8 [perl #18232]' );
+    { 'a' =~ /./; }
+    ok( $1 eq "\x{100}", '$1 is still utf-8' );
+    ok( $1 ne "\xC4\x80", '$1 is not non-utf-8' );
+}
+
+{
+    use utf8;
+    my $attr = 'Name-1' ;
+
+    my $NormalChar          = qr/[\p{IsDigit}\p{IsLower}\p{IsUpper}]/;
+    my $NormalWord          = qr/${NormalChar}+?/;
+    my $PredNameHyphen      = qr/^${NormalWord}(\-${NormalWord})*?$/;
+
+    $attr =~ /^$/;
+    ok( $attr =~ $PredNameHyphen, "[perl #19767] original test" );
+}
+
+{
+    use utf8;
+    "a" =~ m/[b]/;
+    ok ( "0" =~ /\p{N}+\z/, "[perl #19767] variant test" );
+}
+
+# last test 988
+

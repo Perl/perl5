@@ -796,7 +796,7 @@ to write on, values used as a number that doesn't look like numbers,
 using an array as though it were a scalar, if your subroutines
 recurse more than 100 deep, and innumerable other things.
 
-This switch really just enables the internal C<^$W> variable.  You
+This switch really just enables the internal C<$^W> variable.  You
 can disable or promote into fatal errors specific warnings using
 C<__WARN__> hooks, as described in L<perlvar> and L<perlfunc/warn>.
 See also L<perldiag> and L<perltrap>.  A new, fine-grained warning
@@ -1057,6 +1057,10 @@ logical device for the @INC path on VMS only.  Other logical names that
 affect perl on VMS include PERLSHR, PERL_ENV_TABLES, and
 SYS$TIMEZONE_DIFFERENTIAL but are optional and discussed further in
 L<perlvms> and in F<README.vms> in the Perl source distribution.
+
+=item PERL_UTF8_LOCALE
+
+Equivalent to the B<-C> command-line switch.
 
 =item SYS$LOGIN (specific to the VMS port)
 

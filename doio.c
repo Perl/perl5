@@ -1744,22 +1744,23 @@ nothing in the core.
            SV* modified = *++mark;
            void * utbufp = &utbuf;
 
-           /* be like C, and if both times are undefined, let the C
-              library figure out what to do.  This usually means
-              "current time" */
+           /* Be like C, and if both times are undefined, let the C
+            * library figure out what to do.  This usually means
+            * "current time". */
 
            if ( accessed == &PL_sv_undef && modified == &PL_sv_undef )
-             utbufp = NULL;
-
-	    Zero(&utbuf, sizeof utbuf, char);
+                utbufp = NULL;
+           else {
+                Zero(&utbuf, sizeof utbuf, char);
 #ifdef BIG_TIME
-           utbuf.actime = (Time_t)SvNVx(accessed);     /* time accessed */
-           utbuf.modtime = (Time_t)SvNVx(modified);    /* time modified */
+                utbuf.actime = (Time_t)SvNVx(accessed);  /* time accessed */
+                utbuf.modtime = (Time_t)SvNVx(modified); /* time modified */
 #else
-           utbuf.actime = (Time_t)SvIVx(accessed);     /* time accessed */
-           utbuf.modtime = (Time_t)SvIVx(modified);    /* time modified */
+                utbuf.actime = (Time_t)SvIVx(accessed);  /* time accessed */
+                utbuf.modtime = (Time_t)SvIVx(modified); /* time modified */
 #endif
-	    APPLY_TAINT_PROPER();
+            }
+            APPLY_TAINT_PROPER();
 	    tot = sp - mark;
 	    while (++mark <= sp) {
 		char *name = SvPVx(*mark, n_a);

@@ -5,7 +5,7 @@
 
 #ifndef PERL_VERSION
 #    include <patchlevel.h>
-#    ifndef PERL_VERSION
+#    if !(defined(PERL_VERSION) || (SUBVERSION > 0 && defined(PATCHLEVEL)))
 #        include <could_not_find_Perl_patchlevel.h>
 #    endif
 #    define PERL_VERSION PATCHLEVEL

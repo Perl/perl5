@@ -11,7 +11,7 @@ require DynaLoader;
 
 our @ISA        = qw(Exporter DynaLoader);
 our @EXPORT_OK  = qw(first min max minstr maxstr reduce sum shuffle);
-our $VERSION    = "1.09_00";
+our $VERSION    = "1.11_00";
 our $XS_VERSION = $VERSION;
 $VERSION    = eval $VERSION;
 

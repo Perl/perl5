@@ -4417,9 +4417,12 @@ Perl_sv_chop(pTHX_ register SV *sv, register char *ptr)
 	    *SvEND(sv) = '\0';
 	}
 	SvIVX(sv) = 0;
-	SvFLAGS(sv) |= SVf_OOK;
+	/* Same SvOOK_on but SvOOK_on does a SvIOK_off
+	   and we do that anyway inside the SvNIOK_off
+	*/
+	SvFLAGS(sv) |= SVf_OOK; 
     }
-    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVp_IOK|SVp_NOK|SVf_IVisUV);
+    SvNIOK_off(sv);
     delta = ptr - SvPVX(sv);
     SvLEN(sv) -= delta;
     SvCUR(sv) -= delta;
@@ -4961,7 +4964,19 @@ S_sv_add_backref(pTHX_ SV *tsv, SV *sv)
 	sv_magic(tsv, (SV*)av, PERL_MAGIC_backref, NULL, 0);
 	SvREFCNT_dec(av);           /* for sv_magic */
     }
-    av_push(av,sv);
+    if (AvFILLp(av) >= AvMAX(av)) {
+        SV **svp = AvARRAY(av);
+        I32 i = AvFILLp(av);
+        while (i >= 0) {
+            if (svp[i] == &PL_sv_undef) {
+                svp[i] = sv;        /* reuse the slot */
+                return;
+            }
+            i--;
+        }
+        av_extend(av, AvFILLp(av)+1);
+    }
+    AvARRAY(av)[++AvFILLp(av)] = sv; /* av_push() */
 }
 
 /* delete a back-reference to ourselves from the backref magic associated
@@ -5383,7 +5398,7 @@ SV *
 Perl_sv_newref(pTHX_ SV *sv)
 {
     if (sv)
-	ATOMIC_INC(SvREFCNT(sv));
+	(SvREFCNT(sv))++;
     return sv;
 }
 
@@ -5401,8 +5416,6 @@ Normally called via a wrapper macro C<SvREFCNT_dec>.
 void
 Perl_sv_free(pTHX_ SV *sv)
 {
-    int refcount_is_zero;
-
     if (!sv)
 	return;
     if (SvREFCNT(sv) == 0) {
@@ -5421,8 +5434,7 @@ Perl_sv_free(pTHX_ SV *sv)
 	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL), "Attempt to free unreferenced scalar");
 	return;
     }
-    ATOMIC_DEC_AND_TEST(refcount_is_zero, SvREFCNT(sv));
-    if (!refcount_is_zero)
+    if (--(SvREFCNT(sv)) > 0)
 	return;
 #ifdef DEBUGGING
     if (SvTEMP(sv)) {
@@ -8318,6 +8330,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	\d+\$              explicit format parameter index
 	[-+ 0#]+           flags
 	v|\*(\d+\$)?v      vector with optional (optionally specified) arg
+	0		   flag (as above): repeated to allow "v02" 	
 	\d+|\*(\d+\$)?     width using optional (optionally specified) arg
 	\.(\d*|\*(\d+\$)?) precision using optional (optionally specified) arg
 	[hlqLV]            size
@@ -8383,6 +8396,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	}
 
 	if (!asterisk)
+	    if( *q == '0' ) 
+		fill = *q++;
 	    EXPECT_NUMBER(q, width);
 
 	if (vectorize) {
@@ -8810,6 +8825,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		intsize = 'q';
 #endif
 		break;
+/* [perl #20339] - we should accept and ignore %lf rather than die */
+	    case 'l':
+		/* FALL THROUGH */
 	    default:
 #if defined(USE_LONG_DOUBLE)
 		intsize = args ? 0 : 'q';
@@ -8822,8 +8840,6 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		/* FALL THROUGH */
 #endif
 	    case 'h':
-		/* FALL THROUGH */
-	    case 'l':
 		goto unknown;
 	    }
 
@@ -11168,14 +11184,14 @@ The PV of the sv is returned.
 char *
 Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 {
-    if (SvPOK(sv) && !DO_UTF8(sv) && SvROK(encoding)) {
-	int vary = FALSE;
+    if (SvPOK(sv) && !SvUTF8(sv) && !IN_BYTES && SvROK(encoding)) {
 	SV *uni;
 	STRLEN len;
 	char *s;
 	dSP;
 	ENTER;
 	SAVETMPS;
+	save_re_context();
 	PUSHMARK(sp);
 	EXTEND(SP, 3);
 	XPUSHs(encoding);
@@ -11196,13 +11212,6 @@ Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 	uni = POPs;
 	PUTBACK;
 	s = SvPV(uni, len);
-	{
-	    U8 *t = (U8 *)s, *e = (U8 *)s + len;
-	    while (t < e) {
-		if ((vary = !UTF8_IS_INVARIANT(*t++)))
-		    break;
-	    }
-	}
 	if (s != SvPVX(sv)) {
 	    SvGROW(sv, len + 1);
 	    Move(s, SvPVX(sv), len, char);
@@ -11211,12 +11220,54 @@ Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 	}
 	FREETMPS;
 	LEAVE;
-	if (vary)
-	    SvUTF8_on(sv);
 	SvUTF8_on(sv);
     }
     return SvPVX(sv);
 }
 
+/*
+=for apidoc sv_cat_decode
 
+The encoding is assumed to be an Encode object, the PV of the ssv is
+assumed to be octets in that encoding and decoding the input starts
+from the position which (PV + *offset) pointed to.  The dsv will be
+concatenated the decoded UTF-8 string from ssv.  Decoding will terminate
+when the string tstr appears in decoding output or the input ends on
+the PV of the ssv. The value which the offset points will be modified
+to the last input position on the ssv.
+
+Returns TRUE if the terminator was found, else returns FALSE.
+
+=cut */
+
+bool
+Perl_sv_cat_decode(pTHX_ SV *dsv, SV *encoding,
+		   SV *ssv, int *offset, char *tstr, int tlen)
+{
+    if (SvPOK(ssv) && SvPOK(dsv) && SvROK(encoding) && offset) {
+        bool ret = FALSE;
+	SV *offsv;
+	dSP;
+	ENTER;
+	SAVETMPS;
+	save_re_context();
+	PUSHMARK(sp);
+	EXTEND(SP, 6);
+	XPUSHs(encoding);
+	XPUSHs(dsv);
+	XPUSHs(ssv);
+	XPUSHs(offsv = sv_2mortal(newSViv(*offset)));
+	XPUSHs(sv_2mortal(newSVpvn(tstr, tlen)));
+	PUTBACK;
+	call_method("cat_decode", G_SCALAR);
+	SPAGAIN;
+	ret = SvTRUE(TOPs);
+	*offset = SvIV(offsv);
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+	return ret;
+    }
+    Perl_croak(aTHX_ "Invalid argument to sv_cat_decode.");
+}
 

@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 49;
+plan tests => 50;
 
 $FS = ':';
 
@@ -275,4 +275,11 @@ ok(@ary == 3 &&
 	my @d = split /[,]/,$1;
 	is(join (':',@d), 'readin:database:readout', "[perl #18195]")
     }
+}
+
+{
+    $p="a,b";
+    utf8::upgrade $p;
+    @a=split(/[, ]+/,$p);
+    is ("$@-@a-", '-a b-', '#20912 - split() to array with /[]+/ and utf8');
 }

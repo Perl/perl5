@@ -23,6 +23,11 @@ BEGIN {
         print "1..0 # Skip: PerlIO required\n";
         exit 0;
     }
+    eval 'use Encode';
+    if ($@ =~ /dynamic loading not available/) {
+        print "1..0 # Skip: no dynamic loading, no Encode\n";
+        exit 0;
+    }
     $| = 1;
 }
 
@@ -48,10 +53,10 @@ is($str, $katakana, "tr// # hiragana -> katakana");
 $str = $katakana; $str =~ tr/ァ-ン/ぁ-ん/;
 is($str, $hiragana, "tr// # hiragana -> katakana");
 
-$str = $hiragana; eval qq{\$str =~ tr/ぁ-ん/ァ-ン/};
-is($str, $katakana, "eval qq{tr//} # hiragana -> katakana");
-$str = $katakana; eval qq{\$str =~ tr/ァ-ン/ぁ-ん/};
-is($str, $hiragana, "eval qq{tr//} # hiragana -> katakana");
+$str = $hiragana; eval qq(\$str =~ tr/ぁ-ん/ァ-ン/);
+is($str, $katakana, "eval qq(tr//) # hiragana -> katakana");
+$str = $katakana; eval qq(\$str =~ tr/ァ-ン/ぁ-ん/);
+is($str, $hiragana, "eval qq(tr//) # hiragana -> katakana");
 
 $str = $hiragana; $str =~ s/([ぁ-ん])/$h2k{$1}/go;
 is($str, $katakana, "s/// # hiragana -> katakana");
