@@ -4817,7 +4817,6 @@ PerlIO_tmpfile(void)
      dTHX;
      PerlIO *f = NULL;
      int fd = -1;
-     SV *sv = Nullsv;
      GV *gv = gv_fetchpv("File::Temp::tempfile", FALSE, SVt_PVCV);
 
      if (!gv) {
@@ -4848,12 +4847,8 @@ PerlIO_tmpfile(void)
 
      if (fd >= 0) {
 	  f = PerlIO_fdopen(fd, "w+");
-	  if (sv) {
-	       if (f)
-		    PerlIOBase(f)->flags |= PERLIO_F_TEMP;
-	       PerlLIO_unlink(SvPVX(sv));
-	       SvREFCNT_dec(sv);
-	  }
+	  if (f)
+	    PerlIOBase(f)->flags |= PERLIO_F_TEMP;
      }
 
      return f;
