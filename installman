@@ -121,7 +121,12 @@ sub cmd {
     local($cmd) = @_;
     print STDERR "  $cmd\n";
     unless ($notify) {
-	fork ? wait : exec $cmd;
+	if ($Config{d_fork}) {
+	    fork ? wait : exec $cmd;  # Allow user to ^C out of command.
+	}
+	else {
+	    system $cmd;
+	}
 	warn "Command failed!!\n" if $?;
     }
     return $? != 0;
