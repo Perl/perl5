@@ -3007,8 +3007,12 @@ tryagain:
 	loopdone:
 	    RExC_parse = p - 1;
 	    nextchar(pRExC_state);
-	    if (len < 0)
-		vFAIL("Internal disaster");
+	    {
+		/* len is STRLEN which is unsigned, need to copy to signed */
+		IV iv = len;
+		if (iv < 0)
+		    vFAIL("Internal disaster");
+	    }
 	    if (len > 0)
 		*flagp |= HASWIDTH;
 	    if (len == 1)
