@@ -442,7 +442,7 @@ if (defined $ENV{PERLDB_PIDS}) {
   $term_pid = -1;
 } else {
   $ENV{PERLDB_PIDS} = "$$";
-  $pids = '';
+  $pids = "{pid=$$}";
   $term_pid = $$;
 }
 $pidprompt = '';
