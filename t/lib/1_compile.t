@@ -196,3 +196,4 @@ attributes
 base
 bytes
 ops
+warnings::register

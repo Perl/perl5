@@ -18,9 +18,6 @@ Create a warnings category with the same name as the current package.
 
 See L<perlmodlib/Pragmatic Modules> and L<perllexwarn>.
 
-=head1 SEE ALSO
-
-L<perllexwarn>
 
 =cut
 
