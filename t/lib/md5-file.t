@@ -15,12 +15,12 @@ my $EXPECT;
 
 if (ord('A') == 193) { # EBCDIC
 $EXPECT = <<EOT;
-dcc1f89cf6144d81e5f9d291d9849ef1  ext/Digest/MD5/MD5.pm
-61debd0ec12e131e1ba220e2f3ad2d26  ext/Digest/MD5/MD5.xs
+a88bc216e9848a9d57488026f4bd9185  ext/Digest/MD5/MD5.pm
+c1eb144eccdad16fc34399cb4ab2e136  ext/Digest/MD5/MD5.xs
 EOT
 } else { # ASCII
 $EXPECT = <<EOT;
-9e1d1183ff41717c91a563c41e08d672  ext/Digest/MD5/MD5.pm
+3d0146bf194e4fe68733d00fba02a49e  ext/Digest/MD5/MD5.pm
 61debd0ec12e131e1ba220e2f3ad2d26  ext/Digest/MD5/MD5.xs
 EOT
 }
