@@ -1073,6 +1073,10 @@ unsigned long newlen;
 	s = SvPVX(sv);
 	if (newlen > SvLEN(sv))
 	    newlen += 10 * (newlen - SvCUR(sv)); /* avoid copy each time */
+#ifdef HAS_64K_LIMIT
+	if (newlen >= 0x10000)
+	    newlen = 0xFFFF;
+#endif
     }
     else
 	s = SvPVX(sv);
