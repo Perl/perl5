@@ -47,19 +47,29 @@ sub trap {
     syswrite(STDERR, "\n", 1);
 
     # Now go for broke.
-    for ($i = 1; ($p,$f,$l,$s,$h,$w) = caller($i); $i++) {
-	@a = ();
+    for ($i = 1; ($p,$f,$l,$s,$h,$w,$e,$r) = caller($i); $i++) {
+        @a = ();
 	for $arg (@args) {
 	    $_ = "$arg";
-	    s/'/\\'/g;
+	    s/([\'\\])/\\$1/g;
 	    s/([^\0]*)/'$1'/
-		unless /^(?: -?[\d.]+ | \*[\w:]* )$/x;
+	      unless /^(?: -?[\d.]+ | \*[\w:]* )$/x;
 	    s/([\200-\377])/sprintf("M-%c",ord($1)&0177)/eg;
 	    s/([\0-\37\177])/sprintf("^%c",ord($1)^64)/eg;
 	    push(@a, $_);
 	}
 	$w = $w ? '@ = ' : '$ = ';
 	$a = $h ? '(' . join(', ', @a) . ')' : '';
+	$e =~ s/\n\s*\;\s*\Z// if $e;
+	$e =~ s/[\\\']/\\$1/g if $e;
+	if ($r) {
+	    $s = "require '$e'";
+	} elsif (defined $r) {
+	    $s = "eval '$e'";
+	} elsif ($s eq '(eval)') {
+	    $s = "eval {...}";
+	}
+	$f = "file `$f'" unless $f eq '-e';
 	$mess = "$w$s$a called from $f line $l\n";
 	syswrite(STDERR, $mess, length($mess));
     }
