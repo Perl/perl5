@@ -101,7 +101,8 @@ sub debug {
     if ($debug_runtime) {
 	warn(@_);
     } else {
-	runtime(map { chomp; "/* $_ */"} @_);
+	my @tmp=@_;
+	runtime(map { chomp; "/* $_ */"} @tmp);
     }
 }
 
@@ -1480,6 +1481,11 @@ sub compile_bblock {
 sub cc {
     my ($name, $root, $start, @padlist) = @_;
     my $op;
+    if($done{$$start}){ 
+    	#warn "repeat=>".ref($start)."$name,\n";#debug
+	$decl->add(sprintf("#define $name  %s",$done{$$start}));
+	return;
+    }
     init_pp($name);
     load_pad(@padlist);
     B::Pseudoreg->new_scope;
@@ -1503,7 +1509,7 @@ sub cc {
 	next if !defined($op) || !$$op || $done{$$op};
 	#warn "...compiling it\n"; # debug
 	do {
-	    $done{$$op} = 1;
+	    $done{$$op} = $name;
 	    $op = compile_bblock($op);
 	    if ($need_freetmps && $freetmps_each_bblock) {
 		runtime("FREETMPS;");

@@ -582,7 +582,7 @@ sub try_autoload {
 	}
     }
 }
-
+sub Dummy_initxs{};
 sub B::CV::save {
     my ($cv) = @_;
     my $sym = objsym($cv);
@@ -596,10 +596,19 @@ sub B::CV::save {
     my $cvname = $gv->NAME;
     my $root = $cv->ROOT;
     my $cvxsub = $cv->XSUB;
-    if ($cvxsub) {
+    #INIT is removed from the symbol table, so this call must come
+    # from PL_initav->save. Re-bootstrapping  will push INIT back in
+    # so nullop should be sent.
+    if ($cvxsub && ($cvname ne "INIT")) {
+    #if ($cvxsub) {
 	my $egv = $gv->EGV;
 	my $stashname = $egv->STASH->NAME;
 	$xsub{$stashname}='Static' unless  $xsub{$stashname};
+	return qq/(perl_get_cv("$stashname\:\:$cvname",0))/;
+    }
+    if ($cvxsub && $cvname eq "INIT") {
+	 no strict 'refs';
+   	 return svref_2object(\&Dummy_initxs)->save;
     }
     my $sv_ix = $svsect->index + 1;
     $svsect->add("svix$sv_ix");
