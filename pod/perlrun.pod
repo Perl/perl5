@@ -909,19 +909,21 @@ C<:perlio> will insert a C<:unix> layer below itself to do low level IO.
 
 =item :raw
 
+B<Note that the explicit use of the C<:raw> layer is deprecated.>
+
 Arranges for all accesses go straight to the lowest level layer provided
 by the configration. That is it strips off any layers above that layer.
 (The intent - unless layers are then pushed on top again -
 is to make perl's C<read> behave like C<sysread>.)
 
-Not really useful in PERLIO environment variable, instead just use C<:unix>
-layer explicitly.
+Not really useful in PERLIO environment variable, instead just use
+C<:unix> layer explicitly.
 
-In perl5.6 and some books the C<:raw> layer (also called a discipline) is
-documented as the inverse of the C<:crlf> layer. That is not really the case.
-If you want UNIX line endings on a platform that normaly does CRLF translation
-the appropriate thing to do is to add C<:perlio> to PERLIO environment
-variable.
+In Perl 5.6 and some books the C<:raw> layer (also called a discipline)
+is documented as the inverse of the C<:crlf> layer. That is not really
+the case.  If you want UNIX line endings on a platform that normally
+does CRLF translation the appropriate thing to do is to add C<:perlio>
+to PERLIO environment variable.
 
 =item :stdio
 
