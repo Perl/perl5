@@ -138,15 +138,15 @@ use of UTF-8.
 
 For example, if you had C<en_US.UTF-8> as your locale, your STDIN and
 STDOUT were automatically "UTF-8", in other words an implicit
-binmode(..., ":utf8") was made.  This meant that trying to print, say,
-chr(0xff), ended up printing the bytes 0xc3 0xbf.  Hardly what you had
-in mind unless you were aware of this feature of Perl 5.8.0.  The problem
-is that the vast majority of people weren't: for example in RedHat releases
-8 and 9 the B<default> locale setting is UTF-8, so all RedHat users got
-UTF-8 filehandles, whether they wanted it or not.  The pain was
-intensified by the Unicode implementation of Perl 5.8.0 (still) having nasty
-bugs, especially related to the use of s/// and tr///.
-(Bugs that have been fixed in 5.8.1)
+C<< binmode(..., ":utf8") >> was made.  This meant that trying to print,
+say, C<< chr(0xff) >>, ended up printing the bytes 0xc3 0xbf.  Hardly what
+you had in mind unless you were aware of this feature of Perl 5.8.0.
+The problem is that the vast majority of people weren't: for example
+in RedHat releases 8 and 9 the B<default> locale setting is UTF-8, so
+all RedHat users got UTF-8 filehandles, whether they wanted it or not.
+The pain was intensified by the Unicode implementation of Perl 5.8.0
+(still) having nasty bugs, especially related to the use of s/// and
+tr///.  (Bugs that have been fixed in 5.8.1)
 
 Therefore a decision was made to backtrack the feature and change it
 from implicit silent default to explicit conscious option.  The new
@@ -247,12 +247,6 @@ the deprecation warnings, use:
     no warnings 'deprecated';
 
 =head2 Miscellaneous Enhancements
-
-If an input filehandle is marked C<:utf8> and Perl sees illegal UTF-8
-coming in when doing C<< <FH> >, if warnings are enabled a warning is
-immediately given - instead of being silent about it and Perl being
-unhappy about the broken data later.  (The C<:encoding(utf8)> layer
-now works the same way.)
 
 If a socket gets closed by the server while printing to it, the client
 now gets a SIGPIPE.  While this new feature was not planned, it fell
@@ -481,7 +475,13 @@ contains a very complex nesting of anonymous subs, evals and lexicals.
 
 =head2 Generic fixes
 
-binmode(SOCKET, ":utf8") only worked on the input side, not
+If an input filehandle is marked C<:utf8> and Perl sees illegal UTF-8
+coming in when doing C<< <FH> >, if warnings are enabled a warning is
+immediately given - instead of being silent about it and Perl being
+unhappy about the broken data later.  (The C<:encoding(utf8)> layer
+also works the same way.)
+
+C<< binmode(SOCKET, ":utf8") >> only worked on the input side, not
 on the output side of the socket.  Now it works both ways.
 
 For threaded Perls certain system database functions like getpwent()
@@ -501,8 +501,9 @@ In 5.8.0 this
 didn't work correctly but instead corrupted the data.  This has now
 been fixed.
 
-FETCH etc may now safely access tied values (ie resulting in a recursive
-call to FETCH etc).
+Tied methods like FETCH etc. may now safely access tied values, i.e.
+resulting in a recursive call to FETCH etc.  Remember to break the
+recursion, though.
 
 At startup Perl blocks the SIGFPE signal away since there isn't much
 Perl can do about it.  Previously this blocking was in effect also for
@@ -849,7 +850,7 @@ the IP address 127.0.0.1.
 
 The C-generating compiler backend B::C (the frontend being
 C<perlcc -c>) is even more broken than it used to be because of
-the extenstive lexical variable changes.  (The good news is that
+the extensive lexical variable changes.  (The good news is that
 B::Bytecode and ByteLoader are better than they used to be.)
 
 =head1 Platform Specific Problems
