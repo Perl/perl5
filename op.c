@@ -5303,19 +5303,13 @@ ck_subr(OP *o)
 		    bad_type(arg, "block", gv_ename(namegv), o2);
 		break;
 	    case '*':
+		/* '*' allows any scalar type, including bareword */
 		proto++;
 		arg++;
 		if (o2->op_type == OP_RV2GV)
-		    goto wrapref;
-		{
-		    OP* kid = o2;
-		    OP* sib = kid->op_sibling;
-		    kid->op_sibling = 0;
-		    o2 = newUNOP(OP_RV2GV, 0, kid);
-		    o2->op_sibling = sib;
-		    prev->op_sibling = o2;
-		}
-		goto wrapref;
+		    goto wrapref;	/* autoconvert GLOB -> GLOBref */
+		scalar(o2);
+		break;
 	    case '\\':
 		proto++;
 		arg++;

@@ -1072,6 +1072,7 @@ t/lib/dumper.t		See if Data::Dumper works
 t/lib/english.t		See if English works
 t/lib/env.t		See if Env works
 t/lib/errno.t		See if Errno works
+t/lib/fatal.t           See if Fatal works
 t/lib/fields.t          See if base/fields works
 t/lib/filecache.t	See if FileCache works
 t/lib/filecopy.t	See if File::Copy works
