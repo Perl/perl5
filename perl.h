@@ -2007,6 +2007,17 @@ END_EXTERN_C
 
 /* The following must follow proto.h */
 
+#if defined(HASATTRIBUTE) && defined(WIN32)
+/*
+ * This provides a layer of functions and macros to ensure extensions will
+ * get to use the same RTL functions as the core.
+ * It has to go here or #define of printf messes up __attribute__
+ * stuff in proto.h  
+ */
+#  include <win32iop.h>
+#endif	/* WIN32 */
+
+
 #ifdef DOINIT
 
 EXT MGVTBL vtbl_sv =	{magic_get,

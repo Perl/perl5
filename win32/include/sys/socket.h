@@ -11,6 +11,13 @@ extern "C" {
 #endif
 
 #ifndef  _WINDOWS_
+#ifdef   __GNUC__
+#define WIN32_LEAN_AND_MEAN
+#ifdef __GNUC__
+#define Win32_Winsock
+#endif
+#include <windows.h>
+#else
 #define  _WINDOWS_
 
 #define  FAR
@@ -38,8 +45,11 @@ typedef struct _OVERLAPPED {
     HANDLE  hEvent;
 } OVERLAPPED, *LPOVERLAPPED;
 
+#endif
 #endif //_WINDOWS_
+#ifndef __GNUC__
 #include <winsock.h>
+#endif
 
 #define  ENOTSOCK	WSAENOTSOCK
 #undef   HOST_NOT_FOUND

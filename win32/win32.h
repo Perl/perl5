@@ -9,6 +9,12 @@
 #ifndef  _INC_WIN32_PERL5
 #define  _INC_WIN32_PERL5
 
+#ifdef __GNUC__
+#define __declspec(x)
+typedef long long __int64;
+#define Win32_Winsock
+#endif
+
 #define  WIN32_LEAN_AND_MEAN
 #include <windows.h>
 

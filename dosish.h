@@ -98,5 +98,7 @@ void Perl_DJGPP_init();
  * This provides a layer of functions and macros to ensure extensions will
  * get to use the same RTL functions as the core.
  */
+#ifndef HASATTRIBUTE
 #  include <win32iop.h>
+#endif
 #endif	/* WIN32 */
