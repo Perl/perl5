@@ -26,7 +26,7 @@ newer version of perl, install it under a different prefix from
 /usr/perl5.  Common prefixes to use are /usr/local and /opt/perl.
 
 You may wish to put your version of perl in the PATH of all users by
-changing the symlink /usr/bin/perl. This is OK, as all Perl scripts
+changing the link /usr/bin/perl. This is OK, as all Perl scripts
 shipped with Solaris use /usr/perl5/bin/perl.
 
 =head2 Solaris Version Numbers.
@@ -117,7 +117,7 @@ This will display a line like this:
 
 /usr/include/sys/errno.h f none 0644 root bin 7471 37605 956241356 SUNWhea
 
-You need the package SUNWhea.
+The last item listed (SUNWhea in this example) is the package you need.
 
 =head3 Avoid /usr/ucb/cc.
 
@@ -248,7 +248,7 @@ Solaris 7 and above will run in either 32 bit or 64 bit mode on SPARC
 CPUs, via a reboot. You can build 64 bit apps whilst running 32 bit
 mode and vice-versa. 32 bit apps will run under Solaris running in
 either 32 or 64 bit mode.  64 bit apps require Solaris to be running
-64 bit mode
+64 bit mode.
 
 Existing 32 bit apps are properly known as LP32, i.e. Longs and
 Pointers are 32 bit.  64-bit apps are more properly known as LP64.
@@ -324,8 +324,8 @@ relies on Solaris to do the underlying mapping of interfaces.
 
 =head3 Building an LP64 Perl
 
-To compile a 64-bit application with a recent Sun Compiler, you need to
-use the flag "-xarch=v9".  getconf(1) will tell you this, e.g.
+To compile a 64-bit application on an UltraSparc with a recent Sun Compiler,
+you need to use the flag "-xarch=v9".  getconf(1) will tell you this, e.g.
 
       fubar$ getconf -a | grep v9
       XBS5_LP64_OFF64_CFLAGS:         -xarch=v9
@@ -341,8 +341,9 @@ use the flag "-xarch=v9".  getconf(1) will tell you this, e.g.
       _XBS5_LPBIG_OFFBIG_LDFLAGS:     -xarch=v9
       _XBS5_LPBIG_OFFBIG_LINTFLAGS:   -xarch=v9
 
-This flag is supported in Sun WorkShop Compilers 5.0 and onwards when
-used on Solaris 7 onwards.
+This flag is supported in Sun WorkShop Compilers 5.0 and onwards
+(now marketed under the name Forte) when used on Solaris 7 or later on
+UltraSparc systems.
 
 If you are using gcc, you would need to use -mcpu=v9 -m64 instead.  This
 option is not yet supported as of gcc 2.95.2; from install/SPECIFIC
@@ -518,4 +519,4 @@ Please report any errors, updates, or suggestions to F<perlbug@perl.org>.
 
 =head1 LAST MODIFIED
 
-$Id: README.solaris,v 1.3 2000/11/09 19:11:27 doughera Exp $
+$Id: README.solaris,v 1.4 2000/11/11 20:29:58 doughera Exp $
