@@ -77,14 +77,14 @@ sub get_status {
 # the sub/require/eval
 sub get_subname {
   my $info = shift;
-  if (defined($info->{eval})) {
-    my $eval = $info->{eval};
+  if (defined($info->{evaltext})) {
+    my $eval = $info->{evaltext};
     if ($info->{is_require}) {
       return "require $eval";
     }
     else {
       $eval =~ s/([\\\'])/\\$1/g;
-      return str_len_trim($eval, $MaxEvalLen);
+      return "eval '" . str_len_trim($eval, $MaxEvalLen) . "'";
     }
   }
 

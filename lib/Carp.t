@@ -5,7 +5,7 @@ BEGIN {
 
 use Carp qw(carp cluck croak confess);
 
-print "1..7\n";
+print "1..8\n";
 
 print "ok 1\n";
 
@@ -51,3 +51,8 @@ sub_6;
 
 print "ok 7\n";
 
+# test for caller_info API
+my $eval = "use Carp::Heavy; return Carp::caller_info(0);";
+my %info = eval($eval);
+print "not " if ($info{sub_name} ne "eval '$eval'");
+print "ok 8\n";
