@@ -80,7 +80,8 @@ Perl_taint_env(pTHX)
 	NULL
     };
 
-    if (!PL_envgv)
+    /* Don't bother if there's no %ENV hash */
+    if (!PL_envgv || !GvHV(PL_envgv))
 	return;
 
 #ifdef VMS
@@ -98,7 +99,9 @@ Perl_taint_env(pTHX)
 	    TAINT;
 	    taint_proper("Insecure %s%s", "$ENV{DCL$PATH}");
 	}
-	if ((mg = mg_find(*svp, PERL_MAGIC_envelem)) && MgTAINTEDDIR(mg)) {
+	if (SvMAGICAL(*svp)
+		&& (mg = mg_find(*svp, PERL_MAGIC_envelem))
+		&& MgTAINTEDDIR(mg)) {
 	    TAINT;
 	    taint_proper("Insecure directory in %s%s", "$ENV{DCL$PATH}");
 	}
@@ -113,7 +116,9 @@ Perl_taint_env(pTHX)
 	    TAINT;
 	    taint_proper("Insecure %s%s", "$ENV{PATH}");
 	}
-	if ((mg = mg_find(*svp, PERL_MAGIC_envelem)) && MgTAINTEDDIR(mg)) {
+	if (SvMAGICAL(*svp)
+		&& (mg = mg_find(*svp, PERL_MAGIC_envelem))
+		&& MgTAINTEDDIR(mg)) {
 	    TAINT;
 	    taint_proper("Insecure directory in %s%s", "$ENV{PATH}");
 	}

@@ -124,7 +124,7 @@ my $echo = "$Invoke_Perl $ECHO";
 
 my $TEST = catfile(curdir(), 'TEST');
 
-print "1..206\n";
+print "1..208\n";
 
 # First, let's make sure that Perl is checking the dangerous
 # environment variables. Maybe they aren't set yet, so we'll
@@ -981,4 +981,16 @@ else
     use re 'taint';
     $TAINT =~ /(.*)/;
     test 206, tainted(my $foo = $1);
+}
+
+{
+    # test with a non-magical %ENV (and non-magical %ENV elements)
+    our %nonmagicalenv = ( PATH => $TAINT );
+    local *ENV = \%nonmagicalenv;
+    eval { system("lskdfj"); };
+    test 207, $@ =~ /Insecure \$ENV{PATH} while running with -T switch/;
+    # [perl #24291] this used to dump core
+    %nonmagicalenv = ( PATH => "util" );
+    eval { system("lskdfj"); };
+    test 208, 1;
 }
