@@ -142,8 +142,8 @@ For the most part, the B<Pod::Parser> base class should be able to
 do most of the input parsing for you and leave you free to worry about
 how to intepret the commands and translate the result.
 
-Note that all we have described here in this quick overview overview is
-the simplest most striaghtforward use of B<Pod::Parser> to do stream-based
+Note that all we have described here in this quick overview is
+the simplest most straightforward use of B<Pod::Parser> to do stream-based
 parsing. It is also possible to use the B<Pod::Parser::parse_text> function
 to do more sophisticated tree-based parsing. See L<"TREE-BASED PARSING">.
 
