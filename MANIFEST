@@ -614,7 +614,6 @@ lib/ExtUtils/Manifest.pm	Utilities to write MANIFEST files
 lib/ExtUtils/Mkbootstrap.pm	Writes a bootstrap file (see MakeMaker)
 lib/ExtUtils/Mksymlists.pm	Writes a linker options file for extensions
 lib/ExtUtils/Packlist.pm	Manipulates .packlist files
-lib/ExtUtils/inst	Give information about installed extensions
 lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
 lib/ExtUtils/typemap		Extension interface types
 lib/ExtUtils/xsubpp		External subroutine preprocessor
@@ -1840,3 +1839,65 @@ x2p/util.c		Utility routines
 x2p/util.h		Public declarations for the above
 x2p/walk.c		Parse tree walker
 xsutils.c		Additional bundled package methods not in UNIVERSAL::
+lib/ExtUtils/Changes
+lib/ExtUtils/Command/MM.pm
+lib/ExtUtils/Liblist/Kid.pm
+lib/ExtUtils/MANIFEST.SKIP
+lib/ExtUtils/META.yml
+lib/ExtUtils/MM.pm
+lib/ExtUtils/MM_Any.pm
+lib/ExtUtils/MM_BeOS.pm
+lib/ExtUtils/MM_DOS.pm
+lib/ExtUtils/MM_MacOS.pm
+lib/ExtUtils/MM_NW5.pm
+lib/ExtUtils/MM_UWIN.pm
+lib/ExtUtils/MM_Win95.pm
+lib/ExtUtils/MY.pm
+lib/ExtUtils/MakeMaker/FAQ.pod
+lib/ExtUtils/MakeMaker/Tutorial.pod
+lib/ExtUtils/MakeMaker/bytes.pm
+lib/ExtUtils/MakeMaker/vmsish.pm
+lib/ExtUtils/NOTES
+lib/ExtUtils/PATCHING
+lib/ExtUtils/README
+lib/ExtUtils/TODO
+lib/ExtUtils/instmodsh
+lib/ExtUtils/t/00compile.t
+lib/ExtUtils/t/00setup_dummy.t
+lib/ExtUtils/t/Command.t
+lib/ExtUtils/t/INST.t
+lib/ExtUtils/t/INST_PREFIX.t
+lib/ExtUtils/t/Install.t
+lib/ExtUtils/t/Installed.t
+lib/ExtUtils/t/Liblist.t
+lib/ExtUtils/t/MM_Any.t
+lib/ExtUtils/t/MM_BeOS.t
+lib/ExtUtils/t/MM_Cygwin.t
+lib/ExtUtils/t/MM_NW5.t
+lib/ExtUtils/t/MM_OS2.t
+lib/ExtUtils/t/MM_Unix.t
+lib/ExtUtils/t/MM_VMS.t
+lib/ExtUtils/t/MM_Win32.t
+lib/ExtUtils/t/Manifest.t
+lib/ExtUtils/t/Mkbootstrap.t
+lib/ExtUtils/t/Packlist.t
+lib/ExtUtils/t/VERSION_FROM.t
+lib/ExtUtils/t/backwards.t
+lib/ExtUtils/t/basic.t
+lib/ExtUtils/t/bytes.t
+lib/ExtUtils/t/hints.t
+lib/ExtUtils/t/oneliner.t
+lib/ExtUtils/t/postamble.t
+lib/ExtUtils/t/prefixify.t
+lib/ExtUtils/t/prereq_print.t
+lib/ExtUtils/t/problems.t
+lib/ExtUtils/t/prompt.t
+lib/ExtUtils/t/recurs.t
+lib/ExtUtils/t/split_command.t
+lib/ExtUtils/t/testlib.t
+lib/ExtUtils/t/vmsish.t
+lib/ExtUtils/t/writemakefile_args.t
+lib/ExtUtils/t/zz_cleanup_dummy.t
+t/lib/MakeMaker/Test/Setup/Recurs.pm
+t/lib/MakeMaker/Test/Utils.pm
+t/lib/TieIn.pm

@@ -1,14 +1,52 @@
 package ExtUtils::MM_OS2;
 
-#use Config;
-#use Cwd;
-#use File::Basename;
-require Exporter;
+use strict;
+use vars qw($VERSION @ISA);
 
-Exporter::import('ExtUtils::MakeMaker',
-       qw( $Verbose &neatvalue));
+use ExtUtils::MakeMaker qw(neatvalue);
+use File::Spec;
 
-unshift @MM::ISA, 'ExtUtils::MM_OS2';
+$VERSION = '1.04';
+
+require ExtUtils::MM_Any;
+require ExtUtils::MM_Unix;
+@ISA = qw(ExtUtils::MM_Any ExtUtils::MM_Unix);
+
+=pod
+
+=head1 NAME
+
+ExtUtils::MM_OS2 - methods to override UN*X behaviour in ExtUtils::MakeMaker
+
+=head1 SYNOPSIS
+
+ use ExtUtils::MM_OS2; # Done internally by ExtUtils::MakeMaker if needed
+
+=head1 DESCRIPTION
+
+See ExtUtils::MM_Unix for a documentation of the methods provided
+there. This package overrides the implementation of these methods, not
+the semantics.
+
+=head1 METHODS
+
+=over 4
+
+=item init_dist (o)
+
+Define TO_UNIX to convert OS2 linefeeds to Unix style.
+
+=cut
+
+sub init_dist {
+    my($self) = @_;
+
+    $self->{TO_UNIX} ||= <<'MAKE_TEXT';
+$(NOECHO) $(TEST_F) tmp.zip && $(RM_F) tmp.zip; $(ZIP) -ll -mr tmp.zip $(DISTVNAME) && unzip -o tmp.zip && $(RM_F) tmp.zip
+MAKE_TEXT
+
+    $self->SUPER::init_dist;
+}
 
 sub dlsyms {
     my($self,%attribs) = @_;
@@ -34,7 +72,7 @@ $self->{BASEEXT}.def: Makefile.PL
      ', "DL_VARS" => ', neatvalue($vars), ');\'
 ');
     }
-    if (%{$self->{IMPORTS}}) {
+    if ($self->{IMPORTS} && %{$self->{IMPORTS}}) {
 	# Make import files (needed for static build)
 	-d 'tmp_imp' or mkdir 'tmp_imp', 0777 or die "Can't mkdir tmp_imp";
 	open IMP, '>tmpimp.imp' or die "Can't open tmpimp.imp";
@@ -57,7 +95,7 @@ $self->{BASEEXT}.def: Makefile.PL
 sub static_lib {
     my($self) = @_;
     my $old = $self->ExtUtils::MM_Unix::static_lib();
-    return $old unless %{$self->{IMPORTS}};
+    return $old unless $self->{IMPORTS} && %{$self->{IMPORTS}};
     
     my @chunks = split /\n{2,}/, $old;
     shift @chunks unless length $chunks[0]; # Empty lines at the start
@@ -83,52 +121,33 @@ sub maybe_command {
     return;
 }
 
-sub file_name_is_absolute {
-    my($self,$file) = @_;
-    $file =~ m{^([a-z]:)?[\\/]}i ;
+=item init_linker
+
+=cut
+
+sub init_linker {
+    my $self = shift;
+
+    $self->{PERL_ARCHIVE} = "\$(PERL_INC)/libperl\$(LIB_EXT)";
+
+    $self->{PERL_ARCHIVE_AFTER} = $OS2::is_aout
+      ? ''
+      : '$(PERL_INC)/libperl_override$(LIB_EXT)';
+    $self->{EXPORT_LIST} = '$(BASEEXT).def';
 }
 
-sub perl_archive
-{
- return "\$(PERL_INC)/libperl\$(LIB_EXT)";
+=item os_flavor
+
+OS/2 is OS/2
+
+=cut
+
+sub os_flavor {
+    return('OS/2');
 }
 
-=item perl_archive_after
+=back
 
-This is an internal method that returns path to a library which
-should be put on the linker command line I<after> the external libraries
-to be linked to dynamic extensions.  This may be needed if the linker
-is one-pass, and Perl includes some overrides for C RTL functions,
-such as malloc().
-
-=cut 
-
-sub perl_archive_after
-{
- return "\$(PERL_INC)/libperl_override\$(LIB_EXT)" unless $OS2::is_aout;
- return "";
-}
-
-sub export_list
-{
- my ($self) = @_;
- return "$self->{BASEEXT}.def";
-}
+=cut
 
 1;
-__END__
-
-=head1 NAME
-
-ExtUtils::MM_OS2 - methods to override UN*X behaviour in ExtUtils::MakeMaker
-
-=head1 SYNOPSIS
-
- use ExtUtils::MM_OS2; # Done internally by ExtUtils::MakeMaker if needed
-
-=head1 DESCRIPTION
-
-See ExtUtils::MM_Unix for a documentation of the methods provided
-there. This package overrides the implementation of these methods, not
-the semantics.
-

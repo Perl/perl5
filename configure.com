@@ -5582,7 +5582,7 @@ $      Write Sys$Output "''targ'ing ''ext' . . ."
 $      On Error Then Continue
 $    EndIf
 $    If redesc Then -
-       miniperl "-I[''up'.lib]" Makefile.PL "INST_LIB=[''up'.lib]" "INST_ARCHLIB=[''up'.lib]"
+       miniperl "-I[''up'.lib]" Makefile.PL "INST_LIB=[''up'.lib]" "INST_ARCHLIB=[''up'.lib]"  "PERL_CORE=1"
 $    makeutil 'targ'
 $    i = i + 1
 $    Set Def &def

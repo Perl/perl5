@@ -889,103 +889,103 @@ $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 
 $(DUMPER_DLL): $(PERLEXE) $(DUMPER).xs
 	cd $(EXTDIR)\Data\$(*B)
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl PERL_CORE=1
 	$(MAKE)
 	cd ..\..\..\win32
 
 $(DPROF_DLL): $(PERLEXE) $(DPROF).xs
 	cd $(EXTDIR)\Devel\$(*B)
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl PERL_CORE=1
 	$(MAKE)
 	cd ..\..\..\win32
 
 $(GLOB_DLL): $(PERLEXE) $(GLOB).xs
 	cd $(EXTDIR)\File\$(*B)
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl PERL_CORE=1
 	$(MAKE)
 	cd ..\..\..\win32
 
 $(PEEK_DLL): $(PERLEXE) $(PEEK).xs
 	cd $(EXTDIR)\Devel\$(*B)
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl PERL_CORE=1
 	$(MAKE)
 	cd ..\..\..\win32
 
 $(RE_DLL): $(PERLEXE) $(RE).xs
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl PERL_CORE=1
 	$(MAKE)
 	cd ..\..\win32
 
 $(B_DLL): $(PERLEXE) $(B).xs
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl PERL_CORE=1
 	$(MAKE)
 	cd ..\..\win32
 
 $(THREAD_DLL): $(PERLEXE) $(THREAD).xs
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl PERL_CORE=1
 	$(MAKE)
 	cd ..\..\win32
 
 $(ATTRS_DLL): $(PERLEXE) $(ATTRS).xs
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl PERL_CORE=1
 	$(MAKE)
 	cd ..\..\win32
 
 $(POSIX_DLL): $(PERLEXE) $(POSIX).xs
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl PERL_CORE=1
 	$(MAKE)
 	cd ..\..\win32
 
 $(IO_DLL): $(PERLEXE) $(IO).xs
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl PERL_CORE=1
 	$(MAKE)
 	cd ..\..\win32
 
 $(SDBM_FILE_DLL) : $(PERLEXE) $(SDBM_FILE).xs
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl PERL_CORE=1
 	$(MAKE)
 	cd ..\..\win32
 
 $(FCNTL_DLL): $(PERLEXE) $(FCNTL).xs
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl PERL_CORE=1
 	$(MAKE)
 	cd ..\..\win32
 
 $(OPCODE_DLL): $(PERLEXE) $(OPCODE).xs
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl PERL_CORE=1
 	$(MAKE)
 	cd ..\..\win32
 
 $(SOCKET_DLL): $(PERLEXE) $(SOCKET).xs
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl PERL_CORE=1
 	$(MAKE)
 	cd ..\..\win32
 
 $(HOSTNAME_DLL): $(PERLEXE) $(HOSTNAME).xs
 	cd $(EXTDIR)\Sys\$(*B)
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl PERL_CORE=1
 	$(MAKE)
 	cd ..\..\..\win32
 
 $(BYTELOADER_DLL): $(PERLEXE) $(BYTELOADER).xs
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl PERL_CORE=1
 	$(MAKE)
 	cd ..\..\win32
 
 $(ERRNO_PM): $(PERLEXE) $(ERRNO)_pm.PL
 	cd $(EXTDIR)\$(*B)
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl PERL_CORE=1
 	$(MAKE)
 	cd ..\..\win32
 
