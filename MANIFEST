@@ -230,6 +230,7 @@ ext/DynaLoader/dl_hpux.xs	HP-UX implementation
 ext/DynaLoader/dl_mpeix.xs	MPE/iX implementation
 ext/DynaLoader/dl_next.xs	Next implementation
 ext/DynaLoader/dl_none.xs	Stub implementation
+ext/DynaLoader/dl_rhapsody.xs	Rhapsody implementation
 ext/DynaLoader/dl_vms.xs	VMS implementation
 ext/DynaLoader/dl_vmesa.xs	VM/ESA implementation
 ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
@@ -454,6 +455,7 @@ hints/os390.sh		Hints for named architecture
 hints/posix-bc.sh	Hints for named architecture
 hints/powerux.sh	Hints for named architecture
 hints/qnx.sh		Hints for named architecture
+hints/rhapsody.sh	Hints for named architecture
 hints/sco.sh		Hints for named architecture
 hints/sco_2_3_0.sh	Hints for named architecture
 hints/sco_2_3_1.sh	Hints for named architecture
@@ -1074,6 +1076,7 @@ t/io/dup.t		See if >& works right
 t/io/fs.t		See if directory manipulations work
 t/io/inplace.t		See if inplace editing works
 t/io/iprefix.t		See if inplace editing works with prefixes
+t/io/open.t		See if open works
 t/io/pipe.t		See if secure pipes work
 t/io/print.t		See if print commands work
 t/io/read.t		See if read works
@@ -1156,6 +1159,7 @@ t/lib/textwrap.t	See if Text::Wrap::wrap works
 t/lib/thread.t		Basic test of threading (skipped if no threads) 
 t/lib/tie-push.t	Test for Tie::Array
 t/lib/tie-stdarray.t	Test for Tie::StdArray
+t/lib/tie-stdhandle.t	Test for Tie::StdHandle
 t/lib/tie-stdpush.t	Test for Tie::StdArray
 t/lib/timelocal.t	See if Time::Local works
 t/lib/trig.t		See if Math::Trig works
