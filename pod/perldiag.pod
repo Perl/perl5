@@ -402,6 +402,11 @@ L<perlport> for more on portability concerns.
 (W closed) You tried to do a bind on a closed socket.  Did you forget to
 check the return value of your socket() call?  See L<perlfunc/bind>.
 
+=item binmode() on closed filehandle %s
+
+(W unopened) You tried binmode() on a filehandle that was never opened.
+Check you control flow and number of arguments.
+
 =item Bit vector size > 32 non-portable
 
 (W portable) Using bit vector sizes larger than 32 is non-portable.
@@ -1387,7 +1392,7 @@ name.
 =item flock() on closed filehandle %s
 
 (W closed) The filehandle you're attempting to flock() got itself closed
-some time before now.  Check your logic flow.  flock() operates on
+some time before now.  Check your control flow.  flock() operates on
 filehandles.  Are you attempting to call flock() on a dirhandle by the
 same name?
 
@@ -1719,6 +1724,11 @@ silently ignored.
 
 (F) Your machine apparently doesn't implement ioctl(), which is pretty
 strange for a machine that supports C.
+
+=item ioctl() on unopened %s
+
+(W unopened) You tried ioctl() on a filehandle that was never opened.
+Check you control flow and number of arguments.
 
 =item `%s' is not a code reference
 
@@ -2277,9 +2287,9 @@ the buffer and zero pad the new area.
 =item -%s on unopened filehandle %s
 
 (W unopened) You tried to invoke a file test operator on a filehandle
-that isn't open.  Check your logic.  See also L<perlfunc/-X>.
+that isn't open.  Check your control flow.  See also L<perlfunc/-X>.
 
-=item %s() on unopened %s %s
+=item %s() on unopened %s
 
 (W unopened) An I/O operation was attempted on a filehandle that was
 never initialized.  You need to do an open(), a sysopen(), or a socket()
@@ -2734,12 +2744,12 @@ See Server error.
 =item printf() on closed filehandle %s
 
 (W closed) The filehandle you're writing to got itself closed sometime
-before now.  Check your logic flow.
+before now.  Check your control flow.
 
 =item print() on closed filehandle %s
 
 (W closed) The filehandle you're printing on got itself closed sometime
-before now.  Check your logic flow.
+before now.  Check your control flow.
 
 =item Process terminated by SIG%s
 
@@ -2778,7 +2788,7 @@ by prepending "0" to your numbers.
 =item readline() on closed filehandle %s
 
 (W closed) The filehandle you're reading from got itself closed sometime
-before now.  Check your logic flow.
+before now.  Check your control flow.
 
 =item Reallocation too large: %lx
 
@@ -2943,7 +2953,7 @@ scalar that had previously been marked as free.
 =item send() on closed socket %s
 
 (W closed) The socket you're sending to got itself closed sometime
-before now.  Check your logic flow.
+before now.  Check your control flow.
 
 =item Sequence (? incomplete before << HERE mark in regex m/%s/
 
@@ -3218,7 +3228,7 @@ unconfigured.  Consult your system support.
 =item syswrite() on closed filehandle %s
 
 (W closed) The filehandle you're writing to got itself closed sometime
-before now.  Check your logic flow.
+before now.  Check your control flow.
 
 =item Target of goto is too deeply nested
 
@@ -3852,7 +3862,7 @@ So put in parentheses to say what you really mean.
 =item write() on closed filehandle %s
 
 (W closed) The filehandle you're writing to got itself closed sometime
-before now.  Check your logic flow.
+before now.  Check your control flow.
 
 =item X outside of string
 

@@ -3,6 +3,15 @@
   untie attempted while %d inner references still exist	[pp_untie]
     sub TIESCALAR { bless [] } ; tie $a, 'main'; untie $a ;
 
+  fileno() on unopened filehandle abc		[pp_fileno]
+    $a = "abc"; fileno($a)
+
+  binmode() on unopened filehandle abc		[pp_binmode]
+    $a = "abc"; fileno($a)
+
+  printf() on unopened filehandle abc		[pp_prtf]
+    $a = "abc"; printf $a "fred"
+
   Filehandle %s opened only for input		[pp_leavewrite]
     format STDIN =
     .
@@ -400,3 +409,11 @@ close F ;
 unlink $file ;
 EXPECT
 Filehandle F opened only for output at - line 12.
+########
+# pp_sys.c [pp_binmode]
+use warnings 'unopened' ;
+binmode(BLARG);
+$a = "BLERG";binmode($a);
+EXPECT
+binmode() on unopened filehandle BLARG at - line 3.
+binmode() on unopened filehandle at - line 4.

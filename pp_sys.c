@@ -645,8 +645,15 @@ PP(pp_fileno)
 	RETURN;
     }
 
-    if (!gv || !(io = GvIO(gv)) || !(fp = IoIFP(io)))
+    if (!gv || !(io = GvIO(gv)) || !(fp = IoIFP(io))) {
+	/* Can't do this because people seem to do things like
+	   defined(fileno($foo)) to check whether $foo is a valid fh.
+	  if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	      report_evil_fh(gv, io, PL_op->op_type);
+	    */
 	RETPUSHUNDEF;
+    }
+
     PUSHi(PerlIO_fileno(fp));
     RETURN;
 }
@@ -710,7 +717,8 @@ PP(pp_binmode)
 
     EXTEND(SP, 1);
     if (!(io = GvIO(gv)) || !(fp = IoIFP(io))) {
-        report_evil_fh(gv, io, PL_op->op_type);
+	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	    report_evil_fh(gv, io, PL_op->op_type);
         RETPUSHUNDEF;
     }
 
@@ -2052,9 +2060,11 @@ PP(pp_ioctl)
     char *s;
     IV retval;
     GV *gv = (GV*)POPs;
-    IO *io = GvIOn(gv);
+    IO *io = gv ? GvIOn(gv) : 0;
 
     if (!io || !argsv || !IoIFP(io)) {
+	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	    report_evil_fh(gv, io, PL_op->op_type);
 	SETERRNO(EBADF,RMS$_IFI);	/* well, sort of... */
 	RETPUSHUNDEF;
     }
@@ -2166,15 +2176,16 @@ PP(pp_socket)
     int fd;
 
     gv = (GV*)POPs;
+    io = gv ? GvIOn(gv) : NULL;
 
-    if (!gv) {
+    if (!gv || !io) {
+	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	    report_evil_fh(gv, io, PL_op->op_type);
+	if (IoIFP(io))
+	    do_close(gv, FALSE);
 	SETERRNO(EBADF,LIB$_INVARG);
 	RETPUSHUNDEF;
     }
-
-    io = GvIOn(gv);
-    if (IoIFP(io))
-	do_close(gv, FALSE);
 
     TAINT_PROPER("socket");
     fd = PerlSock_socket(domain, type, protocol);
@@ -2214,15 +2225,21 @@ PP(pp_sockpair)
 
     gv2 = (GV*)POPs;
     gv1 = (GV*)POPs;
-    if (!gv1 || !gv2)
+    io1 = gv1 ? GvIOn(gv1) : NULL;
+    io2 = gv2 ? GvIOn(gv2) : NULL;
+    if (!gv1 || !gv2 || !io1 || !io2) {
+	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED)) {
+	    if (!gv1 || !io1)
+		report_evil_fh(gv1, io1, PL_op->op_type);
+	    if (!gv2 || !io2)
+		report_evil_fh(gv1, io2, PL_op->op_type);
+	}
+	if (IoIFP(io1))
+	    do_close(gv1, FALSE);
+	if (IoIFP(io2))
+	    do_close(gv2, FALSE);
 	RETPUSHUNDEF;
-
-    io1 = GvIOn(gv1);
-    io2 = GvIOn(gv2);
-    if (IoIFP(io1))
-	do_close(gv1, FALSE);
-    if (IoIFP(io2))
-	do_close(gv2, FALSE);
+    }
 
     TAINT_PROPER("socketpair");
     if (PerlSock_socketpair(domain, type, protocol, fd) < 0)
@@ -2348,9 +2365,9 @@ PP(pp_listen)
 #ifdef HAS_SOCKET
     int backlog = POPi;
     GV *gv = (GV*)POPs;
-    register IO *io = GvIOn(gv);
+    register IO *io = gv ? GvIOn(gv) : NULL;
 
-    if (!io || !IoIFP(io))
+    if (!gv || !io || !IoIFP(io))
 	goto nuts;
 
     if (PerlSock_listen(PerlIO_fileno(IoIFP(io)), backlog) >= 0)
