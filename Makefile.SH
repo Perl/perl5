@@ -327,7 +327,7 @@ $(LIBPERL): $& perl$(OBJ_EXT) $(obj)
 
 miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL)
 	$(LDLIBPTH) $(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain$(OBJ_EXT) $(LLIBPERL) $(libs)
-	@ $(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e 0 || $(MAKE) minitest
+	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e 0 || $(MAKE) minitest
 
 perl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
 	$(SHRPENV) $(LDLIBPTH) $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o perl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
@@ -367,7 +367,7 @@ sperl$(OBJ_EXT): perl.c perly.h patchlevel.h $(h)
 preplibrary: miniperl lib/Config.pm $(plextract)
 	@sh ./makedir lib/auto
 	@echo "	AutoSplitting perl library"
-	@$(LDLIBPTH) ./miniperl -Ilib -e 'use AutoSplit; \
+	$(LDLIBPTH) ./miniperl -Ilib -e 'use AutoSplit; \
 		autosplit_lib_modules(@ARGV)' lib/*.pm lib/*/*.pm
 
 # Take care to avoid modifying lib/Config.pm without reason
