@@ -2071,7 +2071,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     case '\004':	/* ^D */
 #ifdef DEBUGGING
 	s = SvPV_nolen(sv);
-	PL_debug = get_debug_opts(&s) | DEBUG_TOP_FLAG;
+	PL_debug = get_debug_opts(&s, 0) | DEBUG_TOP_FLAG;
 	DEBUG_x(dump_all());
 #else
 	PL_debug = (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv)) | DEBUG_TOP_FLAG;

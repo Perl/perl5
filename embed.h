@@ -4748,7 +4748,7 @@
 #endif
 #if defined(DEBUGGING)
 #ifdef PERL_CORE
-#define get_debug_opts(a)	Perl_get_debug_opts(aTHX_ a)
+#define get_debug_opts(a,b)	Perl_get_debug_opts(aTHX_ a,b)
 #endif
 #endif
 #define save_set_svflags(a,b,c)	Perl_save_set_svflags(aTHX_ a,b,c)

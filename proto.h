@@ -1329,7 +1329,7 @@ STATIC void	S_cv_dump(pTHX_ CV *cv, char *title);
 PERL_CALLCONV CV*	Perl_find_runcv(pTHX_ U32 *db_seqp);
 PERL_CALLCONV void	Perl_free_tied_hv_pool(pTHX);
 #if defined(DEBUGGING)
-PERL_CALLCONV int	Perl_get_debug_opts(pTHX_ char **s);
+PERL_CALLCONV int	Perl_get_debug_opts(pTHX_ char **s, bool givehelp);
 #endif
 PERL_CALLCONV void	Perl_save_set_svflags(pTHX_ SV* sv, U32 mask, U32 val);
 PERL_CALLCONV void	Perl_hv_assert(pTHX_ HV* tb);

@@ -2373,7 +2373,7 @@ NULL
 
 #ifdef DEBUGGING
 int
-Perl_get_debug_opts(pTHX_ char **s)
+Perl_get_debug_opts(pTHX_ char **s, bool givehelp)
 {
     static char *usage_msgd[] = {
       " Debugging flag values: (see also -d)",
@@ -2420,7 +2420,7 @@ Perl_get_debug_opts(pTHX_ char **s)
 	i = atoi(*s);
 	for (; isALNUM(**s); (*s)++) ;
     }
-    else {
+    else if (givehelp) {
       char **p = usage_msgd;
       while (*p) PerlIO_printf(PerlIO_stdout(), "%s\n", *p++);
     }
@@ -2534,7 +2534,7 @@ Perl_moreswitches(pTHX_ char *s)
 #ifdef DEBUGGING
 	forbid_setid("-D");
 	s++;
-	PL_debug = get_debug_opts(&s) | DEBUG_TOP_FLAG;
+	PL_debug = get_debug_opts(&s, 1) | DEBUG_TOP_FLAG;
 #else /* !DEBUGGING */
 	if (ckWARN_d(WARN_DEBUGGING))
 	    Perl_warner(aTHX_ packWARN(WARN_DEBUGGING),

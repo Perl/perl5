@@ -1390,7 +1390,7 @@ sd	|void	|cv_dump	|CV *cv|char *title
 pd 	|CV*	|find_runcv	|U32 *db_seqp
 p	|void	|free_tied_hv_pool
 #if defined(DEBUGGING)
-p	|int	|get_debug_opts	|char **s
+p	|int	|get_debug_opts	|char **s|bool givehelp
 #endif
 Ap	|void	|save_set_svflags|SV* sv|U32 mask|U32 val
 Apod	|void	|hv_assert	|HV* tb
