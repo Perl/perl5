@@ -253,6 +253,17 @@ CODE:
     SV *dst = newSV(slen);
     SvPOK_only(dst);
     SvCUR_set(dst,0);
+    if (SvUTF8(src)) {
+    	s = utf8_to_bytes(s,&slen);
+	if (s) {
+	    SvCUR_set(src,slen);
+	    SvUTF8_off(src);
+	    e = s+slen;
+	}
+	else {
+	    croak("Cannot decode string with wide characters");
+	}
+    }
     while (s < e) {
     	if (UTF8_IS_INVARIANT(*s) || UTF8_IS_START(*s)) {
 	    U8 skip = UTF8SKIP(s);
