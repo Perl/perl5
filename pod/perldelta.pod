@@ -2056,7 +2056,7 @@ Setting C<$0> now works (as much as possible; see L<perlvar> for details).
 
 Cygwin
 
-Numerous updates; currently synchronised with Cygwin 1.1.4.
+Numerous updates; currently synchronised with Cygwin 1.3.10.
 
 =item *
 
@@ -2078,7 +2078,7 @@ Perl now works on post-3.0 FreeBSDs.
 
 HP-UX
 
-README.hpux updated; C<Configure -Duse64bitall> now almost works.
+README.hpux updated; C<Configure -Duse64bitall> now works.
 
 =item *
 
@@ -2515,7 +2515,7 @@ The AIX C compiler vac version 5.0.0.0 may produce buggy code,
 resulting in few random tests failing, but when the failing tests
 are run by hand, they succeed.  We suggest upgrading to at least
 vac version 5.0.1.0, that has been known to compile Perl correctly.
-"lslpp -L|grep vac.C" will tell you the vac version.
+"lslpp -L|grep vac.C" will tell you the vac version. See README.aix.
 
 =back
 
@@ -2529,10 +2529,6 @@ known but the current suspect is the F<ixemul> library.
 
 Don't panic.  Read INSTALL 'make test' section instead.
 
-=head2 Cygwin intermittent failures of lib/Memoize/t/expire_file 11 and 12
-
-The subtests 11 and 12 sometimes fail and sometimes work.
-
 =head2 FreeBSD 4.3, 4.4, 4.5 fail lib/File/Spec/t/rel2abs2rel.t
 
 F<lib/File/Spec/t/rel2abs2rel.t> tests that "`` works" by running a a perl 1
@@ -2545,14 +2541,6 @@ F</usr/src/sys/kern/vfs_cache.c> is being incremented whenever
 F</proc/curproc/file> fails to return the perl executable's path.
 [If you find that if fails on other versions of FreeBSD, please use perlbug
 to report them to us. If you are able to fix the bug, even better.]
-
-=head2 HP-UX lib/io_multihomed Fails When LP64-Configured
-
-The lib/io_multihomed test may hang in HP-UX if Perl has been
-configured to be 64-bit. Because other 64-bit platforms do not hang in
-this test, HP-UX is suspect. All other tests pass in 64-bit HP-UX. The
-test attempts to create and connect to "multihomed" sockets (sockets
-which have multiple IP addresses).
 
 =head2  HP-UX lib/posix Subtest 9 Fails When LP64-Configured
 
