@@ -25,12 +25,7 @@ print "ok " . $i++ . "\n";
 
 # Tell B::Deparse about our ambient pragmas
 { my ($hint_bits, $warning_bits);
- # Note: there used to be ${^WARNING_BITS} here, instead of
- # warnings::bits('all'), but this doesn't work, as ${^WARNING_BITS} is
- # supposed to be the set of warnings this code has been compiled with, and
- # later in this test we include modules that themselves use warnings::register
- # (thus modyfing the warnings mask).
- BEGIN { ($hint_bits, $warning_bits) = ($^H, warnings::bits('all')); }
+ BEGIN { ($hint_bits, $warning_bits) = ($^H, ${^WARNING_BITS}); }
  $deparse->ambient_pragmas (
      hint_bits    => $hint_bits,
      warning_bits => $warning_bits,
