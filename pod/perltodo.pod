@@ -132,15 +132,17 @@ Wait for ever.
 
 http://archive.develooper.com/perl5-porters@perl.org/msg79618.html
 
-=head2 Better support for nonpreemptive threading systems like PTH
+=head2 Better support for nonpreemptive threading systems like GNU pth
 
-To better support nonpreemptive threading systems perhaps some of the
-blocking functions internally in perl should do a yield() before a 
-blocking call.
+To better support nonpreemptive threading systems, perhaps some of the
+blocking functions internally in Perl should do a yield() before a
+blocking call.  (Now certain threads tests ({basic,list,thread.t})
+simply do a yield() before they sleep() to give nonpreemptive thread
+implementations a chance).
 
-In some cases, like GNUpth, which has replacement functions that
-are non blocking (pth_select instead of select), maybe per should
-be using them instead when built for threading.
+In some cases, like the GNU pth, which has replacement functions that
+are nonblocking (pth_select instead of select), maybe Perl should be
+using them instead when built for threading.
 
 =head2 Typed lexicals for compiler
 
