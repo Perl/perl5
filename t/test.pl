@@ -265,7 +265,7 @@ sub BAILOUT {
 
 # A way to display scalars containing control characters and Unicode.
 sub display {
-    map { join("", map { $_ > 255 ? sprintf("\\x{%x}", $_) : chr($_) =~ /[[:cntrl:]]/ ? sprintf("\\%03o", $_) : chr($_) } unpack("U*", $_) } @_;
+    map { join("", map { $_ > 255 ? sprintf("\\x{%x}", $_) : chr($_) =~ /[[:cntrl:]]/ ? sprintf("\\%03o", $_) : chr($_) } unpack("U*", $_)) } @_;
 }
 
 
