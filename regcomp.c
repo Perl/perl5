@@ -2610,7 +2610,7 @@ regnext(register regnode *p)
 }
 
 #ifdef I_STDARG
-static void	
+STATIC void	
 re_croak2(const char* pat1,const char* pat2,...)
 #else
 /*VARARGS0*/

@@ -503,7 +503,7 @@ nextargv(register GV *gv)
 		    (void)fchown(lastfd,fileuid,filegid);
 #else
 #ifdef HAS_CHOWN
-		    (void)chown(oldname,fileuid,filegid);
+		    (void)PerlLIO_chown(oldname,fileuid,filegid);
 #endif
 #endif
 		}
@@ -1065,7 +1065,7 @@ apply(I32 type, register SV **mark, register SV **sp)
 	    val2 = SvIVx(*++mark);
 	    tot = sp - mark;
 	    while (++mark <= sp) {
-		if (chown(SvPVx(*mark, na),val,val2))
+		if (PerlLIO_chown(SvPVx(*mark, na),val,val2))
 		    tot--;
 	    }
 	}

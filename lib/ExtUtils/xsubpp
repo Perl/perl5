@@ -83,6 +83,8 @@ require 5.002;
 use Cwd;
 use vars '$cplusplus';
 
+use Config;
+
 sub Q ;
 
 # Global Constants
@@ -103,6 +105,8 @@ $FH = 'File0000' ;
 $usage = "Usage: xsubpp [-v] [-C++] [-except] [-prototypes] [-noversioncheck] [-nolinenumbers] [-s pattern] [-typemap typemap]... file.xs\n";
 
 $proto_re = "[" . quotemeta('\$%&*@;') . "]" ;
+# mjn
+$OBJ   = 1 if $Config{'ccflags'} =~ /PERL_OBJECT/i;
 
 $except = "";
 $WantPrototypes = -1 ;
@@ -714,6 +718,10 @@ print("#line 1 \"$filename\"\n")
 while (<$FH>) {
     last if ($Module, $Package, $Prefix) =
 	/^MODULE\s*=\s*([\w:]+)(?:\s+PACKAGE\s*=\s*([\w:]+))?(?:\s+PREFIX\s*=\s*(\S+))?\s*$/;
+
+    if ($OBJ) {
+        s/#if(?:def|\s+defined)\s+(\(__cplusplus\)|__cplusplus)/#if defined(__cplusplus) && !defined(PERL_OBJECT)/;
+    }
     print $_;
 }
 &Exit unless defined $_;

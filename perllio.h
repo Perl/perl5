@@ -7,6 +7,7 @@
 
 #define PerlLIO_access(file, mode) piLIO->Access((file), (mode), ErrorNo())
 #define PerlLIO_chmod(file, mode) piLIO->Chmod((file), (mode), ErrorNo())
+#define PerlLIO_chown(file, owner, group) piLIO->Chown((file), (owner), (group), ErrorNo())
 #define PerlLIO_chsize(fd, size) piLIO->Chsize((fd), (size), ErrorNo())
 #define PerlLIO_close(fd) piLIO->Close((fd), ErrorNo())
 #define PerlLIO_dup(fd) piLIO->Dup((fd), ErrorNo())
@@ -32,6 +33,7 @@
 #else
 #define PerlLIO_access(file, mode) access((file), (mode))
 #define PerlLIO_chmod(file, mode) chmod((file), (mode))
+#define PerlLIO_chown(file, owner, group) chown((file), (owner), (group))
 #define PerlLIO_chsize(fd, size) chsize((fd), (size))
 #define PerlLIO_close(fd) close((fd))
 #define PerlLIO_dup(fd) dup((fd))

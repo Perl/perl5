@@ -108,11 +108,13 @@ EXT I32 obj_list_fill INIT(-1);
 	arg = atof(str);		\
     } STMT_END
 
-#define BGET_objindex(arg) STMT_START {	\
-	U32 ix;				\
-	BGET_U32(ix);			\
-	arg = obj_list[ix];		\
+#define BGET_objindex(arg, type) STMT_START {	\
+	U32 ix;					\
+	BGET_U32(ix);				\
+	arg = (type)obj_list[ix];		\
     } STMT_END
+#define BGET_svindex(arg) BGET_objindex(arg, svindex)
+#define BGET_opindex(arg) BGET_objindex(arg, opindex)
 
 #define BSET_ldspecsv(sv, arg) sv = specialsv_list[arg]
 				    

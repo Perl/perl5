@@ -78,13 +78,22 @@ static void init_postdump_symbols _((int, char **, char **));
 static void init_predump_symbols _((void));
 static void my_exit_jump _((void)) __attribute__((noreturn));
 static void nuke_stacks _((void));
-static void open_script _((char *, bool, SV *));
+static void open_script _((char *, bool, SV *, int *fd));
 static void usage _((char *));
-static void validate_suid _((char *, char*));
+static void validate_suid _((char *, char*, int));
 #endif
 
-static int fdscript = -1;
+#ifdef PERL_OBJECT
+CPerlObj* perl_alloc(IPerlMem* ipM, IPerlEnv* ipE, IPerlStdIO* ipStd,
+					     IPerlLIO* ipLIO, IPerlDir* ipD, IPerlSock* ipS, IPerlProc* ipP)
+{
+    CPerlObj* pPerl = new(ipM) CPerlObj(ipM, ipE, ipStd, ipLIO, ipD, ipS, ipP);
+    if(pPerl != NULL)
+	pPerl->Init();
 
+    return pPerl;
+}
+#else
 PerlInterpreter *
 perl_alloc(void)
 {
@@ -94,7 +103,7 @@ perl_alloc(void)
     New(53, sv_interp, 1, PerlInterpreter);
     return sv_interp;
 }
-#endif
+#endif /* PERL_OBJECT */
 
 void
 #ifdef PERL_OBJECT
@@ -593,6 +602,7 @@ perl_parse(PerlInterpreter *sv_interp, void (*xsinit) (void), int argc, char **a
     AV* comppadlist;
     dJMPENV;
     int ret;
+    int fdscript = -1;
 
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
 #ifdef IAMSUID
@@ -885,9 +895,9 @@ print \"  \\@INC:\\n    @INC\\n\";");
 
     init_perllib();
 
-    open_script(scriptname,dosearch,sv);
+    open_script(scriptname,dosearch,sv,&fdscript);
 
-    validate_suid(validarg, scriptname);
+    validate_suid(validarg, scriptname,fdscript);
 
     if (doextract)
 	find_beginning();
@@ -1797,7 +1807,7 @@ init_main_stash(void)
 }
 
 STATIC void
-open_script(char *scriptname, bool dosearch, SV *sv)
+open_script(char *scriptname, bool dosearch, SV *sv, int *fdscript)
 {
     dTHR;
     char *xfound = Nullch;
@@ -1998,20 +2008,20 @@ open_script(char *scriptname, bool dosearch, SV *sv)
 
     if (strnEQ(scriptname, "/dev/fd/", 8) && isDIGIT(scriptname[8]) ) {
 	char *s = scriptname + 8;
-	fdscript = atoi(s);
+	*fdscript = atoi(s);
 	while (isDIGIT(*s))
 	    s++;
 	if (*s)
 	    scriptname = s + 1;
     }
     else
-	fdscript = -1;
+	*fdscript = -1;
     origfilename = savepv(e_tmpname ? "-e" : scriptname);
     curcop->cop_filegv = gv_fetchfile(origfilename);
     if (strEQ(origfilename,"-"))
 	scriptname = "";
-    if (fdscript >= 0) {
-	rsfp = PerlIO_fdopen(fdscript,PERL_SCRIPT_MODE);
+    if (*fdscript >= 0) {
+	rsfp = PerlIO_fdopen(*fdscript,PERL_SCRIPT_MODE);
 #if defined(HAS_FCNTL) && defined(F_SETFD)
 	if (rsfp)
 	    fcntl(PerlIO_fileno(rsfp),F_SETFD,1);  /* ensure close-on-exec */
@@ -2121,7 +2131,7 @@ sed %s -e \"/^[^#]/b\" \
 }
 
 STATIC void
-validate_suid(char *validarg, char *scriptname)
+validate_suid(char *validarg, char *scriptname, int fdscript)
 {
     int which;
 

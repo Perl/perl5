@@ -356,6 +356,10 @@ public:
     {
 	CALLFUNCRET(chmod(filename, pmode))
     };
+    virtual int Chown(const char *filename, uid_t owner, gid_t group, int &err)
+    {
+	CALLFUNCERR(chown(filename, owner, group))
+    };
     virtual int Chsize(int handle, long size, int &err)
     {
 	CALLFUNCRET(chsize(handle, size))

@@ -85,6 +85,10 @@
 #define block_gimme       CPerlObj::Perl_block_gimme
 #undef  block_start
 #define block_start       CPerlObj::Perl_block_start
+#undef  bset_obj_store
+#define bset_obj_store    CPerlObj::Perl_bset_obj_store
+#undef  byterun
+#define byterun           CPerlObj::Perl_byterun
 #undef  call_list
 #define call_list         CPerlObj::Perl_call_list
 #undef  cando
@@ -809,6 +813,8 @@
 #define newUNOP           CPerlObj::Perl_newUNOP
 #undef  newWHILEOP
 #define newWHILEOP        CPerlObj::Perl_newWHILEOP
+#undef  new_logop
+#define new_logop         CPerlObj::new_logop
 #undef  new_sv
 #define new_sv            CPerlObj::new_sv
 #undef  new_xiv
@@ -1047,6 +1053,8 @@
 #define savepvn           CPerlObj::Perl_savepvn
 #undef  savestack_grow
 #define savestack_grow    CPerlObj::Perl_savestack_grow
+#undef  save_aelem
+#define save_aelem        CPerlObj::Perl_save_aelem
 #undef  save_aptr
 #define save_aptr         CPerlObj::Perl_save_aptr
 #undef  save_ary
@@ -1069,6 +1077,8 @@
 #define save_hash         CPerlObj::Perl_save_hash
 #undef  save_hek
 #define save_hek          CPerlObj::save_hek
+#undef  save_helem
+#define save_helem        CPerlObj::Perl_save_helem
 #undef  save_hptr
 #define save_hptr         CPerlObj::Perl_save_hptr
 #undef  save_I16

@@ -13,6 +13,7 @@ class IPerlLIO
 public:
     virtual int Access(const char *path, int mode, int &err) = 0;
     virtual int Chmod(const char *filename, int pmode, int &err) = 0;
+    virtual int Chown(const char *filename, uid_t owner, gid_t group, int &err) = 0;
     virtual int Chsize(int handle, long size, int &err) = 0;
     virtual int Close(int handle, int &err) = 0;
     virtual int Dup(int handle, int &err) = 0;

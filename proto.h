@@ -796,9 +796,9 @@ void init_postdump_symbols _((int, char **, char **));
 void init_predump_symbols _((void));
 void my_exit_jump _((void)) __attribute__((noreturn));
 void nuke_stacks _((void));
-void open_script _((char *, bool, SV *));
+void open_script _((char *, bool, SV *, int *fd));
 void usage _((char *));
-void validate_suid _((char *, char*));
+void validate_suid _((char *, char*, int));
 
 regnode *reg _((I32, I32 *));
 regnode *reganode _((U8, U32));
@@ -836,8 +836,16 @@ void del_sv _((SV *p));
 void debprof _((OP *o));
 #endif
 
-#define PPDEF(s) OP* CPerlObj::s _((ARGSproto));
+void *bset_obj_store _((void *obj, I32 ix));
+#ifdef INDIRECT_BGET_MACROS
+void byterun _((struct bytestream bs));
+#else
+void byterun _((PerlIO *fp));
+#endif /* INDIRECT_BGET_MACROS */
 
+OP *new_logop _((I32 type, I32 flags, OP **firstp, OP **otherp));
+
+#define PPDEF(s) OP* CPerlObj::s _((ARGSproto));
 public:
 PPDEF(pp_aassign)
 PPDEF(pp_abs)
