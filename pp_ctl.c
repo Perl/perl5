@@ -1393,8 +1393,17 @@ die_where(char *message)
     }
     if (!message)
 	message = SvPVx(ERRSV, n_a);
-    PerlIO_printf(PerlIO_stderr(), "%s",message);
-    PerlIO_flush(PerlIO_stderr());
+    {
+#ifdef USE_SFIO
+	/* SFIO can really mess with your errno */
+	int e = errno;
+#endif
+	PerlIO_puts(PerlIO_stderr(), message);
+	(void)PerlIO_flush(PerlIO_stderr());
+#ifdef USE_SFIO
+	errno = e;
+#endif
+    }
     my_failure_exit();
     /* NOTREACHED */
     return 0;
