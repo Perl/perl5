@@ -257,7 +257,7 @@
 
 #define BIT_BUCKET "_NLA0:"
 #define PERL_SYS_INIT(c,v)	vms_image_init((c),(v)); MALLOC_INIT
-#define PERL_SYS_TERM()		MALLOC_TERM
+#define PERL_SYS_TERM()		OP_REFCNT_TERM; MALLOC_TERM
 #define dXSUB_SYS
 #define HAS_KILL
 #define HAS_WAIT

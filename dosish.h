@@ -30,7 +30,7 @@
 #  endif
 #endif	/* DJGPP */
 
-#define PERL_SYS_TERM() MALLOC_TERM
+#define PERL_SYS_TERM() OP_REFCNT_TERM; MALLOC_TERM
 #define dXSUB_SYS
 
 /*

@@ -1648,6 +1648,7 @@
 #define PL_do_undump		(PL_Vars.Gdo_undump)
 #define PL_hexdigit		(PL_Vars.Ghexdigit)
 #define PL_malloc_mutex		(PL_Vars.Gmalloc_mutex)
+#define PL_op_mutex		(PL_Vars.Gop_mutex)
 #define PL_patleave		(PL_Vars.Gpatleave)
 #define PL_thr_key		(PL_Vars.Gthr_key)
 
@@ -1659,6 +1660,7 @@
 #define PL_Gdo_undump		PL_do_undump
 #define PL_Ghexdigit		PL_hexdigit
 #define PL_Gmalloc_mutex	PL_malloc_mutex
+#define PL_Gop_mutex		PL_op_mutex
 #define PL_Gpatleave		PL_patleave
 #define PL_Gthr_key		PL_thr_key
 
