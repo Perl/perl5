@@ -525,7 +525,7 @@ CFGH_TMPL	= config_H.vc
 
 XCOPY		= xcopy /f /r /i /d
 RCOPY		= xcopy /f /r /i /e /d
-NOOP		= @echo
+NOOP		= @rem
 NULL		=
 
 DEL		= del

@@ -690,7 +690,7 @@ PERLDLL		= ..\perl59.dll
 
 XCOPY		= xcopy /f /r /i /d
 RCOPY		= xcopy /f /r /i /e /d
-NOOP		= @echo.
+NOOP		= @rem
 
 #
 # filenames given to xsubpp must have forward slashes (since it puts
@@ -883,7 +883,6 @@ CFG_VARS	=					\
 .IF "$(IS_WIN95)" == "define"
 MK2 		= .\makefile.95
 RIGHTMAKE	= __switch_makefiles
-NOOP		= @rem
 .ELSE
 MK2		= __not_needed
 RIGHTMAKE	=
