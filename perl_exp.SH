@@ -40,11 +40,9 @@ echo "#!" > perl.exp
 
 case "$bincompat3" in
 y*)
-	(
 	  global=/tmp/exp$$g
 	  interp=/tmp/exp$$i
 	  compat3=/tmp/exp$$c
-	  trap 'rm -f $global $interp $compat3' 0
 	  trap 'exit 1' 1 2 3 13 15
 	  grep '^[A-Za-z]' global.sym | sort >$global
 	  grep '^[A-Za-z]' interp.sym | sort >$interp
@@ -53,7 +51,7 @@ y*)
 	  comm -12 $interp $compat3 | sed 's/^/Perl_/' >> perl.exp
 	  comm -12 $global $compat3 >> perl.exp
 	  comm -23 $interp $compat3 >> perl.exp
-	)
+	  rm -f $global $interp $compat3
 	;;
 *)
 	sed -n '/^[A-Za-z]/ s/^/Perl_/p' global.sym interp.sym >> perl.exp
