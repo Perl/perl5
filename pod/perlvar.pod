@@ -331,7 +331,7 @@ of which filehandle C<$.> is currently aliased to.
 
 C<$.> is reset when the filehandle is closed, but B<not> when an open
 filehandle is reopened without an intervening close().  For more
-details, see L<perlop/"I/O Operators">.  Because C<< <> >> never does
+details, see L<perlop/"IE<sol>O Operators">.  Because C<< <> >> never does
 an explicit close, line numbers increase across ARGV files (but see
 examples in L<perlfunc/eof>).
 
@@ -1146,7 +1146,8 @@ C<require>, or C<use> constructs look for their library files.  It
 initially consists of the arguments to any B<-I> command-line
 switches, followed by the default Perl library, probably
 F</usr/local/lib/perl>, followed by ".", to represent the current
-directory.  If you need to modify this at runtime, you should use
+directory.  ("." will not be appended if taint checks are enabled, either by
+C<-T> or by C<-t>.)  If you need to modify this at runtime, you should use
 the C<use lib> pragma to get the machine-dependent library properly
 loaded also:
 
