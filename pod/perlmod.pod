@@ -26,10 +26,16 @@ packages by prefixing the identifier with the package name and a double
 colon: C<$Package::Variable>.  If the package name is null, the C<main>
 package is assumed.  That is, C<$::sail> is equivalent to C<$main::sail>.
 
-(The old package delimiter was a single quote, but double colon
-is now the preferred delimiter, in part because it's more readable
-to humans, and in part because it's more readable to B<emacs> macros.
-It also makes C++ programmers feel like they know what's going on.)
+The old package delimiter was a single quote, but double colon is now the
+preferred delimiter, in part because it's more readable to humans, and
+in part because it's more readable to B<emacs> macros.  It also makes C++
+programmers feel like they know what's going on--as opposed to using the
+single quote as separator, which was there to make Ada programmers feel
+like they knew what's going on.  Because the old-fashioned syntax is still
+supported for backwards compatibility, if you try to use a string like
+C<"This is $owner's house">, you'll be accessing C<$owner::s>; that is,
+the $s variable in package C<owner>, which is probably not what you meant.
+Use braces to disambiguate, as in C<"This is ${owner}'s house">.
 
 Packages may be nested inside other packages: C<$OUTER::INNER::var>.  This
 implies nothing about the order of name lookups, however.  All symbols

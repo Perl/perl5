@@ -40,14 +40,23 @@ esac
 case "$cc" in
 *"cc -n32"*)
 
+	# Perl 5.004_04/5.004_57 introduced new qsort code into pp_ctl.c
+	# that makes IRIX  cc prior to 7.2.1 to emit bad code.
+	# so some serious hackery follows to set pp_ctl flags correctly.
+
 	# Check for which version of the compiler we're running
 	case "`$cc -version 2>&1`" in
 	*7.0*)                        # Mongoose 7.0
 	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1042,1048,1110,1116,1184 -OPT:Olimit=0"
 	     optimize='none'	  
 	     ;;
-	*7.*)                         # Mongoose 7.1+
+	*7.1*|*7.2)                   # Mongoose 7.1+
 	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184 -OPT:Olimit=0"
+	     optimize='-O3'	  
+	     pp_ctl_cflags='optimize=-O'
+	     ;;
+	*7.*)                         # Mongoose 7.2.1+
+	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184 -OPT:Olimit=0:space=on"
 	     optimize='-O3'	  
 	     ;;
 	*6.2*)                        # Ragnarok 6.2
@@ -55,13 +64,14 @@ case "$cc" in
 	     optimize='none'	  
 	     ;;
 	*)                            # Be safe and not optimize
-	ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184 -OPT:Olimit=0"
+	     ccflags="$ccflags -D_BSD_TYPES -D_BSD_TIME -woff 1009,1110,1184 -OPT:Olimit=0"
 	     optimize='none'
 	     ;;
 	esac
 
 	ld=ld
-	ldflags=' -L/usr/local/lib -L/usr/lib32 -L/lib32'
+	# NOTE: -L/usr/lib32 -L/lib32 are automatically selected by the linker
+	ldflags=' -L/usr/local/lib32 -L/usr/local/lib'
 	cccdlflags=' '
     # From: David Billinghurst <David.Billinghurst@riotinto.com.au>
     # If you get complaints about so_locations then change the following
@@ -92,7 +102,7 @@ libswanted="$*"
 # I have conflicting reports about the sun, crypt, bsd, and PW
 # libraries on Irix 6.2.
 #
-# One user rerports:
+# One user reports:
 # Don't need sun crypt bsd PW under 6.2.  You *may* need to link
 # with these if you want to run perl built under 6.2 on a 5.3 machine
 # (I haven't checked)

@@ -2,6 +2,7 @@
 
 use Config;
 use File::Basename qw(basename dirname);
+use Cwd;
 
 # List explicitly here the variables you want Configure to
 # generate.  Metaconfig only looks for shell variables, so you
@@ -13,6 +14,7 @@ use File::Basename qw(basename dirname);
 
 # This forces PL files to create target in same directory as PL file.
 # This is so that make depend always knows where to find PL derivatives.
+$origdir = cwd;
 chdir dirname($0);
 $file = basename($0, '.PL');
 $file .= '.com' if $^O eq 'VMS';
@@ -38,7 +40,7 @@ use Config;
 use File::Path qw(mkpath);
 use Getopt::Std;
 
-getopts('Dd:rlha');
+getopts('Dd:rlhaQ');
 die "-r and -a options are mutually exclusive\n" if ($opt_r and $opt_a);
 @inc_dirs = inc_dirs() if $opt_a;
 
@@ -79,7 +81,7 @@ while (defined ($file = next_file())) {
 	open(OUT, ">-");
     } else {
 	($outfile = $file) =~ s/\.h$/.ph/ || next;
-	print "$file -> $outfile\n";
+	print "$file -> $outfile\n" unless $opt_Q;
 	if ($file =~ m|^(.*)/|) {
 	    $dir = $1;
 	    mkpath "$Dest_dir/$dir";
@@ -235,7 +237,7 @@ while (defined ($file = next_file())) {
 	    } elsif(/^ident\s+(.*)/) {
 		print OUT $t, "# $1\n";
 	    }
-	} elsif(/^\s*(typedef\s*)?enum\b/) {
+ 	} elsif(/^\s*(typedef\s*)?enum\s*(\s+[a-zA-Z_]\w*\s*)?\{/) {
 	    until(/\}.*?;/) {
 		chomp($next = <IN>);
 		$_ .= $next;
@@ -631,3 +633,4 @@ You may need to dicker with the files produced.
 close OUT or die "Can't close $file: $!";
 chmod 0755, $file or die "Can't reset permissions for $file: $!\n";
 exec("$Config{'eunicefix'} $file") if $Config{'eunicefix'} ne ':';
+chdir $origdir;
