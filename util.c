@@ -1515,6 +1515,7 @@ Perl_vdie(pTHX_ const char* pat, va_list *args)
 	    SV *msg;
 
 	    ENTER;
+	    save_re_context();
 	    if (message) {
 		msg = newSVpvn(message, msglen);
 		SvREADONLY_on(msg);
@@ -1604,6 +1605,7 @@ Perl_vcroak(pTHX_ const char* pat, va_list *args)
 	    SV *msg;
 
 	    ENTER;
+	    save_re_context();
 	    msg = newSVpvn(message, msglen);
 	    SvREADONLY_on(msg);
 	    SAVEFREESV(msg);
@@ -1697,6 +1699,7 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
 	    SV *msg;
 
 	    ENTER;
+	    save_re_context();
 	    msg = newSVpvn(message, msglen);
 	    SvREADONLY_on(msg);
 	    SAVEFREESV(msg);
@@ -1810,15 +1813,17 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
                 SV *msg;
  
                 ENTER;
+		save_re_context();
                 msg = newSVpvn(message, msglen);
                 SvREADONLY_on(msg);
                 SAVEFREESV(msg);
  
+		PUSHSTACKi(PERLSI_DIEHOOK);
                 PUSHMARK(sp);
                 XPUSHs(msg);
                 PUTBACK;
                 call_sv((SV*)cv, G_DISCARD);
- 
+		POPSTACK;
                 LEAVE;
             }
         }
@@ -1843,21 +1848,23 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
             SAVESPTR(PL_warnhook);
             PL_warnhook = Nullsv;
             cv = sv_2cv(oldwarnhook, &stash, &gv, 0);
-                LEAVE;
+	    LEAVE;
             if (cv && !CvDEPTH(cv) && (CvROOT(cv) || CvXSUB(cv))) {
                 dSP;
                 SV *msg;
  
                 ENTER;
+		save_re_context();
                 msg = newSVpvn(message, msglen);
                 SvREADONLY_on(msg);
                 SAVEFREESV(msg);
  
+		PUSHSTACKi(PERLSI_WARNHOOK);
                 PUSHMARK(sp);
                 XPUSHs(msg);
                 PUTBACK;
                 call_sv((SV*)cv, G_DISCARD);
- 
+		POPSTACK;
                 LEAVE;
                 return;
             }
