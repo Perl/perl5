@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Mar  7 07:37:32 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Fri Mar  8 17:00:48 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -8812,11 +8812,13 @@ int main()
 	checkit("123.456", buf);
 
 	/* Testing of 1e+129 in bigintpm.t must not get extra '.' here. */
-	Gconvert((DOUBLETYPE)1e30, 8, 0, buf);
+	Gconvert((DOUBLETYPE)1e34, 8, 0, buf);
+	/* 34 should be enough to scare even long double
+	 * places into using the e notation. */
 	if (strlen(buf) > 5)
-	    checkit("1e+030", buf); /* for Microsoft */
+	    checkit("1e+034", buf); /* for Microsoft */
 	else
-	    checkit("1e+30", buf);
+	    checkit("1e+34", buf);
 
 	/* For Perl, if you add additional tests here, also add them to
 	 * t/base/num.t for benefit of platforms not using Configure or

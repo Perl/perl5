@@ -151,9 +151,5 @@ print $a eq "-100000" ? "ok 43\n" : "not ok 43 # $a\n";
 $a = 123.456; "$a";
 print $a eq "123.456" ? "ok 44\n" : "not ok 44 # $a\n";
 
-$a = 1e30; "$a";
-# If using long doubles the "$a" might be "1"."0"x30.
-# We might fool around with $Config{uselongdouble}
-# and $Config{longdblsize} but let's keep this simple,
-# we are in the base/ after all.
-print $a eq "1e+30" || $a eq "1e+030" || $a eq "1000000000000000000000000000000" ? "ok 45\n" : "not ok 45 $a\n";
+$a = 1e34; "$a";
+print $a eq "1e+34" || $a eq "1e+034" ? "ok 45\n" : "not ok 45 $a\n";
