@@ -7,18 +7,17 @@ perlunicode - Unicode support in Perl (EXPERIMENTAL, subject to change)
 =head2 Important Caveat
 
     WARNING:  As of the 5.6.1 release, the implementation of Unicode
-    support in Perl is incomplete, and continues to be highly experimental.
+    support in Perl is incomplete and highly experimental.
 
-The following areas need further work.  They are being rapidly addressed
-in the 5.7.x development branch.
+If you want a far better unicode support, you should use perl 5.8.1 or
+later instead.
 
 =over 4
 
 =item Input and Output Disciplines
 
-There is currently no easy way to mark data read from a file or other
-external source as being utf8.  This will be one of the major areas of
-focus in the near future.
+As of 5.6.x there is no easy way to mark data read from a file or other
+external source as being utf8.
 
 =item Regular Expressions
 
@@ -122,7 +121,7 @@ a Unicode smiley face is C<\x{263A}>.
 
 Identifiers within the Perl script may contain Unicode alphanumeric
 characters, including ideographs.  (You are currently on your own when
-it comes to using the canonical forms of characters--Perl doesn't (yet)
+it comes to using the canonical forms of characters--Perl doesn't
 attempt to canonicalize variable names for you.)
 
 =item *
@@ -218,13 +217,12 @@ And finally, C<scalar reverse()> reverses by character rather than by byte.
 
 =head2 Character encodings for input and output
 
-[XXX: This feature is not yet implemented.]
+This feature is not implemented.
 
 =head1 CAVEATS
 
-As of yet, there is no method for automatically coercing input and
-output to some encoding other than UTF-8.  This is planned in the near
-future, however.
+As of perl 5.6.2, there is no method for automatically coercing input and
+output to some encoding other than UTF-8.
 
 Whether an arbitrary piece of data will be treated as "characters" or
 "bytes" by internal operations cannot be divined at the current time.
