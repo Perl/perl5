@@ -1400,6 +1400,11 @@ qualifying it as C<CORE::dump()>.  Maybe it's a typo.  See L<perlfunc/dump>.
 (S malloc) An internal routine called free() on something that had
 already been freed.
 
+=item Duplicate modifier '%c' after '%c' in %s
+
+(W) You have applied the same modifier more than once after a type
+in a pack template.  See L<perlfunc/pack>.
+
 =item elseif should be elsif
 
 (S syntax) There is no keyword "elseif" in Perl because Larry thinks it's
