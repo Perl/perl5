@@ -1,10 +1,14 @@
 #!./perl
 
 my $file;
+
 BEGIN {
-	$file = $0;
-	chdir 't' if -d 't';
-	@INC = '../lib';
+        $file = $0;
+        chdir 't' if -d 't';
+
+        if ( $ENV{PERL_CORE} ) {
+           @INC = '../lib';
+        }
 }
 
 END {
@@ -40,7 +44,7 @@ if (open(TCOUT, ">tcout")) {
 	$writable = 0;
 }
 
-# termcap_path
+# termcap_path -- the names are hardcoded in Term::Cap
 $ENV{TERMCAP} = '';
 my $path = join '', Term::Cap::termcap_path();
 is( $path, $files, 'termcap_path() should find default files' );
