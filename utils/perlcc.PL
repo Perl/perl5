@@ -328,7 +328,7 @@ sub cc_harness_msvc {
     $link .= " -libpath:".$_ for split /\s+/, opt(L);
     my @mods = split /-?u /, $stash;
     $link .= " ".ExtUtils::Embed::ldopts("-std", \@mods);
-    $link .= " perl57.lib kernel32.lib msvcrt.lib";
+    $link .= " perl5$Config{PERL_VERSION}.lib kernel32.lib msvcrt.lib";
     vprint 3, "running $Config{cc} $compile";
     system("$Config{cc} $compile");
     vprint 3, "running $Config{ld} $link";
@@ -529,7 +529,7 @@ sub _die {
 sub _usage_and_die {
     _die(<<EOU);
 $0: Usage:
-$0 [-o executable] [-r] [-O|-B|-c|-S] [-log log] [source[.pl] | -e oneliner]
+$0 [-o executable] [-r] [-O|-B|-c|-S] [-I /foo] [-L /foo] [-log log] [source[.pl] | -e oneliner]
 EOU
 }
 

@@ -1863,10 +1863,10 @@ sub walkpackages
  my $sym;
  my $ref;
  no strict 'vars';
- local(*glob);
  $prefix = '' unless defined $prefix;
  while (($sym, $ref) = each %$symref) 
   {             
+   local(*glob);
    *glob = $ref;
    if ($sym =~ /::$/) 
     {
