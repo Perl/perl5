@@ -233,18 +233,6 @@ sub B::LOGOP::save {
     savesym($op, sprintf("(OP*)&logop_list[%d]", $logopsect->index));
 }
 
-sub B::CONDOP::save {
-    my ($op, $level) = @_;
-    my $sym = objsym($op);
-    return $sym if defined $sym;
-    $condopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, s\\_%x",
-			     ${$op->next}, ${$op->sibling}, $op->ppaddr,
-			     $op->targ, $op->type, $op_seq, $op->flags,
-			     $op->private, ${$op->first}, ${$op->true},
-			     ${$op->false}));
-    savesym($op, sprintf("(OP*)&condop_list[%d]", $condopsect->index));
-}
-
 sub B::LOOP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);

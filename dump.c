@@ -544,17 +544,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
 	    PerlIO_printf(file, "DONE\n");
 	break;
     case OP_COND_EXPR:
-	Perl_dump_indent(aTHX_ level, file, "TRUE ===> ");
-	if (cCONDOPo->op_true)
-	    PerlIO_printf(file, "%d\n", cCONDOPo->op_true->op_seq);
-	else
-	    PerlIO_printf(file, "DONE\n");
-	Perl_dump_indent(aTHX_ level, file, "FALSE ===> ");
-	if (cCONDOPo->op_false)
-	    PerlIO_printf(file, "%d\n", cCONDOPo->op_false->op_seq);
-	else
-	    PerlIO_printf(file, "DONE\n");
-	break;
+    case OP_RANGE:
     case OP_MAPWHILE:
     case OP_GREPWHILE:
     case OP_OR:

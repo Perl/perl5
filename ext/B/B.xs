@@ -52,15 +52,14 @@ typedef enum {
     OPc_UNOP,	/* 2 */
     OPc_BINOP,	/* 3 */
     OPc_LOGOP,	/* 4 */
-    OPc_CONDOP,	/* 5 */
-    OPc_LISTOP,	/* 6 */
-    OPc_PMOP,	/* 7 */
-    OPc_SVOP,	/* 8 */
-    OPc_GVOP,	/* 9 */
-    OPc_PVOP,	/* 10 */
-    OPc_CVOP,	/* 11 */
-    OPc_LOOP,	/* 12 */
-    OPc_COP	/* 13 */
+    OPc_LISTOP,	/* 5 */
+    OPc_PMOP,	/* 6 */
+    OPc_SVOP,	/* 7 */
+    OPc_GVOP,	/* 8 */
+    OPc_PVOP,	/* 9 */
+    OPc_CVOP,	/* 10 */
+    OPc_LOOP,	/* 11 */
+    OPc_COP	/* 12 */
 } opclass;
 
 static char *opclassnames[] = {
@@ -69,7 +68,6 @@ static char *opclassnames[] = {
     "B::UNOP",
     "B::BINOP",
     "B::LOGOP",
-    "B::CONDOP",
     "B::LISTOP",
     "B::PMOP",
     "B::SVOP",
@@ -108,9 +106,6 @@ cc_opclass(pTHX_ OP *o)
 
     case OA_LOGOP:
 	return OPc_LOGOP;
-
-    case OA_CONDOP:
-	return OPc_CONDOP;
 
     case OA_LISTOP:
 	return OPc_LISTOP;
@@ -346,7 +341,6 @@ typedef OP	*B__OP;
 typedef UNOP	*B__UNOP;
 typedef BINOP	*B__BINOP;
 typedef LOGOP	*B__LOGOP;
-typedef CONDOP	*B__CONDOP;
 typedef LISTOP	*B__LISTOP;
 typedef PMOP	*B__PMOP;
 typedef SVOP	*B__SVOP;
@@ -615,19 +609,6 @@ MODULE = B	PACKAGE = B::LOGOP		PREFIX = LOGOP_
 B::OP
 LOGOP_other(o)
 	B::LOGOP	o
-
-#define CONDOP_true(o)	o->op_true
-#define CONDOP_false(o)	o->op_false
-
-MODULE = B	PACKAGE = B::CONDOP		PREFIX = CONDOP_
-
-B::OP
-CONDOP_true(o)
-	B::CONDOP	o
-
-B::OP
-CONDOP_false(o)
-	B::CONDOP	o
 
 #define LISTOP_children(o)	o->op_children
 

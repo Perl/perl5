@@ -99,14 +99,6 @@ sub B::LOGOP::mark_if_leader {
     }
 }
 
-sub B::CONDOP::mark_if_leader {
-    my $op = shift;
-    mark_leader($op->next);
-    mark_leader($op->true);
-    mark_leader($op->false);
-}
-
-
 sub B::LISTOP::mark_if_leader {
     my $op = shift;
     my $first=$op->first;
@@ -158,7 +150,6 @@ sub compile {
 #     The ops pointed at by nextop, redoop and lastop->op_next of a LOOP
 #     The ops pointed at by op_next and op_other of a LOGOP, except
 #     for pp_entertry which has op_next and op_other->op_next
-#     The ops pointed at by op_true and op_false of a CONDOP
 #     The op pointed at by op_pmreplstart of a PMOP
 #     The op pointed at by op_other->op_pmreplstart of pp_substcont?
 #     [The op after a pp_return] Omit

@@ -1238,7 +1238,6 @@ typedef struct unop UNOP;
 typedef struct binop BINOP;
 typedef struct listop LISTOP;
 typedef struct logop LOGOP;
-typedef struct condop CONDOP;
 typedef struct pmop PMOP;
 typedef struct svop SVOP;
 typedef struct gvop GVOP;

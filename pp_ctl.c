@@ -1022,11 +1022,11 @@ PP(pp_sort)
 PP(pp_range)
 {
     if (GIMME == G_ARRAY)
-	return cCONDOP->op_true;
+	return NORMAL;
     if (SvTRUEx(PAD_SV(PL_op->op_targ)))
-	return cCONDOP->op_false;
+	return cLOGOP->op_other;
     else
-	return cCONDOP->op_true;
+	return NORMAL;
 }
 
 PP(pp_flip)
@@ -1034,7 +1034,7 @@ PP(pp_flip)
     djSP;
 
     if (GIMME == G_ARRAY) {
-	RETURNOP(((CONDOP*)cUNOP->op_first)->op_false);
+	RETURNOP(((LOGOP*)cUNOP->op_first)->op_other);
     }
     else {
 	dTOPss;
@@ -1052,7 +1052,7 @@ PP(pp_flip)
 	    else {
 		sv_setiv(targ, 0);
 		SP--;
-		RETURNOP(((CONDOP*)cUNOP->op_first)->op_false);
+		RETURNOP(((LOGOP*)cUNOP->op_first)->op_other);
 	    }
 	}
 	sv_setpv(TARG, "");

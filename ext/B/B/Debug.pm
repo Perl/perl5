@@ -39,13 +39,6 @@ sub B::LOGOP::debug {
     printf "\top_other\t0x%x\n", ${$op->other};
 }
 
-sub B::CONDOP::debug {
-    my ($op) = @_;
-    $op->B::UNOP::debug();
-    printf "\top_true\t0x%x\n", ${$op->true};
-    printf "\top_false\t0x%x\n", ${$op->false};
-}
-
 sub B::LISTOP::debug {
     my ($op) = @_;
     $op->B::BINOP::debug();
