@@ -6400,7 +6400,8 @@ files.  The first two elements of the list must be the NUMERICAL access
 and modification times, in that order.  Returns the number of files
 successfully changed.  The inode change time of each file is set
 to the current time.  For example, this code has the same effect as the
-Unix touch(1) command when the files I<already exist>.
+Unix touch(1) command when the files I<already exist> and belong to
+the user running the program:
 
     #!/usr/bin/perl
     $atime = $mtime = time;
@@ -6410,7 +6411,8 @@ Since perl 5.7.2, if the first two elements of the list are C<undef>, then
 the utime(2) function in the C library will be called with a null second
 argument. On most systems, this will set the file's access and
 modification times to the current time (i.e. equivalent to the example
-above.)
+above) and will even work on other users' files where you have write
+permission:
 
     utime undef, undef, @ARGV;
 
