@@ -77,6 +77,9 @@ even if available, access to a fixed interface):
     get_cv
     get_hv
     get_sv
+    grok_hex
+    grok_oct
+    grok_bin
     gv_stashpvn(str,len,flags)
     INT2PTR(type,int)
     IVdf
@@ -151,7 +154,7 @@ require DynaLoader;
 use strict;
 use vars qw( $VERSION @ISA @EXPORT @EXPORT_OK $data );
 
-$VERSION = "2.003";
+$VERSION = "2.004";
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT =  qw();
@@ -760,6 +763,67 @@ SV *sv;
 
 #ifndef get_hv
 #   define get_hv(name,create) perl_get_hv(name,create)
+#endif
+
+#ifndef PERL_SCAN_GREATER_THAN_UV_MAX
+#   define PERL_SCAN_GREATER_THAN_UV_MAX 0x02
+#endif
+
+#ifndef PERL_SCAN_SILENT_ILLDIGIT
+#   define PERL_SCAN_SILENT_ILLDIGIT 0x04
+#endif
+
+#ifndef PERL_SCAN_ALLOW_UNDERSCORES
+#   define PERL_SCAN_ALLOW_UNDERSCORES 0x01
+#endif
+
+#ifndef PERL_SCAN_DISALLOW_PREFIX
+#   define PERL_SCAN_DISALLOW_PREFIX 0x02
+#endif
+
+#ifndef grok_hex
+static UV _grok_hex (char *string, STRLEN *len, I32 *flags, NV *result) {
+    NV r = scan_hex(string, *len, len);
+    if (r > UV_MAX) {
+        *flags |= PERL_SCAN_GREATER_THAN_UV_MAX;
+        if (result) *result = r;
+        return UV_MAX;
+    }
+    return (UV)r;
+}
+        
+#   define grok_hex(string, len, flags, result)     \
+        _grok_hex((string), (len), (flags), (result))
+#endif 
+
+#ifndef grok_oct
+static UV _grok_oct (char *string, STRLEN *len, I32 *flags, NV *result) {
+    NV r = scan_oct(string, *len, len);
+    if (r > UV_MAX) {
+        *flags |= PERL_SCAN_GREATER_THAN_UV_MAX;
+        if (result) *result = r;
+        return UV_MAX;
+    }
+    return (UV)r;
+}
+
+#   define grok_oct(string, len, flags, result)     \
+        _grok_oct((string), (len), (flags), (result))
+#endif
+
+#ifndef grok_bin
+static UV _grok_bin (char *string, STRLEN *len, I32 *flags, NV *result) {
+    NV r = scan_bin(string, *len, len);
+    if (r > UV_MAX) {
+        *flags |= PERL_SCAN_GREATER_THAN_UV_MAX;
+        if (result) *result = r;
+        return UV_MAX;
+    }
+    return (UV)r;
+}
+
+#   define grok_bin(string, len, flags, result)     \
+        _grok_bin((string), (len), (flags), (result))
 #endif
 
 #endif /* _P_P_PORTABILITY_H_ */

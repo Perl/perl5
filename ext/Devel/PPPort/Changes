@@ -1,3 +1,7 @@
+2.004 - 22th August 2003
+
+    * Added grok_(hex|oct|bin) and related constants
+
 2.003 - 8th May 2003
 
     * Added get_av, get_cv, get_hv and get_sv
