@@ -10,7 +10,7 @@ BEGIN {
     require "test.pl";
 }
 
-print "1..74\n";
+print "1..75\n";
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -258,4 +258,22 @@ is(
     $w =~ s/\n//g;
     is($w, '');
 }
+
+# [ID 20020305.025] PACKAGE::SUPER doesn't work anymore
+
+package main;
+our @X;
+package Amajor;
+sub test {
+    push @main::X, 'Amajor', @_;
+}
+package Bminor;
+use base qw(Amajor);
+package main;
+sub Bminor::test {
+    $_[0]->Bminor::SUPER::test('x', 'y');
+    push @main::X, 'Bminor', @_;
+}
+Bminor->test('y', 'z');
+is("@X", "Amajor Bminor x y Bminor Bminor y z");
 
