@@ -229,6 +229,9 @@ struct thread_intern {
     char		Wstrerror_buffer[512];
     struct servent	Wservent;
     char		Wgetlogin_buffer[128];
+#    ifdef USE_SOCKETS_AS_HANDLES
+    int			Winit_socktype;
+#    endif
 #    ifdef HAVE_DES_FCRYPT
     char		Wcrypt_buffer[30];
 #    endif
