@@ -1043,6 +1043,7 @@ S_sublex_push(pTHX)
     SAVEI32(PL_lex_inwhat);
     SAVECOPLINE(PL_curcop);
     SAVEPPTR(PL_bufptr);
+    SAVEPPTR(PL_bufend);
     SAVEPPTR(PL_oldbufptr);
     SAVEPPTR(PL_oldoldbufptr);
     SAVEPPTR(PL_last_lop);
@@ -3227,8 +3228,16 @@ Perl_yylex(pTHX)
 		else
 		    PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR;
 		s = skipspace(s);
-		if (*s == '}')
+		if (*s == '}') {
+		    if (PL_expect == XREF && PL_lex_state == LEX_INTERPNORMAL) {
+			PL_expect = XTERM;
+			/* This hack is to get the ${} in the message. */
+			PL_bufptr = s+1;
+			yyerror("syntax error");
+			break;
+		    }
 		    OPERATOR(HASHBRACK);
+		}
 		/* This hack serves to disambiguate a pair of curlies
 		 * as being a block or an anon hash.  Normally, expectation
 		 * determines that, but in cases where we're not in a
