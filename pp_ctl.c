@@ -3559,9 +3559,10 @@ qsortsv(
             if (j != i) {
                /* Looks like we really need to move some things
                */
+	       int k;
 	       temp = array[i];
-	       for (--i; i >= j; --i)
-		  array[i + 1] = array[i];
+	       for (k = i - 1; k >= j; --k)
+		  array[k + 1] = array[k];
                array[j] = temp;
             }
          }
