@@ -469,7 +469,7 @@ EOF
 EOF
 	    pushssif $endif;
 	}
-        elsif ($func =~ /^(drand48|gmtime|localtime|random)$/) {
+        elsif ($func =~ /^(drand48|gmtime|localtime|random|srandom)$/) {
 	    pushssif $ifdef;
 	    push @struct, <<EOF;
 	$seent{$func} _${func}_struct;

@@ -127,6 +127,8 @@ Perl_reentrant_size(pTHX) {
 #ifdef HAS_SETLOCALE_R
 	PL_reentrant_buffer->_setlocale_size = REENTRANTSMALLSIZE;
 #endif /* HAS_SETLOCALE_R */
+#ifdef HAS_SRANDOM_R
+#endif /* HAS_SRANDOM_R */
 #ifdef HAS_STRERROR_R
 	PL_reentrant_buffer->_strerror_size = REENTRANTSMALLSIZE;
 #endif /* HAS_STRERROR_R */
@@ -211,6 +213,8 @@ Perl_reentrant_init(pTHX) {
 #ifdef HAS_SETLOCALE_R
 	New(31338, PL_reentrant_buffer->_setlocale_buffer, PL_reentrant_buffer->_setlocale_size, char);
 #endif /* HAS_SETLOCALE_R */
+#ifdef HAS_SRANDOM_R
+#endif /* HAS_SRANDOM_R */
 #ifdef HAS_STRERROR_R
 	New(31338, PL_reentrant_buffer->_strerror_buffer, PL_reentrant_buffer->_strerror_size, char);
 #endif /* HAS_STRERROR_R */
@@ -284,6 +288,8 @@ Perl_reentrant_free(pTHX) {
 #ifdef HAS_SETLOCALE_R
 	Safefree(PL_reentrant_buffer->_setlocale_buffer);
 #endif /* HAS_SETLOCALE_R */
+#ifdef HAS_SRANDOM_R
+#endif /* HAS_SRANDOM_R */
 #ifdef HAS_STRERROR_R
 	Safefree(PL_reentrant_buffer->_strerror_buffer);
 #endif /* HAS_STRERROR_R */

@@ -748,6 +748,9 @@ typedef struct {
 	char*	_setlocale_buffer;
 	size_t	_setlocale_size;
 #endif /* HAS_SETLOCALE_R */
+#ifdef HAS_SRANDOM_R
+	struct random_data _srandom_struct;
+#endif /* HAS_SRANDOM_R */
 #ifdef HAS_STRERROR_R
 	char*	_strerror_buffer;
 	size_t	_strerror_size;
