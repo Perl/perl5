@@ -1233,7 +1233,7 @@ PP(pp_helem)
 	    if (HvNAME(hv) && isGV(HeVAL(he)))
 		save_gp((GV*)HeVAL(he), !(op->op_flags & OPf_SPECIAL));
 	    else
-		save_svref(&HeVAL(he));
+		save_helem(hv, keysv, &HeVAL(he));
 	}
 	else if (op->op_private & OPpDEREF)
 	    vivify_ref(HeVAL(he), op->op_private & OPpDEREF);
@@ -1980,7 +1980,7 @@ PP(pp_aelem)
 	    RETURN;
 	}
 	if (op->op_private & OPpLVAL_INTRO)
-	    save_svref(svp);
+	    save_aelem(av, elem, svp);
 	else if (op->op_private & OPpDEREF)
 	    vivify_ref(*svp, op->op_private & OPpDEREF);
     }
