@@ -676,22 +676,34 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
     howlen_t howlen;
 
     /* These must not be in registers: */
-    int aint;
-    long along;
+    I16 ai16;
+    U16 au16;
+    I32 ai32;
+    U32 au32;
 #ifdef HAS_QUAD
     Quad_t aquad;
-#endif
-    U16 aushort;
-    I16 asshort;
-    unsigned int auint;
-    U32 aulong;
-    I32 aslong;
-#ifdef HAS_QUAD
     Uquad_t auquad;
+#endif
+#if SHORTSIZE != SIZE16
+    short ashort;
+    unsigned short aushort;
+#endif
+    int aint;
+    unsigned int auint;
+    long along;
+#if LONGSIZE != SIZE32
+    unsigned long aulong;
 #endif
     char *aptr;
     float afloat;
     double adouble;
+#if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
+    long double aldouble;
+#endif
+    IV aiv;
+    UV auv;
+    NV anv;
+
     I32 checksum = 0;
     UV cuv = 0;
     NV cdouble = 0.0;
@@ -699,13 +711,6 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
     char* strrelbeg = s;
     bool beyond = FALSE;
     bool unpack_only_one = (symptr->flags & FLAG_UNPACK_ONLY_ONE) != 0;
-
-    IV aiv;
-    UV auv;
-    NV anv;
-#if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
-    long double aldouble;
-#endif
 
     while (next_symbol(symptr)) {
         datumtype = symptr->code;
@@ -1019,7 +1024,6 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    if (len > along)
 		len = along;
 	    if (checksum) {
-		short ashort;
 		while (len-- > 0) {
 		    COPYNN(s, &ashort, sizeof(short));
 		    DO_BO_UNPACK(ashort, s);
@@ -1031,7 +1035,6 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		}
 	    }
 	    else {
-		short ashort;
                 if (len && unpack_only_one)
                     len = 1;
 		EXTEND(SP, len);
@@ -1055,17 +1058,17 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		len = along;
 	    if (checksum) {
       		while (len-- > 0) {
-		    COPY16(s, &asshort);
-		    DO_BO_UNPACK(asshort, 16);
+		    COPY16(s, &ai16);
+		    DO_BO_UNPACK(ai16, 16);
 #if U16SIZE > SIZE16
-		    if (asshort > 32767)
-			asshort -= 65536;
+		    if (ai16 > 32767)
+			ai16 -= 65536;
 #endif
 		    s += SIZE16;
 		    if (checksum > bits_in_uv)
-			cdouble += (NV)asshort;
+			cdouble += (NV)ai16;
 		    else
-			cuv += asshort;
+			cuv += ai16;
 		}
 	    }
 	    else {
@@ -1075,15 +1078,15 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		EXTEND_MORTAL(len);
 
 		while (len-- > 0) {
-		    COPY16(s, &asshort);
-		    DO_BO_UNPACK(asshort, 16);
+		    COPY16(s, &ai16);
+		    DO_BO_UNPACK(ai16, 16);
 #if U16SIZE > SIZE16
-		    if (asshort > 32767)
-			asshort -= 65536;
+		    if (ai16 > 32767)
+			ai16 -= 65536;
 #endif
 		    s += SIZE16;
 		    sv = NEWSV(38, 0);
-		    sv_setiv(sv, (IV)asshort);
+		    sv_setiv(sv, (IV)ai16);
 		    PUSHs(sv_2mortal(sv));
 		}
 	    }
@@ -1094,7 +1097,6 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 	    if (len > along)
 		len = along;
 	    if (checksum) {
-		unsigned short aushort;
 		while (len-- > 0) {
 		    COPYNN(s, &aushort, sizeof(unsigned short));
 		    DO_BO_UNPACK(aushort, s);
@@ -1111,7 +1113,6 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
-  		    unsigned short aushort;
 		    COPYNN(s, &aushort, sizeof(unsigned short));
 		    DO_BO_UNPACK(aushort, s);
 		    s += sizeof(unsigned short);
@@ -1132,21 +1133,21 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		len = along;
 	    if (checksum) {
 		while (len-- > 0) {
-		    COPY16(s, &aushort);
-		    DO_BO_UNPACK(aushort, 16);
+		    COPY16(s, &au16);
+		    DO_BO_UNPACK(au16, 16);
 		    s += SIZE16;
 #ifdef HAS_NTOHS
 		    if (datumtype == 'n')
-		        aushort = PerlSock_ntohs(aushort);
+		        au16 = PerlSock_ntohs(au16);
 #endif
 #ifdef HAS_VTOHS
 		    if (datumtype == 'v')
-			aushort = vtohs(aushort);
+			au16 = vtohs(au16);
 #endif
 		    if (checksum > bits_in_uv)
-			cdouble += (NV)aushort;
+			cdouble += (NV)au16;
 		    else
-			cuv += aushort;
+			cuv += au16;
 		}
 	    }
 	    else {
@@ -1155,19 +1156,19 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
-		    COPY16(s, &aushort);
-		    DO_BO_UNPACK(aushort, 16);
+		    COPY16(s, &au16);
+		    DO_BO_UNPACK(au16, 16);
 		    s += SIZE16;
 		    sv = NEWSV(39, 0);
 #ifdef HAS_NTOHS
 		    if (datumtype == 'n')
-			aushort = PerlSock_ntohs(aushort);
+			au16 = PerlSock_ntohs(au16);
 #endif
 #ifdef HAS_VTOHS
 		    if (datumtype == 'v')
-			aushort = vtohs(aushort);
+			au16 = vtohs(au16);
 #endif
-		    sv_setiv(sv, (UV)aushort);
+		    sv_setiv(sv, (UV)au16);
 		    PUSHs(sv_2mortal(sv));
 		}
 	    }
@@ -1179,20 +1180,20 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		len = along;
 	    if (checksum) {
 		while (len-- > 0) {
-		    COPY16(s, &asshort);
+		    COPY16(s, &ai16);
 		    s += SIZE16;
 #ifdef HAS_NTOHS
 		    if (datumtype == ('n' | TYPE_IS_SHRIEKING))
-		        asshort = (I16)PerlSock_ntohs((U16)asshort);
+		        ai16 = (I16)PerlSock_ntohs((U16)ai16);
 #endif
 #ifdef HAS_VTOHS
 		    if (datumtype == ('v' | TYPE_IS_SHRIEKING))
-			asshort = (I16)vtohs((U16)asshort);
+			ai16 = (I16)vtohs((U16)ai16);
 #endif
 		    if (checksum > bits_in_uv)
-			cdouble += (NV)asshort;
+			cdouble += (NV)ai16;
 		    else
-			cuv += asshort;
+			cuv += ai16;
 		}
 	    }
 	    else {
@@ -1201,18 +1202,18 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
-		    COPY16(s, &asshort);
+		    COPY16(s, &ai16);
 		    s += SIZE16;
 #ifdef HAS_NTOHS
 		    if (datumtype == ('n' | TYPE_IS_SHRIEKING))
-			asshort = (I16)PerlSock_ntohs((U16)asshort);
+			ai16 = (I16)PerlSock_ntohs((U16)ai16);
 #endif
 #ifdef HAS_VTOHS
 		    if (datumtype == ('v' | TYPE_IS_SHRIEKING))
-			asshort = (I16)vtohs((U16)asshort);
+			ai16 = (I16)vtohs((U16)ai16);
 #endif
 		    sv = NEWSV(39, 0);
-		    sv_setiv(sv, (IV)asshort);
+		    sv_setiv(sv, (IV)ai16);
 		    PUSHs(sv_2mortal(sv));
 		}
 	    }
@@ -1480,7 +1481,6 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		len = along;
 	    if (checksum) {
 		while (len-- > 0) {
-		    unsigned long aulong;
 		    COPYNN(s, &aulong, sizeof(unsigned long));
 		    DO_BO_UNPACK(aulong, l);
 		    s += sizeof(unsigned long);
@@ -1496,7 +1496,6 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
-		    unsigned long aulong;
 		    COPYNN(s, &aulong, sizeof(unsigned long));
 		    DO_BO_UNPACK(aulong, l);
 		    s += sizeof(unsigned long);
@@ -1517,21 +1516,21 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		len = along;
 	    if (checksum) {
 		while (len-- > 0) {
-		    COPY32(s, &aulong);
-		    DO_BO_UNPACK(aulong, 32);
+		    COPY32(s, &au32);
+		    DO_BO_UNPACK(au32, 32);
 		    s += SIZE32;
 #ifdef HAS_NTOHL
 		    if (datumtype == 'N')
-			aulong = PerlSock_ntohl(aulong);
+			au32 = PerlSock_ntohl(au32);
 #endif
 #ifdef HAS_VTOHL
 		    if (datumtype == 'V')
-			aulong = vtohl(aulong);
+			au32 = vtohl(au32);
 #endif
 		    if (checksum > bits_in_uv)
-			cdouble += (NV)aulong;
+			cdouble += (NV)au32;
 		    else
-			cuv += aulong;
+			cuv += au32;
 		}
 	    }
 	    else {
@@ -1540,19 +1539,19 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
-		    COPY32(s, &aulong);
-		    DO_BO_UNPACK(aulong, 32);
+		    COPY32(s, &au32);
+		    DO_BO_UNPACK(au32, 32);
 		    s += SIZE32;
 #ifdef HAS_NTOHL
 		    if (datumtype == 'N')
-			aulong = PerlSock_ntohl(aulong);
+			au32 = PerlSock_ntohl(au32);
 #endif
 #ifdef HAS_VTOHL
 		    if (datumtype == 'V')
-			aulong = vtohl(aulong);
+			au32 = vtohl(au32);
 #endif
 		    sv = NEWSV(43, 0);
-		    sv_setuv(sv, (UV)aulong);
+		    sv_setuv(sv, (UV)au32);
 		    PUSHs(sv_2mortal(sv));
 		}
 	    }
@@ -1564,20 +1563,20 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		len = along;
 	    if (checksum) {
 		while (len-- > 0) {
-		    COPY32(s, &aslong);
+		    COPY32(s, &ai32);
 		    s += SIZE32;
 #ifdef HAS_NTOHL
 		    if (datumtype == ('N' | TYPE_IS_SHRIEKING))
-			aslong = (I32)PerlSock_ntohl((U32)aslong);
+			ai32 = (I32)PerlSock_ntohl((U32)ai32);
 #endif
 #ifdef HAS_VTOHL
 		    if (datumtype == ('V' | TYPE_IS_SHRIEKING))
-			aslong = (I32)vtohl((U32)aslong);
+			ai32 = (I32)vtohl((U32)ai32);
 #endif
 		    if (checksum > bits_in_uv)
-			cdouble += (NV)aslong;
+			cdouble += (NV)ai32;
 		    else
-			cuv += aslong;
+			cuv += ai32;
 		}
 	    }
 	    else {
@@ -1586,18 +1585,18 @@ S_unpack_rec(pTHX_ register tempsym_t* symptr, register char *s, char *strbeg, c
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
-		    COPY32(s, &aslong);
+		    COPY32(s, &ai32);
 		    s += SIZE32;
 #ifdef HAS_NTOHL
 		    if (datumtype == ('N' | TYPE_IS_SHRIEKING))
-			aslong = (I32)PerlSock_ntohl((U32)aslong);
+			ai32 = (I32)PerlSock_ntohl((U32)ai32);
 #endif
 #ifdef HAS_VTOHL
 		    if (datumtype == ('V' | TYPE_IS_SHRIEKING))
-			aslong = (I32)vtohl((U32)aslong);
+			ai32 = (I32)vtohl((U32)ai32);
 #endif
 		    sv = NEWSV(43, 0);
-		    sv_setiv(sv, (IV)aslong);
+		    sv_setiv(sv, (IV)ai32);
 		    PUSHs(sv_2mortal(sv));
 		}
 	    }
@@ -2181,24 +2180,34 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 
     /* These must not be in registers: */
     char achar;
-    I16 ashort;
-    int aint;
-    unsigned int auint;
-    I32 along;
-    U32 aulong;
-    IV aiv;
-    UV auv;
-    NV anv;
-#if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
-    long double aldouble;
-#endif
+    I16 ai16;
+    U16 au16;
+    I32 ai32;
+    U32 au32;
 #ifdef HAS_QUAD
     Quad_t aquad;
     Uquad_t auquad;
 #endif
+#if SHORTSIZE != SIZE16
+    short ashort;
+    unsigned short aushort;
+#endif
+    int aint;
+    unsigned int auint;
+#if LONGSIZE != SIZE32
+    long along;
+    unsigned long aulong;
+#endif
     char *aptr;
     float afloat;
     double adouble;
+#if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
+    long double aldouble;
+#endif
+    IV aiv;
+    UV auv;
+    NV anv;
+
     int strrelbeg = SvCUR(cat);
     tempsym_t lookahead;
 
@@ -2580,29 +2589,27 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	case 'n':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		ashort = (I16)SvIV(fromstr);
+		ai16 = (I16)SvIV(fromstr);
 #ifdef HAS_HTONS
-		ashort = PerlSock_htons(ashort);
+		ai16 = PerlSock_htons(ai16);
 #endif
-		CAT16(cat, &ashort);
+		CAT16(cat, &ai16);
 	    }
 	    break;
 	case 'v' | TYPE_IS_SHRIEKING:
 	case 'v':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		ashort = (I16)SvIV(fromstr);
+		ai16 = (I16)SvIV(fromstr);
 #ifdef HAS_HTOVS
-		ashort = htovs(ashort);
+		ai16 = htovs(ai16);
 #endif
-		CAT16(cat, &ashort);
+		CAT16(cat, &ai16);
 	    }
 	    break;
         case 'S' | TYPE_IS_SHRIEKING:
 #if SHORTSIZE != SIZE16
 	    {
-		unsigned short aushort;
-
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;
 		    aushort = SvUV(fromstr);
@@ -2616,13 +2623,11 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 #endif
 	case 'S':
             {
-		U16 aushort;
-
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;
-		    aushort = (U16)SvUV(fromstr);
-		    DO_BO_PACK(aushort, 16);
-		    CAT16(cat, &aushort);
+		    au16 = (U16)SvUV(fromstr);
+		    DO_BO_PACK(au16, 16);
+		    CAT16(cat, &au16);
 		}
 
 	    }
@@ -2630,8 +2635,6 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	case 's' | TYPE_IS_SHRIEKING:
 #if SHORTSIZE != SIZE16
 	    {
-		short ashort;
-
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;
 		    ashort = SvIV(fromstr);
@@ -2646,9 +2649,9 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	case 's':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		ashort = (I16)SvIV(fromstr);
-		DO_BO_PACK(ashort, 16);
-		CAT16(cat, &ashort);
+		ai16 = (I16)SvIV(fromstr);
+		DO_BO_PACK(ai16, 16);
+		CAT16(cat, &ai16);
 	    }
 	    break;
 	case 'I':
@@ -2802,29 +2805,27 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	case 'N':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		aulong = SvUV(fromstr);
+		au32 = SvUV(fromstr);
 #ifdef HAS_HTONL
-		aulong = PerlSock_htonl(aulong);
+		au32 = PerlSock_htonl(au32);
 #endif
-		CAT32(cat, &aulong);
+		CAT32(cat, &au32);
 	    }
 	    break;
 	case 'V' | TYPE_IS_SHRIEKING:
 	case 'V':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
-		aulong = SvUV(fromstr);
+		au32 = SvUV(fromstr);
 #ifdef HAS_HTOVL
-		aulong = htovl(aulong);
+		au32 = htovl(au32);
 #endif
-		CAT32(cat, &aulong);
+		CAT32(cat, &au32);
 	    }
 	    break;
 	case 'L' | TYPE_IS_SHRIEKING:
 #if LONGSIZE != SIZE32
 	    {
-		unsigned long aulong;
-
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;
 		    aulong = SvUV(fromstr);
@@ -2840,17 +2841,15 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
             {
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;
-		    aulong = SvUV(fromstr);
-		    DO_BO_PACK(aulong, 32);
-		    CAT32(cat, &aulong);
+		    au32 = SvUV(fromstr);
+		    DO_BO_PACK(au32, 32);
+		    CAT32(cat, &au32);
 		}
 	    }
 	    break;
 	case 'l' | TYPE_IS_SHRIEKING:
 #if LONGSIZE != SIZE32
 	    {
-		long along;
-
 		while (len-- > 0) {
 		    fromstr = NEXTFROM;
 		    along = SvIV(fromstr);
@@ -2865,9 +2864,9 @@ S_pack_rec(pTHX_ SV *cat, register tempsym_t* symptr, register SV **beglist, SV 
 	case 'l':
             while (len-- > 0) {
 		fromstr = NEXTFROM;
-		along = SvIV(fromstr);
-		DO_BO_PACK(along, 32);
-		CAT32(cat, &along);
+		ai32 = SvIV(fromstr);
+		DO_BO_PACK(ai32, 32);
+		CAT32(cat, &ai32);
 	    }
 	    break;
 #ifdef HAS_QUAD
