@@ -88,7 +88,6 @@ sub Process_File
 		open(FH, "+< $FileToProcess") or die "Unable to open the file,  $FileToProcess  for reading and writing.\n";
 		@ARRAY = <FH>;	# Get the contents of the file into an array.
 
-		flock(FH, LOCK_EX);		# Lock the file for safety purposes.
 		foreach $Line(@ARRAY)	# Get each line of the file.
 		{
 			if($Line =~ m/\@INC = /)
@@ -112,7 +111,6 @@ sub Process_File
 
 		seek(FH, 0, 0);		# Seek to the beginning.
 		print FH @ARRAY;	# Write the changed array into the file.
-		flock(FH, LOCK_UN);	# unlock the file.
 		close FH;			# close the file.
 
 		$FilesRead++;	# One more file read.

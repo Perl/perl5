@@ -41,7 +41,6 @@ print "Generating  t/nwauto.pl ...\n\n\n";
 
 open(FHWA, "> t/nwauto.pl") or die "Unable to open the file,  t/nwauto.pl  for writing.\n";
 seek(FHWA, 0, 0);	# seek to the beginning of the file.
-flock(FHWA, LOCK_EX);		# Lock the file for safety purposes.
 
 $version = sprintf("%vd",$^V);
 print FHWA "\n\nprint \"Automated Unit Testing of Perl$version for NetWare\\n\\n\\n\"\;\n\n\n";
@@ -70,7 +69,6 @@ foreach $FileName(@DirNames)
 		# Write into the intermediary auto script.
 		open(FHW, ">> $IntAutoScript") or die "Unable to open the file,  $IntAutoScript  for appending.\n";
 		seek(FHW, 0, 2);	# seek to the end of the file.
-		flock(FHW, LOCK_EX);		# Lock the file for safety purposes.
 
 		$pos = tell(FHW);
 		if($pos <= 0)
@@ -97,7 +95,6 @@ foreach $FileName(@DirNames)
 			$index++;
 		}
 
-		flock(FHW, LOCK_UN);	# unlock the file.
 		close FHW;			# close the file.
 
 		if($index <= 0)
@@ -169,12 +166,10 @@ foreach $DirItem(@Dirs)
 			# Write into the intermediary auto script.
 			open(FHW, ">> $IntAutoScript") or die "Unable to open the file,  $IntAutoScript  for appending.\n";
 			seek(FHW, 0, 2);	# seek to the end of the file.
-			flock(FHW, LOCK_EX);		# Lock the file for safety purposes.
 
 			# Write into the intermediary auto script.
 			print FHW "\nprint \"Testing of  $DirItem  folder done!\\n\\n\"\;\n\n";
 
-			flock(FHW, LOCK_UN);	# unlock the file.
 			close FHW;			# close the file.
 		}
 	}
@@ -184,7 +179,6 @@ foreach $DirItem(@Dirs)
 # Write into  nwauto.pl
 print FHWA "\nprint \"Automated Unit Testing of Perl$version for NetWare done!\\n\\n\"\;\n\n";
 
-flock(FHWA, LOCK_UN);	# unlock the file.
 close FHWA;			# close the file.
 
 print "\n\nGeneration of  t/nwauto.pl  Done!\n\n";

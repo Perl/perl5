@@ -103,6 +103,7 @@ int nw_getsockname(SOCKET s, struct sockaddr *addr, int *addrlen);
 int nw_getsockopt(SOCKET s, int level, int optname, char *optval, int *optlen);
 
 unsigned long nw_inet_addr(const char *cp);
+char * nw_inet_ntoa(struct in_addr in);
 
 void nw_endhostent();
 void nw_endnetent();
