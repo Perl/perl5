@@ -28,7 +28,7 @@ directories <root>/bin and <root>/lib and then the above example will allow
 the use of modules in the lib directory without knowing where the software
 tree is installed.
 
-If perl is invoked using the -e option or the perl script is read from
+If perl is invoked using the B<-e> option or the perl script is read from
 C<STDIN> then FindBin sets both C<$Bin> and C<$RealBin> to the current
 directory.
 
@@ -46,7 +46,7 @@ if perl is invoked as
    perl filename
 
 and I<filename> does not have executable rights and a program called I<filename>
-exists in the users C<$ENV{PATH}> which satisfies both -x and -T then FindBin
+exists in the users C<$ENV{PATH}> which satisfies both B<-x> and B<-T> then FindBin
 assumes that it was invoked via the C<$ENV{PATH}>.
 
 Workaround is to invoke perl as

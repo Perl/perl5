@@ -89,7 +89,7 @@ These are is fprintf()/vfprintf equivalents.
 =item B<PerlIO_stdoutf(fmt,...)>
 
 This is printf() equivalent. printf is #defined to this function,
-so it is (currently) legal to use printf(fmt,...) in perl sources.
+so it is (currently) legal to use C<printf(fmt,...)> in perl sources.
 
 =item B<PerlIO_read(f,buf,count)>, B<PerlIO_write(f,buf,count)>
 

@@ -21,7 +21,7 @@ AutoSplit - split a package for autoloading
  use AutoSplit; autosplit($file, $dir, $keep, $check, $modtime);
 
 for perl versions 5.002 and later:
- 
+
  perl -MAutoSplit -e 'autosplit($ARGV[0], $ARGV[1], $k, $chk, $modtime)' ...
 
 =head1 DESCRIPTION

@@ -156,7 +156,7 @@ WARNING below.) The scope of $<digit> (and C<$`>, C<$&>, and C<$'>)
 extends to the end of the enclosing BLOCK or eval string, or to the next
 successful pattern match, whichever comes first.  If you want to use
 parentheses to delimit a subpattern (e.g. a set of alternatives) without
-saving it as a subpattern, follow the ( with a ?.
+saving it as a subpattern, follow the ( with a ?:.
 
 You may have as many parentheses as you wish.  If you have more
 than 9 substrings, the variables $10, $11, ... refer to the

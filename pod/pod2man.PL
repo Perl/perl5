@@ -402,7 +402,7 @@ if ($name ne 'something') {
 		    $oops++;
 		    warn "$0: Improper man page - no dash in NAME header in paragraph $. of $ARGV[0]\n"
 		}
-		%namedesc = split /\s+-\s+/;
+		%namedesc = split /\s+-+\s+/;
 		last FCHECK;
 	    }
 	    next if /^=cut\b/;	# DB_File and Net::Ping have =cut before NAME

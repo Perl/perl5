@@ -160,7 +160,7 @@ installed handlers.
 These options affect which handler will be used for subsequently
 installed signals.
 
-=over
+=over 4
 
 =item B<stack-trace>
 
@@ -185,7 +185,7 @@ assignment to an element of C<%SIG>.
 
 B<sigtrap> has two built-in lists of signals to trap.  They are:
 
-=over
+=over 4
 
 =item B<normal-signals>
 
@@ -209,6 +209,8 @@ B<sigtrap> this list is used.
 =back
 
 =head2 OTHER
+
+=over 4
 
 =item B<untrapped>
 

@@ -88,7 +88,7 @@ test" is sufficient.
 Our first extension will be very simple.  When we call the routine in the
 extension, it will print out a well-known message and return.
 
-Run "h2xs -A -n Mytest".  This creates a directory named Mytest, possibly under
+Run C<h2xs -A -n Mytest>.  This creates a directory named Mytest, possibly under
 ext/ if that directory exists in the current working directory.  Several files
 will be created in the Mytest dir, including MANIFEST, Makefile.PL, Mytest.pm,
 Mytest.xs, test.pl, and Changes.
@@ -271,7 +271,7 @@ contain the shared library that we will build.  Once we have tested it, we
 can install it into its final location.
 
 Invoking the test script via "make test" did something very important.  It
-invoked perl with all those -I arguments so that it could find the various
+invoked perl with all those C<-I> arguments so that it could find the various
 files that are part of the extension.
 
 It is I<very> important that while you are still testing extensions that
@@ -582,10 +582,12 @@ for equality, but rather the difference being below a certain epsilon factor,
 
 Run "make test" and all should be well.
 
-=head 2 WHAT HAS HAPPENED HERE?
+=head2 WHAT HAS HAPPENED HERE?
 
 Unlike previous examples, we've now run h2xs on a real include file.  This
 has caused some extra goodies to appear in both the .pm and .xs files.
+
+=over 4
 
 =item *
 

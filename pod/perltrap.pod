@@ -796,7 +796,7 @@ that perl4 exhibits only for scalars.
     # SUB: this should never appear
     # SUB: this should never appear
 
-=back 
+=back
 
 =head2 Context Traps - scalar, list contexts
 
@@ -867,6 +867,8 @@ Probably a bug.
 =head2 Precedence Traps
 
 Perl4-to-Perl5 traps involving precedence order.
+
+=over 5
 
 =item * 
 
@@ -1323,6 +1325,8 @@ immediately.
 =head2 Unclassified Traps
 
 Everything else.
+
+=over 5
 
 =item * Unclassified
 

@@ -6,7 +6,7 @@ package IO::Select;
 
 IO::Select - OO interface to the system select call
 
-=head1 SYNOPSYS
+=head1 SYNOPSIS
 
     use IO::Select;
 

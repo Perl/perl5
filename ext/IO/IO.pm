@@ -10,3 +10,26 @@ use IO::Socket;
 
 1;
 
+=head1 NAME
+
+IO - load various IO modules
+
+=head1 SYNOPSIS
+
+    use IO;
+
+=head1 DESCRIPTION
+
+C<IO> provides a simple mechanism to load all of the IO modules at one go.
+Currently this includes:
+
+	IO::Handle
+	IO::Seekable
+	IO::File
+	IO::Pipe
+	IO::Socket
+
+For more information on any of these modules, please see its respective
+documentation.
+
+=cut
