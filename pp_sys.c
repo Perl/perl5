@@ -3724,6 +3724,9 @@ PP(pp_fork)
     if (childpid < 0)
 	RETSETUNDEF;
     if (!childpid) {
+#ifdef SOCKS_64BIT_BUG
+	Perl_do_s64_init_buffer();
+#endif
 	/*SUPPRESS 560*/
 	if ((tmpgv = gv_fetchpv("$", TRUE, SVt_PV)))
 	    sv_setiv(GvSV(tmpgv), (IV)PerlProc_getpid());

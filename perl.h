@@ -3443,6 +3443,16 @@ typedef struct am_table_short AMTS;
 #   include <libutil.h>		/* setproctitle() in some FreeBSDs */
 #endif
 
+#ifdef SOCKS_64BIT_BUG
+typedef struct __s64_iobuffer {
+    struct __s64_iobuffer *next, *last;		/* Queue pointer */
+    PerlIO *fp;					/* Assigned file pointer */
+    int cnt;					/* Buffer counter */
+    int size;					/* Buffer size */
+    int *buffer;				/* The buffer */
+} S64_IOB;
+#endif
+
 /* and finally... */
 #define PERL_PATCHLEVEL_H_IMPLICIT
 #include "patchlevel.h"

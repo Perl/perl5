@@ -156,6 +156,8 @@ if($pid = fork()) {
     if ($sock) {
        $sock->print("ok 11\n");
        $sock->print("quit\n");
+    } else {
+       print "not ok 11\n";
     }
     $sock = undef;
     sleep(1);
