@@ -78,7 +78,7 @@ Sets modified time of dst to that of src
 sub eqtime
 {
  my ($src,$dst) = @ARGV;
- open(F,">$dst");
+ open(F,">>$dst");
  close(F);
  utime((stat($src))[8,9],$dst);
 }
