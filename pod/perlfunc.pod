@@ -455,27 +455,9 @@ binary and text files.  If FILEHANDLE is an expression, the value is
 taken as the name of the filehandle.  Returns true on success,
 C<undef> on failure.
 
-DISCIPLINE can be either of C<:bytes> for "binary" mode or C<:crlf>
-for "text" mode.  If the DISCIPLINE is omitted, it defaults to
-C<:bytes>.  To mark FILEHANDLE as UTF-8, use C<:utf8>.  For backward
-compatibility C<binmode(FILEHANDLE)> also implicitly marks the
-filehandle as bytes.
-
-The C<:bytes>, C<:crlf>, and C<:utf8>, and any other directives of the
-form C<:...>, are called I/O I<disciplines>.  The C<open> pragma can
-be used to establish default I/O disciplines.  See L<open>.
-
-The C<:raw> discipline is deprecated.  (As opposed to what Camel III
-said, it is not the inverse of C<:crlf>.)  See L<perlrun> and the
-discussion about the PERLIO environment variable.
-
-In general, binmode() should be called after open() but before any I/O
-is done on the filehandle.  Calling binmode() will flush any possibly
-pending buffered input or output data on the handle.  The only
-exception to this is the C<:encoding> discipline that changes
-the default character encoding of the handle, see L<open>.
-The C<:encoding> discipline sometimes needs to be called in
-mid-stream, and it doesn't flush the stream.
+If DISCIPLINE is ommited the filehandle is made suitable for
+passing binary data. This includes turning off CRLF translation
+and marking it as bytes.
 
 On some systems (in general, DOS and Windows-based systems) binmode()
 is necessary when you're not working with a text file.  For the sake
@@ -483,7 +465,33 @@ of portability it is a good idea to always use it when appropriate,
 and to never use it when it isn't appropriate.
 
 In other words: regardless of platform, use binmode() on binary files
-(like for example images), and do not use binmode() on text files.
+(like for example images).
+
+If DISCIPLINE is present it is a single string, but may contain
+multiple directives. The directives alter the behaviour of the
+file handle. When DISCIPLINE is present using binmode on text
+file makes sense.
+
+To mark FILEHANDLE as UTF-8, use C<:utf8>.
+
+The C<:bytes>, C<:crlf>, and C<:utf8>, and any other directives of the
+form C<:...>, are called I/O I<disciplines>. The normal implementation
+of disciplines in perl5.8 and later is in terms of I<layers>. See
+L<PerlIO>. (There is typically a one-to-one correspondence between
+layers and disiplines.) The C<open> pragma can be used to establish
+default I/O disciplines.  See L<open>.
+
+The C<:raw> discipline is deprecated.  (As opposed to what Camel III
+said, it is not the inverse of C<:crlf>.)  See L<PerlIO>, L<perlrun>
+and the discussion about the PERLIO environment variable.
+
+In general, binmode() should be called after open() but before any I/O
+is done on the filehandle.  Calling binmode() will normally flush any
+pending buffered output data (and perhaps pending input data) on the
+handle.  An exception to this is the C<:encoding> discipline that
+changes the default character encoding of the handle, see L<open>.
+The C<:encoding> discipline sometimes needs to be called in
+mid-stream, and it doesn't flush the stream.
 
 The operating system, device drivers, C libraries, and Perl run-time
 system all work together to let the programmer treat a single
@@ -496,14 +504,13 @@ one character.
 Mac OS, all variants of Unix, and Stream_LF files on VMS use a single
 character to end each line in the external representation of text (even
 though that single character is CARRIAGE RETURN on Mac OS and LINE FEED
-on Unix and most VMS files).  Consequently binmode() has no effect on
-these operating systems.  In other systems like OS/2, DOS and the various
-flavors of MS-Windows your program sees a C<\n> as a simple C<\cJ>, but
-what's stored in text files are the two characters C<\cM\cJ>.  That means
-that, if you don't use binmode() on these systems, C<\cM\cJ> sequences on
-disk will be converted to C<\n> on input, and any C<\n> in your program
-will be converted back to C<\cM\cJ> on output.  This is what you want for
-text files, but it can be disastrous for binary files.
+on Unix and most VMS files). In other systems like OS/2, DOS and the
+various flavors of MS-Windows your program sees a C<\n> as a simple C<\cJ>,
+but what's stored in text files are the two characters C<\cM\cJ>.  That
+means that, if you don't use binmode() on these systems, C<\cM\cJ>
+sequences on disk will be converted to C<\n> on input, and any C<\n> in
+your program will be converted back to C<\cM\cJ> on output.  This is what
+you want for text files, but it can be disastrous for binary files.
 
 Another consequence of using binmode() (on some systems) is that
 special end-of-file markers will be seen as part of the data stream.
@@ -2476,7 +2483,7 @@ and the month of the year, may not necessarily be three characters wide.
 
 =item lock THING
 
-This function places an advisory lock on a shared variable, or referenced 
+This function places an advisory lock on a shared variable, or referenced
 object contained in I<THING> until the lock goes out of scope.
 
 lock() is a "weak keyword" : this means that if you've defined a function
@@ -2788,13 +2795,16 @@ In the 2-arguments (and 1-argument) form opening C<'-'> opens STDIN
 and opening C<< '>-' >> opens STDOUT.
 
 You may use the three-argument form of open to specify
-I<I/O disciplines> that affect how the input and output
-are processed: see L</binmode> and L<open>.  For example
+I<I/O disciplines>  or IO "layers"  to be applied to the handle that affect how the input and output
+are processed: (see L<open> and L<PerlIO> for more details).
+For example
 
   open(FH, "<:utf8", "file")
 
 will open the UTF-8 encoded file containing Unicode characters,
-see L<perluniintro>.
+see L<perluniintro>. (Note that if disciplines are specified in the
+three-arg form then default disciplines set by the C<open> pragma are
+ignored.)
 
 Open returns nonzero upon success, the undefined value otherwise.  If
 the C<open> involved a pipe, the return value happens to be the pid of
@@ -2807,11 +2817,6 @@ C<binmode> and those that don't is their text file formats.  Systems
 like Unix, Mac OS, and Plan 9, which delimit lines with a single
 character, and which encode that character in C as C<"\n">, do not
 need C<binmode>.  The rest need it.
-
-In the three argument form MODE may also contain a list of IO "layers"
-(see L<open> and L<PerlIO> for more details) to be applied to the
-handle. This can be used to achieve the effect of C<binmode> as well
-as more complex behaviours.
 
 When opening a file, it's usually a bad idea to continue normal execution
 if the request failed, so C<open> is frequently used in connection with
