@@ -4249,15 +4249,9 @@ Perl_cv_undef(pTHX_ CV *cv)
      * CV, they don't hold a refcount on the outside CV.  This avoids
      * the refcount loop between the outer CV (which keeps a refcount to
      * the closure prototype in the pad entry for pp_anoncode()) and the
-     * closure prototype, and the ensuing memory leak.  This does not
-     * apply to closures generated within eval"", since eval"" CVs are
-     * ephemeral. --GSAR */
-    if (!CvANON(cv) || CvCLONED(cv)
-	|| (CvOUTSIDE(cv) && SvTYPE(CvOUTSIDE(cv)) == SVt_PVCV
-	    && CvEVAL(CvOUTSIDE(cv)) && !CvGV(CvOUTSIDE(cv))))
-    {
+     * closure prototype, and the ensuing memory leak.  --GSAR */
+    if (!CvANON(cv) || CvCLONED(cv))
 	SvREFCNT_dec(CvOUTSIDE(cv));
-    }
     CvOUTSIDE(cv) = Nullcv;
     if (CvCONST(cv)) {
 	SvREFCNT_dec((SV*)CvXSUBANY(cv).any_ptr);
@@ -4904,17 +4898,12 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	}
     }
 
-    /* If a potential closure prototype, don't keep a refcount on
-     * outer CV, unless the latter happens to be a passing eval"".
+    /* If a potential closure prototype, don't keep a refcount on outer CV.
      * This is okay as the lifetime of the prototype is tied to the
      * lifetime of the outer CV.  Avoids memory leak due to reference
      * loop. --GSAR */
-    if (!name && CvOUTSIDE(cv)
-	&& !(SvTYPE(CvOUTSIDE(cv)) == SVt_PVCV
-	     && CvEVAL(CvOUTSIDE(cv)) && !CvGV(CvOUTSIDE(cv))))
-    {
+    if (!name)
 	SvREFCNT_dec(CvOUTSIDE(cv));
-    }
 
     if (name || aname) {
 	char *s;
