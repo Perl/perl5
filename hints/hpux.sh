@@ -164,7 +164,7 @@ toke_cflags='ccflags="$ccflags -DARG_ZERO_IS_SCRIPT"'
 # Comment this out if you don't want to follow the SVR4 filesystem layout
 # that HP-UX 10.0 uses
 case "$prefix" in
-'') prefix='/opt/perl5.003' ;;
+'') prefix='/opt/perl5' ;;
 esac
 
 # Date: Fri, 6 Sep 96 23:15:31 CDT
