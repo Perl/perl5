@@ -907,6 +907,7 @@ public:
 #define PerlSock_inet_addr(c)		inet_addr(c)
 #define PerlSock_inet_ntoa(i)		inet_ntoa(i)
 #define PerlSock_listen(s, b)		listen(s, b)
+#define PerlSock_recv(s, b, l, f)	recv(s, b, l, f)
 #define PerlSock_recvfrom(s, b, l, f, from, fromlen)			\
 	recvfrom(s, b, l, f, from, fromlen)
 #define PerlSock_select(n, r, w, e, t)	select(n, r, w, e, t)
