@@ -77,14 +77,14 @@ typedef struct Module {
  * We keep a list of all loaded modules to be able to call the fini
  * handlers at atexit() time.
  */
-static ModulePtr modList;		/* XXX threadead */
+static ModulePtr modList;		/* XXX threaded */
 
 /*
  * The last error from one of the dl* routines is kept in static
  * variables here. Each error is returned only once to the caller.
  */
-static char errbuf[BUFSIZ];		/* XXX threadead */
-static int errvalid;			/* XXX threadead */
+static char errbuf[BUFSIZ];		/* XXX threaded */
+static int errvalid;			/* XXX threaded */
 
 static void caterr(char *);
 static int readExports(ModulePtr);
@@ -103,7 +103,7 @@ char *strerrorcat(char *str, int err) {
 
     if (buf == 0)
       return 0;
-    if (strerror_r(err, buf, sizeof(buf)) == 0)
+    if (strerror_r(err, buf, BUFSIZ) == 0)
       msg = buf;
     else
       msg = strerror_r_failed;
@@ -131,7 +131,7 @@ char *strerrorcpy(char *str, int err) {
 
     if (buf == 0)
       return 0;
-    if (strerror_r(err, buf, sizeof(buf)) == 0)
+    if (strerror_r(err, buf, BUFSIZ) == 0)
       msg = buf;
     else
       msg = strerror_r_failed;
@@ -155,7 +155,7 @@ void *dlopen(char *path, int mode)
 {
 	dTHX;
 	register ModulePtr mp;
-	static int inited;			/* XXX threadead */
+	static int inited;			/* XXX threaded */
 
 	/*
 	 * Upon the first call register a terminate handler that will
@@ -188,11 +188,19 @@ void *dlopen(char *path, int mode)
 		safefree(mp);
 		return NULL;
 	}
+
 	/*
 	 * load should be declared load(const char *...). Thus we
 	 * cast the path to a normal char *. Ugly.
 	 */
-	if ((mp->entry = (void *)load((char *)path, L_NOAUTODEFER, NULL)) == NULL) {
+	if ((mp->entry = (void *)load((char *)path,
+#ifdef L_LIBPATH_EXEC
+				      L_LIBPATH_EXEC |
+#endif
+				      L_NOAUTODEFER,
+				      NULL)) == NULL) {
+	        int saverrno = errno;
+		
 		safefree(mp->name);
 		safefree(mp);
 		errvalid++;
@@ -204,17 +212,17 @@ void *dlopen(char *path, int mode)
 		 * can be further described by querying the loader about
 		 * the last error.
 		 */
-		if (errno == ENOEXEC) {
-			char *tmp[BUFSIZ/sizeof(char *)];
-			if (loadquery(L_GETMESSAGES, tmp, sizeof(tmp)) == -1)
-				strerrorcpy(errbuf, errno);
+		if (saverrno == ENOEXEC) {
+			char *moreinfo[BUFSIZ/sizeof(char *)];
+			if (loadquery(L_GETMESSAGES, moreinfo, sizeof(moreinfo)) == -1)
+				strerrorcpy(errbuf, saverrno);
 			else {
 				char **p;
-				for (p = tmp; *p; p++)
+				for (p = moreinfo; *p; p++)
 					caterr(*p);
 			}
 		} else
-			strerrorcat(errbuf, errno);
+			strerrorcat(errbuf, saverrno);
 		return NULL;
 	}
 	mp->refCnt = 1;
@@ -226,10 +234,12 @@ void *dlopen(char *path, int mode)
 	 * of the perl core are in the same shared object.
 	 */
 	if (loadbind(0, (void *)dlopen, mp->entry) == -1) {
+	        int saverrno = errno;
+
 		dlclose(mp);
 		errvalid++;
 		strcpy(errbuf, "loadbind: ");
-		strerrorcat(errbuf, errno);
+		strerrorcat(errbuf, saverrno);
 		return NULL;
 	}
 	if (readExports(mp) == -1) {

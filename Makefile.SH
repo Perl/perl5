@@ -61,15 +61,13 @@ true)
 	aix*)
 		shrpldflags="-H512 -T512 -bhalt:4 -bM:SRE -bE:perl.exp"
 		case "$osvers" in
-		3*)
-			shrpldflags="$shrpldflags -e _nostart $ldflags $libs $cryptlib"
+		3*)	shrpldflags="$shrpldflags -e _nostart"
 			;;
-		*)
-			shrpldflags="$shrpldflags -b noentry $ldflags $libs $cryptlib"
+		*)	shrpldflags="$shrpldflags -b noentry"
 			;;
 		esac
-		aixinstdir=`pwd | sed 's/\/UU$//'`
-		linklibperl="-L $archlibexp/CORE -L $aixinstdir -lperl"
+	        shrpldflags="$shrpldflags $ldflags $libs $cryptlib"
+		linklibperl="-L $archlibexp/CORE -L `pwd | sed 's/\/UU$//'` -lperl"
 		ldlibpth="LIBPATH=`pwd`:${LIBPATH}"
 		;;
 	hpux*)
@@ -205,10 +203,10 @@ private = preplibrary lib/ExtUtils/Miniperl.pm lib/Config.pm
 # Files to be built with variable substitution before miniperl
 # is available.
 sh = Makefile.SH cflags.SH config_h.SH makeaperl.SH makedepend.SH \
-	makedir.SH myconfig.SH perl_exp.SH writemain.SH
+	makedir.SH myconfig.SH writemain.SH
 
 shextract = Makefile cflags config.h makeaperl makedepend \
-	makedir myconfig perl.exp writemain
+	makedir myconfig writemain
 
 # Files to be built with variable substitution after miniperl is
 # available.  Dependencies handled manually below (for now).
@@ -309,6 +307,51 @@ cygwin*)
 	;;
 esac
 
+case "$osname" in
+aix)
+	$spitshell >>Makefile <<!GROK!THIS!
+LIBS			= $libs
+
+!GROK!THIS!
+	case "$useshrplib" in
+	define|true|[yY]*)
+		$spitshell >>Makefile <<'!NO!SUBS!'
+
+LIBPERL_NONSHR		= libperl_nonshr$(LIB_EXT)
+MINIPERL_NONSHR		= miniperl_nonshr$(EXE_EXT)
+
+$(LIBPERL_NONSHR): perl$(OBJ_EXT) $(obj)
+	$(RMS) $(LIBPERL_NONSHR)
+	$(AR) rcu $(LIBPERL_NONSHR) perl$(OBJ_EXT) $(obj)
+
+$(MINIPERL_NONSHR): $(LIBPERL_NONSHR) miniperlmain$(OBJ_EXT)
+	$(CC) -o $(MINIPERL_NONSHR) miniperlmain$(OBJ_EXT) $(LIBPERL_NONSHR) $(LIBS)
+
+MINIPERLEXP		= $(MINIPERL_NONSHR)
+
+LIBPERLEXPORT		= perl.exp
+
+!NO!SUBS!
+		
+		;;
+	*)	
+		$spitshell >>Makefile <<'!NO!SUBS!'
+MINIPERLEXP		= miniperl$(EXE_EXT)
+
+PERLEXPORT		= perl.exp
+
+!NO!SUBS!
+	;;
+	esac
+	$spitshell >>Makefile <<'!NO!SUBS!'
+perl.exp: $(MINIPERLEXP) makedef.pl config.sh $(SYM) $(SYMH)
+	./$(MINIPERLEXP) makedef.pl PLATFORM=aix | sort -u | sort -f > perl.exp.tmp
+	sh mv-if-diff perl.exp.tmp perl.exp
+
+!NO!SUBS!
+	;;
+esac
+
 if test -r $Makefile_s ; then
 	. $Makefile_s
 	$spitshell >>Makefile <<!GROK!THIS!
@@ -317,7 +360,7 @@ Makefile: $Makefile_s
 !GROK!THIS!
 else
 	$spitshell >>Makefile <<'!NO!SUBS!'
-$(LIBPERL): $& perl$(OBJ_EXT) $(obj)
+$(LIBPERL): $& perl$(OBJ_EXT) $(obj) $(LIBPERLEXPORT)
 !NO!SUBS!
 	case "$useshrplib" in
 	true)
@@ -358,16 +401,16 @@ miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL)
 	$(LDLIBPTH) $(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain$(OBJ_EXT) $(LLIBPERL) $(libs)
 	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e 0 || $(MAKE) minitest
 
-perl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
+perl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs $(PERLEXPORT)
 	$(SHRPENV) $(LDLIBPTH) $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o perl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
-pureperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
+pureperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs $(PERLEXPORT)
 	$(SHRPENV) $(LDLIBPTH) purify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o pureperl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
-purecovperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
+purecovperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs $(PERLEXPORT)
 	$(SHRPENV) $(LDLIBPTH) purecov $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o purecovperl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
-quantperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
+quantperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs $(PERLEXPORT)
 	$(SHRPENV) $(LDLIBPTH) quantify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o quantperl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 # This version, if specified in Configure, does ONLY those scripts which need
@@ -375,7 +418,7 @@ quantperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
 # checks as well as the special code to validate that the script in question
 # has been invoked correctly.
 
-suidperl: $& sperl$(OBJ_EXT) perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
+suidperl: $& sperl$(OBJ_EXT) perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs $(PERLEXPORT)
 	$(SHRPENV) $(LDLIBPTH) $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o suidperl perlmain$(OBJ_EXT) sperl$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 !NO!SUBS!
@@ -562,7 +605,7 @@ _cleaner:
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
 	$(LDLIBPTH) sh ext/util/make_ext realclean $$x MAKE=$(MAKE) ; \
 	done
-	rm -f *.orig */*.orig *~ */*~ core core.perl.*.? core.miniperl.*.? perl.core miniperl.core t/core t/core.perl.*.? t/perl.core t/tmp???? t/c t/perl so_locations t/nonexistent1
+	rm -f *.orig */*.orig *~ */*~ core core.perl.*.? core.miniperl.*.? perl.core miniperl.core t/core t/core.perl.*.? t/perl.core t/tmp???? t/c t/perl so_locations t/nonexistent1 so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
 	rm -rf $(addedbyconf)
 	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old
 	rm -f $(private)
@@ -592,10 +635,6 @@ $(FIRSTMAKEFILE):	README $(MAKEDEPEND)
 
 config.h: config_h.SH config.sh
 	$(SHELL) config_h.SH
-
-# This is an AIXism.
-perl.exp: perl_exp.SH config.sh $(SYM) $(SYMH)
-	$(SHELL) perl_exp.SH
 
 # When done, touch perlmain.c so that it doesn't get remade each time.
 depend: makedepend

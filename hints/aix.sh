@@ -61,7 +61,7 @@ case "$osvers" in
 esac
 
 so="a"
-dlext="so"
+dlext="o"
 
 # Trying to set this breaks the POSIX.c compilation
 
@@ -128,6 +128,13 @@ $define|true|[yY]*)
 	    # (e.g. pragma/overload core dumps)
 	    # --jhi@iki.fi
 	    cc=cc_r
+	    if test ! -e /bin/cc_r; then
+	 	    cat >&4 <<EOM
+For pthreads you should use the AIX C compiler cc_r.
+But I cannot find it in /bin.
+Cannot continue, aborting.
+EOM
+	    fi
             ;;
         '') 
 	    cc=cc_r
@@ -135,7 +142,7 @@ $define|true|[yY]*)
         *)
  	    cat >&4 <<EOM
 For pthreads you should use the AIX C compiler cc_r.
-(now your compiler was '$cc')
+(now your compiler was set to '$cc')
 Cannot continue, aborting.
 EOM
  	    exit 1
