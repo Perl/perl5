@@ -1,6 +1,10 @@
-# A simple listing of core modules that have specific maintainers.
-# Most (but not all) of the modules have dual lives in the core and
-# in CPAN.
+# A simple listing of core files that have specific maintainers,
+# or at least someone that can be called an "interested party".
+# Also, a "module" does not necessarily mean a CPAN module, it
+# might mean a file or files or a subdirectory.
+# Most (but not all) of the modules have dual lives in the core
+# and in CPAN.  Those that have a CPAN existence, have the CPAN
+# attribute set to true.
 
 %Maintainers =
 	(
@@ -9,9 +13,11 @@
 	'arthur'	=> 'Arthur Bergman <abergman@cpan.org>',
 	'autarch'	=> 'Dave Rolsky <drolsky@cpan.org>',
 	'bbb'		=> 'Rob Brown <bbb@cpan.org>',
+	'craig'		=> 'Craig Berry <craigberry@mac.com>',
 	'damian'	=> 'Damian Conway <dconway@cpan.org>',
 	'dankogai'	=> 'Dan Kogai <dankogai@cpan.org>',
 	'gbarr'		=> 'Graham Barr <gbarr@cpan.org>',
+	'gsar'		=> 'Gurusamy Sarathy <gsar@activestate.com>',
 	'gisle'		=> 'Gisle Aas <gaas@cpan.org>',
 	'ilyam'		=> 'Ilya Martynov <ilyam@cpan.org>',
 	'ilyaz'		=> 'Ilya Zakharevich <ilyaz@cpan.org>',
@@ -452,12 +458,26 @@
 		'CPAN'		=> 1,
 		},
 
+	'vms' =>
+		{
+		'MAINTAINER'	=> 'craig',
+		'FILES'		=> q[vms configure.com README.vms],
+		'CPAN'		=> 0,
+		},
+
 	'warnings' =>
 		{
 		'MAINTAINER'	=> 'pmarquess',
 		'FILES'		=> q[warnings.pl lib/warnings.{pm,t}
 				     lib/warnings t/lib/warnings],
 		'CPAN'		=> 1,
+		},
+
+	'win32' =>
+		{
+		'MAINTAINER'	=> 'gsar',
+		'FILES'		=> q[win32 README.win32 lib/Win32.pod t/win32],
+		'CPAN'		=> 0,
 		},
 
 	);
