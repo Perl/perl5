@@ -19,9 +19,6 @@ BEGIN {
 	elsif ($Config{'extensions'} !~ /\bIO\b/) {
 	  $reason = 'IO was not built';
 	}
-	elsif ($^O eq 'os2') {
-	  $reason = "blocks on OS/2, not debugged yet";
-	}
 	elsif ($^O eq 'apollo') {
 	  $reason = "unknown *FIXME*";
 	}
@@ -36,6 +33,18 @@ BEGIN {
 sub compare_addr {
     my $a = shift;
     my $b = shift;
+    if (length($a) != length $b) {
+	my $min = (length($a) < length $b) ? length($a) : length $b;
+	if ($min and substr($a, 0, $min) eq substr($b, 0, $min)) {
+	    printf "# Apparently: %d bytes junk at the end of %s\n# %s\n",
+		abs(length($a) - length ($b)),
+		$_[length($a) < length ($b) ? 1 : 0],
+		"consider decreasing bufsize of recfrom.";
+	    substr($a, $min) = "";
+	    substr($b, $min) = "";
+	}
+	return 0;
+    }
     my @a = unpack_sockaddr_in($a);
     my @b = unpack_sockaddr_in($b);
     "$a[0]$a[1]" eq "$b[0]$b[1]";
@@ -65,7 +74,8 @@ print "ok 2\n";
 
 $udpa->send("ok 4\n",0,$udpb->sockname);
 
-print "not " unless compare_addr($udpa->peername,$udpb->sockname);
+print "not "
+  unless compare_addr($udpa->peername,$udpb->sockname, 'peername', 'sockname');
 print "ok 3\n";
 
 my $where = $udpb->recv($buf="",5);
@@ -73,7 +83,7 @@ print $buf;
 
 my @xtra = ();
 
-unless(compare_addr($where,$udpa->sockname)) {
+unless(compare_addr($where,$udpa->sockname, 'recv name', 'sockname')) {
     print "not ";
     @xtra = (0,$udpa->sockname);
 }
