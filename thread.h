@@ -4,6 +4,7 @@
 #  include <win32thread.h>
 #else
 
+#ifndef DJGPP
 /* POSIXish threads */
 #ifdef OLD_PTHREADS_API
 #  define pthread_mutexattr_init(a) pthread_mutexattr_create(a)
@@ -21,6 +22,7 @@
 #  define pthread_mutexattr_default NULL
 #  define pthread_condattr_default NULL
 #endif /* OLD_PTHREADS_API */
+#endif
 #endif
 
 #ifdef PTHREADS_CREATED_JOINABLE

@@ -74,7 +74,7 @@ OBJVAL = $(MMS$TARGET_NAME)$(O)
 .endif
 
 # Updated by fndvers.com -- do not edit by hand
-PERL_VERSION = 5_00456#
+PERL_VERSION = 5_00460#
 
 .ifdef DECC_SOCKETS
 SOCKET=1
@@ -345,7 +345,7 @@ all : base extras x2p archcorefiles preplibrary perlpods
 .endif
 base : miniperl perl
 	@ $(NOOP)
-extras : Fcntl IO Opcode attrs $(POSIX) $(THREAD) libmods utils podxform
+extras : Fcntl IO Opcode attrs $(POSIX) $(THREAD) SDBM_File libmods utils podxform
 	@ $(NOOP)
 libmods : $(LIBPREREQ)
 	@ $(NOOP)
@@ -555,6 +555,26 @@ THREAD : [.lib]THREAD.pm [.lib.auto.THREAD]THREAD$(E)
 # ${@} necessary to distract different versions of MM[SK]/make
 [.ext.THREAD]Descrip.MMS : [.ext.THREAD]Makefile.PL $(LIBPREREQ) $(DBG)perlshr$(E)
 	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.THREAD]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]"
+
+SDBM_File : [.lib]SDBM_File.pm [.lib.auto.SDBM_File]SDBM_File$(E) 
+	@ $(NOOP)
+
+[.lib]SDBM_File.pm : [.ext.SDBM_File]Descrip.MMS
+	@ If F$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
+	@ If F$Search("[.lib.auto]sdbm.dir").eqs."" Then Create/Directory [.lib.auto.sdbm]
+	@ Set Default [.ext.SDBM_File]
+	$(MMS)
+	@ Set Default [--]
+
+[.lib.auto.SDBM_File]SDBM_File$(E) : [.ext.SDBM_File]Descrip.MMS
+	@ Set Default [.ext.SDBM_File]
+	$(MMS)
+	@ Set Default [--]
+
+# Add "-I[--.lib]" t $(MINIPERL) so we use this copy of lib after C<chdir>
+# ${@} necessary to distract different versions of MM[SK]/make
+[.ext.SDBM_File]Descrip.MMS : [.ext.SDBM_File]Makefile.PL $(LIBPREREQ) $(DBG)perlshr$(E)
+	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.SDBM_File]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]"
 
 IO : [.lib]IO.pm [.lib.IO]File.pm [.lib.IO]Handle.pm [.lib.IO]Pipe.pm [.lib.IO]Seekable.pm [.lib.IO]Socket.pm [.lib.auto.IO]IO$(E)
 	@ $(NOOP)
@@ -1172,6 +1192,9 @@ clean : tidy
 	- $(MMS) clean
 	Set Default [--]
 .endif
+    Set Default [.ext.SDBM_File]
+    - $(MMS) clean
+    Set Default [--]
 	- If F$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*/Exclude=PerlShr_*.Opt
 	- If F$Search("[...]*$(O);*") .nes."" Then Delete/NoConfirm/Log [...]*$(O);*
 	- If F$Search("Config.H").nes."" Then Delete/NoConfirm/Log Config.H;*
@@ -1215,6 +1238,9 @@ realclean : clean
 	- $(MMS) realclean
 	Set Default [--]
 .endif
+    Set Default [.ext.SDBM_File]
+    - $(MMS) realclean
+    Set Default [--]
 	- If F$Search("*$(OLB)").nes."" Then Delete/NoConfirm/Log *$(OLB);*
 	- If F$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*
 	- $(MINIPERL) -e "use File::Path; rmtree(['lib/auto','lib/VMS','lib/$(ARCH)'],1,0);"

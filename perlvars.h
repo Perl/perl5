@@ -19,6 +19,7 @@ PERLVAR(Geval_owner,	struct perl_thread *)		/* Owner thread for doeval */
 PERLVAR(Gnthreads,	int)		/* Number of threads currently */
 PERLVAR(Gthreads_mutex,	perl_mutex)		/* Mutex for nthreads and thread list */
 PERLVAR(Gnthreads_cond,	perl_cond)		/* Condition variable for nthreads */
+PERLVAR(Gsvref_mutex,	perl_mutex)		/* Mutex for SvREFCNT_{inc,dec} */
 PERLVARI(Gthreadsv_names,	char *,	THREADSV_NAMES)	
 #ifdef FAKE_THREADS
 PERLVAR(Gcurthr,	struct perl_thread *)	/* Currently executing (fake) thread */

@@ -356,11 +356,23 @@ PP(pp_close)
 {
     djSP;
     GV *gv;
+    MAGIC *mg;
 
     if (MAXARG == 0)
 	gv = defoutgv;
     else
 	gv = (GV*)POPs;
+
+    if (SvRMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
+	PUSHMARK(SP);
+	XPUSHs(mg->mg_obj);
+	PUTBACK;
+	ENTER;
+	perl_call_method("CLOSE", G_SCALAR);
+	LEAVE;
+	SPAGAIN;
+	RETURN;
+    }
     EXTEND(SP, 1);
     PUSHs(boolSV(do_close(gv, TRUE)));
     RETURN;
@@ -1319,8 +1331,25 @@ PP(pp_send)
     char *buffer;
     int length;
     STRLEN blen;
+    MAGIC *mg;
 
     gv = (GV*)*++MARK;
+    if (op->op_type == OP_SYSWRITE &&
+	SvRMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q')))
+    {
+	SV *sv;
+	
+	PUSHMARK(MARK-1);
+	*MARK = mg->mg_obj;
+	ENTER;
+	perl_call_method("WRITE", G_SCALAR);
+	LEAVE;
+	SPAGAIN;
+	sv = POPs;
+	SP = ORIGMARK;
+	PUSHs(sv);
+	RETURN;
+    }
     if (!gv)
 	goto say_undef;
     bufsv = *++MARK;
@@ -2915,9 +2944,9 @@ PP(pp_telldir)
 {
     djSP; dTARGET;
 #if defined(HAS_TELLDIR) || defined(telldir)
-#if !defined(telldir) && !defined(HAS_TELLDIR_PROTOTYPE) && !defined(DONT_DECLARE_STD)
+# ifdef NEED_TELLDIR_PROTO /* XXX does _anyone_ need this? --AD 2/20/1998 */
     long telldir _((DIR *));
-#endif
+# endif
     GV *gv = (GV*)POPs;
     register IO *io = GvIOn(gv);
 

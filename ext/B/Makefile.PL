@@ -4,7 +4,6 @@ use Config;
 my $e = $Config{'exe_ext'};
 my $o = $Config{'obj_ext'};
 my $exeout_flag = '-o ';
-my @extras = ();
 if ($^O eq 'MSWin32') {
     if ($Config{'cc'} =~ /^cl/i) {
 	$exeout_flag = '-Fe';
@@ -12,21 +11,13 @@ if ($^O eq 'MSWin32') {
     elsif ($Config{'cc'} =~ /^bcc/i) {
 	$exeout_flag = '-e';
     }
-    # XXX this probably applies to everyone else
-    @extras = (
-    OBJECT	=> "B$o byterun$o",
-    depend	=> {
-	"B$o"		=> "B.c ../../bytecode.h ../../byterun.h",
-	"byterun$o"	=> "../../byterun.c ../../bytecode.h ../../byterun.h",
-    });
 }
 
 WriteMakefile(
     NAME	=> "B",
     VERSION	=> "a5",
-    @extras,
     clean	=> {
-	FILES		=> "perl byteperl$e *$o B.c *~"
+	FILES		=> "perl$e byteperl$e *$o B.c *~"
     }
 );
 

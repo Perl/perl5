@@ -1,5 +1,5 @@
 /*
- *      Copyright (c) 1996, 1997 Malcolm Beattie
+ *      Copyright (c) 1996-1998 Malcolm Beattie
  *
  *      You may distribute under the terms of either the GNU General Public
  *      License or the Artistic License, as specified in the README file.
@@ -11,20 +11,30 @@
 
 #include "EXTERN.h"
 #include "perl.h"
-#include "bytecode.h"
-#include "byterun.h"
+
+void *
+bset_obj_store(void *obj, I32 ix)
+{
+    if (ix > obj_list_fill) {
+	if (obj_list_fill == -1)
+	    New(666, obj_list, ix + 1, void*);
+	else
+	    Renew(obj_list, ix + 1, void*);
+	obj_list_fill = ix;
+    }
+    obj_list[ix] = obj;
+    return obj;
+}
 
 #ifdef INDIRECT_BGET_MACROS
-void byterun(bs)
-struct bytestream bs;
+void byterun(struct bytestream bs)
 #else
-void byterun(fp)
-FILE *fp;
+void byterun(FILE *fp)
 #endif /* INDIRECT_BGET_MACROS */
 {
     dTHR;
     int insn;
-    while ((insn = FGETC()) != EOF) {
+    while ((insn = BGET_FGETC()) != EOF) {
 	switch (insn) {
 	  case INSN_COMMENT:		/* 35 */
 	    {

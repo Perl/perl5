@@ -12,15 +12,15 @@ use Fcntl;
 
 print "1..12\n";
 
-unlink <Op.dbmx*>;
+unlink <Op_dbmx.*>;
 
 umask(0);
-print (tie(%h,AnyDBM_File,'Op.dbmx', O_RDWR|O_CREAT, 0640)
+print (tie(%h,AnyDBM_File,'Op_dbmx', O_RDWR|O_CREAT, 0640)
        ? "ok 1\n" : "not ok 1\n");
 
-$Dfile = "Op.dbmx.pag";
+$Dfile = "Op_dbmx.pag";
 if (! -e $Dfile) {
-	($Dfile) = <Op.dbmx*>;
+	($Dfile) = <Op_dbmx.*>;
 }
 if ($^O eq 'amigaos' || $^O eq 'os2' || $^O eq 'MSWin32' || $^O eq 'dos') {
     print "ok 2 # Skipped: different file permission semantics\n";
@@ -55,7 +55,7 @@ $h{'goner2'} = 'snork';
 delete $h{'goner2'};
 
 untie(%h);
-print (tie(%h,AnyDBM_File,'Op.dbmx', O_RDWR, 0640) ? "ok 4\n" : "not ok 4\n");
+print (tie(%h,AnyDBM_File,'Op_dbmx', O_RDWR, 0640) ? "ok 4\n" : "not ok 4\n");
 
 $h{'j'} = 'J';
 $h{'k'} = 'K';
@@ -118,4 +118,8 @@ print ($h{'foo'} eq '' ? "ok 11\n" : "not ok 11\n");
 print ($h{''} eq 'bar' ? "ok 12\n" : "not ok 12\n");
 
 untie %h;
-unlink 'Op.dbmx.dir', $Dfile;
+if ($^O eq 'VMS') {
+  unlink 'Op_dbmx.sdbm_dir', $Dfile;
+} else {
+  unlink 'Op_dbmx.dir', $Dfile;  
+}

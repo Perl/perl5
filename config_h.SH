@@ -25,47 +25,24 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  * that running config_h.SH again will wipe out any changes you've made.
  * For a more permanent change edit config.sh and rerun config_h.SH.
  *
- * \$Id: Config_h.U,v 3.0.1.4 1995/09/25 09:10:49 ram Exp $
+ * \$Id: Config_h.U,v 3.0.1.5 1997/02/28 14:57:43 ram Exp $
  */
 
-/* Configuration time: $cf_time
- * Configured by: $cf_by
- * Target system: $myuname
+/*
+ * Package name      : $package
+ * Source directory  : $src
+ * Configuration time: $cf_time
+ * Configured by     : $cf_by
+ * Target system     : $myuname
  */
 
 #ifndef _config_h_
 #define _config_h_
 
-/* MEM_ALIGNBYTES:
- *	This symbol contains the number of bytes required to align a
- *	double. Usual values are 2, 4 and 8.
- *	On NeXT starting with 3.2, you can build "Fat" Multiple Architecture
- *	Binaries (MAB) for targets with varying alignment.  This only matters
- *	for perl, where the config.h can be generated and installed on one
- *	system, and used by a different architecture to build an extension.
- *	The default is eight, for safety.
+/* LOC_SED:
+ *	This symbol holds the complete pathname to the sed program.
  */
-#ifndef NeXT
-#define MEM_ALIGNBYTES $alignbytes	/**/
-#else  /* NeXT */
-#ifdef __m68k__
-#define MEM_ALIGNBYTES 2
-#else
-#ifdef __i386__
-#define MEM_ALIGNBYTES 4
-#else /* __hppa__, __sparc__ and default for unknown architectures */
-#define MEM_ALIGNBYTES 8
-#endif /* __i386__ */
-#endif /* __m68k__ */
-#endif /* NeXT */
-
-/* ARCHNAME:
- *	This symbol holds a string representing the architecture name.
- *	It may be used to construct an architecture-dependant pathname
- *	where library files may be held under a private library, for
- *	instance.
- */
-#define ARCHNAME "$archname"		/**/
+#define LOC_SED 	"$full_sed"	/**/
 
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
@@ -77,36 +54,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define BIN "$bin"	/**/
 #define BIN_EXP "$binexp"	/**/
-
-/* CAT2:
- *	This macro catenates 2 tokens together.
- */
-/* STRINGIFY:
- *	This macro surrounds its token with double quotes.
- */
-#if $cpp_stuff == 1
-#define CAT2(a,b)a/**/b
-#define CAT3(a,b,c)a/**/b/**/c
-#define CAT4(a,b,c,d)a/**/b/**/c/**/d
-#define CAT5(a,b,c,d,e)a/**/b/**/c/**/d/**/e
-#define STRINGIFY(a)"a"
-		/* If you can get stringification with catify, tell me how! */
-#endif
-#if $cpp_stuff == 42
-#define CAT2(a,b)a ## b
-#define CAT3(a,b,c)a ## b ## c
-#define CAT4(a,b,c,d)a ## b ## c ## d
-#define CAT5(a,b,c,d,e)a ## b ## c ## d ## e
-#define StGiFy(a)# a
-#define STRINGIFY(a)StGiFy(a)
-#define SCAT2(a,b)StGiFy(a) StGiFy(b)
-#define SCAT3(a,b,c)StGiFy(a) StGiFy(b) StGiFy(c)
-#define SCAT4(a,b,c,d)StGiFy(a) StGiFy(b) StGiFy(c) StGiFy(d)
-#define SCAT5(a,b,c,d,e)StGiFy(a) StGiFy(b) StGiFy(c) StGiFy(d) StGiFy(e)
-#endif
-#ifndef CAT2
-#include "Bletch: How does this C preprocessor catenate tokens?"
-#endif
 
 /* CPPSTDIN:
  *	This symbol contains the first part of the string which will invoke
@@ -156,27 +103,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_bzero HAS_BZERO	/**/
 
-/* CASTI32:
- *	This symbol is defined if the C compiler can cast negative
- *	or large floating point numbers to 32-bit ints.
- */
-#$d_casti32	CASTI32		/**/
-
-/* CASTNEGFLOAT:
- *	This symbol is defined if the C compiler can cast negative
- *	numbers to unsigned longs, ints and shorts.
- */
-/* CASTFLAGS:
- *	This symbol contains flags that say what difficulties the compiler
- *	has casting odd floating values to unsigned long:
- *		0 = ok
- *		1 = couldn't cast < 0
- *		2 = couldn't cast >= 0x80000000
- *		4 = couldn't cast in argument expression list
- */
-#$d_castneg	CASTNEGFLOAT		/**/
-#define CASTFLAGS $castflags		/**/
-
 /* HAS_CHOWN:
  *	This symbol, if defined, indicates that the chown routine is
  *	available.
@@ -194,12 +120,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	to truncate files.  You might need a -lx to get this routine.
  */
 #$d_chsize	HAS_CHSIZE		/**/
-
-/* VOID_CLOSEDIR:
- *	This symbol, if defined, indicates that the closedir() routine
- *	does not return a value.
- */
-#$d_void_closedir VOID_CLOSEDIR		/**/
 
 /* HASCONST:
  *	This symbol, if defined, indicates that this C compiler knows about
@@ -244,6 +164,26 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	occurred from a call to dlopen(), dlclose() or dlsym().
  */
 #$d_dlerror HAS_DLERROR	/**/
+
+/* SETUID_SCRIPTS_ARE_SECURE_NOW:
+ *	This symbol, if defined, indicates that the bug that prevents
+ *	setuid scripts from being secure is not present in this kernel.
+ */
+/* DOSUID:
+ *	This symbol, if defined, indicates that the C program should
+ *	check the script that it is executing for setuid/setgid bits, and
+ *	attempt to emulate setuid/setgid on systems that have disabled
+ *	setuid #! scripts because the kernel can't do it securely.
+ *	It is up to the package designer to make sure that this emulation
+ *	is done securely.  Among other things, it should do an fstat on
+ *	the script it just opened to make sure it really is a setuid/setgid
+ *	script, it should make sure the arguments passed correspond exactly
+ *	to the argument on the #! line, and it should not trust any
+ *	subprocesses to which it must pass the filename rather than the
+ *	file descriptor of the script to be executed.
+ */
+#$d_suidsafe SETUID_SCRIPTS_ARE_SECURE_NOW	/**/
+#$d_dosuid DOSUID		/**/
 
 /* HAS_DUP2:
  *	This symbol, if defined, indicates that the dup2 routine is
@@ -315,94 +255,13 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	available to get the list of process groups.  If unavailable, multiple
  *	groups are probably not supported.
  */
-/* HAS_SETGROUPS:
- *	This symbol, if defined, indicates that the setgroups() routine is
- *	available to set the list of process groups.  If unavailable, multiple
- *	groups are probably not supported.
- */
 #$d_getgrps HAS_GETGROUPS		/**/
-#$d_setgrps HAS_SETGROUPS		/**/
 
 /* HAS_GETHOSTENT:
  *	This symbol, if defined, indicates that the gethostent routine is
  *	available to lookup host names in some data base or other.
  */
 #$d_gethent HAS_GETHOSTENT		/**/
-
-/* HAS_GETHOSTBYADDR:
- *	This symbol, if defined, indicates that the gethostbyaddr routine is
- *	available to lookup hosts by their IP addresses.
- */
-#$d_gethbyaddr HAS_GETHOSTBYADDR		/**/
-
-/* Netdb_host_t:
- *	This symbol holds the type used for the 1st argument
- *	to gethostbyaddr().
- */
-#define Netdb_host_t		$netdb_host_type
-
-/* Netdb_hlen_t:
- *	This symbol holds the type used for the 2nd argument
- *	to gethostbyaddr().
- */
-#define Netdb_hlen_t		$netdb_hlen_type
-
-/* HAS_GETHOSTBYNAME:
- *	This symbol, if defined, indicates that the gethostbyname routine is
- *	available to lookup hosts by their DNS names.
- */
-#$d_gethbyname HAS_GETHOSTBYNAME		/**/
-
-/* Netdb_name_t:
- *	This symbol holds the type used for the 1st argument
- *	to gethostbyname(), the 1st argument to getnetbyname(),
- *	the 1st argument to getprotobyname(), the 1st argument to
- *	getservbyname(), the 2nd argument to getservbyname(),
- *	and the 2nd argument to getservbyport().
- */
-#define Netdb_name_t		$netdb_name_type
-
-/* HAS_GETNETBYADDR:
- *	This symbol, if defined, indicates that the getnetbyaddr routine is
- *	available to lookup networks by their IP addresses.
- */
-#$d_getnbyaddr HAS_GETNETBYADDR		/**/
-
-/* Netdb_net_t:
- *	This symbol holds the type used for the 1st argument
- *	to getnetbyaddr().
- */
-#define Netdb_net_t		$netdb_net_type
-
-/* HAS_GETNETBYNAME:
- *	This symbol, if defined, indicates that the getnetbyname routine is
- *	available to lookup networks by their names.
- */
-#$d_getnbyname HAS_GETNETBYNAME		/**/
-
-/* HAS_GETPROTOBYNAME:
- *	This symbol, if defined, indicates that the getprotobyname routine is
- *	available to lookup protocols by their names.
- */
-#$d_getpbyname HAS_GETPROTOBYNAME		/**/
-
-/* HAS_GETPROTOBYNUMBER:
- *	This symbol, if defined, indicates that the getprotobynumber routine is
- *	available to lookup protocols by their numbers.
- */
-#$d_getpbynumber HAS_GETPROTOBYNUMBER		/**/
-
-/* HAS_GETSERVBYNAME:
- *	This symbol, if defined, indicates that the getservbyname routine is
- *	available to lookup services by their names.
- */
-#$d_getsbyname HAS_GETSERVBYNAME		/**/
-
-/* HAS_GETSERVBYPORT:
- *	This symbol, if defined, indicates that the getservbyport routine is
- *	available to lookup services by their ports.
- */
-#$d_getsbyport HAS_GETSERVBYPORT		/**/
 
 /* HAS_UNAME:
  *	This symbol, if defined, indicates that the C program may use the
@@ -416,6 +275,24 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	available to get the login name.
  */
 #$d_getlogin HAS_GETLOGIN		/**/
+
+/* HAS_GETPGID:
+ *	This symbol, if defined, indicates to the C program that 
+ *	the getpgid(pid) function is available to get the
+ *	process group id.
+ */
+#$d_getpgid HAS_GETPGID		/**/
+
+/* HAS_GETPGRP:
+ *	This symbol, if defined, indicates that the getpgrp routine is
+ *	available to get the current process group.
+ */
+/* USE_BSD_GETPGRP:
+ *	This symbol, if defined, indicates that getpgrp needs one
+ *	arguments whereas USG one needs none.
+ */
+#$d_getpgrp HAS_GETPGRP		/**/
+#$d_bsdgetpgrp USE_BSD_GETPGRP	/**/
 
 /* HAS_GETPGRP2:
  *	This symbol, if defined, indicates that the getpgrp2() (as in DG/UX)
@@ -460,11 +337,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_htonl HAS_NTOHL		/**/
 #$d_htonl HAS_NTOHS		/**/
 
-/* HAS_ISASCII:
- *	This manifest constant lets the C program know that isascii 
- *	is available.
+/* HAS_INET_ATON:
+ *	This symbol, if defined, indicates to the C program that the
+ *	inet_aton() function is available to parse IP address "dotted-quad"
+ *	strings.
  */
-#$d_isascii HAS_ISASCII		/**/
+#$d_inetaton HAS_INET_ATON		/**/
 
 /* HAS_KILLPG:
  *	This symbol, if defined, indicates that the killpg routine is available
@@ -574,12 +452,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_nice HAS_NICE		/**/
 
-/* HAS_OPEN3:
- *	This manifest constant lets the C program know that the three
- *	argument form of open(2) is available.
- */
-#$d_open3 HAS_OPEN3		/**/
-
 /* HAS_PATHCONF:
  *	This symbol, if defined, indicates that pathconf() is available
  *	to determine file-system related limits and options associated
@@ -607,15 +479,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 
 /* HAS_POLL:
  *	This symbol, if defined, indicates that the poll routine is
- *	available to poll active file descriptors.
+ *	available to poll active file descriptors. You may safely
+ *	include <poll.h> when this symbol is defined.
  */
 #$d_poll HAS_POLL		/**/
-
-/* HAS_PTHREAD_YIELD:
- *	This symbol, if defined, indicates that the pthread_yield routine is
- *	available to yield the execution of the current thread.
- */
-#$d_pthread_yield HAS_PTHREAD_YIELD
 
 /* HAS_READDIR:
  *	This symbol, if defined, indicates that the readdir routine is
@@ -623,12 +490,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	<dirent.h>. See I_DIRENT.
  */
 #$d_readdir HAS_READDIR		/**/
-
-/* HAS_SCHED_YIELD:
- *	This symbol, if defined, indicates that the sched_yield
- *	routine is available to yield the execution of the current thread.
- */
-#$d_sched_yield HAS_SCHED_YIELD
 
 /* HAS_SEEKDIR:
  *	This symbol, if defined, indicates that the seekdir routine is
@@ -668,29 +529,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_rmdir HAS_RMDIR		/**/
 
-/* HAS_SAFE_BCOPY:
- *	This symbol, if defined, indicates that the bcopy routine is available
- *	to copy potentially overlapping memory blocks. Otherwise you should
- *	probably use memmove() or memcpy(). If neither is defined, roll your
- *	own version.
- */
-#$d_safebcpy HAS_SAFE_BCOPY	/**/
-
-/* HAS_SAFE_MEMCPY:
- *	This symbol, if defined, indicates that the memcpy routine is available
- *	to copy potentially overlapping memory blocks. Otherwise you should
- *	probably use memmove() or memcpy(). If neither is defined, roll your
- *	own version.
- */
-#$d_safemcpy HAS_SAFE_MEMCPY	/**/
-
-/* HAS_SANE_MEMCMP:
- *	This symbol, if defined, indicates that the memcmp routine is available
- *	and can be used to compare relative magnitudes of chars with their high
- *	bits set.  If it is not defined, roll your own version.
- */
-#$d_sanemcmp HAS_SANE_MEMCMP	/**/
-
 /* HAS_SELECT:
  *	This symbol, if defined, indicates that the select routine is
  *	available to select active file descriptors. If the timeout field
@@ -728,6 +566,24 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	available to handle locale-specific ctype implementations.
  */
 #$d_setlocale HAS_SETLOCALE	/**/
+
+/* HAS_SETPGID:
+ *	This symbol, if defined, indicates that the setpgid(pid, gpid)
+ *	routine is available to set process group ID.
+ */
+#$d_setpgid HAS_SETPGID	/**/
+
+/* HAS_SETPGRP:
+ *	This symbol, if defined, indicates that the setpgrp routine is
+ *	available to set the current process group.
+ */
+/* USE_BSD_SETPGRP:
+ *	This symbol, if defined, indicates that setpgrp needs two
+ *	arguments whereas USG one needs none.  See also HAS_SETPGID
+ *	for a POSIX interface.
+ */
+#$d_setpgrp HAS_SETPGRP		/**/
+#$d_bsdsetpgrp USE_BSD_SETPGRP	/**/
 
 /* HAS_SETPGRP2:
  *	This symbol, if defined, indicates that the setpgrp2() (as in DG/UX)
@@ -805,12 +661,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define Shmat_t $shmattype	/**/
 #$d_shmatprototype HAS_SHMAT_PROTOTYPE	/**/
 
-/* HAS_SIGACTION:
- *	This symbol, if defined, indicates that Vr4's sigaction() routine
- *	is available.
- */
-#$d_sigaction HAS_SIGACTION	/**/
-
 /* HAS_SOCKET:
  *	This symbol, if defined, indicates that the BSD socket interface is
  *	supported.
@@ -827,65 +677,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	st_blksize and st_blocks.
  */
 #$d_statblks USE_STAT_BLOCKS 	/**/
-
-/* USE_STDIO_PTR:
- *	This symbol is defined if the _ptr and _cnt fields (or similar)
- *	of the stdio FILE structure can be used to access the stdio buffer
- *	for a file handle.  If this is defined, then the FILE_ptr(fp)
- *	and FILE_cnt(fp) macros will also be defined and should be used
- *	to access these fields.
- */
-/* FILE_ptr:
- *	This macro is used to access the _ptr field (or equivalent) of the
- *	FILE structure pointed to by its argument. This macro will always be
- *	defined if USE_STDIO_PTR is defined.
- */
-/* STDIO_PTR_LVALUE:
- *	This symbol is defined if the FILE_ptr macro can be used as an
- *	lvalue.
- */
-/* FILE_cnt:
- *	This macro is used to access the _cnt field (or equivalent) of the
- *	FILE structure pointed to by its argument. This macro will always be
- *	defined if USE_STDIO_PTR is defined.
- */
-/* STDIO_CNT_LVALUE:
- *	This symbol is defined if the FILE_cnt macro can be used as an
- *	lvalue.
- */
-#$d_stdstdio USE_STDIO_PTR 	/**/
-#ifdef USE_STDIO_PTR
-#define FILE_ptr(fp)	$stdio_ptr
-#$d_stdio_ptr_lval STDIO_PTR_LVALUE 		/**/
-#define FILE_cnt(fp)	$stdio_cnt
-#$d_stdio_cnt_lval STDIO_CNT_LVALUE 		/**/
-#endif
-
-/* USE_STDIO_BASE:
- *	This symbol is defined if the _base field (or similar) of the
- *	stdio FILE structure can be used to access the stdio buffer for
- *	a file handle.  If this is defined, then the FILE_base(fp) macro
- *	will also be defined and should be used to access this field.
- *	Also, the FILE_bufsiz(fp) macro will be defined and should be used
- *	to determine the number of bytes in the buffer.  USE_STDIO_BASE
- *	will never be defined unless USE_STDIO_PTR is.
- */
-/* FILE_base:
- *	This macro is used to access the _base field (or equivalent) of the
- *	FILE structure pointed to by its argument. This macro will always be
- *	defined if USE_STDIO_BASE is defined.
- */
-/* FILE_bufsiz:
- *	This macro is used to determine the number of bytes in the I/O
- *	buffer pointed to by _base field (or equivalent) of the FILE
- *	structure pointed to its argument. This macro will always be defined
- *	if USE_STDIO_BASE is defined.
- */
-#$d_stdiobase USE_STDIO_BASE 	/**/
-#ifdef USE_STDIO_BASE
-#define FILE_base(fp)	$stdio_base
-#define FILE_bufsiz(fp)	$stdio_bufsiz
-#endif
 
 /* HAS_STRCHR:
  *	This symbol is defined to indicate that the strchr()/strrchr()
@@ -1028,14 +819,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_vfork HAS_VFORK	/**/
 
-/* Signal_t:
- *	This symbol's value is either "void" or "int", corresponding to the
- *	appropriate return type of a signal handler.  Thus, you can declare
- *	a signal handler using "Signal_t (*handler)()", and define the
- *	handler using "Signal_t handler(sig)".
- */
-#define Signal_t $signal_t	/* Signal handler's return type */
-
 /* HASVOLATILE:
  *	This symbol, if defined, indicates that this C compiler knows about
  *	the volatile declaration.
@@ -1044,20 +827,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #ifndef HASVOLATILE
 #define volatile
 #endif
-
-/* HAS_VPRINTF:
- *	This symbol, if defined, indicates that the vprintf routine is available
- *	to printf with a pointer to an argument list.  If unavailable, you
- *	may need to write your own, probably in terms of _doprnt().
- */
-/* USE_CHAR_VSPRINTF:
- *	This symbol is defined if this system has vsprintf() returning type
- *	(char*).  The trend seems to be to declare it as "int vsprintf()".  It
- *	is up to the package author to declare vsprintf correctly based on the
- *	symbol.
- */
-#$d_vprintf HAS_VPRINTF	/**/
-#$d_charvspr USE_CHAR_VSPRINTF 	/**/
 
 /* HAS_WAIT4:
  *	This symbol, if defined, indicates that wait4() exists.
@@ -1098,30 +867,16 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define Gid_t $gidtype		/* Type for getgid(), etc... */
 
-/* Groups_t:
- *	This symbol holds the type used for the second argument to
- *	[gs]etgroups().  Usually, this is the same of gidtype, but
- *	sometimes it isn't.  It can be int, ushort, uid_t, etc... 
- *	It may be necessary to include <sys/types.h> to get any 
- *	typedef'ed information.  This is only required if you have
- *	getgroups() or setgroups().
+/* I_DBM:
+ *	This symbol, if defined, indicates that <dbm.h> exists and should
+ *	be included.
  */
-#if defined(HAS_GETGROUPS) || defined(HAS_SETGROUPS)
-#define Groups_t $groupstype	/* Type for 2nd arg to [gs]etgroups() */
-#endif
-
-/* DB_Prefix_t:
- *	This symbol contains the type of the prefix structure element
- *	in the <db.h> header file.  In older versions of DB, it was
- *	int, while in newer ones it is u_int32_t.
+/* I_RPCSVC_DBM:
+ *	This symbol, if defined, indicates that <rpcsvc/dbm.h> exists and
+ *	should be included.
  */
-/* DB_Hash_t:
- *	This symbol contains the type of the prefix structure element
- *	in the <db.h> header file.  In older versions of DB, it was
- *	int, while in newer ones it is size_t.
- */
-#define DB_Hash_t	$db_hashtype		/**/
-#define DB_Prefix_t	$db_prefixtype  	/**/
+#$i_dbm I_DBM	/**/
+#$i_rpcsvcdbm I_RPCSVC_DBM	/**/
 
 /* I_DIRENT:
  *	This symbol, if defined, indicates to the C program that it should
@@ -1174,6 +929,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$i_limits I_LIMITS		/**/
 
+/* I_LOCALE:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <locale.h>.
+ */
+#$i_locale	I_LOCALE		/**/
+
 /* I_MATH:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <math.h>.
@@ -1203,12 +964,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	include <netinet/in.h>. Otherwise, you may try <sys/in.h>.
  */
 #$i_niin I_NETINET_IN	/**/
-
-/* I_NETDB:
- *	This symbol, if defined, indicates that <netdb.h> exists and 
- *	should be included.
- */
-#$i_netdb I_NETDB		/**/
 
 /* I_PWD:
  *	This symbol, if defined, indicates to the C program that it should
@@ -1245,6 +1000,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_pwclass PWCLASS	/**/
 #$d_pwexpire PWEXPIRE	/**/
 #$d_pwcomment PWCOMMENT	/**/
+
+/* I_SFIO:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sfio.h>.
+ */
+#$i_sfio	I_SFIO		/**/
 
 /* I_STDDEF:
  *	This symbol, if defined, indicates that <stddef.h> exists and should
@@ -1306,6 +1067,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$i_sysselct I_SYS_SELECT	/**/
 
+/* I_SYS_STAT:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/stat.h>.
+ */
+#$i_sysstat	I_SYS_STAT		/**/
+
 /* I_SYS_TIMES:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <sys/times.h>.
@@ -1350,22 +1117,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$i_termios I_TERMIOS		/**/
 #$i_sgtty I_SGTTY		/**/
 
-/* I_TIME:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <time.h>.
- */
-/* I_SYS_TIME:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <sys/time.h>.
- */
-/* I_SYS_TIME_KERNEL:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <sys/time.h> with KERNEL defined.
- */
-#$i_time I_TIME		/**/
-#$i_systime I_SYS_TIME		/**/
-#$i_systimek I_SYS_TIME_KERNEL		/**/
-
 /* I_UNISTD:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <unistd.h>.
@@ -1377,6 +1128,14 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	include <utime.h>.
  */
 #$i_utime I_UTIME		/**/
+
+/* I_VALUES:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <values.h> to get definition of symbols like MINFLOAT or
+ *	MAXLONG, i.e. machine dependant limitations.  Probably, you
+ *	should use <limits.h> instead, if it is available.
+ */
+#$i_values I_VALUES		/**/
 
 /* I_STDARG:
  *	This symbol, if defined, indicates that <stdarg.h> exists and should
@@ -1395,6 +1154,353 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$i_vfork I_VFORK	/**/
 
+/* Off_t:
+ *	This symbol holds the type used to declare offsets in the kernel.
+ *	It can be int, long, off_t, etc... It may be necessary to include
+ *	<sys/types.h> to get any typedef'ed information.
+ */
+#define Off_t $lseektype		/* <offset> type */
+
+/* Free_t:
+ *	This variable contains the return type of free().  It is usually
+ * void, but occasionally int.
+ */
+/* Malloc_t:
+ *	This symbol is the type of pointer returned by malloc and realloc.
+ */
+#define Malloc_t $malloctype			/**/
+#define Free_t $freetype			/**/
+
+/* MYMALLOC:
+ *	This symbol, if defined, indicates that we're using our own malloc.
+ */
+#$d_mymalloc MYMALLOC			/**/
+
+/* Mode_t:
+ *	This symbol holds the type used to declare file modes 
+ *	for systems calls.  It is usually mode_t, but may be
+ *	int or unsigned short.  It may be necessary to include <sys/types.h>
+ *	to get any typedef'ed information.
+ */
+#define Mode_t $modetype	 /* file mode parameter for system calls */
+
+/* Pid_t:
+ *	This symbol holds the type used to declare process ids in the kernel.
+ *	It can be int, uint, pid_t, etc... It may be necessary to include
+ *	<sys/types.h> to get any typedef'ed information.
+ */
+#define Pid_t $pidtype		/* PID type */
+
+/* CAN_PROTOTYPE:
+ *	If defined, this macro indicates that the C compiler can handle
+ *	function prototypes.
+ */
+/* _:
+ *	This macro is used to declare function parameters for folks who want
+ *	to make declarations with prototypes using a different style than
+ *	the above macros.  Use double parentheses.  For example:
+ *
+ *		int main _((int argc, char *argv[]));
+ */
+#$prototype	CAN_PROTOTYPE	/**/
+#ifdef CAN_PROTOTYPE
+#define	_(args) args
+#else
+#define	_(args) ()
+#endif
+
+/* SH_PATH:
+ *	This symbol contains the full pathname to the shell used on this
+ *	on this system to execute Bourne shell scripts.  Usually, this will be
+ *	/bin/sh, though it's possible that some systems will have /bin/ksh,
+ *	/bin/pdksh, /bin/ash, /bin/bash, or even something such as
+ *	D:/bin/sh.exe.
+ */
+#define SH_PATH "$sh"  /**/
+
+/* Size_t:
+ *	This symbol holds the type used to declare length parameters
+ *	for string functions.  It is usually size_t, but may be
+ *	unsigned long, int, etc.  It may be necessary to include
+ *	<sys/types.h> to get any typedef'ed information.
+ */
+#define Size_t $sizetype	 /* length paramater for string functions */
+
+/* STDCHAR:
+ *	This symbol is defined to be the type of char used in stdio.h.
+ *	It has the values "unsigned char" or "char".
+ */
+#define STDCHAR $stdchar	/**/
+
+/* Uid_t:
+ *	This symbol holds the type used to declare user ids in the kernel.
+ *	It can be int, ushort, uid_t, etc... It may be necessary to include
+ *	<sys/types.h> to get any typedef'ed information.
+ */
+#define Uid_t $uidtype		/* UID type */
+
+/* VOIDFLAGS:
+ *	This symbol indicates how much support of the void type is given by this
+ *	compiler.  What various bits mean:
+ *
+ *	    1 = supports declaration of void
+ *	    2 = supports arrays of pointers to functions returning void
+ *	    4 = supports comparisons between pointers to void functions and
+ *		    addresses of void functions
+ *	    8 = suports declaration of generic void pointers
+ *
+ *	The package designer should define VOIDUSED to indicate the requirements
+ *	of the package.  This can be done either by #defining VOIDUSED before
+ *	including config.h, or by defining defvoidused in Myinit.U.  If the
+ *	latter approach is taken, only those flags will be tested.  If the
+ *	level of void support necessary is not present, defines void to int.
+ */
+#ifndef VOIDUSED
+#define VOIDUSED $defvoidused
+#endif
+#define VOIDFLAGS $voidflags
+#if (VOIDFLAGS & VOIDUSED) != VOIDUSED
+#define void int		/* is void to be avoided? */
+#define M_VOID			/* Xenix strikes again */
+#endif
+
+/* MEM_ALIGNBYTES:
+ *	 This symbol contains the number of bytes required to align a
+ *	 double. Usual values are 2, 4 and 8.
+ *	 On NeXT starting with 3.2, you can build "Fat" Multiple Architecture
+ *	 Binaries (MAB) for targets with varying alignment.  This only matters
+ *	 for perl, where the config.h can be generated and installed on one
+ *	 system, and used by a different architecture to build an extension.
+ *	 The default is eight, for safety.
+ */
+#define MEM_ALIGNBYTES $alignbytes	/**/
+
+/* BYTEORDER:
+ *	This symbol holds the hexadecimal constant defined in byteorder,
+ *	i.e. 0x1234 or 0x4321, etc...
+ *	On NeXT 3.2 (and greater), you can build "Fat" Multiple Architecture
+ *	Binaries (MAB) on either big endian or little endian machines.
+ *	The endian-ness is available at compile-time.  This only matters
+ *	for perl, where the config.h can be generated and installed on 
+ *	one system, and used by a different architecture to build an
+ *	extension.  Older versions of NeXT that might not have
+ *	defined either *_ENDIAN__ were all on Motorola 680x0 series,
+ *	so the default case (for NeXT) is big endian to catch them. 
+ *	This might matter for NeXT 3.0.
+ */
+#ifndef NeXT
+#define BYTEORDER 0x$byteorder	/* large digits for MSB */
+#else  /* NeXT */
+#ifdef __LITTLE_ENDIAN__
+#define BYTEORDER 0x1234
+#else /* __BIG_ENDIAN__ */
+#define BYTEORDER 0x4321
+#endif /* ENDIAN CHECK */
+#endif /* NeXT */
+
+/* CASTI32:
+ *	This symbol is defined if the C compiler can cast negative
+ *	or large floating point numbers to 32-bit ints.
+ */
+#$d_casti32	CASTI32		/**/
+
+/* CASTNEGFLOAT:
+ *	This symbol is defined if the C compiler can cast negative
+ *	numbers to unsigned longs, ints and shorts.
+ */
+/* CASTFLAGS:
+ *	This symbol contains flags that say what difficulties the compiler
+ *	has casting odd floating values to unsigned long:
+ *		0 = ok
+ *		1 = couldn't cast < 0
+ *		2 = couldn't cast >= 0x80000000
+ *		4 = couldn't cast in argument expression list
+ */
+#$d_castneg	CASTNEGFLOAT		/**/
+#define CASTFLAGS $castflags		/**/
+
+/* VOID_CLOSEDIR:
+ *	This symbol, if defined, indicates that the closedir() routine
+ *	does not return a value.
+ */
+#$d_void_closedir VOID_CLOSEDIR		/**/
+
+/* Gconvert:
+ *	This preprocessor macro is defined to convert a floating point
+ *	number to a string without a trailing decimal point.  This
+ *	emulates the behavior of sprintf("%g"), but is sometimes much more
+ *	efficient.  If gconvert() is not available, but gcvt() drops the
+ *	trailing decimal point, then gcvt() is used.  If all else fails,
+ *	a macro using sprintf("%g") is used. Arguments for the Gconvert
+ *	macro are: value, number of digits, whether trailing zeros should
+ *	be retained, and the output buffer.
+ *	Possible values are:
+ *		d_Gconvert='gconvert((x),(n),(t),(b))'
+ *		d_Gconvert='gcvt((x),(n),(b))'
+ *		d_Gconvert='sprintf((b),"%.*g",(n),(x))'
+ *	The last two assume trailing zeros should not be kept.
+ */
+#define Gconvert(x,n,t,b) $d_Gconvert
+
+/* HAS_GNULIBC:
+ *	This symbol, if defined, indicates to the C program that 
+ *	the GNU C library is being used.
+ */
+#$d_gnulibc HAS_GNULIBC  	/**/
+/* HAS_ISASCII:
+ *	This manifest constant lets the C program know that isascii 
+ *	is available.
+ */
+#$d_isascii HAS_ISASCII		/**/
+
+/* HAS_OPEN3:
+ *	This manifest constant lets the C program know that the three
+ *	argument form of open(2) is available.
+ */
+#$d_open3 HAS_OPEN3		/**/
+
+/* HAS_SAFE_BCOPY:
+ *	This symbol, if defined, indicates that the bcopy routine is available
+ *	to copy potentially overlapping memory blocks. Otherwise you should
+ *	probably use memmove() or memcpy(). If neither is defined, roll your
+ *	own version.
+ */
+#$d_safebcpy HAS_SAFE_BCOPY	/**/
+
+/* HAS_SAFE_MEMCPY:
+ *	This symbol, if defined, indicates that the memcpy routine is available
+ *	to copy potentially overlapping memory blocks. Otherwise you should
+ *	probably use memmove() or memcpy(). If neither is defined, roll your
+ *	own version.
+ */
+#$d_safemcpy HAS_SAFE_MEMCPY	/**/
+
+/* HAS_SANE_MEMCMP:
+ *	This symbol, if defined, indicates that the memcmp routine is available
+ *	and can be used to compare relative magnitudes of chars with their high
+ *	bits set.  If it is not defined, roll your own version.
+ */
+#$d_sanemcmp HAS_SANE_MEMCMP	/**/
+
+/* HAS_SIGACTION:
+ *	This symbol, if defined, indicates that Vr4's sigaction() routine
+ *	is available.
+ */
+#$d_sigaction HAS_SIGACTION	/**/
+
+/* Sigjmp_buf:
+ *	This is the buffer type to be used with Sigsetjmp and Siglongjmp.
+ */
+/* Sigsetjmp:
+ *	This macro is used in the same way as sigsetjmp(), but will invoke
+ *	traditional setjmp() if sigsetjmp isn't available.
+ *	See HAS_SIGSETJMP.
+ */
+/* Siglongjmp:
+ *	This macro is used in the same way as siglongjmp(), but will invoke
+ *	traditional longjmp() if siglongjmp isn't available.
+ *	See HAS_SIGSETJMP.
+ */
+#$d_sigsetjmp HAS_SIGSETJMP	/**/
+#ifdef HAS_SIGSETJMP
+#define Sigjmp_buf sigjmp_buf
+#define Sigsetjmp(buf,save_mask) sigsetjmp((buf),(save_mask))
+#define Siglongjmp(buf,retval) siglongjmp((buf),(retval))
+#else
+#define Sigjmp_buf jmp_buf
+#define Sigsetjmp(buf,save_mask) setjmp((buf))
+#define Siglongjmp(buf,retval) longjmp((buf),(retval))
+#endif
+
+/* USE_STDIO_PTR:
+ *	This symbol is defined if the _ptr and _cnt fields (or similar)
+ *	of the stdio FILE structure can be used to access the stdio buffer
+ *	for a file handle.  If this is defined, then the FILE_ptr(fp)
+ *	and FILE_cnt(fp) macros will also be defined and should be used
+ *	to access these fields.
+ */
+/* FILE_ptr:
+ *	This macro is used to access the _ptr field (or equivalent) of the
+ *	FILE structure pointed to by its argument. This macro will always be
+ *	defined if USE_STDIO_PTR is defined.
+ */
+/* STDIO_PTR_LVALUE:
+ *	This symbol is defined if the FILE_ptr macro can be used as an
+ *	lvalue.
+ */
+/* FILE_cnt:
+ *	This macro is used to access the _cnt field (or equivalent) of the
+ *	FILE structure pointed to by its argument. This macro will always be
+ *	defined if USE_STDIO_PTR is defined.
+ */
+/* STDIO_CNT_LVALUE:
+ *	This symbol is defined if the FILE_cnt macro can be used as an
+ *	lvalue.
+ */
+#$d_stdstdio USE_STDIO_PTR 	/**/
+#ifdef USE_STDIO_PTR
+#define FILE_ptr(fp)	$stdio_ptr
+#$d_stdio_ptr_lval STDIO_PTR_LVALUE 		/**/
+#define FILE_cnt(fp)	$stdio_cnt
+#$d_stdio_cnt_lval STDIO_CNT_LVALUE 		/**/
+#endif
+
+/* USE_STDIO_BASE:
+ *	This symbol is defined if the _base field (or similar) of the
+ *	stdio FILE structure can be used to access the stdio buffer for
+ *	a file handle.  If this is defined, then the FILE_base(fp) macro
+ *	will also be defined and should be used to access this field.
+ *	Also, the FILE_bufsiz(fp) macro will be defined and should be used
+ *	to determine the number of bytes in the buffer.  USE_STDIO_BASE
+ *	will never be defined unless USE_STDIO_PTR is.
+ */
+/* FILE_base:
+ *	This macro is used to access the _base field (or equivalent) of the
+ *	FILE structure pointed to by its argument. This macro will always be
+ *	defined if USE_STDIO_BASE is defined.
+ */
+/* FILE_bufsiz:
+ *	This macro is used to determine the number of bytes in the I/O
+ *	buffer pointed to by _base field (or equivalent) of the FILE
+ *	structure pointed to its argument. This macro will always be defined
+ *	if USE_STDIO_BASE is defined.
+ */
+#$d_stdiobase USE_STDIO_BASE 	/**/
+#ifdef USE_STDIO_BASE
+#define FILE_base(fp)	$stdio_base
+#define FILE_bufsiz(fp)	$stdio_bufsiz
+#endif
+
+/* HAS_VPRINTF:
+ *	This symbol, if defined, indicates that the vprintf routine is available
+ *	to printf with a pointer to an argument list.  If unavailable, you
+ *	may need to write your own, probably in terms of _doprnt().
+ */
+/* USE_CHAR_VSPRINTF:
+ *	This symbol is defined if this system has vsprintf() returning type
+ *	(char*).  The trend seems to be to declare it as "int vsprintf()".  It
+ *	is up to the package author to declare vsprintf correctly based on the
+ *	symbol.
+ */
+#$d_vprintf HAS_VPRINTF	/**/
+#$d_charvspr USE_CHAR_VSPRINTF 	/**/
+
+/* I_TIME:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <time.h>.
+ */
+/* I_SYS_TIME:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/time.h>.
+ */
+/* I_SYS_TIME_KERNEL:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/time.h> with KERNEL defined.
+ */
+#$i_time I_TIME		/**/
+#$i_systime I_SYS_TIME		/**/
+#$i_systimek I_SYS_TIME_KERNEL		/**/
+
 /* INTSIZE:
  *	This symbol contains the value of sizeof(int) so that the C
  *	preprocessor can make decisions based on it.
@@ -1410,21 +1516,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define INTSIZE $intsize		/**/
 #define LONGSIZE $longsize		/**/
 #define SHORTSIZE $shortsize		/**/
-
-/* Off_t:
- *	This symbol holds the type used to declare offsets in the kernel.
- *	It can be int, long, off_t, etc... It may be necessary to include
- *	<sys/types.h> to get any typedef'ed information.
- */
-#define Off_t $lseektype		/* <offset> type */
-
-/* Mode_t:
- *	This symbol holds the type used to declare file modes 
- *	for systems calls.  It is usually mode_t, but may be
- *	int or unsigned short.  It may be necessary to include <sys/types.h>
- *	to get any typedef'ed information.
- */
-#define Mode_t $modetype	 /* file mode parameter for system calls */
 
 /* VAL_O_NONBLOCK:
  *	This symbol is to be used during open() or fcntl(F_SETFL) to turn on
@@ -1453,45 +1544,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define RD_NODATA $rd_nodata
 #$d_eofnblk EOF_NONBLOCK
 
-/* CAN_PROTOTYPE:
- *	If defined, this macro indicates that the C compiler can handle
- *	function prototypes.
- */
-/* _:
- *	This macro is used to declare function parameters for folks who want
- *	to make declarations with prototypes using a different style than
- *	the above macros.  Use double parentheses.  For example:
- *
- *		int main _((int argc, char *argv[]));
- */
-#$prototype	CAN_PROTOTYPE	/**/
-#ifdef CAN_PROTOTYPE
-#define	_(args) args
-#else
-#define	_(args) ()
-#endif
-
 /* RANDBITS:
  *	This symbol contains the number of bits of random number the rand()
  *	function produces.  Usual values are 15, 16, and 31.
  */
 #define RANDBITS $randbits		/**/
-
-/* Select_fd_set_t:
- *	This symbol holds the type used for the 2nd, 3rd, and 4th
- *	arguments to select.  Usually, this is 'fd_set *', if HAS_FD_SET
- *	is defined, and 'int *' otherwise.  This is only useful if you 
- *	have select(), of course.
- */
-#define Select_fd_set_t 	$selecttype	/**/
-
-/* Size_t:
- *	This symbol holds the type used to declare length parameters
- *	for string functions.  It is usually size_t, but may be
- *	unsigned long, int, etc.  It may be necessary to include
- *	<sys/types.h> to get any typedef'ed information.
- */
-#define Size_t $sizetype	 /* length paramater for string functions */
 
 /* SSize_t:
  *	This symbol holds the type used by functions that return
@@ -1502,24 +1559,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	We will pick a type such that sizeof(SSize_t) == sizeof(Size_t).
  */
 #define SSize_t $ssizetype	 /* signed count of bytes */
-
-/* STDCHAR:
- *	This symbol is defined to be the type of char used in stdio.h.
- *	It has the values "unsigned char" or "char".
- */
-#define STDCHAR $stdchar	/**/
-
-/* Uid_t:
- *	This symbol holds the type used to declare user ids in the kernel.
- *	It can be int, ushort, uid_t, etc... It may be necessary to include
- *	<sys/types.h> to get any typedef'ed information.
- */
-#define Uid_t $uidtype		/* UID type */
-
-/* LOC_SED:
- *	This symbol holds the complete pathname to the sed program.
- */
-#define LOC_SED 	"$full_sed"	/**/
 
 /* OSNAME:
  *	This symbol contains the name of the operating system, as determined
@@ -1544,34 +1583,25 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_archlib ARCHLIB "$archlib"		/**/
 #$d_archlib ARCHLIB_EXP "$archlibexp"		/**/
 
-/* BINCOMPAT3:
- *	This symbol, if defined, indicates that Perl 5.004 should be
- *	binary-compatible with Perl 5.003.
+/* CAT2:
+ *	This macro catenates 2 tokens together.
  */
-#$d_bincompat3 BINCOMPAT3			/**/
-
-/* BYTEORDER:
- *	This symbol holds the hexadecimal constant defined in byteorder,
- *	i.e. 0x1234 or 0x4321, etc...
- *	On NeXT 3.2 (and greater), you can build "Fat" Multiple Architecture
- *	Binaries (MAB) on either big endian or little endian machines.
- *	The endian-ness is available at compile-time.  This only matters
- *	for perl, where the config.h can be generated and installed on 
- *	one system, and used by a different architecture to build an
- *	extension.  Older versions of NeXT that might not have
- *	defined either *_ENDIAN__ were all on Motorola 680x0 series,
- *	so the default case (for NeXT) is big endian to catch them. 
- *	This might matter for NeXT 3.0.
+/* STRINGIFY:
+ *	This macro surrounds its token with double quotes.
  */
-#ifndef NeXT
-#define BYTEORDER 0x$byteorder	/* large digits for MSB */
-#else  /* NeXT */
-#ifdef __LITTLE_ENDIAN__
-#define BYTEORDER 0x1234
-#else /* __BIG_ENDIAN__ */
-#define BYTEORDER 0x4321
-#endif /* ENDIAN CHECK */
-#endif /* NeXT */
+#if $cpp_stuff == 1
+#define CAT2(a,b)a/**/b
+#define STRINGIFY(a)"a"
+		/* If you can get stringification with catify, tell me how! */
+#endif
+#if $cpp_stuff == 42
+#define CAT2(a,b)a ## b
+#define StGiFy(a)# a
+#define STRINGIFY(a)StGiFy(a)
+#endif
+#if $cpp_stuff != 1 && $cpp_stuff != 42
+#include "Bletch: How does this C preprocessor catenate tokens?"
+#endif
 
 /* CSH:
  *	This symbol, if defined, indicates that the C-shell exists.
@@ -1579,210 +1609,39 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_csh CSH "$full_csh"		/**/
 
-/* DLSYM_NEEDS_UNDERSCORE:
- *	This symbol, if defined, indicates that we need to prepend an
- *	underscore to the symbol name before calling dlsym().  This only
- *	makes sense if you *have* dlsym, which we will presume is the
- *	case if you're using dl_dlopen.xs.
+/* HAS_SETGROUPS:
+ *	This symbol, if defined, indicates that the setgroups() routine is
+ *	available to set the list of process groups.  If unavailable, multiple
+ *	groups are probably not supported.
  */
-#$d_dlsymun 	DLSYM_NEEDS_UNDERSCORE 	/**/
+#$d_setgrps HAS_SETGROUPS		/**/
 
-/* SETUID_SCRIPTS_ARE_SECURE_NOW:
- *	This symbol, if defined, indicates that the bug that prevents
- *	setuid scripts from being secure is not present in this kernel.
+/* Signal_t:
+ *	This symbol's value is either "void" or "int", corresponding to the
+ *	appropriate return type of a signal handler.  Thus, you can declare
+ *	a signal handler using "Signal_t (*handler)()", and define the
+ *	handler using "Signal_t handler(sig)".
  */
-/* DOSUID:
- *	This symbol, if defined, indicates that the C program should
- *	check the script that it is executing for setuid/setgid bits, and
- *	attempt to emulate setuid/setgid on systems that have disabled
- *	setuid #! scripts because the kernel can't do it securely.
- *	It is up to the package designer to make sure that this emulation
- *	is done securely.  Among other things, it should do an fstat on
- *	the script it just opened to make sure it really is a setuid/setgid
- *	script, it should make sure the arguments passed correspond exactly
- *	to the argument on the #! line, and it should not trust any
- *	subprocesses to which it must pass the filename rather than the
- *	file descriptor of the script to be executed.
- */
-#$d_suidsafe SETUID_SCRIPTS_ARE_SECURE_NOW	/**/
-#$d_dosuid DOSUID		/**/
+#define Signal_t $signal_t	/* Signal handler's return type */
 
-/* Gconvert:
- *	This preprocessor macro is defined to convert a floating point
- *	number to a string without a trailing decimal point.  This
- *	emulates the behavior of sprintf("%g"), but is sometimes much more
- *	efficient.  If gconvert() is not available, but gcvt() drops the
- *	trailing decimal point, then gcvt() is used.  If all else fails,
- *	a macro using sprintf("%g") is used. Arguments for the Gconvert
- *	macro are: value, number of digits, whether trailing zeros should
- *	be retained, and the output buffer.
- *	Possible values are:
- *		d_Gconvert='gconvert((x),(n),(t),(b))'
- *		d_Gconvert='gcvt((x),(n),(b))'
- *		d_Gconvert='sprintf((b),"%.*g",(n),(x))'
- *	The last two assume trailing zeros should not be kept.
+/* Groups_t:
+ *	This symbol holds the type used for the second argument to
+ *	getgroups() and setgropus().  Usually, this is the same as
+ *	gidtype (gid_t) , but sometimes it isn't.
+ *	It can be int, ushort, uid_t, etc... 
+ *	It may be necessary to include <sys/types.h> to get any 
+ *	typedef'ed information.  This is only required if you have
+ *	getgroups() or setgropus()..
  */
-#define Gconvert(x,n,t,b) $d_Gconvert
-
-/* HAS_GETPGID:
- *	This symbol, if defined, indicates to the C program that 
- *	the getpgid(pid) function is available to get the
- *	process group id.
- */
-#$d_getpgid HAS_GETPGID		/**/
-
-/* HAS_GETPGRP:
- *	This symbol, if defined, indicates that the getpgrp routine is
- *	available to get the current process group.
- */
-/* USE_BSD_GETPGRP:
- *	This symbol, if defined, indicates that getpgrp needs one
- *	arguments whereas USG one needs none.
- */
-#$d_getpgrp HAS_GETPGRP		/**/
-#$d_bsdgetpgrp USE_BSD_GETPGRP	/**/
-
-/* HAS_INET_ATON:
- *	This symbol, if defined, indicates to the C program that the
- *	inet_aton() function is available to parse IP address "dotted-quad"
- *	strings.
- */
-#$d_inetaton HAS_INET_ATON		/**/
-
-/* HAS_SETPGID:
- *	This symbol, if defined, indicates to the C program that 
- *	the setpgid(pid, gpid) function is available to set the
- *	process group id.
- */
-#$d_setpgid HAS_SETPGID		/**/
-
-/* HAS_SETPGRP:
- *	This symbol, if defined, indicates that the setpgrp routine is
- *	available to set the current process group.
- */
-/* USE_BSD_SETPGRP:
- *	This symbol, if defined, indicates that setpgrp needs two
- *	arguments whereas USG one needs none.  See also HAS_SETPGID
- *	for a POSIX interface.
- */
-/* USE_BSDPGRP:
- *	This symbol, if defined, indicates that the BSD notion of process
- *	group is to be used. For instance, you have to say setpgrp(pid, pgrp)
- *	instead of the USG setpgrp().  This should be obsolete since
- *	there are systems which have BSD-ish setpgrp but USG-ish getpgrp.
- */
-#$d_setpgrp HAS_SETPGRP		/**/
-#$d_bsdsetpgrp USE_BSD_SETPGRP	/**/
-#$d_bsdpgrp USE_BSDPGRP		/**/
-
-/* USE_SFIO:
- *	This symbol, if defined, indicates that sfio should
- *	be used.
- */
-#$d_sfio	USE_SFIO		/**/
-
-/* PTHREADS_CREATED_JOINABLE:
- *	This symbol, if defined, indicates that pthreads are created
- *	in the joinable (aka undetached) state.
- */
-#$d_pthreads_created_joinable	PTHREADS_CREATED_JOINABLE		/**/
-
-/* Sigjmp_buf:
- *	This is the buffer type to be used with Sigsetjmp and Siglongjmp.
- */
-/* Sigsetjmp:
- *	This macro is used in the same way as sigsetjmp(), but will invoke
- *	traditional setjmp() if sigsetjmp isn't available.
- *	See HAS_SIGSETJMP.
- */
-/* Siglongjmp:
- *	This macro is used in the same way as siglongjmp(), but will invoke
- *	traditional longjmp() if siglongjmp isn't available.
- *	See HAS_SIGSETJMP.
- */
-#$d_sigsetjmp HAS_SIGSETJMP	/**/
-#ifdef HAS_SIGSETJMP
-#define Sigjmp_buf sigjmp_buf
-#define Sigsetjmp(buf,save_mask) sigsetjmp((buf),(save_mask))
-#define Siglongjmp(buf,retval) siglongjmp((buf),(retval))
-#else
-#define Sigjmp_buf jmp_buf
-#define Sigsetjmp(buf,save_mask) setjmp((buf))
-#define Siglongjmp(buf,retval) longjmp((buf),(retval))
+#if defined(HAS_GETGROUPS) || defined(HAS_SETGROUPS)
+#define Groups_t $groupstype	/* Type for 2nd arg to [sg]etgroups() */
 #endif
 
-/* USE_DYNAMIC_LOADING:
- *	This symbol, if defined, indicates that dynamic loading of
- *	some sort is available.
- */
-#$usedl USE_DYNAMIC_LOADING		/**/
-
-/* I_DBM:
- *	This symbol, if defined, indicates that <dbm.h> exists and should
- *	be included.
- */
-/* I_RPCSVC_DBM:
- *	This symbol, if defined, indicates that <rpcsvc/dbm.h> exists and
+/* I_NETDB:
+ *	This symbol, if defined, indicates that <netdb.h> exists and
  *	should be included.
  */
-#$i_dbm I_DBM	/**/
-#$i_rpcsvcdbm I_RPCSVC_DBM	/**/
-
-/* I_LOCALE:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <locale.h>.
- */
-#$i_locale	I_LOCALE		/**/
-
-/* I_SFIO:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <sfio.h>.
- */
-#$i_sfio	I_SFIO		/**/
-
-/* I_SYS_STAT:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <sys/stat.h>.
- */
-#$i_sysstat	I_SYS_STAT		/**/
-
-/* I_VALUES:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <values.h> to get definition of symbols like MINFLOAT or
- *	MAXLONG, i.e. machine dependant limitations.  Probably, you
- *	should use <limits.h> instead, if it is available.
- */
-#$i_values I_VALUES		/**/
-
-/* Free_t:
- *	This variable contains the return type of free().  It is usually
- * void, but occasionally int.
- */
-/* Malloc_t:
- *	This symbol is the type of pointer returned by malloc and realloc.
- */
-#define Malloc_t $malloctype			/**/
-#define Free_t $freetype			/**/
-
-/* MYMALLOC:
- *	This symbol, if defined, indicates that we're using our own malloc.
- */
-#$d_mymalloc MYMALLOC			/**/
-
-/* OLDARCHLIB:
- *	This variable, if defined, holds the name of the directory in
- *	which the user has perl5.000 or perl5.001 architecture-dependent
- *	public library files for $package.  For the most part, these
- *	files will work with 5.002 (and later), but that is not
- *	guaranteed.
- */
-/* OLDARCHLIB_EXP:
- *	This symbol contains the ~name expanded version of OLDARCHLIB, to be
- *	used in programs that are not prepared to deal with ~ expansion at 
- *	run-time.
- */
-#$d_oldarchlib OLDARCHLIB "$oldarchlib"		/**/
-#$d_oldarchlib OLDARCHLIB_EXP "$oldarchlibexp"		/**/
+#$i_netdb I_NETDB		/**/
 
 /* PRIVLIB:
  *	This symbol contains the name of the private library for this package.
@@ -1796,15 +1655,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define PRIVLIB "$privlib"		/**/
 #define PRIVLIB_EXP "$privlibexp"		/**/
-
-/* SH_PATH:
- *	This symbol contains the full pathname to the shell used on this
- *	on this system to execute Bourne shell scripts.  Usually, this will be
- *	/bin/sh, though it's possible that some systems will have /bin/ksh,
- *	/bin/pdksh, /bin/ash, /bin/bash, or even something such as
- *	D:/bin/sh.exe.
- */
-#define SH_PATH "$sh"  /**/
 
 /* SIG_NAME:
  *	This symbol contains a list of signal names in order of
@@ -1834,8 +1684,8 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	The last element is 0, corresponding to the 0 at the end of
  *	the sig_name list.
  */
-#define SIG_NAME "`echo $sig_name | sed 's/ /","/g'`",0	/**/
-#define SIG_NUM `echo $sig_num 0 | sed 's/ /,/g'`	/**/
+#define SIG_NAME $sig_name_init		/**/
+#define SIG_NUM  $sig_num			/**/
 
 /* SITEARCH:
  *	This symbol contains the name of the private library for this package.
@@ -1869,6 +1719,39 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define SITELIB "$sitelib"		/**/
 #define SITELIB_EXP "$sitelibexp"		/**/
 
+/* DLSYM_NEEDS_UNDERSCORE:
+ *	This symbol, if defined, indicates that we need to prepend an
+ *	underscore to the symbol name before calling dlsym().  This only
+ *	makes sense if you *have* dlsym, which we will presume is the
+ *	case if you're using dl_dlopen.xs.
+ */
+#$d_dlsymun 	DLSYM_NEEDS_UNDERSCORE 	/**/
+
+/* USE_SFIO:
+ *	This symbol, if defined, indicates that sfio should
+ *	be used.
+ */
+#$d_sfio	USE_SFIO		/**/
+
+/* USE_DYNAMIC_LOADING:
+ *	This symbol, if defined, indicates that dynamic loading of
+ *	some sort is available.
+ */
+#$usedl USE_DYNAMIC_LOADING		/**/
+
+/* DB_Prefix_t:
+ *	This symbol contains the type of the prefix structure element
+ *	in the <db.h> header file.  In older versions of DB, it was
+ *	int, while in newer ones it is u_int32_t.
+ */
+/* DB_Hash_t:
+ *	This symbol contains the type of the prefix structure element
+ *	in the <db.h> header file.  In older versions of DB, it was
+ *	int, while in newer ones it is size_t.
+ */
+#define DB_Hash_t	$db_hashtype		/**/
+#define DB_Prefix_t	$db_prefixtype  	/**/
+
 /* STARTPERL:
  *	This variable contains the string to put in front of a perl
  *	script to make sure (one hopes) that it runs with perl and not
@@ -1883,30 +1766,61 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$useperlio	USE_PERLIO		/**/
 
-/* VOIDFLAGS:
- *	This symbol indicates how much support of the void type is given by this
- *	compiler.  What various bits mean:
- *
- *	    1 = supports declaration of void
- *	    2 = supports arrays of pointers to functions returning void
- *	    4 = supports comparisons between pointers to void functions and
- *		    addresses of void functions
- *	    8 = suports declaration of generic void pointers
- *
- *	The package designer should define VOIDUSED to indicate the requirements
- *	of the package.  This can be done either by #defining VOIDUSED before
- *	including config.h, or by defining defvoidused in Myinit.U.  If the
- *	latter approach is taken, only those flags will be tested.  If the
- *	level of void support necessary is not present, defines void to int.
+/* Netdb_host_t:
+ *	This symbol holds the type used for the 1st argument
+ *	to gethostbyaddr().
  */
-#ifndef VOIDUSED
-#define VOIDUSED $defvoidused
-#endif
-#define VOIDFLAGS $voidflags
-#if (VOIDFLAGS & VOIDUSED) != VOIDUSED
-#define void int		/* is void to be avoided? */
-#define M_VOID			/* Xenix strikes again */
-#endif
+/* Netdb_hlen_t:
+ *	This symbol holds the type used for the 2nd argument
+ *	to gethostbyaddr().
+ */
+/* Netdb_name_t:
+ *	This symbol holds the type used for the argument to
+ *	gethostbyname().
+ */
+/* Netdb_net_t:
+ *	This symbol holds the type used for the 1st argument to
+ *	getnetbyaddr().
+ */
+#define Netdb_host_t		$netdb_host_type /**/
+#define Netdb_hlen_t		$netdb_hlen_type /**/
+#define Netdb_name_t		$netdb_name_type /**/
+#define Netdb_net_t		$netdb_net_type /**/
+
+/* Select_fd_set_t:
+ *	This symbol holds the type used for the 2nd, 3rd, and 4th
+ *	arguments to select.  Usually, this is 'fd_set *', if HAS_FD_SET
+ *	is defined, and 'int *' otherwise.  This is only useful if you 
+ *	have select(), of course.
+ */
+#define Select_fd_set_t 	$selecttype	/**/
+
+/* ARCHNAME:
+ *	This symbol holds a string representing the architecture name.
+ *	It may be used to construct an architecture-dependant pathname
+ *	where library files may be held under a private library, for
+ *	instance.
+ */
+#define ARCHNAME "$archname"		/**/
+
+/* HAS_PTHREAD_YIELD:
+ *	This symbol, if defined, indicates that the pthread_yield 
+ *	routine is available to yield the execution of the current
+ *	thread.
+ */
+#$d_pthread_yield HAS_PTHREAD_YIELD	/**/
+
+/* PTHREADS_CREATED_JOINABLE:
+ *	This symbol, if defined, indicates that pthreads are created
+ *	in the joinable (aka undetached) state.
+ */
+#$d_pthreads_created_joinable PTHREADS_CREATED_JOINABLE /**/
+
+/* USE_THREADS:
+ *	This symbol, if defined, indicates that Perl should
+ *	be built to use threads.
+ */
+#$usethreads	USE_THREADS		/**/
 
 #endif
 !GROK!THIS!

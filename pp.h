@@ -14,15 +14,11 @@
 #define ARGS
 #define dARGS
 #endif /* USE_THREADS */
-#ifdef CAN_PROTOTYPE
 #ifdef PERL_OBJECT
-#define PP(s) OP* CPerlObj::s _((ARGSproto))
+#define PP(s) OP * CPerlObj::s(ARGSproto)
 #else
 #define PP(s) OP * s(ARGSproto)
 #endif
-#else /* CAN_PROTOTYPE */
-#define PP(s) OP* s(ARGS) dARGS
-#endif /* CAN_PROTOTYPE */
 
 #define SP sp
 #define MARK mark

@@ -329,7 +329,12 @@ undefined behavior (rarely, we hope):
     getgrnam, setgrent, endgrent, ioctl, link, lstat,
     msgctl, msgget, msgsend, msgrcv, readlink, semctl,
     semget, semop, setpgrp, setpriority, shmctl, shmget,
-    shmread, shmwrite, socketpair, symlink, syscall, truncate
+    shmread, shmwrite, socketpair, symlink, syscall
+
+The following functions are available on Perls compiled with Dec C 5.2 or
+greater and running VMS 7.0 or greater
+
+    truncate
 
 The following functions may or may not be implemented, 
 depending on what type of socket support you've built into 
@@ -749,12 +754,23 @@ it's equivalent to calling fflush() and fsync() from C.
 
 =back
 
+=head1 Standard modules with VMS-specific differences
+
+=head2 SDBM_File
+
+SDBM_File works peroperly on VMS. It has, however, one minor
+difference. The database directory file created has a L<.sdbm_dir>
+extension rather than a L<.dir> extension. L<.dir> files are VMS filesystem
+directory files, and using them for other purposes could cause unacceptable
+problems.
+
 =head1 Revision date
 
-This document was last updated on 28-Feb-1996, for Perl 5, 
-patchlevel 2.
+This document was last updated on 26-Feb-1998, for Perl 5, 
+patchlevel 5.
 
 =head1 AUTHOR
 
-Charles Bailey  bailey@genetics.upenn.edu
+Charles Bailey  bailey@cor.newman.upenn.edu
 
+Last revision by Dan Sugalski  sugalskd@ous.edu

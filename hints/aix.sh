@@ -78,8 +78,7 @@ lddlflags='-H512 -T512 -bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).
 esac
 
 if [ "X$usethreads" != "X" ]; then
-    ccflags="-DUSE_THREADS -DNEED_PTHREAD_INIT $ccflags"
-    cppflags="-DUSE_THREADS -DNEED_PTHREAD_INIT $cppflags"
+    ccflags="-DNEED_PTHREAD_INIT $ccflags"
     case "$cc" in
     xlc_r | cc_r)
 	;;

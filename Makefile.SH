@@ -139,13 +139,12 @@ shellflags = $shellflags
 # do it for you.
 $make_set_make
 
-# These variables will be used in a future version to make
-# the make file more portable to non-unix systems.
+# These variables may need to be manually set for non-Unix systems.
 AR = $ar
-EXE_EXT = $exe_ext
-LIB_EXT = $lib_ext
-OBJ_EXT = $obj_ext
-PATH_SEP = $path_sep
+EXE_EXT = $_exe
+LIB_EXT = $_a
+OBJ_EXT = $_o
+PATH_SEP = $p_
 
 FIRSTMAKEFILE = $firstmakefile
 
@@ -187,15 +186,16 @@ h1 = EXTERN.h INTERN.h XSUB.h av.h config.h cop.h cv.h dosish.h
 h2 = embed.h form.h gv.h handy.h hv.h keywords.h mg.h op.h
 h3 = opcode.h patchlevel.h perl.h perly.h pp.h proto.h regcomp.h
 h4 = regexp.h scope.h sv.h unixish.h util.h perlio.h thread.h
-h = $(h1) $(h2) $(h3) $(h4)
+h5 = bytecode.h byterun.h
+h = $(h1) $(h2) $(h3) $(h4) $(h5)
 
-c1 = $(mallocsrc) av.c scope.c op.c doop.c doio.c dump.c hv.c mg.c
+c1 = $(mallocsrc) av.c scope.c op.c doop.c doio.c dump.c hv.c mg.c byterun.c
 c2 = perl.c perly.c pp.c pp_hot.c pp_ctl.c pp_sys.c regcomp.c regexec.c
 c3 = gv.c sv.c taint.c toke.c util.c deb.c run.c universal.c globals.c perlio.c
 
 c = $(c1) $(c2) $(c3) miniperlmain.c perlmain.c
 
-obj1 = $(mallocobj) gv$(OBJ_EXT) toke$(OBJ_EXT) perly$(OBJ_EXT) op$(OBJ_EXT) regcomp$(OBJ_EXT) dump$(OBJ_EXT) util$(OBJ_EXT) mg$(OBJ_EXT)
+obj1 = $(mallocobj) gv$(OBJ_EXT) toke$(OBJ_EXT) perly$(OBJ_EXT) op$(OBJ_EXT) regcomp$(OBJ_EXT) dump$(OBJ_EXT) util$(OBJ_EXT) mg$(OBJ_EXT) byterun$(OBJ_EXT)
 obj2 = hv$(OBJ_EXT) av$(OBJ_EXT) run$(OBJ_EXT) pp_hot$(OBJ_EXT) sv$(OBJ_EXT) pp$(OBJ_EXT) scope$(OBJ_EXT) pp_ctl$(OBJ_EXT) pp_sys$(OBJ_EXT)
 obj3 = doop$(OBJ_EXT) doio$(OBJ_EXT) regexec$(OBJ_EXT) taint$(OBJ_EXT) deb$(OBJ_EXT) universal$(OBJ_EXT) globals$(OBJ_EXT) perlio$(OBJ_EXT)
 
@@ -405,6 +405,10 @@ perly.c: perly.y
 perly.h: perly.y
 	-@sh -c true
 
+SYM  = global.sym interp.sym compat3.sym
+
+SYMH = perlvars.h thrdvar.h
+
 # The following files are generated automatically
 #	keywords.h:	keywords.pl
 #	opcode.h:	opcode.pl
@@ -444,10 +448,10 @@ s_dummy $(static_ext):	miniperl preplibrary $(DYNALOADER) FORCE
 clean:		_tidy _mopup
 
 realclean:	_cleaner _mopup
-	@echo "Note that make realclean does not delete config.sh"
+	@echo "Note that make realclean does not delete config.sh or Policy.sh"
 
 clobber:	_cleaner _mopup
-	rm -f config.sh cppstdin
+	rm -f config.sh cppstdin Policy.sh
 
 distclean:	clobber
 
@@ -505,7 +509,8 @@ $(FIRSTMAKEFILE):	README $(MAKEDEPEND)
 config.h: config_h.SH config.sh
 	$(SHELL) config_h.SH
 
-perl.exp: perl_exp.SH config.sh
+# This is an AIXism.
+perl.exp: perl_exp.SH config.sh $(SYM) $(SYMH)
 	$(SHELL) perl_exp.SH
 
 # When done, touch perlmain.c so that it doesn't get remade each time.

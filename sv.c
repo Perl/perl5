@@ -2295,7 +2295,7 @@ sv_usepvn(register SV *sv, register char *ptr, register STRLEN len)
 void
 sv_usepvn_mg(register SV *sv, register char *ptr, register STRLEN len)
 {
-    sv_usepvn_mg(sv,ptr,len);
+    sv_usepvn(sv,ptr,len);
     SvSETMAGIC(sv);
 }
 
@@ -2401,7 +2401,7 @@ sv_catpv(register SV *sv, register char *ptr)
 void
 sv_catpv_mg(register SV *sv, register char *ptr)
 {
-    sv_catpv_mg(sv,ptr);
+    sv_catpv(sv,ptr);
     SvSETMAGIC(sv);
 }
 
@@ -2876,13 +2876,15 @@ SV *
 sv_newref(SV *sv)
 {
     if (sv)
-	SvREFCNT(sv)++;
+	ATOMIC_INC(SvREFCNT(sv));
     return sv;
 }
 
 void
 sv_free(SV *sv)
 {
+    int refcount_is_zero;
+
     if (!sv)
 	return;
     if (SvREADONLY(sv)) {
@@ -2897,7 +2899,8 @@ sv_free(SV *sv)
 	warn("Attempt to free unreferenced scalar");
 	return;
     }
-    if (--SvREFCNT(sv) > 0)
+    ATOMIC_DEC_AND_TEST(refcount_is_zero, SvREFCNT(sv));
+    if (!refcount_is_zero)
 	return;
 #ifdef DEBUGGING
     if (SvTEMP(sv)) {

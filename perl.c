@@ -85,30 +85,6 @@ static void validate_suid _((char *, char*));
 
 static int fdscript = -1;
 
-#if defined(DEBUGGING) && defined(USE_THREADS) && defined(__linux__)
-#include <asm/sigcontext.h>
-STATIC void
-catch_sigsegv(int signo, struct sigcontext_struct sc)
-{
-    PerlProc_signal(SIGSEGV, SIG_DFL);
-    fprintf(stderr, "Segmentation fault dereferencing 0x%lx\n"
-		    "return_address = 0x%lx, eip = 0x%lx\n",
-	    	    sc.cr2, __builtin_return_address(0), sc.eip);
-    fprintf(stderr, "thread = 0x%lx\n", (unsigned long)THR); 
-}
-#endif
-
-#ifdef PERL_OBJECT
-CPerlObj* perl_alloc(IPerlMem* ipM, IPerlEnv* ipE, IPerlStdIO* ipStd,
-					     IPerlLIO* ipLIO, IPerlDir* ipD, IPerlSock* ipS, IPerlProc* ipP)
-{
-	CPerlObj* pPerl = new(ipM) CPerlObj(ipM, ipE, ipStd, ipLIO, ipD, ipS, ipP);
-	if(pPerl != NULL)
-		pPerl->Init();
-
-	return pPerl;
-}
-#else
 PerlInterpreter *
 perl_alloc(void)
 {
@@ -163,7 +139,10 @@ perl_construct(register PerlInterpreter *sv_interp)
 	COND_INIT(&eval_cond);
 	MUTEX_INIT(&threads_mutex);
 	COND_INIT(&nthreads_cond);
-
+#ifdef EMULATE_ATOMIC_REFCOUNTS
+	MUTEX_INIT(&svref_mutex);
+#endif /* EMULATE_ATOMIC_REFCOUNTS */
+	
 	thr = init_main_thread();
 #endif /* USE_THREADS */
 
@@ -947,10 +926,6 @@ print \"  \\@INC:\\n    @INC\\n\";");
     init_os_extras();
 #endif
 
-#if defined(DEBUGGING) && defined(USE_THREADS) && defined(__linux__)
-    DEBUG_L(PerlProc_signal(SIGSEGV, (void(*)(int))catch_sigsegv););
-#endif
-
     init_predump_symbols();
     if (!do_undump)
 	init_postdump_symbols(argc,argv,env);
@@ -1709,7 +1684,7 @@ moreswitches(char *s)
 #endif
 #ifdef DJGPP
 	printf("djgpp v2 port (jpl5003c) by Hirofumi Watanabe, 1996\n");
-	printf("djgpp v2 port (perl5004) by Laszlo Molnar, 1997\n");
+	printf("djgpp v2 port (perl5004+) by Laszlo Molnar, 1997-1998\n");
 #endif
 #ifdef OS2
 	printf("\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
@@ -1823,16 +1798,8 @@ init_main_stash(void)
     sv_setpvn(GvSV(gv_fetchpv("/", TRUE, SVt_PV)), "\n", 1);
 }
 
-#ifdef CAN_PROTOTYPE
 STATIC void
 open_script(char *scriptname, bool dosearch, SV *sv)
-#else
-STATIC void
-open_script(scriptname,dosearch,sv)
-char *scriptname;
-bool dosearch;
-SV *sv;
-#endif
 {
     dTHR;
     char *xfound = Nullch;
@@ -2704,7 +2671,7 @@ init_perllib(void)
     }
 
 /* Use the ~-expanded versions of APPLLIB (undocumented),
-    ARCHLIB PRIVLIB SITEARCH SITELIB and OLDARCHLIB
+    ARCHLIB PRIVLIB SITEARCH and SITELIB 
 */
 #ifdef APPLLIB_EXP
     incpush(APPLLIB_EXP, FALSE);
@@ -2724,10 +2691,6 @@ init_perllib(void)
 #ifdef SITELIB_EXP
     incpush(SITELIB_EXP, FALSE);
 #endif
-#ifdef OLDARCHLIB_EXP  /* 5.00[01] compatibility */
-    incpush(OLDARCHLIB_EXP, FALSE);
-#endif
-    
     if (!tainting)
 	incpush(".", FALSE);
 }

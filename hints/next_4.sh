@@ -83,8 +83,6 @@ i_dbm='define'
 i_utime='undef'
 groupstype='int'
 direntrytype='struct direct'
-netdb_host_type='const char *'
-netdb_hlen_type='int'
 
 usemymalloc='y'
 clocktype='int'
