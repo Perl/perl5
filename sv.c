@@ -7069,7 +7069,7 @@ Perl_sv_2io(pTHX_ SV *sv)
 	else
 	    io = 0;
 	if (!io)
-	    Perl_croak(aTHX_ "Bad filehandle: %s", SvPV(sv,n_a));
+	    Perl_croak(aTHX_ "Bad filehandle: %"SVf, sv);
 	break;
     }
     return io;
@@ -7150,7 +7150,8 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 		   Nullop);
 	    LEAVE;
 	    if (!GvCVu(gv))
-		Perl_croak(aTHX_ "Unable to create sub named \"%s\"", SvPV(sv,n_a));
+		Perl_croak(aTHX_ "Unable to create sub named \"%"SVf"\"",
+			   sv);
 	}
 	return GvCVu(gv);
     }
@@ -8973,8 +8974,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if (!args && ckWARN(WARN_PRINTF) &&
 		  (PL_op->op_type == OP_PRTF || PL_op->op_type == OP_SPRINTF)) {
 		SV *msg = sv_newmortal();
-		Perl_sv_setpvf(aTHX_ msg, "Invalid conversion in %s: ",
-			  (PL_op->op_type == OP_PRTF) ? "printf" : "sprintf");
+		Perl_sv_setpvf(aTHX_ msg, "Invalid conversion in %sprintf: ",
+			  (PL_op->op_type == OP_PRTF) ? "" : "s");
 		if (c) {
 		    if (isPRINT(c))
 			Perl_sv_catpvf(aTHX_ msg,

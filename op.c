@@ -152,8 +152,8 @@ STATIC void
 S_no_bareword_allowed(pTHX_ OP *o)
 {
     qerror(Perl_mess(aTHX_
-		     "Bareword \"%s\" not allowed while \"strict subs\" in use",
-		     SvPV_nolen(cSVOPo_sv)));
+		     "Bareword \"%"SVf"\" not allowed while \"strict subs\" in use",
+		     cSVOPo_sv));
 }
 
 /* "register" allocation */
@@ -3950,7 +3950,7 @@ Perl_cv_ckproto(pTHX_ CV *cv, GV *gv, char *p)
 	if (name)
 	    Perl_sv_catpvf(aTHX_ msg, " sub %"SVf, name);
 	if (SvPOK(cv))
-	    Perl_sv_catpvf(aTHX_ msg, " (%s)", SvPVX(cv));
+	    Perl_sv_catpvf(aTHX_ msg, " (%"SVf")", (SV *)cv);
 	sv_catpv(msg, " vs ");
 	if (p)
 	    Perl_sv_catpvf(aTHX_ msg, "(%s)", p);
@@ -4272,7 +4272,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		else {
 		    /* force display of errors found but not reported */
 		    sv_catpv(ERRSV, not_safe);
-		    Perl_croak(aTHX_ "%s", SvPVx(ERRSV, n_a));
+		    Perl_croak(aTHX_ "%"SVf, ERRSV);
 		}
 	    }
 	}
@@ -6146,8 +6146,8 @@ Perl_ck_subr(pTHX_ OP *o)
 		continue;
 	    default:
 	      oops:
-		Perl_croak(aTHX_ "Malformed prototype for %s: %s",
-			   gv_ename(namegv), SvPV((SV*)cv, n_a));
+		Perl_croak(aTHX_ "Malformed prototype for %s: %"SVf,
+			   gv_ename(namegv), cv);
 	    }
 	}
 	else
@@ -6356,8 +6356,8 @@ Perl_peep(pTHX_ register OP *o)
 		    SV *sv = sv_newmortal();
 		    gv_efullname3(sv, gv, Nullch);
 		    Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE),
-				"%s() called too early to check prototype",
-				SvPV_nolen(sv));
+				"%"SVf"() called too early to check prototype",
+				sv);
 		}
 	    }
 	    else if (o->op_next->op_type == OP_READLINE

@@ -94,8 +94,8 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, HV* name_stash,
 		if (!basestash) {
 		    if (ckWARN(WARN_MISC))
 			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-		             "Can't locate package %s for @%s::ISA",
-			    SvPVX(sv), HvNAME(stash));
+		             "Can't locate package %"SVf" for @%s::ISA",
+			    sv, HvNAME(stash));
 		    continue;
 		}
 		if (&PL_sv_yes == isa_lookup(basestash, name, name_stash, 

@@ -773,8 +773,8 @@ Perl_nextargv(pTHX_ register GV *gv)
 		    {
 			if (ckWARN_d(WARN_INPLACE))	
 			    Perl_warner(aTHX_ packWARN(WARN_INPLACE),
-			      "Can't do inplace edit: %s would not be unique",
-			      SvPVX(sv));
+			      "Can't do inplace edit: %"SVf" would not be unique",
+			      sv);
 			do_close(gv,FALSE);
 			continue;
 		    }
@@ -784,8 +784,8 @@ Perl_nextargv(pTHX_ register GV *gv)
 		    if (PerlLIO_rename(PL_oldname,SvPVX(sv)) < 0) {
 		        if (ckWARN_d(WARN_INPLACE))	
 			    Perl_warner(aTHX_ packWARN(WARN_INPLACE),
-			      "Can't rename %s to %s: %s, skipping file",
-			      PL_oldname, SvPVX(sv), Strerror(errno) );
+			      "Can't rename %s to %"SVf": %s, skipping file",
+			      PL_oldname, sv, Strerror(errno) );
 			do_close(gv,FALSE);
 			continue;
 		    }
@@ -800,8 +800,8 @@ Perl_nextargv(pTHX_ register GV *gv)
 		    if (link(PL_oldname,SvPVX(sv)) < 0) {
 		        if (ckWARN_d(WARN_INPLACE))	
 			    Perl_warner(aTHX_ packWARN(WARN_INPLACE),
-			      "Can't rename %s to %s: %s, skipping file",
-			      PL_oldname, SvPVX(sv), Strerror(errno) );
+			      "Can't rename %s to %"SVf": %s, skipping file",
+			      PL_oldname, sv, Strerror(errno) );
 			do_close(gv,FALSE);
 			continue;
 		    }

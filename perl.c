@@ -4071,7 +4071,6 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	    atsv = ERRSV;
 	    (void)SvPV(atsv, len);
 	    if (len) {
-		STRLEN n_a;
 		PL_curcop = &PL_compiling;
 		CopLINE_set(PL_curcop, oldline);
 		if (paramList == PL_beginav)
@@ -4085,7 +4084,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 		while (PL_scopestack_ix > oldscope)
 		    LEAVE;
 		JMPENV_POP;
-		Perl_croak(aTHX_ "%s", SvPVx(atsv, n_a));
+		Perl_croak(aTHX_ "%"SVf"", atsv);
 	    }
 	    break;
 	case 1:

@@ -5033,8 +5033,8 @@ Perl_yylex(pTHX)
 		    d[tmp] = '\0';
 		    if (bad_proto && ckWARN(WARN_SYNTAX))
 			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-				    "Illegal character in prototype for %s : %s",
-				    SvPVX(PL_subname), d);
+				    "Illegal character in prototype for %"SVf" : %s",
+				    PL_subname, d);
 		    SvCUR(PL_lex_stuff) = tmp;
 		    have_proto = TRUE;
 
