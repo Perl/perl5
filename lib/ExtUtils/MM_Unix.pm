@@ -1004,7 +1004,7 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists 
     push(@m,'	$(RM_F) $@
 ');
 
-    my $libs = $self->{LDLOADLIBS} || '';
+    my $libs = '$(LDLOADLIBS)';
 
     if ($^O eq 'netbsd') {
 	# Use nothing on static perl platforms, and to the flags needed
@@ -1013,9 +1013,9 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists 
 	# or -R to add paths to the run-time library search path.
 	if ($Config{'useshrplib'}) {
 	    if ($Config{'lddlflags'} =~ /-Wl,-R/) {
-		$libs = '-L$(PERL_INC) -Wl,-R$(INSTALLARCHLIB)/CORE -lperl';
+		$libs .= ' -L$(PERL_INC) -Wl,-R$(INSTALLARCHLIB)/CORE -lperl';
 	    } elsif ($Config{'lddlflags'} =~ /-R/) {
-		$libs = '-L$(PERL_INC) -R$(INSTALLARCHLIB)/CORE -lperl';
+		$libs .= ' -L$(PERL_INC) -R$(INSTALLARCHLIB)/CORE -lperl';
 	    }
 	}
     }

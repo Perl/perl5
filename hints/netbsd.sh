@@ -18,8 +18,6 @@ case "$osvers" in
 	usedl="$undef"
 	;;
 *)
-	# Note that we use the value of $prefix in this block.  The user
-	# should specify -Dprefix=... to the Configure script.
 	if [ -f /usr/libexec/ld.elf_so ]; then
 		d_dlopen=$define
 		d_dlerror=$define
@@ -27,7 +25,7 @@ case "$osvers" in
 		# needs __eh_alloc, __pure_virtual, and others.
 		# XXX This should be obsoleted by gcc-3.0.
 		ccdlflags="-Wl,-whole-archive -lgcc -Wl,-no-whole-archive \
-			-Wl,-E -Wl,-R$prefix/lib $ccdlflags"
+			-Wl,-E $ccdlflags"
 		cccdlflags="-DPIC -fPIC $cccdlflags"
 		lddlflags="--whole-archive -shared $lddlflags"
 	elif [ "`uname -m`" = "pmax" ]; then
@@ -40,7 +38,6 @@ case "$osvers" in
 	elif [ -f /usr/libexec/ld.so ]; then
 		d_dlopen=$define
 		d_dlerror=$define
-		ccdlflags="-Wl,-R$prefix/lib $ccdlflags"
 # we use -fPIC here because -fpic is *NOT* enough for some of the
 # extensions like Tk on some netbsd platforms (the sparc is one)
 		cccdlflags="-DPIC -fPIC $cccdlflags"
@@ -97,6 +94,10 @@ EOCBU
 # GDBM might be here, pth might be there.
 if test -d /usr/pkg/lib; then
 	loclibpth="$loclibpth /usr/pkg/lib"
-	ldflags="$ldflags -R/usr/pkg/lib"
+	if [ -f /usr/libexec/ld.elf_so ]; then
+		ldflags="$ldflags -Wl,-R/usr/pkg/lib"
+	else
+		ldflags="$ldflags -R/usr/pkg/lib"
+	fi
 fi
 test -d /usr/pkg/include && locincpth="$locincpth /usr/pkg/include"
