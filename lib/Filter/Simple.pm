@@ -110,6 +110,7 @@ To use the module it is necessary to do the following:
 =item 1.
 
 Download, build, and install the Filter::Util::Call module.
+(If you have Perl 5.7.1 or later you already have Filter::Util::Call.)
 
 =item 2.
 
