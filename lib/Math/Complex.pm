@@ -320,9 +320,16 @@ sub _zerotozero {
 #
 sub power {
 	my ($z1, $z2, $inverted) = @_;
-	_zerotozero if ($z1 == 0 and $z2 == 0);
-	return 1 if ($z1 == 1);
-	return 0 if ($z2 == 0);
+	my $z1z = $z1 == 0;
+	my $z2z = $z2 == 0;
+	_zerotozero if ($z1z and $z2z);
+	if ($inverted) {
+	    return 0 if ($z2z);
+	    return 1 if ($z1z or $z2 == 1);
+	} else {
+	    return 0 if ($z1z);
+	    return 1 if ($z2z or $z1 == 1);
+	}
 	$z2 = cplx($z2) unless ref $z2;
 	unless (defined $inverted) {
 		my $z3 = exp($z2 * log $z1);
@@ -1464,8 +1471,8 @@ operation (for instance) between two overloaded entities.
 
 =head1 AUTHORS
 
-	Raphael Manfredi <F<Raphael_Manfredi@grenoble.hp.com>>
-	Jarkko Hietaniemi <F<jhi@iki.fi>>
+Raphael Manfredi <F<Raphael_Manfredi@grenoble.hp.com>> and
+Jarkko Hietaniemi <F<jhi@iki.fi>>.
 
 =cut
 

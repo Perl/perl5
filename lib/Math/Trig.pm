@@ -19,9 +19,9 @@ use vars qw($VERSION $PACKAGE
 
 $VERSION = 1.00;
 
-my @angcnv = qw(rad_to_deg rad_to_grad
-	     deg_to_rad deg_to_grad
-	     grad_to_rad grad_to_deg);
+my @angcnv = qw(rad2deg rad2grad
+	     deg2rad deg2grad
+	     grad2rad grad2deg);
 
 @EXPORT = (@{$Math::Complex::EXPORT_TAGS{'trig'}},
 	   @angcnv);
@@ -47,17 +47,17 @@ sub remt ($$) {
 # Angle conversions.
 #
 
-sub rad_to_deg ($)  { remt(RD * $_[0], 360) }
+sub rad2deg ($)  { remt(RD * $_[0], 360) }
 
-sub deg_to_rad ($)  { remt(DR * $_[0], pi2) }
+sub deg2rad ($)  { remt(DR * $_[0], pi2) }
 
-sub grad_to_deg ($) { remt(GD * $_[0], 360) }
+sub grad2deg ($) { remt(GD * $_[0], 360) }
 
-sub deg_to_grad ($) { remt(DG * $_[0], 400) }
+sub deg2grad ($) { remt(DG * $_[0], 400) }
 
-sub rad_to_grad ($) { remt(RG * $_[0], 400) }
+sub rad2grad ($) { remt(RG * $_[0], 400) }
 
-sub grad_to_rad ($) { remt(GR * $_[0], pi2) }
+sub grad2rad ($) { remt(GR * $_[0], pi2) }
 
 =head1 NAME
 
@@ -73,7 +73,7 @@ Math::Trig - trigonometric functions
 	
 	$halfpi = pi/2;
 
-	$rad = deg_to_rad(120);
+	$rad = deg2rad(120);
 
 =head1 DESCRIPTION
 
@@ -193,14 +193,14 @@ and the imaginary part of approximately C<-1.317>.
 
 (Plane, 2-dimensional) angles may be converted with the following functions.
 
-	$radians  = deg_to_rad($degrees);
-	$radians  = grad_to_rad($gradians);
+	$radians  = deg2rad($degrees);
+	$radians  = grad2rad($gradians);
 	
-	$degrees  = rad_to_deg($radians);
-	$degrees  = grad_to_deg($gradians);
+	$degrees  = rad2deg($radians);
+	$degrees  = grad2deg($gradians);
 	
-	$gradians = deg_to_grad($degrees);
-	$gradians = rad_to_grad($radians);
+	$gradians = deg2grad($degrees);
+	$gradians = rad2grad($radians);
 
 The full circle is 2 I<pi> radians or I<360> degrees or I<400> gradians.
 
@@ -218,8 +218,8 @@ an answer instead of giving a fatal runtime error.
 
 =head1 AUTHORS
 
-	Jarkko Hietaniemi <F<jhi@iki.fi>>
-	Raphael Manfredi <F<Raphael_Manfredi@grenoble.hp.com>>
+Jarkko Hietaniemi <F<jhi@iki.fi>> and 
+Raphael Manfredi <F<Raphael_Manfredi@grenoble.hp.com>>.
 
 =cut
 

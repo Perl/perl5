@@ -25,7 +25,7 @@ sub near ($$;$) {
     abs($_[0] - $_[1]) < (defined $_[2] ? $_[2] : $eps);
 }
 
-print "1..6\n";
+print "1..7\n";
 
 $x = 0.9;
 print 'not ' unless (near(tan($x), sin($x) / cos($x)));
@@ -48,7 +48,10 @@ print 'not ' unless (near($y,  1.5707963267949) and
 		     near($z, -1.31695789692482));
 print "ok 5\n";
 
-print 'not ' unless (near(deg_to_rad(90), pi/2));
+print 'not ' unless (near(deg2rad(90), pi/2));
 print "ok 6\n";
+
+print 'not ' unless (near(rad2deg(pi), 180));
+print "ok 7\n";
 
 # eof

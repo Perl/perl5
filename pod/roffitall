@@ -132,6 +132,7 @@ toroff=`
     $libdir/Math::BigFloat.3	\
     $libdir/Math::BigInt.3	\
     $libdir/Math::Complex.3	\
+    $libdir/Math::Trig.3	\
     $libdir/Net::Ping.3	\
     $libdir/Net::hostent.3	\
     $libdir/Net::netent.3	\
