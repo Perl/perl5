@@ -123,6 +123,9 @@ toke.c	AOK
     Ambiguous use of %c resolved as operator %c
         *foo *foo
 
+    Ambiguous -f%c call resolved as a file test		[yylex]
+	sub f { }; -f(0)
+
 __END__
 # toke.c 
 use warnings 'deprecated' ;
@@ -564,3 +567,19 @@ no warnings 'ambiguous';
 "@mjd_previously_unused_array";        
 EXPECT
 Possible unintended interpolation of @mjd_previously_unused_array in string at - line 3.
+########
+# toke.c
+use warnings 'ambiguous';
+sub f { 24 }
+-f("TEST");
+print - f("TEST");
+print -(f("TEST"));
+print -f ("TEST");
+print -f "TEST";
+sub Q { 42 };
+print -Q();
+EXPECT
+Ambiguous -f() resolved as a file test at - line 4.
+Ambiguous -f() resolved as a file test at - line 7.
+-24-2411-42
+

@@ -121,7 +121,7 @@ int yyactlevel = 0;
  * Aop          : addition-level operator
  * Mop          : multiplication-level operator
  * Eop          : equality-testing operator
- * Rop        : relational operator <= != gt
+ * Rop          : relational operator <= != gt
  *
  * Also see LOP and lop() below.
  */
@@ -2802,6 +2802,8 @@ Perl_yylex(pTHX)
 	goto retry;
     case '-':
 	if (s[1] && isALPHA(s[1]) && !isALNUM(s[2])) {
+	    I32 ftst = 0;
+
 	    s++;
 	    PL_bufptr = s;
 	    tmp = *s++;
@@ -2817,41 +2819,58 @@ Perl_yylex(pTHX)
 		OPERATOR('-');		/* unary minus */
 	    }
 	    PL_last_uni = PL_oldbufptr;
-	    PL_last_lop_op = OP_FTEREAD;	/* good enough */
-            DEBUG_T( { PerlIO_printf(Perl_debug_log, 
-                        "### Saw file test %c\n", (int)tmp);
-            } )
 	    switch (tmp) {
-	    case 'r': FTST(OP_FTEREAD);
-	    case 'w': FTST(OP_FTEWRITE);
-	    case 'x': FTST(OP_FTEEXEC);
-	    case 'o': FTST(OP_FTEOWNED);
-	    case 'R': FTST(OP_FTRREAD);
-	    case 'W': FTST(OP_FTRWRITE);
-	    case 'X': FTST(OP_FTREXEC);
-	    case 'O': FTST(OP_FTROWNED);
-	    case 'e': FTST(OP_FTIS);
-	    case 'z': FTST(OP_FTZERO);
-	    case 's': FTST(OP_FTSIZE);
-	    case 'f': FTST(OP_FTFILE);
-	    case 'd': FTST(OP_FTDIR);
-	    case 'l': FTST(OP_FTLINK);
-	    case 'p': FTST(OP_FTPIPE);
-	    case 'S': FTST(OP_FTSOCK);
-	    case 'u': FTST(OP_FTSUID);
-	    case 'g': FTST(OP_FTSGID);
-	    case 'k': FTST(OP_FTSVTX);
-	    case 'b': FTST(OP_FTBLK);
-	    case 'c': FTST(OP_FTCHR);
-	    case 't': FTST(OP_FTTTY);
-	    case 'T': FTST(OP_FTTEXT);
-	    case 'B': FTST(OP_FTBINARY);
-	    case 'M': gv_fetchpv("\024",TRUE, SVt_PV); FTST(OP_FTMTIME);
-	    case 'A': gv_fetchpv("\024",TRUE, SVt_PV); FTST(OP_FTATIME);
-	    case 'C': gv_fetchpv("\024",TRUE, SVt_PV); FTST(OP_FTCTIME);
-	    default:
-		Perl_croak(aTHX_ "Unrecognized file test: -%c", (int)tmp);
+	    case 'r': ftst = OP_FTEREAD;	break;
+	    case 'w': ftst = OP_FTEWRITE;	break;
+	    case 'x': ftst = OP_FTEEXEC;	break;
+	    case 'o': ftst = OP_FTEOWNED;	break;
+	    case 'R': ftst = OP_FTRREAD;	break;
+	    case 'W': ftst = OP_FTRWRITE;	break;
+	    case 'X': ftst = OP_FTREXEC;	break;
+	    case 'O': ftst = OP_FTROWNED;	break;
+	    case 'e': ftst = OP_FTIS;		break;
+	    case 'z': ftst = OP_FTZERO;		break;
+	    case 's': ftst = OP_FTSIZE;		break;
+	    case 'f': ftst = OP_FTFILE;		break;
+	    case 'd': ftst = OP_FTDIR;		break;
+	    case 'l': ftst = OP_FTLINK;		break;
+	    case 'p': ftst = OP_FTPIPE;		break;
+	    case 'S': ftst = OP_FTSOCK;		break;
+	    case 'u': ftst = OP_FTSUID;		break;
+	    case 'g': ftst = OP_FTSGID;		break;
+	    case 'k': ftst = OP_FTSVTX;		break;
+	    case 'b': ftst = OP_FTBLK;		break;
+	    case 'c': ftst = OP_FTCHR;		break;
+	    case 't': ftst = OP_FTTTY;		break;
+	    case 'T': ftst = OP_FTTEXT;		break;
+	    case 'B': ftst = OP_FTBINARY;	break;
+	    case 'M': case 'A': case 'C':
+		gv_fetchpv("\024",TRUE, SVt_PV);
+		switch (tmp) {
+		case 'M': ftst = OP_FTMTIME;	break;
+		case 'A': ftst = OP_FTATIME;	break;
+		case 'C': ftst = OP_FTCTIME;	break;
+		default:			break;
+		}
 		break;
+	    default:
+		break;
+	    }
+	    if (ftst) {
+		PL_last_lop_op = ftst;
+		DEBUG_T( { PerlIO_printf(Perl_debug_log, 
+                        "### Saw file test %c\n", ftst);
+		} )
+		if (*s == '(' && ckWARN(WARN_AMBIGUOUS))
+		    Perl_warner(aTHX_ WARN_AMBIGUOUS,
+				"Ambiguous -%c() resolved as a file test",
+				tmp, tmp);
+		FTST(ftst);
+	    }
+	    else {
+		/* Assume it was a minus followed by a one-letter named
+		 * subroutine call (or a -bareword), then. */
+		s -= 2;
 	    }
 	}
 	tmp = *s++;
