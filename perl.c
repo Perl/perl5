@@ -864,7 +864,9 @@ perl_free(pTHXx)
 #    endif
 #    ifndef NETWARE
     if (PerlProc_lasthost()) {
+#      ifdef USE_PERLIO
 	PerlIO_cleanup();
+#      endif
     }
 #    endif
     PerlMem_free(aTHXx);
@@ -874,7 +876,9 @@ perl_free(pTHXx)
     win32_delete_internal_host(host);
 #    endif
 #  else
+#    ifdef USE_PERLIO
     PerlIO_cleanup();
+#    endif
     PerlMem_free(aTHXx);
 #  endif
 #else
