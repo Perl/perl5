@@ -8,8 +8,6 @@ use File::Basename;
 
 my $Config_libext = $Config{lib_ext} || ".a";
 
-# --- Determine libraries to use and how to use them ---
-
 sub ext {
     my($potential_libs, $Verbose) = @_;
     return ("", "", "", "") unless $potential_libs;
@@ -97,6 +95,7 @@ sub ext {
 	    } elsif (-f ($fullname="$thispth/lib${thislib}_s$Config_libext")
 		 && ($thislib .= "_s") ){ # we must explicitly use _s version
 	    } elsif (-f ($fullname="$thispth/lib$thislib$Config_libext")){
+	    } elsif (-f ($fullname="$thispth/$thislib$Config_libext")){
 	    } elsif (-f ($fullname="$thispth/Slib$thislib$Config_libext")){
 	    } else {
 		print STDOUT "$thislib not found in $thispth\n" if $Verbose;
@@ -145,7 +144,7 @@ sub ext {
 	    }
 	    last;	# found one here so don't bother looking further
 	}
-	print STDOUT "Warning (non-fatal): No library found for -l$thislib\n"
+	print STDOUT "Warning (will try anyway): No library found for -l$thislib\n"
 	    unless $found_lib>0;
     }
     return ('','','','') unless $found;
@@ -164,3 +163,81 @@ sub lsdir { #yes, duplicate code seems less hassle than having an
 }
 
 1;
+__END__
+=head1 NAME
+
+ExtUtils::Liblist - determine libraries to use and how to use them
+
+=head1 SYNOPSIS
+
+C<require ExtUtils::Liblist;>
+
+C<ExtUtils::Liblist::ext($potential_libs, $Verbose);>
+
+=head1 DESCRIPTION
+
+This utility takes a list of libraries in the form C<-llib1 -llib2
+-llib3> and prints out lines suitable for inclusion in an extension
+Makefile.  Extra library paths may be included with the form
+C<-L/another/path> this will affect the searches for all subsequent
+libraries.
+
+It returns an array of four scalar values: EXTRALIBS, BSLOADLIBS,
+LDLOADLIBS, and LD_RUN_PATH.
+
+Dependent libraries can be linked in one of three ways:
+
+=over 2
+
+=item * For static extensions
+
+by the ld command when the perl binary is linked with the extension
+library. See EXTRALIBS below.
+
+=item * For dynamic extensions
+
+by the ld command when the shared object is built/linked. See
+LDLOADLIBS below.
+
+=item * For dynamic extensions
+
+by the DynaLoader when the shared object is loaded. See BSLOADLIBS
+below.
+
+=back
+
+=head2 EXTRALIBS
+
+List of libraries that need to be linked with when linking a perl
+binary which includes this extension Only those libraries that
+actually exist are included.  These are written to a file and used
+when linking perl.
+
+=head2 LDLOADLIBS and LD_RUN_PATH
+
+List of those libraries which can or must be linked into the shared
+library when created using ld. These may be static or dynamic
+libraries.  LD_RUN_PATH is a colon separated list of the directories
+in LDLOADLIBS. It is passed as an environment variable to the process
+that links the shared library.
+
+=head2 BSLOADLIBS
+
+List of those libraries that are needed but can be linked in
+dynamically at run time on this platform.  SunOS/Solaris does not need
+this because ld records the information (from LDLOADLIBS) into the
+object file.  This list is used to create a .bs (bootstrap) file.
+
+=head1 PORTABILITY
+
+This module deals with a lot of system dependencies and has quite a
+few architecture specific B<if>s in the code.
+
+=head1 SEE ALSO
+
+L<ExtUtils::MakeMaker>
+
+=cut
+
+
+

@@ -136,7 +136,7 @@ $Debug = 0;
 $Verbose = 1;
 $Is_VMS = $Config{'osname'} eq 'VMS';
 
-$VERSION = $VERSION = substr(q$Revision: 1.15 $,10,4);
+$VERSION = $VERSION = substr(q$Revision: 1.16 $,10,4);
 
 $Quiet = 0;
 
@@ -144,13 +144,13 @@ sub mkmanifest {
     my $manimiss = 0;
     my $read = maniread() or $manimiss++;
     $read = {} if $manimiss;
+    local *M;
+    rename "MANIFEST", "MANIFEST.bak" unless $manimiss;
+    open M, ">MANIFEST" or die "Could not open MANIFEST: $!";
     my $matches = _maniskip();
     my $found = manifind();
     my($key,$val,$file,%all);
     my %all = (%$found, %$read);
-    local *M;
-    rename "MANIFEST", "MANIFEST.bak" unless $manimiss;
-    open M, ">MANIFEST" or die "Could not open MANIFEST: $!";
     foreach $file (sort keys %all) {
 	next if &$matches($file);
 	if ($Verbose){
