@@ -20,9 +20,9 @@ sub MY::postamble {
     my $retval = <<"EOM";
 
 ppport.h:	ppport_h.PL
-	\$(PERL) "-I\$(PERL_ARCHLIB)" "-I\$(PERL_LIB)"  ppport_h.PL > ppport.h     
+	\$(PERL) "-I\$(PERL_ARCHLIB)" "-I\$(PERL_LIB)" ppport_h.PL
 
-PPPort.xs module2.c module3.c : ppport.h
+PPPort.xs module2.\$(OBJ_EXT) module3.\$(OBJ_EXT) : ppport.h
 	-\$(TOUCH) \$@
 
 EOM
