@@ -2451,7 +2451,7 @@ scan_hex(char *start, I32 len, I32 *retlen)
     while (len-- && *s) {
 	tmp = strchr((char *) PL_hexdigit, *s++);
 	if (!tmp) {
-	    if (*(s-1) == '_')
+	    if (*(s-1) == '_' || (*(s-1) == 'x' && retval == 0))
 		continue;
 	    else {
 		dTHR;
