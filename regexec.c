@@ -377,7 +377,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 
 #ifdef DEBUGGING	/* 7/99: reports of failure (with the older version) */
     if (end_shift < 0)
-	croak("panic: end_shift");
+	Perl_croak(aTHX_ "panic: end_shift");
 #endif
 
     check = prog->check_substr;
