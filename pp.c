@@ -1707,6 +1707,7 @@ PP(pp_substr)
     char *tmps;
     I32 arybase = curcop->cop_arybase;
 
+    SvTAINTED_off(TARG);			/* decontaminate */
     if (MAXARG > 2)
 	len = POPi;
     pos = POPi;
@@ -1795,6 +1796,7 @@ PP(pp_vec)
     unsigned long retnum;
     I32 len;
 
+    SvTAINTED_off(TARG);			/* decontaminate */
     offset *= size;		/* turn into bit offset */
     len = (offset + size + 7) / 8;
     if (offset < 0 || size < 1)
