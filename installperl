@@ -404,7 +404,7 @@ if ($Is_VMS) {  # We did core file selection during build
 }
 else {
     # [als] hard-coded 'libperl' name... not good!
-    @corefiles = <*.h libperl*.*>;
+    @corefiles = <*.h libperl*.* perl*$Config{lib_ext}>;
 
     # AIX needs perl.exp installed as well.
     push(@corefiles,'perl.exp') if $^O eq 'aix';

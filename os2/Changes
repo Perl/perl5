@@ -779,3 +779,43 @@ After @21574:
 		is void.
 	New executables perl___<number> generated with decreased stack size
 		(good when virtual memory is low; e.g. floppy boot).
+
+After 5.8.2 (@21668):
+	Fixes to installperl scripts to avoid junk output, allow overwrite
+		of existing files (File::Copy::copy is mapped to DosCopy()
+		with flags which would not overwrite).
+	Disable DynaLoading of Perl modules with AOUT build (will core anyway).
+	For AOUT build: Quick hack to construct directories necessary for
+		/*/% stuff [maybe better do it from hints/os2.sh?].
+	AOUT build: do -D__ST_MT_ERRNO__ to simplify linking with -Zmtd
+		(e.g., to test GD: gd.dll linked with -Zmtd).
+	MANIFEST.SKIP was read without a drive part of the filename.
+	Rename Cwd::extLibpath*() to OS2::... (old names still preserved).
+	Install perl.lib and perl.a too.
+	New methods libPath_find(),has_f32(),handle(),fullname() for OS2::DLL.
+	Enable quad support using long long.
+	New C exported functions os2_execname(), async_mssleep(), msCounter(),
+		InfoTable(), dir_subst(), Perl_OS2_handler_install(),
+		fill_extLibpath().
+	async_mssleep() uses some undocumented features which allow usage of
+		highest possible resolution of sleep() while preserving low
+		priority (raise of resolution may be not available before
+		Warp3fp40; resolution is 8ms/CLOCK_SCALE).
+		usleep() and select(undef,undef,undef,$t) are using this
+		interface for time up to 0.5sec.
+	New convenience macros os2win_croak_0OK(rc,msg), os2win_croak(rc,msg),
+		os2cp_croak(rc,msg).
+	Supports ~installprefix, ~exe, ~dll in PERLLIB_PREFIX etc (actual
+		directories are substituted).
+	New functions OS2::msCounter(), OS2::ms_sleep(), OS2::_InfoTable().
+	Checks stack when fixing EMX being under-initialized (-Zomf -Zsys
+		produces 32K stack???).
+	New environment variables PERL_BEGINLIBPATH, PERL_PRE_BEGINLIBPATH,
+		PERL_POST_BEGINLIBPATH, PERL_ENDLIBPATH, 
+		PERL_PRE_ENDLIBPATH PERL_POST_ENDLIBPATH (~-enabled);
+		PERL_EMXLOAD_SECS.
+	Better handling of FIRST_MAKEFILE (propagate to subdirs during test,
+		do not require Makefile.PL present).
+	perl2cmd converter: do not rewrite if no change.
+	README.os2 updated with info on building binary distributions and
+		custom perl executables (but not much else).
