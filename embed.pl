@@ -316,7 +316,11 @@ print EM do_not_edit ("embed.h"), <<'END';
 
 /* (Doing namespace management portably in C is really gross.) */
 
-#ifndef PERL_HIDE_SHORT_NAMES
+/* By defining PERL_NO_SHORT_NAMES (not done by default) the short forms
+ * (like warn instead of Perl_warn) for the API are not defined.
+ * Not defining the short forms is a good thing for cleaner embedding. */
+
+#ifndef PERL_NO_SHORT_NAMES
 
 /* Hide global symbols */
 
@@ -428,7 +432,7 @@ print EM <<'END';
 
 #endif	/* PERL_IMPLICIT_CONTEXT */
 
-#endif	/* #ifndef PERL_HIDE_SHORT_NAMES */
+#endif	/* #ifndef PERL_NO_SHORT_NAMES */
 
 END
 
@@ -474,7 +478,7 @@ print EM <<'END';
    an extra argument but grab the context pointer using the macro
    dTHX.
  */
-#if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_HIDE_SHORT_NAMES)
+#if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_NO_SHORT_NAMES)
 #  define croak				Perl_croak_nocontext
 #  define deb				Perl_deb_nocontext
 #  define die				Perl_die_nocontext
