@@ -125,10 +125,11 @@ main(int argc, char *argv[])
     /* And another over the leading ', which better be there */
     *TempValue++ = '\0';
     
-    /* Check to see if there's a trailing '. If not, add a newline to the */
-    /* buffer and grab another line. */
+    /* Check to see if there's a trailing ' or ". If not, add a newline to
+       the buffer and grab another line. */
     TempLength = strlen(TempValue);
-    while (TempValue[TempLength-1] != '\'') {
+    while ((TempValue[TempLength-1] != '\'') &&
+           (TempValue[TempLength-1] != '"'))  {
       fgets(SecondaryLineBuffer, LINEBUFFERSIZE - 1, ConfigSH);
       /* Force a trailing null, just in case */
       SecondaryLineBuffer[LINEBUFFERSIZE - 1] = '\0';
