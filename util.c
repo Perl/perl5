@@ -1589,6 +1589,11 @@ char	*mode;
     SV *sv;
     I32 doexec = strNE(cmd,"-");
 
+#ifdef OS2
+    if (doexec) {
+	return my_syspopen(cmd,mode);
+    }
+#endif 
     if (pipe(p) < 0)
 	return Nullfp;
     this = (*mode == 'w');
@@ -1726,6 +1731,11 @@ PerlIO *ptr;
     pid = (int)SvIVX(*svp);
     SvREFCNT_dec(*svp);
     *svp = &sv_undef;
+#ifdef OS2
+    if (pid == -1) {			/* Opened by popen. */
+	return my_syspclose(ptr);
+    }
+#endif 
     PerlIO_close(ptr);
 #ifdef UTS
     if(kill(pid, 0) < 0) { return(pid); }   /* HOM 12/23/91 */
@@ -1817,10 +1827,16 @@ int status;
     return;
 }
 
-#if defined(atarist) || (defined(OS2) && !defined(HAS_FORK))
+#if defined(atarist) || defined(OS2)
 int pclose();
+#ifdef HAS_FORK
+int					/* Cannot prototype with I32
+					   in os2ish.h. */
+my_syspclose(ptr)
+#else
 I32
 my_pclose(ptr)
+#endif 
 PerlIO *ptr;
 {
     /* Needs work for PerlIO ! */
