@@ -1779,6 +1779,16 @@ OS>, OS/390, VM/ESA)
 
 =item system LIST
 
+In general, do not assume the UNIX/POSIX semantics that you can shift
+the C<$?> left by eight to get the exit value, or that C<$? & 127>
+would give you the number of the signal that terminated the program,
+or that C<$? & 128> would test true if the program was terminated by a
+coredump.  Instead, use the POSIX W*() interfaces: for example, use
+WIFEXITED($?) an WEXITVALUE($?) to test for a normal exit and the exit
+value, and WIFSIGNALED($?) and WTERMSIG($?)  for a signal exit and the
+signal.  Core dumping is not a portable concept so there's no portable
+way to test for that.
+
 Only implemented if ToolServer is installed. (S<Mac OS>)
 
 As an optimization, may not call the command shell specified in

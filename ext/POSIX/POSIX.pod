@@ -191,7 +191,7 @@ to change file and directory owners and groups, see L<perlfunc/chown>.
 
 =item clearerr
 
-Use the method L<IO::Handle::clearerr()> instead, to reset the error
+Use the method C<IO::Handle::clearerr()> instead, to reset the error
 state (if any) and EOF state (if any) of the given stream.
 
 =item clock
@@ -1043,7 +1043,7 @@ argument means 'query'.)
 
 The following will set the LC_CTYPE behaviour according to the locale
 environment variables (the second argument C<"">).
-Please see your systems L<setlocale(3)> documentation for the locale
+Please see your systems C<setlocale(3)> documentation for the locale
 environment variables' meaning or consult L<perllocale>.
 
 	$loc = setlocale( LC_CTYPE, "" );
@@ -1983,9 +1983,56 @@ R_OK SEEK_CUR SEEK_END SEEK_SET STDIN_FILENO STDOUT_FILENO STDERR_FILENO W_OK X_
 
 WNOHANG WUNTRACED
 
+=over 16
+
+=item WNOHANG
+
+Do not suspend the calling process until a child process
+changes state but instead return immediately.
+
+=item WUNTRACED
+
+Catch stopped child processes.
+
+=back
+
 =item Macros
 
 WIFEXITED WEXITSTATUS WIFSIGNALED WTERMSIG WIFSTOPPED WSTOPSIG
+
+=over 16
+
+=item WIFEXITED
+
+WIFEXITED($?) returns true if the child process exited normally
+(C<exit()> or by falling off the end of C<main()>)
+
+=item WEXITSTATUS
+
+WEXITSTATUS($?) returns the normal exit status of the child process
+(only meaningful if WIFEXITED($?) is true)
+
+=item WIFSIGNALED
+
+WIFSIGNALED($?) returns true if the child process terminated because
+of a signal
+
+=item WTERMSIG
+
+WTERMSIG($?) returns the signal the child process terminated for
+(only meaningful if WIFSIGNALED($?) is true)
+
+=item WIFSTOPPED
+
+WIFSTOPPED($?) returns true if the child process is currently stopped
+(can happen only if you specified the WUNTRACED flag to waitpid())
+
+=item WSTOPSIG
+
+WSTOPSIG($?) returns the signal the child process was stopped for
+(only meaningful if WIFSTOPPED($?) is true)
+
+=back
 
 =back
 
