@@ -424,6 +424,8 @@ if (-x "/usr/bin/locale" && open(LOCALES, "/usr/bin/locale -a 2>/dev/null|")) {
 
 setlocale(LC_ALL, "C");
 
+sub utf8locale { $_[0] =~ /utf-?8/i }
+
 @Locale = sort @Locale;
 
 debug "# Locales = @Locale\n";
@@ -512,12 +514,16 @@ foreach $Locale (@Locale) {
 
 	# Test \w.
     
-        my $word = join('', @Neoalpha);
+	if (utf8locale($Locale)) {
+	    # utf8 and locales do not mix.
+	    debug "# skipping UTF-8 locale '$Locale'\n";
+	} else {
+	    my $word = join('', @Neoalpha);
 
-	$word =~ /^(\w+)$/;
-
-	tryneoalpha($Locale, 99, $1 eq $word);
-
+	    $word =~ /^(\w+)$/;
+ 
+	    tryneoalpha($Locale, 99, $1 eq $word);
+	}
 	# Cross-check the whole 8-bit character set.
 
 	for (map { chr } 0..255) {
@@ -691,23 +697,29 @@ foreach $Locale (@Locale) {
     # case-insensitively the UPPER, and does the UPPER match
     # case-insensitively the lc of the UPPER.  And vice versa.
     {
-        use locale;
-        no utf8; # so that the native 8-bit characters work
+        if (utf8locale($Locale)) {
+	    # utf8 and locales do not mix.
+	    debug "# skipping UTF-8 locale '$Locale'\n";
+	} else {
+	    use locale;
+	    use locale;
+	    no utf8; # so that the native 8-bit characters work
 
-        my @f = ();
-        foreach my $x (keys %UPPER) {
-            my $y = lc $x;
-            next unless uc $y eq $x;
-            push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
-        }
-        foreach my $x (keys %lower) {
-       	    my $y = uc $x;
-            next unless lc $y eq $x;
-            push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
-        }
-        tryneoalpha($Locale, 116, @f == 0);
-        if (@f) {
-	    print "# failed 116 locale '$Locale' characters @f\n"
+	    my @f = ();
+	    foreach my $x (keys %UPPER) {
+		my $y = lc $x;
+		next unless uc $y eq $x;
+		push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
+	    }
+	    foreach my $x (keys %lower) {
+		my $y = uc $x;
+		next unless lc $y eq $x;
+		push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
+	    }
+	    tryneoalpha($Locale, 116, @f == 0);
+	    if (@f) {
+		print "# failed 116 locale '$Locale' characters @f\n"
+  	    }
         }
     }
 }
