@@ -28,6 +28,198 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 19955] By: jhi                                   on 2003/07/03  11:26:56
+        Log: Integrate:
+             [ 19952]
+             Tiny tweak to perlartistic from Robin Barker.
+             
+             [ 19954]
+             Subject: Re: maint @ 19923
+             From: "Vadim Konovalov" <vkonovalov@peterstar.ru>
+             Date: Thu, 3 Jul 2003 15:57:55 +0400
+             Message-ID: <048e01c3415b$da0fe510$7c5ec3d9@vad>
+             (WinCE update)
+     Branch: maint-5.8/perl
+	  !> pod/perlartistic.pod wince/Makefile.ce wince/wince.c
+____________________________________________________________________________
+[ 19953] By: jhi                                   on 2003/07/03  11:08:58
+        Log: Tiny tweak to maint perldelta from Robin Barker.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 19951] By: jhi                                   on 2003/07/03  08:47:35
+        Log: Integrate:
+             (most of #18302 was already part of #18791)
+             [ 18302]
+             Subject: Proper fix for CvOUTSIDE weak refcounting
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Tue, 10 Dec 2002 01:26:44 +0000
+             Message-ID: <20021210012644.A7843@fdgroup.com>
+             
+             [ 19924]
+             Fix from Enache Adrian for the magic.t failure in
+             FreeBSD: setproctitle() cannot get rid of the " (perl)".
+             
+             [ 19925]
+             FreeBSD $0 dance.
+             
+             [ 19926]
+             Getting the whitespace right.
+             
+             [ 19927]
+             ...and getting the comma right, too.
+             
+             [ 19928]
+             Darwin: -Dprefix=$HOME/Perl tried to install to /Library.
+             
+             [ 19929]
+             Better links.
+             
+             [ 19930]
+             Let the perldelta iteration begin.
+             
+             [ 19931]
+             Fix for [perl #22759 insufficient format string checking];
+             using ewix makes no sense, assuming evix was intended,
+             no old tests fail; add the test case.
+             
+             [ 19932]
+             Subject: Re: maint @ 19923
+             From: Jim Cromie <jcromie@divsol.com>
+             Date: Wed, 02 Jul 2003 05:35:06 -0600
+             Message-ID: <3F02C36A.9030704@divsol.com>
+             
+             [ 19933]
+             Subject: Re: maint @ 19923
+             From: Ronald J Kimball <rjk@linguist.thayer.dartmouth.edu>
+             Date: Wed, 2 Jul 2003 11:43:05 -0400
+             Message-ID: <20030702154304.GD206089@linguist.thayer.dartmouth.edu>
+             
+             [ 19934]
+             Subject: [PATCH] line numbers are given % 64k
+             From: James Jurach <muaddib@erf.net>
+             Date: Wed, 2 Jul 2003 13:31:05 -0500
+             Message-ID: <20030702183105.GA4837@lebowski>
+             
+             [ 19935]
+             It would seem that in Linux 2.2 there is no way
+             we can do the right thing to make ps(1) see $0
+             our way.  Also amend the $0 documentation a bit.
+             
+             [ 19936]
+             Subject: Re: perldelta for 5.8.1
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Wed, 2 Jul 2003 17:46:32 +0100
+             Message-ID: <20030702164632.GE2137@fdgroup.com>
+             
+             [ 19937]
+             Decomplexing by Jim Cromie.
+             
+             [ 19938]
+             Subject: Perldelta 5.8.1 typos
+             From: Simon Glover <scog@amnh.org>
+             Date: Wed, 2 Jul 2003 13:42:58 -0400 (EDT)
+             Message-ID: <Pine.GSO.4.43.0307021341020.8877-100000@egg.amnh.org>
+             
+             [ 19939]
+             Subject: [PATCH] various Deparse fixes
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Wed, 2 Jul 2003 18:10:45 +0100
+             Message-ID: <20030702171045.GF2137@fdgroup.com>
+             
+             [ 19940]
+             Skip a socketpair test on SCO OSR
+             
+             [ 19941]
+             Minor test adjustments :
+             - test name correction in op/concat.t by Yitzchak Scott-Thoennes
+             - prototypes added to some public functions in t/test.pl,
+             as suggested by Enache Adrian
+             
+             [ 19942]
+             Nicer options for Porting/Modules.
+             
+             [ 19943]
+             Subject: [PATCH] Re: ext/List/Util/t/weak.t panic
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Thu, 3 Jul 2003 01:32:11 +0100
+             Message-ID: <20030703003211.GB3747@fdgroup.com>
+             
+             [ 19944]
+             Subject: [PATCH] "without parens" vs "without parentheses"
+             From: Iain Truskett <spoon@cpan.org>
+             Date: Thu, 3 Jul 2003 12:40:42 +1000
+             Message-ID: <20030703024042.GI12380@ouroboros.anu.edu.au>
+             
+             [ 19945]
+             Subject: Re: perldelta for 5.8.1
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Wed, 2 Jul 2003 23:08:26 +0100
+             Message-ID: <20030702220825.GA558@Bagpuss.unfortu.net>
+             
+             [ 19946]
+             Pod::LaTeX has been updated (from tjenness).
+             
+             [ 19947]
+             Apply Schwern's suggested warning code from
+             [perl #22209] Test::Harness::Straps vs. $Config{path_sep}   
+             
+             [ 19948]
+             Underline the fact that XSLoader is not DynaLoader
+             ([perl #21974] dl_load_flags not honored by XSLoader)
+             
+             [ 19949]
+             No fancy binmode() if no perlio.
+             
+             [ 19950]
+             Mention Modules in AUTHORS.
+     Branch: maint-5.8/perl
+	  !> (integrate 41 files)
+____________________________________________________________________________
+[ 19946] By: jhi                                   on 2003/07/03  06:33:04
+        Log: Pod::LaTeX has been updated (from tjenness).
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 19945] By: jhi                                   on 2003/07/03  06:32:10
+        Log: Subject: Re: perldelta for 5.8.1
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Wed, 2 Jul 2003 23:08:26 +0100
+             Message-ID: <20030702220825.GA558@Bagpuss.unfortu.net>
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 19938] By: jhi                                   on 2003/07/02  20:07:12
+        Log: Subject: Perldelta 5.8.1 typos
+             From: Simon Glover <scog@amnh.org>
+             Date: Wed, 2 Jul 2003 13:42:58 -0400 (EDT)
+             Message-ID: <Pine.GSO.4.43.0307021341020.8877-100000@egg.amnh.org>
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 19937] By: jhi                                   on 2003/07/02  20:06:17
+        Log: Decomplexing by Jim Cromie.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 19936] By: jhi                                   on 2003/07/02  20:04:39
+        Log: Subject: Re: perldelta for 5.8.1
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Wed, 2 Jul 2003 17:46:32 +0100
+             Message-ID: <20030702164632.GE2137@fdgroup.com>
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 19930] By: jhi                                   on 2003/07/02  11:28:02
+        Log: Let the perldelta iteration begin.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 19923] By: jhi                                   on 2003/07/02  05:51:32
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 19922] By: jhi                                   on 2003/07/02  05:43:27
         Log: Integrate:
              [ 19920]
