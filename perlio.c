@@ -2830,7 +2830,11 @@ PerlIOStdio_invalidate_fileno(pTHX_ FILE *f)
     /* XXX this could use PerlIO_canset_fileno() and
      * PerlIO_set_fileno() support from Configure
      */
-#  if defined(__GLIBC__)
+#  if defined(__UCLIBC__)
+    /* uClibc must come before glibc because it defines __GLIBC__ as well. */
+    f->__filedes = -1;
+    return 1;
+#  elif defined(__GLIBC__)
     /* There may be a better way for GLIBC:
     	- libio.h defines a flag to not close() on cleanup
      */	

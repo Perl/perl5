@@ -365,7 +365,7 @@ S_mergesortsv(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
     gptr small[SMALLSORT];
     gptr *which[3];
     off_runs stack[60], *stackp;
-    SVCOMPARE_t savecmp;
+    SVCOMPARE_t savecmp = 0;
 
     if (nmemb <= 1) return;			/* sorted trivially */
 
