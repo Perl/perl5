@@ -1,3 +1,48 @@
+Fri Sep 29 21:52:29 MEST 2000   Raphael Manfredi <Raphael_Manfredi@pobox.com>
+
+. Description:
+
+	Version 1.0.3.
+
+	Avoid using "tainted" and "dirty" since Perl remaps them via
+	cpp (i.e. #define).  This is deeply harmful when threading
+	is enabled.  This concerned both the context structure and
+	local variable and argument names.  Brrr..., scary!
+
+Thu Sep 28 23:46:39 MEST 2000   Raphael Manfredi <Raphael_Manfredi@pobox.com>
+
+. Description:
+
+	Version 1.0.2.
+
+	Fixed spelling in README.
+
+	Added lock_store, lock_nstore, and lock_retrieve (advisory locking)
+	after a proposal from Erik Haugan <erik@solbors.no>.
+
+	Perls before 5.004_04 lack newSVpvn, added remapping in XS.
+
+	Fixed stupid typo in the t/utf8.t test.
+
+Sun Sep 17 18:51:10 MEST 2000   Raphael Manfredi <Raphael_Manfredi@pobox.com>
+
+. Description:
+
+	Version 1.0.1, binary format 2.3.
+
+	Documented that doubles are stored stringified by nstore().
+
+	Added Salvador Ortiz Garcia in CREDITS section,  He identified
+	a bug in the store hooks and proposed the right fix: the class
+	id was allocated too soon.  His bug case was also added to
+	the regression test suite.
+
+	Now only taint retrieved data when source was tainted.  A bug
+	discovered by Marc Lehmann.
+
+	Added support for UTF-8 strings, a contribution of Marc Lehmann.
+	This is normally only activated in post-5.6 perls.
+
 Thu Aug 31 23:06:06 MEST 2000   Raphael Manfredi <Raphael_Manfredi@pobox.com>
 
 	First official release Storable 1.0, for inclusion in perl 5.7.0.

@@ -1425,6 +1425,7 @@ t/lib/st-dclone.t	See if Storable works
 t/lib/st-dump.pl	See if Storable works
 t/lib/st-forgive.t	See if Storable works
 t/lib/st-freeze.t	See if Storable works
+t/lib/st-lock.t		See if Storable works
 t/lib/st-overload.t	See if Storable works
 t/lib/st-recurse.t	See if Storable works
 t/lib/st-retrieve.t	See if Storable works
@@ -1432,6 +1433,7 @@ t/lib/st-store.t	See if Storable works
 t/lib/st-tied.t		See if Storable works
 t/lib/st-tiedhook.t	See if Storable works
 t/lib/st-tieditems.t	See if Storable works
+t/lib/st-utf8.t		See if Storable works
 t/lib/symbol.t		See if Symbol works
 t/lib/syslfs.t		See if large files work for sysio
 t/lib/syslog.t		See if Sys::Syslog works

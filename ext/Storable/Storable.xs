@@ -54,7 +54,10 @@
 #define PL_sv_yes	sv_yes
 #define PL_sv_no	sv_no
 #define PL_sv_undef	sv_undef
+#if (SUBVERSION <= 4)		/* 5.004_04 has been reported to lack newSVpvn */
+#define newSVpvn newSVpv
 #endif
+#endif						/* PATCHLEVEL <= 4 */
 #ifndef HvSHAREKEYS_off
 #define HvSHAREKEYS_off(hv)	/* Ignore */
 #endif
@@ -111,7 +114,7 @@ typedef double NV;			/* Older perls lack the NV type */
 #define C(x) ((char) (x))	/* For markers with dynamic retrieval handling */
 
 #define SX_OBJECT	C(0)	/* Already stored object */
-#define SX_LSCALAR	C(1)	/* Scalar (string) forthcoming (length, data) */
+#define SX_LSCALAR	C(1)	/* Scalar (large binary) follows (length, data) */
 #define SX_ARRAY	C(2)	/* Array forthcominng (size, item list) */
 #define SX_HASH		C(3)	/* Hash forthcoming (size, key/value pair list) */
 #define SX_REF		C(4)	/* Reference to object forthcoming */
@@ -120,7 +123,7 @@ typedef double NV;			/* Older perls lack the NV type */
 #define SX_DOUBLE	C(7)	/* Double forthcoming */
 #define SX_BYTE		C(8)	/* (signed) byte forthcoming */
 #define SX_NETINT	C(9)	/* Integer in network order forthcoming */
-#define SX_SCALAR	C(10)	/* Scalar (small) forthcoming (length, data) */
+#define SX_SCALAR	C(10)	/* Scalar (binary, small) follows (length, data) */
 #define SX_TIED_ARRAY  C(11)  /* Tied array forthcoming */
 #define SX_TIED_HASH   C(12)  /* Tied hash forthcoming */
 #define SX_TIED_SCALAR C(13)  /* Tied scalar forthcoming */
@@ -133,7 +136,9 @@ typedef double NV;			/* Older perls lack the NV type */
 #define SX_OVERLOAD	C(20)	/* Overloaded reference */
 #define SX_TIED_KEY C(21)   /* Tied magic key forthcoming */
 #define SX_TIED_IDX C(22)   /* Tied magic index forthcoming */
-#define SX_ERROR	C(23)	/* Error */
+#define SX_UTF8STR	C(23)   /* UTF-8 string forthcoming (small) */
+#define SX_LUTF8STR	C(24)   /* UTF-8 string forthcoming (large) */
+#define SX_ERROR	C(25)	/* Error */
 
 /*
  * Those are only used to retrieve "old" pre-0.6 binary images.
@@ -220,6 +225,12 @@ typedef unsigned long stag_t;	/* Used by pre-0.6 binary format */
 
 #define MY_VERSION "Storable(" XS_VERSION ")"
 
+/*
+ * Fields s_tainted and s_dirty are prefixed with s_ because Perl's include
+ * files remap tainted and dirty when threading is enabled.  That's bad for
+ * perl to remap such common words.	-- RAM, 29/09/00
+ */
+
 typedef struct stcxt {
 	int entry;			/* flags recursion */
 	int optype;			/* type of traversal operation */
@@ -231,9 +242,10 @@ typedef struct stcxt {
     I32 tagnum;			/* incremented at store time for each seen object */
     I32 classnum;		/* incremented at store time for each seen classname */
     int netorder;		/* true if network order used */
+    int s_tainted;		/* true if input source is tainted, at retrieve time */
     int forgive_me;		/* whether to be forgiving... */
     int canonical;		/* whether to store hashes sorted by key */
-	int dirty;			/* context is dirty due to CROAK() -- can be cleaned */
+	int s_dirty;		/* context is dirty due to CROAK() -- can be cleaned */
     struct extendable keybuf;	/* for hash key retrieval */
     struct extendable membuf;	/* for memory store/retrieve operations */
 	PerlIO *fio;		/* where I/O are performed, NULL for memory */
@@ -298,7 +310,7 @@ static stcxt_t *Context_ptr = &Context;
  * but the topmost context stacked.
  */
 
-#define CROAK(x)	do { cxt->dirty = 1; croak x; } while (0)
+#define CROAK(x)	do { cxt->s_dirty = 1; croak x; } while (0)
 
 /*
  * End of "thread-safe" related definitions.
@@ -546,7 +558,7 @@ static char old_magicstr[] = "perl-store";	/* Magic number before 0.6 */
 static char magicstr[] = "pst0";			/* Used as a magic number */
 
 #define STORABLE_BIN_MAJOR	2				/* Binary major "version" */
-#define STORABLE_BIN_MINOR	2				/* Binary minor "version" */
+#define STORABLE_BIN_MINOR	3				/* Binary minor "version" */
 
 /*
  * Useful store shortcuts...
@@ -593,19 +605,34 @@ static char magicstr[] = "pst0";			/* Used as a magic number */
 		return -1;							\
 	} while (0)
 
-#define STORE_SCALAR(pv, len) do {		\
+#define STORE_PV_LEN(pv, len, small, large) do {	\
 	if (len <= LG_SCALAR) {				\
 		unsigned char clen = (unsigned char) len;	\
-		PUTMARK(SX_SCALAR);				\
+		PUTMARK(small);					\
 		PUTMARK(clen);					\
 		if (len)						\
 			WRITE(pv, len);				\
 	} else {							\
-		PUTMARK(SX_LSCALAR);			\
+		PUTMARK(large);					\
 		WLEN(len);						\
 		WRITE(pv, len);					\
 	}									\
 } while (0)
+
+#define STORE_SCALAR(pv, len)	STORE_PV_LEN(pv, len, SX_SCALAR, SX_LSCALAR)
+
+/*
+ * Conditional UTF8 support.
+ * On non-UTF8 perls, UTF8 strings are returned as normal strings.
+ *
+ */
+#ifdef SvUTF8_on
+#define STORE_UTF8STR(pv, len)	STORE_PV_LEN(pv, len, SX_UTF8STR, SX_LUTF8STR)
+#else
+#define SvUTF8(sv) 0
+#define STORE_UTF8STR(pv, len) CROAK(("panic: storing UTF8 in non-UTF8 perl"))
+#define SvUTF8_on(sv) CROAK(("Cannot retrieve UTF8 data in non-UTF8 perl"))
+#endif
 
 /*
  * Store undef in arrays and hashes without recursing through store().
@@ -730,6 +757,7 @@ static int (*sv_store[])() = {
  */
 
 static SV *retrieve_lscalar(stcxt_t *cxt);
+static SV *retrieve_lutf8str(stcxt_t *cxt);
 static SV *old_retrieve_array(stcxt_t *cxt);
 static SV *old_retrieve_hash(stcxt_t *cxt);
 static SV *retrieve_ref(stcxt_t *cxt);
@@ -739,6 +767,7 @@ static SV *retrieve_double(stcxt_t *cxt);
 static SV *retrieve_byte(stcxt_t *cxt);
 static SV *retrieve_netint(stcxt_t *cxt);
 static SV *retrieve_scalar(stcxt_t *cxt);
+static SV *retrieve_utf8str(stcxt_t *cxt);
 static SV *retrieve_tied_array(stcxt_t *cxt);
 static SV *retrieve_tied_hash(stcxt_t *cxt);
 static SV *retrieve_tied_scalar(stcxt_t *cxt);
@@ -768,6 +797,8 @@ static SV *(*sv_old_retrieve[])() = {
 	retrieve_other,			/* SX_OVERLOADED not supported */
 	retrieve_other,			/* SX_TIED_KEY not supported */
 	retrieve_other,			/* SX_TIED_IDX not supported */
+	retrieve_other,			/* SX_UTF8STR not supported */
+	retrieve_other,			/* SX_LUTF8STR not supported */
 	retrieve_other,			/* SX_ERROR */
 };
 
@@ -807,6 +838,8 @@ static SV *(*sv_retrieve[])() = {
 	retrieve_overloaded,	/* SX_OVERLOAD */
 	retrieve_tied_key,		/* SX_TIED_KEY */
 	retrieve_tied_idx,		/* SX_TIED_IDX */
+	retrieve_utf8str,		/* SX_UTF8STR  */
+	retrieve_lutf8str,		/* SX_LUTF8STR */
 	retrieve_other,			/* SX_ERROR */
 };
 
@@ -954,7 +987,7 @@ static void clean_store_context(stcxt_t *cxt)
 	sv_free((SV *) cxt->hook);
 
 	cxt->entry = 0;
-	cxt->dirty = 0;
+	cxt->s_dirty = 0;
 }
 
 /*
@@ -962,9 +995,7 @@ static void clean_store_context(stcxt_t *cxt)
  *
  * Initialize a new retrieve context for real recursion.
  */
-static void init_retrieve_context(cxt, optype)
-stcxt_t *cxt;
-int optype;
+static void init_retrieve_context(stcxt_t *cxt, int optype, int is_tainted)
 {
 	TRACEME(("init_retrieve_context"));
 
@@ -993,6 +1024,7 @@ int optype;
 	cxt->tagnum = 0;				/* Have to count objects... */
 	cxt->classnum = 0;				/* ...and class names as well */
 	cxt->optype = optype;
+	cxt->s_tainted = is_tainted;
 	cxt->entry = 1;					/* No recursion yet */
 }
 
@@ -1001,8 +1033,7 @@ int optype;
  *
  * Clean retrieve context by
  */
-static void clean_retrieve_context(cxt)
-stcxt_t *cxt;
+static void clean_retrieve_context(stcxt_t *cxt)
 {
 	TRACEME(("clean_retrieve_context"));
 
@@ -1021,7 +1052,7 @@ stcxt_t *cxt;
 		sv_free((SV *) cxt->hseen);		/* optional HV, for backward compat. */
 
 	cxt->entry = 0;
-	cxt->dirty = 0;
+	cxt->s_dirty = 0;
 }
 
 /*
@@ -1034,7 +1065,7 @@ stcxt_t *cxt;
 {
 	TRACEME(("clean_context"));
 
-	ASSERT(cxt->dirty, ("dirty context"));
+	ASSERT(cxt->s_dirty, ("dirty context"));
 
 	if (cxt->optype & ST_RETRIEVE)
 		clean_retrieve_context(cxt);
@@ -1055,7 +1086,7 @@ stcxt_t *parent_cxt;
 
 	TRACEME(("allocate_context"));
 
-	ASSERT(!parent_cxt->dirty, ("parent context clean"));
+	ASSERT(!parent_cxt->s_dirty, ("parent context clean"));
 
 	Newz(0, cxt, 1, stcxt_t);
 	cxt->prev = parent_cxt;
@@ -1077,7 +1108,7 @@ stcxt_t *cxt;
 
 	TRACEME(("free_context"));
 
-	ASSERT(!cxt->dirty, ("clean context"));
+	ASSERT(!cxt->s_dirty, ("clean context"));
 	ASSERT(prev, ("not freeing root context"));
 
 	if (kbuf)
@@ -1499,7 +1530,10 @@ static int store_scalar(stcxt_t *cxt, SV *sv)
 	string:
 
 		wlen = (I32) len;				/* WLEN via STORE_SCALAR expects I32 */
-		STORE_SCALAR(pv, wlen);
+		if (SvUTF8 (sv))
+			STORE_UTF8STR(pv, wlen);
+		else
+			STORE_SCALAR(pv, wlen);
 		TRACEME(("ok (scalar 0x%"UVxf" '%s', length = %"IVdf")",
 			 PTR2UV(sv), SvPVX(sv), (IV)len));
 
@@ -2048,17 +2082,6 @@ static int store_hook(
 	pv = SvPV(ary[0], len2);
 
 	/*
-	 * Allocate a class ID if not already done.
-	 */
-
-	if (!known_class(cxt, class, len, &classnum)) {
-		TRACEME(("first time we see class %s, ID = %d", class, classnum));
-		classnum = -1;				/* Mark: we must store classname */
-	} else {
-		TRACEME(("already seen class %s, ID = %d", class, classnum));
-	}
-
-	/*
 	 * If they returned more than one item, we need to serialize some
 	 * extra references if not already done.
 	 *
@@ -2121,6 +2144,22 @@ static int store_hook(
 		ary[i] = *svh;
 		TRACEME(("listed object %d at 0x%"UVxf" is tag #%"UVuf,
 			 i-1, PTR2UV(xsv), PTR2UV(*svh)));
+	}
+
+	/*
+	 * Allocate a class ID if not already done.
+	 *
+	 * This needs to be done after the recursion above, since at retrieval
+	 * time, we'll see the inner objects first.  Many thanks to
+	 * Salvador Ortiz Garcia <sog@msg.com.mx> who spot that bug and
+	 * proposed the right fix.  -- RAM, 15/09/2000
+	 */
+
+	if (!known_class(cxt, class, len, &classnum)) {
+		TRACEME(("first time we see class %s, ID = %d", class, classnum));
+		classnum = -1;				/* Mark: we must store classname */
+	} else {
+		TRACEME(("already seen class %s, ID = %d", class, classnum));
 	}
 
 	/*
@@ -2597,7 +2636,7 @@ static int do_store(
 	 * free up memory for them now.
 	 */
 
-	if (cxt->dirty)
+	if (cxt->s_dirty)
 		clean_context(cxt);
 
 	/*
@@ -2611,7 +2650,7 @@ static int do_store(
 	cxt->entry++;
 
 	ASSERT(cxt->entry == 1, ("starting new recursion"));
-	ASSERT(!cxt->dirty, ("clean context"));
+	ASSERT(!cxt->s_dirty, ("clean context"));
 
 	/*
 	 * Ensure sv is actually a reference. From perl, we called something
@@ -3035,7 +3074,8 @@ static SV *retrieve_hook(stcxt_t *cxt)
 		*SvEND(frozen) = '\0';
 	}
 	(void) SvPOK_only(frozen);		/* Validates string pointer */
-	SvTAINT(frozen);
+	if (cxt->s_tainted)				/* Is input source tainted? */
+		SvTAINT(frozen);
 
 	TRACEME(("frozen string: %d bytes", len2));
 
@@ -3429,7 +3469,8 @@ static SV *retrieve_lscalar(stcxt_t *cxt)
 	SvCUR_set(sv, len);				/* Record C string length */
 	*SvEND(sv) = '\0';				/* Ensure it's null terminated anyway */
 	(void) SvPOK_only(sv);			/* Validate string pointer */
-	SvTAINT(sv);					/* External data cannot be trusted */
+	if (cxt->s_tainted)				/* Is input source tainted? */
+		SvTAINT(sv);				/* External data cannot be trusted */
 
 	TRACEME(("large scalar len %"IVdf" '%s'", len, SvPVX(sv)));
 	TRACEME(("ok (retrieve_lscalar at 0x%"UVxf")", PTR2UV(sv)));
@@ -3488,9 +3529,48 @@ static SV *retrieve_scalar(stcxt_t *cxt)
 	}
 
 	(void) SvPOK_only(sv);			/* Validate string pointer */
-	SvTAINT(sv);					/* External data cannot be trusted */
+	if (cxt->s_tainted)				/* Is input source tainted? */
+		SvTAINT(sv);				/* External data cannot be trusted */
 
 	TRACEME(("ok (retrieve_scalar at 0x%"UVxf")", PTR2UV(sv)));
+	return sv;
+}
+
+/*
+ * retrieve_utf8str
+ *
+ * Like retrieve_scalar(), but tag result as utf8.
+ * If we're retrieving UTF8 data in a non-UTF8 perl, croaks.
+ */
+static SV *retrieve_utf8str(stcxt_t *cxt)
+{
+	SV *sv;
+
+	TRACEME(("retrieve_utf8str"));
+
+	sv = retrieve_scalar(cxt);
+	if (sv)
+		SvUTF8_on(sv);
+
+	return sv;
+}
+
+/*
+ * retrieve_lutf8str
+ *
+ * Like retrieve_lscalar(), but tag result as utf8.
+ * If we're retrieving UTF8 data in a non-UTF8 perl, croaks.
+ */
+static SV *retrieve_lutf8str(stcxt_t *cxt)
+{
+	SV *sv;
+
+	TRACEME(("retrieve_lutf8str"));
+
+	sv = retrieve_lscalar(cxt);
+	if (sv)
+		SvUTF8_on(sv);
+
 	return sv;
 }
 
@@ -4220,6 +4300,7 @@ static SV *do_retrieve(
 {
 	dSTCXT;
 	SV *sv;
+	int is_tainted;				/* Is input source tainted? */
 	struct extendable msave;	/* Where potentially valid mbuf is saved */
 
 	TRACEME(("do_retrieve (optype = 0x%x)", optype));
@@ -4242,7 +4323,7 @@ static SV *do_retrieve(
 	 * free up memory for them now.
 	 */
 
-	if (cxt->dirty)
+	if (cxt->s_dirty)
 		clean_context(cxt);
 
 	/*
@@ -4256,7 +4337,7 @@ static SV *do_retrieve(
 	cxt->entry++;
 
 	ASSERT(cxt->entry == 1, ("starting new recursion"));
-	ASSERT(!cxt->dirty, ("clean context"));
+	ASSERT(!cxt->s_dirty, ("clean context"));
 
 	/*
 	 * Prepare context.
@@ -4291,7 +4372,19 @@ static SV *do_retrieve(
 	TRACEME(("data stored in %s format",
 		cxt->netorder ? "net order" : "native"));
 
-	init_retrieve_context(cxt, optype);
+	/*
+	 * Check whether input source is tainted, so that we don't wrongly
+	 * taint perfectly good values...
+	 *
+	 * We assume file input is always tainted.  If both `f' and `in' are
+	 * NULL, then we come from dclone, and tainted is already filled in
+	 * the context.  That's a kludge, but the whole dclone() thing is
+	 * already quite a kludge anyway! -- RAM, 15/09/2000.
+	 */
+
+	is_tainted = f ? 1 : (in ? SvTAINTED(in) : cxt->s_tainted);
+	TRACEME(("input source is %s", is_tainted ? "tainted" : "trusted"));
+	init_retrieve_context(cxt, optype, is_tainted);
 
 	ASSERT(is_retrieving(), ("within retrieve operation"));
 
@@ -4421,7 +4514,7 @@ SV *dclone(SV *sv)
 	 * free up memory for them now.
 	 */
 
-	if (cxt->dirty)
+	if (cxt->s_dirty)
 		clean_context(cxt);
 
 	/*
@@ -4444,14 +4537,23 @@ SV *dclone(SV *sv)
 	 * Now, `cxt' may refer to a new context.
 	 */
 
-	ASSERT(!cxt->dirty, ("clean context"));
+	ASSERT(!cxt->s_dirty, ("clean context"));
 	ASSERT(!cxt->entry, ("entry will not cause new context allocation"));
 
 	size = MBUF_SIZE();
 	TRACEME(("dclone stored %d bytes", size));
-
 	MBUF_INIT(size);
-	out = do_retrieve((PerlIO*) 0, Nullsv, ST_CLONE);	/* Will free non-root context */
+
+	/*
+	 * Since we're passing do_retrieve() both a NULL file and sv, we need
+	 * to pre-compute the taintedness of the input by setting cxt->tainted
+	 * to whatever state our own input string was.	-- RAM, 15/09/2000
+	 *
+	 * do_retrieve() will free non-root context.
+	 */
+
+	cxt->s_tainted = SvTAINTED(sv);
+	out = do_retrieve((PerlIO*) 0, Nullsv, ST_CLONE);
 
 	TRACEME(("dclone returns 0x%"UVxf, PTR2UV(out)));
 

@@ -20,12 +20,13 @@ package Storable; @ISA = qw(Exporter DynaLoader);
 	freeze nfreeze thaw
 	dclone
 	retrieve_fd
+	lock_store lock_nstore lock_retrieve
 );
 
 use AutoLoader;
 use vars qw($forgive_me $VERSION);
 
-$VERSION = '1.000';
+$VERSION = '1.003';
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;		# Grrr...
 
 #
@@ -41,6 +42,22 @@ unless (defined @Log::Agent::EXPORT) {
 			Carp::croak(@_);
 		}
 	};
+}
+
+#
+# They might miss :flock in Fcntl
+#
+
+BEGIN {
+	require Fcntl;
+	if (exists $Fcntl::EXPORT_TAGS{'flock'}) {
+		Fcntl->import(':flock');
+	} else {
+		eval q{
+			sub LOCK_SH ()	{1}
+			sub LOCK_EX ()	{2}
+		};
+	}
 }
 
 sub logcroak;
@@ -60,7 +77,7 @@ __END__
 # removed.
 #
 sub store {
-	return _store(\&pstore, @_);
+	return _store(\&pstore, @_, 0);
 }
 
 #
@@ -69,19 +86,43 @@ sub store {
 # Same as store, but in network order.
 #
 sub nstore {
-	return _store(\&net_pstore, @_);
+	return _store(\&net_pstore, @_, 0);
+}
+
+#
+# lock_store
+#
+# Same as store, but flock the file first (advisory locking).
+#
+sub lock_store {
+	return _store(\&pstore, @_, 1);
+}
+
+#
+# lock_nstore
+#
+# Same as nstore, but flock the file first (advisory locking).
+#
+sub lock_nstore {
+	return _store(\&net_pstore, @_, 1);
 }
 
 # Internal store to file routine
 sub _store {
 	my $xsptr = shift;
 	my $self = shift;
-	my ($file) = @_;
+	my ($file, $use_locking) = @_;
 	logcroak "not a reference" unless ref($self);
-	logcroak "too many arguments" unless @_ == 1;	# No @foo in arglist
+	logcroak "too many arguments" unless @_ == 2;	# No @foo in arglist
 	local *FILE;
 	open(FILE, ">$file") || logcroak "can't create $file: $!";
 	binmode FILE;				# Archaic systems...
+	if ($use_locking) {
+		flock(FILE, LOCK_EX) ||
+			logcroak "can't get exclusive lock on $file: $!";
+		truncate FILE, 0;
+		# Unlocking will happen when FILE is closed
+	}
 	my $da = $@;				# Don't mess if called from exception handler
 	my $ret;
 	# Call C routine nstore or pstore, depending on network order
@@ -172,12 +213,30 @@ sub _freeze {
 # object of that tree.
 #
 sub retrieve {
-	my ($file) = @_;
+	_retrieve($_[0], 0);
+}
+
+#
+# lock_retrieve
+#
+# Same as retrieve, but with advisory locking.
+#
+sub lock_retrieve {
+	_retrieve($_[0], 1);
+}
+
+# Internal retrieve routine
+sub _retrieve {
+	my ($file, $use_locking) = @_;
 	local *FILE;
-	open(FILE, "$file") || logcroak "can't open $file: $!";
+	open(FILE, $file) || logcroak "can't open $file: $!";
 	binmode FILE;							# Archaic systems...
 	my $self;
 	my $da = $@;							# Could be from exception handler
+	if ($use_locking) {
+		flock(FILE, LOCK_SH) || logcroak "can't get shared lock on $file: $!";
+		# Unlocking will happen when FILE is closed
+	}
 	eval { $self = pretrieve(*FILE) };		# Call C routine
 	close(FILE);
 	logcroak $@ if $@ =~ s/\.?\n$/,/;
@@ -248,6 +307,12 @@ Storable - persistency for perl data structures
  # Deep (recursive) cloning
  $cloneref = dclone($ref);
 
+ # Advisory locking
+ use Storable qw(lock_store lock_nstore lock_retrieve)
+ lock_store \%table, 'file';
+ lock_nstore \%table, 'file';
+ $hashref = lock_retrieve('file');
+
 =head1 DESCRIPTION
 
 The Storable package brings persistency to your perl data structures
@@ -286,7 +351,9 @@ multiple platforms, or when storing on a socket known to be remotely
 connected. The routines to call have an initial C<n> prefix for I<network>,
 as in C<nstore> and C<nstore_fd>. At retrieval time, your data will be
 correctly restored so you don't have to know whether you're restoring
-from native or network ordered data.
+from native or network ordered data.  Double values are stored stringified
+to ensure portability as well, at the slight risk of loosing some precision
+in the last decimals.
 
 When using C<fd_retrieve>, objects are retrieved in sequence, one
 object (i.e. one recursive tree) per associated C<store_fd>.
@@ -320,6 +387,24 @@ actually achieves a deep cloning of that structure:
 Storable provides you with a C<dclone> interface which does not create
 that intermediary scalar but instead freezes the structure in some
 internal memory space and then immediatly thaws it out.
+
+=head1 ADVISORY LOCKING
+
+The C<lock_store> and C<lock_nstore> routine are equivalent to C<store>
+and C<nstore>, only they get an exclusive lock on the file before
+writing.  Likewise, C<lock_retrieve> performs as C<retrieve>, but also
+gets a shared lock on the file before reading.
+
+Like with any advisory locking scheme, the protection only works if
+you systematically use C<lock_store> and C<lock_retrieve>.  If one
+side of your application uses C<store> whilst the other uses C<lock_retrieve>,
+you will get no protection at all.
+
+The internal advisory locking is implemented using Perl's flock() routine.
+If your system does not support any form of flock(), or if you share
+your files across NFS, you might wish to use other forms of locking by
+using modules like LockFile::Simple which lock a file using a filesystem
+entry, instead of locking the file descriptor.
 
 =head1 SPEED
 
@@ -574,6 +659,19 @@ if you happen to use your numbers as strings between two freezing
 operations on the same data structures, you will get different
 results.
 
+When storing doubles in network order, their value is stored as text.
+However, you should also not expect non-numeric floating-point values
+such as infinity and "not a number" to pass successfully through a
+nstore()/retrieve() pair.
+
+As Storable neither knows nor cares about character sets (although it
+does know that characters may be more than eight bits wide), any difference
+in the interpretation of character codes between a host and a target
+system is your problem.  In particular, if host and target use different
+code points to represent the characters used in the text representation
+of floating-point numbers, you will not be able be able to exchange
+floating-point data, even with nstore().
+
 =head1 CREDITS
 
 Thank you to (in chronological order):
@@ -588,6 +686,9 @@ Thank you to (in chronological order):
 	Marc Lehmann <pcg@opengroup.org>
 	Justin Banks <justinb@wamnet.com>
 	Jarkko Hietaniemi <jhi@iki.fi> (AGAIN, as perl 5.7.0 Pumpkin!)
+	Salvador Ortiz Garcia <sog@msg.com.mx>
+	Dominic Dunlop <domo@computer.org>
+	Erik Haugan <erik@solbors.no>
 
 for their bug reports, suggestions and contributions.
 
