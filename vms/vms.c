@@ -293,7 +293,7 @@ Perl_my_getenv(pTHX_ const char *lnm, bool sys)
     static char __my_getenv_eqv[LNM$C_NAMLENGTH+1];
     char uplnm[LNM$C_NAMLENGTH+1], *cp1, *cp2, *eqv;
     unsigned long int idx = 0;
-    int trnsuccess;
+    int trnsuccess, success, secure, saverr, savvmserr;
     SV *tmpsv;
 
     if (PL_curinterp) {  /* Perl interpreter running -- may be threaded */
@@ -317,16 +317,25 @@ Perl_my_getenv(pTHX_ const char *lnm, bool sys)
         lnm = uplnm;
       }
       /* Impose security constraints only if tainting */
-      if (sys) sys = PL_curinterp ? PL_tainting : will_taint;
-      if (vmstrnenv(lnm,eqv,idx,
-                    sys ? fildev : NULL,
+      if (sys) {
+        /* Impose security constraints only if tainting */
+        secure = PL_curinterp ? PL_tainting : will_taint;
+        saverr = errno;  savvmserr = vaxc$errno;
+      }
+      else secure = 0;
+      success = vmstrnenv(lnm,eqv,idx,
+                          secure ? fildev : NULL,
 #ifdef SECURE_INTERNAL_GETENV
-                    sys ? PERL__TRNENV_SECURE : 0
+                          secure ? PERL__TRNENV_SECURE : 0
 #else
-                                                0
+			  0
 #endif
-                                                 )) return eqv;
-      else return Nullch;
+			                                     );
+      /* Discard NOLOGNAM on internal calls since we're often looking
+       * for an optional name, and this "error" often shows up as the
+       * (bogus) exit status for a die() call later on.  */
+      if (sys && vaxc$errno == SS$_NOLOGNAM) SETERRNO(saverr,savvmserr);
+      return success ? eqv : Nullch;
     }
 
 }  /* end of my_getenv() */
@@ -341,6 +350,7 @@ my_getenv_len(const char *lnm, unsigned long *len, bool sys)
     char *buf, *cp1, *cp2;
     unsigned long idx = 0;
     static char __my_getenv_len_eqv[LNM$C_NAMLENGTH+1];
+    int secure, saverr, savvmserr;
     SV *tmpsv;
     
     if (PL_curinterp) {  /* Perl interpreter running -- may be threaded */
@@ -364,19 +374,25 @@ my_getenv_len(const char *lnm, unsigned long *len, bool sys)
         idx = strtoul(cp2+1,NULL,0);
         lnm = buf;
       }
-      /* Impose security constraints only if tainting */
-      if (sys) sys = PL_curinterp ? PL_tainting : will_taint;
-      if ((*len = vmstrnenv(lnm,buf,idx,
-                           sys ? fildev : NULL,
+      if (sys) {
+        /* Impose security constraints only if tainting */
+        secure = PL_curinterp ? PL_tainting : will_taint;
+        saverr = errno;  savvmserr = vaxc$errno;
+      }
+      else secure = 0;
+      *len = vmstrnenv(lnm,buf,idx,
+                       secure ? fildev : NULL,
 #ifdef SECURE_INTERNAL_GETENV
-                           sys ? PERL__TRNENV_SECURE : 0
+                       secure ? PERL__TRNENV_SECURE : 0
 #else
-                                                       0
+                                                      0
 #endif
-                                                         )))
-	  return buf;
-      else
-	  return Nullch;
+		                                       );
+      /* Discard NOLOGNAM on internal calls since we're often looking
+       * for an optional name, and this "error" often shows up as the
+       * (bogus) exit status for a die() call later on.  */
+      if (sys && vaxc$errno == SS$_NOLOGNAM) SETERRNO(saverr,savvmserr);
+      return *len ? buf : Nullch;
     }
 
 }  /* end of my_getenv_len() */
@@ -707,25 +723,25 @@ vmssetenv(char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
 void
 Perl_my_setenv(pTHX_ char *lnm,char *eqv)
 {
-  if (lnm && *lnm) {
-    int len = strlen(lnm);
-    if  (len == 7) {
-    char uplnm[8];
-    int i;
-    for (i = 0; lnm[i]; i++) uplnm[i] = _toupper(lnm[i]);
-    if (!strcmp(uplnm,"DEFAULT")) {
-      if (eqv && *eqv) chdir(eqv);
-      return;
-    }
-  }
-#ifndef RTL_USES_UTC
-    if (len == 6 || len == 2) {
-        char uplnm[7];
+    if (lnm && *lnm) {
+      int len = strlen(lnm);
+      if  (len == 7) {
+        char uplnm[8];
         int i;
         for (i = 0; lnm[i]; i++) uplnm[i] = _toupper(lnm[i]);
-        uplnm[len] = '\0';
-        if (!strcmp(uplnm,"UCX$TZ")) tz_updated = 1;
-        if (!strcmp(uplnm,"TZ")) tz_updated = 1;
+        if (!strcmp(uplnm,"DEFAULT")) {
+          if (eqv && *eqv) chdir(eqv);
+          return;
+        }
+    } 
+#ifndef RTL_USES_UTC
+    if (len == 6 || len == 2) {
+      char uplnm[7];
+      int i;
+      for (i = 0; lnm[i]; i++) uplnm[i] = _toupper(lnm[i]);
+      uplnm[len] = '\0';
+      if (!strcmp(uplnm,"UCX$TZ")) tz_updated = 1;
+      if (!strcmp(uplnm,"TZ")) tz_updated = 1;
     }
 #endif
   }
@@ -4734,6 +4750,57 @@ do_spawn(char *cmd)
 }  /* end of do_spawn() */
 /*}}}*/
 
+
+static unsigned int *sockflags, sockflagsize;
+
+/*
+ * Shim fdopen to identify sockets for my_fwrite later, since the stdio
+ * routines found in some versions of the CRTL can't deal with sockets.
+ * We don't shim the other file open routines since a socket isn't
+ * likely to be opened by a name.
+ */
+/*{{{ FILE *my_fdopen(int fd, char *mode)*/
+FILE *my_fdopen(int fd, char *mode)
+{
+  FILE *fp = fdopen(fd,mode);
+
+  if (fp) {
+    unsigned int fdoff = fd / sizeof(unsigned int);
+    struct stat sbuf; /* native stat; we don't need flex_stat */
+    if (!sockflagsize || fdoff > sockflagsize) {
+      if (sockflags) Renew(     sockflags,fdoff+2,unsigned int);
+      else           New  (1324,sockflags,fdoff+2,unsigned int);
+      memset(sockflags+sockflagsize,0,fdoff + 2 - sockflagsize);
+      sockflagsize = fdoff + 2;
+    }
+    if (fstat(fd,&sbuf) == 0 && S_ISSOCK(sbuf.st_mode))
+      sockflags[fdoff] |= 1 << (fd % sizeof(unsigned int));
+  }
+  return fp;
+
+}
+/*}}}*/
+
+
+/*
+ * Clear the corresponding bit when the (possibly) socket stream is closed.
+ * There still a small hole: we miss an implicit close which might occur
+ * via freopen().  >> Todo
+ */
+/*{{{ int my_fclose(FILE *fp)*/
+int my_fclose(FILE *fp) {
+  if (fp) {
+    unsigned int fd = fileno(fp);
+    unsigned int fdoff = fd / sizeof(unsigned int);
+
+    if (sockflagsize && fdoff <= sockflagsize)
+      sockflags[fdoff] &= ~(1 << fd % sizeof(unsigned int));
+  }
+  return fclose(fp);
+}
+/*}}}*/
+
+
 /* 
  * A simple fwrite replacement which outputs itmsz*nitm chars without
  * introducing record boundaries every itmsz chars.
@@ -4747,10 +4814,18 @@ int
 my_fwrite(void *src, size_t itmsz, size_t nitm, FILE *dest)
 {
   register char *cp, *end, *cpd, *data;
+  register unsigned int fd = fileno(dest);
+  register unsigned int fdoff = fd / sizeof(unsigned int);
   int retval;
-  int bufsize = itmsz*nitm+1;
+  int bufsize = itmsz * nitm + 1;
 
-  _ckvmssts_noperl(lib$get_vm( &bufsize, &data ));
+  if (fdoff < sockflagsize &&
+      (sockflags[fdoff] | 1 << (fd % sizeof(unsigned int)))) {
+    if (write(fd, src, itmsz * nitm) == EOF) return EOF;
+    return nitm;
+  }
+
+  _ckvmssts_noperl(lib$get_vm(&bufsize, &data));
   memcpy( data, src, itmsz*nitm );
   data[itmsz*nitm] = '\0';
 
@@ -4766,7 +4841,7 @@ my_fwrite(void *src, size_t itmsz, size_t nitm, FILE *dest)
     cpd = cp + 1;
   }
 
-  if (data) _ckvmssts_noperl(lib$free_vm( &bufsize, &data ));
+  if (data) _ckvmssts_noperl(lib$free_vm(&bufsize, &data));
   return retval;
 
 }  /* end of my_fwrite() */

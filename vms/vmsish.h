@@ -19,10 +19,7 @@
  * ADDRCONSTEXT,NEEDCONSTEXT: initialization of data with non-constant values
  *                            (e.g. pointer fields of descriptors)
  */
-#ifdef __DECC
-#  pragma message disable (ADDRCONSTEXT,NEEDCONSTEXT)
-#endif
-#ifdef __DECCXX 
+#if defined(__DECC) || defined(__DECCXX)
 #  pragma message disable (ADDRCONSTEXT,NEEDCONSTEXT)
 #endif
 
@@ -54,16 +51,8 @@
 #include <unixio.h>
 #include <unixlib.h>
 #include <file.h>  /* it's not <sys/file.h>, so don't use I_SYS_FILE */
-#if defined(__DECC) && defined(__DECC_VER) && __DECC_VER > 20000000
-#  include <unistd.h> /* DECC has this; VAXC and gcc don't */
-#endif
-#ifdef __DECCXX 
-#  include <unistd.h> /* DECC has this; VAXC and gcc don't */
-#endif
-
-/* VAXC doesn't have a unary plus operator, so we need to get there indirectly */
-#if defined(VAXC) && !defined(__DECC)
-#  define NO_UNARY_PLUS
+#if (defined(__DECC) && defined(__DECC_VER) && __DECC_VER > 20000000) || defined(__DECCXX)
+#  include <unistd.h> /* DECC has this; gcc doesn't */
 #endif
 
 #ifdef NO_PERL_TYPEDEFS /* a2p; we don't want Perl's special routines */
@@ -176,6 +165,8 @@
 #define vms_do_exec		Perl_vms_do_exec
 #define do_aspawn		Perl_do_aspawn
 #define do_spawn		Perl_do_spawn
+#define my_fdopen               Perl_my_fdopen
+#define my_fclose               Perl_my_fclose
 #define my_fwrite		Perl_my_fwrite
 #define my_flush		Perl_my_flush
 #define my_getpwnam		Perl_my_getpwnam
@@ -383,6 +374,13 @@
  */
 #define fwrite1 my_fwrite
 
+
+#ifndef DONT_MASK_RTL_CALLS
+#  define fdopen my_fdopen
+#  define fclose my_fclose
+#endif
+
+
 /* By default, flush data all the way to disk, not just to RMS buffers */
 #define Fflush(fp) my_flush(fp)
 
@@ -392,11 +390,6 @@
 /* Assorted fiddling with sigs . . . */
 # include <signal.h>
 #define ABORT() abort()
-    /* VAXC's signal.h doesn't #define SIG_ERR, but provides BADSIG instead. */
-#if !defined(SIG_ERR) && defined(BADSIG)
-#  define SIG_ERR BADSIG
-#endif
-
 
 /* Used with our my_utime() routine in vms.c */
 struct utimbuf {
@@ -482,7 +475,7 @@ struct utimbuf {
 /* Thin jacket around cuserid() to match Unix' calling sequence */
 #define getlogin my_getlogin
 
-/* Ditto for sys$hash_passwrod() . . . */
+/* Ditto for sys$hash_password() . . . */
 #define crypt  my_crypt
 
 /* Tweak arg to mkdir & chdir first, so we can tolerate trailing /. */
@@ -743,6 +736,8 @@ bool	vms_do_aexec (SV *, SV **, SV **);
 bool	vms_do_exec (char *);
 unsigned long int	do_aspawn (void *, void **, void **);
 unsigned long int	do_spawn (char *);
+FILE *  my_fdopen (int, char *);
+int     my_fclose (FILE *);
 int	my_fwrite (void *, size_t, size_t, FILE *);
 int	my_flush (FILE *);
 struct passwd *	my_getpwnam (char *name);
