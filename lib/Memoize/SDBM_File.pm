@@ -12,6 +12,7 @@ See L<Memoize>.
 
 use SDBM_File;
 @ISA = qw(SDBM_File);
+$VERSION = 0.65;
 
 $Verbose = 0;
 

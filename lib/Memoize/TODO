@@ -11,6 +11,8 @@ Memouze tries to save a listref, and DB_File etc. can only store
 strings.  This should at least be documented.  Maybe Memoize could
 detect the problem at TIE time and throw a fatal error.
 
+20010623 This was added sometime prior to 20001025.
+
 Try out MLDBM here and document it if it works.
 
 =item *
@@ -174,8 +176,9 @@ This is fixed.  `use strict vars' would have caught it immediately.  Duh.
 
 Don't forget about generic interface to Storable-like packages
 
-=item * 
+20010627 It would appear that you put this into 0.51.
 
+=item * 
 
 Maybe add in TODISK after all, with TODISK => 'filename' equivalent to
 
@@ -200,6 +203,8 @@ information here, or lend me a machine with threaded Perl where I can
 test this theory?  Line 59, currently commented out, may fix the
 problem.  
 
+20010623 Working around this in 0.65, but it still blows.
+
 =item * 
 
 Maybe if the original function has a prototype, the module can use
@@ -214,14 +219,14 @@ example.  (How many ways to make change of a dollar?)
 
 =item * 
 
-I found a use for `unmemoize'.  If you're using the Storable glue, and
-your program gets SIGINT, you find that the cache data is not in the
-cache, because Perl normally writes it all out at once from a
-DESTROY method, and signals skip DESTROY processing.  So you could add
+Jonathan Roy found a use for `unmemoize'.  If you're using the
+Storable glue, and your program gets SIGINT, you find that the cache
+data is not in the cache, because Perl normally writes it all out at
+once from a DESTROY method, and signals skip DESTROY processing.  So
+you could add
 
 	$sig{INT} = sub { unmemoize ... };
 
-(Jonathan Roy pointed this out) 
 
 =item *
 
@@ -307,6 +312,10 @@ But in this case, he tied the cache to Memoize::Expire, which is *not*
 scalar-only, and the check for scalar-only ties is missing from
 Memoize::Expire.  The inheritable method can take care of this.
 
+20010623 I decided not to put it in.  Instead, we avoid the problem by
+getting rid of TIE.  The HASH option does the same thing, and HASH is
+so simple to support that a module is superfluous.
+
 =item *
 
 20001130 Custom cache manager that checks to make sure the function
@@ -326,6 +335,17 @@ manual under 'NORMALIZER', where both f() and normalize_f() do the
 same analysis and make the same adjustments to the hash.  If the
 normalizer could make the adjustments and save the changes in @_, you
 wouldn't have to do it twice. 
+
+=item*
+20010623 Add CLEAR methods to tied hash modules.
+
+=item*
+20010623 You get a warning if you try to use DB_File as LIST_CACHE,
+because it won't store lists.  But if you use it as the underlying
+cache with an expiration manager in the middle, no warning---the
+expiration manager doesn't know it's managing a list cache, and
+memoize doesn't know that DB_File is underlying.  Is this fixable?
+Probably not, but think about it.
 
 =item *
 There was probably some other stuff that I forgot.

@@ -12,6 +12,7 @@ See L<Memoize>.
 
 use NDBM_File;
 @ISA = qw(NDBM_File);
+$VERSION = 0.65;
 
 $Verbose = 0;
 
@@ -68,6 +69,8 @@ sub STORE {
   $keylist{$self}{$_[0]} = undef;
   $self->SUPER::STORE(@_);
 }
+
+
 
 # Inherit FETCH and TIEHASH
 

@@ -3,7 +3,7 @@ package Memoize::Expire;
 # require 5.00556;
 use Carp;
 $DEBUG = 0;
-$VERSION = '0.51';
+$VERSION = '0.65';
 
 # This package will implement expiration by prepending a fixed-length header
 # to the font of the cached data.  The format of the header will be:
@@ -122,12 +122,12 @@ Memoize::Expire - Plug-in module for automatic expiration of memoized values
 =head1 SYNOPSIS
 
   use Memoize;
-  memoize 'function',
-    SCALAR_CACHE => [TIE, Memoize::Expire, 
+  use Memoize::Expire;
+  tie my %cache => 'Memoize::Expire', 
 	  	     LIFETIME => $lifetime,    # In seconds
-		     NUM_USES => $n_uses,      
-                     TIE      => [Module, args...],
-		    ], 
+		     NUM_USES => $n_uses;
+
+  memoize 'function', SCALAR_CACHE => [HASH => \%cache ];
 
 =head1 DESCRIPTION
 
@@ -135,41 +135,59 @@ Memoize::Expire is a plug-in module for Memoize.  It allows the cached
 values for memoized functions to expire automatically.  This manual
 assumes you are already familiar with the Memoize module.  If not, you
 should study that manual carefully first, paying particular attention
-to the TIE feature.
+to the HASH feature.
 
 Memoize::Expire is a layer of software that you can insert in between
 Memoize itself and whatever underlying package implements the cache.
-(By default, plain hash variables implement the cache.)  The layer
-expires cached values whenever they get too old, have been used too
-often, or both.
+The layer presents a hash variable whose values expire whenever they
+get too old, have been used too often, or both. You tell C<Memoize> to
+use this forgetful hash as its cache instead of the default, which is
+an ordinary hash.
 
-To specify a real-time timeout, supply the LIFETIME option with a
+To specify a real-time timeout, supply the C<LIFETIME> option with a
 numeric value.  Cached data will expire after this many seconds, and
 will be looked up afresh when it expires.  When a data item is looked
 up afresh, its lifetime is reset.
 
-If you specify NUM_USES with an argument of I<n>, then each cached
+If you specify C<NUM_USES> with an argument of I<n>, then each cached
 data item will be discarded and looked up afresh after the I<n>th time
 you access it.  When a data item is looked up afresh, its number of
 uses is reset.
 
 If you specify both arguments, data will be discarded from the cache
-when either expiration condition holds.  
+when either expiration condition holds.
 
-If you want the cache to persist between invocations of your program,
-supply a TIE option to specify the package name and arguments for a
-the tied hash that will implement the persistence.  For example:
+Memoize::Expire uses a real hash internally to store the cached data.
+You can use the C<HASH> option to Memoize::Expire to supply a tied
+hash in place of the ordinary hash that Memoize::Expire will normally
+use.  You can use this feature to add Memoize::Expire as a layer in
+between a persistent disk hash and Memoize.  If you do this, you get a
+persistent disk cache whose entries expire automatically.  For
+example:
+
+  #   Memoize
+  #      |
+  #   Memoize::Expire  enforces data expiration policy
+  #      |
+  #   DB_File  implements persistence of data in a disk file
+  #      |
+  #   Disk file
 
   use Memoize;
+  use Memoize::Expire;
   use DB_File;
-  memoize 'function',
-    SCALAR_CACHE => [TIE, Memoize::Expire, 
+
+  # Set up persistence
+  tie my %disk_cache => 'DB_File', $filename, O_CREAT|O_RDWR, 0666];
+
+  # Set up expiration policy, supplying persistent hash as a target
+  tie my %cache => 'Memoize::Expire', 
 	  	     LIFETIME => $lifetime,    # In seconds
-		     NUM_USES => $n_uses,      
-                     TIE      => [DB_File, $filename, O_CREAT|O_RDWR, 0666],
-		    ], ...;
+		     NUM_USES => $n_uses,
+                     HASH => \%disk_cache; 
 
-
+  # Set up memoization, supplying expiring persistent hash for cache
+  memoize 'function', SCALAR_CACHE => [ HASH => \%cache ];
 
 =head1 INTERFACE
 
@@ -211,12 +229,12 @@ them into the cache.
 The user who wants the memoization cache to be expired according to
 your policy will say so by writing
 
-  memoize 'function',
-    SCALAR_CACHE => [TIE, MyExpirePolicy, args...];
+  tie my %cache => 'MyExpirePolicy', args...;
+  memoize 'function', SCALAR_CACHE => [HASH => \%cache];
 
-This will invoke MyExpirePolicy->TIEHASH(args).
+This will invoke C<< MyExpirePolicy->TIEHASH(args) >>.
 MyExpirePolicy::TIEHASH should do whatever is appropriate to set up
-the cache, and it should return the cache object to the caller.  
+the cache, and it should return the cache object to the caller.
 
 For example, MyExpirePolicy::TIEHASH might create an object that
 contains a regular Perl hash (which it will to store the cached
@@ -224,7 +242,7 @@ values) and some extra information about the arguments and how old the
 data is and things like that.  Let us call this object `C'.
 
 When Memoize needs to check to see if an entry is in the cache
-already, it will invoke C->EXISTS(key).  C<key> is the normalized
+already, it will invoke C<< C->EXISTS(key) >>.  C<key> is the normalized
 function argument.  MyExpirePolicy::EXISTS should return 0 if the key
 is not in the cache, or if it has expired, and 1 if an unexpired value
 is in the cache.  It should I<not> return C<undef>, because there is a
@@ -232,10 +250,10 @@ bug in some versions of Perl that will cause a spurious FETCH if the
 EXISTS method returns C<undef>.
 
 If your EXISTS function returns true, Memoize will try to fetch the
-cached value by invoking C->FETCH(key).  MyExpirePolicy::FETCH should
+cached value by invoking C<< C->FETCH(key) >>.  MyExpirePolicy::FETCH should
 return the cached value.  Otherwise, Memoize will call the memoized
 function to compute the appropriate value, and will store it into the
-cache by calling C->STORE(key, value).
+cache by calling C<< C->STORE(key, value) >>.
 
 Here is a very brief example of a policy module that expires each
 cache item after ten seconds.
@@ -243,9 +261,9 @@ cache item after ten seconds.
 	package Memoize::TenSecondExpire;
 
 	sub TIEHASH {
-	  my ($package) = @_;
-	  my %cache;
-	  bless \%cache => $package;
+	  my ($package, %args) = @_;
+          my $cache = $args{$HASH} || {};
+	  bless $cache => $package;
 	}
 
 	sub EXISTS {
@@ -272,18 +290,16 @@ cache item after ten seconds.
 To use this expiration policy, the user would say
 
 	use Memoize;
-	memoize 'function',
-	    SCALAR_CACHE => [TIE, Memoize::TenSecondExpire];
+        tie my %cache10sec => 'Memoize::TenSecondExpire';
+	memoize 'function', SCALAR_CACHE => [HASH => \%cache10sec];
 
 Memoize would then call C<function> whenever a cached value was
 entirely absent or was older than ten seconds.
 
-It's nice if you allow a C<TIE> argument to C<TIEHASH> that ties the
-underlying cache so that the user can specify that the cache is
-persistent or that it has some other interesting semantics.  The
-sample C<Memoize::Expire> module demonstrates how to do this.  It
-implements a policy that expires cache items when they get too old or
-when they have been accessed too many times.
+You should always support a C<HASH> argument to C<TIEHASH> that ties
+the underlying cache so that the user can specify that the cache is
+also persistent or that it has some other interesting semantics.  The
+example above demonstrates how to do this, as does C<Memozie::Expire>.
 
 Another sample module, C<Memoize::Saves>, is included with this
 package.  It implements a policy that allows you to specify that
@@ -291,6 +307,12 @@ certain function values whould always be looked up afresh.  See the
 documentation for details.
 
 =head1 ALTERNATIVES
+
+Brent Powers has a C<Memoize::ExpireLRU> module that was designed to
+wotk with Memoize and provides expiration of least-recently-used data.
+The cache is held at a fixed number of entries, and when new data
+comes in, the least-recently used data is expired.  See
+L<http://search.cpan.org/search?mode=module&query=ExpireLRU>.
 
 Joshua Chamas's Tie::Cache module may be useful as an expiration
 manager.  (If you try this, let me know how it works out.)
@@ -321,7 +343,7 @@ are welcome.  Send them to:
 Mark-Jason Dominus (mjd-perl-memoize+@plover.com)
 
 Mike Cariaso provided valuable insight into the best way to solve this
-problem.  
+problem.
 
 =head1 SEE ALSO
 

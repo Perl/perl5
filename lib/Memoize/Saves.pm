@@ -1,11 +1,13 @@
 package Memoize::Saves;
 
+$VERSION = 0.65;
+
 $DEBUG = 0;
 
 sub TIEHASH 
 {
     my ($package, %args) = @_;
-    my %cache;
+    my $cache = $args{HASH} || {};
 
     # Convert the CACHE to a referenced hash for quick lookup
     #
@@ -42,13 +44,13 @@ sub TIEHASH
 	if ($@) {
 	    die "Memoize::Saves: Couldn't load hash tie module `$module': $@; aborting";
 	}
-	my $rc = (tie %cache => $module, @opts);
+	my $rc = (tie %$cache => $module, @opts);
 	unless ($rc) 	{
 	    die "Memoize::Saves: Couldn't tie hash to `$module': $@; aborting";
 	}
     }
 
-    $args{C} = \%cache;
+    $args{C} = $cache;
     bless \%args => $package;
 }
 
@@ -131,8 +133,8 @@ Memoize::Saves - Plug-in module to specify which return values should be memoize
                        CACHE => [ "word1", "word2" ],
 		       DUMP  => [ "word3", "word4" ],
 		       REGEX => "Regular Expression",
-		       TIE      => [Module, args...],
-		      ], 
+		       HASH  => $cache_hashref,
+		      ],
 
 =head1 DESCRIPTION
 
@@ -156,29 +158,23 @@ second method is prefered.
 Specifying multiple options will result in the least common denominator
 being saved.  
 
-You can use the TIE option to string multiple Memoize Plug-ins together:
+You can use the HASH option to string multiple Memoize Plug-ins together:
 
+   tie my %disk_hash => 'GDBM_File', $filename, O_RDWR|O_CREAT, 0666;
+   tie my %expiring_cache => 'Memoize::Expire', 
+              LIFETIME => 5, HASH => \%disk_cache;
+   tie my %cache => 'Memoize::Saves', 
+              REGEX => qr/my/, HASH => \%expiring_cache;
 
-memoize ('printme', 
-          SCALAR_CACHE => 
-             [TIE, Memoize::Saves,
-              REGEX => qr/my/,
-              TIE   => [Memoize::Expire,
-                        LIFETIME => 5,
-                        TIE => [ GDBM_File, $filename, 
-                                 O_RDWR | O_CREAT, 0666]
-                       ]
-             ]
-         );
-
+   memoize ('printme', SCALAR_CACHE => [HASH => \%cache]);
 
 =head1 CAVEATS
 
 This module is experimental, and may contain bugs.  Please report bugs
-to the address below.
+to C<mjd-perl-memoize+@plover.com>.
 
 If you are going to use Memoize::Saves with Memoize::Expire it is
-import to use it in that order.  Memoize::Expire changes the return
+important to use it in that order.  Memoize::Expire changes the return
 value to include expire information and it may no longer match 
 your CACHE, DUMP, or REGEX.
 
@@ -191,7 +187,7 @@ Joshua Gerth <gerth@teleport.com>
 
 perl(1)
 
-The Memoize man page.
+L<Memoize>
 
 
 

@@ -3,8 +3,14 @@
 
 use lib qw(. ..);
 use Memoize 0.45 qw(memoize unmemoize);
-# use Memoize::Storable;
+use Memoize::Storable;
 # $Memoize::Storable::Verbose = 0;
+
+eval {require GDBM_File};
+if ($@) {
+  print "1..0\n";
+  exit 0;
+}
 
 sub i {
   $_[0];
@@ -36,16 +42,18 @@ if (eval {require File::Spec::Functions}) {
 }
 $tmpdir = $ENV{TMP} || $ENV{TMPDIR} ||  '/tmp';  
 $file = catfile($tmpdir, "storable$$");
-unlink $file;
+1 while unlink $file;
 tryout('Memoize::Storable', $file, 1);  # Test 1..4
-unlink $file;
+1 while unlink $file;
 
 sub tryout {
   my ($tiepack, $file, $testno) = @_;
 
+  tie my %cache => $tiepack, $file
+    or die $!;
 
   memoize 'c5', 
-  SCALAR_CACHE => ['TIE', $tiepack, $file], 
+  SCALAR_CACHE => [HASH => \%cache],
   LIST_CACHE => 'FAULT'
     ;
 
@@ -61,7 +69,7 @@ sub tryout {
   # Now something tricky---we'll memoize c23 with the wrong table that
   # has the 5 already cached.
   memoize 'c23', 
-  SCALAR_CACHE => ['TIE', $tiepack, $file], 
+  SCALAR_CACHE => [HASH => \%cache],
   LIST_CACHE => 'FAULT'
     ;
   

@@ -1,28 +1,28 @@
 apollo/netinet/in.h	Apollo DomainOS port: C header file frontend
-Artistic			The "Artistic License"
-AUTHORS				Contact info for contributors
+Artistic		The "Artistic License"
+AUTHORS			Contact info for contributors
 av.c			Array value code
 av.h			Array value header
 beos/nm.c		BeOS port
 bytecode.pl		Produces ext/ByteLoader/byterun.h, ext/ByteLoader/byterun.c and ext/B/Asmdata.pm
 cc_runtime.h		Macros need by runtime of compiler-generated code
 cflags.SH		A script that emits C compilation flags per file
-Changes				Differences from previous version
-Changes5.000			Differences between 4.x and 5.000
-Changes5.001			Differences between 5.000 and 5.001
-Changes5.002			Differences between 5.001 and 5.002
-Changes5.003			Differences between 5.002 and 5.003
-Changes5.004			Differences between 5.003 and 5.004
-Changes5.005			Differences between 5.004 and 5.005
-Changes5.6			Differences between 5.005 and 5.6
+Changes			Differences from previous version
+Changes5.000		Differences between 4.x and 5.000
+Changes5.001		Differences between 5.000 and 5.001
+Changes5.002		Differences between 5.001 and 5.002
+Changes5.003		Differences between 5.002 and 5.003
+Changes5.004		Differences between 5.003 and 5.004
+Changes5.005		Differences between 5.004 and 5.005
+Changes5.6		Differences between 5.005 and 5.6
 configpm		Produces lib/Config.pm
-Configure			Portability tool
+Configure		Portability tool
 configure.com		Configure-equivalent for VMS
 configure.gnu		Crude emulation of GNU configure
 config_h.SH		Produces config.h
 cop.h			Control operator header
-Copying				The GNU General Public License
-Cross/README			Cross-compilation
+Copying			The GNU General Public License
+Cross/README		Cross-compilation
 cv.h			Code value header
 cygwin/cygwin.c		Additional code for Cygwin port
 cygwin/ld2.in		ld wrapper template for Cygwin port
@@ -965,6 +965,7 @@ lib/Memoize/Saves.pm		Memoize
 lib/Memoize/SDBM_File.pm	Memoize
 lib/Memoize/Storable.pm		Memoize
 lib/Memoize/t/array.t		Memoize
+lib/Memoize/t/array_confusion.t		Memoize
 lib/Memoize/t/correctness.t	Memoize
 lib/Memoize/t/errors.t		Memoize
 lib/Memoize/t/expire.t		Memoize

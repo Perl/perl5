@@ -3,15 +3,15 @@
 #
 # Transparent memoization of idempotent functions
 #
-# Copyright 1998, 1999 M-J. Dominus.
+# Copyright 1998, 1999, 2000, 2001 M-J. Dominus.
 # You may copy and distribute this program under the
 # same terms as Perl itself.  If in doubt, 
 # write to mjd-perl-memoize+@plover.com for a license.
 #
-# Version 0.64 beta $Revision: 1.17 $ $Date: 2000/10/24 04:33:49 $
+# Version 0.65 beta $Revision: 1.17 $ $Date: 2000/10/24 04:33:49 $
 
 package Memoize;
-$VERSION = '0.64';
+$VERSION = '0.65';
 
 # Compile-time constants
 sub SCALAR () { 0 } 
@@ -27,6 +27,7 @@ sub LIST () { 1 }
 use Carp;
 use Exporter;
 use vars qw($DEBUG);
+use Config;                     # Dammit.
 @ISA = qw(Exporter);
 @EXPORT = qw(memoize);
 @EXPORT_OK = qw(unmemoize flush_cache);
@@ -64,18 +65,15 @@ sub memoize {
   if (defined $proto) { $proto = "($proto)" }
   else { $proto = "" }
 
-  # Goto considered harmful!  Hee hee hee.  
-  my $wrapper = eval "sub $proto { unshift \@_, qq{$cref}; goto &_memoizer; }";
-  # Actually I would like to get rid of the eval, but there seems not
-  # to be any other way to set the prototype properly.
-
-# --- THREADED PERL COMMENT ---
-# The above line might not work under threaded perl because goto & 
-# semantics are broken.  If that's the case, try the following instead:
-#  my $wrapper = eval "sub { &_memoizer(qq{$cref}, \@_); }";
-# Confirmed 1998-12-27 this does work.
-# 1998-12-29: Sarathy says this bug is fixed in 5.005_54.
-# However, the module still fails, although the sample test program doesn't.
+  # I would like to get rid of the eval, but there seems not to be any
+  # other way to set the prototype properly.  The switch here for
+  # 'usethreads' works around a bug in threadperl having to do with
+  # magic goto.  It would be better to fix the bug and use the magic
+  # goto version everywhere.
+  my $wrapper = 
+      $Config{usethreads} 
+        ? eval "sub $proto { &_memoizer(\$cref, \@_); }" 
+        : eval "sub $proto { unshift \@_, \$cref; goto &_memoizer; }";
 
   my $normalizer = $options{NORMALIZER};
   if (defined $normalizer  && ! ref $normalizer) {
@@ -118,7 +116,12 @@ sub memoize {
     if ($cache_opt eq 'FAULT') { # no cache
       $caches{$context} = undef;
     } elsif ($cache_opt eq 'HASH') { # user-supplied hash
-      $caches{$context} = $cache_opt_args[0];
+      my $cache = $cache_opt_args[0];
+      my $package = ref(tied %$cache);
+      if ($context eq 'LIST' && $scalar_only{$package}) {
+        croak("You can't use $package for LIST_CACHE because it can only store scalars");
+      }
+      $caches{$context} = $cache;
     } elsif ($cache_opt eq '' ||  $IS_CACHE_TAG{$cache_opt}) {
       # default is that we make up an in-memory hash
       $caches{$context} = {};
@@ -173,6 +176,8 @@ sub _my_tie {
   my $shortopt = (ref $fullopt) ? $fullopt->[0] : $fullopt;
   
   return unless defined $shortopt && $shortopt eq 'TIE';
+  carp("TIE option to memoize() is deprecated; use HASH instead") if $^W;
+
 
   my @args = ref $fullopt ? @$fullopt : ();
   shift @args;
@@ -186,17 +191,9 @@ sub _my_tie {
   if ($@) {
     croak "Memoize: Couldn't load hash tie module `$module': $@; aborting";
   }
-#  eval  { import $module };
-#  if ($@) {
-#    croak "Memoize: Couldn't import hash tie module `$module': $@; aborting";
-#  }    
-#  eval "use $module ()";  
-#  if ($@) {
-#    croak "Memoize: Couldn't use hash tie module `$module': $@; aborting";
-#  }    
   my $rc = (tie %$hash => $module, @args);
   unless ($rc) {
-    croak "Memoize: Couldn't tie hash to `$module': $@; aborting";
+    croak "Memoize: Couldn't tie hash to `$module': $!; aborting";
   }
   1;
 }
@@ -237,12 +234,13 @@ sub _memoizer {
       croak "Internal error \#41; context was neither LIST nor SCALAR\n";
     }
   } else {                      # Default normalizer
-    $argstr = join $;,@_;       # $;,@_;? Perl is great.
+    local $^W = 0;
+    $argstr = join chr(28),@_;  
   }
 
   if ($context == SCALAR) {
     my $cache = $info->{S};
-    _crap_out($info->{NAME}, 'scalar') unless defined $cache;
+    _crap_out($info->{NAME}, 'scalar') unless $cache;
     if (exists $cache->{$argstr}) { 
       return $cache->{$argstr};
     } else {
@@ -257,17 +255,15 @@ sub _memoizer {
     }
   } elsif ($context == LIST) {
     my $cache = $info->{L};
-    _crap_out($info->{NAME}, 'list') unless defined $cache;
+    _crap_out($info->{NAME}, 'list') unless $cache;
     if (exists $cache->{$argstr}) {
       my $val = $cache->{$argstr};
-      return ($val) unless ref $val eq 'ARRAY';
-      # An array ref is ambiguous. Did the function really return 
-      # an array ref?  Or did we cache a list-context list return in
-      # an anonymous array?
       # If LISTCONTEXT=>MERGE, then the function never returns lists,
-      # so we know for sure:
+      # so we have a scalar value cached, so just return it straightaway:
       return ($val) if $info->{O}{LIST_CACHE} eq 'MERGE';
-      # Otherwise, we're doomed.  ###BUG
+      # Maybe in a later version we can use a faster test.
+
+      # Otherwise, we cached an array containing the returned list:
       return @$val;
     } else {
       my $q = $cache->{$argstr} = [&{$info->{U}}(@_)];
@@ -575,19 +571,21 @@ argument lists look different.
 
 The default normalizer just concatenates the arguments with C<$;> in
 between.  This always works correctly for functions with only one
-argument, and also when the arguments never contain C<$;> (which is
-normally character #28, control-\.  )  However, it can confuse certain
-argument lists:
+string argument, and also when the arguments never contain C<$;>
+(which is normally character #28, control-\.  )  However, it can
+confuse certain argument lists:
 
 	normalizer("a\034", "b")
 	normalizer("a", "\034b")
 	normalizer("a\034\034b")
 
-for example.
+for example.  
 
-The default normalizer also won't work when the function's arguments
-are references.  For exampple, consider a function C<g> which gets two
-arguments: A number, and a reference to an array of numbers:
+Since hash keys are strings, the default normalizer will not
+distinguish between C<undef> and the empty string.  It also won't work
+when the function's arguments are references.  For example, consider
+a function C<g> which gets two arguments: A number, and a reference to
+an array of numbers:
 
 	g(13, [1,2,3,4,5,6,7]);
 
@@ -695,7 +693,7 @@ because all its results have been precomputed.
 =item C<TIE>
 
 This option is B<strongly deprecated> and will be removed
-in the B<next> version of C<Memoize>.  Use the C<HASH> option instead.
+in the B<next> release of C<Memoize>.  Use the C<HASH> option instead.
 
         memoize ... [TIE, ARGS...]
 
@@ -937,7 +935,7 @@ cache table on disk in an C<SDBM_File> database:
         memoize 'function', SCALAR_CACHE => [HASH => \%cache];
 
 C<NDBM_File> has the same problem and the same solution.  (Use
-C<Memoize::NDBM_File instead of Plain NDBM_File.>)
+C<Memoize::NDBM_File instead of plain NDBM_File.>)
 
 C<Storable> isn't a tied hash class at all.  You can use it to store a
 hash to disk and retrieve it again, but you can't modify the hash while
@@ -1007,6 +1005,13 @@ empty message to C<mjd-perl-memoize-request@plover.com>.  This mailing
 list is for announcements only and has extremely low traffic---about
 four messages per year.
 
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 1998, 1999, 2000, 2001  by Mark Jason Dominus
+
+This library is free software; you may redistribute it and/or modify
+it under the same terms as Perl itself. 
+
 =head1 THANK YOU
 
 Many thanks to Jonathan Roy for bug reports and suggestions, to
@@ -1026,4 +1031,7 @@ Nandor for portability advice, to Randal Schwartz for suggesting the
 'C<flush_cache> function, and to Jenda Krynicky for being a light in
 the world.
 
+Special thanks to Jarkko Hietaniemi, the 5.8.0 pumpking, for including
+this module in the core and for his patient and helpful guidance
+during the integration process.
 =cut
