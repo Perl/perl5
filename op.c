@@ -4612,7 +4612,7 @@ ck_subr(OP *o)
 		    kid->op_sibling = 0;
 		    o2 = newUNOP(OP_RV2GV, 0, kid);
 		    o2->op_sibling = sib;
-		    prev->op_sibling = o;
+		    prev->op_sibling = o2;
 		}
 		goto wrapref;
 	    case '\\':
@@ -4641,9 +4641,10 @@ ck_subr(OP *o)
 		  wrapref:
 		    {
 			OP* kid = o2;
-			o2 = newUNOP(OP_REFGEN, 0, kid);
-			o2->op_sibling = kid->op_sibling;
+			OP* sib = kid->op_sibling;
 			kid->op_sibling = 0;
+			o2 = newUNOP(OP_REFGEN, 0, kid);
+			o2->op_sibling = sib;
 			prev->op_sibling = o2;
 		    }
 		    break;
