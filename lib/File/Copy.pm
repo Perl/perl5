@@ -24,9 +24,9 @@ sub copy {
     croak("Usage: copy( file1, file2 [, buffersize]) ")
       unless(@_ == 2 || @_ == 3);
 
-    if (($^O eq 'VMS' or $^O eq 'os2') && ref(\$to) ne 'GLOB' &&
-        !(defined ref $to and (ref($to) eq 'GLOB' ||
-          ref($to) eq 'FileHandle' || ref($to) eq 'VMS::Stdio')))
+    if (($^O eq 'VMS' or $^O eq 'os2') && ref(\$_[1]) ne 'GLOB' &&
+        !(defined ref $_[1] and (ref($_[1]) eq 'GLOB' ||
+          ref($_[1]) eq 'FileHandle' || ref($_[1]) eq 'VMS::Stdio')))
         { return File::Copy::syscopy($_[0],$_[1]) }
 
     my $from = shift;
