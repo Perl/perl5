@@ -1259,7 +1259,7 @@ C<require> replacement as C<require Foo::Bar>, it will actually receive
 the argument C<"Foo/Bar.pm"> in @_.  See L<perlfunc/require>.
 
 And, as you'll have noticed from the previous example, if you override
-C<glob>, the C<E<lt>*E<gt>> glob operator is overridden as well.
+C<glob>, the C<< <*> >> glob operator is overridden as well.
 
 In a similar fashion, overriding the C<readline> function also overrides
 the equivalent I/O operator C<< <FILEHANDLE> >>.
@@ -1279,7 +1279,8 @@ been passed to the original subroutine.  The fully qualified name
 of the original subroutine magically appears in the global $AUTOLOAD
 variable of the same package as the C<AUTOLOAD> routine.  The name
 is not passed as an ordinary argument because, er, well, just
-because, that's why...
+because, that's why.  (As an exception, a method call to a nonexistent
+C<import> or C<unimport> method is just skipped instead.)
 
 Many C<AUTOLOAD> routines load in a definition for the requested
 subroutine using eval(), then execute that subroutine using a special
@@ -1305,7 +1306,7 @@ even need parentheses:
     use subs qw(date who ls);
     date;
     who "am", "i";
-    ls -l;
+    ls '-l';
 
 A more complete example of this is the standard Shell module, which
 can treat undefined subroutine calls as calls to external programs.

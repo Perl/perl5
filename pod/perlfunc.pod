@@ -2736,7 +2736,7 @@ C<redo> work.
 
 =item no Module
 
-See the C<use> function, which C<no> is the opposite of.
+See the C<use> function, of which C<no> is the opposite.
 
 =item oct EXPR
 
@@ -6160,7 +6160,8 @@ features back into the current package.  The module can implement its
 C<import> method any way it likes, though most modules just choose to
 derive their C<import> method via inheritance from the C<Exporter> class that
 is defined in the C<Exporter> module.  See L<Exporter>.  If no C<import>
-method can be found then the call is skipped.
+method can be found then the call is skipped, even if there is an AUTOLOAD
+method.
 
 If you do not want to call the package's C<import> method (for instance,
 to stop your namespace from being altered), explicitly supply the empty list:
@@ -6200,6 +6201,8 @@ through the end of the file).
 
 There's a corresponding C<no> command that unimports meanings imported
 by C<use>, i.e., it calls C<unimport Module LIST> instead of C<import>.
+It behaves exactly as C<import> does with respect to VERSION, an
+omitted LIST, empty LIST, or no unimport method being found.
 
     no integer;
     no strict 'refs';
