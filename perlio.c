@@ -2433,7 +2433,12 @@ typedef struct {
 IV
 PerlIOStdio_fileno(pTHX_ PerlIO *f)
 {
-    return PerlSIO_fileno(PerlIOSelf(f, PerlIOStdio)->stdio);
+    FILE *s;
+    if (PerlIOValid(f) && (s = PerlIOSelf(f, PerlIOStdio)->stdio)) {    
+	return PerlSIO_fileno(s);
+    }
+    errno = EBADF;
+    return -1;
 }
 
 char *
@@ -2631,6 +2636,10 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
     Sock_size_t optlen = sizeof(int);
 #endif
     FILE *stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
+    if (!stdio) {
+	errno = EBADF;
+	return -1;
+    }
     if (PerlIOUnix_refcnt_dec(fileno(stdio)) > 0) {
 	/* Do not close it but do flush any buffers */
 	return PerlIO_flush(f);
@@ -4614,6 +4623,7 @@ PerlIO_sprintf(char *s, int n, const char *fmt, ...)
     return result;
 }
 #endif
+
 
 
 
