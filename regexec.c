@@ -3033,12 +3033,15 @@ S_regmatch(pTHX_ regnode *prog)
 		minmod = 0;
 		if (ln && regrepeat_hard(scan, ln, &l) < ln)
 		    sayNO;
-		if (ln && l == 0 && n >= ln
-		    /* In fact, this is tricky.  If paren, then the
-		       fact that we did/didnot match may influence
-		       future execution. */
-		    && !(paren && ln == 0))
-		    ln = n;
+		/* if we matched something zero-length we don't need to
+		   backtrack - capturing parens are already defined, so
+		   the caveat in the maximal case doesn't apply
+
+		   XXXX if ln == 0, we can redo this check first time
+		   through the following loop
+		*/
+		if (ln && l == 0)
+		    n = ln;	/* don't backtrack */
 		locinput = PL_reginput;
 		if (PL_regkind[(U8)OP(next)] == EXACT) {
 		    c1 = (U8)*STRING(next);
@@ -3060,7 +3063,7 @@ S_regmatch(pTHX_ regnode *prog)
 			UCHARAT(PL_reginput) == c2)
 		    {
 			if (paren) {
-			    if (n) {
+			    if (ln) {
 				PL_regstartp[paren] =
 				    HOPc(PL_reginput, -l) - PL_bostr;
 				PL_regendp[paren] = PL_reginput - PL_bostr;
@@ -3084,12 +3087,13 @@ S_regmatch(pTHX_ regnode *prog)
 	    }
 	    else {
 		n = regrepeat_hard(scan, n, &l);
-		if (n != 0 && l == 0
-		    /* In fact, this is tricky.  If paren, then the
-		       fact that we did/didnot match may influence
-		       future execution. */
-		    && !(paren && ln == 0))
-		    ln = n;
+		/* if we matched something zero-length we don't need to
+		   backtrack, unless the minimum count is zero and we
+		   are capturing the result - in that case the capture
+		   being defined or not may affect later execution
+		*/
+		if (n != 0 && l == 0 && !(paren && ln == 0))
+		    ln = n;	/* don't backtrack */
 		locinput = PL_reginput;
 		DEBUG_r(
 		    PerlIO_printf(Perl_debug_log,

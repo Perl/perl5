@@ -792,3 +792,7 @@ tt+$	xxxtt	y	-	-
 ^(a(??{"(?!)"})|(a)(?{1}))b	ab	y	$2	a	# [ID 20010811.006]
 ab(?i)cd	AbCd	n	-	-	# [ID 20010809.023]
 ab(?i)cd	abCd	y	-	-
+(A|B)*(?(1)(CD)|(CD))	CD	y	$2-$3	-CD
+(A|B)*(?(1)(CD)|(CD))	ABCD	y	$2-$3	CD-
+(A|B)*?(?(1)(CD)|(CD))	CD	y	$2-$3	-CD	# [ID 20010803.016]
+(A|B)*?(?(1)(CD)|(CD))	ABCD	y	$2-$3	CD-
