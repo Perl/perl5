@@ -54,10 +54,14 @@ sub printem {
 sub import {
     my $self = shift;
 
-    if ( @_ % 2 == 0 ) {
-      &struct;
-    } else {
+    if ( @_ == 0 ) {
       $self->export_to_level( 1, $self, @EXPORT );
+    } elsif ( @_ == 1 ) {
+	# This is admittedly a little bit silly:
+	# do we ever export anything else than 'struct'...?
+      $self->export_to_level( 1, $self, @_ );
+    } else {
+      &struct;
     }
 }
 
