@@ -495,11 +495,15 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	}
     }
 
-    if (IoTYPE(io) && IoTYPE(io) != IoTYPE_PIPE && IoTYPE(io) != IoTYPE_STD &&
-	/* FIXME: This next term is a hack to avoid fileno on PerlIO::Scalar */
-	!(num_svs && SvROK(*svp))) {
-	if (PerlLIO_fstat(PerlIO_fileno(fp),&PL_statbuf) < 0) {
-	    (void)PerlIO_close(fp);
+    fd = PerlIO_fileno(fp);
+    /* If there is no fd (e.g. PerlIO::Scalar) assume it isn't a
+     * socket - this covers PerlIO::Scalar - otherwise unless we "know" the
+     * type probe for socket-ness.
+     */
+    if (IoTYPE(io) && IoTYPE(io) != IoTYPE_PIPE && IoTYPE(io) != IoTYPE_STD && fd >= 0) {
+	if (PerlLIO_fstat(fd,&PL_statbuf) < 0) {
+	    /* If PerlIO claims to have fd we had better be able to fstat() it. */
+	    (void) PerlIO_close(fp);
 	    goto say_false;
 	}
 #ifndef PERL_MICRO
@@ -515,22 +519,26 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    && IoTYPE(io) != IoTYPE_WRONLY  /* Dups of STD* filehandles already have */
 	    && IoTYPE(io) != IoTYPE_RDONLY  /* type so they aren't marked as sockets */
 	) {				    /* on OS's that return 0 on fstat()ed pipe */
-	    char tmpbuf[256];
-	    Sock_size_t buflen = sizeof tmpbuf;
-	    if (PerlSock_getsockname(PerlIO_fileno(fp), (struct sockaddr *)tmpbuf,
-			    &buflen) >= 0
-		  || errno != ENOTSOCK)
-		IoTYPE(io) = IoTYPE_SOCKET; /* some OS's return 0 on fstat()ed socket */
-				/* but some return 0 for streams too, sigh */
+	     char tmpbuf[256];
+	     Sock_size_t buflen = sizeof tmpbuf;
+	     if (PerlSock_getsockname(fd, (struct sockaddr *)tmpbuf, &buflen) >= 0
+		      || errno != ENOTSOCK)
+		    IoTYPE(io) = IoTYPE_SOCKET; /* some OS's return 0 on fstat()ed socket */
+				                /* but some return 0 for streams too, sigh */
 	}
+#endif /* HAS_SOCKET */
 #endif /* !PERL_MICRO */
-#endif
     }
+
+    /* Eeek - FIXME !!!
+     * If this is a standard handle we discard all the layer stuff
+     * and just dup the fd into whatever was on the handle before !
+     */
+
     if (saveifp) {		/* must use old fp? */
         /* If fd is less that PL_maxsysfd i.e. STDIN..STDERR
            then dup the new fileno down
          */
-        fd = PerlIO_fileno(fp);
 	if (saveofp) {
 	    PerlIO_flush(saveofp);	/* emulate PerlIO_close() */
 	    if (saveofp != saveifp) {	/* was a socket? */
@@ -552,8 +560,8 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    if (savefd != PerlIO_fileno(PerlIO_stdin())) {
 	      char newname[FILENAME_MAX+1];
              if (PerlIO_getname(fp, newname)) {
- 	        if (fd == PerlIO_fileno(PerlIO_stdout())) Perl_vmssetuserlnm(aTHX_ "SYS$OUTPUT", newname);
- 	        if (fd == PerlIO_fileno(PerlIO_stderr())) Perl_vmssetuserlnm(aTHX_ "SYS$ERROR",  newname);
+	        if (fd == PerlIO_fileno(PerlIO_stdout())) Perl_vmssetuserlnm(aTHX_ "SYS$OUTPUT", newname);
+	        if (fd == PerlIO_fileno(PerlIO_stderr())) Perl_vmssetuserlnm(aTHX_ "SYS$ERROR",  newname);
 	      }
 	    }
 #endif
@@ -572,11 +580,11 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	}
 	fp = saveifp;
 	PerlIO_clearerr(fp);
+	fd = PerlIO_fileno(fp);
     }
 #if defined(HAS_FCNTL) && defined(F_SETFD)
-    {
+    if (fd >= 0) {
 	int save_errno = errno;
-	fd = PerlIO_fileno(fp);
 	fcntl(fd,F_SETFD,fd > PL_maxsysfd); /* can change errno */
 	errno = save_errno;
     }
@@ -586,9 +594,9 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     IoFLAGS(io) &= ~IOf_NOLINE;
     if (writing) {
 	if (IoTYPE(io) == IoTYPE_SOCKET
-	    || (IoTYPE(io) == IoTYPE_WRONLY && S_ISCHR(PL_statbuf.st_mode)) ) {
+	    || (IoTYPE(io) == IoTYPE_WRONLY && fd >= 0 && S_ISCHR(PL_statbuf.st_mode)) ) {
 	    mode[0] = 'w';
-	    if (!(IoOFP(io) = PerlIO_openn(aTHX_ type,mode,PerlIO_fileno(fp),0,0,NULL,num_svs,svp))) {
+	    if (!(IoOFP(io) = PerlIO_openn(aTHX_ type,mode,fd,0,0,NULL,num_svs,svp))) {
 		PerlIO_close(fp);
 		IoIFP(io) = Nullfp;
 		goto say_false;
