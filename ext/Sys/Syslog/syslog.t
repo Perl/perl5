@@ -47,11 +47,21 @@ print "1..6\n";
 
 if (Sys::Syslog::_PATH_LOG()) {
     if (-e Sys::Syslog::_PATH_LOG()) {
-        print defined(eval { setlogsock('unix') }) ? "ok 1\n" : "not ok 1 # $!\n";
-        print defined(eval { openlog('perl', 'ndelay', 'local0') }) ? "ok 2\n" : "not ok 2 # $!\n";
-        print defined(eval { syslog('info', $test_string ) }) ? "ok 3\n" : "not ok 3 # $!\n";
-    }
-    else {
+        print defined(eval { setlogsock('unix') })
+		? "ok 1\n" : "not ok 1 # $!\n";
+        if (defined(eval { openlog('perl', 'ndelay', 'local0') })) {
+	    print "ok 2\n";
+	    print defined(eval { syslog('info', $test_string ) })
+		    ? "ok 3\n" : "not ok 3 # $!\n";
+	} else {
+	    if ($@ =~ /no connection to syslog available/) {
+		print "ok 2 # Skip: syslogd not running\n";
+	    } else {
+		print "not ok 2 # $@\n";
+	    }
+	    print "ok 3 # Skip: openlog failed\n";
+	}
+    } else {
         for (1..3) {
             print
                 "ok $_ # Skip: file ",
