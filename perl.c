@@ -90,6 +90,7 @@ register PerlInterpreter *sv_interp;
 	croak("panic: pthread_setspecific");
     nthreads = 1;
     cvcache = newHV();
+    thrflags = 0;
 #endif /* USE_THREADS */
 
     /* Init the real globals? */

@@ -1517,6 +1517,9 @@ EXT MGVTBL vtbl_bm =	{0,	magic_setbm,
 EXT MGVTBL vtbl_uvar =	{magic_getuvar,
 				magic_setuvar,
 					0,	0,	0};
+#ifdef USE_THREADS
+EXT MGVTBL vtbl_mutex =	{0,	0,	0,	0,	magic_mutexfree};
+#endif /* USE_THREADS */
 
 #ifdef OVERLOAD
 EXT MGVTBL vtbl_amagic =       {0,     magic_setamagic,
@@ -1545,6 +1548,10 @@ EXT MGVTBL vtbl_vec;
 EXT MGVTBL vtbl_pos;
 EXT MGVTBL vtbl_bm;
 EXT MGVTBL vtbl_uvar;
+
+#ifdef USE_THREADS
+EXT MGVTBL vtbl_mutex;
+#endif /* USE_THREADS */
 
 #ifdef OVERLOAD
 EXT MGVTBL vtbl_amagic;

@@ -172,7 +172,7 @@
 #define regeol		Perl_regeol
 #define regfold		Perl_regfold
 #define reginput	Perl_reginput
-#define regkind	Perl_regkind
+#define regkind		Perl_regkind
 #define reglastparen	Perl_reglastparen
 #define regmyendp	Perl_regmyendp
 #define regmyp_size	Perl_regmyp_size
@@ -251,6 +251,7 @@
 #define vtbl_isa	Perl_vtbl_isa
 #define vtbl_isaelem	Perl_vtbl_isaelem
 #define vtbl_mglob	Perl_vtbl_mglob
+#define vtbl_mutex	Perl_vtbl_mutex
 #define vtbl_pack	Perl_vtbl_pack
 #define vtbl_packelem	Perl_vtbl_packelem
 #define vtbl_pos	Perl_vtbl_pos
@@ -342,6 +343,7 @@
 #define ck_subr		Perl_ck_subr
 #define ck_svconst	Perl_ck_svconst
 #define ck_trunc	Perl_ck_trunc
+#define condpair_magic	Perl_condpair_magic
 #define convert		Perl_convert
 #define cpytill		Perl_cpytill
 #define croak		Perl_croak
@@ -446,6 +448,7 @@
 #define hv_undef	Perl_hv_undef
 #define ibcmp		Perl_ibcmp
 #define ingroup		Perl_ingroup
+#define init_stacks	Perl_init_stacks
 #define instr		Perl_instr
 #define intuit_more	Perl_intuit_more
 #define invert		Perl_invert
@@ -470,6 +473,7 @@
 #define magic_gettaint	Perl_magic_gettaint
 #define magic_getuvar	Perl_magic_getuvar
 #define magic_len	Perl_magic_len
+#define magic_mutexfree	Perl_magic_mutexfree
 #define magic_nextpack	Perl_magic_nextpack
 #define magic_set	Perl_magic_set
 #define magic_setamagic	Perl_magic_setamagic

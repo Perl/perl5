@@ -40,6 +40,9 @@ I32	chsize _((int fd, Off_t length));
 #endif
 OP *	ck_gvconst _((OP * o));
 OP *	ck_retarget _((OP *o));
+#ifdef USE_THREADS
+MAGIC *	condpair_magic _((SV *sv));
+#endif
 OP*	convert _((I32 optype, I32 flags, OP* o));
 char*	cpytill _((char* to, char* from, char* fromend, int delim, I32* retlen));
 void	croak _((char* pat,...)) __attribute__((format(printf,1,2),noreturn));
@@ -174,6 +177,9 @@ int	magic_getpos	_((SV* sv, MAGIC* mg));
 int	magic_gettaint	_((SV* sv, MAGIC* mg));
 int	magic_getuvar	_((SV* sv, MAGIC* mg));
 U32	magic_len	_((SV* sv, MAGIC* mg));
+#ifdef USE_THREADS
+int	magic_mutexfree	_((SV* sv, MAGIC* mg));
+#endif /* USE_THREADS */
 int	magic_nextpack	_((SV* sv, MAGIC* mg, SV* key));
 int	magic_set	_((SV* sv, MAGIC* mg));
 #ifdef OVERLOAD

@@ -2086,6 +2086,11 @@ I32 namlen;
     case 'l':
 	mg->mg_virtual = &vtbl_dbline;
 	break;
+#ifdef USE_THREADS
+    case 'm':
+	mg->mg_virtual = &vtbl_mutex;
+	break;
+#endif /* USE_THREADS */
     case 'P':
 	mg->mg_virtual = &vtbl_pack;
 	break;

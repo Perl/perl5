@@ -1780,7 +1780,7 @@ PP(pp_entersub)
 #endif /* DEBUGGING */
 	MUTEX_UNLOCK(CvMUTEXP(cv)); /* fast sub wants neither sync nor clone */
     }
-    else if (SvFLAGS(cv) & SVpcv_SYNC) {
+    else if (SvFLAGS(cv) & SVp_SYNC) {
 	/*
 	 * It's a synchronised CV. Wait until it's free unless
 	 * we own it already (in which case we're recursing).

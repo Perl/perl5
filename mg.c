@@ -1340,6 +1340,21 @@ MAGIC* mg;
     return 0;
 }
 
+#ifdef USE_THREADS
+int
+magic_mutexfree(sv, mg)
+SV *sv;
+MAGIC *mg;
+{
+    dTHR;
+    if (MgOWNER(mg))
+	croak("panic: magic_mutexfree");
+    MUTEX_DESTROY(MgMUTEXP(mg));
+    COND_DESTROY(MgCONDP(mg));
+    return 0;
+}
+#endif /* USE_THREADS */
+
 I32
 whichsig(sig)
 char *sig;

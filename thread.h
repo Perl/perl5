@@ -121,9 +121,37 @@ struct thread {
 
     pthread_mutex_t *	Tthreadstart_mutexp;
     HV *	Tcvcache;
+    U32		Tthrflags;
 };
 
 typedef struct thread *Thread;
+
+/* Values and macros for thrflags */
+#define THR_STATE_MASK	3
+#define THR_NORMAL	0
+#define THR_DETACHED	1
+#define THR_JOINED	2
+#define THR_DEAD	3
+
+#define ThrSTATE(t)	(t->Tthrflags & THR_STATE_MASK)
+#define ThrSETSTATE(t, s) STMT_START {		\
+	(t)->Tthrflags &= ~THR_STATE_MASK;	\
+	(t)->Tthrflags |= (s);			\
+	DEBUG_L(fprintf(stderr, "thread 0x%lx set to state %d\n", \
+			(unsigned long)(t), (s))); \
+    } STMT_END
+
+typedef struct condpair {
+    pthread_mutex_t	mutex;
+    pthread_cond_t	owner_cond;
+    pthread_cond_t	cond;
+    Thread		owner;
+} condpair_t;
+
+#define MgMUTEXP(mg) (&((condpair_t *)(mg->mg_ptr))->mutex)
+#define MgOWNERCONDP(mg) (&((condpair_t *)(mg->mg_ptr))->owner_cond)
+#define MgCONDP(mg) (&((condpair_t *)(mg->mg_ptr))->cond)
+#define MgOWNER(mg) ((condpair_t *)(mg->mg_ptr))->owner
 
 #undef	stack_base
 #undef	stack_sp
@@ -202,5 +230,6 @@ typedef struct thread *Thread;
 #define	runlevel	(thr->Trunlevel)
 
 #define	threadstart_mutexp	(thr->Tthreadstart_mutexp)
-#define	cvcache	(thr->Tcvcache)
+#define	cvcache		(thr->Tcvcache)
+#define	thrflags	(thr->Tthrflags)
 #endif /* USE_THREADS */

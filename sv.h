@@ -130,7 +130,7 @@ struct io {
 #define SVpbm_TAIL	0x20000000
 
 #ifdef USE_THREADS
-#define SVpcv_SYNC	0x10000000	/* Synchronised: 1 thread at a time */
+#define SVp_SYNC	0x10000000	/* Synchronised CV or an SV lock */
 #endif /* USE_THREADS */
 
 #ifdef OVERLOAD

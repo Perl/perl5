@@ -238,6 +238,7 @@ vtbl_glob
 vtbl_isa
 vtbl_isaelem
 vtbl_mglob
+vtbl_mutex
 vtbl_pack
 vtbl_packelem
 vtbl_pos
@@ -332,6 +333,7 @@ ck_split
 ck_subr
 ck_svconst
 ck_trunc
+condpair_magic
 convert
 cpytill
 croak
@@ -461,6 +463,7 @@ magic_getpos
 magic_gettaint
 magic_getuvar
 magic_len
+magic_mutexfree
 magic_nextpack
 magic_set
 magic_setamagic
