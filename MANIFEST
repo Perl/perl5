@@ -1169,6 +1169,7 @@ lib/Carp.pm			Error message base class
 lib/Carp.t			See if Carp works
 lib/CGI/Apache.pm		Support for Apache's Perl module
 lib/CGI/Carp.pm			Log server errors with helpful context
+lib/CGI/Changes			Changelog for CGI.pm
 lib/CGI/Cookie.pm		Interface to Netscape Cookies
 lib/CGI/eg/caution.xbm		CGI example
 lib/CGI/eg/clickable_image.cgi	CGI example

@@ -13,7 +13,7 @@ package CGI::Cookie;
 # wish, but if you redistribute a modified version, please attach a note
 # listing the modifications you have made.
 
-$CGI::Cookie::VERSION='1.24';
+$CGI::Cookie::VERSION='1.25';
 
 use CGI::Util qw(rearrange unescape escape);
 use overload '""' => \&as_string,
@@ -26,7 +26,7 @@ if (exists $ENV{MOD_PERL}) {
   eval "require mod_perl";
   if (defined $mod_perl::VERSION) {
     my $float = $mod_perl::VERSION;
-    $float = ~ s/^.+?([\d.]+).+$/$1/;
+    $float += 0;
     if ($float >= 1.99) {
       $MOD_PERL = 2;
       require Apache::RequestUtil;
