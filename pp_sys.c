@@ -1842,9 +1842,6 @@ PP(pp_send)
 	    /* See the note at doio.c:do_print about filesize limits. --jhi */
 	    retval = PerlLIO_write(PerlIO_fileno(IoIFP(io)),
 				   buffer, length);
-	    if (DO_UTF8(bufsv))
-	        retval = utf8_length((U8*)SvPVX(bufsv),
-				     (U8*)SvPVX(bufsv) + retval);
 	}
     }
 #ifdef HAS_SOCKET
@@ -1866,6 +1863,8 @@ PP(pp_send)
     if (retval < 0)
 	goto say_undef;
     SP = ORIGMARK;
+    if (DO_UTF8(bufsv))
+        retval = utf8_length((U8*)buffer, (U8*)buffer + retval);
 #if Size_t_size > IVSIZE
     PUSHn(retval);
 #else
