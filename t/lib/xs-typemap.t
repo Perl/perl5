@@ -240,7 +240,7 @@ print "# T_OPAQUE\n";
 
 $t = 48;
 $ptr = T_OPAQUE_IN( $t );
-ok(T_OPAQUEPTR_OUT( $ptr ), $t);
+ok(T_OPAQUEPTR_OUT_short( $ptr ), $t);
 
 # T_OPAQUE_array
 my @opq = (2,4,8);
