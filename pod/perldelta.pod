@@ -128,7 +128,7 @@ value of ref().
 
 =head2 pack/unpack D/F recycled
 
-The undocumented pack/unpack template letters D/F have been recyled
+The undocumented pack/unpack template letters D/F have been recycled
 for better use: now they stand for long double (if supported by the
 platform) and NV (Perl internal floating point type).  (They used
 to be aliases for f/d, but you never knew that.)
@@ -399,7 +399,7 @@ in multiple arguments.)
 =item *
 
 The builtin dump() now gives an optional warning
-C<Ambiguous call resolved as CORE::dump(), qualify as such or use &>
+C<dump() better written as CORE::dump()>,
 meaning that by default C<dump(...)> is resolved as the builtin 
 dump() which dumps core and aborts, not as (possibly) user-defined
 C<sub dump>.  To call the latter, qualify the call as C<&dump(...)>.
@@ -408,7 +408,7 @@ removed/changed in future releases.)
 
 =item *
 
-chomp() and chop() have been demoted back to I<not> being overrideable
+chomp() and chop() have been demoted back to I<not> being overridable
 because they cannot really be overridden-- the problem is that their
 prototype cannot be expressed and therefore one really cannot write
 replacements to override these builtins.
@@ -576,7 +576,7 @@ but if not possible, the familiar Perl implementation is used.
 
 C<Devel::PPPort>, originally from Kenneth Albanowski and now
 maintained by Paul Marquess, has been added.  It is primarily used
-by C<h2xs> to enhance portability of of XS modules between different
+by C<h2xs> to enhance portability of XS modules between different
 versions of Perl.
 
 =item *
@@ -962,7 +962,7 @@ other improvements.
 The English module can now be used without the infamous performance
 hit by saying
 
-	use English '-no_performance_hit';
+	use English '-no_match_vars';
 
 (Assuming, of course, that one doesn't need the troublesome variables
 C<$`>, C<$&>, or C<$'>.)  Also, introduced C<@LAST_MATCH_START> and
