@@ -2005,13 +2005,13 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	 * the setproctitle() routine to manipulate that. */
 	{
 	    s = SvPV(sv, len);
-#   if __FreeBSD_version >= 400000
-	    /* The - removes the "perl: " prefix,
+#   if __FreeBSD_version >= 410001
+	    /* The leading "-" removes the "perl: " prefix,
 	     * but not the "(perl) suffix from the ps(1)
 	     * output, because that's what ps(1) shows if the
 	     * argv[] is modified. */
 	    setproctitle("-%s", s, len + 1);
-#   else	/* old FreeBSDs, NetBSD, OpenBSD */
+#   else	/* old FreeBSDs, NetBSD, OpenBSD, anyBSD */
 	    /* This doesn't really work if you assume that
 	     * $0 = 'foobar'; will wipe out 'perl' from the $0
 	     * because in ps(1) output the result will be like
