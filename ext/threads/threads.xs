@@ -424,8 +424,10 @@ Perl_ithread_join(pTHX_ SV *obj)
 	{
 	  AV* params = (AV*) SvRV(thread->params);	  
 	  CLONE_PARAMS clone_params;
+	  clone_params.stashes = newAV();
 	  PL_ptr_table = ptr_table_new();
 	  retparam = (AV*) sv_dup((SV*)params, &clone_params);
+	  SvREFCNT_dec(clone_params.stashes);
 	  SvREFCNT_inc(retparam);
 	  ptr_table_free(PL_ptr_table);
 	  PL_ptr_table = NULL;
