@@ -1359,4 +1359,7 @@ PERL_CALLCONV void	Perl_hv_clear_placeholders(pTHX_ HV* hb);
 STATIC SV*	S_hv_delete_common(pTHX_ HV* tb, SV* key_sv, const char* key, STRLEN klen, int k_flags, I32 d_flags, U32 hash);
 STATIC HE*	S_hv_fetch_common(pTHX_ HV* tb, SV* key_sv, const char* key, STRLEN klen, int flags, int action, SV* val, U32 hash);
 #endif
+PERL_CALLCONV SV*	Perl_hv_scalar(pTHX_ HV* hv);
+PERL_CALLCONV SV*	Perl_magic_scalarpack(pTHX_ HV* hv, MAGIC*	mg);
+
 END_EXTERN_C

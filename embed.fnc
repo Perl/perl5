@@ -1416,4 +1416,7 @@ Apd	|void	|hv_clear_placeholders|HV* hb
 sM	|SV*	|hv_delete_common|HV* tb|SV* key_sv|const char* key|STRLEN klen|int k_flags|I32 d_flags|U32 hash
 sM	|HE*	|hv_fetch_common|HV* tb|SV* key_sv|const char* key|STRLEN klen|int flags|int action|SV* val|U32 hash
 #endif
+Apd	|SV*	|hv_scalar	|HV* hv|
+p	|SV*	|magic_scalarpack|HV* hv|MAGIC*	mg
+
 END_EXTERN_C

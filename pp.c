@@ -106,12 +106,7 @@ PP(pp_padhv)
 	RETURNOP(do_kv());
     }
     else if (gimme == G_SCALAR) {
-	SV* sv = sv_newmortal();
-	if (HvFILL((HV*)TARG))
-	    Perl_sv_setpvf(aTHX_ sv, "%ld/%ld",
-		      (long)HvFILL((HV*)TARG), (long)HvMAX((HV*)TARG) + 1);
-	else
-	    sv_setiv(sv, 0);
+	SV* sv = Perl_hv_scalar(aTHX_ (HV*)TARG);
 	SETs(sv);
     }
     RETURN;

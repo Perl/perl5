@@ -1531,6 +1531,7 @@ Perl_magic_wipepack(pTHX_ SV *sv, MAGIC *mg)
     call_method("CLEAR", G_SCALAR|G_DISCARD);
     POPSTACK;
     LEAVE;
+
     return 0;
 }
 
@@ -1563,6 +1564,41 @@ int
 Perl_magic_existspack(pTHX_ SV *sv, MAGIC *mg)
 {
     return magic_methpack(sv,mg,"EXISTS");
+}
+
+SV *
+Perl_magic_scalarpack(pTHX_ HV *hv, MAGIC *mg)
+{
+    dSP;
+    SV *retval = &PL_sv_undef;
+    SV *tied = SvTIED_obj((SV*)hv, mg);
+    HV *pkg = SvSTASH((SV*)SvRV(tied));
+   
+    if (!gv_fetchmethod_autoload(pkg, "SCALAR", FALSE)) {
+        SV *key;
+        if (HvEITER(hv))
+            /* we are in an iteration so the hash cannot be empty */
+            return &PL_sv_yes;
+        /* no xhv_eiter so now use FIRSTKEY */
+        key = sv_newmortal();
+        magic_nextpack((SV*)hv, mg, key);
+        HvEITER(hv) = NULL;     /* need to reset iterator */
+        return SvOK(key) ? &PL_sv_yes : &PL_sv_no;
+    }
+   
+    /* there is a SCALAR method that we can call */
+    ENTER;
+    PUSHSTACKi(PERLSI_MAGIC);
+    PUSHMARK(SP);
+    EXTEND(SP, 1);
+    PUSHs(tied);
+    PUTBACK;
+
+    if (call_method("SCALAR", G_SCALAR))
+        retval = *PL_stack_sp--; 
+    POPSTACK;
+    LEAVE;
+    return retval;
 }
 
 int
