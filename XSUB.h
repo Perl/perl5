@@ -1,17 +1,13 @@
 #define ST(off) PL_stack_base[ax + (off)]
 
-#ifdef CAN_PROTOTYPE
-#  ifdef PERL_OBJECT
-#    define XS(name) void name(CV* cv, CPerlObj* pPerl)
-#  else
-#    if defined(CYGWIN32) && defined(USE_DYNAMIC_LOADING)
-#      define XS(name) __declspec(dllexport) void name(CV* cv)
-#    else
-#      define XS(name) void name(CV* cv)
-#    endif
-#  endif
+#ifdef PERL_OBJECT
+#  define XS(name) void name(CV* cv, CPerlObj* pPerl)
 #else
-#  define XS(name) void name(cv) CV* cv;
+#  if defined(CYGWIN32) && defined(USE_DYNAMIC_LOADING)
+#    define XS(name) __declspec(dllexport) void name(pTHX_ CV* cv)
+#  else
+#    define XS(name) void name(pTHX_ CV* cv)
+#  endif
 #endif
 
 #define dXSARGS				\
@@ -31,7 +27,7 @@
 #define dXSFUNCTION(ret)		XSINTERFACE_CVT(ret,XSFUNCTION)
 #define XSINTERFACE_FUNC(ret,cv,f)	((XSINTERFACE_CVT(ret,))(f))
 #define XSINTERFACE_FUNC_SET(cv,f)	\
-		CvXSUBANY(cv).any_dptr = (void (*) (void*))(f)
+		CvXSUBANY(cv).any_dptr = (void (*) (pTHX_ void*))(f)
 
 #define XSRETURN(off)					\
     STMT_START {					\
@@ -69,14 +65,14 @@
 	    tmpsv = ST(1);						\
 	else {								\
 	    /* XXX GV_ADDWARN */					\
-	    tmpsv = get_sv(form("%s::%s", module,			\
+	    tmpsv = get_sv(Perl_form(aTHX_ "%s::%s", module,		\
 				vn = "XS_VERSION"), FALSE);		\
 	    if (!tmpsv || !SvOK(tmpsv))					\
-		tmpsv = get_sv(form("%s::%s", module,			\
+		tmpsv = get_sv(Perl_form(aTHX_ "%s::%s", module,	\
 				    vn = "VERSION"), FALSE);		\
 	}								\
 	if (tmpsv && (!SvOK(tmpsv) || strNE(XS_VERSION, SvPV(tmpsv, n_a))))	\
-	    croak("%s object version %s does not match %s%s%s%s %_",	\
+	    Perl_croak(aTHX_ "%s object version %s does not match %s%s%s%s %_",	\
 		  module, XS_VERSION,					\
 		  vn ? "$" : "", vn ? module : "", vn ? "::" : "",	\
 		  vn ? vn : "bootstrap parameter", tmpsv);		\

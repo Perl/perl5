@@ -48,12 +48,12 @@
 #define ENTER							\
     STMT_START {						\
 	push_scope();						\
-	DEBUG_l(WITH_THR(deb("ENTER scope %ld at %s:%d\n",	\
+	DEBUG_l(WITH_THR(Perl_deb(aTHX_ "ENTER scope %ld at %s:%d\n",	\
 		    PL_scopestack_ix, __FILE__, __LINE__)));	\
     } STMT_END
 #define LEAVE							\
     STMT_START {						\
-	DEBUG_l(WITH_THR(deb("LEAVE scope %ld at %s:%d\n",	\
+	DEBUG_l(WITH_THR(Perl_deb(aTHX_ "LEAVE scope %ld at %s:%d\n",	\
 		    PL_scopestack_ix, __FILE__, __LINE__)));	\
 	pop_scope();						\
     } STMT_END
@@ -82,9 +82,9 @@
 #define SAVEDELETE(h,k,l) \
 	  save_delete(SOFT_CAST(HV*)(h), SOFT_CAST(char*)(k), (I32)(l))
 #ifdef PERL_OBJECT
-#define CALLDESTRUCTOR(p) this->*SSPOPDPTR(p)
+#define CALLDESTRUCTOR this->*SSPOPDPTR
 #else
-#define CALLDESTRUCTOR(p) (*SSPOPDPTR)(aTHX_ p)
+#define CALLDESTRUCTOR (*SSPOPDPTR)
 #endif
 #define SAVEDESTRUCTOR(f,p) \
 	  save_destructor((DESTRUCTORFUNC_t)(FUNC_NAME_TO_PTR(f)),	\
@@ -156,8 +156,8 @@ typedef struct jmpenv JMPENV;
  * Function that catches/throws, and its callback for the
  *  body of protected processing.
  */
-typedef void *(CPERLscope(*protect_body_t)) (va_list);
-typedef void *(CPERLscope(*protect_proc_t)) (int *, protect_body_t, ...);
+typedef void *(CPERLscope(*protect_body_t)) (pTHX_ va_list);
+typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ int *, protect_body_t, ...);
 
 /*
  * How to build the first jmpenv.

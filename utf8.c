@@ -107,7 +107,7 @@ Perl_utf8_to_uv(pTHX_ U8* s, I32* retlen)
 	return *s;
     }
     if (!(uv & 0x40)) {
-	warn("Malformed UTF-8 character");
+	Perl_warn(aTHX_ "Malformed UTF-8 character");
 	if (retlen)
 	    *retlen = 1;
 	return *s;
@@ -127,7 +127,7 @@ Perl_utf8_to_uv(pTHX_ U8* s, I32* retlen)
     s++;
     while (len--) {
 	if ((*s & 0xc0) != 0x80) {
-	    warn("Malformed UTF-8 character");
+	    Perl_warn(aTHX_ "Malformed UTF-8 character");
 	    if (retlen)
 		*retlen -= len + 1;
 	    return 0xfffd;
@@ -205,7 +205,7 @@ Perl_utf16_to_utf8(pTHX_ U16* p, U8* d, I32 bytelen)
 	if (uv >= 0xd800 && uv < 0xdbff) {	/* surrogates */
 	    int low = *p++;
 	    if (low < 0xdc00 || low >= 0xdfff) {
-		warn("Malformed UTF-16 surrogate");
+		Perl_warn(aTHX_ "Malformed UTF-16 surrogate");
 		p--;
 		uv = 0xfffd;
 	    }
@@ -547,7 +547,7 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
 	PL_curcop->op_private = PL_hints;
     }
     if (!SvROK(retval) || SvTYPE(SvRV(retval)) != SVt_PVHV)
-	croak("SWASHNEW didn't return an HV ref");
+	Perl_croak(aTHX_ "SWASHNEW didn't return an HV ref");
     return retval;
 }
 
@@ -609,7 +609,7 @@ Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr)
 	    svp = hv_store(hv, (char*)ptr, klen, retval, 0);
 
 	    if (!svp || !(tmps = (U8*)SvPV(*svp, slen)) || slen < 8)
-		croak("SWASHGET didn't return result of proper length");
+		Perl_croak(aTHX_ "SWASHGET didn't return result of proper length");
 	}
 
 	PL_last_swash_hv = hv;
@@ -634,6 +634,6 @@ Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr)
 	off <<= 2;
 	return (tmps[off] << 24) + (tmps[off+1] << 16) + (tmps[off+2] << 8) + tmps[off + 3] ;
     }
-    croak("panic: swash_fetch");
+    Perl_croak(aTHX_ "panic: swash_fetch");
     return 0;
 }

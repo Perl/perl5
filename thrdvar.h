@@ -96,7 +96,7 @@ PERLVAR(Tmainstack,	AV *)		/* the stack when nothing funny is happening */
 
 PERLVAR(Ttop_env,	JMPENV *)	/* ptr. to current sigjmp() environment */
 PERLVAR(Tstart_env,	JMPENV)		/* empty startup sigjmp() environment */
-PERLVARI(Tprotect,	protect_proc_t,	FUNC_NAME_TO_PTR(default_protect))
+PERLVARI(Tprotect,	protect_proc_t,	FUNC_NAME_TO_PTR(Perl_default_protect))
 
 /* statics "owned" by various functions */
 PERLVAR(Tav_fetch_sv,	SV *)		/* owned by av_fetch() */
@@ -169,9 +169,9 @@ PERLVARI(Treg_curpm,	PMOP*, NULL)	/* curpm during match */
 PERLVAR(Treg_oldsaved,	char*)		/* old saved substr during match */
 PERLVAR(Treg_oldsavedlen, STRLEN)	/* old length of saved substr during match */
 
-PERLVARI(Tregcompp,	regcomp_t, FUNC_NAME_TO_PTR(pregcomp))
+PERLVARI(Tregcompp,	regcomp_t, FUNC_NAME_TO_PTR(Perl_pregcomp))
 					/* Pointer to RE compiler */
-PERLVARI(Tregexecp,	regexec_t, FUNC_NAME_TO_PTR(regexec_flags))
+PERLVARI(Tregexecp,	regexec_t, FUNC_NAME_TO_PTR(Perl_regexec_flags))
 					/* Pointer to RE executer */
 PERLVARI(Treginterp_cnt,int,	    0)	/* Whether `Regexp'
 						   was interpolated. */

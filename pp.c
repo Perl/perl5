@@ -186,12 +186,12 @@ PP(pp_padhv)
 	RETURN;
     gimme = GIMME_V;
     if (gimme == G_ARRAY) {
-	RETURNOP(do_kv(ARGS));
+	RETURNOP(do_kv());
     }
     else if (gimme == G_SCALAR) {
 	SV* sv = sv_newmortal();
 	if (HvFILL((HV*)TARG))
-	    sv_setpvf(sv, "%ld/%ld",
+	    Perl_sv_setpvf(aTHX_ sv, "%ld/%ld",
 		      (long)HvFILL((HV*)TARG), (long)HvMAX((HV*)TARG) + 1);
 	else
 	    sv_setiv(sv, 0);
@@ -202,7 +202,7 @@ PP(pp_padhv)
 
 PP(pp_padany)
 {
-    DIE("NOT IMPL LINE %d",__LINE__);
+    DIE(aTHX_ "NOT IMPL LINE %d",__LINE__);
 }
 
 /* Translations. */
@@ -224,7 +224,7 @@ PP(pp_rv2gv)
 	    sv = (SV*) gv;
 	}
 	else if (SvTYPE(sv) != SVt_PVGV)
-	    DIE("Not a GLOB reference");
+	    DIE(aTHX_ "Not a GLOB reference");
     }
     else {
 	if (SvTYPE(sv) != SVt_PVGV) {
@@ -257,9 +257,9 @@ PP(pp_rv2gv)
 		}  
 		if (PL_op->op_flags & OPf_REF ||
 		    PL_op->op_private & HINT_STRICT_REFS)
-		    DIE(PL_no_usym, "a symbol");
+		    DIE(aTHX_ PL_no_usym, "a symbol");
 		if (ckWARN(WARN_UNINITIALIZED))
-		    warner(WARN_UNINITIALIZED, PL_warn_uninit);
+		    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 		RETSETUNDEF;
 	    }
 	    sym = SvPV(sv, n_a);
@@ -272,7 +272,7 @@ PP(pp_rv2gv)
 	    }
 	    else {
 		if (PL_op->op_private & HINT_STRICT_REFS)
-		    DIE(PL_no_symref, sym, "a symbol");
+		    DIE(aTHX_ PL_no_symref, sym, "a symbol");
 		sv = (SV*)gv_fetchpv(sym, TRUE, SVt_PVGV);
 	    }
 	}
@@ -296,7 +296,7 @@ PP(pp_rv2sv)
 	case SVt_PVAV:
 	case SVt_PVHV:
 	case SVt_PVCV:
-	    DIE("Not a SCALAR reference");
+	    DIE(aTHX_ "Not a SCALAR reference");
 	}
     }
     else {
@@ -313,9 +313,9 @@ PP(pp_rv2sv)
 	    if (!SvOK(sv)) {
 		if (PL_op->op_flags & OPf_REF ||
 		    PL_op->op_private & HINT_STRICT_REFS)
-		    DIE(PL_no_usym, "a SCALAR");
+		    DIE(aTHX_ PL_no_usym, "a SCALAR");
 		if (ckWARN(WARN_UNINITIALIZED))
-		    warner(WARN_UNINITIALIZED, PL_warn_uninit);
+		    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 		RETSETUNDEF;
 	    }
 	    sym = SvPV(sv, n_a);
@@ -328,7 +328,7 @@ PP(pp_rv2sv)
 	    }
 	    else {
 		if (PL_op->op_private & HINT_STRICT_REFS)
-		    DIE(PL_no_symref, sym, "a SCALAR");
+		    DIE(aTHX_ PL_no_symref, sym, "a SCALAR");
 		gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PV);
 	    }
 	}
@@ -467,7 +467,7 @@ PP(pp_prototype)
 		goto set;
 	    else {			/* None such */
 	      nonesuch:
-		croak("Can't find an opnumber for \"%s\"", s+6);
+		Perl_croak(aTHX_ "Can't find an opnumber for \"%s\"", s+6);
 	    }
 	}
     }
@@ -516,7 +516,7 @@ PP(pp_refgen)
 }
 
 STATIC SV*
-refto(pTHX_ SV *sv)
+S_refto(pTHX_ SV *sv)
 {
     SV* rv;
 
@@ -573,7 +573,7 @@ PP(pp_bless)
 	STRLEN len;
 	char *ptr = SvPV(ssv,len);
 	if (ckWARN(WARN_UNSAFE) && len == 0)
-	    warner(WARN_UNSAFE, 
+	    Perl_warner(aTHX_ WARN_UNSAFE, 
 		   "Explicit blessing to '' (assuming package main)");
 	stash = gv_stashpvn(ptr, len, TRUE);
     }
@@ -689,7 +689,7 @@ PP(pp_study)
     snext = PL_screamnext;
 
     if (!sfirst || !snext)
-	DIE("do_study: out of memory");
+	DIE(aTHX_ "do_study: out of memory");
 
     for (ch = 256; ch; --ch)
 	*sfirst++ = -1;
@@ -820,7 +820,7 @@ PP(pp_undef)
 	break;
     case SVt_PVCV:
 	if (ckWARN(WARN_UNSAFE) && cv_const_sv((CV*)sv))
-	    warner(WARN_UNSAFE, "Constant subroutine %s undefined",
+	    Perl_warner(aTHX_ WARN_UNSAFE, "Constant subroutine %s undefined",
 		 CvANON((CV*)sv) ? "(anonymous)" : GvENAME(CvGV((CV*)sv)));
 	/* FALL THROUGH */
     case SVt_PVFM:
@@ -863,7 +863,7 @@ PP(pp_predec)
 {
     djSP;
     if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
-	croak(PL_no_modify);
+	Perl_croak(aTHX_ PL_no_modify);
     if (SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
     	SvIVX(TOPs) != IV_MIN)
     {
@@ -880,7 +880,7 @@ PP(pp_postinc)
 {
     djSP; dTARGET;
     if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
-	croak(PL_no_modify);
+	Perl_croak(aTHX_ PL_no_modify);
     sv_setsv(TARG, TOPs);
     if (SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
     	SvIVX(TOPs) != IV_MAX)
@@ -901,7 +901,7 @@ PP(pp_postdec)
 {
     djSP; dTARGET;
     if(SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
-	croak(PL_no_modify);
+	Perl_croak(aTHX_ PL_no_modify);
     sv_setsv(TARG, TOPs);
     if (SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
     	SvIVX(TOPs) != IV_MIN)
@@ -945,7 +945,7 @@ PP(pp_divide)
       dPOPPOPnnrl;
       double value;
       if (right == 0.0)
-	DIE("Illegal division by zero");
+	DIE(aTHX_ "Illegal division by zero");
 #ifdef SLOPPYDIVIDE
       /* insure that 20./5. == 4. */
       {
@@ -1032,7 +1032,7 @@ PP(pp_modulo)
 	    dleft  = floor(dleft + 0.5);
 
 	    if (!dright)
-		DIE("Illegal modulus zero");
+		DIE(aTHX_ "Illegal modulus zero");
 
 	    dans = fmod(dleft, dright);
 	    if ((left_neg != right_neg) && dans)
@@ -1046,7 +1046,7 @@ PP(pp_modulo)
 
 	do_uv:
 	    if (!right)
-		DIE("Illegal modulus zero");
+		DIE(aTHX_ "Illegal modulus zero");
 
 	    ans = left % right;
 	    if ((left_neg != right_neg) && ans)
@@ -1493,7 +1493,7 @@ PP(pp_i_divide)
     {
       dPOPiv;
       if (value == 0)
-	DIE("Illegal division by zero");
+	DIE(aTHX_ "Illegal division by zero");
       value = POPi / value;
       PUSHi( value );
       RETURN;
@@ -1506,7 +1506,7 @@ PP(pp_i_modulo)
     {
       dPOPTOPiirl;
       if (!right)
-	DIE("Illegal modulus zero");
+	DIE(aTHX_ "Illegal modulus zero");
       SETi( left % right );
       RETURN;
     }
@@ -1702,7 +1702,7 @@ PP(pp_srand)
 }
 
 STATIC U32
-seed(pTHX)
+S_seed(pTHX)
 {
     /*
      * This is really just a quick hack which grabs various garbage
@@ -1803,7 +1803,7 @@ PP(pp_log)
       value = POPn;
       if (value <= 0.0) {
 	SET_NUMERIC_STANDARD();
-	DIE("Can't take log of %g", value);
+	DIE(aTHX_ "Can't take log of %g", value);
       }
       value = log(value);
       XPUSHn(value);
@@ -1819,7 +1819,7 @@ PP(pp_sqrt)
       value = POPn;
       if (value < 0.0) {
 	SET_NUMERIC_STANDARD();
-	DIE("Can't take sqrt of %g", value);
+	DIE(aTHX_ "Can't take sqrt of %g", value);
       }
       value = sqrt(value);
       XPUSHn(value);
@@ -2000,7 +2000,7 @@ PP(pp_substr)
     }
     if (fail < 0) {
 	if (ckWARN(WARN_SUBSTR) || lvalue || repl)
-	    warner(WARN_SUBSTR, "substr outside of string");
+	    Perl_warner(aTHX_ WARN_SUBSTR, "substr outside of string");
 	RETPUSHUNDEF;
     }
     else {
@@ -2014,7 +2014,7 @@ PP(pp_substr)
 		    STRLEN n_a;
 		    SvPV_force(sv,n_a);
 		    if (ckWARN(WARN_SUBSTR))
-			warner(WARN_SUBSTR,
+			Perl_warner(aTHX_ WARN_SUBSTR,
 				"Attempt to use reference as lvalue in substr");
 		}
 		if (SvOK(sv))		/* is it defined ? */
@@ -2274,7 +2274,7 @@ PP(pp_crypt)
     sv_setpv(TARG, PerlProc_crypt(tmps, SvPV(right, n_a)));
 #endif
 #else
-    DIE(
+    DIE(aTHX_ 
       "The crypt() function is unimplemented due to excessive paranoia.");
 #endif
     SETs(TARG);
@@ -2611,7 +2611,7 @@ PP(pp_aslice)
 	    svp = av_fetch(av, elem, lval);
 	    if (lval) {
 		if (!svp || *svp == &PL_sv_undef)
-		    DIE(PL_no_aelem, elem);
+		    DIE(aTHX_ PL_no_aelem, elem);
 		if (PL_op->op_private & OPpLVAL_INTRO)
 		    save_aelem(av, elem, svp);
 	    }
@@ -2661,12 +2661,12 @@ PP(pp_each)
 
 PP(pp_values)
 {
-    return do_kv(ARGS);
+    return do_kv();
 }
 
 PP(pp_keys)
 {
-    return do_kv(ARGS);
+    return do_kv();
 }
 
 PP(pp_delete)
@@ -2686,7 +2686,7 @@ PP(pp_delete)
 	    if (hvtype == SVt_PVHV)
 		sv = hv_delete_ent(hv, *MARK, discard, 0);
 	    else
-		DIE("Not a HASH reference");
+		DIE(aTHX_ "Not a HASH reference");
 	    *MARK = sv ? sv : &PL_sv_undef;
 	}
 	if (discard)
@@ -2703,7 +2703,7 @@ PP(pp_delete)
 	if (SvTYPE(hv) == SVt_PVHV)
 	    sv = hv_delete_ent(hv, keysv, discard, 0);
 	else
-	    DIE("Not a HASH reference");
+	    DIE(aTHX_ "Not a HASH reference");
 	if (!sv)
 	    sv = &PL_sv_undef;
 	if (!discard)
@@ -2726,7 +2726,7 @@ PP(pp_exists)
 	    RETPUSHYES;
     }
     else {
-	DIE("Not a HASH reference");
+	DIE(aTHX_ "Not a HASH reference");
     }
     RETPUSHNO;
 }
@@ -2739,7 +2739,7 @@ PP(pp_hslice)
     I32 realhv = (SvTYPE(hv) == SVt_PVHV);
 
     if (!realhv && PL_op->op_private & OPpLVAL_INTRO)
-	DIE("Can't localize pseudo-hash element");
+	DIE(aTHX_ "Can't localize pseudo-hash element");
 
     if (realhv || SvTYPE(hv) == SVt_PVAV) {
 	while (++MARK <= SP) {
@@ -2755,7 +2755,7 @@ PP(pp_hslice)
 	    if (lval) {
 		if (!svp || *svp == &PL_sv_undef) {
 		    STRLEN n_a;
-		    DIE(PL_no_helem, SvPV(keysv, n_a));
+		    DIE(aTHX_ PL_no_helem, SvPV(keysv, n_a));
 		}
 		if (PL_op->op_private & OPpLVAL_INTRO)
 		    save_helem(hv, keysv, svp);
@@ -2862,7 +2862,7 @@ PP(pp_anonhash)
 	if (MARK < SP)
 	    sv_setsv(val, *++MARK);
 	else if (ckWARN(WARN_UNSAFE))
-	    warner(WARN_UNSAFE, "Odd number of elements in hash assignment");
+	    Perl_warner(aTHX_ WARN_UNSAFE, "Odd number of elements in hash assignment");
 	(void)hv_store_ent(hv,key,val,0);
     }
     SP = ORIGMARK;
@@ -2905,7 +2905,7 @@ PP(pp_splice)
 	else
 	    offset -= PL_curcop->cop_arybase;
 	if (offset < 0)
-	    DIE(PL_no_aelem, i);
+	    DIE(aTHX_ PL_no_aelem, i);
 	if (++MARK < SP) {
 	    length = SvIVx(*MARK++);
 	    if (length < 0) {
@@ -3198,7 +3198,7 @@ PP(pp_reverse)
 			s += UTF8SKIP(s);
 			down = (char*)(s - 1);
 			if (s > send || !((*down & 0xc0) == 0x80)) {
-			    warn("Malformed UTF-8 character");
+			    Perl_warn(aTHX_ "Malformed UTF-8 character");
 			    break;
 			}
 			while (down > up) {
@@ -3225,7 +3225,7 @@ PP(pp_reverse)
 }
 
 STATIC SV *
-mul128(pTHX_ SV *sv, U8 m)
+S_mul128(pTHX_ SV *sv, U8 m)
 {
   STRLEN          len;
   char           *s = SvPV(sv, len);
@@ -3336,7 +3336,7 @@ PP(pp_unpack)
 		pat++;
 	    }
 	    else
-		croak("'!' allowed only after types %s", natstr);
+		Perl_croak(aTHX_ "'!' allowed only after types %s", natstr);
 	}
 	if (pat >= patend)
 	    len = 1;
@@ -3353,10 +3353,10 @@ PP(pp_unpack)
 	    len = (datumtype != '@');
 	switch(datumtype) {
 	default:
-	    croak("Invalid type in unpack: '%c'", (int)datumtype);
+	    Perl_croak(aTHX_ "Invalid type in unpack: '%c'", (int)datumtype);
 	case ',': /* grandfather in commas but with a warning */
 	    if (commas++ == 0 && ckWARN(WARN_UNSAFE))
-		warner(WARN_UNSAFE, "Invalid type in unpack: '%c'", (int)datumtype);
+		Perl_warner(aTHX_ WARN_UNSAFE, "Invalid type in unpack: '%c'", (int)datumtype);
 	    break;
 	case '%':
 	    if (len == 1 && pat[-1] != '1')
@@ -3369,17 +3369,17 @@ PP(pp_unpack)
 	    break;
 	case '@':
 	    if (len > strend - strbeg)
-		DIE("@ outside of string");
+		DIE(aTHX_ "@ outside of string");
 	    s = strbeg + len;
 	    break;
 	case 'X':
 	    if (len > s - strbeg)
-		DIE("X outside of string");
+		DIE(aTHX_ "X outside of string");
 	    s -= len;
 	    break;
 	case 'x':
 	    if (len > strend - s)
-		DIE("x outside of string");
+		DIE(aTHX_ "x outside of string");
 	    s += len;
 	    break;
 	case 'A':
@@ -3984,7 +3984,7 @@ PP(pp_unpack)
 			char *t;
 			STRLEN n_a;
 
-			sv = newSVpvf("%.*Vu", (int)TYPE_DIGITS(UV), auv);
+			sv = Perl_newSVpvf(aTHX_ "%.*Vu", (int)TYPE_DIGITS(UV), auv);
 			while (s < strend) {
 			    sv = mul128(sv, *s & 0x7f);
 			    if (!(*s++ & 0x80)) {
@@ -4002,7 +4002,7 @@ PP(pp_unpack)
 		    }
 		}
 		if ((s >= strend) && bytes)
-		    croak("Unterminated compressed integer");
+		    Perl_croak(aTHX_ "Unterminated compressed integer");
 	    }
 	    break;
 	case 'P':
@@ -4210,7 +4210,7 @@ PP(pp_unpack)
 }
 
 STATIC void
-doencodes(pTHX_ register SV *sv, register char *s, register I32 len)
+S_doencodes(pTHX_ register SV *sv, register char *s, register I32 len)
 {
     char hunk[5];
 
@@ -4238,7 +4238,7 @@ doencodes(pTHX_ register SV *sv, register char *s, register I32 len)
 }
 
 STATIC SV *
-is_an_int(pTHX_ char *s, STRLEN l)
+S_is_an_int(pTHX_ char *s, STRLEN l)
 {
   STRLEN	 n_a;
   SV             *result = newSVpvn(s, l);
@@ -4288,7 +4288,7 @@ is_an_int(pTHX_ char *s, STRLEN l)
 
 /* pnum must be '\0' terminated */
 STATIC int
-div128(pTHX_ SV *pnum, bool *done)
+S_div128(pTHX_ SV *pnum, bool *done)
 {
   STRLEN          len;
   char           *s = SvPV(pnum, len);
@@ -4369,7 +4369,7 @@ PP(pp_pack)
 		pat++;
 	    }
 	    else
-		croak("'!' allowed only after types %s", natstr);
+		Perl_croak(aTHX_ "'!' allowed only after types %s", natstr);
 	}
 	if (*pat == '*') {
 	    len = strchr("@Xxu", datumtype) ? 0 : items;
@@ -4384,13 +4384,13 @@ PP(pp_pack)
 	    len = 1;
 	switch(datumtype) {
 	default:
-	    croak("Invalid type in pack: '%c'", (int)datumtype);
+	    Perl_croak(aTHX_ "Invalid type in pack: '%c'", (int)datumtype);
 	case ',': /* grandfather in commas but with a warning */
 	    if (commas++ == 0 && ckWARN(WARN_UNSAFE))
-		warner(WARN_UNSAFE, "Invalid type in pack: '%c'", (int)datumtype);
+		Perl_warner(aTHX_ WARN_UNSAFE, "Invalid type in pack: '%c'", (int)datumtype);
 	    break;
 	case '%':
-	    DIE("%% may only be used in unpack");
+	    DIE(aTHX_ "%% may only be used in unpack");
 	case '@':
 	    len -= SvCUR(cat);
 	    if (len > 0)
@@ -4402,7 +4402,7 @@ PP(pp_pack)
 	case 'X':
 	  shrink:
 	    if (SvCUR(cat) < len)
-		DIE("X outside of string");
+		DIE(aTHX_ "X outside of string");
 	    SvCUR(cat) -= len;
 	    *SvEND(cat) = '\0';
 	    break;
@@ -4670,7 +4670,7 @@ PP(pp_pack)
 		adouble = floor(SvNV(fromstr));
 
 		if (adouble < 0)
-		    croak("Cannot compress negative numbers");
+		    Perl_croak(aTHX_ "Cannot compress negative numbers");
 
 		if (
 #ifdef BW_BITS
@@ -4704,7 +4704,7 @@ PP(pp_pack)
 		    /* Copy string and check for compliance */
 		    from = SvPV(fromstr, len);
 		    if ((norm = is_an_int(from, len)) == NULL)
-			croak("can compress only unsigned integer");
+			Perl_croak(aTHX_ "can compress only unsigned integer");
 
 		    New('w', result, len, char);
 		    in = result + len;
@@ -4724,14 +4724,14 @@ PP(pp_pack)
 			double next = floor(adouble / 128);
 			*--in = (unsigned char)(adouble - (next * 128)) | 0x80;
 			if (--in < buf)  /* this cannot happen ;-) */
-			    croak ("Cannot compress integer");
+			    Perl_croak(aTHX_ "Cannot compress integer");
 			adouble = next;
 		    } while (adouble > 0);
 		    buf[sizeof(buf) - 1] &= 0x7f; /* clear continue bit */
 		    sv_catpvn(cat, in, (buf + sizeof(buf)) - in);
 		}
 		else
-		    croak("Cannot compress non integer");
+		    Perl_croak(aTHX_ "Cannot compress non integer");
 	    }
             break;
 	case 'i':
@@ -4831,7 +4831,7 @@ PP(pp_pack)
 		     * gone.
 		     */
 		    if (ckWARN(WARN_UNSAFE) && (SvTEMP(fromstr) || SvPADTMP(fromstr)))
-			warner(WARN_UNSAFE,
+			Perl_warner(aTHX_ WARN_UNSAFE,
 				"Attempt to pack pointer to temporary value");
 		    if (SvPOK(fromstr) || SvNIOK(fromstr))
 			aptr = SvPV(fromstr,n_a);
@@ -4903,7 +4903,7 @@ PP(pp_split)
     pm = (PMOP*)POPs;
 #endif
     if (!pm || !s)
-	DIE("panic: do_split");
+	DIE(aTHX_ "panic: do_split");
     rx = pm->op_pmregexp;
 
     TAINT_IF((pm->op_pmflags & PMf_LOCALE) &&
@@ -5037,7 +5037,7 @@ PP(pp_split)
     else {
 	maxiters += (strend - s) * rx->nparens;
 	while (s < strend && --limit &&
-	       CALLREGEXEC(rx, s, strend, orig, 1, sv, NULL, 0))
+	       CALLREGEXEC(aTHX_ rx, s, strend, orig, 1, sv, NULL, 0))
 	{
 	    TAINT_IF(RX_MATCH_TAINTED(rx));
 	    if (RX_MATCH_COPIED(rx) && rx->subbeg != orig) {
@@ -5075,7 +5075,7 @@ PP(pp_split)
     LEAVE_SCOPE(oldsave);
     iters = (SP - PL_stack_base) - base;
     if (iters > maxiters)
-	DIE("Split loop");
+	DIE(aTHX_ "Split loop");
 
     /* keep field after final delim? */
     if (s < strend || (iters && origlimit)) {
@@ -5143,10 +5143,10 @@ Perl_unlock_condpair(pTHX_ void *svv)
     MAGIC *mg = mg_find((SV*)svv, 'm');
 
     if (!mg)
-	croak("panic: unlock_condpair unlocking non-mutex");
+	Perl_croak(aTHX_ "panic: unlock_condpair unlocking non-mutex");
     MUTEX_LOCK(MgMUTEXP(mg));
     if (MgOWNER(mg) != thr)
-	croak("panic: unlock_condpair unlocking mutex that we don't own");
+	Perl_croak(aTHX_ "panic: unlock_condpair unlocking mutex that we don't own");
     MgOWNER(mg) = 0;
     COND_SIGNAL(MgOWNERCONDP(mg));
     DEBUG_S(PerlIO_printf(PerlIO_stderr(), "0x%lx: unlock 0x%lx\n",
@@ -5177,7 +5177,7 @@ PP(pp_lock)
 	DEBUG_S(PerlIO_printf(PerlIO_stderr(), "0x%lx: pp_lock lock 0x%lx\n",
 			      (unsigned long)thr, (unsigned long)sv);)
 	MUTEX_UNLOCK(MgMUTEXP(mg));
-	save_destructor(unlock_condpair, sv);
+	save_destructor(Perl_unlock_condpair, sv);
     }
 #endif /* USE_THREADS */
     if (SvTYPE(retsv) == SVt_PVAV || SvTYPE(retsv) == SVt_PVHV
@@ -5199,6 +5199,6 @@ PP(pp_threadsv)
 	PUSHs(THREADSV(PL_op->op_targ));
     RETURN;
 #else
-    DIE("tried to access per-thread data in non-threaded perl");
+    DIE(aTHX_ "tried to access per-thread data in non-threaded perl");
 #endif /* USE_THREADS */
 }

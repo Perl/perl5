@@ -25,7 +25,7 @@
 #endif
 
 STATIC HE*
-new_he(pTHX)
+S_new_he(pTHX)
 {
     HE* he;
     LOCK_SV_MUTEX;
@@ -38,7 +38,7 @@ new_he(pTHX)
 }
 
 STATIC void
-del_he(pTHX_ HE *p)
+S_del_he(pTHX_ HE *p)
 {
     LOCK_SV_MUTEX;
     HeNEXT(p) = (HE*)PL_he_root;
@@ -47,7 +47,7 @@ del_he(pTHX_ HE *p)
 }
 
 STATIC void
-more_he(pTHX)
+S_more_he(pTHX)
 {
     register HE* he;
     register HE* heend;
@@ -62,7 +62,7 @@ more_he(pTHX)
 }
 
 STATIC HEK *
-save_hek(pTHX_ const char *str, I32 len, U32 hash)
+S_save_hek(pTHX_ const char *str, I32 len, U32 hash)
 {
     char *k;
     register HEK *hek;
@@ -253,7 +253,7 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 }
 
 STATIC void
-hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store)
+S_hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store)
 {
     MAGIC *mg = SvMAGIC(hv);
     *needs_copy = FALSE;
@@ -700,7 +700,7 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 }
 
 STATIC void
-hsplit(pTHX_ HV *hv)
+S_hsplit(pTHX_ HV *hv)
 {
     register XPVHV* xhv = (XPVHV*)SvANY(hv);
     I32 oldsize = (I32) xhv->xhv_max + 1; /* sic(k) */
@@ -957,7 +957,7 @@ Perl_hv_clear(pTHX_ HV *hv)
 }
 
 STATIC void
-hfreeentries(pTHX_ HV *hv)
+S_hfreeentries(pTHX_ HV *hv)
 {
     register HE **array;
     register HE *entry;
@@ -1018,7 +1018,7 @@ Perl_hv_iterinit(pTHX_ HV *hv)
     HE *entry;
 
     if (!hv)
-	croak("Bad hash");
+	Perl_croak(aTHX_ "Bad hash");
     xhv = (XPVHV*)SvANY(hv);
     entry = xhv->xhv_eiter;
     if (entry && HvLAZYDEL(hv)) {	/* was deleted earlier? */
@@ -1039,7 +1039,7 @@ Perl_hv_iternext(pTHX_ HV *hv)
     MAGIC* mg;
 
     if (!hv)
-	croak("Bad hash");
+	Perl_croak(aTHX_ "Bad hash");
     xhv = (XPVHV*)SvANY(hv);
     oldentry = entry = xhv->xhv_eiter;
 
@@ -1205,7 +1205,7 @@ Perl_unsharepvn(pTHX_ const char *str, I32 len, U32 hash)
     UNLOCK_STRTAB_MUTEX;
     
     if (!found)
-	warn("Attempt to free non-existent shared string");    
+	Perl_warn(aTHX_ "Attempt to free non-existent shared string");    
 }
 
 /* get a (constant) string ptr from the global string table

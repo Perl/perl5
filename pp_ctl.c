@@ -101,7 +101,7 @@ PP(pp_regcomp)
 		PL_reginterp_cnt = I32_MAX; /* Mark as safe.  */
 
 	    pm->op_pmflags = pm->op_pmpermflags;	/* reset case sensitivity */
-	    pm->op_pmregexp = CALLREGCOMP(t, t + len, pm);
+	    pm->op_pmregexp = CALLREGCOMP(aTHX_ t, t + len, pm);
 	    PL_reginterp_cnt = 0;		/* XXXX Be extra paranoid - needed
 					   inside tie/overload accessors.  */
 	}
@@ -143,14 +143,14 @@ PP(pp_substcont)
 
     if (cx->sb_iters++) {
 	if (cx->sb_iters > cx->sb_maxiters)
-	    DIE("Substitution loop");
+	    DIE(aTHX_ "Substitution loop");
 
 	if (!(cx->sb_rxtainted & 2) && SvTAINTED(TOPs))
 	    cx->sb_rxtainted |= 2;
 	sv_catsv(dstr, POPs);
 
 	/* Are we done */
-	if (cx->sb_once || !CALLREGEXEC(rx, s, cx->sb_strend, orig,
+	if (cx->sb_once || !CALLREGEXEC(aTHX_ rx, s, cx->sb_strend, orig,
 				     s == m, cx->sb_targ, NULL,
 				     ((cx->sb_rflags & REXEC_COPY_STR)
 				      ? (REXEC_IGNOREPOS|REXEC_NOT_FIRST)
@@ -350,7 +350,7 @@ PP(pp_formline)
 	    else {
 		sv = &PL_sv_no;
 		if (ckWARN(WARN_SYNTAX))
-		    warner(WARN_SYNTAX, "Not enough format arguments");
+		    Perl_warner(aTHX_ WARN_SYNTAX, "Not enough format arguments");
 	    }
 	    break;
 
@@ -593,7 +593,7 @@ PP(pp_formline)
 		    if (lines == 200) {
 			arg = t - linemark;
 			if (strnEQ(linemark, linemark - arg, arg))
-			    DIE("Runaway format");
+			    DIE(aTHX_ "Runaway format");
 		    }
 		    FmLINES(PL_formtarget) = lines;
 		    SP = ORIGMARK;
@@ -653,8 +653,8 @@ PP(pp_grepstart)
 	RETURNOP(PL_op->op_next->op_next);
     }
     PL_stack_sp = PL_stack_base + *PL_markstack_ptr + 1;
-    pp_pushmark(ARGS);				/* push dst */
-    pp_pushmark(ARGS);				/* push src */
+    pp_pushmark();				/* push dst */
+    pp_pushmark();				/* push src */
     ENTER;					/* enter outer scope */
 
     SAVETMPS;
@@ -669,13 +669,13 @@ PP(pp_grepstart)
 
     PUTBACK;
     if (PL_op->op_type == OP_MAPSTART)
-	pp_pushmark(ARGS);			/* push top */
+	pp_pushmark();			/* push top */
     return ((LOGOP*)PL_op->op_next)->op_other;
 }
 
 PP(pp_mapstart)
 {
-    DIE("panic: mapstart");	/* uses grepstart */
+    DIE(aTHX_ "panic: mapstart");	/* uses grepstart */
 }
 
 PP(pp_mapwhile)
@@ -742,7 +742,7 @@ PP(pp_mapwhile)
 }
 
 STATIC I32
-sv_ncmp(pTHX_ SV *a, SV *b)
+S_sv_ncmp(pTHX_ SV *a, SV *b)
 {
     double nv1 = SvNV(a);
     double nv2 = SvNV(b);
@@ -750,7 +750,7 @@ sv_ncmp(pTHX_ SV *a, SV *b)
 }
 
 STATIC I32
-sv_i_ncmp(pTHX_ SV *a, SV *b)
+S_sv_i_ncmp(pTHX_ SV *a, SV *b)
 {
     IV iv1 = SvIV(a);
     IV iv2 = SvIV(b);
@@ -768,7 +768,7 @@ sv_i_ncmp(pTHX_ SV *a, SV *b)
 	} STMT_END
 
 STATIC I32
-amagic_ncmp(pTHX_ register SV *a, register SV *b)
+S_amagic_ncmp(pTHX_ register SV *a, register SV *b)
 {
     SV *tmpsv;
     tryCALL_AMAGICbin(a,b,ncmp,&tmpsv);
@@ -790,7 +790,7 @@ amagic_ncmp(pTHX_ register SV *a, register SV *b)
 }
 
 STATIC I32
-amagic_i_ncmp(pTHX_ register SV *a, register SV *b)
+S_amagic_i_ncmp(pTHX_ register SV *a, register SV *b)
 {
     SV *tmpsv;
     tryCALL_AMAGICbin(a,b,ncmp,&tmpsv);
@@ -812,7 +812,7 @@ amagic_i_ncmp(pTHX_ register SV *a, register SV *b)
 }
 
 STATIC I32
-amagic_cmp(pTHX_ register SV *str1, register SV *str2)
+S_amagic_cmp(pTHX_ register SV *str1, register SV *str2)
 {
     SV *tmpsv;
     tryCALL_AMAGICbin(str1,str2,scmp,&tmpsv);
@@ -834,7 +834,7 @@ amagic_cmp(pTHX_ register SV *str1, register SV *str2)
 }
 
 STATIC I32
-amagic_cmp_locale(pTHX_ register SV *str1, register SV *str2)
+S_amagic_cmp_locale(pTHX_ register SV *str1, register SV *str2)
 {
     SV *tmpsv;
     tryCALL_AMAGICbin(str1,str2,scmp,&tmpsv);
@@ -890,16 +890,16 @@ PP(pp_sort)
 		    SV *tmpstr = sv_newmortal();
 		    gv_efullname3(tmpstr, gv, Nullch);
 		    if (cv && CvXSUB(cv))
-			DIE("Xsub \"%s\" called in sort", SvPVX(tmpstr));
-		    DIE("Undefined sort subroutine \"%s\" called",
+			DIE(aTHX_ "Xsub \"%s\" called in sort", SvPVX(tmpstr));
+		    DIE(aTHX_ "Undefined sort subroutine \"%s\" called",
 			SvPVX(tmpstr));
 		}
 		if (cv) {
 		    if (CvXSUB(cv))
-			DIE("Xsub called in sort");
-		    DIE("Undefined subroutine in sort");
+			DIE(aTHX_ "Xsub called in sort");
+		    DIE(aTHX_ "Undefined subroutine in sort");
 		}
-		DIE("Not a CODE reference in sort");
+		DIE(aTHX_ "Not a CODE reference in sort");
 	    }
 	    PL_sortcop = CvSTART(cv);
 	    SAVESPTR(CvROOT(cv)->op_ppaddr);
@@ -960,7 +960,7 @@ PP(pp_sort)
 		    (void)SvREFCNT_inc(cv); /* in preparation for POPSUB */
 	    }
 	    PL_sortcxix = cxstack_ix;
-	    qsortsv((myorigmark+1), max, FUNC_NAME_TO_PTR(sortcv));
+	    qsortsv((myorigmark+1), max, FUNC_NAME_TO_PTR(S_sortcv));
 
 	    POPBLOCK(cx,PL_curpm);
 	    PL_stack_sp = newsp;
@@ -975,18 +975,18 @@ PP(pp_sort)
  		    (PL_op->op_private & OPpSORT_NUMERIC)
 			? ( (PL_op->op_private & OPpSORT_INTEGER)
 			    ? ( overloading
-				? FUNC_NAME_TO_PTR(amagic_i_ncmp)
-				: FUNC_NAME_TO_PTR(sv_i_ncmp))
+				? FUNC_NAME_TO_PTR(S_amagic_i_ncmp)
+				: FUNC_NAME_TO_PTR(S_sv_i_ncmp))
 			    : ( overloading
-				? FUNC_NAME_TO_PTR(amagic_ncmp)
-				: FUNC_NAME_TO_PTR(sv_ncmp)))
+				? FUNC_NAME_TO_PTR(S_amagic_ncmp)
+				: FUNC_NAME_TO_PTR(S_sv_ncmp)))
 			: ( (PL_op->op_private & OPpLOCALE)
 			    ? ( overloading
-				? FUNC_NAME_TO_PTR(amagic_cmp_locale)
-				: FUNC_NAME_TO_PTR(sv_cmp_locale))
+				? FUNC_NAME_TO_PTR(S_amagic_cmp_locale)
+				: FUNC_NAME_TO_PTR(Perl_sv_cmp_locale))
 			    : ( overloading
-				? FUNC_NAME_TO_PTR(amagic_cmp)
-		    : FUNC_NAME_TO_PTR(sv_cmp) )));
+				? FUNC_NAME_TO_PTR(S_amagic_cmp)
+		    : FUNC_NAME_TO_PTR(Perl_sv_cmp) )));
 	    if (PL_op->op_private & OPpSORT_REVERSE) {
 		SV **p = ORIGMARK+1;
 		SV **q = ORIGMARK+max;
@@ -1066,7 +1066,7 @@ PP(pp_flop)
 	  (looks_like_number(left) && *SvPVX(left) != '0') )
 	{
 	    if (SvNV(left) < IV_MIN || SvNV(right) > IV_MAX)
-		croak("Range iterator outside integer range");
+		Perl_croak(aTHX_ "Range iterator outside integer range");
 	    i = SvIV(left);
 	    max = SvIV(right);
 	    if (max >= i) {
@@ -1116,7 +1116,7 @@ PP(pp_flop)
 /* Control. */
 
 STATIC I32
-dopoptolabel(pTHX_ char *label)
+S_dopoptolabel(pTHX_ char *label)
 {
     dTHR;
     register I32 i;
@@ -1127,32 +1127,32 @@ dopoptolabel(pTHX_ char *label)
 	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
 	    if (ckWARN(WARN_UNSAFE))
-		warner(WARN_UNSAFE, "Exiting substitution via %s", 
+		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting substitution via %s", 
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_SUB:
 	    if (ckWARN(WARN_UNSAFE))
-		warner(WARN_UNSAFE, "Exiting subroutine via %s", 
+		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting subroutine via %s", 
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_EVAL:
 	    if (ckWARN(WARN_UNSAFE))
-		warner(WARN_UNSAFE, "Exiting eval via %s", 
+		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting eval via %s", 
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_NULL:
 	    if (ckWARN(WARN_UNSAFE))
-		warner(WARN_UNSAFE, "Exiting pseudo-block via %s", 
+		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting pseudo-block via %s", 
 			PL_op_name[PL_op->op_type]);
 	    return -1;
 	case CXt_LOOP:
 	    if (!cx->blk_loop.label ||
 	      strNE(label, cx->blk_loop.label) ) {
-		DEBUG_l(deb("(Skipping label #%ld %s)\n",
+		DEBUG_l(Perl_deb(aTHX_ "(Skipping label #%ld %s)\n",
 			(long)i, cx->blk_loop.label));
 		continue;
 	    }
-	    DEBUG_l( deb("(Found label #%ld %s)\n", (long)i, label));
+	    DEBUG_l( Perl_deb(aTHX_ "(Found label #%ld %s)\n", (long)i, label));
 	    return i;
 	}
     }
@@ -1184,21 +1184,21 @@ Perl_block_gimme(pTHX)
     case G_ARRAY:
 	return G_ARRAY;
     default:
-	croak("panic: bad gimme: %d\n", cxstack[cxix].blk_gimme);
+	Perl_croak(aTHX_ "panic: bad gimme: %d\n", cxstack[cxix].blk_gimme);
 	/* NOTREACHED */
 	return 0;
     }
 }
 
 STATIC I32
-dopoptosub(pTHX_ I32 startingblock)
+S_dopoptosub(pTHX_ I32 startingblock)
 {
     dTHR;
     return dopoptosub_at(cxstack, startingblock);
 }
 
 STATIC I32
-dopoptosub_at(pTHX_ PERL_CONTEXT *cxstk, I32 startingblock)
+S_dopoptosub_at(pTHX_ PERL_CONTEXT *cxstk, I32 startingblock)
 {
     dTHR;
     I32 i;
@@ -1210,7 +1210,7 @@ dopoptosub_at(pTHX_ PERL_CONTEXT *cxstk, I32 startingblock)
 	    continue;
 	case CXt_EVAL:
 	case CXt_SUB:
-	    DEBUG_l( deb("(Found sub #%ld)\n", (long)i));
+	    DEBUG_l( Perl_deb(aTHX_ "(Found sub #%ld)\n", (long)i));
 	    return i;
 	}
     }
@@ -1218,7 +1218,7 @@ dopoptosub_at(pTHX_ PERL_CONTEXT *cxstk, I32 startingblock)
 }
 
 STATIC I32
-dopoptoeval(pTHX_ I32 startingblock)
+S_dopoptoeval(pTHX_ I32 startingblock)
 {
     dTHR;
     I32 i;
@@ -1229,7 +1229,7 @@ dopoptoeval(pTHX_ I32 startingblock)
 	default:
 	    continue;
 	case CXt_EVAL:
-	    DEBUG_l( deb("(Found eval #%ld)\n", (long)i));
+	    DEBUG_l( Perl_deb(aTHX_ "(Found eval #%ld)\n", (long)i));
 	    return i;
 	}
     }
@@ -1237,7 +1237,7 @@ dopoptoeval(pTHX_ I32 startingblock)
 }
 
 STATIC I32
-dopoptoloop(pTHX_ I32 startingblock)
+S_dopoptoloop(pTHX_ I32 startingblock)
 {
     dTHR;
     I32 i;
@@ -1247,26 +1247,26 @@ dopoptoloop(pTHX_ I32 startingblock)
 	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
 	    if (ckWARN(WARN_UNSAFE))
-		warner(WARN_UNSAFE, "Exiting substitution via %s", 
+		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting substitution via %s", 
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_SUB:
 	    if (ckWARN(WARN_UNSAFE))
-		warner(WARN_UNSAFE, "Exiting subroutine via %s", 
+		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting subroutine via %s", 
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_EVAL:
 	    if (ckWARN(WARN_UNSAFE))
-		warner(WARN_UNSAFE, "Exiting eval via %s", 
+		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting eval via %s", 
 			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_NULL:
 	    if (ckWARN(WARN_UNSAFE))
-		warner(WARN_UNSAFE, "Exiting pseudo-block via %s", 
+		Perl_warner(aTHX_ WARN_UNSAFE, "Exiting pseudo-block via %s", 
 			PL_op_name[PL_op->op_type]);
 	    return -1;
 	case CXt_LOOP:
-	    DEBUG_l( deb("(Found loop #%ld)\n", (long)i));
+	    DEBUG_l( Perl_deb(aTHX_ "(Found loop #%ld)\n", (long)i));
 	    return i;
 	}
     }
@@ -1316,7 +1316,7 @@ Perl_dounwind(pTHX_ I32 cxix)
  * relying on the incidental global values.
  */
 STATIC void
-free_closures(pTHX)
+S_free_closures(pTHX)
 {
     dTHR;
     SV **svp = AvARRAY(PL_comppad_name);
@@ -1371,7 +1371,7 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 			sv_catpvn(err, message, msglen);
 			if (ckWARN(WARN_UNSAFE)) {
 			    STRLEN start = SvCUR(err)-msglen-sizeof(prefix)+1;
-			    warner(WARN_UNSAFE, SvPVX(err)+start);
+			    Perl_warner(aTHX_ WARN_UNSAFE, SvPVX(err)+start);
 			}
 		    }
 		    sv_inc(*svp);
@@ -1410,7 +1410,7 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 
 	    if (optype == OP_REQUIRE) {
 		char* msg = SvPVx(ERRSV, n_a);
-		DIE("%s", *msg ? msg : "Compilation failed in require");
+		DIE(aTHX_ "%s", *msg ? msg : "Compilation failed in require");
 	    }
 	    return pop_return();
 	}
@@ -1577,7 +1577,7 @@ PP(pp_caller)
 }
 
 STATIC I32
-sortcv(pTHX_ SV *a, SV *b)
+S_sortcv(pTHX_ SV *a, SV *b)
 {
     dTHR;
     I32 oldsaveix = PL_savestack_ix;
@@ -1587,11 +1587,11 @@ sortcv(pTHX_ SV *a, SV *b)
     GvSV(PL_secondgv) = b;
     PL_stack_sp = PL_stack_base;
     PL_op = PL_sortcop;
-    CALLRUNOPS();
+    CALLRUNOPS(aTHX);
     if (PL_stack_sp != PL_stack_base + 1)
-	croak("Sort subroutine didn't return single value");
+	Perl_croak(aTHX_ "Sort subroutine didn't return single value");
     if (!SvNIOKp(*PL_stack_sp))
-	croak("Sort subroutine didn't return a numeric value");
+	Perl_croak(aTHX_ "Sort subroutine didn't return a numeric value");
     result = SvIV(*PL_stack_sp);
     while (PL_scopestack_ix > oldscopeix) {
 	LEAVE;
@@ -1639,7 +1639,7 @@ PP(pp_dbstate)
 	gv = PL_DBgv;
 	cv = GvCV(gv);
 	if (!cv)
-	    DIE("No DB::DB routine defined");
+	    DIE(aTHX_ "No DB::DB routine defined");
 
 	if (CvDEPTH(cv) >= 1 && !(PL_debug & (1<<30))) /* don't do recursive DB::DB call */
 	    return NORMAL;
@@ -1712,7 +1712,7 @@ PP(pp_enteriter)
 		(looks_like_number(sv) && *SvPVX(sv) != '0')) {
 		 if (SvNV(sv) < IV_MIN ||
 		     SvNV((SV*)cx->blk_loop.iterary) >= IV_MAX)
-		     croak("Range iterator outside integer range");
+		     Perl_croak(aTHX_ "Range iterator outside integer range");
 		 cx->blk_loop.iterix = SvIV(sv);
 		 cx->blk_loop.itermax = SvIV((SV*)cx->blk_loop.iterary);
 	    }
@@ -1810,7 +1810,7 @@ PP(pp_return)
 
     cxix = dopoptosub(cxstack_ix);
     if (cxix < 0)
-	DIE("Can't return outside a subroutine");
+	DIE(aTHX_ "Can't return outside a subroutine");
     if (cxix < cxstack_ix)
 	dounwind(cxix);
 
@@ -1831,11 +1831,11 @@ PP(pp_return)
 	    /* Unassume the success we assumed earlier. */
 	    char *name = cx->blk_eval.old_name;
 	    (void)hv_delete(GvHVn(PL_incgv), name, strlen(name), G_DISCARD);
-	    DIE("%s did not return a true value", name);
+	    DIE(aTHX_ "%s did not return a true value", name);
 	}
 	break;
     default:
-	DIE("panic: return");
+	DIE(aTHX_ "panic: return");
     }
 
     TAINT_NOT;
@@ -1895,12 +1895,12 @@ PP(pp_last)
     if (PL_op->op_flags & OPf_SPECIAL) {
 	cxix = dopoptoloop(cxstack_ix);
 	if (cxix < 0)
-	    DIE("Can't \"last\" outside a block");
+	    DIE(aTHX_ "Can't \"last\" outside a block");
     }
     else {
 	cxix = dopoptolabel(cPVOP->op_pv);
 	if (cxix < 0)
-	    DIE("Label not found for \"last %s\"", cPVOP->op_pv);
+	    DIE(aTHX_ "Label not found for \"last %s\"", cPVOP->op_pv);
     }
     if (cxix < cxstack_ix)
 	dounwind(cxix);
@@ -1922,7 +1922,7 @@ PP(pp_last)
 	nextop = pop_return();
 	break;
     default:
-	DIE("panic: last");
+	DIE(aTHX_ "panic: last");
     }
 
     TAINT_NOT;
@@ -1968,12 +1968,12 @@ PP(pp_next)
     if (PL_op->op_flags & OPf_SPECIAL) {
 	cxix = dopoptoloop(cxstack_ix);
 	if (cxix < 0)
-	    DIE("Can't \"next\" outside a block");
+	    DIE(aTHX_ "Can't \"next\" outside a block");
     }
     else {
 	cxix = dopoptolabel(cPVOP->op_pv);
 	if (cxix < 0)
-	    DIE("Label not found for \"next %s\"", cPVOP->op_pv);
+	    DIE(aTHX_ "Label not found for \"next %s\"", cPVOP->op_pv);
     }
     if (cxix < cxstack_ix)
 	dounwind(cxix);
@@ -1993,12 +1993,12 @@ PP(pp_redo)
     if (PL_op->op_flags & OPf_SPECIAL) {
 	cxix = dopoptoloop(cxstack_ix);
 	if (cxix < 0)
-	    DIE("Can't \"redo\" outside a block");
+	    DIE(aTHX_ "Can't \"redo\" outside a block");
     }
     else {
 	cxix = dopoptolabel(cPVOP->op_pv);
 	if (cxix < 0)
-	    DIE("Label not found for \"redo %s\"", cPVOP->op_pv);
+	    DIE(aTHX_ "Label not found for \"redo %s\"", cPVOP->op_pv);
     }
     if (cxix < cxstack_ix)
 	dounwind(cxix);
@@ -2010,14 +2010,14 @@ PP(pp_redo)
 }
 
 STATIC OP *
-dofindlabel(pTHX_ OP *o, char *label, OP **opstack, OP **oplimit)
+S_dofindlabel(pTHX_ OP *o, char *label, OP **opstack, OP **oplimit)
 {
     OP *kid;
     OP **ops = opstack;
     static char too_deep[] = "Target of goto is too deeply nested";
 
     if (ops >= oplimit)
-	croak(too_deep);
+	Perl_croak(aTHX_ too_deep);
     if (o->op_type == OP_LEAVE ||
 	o->op_type == OP_SCOPE ||
 	o->op_type == OP_LEAVELOOP ||
@@ -2025,7 +2025,7 @@ dofindlabel(pTHX_ OP *o, char *label, OP **opstack, OP **oplimit)
     {
 	*ops++ = cUNOPo->op_first;
 	if (ops >= oplimit)
-	    croak(too_deep);
+	    Perl_croak(aTHX_ too_deep);
     }
     *ops = 0;
     if (o->op_flags & OPf_KIDS) {
@@ -2054,7 +2054,7 @@ dofindlabel(pTHX_ OP *o, char *label, OP **opstack, OP **oplimit)
 
 PP(pp_dump)
 {
-    return pp_goto(ARGS);
+    return pp_goto();
     /*NOTREACHED*/
 }
 
@@ -2100,20 +2100,20 @@ PP(pp_goto)
 			goto retry;
 		    tmpstr = sv_newmortal();
 		    gv_efullname3(tmpstr, gv, Nullch);
-		    DIE("Goto undefined subroutine &%s",SvPVX(tmpstr));
+		    DIE(aTHX_ "Goto undefined subroutine &%s",SvPVX(tmpstr));
 		}
-		DIE("Goto undefined subroutine");
+		DIE(aTHX_ "Goto undefined subroutine");
 	    }
 
 	    /* First do some returnish stuff. */
 	    cxix = dopoptosub(cxstack_ix);
 	    if (cxix < 0)
-		DIE("Can't goto subroutine outside a subroutine");
+		DIE(aTHX_ "Can't goto subroutine outside a subroutine");
 	    if (cxix < cxstack_ix)
 		dounwind(cxix);
 	    TOPBLOCK(cx);
 	    if (CxTYPE(cx) == CXt_EVAL && cx->blk_eval.old_op_type == OP_ENTEREVAL) 
-		DIE("Can't goto subroutine from an eval-string");
+		DIE(aTHX_ "Can't goto subroutine from an eval-string");
 	    mark = PL_stack_sp;
 	    if (CxTYPE(cx) == CXt_SUB &&
 		cx->blk_sub.hasargs) {   /* put @_ back onto stack */
@@ -2179,7 +2179,7 @@ PP(pp_goto)
 		    PL_stack_sp--;		/* There is no cv arg. */
 		    /* Push a mark for the start of arglist */
 		    PUSHMARK(mark); 
-		    (void)(*CvXSUB(cv))(cv _PERL_OBJECT_THIS);
+		    (void)(*CvXSUB(cv))(aTHX_ cv);
 		    /* Pop the current context like a decent sub should */
 		    POPBLOCK(cx, PL_curpm);
 		    /* Do _not_ use PUTBACK, keep the XSUB's return stack! */
@@ -2328,12 +2328,12 @@ PP(pp_goto)
 	else {
 	    label = SvPV(sv,n_a);
 	    if (!(do_dump || *label))
-		DIE(must_have_label);
+		DIE(aTHX_ must_have_label);
 	}
     }
     else if (PL_op->op_flags & OPf_SPECIAL) {
 	if (! do_dump)
-	    DIE(must_have_label);
+	    DIE(aTHX_ must_have_label);
     }
     else
 	label = cPVOP->op_pv;
@@ -2369,10 +2369,10 @@ PP(pp_goto)
 		}
 		/* FALL THROUGH */
 	    case CXt_NULL:
-		DIE("Can't \"goto\" outside a block");
+		DIE(aTHX_ "Can't \"goto\" outside a block");
 	    default:
 		if (ix)
-		    DIE("panic: goto");
+		    DIE(aTHX_ "panic: goto");
 		gotoprobe = PL_main_root;
 		break;
 	    }
@@ -2383,7 +2383,7 @@ PP(pp_goto)
 	    PL_lastgotoprobe = gotoprobe;
 	}
 	if (!retop)
-	    DIE("Can't find label %s", label);
+	    DIE(aTHX_ "Can't find label %s", label);
 
 	/* pop unwanted frames */
 
@@ -2407,9 +2407,9 @@ PP(pp_goto)
 		/* Eventually we may want to stack the needed arguments
 		 * for each op.  For now, we punt on the hard ones. */
 		if (PL_op->op_type == OP_ENTERITER)
-		    DIE("Can't \"goto\" into the middle of a foreach loop",
+		    DIE(aTHX_ "Can't \"goto\" into the middle of a foreach loop",
 			label);
-		(CALLOP->op_ppaddr)(ARGS);
+		(CALLOP->op_ppaddr)(aTHX);
 	    }
 	    PL_op = oldop;
 	}
@@ -2494,7 +2494,7 @@ PP(pp_cswitch)
 /* Eval. */
 
 STATIC void
-save_lines(pTHX_ AV *array, SV *sv)
+S_save_lines(pTHX_ AV *array, SV *sv)
 {
     register char *s = SvPVX(sv);
     register char *send = SvPVX(sv) + SvCUR(sv);
@@ -2518,14 +2518,14 @@ save_lines(pTHX_ AV *array, SV *sv)
 }
 
 STATIC void *
-docatch_body(pTHX_ va_list args)
+S_docatch_body(pTHX_ va_list args)
 {
-    CALLRUNOPS();
+    CALLRUNOPS(aTHX);
     return NULL;
 }
 
 STATIC OP *
-docatch(pTHX_ OP *o)
+S_docatch(pTHX_ OP *o)
 {
     dTHR;
     int ret;
@@ -2536,7 +2536,7 @@ docatch(pTHX_ OP *o)
 #endif
     PL_op = o;
  redo_body:
-    CALLPROTECT(&ret, FUNC_NAME_TO_PTR(docatch_body));
+    CALLPROTECT(aTHX_ &ret, FUNC_NAME_TO_PTR(S_docatch_body));
     switch (ret) {
     case 0:
 	break;
@@ -2625,7 +2625,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
 
 /* With USE_THREADS, eval_owner must be held on entry to doeval */
 STATIC OP *
-doeval(pTHX_ int gimme, OP** startop)
+S_doeval(pTHX_ int gimme, OP** startop)
 {
     dSP;
     OP *saveop = PL_op;
@@ -2738,13 +2738,13 @@ doeval(pTHX_ int gimme, OP** startop)
 	LEAVE;
 	if (optype == OP_REQUIRE) {
 	    char* msg = SvPVx(ERRSV, n_a);
-	    DIE("%s", *msg ? msg : "Compilation failed in require");
+	    DIE(aTHX_ "%s", *msg ? msg : "Compilation failed in require");
 	} else if (startop) {
 	    char* msg = SvPVx(ERRSV, n_a);
 
 	    POPBLOCK(cx,PL_curpm);
 	    POPEVAL(cx);
-	    croak("%sCompilation failed in regexp", (*msg ? msg : "Unknown error\n"));
+	    Perl_croak(aTHX_ "%sCompilation failed in regexp", (*msg ? msg : "Unknown error\n"));
 	}
 	SvREFCNT_dec(PL_rs);
 	PL_rs = SvREFCNT_inc(PL_nrs);
@@ -2802,13 +2802,13 @@ doeval(pTHX_ int gimme, OP** startop)
 }
 
 STATIC PerlIO *
-doopen_pmc(pTHX_ const char *name, const char *mode)
+S_doopen_pmc(pTHX_ const char *name, const char *mode)
 {
     STRLEN namelen = strlen(name);
     PerlIO *fp;
 
     if (namelen > 3 && strcmp(name + namelen - 3, ".pm") == 0) {
-	SV *pmcsv = newSVpvf("%s%c", name, 'c');
+	SV *pmcsv = Perl_newSVpvf(aTHX_ "%s%c", name, 'c');
 	char *pmc = SvPV_nolen(pmcsv);
 	Stat_t pmstat;
 	Stat_t pmcstat;
@@ -2851,13 +2851,13 @@ PP(pp_require)
     if (SvNIOKp(sv) && !SvPOKp(sv)) {
 	SET_NUMERIC_STANDARD();
 	if (atof(PL_patchlevel) + 0.00000999 < SvNV(sv))
-	    DIE("Perl %s required--this is only version %s, stopped",
+	    DIE(aTHX_ "Perl %s required--this is only version %s, stopped",
 		SvPV(sv,n_a),PL_patchlevel);
 	RETPUSHYES;
     }
     name = SvPV(sv, len);
     if (!(name && len > 0 && *name))
-	DIE("Null filename used");
+	DIE(aTHX_ "Null filename used");
     TAINT_PROPER("require");
     if (PL_op->op_type == OP_REQUIRE &&
       (svp = hv_fetch(GvHVn(PL_incgv), name, len, 0)) &&
@@ -2903,7 +2903,7 @@ PP(pp_require)
 		sv_setpv(namesv, unixdir);
 		sv_catpv(namesv, unixname);
 #else
-		sv_setpvf(namesv, "%s/%s", dir, name);
+		Perl_sv_setpvf(aTHX_ namesv, "%s/%s", dir, name);
 #endif
 		TAINT_PROPER("require");
 		tryname = SvPVX(namesv);
@@ -2935,14 +2935,14 @@ PP(pp_require)
 		sv_catpv(msg, " (@INC contains:");
 		for (i = 0; i <= AvFILL(ar); i++) {
 		    char *dir = SvPVx(*av_fetch(ar, i, TRUE), n_a);
-		    sv_setpvf(dirmsgsv, " %s", dir);
+		    Perl_sv_setpvf(aTHX_ dirmsgsv, " %s", dir);
 		    sv_catsv(msg, dirmsgsv);
 		}
 		sv_catpvn(msg, ")", 1);
 		SvREFCNT_dec(dirmsgsv);
 		msgstr = SvPV_nolen(msg);
 	    }
-	    DIE("Can't locate %s", msgstr);
+	    DIE(aTHX_ "Can't locate %s", msgstr);
 	}
 
 	RETPUSHUNDEF;
@@ -2992,7 +2992,7 @@ PP(pp_require)
 
 PP(pp_dofile)
 {
-    return pp_require(ARGS);
+    return pp_require();
 }
 
 PP(pp_entereval)
@@ -3119,7 +3119,7 @@ PP(pp_leaveeval)
 	/* Unassume the success we assumed earlier. */
 	char *name = cx->blk_eval.old_name;
 	(void)hv_delete(GvHVn(PL_incgv), name, strlen(name), G_DISCARD);
-	retop = die("%s did not return a true value", name);
+	retop = Perl_die(aTHX_ "%s did not return a true value", name);
 	/* die_where() did LEAVE, or we won't be here */
     }
     else {
@@ -3199,7 +3199,7 @@ PP(pp_leavetry)
 }
 
 STATIC void
-doparseform(pTHX_ SV *sv)
+S_doparseform(pTHX_ SV *sv)
 {
     STRLEN len;
     register char *s = SvPV_force(sv, len);
@@ -3216,7 +3216,7 @@ doparseform(pTHX_ SV *sv)
     bool ischop;
 
     if (len == 0)
-	croak("Null picture in formline");
+	Perl_croak(aTHX_ "Null picture in formline");
     
     New(804, fops, (send - s)*3+10, U16);    /* Almost certainly too long... */
     fpc = fops;
@@ -3569,7 +3569,7 @@ doqsort_all_asserts(
 /* ****************************************************************** qsort */
 
 STATIC void
-qsortsv(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t compare)
+S_qsortsv(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t compare)
 {
    register SV * temp;
 

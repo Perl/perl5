@@ -83,7 +83,7 @@ START_EXTERN_C
 #undef PERL_CKDEF
 #undef PERL_PPDEF
 #define PERL_CKDEF(s) OP *s (pTHX_ OP *o);
-#define PERL_PPDEF(s) OP *s (pTHX_ ARGSproto);
+#define PERL_PPDEF(s) OP *s (pTHX);
 
 #include "pp_proto.h"
 
@@ -92,13 +92,13 @@ END
 # Emit function declarations.
 
 #for (sort keys %ckname) {
-#    print "OP *\t", &tab(3,$_),"(OP* o);\n";
+#    print "OP *\t", &tab(3,$_),"(pTHX_ OP* o);\n";
 #}
 #
 #print "\n";
 #
 #for (@ops) {
-#    print "OP *\t", &tab(3, "pp_$_"), "(ARGSproto);\n";
+#    print "OP *\t", &tab(3, "pp_$_"), "(pTHX);\n";
 #}
 
 # Emit ppcode switch array.
@@ -109,9 +109,9 @@ END_EXTERN_C
 #endif	/* PERL_OBJECT */
 
 #ifndef DOINIT
-EXT OP * (CPERLscope(*PL_ppaddr)[])(ARGSproto);
+EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX);
 #else
-EXT OP * (CPERLscope(*PL_ppaddr)[])(ARGSproto) = {
+EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX) = {
 END
 
 for (@ops) {
@@ -128,9 +128,9 @@ END
 
 print <<END;
 #ifndef DOINIT
-EXT OP * (CPERLscope(*PL_check)[]) (OP *op);
+EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op);
 #else
-EXT OP * (CPERLscope(*PL_check)[]) (OP *op) = {
+EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op) = {
 END
 
 for (@ops) {

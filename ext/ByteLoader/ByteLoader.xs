@@ -16,7 +16,7 @@ static I32
 #ifdef PERL_OBJECT
 byteloader_filter(CPerlObj *pPerl, int idx, SV *buf_sv, int maxlen)
 #else
-byteloader_filter(int idx, SV *buf_sv, int maxlen)
+byteloader_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 #endif
 {
     dTHR;

@@ -166,13 +166,13 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 #define CHR_DIST(a,b) (UTF ? utf8_distance(a,b) : a - b)
 
 STATIC void
-clear_re(pTHX_ void *r)
+S_clear_re(pTHX_ void *r)
 {
     ReREFCNT_dec((regexp *)r);
 }
 
 STATIC void
-scan_commit(pTHX_ scan_data_t *data)
+S_scan_commit(pTHX_ scan_data_t *data)
 {
     dTHR;
     STRLEN l = CHR_SVLEN(data->last_found);
@@ -209,7 +209,7 @@ scan_commit(pTHX_ scan_data_t *data)
    to the position after last scanned or to NULL. */
 
 STATIC I32
-study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 flags)
+S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 flags)
 			/* scanp: Start here (read-write). */
 			/* deltap: Write maxlen-minlen here. */
 			/* last: Stop before this one. */
@@ -461,7 +461,7 @@ study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data
 		if (ckWARN(WARN_UNSAFE) && (minnext + deltanext == 0) 
 		    && !(data->flags & (SF_HAS_PAR|SF_IN_PAR))
 		    && maxcount <= REG_INFTY/3) /* Complement check for big count */
-		    warner(WARN_UNSAFE, "Strange *+?{} on zero-length expression");
+		    Perl_warner(aTHX_ WARN_UNSAFE, "Strange *+?{} on zero-length expression");
 		min += minnext * mincount;
 		is_inf_internal |= (maxcount == REG_INFTY 
 				    && (minnext + deltanext) > 0
@@ -706,7 +706,7 @@ study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data
 }
 
 STATIC I32
-add_data(pTHX_ I32 n, char *s)
+S_add_data(pTHX_ I32 n, char *s)
 {
     dTHR;
     if (PL_regcomp_rx->data) {
@@ -1044,7 +1044,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
  * follows makes it hard to avoid.
  */
 STATIC regnode *
-reg(pTHX_ I32 paren, I32 *flagp)
+S_reg(pTHX_ I32 paren, I32 *flagp)
     /* paren: Parenthesized? 0=top, 1=(, inside: changed to letter. */
 {
     dTHR;
@@ -1373,7 +1373,7 @@ reg(pTHX_ I32 paren, I32 *flagp)
  * Implements the concatenation operator.
  */
 STATIC regnode *
-regbranch(pTHX_ I32 *flagp, I32 first)
+S_regbranch(pTHX_ I32 *flagp, I32 first)
 {
     dTHR;
     register regnode *ret;
@@ -1439,7 +1439,7 @@ regbranch(pTHX_ I32 *flagp, I32 first)
  * endmarker role is not redundant.
  */
 STATIC regnode *
-regpiece(pTHX_ I32 *flagp)
+S_regpiece(pTHX_ I32 *flagp)
 {
     dTHR;
     register regnode *ret;
@@ -1564,7 +1564,7 @@ regpiece(pTHX_ I32 *flagp)
     }
   nest_check:
     if (ckWARN(WARN_UNSAFE) && !SIZE_ONLY && !(flags&HASWIDTH) && max > REG_INFTY/3) {
-	warner(WARN_UNSAFE, "%.*s matches null string many times",
+	Perl_warner(aTHX_ WARN_UNSAFE, "%.*s matches null string many times",
 	    PL_regcomp_parse - origparse, origparse);
     }
 
@@ -1590,7 +1590,7 @@ regpiece(pTHX_ I32 *flagp)
  * [Yes, it is worth fixing, some scripts can run twice the speed.]
  */
 STATIC regnode *
-regatom(pTHX_ I32 *flagp)
+S_regatom(pTHX_ I32 *flagp)
 {
     dTHR;
     register regnode *ret = 0;
@@ -1985,7 +1985,7 @@ tryagain:
 			/* FALL THROUGH */
 		    default:
 			if (!SIZE_ONLY && ckWARN(WARN_UNSAFE) && isALPHA(*p))
-			    warner(WARN_UNSAFE, 
+			    Perl_warner(aTHX_ WARN_UNSAFE, 
 				   "/%.127s/: Unrecognized escape \\%c passed through",
 				   PL_regprecomp,
 				   *p);
@@ -2058,7 +2058,7 @@ tryagain:
 }
 
 STATIC char *
-regwhite(pTHX_ char *p, char *e)
+S_regwhite(pTHX_ char *p, char *e)
 {
     while (p < e) {
 	if (isSPACE(*p))
@@ -2076,7 +2076,7 @@ regwhite(pTHX_ char *p, char *e)
 
 /* parse POSIX character classes like [[:foo:]] */
 STATIC char*
-regpposixcc(pTHX_ I32 value)
+S_regpposixcc(pTHX_ I32 value)
 {
     dTHR;
     char *posixcc = 0;
@@ -2102,7 +2102,7 @@ regpposixcc(pTHX_ I32 value)
 		 * The text between e.g. [: and :] would start
 		 * at s + 1 and stop at regcomp_parse - 2. */
 		if (ckWARN(WARN_UNSAFE) && !SIZE_ONLY)
-		    warner(WARN_UNSAFE,
+		    Perl_warner(aTHX_ WARN_UNSAFE,
 			   "Character class syntax [%c %c] is reserved for future extensions", c, c);
 		PL_regcomp_parse++; /* skip over the ending ] */
 		posixcc = s + 1;
@@ -2118,7 +2118,7 @@ regpposixcc(pTHX_ I32 value)
 }
 
 STATIC regnode *
-regclass(pTHX)
+S_regclass(pTHX)
 {
     dTHR;
     register char *opnd, *s;
@@ -2316,7 +2316,7 @@ regclass(pTHX)
 }
 
 STATIC regnode *
-regclassutf8(pTHX)
+S_regclassutf8(pTHX)
 {
     register char *opnd, *e;
     register U32 value;
@@ -2362,7 +2362,7 @@ regclassutf8(pTHX)
 		    if (LOC)
 			flags |= ANYOF_ALNUML;
 
-		    sv_catpvf(listsv, "+utf8::IsAlnum\n");
+		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsAlnum\n");
 		}
 		lastvalue = 123456;
 		continue;
@@ -2371,7 +2371,7 @@ regclassutf8(pTHX)
 		    if (LOC)
 			flags |= ANYOF_NALNUML;
 
-		    sv_catpvf(listsv,
+		    Perl_sv_catpvf(aTHX_ listsv,
 			"-utf8::IsAlpha\n-utf8::IsDigit\n0000\t%04x\n%04x\tffff\n",
 			'_' - 1,
 			'_' + 1);
@@ -2382,7 +2382,7 @@ regclassutf8(pTHX)
 		if (!SIZE_ONLY) {
 		    if (LOC)
 			flags |= ANYOF_SPACEL;
-		    sv_catpvf(listsv, "+utf8::IsSpace\n");
+		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsSpace\n");
 		    if (!PL_utf8_space)
 			is_utf8_space((U8*)" ");
 		}
@@ -2392,7 +2392,7 @@ regclassutf8(pTHX)
 		if (!SIZE_ONLY) {
 		    if (LOC)
 			flags |= ANYOF_NSPACEL;
-		    sv_catpvf(listsv,
+		    Perl_sv_catpvf(aTHX_ listsv,
 			"!utf8::IsSpace\n");
 		    if (!PL_utf8_space)
 			is_utf8_space((U8*)" ");
@@ -2401,13 +2401,13 @@ regclassutf8(pTHX)
 		continue;
 	    case 'd':
 		if (!SIZE_ONLY) {
-		    sv_catpvf(listsv, "+utf8::IsDigit\n");
+		    Perl_sv_catpvf(aTHX_ listsv, "+utf8::IsDigit\n");
 		}
 		lastvalue = 123456;
 		continue;
 	    case 'D':
 		if (!SIZE_ONLY) {
-		    sv_catpvf(listsv,
+		    Perl_sv_catpvf(aTHX_ listsv,
 			"!utf8::IsDigit\n");
 		}
 		lastvalue = 123456;
@@ -2426,9 +2426,9 @@ regclassutf8(pTHX)
 		}
 		if (!SIZE_ONLY) {
 		    if (value == 'p')
-			sv_catpvf(listsv, "+utf8::%.*s\n", n, PL_regcomp_parse);
+			Perl_sv_catpvf(aTHX_ listsv, "+utf8::%.*s\n", n, PL_regcomp_parse);
 		    else
-			sv_catpvf(listsv,
+			Perl_sv_catpvf(aTHX_ listsv,
 			    "!utf8::%.*s\n", n, PL_regcomp_parse);
 		}
 		PL_regcomp_parse = e + 1;
@@ -2483,7 +2483,7 @@ regclassutf8(pTHX)
 	    if (lastvalue > value)
 		FAIL("invalid [] range in regexp");
 	    if (!SIZE_ONLY)
-		sv_catpvf(listsv, "%04x\t%04x\n", lastvalue, value);
+		Perl_sv_catpvf(aTHX_ listsv, "%04x\t%04x\n", lastvalue, value);
 	    lastvalue = value;
 	    range = 0;
 	}
@@ -2496,7 +2496,7 @@ regclassutf8(pTHX)
 		continue;	/* do it next time */
 	    }
 	    if (!SIZE_ONLY)
-		sv_catpvf(listsv, "%04x\n", value);
+		Perl_sv_catpvf(aTHX_ listsv, "%04x\n", value);
 	}
     }
 
@@ -2515,7 +2515,7 @@ regclassutf8(pTHX)
 }
 
 STATIC char*
-nextchar(pTHX)
+S_nextchar(pTHX)
 {
     dTHR;
     char* retval = PL_regcomp_parse++;
@@ -2548,7 +2548,7 @@ nextchar(pTHX)
 - reg_node - emit a node
 */
 STATIC regnode *			/* Location. */
-reg_node(pTHX_ U8 op)
+S_reg_node(pTHX_ U8 op)
 {
     dTHR;
     register regnode *ret;
@@ -2573,7 +2573,7 @@ reg_node(pTHX_ U8 op)
 - reganode - emit a node with an argument
 */
 STATIC regnode *			/* Location. */
-reganode(pTHX_ U8 op, U32 arg)
+S_reganode(pTHX_ U8 op, U32 arg)
 {
     dTHR;
     register regnode *ret;
@@ -2598,7 +2598,7 @@ reganode(pTHX_ U8 op, U32 arg)
 - regc - emit (if appropriate) a Unicode character
 */
 STATIC void
-reguni(pTHX_ UV uv, char* s, I32* lenp)
+S_reguni(pTHX_ UV uv, char* s, I32* lenp)
 {
     dTHR;
     if (SIZE_ONLY) {
@@ -2614,7 +2614,7 @@ reguni(pTHX_ UV uv, char* s, I32* lenp)
 - regc - emit (if appropriate) a byte of code
 */
 STATIC void
-regc(pTHX_ U8 b, char* s)
+S_regc(pTHX_ U8 b, char* s)
 {
     dTHR;
     if (!SIZE_ONLY)
@@ -2627,7 +2627,7 @@ regc(pTHX_ U8 b, char* s)
 * Means relocating the operand.
 */
 STATIC void
-reginsert(pTHX_ U8 op, regnode *opnd)
+S_reginsert(pTHX_ U8 op, regnode *opnd)
 {
     dTHR;
     register regnode *src;
@@ -2658,7 +2658,7 @@ reginsert(pTHX_ U8 op, regnode *opnd)
 - regtail - set the next-pointer at the end of a node chain of p to val.
 */
 STATIC void
-regtail(pTHX_ regnode *p, regnode *val)
+S_regtail(pTHX_ regnode *p, regnode *val)
 {
     dTHR;
     register regnode *scan;
@@ -2689,7 +2689,7 @@ regtail(pTHX_ regnode *p, regnode *val)
 - regoptail - regtail on operand of first argument; nop if operandless
 */
 STATIC void
-regoptail(pTHX_ regnode *p, regnode *val)
+S_regoptail(pTHX_ regnode *p, regnode *val)
 {
     dTHR;
     /* "Operandless" and "op != BRANCH" are synonymous in practice. */
@@ -2709,7 +2709,7 @@ regoptail(pTHX_ regnode *p, regnode *val)
  - regcurly - a little FSA that accepts {\d+,?\d*}
  */
 STATIC I32
-regcurly(pTHX_ register char *s)
+S_regcurly(pTHX_ register char *s)
 {
     if (*s++ != '{')
 	return FALSE;
@@ -2728,7 +2728,7 @@ regcurly(pTHX_ register char *s)
 
 
 STATIC regnode *
-dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
+S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 {
 #ifdef DEBUGGING
     register char op = EXACT;	/* Arbitrary non-END op. */
@@ -2881,18 +2881,18 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
     k = PL_regkind[(U8)OP(o)];
 
     if (k == EXACT)
-	sv_catpvf(sv, " <%s%s%s>", PL_colors[0], OPERAND(o) + 1, PL_colors[1]);
+	Perl_sv_catpvf(aTHX_ sv, " <%s%s%s>", PL_colors[0], OPERAND(o) + 1, PL_colors[1]);
     else if (k == CURLY) {
 	if (OP(o) == CURLYM || OP(o) == CURLYN)
-	    sv_catpvf(sv, "[%d]", o->flags); /* Parenth number */
-	sv_catpvf(sv, " {%d,%d}", ARG1(o), ARG2(o));
+	    Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags); /* Parenth number */
+	Perl_sv_catpvf(aTHX_ sv, " {%d,%d}", ARG1(o), ARG2(o));
     }
     else if (k == REF || k == OPEN || k == CLOSE || k == GROUPP )
-	sv_catpvf(sv, "%d", ARG(o));	/* Parenth number */
+	Perl_sv_catpvf(aTHX_ sv, "%d", ARG(o));	/* Parenth number */
     else if (k == LOGICAL)
-	sv_catpvf(sv, "[%d]", ARG(o));	/* 2: embedded, otherwise 1 */
+	Perl_sv_catpvf(aTHX_ sv, "[%d]", ARG(o));	/* 2: embedded, otherwise 1 */
     else if (k == BRANCHJ && (OP(o) == UNLESSM || OP(o) == IFMATCH))
-	sv_catpvf(sv, "[-%d]", o->flags);
+	Perl_sv_catpvf(aTHX_ sv, "[-%d]", o->flags);
 #endif	/* DEBUGGING */
 }
 
@@ -2929,7 +2929,7 @@ Perl_pregfree(pTHX_ struct regexp *r)
 		break;
 	    case 'o':
 		if (new_comppad == NULL)
-		    croak("panic: pregfree comppad");
+		    Perl_croak(aTHX_ "panic: pregfree comppad");
 		old_comppad = PL_comppad;
 		old_curpad = PL_curpad;
 		PL_comppad = new_comppad;
@@ -2977,7 +2977,7 @@ Perl_regnext(pTHX_ register regnode *p)
 }
 
 STATIC void	
-re_croak2(pTHX_ const char* pat1,const char* pat2,...)
+S_re_croak2(pTHX_ const char* pat1,const char* pat2,...)
 {
     va_list args;
     STRLEN l1 = strlen(pat1);
@@ -3007,7 +3007,7 @@ re_croak2(pTHX_ const char* pat1,const char* pat2,...)
 	l1 = 512;
     Copy(message, buf, l1 , char);
     buf[l1] = '\0';			/* Overwrite \n */
-    croak("%s", buf);
+    Perl_croak(aTHX_ "%s", buf);
 }
 
 /* XXX Here's a total kludge.  But we need to re-enter for swash routines. */

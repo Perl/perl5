@@ -9,6 +9,8 @@
 #ifndef H_PERL
 #define H_PERL 1
 
+/*#define PERL_IMPLICIT_CONTEXT*/
+
 #ifdef PERL_FOR_X2P
 /*
  * This file is being used for x2p stuff. 
@@ -133,8 +135,9 @@ class CPerlObj;
 #define VOIDUSED 1
 #include "config.h"
 
-#if !defined(PERL_FOR_X2P)
-#  include "embed.h"
+/* XXXXXX testing threads via implicit pointer */
+#ifdef USE_THREADS
+#define PERL_IMPLICIT_CONTEXT
 #endif
 
 #undef START_EXTERN_C
@@ -182,7 +185,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #endif
 
 #define NOOP (void)0
-
+#define dNOOP extern int Perl___notused
 #define WITH_THR(s) STMT_START { dTHR; s; } STMT_END
 
 /*
@@ -377,6 +380,10 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 /* Use all the "standard" definitions? */
 #if defined(STANDARD_C) && defined(I_STDLIB)
 #   include <stdlib.h>
+#endif
+
+#if !defined(PERL_FOR_X2P)
+#  include "embed.h"
 #endif
 
 #define MEM_SIZE Size_t
@@ -1299,16 +1306,6 @@ typedef union any ANY;
 #   endif
 #endif
 
-#ifdef PERL_OBJECT
-typedef I32 (*filter_t) (CPerlObj*, int, SV *, int);
-#else
-typedef I32 (*filter_t) (int, SV *, int);
-#endif
-
-#define FILTER_READ(idx, sv, len)  filter_read(idx, sv, len)
-#define FILTER_DATA(idx)	   (AvARRAY(PL_rsfp_filters)[idx])
-#define FILTER_ISREADER(idx)	   (idx >= AvFILLp(PL_rsfp_filters))
-
 #if defined(__OPEN_VM)
 # include "vmesa/vmesaish.h"
 #endif
@@ -1492,24 +1489,6 @@ typedef pthread_key_t	perl_key;
 #   endif
 #endif
 
-#ifdef UNION_ANY_DEFINITION
-UNION_ANY_DEFINITION;
-#else
-union any {
-    void*	any_ptr;
-    I32		any_i32;
-    IV		any_iv;
-    long	any_long;
-    void	(CPERLscope(*any_dptr)) (void*);
-};
-#endif
-
-#ifdef USE_THREADS
-#define ARGSproto struct perl_thread *thr
-#else
-#define ARGSproto void
-#endif /* USE_THREADS */
-
 #if defined(CYGWIN32)
 /* USEMYBINMODE
  *   This symbol, if defined, indicates that the program should
@@ -1522,21 +1501,72 @@ union any {
             (PerlLIO_setmode(PerlIO_fileno(fp), O_BINARY) != -1 ? TRUE : NULL)
 #endif
 
+#ifdef PERL_IMPLICIT_CONTEXT
+#  ifdef USE_THREADS
+struct perl_thread;
+#    define pTHX struct perl_thread *thr
+#    define pTHX_ pTHX,
+#    define _pTHX ,pTHX
+#    define aTHX thr
+#    define aTHX_ aTHX,
+#    define _aTHX ,aTHX
+#    define dTHX pTHX = (struct perl_thread *)SvPVX(PL_thrsv)
+#    define dTHR dNOOP
+#  else
+#    define MULTIPLICITY
+#    define pTHX PerlInterpreter *my_perl
+#    define pTHX_ pTHX,
+#    define _pTHX ,pTHX
+#    define aTHX my_perl
+#    define aTHX_ aTHX,
+#    define _aTHX ,aTHX
+#    define dTHX pTHX = PL_curinterp
+#  endif
+#endif
+
 #ifndef pTHX
 #  define pTHX void
 #  define pTHX_
 #  define _pTHX
-#endif
-
-#ifndef aTHX
 #  define aTHX
 #  define aTHX_
 #  define _aTHX
+#  define dTHX dNOOP
 #endif
+
+#define WITH_THX(s) STMT_START { dTHX; s; } STMT_END
 
 #ifndef STATIC
 #  define STATIC static
 #endif
+
+#ifdef UNION_ANY_DEFINITION
+UNION_ANY_DEFINITION;
+#else
+union any {
+    void*	any_ptr;
+    I32		any_i32;
+    IV		any_iv;
+    long	any_long;
+    void	(CPERLscope(*any_dptr)) (pTHX_ void*);
+};
+#endif
+
+#ifdef USE_THREADS
+#define ARGSproto struct perl_thread *thr
+#else
+#define ARGSproto
+#endif /* USE_THREADS */
+
+#ifdef PERL_OBJECT
+typedef I32 (*filter_t) (CPerlObj*, int, SV *, int);
+#else
+typedef I32 (*filter_t) (pTHX_ int, SV *, int);
+#endif
+
+#define FILTER_READ(idx, sv, len)  filter_read(idx, sv, len)
+#define FILTER_DATA(idx)	   (AvARRAY(PL_rsfp_filters)[idx])
+#define FILTER_ISREADER(idx)	   (idx >= AvFILLp(PL_rsfp_filters))
 
 #include "regexp.h"
 #include "sv.h"
@@ -1723,7 +1753,7 @@ Gid_t getegid (void);
 #define DEBUG_o(a) if (PL_debug & 16)	a
 #define DEBUG_c(a) if (PL_debug & 32)	a
 #define DEBUG_P(a) if (PL_debug & 64)	a
-#  ifdef PERL_OBJECT
+#  if defined(PERL_OBJECT) || defined(PERL_IMPLICIT_CONTEXT)
 #    define DEBUG_m(a) if (PL_debug & 128)	a
 #  else
 #    define DEBUG_m(a) if (PL_curinterp && PL_debug & 128)	a
@@ -1767,9 +1797,9 @@ Gid_t getegid (void);
 #ifndef assert  /* <assert.h> might have been included somehow */
 #define assert(what)	DEB( {						\
 	if (!(what)) {							\
-	    croak("Assertion failed: file \"%s\", line %d",		\
+	    Perl_croak(aTHX_ "Assertion failed: file \"%s\", line %d",	\
 		__FILE__, __LINE__);					\
-	    PerlProc_exit(1);							\
+	    PerlProc_exit(1);						\
 	}})
 #endif
 
@@ -1871,10 +1901,10 @@ typedef Sighandler_t Sigsave_t;
 #  define register
 # endif
 # define PAD_SV(po) pad_sv(po)
-# define RUNOPS_DEFAULT runops_debug
+# define RUNOPS_DEFAULT Perl_runops_debug
 #else
 # define PAD_SV(po) PL_curpad[po]
-# define RUNOPS_DEFAULT runops_standard
+# define RUNOPS_DEFAULT Perl_runops_standard
 #endif
 
 #ifdef MYMALLOC
@@ -1906,10 +1936,10 @@ typedef Sighandler_t Sigsave_t;
  */
 
 #ifndef PERL_OBJECT
-typedef int (*runops_proc_t) (void);
-int runops_standard (void);
+typedef int (*runops_proc_t) (pTHX);
+int Perl_runops_standard (pTHX);
 #ifdef DEBUGGING
-int runops_debug (void);
+int Perl_runops_debug (pTHX);
 #endif
 #endif
 
@@ -2292,8 +2322,8 @@ typedef I32 (CPerlObj::*regexec_t) (regexp* prog, char* stringarg,
 				    I32 minend, SV* screamer, void* data,
 				    U32 flags);
 #else
-typedef regexp*(*regcomp_t) (char* exp, char* xend, PMOP* pm);
-typedef I32 (*regexec_t) (regexp* prog, char* stringarg, char* strend, char*
+typedef regexp*(*regcomp_t) (pTHX_ char* exp, char* xend, PMOP* pm);
+typedef I32 (*regexec_t) (pTHX_ regexp* prog, char* stringarg, char* strend, char*
 			  strbeg, I32 minend, SV* screamer, void* data, 
 			  U32 flags);
 
@@ -2309,7 +2339,7 @@ typedef struct exitlistentry {
 #ifdef PERL_OBJECT
     void (*fn) (CPerlObj*, void*);
 #else
-    void (*fn) (void*);
+    void (*fn) (pTHX_ void*);
 #endif
     void *ptr;
 } PerlExitListEntry;
@@ -2504,85 +2534,85 @@ PERLVAR(object_compatibility[30],	char)
 
 #ifdef DOINIT
 
-EXT MGVTBL PL_vtbl_sv =	{magic_get,
-				magic_set,
-					magic_len,
+EXT MGVTBL PL_vtbl_sv =	{Perl_magic_get,
+				Perl_magic_set,
+					Perl_magic_len,
 						0,	0};
-EXT MGVTBL PL_vtbl_env =	{0,	magic_set_all_env,
-				0,	magic_clear_all_env,
+EXT MGVTBL PL_vtbl_env =	{0,	Perl_magic_set_all_env,
+				0,	Perl_magic_clear_all_env,
 							0};
-EXT MGVTBL PL_vtbl_envelem =	{0,	magic_setenv,
-					0,	magic_clearenv,
+EXT MGVTBL PL_vtbl_envelem =	{0,	Perl_magic_setenv,
+					0,	Perl_magic_clearenv,
 							0};
 EXT MGVTBL PL_vtbl_sig =	{0,	0,		 0, 0, 0};
-EXT MGVTBL PL_vtbl_sigelem =	{magic_getsig,
-					magic_setsig,
-					0,	magic_clearsig,
+EXT MGVTBL PL_vtbl_sigelem =	{Perl_magic_getsig,
+					Perl_magic_setsig,
+					0,	Perl_magic_clearsig,
 							0};
-EXT MGVTBL PL_vtbl_pack =	{0,	0,	magic_sizepack,	magic_wipepack,
+EXT MGVTBL PL_vtbl_pack =	{0,	0,	Perl_magic_sizepack,	Perl_magic_wipepack,
 							0};
-EXT MGVTBL PL_vtbl_packelem =	{magic_getpack,
-				magic_setpack,
-					0,	magic_clearpack,
+EXT MGVTBL PL_vtbl_packelem =	{Perl_magic_getpack,
+				Perl_magic_setpack,
+					0,	Perl_magic_clearpack,
 							0};
-EXT MGVTBL PL_vtbl_dbline =	{0,	magic_setdbline,
+EXT MGVTBL PL_vtbl_dbline =	{0,	Perl_magic_setdbline,
 					0,	0,	0};
-EXT MGVTBL PL_vtbl_isa =	{0,	magic_setisa,
-					0,	magic_setisa,
+EXT MGVTBL PL_vtbl_isa =	{0,	Perl_magic_setisa,
+					0,	Perl_magic_setisa,
 							0};
-EXT MGVTBL PL_vtbl_isaelem =	{0,	magic_setisa,
+EXT MGVTBL PL_vtbl_isaelem =	{0,	Perl_magic_setisa,
 					0,	0,	0};
-EXT MGVTBL PL_vtbl_arylen =	{magic_getarylen,
-				magic_setarylen,
+EXT MGVTBL PL_vtbl_arylen =	{Perl_magic_getarylen,
+				Perl_magic_setarylen,
 					0,	0,	0};
-EXT MGVTBL PL_vtbl_glob =	{magic_getglob,
-				magic_setglob,
+EXT MGVTBL PL_vtbl_glob =	{Perl_magic_getglob,
+				Perl_magic_setglob,
 					0,	0,	0};
-EXT MGVTBL PL_vtbl_mglob =	{0,	magic_setmglob,
+EXT MGVTBL PL_vtbl_mglob =	{0,	Perl_magic_setmglob,
 					0,	0,	0};
-EXT MGVTBL PL_vtbl_nkeys =	{magic_getnkeys,
-				magic_setnkeys,
+EXT MGVTBL PL_vtbl_nkeys =	{Perl_magic_getnkeys,
+				Perl_magic_setnkeys,
 					0,	0,	0};
-EXT MGVTBL PL_vtbl_taint =	{magic_gettaint,magic_settaint,
+EXT MGVTBL PL_vtbl_taint =	{Perl_magic_gettaint,Perl_magic_settaint,
 					0,	0,	0};
-EXT MGVTBL PL_vtbl_substr =	{magic_getsubstr, magic_setsubstr,
+EXT MGVTBL PL_vtbl_substr =	{Perl_magic_getsubstr, Perl_magic_setsubstr,
 					0,	0,	0};
-EXT MGVTBL PL_vtbl_vec =	{magic_getvec,
-				magic_setvec,
+EXT MGVTBL PL_vtbl_vec =	{Perl_magic_getvec,
+				Perl_magic_setvec,
 					0,	0,	0};
-EXT MGVTBL PL_vtbl_pos =	{magic_getpos,
-				magic_setpos,
+EXT MGVTBL PL_vtbl_pos =	{Perl_magic_getpos,
+				Perl_magic_setpos,
 					0,	0,	0};
-EXT MGVTBL PL_vtbl_bm =	{0,	magic_setbm,
+EXT MGVTBL PL_vtbl_bm =	{0,	Perl_magic_setbm,
 					0,	0,	0};
-EXT MGVTBL PL_vtbl_fm =	{0,	magic_setfm,
+EXT MGVTBL PL_vtbl_fm =	{0,	Perl_magic_setfm,
 					0,	0,	0};
-EXT MGVTBL PL_vtbl_uvar =	{magic_getuvar,
-				magic_setuvar,
+EXT MGVTBL PL_vtbl_uvar =	{Perl_magic_getuvar,
+				Perl_magic_setuvar,
 					0,	0,	0};
 #ifdef USE_THREADS
-EXT MGVTBL PL_vtbl_mutex =	{0,	0,	0,	0,	magic_mutexfree};
+EXT MGVTBL PL_vtbl_mutex =	{0,	0,	0,	0,	Perl_magic_mutexfree};
 #endif /* USE_THREADS */
-EXT MGVTBL PL_vtbl_defelem = {magic_getdefelem,magic_setdefelem,
+EXT MGVTBL PL_vtbl_defelem = {Perl_magic_getdefelem,Perl_magic_setdefelem,
 					0,	0,	0};
 
-EXT MGVTBL PL_vtbl_regexp = {0,0,0,0, magic_freeregexp};
-EXT MGVTBL PL_vtbl_regdata = {0, 0, magic_regdata_cnt, 0, 0};
-EXT MGVTBL PL_vtbl_regdatum = {magic_regdatum_get, 0, 0, 0, 0};
+EXT MGVTBL PL_vtbl_regexp = {0,0,0,0, Perl_magic_freeregexp};
+EXT MGVTBL PL_vtbl_regdata = {0, 0, Perl_magic_regdata_cnt, 0, 0};
+EXT MGVTBL PL_vtbl_regdatum = {Perl_magic_regdatum_get, 0, 0, 0, 0};
 
 #ifdef USE_LOCALE_COLLATE
 EXT MGVTBL PL_vtbl_collxfrm = {0,
-				magic_setcollxfrm,
+				Perl_magic_setcollxfrm,
 					0,	0,	0};
 #endif
 
-EXT MGVTBL PL_vtbl_amagic =       {0,     magic_setamagic,
-                                        0,      0,      magic_setamagic};
-EXT MGVTBL PL_vtbl_amagicelem =   {0,     magic_setamagic,
-                                        0,      0,      magic_setamagic};
+EXT MGVTBL PL_vtbl_amagic =       {0,     Perl_magic_setamagic,
+                                        0,      0,      Perl_magic_setamagic};
+EXT MGVTBL PL_vtbl_amagicelem =   {0,     Perl_magic_setamagic,
+                                        0,      0,      Perl_magic_setamagic};
 
 EXT MGVTBL PL_vtbl_backref = 	  {0,	0,
-					0,	0,	magic_killbackrefs};
+					0,	0,	Perl_magic_killbackrefs};
 
 #else /* !DOINIT */
 

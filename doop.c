@@ -20,7 +20,7 @@
 #endif
 
 STATIC I32
-do_trans_CC_simple(pTHX_ SV *sv)
+S_do_trans_CC_simple(pTHX_ SV *sv)
 {
     dTHR;
     U8 *s;
@@ -32,7 +32,7 @@ do_trans_CC_simple(pTHX_ SV *sv)
 
     tbl = (short*)cPVOP->op_pv;
     if (!tbl)
-	croak("panic: do_trans");
+	Perl_croak(aTHX_ "panic: do_trans");
 
     s = (U8*)SvPV(sv, len);
     send = s + len;
@@ -50,7 +50,7 @@ do_trans_CC_simple(pTHX_ SV *sv)
 }
 
 STATIC I32
-do_trans_CC_count(pTHX_ SV *sv)
+S_do_trans_CC_count(pTHX_ SV *sv)
 {
     dTHR;
     U8 *s;
@@ -61,7 +61,7 @@ do_trans_CC_count(pTHX_ SV *sv)
 
     tbl = (short*)cPVOP->op_pv;
     if (!tbl)
-	croak("panic: do_trans");
+	Perl_croak(aTHX_ "panic: do_trans");
 
     s = (U8*)SvPV(sv, len);
     send = s + len;
@@ -76,7 +76,7 @@ do_trans_CC_count(pTHX_ SV *sv)
 }
 
 STATIC I32
-do_trans_CC_complex(pTHX_ SV *sv)
+S_do_trans_CC_complex(pTHX_ SV *sv)
 {
     dTHR;
     U8 *s;
@@ -89,7 +89,7 @@ do_trans_CC_complex(pTHX_ SV *sv)
 
     tbl = (short*)cPVOP->op_pv;
     if (!tbl)
-	croak("panic: do_trans");
+	Perl_croak(aTHX_ "panic: do_trans");
 
     s = (U8*)SvPV(sv, len);
     send = s + len;
@@ -133,7 +133,7 @@ do_trans_CC_complex(pTHX_ SV *sv)
 }
 
 STATIC I32
-do_trans_UU_simple(pTHX_ SV *sv)
+S_do_trans_UU_simple(pTHX_ SV *sv)
 {
     dTHR;
     U8 *s;
@@ -185,7 +185,7 @@ do_trans_UU_simple(pTHX_ SV *sv)
 }
 
 STATIC I32
-do_trans_UU_count(pTHX_ SV *sv)
+S_do_trans_UU_count(pTHX_ SV *sv)
 {
     dTHR;
     U8 *s;
@@ -212,7 +212,7 @@ do_trans_UU_count(pTHX_ SV *sv)
 }
 
 STATIC I32
-do_trans_UC_simple(pTHX_ SV *sv)
+S_do_trans_UC_simple(pTHX_ SV *sv)
 {
     dTHR;
     U8 *s;
@@ -265,7 +265,7 @@ do_trans_UC_simple(pTHX_ SV *sv)
 }
 
 STATIC I32
-do_trans_CU_simple(pTHX_ SV *sv)
+S_do_trans_CU_simple(pTHX_ SV *sv)
 {
     dTHR;
     U8 *s;
@@ -328,7 +328,7 @@ do_trans_CU_simple(pTHX_ SV *sv)
 /* utf-8 to latin-1 */
 
 STATIC I32
-do_trans_UC_trivial(pTHX_ SV *sv)
+S_do_trans_UC_trivial(pTHX_ SV *sv)
 {
     dTHR;
     U8 *s;
@@ -360,7 +360,7 @@ do_trans_UC_trivial(pTHX_ SV *sv)
 /* latin-1 to utf-8 */
 
 STATIC I32
-do_trans_CU_trivial(pTHX_ SV *sv)
+S_do_trans_CU_trivial(pTHX_ SV *sv)
 {
     dTHR;
     U8 *s;
@@ -394,7 +394,7 @@ do_trans_CU_trivial(pTHX_ SV *sv)
 }
 
 STATIC I32
-do_trans_UU_complex(pTHX_ SV *sv)
+S_do_trans_UU_complex(pTHX_ SV *sv)
 {
     dTHR;
     U8 *s;
@@ -585,7 +585,7 @@ Perl_do_trans(pTHX_ SV *sv)
     STRLEN len;
 
     if (SvREADONLY(sv) && !(PL_op->op_private & OPpTRANS_IDENTICAL))
-	croak(PL_no_modify);
+	Perl_croak(aTHX_ PL_no_modify);
 
     (void)SvPV(sv, len);
     if (!len)
@@ -594,7 +594,7 @@ Perl_do_trans(pTHX_ SV *sv)
 	(void)SvPV_force(sv, len);
     (void)SvPOK_only(sv);
 
-    DEBUG_t( deb("2.TBL\n"));
+    DEBUG_t( Perl_deb(aTHX_ "2.TBL\n"));
 
     switch (PL_op->op_private & 63) {
     case 0:
@@ -777,7 +777,7 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
         return;
     }
     else if (SvREADONLY(sv))
-	croak(PL_no_modify);
+	Perl_croak(aTHX_ PL_no_modify);
     s = SvPV(sv, len);
     if (len && !SvPOK(sv))
 	s = SvPV_force(sv, len);
@@ -789,7 +789,7 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
 	    while ((*s & 0xc0) == 0x80)
 		--s;
 	    if (UTF8SKIP(s) != send - s)
-		warn("Malformed UTF-8 character");
+		Perl_warn(aTHX_ "Malformed UTF-8 character");
 	    sv_setpvn(astr, s, send - s);
 	    *s = '\0';
 	    SvCUR_set(sv, s - start);
@@ -846,7 +846,7 @@ Perl_do_chomp(pTHX_ register SV *sv)
         return count;
     }
     else if (SvREADONLY(sv))
-	croak(PL_no_modify);
+	Perl_croak(aTHX_ PL_no_modify);
     s = SvPV(sv, len);
     if (len && !SvPOKp(sv))
 	s = SvPV_force(sv, len);
@@ -1005,7 +1005,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 }
 
 OP *
-Perl_do_kv(pTHX_ ARGSproto)
+Perl_do_kv(pTHX)
 {
     djSP;
     HV *hv = (HV*)POPs;
@@ -1077,7 +1077,7 @@ Perl_do_kv(pTHX_ ARGSproto)
 	    PUTBACK;
 	    tmpstr = realhv ?
 		     hv_iterval(hv,entry) : avhv_iterval((AV*)hv,entry);
-	    DEBUG_H(sv_setpvf(tmpstr, "%lu%%%d=%lu",
+	    DEBUG_H(Perl_sv_setpvf(aTHX_ tmpstr, "%lu%%%d=%lu",
 			    (unsigned long)HeHASH(entry),
 			    HvMAX(keys)+1,
 			    (unsigned long)(HeHASH(entry) & HvMAX(keys))));

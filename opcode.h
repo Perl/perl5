@@ -1073,7 +1073,7 @@ START_EXTERN_C
 #undef PERL_CKDEF
 #undef PERL_PPDEF
 #define PERL_CKDEF(s) OP *s (pTHX_ OP *o);
-#define PERL_PPDEF(s) OP *s (pTHX_ ARGSproto);
+#define PERL_PPDEF(s) OP *s (pTHX);
 
 #include "pp_proto.h"
 
@@ -1082,9 +1082,9 @@ END_EXTERN_C
 #endif	/* PERL_OBJECT */
 
 #ifndef DOINIT
-EXT OP * (CPERLscope(*PL_ppaddr)[])(ARGSproto);
+EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX);
 #else
-EXT OP * (CPERLscope(*PL_ppaddr)[])(ARGSproto) = {
+EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX) = {
 	Perl_pp_null,
 	Perl_pp_stub,
 	Perl_pp_scalar,
@@ -1437,9 +1437,9 @@ EXT OP * (CPERLscope(*PL_ppaddr)[])(ARGSproto) = {
 #endif
 
 #ifndef DOINIT
-EXT OP * (CPERLscope(*PL_check)[]) (OP *op);
+EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op);
 #else
-EXT OP * (CPERLscope(*PL_check)[]) (OP *op) = {
+EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op) = {
 	Perl_ck_null,	/* null */
 	Perl_ck_null,	/* stub */
 	Perl_ck_fun,	/* scalar */

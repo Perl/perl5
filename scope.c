@@ -25,14 +25,14 @@ Perl_default_protect(pTHX_ int *excpt, protect_body_t body, ...)
     int ex;
     void *ret;
 
-    DEBUG_l(deb("Setting up local jumplevel %p, was %p\n",
+    DEBUG_l(Perl_deb(aTHX_ "Setting up local jumplevel %p, was %p\n",
 		&cur_env, PL_top_env));
     JMPENV_PUSH(ex);
     if (ex)
 	ret = NULL;
     else {
 	va_start(args, body);
-	ret = CALL_FPTR(body)(args);
+	ret = CALL_FPTR(body)(aTHX_ args);
 	va_end(args);
     }
     *excpt = ex;
@@ -189,7 +189,7 @@ Perl_free_tmps(pTHX)
 }
 
 STATIC SV *
-save_scalar_at(pTHX_ SV **sptr)
+S_save_scalar_at(pTHX_ SV **sptr)
 {
     dTHR;
     register SV *sv;
@@ -435,7 +435,7 @@ Perl_save_threadsv(pTHX_ PADOFFSET i)
     save_svref(svp);
     return svp;
 #else
-    croak("panic: save_threadsv called in non-threaded perl");
+    Perl_croak(aTHX_ "panic: save_threadsv called in non-threaded perl");
     return 0;
 #endif /* USE_THREADS */
 }
@@ -534,11 +534,7 @@ Perl_save_list(pTHX_ register SV **sarg, I32 maxsarg)
 }
 
 void
-#ifdef PERL_OBJECT
-Perl_save_destructor(pTHX_ DESTRUCTORFUNC f, void* p)
-#else
-Perl_save_destructor(pTHX_ void (*f) (void *), void *p)
-#endif
+Perl_save_destructor(pTHX_ DESTRUCTORFUNC_t f, void* p)
 {
     dTHR;
     SSCHECK(3);
@@ -611,7 +607,7 @@ Perl_leave_scope(pTHX_ I32 base)
     I32 i;
 
     if (base < -1)
-	croak("panic: corrupt saved stack index");
+	Perl_croak(aTHX_ "panic: corrupt saved stack index");
     while (PL_savestack_ix > base) {
 	switch (SSPOPINT) {
 	case SAVEt_ITEM:			/* normal string */
@@ -795,7 +791,7 @@ Perl_leave_scope(pTHX_ I32 base)
 		    hv_clear((HV*)sv);
 		    break;
 		case SVt_PVCV:
-		    croak("panic: leave_scope pad code");
+		    Perl_croak(aTHX_ "panic: leave_scope pad code");
 		case SVt_RV:
 		case SVt_IV:
 		case SVt_NV:
@@ -828,7 +824,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_DESTRUCTOR:
 	    ptr = SSPOPPTR;
-	    CALLDESTRUCTOR(ptr);
+	    CALLDESTRUCTOR(aTHX_ ptr);
 	    break;
 	case SAVEt_REGCONTEXT:
 	case SAVEt_ALLOC:
@@ -887,7 +883,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    *(I32*)&PL_hints = (I32)SSPOPINT;
 	    break;
 	default:
-	    croak("panic: leave_scope inconsistency");
+	    Perl_croak(aTHX_ "panic: leave_scope inconsistency");
 	}
     }
 }

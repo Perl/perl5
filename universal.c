@@ -8,7 +8,7 @@
  */
 
 STATIC SV *
-isa_lookup(pTHX_ HV *stash, const char *name, int len, int level)
+S_isa_lookup(pTHX_ HV *stash, const char *name, int len, int level)
 {
     AV* av;
     GV* gv;
@@ -22,7 +22,7 @@ isa_lookup(pTHX_ HV *stash, const char *name, int len, int level)
 	return &PL_sv_yes;
 
     if (level > 100)
-	croak("Recursive inheritance detected in package '%s'", HvNAME(stash));
+	Perl_croak(aTHX_ "Recursive inheritance detected in package '%s'", HvNAME(stash));
 
     gvp = (GV**)hv_fetch(stash, "::ISA::CACHE::", 14, FALSE);
 
@@ -56,7 +56,7 @@ isa_lookup(pTHX_ HV *stash, const char *name, int len, int level)
 		if (!basestash) {
 		    dTHR;
 		    if (ckWARN(WARN_MISC))
-			warner(WARN_SYNTAX,
+			Perl_warner(aTHX_ WARN_SYNTAX,
 		             "Can't locate package %s for @%s::ISA",
 			    SvPVX(sv), HvNAME(stash));
 		    continue;
@@ -117,7 +117,7 @@ XS(XS_UNIVERSAL_isa)
     STRLEN n_a;
 
     if (items != 2)
-	croak("Usage: UNIVERSAL::isa(reference, kind)");
+	Perl_croak(aTHX_ "Usage: UNIVERSAL::isa(reference, kind)");
 
     sv = ST(0);
     name = (char *)SvPV(ST(1),n_a);
@@ -136,7 +136,7 @@ XS(XS_UNIVERSAL_can)
     STRLEN n_a;
 
     if (items != 2)
-	croak("Usage: UNIVERSAL::can(object-ref, method)");
+	Perl_croak(aTHX_ "Usage: UNIVERSAL::can(object-ref, method)");
 
     sv = ST(0);
     name = (char *)SvPV(ST(1),n_a);
@@ -174,7 +174,7 @@ XS(XS_UNIVERSAL_VERSION)
     if(SvROK(ST(0))) {
         sv = (SV*)SvRV(ST(0));
         if(!SvOBJECT(sv))
-            croak("Cannot find version of an unblessed reference");
+            Perl_croak(aTHX_ "Cannot find version of an unblessed reference");
         pkg = SvSTASH(sv);
     }
     else {
@@ -196,7 +196,7 @@ XS(XS_UNIVERSAL_VERSION)
 
     if (items > 1 && (undef || (req = SvNV(ST(1)), req > SvNV(sv)))) {
 	STRLEN n_a;
-	croak("%s version %s required--this is only version %s",
+	Perl_croak(aTHX_ "%s version %s required--this is only version %s",
 	      HvNAME(pkg), SvPV(ST(1),n_a), undef ? undef : SvPV(sv,n_a));
     }
 

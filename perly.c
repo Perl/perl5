@@ -1350,7 +1350,7 @@ Perl_yyparse(pTHX)
 
     struct ysv *ysave;
     New(73, ysave, 1, struct ysv);
-    SAVEDESTRUCTOR(yydestruct, ysave);
+    SAVEDESTRUCTOR(Perl_yydestruct, ysave);
     ysave->oldyydebug	= yydebug;
     ysave->oldyynerrs	= yynerrs;
     ysave->oldyyerrflag	= yyerrflag;

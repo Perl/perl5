@@ -7,8 +7,8 @@
 #include "perl.h"
 #include "XSUB.h"
 
-extern regexp*	my_regcomp (char* exp, char* xend, PMOP* pm);
-extern I32	my_regexec (regexp* prog, char* stringarg, char* strend,
+extern regexp*	my_regcomp (pTHX_ char* exp, char* xend, PMOP* pm);
+extern I32	my_regexec (pTHX_ regexp* prog, char* stringarg, char* strend,
 			    char* strbeg, I32 minend, SV* screamer,
 			    void* data, U32 flags);
 
@@ -17,17 +17,17 @@ static int oldfl;
 #define R_DB 512
 
 static void
-deinstall(void)
+deinstall(pTHX)
 {
     dTHR;
-    PL_regexecp = &regexec_flags;
-    PL_regcompp = &pregcomp;
+    PL_regexecp = &Perl_regexec_flags;
+    PL_regcompp = &Perl_pregcomp;
     if (!oldfl)
 	PL_debug &= ~R_DB;
 }
 
 static void
-install(void)
+install(pTHX)
 {
     dTHR;
     PL_colorset = 0;			/* Allow reinspection of ENV. */
@@ -41,6 +41,10 @@ MODULE = re	PACKAGE = re
 
 void
 install()
+  CODE:
+    install(aTHX);
 
 void
 deinstall()
+  CODE:
+    deinstall(aTHX);

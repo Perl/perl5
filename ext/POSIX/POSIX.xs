@@ -3202,7 +3202,7 @@ sigaction(sig, action, oldaction = 0)
 		    croak("Can't supply an action without a HANDLER");
 		sv_setpv(*sigsvp, SvPV(*svp, n_a));
 		mg_set(*sigsvp);	/* handles DEFAULT and IGNORE */
-		act.sa_handler = sighandler;
+		act.sa_handler = PL_sighandlerp;
 
 		/* Set up any desired mask. */
 		svp = hv_fetch(action, "MASK", 4, FALSE);

@@ -110,7 +110,7 @@
 #define HOPMAYBEc(pos,off) ((char*)HOPMAYBE(pos,off))
 
 STATIC CHECKPOINT
-regcppush(pTHX_ I32 parenfloor)
+S_regcppush(pTHX_ I32 parenfloor)
 {
     dTHR;
     int retval = PL_savestack_ix;
@@ -143,7 +143,7 @@ regcppush(pTHX_ I32 parenfloor)
 				lastcp, PL_savestack_ix) : 0); regcpblow(lastcp)
 
 STATIC char *
-regcppop(pTHX)
+S_regcppop(pTHX)
 {
     dTHR;
     I32 i = SSPOPINT;
@@ -187,7 +187,7 @@ regcppop(pTHX)
 }
 
 STATIC char *
-regcp_set_to(pTHX_ I32 ss)
+S_regcp_set_to(pTHX_ I32 ss)
 {
     dTHR;
     I32 tmp = PL_savestack_ix;
@@ -230,7 +230,7 @@ Perl_pregexec(pTHX_ register regexp *prog, char *stringarg, register char *stren
 }
 
 STATIC void
-cache_re(pTHX_ regexp *prog)
+S_cache_re(pTHX_ regexp *prog)
 {
     dTHR;
     PL_regprecomp = prog->precomp;		/* Needed for FAIL. */
@@ -243,7 +243,7 @@ cache_re(pTHX_ regexp *prog)
 }
 
 STATIC void
-restore_pos(pTHX_ void *arg)
+S_restore_pos(pTHX_ void *arg)
 {
     dTHR;
     if (PL_reg_eval_set) {
@@ -297,7 +297,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 
     /* Be paranoid... */
     if (prog == NULL || startpos == NULL) {
-	croak("NULL regexp parameter");
+	Perl_croak(aTHX_ "NULL regexp parameter");
 	return 0;
     }
 
@@ -314,7 +314,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 
     /* Check validity of program. */
     if (UCHARAT(prog->program) != REG_MAGIC) {
-	croak("corrupted regexp program");
+	Perl_croak(aTHX_ "corrupted regexp program");
     }
 
     PL_reg_flags = 0;
@@ -1030,7 +1030,7 @@ phooey:
  - regtry - try match at specific point
  */
 STATIC I32			/* 0 failure, 1 success */
-regtry(pTHX_ regexp *prog, char *startpos)
+S_regtry(pTHX_ regexp *prog, char *startpos)
 {
     dTHR;
     register I32 i;
@@ -1071,7 +1071,7 @@ regtry(pTHX_ regexp *prog, char *startpos)
 	    }
 	    PL_reg_magic    = mg;
 	    PL_reg_oldpos   = mg->mg_len;
-	    SAVEDESTRUCTOR(restore_pos, 0);
+	    SAVEDESTRUCTOR(S_restore_pos, 0);
         }
 	if (!PL_reg_curpm)
 	    New(22,PL_reg_curpm, 1, PMOP);
@@ -1142,7 +1142,7 @@ regtry(pTHX_ regexp *prog, char *startpos)
  * advantage of machines that use a register save mask on subroutine entry.
  */
 STATIC I32			/* 0 failure, 1 success */
-regmatch(pTHX_ regnode *prog)
+S_regmatch(pTHX_ regnode *prog)
 {
     dTHR;
     register regnode *scan;	/* Current node. */
@@ -1676,7 +1676,7 @@ regmatch(pTHX_ regnode *prog)
 	    PL_curpad = AvARRAY((AV*)PL_regdata->data[n + 2]);
 	    PL_regendp[0] = PL_reg_magic->mg_len = locinput - PL_bostr;
 
-	    CALLRUNOPS();			/* Scalar context. */
+	    CALLRUNOPS(aTHX);			/* Scalar context. */
 	    SPAGAIN;
 	    ret = POPs;
 	    PUTBACK;
@@ -1711,7 +1711,7 @@ regmatch(pTHX_ regnode *prog)
 			I32 onpar = PL_regnpar;
 
 			pm.op_pmflags = 0;
-			re = CALLREGCOMP(t, t + len, &pm);
+			re = CALLREGCOMP(aTHX_ t, t + len, &pm);
 			if (!(SvFLAGS(ret) 
 			      & (SVs_TEMP | SVs_PADTMP | SVf_READONLY)))
 			    sv_magic(ret,(SV*)ReREFCNT_inc(re),'r',0,0);
@@ -1905,7 +1905,7 @@ regmatch(pTHX_ regnode *prog)
 			if (ckWARN(WARN_UNSAFE) && n >= REG_INFTY 
 			    && !(PL_reg_flags & RF_warned)) {
 			    PL_reg_flags |= RF_warned;
-			    warner(WARN_UNSAFE, "%s limit (%d) exceeded",
+			    Perl_warner(aTHX_ WARN_UNSAFE, "%s limit (%d) exceeded",
 				 "Complex regular subexpression recursion",
 				 REG_INFTY - 1);
 			}
@@ -1962,7 +1962,7 @@ regmatch(pTHX_ regnode *prog)
 		if (ckWARN(WARN_UNSAFE) && n >= REG_INFTY 
 			&& !(PL_reg_flags & RF_warned)) {
 		    PL_reg_flags |= RF_warned;
-		    warner(WARN_UNSAFE, "%s limit (%d) exceeded",
+		    Perl_warner(aTHX_ WARN_UNSAFE, "%s limit (%d) exceeded",
 			 "Complex regular subexpression recursion",
 			 REG_INFTY - 1);
 		}
@@ -2454,7 +2454,7 @@ regmatch(pTHX_ regnode *prog)
 	default:
 	    PerlIO_printf(PerlIO_stderr(), "%lx %d\n",
 			  (unsigned long)scan, OP(scan));
-	    croak("regexp memory corruption");
+	    Perl_croak(aTHX_ "regexp memory corruption");
 	}
 	scan = next;
     }
@@ -2463,7 +2463,7 @@ regmatch(pTHX_ regnode *prog)
     * We get here only if there's trouble -- normally "case END" is
     * the terminating point.
     */
-    croak("corrupted regexp pointers");
+    Perl_croak(aTHX_ "corrupted regexp pointers");
     /*NOTREACHED*/
     sayNO;
 
@@ -2489,7 +2489,7 @@ no:
  * rather than incrementing count on every character.  [Er, except utf8.]]
  */
 STATIC I32
-regrepeat(pTHX_ regnode *p, I32 max)
+S_regrepeat(pTHX_ regnode *p, I32 max)
 {
     dTHR;
     register char *scan;
@@ -2703,7 +2703,7 @@ regrepeat(pTHX_ regnode *p, I32 max)
  */
 
 STATIC I32
-regrepeat_hard(pTHX_ regnode *p, I32 max, I32 *lp)
+S_regrepeat_hard(pTHX_ regnode *p, I32 max, I32 *lp)
 {
     dTHR;
     register char *scan;
@@ -2754,7 +2754,7 @@ regrepeat_hard(pTHX_ regnode *p, I32 max, I32 *lp)
  */
 
 STATIC bool
-reginclass(pTHX_ register char *p, register I32 c)
+S_reginclass(pTHX_ register char *p, register I32 c)
 {
     dTHR;
     char flags = *p;
@@ -2791,7 +2791,7 @@ reginclass(pTHX_ register char *p, register I32 c)
 }
 
 STATIC bool
-reginclassutf8(pTHX_ regnode *f, U8 *p)
+S_reginclassutf8(pTHX_ regnode *f, U8 *p)
 {                                           
     dTHR;
     char flags = ARG1(f);
@@ -2829,7 +2829,7 @@ reginclassutf8(pTHX_ regnode *f, U8 *p)
 }
 
 STATIC U8 *
-reghop(pTHX_ U8 *s, I32 off)
+S_reghop(pTHX_ U8 *s, I32 off)
 {                               
     dTHR;
     if (off >= 0) {
@@ -2851,7 +2851,7 @@ reghop(pTHX_ U8 *s, I32 off)
 }
 
 STATIC U8 *
-reghopmaybe(pTHX_ U8* s, I32 off)
+S_reghopmaybe(pTHX_ U8* s, I32 off)
 {
     dTHR;
     if (off >= 0) {

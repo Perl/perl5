@@ -58,7 +58,7 @@ Perl_do_exec(pTHX_ char *cmd)
 }
 
 int
-do_aspawn(pTHX_ void *vreally, void **vmark, void **vsp)
+S_do_aspawn(pTHX_ void *vreally, void **vmark, void **vsp)
 {
     return PerlProc_aspawn(vreally, vmark, vsp);
 }

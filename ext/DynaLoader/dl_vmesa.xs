@@ -81,7 +81,7 @@
  
 	RETVAL = dlopen(filename) ;
 	if (RETVAL == NULL)
-	    SaveError("%s",dlerror()) ;
+	    SaveError(aTHX_ "%s",dlerror()) ;
  
    Note that SaveError() takes a printf format string. Use a "%s" as
    the first parameter if the error may contain and % characters.
@@ -98,15 +98,15 @@
  
  
 static void
-dl_private_init()
+dl_private_init(pTHX)
 {
-    (void)dl_generic_private_init();
+    (void)dl_generic_private_init(aTHX);
 }
  
 MODULE = DynaLoader	PACKAGE = DynaLoader
  
 BOOT:
-    (void)dl_private_init();
+    (void)dl_private_init(aTHX);
  
  
 void *
@@ -115,13 +115,13 @@ dl_load_file(filename, flags=0)
     int		flags
     CODE:
     if (flags & 0x01)
-	warn("Can't make loaded symbols global on this platform while loading %s",filename);
+	Perl_warn(aTHX_ "Can't make loaded symbols global on this platform while loading %s",filename);
     DLDEBUG(1,PerlIO_printf(PerlIO_stderr(), "dl_load_file(%s,%x):\n", filename,flags));
     RETVAL = dlopen(filename) ;
     DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), " libref=%lx\n", (unsigned long) RETVAL));
     ST(0) = sv_newmortal() ;
     if (RETVAL == NULL)
-	SaveError("%s",dlerror()) ;
+	SaveError(aTHX_ "%s",dlerror()) ;
     else
 	sv_setiv( ST(0), (IV)RETVAL);
  
@@ -139,7 +139,7 @@ dl_find_symbol(libhandle, symbolname)
 			     "  symbolref = %lx\n", (unsigned long) RETVAL));
     ST(0) = sv_newmortal() ;
     if (RETVAL == NULL)
-	SaveError("%s",dlerror()) ;
+	SaveError(aTHX_ "%s",dlerror()) ;
     else
 	sv_setiv( ST(0), (IV)RETVAL);
  
@@ -160,7 +160,9 @@ dl_install_xsub(perl_name, symref, filename="$Package")
     CODE:
     DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "dl_install_xsub(name=%s, symref=%lx)\n",
 		perl_name, (unsigned long) symref));
-    ST(0)=sv_2mortal(newRV((SV*)newXS(perl_name, (void(*)(CV *))symref, filename)));
+    ST(0) = sv_2mortal(newRV((SV*)newXS(perl_name,
+					(void(*)(pTHX_ CV *))symref,
+					filename)));
  
  
 char *

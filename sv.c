@@ -82,7 +82,7 @@ static I32 registry_size;
 	    if (++i >= registry_size)			\
 		i = 0;					\
 	    if (i == h)					\
-		die("SV registry bug");			\
+		Perl_die(aTHX_ "SV registry bug");			\
 	}						\
 	registry[i] = (b);				\
     } STMT_END
@@ -91,7 +91,7 @@ static I32 registry_size;
 #define REG_REMOVE(sv)	REG_REPLACE(sv,sv,Nullsv)
 
 STATIC void
-reg_add(pTHX_ SV *sv)
+S_reg_add(pTHX_ SV *sv)
 {
     if (PL_sv_count >= (registry_size >> 1))
     {
@@ -118,14 +118,14 @@ reg_add(pTHX_ SV *sv)
 }
 
 STATIC void
-reg_remove(pTHX_ SV *sv)
+S_reg_remove(pTHX_ SV *sv)
 {
     REG_REMOVE(sv);
     --PL_sv_count;
 }
 
 STATIC void
-visit(pTHX_ SVFUNC_t f)
+S_visit(pTHX_ SVFUNC_t f)
 {
     I32 i;
 
@@ -191,7 +191,7 @@ Perl_sv_add_arena(pTHX_ char *ptr, U32 size, U32 flags)
     } STMT_END
 
 STATIC void
-del_sv(pTHX_ SV *p)
+S_del_sv(pTHX_ SV *p)
 {
     if (PL_debug & 32768) {
 	SV* sva;
@@ -205,7 +205,7 @@ del_sv(pTHX_ SV *p)
 		ok = 1;
 	}
 	if (!ok) {
-	    warn("Attempt to free non-arena SV: 0x%lx", (unsigned long)p);
+	    Perl_warn(aTHX_ "Attempt to free non-arena SV: 0x%lx", (unsigned long)p);
 	    return;
 	}
     }
@@ -247,7 +247,7 @@ Perl_sv_add_arena(pTHX_ char *ptr, U32 size, U32 flags)
 
 /* sv_mutex must be held while calling more_sv() */
 STATIC SV*
-more_sv(pTHX)
+S_more_sv(pTHX)
 {
     register SV* sv;
 
@@ -265,7 +265,7 @@ more_sv(pTHX)
 }
 
 STATIC void
-visit(pTHX_ SVFUNC_t f)
+S_visit(pTHX_ SVFUNC_t f)
 {
     SV* sva;
     SV* sv;
@@ -275,7 +275,7 @@ visit(pTHX_ SVFUNC_t f)
 	svend = &sva[SvREFCNT(sva)];
 	for (sv = sva + 1; sv < svend; ++sv) {
 	    if (SvTYPE(sv) != SVTYPEMASK)
-		(FCALL)(sv);
+		(FCALL)(aTHX_ sv);
 	}
     }
 }
@@ -283,7 +283,7 @@ visit(pTHX_ SVFUNC_t f)
 #endif /* PURIFY */
 
 STATIC void
-do_report_used(pTHX_ SV *sv)
+S_do_report_used(pTHX_ SV *sv)
 {
     if (SvTYPE(sv) != SVTYPEMASK) {
 	/* XXX Perhaps this ought to go to Perl_debug_log, if DEBUGGING. */
@@ -295,11 +295,11 @@ do_report_used(pTHX_ SV *sv)
 void
 Perl_sv_report_used(pTHX)
 {
-    visit(FUNC_NAME_TO_PTR(do_report_used));
+    visit(FUNC_NAME_TO_PTR(S_do_report_used));
 }
 
 STATIC void
-do_clean_objs(pTHX_ SV *sv)
+S_do_clean_objs(pTHX_ SV *sv)
 {
     SV* rv;
 
@@ -315,7 +315,7 @@ do_clean_objs(pTHX_ SV *sv)
 
 #ifndef DISABLE_DESTRUCTOR_KLUDGE
 STATIC void
-do_clean_named_objs(pTHX_ SV *sv)
+S_do_clean_named_objs(pTHX_ SV *sv)
 {
     if (SvTYPE(sv) == SVt_PVGV) {
 	if ( SvOBJECT(GvSV(sv)) ||
@@ -335,16 +335,16 @@ void
 Perl_sv_clean_objs(pTHX)
 {
     PL_in_clean_objs = TRUE;
-    visit(FUNC_NAME_TO_PTR(do_clean_objs));
+    visit(FUNC_NAME_TO_PTR(S_do_clean_objs));
 #ifndef DISABLE_DESTRUCTOR_KLUDGE
     /* some barnacles may yet remain, clinging to typeglobs */
-    visit(FUNC_NAME_TO_PTR(do_clean_named_objs));
+    visit(FUNC_NAME_TO_PTR(S_do_clean_named_objs));
 #endif
     PL_in_clean_objs = FALSE;
 }
 
 STATIC void
-do_clean_all(pTHX_ SV *sv)
+S_do_clean_all(pTHX_ SV *sv)
 {
     DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops: SV at 0x%lx\n", sv) );)
     SvFLAGS(sv) |= SVf_BREAK;
@@ -355,7 +355,7 @@ void
 Perl_sv_clean_all(pTHX)
 {
     PL_in_clean_all = TRUE;
-    visit(FUNC_NAME_TO_PTR(do_clean_all));
+    visit(FUNC_NAME_TO_PTR(S_do_clean_all));
     PL_in_clean_all = FALSE;
 }
 
@@ -386,7 +386,7 @@ Perl_sv_free_arenas(pTHX)
 }
 
 STATIC XPVIV*
-new_xiv(pTHX)
+S_new_xiv(pTHX)
 {
     IV* xiv;
     LOCK_SV_MUTEX;
@@ -402,7 +402,7 @@ new_xiv(pTHX)
 }
 
 STATIC void
-del_xiv(pTHX_ XPVIV *p)
+S_del_xiv(pTHX_ XPVIV *p)
 {
     IV* xiv = (IV*)((char*)(p) + STRUCT_OFFSET(XPVIV, xiv_iv));
     LOCK_SV_MUTEX;
@@ -412,7 +412,7 @@ del_xiv(pTHX_ XPVIV *p)
 }
 
 STATIC void
-more_xiv(pTHX)
+S_more_xiv(pTHX)
 {
     register IV* xiv;
     register IV* xivend;
@@ -433,7 +433,7 @@ more_xiv(pTHX)
 }
 
 STATIC XPVNV*
-new_xnv(pTHX)
+S_new_xnv(pTHX)
 {
     double* xnv;
     LOCK_SV_MUTEX;
@@ -446,7 +446,7 @@ new_xnv(pTHX)
 }
 
 STATIC void
-del_xnv(pTHX_ XPVNV *p)
+S_del_xnv(pTHX_ XPVNV *p)
 {
     double* xnv = (double*)((char*)(p) + STRUCT_OFFSET(XPVNV, xnv_nv));
     LOCK_SV_MUTEX;
@@ -456,7 +456,7 @@ del_xnv(pTHX_ XPVNV *p)
 }
 
 STATIC void
-more_xnv(pTHX)
+S_more_xnv(pTHX)
 {
     register double* xnv;
     register double* xnvend;
@@ -472,7 +472,7 @@ more_xnv(pTHX)
 }
 
 STATIC XRV*
-new_xrv(pTHX)
+S_new_xrv(pTHX)
 {
     XRV* xrv;
     LOCK_SV_MUTEX;
@@ -485,7 +485,7 @@ new_xrv(pTHX)
 }
 
 STATIC void
-del_xrv(pTHX_ XRV *p)
+S_del_xrv(pTHX_ XRV *p)
 {
     LOCK_SV_MUTEX;
     p->xrv_rv = (SV*)PL_xrv_root;
@@ -494,7 +494,7 @@ del_xrv(pTHX_ XRV *p)
 }
 
 STATIC void
-more_xrv(pTHX)
+S_more_xrv(pTHX)
 {
     register XRV* xrv;
     register XRV* xrvend;
@@ -509,7 +509,7 @@ more_xrv(pTHX)
 }
 
 STATIC XPV*
-new_xpv(pTHX)
+S_new_xpv(pTHX)
 {
     XPV* xpv;
     LOCK_SV_MUTEX;
@@ -522,7 +522,7 @@ new_xpv(pTHX)
 }
 
 STATIC void
-del_xpv(pTHX_ XPV *p)
+S_del_xpv(pTHX_ XPV *p)
 {
     LOCK_SV_MUTEX;
     p->xpv_pv = (char*)PL_xpv_root;
@@ -531,7 +531,7 @@ del_xpv(pTHX_ XPV *p)
 }
 
 STATIC void
-more_xpv(pTHX)
+S_more_xpv(pTHX)
 {
     register XPV* xpv;
     register XPV* xpvend;
@@ -582,7 +582,7 @@ more_xpv(pTHX)
 #  define my_safefree(s) safefree(s)
 #else
 STATIC void* 
-my_safemalloc(pTHX_ MEM_SIZE size)
+S_my_safemalloc(pTHX_ MEM_SIZE size)
 {
     char *p;
     New(717, p, size, char);
@@ -733,12 +733,12 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	del_XPVMG(SvANY(sv));
 	break;
     default:
-	croak("Can't upgrade that kind of scalar");
+	Perl_croak(aTHX_ "Can't upgrade that kind of scalar");
     }
 
     switch (mt) {
     case SVt_NULL:
-	croak("Can't upgrade to undef");
+	Perl_croak(aTHX_ "Can't upgrade to undef");
     case SVt_IV:
 	SvANY(sv) = new_XIV();
 	SvIVX(sv)	= iv;
@@ -985,7 +985,7 @@ Perl_sv_setiv(pTHX_ register SV *sv, IV i)
     case SVt_PVIO:
 	{
 	    dTHR;
-	    croak("Can't coerce %s to integer in %s", sv_reftype(sv,0),
+	    Perl_croak(aTHX_ "Can't coerce %s to integer in %s", sv_reftype(sv,0),
 		  PL_op_desc[PL_op->op_type]);
 	}
     }
@@ -1039,7 +1039,7 @@ Perl_sv_setnv(pTHX_ register SV *sv, double num)
     case SVt_PVIO:
 	{
 	    dTHR;
-	    croak("Can't coerce %s to number in %s", sv_reftype(sv,0),
+	    Perl_croak(aTHX_ "Can't coerce %s to number in %s", sv_reftype(sv,0),
 		  PL_op_name[PL_op->op_type]);
 	}
     }
@@ -1056,7 +1056,7 @@ Perl_sv_setnv_mg(pTHX_ register SV *sv, double num)
 }
 
 STATIC void
-not_a_number(pTHX_ SV *sv)
+S_not_a_number(pTHX_ SV *sv)
 {
     dTHR;
     char tmpbuf[64];
@@ -1104,10 +1104,10 @@ not_a_number(pTHX_ SV *sv)
     *d = '\0';
 
     if (PL_op)
-	warner(WARN_NUMERIC, "Argument \"%s\" isn't numeric in %s", tmpbuf,
+	Perl_warner(aTHX_ WARN_NUMERIC, "Argument \"%s\" isn't numeric in %s", tmpbuf,
 		PL_op_name[PL_op->op_type]);
     else
-	warner(WARN_NUMERIC, "Argument \"%s\" isn't numeric", tmpbuf);
+	Perl_warner(aTHX_ WARN_NUMERIC, "Argument \"%s\" isn't numeric", tmpbuf);
 }
 
 /* the number can be converted to _integer_ with atol() */
@@ -1137,7 +1137,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
 		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
-		    warner(WARN_UNINITIALIZED, PL_warn_uninit);
+		    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	    }
 	    return 0;
 	}
@@ -1158,7 +1158,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	    {
 		dTHR;
 		if (ckWARN(WARN_UNINITIALIZED))
-		    warner(WARN_UNINITIALIZED, PL_warn_uninit);
+		    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	    }
 	    return 0;
 	}
@@ -1251,7 +1251,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
     else  {
 	dTHR;
 	if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
-	    warner(WARN_UNINITIALIZED, PL_warn_uninit);
+	    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	if (SvTYPE(sv) < SVt_IV)
 	    /* Typically the caller expects that sv_any is not NULL now.  */
 	    sv_upgrade(sv, SVt_IV);
@@ -1279,7 +1279,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
 		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
-		    warner(WARN_UNINITIALIZED, PL_warn_uninit);
+		    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	    }
 	    return 0;
 	}
@@ -1300,7 +1300,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	    {
 		dTHR;
 		if (ckWARN(WARN_UNINITIALIZED))
-		    warner(WARN_UNINITIALIZED, PL_warn_uninit);
+		    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	    }
 	    return 0;
 	}
@@ -1409,7 +1409,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 	    dTHR;
 	    if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
-		warner(WARN_UNINITIALIZED, PL_warn_uninit);
+		Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	}
 	if (SvTYPE(sv) < SVt_IV)
 	    /* Typically the caller expects that sv_any is not NULL now.  */
@@ -1448,7 +1448,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
 		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
-		    warner(WARN_UNINITIALIZED, PL_warn_uninit);
+		    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	    }
             return 0;
         }
@@ -1475,7 +1475,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 		    return (double)SvIVX(sv);
 	    }
 	    if (ckWARN(WARN_UNINITIALIZED))
-		warner(WARN_UNINITIALIZED, PL_warn_uninit);
+		Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	    return 0.0;
 	}
     }
@@ -1505,7 +1505,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
     else  {
 	dTHR;
 	if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
-	    warner(WARN_UNINITIALIZED, PL_warn_uninit);
+	    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	if (SvTYPE(sv) < SVt_NV)
 	    /* Typically the caller expects that sv_any is not NULL now.  */
 	    sv_upgrade(sv, SVt_NV);
@@ -1519,7 +1519,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 }
 
 STATIC IV
-asIV(pTHX_ SV *sv)
+S_asIV(pTHX_ SV *sv)
 {
     I32 numtype = looks_like_number(sv);
     double d;
@@ -1537,7 +1537,7 @@ asIV(pTHX_ SV *sv)
 }
 
 STATIC UV
-asUV(pTHX_ SV *sv)
+S_asUV(pTHX_ SV *sv)
 {
     I32 numtype = looks_like_number(sv);
 
@@ -1734,7 +1734,7 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
 		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
-		    warner(WARN_UNINITIALIZED, PL_warn_uninit);
+		    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	    }
             *lp = 0;
             return "";
@@ -1816,11 +1816,11 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 		}
 		tsv = NEWSV(0,0);
 		if (SvOBJECT(sv))
-		    sv_setpvf(tsv, "%s=%s", HvNAME(SvSTASH(sv)), s);
+		    Perl_sv_setpvf(aTHX_ tsv, "%s=%s", HvNAME(SvSTASH(sv)), s);
 		else
 		    sv_setpv(tsv, s);
 		/* XXXX 64-bit? */
-		sv_catpvf(tsv, "(0x%lx)", (unsigned long)sv);
+		Perl_sv_catpvf(aTHX_ tsv, "(0x%lx)", (unsigned long)sv);
 		goto tokensaveref;
 	    }
 	    *lp = strlen(s);
@@ -1848,7 +1848,7 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 	    {
 		dTHR;
 		if (ckWARN(WARN_UNINITIALIZED))
-		    warner(WARN_UNINITIALIZED, PL_warn_uninit);
+		    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	    }
 	    *lp = 0;
 	    return "";
@@ -1906,7 +1906,7 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
     else {
 	dTHR;
 	if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
-	    warner(WARN_UNINITIALIZED, PL_warn_uninit);
+	    Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	*lp = 0;
 	if (SvTYPE(sv) < SVt_PV)
 	    /* Typically the caller expects that sv_any is not NULL now.  */
@@ -2106,10 +2106,10 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
     case SVt_PVCV:
     case SVt_PVIO:
 	if (PL_op)
-	    croak("Bizarre copy of %s in %s", sv_reftype(sstr, 0),
+	    Perl_croak(aTHX_ "Bizarre copy of %s in %s", sv_reftype(sstr, 0),
 		PL_op_name[PL_op->op_type]);
 	else
-	    croak("Bizarre copy of %s", sv_reftype(sstr, 0));
+	    Perl_croak(aTHX_ "Bizarre copy of %s", sv_reftype(sstr, 0));
 	break;
 
     case SVt_PVGV:
@@ -2128,7 +2128,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 	    /* ahem, death to those who redefine active sort subs */
 	    else if (PL_curstackinfo->si_type == PERLSI_SORT
 		     && GvCV(dstr) && PL_sortcop == CvSTART(GvCV(dstr)))
-		croak("Can't redefine active sort subroutine %s",
+		Perl_croak(aTHX_ "Can't redefine active sort subroutine %s",
 		      GvNAME(dstr));
 	    (void)SvOK_off(dstr);
 	    GvINTRO_off(dstr);		/* one-shot flag */
@@ -2224,7 +2224,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 				 * active sort subs */
 				if (PL_curstackinfo->si_type == PERLSI_SORT &&
 				      PL_sortcop == CvSTART(cv))
-				    croak(
+				    Perl_croak(aTHX_ 
 				    "Can't redefine active sort subroutine %s",
 					  GvENAME((GV*)dstr));
 				if (ckWARN(WARN_REDEFINE) || (const_changed && const_sv)) {
@@ -2232,7 +2232,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 					  && HvNAME(GvSTASH(CvGV(cv)))
 					  && strEQ(HvNAME(GvSTASH(CvGV(cv))),
 						   "autouse")))
-					warner(WARN_REDEFINE, const_sv ? 
+					Perl_warner(aTHX_ WARN_REDEFINE, const_sv ? 
 					     "Constant subroutine %s redefined"
 					     : "Subroutine %s redefined", 
 					     GvENAME((GV*)dstr));
@@ -2370,7 +2370,7 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
     else {
 	if (dtype == SVt_PVGV) {
 	    if (ckWARN(WARN_UNSAFE))
-		warner(WARN_UNSAFE, "Undefined value assigned to typeglob");
+		Perl_warner(aTHX_ WARN_UNSAFE, "Undefined value assigned to typeglob");
 	}
 	else
 	    (void)SvOK_off(dstr);
@@ -2475,7 +2475,7 @@ Perl_sv_force_normal(pTHX_ register SV *sv)
     if (SvREADONLY(sv)) {
 	dTHR;
 	if (PL_curcop != &PL_compiling)
-	    croak(PL_no_modify);
+	    Perl_croak(aTHX_ PL_no_modify);
     }
     if (SvROK(sv))
 	sv_unref(sv);
@@ -2607,7 +2607,7 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     if (SvREADONLY(sv)) {
 	dTHR;
 	if (PL_curcop != &PL_compiling && !strchr("gBf", how))
-	    croak(PL_no_modify);
+	    Perl_croak(aTHX_ PL_no_modify);
     }
     if (SvMAGICAL(sv) || (how == 't' && SvTYPE(sv) >= SVt_PVMG)) {
 	if (SvMAGIC(sv) && (mg = mg_find(sv, how))) {
@@ -2749,7 +2749,7 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
 	SvRMAGICAL_on(sv);
 	break;
     default:
-	croak("Don't know how to handle magic of type '%c'", how);
+	Perl_croak(aTHX_ "Don't know how to handle magic of type '%c'", how);
     }
     mg_magical(sv);
     if (SvGMAGICAL(sv))
@@ -2769,7 +2769,7 @@ Perl_sv_unmagic(pTHX_ SV *sv, int type)
 	    MGVTBL* vtbl = mg->mg_virtual;
 	    *mgp = mg->mg_moremagic;
 	    if (vtbl && (vtbl->svt_free != NULL))
-		(VTBL->svt_free)(sv, mg);
+		(VTBL->svt_free)(aTHX_ sv, mg);
 	    if (mg->mg_ptr && mg->mg_type != 'g')
 		if (mg->mg_len >= 0)
 		    Safefree(mg->mg_ptr);
@@ -2797,11 +2797,11 @@ Perl_sv_rvweaken(pTHX_ SV *sv)
     if (!SvOK(sv))  /* let undefs pass */
 	return sv;
     if (!SvROK(sv))
-	croak("Can't weaken a nonreference");
+	Perl_croak(aTHX_ "Can't weaken a nonreference");
     else if (SvWEAKREF(sv)) {
 	dTHR;
 	if (ckWARN(WARN_MISC))
-	    warner(WARN_MISC, "Reference is already weak");
+	    Perl_warner(aTHX_ WARN_MISC, "Reference is already weak");
 	return sv;
     }
     tsv = SvRV(sv);
@@ -2812,7 +2812,7 @@ Perl_sv_rvweaken(pTHX_ SV *sv)
 }
 
 STATIC void
-sv_add_backref(pTHX_ SV *tsv, SV *sv)
+S_sv_add_backref(pTHX_ SV *tsv, SV *sv)
 {
     AV *av;
     MAGIC *mg;
@@ -2827,7 +2827,7 @@ sv_add_backref(pTHX_ SV *tsv, SV *sv)
 }
 
 STATIC void 
-sv_del_backref(pTHX_ SV *sv)
+S_sv_del_backref(pTHX_ SV *sv)
 {
     AV *av;
     SV **svp;
@@ -2835,7 +2835,7 @@ sv_del_backref(pTHX_ SV *sv)
     SV *tsv = SvRV(sv);
     MAGIC *mg;
     if (!SvMAGICAL(tsv) || !(mg = mg_find(tsv, '<')))
-	croak("panic: del_backref");
+	Perl_croak(aTHX_ "panic: del_backref");
     av = (AV *)mg->mg_obj;
     svp = AvARRAY(av);
     i = AvFILLp(av);
@@ -2859,7 +2859,7 @@ Perl_sv_insert(pTHX_ SV *bigstr, STRLEN offset, STRLEN len, char *little, STRLEN
     
 
     if (!bigstr)
-	croak("Can't modify non-existent substring");
+	Perl_croak(aTHX_ "Can't modify non-existent substring");
     SvPV_force(bigstr, curlen);
     if (offset + len > curlen) {
 	SvGROW(bigstr, offset+len+1);
@@ -2893,7 +2893,7 @@ Perl_sv_insert(pTHX_ SV *bigstr, STRLEN offset, STRLEN len, char *little, STRLEN
     bigend = big + SvCUR(bigstr);
 
     if (midend > bigend)
-	croak("panic: sv_insert");
+	Perl_croak(aTHX_ "panic: sv_insert");
 
     if (mid - big > bigend - midend) {	/* faster to shorten from end */
 	if (littlelen) {
@@ -2938,7 +2938,7 @@ Perl_sv_replace(pTHX_ register SV *sv, register SV *nsv)
     U32 refcnt = SvREFCNT(sv);
     SV_CHECK_THINKFIRST(sv);
     if (SvREFCNT(nsv) != 1)
-	warn("Reference miscount in sv_replace()");
+	Perl_warn(aTHX_ "Reference miscount in sv_replace()");
     if (SvMAGICAL(sv)) {
 	if (SvMAGICAL(nsv))
 	    mg_free(nsv);
@@ -3002,7 +3002,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 
 	    if (SvREFCNT(sv)) {
 		if (PL_in_clean_objs)
-		    croak("DESTROY created new reference to dead object '%s'",
+		    Perl_croak(aTHX_ "DESTROY created new reference to dead object '%s'",
 			  HvNAME(stash));
 		/* DESTROY gave object new lease on life */
 		return;
@@ -3169,7 +3169,7 @@ Perl_sv_free(pTHX_ SV *sv)
 	    SvREFCNT(sv) = (~(U32)0)/2;
 	    return;
 	}
-	warn("Attempt to free unreferenced scalar");
+	Perl_warn(aTHX_ "Attempt to free unreferenced scalar");
 	return;
     }
     ATOMIC_DEC_AND_TEST(refcount_is_zero, SvREFCNT(sv));
@@ -3177,7 +3177,7 @@ Perl_sv_free(pTHX_ SV *sv)
 	return;
 #ifdef DEBUGGING
     if (SvTEMP(sv)) {
-	warn("Attempt to free temp prematurely: SV 0x%lx", (unsigned long)sv);
+	Perl_warn(aTHX_ "Attempt to free temp prematurely: SV 0x%lx", (unsigned long)sv);
 	return;
     }
 #endif
@@ -3275,7 +3275,7 @@ Perl_sv_pos_b2u(pTHX_ register SV *sv, I32* offsetp)
 
     s = (U8*)SvPV(sv, len);
     if (len < *offsetp)
-	croak("panic: bad byte offset");
+	Perl_croak(aTHX_ "panic: bad byte offset");
     send = s + *offsetp;
     len = 0;
     while (s < send) {
@@ -3283,7 +3283,7 @@ Perl_sv_pos_b2u(pTHX_ register SV *sv, I32* offsetp)
 	++len;
     }
     if (s != send) {
-	warn("Malformed UTF-8 character");
+	Perl_warn(aTHX_ "Malformed UTF-8 character");
 	--len;
     }
     *offsetp = len;
@@ -3721,7 +3721,7 @@ Perl_sv_inc(pTHX_ register SV *sv)
 	if (SvREADONLY(sv)) {
 	    dTHR;
 	    if (PL_curcop != &PL_compiling)
-		croak(PL_no_modify);
+		Perl_croak(aTHX_ PL_no_modify);
 	}
 	if (SvROK(sv)) {
 	    IV i;
@@ -3822,7 +3822,7 @@ Perl_sv_dec(pTHX_ register SV *sv)
 	if (SvREADONLY(sv)) {
 	    dTHR;
 	    if (PL_curcop != &PL_compiling)
-		croak(PL_no_modify);
+		Perl_croak(aTHX_ PL_no_modify);
 	}
 	if (SvROK(sv)) {
 	    IV i;
@@ -3940,6 +3940,22 @@ Perl_newSVpvn(pTHX_ const char *s, STRLEN len)
     return sv;
 }
 
+#if defined(PERL_IMPLICIT_CONTEXT)
+SV *
+Perl_newSVpvf_nocontext(const char* pat, ...)
+{
+    dTHX;
+    register SV *sv;
+    va_list args;
+
+    new_SV(sv);
+    va_start(args, pat);
+    sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    va_end(args);
+    return sv;
+}
+#endif
+
 SV *
 Perl_newSVpvf(pTHX_ const char* pat, ...)
 {
@@ -3952,7 +3968,6 @@ Perl_newSVpvf(pTHX_ const char* pat, ...)
     va_end(args);
     return sv;
 }
-
 
 SV *
 Perl_newSVnv(pTHX_ double n)
@@ -4004,7 +4019,7 @@ Perl_newSVsv(pTHX_ register SV *old)
     if (!old)
 	return Nullsv;
     if (SvTYPE(old) == SVTYPEMASK) {
-	warn("semi-panic: attempt to dup freed string");
+	Perl_warn(aTHX_ "semi-panic: attempt to dup freed string");
 	return Nullsv;
     }
     new_SV(sv);
@@ -4105,11 +4120,11 @@ Perl_sv_2io(pTHX_ SV *sv)
 	gv = (GV*)sv;
 	io = GvIO(gv);
 	if (!io)
-	    croak("Bad filehandle: %s", GvNAME(gv));
+	    Perl_croak(aTHX_ "Bad filehandle: %s", GvNAME(gv));
 	break;
     default:
 	if (!SvOK(sv))
-	    croak(PL_no_usym, "filehandle");
+	    Perl_croak(aTHX_ PL_no_usym, "filehandle");
 	if (SvROK(sv))
 	    return sv_2io(SvRV(sv));
 	gv = gv_fetchpv(SvPV(sv,n_a), FALSE, SVt_PVIO);
@@ -4118,7 +4133,7 @@ Perl_sv_2io(pTHX_ SV *sv)
 	else
 	    io = 0;
 	if (!io)
-	    croak("Bad filehandle: %s", SvPV(sv,n_a));
+	    Perl_croak(aTHX_ "Bad filehandle: %s", SvPV(sv,n_a));
 	break;
     }
     return io;
@@ -4166,7 +4181,7 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 	    else if(isGV(sv))
 		gv = (GV*)sv;
 	    else
-		croak("Not a subroutine reference");
+		Perl_croak(aTHX_ "Not a subroutine reference");
 	}
 	else if (isGV(sv))
 	    gv = (GV*)sv;
@@ -4191,7 +4206,7 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 		   Nullop);
 	    LEAVE;
 	    if (!GvCVu(gv))
-		croak("Unable to create sub named \"%s\"", SvPV(sv,n_a));
+		Perl_croak(aTHX_ "Unable to create sub named \"%s\"", SvPV(sv,n_a));
 	}
 	return GvCVu(gv);
     }
@@ -4290,7 +4305,7 @@ Perl_sv_pvn_force(pTHX_ SV *sv, STRLEN *lp)
     else {
 	if (SvTYPE(sv) > SVt_PVLV && SvTYPE(sv) != SVt_PVFM) {
 	    dTHR;
-	    croak("Can't coerce %s to string in %s", sv_reftype(sv,0),
+	    Perl_croak(aTHX_ "Can't coerce %s to string in %s", sv_reftype(sv,0),
 		PL_op_name[PL_op->op_type]);
 	}
 	else
@@ -4442,11 +4457,11 @@ Perl_sv_bless(pTHX_ SV *sv, HV *stash)
     dTHR;
     SV *tmpRef;
     if (!SvROK(sv))
-        croak("Can't bless non-reference value");
+        Perl_croak(aTHX_ "Can't bless non-reference value");
     tmpRef = SvRV(sv);
     if (SvFLAGS(tmpRef) & (SVs_OBJECT|SVf_READONLY)) {
 	if (SvREADONLY(tmpRef))
-	    croak(PL_no_modify);
+	    Perl_croak(aTHX_ PL_no_modify);
 	if (SvOBJECT(tmpRef)) {
 	    if (SvTYPE(tmpRef) != SVt_PVIO)
 		--PL_sv_objcount;
@@ -4468,7 +4483,7 @@ Perl_sv_bless(pTHX_ SV *sv, HV *stash)
 }
 
 STATIC void
-sv_unglob(pTHX_ SV *sv)
+S_sv_unglob(pTHX_ SV *sv)
 {
     assert(SvTYPE(sv) == SVt_PVGV);
     SvFAKE_off(sv);
@@ -4553,6 +4568,30 @@ Perl_sv_setpviv_mg(pTHX_ SV *sv, IV iv)
     SvSETMAGIC(sv);
 }
 
+#if defined(PERL_IMPLICIT_CONTEXT)
+void
+Perl_sv_setpvf_nocontext(SV *sv, const char* pat, ...)
+{
+    dTHX;
+    va_list args;
+    va_start(args, pat);
+    sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    va_end(args);
+}
+
+
+void
+Perl_sv_setpvf_mg_nocontext(SV *sv, const char* pat, ...)
+{
+    dTHX;
+    va_list args;
+    va_start(args, pat);
+    sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    va_end(args);
+    SvSETMAGIC(sv);
+}
+#endif
+
 void
 Perl_sv_setpvf(pTHX_ SV *sv, const char* pat, ...)
 {
@@ -4572,6 +4611,29 @@ Perl_sv_setpvf_mg(pTHX_ SV *sv, const char* pat, ...)
     va_end(args);
     SvSETMAGIC(sv);
 }
+
+#if defined(PERL_IMPLICIT_CONTEXT)
+void
+Perl_sv_catpvf_nocontext(SV *sv, const char* pat, ...)
+{
+    dTHX;
+    va_list args;
+    va_start(args, pat);
+    sv_vcatpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    va_end(args);
+}
+
+void
+Perl_sv_catpvf_mg_nocontext(SV *sv, const char* pat, ...)
+{
+    dTHX;
+    va_list args;
+    va_start(args, pat);
+    sv_vcatpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    va_end(args);
+    SvSETMAGIC(sv);
+}
+#endif
 
 void
 Perl_sv_catpvf(pTHX_ SV *sv, const char* pat, ...)
@@ -4987,7 +5049,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		i = PERL_INT_MIN;
 		(void)frexp(nv, &i);
 		if (i == PERL_INT_MIN)
-		    die("panic: frexp");
+		    Perl_die(aTHX_ "panic: frexp");
 		if (i > 0)
 		    need = BIT_DIGITS(i);
 	    }
@@ -5064,14 +5126,14 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if (!args && ckWARN(WARN_PRINTF) &&
 		  (PL_op->op_type == OP_PRTF || PL_op->op_type == OP_SPRINTF)) {
 		SV *msg = sv_newmortal();
-		sv_setpvf(msg, "Invalid conversion in %s: ",
+		Perl_sv_setpvf(aTHX_ msg, "Invalid conversion in %s: ",
 			  (PL_op->op_type == OP_PRTF) ? "printf" : "sprintf");
 		if (c)
-		    sv_catpvf(msg, isPRINT(c) ? "\"%%%c\"" : "\"%%\\%03o\"",
+		    Perl_sv_catpvf(aTHX_ msg, isPRINT(c) ? "\"%%%c\"" : "\"%%\\%03o\"",
 			      c & 0xFF);
 		else
 		    sv_catpv(msg, "end of string");
-		warner(WARN_PRINTF, "%_", msg); /* yes, this is reentrant */
+		Perl_warner(aTHX_ WARN_PRINTF, "%_", msg); /* yes, this is reentrant */
 	    }
 
 	    /* output mangled stuff ... */

@@ -82,7 +82,7 @@ Perl_safesysmalloc(pTHX_ MEM_SIZE size)
 #endif /* HAS_64K_LIMIT */
 #ifdef DEBUGGING
     if ((long)size < 0)
-	croak("panic: malloc");
+	Perl_croak(aTHX_ "panic: malloc");
 #endif
     ptr = PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
 #if !(defined(I286) || defined(atarist))
@@ -128,7 +128,7 @@ Perl_safesysrealloc(pTHX_ Malloc_t where,MEM_SIZE size)
 	return safesysmalloc(size);
 #ifdef DEBUGGING
     if ((long)size < 0)
-	croak("panic: realloc");
+	Perl_croak(aTHX_ "panic: realloc");
 #endif
     ptr = PerlMem_realloc(where,size);
 
@@ -188,7 +188,7 @@ Perl_safesyscalloc(pTHX_ MEM_SIZE count, MEM_SIZE size)
 #endif /* HAS_64K_LIMIT */
 #ifdef DEBUGGING
     if ((long)size < 0 || (long)count < 0)
-	croak("panic: calloc");
+	Perl_croak(aTHX_ "panic: calloc");
 #endif
     size *= count;
     ptr = PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
@@ -297,7 +297,7 @@ Perl_safexcalloc(pTHX_ I32 x,MEM_SIZE count, MEM_SIZE size)
 }
 
 STATIC void
-xstat(pTHX_ int flag)
+S_xstat(pTHX_ int flag)
 {
     register I32 i, j, total = 0;
     I32 subtot[MAXYCOUNT];
@@ -527,7 +527,7 @@ Perl_new_collate(pTHX_ const char *newcoll)
 	  Size_t fb = strxfrm(xbuf, "ab", XFRMBUFSIZE);
 	  SSize_t mult = fb - fa;
 	  if (mult < 1)
-	      croak("strxfrm() gets absurd");
+	      Perl_croak(aTHX_ "strxfrm() gets absurd");
 	  PL_collxfrm_base = (fa > mult) ? (fa - mult) : 0;
 	  PL_collxfrm_mult = mult;
 	}
@@ -1307,10 +1307,10 @@ Perl_savepvn(pTHX_ const char *sv, register I32 len)
     return newaddr;
 }
 
-/* the SV for form() and mess() is not kept in an arena */
+/* the SV for Perl_form() and mess() is not kept in an arena */
 
 STATIC SV *
-mess_alloc(pTHX)
+S_mess_alloc(pTHX)
 {
     dTHR;
     SV *sv;
@@ -1331,6 +1331,20 @@ mess_alloc(pTHX)
     PL_mess_sv = sv;
     return sv;
 }
+
+#ifdef PERL_IMPLICIT_CONTEXT
+char *
+Perl_form_nocontext(const char* pat, ...)
+{
+    dTHX;
+    SV *sv = mess_alloc();
+    va_list args;
+    va_start(args, pat);
+    sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
+    va_end(args);
+    return SvPVX(sv);
+}
+#endif
 
 char *
 Perl_form(pTHX_ const char* pat, ...)
@@ -1353,12 +1367,12 @@ Perl_mess(pTHX_ const char *pat, va_list *args)
     if (!SvCUR(sv) || *(SvEND(sv) - 1) != '\n') {
 	dTHR;
 	if (PL_curcop->cop_line)
-	    sv_catpvf(sv, " at %_ line %ld",
+	    Perl_sv_catpvf(aTHX_ sv, " at %_ line %ld",
 		      GvSV(PL_curcop->cop_filegv), (long)PL_curcop->cop_line);
 	if (GvIO(PL_last_in_gv) && IoLINES(GvIOp(PL_last_in_gv))) {
 	    bool line_mode = (RsSIMPLE(PL_rs) &&
 			      SvCUR(PL_rs) == 1 && *SvPVX(PL_rs) == '\n');
-	    sv_catpvf(sv, ", <%s> %s %ld",
+	    Perl_sv_catpvf(aTHX_ sv, ", <%s> %s %ld",
 		      PL_last_in_gv == PL_argvgv ? "" : GvNAME(PL_last_in_gv),
 		      line_mode ? "line" : "chunk", 
 		      (long)IoLINES(GvIOp(PL_last_in_gv)));
@@ -1368,11 +1382,10 @@ Perl_mess(pTHX_ const char *pat, va_list *args)
     return sv;
 }
 
-OP *
-Perl_die(pTHX_ const char* pat, ...)
+static OP *
+do_die(pTHX_ const char* pat, va_list *args)
 {
     dTHR;
-    va_list args;
     char *message;
     int was_in_eval = PL_in_eval;
     HV *stash;
@@ -1385,21 +1398,19 @@ Perl_die(pTHX_ const char* pat, ...)
 			  "%p: die: curstack = %p, mainstack = %p\n",
 			  thr, PL_curstack, PL_mainstack));
 
-    va_start(args, pat);
     if (pat) {
-	msv = mess(pat, &args);
+	msv = mess(pat, args);
 	message = SvPV(msv,msglen);
     }
     else {
 	message = Nullch;
     }
-    va_end(args);
 
     DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			  "%p: die: message = %s\ndiehook = %p\n",
 			  thr, message, PL_diehook));
     if (PL_diehook) {
-	/* sv_2cv might call croak() */
+	/* sv_2cv might call Perl_croak() */
 	SV *olddiehook = PL_diehook;
 	ENTER;
 	SAVESPTR(PL_diehook);
@@ -1439,11 +1450,35 @@ Perl_die(pTHX_ const char* pat, ...)
     return PL_restartop;
 }
 
-void
-Perl_croak(pTHX_ const char* pat, ...)
+#ifdef PERL_IMPLICIT_CONTEXT
+OP *
+Perl_die_nocontext(const char* pat, ...)
+{
+    dTHX;
+    OP *o;
+    va_list args;
+    va_start(args, pat);
+    o = do_die(aTHX_ pat, &args);
+    va_end(args);
+    return o;
+}
+#endif
+
+OP *
+Perl_die(pTHX_ const char* pat, ...)
+{
+    OP *o;
+    va_list args;
+    va_start(args, pat);
+    o = do_die(aTHX_ pat, &args);
+    va_end(args);
+    return o;
+}
+
+STATIC void
+S_do_croak(pTHX_ const char* pat, va_list *args)
 {
     dTHR;
-    va_list args;
     char *message;
     HV *stash;
     GV *gv;
@@ -1451,13 +1486,11 @@ Perl_croak(pTHX_ const char* pat, ...)
     SV *msv;
     STRLEN msglen;
 
-    va_start(args, pat);
-    msv = mess(pat, &args);
+    msv = mess(pat, args);
     message = SvPV(msv,msglen);
-    va_end(args);
     DEBUG_S(PerlIO_printf(PerlIO_stderr(), "croak: 0x%lx %s", (unsigned long) thr, message));
     if (PL_diehook) {
-	/* sv_2cv might call croak() */
+	/* sv_2cv might call Perl_croak() */
 	SV *olddiehook = PL_diehook;
 	ENTER;
 	SAVESPTR(PL_diehook);
@@ -1500,10 +1533,32 @@ Perl_croak(pTHX_ const char* pat, ...)
     my_failure_exit();
 }
 
+#ifdef PERL_IMPLICIT_CONTEXT
 void
-Perl_warn(pTHX_ const char* pat,...)
+Perl_croak_nocontext(const char *pat, ...)
+{
+    dTHX;
+    va_list args;
+    va_start(args, pat);
+    do_croak(pat, &args);
+    /* NOTREACHED */
+    va_end(args);
+}
+#endif /* PERL_IMPLICIT_CONTEXT */
+
+void
+Perl_croak(pTHX_ const char *pat, ...)
 {
     va_list args;
+    va_start(args, pat);
+    do_croak(pat, &args);
+    /* NOTREACHED */
+    va_end(args);
+}
+
+STATIC void
+S_do_warn(pTHX_ const char* pat, va_list *args)
+{
     char *message;
     HV *stash;
     GV *gv;
@@ -1511,13 +1566,11 @@ Perl_warn(pTHX_ const char* pat,...)
     SV *msv;
     STRLEN msglen;
 
-    va_start(args, pat);
-    msv = mess(pat, &args);
+    msv = mess(pat, args);
     message = SvPV(msv, msglen);
-    va_end(args);
 
     if (PL_warnhook) {
-	/* sv_2cv might call warn() */
+	/* sv_2cv might call Perl_warn() */
 	dTHR;
 	SV *oldwarnhook = PL_warnhook;
 	ENTER;
@@ -1556,6 +1609,27 @@ Perl_warn(pTHX_ const char* pat,...)
     (void)PerlIO_flush(PerlIO_stderr());
 }
 
+#ifdef PERL_IMPLICIT_CONTEXT
+void
+Perl_warn_nocontext(const char *pat, ...)
+{
+    dTHX;
+    va_list args;
+    va_start(args, pat);
+    do_warn(pat, &args);
+    va_end(args);
+}
+#endif /* PERL_IMPLICIT_CONTEXT */
+
+void
+Perl_warn(pTHX_ const char *pat, ...)
+{
+    va_list args;
+    va_start(args, pat);
+    do_warn(pat, &args);
+    va_end(args);
+}
+
 void
 Perl_warner(pTHX_ U32  err, const char* pat,...)
 {
@@ -1578,7 +1652,7 @@ Perl_warner(pTHX_ U32  err, const char* pat,...)
         DEBUG_S(PerlIO_printf(PerlIO_stderr(), "croak: 0x%lx %s", (unsigned long) thr, message));
 #endif /* USE_THREADS */
         if (PL_diehook) {
-            /* sv_2cv might call croak() */
+            /* sv_2cv might call Perl_croak() */
             SV *olddiehook = PL_diehook;
             ENTER;
             SAVESPTR(PL_diehook);
@@ -1613,7 +1687,7 @@ Perl_warner(pTHX_ U32  err, const char* pat,...)
     }
     else {
         if (PL_warnhook) {
-            /* sv_2cv might call warn() */
+            /* sv_2cv might call Perl_warn() */
             dTHR;
             SV *oldwarnhook = PL_warnhook;
             ENTER;
@@ -1925,7 +1999,7 @@ Perl_my_htonl(pTHX_ long l)
     return u.result;
 #else
 #if ((BYTEORDER - 0x1111) & 0x444) || !(BYTEORDER & 0xf)
-    croak("Unknown BYTEORDER\n");
+    Perl_croak(aTHX_ "Unknown BYTEORDER\n");
 #else
     register I32 o;
     register I32 s;
@@ -1954,7 +2028,7 @@ Perl_my_ntohl(pTHX_ long l)
     return u.l;
 #else
 #if ((BYTEORDER - 0x1111) & 0x444) || !(BYTEORDER & 0xf)
-    croak("Unknown BYTEORDER\n");
+    Perl_croak(aTHX_ "Unknown BYTEORDER\n");
 #else
     register I32 o;
     register I32 s;
@@ -2064,7 +2138,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 		PerlLIO_close(pp[1]);
 	    }
 	    if (!doexec)
-		croak("Can't fork");
+		Perl_croak(aTHX_ "Can't fork");
 	    return Nullfp;
 	}
 	sleep(5);
@@ -2139,7 +2213,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 	}
 	if (n) {			/* Error */
 	    if (n != sizeof(int))
-		croak("panic: kid popen errno read");
+		Perl_croak(aTHX_ "panic: kid popen errno read");
 	    PerlLIO_close(pp[0]);
 	    errno = errkid;		/* Propagate errno from kid */
 	    return Nullfp;
@@ -2422,7 +2496,7 @@ Perl_wait4pid(pTHX_ int pid, int *statusp, int flags)
     {
 	I32 result;
 	if (flags)
-	    croak("Can't do waitpid with flags");
+	    Perl_croak(aTHX_ "Can't do waitpid with flags");
 	else {
 	    while ((result = PerlProc_wait(statusp)) != pid && pid > 0 && result >= 0)
 		pidgone(result,*statusp);
@@ -2613,7 +2687,7 @@ Perl_scan_bin(pTHX_ char *start, I32 len, I32 *retlen)
     while (len && *s >= '0' && *s <= '1') {
       register UV n = retval << 1;
       if (!overflowed && (n >> 1) != retval) {
-          warn("Integer overflow in binary number");
+          Perl_warn(aTHX_ "Integer overflow in binary number");
           overflowed = TRUE;
       }
       retval = n | (*s++ - '0');
@@ -2622,7 +2696,7 @@ Perl_scan_bin(pTHX_ char *start, I32 len, I32 *retlen)
     if (len && (*s >= '2' && *s <= '9')) {
       dTHR;
       if (ckWARN(WARN_UNSAFE))
-          warner(WARN_UNSAFE, "Illegal binary digit '%c' ignored", *s);
+          Perl_warner(aTHX_ WARN_UNSAFE, "Illegal binary digit '%c' ignored", *s);
     }
     *retlen = s - start;
     return retval;
@@ -2637,7 +2711,7 @@ Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
     while (len && *s >= '0' && *s <= '7') {
 	register UV n = retval << 3;
 	if (!overflowed && (n >> 3) != retval) {
-	    warn("Integer overflow in octal number");
+	    Perl_warn(aTHX_ "Integer overflow in octal number");
 	    overflowed = TRUE;
 	}
 	retval = n | (*s++ - '0');
@@ -2646,7 +2720,7 @@ Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
     if (len && (*s == '8' || *s == '9')) {
 	dTHR;
 	if (ckWARN(WARN_OCTAL))
-	    warner(WARN_OCTAL, "Illegal octal digit '%c' ignored", *s);
+	    Perl_warner(aTHX_ WARN_OCTAL, "Illegal octal digit '%c' ignored", *s);
     }
     *retlen = s - start;
     return retval;
@@ -2670,13 +2744,13 @@ Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
 		dTHR;
 		--s;
 		if (ckWARN(WARN_UNSAFE))
-		    warner(WARN_UNSAFE,"Illegal hex digit '%c' ignored", *s);
+		    Perl_warner(aTHX_ WARN_UNSAFE,"Illegal hex digit '%c' ignored", *s);
 		break;
 	    }
 	}
 	n = retval << 4;
 	if (!overflowed && (n >> 4) != retval) {
-	    warn("Integer overflow in hex number");
+	    Perl_warn(aTHX_ "Integer overflow in hex number");
 	    overflowed = TRUE;
 	}
 	retval = n | ((tmp - PL_hexdigit) & 15);
@@ -2885,7 +2959,7 @@ Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext, I32 f
 	    seen_dot = 1;			/* Disable message. */
 	if (!xfound) {
 	    if (flags & 1) {			/* do or die? */
-	        croak("Can't %s %s%s%s",
+	        Perl_croak(aTHX_ "Can't %s %s%s%s",
 		      (xfailed ? "execute" : "find"),
 		      (xfailed ? xfailed : scriptname),
 		      (xfailed ? "" : " on PATH"),
@@ -2963,7 +3037,7 @@ Perl_cond_wait(pTHX_ perl_cond *cp)
     perl_cond cond;
 
     if (thr->i.next_run == thr)
-	croak("panic: perl_cond_wait called by last runnable thread");
+	Perl_croak(aTHX_ "panic: perl_cond_wait called by last runnable thread");
     
     New(666, cond, 1, struct perl_wait_queue);
     cond->thread = thr;
@@ -2983,7 +3057,7 @@ Perl_getTHR(pTHX)
     pthread_addr_t t;
 
     if (pthread_getspecific(PL_thr_key, &t))
-	croak("panic: pthread_getspecific");
+	Perl_croak(aTHX_ "panic: pthread_getspecific");
     return (struct perl_thread *) t;
 }
 #endif
@@ -3036,7 +3110,9 @@ Perl_condpair_magic(pTHX_ SV *sv)
 struct perl_thread *
 Perl_new_struct_thread(pTHX_ struct perl_thread *t)
 {
+#ifndef PERL_IMPLICIT_CONTEXT
     struct perl_thread *thr;
+#endif
     SV *sv;
     SV **svp;
     I32 i;
@@ -3058,10 +3134,10 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     Zero(thr, 1, struct perl_thread);
 #endif
 
-    PL_protect = FUNC_NAME_TO_PTR(default_protect);
+    PL_protect = FUNC_NAME_TO_PTR(Perl_default_protect);
 
     thr->oursv = sv;
-    init_stacks(ARGS);
+    init_stacks();
 
     PL_curcop = &PL_compiling;
     thr->cvcache = newHV();
@@ -3090,8 +3166,8 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
 
     PL_statname = NEWSV(66,0);
     PL_maxscream = -1;
-    PL_regcompp = FUNC_NAME_TO_PTR(pregcomp);
-    PL_regexecp = FUNC_NAME_TO_PTR(regexec_flags);
+    PL_regcompp = FUNC_NAME_TO_PTR(Perl_pregcomp);
+    PL_regexecp = FUNC_NAME_TO_PTR(Perl_regexec_flags);
     PL_regindent = 0;
     PL_reginterp_cnt = 0;
     PL_lastscream = Nullsv;

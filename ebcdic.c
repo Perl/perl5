@@ -15,7 +15,7 @@ ebcdic_control(int ch)
   	              ch = toupper(ch);
  
  	       if ((ctlp = strchr(controllablechars, ch)) == 0) {
-  	              die("unrecognised control character '%c'\n", ch);
+  	              Perl_die(aTHX_ "unrecognised control character '%c'\n", ch);
      	       }
  
         	if (ctlp == controllablechars)
@@ -28,6 +28,6 @@ ebcdic_control(int ch)
         	else if (0 < ch && ch < (sizeof(controllablechars) - 1))
                 	return(controllablechars[ch+1]);
         	else
-                	die("invalid control request: '\\%03o'\n", ch & 0xFF);
+                	Perl_die(aTHX_ "invalid control request: '\\%03o'\n", ch & 0xFF);
 	}
 }

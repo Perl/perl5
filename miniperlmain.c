@@ -13,6 +13,7 @@
 
 static void xs_init (pTHX);
 static PerlInterpreter *my_perl;
+static struct perl_thread *thr;		/* XXXXXX testing */
 
 #if defined (__MINT__) || defined (atarist)
 /* The Atari operating system doesn't have a dynamic stack.  The

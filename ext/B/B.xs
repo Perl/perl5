@@ -86,7 +86,7 @@ static int walkoptree_debug = 0;	/* Flag for walkoptree debug hook */
 static SV *specialsv_list[4];
 
 static opclass
-cc_opclass(OP *o)
+cc_opclass(pTHX_ OP *o)
 {
     if (!o)
 	return OPc_NULL;
@@ -188,13 +188,13 @@ cc_opclass(OP *o)
 }
 
 static char *
-cc_opclassname(OP *o)
+cc_opclassname(pTHX_ OP *o)
 {
-    return opclassnames[cc_opclass(o)];
+    return opclassnames[cc_opclass(aTHX_ o)];
 }
 
 static SV *
-make_sv_object(SV *arg, SV *sv)
+make_sv_object(pTHX_ SV *arg, SV *sv)
 {
     char *type = 0;
     IV iv;
@@ -214,14 +214,14 @@ make_sv_object(SV *arg, SV *sv)
 }
 
 static SV *
-make_mg_object(SV *arg, MAGIC *mg)
+make_mg_object(pTHX_ SV *arg, MAGIC *mg)
 {
     sv_setiv(newSVrv(arg, "B::MAGIC"), (IV)mg);
     return arg;
 }
 
 static SV *
-cstring(SV *sv)
+cstring(pTHX_ SV *sv)
 {
     SV *sstr = newSVpvn("", 0);
     STRLEN len;
@@ -274,7 +274,7 @@ cstring(SV *sv)
 }
 
 static SV *
-cchar(SV *sv)
+cchar(pTHX_ SV *sv)
 {
     SV *sstr = newSVpvn("'", 1);
     STRLEN n_a;
@@ -314,7 +314,7 @@ cchar(SV *sv)
 }
 
 void
-walkoptree(SV *opsv, char *method)
+walkoptree(pTHX_ SV *opsv, char *method)
 {
     dSP;
     OP *o;
@@ -337,8 +337,8 @@ walkoptree(SV *opsv, char *method)
 	OP *kid;
 	for (kid = ((UNOP*)o)->op_first; kid; kid = kid->op_sibling) {
 	    /* Use the same opsv. Rely on methods not to mess it up. */
-	    sv_setiv(newSVrv(opsv, cc_opclassname(kid)), (IV)kid);
-	    walkoptree(opsv, method);
+	    sv_setiv(newSVrv(opsv, cc_opclassname(aTHX_ kid)), (IV)kid);
+	    walkoptree(aTHX_ opsv, method);
 	}
     }
 }
@@ -431,6 +431,8 @@ void
 walkoptree(opsv, method)
 	SV *	opsv
 	char *	method
+    CODE:
+	walkoptree(aTHX_ opsv, method);
 
 int
 walkoptree_debug(...)
@@ -527,10 +529,18 @@ minus_c()
 SV *
 cstring(sv)
 	SV *	sv
+    CODE:
+	RETVAL = cstring(aTHX_ sv);
+    OUTPUT:
+	RETVAL
 
 SV *
 cchar(sv)
 	SV *	sv
+    CODE:
+	RETVAL = cchar(aTHX_ sv);
+    OUTPUT:
+	RETVAL
 
 void
 threadsv_names()
@@ -664,7 +674,7 @@ PMOP_pmreplroot(o)
 		     (IV)root);
 	}
 	else {
-	    sv_setiv(newSVrv(ST(0), cc_opclassname(root)), (IV)root);
+	    sv_setiv(newSVrv(ST(0), cc_opclassname(aTHX_ root)), (IV)root);
 	}
 
 B::OP
@@ -864,7 +874,7 @@ SvMAGIC(sv)
 	MAGIC *	mg = NO_INIT
     PPCODE:
 	for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic)
-	    XPUSHs(make_mg_object(sv_newmortal(), mg));
+	    XPUSHs(make_mg_object(aTHX_ sv_newmortal(), mg));
 
 MODULE = B	PACKAGE = B::PVMG
 
@@ -1103,7 +1113,7 @@ AvARRAY(av)
 	    SV **svp = AvARRAY(av);
 	    I32 i;
 	    for (i = 0; i <= AvFILL(av); i++)
-		XPUSHs(make_sv_object(sv_newmortal(), svp[i]));
+		XPUSHs(make_sv_object(aTHX_ sv_newmortal(), svp[i]));
 	}
 
 MODULE = B	PACKAGE = B::AV
@@ -1204,6 +1214,6 @@ HvARRAY(hv)
 	    EXTEND(sp, HvKEYS(hv) * 2);
 	    while (sv = hv_iternextsv(hv, &key, &len)) {
 		PUSHs(newSVpvn(key, len));
-		PUSHs(make_sv_object(sv_newmortal(), sv));
+		PUSHs(make_sv_object(aTHX_ sv_newmortal(), sv));
 	    }
 	}

@@ -24,7 +24,7 @@ GV *
 Perl_gv_AVadd(pTHX_ register GV *gv)
 {
     if (!gv || SvTYPE((SV*)gv) != SVt_PVGV)
-	croak("Bad symbol for array");
+	Perl_croak(aTHX_ "Bad symbol for array");
     if (!GvAV(gv))
 	GvAV(gv) = newAV();
     return gv;
@@ -34,7 +34,7 @@ GV *
 Perl_gv_HVadd(pTHX_ register GV *gv)
 {
     if (!gv || SvTYPE((SV*)gv) != SVt_PVGV)
-	croak("Bad symbol for hash");
+	Perl_croak(aTHX_ "Bad symbol for hash");
     if (!GvHV(gv))
 	GvHV(gv) = newHV();
     return gv;
@@ -44,7 +44,7 @@ GV *
 Perl_gv_IOadd(pTHX_ register GV *gv)
 {
     if (!gv || SvTYPE((SV*)gv) != SVt_PVGV)
-	croak("Bad symbol for filehandle");
+	Perl_croak(aTHX_ "Bad symbol for filehandle");
     if (!GvIOp(gv))
 	GvIOp(gv) = newIO();
     return gv;
@@ -137,7 +137,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 }
 
 STATIC void
-gv_init_sv(pTHX_ GV *gv, I32 sv_type)
+S_gv_init_sv(pTHX_ GV *gv, I32 sv_type)
 {
     switch (sv_type) {
     case SVt_PVIO:
@@ -164,10 +164,10 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
     if (!stash)
 	return 0;
     if ((level > 100) || (level < -100))
-	croak("Recursive inheritance detected while looking for method '%s' in package '%s'",
+	Perl_croak(aTHX_ "Recursive inheritance detected while looking for method '%s' in package '%s'",
 	      name, HvNAME(stash));
 
-    DEBUG_o( deb("Looking for method %s in package %s\n",name,HvNAME(stash)) );
+    DEBUG_o( Perl_deb(aTHX_ "Looking for method %s in package %s\n",name,HvNAME(stash)) );
 
     gvp = (GV**)hv_fetch(stash, name, len, (level >= 0));
     if (!gvp)
@@ -207,7 +207,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 		dTHR;		/* just for SvREFCNT_dec */
 		gvp = (GV**)hv_fetch(stash, "ISA", 3, TRUE);
 		if (!gvp || !(gv = *gvp))
-		    croak("Cannot create %s::ISA", HvNAME(stash));
+		    Perl_croak(aTHX_ "Cannot create %s::ISA", HvNAME(stash));
 		if (SvTYPE(gv) != SVt_PVGV)
 		    gv_init(gv, stash, "ISA", 3, TRUE);
 		SvREFCNT_dec(GvAV(gv));
@@ -226,7 +226,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 	    if (!basestash) {
 		dTHR;		/* just for ckWARN */
 		if (ckWARN(WARN_MISC))
-		    warner(WARN_MISC, "Can't locate package %s for @%s::ISA",
+		    Perl_warner(aTHX_ WARN_MISC, "Can't locate package %s for @%s::ISA",
 			SvPVX(sv), HvNAME(stash));
 		continue;
 	    }
@@ -300,10 +300,10 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 	    --nsplit;
 	if ((nsplit - origname) == 5 && strnEQ(origname, "SUPER", 5)) {
 	    /* ->SUPER::method should really be looked up in original stash */
-	    SV *tmpstr = sv_2mortal(newSVpvf("%s::SUPER",
+	    SV *tmpstr = sv_2mortal(Perl_newSVpvf(aTHX_ "%s::SUPER",
 					     HvNAME(PL_curcop->cop_stash)));
 	    stash = gv_stashpvn(SvPVX(tmpstr), SvCUR(tmpstr), TRUE);
-	    DEBUG_o( deb("Treating %s as %s::%s\n",
+	    DEBUG_o( Perl_deb(aTHX_ "Treating %s as %s::%s\n",
 			 origname, HvNAME(stash), name) );
 	}
 	else
@@ -363,7 +363,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
      */
     if (ckWARN(WARN_DEPRECATED) && !method && 
 	(GvCVGEN(gv) || GvSTASH(gv) != stash))
-	warner(WARN_DEPRECATED,
+	Perl_warner(aTHX_ WARN_DEPRECATED,
 	  "Use of inherited AUTOLOAD for non-method %s::%.*s() is deprecated",
 	     HvNAME(stash), (int)len, name);
 
@@ -548,12 +548,12 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 			     sv_type == SVt_PVAV && !GvIMPORTED_AV(*gvp) ||
 			     sv_type == SVt_PVHV && !GvIMPORTED_HV(*gvp) )
 		    {
-			warn("Variable \"%c%s\" is not imported",
+			Perl_warn(aTHX_ "Variable \"%c%s\" is not imported",
 			    sv_type == SVt_PVAV ? '@' :
 			    sv_type == SVt_PVHV ? '%' : '$',
 			    name);
 			if (GvCVu(*gvp))
-			    warn("(Did you mean &%s instead?)\n", name);
+			    Perl_warn(aTHX_ "(Did you mean &%s instead?)\n", name);
 			stash = 0;
 		    }
 		}
@@ -576,10 +576,10 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 				 : (sv_type == SVt_PVHV) ? '%'
 				 : 0);
 	    if (sv_type_char) 
-		warn("Global symbol \"%c%s\" requires explicit package name",
+		Perl_warn(aTHX_ "Global symbol \"%c%s\" requires explicit package name",
 		     sv_type_char, name);
 	    else
-		warn("Global symbol \"%s\" requires explicit package name",
+		Perl_warn(aTHX_ "Global symbol \"%s\" requires explicit package name",
 		     name);
 	}
 	++PL_error_count;
@@ -610,7 +610,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     /* Adding a new symbol */
 
     if (add & GV_ADDWARN)
-	warn("Had to create %s unexpectedly", nambeg);
+	Perl_warn(aTHX_ "Had to create %s unexpectedly", nambeg);
     gv_init(gv, stash, name, len, add & GV_ADDMULTI);
     gv_init_sv(gv, sv_type);
     GvFLAGS(gv) |= add_gvflags;
@@ -718,11 +718,11 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	    if(!stash || !(gv_fetchmethod(stash, "TIEHASH"))) {
 		dSP;
 		PUTBACK;
-		perl_require_pv("Errno.pm");
+		require_pv("Errno.pm");
 		SPAGAIN;
 		stash = gv_stashpvn("Errno",5,FALSE);
 		if (!stash || !(gv_fetchmethod(stash, "TIEHASH")))
-		    croak("Can't use %%! because Errno.pm is not available");
+		    Perl_croak(aTHX_ "Can't use %%! because Errno.pm is not available");
 	    }
 	}
 	goto magicalize;
@@ -737,7 +737,7 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     case '#':
     case '*':
 	if (ckWARN(WARN_DEPRECATED) && len == 1 && sv_type == SVt_PV)
-	    warner(WARN_DEPRECATED, "Use of $%s is deprecated", name);
+	    Perl_warner(aTHX_ WARN_DEPRECATED, "Use of $%s is deprecated", name);
 	/* FALL THROUGH */
     case '[':
     case '^':
@@ -905,7 +905,7 @@ Perl_gv_check(pTHX_ HV *stash)
 		PL_curcop->cop_filegv = filegv;
 		if (filegv && GvMULTI(filegv))	/* Filename began with slash */
 		    continue;
-		warner(WARN_ONCE,
+		Perl_warner(aTHX_ WARN_ONCE,
 			"Name \"%s::%s\" used only once: possible typo",
 			HvNAME(stash), GvNAME(gv));
 	    }
@@ -916,7 +916,7 @@ Perl_gv_check(pTHX_ HV *stash)
 GV *
 Perl_newGVgen(pTHX_ char *pack)
 {
-    return gv_fetchpv(form("%s::_GEN_%ld", pack, (long)PL_gensym++),
+    return gv_fetchpv(Perl_form(aTHX_ "%s::_GEN_%ld", pack, (long)PL_gensym++),
 		      TRUE, SVt_PVGV);
 }
 
@@ -950,7 +950,7 @@ Perl_gp_free(pTHX_ GV *gv)
     if (!gv || !(gp = GvGP(gv)))
 	return;
     if (gp->gp_refcnt == 0) {
-        warn("Attempt to free unreferenced glob pointers");
+        Perl_warn(aTHX_ "Attempt to free unreferenced glob pointers");
         return;
     }
     if (gp->gp_cv) {
@@ -1026,7 +1026,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
   }
   sv_unmagic((SV*)stash, 'c');
 
-  DEBUG_o( deb("Recalcing overload magic in package %s\n",HvNAME(stash)) );
+  DEBUG_o( Perl_deb(aTHX_ "Recalcing overload magic in package %s\n",HvNAME(stash)) );
 
   amt.was_ok_am = PL_amagic_generation;
   amt.was_ok_sub = PL_sub_generation;
@@ -1069,7 +1069,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
                 /* FALL THROUGH */
             case SVt_PVHV:
             case SVt_PVAV:
-	      croak("Not a subroutine reference in overload table");
+	      Perl_croak(aTHX_ "Not a subroutine reference in overload table");
 	      return FALSE;
             case SVt_PVCV:
               cv = (CV*)sv;
@@ -1081,7 +1081,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
           }
           if (cv) filled=1;
 	  else {
-	    croak("Method for operation %s not found in package %.256s during blessing\n",
+	    Perl_croak(aTHX_ "Method for operation %s not found in package %.256s during blessing\n",
 		cp,HvNAME(stash));
 	    return FALSE;
 	  }
@@ -1107,8 +1107,8 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
     }
 
     for (i = 1; i < NofAMmeth; i++) {
-	SV *cookie = sv_2mortal(newSVpvf("(%s", cp = PL_AMG_names[i]));
-	DEBUG_o( deb("Checking overloading of `%s' in package `%.256s'\n",
+	SV *cookie = sv_2mortal(Perl_newSVpvf(aTHX_ "(%s", cp = PL_AMG_names[i]));
+	DEBUG_o( Perl_deb(aTHX_ "Checking overloading of `%s' in package `%.256s'\n",
 		     cp, HvNAME(stash)) );
 	/* don't fill the cache while looking up! */
 	gv = gv_fetchmeth(stash, SvPVX(cookie), SvCUR(cookie), -1);
@@ -1119,7 +1119,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 		/* GvSV contains the name of the method. */
 		GV *ngv;
 		
-		DEBUG_o( deb("Resolving method `%.256s' for overloaded `%s' in package `%.256s'\n", 
+		DEBUG_o( Perl_deb(aTHX_ "Resolving method `%.256s' for overloaded `%s' in package `%.256s'\n", 
 			     SvPV(GvSV(gv), n_a), cp, HvNAME(stash)) );
 		if (!SvPOK(GvSV(gv)) 
 		    || !(ngv = gv_fetchmethod_autoload(stash, SvPVX(GvSV(gv)),
@@ -1127,17 +1127,17 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 		{
 		    /* Can be an import stub (created by `can'). */
 		    if (GvCVGEN(gv)) {
-			croak("Stub found while resolving method `%.256s' overloading `%s' in package `%.256s'", 
+			Perl_croak(aTHX_ "Stub found while resolving method `%.256s' overloading `%s' in package `%.256s'", 
 			      (SvPOK(GvSV(gv)) ?  SvPVX(GvSV(gv)) : "???" ),
 			      cp, HvNAME(stash));
 		    } else
-			croak("Can't resolve method `%.256s' overloading `%s' in package `%.256s'", 
+			Perl_croak(aTHX_ "Can't resolve method `%.256s' overloading `%s' in package `%.256s'", 
 			      (SvPOK(GvSV(gv)) ?  SvPVX(GvSV(gv)) : "???" ),
 			      cp, HvNAME(stash));
 		}
 		cv = GvCV(gv = ngv);
 	    }
-	    DEBUG_o( deb("Overloading `%s' in package `%.256s' via `%.256s::%.256s' \n",
+	    DEBUG_o( Perl_deb(aTHX_ "Overloading `%s' in package `%.256s' via `%.256s::%.256s' \n",
 			 cp, HvNAME(stash), HvNAME(GvSTASH(CvGV(cv))),
 			 GvNAME(CvGV(cv))) );
 	    filled = 1;
@@ -1327,7 +1327,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
       } else {
 	SV *msg;
 	if (off==-1) off=method;
-	msg = sv_2mortal(newSVpvf(
+	msg = sv_2mortal(Perl_newSVpvf(aTHX_ 
 		      "Operation `%s': no method found,%sargument %s%s%s%s",
 		      PL_AMG_names[method + assignshift],
 		      (flags & AMGf_unary ? " " : "\n\tleft "),
@@ -1346,9 +1346,9 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 		        HvNAME(SvSTASH(SvRV(right))):
 		        ""));
 	if (amtp && amtp->fallback >= AMGfallYES) {
-	  DEBUG_o( deb("%s", SvPVX(msg)) );
+	  DEBUG_o( Perl_deb(aTHX_ "%s", SvPVX(msg)) );
 	} else {
-	  croak("%_", msg);
+	  Perl_croak(aTHX_ "%_", msg);
 	}
 	return NULL;
       }
@@ -1356,7 +1356,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     }
   }
   if (!notfound) {
-    DEBUG_o( deb(
+    DEBUG_o( Perl_deb(aTHX_ 
   "Overloaded operator `%s'%s%s%s:\n\tmethod%s found%s in package %s%s\n",
 		 PL_AMG_names[off],
 		 method+assignshift==off? "" :
@@ -1415,7 +1415,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     if (PERLDB_SUB && PL_curstash != PL_debstash)
 	PL_op->op_private |= OPpENTERSUB_DB;
     PUTBACK;
-    pp_pushmark(ARGS);
+    pp_pushmark();
 
     EXTEND(SP, notfound + 5);
     PUSHs(lr>0? right: left);
@@ -1427,8 +1427,8 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     PUSHs((SV*)cv);
     PUTBACK;
 
-    if (PL_op = pp_entersub(ARGS))
-      CALLRUNOPS();
+    if (PL_op = Perl_pp_entersub(aTHX))
+      CALLRUNOPS(aTHX);
     LEAVE;
     SPAGAIN;
 
@@ -1467,7 +1467,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
       return boolSV(ans);
     } else if (method==copy_amg) {
       if (!SvROK(res)) {
-	croak("Copy method did not return a reference");
+	Perl_croak(aTHX_ "Copy method did not return a reference");
       }
       return SvREFCNT_inc(SvRV(res));
     } else {

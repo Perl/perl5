@@ -8,7 +8,7 @@
     STMT_START {				\
 	if (pthread_detach(&(t)->self)) {	\
 	    MUTEX_UNLOCK(&(t)->mutex);		\
-	    croak("panic: DETACH");		\
+	    Perl_croak(aTHX_ "panic: DETACH");		\
 	}					\
     } STMT_END
 #    define THR getTHR()
@@ -70,7 +70,7 @@ struct perl_thread *getTHR (void);
 		if (*m) {				\
 			mutex_init(*m);			\
 		} else {				\
-			croak("panic: MUTEX_INIT");	\
+			Perl_croak(aTHX_ "panic: MUTEX_INIT");	\
 		}					\
 	} STMT_END
 
@@ -88,7 +88,7 @@ struct perl_thread *getTHR (void);
 		if (*c) {				\
 			condition_init(*c);		\
 		} else {				\
-			croak("panic: COND_INIT");	\
+			Perl_croak(aTHX_ "panic: COND_INIT");	\
 		}					\
 	} STMT_END
 
@@ -147,29 +147,39 @@ struct perl_thread *getTHR (void);
     STMT_START {						\
 	Zero((m), 1, perl_mutex);                               \
  	if (pthread_mutex_init((m), pthread_mutexattr_default))	\
-	    croak("panic: MUTEX_INIT");				\
+	    Perl_croak(aTHX_ "panic: MUTEX_INIT");				\
     } STMT_END
 #else
 #define MUTEX_INIT(m)						\
     STMT_START {						\
 	if (pthread_mutex_init((m), pthread_mutexattr_default))	\
-	    croak("panic: MUTEX_INIT");				\
+	    Perl_croak(aTHX_ "panic: MUTEX_INIT");				\
     } STMT_END
 #endif
 #define MUTEX_LOCK(m)				\
     STMT_START {				\
 	if (pthread_mutex_lock((m)))		\
-	    croak("panic: MUTEX_LOCK");		\
+	    Perl_croak(aTHX_ "panic: MUTEX_LOCK");		\
     } STMT_END
 #define MUTEX_UNLOCK(m)				\
     STMT_START {				\
 	if (pthread_mutex_unlock((m)))		\
-	    croak("panic: MUTEX_UNLOCK");	\
+	    Perl_croak(aTHX_ "panic: MUTEX_UNLOCK");	\
+    } STMT_END
+#define MUTEX_LOCK_NOCONTEXT(m)				\
+    STMT_START {					\
+	if (pthread_mutex_lock((m)))			\
+	    Perl_croak_nocontext("panic: MUTEX_LOCK");	\
+    } STMT_END
+#define MUTEX_UNLOCK_NOCONTEXT(m)			\
+    STMT_START {					\
+	if (pthread_mutex_unlock((m)))			\
+	    Perl_croak_nocontext("panic: MUTEX_UNLOCK");\
     } STMT_END
 #define MUTEX_DESTROY(m)			\
     STMT_START {				\
 	if (pthread_mutex_destroy((m)))		\
-	    croak("panic: MUTEX_DESTROY");	\
+	    Perl_croak(aTHX_ "panic: MUTEX_DESTROY");	\
     } STMT_END
 #endif /* MUTEX_INIT */
 
@@ -177,27 +187,27 @@ struct perl_thread *getTHR (void);
 #define COND_INIT(c)						\
     STMT_START {						\
 	if (pthread_cond_init((c), pthread_condattr_default))	\
-	    croak("panic: COND_INIT");				\
+	    Perl_croak(aTHX_ "panic: COND_INIT");				\
     } STMT_END
 #define COND_SIGNAL(c)				\
     STMT_START {				\
 	if (pthread_cond_signal((c)))		\
-	    croak("panic: COND_SIGNAL");	\
+	    Perl_croak(aTHX_ "panic: COND_SIGNAL");	\
     } STMT_END
 #define COND_BROADCAST(c)			\
     STMT_START {				\
 	if (pthread_cond_broadcast((c)))	\
-	    croak("panic: COND_BROADCAST");	\
+	    Perl_croak(aTHX_ "panic: COND_BROADCAST");	\
     } STMT_END
 #define COND_WAIT(c, m)				\
     STMT_START {				\
 	if (pthread_cond_wait((c), (m)))	\
-	    croak("panic: COND_WAIT");		\
+	    Perl_croak(aTHX_ "panic: COND_WAIT");		\
     } STMT_END
 #define COND_DESTROY(c)				\
     STMT_START {				\
 	if (pthread_cond_destroy((c)))		\
-	    croak("panic: COND_DESTROY");	\
+	    Perl_croak(aTHX_ "panic: COND_DESTROY");	\
     } STMT_END
 #endif /* COND_INIT */
 
@@ -207,7 +217,7 @@ struct perl_thread *getTHR (void);
     STMT_START {				\
 	if (pthread_detach((t)->self)) {	\
 	    MUTEX_UNLOCK(&(t)->mutex);		\
-	    croak("panic: DETACH");		\
+	    Perl_croak(aTHX_ "panic: DETACH");		\
 	}					\
     } STMT_END
 #endif /* DETACH */
@@ -216,7 +226,7 @@ struct perl_thread *getTHR (void);
 #define JOIN(t, avp) 					\
     STMT_START {					\
 	if (pthread_join((t)->self, (void**)(avp)))	\
-	    croak("panic: pthread_join");		\
+	    Perl_croak(aTHX_ "panic: pthread_join");		\
     } STMT_END
 #endif /* JOIN */
 
@@ -224,7 +234,7 @@ struct perl_thread *getTHR (void);
 #define SET_THR(t)					\
     STMT_START {					\
 	if (pthread_setspecific(PL_thr_key, (void *) (t)))	\
-	    croak("panic: pthread_setspecific");	\
+	    Perl_croak(aTHX_ "panic: pthread_setspecific");	\
     } STMT_END
 #endif /* SET_THR */
 
@@ -325,7 +335,9 @@ typedef struct condpair {
 #else
 /* USE_THREADS is not defined */
 #define MUTEX_LOCK(m)
+#define MUTEX_LOCK_NOCONTEXT(m)
 #define MUTEX_UNLOCK(m)
+#define MUTEX_UNLOCK_NOCONTEXT(m)
 #define MUTEX_INIT(m)
 #define MUTEX_DESTROY(m)
 #define COND_INIT(c)
@@ -339,10 +351,5 @@ typedef struct condpair {
 #define UNLOCK_STRTAB_MUTEX
 
 #define THR
-/* Rats: if dTHR is just blank then the subsequent ";" throws an error */
-#ifdef WIN32
-#define dTHR extern int Perl___notused
-#else
-#define dTHR extern int errno
-#endif
+#define dTHR dNOOP
 #endif /* USE_THREADS */

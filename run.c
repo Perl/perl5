@@ -40,7 +40,7 @@ Perl_runops_debug(pTHX)
 #ifdef DEBUGGING
     dTHR;
     if (!PL_op) {
-	warn("NULL OP IN RUN");
+	Perl_warn(aTHX_ "NULL OP IN RUN");
 	return 0;
     }
 
@@ -68,7 +68,7 @@ Perl_debop(pTHX_ OP *o)
 #ifdef DEBUGGING
     SV *sv;
     STRLEN n_a;
-    deb("%s", PL_op_name[o->op_type]);
+    Perl_deb(aTHX_ "%s", PL_op_name[o->op_type]);
     switch (o->op_type) {
     case OP_CONST:
 	PerlIO_printf(Perl_debug_log, "(%s)", SvPEEK(cSVOPo->op_sv));
@@ -105,7 +105,7 @@ Perl_watch(pTHX_ char **addr)
 }
 
 STATIC void
-debprof(pTHX_ OP *o)
+S_debprof(pTHX_ OP *o)
 {
 #ifdef DEBUGGING
     if (!PL_profiledata)

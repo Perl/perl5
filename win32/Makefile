@@ -49,6 +49,8 @@ INST_VER	= \5.00557
 #CCTYPE		= MSVC60
 
 #
+# XXX Do not enable.  This is currently undergoing a rewrite and will
+# NOT work.
 # uncomment next line if you want to use the perl object
 # Currently, this cannot be enabled if you ask for threads above
 #

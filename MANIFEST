@@ -157,7 +157,7 @@ emacs/cperl-mode.el	An alternate perl-mode
 emacs/e2ctags.pl	etags to ctags converter
 emacs/ptags		Creates smart TAGS file
 embed.h			Maps symbols to safer names
-embed.pl		Produces embed.h
+embed.pl		Produces {embed,embedvar,objXSUB,proto}.h, global.sym
 embedvar.h		C namespace management
 ext/B/B.pm		Compiler backend support functions and methods
 ext/B/B.xs		Compiler backend external subroutines
@@ -1025,7 +1025,6 @@ pp_hot.c		Push/Pop code for heavily used opcodes
 pp_proto.h		C++ definitions for Push/Pop code
 pp_sys.c		Push/Pop code for system interaction
 proto.h			Prototypes
-proto.pl		Produces proto.h and global.sym
 qnx/ar			QNX implementation of "ar" utility
 qnx/cpp			QNX implementation of preprocessor filter
 regcomp.c		Regular expression compiler

@@ -111,7 +111,7 @@ typedef IV IV64;
 #define BSET_pv_free(pv)	Safefree(pv.xpv_pv)
 #define BSET_pregcomp(o, arg) \
 	((PMOP*)o)->op_pmregexp = arg ? \
-		CALLREGCOMP(arg, arg + bytecode_pv.xpv_cur, ((PMOP*)o)) : 0
+		CALLREGCOMP(aTHX_ arg, arg + bytecode_pv.xpv_cur, ((PMOP*)o)) : 0
 #define BSET_newsv(sv, arg)	sv = NEWSV(666,0); SvUPGRADE(sv, arg)
 #define BSET_newop(o, arg)	o = (OP*)safemalloc(optype_size[arg])
 #define BSET_newopn(o, arg) STMT_START {	\
@@ -132,7 +132,7 @@ typedef IV IV64;
 	    arg = OP_GREPSTART;			\
 	o->op_ppaddr = PL_ppaddr[arg];		\
     } STMT_END
-#define BSET_op_ppaddr(o, arg) croak("op_ppaddr not yet implemented")
+#define BSET_op_ppaddr(o, arg) Perl_croak(aTHX_ "op_ppaddr not yet implemented")
 #define BSET_curpad(pad, arg) STMT_START {	\
 	PL_comppad = (AV *)arg;			\
 	pad = AvARRAY(arg);			\
