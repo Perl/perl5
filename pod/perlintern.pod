@@ -12,6 +12,18 @@ B<they are not for use in extensions>!
 
 =over 8
 
+=item djSP
+
+Declare Just C<SP>. This is actually identical to C<dSP>, and declares
+a local copy of perl's stack pointer, available via the C<SP> macro.
+See C<SP>.  (Available for backward source code compatibility with the
+old (Perl 5.005) thread model.)
+
+		djSP;
+
+=for hackers
+Found in file pp.h
+
 =item is_gv_magical
 
 Returns C<TRUE> if given the name of a magical GV.
@@ -26,6 +38,18 @@ allow selecting particular classes of magical variable.
 
 =for hackers
 Found in file gv.c
+
+=item start_glob
+
+Function called by C<do_readline> to spawn a glob (or do the glob inside
+perl on VMS). This code used to be inline, but now perl uses C<File::Glob>
+this glob starter is only used by miniperl during the build proccess.
+Moving it away shrinks pp_hot.c; shrinking pp_hot.c helps speed perl up.
+
+	PerlIO*	start_glob(SV* pattern, IO *io)
+
+=for hackers
+Found in file doio.c
 
 =back
 

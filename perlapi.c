@@ -85,6 +85,13 @@ Perl_Gv_AMupdate(pTHXo_ HV* stash)
     return ((CPerlObj*)pPerl)->Perl_Gv_AMupdate(stash);
 }
 
+#undef  Perl_gv_handler
+CV*
+Perl_gv_handler(pTHXo_ HV* stash, I32 id)
+{
+    return ((CPerlObj*)pPerl)->Perl_gv_handler(stash, id);
+}
+
 #undef  Perl_apply_attrs_string
 void
 Perl_apply_attrs_string(pTHXo_ char *stashpv, CV *cv, char *attrstr, STRLEN len)
@@ -4095,6 +4102,8 @@ Perl_sys_intern_init(pTHXo)
 #endif
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #  if defined(DEBUGGING)
+#  endif
+#  if !defined(NV_PRESERVES_UV)
 #  endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
