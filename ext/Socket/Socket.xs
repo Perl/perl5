@@ -181,6 +181,36 @@ not_here(char *s)
 
 #include "constants.c"
 
+#define PERL_IN_ADDR_S_ADDR_SIZE 4
+
+/*
+ * Bad assumptions possible here.
+ *
+ * Bad Assumption 1: struct in_addr has no other fields
+ * than the s_addr (which is the field we care about
+ * in here, really). However, we can be fed either 4-byte
+ * addresses (from pack("N", ...), or va.b.c.d, or ...),
+ * or full struct in_addrs (from e.g. pack_sockaddr_in()),
+ * which may or may not be 4 bytes in size.
+ *
+ * Bad Assumption 2: the s_addr field is a simple type
+ * (such as an int, u_int32_t).  It can be a bit field,
+ * in which case using & (address-of) on it or taking sizeof()
+ * wouldn't go over too well.  (Those are not attempted
+ * now but in case someone thinks to change the below code
+ * to use addr.s_addr instead of addr, you have been warned.)
+ *
+ * Bad Assumption 3: the s_addr is the first field in
+ * an in_addr, or that its bytes are the first bytes in
+ * an in_addr.
+ *
+ * These bad assumptions are wrong in UNICOS which has
+ * struct in_addr { struct { u_long  st_addr:32; } s_da };
+ * #define s_addr s_da.st_addr
+ * and u_long is 64 bits.
+ *
+ * --jhi */
+
 MODULE = Socket		PACKAGE = Socket
 
 INCLUDE: constants.xs
@@ -190,18 +220,26 @@ inet_aton(host)
 	char *	host
 	CODE:
 	{
-	struct in_addr ip_address;
+	struct in_addr addr;
+	char saddr[PERL_IN_ADDR_S_ADDR_SIZE];
 	struct hostent * phe;
-	int ok = inet_aton(host, &ip_address);
+	int ok;
 
-	if (!ok && (phe = gethostbyname(host))) {
-		Copy( phe->h_addr, &ip_address, phe->h_length, char );
+	ok = inet_aton(host, &addr);
+	if (ok) {
+		saddr[0] = (addr.s_addr >> 24) & 0xFF;
+		saddr[1] = (addr.s_addr >> 16) & 0xFF;
+		saddr[2] = (addr.s_addr >>  8) & 0xFF;
+		saddr[3] = (addr.s_addr      ) & 0xFF;
+	}
+	else if (phe = gethostbyname(host)) {
+		Copy( phe->h_addr, saddr, phe->h_length, char );
 		ok = 1;
 	}
 
 	ST(0) = sv_newmortal();
 	if (ok) {
-		sv_setpvn( ST(0), (char *)&ip_address, sizeof ip_address );
+		sv_setpvn( ST(0), saddr, PERL_IN_ADDR_S_ADDR_SIZE);
 	}
 	}
 
@@ -217,34 +255,6 @@ inet_ntoa(ip_address_sv)
 	if (DO_UTF8(ip_address_sv) && !sv_utf8_downgrade(ip_address_sv, 1))
 	     croak("Wide character in Socket::inet_ntoa");
 	ip_address = SvPV(ip_address_sv, addrlen);
-	/*
-	 * Bad assumptions possible here.
-	 *
-	 * Bad Assumption 1: struct in_addr has no other fields
-	 * than the s_addr (which is the field we care about
-	 * in here, really). However, we can be fed either 4-byte
-	 * addresses (from pack("N", ...), or va.b.c.d, or ...),
-	 * or full struct in_addrs (from e.g. pack_sockaddr_in()),
-	 * which may or may not be 4 bytes in size.
-	 *
-	 * Bad Assumption 2: the s_addr field is a simple type
-	 * (such as an int, u_int32_t).  It can be a bit field,
-	 * in which case using & (address-of) on it or taking sizeof()
-	 * wouldn't go over too well.  (Those are not attempted
-	 * now but in case someone thinks to change the below code
-	 * to use addr.s_addr instead of addr, you have been warned.)
-	 *
-	 * Bad Assumption 3: the s_addr is the first field in
-	 * an in_addr, or that its bytes are the first bytes in
-	 * an in_addr.
-	 *
-	 * These bad assumptions are wrong in UNICOS which has
-	 * struct in_addr { struct { u_long  st_addr:32; } s_da };
-	 * #define s_addr s_da.st_addr
-	 * and u_long is 64 bits.
-	 *
-	 * --jhi */
-#define PERL_IN_ADDR_S_ADDR_SIZE 4
 	if (addrlen == PERL_IN_ADDR_S_ADDR_SIZE) {
 	     /* It must be (better be) a network-order 32-bit integer.
 	      * We can't use any fancy casting of ip_address to pointer ofn
@@ -255,25 +265,25 @@ inet_ntoa(ip_address_sv)
 	     addr.s_addr |= (ip_address[2] & 0xFF) <<  8;
 	     addr.s_addr |= (ip_address[3] & 0xFF);
 	}
-	else {
-	     /* It could be a struct in_addr that is not 32 bits. */
+        else {
+             /* It could be a struct in_addr that is not 32 bits. */
 
-	     if (addrlen == sizeof(addr))
-		  /* This branch could be optimized away if we knew
-		   * during compile time what size is struct in_addr.
-		   * If it's four, the above code should have worked. */
-		  Copy( ip_address, &addr, sizeof addr, char );
-	     else {
-		  if (PERL_IN_ADDR_S_ADDR_SIZE == sizeof(addr))
-		       croak("Bad arg length for %s, length is %d, should be %d",
-			     "Socket::inet_ntoa",
-			     addrlen, PERL_IN_ADDR_S_ADDR_SIZE);
-		  else
-		       croak("Bad arg length for %s, length is %d, should be %d or %d",
-			     "Socket::inet_ntoa",
-			     addrlen, PERL_IN_ADDR_S_ADDR_SIZE, sizeof(addr));
-	     }
-	}
+             if (addrlen == sizeof(addr))
+                  /* This branch could be optimized away if we knew
+                   * during compile time what size is struct in_addr.
+                   * If it's four, the above code should have worked. */
+                  Copy( ip_address, &addr, sizeof addr, char );
+             else {
+                  if (PERL_IN_ADDR_S_ADDR_SIZE == sizeof(addr))
+                       croak("Bad arg length for %s, length is %d, should be %d",
+                             "Socket::inet_ntoa",
+                             addrlen, PERL_IN_ADDR_S_ADDR_SIZE);
+                  else 
+                       croak("Bad arg length for %s, length is %d, should be %d or %d",
+                             "Socket::inet_ntoa",
+                             addrlen, PERL_IN_ADDR_S_ADDR_SIZE, sizeof(addr));
+             }
+        }
 	/* We could use inet_ntoa() but that is broken
 	 * in HP-UX + GCC + 64bitint (returns "0.0.0.0"),
 	 * so let's use this sprintf() workaround everywhere. */
@@ -396,6 +406,7 @@ unpack_sockaddr_in(sin_sv)
 	struct sockaddr_in addr;
 	unsigned short	port;
 	struct in_addr	ip_address;
+	char saddr[PERL_IN_ADDR_S_ADDR_SIZE];
 	char *	sin = SvPV(sin_sv,sockaddrlen);
 	if (sockaddrlen != sizeof(addr)) {
 	    croak("Bad arg length for %s, length is %d, should be %d",
@@ -411,8 +422,12 @@ unpack_sockaddr_in(sin_sv)
 	}
 	port = ntohs(addr.sin_port);
 	ip_address = addr.sin_addr;
+	saddr[0] = (ip_address.s_addr >> 24) & 0xFF;
+	saddr[1] = (ip_address.s_addr >> 16) & 0xFF;
+	saddr[2] = (ip_address.s_addr >>  8) & 0xFF;
+	saddr[3] = (ip_address.s_addr      ) & 0xFF;
 
 	EXTEND(SP, 2);
 	PUSHs(sv_2mortal(newSViv((IV) port)));
-	PUSHs(sv_2mortal(newSVpvn((char *)&ip_address,sizeof ip_address)));
+	PUSHs(sv_2mortal(newSVpvn(saddr, PERL_IN_ADDR_S_ADDR_SIZE)));
 	}
