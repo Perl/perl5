@@ -546,7 +546,7 @@ Perl_new_collate(pTHX_ const char *newcoll)
 }
 
 void
-perl_set_numeric_radix(void)
+Perl_set_numeric_radix(pTHX)
 {
 #ifdef USE_LOCALE_NUMERIC
 # ifdef HAS_LOCALECONV
@@ -589,7 +589,7 @@ Perl_new_numeric(pTHX_ const char *newnum)
 	PL_numeric_name = savepv(newnum);
 	PL_numeric_standard = (strEQ(newnum, "C") || strEQ(newnum, "POSIX"));
 	PL_numeric_local = TRUE;
-	perl_set_numeric_radix();
+	set_numeric_radix();
     }
 
 #endif /* USE_LOCALE_NUMERIC */
@@ -618,7 +618,7 @@ Perl_set_numeric_local(pTHX)
 	setlocale(LC_NUMERIC, PL_numeric_name);
 	PL_numeric_standard = FALSE;
 	PL_numeric_local = TRUE;
-	perl_set_numeric_radix();
+	set_numeric_radix();
     }
 
 #endif /* USE_LOCALE_NUMERIC */
@@ -2752,14 +2752,15 @@ Perl_scan_bin(pTHX_ char *start, I32 len, I32 *retlen)
     register UV retval = 0;
     bool overflowed = FALSE;
     while (len && *s >= '0' && *s <= '1') {
-      dTHR;	    
-      register UV n = retval << 1;
-      if (!overflowed && (n >> 1) != retval  && ckWARN_d(WARN_UNSAFE)) {
-          Perl_warner(aTHX_ WARN_UNSAFE, "Integer overflow in binary number");
-          overflowed = TRUE;
-      }
-      retval = n | (*s++ - '0');
-      len--;
+	register UV n = retval << 1;
+	if (!overflowed && (n >> 1) != retval) {
+	    dTHR;
+	    if (ckWARN_d(WARN_UNSAFE))
+		Perl_warner(aTHX_ WARN_UNSAFE, "Integer overflow in binary number");
+	    overflowed = TRUE;
+	}
+	retval = n | (*s++ - '0');
+	len--;
     }
     if (len && (*s >= '2' && *s <= '9')) {
       dTHR;
@@ -2777,10 +2778,11 @@ Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
     bool overflowed = FALSE;
 
     while (len && *s >= '0' && *s <= '7') {
-	dTHR;
 	register UV n = retval << 3;
-	if (!overflowed && (n >> 3) != retval && ckWARN_d(WARN_UNSAFE)) {
-	    Perl_warner(aTHX_ WARN_UNSAFE, "Integer overflow in octal number");
+	if (!overflowed && (n >> 3) != retval) {
+	    dTHR;
+	    if (ckWARN_d(WARN_UNSAFE))
+		Perl_warner(aTHX_ WARN_UNSAFE, "Integer overflow in octal number");
 	    overflowed = TRUE;
 	}
 	retval = n | (*s++ - '0');
@@ -2818,12 +2820,11 @@ Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
 	    }
 	}
 	n = retval << 4;
-	{
+	if (!overflowed && (n >> 4) != retval) {
 	    dTHR;
-	    if (!overflowed && (n >> 4) != retval && ckWARN_d(WARN_UNSAFE)) {
-	        Perl_warner(aTHX_ WARN_UNSAFE, "Integer overflow in hex number");
-	        overflowed = TRUE;
-	    }
+	    if (ckWARN_d(WARN_UNSAFE))
+		Perl_warner(aTHX_ WARN_UNSAFE, "Integer overflow in hex number");
+	    overflowed = TRUE;
 	}
 	retval = n | ((tmp - PL_hexdigit) & 15);
     }

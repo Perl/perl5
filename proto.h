@@ -676,16 +676,8 @@ VIRTUAL void	Perl_safexfree(Malloc_t where);
 #if defined(PERL_GLOBAL_STRUCT)
 VIRTUAL struct perl_vars *	Perl_GetVars(pTHX);
 #endif
-VIRTUAL void	Perl_yydestruct(pTHX_ void *ptr);
 VIRTUAL int	Perl_runops_standard(pTHX);
 VIRTUAL int	Perl_runops_debug(pTHX);
-#if defined(WIN32)
-#if defined(PERL_OBJECT)
-VIRTUAL int&	Perl_ErrorNo(pTHX);
-#else
-VIRTUAL int*	Perl_ErrorNo(pTHX);
-#endif
-#endif
 VIRTUAL void	Perl_sv_catpvf_mg(pTHX_ SV *sv, const char* pat, ...);
 VIRTUAL void	Perl_sv_catpv_mg(pTHX_ SV *sv, const char *ptr);
 VIRTUAL void	Perl_sv_catpvn_mg(pTHX_ SV *sv, const char *ptr, STRLEN len);
@@ -752,8 +744,6 @@ STATIC void	S_hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store);
 STATIC void	S_save_magic(pTHX_ I32 mgs_ix, SV *sv);
 STATIC int	S_magic_methpack(pTHX_ SV *sv, MAGIC *mg, char *meth);
 STATIC int	S_magic_methcall(pTHX_ SV *sv, MAGIC *mg, char *meth, I32 f, int n, SV *val);
-STATIC void	S_unwind_handler_stack(pTHX_ void *p);
-STATIC void	S_restore_magic(pTHX_ void *p);
 #endif
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 STATIC I32	S_list_assignment(pTHX_ OP *o);
@@ -830,19 +820,9 @@ STATIC void	S_save_lines(pTHX_ AV *array, SV *sv);
 STATIC OP*	S_doeval(pTHX_ int gimme, OP** startop);
 STATIC PerlIO *	S_doopen_pmc(pTHX_ const char *name, const char *mode);
 STATIC void	S_qsortsv(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t f);
-STATIC I32	S_sortcv(pTHX_ SV *a, SV *b);
-STATIC I32	S_sv_ncmp(pTHX_ SV *a, SV *b);
-STATIC I32	S_sv_i_ncmp(pTHX_ SV *a, SV *b);
-STATIC I32	S_amagic_ncmp(pTHX_ SV *a, SV *b);
-STATIC I32	S_amagic_i_ncmp(pTHX_ SV *a, SV *b);
-STATIC I32	S_amagic_cmp(pTHX_ SV *str1, SV *str2);
-STATIC I32	S_amagic_cmp_locale(pTHX_ SV *str1, SV *str2);
 #endif
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
 STATIC CV*	S_get_db_sub(pTHX_ SV **svp, CV *cv);
-#  if defined(USE_THREADS)
-STATIC void	S_unset_cvowner(pTHX_ void *cvarg);
-#  endif
 #endif
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
 STATIC OP*	S_doform(pTHX_ CV *cv, GV *gv, OP *retop);
@@ -875,7 +855,6 @@ STATIC I32	S_add_data(pTHX_ I32 n, char *s);
 STATIC void	S_re_croak2(pTHX_ const char* pat1, const char* pat2, ...) __attribute__((noreturn));
 STATIC I32	S_regpposixcc(pTHX_ I32 value);
 STATIC void	S_checkposixcc(pTHX);
-STATIC void	S_clear_re(pTHX_ void *r);
 #endif
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
 STATIC I32	S_regmatch(pTHX_ regnode *prog);
@@ -888,7 +867,6 @@ STATIC CHECKPOINT	S_regcppush(pTHX_ I32 parenfloor);
 STATIC char*	S_regcppop(pTHX);
 STATIC char*	S_regcp_set_to(pTHX_ I32 ss);
 STATIC void	S_cache_re(pTHX_ regexp *prog);
-STATIC void	S_restore_pos(pTHX_ void *arg);
 STATIC U8*	S_reghop(pTHX_ U8 *pos, I32 off);
 STATIC U8*	S_reghopmaybe(pTHX_ U8 *pos, I32 off);
 #endif
@@ -915,10 +893,6 @@ STATIC void	S_del_xnv(pTHX_ XPVNV* p);
 STATIC void	S_del_xpv(pTHX_ XPV* p);
 STATIC void	S_del_xrv(pTHX_ XRV* p);
 STATIC void	S_sv_unglob(pTHX_ SV* sv);
-STATIC void	S_do_report_used(pTHX_ SV *sv);
-STATIC void	S_do_clean_objs(pTHX_ SV *sv);
-STATIC void	S_do_clean_named_objs(pTHX_ SV *sv);
-STATIC void	S_do_clean_all(pTHX_ SV *sv);
 STATIC void	S_not_a_number(pTHX_ SV *sv);
 STATIC void	S_visit(pTHX_ SVFUNC_t f);
 #  if defined(PURIFY)
@@ -969,9 +943,6 @@ STATIC void	S_depcom(pTHX);
 STATIC char*	S_incl_perldb(pTHX);
 STATIC I32	S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen);
 STATIC I32	S_utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen);
-STATIC void	S_restore_rsfp(pTHX_ void *f);
-STATIC void	S_restore_expect(pTHX_ void *e);
-STATIC void	S_restore_lex_expect(pTHX_ void *e);
 #  if defined(CRIPPLED_CC)
 STATIC int	S_uni(pTHX_ I32 f, char *s);
 #  endif

@@ -286,6 +286,13 @@
 #define PL_DBsingle		(PL_curinterp->IDBsingle)
 #define PL_DBsub		(PL_curinterp->IDBsub)
 #define PL_DBtrace		(PL_curinterp->IDBtrace)
+#define PL_Dir			(PL_curinterp->IDir)
+#define PL_Env			(PL_curinterp->IEnv)
+#define PL_LIO			(PL_curinterp->ILIO)
+#define PL_Mem			(PL_curinterp->IMem)
+#define PL_Proc			(PL_curinterp->IProc)
+#define PL_Sock			(PL_curinterp->ISock)
+#define PL_StdIO		(PL_curinterp->IStdIO)
 #define PL_amagic_generation	(PL_curinterp->Iamagic_generation)
 #define PL_ampergv		(PL_curinterp->Iampergv)
 #define PL_an			(PL_curinterp->Ian)
@@ -549,6 +556,13 @@
 #define PL_IDBsingle		PL_DBsingle
 #define PL_IDBsub		PL_DBsub
 #define PL_IDBtrace		PL_DBtrace
+#define PL_IDir			PL_Dir
+#define PL_IEnv			PL_Env
+#define PL_ILIO			PL_LIO
+#define PL_IMem			PL_Mem
+#define PL_IProc		PL_Proc
+#define PL_ISock		PL_Sock
+#define PL_IStdIO		PL_StdIO
 #define PL_Iamagic_generation	PL_amagic_generation
 #define PL_Iampergv		PL_ampergv
 #define PL_Ian			PL_an

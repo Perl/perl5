@@ -14,6 +14,7 @@ BEGIN {
 
 
 use FileHandle;
+use Config;
 autoflush STDOUT 1;
 $SIG{PIPE} = 'IGNORE';
 
@@ -49,12 +50,15 @@ print "ok 4\n";
 
 print "# pids were $pid1, $pid2, $pid3, $pid4\n";
 
+my $killsig = 'HUP';
+$killsig = 1 unless $Config{sig_name} =~ /\bHUP\b/;
+
 # get message from first process and kill it
 chomp($from_pid1 = scalar(<FH1>));
 print "# child1 returned [$from_pid1]\nnot "
     unless $from_pid1 eq 'first process';
 print "ok 5\n";
-$kill_cnt = kill 'HUP', $pid1;
+$kill_cnt = kill $killsig, $pid1;
 print "not " unless $kill_cnt == 1;
 print "ok 6\n";
 
@@ -63,7 +67,7 @@ chomp($from_pid2 = scalar(<FH2>));
 print "# child2 returned [$from_pid2]\nnot "
     unless $from_pid2 eq 'second process';
 print "ok 7\n";
-$kill_cnt = kill 'HUP', $pid2, $pid3;
+$kill_cnt = kill $killsig, $pid2, $pid3;
 print "not " unless $kill_cnt == 2;
 print "ok 8\n";
 

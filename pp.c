@@ -3192,9 +3192,10 @@ PP(pp_reverse)
 			up = (char*)s;
 			s += UTF8SKIP(s);
 			down = (char*)(s - 1);
-			if ((s > send || !((*down & 0xc0) == 0x80)) &&
-					ckWARN_d(WARN_UTF8)) {
-			    Perl_warner(aTHX_ WARN_UTF8, "Malformed UTF-8 character");
+			if (s > send || !((*down & 0xc0) == 0x80)) {
+			    if (ckWARN_d(WARN_UTF8))
+				Perl_warner(aTHX_ WARN_UTF8,
+					    "Malformed UTF-8 character");
 			    break;
 			}
 			while (down > up) {
@@ -5179,7 +5180,7 @@ PP(pp_lock)
 	DEBUG_S(PerlIO_printf(PerlIO_stderr(), "0x%lx: pp_lock lock 0x%lx\n",
 			      (unsigned long)thr, (unsigned long)sv);)
 	MUTEX_UNLOCK(MgMUTEXP(mg));
-	save_destructor(Perl_unlock_condpair, sv);
+	SAVEDESTRUCTOR(Perl_unlock_condpair, sv);
     }
 #endif /* USE_THREADS */
     if (SvTYPE(retsv) == SVt_PVAV || SvTYPE(retsv) == SVt_PVHV

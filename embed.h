@@ -668,16 +668,8 @@
 #if defined(PERL_GLOBAL_STRUCT)
 #define GetVars			Perl_GetVars
 #endif
-#define yydestruct		Perl_yydestruct
 #define runops_standard		Perl_runops_standard
 #define runops_debug		Perl_runops_debug
-#if defined(WIN32)
-#if defined(PERL_OBJECT)
-#define ErrorNo			Perl_ErrorNo
-#else
-#define ErrorNo			Perl_ErrorNo
-#endif
-#endif
 #define sv_catpvf_mg		Perl_sv_catpvf_mg
 #define sv_catpv_mg		Perl_sv_catpv_mg
 #define sv_catpvn_mg		Perl_sv_catpvn_mg
@@ -743,8 +735,6 @@
 #define save_magic		S_save_magic
 #define magic_methpack		S_magic_methpack
 #define magic_methcall		S_magic_methcall
-#define unwind_handler_stack	S_unwind_handler_stack
-#define restore_magic		S_restore_magic
 #endif
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #define list_assignment		S_list_assignment
@@ -821,19 +811,9 @@
 #define doeval			S_doeval
 #define doopen_pmc		S_doopen_pmc
 #define qsortsv			S_qsortsv
-#define sortcv			S_sortcv
-#define sv_ncmp			S_sv_ncmp
-#define sv_i_ncmp		S_sv_i_ncmp
-#define amagic_ncmp		S_amagic_ncmp
-#define amagic_i_ncmp		S_amagic_i_ncmp
-#define amagic_cmp		S_amagic_cmp
-#define amagic_cmp_locale	S_amagic_cmp_locale
 #endif
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
 #define get_db_sub		S_get_db_sub
-#  if defined(USE_THREADS)
-#define unset_cvowner		S_unset_cvowner
-#  endif
 #endif
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
 #define doform			S_doform
@@ -866,7 +846,6 @@
 #define re_croak2		S_re_croak2
 #define regpposixcc		S_regpposixcc
 #define checkposixcc		S_checkposixcc
-#define clear_re		S_clear_re
 #endif
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
 #define regmatch		S_regmatch
@@ -879,7 +858,6 @@
 #define regcppop		S_regcppop
 #define regcp_set_to		S_regcp_set_to
 #define cache_re		S_cache_re
-#define restore_pos		S_restore_pos
 #define reghop			S_reghop
 #define reghopmaybe		S_reghopmaybe
 #endif
@@ -906,10 +884,6 @@
 #define del_xpv			S_del_xpv
 #define del_xrv			S_del_xrv
 #define sv_unglob		S_sv_unglob
-#define do_report_used		S_do_report_used
-#define do_clean_objs		S_do_clean_objs
-#define do_clean_named_objs	S_do_clean_named_objs
-#define do_clean_all		S_do_clean_all
 #define not_a_number		S_not_a_number
 #define visit			S_visit
 #  if defined(PURIFY)
@@ -960,9 +934,6 @@
 #define incl_perldb		S_incl_perldb
 #define utf16_textfilter	S_utf16_textfilter
 #define utf16rev_textfilter	S_utf16rev_textfilter
-#define restore_rsfp		S_restore_rsfp
-#define restore_expect		S_restore_expect
-#define restore_lex_expect	S_restore_lex_expect
 #  if defined(CRIPPLED_CC)
 #define uni			S_uni
 #  endif
@@ -2001,16 +1972,8 @@
 #if defined(PERL_GLOBAL_STRUCT)
 #define GetVars()		Perl_GetVars(aTHX)
 #endif
-#define yydestruct(a)		Perl_yydestruct(aTHX_ a)
 #define runops_standard()	Perl_runops_standard(aTHX)
 #define runops_debug()		Perl_runops_debug(aTHX)
-#if defined(WIN32)
-#if defined(PERL_OBJECT)
-#define ErrorNo()		Perl_ErrorNo(aTHX)
-#else
-#define ErrorNo()		Perl_ErrorNo(aTHX)
-#endif
-#endif
 #define sv_catpv_mg(a,b)	Perl_sv_catpv_mg(aTHX_ a,b)
 #define sv_catpvn_mg(a,b,c)	Perl_sv_catpvn_mg(aTHX_ a,b,c)
 #define sv_catsv_mg(a,b)	Perl_sv_catsv_mg(aTHX_ a,b)
@@ -2072,8 +2035,6 @@
 #define save_magic(a,b)		S_save_magic(aTHX_ a,b)
 #define magic_methpack(a,b,c)	S_magic_methpack(aTHX_ a,b,c)
 #define magic_methcall(a,b,c,d,e,f)	S_magic_methcall(aTHX_ a,b,c,d,e,f)
-#define unwind_handler_stack(a)	S_unwind_handler_stack(aTHX_ a)
-#define restore_magic(a)	S_restore_magic(aTHX_ a)
 #endif
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #define list_assignment(a)	S_list_assignment(aTHX_ a)
@@ -2150,19 +2111,9 @@
 #define doeval(a,b)		S_doeval(aTHX_ a,b)
 #define doopen_pmc(a,b)		S_doopen_pmc(aTHX_ a,b)
 #define qsortsv(a,b,c)		S_qsortsv(aTHX_ a,b,c)
-#define sortcv(a,b)		S_sortcv(aTHX_ a,b)
-#define sv_ncmp(a,b)		S_sv_ncmp(aTHX_ a,b)
-#define sv_i_ncmp(a,b)		S_sv_i_ncmp(aTHX_ a,b)
-#define amagic_ncmp(a,b)	S_amagic_ncmp(aTHX_ a,b)
-#define amagic_i_ncmp(a,b)	S_amagic_i_ncmp(aTHX_ a,b)
-#define amagic_cmp(a,b)		S_amagic_cmp(aTHX_ a,b)
-#define amagic_cmp_locale(a,b)	S_amagic_cmp_locale(aTHX_ a,b)
 #endif
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
 #define get_db_sub(a,b)		S_get_db_sub(aTHX_ a,b)
-#  if defined(USE_THREADS)
-#define unset_cvowner(a)	S_unset_cvowner(aTHX_ a)
-#  endif
 #endif
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
 #define doform(a,b,c)		S_doform(aTHX_ a,b,c)
@@ -2194,7 +2145,6 @@
 #define add_data(a,b)		S_add_data(aTHX_ a,b)
 #define regpposixcc(a)		S_regpposixcc(aTHX_ a)
 #define checkposixcc()		S_checkposixcc(aTHX)
-#define clear_re(a)		S_clear_re(aTHX_ a)
 #endif
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
 #define regmatch(a)		S_regmatch(aTHX_ a)
@@ -2207,7 +2157,6 @@
 #define regcppop()		S_regcppop(aTHX)
 #define regcp_set_to(a)		S_regcp_set_to(aTHX_ a)
 #define cache_re(a)		S_cache_re(aTHX_ a)
-#define restore_pos(a)		S_restore_pos(aTHX_ a)
 #define reghop(a,b)		S_reghop(aTHX_ a,b)
 #define reghopmaybe(a,b)	S_reghopmaybe(aTHX_ a,b)
 #endif
@@ -2234,10 +2183,6 @@
 #define del_xpv(a)		S_del_xpv(aTHX_ a)
 #define del_xrv(a)		S_del_xrv(aTHX_ a)
 #define sv_unglob(a)		S_sv_unglob(aTHX_ a)
-#define do_report_used(a)	S_do_report_used(aTHX_ a)
-#define do_clean_objs(a)	S_do_clean_objs(aTHX_ a)
-#define do_clean_named_objs(a)	S_do_clean_named_objs(aTHX_ a)
-#define do_clean_all(a)		S_do_clean_all(aTHX_ a)
 #define not_a_number(a)		S_not_a_number(aTHX_ a)
 #define visit(a)		S_visit(aTHX_ a)
 #  if defined(PURIFY)
@@ -2288,9 +2233,6 @@
 #define incl_perldb()		S_incl_perldb(aTHX)
 #define utf16_textfilter(a,b,c)	S_utf16_textfilter(aTHX_ a,b,c)
 #define utf16rev_textfilter(a,b,c)	S_utf16rev_textfilter(aTHX_ a,b,c)
-#define restore_rsfp(a)		S_restore_rsfp(aTHX_ a)
-#define restore_expect(a)	S_restore_expect(aTHX_ a)
-#define restore_lex_expect(a)	S_restore_lex_expect(aTHX_ a)
 #  if defined(CRIPPLED_CC)
 #define uni(a,b)		S_uni(aTHX_ a,b)
 #  endif
@@ -3961,21 +3903,10 @@
 #define Perl_GetVars		CPerlObj::Perl_GetVars
 #define GetVars			Perl_GetVars
 #endif
-#define Perl_yydestruct		CPerlObj::Perl_yydestruct
-#define yydestruct		Perl_yydestruct
 #define Perl_runops_standard	CPerlObj::Perl_runops_standard
 #define runops_standard		Perl_runops_standard
 #define Perl_runops_debug	CPerlObj::Perl_runops_debug
 #define runops_debug		Perl_runops_debug
-#if defined(WIN32)
-#if defined(PERL_OBJECT)
-#define Perl_ErrorNo		CPerlObj::Perl_ErrorNo
-#define ErrorNo			Perl_ErrorNo
-#else
-#define Perl_ErrorNo		CPerlObj::Perl_ErrorNo
-#define ErrorNo			Perl_ErrorNo
-#endif
-#endif
 #define Perl_sv_catpvf_mg	CPerlObj::Perl_sv_catpvf_mg
 #define sv_catpvf_mg		Perl_sv_catpvf_mg
 #define Perl_sv_catpv_mg	CPerlObj::Perl_sv_catpv_mg
@@ -4095,10 +4026,6 @@
 #define magic_methpack		S_magic_methpack
 #define S_magic_methcall	CPerlObj::S_magic_methcall
 #define magic_methcall		S_magic_methcall
-#define S_unwind_handler_stack	CPerlObj::S_unwind_handler_stack
-#define unwind_handler_stack	S_unwind_handler_stack
-#define S_restore_magic		CPerlObj::S_restore_magic
-#define restore_magic		S_restore_magic
 #endif
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 #define S_list_assignment	CPerlObj::S_list_assignment
@@ -4237,28 +4164,10 @@
 #define doopen_pmc		S_doopen_pmc
 #define S_qsortsv		CPerlObj::S_qsortsv
 #define qsortsv			S_qsortsv
-#define S_sortcv		CPerlObj::S_sortcv
-#define sortcv			S_sortcv
-#define S_sv_ncmp		CPerlObj::S_sv_ncmp
-#define sv_ncmp			S_sv_ncmp
-#define S_sv_i_ncmp		CPerlObj::S_sv_i_ncmp
-#define sv_i_ncmp		S_sv_i_ncmp
-#define S_amagic_ncmp		CPerlObj::S_amagic_ncmp
-#define amagic_ncmp		S_amagic_ncmp
-#define S_amagic_i_ncmp		CPerlObj::S_amagic_i_ncmp
-#define amagic_i_ncmp		S_amagic_i_ncmp
-#define S_amagic_cmp		CPerlObj::S_amagic_cmp
-#define amagic_cmp		S_amagic_cmp
-#define S_amagic_cmp_locale	CPerlObj::S_amagic_cmp_locale
-#define amagic_cmp_locale	S_amagic_cmp_locale
 #endif
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
 #define S_get_db_sub		CPerlObj::S_get_db_sub
 #define get_db_sub		S_get_db_sub
-#  if defined(USE_THREADS)
-#define S_unset_cvowner		CPerlObj::S_unset_cvowner
-#define unset_cvowner		S_unset_cvowner
-#  endif
 #endif
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
 #define S_doform		CPerlObj::S_doform
@@ -4317,8 +4226,6 @@
 #define regpposixcc		S_regpposixcc
 #define S_checkposixcc		CPerlObj::S_checkposixcc
 #define checkposixcc		S_checkposixcc
-#define S_clear_re		CPerlObj::S_clear_re
-#define clear_re		S_clear_re
 #endif
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
 #define S_regmatch		CPerlObj::S_regmatch
@@ -4341,8 +4248,6 @@
 #define regcp_set_to		S_regcp_set_to
 #define S_cache_re		CPerlObj::S_cache_re
 #define cache_re		S_cache_re
-#define S_restore_pos		CPerlObj::S_restore_pos
-#define restore_pos		S_restore_pos
 #define S_reghop		CPerlObj::S_reghop
 #define reghop			S_reghop
 #define S_reghopmaybe		CPerlObj::S_reghopmaybe
@@ -4389,14 +4294,6 @@
 #define del_xrv			S_del_xrv
 #define S_sv_unglob		CPerlObj::S_sv_unglob
 #define sv_unglob		S_sv_unglob
-#define S_do_report_used	CPerlObj::S_do_report_used
-#define do_report_used		S_do_report_used
-#define S_do_clean_objs		CPerlObj::S_do_clean_objs
-#define do_clean_objs		S_do_clean_objs
-#define S_do_clean_named_objs	CPerlObj::S_do_clean_named_objs
-#define do_clean_named_objs	S_do_clean_named_objs
-#define S_do_clean_all		CPerlObj::S_do_clean_all
-#define do_clean_all		S_do_clean_all
 #define S_not_a_number		CPerlObj::S_not_a_number
 #define not_a_number		S_not_a_number
 #define S_visit			CPerlObj::S_visit
@@ -4490,12 +4387,6 @@
 #define utf16_textfilter	S_utf16_textfilter
 #define S_utf16rev_textfilter	CPerlObj::S_utf16rev_textfilter
 #define utf16rev_textfilter	S_utf16rev_textfilter
-#define S_restore_rsfp		CPerlObj::S_restore_rsfp
-#define restore_rsfp		S_restore_rsfp
-#define S_restore_expect	CPerlObj::S_restore_expect
-#define restore_expect		S_restore_expect
-#define S_restore_lex_expect	CPerlObj::S_restore_lex_expect
-#define restore_lex_expect	S_restore_lex_expect
 #  if defined(CRIPPLED_CC)
 #define S_uni			CPerlObj::S_uni
 #define uni			S_uni

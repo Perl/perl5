@@ -490,11 +490,12 @@ Perl_nextargv(pTHX_ register GV *gv)
 #ifdef DJGPP
                       || (_djstat_fail_bits & _STFAIL_TRUENAME)!=0
 #endif
-                      ) {
-		    if (ckWARN_d(WARN_INPLACE))	
-			Perl_warner(aTHX_ WARN_INPLACE,
-			  "Can't do inplace edit: %s would not be unique",
-			  SvPVX(sv) );
+                      )
+		    {
+			if (ckWARN_d(WARN_INPLACE))	
+			    Perl_warner(aTHX_ WARN_INPLACE,
+			      "Can't do inplace edit: %s would not be unique",
+			      SvPVX(sv));
 			do_close(gv,FALSE);
 			continue;
 		    }
@@ -584,9 +585,18 @@ Perl_nextargv(pTHX_ register GV *gv)
 	    }
 	    return IoIFP(GvIOp(gv));
 	}
-	else
-	    PerlIO_printf(PerlIO_stderr(), "Can't open %s: %s\n",
-	      SvPV(sv, oldlen), Strerror(errno));
+	else {
+	    dTHR;
+	    if (ckWARN_d(WARN_INPLACE)) {
+		if (!S_ISREG(PL_statbuf.st_mode))	
+		    Perl_warner(aTHX_ WARN_INPLACE,
+				"Can't do inplace edit: %s is not a regular file",
+				PL_oldname );
+		else
+		    Perl_warner(aTHX_ WARN_INPLACE, "Can't open %s: %s\n",
+				PL_oldname, Strerror(errno));
+	    }
+	}
     }
     if (PL_inplace) {
 	(void)do_close(PL_argvoutgv,FALSE);

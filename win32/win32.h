@@ -239,7 +239,7 @@ struct mgvtbl {								\
 }
 
 
-#define dPERLOBJ
+#define dPERLOBJ dNOOP
 #endif /* PERL_OBJECT */
 
 #endif /* _MSC_VER */

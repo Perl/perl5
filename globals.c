@@ -6,6 +6,8 @@
 
 #undef PERLVAR
 #define PERLVAR(x, y)
+#undef PERLVARA
+#define PERLVARA(x, n, y)
 #undef PERLVARI
 #define PERLVARI(x, y, z) PL_##x = z;
 #undef PERLVARIC
@@ -21,13 +23,13 @@ CPerlObj::CPerlObj(IPerlMem* ipM, IPerlEnv* ipE, IPerlStdIO* ipStd,
 #include "intrpvar.h"
 #include "perlvars.h"
 
-    PL_piMem = ipM;
-    PL_piENV = ipE;
-    PL_piStdIO = ipStd;
-    PL_piLIO = ipLIO;
-    PL_piDir = ipD;
-    PL_piSock = ipS;
-    PL_piProc = ipP;
+    PL_Mem = ipM;
+    PL_Env = ipE;
+    PL_StdIO = ipStd;
+    PL_LIO = ipLIO;
+    PL_Dir = ipD;
+    PL_Sock = ipS;
+    PL_Proc = ipP;
 }
 
 void*
@@ -37,12 +39,6 @@ CPerlObj::operator new(size_t nSize, IPerlMem *pvtbl)
 	return pvtbl->pMalloc(pvtbl, nSize);
 
     return NULL;
-}
-
-int&
-Perl_ErrorNo(void)
-{
-    return errno;
 }
 
 void

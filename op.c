@@ -3840,8 +3840,7 @@ Perl_cv_ckproto(pTHX_ CV *cv, GV *gv, char *p)
 {
     dTHR;
 
-    if (((!p != !SvPOK(cv)) || (p && strNE(p, SvPVX(cv)))) &&
-		    ckWARN_d(WARN_UNSAFE) ) {
+    if (((!p != !SvPOK(cv)) || (p && strNE(p, SvPVX(cv)))) && ckWARN_d(WARN_UNSAFE)) {
 	SV* msg = sv_newmortal();
 	SV* name = Nullsv;
 
@@ -3928,8 +3927,10 @@ Perl_newSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *block)
 					   maximum a prototype before. */
 	if (SvTYPE(gv) > SVt_NULL) {
 	    if (!SvPOK((SV*)gv) && !(SvIOK((SV*)gv) && SvIVX((SV*)gv) == -1)
-			    && ckWARN_d(WARN_UNSAFE))
+		&& ckWARN_d(WARN_UNSAFE))
+	    {
 		Perl_warner(aTHX_ WARN_UNSAFE, "Runaway prototype");
+	    }
 	    cv_ckproto((CV*)gv, NULL, ps);
 	}
 	if (ps)
@@ -4350,8 +4351,6 @@ Perl_oopsAV(pTHX_ OP *o)
 OP *
 Perl_oopsHV(pTHX_ OP *o)
 {
-    dTHR;
-
     dTHR;
     
     switch (o->op_type) {

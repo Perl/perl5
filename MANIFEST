@@ -930,6 +930,8 @@ os2/perl2cmd.pl		Corrects installed binaries under OS/2
 patchlevel.h		The current patch level of perl
 perl.c			main()
 perl.h			Global declarations
+perlapi.c		Perl API functions
+perlapi.h		Perl API function declarations
 perl_exp.SH		Creates list of exported symbols for AIX
 perlio.c		C code for PerlIO abstraction
 perlio.h		compatibility stub

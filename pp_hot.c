@@ -34,25 +34,7 @@
 /* Hot code. */
 
 #ifdef USE_THREADS
-STATIC void
-S_unset_cvowner(pTHX_ void *cvarg)
-{
-    register CV* cv = (CV *) cvarg;
-#ifdef DEBUGGING
-    dTHR;
-#endif /* DEBUGGING */
-
-    DEBUG_S((PerlIO_printf(PerlIO_stderr(), "%p unsetting CvOWNER of %p:%s\n",
-			   thr, cv, SvPEEK((SV*)cv))));
-    MUTEX_LOCK(CvMUTEXP(cv));
-    DEBUG_S(if (CvDEPTH(cv) != 0)
-		PerlIO_printf(PerlIO_stderr(), "depth %ld != 0\n",
-			      CvDEPTH(cv)););
-    assert(thr == CvOWNER(cv));
-    CvOWNER(cv) = 0;
-    MUTEX_UNLOCK(CvMUTEXP(cv));
-    SvREFCNT_dec(cv);
-}
+static void unset_cvowner(pTHXo_ void *cvarg);
 #endif /* USE_THREADS */
 
 PP(pp_const)
@@ -2142,7 +2124,7 @@ try_autoload:
 	    DEBUG_S(PerlIO_printf(PerlIO_stderr(), "%p: pp_entersub lock %p\n",
 				  thr, sv);)
 	    MUTEX_UNLOCK(MgMUTEXP(mg));
-	    save_destructor(Perl_unlock_condpair, sv);
+	    SAVEDESTRUCTOR(Perl_unlock_condpair, sv);
 	}
 	MUTEX_LOCK(CvMUTEXP(cv));
     }
@@ -2187,7 +2169,7 @@ try_autoload:
 	    CvOWNER(cv) = thr;
 	    SvREFCNT_inc(cv);
 	    if (CvDEPTH(cv) == 0)
-		SAVEDESTRUCTOR(S_unset_cvowner, (void*) cv);
+		SAVEDESTRUCTOR(unset_cvowner, (void*) cv);
 	}
 	else {
 	    /* (2) => grab ownership of cv. (3) => make clone */
@@ -2224,7 +2206,7 @@ try_autoload:
 	    DEBUG_S(if (CvDEPTH(cv) != 0)
 			PerlIO_printf(PerlIO_stderr(), "depth %ld != 0\n",
 				      CvDEPTH(cv)););
-	    SAVEDESTRUCTOR(S_unset_cvowner, (void*) cv);
+	    SAVEDESTRUCTOR(unset_cvowner, (void*) cv);
 	}
     }
 #endif /* USE_THREADS */
@@ -2597,3 +2579,24 @@ PP(pp_method)
     RETURN;
 }
 
+#ifdef USE_THREADS
+static void
+unset_cvowner(pTHXo_ void *cvarg)
+{
+    register CV* cv = (CV *) cvarg;
+#ifdef DEBUGGING
+    dTHR;
+#endif /* DEBUGGING */
+
+    DEBUG_S((PerlIO_printf(PerlIO_stderr(), "%p unsetting CvOWNER of %p:%s\n",
+			   thr, cv, SvPEEK((SV*)cv))));
+    MUTEX_LOCK(CvMUTEXP(cv));
+    DEBUG_S(if (CvDEPTH(cv) != 0)
+		PerlIO_printf(PerlIO_stderr(), "depth %ld != 0\n",
+			      CvDEPTH(cv)););
+    assert(thr == CvOWNER(cv));
+    CvOWNER(cv) = 0;
+    MUTEX_UNLOCK(CvMUTEXP(cv));
+    SvREFCNT_dec(cv);
+}
+#endif /* USE_THREADS */

@@ -28,10 +28,12 @@ main(int argc, char **argv, char **env)
 
 #ifdef PERL_GLOBAL_STRUCT
 #define PERLVAR(var,type) /**/
+#define PERLVARA(var,type) /**/
 #define PERLVARI(var,type,init) PL_Vars.var = init;
 #define PERLVARIC(var,type,init) PL_Vars.var = init;
 #include "perlvars.h"
 #undef PERLVAR
+#undef PERLVARA
 #undef PERLVARI
 #undef PERLVARIC
 #endif

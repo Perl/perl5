@@ -23,7 +23,7 @@
 #define dXSFUNCTION(ret)		XSINTERFACE_CVT(ret,XSFUNCTION)
 #define XSINTERFACE_FUNC(ret,cv,f)	((XSINTERFACE_CVT(ret,cv))(f))
 #define XSINTERFACE_FUNC_SET(cv,f)	\
-		CvXSUBANY(cv).any_dptr = (void (*) (pTHX_ void*))(f)
+		CvXSUBANY(cv).any_dptr = (void (*) (pTHXo_ void*))(f)
 
 #define XSRETURN(off)					\
     STMT_START {					\
@@ -77,38 +77,7 @@
 #  define XS_VERSION_BOOTCHECK
 #endif
 
-#ifdef PERL_CAPI
-#  define VTBL_sv		get_vtbl(want_vtbl_sv)
-#  define VTBL_env		get_vtbl(want_vtbl_env)
-#  define VTBL_envelem		get_vtbl(want_vtbl_envelem)
-#  define VTBL_sig		get_vtbl(want_vtbl_sig)
-#  define VTBL_sigelem		get_vtbl(want_vtbl_sigelem)
-#  define VTBL_pack		get_vtbl(want_vtbl_pack)
-#  define VTBL_packelem		get_vtbl(want_vtbl_packelem)
-#  define VTBL_dbline		get_vtbl(want_vtbl_dbline)
-#  define VTBL_isa		get_vtbl(want_vtbl_isa)
-#  define VTBL_isaelem		get_vtbl(want_vtbl_isaelem)
-#  define VTBL_arylen		get_vtbl(want_vtbl_arylen)
-#  define VTBL_glob		get_vtbl(want_vtbl_glob)
-#  define VTBL_mglob		get_vtbl(want_vtbl_mglob)
-#  define VTBL_nkeys		get_vtbl(want_vtbl_nkeys)
-#  define VTBL_taint		get_vtbl(want_vtbl_taint)
-#  define VTBL_substr		get_vtbl(want_vtbl_substr)
-#  define VTBL_vec		get_vtbl(want_vtbl_vec)
-#  define VTBL_pos		get_vtbl(want_vtbl_pos)
-#  define VTBL_bm		get_vtbl(want_vtbl_bm)
-#  define VTBL_fm		get_vtbl(want_vtbl_fm)
-#  define VTBL_uvar		get_vtbl(want_vtbl_uvar)
-#  define VTBL_defelem		get_vtbl(want_vtbl_defelem)
-#  define VTBL_regexp		get_vtbl(want_vtbl_regexp)
-#  define VTBL_regdata		get_vtbl(want_vtbl_regdata)
-#  define VTBL_regdatum		get_vtbl(want_vtbl_regdatum)
-#  ifdef USE_LOCALE_COLLATE
-#    define VTBL_collxfrm	get_vtbl(want_vtbl_collxfrm)
-#  endif
-#  define VTBL_amagic		get_vtbl(want_vtbl_amagic)
-#  define VTBL_amagicelem	get_vtbl(want_vtbl_amagicelem)
-#else
+#if 1		/* for compatibility */
 #  define VTBL_sv		&PL_vtbl_sv
 #  define VTBL_env		&PL_vtbl_env
 #  define VTBL_envelem		&PL_vtbl_envelem
@@ -142,6 +111,8 @@
 #endif
 
 #ifdef PERL_OBJECT
+
+#  include "perlapi.h"
 #  include "objXSUB.h"
 
 #  undef  aTHXo
@@ -151,27 +122,7 @@
 #  undef  _aTHXo
 #  define _aTHXo		,aTHXo
 
-#  undef  SAVEDESTRUCTOR
-#  define SAVEDESTRUCTOR(f,p) \
-	pPerl->Perl_save_destructor((FUNC_NAME_TO_PTR(f)),(p))
-
 #  ifdef WIN32
-#    ifndef WIN32IO_IS_STDIO
-#      undef	errno
-#      define	errno			ErrorNo()
-#    endif
-#    undef  NtCrypt
-#    define NtCrypt			pPerl->NtCrypt
-#    undef  NtGetLib
-#    define NtGetLib			pPerl->NtGetLib
-#    undef  NtGetArchLib
-#    define NtGetArchLib		pPerl->NtGetArchLib
-#    undef  NtGetSiteLib
-#    define NtGetSiteLib		pPerl->NtGetSiteLib
-#    undef  NtGetBin
-#    define NtGetBin			pPerl->NtGetBin
-#    undef  NtGetDebugScriptStr
-#    define NtGetDebugScriptStr		pPerl->NtGetDebugScriptStr
 #    undef fprintf
 #    define fprintf			pPerl->fprintf
 #  endif /* WIN32 */
@@ -327,13 +278,9 @@
 #    define shutdown		PerlSock_shutdown
 #    define socket		PerlSock_socket
 #    define socketpair		PerlSock_socketpair
-
 #    ifdef WIN32
 #      include "XSlock.h"
-#    endif  /* WIN32 */
+#    endif
 #  endif  /* NO_XSLOCKS */
-#else
-#  ifdef PERL_CAPI
-#    include "perlCAPI.h"
-#  endif
+
 #endif	/* PERL_OBJECT */

@@ -32,6 +32,16 @@
 #define CALLOP *PL_op
 #endif
 
+static I32 sortcv(pTHXo_ SV *a, SV *b);
+static I32 sv_ncmp(pTHXo_ SV *a, SV *b);
+static I32 sv_i_ncmp(pTHXo_ SV *a, SV *b);
+static I32 amagic_ncmp(pTHXo_ SV *a, SV *b);
+static I32 amagic_i_ncmp(pTHXo_ SV *a, SV *b);
+static I32 amagic_cmp(pTHXo_ SV *a, SV *b);
+static I32 amagic_cmp_locale(pTHXo_ SV *a, SV *b);
+static I32 sv_cmp_static(pTHXo_ SV *a, SV *b);
+static I32 sv_cmp_locale_static(pTHXo_ SV *a, SV *b);
+
 PP(pp_wantarray)
 {
     djSP;
@@ -755,120 +765,6 @@ PP(pp_mapwhile)
     }
 }
 
-STATIC I32
-S_sv_ncmp(pTHX_ SV *a, SV *b)
-{
-    NV nv1 = SvNV(a);
-    NV nv2 = SvNV(b);
-    return nv1 < nv2 ? -1 : nv1 > nv2 ? 1 : 0;
-}
-
-STATIC I32
-S_sv_i_ncmp(pTHX_ SV *a, SV *b)
-{
-    IV iv1 = SvIV(a);
-    IV iv2 = SvIV(b);
-    return iv1 < iv2 ? -1 : iv1 > iv2 ? 1 : 0;
-}
-#define tryCALL_AMAGICbin(left,right,meth,svp) STMT_START { \
-	  *svp = Nullsv;				\
-          if (PL_amagic_generation) { \
-	    if (SvAMAGIC(left)||SvAMAGIC(right))\
-		*svp = amagic_call(left, \
-				   right, \
-				   CAT2(meth,_amg), \
-				   0); \
-	  } \
-	} STMT_END
-
-STATIC I32
-S_amagic_ncmp(pTHX_ register SV *a, register SV *b)
-{
-    SV *tmpsv;
-    tryCALL_AMAGICbin(a,b,ncmp,&tmpsv);
-    if (tmpsv) {
-    	NV d;
-    	
-        if (SvIOK(tmpsv)) {
-            I32 i = SvIVX(tmpsv);
-            if (i > 0)
-               return 1;
-            return i? -1 : 0;
-        }
-        d = SvNV(tmpsv);
-        if (d > 0)
-           return 1;
-        return d? -1 : 0;
-     }
-     return sv_ncmp(a, b);
-}
-
-STATIC I32
-S_amagic_i_ncmp(pTHX_ register SV *a, register SV *b)
-{
-    SV *tmpsv;
-    tryCALL_AMAGICbin(a,b,ncmp,&tmpsv);
-    if (tmpsv) {
-    	NV d;
-    	
-        if (SvIOK(tmpsv)) {
-            I32 i = SvIVX(tmpsv);
-            if (i > 0)
-               return 1;
-            return i? -1 : 0;
-        }
-        d = SvNV(tmpsv);
-        if (d > 0)
-           return 1;
-        return d? -1 : 0;
-    }
-    return sv_i_ncmp(a, b);
-}
-
-STATIC I32
-S_amagic_cmp(pTHX_ register SV *str1, register SV *str2)
-{
-    SV *tmpsv;
-    tryCALL_AMAGICbin(str1,str2,scmp,&tmpsv);
-    if (tmpsv) {
-    	NV d;
-    	
-        if (SvIOK(tmpsv)) {
-            I32 i = SvIVX(tmpsv);
-            if (i > 0)
-               return 1;
-            return i? -1 : 0;
-        }
-        d = SvNV(tmpsv);
-        if (d > 0)
-           return 1;
-        return d? -1 : 0;
-    }
-    return sv_cmp(str1, str2);
-}
-
-STATIC I32
-S_amagic_cmp_locale(pTHX_ register SV *str1, register SV *str2)
-{
-    SV *tmpsv;
-    tryCALL_AMAGICbin(str1,str2,scmp,&tmpsv);
-    if (tmpsv) {
-    	NV d;
-    	
-        if (SvIOK(tmpsv)) {
-            I32 i = SvIVX(tmpsv);
-            if (i > 0)
-               return 1;
-            return i? -1 : 0;
-        }
-        d = SvNV(tmpsv);
-        if (d > 0)
-           return 1;
-        return d? -1 : 0;
-    }
-    return sv_cmp_locale(str1, str2);
-}
-
 PP(pp_sort)
 {
     djSP; dMARK; dORIGMARK;
@@ -974,7 +870,7 @@ PP(pp_sort)
 		    (void)SvREFCNT_inc(cv); /* in preparation for POPSUB */
 	    }
 	    PL_sortcxix = cxstack_ix;
-	    qsortsv((myorigmark+1), max, FUNC_NAME_TO_PTR(S_sortcv));
+	    qsortsv((myorigmark+1), max, FUNC_NAME_TO_PTR(sortcv));
 
 	    POPBLOCK(cx,PL_curpm);
 	    PL_stack_sp = newsp;
@@ -989,18 +885,18 @@ PP(pp_sort)
  		    (PL_op->op_private & OPpSORT_NUMERIC)
 			? ( (PL_op->op_private & OPpSORT_INTEGER)
 			    ? ( overloading
-				? FUNC_NAME_TO_PTR(S_amagic_i_ncmp)
-				: FUNC_NAME_TO_PTR(S_sv_i_ncmp))
+				? FUNC_NAME_TO_PTR(amagic_i_ncmp)
+				: FUNC_NAME_TO_PTR(sv_i_ncmp))
 			    : ( overloading
-				? FUNC_NAME_TO_PTR(S_amagic_ncmp)
-				: FUNC_NAME_TO_PTR(S_sv_ncmp)))
+				? FUNC_NAME_TO_PTR(amagic_ncmp)
+				: FUNC_NAME_TO_PTR(sv_ncmp)))
 			: ( (PL_op->op_private & OPpLOCALE)
 			    ? ( overloading
-				? FUNC_NAME_TO_PTR(S_amagic_cmp_locale)
-				: FUNC_NAME_TO_PTR(Perl_sv_cmp_locale))
+				? FUNC_NAME_TO_PTR(amagic_cmp_locale)
+				: FUNC_NAME_TO_PTR(sv_cmp_locale_static))
 			    : ( overloading
-				? FUNC_NAME_TO_PTR(S_amagic_cmp)
-		    : FUNC_NAME_TO_PTR(Perl_sv_cmp) )));
+				? FUNC_NAME_TO_PTR(amagic_cmp)
+		    : FUNC_NAME_TO_PTR(sv_cmp_static) )));
 	    if (PL_op->op_private & OPpSORT_REVERSE) {
 		SV **p = ORIGMARK+1;
 		SV **q = ORIGMARK+max;
@@ -1593,30 +1489,6 @@ PP(pp_caller)
     PUSHs(sv_2mortal(newSViv((I32)cx->blk_oldcop->op_private &
 			     HINT_PRIVATE_MASK)));
     RETURN;
-}
-
-STATIC I32
-S_sortcv(pTHX_ SV *a, SV *b)
-{
-    dTHR;
-    I32 oldsaveix = PL_savestack_ix;
-    I32 oldscopeix = PL_scopestack_ix;
-    I32 result;
-    GvSV(PL_firstgv) = a;
-    GvSV(PL_secondgv) = b;
-    PL_stack_sp = PL_stack_base;
-    PL_op = PL_sortcop;
-    CALLRUNOPS(aTHX);
-    if (PL_stack_sp != PL_stack_base + 1)
-	Perl_croak(aTHX_ "Sort subroutine didn't return single value");
-    if (!SvNIOKp(*PL_stack_sp))
-	Perl_croak(aTHX_ "Sort subroutine didn't return a numeric value");
-    result = SvIV(*PL_stack_sp);
-    while (PL_scopestack_ix > oldscopeix) {
-	LEAVE;
-    }
-    leave_scope(oldsaveix);
-    return result;
 }
 
 PP(pp_reset)
@@ -3503,13 +3375,8 @@ struct partition_stack_entry {
 
 /* Return < 0 == 0 or > 0 as the value of elt1 is < elt2, == elt2, > elt2
 */
-#ifdef PERL_OBJECT
 #define qsort_cmp(elt1, elt2) \
-   ((this->*compare)(array[elt1], array[elt2]))
-#else
-#define qsort_cmp(elt1, elt2) \
-   ((*compare)(aTHX_ array[elt1], array[elt2]))
-#endif
+   ((*compare)(aTHXo_ array[elt1], array[elt2]))
 
 #ifdef QSORT_ORDER_GUESS
 #define QSORT_NOTICE_SWAP swapped++;
@@ -4079,4 +3946,164 @@ S_qsortsv(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t compare)
    }
 
    /* Believe it or not, the array is sorted at this point! */
+}
+
+
+#ifdef PERL_OBJECT
+#define NO_XSLOCKS
+#undef this
+#define this pPerl
+#include "XSUB.h"
+#endif
+
+
+static I32
+sortcv(pTHXo_ SV *a, SV *b)
+{
+    dTHR;
+    I32 oldsaveix = PL_savestack_ix;
+    I32 oldscopeix = PL_scopestack_ix;
+    I32 result;
+    GvSV(PL_firstgv) = a;
+    GvSV(PL_secondgv) = b;
+    PL_stack_sp = PL_stack_base;
+    PL_op = PL_sortcop;
+    CALLRUNOPS(aTHX);
+    if (PL_stack_sp != PL_stack_base + 1)
+	Perl_croak(aTHX_ "Sort subroutine didn't return single value");
+    if (!SvNIOKp(*PL_stack_sp))
+	Perl_croak(aTHX_ "Sort subroutine didn't return a numeric value");
+    result = SvIV(*PL_stack_sp);
+    while (PL_scopestack_ix > oldscopeix) {
+	LEAVE;
+    }
+    leave_scope(oldsaveix);
+    return result;
+}
+
+
+static I32
+sv_ncmp(pTHXo_ SV *a, SV *b)
+{
+    NV nv1 = SvNV(a);
+    NV nv2 = SvNV(b);
+    return nv1 < nv2 ? -1 : nv1 > nv2 ? 1 : 0;
+}
+
+static I32
+sv_i_ncmp(pTHXo_ SV *a, SV *b)
+{
+    IV iv1 = SvIV(a);
+    IV iv2 = SvIV(b);
+    return iv1 < iv2 ? -1 : iv1 > iv2 ? 1 : 0;
+}
+#define tryCALL_AMAGICbin(left,right,meth,svp) STMT_START { \
+	  *svp = Nullsv;				\
+          if (PL_amagic_generation) { \
+	    if (SvAMAGIC(left)||SvAMAGIC(right))\
+		*svp = amagic_call(left, \
+				   right, \
+				   CAT2(meth,_amg), \
+				   0); \
+	  } \
+	} STMT_END
+
+static I32
+amagic_ncmp(pTHXo_ register SV *a, register SV *b)
+{
+    SV *tmpsv;
+    tryCALL_AMAGICbin(a,b,ncmp,&tmpsv);
+    if (tmpsv) {
+    	NV d;
+    	
+        if (SvIOK(tmpsv)) {
+            I32 i = SvIVX(tmpsv);
+            if (i > 0)
+               return 1;
+            return i? -1 : 0;
+        }
+        d = SvNV(tmpsv);
+        if (d > 0)
+           return 1;
+        return d? -1 : 0;
+     }
+     return sv_ncmp(aTHXo_ a, b);
+}
+
+static I32
+amagic_i_ncmp(pTHXo_ register SV *a, register SV *b)
+{
+    SV *tmpsv;
+    tryCALL_AMAGICbin(a,b,ncmp,&tmpsv);
+    if (tmpsv) {
+    	NV d;
+    	
+        if (SvIOK(tmpsv)) {
+            I32 i = SvIVX(tmpsv);
+            if (i > 0)
+               return 1;
+            return i? -1 : 0;
+        }
+        d = SvNV(tmpsv);
+        if (d > 0)
+           return 1;
+        return d? -1 : 0;
+    }
+    return sv_i_ncmp(aTHXo_ a, b);
+}
+
+static I32
+amagic_cmp(pTHXo_ register SV *str1, register SV *str2)
+{
+    SV *tmpsv;
+    tryCALL_AMAGICbin(str1,str2,scmp,&tmpsv);
+    if (tmpsv) {
+    	NV d;
+    	
+        if (SvIOK(tmpsv)) {
+            I32 i = SvIVX(tmpsv);
+            if (i > 0)
+               return 1;
+            return i? -1 : 0;
+        }
+        d = SvNV(tmpsv);
+        if (d > 0)
+           return 1;
+        return d? -1 : 0;
+    }
+    return sv_cmp(str1, str2);
+}
+
+static I32
+amagic_cmp_locale(pTHXo_ register SV *str1, register SV *str2)
+{
+    SV *tmpsv;
+    tryCALL_AMAGICbin(str1,str2,scmp,&tmpsv);
+    if (tmpsv) {
+    	NV d;
+    	
+        if (SvIOK(tmpsv)) {
+            I32 i = SvIVX(tmpsv);
+            if (i > 0)
+               return 1;
+            return i? -1 : 0;
+        }
+        d = SvNV(tmpsv);
+        if (d > 0)
+           return 1;
+        return d? -1 : 0;
+    }
+    return sv_cmp_locale(str1, str2);
+}
+
+static I32
+sv_cmp_locale_static(pTHXo_ register SV *str1, register SV *str2)
+{
+    return sv_cmp_locale(str1, str2);
+}
+
+static I32
+sv_cmp_static(pTHXo_ register SV *str1, register SV *str2)
+{
+    return sv_cmp(str1, str2);
 }

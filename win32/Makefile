@@ -40,7 +40,7 @@ INST_VER	= \5.00557
 # the same location.  Commenting it out gives you a simpler
 # installation that is easier to understand for beginners.
 #
-#INST_ARCH	= \$(ARCHNAME)
+INST_ARCH	= \$(ARCHNAME)
 
 #
 # uncomment to enable threads-capabilities
@@ -325,7 +325,7 @@ EXTUTILSDIR	= $(LIBDIR)\extutils
 !IF "$(OBJECT)" == "-DPERL_OBJECT"
 PERLIMPLIB	= ..\perlcore.lib
 PERLDLL		= ..\perlcore.dll
-#CAPILIB		= $(COREDIR)\perlCAPI.lib
+#CAPILIB		= $(COREDIR)\perlapi.lib
 !ELSE
 PERLIMPLIB	= ..\perl.lib
 PERLDLL		= ..\perl.dll
@@ -400,6 +400,7 @@ MICROCORE_SRC	=		\
 		..\mg.c		\
 		..\op.c		\
 		..\perl.c	\
+		..\perlapi.c	\
 		..\perly.c	\
 		..\pp.c		\
 		..\pp_ctl.c	\
@@ -477,6 +478,7 @@ CORE_NOCFG_H	=		\
 		..\op.h		\
 		..\opcode.h	\
 		..\perl.h	\
+		..\perlapi.h	\
 		..\perlsdio.h	\
 		..\perlsfio.h	\
 		..\perly.h	\
@@ -793,15 +795,12 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 	cd ..\..\win32
 
 #!IF "$(OBJECT)" == "-DPERL_OBJECT"
-#perlCAPI.cpp : $(MINIPERL)
-#	$(MINIPERL) GenCAPI.pl $(COREDIR)
-#
-#perlCAPI$(o) : perlCAPI.cpp
+#perlapi$(o) : ..\perlapi.c
 #	$(CC) $(CFLAGS_O) $(RUNTIME) -UPERLDLL -c \
-#	    $(OBJOUT_FLAG)perlCAPI$(o) perlCAPI.cpp
+#	    $(OBJOUT_FLAG)perlapi$(o) ..\perlapi.c
 #
-#$(CAPILIB) : perlCAPI.cpp perlCAPI$(o)
-#	lib /OUT:$(CAPILIB) perlCAPI$(o)
+#$(CAPILIB) : ..\perlapi.c ..\perlapi$(o)
+#	lib /OUT:$(CAPILIB) ..\perlapi$(o)
 #!ENDIF
 
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
@@ -993,7 +992,6 @@ clean :
 	-@erase perlmain$(o)
 	-@erase config.w32
 	-@erase /f config.h
-	-@erase perlCAPI.cpp
 	-@erase $(GLOBEXE)
 	-@erase $(PERLEXE)
 	-@erase $(PERLDLL)

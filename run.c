@@ -39,8 +39,9 @@ Perl_runops_debug(pTHX)
 {
 #ifdef DEBUGGING
     dTHR;
-    if (!PL_op && ckWARN_d(WARN_DEBUGGING)) {
-	Perl_warner(aTHX_ WARN_DEBUGGING, "NULL OP IN RUN");
+    if (!PL_op) {
+	if (ckWARN_d(WARN_DEBUGGING))
+	    Perl_warner(aTHX_ WARN_DEBUGGING, "NULL OP IN RUN");
 	return 0;
     }
 

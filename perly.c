@@ -16,6 +16,8 @@ static char yysccsid[] = "@(#)yaccpar 1.8 (Berkeley) 01/20/91";
 
 #define dep() deprecate("\"do\" to call subroutines")
 
+static void yydestruct(pTHXo_ void *ptr);
+
 #line 30 "perly.y"
 #define YYERRCODE 256
 static short yylhs[] = {                                 -1,
@@ -1316,21 +1318,6 @@ struct ysv {
     YYSTYPE oldyylval;
 };
 
-void
-Perl_yydestruct(pTHX_ void *ptr)
-{
-    struct ysv* ysave = (struct ysv*)ptr;
-    if (ysave->yyss) Safefree(ysave->yyss);
-    if (ysave->yyvs) Safefree(ysave->yyvs);
-    yydebug	= ysave->oldyydebug;
-    yynerrs	= ysave->oldyynerrs;
-    yyerrflag	= ysave->oldyyerrflag;
-    yychar	= ysave->oldyychar;
-    yyval	= ysave->oldyyval;
-    yylval	= ysave->oldyylval;
-    Safefree(ysave);
-}
-
 int
 Perl_yyparse(pTHX)
 {
@@ -1350,7 +1337,7 @@ Perl_yyparse(pTHX)
 
     struct ysv *ysave;
     New(73, ysave, 1, struct ysv);
-    SAVEDESTRUCTOR(Perl_yydestruct, ysave);
+    SAVEDESTRUCTOR(yydestruct, ysave);
     ysave->oldyydebug	= yydebug;
     ysave->oldyynerrs	= yynerrs;
     ysave->oldyyerrflag	= yyerrflag;
@@ -2383,4 +2370,25 @@ yyabort:
     retval = 1;
 yyaccept:
     return retval;
+}
+
+
+#ifdef PERL_OBJECT
+#define NO_XSLOCKS
+#include "XSUB.h"
+#endif
+
+static void
+yydestruct(pTHXo_ void *ptr)
+{
+    struct ysv* ysave = (struct ysv*)ptr;
+    if (ysave->yyss) Safefree(ysave->yyss);
+    if (ysave->yyvs) Safefree(ysave->yyvs);
+    yydebug	= ysave->oldyydebug;
+    yynerrs	= ysave->oldyynerrs;
+    yyerrflag	= ysave->oldyyerrflag;
+    yychar	= ysave->oldyychar;
+    yyval	= ysave->oldyyval;
+    yylval	= ysave->oldyylval;
+    Safefree(ysave);
 }

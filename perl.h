@@ -448,6 +448,19 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 
 #define MEM_SIZE Size_t
 
+#if defined(STANDARD_C) && defined(I_STDDEF)
+#   include <stddef.h>
+#   define STRUCT_OFFSET(s,m)  offsetof(s,m)
+#else
+#   define STRUCT_OFFSET(s,m)  (Size_t)(&(((s *)0)->m))
+#endif
+
+#if defined(I_STRING) || defined(__cplusplus)
+#   include <string.h>
+#else
+#   include <strings.h>
+#endif
+
 /* This comes after <stdlib.h> so we don't try to change the standard
  * library prototypes; we'll use our own in proto.h instead. */
 
@@ -477,19 +490,6 @@ Free_t   Perl_mfree (Malloc_t where);
 #  define saferealloc safesysrealloc
 #  define safefree    safesysfree
 #endif /* MYMALLOC */
-
-#if defined(STANDARD_C) && defined(I_STDDEF)
-#   include <stddef.h>
-#   define STRUCT_OFFSET(s,m)  offsetof(s,m)
-#else
-#   define STRUCT_OFFSET(s,m)  (Size_t)(&(((s *)0)->m))
-#endif
-
-#if defined(I_STRING) || defined(__cplusplus)
-#   include <string.h>
-#else
-#   include <strings.h>
-#endif
 
 #if !defined(HAS_STRCHR) && defined(HAS_INDEX) && !defined(strchr)
 #define strchr index
@@ -1609,7 +1609,7 @@ union any {
     I32		any_i32;
     IV		any_iv;
     long	any_long;
-    void	(CPERLscope(*any_dptr)) (pTHX_ void*);
+    void	(*any_dptr) (pTHXo_ void*);
 };
 #endif
 
@@ -2394,9 +2394,20 @@ typedef char* (CPERLscope(*re_intuit_start_t)) (pTHX_ regexp *prog, SV *sv,
 typedef SV*	(CPERLscope(*re_intuit_string_t)) (pTHX_ regexp *prog);
 typedef void	(CPERLscope(*regfree_t)) (pTHX_ struct regexp* r);
 
+#ifdef USE_PURE_BISON
+int Perl_yylex(pTHX_ YYSTYPE *lvalp, int *lcharp);
+#endif
+
+typedef void (*DESTRUCTORFUNC_t) (pTHXo_ void*);
+typedef void (*SVFUNC_t) (pTHXo_ SV*);
+typedef I32  (*SVCOMPARE_t) (pTHXo_ SV*, SV*);
+typedef void (*XSINIT_t) (pTHXo);
+typedef void (*ATEXIT_t) (pTHXo_ void*);
+typedef void (*XSUBADDR_t) (pTHXo_ CV *);
 
 /* Set up PERLVAR macros for populating structs */
 #define PERLVAR(var,type) type var;
+#define PERLVARA(var,n,type) type var[n];
 #define PERLVARI(var,type,init) type var;
 #define PERLVARIC(var,type,init) type var;
 
@@ -2478,6 +2489,7 @@ typedef void *Thread;
 
 /* Done with PERLVAR macros for now ... */
 #undef PERLVAR
+#undef PERLVARA
 #undef PERLVARI
 #undef PERLVARIC
 
@@ -2503,17 +2515,6 @@ typedef void *Thread;
 #    define __attribute__(attr)
 #  endif
 #endif
-
-#ifdef USE_PURE_BISON
-int Perl_yylex(pTHX_ YYSTYPE *lvalp, int *lcharp);
-#endif
-
-typedef void (CPERLscope(*DESTRUCTORFUNC_t)) (pTHX_ void*);
-typedef void (CPERLscope(*SVFUNC_t)) (pTHX_ SV*);
-typedef I32 (CPERLscope(*SVCOMPARE_t)) (pTHX_ SV*, SV*);
-typedef void (*XSINIT_t) (pTHXo);
-typedef void (*ATEXIT_t) (pTHXo_ void*);
-typedef void (*XSUBADDR_t) (pTHXo_ CV *);
 
 #ifdef PERL_OBJECT
 #define PERL_DECL_PROT
@@ -2557,6 +2558,7 @@ VIRTUAL int CPerlObj::do_aspawn (void *vreally, void **vmark, void **vsp);
  */
                          
 #define PERLVAR(var,type) EXT type PL_##var;
+#define PERLVARA(var,n,type) EXT type PL_##var[n];
 #define PERLVARI(var,type,init) EXT type  PL_##var INIT(init);
 #define PERLVARIC(var,type,init) EXTCONST type PL_##var INIT(init);
 
@@ -2587,7 +2589,7 @@ END_EXTERN_C
  * be defined to maintain binary compatibility with PERL_OBJECT
  * for 5.005
  */
-PERLVAR(object_compatibility[30],	char)
+PERLVARA(object_compatibility,30,	char)
 };
 
 #  include "embed.h"
@@ -2607,6 +2609,7 @@ PERLVAR(object_compatibility[30],	char)
 #endif  /* PERL_OBJECT */
 
 #undef PERLVAR
+#undef PERLVARA
 #undef PERLVARI
 #undef PERLVARIC
 
