@@ -1002,6 +1002,8 @@ END_EXTERN_C
 #define PL_patleave		(*Perl_Gpatleave_ptr(NULL))
 #undef  PL_sh_path
 #define PL_sh_path		(*Perl_Gsh_path_ptr(NULL))
+#undef  PL_sigfpe_saved
+#define PL_sigfpe_saved		(*Perl_Gsigfpe_saved_ptr(NULL))
 #undef  PL_thr_key
 #define PL_thr_key		(*Perl_Gthr_key_ptr(NULL))
 

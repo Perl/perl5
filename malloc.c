@@ -566,6 +566,9 @@ union	overhead {
 	union	overhead *ov_next;	/* when free */
 #if MEM_ALIGNBYTES > 4
 	double	strut;			/* alignment problems */
+#  if MEM_ALIGNBYTES > 8
+	char	sstrut[MEM_ALIGNBYTES]; /* for the sizing */
+#  endif
 #endif
 	struct {
 /*
