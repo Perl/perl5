@@ -1785,7 +1785,7 @@ instead on the filehandle.)
 values cannot be returned in subroutines used in lvalue context.  See
 L<perlsub/"Lvalue subroutines">.
 
-=item Lookbehind longer than %d not implemented before << HERE in reges m/%s/
+=item Lookbehind longer than %d not implemented before << HERE %s
 
 (F) There is currently a limit on the length of string which lookbehind can
 handle. This restriction may be eased in a future release. The << HERE shows in
@@ -2770,7 +2770,7 @@ declared or defined with a different function prototype.
 {min,max} construct. The << HERE shows in the regular expression about where
 the problem was discovered. See L<perlre>.
 
-=item Quantifier unexpected on zero-length expression before << HERE in regex m/%s/
+=item Quantifier unexpected on zero-length expression before << HERE %s
 
 (W regexp) You applied a regular expression quantifier in a place where
 it makes no sense, such as on a zero-width assertion.  Try putting the
@@ -2961,18 +2961,18 @@ before now.  Check your control flow.
 shows in the regular expression about where the problem was discovered. See
 L<perlre>.
 
-=item Sequence (?{...}) not terminated or not {}-balanced in regex m/%s/
+=item Sequence (?{...}) not terminated or not {}-balanced in %s
 
 (F) If the contents of a (?{...}) clause contains braces, they must balance
 for Perl to properly detect the end of the clause. See L<perlre>.
 
-=item Sequence (?%s...) not implemented before << HERE mark in regex m/%s/
+=item Sequence (?%s...) not implemented before << HERE mark in %s
 
 (F) A proposed regular expression extension has the character reserved but
 has not yet been written. The << HERE shows in the regular expression about
 where the problem was discovered. See L<perlre>.
 
-=item Sequence (?%s...) not recognized before << HERE mark in regex m/%s/
+=item Sequence (?%s...) not recognized before << HERE mark in %s
 
 (F) You used a regular expression extension that doesn't make sense.
 The << HERE shows in the regular expression about
@@ -3163,7 +3163,7 @@ assignment or as a subroutine argument for example).
 (F) Your Perl was compiled with B<-D>SETUID_SCRIPTS_ARE_SECURE_NOW, but
 a version of the setuid emulator somehow got run anyway.
 
-=item Switch (?(condition)... contains too many branches before << HERE in regex m/%s/
+=item Switch (?(condition)... contains too many branches before << HE%s
 
 (F) A (?(condition)if-clause|else-clause) construct can have at most two
 branches (the if-clause and the else-clause). If you want one or both to
@@ -3813,7 +3813,7 @@ anonymous, using the C<sub {}> syntax.  When inner anonymous subs that
 reference variables in outer subroutines are called or referenced, they
 are automatically rebound to the current values of such variables.
 
-=item Variable length lookbehind not implemented before << HERE in regex m/%s/
+=item Variable length lookbehind not implemented before << HERE in %s
 
 (F) Lookbehind is allowed only for subexpressions whose length is fixed and
 known at compile time. The << HERE shows in the regular expression about where

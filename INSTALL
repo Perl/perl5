@@ -517,6 +517,23 @@ directories to add to @INC.  By default, it will be empty.
 Perl will search these directories (including architecture and
 version-specific subdirectories) for add-on modules and extensions.
 
+=item APPLLIB_EXP
+
+There is one other way of adding paths to @INC at perl build time, and
+that is by setting the APPLLIB_EXP C pre-processor token to a colon-
+separated list of directories, like this
+
+       sh Configure -Accflags='-DAPPLLIB_EXP=\"/usr/libperl\"'
+
+The directories defined by APPLLIB_EXP get added to @INC I<first>,
+ahead of any others, and so provide a way to override the standard perl
+modules should you, for example, want to distribute fixes without
+touching the perl distribution proper.  And, like otherlib dirs,
+version and architecture specific subdirectories are also searched, if
+present, at run time.  Of course, you can still search other @INC
+directories ahead of those in APPLLIB_EXP by using any of the standard
+run-time methods: $PERLLIB, $PERL5LIB, -I, use lib, etc.
+
 =item Man Pages
 
 In versions 5.005_57 and earlier, the default was to store module man

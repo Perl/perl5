@@ -368,24 +368,31 @@ has several abbreviations for common character classes:
 =over 4
 
 =item *
+
 \d is a digit and represents [0-9]
 
 =item *
+
 \s is a whitespace character and represents [\ \t\r\n\f]
 
 =item *
+
 \w is a word character (alphanumeric or _) and represents [0-9a-zA-Z_]
 
 =item *
+
 \D is a negated \d; it represents any character but a digit [^0-9]
 
 =item *
+
 \S is a negated \s; it represents any non-whitespace character [^\s]
 
 =item *
+
 \W is a negated \w; it represents any non-word character [^\w]
 
 =item *
+
 The period '.' matches any character but "\n"
 
 =back
@@ -451,22 +458,26 @@ and C<$> are able to match.  Here are the four possible combinations:
 =over 4
 
 =item *
+
 no modifiers (//): Default behavior.  C<'.'> matches any character
 except C<"\n">.  C<^> matches only at the beginning of the string and
 C<$> matches only at the end or before a newline at the end.
 
 =item *
+
 s modifier (//s): Treat string as a single long line.  C<'.'> matches
 any character, even C<"\n">.  C<^> matches only at the beginning of
 the string and C<$> matches only at the end or before a newline at the
 end.
 
 =item *
+
 m modifier (//m): Treat string as a set of multiple lines.  C<'.'>
 matches any character except C<"\n">.  C<^> and C<$> are able to match
 at the start or end of I<any> line within the string.
 
 =item *
+
 both s and m modifiers (//sm): Treat string as a single long line, but
 detect multiple lines.  C<'.'> matches any character, even
 C<"\n">.  C<^> and C<$>, however, are able to match at the start or end
@@ -602,32 +613,52 @@ of what perl does when it tries to match the regexp
 
 =over 4
 
-=item 0 Start with the first letter in the string 'a'.
+=item 0
 
-=item 1 Try the first alternative in the first group 'abd'.
+Start with the first letter in the string 'a'.
 
-=item 2 Match 'a' followed by 'b'. So far so good.
+=item 1
 
-=item 3 'd' in the regexp doesn't match 'c' in the string - a dead
+Try the first alternative in the first group 'abd'.
+
+=item 2
+
+Match 'a' followed by 'b'. So far so good.
+
+=item 3
+
+'d' in the regexp doesn't match 'c' in the string - a dead
 end.  So backtrack two characters and pick the second alternative in
 the first group 'abc'.
 
-=item 4 Match 'a' followed by 'b' followed by 'c'.  We are on a roll
+=item 4
+
+Match 'a' followed by 'b' followed by 'c'.  We are on a roll
 and have satisfied the first group. Set $1 to 'abc'.
 
-=item 5 Move on to the second group and pick the first alternative
+=item 5
+
+Move on to the second group and pick the first alternative
 'df'.
 
-=item 6 Match the 'd'.
+=item 6
 
-=item 7 'f' in the regexp doesn't match 'e' in the string, so a dead
+Match the 'd'.
+
+=item 7
+
+'f' in the regexp doesn't match 'e' in the string, so a dead
 end.  Backtrack one character and pick the second alternative in the
 second group 'd'.
 
-=item 8 'd' matches. The second grouping is satisfied, so set $2 to
+=item 8
+
+'d' matches. The second grouping is satisfied, so set $2 to
 'd'.
 
-=item 9 We are at the end of the regexp, so we are done! We have
+=item 9
+
+We are at the end of the regexp, so we are done! We have
 matched 'abcd' out of the string "abcde".
 
 =back
@@ -770,18 +801,30 @@ meanings:
 
 =over 4
 
-=item * C<a?> = match 'a' 1 or 0 times
+=item *
 
-=item * C<a*> = match 'a' 0 or more times, i.e., any number of times
+C<a?> = match 'a' 1 or 0 times
 
-=item * C<a+> = match 'a' 1 or more times, i.e., at least once
+=item *
 
-=item * C<a{n,m}> = match at least C<n> times, but not more than C<m>
+C<a*> = match 'a' 0 or more times, i.e., any number of times
+
+=item *
+
+C<a+> = match 'a' 1 or more times, i.e., at least once
+
+=item *
+
+C<a{n,m}> = match at least C<n> times, but not more than C<m>
 times.
 
-=item * C<a{n,}> = match at least C<n> or more times
+=item *
 
-=item * C<a{n}> = match exactly C<n> times
+C<a{n,}> = match at least C<n> or more times
+
+=item *
+
+C<a{n}> = match exactly C<n> times
 
 =back
 
@@ -845,19 +888,23 @@ the principles above to predict which way the regexp will match:
 =over 4
 
 =item *
+
 Principle 0: Taken as a whole, any regexp will be matched at the
 earliest possible position in the string.
 
 =item *
+
 Principle 1: In an alternation C<a|b|c...>, the leftmost alternative
 that allows a match for the whole regexp will be the one used.
 
 =item *
+
 Principle 2: The maximal matching quantifiers C<?>, C<*>, C<+> and
 C<{n,m}> will in general match as much of the string as possible while
 still allowing the whole regexp to match.
 
 =item *
+
 Principle 3: If there are two or more elements in a regexp, the
 leftmost greedy quantifier, if any, will match as much of the string
 as possible while still allowing the whole regexp to match.  The next
@@ -925,21 +972,33 @@ following meanings:
 
 =over 4
 
-=item * C<a??> = match 'a' 0 or 1 times. Try 0 first, then 1.
+=item *
 
-=item * C<a*?> = match 'a' 0 or more times, i.e., any number of times,
+C<a??> = match 'a' 0 or 1 times. Try 0 first, then 1.
+
+=item *
+
+C<a*?> = match 'a' 0 or more times, i.e., any number of times,
 but as few times as possible
 
-=item * C<a+?> = match 'a' 1 or more times, i.e., at least once, but
+=item *
+
+C<a+?> = match 'a' 1 or more times, i.e., at least once, but
 as few times as possible
 
-=item * C<a{n,m}?> = match at least C<n> times, not more than C<m>
+=item *
+
+C<a{n,m}?> = match at least C<n> times, not more than C<m>
 times, as few times as possible
 
-=item * C<a{n,}?> = match at least C<n> times, but as few times as
+=item *
+
+C<a{n,}?> = match at least C<n> times, but as few times as
 possible
 
-=item * C<a{n}?> = match exactly C<n> times.  Because we match exactly
+=item *
+
+C<a{n}?> = match exactly C<n> times.  Because we match exactly
 C<n> times, C<a{n}?> is equivalent to C<a{n}> and is just there for
 notational consistency.
 
@@ -998,6 +1057,7 @@ quantifiers:
 =over 4
 
 =item *
+
 Principle 3: If there are two or more elements in a regexp, the
 leftmost greedy (non-greedy) quantifier, if any, will match as much
 (little) of the string as possible while still allowing the whole
@@ -1019,23 +1079,37 @@ backtracking.  Here is a step-by-step analysis of the example
 
 =over 4
 
-=item 0 Start with the first letter in the string 't'.
+=item 0
 
-=item 1 The first quantifier '.*' starts out by matching the whole
+Start with the first letter in the string 't'.
+
+=item 1
+
+The first quantifier '.*' starts out by matching the whole
 string 'the cat in the hat'.
 
-=item 2 'a' in the regexp element 'at' doesn't match the end of the
+=item 2
+
+'a' in the regexp element 'at' doesn't match the end of the
 string.  Backtrack one character.
 
-=item 3 'a' in the regexp element 'at' still doesn't match the last
+=item 3
+
+'a' in the regexp element 'at' still doesn't match the last
 letter of the string 't', so backtrack one more character.
 
-=item 4 Now we can match the 'a' and the 't'.
+=item 4
 
-=item 5 Move on to the third element '.*'.  Since we are at the end of
+Now we can match the 'a' and the 't'.
+
+=item 5
+
+Move on to the third element '.*'.  Since we are at the end of
 the string and '.*' can match 0 times, assign it the empty string.
 
-=item 6 We are done!
+=item 6
+
+We are done!
 
 =back
 
@@ -1180,15 +1254,25 @@ This is our final regexp.  To recap, we built a regexp by
 
 =over 4
 
-=item * specifying the task in detail,
+=item *
 
-=item * breaking down the problem into smaller parts,
+specifying the task in detail,
 
-=item * translating the small parts into regexps,
+=item *
 
-=item * combining the regexps,
+breaking down the problem into smaller parts,
 
-=item * and optimizing the final combined regexp.
+=item *
+
+translating the small parts into regexps,
+
+=item *
+
+combining the regexps,
+
+=item *
+
+and optimizing the final combined regexp.
 
 =back
 

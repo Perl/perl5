@@ -175,7 +175,9 @@ function.
 system boot. Resolution is limited to system timer ticks (about 10ms
 on WinNT and 55ms on Win9X).
 
-=item Win32::InitiateSystemShutdown(MACHINE, MESSAGE, TIMEOUT, FORCECLOSE, REBOOT)
+=item
+
+Win32::InitiateSystemShutdown(MACHINE, MESSAGE, TIMEOUT, FORCECLOSE, REBOOT)
 
 [EXT] Shutsdown the specified MACHINE, notifying users with the
 supplied MESSAGE, within the specified TIMEOUT interval. Forces

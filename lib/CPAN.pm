@@ -6625,8 +6625,10 @@ Your milage may vary...
 
 =over
 
-=item 1) I installed a new version of module X but CPAN keeps saying,
-      I have the old version installed
+=item 1)
+
+I installed a new version of module X but CPAN keeps saying,
+I have the old version installed
 
 Most probably you B<do> have the old version installed. This can
 happen if a module installs itself into a different directory in the
@@ -6638,14 +6640,18 @@ many people add this argument permanently by configuring
 
   o conf make_install_arg UNINST=1
 
-=item 2) So why is UNINST=1 not the default?
+=item 2)
+
+So why is UNINST=1 not the default?
 
 Because there are people who have their precise expectations about who
 may install where in the @INC path and who uses which @INC array. In
 fine tuned environments C<UNINST=1> can cause damage.
 
-=item 3) I want to clean up my mess, and install a new perl along with
-      all modules I have. How do I go about it?
+=item 3)
+
+I want to clean up my mess, and install a new perl along with
+all modules I have. How do I go about it?
 
 Run the autobundle command for your old perl and optionally rename the
 resulting bundle file (e.g. Bundle/mybundle.pm), install the new perl
@@ -6659,8 +6665,10 @@ Install the bundle file you produced in the first step with something like
 
 and you're done.
 
-=item 4) When I install bundles or multiple modules with one command
-      there is too much output to keep track of
+=item 4)
+
+When I install bundles or multiple modules with one command
+there is too much output to keep track of.
 
 You may want to configure something like
 
@@ -6670,8 +6678,9 @@ You may want to configure something like
 so that STDOUT is captured in a file for later inspection.
 
 
-=item 5) I am not root, how can I install a module in a personal
-      directory?
+=item 5)
+
+I am not root, how can I install a module in a personal directory?
 
 You will most probably like something like this:
 
@@ -6694,14 +6703,17 @@ or setting the PERL5LIB environment variable.
 Another thing you should bear in mind is that the UNINST parameter
 should never be set if you are not root.
 
-=item 6) How to get a package, unwrap it, and make a change before
-      building it?
+=item 6)
+
+How to get a package, unwrap it, and make a change before building it?
 
   look Sybase::Sybperl
 
-=item 7) I installed a Bundle and had a couple of fails. When I
-      retried, everything resolved nicely. Can this be fixed to work
-      on first try?
+=item 7)
+
+I installed a Bundle and had a couple of fails. When I
+retried, everything resolved nicely. Can this be fixed to work
+on first try?
 
 The reason for this is that CPAN does not know the dependencies of all
 modules when it starts out. To decide about the additional items to
@@ -6718,21 +6730,27 @@ definition file manually. It is planned to improve the metadata
 situation for dependencies on CPAN in general, but this will still
 take some time.
 
-=item 8) In our intranet we have many modules for internal use. How
-      can I integrate these modules with CPAN.pm but without uploading
-      the modules to CPAN?
+=item 8)
+
+In our intranet we have many modules for internal use. How
+can I integrate these modules with CPAN.pm but without uploading
+the modules to CPAN?
 
 Have a look at the CPAN::Site module.
 
-=item 9) When I run CPAN's shell, I get error msg about line 1 to 4,
-      setting meta input/output via the /etc/inputrc file.
+=item 9)
+
+When I run CPAN's shell, I get error msg about line 1 to 4,
+setting meta input/output via the /etc/inputrc file.
 
 Some versions of readline are picky about capitalization in the
 /etc/inputrc file and specifically RedHat 6.2 comes with a
 /etc/inputrc that contains the word C<on> in lowercase. Change the
 occurrences of C<on> to C<On> and the bug should disappear.
 
-=item 10) Some authors have strange characters in their names.
+=item 10)
+
+Some authors have strange characters in their names.
 
 Internally CPAN.pm uses the UTF-8 charset. If your terminal is
 expecting ISO-8859-1 charset, a converter can be activated by setting

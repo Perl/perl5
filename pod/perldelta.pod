@@ -314,7 +314,7 @@ distribution.
 map() that changes the size of the list should now work faster.
 
 =item *
- 
+
 sort() has been changed to use mergesort internally as opposed to the
 earlier quicksort.  For very small lists this may result in slightly
 slower sorting times, but in general the speedup should be at least
@@ -469,7 +469,7 @@ Regular expressions on references and overloaded scalars now work.
 scalar() now forces scalar context even when used in void context.
 
 =item *
-	
+
 sort() arguments are now compiled in the right wantarray context
 (they were accidentally using the context of the sort() itself).
 

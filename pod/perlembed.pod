@@ -37,25 +37,45 @@ Read on...
 
 =over 5
 
-=item Compiling your C program
+=item *
 
-=item Adding a Perl interpreter to your C program
+Compiling your C program
 
-=item Calling a Perl subroutine from your C program
+=item *
 
-=item Evaluating a Perl statement from your C program
+Adding a Perl interpreter to your C program
 
-=item Performing Perl pattern matches and substitutions from your C program
+=item *
 
-=item Fiddling with the Perl stack from your C program
+Calling a Perl subroutine from your C program
 
-=item Maintaining a persistent interpreter
+=item *
 
-=item Maintaining multiple interpreter instances
+Evaluating a Perl statement from your C program
 
-=item Using Perl modules, which themselves use C libraries, from your C program
+=item *
 
-=item Embedding Perl under Win32
+Performing Perl pattern matches and substitutions from your C program
+
+=item *
+
+Fiddling with the Perl stack from your C program
+
+=item *
+
+Maintaining a persistent interpreter
+
+=item *
+
+Maintaining multiple interpreter instances
+
+=item *
+
+Using Perl modules, which themselves use C libraries, from your C program
+
+=item *
+
+Embedding Perl under Win32
 
 =back 
 
