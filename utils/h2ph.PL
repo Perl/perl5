@@ -142,7 +142,7 @@ while (defined (my $file = next_file())) {
 			    $curargs{$arg} = 1;
 			}
 			$args =~ s/\b(\w)/\$$1/g;
-			$args = "local($args) = \@_;\n$t    ";
+			$args = "my($args) = \@_;\n$t    ";
 		    }
 		    s/^\s+//;
 		    expr();
@@ -338,7 +338,7 @@ while (defined (my $file = next_file())) {
 	    }
 	    $args = (
 		@args
-		? "local(" . (join ',', map "\$$_", @args) . ") = \@_;\n$t    "
+		? "my(" . (join ',', map "\$$_", @args) . ") = \@_;\n$t    "
 		: ""
 	    );
 	    my $proto = @args ? '' : '() ';
@@ -391,6 +391,7 @@ if ($opt_e && (scalar(keys %bad_file) > 0)) {
 exit $Exit;
 
 sub expr {
+    $new = '"(assembly code)"' and return if /\b__asm__\b/; # freak out.
     my $joined_args;
     if(keys(%curargs)) {
 	$joined_args = join('|', keys(%curargs));
