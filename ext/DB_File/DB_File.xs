@@ -3,8 +3,8 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess <Paul.Marquess@btinternet.com>
- last modified 21st February 1999
- version 1.64
+ last modified 6th March 1999
+ version 1.65
 
  All comments/suggestions/problems are welcome
 
@@ -63,6 +63,8 @@
         1.64 -  Tidied up the 1.x to 2.x flags mapping code.
 		Added a patch from Mark Kettenis <kettenis@wins.uva.nl>
 		to fix a flag mapping problem with O_RDONLY on the Hurd
+        1.65 -  Fixed a bug in the PUSH logic.
+		Added BOOT check that using 2.3.4 or greater
 
 
 
@@ -346,9 +348,9 @@ GetVersionInfo()
 
     (void)db_version(&Major, &Minor, &Patch) ;
 
-    /* check that libdb is recent enough */
-    if (Major == 2 && Minor ==  0 && Patch < 5)
-	croak("DB_File needs Berkeley DB 2.0.5 or greater, you have %d.%d.%d\n",
+    /* check that libdb is recent enough  -- we need 2.3.4 or greater */
+    if (Major == 2 && (Minor < 3 || (Minor ==  3 && Patch < 4)))
+	croak("DB_File needs Berkeley DB 2.3.4 or greater, you have %d.%d.%d\n",
 		 Major, Minor, Patch) ;
  
 #if PERL_VERSION > 3
@@ -1228,7 +1230,6 @@ db_FIRSTKEY(db)
 	{
 	    DBTKEY	key ;
 	    DBT		value ;
-	    DB *	Db = db->dbp ;
 
 	    DBT_flags(key) ; 
 	    DBT_flags(value) ; 
@@ -1245,7 +1246,6 @@ db_NEXTKEY(db, key)
 	CODE:
 	{
 	    DBT		value ;
-	    DB *	Db = db->dbp ;
 
 	    DBT_flags(value) ; 
 	    CurrentDB = db ;
@@ -1308,7 +1308,6 @@ pop(db)
 	{
 	    DBTKEY	key ;
 	    DBT		value ;
-	    DB *	Db = db->dbp ;
 
 	    DBT_flags(key) ; 
 	    DBT_flags(value) ; 
@@ -1336,7 +1335,6 @@ shift(db)
 	{
 	    DBT		value ;
 	    DBTKEY	key ;
-	    DB *	Db = db->dbp ;
 
 	    DBT_flags(key) ; 
 	    DBT_flags(value) ; 
@@ -1363,7 +1361,6 @@ push(db, ...)
 	CODE:
 	{
 	    DBTKEY	key ;
-	    DBTKEY *	keyptr = &key ; 
 	    DBT		value ;
 	    DB *	Db = db->dbp ;
 	    int		i ;
@@ -1372,34 +1369,34 @@ push(db, ...)
 	    DBT_flags(key) ; 
 	    DBT_flags(value) ; 
 	    CurrentDB = db ;
+#ifdef DB_VERSION_MAJOR
+	   	RETVAL = 0 ;
+		key = empty ;
+	        for (i = 1 ; i < items  ; ++i)
+	        {
+	            value.data = SvPV(ST(i), n_a) ;
+	            value.size = n_a ;
+	            RETVAL = (Db->put)(Db, NULL, &key, &value, DB_APPEND) ;
+	            if (RETVAL != 0)
+	                break;
+		}
+#else
 	    /* Set the Cursor to the Last element */
 	    RETVAL = do_SEQ(db, key, value, R_LAST) ;
 	    if (RETVAL >= 0)
 	    {
 		if (RETVAL == 1)
-		    keyptr = &empty ;
-#ifdef DB_VERSION_MAJOR
-	        for (i = 1 ; i < items  ; ++i)
-	        {
-		    
-		    ++ (* (int*)key.data) ;
-	            value.data = SvPV(ST(i), n_a) ;
-	            value.size = n_a ;
-	            RETVAL = (Db->put)(Db, NULL, &key, &value, 0) ;
-	            if (RETVAL != 0)
-	                break;
-		}
-#else
+		    key = empty ;
 	        for (i = items - 1 ; i > 0 ; --i)
 	        {
 	            value.data = SvPV(ST(i), n_a) ;
 	            value.size = n_a ;
-	            RETVAL = (Db->put)(Db, keyptr, &value, R_IAFTER) ;
+	            RETVAL = (Db->put)(Db, &key, &value, R_IAFTER) ;
 	            if (RETVAL != 0)
 	                break;
 	        }
-#endif
 	    }
+#endif
 	}
 	OUTPUT:
 	    RETVAL
