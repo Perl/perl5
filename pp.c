@@ -3136,6 +3136,7 @@ PP(pp_reverse)
 	    *MARK++ = *SP;
 	    *SP-- = tmp;
 	}
+	/* safe as long as stack cannot get extended in the above */
 	SP = oldsp;
     }
     else {
@@ -3236,7 +3237,7 @@ PP(pp_unpack)
 {
     djSP;
     dPOPPOPssrl;
-    SV **oldsp = SP;
+    I32 start_sp_offset = SP - PL_stack_base;
     I32 gimme = GIMME_V;
     SV *sv;
     STRLEN llen;
@@ -3364,7 +3365,7 @@ PP(pp_unpack)
 	    s += len;
 	    break;
 	case '/':
-	    if (oldsp >= SP)
+	    if (start_sp_offset >= SP - PL_stack_base)
 		DIE(aTHX_ "/ must follow a numeric type");
 	    datumtype = *pat++;
 	    if (*pat == '*')
@@ -4204,7 +4205,7 @@ PP(pp_unpack)
 	    checksum = 0;
 	}
     }
-    if (SP == oldsp && gimme == G_SCALAR)
+    if (SP - PL_stack_base == start_sp_offset && gimme == G_SCALAR)
 	PUSHs(&PL_sv_undef);
     RETURN;
 }
