@@ -23,28 +23,66 @@
 
 #define CALL_PEEP(o) CALL_FPTR(PL_peepp)(aTHX_ o)
 
-/* #define PL_OP_SLAB_ALLOC */
+#if defined(PL_OP_SLAB_ALLOC)
 
-#if defined(PL_OP_SLAB_ALLOC) && !defined(PERL_IMPLICIT_CONTEXT)
-#define SLAB_SIZE 8192
-static char    *PL_OpPtr  = NULL;	/* XXX threadead */
-static int     PL_OpSpace = 0;		/* XXX threadead */
-#define NewOp(m,var,c,type) do { if ((PL_OpSpace -= c*sizeof(type)) >= 0)     \
-                              var =  (type *)(PL_OpPtr -= c*sizeof(type));    \
-                             else                                             \
-                              var = (type *) Slab_Alloc(m,c*sizeof(type));    \
-                           } while (0)
+#ifndef PERL_SLAB_SIZE
+#define PERL_SLAB_SIZE 2048
+#endif
+
+#define NewOp(m,var,c,type) \
+	STMT_START { var = (type *) Slab_Alloc(m,c*sizeof(type)); } STMT_END
+
+#define FreeOp(p) Slab_Free(p)
 
 STATIC void *
 S_Slab_Alloc(pTHX_ int m, size_t sz)
 {
- Newz(m,PL_OpPtr,SLAB_SIZE,char);
- PL_OpSpace = SLAB_SIZE - sz;
- return PL_OpPtr += PL_OpSpace;
+    /* Add an overhead for pointer to slab and round up as a number of IVs */
+    sz = (sz + 2*sizeof(IV) -1)/sizeof(IV);
+    if ((PL_OpSpace -= sz) < 0) {
+	PL_OpSlab = (IV *) PerlMemShared_malloc(PERL_SLAB_SIZE*sizeof(IV));
+	if (!PL_OpSlab) {
+	    return NULL;
+	}
+	Zero(PL_OpSlab,PERL_SLAB_SIZE,IV);
+	/* We reserve the 0'th word as a use count */
+	PL_OpSpace = PERL_SLAB_SIZE - 1 - sz;
+	/* Allocation pointer starts at the top.
+	   Theory: because we build leaves before trunk allocating at end
+	   means that at run time access is cache friendly upward
+	 */
+	PL_OpPtr   = (IV **) &PL_OpSlab[PERL_SLAB_SIZE];
+    }
+    assert( PL_OpSpace >= 0 );
+    /* Move the allocation pointer down */
+    PL_OpPtr   -= sz;
+    assert( PL_OpPtr > (IV **) PL_OpSlab );
+    *PL_OpPtr   = PL_OpSlab;	/* Note which slab it belongs to */
+    (*PL_OpSlab)++;		/* Increment use count of slab */
+    assert( (IV *) (PL_OpPtr+sz) <= (PL_OpSlab + PERL_SLAB_SIZE) );
+    assert( *PL_OpSlab > 0 );
+    return (void *)(PL_OpPtr + 1);
+}
+
+STATIC void
+S_Slab_Free(pTHX_ void *op)
+{
+    IV **ptr = (IV **) op;
+    IV *slab = ptr[-1];
+    assert( ptr-1 > (IV **) slab );
+    assert( (IV *) ptr < (slab + PERL_SLAB_SIZE) );
+    assert( *slab > 0 );
+    if (--(*slab) == 0) {
+	PerlMemShared_free(slab);
+	if (slab == PL_OpSlab) {
+	    PL_OpSpace = 0;
+	}
+    }
 }
 
 #else
 #define NewOp(m, var, c, type) Newz(m, var, c, type)
+#define FreeOp(p) SafeFree(p)
 #endif
 /*
  * In the following definition, the ", Nullop" is just to make the compiler
@@ -735,14 +773,7 @@ Perl_op_free(pTHX_ OP *o)
 	cop_free((COP*)o);
 
     op_clear(o);
-
-#ifdef PL_OP_SLAB_ALLOC
-    if ((char *) o == PL_OpPtr)
-     {
-     }
-#else
-    Safefree(o);
-#endif
+    FreeOp(o);
 }
 
 void
@@ -2583,10 +2614,8 @@ Perl_append_list(pTHX_ I32 type, LISTOP *first, LISTOP *last)
     first->op_last = last->op_last;
     first->op_flags |= (last->op_flags & OPf_KIDS);
 
-#ifdef PL_OP_SLAB_ALLOC
-#else
-    Safefree(last);
-#endif
+    FreeOp(last);
+
     return (OP*)first;
 }
 
@@ -4288,6 +4317,7 @@ Perl_newFOROP(pTHX_ I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *blo
 	LOOP *tmp;
 	NewOp(1234,tmp,1,LOOP);
 	Copy(loop,tmp,1,LOOP);
+	FreeOp(loop);
 	loop = tmp;
     }
 #else
