@@ -60,8 +60,7 @@ IMPLIB = implib
 RUNTIME  = -D_RTLDLL
 INCLUDES = -I.\include -I. -I.. -I$(CCINCDIR)
 #PCHFLAGS = -H -H$(INTDIR)\bcmoduls.pch 
-DEFINES  = -DWIN32 -DUSE_THREADS -D_WIN32_WINNT=0x0400
-LOCDEFS  = -DPERLDLL
+DEFINES  = -DWIN32 -DPERLDLL
 SUBSYS   = console
 LIBC = cw32mti.lib
 LIBFILES = import32.lib $(LIBC) odbc32.lib odbccp32.lib
@@ -76,7 +75,7 @@ OPTIMIZE = -O $(RUNTIME)
 LINK_DBG = 
 .ENDIF
 
-CFLAGS   = -w -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
+CFLAGS   = -w -tWM -tWD $(INCLUDES) $(DEFINES) $(PCHFLAGS) $(OPTIMIZE)
 LINK_FLAGS  = $(LINK_DBG) -L$(CCLIBDIR)
 OBJOUT_FLAG = -o
 
@@ -93,8 +92,7 @@ RUNTIME  = -MD
 .ENDIF
 INCLUDES = -I.\include -I. -I..
 #PCHFLAGS = -Fp$(INTDIR)\vcmoduls.pch -YX 
-DEFINES  = -DWIN32 -D_CONSOLE -DUSE_THREADS -D_WIN32_WINNT=0x0400
-LOCDEFS  = -DPERLDLL
+DEFINES  = -DWIN32 -D_CONSOLE -DPERLDLL
 SUBSYS   = console
 
 .IF "$(RUNTIME)" == "-MD"
@@ -127,7 +125,7 @@ LIBFILES = oldnames.lib kernel32.lib user32.lib gdi32.lib \
 	oleaut32.lib netapi32.lib uuid.lib wsock32.lib mpr.lib winmm.lib \
 	version.lib odbc32.lib odbccp32.lib
 
-CFLAGS   = -nologo -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
+CFLAGS   = -nologo -W3 $(INCLUDES) $(DEFINES) $(PCHFLAGS) $(OPTIMIZE)
 LINK_FLAGS  = -nologo $(LIBFILES) $(LINK_DBG) -machine:I386
 OBJOUT_FLAG = -Fo
 
@@ -179,7 +177,7 @@ CONFIGPM=..\lib\Config.pm
 MINIMOD=..\lib\ExtUtils\Miniperl.pm
 
 PL2BAT=bin\pl2bat.pl
-GLOBBAT = perlglob.bat
+GLOBBAT = bin\perlglob.bat
 
 .IF "$(CCTYPE)" == "BORLAND"
 
@@ -294,7 +292,6 @@ CORE_H = ..\av.h	\
 	..\regexp.h	\
 	..\scope.h	\
 	..\sv.h		\
-	..\thread.h	\
 	..\unixish.h	\
 	..\util.h	\
 	..\XSUB.h	\
@@ -306,7 +303,7 @@ CORE_H = ..\av.h	\
 	.\win32.h
 
 
-EXTENSIONS=DynaLoader Socket IO Fcntl Opcode SDBM_File attrs
+EXTENSIONS=DynaLoader Socket IO Fcntl Opcode SDBM_File
 
 DYNALOADER=$(EXTDIR)\DynaLoader\DynaLoader
 SOCKET=$(EXTDIR)\Socket\Socket
@@ -314,14 +311,12 @@ FCNTL=$(EXTDIR)\Fcntl\Fcntl
 OPCODE=$(EXTDIR)\Opcode\Opcode
 SDBM_FILE=$(EXTDIR)\SDBM_File\SDBM_File
 IO=$(EXTDIR)\IO\IO
-ATTRS=$(EXTDIR)\attrs\attrs
 
 SOCKET_DLL=..\lib\auto\Socket\Socket.dll
 FCNTL_DLL=..\lib\auto\Fcntl\Fcntl.dll
 OPCODE_DLL=..\lib\auto\Opcode\Opcode.dll
 SDBM_FILE_DLL=..\lib\auto\SDBM_File\SDBM_File.dll
 IO_DLL=..\lib\auto\IO\IO.dll
-ATTRS_DLL=..\lib\auto\attrs\attrs.dll
 
 STATICLINKMODULES=DynaLoader
 DYNALOADMODULES=	\
@@ -329,8 +324,7 @@ DYNALOADMODULES=	\
 	$(FCNTL_DLL)	\
 	$(OPCODE_DLL)	\
 	$(SDBM_FILE_DLL)\
-	$(IO_DLL)	\
-	$(ATTRS_DLL)
+	$(IO_DLL)
 
 POD2HTML=$(PODDIR)\pod2html
 POD2MAN=$(PODDIR)\pod2man
@@ -356,8 +350,8 @@ $(GLOBEXE): perlglob.obj
 	$(LINK32) $(LINK_FLAGS) -out:$@ -subsystem:$(SUBSYS) perlglob.obj setargv.obj 
 .ENDIF
 
-perlglob.bat : ..\lib\File\DosGlob.pm $(MINIPERL)
-	$(MINIPERL) $(PL2BAT) - < ..\lib\File\DosGlob.pm > $(*B).bat
+$(GLOBBAT) : ..\lib\File\DosGlob.pm $(MINIPERL)
+	$(MINIPERL) $(PL2BAT) - < ..\lib\File\DosGlob.pm > $(GLOBBAT)
 
 perlglob.obj  : perlglob.c
 
@@ -372,8 +366,8 @@ config.w32 : $(CFGSH_TMPL)
 
 ..\config.sh : config.w32 $(MINIPERL) config_sh.PL
 	$(MINIPERL) -I..\lib config_sh.PL "INST_DRV=$(INST_DRV)" \
-	    "INST_TOP=$(INST_TOP)" "cc=$(CC)" "ccflags=$(OPTIMIZE) $(DEFINES)" \
-	    "cf_email=$(EMAIL)" "libs=$(LIBFILES:f)" \
+	    "INST_TOP=$(INST_TOP)" "cc=$(CC)" "ccflags=$(RUNTIME) -DWIN32" \
+	    "cf_email=$(EMAIL)" "libs=$(LIBFILES:f)" "incpath=$(CCINCDIR)" \
 	    "libpth=$(strip $(CCLIBDIR) $(LIBFILES:d))" "libc=$(LIBC)" \
 	    config.w32 > ..\config.sh
 
@@ -478,12 +472,7 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
 
-$(ATTRS_DLL): $(PERLEXE) $(ATTRS).xs
-	cd $(EXTDIR)\$(*B) && \
-	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
-	cd $(EXTDIR)\$(*B) && $(MAKE)
-
-$(IO_DLL): $(PERLEXE) $(IO).xs
+$(IO_DLL): $(PERLEXE) $(CONFIGPM) $(IO).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
@@ -503,12 +492,15 @@ $(OPCODE_DLL): $(PERLEXE) $(OPCODE).xs
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
-$(SOCKET_DLL): $(PERLEXE) $(SOCKET).xs 
+$(SOCKET_DLL): $(SOCKET).xs $(PERLEXE)
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
 doc: $(PERLEXE)
+	cd ..\pod && $(MAKE) -f ..\win32\pod.mak checkpods \
+		pod2html pod2latex pod2man pod2text
+	cd ..\pod && $(XCOPY) *.bat ..\win32\bin\*.*
 	copy ..\README.win32 ..\pod\perlwin32.pod
 	$(PERLEXE) ..\installhtml --podroot=.. --htmldir=./html \
 	    --podpath=pod:lib:ext:utils --htmlroot="//$(INST_HTML:s,:,|,)" \
@@ -518,18 +510,25 @@ utils: $(PERLEXE)
 	cd ..\utils && $(MAKE) PERL=$(MINIPERL)
 	cd ..\utils && $(PERLEXE) ..\win32\$(PL2BAT) h2ph splain perlbug \
 		pl2pm c2ph h2xs perldoc pstruct
-	cd ..\utils && $(XCOPY) *.bat ..\win32\bin\*.*
+	$(XCOPY) ..\utils\*.bat bin\*.*
+	$(PERLEXE) $(PL2BAT) bin\network.pl bin\www.pl bin\runperl.pl \
+			bin\pl2bat.pl
 
 distclean: clean
 	-del /f $(MINIPERL) $(PERLEXE) $(PERLDLL) $(GLOBEXE) \
 		$(PERLIMPLIB) ..\miniperl.lib $(MINIMOD)
 	-del /f *.def *.map
 	-del /f $(SOCKET_DLL) $(IO_DLL) $(SDBM_FILE_DLL) $(FCNTL_DLL) \
-		$(OPCODE_DLL) $(ATTRS_DLL)
+		$(OPCODE_DLL)
 	-del /f $(SOCKET).c $(IO).c $(SDBM_FILE).c $(FCNTL).c $(OPCODE).c \
-		$(DYNALOADER).c $(ATTRS).c
+		$(DYNALOADER).c
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
+	-del /f ..\config.sh ..\splittree.pl perlmain.c dlutils.c config.h.new
+.IF "$(PERL95EXE)" != ""
+	-del /f perl95.c
+.ENDIF
+	-del /f bin\*.bat
 	-cd $(EXTDIR) && del /s *.lib *.def *.map *.bs Makefile *.obj pm_to_blib
 	-rmdir /s /q ..\lib\auto
 	-rmdir /s /q ..\lib\CORE
@@ -542,9 +541,8 @@ install : all doc utils
 	$(XCOPY) $(PERL95EXE) $(INST_BIN)\*.*
 .ENDIF
 	$(XCOPY) $(GLOBEXE) $(INST_BIN)\*.*
-	$(XCOPY) $(GLOBBAT) $(INST_BIN)\*.*
 	$(XCOPY) $(PERLDLL) $(INST_BIN)\*.*
-	$(XCOPY) bin\*.* $(INST_BIN)\*.*
+	$(XCOPY) bin\*.bat $(INST_BIN)\*.*
 	$(RCOPY) ..\lib $(INST_LIB)\*.*
 	$(XCOPY) ..\pod\*.bat $(INST_BIN)\*.*
 	$(XCOPY) ..\pod\*.pod $(INST_POD)\*.*
@@ -590,7 +588,8 @@ clean :
 	-@erase $(CORE_OBJ)
 	-@erase $(WIN32_OBJ)
 	-@erase $(DLL_OBJ)
-	-@erase ..\*.obj *.obj ..\*.lib ..\*.exp
+	-@erase ..\*.obj ..\*.lib ..\*.exp *.obj *.lib *.exp
+	-@erase ..\t\*.exe ..\t\*.dll ..\t\*.bat
 	-@erase *.ilk
 	-@erase *.pdb
 

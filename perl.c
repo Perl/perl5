@@ -132,15 +132,13 @@ register PerlInterpreter *sv_interp;
 	nthreads = 1;
 	cvcache = newHV();
 	curcop = &compiling;
-	thr->flags = THRf_NORMAL;
+	thr->flags = THRf_R_JOINABLE;
+	MUTEX_INIT(&thr->mutex);
 	thr->next = thr;
 	thr->prev = thr;
-#ifdef FAKE_THREADS
-	self = thr;
-	thr->next_run = thr->prev_run = thr;
-	thr->wait_queue = 0;
-	thr->private = 0;
 	thr->tid = 0;
+#ifdef HAVE_THREAD_INTERN
+	init_thread_intern(thr);
 #else
 #ifdef WIN32
     DuplicateHandle(GetCurrentProcess(),
@@ -257,23 +255,56 @@ register PerlInterpreter *sv_interp;
 
 #ifdef USE_THREADS
 #ifndef FAKE_THREADS
-    /* Detach any remaining joinable threads apart from ourself */
+    /* Join with any remaining non-detached threads */
     MUTEX_LOCK(&threads_mutex);
     DEBUG_L(PerlIO_printf(PerlIO_stderr(),
-			  "perl_destruct: detaching remaining %d threads\n",
+			  "perl_destruct: waiting for %d threads...\n",
 			  nthreads - 1));
     for (t = thr->next; t != thr; t = t->next) {
-	if (ThrSTATE(t) == THRf_NORMAL) {
+	MUTEX_LOCK(&t->mutex);
+	switch (ThrSTATE(t)) {
+	    AV *av;
+	case THRf_ZOMBIE:
+	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+				  "perl_destruct: joining zombie %p\n", t));
+	    ThrSETSTATE(t, THRf_DEAD);
+	    MUTEX_UNLOCK(&t->mutex);
+	    nthreads--;
+	    MUTEX_UNLOCK(&threads_mutex);
+	    if (pthread_join(t->Tself, (void**)&av))
+		croak("panic: pthread_join failed during global destruction");
+	    SvREFCNT_dec((SV*)av);
+	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+				  "perl_destruct: joined zombie %p OK\n", t));
+	    break;
+	case THRf_R_JOINABLE:
+	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+				  "perl_destruct: detaching thread %p\n", t));
+	    ThrSETSTATE(t, THRf_R_DETACHED);
+	    /* 
+	     * We unlock threads_mutex and t->mutex in the opposite order
+	     * from which we locked them just so that DETACH won't
+	     * deadlock if it panics. It's only a breach of good style
+	     * not a bug since they are unlocks not locks.
+	     */
+	    MUTEX_UNLOCK(&threads_mutex);
 	    DETACH(t);
-	    ThrSETSTATE(t, THRf_DETACHED);
-	    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "...detached %p\n", t));
+	    MUTEX_UNLOCK(&t->mutex);
+	    break;
+	default:
+	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+				  "perl_destruct: ignoring %p (state %u)\n",
+				  t, ThrSTATE(t)));
+	    MUTEX_UNLOCK(&t->mutex);
+	    MUTEX_UNLOCK(&threads_mutex);
+	    /* fall through and out */
 	}
     }
     /* Now wait for the thread count nthreads to drop to one */
     while (nthreads > 1)
     {
 	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
-			      "perl_destruct: waiting for %d threads\n",
+			      "perl_destruct: final wait for %d threads\n",
 			      nthreads - 1));
 	COND_WAIT(&nthreads_cond, &threads_mutex);
     }

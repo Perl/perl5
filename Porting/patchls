@@ -18,18 +18,19 @@ use Text::Tabs qw(expand unexpand);
 use strict;
 
 sub usage {
-die qq{
-
+die q{
   patchls [options] patchfile [ ... ]
 
-    -i     Invert: for each patched file list which patch files patch it
-    -h     no filename headers (like grep), only the listing
-    -l     no listing (like grep), only the filename headers
-    -c     Categorise the patch and sort by category (perl specific)
-    -m     print formatted Meta-information (Subject,From,Msg-ID etc)
-    -p N   strip N levels of directory Prefix (like patch), else automatic
-    -v     more verbose (-d for noisy debugging)
-
+    -i     Invert: for each patched file list which patch files patch it.
+    -h     no filename headers (like grep), only the listing.
+    -l     no listing (like grep), only the filename headers.
+    -c     Categorise the patch and sort by category (perl specific).
+    -m     print formatted Meta-information (Subject,From,Msg-ID etc).
+    -p N   strip N levels of directory Prefix (like patch), else automatic.
+    -v     more verbose (-d for noisy debugging).
+    -f F   only list patches which patch files matching regexp F
+           (F has $ appended unless it contains a /).
+    -I     just gather and display summary Information about the patches.
 }
 }
 
@@ -43,20 +44,23 @@ $::opt_i = 0;
 $::opt_h = 0;
 $::opt_l = 0;
 $::opt_c = 0;
+$::opt_f = '';
+$::opt_I = 0;
 
 usage unless @ARGV;
 
-getopts("mihlvcp:") or usage;
+getopts("mihlvcp:f:I") or usage;
 
 my %cat_title = (
-    'TEST'	=> 'TESTS',
-    'DOC'	=> 'DOCUMENTATION',
-    'UTIL'	=> 'UTILITIES',
-    'PORT'	=> 'PORTABILITY',
-    'LIB'	=> 'LIBRARY AND EXTENSIONS',
-    'CORE'	=> 'CORE LANGUAGE',
     'BUILD'	=> 'BUILD PROCESS',
-    'OTHER'	=> 'OTHER',
+    'CORE'	=> 'CORE LANGUAGE',
+    'DOC'	=> 'DOCUMENTATION',
+    'LIB'	=> 'LIBRARY AND EXTENSIONS',
+    'PORT1'	=> 'PORTABILITY - WIN32',
+    'PORT2'	=> 'PORTABILITY - OTHER',
+    'TEST'	=> 'TESTS',
+    'UTIL'	=> 'UTILITIES',
+    'OTHER'	=> 'OTHER CHANGES',
 );
 
 my %ls;
@@ -94,10 +98,10 @@ foreach my $argv (@ARGV) {
 	unless (/^([-+*]{3}) / || /^(Index):/) {
 	    # not an interesting patch line but possibly meta-information
 	    next unless $::opt_m;
-	    $ls->{From}{$1}=1       if /^From: (.*\S)/i;
-	    $ls->{Title}{$1}=1      if /^Subject: (?:Re: )?(.*\S)/i;
-	    $ls->{'Msg-ID'}{$1}=1   if /^Message-Id: (.*\S)/i;
-	    $ls->{Date}{$1}=1       if /^Date: (.*\S)/i;
+	    $ls->{From}{$1}=1       if /^From:\s+(.*\S)/i;
+	    $ls->{Title}{$1}=1      if /^Subject:\s+(?:Re: )?(.*\S)/i;
+	    $ls->{'Msg-ID'}{$1}=1   if /^Message-Id:\s+(.*\S)/i;
+	    $ls->{Date}{$1}=1       if /^Date:\s+(.*\S)/i;
 	    next;
 	}
 	$type = $1;
@@ -141,6 +145,41 @@ my @ls  = sort {
     $a->{category} cmp $b->{category} || $a->{in} cmp $b->{in}
 } values %ls;
 
+if ($::opt_f) {		# filter out patches based on -f <regexp>
+    my $out;
+    $::opt_f .= '$' unless $::opt_f =~ m:/:;
+    @ls = grep {
+	my @out = keys %{$_->{out}};
+	my $match = 0;
+	for $out (@out) {
+	    ++$match if $out =~ m/$::opt_f/o;
+	}
+	$match;
+    } @ls;
+}
+
+if ($::opt_I) {
+    my $n_patches = 0;
+    my($in,$out);
+    my %all_out;
+    foreach $in (@ls) {
+	next unless $in->{is_in};
+	++$n_patches;
+	my @outs = keys %{$in->{out}};
+	@all_out{@outs} = ($in->{in}) x @outs;
+    }
+    my @all_out = sort keys %all_out;
+    my @missing = grep { ! -f $_ } @all_out;
+    print "$n_patches patch files patch ".@all_out." files (".@missing." missing)\n";
+    if ($::opt_v and @missing) {
+	print "Missing files:\n";
+	foreach $out (@missing) {
+	    printf "  %-20s\t%s\n", $out, $all_out{$out};
+	}
+    }
+    exit 0+@missing;
+}
+
 unless ($::opt_c and $::opt_m) {
     foreach $ls (@ls) {
 	next unless ($::opt_i) ? $ls->{is_out} : $ls->{is_in};
@@ -151,7 +190,8 @@ else {
     my $c = '';
     foreach $ls (@ls) {
 	next unless ($::opt_i) ? $ls->{is_out} : $ls->{is_in};
-	print "\n  $cat_title{$ls->{category}}\n" if $ls->{category} ne $c;
+	print "\n  ------  $cat_title{$ls->{category}}  ------\n"
+	    if $ls->{category} ne $c;
 	$c = $ls->{category};
 	unless ($::opt_i) {
 	    list_files_by_patch($ls);
@@ -194,6 +234,8 @@ sub add_file {
 sub trim_name {		# reduce/tidy file paths from diff lines
     my $name = shift;
     $name = "$name ($in)" if $name eq "/dev/null";
+    $name =~ s:\\:/:g;	# adjust windows paths
+    $name =~ s://:/:g;	# simplify (and make win \\share into absolute path)
     if (defined $::opt_p) {
 	# strip on -p levels of directory prefix
 	my $dc = $::opt_p;
@@ -202,7 +244,7 @@ sub trim_name {		# reduce/tidy file paths from diff lines
     else {	# try to strip off leading path to perl directory
 	# if absolute path, strip down to any *perl* directory first
 	$name =~ s:^/.*?perl.*?/::i;
-	$name =~ s:.*perl[-_]?5\.[-_a-z0-9.]+/::i;
+	$name =~ s:.*perl[-_]?5?[._]?[-_a-z0-9.+]*/::i;
 	$name =~ s:^\./::;
     }
     return $name;
@@ -239,7 +281,9 @@ sub list_files_by_patch {
 
 
 sub my_wrap {
-    return expand(wrap(@_));
+	my $txt = eval { expand(wrap(@_)) };	# die's on long lines!
+    return $txt unless $@;
+	return expand("@_");
 }
 
 
@@ -253,17 +297,18 @@ sub categorize_files {
 	$c{TEST} += 5,next   if m:^t/:;
 	$c{DOC}  += 5,next   if m:^pod/:;
 	$c{UTIL} += 10,next  if m:^(utils|x2p|h2pl)/:;
-	$c{PORT} += 15,next
-	    if m:^(cygwin32|os2|plan9|qnx|vms|win32)/:
+	$c{PORT1}+= 15,next  if m:^win32:;
+	$c{PORT2} += 15,next
+	    if m:^(cygwin32|os2|plan9|qnx|vms)/:
 	    or m:^(hints|Porting|ext/DynaLoader)/:
 	    or m:^README\.:;
 	$c{LIB}  += 10,next
 	    if m:^(lib|ext)/:;
 	$c{'CORE'} += 15,next
-	    if m:^[^/]+[\._]([chH]|sym)$:;
+	    if m:^[^/]+[\._]([chH]|sym|pl)$:;
 	$c{BUILD} += 10,next
 	    if m:^[A-Z]+$: or m:^[^/]+\.SH$:
-	    or m:^(install|configure):i;
+	    or m:^(install|configure|configpm):i;
 	print "Couldn't categorise $_\n" if $::opt_v;
 	$c{OTHER} += 1;
     }

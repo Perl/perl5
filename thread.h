@@ -130,6 +130,7 @@ typedef pthread_t perl_thread;
 #define pthread_key_create(k,d) pthread_keycreate(k,(pthread_destructor_t)(d))
 #else
 #define pthread_mutexattr_default NULL
+#define pthread_condattr_default NULL
 #endif /* OLD_PTHREADS_API */
 
 #define MUTEX_INIT(m) \
@@ -143,7 +144,9 @@ typedef pthread_t perl_thread;
 #define MUTEX_DESTROY(m) \
     if (pthread_mutex_destroy((m))) croak("panic: MUTEX_DESTROY"); else 1
 #define COND_INIT(c) \
-    if (pthread_cond_init((c), NULL)) croak("panic: COND_INIT"); else 1
+    if (pthread_cond_init((c), pthread_condattr_default)) \
+	croak("panic: COND_INIT"); \
+    else 1
 #define COND_SIGNAL(c) \
     if (pthread_cond_signal((c))) croak("panic: COND_SIGNAL"); else 1
 #define COND_BROADCAST(c) \
@@ -153,8 +156,12 @@ typedef pthread_t perl_thread;
 #define COND_DESTROY(c) \
     if (pthread_cond_destroy((c))) croak("panic: COND_DESTROY"); else 1
 
-#define DETACH(t) \
-    if (pthread_detach((t)->Tself)) croak("panic: DETACH"); else 1
+/* DETACH(t) must only be called while holding t->mutex */
+#define DETACH(t)			\
+    if (pthread_detach((t)->Tself)) {	\
+	MUTEX_UNLOCK(&(t)->mutex);	\
+	croak("panic: DETACH");		\
+    } else 1
 
 /* XXX Add "old" (?) POSIX draft interface too */
 #ifdef OLD_PTHREADS_API
@@ -243,44 +250,43 @@ struct thread {
 
     perl_thread	Tself;
     SV *	Toursv;
-    perl_mutex *Tthreadstart_mutexp;
     HV *	Tcvcache;
     U32		flags;
+    perl_mutex	mutex;			/* For the fields others can change */
     U32		tid;
     struct thread *next, *prev;		/* Circular linked list of threads */
 
-#ifdef FAKE_THREADS
-    perl_thread next_run, prev_run;	/* Linked list of runnable threads */
-    perl_cond	wait_queue;		/* Wait queue that we are waiting on */
-    IV		private;		/* Holds data across time slices */
-    I32		savemark;		/* Holds MARK for thread join values */
-#endif /* FAKE_THREADS */
+#ifdef ADD_THREAD_INTERN
+    struct thread_intern i;		/* Platform-dependent internals */
+#endif
 };
 
 typedef struct thread *Thread;
 
 /* Values and macros for thr->flags */
-#define THRf_STATE_MASK	3
-#define THRf_NORMAL	0
-#define THRf_DETACHED	1
-#define THRf_JOINED	2
-#define THRf_DEAD	3
+#define THRf_STATE_MASK	7
+#define THRf_R_JOINABLE	0
+#define THRf_R_JOINED	1
+#define THRf_R_DETACHED	2
+#define THRf_ZOMBIE	3
+#define THRf_DEAD	4
 
-#define THRf_DIE_FATAL	4
+#define THRf_DIE_FATAL	8
 
-#define ThrSTATE(t)	(t->flags & THRf_STATE_MASK)
+/* ThrSTATE(t) and ThrSETSTATE(t) must only be called while holding t->mutex */
+#define ThrSTATE(t) ((t)->flags)
 #define ThrSETSTATE(t, s) STMT_START {		\
-	(t)->flags &= ~THRf_STATE_MASK;	\
+	(t)->flags &= ~THRf_STATE_MASK;		\
 	(t)->flags |= (s);			\
-	DEBUG_L(fprintf(stderr, "thread 0x%lx set to state %d\n", \
-			(unsigned long)(t), (s))); \
+	DEBUG_L(PerlIO_printf(PerlIO_stderr(),	\
+			      "thread %p set to state %d\n", (t), (s))); \
     } STMT_END
 
 typedef struct condpair {
-    perl_mutex	mutex;
-    perl_cond	owner_cond;
-    perl_cond	cond;
-    Thread	owner;
+    perl_mutex	mutex;		/* Protects all other fields */
+    perl_cond	owner_cond;	/* For when owner changes at all */
+    perl_cond	cond;		/* For cond_signal and cond_broadcast */
+    Thread	owner;		/* Currently owning thread */
 } condpair_t;
 
 #define MgMUTEXP(mg) (&((condpair_t *)(mg->mg_ptr))->mutex)
@@ -384,6 +390,5 @@ typedef struct condpair {
 #define	top_env		(thr->Ttop_env)
 #define	runlevel	(thr->Trunlevel)
 
-#define	threadstart_mutexp	(thr->Tthreadstart_mutexp)
 #define	cvcache		(thr->Tcvcache)
 #endif /* USE_THREADS */
