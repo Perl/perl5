@@ -22,6 +22,7 @@ $Is_NetWare = $^O eq 'NetWare';
 $Is_OS2     = $^O eq 'os2';
 $Is_Solaris = $^O eq 'solaris';
 $Is_VMS     = $^O eq 'VMS';
+$Is_DGUX    = $^O eq 'dgux';
 
 $Is_Dosish  = $Is_Dos || $Is_OS2 || $Is_MSWin32 || $Is_NetWare || $Is_Cygwin;
 
@@ -243,14 +244,20 @@ SKIP: {
 	is($c1, $c2, "ls and $_[1] agreeing on /dev ($c1 $c2)");
     };
 
+SKIP: {
+    skip("DG/UX ls -L broken", 3) if $Is_DGUX;
+
     $try->('b', '-b');
     $try->('c', '-c');
     $try->('s', '-S');
+
 }
 
 ok(! -b $Curdir,    '!-b cwd');
 ok(! -c $Curdir,    '!-c cwd');
 ok(! -S $Curdir,    '!-S cwd');
+
+}
 
 SKIP: {
     my($cnt, $uid);
@@ -322,7 +329,11 @@ SKIP: {
 ok(-T 'op/stat.t',      '-T');
 ok(! -B 'op/stat.t',    '!-B');
 
+SKIP: {
+     skip("DG/UX", 1) if $Is_DGUX;
 ok(-B $Perl,      '-B');
+}
+
 ok(! -T $Perl,    '!-T');
 
 open(FOO,'op/stat.t');

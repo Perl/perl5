@@ -52,7 +52,7 @@ If you are using as compiler GCC-2.95.x rev(DG/UX)
 an easy solution for configuring perl in your DG/UX
 machine is to run the command:
 
-./Configure -Dusethreads -Duse5005threads -des
+./Configure -Dusethreads -Duseithreads -Dusedevel -des
 
 This will automatically accept all the defaults and
 in particular /usr/local/ as installation directory.
@@ -65,7 +65,7 @@ have a standard DG/UX with C compiler GCC-2.7.2.x
 then you have no choice than to do an interactive
 build by issuing the command:
 
-./Configure -Dusethreads -Duse5005threads
+./Configure -Dusethreads -Duseithreads
 
 In particular with GCC-2.7.2.x accept all the defaults
 and *watch* out for the message:
@@ -107,7 +107,7 @@ Centre for Mathematical Sciences
 Department of Pure Mathematics
 Wilberforce road
 Cambridge CB3 0WB , UK
-email <takis@xfree86.org>
+email <takis@XFree86.Org>
 
 =head1 SEE ALSO
 

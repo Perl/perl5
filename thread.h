@@ -87,7 +87,7 @@
 #endif
 
 #ifdef DGUX
-#  define THREAD_CREATE_NEEDS_STACK (16*1024)
+#  define THREAD_CREATE_NEEDS_STACK (32*1024)
 #endif
 
 #ifdef I_MACH_CTHREADS
