@@ -1240,7 +1240,7 @@ one to five, but they are always performed in the same order.
 
 First pass is finding the end of the quoted construct, be it multichar ender
 C<"\nEOF\n"> of C<<<EOF> construct, C</> which terminates C<qq/> construct,
-C<E<]>> which terminates C<qq[> construct, or C<E<gt>> which terminates a
+C<]> which terminates C<qq[> construct, or C<E<gt>> which terminates a
 fileglob started with C<<>.
 
 When searching for multichar construct no skipping is performed.  When 
@@ -1249,9 +1249,9 @@ C<\\> and C<\/> are skipped.  When searching for one-char matching delimiter,
 such as C<]>, combinations C<\\>, C<\]> and C<\[> are skipped, and 
 nested C<[>, C<]> are skipped as well.
 
-For 3-parts constructs C<s///> etc. the search is repeated once more.
+For 3-parts constructs, C<s///> etc. the search is repeated once more.
 
-During this search no attension is paid to the semantic of the construct, thus
+During this search no attention is paid to the semantic of the construct, thus
 
     "$hash{"$foo/$bar"}"
 
@@ -1282,7 +1282,7 @@ parsing.
 =item Interpolation
 
 Next step is interpolation in the obtained delimiter-independent text.
-There are many different cases.
+There are four different cases.
 
 =over
 
@@ -1312,11 +1312,11 @@ constructs, thus C<"'@arr'"> becomes
 Since all three above steps are performed simultaneously left-to-right,
 the is no way to insert a literal C<$> or C<@> inside C<\Q\E> pair: it
 cannot be protected by C<\>, since any C<\> (except in C<\E>) is 
-interpreted as a literal inside C<\Q\E>, and any $ is 
+interpreted as a literal inside C<\Q\E>, and any C<$> is 
 interpreted as starting an interpolated scalar.
 
 Note also that the interpolating code needs to make decision where the 
-interpolated scalar ends, say, whether C<"a $b -> {c}"> means 
+interpolated scalar ends, say, whether C<"a $b -E<gt> {c}"> means 
 
   "a " . $b . " -> {c}";
 
@@ -1330,24 +1330,24 @@ not include spaces between components and contains matching braces/brackets.
 =item C<?RE?>, C</RE/>, C<m/RE/>, C<s/RE/foo/>, 
 
 Processing of C<\Q>, C<\U>, C<\u>, C<\L>, C<\l> and interpolation happens 
-(almost) as with qq// constructs, but I<the substitution of C<\> followed by
+(almost) as with C<qq//> constructs, but I<the substitution of C<\> followed by
 other chars is not performed>!  Moreover, inside C<(?{BLOCK})> no processing
 is performed at all.
 
-Interpolation has several quirks: $|, $( and $) are not interpolated, and
+Interpolation has several quirks: C<$|>, C<$(> and C<$)> are not interpolated, and
 constructs C<$var[SOMETHING]> are I<voted> (by several different estimators) 
-to be an array element or $var followed by a RE alternative.  This is
+to be an array element or C<$var> followed by a RE alternative.  This is
 the place where the notation C<${arr[$bar]}> comes handy: C</${arr[0-9]}/>
-is interpreted as an array element -9, not as a regular expression from
-variable $arr followed by a digit, which is the interpretation of 
+is interpreted as an array element C<-9>, not as a regular expression from
+variable C<$arr> followed by a digit, which is the interpretation of 
 C</$arr[0-9]/>.
 
-Note that absense of processing of C<\\> creates specific restrictions on the
-post-processed text: if the delimeter is C</>, one cannot get the combination
+Note that absence of processing of C<\\> creates specific restrictions on the
+post-processed text: if the delimiter is C</>, one cannot get the combination
 C<\/> into the result of this step: C</> will finish the regular expression,
 C<\/> will be stripped to C</> on the previous step, and C<\\/> will be left
 as is.  Since C</> is equivalent to C<\/> inside a regular expression, this
-does not matter unless the delimiter is special character for RE engine, as 
+does not matter unless the delimiter is special character for the RE engine, as 
 in C<s*foo*bar*>, C<m[foo]>, or C<?foo?>.
 
 =back
@@ -1361,19 +1361,19 @@ All the previous steps were performed during the compilation of Perl code,
 this one happens in run time (though it may be optimized to be calculated
 at compile time if appropriate).  After all the preprocessing performed 
 above (and possibly after evaluation if catenation, joining, up/down-casing 
-and quotemeta()ing are involved) the resulting I<string> is passed to RE
+and C<quotemeta()>ing are involved) the resulting I<string> is passed to RE
 engine for compilation.
 
 Whatever happens in the RE engine is better be discussed in L<perlre>,
 but for the sake of continuity let us do it here.
 
-This is the first step where presense of the C<//x> switch is relevant.
-RE engine scans the string left-to-right, and converts it to a finite 
+This is the first step where presence of the C<//x> switch is relevant.
+The RE engine scans the string left-to-right, and converts it to a finite 
 automaton.  
 
 Backslashed chars are either substituted by corresponding literal 
 strings, or generate special nodes of the finite automaton.  Characters
-which are special to RE engine generate corresponding nodes.  C<(?#...)>
+which are special to the RE engine generate corresponding nodes.  C<(?#...)>
 comments are ignored.  All the rest is either converted to literal strings
 to match, or is ignored (as is whitespace and C<#>-style comments if
 C<//x> is present).
@@ -1384,7 +1384,7 @@ Similarly, the C<(?{...})> is only checked for matching braces.
 
 =item Optimization of regular expressions
 
-This step is listed for compeleteness only.  Since it does not change
+This step is listed for completeness only.  Since it does not change
 semantics, details of this step are not documented and are subject
 to change.
 

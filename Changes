@@ -65,7 +65,204 @@ indicator:
 
 
 ----------------
-Version 5.004_74        Developer release working toward 5.005
+Version 5.004_75        5.005 Public Beta, Issue 1
+----------------
+
+____________________________________________________________________________
+[  1516] By: gsar                                  on 1998/07/15  08:04:24
+        Log: From:    abigail@fnx.com
+             Date:    Wed, 15 Jul 1998 03:47:56 EDT
+             Message-Id: <19980715074756.21868.qmail@betelgeuse.wayne.fnx.com>
+             Subject: [PATCH 5.004_74] pod/pod2man.PL Fix use of < inside C<>
+     Branch: perl
+           ! pod/pod2man.PL
+____________________________________________________________________________
+[  1515] By: gsar                                  on 1998/07/15  08:02:14
+        Log: From:    Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date:    Wed, 15 Jul 1998 03:49:24 EDT
+             Message-Id: <199807150749.DAA09177@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.004_72] Additional targets for OS/2 build
+     Branch: perl
+           ! os2/Makefile.SHs
+____________________________________________________________________________
+[  1514] By: gsar                                  on 1998/07/15  07:58:29
+        Log: rename some long file names to be 8.3 truncation-safe
+     Branch: perl
+          +> Todo-5.005 perly_c.diff pod/perld4.pod
+           - Todo.5.005 perly.c.diff pod/perldelta4.pod
+           ! MANIFEST Porting/pumpkin.pod perly.fixer
+____________________________________________________________________________
+[  1513] By: gsar                                  on 1998/07/15  07:35:29
+        Log: minor tweaks to docs on qr//
+     Branch: perl
+           ! ext/re/re.pm pod/perldelta.pod pod/perlop.pod pod/perlre.pod
+____________________________________________________________________________
+[  1512] By: gsar                                  on 1998/07/15  07:06:02
+        Log: applied patch, with tab tweak suggest by Peter Prymmer
+             From: Dan Sugalski <sugalskd@osshe.edu>
+             Date: Tue, 14 Jul 1998 16:41:14 -0700
+             Message-Id: <3.0.5.32.19980714164114.00a3e2a0@ous.edu>
+             Subject: [PATCH 5.004_74]VMS build cleanups
+     Branch: perl
+           ! vms/descrip_mms.template
+____________________________________________________________________________
+[  1511] By: gsar                                  on 1998/07/15  07:03:33
+        Log: allow perlbug -ok when STDIN it not a tty
+             From: Hugo van der Sanden <hv@crypt0.demon.co.uk>
+             Date: Wed, 15 Jul 1998 03:24:56 +0200
+             Message-Id: <l03130302b1d1b1e7c2a0@[194.222.64.89]>
+             Subject: Re: [NOT OK] 5.004_74: "make ok" not ok in IRIX 6.2
+     Branch: perl
+           ! utils/perlbug.PL
+____________________________________________________________________________
+[  1510] By: gsar                                  on 1998/07/15  06:59:43
+        Log: From: "Art Green" <Art_Green@mercmarine.com>
+             Date: Tue, 14 Jul 1998 20:53:48 -0500
+             Message-ID: <86256642.0004D7AB.00@FDLTest1.mercmarine.com>
+             Subject: [PATCH]:_74 - Allow Configure to recognize _AIX41 & _POWER compiler defines
+     Branch: perl
+           ! Configure
+____________________________________________________________________________
+[  1509] By: gsar                                  on 1998/07/15  06:57:50
+        Log: typecast long vs. IV compares in pp_flip/pp_flop
+     Branch: perl
+           ! pp_ctl.c
+____________________________________________________________________________
+[  1508] By: gsar                                  on 1998/07/15  06:50:49
+        Log: don't copy foreach itervar when no external refs exist
+             From: Gisle Aas <gisle@aas.no>
+             Date: 15 Jul 1998 03:35:25 +0200
+             Message-ID: <m33ec3nbfm.fsf@furu.g.aas.no>
+             Subject: Re: Testcase for 1..n closure change
+     Branch: perl
+           ! pp_hot.c
+____________________________________________________________________________
+[  1507] By: gsar                                  on 1998/07/15  06:46:41
+        Log: applied patch, regen headers
+             From: Stephen McCamant <alias@mcs.com>
+             Date: Tue, 14 Jul 1998 19:56:47 -0500 (CDT)
+             Message-ID: <13739.64763.792570.626015@alias-2.pr.mcs.net>
+             Subject: B::Deparse update for qr// and regcreset
+     Branch: perl
+           ! ext/B/B/Deparse.pm opcode.h opcode.pl
+____________________________________________________________________________
+[  1506] By: gsar                                  on 1998/07/15  06:43:04
+        Log: make pregcomp et al VIRTUAL again for PERL_OBJECT
+             From: "Douglas Lankshear" <dougl@ActiveState.com>
+             Date: Tue, 14 Jul 1998 16:40:30 -0700
+             Message-ID: <000301bdaf80$c93d14a0$a32fa8c0@tau.Active>
+             Subject: [PATCH 5.004_74]
+     Branch: perl
+           ! proto.h
+____________________________________________________________________________
+[  1505] By: gsar                                  on 1998/07/15  06:41:43
+        Log: dont use sv_dump() in -DD diagnostic
+             From: Gisle Aas <gisle@aas.no>
+             Date: 14 Jul 1998 23:55:36 +0200
+             Message-ID: <m33ec4jdwn.fsf@furu.g.aas.no>
+             Subject: [PATCH] Fix 'PERL_DESTRUCT_LEVEL=2 ./perl -DD -e 1' loop
+     Branch: perl
+           ! sv.c
+____________________________________________________________________________
+[  1504] By: gsar                                  on 1998/07/15  06:39:37
+        Log: add a few more thread.t tests
+     Branch: perl
+           ! t/lib/thread.t
+____________________________________________________________________________
+[  1503] By: gsar                                  on 1998/07/15  06:31:33
+        Log: fix thread.t ('join $t' ne '$t->join' !)
+     Branch: perl
+           ! t/lib/thread.t
+____________________________________________________________________________
+[  1502] By: gsar                                  on 1998/07/15  06:26:00
+        Log: From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Wed, 15 Jul 1998 01:45:57 +0300 (EET DST)
+             Message-Id: <199807142245.BAA09651@alpha.hut.fi>
+             Subject: [PATCH] 5.004_74: MPE/iX final touches
+     Branch: perl
+           ! installperl lib/File/Copy.pm
+____________________________________________________________________________
+[  1501] By: gsar                                  on 1998/07/15  05:59:49
+        Log: apply (reversed) patch
+             From: Peter Wolfe <wolfe@titan.teloseng.com>
+             Date: Tue, 14 Jul 1998 13:01:58 -0700 (PDT)
+             Message-Id: <199807142001.NAA26550@titan.teloseng.com>
+             Subject: NOT_OK: perl 5.00474 on SCO 3.2v5.0.4
+     Branch: perl
+           ! ext/IPC/SysV/SysV.xs
+____________________________________________________________________________
+[  1500] By: gsar                                  on 1998/07/15  05:57:39
+        Log: From: Andy Dougherty <doughera@lafcol.lafayette.edu>
+             Date: Tue, 14 Jul 1998 14:14:59 -0400 (EDT)
+             Message-Id: <Pine.SUN.3.96.980714141346.29710D-100000@newton.phys>
+             Subject: [PATCH 5.004_74] Config_74-01
+     Branch: perl
+	   ! Configure MANIFEST Porting/Glossary Porting/config.sh
+	   ! Porting/config_H Porting/pumpkin.pod config_h.SH
+	   ! vms/subconfigure.com win32/config.bc win32/config.gc
+           ! win32/config.vc
+____________________________________________________________________________
+[  1499] By: gsar                                  on 1998/07/15  05:48:38
+        Log: From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Tue, 14 Jul 1998 21:35:02 +0300 (EET DST)
+             Message-Id: <199807141835.VAA09030@alpha.hut.fi>
+             Subject: [PATCH] 5.004_74: trig.t: math inaccuracy fudge for unicos
+     Branch: perl
+           ! t/lib/trig.t
+____________________________________________________________________________
+[  1498] By: gsar                                  on 1998/07/15  05:47:33
+        Log: -w, strict clean perldoc (via PM)
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Tue, 14 Jul 98 17:22:01 BST
+             Message-Id: <18695.9807141622@tempest.cise.npl.co.uk>
+             Subject: [PATCH 5.004_74] perldoc.PL
+     Branch: perl
+           ! utils/perldoc.PL
+____________________________________________________________________________
+[  1497] By: gsar                                  on 1998/07/15  05:35:54
+        Log: add comment about cpprun etc., to hints/hpux.sh
+     Branch: perl
+           ! hints/hpux.sh
+____________________________________________________________________________
+[  1496] By: gsar                                  on 1998/07/15  05:15:16
+        Log: fix warning from CGI::Carp
+     Branch: perl
+           ! lib/CGI/Carp.pm
+____________________________________________________________________________
+[  1495] By: gsar                                  on 1998/07/14  23:47:18
+        Log: fix off-by-one in win32 registry handling
+             From: "Douglas Lankshear" <dougl@ActiveState.com>
+             Date: Tue, 14 Jul 1998 07:39:06 -0700
+             Message-ID: <000401bdaf35$27489e80$a32fa8c0@tau.Active>
+             Subject: [PATCH 5.004_73]
+     Branch: perl
+           ! win32/win32.c
+____________________________________________________________________________
+[  1494] By: gsar                                  on 1998/07/14  23:45:58
+        Log: doc patches from Gisle Aas <gisle@aas.no>
+             Date: 14 Jul 1998 16:18:31 +0200
+             Message-ID: <m33ec4cy88.fsf@furu.g.aas.no>
+             Subject: [PATCH] substr/splice changes for perldelta.pod
+             --
+             Date: 14 Jul 1998 20:31:27 +0200
+             Message-ID: <m3hg0kqo74.fsf@furu.g.aas.no>
+             Subject: [PATCH] Duplicate description of use integer %
+     Branch: perl
+           ! pod/perldelta.pod pod/perlop.pod
+____________________________________________________________________________
+[  1493] By: gsar                                  on 1998/07/14  23:39:31
+        Log: File/Spec.pm needs trailing newline
+     Branch: perl
+           ! lib/File/Spec.pm
+____________________________________________________________________________
+[  1492] By: gsar                                  on 1998/07/14  21:43:03
+        Log: unsubmitted _74 tweaks
+     Branch: perl
+	   ! Changes mpeix/nm mpeix/relink pod/perldelta.pod
+           ! pod/perldiag.pod
+
+----------------
+Version 5.004_74
 ----------------
 
 ____________________________________________________________________________
