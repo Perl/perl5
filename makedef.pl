@@ -114,6 +114,8 @@ if ($PLATFORM eq 'win32') {
     if ($define{PERL_IMPLICIT_SYS}) {
 	output_symbol("perl_get_host_info");
 	output_symbol("perl_alloc_override");
+    }
+    if ($define{USE_ITHREADS}) {
 	output_symbol("perl_clone_host");
     }
 }
