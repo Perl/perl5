@@ -205,7 +205,7 @@ do_test(13,
     XSUB = 0x0
     XSUBANY = 0
     GVGV::GV = $ADDR\\t"main" :: "__ANON__[^"]*"
-    FILE = ".+\\b(?i:peek\\.t)"
+    FILE = ".*\\b(?i:peek\\.t)"
     DEPTH = 0
 (?:    MUTEXP = $ADDR
     OWNER = $ADDR
@@ -230,7 +230,7 @@ do_test(14,
     XSUB = 0x0
     XSUBANY = 0
     GVGV::GV = $ADDR\\t"main" :: "do_test"
-    FILE = ".+\\b(?i:peek\\.t)"
+    FILE = ".*\\b(?i:peek\\.t)"
     DEPTH = 1
 (?:    MUTEXP = $ADDR
     OWNER = $ADDR
@@ -303,7 +303,7 @@ do_test(17,
     CVGEN = 0x0
     GPFLAGS = 0x0
     LINE = \\d+
-    FILE = ".+\\b(?i:peek\\.t)"
+    FILE = ".*\\b(?i:peek\\.t)"
     FLAGS = $ADDR
     EGV = $ADDR\\t"a"');
 
