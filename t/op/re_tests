@@ -751,3 +751,4 @@ tt+$	xxxtt	y	-	-
 '^\S\s+aa$'m	\nx aa	y	-	-
 (^|a)b	ab	y	-	-
 (?i)		y	-	-
+'(?!\A)x'm	a\nxb\n	y	-	-
