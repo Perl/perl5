@@ -813,6 +813,6 @@ mailing lists for their valuable feedback.
 
 =head1 AUTHOR, COPYRIGHT, AND LICENSE
 
-Copyright 2001 Jarkko Hietaniemi <jhi@iki.fi>
+Copyright 2001-2002 Jarkko Hietaniemi <jhi@iki.fi>
 
 This document may be distributed under the same terms as Perl itself.

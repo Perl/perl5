@@ -1,5 +1,5 @@
 /*
- * perlio.c Copyright (c) 1996-2001, Nick Ing-Simmons You may distribute
+ * perlio.c Copyright (c) 1996-2002, Nick Ing-Simmons You may distribute
  * under the terms of either the GNU General Public License or the
  * Artistic License, as specified in the README file.
  */

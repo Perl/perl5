@@ -439,7 +439,7 @@ First version July 22, 1998; last revised November 21, 2001.
 
 =head1 COPYRIGHT
 
-Copyright (C) 1998, 2001 Jon Orwant.  All Rights Reserved.
+Copyright (C) 1998, 2002 Jon Orwant.  All Rights Reserved.
 
 Permission is granted to make and distribute verbatim copies of this
 documentation provided the copyright notice and this permission notice are
