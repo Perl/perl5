@@ -337,7 +337,7 @@ c2 = perl.c perly.c pp.c pp_hot.c pp_ctl.c pp_sys.c regcomp.c regexec.c utf8.c
 c3 = gv.c sv.c taint.c toke.c util.c deb.c run.c universal.c xsutils.c pad.c
 c4 = globals.c perlio.c perlapi.c numeric.c locale.c pp_pack.c pp_sort.c
 
-c = $(c1) $(c2) $(c3) $(c4) miniperlmain.c perlmain.c
+c = $(c1) $(c2) $(c3) $(c4) miniperlmain.c perlmain.c opmini.c
 
 obj1 = $(mallocobj) gv$(OBJ_EXT) toke$(OBJ_EXT) perly$(OBJ_EXT) op$(OBJ_EXT) pad$(OBJ_EXT) regcomp$(OBJ_EXT) dump$(OBJ_EXT) util$(OBJ_EXT) mg$(OBJ_EXT) reentr$(OBJ_EXT)
 obj2 = hv$(OBJ_EXT) av$(OBJ_EXT) run$(OBJ_EXT) pp_hot$(OBJ_EXT) sv$(OBJ_EXT) pp$(OBJ_EXT) scope$(OBJ_EXT) pp_ctl$(OBJ_EXT) pp_sys$(OBJ_EXT)
@@ -390,11 +390,12 @@ $spitshell >>Makefile <<!GROK!THIS!
 # if we have a symlink forest to another disk (it complains about too many
 # levels of symbolic links, even if we have only two)
 
-opmini\$(OBJ_EXT): op.c config.h
-	\$(RMS) opmini.c
-	\$(CPS) op.c opmini.c
+opmini.c: op.c
+	\$(CPS) op.c opmini.tmp
+	sh mv-if-diff opmini.tmp opmini.c
+
+opmini\$(OBJ_EXT): opmini.c
 	\$(CCCMD) \$(PLDLFLAGS) $DPERL_EXTERNAL_GLOB opmini.c
-	\$(RMS) opmini.c
 
 !GROK!THIS!
 $spitshell >>Makefile <<'!NO!SUBS!'
