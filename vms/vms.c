@@ -1096,13 +1096,18 @@ Perl_my_sigaction (pTHX_ int sig, const struct sigaction* act,
 #ifdef KILL_BY_SIGPRC
 #include <errnodef.h>
 
-/* okay, this is some BLATENT hackery ... 
-   we use this if the kill() in the CRTL uses sys$forcex, causing the
+/* We implement our own kill() using the undocumented system service
+   sys$sigprc for one of two reasons:
+
+   1.) If the kill() in an older CRTL uses sys$forcex, causing the
    target process to do a sys$exit, which usually can't be handled 
    gracefully...certainly not by Perl and the %SIG{} mechanism.
 
-   Instead we use the (undocumented) system service sys$sigprc.
-   It has the same parameters as sys$forcex, but throws an exception
+   2.) If the kill() in the CRTL can't be called from a signal
+   handler without disappearing into the ether, i.e., the signal
+   it purportedly sends is never trapped. Still true as of VMS 7.3.
+
+   sys$sigprc has the same parameters as sys$forcex, but throws an exception
    in the target process rather than calling sys$exit.
 
    Note that distinguishing SIGSEGV from SIGBUS requires an extra arg

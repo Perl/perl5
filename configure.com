@@ -4943,24 +4943,29 @@ $   GOSUB compile
 $   nv_preserves_uv_bits = tmp
 $ ENDIF
 $!
-$ echo4 "Checking whether your kill() uses SYS$FORCEX..."
+$ echo4 "Checking if kill() uses SYS$FORCEX or can't be called from a signal handler..."
 $ kill_by_sigprc = "undef"
 $ OS
 $ WS "#include <stdio.h>"
 $ WS "#include <signal.h>"
 $ WS "#include <unistd.h>"
-$ WS "void handler(int s) { printf(""%d\n"",s); } "
+$ WS "void handler1(int s) { printf(""%d"",s); kill(getpid(),2); }"
+$ WS "void handler2(int s) { printf(""%d"",s); }"
 $ WS "main(){"
 $ WS "    printf(""0"");"
-$ WS "    signal(1,handler); kill(getpid(),1);"
+$ WS "    signal(1,handler1);"
+$ WS "    signal(2,handler2);"
+$ WS "    kill(getpid(),1);"
+$ WS "    sleep(1);"
+$ WS "    printf(""\n"");"
 $ WS "}"
 $ CS
 $ ON ERROR THEN CONTINUE
 $ GOSUB compile
-$ IF tmp .NES. "01"
+$ IF tmp .NES. "012"
 $ THEN 
-$   echo4 "Yes, it does." 
-$   echo4 "Checking whether we can use SYS$SIGPRC instead"
+$   echo4 "Yes, it has at least one of those limitations."
+$   echo4 "Checking whether we can use SYS$SIGPRC instead..."
 $   OS
 $   WS "#include <stdio.h>"
 $   WS "#include <lib$routines.h>"
