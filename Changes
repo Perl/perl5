@@ -25,8 +25,306 @@ to the perl5-porters mailing list.  You can retrieve the messages for
 example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 
 --------------
-Version v5.9.X		Development release working toward v5.10
+Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
+____________________________________________________________________________
+[ 18133] By: jhi                                   on 2002/11/09  21:56:38
+        Log: Integrate
+             
+             [ 18122]
+             Subject: [perl #18065] LFS related bug in perl-5.8.0 testsuite
+             From: "david@dhaller.de (via RT)" <perlbug@perl.org>
+             Date: 23 Oct 2002 18:42:51 -0000
+             Message-Id: <rt-18065-40384.14.044473925414@bugs6.perl.org>
+             
+             [ 18123]
+             Subject: PATCH x2p/find2perl.PL
+             From: "Newton, Philip" <Philip.Newton@datenrevision.de>
+             Date: Thu, 24 Oct 2002 10:05:19 +0200
+             Message-ID: <C9A98F2128EDD411B0920008C7B337A13DCF41@hamsem01.de.gedas.vwg>
+             
+             [ 18124]
+             Subject: [PATCH] File::Temp documentation fix
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: Thu, 24 Oct 2002 19:04:20 +0200 (CEST)
+             Message-Id: <200210241704.g9OH4KlR030883@vran.herceg.de>
+             
+             [ 18125]
+             Subject: Re: The Inaba patch for tr/// vs. use encoding
+             From: Dan Kogai <dankogai@dan.co.jp>
+             Date: Fri, 25 Oct 2002 13:04:00 +0900
+             Message-Id: <CAC896FE-E7CE-11D6-9228-0003939A104C@dan.co.jp>
+     Branch: maint-5.8/perl
+	  +> t/uni/tr_7jis.t t/uni/tr_eucjp.t t/uni/tr_sjis.t
+	  +> t/uni/tr_utf8.t
+	  !> MANIFEST ext/Fcntl/t/syslfs.t lib/File/Temp.pm t/op/lfs.t
+	  !> x2p/find2perl.PL
+____________________________________________________________________________
+[ 18132] By: jhi                                   on 2002/11/09  21:50:30
+        Log: Integrate
+             
+             [ 18121]
+             Subject: Re: [perl #18038] DESTROY change in 5.8.0?
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Sun, 03 Nov 2002 15:48:18 -0800
+             Message-ID: <CXbx9gzkgS8W092yn@efn.org>
+     Branch: maint-5.8/perl
+	  !> sv.c t/op/tie.t
+____________________________________________________________________________
+[ 18131] By: jhi                                   on 2002/11/09  21:28:07
+        Log: Integrate
+             
+             [ 18119]
+             Subject: [perl #18154] Problem found in calculating offsets in regex
+             From: Mark Pease (via RT) <perlbug@perl.org>
+             Date: 29 Oct 2002 20:23:54 -0000
+             Message-Id: <rt-18154-40762.0.46361502706489@bugs6.perl.org>
+             
+             [ 18120]
+             Subject: Re: Is this true that Perl 5.8 uses :crlf as default DISCIPLINE on so ckets?
+             From: Gurusamy Sarathy <gsar@ActiveState.com>
+             Date: Sat, 19 Oct 2002 12:11:43 -0700
+             Message-Id: <200210191911.g9JJBhK02618@smtp3.ActiveState.com>
+     Branch: maint-5.8/perl
+	  !> doio.c ext/DB_File/t/db-recno.t perl.h pp_sys.c regcomp.c
+	  !> win32/win32.h
+____________________________________________________________________________
+[ 18130] By: jhi                                   on 2002/11/09  21:25:39
+        Log: Integrate
+             
+             [ 18118]
+             Subject: Re: [perl #17605] strange behaviour (difference between perl 5.6 and perl 5.8.0) in the regexp
+             From: hv@crypt.org
+             Date: Sun, 03 Nov 2002 16:41:24 +0000
+             Message-Id: <200211031641.gA3GfOm08609@crypt.compulink.co.uk>
+             
+             (closure.t required manual edit since blead had a new test)
+     Branch: maint-5.8/perl
+	  !> ext/B/B/Concise.pm op.c pp_hot.c t/op/closure.t
+	  !> t/op/sub_lval.t
+____________________________________________________________________________
+[ 18129] By: jhi                                   on 2002/11/09  21:20:02
+        Log: Integrate
+             
+             [ 18115]
+             Subject: Re: [perl #18048] read \*FH, ... returns undef but doesn' t set $! if \*FH not open
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 24 Oct 2002 00:44:35 +0200
+             Message-ID: <87vg3sixm4.fsf@vran.herceg.de>
+             
+             [ 18117]
+             "make distclean" should remove the generated file lib/Config.pod.
+     Branch: maint-5.8/perl
+	  !> Makefile.SH pod/perldiag.pod pod/perlfunc.pod pp_sys.c
+	  !> t/io/binmode.t t/io/print.t t/io/read.t t/lib/warnings/pp_sys
+____________________________________________________________________________
+[ 18128] By: jhi                                   on 2002/11/09  21:15:09
+        Log: Integrate
+             
+             [ 18116]
+             The new test introduced in #18114 failed with threads
+             
+             (edit //= to be ||=)
+     Branch: maint-5.8/perl
+	  !> ext/B/t/concise.t
+____________________________________________________________________________
+[ 18127] By: jhi                                   on 2002/11/09  21:07:43
+        Log: Integrate
+             
+             [ 18114]
+             Subject: Re: [PATCH] [perl #18175] B::Concise,-exec doesn't handle // operator well
+             From: Stephen McCamant <smcc@mit.edu>
+             Date: Thu, 31 Oct 2002 01:35:29 -0500
+             Message-ID: <15808.53041.181907.308803@syllepsis.MIT.EDU>
+             
+             plus a test case in ext/B/t/concise.t
+             plus a (less intrusive, but less future-proof) fix for a
+             similar problem in B::walkoptree_exec().
+             
+             (edit away dor and dorassign)
+     Branch: maint-5.8/perl
+	  !> ext/B/B.pm ext/B/B/Concise.pm ext/B/t/concise.t
+____________________________________________________________________________
+[ 18126] By: jhi                                   on 2002/11/09  19:00:47
+        Log: Integrate
+             
+             [ 18102]
+             Subject: Re: [perl #18066] Bug in -I when path has double colons?
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 30 Oct 2002 11:18:47 +0100
+             Message-ID: <87of9c2prs.fsf@vran.herceg.de>
+             
+             With the corresponding change to embed.fnc
+             
+             [ 18105]
+             Subject: Re: Class::Struct, simple patch, tests
+             From: Marty Pauley <marty+p5p@kasei.com>
+             Date: Fri, 18 Oct 2002 22:26:38 +0100
+             Message-ID: <20021018212638.GB3764@soto.kasei.com>
+             
+             [ 18106]
+             new test based on:
+             Subject: [TEST] for [PATCH] bug in utf8.c(?)
+             From: Marty Pauley <marty+p5p@kasei.com>
+             Date: Fri, 18 Oct 2002 21:02:38 +0100
+             Message-ID: <20021018200238.GY3764@soto.kasei.com>
+             
+             [ 18107]
+             1. Update pp_ucfirst to enter the UTF-8 branch only if the first
+             character is UTF-8. (Copied from pp_lcfirst.)
+             2. sv_dump() should display FLAGS=...,UTF8 for both POK and pPOK.
+             
+             [ 18108]
+             Put back the DO NOT EDIT headers in proto.h and global.sym
+             
+             Subject: Re: [perl #18066] Bug in -I when path has double colons?
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 03 Nov 2002 10:25:10 +0100
+             Message-ID: <87adkrngy1.fsf@vran.herceg.de>
+             
+             [ 18109]
+             Subject: Re: [perl #18107] lc(), uc() and ucfirst() broken inside utf8 regex
+             From: hv@crypt.org
+             Date: Tue, 05 Nov 2002 13:30:00 +0000
+             Message-Id: <200211051330.gA5DU0p00718@crypt.compulink.co.uk>
+             
+             This is half of the fix for #18107. The swash_init() problems
+             described in <20021105143646.M18101@lustre.dyn.wiw.org> remain,
+             but can now be seen only with UTF-8 test cases.
+             
+             [ 18113]
+             make regen_headers.
+             Backport change #18078 to warnings.pl.
+             
+             plus make regen_headers
+     Branch: maint-5.8/perl
+	  +> t/run/switchI.t
+	   ! pod/perlapi.pod
+	  !> MANIFEST dump.c embed.fnc embed.h embedvar.h global.sym
+	  !> lib/Class/Struct.pm lib/Class/Struct.t lib/utf8.t perl.c
+	  !> perlapi.c perlapi.h pp.c proto.h t/run/runenv.t warnings.pl
+____________________________________________________________________________
+[ 18112] By: jhi                                   on 2002/11/05  13:26:28
+        Log: perl embed.pl
+     Branch: maint-5.8/perl
+	   ! embed.h embedvar.h global.sym perlapi.c perlapi.h proto.h
+____________________________________________________________________________
+[ 18111] By: jhi                                   on 2002/11/05  13:24:59
+        Log: Integrate
+             
+             [ 18067]
+             [PATCH] embed.pl doc. (embed.pl reorganization for doc headers)
+             Wed, 23 Oct 2002; Jarkko Hietaniemi <jhi@iki.fi>
+             With some additional modifications
+             
+             [ 18068]
+             Repair broken previous patch. I don't like it, but not repairing it
+             breaks each and every build. Will teach me to test on the same
+             machine where I patched it. Sorry.
+             
+             [ 18108]
+             Put back the DO NOT EDIT headers in proto.h and global.sym
+             
+             Subject: Re: [perl #18066] Bug in -I when path has double colons?
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 03 Nov 2002 10:25:10 +0100
+             Message-ID: <87adkrngy1.fsf@vran.herceg.de>
+     Branch: maint-5.8/perl
+	  !> embed.pl
+____________________________________________________________________________
+[ 18110] By: jhi                                   on 2002/11/05  13:12:12
+        Log: Integrate
+             
+             [ 17951]
+             MakeMaker's INSTALLSITEMANXDIR Configure's counterpart
+             Thu, 25 Jul 2002, Andy Dougherty
+             
+             (had to regen Configure)
+     Branch: maint-5.8/perl
+	   ! Configure config_h.SH
+	  !> Policy_sh.SH
+____________________________________________________________________________
+[ 18104] By: jhi                                   on 2002/11/04  22:23:54
+        Log: Integrate
+             [ 17946]
+             nanosleep on VMS not present
+     Branch: maint-5.8/perl
+	  !> configure.com
+____________________________________________________________________________
+[ 18103] By: jhi                                   on 2002/11/04  22:11:33
+        Log: Integrate
+             [ 17944]
+             nanosleep probes as per Jarkko's request
+             
+             (and regen Configure)
+     Branch: maint-5.8/perl
+	   ! Configure config_h.SH
+	  !> NetWare/config_H.wc Porting/config.sh Porting/config_H
+	  !> epoc/config.sh perl.h win32/config.bc win32/config.gc
+	  !> win32/config.vc win32/config.vc64 win32/config_H.bc
+	  !> win32/config_H.gc win32/config_H.vc win32/config_H.vc64
+	  !> wince/config.ce wince/config_H.ce
+____________________________________________________________________________
+[ 18101] By: jhi                                   on 2002/11/04  21:29:57
+        Log: Integrate
+             
+             [ 17731]
+             Subject: [PATCH] Configure missing d_modflproto=''
+             From: "Gerrit P. Haase" <gp@familiehaase.de>
+             Date: Tue, 13 Aug 2002 15:11:05 +0200
+             Message-id: <11417599086.20020813151105@familiehaase.de>
+             
+             [ 17739]
+             Subject: Re: [perl #15326] Not OK: perl v5.8.0 on i686-linux-64int-ld 2.4.5
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Tue, 23 Jul 2002 09:21:10 +0200
+             Message-id: <20020723092051.184C.H.M.BRAND@hccnet.nl>
+             
+             [ 17902]
+             [PATCH perl@17882] configure.com needs d_modflproto
+             Thu 12 Sep 2002 23:19, "Craig A. Berry"
+             
+             [ 17919]
+             Subject: [PATCH] AIX hints missinga  >&4
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Fri, 13 Sep 2002 16:48:42 +0300
+             Message-ID: <20020913134842.GD8929@lyta.hut.fi>
+     Branch: maint-5.8/perl
+	  !> Configure configure.com hints/aix.sh
+____________________________________________________________________________
+[ 18100] By: jhi                                   on 2002/11/04  21:21:09
+        Log: Integrate (two changes that are followups for changes already in)
+             
+             [ 17745]
+             perldelta for #17727
+             
+             [ 17831]
+             #17827 misses some win32 tweaks
+     Branch: maint-5.8/perl
+	  !> pod/perldelta.pod win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 18099] By: jhi                                   on 2002/11/04  21:17:25
+        Log: Integrate (automerge didn't work, required manual copying from
+             a post-17815 snapshot and editing a '59' to '58')
+             
+             [ 17815]
+             formatting cleanup and:
+             Subject: Re: perl-5.8.0 on HP porting center
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Thu, 29 Aug 2002 12:23:31 +0200
+             Message-Id: <20020829122221.0CA3.H.M.BRAND@hccnet.nl>
+     Branch: maint-5.8/perl
+	   ! installperl
+____________________________________________________________________________
+[ 18098] By: jhi                                   on 2002/11/04  18:53:22
+        Log: Kick patchlevel.
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 18097] By: jhi                                   on 2002/11/04  18:52:23
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
 ____________________________________________________________________________
 [ 18096] By: jhi                                   on 2002/11/04  18:46:09
         Log: Integrate:
