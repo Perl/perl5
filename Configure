@@ -10156,7 +10156,16 @@ $define)
 	false) dflt='n';;
 	*) dflt='y';;
 	esac
-	rp="Some systems have problems with vfork().  Do you want to use it?"
+	cat <<'EOM'
+ 
+Perl can only use a vfork() that doesn't suffer from strict
+restrictions on calling functions or modifying global data in
+the child.  For example, glibc-2.1 contains such a vfork()
+that is unsuitable.  If your system provides a proper fork()
+call, chances are that you do NOT want perl to use vfork().
+
+EOM
+	rp="Do you still want to use vfork()?"
 	. ./myread
 	case "$ans" in
 	y|Y) ;;
