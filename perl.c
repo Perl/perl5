@@ -278,7 +278,10 @@ perl_construct(pTHXx)
 #if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT)
     /* [perl #22371] Algorimic Complexity Attack on Perl 5.6.1, 5.8.0 */
     {
-       char *s = PerlEnv_getenv("PERL_HASH_SEED");
+       char *s = NULL;
+
+       if (!PL_tainting)
+	   s = PerlEnv_getenv("PERL_HASH_SEED");
        if (s)
            while (isSPACE(*s)) s++;
        if (s && isDIGIT(*s))
@@ -299,7 +302,7 @@ perl_construct(pTHXx)
 #endif /* RANDBITS < (UVSIZE * 8) */
        }
 #endif /* USE_HASH_SEED_EXPLICIT */
-       if ((s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG")))
+       if (!PL_tainting && (s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG")))
 	   PerlIO_printf(Perl_debug_log, "HASH_SEED = %"UVuf"\n",
 			 PL_hash_seed);
     }
