@@ -64,6 +64,10 @@ even if available, access to a fixed interface):
     aTHX_
     AvFILLp
     boolSV(b)
+    call_argv
+    call_method
+    call_pv
+    call_sv
     DEFSV
     dMY_CXT	
     dMY_CXT_SV
@@ -156,7 +160,7 @@ require DynaLoader;
 use strict;
 use vars qw( $VERSION @ISA @EXPORT @EXPORT_OK $data );
 
-$VERSION = "2.005";
+$VERSION = "2.006";
 
 @ISA = qw(Exporter DynaLoader);
 @EXPORT =  qw();
@@ -767,6 +771,22 @@ SV *sv;
 #   define get_hv(name,create) perl_get_hv(name,create)
 #endif
 
+#ifndef call_argv
+#   define call_argv perl_call_argv
+#endif
+
+#ifndef call_method
+#   define call_method perl_call_method
+#endif
+
+#ifndef call_pv
+#   define call_pv perl_call_pv
+#endif
+
+#ifndef call_sv
+#   define call_sv perl_call_sv
+#endif
+
 #ifndef PERL_SCAN_GREATER_THAN_UV_MAX
 #   define PERL_SCAN_GREATER_THAN_UV_MAX 0x02
 #endif
@@ -783,7 +803,7 @@ SV *sv;
 #   define PERL_SCAN_DISALLOW_PREFIX 0x02
 #endif
 
-#if (PERL_VERSION > 6)
+#if (PERL_VERSION >= 6)
 #define I32_CAST
 #else
 #define I32_CAST (I32*)
