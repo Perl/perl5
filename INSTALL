@@ -885,6 +885,11 @@ If you get syntax errors on '(', try -DCRIPPLED_CC.
 
 Machines with half-implemented dbm routines will need to #undef I_ODBM
 
+db-recno failure on tests 51, 53 and 55:  Old versions of the DB library
+(including the DB library which comes with FreeBSD 2.1) had broken
+handling of recno databases with modified bval settings.  Upgrade your
+DB library or OS.
+
 =back
 
 =head1 make test
