@@ -19,13 +19,6 @@ use File::Spec;
 ##    whereby the case distinctions, whitespace, hyphens, and underbar
 ##    are ignored.
 
-foreach my $lib ('To', 'lib',
-		 map {File::Spec->catdir("lib",$_)}
-		 qw(gc_sc dt bc hst ea jt lb nt ccc)) {
-  next if -d $lib;
-  mkdir $lib, 0755 or die "mkdir '$lib': $!";
-}
-
 ## Base names already used in lib/gc_sc (for avoiding 8.3 conflicts)
 my %BaseNames;
 
@@ -45,9 +38,18 @@ while (@ARGV)
         $Verbose = 0;
     } elsif ($arg eq '-maketest') {
         $MakeTestScript = 1;
+    } elsif ($arg eq '-C' && defined (my $dir = shift)) {
+	chdir $dir or die "chdir $_: $!";
     } else {
-        die "usage: $0 [-v|-q] [-maketest]";
+        die "usage: $0 [-v|-q|-C dir] [-maketest]";
     }
+}
+
+foreach my $lib ('To', 'lib',
+		 map {File::Spec->catdir("lib",$_)}
+		 qw(gc_sc dt bc hst ea jt lb nt ccc)) {
+  next if -d $lib;
+  mkdir $lib, 0755 or die "mkdir '$lib': $!";
 }
 
 my $LastUnicodeCodepoint = 0x10FFFF; # As of Unicode 3.1.1.

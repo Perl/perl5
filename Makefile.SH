@@ -997,7 +997,7 @@ _cleaner2:
 	rm -rf $(addedbyconf)
 	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old makefile.old
 	rm -f $(private) lib/Config.pod
-	echo TODO rm -rf $(unidatafiles) $(unidatadirs)
+	rm -rf $(unidatafiles) $(unidatadirs)
 	rm -rf lib/auto
 	rm -f lib/.exists lib/*/.exists lib/*/*/.exists
 	rm -f h2ph.man pstruct
