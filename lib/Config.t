@@ -6,7 +6,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan tests => 46;
+plan tests => 47;
 
 use_ok('Config');
 
@@ -89,6 +89,10 @@ Config::config_vars(':PERL_API_REVISION:');
 my $out5 = $$out;
 $out->clear;
 
+Config::config_vars('?flags');
+my $out6 = $$out;
+$out->clear;
+
 untie *STDOUT;
 like($out1, qr/^cc='\Q$Config{cc}\E';/, "config_vars cc");
 like($out2, qr/^d_bork='UNKNOWN';/, "config_vars d_bork is UNKNOWN");
@@ -106,6 +110,9 @@ is("'8'", $api[2], "version is 9");
 is("'0'", $api[1], "subversion is 1");
 
 is("'5' ", $out5, "leading and trailing colons return just the value");
+
+like($out6, qr/\bnot\s+found\b/, "config_vars with invalid regexp");
+
 # Read-only.
 
 undef $@;

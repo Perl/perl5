@@ -190,8 +190,8 @@ sub import
   ## fill %h keys with our @_ args.
   ##
   my ($promote, %h, @args) = (0);
-  while (@_ and $_ = shift) {
-    if ($_ eq ":alias") {
+  while (my $arg = shift) {
+    if ($arg eq ":alias") {
       @_ or
 	croak ":alias needs an argument in charnames";
       my $alias = shift;
@@ -210,11 +210,11 @@ sub import
       alias_file ($alias);
       next;
     }
-    if (m/^:/ and ! ($_ eq ":full" || $_ eq ":short")) {
-      warn "unsupported special '$_' in charnames";
+    if (substr($arg, 0, 1) eq ':' and ! ($arg eq ":full" || $arg eq ":short")) {
+      warn "unsupported special '$arg' in charnames";
       next;
     }
-    push @args, $_;
+    push @args, $arg;
   }
   @args == 0 && $promote and @args = (":full");
   @h{@args} = (1) x @args;

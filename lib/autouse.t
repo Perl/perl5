@@ -39,7 +39,7 @@ use autouse 'Carp' => qw(carp croak);
     local $SIG{__WARN__} = sub { push @warning, @_ };
     carp "this carp was predeclared and autoused\n";
     ok( scalar @warning, 1 );
-    ok( $warning[0], "this carp was predeclared and autoused\n" );
+    ok( $warning[0], qr/^this carp was predeclared and autoused\n/ );
 
     eval { croak "It is but a scratch!" };
     ok( $@, qr/^It is but a scratch!/);
