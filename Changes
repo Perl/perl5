@@ -105,6 +105,160 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7149] By: jhi                                   on 2000/10/05  00:20:01
+        Log: Regen toc.
+     Branch: perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[  7148] By: jhi                                   on 2000/10/04  23:35:08
+        Log: Code around the stat-on-a-pipe-returns-a-mode-of-zero bug
+             reported several times by Dominic Dunlop, for example in
+             ID 20000315.008.  Patch from Dominic.  Patch affects at
+             least MachTen, and possibly other oldish BSDs. Should not
+             break non-broken platforms (tested on LinuxPPC). 
+     Branch: perl
+	   ! doio.c
+____________________________________________________________________________
+[  7147] By: jhi                                   on 2000/10/04  23:26:34
+        Log: The one that got away from 7146.
+     Branch: metaconfig
+	   + U/installdirs/installscripts.U
+____________________________________________________________________________
+[  7146] By: jhi                                   on 2000/10/04  23:25:04
+        Log: Enable disabling scripts installation by Configure -Uinstallscripts,
+             suggested by H. Merijn Brand.
+     Branch: perl
+	   ! Configure INSTALL Makefile.SH Porting/Glossary
+	   ! Porting/config.sh Porting/config_H epoc/config.sh installperl
+	   ! uconfig.sh vos/config.def win32/config.bc win32/config.gc
+	   ! win32/config.vc
+____________________________________________________________________________
+[  7145] By: jhi                                   on 2000/10/04  22:08:21
+        Log: Subject: Re: [PATCH 5.7.0] h2xs not documenting the created module
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Wed, 4 Oct 2000 17:37:46 -0400
+             Message-ID: <20001004173746.A26697@monk.mps.ohio-state.edu>
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[  7144] By: jhi                                   on 2000/10/04  18:11:41
+        Log: Subject: [PATCH perlrun.pod] Re: [ID 20000930.002] perlrun nor perldelta mention -s modification
+             From: Jeff Pinyan <jeffp@crusoe.net>
+             Date: Tue, 3 Oct 2000 16:35:42 -0400 (EDT)
+             Message-ID: <Pine.GSO.4.21.0010031634530.14163-100000@crusoe.crusoe.net>
+     Branch: perl
+	   ! pod/perlrun.pod
+____________________________________________________________________________
+[  7143] By: jhi                                   on 2000/10/04  18:09:58
+        Log: Subject: perlhack.pod Patch for Externals Tools
+             From: Fisher Mark <fisherm@tce.com>
+             Date: Tue, 3 Oct 2000 15:43:27 -0500 
+             Message-ID: <B9B6874277EED211B1890008C707AF530505B180@indyexch3.indy.tce.com>
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[  7142] By: jhi                                   on 2000/10/04  18:08:41
+        Log: Subject:  [PATCH] 5.6.0 & 5.7.0  VMS TZ fix for VMS6.2 and earlier
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date:     Wed, 4 Oct 2000 12:11:11 EDT
+             Message-Id: <001004120530.25cb5@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[  7141] By: jhi                                   on 2000/10/04  12:20:16
+        Log: Subject: [PATCH 5.7.0] h2xs not working
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Message-ID: <20001003214301.A22851@monk.mps.ohio-state.edu>
+             Date: Tue, 3 Oct 2000 21:43:01 -0400
+             
+             Subject: [PATCH 5.7.0] h2xs not documenting the created module
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Tue, 3 Oct 2000 22:55:19 -0400
+             Message-ID: <20001003225519.A23360@monk.mps.ohio-state.edu>
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[  7140] By: jhi                                   on 2000/10/04  11:53:44
+        Log: Subject: [ID 20001004.003] installman "Ambiguous call resolved as CORE::"
+             From: nick@babyhippo.com
+             Date: Wed, 4 Oct 2000 12:06:45 +0100
+             Message-Id: <20001004120645.A7356@babyhippo.com>
+             
+             Retract 7118 and 7135.
+     Branch: perl
+	   ! installman installperl op.c t/pragma/subs.t
+____________________________________________________________________________
+[  7139] By: jhi                                   on 2000/10/03  22:09:41
+        Log: It is possible to have no hosts database at all.  Pointed out in
+             
+             Subject: [PATCH: 7131] PWPASSWD problem for passwd less pwd's
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Tue, 3 Oct 2000 12:05:59 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10010031203470.388222-100000@aspara.forte.com>
+     Branch: metaconfig
+	   ! U/modified/myhostname.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  7138] By: jhi                                   on 2000/10/03  21:49:49
+        Log: Subject: [PATCH: 7131] PWPASSWD problem for passwd less pwd's
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Tue, 3 Oct 2000 12:05:59 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10010031203470.388222-100000@aspara.forte.com>
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[  7137] By: jhi                                   on 2000/10/03  20:10:05
+        Log: One remaining nit less at the VMS mailbox sizing.
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[  7136] By: jhi                                   on 2000/10/03  20:08:47
+        Log: Test harness update to sync with the new perlcc,
+             from Simon Cozens.
+     Branch: perl
+	   ! t/TEST t/UTEST
+____________________________________________________________________________
+[  7135] By: jhi                                   on 2000/10/03  15:15:42
+        Log: Subject: Re: PATCH for 20001003.004
+             Date: Tue, 3 Oct 2000 11:03:04 -0400 (EDT)
+             From: "AARON B. DOSSETT" <aaron@iglou.com>
+             Message-Id: <E13gTay-0006od-00@iglou.com>
+     Branch: perl
+	   ! installman installperl
+____________________________________________________________________________
+[  7134] By: jhi                                   on 2000/10/03  15:00:34
+        Log: Subject: [ID 20001003.006] B::Debug not -w clean
+             From: Nicholas Clark <nick@babyhippo.co.uk>
+             Date: Tue, 03 Oct 2000 15:46:32 +0100
+             Message-Id: <E13gTKy-0002R2-00@fruitbat.babyhippo.co.uk>
+     Branch: perl
+	   ! ext/B/B/Debug.pm
+____________________________________________________________________________
+[  7133] By: jhi                                   on 2000/10/03  14:58:39
+        Log: Scale down the VMS message boxes, by Charles Lane.
+             Fix for ID 20000903.009, workaround at
+             http://www.xray.mpe.mpg.de/mailing-lists/vmsperl/2000-09/msg00039.html
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[  7132] By: jhi                                   on 2000/10/03  11:20:37
+        Log: Upgrade to Storable 1.0.3, from Raphael Manfredi.
+     Branch: perl
+	   + t/lib/st-lock.t t/lib/st-utf8.t
+	   ! MANIFEST ext/Storable/ChangeLog ext/Storable/Storable.pm
+	   ! ext/Storable/Storable.xs t/lib/st-recurse.t
+____________________________________________________________________________
+[  7131] By: jhi                                   on 2000/10/03  03:38:23
+        Log: Encode nits.
+     Branch: perl
+	   ! MANIFEST Makefile.SH
+____________________________________________________________________________
+[  7130] By: jhi                                   on 2000/10/03  03:31:05
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7129] By: jhi                                   on 2000/10/03  02:24:02
         Log: Misplaced else.
      Branch: metaconfig/U/perl
