@@ -3096,18 +3096,18 @@ typedef struct am_table_short AMTS;
 #        define strtoull __strtoull	/* secret handshake */
 #    endif
 #    if !defined(Strtoul) && defined(HAS_STRTOULL)
-#       define Strtoul strtoull
+#       define Strtoul	strtoull
 #    endif
 #endif
 /* is there atouq() anywhere? */
 #if !defined(Strtoul) && defined(HAS_STRTOUQ)
-#   define Strtoul strtouq
+#   define Strtoul	strtouq
 #endif
 #if !defined(Strtoul)
 #   define Strtoul strtoul /* we assume strtoul being available anywhere */
 #endif
 #ifndef Atoul 
-#   define Atoul Strtoul
+#   define Atoul(s) Strtoul(s, (char**)NULL, 10)
 #endif
 
 #if !defined(PERLIO_IS_STDIO) && defined(HASATTRIBUTE)
