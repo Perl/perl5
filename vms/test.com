@@ -91,10 +91,9 @@ use Config;
 
 @compexcl=('cpp.t');
 @ioexcl=('argv.t','dup.t','fs.t','inplace.t','pipe.t');
-@libexcl=('anydbm.t','db-btree.t','db-hash.t','db-recno.t',
+@libexcl=('db-btree.t','db-hash.t','db-recno.t',
           'gdbm.t','io_dup.t', 'io_pipe.t', 'io_sel.t', 'io_sock.t',
-          'ndbm.t','odbm.t','open2.t','open3.t','posix.t',
-          'sdbm.t');
+          'ndbm.t','odbm.t','open2.t','open3.t','posix.t');
 
 # Note: POSIX is not part of basic build, but can be built
 # separately if you're using DECC

@@ -1422,7 +1422,21 @@ $(INST_STATIC) : $(OBJECT) $(MYEXTLIB)
 
     push(@m,'
 	If F$Search("$(MMS$TARGET)").eqs."" Then Library/Object/Create $(MMS$TARGET)
+');
+    # if there was a library to copy, then we can't use MMS$SOURCE_LIST,
+    # 'cause it's a library and you can't stick them in other libraries.
+    # In that case, we use $OBJECT instead and hope for the best
+    if ($self->{MYEXTLIB}) {
+      push(@m,'
+	Library/Object/Replace $(MMS$TARGET) $(OBJECT)
+'); 
+    } else {
+      push(@m,'
 	Library/Object/Replace $(MMS$TARGET) $(MMS$SOURCE_LIST)
+'); 
+    }
+    
+    push(@m, '
 	$(NOECHO) $(PERL) -e "open F,\'>>$(INST_ARCHAUTODIR)extralibs.ld\';print F qq{$(EXTRALIBS)\n};close F;"
 ');
     push @m, $self->dir_target('$(INST_ARCHAUTODIR)');

@@ -1855,14 +1855,14 @@ my_popen(char *cmd, char *mode)
 	return my_syspopen(cmd,mode);
     }
 #endif 
-    if (PerlProc_pipe(p) < 0)
-	return Nullfp;
     This = (*mode == 'w');
     that = !This;
     if (doexec && tainting) {
 	taint_env();
 	taint_proper("Insecure %s%s", "EXEC");
     }
+    if (PerlProc_pipe(p) < 0)
+	return Nullfp;
     while ((pid = (doexec?vfork():fork())) < 0) {
 	if (errno != EAGAIN) {
 	    PerlLIO_close(p[This]);

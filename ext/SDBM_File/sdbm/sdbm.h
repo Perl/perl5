@@ -9,7 +9,11 @@
 #define PAIRMAX 1008			/* arbitrary on PBLKSIZ-N */
 #define SPLTMAX	10			/* maximum allowed splits */
 					/* for a single insertion */
+#ifdef VMS
+#define DIRFEXT	".sdbm_dir"
+#else
 #define DIRFEXT	".dir"
+#endif
 #define PAGFEXT	".pag"
 
 typedef struct {
@@ -116,11 +120,15 @@ extern long sdbm_hash proto((char *, int));
 #include <ctype.h>
 #include <setjmp.h>
 
-#ifdef I_UNISTD
+#if defined(I_UNISTD) || defined(VMS)
 #include <unistd.h>
 #endif
 
-#if !defined(MSDOS) && !defined(WIN32)
+#ifdef VMS
+# include <fcntl.h>
+#endif
+
+#if !defined(MSDOS) && !defined(WIN32) && !defined(VMS)
 #   ifdef PARAM_NEEDS_TYPES
 #	include <sys/types.h>
 #   endif
@@ -237,7 +245,7 @@ extern long sdbm_hash proto((char *, int));
 #  endif
 #else
 #   ifndef memcmp
-#	/* maybe we should have included the full embedding header... */
+	/* maybe we should have included the full embedding header... */
 #	ifdef NO_EMBED
 #	    define memcmp my_memcmp
 #	else
@@ -264,7 +272,11 @@ extern long sdbm_hash proto((char *, int));
 #endif
 
 #ifdef I_NETINET_IN
-#   include <netinet/in.h>
+#  ifdef VMS
+#    include <in.h>
+#  else
+#    include <netinet/in.h>
+#  endif
 #endif
 
 #endif /* Include guard */

@@ -620,8 +620,8 @@ use the each() function to iterate over such.  Example:
 This is partially implemented now.
 
 A class implementing a tied filehandle should define the following
-methods: TIEHANDLE, at least one of PRINT, PRINTF, READLINE, GETC, or READ,
-and possibly DESTROY.
+methods: TIEHANDLE, at least one of PRINT, PRINTF, WRITE, READLINE, GETC,
+READ, and possibly CLOSE and DESTROY.
 
 It is especially useful when perl is embedded in some other program,
 where output to STDOUT and STDERR may have to be redirected in some
@@ -640,6 +640,17 @@ return a blessed reference of some sort. The reference can be used to
 hold some internal information.
 
     sub TIEHANDLE { print "<shout>\n"; my $i; bless \$i, shift }
+
+=item WRITE this, LIST
+
+This method will be called when the handle is written to via the
+C<syswrite> function.
+
+    sub WRITE {
+	$r = shift;
+	my($buf,$len,$offset) = @_;
+	print "WRITE called, \$buf=$buf, \$len=$len, \$offset=$offset";
+    }
 
 =item PRINT this, LIST
 
@@ -663,7 +674,7 @@ passed to the printf function.
         print sprintf($fmt, @_)."\n";
     }
 
-=item READ this LIST
+=item READ this, LIST
 
 This method will be called when the handle is read from via the C<read>
 or C<sysread> functions.
@@ -686,6 +697,13 @@ The method should return undef when there is no more data.
 This method will be called when the C<getc> function is called.
 
     sub GETC { print "Don't GETC, Get Perl"; return "a"; }
+
+=item CLOSE this
+
+This method will be called when the handle is closed via the C<close>
+function.
+
+    sub CLOSE { print "CLOSE called.\n" }
 
 =item DESTROY this
 

@@ -203,6 +203,7 @@ unless ($define{'USE_THREADS'})
 Perl_condpair_magic
 Perl_thr_key
 Perl_sv_mutex
+Perl_svref_mutex
 Perl_malloc_mutex
 Perl_eval_mutex
 Perl_eval_cond
