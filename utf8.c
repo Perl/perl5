@@ -1401,21 +1401,19 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
     if (!*swashp) /* load on-demand */
          *swashp = swash_init("utf8", normal, &PL_sv_undef, 4, 0);
 
-    if (special) {
+    /* The 0xDF is the only special casing Unicode code point below 0x100. */
+    if (special && (uv1 == 0xDF || uv1 > 0xFF)) {
          /* It might be "special" (sometimes, but not always,
 	  * a multicharacter mapping) */
 	 HV *hv;
-	 SV *keysv;
-	 HE *he;
-	 SV *val;
-	
-	 if ((hv    = get_hv(special, FALSE)) &&
-	     (keysv = sv_2mortal(Perl_newSVpvf(aTHX_ "%04"UVXf, uv1))) &&
-	     (he    = hv_fetch_ent(hv, keysv, FALSE, 0)) &&
-	     (val   = HeVAL(he))) {
-	     char *s;
+	 SV **svp;
 
-	      s = SvPV(val, len);
+	 if ((hv  = get_hv(special, FALSE)) &&
+	     (svp = hv_fetch(hv, (const char*)tmpbuf, UNISKIP(uv1), FALSE)) &&
+	     (*svp)) {
+	      char *s;
+
+	      s = SvPV(*svp, len);
 	      if (len == 1)
 		   len = uvuni_to_utf8(ustrp, NATIVE_TO_UNI(*(U8*)s)) - ustrp;
 	      else {
@@ -1426,7 +1424,7 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
 		   U8 *t = (U8*)s, *tend = t + len, *d;
 		
 		   d = tmpbuf;
-		   if (SvUTF8(val)) {
+		   if (SvUTF8(*svp)) {
 			STRLEN tlen = 0;
 			
 			while (t < tend) {

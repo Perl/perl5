@@ -1658,16 +1658,18 @@ sub SpecialCasing_txt()
     {
         my $NormalCase = do "To/$case.pl" || die "$0: $@\n";
 
-        my @OUT = (
-                   $HEADER, "\n",
-                   "%utf8::ToSpec$case =\n(\n",
-                   );
+        my @OUT =
+	    (
+	     $HEADER, "\n",
+	     "# The key UTF-8 _bytes_, the value UTF-8 (speed hack)\n",
+	     "%utf8::ToSpec$case =\n(\n",
+	    );
 
         for my $prop (sort { $a->[0] <=> $b->[0] } @{$CaseInfo{$case}}) {
             my ($ix, $code, $to) = @$prop;
             my $tostr =
               join "", map { sprintf "\\x{%s}", $_ } split ' ', $to;
-            push @OUT, sprintf qq['%04X' => "$tostr",\n], $ix;
+            push @OUT, sprintf qq["%s" => "$tostr",\n], join("", map { sprintf "\\x%02X", $_ } unpack("U0C*", pack("U", $ix)));
 	    # Remove any single-character mappings for
 	    # the same character since we are going for
 	    # the special casing rules.
@@ -1719,14 +1721,16 @@ sub CaseFolding_txt()
     #
     my $CommonFold = do "To/Fold.pl" || die "$0: To/Fold.pl: $!\n";
 
-    my @OUT = (
-               $HEADER, "\n",
-               "%utf8::ToSpecFold =\n(\n",
-              );
+    my @OUT =
+	(
+	 $HEADER, "\n",
+	 "#  The ke UTF-8 _bytes_, the value UTF-8 (speed hack)\n",
+	 "%utf8::ToSpecFold =\n(\n",
+	);
     for my $code (sort { $a <=> $b } keys %Fold) {
         my $foldstr =
           join "", map { sprintf "\\x{%s}", $_ } split ' ', $Fold{$code};
-        push @OUT, sprintf qq['%04X' => "$foldstr",\n], $code;
+        push @OUT, sprintf qq["%s" => "$foldstr",\n], join("", map { sprintf "\\x%02X", $_ } unpack("U0C*", pack("U", $code)));
     }
     push @OUT, (
                 ");\n\n",
