@@ -2477,7 +2477,7 @@ Perl_yylex(pTHX)
 				   || (*t == '=' && t[1] == '>')))
 		    OPERATOR(HASHBRACK);
 		if (PL_expect == XREF)
-		    PL_expect = XSTATE;	/* was XTERM, trying XSTATE */
+		    PL_expect = XTERM;
 		else {
 		    PL_lex_brackstack[PL_lex_brackets-1] = XSTATE;
 		    PL_expect = XSTATE;
@@ -3675,8 +3675,8 @@ Perl_yylex(pTHX)
 	    TERM(sublex_start());
 
 	case KEY_map:
-	    LOP(OP_MAPSTART, XREF);
-	    
+	    LOP(OP_MAPSTART, *s == '(' ? XTERM : XREF);
+
 	case KEY_mkdir:
 	    LOP(OP_MKDIR,XTERM);
 
