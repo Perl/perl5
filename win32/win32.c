@@ -4654,20 +4654,21 @@ Perl_init_os_extras(void)
      */
 }
 
-#ifdef MULTIPLICITY
-
-PerlInterpreter *
+void *
 win32_signal_context(void)
 {
     dTHX;
+#ifdef MULTIPLICITY
     if (!my_perl) {
 	my_perl = PL_curinterp;
 	PERL_SET_THX(my_perl);
     }
     return my_perl;
+#else
+    return aTHX;
+#endif
 }
 
-#endif
 
 BOOL WINAPI
 win32_ctrlhandler(DWORD dwCtrlType)
@@ -4677,6 +4678,10 @@ win32_ctrlhandler(DWORD dwCtrlType)
 
     if (!my_perl)
 	return FALSE;
+#else
+#ifdef USE_5005THREADS
+    dTHX;
+#endif
 #endif
 
     switch(dwCtrlType) {
