@@ -3340,7 +3340,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		/* Possible truncation here but in some 64-bit environments
 		 * the compiler gets heartburn about switch on 64-bit values.
 		 * A similar issue a little earlier when switching on value.
-		 * --jhi
+		 * --jhi */
 		switch ((I32)namedclass) {
 		case ANYOF_ALNUM:
 		    if (LOC)
