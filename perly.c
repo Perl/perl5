@@ -1662,7 +1662,7 @@ case 21:
 break;
 case 22:
 #line 203 "perly.y"
-{ yyval.opval = scope(yyvsp[0].opval); }
+{ (yyvsp[0].opval)->op_flags |= OPf_PARENS; yyval.opval = scope(yyvsp[0].opval); }
 break;
 case 23:
 #line 205 "perly.y"
