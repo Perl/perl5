@@ -62,8 +62,8 @@ scalar's type changes.) An IO stream is then in general represented as a
 pointer to this linked-list of "layers".
 
 It should be noted that because of the double indirection in a C<PerlIO *>,
-a C<< &(perlio->next) >> "is" a C<PerlIO *>, and so to some degree at least
-one layer can use the "standard" API on the next layer down.
+a C<< &(perlio-E<gt>next) >> "is" a C<PerlIO *>, and so to some degree
+at least one layer can use the "standard" API on the next layer down.
 
 A "layer" is composed of two parts:
 
@@ -246,9 +246,9 @@ All writes should be appends.
 
 =item PERLIO_F_CRLF
 
-Layer is performing Win32-like "\n" => CR,LF for output and CR,LF =>
-"\n" for input. Normally the provided "crlf" layer is the only layer
-that need bother about this. C<PerlIO_binmode()> will mess with this
+Layer is performing Win32-like "\n" mapped to CR,LF for output and CR,LF
+mapped to "\n" for input. Normally the provided "crlf" layer is the only
+layer that need bother about this. C<PerlIO_binmode()> will mess with this
 flag rather than add/remove layers if the C<PERLIO_K_CANCRLF> bit is set
 for the layers class.
 

@@ -136,7 +136,7 @@ There may be an implementation limit on the number of open handles, which may
 be lower than the limit on the number of open files - C<errno> may
 not be set when C<NULL> is returned if this limnit is exceeded.
 
-=item B<PerlIO_reopen(path,mode,f)
+=item B<PerlIO_reopen(path,mode,f)>
 
 While this currently exists in all three implementations perl itself
 does not use it. I<As perl does not use it, it is not well tested.>
@@ -389,7 +389,7 @@ Do not use this - use PerlIO_fast_gets.
 
 Obscure - set count of bytes in the buffer. Deprecated.
 Only usable if PerlIO_canset_cnt() returns true.
-Currently used in only doio.c to force count < -1 to -1.
+Currently used in only doio.c to force count less than -1 to -1.
 Perhaps should be PerlIO_set_empty or similar.
 This call may actually do nothing if "count" is deduced from pointer
 and a "limit".
@@ -433,9 +433,9 @@ B<ptype> is perl's charcter for the kind of IO:
 
 =over 8
 
-=item '<' read
+=item 'E<lt>' read
 
-=item '>' write
+=item 'E<gt>' write
 
 =item '+' read/write
 
@@ -467,7 +467,6 @@ recursively call PerlIO and be a problem.
 
 PerlIO_debug writes to the file named by $ENV{'PERLIO_DEBUG'} typical use
 might be
-
 
   Bourne shells:
    PERLIO_DEBUG=/dev/tty ./perl somescript some args
