@@ -1361,8 +1361,8 @@ See L<perlfunc/pack>.
 
 =item (Do you need to predeclare %s?)
 
-(S) This is an educated guess made in conjunction with the message "%s
-found where operator expected".  It often means a subroutine or module
+(S syntax) This is an educated guess made in conjunction with the message
+"%s found where operator expected".  It often means a subroutine or module
 name is being referenced that hasn't been declared yet.  This may be
 because of ordering problems in your file, or because of a missing
 "sub", "package", "require", or "use" statement.  If you're referencing
@@ -1382,8 +1382,8 @@ already been freed.
 
 =item elseif should be elsif
 
-(S) There is no keyword "elseif" in Perl because Larry thinks it's ugly.
-Your code will be interpreted as an attempt to call a method named
+(S syntax) There is no keyword "elseif" in Perl because Larry thinks it's
+ugly. Your code will be interpreted as an attempt to call a method named
 "elseif" for the class returned by the following block.  This is
 unlikely to be what you want.
 
@@ -1575,8 +1575,8 @@ when you meant
 
 =item %s found where operator expected
 
-(S) The Perl lexer knows whether to expect a term or an operator.  If it
-sees what it knows to be a term when it was expecting to see an
+(S syntax) The Perl lexer knows whether to expect a term or an operator.
+If it sees what it knows to be a term when it was expecting to see an
 operator, it gives you this warning.  Usually it indicates that an
 operator or delimiter was omitted, such as a semicolon.
 
@@ -2096,8 +2096,8 @@ can vary from one line to the next.
 
 =item (Missing operator before %s?)
 
-(S) This is an educated guess made in conjunction with the message "%s
-found where operator expected".  Often the missing operator is a comma.
+(S syntax) This is an educated guess made in conjunction with the message
+"%s found where operator expected".  Often the missing operator is a comma.
 
 =item Missing right brace on %s
 
@@ -2111,8 +2111,8 @@ were last editing.
 
 =item (Missing semicolon on previous line?)
 
-(S) This is an educated guess made in conjunction with the message "%s
-found where operator expected".  Don't automatically put a semicolon on
+(S syntax) This is an educated guess made in conjunction with the message
+"%s found where operator expected".  Don't automatically put a semicolon on
 the previous line just because you saw this message.
 
 =item Modification of a read-only value attempted
