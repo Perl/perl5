@@ -3,6 +3,7 @@
 # If you modify/add tests here, remember to update also t/op/lfs.t.
 
 BEGIN {
+	# Don't bother if there are no quads.
 	eval { my $q = pack "q", 0 };
 	if ($@) {
 		print "1..0\n# no 64-bit types\n";
@@ -19,15 +20,18 @@ sub bye {
     exit(0);
 }
 
-# First try to figure out whether we have sparse files.
-
+# Known have-nots.
 if ($^O eq 'win32' || $^O eq 'vms') {
     print "1..0\n# no sparse files\n";
     bye();
 }
 
+# Then try to deduce whether we have sparse files.
+
 # We'll start off by creating a one megabyte file which has
-# only three "true" bytes.
+# only three "true" bytes.  If we have sparseness, we should
+# consume less blocks than one megabyte (assuming nobody has
+# one megabyte blocks...)
 
 sysopen(BIG, "big", O_WRONLY|O_CREAT|O_TRUNC) or
 	do { warn "sysopen failed: $!\n"; bye };
@@ -55,6 +59,8 @@ unless (@s == 13 &&
 
 print "1..8\n";
 
+my $fail = 0;
+
 sysopen(BIG, "big", O_WRONLY|O_CREAT|O_TRUNC) or
 	do { warn "sysopen failed: $!\n"; bye };
 sysseek(BIG, 5_000_000_000, SEEK_SET);
@@ -65,42 +71,58 @@ close BIG;
 
 print "# @s\n";
 
-print "not " unless $s[7] == 5_000_000_003;
+sub fail () {
+    print " not ";
+    $fail++;
+}
+
+fail unless $s[7] == 5_000_000_003;
 print "ok 1\n";
 
-print "not " unless -s "big" == 5_000_000_003;
+fail unless -s "big" == 5_000_000_003;
 print "ok 2\n";
 
 sysopen(BIG, "big", O_RDONLY) or do { warn "sysopen failed: $!\n"; bye };
 
 sysseek(BIG, 4_500_000_000, SEEK_SET);
 
-print "not " unless sysseek(BIG, 0, SEEK_CUR) == 4_500_000_000;
+fail unless sysseek(BIG, 0, SEEK_CUR) == 4_500_000_000;
 print "ok 3\n";
 
 sysseek(BIG, 1, SEEK_CUR);
 
-print "not " unless sysseek(BIG, 0, SEEK_CUR) == 4_500_000_001;
+fail unless sysseek(BIG, 0, SEEK_CUR) == 4_500_000_001;
 print "ok 4\n";
 
 sysseek(BIG, -1, SEEK_CUR);
 
-print "not " unless sysseek(BIG, 0, SEEK_CUR) == 4_500_000_000;
+fail unless sysseek(BIG, 0, SEEK_CUR) == 4_500_000_000;
 print "ok 5\n";
 
 sysseek(BIG, -3, SEEK_END);
 
-print "not " unless sysseek(BIG, 0, SEEK_CUR) == 5_000_000_000;
+fail unless sysseek(BIG, 0, SEEK_CUR) == 5_000_000_000;
 print "ok 6\n";
 
 my $big;
 
-print "not " unless sysread(BIG, $big, 3) == 3;
+fail unless sysread(BIG, $big, 3) == 3;
 print "ok 7\n";
 
-print "not " unless $big eq "big";
+fail unless $big eq "big";
 print "ok 8\n";
 
 bye();
+
+if ($fail) {
+    print STDERR <<EOM;
+#
+# If the lfs (large file support) tests fail, it means that
+# the *file system* you are running the tests on doesn't support
+# large files (files larger than two gigabytes).  Perl may still
+# be able to support such files, once you have such a file system.
+#
+EOM
+}
 
 # eof
