@@ -19,18 +19,6 @@ my $TB = Test::More->builder;
 
 BEGIN { use_ok('constant'); }
 
-sub test ($$;$) {
-    my($num, $bool, $diag) = @_;
-    if ($bool) {
-	print "ok $num\n";
-	return;
-    }
-    print "not ok $num\n";
-    return unless defined $diag;
-    $diag =~ s/\Z\n?/\n/;			# unchomp
-    print map "# $num : $_", split m/^/m, $diag;
-}
-
 use constant PI		=> 4 * atan2 1, 1;
 
 ok defined PI,                          'basic scalar constant';
