@@ -177,7 +177,6 @@ register U32 hash;
 	    char *k;
 	    New(54, k, HEK_BASESIZE + sizeof(SV*), char);
 	    HeKEY_hek(&mh) = (HEK*)k;
-	    HeKLEN(&mh) = HEf_SVKEY;	/* key will always hold an SV* */
 	}
 	HeSVKEY_set(&mh, keysv);
 	HeVAL(&mh) = sv;

@@ -1946,10 +1946,10 @@ OP *o;
 {
     int ret;
     int oldrunlevel = runlevel;
-    OP *oldop = op;
     Sigjmp_buf oldtop;
 
     op = o;
+    runlevel--;				/* pretense */
     Copy(top_env, oldtop, 1, Sigjmp_buf);
 #ifdef DEBUGGING
     assert(mustcatch == TRUE);
@@ -1960,7 +1960,6 @@ OP *o;
 	Copy(oldtop, top_env, 1, Sigjmp_buf);
 	runlevel = oldrunlevel;
 	mustcatch = TRUE;
-	op = oldop;
 	Siglongjmp(top_env, ret);
 	/* NOTREACHED */
     case 3:
@@ -1968,7 +1967,6 @@ OP *o;
 	    PerlIO_printf(PerlIO_stderr(), "panic: restartop\n");
 	    break;
 	}
-	mustcatch = FALSE;
 	op = restartop;
 	restartop = 0;
 	/* FALL THROUGH */
@@ -1979,7 +1977,6 @@ OP *o;
     Copy(oldtop, top_env, 1, Sigjmp_buf);
     runlevel = oldrunlevel;
     mustcatch = TRUE;
-    op = oldop;
     return Nullop;
 }
 

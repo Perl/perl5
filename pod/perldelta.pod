@@ -671,6 +671,18 @@ C<perl_call_sv> is Perl's producing an "Undefined subroutine called"
 error on the I<second> call to a given method (since there is no cache
 on the first call).
 
+=item Extended API for manipulating hashes
+
+Internal handling of hash keys has changed.  The old hashtable API
+is still fully supported, and will likely remain that way.  The additions
+to the API allow passing keys as C<SV*>s, so that C<tied> hashes can be
+given real scalars as keys rather than plain strings (non-tied hashes still
+can only use strings as keys).  All new extensions must use the new 
+hash access functions and macros if they wish to use C<SV*> keys.  These
+additions also make it feasible to manipulate whole C<HE*>s (hash entries),
+allowing for more efficient handling of hash data. See L<perlguts> for
+details.
+
 =back
 
 =head1 Documentation Changes
