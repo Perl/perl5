@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Feb 22 23:32:31 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Sat Feb 23 06:28:54 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -15692,7 +15692,7 @@ $cat >>signal_cmd <<'EOS'
 
 set signal
 if eval $compile_ok; then
-	$run ./signal$_exe | $sort -n -k 2 | $uniq | $awk -f signal.awk >signal.lst
+	$run ./signal$_exe | ($sort -n -k 2 2>/dev/null || $sort -n +1) | $uniq | $awk -f signal.awk >signal.lst
 else
 	echo "(I can't seem be able to compile the whole test program)" >&4
 	echo "(I'll try it in little pieces.)" >&4
