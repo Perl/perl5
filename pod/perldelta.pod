@@ -35,17 +35,23 @@ The following modules have been upgraded :
 
 =item Test 1.24
 
-=item Test::Builder 0.17
-
 =item Test::Harness 2.30
+
+=back
+
+The following modules were added :
+
+=over
+
+=item Test::Builder 0.17
 
 =item Test::More 0.47
 
 =item Test::Simple 0.47
 
-=back
+=item if 0.03
 
-In addition to this, the C<if> pragma was added.
+=back
 
 =head1 Summary of changes between 5.6.0 and 5.6.1
 
