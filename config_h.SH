@@ -1401,6 +1401,18 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_perl_otherlibdirs PERL_OTHERLIBDIRS "$otherlibdirs"		/**/
 
+/* INSTALL_PREFIX:
+ *	This symbol contains the "root" of installation tree for this package.
+ *	The program should be prepared to do ~ expansion.
+ */
+/* INSTALL_PREFIX_EXP:
+ *	This symbol contains the "root" of installation tree for this package
+ *	to be used in programs that are not prepared to deal with ~ expansion
+ *	at run-time.
+ */
+#define INSTALL_PREFIX "$installprefix"		/**/
+#define INSTALL_PREFIX_EXP "$installprefixexp"	/**/
+
 /* PRIVLIB:
  *	This symbol contains the name of the private library for this package.
  *	The library is private in the sense that it needn't be in anyone's
