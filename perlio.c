@@ -3375,6 +3375,7 @@ PerlIO_vprintf(PerlIO *f, const char *fmt, va_list ap)
  SV *sv = newSVpvn("",0);
  char *s;
  STRLEN len;
+ SSize_t wrote;
 #ifdef NEED_VA_COPY
  va_list apc;
  Perl_va_copy(ap, apc);
@@ -3383,7 +3384,9 @@ PerlIO_vprintf(PerlIO *f, const char *fmt, va_list ap)
  sv_vcatpvf(sv, fmt, &ap);
 #endif
  s = SvPV(sv,len);
- return PerlIO_write(f,s,len);
+ wrote = PerlIO_write(f,s,len);
+ SvREFCNT_dec(sv);
+ return wrote;
 }
 
 #undef PerlIO_printf
