@@ -104,6 +104,32 @@ representation of the Unicode standard that looks very much like ASCII.
 UTF-EBCDIC is an attempt to represent Unicode characters in an EBCDIC
 transparent manner.
 
+=head Using Encode
+
+Starting from Perl 5.8 you can use the standard new module Encode
+to translate from EBCDIC to Latin-1 code points
+
+	use Encode 'from_to';
+
+	my %ebcdic = ( 176 => 'cp37', 95 => 'cp1047', 106 => 'posix-bc' );
+
+	# $a is in EBCDIC code points
+	from_to($a, $ebcdic{ord '^'}, 'latin1');
+	# $a is ISO 8859-1 code points
+
+and from Latin-1 code points to EBCDIC code points
+
+	use Encode 'from_to';
+
+	my %ebcdic = ( 176 => 'cp37', 95 => 'cp1047', 106 => 'posix-bc' );
+
+	# $a is ISO 8859-1 code points
+	from_to($a, 'latin1', $ebcdic{ord '^'});
+	# $a is in EBCDIC code points
+
+For doing I/O it is suggested that you use the autotranslating features
+of PerlIO, see L<perluniintro>.
+
 =head1 SINGLE OCTET TABLES
 
 The following tables list the ASCII and Latin 1 ordered sets including
