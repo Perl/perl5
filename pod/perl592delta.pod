@@ -43,7 +43,17 @@ values outside the range 0..255, and not respect the string encoding).
 In practice, that means that pack formats are now encoding-neutral, except
 C<C>.
 
+For consistency, C<A> in unpack() format now trims all Unicode whitespace
+from the end of the string. Before perl 5.9.2, it used to strip only the
+classical ASCII space characters.
+
 =head1 Core Enhancements
+
+=head2 Regexp debug flags
+
+A new variable, ${^RE_DEBUG_FLAGS}, controls what debug flags are in
+effect for the regular expression engine when running under C<use re
+"debug">. See L<re> for details.
 
 =head1 Modules and Pragmata
 
@@ -52,6 +62,12 @@ C<C>.
 =head1 Documentation
 
 =head1 Performance Enhancements
+
+=head2 Trie optimization for regexp engine
+
+The regexp engine is now able to factorize common prefixes and suffixes in
+regular expressions. A new special variable, ${^RE_TRIE_MAXBUFF}, has been
+added to fine tune this optimization.
 
 =head1 Installation and Configuration Improvements
 
