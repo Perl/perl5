@@ -11,7 +11,7 @@ BEGIN {
 
 use warnings;
 
-print "1..42\n";
+print "1..41\n";
 
 # type coersion on assignment
 $foo = 'foo';
@@ -105,6 +105,16 @@ print ref *x{FORMAT} eq "FORMAT" ? "ok 21\n" : "not ok 21\n";
 print *{*x{GLOB}} eq "*main::STDOUT" ? "ok 22\n" : "not ok 22\n";
 print {*x{IO}} "ok 23\n";
 
+{
+	my $warn;
+	local $SIG{__WARN__} = sub {
+		$warn .= $_[0];
+	};
+	my $val = *x{FILEHANDLE};
+	print {*x{IO}} ($warn =~ /is deprecated/ ? "ok 42\n" : "not ok 42\n");
+	
+}
+
 # test if defined() doesn't create any new symbols
 
 {
@@ -173,16 +183,6 @@ print {*x{IO}} "ok 23\n";
     my $g = *foo;
     $g = <DATA>;
     print $g;
-}
-
-{
-	my $warn;
-	local $SIG{__WARN__} = sub {
-		$warn .= $_[0];
-	};
-	my $val = *x{FILEHANDLE};
-	print {*x{IO}} ($warn =~ /is deprecated/ ? "ok 42\n" : "not ok 42\n");
-	
 }
 
 __END__
