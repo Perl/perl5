@@ -68,6 +68,11 @@ C<-x $file && -w _ && -f _>. See L<perlfunc/-X>.
 
 =over 4
 
+=item Benchmark
+
+In C<Benchmark>, cmpthese() and timestr() now use the time statistics of
+children instead of parent when the selected style is 'nop'.
+
 =item Carp
 
 The error messages produced by C<Carp> now include spaces between the
@@ -109,6 +114,10 @@ The documentation has been revised in places to produce more standard manpages.
 
 The long-existing feature of C</(?{...})/> regexps setting C<$_> and pos()
 is now documented.
+
+The perl debugger now supports a C<save> command, to save the current
+history to a file, and an C<i> command, which prints the inheritance tree
+of its argument (if the C<Class::ISA> module is installed.)
 
 =head1 Performance Enhancements
 
