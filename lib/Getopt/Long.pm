@@ -522,7 +522,7 @@ cause options parsing to fail.
 use strict;
 
 BEGIN {
-    require 5.00327;
+    require 5.003;
     use Exporter ();
     use vars   qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
     $VERSION   = sprintf("%d.%02d", q$Revision: 2.9 $ =~ /(\d+)\.(\d+)/);
