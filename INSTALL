@@ -929,6 +929,42 @@ to config.h and edit the config.h to reflect your system's peculiarities.
 You'll probably also have to extensively modify the extension building
 mechanism.
 
+=item Environment variable clashes
+
+Configure uses a CONFIG variable that is reported to cause trouble on
+ReliantUnix 5.44.  If your system sets this variable, you can try
+unsetting it before you run Configure.  Configure should eventually
+be fixed to avoid polluting the namespace of the environment.
+
+=item Digital UNIX/Tru64 UNIX and BIN_SH
+
+In Digital UNIX/Tru64 UNIX Configure might abort with
+
+Build a threading Perl? [n]
+Configure[2437]: Syntax error at line 1 : `config.sh' is not expected.
+
+This indicates that Configure is being run with a broken Korn shell
+(even though you think you are using a Bourne shell by using
+"sh Configure" or "./Configure").  The Korn shell bug has been reported
+to Compaq as of February 1999 but in the meanwhile, the reason ksh is
+being used is that you have the environment variable BIN_SH set to
+'xpg4'.  This causes /bin/sh to delegate its duties to /bin/posix/sh
+(a ksh).  Unset the environment variable and rerun Configure.
+
+=item HP-UX 11, pthreads, and libgdbm
+
+If you are running Configure with -Dusethreads in HP-UX 11, be warned
+that POSIX threads and libgdbm (the GNU dbm library) compiled before
+HP-UX 11 do not mix.  This will cause a basic test run by Configure to
+fail
+
+Pthread internal error: message: __libc_reinit() failed, file: ../pthreads/pthread.c, line: 1096
+Return Pointer is 0xc082bf33
+sh: 5345 Quit(coredump)
+
+and Configure will give up.  The cure is to recompile and install
+libgdbm under HP-UX 11.
+
 =item Porting information
 
 Specific information for the OS/2, Plan9, VMS and Win32 ports is in the
@@ -1226,6 +1262,17 @@ both.  Either list the semaphores with "ipcs" and remove the unneeded
 ones (which ones these are depends on your system and applications)
 with "ipcrm -s SEMAPHORE_ID_HERE" or configure more semaphores to your
 system.
+
+=item GNU binutils
+
+If you mix GNU binutils (nm, ld, ar) with equivalent vendor-supplied
+tools you may be in for some trouble.  For example creating archives
+with an old GNU 'ar' and then using a new current vendor-supplied 'ld'
+may lead into linking problems.  Either recompile your GNU binutils
+under your current operating system release, or modify your PATH not
+to include the GNU utils before running Configure, or specify the
+vendor-supplied utilities explicitly to Configure, for example by
+Configure -Dar=/bin/ar.
 
 =item Miscellaneous
 
