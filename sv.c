@@ -2306,7 +2306,10 @@ Perl_sv_2nv(pTHX_ register SV *sv)
     }
     else if (SvTYPE(sv) < SVt_PVNV)
 	sv_upgrade(sv, SVt_PVNV);
-    if (SvIOKp(sv) &&
+    if (SvNOKp(sv) && !(SvIOK(sv) || SvPOK(sv))) {
+	SvNOK_on(sv);
+    }
+    else if (SvIOKp(sv) &&
 	    (!SvPOKp(sv) || !strchr(SvPVX(sv),'.') || !looks_like_number(sv)))
     {
 	SvNVX(sv) = SvIsUV(sv) ? (NV)SvUVX(sv) : (NV)SvIVX(sv);
