@@ -118,7 +118,9 @@ test.  Outside a C<while> test, this will not happen.
 Special package variables when using sort(), see L<perlfunc/sort>.
 Because of this specialness $a and $b don't need to be declared
 (using local(), use vars, or our()) even when using the strict
-vars pragma.
+vars pragma.  Don't lexicalize them with C<my $a> or C<my $b>
+if you want to be able to use them in the sort() comparison block
+or function.
 
 =back
 
