@@ -6,7 +6,9 @@
 #   Author:  Matthias Neeracher <neeracher@mac.com>
 
 package ExtUtils::MM_MacOS;
-unshift @MM::ISA, 'ExtUtils::MM_MacOS';
+require ExtUtils::MM_Any;
+require ExtUtils::MM_Unix;
+@ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
 
 use Config;
 use Cwd 'cwd';
@@ -168,6 +170,18 @@ sub skipcheck {
     my($section) = @_;
     return 'skipped' if $self->{SKIPHASH}{$section};
     return '';
+}
+
+=item maybe_command
+
+Returns true, if the argument is likely to be a command.
+
+=cut
+
+sub maybe_command {
+    my($self,$file) = @_;
+    return $file if ! -d $file;
+    return;
 }
 
 =item guess_name
