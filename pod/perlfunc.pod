@@ -2617,12 +2617,17 @@ the platform where Perl was built are available via L<Config>:
 The integer formats C<"s">, C<"S">, C<"i">, C<"I">, C<"l">, and C<"L">
 are inherently non-portable between processors and operating systems
 because they obey the native byteorder and endianness.  For example a
-4-byte integer 0x12345678 (305419896 decimal) be ordered natively
+4-byte integer 0x87654321 (2271560481 decimal) be ordered natively
 (arranged in and handled by the CPU registers) into bytes as
  
- 	0x12 0x34 0x56 0x78	# big-endian
- 	0x78 0x56 0x34 0x12	# little-endian
+ 	0x12 0x34 0x56 0x78	# little-endian
+ 	0x78 0x56 0x34 0x12	# big-endian
  
+Basically, the Intel, Alpha, and VAX CPUs and little-endian, while
+everybody else, for example Motorola m68k/88k, PPC, Sparc, HP PA,
+Power, and Cray are big-endian.  MIPS can be either: Digital used it
+in little-endian mode, SGI uses it in big-endian mode.
+
 The names `big-endian' and `little-endian' are joking references to
 the classic "Gulliver's Travels" (via the paper "On Holy Wars and a
 Plea for Peace" by Danny Cohen, USC/ISI IEN 137, April 1, 1980) and
@@ -2643,6 +2648,9 @@ via L<Config>:
 
 	use Config;
 	print $Config{byteorder}, "\n";
+
+Byteorders '1234' and '12345678' are little-endian, '4321' and
+'87654321' are big-endian.
 
 If you want portable integers use the formats C<"n">, C<"N">, C<"v">, and
 "V", their byte endianness and size is known.
