@@ -98,7 +98,7 @@ the PA-RISC 1.1 or 2.0 platforms.  The command-line flags are accepted,
 but the resulting executable will not run when transferred to a PA-RISC
 1.0 system.
 
-=head2 Itanium Processor Family
+=head2 Itanium Processor Family and HP-UX
 
 HP-UX also runs on the new Itanium processor.  This requires the use
 of a different version of HP-UX (currently 11.20), and with the exception
@@ -213,7 +213,7 @@ flag -Aa is added to the cpprun and cppstdin variables in the config.sh
 file (though see the section on 64-bit perl below). If you are using a
 recent version of the Perl distribution, these flags are set automatically.
 
-=head2 Using Large Files with Perl
+=head2 Using Large Files with Perl on HP-UX
 
 Beginning with HP-UX version 10.20, files larger than 2GB (2^31 bytes)
 may be created and manipulated.  Three separate methods of doing this
@@ -248,7 +248,7 @@ Configure.  If you do not do this, but later answer the question about
 large files when Configure asks you, you may get a configuration that
 cannot be compiled, or that does not function as expected.
 
-=head2 Threaded Perl
+=head2 Threaded Perl on HP-UX
 
 It is possible to compile a version of threaded Perl on any version of
 HP-UX before 10.30, but it is strongly suggested that you be running on
@@ -268,7 +268,7 @@ April 1999 (B3920-13941)" or the Freely available PTH package, available
 though worldwide HP-UX mirrors of precompiled packages
 (e.g. http://hpux.tn.tudelft.nl/hppd/hpux/alpha.html)
 
-=head2 64-bit Perl
+=head2 64-bit Perl on HP-UX
 
 Beginning with HP-UX 11.00, programs compiled under HP-UX can take
 advantage of the LP64 programming environment (LP64 means Longs and
@@ -299,20 +299,20 @@ expected.
 compiler.  If you want to compile Perl using gcc, you will have to get a
 version of the compiler that support 64-bit operations.)
 
-=head2 GDBM and Threads
+=head2 GDBM and Threads on HP-UX
 
 If you attempt to compile Perl with threads on an 11.X system and also
 link in the GDBM library, then Perl will immediately core dump when it
 starts up.  The only workaround at this point is to relink the GDBM
 library under 11.X, then relink it into Perl.
 
-=head2 NFS filesystems and utime(2)
+=head2 NFS filesystems and utime(2) on HP-UX
 
 If you are compiling Perl on a remotely-mounted NFS filesystem, the test
 io/fs.t may fail on test #18.  This appears to be a bug in HP-UX and no
 fix is currently available.
 
-=head2 perl -P and //
+=head2 perl -P and // and HP-UX
 
 In HP-UX Perl is compiled with flags that will cause problems if the
 -P flag of Perl (preprocess Perl code with the C preprocessor before
@@ -331,7 +331,7 @@ like for example C<"!">:
 
     s!foo!!;
 
-=head2 Kernel parameters (maxdsiz)
+=head2 HP-UX Kernel Parameters (maxdsiz) for Compiling Perl
 
 By default, HP-UX comes configured with a maximum data segment size of
 64MB.  This is too small to correctly compile Perl with the maximum

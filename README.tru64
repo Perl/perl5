@@ -42,6 +42,12 @@ example the regular expressions are not thread-safe.  The bugs are
 very hard to fix are and therefore the 5.005 threads model is still
 classified as an experimental feature.
 
+=head2 Long Doubles on Tru64
+
+You cannot Configure Perl to use long doubles unless you have at least
+Tru64 V5.0, the long double support simply wasn't functional before
+that.
+
 =head2 64-bit Perl on Tru64
 
 In Tru64 Perl's integers are automatically 64-bit wide, there is

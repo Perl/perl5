@@ -73,7 +73,7 @@ redirection. You will have to reboot the PDA!
 
 =head1 USING PERL ON EPOC
 
-=head2 I/O Redirection
+=head2 I/O Redirection on Epoc
 
 You can redirect the output with the UNIX bourne shell syntax (this is
 built into perl rather then eshell) For instance the following command
@@ -85,7 +85,7 @@ perl test.pl >stdout_file <stdin_file 2>stderr_file
 Alternatively you can use 2>&1 in order to add the standard error
 output to stdout.
 
-=head2 PATH Names
+=head2 PATH Names on Epoc
 
 ESHELL looks for executables in ?:/System/Programs. The SIS file
 installs perl in this special folder directory. The default drive and
@@ -107,16 +107,16 @@ internally in perl, so please use slashes for redirects.
 
 perl.exe C:/test.pl >C:/output.txt
 
-=head2 Editors
+=head2 Editors on Epoc
 
 A suitable text editor can be downloaded from symbian
  http://developer.epocworld.com/downloads/progs/Editor.zip
 
-=head2 Features
+=head2 Features of Perl on Epoc
 
 The built-in function EPOC::getcwd returns the current directory.
 
-=head2 Restrictions
+=head2 Restrictions of Perl on Epoc
 
 Features are left out, because of restrictions of the POSIX support in
 EPOC:
@@ -214,7 +214,7 @@ Start again from scratch
 
 =back
 
-=head1 SUPPORT STATUS
+=head1 SUPPORT STATUS OF PERL ON EPOC
 
 I'm offering this port "as is". You can ask me questions, but I can't
 guarantee I'll be able to answer them.

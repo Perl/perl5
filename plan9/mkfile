@@ -20,7 +20,10 @@ perlshr = $archlib/CORE/libperlshr.a
 installman1dir = /sys/man/1
 installman3dir = /sys/man/2
 
-podnames = perl perlbook perlbot perlcall perldata perldebug perldiag perldsc perlembed perlform perlfunc perlguts perlipc perllol perlmod perlobj perlop perlpod perlre perlref perlrun perlsec perlstyle perlsub perlsyn perltie perltoc perltrap perlvar perlxs perlxstut
+podnames = perl perlbook perlboot perlbot perldata perldebtut perldiag perldsc perlform perlfunc perlipc perllol perlmod perlmodlib perlmodinstall perlnewmod perlop perlopentut perlpod perlrequick perlretut perlref perlreftut perlrun perlsec perlstyle perlsub perlsyn perltie perltoc perltoot perltootc perltrap perlutil perlvar
+faqpodnames = perlfaq perlfaq1 perlfaq2 perlfaq3 perlfaq4 perlfaq5 perlfaq6 perlfaq7 perlfaq8 perlfaq9
+advpodnames = perlapi perlapio perlcall perlclib perlcompile perldebguts perldbmfilter perldebug perldelta perldiag perlebcdic perlembed perlfilter perlfor perlguts perlhack perlhist perlintern perliol perlnumber perlobj perlre perlthrtut perltodo perlunicode perlxs perlxs perlxstut
+archpodnames = perlaix perlapollo perlamiga perlbs2000 perlcygwin perldgux perldos perlepoc perlhpux perlhurd perlmachten perlmacos perlmint perlmpeix perlos2 perlos390 perlqnx perlsolaris perltru64 perlvmesa perlvms perlvos perlwin32
 
 libpods = ${podnames:%=pod/%.pod}
 
@@ -133,7 +136,9 @@ installall:V:
 man:V:		$perlpods pod/pod2man.PL perl
 			perl pod/pod2man.PL
 			for (i in $podnames) pod/pod2man pod/$i.pod > $installman3dir/$i
-			pod/pod2man plan9/perlplan9.pod > $installman3dir/perlplan9
+			for (i in $faqpodnames) pod/pod2man pod/$i.pod > $installman3dir/$i
+			for (i in $advpodnames) pod/pod2man pod/$i.pod > $installman3dir/$i
+			for (i in $archpodnames) pod/pod2man pod/$i.pod > $installman3dir/$i
 			
 nuke clean:V:	
 		rm -f *.$O   $extensions^.pm config.sh $perllib config.h $perlshr perlmain.c perl miniperl $archlib/Config.pm $ext_c

@@ -110,18 +110,24 @@ For ease of access, the Perl manual has been split up into several sections:
     perl5004delta	Perl changes in version 5.004
 
     perlaix		Perl notes for AIX
-    perlamiga		Perl notes for Amiga
+    perlamiga		Perl notes for AmigaOS
+    perlapollo		Perl notes for Apollo DomainOS
+    perlbeos		Perl notes for BeOS
     perlbs2000		Perl notes for POSIX-BC BS2000
     perlcygwin		Perl notes for Cygwin
     perldgux		Perl notes for DG/UX
     perldos		Perl notes for DOS
     perlepoc		Perl notes for EPOC
     perlhpux		Perl notes for HP-UX
+    perlhurd		Perl notes for Hurd
     perlmachten		Perl notes for Power MachTen
     perlmacos		Perl notes for Mac OS (Classic)
+    perlmint		Perl notes for MiNT
     perlmpeix		Perl notes for MPE/iX
     perlos2		Perl notes for OS/2
     perlos390		Perl notes for OS/390
+    perlplan9		Perl notes for Plan 9
+    perlqnx		Perl notes for QNX
     perlsolaris 	Perl notes for Solaris
     perltru64		Perl notes for Tru64
     perlvmesa		Perl notes for VM/ESA

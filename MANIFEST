@@ -1298,8 +1298,6 @@ plan9/fndvers		Plan9 port: update Perl version in config.plan9
 plan9/genconfig.pl	Plan9 port: generate config.sh
 plan9/mkfile		Plan9 port: Mk driver for build
 plan9/myconfig.plan9	Plan9 port: script to print config summary
-plan9/perlplan9.doc	Plan9 port: Plan9-specific formatted documentation
-plan9/perlplan9.pod	Plan9 port: Plan9-specific pod documentation
 plan9/plan9.c		Plan9 port: Plan9-specific C routines
 plan9/plan9ish.h	Plan9 port: Plan9-specific C header file
 plan9/setup.rc		Plan9 port: script for easy build+install

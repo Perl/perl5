@@ -36,7 +36,7 @@ but the media charges might prohibit an upgrade), consider getting Gnu C
 instead.
 
 
-=head2 Introduction
+=head2 Introduction to Perl on VMS
 
 The VMS port of Perl is as functionally complete as any other Perl port
 (and as complete as the ports on some Unix systems). The Perl binaries
@@ -59,7 +59,7 @@ There are issues with various versions of DEC C, so if you're not running a
 relatively modern version, check the "DEC C issues" section later on in this
 document.
 
-=head2 Other required software
+=head2 Other required software for Compiling Perl on VMS
 
 In addition to VMS and DCL you will need two things:
 
@@ -79,7 +79,7 @@ go ahead and use that.
 
 =back
 
-=head2 Additional software that is optional
+=head2 Additional software that is optional for Perl on VMS
 
 You may also want to have on hand:
 
@@ -207,7 +207,7 @@ then be sure to also follow the advice in the "Cleaning up and starting
 fresh (optional)" and the checklist of items in the "CAVEATS" sections 
 below.
 
-=head2 Changing compile-time options (optional)
+=head2 Changing compile-time options (optional) for Perl on VMS
 
 Most of the user definable features of Perl are enabled or disabled in
 [.VMS]CONFIG.VMS. There is code in there to Do The Right Thing, but that 
@@ -224,7 +224,7 @@ The one exception is the various *DIR install locations. Changing those
 requires changes in genconfig.pl as well.  Be really careful if you need to
 change these, as they can cause some fairly subtle problems.
 
-=head2 Socket Support (optional)
+=head2 Socket Support (optional) for Perl on VMS
 
 Perl includes a number of functions for IP sockets, which are available if
 you choose to compile Perl with socket support.  Since IP networking is an 
@@ -322,7 +322,7 @@ with DEC C, "gcc --version" with GNU CC).  To obtain the version of MMS or
 MMK you are running try "MMS/ident" or "MMK /ident".  The GNU make version 
 can be identified with "make --version".
 
-=head2 Cleaning up and starting fresh (optional)
+=head2 Cleaning up and starting fresh (optional) installing Perl on VMS
 
 If you need to recompile from scratch, you have to make sure you clean up
 first.  There is a procedure to do it--enter the *exact* MMS line you used 
@@ -408,7 +408,7 @@ is to simply copy it into the system shareable library directory with:
 
 See also the "INSTALLing images (optional)" section.
 
-=head2 Installing Perl into DCLTABLES (optional)
+=head2 Installing Perl into DCLTABLES (optional) on VMS
 
 Execute the following command file to define PERL as a DCL command.
 You'll need CMKRNL privilege to install the new dcltables.exe.
@@ -426,7 +426,7 @@ You'll need CMKRNL privilege to install the new dcltables.exe.
     $ install replace sys$common:[syslib]dcltables.exe
     $ exit
 
-=head2 INSTALLing images (optional)
+=head2 INSTALLing Perl images (optional) on VMS
 
 On systems that are using perl quite a bit, and particularly those with 
 minimal RAM, you can boost the performance of perl by INSTALLing it as
@@ -494,7 +494,7 @@ A final thing that causes trouble is leftover pieces from a failed
 build.  If things go wrong make sure you do a "(MMK|MMS|make) realclean"
 before you rebuild.
 
-=head2 DEC C issues
+=head2 DEC C issues with Perl on VMS
 
 Note to DEC C users: Some early versions (pre-5.2, some pre-4. If you're DEC
 C 5.x or higher, with current patches if any, you're fine) of the DECCRTL
@@ -531,7 +531,7 @@ See also:
 Please note that in later versions "DEC C" may also be known as 
 "Compaq C".
 
-=head2 GNU issues
+=head2 GNU issues with Perl on VMS
 
 It has been a while since the GNU utilities such as GCC or GNU make
 were used to build perl on VMS.  Hence they may require a great deal
@@ -555,11 +555,11 @@ to all subscribers of the list.  There is a searchable archive of the list
 on the web at:
 
     http://www.xray.mpe.mpg.de/mailing-lists/vmsperl/
-   
+
 To unsubscribe from VMSPERL send a message to VMSPERL-UNSUBSCRIBE@PERL.ORG.
 Be sure to do so from the subscribed account that you are canceling.
 
-=head2 Web sites
+=head2 Web sites for Perl on VMS
 
 Vmsperl pages on the web include:
 

@@ -934,17 +934,23 @@ utils: $(PERLEXE) $(X2P)
 	cd ..\pod
 	copy ..\README.aix      .\perlaix.pod
 	copy ..\README.amiga    .\perlamiga.pod
+	copy ..\README.apollo   .\perlapollo.pod
+	copy ..\README.beos     .\perlbeos.pod
 	copy ..\README.bs2000   .\perlbs2000.pod
 	copy ..\README.cygwin   .\perlcygwin.pod
 	copy ..\README.dgux     .\perldgux.pod
 	copy ..\README.dos      .\perldos.pod
 	copy ..\README.epoc     .\perlepoc.pod
+	copy ..\README.hurd     .\perlhurd.pod
 	copy ..\README.hpux     .\perlhpux.pod
 	copy ..\README.machten  .\perlmachten.pod
 	copy ..\README.macos    .\perlmacos.pod
+	copy ..\README.mint     .\perlmint.pod
 	copy ..\README.mpeix    .\perlmpeix.pod
 	copy ..\README.os2      .\perlos2.pod
 	copy ..\README.os390    .\perlos390.pod
+	copy ..\README.plan9    .\perlplan9.pod
+	copy ..\README.qnx      .\perlqnx.pod
 	copy ..\README.solaris  .\perlsolaris.pod
 	copy ..\README.tru64    .\perltru64.pod
 	copy ..\README.vmesa    .\perlvmesa.pod
@@ -1007,9 +1013,12 @@ distclean: clean
 	-rmdir /s $(LIBDIR)\XS
 	cd $(PODDIR)
 	-del /f *.html *.bat checkpods \
-	    perlaix.pod perlamiga.pod perlbs2000.pod perlcygwin.pod \
-	    perldos.pod perlepoc.pod perlhpux.pod perlmachten.pod \
-	    perlmacos.pod perlmpeix.pod perlos2.pod perlos390.pod \
+	    perlaix.pod perlamiga.pod perlapollo.pod perlbeos.pod \
+	    perlbs2000.pod perlcygwin.pod perldgux.pod \
+	    perldos.pod perlepoc.pod perlhurd.pod \
+	    perlhpux.pod perlmachten.pod \
+	    perlmacos.pod perlmpeix.pod perlmint.pod \
+	    perlos2.pod perlos390.pod perlplan9.pod perlqnx.pod \
 	    perlsolaris.pod perlvmesa.pod perlvms.pod perlvos.pod \
 	    perlwin32.pod pod2html pod2latex pod2man pod2text pod2usage \
 	    podchecker podselect

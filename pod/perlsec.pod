@@ -44,8 +44,8 @@ directories, or processes, B<with the following exceptions>:
 
 =item *
 
-If you pass a list of arguments to either C<system> or C<exec>,
-the elements of that list are B<not> checked for taintedness.
+If you pass more than one argument to either C<system> or C<exec>,
+the arguments are B<not> checked for taintedness.
 
 =item *
 
@@ -53,9 +53,10 @@ Arguments to C<print> and C<syswrite> are B<not> checked for taintedness.
 
 =back
 
-Any variable set to a value
-derived from tainted data will itself be tainted, even if it is
-logically impossible for the tainted data to alter the variable.
+The value of an expression containing tainted data will itself be
+tainted, even if it is logically impossible for the tainted data to
+affect the value.
+
 Because taintedness is associated with each scalar value, some
 elements of an array can be tainted and others not.
 
@@ -106,6 +107,9 @@ For example:
     # have used an external program to do the filename expansion; but in
     # either case the result is tainted since the list of filenames comes
     # from outside of the program.
+
+    $bad = ($arg, 23);		# $bad will be tainted
+    $arg, `true`;		# Insecure (although it isn't really)
 
 If you try to do something insecure, you will get a fatal error saying
 something like "Insecure dependency" or "Insecure $ENV{PATH}".  Note that you

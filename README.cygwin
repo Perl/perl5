@@ -18,7 +18,7 @@ customize the configuration, consider using one of these packages:
 
   http://cygutils.netpedia.net/
 
-=head1 PREREQUISITES
+=head1 PREREQUISITES FOR COMPILING PERL ON CYGWIN
 
 =head2 Cygwin = GNU+Cygnus+Windows (Don't leave UNIX without it)
 
@@ -84,7 +84,7 @@ a UNIX system.
 
 =back
 
-=head1 CONFIGURE
+=head1 CONFIGURE PERL ON CYGWIN
 
 The default options gathered by Configure with the assistance of
 F<hints/cygwin.sh> will build a Perl that supports dynamic loading
@@ -97,7 +97,7 @@ This will run Configure and keep a record:
 If you are willing to accept all the defaults run Configure with B<-de>.
 However, several useful customizations are available.
 
-=head2 Strip Binaries
+=head2 Stripping Perl Binaries on Cygwin
 
 It is possible to strip the EXEs and DLLs created by the build process.
 The resulting binaries will be significantly smaller.  If you want the
@@ -112,7 +112,7 @@ prompts you,
 or you can edit F<hints/cygwin.sh> and uncomment the relevant variables
 near the end of the file.
 
-=head2 Optional Libraries
+=head2 Optional Libraries for Perl on Cygwin
 
 Several Perl functions and modules depend on the existence of
 some optional libraries.  Configure will find them if they are
@@ -168,7 +168,7 @@ CPAN modules).
 
 =back
 
-=head2 Configure-time Options
+=head2 Configure-time Options for Perl on Cygwin
 
 The F<INSTALL> document describes several Configure-time options.  Some of
 these will work with Cygwin, others are not yet possible.  Also, some of
@@ -219,7 +219,7 @@ for internal size and position calculations.
 
 =back
 
-=head2 Suspicious Warnings
+=head2 Suspicious Warnings on Cygwin
 
 You may see some messages during Configure that seem suspicious.
 
@@ -265,13 +265,13 @@ This failure does not seem to cause any problems.
 
 =back
 
-=head1 MAKE
+=head1 MAKE ON CYGWIN
 
 Simply run I<make> and wait:
 
   make 2>&1 | tee log.make
 
-=head2 Warnings
+=head2 Warnings on Cygwin
 
 Warnings like these are normal:
 
@@ -281,7 +281,7 @@ Warnings like these are normal:
   dllwrap: no export definition file provided
   dllwrap: creating one, but that may not be what you want
 
-=head2 ld2
+=head2 ld2 on Cygwin
 
 During `C<make>', I<ld2> will be created and installed in your $installbin
 directory (where you said to put public executables).  It does not
@@ -293,7 +293,7 @@ is not the case `C<make>' will fail at some point.  If this happens,
 just manually copy I<ld2> from the source directory to somewhere in
 your C<PATH>.
 
-=head1 TEST
+=head1 TEST ON CYGWIN
 
 There are two steps to running the test suite:
 
@@ -310,7 +310,7 @@ attempted and explainable test failures are documented.  It is possible
 for Perl to pass all the tests, but it is more likely that some tests
 will fail for one of the reasons listed below.
 
-=head2 File Permissions
+=head2 File Permissions on Cygwin
 
 UNIX file permissions are based on sets of mode bits for
 {read,write,execute} for each {user,group,other}.  By default Cygwin
@@ -336,7 +336,7 @@ these options, these tests will fail:
   lib/sdbm.t            2
   op/stat.t             9, 20 (.tmp not an executable extension)
 
-=head2 Hard Links
+=head2 Hard Links on Cygwin
 
 FAT partitions do not support hard links (whereas NTFS does), in which
 case Cygwin implements link() by copying the file.  On remote (network)
@@ -349,7 +349,7 @@ these tests will fail:
   io/fs.t               4
   op/stat.t             3
 
-=head2 Filetime Granularity
+=head2 Filetime Granularity on Cygwin
 
 On FAT partitions the filetime granularity is 2 seconds.  The following
 test will fail:
@@ -358,7 +358,7 @@ test will fail:
   ------------------------------------
   io/fs.t               18
 
-=head2 Tainting Checks
+=head2 Tainting Checks on Cygwin
 
 When Perl is running in taint mode, C<$ENV{PATH}> is considered tainted
 and not used, so DLLs not in the default system directories will not
@@ -390,7 +390,7 @@ tests run:
 or one of the Windows system directories (although, this is B<not>
 recommended).
 
-=head2 /etc/group
+=head2 /etc/group on Cygwin
 
 Cygwin does not require F</etc/group>, in which case the F<op/grent.t>
 test will be skipped.  The check performed by F<op/grent.t> expects to
@@ -400,7 +400,7 @@ see entries that use the members field, otherwise this test will fail:
   ------------------------------------
   op/grent.t            1
 
-=head2 Script Portability
+=head2 Script Portability on Cygwin
 
 Cygwin does an outstanding job of providing UNIX-like semantics on top of
 Win32 systems.  However, in addition to the items noted above, there are
@@ -466,7 +466,7 @@ access by native Win32 programs).
 
 =back
 
-=head1 INSTALL
+=head1 INSTALL PERL ON CYGWIN
 
 This will install Perl, including I<man> pages.
 
@@ -481,7 +481,7 @@ are not, you must have write access to the directories in question.
 Information on installing the Perl documentation in HTML format can be
 found in the F<INSTALL> document.
 
-=head1 MANIFEST
+=head1 MANIFEST ON CYGWIN
 
 These are the files in the Perl release that contain references to Cygwin.
 These very brief notes attempt to explain the reason for all conditional
@@ -559,7 +559,7 @@ be kept as clean as possible.
 
 =back
 
-=head1 BUGS
+=head1 BUGS ON CYGWIN
 
 When I<make> starts, it warns about overriding commands for F<perlmain.o>.
 

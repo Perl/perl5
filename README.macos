@@ -45,13 +45,11 @@ for all things having to do with MacPerl development.
 MacPerl 5.2.0r4 is available on the CPAN and on SourceForge.  It
 is based on perl 5.004.
 
-
 =head1 AUTHOR
 
 perl was ported to Mac OS by Matthias Neeracher
 E<lt>neeracher@mac.comE<gt>.  It is currently maintained by Chris
 Nandor E<lt>pudge@pobox.comE<gt>.
-
 
 =head1 DATE
 

@@ -5644,6 +5644,16 @@ long, Process terminated by SIG%s
 
 =back
 
+=head2 perlapollo, README.apollo - Perl version 5 on Apollo DomainOS
+
+=over 4
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=back
+
 =head2 perlamiga - Perl under Amiga OS
 
 =over 4
@@ -5658,7 +5668,7 @@ long, Process terminated by SIG%s
 
 =over 4
 
-=item Prerequisites
+=item Prerequisites for Compiling Perl on AmigaOS
 
 B<Unix emulation for AmigaOS: ixemul.library>, B<Version of Amiga OS>
 
@@ -5679,35 +5689,55 @@ finally close()d
 
 =over 4
 
-=item Manpages
+=item Manpages for Perl on AmigaOS
 
-=item B<HTML>
+=item Perl HTML Documentation on AmigaOS
 
-=item B<GNU> C<info> files
+=item Perl GNU Info Files on AmigaOS
 
-=item C<LaTeX> docs
+=item Perl LaTeX Documentation on AmigaOS
 
 =back
 
-=item BUILD
+=item BUILDING PERL ON AMIGAOS
 
 =over 4
 
-=item Build Prerequisites
+=item Build Prerequisites for Perl on AmigaOS
 
-=item Getting the perl source
+=item Getting the Perl Source for AmigaOS
 
-=item Making
+=item Making Perl on AmigaOS
 
-=item Testing
+=item Testing Perl on AmigaOS
 
-=item Installing the built perl
+=item Installing the built Perl on AmigaOS
 
 =back
 
 =item AUTHORS
 
 =item SEE ALSO
+
+=back
+
+=head2 perlbeos, README.beos - Perl version 5 on BeOS
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item General Issues with Perl on BeOS
+
+=item BeOS Release-specific Notes
+
+R4 x86, R4 PPC
+
+=item Contact Information
+
+=back
 
 =back
 
@@ -5721,23 +5751,23 @@ finally close()d
 
 =over 4
 
-=item gzip
+=item gzip on BS2000
 
-=item bison
+=item bison on BS2000
 
-=item Unpacking
+=item Unpacking Perl Distribution on BS2000
 
-=item Compiling
+=item Compiling Perl on BS2000
 
-=item Testing
+=item Testing Perl on BS2000
 
-=item Install
+=item Installing Perl on BS2000
 
-=item Using Perl in the Posix-Shell
+=item Using Perl in the Posix-Shell of BS2000
 
 =item Using Perl in "native" BS2000
 
-=item Floating point anomalies
+=item Floating point anomalies on BS2000
 
 =back
 
@@ -5761,7 +5791,7 @@ finally close()d
 
 =item SYNOPSIS
 
-=item PREREQUISITES
+=item PREREQUISITES FOR COMPILING PERL ON CYGWIN
 
 =over 4
 
@@ -5773,66 +5803,66 @@ C<PATH>, I<nroff>, Permissions
 
 =back
 
-=item CONFIGURE
+=item CONFIGURE PERL ON CYGWIN
 
 =over 4
 
-=item Strip Binaries
+=item Stripping Perl Binaries on Cygwin
 
-=item Optional Libraries
+=item Optional Libraries for Perl on Cygwin
 
 C<-lcrypt>, C<-lgdbm> (C<use GDBM_File>), C<-ldb> (C<use DB_File>),
 C<-lcygipc> (C<use IPC::SysV>)
 
-=item Configure-time Options
+=item Configure-time Options for Perl on Cygwin
 
 C<-Uusedl>, C<-Uusemymalloc>, C<-Dusemultiplicity>, C<-Duseperlio>,
 C<-Duse64bitint>, C<-Duselongdouble>, C<-Dusethreads>, C<-Duselargefiles>
 
-=item Suspicious Warnings
+=item Suspicious Warnings on Cygwin
 
 I<dlsym()>, Win9x and C<d_eofnblk>, Compiler/Preprocessor defines
 
 =back
 
-=item MAKE
+=item MAKE ON CYGWIN
 
 =over 4
 
-=item Warnings
+=item Warnings on Cygwin
 
-=item ld2
+=item ld2 on Cygwin
 
 =back
 
-=item TEST
+=item TEST ON CYGWIN
 
 =over 4
 
-=item File Permissions
+=item File Permissions on Cygwin
 
-=item Hard Links
+=item Hard Links on Cygwin
 
-=item Filetime Granularity
+=item Filetime Granularity on Cygwin
 
-=item Tainting Checks
+=item Tainting Checks on Cygwin
 
-=item /etc/group
+=item /etc/group on Cygwin
 
-=item Script Portability
+=item Script Portability on Cygwin
 
 Pathnames, Text/Binary, F<.exe>, chown(), Miscellaneous
 
 =back
 
-=item INSTALL
+=item INSTALL PERL ON CYGWIN
 
-=item MANIFEST
+=item MANIFEST ON CYGWIN
 
 Documentation, Build, Configure, Make, Install, Tests, Compiled Perl
 Source, Compiled Module Source, Perl Modules/Scripts
 
-=item BUGS
+=item BUGS ON CYGWIN
 
 =item AUTHORS
 
@@ -5852,17 +5882,17 @@ Source, Compiled Module Source, Perl Modules/Scripts
 
 =item DESCRIPTION
 
-=item BUILD
+=item BUILDING PERL ON DG/UX
 
 =over 4
 
-=item Non-threaded Case
+=item Non-threaded Perl on DG/UX
 
-=item Threaded Case
+=item Threaded Perl on DG/UX
 
-=item Testing
+=item Testing Perl on DG/UX
 
-=item Installing the built perl
+=item Installing the built perl on DG/UX
 
 =back
 
@@ -5890,21 +5920,21 @@ Source, Compiled Module Source, Perl Modules/Scripts
 
 =over 4
 
-=item I/O Redirection
+=item I/O Redirection on Epoc
 
-=item PATH Names
+=item PATH Names on Epoc
 
-=item Editors
+=item Editors on Epoc
 
-=item Features
+=item Features of Perl on Epoc
 
-=item Restrictions
+=item Restrictions of Perl on Epoc
 
 =item Compiling Perl 5 on the EPOC cross compiling environment
 
 =back
 
-=item SUPPORT STATUS
+=item SUPPORT STATUS OF PERL ON EPOC
 
 =item AUTHOR
 
@@ -5933,31 +5963,47 @@ Source, Compiled Module Source, Perl Modules/Scripts
 
 =item Portability Between PA-RISC Versions
 
-=item Itanium Processor Family
+=item Itanium Processor Family and HP-UX
 
 =item Building Dynamic Extensions on HP-UX
 
 =item The HP ANSI C Compiler
 
-=item Using Large Files with Perl
+=item Using Large Files with Perl on HP-UX
 
-=item Threaded Perl
+=item Threaded Perl on HP-UX
 
-=item 64-bit Perl
+=item 64-bit Perl on HP-UX
 
-=item GDBM and Threads
+=item GDBM and Threads on HP-UX
 
-=item NFS filesystems and utime(2)
+=item NFS filesystems and utime(2) on HP-UX
 
-=item perl -P and //
+=item perl -P and // and HP-UX
 
-=item Kernel parameters (maxdsiz)
+=item HP-UX Kernel Parameters (maxdsiz) for Compiling Perl
 
 =back
 
 =item AUTHOR
 
 =item DATE
+
+=back
+
+=head2 perlhurd, README.hurd - Perl version 5 on Hurd
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Known Problems with Perl on Hurd 
+
+=back
+
+=item AUTHOR
 
 =back
 
@@ -5972,11 +6018,11 @@ systems
 
 =item Compiling Perl 5 on MachTen
 
-=item Failures during C<make test>
+=item Failures during C<make test> on MachTen
 
 op/lexassign.t, pragma/warnings.t
 
-=item Building external modules
+=item Building external modules on MachTen
 
 =back
 
@@ -6000,6 +6046,18 @@ op/lexassign.t, pragma/warnings.t
 
 =back
 
+=head2 perlmint, README.mint - Perl version 5 on Atari MiNT
+
+=over 4
+
+=item DESCRIPTION
+
+=item Known problems with Perl on MiNT
+
+=item AUTHOR
+
+=back
+
 =head2 perlmpeix, README.mpeix - Perl/iX for HP e3000 MPE
 
 =over 4
@@ -6008,15 +6066,15 @@ op/lexassign.t, pragma/warnings.t
 
 =item NOTE
 
-=item What's New
+=item What's New in Perl ffor MPE/iX
 
-=item Welcome
+=item Welcome to Perl/iX
 
-=item System Requirements
+=item System Requirements for Perl/iX
 
 =item How to Obtain Perl/iX
 
-=item Distribution Contents Highlights
+=item Perl/iX Distribution Contents Highlights
 
 README, INSTALL, LIBSHP3K, PERL, .cpan/, lib/, man/,
 public_html/feedback.cgi, src/perl-5.6.0-mpe
@@ -6029,13 +6087,13 @@ public_html/feedback.cgi, src/perl-5.6.0-mpe
 
 =item MPE/iX Implementation Considerations
 
-=item Known Bugs Under Investigation
+=item Known Perl/iX Bugs Under Investigation
 
-=item To-Do List
+=item Perl/iX To-Do List
 
-=item Change History
+=item Perl/iX Change History
 
-=item Author
+=item AUTHOR
 
 =back
 
@@ -6297,25 +6355,25 @@ C<COND_WAIT>, F<os2.c>
 
 =over 4
 
-=item Unpacking
+=item Unpacking Perl distribution on OS/390
 
-=item Setup and utilities
+=item Setup and utilities for Perl on OS/390
 
-=item Configure
+=item Configure Perl on OS/390
 
-=item Build, test, install
+=item Build, Test, Install Perl on OS/390
 
-=item build anomalies
+=item Build Anomalies with Perl on OS/390
 
-=item testing anomalies
+=item Testing Anomalies with Perl on OS/390
 
-=item installation anomalies
+=item Installation Anomalies with Perl on OS/390
 
-=item Usage Hints
+=item Usage Hints for Perl on OS/390
 
-=item Floating point anomalies
+=item Floating Point Anomalies with Perl on OS/390
 
-=item Modules and Extensions
+=item Modules and Extensions for Perl on OS/390
 
 =back
 
@@ -6325,11 +6383,71 @@ C<COND_WAIT>, F<os2.c>
 
 =over 4
 
-=item Mailing list
+=item Mailing list for Perl on OS/390
 
 =back
 
 =item HISTORY
+
+=back
+
+=head2 perlqnx, README.qnx - Perl version 5 on QNX
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Required Software for Compiling Perl on QNX
+
+/bin/sh, ar, nm, cpp, make
+
+=item Outstanding Issues with Perl on QNX
+
+=item QNX auxiliary files
+
+qnx/ar, qnx/cpp
+
+=back
+
+=item AUTHOR
+
+=back
+
+=head2 perlplan9 - Plan 9-specific documentation for Perl
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Invoking Perl
+
+=item What's in Plan 9 Perl
+
+=item What's not in Plan 9 Perl
+
+=item Perl5 Functions not currently supported in Plan 9 Perl
+
+=item Signals in Plan 9 Perl
+
+=back
+
+=item COMPILING AND INSTALLING PERL ON PLAN 9
+
+=over 4
+
+=item Installing Perl Documentation on Plan 9
+
+=back
+
+=item BUGS
+
+=item Revision date
+
+=item AUTHOR
 
 =back
 
@@ -6353,11 +6471,11 @@ Solaris FAQ, Precompiled Binaries, Solaris Documentation
 
 =over 4
 
-=item File Extraction Problems.
+=item File Extraction Problems on Solaris.
 
-=item Compiler and Related Tools.
+=item Compiler and Related Tools on Solaris.
 
-=item Environment
+=item Environment for Compiling Perl on Solaris
 
 =back
 
@@ -6365,11 +6483,11 @@ Solaris FAQ, Precompiled Binaries, Solaris Documentation
 
 =over 4
 
-=item 64-bit Issues.
+=item 64-bit Issues with Perl on Solaris.
 
-=item Threads.
+=item Threads in Perl on Solaris.
 
-=item Malloc Issues.
+=item Malloc Issues with Perl on Solaris.
 
 =back
 
@@ -6383,17 +6501,17 @@ DATAMODEL_NATIVE specified", sh: ar: not found
 
 =over 4
 
-=item op/stat.t test 4
+=item op/stat.t test 4 in Solaris
 
 =back
 
-=item PREBUILT BINARIES.
+=item PREBUILT BINARIES OF PERL FOR SOLARIS.
 
-=item RUNTIME ISSUES.
+=item RUNTIME ISSUES FOR PERL ON SOLARIS.
 
 =over 4
 
-=item Limits on Numbers of Open Files.
+=item Limits on Numbers of Open Files on Solaris.
 
 =back
 
@@ -6403,11 +6521,11 @@ DATAMODEL_NATIVE specified", sh: ar: not found
 
 =over 4
 
-=item Proc::ProcessTable
+=item Proc::ProcessTable on Solaris
 
-=item BSD::Resource
+=item BSD::Resource on Solairs
 
-=item Net::SSLeay
+=item Net::SSLeay on Soalris
 
 =back
 
@@ -6432,6 +6550,8 @@ Digital UNIX formerly known as DEC OSF/1) systems
 
 =item Threaded Perl on Tru64
 
+=item Long Doubles on Tru64
+
 =item 64-bit Perl on Tru64
 
 =item Warnings about floating-point overflow when compiling Perl on Tru64
@@ -6454,15 +6574,15 @@ Digital UNIX formerly known as DEC OSF/1) systems
 
 =over 4
 
-=item Unpacking
+=item Unpacking Perl Distribution on VM/ESA
 
-=item Setup and utilities
+=item Setup Perl and utilities on VM/ESA
 
-=item Configure
+=item Configure Perl on VM/ESA
 
-=item testing anomalies
+=item Testing Anomalies of Perl on VM/ESA
 
-=item Usage Hints
+=item Usage Hints for Perl on VM/ESA
 
 =back
 
@@ -6472,7 +6592,7 @@ Digital UNIX formerly known as DEC OSF/1) systems
 
 =over 4
 
-=item Mailing list
+=item Mailing list for Perl on VM/ESA
 
 =back
 
@@ -6577,9 +6697,9 @@ LIST, waitpid PID,FLAGS
 
 =over 4
 
-=item Unimplemented Features
+=item Unimplemented Features of Perl on VOS
 
-=item Restrictions
+=item Restrictions of Perl on VOS
 
 =back
 
