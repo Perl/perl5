@@ -3325,7 +3325,9 @@ PP(pp_ucfirst)
     STRLEN slen;
 
     SvGETMAGIC(sv);
-    if (DO_UTF8(sv) && (s = (U8*)SvPV_nomg(sv, slen)) && slen && UTF8_IS_START(*s)) {
+    if (DO_UTF8(sv) &&
+	(s = (U8*)SvPV_nomg(sv, slen)) && slen &&
+	UTF8_IS_START(*s)) {
 	U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
 	STRLEN ulen;
 	STRLEN tculen;
@@ -3336,8 +3338,16 @@ PP(pp_ucfirst)
 
 	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
 	    dTARGET;
+	    /* slen is the byte length of the whole SV.
+	     * ulen is the byte length of the original Unicode character
+	     * stored as UTF-8 at s.
+	     * tculen is the byte length of the freshly titlecased
+	     * Unicode character stored as UTF-8 at tmpbuf.
+	     * We first set the result to be the titlecased character,
+	     * and then append the rest of the SV data. */
 	    sv_setpvn(TARG, (char*)tmpbuf, tculen);
-	    sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
+	    if (slen > ulen)
+	        sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
 	    SvUTF8_on(TARG);
 	    SETs(TARG);
 	}
@@ -3377,7 +3387,9 @@ PP(pp_lcfirst)
     STRLEN slen;
 
     SvGETMAGIC(sv);
-    if (DO_UTF8(sv) && (s = (U8*)SvPV_nomg(sv, slen)) && slen && UTF8_IS_START(*s)) {
+    if (DO_UTF8(sv) &&
+	(s = (U8*)SvPV_nomg(sv, slen)) && slen &&
+	UTF8_IS_START(*s)) {
 	STRLEN ulen;
 	U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
 	U8 *tend;
@@ -3390,7 +3402,8 @@ PP(pp_lcfirst)
 	if (!SvPADTMP(sv) || (STRLEN)(tend - tmpbuf) != ulen || SvREADONLY(sv)) {
 	    dTARGET;
 	    sv_setpvn(TARG, (char*)tmpbuf, tend - tmpbuf);
-	    sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
+	    if (slen > ulen)
+	        sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
 	    SvUTF8_on(TARG);
 	    SETs(TARG);
 	}
