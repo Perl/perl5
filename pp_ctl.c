@@ -2945,11 +2945,11 @@ PP(pp_require)
 
 		/* help out with the "use 5.6" confusion */
 		if (sver == 0 && (rev > 5 || (rev == 5 && ver >= 100))) {
-		    DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required--"
-			"this is only v%d.%d.%d, stopped"
-			" (did you mean v%"UVuf".%03"UVuf"?)",
-			rev, ver, sver, PERL_REVISION, PERL_VERSION,
-			PERL_SUBVERSION, rev, ver/100);
+		    DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required"
+			" (did you mean v%"UVuf".%03"UVuf"?)--"
+			"this is only v%d.%d.%d, stopped",
+			rev, ver, sver, rev, ver/100,
+			PERL_REVISION, PERL_VERSION, PERL_SUBVERSION);
 		}
 		else {
 		    DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required--"

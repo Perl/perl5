@@ -2534,6 +2534,7 @@ $   IF xxx .EQS. "Encode/CN" THEN goto ext_loop  ! sub extension - omit
 $   IF xxx .EQS. "Encode/JP" THEN goto ext_loop  ! sub extension - omit
 $   IF xxx .EQS. "Encode/KR" THEN goto ext_loop  ! sub extension - omit
 $   IF xxx .EQS. "Encode/TW" THEN goto ext_loop  ! sub extension - omit
+$   IF xxx .EQS. "B/C" THEN goto ext_loop  ! sub extension - omit
 $   IF F$EXTRACT(0,8,line) .EQS. "vms/ext/" THEN -
       xxx = "VMS/" + F$EXTRACT(8,line_len - 20,line)
 $   known_extensions = known_extensions + " ''xxx'"

@@ -13,7 +13,14 @@
 # disable the test!)
 #
 # Getting everything to run well on the myriad of platforms Perl runs on
-# is unfortunally, not a trivial task.
+# is unfortunately not a trivial task.
+#
+# WARNING: these tests are obfuscated.  Do not get frustrated.
+# Ask Abigail <abigail@foad.org>, or use the Deparse or Concise
+# modules (the former parses Perl to Perl, the latter shows the
+# op syntax tree) like this:
+# ./perl -Ilib -MO=Deparse foo.pl
+# ./perl -Ilib -MO=Concise foo.pl
 #
 
 BEGIN {

@@ -668,7 +668,7 @@ OP_ppaddr(o)
     CODE:
 	sv_setpvn(sv, "PL_ppaddr[OP_", 13);
 	sv_catpv(sv, PL_op_name[o->op_type]);
-	for (i=13; i<SvCUR(sv); ++i)
+	for (i=13; (STRLEN)i < SvCUR(sv); ++i)
 	    SvPVX(sv)[i] = toUPPER(SvPVX(sv)[i]);
 	sv_catpv(sv, "]");
 	ST(0) = sv;

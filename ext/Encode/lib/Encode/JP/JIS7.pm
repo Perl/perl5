@@ -1,7 +1,7 @@
 package Encode::JP::JIS7;
 use strict;
 
-our $VERSION = do { my @r = (q$Revision: 1.6 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.7 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode qw(:fallbacks);
 
@@ -42,9 +42,13 @@ our $DEBUG = 0;
 
 sub decode($$;$)
 {
-    my ($obj,$str,$chk) = @_;
-    my $residue = jis_euc(\$str);
-    # This is for PerlIO
+    my ($obj, $str, $chk) = @_;
+    my $residue = '';
+    if ($chk){
+	$str =~ s/([^\x00-\x7f].*)$//so;
+	$1 and $residue = $1;
+    }
+    $residue .= jis_euc(\$str);
     $_[1] = $residue if $chk;
     return Encode::decode('euc-jp', $str, FB_PERLQQ);
 }

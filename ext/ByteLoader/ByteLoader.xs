@@ -11,7 +11,7 @@ int
 bl_getc(struct byteloader_fdata *data)
 {
     dTHX;
-    if (SvCUR(data->datasv) <= data->next_out) {
+    if (SvCUR(data->datasv) <= (STRLEN)data->next_out) {
       int result;
       /* Run out of buffered data, so attempt to read some more */
       *(SvPV_nolen (data->datasv)) = '\0';

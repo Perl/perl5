@@ -54,6 +54,14 @@ my %Tests = (
 
 print "1..".keys(%Tests)."\n";
 
+eval { require POSIX; &POSIX::WEXITSTATUS(0) };
+if( $@ ) {
+    *exitstatus = sub { $_[0] >> 8 };
+}
+else {
+    *exitstatus = sub { POSIX::WEXITSTATUS($_[0]) }
+}
+
 chdir 't';
 my $lib = File::Spec->catdir(qw(lib Test Simple sample_tests));
 while( my($test_name, $exit_codes) = each %Tests ) {
@@ -72,7 +80,7 @@ while( my($test_name, $exit_codes) = each %Tests ) {
 
     my $file = File::Spec->catfile($lib, $test_name);
     my $wait_stat = system(qq{$Perl -"I../blib/lib" -"I../lib" -"I../t/lib" $file});
-    my $actual_exit = $wait_stat >> 8;
+    my $actual_exit = exitstatus($wait_stat);
 
     My::Test::ok( $actual_exit == $exit_code, 
                   "$test_name exited with $actual_exit (expected $exit_code)");

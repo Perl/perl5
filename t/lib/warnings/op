@@ -130,10 +130,13 @@ __END__
 use warnings 'misc' ;
 my $x ;
 my $x ;
+my $y = my $y ;
 no warnings 'misc' ;
 my $x ;
+my $y ;
 EXPECT
 "my" variable $x masks earlier declaration in same scope at - line 4.
+"my" variable $y masks earlier declaration in same statement at - line 5.
 ########
 # op.c
 use warnings 'closure' ;

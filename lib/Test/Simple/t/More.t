@@ -7,7 +7,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 37;
+use Test::More tests => 41;
 
 # Make sure we don't mess with $@ or $!.  Test at bottom.
 my $Err   = "this should not be touched";
@@ -38,9 +38,26 @@ can_ok('Test::More', qw(require_ok use_ok ok is isnt like skip can_ok
 can_ok(bless({}, "Test::More"), qw(require_ok use_ok ok is isnt like skip 
                                    can_ok pass fail eq_array eq_hash eq_set));
 
+
 isa_ok(bless([], "Foo"), "Foo");
 isa_ok([], 'ARRAY');
 isa_ok(\42, 'SCALAR');
+
+
+# can_ok() & isa_ok should call can() & isa() on the given object, not 
+# just class, in case of custom can()
+{
+       local *Foo::can;
+       local *Foo::isa;
+       *Foo::can = sub { $_[0]->[0] };
+       *Foo::isa = sub { $_[0]->[0] };
+       my $foo = bless([0], 'Foo');
+       ok( ! $foo->can('bar') );
+       ok( ! $foo->isa('bar') );
+       $foo->[0] = 1;
+       can_ok( $foo, 'blah');
+       isa_ok( $foo, 'blah');
+}
 
 
 pass('pass() passed');

@@ -94,11 +94,15 @@ extern void Encode_DefineEncoding(encode_t *enc);
 #define  ENCODE_RETURN_ON_ERR  0x0004 /* immediately returns on NOREP */
 #define  ENCODE_LEAVE_SRC      0x0008 /* $src updated unless set */
 #define  ENCODE_PERLQQ         0x0100 /* perlqq fallback string */
+#define  ENCODE_HTMLCREF       0x0200 /* HTML character ref. fb mode */
+#define  ENCODE_XMLCREF        0x0400 /* XML  character ref. fb mode */
 
 #define  ENCODE_FB_DEFAULT     0x0000
 #define  ENCODE_FB_CROAK       0x0001
 #define  ENCODE_FB_QUIET       ENCODE_RETURN_ON_ERR
 #define  ENCODE_FB_WARN        (ENCODE_RETURN_ON_ERR|ENCODE_WARN_ON_ERR)
 #define  ENCODE_FB_PERLQQ      ENCODE_PERLQQ
+#define  ENCODE_FB_HTMLCREF    ENCODE_HTMLCREF
+#define  ENCODE_FB_XMLCREF     ENCODE_XMLCREF
 
 #endif /* ENCODE_H */

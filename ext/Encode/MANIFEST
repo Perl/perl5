@@ -42,12 +42,13 @@ lib/Encode/CN/HZ.pm		Encode extension
 lib/Encode/Config.pm	        Encode configuration module
 lib/Encode/Encoder.pm	       OO Encoder
 lib/Encode/Encoding.pm	Encode extension
+lib/Encode/Guess.pm	Encode Extension
 lib/Encode/JP/H2Z.pm		Encode extension
 lib/Encode/JP/JIS7.pm	Encode extension
 lib/Encode/KR/2022_KR.pm	 Encode extension
+lib/Encode/MIME/Header.pm	Encode extension
 lib/Encode/PerlIO.pod	Documents for Encode & PerlIO
 lib/Encode/Supported.pod	Documents for supported encodings
-t/unibench.pl	benchmark script
 t/Aliases.t	test script
 t/CJKT.t	test script
 t/Encode.t	test script
@@ -64,6 +65,7 @@ t/fallback.t	test script
 t/gb2312.enc	test data
 t/gb2312.utf	test data
 t/grow.t	test script
+t/guess.t	test script
 t/jisx0201.enc	test data
 t/jisx0201.utf	test data
 t/jisx0208.enc	test data
@@ -73,7 +75,9 @@ t/jisx0212.utf	test data
 t/jperl.t	test script
 t/ksc5601.enc	test data
 t/ksc5601.utf	test data
+t/mime-header.t	test script
 t/perlio.t	test script
+t/unibench.pl	benchmark script
 ucm/8859-1.ucm	Unicode Character Map
 ucm/8859-10.ucm	Unicode Character Map
 ucm/8859-11.ucm	Unicode Character Map

@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 1.34 2002/04/22 20:27:30 dankogai Exp $
+ $Id: Encode.xs,v 1.39 2002/04/26 03:02:04 dankogai Exp $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -141,10 +141,22 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
        			goto ENCODE_SET_SRC;
 		    }else if (check & ENCODE_PERLQQ){
 			SV* perlqq =
-			    sv_2mortal(newSVpvf("\\x{%04x}", ch));
+			    sv_2mortal(newSVpvf("\\x{%04"UVxf"}", ch));
 			sdone += slen + clen;
 			ddone += dlen + SvCUR(perlqq);
 			sv_catsv(dst, perlqq);
+		    }else if (check & ENCODE_HTMLCREF){
+			SV* htmlcref =
+			    sv_2mortal(newSVpvf("&#%" UVuf ";", ch));
+			sdone += slen + clen;
+			ddone += dlen + SvCUR(htmlcref);
+			sv_catsv(dst, htmlcref);
+		    }else if (check & ENCODE_XMLCREF){
+			SV* xmlcref =
+			    sv_2mortal(newSVpvf("&#x%" UVxf ";", ch));
+			sdone += slen + clen;
+			ddone += dlen + SvCUR(xmlcref);
+			sv_catsv(dst, xmlcref);
 		    } else {
 			/* fallback char */
 			sdone += slen + clen;
@@ -168,7 +180,8 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 				enc->name[0], (U8) s[slen], code);
 			}
 			goto ENCODE_SET_SRC;
-		    }else if (check & ENCODE_PERLQQ){
+		    }else if (check &
+			      (ENCODE_PERLQQ|ENCODE_HTMLCREF|ENCODE_XMLCREF)){
 			SV* perlqq =
 			    sv_2mortal(newSVpvf("\\x%02X", s[slen]));
 			sdone += slen + 1;
@@ -441,9 +454,6 @@ CODE:
 OUTPUT:
     RETVAL
 
-PROTOTYPES: DISABLE
-
-
 int
 DIE_ON_ERR()
 CODE:
@@ -480,6 +490,20 @@ OUTPUT:
     RETVAL
 
 int
+HTMLCREF()
+CODE:
+    RETVAL = ENCODE_HTMLCREF;
+OUTPUT:
+    RETVAL
+
+int
+XMLCREF()
+CODE:
+    RETVAL = ENCODE_XMLCREF;
+OUTPUT:
+    RETVAL
+
+int
 FB_DEFAULT()
 CODE:
     RETVAL = ENCODE_FB_DEFAULT;
@@ -511,6 +535,20 @@ int
 FB_PERLQQ()
 CODE:
     RETVAL = ENCODE_FB_PERLQQ;
+OUTPUT:
+    RETVAL
+
+int
+FB_HTMLCREF()
+CODE:
+    RETVAL = ENCODE_FB_HTMLCREF;
+OUTPUT:
+    RETVAL
+
+int
+FB_XMLCREF()
+CODE:
+    RETVAL = ENCODE_FB_XMLCREF;
 OUTPUT:
     RETVAL
 

@@ -251,7 +251,7 @@ struct pmop {
 #else
     REGEXP *    op_pmregexp;            /* compiled expression */
 #endif
-    U16		op_pmflags;
+    U32		op_pmflags;
     U16		op_pmpermflags;
     U8		op_pmdynflags;
 #ifdef USE_ITHREADS
@@ -282,7 +282,7 @@ struct pmop {
 
 #define PMf_RETAINT	0x0001		/* taint $1 etc. if target tainted */
 #define PMf_ONCE	0x0002		/* use pattern only once per reset */
-#define PMf_REVERSED	0x0004		/* Should be matched right->left */
+#define PMf_UNUSED	0x0004		/* free for use */
 #define PMf_MAYBE_CONST	0x0008		/* replacement contains variables */
 #define PMf_SKIPWHITE	0x0010		/* skip leading whitespace for split */
 #define PMf_WHITE	0x0020		/* pattern is \s+ */

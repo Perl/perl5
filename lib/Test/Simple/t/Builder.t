@@ -10,7 +10,7 @@ BEGIN {
 use Test::Builder;
 my $Test = Test::Builder->new;
 
-$Test->plan( tests => 7 );
+$Test->plan( tests => 9 );
 
 my $default_lvl = $Test->level;
 $Test->level(0);
@@ -28,3 +28,9 @@ $Test->current_test( $test_num );
 print "ok $test_num - current_test() set\n";
 
 $Test->ok( 1, 'counter still good' );
+
+eval { $Test->plan(7); };
+$Test->like( $@, q{/^plan\(\) doesn't understand 7/}, 'bad plan()' );
+
+eval { $Test->plan(wibble => 7); };
+$Test->like( $@, q{/^plan\(\) doesn't understand wibble 7/}, 'bad plan()' );

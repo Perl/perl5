@@ -145,7 +145,7 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg)
     if (SvIV(result = get_sv("PerlIO::encoding::check", 1)) == 0){
 	PUSHMARK(sp);
 	PUTBACK;
-	if (call_pv("Encode::FB_QUIET", G_SCALAR|G_NOARGS) != 1) {
+       if (call_pv("Encode::FB_QUIET", G_SCALAR) != 1) {
 	    /* should never happen */
 	    Perl_die(aTHX_ "Encode::FB_QUIET did not return a value");
 	    return -1;
@@ -317,7 +317,7 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	    if (SvLEN(e->dataSV) && SvPVX(e->dataSV)) {
 		Safefree(SvPVX(e->dataSV));
 	    }
-	    if (use > e->base.bufsiz) {
+	    if (use > (SSize_t)e->base.bufsiz) {
 		if (e->flags & NEEDS_LINES) {
 		    /* Have to grow buffer */
 		    e->base.bufsiz = use;
@@ -427,7 +427,7 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 	    PUTBACK;
 	    s = SvPV(str, len);
 	    count = PerlIO_write(PerlIONext(f),s,len);
-	    if (count != len) {
+	    if ((STRLEN)count != len) {
 		code = -1;
 	    }
 	    FREETMPS;
@@ -447,7 +447,7 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 	    if (e->dataSV && SvCUR(e->dataSV)) {
 		s = SvPV(e->dataSV, len);
 		count = PerlIO_unread(PerlIONext(f),s,len);
-		if (count != len) {
+		if ((STRLEN)count != len) {
 		    code = -1;
 		}
 	    }
@@ -478,7 +478,7 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 		PUTBACK;
 		s = SvPV(str, len);
 		count = PerlIO_unread(PerlIONext(f),s,len);
-		if (count != len) {
+		if ((STRLEN)count != len) {
 		    code = -1;
 		}
 		FREETMPS;

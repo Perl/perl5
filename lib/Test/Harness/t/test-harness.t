@@ -1,9 +1,12 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 BEGIN {
     if( $ENV{PERL_CORE} ) {
         chdir 't';
-        @INC = '../lib';
+        @INC = ('../lib', 'lib');
+    }
+    else {
+        unshift @INC, 't/lib';
     }
 }
 
@@ -30,41 +33,14 @@ sub GETC {}
 
 package main;
 
-# Utility testing functions.
-my $test_num = 1;
-sub ok ($;$) {
-    my($test, $name) = @_;
-    my $okstring = '';
-    $okstring = "not " unless $test;
-    $okstring .= "ok $test_num";
-    $okstring .= " - $name" if defined $name;
-    print "$okstring\n";
-    $test_num++;
-}
-
-sub eqhash {
-    my($a1, $a2) = @_;
-    return 0 unless keys %$a1 == keys %$a2;
-
-    my $ok = 1;
-    foreach my $k (keys %$a1) {
-        $ok = $a1->{$k} eq $a2->{$k};
-        last unless $ok;
-    }
-
-    return $ok;
-}
+use Test::More;
 
 use vars qw($Total_tests %samples);
 
-my $loaded;
-BEGIN { $| = 1; $^W = 1; }
-END {print "not ok $test_num\n" unless $loaded;}
-print "1..$Total_tests\n";
+plan tests => $Total_tests;
 use Test::Harness;
-$loaded = 1;
-ok(1, 'compile');
-######################### End of black magic.
+use_ok('Test::Harness');
+
 
 BEGIN {
     %samples = (
@@ -78,7 +54,7 @@ BEGIN {
                                                 good       => 1,
                                                 tests      => 1,
                                                 sub_skipped=> 0,
-                                                todo       => 0,
+                                                'todo'     => 0,
                                                 skipped    => 0,
                                                },
                                       failed => { },
@@ -94,7 +70,7 @@ BEGIN {
                                                good        => 0,
                                                tests       => 1,
                                                sub_skipped => 0,
-                                               todo        => 0,
+                                               'todo'      => 0,
                                                skipped     => 0,
                                               },
                                      failed => {
@@ -112,7 +88,7 @@ BEGIN {
                                                 good       => 1,
                                                 tests      => 1,
                                                 sub_skipped=> 0,
-                                                todo       => 0,
+                                                'todo'     => 0,
                                                 skipped    => 0,
                                                },
                                       failed => { },
@@ -128,7 +104,7 @@ BEGIN {
                                                 good       => 0,
                                                 tests      => 1,
                                                 sub_skipped=> 0,
-                                                todo       => 0,
+                                                'todo'     => 0,
                                                 skipped    => 0,
                                                },
                                       failed => {
@@ -136,7 +112,7 @@ BEGIN {
                                                 },
                                       all_ok => 0,
                                      },
-                todo              => {
+                'todo'            => {
                                       total => {
                                                 bonus      => 1,
                                                 max        => 5,
@@ -146,7 +122,7 @@ BEGIN {
                                                 good       => 1,
                                                 tests      => 1,
                                                 sub_skipped=> 0,
-                                                todo       => 2,
+                                                'todo'     => 2,
                                                 skipped    => 0,
                                                },
                                       failed => { },
@@ -162,13 +138,13 @@ BEGIN {
                                                 good        => 1,
                                                 tests       => 1,
                                                 sub_skipped => 0,
-                                                todo        => 2,
+                                                'todo'      => 2,
                                                 skipped     => 0,
                                                },
                                       failed => { },
                                       all_ok => 1,
                                      },
-                skip              => {
+                'skip'            => {
                                       total => {
                                                 bonus      => 0,
                                                 max        => 5,
@@ -178,7 +154,7 @@ BEGIN {
                                                 good       => 1,
                                                 tests      => 1,
                                                 sub_skipped=> 1,
-                                                todo       => 0,
+                                                'todo'     => 0,
                                                 skipped    => 0,
                                                },
                                       failed => { },
@@ -195,7 +171,7 @@ BEGIN {
                                                 good       => 0,
                                                 tests      => 1,
                                                 sub_skipped=> 1,
-                                                todo       => 2,
+                                                'todo'     => 2,
                                                 skipped    => 0
                                                },
                                       failed => {
@@ -213,7 +189,7 @@ BEGIN {
                                                 good       => 0,
                                                 tests      => 1,
                                                 sub_skipped=> 0,
-                                                todo       => 0,
+                                                'todo'     => 0,
                                                 skipped    => 0,
                                                },
                                       failed => {
@@ -231,7 +207,7 @@ BEGIN {
                                                 good       => 1,
                                                 tests      => 1,
                                                 sub_skipped=> 0,
-                                                todo       => 0,
+                                                'todo'     => 0,
                                                 skipped    => 0,
                                                },
                                       failed => { },
@@ -247,7 +223,7 @@ BEGIN {
                                                 good       => 0,
                                                 tests      => 1,
                                                 sub_skipped=> 0,
-                                                todo       => 0,
+                                                'todo'     => 0,
                                                 skipped    => 0,
                                                },
                                       failed => {
@@ -265,7 +241,7 @@ BEGIN {
                                                 good       => 1,
                                                 tests      => 1,
                                                 sub_skipped=> 0,
-                                                todo       => 0,
+                                                'todo'     => 0,
                                                 skipped    => 1,
                                                },
                                       failed => { },
@@ -281,7 +257,7 @@ BEGIN {
                                                 good       => 1,
                                                 tests      => 1,
                                                 sub_skipped=> 0,
-                                                todo       => 4,
+                                                'todo'     => 4,
                                                 skipped    => 0,
                                                },
                                       failed => { },
@@ -297,15 +273,102 @@ BEGIN {
                                                 good       => 1,
                                                 tests      => 1,
                                                 sub_skipped=> 0,
-                                                todo       => 0,
+                                                'todo'     => 0,
                                                 skipped    => 0,
                                                },
                                       failed => { },
                                       all_ok => 1,
                                      },
+
+                'die'             => {
+                                      total => {
+                                                bonus      => 0,
+                                                max        => 0,
+                                                'ok'       => 0,
+                                                files      => 1,
+                                                bad        => 1,
+                                                good       => 0,
+                                                tests      => 1,
+                                                sub_skipped=> 0,
+                                                'todo'     => 0,
+                                                skipped    => 0,
+                                               },
+                                      failed => {
+                                                 estat      => 1,
+                                                 wstat      => 256,
+                                                 max        => '??',
+                                                 failed     => '??',
+                                                 canon      => '??',
+                                                },
+                                      all_ok => 0,
+                                     },
+
+                die_head_end      => {
+                                      total => {
+                                                bonus      => 0,
+                                                max        => 0,
+                                                'ok'       => 4,
+                                                files      => 1,
+                                                bad        => 1,
+                                                good       => 0,
+                                                tests      => 1,
+                                                sub_skipped=> 0,
+                                                'todo'     => 0,
+                                                skipped    => 0,
+                                               },
+                                      failed => {
+                                                 estat      => 1,
+                                                 wstat      => 256,
+                                                 max        => '??',
+                                                 failed     => '??',
+                                                 canon      => '??',
+                                                },
+                                      all_ok => 0,
+                                     },
+
+                die_last_minute   => {
+                                      total => {
+                                                bonus      => 0,
+                                                max        => 4,
+                                                'ok'       => 4,
+                                                files      => 1,
+                                                bad        => 1,
+                                                good       => 0,
+                                                tests      => 1,
+                                                sub_skipped=> 0,
+                                                'todo'     => 0,
+                                                skipped    => 0,
+                                               },
+                                      failed => {
+                                                 estat      => 1,
+                                                 wstat      => 256,
+                                                 max        => 4,
+                                                 failed     => 0,
+                                                 canon      => '??',
+                                                },
+                                      all_ok => 0,
+                                     },
+                bignum            => {
+                                      total => {
+                                                bonus      => 0,
+                                                max        => 2,
+                                                'ok'       => 4,
+                                                files      => 1,
+                                                bad        => 1,
+                                                good       => 0,
+                                                tests      => 1,
+                                                sub_skipped=> 0,
+                                                'todo'     => 0,
+                                                skipped    => 0,
+                                               },
+                                      failed => {
+                                                 canon      => '??',
+                                                },
+                                      all_ok => 0,
+                                     },
                );
 
-    $Total_tests = (keys(%samples) * 4);
+    $Total_tests = (keys(%samples) * 4) + 1;
 }
 
 tie *NULL, 'My::Dev::Null' or die $!;
@@ -321,21 +384,21 @@ while (my($test, $expect) = each %samples) {
     select STDOUT;
 
     unless( $@ ) {
-        ok( Test::Harness::_all_ok($totals) == $expect->{all_ok},    
+        is( Test::Harness::_all_ok($totals), $expect->{all_ok},    
                                                       "$test - all ok" );
         ok( defined $expect->{total},                 "$test - has total" );
-        ok( eqhash( $expect->{total}, 
-                    {map { $_=>$totals->{$_} } keys %{$expect->{total}}} ),
+        is_deeply( {map { $_=>$totals->{$_} } keys %{$expect->{total}}},
+                   $expect->{total},
                                                          "$test - totals" );
-        ok( eqhash( $expect->{failed}, 
-                    {map { $_=>$failed->{"$SAMPLE_TESTS/$test"}{$_} }
-                              keys %{$expect->{failed}}} ),
+        is_deeply( {map { $_=>$failed->{"$SAMPLE_TESTS/$test"}{$_} }
+                        keys %{$expect->{failed}}},
+                   $expect->{failed},
                                                          "$test - failed" );
     }
     else {      # special case for bailout
-        ok( ($test eq 'bailout' and $@ =~ /Further testing stopped: GERONI/i),
-            $test );
-        ok( 1,  'skipping for bailout' );
-        ok( 1,  'skipping for bailout' );
+        is( $test, 'bailout' );
+        like( $@, '/Further testing stopped: GERONI/i', $test );
+        pass( 'skipping for bailout' );
+        pass( 'skipping for bailout' );
     }
 }

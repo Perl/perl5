@@ -745,29 +745,28 @@ sub pm_to_blib {
 pm_to_blib : pm_to_blib.ts
 	$(NOECHO) $(NOOP)
 
-};
-
-    push @m, <<'MAKE_FRAG', 
 # As always, keep under DCL's 255-char limit
 pm_to_blib.ts : $(TO_INST_PM)
-	$(NOECHO) $(RM_F) .MM_tmp
-MAKE_FRAG
+};
 
-    $line = '';  # avoid uninitialized var warning
-    while ($from = shift(@files),$to = shift(@files)) {
+    if (scalar(@files) > 0) {  # protect ourselves from empty PM_TO_BLIB
+
+      push(@m,qq[\t\$(NOECHO) \$(RM_F) .MM_tmp\n]);
+      $line = '';  # avoid uninitialized var warning
+      while ($from = shift(@files),$to = shift(@files)) {
 	$line .= " $from $to";
 	if (length($line) > 128) {
 	    push(@m,"\t\$(NOECHO) \$(PERL) -e \"print '$line'\" >>.MM_tmp\n");
 	    $line = '';
 	}
-    }
-    push(@m,"\t\$(NOECHO) \$(PERL) -e \"print '$line'\" >>.MM_tmp\n") if $line;
+      }
+      push(@m,"\t\$(NOECHO) \$(PERL) -e \"print '$line'\" >>.MM_tmp\n") if $line;
 
-    push(@m,q[	$(PERLRUN) "-MExtUtils::Install" -e "pm_to_blib({split(' ',<STDIN>)},'].$autodir.q[','$(PM_FILTER)')" <.MM_tmp]);
-    push(@m,qq[
-	\$(NOECHO) Delete/NoLog/NoConfirm .MM_tmp;
-	\$(NOECHO) \$(TOUCH) pm_to_blib.ts
-]);
+      push(@m,q[	$(PERLRUN) "-MExtUtils::Install" -e "pm_to_blib({split(' ',<STDIN>)},'].$autodir.q[','$(PM_FILTER)')" <.MM_tmp]);
+      push(@m,qq[\n\t\$(NOECHO) \$(RM_F) .MM_tmp\n]);
+
+    }
+    push(@m,qq[\t\$(NOECHO) \$(TOUCH) pm_to_blib.ts]);
 
     join('',@m);
 }

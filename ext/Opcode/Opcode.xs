@@ -151,7 +151,7 @@ verify_opset(pTHX_ SV *opset, int fatal)
 
     if      (!SvOK(opset))              err = "undefined";
     else if (!SvPOK(opset))             err = "wrong type";
-    else if (SvCUR(opset) != opset_len) err = "wrong size";
+    else if (SvCUR(opset) != (STRLEN)opset_len) err = "wrong size";
     if (err && fatal) {
 	croak("Invalid opset: %s", err);
     }
@@ -178,7 +178,7 @@ set_opset_bits(pTHX_ char *bitmap, SV *bitspec, int on, char *opname)
 	else
 	    bitmap[offset] &= ~(1 << bit);
     }
-    else if (SvPOK(bitspec) && SvCUR(bitspec) == opset_len) {
+    else if (SvPOK(bitspec) && SvCUR(bitspec) == (STRLEN)opset_len) {
 
 	STRLEN len;
 	char *specbits = SvPV(bitspec, len);
@@ -464,7 +464,7 @@ PPCODE:
 		croak("panic: opcode %d (%s) out of range",myopcode,opname);
 	    XPUSHs(sv_2mortal(newSVpv(op_desc[myopcode], 0)));
 	}
-	else if (SvPOK(bitspec) && SvCUR(bitspec) == opset_len) {
+	else if (SvPOK(bitspec) && SvCUR(bitspec) == (STRLEN)opset_len) {
 	    int b, j;
 	    STRLEN n_a;
 	    char *bitmap = SvPV(bitspec,n_a);

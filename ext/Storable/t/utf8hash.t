@@ -38,6 +38,8 @@ use bytes ();
 use Encode qw(is_utf8);
 my %utf8hash;
 
+$Storable::canonical = $Storable::canonical; # Shut up a used only once warning.
+
 for $Storable::canonical (0, 1) {
 
 # first we generate a nasty hash which keys include both utf8

@@ -1,25 +1,24 @@
-$!  Test.Com - DCL driver for perl5 regression tests
+$!  Test.Com - DCL wrapper for perl5 regression test driver
+$!
+$!  Version 2.0  25-April-2002   Craig Berry  craigberry@mac.com
+$!                               (and many other hands in the last 7+ years)
+$!  The most significant difference is that we now run the external t/TEST
+$!  rather than keeping a separately maintained test driver embedded here.
 $!
 $!  Version 1.1   4-Dec-1995
 $!  Charles Bailey  bailey@newman.upenn.edu
 $!
-$!  A little basic setup
+$!  Set up error handler and save things we'll restore later.
+$   On Control_Y Then Goto Control_Y_exit
 $   On Error Then Goto wrapup
 $   olddef = F$Environment("Default")
 $   oldmsg = F$Environment("Message")
-$   If F$Search("t.dir").nes.""
-$   Then
-$       Set Default [.t]
-$   Else
-$       If F$TrnLNm("Perl_Root").nes.""
-$       Then 
-$           Set Default Perl_Root:[t]
-$       Else
-$           Write Sys$Error "Can't find test directory"
-$           Exit 44
-$       EndIf
-$   EndIf
-$   Set Message /NoFacility/NoSeverity/NoIdentification/NoText
+$   oldpriv = F$SetPrv("NOALL")         ! downgrade privs for safety
+$   discard = F$SetPrv("NETMBX,TMPMBX") ! only need these to run tests
+$!
+$! Process arguments.  P1 is the file extension of the Perl images.  P2,
+$! when not empty, indicates that we are testing a version of Perl built for
+$! the VMS debugger.  The other arguments are passed directly to t/TEST.
 $!
 $   exe = ".Exe"
 $   If p1.nes."" Then exe = p1
@@ -30,7 +29,8 @@ $     Write Sys$Error "The first parameter passed to Test.Com must be the file t
 $     Write Sys$Error "images produced when you built Perl (i.e. "".Exe"", unless you edited"
 $     Write Sys$Error "Descrip.MMS or used the AXE=1 macro in the MM[SK] command line."
 $     Write Sys$Error ""
-$     Exit 44
+$     $status = 44
+$     goto wrapup
 $   EndIf
 $!
 $!  "debug" perl if second parameter is nonblank
@@ -39,6 +39,21 @@ $   dbg = ""
 $   ndbg = ""
 $   if p2.nes."" then dbg  = "dbg"
 $   if p2.nes."" then ndbg = "ndbg"
+$!
+$!  Make sure we are where we need to be.
+$   If F$Search("t.dir").nes.""
+$   Then
+$       Set Default [.t]
+$   Else
+$       If F$TrnLNm("Perl_Root").nes.""
+$       Then 
+$           Set Default Perl_Root:[t]
+$       Else
+$           Write Sys$Error "Can't find test directory"
+$           $status = 44
+$           goto wrapup
+$       EndIf
+$   EndIf
 $!
 $!  Pick up a copy of perl to use for the tests
 $   If F$Search("Perl.").nes."" Then Delete/Log/NoConfirm Perl.;*
@@ -52,174 +67,23 @@ $!  This may be set for the C compiler in descrip.mms, but it confuses the File:
 $   if f$trnlnm("sys") .nes. "" then DeAssign sys
 $!
 $!  And do it
+$   Set Message /NoFacility/NoSeverity/NoIdentification/NoText
 $   Show Process/Accounting
 $   testdir = "Directory/NoHead/NoTrail/Column=1"
 $   PerlShr_filespec = f$parse("Sys$Disk:[-]''dbg'PerlShr''exe'")
 $   Define 'dbg'Perlshr 'PerlShr_filespec'
-$   if f$mode() .nes. "INTERACTIVE" then Define PERL_SKIP_TTY_TEST 1
-$   MCR Sys$Disk:[]Perl. "-I[-.lib]" - "''p3'" "''p4'" "''p5'" "''p6'"
-$   Deck/Dollar=$$END-OF-TEST$$
-#
-# The bulk of the below code is scheduled for deletion.  test.com
-# will shortly use t/TEST.
-#
-
-use Config;
-use File::Spec;
-
-$| = 1;
-
-# Let tests know they're running in the perl core.  Useful for modules
-# which live dual lives on CPAN.
-$ENV{PERL_CORE} = 1;
-
-@ARGV = grep($_,@ARGV);  # remove empty elements due to "''p1'" syntax
-
-if (lc($ARGV[0]) eq '-v') {
-    $verbose = 1;
-    shift;
-}
-
-chdir 't' if -f 't/TEST';
-
-if ($ARGV[0] eq '') {
-    foreach (<[.*]*.t>, <[-.ext...]*.t>, <[-.lib...]*.t>) {
-      $_ = File::Spec->abs2rel($_);
-      s/\[([a-z]+)/[.$1/;      # hmm, abs2rel doesn't do subdirs of the cwd
-      ($fname = $_) =~ s/.*\]//;
-      push(@ARGV,$_);
-    }
-}
-
-$bad = 0;
-$good = 0;
-$extra_skip = 0;
-$total = @ARGV;
-while ($test = shift) {
-    if ($test =~ /^$/) {
-	next;
-    }
-    $te = $test;
-    chop($te);
-    $te .= '.' x (40 - length($te));
-	open(script,"$test") || die "Can't run $test.\n";
-	$_ = <script>;
-	close(script);
-	if (/#!.*\bperl.*-\w*([tT])/) {
-	    $switch = qq{"-$1"};
-	} else {
-	    $switch = '';
-	}
-	open(results,"\$ MCR Sys\$Disk:[]Perl. \"-I[-.lib]\" $switch $test 2>&1|") || (print "can't run.\n");
-    $ok = 0;
-    $next = 0;
-    $pending_not = 0;
-    while (<results>) {
-	if ($verbose) {
-	    print "$te$_";
-	    $te = '';
-	}
-	unless (/^#/) {
-	    if (/^1\.\.([0-9]+)( todo ([\d ]+))?/) {
-		$max = $1;
-                %todo = map { $_ => 1 } split / /, $3 if $3;
-		$totmax += $max;
-		$files += 1;
-		$next = 1;
-		$ok = 1;
-	    } else {
-                # our 'echo' substitute produces one more \n than Unix'
-		next if /^\s*$/;
-
-
-                if (/^(not )?ok (\d+)[^#]*(\s*#.*)?/ &&
-                    $2 == $next)
-                {
-                    my($not, $num, $extra) = ($1, $2, $3);
-                    my($istodo) = $extra =~ /^\s*#\s*TODO/ if $extra;
-                    $istodo = 1 if $todo{$num};
-
-                    if( $not && !$istodo ) {
-                        $ok = 0;
-                        $next = $num;
-                        last;
-                    }
-                    elsif( $pending_not ) {
-                        $next = $num;
-                        $ok = 0;
-                    }
-                    else {
-                        $next = $next + 1;
-                    }
-                }
-                elsif(/^not $/) {
-                    # VMS has this problem.  It sometimes adds newlines
-                    # between prints.  This sometimes means you get
-                    # "not \nok 42"
-                    $pending_not = 1;
-                }
-                elsif (/^Bail out!\s*(.*)/i) { # magic words
-                    die "FAILED--Further testing stopped" . ($1 ? ": $1\n" : ".\n");
-		}
-		else {
-                    $ok = 0;
-		}
-
-	    }
-	}
-    }
-    $next = $next - 1;
-    if ($ok && $next == $max) {
-	if ($max) {
-	    print "${te}ok\n";
-	    $good = $good + 1;
-	} else {
-	    print "${te}skipping test on this platform\n";
-	    $files -= 1;
-	    $extra_skip = $extra_skip + 1;
-	}
-    } else {
-	$next += 1;
-	print "${te}FAILED on test $next\n";
-	$bad = $bad + 1;
-	$_ = $test;
-	if (/^base/) {
-	    die "Failed a basic test--cannot continue.\n";
-	}
-    }
-}
-
-if ($bad == 0) {
-    if ($ok) {
-	print "All tests successful.\n";
-    } else {
-	die "FAILED--no tests were run for some reason.\n";
-    }
-} else {
-    # $pct = sprintf("%.2f", $good / $total * 100);
-    $gtotal = $total - $extra_skip;
-    if ($gtotal <= 0) { $gtotal = $total; }
-    $pct = sprintf("%.2f", $good / $gtotal * 100);
-    if ($bad == 1) {
-	warn "Failed 1 test, $pct% okay.\n";
-   } else {
-         if ($extra_skip > 0) {
-	     warn "Total tests: $total, Passed $good, Skipped $extra_skip.\n";
-	     warn "Failed $bad/$gtotal tests, $pct% okay.\n";
-         }
-         else {
-	     warn "Total tests: $total, Passed $good.\n";
-	     warn "Failed $bad/$gtotal tests, $pct% okay.\n";
-         }
-    }
-}
-($user,$sys,$cuser,$csys) = times;
-print sprintf("u=%g  s=%g  cu=%g  cs=%g  scripts=%d  tests=%d\n",
-    $user,$sys,$cuser,$csys,$files,$totmax);
-$$END-OF-TEST$$
+$   If F$Mode() .nes. "INTERACTIVE" Then Define/Nolog PERL_SKIP_TTY_TEST 1
+$   MCR Sys$Disk:[]Perl. "-I[-.lib]" TEST. "''p3'" "''p4'" "''p5'" "''p6'"
+$   goto wrapup
+$!
+$ Control_Y_exit:
+$   $status = 1552   ! %SYSTEM-W-CONTROLY
+$!
 $ wrapup:
-$   deassign 'dbg'Perlshr
+$   status = $status
+$   If f$trnlnm("''dbg'PerlShr") .nes. "" Then DeAssign 'dbg'PerlShr
 $   Show Process/Accounting
-$   Set Default &olddef
-$   Set Message 'oldmsg'
-$   Exit
+$   If f$type(olddef) .nes. "" Then Set Default &olddef
+$   If f$type(oldmsg) .nes. "" Then Set Message 'oldmsg'
+$   If f$type(oldpriv) .nes. "" Then discard = F$SetPrv(oldpriv)
+$   Exit status

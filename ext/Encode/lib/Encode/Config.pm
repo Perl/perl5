@@ -2,7 +2,7 @@
 # Demand-load module list
 #
 package Encode::Config;
-our $VERSION = do { my @r = (q$Revision: 1.5 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.6 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use strict;
 
@@ -139,6 +139,11 @@ unless (ord("A") == 193){
 	 #'big5plus'           => 'Encode::HanExtra',
 	 #'euc-tw'             => 'Encode::HanExtra',
 	 #'gb18030'            => 'Encode::HanExtra',
+
+	 'MIME-Header'        => 'Encode::MIME::Header',
+	 'MIME-B'             => 'Encode::MIME::Header',
+	 'MIME-Q'             => 'Encode::MIME::Header',
+
 	);
 }
 

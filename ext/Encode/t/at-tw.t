@@ -21,9 +21,11 @@ use strict;
 use Test::More tests => 17;
 use Encode;
 
+no utf8; # we have raw Chinese encodings here
+
 use_ok('Encode::TW');
 
-# Since JP.t already test basic file IO, we will just focus on
+# Since JP.t already tests basic file IO, we will just focus on
 # internal encode / decode test here. Unfortunately, to test
 # against all the UniHan characters will take a huge disk space,
 # not to mention the time it will take, and the fact that Perl
