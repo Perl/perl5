@@ -3470,13 +3470,15 @@ symbols, for example
 you probably have an old pre-Perl-5.8.0 installation (or parts of one)
 in /Library/Perl (the undefined symbols used to exist in pre-5.8.0 Perls).
 It seems that for some reason "make install" doesn't always completely
-overwrite the files in /Library/Perl.  You can remove the shared
-libraries for example like this:
+overwrite the files in /Library/Perl.  You can remove the Perl
+shared library like this:
 
-   # find /Library/Perl -name '*.bundle' -print | xargs rm -i
+   rm /Library/Perl/darwin/CORE/libperl.dylib
 
-and then reissue "make install".  (If you already installed some XS
-extensions beyond the Perl core, you will have to reinstall them, too.)
+and then reissue "make install".  Note that the above of course is
+extremely disruptive for anything using the /usr/local/bin/perl.
+If that doesn't help, you may have to try removing all the .bundle
+files from beneath /Library/Perl, and again "make install"-ing.
 
 =head2 OS/2 Test Failures
 
