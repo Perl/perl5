@@ -4533,6 +4533,15 @@ win32_get_child_IO(child_IO_table* ptbl)
 #ifdef HAVE_INTERP_INTERN
 
 
+static void
+win32_csighandler(int sig)
+{
+#if 0
+    dTHXa(PERL_GET_SIG_CONTEXT);
+    Perl_warn(aTHX_ "Got signal %d",sig);
+#endif
+    /* Does nothing */
+}
 
 void
 Perl_sys_intern_init(pTHX)
@@ -4551,8 +4560,8 @@ Perl_sys_intern_init(pTHX)
     w32_init_socktype		= 0;
     if (my_perl == PL_curinterp) {
         /* Force C runtime signal stuff to set its console handler */
-	signal(SIGINT,SIG_DFL);
-	signal(SIGBREAK,SIG_DFL);
+	signal(SIGINT,&win32_csighandler);
+	signal(SIGBREAK,&win32_csighandler);
         /* Push our handler on top */
 	SetConsoleCtrlHandler(win32_ctrlhandler,TRUE);
     }
