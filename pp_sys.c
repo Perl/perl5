@@ -3252,7 +3252,8 @@ PP(pp_ghostent)
 	PUSHs(sv = sv_newmortal());
 	if (hent) {
 	    if (which == OP_GHBYNAME) {
-		sv_setpvn(sv, hent->h_addr, hent->h_length);
+		if (hent->h_addr)
+		    sv_setpvn(sv, hent->h_addr, hent->h_length);
 	    }
 	    else
 		sv_setpv(sv, (char*)hent->h_name);
@@ -3281,7 +3282,8 @@ PP(pp_ghostent)
 	}
 #else
 	PUSHs(sv = sv_mortalcopy(&sv_no));
-	sv_setpvn(sv, hent->h_addr, len);
+	if (hent->h_addr)
+	    sv_setpvn(sv, hent->h_addr, len);
 #endif /* h_addr */
     }
     RETURN;
