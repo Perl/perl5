@@ -570,6 +570,7 @@ ext/re/re.t				see if re pragma works
 ext/re/re.xs			re extension external subroutines
 ext/Safe/safe1.t		See if Safe works
 ext/Safe/safe2.t		See if Safe works
+ext/Safe/safe3.t		See if Safe works
 ext/SDBM_File/Makefile.PL	SDBM extension makefile writer
 ext/SDBM_File/sdbm.t		See if SDBM_File works
 ext/SDBM_File/sdbm/biblio	SDBM kit
