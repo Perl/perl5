@@ -1,7 +1,7 @@
 @menu
-pod:pod/perl.pod			MacPerl Overview
-pod:pod/perltoc.pod			Table of contents
-pod:pod/macperl.pod			Macintosh specific features	
+pod:pod/perl.pod			Perl Overview (perl)
+pod:pod/perltoc.pod			Table of contents (perltoc)
+pod:pod/macperl.pod			Macintosh specific features
 pod:pod/macperlbook.pod			MacPerl book information
 @sub				Macintosh Toolbox Modules
 pod:lib/Mac/Toolbox.pod			Overview
@@ -9,6 +9,7 @@ pod:lib/Mac/Toolbox.pod			Overview
 pod:lib/Mac/Types.pm			MacOS Types
 pod:lib/Mac/Events.pm			Event Manager
 pod:lib/Mac/Windows.pm			Window Manager
+pod:lib/Mac/Pane.pm			Window Panes
 pod:lib/Mac/QuickDraw.pm		QuickDraw
 pod:lib/Mac/QDOffscreen.pm		Offscreen QuickDraw
 pod:lib/Mac/Fonts.pm			Font Manager
@@ -16,77 +17,122 @@ pod:lib/Mac/Controls.pm			Control Manager
 pod:lib/Mac/Menus.pm			Menu Manager
 pod:lib/Mac/Dialogs.pm			Dialog Manager
 pod:lib/Mac/Movies.pm			QuickTime Movie Manager
+pod:lib/Mac/QuickTimeVR.pm		QuickTime VR
+pod:lib/Mac/Components.pm		QuickTime Components
+pod:lib/Mac/Sounds.pm			Sound Manager
+pod:lib/Mac/Speech.pm			Speech Synthesis Manager
+pod:lib/Mac/SpeechRecognition.pm	Speech Recognition Manager
 pod:lib/Mac/Lists.pm			List Manager
 pod:lib/Mac/StandardFile.pm		Standard File Dialogs
+pod:lib/Mac/Navigation.pm		Navigation Services
 pod:lib/Mac/Files.pm			File Manager
 pod:lib/Mac/MoreFiles.pm		More File Routines
 pod:lib/Mac/Memory.pm			Memory Manager
 pod:lib/Mac/Resources.pm		Resource Manager
 pod:lib/Mac/Gestalt.pm			Gestalt Manager
-pod:lib/Mac/AppleEvents.pm		AppleEvents
 pod:lib/Mac/Processes.pm		Process Manager
+pod:lib/Mac/Apps/Launch.pm		Launch/Quit Processes
+pod:lib/Mac/AppleEvents.pm		AppleEvent Manager
+pod:lib/Mac/AppleEvents/Simple.pm	Simple Interface to AppleEvents
 pod:lib/Mac/OSA.pm			Open Scripting Architecture
-pod:lib/Mac/Components.pm		QuickTime Components
-pod:lib/Mac/Speech.pm			Speech Synthesis Manager
-pod:lib/Mac/SpeechRecognition.pm	Speech Recognition Manager
+pod:lib/Mac/OSA/Simple.pm		Simple Interface to OSA
+pod:lib/Mac/Notification.pm		Notification Manager
+pod:lib/Mac/TextEdit.pm			TextEdit
+pod:lib/Mac/LowMem.pm			Low Memory Globals
 @sep
-pod:lib/Mac/InternetConfig.pm		Internet Config 
+pod:lib/Mac/InternetConfig.pm		Internet Config
+pod:lib/Mac/err.pm			Error Formating
 @sep
-pod:pod/macperlcat.pod			Chris' AppleEvents Tutorial
+pod:lib/Mac/Glue.pm			Mac::Glue Scripting Framework
+pod:pod/macperlcat.pod			Chris' Apple events Tutorial
 @end
 @sub				Perl FAQ
-pod:pod/perlfaq.pod			Overview
+pod:pod/perlfaq.pod			Overview (perlfaq)
 @sep
-pod:pod/perlfaq1.pod			General Questions About Perl
-pod:pod/perlfaq2.pod			Obtaining and Learning about Perl
-pod:pod/perlfaq3.pod			Programming Tools
-pod:pod/perlfaq4.pod			Data Manipulation
-pod:pod/perlfaq5.pod			Files and Formats
-pod:pod/perlfaq6.pod			Regexps
-pod:pod/perlfaq7.pod			General Perl Language Issues
-pod:pod/perlfaq8.pod			System Interaction
-pod:pod/perlfaq9.pod			Networking
+pod:pod/perlfaq1.pod			General Questions About Perl (perlfaq1)
+pod:pod/perlfaq2.pod			Obtaining and Learning about Perl (perlfaq2)
+pod:pod/perlfaq3.pod			Programming Tools (perlfaq3)
+pod:pod/perlfaq4.pod			Data Manipulation (perlfaq4)
+pod:pod/perlfaq5.pod			Files and Formats (perlfaq5)
+pod:pod/perlfaq6.pod			Regexps (perlfaq6)
+pod:pod/perlfaq7.pod			General Perl Language Issues (perlfaq7)
+pod:pod/perlfaq8.pod			System Interaction (perlfaq8)
+pod:pod/perlfaq9.pod			Networking (perlfaq9)
 @end
 @sep
-pod:pod/perldata.pod		Data structures
-pod:pod/perlsyn.pod			Syntax
-pod:pod/perlop.pod			Operators and precedence
-pod:pod/perlre.pod			Regular expressions
-pod:pod/perlfunc.pod			Builtin functions
-pod:pod/perlvar.pod			Predefined variables
+pod:pod/perlsyn.pod			Syntax (perlsyn)
+pod:pod/perldata.pod			Data structures (perldata)
+pod:pod/perlop.pod			Operators and precedence (perlop)
+pod:pod/perlsub.pod			Subroutines (perlsub)
+pod:pod/perlfunc.pod			Builtin functions (perlfunc)
+pod:pod/perlvar.pod			Predefined variables (perlvar)
+pod:pod/perlrun.pod			Execution and options (perlrun)
 @sep
+@sub				Intros / Tutorials
+pod:pod/perlrequick.pod			Regular expressions quick start (perlrequick)
+pod:pod/perlretut.pod			Regular expressions tutorial (perlretut)
+pod:pod/perlopentut.pod			open() tutorial (perlopentut)
+pod:pod/perlreftut.pod			References short introduction (perlreftut)
+pod:pod/perldsc.pod			Data structures intro (perldsc)
+pod:pod/perlboot.pod			OO tutorial for beginners (perlboot)
+pod:pod/perltoot.pod			OO tutorial, part 1 (perltoot)
+pod:pod/perltootc.pod			OO tutorial, part 2 (perltootc)
+pod:pod/perldebtut.pod			Debugging tutorial (perldebtut)
+pod:pod/perlbot.pod			OO tricks and examples (perlbot)
+@end
 @sub				Advanced Topics
-pod:pod/perlsub.pod			Subroutines
-pod:pod/perlmod.pod			Modules
-pod:pod/perlmodlib.pod			Creating new Modules
-pod:pod/perlref.pod			References
-pod:pod/perldsc.pod			Data structures intro
-pod:pod/perllol.pod			Lists of lists
-pod:pod/perlobj.pod			Objects
-pod:pod/perltie.pod			Tied Objects
-pod:pod/perlbot.pod			OO tricks and examples
-pod:pod/perltoot.pod			OO tutorial
-pod:pod/perlform.pod			Formats
-pod:pod/perlipc.pod			Interprocess communication
-@sub				Interfacing to C
-pod:pod/perlxs.pod			XS API
-pod:pod/perlxstut.pod			XS tutorial
-pod:pod/perlguts.pod			Internal functions
-pod:pod/perlapio.pod			Internal I/O Interface
-pod:pod/perlcall.pod			Calling from C
-pod:pod/perlembed.pod			Embedding Perl
+pod:pod/perllol.pod			Lists of lists (perllol)
+pod:pod/perlre.pod			Regular expressions (perlre)
+pod:pod/perlref.pod			References (perlref)
+pod:pod/perlform.pod			Formats (perlform)
+pod:pod/perlobj.pod			Objects (perlobj)
+pod:pod/perltie.pod			Tied Objects (perltie)
+pod:pod/perlipc.pod			Interprocess communication (perlipc)
+@sep
+pod:pod/perlnumber.pod			Number semantics (perlnumber)
+pod:pod/perlport.pod			Portability guide (perlport)
+pod:pod/perllocale.pod			Locale support (perllocale)
+pod:pod/perlunicode.pod			Unicode support (perlunicode)
+pod:pod/perlsec.pod			Security (perlsec)
 @end
+@sub				Modules
+pod:pod/perlmod.pod			How they work (perlmod)
+pod:pod/perlmodlib.pod			How to write and use (perlmodlib)
+pod:pod/perlmodinstall.pod		How to install from CPAN (perlmodinstall)
+pod:pod/perlnewmod.pod			Preparing a new module for distribution (perlnewmod)
+@end
+@sub				Interfacing to C
+pod:pod/perlcompile.pod			Compiler suite intro (perlcompile)
+pod:pod/perlembed.pod			Ways to embed perl in your C or C++ application (perlembed)
+pod:pod/perldebguts.pod			debugging guts and tips (perldebguts)
+pod:pod/perlxstut.pod			XS tutorial (perlxstut)
+pod:pod/perlxs.pod			XS application programming interface (perlxs)
+pod:pod/perlclib.pod			Internal replacements for standard C library functions (perlclib)
+pod:pod/perlguts.pod			Internal functions for those doing extensions (perlguts)
+pod:pod/perlcall.pod			Calling conventions from C (perlcall)
+pod:pod/perlutil.pod			Utilities packaged with the Perl distribution (perlutil)
+pod:pod/perlfilter.pod			Source filters (perlfilter)
+pod:pod/perldbmfilter.pod		DBM filters (perldbmfilter)
+pod:pod/perlapi.pod			API listing (autogenerated) (perlapi)
+pod:pod/perlintern.pod			Internal functions (autogenerated) (perlintern)
+pod:pod/perlapio.pod			Internal IO abstraction interface (perlapio)
+pod:pod/perltodo.pod			Things to do (perltodo)
+pod:pod/perlhack.pod			Hackers guide (perlhack)
 @end
 @sub				Troubleshooting
-pod:pod/perldebug.pod			Debugging
-pod:pod/perldiag.pod			Diagnostic messages
-pod:pod/perltrap.pod			Traps for the unwary
+pod:pod/perltrap.pod			Traps for the unwary (perltrap)
+pod:pod/perldiag.pod			Diagnostic messages (perldiag)
+pod:pod/perllexwarn.pod			Warnings and their control (perllexwarn)
+pod:pod/perldebug.pod			Debugging (perldebug)
 @end
 @sub				Various
-pod:pod/perlstyle.pod			Style guide
-pod:pod/perlpod.pod			Documentation format
-pod:pod/perlbook.pod			Book information
-pod:pod/perldelta.pod			News for Perl 5.004
+pod:pod/perlstyle.pod			Style guide (perlstyle)
+pod:pod/perlpod.pod			Documentation format (perlpod)
+pod:pod/perlbook.pod			Book information (perlbook)
+pod:pod/perlhist.pod			Book information (perlhist)
+pod:pod/perldelta.pod			New for Perl 5.6 (perldelta)
+pod:pod/perl5005delta.pod		New for Perl 5.005 (perl5005delta)
+pod:pod/perl5004delta.pod		New for Perl 5.004 (perl5004delta)
 @end
 @sep
 http://www.macperl.org/			MacPerl Homepage
@@ -227,10 +273,55 @@ http://www.ptf.com/macperl/		The MacPerl Pages (PTF)
 @alias	until		Simple statements
 @end
 
-@file perl pod:pod/perl.pod
-@file perltoc pod:pod/perltoc.pod
 @file macperl pod:pod/macperl.pod
+@file macperlcat pod:pod/macperlcat.pod
+@file macperlbook pod:pod/macperlbook.pod
+@file perl pod:pod/perl.pod
 @file perlfaq pod:pod/perlfaq.pod
+@file perltoc pod:pod/perltoc.pod
+@file perlbook pod:pod/perlbook.pod
+@file perlsyn pod:pod/perlsyn.pod
+@file perldata pod:pod/perldata.pod
+@file perlop pod:pod/perlop.pod
+@file perlsub pod:pod/perlsub.pod
+@file perlfunc pod:pod/perlfunc.pod
+@file perlreftut pod:pod/perlreftut.pod
+@file perldsc pod:pod/perldsc.pod
+@file perlrequick pod:pod/perlrequick.pod
+@file perlpod pod:pod/perlpod.pod
+@file perlstyle pod:pod/perlstyle.pod
+@file perltrap pod:pod/perltrap.pod
+@file perlrun pod:pod/perlrun.pod
+@file perldiag pod:pod/perldiag.pod
+@file perllexwarn pod:pod/perllexwarn.pod
+@file perldebtut pod:pod/perldebtut.pod
+@file perldebug pod:pod/perldebug.pod
+@file perlvar pod:pod/perlvar.pod
+@file perllol pod:pod/perllol.pod
+@file perlopentut pod:pod/perlopentut.pod
+@file perlretut pod:pod/perlretut.pod
+@file perlre pod:pod/perlre.pod
+@file perlref pod:pod/perlref.pod
+@file perlform pod:pod/perlform.pod
+@file perlboot pod:pod/perlboot.pod
+@file perltoot pod:pod/perltoot.pod
+@file perltootc pod:pod/perltootc.pod
+@file perlobj pod:pod/perlobj.pod
+@file perlbot pod:pod/perlbot.pod
+@file perltie pod:pod/perltie.pod
+@file perlipc pod:pod/perlipc.pod
+@file perlfork pod:pod/perlfork.pod
+@file perlnumber pod:pod/perlnumber.pod
+@file perlthrtut pod:pod/perlthrtut.pod
+@file perlport pod:pod/perlport.pod
+@file perllocale pod:pod/perllocale.pod
+@file perlunicode pod:pod/perlunicode.pod
+@file perlebcdic pod:pod/perlebcdic.pod
+@file perlsec pod:pod/perlsec.pod
+@file perlmod pod:pod/perlmod.pod
+@file perlmodlib pod:pod/perlmodlib.pod
+@file perlmodinstall pod:pod/perlmodinstall.pod
+@file perlnewmod pod:pod/perlnewmod.pod
 @file perlfaq1 pod:pod/perlfaq1.pod
 @file perlfaq2 pod:pod/perlfaq2.pod
 @file perlfaq3 pod:pod/perlfaq3.pod
@@ -240,34 +331,23 @@ http://www.ptf.com/macperl/		The MacPerl Pages (PTF)
 @file perlfaq7 pod:pod/perlfaq7.pod
 @file perlfaq8 pod:pod/perlfaq8.pod
 @file perlfaq9 pod:pod/perlfaq9.pod
-@file perldata pod:pod/perldata.pod
-@file perlsyn pod:pod/perlsyn.pod
-@file perlop pod:pod/perlop.pod
-@file perlre pod:pod/perlre.pod
-@file perlfunc pod:pod/perlfunc.pod
-@file perlvar pod:pod/perlvar.pod
-@file perlsub pod:pod/perlsub.pod
-@file perlmod pod:pod/perlmod.pod
-@file perlmodlib pod:pod/perlmodlib.pod
-@file perlref pod:pod/perlref.pod
-@file perldsc pod:pod/perldsc.pod
-@file perllol pod:pod/perllol.pod
-@file perlobj pod:pod/perlobj.pod
-@file perltie pod:pod/perltie.pod
-@file perlbot pod:pod/perlbot.pod
-@file perltoot pod:pod/perltoot.pod
-@file perlform pod:pod/perlform.pod
-@file perlipc pod:pod/perlipc.pod
-@file perlxs pod:pod/perlxs.pod
-@file perlxstut pod:pod/perlxstut.pod
-@file perlguts pod:pod/perlguts.pod
-@file perlapio pod:pod/perlapio.pod
-@file perlcall pod:pod/perlcall.pod
+@file perlcompile pod:pod/perlcompile.pod
 @file perlembed pod:pod/perlembed.pod
-@file perldebug pod:pod/perldebug.pod
-@file perldiag pod:pod/perldiag.pod
-@file perltrap pod:pod/perltrap.pod
-@file perlstyle pod:pod/perlstyle.pod
-@file perlpod pod:pod/perlpod.pod
-@file perlbook pod:pod/perlbook.pod
+@file perldebguts pod:pod/perldebguts.pod
+@file perlxstut pod:pod/perlxstut.pod
+@file perlxs pod:pod/perlxs.pod
+@file perlclib pod:pod/perlclib.pod
+@file perlguts pod:pod/perlguts.pod
+@file perlcall pod:pod/perlcall.pod
+@file perlutil pod:pod/perlutil.pod
+@file perlfilter pod:pod/perlfilter.pod
+@file perldbmfilter pod:pod/perldbmfilter.pod
+@file perlapi pod:pod/perlapi.pod
+@file perlintern pod:pod/perlintern.pod
+@file perlapio pod:pod/perlapio.pod
+@file perltodo pod:pod/perltodo.pod
+@file perlhack pod:pod/perlhack.pod
+@file perlhist pod:pod/perlhist.pod
 @file perldelta pod:pod/perldelta.pod
+@file perl5005delta pod:pod/perl5005delta.pod
+@file perl5004delta pod:pod/perl5004delta.pod
