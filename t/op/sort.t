@@ -163,7 +163,10 @@ print $@ ? "not ok 21\n# $@" : "ok 21\n";
 
 ## exercise sort builtins... ($a <=> $b already tested)
 @a = ( 5, 19, 1996, 255, 90 );
-@b = sort { $b <=> $a } @a;
+@b = sort {
+    my $dummy;		# force blockness
+    return $b <=> $a
+} @a;
 print ("@b" eq '1996 255 90 19 5' ? "ok 30\n" : "not ok 30\n");
 print "# x = '@b'\n";
 $x = join('', sort { $a cmp $b } @harry);
