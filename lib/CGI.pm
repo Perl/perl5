@@ -29,7 +29,7 @@ $AUTOLOAD_DEBUG=0;
 $NPH=0;
 
 $CGI::revision = '$Id: CGI.pm,v 2.32 1997/3/19 10:10 lstein Exp $';
-$CGI::VERSION='2.3201';
+$CGI::VERSION='2.3202';
 
 # OVERRIDE THE OS HERE IF CGI.pm GUESSES WRONG
 # $OS = 'UNIX';
@@ -986,10 +986,18 @@ END_OF_FUNC
 'redirect' => <<'END_OF_FUNC',
 sub redirect {
     my($self,@p) = self_or_default(@_);
-    my($url,$target,$cookie,$nph,@other) = $self->rearrange([[URI,URL],TARGET,COOKIE,NPH],@p);
+    my($url,$target,$cookie,$nph,@other) =
+	$self->rearrange([[URI,URL],TARGET,COOKIE,NPH],@p);
     $url = $url || $self->self_url;
     my(@o);
     foreach (@other) { push(@o,split("=")); }
+    if ($MOD_PERL or exists $self->{'.req'}) {
+	my $r = $self->{'.req'} || Apache->request;
+	$r->header_out(Location => $url);
+	$r->err_header_out(Location => $url);
+	$r->status(302);
+	return;
+    }
     push(@o,
 	 '-Status'=>'302 Found',
 	 '-Location'=>$url,
