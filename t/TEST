@@ -32,6 +32,7 @@ while (<CONFIG>) {
     }
 }
 $sharpbang = 0 if $ENV{OS2_SHELL};		# OS/2
+$sharpbang = 0 if ($^O eq 'qnx');		# QNX
 $bad = 0;
 $good = 0;
 $total = @ARGV;

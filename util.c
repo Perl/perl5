@@ -42,6 +42,10 @@
 #  include <sys/file.h>
 #endif
 
+#ifdef I_SYS_WAIT
+#  include <sys/wait.h>
+#endif
+
 #define FLUSH
 
 #ifdef LEAKTEST

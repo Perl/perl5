@@ -4978,11 +4978,9 @@ start_subparse()
     CV* outsidecv = compcv;
     AV* comppadlist;
 
-#ifndef __QNX__
     if (compcv) {
 	assert(SvTYPE(compcv) == SVt_PVCV);
     }
-#endif
     save_I32(&subline);
     save_item(subname);
     SAVEI32(padix);
