@@ -47,7 +47,11 @@ cd t || exit 1
 
 ln -sf ../perl.pixie .
 
-the_t=`echo base/*.t comp/*.t cmd/*.t run/*.t io/*.t; echo op/*.t pod/*.t x2p/*.t; find ../ext ../lib -name '*.t' -print`
+if test $# = 0; then
+  the_t=`echo base/*.t comp/*.t cmd/*.t run/*.t io/*.t; echo op/*.t uni/*.t pod/*.t x2p/*.t; find ../ext ../lib -name '*.t' -print`
+else
+  the_t=$@
+fi
 
 PERL_DESTRUCT_LEVEL=2
 export PERL_DESTRUCT_LEVEL
@@ -58,13 +62,17 @@ rm -f all.Counts
 
 for t in $the_t
 do
+    case "$t" in
+    ext/*|lib/*) t=../$t ;;
+    t/*) t=`echo $t|sed 's:^t/::'` ;;
+    esac
     echo $t|sed 's:\.t$::'
     sw=''
-    case "`head -1 $t|egrep -e '^#.* -*T'`" in
-    *-T*) sw="$sw -T" ;;
+    case "`head -1 $t|egrep -e '^#.* -.*T'`" in
+    *-*T*) sw="$sw -T" ;;
     esac
-    case "`head -1 $t|egrep -e '^#.* -t'`" in
-    *-t*) sw="$sw -t" ;;
+    case "`head -1 $t|egrep -e '^#.* -.*t'`" in
+    *-*t*) sw="$sw -t" ;;
     esac
     ./perl.pixie -I../lib $sw $t > /dev/null
     if cd ..
