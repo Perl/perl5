@@ -73,6 +73,11 @@ case `$cc -v 2>&1`"" in
 		# Done too late in Configure if hinted
 		gccversion=`$cc --version`
 		fi
+           case "$gccversion in
+               [012]*) # HP-UX and gcc-2.* break UINT32_MAX :-(
+                       ccflags="$ccflags -DUINT32_MAX_BROKEN"
+                       ;;
+               esac
 	    case "`getconf KERNEL_BITS 2>/dev/null`" in
 		*64*)
 		    echo "main(){}">try.c
