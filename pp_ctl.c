@@ -1776,9 +1776,11 @@ PP(pp_enteriter)
     else
 #endif /* USE_THREADS */
     if (PL_op->op_targ) {
+#ifndef USE_ITHREADS
 	svp = &PL_curpad[PL_op->op_targ];		/* "my" variable */
 	SAVESPTR(*svp);
-#ifdef USE_ITHREADS
+#else
+	SAVEPADSV(PL_op->op_targ);
 	iterdata = (void*)PL_op->op_targ;
 	cxtype |= CXp_PADVAR;
 #endif

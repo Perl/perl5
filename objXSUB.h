@@ -1433,6 +1433,10 @@
 #define Perl_save_re_context	pPerl->Perl_save_re_context
 #undef  save_re_context
 #define save_re_context		Perl_save_re_context
+#undef  Perl_save_padsv
+#define Perl_save_padsv		pPerl->Perl_save_padsv
+#undef  save_padsv
+#define save_padsv		Perl_save_padsv
 #undef  Perl_save_sptr
 #define Perl_save_sptr		pPerl->Perl_save_sptr
 #undef  save_sptr

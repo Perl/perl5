@@ -1933,6 +1933,7 @@ Ap	|SV*	|save_scalar	|GV* gv
 Ap	|void	|save_pptr	|char** pptr
 Ap	|void	|save_vptr	|void* pptr
 Ap	|void	|save_re_context
+Ap	|void	|save_padsv	|PADOFFSET off
 Ap	|void	|save_sptr	|SV** sptr
 Ap	|SV*	|save_svref	|SV** sptr
 Ap	|SV**	|save_threadsv	|PADOFFSET i
@@ -2071,7 +2072,7 @@ p	|void	|utilize	|int aver|I32 floor|OP* version|OP* id|OP* arg
 Ap	|U8*	|utf16_to_utf8	|U8* p|U8 *d|I32 bytelen|I32 *newlen
 Ap	|U8*	|utf16_to_utf8_reversed|U8* p|U8 *d|I32 bytelen|I32 *newlen
 Ap	|STRLEN	|utf8_length	|U8* s|U8 *e
-Ap	|I32	|utf8_distance	|U8 *a|U8 *b
+Ap	|IV	|utf8_distance	|U8 *a|U8 *b
 Ap	|U8*	|utf8_hop	|U8 *s|I32 off
 ApM	|U8*	|utf8_to_bytes	|U8 *s|STRLEN *len
 ApM	|U8*	|bytes_to_utf8	|U8 *s|STRLEN *len

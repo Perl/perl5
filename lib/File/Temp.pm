@@ -166,7 +166,7 @@ Exporter::export_tags('POSIX','mktemp');
 
 # Version number 
 
-$VERSION = '0.10';
+$VERSION = '0.11';
 
 # This is a list of characters that can be used in random filenames
 
@@ -881,7 +881,8 @@ is specified.
 Return the filename and filehandle as before except that the file is
 automatically removed when the program exits. Default is for the file
 to be removed if a file handle is requested and to be kept if the
-filename is requested.
+filename is requested. In a scalar context (where no filename is 
+returned) the file is always deleted either on exit or when it is closed.
 
 If the template is not specified, a template is always
 automatically generated. This temporary file is placed in tmpdir()
@@ -896,8 +897,11 @@ the description of tmpfile() elsewhere in this document).
 This is the preferred mode of operation, as if you only 
 have a filehandle, you can never create a race condition
 by fumbling with the filename. On systems that can not unlink
-an open file (for example, Windows NT) the file is marked for
-deletion when the program ends (equivalent to setting UNLINK to 1).
+an open file or can not mark a file as temporary when it is opened
+(for example, Windows NT uses the C<O_TEMPORARY> flag))
+the file is marked for deletion when the program ends (equivalent
+to setting UNLINK to 1). The C<UNLINK> flag is ignored if present.
+
 
   (undef, $filename) = tempfile($template, OPEN => 0);
 
@@ -978,19 +982,33 @@ sub tempfile {
   # Now add a suffix
   $template .= $options{"SUFFIX"};
 
+  # Determine whether we should tell _gettemp to unlink the file
+  # On unix this is irrelevant and can be worked out after the file is
+  # opened (simply by unlinking the open filehandle). On Windows or VMS
+  # we have to indicate temporary-ness when we open the file. In general
+  # we only want a true temporary file if we are returning just the 
+  # filehandle - if the user wants the filename they probably do not
+  # want the file to disappear as soon as they close it.
+  # For this reason, tie unlink_on_close to the return context regardless
+  # of OS.
+  my $unlink_on_close = ( wantarray ? 0 : 1);
+
   # Create the file
   my ($fh, $path);
   croak "Error in tempfile() using $template"
     unless (($fh, $path) = _gettemp($template,
 				    "open" => $options{'OPEN'},
 				    "mkdir"=> 0 ,
-                                   "unlink_on_close" => $options{'UNLINK'},
+                                    "unlink_on_close" => $unlink_on_close,
 				    "suffixlen" => length($options{'SUFFIX'}),
 				   ) );
 
   # Set up an exit handler that can do whatever is right for the
-  # system. Do not check return status since this is all done with
-  # END blocks
+  # system. This removes files at exit when requested explicitly or when
+  # system is asked to unlink_on_close but is unable to do so because
+  # of OS limitations.
+  # The latter should be achieved by using a tied filehandle.
+  # Do not check return status since this is all done with END blocks.
   _deferred_unlink($fh, $path, 0) if $options{"UNLINK"};
 
   # Return
@@ -1731,6 +1749,15 @@ descriptor before passing it to another process.
     fcntl($tmpfh, F_SETFD, 0)
         or die "Can't clear close-on-exec flag on temp fh: $!\n";
 
+=head2 Temporary files and NFS
+
+Some problems are associated with using temporary files that reside
+on NFS file systems and it is recommended that a local filesystem
+is used whenever possible. Some of the security tests will most probably
+fail when the temp file is not local. Additionally, be aware that
+the performance of I/O operations over NFS will not be as good as for
+a local disk.
+
 =head1 HISTORY
 
 Originally began life in May 1999 as an XS interface to the system
@@ -1743,8 +1770,8 @@ operating system and to help with portability.
 
 L<POSIX/tmpnam>, L<POSIX/tmpfile>, L<File::Spec>, L<File::Path>
 
-See L<File::MkTemp> for a different implementation of temporary
-file handling.
+See L<IO::File> and L<File::MkTemp> for different implementations of 
+temporary file handling.
 
 =head1 AUTHOR
 

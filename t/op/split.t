@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..28\n";
+print "1..29\n";
 
 $FS = ':';
 
@@ -122,3 +122,8 @@ print "ok 27\n";
 print "not " if @list1 != @list2 or "@list1" ne "@list2"
              or @list1 != 2 or "@list1" ne "a   b c ";
 print "ok 28\n";
+
+# zero-width assertion
+$_ = join ':', split /(?=\w)/, "rm b";
+print "not" if $_ ne "r:m :b";
+print "ok 29\n";

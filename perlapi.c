@@ -2615,6 +2615,13 @@ Perl_save_re_context(pTHXo)
     ((CPerlObj*)pPerl)->Perl_save_re_context();
 }
 
+#undef  Perl_save_padsv
+void
+Perl_save_padsv(pTHXo_ PADOFFSET off)
+{
+    ((CPerlObj*)pPerl)->Perl_save_padsv(off);
+}
+
 #undef  Perl_save_sptr
 void
 Perl_save_sptr(pTHXo_ SV** sptr)

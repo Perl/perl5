@@ -669,6 +669,7 @@ PERL_CALLCONV SV*	Perl_save_scalar(pTHX_ GV* gv);
 PERL_CALLCONV void	Perl_save_pptr(pTHX_ char** pptr);
 PERL_CALLCONV void	Perl_save_vptr(pTHX_ void* pptr);
 PERL_CALLCONV void	Perl_save_re_context(pTHX);
+PERL_CALLCONV void	Perl_save_padsv(pTHX_ PADOFFSET off);
 PERL_CALLCONV void	Perl_save_sptr(pTHX_ SV** sptr);
 PERL_CALLCONV SV*	Perl_save_svref(pTHX_ SV** sptr);
 PERL_CALLCONV SV**	Perl_save_threadsv(pTHX_ PADOFFSET i);
@@ -806,7 +807,7 @@ PERL_CALLCONV void	Perl_utilize(pTHX_ int aver, I32 floor, OP* version, OP* id, 
 PERL_CALLCONV U8*	Perl_utf16_to_utf8(pTHX_ U8* p, U8 *d, I32 bytelen, I32 *newlen);
 PERL_CALLCONV U8*	Perl_utf16_to_utf8_reversed(pTHX_ U8* p, U8 *d, I32 bytelen, I32 *newlen);
 PERL_CALLCONV STRLEN	Perl_utf8_length(pTHX_ U8* s, U8 *e);
-PERL_CALLCONV I32	Perl_utf8_distance(pTHX_ U8 *a, U8 *b);
+PERL_CALLCONV IV	Perl_utf8_distance(pTHX_ U8 *a, U8 *b);
 PERL_CALLCONV U8*	Perl_utf8_hop(pTHX_ U8 *s, I32 off);
 PERL_CALLCONV U8*	Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len);
 PERL_CALLCONV U8*	Perl_bytes_to_utf8(pTHX_ U8 *s, STRLEN *len);

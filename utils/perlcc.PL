@@ -308,10 +308,10 @@ sub cc_harness {
 	my ($cfile,$stash)=@_;
 	use ExtUtils::Embed ();
 	my $command = ExtUtils::Embed::ccopts." -o $Output $cfile ";
-	$command .= join " -I", split /\s+/, opt(I);
-	$command .= join " -L", split /\s+/, opt(L);
+	$command .= " -I".$_ for split /\s+/, opt(I);
+	$command .= " -L".$_ for split /\s+/, opt(L);
 	my @mods = split /-?u /, $stash;
-	$command .= ExtUtils::Embed::ldopts("-std", \@mods);
+	$command .= " ".ExtUtils::Embed::ldopts("-std", \@mods);
 	vprint 3, "running cc $command";
 	system("cc $command");
 }

@@ -758,7 +758,7 @@ _cleaner2:
 	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old
 	rm -f $(private)
 	rm -rf lib/auto
-	rm -f lib/.exists lib/*/.exists
+	rm -f lib/.exists lib/*/.exists lib/*/*/.exists
 	rm -f h2ph.man pstruct
 	rm -rf .config
 	rm -f testcompile compilelog

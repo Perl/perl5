@@ -1211,6 +1211,11 @@ cleanlis :
 	- If F$Search("*.CPP").nes."" Then Delete/NoConfirm/Log *.CPP;*
 	- If F$Search("*.Map").nes."" Then Delete/NoConfirm/Log *.Map;*
 
+cleantest :
+        - If F$Search("[.t]Perl.").nes."" Then Delete/NoConfirm/Log [.t]Perl.;*
+        - If F$Search("[.t]VMSPIPE.COM").nes."" Then Delete/NoConfirm/Log [.t]VMSPIPE.COM;*
+        - If F$Search("[.t]Echo.exe").nes."" Then Delete/NoConfirm/Log [.t]Echo.exe;*
+
 tidy : cleanlis
 	- If F$Search("[...]*.Opt;-1").nes."" Then Purge/NoConfirm/Log [...]*.Opt
 	- If F$Search("[...]*$(O);-1").nes."" Then Purge/NoConfirm/Log [...]*$(O)
@@ -1247,7 +1252,7 @@ tidy : cleanlis
 	- If F$Search("[.x2p]*.com;-1").nes."" Then Purge/NoConfirm/Log [.x2p]*.com
 	- If F$Search("[.lib.pod]*.com;-1").nes."" Then Purge/NoConfirm/Log [.lib.pod]*.com
 
-clean : tidy
+clean : tidy cleantest
 	- @make_ext "$(dynamic_ext)" "$(MINIPERL_EXE)" "$(MMS)" clean
 	- If F$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*/Exclude=PerlShr_*.Opt
 	- If F$Search("[...]*$(O);*") .nes."" Then Delete/NoConfirm/Log [...]*$(O);*

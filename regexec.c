@@ -190,11 +190,23 @@ S_regcppop(pTHX)
 			  (IV)(*PL_reglastparen + 1), (IV)PL_regnpar);
 	}
     );
+#if 1
+    /* It would seem that the similar code in regtry()
+     * already takes care of this, and in fact it is in
+     * a better location to since this code can #if 0-ed out
+     * but the code in regtry() is needed or otherwise tests
+     * requiring null fields (pat.t#187 and split.t#{13,14}
+     * (as of patchlevel 7877)  will fail.  Then again,
+     * this code seems to be necessary or otherwise
+     * building DynaLoader will fail:
+     * "Error: '*' not in typemap in DynaLoader.xs, line 164"
+     * --jhi */
     for (paren = *PL_reglastparen + 1; paren <= PL_regnpar; paren++) {
 	if (paren > PL_regsize)
 	    PL_regstartp[paren] = -1;
 	PL_regendp[paren] = -1;
     }
+#endif
     return input;
 }
 
@@ -917,10 +929,15 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case BOUNDUTF8:
-	    tmp = (I32)(s != startpos) ? utf8_to_uv(reghop((U8*)s, -1),
-							strend - s,
-							0, 0) : '\n';
-	    tmp = ((OP(c) == BOUNDUTF8 ? isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
+	    if (s == startpos)
+		tmp = '\n';
+	    else {
+		U8 *r = reghop((U8*)s, -1);
+
+		tmp = (I32)utf8_to_uv(r, s - (char*)r, 0, 0);
+	    }
+	    tmp = ((OP(c) == BOUNDUTF8 ?
+		    isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
 	    while (s < strend) {
 		if (tmp == !(OP(c) == BOUNDUTF8 ?
 			     swash_fetch(PL_utf8_alnum, (U8*)s) :
@@ -955,10 +972,15 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case NBOUNDUTF8:
-	    tmp = (I32)(s != startpos) ? utf8_to_uv(reghop((U8*)s, -1),
-							strend - s,
-							0, 0) : '\n';
-	    tmp = ((OP(c) == NBOUNDUTF8 ? isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
+	    if (s == startpos)
+		tmp = '\n';
+	    else {
+		U8 *r = reghop((U8*)s, -1);
+
+		tmp = (I32)utf8_to_uv(r, s - (char*)r, 0, 0);
+	    }
+	    tmp = ((OP(c) == NBOUNDUTF8 ?
+		    isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
 	    while (s < strend) {
 		if (tmp == !(OP(c) == NBOUNDUTF8 ?
 			     swash_fetch(PL_utf8_alnum, (U8*)s) :
@@ -1780,15 +1802,28 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 
     /* XXXX What this code is doing here?!!!  There should be no need
        to do this again and again, PL_reglastparen should take care of
-       this!  */
+       this!  --ilya*/
+
+    /* Tests pat.t#187 and split.t#{13,14} seem to depend on this code.
+     * Actually, the code in regcppop() (which Ilya may be meaning by
+     * PL_reglastparen), is not needed at all by the test suite
+     * (op/regexp, op/pat, op/split), but that code is needed, oddly
+     * enough, for building DynaLoader, or otherwise this
+     * "Error: '*' not in typemap in DynaLoader.xs, line 164"
+     * will happen.  Meanwhile, this code *is* needed for the
+     * above-mentioned test suite tests to succeed.  The common theme
+     * on those tests seems to be returning null fields from matches.
+     * --jhi */
+#if 1
     sp = prog->startp;
     ep = prog->endp;
     if (prog->nparens) {
-	for (i = prog->nparens; i >= 1; i--) {
+	for (i = prog->nparens; i > *PL_reglastparen; i--) {
 	    *++sp = -1;
 	    *++ep = -1;
 	}
     }
+#endif
     REGCP_SET(lastcp);
     if (regmatch(prog->program + 1)) {
 	prog->endp[0] = PL_reginput - PL_bostr;
@@ -2038,9 +2073,10 @@ S_regmatch(pTHX_ regnode *prog)
 		while (s < e) {
 		    if (l >= PL_regeol)
 			sayNO;
-		    if (utf8_to_uv((U8*)s, e - s, 0, 0) != (c1 ?
-						  toLOWER_utf8((U8*)l) :
-						  toLOWER_LC_utf8((U8*)l)))
+		    if (utf8_to_uv((U8*)s, e - s, 0, 0) !=
+			(c1 ?
+			 toLOWER_utf8((U8*)l) :
+			 toLOWER_LC_utf8((U8*)l)))
 		    {
 			sayNO;
 		    }
@@ -2175,9 +2211,13 @@ S_regmatch(pTHX_ regnode *prog)
 	case BOUNDUTF8:
 	case NBOUNDUTF8:
 	    /* was last char in word? */
-	    ln = (locinput != PL_regbol)
-		? utf8_to_uv(reghop((U8*)locinput, -1),
-				 PL_regeol - locinput, 0, 0) : PL_regprev;
+	    if (locinput == PL_regbol)
+		ln = PL_regprev;
+	    else {
+		U8 *r = reghop((U8*)locinput, -1);
+
+		ln = utf8_to_uv(r, s - (char*)r, 0, 0);
+	    }
 	    if (OP(scan) == BOUNDUTF8 || OP(scan) == NBOUNDUTF8) {
 		ln = isALNUM_uni(ln);
 		n = swash_fetch(PL_utf8_alnum, (U8*)locinput);

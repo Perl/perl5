@@ -201,27 +201,18 @@ B<Tie::Array> simply C<croak>.
 In addition EXTEND will be called when perl would have pre-extended
 allocation in a real array.
 
-This means that tied arrays are now I<complete>. The example below needs
-upgrading to illustrate this. (The documentation in B<Tie::Array> is more
-complete.)
+For this discussion, we'll implement an array whose elements are a fixed
+size at creation.  If you try to create an element larger than the fixed
+size, you'll take an exception.  For example:
 
-For this discussion, we'll implement an array whose indices are fixed at
-its creation.  If you try to access anything beyond those bounds, you'll
-take an exception.  For example:
-
-    require Bounded_Array;
-    tie @ary, 'Bounded_Array', 2;
-    $| = 1;
-    for $i (0 .. 10) {
-        print "setting index $i: ";
-        $ary[$i] = 10 * $i;
-        $ary[$i] = 10 * $i;
-        print "value of elt $i now $ary[$i]\n";
-    }
+    use FixedElem_Array;
+    tie @array, 'FixedElem_Array', 3;
+    $array[0] = 'cat';  # ok.
+    $array[1] = 'dogs'; # exception, length('dogs') > 3.
 
 The preamble code for the class is as follows:
 
-    package Bounded_Array;
+    package FixedElem_Array;
     use Carp;
     use strict;
 
@@ -235,21 +226,22 @@ anonymous ARRAY ref) will be accessed.
 
 In our example, just to show you that you don't I<really> have to return an
 ARRAY reference, we'll choose a HASH reference to represent our object.
-A HASH works out well as a generic record type: the C<{BOUND}> field will
-store the maximum bound allowed, and the C<{ARRAY}> field will hold the
+A HASH works out well as a generic record type: the C<{ELEMSIZE}> field will
+store the maximum element size allowed, and the C<{ARRAY}> field will hold the
 true ARRAY ref.  If someone outside the class tries to dereference the
 object returned (doubtless thinking it an ARRAY ref), they'll blow up.
 This just goes to show you that you should respect an object's privacy.
 
     sub TIEARRAY {
-	my $class = shift;
-	my $bound = shift;
-	confess "usage: tie(\@ary, 'Bounded_Array', max_subscript)"
-	    if @_ || $bound =~ /\D/;
-	return bless {
-	    BOUND => $bound,
-	    ARRAY => [],
-	}, $class;
+      my $class    = shift;
+      my $elemsize = shift;
+      if ( @_ || $elemsize =~ /\D/ ) {
+        croak "usage: tie ARRAY, '" . __PACKAGE__ . "', elem_size";
+      }
+      return bless {
+        ELEMSIZE => $elemsize,
+        ARRAY    => [],
+      }, $class;
     }
 
 =item FETCH this, index
@@ -259,11 +251,9 @@ is accessed (read).  It takes one argument beyond its self reference: the
 index whose value we're trying to fetch.
 
     sub FETCH {
-      my($self,$idx) = @_;
-      if ($idx > $self->{BOUND}) {
-	confess "Array OOB: $idx > $self->{BOUND}";
-      }
-      return $self->{ARRAY}[$idx];
+      my $self  = shift;
+      my $index = shift;
+      return $self->{ARRAY}->[$index];
     }
 
 If a negative array index is used to read from an array, the index
@@ -281,18 +271,178 @@ to keep them at simply one tie type per class.
 This method will be triggered every time an element in the tied array is set
 (written).  It takes two arguments beyond its self reference: the index at
 which we're trying to store something and the value we're trying to put
-there.  For example:
+there.
+
+In our example, C<undef> is really C<$self-E<gt>{ELEMSIZE}> number of
+spaces so we have a little more work to do here:
 
     sub STORE {
-      my($self, $idx, $value) = @_;
-      print "[STORE $value at $idx]\n" if _debug;
-      if ($idx > $self->{BOUND} ) {
-        confess "Array OOB: $idx > $self->{BOUND}";
+      my $self = shift;
+      my( $index, $value ) = @_;
+      if ( length $value > $self->{ELEMSIZE} ) {
+        croak "length of $value is greater than $self->{ELEMSIZE}";
       }
-      return $self->{ARRAY}[$idx] = $value;
+      # fill in the blanks
+      $self->EXTEND( $index ) if $index > $self->FETCHSIZE();
+      # right justify to keep element size for smaller elements
+      $self->{ARRAY}->[$index] = sprintf "%$self->{ELEMSIZE}s", $value;
     }
 
 Negative indexes are treated the same as with FETCH.
+
+=item FETCHSIZE this
+
+Returns the total number of items in the tied array associated with
+object I<this>. (Equivalent to C<scalar(@array)>).  For example:
+
+    sub FETCHSIZE {
+      my $self = shift;
+      return scalar @{$self->{ARRAY}};
+    }
+
+=item STORESIZE this, count
+
+Sets the total number of items in the tied array associated with
+object I<this> to be I<count>. If this makes the array larger then
+class's mapping of C<undef> should be returned for new positions.
+If the array becomes smaller then entries beyond count should be
+deleted. 
+
+In our example, 'undef' is really an element containing
+C<$self-E<gt>{ELEMSIZE}> number of spaces.  Observe:
+
+sub STORESIZE {
+  my $self  = shift;
+  my $count = shift;
+  if ( $count > $self->FETCHSIZE() ) {
+    $self->STORE( $_, '' ) foreach $count - $self->FETCHSIZE() + 1 .. $count;
+  } elsif ( $count < $self->FETCHSIZE() ) {
+    $self->POP() foreach 0 .. $self->FETCHSIZE() - $count + 1;
+  }
+}
+
+=item EXTEND this, count
+
+Informative call that array is likely to grow to have I<count> entries.
+Can be used to optimize allocation. This method need do nothing.
+
+In our example, we want to make sure there are no blank (C<undef>)
+entries, so C<EXTEND> will make use of C<STORESIZE> to fill elements
+as needed:
+
+    sub EXTEND {   
+      my $self  = shift;
+      my $count = shift;
+      $self->STORESIZE( $count );
+    }
+
+=item EXISTS this, key
+
+Verify that the element at index I<key> exists in the tied array I<this>.
+
+In our example, we will determine that if an element consists of
+C<$self-E<gt>{ELEMSIZE}> spaces only, it does not exist:
+
+    sub EXISTS {
+      my $self  = shift;
+      my $index = shift;
+      return $self->{ARRAY}->[$index] eq ' ' x $self->{ELEMSIZE} ? 0 : 1;
+    }
+
+=item DELETE this, key
+
+Delete the element at index I<key> from the tied array I<this>.
+
+In our example, a deleted item is C<$self->{ELEMSIZE}> spaces:
+
+    sub DELETE {
+      my $self  = shift;
+      my $index = shift;
+      return $self->STORE( $index, '' );
+    }
+
+=item CLEAR this
+
+Clear (remove, delete, ...) all values from the tied array associated with
+object I<this>.  For example:
+
+    sub CLEAR {
+      my $self = shift;
+      return $self->{ARRAY} = [];
+    }
+
+=item PUSH this, LIST 
+
+Append elements of I<LIST> to the array.  For example:
+
+    sub PUSH {  
+      my $self = shift;
+      my @list = @_;
+      my $last = $self->FETCHSIZE();
+      $self->STORE( $last + $_, $list[$_] ) foreach 0 .. $#list;
+      return $self->FETCHSIZE();
+    }   
+
+=item POP this
+
+Remove last element of the array and return it.  For example:
+
+    sub POP {
+      my $self = shift;
+      return pop @{$self->{ARRAY}};
+    }
+
+=item SHIFT this
+
+Remove the first element of the array (shifting other elements down)
+and return it.  For example:
+
+    sub SHIFT {
+      my $self = shift;
+      return shift @{$self->{ARRAY}};
+    }
+
+=item UNSHIFT this, LIST 
+
+Insert LIST elements at the beginning of the array, moving existing elements
+up to make room.  For example:
+
+    sub UNSHIFT {
+      my $self = shift;
+      my @list = @_;
+      my $size = scalar( @list );
+      # make room for our list
+      @{$self->{ARRAY}}[ $size .. $#{$self->{ARRAY}} + $size ]
+       = @{$self->{ARRAY}};
+      $self->STORE( $_, $list[$_] ) foreach 0 .. $#list;
+    }
+
+=item SPLICE this, offset, length, LIST
+
+Perform the equivalent of C<splice> on the array. 
+
+I<offset> is optional and defaults to zero, negative values count back 
+from the end of the array. 
+
+I<length> is optional and defaults to rest of the array.
+
+I<LIST> may be empty.
+
+Returns a list of the original I<length> elements at I<offset>.
+
+In our example, we'll use a little shortcut if there is a I<LIST>:
+
+    sub SPLICE {
+      my $self   = shift;
+      my $offset = shift || 0;
+      my $length = shift || $self->FETCHSIZE() - $offset;
+      my @list   = (); 
+      if ( @_ ) {
+        tie @list, __PACKAGE__, $self->{ELEMSIZE};
+        @list   = @_;
+      }
+      return splice @{$self->{ARRAY}}, $offset, $length, @list;
+    }
 
 =item UNTIE this
 
@@ -936,3 +1086,4 @@ TIEHANDLE by Sven Verdoolaege <F<skimo@dns.ufsia.ac.be>> and Doug MacEachern <F<
 
 UNTIE by Nick Ing-Simmons <F<nick@ing-simmons.net>>
 
+Tying Arrays by Casey Tweten <F<crt@kiski.net>>

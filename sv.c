@@ -2010,6 +2010,7 @@ Perl_looks_like_number(pTHX_ SV *sv)
 	    s++; if (*s != 'I' && *s != 'i') return 0;
 	    s++; if (*s != 'T' && *s != 't') return 0;
 	    s++; if (*s != 'Y' && *s != 'y') return 0;
+	    s++;
 	}
 	sawinf = 1;
     }
@@ -2859,7 +2860,8 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 	if (SvTEMP(sstr) &&		/* slated for free anyway? */
 	    SvREFCNT(sstr) == 1 && 	/* and no other references to it? */
 	    !(sflags & SVf_OOK) && 	/* and not involved in OOK hack? */
-	    SvLEN(sstr))			/* and really is a string */
+	    SvLEN(sstr) 	&&	/* and really is a string */
+	    !(PL_op && PL_op->op_type == OP_AASSIGN)) /* and won't be needed again, potentially */
 	{
 	    if (SvPVX(dstr)) {		/* we know that dtype >= SVt_PV */
 		if (SvOOK(dstr)) {
@@ -6621,6 +6623,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		*--eptr = '#';
 	    *--eptr = '%';
 
+	    /* No taint.  Otherwise we are in the strange situation
+	     * where printf() taints but print($float) doesn't.
+	     * --jhi */
 	    (void)sprintf(PL_efloatbuf, eptr, nv);
 
 	    eptr = PL_efloatbuf;
@@ -7655,6 +7660,14 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl)
 	case SAVEt_COMPPAD:
 	    av = (AV*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = av_dup(av);
+	    break;
+	case SAVEt_PADSV:
+	    longval = (long)POPLONG(ss,ix);
+	    TOPLONG(nss,ix) = longval;
+	    ptr = POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
+	    sv = (SV*)POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = sv_dup(sv);
 	    break;
 	default:
 	    Perl_croak(aTHX_ "panic: ss_dup inconsistency");

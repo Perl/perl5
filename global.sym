@@ -358,6 +358,7 @@ Perl_save_scalar
 Perl_save_pptr
 Perl_save_vptr
 Perl_save_re_context
+Perl_save_padsv
 Perl_save_sptr
 Perl_save_svref
 Perl_save_threadsv

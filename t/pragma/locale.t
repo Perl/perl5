@@ -361,7 +361,7 @@ delete $ENV{PATH} if $^O ne 'VMS' or $Config{d_setenv};
 # Other subversive stuff.
 delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
 
-if (-x "/usr/bin/locale" && open(LOCALES, "/usr/bin/locale -a|")) {
+if (-x "/usr/bin/locale" && open(LOCALES, "/usr/bin/locale -a 2>/dev/null|")) {
     while (<LOCALES>) {
         chomp;
 	trylocale($_);

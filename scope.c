@@ -470,6 +470,17 @@ Perl_save_sptr(pTHX_ SV **sptr)
     SSPUSHINT(SAVEt_SPTR);
 }
 
+void
+Perl_save_padsv(pTHX_ PADOFFSET off)
+{
+    dTHR;
+    SSCHECK(4);
+    SSPUSHPTR(PL_curpad[off]);
+    SSPUSHPTR(PL_curpad);
+    SSPUSHLONG((long)off);
+    SSPUSHINT(SAVEt_PADSV);
+}
+
 SV **
 Perl_save_threadsv(pTHX_ PADOFFSET i)
 {
@@ -960,6 +971,14 @@ Perl_leave_scope(pTHX_ I32 base)
 		PL_curpad = AvARRAY(PL_comppad);
 	    else
 		PL_curpad = Null(SV**);
+	    break;
+	case SAVEt_PADSV:
+	    {
+		PADOFFSET off = (PADOFFSET)SSPOPLONG;
+		ptr = SSPOPPTR;
+		if (ptr)
+		    ((SV**)ptr)[off] = (SV*)SSPOPPTR;
+	    }
 	    break;
 	default:
 	    Perl_croak(aTHX_ "panic: leave_scope inconsistency");
