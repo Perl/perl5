@@ -1557,7 +1557,14 @@ S_scan_const(pTHX_ char *start)
 		    if (has_utf8)
 			sv_utf8_upgrade(res);
 		    str = SvPV(res,len);
-#ifdef EBCDIC
+#ifdef EBCDIC_NEVER_MIND
+		    /* charnames uses pack U and that has been
+		     * recently changed to do the below uni->native
+		     * mapping, so this would be redundant (and wrong,
+		     * the code point would be doubly converted).
+		     * But leave this in just in case the pack U change
+		     * gets revoked, but the semantics is still
+		     * desireable for charnames. --jhi */
 		    {
 			 UV uv = utf8_to_uvchr((U8*)str, 0);
 
