@@ -3526,7 +3526,7 @@ is_an_int(char *s, STRLEN l)
 }
 
 static int
-div128(SV *pnum, char *done)
+div128(SV *pnum, bool *done)
                           		    /* must be '\0' terminated */
                           
 {

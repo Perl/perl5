@@ -65,7 +65,7 @@
 #endif /* NeXT */
 
 #ifndef HAS_BOOL
-# ifdef UTS
+# if defined(UTS) || defined(VMS)
 #  define bool int
 # else
 #  define bool char

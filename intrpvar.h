@@ -51,7 +51,7 @@ PERLVAR(Istatusvalue,	I32)		/* $? */
 PERLVAR(Istatusvalue_vms,	U32)		
 #endif
 
-PERLVAR(Istatcache,	struct stat)	/* _ */
+PERLVAR(Istatcache,	Stat_t)	/* _ */
 PERLVAR(Istatgv,	GV *)		
 PERLVARI(Istatname,	SV *,	Nullsv)	
 

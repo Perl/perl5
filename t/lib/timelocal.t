@@ -19,6 +19,9 @@ use Time::Local;
    [2010, 10, 12, 14, 13, 12],
   );
 
+# use vmsish 'time' makes for oddness around the Unix epoch
+if ($^O eq 'VMS') { $time[0][2]++ }
+
 print "1..", @time * 2 + 5, "\n";
 
 $count = 1;

@@ -75,7 +75,7 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 
 #define NOOP (void)0
 
-#define WITH_THR(s) do { dTHR; s; } while (0)
+#define WITH_THR(s) STMT_START { dTHR; s; } STMT_END
 
 /*
  * SOFT_CAST can be used for args to prototyped functions to retain some

@@ -913,6 +913,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 
     /* now parse the script */
 
+    SETERRNO(0,SS$_NORMAL);
     error_count = 0;
     if (yyparse() || error_count) {
 	if (minus_c)
@@ -1823,7 +1824,7 @@ SV *sv;
      *
      * Assuming SEARCH_EXTS is C<".foo",".bar",NULL>, PATH search
      * proceeds as follows:
-     *   If DOSISH:
+     *   If DOSISH or VMSISH:
      *     + look for ./scriptname{,.foo,.bar}
      *     + search the PATH for scriptname{,.foo,.bar}
      *
@@ -1833,11 +1834,20 @@ SV *sv;
      */
 
 #ifdef VMS
+#  ifdef ALWAYS_DEFTYPES
+    len = strlen(scriptname);
+    if (!(len == 1 && *scriptname == '-') && scriptname[len-1] != ':') {
+	int hasdir, idx = 0, deftypes = 1;
+	bool seen_dot = 1;
+
+	hasdir = !dosearch || (strpbrk(scriptname,":[</") != Nullch) ;
+#  else
     if (dosearch) {
 	int hasdir, idx = 0, deftypes = 1;
 	bool seen_dot = 1;
 
 	hasdir = (strpbrk(scriptname,":[</") != Nullch) ;
+#  endif
 	/* The first time through, just add SEARCH_EXTS to whatever we
 	 * already have, so we can check for default file types. */
 	while (deftypes ||
