@@ -91,10 +91,22 @@ sub docat_del
 
 sub bad_one
 {
-    print STDERR <<EOM unless $bad_ones++ ;
+    unless ($bad_ones++) {
+	print STDERR <<EOM ;
 #
-# Some older versions of Berkeley DB version 1 will fail tests 61,
-# 63 and 65.
+# Some older versions of Berkeley DB version 1 will fail db-recno
+# tests 61, 63 and 65.
+EOM
+        if ($^O eq 'darwin') {
+	print STDERR <<EOM ;
+#
+#  For example Mac OS X 10.1.3 (or earlier) has such an old
+#  version of Berkeley DB.
+#
+EOM
+	}
+
+	print STDERR <<EOM ;
 #
 # You can safely ignore the errors if you're never going to use the
 # broken functionality (recno databases with a modified bval). 
@@ -105,6 +117,7 @@ sub bad_one
 # being updated -- Check out http://www.sleepycat.com/ for more details.
 #
 EOM
+    }
 }
 
 sub normalise
