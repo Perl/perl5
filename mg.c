@@ -2161,8 +2161,6 @@ Perl_sighandler(int sig)
     U32 flags = 0;
     I32 o_save_i = PL_savestack_ix;
     XPV *tXpv = PL_Xpv;
-    sigjmp_buf jmp;
-    Sighandler_t handler;
 
 #if defined(WIN32) && defined(PERL_IMPLICIT_CONTEXT)
     PERL_SET_THX(aTHXo);	/* fake TLS, see above */
