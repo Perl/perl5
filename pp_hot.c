@@ -827,7 +827,7 @@ PP(pp_match)
 play_it_again:
     if (global && rx->startp[0]) {
 	t = s = rx->endp[0];
-	if (s >= strend)
+	if ((s + rx->minlen) > strend)
 	    goto nope;
 	if (update_minmatch++)
 	    minmatch = (s == rx->startp[0]);
