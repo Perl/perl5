@@ -75,7 +75,7 @@ typedef void (*SVFUNC) _((SV*));
     do {				\
 	LOCK_SV_MUTEX;			\
 	reg_remove(p);			\
-        free((char*)(p));		\
+        Safefree((char*)(p));		\
 	UNLOCK_SV_MUTEX;		\
     } while (0)
 
@@ -158,7 +158,7 @@ U32 size;
 U32 flags;
 {
     if (!(flags & SVf_FAKE))
-	free(ptr);
+	Safefree(ptr);
 }
 
 #else /* ! PURIFY */
@@ -541,7 +541,7 @@ more_xpv(void)
 
 #ifdef PURIFY
 #define new_XIV() (void*)safemalloc(sizeof(XPVIV))
-#define del_XIV(p) free((char*)p)
+#define del_XIV(p) Safefree((char*)p)
 #else
 #define new_XIV() (void*)new_xiv()
 #define del_XIV(p) del_xiv((XPVIV*) p)
@@ -549,7 +549,7 @@ more_xpv(void)
 
 #ifdef PURIFY
 #define new_XNV() (void*)safemalloc(sizeof(XPVNV))
-#define del_XNV(p) free((char*)p)
+#define del_XNV(p) Safefree((char*)p)
 #else
 #define new_XNV() (void*)new_xnv()
 #define del_XNV(p) del_xnv((XPVNV*) p)
@@ -557,7 +557,7 @@ more_xpv(void)
 
 #ifdef PURIFY
 #define new_XRV() (void*)safemalloc(sizeof(XRV))
-#define del_XRV(p) free((char*)p)
+#define del_XRV(p) Safefree((char*)p)
 #else
 #define new_XRV() (void*)new_xrv()
 #define del_XRV(p) del_xrv((XRV*) p)
@@ -565,44 +565,44 @@ more_xpv(void)
 
 #ifdef PURIFY
 #define new_XPV() (void*)safemalloc(sizeof(XPV))
-#define del_XPV(p) free((char*)p)
+#define del_XPV(p) Safefree((char*)p)
 #else
 #define new_XPV() (void*)new_xpv()
 #define del_XPV(p) del_xpv((XPV *)p)
 #endif
 
 #define new_XPVIV() (void*)safemalloc(sizeof(XPVIV))
-#define del_XPVIV(p) free((char*)p)
+#define del_XPVIV(p) Safefree((char*)p)
 
 #define new_XPVNV() (void*)safemalloc(sizeof(XPVNV))
-#define del_XPVNV(p) free((char*)p)
+#define del_XPVNV(p) Safefree((char*)p)
 
 #define new_XPVMG() (void*)safemalloc(sizeof(XPVMG))
-#define del_XPVMG(p) free((char*)p)
+#define del_XPVMG(p) Safefree((char*)p)
 
 #define new_XPVLV() (void*)safemalloc(sizeof(XPVLV))
-#define del_XPVLV(p) free((char*)p)
+#define del_XPVLV(p) Safefree((char*)p)
 
 #define new_XPVAV() (void*)safemalloc(sizeof(XPVAV))
-#define del_XPVAV(p) free((char*)p)
+#define del_XPVAV(p) Safefree((char*)p)
 
 #define new_XPVHV() (void*)safemalloc(sizeof(XPVHV))
-#define del_XPVHV(p) free((char*)p)
+#define del_XPVHV(p) Safefree((char*)p)
 
 #define new_XPVCV() (void*)safemalloc(sizeof(XPVCV))
-#define del_XPVCV(p) free((char*)p)
+#define del_XPVCV(p) Safefree((char*)p)
 
 #define new_XPVGV() (void*)safemalloc(sizeof(XPVGV))
-#define del_XPVGV(p) free((char*)p)
+#define del_XPVGV(p) Safefree((char*)p)
 
 #define new_XPVBM() (void*)safemalloc(sizeof(XPVBM))
-#define del_XPVBM(p) free((char*)p)
+#define del_XPVBM(p) Safefree((char*)p)
 
 #define new_XPVFM() (void*)safemalloc(sizeof(XPVFM))
-#define del_XPVFM(p) free((char*)p)
+#define del_XPVFM(p) Safefree((char*)p)
 
 #define new_XPVIO() (void*)safemalloc(sizeof(XPVIO))
-#define del_XPVIO(p) free((char*)p)
+#define del_XPVIO(p) Safefree((char*)p)
 
 bool
 sv_upgrade(register SV *sv, U32 mt)
@@ -785,7 +785,7 @@ sv_upgrade(register SV *sv, U32 mt)
 	    Safefree(pv);
 	SvPVX(sv)	= 0;
 	AvMAX(sv)	= -1;
-	AvFILL(sv)	= -1;
+	AvFILLp(sv)	= -1;
 	SvIVX(sv)	= 0;
 	SvNVX(sv)	= 0.0;
 	SvMAGIC(sv)	= magic;
@@ -2983,7 +2983,7 @@ sv_collxfrm(SV *sv, STRLEN *nxp)
 #endif /* USE_LOCALE_COLLATE */
 
 char *
-sv_gets(register SV *sv, register FILE *fp, I32 append)
+sv_gets(register SV *sv, register PerlIO *fp, I32 append)
 {
     dTHR;
     char *rsptr;
@@ -3703,8 +3703,6 @@ sv_true(register SV *sv)
     dTHR;
     if (!sv)
 	return 0;
-    if (SvGMAGICAL(sv))
-	mg_get(sv);
     if (SvPOK(sv)) {
 	register XPV* tXpv;
 	if ((tXpv = (XPV*)SvANY(sv)) &&
@@ -3906,8 +3904,10 @@ newSVrv(SV *rv, char *classname)
 SV*
 sv_setref_pv(SV *rv, char *classname, void *pv)
 {
-    if (!pv)
+    if (!pv) {
 	sv_setsv(rv, &sv_undef);
+	SvSETMAGIC(rv);
+    }
     else
 	sv_setiv(newSVrv(rv,classname), (IV)pv);
     return rv;
@@ -4772,7 +4772,7 @@ sv_dump(SV *sv)
     case SVt_PVAV:
 	PerlIO_printf(Perl_debug_log, "  ARRAY = 0x%lx\n", (long)AvARRAY(sv));
 	PerlIO_printf(Perl_debug_log, "  ALLOC = 0x%lx\n", (long)AvALLOC(sv));
-	PerlIO_printf(Perl_debug_log, "  FILL = %ld\n", (long)AvFILL(sv));
+	PerlIO_printf(Perl_debug_log, "  FILL = %ld\n", (long)AvFILLp(sv));
 	PerlIO_printf(Perl_debug_log, "  MAX = %ld\n", (long)AvMAX(sv));
 	PerlIO_printf(Perl_debug_log, "  ARYLEN = 0x%lx\n", (long)AvARYLEN(sv));
 	flags = AvFLAGS(sv);

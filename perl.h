@@ -205,6 +205,11 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #endif
 
 #include "perlio.h"
+#include "perllio.h"
+#include "perlsock.h"
+#include "perlproc.h"
+#include "perlenv.h"
+#include "perldir.h"
 
 #ifdef USE_NEXT_CTYPE
 
@@ -945,7 +950,7 @@ typedef union any ANY;
 typedef I32 (*filter_t) _((int, SV *, int));
 #define FILTER_READ(idx, sv, len)  filter_read(idx, sv, len)
 #define FILTER_DATA(idx)	   (AvARRAY(rsfp_filters)[idx])
-#define FILTER_ISREADER(idx)	   (idx >= AvFILL(rsfp_filters))
+#define FILTER_ISREADER(idx)	   (idx >= AvFILLp(rsfp_filters))
 
 #ifdef DOSISH
 # if defined(OS2)
@@ -1256,7 +1261,7 @@ Gid_t getegid _((void));
 	if (!(what)) {							\
 	    croak("Assertion failed: file \"%s\", line %d",		\
 		__FILE__, __LINE__);					\
-	    exit(1);							\
+	    PerlProc_exit(1);							\
 	}})
 #endif
 
@@ -1751,7 +1756,7 @@ EXT MGVTBL vtbl_sigelem =	{magic_getsig,
 					magic_setsig,
 					0,	magic_clearsig,
 							0};
-EXT MGVTBL vtbl_pack =	{0,	0,	0,	magic_wipepack,
+EXT MGVTBL vtbl_pack =	{0,	0,	magic_sizepack,	magic_wipepack,
 							0};
 EXT MGVTBL vtbl_packelem =	{magic_getpack,
 				magic_setpack,

@@ -217,6 +217,8 @@ typedef struct condpair {
 #define COND_BROADCAST(c)
 #define COND_WAIT(c, m)
 #define COND_DESTROY(c)
+#define LOCK_SV_MUTEX
+#define UNLOCK_SV_MUTEX
 
 #define THR
 /* Rats: if dTHR is just blank then the subsequent ";" throws an error */

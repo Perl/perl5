@@ -21,10 +21,14 @@ av_reify(AV *av)
     I32 key;
     SV* sv;
 
-    if (AvREAL(av))
-	return;
+    if (AvREAL(av))                           
+	return;          
+#ifdef DEBUGGING
+    if (SvRMAGICAL(av) && mg_find((SV*)av,'P')) 
+	warn("av_reify called on tied array");
+#endif
     key = AvMAX(av) + 1;
-    while (key > AvFILL(av) + 1)
+    while (key > AvFILLp(av) + 1)
 	AvARRAY(av)[--key] = &sv_undef;
     while (key) {
 	sv = AvARRAY(av)[--key];
@@ -44,15 +48,30 @@ void
 av_extend(AV *av, I32 key)
 {
     dTHR;			/* only necessary if we have to extend stack */
+    MAGIC *mg;
+    if (SvRMAGICAL(av) && (mg = mg_find((SV*)av,'P'))) {
+	dSP;
+	ENTER;
+	SAVETMPS;
+	PUSHMARK(sp);
+	EXTEND(sp,2);
+	PUSHs(mg->mg_obj);
+	PUSHs(sv_2mortal(newSViv(key+1)));
+        PUTBACK;
+	perl_call_method("EXTEND", G_SCALAR|G_DISCARD);
+	FREETMPS;
+	LEAVE;
+	return;
+    }
     if (key > AvMAX(av)) {
 	SV** ary;
 	I32 tmp;
 	I32 newmax;
 
 	if (AvALLOC(av) != AvARRAY(av)) {
-	    ary = AvALLOC(av) + AvFILL(av) + 1;
+	    ary = AvALLOC(av) + AvFILLp(av) + 1;
 	    tmp = AvARRAY(av) - AvALLOC(av);
-	    Move(AvARRAY(av), AvALLOC(av), AvFILL(av)+1, SV*);
+	    Move(AvARRAY(av), AvALLOC(av), AvFILLp(av)+1, SV*);
 	    AvMAX(av) += tmp;
 	    SvPVX(av) = (char*)AvALLOC(av);
 	    if (AvREAL(av)) {
@@ -127,6 +146,12 @@ av_fetch(register AV *av, I32 key, I32 lval)
     if (!av)
 	return 0;
 
+    if (key < 0) {
+	key += AvFILL(av) + 1;
+	if (key < 0)
+	    return 0;
+    }
+
     if (SvRMAGICAL(av)) {
 	if (mg_find((SV*)av,'P')) {
 	    dTHR;
@@ -137,12 +162,7 @@ av_fetch(register AV *av, I32 key, I32 lval)
 	}
     }
 
-    if (key < 0) {
-	key += AvFILL(av) + 1;
-	if (key < 0)
-	    return 0;
-    }
-    else if (key > AvFILL(av)) {
+    if (key > AvFILLp(av)) {
 	if (!lval)
 	    return 0;
 	if (AvREALISH(av))
@@ -172,42 +192,47 @@ SV**
 av_store(register AV *av, I32 key, SV *val)
 {
     SV** ary;
+    U32  fill;
+
 
     if (!av)
 	return 0;
     if (!val)
 	val = &sv_undef;
 
-    if (SvRMAGICAL(av)) {
-	if (mg_find((SV*)av,'P')) {
-	    if (val != &sv_undef)
-		mg_copy((SV*)av, val, 0, key);
-	    return 0;
-	}
-    }
-
     if (key < 0) {
 	key += AvFILL(av) + 1;
 	if (key < 0)
 	    return 0;
     }
+
     if (SvREADONLY(av) && key >= AvFILL(av))
 	croak(no_modify);
+
+    if (SvRMAGICAL(av)) {
+	if (mg_find((SV*)av,'P')) {
+	    if (val != &sv_undef) {
+		mg_copy((SV*)av, val, 0, key);
+	    }
+	    return 0;
+	}
+    }
+
     if (!AvREAL(av) && AvREIFY(av))
 	av_reify(av);
     if (key > AvMAX(av))
 	av_extend(av,key);
     ary = AvARRAY(av);
-    if (AvFILL(av) < key) {
+    if (AvFILLp(av) < key) {
 	if (!AvREAL(av)) {
 	    dTHR;
 	    if (av == curstack && key > stack_sp - stack_base)
 		stack_sp = stack_base + key;	/* XPUSH in disguise */
 	    do
-		ary[++AvFILL(av)] = &sv_undef;
-	    while (AvFILL(av) < key);
+		ary[++AvFILLp(av)] = &sv_undef;
+	    while (AvFILLp(av) < key);
 	}
-	AvFILL(av) = key;
+	AvFILLp(av) = key;
     }
     else if (AvREAL(av))
 	SvREFCNT_dec(ary[key]);
@@ -232,7 +257,7 @@ newAV(void)
     AvREAL_on(av);
     AvALLOC(av) = 0;
     SvPVX(av) = 0;
-    AvMAX(av) = AvFILL(av) = -1;
+    AvMAX(av) = AvFILLp(av) = -1;
     return av;
 }
 
@@ -250,7 +275,7 @@ av_make(register I32 size, register SV **strp)
 	New(4,ary,size,SV*);
 	AvALLOC(av) = ary;
 	SvPVX(av) = (char*)ary;
-	AvFILL(av) = size - 1;
+	AvFILLp(av) = size - 1;
 	AvMAX(av) = size - 1;
 	for (i = 0; i < size; i++) {
 	    assert (*strp);
@@ -275,7 +300,7 @@ av_fake(register I32 size, register SV **strp)
     Copy(strp,ary,size,SV*);
     AvFLAGS(av) = AVf_REIFY;
     SvPVX(av) = (char*)ary;
-    AvFILL(av) = size - 1;
+    AvFILLp(av) = size - 1;
     AvMAX(av) = size - 1;
     while (size--) {
 	assert (*strp);
@@ -296,13 +321,20 @@ av_clear(register AV *av)
 	warn("Attempt to clear deleted array");
     }
 #endif
-    if (!av || AvMAX(av) < 0)
+    if (!av)
 	return;
     /*SUPPRESS 560*/
 
+    /* Give any tie a chance to cleanup first */
+    if (SvRMAGICAL(av))
+	mg_clear((SV*)av); 
+
+    if (AvMAX(av) < 0)
+	return;
+
     if (AvREAL(av)) {
 	ary = AvARRAY(av);
-	key = AvFILL(av) + 1;
+	key = AvFILLp(av) + 1;
 	while (key) {
 	    SvREFCNT_dec(ary[--key]);
 	    ary[key] = &sv_undef;
@@ -312,10 +344,8 @@ av_clear(register AV *av)
 	AvMAX(av) += key;
 	SvPVX(av) = (char*)AvALLOC(av);
     }
-    AvFILL(av) = -1;
+    AvFILLp(av) = -1;
 
-    if (SvRMAGICAL(av))
-	mg_clear((SV*)av); 
 }
 
 void
@@ -326,15 +356,21 @@ av_undef(register AV *av)
     if (!av)
 	return;
     /*SUPPRESS 560*/
+
+    /* Give any tie a chance to cleanup first */
+    if (SvRMAGICAL(av) && mg_find((SV*)av,'P')) 
+	av_fill(av, -1);   /* mg_clear() ? */
+
     if (AvREAL(av)) {
-	key = AvFILL(av) + 1;
+	key = AvFILLp(av) + 1;
 	while (key)
 	    SvREFCNT_dec(AvARRAY(av)[--key]);
     }
     Safefree(AvALLOC(av));
+    AvARRAY(av) = 0;
     AvALLOC(av) = 0;
     SvPVX(av) = 0;
-    AvMAX(av) = AvFILL(av) = -1;
+    AvMAX(av) = AvFILLp(av) = -1;
     if (AvARYLEN(av)) {
 	SvREFCNT_dec(AvARYLEN(av));
 	AvARYLEN(av) = 0;
@@ -343,23 +379,54 @@ av_undef(register AV *av)
 
 void
 av_push(register AV *av, SV *val)
-{
+{             
+    MAGIC *mg;
     if (!av)
 	return;
-    av_store(av,AvFILL(av)+1,val);
+    if (SvREADONLY(av))
+	croak(no_modify);
+
+    if (SvRMAGICAL(av) && (mg = mg_find((SV*)av,'P'))) {
+	dSP;
+	PUSHMARK(sp);
+	EXTEND(sp,2);
+	PUSHs(mg->mg_obj);
+	PUSHs(val);
+	PUTBACK;
+	ENTER;
+	perl_call_method("PUSH", G_SCALAR|G_DISCARD);
+	LEAVE;
+	return;
+    }
+    av_store(av,AvFILLp(av)+1,val);
 }
 
 SV *
 av_pop(register AV *av)
 {
     SV *retval;
+    MAGIC* mg;
 
     if (!av || AvFILL(av) < 0)
 	return &sv_undef;
     if (SvREADONLY(av))
 	croak(no_modify);
-    retval = AvARRAY(av)[AvFILL(av)];
-    AvARRAY(av)[AvFILL(av)--] = &sv_undef;
+    if (SvRMAGICAL(av) && (mg = mg_find((SV*)av,'P'))) {
+	dSP;    
+	PUSHMARK(sp);
+	XPUSHs(mg->mg_obj);
+	PUTBACK;
+	ENTER;
+	if (perl_call_method("POP", G_SCALAR)) {
+	    retval = newSVsv(*stack_sp--);    
+	} else {    
+	    retval = &sv_undef;
+	}
+	LEAVE;
+	return retval;
+    }
+    retval = AvARRAY(av)[AvFILLp(av)];
+    AvARRAY(av)[AvFILLp(av)--] = &sv_undef;
     if (SvSMAGICAL(av))
 	mg_set((SV*)av);
     return retval;
@@ -369,12 +436,29 @@ void
 av_unshift(register AV *av, register I32 num)
 {
     register I32 i;
-    register SV **sstr,**dstr;
+    register SV **ary;
+    MAGIC* mg;
 
     if (!av || num <= 0)
 	return;
     if (SvREADONLY(av))
 	croak(no_modify);
+
+    if (SvRMAGICAL(av) && (mg = mg_find((SV*)av,'P'))) {
+	dSP;
+	PUSHMARK(sp);
+	EXTEND(sp,1+num);
+	PUSHs(mg->mg_obj);
+	while (num-- > 0) {
+	    PUSHs(&sv_undef);
+	}
+	PUTBACK;
+	ENTER;
+	perl_call_method("UNSHIFT", G_SCALAR|G_DISCARD);
+	LEAVE;
+	return;
+    }
+
     if (!AvREAL(av) && AvREIFY(av))
 	av_reify(av);
     i = AvARRAY(av) - AvALLOC(av);
@@ -384,25 +468,18 @@ av_unshift(register AV *av, register I32 num)
 	num -= i;
     
 	AvMAX(av) += i;
-	AvFILL(av) += i;
+	AvFILLp(av) += i;
 	SvPVX(av) = (char*)(AvARRAY(av) - i);
     }
-    if (num) {
-	av_extend(av,AvFILL(av)+num);
-	AvFILL(av) += num;
-	dstr = AvARRAY(av) + AvFILL(av);
-	sstr = dstr - num;
-#ifdef BUGGY_MSC5
- # pragma loop_opt(off)	/* don't loop-optimize the following code */
-#endif /* BUGGY_MSC5 */
-	for (i = AvFILL(av) - num; i >= 0; --i) {
-	    *dstr-- = *sstr--;
-#ifdef BUGGY_MSC5
- # pragma loop_opt()	/* loop-optimization back to command-line setting */
-#endif /* BUGGY_MSC5 */
-	}
-	while (num)
-	    AvARRAY(av)[--num] = &sv_undef;
+    if (num) {     
+	i = AvFILLp(av);
+	av_extend(av, i + num);
+	AvFILLp(av) += num;
+	ary = AvARRAY(av);
+	Move(ary, ary + num, i + 1, SV*);
+	do {
+	    ary[--num] = &sv_undef;
+	} while (num);
     }
 }
 
@@ -410,17 +487,32 @@ SV *
 av_shift(register AV *av)
 {
     SV *retval;
+    MAGIC* mg;
 
     if (!av || AvFILL(av) < 0)
 	return &sv_undef;
     if (SvREADONLY(av))
 	croak(no_modify);
+    if (SvRMAGICAL(av) && (mg = mg_find((SV*)av,'P'))) {
+	dSP;
+	PUSHMARK(sp);
+	XPUSHs(mg->mg_obj);
+	PUTBACK;
+	ENTER;
+	if (perl_call_method("SHIFT", G_SCALAR)) {
+	    retval = newSVsv(*stack_sp--);            
+	} else {    
+	    retval = &sv_undef;
+	}     
+	LEAVE;
+	return retval;
+    }
     retval = *AvARRAY(av);
     if (AvREAL(av))
 	*AvARRAY(av) = &sv_undef;
     SvPVX(av) = (char*)(AvARRAY(av) + 1);
     AvMAX(av)--;
-    AvFILL(av)--;
+    AvFILLp(av)--;
     if (SvSMAGICAL(av))
 	mg_set((SV*)av);
     return retval;
@@ -435,12 +527,27 @@ av_len(register AV *av)
 void
 av_fill(register AV *av, I32 fill)
 {
+    MAGIC *mg;
     if (!av)
 	croak("panic: null array");
     if (fill < 0)
 	fill = -1;
+    if (SvRMAGICAL(av) && (mg = mg_find((SV*)av,'P'))) {
+	dSP;            
+	ENTER;
+	SAVETMPS;
+	PUSHMARK(sp);
+	EXTEND(sp,2);
+	PUSHs(mg->mg_obj);
+	PUSHs(sv_2mortal(newSViv(fill+1)));
+	PUTBACK;
+	perl_call_method("STORESIZE", G_SCALAR|G_DISCARD);
+	FREETMPS;
+	LEAVE;
+	return;
+    }
     if (fill <= AvMAX(av)) {
-	I32 key = AvFILL(av);
+	I32 key = AvFILLp(av);
 	SV** ary = AvARRAY(av);
 
 	if (AvREAL(av)) {
@@ -454,7 +561,7 @@ av_fill(register AV *av, I32 fill)
 		ary[++key] = &sv_undef;
 	}
 	    
-	AvFILL(av) = fill;
+	AvFILLp(av) = fill;
 	if (SvSMAGICAL(av))
 	    mg_set((SV*)av);
     }

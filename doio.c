@@ -76,7 +76,7 @@
 #endif
 
 bool
-do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawperm, FILE *supplied_fp)
+do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp)
 {
     register IO *io = GvIOn(gv);
     PerlIO *saveifp = Nullfp;
@@ -100,7 +100,7 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 	    result = 0;
 	}
 	else if (IoTYPE(io) == '|')
-	    result = my_pclose(IoIFP(io));
+	    result = PerlProc_pclose(IoIFP(io));
 	else if (IoIFP(io) != IoOFP(io)) {
 	    if (IoOFP(io)) {
 		result = PerlIO_close(IoOFP(io));
@@ -121,7 +121,7 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 	result = rawmode & 3;
 	IoTYPE(io) = "<>++"[result];
 	writing = (result > 0);
-	fd = open(name, rawmode, rawperm);
+	fd = PerlLIO_open3(name, rawmode, rawperm);
 	if (fd == -1)
 	    fp = NULL;
 	else {
@@ -136,7 +136,7 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 		fpmode = (result == 1) ? "w" : "r+";
 	    fp = PerlIO_fdopen(fd, fpmode);
 	    if (!fp)
-		close(fd);
+		PerlLIO_close(fd);
 	}
     }
     else {
@@ -166,7 +166,7 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 	    TAINT_PROPER("piped open");
 	    if (dowarn && name[strlen(name)-1] == '|')
 		warn("Can't do bidirectional pipe");
-	    fp = my_popen(name,"w");
+	    fp = PerlProc_popen(name,"w");
 	    writing = 1;
 	}
 	else if (*name == '>') {
@@ -214,10 +214,10 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 			    fd = -1;
 		    }
 		    if (dodup)
-			fd = dup(fd);
+			fd = PerlLIO_dup(fd);
 		    if (!(fp = PerlIO_fdopen(fd,mode))) {
 			if (dodup)
-			    close(fd);
+			    PerlLIO_close(fd);
 			}
 		}
 	    }
@@ -255,7 +255,7 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 	    if (strNE(name,"-"))
 		TAINT_ENV();
 	    TAINT_PROPER("piped open");
-	    fp = my_popen(name,"r");
+	    fp = PerlProc_popen(name,"r");
 	    IoTYPE(io) = '|';
 	}
 	else {
@@ -278,7 +278,7 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
     if (IoTYPE(io) &&
       IoTYPE(io) != '|' && IoTYPE(io) != '-') {
 	dTHR;
-	if (Fstat(PerlIO_fileno(fp),&statbuf) < 0) {
+	if (PerlLIO_fstat(PerlIO_fileno(fp),&statbuf) < 0) {
 	    (void)PerlIO_close(fp);
 	    goto say_false;
 	}
@@ -294,7 +294,7 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 	) {
 	    char tmpbuf[256];
 	    Sock_size_t buflen = sizeof tmpbuf;
-	    if (getsockname(PerlIO_fileno(fp), (struct sockaddr *)tmpbuf,
+	    if (PerlSock_getsockname(PerlIO_fileno(fp), (struct sockaddr *)tmpbuf,
 			    &buflen) >= 0
 		  || errno != ENOTSOCK)
 		IoTYPE(io) = 's'; /* some OS's return 0 on fstat()ed socket */
@@ -316,7 +316,7 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 	    int pid;
 	    SV *sv;
 
-	    dup2(PerlIO_fileno(fp), fd);
+	    PerlLIO_dup2(PerlIO_fileno(fp), fd);
 	    sv = *av_fetch(fdpid,PerlIO_fileno(fp),TRUE);
 	    (void)SvUPGRADE(sv, SVt_IV);
 	    pid = SvIVX(sv);
@@ -375,7 +375,7 @@ nextargv(register GV *gv)
 #ifdef HAS_FCHMOD
 	(void)fchmod(lastfd,filemode);
 #else
-	(void)chmod(oldname,filemode);
+	(void)PerlLIO_chmod(oldname,filemode);
 #endif
     }
     filemode = 0;
@@ -414,7 +414,7 @@ nextargv(register GV *gv)
 		    sv_catpv(sv,inplace);
 #endif
 #ifndef FLEXFILENAMES
-		    if (Stat(SvPVX(sv),&statbuf) >= 0
+		    if (PerlLIO_stat(SvPVX(sv),&statbuf) >= 0
 		      && statbuf.st_dev == filedev
 		      && statbuf.st_ino == fileino
 #ifdef DJGPP
@@ -429,7 +429,7 @@ nextargv(register GV *gv)
 #endif
 #ifdef HAS_RENAME
 #ifndef DOSISH
-		    if (rename(oldname,SvPVX(sv)) < 0) {
+		    if (PerlLIO_rename(oldname,SvPVX(sv)) < 0) {
 			warn("Can't rename %s to %s: %s, skipping file",
 			  oldname, SvPVX(sv), Strerror(errno) );
 			do_close(gv,FALSE);
@@ -437,8 +437,8 @@ nextargv(register GV *gv)
 		    }
 #else
 		    do_close(gv,FALSE);
-		    (void)unlink(SvPVX(sv));
-		    (void)rename(oldname,SvPVX(sv));
+		    (void)PerlLIO_unlink(SvPVX(sv));
+		    (void)PerlLIO_rename(oldname,SvPVX(sv));
 		    do_open(gv,SvPVX(sv),SvCUR(sv),FALSE,0,0,Nullfp);
 #endif /* DOSISH */
 #else
@@ -478,13 +478,13 @@ nextargv(register GV *gv)
 		}
 		setdefout(argvoutgv);
 		lastfd = PerlIO_fileno(IoIFP(GvIOp(argvoutgv)));
-		(void)Fstat(lastfd,&statbuf);
+		(void)PerlLIO_fstat(lastfd,&statbuf);
 #ifdef HAS_FCHMOD
 		(void)fchmod(lastfd,filemode);
 #else
 #  if !(defined(WIN32) && defined(__BORLANDC__))
 		/* Borland runtime creates a readonly file! */
-		(void)chmod(oldname,filemode);
+		(void)PerlLIO_chmod(oldname,filemode);
 #  endif
 #endif
 		if (fileuid != statbuf.st_uid || filegid != statbuf.st_gid) {
@@ -531,7 +531,7 @@ do_pipe(SV *sv, GV *rgv, GV *wgv)
     if (IoIFP(wstio))
 	do_close(wgv,FALSE);
 
-    if (pipe(fd) < 0)
+    if (PerlProc_pipe(fd) < 0)
 	goto badexit;
     IoIFP(rstio) = PerlIO_fdopen(fd[0], "r");
     IoOFP(wstio) = PerlIO_fdopen(fd[1], "w");
@@ -540,9 +540,9 @@ do_pipe(SV *sv, GV *rgv, GV *wgv)
     IoTYPE(wstio) = '>';
     if (!IoIFP(rstio) || !IoOFP(wstio)) {
 	if (IoIFP(rstio)) PerlIO_close(IoIFP(rstio));
-	else close(fd[0]);
+	else PerlLIO_close(fd[0]);
 	if (IoOFP(wstio)) PerlIO_close(IoOFP(wstio));
-	else close(fd[1]);
+	else PerlLIO_close(fd[1]);
 	goto badexit;
     }
 
@@ -598,7 +598,7 @@ io_close(IO *io)
 
     if (IoIFP(io)) {
 	if (IoTYPE(io) == '|') {
-	    status = my_pclose(IoIFP(io));
+	    status = PerlProc_pclose(IoIFP(io));
 	    STATUS_NATIVE_SET(status);
 	    retval = (STATUS_POSIX == 0);
 	}
@@ -701,7 +701,7 @@ do_sysseek(GV *gv, long int pos, int whence)
     register PerlIO *fp;
 
     if (gv && (io = GvIO(gv)) && (fp = IoIFP(io)))
-	return lseek(PerlIO_fileno(fp), pos, whence);
+	return PerlLIO_lseek(PerlIO_fileno(fp), pos, whence);
     if (dowarn)
 	warn("sysseek() on unopened file");
     SETERRNO(EBADF,RMS$_IFI);
@@ -719,19 +719,19 @@ Off_t length;		/* length to set file to */
     struct flock fl;
     struct stat filebuf;
 
-    if (Fstat(fd, &filebuf) < 0)
+    if (PerlLIO_fstat(fd, &filebuf) < 0)
 	return -1;
 
     if (filebuf.st_size < length) {
 
 	/* extend file length */
 
-	if ((lseek(fd, (length - 1), 0)) < 0)
+	if ((PerlLIO_lseek(fd, (length - 1), 0)) < 0)
 	    return -1;
 
 	/* write a "0" byte */
 
-	if ((write(fd, "", 1)) != 1)
+	if ((PerlLIO_write(fd, "", 1)) != 1)
 	    return -1;
     }
     else {
@@ -760,7 +760,7 @@ Off_t length;		/* length to set file to */
 #endif /* F_FREESP */
 
 bool
-do_print(register SV *sv, FILE *fp)
+do_print(register SV *sv, PerlIO *fp)
 {
     register char *tmps;
     STRLEN len;
@@ -819,7 +819,7 @@ my_stat(ARGSproto)
 	    statgv = tmpgv;
 	    sv_setpv(statname,"");
 	    laststype = OP_STAT;
-	    return (laststatval = Fstat(PerlIO_fileno(IoIFP(io)), &statcache));
+	    return (laststatval = PerlLIO_fstat(PerlIO_fileno(IoIFP(io)), &statcache));
 	}
 	else {
 	    if (tmpgv == defgv)
@@ -847,7 +847,7 @@ my_stat(ARGSproto)
 	statgv = Nullgv;
 	sv_setpv(statname,SvPV(sv, na));
 	laststype = OP_STAT;
-	laststatval = Stat(SvPV(sv, na),&statcache);
+	laststatval = PerlLIO_stat(SvPV(sv, na),&statcache);
 	if (laststatval < 0 && dowarn && strchr(SvPV(sv, na), '\n'))
 	    warn(warn_nl, "stat");
 	return laststatval;
@@ -875,9 +875,9 @@ my_lstat(ARGSproto)
     PUTBACK;
     sv_setpv(statname,SvPV(sv, na));
 #ifdef HAS_LSTAT
-    laststatval = lstat(SvPV(sv, na),&statcache);
+    laststatval = PerlLIO_lstat(SvPV(sv, na),&statcache);
 #else
-    laststatval = Stat(SvPV(sv, na),&statcache);
+    laststatval = PerlLIO_stat(SvPV(sv, na),&statcache);
 #endif
     if (laststatval < 0 && dowarn && strchr(SvPV(sv, na), '\n'))
 	warn(warn_nl, "lstat");
@@ -904,9 +904,9 @@ do_aexec(SV *really, register SV **mark, register SV **sp)
 	if (*Argv[0] != '/')	/* will execvp use PATH? */
 	    TAINT_ENV();		/* testing IFS here is overkill, probably */
 	if (really && *(tmps = SvPV(really, na)))
-	    execvp(tmps,Argv);
+	    PerlProc_execvp(tmps,Argv);
 	else
-	    execvp(Argv[0],Argv);
+	    PerlProc_execvp(Argv[0],Argv);
 	if (dowarn)
 	    warn("Can't exec \"%s\": %s", Argv[0], Strerror(errno));
     }
@@ -960,7 +960,7 @@ do_exec(char *cmd)
 		*--s = '\0';
 	    if (s[-1] == '\'') {
 		*--s = '\0';
-		execl(cshname,"csh", flags,ncmd,(char*)0);
+		PerlProc_execl(cshname,"csh", flags,ncmd,(char*)0);
 		*s = '\'';
 		return FALSE;
 	    }
@@ -987,7 +987,7 @@ do_exec(char *cmd)
 		break;
 	    }
 	  doshell:
-	    execl(sh_path, "sh", "-c", cmd, (char*)0);
+	    PerlProc_execl(sh_path, "sh", "-c", cmd, (char*)0);
 	    return FALSE;
 	}
     }
@@ -1005,7 +1005,7 @@ do_exec(char *cmd)
     }
     *a = Nullch;
     if (Argv[0]) {
-	execvp(Argv[0],Argv);
+	PerlProc_execvp(Argv[0],Argv);
 	if (errno == ENOEXEC) {		/* for system V NIH syndrome */
 	    do_execfree();
 	    goto doshell;
@@ -1045,7 +1045,7 @@ apply(I32 type, register SV **mark, register SV **sp)
 	    tot = sp - mark;
 	    val = SvIVx(*mark);
 	    while (++mark <= sp) {
-		if (chmod(SvPVx(*mark, na),val))
+		if (PerlLIO_chmod(SvPVx(*mark, na),val))
 		    tot--;
 	    }
 	}
@@ -1114,16 +1114,16 @@ apply(I32 type, register SV **mark, register SV **sp)
 	    while (++mark <= sp) {
 		I32 proc = SvIVx(*mark);
 #ifdef HAS_KILLPG
-		if (killpg(proc,val))	/* BSD */
+		if (PerlProc_killpg(proc,val))	/* BSD */
 #else
-		if (kill(-proc,val))	/* SYSV */
+		if (PerlProc_kill(-proc,val))	/* SYSV */
 #endif
 		    tot--;
 	    }
 	}
 	else {
 	    while (++mark <= sp) {
-		if (kill(SvIVx(*mark),val))
+		if (PerlProc_kill(SvIVx(*mark),val))
 		    tot--;
 	    }
 	}
@@ -1140,9 +1140,9 @@ apply(I32 type, register SV **mark, register SV **sp)
 	    }
 	    else {	/* don't let root wipe out directories without -U */
 #ifdef HAS_LSTAT
-		if (lstat(s,&statbuf) < 0 || S_ISDIR(statbuf.st_mode))
+		if (PerlLIO_lstat(s,&statbuf) < 0 || S_ISDIR(statbuf.st_mode))
 #else
-		if (Stat(s,&statbuf) < 0 || S_ISDIR(statbuf.st_mode))
+		if (PerlLIO_stat(s,&statbuf) < 0 || S_ISDIR(statbuf.st_mode))
 #endif
 		    tot--;
 		else {
@@ -1175,7 +1175,7 @@ apply(I32 type, register SV **mark, register SV **sp)
 #endif
 	    tot = sp - mark;
 	    while (++mark <= sp) {
-		if (utime(SvPVx(*mark, na),&utbuf))
+		if (PerlLIO_utime(SvPVx(*mark, na),&utbuf))
 		    tot--;
 	    }
 	}

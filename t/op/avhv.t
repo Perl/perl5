@@ -1,13 +1,23 @@
 #!./perl
+      
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
 
-package Tie::StdArray;
+require Tie::Array;
+
+package Tie::BasicArray;
+@ISA = 'Tie::Array';
 sub TIEARRAY  { bless [], $_[0] }
-sub STORE    { $_[0]->[$_[1]] = $_[2] }
-sub FETCH    { $_[0]->[$_[1]] }
+sub STORE     { $_[0]->[$_[1]] = $_[2] }
+sub FETCH     { $_[0]->[$_[1]] }
+sub FETCHSIZE { scalar(@{$_[0]})} 
+sub STORESIZE { $#{$_[0]} = $_[1]+1 } 
 
 package main;
 
-print "1..4\n";
+print "1..5\n";
 
 $sch = {
     'abc' => 1,
@@ -48,12 +58,19 @@ $a->[0] = $sch;
 $a->{'abc'} = 'ABC';
 if ($a->{'abc'} eq 'ABC') {print "ok 3\n";} else {print "not ok 3\n";}
 
+# quick check with tied array
+tie @fake, 'Tie::BasicArray';
+$a = \@fake;
+$a->[0] = $sch;
+
+$a->{'abc'} = 'ABC';
+if ($a->{'abc'} eq 'ABC') {print "ok 4\n";} else {print "not ok 4\n";}
+
 # quick check with tied array & tied hash
-@INC = ("./lib", "../lib");
 require Tie::Hash;
 tie %fake, Tie::StdHash;
 %fake = %$sch;
 $a->[0] = \%fake;
 
 $a->{'abc'} = 'ABC';
-if ($a->{'abc'} eq 'ABC') {print "ok 4\n";} else {print "not ok 4\n";}
+if ($a->{'abc'} eq 'ABC') {print "ok 5\n";} else {print "not ok 5\n";}

@@ -389,7 +389,7 @@ skipspace(register char *s)
 	    oldoldbufptr = oldbufptr = bufptr = s = linestart = SvPVX(linestr);
 	    bufend = SvPVX(linestr) + SvCUR(linestr);
 	    if (preprocess && !in_eval)
-		(void)my_pclose(rsfp);
+		(void)PerlProc_pclose(rsfp);
 	    else if ((PerlIO*)rsfp == PerlIO_stdin())
 		PerlIO_clearerr(rsfp);
 	    else
@@ -1064,7 +1064,7 @@ static char*
 incl_perldb(void)
 {
     if (perldb) {
-	char *pdb = getenv("PERL5DB");
+	char *pdb = PerlEnv_getenv("PERL5DB");
 
 	if (pdb)
 	    return pdb;
@@ -1120,10 +1120,10 @@ filter_del(filter_t funcp)
 {
     if (filter_debug)
 	warn("filter_del func %p", funcp);
-    if (!rsfp_filters || AvFILL(rsfp_filters)<0)
+    if (!rsfp_filters || AvFILLp(rsfp_filters)<0)
 	return;
     /* if filter is on top of stack (usual case) just pop it off */
-    if (IoDIRP(FILTER_DATA(AvFILL(rsfp_filters))) == (void*)funcp){
+    if (IoDIRP(FILTER_DATA(AvFILLp(rsfp_filters))) == (void*)funcp){
 	sv_free(av_pop(rsfp_filters));
 
         return;
@@ -1145,7 +1145,7 @@ filter_read(int idx, SV *buf_sv, int maxlen)
 
     if (!rsfp_filters)
 	return -1;
-    if (idx > AvFILL(rsfp_filters)){       /* Any more filters?	*/
+    if (idx > AvFILLp(rsfp_filters)){       /* Any more filters?	*/
 	/* Provide a default input filter to make life easy.	*/
 	/* Note that we append to the line. This is handy.	*/
 	if (filter_debug)
@@ -1195,7 +1195,7 @@ filter_read(int idx, SV *buf_sv, int maxlen)
 
 
 static char *
-filter_gets(register SV *sv, register FILE *fp, STRLEN append)
+filter_gets(register SV *sv, register PerlIO *fp, STRLEN append)
 {
 #ifdef WIN32FILTER
     if (!rsfp_filters) {
@@ -1503,7 +1503,7 @@ yylex(void)
 	    if (SvCUR(linestr))
 		sv_catpv(linestr,";");
 	    if (preambleav){
-		while(AvFILL(preambleav) >= 0) {
+		while(AvFILLp(preambleav) >= 0) {
 		    SV *tmpsv = av_shift(preambleav);
 		    sv_catsv(linestr, tmpsv);
 		    sv_catpv(linestr, ";");
@@ -1560,7 +1560,7 @@ yylex(void)
 	      fake_eof:
 		if (rsfp) {
 		    if (preprocess && !in_eval)
-			(void)my_pclose(rsfp);
+			(void)PerlProc_pclose(rsfp);
 		    else if ((PerlIO *)rsfp == PerlIO_stdin())
 			PerlIO_clearerr(rsfp);
 		    else

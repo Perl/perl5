@@ -88,7 +88,7 @@ static int fdscript = -1;
 static void
 catch_sigsegv(int signo, struct sigcontext_struct sc)
 {
-    signal(SIGSEGV, SIG_DFL);
+    PerlProc_signal(SIGSEGV, SIG_DFL);
     fprintf(stderr, "Segmentation fault dereferencing 0x%lx\n"
 		    "return_address = 0x%lx, eip = 0x%lx\n",
 	    	    sc.cr2, __builtin_return_address(0), sc.eip);
@@ -311,7 +311,7 @@ perl_destruct(register PerlInterpreter *sv_interp)
 #ifdef DEBUGGING
     {
 	char *s;
-	if (s = getenv("PERL_DESTRUCT_LEVEL")) {
+	if (s = PerlEnv_getenv("PERL_DESTRUCT_LEVEL")) {
 	    int i = atoi(s);
 	    if (destruct_level < i)
 		destruct_level = i;
@@ -689,7 +689,7 @@ setuid perl scripts securely.\n");
 		croak("No -e allowed in setuid scripts");
 	    if (!e_fp) {
 	        e_tmpname = savepv(TMPPATH);
-		(void)mktemp(e_tmpname);
+		(void)PerlLIO_mktemp(e_tmpname);
 		if (!*e_tmpname)
 		    croak("Can't mktemp()");
 		e_fp = PerlIO_open(e_tmpname,"w");
@@ -821,7 +821,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     }
   switch_end:
 
-    if (!tainting && (s = getenv("PERL5OPT"))) {
+    if (!tainting && (s = PerlEnv_getenv("PERL5OPT"))) {
 	while (s && *s) {
 	    while (isSPACE(*s))
 		s++;
@@ -853,7 +853,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     }
     else if (scriptname == Nullch) {
 #ifdef MSDOS
-	if ( isatty(PerlIO_fileno(PerlIO_stdin())) )
+	if ( PerlLIO_isatty(PerlIO_fileno(PerlIO_stdin())) )
 	    moreswitches("h");
 #endif
 	scriptname = "-";
@@ -902,7 +902,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 #endif
 
 #if defined(DEBUGGING) && defined(USE_THREADS) && defined(__linux__)
-    DEBUG_L(signal(SIGSEGV, (void(*)(int))catch_sigsegv););
+    DEBUG_L(PerlProc_signal(SIGSEGV, (void(*)(int))catch_sigsegv););
 #endif
 
     init_predump_symbols();
@@ -950,7 +950,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     FREETMPS;
 
 #ifdef MYMALLOC
-    if ((s=getenv("PERL_DEBUG_MSTATS")) && atoi(s) >= 2)
+    if ((s=PerlEnv_getenv("PERL_DEBUG_MSTATS")) && atoi(s) >= 2)
 	dump_mstats("after compilation:");
 #endif
 
@@ -987,7 +987,7 @@ perl_run(PerlInterpreter *sv_interp)
 	if (endav)
 	    call_list(oldscope, endav);
 #ifdef MYMALLOC
-	if (getenv("PERL_DEBUG_MSTATS"))
+	if (PerlEnv_getenv("PERL_DEBUG_MSTATS"))
 	    dump_mstats("after execution:  ");
 #endif
 	JMPENV_POP;
@@ -1532,7 +1532,7 @@ moreswitches(char *s)
 	return s;
     case 'h':
 	usage(origargv[0]);    
-	exit(0);
+	PerlProc_exit(0);
     case 'i':
 	if (inplace)
 	    Safefree(inplace);
@@ -1674,7 +1674,7 @@ moreswitches(char *s)
 	printf("\n\
 Perl may be copied only under the terms of either the Artistic License or the\n\
 GNU General Public License, which may be found in the Perl 5.0 source kit.\n\n");
-	exit(0);
+	PerlProc_exit(0);
     case 'w':
 	dowarn = TRUE;
 	s++;
@@ -1728,7 +1728,7 @@ my_unexec(void)
     if (status)
 	PerlIO_printf(PerlIO_stderr(), "unexec of %s into %s failed!\n",
 		      SvPVX(prog), SvPVX(file));
-    exit(status);
+    PerlProc_exit(status);
 #else
 #  ifdef VMS
 #    include <lib$routines.h>
@@ -1903,7 +1903,7 @@ SV *sv;
 #ifdef DOSISH
 		 && !strchr(scriptname, '\\')
 #endif
-		 && (s = getenv("PATH"))) {
+		 && (s = PerlEnv_getenv("PATH"))) {
 	bool seen_dot = 0;
 	
 	bufend = s + strlen(s);
@@ -2074,7 +2074,7 @@ sed %s -e \"/^[^#]/b\" \
 		croak("Can't do seteuid!\n");
 	}
 #endif /* IAMSUID */
-	rsfp = my_popen(SvPVX(cmd), "r");
+	rsfp = PerlProc_popen(SvPVX(cmd), "r");
 	SvREFCNT_dec(cmd);
 	SvREFCNT_dec(cpp);
     }
@@ -2098,7 +2098,7 @@ sed %s -e \"/^[^#]/b\" \
 	if (euid && Stat(SvPVX(GvSV(curcop->cop_filegv)),&statbuf) >= 0 &&
 	  statbuf.st_mode & (S_ISUID|S_ISGID)) {
 	    /* try again */
-	    execv(form("%s/sperl%s", BIN_EXP, patchlevel), origargv);
+	    PerlProc_execv(form("%s/sperl%s", BIN_EXP, patchlevel), origargv);
 	    croak("Can't do setuid\n");
 	}
 #endif
@@ -2137,7 +2137,7 @@ validate_suid(char *validarg, char *scriptname)
     dTHR;
     char *s, *s2;
 
-    if (Fstat(PerlIO_fileno(rsfp),&statbuf) < 0)	/* normal stat is insecure */
+    if (PerlLIO_fstat(PerlIO_fileno(rsfp),&statbuf) < 0)	/* normal stat is insecure */
 	croak("Can't stat script \"%s\"",origfilename);
     if (fdscript < 0 && statbuf.st_mode & (S_ISUID|S_ISGID)) {
 	I32 len;
@@ -2152,7 +2152,7 @@ validate_suid(char *validarg, char *scriptname)
 	 * But I don't think it's too important.  The manual lies when
 	 * it says access() is useful in setuid programs.
 	 */
-	if (access(SvPVX(GvSV(curcop->cop_filegv)),1))	/*double check*/
+	if (PerlLIO_access(SvPVX(GvSV(curcop->cop_filegv)),1))	/*double check*/
 	    croak("Permission denied");
 #else
 	/* If we can swap euid and uid, then we can determine access rights
@@ -2178,7 +2178,7 @@ validate_suid(char *validarg, char *scriptname)
 	    if (tmpstatbuf.st_dev != statbuf.st_dev ||
 		tmpstatbuf.st_ino != statbuf.st_ino) {
 		(void)PerlIO_close(rsfp);
-		if (rsfp = my_popen("/bin/mail root","w")) {	/* heh, heh */
+		if (rsfp = PerlProc_popen("/bin/mail root","w")) {	/* heh, heh */
 		    PerlIO_printf(rsfp,
 "User %ld tried to run dev %ld ino %ld in place of dev %ld ino %ld!\n\
 (Filename of set-id script was %s, uid %ld gid %ld.)\n\nSincerely,\nperl\n",
@@ -2186,7 +2186,7 @@ validate_suid(char *validarg, char *scriptname)
 			(long)statbuf.st_dev, (long)statbuf.st_ino,
 			SvPVX(GvSV(curcop->cop_filegv)),
 			(long)statbuf.st_uid, (long)statbuf.st_gid);
-		    (void)my_pclose(rsfp);
+		    (void)PerlProc_pclose(rsfp);
 		}
 		croak("Permission denied\n");
 	    }
@@ -2245,7 +2245,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	    (void)PerlIO_close(rsfp);
 #ifndef IAMSUID
 	    /* try again */
-	    execv(form("%s/sperl%s", BIN_EXP, patchlevel), origargv);
+	    PerlProc_execv(form("%s/sperl%s", BIN_EXP, patchlevel), origargv);
 #endif
 	    croak("Can't do setuid\n");
 	}
@@ -2318,7 +2318,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
     /* exec the real perl, substituting fd script for scriptname. */
     /* (We pass script name as "subdir" of fd, which perl will grok.) */
     PerlIO_rewind(rsfp);
-    lseek(PerlIO_fileno(rsfp),(Off_t)0,0);  /* just in case rewind didn't */
+    PerlLIO_lseek(PerlIO_fileno(rsfp),(Off_t)0,0);  /* just in case rewind didn't */
     for (which = 1; origargv[which] && origargv[which] != scriptname; which++) ;
     if (!origargv[which])
 	croak("Permission denied");
@@ -2327,14 +2327,14 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 #if defined(HAS_FCNTL) && defined(F_SETFD)
     fcntl(PerlIO_fileno(rsfp),F_SETFD,0);	/* ensure no close-on-exec */
 #endif
-    execv(form("%s/perl%s", BIN_EXP, patchlevel), origargv);	/* try again */
+    PerlProc_execv(form("%s/perl%s", BIN_EXP, patchlevel), origargv);	/* try again */
     croak("Can't do setuid\n");
 #endif /* IAMSUID */
 #else /* !DOSUID */
     if (euid != uid || egid != gid) {	/* (suidperl doesn't exist, in fact) */
 #ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
 	dTHR;
-	Fstat(PerlIO_fileno(rsfp),&statbuf);	/* may be either wrapped or real suid */
+	PerlLIO_fstat(PerlIO_fileno(rsfp),&statbuf);	/* may be either wrapped or real suid */
 	if ((euid != uid && euid == statbuf.st_uid && statbuf.st_mode & S_ISUID)
 	    ||
 	    (egid != gid && egid == statbuf.st_gid && statbuf.st_mode & S_ISGID)
@@ -2371,7 +2371,7 @@ find_beginning(void)
 		    /*SUPPRESS 530*/
 		    while (s = moreswitches(s)) ;
 	    }
-	    if (cddir && chdir(cddir) < 0)
+	    if (cddir && PerlDir_chdir(cddir) < 0)
 		croak("Can't chdir to %s",cddir);
 	}
     }
@@ -2618,7 +2618,7 @@ init_postdump_symbols(register int argc, register char **argv, register char **e
 	    *s = '=';
 #if defined(__BORLANDC__) && defined(USE_WIN32_RTL_ENV)
 	    /* Sins of the RTL. See note in my_setenv(). */
-	    (void)putenv(savepv(*env));
+	    (void)PerlEnv_putenv(savepv(*env));
 #endif
 	}
 #endif
@@ -2637,11 +2637,11 @@ init_perllib(void)
     char *s;
     if (!tainting) {
 #ifndef VMS
-	s = getenv("PERL5LIB");
+	s = PerlEnv_getenv("PERL5LIB");
 	if (s)
 	    incpush(s, TRUE);
 	else
-	    incpush(getenv("PERLLIB"), FALSE);
+	    incpush(PerlEnv_getenv("PERLLIB"), FALSE);
 #else /* VMS */
 	/* Treat PERL5?LIB as a possible search list logical name -- the
 	 * "natural" VMS idiom for a Unix path string.  We allow each
@@ -2861,7 +2861,7 @@ call_list(I32 oldscope, AV *list)
     dJMPENV;
     int ret;
 
-    while (AvFILL(list) >= 0) {
+    while (AvFILL(list) >= 0) { 
 	CV *cv = (CV*)av_shift(list);
 
 	SAVEFREESV(cv);

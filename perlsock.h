@@ -3,10 +3,10 @@
 
 #ifdef PERL_OBJECT
 #else
-#define PerlSock_htonlx htonl(x)
-#define PerlSock_htonsx htons(x)
-#define PerlSock_ntohlx ntohl(x)
-#define PerlSock_ntohsx ntohs(x)
+#define PerlSock_htonl(x) htonl(x)
+#define PerlSock_htons(x) htons(x)
+#define PerlSock_ntohl(x) ntohl(x)
+#define PerlSock_ntohs(x) ntohs(x)
 #define PerlSock_accept(s, a, l) accept(s, a, l)
 #define PerlSock_bind(s, n, l) bind(s, n, l)
 #define PerlSock_connect(s, n, l) connect(s, n, l)

@@ -265,7 +265,7 @@ static void
 botch(char *s)
 {
 	PerlIO_printf(PerlIO_stderr(), "assertion botched: %s\n", s);
-	abort();
+	PerlProc_abort();
 }
 #else
 #define	ASSERT(p)
@@ -508,7 +508,7 @@ free(void *mp)
 	if (OV_MAGIC(ovp, bucket) != MAGIC) {
 		static int bad_free_warn = -1;
 		if (bad_free_warn == -1) {
-		    char *pbf = getenv("PERL_BADFREE");
+		    char *pbf = PerlEnv_getenv("PERL_BADFREE");
 		    bad_free_warn = (pbf) ? atoi(pbf) : 1;
 		}
 		if (!bad_free_warn)

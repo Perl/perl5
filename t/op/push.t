@@ -22,7 +22,7 @@ die "blech" unless @tests;
 @x = (1,2,3);
 push(@x,@x);
 if (join(':',@x) eq '1:2:3:1:2:3') {print "ok 1\n";} else {print "not ok 1\n";}
-push(x,4);
+push(@x,4);
 if (join(':',@x) eq '1:2:3:1:2:3:4') {print "ok 2\n";} else {print "not ok 2\n";}
 
 $test = 3;
@@ -47,3 +47,4 @@ foreach $line (@tests) {
     }
 }
 
+1;  # this file is require'd by lib/tie-stdpush.t
