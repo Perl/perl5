@@ -1178,7 +1178,8 @@ equivalent to:
 
     split(' ', q/STRING/);
 
-the difference being that it generates a real list at compile time.  So
+the differences being that it generates a real list at compile time, and
+in scalar context it returns the last element in the list.  So
 this expression:
 
     qw(foo bar baz)
