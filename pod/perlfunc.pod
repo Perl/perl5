@@ -3151,8 +3151,18 @@ of values, as follows:
 	   integer values _and_ if Perl has been compiled to support those.
            Causes a fatal error otherwise.)
 
+    j   A signed integer value (a Perl internal integer, IV).
+    J   An unsigned integer value (a Perl internal unsigned integer, UV).
+
     f	A single-precision float in the native format.
     d	A double-precision float in the native format.
+
+    F	A floating point value in the native native format
+           (a Perl internal floating point value, NV).
+    D	A long double-precision float in the native format.
+	  (Long doubles are available only if your system supports long
+	   double values _and_ if Perl has been compiled to support those.
+           Causes a fatal error otherwise.)
 
     p	A pointer to a null-terminated string.
     P	A pointer to a structure (fixed-length string).
@@ -3281,11 +3291,10 @@ The C</> template character allows packing and unpacking of strings where
 the packed structure contains a byte count followed by the string itself.
 You write I<length-item>C</>I<string-item>.
 
-The I<length-item> can be any C<pack> template letter,
-and describes how the length value is packed.
-The ones likely to be of most use are integer-packing ones like
-C<n> (for Java strings), C<w> (for ASN.1 or SNMP)
-and C<N> (for Sun XDR).
+The I<length-item> can be any C<pack> template letter, and describes
+how the length value is packed.  The ones likely to be of most use are
+integer-packing ones like C<n> (for Java strings), C<w> (for ASN.1 or
+SNMP) and C<N> (for Sun XDR).
 
 The I<string-item> must, at present, be C<"A*">, C<"a*"> or C<"Z*">.
 For C<unpack> the length of the string is obtained from the I<length-item>,
@@ -3332,7 +3341,7 @@ not support long longs.)
 
 =item *
 
-The integer formats C<s>, C<S>, C<i>, C<I>, C<l>, and C<L>
+The integer formats C<s>, C<S>, C<i>, C<I>, C<l>, C<L>, C<j>, and C<J>
 are inherently non-portable between processors and operating systems
 because they obey the native byteorder and endianness.  For example a
 4-byte integer 0x12345678 (305419896 decimal) would be ordered natively

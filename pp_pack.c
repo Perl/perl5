@@ -293,6 +293,12 @@ S_measure_struct(pTHX_ char *pat, register char *patend)
 	case 'I':
 	    size = sizeof(unsigned int);
 	    break;
+	case 'j':
+	    size = IVSIZE;
+	    break;
+	case 'J':
+	    size = UVSIZE;
+	    break;
 	case 'l':
 #if LONGSIZE == SIZE32
 	    size = SIZE32;
@@ -325,13 +331,19 @@ S_measure_struct(pTHX_ char *pat, register char *patend)
 	    break;
 #endif
 	case 'f':
-	case 'F':
 	    size = sizeof(float);
 	    break;
 	case 'd':
-	case 'D':
 	    size = sizeof(double);
 	    break;
+	case 'F':
+	    size = NVSIZE;
+	    break;
+#if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
+	case 'D':
+	    size = LONG_DOUBLESIZE;
+	    break;
+#endif
 	}
 	total += len * size;
     }
@@ -430,14 +442,20 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
     float afloat;
     double adouble;
     I32 checksum = 0;
-    UV culong = 0;
+    UV cuv = 0;
     NV cdouble = 0.0;
-    const int bits_in_uv = 8 * sizeof(culong);
+    const int bits_in_uv = 8 * sizeof(cuv);
     int commas = 0;
     int star;		/* 1 if count is *, -1 if no count given, -2 for / */
 #ifdef PERL_NATINT_PACK
     int natint;		/* native integer */
     int unatint;	/* unsigned native integer */
+#endif
+    IV aiv;
+    UV auv;
+    NV anv;
+#if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
+    long double aldouble;
 #endif
     bool do_utf8 = flags & UNPACK_DO_UTF8;
 
@@ -488,7 +506,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 	    if (len == 1 && pat[-1] != '1' && pat[-1] != ']')
 		len = 16;		/* len is not specified */
 	    checksum = len;
-	    culong = 0;
+	    cuv = 0;
 	    cdouble = 0;
 	    continue;
 	    break;
@@ -608,20 +626,20 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		    }
 		}
 		while (len >= 8) {
-		    culong += PL_bitcount[*(unsigned char*)s++];
+		    cuv += PL_bitcount[*(unsigned char*)s++];
 		    len -= 8;
 		}
 		if (len) {
 		    bits = *s;
 		    if (datumtype == 'b') {
 			while (len-- > 0) {
-			    if (bits & 1) culong++;
+			    if (bits & 1) cuv++;
 			    bits >>= 1;
 			}
 		    }
 		    else {
 			while (len-- > 0) {
-			    if (bits & 128) culong++;
+			    if (bits & 128) cuv++;
 			    bits <<= 1;
 			}
 		    }
@@ -697,7 +715,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		    if (checksum > bits_in_uv)
 			cdouble += (NV)aint;
 		    else
-			culong += aint;
+			cuv += aint;
 		}
 	    }
 	    else {
@@ -725,7 +743,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 	      uchar_checksum:
 		while (len-- > 0) {
 		    auint = *s++ & 255;
-		    culong += auint;
+		    cuv += auint;
 		}
 	    }
 	    else {
@@ -757,7 +775,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		    if (checksum > bits_in_uv)
 			cdouble += (NV)auint;
 		    else
-			culong += auint;
+			cuv += auint;
 		}
 	    }
 	    else {
@@ -792,7 +810,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 			if (checksum > bits_in_uv)
 			    cdouble += (NV)ashort;
 			else
-			    culong += ashort;
+			    cuv += ashort;
 
 		    }
 		}
@@ -809,7 +827,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 			if (checksum > bits_in_uv)
 			    cdouble += (NV)ashort;
 			else
-			    culong += ashort;
+			    cuv += ashort;
 		    }
 		}
 	    }
@@ -865,7 +883,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 			if (checksum > bits_in_uv)
 			    cdouble += (NV)aushort;
 			else
-			    culong += aushort;
+			    cuv += aushort;
 		    }
 		}
 		else
@@ -885,7 +903,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 			if (checksum > bits_in_uv)
 			    cdouble += (NV)aushort;
 			else
-			    culong += aushort;
+			    cuv += aushort;
 		    }
 		}
 	    }
@@ -935,7 +953,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		    if (checksum > bits_in_uv)
 			cdouble += (NV)aint;
 		    else
-			culong += aint;
+			cuv += aint;
 		}
 	    }
 	    else {
@@ -986,7 +1004,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		    if (checksum > bits_in_uv)
 			cdouble += (NV)auint;
 		    else
-			culong += auint;
+			cuv += auint;
 		}
 	    }
 	    else {
@@ -1008,6 +1026,58 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		}
 	    }
 	    break;
+	case 'j':
+	    along = (strend - s) / IVSIZE;
+	    if (len > along)
+		len = along;
+	    if (checksum) {
+		while (len-- > 0) {
+		    Copy(s, &aiv, 1, IV);
+		    s += IVSIZE;
+		    if (checksum > bits_in_uv)
+			cdouble += (NV)aiv;
+		    else
+			cuv += aiv;
+		}
+	    }
+	    else {
+		EXTEND(SP, len);
+		EXTEND_MORTAL(len);
+		while (len-- > 0) {
+		    Copy(s, &aiv, 1, IV);
+		    s += IVSIZE;
+		    sv = NEWSV(40, 0);
+		    sv_setiv(sv, aiv);
+		    PUSHs(sv_2mortal(sv));
+		}
+	    }
+	    break;
+	case 'J':
+	    along = (strend - s) / UVSIZE;
+	    if (len > along)
+		len = along;
+	    if (checksum) {
+		while (len-- > 0) {
+		    Copy(s, &auv, 1, UV);
+		    s += UVSIZE;
+		    if (checksum > bits_in_uv)
+			cdouble += (NV)auv;
+		    else
+			cuv += auv;
+		}
+	    }
+	    else {
+		EXTEND(SP, len);
+		EXTEND_MORTAL(len);
+		while (len-- > 0) {
+		    Copy(s, &auv, 1, UV);
+		    s += UVSIZE;
+		    sv = NEWSV(41, 0);
+		    sv_setuv(sv, auv);
+		    PUSHs(sv_2mortal(sv));
+		}
+	    }
+	    break;
 	case 'l':
 #if LONGSIZE == SIZE32
 	    along = (strend - s) / SIZE32;
@@ -1025,7 +1095,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 			if (checksum > bits_in_uv)
 			    cdouble += (NV)along;
 			else
-			    culong += along;
+			    cuv += along;
 		    }
 		}
 		else
@@ -1044,7 +1114,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 			if (checksum > bits_in_uv)
 			    cdouble += (NV)along;
 			else
-			    culong += along;
+			    cuv += along;
 		    }
 		}
 	    }
@@ -1102,7 +1172,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 			if (checksum > bits_in_uv)
 			    cdouble += (NV)aulong;
 			else
-			    culong += aulong;
+			    cuv += aulong;
 		    }
 		}
 		else
@@ -1122,7 +1192,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 			if (checksum > bits_in_uv)
 			    cdouble += (NV)aulong;
 			else
-			    culong += aulong;
+			    cuv += aulong;
 		    }
 		}
 	    }
@@ -1250,7 +1320,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		    if (checksum > bits_in_uv)
 			cdouble += (NV)aquad;
 		    else
-			culong += aquad;
+			cuv += aquad;
 		}
 	    }
             else {
@@ -1260,12 +1330,12 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
                     if (s + sizeof(Quad_t) > strend)
                         aquad = 0;
                     else {
-		    Copy(s, &aquad, 1, Quad_t);
-		    s += sizeof(Quad_t);
+		        Copy(s, &aquad, 1, Quad_t);
+		        s += sizeof(Quad_t);
                     }
                     sv = NEWSV(42, 0);
                     if (aquad >= IV_MIN && aquad <= IV_MAX)
-		    sv_setiv(sv, (IV)aquad);
+		        sv_setiv(sv, (IV)aquad);
                     else
                         sv_setnv(sv, (NV)aquad);
                     PUSHs(sv_2mortal(sv));
@@ -1283,7 +1353,7 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		    if (checksum > bits_in_uv)
 			cdouble += (NV)auquad;
 		    else
-			culong += auquad;
+			cuv += auquad;
 		}
 	    }
             else {
@@ -1308,7 +1378,6 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 #endif
 	/* float and double added gnb@melba.bby.oz.au 22/11/89 */
 	case 'f':
-	case 'F':
 	    along = (strend - s) / sizeof(float);
 	    if (len > along)
 		len = along;
@@ -1332,7 +1401,6 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 	    }
 	    break;
 	case 'd':
-	case 'D':
 	    along = (strend - s) / sizeof(double);
 	    if (len > along)
 		len = along;
@@ -1355,6 +1423,54 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		}
 	    }
 	    break;
+	case 'F':
+	    along = (strend - s) / NVSIZE;
+	    if (len > along)
+		len = along;
+	    if (checksum) {
+		while (len-- > 0) {
+		    Copy(s, &anv, 1, NV);
+		    s += NVSIZE;
+		    cdouble += anv;
+		}
+	    }
+	    else {
+		EXTEND(SP, len);
+		EXTEND_MORTAL(len);
+		while (len-- > 0) {
+		    Copy(s, &anv, 1, NV);
+		    s += NVSIZE;
+		    sv = NEWSV(48, 0);
+		    sv_setnv(sv, anv);
+		    PUSHs(sv_2mortal(sv));
+		}
+	    }
+	    break;
+#if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
+	case 'D':
+	    along = (strend - s) / LONG_DOUBLESIZE;
+	    if (len > along)
+		len = along;
+	    if (checksum) {
+		while (len-- > 0) {
+		    Copy(s, &aldouble, 1, long double);
+		    s += LONG_DOUBLESIZE;
+		    cdouble += aldouble;
+		}
+	    }
+	    else {
+		EXTEND(SP, len);
+		EXTEND_MORTAL(len);
+		while (len-- > 0) {
+		    Copy(s, &aldouble, 1, long double);
+		    s += LONG_DOUBLESIZE;
+		    sv = NEWSV(48, 0);
+		    sv_setnv(sv, (NV)aldouble);
+		    PUSHs(sv_2mortal(sv));
+		}
+	    }
+	    break;
+#endif
 	case 'u':
 	    /* MKS:
 	     * Initialise the decode mapping.  By using a table driven
@@ -1417,7 +1533,8 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 	if (checksum) {
 	    sv = NEWSV(42, 0);
 	    if (strchr("fFdD", datumtype) ||
-	      (checksum > bits_in_uv && strchr("csSiIlLnNUvVqQ", datumtype)) ) {
+	      (checksum > bits_in_uv &&
+	       strchr("csSiIlLnNUvVqQjJ", datumtype)) ) {
 		NV trouble;
 
                 adouble = (NV) (1 << (checksum & 15));
@@ -1433,9 +1550,10 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 	    else {
 		if (checksum < bits_in_uv) {
 		    UV mask = ((UV)1 << checksum) - 1;
-		    culong &= mask;
+
+		    cuv &= mask;
 		}
-		sv_setuv(sv, (UV)culong);
+		sv_setuv(sv, cuv);
 	    }
 	    XPUSHs(sv_2mortal(sv));
 	    checksum = 0;
@@ -1610,6 +1728,12 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
     unsigned int auint;
     I32 along;
     U32 aulong;
+    IV aiv;
+    UV auv;
+    NV anv;
+#if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
+    long double aldouble;
+#endif
 #ifdef HAS_QUAD
     Quad_t aquad;
     Uquad_t auquad;
@@ -1920,7 +2044,6 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 	    break;
 	/* Float and double added by gnb@melba.bby.oz.au  22/11/89 */
 	case 'f':
-	case 'F':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
 		afloat = (float)SvNV(fromstr);
@@ -1928,13 +2051,28 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 	    }
 	    break;
 	case 'd':
-	case 'D':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
 		adouble = (double)SvNV(fromstr);
 		sv_catpvn(cat, (char *)&adouble, sizeof (double));
 	    }
 	    break;
+	case 'F':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		anv = SvNV(fromstr);
+		sv_catpvn(cat, (char *)&anv, NVSIZE);
+	    }
+	    break;
+#if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
+	case 'D':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		aldouble = (long double)SvNV(fromstr);
+		sv_catpvn(cat, (char *)&aldouble, LONG_DOUBLESIZE);
+	    }
+	    break;
+#endif
 	case 'n':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
@@ -2005,6 +2143,20 @@ Perl_pack_cat(pTHX_ SV *cat, char *pat, register char *patend, register SV **beg
 		fromstr = NEXTFROM;
 		auint = SvUV(fromstr);
 		sv_catpvn(cat, (char*)&auint, sizeof(unsigned int));
+	    }
+	    break;
+	case 'j':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		aiv = SvIV(fromstr);
+		sv_catpvn(cat, (char*)&aiv, IVSIZE);
+	    }
+	    break;
+	case 'J':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		auv = SvUV(fromstr);
+		sv_catpvn(cat, (char*)&auv, UVSIZE);
 	    }
 	    break;
 	case 'w':

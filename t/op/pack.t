@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 5179;
+plan tests => 5619;
 
 use strict;
 use warnings;
@@ -751,12 +751,18 @@ foreach (
 }
 
 {  # Repeat count [SUBEXPR]
-   my @codes = qw( x A Z a c C B b H h s v n S i I l V N L p P f F d D
-		   s! S! i! I! l! L! );
+   my @codes = qw( x A Z a c C B b H h s v n S i I l V N L p P f F d
+		   s! S! i! I! l! L! j J);
+   my $G;
    if (eval { pack 'q', 1 } ) {
      push @codes, qw(q Q);
    } else {
      push @codes, qw(c C);	# Keep the count the same
+   }
+   if (eval { pack 'D', 1 } ) {
+     push @codes, 'D';
+   } else {
+     push @codes, 'd';	# Keep the count the same
    }
 
    my %val;
@@ -766,7 +772,7 @@ foreach (
 			| c     (?{ 114 })
 			| [Bb]  (?{ '101' })
 			| [Hh]  (?{ 'b8' })
-			| [svnSiIlVNLqQ]  (?{ 10111 })
+			| [svnSiIlVNLqQjJ]  (?{ 10111 })
 			| [FfDd]  (?{ 1.36514538e67 })
 			| [pP]  (?{ "try this buffer" })
 			/x; $^R } @codes;
@@ -846,3 +852,20 @@ is(scalar unpack('A /A /A Z20', '3004bcde'), 'bcde');
   is(scalar @b, scalar @a);
   is("@b", "@a");
 }
+
+is(length(pack("j", 0)), $Config{ivsize});
+is(length(pack("J", 0)), $Config{uvsize});
+is(length(pack("F", 0)), $Config{nvsize});
+
+numbers ('j', -2147483648, -1, 0, 1, 2147483647);
+numbers ('J', 0, 1, 2147483647, 2147483648, 4294967295);
+numbers ('F', -(2**34), -1, 0, 1, 2**34);
+SKIP: {
+    my $t = eval { unpack("D*", pack("D", 12.34)) };
+
+    skip "Long doubles not in use", 56 if $@ =~ /Invalid type in pack/;
+
+    is(length(pack("D", 0)), $Config{longdblsize});
+    numbers ('D', -(2**34), -1, 0, 1, 2**34);
+}
+
