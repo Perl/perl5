@@ -105,6 +105,120 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7228] By: jhi                                   on 2000/10/14  00:46:10
+        Log: Subject: RFC: a (temporary?) way around utf8.pm for EBCDIC
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 13 Oct 2000 15:59:56 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10010131548260.133963-100000@aspara.forte.com>
+     Branch: perl
+	   ! lib/utf8.pm
+____________________________________________________________________________
+[  7227] By: jhi                                   on 2000/10/13  23:20:30
+        Log: Make the test acknowledge that self-ties are disabled as #7213 said.
+     Branch: perl
+	   ! t/op/tie.t
+____________________________________________________________________________
+[  7226] By: jhi                                   on 2000/10/13  22:14:32
+        Log: Tweak #7225.
+             
+             Subject: Re: [ID 20001006.014] Not OK: perl v5.7.0 +DEVEL7158 on os390 05.00 (UNINSTALLED) [PATCH bleadperl]
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 13 Oct 2000 14:44:49 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10010131414410.133963-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/op/sprintf.t
+____________________________________________________________________________
+[  7225] By: jhi                                   on 2000/10/13  22:11:31
+        Log: op/sprintf.t patch for OS/390 (and any other host with limited
+             floating-point exponent length)
+             
+             Subject: Re: [ID 20001006.014] Not OK: perl v5.7.0 +DEVEL7158 on os390 05.00  (UNINSTALLED) [PATCH bleadperl]
+             From: Dominic Dunlop <domo@computer.org>
+             Date: Fri, 13 Oct 2000 19:17:57 +0200
+             Message-Id: <p04320400b60cf2a6a05c@[192.168.1.4]>
+     Branch: perl
+	   ! t/op/sprintf.t
+____________________________________________________________________________
+[  7224] By: jhi                                   on 2000/10/13  18:40:48
+        Log: Allow @+ and @- to be doublequoted, from Simon Cozens. 
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  7223] By: jhi                                   on 2000/10/13  18:37:13
+        Log: Thinko in #7222.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[  7222] By: jhi                                   on 2000/10/13  18:05:23
+        Log: Use UTF8SKIP(), from Simon Cozens.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[  7221] By: jhi                                   on 2000/10/13  15:43:19
+        Log: (accidentally empty check-in)
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[  7220] By: jhi                                   on 2000/10/13  15:23:51
+        Log: Add (optimistically) Storable to static extensions.
+     Branch: perl
+	   ! hints/uwin.sh hints/vmesa.sh
+____________________________________________________________________________
+[  7219] By: jhi                                   on 2000/10/13  15:20:05
+        Log: Amdahl UTS doesn't seem to do dynaloading.
+     Branch: perl
+	   ! hints/uts.sh
+____________________________________________________________________________
+[  7218] By: jhi                                   on 2000/10/13  15:15:20
+        Log: Slight tweak of the code to appease Amdahl UTS cc.
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[  7217] By: jhi                                   on 2000/10/13  14:50:42
+        Log: In Amdahl UTS "struct sv" is defined by a system header,
+             <ksync.h>.
+     Branch: perl
+	   ! perl.h sv.h
+____________________________________________________________________________
+[  7216] By: jhi                                   on 2000/10/13  11:58:25
+        Log: Ilya implemented the memory profiling API.
+     Branch: perl
+	   ! Todo
+____________________________________________________________________________
+[  7215] By: jhi                                   on 2000/10/13  02:56:38
+        Log: Subject: [PATCH 5.7.0] Perl API for mstats
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Thu, 12 Oct 2000 22:52:40 -0400
+             Message-ID: <20001012225240.A7113@monk.mps.ohio-state.edu>
+     Branch: perl
+	   ! ext/Devel/Peek/Peek.pm ext/Devel/Peek/Peek.xs
+____________________________________________________________________________
+[  7214] By: jhi                                   on 2000/10/13  02:55:38
+        Log: Subject: [PATCH 5.7.0] IVs in mtats
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Thu, 12 Oct 2000 22:51:04 -0400
+             Message-ID: <20001012225104.A7103@monk.mps.ohio-state.edu>
+     Branch: perl
+	   ! malloc.c perl.h
+____________________________________________________________________________
+[  7213] By: jhi                                   on 2000/10/13  02:31:47
+        Log: Self-ties are unsupported currently, stopgap patch from Alan Burlison.
+     Branch: perl
+	   ! pod/perldiag.pod pp_sys.c
+____________________________________________________________________________
+[  7212] By: jhi                                   on 2000/10/13  01:27:38
+        Log: Subject: [PATCH: perl@7181] was: Re: off to a bad start on fixing regression tests
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Tue, 10 Oct 2000 10:26:07 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10010101020180.441897-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/op/oct.t
+____________________________________________________________________________
+[  7211] By: jhi                                   on 2000/10/13  00:35:09
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7210] By: jhi                                   on 2000/10/12  23:59:40
         Log: The Install.pm third of
              
