@@ -1068,7 +1068,7 @@ PP(pp_repeat)
 {
   djSP; dATARGET; tryAMAGICbin(repeat,opASSIGN);
   {
-    register I32 count = POPi;
+    register IV count = POPi;
     if (GIMME == G_ARRAY && PL_op->op_private & OPpREPEAT_DOLIST) {
 	dMARK;
 	I32 items = SP - MARK;
@@ -2104,8 +2104,8 @@ PP(pp_substr)
 PP(pp_vec)
 {
     djSP; dTARGET;
-    register I32 size = POPi;
-    register I32 offset = POPi;
+    register IV size   = POPi;
+    register IV offset = POPi;
     register SV *src = POPs;
     I32 lvalue = PL_op->op_flags & OPf_MOD;
 
@@ -2238,7 +2238,7 @@ PP(pp_chr)
 {
     djSP; dTARGET;
     char *tmps;
-    U32 value = POPu;
+    UV value = POPu;
 
     (void)SvUPGRADE(TARG,SVt_PV);
 
@@ -5005,7 +5005,7 @@ PP(pp_split)
 {
     djSP; dTARG;
     AV *ary;
-    register I32 limit = POPi;			/* note, negative is forever */
+    register IV limit = POPi;			/* note, negative is forever */
     SV *sv = POPs;
     bool doutf8 = DO_UTF8(sv);
     STRLEN len;

@@ -2780,7 +2780,7 @@ PP(pp_aelem)
 {
     djSP;
     SV** svp;
-    I32 elem = POPi;
+    IV elem = POPi;
     AV* av = (AV*)POPs;
     U32 lval = PL_op->op_flags & OPf_MOD;
     U32 defer = (PL_op->op_private & OPpLVAL_DEFER) && (elem > AvFILL(av));
