@@ -14,9 +14,8 @@ typedef struct
 } PerlIOScalar;
 
 IV
-PerlIOScalar_pushed(PerlIO *f, const char *mode, SV *arg)
+PerlIOScalar_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg)
 {
- dTHX;
  IV code;
  PerlIOScalar *s = PerlIOSelf(f,PerlIOScalar);
  /* If called (normally) via open() then arg is ref to scalar we are
@@ -39,7 +38,7 @@ PerlIOScalar_pushed(PerlIO *f, const char *mode, SV *arg)
    s->var = newSVpvn("",0);
   }
  sv_upgrade(s->var,SVt_PV);
- code = PerlIOBase_pushed(f,mode,Nullsv);
+ code = PerlIOBase_pushed(aTHX_ f,mode,Nullsv);
  if ((PerlIOBase(f)->flags) & PERLIO_F_TRUNCATE)
    SvCUR(s->var) = 0;
  if ((PerlIOBase(f)->flags) & PERLIO_F_APPEND)
@@ -50,12 +49,11 @@ PerlIOScalar_pushed(PerlIO *f, const char *mode, SV *arg)
 }
 
 IV
-PerlIOScalar_popped(PerlIO *f)
+PerlIOScalar_popped(pTHX_ PerlIO *f)
 {
  PerlIOScalar *s = PerlIOSelf(f,PerlIOScalar);
  if (s->var)
   {
-   dTHX;
    SvREFCNT_dec(s->var);
    s->var = Nullsv;
   }
@@ -63,21 +61,21 @@ PerlIOScalar_popped(PerlIO *f)
 }
 
 IV
-PerlIOScalar_close(PerlIO *f)
+PerlIOScalar_close(pTHX_ PerlIO *f)
 {
- IV code = PerlIOBase_close(f);
+ IV code = PerlIOBase_close(aTHX_ f);
  PerlIOBase(f)->flags &= ~(PERLIO_F_RDBUF|PERLIO_F_WRBUF);
  return code;
 }
 
 IV
-PerlIOScalar_fileno(PerlIO *f)
+PerlIOScalar_fileno(pTHX_ PerlIO *f)
 {
  return -1;
 }
 
 IV
-PerlIOScalar_seek(PerlIO *f, Off_t offset, int whence)
+PerlIOScalar_seek(pTHX_ PerlIO *f, Off_t offset, int whence)
 {
  PerlIOScalar *s = PerlIOSelf(f,PerlIOScalar);
  switch(whence)
@@ -94,23 +92,21 @@ PerlIOScalar_seek(PerlIO *f, Off_t offset, int whence)
   }
  if (s->posn > SvCUR(s->var))
   {
-   dTHX;
    (void) SvGROW(s->var,s->posn);
   }
  return 0;
 }
 
 Off_t
-PerlIOScalar_tell(PerlIO *f)
+PerlIOScalar_tell(pTHX_ PerlIO *f)
 {
  PerlIOScalar *s = PerlIOSelf(f,PerlIOScalar);
  return s->posn;
 }
 
 SSize_t
-PerlIOScalar_unread(PerlIO *f, const void *vbuf, Size_t count)
+PerlIOScalar_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
- dTHX;
  PerlIOScalar *s = PerlIOSelf(f,PerlIOScalar);
  char *dst = SvGROW(s->var,s->posn+count);
  Move(vbuf,dst+s->posn,count,char);
@@ -121,11 +117,10 @@ PerlIOScalar_unread(PerlIO *f, const void *vbuf, Size_t count)
 }
 
 SSize_t
-PerlIOScalar_write(PerlIO *f, const void *vbuf, Size_t count)
+PerlIOScalar_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
  if (PerlIOBase(f)->flags & PERLIO_F_CANWRITE)
   {
-   dTHX;
    Off_t offset;
    PerlIOScalar *s = PerlIOSelf(f,PerlIOScalar);
    SV *sv = s->var;
@@ -156,42 +151,41 @@ PerlIOScalar_write(PerlIO *f, const void *vbuf, Size_t count)
 }
 
 IV
-PerlIOScalar_fill(PerlIO *f)
+PerlIOScalar_fill(pTHX_ PerlIO *f)
 {
  return -1;
 }
 
 IV
-PerlIOScalar_flush(PerlIO *f)
+PerlIOScalar_flush(pTHX_ PerlIO *f)
 {
  return 0;
 }
 
 STDCHAR *
-PerlIOScalar_get_base(PerlIO *f)
+PerlIOScalar_get_base(pTHX_ PerlIO *f)
 {
  PerlIOScalar *s = PerlIOSelf(f,PerlIOScalar);
  if (PerlIOBase(f)->flags & PERLIO_F_CANREAD)
   {
-   dTHX;
    return (STDCHAR *)SvPV_nolen(s->var);
   }
  return (STDCHAR *) Nullch;
 }
 
 STDCHAR *
-PerlIOScalar_get_ptr(PerlIO *f)
+PerlIOScalar_get_ptr(pTHX_ PerlIO *f)
 {
  if (PerlIOBase(f)->flags & PERLIO_F_CANREAD)
   {
    PerlIOScalar *s = PerlIOSelf(f,PerlIOScalar);
-   return PerlIOScalar_get_base(f)+s->posn;
+   return PerlIOScalar_get_base(aTHX_ f)+s->posn;
   }
  return (STDCHAR *) Nullch;
 }
 
 SSize_t
-PerlIOScalar_get_cnt(PerlIO *f)
+PerlIOScalar_get_cnt(pTHX_ PerlIO *f)
 {
  if (PerlIOBase(f)->flags & PERLIO_F_CANREAD)
   {
@@ -205,7 +199,7 @@ PerlIOScalar_get_cnt(PerlIO *f)
 }
 
 Size_t
-PerlIOScalar_bufsiz(PerlIO *f)
+PerlIOScalar_bufsiz(pTHX_ PerlIO *f)
 {
  if (PerlIOBase(f)->flags & PERLIO_F_CANREAD)
   {
@@ -216,7 +210,7 @@ PerlIOScalar_bufsiz(PerlIO *f)
 }
 
 void
-PerlIOScalar_set_ptrcnt(PerlIO *f, STDCHAR *ptr, SSize_t cnt)
+PerlIOScalar_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR *ptr, SSize_t cnt)
 {
  PerlIOScalar *s = PerlIOSelf(f,PerlIOScalar);
  s->posn = SvCUR(s->var)-cnt;

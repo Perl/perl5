@@ -75,13 +75,12 @@ PerlIOEncode_getarg(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
 }
 
 IV
-PerlIOEncode_pushed(PerlIO *f, const char *mode, SV *arg)
+PerlIOEncode_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg)
 {
  PerlIOEncode *e = PerlIOSelf(f,PerlIOEncode);
- dTHX;
  dSP;
  IV code;
- code = PerlIOBuf_pushed(f,mode,Nullsv);
+ code = PerlIOBuf_pushed(aTHX_ f,mode,Nullsv);
  ENTER;
  SAVETMPS;
  PUSHMARK(sp);
@@ -114,10 +113,9 @@ PerlIOEncode_pushed(PerlIO *f, const char *mode, SV *arg)
 }
 
 IV
-PerlIOEncode_popped(PerlIO *f)
+PerlIOEncode_popped(pTHX_ PerlIO *f)
 {
  PerlIOEncode *e = PerlIOSelf(f,PerlIOEncode);
- dTHX;
  if (e->enc)
   {
    SvREFCNT_dec(e->enc);
@@ -132,10 +130,9 @@ PerlIOEncode_popped(PerlIO *f)
 }
 
 STDCHAR *
-PerlIOEncode_get_base(PerlIO *f)
+PerlIOEncode_get_base(pTHX_ PerlIO *f)
 {
  PerlIOEncode *e = PerlIOSelf(f,PerlIOEncode);
- dTHX;
  if (!e->base.bufsiz)
   e->base.bufsiz = 1024;
  if (!e->bufsv)
@@ -172,13 +169,12 @@ PerlIOEncode_get_base(PerlIO *f)
 }
 
 IV
-PerlIOEncode_fill(PerlIO *f)
+PerlIOEncode_fill(pTHX_ PerlIO *f)
 {
  PerlIOEncode *e = PerlIOSelf(f,PerlIOEncode);
- dTHX;
  dSP;
  IV code;
- code = PerlIOBuf_fill(f);
+ code = PerlIOBuf_fill(aTHX_ f);
  if (code == 0)
   {
    SV *uni;
@@ -221,7 +217,7 @@ PerlIOEncode_fill(PerlIO *f)
 }
 
 IV
-PerlIOEncode_flush(PerlIO *f)
+PerlIOEncode_flush(pTHX_ PerlIO *f)
 {
  PerlIOEncode *e = PerlIOSelf(f,PerlIOEncode);
  IV code = 0;
@@ -229,7 +225,6 @@ PerlIOEncode_flush(PerlIO *f)
      &&(e->base.ptr > e->base.buf)
     )
   {
-   dTHX;
    dSP;
    SV *str;
    char *s;
@@ -270,18 +265,17 @@ PerlIOEncode_flush(PerlIO *f)
    e->base.end = e->base.ptr + left;
    FREETMPS;
    LEAVE;
-   if (PerlIOBuf_flush(f) != 0)
+   if (PerlIOBuf_flush(aTHX_ f) != 0)
     code = -1;
   }
  return code;
 }
 
 IV
-PerlIOEncode_close(PerlIO *f)
+PerlIOEncode_close(pTHX_ PerlIO *f)
 {
  PerlIOEncode *e = PerlIOSelf(f,PerlIOEncode);
- IV code = PerlIOBase_close(f);
- dTHX;
+ IV code = PerlIOBase_close(aTHX_ f);
  if (e->bufsv)
   {
    SvREFCNT_dec(e->bufsv);
@@ -295,9 +289,8 @@ PerlIOEncode_close(PerlIO *f)
 }
 
 Off_t
-PerlIOEncode_tell(PerlIO *f)
+PerlIOEncode_tell(pTHX_ PerlIO *f)
 {
- dTHX;
  PerlIOBuf *b = PerlIOSelf(f,PerlIOBuf);
  /* Unfortunately the only way to get a postion is to back-translate,
     the UTF8-bytes we have buf..ptr and adjust accordingly.
