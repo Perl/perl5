@@ -243,6 +243,14 @@ sub _win32_ext {
 	}
 	$thislib .= $libext if $thislib !~ /\Q$libext\E$/i;
 
+        # look for the file itself
+	if (-f $thislib) {
+	    warn "'$thislib' found\n" if $verbose;
+	    $found++;
+	    push(@extralibs, $thislib);
+	    next;
+	}
+
 	my($found_lib)=0;
 	foreach $thispth (@searchpath, @libpath){
 	    unless (-f ($fullname="$thispth\\$thislib")) {
