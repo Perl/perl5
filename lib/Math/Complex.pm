@@ -196,6 +196,14 @@ use constant pit2 => 2 * pi;
 use constant pip2 => pi / 2;
 
 #
+# deg1
+#
+# One degree in radians, used in stringify_polar.
+#
+
+use constant deg1 => pi / 180;
+
+#
 # uplog10
 #
 # Used in log10().
@@ -424,7 +432,11 @@ sub power {
 	    return 0 if ($z1z);
 	    return 1 if ($z2z or $z1 == 1);
 	}
-	return $inverted ? exp($z1 * log $z2) : exp($z2 * log $z1);
+	my $w = $inverted ? exp($z1 * log $z2) : exp($z2 * log $z1);
+	# If both arguments cartesian, return cartesian, else polar.
+	return $z1->{c_dirty} == 0 &&
+	       (not ref $z2 or $z2->{c_dirty} == 0) ?
+	       cplx(@{$w->cartesian}) : $w;
 }
 
 #
@@ -590,9 +602,11 @@ sub root {
 	my $theta_inc = pit2 / $n;
 	my $rho = $r ** (1/$n);
 	my $theta;
-	my $complex = ref($z) || $package;
+	my $cartesian = ref $z && $z->{c_dirty} == 0;
 	for ($k = 0, $theta = $t / $n; $k < $n; $k++, $theta += $theta_inc) {
-		push(@root, $complex->emake($rho, $theta));
+	    my $w = cplxe($rho, $theta);
+	    # Yes, $cartesian is loop invariant.
+	    push @root, $cartesian ? cplx(@{$w->cartesian}) : $w;
 	}
 	return @root;
 }
@@ -1232,9 +1246,40 @@ sub stringify_cartesian {
 	$str .= "+$im" if defined $im;
 	$str =~ s/\+-/-/;
 	$str =~ s/^\+//;
+	$str =~ s/([-+])1i/$1i/; # Not redundant with the above 1/-1 tests.
 	$str = '0' unless $str;
 
 	return $str;
+}
+
+
+# Helper for stringify_polar, a Greatest Common Divisor with a memory.
+
+sub _gcd {
+    my ($a, $b) = @_;
+
+    use integer;
+
+    # Loops forever if given negative inputs.
+
+    if    ($b and $a > $b) { return gcd($a % $b, $b) }
+    elsif ($a and $b > $a) { return gcd($b % $a, $a) }
+    else                   { return $a ? $a : $b     }
+}
+
+my %gcd;
+
+sub gcd {
+    my ($a, $b) = @_;
+
+    my $id = "$a $b";
+    
+    unless (exists $gcd{$id}) {
+	$gcd{$id} = _gcd($a, $b);
+	$gcd{"$b $a"} = $gcd{$id};
+    }
+
+    return $gcd{$id};
 }
 
 #
@@ -1270,15 +1315,26 @@ sub stringify_polar {
 	#
 
 	$nt -= pit2 if $nt > pi;
-	my ($n, $k, $kpi);
 
-	for ($k = 1, $kpi = pi; $k < 10; $k++, $kpi += pi) {
+	if (abs($nt) >= deg1) {
+	    my ($n, $k, $kpi);
+
+	    for ($k = 1, $kpi = pi; $k < 10; $k++, $kpi += pi) {
 		$n = int($kpi / $nt + ($nt > 0 ? 1 : -1) * 0.5);
 		if (abs($kpi/$n - $nt) <= $eps) {
-			$theta = ($nt < 0 ? '-':'').
-				 ($k == 1 ? 'pi':"${k}pi").'/'.abs($n);
-			last;
+		    $n = abs $n;
+		    my $gcd = gcd($k, $n);
+		    if ($gcd > 1) {
+			$k /= $gcd;
+			$n /= $gcd;
+		    }
+		    next if $n > 360;
+		    $theta = ($nt < 0 ? '-':'').
+			     ($k == 1 ? 'pi':"${k}pi");
+		    $theta .= '/'.$n if $n > 1;
+		    last;
 		}
+	    }
 	}
 
 	$theta = $nt unless defined $theta;
@@ -1699,6 +1755,11 @@ This is construed as a feature by the Authors, actually... ;-)
 All routines expect to be given real or complex numbers. Don't attempt to
 use BigFloat, since Perl has currently no rule to disambiguate a '+'
 operation (for instance) between two overloaded entities.
+
+In Cray UNICOS there is some strange numerical instability that results
+in root(), cos(), sin(), cosh(), sinh(), losing accuracy fast.  Beware.
+The bug may be in UNICOS math libs, in UNICOS C compiler, in Math::Complex.
+Whatever it is, it does not manifest itself anywhere else where Perl runs.
 
 =head1 AUTHORS
 
