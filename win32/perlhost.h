@@ -7,6 +7,8 @@
  *    License or the Artistic License, as specified in the README file.
  */
 
+#define CHECK_HOST_INTERP
+
 #ifndef ___PerlHost_H___
 #define ___PerlHost_H___
 
@@ -214,16 +216,30 @@ protected:
     static long num_hosts;
 public:
     inline  int LastHost(void) { return num_hosts == 1L; };
+#ifdef CHECK_HOST_INTERP
+    struct interpreter *host_perl;
+#endif
 };
 
 long CPerlHost::num_hosts = 0L;
 
+extern "C" void win32_checkTLS(struct interpreter *host_perl);
 
-#define STRUCT2PTR(x, y) (CPerlHost*)(((LPBYTE)x)-offsetof(CPerlHost, y))
+#define STRUCT2RAWPTR(x, y) (CPerlHost*)(((LPBYTE)x)-offsetof(CPerlHost, y))
+#ifdef CHECK_HOST_INTERP
+inline CPerlHost* CheckInterp(CPerlHost *host) 
+{
+ win32_checkTLS(host->host_perl);
+ return host;
+}
+#define STRUCT2PTR(x, y) CheckInterp(STRUCT2RAWPTR(x, y))
+#else
+#define STRUCT2PTR(x, y) STRUCT2RAWPTR(x, y)
+#endif
 
 inline CPerlHost* IPerlMem2Host(struct IPerlMem* piPerl)
 {
-    return STRUCT2PTR(piPerl, m_hostperlMem);
+    return STRUCT2RAWPTR(piPerl, m_hostperlMem);
 }
 
 inline CPerlHost* IPerlMemShared2Host(struct IPerlMem* piPerl)
@@ -1681,6 +1697,7 @@ win32_start_child(LPVOID arg)
 
 
     PERL_SET_THX(my_perl);
+    win32_checkTLS(my_perl);
 
     /* set $$ to pseudo id */
 #ifdef PERL_SYNC_FORK
@@ -1747,9 +1764,11 @@ restart:
 	JMPENV_POP;
 
 	/* XXX hack to avoid perl_destruct() freeing optree */
+        win32_checkTLS(my_perl);
 	PL_main_root = Nullop;
     }
 
+    win32_checkTLS(my_perl);
     /* close the std handles to avoid fd leaks */
     {
 	do_close(gv_fetchpv("STDIN", TRUE, SVt_PVIO), FALSE);
@@ -1758,7 +1777,9 @@ restart:
     }
 
     /* destroy everything (waits for any pseudo-forked children) */
+    win32_checkTLS(my_perl);
     perl_destruct(my_perl);
+    win32_checkTLS(my_perl);
     perl_free(my_perl);
 
 #ifdef PERL_SYNC_FORK
@@ -1795,6 +1816,7 @@ PerlProcFork(struct IPerlProc* piPerl)
 						 h->m_pHostperlProc
 						 );
     new_perl->Isys_intern.internal_host = h;
+    h->host_perl = new_perl;
 #  ifdef PERL_SYNC_FORK
     id = win32_start_child((LPVOID)new_perl);
     PERL_SET_THX(aTHX);
@@ -2414,3 +2436,4 @@ CPerlHost::Chdir(const char *dirname)
 }
 
 #endif /* ___PerlHost_H___ */
+
