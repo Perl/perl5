@@ -688,6 +688,16 @@ C<Use of /c modifier is meaningless in s///>.
 Use of C</g> with C<split> elicits C<Use of /g modifier is meaningless
 in split>.
 
+=item *
+
+Support for the C<CLONE> keyword had been added. With ithreads, when a
+new thread is created, all perl data is cloned, however non perl data
+cannot be cloned. C<CLONE> will be executed once for every package
+that has it defined or inherited. It will be called in the context of
+the new thread, so all modifications are made in the new area.
+
+See L<perlmod>
+
 =back
 
 =head1 Modules and Pragmata
