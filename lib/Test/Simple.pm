@@ -4,7 +4,7 @@ use 5.004;
 
 use strict 'vars';
 use vars qw($VERSION);
-$VERSION = '0.32';
+$VERSION = '0.33';
 
 
 use Test::Builder;
@@ -44,7 +44,7 @@ The basic unit of Perl testing is the ok.  For each thing you want to
 test your program will print out an "ok" or "not ok" to indicate pass
 or fail.  You do this with the ok() function (see below).
 
-The only other constraint is you must predeclare how many tests you
+The only other constraint is you must pre-declare how many tests you
 plan to run.  This is in case something goes horribly wrong during the
 test and your test program aborts, or skips a test or whatever.  You
 do this like so:
@@ -184,12 +184,6 @@ to learn.  Paul Johnson simultaneously had this idea (unfortunately,
 he wasn't in Tony's kitchen).  This is it.
 
 
-=head1 AUTHOR
-
-Idea by Tony Bowden and Paul Johnson, code by Michael G Schwern
-E<lt>schwern@pobox.comE<gt>, wardrobe by Calvin Klein.
-
-
 =head1 SEE ALSO
 
 =over 4
@@ -198,7 +192,7 @@ E<lt>schwern@pobox.comE<gt>, wardrobe by Calvin Klein.
 
 More testing functions!  Once you outgrow Test::Simple, look at
 Test::More.  Test::Simple is 100% forward compatible with Test::More
-(ie. you can just use Test::More instead of Test::Simple in your
+(i.e. you can just use Test::More instead of Test::Simple in your
 programs and things will still work).
 
 =item L<Test>
@@ -209,7 +203,7 @@ The original Perl testing module.
 
 Elaborate unit testing.
 
-=item L<Pod::Tests>, L<SelfTest>
+=item L<Test::Inline>, L<SelfTest>
 
 Embed tests in your code!
 
@@ -218,6 +212,22 @@ Embed tests in your code!
 Interprets the output of your test program.
 
 =back
+
+
+=head1 AUTHORS
+
+Idea by Tony Bowden and Paul Johnson, code by Michael G Schwern
+E<lt>schwern@pobox.comE<gt>, wardrobe by Calvin Klein.
+
+
+=head1 COPYRIGHT
+
+Copyright 2001 by Michael G Schwern E<lt>schwern@pobox.comE<gt>.
+
+This program is free software; you can redistribute it and/or 
+modify it under the same terms as Perl itself.
+
+See L<http://www.perl.com/perl/misc/Artistic.html>
 
 =cut
 
