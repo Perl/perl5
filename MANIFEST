@@ -612,6 +612,8 @@ t/lib/io_xs.t		See if XSUB methods from IO work
 t/lib/ndbm.t		See if NDBM_File works
 t/lib/odbm.t		See if ODBM_File works
 t/lib/opcode.t		See if Opcode works
+t/lib/open2.t		See if IPC::Open3 works
+t/lib/open3.t		See if IPC::Open2 works
 t/lib/ops.t		See if Opcode works
 t/lib/parsewords.t	See if Text::ParseWords works
 t/lib/posix.t		See if POSIX works

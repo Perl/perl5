@@ -1,7 +1,18 @@
 package IPC::Open3;
+
+use strict;
+no strict 'refs'; # because users pass me bareword filehandles
+use vars qw($VERSION @ISA @EXPORT $Fh $Me);
+
 require 5.001;
 require Exporter;
+
 use Carp;
+use Symbol 'qualify';
+
+$VERSION	= 1.01;
+@ISA		= qw(Exporter);
+@EXPORT		= qw(open3);
 
 =head1 NAME
 
@@ -9,7 +20,7 @@ IPC::Open3, open3 - open a process for reading, writing, and error handling
 
 =head1 SYNOPSIS
 
-    $pid = open3(\*WTRFH, \*RDRFH, \*ERRFH 
+    $pid = open3(\*WTRFH, \*RDRFH, \*ERRFH
 		    'some cmd and args', 'optarg', ...);
 
 =head1 DESCRIPTION
@@ -29,12 +40,28 @@ writer, you'll have problems with blocking, which means you'll
 want to use select(), which means you'll have to use sysread() instead
 of normal stuff.
 
-All caveats from open2() continue to apply.  See L<open2> for details.
+open3() returns the process ID of the child process.  It doesn't return on
+failure: it just raises an exception matching C</^open3:/>.
+
+=head1 WARNING
+
+It will not create these file handles for you.  You have to do this
+yourself.  So don't pass it empty variables expecting them to get filled
+in for you.
+
+Additionally, this is very dangerous as you may block forever.  It
+assumes it's going to talk to something like B<bc>, both writing to it
+and reading from it.  This is presumably safe because you "know" that
+commands like B<bc> will read a line at a time and output a line at a
+time.  Programs like B<sort> that read their entire input stream first,
+however, are quite apt to cause deadlock.
+
+The big problem with this approach is that if you don't have control
+over source code being run in the the child process, you can't control
+what it does with pipe buffering.  Thus you can't just open a pipe to
+C<cat -v> and continually read and write a line from it.
 
 =cut
-
-@ISA = qw(Exporter);
-@EXPORT = qw(open3);
 
 # &open3: Marc Horowitz <marc@mit.edu>
 # derived mostly from &open2 by tom christiansen, <tchrist@convex.com>
@@ -48,7 +75,7 @@ All caveats from open2() continue to apply.  See L<open2> for details.
 # reading, wtr for writing, and err for errors.
 # if err is '', or the same as rdr, then stdout and
 # stderr of the child are on the same fh.  returns pid
-# of child, or 0 on failure.
+# of child (or dies on failure).
 
 
 # if wtr begins with '<&', then wtr will be closed in the parent, and
@@ -64,17 +91,41 @@ All caveats from open2() continue to apply.  See L<open2> for details.
 #
 # abort program if
 #   rdr or wtr are null
-#   pipe or fork or exec fails
+#   a system call fails
 
-$fh = 'FHOPEN000';  # package static in case called more than once
+$Fh = 'FHOPEN000';	# package static in case called more than once
+$Me = 'open3 (bug)';	# you should never see this, it's always localized
 
-sub open3 {
-    my($kidpid);
-    my($dad_wtr, $dad_rdr, $dad_err, @cmd) = @_;
-    my($dup_wtr, $dup_rdr, $dup_err);
+# Fatal.pm needs to be fixed WRT prototypes.
 
-    $dad_wtr			|| croak "open3: wtr should not be null";
-    $dad_rdr			|| croak "open3: rdr should not be null";
+sub xfork {
+    my $pid = fork;
+    defined $pid or croak "$Me: fork failed: $!";
+    return $pid;
+}
+
+sub xpipe {
+    pipe $_[0], $_[1] or croak "$Me: pipe($_[0], $_[1]) failed: $!";
+}
+
+# I tried using a * prototype character for the filehandle but it still
+# disallows a bearword while compiling under strict subs.
+
+sub xopen {
+    open $_[0], $_[1] or croak "$Me: open($_[0], $_[1]) failed: $!";
+}
+
+sub xclose {
+    close $_[0] or croak "$Me: close($_[0]) failed: $!";
+}
+
+sub _open3 {
+    local $Me = shift;
+    my($package, $dad_wtr, $dad_rdr, $dad_err, @cmd) = @_;
+    my($dup_wtr, $dup_rdr, $dup_err, $kidpid);
+
+    $dad_wtr			or croak "$Me: wtr should not be null";
+    $dad_rdr			or croak "$Me: rdr should not be null";
     $dad_err = $dad_rdr if ($dad_err eq '');
 
     $dup_wtr = ($dad_wtr =~ s/^[<>]&//);
@@ -82,28 +133,29 @@ sub open3 {
     $dup_err = ($dad_err =~ s/^[<>]&//);
 
     # force unqualified filehandles into callers' package
-    my($package) = caller;
-    $dad_wtr =~ s/^([^:]+$)/$package\:\:$1/ unless ref $dad_wtr;
-    $dad_rdr =~ s/^([^:]+$)/$package\:\:$1/ unless ref $dad_rdr;
-    $dad_err =~ s/^([^:]+$)/$package\:\:$1/ unless ref $dad_err;
+    $dad_wtr = qualify $dad_wtr, $package;
+    $dad_rdr = qualify $dad_rdr, $package;
+    $dad_err = qualify $dad_err, $package;
 
-    my($kid_rdr) = ++$fh;
-    my($kid_wtr) = ++$fh;
-    my($kid_err) = ++$fh;
+    my $kid_rdr = ++$Fh;
+    my $kid_wtr = ++$Fh;
+    my $kid_err = ++$Fh;
 
-    if (!$dup_wtr) {
-	pipe($kid_rdr, $dad_wtr)    || croak "open3: pipe 1 (stdin) failed: $!";
-    }
-    if (!$dup_rdr) {
-	pipe($dad_rdr, $kid_wtr)    || croak "open3: pipe 2 (stdout) failed: $!";
-    }
-    if ($dad_err ne $dad_rdr && !$dup_err) {
-	pipe($dad_err, $kid_err)    || croak "open3: pipe 3 (stderr) failed: $!";
-    }
+    xpipe $kid_rdr, $dad_wtr if !$dup_wtr;
+    xpipe $dad_rdr, $kid_wtr if !$dup_rdr;
+    xpipe $dad_err, $kid_err if !$dup_err && $dad_err ne $dad_rdr;
 
-    if (($kidpid = fork) < 0) {
-        croak "open3: fork failed: $!";
-    } elsif ($kidpid == 0) {
+    $kidpid = xfork;
+    if ($kidpid == 0) {
+	# If she wants to dup the kid's stderr onto her stdout I need to
+	# save a copy of her stdout before I put something else there.
+	if ($dad_rdr ne $dad_err && $dup_err
+		&& fileno($dad_err) == fileno(STDOUT)) {
+	    my $tmp = ++$Fh;
+	    xopen($tmp, ">&$dad_err");
+	    $dad_err = $tmp;
+	}
+
 	if ($dup_wtr) {
 	    open(STDIN,  "<&$dad_wtr") if (fileno(STDIN) != fileno($dad_wtr));
 	} else {
@@ -132,13 +184,19 @@ sub open3 {
 	    or croak "open3: exec of @cmd failed";
     }
 
-    close $kid_rdr; close $kid_wtr; close $kid_err;
-    if ($dup_wtr) {
-	close($dad_wtr);
-    }
+    xclose $kid_rdr if !$dup_wtr;
+    xclose $kid_wtr if !$dup_rdr;
+    xclose $kid_err if !$dup_err && $dad_rdr ne $dad_err;
+    # If the write handle is a dup give it away entirely, close my copy
+    # of it.
+    xclose $dad_wtr if $dup_wtr;
 
     select((select($dad_wtr), $| = 1)[0]); # unbuffer pipe
     $kidpid;
+}
+
+sub open3 {
+    return _open3 'open3', scalar caller, @_
 }
 1; # so require is happy
 
