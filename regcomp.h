@@ -286,6 +286,14 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
 #define ANYOF_BITMAP_CLEAR(p,c)	(ANYOF_BITMAP_BYTE(p, c) &= ~ANYOF_BIT(c))
 #define ANYOF_BITMAP_TEST(p, c)	(ANYOF_BITMAP_BYTE(p, c) &   ANYOF_BIT(c))
 
+#define ANYOF_BITMAP_SETALL(p)		\
+	memset (ANYOF_BITMAP(p), 255, ANYOF_BITMAP_SIZE)
+#define ANYOF_BITMAP_CLEARALL(p)	\
+	Zero (ANYOF_BITMAP(p), ANYOF_BITMAP_SIZE)
+/* Check that all 256 bits are all set.  Used in S_cl_is_anything()  */
+#define ANYOF_BITMAP_TESTALLSET(p)	\
+	memEQ (ANYOF_BITMAP(p), "\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377", ANYOF_BITMAP_SIZE)
+
 #define ANYOF_SKIP		((ANYOF_SIZE - 1)/sizeof(regnode))
 #define ANYOF_CLASS_SKIP	((ANYOF_CLASS_SIZE - 1)/sizeof(regnode))
 #define ANYOF_CLASS_ADD_SKIP	(ANYOF_CLASS_SKIP - ANYOF_SKIP)
