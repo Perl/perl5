@@ -23,8 +23,8 @@
 			 return (y)0; /* fool picky compilers */ \
                          }
 /**/
-UNIMPLEMENTED(_encoded_utf8_to_bytes, I32);
-UNIMPLEMENTED(_encoded_bytes_to_utf8, I32);
+UNIMPLEMENTED(_encoded_utf8_to_bytes, I32)
+UNIMPLEMENTED(_encoded_bytes_to_utf8, I32)
 
 void
 Encode_XSEncoding(pTHX_ encode_t * enc)
