@@ -114,12 +114,6 @@ C<\p{InTibetan}> refers to the block. When there is no name conflict, you
 can omit the C<In> from the block name (e.g. C<\p{BraillePatterns}>), but
 to be safe, it's probably best to always use the C<In>).
 
-=head2 Perl Parser Stress Tested
-
-The Perl parser has been stress tested using both random input and
-Markov chain input and the few found crashes and lockups have been
-fixed.
-
 =head2 REF(...) Instead Of SCALAR(...)
 
 A reference to a reference now stringifies as "REF(0x81485ec)" instead
@@ -1580,6 +1574,13 @@ Thread extension requires being Configured with C<-Duse5005threads>).
 But note that the Thread.pm interface is now shared by both
 thread models.
 
+=item *
+
+The Gconvert macro ($Config{d_Gconvert}) used by perl for stringifying
+floating-point numbers is now more picky about using sprintf %.*g
+rules for the conversion.  Some platforms that used to use gcvt may
+now resort to the slower sprintf.
+
 =back
 
 =head2 New Or Improved Platforms
@@ -2281,6 +2282,12 @@ Windows 9x.
 
 winsock handle leak fixed.
 
+=item *
+
+The Perl parser has been stress tested using both random input and
+Markov chain input and the few found crashes and lockups have been
+fixed.
+
 =back
 
 =back
@@ -2476,8 +2483,8 @@ such as sudo (see http://www.courtesan.com/sudo/).
 =head1 New Tests
 
 Several new tests have been added, especially for the F<lib>
-subsection.  There are now about 34 000 individual tests (spread over
-about 530 test scripts), in the regression suite (5.6.1 has about
+subsection.  There are now about 56 000 individual tests (spread over
+about 620 test scripts), in the regression suite (5.6.1 has about
 11700 tests, in 258 test scripts) Many of the new tests are introduced
 by the new modules, but still in general Perl is now more thoroughly
 tested.
@@ -2485,7 +2492,7 @@ tested.
 Because of the large number of tests, running the regression suite
 will take considerably longer time than it used to: expect the suite
 to take up to 4-5 times longer to run than in perl 5.6.  In a really
-fast machine you can hope to finish the suite in about 5 minutes
+fast machine you can hope to finish the suite in about 6-8 minutes
 (wallclock time).
 
 The tests are now reported in a different order than in earlier Perls.

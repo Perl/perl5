@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Mar  6 17:32:31 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Thu Mar  7 07:37:32 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -8817,6 +8817,10 @@ int main()
 	    checkit("1e+030", buf); /* for Microsoft */
 	else
 	    checkit("1e+30", buf);
+
+	/* For Perl, if you add additional tests here, also add them to
+	 * t/base/num.t for benefit of platforms not using Configure or
+	 * overriding d_Gconvert */
 
 	exit(0);
 }

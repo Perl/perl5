@@ -107,7 +107,7 @@ $a = 1000; "$a";
 print $a + 1 == 1001  ? "ok 30\n" : "not ok 30 #" . $a + 1 . "\n";
 
 # back to some basic stringify tests
-# we expect NV stringification to work according to C sprintf %.g rules
+# we expect NV stringification to work according to C sprintf %.*g rules
 
 $a = 0.01; "$a";
 print $a eq "0.01"    ? "ok 31\n" : "not ok 31 # $a\n";
