@@ -2006,6 +2006,29 @@ S_filter_gets(pTHX_ register SV *sv, register PerlIO *fp, STRLEN append)
         return (sv_gets(sv, fp, append));
 }
 
+STATIC HV *S_find_in_my_stash(pTHX_ char *pkgname, I32 len)
+{
+    GV *gv;
+
+    if (*pkgname == '_' && strEQ(pkgname, "__PACKAGE__"))
+        return PL_curstash;
+
+    if (len > 2 &&
+        (pkgname[len - 2] == ':' && pkgname[len - 1] == ':') &&
+        (gv = gv_fetchpv(pkgname, FALSE, SVt_PVHV))) {
+        return GvHV(gv); /* Foo:: */
+    }
+
+    /* use constant CLASS => 'MyClass' */
+    if ((gv = gv_fetchpv(pkgname, FALSE, SVt_PVCV))) {
+        SV *sv;
+        if (GvCV(gv) && (sv = cv_const_sv(GvCV(gv)))) {
+            pkgname = SvPV_nolen(sv);
+        }
+    }
+
+    return gv_stashpv(pkgname, FALSE);
+}
 
 #ifdef DEBUGGING
     static char* exp_name[] =
@@ -4410,7 +4433,7 @@ Perl_yylex(pTHX)
 		s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len);
 		if (len == 3 && strnEQ(PL_tokenbuf, "sub", 3))
 		    goto really_sub;
-		PL_in_my_stash = gv_stashpv(PL_tokenbuf, FALSE);
+		PL_in_my_stash = find_in_my_stash(PL_tokenbuf, len);
 		if (!PL_in_my_stash) {
 		    char tmpbuf[1024];
 		    PL_bufptr = s;

@@ -1233,6 +1233,7 @@ STATIC I32	S_sublex_done(pTHX);
 STATIC I32	S_sublex_push(pTHX);
 STATIC I32	S_sublex_start(pTHX);
 STATIC char *	S_filter_gets(pTHX_ SV *sv, PerlIO *fp, STRLEN append);
+STATIC HV *	S_find_in_my_stash(pTHX_ char *pkgname, I32 len);
 STATIC SV*	S_new_constant(pTHX_ char *s, STRLEN len, const char *key, SV *sv, SV *pv, const char *type);
 STATIC int	S_ao(pTHX_ int toketype);
 STATIC void	S_depcom(pTHX);
