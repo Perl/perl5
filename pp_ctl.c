@@ -3692,8 +3692,8 @@ run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 
 /* perhaps someone can come up with a better name for
    this?  it is not really "absolute", per se ... */
-bool
-path_is_absolute(char *name)
+static bool
+S_path_is_absolute(pTHX_ char *name)
 {
     if (PERL_FILE_IS_ABSOLUTE(name)
 #ifdef MACOS_TRADITIONAL
