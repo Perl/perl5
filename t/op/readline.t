@@ -64,7 +64,7 @@ my $err = $! + 0;
 close F;
 
 SKIP: {
-  skip 2 => "you can read directories as plain files" unless( $err );
+  skip "you can read directories as plain files", 2 unless( $err );
 
   $!=0;
   open F, File::Spec->curdir and $_=<F>;
