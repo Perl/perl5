@@ -6877,10 +6877,11 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
   Read a number in any of the formats that Perl accepts:
 
   0(x[0-7A-F]+)|([0-7]+)|(b[01])
-  [\d_]+(\.[\d_]*)?[Ee](\d+)
+  \d([\d_]*\d)?(\.\d([\d_]*\d)?)?[Ee](\d+)
 
   Underbars (_) are allowed in decimal numbers.  If -w is on,
-  underbars before a decimal point must be at three digit intervals.
+  underbars must not be consecutive, and they cannot start
+  or end integer or fractional parts.
 
   Like most scan_ routines, it uses the PL_tokenbuf buffer to hold the
   thing it reads.
@@ -6950,8 +6951,17 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 	    else if (s[1] == '.' || s[1] == 'e' || s[1] == 'E')
 		goto decimal;
 	    /* so it must be octal */
-	    else
+	    else {
 		shift = 3;
+		s++;
+	    }
+
+	    if (*s == '_') {
+	       if (ckWARN(WARN_SYNTAX))
+		   Perl_warner(aTHX_ WARN_SYNTAX,
+			       "Misplaced _ in number");
+	       lastub = s++;
+	    }
 
 	    base = bases[shift];
 	    Base = Bases[shift];
@@ -6969,9 +6979,12 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 		default:
 		    goto out;
 
-		/* _ are ignored */
+		/* _ are ignored -- but warned about if consecutive */
 		case '_':
-		    s++;
+		    if (ckWARN(WARN_SYNTAX) && lastub && s == lastub + 1)
+		        Perl_warner(aTHX_ WARN_SYNTAX,
+				    "Misplaced _ in number");
+		    lastub = s++;
 		    break;
 
 		/* 8 and 9 are not octal */
@@ -7038,6 +7051,13 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 	     the number.
 	  */
 	  out:
+
+	    /* final misplaced underbar check */
+	    if (s[-1] == '_') {
+	        if (ckWARN(WARN_SYNTAX))
+		    Perl_warner(aTHX_ WARN_SYNTAX, "Misplaced _ in number");
+	    }
+
 	    sv = NEWSV(92,0);
 	    if (overflowed) {
 		if (ckWARN(WARN_PORTABLE) && n > 4294967295.0)
@@ -7077,9 +7097,10 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 	       if -w is on
 	    */
 	    if (*s == '_') {
-		if (ckWARN(WARN_SYNTAX) && lastub && s - lastub != 3)
-		    Perl_warner(aTHX_ WARN_SYNTAX, "Misplaced _ in number");
-		lastub = ++s;
+		if (ckWARN(WARN_SYNTAX) && lastub && s == lastub + 1)
+		    Perl_warner(aTHX_ WARN_SYNTAX,
+				"Misplaced _ in number");
+		lastub = s++;
 	    }
 	    else {
 	        /* check for end of fixed-length buffer */
@@ -7091,7 +7112,7 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 	}
 
 	/* final misplaced underbar check */
-	if (lastub && s - lastub != 3) {
+	if (lastub && s == lastub + 1) {
 	    if (ckWARN(WARN_SYNTAX))
 		Perl_warner(aTHX_ WARN_SYNTAX, "Misplaced _ in number");
 	}
@@ -7104,15 +7125,33 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 	    floatit = TRUE;
 	    *d++ = *s++;
 
-	    /* copy, ignoring underbars, until we run out of
-	       digits.  Note: no misplaced underbar checks!
+	    if (*s == '_') {
+	        if (ckWARN(WARN_SYNTAX))
+		    Perl_warner(aTHX_ WARN_SYNTAX,
+				"Misplaced _ in number");
+		lastub = s;
+	    }
+
+	    /* copy, ignoring underbars, until we run out of digits.
 	    */
 	    for (; isDIGIT(*s) || *s == '_'; s++) {
 	        /* fixed length buffer check */
 		if (d >= e)
 		    Perl_croak(aTHX_ number_too_long);
-		if (*s != '_')
+		if (*s == '_') {
+		   if (ckWARN(WARN_SYNTAX) && lastub && s == lastub + 1)
+		       Perl_warner(aTHX_ WARN_SYNTAX,
+				   "Misplaced _ in number");
+		   lastub = s;
+		}
+		else
 		    *d++ = *s;
+	    }
+	    /* fractional part ending in underbar? */
+	    if (s[-1] == '_') {
+	        if (ckWARN(WARN_SYNTAX))
+		    Perl_warner(aTHX_ WARN_SYNTAX,
+				"Misplaced _ in number");
 	    }
 	    if (*s == '.' && isDIGIT(s[1])) {
 		/* oops, it's really a v-string, but without the "v" */
