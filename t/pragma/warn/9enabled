@@ -332,7 +332,7 @@ print $@ ;
 EXPECT
 Usage: warnings::warn([category,] 'message') at - line 4
 unknown warnings category 'fred' at - line 6
-	require 0 called at - line 6
+	eval {...} called at - line 6
 ########
 
 --FILE-- abc.pm
