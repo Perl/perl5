@@ -944,7 +944,7 @@ This can be used to determine whether the Perl interpreter executing a
 script is in the right range of versions.  (Mnemonic: use ^V for Version
 Control.)  Example:
 
-    warn "No "our" declarations!\n" if $^V and $^V lt v5.6.0;
+    warn "No \"our\" declarations!\n" if $^V and $^V lt v5.6.0;
 
 See the documentation of C<use VERSION> and C<require VERSION>
 for a convenient way to fail if the running Perl interpreter is too old.
