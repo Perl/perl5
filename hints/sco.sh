@@ -62,7 +62,7 @@ scocc)	;;  # Anybody know anything about this?
 	# optimization.  Apparently.
 	case $scorls in
 	3)  ccflags="$ccflags -W0 -quiet" ;;
-	*)  ccflags="$ccflags -w0" ;;
+	*)  ccflags="$ccflags -w0 -DPERL_SCO5" ;;
 	esac
 	case "$optimize" in
 	'') case "$cc" in
@@ -95,6 +95,11 @@ else
     ccdlflags='-W l,-Bexport'
     lddlflags="$lddlflags -b elf -G"
     ldflags="$ldflags -b elf -W l,-Bexport"
+    dlext='so'
+    dlsrc='dl_dlopen.xs'
+    d_dlerror='define'
+    d_dlopen='define'
+    usedl='define'
 fi
 
 # I have received one report that nm extraction doesn't work if you're
