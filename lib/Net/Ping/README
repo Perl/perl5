@@ -1,7 +1,7 @@
 NAME
     Net::Ping - check a remote host for reachability
 
-    $Id: Ping.pm,v 1.13 2001/12/07 02:18:44 rob Exp $
+    $Id: Ping.pm,v 1.16 2002/01/05 23:36:54 rob Exp $
 
 SYNOPSIS
         use Net::Ping;
@@ -11,6 +11,7 @@ SYNOPSIS
         $p->close();
 
         $p = Net::Ping->new("icmp");
+        $p->bind($my_addr); # Specify source interface of pings
         foreach $host (@host_array)
         {
             print "$host is ";
@@ -93,6 +94,19 @@ DESCRIPTION
         otherwise. The maximum number of data bytes that can be specified is
         1024.
 
+    $p->bind($local_addr);
+        Sets the source address from which pings will be sent. This must be
+        the address of one of the interfaces on the local host. $local_addr
+        may be specified as a hostname or as a text IP address such as
+        "192.168.1.1".
+
+        If the protocol is set to "tcp", this method may be called any
+        number of times, and each call to the ping() method (below) will use
+        the most recent $local_addr. If the protocol is "icmp" or "udp",
+        then bind() must be called at most once per object, and (if it is
+        called at all) must be called before the first call to ping() for
+        that object.
+
     $p->ping($host [, $timeout]);
         Ping the remote host and wait for a response. $host can be either
         the hostname or the IP number of the remote host. The optional
@@ -169,9 +183,10 @@ NOTES
     module to be written which understands all of the different kinds of
     ICMP packets.
 
-AUTHOR(S)
-      Current maintainer Net::Ping base code:
+AUTHORS
+      Current maintainers:
         colinm@cpan.org (Colin McMillen)
+        bbb@cpan.org (Rob Brown)
 
       Stream protocol:
         bronson@trestle.com (Scott Bronson)
@@ -183,12 +198,10 @@ AUTHOR(S)
       Original Net::Ping author:
         mose@ns.ccsn.edu (Russell Mosemann)
 
-      Compatibility porting:
-        bbb@cpan.org (Rob Brown)
-
 COPYRIGHT
-    Copyright (c) 2001, Colin McMillen. All rights reserved. Copyright (c)
-    2001, Rob Brown. All rights reserved.
+    Copyright (c) 2001, Colin McMillen. All rights reserved.
+
+    Copyright (c) 2001, Rob Brown. All rights reserved.
 
     This program is free software; you may redistribute it and/or modify it
     under the same terms as Perl itself.

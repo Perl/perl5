@@ -1,16 +1,20 @@
 BEGIN {
-    if ($ENV{PERL_CORE}) {
-	unless ($ENV{PERL_TEST_Net_Ping}) {
-	    print "1..0 # Skip: network dependent test\n";
-	    exit;
-	}
-	chdir 't' if -d 't';
-	@INC = qw(../lib);
+  if ($ENV{PERL_CORE}) {
+    unless ($ENV{PERL_TEST_Net_Ping}) {
+      print "1..0 # Skip: network dependent test\n";
+        exit;
     }
-    unless (eval "require Socket") {
-	print "1..0 \# Skip: no Socket\n";
-	exit;
-    }
+    chdir 't' if -d 't';
+    @INC = qw(../lib);
+  }
+  unless (eval "require Socket") {
+    print "1..0 \# Skip: no Socket\n";
+    exit;
+  }
+  unless (getservbyname('echo', 'udp')) {
+    print "1..0 \# Skip: no echo port\n";
+    exit;
+  }
 }
 
 # Test of stream protocol using loopback interface.
