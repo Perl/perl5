@@ -338,6 +338,7 @@ XCOPY		= xcopy /f /r /i /d
 RCOPY		= xcopy /f /r /i /e /d
 NOOP		= @echo
 
+#
 # filenames given to xsubpp must have forward slashes (since it puts
 # full pathnames in #line strings)
 XSUBPP		= ..\$(MINIPERL) -I..\..\lib ..\$(EXTUTILSDIR)\xsubpp \
@@ -371,7 +372,9 @@ CORE_SRC	=		\
 		..\universal.c	\
 		..\util.c
 
-CORE_SRC	+= $(CRYPT_SRC)
+.IF "$(CRYPT_SRC)" != ""
+CORE_SRC	+= ..\$(CRYPT_SRC)
+.ENDIF
 
 .IF "$(PERL_MALLOC)" == "define"
 CORE_SRC	+= ..\malloc.c
@@ -385,14 +388,18 @@ WIN32_SRC	=		\
 		.\win32.c	\
 		.\win32sck.c
 
-.IF "$(USE_THREADS)" == "define" || "$(OBJECT)" == ""
-WIN32_SRC	+= .\win32thread.c
+.IF "$(USE_THREADS)" == "define"
+WIN32_SRC	+= .\win32thread.c 
 .ENDIF
 
 PERL95_SRC	=		\
 		perl95.c	\
 		win32mt.c	\
 		win32sckmt.c
+
+.IF "$(CRYPT_SRC)" != ""
+PERL95_SRC	+= ..\$(CRYPT_SRC)
+.ENDIF
 
 DLL_SRC		= $(DYNALOADER).c
 
@@ -450,12 +457,16 @@ CORE_H		=		\
 
 CORE_OBJ	= $(CORE_SRC:db:+$(o))
 WIN32_OBJ	= $(WIN32_SRC:db:+$(o))
-MINICORE_OBJ	= $(MINIDIR)\{$(CORE_OBJ:f) perlio$(o) miniperlmain$(o)}
+MINICORE_OBJ	= $(MINIDIR)\{$(CORE_OBJ:f) miniperlmain$(o)}
 MINIWIN32_OBJ	= $(MINIDIR)\{$(WIN32_OBJ:f)}
 MINI_OBJ	= $(MINICORE_OBJ) $(MINIWIN32_OBJ)
 PERL95_OBJ	= $(PERL95_SRC:db:+$(o)) DynaLoadmt$(o)
 DLL_OBJ		= $(DLL_SRC:db:+$(o))
 X2P_OBJ		= $(X2P_SRC:db:+$(o))
+
+.IF "$(OBJECT)" != ""
+MINICORE_OBJ	+= $(MINIDIR)\perlio$(o)
+.ENDIF
 
 PERLDLL_OBJ	= $(CORE_OBJ)
 PERLEXE_OBJ	= perlmain$(o)
@@ -466,7 +477,7 @@ PERLDLL_OBJ	+= $(WIN32_OBJ) $(DLL_OBJ)
 PERLEXE_OBJ	+= $(WIN32_OBJ) $(DLL_OBJ)
 .ENDIF
 
-DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File attrs Thread B
+DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B
 STATIC_EXT	= DynaLoader
 
 DYNALOADER	= $(EXTDIR)\DynaLoader\DynaLoader
@@ -475,6 +486,7 @@ FCNTL		= $(EXTDIR)\Fcntl\Fcntl
 OPCODE		= $(EXTDIR)\Opcode\Opcode
 SDBM_FILE	= $(EXTDIR)\SDBM_File\SDBM_File
 IO		= $(EXTDIR)\IO\IO
+POSIX		= $(EXTDIR)\POSIX\POSIX
 ATTRS		= $(EXTDIR)\attrs\attrs
 THREAD		= $(EXTDIR)\Thread\Thread
 B		= $(EXTDIR)\B\B
@@ -484,6 +496,7 @@ FCNTL_DLL	= $(AUTODIR)\Fcntl\Fcntl.dll
 OPCODE_DLL	= $(AUTODIR)\Opcode\Opcode.dll
 SDBM_FILE_DLL	= $(AUTODIR)\SDBM_File\SDBM_File.dll
 IO_DLL		= $(AUTODIR)\IO\IO.dll
+POSIX_DLL	= $(AUTODIR)\POSIX\POSIX.dll
 ATTRS_DLL	= $(AUTODIR)\attrs\attrs.dll
 THREAD_DLL	= $(AUTODIR)\Thread\Thread.dll
 B_DLL		= $(AUTODIR)\B\B.dll
@@ -494,6 +507,7 @@ EXTENSION_C	=		\
 		$(OPCODE).c	\
 		$(SDBM_FILE).c	\
 		$(IO).c		\
+		$(POSIX).c	\
 		$(ATTRS).c	\
 		$(THREAD).c	\
 		$(B).c
@@ -504,6 +518,7 @@ EXTENSION_DLL	=		\
 		$(OPCODE_DLL)	\
 		$(SDBM_FILE_DLL)\
 		$(IO_DLL)	\
+		$(POSIX_DLL)	\
 		$(ATTRS_DLL)
 #		$(THREAD_DLL)	\
 #		$(B_DLL)
@@ -733,6 +748,7 @@ $(PERL95EXE): $(PERLDLL) $(CONFIGPM) $(PERL95_OBJ)
 
 $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 	if not exist $(AUTODIR) mkdir $(AUTODIR)
+	cd $(EXTDIR)\$(*B) && ..\$(MINIPERL) -I..\..\lib $(*B).pm.PL
 	$(XCOPY) $(EXTDIR)\$(*B)\$(*B).pm $(LIBDIR)\$(NULL)
 	cd $(EXTDIR)\$(*B) && $(XSUBPP) dl_win32.xs > $(*B).c
 	$(XCOPY) $(EXTDIR)\$(*B)\dlutils.c .
@@ -795,7 +811,7 @@ doc: $(PERLEXE)
 	    --libpod=perlfunc:perlguts:perlvar:perlrun:perlop --recurse
 
 utils: $(PERLEXE)
-	cd ..\utils && $(MAKE) PERL=$(PERLEXE)
+	cd ..\utils && $(MAKE) PERL=$(MINIPERL)
 	cd ..\utils && $(PERLEXE) ..\win32\$(PL2BAT) h2ph splain perlbug \
 		pl2pm c2ph h2xs perldoc pstruct
 	$(XCOPY) ..\utils\*.bat bin\*.*
@@ -807,13 +823,22 @@ distclean: clean
 		$(PERLIMPLIB) ..\miniperl.lib $(MINIMOD)
 	-del /f *.def *.map
 	-del /f $(EXTENSION_DLL)
-	-del /f $(EXTENSION_C)
+	-del /f $(EXTENSION_C) $(DYNALOADER).c
+	-del /f $(EXTDIR)\DynaLoader\dl_win32.xs
+	-del /f $(LIBDIR)\.exists $(LIBDIR)\attrs.pm $(LIBDIR)\DynaLoader.pm
+	-del /f $(LIBDIR)\Fcntl.pm $(LIBDIR)\IO.pm $(LIBDIR)\Opcode.pm
+	-del /f $(LIBDIR)\ops.pm $(LIBDIR)\Safe.pm $(LIBDIR)\Thread.pm
+	-del /f $(LIBDIR)\SDBM_File.pm $(LIBDIR)\Socket.pm $(LIBDIR)\POSIX.pm
+	-del /f $(LIBDIR)\B.pm $(LIBDIR)\O.pm
+	-rmdir /s /q $(LIBDIR)\IO || rmdir /s $(LIBDIR)\IO
+	-rmdir /s /q $(LIBDIR)\Thread || rmdir /s $(LIBDIR)\Thread
+	-rmdir /s /q $(LIBDIR)\B || rmdir /s $(LIBDIR)\B
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph h2xs perldoc pstruct *.bat
 	-cd ..\x2p && del /f find2perl s2p *.bat
 	-del /f ..\config.sh ..\splittree.pl perlmain.c dlutils.c config.h.new
-	-del /f ..\lib\Config.pm
+	-del /f $(CONFIGPM)
 .IF "$(PERL95EXE)" != ""
 	-del /f perl95.c
 .ENDIF
@@ -821,7 +846,8 @@ distclean: clean
 	-cd $(EXTDIR) && del /s *.lib *.def *.map *.bs Makefile *$(o) pm_to_blib
 	-rmdir /s /q $(AUTODIR) || rmdir /s $(AUTODIR)
 	-rmdir /s /q $(COREDIR) || rmdir /s $(COREDIR)
-	-rmdir /s /q $(MINIDIR) || rmdir /s $(MINIDIR)
+
+install : all installbare installutils installhtml
 
 installbare :
 	$(PERLEXE) ..\installperl
@@ -881,7 +907,7 @@ clean :
 	-@erase $(PERLEXE)
 	-@erase $(PERLDLL)
 	-@erase $(CORE_OBJ)
-	-rmdir /s /q "$(MINIDIR)"
+	-rmdir /s /q $(MINIDIR) || rmdir /s $(MINIDIR)
 	-@erase $(WIN32_OBJ)
 	-@erase $(DLL_OBJ)
 	-@erase $(X2P_OBJ)
