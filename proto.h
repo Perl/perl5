@@ -810,7 +810,7 @@ PERL_CALLCONV U8*	Perl_utf8_hop(pTHX_ U8 *s, I32 off);
 PERL_CALLCONV U8*	Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len);
 PERL_CALLCONV U8*	Perl_bytes_to_utf8(pTHX_ U8 *s, STRLEN *len);
 PERL_CALLCONV UV	Perl_utf8_to_uv(pTHX_ U8 *s, STRLEN* retlen);
-PERL_CALLCONV UV	Perl_utf8_to_uv_chk(pTHX_ U8 *s, STRLEN curlen, STRLEN* retlen, bool checking);
+PERL_CALLCONV UV	Perl_utf8_to_uv_chk(pTHX_ U8 *s, STRLEN curlen, STRLEN* retlen, U32 flags);
 PERL_CALLCONV U8*	Perl_uv_to_utf8(pTHX_ U8 *d, UV uv);
 PERL_CALLCONV void	Perl_vivify_defelem(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_vivify_ref(pTHX_ SV* sv, U32 to_what);

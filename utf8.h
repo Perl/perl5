@@ -29,9 +29,20 @@ END_EXTERN_C
 
 #define UTF8_MAXLEN 13 /* how wide can a single UTF8 encoded character become */
 
-#define IN_UTF8 (PL_curcop->op_private & HINT_UTF8)
+/* #define IN_UTF8 (PL_curcop->op_private & HINT_UTF8) */
 #define IN_BYTE (PL_curcop->op_private & HINT_BYTE)
 #define DO_UTF8(sv) (SvUTF8(sv) && !IN_BYTE)
+
+#define UTF8_ALLOW_CONTINUATION		0x0001
+#define UTF8_ALLOW_NON_CONTINUATION	0x0002
+#define UTF8_ALLOW_FE_FF		0x0004
+#define UTF8_ALLOW_SHORT		0x0008
+#define UTF8_ALLOW_SURROGATE		0x0010
+#define UTF8_ALLOW_BOM			0x0020
+#define UTF8_ALLOW_FFFF			0x0040
+#define UTF8_ALLOW_LONG			0x0080
+#define UTF8_ALLOW_ANY			0x00ff
+#define UTF8_CHECK_ONLY			0x0100
 
 #define UTF8SKIP(s) PL_utf8skip[*(U8*)s]
 

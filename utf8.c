@@ -171,7 +171,7 @@ Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
 }
 
 /*
-=for apidoc Am|U8* s|utf8_to_uv_chk|STRLEN curlen|I32 *retlen|I32 checking
+=for apidoc Am|U8* s|utf8_to_uv_chk|STRLEN curlen|I32 *retlen|U32 flags
 
 Returns the character value of the first character in the string C<s>
 which is assumed to be in UTF8 encoding and no longer than C<curlen>;
@@ -188,7 +188,7 @@ warning is produced.
 */
 
 UV
-Perl_utf8_to_uv_chk(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, bool checking)
+Perl_utf8_to_uv_chk(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 {
     dTHR;
     UV uv = *s, ouv;
@@ -202,7 +202,8 @@ Perl_utf8_to_uv_chk(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, bool checking)
 	return *s;
     }
 
-    if (uv >= 0x80 && uv <= 0xbf) {
+    if ((uv >= 0x80 && uv <= 0xbf) &&
+	!(flags & UTF8_ALLOW_CONTINUATION)) {
 	if (dowarn)
 	    Perl_warner(aTHX_ WARN_UTF8,
 			"Malformed UTF-8 character (unexpected continuation byte 0x%02x)",
@@ -210,22 +211,24 @@ Perl_utf8_to_uv_chk(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, bool checking)
 	goto malformed;
     }
 
-    if (uv >= 0xc0 && uv <= 0xfd && curlen > 1 && s[1] < 0x80) {
+    if ((uv >= 0xc0 && uv <= 0xfd && s[1] < 0x80) &&
+	!(flags & UTF8_ALLOW_NON_CONTINUATION)) {
 	if (dowarn)
 	    Perl_warner(aTHX_ WARN_UTF8,
 			"Malformed UTF-8 character (unexpected non-continuation byte 0x%02x after byte 0x%02x)",
 			s[1], uv);
 	goto malformed;
     }
-
-    if ((uv == 0xfe || uv == 0xff) && IN_UTF8){
+    
+    if ((uv == 0xfe || uv == 0xff) &&
+	!(flags & UTF8_ALLOW_FE_FF)) {
 	if (dowarn)
 	    Perl_warner(aTHX_ WARN_UTF8,
-			"Malformed UTF-8 character (impossible byte 0x%02x)",
+			"Malformed UTF-8 character (byte 0x%02x)",
 			uv);
 	goto malformed;
     }
-
+	
     if      (!(uv & 0x20))	{ len =  2; uv &= 0x1f; }
     else if (!(uv & 0x10))	{ len =  3; uv &= 0x0f; }
     else if (!(uv & 0x08))	{ len =  4; uv &= 0x07; }
@@ -233,13 +236,14 @@ Perl_utf8_to_uv_chk(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, bool checking)
     else if (!(uv & 0x02))	{ len =  6; uv &= 0x01; }
     else if (!(uv & 0x01))	{ len =  7; uv = 0; }
     else 			{ len = 13; uv = 0; } /* whoa! */
-
+	
     if (retlen)
 	*retlen = len;
     
     expectlen = len;
 
-    if (curlen < expectlen) {
+    if ((curlen < expectlen) &&
+	!(flags & UTF8_ALLOW_SHORT)) {
 	if (dowarn)
 	    Perl_warner(aTHX_ WARN_UTF8,
 			"Malformed UTF-8 character (%d byte%s, need %d)",
@@ -262,6 +266,7 @@ Perl_utf8_to_uv_chk(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, bool checking)
 	else
 	    uv = (uv << 6) | (*s & 0x3f);
 	if (uv < ouv) {
+	    /* This cannot be allowed. */
 	    if (dowarn)
 		Perl_warner(aTHX_ WARN_UTF8,
 			    "Malformed UTF-8 character (overflow at 0x%"UVxf", byte 0x%02x)",
@@ -272,25 +277,29 @@ Perl_utf8_to_uv_chk(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, bool checking)
 	ouv = uv;
     }
 
-    if (uv >= 0xd800 && uv <= 0xdfff) {
+    if ((uv >= 0xd800 && uv <= 0xdfff) &&
+	!(flags & UTF8_ALLOW_SURROGATE)) {
 	if (dowarn)
 	    Perl_warner(aTHX_ WARN_UTF8,
 			"Malformed UTF-8 character (UTF-16 surrogate 0x%04"UVxf")",
 			uv);
 	goto malformed;
-    } else if (uv == 0xfffe) {
+    } else if ((uv == 0xfffe) &&
+	       !(flags & UTF8_ALLOW_BOM)) {
 	if (dowarn)
 	    Perl_warner(aTHX_ WARN_UTF8,
 			"Malformed UTF-8 character (byte order mark 0x%04"UVxf")",
 			uv);
 	goto malformed;
-    } else if (uv == 0xffff && IN_UTF8) {
+    } else if ((uv == 0xffff) &&
+	       !(flags & UTF8_ALLOW_FFFF)) {
 	if (dowarn)
 	    Perl_warner(aTHX_ WARN_UTF8,
-			"Malformed UTF-8 character (impossible character 0x%04"UVxf")",
+			"Malformed UTF-8 character (character 0x%04"UVxf")",
 			uv);
 	goto malformed;
-    } else if (expectlen > UNISKIP(uv)) {
+    } else if ((expectlen > UNISKIP(uv)) &&
+	       !(flags & UTF8_ALLOW_LONG)) {
 	if (dowarn)
 	    Perl_warner(aTHX_ WARN_UTF8,
 			"Malformed UTF-8 character (%d byte%s, need %d)",
@@ -302,7 +311,7 @@ Perl_utf8_to_uv_chk(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, bool checking)
 
 malformed:
 
-    if (checking) {
+    if (flags & UTF8_CHECK_ONLY) {
 	if (retlen)
 	    *retlen = len;
 	return 0;

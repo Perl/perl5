@@ -578,8 +578,8 @@ my @MK = split(/\n/, <<__EOMK__);
 2.2	Last possible sequence of certain length
 2.2.1 y ""			7f		1	7f	1
 2.2.2 y "ß¿"			7ff		2	df:bf	1
-# The ffff is legal unless under use utf8
-2.2.3 y "ï¿¿"			ffff		3	ef:bf:bf	1
+# The ffff is illegal unless UTF8_ALLOW_FFFF
+2.2.3 n "ï¿¿"			ffff		3	ef:bf:bf	1
 2.2.4 y "÷¿¿¿"			1fffff		4	f7:bf:bf:bf	1
 2.2.5 y "û¿¿¿¿"			3ffffff		5	fb:bf:bf:bf:bf	1
 2.2.6 y "ı¿¿¿¿¿"		7fffffff	6	fd:bf:bf:bf:bf:bf	1
@@ -662,8 +662,8 @@ my @MK = split(/\n/, <<__EOMK__);
 5.2.8 n "í¯¿í¿¿"		-	6	ed:af:bf:ed:bf:bf
 5.3	Other illegal code positions
 5.3.1 n "ï¿¾"			-	3	ef:bf:be
-# The ffff is legal unless under use utf8
-5.3.2 y "ï¿¿"			-	3	ef:bf:bf
+# The ffff is illegal unless UTF8_ALLOW_FFFF
+5.3.2 n "ï¿¿"			-	3	ef:bf:bf
 __EOMK__
 
 # 104..181
