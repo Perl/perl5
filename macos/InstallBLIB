@@ -5,7 +5,7 @@ Exit "{Status}"
 
 $name = shift;
 if (($prefix) = $name =~ /(.*::)/) {
-	$prefix =~ s/::/:/;
+	$prefix =~ s/::/:/g;
 }
 
 $mkpath = shift;

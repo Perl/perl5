@@ -267,7 +267,7 @@ sub init_main {
 
     unless ($self->{PERL_SRC}){
 	my($dir);
-	foreach $dir (qw(:: ::: :::: :::::)){
+	foreach $dir (qw(:: ::: :::: ::::: ::::::)){
 	    if (-f "${dir}perl.h") {
 		$self->{PERL_SRC}=$dir ;
 		last;

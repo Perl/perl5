@@ -126,15 +126,20 @@ public		=	perl translators sitelib_install
 Dynamic_Ext_Mac	=	Mac
 Dynamic_Ext_Std	=	
 Dynamic_Ext_Xtr =	
-Static_Ext_Xtr =	\
-	Time:HiRes:HiRes \
-	Compress:Zlib:Zlib Digest:MD5:MD5 HTML:Parser:Parser \
-	MIME:Base64:Base64 Storable:Storable List:Util:Util
-Static_Ext_Mac	= 	\
-	MacPerl:MacPerl 
+Static_Lib_Mac	= \
+	ExtUtils:MM_MacOS ExtUtils:Miniperl Config Errno \
+	Mac:Hooks Mac:Pane \
+	Mac:AppleEvents:Simple Mac:BuildTools Mac:Apps:Launch
+
 ########
 # sync all extensions with both config.sh and macperl/Makefile.mk!
 ########
+Static_Ext_Xtr =	\
+	Compress:Zlib:Zlib Digest:MD5:MD5 Filter:Util:Call:Call \
+	HTML:Parser:Parser List:Util:Util MIME:Base64:Base64 \
+	Storable:Storable Time:HiRes:HiRes
+Static_Ext_Mac	= 	\
+	MacPerl:MacPerl 
 Static_Ext_Std	= 	\
 	B:B ByteLoader:ByteLoader Data:Dumper:Dumper DB_File:DB_File \
 	Devel:DProf:DProf Devel:Peek:Peek DynaLoader:DynaLoader \
@@ -146,9 +151,6 @@ Static_Ext_Std	= 	\
 	# not going to be built:
 	# GDBM_File:GDBM_File ODBM_File:ODBM_File IPC:IPC:SysV
 	# SDBM_File:SDBM_File Sys:Syslog:Syslog Thread:Thread
-Static_Lib_Mac	= \
-	ExtUtils:MM_MacOS ExtUtils:Miniperl Config Errno \
-	Mac:Hooks Mac:Pane
 
 Static_Ext_AutoInit	= 	$(Static_Ext_Mac) $(Static_Ext_Std) $(Static_Ext_Xtr)
 More_Static_Ext		= 	OSA XL

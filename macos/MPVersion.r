@@ -20,9 +20,9 @@
  *
  */
 
-#define MPDate		"2001-07-07"
-#define MPVersionStr	"5.6.1a3"
+#define MPDate		"2001-07-20"
+#define MPVersionStr	"5.6.1a4"
 #define MPRevision	0x05
 #define MPVersion	0x61
-#define MPBuild		0x03
+#define MPBuild		0x04
 #define MPState		alpha

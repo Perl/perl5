@@ -21,7 +21,7 @@ diff -ru :perl:lib:ExtUtils: :perl.new:lib:ExtUtils:xsubpp
  }
 -unshift @tm, qw(../../../../lib/ExtUtils/typemap ../../../lib/ExtUtils/typemap
 +if ($Is_MacOS) { my @tmp;
-+    foreach (qw(:::: ::: :: :)) {
++    foreach (qw(::::: :::: ::: :: :)) {
 +    	push @tmp, "$_:lib:ExtUtils:typemap";
 +    	push @tmp, "$_:macos:lib:ExtUtils:typemap";
 +    	push @tmp, "$_:Mac:typemap";
