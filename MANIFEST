@@ -1077,6 +1077,7 @@ t/io/fs.t		See if directory manipulations work
 t/io/inplace.t		See if inplace editing works
 t/io/iprefix.t		See if inplace editing works with prefixes
 t/io/open.t		See if open works
+t/io/openpid.t		See if open works for subprocesses
 t/io/pipe.t		See if secure pipes work
 t/io/print.t		See if print commands work
 t/io/read.t		See if read works

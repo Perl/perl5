@@ -2122,6 +2122,9 @@ win32_popen(const char *command, const char *mode)
 	win32_close(oldfd);
 
 	sv_setiv(*av_fetch(w32_fdpid, p[parent], TRUE), childpid);
+
+	/* set process id so that it can be returned by perl's open() */
+	PL_forkprocess = childpid;
     }
 
     /* we have an fd, return a file stream */
