@@ -1135,6 +1135,9 @@ typedef UVTYPE UV;
 
 typedef NVTYPE NV;
 
+#ifdef I_IEEEFP
+#   include <ieeefp.h>
+#endif
 
 #ifdef USE_LONG_DOUBLE
 #   ifdef I_SUNMATH

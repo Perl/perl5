@@ -3028,6 +3028,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_getfsstat HAS_GETFSSTAT		/**/
 
+/* I_IEEEFP:
+ *	This symbol, if defined, indicates that <ieeefp.h> exists and
+ *	should be included.
+ */
+#$i_ieeefp	I_IEEEFP		/**/
+
 /* HAS_LSEEK_PROTO:
  *	This symbol, if defined, indicates that the system provides
  *	a prototype for the lseek() function.  Otherwise, it is up
