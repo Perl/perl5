@@ -1065,7 +1065,7 @@ that understands regular expressions.
 	my $pat = shift;
 	my @got;
 	local(*D);
-	if (opendir D, '.') { @got = grep /$pat/o, readdir D; closedir D; }
+	if (opendir D, '.') { @got = grep /$pat/, readdir D; closedir D; }
 	@got;
     }
     1;

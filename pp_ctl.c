@@ -76,8 +76,8 @@ PP(pp_regcomp) {
     MAGIC *mg = Null(MAGIC*);
 
     tmpstr = POPs;
-    if(SvROK(tmpstr) || SvRMAGICAL(tmpstr)) {
-	SV *sv = SvROK(tmpstr) ? SvRV(tmpstr) : tmpstr;
+    if(SvROK(tmpstr)) {
+	SV *sv = SvRV(tmpstr);
 	if(SvMAGICAL(sv))
 	    mg = mg_find(sv, 'r');
     }
@@ -101,7 +101,6 @@ PP(pp_regcomp) {
 
 	    pm->op_pmflags = pm->op_pmpermflags;	/* reset case sensitivity */
 	    pm->op_pmregexp = pregcomp(t, t + len, pm);
-	    sv_magic(tmpstr,(SV*)ReREFCNT_inc(pm->op_pmregexp),'r',0,0);
 	}
     }
 
