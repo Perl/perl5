@@ -91,7 +91,6 @@ perl_key self_key;
 void
 Perl_ithread_destruct (pTHX_ ithread* thread, const char *why)
 {
-        PerlInterpreter* destroyperl = NULL;        
 	MUTEX_LOCK(&thread->mutex);
 	if (!thread->next) {
 	    Perl_croak(aTHX_ "panic: destruct destroyed thread %p (%s)",thread, why);
@@ -123,26 +122,31 @@ Perl_ithread_destruct (pTHX_ ithread* thread, const char *why)
 #endif
 	MUTEX_UNLOCK(&create_destruct_mutex);
 	/* Thread is now disowned */
-	if (thread->interp) {
+
+	if(thread->interp) {
 	    dTHXa(thread->interp);
+	    ithread*        current_thread;
 	    PERL_SET_CONTEXT(thread->interp);
+	    PERL_THREAD_GETSPECIFIC(self_key,current_thread);
+	    PERL_THREAD_SETSPECIFIC(self_key,thread);
+
+
+	    
 	    SvREFCNT_dec(thread->params);
+
+
+
 	    thread->params = Nullsv;
-	    destroyperl = thread->interp;
+	    perl_destruct(thread->interp);
+            perl_free(thread->interp);
 	    thread->interp = NULL;
+	    PERL_THREAD_SETSPECIFIC(self_key,current_thread);
+
 	}
 	MUTEX_UNLOCK(&thread->mutex);
 	MUTEX_DESTROY(&thread->mutex);
         PerlMemShared_free(thread);
-	if(destroyperl) {
-	    ithread*        current_thread;
-	    PERL_THREAD_GETSPECIFIC(self_key,current_thread);
-	    PERL_THREAD_SETSPECIFIC(self_key,thread);
-	    perl_destruct(destroyperl);
-            perl_free(destroyperl);
-	    PERL_THREAD_SETSPECIFIC(self_key,current_thread);
 
-	}
 	PERL_SET_CONTEXT(aTHX);
 }
 
@@ -364,6 +368,10 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 	ithread*	thread;
 	CLONE_PARAMS	clone_param;
 	ithread*        current_thread;
+
+	SV**            tmps_tmp = PL_tmps_stack;
+	I32             tmps_ix  = PL_tmps_ix;
+
 	PERL_THREAD_GETSPECIFIC(self_key,current_thread);
 	MUTEX_LOCK(&create_destruct_mutex);
 	thread = PerlMemShared_malloc(sizeof(ithread));
@@ -386,6 +394,9 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 
 	PerlIO_flush((PerlIO*)NULL);
 	PERL_THREAD_SETSPECIFIC(self_key,thread);
+
+
+
 #ifdef WIN32
 	thread->interp = perl_clone(aTHX, CLONEf_KEEP_PTR_TABLE | CLONEf_CLONE_HOST);
 #else
@@ -408,9 +419,42 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 	    if (SvREFCNT(thread->init_function) == 0) {
 		SvREFCNT_inc(thread->init_function);
 	    }
+	    
+
 
 	    thread->params = sv_dup(params, &clone_param);
 	    SvREFCNT_inc(thread->params);
+
+
+	    /* The code below checks that anything living on
+	       the tmps stack and has been cloned (so it lives in the
+	       ptr_table) has a refcount higher than 0
+
+	       If the refcount is 0 it means that a something on the
+	       stack/context was holding a reference to it and
+	       since we init_stacks() in perl_clone that won't get
+	       cleaned and we will get a leaked scalar.
+	       The reason it was cloned was that it lived on the
+	       @_ stack.
+
+	       Example of this can be found in bugreport 15837
+	       where calls in the parameter list end up as a temp
+
+	       One could argue that this fix should be in perl_clone
+	    */
+	       
+
+	    while (tmps_ix > 0) { 
+	      SV* sv = (SV*)ptr_table_fetch(PL_ptr_table, tmps_tmp[tmps_ix]);
+	      tmps_ix--;
+	      if (sv && SvREFCNT(sv) == 0) {
+		SvREFCNT_inc(sv);
+		SvREFCNT_dec(sv);
+	      }
+	    }
+	    
+
+
 	    SvTEMP_off(thread->init_function);
 	    ptr_table_free(PL_ptr_table);
 	    PL_ptr_table = NULL;
@@ -454,6 +498,7 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 	active_threads++;
 	MUTEX_UNLOCK(&create_destruct_mutex);
 	sv_2mortal(params);
+
 	return ithread_to_SV(aTHX_ obj, thread, classname, FALSE);
 }
 
