@@ -832,6 +832,7 @@ void nuke_stacks _((void));
 void open_script _((char *, bool, SV *, int *fd));
 void usage _((char *));
 void validate_suid _((char *, char*, int));
+int emulate_eaccess _((const char* path, int mode));
 
 regnode *reg _((I32, I32 *));
 regnode *reganode _((U8, U32));

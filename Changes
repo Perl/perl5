@@ -78,6 +78,67 @@ Version 5.005_52        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  1889] By: gsar                                  on 1998/09/25  07:13:13
+        Log: big Configure update from Jarkko: sync metaconfig units; d_statblks fix
+             for Linux; hpux CMA-threads hints; ELF support for FreeBSD; beginnings
+             of full-fledged 64-bit support (including support for: fseeko/ftello,
+             Quad_t aka long long, hpux and irix 64-bits hints, new 64-bit constants
+             in Fcntl)
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Fri, 11 Sep 1998 23:56:11 +0300 (EET DST)
+             Message-Id: <199809112056.XAA04720@alpha.hut.fi>
+             Subject: [PATCH] 5.005_51: Configure "Massive Attack"
+             --
+             From: Jarkko Hietaniemi <jhi@cc.hut.fi>
+             Date: 12 Sep 1998 09:44:25 +0300
+             Message-ID: <oeeaf45bzjq.fsf@alpha.hut.fi>
+             Subject: Re: [PATCH] 5.005_51: Configure "Massive Attack"
+     Branch: perl
+           + lib/filetest.pm
+	   ! Configure MANIFEST Makefile.SH config_h.SH doio.c embedvar.h
+	   ! ext/Fcntl/Fcntl.pm ext/Fcntl/Fcntl.xs handy.h hints/dec_osf.sh
+	   ! hints/freebsd.sh hints/hpux.sh hints/irix_6.sh objXSUB.h
+	   ! perl.c perl.h perl_exp.SH perlio.c perlvars.h pod/perldiag.pod
+	   ! pod/perlfunc.pod pp_sys.c proto.h win32/GenCAPI.pl
+           ! win32/makedef.pl
+____________________________________________________________________________
+[  1888] By: gsar                                  on 1998/09/25  06:27:12
+        Log: bump patchlevel to 52; other little tweaks for threads, win32 builds
+     Branch: perl
+	   ! doop.c mg.c patchlevel.h regexec.c win32/Makefile
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+           ! win32/makedef.pl win32/makefile.mk win32/win32.c
+____________________________________________________________________________
+[  1887] By: gsar                                  on 1998/09/25  04:50:49
+        Log: win32.c tweak
+     Branch: perl
+           ! win32/win32.c
+____________________________________________________________________________
+[  1886] By: gsar                                  on 1998/09/25  04:47:32
+        Log: s/MAKEMAKEROPT/PERL_MM_OPT/
+     Branch: perl
+           ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[  1885] By: gsar                                  on 1998/09/25  04:05:09
+        Log: From: Dominic Dunlop <domo@vo.lu>
+             Date: Thu, 10 Sep 1998 11:02:46 +0000
+             Message-Id: <v03110703b21d581d7ef1@[212.24.192.107]>
+             Subject: MM_Unix::canonpath erroneously turns leading // into /
+     Branch: perl
+           ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  1884] By: gsar                                  on 1998/09/25  03:06:10
+        Log: temporarily disable perl malloc for a2p until we clean up
+             conflicting malloc() declarations everywhere
+     Branch: perl
+           ! x2p/Makefile.SH
+____________________________________________________________________________
+[  1883] By: gsar                                  on 1998/09/25  02:27:00
+        Log: remove obsolete win32/bin/*.pl
+     Branch: perl
+           - win32/bin/network.pl win32/bin/webget.pl win32/bin/www.pl
+           ! Changes MANIFEST win32/Makefile win32/makefile.mk
+____________________________________________________________________________
 [  1882] By: gsar                                  on 1998/09/25  02:04:43
         Log: missing file in last submit
      Branch: perl

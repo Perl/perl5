@@ -325,6 +325,8 @@
 #define dump_sub          CPerlObj::Perl_dump_sub
 #undef  dumpuntil
 #define dumpuntil         CPerlObj::dumpuntil
+#undef  emulate_eaccess
+#define emulate_eaccess   CPerlObj::emulate_eaccess
 #undef  fbm_compile
 #define fbm_compile       CPerlObj::Perl_fbm_compile
 #undef  fbm_instr

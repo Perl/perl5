@@ -1679,7 +1679,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol is defined if this system has a stat structure declaring
  *	st_blksize and st_blocks.
  */
-#$d_statblks USE_STAT_BLOCKS 	/**/ /* backward compatibility */
+#$d_statblks USE_STAT_BLOCKS 	/* backward compatibility */
 
 /* HAS_STRERROR:
  *	This symbol, if defined, indicates that the strerror routine is

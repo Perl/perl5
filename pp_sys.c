@@ -207,9 +207,12 @@ static int dooneliner _((char *cmd, char *filename));
 #   define PERL_EFF_ACCESS_X_OK(p) (accessx((p), X_OK, ACC_SELF))
 #endif
 
-#if !defined(PERL_EFF_ACCESS_R_OK) && defined(HAS_ACCESS)
+#if !defined(PERL_EFF_ACCESS_R_OK) && defined(HAS_ACCESS)	\
+    && (defined(HAS_SETREUID) || defined(HAS_SETRESUID)		\
+	|| defined(HAS_SETREGID) || defined(HAS_SETRESGID))
 /* The Hard Way. */
-static int emulate_eaccess (const char* path, int mode) {
+STATIC int
+emulate_eaccess (const char* path, int mode) {
     Uid_t ruid = getuid();
     Uid_t euid = geteuid();
     Gid_t rgid = getgid();
@@ -272,7 +275,8 @@ static int emulate_eaccess (const char* path, int mode) {
 #endif
 
 #if !defined(PERL_EFF_ACCESS_R_OK)
-static int emulate_eaccess (const char* path, int mode) {
+STATIC int
+emulate_eaccess (const char* path, int mode) {
     croak("effective uid access is not implemented");
     /*NOTREACHED*/
     return -1;
