@@ -103,6 +103,7 @@ __DATA__
 #Symbol	spare	nocsum	size
 c			char
 C			unsigned char
+W			unsigned char	PERL_PACK_CAN_W
 U			char
 s!			short
 s			=SIZE16
