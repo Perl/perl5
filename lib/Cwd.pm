@@ -70,7 +70,7 @@ kept up to date if all packages which use chdir import it from Cwd.
 
 use Carp;
 
-$VERSION = '2.03';
+$VERSION = '2.02';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -200,38 +200,62 @@ sub chdir {
     1;
 }
 
+# Taken from Cwd.pm It is really getcwd with an optional
+# parameter instead of '.'
+#
 
-# By Jeff "japhy" Pinyan (07/23/2000)
-#   usage:  abs_path(PATHNAME)
-# see the docs
+sub abs_path
+{
+    my $start = @_ ? shift : '.';
+    my($dotdots, $cwd, @pst, @cst, $dir, @tst);
 
-sub abs_path {
-  my $base = @_ ? $_[0] : ".";
-  my $path = "";
-  my $file;
-
-  do {
-    my @devino = (stat($base))[0,1] or
-      carp("stat($base): $!"), return;
-
-    $base .= "/..";
-
-    opendir PREV, $base or carp("opendir($base): $!"), return;
-    while (defined($file = readdir PREV)) {
-      next if $file eq "." or $file eq "..";
-      my @entry = (lstat("$base/$file"))[0,1] or
-        carp("lstat($base/$file): $!"), return;
-      last if $devino[0] == $entry[0] and $devino[1] == $entry[1];
+    unless (@cst = stat( $start ))
+    {
+	carp "stat($start): $!";
+	return '';
     }
-    closedir PREV;
-
-    $path = (defined $file and $file) . "/$path";
-  } while defined $file;
-
-  length($path) > 1 and chop $path;
-  return $path;
+    $cwd = '';
+    $dotdots = $start;
+    do
+    {
+	$dotdots .= '/..';
+	@pst = @cst;
+	unless (opendir(PARENT, $dotdots))
+	{
+	    carp "opendir($dotdots): $!";
+	    return '';
+	}
+	unless (@cst = stat($dotdots))
+	{
+	    carp "stat($dotdots): $!";
+	    closedir(PARENT);
+	    return '';
+	}
+	if ($pst[0] == $cst[0] && $pst[1] == $cst[1])
+	{
+	    $dir = undef;
+	}
+	else
+	{
+	    do
+	    {
+		unless (defined ($dir = readdir(PARENT)))
+	        {
+		    carp "readdir($dotdots): $!";
+		    closedir(PARENT);
+		    return '';
+		}
+		$tst[0] = $pst[0]+1 unless (@tst = lstat("$dotdots/$dir"))
+	    }
+	    while ($dir eq '.' || $dir eq '..' || $tst[0] != $pst[0] ||
+		   $tst[1] != $pst[1]);
+	}
+	$cwd = (defined $dir ? "$dir" : "" ) . "/$cwd" ;
+	closedir(PARENT);
+    } while (defined $dir);
+    chop($cwd) unless $cwd eq '/'; # drop the trailing /
+    $cwd;
 }
-
 
 # added function alias for those of us more
 # used to the libc function.  --tchrist 27-Jan-00
