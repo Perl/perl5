@@ -176,6 +176,7 @@ sub export_ok_tags { _push_tags((caller)[0], "EXPORT_OK", \@_) }
 # Default methods
 
 sub export_fail {
+    my $self = shift;
     @_;
 }
 
