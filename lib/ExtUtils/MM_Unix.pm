@@ -3512,7 +3512,7 @@ sub tool_autosplit {
     $asl = "\$AutoSplit::Maxlen=$attribs{MAXLEN};" if $attribs{MAXLEN};
     q{
 # Usage: $(AUTOSPLITFILE) FileToSplit AutoDirToSplitInto
-AUTOSPLITFILE = $(PERLRUNINST) -e 'use AutoSplit;}.$asl.q{autosplit($$ARGV[0], $$ARGV[1], 0, 1, 1) ;'
+AUTOSPLITFILE = $(PERLRUN) -e 'use AutoSplit;}.$asl.q{autosplit($$ARGV[0], $$ARGV[1], 0, 1, 1) ;'
 };
 }
 
@@ -3539,13 +3539,13 @@ SHELL = $bin_sh
     push @m, q{
 # The following is a portable way to say mkdir -p
 # To see which directories are created, change the if 0 to if 1
-MKPATH = $(PERLRUNINST) -MExtUtils::Command -e mkpath
+MKPATH = $(PERLRUN) -MExtUtils::Command -e mkpath
 
 # This helps us to minimize the effect of the .exists files A yet
 # better solution would be to have a stable file in the perl
 # distribution with a timestamp of zero. But this solution doesn't
 # need any changes to the core distribution and works with older perls
-EQUALIZE_TIMESTAMP = $(PERLRUNINST) -MExtUtils::Command -e eqtime
+EQUALIZE_TIMESTAMP = $(PERLRUN) -MExtUtils::Command -e eqtime
 };
 
 

@@ -411,7 +411,7 @@ sub ExtUtils::MakeMaker::new {
 	}
 	if ($self->{PARENT}) {
 	    $self->{PARENT}->{CHILDREN}->{$newclass} = $self;
-	    foreach my $opt (qw(CAPI POLLUTE)) {
+	    foreach my $opt (qw(CAPI POLLUTE PERL_CORE)) {
 		if (exists $self->{PARENT}->{$opt}
 		    and not exists $self->{$opt})
 		    {
@@ -1647,12 +1647,15 @@ of memory allocations, etc.
 
 =item PERLRUN
 
-  $(PERL) -I$(PERL_ARCH) -I$(PERL_LIB)
-
+Use this instead of $(PERL) or $(FULLPERL) when you wish to run perl.
+It will set up extra necessary flags for you.
+  
 =item PERLRUNINST
-
-  $(PERL) -I$(INST_ARCH) -I$(INST_LIB) -I$(PERL_ARCH) -I$(PERL_LIB)
-
+  
+Use this instead of $(PERL) or $(FULLPERL) when you wish to run
+perl to work with modules.  It will add things like -I$(INST_ARCH)
+and other necessary flags.
+  
 =item PERL_SRC
 
 Directory containing the Perl source code (use of this should be
@@ -1772,8 +1775,9 @@ if you really need it.
 
 =item TEST_LIBS
 
-The set of -I's necessary to run a "make test".
-
+The set of -I's necessary to run a "make test".  Use as:
+$(PERL) $(TEST_LIBS) -e '...' for example.
+  
 =item TYPEMAPS
 
 Ref to array of typemap file names.  Use this when the typemaps are
