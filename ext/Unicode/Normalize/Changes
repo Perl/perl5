@@ -1,5 +1,10 @@
 Revision history for Perl extension Unicode::Normalize.
 
+0.16  Thu Mar 21 13:36:14 2002
+	- synchronization with bleadperl.
+	- Change 15318: by jhi
+	- Change 15319: by jhi
+
 0.15  Tue Mar 19 22:04:07 2002
 	- Quick check is implemented.
 	- decompose(), reorder(), and compose() are documented.

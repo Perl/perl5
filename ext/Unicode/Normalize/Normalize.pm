@@ -2,7 +2,7 @@ package Unicode::Normalize;
 
 BEGIN {
     if (ord("A") == 193) {
-       die "Unicode::Normalize not ported to EBCDIC\n";
+	die "Unicode::Normalize not ported to EBCDIC\n";
     }
 }
 
@@ -11,7 +11,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 our $PACKAGE = __PACKAGE__;
 
 require Exporter;
