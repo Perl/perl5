@@ -3687,7 +3687,7 @@
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #  if defined(CRIPPLED_CC)
 #  endif
-#  if defined(WIN32)
+#  if defined(PERL_CR_FILTER)
 #  endif
 #endif
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)

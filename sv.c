@@ -4058,10 +4058,6 @@ screamer2:
 	}
     }
 
-#ifdef WIN32
-    win32_strip_return(sv);
-#endif
-
     return (SvCUR(sv) - append) ? SvPVX(sv) : Nullch;
 }
 

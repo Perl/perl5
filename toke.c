@@ -304,15 +304,36 @@ S_depcom(pTHX)
  * utf16-to-utf8-reversed.
  */
 
-#ifdef WIN32
+#ifdef PERL_CR_FILTER
+static void
+strip_return(SV *sv)
+{
+    register char *s = SvPVX(sv);
+    register char *e = s + SvCUR(sv);
+    /* outer loop optimized to do nothing if there are no CR-LFs */
+    while (s < e) {
+	if (*s++ == '\r' && *s == '\n') {
+	    /* hit a CR-LF, need to copy the rest */
+	    register char *d = s - 1;
+	    *d++ = *s++;
+	    while (s < e) {
+		if (*s == '\r' && s[1] == '\n')
+		    s++;
+		*d++ = *s++;
+	    }
+	    SvCUR(sv) -= s - d;
+	    return;
+	}
+    }
+}
 
 STATIC I32
-S_win32_textfilter(pTHX_ int idx, SV *sv, int maxlen)
+S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 {
- I32 count = FILTER_READ(idx+1, sv, maxlen);
- if (count > 0 && !maxlen)
-  win32_strip_return(sv);
- return count;
+    I32 count = FILTER_READ(idx+1, sv, maxlen);
+    if (count > 0 && !maxlen)
+	strip_return(sv);
+    return count;
 }
 #endif
 
@@ -1872,9 +1893,9 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
 STATIC char *
 S_filter_gets(pTHX_ register SV *sv, register PerlIO *fp, STRLEN append)
 {
-#ifdef WIN32FILTER
+#ifdef PERL_CR_FILTER
     if (!PL_rsfp_filters) {
-	filter_add(win32_textfilter,NULL);
+	filter_add(S_cr_textfilter,NULL);
     }
 #endif
     if (PL_rsfp_filters) {
@@ -3785,6 +3806,26 @@ Perl_yylex(pTHX)
 		    IoTYPE(GvIOp(gv)) = '-';
 		else
 		    IoTYPE(GvIOp(gv)) = '<';
+#if defined(WIN32) && !defined(PERL_TEXTMODE_SCRIPTS)
+		/* if the script was opened in binmode, we need to revert
+		 * it to text mode for compatibility.
+		 * XXX this is a questionable hack at best. */
+		{
+		    Off_t loc = 0;
+		    if (IoTYPE(GvIOp(gv)) == '<') {
+			loc = PerlIO_tell(PL_rsfp);
+			(void)PerlIO_seek(PL_rsfp, 0L, 0);
+		    }
+		    if (PerlLIO_setmode(PerlIO_fileno(PL_rsfp), O_TEXT) != -1) {
+#if defined(__BORLANDC__)
+			/* XXX see note in do_binmode() */
+			((FILE*)PL_rsfp)->flags |= _F_BIN;
+#endif
+			if (loc > 0)
+			    PerlIO_seek(PL_rsfp, loc, 0);
+		    }
+		}
+#endif
 		PL_rsfp = Nullfp;
 	    }
 	    goto fake_eof;

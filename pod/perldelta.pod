@@ -1043,6 +1043,10 @@ The C<Shell> module is supported.
 Rudimentary support for building under command.com in Windows 95
 has been added.
 
+Scripts are read in binary mode by default to allow ByteLoader (and
+the filter mechanism in general) to work properly.  For compatibility,
+the DATA filehandle continues to be set to text mode.
+
 [TODO - GSAR]
 
 =head1 New tests

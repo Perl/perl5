@@ -3688,31 +3688,6 @@ Perl_win32_init(int *argcp, char ***argvp)
     MALLOC_INIT;
 }
 
-#ifdef USE_BINMODE_SCRIPTS
-
-void
-win32_strip_return(SV *sv)
-{
- char *s = SvPVX(sv);
- char *e = s+SvCUR(sv);
- char *d = s;
- while (s < e)
-  {
-   if (*s == '\r' && s[1] == '\n')
-    {
-     *d++ = '\n';
-     s += 2;
-    }
-   else 
-    {
-     *d++ = *s++;
-    }   
-  }
- SvCUR_set(sv,d-SvPVX(sv)); 
-}
-
-#endif
-
 #ifdef USE_ITHREADS
 
 #  ifdef PERL_OBJECT

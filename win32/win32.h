@@ -325,12 +325,10 @@ typedef  char *		caddr_t;	/* In malloc.c (core address). */
 #define PERL_CORE
 #endif
 
-#ifdef USE_BINMODE_SCRIPTS
-#define PERL_SCRIPT_MODE "rb"
-EXT void win32_strip_return(struct sv *sv);
+#ifdef USE_TEXTMODE_SCRIPTS
+#  define PERL_SCRIPT_MODE		"r"
 #else
-#define PERL_SCRIPT_MODE "r"
-#define win32_strip_return(sv) NOOP
+#  define PERL_SCRIPT_MODE		"rb"
 #endif
 
 /* 

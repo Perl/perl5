@@ -2169,8 +2169,8 @@ s	|I32	|utf16rev_textfilter|int idx|SV *sv|int maxlen
 #  if defined(CRIPPLED_CC)
 s	|int	|uni		|I32 f|char *s
 #  endif
-#  if defined(WIN32)
-s	|I32	|win32_textfilter	|int idx|SV *sv|int maxlen
+#  if defined(PERL_CR_FILTER)
+s	|I32	|cr_textfilter	|int idx|SV *sv|int maxlen
 #  endif
 #endif
 

@@ -166,26 +166,33 @@ CCINCDIR	*= $(CCHOME)\include
 CCLIBDIR	*= $(CCHOME)\lib
 
 #
-# additional compiler flags can be specified here.
+# Additional compiler flags can be specified here.
 #
-# Adding -DPERL_POLLUTE enables support for old symbols, at the expense of
-# extreme pollution. You most probably want this if you're compiling modules
-# from CPAN, or other such serious uses of this experimental perl release.
-# We don't enable this by default because we want the modules to get fixed
-# instead of clinging to shortcuts like this one.
+
+#
+# This should normally be disabled.  Adding -DPERL_POLLUTE enables support
+# for old symbols by default, at the expense of extreme pollution.  You most
+# probably just want to build modules that won't compile with
+#         perl Makefile.PL POLLUTE=1
+# instead of enabling this.  Please report such modules to the respective
+# authors.
 #
 #BUILDOPT	+= -DPERL_POLLUTE
 
 #
-# enable this to disable the File::Glob implementation of CORE::glob
+# This should normally be disabled.  Enabling it will disable the File::Glob
+# implementation of CORE::glob.
 #
 #BUILDOPT	+= -DPERL_EXTERNAL_GLOB
 
-# Enabling this causes perl to do its own CR/LF conversions, and is required
-# if you want to be able to use the bytecode compiler and ByteLoader
-BUILDOPT	+= -DUSE_BINMODE_SCRIPTS
+#
+# This should normally be disabled.  Enabling it causes perl to read scripts
+# in text mode (which is the 5.005 behavior) and will break ByteLoader.
+#BUILDOPT	+= -DUSE_TEXTMODE_SCRIPTS
 
-# Enabling this runs a cloned toplevel interpreter (*EXPERIMENTAL*, fails tests)
+#
+# This should normally be disabled.  Enabling it runs a cloned toplevel
+# interpreter (*EXPERIMENTAL*, fails tests)
 #BUILDOPT	+= -DTOP_CLONE
 
 #

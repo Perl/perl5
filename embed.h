@@ -1077,8 +1077,8 @@
 #  if defined(CRIPPLED_CC)
 #define uni			S_uni
 #  endif
-#  if defined(WIN32)
-#define win32_textfilter	S_win32_textfilter
+#  if defined(PERL_CR_FILTER)
+#define cr_textfilter		S_cr_textfilter
 #  endif
 #endif
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
@@ -2482,8 +2482,8 @@
 #  if defined(CRIPPLED_CC)
 #define uni(a,b)		S_uni(aTHX_ a,b)
 #  endif
-#  if defined(WIN32)
-#define win32_textfilter(a,b,c)	S_win32_textfilter(aTHX_ a,b,c)
+#  if defined(PERL_CR_FILTER)
+#define cr_textfilter(a,b,c)	S_cr_textfilter(aTHX_ a,b,c)
 #  endif
 #endif
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
@@ -4830,9 +4830,9 @@
 #define S_uni			CPerlObj::S_uni
 #define uni			S_uni
 #  endif
-#  if defined(WIN32)
-#define S_win32_textfilter	CPerlObj::S_win32_textfilter
-#define win32_textfilter	S_win32_textfilter
+#  if defined(PERL_CR_FILTER)
+#define S_cr_textfilter		CPerlObj::S_cr_textfilter
+#define cr_textfilter		S_cr_textfilter
 #  endif
 #endif
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
