@@ -178,7 +178,7 @@ PP(pp_padany)
 
 PP(pp_rv2gv)
 {
-    djSP; dTOPss;  
+    djSP; dTOPss;
 
     if (SvROK(sv)) {
       wasref:
@@ -206,9 +206,9 @@ PP(pp_rv2gv)
 		    goto wasref;
 	    }
 	    if (!SvOK(sv) && sv != &PL_sv_undef) {
-		/* If this is a 'my' scalar and flag is set then vivify 
+		/* If this is a 'my' scalar and flag is set then vivify
 		 * NI-S 1999/05/07
-		 */ 
+		 */
 		if (PL_op->op_private & OPpDEREF) {
 		    char *name;
 		    GV *gv;
@@ -223,7 +223,8 @@ PP(pp_rv2gv)
 			name = CopSTASHPV(PL_curcop);
 			gv = newGVgen(name);
 		    }
-		    sv_upgrade(sv, SVt_RV);
+		    if (SvTYPE(sv) < SVt_RV)
+			sv_upgrade(sv, SVt_RV);
 		    SvRV(sv) = (SV*)gv;
 		    SvROK_on(sv);
 		    SvSETMAGIC(sv);
@@ -410,7 +411,7 @@ PP(pp_prototype)
 	char *s = SvPVX(TOPs);
 	if (strnEQ(s, "CORE::", 6)) {
 	    int code;
-	    
+	
 	    code = keyword(s + 6, SvCUR(TOPs) - 6);
 	    if (code < 0) {	/* Overridable. */
 #define MAX_ARGS_OP ((sizeof(I32) - 1) * 2)
@@ -434,9 +435,9 @@ PP(pp_prototype)
 			seen_question = 1;
 			str[n++] = ';';
 		    }
-		    else if (n && str[0] == ';' && seen_question) 
+		    else if (n && str[0] == ';' && seen_question)
 			goto set;	/* XXXX system, exec */
-		    if ((oa & (OA_OPTIONAL - 1)) >= OA_AVREF 
+		    if ((oa & (OA_OPTIONAL - 1)) >= OA_AVREF
 			&& (oa & (OA_OPTIONAL - 1)) <= OA_HVREF) {
 			str[n++] = '\\';
 		    }
@@ -567,7 +568,7 @@ PP(pp_bless)
 	    Perl_croak(aTHX_ "Attempt to bless into a reference");
 	ptr = SvPV(ssv,len);
 	if (ckWARN(WARN_MISC) && len == 0)
-	    Perl_warner(aTHX_ WARN_MISC, 
+	    Perl_warner(aTHX_ WARN_MISC,
 		   "Explicit blessing to '' (assuming package main)");
 	stash = gv_stashpvn(ptr, len, TRUE);
     }
@@ -584,7 +585,7 @@ PP(pp_gelem)
     char *elem;
     djSP;
     STRLEN n_a;
- 
+
     sv = POPs;
     elem = SvPV(sv, n_a);
     gv = (GV*)POPs;
@@ -1571,7 +1572,7 @@ PP(pp_i_divide)
 
 PP(pp_i_modulo)
 {
-    djSP; dATARGET; tryAMAGICbin(modulo,opASSIGN); 
+    djSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
     {
       dPOPTOPiirl;
       if (!right)
@@ -2308,7 +2309,7 @@ PP(pp_crypt)
     sv_setpv(TARG, PerlProc_crypt(tmps, SvPV(right, n_a)));
 #endif
 #else
-    DIE(aTHX_ 
+    DIE(aTHX_
       "The crypt() function is unimplemented due to excessive paranoia.");
 #endif
     SETs(TARG);
@@ -2916,7 +2917,7 @@ PP(pp_lslice)
 	ix = SvIVx(*lelem);
 	if (ix < 0)
 	    ix += max;
-	else 
+	else
 	    ix -= arybase;
 	if (ix < 0 || ix >= max)
 	    *lelem = &PL_sv_undef;
@@ -4252,7 +4253,7 @@ PP(pp_unpack)
              */
             if (PL_uudmap['M'] == 0) {
                 int i;
- 
+
                 for (i = 0; i < sizeof(PL_uuemap); i += 1)
                     PL_uudmap[(U8)PL_uuemap[i]] = i;
                 /*
@@ -4497,7 +4498,7 @@ PP(pp_pack)
 	    patcopy++;
 	    continue;
         }
-	if (datumtype == 'U' && pat == patcopy+1) 
+	if (datumtype == 'U' && pat == patcopy+1)
 	    SvUTF8_on(cat);
 	if (datumtype == '#') {
 	    while (pat < patend && *pat != '\n')
@@ -5228,7 +5229,7 @@ PP(pp_split)
     else {
 	maxiters += (strend - s) * rx->nparens;
 	while (s < strend && --limit
-/*	       && (!rx->check_substr 
+/*	       && (!rx->check_substr
 		   || ((s = CALLREG_INTUIT_START(aTHX_ rx, sv, s, strend,
 						 0, NULL))))
 */	       && CALLREGEXEC(aTHX_ rx, s, strend, orig,

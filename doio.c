@@ -79,9 +79,14 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     int result;
     bool was_fdopen = FALSE;
     bool in_raw = 0, in_crlf = 0, out_raw = 0, out_crlf = 0;
+    char *type  = NULL;
+    char *deftype = NULL;
+    char mode[4];		/* stdio file mode ("r\0", "rb\0", "r+b\0" etc.) */
 
+    Zero(mode,sizeof(mode),char);
     PL_forkprocess = 1;		/* assume true if no fork */
 
+    /* Collect default raw/crlf info from the op */
     if (PL_op && PL_op->op_type == OP_OPEN) {
 	/* set up disciplines */
 	U8 flags = PL_op->op_private;
@@ -91,6 +96,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	out_crlf = (flags & OPpOPEN_OUT_CRLF);
     }
 
+    /* If currently open - close before we re-open */
     if (IoIFP(io)) {
 	fd = PerlIO_fileno(IoIFP(io));
 	if (IoTYPE(io) == IoTYPE_STD)
@@ -121,6 +127,8 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     }
 
     if (as_raw) {
+        /* sysopen style args, i.e. integer mode and permissions */
+
 #if defined(USE_64_BIT_RAWIO) && defined(O_LARGEFILE)
 	rawmode |= O_LARGEFILE;
 #endif
@@ -148,75 +156,79 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	if (fd == -1)
 	    fp = NULL;
 	else {
-	    char fpmode[4];
 	    STRLEN ix = 0;
-	    if (result == O_RDONLY)
-		fpmode[ix++] = 'r';
+	    if (result == O_RDONLY) {
+		mode[ix++] = 'r';
+	    }
 #ifdef O_APPEND
 	    else if (rawmode & O_APPEND) {
-		fpmode[ix++] = 'a';
+		mode[ix++] = 'a';
 		if (result != O_WRONLY)
-		    fpmode[ix++] = '+';
+		    mode[ix++] = '+';
 	    }
 #endif
 	    else {
 		if (result == O_WRONLY)
-		    fpmode[ix++] = 'w';
+		    mode[ix++] = 'w';
 		else {
-		    fpmode[ix++] = 'r';
-		    fpmode[ix++] = '+';
+		    mode[ix++] = 'r';
+		    mode[ix++] = '+';
 		}
 	    }
 	    if (rawmode & O_BINARY)
-		fpmode[ix++] = 'b';
-	    fpmode[ix] = '\0';
-	    fp = PerlIO_fdopen(fd, fpmode);
+		mode[ix++] = 'b';
+	    mode[ix] = '\0';
+	    fp = PerlIO_fdopen(fd, mode);
 	    if (!fp)
 		PerlLIO_close(fd);
 	}
     }
     else {
-	char *type;
+	/* Regular (non-sys) open */
 	char *oname = name;
-	STRLEN tlen;
 	STRLEN olen = len;
-	char mode[4];		/* stdio file mode ("r\0", "rb\0", "r+b\0" etc.) */
-	int dodup;
+	char *tend;
+	int dodup = 0;
 
 	type = savepvn(name, len);
-	tlen = len;
+	tend = type+len;
 	SAVEFREEPV(type);
+	/* Loose trailing white space */
+	while (tend > type && isSPACE(tend[-1]))
+	    *tend-- = '\0';
 	if (num_svs) {
+	    /* New style explict name, type is just mode and discipline/layer info */
 	    STRLEN l;
 	    name = SvPV(svs, l) ;
 	    len = (I32)l;
 	    name = savepvn(name, len);
 	    SAVEFREEPV(name);
+	    /*SUPPRESS 530*/
+	    for (; isSPACE(*type); type++) ;
 	}
 	else {
-	    while (tlen && isSPACE(type[tlen-1]))
-		type[--tlen] = '\0';
 	    name = type;
-	    len = tlen;
+	    len  = tend-type;
 	}
-	mode[0] = mode[1] = mode[2] = mode[3] = '\0';
 	IoTYPE(io) = *type;
-	if (*type == IoTYPE_RDWR && tlen > 1 && type[tlen-1] != IoTYPE_PIPE) { /* scary */
+	if (*type == IoTYPE_RDWR && (!num_svs || tend > type+1 && tend[-1] != IoTYPE_PIPE)) { /* scary */
 	    mode[1] = *type++;
-	    --tlen;
 	    writing = 1;
 	}
 
 	if (*type == IoTYPE_PIPE) {
-	    if (num_svs && (tlen != 2 || type[1] != IoTYPE_STD)) {
-	      unknown_desr:
-		Perl_croak(aTHX_ "Unknown open() mode '%.*s'", (int)olen, oname);
+	    if (num_svs) {
+		if (type[1] != IoTYPE_STD) {
+	          unknown_desr:
+		    Perl_croak(aTHX_ "Unknown open() mode '%.*s'", (int)olen, oname);
+		}
+		type++;
 	    }
 	    /*SUPPRESS 530*/
-	    for (type++, tlen--; isSPACE(*type); type++, tlen--) ;
+	    for (type++; isSPACE(*type); type++) ;
 	    if (!num_svs) {
 		name = type;
-		len = tlen;
+		len = tend-type;
 	    }
 	    if (*name == '\0') { /* command is missing 19990114 */
 		dTHR;
@@ -228,7 +240,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    if (strNE(name,"-") || num_svs)
 		TAINT_ENV();
 	    TAINT_PROPER("piped open");
-	    if (name[len-1] == '|') {
+	    if (!num_svs && name[len-1] == '|') {
 		dTHR;
 		name[--len] = '\0' ;
 		if (ckWARN(WARN_PIPE))
@@ -249,7 +261,6 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		/* Two IoTYPE_WRONLYs in a row make for an IoTYPE_APPEND. */
 		mode[0] = IoTYPE(io) = IoTYPE_APPEND;
 		type++;
-		tlen--;
 	    }
 	    else
 		mode[0] = 'w';
@@ -260,11 +271,11 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    else if (out_crlf)
 		strcat(mode, "t");
 
-	    if (num_svs && tlen != 1)
-	        goto unknown_desr;
 	    if (*type == '&') {
 		name = type;
 	      duplicity:
+		if (num_svs)
+		    goto unknown_desr;
 		dodup = 1;
 		name++;
 		if (*name == '=') {
@@ -336,7 +347,9 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    else {
 		/*SUPPRESS 530*/
 		for (; isSPACE(*type); type++) ;
-		if (*type == IoTYPE_STD && !type[1]) {
+		if (*type == IoTYPE_STD && (!type[1] || isSPACE(type[1]) || type[1] == ':')) {
+		    /*SUPPRESS 530*/
+		    type++;
 		    fp = PerlIO_stdout();
 		    IoTYPE(io) = IoTYPE_STD;
 		}
@@ -346,8 +359,6 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    }
 	}
 	else if (*type == IoTYPE_RDONLY) {
-	    if (num_svs && tlen != 1)
-	        goto unknown_desr;
 	    /*SUPPRESS 530*/
 	    for (type++; isSPACE(*type); type++) ;
 	    mode[0] = 'r';
@@ -360,25 +371,28 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		name = type;
 		goto duplicity;
 	    }
-	    if (*type == IoTYPE_STD && !type[1]) {
+	    if (*type == IoTYPE_STD && (!type[1] || isSPACE(type[1]) || type[1] == ':')) {
+		/*SUPPRESS 530*/
+		type++;
 		fp = PerlIO_stdin();
 		IoTYPE(io) = IoTYPE_STD;
 	    }
 	    else
 		fp = PerlIO_open((num_svs ? name : type), mode);
 	}
-	else if (tlen > 1 && type[tlen-1] == IoTYPE_PIPE) {
+	else if ((num_svs && type[0] == IoTYPE_STD && type[1] == IoTYPE_PIPE) ||
+	         (!num_svs && tend > type+1 && tend[-1] == IoTYPE_PIPE)) {
 	    if (num_svs) {
-		if (tlen != 2 || type[0] != IoTYPE_STD)
-		    goto unknown_desr;
+		type += 2;   /* skip over '-|' */
 	    }
 	    else {
-		type[--tlen] = '\0';
-		while (tlen && isSPACE(type[tlen-1]))
-		    type[--tlen] = '\0';
+		*--tend = '\0';
+		while (tend > type && isSPACE(tend[-1]))
+		    *--tend = '\0';
 		/*SUPPRESS 530*/
 		for (; isSPACE(*type); type++) ;
 		name = type;
+	        len  = tend-type;
 	    }
 	    if (*name == '\0') { /* command is missing 19990114 */
 		dTHR;
@@ -494,20 +508,23 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     }
 #endif
     IoIFP(io) = fp;
+    if (!num_svs) {
+	/* Need to supply default type info from open.pm */
+	type = NULL;
+    }
+    if (type) {
+	while (isSPACE(*type)) type++;
+	if (*type) {
+	}
+    }
+
     IoFLAGS(io) &= ~IOf_NOLINE;
     if (writing) {
 	dTHR;
 	if (IoTYPE(io) == IoTYPE_SOCKET
 	    || (IoTYPE(io) == IoTYPE_WRONLY && S_ISCHR(PL_statbuf.st_mode)) )
 	{
-	    char *mode;
-	    if (out_raw)
-		mode = "wb";
-	    else if (out_crlf)
-		mode = "wt";
-	    else
-		mode = "w";
-
+	    mode[0] = 'w';
 	    if (!(IoOFP(io) = PerlIO_fdopen(PerlIO_fileno(fp),mode))) {
 		PerlIO_close(fp);
 		IoIFP(io) = Nullfp;

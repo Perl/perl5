@@ -208,28 +208,8 @@ PerlIO_pop(PerlIO *f)
   }
 }
 
-#undef PerlIO_close
-int
-PerlIO_close(PerlIO *f)
-{
- int code = (*PerlIOBase(f)->tab->Close)(f);
- while (*f)
-  {
-   PerlIO_pop(f);
-  }
- return code;
-}
-
-
 /*--------------------------------------------------------------------------------------*/
-/* Given the abstraction above the public API functions */
-
-#undef PerlIO_fileno
-int
-PerlIO_fileno(PerlIO *f)
-{
- return (*PerlIOBase(f)->tab->Fileno)(f);
-}
+/* XS Interface for perl code */
 
 XS(XS_perlio_import)
 {
@@ -265,6 +245,90 @@ PerlIO_find_layer(char *name, STRLEN len)
  return NULL;
 }
 
+
+static int
+perlio_mg_set(pTHX_ SV *sv, MAGIC *mg)
+{
+ if (SvROK(sv))
+  {
+   IO *io = GvIOn((GV *)SvRV(sv));
+   PerlIO *ifp = IoIFP(io);
+   PerlIO *ofp = IoOFP(io);
+   AV *av = (AV *) mg->mg_obj;
+   Perl_warn(aTHX_ "set %_ %p %p %p",sv,io,ifp,ofp);
+  }
+ return 0;
+}
+
+static int
+perlio_mg_get(pTHX_ SV *sv, MAGIC *mg)
+{
+ if (SvROK(sv))
+  {
+   IO *io = GvIOn((GV *)SvRV(sv));
+   PerlIO *ifp = IoIFP(io);
+   PerlIO *ofp = IoOFP(io);
+   AV *av = (AV *) mg->mg_obj;
+   Perl_warn(aTHX_ "get %_ %p %p %p",sv,io,ifp,ofp);
+  }
+ return 0;
+}
+
+static int
+perlio_mg_clear(pTHX_ SV *sv, MAGIC *mg)
+{
+ Perl_warn(aTHX_ "clear %_",sv);
+ return 0;
+}
+
+static int
+perlio_mg_free(pTHX_ SV *sv, MAGIC *mg)
+{
+ Perl_warn(aTHX_ "free %_",sv);
+ return 0;
+}
+
+MGVTBL perlio_vtab = {
+ perlio_mg_get,
+ perlio_mg_set,
+ NULL, /* len */
+ NULL,
+ perlio_mg_free
+};
+
+XS(XS_io_MODIFY_SCALAR_ATTRIBUTES)
+{
+ dXSARGS;
+ SV *sv    = SvRV(ST(1));
+ AV *av    = newAV();
+ MAGIC *mg;
+ int count = 0;
+ int i;
+ sv_magic(sv, (SV *)av, '~', NULL, 0);
+ SvRMAGICAL_off(sv);
+ mg = mg_find(sv,'~');
+ mg->mg_virtual = &perlio_vtab;
+ mg_magical(sv);
+ Perl_warn(aTHX_ "attrib %_",sv);
+ for (i=2; i < items; i++)
+  {
+   STRLEN len;
+   char *name = SvPV(ST(i),len);
+   SV *layer  = PerlIO_find_layer(name,len);
+   if (layer)
+    {
+     av_push(av,SvREFCNT_inc(layer));
+    }
+   else
+    {
+     ST(count) = ST(i);
+     count++;
+    }
+  }
+ SvREFCNT_dec(av);
+ XSRETURN(count);
+}
+
 void
 PerlIO_define_layer(PerlIO_funcs *tab)
 {
@@ -287,6 +351,9 @@ PerlIO_default_layer(I32 n)
    char *s  = PerlEnv_getenv("PERLIO");
    newXS("perlio::import",XS_perlio_import,__FILE__);
    newXS("perlio::unimport",XS_perlio_unimport,__FILE__);
+#if 0
+   newXS("io::MODIFY_SCALAR_ATTRIBUTES",XS_io_MODIFY_SCALAR_ATTRIBUTES,__FILE__);
+#endif
    PerlIO_layer_hv = get_hv("open::layers",GV_ADD|GV_ADDMULTI);
    PerlIO_layer_av = get_av("open::layers",GV_ADD|GV_ADDMULTI);
    PerlIO_define_layer(&PerlIO_unix);
@@ -379,6 +446,30 @@ PerlIO_push(PerlIO *f,PerlIO_funcs *tab,const char *mode)
   }
  return f;
 }
+
+/*--------------------------------------------------------------------------------------*/
+/* Given the abstraction above the public API functions */
+
+#undef PerlIO_close
+int
+PerlIO_close(PerlIO *f)
+{
+ int code = (*PerlIOBase(f)->tab->Close)(f);
+ while (*f)
+  {
+   PerlIO_pop(f);
+  }
+ return code;
+}
+
+#undef PerlIO_fileno
+int
+PerlIO_fileno(PerlIO *f)
+{
+ return (*PerlIOBase(f)->tab->Fileno)(f);
+}
+
+
 
 #undef PerlIO_fdopen
 PerlIO *
