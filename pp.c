@@ -426,7 +426,7 @@ PP(pp_bless)
     else
 	stash = gv_stashsv(POPs, TRUE);
 
-    (void)sv_bless(TOPs, stash);
+    (void)sv_bless3(TOPs, stash, TRUE);
     RETURN;
 }
 
