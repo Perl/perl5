@@ -20,10 +20,10 @@
 "magical" properties.  When any Perl code tries to read from, or assign to,
 an SV marked as magical, it calls the 'get' or 'set' function associated
 with that SV's magic. A get is called prior to reading an SV, in order to
-give it a chance to update its interval value (get on $. writes the line
+give it a chance to update its internal value (get on $. writes the line
 number of the last read filehandle into to the SV's IV slot), while
 set is called after an SV has been written to, in order to allow it to make
-use of it's changed value (set on $/ copies the SV's new value to the
+use of its changed value (set on $/ copies the SV's new value to the
 PL_rs global variable).
 
 Magic is implemented as a linked list of MAGIC structures attached to the

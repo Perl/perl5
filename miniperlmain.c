@@ -16,8 +16,8 @@
  * Note that miniperlmain.c contains main() for the 'miniperl' binary,
  * while perlmain.c contains main() for the 'perl' binary.
  *
- * Miniperl is like perl except that does not support dynamic loading,
- * and in fact is used to build the dynamic modules need for the 'real'
+ * Miniperl is like perl except that it does not support dynamic loading,
+ * and in fact is used to build the dynamic modules needed for the 'real'
  * perl executable.
  */
 

@@ -11,7 +11,7 @@
 /* This file contains the main Perl opcode execution loop. It just
  * calls the pp_foo() function associated with each op, and expects that
  * function to return a pointer to the next op to be executed, or null if
- * its the end of the sub or program or whatever.
+ * it's the end of the sub or program or whatever.
  *
  * There is a similar loop in dump.c, Perl_runops_debug(), which does
  * the same, but also checks for various debug flags each time round the
