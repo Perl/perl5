@@ -821,7 +821,6 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
            sv_type == SVt_PVAV ||
            sv_type == SVt_PVHV ||
            sv_type == SVt_PVCV ||
-           sv_type == SVt_PVGV ||
            sv_type == SVt_PVFM ||
            sv_type == SVt_PVIO
        ) { break; }
