@@ -5504,6 +5504,7 @@ Perl_ck_glob(pTHX_ OP *o)
 {
     GV *gv;
 
+    o = ck_fun(o);
     if ((o->op_flags & OPf_KIDS) && !cLISTOPo->op_first->op_sibling)
 	append_elem(OP_GLOB, o, newDEFSVOP());
 
@@ -5542,7 +5543,7 @@ Perl_ck_glob(pTHX_ OP *o)
     gv_IOadd(gv);
     append_elem(OP_GLOB, o, newGVOP(OP_GV, 0, gv));
     scalarkids(o);
-    return ck_fun(o);
+    return o;
 }
 
 OP *

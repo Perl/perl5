@@ -379,7 +379,7 @@ bless		bless			ck_fun		s@	S S?
 
 backtick	quoted execution (``, qx)	ck_null		t%	
 # glob defaults its first arg to $_
-glob		glob			ck_glob		t@	S? S?
+glob		glob			ck_glob		t@	S?
 readline	<HANDLE>		ck_null		t%	
 rcatline	append I/O operator	ck_null		t%	
 
