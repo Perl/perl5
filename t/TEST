@@ -73,12 +73,18 @@ EOT
 	chop($te);
 	print "$te" . '.' x (18 - length($te));
 	if ($sharpbang) {
-	    -x $test || (print "isn't executable.\n");
+	    eval { chmod 0555, $test } unless -x $test;
 
 	    if ($type eq 'perl') {
-		open(RESULTS, "./$test |") || (print "can't run.\n"); }
+		unless (open(RESULTS, "./$test |")) {
+		    print "$test not executable, " unless -x $test;
+		    print "can't run.\n";
+		}
+	    }
 	    else { 
-		open(RESULTS, "./perl -I../lib ../utils/perlcc ./$test -run -verbose dcf -log ../compilelog |") or print "can't compile.\n";
+		open(RESULTS, "./perl -I../lib ../utils/perlcc ./$test "
+			     ."-run -verbose dcf -log ../compilelog |")
+		    or print "can't compile.\n";
 	    }
 	}
 	else {
