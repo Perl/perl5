@@ -3874,7 +3874,7 @@ ck_eval(OP *o)
 	    return o;
 	}
 	else
-	    scalar(kid);
+	    scalar((OP*)kid);
     }
     else {
 	op_free(o);
