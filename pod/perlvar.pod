@@ -1153,9 +1153,8 @@ lexical scope.  See L<bytes>.
 The name that the Perl binary itself was executed as, from C's
 C<argv[0]>.
 
-This may not be a full pathname, nor even necessarily in your
-path. Currently there is no universal solution for this, you may try
-to use:
+This may not be a full pathname, nor even necessarily in your path.
+Currently there is no universal solution for this; you may want to try:
 
   use Config;
   $current_perl_path = (-x $^X) ? $^X : $Config{perlpath};
