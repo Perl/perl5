@@ -103,9 +103,17 @@ OP *op;
     int type = op->op_type;
     if (type != OP_AELEM && type != OP_HELEM) {
 	yyerror(form("Can't use subscript on %s", op_desc[type]));
-	if (type == OP_ENTERSUB || type == OP_RV2HV || type == OP_PADHV)
-	    warn("(Did you mean $ or @ instead of %c?)\n",
-		 type == OP_ENTERSUB ? '&' : '%');
+	if (type == OP_ENTERSUB || type == OP_RV2HV || type == OP_PADHV) {
+	    SV *msg = sv_2mortal(
+			newSVpvf("(Did you mean $ or @ instead of %c?)\n",
+				 type == OP_ENTERSUB ? '&' : '%'));
+	    if (in_eval & 2)
+		warn("%_", msg);
+	    else if (in_eval)
+		sv_catsv(GvSV(errgv), msg);
+	    else
+		PerlIO_write(PerlIO_stderr(), SvPVX(msg), SvCUR(msg));
+	}
     }
 }
 
