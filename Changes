@@ -28,6 +28,133 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 21147] By: jhi                                   on 2003/09/09  15:36:59
+        Log: Integrate:
+             [ 21146]
+             Adjust the test count.
+     Branch: maint-5.8/perl
+	  !> lib/Test/Simple/t/is_deeply.t
+____________________________________________________________________________
+[ 21145] By: jhi                                   on 2003/09/09  15:07:47
+        Log: Integrate:
+             [ 21143]
+             Retract #20548 and #20465.
+             
+             [ 21144]
+             AUTHORS update from Dave Mitchell.
+     Branch: maint-5.8/perl
+	  !> AUTHORS lib/Test/More.pm lib/Test/Simple/t/More.t
+	  !> lib/Test/Simple/t/is_deeply.t
+____________________________________________________________________________
+[ 21142] By: jhi                                   on 2003/09/09  14:28:55
+        Log: Integrate:
+             [ 21139]
+             Warn more about disclosing the hash seed, from Scott A. Crosby.
+             
+             [ 21140]
+             Retract #21132.
+             
+             [ 21116]
+             Update Changes.
+     Branch: maint-5.8/perl
+	  !> lib/Hash/Util.pm makedef.pl perl.h pod/perlrun.pod
+____________________________________________________________________________
+[ 21138] By: jhi                                   on 2003/09/09  10:32:25
+        Log: Integrate:
+             [ 21135]
+             test++.
+             
+             [ 21136]
+             One more chance...
+             
+             [ 21137]
+             Subject: =encoding in perlpod/perlpodspec
+             From: sburke@cpan.org (Sean M. Burke)
+             Date: Sun, 07 Sep 2003 03:08:28 -0800
+             Message-ID: <5.2.1.1.1.20030907030717.00a6aaa0@mailstore.pobox.com>
+     Branch: maint-5.8/perl
+	  !> lib/warnings.pm pod/perlpod.pod pod/perlpodspec.pod
+	  !> t/op/grep.t toke.c warnings.pl
+____________________________________________________________________________
+[ 21134] By: jhi                                   on 2003/09/09  08:37:02
+        Log: Changing the test count is always a good habit.
+     Branch: maint-5.8/perl
+	   ! ext/threads/t/join.t
+____________________________________________________________________________
+[ 21133] By: jhi                                   on 2003/09/09  07:58:23
+        Log: Integrate:
+             [ 21131]
+             Subject: Re: [PATCH] honoring void context for map(), return from sub end test
+             From: david nicol <whatever@davidnicol.com>
+             Date: 08 Sep 2003 23:39:32 -0500
+             Message-Id: <1063082372.1375.126.camel@plaza.davidnicol.com>
+             
+             (a testcase)
+             
+             [ 21132]
+             Subject: Re: maint @ 21116
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Date: Tue, 09 Sep 2003 09:49:07 +0100
+             Message-ID: <3F5D9403.3040004@uk.radan.com>
+     Branch: maint-5.8/perl
+	  !> makedef.pl perl.h t/op/grep.t
+____________________________________________________________________________
+[ 21130] By: jhi                                   on 2003/09/09  07:46:30
+        Log: de0.t is gone for now.
+     Branch: maint-5.8/perl
+	  !> MANIFEST
+____________________________________________________________________________
+[ 21129] By: jhi                                   on 2003/09/09  07:13:19
+        Log: Integrate:
+             [ 21124]
+             In trying to save space, the warnings.pl change (#21107)
+             pulled in attributes.pm... and the change didn't seem to
+             be that well tested with different configurations.
+             Retract #21119, #21117, #21107.
+     Branch: maint-5.8/perl
+	  !> ext/B/t/stash.t lib/warnings.pm warnings.pl
+____________________________________________________________________________
+[ 21125] By: jhi                                   on 2003/09/09  07:00:57
+        Log: Remove the two new join.t tests from maint,
+             something fishy is going on.
+     Branch: maint-5.8/perl
+	   ! ext/threads/t/join.t
+____________________________________________________________________________
+[ 21123] By: jhi                                   on 2003/09/09  06:43:23
+        Log: Integrate:
+             [ 21121]
+             There's no particular reason to have the dumpvar.t
+             in lib/perl5db/.
+             
+             [ 21122]
+             Really do #21121.
+     Branch: maint-5.8/perl
+	  +> lib/dumpvar.t
+	   - lib/perl5db/dumpvar.t
+	  !> MANIFEST
+____________________________________________________________________________
+[ 21120] By: jhi                                   on 2003/09/09  05:48:49
+        Log: Integrate:
+             [ 21117]
+             Loading warnings.pm now loads attributes.pm that loads strict.pm.
+             (due to #21107 apparently.) Adjust this test accordingly.
+             
+             [ 21119]
+             strict stash seems to have gone, too.
+     Branch: maint-5.8/perl
+	  !> ext/B/t/stash.t
+____________________________________________________________________________
+[ 21118] By: jhi                                   on 2003/09/09  05:36:32
+        Log: The de0.t is far too flaky to be in the maint.
+     Branch: maint-5.8/perl
+	   - lib/perl5db/de0.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 21116] By: jhi                                   on 2003/09/08  21:23:27
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 21115] By: jhi                                   on 2003/09/08  21:20:04
         Log: Integrate:
              [ 21112]
