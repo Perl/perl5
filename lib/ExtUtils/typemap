@@ -225,7 +225,7 @@ T_U_CHAR
 T_FLOAT
 	sv_setnv($arg, (double)$var);
 T_NV
-	sv_setnv($arg, (double)$var);
+	sv_setnv($arg, (NV)$var);
 T_DOUBLE
 	sv_setnv($arg, (double)$var);
 T_PV
