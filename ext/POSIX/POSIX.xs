@@ -3213,7 +3213,7 @@ pipe()
     PPCODE:
 	int fds[2];
 	if (pipe(fds) != -1) {
-	    EXTEND(sp,2);
+	    EXTEND(SP,2);
 	    PUSHs(sv_2mortal(newSViv(fds[0])));
 	    PUSHs(sv_2mortal(newSViv(fds[1])));
 	}
@@ -3257,7 +3257,7 @@ uname()
 #ifdef HAS_UNAME
 	struct utsname buf;
 	if (uname(&buf) >= 0) {
-	    EXTEND(sp, 5);
+	    EXTEND(SP, 5);
 	    PUSHs(sv_2mortal(newSVpv(buf.sysname, 0)));
 	    PUSHs(sv_2mortal(newSVpv(buf.nodename, 0)));
 	    PUSHs(sv_2mortal(newSVpv(buf.release, 0)));
@@ -3325,7 +3325,7 @@ strtod(str)
 	num = strtod(str, &unparsed);
 	PUSHs(sv_2mortal(newSVnv(num)));
 	if (GIMME == G_ARRAY) {
-	    EXTEND(sp, 1);
+	    EXTEND(SP, 1);
 	    if (unparsed)
 		PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
 	    else
@@ -3346,7 +3346,7 @@ strtol(str, base = 0)
 	else
 	    PUSHs(sv_2mortal(newSVnv((double)num)));
 	if (GIMME == G_ARRAY) {
-	    EXTEND(sp, 1);
+	    EXTEND(SP, 1);
 	    if (unparsed)
 		PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
 	    else
@@ -3367,7 +3367,7 @@ strtoul(str, base = 0)
 	else
 	    PUSHs(sv_2mortal(newSVnv((double)num)));
 	if (GIMME == G_ARRAY) {
-	    EXTEND(sp, 1);
+	    EXTEND(SP, 1);
 	    if (unparsed)
 		PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
 	    else
@@ -3468,7 +3468,7 @@ times()
 	struct tms tms;
 	clock_t realtime;
 	realtime = times( &tms );
-	EXTEND(sp,5);
+	EXTEND(SP,5);
 	PUSHs( sv_2mortal( newSViv( (IV) realtime ) ) );
 	PUSHs( sv_2mortal( newSViv( (IV) tms.tms_utime ) ) );
 	PUSHs( sv_2mortal( newSViv( (IV) tms.tms_stime ) ) );
@@ -3546,7 +3546,7 @@ tzset()
 void
 tzname()
     PPCODE:
-	EXTEND(sp,2);
+	EXTEND(SP,2);
 	PUSHs(sv_2mortal(newSVpv(tzname[0],strlen(tzname[0]))));
 	PUSHs(sv_2mortal(newSVpv(tzname[1],strlen(tzname[1]))));
 

@@ -105,6 +105,20 @@ long	w32_num_children = 0;
 HANDLE	w32_child_pids[MAXIMUM_WAIT_OBJECTS];
 #endif
 
+#ifndef FOPEN_MAX
+#  ifdef _NSTREAM_
+#    define FOPEN_MAX _NSTREAM_
+#  elsif _NFILE_
+#    define FOPEN_MAX _NFILE_
+#  elsif _NFILE
+#    define FOPEN_MAX _NFILE
+#  endif
+#endif
+
+#ifndef USE_CRT_POPEN
+int	w32_popen_pids[FOPEN_MAX];
+#endif
+
 #ifdef USE_THREADS
 #  ifdef USE_DECLSPEC_THREAD
 __declspec(thread) char	strerror_buffer[512];
@@ -222,10 +236,8 @@ my_popen(char *cmd, char *mode)
 #define fixcmd(x)
 #endif
     fixcmd(cmd);
-#ifdef __BORLANDC__ /* workaround a Borland stdio bug */
     win32_fflush(stdout);
     win32_fflush(stderr);
-#endif
     return win32_popen(cmd, mode);
 }
 
@@ -370,15 +382,18 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
 			       (const char* const*)argv);
     }
 
-    if (status < 0) {
-	if (dowarn)
-	    warn("Can't spawn \"%s\": %s", argv[0], strerror(errno));
-	status = 255 * 256;
+    if (flag != P_NOWAIT) {
+	if (status < 0) {
+	    if (dowarn)
+		warn("Can't spawn \"%s\": %s", argv[0], strerror(errno));
+	    status = 255 * 256;
+	}
+	else
+	    status *= 256;
+	statusvalue = status;
     }
-    else if (flag != P_NOWAIT)
-	status *= 256;
     Safefree(argv);
-    return (statusvalue = status);
+    return (status);
 }
 
 int
@@ -454,16 +469,19 @@ do_spawn2(char *cmd, int exectype)
 	cmd = argv[0];
 	Safefree(argv);
     }
-    if (status < 0) {
-	if (dowarn)
-	    warn("Can't %s \"%s\": %s",
-		 (exectype == EXECF_EXEC ? "exec" : "spawn"),
-		 cmd, strerror(errno));
-	status = 255 * 256;
+    if (exectype != EXECF_SPAWN_NOWAIT) {
+	if (status < 0) {
+	    if (dowarn)
+		warn("Can't %s \"%s\": %s",
+		     (exectype == EXECF_EXEC ? "exec" : "spawn"),
+		     cmd, strerror(errno));
+	    status = 255 * 256;
+	}
+	else
+	    status *= 256;
+	statusvalue = status;
     }
-    else if (exectype != EXECF_SPAWN_NOWAIT)
-	status *= 256;
-    return (statusvalue = status);
+    return (status);
 }
 
 int
@@ -1483,16 +1501,125 @@ win32_pipe(int *pfd, unsigned int size, int mode)
     return _pipe(pfd, size, mode);
 }
 
+/*
+ * a popen() clone that respects PERL5SHELL
+ */
+
 DllExport FILE*
 win32_popen(const char *command, const char *mode)
 {
+#ifdef USE_CRT_POPEN
     return _popen(command, mode);
+#else
+    int p[2];
+    int parent, child;
+    int stdfd, oldfd;
+    int ourmode;
+    int childpid;
+
+    /* establish which ends read and write */
+    if (strchr(mode,'w')) {
+        stdfd = 0;		/* stdin */
+        parent = 1;
+        child = 0;
+    }
+    else if (strchr(mode,'r')) {
+        stdfd = 1;		/* stdout */
+        parent = 0;
+        child = 1;
+    }
+    else
+        return NULL;
+
+    /* set the correct mode */
+    if (strchr(mode,'b'))
+        ourmode = O_BINARY;
+    else if (strchr(mode,'t'))
+        ourmode = O_TEXT;
+    else
+        ourmode = _fmode & (O_TEXT | O_BINARY);
+
+    /* the child doesn't inherit handles */
+    ourmode |= O_NOINHERIT;
+
+    if (win32_pipe( p, 512, ourmode) == -1)
+        return NULL;
+
+    /* save current stdfd */
+    if ((oldfd = win32_dup(stdfd)) == -1)
+        goto cleanup;
+
+    /* make stdfd go to child end of pipe (implicitly closes stdfd) */
+    /* stdfd will be inherited by the child */
+    if (win32_dup2(p[child], stdfd) == -1)
+        goto cleanup;
+
+    /* close the child end in parent */
+    win32_close(p[child]);
+
+    /* start the child */
+    if ((childpid = do_spawn_nowait((char*)command)) == -1)
+        goto cleanup;
+
+    /* revert stdfd to whatever it was before */
+    if (win32_dup2(oldfd, stdfd) == -1)
+        goto cleanup;
+
+    /* close saved handle */
+    win32_close(oldfd);
+
+    w32_popen_pids[p[parent]] = childpid;
+
+    /* we have an fd, return a file stream */
+    return (win32_fdopen(p[parent], (char *)mode));
+
+cleanup:
+    /* we don't need to check for errors here */
+    win32_close(p[0]);
+    win32_close(p[1]);
+    if (oldfd != -1) {
+        win32_dup2(oldfd, stdfd);
+        win32_close(oldfd);
+    }
+    return (NULL);
+
+#endif /* USE_CRT_POPEN */
 }
+
+/*
+ * pclose() clone
+ */
 
 DllExport int
 win32_pclose(FILE *pf)
 {
+#ifdef USE_CRT_POPEN
     return _pclose(pf);
+#else
+    int fd, childpid, status;
+
+    fd = win32_fileno(pf);
+    childpid = w32_popen_pids[fd];
+
+    if (!childpid) {
+	errno = EBADF;
+        return -1;
+    }
+
+    win32_fclose(pf);
+    w32_popen_pids[fd] = 0;
+
+    /* wait for the child */
+    if (cwait(&status, childpid, WAIT_CHILD) == -1)
+        return (-1);
+    /* cwait() returns differently on Borland */
+#ifdef __BORLANDC__
+    return (((status >> 8) & 0xff) | ((status << 8) & 0xff00));
+#else
+    return (status);
+#endif
+
+#endif /* USE_CRT_OPEN */
 }
 
 DllExport int
@@ -1814,7 +1941,7 @@ XS(w32_GetCwd)
      */
     if (SvCUR(sv))
 	SvPOK_on(sv);
-    EXTEND(sp,1);
+    EXTEND(SP,1);
     ST(0) = sv;
     XSRETURN(1);
 }

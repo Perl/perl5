@@ -29,7 +29,7 @@ bset_obj_store(void *obj, I32 ix)
 #ifdef INDIRECT_BGET_MACROS
 void byterun(struct bytestream bs)
 #else
-void byterun(FILE *fp)
+void byterun(PerlIO *fp)
 #endif /* INDIRECT_BGET_MACROS */
 {
     dTHR;

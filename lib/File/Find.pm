@@ -17,7 +17,7 @@ finddepth - traverse a directory structure depth-first
     use File::Find;
     find(\&wanted, '/foo','/bar');
     sub wanted { ... }
-    
+
     use File::Find;
     finddepth(\&wanted, '/foo','/bar');
     sub wanted { ... }
@@ -34,7 +34,7 @@ prune the tree.
 File::Find assumes that you don't alter the $_ variable.  If you do then
 make sure you return it to its original value before exiting your function.
 
-This library is primarily for the C<find2perl> tool, which when fed, 
+This library is primarily for the C<find2perl> tool, which when fed,
 
     find2perl / -name .nfs\* -mtime +7 \
 	-exec rm -f {} \; -o -fstype nfs -prune
@@ -63,7 +63,7 @@ that don't resolve:
 
     sub wanted {
 	-l && !-e && print "bogus link: $File::Find::name\n";
-    } 
+    }
 
 =head1 BUGS
 
@@ -91,12 +91,11 @@ sub find {
 		$name = $topdir;
 		$prune = 0;
 		&$wanted;
-		if (!$prune) {
-		    my $fixtopdir = $topdir;
-	            $fixtopdir =~ s,/$,, ;
-		    $fixtopdir =~ s/\.dir$// if $Is_VMS;
-		    &finddir($wanted,$fixtopdir,$topnlink);
-		}
+		next if $prune;
+		my $fixtopdir = $topdir;
+		$fixtopdir =~ s,/$,, ;
+		$fixtopdir =~ s/\.dir$// if $Is_VMS;
+		&finddir($wanted,$fixtopdir,$topnlink);
 	    }
 	    else {
 		warn "Can't cd to $topdir: $!\n";
@@ -106,8 +105,13 @@ sub find {
 	    unless (($_,$dir) = File::Basename::fileparse($topdir)) {
 		($dir,$_) = ('.', $topdir);
 	    }
-	    $name = $topdir;
-	    chdir $dir && &$wanted;
+	    if (chdir($dir)) {
+		$name = $topdir;
+		&$wanted;
+	    }
+	    else {
+		warn "Can't cd to $dir: $!\n";
+	    }
 	}
 	chdir $cwd;
     }
@@ -134,7 +138,7 @@ sub finddir {
 	    &$wanted;
 	}
     }
-    else {                    # This dir has subdirectories.
+    else {		      # This dir has subdirectories.
 	$subcount = $nlink - 2;
 	for (@filenames) {
 	    next if $_ eq '.';
@@ -148,17 +152,21 @@ sub finddir {
 
 		($dev,$ino,$mode,$nlink) = ($Is_VMS ? stat($_) : lstat($_));
 		    # unless ($nlink || $dont_use_nlink);
-		
+
 		if (-d _) {
 
 		    # It really is a directory, so do it recursively.
 
-		    if (!$prune && chdir $_) {
+		    --$subcount;
+		    next if $prune;
+		    if (chdir $_) {
 			$name =~ s/\.dir$// if $Is_VMS;
 			&finddir($wanted,$name,$nlink);
 			chdir '..';
 		    }
-		    --$subcount;
+		    else {
+			warn "Can't cd to $_: $!\n";
+		    }
 		}
 	    }
 	}
@@ -168,12 +176,10 @@ sub finddir {
 
 sub finddepth {
     my $wanted = shift;
-
-    $cwd = Cwd::fastcwd();;
-
+    my $cwd = Cwd::cwd();
     # Localize these rather than lexicalizing them for backwards
     # compatibility.
-    local($topdir, $topdev, $topino, $topmode, $topnlink);
+    local($topdir,$topdev,$topino,$topmode,$topnlink);
     foreach $topdir (@_) {
 	(($topdev,$topino,$topmode,$topnlink) =
 	  ($Is_VMS ? stat($topdir) : lstat($topdir)))
@@ -184,8 +190,8 @@ sub finddepth {
 		$fixtopdir =~ s,/$,, ;
 		$fixtopdir =~ s/\.dir$// if $Is_VMS;
 		&finddepthdir($wanted,$fixtopdir,$topnlink);
-		($dir,$_) = ($fixtopdir,'.');
-		$name = $fixtopdir;
+		($dir,$_) = ($topdir,'.');
+		$name = $topdir;
 		&$wanted;
 	    }
 	    else {
@@ -196,8 +202,13 @@ sub finddepth {
 	    unless (($_,$dir) = File::Basename::fileparse($topdir)) {
 		($dir,$_) = ('.', $topdir);
 	    }
-	    $name = $topdir;
-	    chdir $dir && &$wanted;
+	    if (chdir($dir)) {
+		$name = $topdir;
+		&$wanted;
+	    }
+	    else {
+		warn "Can't cd to $dir: $!\n";
+	    }
 	}
 	chdir $cwd;
     }
@@ -206,15 +217,15 @@ sub finddepth {
 sub finddepthdir {
     my($wanted, $nlink);
     local($dir, $name);
-    ($wanted,$dir,$nlink) = @_;
+    ($wanted, $dir, $nlink) = @_;
     my($dev, $ino, $mode, $subcount);
 
     # Get the list of files in the current directory.
-    opendir(DIR,'.') || warn "Can't open $dir: $!\n";
+    opendir(DIR,'.') || (warn "Can't open $dir: $!\n", return);
     my(@filenames) = readdir(DIR);
     closedir(DIR);
 
-    if ($nlink == 2 && !$dont_use_nlink) {   # This dir has no subdirectories.
+    if ($nlink == 2 && !$dont_use_nlink) {  # This dir has no subdirectories.
 	for (@filenames) {
 	    next if $_ eq '.';
 	    next if $_ eq '..';
@@ -223,7 +234,7 @@ sub finddepthdir {
 	    &$wanted;
 	}
     }
-    else {                    # This dir has subdirectories.
+    else {		      # This dir has subdirectories.
 	$subcount = $nlink - 2;
 	for (@filenames) {
 	    next if $_ eq '.';
@@ -235,17 +246,20 @@ sub finddepthdir {
 		# Get link count and check for directoriness.
 
 		($dev,$ino,$mode,$nlink) = ($Is_VMS ? stat($_) : lstat($_));
-		
+
 		if (-d _) {
 
 		    # It really is a directory, so do it recursively.
 
+		    --$subcount;
 		    if (chdir $_) {
 			$name =~ s/\.dir$// if $Is_VMS;
 			&finddepthdir($wanted,$name,$nlink);
 			chdir '..';
 		    }
-		    --$subcount;
+		    else {
+			warn "Can't cd to $_: $!\n";
+		    }
 		}
 	    }
 	    &$wanted;
@@ -264,13 +278,9 @@ if ($^O eq 'VMS') {
   $Is_VMS = 1;
   $dont_use_nlink = 1;
 }
-if ($^O =~ m:^mswin32:i) {
-  $Is_NT = 1;
-  $dont_use_nlink = 1;
-}
 
 $dont_use_nlink = 1
-    if $^O eq 'os2' || $^O eq 'dos' || $^O eq 'amigaos';
+    if $^O eq 'os2' || $^O eq 'dos' || $^O eq 'amigaos' || $^O eq 'MSWin32';
 
 1;
 

@@ -17,7 +17,7 @@ INST_TOP	*= $(INST_DRV)\perl5004.5x
 
 #
 # uncomment to enable threads-capabilities
-USE_THREADS	*= define
+#USE_THREADS	*= define
 
 #
 # uncomment one

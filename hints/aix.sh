@@ -48,12 +48,6 @@ esac
 d_setregid='undef'
 d_setreuid='undef'
 
-# The optimizer in 4.1.1 apparently generates bad code for scope.c.
-# Configure doesn't offer an easy way to propagate extra variables
-# only for certain cases, so the following contortion is required:
-# This is probably not needed in 5.002 and later.
-# scope_cflags='case "$osvers" in 4.1*) optimize=" ";; esac'
-
 # Changes for dynamic linking by Wayne Scott <wscott@ichips.intel.com>
 #
 # Tell perl which symbols to export for dynamic linking.

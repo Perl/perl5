@@ -1945,7 +1945,6 @@ sv_setsv(SV *dstr, register SV *sstr)
 	if (dtype < SVt_PVNV)
 	    sv_upgrade(dstr, SVt_PVNV);
 	break;
-
     case SVt_PVAV:
     case SVt_PVHV:
     case SVt_PVCV:
@@ -1996,8 +1995,10 @@ sv_setsv(SV *dstr, register SV *sstr)
 		    goto glob_assign;
 	    }
 	}
-	if (dtype < stype)
-	    sv_upgrade(dstr, stype);
+	if (stype == SVt_PVLV)
+	    SvUPGRADE(dstr, SVt_PVNV);
+	else
+	    SvUPGRADE(dstr, stype);
     }
 
     sflags = SvFLAGS(sstr);
@@ -2068,9 +2069,14 @@ sv_setsv(SV *dstr, register SV *sstr)
 				if (cv_const_sv(cv))
 				    warn("Constant subroutine %s redefined",
 					 GvENAME((GV*)dstr));
-				else if (dowarn)
-				    warn("Subroutine %s redefined",
-					 GvENAME((GV*)dstr));
+				else if (dowarn) {
+				    if (!(CvGV(cv) && GvSTASH(CvGV(cv))
+					  && HvNAME(GvSTASH(CvGV(cv)))
+					  && strEQ(HvNAME(GvSTASH(CvGV(cv))),
+						   "autouse")))
+					warn("Subroutine %s redefined",
+					     GvENAME((GV*)dstr));
+				}
 			    }
 			    cv_ckproto(cv, (GV*)dstr,
 				       SvPOK(sref) ? SvPVX(sref) : Nullch);
@@ -4576,6 +4582,8 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 	    switch (base) {
 		unsigned dig;
 	    case 16:
+		if (!uv)
+		    alt = FALSE;
 		p = (c == 'X') ? "0123456789ABCDEF" : "0123456789abcdef";
 		do {
 		    dig = uv & 15;
@@ -4602,8 +4610,12 @@ sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, 
 		break;
 	    }
 	    elen = (ebuf + sizeof ebuf) - eptr;
-	    if (has_precis && precis > elen)
-		zeros = precis - elen;
+	    if (has_precis) {
+		if (precis > elen)
+		    zeros = precis - elen;
+		else if (precis == 0 && elen == 1 && *eptr == '0')
+		    elen = 0;
+	    }
 	    break;
 
 	    /* FLOATING POINT */

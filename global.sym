@@ -902,6 +902,7 @@ safexrealloc
 same_dirent
 save_I16
 save_I32
+save_aelem
 save_aptr
 save_ary
 save_clearsv
@@ -912,6 +913,7 @@ save_freepv
 save_freesv
 save_gp
 save_hash
+save_helem
 save_hptr
 save_int
 save_item

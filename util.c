@@ -891,7 +891,7 @@ mem_collxfrm(const char *s, STRLEN len, STRLEN *xlen)
 #endif /* USE_LOCALE_COLLATE */
 
 void
-fbm_compile(SV *sv)
+fbm_compile(SV *sv, U32 flags /* not used yet */)
 {
     register unsigned char *s;
     register unsigned char *table;
@@ -1311,7 +1311,7 @@ die(pat, va_alist)
 	    SvREADONLY_on(msg);
 	    SAVEFREESV(msg);
 
-	    PUSHMARK(sp);
+	    PUSHMARK(SP);
 	    XPUSHs(msg);
 	    PUTBACK;
 	    perl_call_sv((SV*)cv, G_DISCARD);
@@ -1376,7 +1376,7 @@ croak(pat, va_alist)
 	    SvREADONLY_on(msg);
 	    SAVEFREESV(msg);
 
-	    PUSHMARK(sp);
+	    PUSHMARK(SP);
 	    XPUSHs(msg);
 	    PUTBACK;
 	    perl_call_sv((SV*)cv, G_DISCARD);
@@ -1435,7 +1435,7 @@ warn(pat,va_alist)
 	    SvREADONLY_on(msg);
 	    SAVEFREESV(msg);
 
-	    PUSHMARK(sp);
+	    PUSHMARK(SP);
 	    XPUSHs(msg);
 	    PUTBACK;
 	    perl_call_sv((SV*)cv, G_DISCARD);

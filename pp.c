@@ -2218,7 +2218,7 @@ PP(pp_aslice)
     if (SvTYPE(av) == SVt_PVAV) {
 	if (lval && op->op_private & OPpLVAL_INTRO) {
 	    I32 max = -1;
-	    for (svp = mark + 1; svp <= sp; svp++) {
+	    for (svp = MARK + 1; svp <= SP; svp++) {
 		elem = SvIVx(*svp);
 		if (elem > max)
 		    max = elem;
@@ -2236,7 +2236,7 @@ PP(pp_aslice)
 		if (!svp || *svp == &sv_undef)
 		    DIE(no_aelem, elem);
 		if (op->op_private & OPpLVAL_INTRO)
-		    save_svref(svp);
+		    save_aelem(av, elem, svp);
 	    }
 	    *MARK = svp ? *svp : &sv_undef;
 	}
@@ -2378,7 +2378,7 @@ PP(pp_hslice)
 		if (!he || HeVAL(he) == &sv_undef)
 		    DIE(no_helem, SvPV(keysv, na));
 		if (op->op_private & OPpLVAL_INTRO)
-		    save_svref(&HeVAL(he));
+		    save_helem(hv, keysv, &HeVAL(he));
 	    }
 	    *MARK = he ? HeVAL(he) : &sv_undef;
 	}
@@ -2860,7 +2860,7 @@ PP(pp_unpack)
 {
     djSP;
     dPOPPOPssrl;
-    SV **oldsp = sp;
+    SV **oldsp = SP;
     I32 gimme = GIMME_V;
     SV *sv;
     STRLEN llen;
@@ -3544,7 +3544,7 @@ PP(pp_unpack)
 	    checksum = 0;
 	}
     }
-    if (sp == oldsp && gimme == G_SCALAR)
+    if (SP == oldsp && gimme == G_SCALAR)
 	PUSHs(&sv_undef);
     RETURN;
 }
@@ -4438,7 +4438,7 @@ PP(pp_threadsv)
 {
     djSP;
 #ifdef USE_THREADS
-    EXTEND(sp, 1);
+    EXTEND(SP, 1);
     if (op->op_private & OPpLVAL_INTRO)
 	PUSHs(*save_threadsv(op->op_targ));
     else

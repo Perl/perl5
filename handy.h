@@ -96,7 +96,15 @@
     #    endif
     #  endif
     #endif
-   For the moment, these are mentioned here so metaconfig will
+
+   except that still won't work if a system has no integral type
+   with a size that is 32 bytes.
+
+   Further, we need to know about PTRSIZE == sizeof(void *) and
+   DOUBLESIZE == sizeof(double) if we really want to try to handle
+   32/64-bit combinations.
+
+   For the moment, these are only mentioned here so metaconfig will
    construct Configure to figure out the various sizes.
 */
 

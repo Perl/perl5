@@ -29,6 +29,7 @@ do_trans(SV *sv, OP *arg)
     register I32 ch;
     register I32 matches = 0;
     register I32 squash = op->op_private & OPpTRANS_SQUASH;
+    register U8 *p;
     STRLEN len;
 
     if (SvREADONLY(sv) && !(op->op_private & OPpTRANS_COUNTONLY))
@@ -63,14 +64,16 @@ do_trans(SV *sv, OP *arg)
     }
     else {
 	d = s;
+	p = send;
 	while (s < send) {
 	    if ((ch = tbl[*s]) >= 0) {
 		*d = ch;
-		if (matches++ && squash) {
-		    if (d[-1] == *d)
+		matches++;
+		if (squash) {
+		    if (p == d - 1 && *p == *d)
 			matches--;
 		    else
-			d++;
+		        p = d++;
 		}
 		else
 		    d++;
@@ -499,7 +502,7 @@ do_kv(ARGSproto)
     }
 
     /* Guess how much room we need.  hv_max may be a few too many.  Oh well. */
-    EXTEND(sp, HvMAX(hv) * (dokeys + dovalues));
+    EXTEND(SP, HvMAX(hv) * (dokeys + dovalues));
 
     PUTBACK;	/* hv_iternext and hv_iterval might clobber stack_sp */
     while (entry = realhv ? hv_iternext(hv) : avhv_iternext((AV*)hv)) {

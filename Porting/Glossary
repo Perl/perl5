@@ -380,7 +380,7 @@ d_gethbyaddr (d_gethbyad.U):
 
 d_gethent (d_gethent.U):
 	This variable conditionally defines HAS_GETHOSTENT if gethostent() is
-	available to dup file descriptors.
+	available to look up host names in some data base or another.
 
 d_gethname (d_gethname.U):
 	This variable conditionally defines the HAS_GETHOSTNAME symbol, which
@@ -396,6 +396,23 @@ d_getnbyaddr (d_getnbyad.U):
 	This variable conditionally defines the HAS_GETNETBYADDR symbol, which
 	indicates to the C program that the getnetbyaddr() routine is available
 	to look up networks by their IP addresses.
+
+d_getnbyname (d_getnbynm.U):
+	This variable conditionally defines the HAS_GETNETBYNAME symbol, which
+	indicates to the C program that the getnetbyname() routine is available
+	to look up networks by their names.
+
+d_getpbyname (d_getprotby.U):
+	This variable conditionally defines the HAS_GETPROTOBYNAME 
+	symbol, which indicates to the C program that the 
+	getprotobyname() routine is available to look up protocols
+	by their name.
+
+d_getpbynumber (d_getprotby.U):
+	This variable conditionally defines the HAS_GETPROTOBYNUMBER 
+	symbol, which indicates to the C program that the 
+	getprotobynumber() routine is available to look up protocols
+	by their number.
 
 d_getpgid (d_getpgid.U):
 	This variable conditionally defines the HAS_GETPGID symbol, which
@@ -419,6 +436,18 @@ d_getppid (d_getppid.U):
 d_getprior (d_getprior.U):
 	This variable conditionally defines HAS_GETPRIORITY if getpriority()
 	is available to get a process's priority.
+
+d_getsbyname (d_getsrvby.U):
+	This variable conditionally defines the HAS_GETSERVBYNAME 
+	symbol, which indicates to the C program that the 
+	getservbyname() routine is available to look up services
+	by their name.
+
+d_getsbyport (d_getsrvby.U):
+	This variable conditionally defines the HAS_GETSERVBYPORT 
+	symbol, which indicates to the C program that the 
+	getservbyport() routine is available to look up services
+	by their port.
 
 d_gettimeod (d_ftime.U):
 	This variable conditionally defines the HAS_GETTIMEOFDAY symbol, which
@@ -542,6 +571,12 @@ d_mymalloc (mallocsrc.U):
 d_nice (d_nice.U):
 	This variable conditionally defines the HAS_NICE symbol, which
 	indicates to the C program that the nice() routine is available.
+
+d_oldpthreads (usethreads.U):
+	This variable conditionally defines the OLD_PTHREADS_API symbol,
+	and indicates that Perl should be built to use the old
+	draft POSIX threads API.  This is only potneially meaningful if
+	usethreads is set.
 
 d_oldsock (d_socket.U):
 	This variable conditionally defines the OLDSOCKET symbol, which
@@ -696,6 +731,10 @@ d_setgrps (d_setgrps.U):
 	This variable conditionally defines the HAS_SETGROUPS symbol, which
 	indicates to the C program that the setgroups() routine is available
 	to set the list of process groups.
+
+d_sethent (d_sethent.U):
+	This variable conditionally defines HAS_SETHOSTENT if sethostent() is
+	available.
 
 d_setlinebuf (d_setlnbuf.U):
 	This variable conditionally defines the HAS_SETLINEBUF symbol, which
@@ -1013,6 +1052,10 @@ dlext (dlext.U):
 dlsrc (dlsrc.U):
 	This variable contains the name of the dynamic loading file that
 	will be used with the package.
+
+doublesize (doublesize.U):
+	This variable contains the value of the DOUBLESIZE symbol, which
+	indicates to the C program how many bytes there are in a double.
 
 dynamic_ext (Extensions.U):
 	This variable holds a list of extension files we want to
@@ -1695,6 +1738,10 @@ privlibexp (privlib.U):
 prototype (prototype.U):
 	This variable holds the eventual value of CAN_PROTOTYPE, which
 	indicates the C compiler can handle funciton prototypes.
+
+ptrsize (ptrsize.U):
+	This variable contains the value of the PTRSIZE symbol, which
+	indicates to the C program how many bytes there are in a pointer.
 
 randbits (randbits.U):
 	This variable contains the eventual value of the RANDBITS symbol,

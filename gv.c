@@ -530,17 +530,26 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
     /* By this point we should have a stash and a name */
 
     if (!stash) {
-	if (add) {
-	    warn("Global symbol \"%s\" requires explicit package name", name);
-	    ++error_count;
-	    stash = curstash ? curstash : defstash;	/* avoid core dumps */
-	    add_gvflags = ((sv_type == SVt_PV) ? GVf_IMPORTED_SV
-			   : (sv_type == SVt_PVAV) ? GVf_IMPORTED_AV
-			   : (sv_type == SVt_PVHV) ? GVf_IMPORTED_HV
-			   : 0);
-	}
-	else
+	if (!add)
 	    return Nullgv;
+	if (add & ~2) {
+	    char sv_type_char = ((sv_type == SVt_PV) ? '$'
+				 : (sv_type == SVt_PVAV) ? '@'
+				 : (sv_type == SVt_PVHV) ? '%'
+				 : 0);
+	    if (sv_type_char) 
+		warn("Global symbol \"%c%s\" requires explicit package name",
+		     sv_type_char, name);
+	    else
+		warn("Global symbol \"%s\" requires explicit package name",
+		     name);
+	}
+	++error_count;
+	stash = curstash ? curstash : defstash;	/* avoid core dumps */
+	add_gvflags = ((sv_type == SVt_PV) ? GVf_IMPORTED_SV
+		       : (sv_type == SVt_PVAV) ? GVf_IMPORTED_AV
+		       : (sv_type == SVt_PVHV) ? GVf_IMPORTED_HV
+		       : 0);
     }
 
     if (!SvREFCNT(stash))	/* symbol table under destruction */
@@ -1314,7 +1323,7 @@ amagic_call(SV *left, SV *right, int method, int flags)
     PUTBACK;
     pp_pushmark(ARGS);
 
-    EXTEND(sp, notfound + 5);
+    EXTEND(SP, notfound + 5);
     PUSHs(lr>0? right: left);
     PUSHs(lr>0? left: right);
     PUSHs( lr > 0 ? &sv_yes : ( assign ? &sv_undef : &sv_no ));

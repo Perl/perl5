@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Feb 25 16:44:06 EST 1998 [metaconfig 3.0 PL70]
+# Generated on Tue Mar  3 11:16:26 EST 1998 [metaconfig 3.0 PL70]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -194,6 +194,7 @@ make=''
 mkdir=''
 more=''
 mv=''
+nm=''
 nroff=''
 perl=''
 pg=''
@@ -211,6 +212,7 @@ submit=''
 tail=''
 tar=''
 tbl=''
+tee=''
 test=''
 touch=''
 tr=''
@@ -330,12 +332,17 @@ d_phostname=''
 d_uname=''
 d_getlogin=''
 d_getnbyaddr=''
+d_getnbyname=''
 d_getpgid=''
 d_getpgrp2=''
 d_bsdgetpgrp=''
 d_getpgrp=''
 d_getppid=''
 d_getprior=''
+d_getpbyname=''
+d_getpbynumber=''
+d_getsbyname=''
+d_getsbyport=''
 d_gnulibc=''
 d_htonl=''
 d_inetaton=''
@@ -389,6 +396,7 @@ d_semop=''
 d_setegid=''
 d_seteuid=''
 d_setgrps=''
+d_sethent=''
 d_setlinebuf=''
 d_setlocale=''
 d_setpgid=''
@@ -472,6 +480,7 @@ dlsrc=''
 ld=''
 lddlflags=''
 usedl=''
+doublesize=''
 fpostype=''
 gidtype=''
 groupstype=''
@@ -612,6 +621,7 @@ installprivlib=''
 privlib=''
 privlibexp=''
 prototype=''
+ptrsize=''
 randbits=''
 installscript=''
 scriptdir=''
@@ -644,6 +654,7 @@ nm_so_opt=''
 runnm=''
 usenm=''
 useperlio=''
+d_oldpthreads=''
 usethreads=''
 incpath=''
 mips=''
@@ -775,7 +786,8 @@ useposix=true
 useopcode=true
 : set usethreads on the Configure command line to enable threads.
 : List of libraries we want.
-libswanted='sfio net socket inet nsl nm ndbm gdbm dbm db malloc dl'
+: If anyone needs -lnet, put it in a hint file.
+libswanted='sfio socket inet nsl nm ndbm gdbm dbm db malloc dl'
 libswanted="$libswanted dld ld sun m c cposix posix ndir dir crypt"
 libswanted="$libswanted ucb bsd BSD PW x"
 : We probably want to search /usr/shlib before most other libraries.
@@ -1566,10 +1578,12 @@ less
 line
 ln
 more
+nm
 nroff
 perl
 pg
 sendmail
+tee
 test
 uname
 zip
@@ -2250,6 +2264,19 @@ y|Y)	val="$define" ;;
 esac
 set usethreads
 eval $setvar 
+: Look for a hint-file generated 'call-back-unit'.  Now that the
+: user has specified the compiler, we may need to set or change some
+: other defaults.
+if $test -f usethreads.cbu; then
+    . ./usethreads.cbu
+fi
+case "$d_oldpthreads" in
+'')	: Configure tests would be welcome here.  For now, assume undef.
+	val="$undef" ;;
+*)	val="$d_oldpthreads" ;;
+esac
+set d_oldpthreads
+eval $setvar
 
 : determine the architecture name
 echo " "
@@ -3000,8 +3027,8 @@ fi
 
 
 : Binary compatibility with 5.003 is not possible with 5.004_50 and later.
-if test $patchlevel -ge 4 -o $subversion -ge 50; then
-    val=$undef
+if test $patchlevel -gt 4 -o $subversion -ge 50; then
+    d_bincompat3=$undef
 else
 	$cat <<EOM
 
@@ -3023,13 +3050,13 @@ EOM
 	y*) val="$define" ;;
 	*)  val="$undef" ;;
 	esac
+	set d_bincompat3
+	eval $setvar
+	case "$d_bincompat3" in
+	"$define") bincompat3=y ;;
+	*) bincompat3=n ;;
+	esac
 fi
-set d_bincompat3
-eval $setvar
-case "$d_bincompat3" in
-"$define") bincompat3=y ;;
-*) bincompat3=n ;;
-esac
 
 : determine where manual pages are on this system
 echo " "
@@ -3483,6 +3510,8 @@ put the appropriate flags later when it asks you for other cc and ld flags.
 Venix systems may wish to put "none" and let the compiler figure things out.
 (In the following question multiple model names should be space separated.)
 
+The default for most systems is "none".
+
 EOM
 rp="Which memory models are supported?"
 . ./myread
@@ -3601,8 +3630,9 @@ if ./usg; then
 		esac;;
 	*)  dflt="$cc";;
 	esac
-	$cat <<'EOM'
-On some systems the default C compiler will not resolve multiple global
+	case "$dflt" in
+	*M*)	$cat <<'EOM'
+On some older systems the default C compiler will not resolve multiple global
 references that happen to have the same name.  On some such systems the "Mcc"
 command may be used to force these to be resolved.  On other systems a "cc -M"
 command is required.  (Note that the -M flag on other systems indicates a
@@ -3610,7 +3640,9 @@ memory model to use!) If you have the Gnu C compiler, you might wish to use
 that instead.
 
 EOM
-	rp="What command will force resolution on this system?"
+	;;
+	esac
+	rp="Use which C compiler?"
 	. ./myread
 	cc="$ans"
 else
@@ -3621,6 +3653,12 @@ else
 	rp="Use which C compiler?"
 	. ./myread
 	cc="$ans"
+fi
+: Look for a hint-file generated 'call-back-unit'.  Now that the
+: user has specified the compiler, we may need to set or change some
+: other defaults.
+if $test -f cc.cbu; then
+    . ./cc.cbu
 fi
 echo " "
 echo "Checking for GNU cc in disguise and/or its version number..." >&4
@@ -4374,7 +4412,7 @@ case "$usenm" in
 esac
 $cat <<EOM
 
-I can use 'nm' to extract the symbols from your C libraries. This is a time
+I can use '$nm' to extract the symbols from your C libraries. This is a time
 consuming task which may generate huge output on the disk (up to 3 megabytes)
 but that should make the symbols extraction faster. The alternative is to skip
 the 'nm' extraction part and to compile a small test program instead to
@@ -4383,7 +4421,7 @@ if your 'nm' output cannot be parsed, this may be the best solution.
 You shouldn't let me use 'nm' if you have the GNU C Library.
 
 EOM
-rp='Shall I use nm to extract C symbols from the libraries?'
+rp="Shall I use $nm to extract C symbols from the libraries?"
 . ./myread
 case "$ans" in
 n|N) usenm=false;;
@@ -4415,7 +4453,7 @@ esac
 case "$nm_so_opt" in
 '')	case "$myuname" in
 	*linux*)
-		if nm --help | $grep 'dynamic' > /dev/null 2>&1; then
+		if $nm --help | $grep 'dynamic' > /dev/null 2>&1; then
 			nm_so_opt='--dynamic'
 		fi
 		;;
@@ -4574,8 +4612,8 @@ $echo $n "This may take a while...$c" >&4
 
 for file in $*; do
 	case $file in
-	*$so*) nm $nm_so_opt $nm_opt $file 2>/dev/null;;
-	*) nm $nm_opt $file 2>/dev/null;;
+	*$so*) $nm $nm_so_opt $nm_opt $file 2>/dev/null;;
+	*) $nm $nm_opt $file 2>/dev/null;;
 	esac
 done >libc.tmp
 
@@ -4638,7 +4676,7 @@ elif com="$sed -n -e 's/.*\.text n\ \ \ \.//p'";\
 	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
 		eval $xrun
 else
-	nm -p $* 2>/dev/null >libc.tmp
+	$nm -p $* 2>/dev/null >libc.tmp
 	$grep fprintf libc.tmp > libc.ptf
 	if com="$sed -n -e 's/^.* [ADTSIW]  *_[_.]*//p' -e 's/^.* [ADTSIW] //p'";\
 		eval $xscan; $contains '^fprintf$' libc.list >/dev/null 2>&1
@@ -4647,7 +4685,7 @@ else
 		eval $xrun
 	else
 		echo " "
-		echo "nm didn't seem to work right. Trying ar instead..." >&4
+		echo "$nm didn't seem to work right. Trying ar instead..." >&4
 		com=''
 		if ar t $libc > libc.tmp; then
 			for thisname in $libnames; do
@@ -5120,10 +5158,10 @@ EOM
 		next4*)	xxx='DYLD_LIBRARY_PATH' ;;
 		*)		xxx='LD_LIBRARY_PATH' ;;
 		esac
-		$cat <<EOM >&4
+		$cat <<EOM  | $tee -a ../config.msg >&4
 
 To build perl, you must add the current working directory to your
-$xxx environtment variable before running make.  You can do
+$xxx environment variable before running make.  You can do
 this with
    $xxx=\`pwd\`; export $xxx
 for Bourne-style shells, or
@@ -6803,6 +6841,14 @@ eval $inlibc
 set fsetpos d_fsetpos
 eval $inlibc
 
+: see if gethostbyaddr exists
+set gethostbyaddr d_gethbyaddr
+eval $inlibc
+
+: see if gethostbyname exists
+set gethostbyname d_gethbyname
+eval $inlibc
+
 : see if gethostent exists
 set gethostent d_gethent
 eval $inlibc
@@ -6811,6 +6857,22 @@ eval $inlibc
 set getlogin d_getlogin
 eval $inlibc
 
+: see if getnetbyaddr exists
+set getnetbyaddr d_getnbyaddr
+eval $inlibc
+
+: see if getnetbyname exists
+set getnetbyname d_getnbyname
+eval $inlibc
+
+
+: see if getprotobyname exists
+set getprotobyname d_getpbyname
+eval $inlibc
+
+: see if getprotobynumber exists
+set getprotobynumber d_getpbynumber
+eval $inlibc
 : see if getpgid exists
 set getpgid d_getpgid
 eval $inlibc
@@ -6827,6 +6889,14 @@ eval $inlibc
 set getpriority d_getprior
 eval $inlibc
 
+
+: see if getservbyname exists
+set getservbyname d_getsbyname
+eval $inlibc
+
+: see if getservbyport exists
+set getservbyport d_getsbyport
+eval $inlibc
 : see if gettimeofday or ftime exists
 set gettimeofday d_gettimeod
 eval $inlibc
@@ -7600,6 +7670,10 @@ eval $inlibc
 
 : see if seteuid exists
 set seteuid d_seteuid
+eval $inlibc
+
+: see if sethostent exists
+set sethostent d_sethent
 eval $inlibc
 
 : see if setlinebuf exists
@@ -8601,12 +8675,11 @@ main()
     printf("db.h and libdb are compatible\n") ;
 
     Version = DB_VERSION_MAJOR * 1000000 + DB_VERSION_MINOR * 1000
-              + DB_VERSION_PATCH ;
+		+ DB_VERSION_PATCH ;
 
     /* needs to be >= 2.3.4 */
     if (Version < 2003004) {
-    /* if (DB_VERSION_MAJOR == 2 && DB_VERSION_MINOR == 0 && DB_VERSION_PATCH 
-< 5) { */
+    /* if (DB_VERSION_MAJOR == 2 && DB_VERSION_MINOR == 0 && DB_VERSION_PATCH < 5) { */
 	printf("but Perl needs Berkeley DB 2.3.4 or greater\n") ;
         exit(2);	
     }
@@ -8783,6 +8856,32 @@ case "$voidflags" in
 esac
 $rm -f try.* .out
 
+: check for length of double
+echo " "
+case "$doublesize" in
+'')
+	echo "Checking to see how big your double precision numbers are..." >&4
+	$cat >try.c <<'EOCP'
+#include <stdio.h>
+main()
+{
+	printf("%d\n", sizeof(double));
+}
+EOCP
+	set try
+	if eval $compile; then
+		doublesize=`./try`
+	else
+		dflt='8'
+		echo "(I can't seem to compile the test program.  Guessing...)"
+		rp="What is the size of a double precision number (in bytes)?"
+		. ./myread
+		doublesize="$ans"
+	fi
+	;;
+esac
+$rm -f try.c try
+
 : see what type file positions are declared as in the library
 set fpos_t fpostype long stdio.h sys/types.h
 eval $typedef
@@ -8939,18 +9038,6 @@ exit $status
 EOSH
 chmod +x protochk
 $eunicefix protochk
-
-: see if gethostbyaddr exists
-set gethostbyaddr d_gethbyaddr
-eval $inlibc
-
-: see if gethostbyname exists
-set gethostbyname d_gethbyname
-eval $inlibc
-
-: see if getnetbyaddr exists
-set getnetbyaddr d_getnbyaddr
-eval $inlibc
 
 : see if this is a netdb.h system
 set netdb.h i_netdb
@@ -9125,6 +9212,38 @@ echo " "
 rp="What type are process ids on this system declared as?"
 . ./myread
 pidtype="$ans"
+
+: check for length of pointer
+echo " "
+case "$ptrsize" in
+'')
+	echo "Checking to see how big your pointers are..." >&4
+	if test "$voidflags" -gt 7; then
+		echo '#define VOID_PTR char *' > try.c
+	else
+		echo '#define VOID_PTR void *' > try.c
+	fi
+	$cat >>try.c <<'EOCP'
+#include <stdio.h>
+main()
+{
+	printf("%d\n", sizeof(VOID_PTR));
+	exit(0);
+}
+EOCP
+	set try
+	if eval $compile; then
+		ptrsize=`./try`
+	else
+		dflt='4'
+		echo "(I can't seem to compile the test program.  Guessing...)" >&4
+		rp="What is the size of a pointer (in bytes)?"
+		. ./myread
+		ptrsize="$ans"
+	fi
+	;;
+esac
+$rm -f try.c try
 
 : check for size of random number generator
 echo " "
@@ -10205,22 +10324,23 @@ known_extensions=''
 : some additional extensions into the source tree and expect them
 : to be built.
 for xxx in * ; do
-    case "$xxx" in
-    DynaLoader) ;;
-    *)	if $test -f $xxx/$xxx.xs; then
-	    known_extensions="$known_extensions $xxx"
-	else
-	    if $test -d $xxx; then
-		cd $xxx
-		for yyy in * ; do
-		    if $test -f $yyy/$yyy.xs; then
-			known_extensions="$known_extensions $xxx/$yyy"
-		    fi
-		done
-		cd ..
-	    fi
-	fi ;;
-    esac
+	case "$xxx" in
+	DynaLoader) ;;
+	*)	if $test -f $xxx/$xxx.xs; then
+			known_extensions="$known_extensions $xxx"
+		else
+			if $test -d $xxx; then
+				cd $xxx
+				for yyy in * ; do
+				if $test -f $yyy/$yyy.xs; then
+					known_extensions="$known_extensions $xxx/$yyy"
+				fi
+				done
+			cd ..
+			fi
+		fi 
+		;;
+	esac
 done
 set X $known_extensions
 shift
@@ -10230,42 +10350,50 @@ cd ../UU
 : Now see which are supported on this system.
 avail_ext=''
 for xxx in $known_extensions ; do
-    case "$xxx" in
-    DB_File|db_file) case "$i_db" in
-	    $define) avail_ext="$avail_ext $xxx" ;;
-	    esac
-	    ;;
-    GDBM_File|gdbm_fil) case "$i_gdbm" in 
-	    $define) avail_ext="$avail_ext $xxx" ;;
-	    esac
-	    ;;
-    NDBM_File|ndbm_fil) case "$i_ndbm" in
-	    $define) avail_ext="$avail_ext $xxx" ;;
-	    esac
-	    ;;
-    ODBM_File|odbm_fil) case "${i_dbm}${i_rpcsvcdbm}" in
-	    *"${define}"*) avail_ext="$avail_ext $xxx" ;;
-	    esac
-	    ;;
-    POSIX|posix) case "$useposix" in
-	    true|define|y) avail_ext="$avail_ext $xxx" ;;
-	    esac
-	    ;;
-    Opcode|opcode) case "$useopcode" in
-	    true|define|y) avail_ext="$avail_ext $xxx" ;;
-	    esac
-	    ;;
-    Socket|socket) case "$d_socket" in 
-	    true|$define|y) avail_ext="$avail_ext $xxx" ;;
-	    esac
-	    ;;
-    Thread|thread) case "$usethreads" in 
-	    true|$define|y) avail_ext="$avail_ext $xxx" ;;
-	    esac
-	    ;;
-    *)      avail_ext="$avail_ext $xxx"
-	    ;;
-    esac
+	case "$xxx" in
+	DB_File|db_file)
+		case "$i_db" in
+		$define) avail_ext="$avail_ext $xxx" ;;
+		esac
+		;;
+	GDBM_File|gdbm_fil)
+		case "$i_gdbm" in 
+		$define) avail_ext="$avail_ext $xxx" ;;
+		esac
+		;;
+	NDBM_File|ndbm_fil)
+		case "$i_ndbm" in
+		$define) avail_ext="$avail_ext $xxx" ;;
+		esac
+		;;
+	ODBM_File|odbm_fil) 
+		case "${i_dbm}${i_rpcsvcdbm}" in
+		*"${define}"*) avail_ext="$avail_ext $xxx" ;;
+		esac
+		;;
+	POSIX|posix)
+		case "$useposix" in
+		true|define|y) avail_ext="$avail_ext $xxx" ;;
+		esac
+		;;
+	Opcode|opcode)
+		case "$useopcode" in
+		true|define|y) avail_ext="$avail_ext $xxx" ;;
+		esac
+		;;
+	Socket|socket)
+		case "$d_socket" in 
+		true|$define|y) avail_ext="$avail_ext $xxx" ;;
+		esac
+		;;
+	Thread|thread)
+		case "$usethreads" in 
+		true|$define|y) avail_ext="$avail_ext $xxx" ;;
+		esac
+		;;
+	*)	avail_ext="$avail_ext $xxx"
+		;;
+	esac
 done
 
 set X $avail_ext
@@ -10279,11 +10407,28 @@ A number of extensions are supplied with $package.  You may choose to
 compile these extensions for dynamic loading (the default), compile
 them into the $package executable (static loading), or not include
 them at all.  Answer "none" to include no extensions.
+Note that DynaLoader is always built and need not be mentioned here.
 
 EOM
 	case "$dynamic_ext" in
 	'') dflt="$avail_ext" ;;
-	*)	dflt="$dynamic_ext" ;;
+	*)	dflt="$dynamic_ext"
+		# Perhaps we are reusing an old out-of-date config.sh.
+		case "$hint" in
+		previous)
+			if test X"$dynamic_ext" != X$"avail_ext"; then
+				$cat <<EOM
+NOTICE:  Your previous config.sh list may be incorrect. 
+The extensions now available to you are 
+	${avail_ext}
+but the default list from your previous config.sh is
+	${dynamic_ext} 
+
+EOM
+			fi
+			;;
+		esac
+		;;
 	esac
 	case "$dflt" in
 	'')	dflt=none;;
@@ -10327,13 +10472,29 @@ EOM
 	$cat <<EOM
 A number of extensions are supplied with $package.  Answer "none" 
 to include no extensions. 
+Note that DynaLoader is always built and need not be mentioned here.
 
 EOM
 	case "$static_ext" in
 	'') dflt="$avail_ext" ;;
-	*)	dflt="$static_ext" ;;
-	esac
+	*)	dflt="$static_ext"
+		# Perhaps we are reusing an old out-of-date config.sh.
+		case "$hint" in
+		previous)
+			if test X"$static_ext" != X$"avail_ext"; then
+				$cat <<EOM
+NOTICE:  Your previous config.sh list may be incorrect. 
+The extensions now available to you are 
+	${avail_ext}
+but the default list from your previous config.sh is
+	${static_ext} 
 
+EOM
+			fi
+			;;
+		esac
+		;;
+	esac
 	case "$dflt" in
 	'')	dflt=none;;
 	esac
@@ -10528,11 +10689,16 @@ d_gethent='$d_gethent'
 d_gethname='$d_gethname'
 d_getlogin='$d_getlogin'
 d_getnbyaddr='$d_getnbyaddr'
+d_getnbyname='$d_getnbyname'
+d_getpbyname='$d_getpbyname'
+d_getpbynumber='$d_getpbynumber'
 d_getpgid='$d_getpgid'
 d_getpgrp2='$d_getpgrp2'
 d_getpgrp='$d_getpgrp'
 d_getppid='$d_getppid'
 d_getprior='$d_getprior'
+d_getsbyname='$d_getsbyname'
+d_getsbyport='$d_getsbyport'
 d_gettimeod='$d_gettimeod'
 d_gnulibc='$d_gnulibc'
 d_htonl='$d_htonl'
@@ -10561,6 +10727,7 @@ d_msgrcv='$d_msgrcv'
 d_msgsnd='$d_msgsnd'
 d_mymalloc='$d_mymalloc'
 d_nice='$d_nice'
+d_oldpthreads='$d_oldpthreads'
 d_oldsock='$d_oldsock'
 d_open3='$d_open3'
 d_pathconf='$d_pathconf'
@@ -10595,6 +10762,7 @@ d_semop='$d_semop'
 d_setegid='$d_setegid'
 d_seteuid='$d_seteuid'
 d_setgrps='$d_setgrps'
+d_sethent='$d_sethent'
 d_setlinebuf='$d_setlinebuf'
 d_setlocale='$d_setlocale'
 d_setpgid='$d_setpgid'
@@ -10667,6 +10835,7 @@ defvoidused='$defvoidused'
 direntrytype='$direntrytype'
 dlext='$dlext'
 dlsrc='$dlsrc'
+doublesize='$doublesize'
 dynamic_ext='$dynamic_ext'
 eagain='$eagain'
 echo='$echo'
@@ -10815,6 +10984,7 @@ netdb_hlen_type='$netdb_hlen_type'
 netdb_host_type='$netdb_host_type'
 netdb_name_type='$netdb_name_type'
 netdb_net_type='$netdb_net_type'
+nm='$nm'
 nm_opt='$nm_opt'
 nm_so_opt='$nm_so_opt'
 nroff='$nroff'
@@ -10843,6 +11013,7 @@ prefixexp='$prefixexp'
 privlib='$privlib'
 privlibexp='$privlibexp'
 prototype='$prototype'
+ptrsize='$ptrsize'
 randbits='$randbits'
 ranlib='$ranlib'
 rd_nodata='$rd_nodata'
@@ -10898,6 +11069,7 @@ sysman='$sysman'
 tail='$tail'
 tar='$tar'
 tbl='$tbl'
+tee='$tee'
 test='$test'
 timeincl='$timeincl'
 timetype='$timetype'
@@ -11032,7 +11204,12 @@ the policy defaults.
 
 EOM
 fi
-
+if $test -f config.msg; then
+    echo "Hmm.  I also noted the following information while running:"
+    echo " "
+    $cat config.msg >&4
+    $rm -f config.msg
+fi
 $rm -f kit*isdone ark*isdone
 $rm -rf UU
 

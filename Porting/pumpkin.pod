@@ -357,21 +357,41 @@ permissions for system files; something like that might be appropriate.
 =head2 Run Configure
 
 This will build a config.sh and config.h.  You can skip this if you haven't
-changed Configure or config_h.SH at all.
+changed Configure or config_h.SH at all.  I use the following command
 
-=head2 Update Porting/config_H
+    sh Configure -Dprefix=/opt/perl -Doptimize=-O -Dusethreads \
+	-Dcf_by='yourname' \
+	-Dcf_email='yourname@yourhost.yourplace.com' \
+	-Dperladmin='yourname@yourhost.yourplace.com' \
+	-Dmydomain='.yourplace.com' \
+	-Dmyhostname='yourhost' \
+	-des
 
-[This section needs revision.  We're currently working on easing
+=head2 Update Porting/config.sh and Porting/config_H
+
+[XXX 
+This section needs revision.  We're currently working on easing
 the task of keeping the vms, win32, and plan9 config.sh info
-up-to-date.]
+up-to-date.  The plan is to use keep up-to-date 'canned' config.sh
+files in the appropriate subdirectories and then generate 'canned'
+config.h files for vms, win32, etc. from the generic config.sh file.
+This is to ease maintenance.  When Configure gets updated, the parts
+sometimes get scrambled around, and the changes in config_H can
+sometimes be very hard to follow.  config.sh, on the other hand, can
+safely be sorted, so it's easy to track (typically very small) changes
+to config.sh and then propoagate them to a canned 'config.h' by any
+number of means, including a perl script in win32/ or carrying 
+config.sh and config_h.SH to a Unix system and running sh
+config_h.SH.)
+XXX]
 
-The Porting/config_H file is provided to help those folks who can't
-run Configure.  It is important to keep it up-to-date.  If you have
-changed config_h.SH, those changes must be reflected in config_H as well.
-(The name config_H was chosen to distinguish the file from config.h even
-on case-insensitive file systems.)  Simply edit the existing config_H
-file; keep the first few explanatory lines and then copy your new
-config.h below.
+The Porting/config.sh and Porting/config_H files are provided to
+help those folks who can't run Configure.  It is important to keep
+them up-to-date.  If you have changed config_h.SH, those changes must
+be reflected in config_H as well.  (The name config_H was chosen to
+distinguish the file from config.h even on case-insensitive file systems.)
+Simply edit the existing config_H file; keep the first few explanatory
+lines and then copy your new config.h below.
 
 It may also be necessary to update vms/config.vms and
 plan9/config.plan9, though you should be quite careful in doing so if
@@ -1184,4 +1204,4 @@ All opinions expressed herein are those of the authorZ<>(s).
 
 =head1 LAST MODIFIED
 
-$Id: pumpkin.pod,v 1.13 1997/08/28 18:26:40 doughera Released $
+$Id: pumpkin.pod,v 1.14 1998/03/03 17:14:47 doughera Released $

@@ -194,7 +194,7 @@ the return value of your socket() call?  See L<perlfunc/accept>.
 
 =item Applying %s to %s will act on scalar(%s)
 
-(W) The pattern match (//), substitution (s///), and translation (tr///)
+(W) The pattern match (//), substitution (s///), and transliteration (tr///)
 operators work on scalar values.  If you apply one of them to an array
 or a hash, it will convert the array or hash to a scalar value -- the
 length of an array, or the population info of a hash -- and then work on
@@ -360,6 +360,12 @@ Perl yourself.
 (F) With "strict subs" in use, a bareword is only allowed as a
 subroutine identifier, in curly braces or to the left of the "=>" symbol.
 Perhaps you need to predeclare a subroutine?
+
+=item Bareword "%s" refers to nonexistent package
+
+(W) You used a qualified bareword of the form C<Foo::>, but
+the compiler saw no other uses of that namespace before that point.
+Perhaps you need to predeclare a package?
 
 =item BEGIN failed--compilation aborted
 
@@ -2463,13 +2469,13 @@ Perl yourself.
 (F) The regular expression ends with an unbackslashed backslash.  Backslash
 it.   See L<perlre>.
 
-=item Translation pattern not terminated
+=item Transliteration pattern not terminated
 
 (F) The lexer couldn't find the interior delimiter of a tr/// or tr[][]
 or y/// or y[][] construct.  Missing the leading C<$> from variables
 C<$tr> or C<$y> may cause this error.
 
-=item Translation replacement not terminated
+=item Transliteration replacement not terminated
 
 (F) The lexer couldn't find the final delimiter of a tr/// or tr[][]
 construct.

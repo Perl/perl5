@@ -65,7 +65,7 @@ PP(pp_nextstate)
 PP(pp_gvsv)
 {
     djSP;
-    EXTEND(sp,1);
+    EXTEND(SP,1);
     if (op->op_private & OPpLVAL_INTRO)
 	PUSHs(save_scalar(cGVOP->op_gv));
     else
@@ -1265,7 +1265,7 @@ PP(pp_enter)
     ENTER;
 
     SAVETMPS;
-    PUSHBLOCK(cx, CXt_BLOCK, sp);
+    PUSHBLOCK(cx, CXt_BLOCK, SP);
 
     RETURN;
 }
@@ -1310,7 +1310,7 @@ PP(pp_helem)
 	    if (HvNAME(hv) && isGV(*svp))
 		save_gp((GV*)*svp, !(op->op_flags & OPf_SPECIAL));
 	    else
-		save_svref(svp);
+		save_helem(hv, keysv, svp);
 	}
 	else if (op->op_private & OPpDEREF)
 	    vivify_ref(*svp, op->op_private & OPpDEREF);
@@ -1382,7 +1382,7 @@ PP(pp_iter)
     SV* sv;
     AV* av;
 
-    EXTEND(sp, 1);
+    EXTEND(SP, 1);
     cx = &cxstack[cxstack_ix];
     if (cx->cx_type != CXt_LOOP)
 	DIE("panic: pp_iter");
@@ -1714,7 +1714,7 @@ PP(pp_grepwhile)
     LEAVE;					/* exit inner scope */
 
     /* All done yet? */
-    if (stack_base + *markstack_ptr > sp) {
+    if (stack_base + *markstack_ptr > SP) {
 	I32 items;
 	I32 gimme = GIMME_V;
 
@@ -2038,9 +2038,9 @@ PP(pp_entersub)
 	    dMARK;
 	    register I32 items = SP - MARK;
 					/* We dont worry to copy from @_. */
-	    while (sp > mark) {
-		sp[1] = sp[0];
-		sp--;
+	    while (SP > mark) {
+		SP[1] = SP[0];
+		SP--;
 	    }
 	    stack_sp = mark + 1;
 	    fp3 = (I32(*)_((int,int,int)))CvXSUB(cv);
@@ -2069,9 +2069,9 @@ PP(pp_entersub)
 
 		if (items) {
 		    /* Mark is at the end of the stack. */
-		    EXTEND(sp, items);
-		    Copy(AvARRAY(av), sp + 1, items, SV*);
-		    sp += items;
+		    EXTEND(SP, items);
+		    Copy(AvARRAY(av), SP + 1, items, SV*);
+		    SP += items;
 		    PUTBACK ;		    
 		}
 	    }
@@ -2157,9 +2157,9 @@ PP(pp_entersub)
 	    items = AvFILLp(av) + 1;
 	    if (items) {
 		/* Mark is at the end of the stack. */
-		EXTEND(sp, items);
-		Copy(AvARRAY(av), sp + 1, items, SV*);
-		sp += items;
+		EXTEND(SP, items);
+		Copy(AvARRAY(av), SP + 1, items, SV*);
+		SP += items;
 		PUTBACK ;		    
 	    }
 	}
@@ -2261,7 +2261,7 @@ PP(pp_aelem)
 	    RETURN;
 	}
 	if (op->op_private & OPpLVAL_INTRO)
-	    save_svref(svp);
+	    save_aelem(av, elem, svp);
 	else if (op->op_private & OPpDEREF)
 	    vivify_ref(*svp, op->op_private & OPpDEREF);
     }

@@ -22,11 +22,11 @@ INST_TOP=$(INST_DRV)\perl5004.5x
 
 #
 # uncomment next line if you want to use the perl object
-#OBJECT=-DPERL_OBJECT
+OBJECT=-DPERL_OBJECT
 
 #
 # uncomment next line if you want debug version of perl (big,slow)
-#CFG=Debug
+CFG=Debug
 
 #
 # if you have the source for des_fcrypt(), uncomment this and make sure the
@@ -43,7 +43,7 @@ INST_TOP=$(INST_DRV)\perl5004.5x
 # WARNING: Turning this on/off WILL break binary compatibility with extensions
 # you may have compiled with/without it.  Be prepared to recompile all extensions
 # if you change the default.
-PERL_MALLOC	*= define
+PERL_MALLOC	= define
 
 #
 # set the install locations of the compiler include/libraries

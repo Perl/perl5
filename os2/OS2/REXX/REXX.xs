@@ -133,7 +133,7 @@ PERLCALL(PSZ name, ULONG argc, PRXSTRING argv, PSZ queue, PRXSTRING ret)
 
     ENTER;
     SAVETMPS;
-    PUSHMARK(sp);
+    PUSHMARK(SP);
 
 #if 0
     if (!my_perl) {
@@ -339,7 +339,7 @@ _fetch(name, ...)
    {
        int   i;
        ULONG rc;
-       EXTEND(sp, items);
+       EXTEND(SP, items);
        needvars(items);
        if (trace)
 	   fprintf(stderr, "REXXCALL::_fetch");
@@ -410,7 +410,7 @@ _next(stem)
 	   rc = RexxVariablePool(&sv);
        } while (!rc && memcmp(stem, sv.shvname.strptr, len) != 0);
        if (!rc) {
-	   EXTEND(sp, 2);
+	   EXTEND(SP, 2);
 	   /* returned lengths appear to be swapped */
 	   /* but beware of "future bug fixes" */
 	   namelen = sv.shvname.strlength; /* should be */

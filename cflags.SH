@@ -88,6 +88,7 @@ for file do
     POSIX) ;;
     SDBM_File) ;;
     av) ;;
+    byterun) ;;
     deb) ;;
     dl) ;;
     doio) ;;

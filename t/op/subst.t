@@ -2,7 +2,7 @@
 
 # $RCSfile: s.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:22 $
 
-print "1..67\n";
+print "1..68\n";
 
 $x = 'foo';
 $_ = "x";
@@ -261,3 +261,9 @@ print $_ eq "foobarfoobbar" ? "ok 66\n" : "not ok 66 # `$_' ne `foobarfoobbar'\n
 eval 's{foo} # this is a comment, not a delimiter
        {bar};';
 print @? ? "not ok 67\n" : "ok 67\n";
+
+# check if squashing works at the end of string
+$_="baacbaa";
+tr/a/b/s;
+print $_ eq "bbcbb" ? "ok 68\n" : "not ok 68 # `$_' ne `bbcbb'\n";
+
