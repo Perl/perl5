@@ -3052,7 +3052,7 @@ sub ppd {
 Returns the attribute C<PERM_RW> or the string C<644>.
 Used as the string that is passed
 to the C<chmod> command to set the permissions for read/writeable files.
-MakeMaker chooses C<644> because it has turned out in the past that
+MakeMaker chooses C<0644> because it has turned out in the past that
 relying on the umask provokes hard-to-track bug reports.
 When the return value is used by the perl function C<chmod>, it is
 interpreted as an octal value.
@@ -3060,12 +3060,12 @@ interpreted as an octal value.
 =cut
 
 sub perm_rw {
-    shift->{PERM_RW} || "644";
+    shift->{PERM_RW} || "0644";
 }
 
 =item perm_rwx (o)
 
-Returns the attribute C<PERM_RWX> or the string C<755>,
+Returns the attribute C<PERM_RWX> or the string C<0755>,
 i.e. the string that is passed
 to the C<chmod> command to set the permissions for executable files.
 See also perl_rw.
@@ -3073,7 +3073,7 @@ See also perl_rw.
 =cut
 
 sub perm_rwx {
-    shift->{PERM_RWX} || "755";
+    shift->{PERM_RWX} || "0755";
 }
 
 =item pm_to_blib
