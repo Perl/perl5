@@ -99,6 +99,12 @@
 #define cddir			(curinterp->Icddir)
 #define colors			(curinterp->Icolors)
 #define colorset		(curinterp->Icolorset)
+#define compcv			(curinterp->Icompcv)
+#define compiling		(curinterp->Icompiling)
+#define comppad			(curinterp->Icomppad)
+#define comppad_name		(curinterp->Icomppad_name)
+#define comppad_name_fill	(curinterp->Icomppad_name_fill)
+#define comppad_name_floor	(curinterp->Icomppad_name_floor)
 #define copline			(curinterp->Icopline)
 #define curcopdb		(curinterp->Icurcopdb)
 #define curstname		(curinterp->Icurstname)
@@ -180,6 +186,7 @@
 #define preambleav		(curinterp->Ipreambleav)
 #define preambled		(curinterp->Ipreambled)
 #define preprocess		(curinterp->Ipreprocess)
+#define profiledata		(curinterp->Iprofiledata)
 #define reg_eval_set		(curinterp->Ireg_eval_set)
 #define reg_flags		(curinterp->Ireg_flags)
 #define reg_start_tmp		(curinterp->Ireg_start_tmp)
@@ -211,6 +218,8 @@
 #define regxend			(curinterp->Iregxend)
 #define replgv			(curinterp->Ireplgv)
 #define rightgv			(curinterp->Irightgv)
+#define rsfp			(curinterp->Irsfp)
+#define rsfp_filters		(curinterp->Irsfp_filters)
 #define sawampersand		(curinterp->Isawampersand)
 #define sawstudy		(curinterp->Isawstudy)
 #define sawvec			(curinterp->Isawvec)
@@ -264,6 +273,12 @@
 #define Icddir			cddir
 #define Icolors			colors
 #define Icolorset		colorset
+#define Icompcv			compcv
+#define Icompiling		compiling
+#define Icomppad		comppad
+#define Icomppad_name		comppad_name
+#define Icomppad_name_fill	comppad_name_fill
+#define Icomppad_name_floor	comppad_name_floor
 #define Icopline		copline
 #define Icurcopdb		curcopdb
 #define Icurstname		curstname
@@ -345,6 +360,7 @@
 #define Ipreambleav		preambleav
 #define Ipreambled		preambled
 #define Ipreprocess		preprocess
+#define Iprofiledata		profiledata
 #define Ireg_eval_set		reg_eval_set
 #define Ireg_flags		reg_flags
 #define Ireg_start_tmp		reg_start_tmp
@@ -376,6 +392,8 @@
 #define Iregxend		regxend
 #define Ireplgv			replgv
 #define Irightgv		rightgv
+#define Irsfp			rsfp
+#define Irsfp_filters		rsfp_filters
 #define Isawampersand		sawampersand
 #define Isawstudy		sawstudy
 #define Isawvec			sawvec
@@ -491,6 +509,12 @@
 #define cddir			Perl_cddir
 #define colors			Perl_colors
 #define colorset		Perl_colorset
+#define compcv			Perl_compcv
+#define compiling		Perl_compiling
+#define comppad			Perl_comppad
+#define comppad_name		Perl_comppad_name
+#define comppad_name_fill	Perl_comppad_name_fill
+#define comppad_name_floor	Perl_comppad_name_floor
 #define copline			Perl_copline
 #define curcopdb		Perl_curcopdb
 #define curstname		Perl_curstname
@@ -572,6 +596,7 @@
 #define preambleav		Perl_preambleav
 #define preambled		Perl_preambled
 #define preprocess		Perl_preprocess
+#define profiledata		Perl_profiledata
 #define reg_eval_set		Perl_reg_eval_set
 #define reg_flags		Perl_reg_flags
 #define reg_start_tmp		Perl_reg_start_tmp
@@ -603,6 +628,8 @@
 #define regxend			Perl_regxend
 #define replgv			Perl_replgv
 #define rightgv			Perl_rightgv
+#define rsfp			Perl_rsfp
+#define rsfp_filters		Perl_rsfp_filters
 #define sawampersand		Perl_sawampersand
 #define sawstudy		Perl_sawstudy
 #define sawvec			Perl_sawvec
@@ -772,12 +799,6 @@
 #define collation_standard	(Perl_Vars.Gcollation_standard)
 #define collxfrm_base		(Perl_Vars.Gcollxfrm_base)
 #define collxfrm_mult		(Perl_Vars.Gcollxfrm_mult)
-#define compcv			(Perl_Vars.Gcompcv)
-#define compiling		(Perl_Vars.Gcompiling)
-#define comppad			(Perl_Vars.Gcomppad)
-#define comppad_name		(Perl_Vars.Gcomppad_name)
-#define comppad_name_fill	(Perl_Vars.Gcomppad_name_fill)
-#define comppad_name_floor	(Perl_Vars.Gcomppad_name_floor)
 #define cop_seqmax		(Perl_Vars.Gcop_seqmax)
 #define cryptseen		(Perl_Vars.Gcryptseen)
 #define cshlen			(Perl_Vars.Gcshlen)
@@ -834,6 +855,7 @@
 #define nextval			(Perl_Vars.Gnextval)
 #define nice_chunk		(Perl_Vars.Gnice_chunk)
 #define nice_chunk_size		(Perl_Vars.Gnice_chunk_size)
+#define ninterps		(Perl_Vars.Gninterps)
 #define nomemok			(Perl_Vars.Gnomemok)
 #define nthreads		(Perl_Vars.Gnthreads)
 #define nthreads_cond		(Perl_Vars.Gnthreads_cond)
@@ -851,9 +873,6 @@
 #define padix_floor		(Perl_Vars.Gpadix_floor)
 #define patleave		(Perl_Vars.Gpatleave)
 #define pidstatus		(Perl_Vars.Gpidstatus)
-#define profiledata		(Perl_Vars.Gprofiledata)
-#define rsfp			(Perl_Vars.Grsfp)
-#define rsfp_filters		(Perl_Vars.Grsfp_filters)
 #define runops			(Perl_Vars.Grunops)
 #define sh_path			(Perl_Vars.Gsh_path)
 #define sighandlerp		(Perl_Vars.Gsighandlerp)
@@ -891,12 +910,6 @@
 #define Gcollation_standard	collation_standard
 #define Gcollxfrm_base		collxfrm_base
 #define Gcollxfrm_mult		collxfrm_mult
-#define Gcompcv			compcv
-#define Gcompiling		compiling
-#define Gcomppad		comppad
-#define Gcomppad_name		comppad_name
-#define Gcomppad_name_fill	comppad_name_fill
-#define Gcomppad_name_floor	comppad_name_floor
 #define Gcop_seqmax		cop_seqmax
 #define Gcryptseen		cryptseen
 #define Gcshlen			cshlen
@@ -953,6 +966,7 @@
 #define Gnextval		nextval
 #define Gnice_chunk		nice_chunk
 #define Gnice_chunk_size	nice_chunk_size
+#define Gninterps		ninterps
 #define Gnomemok		nomemok
 #define Gnthreads		nthreads
 #define Gnthreads_cond		nthreads_cond
@@ -970,9 +984,6 @@
 #define Gpadix_floor		padix_floor
 #define Gpatleave		patleave
 #define Gpidstatus		pidstatus
-#define Gprofiledata		profiledata
-#define Grsfp			rsfp
-#define Grsfp_filters		rsfp_filters
 #define Grunops			runops
 #define Gsh_path		sh_path
 #define Gsighandlerp		sighandlerp
@@ -1010,12 +1021,6 @@
 #define collation_standard	Perl_collation_standard
 #define collxfrm_base		Perl_collxfrm_base
 #define collxfrm_mult		Perl_collxfrm_mult
-#define compcv			Perl_compcv
-#define compiling		Perl_compiling
-#define comppad			Perl_comppad
-#define comppad_name		Perl_comppad_name
-#define comppad_name_fill	Perl_comppad_name_fill
-#define comppad_name_floor	Perl_comppad_name_floor
 #define cop_seqmax		Perl_cop_seqmax
 #define cryptseen		Perl_cryptseen
 #define cshlen			Perl_cshlen
@@ -1072,6 +1077,7 @@
 #define nextval			Perl_nextval
 #define nice_chunk		Perl_nice_chunk
 #define nice_chunk_size		Perl_nice_chunk_size
+#define ninterps		Perl_ninterps
 #define nomemok			Perl_nomemok
 #define nthreads		Perl_nthreads
 #define nthreads_cond		Perl_nthreads_cond
@@ -1089,9 +1095,6 @@
 #define padix_floor		Perl_padix_floor
 #define patleave		Perl_patleave
 #define pidstatus		Perl_pidstatus
-#define profiledata		Perl_profiledata
-#define rsfp			Perl_rsfp
-#define rsfp_filters		Perl_rsfp_filters
 #define runops			Perl_runops
 #define sh_path			Perl_sh_path
 #define sighandlerp		Perl_sighandlerp

@@ -772,6 +772,7 @@ CV *cv_clone2 _((CV *proto, CV *outside));
 void find_beginning _((void));
 void forbid_setid _((char *));
 void incpush _((char *, int));
+void init_interp _((void));
 void init_ids _((void));
 void init_debugger _((void));
 void init_lexer _((void));

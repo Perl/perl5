@@ -45,41 +45,13 @@ dEXTCONST char rcsid[] = "perl.c\nPatch level: ###\n";
 #endif
 #endif
 
-#define I_REINIT \
-  STMT_START {			\
-    chopset	= " \n-";	\
-    copline	= NOLINE;	\
-    curcop	= &compiling;	\
-    curcopdb    = NULL;		\
-    dbargs	= 0;		\
-    dlmax	= 128;		\
-    laststatval	= -1;		\
-    laststype	= OP_STAT;	\
-    maxscream	= -1;		\
-    maxsysfd	= MAXSYSFD;	\
-    statname	= Nullsv;	\
-    tmps_floor	= -1;		\
-    tmps_ix     = -1;		\
-    op_mask     = NULL;		\
-    dlmax       = 128;		\
-    laststatval = -1;		\
-    laststype   = OP_STAT;	\
-    mess_sv     = Nullsv;	\
-    splitstr    = " ";		\
-    generation  = 100;		\
-    exitlist    = NULL;		\
-    exitlistlen = 0;		\
-    regindent   = 0;		\
-    in_clean_objs = FALSE;	\
-    in_clean_all= FALSE;	\
-  } STMT_END
-
 #ifdef PERL_OBJECT
 static I32 read_e_script _((CPerlObj* pPerl, int idx, SV *buf_sv, int maxlen));
 #else
 static void find_beginning _((void));
 static void forbid_setid _((char *));
 static void incpush _((char *, int));
+static void init_interp _((void));
 static void init_ids _((void));
 static void init_debugger _((void));
 static void init_lexer _((void));
@@ -140,6 +112,7 @@ perl_construct(register PerlInterpreter *sv_interp)
 #endif
 
 #ifdef MULTIPLICITY
+    ++ninterps;
     Zero(sv_interp, 1, PerlInterpreter);
 #endif
 
@@ -209,11 +182,11 @@ perl_construct(register PerlInterpreter *sv_interp)
 
     init_stacks(ARGS);
 #ifdef MULTIPLICITY
-    I_REINIT;
+    init_interp();
     perl_destruct_level = 1; 
 #else
-   if(perl_destruct_level > 0)
-       I_REINIT;
+   if (perl_destruct_level > 0)
+       init_interp();
 #endif
 
     init_ids();
@@ -356,6 +329,10 @@ perl_destruct(register PerlInterpreter *sv_interp)
 
     LEAVE;
     FREETMPS;
+
+#ifdef MULTIPLICITY
+    --ninterps;
+#endif
 
     /* We must account for everything.  */
 
@@ -1798,6 +1775,58 @@ my_unexec(void)
 #endif
 }
 
+/* initialize curinterp */
+STATIC void
+init_interp(void)
+{
+
+#if 0
+#define I_REINIT \
+  STMT_START {			\
+    chopset	= " \n-";	\
+    copline	= NOLINE;	\
+    curcop	= &compiling;	\
+    curcopdb    = NULL;		\
+    dbargs	= 0;		\
+    dlmax	= 128;		\
+    laststatval	= -1;		\
+    laststype	= OP_STAT;	\
+    maxscream	= -1;		\
+    maxsysfd	= MAXSYSFD;	\
+    statname	= Nullsv;	\
+    tmps_floor	= -1;		\
+    tmps_ix     = -1;		\
+    op_mask     = NULL;		\
+    dlmax       = 128;		\
+    laststatval = -1;		\
+    laststype   = OP_STAT;	\
+    mess_sv     = Nullsv;	\
+    splitstr    = " ";		\
+    generation  = 100;		\
+    exitlist    = NULL;		\
+    exitlistlen = 0;		\
+    regindent   = 0;		\
+    in_clean_objs = FALSE;	\
+    in_clean_all= FALSE;	\
+    profiledata = NULL;		\
+    rsfp	= Nullfp;	\
+    rsfp_filters= Nullav;	\
+  } STMT_END
+#endif
+
+#define PERLVAR(var,type)
+#define PERLVARI(var,type,init)		curinterp->var = init;
+#define PERLVARIC(var,type,init)	curinterp->var = init;
+#include "intrpvar.h"
+#ifndef USE_THREADS
+#  include "thrdvar.h"
+#endif
+#undef PERLVAR
+#undef PERLVARI
+#undef PERLVARIC
+
+}
+
 STATIC void
 init_main_stash(void)
 {
@@ -2303,44 +2332,23 @@ init_stacks(ARGSproto)
     tmps_ix = -1;
     tmps_max = REASONABLE(128);
 
-    /*
-     * The following stacks almost certainly should be per-interpreter,
-     * but for now they're not.  XXX
-     */
-
-    if (markstack) {
-	markstack_ptr = markstack;
-    } else {
-	New(54,markstack,REASONABLE(32),I32);
-	markstack_ptr = markstack;
-	markstack_max = markstack + REASONABLE(32);
-    }
+    New(54,markstack,REASONABLE(32),I32);
+    markstack_ptr = markstack;
+    markstack_max = markstack + REASONABLE(32);
 
     SET_MARKBASE;
 
-    if (scopestack) {
-	scopestack_ix = 0;
-    } else {
-	New(54,scopestack,REASONABLE(32),I32);
-	scopestack_ix = 0;
-	scopestack_max = REASONABLE(32);
-    }
+    New(54,scopestack,REASONABLE(32),I32);
+    scopestack_ix = 0;
+    scopestack_max = REASONABLE(32);
 
-    if (savestack) {
-	savestack_ix = 0;
-    } else {
-	New(54,savestack,REASONABLE(128),ANY);
-	savestack_ix = 0;
-	savestack_max = REASONABLE(128);
-    }
+    New(54,savestack,REASONABLE(128),ANY);
+    savestack_ix = 0;
+    savestack_max = REASONABLE(128);
 
-    if (retstack) {
-	retstack_ix = 0;
-    } else {
-	New(54,retstack,REASONABLE(16),OP*);
-	retstack_ix = 0;
-	retstack_max = REASONABLE(16);
-    }
+    New(54,retstack,REASONABLE(16),OP*);
+    retstack_ix = 0;
+    retstack_max = REASONABLE(16);
 }
 
 #undef REASONABLE
@@ -2359,12 +2367,10 @@ nuke_stacks(void)
 	curstackinfo = p;
     }
     Safefree(tmps_stack);
-    /*  XXX refcount interpreters to determine when to free global data
     Safefree(markstack);
     Safefree(scopestack);
     Safefree(savestack);
     Safefree(retstack);
-    */
     DEBUG( {
 	Safefree(debname);
 	Safefree(debdelim);

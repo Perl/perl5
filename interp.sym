@@ -19,6 +19,12 @@ cddir
 chopset
 colors
 colorset
+compcv
+compiling
+comppad
+comppad_name
+comppad_name_fill
+comppad_name_floor
 copline
 curcop
 curcopdb
@@ -118,6 +124,7 @@ perl_destruct_level
 preambled
 preambleav
 preprocess
+profiledata
 reg_eval_set
 reg_flags
 reg_start_tmp
@@ -150,6 +157,8 @@ replgv
 restartop
 rightgv
 rs
+rsfp
+rsfp_filters
 regcomp_rx
 sawampersand
 sawstudy
