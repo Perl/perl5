@@ -408,6 +408,7 @@ p	|int	|magic_setmglob	|SV* sv|MAGIC* mg
 p	|int	|magic_setnkeys	|SV* sv|MAGIC* mg
 p	|int	|magic_setpack	|SV* sv|MAGIC* mg
 p	|int	|magic_setpos	|SV* sv|MAGIC* mg
+p	|int	|magic_setregexp|SV* sv|MAGIC* mg
 p	|int	|magic_setsig	|SV* sv|MAGIC* mg
 p	|int	|magic_setsubstr|SV* sv|MAGIC* mg
 p	|int	|magic_settaint	|SV* sv|MAGIC* mg
@@ -726,6 +727,7 @@ Ap	|void	|sv_dump	|SV* sv
 Apd	|bool	|sv_derived_from|SV* sv|const char* name
 Apd	|I32	|sv_eq		|SV* sv1|SV* sv2
 Apd	|void	|sv_free	|SV* sv
+Apo	|void	|sv_free2	|SV* sv
 pd	|void	|sv_free_arenas
 Apd	|char*	|sv_gets	|SV* sv|PerlIO* fp|I32 append
 Apd	|char*	|sv_grow	|SV* sv|STRLEN newlen
@@ -943,7 +945,7 @@ Ap |char * |custom_op_name|OP* op
 Ap |char * |custom_op_desc|OP* op
 
 #if defined(PERL_COPY_ON_WRITE)
-pM	|int	|sv_release_IVX	|SV *sv
+ApM	|int	|sv_release_IVX	|SV *sv
 #endif
 
 Adp	|void	|sv_nosharing	|SV *
@@ -1302,6 +1304,9 @@ Apd	|char*	|sv_2pv_flags	|SV* sv|STRLEN* lp|I32 flags
 Apd	|void	|sv_copypv	|SV* dsv|SV* ssv
 Ap	|char*	|my_atof2	|const char *s|NV* value
 Apn	|int	|my_socketpair	|int family|int type|int protocol|int fd[2]
+#ifdef PERL_COPY_ON_WRITE
+Ap	|SV*	|sv_setsv_cow	|SV* dsv|SV* ssv
+#endif
 
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
 Ap	|int	|PerlIO_close		|PerlIO *

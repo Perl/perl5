@@ -1,12 +1,7 @@
-# $Id: enc_utf8.t,v 1.2 2003/01/22 03:29:07 dankogai Exp $
-# This is the twin of enc_eucjp.t, the only difference is that
-# this has "use encoding 'utf8'".
+# $Id: enc_utf8.t,v 1.3 2003/02/20 14:42:34 dankogai Exp $
+# This is the twin of enc_eucjp.t .
 
 BEGIN {
-#     if ($] <= 5.008){
-# 	print "1..0 # Skip: Perl 5.8.1 or later required\n";
-# 	exit 0;
-#     }
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bEncode\b/) {
       print "1..0 # Skip: Encode was not built\n";
@@ -63,6 +58,7 @@ binmode(F, ":encoding(utf-8)");
 	local $SIG{__WARN__} = sub { $a = shift };
 	eval { <F> }; # This should get caught.
 }
+close F;
 print $a =~ qr{^utf8 "\\x80" does not map to Unicode} ?
   "ok $t - illegal utf8 input\n" : "not ok $t - illegal utf8 input: a = " . unpack("H*", $a) . "\n";
 

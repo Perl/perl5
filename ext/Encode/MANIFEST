@@ -54,6 +54,7 @@ t/Aliases.t	test script
 t/CJKT.t	test script
 t/Encode.t	test script
 t/Encoder.t	test script
+t/Mod_EUCJP.pm	module that t/enc_module.enc uses
 t/Unicode.t	test script
 t/at-cn.t	test script
 t/at-tw.t	test script
@@ -62,6 +63,8 @@ t/big5-eten.utf	test data
 t/big5-hkscs.enc	test data
 t/big5-hkscs.utf	test data
 t/enc_eucjp.t	test script
+t/enc_module.enc test data for t/enc_module.t
+t/enc_module.t	test script
 t/enc_utf8.t	test script
 t/encoding.t	test script
 t/fallback.t	test script

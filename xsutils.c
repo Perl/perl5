@@ -1,6 +1,6 @@
 /*    xsutils.c
  *
- *    Copyright (c) 1999-2002, Larry Wall
+ *    Copyright (c) 1999-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -72,6 +72,15 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 	    switch ((int)len) {
 	    case 6:
 		switch (*name) {
+		case 'a':
+		    if (strEQ(name, "assertion")) {
+			if (negated)
+			    CvFLAGS((CV*)sv) &= ~CVf_ASSERTION;
+			else
+			    CvFLAGS((CV*)sv) |= CVf_ASSERTION;
+			continue;
+		    }
+		    break;
 		case 'l':
 #ifdef CVf_LVALUE
 		    if (strEQ(name, "lvalue")) {
@@ -220,6 +229,8 @@ usage:
 	    XPUSHs(sv_2mortal(newSVpvn("method", 6)));
         if (GvUNIQUE(CvGV((CV*)sv)))
 	    XPUSHs(sv_2mortal(newSVpvn("unique", 6)));
+	if (cvflags & CVf_ASSERTION)
+	    XPUSHs(sv_2mortal(newSVpvn("assertion", 9)));
 	break;
     case SVt_PVGV:
 	if (GvUNIQUE(sv))

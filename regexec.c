@@ -67,7 +67,7 @@
  *
  ****    Alterations to Henry's code are...
  ****
- ****    Copyright (c) 1991-2002, Larry Wall
+ ****    Copyright (c) 1991-2003, Larry Wall
  ****
  ****    You may distribute under the terms of either the GNU General Public
  ****    License or the Artistic License, as specified in the README file.
@@ -2023,17 +2023,28 @@ got_it:
 
     /* make sure $`, $&, $', and $digit will work later */
     if ( !(flags & REXEC_NOT_FIRST) ) {
-	if (RX_MATCH_COPIED(prog)) {
-	    Safefree(prog->subbeg);
-	    RX_MATCH_COPIED_off(prog);
-	}
+	RX_MATCH_COPY_FREE(prog);
 	if (flags & REXEC_COPY_STR) {
 	    I32 i = PL_regeol - startpos + (stringarg - strbeg);
-
-	    s = savepvn(strbeg, i);
-	    prog->subbeg = s;
+#ifdef PERL_COPY_ON_WRITE
+	    if ((SvIsCOW(sv)
+		 || (SvFLAGS(sv) & CAN_COW_MASK) == CAN_COW_FLAGS)) {
+		if (DEBUG_C_TEST) {
+		    PerlIO_printf(Perl_debug_log,
+				  "Copy on write: regexp capture, type %d\n",
+				  (int) SvTYPE(sv));
+		}
+		prog->saved_copy = sv_setsv_cow(prog->saved_copy, sv);
+		prog->subbeg = SvPVX(prog->saved_copy);
+		assert (SvPOKp(prog->saved_copy));
+	    } else
+#endif
+	    {
+		RX_MATCH_COPIED_on(prog);
+		s = savepvn(strbeg, i);
+		prog->subbeg = s;
+	    }
 	    prog->sublen = i;
-	    RX_MATCH_COPIED_on(prog);
 	}
 	else {
 	    prog->subbeg = strbeg;
@@ -2123,6 +2134,9 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 		$` inside (?{}) could fail... */
 	    PL_reg_oldsaved = prog->subbeg;
 	    PL_reg_oldsavedlen = prog->sublen;
+#ifdef PERL_COPY_ON_WRITE
+	    PL_nrs = prog->saved_copy;
+#endif
 	    RX_MATCH_COPIED_off(prog);
 	}
 	else
@@ -2853,13 +2867,17 @@ S_regmatch(pTHX_ regnode *prog)
 		    re_cc_state state;
 		    CHECKPOINT cp, lastcp;
                     int toggleutf;
+		    register SV *sv;
 
-		    if(SvROK(ret) || SvRMAGICAL(ret)) {
-			SV *sv = SvROK(ret) ? SvRV(ret) : ret;
-
-			if(SvMAGICAL(sv))
-			    mg = mg_find(sv, PERL_MAGIC_qr);
+		    if(SvROK(ret) && SvSMAGICAL(sv = SvRV(ret)))
+			mg = mg_find(sv, PERL_MAGIC_qr);
+		    else if (SvSMAGICAL(ret)) {
+			if (SvGMAGICAL(ret))
+			    sv_unmagic(ret, PERL_MAGIC_qr);
+			else
+			    mg = mg_find(ret, PERL_MAGIC_qr);
 		    }
+
 		    if (mg) {
 			re = (regexp *)mg->mg_obj;
 			(void)ReREFCNT_inc(re);
@@ -2876,7 +2894,8 @@ S_regmatch(pTHX_ regnode *prog)
                         if (DO_UTF8(ret)) pm.op_pmdynflags |= PMdf_DYN_UTF8;
 			re = CALLREGCOMP(aTHX_ t, t + len, &pm);
 			if (!(SvFLAGS(ret)
-			      & (SVs_TEMP | SVs_PADTMP | SVf_READONLY)))
+			      & (SVs_TEMP | SVs_PADTMP | SVf_READONLY
+				| SVs_GMG)))
 			    sv_magic(ret,(SV*)ReREFCNT_inc(re),
 					PERL_MAGIC_qr,0,0);
 			PL_regprecomp = oprecomp;
@@ -4555,6 +4574,9 @@ restore_pos(pTHX_ void *arg)
 	if (PL_reg_oldsaved) {
 	    PL_reg_re->subbeg = PL_reg_oldsaved;
 	    PL_reg_re->sublen = PL_reg_oldsavedlen;
+#ifdef PERL_COPY_ON_WRITE
+	    PL_reg_re->saved_copy = PL_nrs;
+#endif
 	    RX_MATCH_COPIED_on(PL_reg_re);
 	}
 	PL_reg_magic->mg_len = PL_reg_oldpos;

@@ -1117,10 +1117,10 @@ B<-t> or B<-TU>).  This variable is read-only.
 
 =item ${^UNICODE}
 
-Reflects certain Unicode settings of Perl.  See L<perlrun> for more
-information about the possible values. This variable is set during
-Perl startup and thereafter read-only.  See L<perluniintro>,
-L<perlfunc/open>, and L<open> for more information.
+Reflects certain Unicode settings of Perl.  See L<perlrun>
+documentation for the C<-C> switch for more information about
+the possible values. This variable is set during Perl startup
+and is thereafter read-only.
 
 =item $PERL_VERSION
 
@@ -1483,7 +1483,7 @@ exempt in these ways:
 	ENV		STDIN
 	INC		STDOUT
 	ARGV		STDERR
-	ARGVOUT
+	ARGVOUT		_
 	SIG
 
 In particular, the new special C<${^_XYZ}> variables are always taken

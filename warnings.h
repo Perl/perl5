@@ -73,6 +73,10 @@
 #define WARN_VOID		45
 #define WARN_Y2K		46
 
+/* Warnings Categories added in Perl 5.009 */
+
+#define WARN_ASSERTIONS		47
+
 #define WARNsize		12
 #define WARN_ALLstring		"\125\125\125\125\125\125\125\125\125\125\125\125"
 #define WARN_NONEstring		"\0\0\0\0\0\0\0\0\0\0\0\0"

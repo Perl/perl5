@@ -1,7 +1,7 @@
 /*
  *    perlapi.h
  *
- *    Copyright (c) 1997-2002, Larry Wall
+ *    Copyright (c) 1997-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -88,6 +88,8 @@ END_EXTERN_C
 #define PL_Argv			(*Perl_IArgv_ptr(aTHX))
 #undef  PL_Cmd
 #define PL_Cmd			(*Perl_ICmd_ptr(aTHX))
+#undef  PL_DBassertion
+#define PL_DBassertion		(*Perl_IDBassertion_ptr(aTHX))
 #undef  PL_DBcv
 #define PL_DBcv			(*Perl_IDBcv_ptr(aTHX))
 #undef  PL_DBgv
@@ -494,6 +496,8 @@ END_EXTERN_C
 #define PL_sig_pending		(*Perl_Isig_pending_ptr(aTHX))
 #undef  PL_sighandlerp
 #define PL_sighandlerp		(*Perl_Isighandlerp_ptr(aTHX))
+#undef  PL_signals
+#define PL_signals		(*Perl_Isignals_ptr(aTHX))
 #undef  PL_sort_RealCmp
 #define PL_sort_RealCmp		(*Perl_Isort_RealCmp_ptr(aTHX))
 #undef  PL_splitstr

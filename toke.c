@@ -1,6 +1,6 @@
 /*    toke.c
  *
- *    Copyright (c) 1991-2002, Larry Wall
+ *    Copyright (c) 1991-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -3025,6 +3025,8 @@ Perl_yylex(pTHX)
 			CvLOCKED_on(PL_compcv);
 		    else if (!PL_in_my && len == 6 && strnEQ(s, "method", len))
 			CvMETHOD_on(PL_compcv);
+		    else if (!PL_in_my && len == 9 && strnEQ(s, "assertion", len))
+		        CvASSERTION_on(PL_compcv);
 #ifdef USE_ITHREADS
 		    else if (PL_in_my == KEY_our && len == 6 &&
 			     strnEQ(s, "unique", len))
@@ -6274,8 +6276,10 @@ S_scan_ident(pTHX_ register char *s, register char *send, char *dest, STRLEN des
 	}
 	if (*s == '}') {
 	    s++;
-	    if (PL_lex_state == LEX_INTERPNORMAL && !PL_lex_brackets)
+	    if (PL_lex_state == LEX_INTERPNORMAL && !PL_lex_brackets) {
 		PL_lex_state = LEX_INTERPEND;
+		PL_expect = XREF;
+	    }
 	    if (funny == '#')
 		funny = '@';
 	    if (PL_lex_state == LEX_NORMAL) {
@@ -6287,8 +6291,6 @@ S_scan_ident(pTHX_ register char *s, register char *send, char *dest, STRLEN des
 			funny, dest, funny, dest);
 		}
 	    }
-	    if (PL_lex_inwhat == OP_STRINGIFY)
-		PL_expect = XREF;
 	}
 	else {
 	    s = bracket;		/* let the parser handle it */
@@ -7615,6 +7617,12 @@ S_scan_formline(pTHX_ register char *s)
 	}
 	else
 	    PL_lex_state = LEX_FORMLINE;
+	if (!IN_BYTES) {
+	    if (UTF && is_utf8_string((U8*)SvPVX(stuff), SvCUR(stuff)))
+		SvUTF8_on(stuff);
+	    else if (PL_encoding)
+		sv_recode_to_utf8(stuff, PL_encoding);
+	}
 	PL_nextval[PL_nexttoke].opval = (OP*)newSVOP(OP_CONST, 0, stuff);
 	force_next(THING);
 	PL_nextval[PL_nexttoke].ival = OP_FORMLINE;

@@ -1,6 +1,6 @@
 /*    perl.c
  *
- *    Copyright (c) 1987-2002 Larry Wall
+ *    Copyright (c) 1987-2003 Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -1024,6 +1024,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	case 'W':
 	case 'X':
 	case 'w':
+	case 'A':
 	    if ((s = moreswitches(s)))
 		goto reswitch;
 	    break;
@@ -1235,7 +1236,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 		d = s;
 		if (!*s)
 		    break;
-		if (!strchr("DIMUdmtw", *s))
+		if (!strchr("DIMUdmtwA", *s))
 		    Perl_croak(aTHX_ "Illegal switch in PERL5OPT: -%c", *s);
 		while (++s && *s) {
 		    if (isSPACE(*s)) {
@@ -1356,14 +1357,15 @@ print \"  \\@INC:\\n    @INC\\n\";");
      * PL_utf8locale is conditionally turned on by
      * locale.c:Perl_init_i18nl10n() if the environment
      * look like the user wants to use UTF-8. */
-    if (PL_unicode) { /* Requires init_predump_symbols(). */
-	 IO* io;
-	 PerlIO* fp;
-	 SV* sv;
-
+    if (PL_unicode) {
+	 /* Requires init_predump_symbols(). */
 	 if (!(PL_unicode & PERL_UNICODE_LOCALE_FLAG) || PL_utf8locale) {
+	      IO* io;
+	      PerlIO* fp;
+	      SV* sv;
+
 	      /* Turn on UTF-8-ness on STDIN, STDOUT, STDERR
-	       * and the default open discipline. */
+	       * and the default open disciplines. */
 	      if ((PL_unicode & PERL_UNICODE_STDIN_FLAG) &&
 		  PL_stdingv  && (io = GvIO(PL_stdingv)) &&
 		  (fp = IoIFP(io)))
@@ -1391,6 +1393,15 @@ print \"  \\@INC:\\n    @INC\\n\";");
 		   SvSETMAGIC(sv);
 	      }
 	 }
+    }
+
+    if ((s = PerlEnv_getenv("PERL_SIGNALS"))) {
+	 if (strEQ(s, "unsafe"))
+	      PL_signals |=  PERL_SIGNALS_UNSAFE_FLAG;
+	 else if (strEQ(s, "safe"))
+	      PL_signals &= ~PERL_SIGNALS_UNSAFE_FLAG;
+	 else
+	      Perl_croak(aTHX_ "PERL_SIGNALS illegal: \"%s\"", s);
     }
 
     init_lexer();
@@ -2319,6 +2330,20 @@ Perl_moreswitches(pTHX_ char *s)
 	    }
 	}
 	return s;
+    case 'A':
+	forbid_setid("-A");
+	if (!PL_preambleav)
+	    PL_preambleav = newAV();
+	if (*++s) {
+	    SV *sv = newSVpvn("use assertions::activate split(/,/,q{",37);
+	    sv_catpv(sv,s);
+	    sv_catpv(sv,"})");
+	    s+=strlen(s);
+	    av_push(PL_preambleav, sv);
+	}
+	else
+	    av_push(PL_preambleav, newSVpvn("use assertions::activate",24));
+	return s;
     case 'M':
 	forbid_setid("-M");	/* XXX ? */
 	/* FALL THROUGH */
@@ -2419,7 +2444,7 @@ Perl_moreswitches(pTHX_ char *s)
 #endif
 
 	PerlIO_printf(PerlIO_stdout(),
-		      "\n\nCopyright 1987-2002, Larry Wall\n");
+		      "\n\nCopyright 1987-2003, Larry Wall\n");
 #ifdef MACOS_TRADITIONAL
 	PerlIO_printf(PerlIO_stdout(),
 		      "\nMac OS port Copyright 1991-2002, Matthias Neeracher;\n"
@@ -3265,6 +3290,8 @@ Perl_init_debugger(pTHX)
     sv_setiv(PL_DBtrace, 0);
     PL_DBsignal = GvSV((gv_fetchpv("signal", GV_ADDMULTI, SVt_PV)));
     sv_setiv(PL_DBsignal, 0);
+    PL_DBassertion = GvSV((gv_fetchpv("assertion", GV_ADDMULTI, SVt_PV)));
+    sv_setiv(PL_DBassertion, 0);
     PL_curstash = ostash;
 }
 
@@ -3414,8 +3441,10 @@ Perl_init_argv_symbols(pTHX_ register int argc, register char **argv)
 	for (; argc > 0; argc--,argv++) {
 	    SV *sv = newSVpv(argv[0],0);
 	    av_push(GvAVn(PL_argvgv),sv);
-	    if (PL_unicode & PERL_UNICODE_ARGV_FLAG)
-		 SvUTF8_on(sv);
+	    if (!(PL_unicode & PERL_UNICODE_LOCALE_FLAG) || PL_utf8locale) {
+		 if (PL_unicode & PERL_UNICODE_ARGV_FLAG)
+		      SvUTF8_on(sv);
+	    }
 	    if (PL_unicode & PERL_UNICODE_WIDESYSCALLS_FLAG) /* Sarathy? */
 		 (void)sv_utf8_decode(sv);
 	}

@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..988\n";
+print "1..994\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3108,5 +3108,42 @@ ok("bbbbac" =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
     ok ( "0" =~ /\p{N}+\z/, "[perl #19767] variant test" );
 }
 
-# last test 988
+{
+
+    $p = 1;
+    foreach (1,2,3,4) {
+	    $p++ if /(??{ $p })/
+    }
+    ok ($p == 5, "[perl #20683] (??{ }) returns stale values");
+    { package P; $a=1; sub TIESCALAR { bless[] } sub FETCH { $a++ } }
+    tie $p, P;
+    foreach (1,2,3,4) {
+	    /(??{ $p })/
+    }
+    ok ( $p == 5, "(??{ }) returns stale values");
+}
+
+{
+  # Subject: Odd regexp behavior
+  # From: Markus Kuhn <Markus.Kuhn@cl.cam.ac.uk>
+  # Date: Wed, 26 Feb 2003 16:53:12 +0000
+  # Message-Id: <E18o4nw-0008Ly-00@wisbech.cl.cam.ac.uk>
+  # To: perl-unicode@perl.org
+    
+  $x = "\x{2019}\nk"; $x =~ s/(\S)\n(\S)/$1 $2/sg;
+  ok($x eq "\x{2019} k", "Markus Kuhn 2003-02-26");
+
+  $x = "b\nk"; $x =~ s/(\S)\n(\S)/$1 $2/sg;
+  ok($x eq "b k", "Markus Kuhn 2003-02-26");
+
+  ok("\x{2019}" =~ /\S/, "Markus Kuhn 2003-02-26");
+}
+
+{
+    my $i;
+    ok('-1-3-5-' eq join('', split /((??{$i++}))/, '-1-3-5-'),
+	"[perl #21411] (??{ .. }) corrupts split's stack")
+}
+
+# last test 994
 

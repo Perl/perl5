@@ -1,6 +1,6 @@
 /*    pp_pack.c
  *
- *    Copyright (c) 1991-2002, Larry Wall
+ *    Copyright (c) 1991-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -1606,7 +1606,8 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 PP(pp_unpack)
 {
     dSP;
-    dPOPPOPssrl;
+    SV *right = (MAXARG > 1) ? POPs : GvSV(PL_defgv);
+    SV *left = POPs;
     I32 gimme = GIMME_V;
     STRLEN llen;
     STRLEN rlen;

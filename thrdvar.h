@@ -1,6 +1,6 @@
 /*    thdrvar.h
  *
- *    Copyright (c) 1997-2002, Larry Wall
+ *    Copyright (c) 1997-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -90,7 +90,7 @@ PERLVAR(Ttimesbuf,	struct tms)
 /* Fields used by magic variables such as $@, $/ and so on */
 PERLVAR(Ttainted,	bool)		/* using variables controlled by $< */
 PERLVAR(Tcurpm,		PMOP *)		/* what to do \ interps in REs from */
-PERLVAR(Tnrs,		SV *)		/* placeholder: unused since 5.8.0 (5.7.2 patch #12027 for bug ID 20010815.012) */
+PERLVAR(Tnrs,		SV *)		/* was placeholder: unused since 5.8.0 (5.7.2 patch #12027 for bug ID 20010815.012). Used to save rx->saved_copy */
 
 /*
 =for apidoc mn|SV*|PL_rs

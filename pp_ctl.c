@@ -1,6 +1,6 @@
 /*    pp_ctl.c
  *
- *    Copyright (c) 1991-2002, Larry Wall
+ *    Copyright (c) 1991-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -156,6 +156,7 @@ PP(pp_substcont)
     register char *m = cx->sb_m;
     char *orig = cx->sb_orig;
     register REGEXP *rx = cx->sb_rx;
+    SV *nsv = Nullsv;
 
     rxres_restore(&cx->sb_rxres, rx);
     RX_MATCH_UTF8_set(rx, SvUTF8(cx->sb_targ));
@@ -178,12 +179,22 @@ PP(pp_substcont)
 	{
 	    SV *targ = cx->sb_targ;
 
-	    sv_catpvn(dstr, s, cx->sb_strend - s);
+	    if (DO_UTF8(dstr) && !SvUTF8(targ))
+		sv_catpvn_utf8_upgrade(dstr, s, cx->sb_strend - s, nsv);
+	    else
+		sv_catpvn(dstr, s, cx->sb_strend - s);
 	    cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
 
-	    (void)SvOOK_off(targ);
-	    if (SvLEN(targ))
-		Safefree(SvPVX(targ));
+#ifdef PERL_COPY_ON_WRITE
+	    if (SvIsCOW(targ)) {
+		sv_force_normal_flags(targ, SV_COW_DROP_PV);
+	    } else
+#endif
+	    {
+		(void)SvOOK_off(targ);
+		if (SvLEN(targ))
+		    Safefree(SvPVX(targ));
+	    }
 	    SvPVX(targ) = SvPVX(dstr);
 	    SvCUR_set(targ, SvCUR(dstr));
 	    SvLEN_set(targ, SvLEN(dstr));
@@ -193,7 +204,7 @@ PP(pp_substcont)
 	    sv_free(dstr);
 
 	    TAINT_IF(cx->sb_rxtainted & 1);
-	    PUSHs(sv_2mortal(newSViv((I32)cx->sb_iters - 1)));
+	    PUSHs(sv_2mortal(newSViv(saviters - 1)));
 
 	    (void)SvPOK_only_UTF8(targ);
 	    TAINT_IF(cx->sb_rxtainted);
@@ -214,8 +225,12 @@ PP(pp_substcont)
 	cx->sb_strend = s + (cx->sb_strend - m);
     }
     cx->sb_m = m = rx->startp[0] + orig;
-    if (m > s)
-	sv_catpvn(dstr, s, m-s);
+    if (m > s) {
+	if (DO_UTF8(dstr) && !SvUTF8(cx->sb_targ)) 
+	    sv_catpvn_utf8_upgrade(dstr, s, m - s, nsv);
+	else
+	    sv_catpvn(dstr, s, m-s);
+    }
     cx->sb_s = rx->endp[0] + orig;
     { /* Update the pos() information. */
 	SV *sv = cx->sb_targ;
@@ -244,7 +259,11 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
     U32 i;
 
     if (!p || p[1] < rx->nparens) {
+#ifdef PERL_COPY_ON_WRITE
+	i = 7 + rx->nparens * 2;
+#else
 	i = 6 + rx->nparens * 2;
+#endif
 	if (!p)
 	    New(501, p, i, UV);
 	else
@@ -254,6 +273,11 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
 
     *p++ = PTR2UV(RX_MATCH_COPIED(rx) ? rx->subbeg : Nullch);
     RX_MATCH_COPIED_off(rx);
+
+#ifdef PERL_COPY_ON_WRITE
+    *p++ = PTR2UV(rx->saved_copy);
+    rx->saved_copy = Nullsv;
+#endif
 
     *p++ = rx->nparens;
 
@@ -271,10 +295,16 @@ Perl_rxres_restore(pTHX_ void **rsp, REGEXP *rx)
     UV *p = (UV*)*rsp;
     U32 i;
 
-    if (RX_MATCH_COPIED(rx))
-	Safefree(rx->subbeg);
+    RX_MATCH_COPY_FREE(rx);
     RX_MATCH_COPIED_set(rx, *p);
     *p++ = 0;
+
+#ifdef PERL_COPY_ON_WRITE
+    if (rx->saved_copy)
+	SvREFCNT_dec (rx->saved_copy);
+    rx->saved_copy = INT2PTR(SV*,*p);
+    *p++ = 0;
+#endif
 
     rx->nparens = *p++;
 
@@ -293,6 +323,11 @@ Perl_rxres_free(pTHX_ void **rsp)
 
     if (p) {
 	Safefree(INT2PTR(char*,*p));
+#ifdef PERL_COPY_ON_WRITE
+	if (p[1]) {
+	    SvREFCNT_dec (INT2PTR(SV*,p[1]));
+	}
+#endif
 	Safefree(p);
 	*rsp = Null(void*);
     }
@@ -320,7 +355,9 @@ PP(pp_formline)
     bool gotsome = FALSE;
     STRLEN len;
     STRLEN fudge = SvCUR(tmpForm) * (IN_BYTES ? 1 : 3) + 1;
-    bool item_is_utf = FALSE;
+    bool item_is_utf8 = FALSE;
+    bool targ_is_utf8 = FALSE;
+    SV * nsv = Nullsv;
 
     if (!SvMAGICAL(tmpForm) || !SvCOMPILED(tmpForm)) {
 	if (SvREADONLY(tmpForm)) {
@@ -331,8 +368,9 @@ PP(pp_formline)
 	else
 	    doparseform(tmpForm);
     }
-
     SvPV_force(PL_formtarget, len);
+    if (DO_UTF8(PL_formtarget))
+	targ_is_utf8 = TRUE;
     t = SvGROW(PL_formtarget, len + fudge + 1);  /* XXX SvCUR bad */
     t += len;
     f = SvPV(tmpForm, len);
@@ -379,6 +417,21 @@ PP(pp_formline)
 
 	case FF_LITERAL:
 	    arg = *fpc++;
+	    if (targ_is_utf8 && !SvUTF8(tmpForm)) {
+		SvCUR_set(PL_formtarget, t - SvPVX(PL_formtarget));
+		*t = '\0';
+		sv_catpvn_utf8_upgrade(PL_formtarget, f, arg, nsv);
+		t = SvEND(PL_formtarget);
+		break;
+	    }
+	    if (!targ_is_utf8 && DO_UTF8(tmpForm)) {
+		SvCUR_set(PL_formtarget, t - SvPVX(PL_formtarget));
+		*t = '\0';
+		sv_utf8_upgrade(PL_formtarget);
+		SvGROW(PL_formtarget, SvCUR(PL_formtarget) + fudge + 1);
+		t = SvEND(PL_formtarget);
+		targ_is_utf8 = TRUE;
+	    }
 	    while (arg--)
 		*t++ = *f++;
 	    break;
@@ -423,13 +476,13 @@ PP(pp_formline)
 			    break;
 			s++;
 		    }
-		    item_is_utf = TRUE;
+		    item_is_utf8 = TRUE;
 		    itemsize = s - item;
 		    sv_pos_b2u(sv, &itemsize);
 		    break;
 		}
 	    }
-	    item_is_utf = FALSE;
+	    item_is_utf8 = FALSE;
 	    if (itemsize > fieldsize)
 		itemsize = fieldsize;
 	    send = chophere = s + itemsize;
@@ -484,11 +537,11 @@ PP(pp_formline)
 			itemsize = chophere - item;
 			sv_pos_b2u(sv, &itemsize);
 		    }
-		    item_is_utf = TRUE;
+		    item_is_utf8 = TRUE;
 		    break;
 		}
 	    }
-	    item_is_utf = FALSE;
+	    item_is_utf8 = FALSE;
 	    if (itemsize <= fieldsize) {
 		send = chophere = s + itemsize;
 		while (s < send) {
@@ -544,7 +597,15 @@ PP(pp_formline)
 	case FF_ITEM:
 	    arg = itemsize;
 	    s = item;
-	    if (item_is_utf) {
+	    if (item_is_utf8) {
+		if (!targ_is_utf8) {
+		    SvCUR_set(PL_formtarget, t - SvPVX(PL_formtarget));
+		    *t = '\0';
+		    sv_utf8_upgrade(PL_formtarget);
+		    SvGROW(PL_formtarget, SvCUR(PL_formtarget) + fudge + 1);
+		    t = SvEND(PL_formtarget);
+		    targ_is_utf8 = TRUE;
+		}
 		while (arg--) {
 		    if (UTF8_IS_CONTINUED(*s)) {
 			STRLEN skip = UTF8SKIP(s);
@@ -567,6 +628,21 @@ PP(pp_formline)
 			if ( !((*t++ = *s++) & ~31) )
 			    t[-1] = ' ';
 		    }
+		}
+		break;
+	    }
+	    if (targ_is_utf8 && !item_is_utf8) {
+		SvCUR_set(PL_formtarget, t - SvPVX(PL_formtarget));
+		*t = '\0';
+		sv_catpvn_utf8_upgrade(PL_formtarget, s, arg, nsv);
+		for (; t < SvEND(PL_formtarget); t++) {
+#ifdef EBCDIC
+		    int ch = *t++ = *s++;
+		    if (iscntrl(ch))
+#else
+		    if (!(*t & ~31))
+#endif
+			*t = ' ';
 		}
 		break;
 	    }
@@ -593,22 +669,32 @@ PP(pp_formline)
 	case FF_LINEGLOB:
 	    item = s = SvPV(sv, len);
 	    itemsize = len;
-	    item_is_utf = FALSE;		/* XXX is this correct? */
+	    if ((item_is_utf8 = DO_UTF8(sv)))
+		itemsize = sv_len_utf8(sv);	    
 	    if (itemsize) {
+		bool chopped = FALSE;
 		gotsome = TRUE;
-		send = s + itemsize;
+		send = s + len;
 		while (s < send) {
 		    if (*s++ == '\n') {
-			if (s == send)
+			if (s == send) {
 			    itemsize--;
+			    chopped = TRUE;
+			}
 			else
 			    lines++;
 		    }
 		}
 		SvCUR_set(PL_formtarget, t - SvPVX(PL_formtarget));
-		sv_catpvn(PL_formtarget, item, itemsize);
+		if (targ_is_utf8)
+		    SvUTF8_on(PL_formtarget);
+		sv_catsv(PL_formtarget, sv);
+		if (chopped)
+		    SvCUR_set(PL_formtarget, SvCUR(PL_formtarget) - 1);
 		SvGROW(PL_formtarget, SvCUR(PL_formtarget) + fudge + 1);
 		t = SvPVX(PL_formtarget) + SvCUR(PL_formtarget);
+		if (item_is_utf8)
+		    targ_is_utf8 = TRUE;
 	    }
 	    break;
 
@@ -704,6 +790,8 @@ PP(pp_formline)
 			if (strnEQ(linemark, linemark - arg, arg))
 			    DIE(aTHX_ "Runaway format");
 		    }
+		    if (targ_is_utf8)
+			SvUTF8_on(PL_formtarget);
 		    FmLINES(PL_formtarget) = lines;
 		    SP = ORIGMARK;
 		    RETURNOP(cLISTOP->op_first);
@@ -743,6 +831,8 @@ PP(pp_formline)
 	case FF_END:
 	    *t = '\0';
 	    SvCUR_set(PL_formtarget, t - SvPVX(PL_formtarget));
+	    if (targ_is_utf8)
+		SvUTF8_on(PL_formtarget);
 	    FmLINES(PL_formtarget) += lines;
 	    SP = ORIGMARK;
 	    RETPUSHYES;
@@ -1545,8 +1635,18 @@ PP(pp_caller)
 		(old_warnings == pWARN_STD && (PL_dowarn & G_WARN_ON) == 0))
             mask = newSVpvn(WARN_NONEstring, WARNsize) ;
         else if (old_warnings == pWARN_ALL ||
-		  (old_warnings == pWARN_STD && PL_dowarn & G_WARN_ON))
-            mask = newSVpvn(WARN_ALLstring, WARNsize) ;
+		  (old_warnings == pWARN_STD && PL_dowarn & G_WARN_ON)) {
+	    /* Get the bit mask for $warnings::Bits{all}, because
+	     * it could have been extended by warnings::register */
+	    SV **bits_all;
+	    HV *bits = get_hv("warnings::Bits", FALSE);
+	    if (bits && (bits_all=hv_fetch(bits, "all", 3, FALSE))) {
+		mask = newSVsv(*bits_all);
+	    }
+	    else {
+		mask = newSVpvn(WARN_ALLstring, WARNsize) ;
+	    }
+	}
         else
             mask = newSVsv(old_warnings);
         PUSHs(sv_2mortal(mask));

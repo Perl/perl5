@@ -129,8 +129,6 @@ sub configure {
 			or return _error($sock, $!, $@);
     }
 
-    $sock->blocking($arg->{Blocking}) if defined $arg->{Blocking};
-
     $proto ||= (getprotobyname('tcp'))[2];
 
     my $pname = (getprotobynumber($proto))[0];
@@ -148,6 +146,11 @@ sub configure {
 
 	$sock->socket(AF_INET, $type, $proto) or
 	    return _error($sock, $!, "$!");
+
+        if (defined $arg->{Blocking}) {
+	    defined $sock->blocking($arg->{Blocking})
+		or return _error($sock, $!, "$!");
+	}
 
 	if ($arg->{Reuse} || $arg->{ReuseAddr}) {
 	    $sock->sockopt(SO_REUSEADDR,1) or

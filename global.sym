@@ -1,7 +1,7 @@
 #
 #    global.sym
 #
-#    Copyright (c) 1997-2002, Larry Wall
+#    Copyright (c) 1997-2003, Larry Wall
 #
 #    You may distribute under the terms of either the GNU General Public
 #    License or the Artistic License, as specified in the README file.
@@ -450,6 +450,7 @@ Perl_sv_dump
 Perl_sv_derived_from
 Perl_sv_eq
 Perl_sv_free
+Perl_sv_free2
 Perl_sv_gets
 Perl_sv_grow
 Perl_sv_inc
@@ -605,6 +606,7 @@ Perl_sys_intern_clear
 Perl_sys_intern_init
 Perl_custom_op_name
 Perl_custom_op_desc
+Perl_sv_release_IVX
 Perl_sv_nosharing
 Perl_sv_nolocking
 Perl_sv_nounlocking
@@ -618,6 +620,7 @@ Perl_sv_2pv_flags
 Perl_sv_copypv
 Perl_my_atof2
 Perl_my_socketpair
+Perl_sv_setsv_cow
 Perl_PerlIO_close
 Perl_PerlIO_fill
 Perl_PerlIO_fileno

@@ -1,6 +1,6 @@
 /*    sv.h
  *
- *    Copyright (c) 1991-2002, Larry Wall
+ *    Copyright (c) 1991-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -138,7 +138,22 @@ perform the upgrade if necessary.  See C<svtype>.
 	((PL_Sv=(SV*)(sv)), (PL_Sv && ++(SvREFCNT(PL_Sv))), (SV*)PL_Sv)
 #endif
 
+#if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
+#  define SvREFCNT_dec(sv)		\
+    ({					\
+	SV *nsv = (SV*)(sv);		\
+	if (nsv) {			\
+	    if (SvREFCNT(nsv)) {	\
+		if (--(SvREFCNT(nsv)) == 0) \
+		    Perl_sv_free2(aTHX_ nsv);	\
+	    } else {			\
+		sv_free(nsv);		\
+	    }				\
+	}				\
+    })
+#else
 #define SvREFCNT_dec(sv)	sv_free((SV*)(sv))
+#endif
 
 #define SVTYPEMASK	0xff
 #define SvTYPE(sv)	((sv)->sv_flags & SVTYPEMASK)
@@ -1054,6 +1069,12 @@ otherwise.
 #  define SvRELEASE_IVX(sv)   ((void)((SvFLAGS(sv) & (SVf_OOK|SVf_READONLY|SVf_FAKE)) \
 				&& Perl_sv_release_IVX(aTHX_ sv)))
 #  define SvIsCOW_normal(sv)	(SvIsCOW(sv) && SvLEN(sv))
+
+#define CAN_COW_MASK	(SVs_OBJECT|SVs_GMG|SVs_SMG|SVs_RMG|SVf_IOK|SVf_NOK| \
+			 SVf_POK|SVf_ROK|SVp_IOK|SVp_NOK|SVp_POK|SVf_FAKE| \
+			 SVf_OOK|SVf_BREAK|SVf_READONLY|SVf_AMAGIC)
+#define CAN_COW_FLAGS	(SVp_POK|SVf_POK)
+
 #else
 #  define SvRELEASE_IVX(sv)   ((void)SvOOK_off(sv))
 #endif /* PERL_COPY_ON_WRITE */
@@ -1081,6 +1102,17 @@ otherwise.
 #define sv_pvn_force(sv, lp) sv_pvn_force_flags(sv, lp, SV_GMAGIC)
 #define sv_utf8_upgrade(sv) sv_utf8_upgrade_flags(sv, SV_GMAGIC)
 
+/* Should be named SvCatPVN_utf8_upgrade? */
+#define sv_catpvn_utf8_upgrade(dsv, sstr, slen, nsv)	\
+	STMT_START {					\
+	    if (!(nsv))					\
+		nsv = sv_2mortal(newSVpvn(sstr, slen));	\
+	    else					\
+		sv_setpvn(nsv, sstr, slen);		\
+	    SvUTF8_off(nsv);				\
+	    sv_utf8_upgrade(nsv);			\
+	    sv_catsv(dsv, nsv);	\
+	} STMT_END
 
 /*
 =for apidoc Am|SV*|newRV_inc|SV* sv
@@ -1177,6 +1209,7 @@ Returns a pointer to the character buffer.
 		SvSetSV_and(dst,src,SvSETMAGIC(dst))
 #define SvSetMagicSV_nosteal(dst,src) \
 		SvSetSV_nosteal_and(dst,src,SvSETMAGIC(dst))
+
 
 #if !defined(SKIP_DEBUGGING)
 #define SvPEEK(sv) sv_peek(sv)

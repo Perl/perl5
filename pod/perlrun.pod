@@ -270,34 +270,49 @@ An alternate delimiter may be specified using B<-F>.
 The C<-C> flag controls some Unicode of the Perl Unicode features.
 
 As of 5.8.1, the C<-C> can be followed either by a number or a list
-of option letters.
+of option letters.  The letters, their numeric values, and effects
+are as follows; listing the letters is equal to summing the numbers.
 
-    I    0x0001    STDIN is assumed to be in UTF-8
-    O    0x0002    STDOUT will be in UTF-8
-    E    0x0004    STDERR will be in UTF-8
-    S    0x0007    I + O + E
-    i    0x0008    the default input layer expects UTF-8
-    o    0x0010    the default output layer enforces UTF-8
-    D    0x0018    i + o
-    A    0x0020    the @ARGV elements are supposed to be in UTF-8
-    L    0x0040    normally the IOEio (SD) are unconditional,
-                   the L makes them conditional on the locale environment
-                   variables (the LC_ALL, LC_TYPE, and LANG; in the order
-                   of decreasing precedence)
+    I     1    STDIN is assumed to be in UTF-8
+    O     2    STDOUT will be in UTF-8
+    E     4    STDERR will be in UTF-8
+    S     7    I + O + E
+    i     8    UTF-8 is the default PerlIO layer for input streams
+    o    16    UTF-8 is the default PerlIO layer for output streams
+    D    24    i + o
+    A    32    the @ARGV elements are expected to be strings encoded in UTF-8
+    L    64    normally the "IOEioA" are unconditional,
+               the L makes them conditional on the locale environment
+               variables (the LC_ALL, LC_TYPE, and LANG, in the order
+               of decreasing precedence) -- if the variables indicate
+               UTF-8, then the selected "IOEioA" are in effect
 
-The C<-C> on its own (not followed by any number or option list) has
-the same effect as <-CSDL>.  In other words, the standard I/O handles
-and the default C<open()> layer are UTF-8-fied B<but> only if the locale
-environment variables indicate a UTF-8 locale.  This behavior follows
-the I<implicit> behaviour of Perl 5.8.0.
+For example, C<-COE> and C<-C6> will both turn on UTF-8-ness on both
+STDOUT and STDERR.  Repeating letters is just redundant, not cumulative
+nor toggling.
 
-You can use C<-C0> to explicitly disable all the above Unicode features.
+The C<io> options mean that any subsequent open() (or similar I/O
+operations) will have the C<:utf8> PerlIO layer implicitly applied
+to them, in other words, UTF-8 is expected from any input stream,
+and UTF-8 is produced to any output stream.  This is just the default,
+with explicit layers in open() and with binmode() one can manipulate
+streams as usual.
 
-See L<perluniintro>, L<perlfunc/open>, and L<open> for more information.
+C<-C> on its own (not followed by any number or option list), or the
+empty string C<""> for the C<$ENV{PERL_UNICODE}, has the same effect
+as <-CSDL>.  In other words, the standard I/O handles and the default
+C<open()> layer are UTF-8-fied B<but> only if the locale environment
+variables indicate a UTF-8 locale.  This behaviour follows the
+I<implicit> (and problematic) UTF-8 behaviour of Perl 5.8.0.
 
-The magic variable C<${^UNICODE}> reflects the state of this setting,
-see L<perlvar/"${^UNICODE}">.  (Another way of setting this variable
-is to set the environment variable PERL_UNICODE.)
+You can use C<-C0> (or C<"0"> for $ENV{PERL_UNICODE}) to explicitly
+disable all the above Unicode features.
+
+The read-only magic variable C<${^UNICODE}> reflects the numeric value
+of this setting.  This is variable is set during Perl startup and is
+thereafter read-only.  If you want runtime effects, use the three-arg
+open() (see L<perlfunc/open), the two-arg binmode() (see L<perlfunc/binmode>),
+and the C<open> pragma (see L<open>).
 
 (In Perls earlier than 5.8.1 the C<-C> switch was a Win32-only switch
 that enabled the use of Unicode-aware "wide system call" Win32 APIs.
@@ -1078,9 +1093,20 @@ affect perl on VMS include PERLSHR, PERL_ENV_TABLES, and
 SYS$TIMEZONE_DIFFERENTIAL but are optional and discussed further in
 L<perlvms> and in F<README.vms> in the Perl source distribution.
 
+=item PERL_SIGNALS
+
+In Perls 5.8.1 and later.  If set to C<unsafe> the pre-Perl-5.8.0
+signals behaviour (immediate but unsafe) is restored.  If set to
+C<safe> the safe signals are used.
+
 =item PERL_UNICODE
 
-Equivalent to the B<-C> command-line switch.
+Equivalent to the B<-C> command-line switch.  Note that this is not
+a boolean variable-- setting this to C<"1"> is not the right way to
+"enable Unicode" (whatever that would mean).  You can use C<"0"> to
+"disable Unicode", though (or alternatively unset PERL_UNICODE in
+your shell before starting Perl).  See the description of the C<-C>
+switch for more information.
 
 =item SYS$LOGIN (specific to the VMS port)
 

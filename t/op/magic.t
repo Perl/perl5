@@ -36,7 +36,7 @@ sub skip {
     return 1;
 }
 
-print "1..50\n";
+print "1..52\n";
 
 $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_NetWare = $^O eq 'NetWare';
@@ -67,7 +67,7 @@ ok $!, $!;
 close FOO; # just mention it, squelch used-only-once
 
 if ($Is_MSWin32 || $Is_NetWare || $Is_Dos || $Is_MPE || $Is_MacOS) {
-    skip('SIGINT not safe on this platform') for 1..2;
+    skip('SIGINT not safe on this platform') for 1..4;
 }
 else {
   # the next tests are done in a subprocess because sh spits out a
@@ -98,7 +98,35 @@ END
 
     close CMDPIPE;
 
-    $test += 2;
+    open( CMDPIPE, "| $PERL");
+    print CMDPIPE <<'END';
+
+    { package X;
+	sub DESTROY {
+	    kill "INT",$$;
+	}
+    }
+    sub x {
+	my $x=bless [], 'X';
+	return sub { $x };
+    }
+    $| = 1;		# command buffering
+    $SIG{"INT"} = "ok5";
+    {
+	local $SIG{"INT"}=x();
+	print ""; # Needed to expose failure in 5.8.0 (why?)
+    }
+    sleep 1;
+    delete $SIG{"INT"};
+    kill "INT",$$; sleep 1;
+    sub ok5 {
+	print "ok 5\n";
+    }
+END
+    close CMDPIPE;
+    print $? & 0xFF ? "ok 6\n" : "not ok 6\n";
+
+    $test += 4;
 }
 
 # can we slice ENV?

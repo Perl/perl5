@@ -1,6 +1,6 @@
 /*    cv.h
  *
- *    Copyright (c) 1991-2002, Larry Wall
+ *    Copyright (c) 1991-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -82,9 +82,10 @@ Returns the stash of the CV.
 #define CVf_LVALUE	0x0100  /* CV return value can be used as lvalue */
 #define CVf_CONST	0x0200  /* inlinable sub */
 #define CVf_WEAKOUTSIDE	0x0400  /* CvOUTSIDE isn't ref counted */
+#define CVf_ASSERTION   0x0800  /* CV called only when asserting */
 
 /* This symbol for optimised communication between toke.c and op.c: */
-#define CVf_BUILTIN_ATTRS	(CVf_METHOD|CVf_LOCKED|CVf_LVALUE)
+#define CVf_BUILTIN_ATTRS	(CVf_METHOD|CVf_LOCKED|CVf_LVALUE|CVf_ASSERTION)
 
 #define CvCLONE(cv)		(CvFLAGS(cv) & CVf_CLONE)
 #define CvCLONE_on(cv)		(CvFLAGS(cv) |= CVf_CLONE)
@@ -123,6 +124,10 @@ Returns the stash of the CV.
 #define CvLVALUE(cv)		(CvFLAGS(cv) & CVf_LVALUE)
 #define CvLVALUE_on(cv)		(CvFLAGS(cv) |= CVf_LVALUE)
 #define CvLVALUE_off(cv)	(CvFLAGS(cv) &= ~CVf_LVALUE)
+
+#define CvASSERTION(cv)		(CvFLAGS(cv) & CVf_ASSERTION)
+#define CvASSERTION_on(cv)	(CvFLAGS(cv) |= CVf_ASSERTION)
+#define CvASSERTION_off(cv)	(CvFLAGS(cv) &= ~CVf_ASSERTION)
 
 #define CvEVAL(cv)		(CvUNIQUE(cv) && !SvFAKE(cv))
 #define CvEVAL_on(cv)		(CvUNIQUE_on(cv),SvFAKE_off(cv))

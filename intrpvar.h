@@ -120,6 +120,7 @@ PERLVAR(IDBsub,		GV *)
 PERLVAR(IDBsingle,	SV *)
 PERLVAR(IDBtrace,	SV *)
 PERLVAR(IDBsignal,	SV *)
+PERLVAR(IDBassertion,   SV *)
 PERLVAR(Ilineary,	AV *)		/* lines of script for debugger */
 PERLVAR(Idbargs,	AV *)		/* args to call listed by caller function */
 
@@ -496,6 +497,8 @@ PERLVARI(Iclocktick, long, 0)	/* this many times() ticks in a second */
 PERLVARI(Iin_load_module, int, 0)	/* to prevent recursions in PerlIO_find_layer */
 
 PERLVAR(Iunicode, U32)	/* Unicode features: $ENV{PERL_UNICODE} or -C */
+
+PERLVAR(Isignals, U32)	/* Using which pre-5.8 signals */
 
 /* New variables must be added to the very end, before this comment,
  * for binary compatibility (the offsets of the old members must not change).

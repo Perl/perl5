@@ -4449,15 +4449,19 @@ vms_image_init(int *argcp, char ***argvp)
    * hasn't been allocated when vms_image_init() is called.
    */
   if (will_taint) {
-    char ***newap;
-    New(1320,newap,*argcp+2,char **);
-    newap[0] = argvp[0];
-    *newap[1] = "-T";
-    Copy(argvp[1],newap[2],*argcp-1,char **);
+    char **newargv, **oldargv;
+    oldargv = *argvp;
+    New(1320,newargv,(*argcp)+2,char *);
+    newargv[0] = oldargv[0];
+    New(1320,newargv[1],3,char);
+    strcpy(newargv[1], "-T");
+    Copy(&oldargv[1],&newargv[2],(*argcp)-1,char **);
+    (*argcp)++;
+    newargv[*argcp] = NULL;
     /* We orphan the old argv, since we don't know where it's come from,
      * so we don't know how to free it.
      */
-    *argcp++; argvp = newap;
+    *argvp = newargv;
   }
   else {  /* Did user explicitly request tainting? */
     int i;

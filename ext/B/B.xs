@@ -95,7 +95,8 @@ cc_opclass(pTHX_ OP *o)
 	return ((o->op_private & OPpASSIGN_BACKWARDS) ? OPc_UNOP : OPc_BINOP);
 
 #ifdef USE_ITHREADS
-    if (o->op_type == OP_GV || o->op_type == OP_GVSV || o->op_type == OP_AELEMFAST)
+    if (o->op_type == OP_GV || o->op_type == OP_GVSV ||
+	o->op_type == OP_AELEMFAST || o->op_type == OP_RCATLINE)
 	return OPc_PADOP;
 #endif
 

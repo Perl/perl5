@@ -1,7 +1,7 @@
 package DB;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
-$VERSION = 1.19;
+$VERSION = 1.20;
 $header  = "perl5db.pl version $VERSION";
 
 # It is crucial that there is no lexicals in scope of `eval ""' down below
@@ -79,7 +79,6 @@ sub eval {
 # true if $deep is not defined.
 #
 # $Log:	perldb.pl,v $
-
 #
 # At start reads $rcfile that may set important options.  This file
 # may define a subroutine &afterinit that will be executed after the
@@ -320,12 +319,25 @@ sub eval {
 #   + fixed missing cmd_O bug
 # Changes: 1.19: Mar 29, 2002 Spider Boardman
 #   + Added missing local()s -- DB::DB is called recursively.
+# Changes: 1.20: Feb 17, 2003 Richard Foley <richard.foley@rfi.net>
+#   + pre'n'post commands no longer trashed with no args
+#   + watch val joined out of eval()
 # 
 ####################################################################
 
 # Needed for the statement after exec():
 
 BEGIN { $ini_warn = $^W; $^W = 0 } # Switch compilation warnings off until another BEGIN.
+
+# test if assertions are supported and actived:
+BEGIN {
+    $ini_assertion=
+	eval "sub asserting_test : assertion {1}; 1";
+    # $ini_assertion = undef => assertions unsupported,
+    #        "       = 1     => assertions suported
+    # print "\$ini_assertion=$ini_assertion\n";
+}
+
 local($^W) = 0;			# Switch run-time warnings off during init.
 warn (			# Do not ;-)
       $dumpvar::hashDepth,     
@@ -359,7 +371,10 @@ $inhibit_exit = $option{PrintRet} = 1;
 		  recallCommand ShellBang pager tkRunning ornaments
 		  signalLevel warnLevel dieLevel inhibit_exit
 		  ImmediateStop bareStringify CreateTTY
-		  RemotePort windowSize);
+		  RemotePort windowSize DollarCaretP OnlyAssertions
+		  WarnAssertions);
+
+@RememberOnROptions = qw(DollarCaretP OnlyAssertions);
 
 %optionVars    = (
 		 hashDepth	=> \$dumpvar::hashDepth,
@@ -381,6 +396,7 @@ $inhibit_exit = $option{PrintRet} = 1;
 		 ImmediateStop	=> \$ImmediateStop,
 		 RemotePort	=> \$remoteport,
 		 windowSize	=> \$window,
+		 WarnAssertions => \$warnassertions,
 );
 
 %optionAction  = (
@@ -401,6 +417,8 @@ $inhibit_exit = $option{PrintRet} = 1;
 		  tkRunning	=> \&tkRunning,
 		  ornaments	=> \&ornaments,
 		  RemotePort	=> \&RemotePort,
+		  DollarCaretP  => \&DollarCaretP,
+		  OnlyAssertions=> \&OnlyAssertions,
 		 );
 
 %optionRequire = (
@@ -693,7 +711,7 @@ sub DB {
       for (my $n = 0; $n <= $#to_watch; $n++) {
 		$evalarg = $to_watch[$n];
 		local $onetimeDump;	# Do not output results
-		my ($val) = &eval;	# Fix context (&eval is doing array)?
+		my ($val) = join("', '", &eval);	# Fix context (&eval is doing array)? - rjsf
 		$val = ( (defined $val) ? "'$val'" : 'undef' );
 		if ($val ne $old_watch[$n]) {
 		  $signal = 1;
@@ -896,90 +914,12 @@ EOP
 			$start = 1 if $start <= 0;
 			$incr = $window - 1;
 			$cmd = 'l ' . ($start) . '+'; };
-			# rjsf ->
-		  $cmd =~ /^([aAbBhlLMoOvwW])\b\s*(.*)/s && do { 
+			# rjsf     ->
+		  $cmd =~ /^([aAbBhlLMoOPvwW]\b|[<>\{]{1,2})\s*(.*)/so && do { 
 				&cmd_wrapper($1, $2, $line); 
 				next CMD; 
 			};
-			# <- rjsf
-		  $cmd =~ /^\<\<\s*(.*)/ && do { # \<\< for CPerl sake: not HERE
-			push @$pre, action($1);
-			next CMD; };
-		    $cmd =~ /^>>\s*(.*)/ && do {
-			push @$post, action($1);
-			next CMD; };
-		    $cmd =~ /^<\s*(.*)/ && do {
-			unless ($1) {
-			    print $OUT "All < actions cleared.\n";
-			    $pre = [];
-			    next CMD;
-			} 
-			if ($1 eq '?') {
-			    unless (@$pre) {
-				print $OUT "No pre-prompt Perl actions.\n";
-				next CMD;
-			    } 
-			    print $OUT "Perl commands run before each prompt:\n";
-			    for my $action ( @$pre ) {
-				print $OUT "\t< -- $action\n";
-			    } 
-			    next CMD;
-			} 
-			$pre = [action($1)];
-			next CMD; };
-		    $cmd =~ /^>\s*(.*)/ && do {
-			unless ($1) {
-			    print $OUT "All > actions cleared.\n";
-			    $post = [];
-			    next CMD;
-			}
-			if ($1 eq '?') {
-			    unless (@$post) {
-				print $OUT "No post-prompt Perl actions.\n";
-				next CMD;
-			    } 
-			    print $OUT "Perl commands run after each prompt:\n";
-			    for my $action ( @$post ) {
-				print $OUT "\t> -- $action\n";
-			    } 
-			    next CMD;
-			} 
-			$post = [action($1)];
-			next CMD; };
-		    $cmd =~ /^\{\{\s*(.*)/ && do {
-			if ($cmd =~ /^\{.*\}$/ && unbalanced(substr($cmd,2))) { 
-			    print $OUT "{{ is now a debugger command\n",
-				"use `;{{' if you mean Perl code\n";
-			    $cmd = "h {{";
-			    redo CMD;
-			} 
-			push @$pretype, $1;
-			next CMD; };
-		    $cmd =~ /^\{\s*(.*)/ && do {
-			unless ($1) {
-			    print $OUT "All { actions cleared.\n";
-			    $pretype = [];
-			    next CMD;
-			}
-			if ($1 eq '?') {
-			    unless (@$pretype) {
-				print $OUT "No pre-prompt debugger actions.\n";
-				next CMD;
-			    } 
-			    print $OUT "Debugger commands run before each prompt:\n";
-			    for my $action ( @$pretype ) {
-				print $OUT "\t{ -- $action\n";
-			    } 
-			    next CMD;
-			} 
-			if ($cmd =~ /^\{.*\}$/ && unbalanced(substr($cmd,1))) { 
-			    print $OUT "{ is now a debugger command\n",
-				"use `;{' if you mean Perl code\n";
-			    $cmd = "h {";
-			    redo CMD;
-			} 
-			$pretype = [$1];
-			next CMD; };
+			# rjsf <- pre|post commands stripped out
                    $cmd =~ /^y(?:\s+(\d*)\s*(.*))?$/ && do {
                        eval { require PadWalker; PadWalker->VERSION(0.08) }
                          or &warn($@ =~ /locate/
@@ -1054,6 +994,10 @@ EOP
 		        print $OUT "Warning: some settings and command-line options may be lost!\n";
 			my (@script, @flags, $cl);
 			push @flags, '-w' if $ini_warn;
+			if ($ini_assertion and @{^ASSERTING}) {
+			    push @flags, (map { /\:\^\(\?\:(.*)\)\$\)/ ?
+						"-A$1" : "-A$_" } @{^ASSERTING});
+			}
 			# Put all the old includes at the start to get
 			# the same debugger.
 			for (@ini_INC) {
@@ -1075,7 +1019,7 @@ EOP
 				 ? $term->GetHistory : @hist);
 			my @had_breakpoints = keys %had_breakpoints;
 			set_list("PERLDB_VISITED", @had_breakpoints);
-			set_list("PERLDB_OPT", %option);
+			set_list("PERLDB_OPT", options2remember());
 			set_list("PERLDB_ON_LOAD", %break_on_load);
 			my @hard;
 			for (0 .. $#had_breakpoints) {
@@ -1137,8 +1081,8 @@ EOP
 		    $cmd =~ /^T$/ && do {
 			print_trace($OUT, 1); # skip DB
 			next CMD; };
-		    $cmd =~ /^w\b\s*(.*)/s && do { &cmd_w($1); next CMD; };
-		    $cmd =~ /^W\b\s*(.*)/s && do { &cmd_W($1); next CMD; };
+		    $cmd =~ /^w\b\s*(.*)/s && do { &cmd_w('w', $1); next CMD; };
+		    $cmd =~ /^W\b\s*(.*)/s && do { &cmd_W('W', $1); next CMD; };
 		    $cmd =~ /^\/(.*)$/ && do {
 			$inpat = $1;
 			$inpat =~ s:([^\\])/$:$1:;
@@ -1389,7 +1333,19 @@ sub sub {
 	 print_trace($LINEINFO, -1, 1, 1, "$sub$al") )
      : print_lineinfo(' ' x ($stack_depth - 1), "entering $sub$al\n")) if $frame;
     if (wantarray) {
-	@ret = &$sub;
+        if ($assertion) {
+            $assertion=0;
+	    eval {
+	        @ret = &$sub;
+	    };
+	    if ($@) {
+	      print $OUT $@;
+	      $signal=1 unless $warnassertions;
+	    }
+	}
+	else {
+	    @ret = &$sub;
+	}
 	$single |= $stack[$stack_depth--];
 	($frame & 4 
 	 ? ( print_lineinfo(' ' x $stack_depth, "out "), 
@@ -1405,11 +1361,24 @@ sub sub {
 	}
 	@ret;
     } else {
-        if (defined wantarray) {
-	    $ret = &$sub;
-        } else {
-            &$sub; undef $ret;
-        };
+        if ($assertion) {
+	    $assertion=0;
+	    eval {
+	        $ret = &$sub;
+	    };
+	    if ($@) {
+	      print $OUT $@;
+	      $signal=1 unless $warnassertions;
+	    }
+	    $ret=undef unless defined wantarray;
+	}
+	else {
+	    if (defined wantarray) {
+	        $ret = &$sub;
+	    } else {
+	        &$sub; undef $ret;
+	    }
+	}
 	$single |= $stack[$stack_depth--];
 	($frame & 4 
 	 ? (  print_lineinfo(' ' x $stack_depth, "out "),
@@ -1435,7 +1404,7 @@ sub sub {
 ### returns FALSE on error.
 ### User-interface functions cmd_* output error message.
 
-### Note all cmd_[a-zA-Z]'s require $line, $dblineno as first arguments
+### Note all cmd_[a-zA-Z]'s require $cmd, $line, $dblineno as first arguments
 
 my %set = ( # 
 	'pre580'	=> {
@@ -1453,6 +1422,14 @@ my %set = ( #
 		'w'	=> 'v',
 		'W'	=> 'pre580_W',
 	},
+	'pre590'	=> {
+		'<'		=> 'pre590_prepost',
+		'<<'	=> 'pre590_prepost',
+		'>'		=> 'pre590_prepost',
+		'>>'	=> 'pre590_prepost',
+		'{'		=> 'pre590_prepost',
+		'{{'	=> 'pre590_prepost',
+	},
 );
 
 sub cmd_wrapper {
@@ -1464,14 +1441,15 @@ sub cmd_wrapper {
 	# to old (pre580) or other command sets easily
 	# 
 	my $call = 'cmd_'.(
-		$set{$CommandSet}{$cmd} || $cmd
+		$set{$CommandSet}{$cmd} || ($cmd =~ /^[<>{]+/o ? 'prepost' : $cmd)
 	);
 	# print "cmd_wrapper($cmd): $CommandSet($set{$CommandSet}{$cmd}) => call($call)\n";
 
-	return &$call($line, $dblineno);
+	return &$call($cmd, $line, $dblineno);
 }
 
 sub cmd_a {
+	my $cmd    = shift; # a
 	my $line   = shift || ''; # [.|line] expr
 	my $dbline = shift; $line =~ s/^(\.|(?:[^\d]))/$dbline/;
 	if ($line =~ /^\s*(\d*)\s*(\S.+)/) {
@@ -1491,6 +1469,7 @@ sub cmd_a {
 }
 
 sub cmd_A {
+	my $cmd    = shift; # A
 	my $line   = shift || '';
 	my $dbline = shift; $line =~ s/^\./$dbline/;
 	if ($line eq '*') {
@@ -1528,6 +1507,7 @@ sub delete_action {
 }
 
 sub cmd_b {
+	my $cmd    = shift; # b
 	my $line   = shift; # [.|line] [cond]
 	my $dbline = shift; $line =~ s/^\./$dbline/;
 	if ($line =~ /^\s*$/) {
@@ -1672,6 +1652,7 @@ sub cmd_b_sub {
 }
 
 sub cmd_B {
+	my $cmd    = shift; # B
 	my $line   = ($_[0] =~ /^\./) ? $dbline : shift || ''; 
 	my $dbline = shift; $line =~ s/^\./$dbline/;
 	if ($line eq '*') {
@@ -1721,6 +1702,7 @@ sub cmd_stop {			# As on ^C, but not signal-safy.
 }
 
 sub cmd_h {
+	my $cmd    = shift; # h
 	my $line   = shift || '';
 	if ($line  =~ /^h\s*/) {
 		print_help($help);
@@ -1744,6 +1726,7 @@ sub cmd_h {
 
 sub cmd_l {
 	my $current_line = $line;
+	my $cmd    = shift; # l
 	my $line = shift;
 	$line =~ s/^-\s*$/-/;
 	if ($line =~ /^(\$.*)/s) {
@@ -1753,7 +1736,7 @@ sub cmd_l {
 		$s = CvGV_name($s);
 		print($OUT "Interpreted as: $1 $s\n");
 		$line = "$1 $s";
-		&cmd_l($s);
+		&cmd_l('l', $s);
 	} elsif ($line =~ /^([\':A-Za-z_][\':\w]*(\[.*\])?)/s) { 
 		my $s = $subname = $1;
 		$subname =~ s/\'/::/;
@@ -1778,20 +1761,20 @@ sub cmd_l {
 		$subrange =~ s/-.*/+/;
 			}
 			$line = $subrange;
-			&cmd_l($subrange);
+			&cmd_l('l', $subrange);
 		} else {
 			print $OUT "Subroutine $subname not found.\n";
 		}
 	} elsif ($line =~ /^\s*$/) {
 		$incr = $window - 1;
 		$line = $start . '-' . ($start + $incr); 
-		&cmd_l($line);
+		&cmd_l('l', $line);
 	} elsif ($line =~ /^(\d*)\+(\d*)$/) { 
 		$start = $1 if $1;
 		$incr = $2;
 		$incr = $window - 1 unless $incr;
 		$line = $start . '-' . ($start + $incr); 
-		&cmd_l($line);	
+		&cmd_l('l', $line);	
 	} elsif ($line =~ /^((-?[\d\$\.]+)([-,]([\d\$\.]+))?)?/) { 
 		$end = (!defined $2) ? $max : ($4 ? $4 : $2);
 		$end = $max if $end > $max;
@@ -1824,6 +1807,7 @@ sub cmd_l {
 }
 
 sub cmd_L {
+	my $cmd    = shift; # L
 	my $arg    = shift || 'abw'; $arg = 'abw' unless $CommandSet eq '580'; # sigh...
 	my $action_wanted = ($arg =~ /a/) ? 1 : 0;
 	my $break_wanted  = ($arg =~ /b/) ? 1 : 0;
@@ -1901,6 +1885,7 @@ sub cmd_M {
 }
 
 sub cmd_o {
+	my $cmd    = shift; # o
 	my $opt      = shift || ''; # opt[=val]
 	if ($opt =~ /^(\S.*)/) {
 		&parse_options($1);
@@ -1918,6 +1903,7 @@ sub cmd_O {
 }
 
 sub cmd_v {
+	my $cmd    = shift; # v
 	my $line = shift;
 
 	if ($line =~ /^(\d*)$/) {
@@ -1925,16 +1911,17 @@ sub cmd_v {
 		$start = $1 if $1;
 		$start -= $preview;
 		$line = $start . '-' . ($start + $incr);
-		&cmd_l($line);
+		&cmd_l('l', $line);
 	}
 }
 
 sub cmd_w {
+	my $cmd    = shift; # w
 	my $expr     = shift || '';
 	if ($expr =~ /^(\S.*)/) {
 		push @to_watch, $expr;
 		$evalarg = $expr;
-		my ($val) = &eval;
+		my ($val) = join(' ', &eval);
 		$val = (defined $val) ? "'$val'" : 'undef' ;
 		push @old_watch, $val;
 		$trace |= 2;
@@ -1944,6 +1931,7 @@ sub cmd_w {
 }
 
 sub cmd_W {
+	my $cmd    = shift; # W
 	my $expr     = shift || '';
 	if ($expr eq '*') {
 		$trace &= ~2;
@@ -1961,6 +1949,25 @@ sub cmd_W {
 	} else {
 		print $OUT "Deleting a watch-expression requires an expression, or '*' for all\n"; # hint
 	}
+}
+
+
+
+sub cmd_P {
+  if ($cmd =~ /^.\b\s*([+-]?)\s*(~?)\s*(\w+(\s*\|\s*\w+)*)\s*$/) {
+    my ($how, $neg, $flags)=($1, $2, $3);
+    my $acu=parse_DollarCaretP_flags($flags);
+    if (defined $acu) {
+      $acu= ~$acu if $neg;
+      if ($how eq '+') { $^P|=$acu }
+      elsif ($how eq '-') { $^P&=~$acu }
+      else { $^P=$acu }
+    }
+    # else { print $OUT "undefined acu\n" }
+  }
+  my $expanded=expand_DollarCaretP_flags($^P);
+  print $OUT "Internal Perl debugger flags:\n\$^P=$expanded\n";
+  $expanded
 }
 
 ### END of the API section
@@ -2386,6 +2393,13 @@ sub dump_option {
     printf $OUT "%20s = '%s'\n", $opt, $val;
 }
 
+sub options2remember {
+  foreach my $k (@RememberOnROptions) {
+    $option{$k}=option_val($k, 'N/A');
+  }
+  return %option;
+}
+
 sub option_val {
     my ($opt, $default)= @_;
     my $val;
@@ -2599,6 +2613,40 @@ sub NonStop {
     $runnonstop;
 }
 
+sub DollarCaretP {
+    if ($term) {
+	&warn("Some flag changes could not take effect until next 'R'!\n") if @_;
+    }
+    $^P = parse_DollarCaretP_flags(shift) if @_;
+    expand_DollarCaretP_flags($^P)
+}
+
+sub OnlyAssertions {
+    if ($term) {
+        &warn("Too late to set up OnlyAssertions mode, enabled on next 'R'!\n") if @_;
+    }
+    if (@_) {
+	unless (defined $ini_assertion) {
+	    if ($term) {
+		&warn("Current Perl interpreter doesn't support assertions");
+	    }
+	    return 0;
+	}
+	if (shift) {
+	    unless ($ini_assertion) {
+		print "Assertions will be active on next 'R'!\n";
+		$ini_assertion=1;
+	    }
+	    $^P&= ~$DollarCaretP_flags{PERLDBf_SUB};
+	    $^P|=$DollarCaretP_flags{PERLDBf_ASSERTION};
+	}
+	else {
+	    $^P|=$DollarCaretP_flags{PERLDBf_SUB};
+	}
+    }
+    !($^P & $DollarCaretP_flags{PERLDBf_SUB}) || 0;
+}
+
 sub pager {
     if (@_) {
 	$pager = shift;
@@ -2745,16 +2793,20 @@ B<m> I<expr>		Evals expression in list context, prints methods callable
 		on the first element of the result.
 B<m> I<class>		Prints methods callable via the given class.
 B<M>		Show versions of loaded modules.
+B<y> [I<n> [I<vars>]]	List lexical variables I<n> levels up from current sub
 
 B<<> ?			List Perl commands to run before each prompt.
 B<<> I<expr>		Define Perl command to run before each prompt.
 B<<<> I<expr>		Add to the list of Perl commands to run before each prompt.
+B<< *> 			Delete the list of perl commands to run before each prompt.
 B<>> ?			List Perl commands to run after each prompt.
 B<>> I<expr>		Define Perl command to run after each prompt.
 B<>>B<>> I<expr>		Add to the list of Perl commands to run after each prompt.
+B<>>B< *> 		Delete the list of Perl commands to run after each prompt.
 B<{> I<db_command>	Define debugger command to run before each prompt.
 B<{> ?			List debugger commands to run before each prompt.
 B<{{> I<db_command>	Add to the list of debugger commands to run before each prompt.
+B<{ *> 			Delete the list of debugger commands to run before each prompt.
 B<$prc> I<number>	Redo a previous command (default previous command).
 B<$prc> I<-number>	Redo number'th-to-last command.
 B<$prc> I<pattern>	Redo last command that started with I<pattern>.
@@ -3456,6 +3508,70 @@ sub clean_ENV {
     }
 }
 
+
+# PERLDBf_... flag names from perl.h
+our (%DollarCaretP_flags, %DollarCaretP_flags_r);
+BEGIN {
+  %DollarCaretP_flags =
+    ( PERLDBf_SUB =>        0x01, # Debug sub enter/exit
+      PERLDBf_LINE =>       0x02, # Keep line #
+      PERLDBf_NOOPT =>      0x04, # Switch off optimizations
+      PERLDBf_INTER =>      0x08, # Preserve more data
+      PERLDBf_SUBLINE =>    0x10, # Keep subr source lines
+      PERLDBf_SINGLE =>     0x20, # Start with single-step on
+      PERLDBf_NONAME =>     0x40, # For _SUB: no name of the subr
+      PERLDBf_GOTO =>       0x80, # Report goto: call DB::goto
+      PERLDBf_NAMEEVAL =>  0x100, # Informative names for evals
+      PERLDBf_NAMEANON =>  0x200, # Informative names for anon subs
+      PERLDBf_ASSERTION => 0x400, # Debug assertion subs enter/exit
+      PERLDB_ALL =>        0x33f, # No _NONAME, _GOTO, _ASSERTION
+    );
+
+  %DollarCaretP_flags_r=reverse %DollarCaretP_flags;
+}
+
+sub parse_DollarCaretP_flags {
+    my $flags=shift;
+    $flags=~s/^\s+//;
+    $flags=~s/\s+$//;
+    my $acu=0;
+    foreach my $f (split /\s*\|\s*/, $flags) {
+      my $value;
+      if ($f=~/^0x([[:xdigit:]]+)$/) {
+	$value=hex $1;
+      }
+      elsif ($f=~/^(\d+)$/) {
+	$value=int $1;
+      }
+      elsif ($f=~/^DEFAULT$/i) {
+	$value=$DollarCaretP_flags{PERLDB_ALL};
+      }
+      else {
+	$f=~/^(?:PERLDBf_)?(.*)$/i;
+	$value=$DollarCaretP_flags{'PERLDBf_'.uc($1)};
+	unless (defined $value) {
+	  print $OUT ("Unrecognized \$^P flag '$f'!\n",
+		      "Acceptable flags are: ".
+		      join(', ', sort keys %DollarCaretP_flags),
+		      ", and hexadecimal and decimal numbers.\n");
+	  return undef;
+	}
+      }
+      $acu|=$value;
+    }
+    $acu;
+}
+
+sub expand_DollarCaretP_flags {
+  my $DollarCaretP=shift;
+  my @bits= ( map { my $n=(1<<$_);
+		    ($DollarCaretP & $n)
+		      ? ($DollarCaretP_flags_r{$n}
+			 || sprintf('0x%x', $n))
+			: () } 0..31 );
+  return @bits ? join('|', @bits) : 0;
+}
+
 END {
   $finished = 1 if $inhibit_exit;      # So that some keys may be disabled.
   $fall_off_end = 1 unless $inhibit_exit;
@@ -3474,6 +3590,7 @@ sub cmd_pre580_null {
 }
 
 sub cmd_pre580_a {
+	my $xcmd    = shift; # 
 	my $cmd = shift;
 	if ($cmd =~ /^(\d*)\s*(.*)/) {
 		$i = $1 || $line; $j = $2;
@@ -3493,6 +3610,7 @@ sub cmd_pre580_a {
 }
 
 sub cmd_pre580_b {
+	my $xcmd    = shift; # 
 	my $cmd    = shift;
 	my $dbline = shift;
 	if ($cmd =~ /^load\b\s*(.*)/) {
@@ -3518,6 +3636,7 @@ sub cmd_pre580_b {
 }
 
 sub cmd_pre580_D {
+	my $xcmd    = shift; # 
 	my $cmd = shift;
 	if ($cmd =~ /^\s*$/) {
 		print $OUT "Deleting all breakpoints...\n";
@@ -3547,6 +3666,7 @@ sub cmd_pre580_D {
 }
 
 sub cmd_pre580_h {
+	my $xcmd    = shift; # 
 	my $cmd = shift;
 	if ($cmd =~ /^\s*$/) {
 		print_help($pre580_help);
@@ -3567,6 +3687,7 @@ sub cmd_pre580_h {
 }
 
 sub cmd_pre580_W {
+	my $xcmd    = shift; # 
 	my $cmd = shift;
 	if ($cmd =~ /^$/) { 
 		$trace &= ~2;
@@ -3581,6 +3702,67 @@ sub cmd_pre580_W {
 	}
 }
 
+sub cmd_pre590_prepost {
+	my $cmd    = shift;
+	my $line   = shift || '*'; # delete
+	my $dbline = shift;
+
+	return &cmd_prepost($cmd, $line, $dbline);
+}
+
+sub cmd_prepost { # cannot do &cmd_<(), <, <<, >>, {, {{, etc.
+	my $cmd    = shift;
+	my $line   = shift || '?';
+	
+	my $which = '';
+	my $aref  = [];
+	if ($cmd =~ /^\</o) {
+		$which = 'pre-perl';
+		$aref  = $pre;	
+	} elsif ($cmd =~ /^\>/o) {
+		$which = 'post-perl';
+		$aref  = $post;
+	} elsif ($cmd =~ /^\{/o) {
+		if ($cmd =~ /^\{.*\}$/o && unbalanced(substr($cmd,1))) { 
+			print $OUT "$cmd is now a debugger command\nuse `;$cmd' if you mean Perl code\n";
+			# $DB::cmd = "h $cmd";
+			# redo CMD;
+		}  else {
+			$which = 'pre-debugger';
+			$aref  = $pretype;
+		} 
+	} 
+
+	unless ($which) {
+		print $OUT "Confused by command: $cmd\n";
+	} else {
+		if ($line =~ /^\s*\?\s*$/o) {
+			unless (@$aref) {
+				print $OUT "No $which actions.\n";
+#				print $OUT "If you meant to delete them all - use '$cmd *' or 'o commandSet=pre590'\n"; # hint
+			} else { 
+				print $OUT "$which commands:\n";
+				foreach my $action (@$aref) {
+					print $OUT "\t$cmd -- $action\n";
+				}
+			} 
+		} else {
+			if (length($cmd) == 1) { 
+				if ($line =~ /^\s*\*\s*$/o) { 
+					@$aref = ();			# delete
+					print $OUT "All $cmd actions cleared.\n";
+				} else {
+					@$aref = action($line);	# set
+				}
+			} elsif (length($cmd) == 2) {	# append
+				push @$aref, action($line); 
+			} else {
+				print $OUT "Confused by strange length of $which command($cmd)...\n";
+			}	 
+		}	 
+	}	 
+}
+
 package DB::fake;
 
 sub at_exit {
@@ -3590,4 +3772,3 @@ sub at_exit {
 package DB;			# Do not trace this 1; below!
 
 1;
-

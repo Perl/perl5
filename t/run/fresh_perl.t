@@ -89,7 +89,7 @@ $x=2;$y=3;$x<$y ? $x : $y += 23;print $x;
 EXPECT
 25
 ########
-eval {sub bar {print "In bar";}}
+eval 'sub bar {print "In bar"}';
 ########
 system './perl -ne "print if eof" /dev/null' unless $^O eq 'MacOS'
 ########

@@ -8,12 +8,13 @@ use warnings;
 
 use Exporter ();
 
-our $VERSION   = "0.54";
+our $VERSION   = "0.55";
 our @ISA       = qw(Exporter);
-our @EXPORT_OK = qw(set_style add_callback);
+our @EXPORT_OK = qw(set_style set_style_standard add_callback
+		    concise_cv concise_main);
 
 use B qw(class ppname main_start main_root main_cv cstring svref_2object
-	 SVf_IOK SVf_NOK SVf_POK OPf_KIDS);
+	 SVf_IOK SVf_NOK SVf_POK SVf_IVisUV OPf_KIDS);
 
 my %style = 
   ("terse" =>
@@ -51,6 +52,11 @@ sub set_style {
     ($format, $gotofmt, $treefmt) = @_;
 }
 
+sub set_style_standard {
+    my($name) = @_;
+    set_style(@{$style{$name}});
+}
+
 sub add_callback {
     push @callbacks, @_;
 }
@@ -66,6 +72,23 @@ sub concise_cv {
 	walk_topdown($cv->ROOT, sub { $_[0]->concise($_[1]) }, 0);
     } else {
 	print tree($cv->ROOT, 0)
+    }
+}
+
+sub concise_main {
+    my($order) = @_;
+    sequence(main_start);
+    $curcv = main_cv;
+    if ($order eq "exec") {
+	return if class(main_start) eq "NULL";
+	walk_exec(main_start);
+    } elsif ($order eq "tree") {
+	return if class(main_root) eq "NULL";
+	print tree(main_root, 0);
+    } elsif ($order eq "basic") {
+	return if class(main_root) eq "NULL";
+	walk_topdown(main_root,
+		     sub { $_[0]->concise($_[1]) }, 0);
     }
 }
 
@@ -85,7 +108,7 @@ my $big_endian = 1;
 
 my $order = "basic";
 
-set_style(@{$style{concise}});
+set_style_standard("concise");
 
 sub compile {
     my @options = grep(/^-/, @_);
@@ -131,19 +154,7 @@ sub compile {
 	}
 	if (!@args or $do_main) {
 	    print "main program:\n" if $do_main;
-	    sequence(main_start);
-	    $curcv = main_cv;
-	    if ($order eq "exec") {
-		return if class(main_start) eq "NULL";
-		walk_exec(main_start);
-	    } elsif ($order eq "tree") {
-		return if class(main_root) eq "NULL";
-		print tree(main_root, 0);
-	    } elsif ($order eq "basic") {
-		return if class(main_root) eq "NULL";
-		walk_topdown(main_root,
-			     sub { $_[0]->concise($_[1]) }, 0);
-	    }
+	    concise_main($order);
 	}
     }
 }
@@ -216,7 +227,7 @@ sub walk_topdown {
 	    walk_topdown($kid, $sub, $level + 1);
 	}
     }
-    if (class($op) eq "PMOP" and $ {$op->pmreplroot}
+    if (class($op) eq "PMOP" and $op->pmreplroot and $ {$op->pmreplroot}
 	and $op->pmreplroot->isa("B::OP")) {
 	walk_topdown($op->pmreplroot, $sub, $level + 1);
     }
@@ -374,6 +385,8 @@ sub private_flags {
 sub concise_sv {
     my($sv, $hr) = @_;
     $hr->{svclass} = class($sv);
+    $hr->{svclass} = "UV"
+      if $hr->{svclass} eq "IV" and $sv->FLAGS & SVf_IVisUV;
     $hr->{svaddr} = sprintf("%#x", $$sv);
     if ($hr->{svclass} eq "GV") {
 	my $gv = $sv;
@@ -395,9 +408,11 @@ sub concise_sv {
 	} elsif ($sv->FLAGS & SVf_NOK) {
 	    $hr->{svval} .= $sv->NV;
 	} elsif ($sv->FLAGS & SVf_IOK) {
-	    $hr->{svval} .= $sv->IV;
+	    $hr->{svval} .= $sv->int_value;
 	} elsif ($sv->FLAGS & SVf_POK) {
 	    $hr->{svval} .= cstring($sv->PV);
+	} elsif (class($sv) eq "HV") {
+	    $hr->{svval} .= 'HASH';
 	}
 	return $hr->{svclass} . " " .  $hr->{svval};
     }
@@ -438,7 +453,7 @@ sub concise_op {
 	}
 	my $pmreplroot = $op->pmreplroot;
 	my $pmreplstart;
-	if ($$pmreplroot && $pmreplroot->isa("B::GV")) {
+	if ($pmreplroot && $$pmreplroot && $pmreplroot->isa("B::GV")) {
 	    # with C<@stash_array = split(/pat/, str);>,
 	    #  *stash_array is stored in pmreplroot.
 	    $h{arg} = "($precomp => \@" . $pmreplroot->NAME . ")";
@@ -477,6 +492,9 @@ sub concise_op {
 	} else {
 	    $h{arg} = "(" . concise_sv($op->sv, \%h) . ")";
 	}
+    } elsif ($h{class} eq "PADOP") {
+	my $sv = (($curcv->PADLIST->ARRAY)[1]->ARRAY)[$op->padix];
+	$h{arg} = "[" . concise_sv($sv, \%h) . "]";
     }
     $h{seq} = $h{hyphseq} = seq($op);
     $h{seq} = "" if $h{seq} eq "-";
@@ -510,6 +528,30 @@ sub B::OP::concise {
     }
     $lastnext = $op->next;
     print concise_op($op, $level, $format);
+}
+
+# B::OP::terse (see Terse.pm) now just calls this
+sub b_terse {
+    my($op, $level) = @_;
+
+    # This isn't necessarily right, but there's no easy way to get
+    # from an OP to the right CV. This is a limitation of the
+    # ->terse() interface style, and there isn't much to do about
+    # it. In particular, we can die in concise_op if the main pad
+    # isn't long enough, or has the wrong kind of entries, compared to
+    # the pad a sub was compiled with. The fix for that would be to
+    # make a backwards compatible "terse" format that never even
+    # looked at the pad, just like the old B::Terse. I don't think
+    # that's worth the effort, though.
+    $curcv = main_cv unless $curcv;
+
+    if ($order eq "exec" and $lastnext and $$lastnext != $$op) {
+	my $h = {"seq" => seq($lastnext), "class" => class($lastnext),
+		 "addr" => sprintf("%#x", $$lastnext)};
+	print fmt_line($h, $style{"terse"}[1], $level+1);
+    }
+    $lastnext = $op->next;
+    print concise_op($op, $level, $style{"terse"}[0]);
 }
 
 sub tree {
@@ -1006,11 +1048,14 @@ existing values if you need to.  The level and format are passed in as
 references to scalars, but it is unlikely that they will need to be
 changed or even used.
 
+To switch back to one of the standard styles like C<concise> or
+C<terse>, use C<set_style_standard>.
+
 To see the output, call the subroutine returned by B<compile> in the
 same way that B<O> does.
 
 =head1 AUTHOR
 
-Stephen McCamant, C<smcc@CSUA.Berkeley.EDU>
+Stephen McCamant, E<lt>smcc@CSUA.Berkeley.EDUE<gt>.
 
 =cut

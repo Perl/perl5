@@ -118,7 +118,7 @@ sub fetch_string {
     my $quote_type = "'";
     my $marker = "$key=";
 
-    # Check for the common case, ' delimeted
+    # Check for the common case, ' delimited
     my $start = index($Config_SH, "\n$marker$quote_type");
     # If that failed, check for " delimited
     if ($start == -1) {

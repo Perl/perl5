@@ -560,6 +560,13 @@ else {
 		    )];
 }
 
+unless ($define{'PERL_COPY_ON_WRITE'}) {
+    skip_symbols [qw(
+		    Perl_sv_setsv_cow
+		    Perl_sv_release_IVX
+		  )];
+}
+
 unless ($define{'PERL_FLEXIBLE_EXCEPTIONS'}) {
     skip_symbols [qw(
 		    PL_protect

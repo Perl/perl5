@@ -1,5 +1,12 @@
 Revision history for Perl extension Unicode::Normalize.
 
+0.20  Sun Mar 02 13:29:25 2003
+	- decompose Hangul syllables in a decomposition mapping.
+
+0.18  ... unreleased
+	- synchronization with bleadperl.
+	- Change 16262: by me
+
 0.17  Sun Apr 28 23:13:32 2002
 	- now normalize('NFC',$1) should work.
 	- Some croak()'s are added in mkheader.

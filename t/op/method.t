@@ -231,7 +231,7 @@ is( Foo->boogie(), "yes, sir!");
 # This is actually testing parsing of indirect objects and undefined subs
 #   print foo("bar") where foo does not exist is not an indirect object.
 #   print foo "bar"  where foo does not exist is an indirect object.
-eval { sub AUTOLOAD { "ok ", shift, "\n"; } };
+eval 'sub AUTOLOAD { "ok ", shift, "\n"; }';
 ok(1);
 
 # Bug ID 20010902.002

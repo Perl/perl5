@@ -25,7 +25,7 @@ print "ok " . $i++ . "\n";
 
 # Tell B::Deparse about our ambient pragmas
 { my ($hint_bits, $warning_bits);
- BEGIN {($hint_bits, $warning_bits) = ($^H, ${^WARNING_BITS})}
+ BEGIN { ($hint_bits, $warning_bits) = ($^H, ${^WARNING_BITS}); }
  $deparse->ambient_pragmas (
      hint_bits    => $hint_bits,
      warning_bits => $warning_bits,

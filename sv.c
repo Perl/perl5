@@ -1,6 +1,6 @@
 /*    sv.c
  *
- *    Copyright (c) 1991-2002, Larry Wall
+ *    Copyright (c) 1991-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -28,10 +28,6 @@
 #define SV_COW_NEXT_SV_SET(current,next)	SvUVX(current) = PTR2UV(next)
 /* This is a pessimistic view. Scalar must be purely a read-write PV to copy-
    on-write.  */
-#define CAN_COW_MASK	(SVs_OBJECT|SVs_GMG|SVs_SMG|SVs_RMG|SVf_IOK|SVf_NOK| \
-			 SVf_POK|SVf_ROK|SVp_IOK|SVp_NOK|SVp_POK|SVf_FAKE| \
-			 SVf_OOK|SVf_BREAK|SVf_READONLY|SVf_AMAGIC)
-#define CAN_COW_FLAGS	(SVp_POK|SVf_POK)
 #endif
 
 /* ============================================================================
@@ -1566,8 +1562,6 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 {
     register char *s;
 
-
-
 #ifdef HAS_64K_LIMIT
     if (newlen >= 0x10000) {
 	PerlIO_printf(Perl_debug_log,
@@ -2279,7 +2273,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
                        this NV is in the preserved range, therefore: */
                     if (!(U_V(SvNVX(sv) > 0 ? SvNVX(sv) : -SvNVX(sv))
                           < (UV)IV_MAX)) {
-                        Perl_croak(aTHX_ "sv_2iv assumed (U_V(fabs(SvNVX(sv))) < (UV)IV_MAX) but SvNVX(sv)=%"NVgf" U_V is 0x%"UVxf", IV_MAX is 0x%"UVxf"\n", SvNVX(sv), U_V(SvNVX(sv)), (UV)IV_MAX);
+                        Perl_croak(aTHX_ "sv_2iv assumed (U_V(fabs((double)SvNVX(sv))) < (UV)IV_MAX) but SvNVX(sv)=%"NVgf" U_V is 0x%"UVxf", IV_MAX is 0x%"UVxf"\n", SvNVX(sv), U_V(SvNVX(sv)), (UV)IV_MAX);
                     }
                 } else {
                     /* IN_UV NOT_INT
@@ -2566,7 +2560,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
                        this NV is in the preserved range, therefore: */
                     if (!(U_V(SvNVX(sv) > 0 ? SvNVX(sv) : -SvNVX(sv))
                           < (UV)IV_MAX)) {
-                        Perl_croak(aTHX_ "sv_2uv assumed (U_V(fabs(SvNVX(sv))) < (UV)IV_MAX) but SvNVX(sv)=%"NVgf" U_V is 0x%"UVxf", IV_MAX is 0x%"UVxf"\n", SvNVX(sv), U_V(SvNVX(sv)), (UV)IV_MAX);
+                        Perl_croak(aTHX_ "sv_2uv assumed (U_V(fabs((double)SvNVX(sv))) < (UV)IV_MAX) but SvNVX(sv)=%"NVgf" U_V is 0x%"UVxf", IV_MAX is 0x%"UVxf"\n", SvNVX(sv), U_V(SvNVX(sv)), (UV)IV_MAX);
                     }
                 } else
                     sv_2iuv_non_preserve (sv, numtype);
@@ -2972,7 +2966,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		case SVt_PVMG:
 		    if ( ((SvFLAGS(sv) &
 			   (SVs_OBJECT|SVf_OK|SVs_GMG|SVs_SMG|SVs_RMG))
-			  == (SVs_OBJECT|SVs_RMG))
+			  == (SVs_OBJECT|SVs_SMG))
 			 && (mg = mg_find(sv, PERL_MAGIC_qr))) {
 			regexp *re = (regexp *)mg->mg_obj;
 
@@ -3944,8 +3938,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
             /* Either it's a shared hash key, or it's suitable for
                copy-on-write or we can swipe the string.  */
             if (DEBUG_C_TEST) {
-                PerlIO_printf(Perl_debug_log,
-                              "Copy on write: sstr --> dstr\n");
+                PerlIO_printf(Perl_debug_log, "Copy on write: sstr --> dstr\n");
                 sv_dump(sstr);
                 sv_dump(dstr);
             }
@@ -4097,6 +4090,77 @@ Perl_sv_setsv_mg(pTHX_ SV *dstr, register SV *sstr)
     sv_setsv(dstr,sstr);
     SvSETMAGIC(dstr);
 }
+
+#ifdef PERL_COPY_ON_WRITE
+SV *
+Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
+{
+    STRLEN cur = SvCUR(sstr);
+    STRLEN len = SvLEN(sstr);
+    register char *new_pv;
+
+    if (DEBUG_C_TEST) {
+	PerlIO_printf(Perl_debug_log, "Fast copy on write: %p -> %p\n",
+		      sstr, dstr);
+	sv_dump(sstr);
+	if (dstr)
+		    sv_dump(dstr);
+    }
+
+    if (dstr) {
+	if (SvTHINKFIRST(dstr))
+	    sv_force_normal_flags(dstr, SV_COW_DROP_PV);
+	else if (SvPVX(dstr))
+	    Safefree(SvPVX(dstr));
+    }
+    else
+	new_SV(dstr);
+    SvUPGRADE (dstr, SVt_PVIV);
+
+    assert (SvPOK(sstr));
+    assert (SvPOKp(sstr));
+    assert (!SvIOK(sstr));
+    assert (!SvIOKp(sstr));
+    assert (!SvNOK(sstr));
+    assert (!SvNOKp(sstr));
+
+    if (SvIsCOW(sstr)) {
+
+	if (SvLEN(sstr) == 0) {
+	    /* source is a COW shared hash key.  */
+	    UV hash = SvUVX(sstr);
+	    DEBUG_C(PerlIO_printf(Perl_debug_log,
+				  "Fast copy on write: Sharing hash\n"));
+	    SvUVX(dstr) = hash;
+	    new_pv = sharepvn(SvPVX(sstr), (SvUTF8(sstr)?-cur:cur), hash);
+	    goto common_exit;
+	}
+	SV_COW_NEXT_SV_SET(dstr, SV_COW_NEXT_SV(sstr));
+    } else {
+	assert ((SvFLAGS(sstr) & CAN_COW_MASK) == CAN_COW_FLAGS);
+	SvUPGRADE (sstr, SVt_PVIV);
+	SvREADONLY_on(sstr);
+	SvFAKE_on(sstr);
+	DEBUG_C(PerlIO_printf(Perl_debug_log,
+			      "Fast copy on write: Converting sstr to COW\n"));
+	SV_COW_NEXT_SV_SET(dstr, sstr);
+    }
+    SV_COW_NEXT_SV_SET(sstr, dstr);
+    new_pv = SvPVX(sstr);
+
+  common_exit:
+    SvPV_set(dstr, new_pv);
+    SvFLAGS(dstr) = (SVt_PVIV|SVf_POK|SVp_POK|SVf_FAKE|SVf_READONLY);
+    if (SvUTF8(sstr))
+	SvUTF8_on(dstr);
+    SvLEN(dstr) = len;
+    SvCUR(dstr) = cur;
+    if (DEBUG_C_TEST) {
+	sv_dump(dstr);
+    }
+    return dstr;
+}
+#endif
 
 /*
 =for apidoc sv_setpvn
@@ -4299,7 +4363,7 @@ an xpvmg; if we're a copy-on-write scalar, this is the on-write time when
 we do the copy, and is also used locally. If C<SV_COW_DROP_PV> is set
 then a copy-on-write scalar drops its PV buffer (if any) and becomes
 SvPOK_off rather than making a copy. (Used where this scalar is about to be
-set to some other value. In addtion, the C<flags> parameter gets passed to
+set to some other value.) In addition, the C<flags> parameter gets passed to
 C<sv_unref_flags()> when unrefing. C<sv_force_normal> calls this function
 with flags set to 0.
 
@@ -5436,6 +5500,12 @@ Perl_sv_free(pTHX_ SV *sv)
     }
     if (--(SvREFCNT(sv)) > 0)
 	return;
+    Perl_sv_free2(aTHX_ sv);
+}
+
+void
+Perl_sv_free2(pTHX_ SV *sv)
+{
 #ifdef DEBUGGING
     if (SvTEMP(sv)) {
 	if (ckWARN_d(WARN_DEBUGGING))
@@ -6177,7 +6247,27 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
     (void)SvUPGRADE(sv, SVt_PV);
 
     SvSCREAM_off(sv);
-    SvPOK_only(sv);    /* Validate pointer */
+
+    if (append) {
+	if (PerlIO_isutf8(fp)) {
+	    if (!SvUTF8(sv)) {
+		sv_utf8_upgrade_nomg(sv);
+		sv_pos_u2b(sv,&append,0);
+	    }
+	} else if (SvUTF8(sv)) {
+	    SV *tsv = NEWSV(0,0);
+	    sv_gets(tsv, fp, 0);
+	    sv_utf8_upgrade_nomg(tsv);
+	    SvCUR_set(sv,append);
+	    sv_catsv(sv,tsv);
+	    sv_free(tsv);
+	    goto return_string_or_null;
+	}
+    }
+
+    SvPOK_only(sv);
+    if (PerlIO_isutf8(fp))
+	SvUTF8_on(sv);
 
     if (PL_curcop == &PL_compiling) {
 	/* we always read code in line mode */
@@ -6220,7 +6310,7 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 #endif
       SvCUR_set(sv, bytesread += append);
       buffer[bytesread] = '\0';
-      goto check_utf8_and_return;
+      goto return_string_or_null;
     }
     else if (RsPARA(PL_rs)) {
 	rsptr = "\n\n";
@@ -6473,12 +6563,7 @@ screamer2:
 	}
     }
 
-check_utf8_and_return:
-    if (PerlIO_isutf8(fp))
-	SvUTF8_on(sv);
-    else
-	SvUTF8_off(sv);
-
+return_string_or_null:
     return (SvCUR(sv) - append) ? SvPVX(sv) : Nullch;
 }
 
@@ -8218,7 +8303,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     I32 svix = 0;
     static char nullstr[] = "(null)";
     SV *argsv = Nullsv;
-    bool has_utf8 = FALSE; /* has the result utf8? */
+    bool has_utf8; /* has the result utf8? */
+    bool pat_utf8; /* the pattern is in utf8? */
+    SV *nsv = Nullsv;
+
+    has_utf8 = pat_utf8 = DO_UTF8(sv);
 
     /* no matter what, this is a string now */
     (void)SvPV_force(sv, origlen);
@@ -8319,7 +8408,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	/* echo everything up to the next format specification */
 	for (q = p; q < patend && *q != '%'; ++q) ;
 	if (q > p) {
-	    sv_catpvn(sv, p, q - p);
+	    if (has_utf8 && !pat_utf8)
+		sv_catpvn_utf8_upgrade(sv, p, q - p, nsv);
+	    else
+		sv_catpvn(sv, p, q - p);
 	    p = q;
 	}
 	if (q++ >= patend)
@@ -9253,6 +9345,9 @@ Perl_re_dup(pTHX_ REGEXP *r, CLONE_PARAMS *param)
 	ret->subbeg  = SAVEPV(r->subbeg);
     else
 	ret->subbeg = Nullch;
+#ifdef PERL_COPY_ON_WRITE
+    ret->saved_copy = Nullsv;
+#endif
 
     ptr_table_store(PL_ptr_table, r, ret);
     return ret;
@@ -10679,6 +10774,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_DBsingle		= sv_dup(proto_perl->IDBsingle, param);
     PL_DBtrace		= sv_dup(proto_perl->IDBtrace, param);
     PL_DBsignal		= sv_dup(proto_perl->IDBsignal, param);
+    PL_DBassertion      = sv_dup(proto_perl->IDBassertion, param);
     PL_lineary		= av_dup(proto_perl->Ilineary, param);
     PL_dbargs		= av_dup(proto_perl->Idbargs, param);
 
@@ -10711,6 +10807,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	PL_op_mask	= SAVEPVN(proto_perl->Iop_mask, PL_maxo);
     else
 	PL_op_mask 	= Nullch;
+    /* PL_asserting        = proto_perl->Iasserting; */
 
     /* current interpreter roots */
     PL_main_cv		= cv_dup_inc(proto_perl->Imain_cv, param);
@@ -11114,6 +11211,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_reg_curpm	= (PMOP*)NULL;
     PL_reg_oldsaved	= Nullch;
     PL_reg_oldsavedlen	= 0;
+#ifdef PERL_COPY_ON_WRITE
+    PL_nrs		= Nullsv;
+#endif
     PL_reg_maxiter	= 0;
     PL_reg_leftiter	= 0;
     PL_reg_poscache	= Nullch;

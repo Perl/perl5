@@ -1,6 +1,6 @@
 /*    perl.h
  *
- *    Copyright (c) 1987-2002, Larry Wall
+ *    Copyright (c) 1987-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -2933,6 +2933,8 @@ EXTCONST char PL_no_func[]
   INIT("The %s function is unimplemented");
 EXTCONST char PL_no_myglob[]
   INIT("\"my\" variable %s can't be in a package");
+EXTCONST char PL_no_localize_ref[]
+  INIT("Can't localize through a reference");
 
 EXTCONST char PL_uuemap[65]
   INIT("`!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_");
@@ -3239,6 +3241,10 @@ enum {		/* pass one of these to get_vtbl */
 #define HINT_FILETEST_ACCESS	0x00400000 /* filetest pragma */
 #define HINT_UTF8		0x00800000 /* utf8 pragma */
 
+/* assertions pragma */
+#define HINT_ASSERTING          0x01000000
+#define HINT_ASSERTIONSSEEN     0x02000000
+
 /* The following are stored in $sort::hints, not in PL_hints */
 #define HINT_SORT_SORT_BITS	0x000000FF /* allow 256 different ones */
 #define HINT_SORT_QUICKSORT	0x00000001
@@ -3483,7 +3489,7 @@ EXT MGVTBL PL_vtbl_defelem = {MEMBER_TO_FPTR(Perl_magic_getdefelem),
     					MEMBER_TO_FPTR(Perl_magic_setdefelem),
 					0,	0,	0};
 
-EXT MGVTBL PL_vtbl_regexp = {0,0,0,0, MEMBER_TO_FPTR(Perl_magic_freeregexp)};
+EXT MGVTBL PL_vtbl_regexp = {0, MEMBER_TO_FPTR(Perl_magic_setregexp),0,0, MEMBER_TO_FPTR(Perl_magic_freeregexp)};
 EXT MGVTBL PL_vtbl_regdata = {0, 0, MEMBER_TO_FPTR(Perl_magic_regdata_cnt), 0, 0};
 EXT MGVTBL PL_vtbl_regdatum = {MEMBER_TO_FPTR(Perl_magic_regdatum_get),
 			       MEMBER_TO_FPTR(Perl_magic_regdatum_set), 0, 0, 0};
@@ -3703,8 +3709,8 @@ typedef struct am_table_short AMTS;
 #define PERLDB_ALL		(PERLDBf_SUB	| PERLDBf_LINE	|	\
 				 PERLDBf_NOOPT	| PERLDBf_INTER	|	\
 				 PERLDBf_SUBLINE| PERLDBf_SINGLE|	\
-				 PERLDBf_NAMEEVAL| PERLDBf_NAMEANON)
-					/* No _NONAME, _GOTO */
+				 PERLDBf_NAMEEVAL| PERLDBf_NAMEANON )
+					/* No _NONAME, _GOTO, _ASSERTION */
 #define PERLDBf_SUB		0x01	/* Debug sub enter/exit */
 #define PERLDBf_LINE		0x02	/* Keep line # */
 #define PERLDBf_NOOPT		0x04	/* Switch off optimizations */
@@ -3716,6 +3722,7 @@ typedef struct am_table_short AMTS;
 #define PERLDBf_GOTO		0x80	/* Report goto: call DB::goto */
 #define PERLDBf_NAMEEVAL	0x100	/* Informative names for evals */
 #define PERLDBf_NAMEANON	0x200	/* Informative names for anon subs */
+#define PERLDBf_ASSERTION       0x400   /* Debug assertion subs enter/exit */
 
 #define PERLDB_SUB	(PL_perldb && (PL_perldb & PERLDBf_SUB))
 #define PERLDB_LINE	(PL_perldb && (PL_perldb & PERLDBf_LINE))
@@ -3727,7 +3734,7 @@ typedef struct am_table_short AMTS;
 #define PERLDB_GOTO	(PL_perldb && (PL_perldb & PERLDBf_GOTO))
 #define PERLDB_NAMEEVAL	(PL_perldb && (PL_perldb & PERLDBf_NAMEEVAL))
 #define PERLDB_NAMEANON	(PL_perldb && (PL_perldb & PERLDBf_NAMEANON))
-
+#define PERLDB_ASSERTION (PL_perldb && (PL_perldb & PERLDBf_ASSERTION))
 
 #ifdef USE_LOCALE_NUMERIC
 
@@ -3865,11 +3872,9 @@ typedef struct am_table_short AMTS;
  */
 
 #ifndef PERL_MICRO
-#   ifndef PERL_OLD_SIGNALS
-#		ifndef PERL_ASYNC_CHECK
-#			define PERL_ASYNC_CHECK() if (PL_sig_pending) despatch_signals()
-#		endif
-#   endif
+#	ifndef PERL_ASYNC_CHECK
+#		define PERL_ASYNC_CHECK() if (PL_sig_pending) despatch_signals()
+#	endif
 #endif
 
 #ifndef PERL_ASYNC_CHECK
@@ -4172,15 +4177,22 @@ extern void moncontrol(int);
 #define PERL_UNICODE_STDIN_FLAG			0x0001
 #define PERL_UNICODE_STDOUT_FLAG		0x0002
 #define PERL_UNICODE_STDERR_FLAG		0x0004
-#define PERL_UNICODE_STD_FLAG			0x0007
 #define PERL_UNICODE_IN_FLAG			0x0008
 #define PERL_UNICODE_OUT_FLAG			0x0010
-#define PERL_UNICODE_INOUT_FLAG			0x0018
-#define PERL_UNICODE_ARGV_FLAG			0x0020 /* For @ARGV? */
+#define PERL_UNICODE_ARGV_FLAG			0x0020
 #define PERL_UNICODE_LOCALE_FLAG		0x0040
 #define PERL_UNICODE_WIDESYSCALLS_FLAG		0x0080 /* for Sarathy */
 
-#define PERL_UNICODE_DEFAULT_FLAGS \
+#define PERL_UNICODE_STD_FLAG		\
+	(PERL_UNICODE_STDIN_FLAG	| \
+	 PERL_UNICODE_STDOUT_FLAG	| \
+	 PERL_UNICODE_STDERR_FLAG)
+
+#define PERL_UNICODE_INOUT_FLAG		\
+	(PERL_UNICODE_IN_FLAG	| \
+	 PERL_UNICODE_OUT_FLAG)
+
+#define PERL_UNICODE_DEFAULT_FLAGS	\
 	(PERL_UNICODE_STD_FLAG		| \
 	 PERL_UNICODE_INOUT_FLAG	| \
 	 PERL_UNICODE_LOCALE_FLAG)
@@ -4197,6 +4209,42 @@ extern void moncontrol(int);
 #define PERL_UNICODE_ARGV			'A'
 #define PERL_UNICODE_LOCALE			'L'
 #define PERL_UNICODE_WIDESYSCALLS		'W'
+
+#define PERL_SIGNALS_UNSAFE_FLAG	0x0001
+
+/* From sigaction(2) (FreeBSD man page):
+ * | Signal routines normally execute with the signal that
+ * | caused their invocation blocked, but other signals may
+ * | yet occur.
+ * Emulation of this behavior (from within Perl) is enabled
+ * by defining PERL_BLOCK_SIGNALS.
+ */
+#define PERL_BLOCK_SIGNALS
+
+#if defined(HAS_SIGPROCMASK) && defined(PERL_BLOCK_SIGNALS)
+#   define PERL_BLOCKSIG_ADD(set,sig) \
+	sigset_t set; sigemptyset(&(set)); sigaddset(&(set), sig)
+#   define PERL_BLOCKSIG_BLOCK(set) \
+	sigprocmask(SIG_BLOCK, &(set), NULL)
+#   define PERL_BLOCKSIG_UNBLOCK(set) \
+	sigprocmask(SIG_UNBLOCK, &(set), NULL)
+#endif /* HAS_SIGPROCMASK && PERL_BLOCK_SIGNALS */
+
+/* How about the old style of sigblock()? */
+
+#ifndef PERL_BLOCKSIG_ADD
+#   define PERL_BLOCKSIG_ADD(set, sig)	NOOP
+#endif
+#ifndef PERL_BLOCKSIG_BLOCK
+#   define PERL_BLOCKSIG_BLOCK(set)	NOOP
+#endif
+#ifndef PERL_BLOCKSIG_UNBLOCK
+#   define PERL_BLOCKSIG_UNBLOCK(set)	NOOP
+#endif
+
+/* Use instead of abs() since abs() forces its argument to be an int,
+ * but also beware since evaluates its argument thrice. */
+#define PERL_ABS(x) ((x) < 0 ? -(x) : (x))
 
 /* and finally... */
 #define PERL_PATCHLEVEL_H_IMPLICIT

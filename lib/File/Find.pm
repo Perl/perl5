@@ -14,7 +14,7 @@ File::Find - Traverse a directory tree.
 =head1 SYNOPSIS
 
     use File::Find;
-    find(\&wanted, @directories_to_seach);
+    find(\&wanted, @directories_to_search);
     sub wanted { ... }
 
     use File::Find;
@@ -39,7 +39,7 @@ but have subtle differences.
   find(\%options, @directories);
 
 find() does a breadth-first search over the given @directories in the
-order they are given.  In essense, it works from the top down.
+order they are given.  In essence, it works from the top down.
 
 For each file or directory found the &wanted subroutine is called (see
 below for details).  Additionally, for each directory found it will go
@@ -700,6 +700,7 @@ sub _find_opt {
 	    }
 
 	    $name = $abs_dir . $_; # $File::Find::name
+	    $_ = $name if $no_chdir;
 
 	    { $wanted_callback->() }; # protect against wild "next"
 

@@ -69,7 +69,7 @@
  *
  ****    Alterations to Henry's code are...
  ****
- ****    Copyright (c) 1991-2002, Larry Wall
+ ****    Copyright (c) 1991-2003, Larry Wall
  ****
  ****    You may distribute under the terms of either the GNU General Public
  ****    License or the Artistic License, as specified in the README file.
@@ -1778,6 +1778,9 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     r->prelen = xend - exp;
     r->precomp = savepvn(RExC_precomp, r->prelen);
     r->subbeg = NULL;
+#ifdef PERL_COPY_ON_WRITE
+    r->saved_copy = Nullsv;
+#endif
     r->reganch = pm->op_pmflags & PMf_COMPILETIME;
     r->nparens = RExC_npar - 1;	/* set early to validate backrefs */
 
@@ -4900,8 +4903,11 @@ Perl_pregfree(pTHX_ struct regexp *r)
 	Safefree(r->precomp);
     if (r->offsets)             /* 20010421 MJD */
 	Safefree(r->offsets);
-    if (RX_MATCH_COPIED(r))
-	Safefree(r->subbeg);
+    RX_MATCH_COPY_FREE(r);
+#ifdef PERL_COPY_ON_WRITE
+    if (r->saved_copy)
+	SvREFCNT_dec(r->saved_copy);
+#endif
     if (r->substrs) {
 	if (r->anchored_substr)
 	    SvREFCNT_dec(r->anchored_substr);
@@ -5054,6 +5060,10 @@ Perl_save_re_context(pTHX)
     PL_reg_oldsaved = Nullch;
     SAVEI32(PL_reg_oldsavedlen);	/* old length of saved substr during match */
     PL_reg_oldsavedlen = 0;
+#ifdef PERL_COPY_ON_WRITE
+    SAVESPTR(PL_nrs);
+    PL_nrs = Nullsv;
+#endif
     SAVEI32(PL_reg_maxiter);		/* max wait until caching pos */
     PL_reg_maxiter = 0;
     SAVEI32(PL_reg_leftiter);		/* wait until caching pos */

@@ -1,7 +1,7 @@
 /*
  *    embed.h
  *
- *    Copyright (c) 1997-2002, Larry Wall
+ *    Copyright (c) 1997-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -16,7 +16,11 @@
 
 /* (Doing namespace management portably in C is really gross.) */
 
-/* NO_EMBED is no longer supported. i.e. EMBED is always active. */
+/* By defining PERL_NO_SHORT_NAMES (not done by default) the short forms
+ * (like warn instead of Perl_warn) for the API are not defined.
+ * Not defining the short forms is a good thing for cleaner embedding. */
+
+#ifndef PERL_NO_SHORT_NAMES
 
 /* Hide global symbols */
 
@@ -576,6 +580,9 @@
 #define magic_setpos		Perl_magic_setpos
 #endif
 #ifdef PERL_CORE
+#define magic_setregexp		Perl_magic_setregexp
+#endif
+#ifdef PERL_CORE
 #define magic_setsig		Perl_magic_setsig
 #endif
 #ifdef PERL_CORE
@@ -771,8 +778,6 @@
 #endif
 #ifdef PERL_CORE
 #define peep			Perl_peep
-#endif
-#ifdef PERL_CORE
 #endif
 #if defined(USE_REENTRANT_API)
 #define reentrant_size		Perl_reentrant_size
@@ -1225,9 +1230,7 @@
 #define custom_op_name		Perl_custom_op_name
 #define custom_op_desc		Perl_custom_op_desc
 #if defined(PERL_COPY_ON_WRITE)
-#ifdef PERL_CORE
 #define sv_release_IVX		Perl_sv_release_IVX
-#endif
 #endif
 #define sv_nosharing		Perl_sv_nosharing
 #define sv_nolocking		Perl_sv_nolocking
@@ -2025,6 +2028,9 @@
 #define sv_copypv		Perl_sv_copypv
 #define my_atof2		Perl_my_atof2
 #define my_socketpair		Perl_my_socketpair
+#ifdef PERL_COPY_ON_WRITE
+#define sv_setsv_cow		Perl_sv_setsv_cow
+#endif
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
 #define PerlIO_close		Perl_PerlIO_close
 #define PerlIO_fill		Perl_PerlIO_fill
@@ -3033,6 +3039,9 @@
 #define magic_setpos(a,b)	Perl_magic_setpos(aTHX_ a,b)
 #endif
 #ifdef PERL_CORE
+#define magic_setregexp(a,b)	Perl_magic_setregexp(aTHX_ a,b)
+#endif
+#ifdef PERL_CORE
 #define magic_setsig(a,b)	Perl_magic_setsig(aTHX_ a,b)
 #endif
 #ifdef PERL_CORE
@@ -3671,9 +3680,7 @@
 #define custom_op_name(a)	Perl_custom_op_name(aTHX_ a)
 #define custom_op_desc(a)	Perl_custom_op_desc(aTHX_ a)
 #if defined(PERL_COPY_ON_WRITE)
-#ifdef PERL_CORE
 #define sv_release_IVX(a)	Perl_sv_release_IVX(aTHX_ a)
-#endif
 #endif
 #define sv_nosharing(a)		Perl_sv_nosharing(aTHX_ a)
 #define sv_nolocking(a)		Perl_sv_nolocking(aTHX_ a)
@@ -4470,6 +4477,9 @@
 #define sv_copypv(a,b)		Perl_sv_copypv(aTHX_ a,b)
 #define my_atof2(a,b)		Perl_my_atof2(aTHX_ a,b)
 #define my_socketpair		Perl_my_socketpair
+#ifdef PERL_COPY_ON_WRITE
+#define sv_setsv_cow(a,b)	Perl_sv_setsv_cow(aTHX_ a,b)
+#endif
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
 #define PerlIO_close(a)		Perl_PerlIO_close(aTHX_ a)
 #define PerlIO_fill(a)		Perl_PerlIO_fill(aTHX_ a)
@@ -4944,6 +4954,8 @@
 
 #endif	/* PERL_IMPLICIT_CONTEXT */
 
+#endif	/* #ifndef PERL_NO_SHORT_NAMES */
+
 
 /* Compatibility stubs.  Compile extensions with -DPERL_NOCOMPAT to
    disable them.
@@ -4985,7 +4997,7 @@
    an extra argument but grab the context pointer using the macro
    dTHX.
  */
-#if defined(PERL_IMPLICIT_CONTEXT)
+#if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_NO_SHORT_NAMES)
 #  define croak				Perl_croak_nocontext
 #  define deb				Perl_deb_nocontext
 #  define die				Perl_die_nocontext

@@ -1,6 +1,6 @@
 /*    mg.c
  *
- *    Copyright (c) 1991-2002, Larry Wall
+ *    Copyright (c) 1991-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -32,6 +32,8 @@
 #ifdef __hpux
 #  include <sys/pstat.h>
 #endif
+
+Signal_t Perl_csighandler(int sig);
 
 /* if you only have signal() and it resets on each signal, FAKE_PERSISTENT_SIGNAL_HANDLERS fixes */
 #if !defined(HAS_SIGACTION) && defined(VMS)
@@ -640,7 +642,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	sv_setiv(sv, (IV)PL_perldb);
 	break;
     case '\023':		/* ^S */
-	{
+        if (*(mg->mg_ptr+1) == '\0') {
 	    if (PL_lex_state != LEX_NOTPARSING)
 		(void)SvOK_off(sv);
 	    else if (PL_in_eval)
@@ -676,7 +678,16 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	        sv_setpvn(sv, WARN_NONEstring, WARNsize) ;
             }
             else if (PL_compiling.cop_warnings == pWARN_ALL) {
-	        sv_setpvn(sv, WARN_ALLstring, WARNsize) ;
+		/* Get the bit mask for $warnings::Bits{all}, because
+		 * it could have been extended by warnings::register */
+		SV **bits_all;
+		HV *bits=get_hv("warnings::Bits", FALSE);
+		if (bits && (bits_all=hv_fetch(bits, "all", 3, FALSE))) {
+		    sv_setsv(sv, *bits_all);
+		}
+	        else {
+		    sv_setpvn(sv, WARN_ALLstring, WARNsize) ;
+		}
 	    }
             else {
 	        sv_setsv(sv, PL_compiling.cop_warnings);
@@ -1043,6 +1054,14 @@ static int sig_defaulting[SIG_SIZE];
 #endif
 
 #ifndef PERL_MICRO
+#ifdef HAS_SIGPROCMASK
+static void
+restore_sigmask(pTHX_ SV *save_sv)
+{
+    sigset_t *ossetp = (sigset_t *) SvPV_nolen( save_sv );
+    (void)sigprocmask(SIG_SETMASK, ossetp, (sigset_t *)0);
+}
+#endif
 int
 Perl_magic_getsig(pTHX_ SV *sv, MAGIC *mg)
 {
@@ -1076,19 +1095,67 @@ Perl_magic_getsig(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
 {
-    I32 i;
+    /* XXX Some of this code was copied from Perl_magic_setsig. A little
+     * refactoring might be in order.
+     */
+    register char *s;
     STRLEN n_a;
-    /* Are we clearing a signal entry? */
-    i = whichsig(MgPV(mg,n_a));
-    if (i) {
-    	if(PL_psig_ptr[i]) {
-    	    SvREFCNT_dec(PL_psig_ptr[i]);
-    	    PL_psig_ptr[i]=0;
-    	}
-    	if(PL_psig_name[i]) {
-    	    SvREFCNT_dec(PL_psig_name[i]);
-    	    PL_psig_name[i]=0;
-    	}
+    SV* to_dec;
+    s = MgPV(mg,n_a);
+    if (*s == '_') {
+	SV** svp;
+	if (strEQ(s,"__DIE__"))
+	    svp = &PL_diehook;
+	else if (strEQ(s,"__WARN__"))
+	    svp = &PL_warnhook;
+	else
+	    Perl_croak(aTHX_ "No such hook: %s", s);
+	if (*svp) {
+	    to_dec = *svp;
+	    *svp = 0;
+    	    SvREFCNT_dec(to_dec);
+	}
+    }
+    else {
+	I32 i;
+	/* Are we clearing a signal entry? */
+	i = whichsig(s);
+	if (i) {
+#ifdef HAS_SIGPROCMASK
+	    sigset_t set, save;
+	    SV* save_sv;
+	    /* Avoid having the signal arrive at a bad time, if possible. */
+	    sigemptyset(&set);
+	    sigaddset(&set,i);
+	    sigprocmask(SIG_BLOCK, &set, &save);
+	    ENTER;
+	    save_sv = newSVpv((char *)(&save), sizeof(sigset_t));
+	    SAVEFREESV(save_sv);
+	    SAVEDESTRUCTOR_X(restore_sigmask, save_sv);
+#endif
+	    PERL_ASYNC_CHECK();
+#if defined(FAKE_PERSISTENT_SIGNAL_HANDLERS) || defined(FAKE_DEFAULT_SIGNAL_HANDLERS)
+	    if (!sig_handlers_initted) Perl_csighandler_init();
+#endif
+#ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
+	    sig_defaulting[i] = 1;
+	    (void)rsignal(i, &Perl_csighandler);
+#else
+	    (void)rsignal(i, SIG_DFL);
+#endif
+    	    if(PL_psig_name[i]) {
+    		SvREFCNT_dec(PL_psig_name[i]);
+    		PL_psig_name[i]=0;
+    	    }
+    	    if(PL_psig_ptr[i]) {
+		to_dec=PL_psig_ptr[i];
+    		PL_psig_ptr[i]=0;
+		LEAVE;
+    		SvREFCNT_dec(to_dec);
+    	    }
+	    else
+		LEAVE;
+	}
     }
     return 0;
 }
@@ -1122,13 +1189,12 @@ Perl_csighandler(int sig)
             exit(1);
 #endif
 #endif
-
-#ifdef PERL_OLD_SIGNALS
-    /* Call the perl level handler now with risk we may be in malloc() etc. */
-    (*PL_sighandlerp)(sig);
-#else
-    Perl_raise_signal(aTHX_ sig);
-#endif
+   if (PL_signals & PERL_SIGNALS_UNSAFE_FLAG)
+	/* Call the perl level handler now--
+	 * with risk we may be in malloc() etc. */
+	(*PL_sighandlerp)(sig);
+   else
+	Perl_raise_signal(aTHX_ sig);
 }
 
 #if defined(FAKE_PERSISTENT_SIGNAL_HANDLERS) || defined(FAKE_DEFAULT_SIGNAL_HANDLERS)
@@ -1159,8 +1225,11 @@ Perl_despatch_signals(pTHX)
     PL_sig_pending = 0;
     for (sig = 1; sig < SIG_SIZE; sig++) {
 	if (PL_psig_pend[sig]) {
-	    PL_psig_pend[sig] = 0;
+	    PERL_BLOCKSIG_ADD(set, sig);
+ 	    PL_psig_pend[sig] = 0;
+	    PERL_BLOCKSIG_BLOCK(set);
 	    (*PL_sighandlerp)(sig);
+	    PERL_BLOCKSIG_UNBLOCK(set);
 	}
     }
 }
@@ -1171,7 +1240,16 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
     register char *s;
     I32 i;
     SV** svp = 0;
+    /* Need to be careful with SvREFCNT_dec(), because that can have side
+     * effects (due to closures). We must make sure that the new disposition
+     * is in place before it is called.
+     */
+    SV* to_dec = 0;
     STRLEN len;
+#ifdef HAS_SIGPROCMASK
+    sigset_t set, save;
+    SV* save_sv;
+#endif
 
     s = MgPV(mg,len);
     if (*s == '_') {
@@ -1183,7 +1261,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	    Perl_croak(aTHX_ "No such hook: %s", s);
 	i = 0;
 	if (*svp) {
-	    SvREFCNT_dec(*svp);
+	    to_dec = *svp;
 	    *svp = 0;
 	}
     }
@@ -1194,6 +1272,17 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 		Perl_warner(aTHX_ packWARN(WARN_SIGNAL), "No such signal: SIG%s", s);
 	    return 0;
 	}
+#ifdef HAS_SIGPROCMASK
+	/* Avoid having the signal arrive at a bad time, if possible. */
+	sigemptyset(&set);
+	sigaddset(&set,i);
+	sigprocmask(SIG_BLOCK, &set, &save);
+	ENTER;
+	save_sv = newSVpv((char *)(&save), sizeof(sigset_t));
+	SAVEFREESV(save_sv);
+	SAVEDESTRUCTOR_X(restore_sigmask, save_sv);
+#endif
+	PERL_ASYNC_CHECK();
 #if defined(FAKE_PERSISTENT_SIGNAL_HANDLERS) || defined(FAKE_DEFAULT_SIGNAL_HANDLERS)
 	if (!sig_handlers_initted) Perl_csighandler_init();
 #endif
@@ -1201,20 +1290,26 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	sig_ignoring[i] = 0;
 #endif
 #ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
-	  sig_defaulting[i] = 0;
+	sig_defaulting[i] = 0;
 #endif
 	SvREFCNT_dec(PL_psig_name[i]);
-	SvREFCNT_dec(PL_psig_ptr[i]);
+	to_dec = PL_psig_ptr[i];
 	PL_psig_ptr[i] = SvREFCNT_inc(sv);
 	SvTEMP_off(sv); /* Make sure it doesn't go away on us */
 	PL_psig_name[i] = newSVpvn(s, len);
 	SvREADONLY_on(PL_psig_name[i]);
     }
     if (SvTYPE(sv) == SVt_PVGV || SvROK(sv)) {
-	if (i)
+	if (i) {
 	    (void)rsignal(i, &Perl_csighandler);
+#ifdef HAS_SIGPROCMASK
+	    LEAVE;
+#endif
+	}
 	else
 	    *svp = SvREFCNT_inc(sv);
+	if(to_dec)
+	    SvREFCNT_dec(to_dec);
 	return 0;
     }
     s = SvPV_force(sv,len);
@@ -1226,8 +1321,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 #else
 	    (void)rsignal(i, SIG_IGN);
 #endif
-	} else
-	    *svp = 0;
+	}
     }
     else if (strEQ(s,"DEFAULT") || !*s) {
 	if (i)
@@ -1239,8 +1333,6 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 #else
 	    (void)rsignal(i, SIG_DFL);
 #endif
-	else
-	    *svp = 0;
     }
     else {
 	/*
@@ -1255,6 +1347,12 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	else
 	    *svp = SvREFCNT_inc(sv);
     }
+#ifdef HAS_SIGPROCMASK
+    if(i)
+	LEAVE;
+#endif
+    if(to_dec)
+	SvREFCNT_dec(to_dec);
     return 0;
 }
 #endif /* !PERL_MICRO */
@@ -1812,6 +1910,13 @@ Perl_magic_setuvar(pTHX_ SV *sv, MAGIC *mg)
 
     if (uf && uf->uf_set)
 	(*uf->uf_set)(aTHX_ uf->uf_index, sv);
+    return 0;
+}
+
+int
+Perl_magic_setregexp(pTHX_ SV *sv, MAGIC *mg)
+{
+    sv_unmagic(sv, PERL_MAGIC_qr);
     return 0;
 }
 

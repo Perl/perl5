@@ -1,6 +1,6 @@
 /*    op.c
  *
- *    Copyright (c) 1991-2002, Larry Wall
+ *    Copyright (c) 1991-2003, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -299,6 +299,18 @@ Perl_op_clear(pTHX_ OP *o)
     case OP_CONST:
 	SvREFCNT_dec(cSVOPo->op_sv);
 	cSVOPo->op_sv = Nullsv;
+#ifdef USE_ITHREADS
+	/** Bug #15654
+	  Even if op_clear does a pad_free for the target of the op,
+	  pad_free doesn't actually remove the sv that exists in the bad
+	  instead it lives on. This results in that it could be reused as 
+	  a target later on when the pad was reallocated.
+	**/
+        if(o->op_targ) {
+          pad_swipe(o->op_targ,1);
+          o->op_targ = 0;
+        }
+#endif
 	break;
     case OP_GOTO:
     case OP_NEXT:
@@ -1053,8 +1065,6 @@ Perl_mod(pTHX_ OP *o, I32 type)
 
     case OP_RV2AV:
     case OP_RV2HV:
-	if (!type && cUNOPo->op_first->op_type != OP_GV)
-	    Perl_croak(aTHX_ "Can't localize through a reference");
 	if (type == OP_REFGEN && o->op_flags & OPf_PARENS) {
            PL_modcount = RETURN_UNLIMITED_NUMBER;
 	    return o;		/* Treat \(@foo) like ordinary list. */
@@ -1076,8 +1086,6 @@ Perl_mod(pTHX_ OP *o, I32 type)
        PL_modcount = RETURN_UNLIMITED_NUMBER;
 	break;
     case OP_RV2SV:
-	if (!type && cUNOPo->op_first->op_type != OP_GV)
-	    Perl_croak(aTHX_ "Can't localize through a reference");
 	ref(cUNOPo->op_first, o->op_type);
 	/* FALL THROUGH */
     case OP_GV:
@@ -1705,18 +1713,16 @@ Perl_scope(pTHX_ OP *o)
 	    o->op_type = OP_LEAVE;
 	    o->op_ppaddr = PL_ppaddr[OP_LEAVE];
 	}
-	else {
-	    if (o->op_type == OP_LINESEQ) {
-		OP *kid;
-		o->op_type = OP_SCOPE;
-		o->op_ppaddr = PL_ppaddr[OP_SCOPE];
-		kid = ((LISTOP*)o)->op_first;
-		if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE)
-		    op_null(kid);
-	    }
-	    else
-		o = newLISTOP(OP_SCOPE, 0, o, Nullop);
+	else if (o->op_type == OP_LINESEQ) {
+	    OP *kid;
+	    o->op_type = OP_SCOPE;
+	    o->op_ppaddr = PL_ppaddr[OP_SCOPE];
+	    kid = ((LISTOP*)o)->op_first;
+	    if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE)
+		op_null(kid);
 	}
+	else
+	    o = newLISTOP(OP_SCOPE, 0, o, Nullop);
     }
     return o;
 }
@@ -1757,17 +1763,9 @@ OP*
 Perl_block_end(pTHX_ I32 floor, OP *seq)
 {
     int needblockscope = PL_hints & HINT_BLOCK_SCOPE;
-    line_t copline = PL_copline;
     OP* retval = scalarseq(seq);
     /* If there were syntax errors, don't try to close a block */
     if (PL_yynerrs) return retval;
-    if (!seq) {
-	/* scalarseq() gave us an OP_STUB */
-	retval->op_flags |= OPf_PARENS;
-	/* there should be a nextstate in every block */
-	retval = newSTATEOP(0, Nullch, retval);
-	PL_copline = copline;  /* XXX newSTATEOP may reset PL_copline */
-    }
     LEAVE_SCOPE(floor);
     PL_compiling.op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
     if (needblockscope)
@@ -1942,19 +1940,7 @@ Perl_fold_constants(pTHX_ register OP *o)
     op_free(o);
     if (type == OP_RV2GV)
 	return newGVOP(OP_GV, 0, (GV*)sv);
-    else {
-	/* try to smush double to int, but don't smush -2.0 to -2 */
-	if ((SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK)) == SVf_NOK &&
-	    type != OP_NEGATE)
-	{
-#ifdef PERL_PRESERVE_IVUV
-	    /* Only bother to attempt to fold to IV if
-	       most operators will benefit  */
-	    SvIV_please(sv);
-#endif
-	}
-	return newSVOP(OP_CONST, 0, sv);
-    }
+    return newSVOP(OP_CONST, 0, sv);
 
   nope:
     return o;
@@ -2656,7 +2642,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl)
 		    if (curop->op_type == OP_GV) {
 			GV *gv = cGVOPx_gv(curop);
 			repl_has_vars = 1;
-			if (strchr("&`'123456789+", *GvENAME(gv)))
+			if (strchr("&`'123456789+-\016\022", *GvENAME(gv)))
 			    break;
 		    }
 		    else if (curop->op_type == OP_RV2CV)
@@ -4714,8 +4700,7 @@ Perl_ck_eof(pTHX_ OP *o)
     if (o->op_flags & OPf_KIDS) {
 	if (cLISTOPo->op_first->op_type == OP_STUB) {
 	    op_free(o);
-	    o = newUNOP(type, OPf_SPECIAL,
-		newGVOP(OP_GV, 0, gv_fetchpv("main::ARGV", TRUE, SVt_PVAV)));
+	    o = newUNOP(type, OPf_SPECIAL, newGVOP(OP_GV, 0, PL_argvgv));
 	}
 	return ck_fun(o);
     }
@@ -4952,8 +4937,7 @@ Perl_ck_ftst(pTHX_ OP *o)
     else {
 	op_free(o);
 	if (type == OP_FTTTY)
-           o =  newGVOP(type, OPf_REF, gv_fetchpv("main::STDIN", TRUE,
-				SVt_PVIO));
+	    o = newGVOP(type, OPf_REF, PL_stdingv);
 	else
 	    o = newUNOP(type, 0, newDEFSVOP());
     }
@@ -5586,8 +5570,7 @@ Perl_ck_shift(pTHX_ OP *o)
 
 	op_free(o);
 	argop = newUNOP(OP_RV2AV, 0,
-	    scalar(newGVOP(OP_GV, 0, !CvUNIQUE(PL_compcv) ?
-			   PL_defgv : gv_fetchpv("ARGV", TRUE, SVt_PVAV))));
+	    scalar(newGVOP(OP_GV, 0, CvUNIQUE(PL_compcv) ? PL_argvgv : PL_defgv)));
 	return newUNOP(type, 0, scalar(argop));
     }
     return scalar(modkids(ck_fun(o), type));
@@ -5807,6 +5790,7 @@ Perl_ck_subr(pTHX_ OP *o)
     I32 contextclass = 0;
     char *e = 0;
     STRLEN n_a;
+    bool delete=0;
 
     o->op_private |= OPpENTERSUB_HASTARG;
     for (cvop = o2; cvop->op_sibling; cvop = cvop->op_sibling) ;
@@ -5820,9 +5804,24 @@ Perl_ck_subr(pTHX_ OP *o)
 	    cv = GvCVu(gv);
 	    if (!cv)
 		tmpop->op_private |= OPpEARLY_CV;
-	    else if (SvPOK(cv)) {
-		namegv = CvANON(cv) ? gv : CvGV(cv);
-		proto = SvPV((SV*)cv, n_a);
+	    else {
+		if (SvPOK(cv)) {
+		    namegv = CvANON(cv) ? gv : CvGV(cv);
+		    proto = SvPV((SV*)cv, n_a);
+		}
+		if (CvASSERTION(cv)) {
+		    if (PL_hints & HINT_ASSERTING) {
+			if (PERLDB_ASSERTION && PL_curstash != PL_debstash)
+			    o->op_private |= OPpENTERSUB_DB;
+		    }
+		    else {
+			delete=1;
+			if (ckWARN(WARN_ASSERTIONS) && !(PL_hints & HINT_ASSERTIONSSEEN)) {
+			    Perl_warner(aTHX_ packWARN(WARN_ASSERTIONS),
+					"Impossible to activate assertion call");
+			}
+		    }
+		}
 	    }
 	}
     }
@@ -6006,6 +6005,10 @@ Perl_ck_subr(pTHX_ OP *o)
     if (proto && !optional &&
 	  (*proto && *proto != '@' && *proto != '%' && *proto != ';'))
 	return too_few_arguments(o, gv_ename(namegv));
+    if(delete) {
+	op_free(o);
+	o=newSVOP(OP_CONST, 0, newSViv(0));
+    }
     return o;
 }
 
