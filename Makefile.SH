@@ -737,7 +737,7 @@ _cleaner2:
 	rm -f h2ph.man pstruct
 	rm -rf .config
 	rm -f testcompile compilelog
-	-rmdir lib/B lib/Data lib/IO/Socket lib/IO lib/Sys lib/Thread
+	-rmdir lib/B lib/Data lib/Encode lib/IO/Socket lib/IO lib/Sys lib/Thread
 
 _realcleaner: 
 	@$(LDLIBPTH) $(MAKE) _cleaner1 CLEAN=realclean

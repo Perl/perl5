@@ -1354,6 +1354,7 @@ t/lib/dumper-ovl.t	See if Data::Dumper works for overloaded data
 t/lib/dumper.t		See if Data::Dumper works
 t/lib/english.t		See if English works
 t/lib/env-array.t	See if Env works for arrays
+t/lib/encode.t		See if Encode works
 t/lib/env.t		See if Env works
 t/lib/errno.t		See if Errno works
 t/lib/fatal.t           See if Fatal works
