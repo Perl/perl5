@@ -2651,7 +2651,7 @@ try_autoload:
 	    }
 	    DEBUG_S(if (CvDEPTH(cv) != 0)
 			PerlIO_printf(Perl_debug_log, "depth %ld != 0\n",
-				      CvDEPTH(cv)));;
+                                     CvDEPTH(cv)));
 	    SAVEDESTRUCTOR_X(unset_cvowner, (void*) cv);
 	}
     }
@@ -3116,7 +3116,7 @@ unset_cvowner(pTHXo_ void *cvarg)
     MUTEX_LOCK(CvMUTEXP(cv));
     DEBUG_S(if (CvDEPTH(cv) != 0)
 		PerlIO_printf(Perl_debug_log, "depth %ld != 0\n",
-			      CvDEPTH(cv)));;
+                             CvDEPTH(cv)));
     assert(thr == CvOWNER(cv));
     CvOWNER(cv) = 0;
     MUTEX_UNLOCK(CvMUTEXP(cv));
