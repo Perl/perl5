@@ -615,6 +615,7 @@ ext/Storable/t/overload.t	See if Storable works
 ext/Storable/t/recurse.t	See if Storable works
 ext/Storable/t/restrict.t	See if Storable works
 ext/Storable/t/retrieve.t	See if Storable works
+ext/Storable/t/st-dump.pl	See if Storable works
 ext/Storable/t/store.t		See if Storable works
 ext/Storable/t/tied.t		See if Storable works
 ext/Storable/t/tied_hook.t	See if Storable works
