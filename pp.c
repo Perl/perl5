@@ -1139,8 +1139,10 @@ PP(pp_repeat)
 	MEXTEND(MARK, max);
 	if (count > 1) {
 	    while (SP > MARK) {
-		if (*SP)
-		    SvTEMP_off((*SP));
+		if (*SP) {
+		    *SP = sv_2mortal(newSVsv(*SP));
+		    SvREADONLY_on(*SP);
+		}
 		SP--;
 	    }
 	    MARK++;
