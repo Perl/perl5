@@ -159,12 +159,9 @@ typedef U64TYPE U64;
 #   endif
 #endif
 
-/* H.Merijn Brand [ 01 Nov 2004 ] */
-#if defined(HAS_STRLCAT) || defined(HAS_STRLCPY)
-/* Not (yet) used at top level, but mention them for metaconfig
- * Read http://www.courtesan.com/todd/papers/strlcpy.html
- * for the discussion of why replacing strncat/strncpy with
- * strlcat/strlcpy would be wise */
+/* HMB H.Merijn Brand - a placeholder for preparing Configure patches */
+#if defined(USE_SITECUSTOMIZE) || defined(LIBM_VERSION_TYPE)
+/* Not (yet) used at top level, but mention them for metaconfig */
 #endif
 
 /* Mention I8SIZE, U8SIZE, I16SIZE, U16SIZE, I32SIZE, U32SIZE,
