@@ -555,10 +555,12 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 		    }
 		}
 		else {
-		    /* UTF-8 is supposed to be "Universal" so should not happen */
-		    Perl_croak(aTHX_ "%s '%.*s' does not map to UTF-8",
-			       enc->name[0], (int) (SvCUR(src) - slen),
-			       s + slen);
+		    /* UTF-8 is supposed to be "Universal" so should not happen
+		       for real characters, but some encodings have non-assigned
+		       codes which may occur.
+		     */
+		    Perl_croak(aTHX_ "%s \"\\x%02X\" does not map to Unicode",
+			       enc->name[0], (U8) s[slen]);
 		}
 		break;
 
