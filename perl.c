@@ -1303,7 +1303,6 @@ register char **env;
 	SvMULTI_on(envgv);
 	hv = GvHVn(envgv);
 	hv_clear(hv);
-	hv_magic(hv, envgv, 'E');
 	if (env != environ)
 	    environ[0] = Nullch;
 	for (; *env; env++) {
@@ -1314,6 +1313,7 @@ register char **env;
 	    (void)hv_store(hv, *env, s - *env, sv, 0);
 	    *s = '=';
 	}
+	hv_magic(hv, envgv, 'E');
     }
     tainted = 0;
     if (tmpgv = gv_fetchpv("$",TRUE))
