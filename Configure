@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Feb 20 15:44:46 EET 1999 [metaconfig 3.0 PL70]
+# Generated on Mon Feb 22 10:45:25 EET 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -293,6 +293,7 @@ cpplast=''
 cppminus=''
 cpprun=''
 cppstdin=''
+crosscompile=''
 d_access=''
 d_accessx=''
 d_alarm=''
@@ -707,6 +708,7 @@ models=''
 small=''
 split=''
 modetype=''
+multiarch=''
 mydomain=''
 myhostname=''
 phostname=''
@@ -2528,7 +2530,7 @@ case "$usethreads" in
 		. ./usethreads.cbu
 	fi
 	case "$osname" in
-	aix|dec_osf|dos_djgpp|freebsd|hpux|irix|linux|openbsd|os2|solaris|vmesa)
+	aix|dec_osf|dos_djgpp|freebsd|hpux|irix|linux|next|openbsd|os2|solaris|vmesa)
 		# Known thread-capable platforms.
 		;;
 	*)
@@ -6146,8 +6148,8 @@ $cat <<EOM
 
 The installation process will also create a directory for
 site-specific extensions and modules.  Some users find it convenient
-to place all local files in this directory rather than in the main
-distribution directory.
+to place all site-specific files in this directory rather than in the
+main distribution directory.
 
 EOM
 fn=d~+
@@ -10281,11 +10283,29 @@ Log='$Log'
 RCSfile='$RCSfile'
 Revision='$Revision'
 
+case "$crosscompile" in
+''|[nN]*) crosscompile="$undef" ;;
+esac
+
+case "$multiarch" in
+''|[nN]*) multiarch="$undef" ;;
+esac
+
 : check for alignment requirements
 echo " "
-case "$alignbytes" in
-'') echo "Checking alignment constraints..." >&4
-	$cat >try.c <<'EOCP'
+case "$crosscompile$multiarch" in
+*$define*)
+You seem to be cross-compiling, skipping the memory alignment check.
+
+EOM
+	case "$alignbytes" in
+	'') alignbytes=8 ;;
+	esac
+	;;
+*)
+	case "$alignbytes" in
+	'') echo "Checking alignment constraints..." >&4
+		$cat >try.c <<'EOCP'
 struct foobar {
 	char foo;
 	double bar;
@@ -10295,27 +10315,38 @@ int main()
 	printf("%d\n", (char *)&try_algn.bar - (char *)&try_algn.foo);
 }
 EOCP
-	set try
-	if eval $compile_ok; then
-		dflt=`./try`
-	else
-		dflt='8'
-		echo "(I can't seem to compile the test program...)"
-	fi
-	;;
-*) dflt="$alignbytes"
+		set try
+		if eval $compile_ok; then
+			dflt=`./try`
+		else
+			dflt='8'
+			echo "(I can't seem to compile the test program...)"
+		fi
+		;;
+	*) dflt="$alignbytes"
+		;;
+	esac
+	rp="Doubles must be aligned on a how-many-byte boundary?"
+	. ./myread
+	alignbytes="$ans"
+	$rm -f try.c try
 	;;
 esac
-rp="Doubles must be aligned on a how-many-byte boundary?"
-. ./myread
-alignbytes="$ans"
-$rm -f try.c try
+
 
 : check for ordering of bytes in a long
-case "$byteorder" in
-'')
-	$cat <<'EOM'
-  
+echo " "
+case "$crosscompile$multiarch" in
+*$define*)
+	$cat <<EOM
+You seem to be cross-compiling, I'm skipping the byteorder check.
+
+EOM
+	;;
+*)
+	case "$byteorder" in
+	'')
+		$cat <<'EOM'
 In the following, larger digits indicate more significance.  A big-endian
 machine like a Pyramid or a Motorola 680?0 chip will come out to 4321. A
 little-endian machine like a Vax or an Intel 80?86 chip would be 1234. Other
@@ -10323,7 +10354,7 @@ machines may have weird orders like 3412.  A Cray will report 87654321. If
 the test program works the default is probably right.
 I'm now running the test program...
 EOM
-	$cat >try.c <<'EOCP'
+		$cat >try.c <<'EOCP'
 #include <stdio.h>
 int main()
 {
@@ -10343,37 +10374,40 @@ int main()
 	exit(0);
 }
 EOCP
-	xxx_prompt=y
-	set try
-	if eval $compile && ./try > /dev/null; then
-		dflt=`./try`
-		case "$dflt" in
-		[1-4][1-4][1-4][1-4]|12345678|87654321)
-			echo "(The test program ran ok.)"
-			echo "byteorder=$dflt"
-			xxx_prompt=n
+		xxx_prompt=y
+		set try
+		if eval $compile && ./try > /dev/null; then
+			dflt=`./try`
+			case "$dflt" in
+			[1-4][1-4][1-4][1-4]|12345678|87654321)
+				echo "(The test program ran ok.)"
+				echo "byteorder=$dflt"
+				xxx_prompt=n
 			;;
-		????|????????) echo "(The test program ran ok.)" ;;
-		*) echo "(The test program didn't run right for some reason.)" ;;
-		esac
-	else
-		dflt='4321'
-		cat <<'EOM'
+			????|????????) echo "(The test program ran ok.)" ;;
+			*) echo "(The test program didn't run right for some reason.)" ;;
+			esac
+		else
+			dflt='4321'
+			cat <<'EOM'
 (I can't seem to compile the test program.  Guessing big-endian...)
 EOM
-	fi
-	case "$xxx_prompt" in
-	y)
-		rp="What is the order of bytes in a long?"
-		. ./myread
-		byteorder="$ans"
-		;;
-	*)	byteorder=$dflt
+		fi
+		case "$xxx_prompt" in
+		y)
+			rp="What is the order of bytes in a long?"
+			. ./myread
+			byteorder="$ans"
+			;;
+		*)	byteorder=$dflt
+			;;
+		esac
 		;;
 	esac
+	$rm -f try.c try
 	;;
 esac
-$rm -f try.c try
+
 
 : how do we catenate cpp tokens here?
 echo " "
@@ -12587,6 +12621,7 @@ cppminus='$cppminus'
 cpprun='$cpprun'
 cppstdin='$cppstdin'
 cppsymbols='$cppsymbols'
+crosscompile='$crosscompile'
 cryptlib='$cryptlib'
 csh='$csh'
 d_Gconvert='$d_Gconvert'
@@ -13039,6 +13074,7 @@ mmaptype='$mmaptype'
 models='$models'
 modetype='$modetype'
 more='$more'
+multiarch='$multiarch'
 mv='$mv'
 myarchname='$myarchname'
 mydomain='$mydomain'

@@ -1072,19 +1072,22 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$i_syssecrt   I_SYS_SECURITY	/**/
 
 /* MEM_ALIGNBYTES:
- *	 This symbol contains the number of bytes required to align a
- *	 double. Usual values are 2, 4 and 8.
- *	 On NeXT starting with 3.2, you can build "Fat" Multiple Architecture
- *	 Binaries (MAB) for targets with varying alignment.  This only matters
- *	 for perl, where the config.h can be generated and installed on one
- *	 system, and used by a different architecture to build an extension.
- *	 The default is eight, for safety.
+ *	This symbol contains the number of bytes required to align a
+ *	double. Usual values are 2, 4 and 8. The default is eight,
+ *	for safety.
  */
-#define MEM_ALIGNBYTES $alignbytes	/**/
+#if defined(CROSSCOMPILE) || defined(MULTIARCH)
+#  define MEM_ALIGNBYTES 8
+#else
+#define MEM_ALIGNBYTES $alignbytes
+#endif
 
 /* BYTEORDER:
  *	This symbol holds the hexadecimal constant defined in byteorder,
  *	i.e. 0x1234 or 0x4321, etc...
+ *	If the compiler supports cross-compiling or multiple-architecture
+ *	binaries (eg. on NeXT systems), use compiler-defined macros to
+ *	determine the byte order.
  *	On NeXT 3.2 (and greater), you can build "Fat" Multiple Architecture
  *	Binaries (MAB) on either big endian or little endian machines.
  *	The endian-ness is available at compile-time.  This only matters
@@ -1095,14 +1098,31 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	so the default case (for NeXT) is big endian to catch them. 
  *	This might matter for NeXT 3.0.
  */
-#ifndef NeXT
+#if defined(CROSSCOMPILE) || defined(MULTIARCH)
+#  ifdef __LITTLE_ENDIAN__
+#    if LONGSIZE == 4
+#      define BYTEORDER 0x1234
+#    else
+#      if LONGSIZE == 8
+#        define BYTEORDER 0x12345678
+#      endif
+#    endif
+#  else
+#    ifdef __BIG_ENDIAN__
+#      if LONGSIZE == 4
+#        define BYTEORDER 0x4321
+#      else
+#        if LONGSIZE == 8
+#          define BYTEORDER 0x87654321
+#        endif
+#      endif
+#    endif
+#  endif
+#  if !defined(BYTEORDER) && (defined(NeXT) || defined(__NeXT__))
+#    define BYTEORDER 0x4321
+#  endif
+#else
 #define BYTEORDER 0x$byteorder	/* large digits for MSB */
-#else  /* NeXT */
-#ifdef __LITTLE_ENDIAN__
-#define BYTEORDER 0x1234
-#else /* __BIG_ENDIAN__ */
-#define BYTEORDER 0x4321
-#endif /* ENDIAN CHECK */
 #endif /* NeXT */
 
 /* CASTI32:
@@ -2330,6 +2350,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	The standard distribution will put nothing in this directory.
  *	Individual sites may place their own extensions and modules in
  *	this directory.
+ *	This differs from LOCALARCH in that SITEARCH is often
+ *	a shared network directory while LOCALARCH is
+ *	at a local disk, because of policy/administrative issues
+ *	like for example caching (performance), licensing, or security.
  */
 /* SITEARCH_EXP:
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
@@ -2346,6 +2370,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	The standard distribution will put nothing in this directory.
  *	Individual sites may place their own extensions and modules in
  *	this directory.
+ *	This differs from LOCALLIB in that SITELIB is often
+ *	a shared network directory while LOCALLIB is
+ *	at a local disk, because of policy/administrative issues
+ *	like for example caching (performance), licensing, or security.
  */
 /* SITELIB_EXP:
  *	This symbol contains the ~name expanded version of SITELIB, to be used
