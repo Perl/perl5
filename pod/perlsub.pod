@@ -67,7 +67,8 @@ Assigning to the whole array C<@_> removes that aliasing, and does
 not update any arguments.
 
 The return value of a subroutine is the value of the last expression
-evaluated.  More explicitly, a C<return> statement may be used to exit the
+evaluated by that sub, or the empty list in the case of an empty sub.
+More explicitly, a C<return> statement may be used to exit the
 subroutine, optionally specifying the returned value, which will be
 evaluated in the appropriate context (list, scalar, or void) depending
 on the context of the subroutine call.  If you specify no return value,

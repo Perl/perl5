@@ -290,6 +290,14 @@ $declaresubs
 
 END
 
+if (exists $init{doexec}) {
+    print <<'END';
+use Cwd ();
+my $cwd = Cwd::cwd();
+
+END
+}  
+
 if (exists $init{ls}) {
     print <<'END';
 my @rwx = qw(--- --x -w- -wx r-- r-x rw- rwx);
@@ -357,9 +365,6 @@ END
 
 if (exists $init{doexec}) {
     print <<'END';
-
-use Cwd ();
-my $cwd = Cwd::cwd();
 
 sub doexec ($@) {
     my $ok = shift;

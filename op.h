@@ -144,8 +144,8 @@ Deprecated.  Use C<GIMME_V> instead.
 /* Private for OP_REPEAT */
 #define OPpREPEAT_DOLIST	64	/* List replication. */
 
-/* Private for OP_RV2?V, OP_?ELEM */
-#define OPpDEREF		(32|64)	/* Want ref to something: */
+/* Private for OP_RV2GV, OP_RV2SV, OP_AELEM, OP_AHLEM, OP_PADSV */
+#define OPpDEREF		(32|64)	/* autovivify: Want ref to something: */
 #define OPpDEREF_AV		32	/*   Want ref to AV. */
 #define OPpDEREF_HV		64	/*   Want ref to HV. */
 #define OPpDEREF_SV		(32|64)	/*   Want ref to SV. */
