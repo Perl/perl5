@@ -370,7 +370,7 @@ case "$use64bitall" in
 "$define"|true|[yY]*)
 	    libc='/usr/lib/sparcv9/libc.so'
 	    if test ! -f $libc; then
-		cat <<EOM
+		cat >&4 <<EOM
 
 I do not see the 64-bit libc, $libc.
 Cannot continue, aborting.
@@ -381,11 +381,27 @@ EOM
 	    loclibpth="$loclibpth /usr/lib/sparcv9"
 	    case "$cc -v 2>/dev/null" in
 	    *gcc*)
-		# I don't know what are the flags to make gcc sparcv9-aware,
-	        # I'm just guessing. --jhi
-		ccflags="$ccflags -mv9"
-		ldflags="$ldflags -mv9"
-		lddlflags="$lddlflags -G -mv9"
+		echo 'main() { return 0; }' > try.c
+		if ${cc:-cc} -mcpu=v9 -m64 -S try.c 2>&1 | grep -e \
+		    '-m64 is not supported by this configuration'; then
+		    cat >&4 <<EOM
+
+Full 64-bit build not supported by this configuration.
+Cannot continue, aborting.
+
+EOM
+		    exit 1
+		fi
+		ccflags="$ccflags -mcpu=v9 -m64"
+		if test X`getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null` != X; then
+		    ccflags="$ccflags -Wa,`getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null`"
+		fi
+		# no changes to ld flags, as (according to man ld):
+		#
+   		# There is no specific option that tells ld to link 64-bit
+		# objects; the class of the first object that gets processed
+		# by ld determines whether it is to perform a 32-bit or a
+		# 64-bit link edit.
 		;;
 	    *)
 		ccflags="$ccflags `getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null`"
