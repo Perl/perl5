@@ -37,8 +37,8 @@ through to locate the proper section you're looking for.
 
 =back
 
-=head2 perlfaq - frequently asked questions about Perl ($Date: 1999/05/23
-20:38:02 $)
+=head2 perlfaq - frequently asked questions about Perl ($Date: 2001/09/20
+03:03:00 $)
 
 =over 4
 
@@ -833,7 +833,8 @@ b [line] [condition], b subname [condition], b postpone subname
 command, a [line], A, W expr, W, O booloption .., O anyoption? .., O
 option=value .., < ?, < [ command ], << command, > ?, > command, >>
 command, { ?, { [ command ], {{ command, ! number, ! -number, ! pattern, !!
-cmd, H -number, q or ^D, R, |dbcmd, ||dbcmd, command, m expr, man [manpage]
+cmd, @ file, H -number, q or ^D, R, |dbcmd, ||dbcmd, command, m expr, man
+[manpage]
 
 =item Configurable Options
 
@@ -909,7 +910,8 @@ $INPLACE_EDIT, $^I, $^M, $OSNAME, $^O, $PERLDB, $^P, 0x01, 0x02, 0x04,
 0x08, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, $LAST_REGEXP_CODE_RESULT, $^R,
 $EXCEPTIONS_BEING_CAUGHT, $^S, $BASETIME, $^T, $PERL_VERSION, $^V,
 $WARNING, $^W, ${^WARNING_BITS}, ${^WIDE_SYSTEM_CALLS}, $EXECUTABLE_NAME,
-$^X, $ARGV, @ARGV, @F, @INC, @_, %INC, %ENV, $ENV{expr}, %SIG, $SIG{expr}
+$^X, ARGV, $ARGV, @ARGV, @F, @INC, @_, %INC, %ENV, $ENV{expr}, %SIG,
+$SIG{expr}
 
 =item Error Indicators
 
@@ -2016,6 +2018,8 @@ to enable UTF-8/UTF-EBCDIC in scripts
 
 =item CAVEATS
 
+=item UNICODE REGULAR EXPRESSION SUPPORT LEVEL
+
 =item SEE ALSO
 
 =back
@@ -2206,7 +2210,8 @@ chcp, dataset access, OS/390, z/OS iconv, locales
 
 attributes, attrs, autouse, base, blib, bytes, charnames, constant,
 diagnostics, fields, filetest, integer, less, locale, open, ops, overload,
-re, sigtrap, strict, subs, utf8, vars, warnings, warnings::register
+re, sigtrap, strict, subs, threads, utf8, vars, warnings,
+warnings::register
 
 =item Standard Modules
 
@@ -2230,27 +2235,27 @@ File::Spec::Mac, File::Spec::OS2, File::Spec::Unix, File::Spec::VMS,
 File::Spec::Win32, File::Temp, File::stat, FileCache, FileHandle,
 Filter::Simple, FindBin, Getopt::Long, Getopt::Std, I18N::Collate,
 I18N::LangTags, I18N::LangTags::List, IO, IPC::Open2, IPC::Open3,
-Locale::Constants, Locale::Country, Locale::Currency, Locale::Language,
-Locale::Maketext, Locale::Maketext::TPJ13, Math::BigFloat, Math::BigInt,
-Math::BigInt::Calc, Math::Complex, Math::Trig, Memoize,
-Memoize::AnyDBM_File, Memoize::Expire, Memoize::ExpireFile,
-Memoize::ExpireTest, Memoize::NDBM_File, Memoize::SDBM_File,
-Memoize::Saves, Memoize::Storable, NDBM_File, NEXT, Net::Cmd, Net::Config,
-Net::Domain, Net::FTP, Net::NNTP, Net::Netrc, Net::POP3, Net::Ping,
-Net::SMTP, Net::Time, Net::hostent, Net::libnetFAQ, Net::netent,
-Net::protoent, Net::servent, O, ODBM_File, Opcode, POSIX, PerlIO,
-Pod::Checker, Pod::Find, Pod::Html, Pod::InputObjects, Pod::LaTeX,
+Lingua::KO::Hangul::Util, Locale::Constants, Locale::Country,
+Locale::Currency, Locale::Language, Locale::Maketext,
+Locale::Maketext::TPJ13, Math::BigFloat, Math::BigInt, Math::BigInt::Calc,
+Math::Complex, Math::Trig, Memoize, Memoize::AnyDBM_File, Memoize::Expire,
+Memoize::ExpireFile, Memoize::ExpireTest, Memoize::NDBM_File,
+Memoize::SDBM_File, Memoize::Saves, Memoize::Storable, NDBM_File, NEXT,
+Net::Cmd, Net::Config, Net::Domain, Net::FTP, Net::NNTP, Net::Netrc,
+Net::POP3, Net::Ping, Net::SMTP, Net::Time, Net::hostent, Net::libnetFAQ,
+Net::netent, Net::protoent, Net::servent, O, ODBM_File, Opcode, POSIX,
+PerlIO, Pod::Checker, Pod::Find, Pod::Html, Pod::InputObjects, Pod::LaTeX,
 Pod::Man, Pod::ParseUtils, Pod::Parser, Pod::Plainer, Pod::Select,
 Pod::Text, Pod::Text::Color, Pod::Text::Overstrike, Pod::Text::Termcap,
 Pod::Usage, SDBM_File, Safe, Search::Dict, SelectSaver, SelfLoader, Shell,
 Socket, Storable, Switch, Symbol, Term::ANSIColor, Term::Cap,
 Term::Complete, Term::ReadLine, Test, Test::Harness, Test::More,
-Test::Simple, Text::Abbrev, Text::Balanced, Text::ParseWords,
-Text::Soundex, Text::Tabs, Text::Wrap, Thread, Thread::Queue,
-Thread::Semaphore, Thread::Signal, Thread::Specific, Tie::Array,
+Test::Simple, Test::Tutorial, Text::Abbrev, Text::Balanced,
+Text::ParseWords, Text::Soundex, Text::Tabs, Text::Wrap, Tie::Array,
 Tie::Handle, Tie::Hash, Tie::RefHash, Tie::Scalar, Tie::SubstrHash,
-Time::Local, Time::gmtime, Time::localtime, Time::tm, UNIVERSAL, UnicodeCD,
-User::grent, User::pwent, Win32
+Time::Local, Time::gmtime, Time::localtime, Time::tm, UNIVERSAL,
+Unicode::Collate, Unicode::Normalize, Unicode::UCD, User::grent,
+User::pwent, Win32
 
 =item Extension Modules
 
@@ -2354,8 +2359,8 @@ tarball, Announce to the modules list, Announce to clpa, Fix bugs!
 
 =back
 
-=head2 perlfaq1 - General Questions About Perl ($Revision: 1.23 $, $Date:
-1999/05/23 16:08:30 $)
+=head2 perlfaq1 - General Questions About Perl ($Revision: 1.1 $, $Date:
+2001/09/20 03:03:00 $)
 
 =over 4
 
@@ -2401,8 +2406,8 @@ Scheme, or Tcl?
 
 =back
 
-=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.32 $,
-$Date: 1999/10/14 18:46:09 $)
+=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.1 $,
+$Date: 2001/09/20 03:03:00 $)
 
 =over 4
 
@@ -2457,8 +2462,8 @@ References, Tutorials, Task-Oriented, Special Topics
 
 =back
 
-=head2 perlfaq3 - Programming Tools ($Revision: 1.38 $, $Date: 1999/05/23
-16:08:30 $)
+=head2 perlfaq3 - Programming Tools ($Revision: 1.1 $, $Date: 2001/09/20
+03:03:00 $)
 
 =over 4
 
@@ -2542,8 +2547,8 @@ mean?
 
 =back
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 1.49 $, $Date: 1999/05/23
-20:37:49 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 1.1 $, $Date: 2001/09/20
+03:03:00 $)
 
 =over 4
 
@@ -2752,8 +2757,8 @@ array of hashes or arrays?
 
 =back
 
-=head2 perlfaq5 - Files and Formats ($Revision: 1.38 $, $Date: 1999/05/23
-16:08:30 $)
+=head2 perlfaq5 - Files and Formats ($Revision: 1.1 $, $Date: 2001/09/20
+03:03:00 $)
 
 =over 4
 
@@ -2845,7 +2850,7 @@ protected files?  Isn't this a bug in Perl?
 
 =back
 
-=head2 perlfaq6 - Regexes ($Revision: 1.27 $, $Date: 1999/05/23 16:08:30 $)
+=head2 perlfaq6 - Regexes ($Revision: 1.1 $, $Date: 2001/09/20 03:03:00 $)
 
 =over 4
 
@@ -2911,8 +2916,8 @@ file?
 
 =back
 
-=head2 perlfaq7 - Perl Language Issues ($Revision: 1.28 $, $Date:
-1999/05/23 20:36:18 $)
+=head2 perlfaq7 - Perl Language Issues ($Revision: 1.1 $, $Date: 2001/09/20
+03:03:00 $)
 
 =over 4
 
@@ -2990,8 +2995,8 @@ is in scope?
 
 =back
 
-=head2 perlfaq8 - System Interaction ($Revision: 1.39 $, $Date: 1999/05/23
-18:37:57 $)
+=head2 perlfaq8 - System Interaction ($Revision: 1.1 $, $Date: 2001/09/20
+03:03:00 $)
 
 =over 4
 
@@ -3118,7 +3123,7 @@ search path?
 
 =back
 
-=head2 perlfaq9 - Networking ($Revision: 1.26 $, $Date: 1999/05/23 16:08:30
+=head2 perlfaq9 - Networking ($Revision: 1.1 $, $Date: 2001/09/20 03:03:00
 $)
 
 =over 4
@@ -4119,9 +4124,7 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 
 =item Overloadable regex assertions
 
-=item Unicode case mappings 
-
-=item Unicode regular expression character classes
+=item Unicode
 
 =item use Thread for iThreads
 
@@ -6912,6 +6915,33 @@ method, locked
 
 =back
 
+=head2 threads - Perl extension allowing use of interpreter based threads
+from perl
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+new, function, LIST, $threads->join, $threads->detach, threads->self,
+$threads->tid
+
+=item TODO
+
+Fix so the return value is returned when you join, Add join_all, Fix memory
+leaks!
+
+=item AUTHOR and COPYRIGHT
+
+=item BUGS
+
+creating a thread from within a thread is unsafe under win32
+
+=item SEE ALSO
+
+=back
+
 =head2 attributes - get/set subroutine or variable attributes
 
 =over 4
@@ -7359,6 +7389,33 @@ C<strict refs>, C<strict vars>, C<strict subs>
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=back
+
+=head2 threads - Perl extension allowing use of interpreter based threads
+from perl
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+new, function, LIST, $threads->join, $threads->detach, threads->self,
+$threads->tid
+
+=item TODO
+
+Fix so the return value is returned when you join, Add join_all, Fix memory
+leaks!
+
+=item AUTHOR and COPYRIGHT
+
+=item BUGS
+
+creating a thread from within a thread is unsafe under win32
+
+=item SEE ALSO
 
 =back
 
@@ -9672,7 +9729,7 @@ cat
 
 eqtime src dst
 
-rm_f files...
+rm_rf files...
 
 rm_f files...
 
@@ -15391,6 +15448,40 @@ B<_my_exit>
 
 L<Test::More>, L<Test>, L<Test::Unit>, L<Pod::Tests>, L<SelfTest>,
 L<Test::Harness>
+
+=back
+
+=head2 Test::Tutorial - A tutorial about writing really basic tests
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Nuts and bolts of testing.
+
+=item Where to start?
+
+=item Names
+
+=item Test the manual
+
+=item Sometimes the tests are wrong
+
+=item Testing lots of values
+
+=item Informative names
+
+=item Skipping tests
+
+=item Todo tests
+
+=item Testing with taint mode.
+
+=back
+
+=item FOOTNOTES
 
 =back
 

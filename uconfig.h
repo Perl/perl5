@@ -1687,12 +1687,6 @@
 /*#define HAS_NTOHL		/ **/
 /*#define HAS_NTOHS		/ **/
 
-/* HAS_ICONV:
- *	This symbol, if defined, indicates that the iconv routine is
- *	available to do character set conversions.
- */
-/*#define HAS_ICONV		/ **/
-
 /* HAS_INT64_T:
  *     This symbol will defined if the C compiler supports int64_t.
  *     Usually the <inttypes.h> needs to be included, but sometimes
@@ -2511,12 +2505,6 @@
  */
 /*#define I_GRP		/ **/
 /*#define GRPASSWD	/ **/
-
-/* I_ICONV:
- *	This symbol, if defined, indicates that <iconv.h> exists and
- *	should be included.
- */
-/*#define	I_ICONV		/ **/
 
 /* I_IEEEFP:
  *	This symbol, if defined, indicates that <ieeefp.h> exists and

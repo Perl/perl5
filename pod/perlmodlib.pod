@@ -132,6 +132,10 @@ Restrict unsafe constructs
 
 Predeclare sub names
 
+=item threads
+
+Perl extension allowing use of interpreter based threads from perl
+
 =item utf8
 
 Enable/disable UTF-8 (or UTF-EBCDIC) in source code
@@ -500,7 +504,7 @@ Methods for OS/2 file specs
 
 =item File::Spec::Unix
 
-Methods used by File::Spec
+File::Spec for Unix, base for other File::Spec modules
 
 =item File::Spec::VMS
 
@@ -565,6 +569,10 @@ Open a process for both reading and writing
 =item IPC::Open3
 
 Open a process for reading, writing, and error handling
+
+=item Lingua::KO::Hangul::Util
+
+Utility functions for Hangul Syllables
 
 =item Locale::Constants
 
@@ -866,6 +874,10 @@ Yet another framework for writing test scripts
 
 Basic utilities for writing tests.
 
+=item Test::Tutorial
+
+A tutorial about writing really basic tests
+
 =item Text::Abbrev
 
 Create an abbreviation table from a list
@@ -889,26 +901,6 @@ Expand and unexpand tabs per the unix expand(1) and unexpand(1)
 =item Text::Wrap
 
 Line wrapping to form simple paragraphs
-
-=item Thread
-
-Manipulate threads in Perl (EXPERIMENTAL, subject to change)
-
-=item Thread::Queue
-
-Thread-safe queues
-
-=item Thread::Semaphore
-
-Thread-safe semaphores
-
-=item Thread::Signal
-
-Start a thread which runs signal handlers reliably
-
-=item Thread::Specific
-
-Thread-specific keys
 
 =item Tie::Array
 
@@ -954,7 +946,15 @@ Internal object used by Time::gmtime and Time::localtime
 
 Base class for ALL classes (blessed references)
 
-=item UnicodeCD
+=item Unicode::Collate
+
+Use UCA (Unicode Collation Algorithm)
+
+=item Unicode::Normalize
+
+Normalized forms of Unicode text
+
+=item Unicode::UCD
 
 Unicode character database
 

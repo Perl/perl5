@@ -3881,9 +3881,6 @@ extern void moncontrol(int);
 
    NV_PRESERVES_UV
 
-   HAS_ICONV
-   I_ICONV
-
    HAS_MKSTEMP
    HAS_MKSTEMPS
    HAS_MKDTEMP

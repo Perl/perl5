@@ -3920,43 +3920,6 @@ $ tmp = "mkstemps"
 $ GOSUB inlibc
 $ d_mkstemps = tmp
 $!
-$! Check for iconv
-$!
-$ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
-$ WS "#include <stdlib.h>"
-$ WS "#endif"
-$ WS "#include <stdio.h>"
-$ WS "#include <iconv.h>"
-$ WS "int main()"
-$ WS "{"
-$ WS "  iconv_t cd = (iconv_t)0;"
-$ WS "  char *inbuf, *outbuf;"
-$ WS "  size_t inleft, outleft;"
-$ WS "  iconv(cd, &inbuf, &inleft, &outbuf, &outleft);"
-$ WS "  exit(0);"
-$ WS "}"
-$ CS
-$ GOSUB link_ok
-$ IF compile_status .ne. good_compile
-$ THEN
-$   d_iconv="undef"
-$   i_iconv="undef"
-$ ELSE
-$   IF link_status .ne. good_link
-$   THEN
-$     d_iconv="undef"
-$     i_iconv="undef"
-$   ELSE
-$     d_iconv="define"
-$     i_iconv="define"
-$   ENDIF
-$ ENDIF
-$ IF i_iconv .eqs. "define" 
-$ THEN echo4 "<iconv.h> found."
-$ ELSE echo4 "<iconv.h> NOT found."
-$ ENDIF
-$!
 $! Check for mkdtemp
 $!
 $ OS
@@ -5124,7 +5087,6 @@ $ WC "d_gnulibc='undef'"
 $ WC "d_grpasswd='undef'"
 $ WC "d_hasmntopt='undef'"
 $ WC "d_htonl='" + d_htonl + "'"
-$ WC "d_iconv='" + d_iconv +"'"
 $ WC "d_index='" + d_index + "'"
 $ WC "d_inetaton='undef'"
 $ WC "d_int64_t='" + d_int64_t + "'"
@@ -5388,7 +5350,6 @@ $ WC "i_float='define'"
 $ WC "i_fp='undef'"
 $ WC "i_fp_class='undef'"
 $ WC "i_grp='undef'"
-$ WC "i_iconv='" + i_iconv +"'"
 $ WC "i_ieeefp='undef'"
 $ WC "i_inttypes='" + i_inttypes + "'"
 $ WC "i_langinfo='" + i_langinfo + "'"
