@@ -515,7 +515,9 @@ see pack('U0', ...)).
 
 =item *
 
-vec() now refuses to deal with characters >255.
+vec() now tries to work with characters <= 255 when possible, but it leaves
+higher character values in place.  In that case, if vec() was used to modify
+the string, it is no longer considered to be utf8-encoded.
 
 =item *
 

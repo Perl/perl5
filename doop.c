@@ -537,8 +537,7 @@ Perl_do_sprintf(pTHX_ SV *sv, I32 len, SV **sarg)
 	SvTAINTED_on(sv);
 }
 
-/* currently converts input to bytes if needed and croaks if a character
-   > 255 is encountered							*/
+/* currently converts input to bytes if possible, but doesn't sweat failure */
 UV
 Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 {
@@ -552,12 +551,7 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 	Perl_croak(aTHX_ "Illegal number of bits in vec");
 
     if (SvUTF8(sv)) {
-	if (Perl_utf8_to_bytes(aTHX_ (U8*) s, &srclen)) {
-	    SvUTF8_off(sv);
-	    SvCUR_set(sv, srclen);
-	}
-	else
-	    Perl_croak(aTHX_ "Character > 255 in vec()");
+	(void) Perl_sv_utf8_downgrade(aTHX_ sv, TRUE);
     }
 
     offset *= size;	/* turn into bit offset */
@@ -681,8 +675,10 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
     return retnum;
 }
 
-/* currently converts input to bytes if needed and croaks if a character
-   > 255 is encountered							*/
+/* currently converts input to bytes if possible but doesn't sweat failures,
+ * although it does ensure that the string it clobbers is not marked as
+ * utf8-valid any more
+ */
 void
 Perl_do_vecset(pTHX_ SV *sv)
 {
@@ -699,12 +695,11 @@ Perl_do_vecset(pTHX_ SV *sv)
 	return;
     s = (unsigned char*)SvPV_force(targ, targlen);
     if (SvUTF8(targ)) {
-	if (Perl_utf8_to_bytes(aTHX_ (U8*) s, &targlen)) {
-	/*  SvUTF8_off(targ);   SvPOK_only below ensures this  */
-	    SvCUR_set(targ, targlen);
-	}
-	else
-	    Perl_croak(aTHX_ "Character > 255 in vec()");
+	/* This is handled by the SvPOK_only below...
+	if (!Perl_sv_utf8_downgrade(aTHX_ targ, TRUE))
+	    SvUTF8_off(targ);
+	 */
+	(void) Perl_sv_utf8_downgrade(aTHX_ targ, TRUE);
     }
 
     (void)SvPOK_only(targ);
