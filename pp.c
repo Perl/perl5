@@ -139,6 +139,8 @@ PP(pp_rv2gv)
 		if (op->op_flags & OPf_REF ||
 		    op->op_private & HINT_STRICT_REFS)
 		    DIE(no_usym, "a symbol");
+		if (dowarn)
+		    warn(warn_uninit);
 		RETSETUNDEF;
 	    }
 	    sym = SvPV(sv, na);
@@ -181,6 +183,8 @@ PP(pp_rv2sv)
 		if (op->op_flags & OPf_REF ||
 		    op->op_private & HINT_STRICT_REFS)
 		    DIE(no_usym, "a SCALAR");
+		if (dowarn)
+		    warn(warn_uninit);
 		RETSETUNDEF;
 	    }
 	    sym = SvPV(sv, na);

@@ -412,7 +412,6 @@ PP(pp_print)
 PP(pp_rv2av)
 {
     dSP; dPOPss;
-
     AV *av;
 
     if (SvROK(sv)) {
@@ -450,6 +449,8 @@ PP(pp_rv2av)
 		    if (op->op_flags & OPf_REF ||
 		      op->op_private & HINT_STRICT_REFS)
 			DIE(no_usym, "an ARRAY");
+		    if (dowarn)
+			warn(warn_uninit);
 		    if (GIMME == G_ARRAY)
 			RETURN;
 		    RETPUSHUNDEF;
@@ -487,9 +488,7 @@ PP(pp_rv2av)
 
 PP(pp_rv2hv)
 {
-
     dSP; dTOPss;
-
     HV *hv;
 
     if (SvROK(sv)) {
@@ -527,6 +526,8 @@ PP(pp_rv2hv)
 		    if (op->op_flags & OPf_REF ||
 		      op->op_private & HINT_STRICT_REFS)
 			DIE(no_usym, "a HASH");
+		    if (dowarn)
+			warn(warn_uninit);
 		    if (GIMME == G_ARRAY) {
 			SP--;
 			RETURN;
