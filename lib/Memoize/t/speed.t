@@ -5,6 +5,9 @@ BEGIN {
     @INC = '../lib';
 }
 use Memoize;
+use strict;
+our $COUNT;
+our $RESULT;
 
 if (-e '.fast') {
   print "1..0\n";
@@ -15,12 +18,10 @@ $| = 1;
 # If we don't say anything, maybe nobody will notice.
 # print STDERR "\nWarning: I'm testing the speedup.  This might take up to thirty seconds.\n                    ";
 
-my $COARSE_TIME = 1;
-
 sub times_to_time { my ($u) = times; $u; }
 if ($^O eq 'riscos') {
   eval {require Time::HiRes; *my_time = \&Time::HiRes::time };
-  if ($@) { *my_time = sub { time }; $COARSE_TIME = 1 }
+  if ($@) { *my_time = sub { time }; }
 } else {
   *my_time = \&times_to_time;
 }
@@ -32,10 +33,10 @@ print "1..6\n";
 
 # This next test finds an example that takes a long time to run, then
 # checks to make sure that the run is actually speeded up by memoization.
-# In some sense, this is the most essential correctness test in the package.  
+# In some sense, this is the most essential correctness test in the package.
 #
-# We do this by running the fib() function with successfily larger
-# arguments until we find one that tales at least $LONG_RUN seconds
+# We do this by running the fib() function with successively larger
+# arguments until we find one that takes at least $LONG_RUN seconds
 # to execute.  Then we memoize fib() and run the same call cagain.  If
 # it doesn't produce the same test in less than one-tenth the time,
 # something is seriously wrong.
@@ -51,13 +52,9 @@ sub fib {
   fib($n-1) + fib($n-2);
 }
 
-sub max { $_[0] > $_[1] ? 
-          $_[0] : $_[1] 
-        }
+our $N = 1;
 
-$N = 1;
-
-$ELAPSED = 0;
+our $ELAPSED = 0;
 
 my $LONG_RUN = 10;
 
@@ -78,7 +75,7 @@ while (1) {
       # is exponential in $N.  If we increase $N too aggressively,
       # the user will be forced to wait a very long time.
   } else {
-      $N++; 
+      $N++;
   }
 }
 
@@ -88,13 +85,16 @@ print "# Total calls: $COUNT.\n";
 &memoize('fib');
 
 $COUNT=0;
-$start = time;
-$RESULT2 = fib($N);
-$ELAPSED2 = time - $start + .001; # prevent division by 0 errors
+my $start = time;
+our $RESULT2 = fib($N);
+our $ELAPSED2 = (time - $start) || 1; # prevent division by 0 errors
 
 print (($RESULT == $RESULT2) ? "ok 1\n" : "not ok 1\n");
 # If it's not ten times as fast, something is seriously wrong.
-print (($ELAPSED/$ELAPSED2 > 10) ? "ok 2\n" : "not ok 2\n");
+print (($ELAPSED/$ELAPSED2 >= 10) ? "ok 2 - ELAPSED[$ELAPSED] ELAPSED2[$ELAPSED2]\n"
+       : "#
+# COUNT[$COUNT] N[$N] ELAPSED[$ELAPSED] ELAPSED2[$ELAPSED2]
+not ok 2\n");
 # If it called the function more than $N times, it wasn't memoized properly
 print (($COUNT > $N) ? "ok 3\n" : "not ok 3\n");
 
@@ -102,9 +102,10 @@ print (($COUNT > $N) ? "ok 3\n" : "not ok 3\n");
 $COUNT = 0;
 $start = time;
 $RESULT2 = fib($N);
-$ELAPSED2 = time - $start + .001; # prevent division by 0 errors
+$ELAPSED2 = (time - $start) || 1; # prevent division by 0 errors
 
 print (($RESULT == $RESULT2) ? "ok 4\n" : "not ok 4\n");
-print (($ELAPSED/$ELAPSED2 > 10) ? "ok 5\n" : "not ok 5\n");
+print (($ELAPSED/$ELAPSED2 >= 10) ? "ok 5 - ELAPSED[$ELAPSED] ELAPSED2[$ELAPSED2]\n"
+       : "not ok 5\n");
 # This time it shouldn't have called the function at all.
 print ($COUNT == 0 ? "ok 6\n" : "not ok 6\n");
