@@ -41,7 +41,8 @@ my %translators = ('Pod::Man'              => 'man',
                    'Pod::Text'             => 'txt',
                    'Pod::Text::Color'      => 'clr',
                    'Pod::Text::Overstrike' => 'ovr',
-                   'Pod::Text::Termcap'    => 'cap');
+                   # 'Pod::Text::Termcap'    => 'cap' # unportable
+		   );
 
 # Set default options to match those of pod2man and pod2text.
 %options = (sentence => 0);
