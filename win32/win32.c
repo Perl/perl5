@@ -2718,17 +2718,22 @@ win32_popen(const char *command, const char *mode)
     int stdfd, oldfd;
     int ourmode;
     int childpid;
+    DWORD nhandle;
+    HANDLE old_h;
+    int lock_held = 0;
 
     /* establish which ends read and write */
     if (strchr(mode,'w')) {
         stdfd = 0;		/* stdin */
         parent = 1;
         child = 0;
+	nhandle = STD_INPUT_HANDLE;
     }
     else if (strchr(mode,'r')) {
         stdfd = 1;		/* stdout */
         parent = 0;
         child = 1;
+	nhandle = STD_OUTPUT_HANDLE;
     }
     else
         return NULL;
@@ -2744,7 +2749,7 @@ win32_popen(const char *command, const char *mode)
     /* the child doesn't inherit handles */
     ourmode |= O_NOINHERIT;
 
-    if (win32_pipe( p, 512, ourmode) == -1)
+    if (win32_pipe(p, 512, ourmode) == -1)
         return NULL;
 
     /* save current stdfd */
@@ -2759,11 +2764,24 @@ win32_popen(const char *command, const char *mode)
     /* close the child end in parent */
     win32_close(p[child]);
 
+    /* save the old std handle, and set the std handle */
+    OP_REFCNT_LOCK;
+    lock_held = 1;
+    old_h = GetStdHandle(nhandle);
+    SetStdHandle(nhandle, (HANDLE)_get_osfhandle(stdfd));
+
     /* start the child */
     {
 	dTHX;
 	if ((childpid = do_spawn_nowait((char*)command)) == -1)
 	    goto cleanup;
+
+	/* restore the old std handle */
+	if (lock_held) {
+	    SetStdHandle(nhandle, old_h);
+	    OP_REFCNT_UNLOCK;
+	    lock_held = 0;
+	}
 
 	/* revert stdfd to whatever it was before */
 	if (win32_dup2(oldfd, stdfd) == -1)
@@ -2787,6 +2805,11 @@ cleanup:
     /* we don't need to check for errors here */
     win32_close(p[0]);
     win32_close(p[1]);
+    if (lock_held) {
+	SetStdHandle(nhandle, old_h);
+	OP_REFCNT_UNLOCK;
+	lock_held = 0;
+    }
     if (oldfd != -1) {
         win32_dup2(oldfd, stdfd);
         win32_close(oldfd);
