@@ -2208,7 +2208,7 @@ Uses C<dumpvar.pl> to dump out the current values for selected variables.
                     do 'dumpvar.pl' unless defined &main::dumpvar;
                     if (defined &main::dumpvar) {
                         # We got it. Turn off subroutine entry/exit messages
-                        # for the moment. XXX Why do this to doret?
+                        # for the moment, along with return values.
                         local $frame = 0;
                         local $doret = -2;
 
@@ -2593,7 +2593,7 @@ appropriately, and force us out of the command loop.
                     end_report(), next CMD if $finished and $level <= 1;
                     # Turn on stack trace.
                     $stack[$stack_depth] |= 1;
-                    # XXX weird stack fram management? 
+                    # Print return value unless the stack is empty.
                     $doret = $option{PrintRet} ? $stack_depth - 1 : -2;
                     last CMD;
                 };
@@ -5009,18 +5009,17 @@ sub cmd_W {
 
             # Does this one match the command argument?
             if ($val eq $expr) {    # =~ m/^\Q$i$/) {
-                # Yes. Turn it off.
+                # Yes. Turn it off, and its value too.
                 splice(@to_watch, $i_cnt, 1);
-                # We ought to kill the value too, oughtn't we?
-                # But we don't. XXX This is a bug.
+                splice(@old_watch, $i_cnt, 1);
             }
             $i_cnt++;
         } ## end foreach (@to_watch)
 
-        # We probably should see if they're all gone. But we don't.
-        # No bug shows up for this because the 'check watch expressions'
-        # code iterates over the @to_watch array. Since it's empty, nothing
-        # untoward happens.
+        # We don't bother to turn watching off because
+        #  a) we don't want to stop calling watchfunction() it it exists
+        #  b) foreach over a null list doesn't do anything anyway
+
     } ## end elsif ($expr =~ /^(\S.*)/)
 
     # No command arguments entered.
@@ -6137,7 +6136,7 @@ sub parse_options {
     # These options need a value. Don't allow them to be clobbered by accident.
     my %opt_needs_val = map { ($_ => 1) } qw{
       dumpDepth arrayDepth hashDepth LineInfo maxTraceLen ornaments windowSize
-      pager quote ReadLine recallCommand RemotePort ShellBang TTY
+      pager quote ReadLine recallCommand RemotePort ShellBang TTY CommandSet
       };
 
     while (length) {
@@ -6150,6 +6149,13 @@ sub parse_options {
         # separator.
         s/^(\w+)(\W?)// or print($OUT "Invalid option `$_'\n"), last;
         my ($opt, $sep) = ($1, $2);
+
+        # Make sure that such an option exists.
+        my $matches = grep(/^\Q$opt/ && ($option = $_), @options) ||
+          grep(/^\Q$opt/i && ($option = $_), @options);
+
+        print($OUT "Unknown option `$opt'\n"), next unless $matches;
+        print($OUT "Ambiguous option `$opt'\n"), next if $matches > 1;
 
         my $val;
 
@@ -6178,8 +6184,6 @@ sub parse_options {
             }
 
             # Not quoted. Use the whole thing. Warn about 'option='.
-            # XXX Spurious messages about clearing nonexistent options
-            # XXX can be created, e.g., 'o googleWhack='. 
             else {
                 s/^(\S*)//;
                 $val = $1;
@@ -6197,14 +6201,8 @@ sub parse_options {
             ($val = $1) =~ s/\\([\\$end])/$1/g;
         } ## end else [ if ("?" eq $sep)
 
-        my $option;
-
-        # Make sure that such an option exists.
-        my $matches = grep(/^\Q$opt/ && ($option = $_), @options) ||
-          grep(/^\Q$opt/i && ($option = $_), @options);
-
-        print($OUT "Unknown option `$opt'\n"), next unless $matches;
-        print($OUT "Ambiguous option `$opt'\n"), next if $matches > 1;
+        # Impedance-match the code above to the code below.
+        my $option = $opt;
 
         # Exclude non-booleans from getting set to 1 by default.
         if ($opt_needs_val{$option} && $val_defaulted) {
@@ -7498,9 +7496,7 @@ higher in the C<@ISA> tree, 0 if we should stop.
 sub methods_via {
     # If we've processed this class already, just quit.
     my $class = shift;
-
-    # XXX This may be a bug - no other references to %packs.
-    return if $packs{$class}++;
+    return if $seen{$class}++;
 
     # This is a package that is contributing the methods we're about to print. 
     my $prefix = shift;
@@ -7513,8 +7509,10 @@ sub methods_via {
              # Extract from all the symbols in this class.
              sort keys %{"${class}::"}
       ) {
-        # XXX This should probably be %packs (or %packs should be %seen).
+        # If we printed this already, skip it.
         next if $seen{$name}++;
+ 
+        # Print the new method name.
         local $\ = '';
         local $, = '';
         print $DB::OUT "$prepend$name\n";
@@ -7996,10 +7994,8 @@ question mark, which, if executed, will list the current value of the option.
 
 =cut
 
-    # Say, didn't the option command's character change?)
-    # XXX Yes it did. Fix the following pattern match to correct the problem.
-    # XXX This is a bug.
-    if ((substr $line, 0, $start) =~ /^\|*O\b.*\s$/) { # Options after a space
+    my $cmd = ($CommandSet eq '580') ? 'o' : 'O';
+    if ((substr $line, 0, $start) =~ /^\|*$cmd\b.*\s$/) { # Options after space
         # We look for the text to be matched in the list of possible options, 
         # and fetch the current value. 
         my @out = grep /^\Q$text/, @options;
