@@ -2253,7 +2253,7 @@ B<-I>I<directory>, B<-l>[I<octnum>], B<-m>[B<->]I<module>,
 B<-M>[B<->]I<module>, B<-M>[B<->]I<'module ...'>,
 B<-[mM]>[B<->]I<module=arg[,arg]...>, B<-n>, B<-p>, B<-P>, B<-s>, B<-S>,
 B<-t>, B<-T>, B<-u>, B<-U>, B<-v>, B<-V>, B<-V:>I<name>, B<-w>, B<-W>,
-B<-X>, B<-x> I<directory>
+B<-X>, B<-x>, B<-x> I<directory>
 
 =back
 
@@ -3358,8 +3358,8 @@ LC_NUMERIC, LC_TIME, LANG
 =item Important Caveats
 
 Input and Output Layers, Regular Expressions, C<use utf8> still needed to
-enable UTF-8/UTF-EBCDIC in scripts, C<use encoding> needed to upgrade
-non-Latin-1 byte strings
+enable UTF-8/UTF-EBCDIC in scripts, BOM-marked scripts and UTF-16 scripts
+autodetected, C<use encoding> needed to upgrade non-Latin-1 byte strings
 
 =item Byte and Character Semantics
 
@@ -4630,7 +4630,7 @@ GIMME, GIMME_V, G_ARRAY, G_DISCARD, G_EVAL, G_NOARGS, G_SCALAR, G_VOID
 
 AvFILL, av_clear, av_delete, av_exists, av_extend, av_fetch, av_fill,
 av_len, av_make, av_pop, av_push, av_shift, av_store, av_undef, av_unshift,
-get_av, newAV, Nullav, sortsv
+get_av, newAV, sortsv
 
 =item Callback Functions
 
@@ -4647,7 +4647,7 @@ perl_clone
 
 =item CV Manipulation Functions
 
-CvSTASH, get_cv, Nullcv
+CvSTASH, get_cv
 
 =item Embedding Functions
 
@@ -4669,26 +4669,27 @@ gv_fetchmeth_autoload, gv_stashpv, gv_stashsv
 
 =item Handy Values
 
-HEf_SVKEY, Nullch, Nullsv
+Nullav, Nullch, Nullcv, Nullhv, Nullsv
 
 =item Hash Manipulation Functions
 
-get_hv, HeHASH, HeKEY, HeKLEN, HePV, HeSVKEY, HeSVKEY_force, HeSVKEY_set,
-HeVAL, HvNAME, hv_clear, hv_clear_placeholders, hv_delete, hv_delete_ent,
-hv_exists, hv_exists_ent, hv_fetch, hv_fetch_ent, hv_iterinit, hv_iterkey,
-hv_iterkeysv, hv_iternext, hv_iternextsv, hv_iternext_flags, hv_iterval,
-hv_magic, hv_scalar, hv_store, hv_store_ent, hv_undef, newHV, Nullhv
+get_hv, HEf_SVKEY, HeHASH, HeKEY, HeKLEN, HePV, HeSVKEY, HeSVKEY_force,
+HeSVKEY_set, HeVAL, HvNAME, hv_clear, hv_clear_placeholders, hv_delete,
+hv_delete_ent, hv_exists, hv_exists_ent, hv_fetch, hv_fetch_ent,
+hv_iterinit, hv_iterkey, hv_iterkeysv, hv_iternext, hv_iternextsv,
+hv_iternext_flags, hv_iterval, hv_magic, hv_scalar, hv_store, hv_store_ent,
+hv_undef, newHV
 
 =item Magical Functions
 
 mg_clear, mg_copy, mg_find, mg_free, mg_get, mg_length, mg_magical, mg_set,
 SvGETMAGIC, SvLOCK, SvSETMAGIC, SvSetMagicSV, SvSetMagicSV_nosteal,
-SvSetSV, SvSetSV_nosteal, SvSHARE
+SvSetSV, SvSetSV_nosteal, SvSHARE, SvUNLOCK
 
 =item Memory Management
 
-Copy, Move, New, Newc, NEWSV, Newz, Poison, Renew, Renewc, Safefree,
-savepv, savepvn, savesharedpv, StructCopy, Zero
+Copy, Move, New, Newc, Newz, Poison, Renew, Renewc, Safefree, savepv,
+savepvn, savesharedpv, StructCopy, Zero
 
 =item Miscellaneous Functions
 
@@ -4710,12 +4711,13 @@ pad_sv
 
 =item Stack Manipulation Macros
 
-dMARK, dORIGMARK, dSP, EXTEND, MARK, ORIGMARK, POPi, POPl, POPn, POPp,
-POPpbytex, POPpx, POPs, PUSHi, PUSHMARK, PUSHn, PUSHp, PUSHs, PUSHu,
-PUTBACK, SP, SPAGAIN, XPUSHi, XPUSHn, XPUSHp, XPUSHs, XPUSHu, XSRETURN,
-XSRETURN_IV, XSRETURN_NO, XSRETURN_NV, XSRETURN_PV, XSRETURN_UNDEF,
-XSRETURN_UV, XSRETURN_YES, XST_mIV, XST_mNO, XST_mNV, XST_mPV, XST_mUNDEF,
-XST_mYES
+dMARK, dORIGMARK, dSP, EXTEND, MARK, mPUSHi, mPUSHn, mPUSHp, mPUSHu,
+mXPUSHi, mXPUSHn, mXPUSHp, mXPUSHu, ORIGMARK, POPi, POPl, POPn, POPp,
+POPpbytex, POPpx, POPs, PUSHi, PUSHMARK, PUSHmortal, PUSHn, PUSHp, PUSHs,
+PUSHu, PUTBACK, SP, SPAGAIN, XPUSHi, XPUSHmortal, XPUSHn, XPUSHp, XPUSHs,
+XPUSHu, XSRETURN, XSRETURN_EMPTY, XSRETURN_IV, XSRETURN_NO, XSRETURN_NV,
+XSRETURN_PV, XSRETURN_UNDEF, XSRETURN_UV, XSRETURN_YES, XST_mIV, XST_mNO,
+XST_mNV, XST_mPV, XST_mUNDEF, XST_mYES
 
 =item SV Flags
 
@@ -4723,10 +4725,10 @@ svtype, SVt_IV, SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG
 
 =item SV Manipulation Functions
 
-get_sv, looks_like_number, newRV_inc, newRV_noinc, newSV, newSViv, newSVnv,
-newSVpv, newSVpvf, newSVpvn, newSVpvn_share, newSVrv, newSVsv, newSVuv,
-SvCUR, SvCUR_set, SvEND, SvGROW, SvIOK, SvIOKp, SvIOK_notUV, SvIOK_off,
-SvIOK_on, SvIOK_only, SvIOK_only_UV, SvIOK_UV, SvIsCOW,
+get_sv, looks_like_number, newRV_inc, newRV_noinc, NEWSV, newSV, newSViv,
+newSVnv, newSVpv, newSVpvf, newSVpvn, newSVpvn_share, newSVrv, newSVsv,
+newSVuv, SvCUR, SvCUR_set, SvEND, SvGROW, SvIOK, SvIOKp, SvIOK_notUV,
+SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only_UV, SvIOK_UV, SvIsCOW,
 SvIsCOW_shared_hash, SvIV, SvIVx, SvIVX, SvLEN, SvNIOK, SvNIOKp,
 SvNIOK_off, SvNOK, SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVx,
 SvNVX, SvOK, SvOOK, SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only,
@@ -4735,8 +4737,8 @@ SvPVbyte_force, SvPVbyte_nolen, SvPVutf8, SvPVutf8x, SvPVutf8x_force,
 SvPVutf8_force, SvPVutf8_nolen, SvPVX, SvPVx, SvPV_force, SvPV_force_nomg,
 SvPV_nolen, SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off,
 SvROK_on, SvRV, SvSTASH, SvTAINT, SvTAINTED, SvTAINTED_off, SvTAINTED_on,
-SvTRUE, SvTYPE, SvUNLOCK, SvUOK, SvUPGRADE, SvUTF8, SvUTF8_off, SvUTF8_on,
-SvUV, SvUVx, SvUVX, sv_2bool, sv_2cv, sv_2io, sv_2iv, sv_2mortal, sv_2nv,
+SvTRUE, SvTYPE, SvUOK, SvUPGRADE, SvUTF8, SvUTF8_off, SvUTF8_on, SvUV,
+SvUVx, SvUVX, sv_2bool, sv_2cv, sv_2io, sv_2iv, sv_2mortal, sv_2nv,
 sv_2pvbyte, sv_2pvbyte_nolen, sv_2pvutf8, sv_2pvutf8_nolen, sv_2pv_flags,
 sv_2pv_nolen, sv_2uv, sv_backoff, sv_bless, sv_catpv, sv_catpvf,
 sv_catpvf_mg, sv_catpvn, sv_catpvn_flags, sv_catpvn_mg, sv_catpv_mg,
@@ -4769,7 +4771,7 @@ uvuni_to_utf8_flags
 =item Variables created by C<xsubpp> and C<xsubpp> internal functions
 
 ax, CLASS, dAX, dITEMS, dXSARGS, dXSI32, items, ix, newXSproto, RETVAL, ST,
-THIS, XS, XSRETURN_EMPTY, XS_VERSION, XS_VERSION_BOOTCHECK
+THIS, XS, XS_VERSION, XS_VERSION_BOOTCHECK
 
 =item Warning and Dieing
 
@@ -4969,6 +4971,8 @@ It's easier to rsync the source tree, It's more reliable
 
 It's easier to rsync the patches, It's a good reference, Finding a start
 point, Finding how to fix a bug, Finding the source of misbehaviour
+
+=item Working with the source
 
 =item Perlbug administration
 
@@ -5502,7 +5506,7 @@ B<-V>
 
 =back
 
-=head2 perldelta - what is new for perl v5.8.4
+=head2 perldelta, perl584delta - what is new for perl v5.8.4
 
 =over 4
 
@@ -5574,6 +5578,14 @@ base, open, threads, utf8
 
 =item Utility Changes
 
+=over 4
+
+=item Perl's debugger
+
+=item h2ph
+
+=back
+
 =item New Documentation
 
 =item Performance Enhancements
@@ -5598,7 +5610,7 @@ base, open, threads, utf8
 
 =back
 
-=head2 perl584delta, perldelta - what is new for perl v5.8.4
+=head2 perl584delta - what is new for perl v5.8.4
 
 =over 4
 
@@ -8132,7 +8144,7 @@ DJGPP, Pthreads
 
 =item PA-RISC 2.0
 
-=item Itanium
+=item Itanium & Itanium 2
 
 =item Portability Between PA-RISC Versions
 
@@ -9095,7 +9107,7 @@ LIST, waitpid PID,FLAGS
 =item Setting Up Perl on Win32
 
 Make, Command Shell, Borland C++, Microsoft Visual C++, Microsoft Platform
-SDK 64-bit Compiler, MinGW32 with gcc, MinGW release 1
+SDK 64-bit Compiler, MinGW release 3 with gcc, MinGW release 1 with gcc
 
 =item Building
 
@@ -9279,6 +9291,10 @@ FETCH_I<type>_ATTRIBUTES, MODIFY_I<type>_ATTRIBUTES
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=item DIAGNOSTICS
+
+Base class package "%s" is empty
 
 =item HISTORY
 
@@ -10391,9 +10407,31 @@ B<-ffreetmps-each-bblock>, B<-ffreetmps-each-loop>, B<-fomit-taint>, B<-On>
 
 =item OPTIONS
 
-B<-basic>, B<-exec>, B<-tree>, B<-compact>, B<-loose>, B<-vt>, B<-ascii>,
-B<-main>, B<-base>I<n>, B<-bigendian>, B<-littleendian>, B<-concise>,
-B<-terse>, B<-linenoise>, B<-debug>, B<-env>
+=over 4
+
+=item Options for Opcode Ordering
+
+B<-basic>, B<-exec>, B<-tree>
+
+=item Options for Line-Style
+
+B<-concise>, B<-terse>, B<-linenoise>, B<-debug>, B<-env>
+
+=item Options for tree-specific formatting
+
+B<-compact>, B<-loose>, B<-vt>, B<-ascii>
+
+=item Options controlling sequence numbering
+
+B<-base>I<n>, B<-bigendian>, B<-littleendian>
+
+=item Other options
+
+B<-main>, B<-banner>
+
+=item Option Stickiness
+
+=back
 
 =item FORMATTING SPECIFICATIONS
 
@@ -10420,17 +10458,17 @@ B<#targ>, B<#targarg>, B<#targarglife>, B<#typenum>
 
 =over 4
 
-=item example: Altering Concise Output
+=item Example: Altering Concise Renderings
 
 =item set_style()
 
-=item add_style()
-
 =item set_style_standard($name)
+
+=item add_style()
 
 =item add_callback()
 
-=item running B::Concise::compile()
+=item Running B::Concise::compile()
 
 =item B::Concise::reset_sequence()
 
@@ -11703,7 +11741,7 @@ C<zcat>, C<zip>
 
 =item getcwd and friends
 
-getcwd, cwd, fastcwd, fastgetcwd
+getcwd, cwd, fastcwd, fastgetcwd, getdcwd
 
 =item abs_path and friends
 
@@ -15024,8 +15062,6 @@ cacheout EXPR, cacheout MODE, EXPR
 
 =item BUGS
 
-=item NOTES
-
 =back
 
 =head2 FileHandle - supply object methods for filehandles
@@ -15361,11 +15397,34 @@ the function alternate_language_tags($lang1)
 
 the function @langs = panic_languages(@accept_languages)
 
+the function implicate_supers( ...languages... ), the function
+implicate_supers_strictly( ...languages... )
+
 =over 4
 
 =item ABOUT LOWERCASING
 
 =item ABOUT UNICODE PLAINTEXT LANGUAGE TAGS
+
+=item SEE ALSO
+
+=item COPYRIGHT
+
+=item AUTHOR
+
+=back
+
+=head2 I18N::LangTags::Detect - detect the user's language preferences
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item FUNCTIONS
+
+=item ENVIRONMENT
 
 =item SEE ALSO
 
@@ -17274,23 +17333,23 @@ hostfqdn (), hostname (), hostdomain ()
 
 =item CONSTRUCTOR
 
-new (HOST [,OPTIONS])
+new ([ HOST ] [, OPTIONS ])
 
 =item METHODS
 
 login ([LOGIN [,PASSWORD [, ACCOUNT] ] ]), authorize ( [AUTH [, RESP]]),
 site (ARGS), ascii, binary, rename ( OLDNAME, NEWNAME ), delete ( FILENAME
 ), cwd ( [ DIR ] ), cdup (), pwd (), restart ( WHERE ), rmdir ( DIR [,
-RECURSE ]), mkdir ( DIR [, RECURSE ]), ls ( [ DIR ] ), alloc ( SIZE [,
-RECORD_SIZE] ), dir ( [ DIR ] ), get ( REMOTE_FILE [, LOCAL_FILE [, WHERE]]
-), put ( LOCAL_FILE [, REMOTE_FILE ] ), put_unique ( LOCAL_FILE [,
-REMOTE_FILE ] ), append ( LOCAL_FILE [, REMOTE_FILE ] ), unique_name (),
-mdtm ( FILE ), size ( FILE ), supported ( CMD ), hash (
-[FILEHANDLE_GLOB_REF],[ BYTES_PER_HASH_MARK] ), nlst ( [ DIR ] ), list ( [
-DIR ] ), retr ( FILE ), stor ( FILE ), stou ( FILE ), appe ( FILE ), port (
-[ PORT ] ), pasv (), pasv_xfer ( SRC_FILE, DEST_SERVER [, DEST_FILE ] ),
-pasv_xfer_unique ( SRC_FILE, DEST_SERVER [, DEST_FILE ] ), pasv_wait (
-NON_PASV_SERVER ), abort (), quit ()
+RECURSE ]), mkdir ( DIR [, RECURSE ]), alloc ( SIZE [, RECORD_SIZE] ), ls (
+[ DIR ] ), dir ( [ DIR ] ), get ( REMOTE_FILE [, LOCAL_FILE [, WHERE]] ),
+put ( LOCAL_FILE [, REMOTE_FILE ] ), put_unique ( LOCAL_FILE [, REMOTE_FILE
+] ), append ( LOCAL_FILE [, REMOTE_FILE ] ), unique_name (), mdtm ( FILE ),
+size ( FILE ), supported ( CMD ), hash ( [FILEHANDLE_GLOB_REF],[
+BYTES_PER_HASH_MARK] ), nlst ( [ DIR ] ), list ( [ DIR ] ), retr ( FILE ),
+stor ( FILE ), stou ( FILE ), appe ( FILE ), port ( [ PORT ] ), pasv (),
+pasv_xfer ( SRC_FILE, DEST_SERVER [, DEST_FILE ] ), pasv_xfer_unique (
+SRC_FILE, DEST_SERVER [, DEST_FILE ] ), pasv_wait ( NON_PASV_SERVER ),
+abort (), quit ()
 
 =over 4
 
@@ -17383,14 +17442,15 @@ MESSAGE-SPEC, PATTERN, Examples, C<[^]-]>, C<*bdc>, C<[0-9a-zA-Z]>, C<a??d>
 
 =item CONSTRUCTOR
 
-new ( [ HOST, ] [ OPTIONS ] )
+new ( [ HOST ] [, OPTIONS ] 0
 
 =item METHODS
 
-user ( USER ), pass ( PASS ), login ( [ USER [, PASS ]] ), apop ( [ USER [,
-PASS ]] ), top ( MSGNUM [, NUMLINES ] ), list ( [ MSGNUM ] ), get ( MSGNUM
-[, FH ] ), getfh ( MSGNUM ), last (), popstat (), ping ( USER ), uidl ( [
-MSGNUM ] ), delete ( MSGNUM ), reset (), quit ()
+auth ( USERNAME, PASSWORD ), user ( USER ), pass ( PASS ), login ( [ USER
+[, PASS ]] ), apop ( [ USER [, PASS ]] ), banner (), capa (),  capabilities
+(), top ( MSGNUM [, NUMLINES ] ), list ( [ MSGNUM ] ), get ( MSGNUM [, FH ]
+), getfh ( MSGNUM ), last (), popstat (), ping ( USER ), uidl ( [ MSGNUM ]
+), delete ( MSGNUM ), reset (), quit ()
 
 =item NOTES
 
@@ -17447,17 +17507,17 @@ $p->hires( { 0 | 1 } );, $p->bind($local_addr);, $p->open($host);, $p->ack(
 
 =item CONSTRUCTOR
 
-new Net::SMTP [ HOST, ] [ OPTIONS ]
+new ( [ HOST ] [, OPTIONS ] )
 
 =item METHODS
 
-banner (), domain (), hello ( DOMAIN ), etrn ( DOMAIN ), auth ( USERNAME,
-PASSWORD ), mail ( ADDRESS [, OPTIONS] ), send ( ADDRESS ), send_or_mail (
-ADDRESS ), send_and_mail ( ADDRESS ), reset (), recipient ( ADDRESS [,
-ADDRESS [ ...]] [, OPTIONS ] ), to ( ADDRESS [, ADDRESS [...]] ), cc (
-ADDRESS [, ADDRESS [...]] ), bcc ( ADDRESS [, ADDRESS [...]] ), data ( [
-DATA ] ), expand ( ADDRESS ), verify ( ADDRESS ), help ( [ $subject ] ),
-quit ()
+banner (), domain (), hello ( DOMAIN ), host (), etrn ( DOMAIN ), auth (
+USERNAME, PASSWORD ), mail ( ADDRESS [, OPTIONS] ), send ( ADDRESS ),
+send_or_mail ( ADDRESS ), send_and_mail ( ADDRESS ), reset (), recipient (
+ADDRESS [, ADDRESS, [...]] [, OPTIONS ] ), to ( ADDRESS [, ADDRESS [...]]
+), cc ( ADDRESS [, ADDRESS [...]] ), bcc ( ADDRESS [, ADDRESS [...]] ),
+data ( [ DATA ] ), expand ( ADDRESS ), verify ( ADDRESS ), help ( [
+$subject ] ), quit ()
 
 =item ADDRESSES
 
@@ -19475,9 +19535,15 @@ set_prototype CODEREF, PROTOTYPE, tainted EXPR, weaken REF
 
 =over 4
 
-=item OBJECT ORIENTED SYNTAX
+=item Caveats
+
+=item Escaping Magic Characters
+
+=item Configuration
 
 =back
+
+=item BUGS
 
 =item AUTHOR
 
@@ -19816,6 +19882,8 @@ NORMAL TESTS, SKIPPED TESTS, TODO TESTS
 =item ONFAIL
 
 =item BUGS and CAVEATS
+
+=item ENVIRONMENT
 
 =item NOTE
 
@@ -20874,6 +20942,16 @@ $which )
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=over 4
+
+=item Ambiguous Local Times (DST)
+
+=item Non-Existent Local Times (DST)
+
+=item Negative Epoch Values
+
+=back
 
 =item IMPLEMENTATION
 
