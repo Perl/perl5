@@ -301,6 +301,14 @@ are compile time errors.  Attempting to read from filehandles that
 were opened only for writing will now produce warnings (just as
 writing to read-only filehandles does).
 
+=head2 Buffered data discarded from input filehandle when dup'ed.
+
+C<open(NEW, "E<lt>&OLD")> now discards any data that was previously
+read and buffered in C<OLD>.  The next read operation on C<NEW> will
+return the same data as the corresponding operation on C<OLD>.
+Formerly, it would have returned the data from the start of the
+following disk block instead.
+
 =head1 Supported Platforms
 
 =over 4

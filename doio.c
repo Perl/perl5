@@ -282,7 +282,10 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 			    goto say_false;
 			}
 			if (IoIFP(thatio)) {
-			    fd = PerlIO_fileno(IoIFP(thatio));
+			    PerlIO *fp = IoIFP(thatio);
+				/* Flush stdio buffer before dup */
+			    PerlIO_seek(fp, 0, SEEK_CUR);
+			    fd = PerlIO_fileno(fp);
 			    if (IoTYPE(thatio) == 's')
 				IoTYPE(io) = 's';
 			}
