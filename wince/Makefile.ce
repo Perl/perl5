@@ -1,21 +1,21 @@
 # perl makefile for wince
 #
-# Time-stamp: <07/09/01 15:46:36 keuchel@keuchelnt>
+# Time-stamp: <26/10/01 15:10:06 keuchel@keuchelnt>
 
 SRCDIR     = ..
 PV         = 57
 INST_VER   = 5.7.2
 PERLCEDIR  = H:\src\wince\perl\wince
 WCEROOT    = N:\Windows CE Tools
-#WCEROOT    = D:\Windows CE Tools
+WCEROOT    = D:\Windows CE Tools
 NTPERL     = N:\Programme\perl\bin\perl.exe
-#NTPERL     = D:\Programme\ActiveState\perl-5.6\bin\Perl.exe
+NTPERL     = D:\Programme\ActiveState\perl-5.6\bin\Perl.exe
 CEPATH     = N:\Programme\Microsoft eMbedded Tools\EVC\WCE211\BIN
-#CEPATH     = D:\Programme\Microsoft eMbedded Tools\EVC\WCE211\BIN
-CELIBDLLDIR  = h:\src\wince\celib-palm
+CEPATH     = D:\Programme\Microsoft eMbedded Tools\EVC\WCE211\BIN
+CELIBDLLDIR  = h:\src\wince\celib-palm-3.0
 CECONSOLEDIR = h:\src\wince\w32console
 # Only for WIN2000
-YES        = /y
+#YES        = /y
 COPY       = copy $(YES)
 XCOPY      = xcopy $(YES) /f /r /i /d
 RCOPY	   = xcopy $(YES) /f /r /i /e /d
@@ -290,7 +290,8 @@ STARTOBJS  = $(CECONSOLEDIR)/$(MACHINE)/wmain.obj \
 # common section
 
 CEDEFS    = -D_WINDOWS -D_WIN32_WCE=$(CEVersion) -DUNDER_CE=$(CEVersion) \
-            $(MCFLAGS) 
+            $(MCFLAGS) -D PERL
+
 #CEDEFS    = $(CEDEFS) -DDEBUGGING_OPS
 
 CECFLAGS  = $(CEDEFS)

@@ -884,11 +884,8 @@ EXPORTS
 	Perl_taint_proper
 	Perl_tmps_grow
 	Perl_to_uni_lower
-	Perl_to_uni_lower_lc
 	Perl_to_uni_title
-	Perl_to_uni_title_lc
 	Perl_to_uni_upper
-	Perl_to_uni_upper_lc
 	Perl_to_utf8_lower
 	Perl_to_utf8_title
 	Perl_to_utf8_upper

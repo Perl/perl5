@@ -1360,6 +1360,10 @@ typedef NVTYPE NV;
 #   endif
 #endif
 
+#ifdef UNDER_CE
+int isnan(double d);
+#endif
+
 #ifndef Perl_isinf
 #   ifdef HAS_ISINF
 #       define Perl_isinf(x) isinf((NV)x)

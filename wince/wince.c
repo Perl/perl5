@@ -1,6 +1,6 @@
 /*  WINCE.C - stuff for Windows CE
  *
- *  Time-stamp: <01/08/01 19:29:57 keuchel@w2k>
+ *  Time-stamp: <26/10/01 15:25:20 keuchel@keuchelnt>
  *
  *  You may distribute under the terms of either the GNU General Public
  *  License or the Artistic License, as specified in the README file.
@@ -1595,5 +1595,21 @@ Perl_sys_intern_clear(pTHX)
 #  ifdef USE_ITHREADS
     Safefree(w32_pseudo_children);
 #  endif
+}
+
+//////////////////////////////////////////////////////////////////////
+
+#undef getcwd
+
+char *
+getcwd(char *buf, size_t size)
+{
+  return xcegetcwd(buf, size);
+}
+
+int 
+isnan(double d)
+{
+  return _isnan(d);
 }
 
