@@ -5656,7 +5656,7 @@ cando_by_name(I32 bit, Uid_t effective, char *fname)
   retsts = sys$check_access(&objtyp,&namdsc,&usrdsc,armlst);
   if (retsts == SS$_NOPRIV      || retsts == SS$_NOSUCHOBJECT ||
       retsts == SS$_INVFILFOROP || retsts == RMS$_FNF || retsts == RMS$_SYN ||
-      retsts == RMS$_DIR        || retsts == RMS$_DEV) {
+      retsts == RMS$_DIR        || retsts == RMS$_DEV || retsts == RMS$_DNF) {
     set_vaxc_errno(retsts);
     if (retsts == SS$_NOPRIV) set_errno(EACCES);
     else if (retsts == SS$_INVFILFOROP) set_errno(EINVAL);
