@@ -1,4 +1,4 @@
-print "1..10\n";
+print "1..15\n";
 
 use encoding "latin1"; # ignored (overwritten by the next line)
 use encoding "greek";  # iso 8859-7 (no "latin" alias, surprise...)
@@ -44,8 +44,27 @@ print "ok 8\n";
 print "not " unless unpack("C", chr(0xdf)) == 0xce;
 print "ok 9\n";
 
+print "not " unless unpack("U", pack("U", 0xdf)) == 0xdf;
+print "ok 10\n";
+
+print "not " unless unpack("U", chr(0xdf)) == 0x3af;
+print "ok 11\n";
+
 # charnames must still work
 use charnames ':full';
 print "not " unless ord("\N{LATIN SMALL LETTER SHARP S}") == 0xdf;
-print "ok 10\n";
+print "ok 12\n";
+
+# combine
+
+$c = "\xDF\N{LATIN SMALL LETTER SHARP S}" . chr(0xdf);
+
+print "not " unless ord($c) == 0x3af;
+print "ok 13\n";
+
+print "not " unless ord(substr($c, 1, 1)) == 0xdf;
+print "ok 14\n";
+
+print "not " unless ord(substr($c, 2, 1)) == 0x3af;
+print "ok 15\n";
 

@@ -43,7 +43,7 @@ encoding - pragma to control the conversion of legacy data into Unicode
 
     print "tera\n" if ord(pack("C", 0xdf)) == 0x3af;
 
-    # but pack/unpack C are not, in case you still
+    # but pack/unpack are not affected, in case you still
     # want back to your native encoding
 
     print "peta\n" if unpack("C", (pack("C", 0xdf))) == 0xdf;
@@ -58,13 +58,13 @@ The pragma is a per script, not a per block lexical.  Only the last
 C<use encoding> matters, and it affects B<the whole script>.
 
 If no encoding is specified, the environment variable L<PERL_ENCODING>
-is consulted.  If that fails, "latin1" (ISO 8859-1) is assumed.
-If no encoding can be found, C<Unknown encoding '...'> error will be thrown.
+is consulted.  If that fails, "latin1" (ISO 8859-1) is assumed.  If no
+encoding can be found, C<Unknown encoding '...'> error will be thrown.
 
 =head1 KNOWN PROBLEMS
 
-The C<\x..> and C<\0...> in regular expressions are not affected by
-this pragma.  They very probably should.
+Literals in regular expressions are not affected by this pragma.
+They very probably should.
 
 =head1 SEE ALSO
 
