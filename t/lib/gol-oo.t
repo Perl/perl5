@@ -1,5 +1,10 @@
 #!./perl -w
 
+BEGIN {
+    chdir('t') if -d 't';
+    unshift @INC, '../lib';
+}
+
 use Getopt::Long;
 die("Getopt::Long version 2.23_03 required--this is only version ".
     $Getopt::Long::VERSION)

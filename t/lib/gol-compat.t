@@ -1,5 +1,10 @@
 #!./perl -w
 
+BEGIN {
+    chdir('t') if -d 't';
+    unshift @INC, '../lib';
+}
+
 require "newgetopt.pl";
 
 print "1..9\n";
