@@ -1869,12 +1869,12 @@ wait, waitpid PID,FLAGS
 
 =item CHANGES
 
-v1.47, 22 March 2000, v1.46, 12 February 2000, v1.45, 20 December 1999,
-v1.44, 19 July 1999, v1.43, 24 May 1999, v1.42, 22 May 1999, v1.41, 19 May
-1999, v1.40, 11 April 1999, v1.39, 11 February 1999, v1.38, 31 December
-1998, v1.37, 19 December 1998, v1.36, 9 September 1998, v1.35, 13 August
-1998, v1.33, 06 August 1998, v1.32, 05 August 1998, v1.30, 03 August 1998,
-v1.23, 10 July 1998
+v1.48, 02 February 2001, v1.47, 22 March 2000, v1.46, 12 February 2000,
+v1.45, 20 December 1999, v1.44, 19 July 1999, v1.43, 24 May 1999, v1.42, 22
+May 1999, v1.41, 19 May 1999, v1.40, 11 April 1999, v1.39, 11 February
+1999, v1.38, 31 December 1998, v1.37, 19 December 1998, v1.36, 9 September
+1998, v1.35, 13 August 1998, v1.33, 06 August 1998, v1.32, 05 August 1998,
+v1.30, 03 August 1998, v1.23, 10 July 1998
 
 =item Supported Platforms
 
@@ -2185,17 +2185,19 @@ chcp, dataset access, OS/390 iconv, locales
 
 attributes, attrs, autouse, base, blib, bytes, charnames, constant,
 diagnostics, fields, filetest, integer, less, locale, open, ops, overload,
-perlio, re, sigtrap, strict, subs, utf8, vars, warnings, warnings::register
+re, sigtrap, strict, subs, unicode::distinct, utf8, vars, warnings,
+warnings::register
 
 =item Standard Modules
 
 AnyDBM_File, AutoLoader, AutoSplit, B, B::Asmdata, B::Assembler, B::Bblock,
-B::Bytecode, B::C, B::CC, B::Debug, B::Deparse, B::Disassembler, B::Lint,
-B::Showlex, B::Stackobj, B::Stash, B::Terse, B::Xref, Benchmark,
-ByteLoader, CGI, CGI::Apache, CGI::Carp, CGI::Cookie, CGI::Fast,
-CGI::Pretty, CGI::Push, CGI::Switch, CPAN, CPAN::FirstTime, CPAN::Nox,
-Carp, Class::Struct, Cwd, DB, DB_File, Devel::SelfStubber, DirHandle,
-Dumpvalue, Encode, English, Env, Exporter, Exporter::Heavy,
+B::Bytecode, B::C, B::CC, B::Concise, B::Debug, B::Deparse,
+B::Disassembler, B::Lint, B::Showlex, B::Stackobj, B::Stash, B::Terse,
+B::Xref, Benchmark, ByteLoader, CGI, CGI::Apache, CGI::Carp, CGI::Cookie,
+CGI::Fast, CGI::Pretty, CGI::Push, CGI::Switch, CGI::Util, CPAN,
+CPAN::FirstTime, CPAN::Nox, Carp, Carp::Heavy, Class::ISA, Class::Struct,
+Cwd, DB, DB_File, Devel::SelfStubber, Digest, DirHandle, Dumpvalue, Encode,
+Encode::EncodeFormat, Encode::Tcl, English, Env, Exporter, Exporter::Heavy,
 ExtUtils::Command, ExtUtils::Embed, ExtUtils::Install, ExtUtils::Installed,
 ExtUtils::Liblist, ExtUtils::MM_Cygwin, ExtUtils::MM_OS2,
 ExtUtils::MM_Unix, ExtUtils::MM_VMS, ExtUtils::MM_Win32,
@@ -2206,18 +2208,20 @@ File::Find, File::Path, File::Spec, File::Spec::Epoc,
 File::Spec::Functions, File::Spec::Mac, File::Spec::OS2, File::Spec::Unix,
 File::Spec::VMS, File::Spec::Win32, File::Temp, File::stat, FileCache,
 FileHandle, Filter::Simple, FindBin, Getopt::Long, Getopt::Std,
-I18N::Collate, IO, IPC::Open2, IPC::Open3, Math::BigFloat, Math::BigInt,
-Math::Complex, Math::Trig, NDBM_File, Net::Ping, Net::hostent, Net::netent,
-Net::protoent, Net::servent, O, ODBM_File, Opcode, Pod::Checker, Pod::Find,
-Pod::Html, Pod::InputObjects, Pod::LaTeX, Pod::Man, Pod::ParseUtils,
-Pod::Parser, Pod::Plainer, Pod::Select, Pod::Text, Pod::Text::Color,
-Pod::Text::Termcap, Pod::Usage, SDBM_File, Safe, Search::Dict, SelectSaver,
-SelfLoader, Shell, Socket, Storable, Symbol, Term::ANSIColor, Term::Cap,
-Term::Complete, Term::ReadLine, Test, Test::Harness, Text::Abbrev,
-Text::ParseWords, Text::Soundex, Text::Wrap, Tie::Array, Tie::Handle,
-Tie::Hash, Tie::RefHash, Tie::Scalar, Tie::SubstrHash, Time::Local,
-Time::gmtime, Time::localtime, Time::tm, UNIVERSAL, User::grent,
-User::pwent
+I18N::Collate, IO, IPC::Open2, IPC::Open3, Locale::Constants,
+Locale::Country, Locale::Currency, Locale::Language, Math::BigFloat,
+Math::BigInt, Math::Complex, Math::Trig, NDBM_File, Net::Ping,
+Net::hostent, Net::netent, Net::protoent, Net::servent, O, ODBM_File,
+Opcode, POSIX, PerlIO, Pod::Checker, Pod::Find, Pod::Html,
+Pod::InputObjects, Pod::LaTeX, Pod::Man, Pod::ParseUtils, Pod::Parser,
+Pod::Plainer, Pod::Select, Pod::Text, Pod::Text::Color,
+Pod::Text::Overstrike, Pod::Text::Termcap, Pod::Usage, SDBM_File, Safe,
+Search::Dict, SelectSaver, SelfLoader, Shell, Socket, Storable, Switch,
+Symbol, Term::ANSIColor, Term::Cap, Term::Complete, Term::ReadLine, Test,
+Test::Harness, Text::Abbrev, Text::Balanced, Text::ParseWords,
+Text::Soundex, Text::Tabs, Text::Wrap, Tie::Array, Tie::Handle, Tie::Hash,
+Tie::RefHash, Tie::Scalar, Tie::SubstrHash, Time::Local, Time::gmtime,
+Time::localtime, Time::tm, UNIVERSAL, User::grent, User::pwent, Win32
 
 =item Extension Modules
 
@@ -2225,8 +2229,23 @@ User::pwent
 
 =item CPAN
 
-Africa, Asia, Australasia, Central America, Europe, North America, South
-America
+=over 4
+
+=item Africa
+
+=item Asia
+
+=item Central America
+
+=item Europe
+
+=item North America
+
+=item Oceania
+
+=item South America
+
+=back
 
 =item Modules: Creation, Use, and Abuse
 
@@ -2234,24 +2253,9 @@ America
 
 =item Guidelines for Module Creation
 
-Do similar modules already exist in some form?, Try to design the new
-module to be easy to extend and reuse, Some simple style guidelines, Select
-what to export, Select a name for the module, Have you got it right?,
-README and other Additional Files, A description of the
-module/package/extension etc, A copyright notice - see below, Prerequisites
-- what else you may need to have, How to build it - possible changes to
-Makefile.PL etc, How to install it, Recent changes in this release,
-especially incompatibilities, Changes / enhancements you plan to make in
-the future, Adding a Copyright Notice, Give the module a
-version/issue/release number, How to release and distribute a module, Take
-care when changing a released module
+Adding a Copyright Notice
 
 =item Guidelines for Converting Perl 4 Library Scripts into Modules
-
-There is no requirement to convert anything, Consider the implications,
-Make the most of the opportunity, The pl2pm utility will get you started,
-Adds the standard Module prologue lines, Converts package specifiers from '
-to ::, Converts die(...) to croak(...), Several other minor changes
 
 =item Guidelines for Reusing Application Code
 
@@ -2450,6 +2454,10 @@ References, Tutorials, Task-Oriented, Special Topics
 =item Is there a ctags for Perl?
 
 =item Is there an IDE or Windows Perl Editor?
+
+CodeMagicCD, Komodo, The Object System, PerlBuilder, Perl code magic,
+visiPerl+, GNU Emacs, MicroEMACS, XEmacs, Elvis, Vile, Vim, Codewright,
+MultiEdit, SlickEdit, Bash, Ksh, Tcsh, Zsh, BBEdit and BBEdit Lite, Alpha
 
 =item Where can I get Perl macros for vi?
 
@@ -4459,7 +4467,122 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =back
 
-=head2 perldelta - what's new for perl v5.7.0
+=head2 perldelta - what will be new for perl v5.8.0
+
+=over 4
+
+=item DESCRIPTION
+
+=item Reporting Bugs
+
+=item SEE ALSO
+
+=item HISTORY
+
+=back
+
+=head2 perl571delta - what's new for perl v5.7.1
+
+=over 4
+
+=item DESCRIPTION
+
+=item Security Vulnerability Closed
+
+=item Incompatible Changes
+
+=item Core Enhancements
+
+The printf() and sprintf() now support parameter reordering using the
+C<%\d+\$> and C<*\d+\$> syntaxes.  For example
+
+=over 4
+
+=item Modules and Pragmata
+
+=item New Modules
+
+=item Updated And Improved Modules and Pragmata
+
+=back
+
+=item Performance Enhancements
+
+=item Utility Changes
+
+=item New Documentation
+
+=over 4
+
+=item perlclib
+
+=item perliol
+
+=item README.aix
+
+=item README.bs2000
+
+=item README.macos
+
+=item README.mpeix
+
+=item README.solaris
+
+=item README.vos
+
+=item Porting/repository.pod
+
+=back
+
+=item Performance Enhancements
+
+=item Installation and Configuration Improvements
+
+=over 4
+
+=item New Or Improved Platforms
+
+=item Generic Improvements
+
+=back
+
+=item Selected Bug Fixes
+
+=over 4
+
+=item Platform Specific Changes and Fixes
+
+=back
+
+=item New or Changed Diagnostics
+
+=item Changed Internals
+
+=item Known Problems
+
+=over 4
+
+=item lib/b test 19
+
+=item Localizing a Tied Variable Leaks Memory
+
+=item sigaction test 13 in VMS
+
+=item sprintf tests 129 and 130
+
+=item Self-tying of Arrays and Hashes Is Forbidden
+
+=back
+
+=item Reporting Bugs
+
+=item SEE ALSO
+
+=item HISTORY
+
+=back
+
+=head2 perl570delta - what's new for perl v5.7.0
 
 =over 4
 
@@ -4524,8 +4647,6 @@ I<The Road goes ever on and on, down from the door where it began.>
 =item Long Doubles Still Don't Work In Solaris
 
 =item Linux With Sfio Fails op/misc Test 48
-
-=item sprintf tests 129 and 130
 
 =item Storable tests fail in some platforms
 
