@@ -5341,10 +5341,10 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtable,
     mg->mg_moremagic = SvMAGIC(sv);
     SvMAGIC(sv) = mg;
 
-    /* Some magic sontains a reference loop, where the sv and object refer to
-       each other.  To prevent a reference loop that would prevent such
-       objects being freed, we look for such loops and if we find one we
-       avoid incrementing the object refcount.
+    /* Sometimes a magic contains a reference loop, where the sv and
+       object refer to each other.  To prevent a reference loop that
+       would prevent such objects being freed, we look for such loops
+       and if we find one we avoid incrementing the object refcount.
 
        Note we cannot do this to avoid self-tie loops as intervening RV must
        have its REFCNT incremented to keep it in existence.
