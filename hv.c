@@ -773,6 +773,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, I32 klen_i32,
     bool is_utf8;
     int k_flags = 0;
     const char *keysave;
+    int masked_flags;
 
     if (!hv)
 	return Nullsv;
@@ -797,17 +798,10 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, I32 klen_i32,
 	hv_magic_check (hv, &needs_copy, &needs_store);
 
 	if (needs_copy) {
-	    sv = NULL;
-	    if (keysv) {
-		if ((entry = hv_fetch_ent(hv, keysv, TRUE, hash))) {
-		    sv = HeVAL(entry);
-		}
-	    } else {
-		SV **svp;
-		if ((svp = hv_fetch(hv, key, is_utf8 ? -klen : klen, TRUE))) {
-		    sv = *svp;
-		}
-	    }
+	    entry = hv_fetch_common(hv, keysv, key, klen,
+				    k_flags & ~HVhek_FREEKEY, HV_FETCH_LVALUE,
+				    hash);
+	    sv = entry ? HeVAL(entry) : NULL;
 	    if (sv) {
 		if (SvMAGICAL(sv)) {
 		    mg_clear(sv);
@@ -847,8 +841,15 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, I32 klen_i32,
     if (HvREHASH(hv)) {
 	PERL_HASH_INTERNAL(hash, key, klen);
     } else if (!hash) {
+        if (keysv && (SvIsCOW_shared_hash(keysv))) {
+            hash = SvUVX(keysv);
+        } else {
+            PERL_HASH(hash, key, klen);
+        }
 	PERL_HASH(hash, key, klen);
     }
+
+    masked_flags = (k_flags & HVhek_MASK);
 
     /* oentry = &(HvARRAY(hv))[hash & (I32) HvMAX(hv)]; */
     oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
@@ -861,7 +862,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, I32 klen_i32,
 	    continue;
 	if (HeKEY(entry) != key && memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
-	if ((HeKFLAGS(entry) ^ k_flags) & HVhek_UTF8)
+	if ((HeKFLAGS(entry) ^ masked_flags) & HVhek_UTF8)
 	    continue;
         if (k_flags & HVhek_FREEKEY)
             Safefree(key);
