@@ -2289,7 +2289,7 @@ sv_usepvn(register SV *sv, register char *ptr, register STRLEN len)
 void
 sv_usepvn_mg(register SV *sv, register char *ptr, register STRLEN len)
 {
-    sv_usepvn_mg(sv,ptr,len);
+    sv_usepvn(sv,ptr,len);
     SvSETMAGIC(sv);
 }
 
@@ -2395,7 +2395,7 @@ sv_catpv(register SV *sv, register char *ptr)
 void
 sv_catpv_mg(register SV *sv, register char *ptr)
 {
-    sv_catpv_mg(sv,ptr);
+    sv_catpv(sv,ptr);
     SvSETMAGIC(sv);
 }
 
