@@ -23,8 +23,8 @@ The perl 5.6.1 source itself builds on Mac OS, with some additional
 pieces. Support for Mac OS is now in the perl core, and MacPerl will be
 able to, in the future, keep in closer sync with regular perl releases.
 
-At this time, though, it is very buggy, and is under development.  An
-alpha release is available, with work progressing toward a beta.
+At this time, the code is beta quality.  Please feel free to use it,
+but be warned that there are still some significant bugs remaining.
 
 To build perl for Mac OS (as an MPW tool), you will need the addition
 of the "macos" subdirectory, distributed separately.  It includes extra
@@ -60,4 +60,4 @@ Nandor E<lt>pudge@pobox.comE<gt>.
 
 =head1 DATE
 
-Last modified 2001.07.19.
+Last modified 2001.10.02.

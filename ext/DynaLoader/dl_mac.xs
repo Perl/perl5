@@ -1,7 +1,7 @@
 /* dl_mac.xs
  * 
  * Platform:	Macintosh CFM
- * Author:	Matthias Neeracher <neeri@iis.ee.ethz.ch>
+ * Author:	Matthias Neeracher <neeracher@mac.com>
  *		Adapted from dl_dlopen.xs reference implementation by
  *              Paul Marquess (pmarquess@bfsec.bt.co.uk)
  * $Log: dl_mac.xs,v $

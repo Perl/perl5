@@ -2276,7 +2276,8 @@ Perl_moreswitches(pTHX_ char *s)
 		      "\n\nCopyright 1987-2001, Larry Wall\n");
 #ifdef MACOS_TRADITIONAL
 	PerlIO_printf(PerlIO_stdout(),
-		      "\nMac OS port Copyright (c) 1991-2001, Matthias Neeracher\n");
+		      "\nMac OS port Copyright 1991-2001, Matthias Neeracher\n"
+		      "Maintained by Chris Nandor\n");
 #endif
 #ifdef MSDOS
 	PerlIO_printf(PerlIO_stdout(),
