@@ -2256,8 +2256,8 @@ Perl_yylex(pTHX)
 	    PL_lex_defer = LEX_NORMAL;
 	}
 	DEBUG_T({ PerlIO_printf(Perl_debug_log,
-              "### Next token after '%s' was known, type %i\n", PL_bufptr,
-              PL_nexttype[PL_nexttoke]); })
+              "### Next token after '%s' was known, type %"IVdf"\n", PL_bufptr,
+              (IV)PL_nexttype[PL_nexttoke]); })
 
 	return(PL_nexttype[PL_nexttoke]);
 
