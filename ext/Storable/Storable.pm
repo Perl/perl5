@@ -813,7 +813,7 @@ compartment:
 	use strict;
 	my $safe = new Safe;
         # because of opcodes used in "use strict":
-	$safe->permit(qw(:default require caller));
+	$safe->permit(qw(:default require));
 	local $Storable::Deparse = 1;
 	local $Storable::Eval = sub { $safe->reval($_[0]) };
 	my $serialized = freeze(sub { 42 });
