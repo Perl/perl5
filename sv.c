@@ -11150,7 +11150,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_utf8_idcont	= sv_dup_inc(proto_perl->Iutf8_idcont, param);
 
     /* Did the locale setup indicate UTF-8? */
-    PL_utf8locale	= proto_perl->Iutf8_locale;
+    PL_utf8locale	= proto_perl->Iutf8locale;
     /* Unicode features (see perlrun/-C) */
     PL_unicode		= proto_perl->Iunicode;
 
