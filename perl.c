@@ -851,7 +851,7 @@ S_parse_body(pTHX_ va_list args)
 		Safefree(p);
 	    }
 	    else
-		Perl_croak(aTHX_ "No argument specified for -I");
+		Perl_croak(aTHX_ "No directory specified for -I");
 	    break;
 	case 'P':
 	    forbid_setid("-P");
@@ -1763,7 +1763,7 @@ Perl_moreswitches(pTHX_ char *s)
 		s++;
 	}
 	else
-	    Perl_croak(aTHX_ "No argument specified for -I");
+	    Perl_croak(aTHX_ "No directory specified for -I");
 	return s;
     case 'l':
 	PL_minus_l = TRUE;

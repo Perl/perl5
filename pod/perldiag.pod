@@ -1904,6 +1904,11 @@ See L<perlsec>.
 
 (F) A setuid script can't be specified by the user.
 
+=item No %s specified for -%c
+
+(F) The indicated command line switch needs a mandatory argument, but
+you haven't specified one.
+
 =item No comma allowed after %s
 
 (F) A list operator that has a filehandle or "indirect object" is not
@@ -1988,10 +1993,10 @@ your system.
 (F) Configure didn't find anything resembling the setreuid() call for
 your system.
 
-=item No space allowed after B<-I>
+=item No space allowed after -%c
 
-(F) The argument to B<-I> must follow the B<-I> immediately with no
-intervening space.
+(F) The argument to the indicated command line switch must follow immediately
+after the switch, without intervening spaces.
 
 =item No such pseudo-hash field "%s"
 
