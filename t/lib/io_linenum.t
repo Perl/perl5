@@ -3,8 +3,6 @@
 # test added 29th April 1999 by Paul Johnson (pjcj@transeda.com)
 # updated    28th May   1999 by Paul Johnson
 
-use strict;
-
 my $File;
 
 BEGIN
@@ -16,6 +14,7 @@ BEGIN
     $File =~ s/^t\W+//;                                 # Remove first directory
   }
   unshift @INC, '../lib' if -d '../lib';
+  require strict; import strict;
 }
 
 use Test;
