@@ -1823,6 +1823,7 @@ Perl_newPROG(pTHX_ OP *o)
 	if (o->op_type == OP_STUB) {
 	    PL_comppad_name = 0;
 	    PL_compcv = 0;
+	    FreeOp(o);
 	    return;
 	}
 	PL_main_root = scope(sawparens(scalarvoid(o)));
@@ -5235,8 +5236,7 @@ Perl_ck_fun(pTHX_ OP *o)
 					   
 				      }
 				      if (tmpstr) {
-					   name = savepv(SvPVX(tmpstr));
-					   len = strlen(name);
+					   name = SvPV(tmpstr, len);
 					   sv_2mortal(tmpstr);
 				      }
 				 }
