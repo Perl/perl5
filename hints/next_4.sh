@@ -12,18 +12,10 @@
 #
 useposix='undef'
 
-altmake='gnumake'
 libpth='/lib /usr/lib'
 libswanted=' '
 libc='/NextLibrary/Frameworks/System.framework/System'
 
-isnext_4='define'
-
-#
-# Change the line below if you do not want to build 'quad-fat'
-# binaries
-#
-mab='-arch m68k -arch i386 -arch sparc'
 ldflags='-dynamic -prebind'
 lddlflags='-dynamic -bundle -undefined suppress'
 ccflags='-dynamic -fno-common -DUSE_NEXT_CTYPE -DUSE_PERL_SBRK -DHIDEMYMALLOC'
@@ -31,7 +23,21 @@ cccdlflags='none'
 ld='cc'
 #optimize='-g -O'
 
-d_shrplib='define'
+#
+# Change the lines below if you do not want to build 'quad-fat'
+# binaries
+#
+archs=`/bin/lipo -info /usr/lib/libm.a | sed 's/^[^:]*:[^:]*: //'`
+for d in  $archs
+do
+       mab="$mab -arch $d"
+done
+
+ccflags="$ccflags $mab"
+ccdlflags="$mab"
+# Can we also set ld='libtool -xxx' ?
+
+useshprlib='true'
 dlext='bundle'
 so='dylib'
 
@@ -39,8 +45,12 @@ so='dylib'
 # The default prefix would be '/usr/local'. But since many people are
 # likely to have still 3.3 machines on their network, we do not want
 # to overwrite possibly existing 3.3 binaries. 
+# Allow a Configure -Dprefix=/foo/bar override.
 #
-prefix='/usr/local/OPENSTEP'
+case "$prefix" in
+'') prefix='/usr/local/OPENSTEP' ;;
+esac
+
 #archlib='/usr/lib/perl5'
 #archlibexp='/usr/lib/perl5'
 archname='OPENSTEP-Mach'
