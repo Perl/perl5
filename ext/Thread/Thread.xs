@@ -229,7 +229,7 @@ newthread (SV *startsv, AV *initargs, char *classname)
     static pthread_attr_t attr;
     static int attr_inited = 0;
     sigset_t fullmask, oldmask;
-    static int attr_joinable = ATTR_JOINABLE;
+    static int attr_joinable = PTHREAD_CREATE_JOINABLE;
 #endif
 
     savethread = thr;
