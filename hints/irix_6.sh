@@ -53,7 +53,7 @@ cc=${cc:-cc}
 
 case "$cc" in
 *gcc*) ;;
-*) ccversion=`cc -version` ;;
+*) ccversion=`cc -version 2>&1` ;;
 esac
 
 case "$use64bitint" in

@@ -203,3 +203,9 @@ EOWARN
     fi
 fi
 
+cat >config.arch<<'__CONFIG_ARCH__'
+# The '-W 0,float(ieee)' cannot be used during Configure as ldflags.
+
+ldflags="$ldflags -W 0,float\(ieee\)"
+
+__CONFIG_ARCH__

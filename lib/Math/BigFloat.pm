@@ -391,7 +391,7 @@ sub bacmp
   my ($self,$x,$y) = objectify(2,@_);
 
   # handle +-inf and NaN's
-  if ($x->{sign} !~ /^[+-]$/ || $y->{sign} !~ /^[+-]/)
+  if ($x->{sign} !~ /^[+-]$/ || $y->{sign} !~ /^[+-]$/)
     {
     return undef if (($x->{sign} eq $nan) || ($y->{sign} eq $nan));
     return 0 if ($x->is_inf() && $y->is_inf());
@@ -764,7 +764,7 @@ sub bmod
   # (dividend: BFLOAT or num_str, divisor: BFLOAT or num_str) return reminder 
   my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
 
-  return $x->bnan() if ($x->{sign} eq $nan || $y->is_nan() || $y->is_zero());
+  return $x->bnan() if ($x->is_nan() || $y->is_nan() || $y->is_zero());
   return $x->bzero() if $y->is_one();
 
   # XXX tels: not done yet
@@ -1157,8 +1157,8 @@ sub import
     }
   # any non :constant stuff is handled by our parent, Exporter
   # even if @_ is empty, to give it a chance
-  #$self->SUPER::import(@_);      	# does not work (would call MBI)
-  $self->export_to_level(1,$self,@_);	# need this instead
+  $self->SUPER::import(@_);      	# for subclasses
+  $self->export_to_level(1,$self,@_);	# need this, too
   }
 
 sub bnorm

@@ -9,10 +9,11 @@ BEGIN {
     }
 }
 
-print "1..8\n";
+print "1..10\n";
 
 my $grk = "grk$$";
 my $utf = "utf$$";
+my $fail1 = "fail$$";
 
 if (open(GRK, ">$grk")) {
     # alpha beta gamma in ISO 8859-7
@@ -57,6 +58,21 @@ if (open(GRK, "<$grk")) {
     close GRK;
 }
 
+$SIG{__WARN__} = sub {$warn = $_[0]};
+
+if (open(FAIL, ">:encoding(NoneSuch)", $fail1)) {
+    print "not ok 9 # Open should fail\n";
+} else {
+    print "ok 9\n";
+}
+if (!defined $warn) {
+    print "not ok 10 # warning is undef\n";
+} elsif ($warn =~ /^Cannot find encoding "NoneSuch" at/) {
+    print "ok 10\n";
+} else {
+    print "not ok 10 # warning is '$warn'";
+}
+
 END {
-    unlink($grk, $utf);
+    unlink($grk, $utf, $fail1);
 }

@@ -612,7 +612,7 @@ table, here split across several lines:
 
 The first line here indicates that the offset/length table contains 45
 entries.  Each entry is a pair of integers, denoted by C<offset[length]>.
-Entries are numbered starting with, so entry #1 here is C<1[4]> and
+Entries are numbered starting with 1, so entry #1 here is C<1[4]> and
 entry #12 is C<5[1]>.  C<1[4]> indicates that the node labeled C<1:>
 (the C<1: ANYOF[bc]>) begins at character position 1 in the
 pre-compiled form of the regex, and has a length of 4 characters.

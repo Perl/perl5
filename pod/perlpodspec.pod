@@ -1110,7 +1110,7 @@ The section (AKA "item" in older perlpods), or undef if none.  E.g.,
 in L<Getopt::Std/DESCRIPTION>, "DESCRIPTION" is the section.  (Note
 that this is not the same as a manpage section like the "5" in "man 5
 crontab".  "Section Foo" in the Pod sense means the part of the text
-that's introduced by the heading or item whose text is "Foo".
+that's introduced by the heading or item whose text is "Foo".)
 
 =back
 

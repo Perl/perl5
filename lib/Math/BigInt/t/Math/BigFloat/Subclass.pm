@@ -1,25 +1,17 @@
 #!/usr/bin/perl -w
 
-package Math::Subclass;
+package Math::BigFloat::Subclass;
 
 require 5.005_02;
 use strict;
 
 use Exporter;
 use Math::BigFloat(1.23);
-use vars qw($VERSION @ISA @EXPORT
-            @EXPORT_OK %EXPORT_TAGS $PACKAGE
+use vars qw($VERSION @ISA $PACKAGE
             $accuracy $precision $round_mode $div_scale);
 
 @ISA = qw(Exporter Math::BigFloat);
 
-%EXPORT_TAGS = ( 'all' => [ qw(
-) ] );
-
-@EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
-
-@EXPORT = qw(
-);
 $VERSION = 0.01;
 
 # Globals

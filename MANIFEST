@@ -574,21 +574,21 @@ ext/Thread/unsync4.tx		Test thread implicit synchronisation
 ext/threads/Changes		ithreads
 ext/threads/Makefile.PL		ithreads
 ext/threads/README		ithreads
+ext/threads/shared/Makefile.PL  thread shared variables
+ext/threads/shared/README       thread shared variables
+ext/threads/shared/shared.pm    thread shared variables
+ext/threads/shared/shared.xs    thread shared variables
+ext/threads/shared/t/av_simple.t	Tests for basic shared array functionality.
+ext/threads/shared/t/hv_refs.t	Test shared hashes containing references
+ext/threads/shared/t/hv_simple.t	Tests for basic shared hash functionality.
+ext/threads/shared/t/sv_refs.t	thread shared variables
+ext/threads/shared/t/sv_simple.t	thread shared variables
 ext/threads/t/basic.t		ithreads
 ext/threads/t/stress_cv.t	Test with multiple threads, coderef cv argument.
 ext/threads/t/stress_string.t	Test with multiple threads, string cv argument.
 ext/threads/threads.h		ithreads
 ext/threads/threads.pm          ithreads
 ext/threads/threads.xs		ithreads
-ext/threads/shared/Makefile.PL  thread shared variables
-ext/threads/shared/README       thread shared variables
-ext/threads/shared/shared.pm    thread shared variables
-ext/threads/shared/shared.xs    thread shared variables
-ext/threads/shared/t/sv_simple.t	thread shared variables
-ext/threads/shared/t/sv_refs.t	thread shared variables
-ext/threads/shared/t/av_simple.t	Tests for basic shared array functionality.
-ext/threads/shared/t/hv_simple.t	Tests for basic shared hash functionality.
-ext/threads/shared/t/hv_refs.t	Test shared hashes containing references
 ext/Time/HiRes/Changes		Time::HiRes extension
 ext/Time/HiRes/hints/dynixptx.pl	Hint for Time::HiRes for named architecture
 ext/Time/HiRes/hints/sco.pl	Hints for Time::HiRes for named architecture
@@ -1031,14 +1031,17 @@ lib/look.pl			A "look" equivalent
 lib/Math/BigFloat.pm		An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm		An arbitrary precision integer arithmetic package
 lib/Math/BigInt/Calc.pm		Pure Perl module to support Math::BigInt
-lib/Math/BigInt/t/bigfltpm.inc	Shared tests for bigfltpm.t and subclass.t
+lib/Math/BigInt/t/bigfltpm.inc	Shared tests for bigfltpm.t and sub_mbf.t
 lib/Math/BigInt/t/bigfltpm.t	See if BigFloat.pm works
 lib/Math/BigInt/t/bigintc.t	See if BigInt/Calc.pm works
+lib/Math/BigInt/t/bigintpm.inc	Shared tests for bigintpm.t and sub_mbi.t
 lib/Math/BigInt/t/bigintpm.t	See if BigInt.pm works
 lib/Math/BigInt/t/calling.t	Test calling conventions
-lib/Math/BigInt/t/Math/Subclass.pm	Empty subclass of BigFloat for test
+lib/Math/BigInt/t/Math/BigFloat/Subclass.pm	Empty subclass of BigFloat for test
+lib/Math/BigInt/t/Math/BigInt/Subclass.pm	Empty subclass of BigInt for test
 lib/Math/BigInt/t/mbimbf.t	BigInt/BigFloat accuracy, precicion and fallback, round_mode
-lib/Math/BigInt/t/subclass.t	Empty subclass test of BigFloat
+lib/Math/BigInt/t/sub_mbf.t	Empty subclass test of BigFloat
+lib/Math/BigInt/t/sub_mbi.t	Empty subclass test of BigInt
 lib/Math/Complex.pm		A Complex package
 lib/Math/Complex.t		See if Math::Complex works
 lib/Math/Trig.pm		A simple interface to complex trigonometry
@@ -1214,8 +1217,8 @@ lib/Test/Simple/t/skip.t        Test::More test, SKIP tests
 lib/Test/Simple/t/skipall.t     Test::More test, skip all tests
 lib/Test/Simple/t/todo.t        Test::More test, TODO tests
 lib/Test/Simple/t/undef.t       Test::More test, undefs don't cause warnings
-lib/Test/Simple/t/use_ok.t      Test::More test, use_ok()
 lib/Test/Simple/t/useing.t      Test::More test, compile test
+lib/Test/Simple/t/use_ok.t      Test::More test, use_ok()
 lib/Test/t/fail.t		See if Test works
 lib/Test/t/mix.t		See if Test works
 lib/Test/t/onfail.t		See if Test works

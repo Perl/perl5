@@ -209,8 +209,9 @@ sub full_setup {
     PERLRUN PERLRUNINST PERL_ARCHLIB PERL_CORE
     PERL_LIB PERL_SRC PERM_RW PERM_RWX
     PL_FILES PM PM_FILTER PMLIBDIRS POLLUTE PPM_INSTALL_EXEC
-    PPM_INSTALL_SCRIPT PREFIX PREREQ_FATAL
-    PREREQ_PM SKIP TEST_LIBS TYPEMAPS VERSION VERSION_FROM XS XSOPT XSPROTOARG
+    PPM_INSTALL_SCRIPT PREFIX
+    PREREQ_FATAL PREREQ_PM PREREQ_PRINT PRINT_PREREQ
+    SKIP TEST_LIBS TYPEMAPS VERSION VERSION_FROM XS XSOPT XSPROTOARG
     XS_VERSION clean depend dist dynamic_lib linkext macro realclean
     tool_autosplit
     MACPERL_SRC MACPERL_LIB MACLIBS_68K MACLIBS_PPC MACLIBS_SC MACLIBS_MRC
@@ -326,6 +327,17 @@ END
 sub ExtUtils::MakeMaker::new {
     my($class,$self) = @_;
     my($key);
+
+    if ("@ARGV" =~ /\bPREREQ_PRINT\b/) {
+	require Data::Dumper;
+        print Data::Dumper->Dump([$self->{PREREQ_PM}], [qw(PREREQ_PM)]);
+   }
+
+    # PRINT_PREREQ is RedHatism.
+    if ("@ARGV" =~ /\bPRINT_PREREQ\b/) {
+	print join(" ", map { "perl($_)>=$self->{PREREQ_PM}->{$_} " } sort keys %{$self->{PREREQ_PM}}), "\n";
+	exit 0;
+   }
 
     print STDOUT "MakeMaker (v$VERSION)\n" if $Verbose;
     if (-f "MANIFEST" && ! -f "Makefile"){
@@ -1801,6 +1813,23 @@ Do I<not> use this parameter for simple requirements, which could be resolved
 at a later time, e.g. after an unsuccessful B<make test> of your module.
 
 It is I<extremely> rare to have to use C<PREREQ_FATAL> at all!
+
+=item PREREQ_PRINT
+
+Bool.  If this parameter is true, the prerequisites will be printed to
+stdout and MakeMaker will exit.  The output format is
+
+$PREREQ_PM = {
+               'A::B' => Vers1,
+               'C::D' => Vers2,
+               ...
+             };
+
+=item PRINT_PREREQ
+
+RedHatism for C<PREREQ_PRINT>.  The output format is different, though:
+
+    perl(A::B)>=Vers1 perl(C::D)>=Vers2 ...
 
 =item SKIP
 

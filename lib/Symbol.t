@@ -5,26 +5,22 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..8\n";
+use Test::More tests => 10;
 
 BEGIN { $_ = 'foo'; }  # because Symbol used to clobber $_
 
 use Symbol;
 
-# First check $_ clobbering
-print "not " if $_ ne 'foo';
-print "ok 1\n";
+ok( $_ eq 'foo', 'check $_ clobbering' );
 
 
 # First test gensym()
 $sym1 = gensym;
-print "not " if ref($sym1) ne 'GLOB';
-print "ok 2\n";
+ok( ref($sym1) eq 'GLOB', 'gensym() returns a GLOB' );
 
 $sym2 = gensym;
 
-print "not " if $sym1 eq $sym2;
-print "ok 3\n";
+ok( $sym1 ne $sym2, 'gensym() returns a different GLOB' );
 
 ungensym $sym1;
 
@@ -36,17 +32,15 @@ package foo;
 
 use Symbol qw(qualify);  # must import into this package too
 
-qualify("x") eq "foo::x"          or print "not ";
-print "ok 4\n";
-
-qualify("x", "FOO") eq "FOO::x"   or print "not ";
-print "ok 5\n";
-
-qualify("BAR::x") eq "BAR::x"     or print "not ";
-print "ok 6\n";
-
-qualify("STDOUT") eq "main::STDOUT" or print "not ";
-print "ok 7\n";
-
-qualify("ARGV", "FOO") eq "main::ARGV" or print "not ";
-print "ok 8\n";
+::ok( qualify("x") eq "foo::x",		'qualify() with a simple identifier' );
+::ok( qualify("x", "FOO") eq "FOO::x",	'qualify() with a package' );
+::ok( qualify("BAR::x") eq "BAR::x",
+    'qualify() with a qualified identifier' );
+::ok( qualify("STDOUT") eq "main::STDOUT",
+    'qualify() with a reserved identifier' );
+::ok( qualify("ARGV", "FOO") eq "main::ARGV",
+    'qualify() with a reserved identifier and a package' );
+::ok( qualify("_foo") eq "foo::_foo",
+    'qualify() with an identifier starting with a _' );
+::ok( qualify("^FOO") eq "main::\cFOO",
+    'qualify() with an identifier starting with a ^' );

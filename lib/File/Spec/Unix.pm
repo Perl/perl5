@@ -3,7 +3,7 @@ package File::Spec::Unix;
 use strict;
 our($VERSION);
 
-$VERSION = '1.3';
+$VERSION = '1.4';
 
 use Cwd;
 
@@ -124,12 +124,23 @@ from the following list or "" if none are writable:
     $ENV{TMPDIR}
     /tmp
 
+Since perl 5.8.0, if running under taint mode, and if $ENV{TMPDIR}
+is tainted, it is not used.
+
 =cut
 
 my $tmpdir;
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
-    foreach ($ENV{TMPDIR}, "/tmp") {
+    my @dirlist = ($ENV{TMPDIR}, "/tmp");
+    {
+	no strict 'refs';
+	if (${"\cTAINT"}) { # Check for taint mode on perl >= 5.8.0
+            require Scalar::Util;
+	    shift @dirlist if Scalar::Util::tainted($ENV{TMPDIR});
+	}
+    }
+    foreach (@dirlist) {
 	next unless defined && -d && -w _;
 	$tmpdir = $_;
 	last;

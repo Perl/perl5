@@ -43,16 +43,16 @@ while (<DATA>)
       } elsif ($f eq "fsstr") {
         $try .= '$x->fsstr();';
       } elsif ($f eq "parts") {
-        # ->bstr() to see if a BigFloat is returned
+        # ->bstr() to see if an object is returned
         $try .= '($a,$b) = $x->parts(); $a = $a->bstr(); $b = $b->bstr();';
         $try .= '"$a $b";';
       } elsif ($f eq "length") {
         $try .= '$x->length();';
       } elsif ($f eq "exponent") {
-        # ->bstr() to see if a BigFloat is returned
+        # ->bstr() to see if an object is returned
         $try .= '$x->exponent()->bstr();';
       } elsif ($f eq "mantissa") {
-        # ->bstr() to see if a BigFloat is returned
+        # ->bstr() to see if an object is returned
         $try .= '$x->mantissa()->bstr();';
       } elsif ($f eq "fneg") {
         $try .= '$x->bneg();';
@@ -646,6 +646,10 @@ fcmpNaN:+0:
 -inf:-inf:0
 +inf:-inf:0
 -inf:+inf:0
+5:inf:-1
+-1:inf:-1
+5:-inf:-1
+-1:-inf:-1
 # return undef
 +inf:facmpNaN:
 facmpNaN:inf:

@@ -63,14 +63,14 @@ explicitly.
 
 =cut
 
-BEGIN { require 5.002; }
+BEGIN { require 5.005; }
 
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(gensym ungensym qualify qualify_to_ref);
 @EXPORT_OK = qw(delete_package);
 
-$VERSION = 1.03;
+$VERSION = 1.04;
 
 my $genpkg = "Symbol::";
 my $genseq = 0;
@@ -95,8 +95,10 @@ sub qualify ($;$) {
     my ($name) = @_;
     if (!ref($name) && index($name, '::') == -1 && index($name, "'") == -1) {
 	my $pkg;
-	# Global names: special character, "^x", or other. 
-	if ($name =~ /^([^a-z])|(\^[a-z])$/i || $global{$name}) {
+	# Global names: special character, "^xyz", or other. 
+	if ($name =~ /^(([^a-z])|(\^[a-z_]+))\z/i || $global{$name}) {
+	    # RGS 2001-11-05 : translate leading ^X to control-char
+	    $name =~ s/^\^([a-z_])/'qq(\c'.$1.')'/eei;
 	    $pkg = "main";
 	}
 	else {

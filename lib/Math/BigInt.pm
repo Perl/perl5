@@ -19,7 +19,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 require 5.005;
 
-$VERSION = '1.44';
+$VERSION = '1.45';
 use Exporter;
 @ISA =       qw( Exporter );
 @EXPORT_OK = qw( bneg babs bcmp badd bmul bdiv bmod bnorm bsub
@@ -391,7 +391,6 @@ sub new
     }
   $self->{sign} = '+' if $$miv eq '0';			# normalize -0 => +0
   $self->{value} = $CALC->_new($miv) if $self->{sign} =~ /^[+-]$/;
-  #print "$wanted => $self->{sign}\n";
   # if any of the globals is set, use them to round and store them inside $self
   $self->round($accuracy,$precision,$round_mode)
    if defined $accuracy || defined $precision;
@@ -443,7 +442,6 @@ sub bzero
   return if $self->modify('bzero');
   $self->{value} = $CALC->_zero();
   $self->{sign} = '+';
-  #print "result: $self\n";
   return $self;
   }
 
@@ -454,7 +452,6 @@ sub bone
   my $self = shift;
   my $sign = shift; $sign = '+' if !defined $sign || $sign ne '-';
   $self = $class if !defined $self;
-  #print "bone $self\n";
  
   if (!ref($self))
     {
@@ -463,7 +460,6 @@ sub bone
   return if $self->modify('bone');
   $self->{value} = $CALC->_one();
   $self->{sign} = $sign;
-  #print "result: $self\n";
   return $self;
   }
 
@@ -475,12 +471,8 @@ sub bsstr
   # (ref to BFLOAT or num_str ) return num_str
   # Convert number from internal format to scientific string format.
   # internal format is always normalized (no leading zeros, "-0E0" => "+0E0")
-#  print "bsstr $_[0] $_[1]\n";
-#  my $x = shift; $class = ref($x) || $x;
-#  print "class $class $x (",ref($x),") $_[0]\n";
-#  $x = $class->new(shift) if !ref($x);
-# 
-  my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_); 
+  my $x = shift; $class = ref($x) || $x; $x = $class->new(shift) if !ref($x); 
+  # my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_); 
 
   if ($x->{sign} !~ /^[+-]$/)
     {
@@ -585,7 +577,6 @@ sub _find_round_parameters
   my @params = ($self);
   if (defined $a || defined $p)
     {
-#    print "r => ",$r||'r undef'," in $c\n";
     $r = $r || ${"$c\::round_mode"};
     die "Unknown round mode '$r'"
      if $r !~ /^(even|odd|\+inf|\-inf|zero|trunc)$/;
@@ -619,8 +610,8 @@ sub bnorm
   { 
   # (numstr or or BINT) return BINT
   # Normalize number -- no-op here
-  return Math::BigInt->new($_[0]) if !ref($_[0]);
-  return $_[0];
+  my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
+  return $x;
   }
 
 sub babs 
@@ -674,8 +665,19 @@ sub bcmp
   return 0 if $xz && $yz;                               # 0 <=> 0
   return -1 if $xz && $y->{sign} eq '+';                # 0 <=> +y
   return 1 if $yz && $x->{sign} eq '+';                 # +x <=> 0
-  # normal compare now
-  &cmp($x->{value},$y->{value},$x->{sign},$y->{sign}) <=> 0;
+  
+  # post-normalized compare for internal use (honors signs)
+  if ($x->{sign} eq '+') 
+    {
+    return 1 if $y->{sign} eq '-'; # 0 check handled above
+    return $CALC->_acmp($x->{value},$y->{value});
+    }
+
+  # $x->{sign} eq '-'
+  return -1 if $y->{sign} eq '+';
+  return $CALC->_acmp($y->{value},$x->{value});	# swaped
+
+  # &cmp($x->{value},$y->{value},$x->{sign},$y->{sign}) <=> 0;
   }
 
 sub bacmp 
@@ -808,7 +810,7 @@ sub blcm
     {
     $x = $class->new($y);
     }
-  while (@_) { $x = _lcm($x,shift); } 
+  while (@_) { $x = __lcm($x,shift); } 
   $x;
   }
 
@@ -818,21 +820,15 @@ sub bgcd
   # does not modify arguments, but returns new object
   # GCD -- Euclids algorithm, variant C (Knuth Vol 3, pg 341 ff)
 
-  my $y = shift; my ($x);
-  if (ref($y))
-    {
-    $x = $y->copy();
-    }
-  else
-    {
-    $x = $class->new($y);
-    }
-
+  my $y = shift;
+  $y = __PACKAGE__->new($y) if !ref($y);
+  my $self = ref($y);
+  my $x = $y->copy();		# keep arguments
   if ($CALC->can('_gcd'))
     {
     while (@_)
       {
-      $y = shift; $y = $class->new($y) if !ref($y);
+      $y = shift; $y = $self->new($y) if !ref($y);
       next if $y->is_zero();
       return $x->bnan() if $y->{sign} !~ /^[+-]$/;	# y NaN?
       $x->{value} = $CALC->_gcd($x->{value},$y->{value}); last if $x->is_one();
@@ -842,20 +838,11 @@ sub bgcd
     {
     while (@_)
       {
-      $x = __gcd($x,shift); last if $x->is_one();	# _gcd handles NaN
+      $y = shift; $y = $self->new($y) if !ref($y);
+      $x = __gcd($x,$y->copy()); last if $x->is_one();	# _gcd handles NaN
       } 
     }
   $x->babs();
-  }
-
-sub bmod 
-  {
-  # modulus
-  # (BINT or num_str, BINT or num_str) return BINT
-  my ($self,$x,$y) = objectify(2,@_);
-  
-  return $x if $x->modify('bmod');
-  (&bdiv($self,$x,$y))[1];
   }
 
 sub bnot 
@@ -985,8 +972,79 @@ sub bmul
     }
 
   $x->{sign} = $x->{sign} eq $y->{sign} ? '+' : '-'; # +1 * +1 or -1 * -1 => +
+
   $x->{value} = $CALC->_mul($x->{value},$y->{value});  # do actual math
   return $x->round($a,$p,$r,$y);
+
+ # from http://groups.google.com/groups?selm=3BBF69A6.72E1%40pointecom.net
+ #
+ # my $yc = $y->copy();	# make copy of second argument
+ # my $carry = $self->bzero();
+ #
+ # # XXX 
+ # while ($yc > 1)
+ #   {
+ #   #print "$x\t$yc\t$carry\n";
+ #   $carry += $x if $yc->is_odd();
+ #   $yc->brsft(1,2);
+ #   $x->blsft(1,2);
+ #   }
+ # $x += $carry;
+ # #print "result $x\n";
+ #
+ # return $x->round($a,$p,$r,$y);
+  }
+
+sub _div_inf
+  {
+  # helper function that handles +-inf cases for bdiv()/bmod() to reuse code
+  my ($self,$x,$y) = @_;
+
+  # NaN if x == NaN or y == NaN or x==y==0
+  return wantarray ? ($x->bnan(),$self->bnan()) : $x->bnan()
+   if (($x->is_nan() || $y->is_nan())   ||
+       ($x->is_zero() && $y->is_zero()));
+ 
+  # +inf / +inf == -inf / -inf == 1, remainder is 0 (A / A = 1, remainder 0)
+  if (($x->{sign} eq $y->{sign}) &&
+    ($x->{sign} =~ /^[+-]inf$/) && ($y->{sign} =~ /^[+-]inf$/))
+    {
+    return wantarray ? ($x->bone(),$self->bzero()) : $x->bone();
+    }
+  # +inf / -inf == -inf / +inf == -1, remainder 0
+  if (($x->{sign} ne $y->{sign}) &&
+    ($x->{sign} =~ /^[+-]inf$/) && ($y->{sign} =~ /^[+-]inf$/))
+    {
+    return wantarray ? ($x->bone('-'),$self->bzero()) : $x->bone('-');
+    }
+  # x / +-inf => 0, remainder x (works even if x == 0)
+  if ($y->{sign} =~ /^[+-]inf$/)
+    {
+    my $t = $x->copy();		# binf clobbers up $x
+    return wantarray ? ($x->bzero(),$t) : $x->bzero()
+    }
+  
+  # 5 / 0 => +inf, -6 / 0 => -inf
+  # +inf / 0 = inf, inf,  and -inf / 0 => -inf, -inf 
+  # exception:   -8 / 0 has remainder -8, not 8
+  # exception: -inf / 0 has remainder -inf, not inf
+  if ($y->is_zero())
+    {
+    # +-inf / 0 => special case for -inf
+    return wantarray ?  ($x,$x->copy()) : $x if $x->is_inf();
+    if (!$x->is_zero() && !$x->is_inf())
+      {
+      my $t = $x->copy();		# binf clobbers up $x
+      return wantarray ?
+       ($x->binf($x->{sign}),$t) : $x->binf($x->{sign})
+      }
+    }
+  
+  # last case: +-inf / ordinary number
+  my $sign = '+inf';
+  $sign = '-inf' if substr($x->{sign},0,1) ne $y->{sign};
+  $x->{sign} = $sign;
+  return wantarray ? ($x,$self->bzero()) : $x;
   }
 
 sub bdiv 
@@ -997,23 +1055,8 @@ sub bdiv
 
   return $x if $x->modify('bdiv');
 
-  # x / +-inf => 0, reminder x
-  return wantarray ? ($x->bzero(),$x->copy()) : $x->bzero()
-   if $y->{sign} =~ /^[+-]inf$/;
-  
-  # NaN if x == NaN or y == NaN or x==y==0
-  return wantarray ? ($x->bnan(),bnan()) : $x->bnan()
-   if (($x->is_nan() || $y->is_nan()) ||
-      ($x->is_zero() && $y->is_zero()));
-  
-  # 5 / 0 => +inf, -6 / 0 => -inf
-  return wantarray 
-   ? ($x->binf($x->{sign}),$self->bnan()) : $x->binf($x->{sign})
-   if ($x->{sign} =~ /^[+-]$/ && $y->is_zero());
-  
-  # old code: always NaN if /0
-  #return wantarray ? ($x->bnan(),$self->bnan()) : $x->bnan()
-  # if ($x->{sign} !~ /^[+-]$/ || $y->{sign} !~ /^[+-]$/ || $y->is_zero());
+  return $self->_div_inf($x,$y)
+   if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/) || $y->is_zero());
 
   # 0 / something
   return wantarray ? ($x,$self->bzero()) : $x if $x->is_zero();
@@ -1035,34 +1078,72 @@ sub bdiv
     }
    
   # calc new sign and in case $y == +/- 1, return $x
+  my $xsign = $x->{sign};				# keep
   $x->{sign} = ($x->{sign} ne $y->{sign} ? '-' : '+'); 
   # check for / +-1 (cant use $y->is_one due to '-'
-  if (($y == 1) || ($y == -1))	# slow!
-  #if ((@{$y->{value}} == 1) && ($y->{value}->[0] == 1))
+  if (($y == 1) || ($y == -1))				# slow!
     {
     return wantarray ? ($x,$self->bzero()) : $x; 
     }
 
   # call div here 
   my $rem = $self->bzero(); 
-  $rem->{sign} = $y->{sign};
   ($x->{value},$rem->{value}) = $CALC->_div($x->{value},$y->{value});
-  # do not leave reminder "-0";
-  # $rem->{sign} = '+' if (@{$rem->{value}} == 1) && ($rem->{value}->[0] == 0);
-  $rem->{sign} = '+' if $CALC->_is_zero($rem->{value});
-  if (($x->{sign} eq '-') and (!$rem->is_zero()))
-    {
-    $x->bdec();
-    }
-#  print "in div round ",$a||'a undef'," ",$p|| 'p undef'," $r\n";
+  # do not leave result "-0";
+  $x->{sign} = '+' if $CALC->_is_zero($x->{value});
   $x->round($a,$p,$r,$y); 
+
+#  print "in div round ",$a||'a undef'," ",$p|| 'p undef'," $r\n";
   if (wantarray)
     {
-    $rem->round($a,$p,$r,$x,$y); 
-    return ($x,$y-$rem) if $x->{sign} eq '-';	# was $x,$rem
+    if (! $CALC->_is_zero($rem->{value}))
+      {
+      $rem->{sign} = $y->{sign};
+      $rem = $y-$rem if $xsign ne $y->{sign};	# one of them '-'
+      }
+    else
+      {
+      $rem->{sign} = '+';			# dont leave -0
+      }
+    $rem->round($a,$p,$r,$x,$y);
     return ($x,$rem);
     }
   return $x; 
+  }
+
+sub bmod 
+  {
+  # modulus (or remainder)
+  # (BINT or num_str, BINT or num_str) return BINT
+  my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
+  
+  return $x if $x->modify('bmod');
+  if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/) || $y->is_zero())
+    {
+    my ($d,$r) = $self->_div_inf($x,$y);
+    return $r;
+    }
+
+  if ($CALC->can('_mod'))
+    {
+    # calc new sign and in case $y == +/- 1, return $x
+    $x->{value} = $CALC->_mod($x->{value},$y->{value});
+    my $xsign = $x->{sign};
+    if (!$CALC->_is_zero($x->{value}))
+      {
+      $x->{sign} = $y->{sign};
+      $x = $y-$x if $xsign ne $y->{sign};	# one of them '-'
+      }
+    else
+      {
+      $x->{sign} = '+';				# dont leave -0
+      }
+    }
+  else
+    {
+    $x = (&bdiv($self,$x,$y))[1];
+    }
+  $x->bround($a,$p,$r);
   }
 
 sub bpow 
@@ -1115,18 +1196,20 @@ sub bpow
   my $pow2 = $self->__one();
   my $y1 = $class->new($y);
   my ($res);
+  my $two = $self->new(2);
   while (!$y1->is_one())
     {
-    #print "bpow: p2: $pow2 x: $x y: $y1 r: $res\n";
-    #print "len ",$x->length(),"\n";
-    ($y1,$res)=&bdiv($y1,2);
-    if (!$res->is_zero()) { &bmul($pow2,$x); }
-    if (!$y1->is_zero())  { &bmul($x,$x); }
-    #print "$x $y\n";
+    # thats a tad (between 8 and 17%) faster for small results 
+    # 7777 ** 7777 is not faster, but 2 ** 150, 3 ** 16, 3 ** 256 etc are
+    $pow2->bmul($x) if $y1->is_odd();
+    $y1->bdiv($two);
+    $x->bmul($x) unless $y1->is_zero(); 
+
+    # ($y1,$res)=&bdiv($y1,2);
+    # if (!$res->is_zero()) { &bmul($pow2,$x); }
+    # if (!$y1->is_zero())  { &bmul($x,$x); }
     }
-  #print "bpow: e p2: $pow2 x: $x y: $y1 r: $res\n";
-  &bmul($x,$pow2) if (!$pow2->is_one());
-  #print "bpow: e p2: $pow2 x: $x y: $y1 r: $res\n";
+  $x->bmul($pow2) unless $pow2->is_one();
   return $x->round($a,$p,$r);
   }
 
@@ -1249,7 +1332,6 @@ sub bior
     $x->badd( bmul( $class->new(
        abs($sx*int($xr->numify()) | $sy*int($yr->numify()))), 
       $m));
-#    $x->badd( bmul( $class->new(int($xr->numify()) | int($yr->numify())), $m));
     $m->bmul($x10000);
     }
   $x->bneg() if $sign;
@@ -1294,7 +1376,6 @@ sub bxor
     $x->badd( bmul( $class->new(
        abs($sx*int($xr->numify()) ^ $sy*int($yr->numify()))), 
       $m));
-#    $x->badd( bmul( $class->new(int($xr->numify()) ^ int($yr->numify())), $m));
     $m->bmul($x10000);
     }
   $x->bneg() if $sign;
@@ -1306,9 +1387,6 @@ sub length
   my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
 
   my $e = $CALC->_len($x->{value}); 
-  #  # fallback, since we do not know the underlying representation
-  #my $es = "$x"; my $c = 0; $c = 1 if $es =~ /^[+-]/;	# if lib returns '+123'
-  #my $e = CORE::length($es)-$c;
   return wantarray ? ($e,0) : $e;
   }
 
@@ -1327,8 +1405,7 @@ sub _trailing_zeros
   my $x = shift;
   $x = $class->new($x) unless ref $x;
 
-  #return 0 if $x->is_zero() || $x->is_odd() || $x->{sign} !~ /^[+-]$/;
-  return 0 if $x->is_zero() || $x->{sign} !~ /^[+-]$/;
+  return 0 if $x->is_zero() || $x->is_odd() || $x->{sign} !~ /^[+-]$/;
 
   return $CALC->_zeros($x->{value}) if $CALC->can('_zeros');
 
@@ -1415,7 +1492,7 @@ sub bfround
   # precision: round to the $Nth digit left (+$n) or right (-$n) from the '.'
   # $n == 0 || $n == 1 => round to integer
   my $x = shift; $x = $class->new($x) unless ref $x;
-  my ($scale,$mode) = $x->_scale_p($precision,$round_mode,@_);
+  my ($scale,$mode) = $x->_scale_p($x->precision(),$x->round_mode(),@_);
   return $x if !defined $scale;		# no-op
 
   # no-op for BigInts if $n <= 0
@@ -1464,7 +1541,7 @@ sub bround
   # and overwrite the rest with 0's, return normalized number
   # do not return $x->bnorm(), but $x
   my $x = shift; $x = $class->new($x) unless ref $x;
-  my ($scale,$mode) = $x->_scale_a($accuracy,$round_mode,@_);
+  my ($scale,$mode) = $x->_scale_a($x->accuracy(),$x->round_mode(),@_);
   return $x if !defined $scale;		# no-op
   
   # print "MBI round: $x to $scale $mode\n";
@@ -1605,7 +1682,7 @@ sub __one
   {
   # internal speedup, set argument to 1, or create a +/- 1
   my $self = shift;
-  my $x = $self->bzero(); $x->{value} = $CALC->_one();
+  my $x = $self->bone(); # $x->{value} = $CALC->_one();
   $x->{sign} = shift || '+';
   return $x;
   }
@@ -1673,7 +1750,7 @@ sub objectify
 
   my $count = abs(shift || 0);
   
-  #print caller(),"\n";
+#  print "MBI ",caller(),"\n";
  
   my @a;			# resulting array 
   if (ref $_[0])
@@ -1715,7 +1792,7 @@ sub objectify
       #print "$count\n";
       $count--; 
       $k = shift; 
-  #    print "$k (",ref($k),") => \n";
+#      print "$k (",ref($k),") => \n";
       if (!ref($k))
         {
         $k = $a[0]->new($k);
@@ -1765,8 +1842,8 @@ sub import
     }
   # any non :constant stuff is handled by our parent, Exporter
   # even if @_ is empty, to give it a chance 
-  #$self->SUPER::import(@a);			# does not work
-  $self->export_to_level(1,$self,@a);		# need this instead
+  $self->SUPER::import(@a);			# need it for subclasses
+  $self->export_to_level(1,$self,@a);		# need it for MBF
 
   # try to load core math lib
   my @c = split /\s*,\s*/,$CALC;
@@ -1872,7 +1949,7 @@ sub _split
   {
   # (ref to num_str) return num_str
   # internal, take apart a string and return the pieces
-  # strip leading/trailing whitespace, leading zeros, underscore, reject
+  # strip leading/trailing whitespace, leading zeros, underscore and reject
   # invalid input
   my $x = shift;
 
@@ -2005,28 +2082,7 @@ sub as_bin
 ##############################################################################
 # internal calculation routines (others are in Math::BigInt::Calc etc)
 
-sub cmp 
-  {
-  # post-normalized compare for internal use (honors signs)
-  # input:  ref to value, ref to value, sign, sign
-  # output: <0, 0, >0
-  my ($cx,$cy,$sx,$sy) = @_;
-
-  if ($sx eq '+') 
-    {
-    return 1 if $sy eq '-'; # 0 check handled above
-    return $CALC->_acmp($cx,$cy);
-    }
-  else
-    {
-    # $sx eq '-'
-    return -1 if $sy eq '+';
-    return $CALC->_acmp($cy,$cx);
-    }
-  0; # equal
-  }
-
-sub _lcm 
+sub __lcm 
   { 
   # (BINT or num_str, BINT or num_str) return BINT
   # does modify first argument
@@ -2040,10 +2096,10 @@ sub _lcm
 sub __gcd
   { 
   # (BINT or num_str, BINT or num_str) return BINT
-  # does modify first arg
+  # does modify both arguments
   # GCD -- Euclids algorithm E, Knuth Vol 2 pg 296
- 
-  my $x = shift; my $ty = $class->new(shift); # preserve y, but make class
+  my ($x,$ty) = @_;
+
   return $x->bnan() if $x->{sign} !~ /^[+-]$/ || $ty->{sign} !~ /^[+-]$/;
 
   while (!$ty->is_zero())
@@ -2142,8 +2198,8 @@ Math::BigInt - Arbitrary size integer math package
   
   # The following do not modify their arguments:
 
-  bgcd(@values);		# greatest common divisor
-  blcm(@values);		# lowest common multiplicator
+  bgcd(@values);		# greatest common divisor (no OO style)
+  blcm(@values);		# lowest common multiplicator (no OO style)
  
   $x->length();			# return number of digits in number
   ($x,$f) = $x->length();	# length of number and length of fraction part,
@@ -2375,7 +2431,7 @@ versions <= 5.7.2) is like this:
     again. Thus 124/3 with div_scale=1 will get you '41.3' based on the strange
     assumption that 124 has 3 significant digits, while 120/7 will get you
     '17', not '17.1' since 120 is thought to have 2 significant digits.
-    The rounding after the division then uses the reminder and $y to determine
+    The rounding after the division then uses the remainder and $y to determine
     wether it must round up or down.
  ?  I have no idea which is the right way. That's why I used a slightly more
  ?  simple scheme and tweaked the few failing testcases to match it.
@@ -2818,7 +2874,7 @@ This also works for other subclasses, like Math::String.
 
 It is yet unlcear whether overloaded int() should return a scalar or a BigInt.
 
-=item bdiv
+=item length
 
 The following will probably not do what you expect:
 
@@ -2836,7 +2892,7 @@ The following will probably not do what you expect:
 
 	print $c->bdiv(10000),"\n";
 
-It prints both quotient and reminder since print calls C<bdiv()> in list
+It prints both quotient and remainder since print calls C<bdiv()> in list
 context. Also, C<bdiv()> will modify $c, so be carefull. You probably want
 to use
 	
@@ -2850,10 +2906,12 @@ real-valued quotient of the two operands, and the remainder (when it is
 nonzero) always has the same sign as the second operand; so, for
 example,
 
-	 1 / 4  => ( 0, 1)
-	 1 / -4 => (-1,-3)
-	-3 / 4  => (-1, 1)
-	-3 / -4 => ( 0,-3)
+	  1 / 4  => ( 0, 1)
+	  1 / -4 => (-1,-3)
+	 -3 / 4  => (-1, 1)
+	 -3 / -4 => ( 0,-3)
+	-11 / 2  => (-5,1)
+	 11 /-2  => (-5,-1)
 
 As a consequence, the behavior of the operator % agrees with the
 behavior of Perl's built-in % operator (as documented in the perlop
@@ -2862,13 +2920,56 @@ manpage), and the equation
 	$x == ($x / $y) * $y + ($x % $y)
 
 holds true for any $x and $y, which justifies calling the two return
-values of bdiv() the quotient and remainder.
+values of bdiv() the quotient and remainder. The only exception to this rule
+are when $y == 0 and $x is negative, then the remainder will also be
+negative. See below under "infinity handling" for the reasoning behing this.
 
 Perl's 'use integer;' changes the behaviour of % and / for scalars, but will
 not change BigInt's way to do things. This is because under 'use integer' Perl
 will do what the underlying C thinks is right and this is different for each
 system. If you need BigInt's behaving exactly like Perl's 'use integer', bug
 the author to implement it ;)
+
+=item infinity handling
+
+Here are some examples that explain the reasons why certain results occur while
+handling infinity:
+
+The following table shows the result of the division and the remainder, so that
+the equation above holds true. Some "ordinary" cases are strewn in to show more
+clearly the reasoning:
+
+	A /  B  =   C,     R so that C *    B +    R =    A
+     =========================================================
+	5 /   8 =   0,     5 	     0 *    8 +    5 =    5
+	0 /   8 =   0,     0	     0 *    8 +    0 =    0
+	0 / inf =   0,     0	     0 *  inf +    0 =    0
+	0 /-inf =   0,     0	     0 * -inf +    0 =    0
+	5 / inf =   0,     5	     0 *  inf +    5 =    5
+	5 /-inf =   0,     5	     0 * -inf +    5 =    5
+	-5/ inf =   0,    -5	     0 *  inf +   -5 =   -5
+	-5/-inf =   0,    -5	     0 * -inf +   -5 =   -5
+       inf/   5 =  inf,    0	   inf *    5 +    0 =  inf
+      -inf/   5 = -inf,    0      -inf *    5 +    0 = -inf
+       inf/  -5 = -inf,    0	  -inf *   -5 +    0 =  inf
+      -inf/  -5 =  inf,    0       inf *   -5 +    0 = -inf
+	 5/   5 =    1,    0         1 *    5 +    0 =    5
+	-5/  -5 =    1,    0         1 *   -5 +    0 =   -5
+       inf/ inf =    1,    0         1 *  inf +    0 =  inf
+      -inf/-inf =    1,    0         1 * -inf +    0 = -inf
+       inf/-inf =   -1,    0        -1 * -inf +    0 =  inf
+      -inf/ inf =   -1,    0         1 * -inf +    0 = -inf
+	 8/   0 =  inf,    8       inf *    0 +    8 =    8 
+       inf/   0 =  inf,  inf       inf *    0 +  inf =  inf 
+         0/   0 =  NaN
+
+These cases below violate the "remainder has the sign of the second of the two
+arguments", since they wouldn't match up otherwise.
+
+	A /  B  =   C,     R so that C *    B +    R =    A
+     ========================================================
+      -inf/   0 = -inf, -inf      -inf *    0 +  inf = -inf 
+	-8/   0 = -inf,   -8      -inf *    0 +    8 = -8 
 
 =item Modifying and =
 

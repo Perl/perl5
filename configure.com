@@ -1,5 +1,6 @@
 $! OpenVMS configuration procedure for Perl -- do not attempt to run under DOS
 $ sav_ver = 'F$VERIFY(0)'
+$ on control_y then goto clean_up
 $! SET VERIFY
 $!
 $! For example, if you unpacked perl into: [USER.PERL-5n...] then you will 
@@ -608,71 +609,71 @@ $!
 $myread:
 $ ans = ""
 $ len_rp = F$LENGTH(rp)
-$ If (fastread)
-$ Then
-$   IF len_rp .GT. 210
-$   THEN
-$     i_rp = 0
-$     fastread_rp_loop:
-$       sub_rp = F$EXTRACT(i_rp,COLUMNS,rp)
-$       echo4 "''sub_rp'"
-$       i_rp = i_rp + COLUMNS
-$       IF i_rp .LT. len_rp THEN GOTO fastread_rp_loop
-$   ELSE
-$     echo4 "''rp'"
-$   ENDIF
-$ Else
 $   If (.NOT. silent) Then echo ""
 $   IF len_rp .GT. 210
 $   THEN
 $     i_rp = 0
-$     firstread_rp_loop:
+$   rp_loop:
 $       sub_rp = F$EXTRACT(i_rp,COLUMNS,rp)
 $       i_rp = i_rp + COLUMNS
 $       if i_rp .LT. len_rp THEN echo4 "''sub_rp'"
-$       IF i_rp .LT. len_rp THEN GOTO firstread_rp_loop
-$     READ SYS$COMMAND/PROMPT="''sub_rp'" ans
+$     IF i_rp .LT. len_rp THEN GOTO rp_loop
 $   ELSE
-$     READ SYS$COMMAND/PROMPT="''rp'" ans
+$   sub_rp = rp
 $   ENDIF
+$ if (fastread)
+$ then
+$     echo4 "''sub_rp'"
+$ else
+$     READ SYS$COMMAND/PROMPT="''sub_rp'" ans
+$ endif
 $   IF (ans .EQS. "&-d")
 $   THEN
 $     echo4 "(OK, I will run with -d after this question.)"
-$     IF (.NOT. silent) THEN echo ""
-$     IF len_rp .GT. 210
-$     THEN
-$       i_rp = 0
-$       secondread_rp_loop:
-$         sub_rp = F$EXTRACT(i_rp,COLUMNS,rp)
-$         echo4 "''sub_rp'"
-$         i_rp = i_rp + COLUMNS
-$         IF i_rp .LT. len_rp THEN GOTO secondread_rp_loop
-$       READ SYS$COMMAND/PROMPT="''sub_rp'" ans
-$     ELSE
-$       READ SYS$COMMAND/PROMPT="''rp'" ans
-$     ENDIF
-$     fastread := yes
+$   echo ""
+$   deferred_fastread =1
+$   goto myread
 $   ENDIF
 $   IF (ans .EQS. "&-s")
 $   THEN
 $     echo4 "(OK, I will run with -s after this question.)"
 $     echo ""
-$     IF len_rp .GT. 210
-$     THEN
-$       i_rp = 0
-$       thirdread_rp_loop:
-$         sub_rp = F$EXTRACT(i_rp,COLUMNS,rp)
-$         echo4 "''sub_rp'"
-$         i_rp = i_rp + COLUMNS
-$         IF i_rp .LT. len_rp THEN GOTO thirdread_rp_loop
-$       READ SYS$COMMAND/PROMPT="''sub_rp'" ans
-$     ELSE
-$       READ SYS$COMMAND/PROMPT="''rp'" ans
+$   deferred_silent = 1
+$   goto myread
 $     ENDIF
+$ if (bool_dflt .nes. "")
+$ then
+$   if (ans .eqs. "") then ans = bool_dflt
+$   ans = f$extract(0,1,f$edit(ans,"collapse,upcase"))
+$   if (ans .eqs. "Y" .or. ans .eqs. "1" .or. ans .eqs. "T") 
+$   then
+$       ans = "Y"
+$   else
+$       if (ans .eqs. "N" .or. ans .eqs. "0" .or. ans .eqs. "F") 
+$       then
+$           ans = "N"
+$       else
+$           echo4 "Input not understood please answer 'Yes' or 'No'"
+$           goto myread
+$       endif
+$   endif
+$   bool_dflt = ""
+$ else
+$   ans = f$edit(ans,"trim,compress")
+$   if (ans .eqs. "") then ans = dflt
+$   if (f$edit(ans,"upcase") .eqs. "NONE") then ans = ""
+$ endif
+$ if f$type(deferred_silent) .nes. ""  
+$ then
 $     silent := true
 $     GOSUB Shut_up
+$     delete/symbol deferred_silent
 $   ENDIF
-$ Endif
+$ if f$type(deferred_fastread) .nes. ""
+$ then 
+$   fastread = 1
+$   delete/symbol deferred_fastread
+$ endif
 $ RETURN
 $!
 $Beyond_myread:
@@ -725,11 +726,10 @@ $       DECK
     unless you want to help in developing and debugging Perl.
 
 $       EOD
-$       dflt="n"
-$       rp="Do you really want to continue? [''dflt'] "
+$       bool_dflt="n"
+$       rp="Do you really want to continue? [''bool_dflt'] "
 $       IF (fastread) THEN fastread := FALSE
 $       GOSUB myread
-$       IF ans .EQS. "" THEN ans = dflt
 $       IF ans
 $       THEN
 $         echo4 "Okay, continuing."
@@ -756,8 +756,8 @@ $   contains /NOOUTPUT [-.CONFIG]INSTRUCT. 'user'
 $   IF .NOT.($status.EQ.%X08D78053)
 $   THEN
 $     firsttime=""
-$     dflt = "n"
-$     rp = "Would you like to see the instructions? [''dflt'] "
+$     bool_dflt = "n"
+$     rp = "Would you like to see the instructions? [''bool_dflt'] "
 $     GOSUB myread
 $     if .NOT.ans THEN needman=""
 $   ENDIF
@@ -856,32 +856,64 @@ $   GOTO Beyond_config_sh
 $ ENDIF
 $Config_sh_found:
 $ IF F$TYPE(osname) .EQS. "" THEN osname = F$EDIT(F$GETSYI("NODE_SWTYPE"),"COLLAPSE")
-$ IF F$TYPE(config_dflt) .EQS. "" THEN config_dflt = "n"
-$ rp = "Shall I @ ''config_sh' for default answers? [''config_dflt'] "
+$ bool_dflt = "n"
+$ IF F$TYPE(config_dflt) .NES. "" THEN bool_dflt = config_dflt
+$ rp = "Shall I use ''config_sh' for default answers? [''bool_dflt'] "
 $ GOSUB myread
-$ IF ans .EQS. "" THEN ans = config_dflt
 $ IF ans
 $ THEN
 $   echo ""
 $   echo "Fetching default answers from ''config_sh'..."
 $!
-$! This @ is why config_sh must employ DCL syntax.  Note that for
-$! symbols to be returned to this procedure they must be global.
-$! Which implies that assignments must be of the :== or == variety.
-$! Note further that the [-]config.sh file written by this procedure
-$! employs shell syntax.  In order to convert shell syntax to DCL
-$! you might try:
+$!  we do our own parsing of the shell-script stuff
+$!  ...and only accept symbols if they're in the | delimited list below
 $!
-$! perl -ni -e "s/^#/!#/;s/='/==""/;s/'$/""/;print ""\$ $_"";" config.sh
-$!
-$! However, watch out for sig_nam, sig_nam_init, sig_num, startperl 
-$! and any of the lower case double quoted variables such as the *format
-$! variables in such a config."sh".
-$!
-$   @'config_sh'
+$   config_symbols0 ="|archlib|archlibexp|bin|binexp|builddir|cf_email|config_sh|installarchlib|installbin|installman1dir|installman3dir|"
+$   config_symbols1 ="|installprivlib|installscript|installsitearch|installsitelib|most|oldarchlib|oldarchlibexp|osname|pager|perl_symbol|perl_verb|"
+$   config_symbols2 ="|prefix|privlib|privlibexp|scriptdir|sitearch|sitearchexp|sitelib|sitelib_stem|sitelibexp|try_cxx|use64bitall|use64bitint|"
+$   config_symbols3 ="|usecasesensitive|usedefaulttypes|usedevel|useieee|useithreads|usemultiplicity|usemymalloc|usedebugging_perl|useperlio|usesecurelog|"
+$   config_symbols4 ="|usethreads|usevmsdebug|"
+$!  
+$   open/read CONFIG 'config_sh'
+$   rd_conf_loop:
+$     read/end=erd_conf_loop CONFIG line
+$     line = f$edit(line,"trim")
+$     if line .eqs. "" .or. f$extract(0,1,line) .eqs. "#" then goto rd_conf_loop
+$     sym = f$element(0,"=",line)
+$     if sym .eqs. "=" then goto rd_conf_loop
+$     dsym = "|"+sym+"|"
+$     k = 0
+$     rd_ck_loop:
+$         syms = config_symbols'k'
+$         j = f$locate(dsym, syms)
+$         if j .lt. f$length(syms) then goto erd_ck_loop
+$         k = k + 1
+$     if k .lt. 5 then goto rd_ck_loop
+$     goto rd_conf_loop
+$     erd_ck_loop:
+$     val = f$element(1,"=",line)
+$     val = f$extract(1,f$length(val)-2,val)
+$     write sys$output "''sym' = ""''val'"""
+$    'sym' = "''val'"
+$   goto rd_conf_loop
+$   erd_conf_loop:
+$   close CONFIG
+$   delete/symbol config_symbols0
+$   delete/symbol config_symbols1
+$   delete/symbol config_symbols2
+$   delete/symbol config_symbols3
+$   delete/symbol config_symbols4
+$   delete/symbol sym
+$   delete/symbol val
+$   delete/symbol dsym
+$   if f$type(usedebugging_perl) .nes. ""
+$   then
+$       useperldebug = usedebugging_perl
+$       delete/symbol usedebugging_perl
+$   endif
 $!
 $ ENDIF
-$ DELETE/SYMBOL config_dflt
+$ if f$type(config_dflt) .nes. "" then DELETE/SYMBOL config_dflt
 $!
 $!we actually do not have "hints/" for VMS
 $!     TYPE SYS$INPUT:
@@ -919,7 +951,8 @@ $   DECK
  This procedure is intended to Configure the building of Perl for VMS.
 
 $   EOD
-$   READ SYS$COMMAND/PROMPT="Continue anyway? [n] " ans
+$   bool_dflt = "n"
+$   GOSUB myread
 $   IF ans
 $   THEN
 $     echo4 "Continuing..."
@@ -928,26 +961,6 @@ $     echo4 "ABORTING..."
 $     SET DEFAULT 'vms_default_directory_name' !be kind rewind
 $     STOP
 $     EXIT 2 !$STATUS = "%X00000002" (error)
-$   ENDIF
-$ ELSE           !we are on VMS huzzah!
-$   IF .NOT.silent 
-$   THEN TYPE SYS$INPUT:
-$   DECK
-
-Configure uses the operating system name and version to set some defaults.
-The default value is probably right if the name rings a bell. Otherwise,
-since spelling matters for me, either accept the default or answer "none"
-to leave it blank.
-$   EOD
-$   ENDIF
-$   rp = "Operating system name? [''osname'] "
-$   GOSUB myread
-$   IF ans.nes.""
-$   THEN
-$     IF (ans.NES.osname) !.AND.knowitall
-$     THEN
-$       echo4 "I'll go with ''osname' anyway..."
-$     ENDIF
 $   ENDIF
 $ ENDIF !(osname .NES./.EQS. "VMS")
 $!
@@ -1020,11 +1033,11 @@ $     tzspan = "''tzhour' hours & ''tzminrem' minutes"
 $   ELSE
 $     tzspan = "''tzhour' hours"
 $   ENDIF
-$   dflt = "y"
+$   bool_dflt = "y"
 $   echo "Your system is ''tzspan' ''direction'UTC in England."
-$   rp = "(''systz') Is this UTC Time Zone Offset correct? [''dflt'] "
+$   rp = "(''systz') Is this UTC Time Zone Offset correct? [''bool_dflt'] "
 $   GOSUB myread
-$   IF ans.OR.(ans.EQS."") 
+$   IF ans
 $   THEN 
 $     tzneedset = "f"
 $     tzd = systz
@@ -1096,6 +1109,7 @@ $   otherarch = "a VAX"
 $   alignbytes="8"
 $   arch_type = "ARCH-TYPE=__AXP__"
 $ ENDIF
+$ dflt = archname
 $ rp = "What is your architecture name? [''archname'] "
 $ GOSUB myread
 $ IF ans.NES.""
@@ -1106,12 +1120,11 @@ $   THEN
 $     echo4 "I'll go with ''archname' anyway..."
 $   ENDIF
 $ ENDIF
-$ dflt = "n"
+$ bool_dflt = "n"
 $ vms_prefix = "perl_root"
 $ vms_prefixup = F$EDIT(vms_prefix,"UPCASE")
-$ rp = "Will you be sharing your ''vms_prefixup' with ''otherarch'? [''dflt'] "
+$ rp = "Will you be sharing your ''vms_prefixup' with ''otherarch'? [''bool_dflt'] "
 $ GOSUB myread
-$ if ans .EQS. "" THEN ans = dflt
 $ IF .NOT. ans
 $ THEN
 $   sharedperl = "N"
@@ -1132,7 +1145,7 @@ $!
 $ IF F$TYPE(prefix) .EQS. ""
 $ THEN
 $   prefix = F$ENVIRONMENT("DEFAULT") - ".UU]" + "]"
-$   prefix = F$PARSE(prefix,,,,"NO_CONCEAL") - "][" - ".;"
+$   prefix = F$PARSE(prefix,,,,"NO_CONCEAL") - "][" - "000000." - ".000000" - ".;"
 $   prefixbase = prefix - "]"
 $!  Add _ROOT to make install PERL_ROOT differ from build directory.
 $   prefix = prefixbase + "_ROOT.]"
@@ -1165,13 +1178,8 @@ $!  -> ask if removal desired.
 $! Check here for writability of requested PERL_ROOT if it is not the default (cwd).
 $!  -> recommend letting PERL_ROOT be PERL_SRC if requested PERL_ROOT is not writable.
 $!
-$ IF .NOT. F$GETDVI(perl_root,"MNT")
-$ THEN
-$   tmp = F$PARSE(perl_root,,,"DEVICE",)
-$   echo4 "''tmp' is not mounted."
-$ ELSE
 $   tmp = perl_root - ".]" + "]"
-$   dflt = F$PARSE(tmp,,,,)
+$ dflt = f$parse(tmp,,,,)
 $   IF dflt .eqs. ""
 $   THEN
 $       echo4 "''tmp' does not yet exist."
@@ -1179,14 +1187,13 @@ $!      create/directory 'tmp'
 $   ELSE
 $       echo4 "''tmp' already exists."
 $   ENDIF
-$ ENDIF
 $!
 $ vms_skip_install = "true"
-$ dflt = "y"
+$ bool_dflt = "y"
 $! echo ""
-$ rp = "Skip the remaining """"where install"""" questions? [''dflt'] "
+$ rp = "Skip the remaining """"where install"""" questions? [''bool_dflt'] "
 $ GOSUB myread
-$ IF (.NOT.ans).AND.(ans.NES."") THEN vms_skip_install = "false"
+$ IF (.NOT.ans) THEN vms_skip_install = "false"
 $ IF (.NOT.vms_skip_install)
 $ THEN
 $!
@@ -1211,18 +1218,15 @@ $   ENDIF
 $   rp = "Pathname where the private library files will reside? " 
 $   rp = F$FAO("!AS!/!AS",rp,"[ ''dflt' ] ")
 $   GOSUB myread
-$   IF ans.NES.""
-$   THEN privlib = ans
-$   ELSE privlib = dflt
-$   ENDIF
+$   privlib = ans
 $!
 $ ENDIF !%Config-I-VMS, skip remaining "where install" questions
 $!
 $ IF F$TYPE(perl_symbol) .EQS. "" THEN perl_symbol := true
 $ IF F$TYPE(perl_verb) .EQS. "" THEN perl_verb = ""
 $ IF perl_symbol
-$ THEN dflt = "y"
-$ ELSE dflt = "n"
+$ THEN bool_dflt = "y"
+$ ELSE bool_dflt = "n"
 $ ENDIF
 $ IF .NOT.silent 
 $ THEN 
@@ -1232,16 +1236,15 @@ $   echo "symbol to invoke ''package', which is the usual method."
 $   echO "If you do not do so then you would need a DCL command verb at the"
 $   echo "process or the system wide level."
 $ ENDIF
-$ rp = "Invoke perl as a global symbol foreign command? [''dflt'] "
+$ rp = "Invoke perl as a global symbol foreign command? [''bool_dflt'] "
 $ GOSUB myread
-$ IF (ans.EQS."") THEN ans = dflt
 $ IF (.NOT.ans) THEN perl_symbol = "false"
 $!
 $ IF (.NOT.perl_symbol)
 $ THEN
 $   IF perl_verb .EQS. "DCLTABLES"
-$   THEN dflt = "n"
-$   ELSE dflt = "y"
+$   THEN bool_dflt = "n"
+$   ELSE bool_dflt = "y"
 $   ENDIF
 $   IF .NOT.silent 
 $   THEN 
@@ -1250,9 +1253,8 @@ $     echo "Since you won't be using a symbol you must choose to put the ''packa
 $     echo "verb in a per-process table or in the system wide DCLTABLES (which"
 $     echo "would require write privilege)."
 $   ENDIF
-$   rp = "Invoke perl as a per process command verb? [ ''dflt' ] "
+$   rp = "Invoke perl as a per process command verb? [ ''bool_dflt' ] "
 $   GOSUB myread
-$   IF (ans.EQS."") THEN ans = dflt
 $   IF (.NOT.ans)
 $   THEN perl_verb = "DCLTABLES"
 $   ELSE perl_verb = "PROCESS"
@@ -1356,10 +1358,7 @@ $   ENDIF
 $   rp = "Where do you want to put the public architecture-dependent libraries? "
 $   rp = F$FAO("!AS!/!AS",rp,"[ ''dflt' ] ")
 $   GOSUB myread
-$   IF ans.NES.""
-$   THEN archlib = ans
-$   ELSE archlib = dflt
-$   ENDIF
+$   archlib = ans
 $!
 $ ENDIF !%Config-I-VMS, skip "where install" questions
 $!
@@ -1397,10 +1396,7 @@ $   ENDIF
 $   rp = "Pathname for the site-specific library files? "
 $   rp = F$FAO("!AS!/!AS",rp,"[ ''dflt' ] ")
 $   GOSUB myread
-$   IF ans.NES.""
-$   THEN sitelib = ans
-$   ELSE sitelib = dflt
-$   ENDIF
+$   sitelib = ans
 $!
 $!: determine where site specific architecture-dependent libraries go.
 $   IF .NOT.silent 
@@ -1418,10 +1414,7 @@ $   ENDIF
 $   rp = "Pathname for the site-specific architecture-dependent library files? "
 $   rp = F$FAO("!AS!/!AS",rp,"[ ''dflt' ] ")
 $   GOSUB myread
-$   IF ans.NES.""
-$   THEN sitearch = ans
-$   ELSE sitearch = dflt
-$   ENDIF
+$   sitearch = ans
 $!
 $!: determine where old public architecture dependent libraries might be
 $!
@@ -1434,10 +1427,7 @@ $   ENDIF
 $   rp = "Pathname where the public executables will reside? "
 $   rp = F$FAO("!AS!/!AS",rp,"[ ''dflt' ] ")
 $   GOSUB myread
-$   IF ans.NES.""
-$   THEN bin = ans
-$   ELSE bin = dflt
-$   ENDIF
+$   bin = ans
 $!
 $!: determine where manual pages are on this system
 $!: What suffix to use on installed man pages
@@ -2030,8 +2020,9 @@ $  IF myhostname.eqs."" THEN myhostname = F$EDIT(F$GETSYI("SCSNODE"),"TRIM")
 $!: you do not want to know about this
 $!: verify guess
 $ rp = "Your host name appears to be """"''myhostname'"""". Right? "
+$ bool_dflt = "y"
 $ GOSUB myread
-$ IF (.not.ans).and.(ans.NES."")
+$ IF (.not.ans)
 $   THEN 
 $     READ SYS$COMMAND/PROMPT= - 
  "Please type the (one word) name of your host: " ans
@@ -2051,8 +2042,9 @@ $ mydomain = F$EXTRACT(fp,(F$LENGTH(myhostname)-fp)+1,myhostname)
 $ IF mydomain.NES.""  !no periods in DECnet names like "MYDECNODE::"
 $ THEN
 $   rp = "What is your domain name? [''mydomain'] "
+$   dflt = mydomain
 $   GOSUB myread
-$   IF ans .nes. "" THEN mydomain = ans
+$   mydomain = ans
 $!: translate upper to lower if necessary
 $   mydomain = F$EDIT(mydomain,"COLLAPSE")
 $   mylowdomain = F$EDIT(mydomain," LOWERCASE")
@@ -2081,10 +2073,7 @@ $ THEN
 $   dflt = "''cf_by'@''myhostname'"+"''mydomain'"
 $   rp = "What is your e-mail address? [''dflt'] "
 $   GOSUB myread
-$   IF ans .nes. ""
-$   THEN cf_email = ans
-$   ELSE cf_email = dflt
-$   ENDIF
+$   cf_email = ans
 $ ENDIF
 $!
 $ IF .NOT.silent 
@@ -2102,10 +2091,7 @@ $ ENDIF
 $ dflt = "''cf_email'"
 $ rp = "Perl administrator e-mail address [''dflt'] "
 $ GOSUB myread
-$ IF ans .nes. ""
-$ THEN perladmin = ans
-$ ELSE perladmin = dflt
-$ ENDIF
+$ perladmin = ans
 $!
 $!: determine where public executable scripts go
 $!: determine perl absolute location
@@ -2165,7 +2151,6 @@ $   IF Has_socketshr THEN rp = rp + ",SOCKETSHR"
 $   IF Has_Dec_C_Sockets THEN rp = rp + ",DECC"
 $   rp = rp + ") [''dflt'] "
 $   GOSUB myread
-$   IF ans .EQS. "" THEN ans = "''dflt'"
 $   Has_Dec_C_Sockets = "F"
 $   Has_socketshr = "F"
 $   ans = F$EDIT(ans,"TRIM,COMPRESS,LOWERCASE")
@@ -2180,16 +2165,20 @@ $ echo "Perl can be built to run under the VMS debugger."
 $ echo "You should only select this option if you are debugging"
 $ echo "perl itself.  This can be a useful feature if you are "
 $ echo "embedding perl in a program."
-$ dflt = "n"
-$ rp = "Build a VMS-DEBUG version of Perl? [''dflt'] "
+$ bool_dflt = "n"
+$ if f$type(usevmsdebug) .nes. "" 
+$ then
+$   if usevmsdebug .or. usevmsdebug .eqs. "define" then bool_dflt="y"
+$ endif
+$ rp = "Build a VMS-DEBUG version of Perl? [''bool_dflt'] "
 $ GOSUB myread
-$ IF ans.eqs."" then ans = dflt
-$ IF F$EXTRACT(0, 1, F$EDIT(ans,"COLLAPSE,UPCASE")) .eqs. "Y"
+$ use_vmsdebug_perl = ans
+$ IF use_vmsdebug_perl
 $ THEN
-$   use_vmsdebug_perl = "Y"
+$   usevmsdebug = "define"
 $   macros = macros + """__DEBUG__=1"","
 $ ELSE
-$   use_vmsdebug_perl = "N"
+$   usevmsdebug = "undef"
 $ ENDIF
 $!
 $! Ask if they want to build with DEBUGGING
@@ -2199,16 +2188,14 @@ $ echo "enables the -D switch, at the cost of some performance.  It"
 $ echo "was mandatory on perl 5.005 and before on VMS, but is now"
 $ echo "optional.  If you do not generally use it you should probably"
 $ echo "leave this off and gain a bit of extra speed."
-$ dflt = "y"
-$ rp = "Build a DEBUGGING version of Perl? [''dflt'] "
+$ bool_dflt = "y"
+$ if f$type(useperldebug) .nes. "" 
+$ then
+$   if f$extract(0,1,f$edit(useperldebug,"collapse,upcase")).eqs."N"  .or. useperldebug .eqs. "undef" then bool_dflt="n"
+$ endif
+$ rp = "Build a DEBUGGING version of Perl? [''bool_dflt'] "
 $ GOSUB myread
-$ IF ans.eqs."" then ans = dflt
-$ IF F$EXTRACT(0, 1, F$EDIT(ans,"COLLAPSE,UPCASE")) .eqs. "Y"
-$ THEN
-$   use_debugging_perl = "Y"
-$ ELSE
-$   use_debugging_perl = "N"
-$ ENDIF
+$ use_debugging_perl = ans
 $!
 $! Ask if they want to build with MULTIPLICITY
 $ echo ""
@@ -2217,10 +2204,13 @@ $ echo "within the same Perl executable."
 $ echo "There is some performance overhead, however, so you"
 $ echo "probably do not want to choose this unless you are going to be" 
 $ echo "doing things with embedded perl."
-$ dflt = "n"
-$ rp = "Build Perl for multiplicity? [''dflt'] "
+$ bool_dflt = "n"
+$ if f$type(usemultiplicity) .nes. "" 
+$ then
+$   if usemultiplicity .or. usemultiplicity .eqs. "define" then bool_dflt = "y"
+$ endif
+$ rp = "Build Perl for multiplicity? [''bool_dflt'] "
 $ GOSUB myread
-$ IF ans.eqs."" then ans = dflt
 $ IF ans
 $ THEN
 $   usemultiplicity="define"
@@ -2231,10 +2221,10 @@ $!
 $! Ask if they want to build with 64-bit support
 $ IF (archname.eqs."VMS_AXP").and.("''f$extract(1,3, f$getsyi(""version""))'".ges."7.1")
 $ THEN
-$   dflt = "n"
+$   bool_dflt = "n"
 $   IF F$TYPE(use64bitint) .NES. "" 
 $   THEN
-$       IF use64bitint .OR. use64bitint .eqs. "define" THEN dflt = "y"
+$       IF use64bitint .OR. use64bitint .eqs. "define" THEN bool_dflt = "y"
 $   ENDIF
 $   echo ""
 $   echo "You can have native 64-bit long integers."
@@ -2246,18 +2236,14 @@ $   echo "fileops at the moment, as Dec C doesn't do that yet)."
 $   echo "Choosing this option will most probably introduce binary incompatibilities."
 $   echo ""
 $   echo "If this does not make any sense to you, just accept the default ''dflt'."
-$   rp = "Try to use 64-bit integers, if available? [''dflt'] "
+$   rp = "Try to use 64-bit integers, if available? [''bool_dflt'] "
 $   GOSUB myread
-$   IF ans .EQS. "" THEN ans = dflt
-$   IF ans
-$   THEN use64bitint="Y"
-$   ELSE use64bitint="N"
-$   ENDIF
+$   use64bitint = ans
 $!
-$   dflt = "n"
+$   bool_dflt = "n"
 $   IF F$TYPE(use64bitall) .NES. "" 
 $   THEN
-$       IF use64bitall .OR. use64bitall .eqs. "define" THEN dflt = "y"
+$       IF use64bitall .OR. use64bitall .eqs. "define" THEN bool_dflt = "y"
 $   ENDIF
 $   echo ""
 $   echo "You may also choose to try maximal 64-bitness.  It means using as much"
@@ -2266,13 +2252,9 @@ $   echo "binary incompatibilities.  On the other hand, your platform may not"
 $   echo "have any more 64-bitness available than what you already have chosen."
 $   echo ""
 $   echo "If this does not make any sense to you, just accept the default ''dflt'."
-$   rp = "Try to use maximal 64-bit support, if available? [''dflt'] "
+$   rp = "Try to use maximal 64-bit support, if available? [''bool_dflt'] "
 $   GOSUB myread
-$   IF ans .EQS. "" THEN ans = dflt
-$   IF ans
-$   THEN use64bitall="Y"
-$   ELSE use64bitall="N"
-$   ENDIF
+$   use64bitall=ans
 $   IF use64bitall .AND. .NOT. use64bitint
 $   THEN
 $     echo ""
@@ -2289,11 +2271,14 @@ $   echo ""
 $   echo "This version of Perl can be built with threads. While really nifty,"
 $   echo "they are a beta feature, and there is a speed penalty for perl"
 $   echo "programs if you build with threads *even if you do not use them*."
-$   dflt = "n"
-$   rp = "Build with threads? [''dflt'] "
+$   bool_dflt = "n"
+$   if f$type(usethreads) .nes. "" 
+$   then 
+$       if usethreads .or. usethreads .eqs. "define" then bool_dflt="y"
+$   endif
+$   rp = "Build with threads? [''bool_dflt'] "
 $   GOSUB myread
-$   if ans.eqs."" then ans = dflt
-$   if (f$extract(0, 1, "''ans'").eqs."Y").or.(f$extract(0, 1, "''ans'").eqs."y")
+$   if ans
 $   THEN
 $     use_threads="T"
 $     ! Shall we do the 5.005-stype threads, or IThreads?
@@ -2309,16 +2294,18 @@ $     echo "interpreter-threads at this time.  There doesn't yet exist"
 $     echo "a way to create threads from within Perl in this model,"
 $     echo "i.e., ""use Thread;"" will NOT work."
 $     echo ""
-$     dflt = "n"
-$     rp = "Build with Interpreter threads? [''dflt'] "
+$     bool_dflt = "n"
+$     if f$type(useithreads) .nes. ""
+$     then
+$         if useithreads .eqs. "define" then bool_dflt="y"
+$     endif
+$     rp = "Build with Interpreter threads? [''bool_dflt'] "
 $     GOSUB myread
-$     if ans.eqs."" then ans = dflt
-$     if (f$extract(0, 1, "''ans'").eqs."Y").or.(f$extract(0, 1, "''ans'").eqs."y")
+$     use_ithreads=ans
+$     if use_ithreads 
 $     THEN
-$       use_ithreads="Y"
 $       use_5005_threads="N"
 $     ELSE
-$       use_ithreads="N"
 $       use_5005_threads="Y"
 $     ENDIF
 $     ! Are they on VMS 7.1 on an alpha?
@@ -2333,11 +2320,10 @@ $       echo "all the threads in a program, even on a single-processor"
 $       echo "machine.  Unfortunately, this feature isn't safe on an"
 $       echo "unpatched 7.1 system (several OS patches were required when"
 $       echo "this procedure was written)."
-$       dflt = "n"
-$       rp = "Enable multiple kernel threads and upcalls? [''dflt'] "
+$       bool_dflt = "n"
+$       rp = "Enable multiple kernel threads and upcalls? [''bool_dflt'] "
 $       gosub myread
-$       if ans.eqs."" then ans="''dflt'"
-$       if f$extract(0, 1, f$edit(ans,"TRIM,COMPRESS,UPCASE")).eqs."Y"
+$       if ans
 $       THEN
 $         Thread_Live_Dangerously = "MT=MT=1"
 $       ENDIF
@@ -2358,26 +2344,37 @@ $   echo "linker symbols."
 $   echo ""
 $   echo "If you have no idea what this means, and do not have"
 $   echo "any program requiring anything, choose the default."
-$   dflt = be_case_sensitive
-$   rp = "Build with case-sensitive symbols? [''dflt'] "
+$   bool_dflt = be_case_sensitive
+$   if f$type(usecasesensitive) .nes. ""
+$   then
+$       if usecasesensitive .or. usecasesensitive .eqs. "define" then bool_dflt = "y"
+$       if f$extract(0,1,f$edit(usecasesensitive,"collapse,upcase")).eqs."N" .or. usecasesensitive .eqs. "undef"  then bool_dflt = "n"
+$   endif
+$   rp = "Build with case-sensitive symbols? [''bool_dflt'] "
 $   GOSUB myread
-$   IF ans .EQS. "" THEN ans="''dflt'"
-$   be_case_sensitive = "''ans'"
+$   be_case_sensitive = ans
 $! IEEE math?
 $   echo ""
 $   echo "Perl normally uses IEEE format (T_FLOAT) floating point numbers"
 $   echo "internally on Alpha, but if you need G_FLOAT for binary compatibility"
 $   echo "with an external library or existing data, you may wish to disable"
 $   echo "the IEEE math option."
-$   dflt = use_ieee_math
-$   rp = "Use IEEE math? [''dflt'] "
+$   bool_dflt = use_ieee_math
+$   if f$type(useieee) .nes. "" 
+$   then
+$       if useieee .or. useieee .eqs. "define" then bool_dflt="y"
+$   endif
+$   rp = "Use IEEE math? [''bool_dflt'] "
 $   GOSUB myread
-$   IF ans .eqs. "" THEN ans = "''dflt'"
-$   use_ieee_math = "''ans'"
+$   use_ieee_math = ans
 $ ELSE
 $   be_case_sensitive = "n"
 $   use_ieee_math = "n"
 $ ENDIF
+$ useieee = "undef"
+$ usecasesensitive = "undef"
+$ if (use_ieee_math) then useieee = "define"
+$ if (be_case_sensitive) then usecasesensitive = "define"
 $! CC Flags
 $ echo ""
 $ echo "Your compiler may want other flags.  For this question you should include"
@@ -2388,7 +2385,6 @@ $ echo "To use no flags, specify the word ""none""."
 $ dflt = user_c_flags
 $ rp = "Any additional cc flags? [''dflt'] "
 $ GOSUB myread
-$ IF ans .EQS. "" THEN ans = "''dflt'"
 $ IF ans .EQS. "none" THEN ans = ""
 $ user_c_flags = "''ans'"
 $!
@@ -2407,14 +2403,16 @@ $ echo "This restriction does not apply to the %ENV hash or to implicit"
 $ echo "logical name translation during parsing of file specifications;"
 $ echo "these always use the normal sequence of access modes for logical"
 $ echo "name translation."
-$ dflt = "y"
-$ rp = "Use secure logical name translation? [''dflt'] "
+$ bool_dflt = "y"
+$ if f$type(usesecurelog) .nes. "" 
+$ then
+$   if f$extract(0,1,f$edit(usesecurelog,"collapse,upcase")).eqs."N" .or. usesecurelog .eqs. "undef" then bool_dflt = "n"
+$ endif
+$ rp = "Use secure logical name translation? [''bool_dflt'] "
 $ GOSUB myread
-$ IF ans .eqs. "" THEN ans = dflt
-$ IF ans
-$ THEN d_secintgenv := Y
-$ ELSE d_secintgenv := N
-$ ENDIF
+$ d_secintgenv  = ans
+$ usesecurelog = "undef"
+$ if (d_secintgenv) then usesecurelog = "define"
 $!
 $! Ask whether they want to default filetypes
 $ echo ""
@@ -2428,32 +2426,31 @@ $ echo "finally foo.com)."
 $ echo ""
 $ echo "This is currently broken in some configurations. Only enable it if"
 $ echo "you know what you are doing."
-$ dflt = "n"
-$ rp = "Always use default file types? [''dflt'] "
+$ bool_dflt = "n"
+$ if f$type(usedefaulttypes) .nes. "" 
+$ then
+$     if usedefaulttypes .or. usedefaulttypes .eqs. "define" then bool_dflt="y"
+$ endif
+$ rp = "Always use default file types? [''bool_dflt'] "
 $ GOSUB myread
-$ IF ans .EQS. "" THEN ans = dflt
-$ IF ans
-$ THEN d_alwdeftype := Y
-$ ELSE d_alwdeftype := N
-$ ENDIF
+$ d_alwdeftype = ans
+$ usedefaulttypes = "undef"
+$ if (d_alwdeftype) then usedefaulttypes = "define"
+$!
 $! Ask if they want to use perl's memory allocator
 $ echo ""
 $ echo "Perl has a built-in memory allocator that is tuned for normal"
 $ echo "memory usage.  It is oftentimes better than the standard system"
 $ echo "memory allocator.  It also has the advantage of providing memory"
 $ echo "allocation statistics, if you choose to enable them."
-$ dflt = "n"
-$ IF F$TYPE(usemymalloc) .EQS. "STRING"
-$ THEN
-$   IF usemymalloc THEN dflt = "y"
-$ ENDIF
-$ rp = "Do you wish to attempt to use the malloc that comes with ''package'? [''dflt'] "
+$ bool_dflt = "n"
+$ IF F$TYPE(usemymalloc) .nes. ""
+$ then
+$   if usemymalloc .or. usemymalloc .eqs. "define" then bool_dflt = "y"
+$ endif
+$ rp = "Do you wish to attempt to use the malloc that comes with ''package'? [''bool_dflt'] "
 $ GOSUB myread
-$ IF ans .eqs. "" THEN ans = dflt
-$ IF ans
-$ THEN mymalloc := Y
-$ ELSE mymalloc := N
-$ ENDIF
+$ mymalloc = ans
 $ IF mymalloc
 $ THEN
 $   IF use_debugging_perl
@@ -2462,11 +2459,10 @@ $     echo ""
 $     echo "Perl can keep statistics on memory usage if you choose to use"
 $     echo "them.  This is useful for debugging, but does have some"
 $     echo "performance overhead."
-$     dflt = "n"
-$     rp = "Do you want the debugging memory allocator? [''dflt'] "
+$     bool_dflt = "n"
+$     rp = "Do you want the debugging memory allocator? [''bool_dflt'] "
 $     gosub myread
-$     IF ans .eqs. "" THEN ans = "''dflt'"
-$     use_debugmalloc = f$extract(0, 1, f$edit(ans, "COLLAPSE,UPCASE"))
+$     use_debugmalloc = ans
 $   ENDIF
 $   ! Check which memory allocator we want
 $   echo ""
@@ -2480,7 +2476,6 @@ $   echo "PACK_MALLOC."
 $   dflt = "DEFAULT"
 $   rp = "Memory allocator (DEFAULT, TWO_POT, PACK_MALLOC) [''dflt'] "
 $   GOSUB myread
-$   if ans.eqs."" then ans = "''dflt'"
 $   if ans.eqs."TWO_POT" then use_two_pot_malloc = "Y"
 $   if ans.eqs."PACK_MALLOC" then use_pack_malloc = "Y"
 $ ENDIF
@@ -2524,11 +2519,8 @@ $ IF .NOT. Has_socketshr .AND. .NOT. Has_Dec_C_Sockets
 $ THEN
 $   dflt = dflt - "Socket"            ! optional on VMS
 $ ENDIF
-$ IF .NOT. use_ithreads 
-$ THEN 
-$   dflt = dflt - "threads/shared"
-$   dflt = dflt - "threads"
-$ ENDIF
+$ IF .NOT. use_ithreads THEN dflt = dflt - "threads/shared"
+$ IF .NOT. use_ithreads THEN dflt = dflt - "threads"
 $ dflt = F$EDIT(dflt,"TRIM,COMPRESS")
 $!
 $! Ask for their default list of extensions to build
@@ -2541,7 +2533,6 @@ $ echo ""
 $ echo "Which modules do you want to build into perl?"
 $ rp = "[''dflt'] "
 $ GOSUB myread
-$ if ans .eqs. "" then ans = "''dflt'"
 $ extensions = F$EDIT(ans,"TRIM,COMPRESS")
 $!
 $! %Config-I-VMS, determine build/make utility here (make gmake mmk mms)
@@ -2594,6 +2585,7 @@ $ ENDIF
 $Reenable_messages_build:
 $ SET MESSAGE 'messages'
 $ SET ON
+$ on control_y then goto clean_up
 $ n = n + 1
 $ IF (n .LT. max_build) THEN GOTO Build_probe
 $!
@@ -2669,10 +2661,7 @@ $ IF F$TYPE(most) .EQS. "STRING" THEN dflt = "most"
 $ IF F$TYPE(pager) .EQS. "STRING" THEN dflt = pager
 $ rp="What pager is used on your system? [''dflt'] "
 $ GOSUB myread
-$ IF (ans .EQS. "") 
-$ THEN pager = dflt
-$ ELSE pager = ans
-$ ENDIF
+$ pager = ans
 $!
 $! update [.vms]config.vms here
 $!
@@ -2727,11 +2716,11 @@ $ ENDIF
 $!
 $! PerlIO abstraction
 $!
-$ dflt = "y"
+$ bool_dflt = "y"
 $ IF F$TYPE(useperlio) .NES. ""
-$ THEN
-$   IF useperlio .EQS. "undef" THEN dflt = "n"
-$ ENDIF
+$ then
+$   if f$extract(0,1,f$edit(useperlio,"collapse,upcase")) .eqs. "N" .or. useperlio .eqs. "undef" then bool_dflt = "n"
+$ endif
 $ IF .NOT. silent
 $ THEN
 $   echo "Previous versions of ''package' used the standard IO mechanisms as"
@@ -2744,11 +2733,10 @@ can use AT&T's sfio (if you already have sfio installed) or regular stdio.
 Using PerlIO with sfio may cause problems with some extension modules.
 
 $   EOD
-$   echo "If this does not make any sense to you, just accept the default '" + dflt + "'."
+$   echo "If this does not make any sense to you, just accept the default '" + bool_dflt + "'."
 $ ENDIF
-$ rp = "Use the PerlIO abstraction layer? [''dflt'] "
+$ rp = "Use the PerlIO abstraction layer? [''bool_dflt'] "
 $ GOSUB myread
-$ IF ans .EQS. "" THEN ans = dflt
 $ IF ans
 $ THEN
 $   useperlio = "define"
@@ -2881,7 +2869,8 @@ $ ELSE
 $   use64bitall = "undef"
 $ ENDIF
 $!
-$ usemymalloc=mymalloc
+$ usemymalloc = "undef"
+$ if mymalloc then usemymalloc = "define"
 $!
 $ perl_cc=Mcc
 $!
@@ -5006,13 +4995,7 @@ $ WC "cpplast='" + cpplast + "'"
 $ WC "cppminus='" + cppminus + "'"
 $ WC "cpprun='" + cpprun + "'"
 $ WC "cppstdin='" + cppstdin + "'"
-$ IF use64bitint .OR. use64bitint .EQS. "define"
-$ THEN
-$!  gcvt() does not work for > 16 decimal places; fallback to sprintf
-$   WC "d_Gconvert='sprintf((b),""%.*" + (nvgformat-"""") + ",(n),(x))'"
-$ ELSE
 $   WC "d_Gconvert='my_gconvert(x,n,t,b)'"
-$ ENDIF
 $ WC "d_PRIEldbl='" + d_PRIEUldbl + "'"
 $ WC "d_PRIFldbl='" + d_PRIFUldbl + "'"
 $ WC "d_PRIGldbl='" + d_PRIGUldbl + "'"
@@ -5360,7 +5343,7 @@ $ WC/symbol tmp
 $ DELETE/SYMBOL tmp
 $ WC "eagain=' '"
 $ WC "ebcdic='undef'"
-$ WC "embedmymalloc='" + mymalloc + "'"
+$ WC "embedmymalloc='" + usemymalloc + "'"
 $ WC "eunicefix=':'"
 $ WC "exe_ext='" + exe_ext + "'"
 $!
@@ -5536,6 +5519,8 @@ $ WC "path_sep='|'"
 $ WC "perl_root='" + perl_root + "'" ! VMS specific $trnlnm()
 $ WC "perladmin='" + perladmin + "'"
 $ WC "perllibs='" + perllibs + "'"
+$ WC "perl_symbol='" + perl_symbol + "'"  ! VMS specific
+$ WC "perl_verb='" + perl_verb + "'"      ! VMS specific
 $ WC "pgflquota='" + pgflquota + "'"
 $ WC "pidtype='" + pidtype + "'"
 $ WC "pm_apiversion='" + version + "'"
@@ -5620,9 +5605,12 @@ $ WC "uquadtype='" + uquadtype + "'"
 $ WC "use5005threads='" + use5005threads + "'"
 $ WC "use64bitall='" + use64bitall + "'"
 $ WC "use64bitint='" + use64bitint + "'"
-$ WC "usedebugging_perl='" + use_debugging_perl + "'"
+$ WC "usecasesensitive='" + be_case_sensitive + "'"    ! VMS-specific
+$ WC "usedebugging_perl='"+use_debugging_perl+"'"
+$ WC "usedefaulttypes='" + usedefaulttypes + "'"    ! VMS-specific
 $ WC "usecrosscompile='undef'"
 $ WC "usedl='" + usedl + "'"
+$ WC "useieee='" + useieee + "'"                    ! VMS-specific
 $ WC "useithreads='" + useithreads + "'"
 $ WC "uselargefiles='" + uselargefiles + "'"
 $ WC "uselongdouble='" + uselongdouble + "'"
@@ -5632,9 +5620,11 @@ $ WC "usemymalloc='" + usemymalloc + "'"
 $ WC "useperlio='" + useperlio + "'"
 $ WC "useposix='false'"
 $ WC "usereentrant='undef'"
+$ WC "usesecurelog='" + usesecurelog + "'"  ! VMS-specific
 $ WC "usesocks='undef'"
 $ WC "usethreads='" + usethreads + "'"
 $ WC "usevfork='true'"
+$ WC "usevmsdebug='" + usevmsdebug + "'"     ! VMS-specific
 $ WC "uvoformat='" + uvoformat + "'"
 $ WC "uvsize='" + uvsize + "'"
 $ WC "uvtype='" + uvtype + "'"
@@ -5690,10 +5680,9 @@ If you'd like to make any changes to the config.sh file before I begin
 to configure things, answer yes to the following question.
 
 $   EOD
-$   dflt="n"
-$   rp="Do you wish to edit ''basename_config_sh'? [''dflt'] "
+$   bool_dflt="n"
+$   rp="Do you wish to edit ''basename_config_sh'? [''bool_dflt'] "
 $   GOSUB myread
-$   IF ans .EQS. "" then ans = dflt
 $   IF ans
 $   THEN
 $     echo4 ""
