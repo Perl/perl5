@@ -316,6 +316,8 @@ sub eval {
 #   + m(methods),   M(modules)        # ...           (was m,v)
 #   + o(option)                       # lc            (was O)
 #   + v(view code), V(view Variables) # ...           (was w,V)
+# Changes: 1.18: Mar 17, 2002 Richard Foley <richard.foley@rfi.net>
+#   + fixed missing cmd_O bug
 # 
 ####################################################################
 
@@ -1441,7 +1443,7 @@ sub cmd_wrapper {
 	my $call = 'cmd_'.(
 		$set{$CommandSet}{$cmd} || $cmd
 	);
-	# print "rjsf: cmd_wrapper($cmd): $CommandSet($set{$CommandSet}{$cmd}) => call($call)\n";
+	# print "cmd_wrapper($cmd): $CommandSet($set{$CommandSet}{$cmd}) => call($call)\n";
 
 	return &$call($line, $dblineno);
 }
@@ -1883,6 +1885,12 @@ sub cmd_o {
 			&dump_option($_);
 		}
 	}
+}
+
+sub cmd_O {
+	print $OUT "The old O command is now the o command.\n";        # hint
+	print $OUT "Use 'h' to get current command help synopsis or\n"; # 
+	print $OUT "use 'o CommandSet=pre580' to revert to old usage\n"; # 
 }
 
 sub cmd_v {
