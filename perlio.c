@@ -33,20 +33,6 @@
 #undef PerlMemShared_free
 #define PerlMemShared_free(x) free(x)
 
-
-#ifndef PERLIO_LAYERS
-int
-PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
-{
- if (!names || !*names || strEQ(names,":crlf") || strEQ(names,":raw"))
-  {
-   return 0;
-  }
- Perl_croak(aTHX_ "Cannot apply \"%s\" in non-PerlIO perl",names);
- /* NOTREACHED */
- return -1;
-}
-
 int
 perlsio_binmode(FILE *fp, int iotype, int mode)
 {
@@ -62,6 +48,7 @@ perlsio_binmode(FILE *fp, int iotype, int mode)
     }
     return 0;
 #  else
+    dTHX;
     if (PerlLIO_setmode(fileno(fp), mode) != -1) {
 #    if defined(WIN32) && defined(__BORLANDC__)
 	/* The translation mode of the stream is maintained independent
@@ -91,6 +78,19 @@ perlsio_binmode(FILE *fp, int iotype, int mode)
     return 1;
 #  endif
 #endif
+}
+
+#ifndef PERLIO_LAYERS
+int
+PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
+{
+ if (!names || !*names || strEQ(names,":crlf") || strEQ(names,":raw"))
+  {
+   return 0;
+  }
+ Perl_croak(aTHX_ "Cannot apply \"%s\" in non-PerlIO perl",names);
+ /* NOTREACHED */
+ return -1;
 }
 
 int
