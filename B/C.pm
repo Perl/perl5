@@ -541,11 +541,10 @@ sub B::CV::save {
     if ($$root) {
 	warn sprintf("saving op tree for CV 0x%x, root = 0x%x\n",
 		     $$cv, $$root) if $debug_cv;
-	my $ppname;
+	my $ppname = "";
 	if ($$gv) {
 	    my $stashname = $gv->STASH->NAME;
 	    my $gvname = $gv->NAME;
-	    my $ppname = "";
 	    if ($gvname ne "__ANON__") {
 		$ppname = (${$gv->FORM} == $$cv) ? "pp_form_" : "pp_sub_";
 		$ppname .= ($stashname eq "main") ?
