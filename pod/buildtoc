@@ -203,6 +203,8 @@ close MASTER;
       return if $file =~ m!lib/Math/BigInt/t/!;
       return if $file =~ m!/Devel/PPPort/[Hh]arness|lib/Devel/Harness!i;
       return if $file =~ m!XS/(?:APItest|Typemap)!;
+      my $pod = $file;
+      return if $pod =~ s/pm$/pod/ && -e $pod;
       die "$0: tut $File::Find::name" if $file =~ /TUT/;
       unless (open (F, "< $_\0")) {
 	warn "$0: bogus <$file>: $!";
