@@ -395,7 +395,9 @@ EOM
 	    if test -n "$workshoplibs"; then
 		loclibpth=`echo $loclibpth | sed -e "s% $workshoplibs%%" `
 		for lib in $workshoplibs; do
-		    loclibpth="$loclibpth $lib/sparcv9"
+		    # Logically, it should be sparcv9.
+		    # But the reality fights back, it's v9.
+		    loclibpth="$loclibpth $lib/sparcv9 $lib/v9"
 		done
 		loclibpth="$loclibpth $workshoplibs"
 	    fi 
