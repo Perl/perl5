@@ -6463,6 +6463,22 @@ Perl_ck_trunc(pTHX_ OP *o)
     return ck_fun(o);
 }
 
+OP *
+Perl_ck_substr(pTHX_ OP *o)
+{
+    o = ck_fun(o);
+    if ((o->op_flags & OPf_KIDS) && o->op_private == 4) {
+	OP *kid = cLISTOPo->op_first;
+
+	if (kid->op_type == OP_NULL)
+	    kid = kid->op_sibling;
+	if (kid)
+	    kid->op_flags |= OPf_MOD;
+
+    }
+    return o;
+}
+
 /* A peephole optimizer.  We visit the ops in the order they're to execute. */
 
 void

@@ -515,7 +515,7 @@ abs		abs			ck_fun		fsTu%	S?
 # String stuff.
 
 length		length			ck_lengthconst	isTu%	S?
-substr		substr			ck_fun		st@	S S S? S?
+substr		substr			ck_substr	st@	S S S? S?
 vec		vec			ck_fun		ist@	S S S
 
 index		index			ck_index	isT@	S S S?

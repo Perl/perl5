@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..135\n";
+print "1..136\n";
 
 #P = start of string  Q = start of substr  R = end of substr  S = end of string
 
@@ -297,3 +297,10 @@ ok 125, $a eq 'xxxxefgh';
     ok 134, length($z) == 5;
     ok 135, $z eq "21\x{263a}10";
 }
+
+# replacement should work on magical values
+require Tie::Scalar;
+my %data;
+tie $data{'a'}, 'Tie::StdScalar';  # makes $data{'a'} magical
+$data{a} = "firstlast";
+ok 136, substr($data{'a'}, 0, 5, "") eq "first" && $data{'a'} eq "last";
