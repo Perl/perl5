@@ -137,6 +137,14 @@ O.pm/B.pm backend framework depends on it.
 
 Make the peephole optimizer optional.
 
+=head2 You WANT *how* many
+
+Currently contexts are void, scalar and list. sort has a special mechanism in
+place to pass in the number of return values wanted. It would be useful to
+have a general mechanism for this, backwards compatible and little speed hit.
+This would allow proposals such as short circuiting sort to be implemented
+as a module on CPAN.
+
 =head2 lexical aliases
 
 Allow lexical aliases (maybe via the syntax C<my \$alias = \$foo>.
