@@ -2480,23 +2480,10 @@ PerlIOStdio_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param)
     /* This assumes no layers underneath - which is what
        happens, but is not how I remember it. NI-S 2001/10/16
      */
-    int fd = PerlIO_fileno(o);
-    if (fd >= 0) {
-	char buf[8];
-	FILE *stdio = PerlSIO_fdopen(fd, PerlIO_modestr(o, buf));
-	if (stdio) {
-	    if ((f = PerlIOBase_dup(aTHX_ f, o, param))) {
-		PerlIOSelf(f, PerlIOStdio)->stdio = stdio;
-		PerlIOUnix_refcnt_inc(fd);
-	    }
-	    else {
-		PerlSIO_fclose(stdio);
-	    }
-	}
-	else {
-	    PerlLIO_close(fd);
-	    f = NULL;
-	}
+    if ((f = PerlIOBase_dup(aTHX_ f, o, param))) {
+	FILE *stdio = PerlIOSelf(o, PerlIOStdio)->stdio;
+	PerlIOSelf(f, PerlIOStdio)->stdio = stdio;
+	PerlIOUnix_refcnt_inc(fileno(stdio));
     }
     return f;
 }
