@@ -1,4 +1,4 @@
-/* $Header: str.c,v 3.0.1.8 90/08/09 05:22:18 lwall Locked $
+/* $Header: str.c,v 3.0.1.9 90/10/16 10:41:21 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	str.c,v $
+ * Revision 3.0.1.9  90/10/16  10:41:21  lwall
+ * patch29: the undefined value could get defined by devious means
+ * patch29: undefined values compared inconsistently 
+ * patch29: taintperl now checks for world writable PATH components
+ * 
  * Revision 3.0.1.8  90/08/09  05:22:18  lwall
  * patch19: the number to string converter wasn't allocating enough space
  * patch19: tainting didn't work on setgid scripts
@@ -235,7 +240,7 @@ register STR *sstr;
     if (sstr)
 	tainted |= sstr->str_tainted;
 #endif
-    if (sstr == dstr)
+    if (sstr == dstr || dstr == &str_undef)
 	return;
     if (!sstr)
 	dstr->str_pok = dstr->str_nok = 0;
@@ -250,8 +255,10 @@ register STR *sstr;
 	    char *tmps = sstr->str_ptr;
 
 	    if (*tmps == 'S' && bcmp(tmps,"StB",4) == 0) {
-		dstr->str_magic = str_smake(sstr->str_magic);
-		dstr->str_magic->str_rare = 'X';
+		if (!dstr->str_magic) {
+		    dstr->str_magic = str_smake(sstr->str_magic);
+		    dstr->str_magic->str_rare = 'X';
+		}
 	    }
 	}
     }
@@ -275,6 +282,8 @@ register STR *str;
 register char *ptr;
 register STRLEN len;
 {
+    if (str == &str_undef)
+	return;
     STR_GROW(str, len + 1);
     if (ptr)
 	(void)bcopy(ptr,str->str_ptr,len);
@@ -293,6 +302,8 @@ register char *ptr;
 {
     register STRLEN len;
 
+    if (str == &str_undef)
+	return;
     if (!ptr)
 	ptr = "";
     len = strlen(ptr);
@@ -333,6 +344,8 @@ register STR *str;
 register char *ptr;
 register STRLEN len;
 {
+    if (str == &str_undef)
+	return;
     if (!(str->str_pok))
 	(void)str_2ptr(str);
     STR_GROW(str, str->str_cur + len + 1);
@@ -367,6 +380,8 @@ register char *ptr;
 {
     register STRLEN len;
 
+    if (str == &str_undef)
+	return;
     if (!ptr)
 	return;
     if (!(str->str_pok))
@@ -393,6 +408,8 @@ char *keeplist;
     register char *to;
     register STRLEN len;
 
+    if (str == &str_undef)
+	return Nullch;
     if (!from)
 	return Nullch;
     len = fromend - from;
@@ -455,7 +472,7 @@ int how;
 char *name;
 STRLEN namlen;
 {
-    if (str->str_magic)
+    if (str == &str_undef || str->str_magic)
 	return;
     str->str_magic = Str_new(75,namlen);
     str = str->str_magic;
@@ -479,6 +496,8 @@ STRLEN littlelen;
     register char *bigend;
     register int i;
 
+    if (bigstr == &str_undef)
+	return;
     bigstr->str_nok = 0;
     bigstr->str_pok = SP_VALID;	/* disable possible screamer */
 
@@ -550,6 +569,8 @@ str_replace(str,nstr)
 register STR *str;
 register STR *nstr;
 {
+    if (str == &str_undef)
+	return;
     if (str->str_state == SS_INCR)
 	Str_Grow(str,0);	/* just force copy down */
     if (nstr->str_state == SS_INCR)
@@ -576,7 +597,7 @@ void
 str_free(str)
 register STR *str;
 {
-    if (!str)
+    if (!str || str == &str_undef)
 	return;
     if (str->str_state) {
 	if (str->str_state == SS_FREE)	/* already freed */
@@ -636,10 +657,10 @@ str_eq(str1,str2)
 register STR *str1;
 register STR *str2;
 {
-    if (!str1)
-	return str2 == Nullstr;
-    if (!str2)
-	return 0;
+    if (!str1 || str1 == &str_undef)
+	return (str2 == Nullstr || str2 == &str_undef || !str2->str_cur);
+    if (!str2 || str2 == &str_undef)
+	return !str1->str_cur;
 
     if (!str1->str_pok)
 	(void)str_2ptr(str1);
@@ -658,10 +679,10 @@ register STR *str2;
 {
     int retval;
 
-    if (!str1)
-	return str2 == Nullstr;
-    if (!str2)
-	return 0;
+    if (!str1 || str1 == &str_undef)
+	return (str2 == Nullstr || str2 == &str_undef || !str2->str_cur)?0:-1;
+    if (!str2 || str2 == &str_undef)
+	return str1->str_cur != 0;
 
     if (!str1->str_pok)
 	(void)str_2ptr(str1);
@@ -698,12 +719,13 @@ int append;
     register int get_paragraph;
     register char *oldbp;
 
+    if (str == &str_undef)
+	return Nullch;
     if (get_paragraph = !rslen) {	/* yes, that's an assignment */
 	newline = '\n';
 	oldbp = Nullch;			/* remember last \n position (none) */
     }
 #ifdef STDSTDIO		/* Here is some breathtakingly efficient cheating */
-
     cnt = fp->_cnt;			/* get count into register */
     str->str_nok = 0;			/* invalidate number */
     str->str_pok = 1;			/* validate pointer */
@@ -790,8 +812,10 @@ STR *str;
     register CMD *cmd;
     register ARG *arg;
     CMD *oldcurcmd = curcmd;
+    int oldperldb = perldb;
     int retval;
 
+    perldb = 0;
     str_sset(linestr,str);
     in_eval++;
     oldoldbufptr = oldbufptr = bufptr = str_get(linestr);
@@ -810,6 +834,7 @@ STR *str;
     if (setjmp(loop_stack[loop_ptr].loop_env)) {
 	in_eval--;
 	loop_ptr--;
+	perldb = oldperldb;
 	fatal("%s\n",stab_val(stabent("@",TRUE))->str_ptr);
     }
 #ifdef DEBUGGING
@@ -825,6 +850,7 @@ STR *str;
     curcmd->c_line = oldcurcmd->c_line;
     retval = yyparse();
     curcmd = oldcurcmd;
+    perldb = oldperldb;
     in_eval--;
     if (retval || error_count)
 	fatal("Invalid component in string or format");
@@ -994,7 +1020,8 @@ STR *src;
 				    weight += 100;
 				break;
 			    case '-':
-				if (last_un_char < d[1] || d[1] == '\\') {
+				if (last_un_char < (unsigned char) d[1]
+				  || d[1] == '\\') {
 				    if (index("aA01! ",last_un_char))
 					weight += 30;
 				    if (index("zZ79~",d[1]))
@@ -1068,11 +1095,13 @@ int sp;
     register char *send;
     register STR **elem;
 
+    if (str == &str_undef)
+	return Nullstr;
     if (!(src->str_pok & SP_INTRP)) {
 	int oldsave = savestack->ary_fill;
 
 	(void)savehptr(&curstash);
-	curstash = src->str_u.str_hash;	/* so stabent knows right package */
+	curstash = curcmd->c_stash;	/* so stabent knows right package */
 	intrpcompile(src);
 	restorelist(oldsave);
     }
@@ -1113,7 +1142,7 @@ register STR *str;
 {
     register char *d;
 
-    if (!str)
+    if (!str || str == &str_undef)
 	return;
     if (str->str_nok) {
 	str->str_u.str_nval += 1.0;
@@ -1162,7 +1191,7 @@ void
 str_dec(str)
 register STR *str;
 {
-    if (!str)
+    if (!str || str == &str_undef)
 	return;
     if (str->str_nok) {
 	str->str_u.str_nval -= 1.0;
@@ -1210,6 +1239,8 @@ STR *
 str_2static(str)
 register STR *str;
 {
+    if (str == &str_undef)
+	return str;
     if (++tmps_max > tmps_size) {
 	tmps_size = tmps_max;
 	if (!(tmps_size & 127)) {
@@ -1292,6 +1323,8 @@ HASH *stash;
 
     /* reset variables */
 
+    if (!stash->tbl_array)
+	return;
     while (*s) {
 	i = *s;
 	if (s[1] == '-') {
@@ -1315,7 +1348,7 @@ HASH *stash;
 		    aclear(stab_xarray(stab));
 		}
 		if (stab_xhash(stab)) {
-		    hclear(stab_xhash(stab));
+		    hclear(stab_xhash(stab), FALSE);
 		    if (stab == envstab)
 			environ[0] = Nullch;
 		}
@@ -1345,12 +1378,15 @@ taintenv()
     register STR *envstr;
 
     envstr = hfetch(stab_hash(envstab),"PATH",4,FALSE);
-    if (!envstr || envstr->str_tainted) {
+    if (envstr == &str_undef || envstr->str_tainted) {
 	tainted = 1;
-	taintproper("Insecure PATH");
+	if (envstr->str_tainted == 2)
+	    taintproper("Insecure directory in PATH");
+	else
+	    taintproper("Insecure PATH");
     }
     envstr = hfetch(stab_hash(envstab),"IFS",3,FALSE);
-    if (envstr && envstr->str_tainted) {
+    if (envstr != &str_undef && envstr->str_tainted) {
 	tainted = 1;
 	taintproper("Insecure IFS");
     }

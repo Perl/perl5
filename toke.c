@@ -1,4 +1,4 @@
-/* $Header: toke.c,v 3.0.1.9 90/08/13 22:37:25 lwall Locked $
+/* $Header: toke.c,v 3.0.1.10 90/10/16 11:20:46 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,21 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	toke.c,v $
+ * Revision 3.0.1.10  90/10/16  11:20:46  lwall
+ * patch29: the length of a search pattern was limited
+ * patch29: added DATA filehandle to read stuff after __END__
+ * patch29: added -M, -A and -C
+ * patch29: added cmp and <=>
+ * patch29: added caller
+ * patch29: added scalar
+ * patch29: added sysread and syswrite
+ * patch29: added SysV IPC
+ * patch29: added waitpid
+ * patch29: tr/// now understands c, d and s options, and handles nulls right
+ * patch29: 0x80000000 now makes unsigned value
+ * patch29: Null could not be used as a delimiter
+ * patch29: added @###.## fields to format
+ * 
  * Revision 3.0.1.9  90/08/13  22:37:25  lwall
  * patch28: defined(@array) and defined(%array) didn't work right
  * 
@@ -62,6 +77,14 @@
 #include "perl.h"
 #include "perly.h"
 
+#ifdef I_FCNTL
+#include <fcntl.h>
+#endif
+
+/* which backslash sequences to keep in m// or s// */
+
+static char *patleave = "\\.^$@dDwWsSbB+*?|()-nrtf0123456789[{]}";
+
 char *reparse;		/* if non-null, scanreg found ${foo[$bar]} */
 
 #ifdef CLINE
@@ -79,13 +102,15 @@ char *reparse;		/* if non-null, scanreg found ${foo[$bar]} */
 #define FUN0(f) return(yylval.ival = f,expectterm = FALSE,bufptr = s,(int)FUNC0)
 #define FUN1(f) return(yylval.ival = f,expectterm = FALSE,bufptr = s,(int)FUNC1)
 #define FUN2(f) return(yylval.ival = f,expectterm = FALSE,bufptr = s,(int)FUNC2)
+#define FUN2x(f) return(yylval.ival = f,expectterm = FALSE,bufptr = s,(int)FUNC2x)
 #define FUN3(f) return(yylval.ival = f,expectterm = FALSE,bufptr = s,(int)FUNC3)
+#define FUN4(f) return(yylval.ival = f,expectterm = FALSE,bufptr = s,(int)FUNC4)
+#define FUN5(f) return(yylval.ival = f,expectterm = FALSE,bufptr = s,(int)FUNC5)
 #define FL(f) return(yylval.ival=f,expectterm = FALSE,bufptr = s,(int)FLIST)
 #define FL2(f) return(yylval.ival=f,expectterm = FALSE,bufptr = s,(int)FLIST2)
 #define HFUN(f) return(yylval.ival=f,expectterm = TRUE,bufptr = s,(int)HSHFUN)
 #define HFUN3(f) return(yylval.ival=f,expectterm = FALSE,bufptr = s,(int)HSHFUN3)
 #define LFUN(f) return(yylval.ival=f,expectterm = TRUE,bufptr = s,(int)LVALFUN)
-#define LFUN4(f) return(yylval.ival = f,expectterm = FALSE,bufptr = s,(int)LFUNC4)
 #define AOP(f) return(yylval.ival=f,expectterm = TRUE,bufptr = s,(int)ADDOP)
 #define MOP(f) return(yylval.ival=f,expectterm = TRUE,bufptr = s,(int)MULOP)
 #define EOP(f) return(yylval.ival=f,expectterm = TRUE,bufptr = s,(int)EQOP)
@@ -215,8 +240,13 @@ yylex()
 	    firstline = FALSE;
 	    if (minus_n || minus_p || perldb) {
 		str_set(linestr,"");
-		if (perldb)
-		    str_cat(linestr, "require 'perldb.pl';");
+		if (perldb) {
+		    char *getenv();
+		    char *pdb = getenv("PERLDB");
+
+		    str_cat(linestr, pdb ? pdb : "require 'perldb.pl'");
+		    str_cat(linestr, ";");
+		}
 		if (minus_n || minus_p) {
 		    str_cat(linestr,"line: while (<>) {");
 		    if (minus_a)
@@ -242,13 +272,15 @@ yylex()
 	do {
 	    if ((s = str_gets(linestr, rsfp, 0)) == Nullch) {
 	      fake_eof:
-		if (preprocess)
-		    (void)mypclose(rsfp);
-		else if (rsfp == stdin)
-		    clearerr(stdin);
-		else
-		    (void)fclose(rsfp);
-		rsfp = Nullfp;
+		if (rsfp) {
+		    if (preprocess)
+			(void)mypclose(rsfp);
+		    else if (rsfp == stdin)
+			clearerr(stdin);
+		    else
+			(void)fclose(rsfp);
+		    rsfp = Nullfp;
+		}
 		if (minus_n || minus_p) {
 		    str_set(linestr,minus_p ? ";}continue{print" : "");
 		    str_cat(linestr,";}");
@@ -269,7 +301,7 @@ yylex()
 	    STR *str = Str_new(85,0);
 
 	    str_sset(str,linestr);
-	    astore(lineary,(int)curcmd->c_line,str);
+	    astore(stab_xarray(curcmd->c_filestab),(int)curcmd->c_line,str);
 	}
 #ifdef DEBUG
 	if (firstline) {
@@ -332,9 +364,9 @@ yylex()
 		s[strlen(s)-1] = '\0';	/* wipe out trailing quote */
 	    }
 	    if (*s)
-		filename = savestr(s);
+		curcmd->c_filestab = fstab(s);
 	    else
-		filename = origfilename;
+		curcmd->c_filestab = fstab(origfilename);
 	    oldoldbufptr = oldbufptr = s = str_get(linestr);
 	}
 	/* FALL THROUGH */
@@ -345,6 +377,13 @@ yylex()
 		s++;
 	    if (s < d)
 		s++;
+	    if (perldb) {
+		STR *str = Str_new(85,0);
+
+		str_nset(str,linestr->str_ptr, s - linestr->str_ptr);
+		astore(stab_xarray(curcmd->c_filestab),(int)curcmd->c_line,str);
+		str_chop(linestr, s);
+	    }
 	    if (in_format) {
 		bufptr = s;
 		yylval.formval = load_format();
@@ -387,6 +426,9 @@ yylex()
 	    case 't': FTST(O_FTTTY);
 	    case 'T': FTST(O_FTTEXT);
 	    case 'B': FTST(O_FTBINARY);
+	    case 'M': stabent("\024",TRUE); FTST(O_FTMTIME);
+	    case 'A': stabent("\024",TRUE); FTST(O_FTATIME);
+	    case 'C': stabent("\024",TRUE); FTST(O_FTCTIME);
 	    default:
 		s -= 2;
 		break;
@@ -507,8 +549,13 @@ yylex()
 	tmp = *s++;
 	if (tmp == '<')
 	    OPERATOR(LS);
-	if (tmp == '=')
+	if (tmp == '=') {
+	    tmp = *s++;
+	    if (tmp == '>')
+		EOP(O_NCMP);
+	    s--;
 	    ROP(O_LE);
+	}
 	s--;
 	ROP(O_LT);
     case '>':
@@ -600,13 +647,35 @@ yylex()
 		if (d[2] == 'L')
 		    (void)sprintf(tokenbuf,"%ld",(long)curcmd->c_line);
 		else
-		    strcpy(tokenbuf, filename);
+		    strcpy(tokenbuf, stab_val(curcmd->c_filestab)->str_ptr);
 		arg[1].arg_type = A_SINGLE;
 		arg[1].arg_ptr.arg_str = str_make(tokenbuf,strlen(tokenbuf));
 		TERM(RSTRING);
 	    }
-	    else if (strEQ(d,"__END__"))
+	    else if (strEQ(d,"__END__")) {
+#ifndef TAINT
+		STAB *stab;
+		int fd;
+
+		if (stab = stabent("DATA",FALSE)) {
+		    stab->str_pok |= SP_MULTI;
+		    stab_io(stab) = stio_new();
+		    stab_io(stab)->ifp = rsfp;
+#if defined(FCNTL) && defined(F_SETFD)
+		    fd = fileno(rsfp);
+		    fcntl(fd,F_SETFD,fd >= 3);
+#endif
+		    if (preprocess)
+			stab_io(stab)->type = '|';
+		    else if (rsfp == stdin)
+			stab_io(stab)->type = '-';
+		    else
+			stab_io(stab)->type = '<';
+		    rsfp = Nullfp;
+		}
+#endif
 		goto fake_eof;
+	    }
 	}
 	break;
     case 'a': case 'A':
@@ -637,6 +706,10 @@ yylex()
 	    FOP(O_CLOSE);
 	if (strEQ(d,"closedir"))
 	    FOP(O_CLOSEDIR);
+	if (strEQ(d,"cmp"))
+	    EOP(O_SCMP);
+	if (strEQ(d,"caller"))
+	    UNI(O_CALLER);
 	if (strEQ(d,"crypt")) {
 #ifdef FCRYPT
 	    init_des();
@@ -701,7 +774,7 @@ yylex()
 	    HFUN(O_EACH);
 	if (strEQ(d,"exec")) {
 	    set_csh();
-	    LOP(O_EXEC);
+	    LOP(O_EXEC_OP);
 	}
 	if (strEQ(d,"endhostent"))
 	    FUN0(O_EHOSTENT);
@@ -834,7 +907,7 @@ yylex()
 	    OPERATOR(IF);
 	}
 	if (strEQ(d,"index"))
-	    FUN2(O_INDEX);
+	    FUN2x(O_INDEX);
 	if (strEQ(d,"int"))
 	    UNI(O_INT);
 	if (strEQ(d,"ioctl"))
@@ -890,8 +963,22 @@ yylex()
 	    else
 		RETURN(1);	/* force error */
 	}
-	if (strEQ(d,"mkdir"))
-	    FUN2(O_MKDIR);
+	switch (d[1]) {
+	case 'k':
+	    if (strEQ(d,"mkdir"))
+		FUN2(O_MKDIR);
+	    break;
+	case 's':
+	    if (strEQ(d,"msgctl"))
+		FUN3(O_MSGCTL);
+	    if (strEQ(d,"msgget"))
+		FUN2(O_MSGGET);
+	    if (strEQ(d,"msgrcv"))
+		FUN5(O_MSGRCV);
+	    if (strEQ(d,"msgsnd"))
+		FUN3(O_MSGSND);
+	    break;
+	}
 	break;
     case 'n': case 'N':
 	SNARFWORD;
@@ -964,7 +1051,7 @@ yylex()
 	if (strEQ(d,"rmdir"))
 	    UNI(O_RMDIR);
 	if (strEQ(d,"rindex"))
-	    FUN2(O_RINDEX);
+	    FUN2x(O_RINDEX);
 	if (strEQ(d,"read"))
 	    FOP3(O_READ);
 	if (strEQ(d,"readdir"))
@@ -996,7 +1083,11 @@ yylex()
 	switch (d[1]) {
 	case 'a':
 	case 'b':
+	    break;
 	case 'c':
+	    if (strEQ(d,"scalar"))
+		UNI(O_SCALAR);
+	    break;
 	case 'd':
 	    break;
 	case 'e':
@@ -1004,6 +1095,12 @@ yylex()
 		OPERATOR(SSELECT);
 	    if (strEQ(d,"seek"))
 		FOP3(O_SEEK);
+	    if (strEQ(d,"semctl"))
+		FUN4(O_SEMCTL);
+	    if (strEQ(d,"semget"))
+		FUN3(O_SEMGET);
+	    if (strEQ(d,"semop"))
+		FUN2(O_SEMOP);
 	    if (strEQ(d,"send"))
 		FOP3(O_SEND);
 	    if (strEQ(d,"setpgrp"))
@@ -1033,6 +1130,14 @@ yylex()
 	case 'h':
 	    if (strEQ(d,"shift"))
 		TERM(SHIFT);
+	    if (strEQ(d,"shmctl"))
+		FUN3(O_SHMCTL);
+	    if (strEQ(d,"shmget"))
+		FUN3(O_SHMGET);
+	    if (strEQ(d,"shmread"))
+		FUN4(O_SHMREAD);
+	    if (strEQ(d,"shmwrite"))
+		FUN4(O_SHMWRITE);
 	    if (strEQ(d,"shutdown"))
 		FOP2(O_SHUTDOWN);
 	    break;
@@ -1107,7 +1212,7 @@ yylex()
 	    break;
 	case 'u':
 	    if (strEQ(d,"substr"))
-		FUN3(O_SUBSTR);
+		FUN2x(O_SUBSTR);
 	    if (strEQ(d,"sub")) {
 		subline = curcmd->c_line;
 		d = bufend;
@@ -1144,6 +1249,10 @@ yylex()
 		FUN2(O_SYMLINK);
 	    if (strEQ(d,"syscall"))
 		LOP(O_SYSCALL);
+	    if (strEQ(d,"sysread"))
+		FOP3(O_SYSREAD);
+	    if (strEQ(d,"syswrite"))
+		FOP3(O_SYSWRITE);
 	    break;
 	case 'z':
 	    break;
@@ -1215,6 +1324,8 @@ yylex()
 	    LOP(O_WARN);
 	if (strEQ(d,"wait"))
 	    FUN0(O_WAIT);
+	if (strEQ(d,"waitpid"))
+	    FUN2(O_WAITPID);
 	if (strEQ(d,"wantarray")) {
 	    yylval.arg = op_new(1);
 	    yylval.arg->arg_type = O_ITEM;
@@ -1428,6 +1539,7 @@ register char *s;
     register char *e;
     int len;
     SPAT savespat;
+    STR *str = Str_new(93,0);
 
     Newz(801,spat,1,SPAT);
     spat->spat_next = curstash->tbl_spatroot;	/* link into spat list */
@@ -1445,8 +1557,9 @@ register char *s;
     default:
 	fatal("panic: scanpat");
     }
-    s = cpytill(tokenbuf,s,bufend,s[-1],&len);
+    s = str_append_till(str,s,bufend,s[-1],patleave);
     if (s >= bufend) {
+	str_free(str);
 	yyerror("Search pattern not terminated");
 	yylval.arg = Nullarg;
 	return s;
@@ -1463,8 +1576,9 @@ register char *s;
 	    spat->spat_flags |= SPAT_KEEP;
 	}
     }
-    e = tokenbuf + len;
-    for (d=tokenbuf; d < e; d++) {
+    len = str->str_cur;
+    e = str->str_ptr + len;
+    for (d = str->str_ptr; d < e; d++) {
 	if (*d == '\\')
 	    d++;
 	else if ((*d == '$' && d[1] && d[1] != '|' && d[1] != ')') ||
@@ -1474,8 +1588,7 @@ register char *s;
 	    spat->spat_runtime = arg = op_new(1);
 	    arg->arg_type = O_ITEM;
 	    arg[1].arg_type = A_DOUBLE;
-	    arg[1].arg_ptr.arg_str = str_make(tokenbuf,len);
-	    arg[1].arg_ptr.arg_str->str_u.str_hash = curstash;
+	    arg[1].arg_ptr.arg_str = str_smake(str);
 	    d = scanreg(d,bufend,buf);
 	    (void)stabent(buf,TRUE);		/* make sure it's created */
 	    for (; d < e; d++) {
@@ -1501,8 +1614,8 @@ register char *s;
 #else
 	(void)bcopy((char *)spat, (char *)&savespat, sizeof(SPAT));
 #endif
-    if (*tokenbuf == '^') {
-	spat->spat_short = scanconst(tokenbuf+1,len-1);
+    if (*str->str_ptr == '^') {
+	spat->spat_short = scanconst(str->str_ptr+1,len-1);
 	if (spat->spat_short) {
 	    spat->spat_slen = spat->spat_short->str_cur;
 	    if (spat->spat_slen == len - 1)
@@ -1511,7 +1624,7 @@ register char *s;
     }
     else {
 	spat->spat_flags |= SPAT_SCANFIRST;
-	spat->spat_short = scanconst(tokenbuf,len);
+	spat->spat_short = scanconst(str->str_ptr,len);
 	if (spat->spat_short) {
 	    spat->spat_slen = spat->spat_short->str_cur;
 	    if (spat->spat_slen == len)
@@ -1520,7 +1633,7 @@ register char *s;
     }	
     if ((spat->spat_flags & SPAT_ALL) && (spat->spat_flags & SPAT_SCANFIRST)) {
 	fbmcompile(spat->spat_short, spat->spat_flags & SPAT_FOLD);
-	spat->spat_regexp = regcomp(tokenbuf,tokenbuf+len,
+	spat->spat_regexp = regcomp(str->str_ptr,str->str_ptr+len,
 	    spat->spat_flags & SPAT_FOLD);
 		/* Note that this regexp can still be used if someone says
 		 * something like /a/ && s//b/;  so we can't delete it.
@@ -1535,11 +1648,12 @@ register char *s;
 #endif
 	if (spat->spat_short)
 	    fbmcompile(spat->spat_short, spat->spat_flags & SPAT_FOLD);
-	spat->spat_regexp = regcomp(tokenbuf,tokenbuf+len,
+	spat->spat_regexp = regcomp(str->str_ptr,str->str_ptr+len,
 	    spat->spat_flags & SPAT_FOLD,1);
 	hoistmust(spat);
     }
   got_pat:
+    str_free(str);
     yylval.arg = make_match(O_MATCH,stab2arg(A_STAB,defstab),spat);
     return s;
 }
@@ -1552,28 +1666,32 @@ register char *s;
     register char *d;
     register char *e;
     int len;
+    STR *str = Str_new(93,0);
 
     Newz(802,spat,1,SPAT);
     spat->spat_next = curstash->tbl_spatroot;	/* link into spat list */
     curstash->tbl_spatroot = spat;
 
-    s = cpytill(tokenbuf,s+1,bufend,*s,&len);
+    s = str_append_till(str,s+1,bufend,*s,patleave);
     if (s >= bufend) {
+	str_free(str);
 	yyerror("Substitution pattern not terminated");
 	yylval.arg = Nullarg;
 	return s;
     }
-    e = tokenbuf + len;
-    for (d=tokenbuf; d < e; d++) {
-	if ((*d == '$' && d[1] && d[-1] != '\\' && d[1] != '|') ||
-	    (*d == '@' && d[-1] != '\\')) {
+    len = str->str_cur;
+    e = str->str_ptr + len;
+    for (d = str->str_ptr; d < e; d++) {
+	if (*d == '\\')
+	    d++;
+	else if ((*d == '$' && d[1] && d[1] != '|' && /*(*/ d[1] != ')') ||
+	    *d == '@' ) {
 	    register ARG *arg;
 
 	    spat->spat_runtime = arg = op_new(1);
 	    arg->arg_type = O_ITEM;
 	    arg[1].arg_type = A_DOUBLE;
-	    arg[1].arg_ptr.arg_str = str_make(tokenbuf,len);
-	    arg[1].arg_ptr.arg_str->str_u.str_hash = curstash;
+	    arg[1].arg_ptr.arg_str = str_smake(str);
 	    d = scanreg(d,bufend,buf);
 	    (void)stabent(buf,TRUE);		/* make sure it's created */
 	    for (; *d; d++) {
@@ -1591,21 +1709,21 @@ register char *s;
 	    goto get_repl;		/* skip compiling for now */
 	}
     }
-    if (*tokenbuf == '^') {
-	spat->spat_short = scanconst(tokenbuf+1,len-1);
+    if (*str->str_ptr == '^') {
+	spat->spat_short = scanconst(str->str_ptr+1,len-1);
 	if (spat->spat_short)
 	    spat->spat_slen = spat->spat_short->str_cur;
     }
     else {
 	spat->spat_flags |= SPAT_SCANFIRST;
-	spat->spat_short = scanconst(tokenbuf,len);
+	spat->spat_short = scanconst(str->str_ptr,len);
 	if (spat->spat_short)
 	    spat->spat_slen = spat->spat_short->str_cur;
     }
-    d = nsavestr(tokenbuf,len);
 get_repl:
     s = scanstr(s);
     if (s >= bufend) {
+	str_free(str);
 	yyerror("Substitution replacement not terminated");
 	yylval.arg = Nullarg;
 	return s;
@@ -1632,10 +1750,10 @@ get_repl:
 	    s++;
 	    if ((spat->spat_repl[1].arg_type & A_MASK) == A_DOUBLE)
 		spat->spat_repl[1].arg_type = A_SINGLE;
-	    spat->spat_repl = fixeval(make_op(O_EVAL,2,
+	    spat->spat_repl = make_op(O_EVAL,2,
 		spat->spat_repl,
 		Nullarg,
-		Nullarg));
+		Nullarg);
 	    spat->spat_flags &= ~SPAT_CONST;
 	}
 	if (*s == 'g') {
@@ -1660,11 +1778,12 @@ get_repl:
     if (spat->spat_short && (spat->spat_flags & SPAT_SCANFIRST))
 	fbmcompile(spat->spat_short, spat->spat_flags & SPAT_FOLD);
     if (!spat->spat_runtime) {
-	spat->spat_regexp = regcomp(d,d+len,spat->spat_flags & SPAT_FOLD,1);
+	spat->spat_regexp = regcomp(str->str_ptr,str->str_ptr+len,
+	  spat->spat_flags & SPAT_FOLD,1);
 	hoistmust(spat);
-	Safefree(d);
     }
     yylval.arg = make_match(O_SUBST,stab2arg(A_STAB,defstab),spat);
+    str_free(str);
     return s;
 }
 
@@ -1729,14 +1848,17 @@ register char *s;
 	l(make_op(O_TRANS,2,stab2arg(A_STAB,defstab),Nullarg,Nullarg));
     register char *t;
     register char *r;
-    register char *tbl;
+    register short *tbl;
     register int i;
     register int j;
     int tlen, rlen;
+    int squash;
+    int delete;
+    int complement;
 
-    Newz(803,tbl,256,char);
+    New(803,tbl,256,short);
     arg[2].arg_type = A_NULL;
-    arg[2].arg_ptr.arg_cval = tbl;
+    arg[2].arg_ptr.arg_cval = (char*) tbl;
     s = scanstr(s);
     if (s >= bufend) {
 	yyerror("Translation pattern not terminated");
@@ -1752,18 +1874,57 @@ register char *s;
 	yylval.arg = Nullarg;
 	return s;
     }
+    complement = delete = squash = 0;
+    while (*s == 'c' || *s == 'd' || *s == 's') {
+	if (*s == 'c')
+	    complement = 1;
+	else if (*s == 'd')
+	    delete = 2;
+	else
+	    squash = 1;
+	s++;
+    }
     r = expand_charset(yylval.arg[1].arg_ptr.arg_str->str_ptr,
 	yylval.arg[1].arg_ptr.arg_str->str_cur,&rlen);
     free_arg(yylval.arg);
+    arg[2].arg_len = delete|squash;
     yylval.arg = arg;
-    if (!*r) {
+    if (!rlen && !delete) {
 	Safefree(r);
 	r = t; rlen = tlen;
     }
-    for (i = 0, j = 0; i < tlen; i++,j++) {
-	if (j >= rlen)
-	    --j;
-	tbl[t[i] & 0377] = r[j];
+    if (complement) {
+	Zero(tbl, 256, short);
+	for (i = 0; i < tlen; i++)
+	    tbl[t[i] & 0377] = -1;
+	for (i = 0, j = 0; i < 256; i++,j++) {
+	    if (!tbl[i]) {
+		if (j >= rlen) {
+		    if (delete) {
+			tbl[i] = -2;
+			continue;
+		    }
+		    --j;
+		}
+		tbl[i] = r[j];
+	    }
+	}
+    }
+    else {
+	for (i = 0; i < 256; i++)
+	    tbl[i] = -1;
+	for (i = 0, j = 0; i < tlen; i++,j++) {
+	    if (j >= rlen) {
+		if (delete) {
+		    if (tbl[t[i] & 0377] == -1)
+			tbl[t[i] & 0377] = -2;
+		    continue;
+		}
+		--j;
+	    }
+	    if (tbl[t[i] & 0377] == -1)
+		tbl[t[i] & 0377] = r[j];
+	}
     }
     if (r != t)
 	Safefree(r);
@@ -1802,7 +1963,7 @@ register char *s;
 	goto snarf_it;
     case '0':
 	{
-	    long i;
+	    unsigned long i;
 	    int shift;
 
 	    arg[1].arg_type = A_SINGLE;
@@ -1936,7 +2097,6 @@ register char *s;
 	    arg[1].arg_ptr.arg_stab = stab = genstab();
 	    stab_io(stab) = stio_new();
 	    stab_val(stab) = str_make(d,len);
-	    stab_val(stab)->str_u.str_hash = curstash;
 	    Safefree(d);
 	    set_csh();
 	}
@@ -1950,10 +2110,6 @@ register char *s;
 	    }
 	    else {
 		arg[1].arg_type = A_READ;
-#ifdef NOTDEF
-		if (rsfp == stdin && (strEQ(d,"stdin") || strEQ(d,"STDIN")))
-		    yyerror("Can't get both program and data from <STDIN>");
-#endif
 		arg[1].arg_ptr.arg_stab = stabent(d,TRUE);
 		if (!stab_io(arg[1].arg_ptr.arg_stab))
 		    stab_io(arg[1].arg_ptr.arg_stab) = stio_new();
@@ -2003,7 +2159,7 @@ register char *s;
 		multi_open = multi_close = '<';
 	    else {
 		multi_open = term;
-		if (tmps = index("([{< )]}> )]}>",term))
+		if (term && (tmps = index("([{< )]}> )]}>",term)))
 		    term = tmps[5];
 		multi_close = term;
 	    }
@@ -2045,7 +2201,8 @@ register char *s;
 		    STR *str = Str_new(88,0);
 
 		    str_sset(str,linestr);
-		    astore(lineary,(int)curcmd->c_line,str);
+		    astore(stab_xarray(curcmd->c_filestab),
+		      (int)curcmd->c_line,str);
 		}
 		bufend = linestr->str_ptr + linestr->str_cur;
 		if (hereis) {
@@ -2151,8 +2308,6 @@ register char *s;
 	    if ((arg[1].arg_type & A_MASK) == A_DOUBLE && makesingle)
 		    arg[1].arg_type = A_SINGLE;	/* now we can optimize on it */
 
-	    tmpstr->str_u.str_hash = curstash;	/* so interp knows package */
-
 	    tmpstr->str_cur = d - tmpstr->str_ptr;
 	    arg[1].arg_ptr.arg_str = tmpstr;
 	    s = tmps;
@@ -2182,12 +2337,6 @@ load_format()
     s = bufptr;
     while (s < bufend || (s = str_gets(linestr,rsfp, 0)) != Nullch) {
 	curcmd->c_line++;
-	if (perldb) {
-	    STR *tmpstr = Str_new(89,0);
-
-	    str_sset(tmpstr,linestr);
-	    astore(lineary,(int)curcmd->c_line,tmpstr);
-	}
 	if (in_eval && !rsfp) {
 	    eol = index(s,'\n');
 	    if (!eol++)
@@ -2195,6 +2344,12 @@ load_format()
 	}
 	else
 	    eol = bufend = linestr->str_ptr + linestr->str_cur;
+	if (perldb) {
+	    STR *tmpstr = Str_new(89,0);
+
+	    str_nset(tmpstr, s, eol-s);
+	    astore(stab_xarray(curcmd->c_filestab), (int)curcmd->c_line,tmpstr);
+	}
 	if (strnEQ(s,".\n",2)) {
 	    bufptr = s;
 	    return froot.f_next;
@@ -2254,7 +2409,35 @@ load_format()
 		while (*s == '|')
 		    s++;
 		break;
+	    case '#':
+	    case '.':
+		/* Catch the special case @... and handle it as a string
+		   field. */
+		if (*s == '.' && s[1] == '.') {
+		    goto default_format;
+		}
+		fcmd->f_type = F_DECIMAL;
+		{
+		    char *p;
+
+		    /* Read a format in the form @####.####, where either group
+		       of ### may be empty, or the final .### may be missing. */
+		    while (*s == '#')
+			s++;
+		    if (*s == '.') {
+			s++;
+			p = s;
+			while (*s == '#')
+			    s++;
+			fcmd->f_decimals = s-p;
+			fcmd->f_flags |= FC_DP;
+		    } else {
+			fcmd->f_decimals = 0;
+		    }
+		}
+		break;
 	    default:
+	    default_format:
 		fcmd->f_type = F_LEFT;
 		break;
 	    }
@@ -2270,12 +2453,6 @@ load_format()
 	    if (s >= bufend && (s = str_gets(linestr, rsfp, 0)) == Nullch)
 		goto badform;
 	    curcmd->c_line++;
-	    if (perldb) {
-		STR *tmpstr = Str_new(90,0);
-
-		str_sset(tmpstr,linestr);
-		astore(lineary,(int)curcmd->c_line,tmpstr);
-	    }
 	    if (in_eval && !rsfp) {
 		eol = index(s,'\n');
 		if (!eol++)
@@ -2283,6 +2460,13 @@ load_format()
 	    }
 	    else
 		eol = bufend = linestr->str_ptr + linestr->str_cur;
+	    if (perldb) {
+		STR *tmpstr = Str_new(90,0);
+
+		str_nset(tmpstr, s, eol-s);
+		astore(stab_xarray(curcmd->c_filestab),
+		    (int)curcmd->c_line,tmpstr);
+	    }
 	    if (strnEQ(s,".\n",2)) {
 		bufptr = s;
 		yyerror("Missing values line");

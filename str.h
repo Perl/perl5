@@ -1,4 +1,4 @@
-/* $Header: str.h,v 3.0.1.2 90/08/09 05:23:24 lwall Locked $
+/* $Header: str.h,v 3.0.1.3 90/10/16 10:44:04 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	str.h,v $
+ * Revision 3.0.1.3  90/10/16  10:44:04  lwall
+ * patch29: added caller
+ * patch29: scripts now run at almost full speed under the debugger
+ * 
  * Revision 3.0.1.2  90/08/09  05:23:24  lwall
  * patch19: various MSDOS and OS/2 patches folded in
  * 
@@ -27,6 +31,7 @@ struct string {
 	ARG	*str_args;	/* list of args for interpreted string */
 	HASH	*str_hash;	/* string represents an assoc array (stab?) */
 	ARRAY	*str_array;	/* string represents an array */
+	CMD	*str_cmd;	/* command for this source line */
     } str_u;
     STRLEN	str_cur;	/* length of str_ptr as a C string */
     STR		*str_magic;	/* while free, link to next free str */
@@ -51,6 +56,7 @@ struct stab {	/* should be identical, except for str_ptr */
 	ARG	*str_args;	/* list of args for interpreted string */
 	HASH	*str_hash;	/* string represents an assoc array (stab?) */
 	ARRAY	*str_array;	/* string represents an array */
+	CMD	*str_cmd;	/* command for this source line */
     } str_u;
     STRLEN	str_cur;	/* length of str_ptr as a C string */
     STR		*str_magic;	/* while free, link to next free str */
@@ -94,6 +100,7 @@ struct lstring {
 #define SS_SSTRP	6	/* STR* on save stack */
 #define SS_SHPTR	7	/* HASH* on save stack */
 #define SS_SNSTAB	8	/* non-stab on save stack */
+#define SS_SCSV		9	/* callsave structure on save stack */
 #define SS_HASH		253	/* carrying an hash */
 #define SS_ARY		254	/* carrying an array */
 #define SS_FREE		255	/* in free list */
