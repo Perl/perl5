@@ -3,7 +3,7 @@ package ODBM_File;
 use strict;
 
 require Tie::Hash;
-use DynaLoader ();
+use XSLoader ();
 
 our @ISA = qw(Tie::Hash);
 our $VERSION = "1.02";

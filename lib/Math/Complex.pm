@@ -180,21 +180,21 @@ sub cplxe {
 #
 # The number defined as pi = 180 degrees
 #
-use constant pi => 4 * CORE::atan2(1, 1);
+sub pi () { 4 * CORE::atan2(1, 1) }
 
 #
 # pit2
 #
 # The full circle
 #
-use constant pit2 => 2 * pi;
+sub pit2 () { 2 * pi }
 
 #
 # pip2
 #
 # The quarter circle
 #
-use constant pip2 => pi / 2;
+sub pip2 () { pi / 2 }
 
 #
 # deg1
@@ -202,14 +202,14 @@ use constant pip2 => pi / 2;
 # One degree in radians, used in stringify_polar.
 #
 
-use constant deg1 => pi / 180;
+sub deg1 () { pi / 180 }
 
 #
 # uplog10
 #
 # Used in log10().
 #
-use constant uplog10 => 1 / CORE::log(10);
+sub uplog10 () { 1 / CORE::log(10) }
 
 #
 # i
