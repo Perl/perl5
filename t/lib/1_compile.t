@@ -78,7 +78,7 @@ add_by_name('unicode::distinct');	# put this back
 
 
 # Delete all modules which have their own tests.  This makes
-# this test alot faster.
+# this test a lot faster.
 foreach my $mod (<DATA>) {
     chomp $mod;
     delete_by_name($mod);
@@ -106,7 +106,6 @@ sub compile_module {
     return scalar `$^X "-Ilib" t/lib/compmod.pl $module` =~ /^ok/;
 }
 
-
 __DATA__
 AnyDBM_File
 AutoLoader
@@ -122,6 +121,7 @@ CGI::Util
 Carp
 Class::ISA
 Class::Struct
+CPAN
 Cwd
 DB_File
 Data::Dumper
