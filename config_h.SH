@@ -2519,6 +2519,18 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_strerror_r HAS_STRERROR_R	   /**/
 #define STRERROR_R_PROTO $strerror_r_proto	   /**/
 
+/* HAS_STRLCAT:
+ *	This symbol, if defined, indicates that the strlcat () routine is
+ *	available to do string concatenation.
+ */
+#$d_strlcat HAS_STRLCAT		/**/
+
+/* HAS_STRLCPY:
+ *	This symbol, if defined, indicates that the strlcpy () routine is
+ *	available to do string copying.
+ */
+#$d_strlcpy HAS_STRLCPY		/**/
+
 /* HAS_STRTOLD:
  *	This symbol, if defined, indicates that the strtold routine is
  *	available to convert strings to long doubles.
@@ -3059,7 +3071,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* PERL_MALLOC_WRAP:
  *	This symbol, if defined, indicates that we'd like malloc wrap checks.
  */
-#$usemallocwrap PERL_MALLOC_WRAP			/**/
+#$usemallocwrap PERL_MALLOC_WRAP		/**/
 
 /* MYMALLOC:
  *	This symbol, if defined, indicates that we're using our own malloc.
@@ -3931,18 +3943,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to do time formatting.
  */
 #$d_strftime HAS_STRFTIME		/**/
-
-/* HAS_STRLCAT
- *      This symbol, if defined, indicates that the strlcat routine is
- *      available to do string concatenation.
- */
-#$d_strlcat HAS_STRLCAT			/**/
-
-/* HAS_STRLCPY:
- *      This symbol, if defined, indicates that the strlcpy routine is
- *      available to do string copying.
- */
-#$d_strlcpy HAS_STRLCPY			/**/
 
 /* HAS_SYSCALL_PROTO:
  *	This symbol, if defined, indicates that the system provides

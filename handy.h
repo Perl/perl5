@@ -159,6 +159,19 @@ typedef U64TYPE U64;
 #   endif
 #endif
 
+/* H.Merijn Brand [ 31 Oct 2004 ]
+ * Not (yet) used at top level, but mention them for metaconfig */
+#ifdef HAS_STRLCAT
+#    define STRNCAT strlcat
+#else
+#    define STRNCAT strncat
+#endif
+#ifdef HAS_STRLCPY
+#    define STRNCPY strlcpy
+#else
+#    define STRNCPY strncpy
+#endif
+
 /* Mention I8SIZE, U8SIZE, I16SIZE, U16SIZE, I32SIZE, U32SIZE,
    I64SIZE, and U64SIZE here so that metaconfig pulls them in. */
 
