@@ -305,27 +305,34 @@ changes in this area.
 
 =item B<PerlIO_importFILE(f,flags)>
 
-Used to get a PerlIO * from a FILE *.  May need additional arguments,
-interface under review.
+Used to get a PerlIO * from a FILE *.
 
 The flags argument was meant to be used for read vs write vs
 read/write information. In hindsight it would have been better to make
-it a char *mode as in fopen/freopen.
+it a char *mode as in fopen/freopen. Flags arecurrently ignored, and
+code attempts to empirically determine the mode in which I<f> is open.
+
+Once called the FILE * should I<ONLY> be closed by calling
+C<PerlIO_close()> on the returned PerlIO *.
+
 
 =item B<PerlIO_exportFILE(f,flags)>
 
 Given a PerlIO * create a 'native' FILE * suitable for passing to code
 expecting to be compiled and linked with ANSI C I<stdio.h>.
+The flags argument was meant to be used for read vs write vs
+read/write information. In hindsight it would have been better to make
+it a char *mode as in fopen/freopen. Flags are ignored and the
+FILE * is opened in same mode as the PerlIO *.
 
-The fact that such a FILE * has been 'exported' is recorded, and may
-affect future PerlIO operations on the original PerlIO *.
+The fact that such a FILE * has been 'exported' is recorded, (normally by
+pushing a new :stdio "layer" onto the PerlIO *), which may affect future
+PerlIO operations on the original PerlIO *.
+You should not call C<fclose()> on the file unless you call
+C<PerlIO_releaseFILE()> to disassociate it from the the PerlIO *.
 
-Calling this function repeatedly will create a FILE * on each call.
-
-=item B<PerlIO_findFILE(f)>
-
-Returns a native FILE * used by a stdio layer. If there is none, it
-will create one with PerlIO_exportFILE.
+Calling this function repeatedly will create a FILE * on each call
+(and will push an :stdio layer each time as well).
 
 =item B<PerlIO_releaseFILE(p,f)>
 
@@ -333,7 +340,13 @@ Calling PerlIO_releaseFILE informs PerlIO that all use of FILE * is
 complete. It is removed from list of 'exported' FILE *s, and
 associated PerlIO * should revert to original behaviour.
 
-(Currently a noop.)
+=item B<PerlIO_findFILE(f)>
+
+Returns a native FILE * used by a stdio layer. If there is none, it
+will create one with PerlIO_exportFILE. In either case the FILE *
+should be considered at belonging to PerlIO subsystem and should
+only be closed by calling C<PerlIO_close()>.
+
 
 =back
 
