@@ -95,7 +95,9 @@ pragma.
 Converts (in-place) I<$string> from logical characters to octet
 sequence representing it in Perl's I<UTF-X> encoding.  Note that this
 should not be used to convert a legacy byte encoding to Unicode: use
-Encode for that.  =item * $flag = utf8::decode($string)
+Encode for that.
+
+=item * $flag = utf8::decode($string)
 
 Attempts to convert I<$string> in-place from Perl's I<UTF-X> encoding
 into logical characters.  Note that this should not be used to convert
@@ -103,11 +105,11 @@ Unicode back to a legacy byte encoding: use Encode for that.
 
 =back
 
-C<utf8::encode> is like C<utf8::upgrade> but the UTF8 flag does not
-get turned on. See L<perlunicode> for more on the UTF8 flag and the C
-API functions C<sv_utf8_upgrade>, C<sv_utf8_downgrade>,
-C<sv_utf8_encode>, C<sv_utf8_decode> that are wrapped by the Perl
-functions C<utf8::upgrade>, C<utf8::downgrade>, C<utf8::encode> and
+C<utf8::encode> is like C<utf8::upgrade>, but the UTF8 flag is cleared.
+See L<perlunicode> for more on the UTF8 flag and the C API functions
+C<sv_utf8_upgrade>, C<sv_utf8_downgrade>, C<sv_utf8_encode>,
+and C<sv_utf8_decode>, which are wrapped by the Perl functions
+C<utf8::upgrade>, C<utf8::downgrade>, C<utf8::encode> and
 C<utf8::decode>.
 
 =head1 SEE ALSO
