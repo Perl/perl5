@@ -3721,7 +3721,7 @@ PP(pp_open_dir)
     RETPUSHYES;
 nope:
     if (!errno)
-	SETERRNO(EBADF,RMS$_DIR);
+        SETERRNO(EBADF,VMS_RMS_DIR);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_dir_func, "opendir");
@@ -3776,7 +3776,7 @@ PP(pp_readdir)
 
 nope:
     if (!errno)
-	SETERRNO(EBADF,RMS$_ISI);
+	SETERRNO(EBADF,VMS_RMS_ISI);
     if (GIMME == G_ARRAY)
 	RETURN;
     else
@@ -3807,7 +3807,7 @@ PP(pp_telldir)
     RETURN;
 nope:
     if (!errno)
-	SETERRNO(EBADF,RMS$_ISI);
+	SETERRNO(EBADF,VMS_RMS_ISI);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_dir_func, "telldir");
@@ -3830,7 +3830,7 @@ PP(pp_seekdir)
     RETPUSHYES;
 nope:
     if (!errno)
-	SETERRNO(EBADF,RMS$_ISI);
+	SETERRNO(EBADF,VMS_RMS_ISI);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_dir_func, "seekdir");
@@ -3851,7 +3851,7 @@ PP(pp_rewinddir)
     RETPUSHYES;
 nope:
     if (!errno)
-	SETERRNO(EBADF,RMS$_ISI);
+	SETERRNO(EBADF,VMS_RMS_ISI);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_dir_func, "rewinddir");

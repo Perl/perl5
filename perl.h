@@ -3931,18 +3931,27 @@ extern void moncontrol(int);
  * compilers which get huffy about dollars in identifiers,
  * which is common practise in VMS.  The definitions in the
  * non-VMS branch are not used -- but their only point is to
- * be something non-dollared. */
+ * be something non-dollared.  Neither are all instances of
+ * dollared variables hidden this way, only at the spots where
+ * non-VMS platforms see them. */
 #ifdef VMS
-#define VMS_SS_NORMAL SS$_NORMAL
-#define VMS_SS_IVCHAN SS$_IVCHAN
-#define VMS_RMS_IFI   RMS$_FAC
-#define VMS_RMS_IFI   RMS$_IFI
+#define VMS_LIB_INVARGV	LIB$_INVARG
+#define VMS_RMS_DIR	RMS$_DIR
+#define VMS_RMS_FAC	RMS$_FAC
+#define VMS_RMS_IFI	RMS$_IFI
+#define VMS_RMS_ISI	RMS$_ISI
+#define VMS_SS_ACCVIO	SS$_ACCVIO
+#define VMS_SS_IVCHAN	SS$_IVCHAN
+#define VMS_SS_NORMAL	SS$_NORMAL
 #else
-#define VMS_LIB_INVARG EINVAL
-#define VMS_SS_NORMAL  0
-#define VMS_SS_IVCHAN  EBADF
-#define VMS_RMS_FAC    0
-#define VMS_RMS_IFI    EBADF
+#define VMS_LIB_INVARG	EINVAL
+#define VMS_RMS_DIR	EBADF
+#define VMS_RMS_FAC	0
+#define VMS_RMS_IFI	EBADF
+#define VMS_RMS_ISI	EBADF
+#define VMS_SS_ACCVIO	EFAULT
+#define VMS_SS_IVCHAN	EBADF
+#define VMS_SS_NORMAL	0
 #endif
 
 #endif /* Include guard */

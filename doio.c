@@ -2091,7 +2091,7 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
     if (shmctl(id, IPC_STAT, &shmds) == -1)
 	return -1;
     if (mpos < 0 || msize < 0 || mpos + msize > shmds.shm_segsz) {
-	SETERRNO(EFAULT,SS$_ACCVIO);		/* can't do as caller requested */
+	SETERRNO(EFAULT,VMS_SS_ACCVIO);		/* can't do as caller requested */
 	return -1;
     }
     shm = (char *)shmat(id, (char*)NULL, (optype == OP_SHMREAD) ? SHM_RDONLY : 0);
