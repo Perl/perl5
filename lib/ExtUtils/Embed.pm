@@ -18,7 +18,7 @@ use vars qw(@ISA @EXPORT $VERSION
 	    );
 use strict;
 
-$VERSION = 1.2506_01;
+$VERSION = 1.26;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&xsinit &ldopts 
@@ -226,7 +226,10 @@ sub ldopts {
 	$libperl = $Config{libperl};
     }
     else {
-	$libperl = (grep(/^-l\w*perl\w*$/, @link_args))[0] || "-lperl";
+	$libperl = (grep(/^-l\w*perl\w*$/, @link_args))[0]
+	    || ($Config{libperl} =~ /^lib(\w+)(\Q$lib_ext\E|\.\Q$Config{dlext}\E)$/
+		? "-l$1" : '')
+	    || "-lperl";
     }
 
     my $lpath = File::Spec->catdir($Config{archlibexp}, 'CORE');
