@@ -22,7 +22,7 @@ Trappable errors may be trapped using the eval operator.  See
 L<perlfunc/eval>.
 
 Some of these messages are generic.  Spots that vary are denoted with a %s,
-just as in a printf format.  Note that some message start with a %s!
+just as in a printf format.  Note that some messages start with a %s!
 The symbols C<"%-?@> sort before the letters, while C<[> and C<\> sort after.
 
 =over 4
@@ -32,6 +32,14 @@ The symbols C<"%-?@> sort before the letters, while C<[> and C<\> sort after.
 (F) Lexically scoped variables aren't in a package, so it doesn't make sense
 to try to declare one with a package qualifier on the front.  Use local()
 if you want to localize a package variable.
+
+=item "my" variable %s masks earlier declaration in same scope
+
+(S) A lexical variable has been redeclared in the same scope, effectively
+eliminating all access to the previous instance.  This is almost always
+a typographical error.  Note that the earlier variable will still exist 
+until the end of the scope or until all closure referents to it are
+destroyed.
 
 =item "no" not allowed in expression
 
@@ -144,7 +152,7 @@ if you meant it literally.   See L<perlre>.
 
 =item @ outside of string
 
-(F) You had a pack template that specified an absolution position outside
+(F) You had a pack template that specified an absolute position outside
 the string being unpacked.  See L<perlfunc/pack>.
 
 =item accept() on closed fd
@@ -226,7 +234,7 @@ when it shouldn't have been, or that memory has been corrupted.
 =item Bad arg length for %s, is %d, should be %d
 
 (F) You passed a buffer of the wrong size to one of msgctl(), semctl() or
-shmctl().  In C parlance, the correct sized are, respectively,
+shmctl().  In C parlance, the correct sizes are, respectively,
 S<sizeof(struct msqid_ds *)>, S<sizeof(struct semid_ds *)> and
 S<sizeof(struct shmid_ds *)>.
 
@@ -531,7 +539,7 @@ do a local.
 
 =item Can't localize lexical variable %s
 
-(F) You used local on a variable name that was previous declared as a
+(F) You used local on a variable name that was previously declared as a
 lexical variable using "my".  This is not allowed.  If you want to
 localize a package variable of the same name, qualify it with the
 package name.
@@ -548,7 +556,7 @@ you just misspelled the name of the file.  See L<perlfunc/require>.
 
 (F) You called a method correctly, and it correctly indicated a package
 functioning as a class, but that package doesn't define that particular
-method, nor does any of it's base classes.  See L<perlobj>.
+method, nor does any of its base classes.  See L<perlobj>.
 
 =item Can't locate package %s for @%s::ISA
 
@@ -664,6 +672,11 @@ redefined subroutine while the old routine is running.  Go figure.
 (F) You tried to unshift an "unreal" array that can't be unshifted, such
 as the main Perl stack.
 
+=item Can't untie: %d inner references still exist
+
+(F) With "use strict untie" in effect, a copy of the object returned
+from C<tie> (or C<tied>) was still valid when C<untie> was called.
+
 =item Can't upgrade that kind of scalar
 
 (P) The internal sv_upgrade routine adds "members" to an SV, making
@@ -712,11 +725,6 @@ are disallowed.  See L<perlref>.
 
 (F) A value used as either a hard reference or a symbolic reference must
 be a defined value.  This helps to de-lurk some insidious errors.
-
-=item Can't use delimiter brackets within expression
-
-(F) The ${name} construct is for disambiguating identifiers in strings, not
-in ordinary code.
 
 =item Can't use global %s in "my"
 
@@ -982,11 +990,12 @@ an emergency basis to prevent a core dump.
 (D) Really old Perl let you omit the % on hash names in some spots.  This
 is now heavily deprecated.
 
-=item Identifier "%s::%s" used only once: possible typo
+=item Name "%s::%s" used only once: possible typo
 
-(W) Typographical errors often show up as unique identifiers.  If you
-had a good reason for having a unique identifier, then just mention it
-again somehow to suppress the message.
+(W) Typographical errors often show up as unique variable names.  If you
+had a good reason for having a unique name, then just mention it
+again somehow to suppress the message (the C<use vars> pragma is
+provided for just this purpose).
 
 =item Illegal division by zero
 
@@ -1034,7 +1043,7 @@ known value, using trustworthy data.  See L<perlsec>.
 
 (S) A warning peculiar to VMS.  Perl keeps track of the number
 of times you've called C<fork> and C<exec>, in order to determine
-whether the current call to C<exec> should be affect the current
+whether the current call to C<exec> should affect the current
 script or a subprocess (see L<perlvms/exec>).  Somehow, this count
 has become scrambled, so Perl is making a guess and treating
 this C<exec> as a request to terminate the Perl script
@@ -1669,7 +1678,7 @@ expression compiler gave it.
 
 =item regexp too big
 
-(F) The current implementation of regular expression uses shorts as
+(F) The current implementation of regular expressions uses shorts as
 address offsets within a string.  Unfortunately this means that if
 the regular expression compiles to longer than 32767, it'll blow up.
 Usually when you want a regular expression this big, there is a better
@@ -2236,7 +2245,7 @@ into Perl yourself.
 =item Warning: unable to close filehandle %s properly.
 
 (S) The implicit close() done by an open() got an error indication on the 
-close(0.  This usually indicates your filesystem ran out of disk space.
+close().  This usually indicates your filesystem ran out of disk space.
 
 =item Warning: Use of "%s" without parens is ambiguous
 
