@@ -328,6 +328,11 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 	    if (PerlIO_flush(PerlIONext(f)) != 0) {
 		code = -1;
 	    }
+	    if (SvCUR(e->bufsv)) {
+		/* Did not all translate */
+		e->base.ptr = e->base.buf+SvCUR(e->bufsv);
+		return code;
+	    }
 	}
 	else if (PerlIOBase(f)->flags & PERLIO_F_RDBUF) {
 	    /* read case */
@@ -384,6 +389,9 @@ PerlIOEncode_close(pTHX_ PerlIO * f)
     PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
     IV code = PerlIOBase_close(aTHX_ f);
     if (e->bufsv) {
+	if (e->base.buf && e->base.ptr > e->base.buf) {
+	    Perl_croak(aTHX_ "Close with partial character");
+	}
 	SvREFCNT_dec(e->bufsv);
 	e->bufsv = Nullsv;
     }
@@ -402,6 +410,9 @@ PerlIOEncode_tell(pTHX_ PerlIO * f)
        the UTF8 we have in bufefr and then ask layer below
      */
     PerlIO_flush(f);
+    if (b->buf && b->ptr > b->buf) {
+	Perl_croak(aTHX_ "Cannot tell at partial character");
+    }
     return PerlIO_tell(PerlIONext(f));
 }
 
@@ -470,6 +481,7 @@ Encode_XSEncoding(pTHX_ encode_t * enc)
 void
 call_failure(SV * routine, U8 * done, U8 * dest, U8 * orig)
 {
+ /* Exists for breakpointing */
 }
 
 static SV *

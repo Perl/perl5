@@ -70,7 +70,7 @@ select($out);
 
 SKIP:
 {
- skip "Multi-byte write is broken",3;
+ #skip "Multi-byte write is broken",3;
  print "# dst :encoding test\n";
  open(my $src,"<:utf8",$ref) || die "Cannot open $ref:$!";
  ok(defined($src) || fileno($src));
