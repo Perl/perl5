@@ -13,13 +13,13 @@ BEGIN {
 	print "1..0 # Skip: no ithreads\n";
 	exit 0;
      }
-     eval 'use threads';
-     if ($@ =~ /dynamic loading not available/) {
-	print "1..0 # Skip: miniperl can't load threads\n";
-	exit 0;
+     if ($ENV{PERL_CORE_MINITEST}) {
+       print "1..0 # Skip: no dynamic loading on miniperl, no threads\n";
+       exit 0;
      }
      plan(3);
 }
+use threads;
 
 # test that we don't get:
 # Attempt to free unreferenced scalar: SV 0x40173f3c
