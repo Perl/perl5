@@ -3723,7 +3723,7 @@ Perl_sv_getcwd(pTHX_ register SV *sv)
         *SvEND(sv) = '\0';
         SvPOK_only(sv);
 
-        if (PerlDir_chdir(SvPVX(sv)) < 0) {
+	if (PerlDir_chdir(SvPVX(sv)) < 0) {
             SV_CWD_RETURN_UNDEF;
         }
     }
