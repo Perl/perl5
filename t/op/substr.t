@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..149\n";
+print "1..162\n";
 
 #P = start of string  Q = start of substr  R = end of substr  S = end of string
 
@@ -429,3 +429,122 @@ ok 149, length($x) == 5 &&
         substr($x, 3, 1) eq "\x{FF}" &&
         substr($x, 4, 1) eq "\x{F3}";
 
+# And tests for already-UTF8 one
+
+$x = "\x{101}\x{F2}\x{F3}";
+substr($x, 0, 1) = "\x{100}";
+ok 150, length($x) == 3 &&
+        $x eq "\x{100}\xF2\xF3" &&
+        substr($x, 0, 1) eq "\x{100}" &&
+        substr($x, 1, 1) eq "\x{F2}" &&
+        substr($x, 2, 1) eq "\x{F3}";
+
+$x = "\x{101}\x{F2}\x{F3}";
+substr($x, 0, 1) = "\x{100}\x{FF}";
+ok 151, length($x) == 4 &&
+        $x eq "\x{100}\x{FF}\xF2\xF3" &&
+        substr($x, 0, 1) eq "\x{100}" &&
+        substr($x, 1, 1) eq "\x{FF}" &&
+        substr($x, 2, 1) eq "\x{F2}" &&
+        substr($x, 3, 1) eq "\x{F3}";
+
+$x = "\x{101}\x{F2}\x{F3}";
+substr($x, 0, 2) = "\x{100}\xFF";
+ok 152, length($x) == 3 &&
+        $x eq "\x{100}\xFF\xF3" &&
+        substr($x, 0, 1) eq "\x{100}" &&
+        substr($x, 1, 1) eq "\x{FF}" &&
+        substr($x, 2, 1) eq "\x{F3}";
+
+$x = "\x{101}\x{F2}\x{F3}";
+substr($x, 1, 1) = "\x{100}\xFF";
+ok 153, length($x) == 4 &&
+        $x eq "\x{101}\x{100}\xFF\xF3" &&
+        substr($x, 0, 1) eq "\x{101}" &&
+        substr($x, 1, 1) eq "\x{100}" &&
+        substr($x, 2, 1) eq "\x{FF}" &&
+        substr($x, 3, 1) eq "\x{F3}";
+
+$x = "\x{101}\x{F2}\x{F3}";
+substr($x, 2, 1) = "\x{100}\xFF";
+ok 154, length($x) == 4 &&
+        $x eq "\x{101}\xF2\x{100}\xFF" &&
+        substr($x, 0, 1) eq "\x{101}" &&
+        substr($x, 1, 1) eq "\x{F2}" &&
+        substr($x, 2, 1) eq "\x{100}" &&
+        substr($x, 3, 1) eq "\x{FF}";
+
+$x = "\x{101}\x{F2}\x{F3}";
+substr($x, 3, 1) = "\x{100}\xFF";
+ok 155, length($x) == 5 &&
+        $x eq "\x{101}\x{F2}\x{F3}\x{100}\xFF" &&
+        substr($x, 0, 1) eq "\x{101}" &&
+        substr($x, 1, 1) eq "\x{F2}" &&
+        substr($x, 2, 1) eq "\x{F3}" &&
+        substr($x, 3, 1) eq "\x{100}" &&
+        substr($x, 4, 1) eq "\x{FF}";
+
+$x = "\x{101}\x{F2}\x{F3}";
+substr($x, -1, 1) = "\x{100}\xFF";
+ok 156, length($x) == 4 &&
+        $x eq "\x{101}\xF2\x{100}\xFF" &&
+        substr($x, 0, 1) eq "\x{101}" &&
+        substr($x, 1, 1) eq "\x{F2}" &&
+        substr($x, 2, 1) eq "\x{100}" &&
+        substr($x, 3, 1) eq "\x{FF}";
+
+$x = "\x{101}\x{F2}\x{F3}";
+substr($x, -1, 0) = "\x{100}\xFF";
+ok 157, length($x) == 5 &&
+        $x eq "\x{101}\xF2\x{100}\xFF\xF3" &&
+        substr($x, 0, 1) eq "\x{101}" &&
+        substr($x, 1, 1) eq "\x{F2}" &&
+        substr($x, 2, 1) eq "\x{100}" &&
+        substr($x, 3, 1) eq "\x{FF}" &&
+        substr($x, 4, 1) eq "\x{F3}";
+
+$x = "\x{101}\x{F2}\x{F3}";
+substr($x, 0, -1) = "\x{100}\xFF";
+ok 158, length($x) == 3 &&
+        $x eq "\x{100}\xFF\xF3" &&
+        substr($x, 0, 1) eq "\x{100}" &&
+        substr($x, 1, 1) eq "\x{FF}" &&
+        substr($x, 2, 1) eq "\x{F3}";
+
+$x = "\x{101}\x{F2}\x{F3}";
+substr($x, 0, -2) = "\x{100}\xFF";
+ok 159, length($x) == 4 &&
+        $x eq "\x{100}\xFF\xF2\xF3" &&
+        substr($x, 0, 1) eq "\x{100}" &&
+        substr($x, 1, 1) eq "\x{FF}" &&
+        substr($x, 2, 1) eq "\x{F2}" &&
+        substr($x, 3, 1) eq "\x{F3}";
+
+$x = "\x{101}\x{F2}\x{F3}";
+substr($x, 0, -3) = "\x{100}\xFF";
+ok 160, length($x) == 5 &&
+        $x eq "\x{100}\xFF\x{101}\x{F2}\x{F3}" &&
+        substr($x, 0, 1) eq "\x{100}" &&
+        substr($x, 1, 1) eq "\x{FF}" &&
+        substr($x, 2, 1) eq "\x{101}" &&
+        substr($x, 3, 1) eq "\x{F2}" &&
+        substr($x, 4, 1) eq "\x{F3}";
+
+$x = "\x{101}\x{F2}\x{F3}";
+substr($x, 1, -1) = "\x{100}\xFF";
+ok 161, length($x) == 4 &&
+        $x eq "\x{101}\x{100}\xFF\xF3" &&
+        substr($x, 0, 1) eq "\x{101}" &&
+        substr($x, 1, 1) eq "\x{100}" &&
+        substr($x, 2, 1) eq "\x{FF}" &&
+        substr($x, 3, 1) eq "\x{F3}";
+
+$x = "\x{101}\x{F2}\x{F3}";
+substr($x, -1, -1) = "\x{100}\xFF";
+ok 162, length($x) == 5 &&
+        $x eq "\x{101}\xF2\x{100}\xFF\xF3" &&
+        substr($x, 0, 1) eq "\x{101}" &&
+        substr($x, 1, 1) eq "\x{F2}" &&
+        substr($x, 2, 1) eq "\x{100}" &&
+        substr($x, 3, 1) eq "\x{FF}" &&
+        substr($x, 4, 1) eq "\x{F3}";

@@ -1053,8 +1053,11 @@ STATIC I32
 S_sublex_done(pTHX)
 {
     if (!PL_lex_starts++) {
+	SV *sv = newSVpvn("",0);
+	if (SvUTF8(PL_linestr))
+	    SvUTF8_on(sv);
 	PL_expect = XOPERATOR;
-	yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpvn("",0));
+	yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
 	return THING;
     }
 
@@ -2860,7 +2863,7 @@ Perl_yylex(pTHX)
 	    if (ftst) {
 		PL_last_lop_op = ftst;
 		DEBUG_T( { PerlIO_printf(Perl_debug_log,
-                        "### Saw file test %c\n", ftst);
+                        "### Saw file test %c\n", (int)ftst);
 		} )
 		FTST(ftst);
 	    }
@@ -2868,7 +2871,8 @@ Perl_yylex(pTHX)
 		/* Assume it was a minus followed by a one-letter named
 		 * subroutine call (or a -bareword), then. */
 		DEBUG_T( { PerlIO_printf(Perl_debug_log,
-                        "### %c looked like a file test but was not\n", ftst);
+			"### %c looked like a file test but was not\n",
+			(int)ftst);
 		} )
 		s -= 2;
 	    }
