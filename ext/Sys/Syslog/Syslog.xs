@@ -11,7 +11,7 @@ constant_LOG_NO(char *name, int len)
 {
     switch (name[6 + 0]) {
     case 'T':
-	if (strEQ(name + 6, "TICE")) {	/* LOG_NO removed */
+	if (strEQ(name + 6, "TICE")) {	/* "LOG_NO" removed */
 #ifdef LOG_NOTICE
 	    return LOG_NOTICE;
 #else
@@ -19,7 +19,7 @@ constant_LOG_NO(char *name, int len)
 #endif
 	}
     case 'W':
-	if (strEQ(name + 6, "WAIT")) {	/* LOG_NO removed */
+	if (strEQ(name + 6, "WAIT")) {	/* "LOG_NO" removed */
 #ifdef LOG_NOWAIT
 	    return LOG_NOWAIT;
 #else
@@ -40,7 +40,7 @@ constant_LOG_N(char *name, int len)
 {
     switch (name[5 + 0]) {
     case 'D':
-	if (strEQ(name + 5, "DELAY")) {	/* LOG_N removed */
+	if (strEQ(name + 5, "DELAY")) {	/* "LOG_N" removed */
 #ifdef LOG_NDELAY
 	    return LOG_NDELAY;
 #else
@@ -48,7 +48,7 @@ constant_LOG_N(char *name, int len)
 #endif
 	}
     case 'E':
-	if (strEQ(name + 5, "EWS")) {	/* LOG_N removed */
+	if (strEQ(name + 5, "EWS")) {	/* "LOG_N" removed */
 #ifdef LOG_NEWS
 	    return LOG_NEWS;
 #else
@@ -56,7 +56,7 @@ constant_LOG_N(char *name, int len)
 #endif
 	}
     case 'F':
-	if (strEQ(name + 5, "FACILITIES")) {	/* LOG_N removed */
+	if (strEQ(name + 5, "FACILITIES")) {	/* "LOG_N" removed */
 #ifdef LOG_NFACILITIES
 	    return LOG_NFACILITIES;
 #else
@@ -78,8 +78,16 @@ static double
 constant_LOG_P(char *name, int len)
 {
     switch (name[5 + 0]) {
+    case 'E':
+	if (strEQ(name + 5, "ERROR")) {	/* "LOG_P" removed */
+#ifdef LOG_PERROR
+	    return LOG_PERROR;
+#else
+	    goto not_there;
+#endif
+	}
     case 'I':
-	if (strEQ(name + 5, "ID")) {	/* LOG_P removed */
+	if (strEQ(name + 5, "ID")) {	/* "LOG_P" removed */
 #ifdef LOG_PID
 	    return LOG_PID;
 #else
@@ -87,7 +95,7 @@ constant_LOG_P(char *name, int len)
 #endif
 	}
     case 'R':
-	if (strEQ(name + 5, "RIMASK")) {	/* LOG_P removed */
+	if (strEQ(name + 5, "RIMASK")) {	/* "LOG_P" removed */
 #ifdef LOG_PRIMASK
 	    return LOG_PRIMASK;
 #else
@@ -112,7 +120,7 @@ constant_LOG_AU(char *name, int len)
     }
     switch (name[6 + 2]) {
     case '\0':
-	if (strEQ(name + 6, "TH")) {	/* LOG_AU removed */
+	if (strEQ(name + 6, "TH")) {	/* "LOG_AU" removed */
 #ifdef LOG_AUTH
 	    return LOG_AUTH;
 #else
@@ -120,7 +128,7 @@ constant_LOG_AU(char *name, int len)
 #endif
 	}
     case 'P':
-	if (strEQ(name + 6, "THPRIV")) {	/* LOG_AU removed */
+	if (strEQ(name + 6, "THPRIV")) {	/* "LOG_AU" removed */
 #ifdef LOG_AUTHPRIV
 	    return LOG_AUTHPRIV;
 #else
@@ -141,7 +149,7 @@ constant_LOG_A(char *name, int len)
 {
     switch (name[5 + 0]) {
     case 'L':
-	if (strEQ(name + 5, "LERT")) {	/* LOG_A removed */
+	if (strEQ(name + 5, "LERT")) {	/* "LOG_A" removed */
 #ifdef LOG_ALERT
 	    return LOG_ALERT;
 #else
@@ -164,7 +172,7 @@ constant_LOG_CR(char *name, int len)
 {
     switch (name[6 + 0]) {
     case 'I':
-	if (strEQ(name + 6, "IT")) {	/* LOG_CR removed */
+	if (strEQ(name + 6, "IT")) {	/* "LOG_CR" removed */
 #ifdef LOG_CRIT
 	    return LOG_CRIT;
 #else
@@ -172,7 +180,7 @@ constant_LOG_CR(char *name, int len)
 #endif
 	}
     case 'O':
-	if (strEQ(name + 6, "ON")) {	/* LOG_CR removed */
+	if (strEQ(name + 6, "ON")) {	/* "LOG_CR" removed */
 #ifdef LOG_CRON
 	    return LOG_CRON;
 #else
@@ -193,7 +201,7 @@ constant_LOG_C(char *name, int len)
 {
     switch (name[5 + 0]) {
     case 'O':
-	if (strEQ(name + 5, "ONS")) {	/* LOG_C removed */
+	if (strEQ(name + 5, "ONS")) {	/* "LOG_C" removed */
 #ifdef LOG_CONS
 	    return LOG_CONS;
 #else
@@ -216,7 +224,7 @@ constant_LOG_D(char *name, int len)
 {
     switch (name[5 + 0]) {
     case 'A':
-	if (strEQ(name + 5, "AEMON")) {	/* LOG_D removed */
+	if (strEQ(name + 5, "AEMON")) {	/* "LOG_D" removed */
 #ifdef LOG_DAEMON
 	    return LOG_DAEMON;
 #else
@@ -224,7 +232,7 @@ constant_LOG_D(char *name, int len)
 #endif
 	}
     case 'E':
-	if (strEQ(name + 5, "EBUG")) {	/* LOG_D removed */
+	if (strEQ(name + 5, "EBUG")) {	/* "LOG_D" removed */
 #ifdef LOG_DEBUG
 	    return LOG_DEBUG;
 #else
@@ -245,7 +253,7 @@ constant_LOG_U(char *name, int len)
 {
     switch (name[5 + 0]) {
     case 'S':
-	if (strEQ(name + 5, "SER")) {	/* LOG_U removed */
+	if (strEQ(name + 5, "SER")) {	/* "LOG_U" removed */
 #ifdef LOG_USER
 	    return LOG_USER;
 #else
@@ -253,7 +261,7 @@ constant_LOG_U(char *name, int len)
 #endif
 	}
     case 'U':
-	if (strEQ(name + 5, "UCP")) {	/* LOG_U removed */
+	if (strEQ(name + 5, "UCP")) {	/* "LOG_U" removed */
 #ifdef LOG_UUCP
 	    return LOG_UUCP;
 #else
@@ -274,7 +282,7 @@ constant_LOG_E(char *name, int len)
 {
     switch (name[5 + 0]) {
     case 'M':
-	if (strEQ(name + 5, "MERG")) {	/* LOG_E removed */
+	if (strEQ(name + 5, "MERG")) {	/* "LOG_E" removed */
 #ifdef LOG_EMERG
 	    return LOG_EMERG;
 #else
@@ -282,7 +290,7 @@ constant_LOG_E(char *name, int len)
 #endif
 	}
     case 'R':
-	if (strEQ(name + 5, "RR")) {	/* LOG_E removed */
+	if (strEQ(name + 5, "RR")) {	/* "LOG_E" removed */
 #ifdef LOG_ERR
 	    return LOG_ERR;
 #else
@@ -303,7 +311,7 @@ constant_LOG_F(char *name, int len)
 {
     switch (name[5 + 0]) {
     case 'A':
-	if (strEQ(name + 5, "ACMASK")) {	/* LOG_F removed */
+	if (strEQ(name + 5, "ACMASK")) {	/* "LOG_F" removed */
 #ifdef LOG_FACMASK
 	    return LOG_FACMASK;
 #else
@@ -311,7 +319,7 @@ constant_LOG_F(char *name, int len)
 #endif
 	}
     case 'T':
-	if (strEQ(name + 5, "TP")) {	/* LOG_F removed */
+	if (strEQ(name + 5, "TP")) {	/* "LOG_F" removed */
 #ifdef LOG_FTP
 	    return LOG_FTP;
 #else
@@ -336,7 +344,7 @@ constant_LOG_LO(char *name, int len)
     }
     switch (name[6 + 3]) {
     case '0':
-	if (strEQ(name + 6, "CAL0")) {	/* LOG_LO removed */
+	if (strEQ(name + 6, "CAL0")) {	/* "LOG_LO" removed */
 #ifdef LOG_LOCAL0
 	    return LOG_LOCAL0;
 #else
@@ -344,7 +352,7 @@ constant_LOG_LO(char *name, int len)
 #endif
 	}
     case '1':
-	if (strEQ(name + 6, "CAL1")) {	/* LOG_LO removed */
+	if (strEQ(name + 6, "CAL1")) {	/* "LOG_LO" removed */
 #ifdef LOG_LOCAL1
 	    return LOG_LOCAL1;
 #else
@@ -352,7 +360,7 @@ constant_LOG_LO(char *name, int len)
 #endif
 	}
     case '2':
-	if (strEQ(name + 6, "CAL2")) {	/* LOG_LO removed */
+	if (strEQ(name + 6, "CAL2")) {	/* "LOG_LO" removed */
 #ifdef LOG_LOCAL2
 	    return LOG_LOCAL2;
 #else
@@ -360,7 +368,7 @@ constant_LOG_LO(char *name, int len)
 #endif
 	}
     case '3':
-	if (strEQ(name + 6, "CAL3")) {	/* LOG_LO removed */
+	if (strEQ(name + 6, "CAL3")) {	/* "LOG_LO" removed */
 #ifdef LOG_LOCAL3
 	    return LOG_LOCAL3;
 #else
@@ -368,7 +376,7 @@ constant_LOG_LO(char *name, int len)
 #endif
 	}
     case '4':
-	if (strEQ(name + 6, "CAL4")) {	/* LOG_LO removed */
+	if (strEQ(name + 6, "CAL4")) {	/* "LOG_LO" removed */
 #ifdef LOG_LOCAL4
 	    return LOG_LOCAL4;
 #else
@@ -376,7 +384,7 @@ constant_LOG_LO(char *name, int len)
 #endif
 	}
     case '5':
-	if (strEQ(name + 6, "CAL5")) {	/* LOG_LO removed */
+	if (strEQ(name + 6, "CAL5")) {	/* "LOG_LO" removed */
 #ifdef LOG_LOCAL5
 	    return LOG_LOCAL5;
 #else
@@ -384,7 +392,7 @@ constant_LOG_LO(char *name, int len)
 #endif
 	}
     case '6':
-	if (strEQ(name + 6, "CAL6")) {	/* LOG_LO removed */
+	if (strEQ(name + 6, "CAL6")) {	/* "LOG_LO" removed */
 #ifdef LOG_LOCAL6
 	    return LOG_LOCAL6;
 #else
@@ -392,7 +400,7 @@ constant_LOG_LO(char *name, int len)
 #endif
 	}
     case '7':
-	if (strEQ(name + 6, "CAL7")) {	/* LOG_LO removed */
+	if (strEQ(name + 6, "CAL7")) {	/* "LOG_LO" removed */
 #ifdef LOG_LOCAL7
 	    return LOG_LOCAL7;
 #else
@@ -413,7 +421,7 @@ constant_LOG_L(char *name, int len)
 {
     switch (name[5 + 0]) {
     case 'F':
-	if (strEQ(name + 5, "FMT")) {	/* LOG_L removed */
+	if (strEQ(name + 5, "FMT")) {	/* "LOG_L" removed */
 #ifdef LOG_LFMT
 	    return LOG_LFMT;
 #else
@@ -423,7 +431,7 @@ constant_LOG_L(char *name, int len)
     case 'O':
 	return constant_LOG_LO(name, len);
     case 'P':
-	if (strEQ(name + 5, "PR")) {	/* LOG_L removed */
+	if (strEQ(name + 5, "PR")) {	/* "LOG_L" removed */
 #ifdef LOG_LPR
 	    return LOG_LPR;
 #else
@@ -469,7 +477,7 @@ constant(char *name, int len)
 	    break;
 	return constant_LOG_F(name, len);
     case 'I':
-	if (strEQ(name + 0, "LOG_INFO")) {	/*  removed */
+	if (strEQ(name + 0, "LOG_INFO")) {	/* "" removed */
 #ifdef LOG_INFO
 	    return LOG_INFO;
 #else
@@ -477,7 +485,7 @@ constant(char *name, int len)
 #endif
 	}
     case 'K':
-	if (strEQ(name + 0, "LOG_KERN")) {	/*  removed */
+	if (strEQ(name + 0, "LOG_KERN")) {	/* "" removed */
 #ifdef LOG_KERN
 	    return LOG_KERN;
 #else
@@ -489,7 +497,7 @@ constant(char *name, int len)
 	    break;
 	return constant_LOG_L(name, len);
     case 'M':
-	if (strEQ(name + 0, "LOG_MAIL")) {	/*  removed */
+	if (strEQ(name + 0, "LOG_MAIL")) {	/* "" removed */
 #ifdef LOG_MAIL
 	    return LOG_MAIL;
 #else
@@ -501,7 +509,7 @@ constant(char *name, int len)
 	    break;
 	return constant_LOG_N(name, len);
     case 'O':
-	if (strEQ(name + 0, "LOG_ODELAY")) {	/*  removed */
+	if (strEQ(name + 0, "LOG_ODELAY")) {	/* "" removed */
 #ifdef LOG_ODELAY
 	    return LOG_ODELAY;
 #else
@@ -513,7 +521,7 @@ constant(char *name, int len)
 	    break;
 	return constant_LOG_P(name, len);
     case 'S':
-	if (strEQ(name + 0, "LOG_SYSLOG")) {	/*  removed */
+	if (strEQ(name + 0, "LOG_SYSLOG")) {	/* "" removed */
 #ifdef LOG_SYSLOG
 	    return LOG_SYSLOG;
 #else
@@ -525,7 +533,7 @@ constant(char *name, int len)
 	    break;
 	return constant_LOG_U(name, len);
     case 'W':
-	if (strEQ(name + 0, "LOG_WARNING")) {	/*  removed */
+	if (strEQ(name + 0, "LOG_WARNING")) {	/* "" removed */
 #ifdef LOG_WARNING
 	    return LOG_WARNING;
 #else
