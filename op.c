@@ -378,6 +378,7 @@ S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, U32 seq, CV* startcv,
 	    cv = cx->blk_sub.cv;
 	    if (PL_debstash && CvSTASH(cv) == PL_debstash) {	/* ignore DB'* scope */
 		saweval = i;	/* so we know where we were called from */
+		seq = cxstack[i].blk_oldcop->cop_seq;
 		continue;
 	    }
 	    return pad_findlex(name, newoff, seq, cv, i-1, saweval,FINDLEX_NOSEARCH);
