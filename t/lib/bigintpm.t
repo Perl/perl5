@@ -69,7 +69,7 @@ while (<DATA>) {
 }
 
 {
-  use Math::BigInt ':constant';
+  use Math::BigInt(0.02,':constant');
 
   $test++;
   print "not " 
