@@ -398,6 +398,11 @@ Recommended books on (or mostly on) Perl follow.
        ISBN 1-930110-82-0 [1st edition August 2002]
        http://www.manning.com/jenness
 
+    Perl Debugger Pocket Reference
+       by Richard Foley
+       ISBN 0-596-00503-2 [1st edition January 2004]
+       http://www.oreilly.com/catalog/perldebugpr/ 
+
 =back
 
 =head2 Perl in Magazines
