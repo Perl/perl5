@@ -4844,6 +4844,8 @@ register OP* o;
 	    o->op_seq = op_seqmax++;
 	    if (dowarn && o->op_next && o->op_next->op_type == OP_NEXTSTATE) {
 		if (o->op_next->op_sibling &&
+			o->op_next->op_sibling->op_type != OP_EXIT &&
+			o->op_next->op_sibling->op_type != OP_WARN &&
 			o->op_next->op_sibling->op_type != OP_DIE) {
 		    line_t oldline = curcop->cop_line;
 
