@@ -67,7 +67,7 @@ D_CRYPT=define
 CRYPT_FLAG=-DHAVE_DES_FCRYPT
 !ENDIF
 
-!IF "$OBJECT)" != "" || "$(PERL_MALLOC)" == ""
+!IF "$(OBJECT)" != "" || "$(PERL_MALLOC)" == ""
 PERL_MALLOC	= undef
 !ENDIF
 
@@ -212,14 +212,14 @@ RCOPY=xcopy /f /r /i /e /d
 NOOP=@echo
 NULL=
 
-EXTRA_C		= $(EXTRA_C) $(CRYPT_SRC)
+EXTRA_SRC	= $(EXTRA_SRC) $(CRYPT_SRC)
 
 !IF "$(PERL_MALLOC)" == "define"
-EXTRA_C		= $(EXTRA_C) ..\malloc.c
+EXTRA_SRC	= $(EXTRA_SRC) ..\malloc.c
 !ENDIF
 
 !IF "$(OBJECT)" == ""
-EXTRA_C		= $(EXTRA_C) ..\perlio.c
+EXTRA_SRC	= $(EXTRA_SRC) ..\perlio.c
 !ENDIF
 
 EXTRA_OBJ	= $(EXTRA_SRC:.c=.obj)
