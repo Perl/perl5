@@ -27,17 +27,23 @@ might have symbol conflicts if you embed Perl in another application,
 just as in the 5.003 release.  By default, binary compatibility
 is preserved at the expense of symbol table pollution.
 
-=head2 No Autovivification of Subroutine Parameters
+=head2 Creation of Subroutine argumnets only when necessary
 
-In Perl versions 5.002 and 5.003, array and hash elements used as
-subroutine parameters were "autovivified"; that is, they were brought
-into existence if they did not already exist.  For example, calling
-C<func($h{foo})> would create C<$h{foo}> if it did not already exist,
-causing C<exists $h{foo}> to become true and C<keys %h> to return
-C<('foo')>.
+In Perl 5.004, array and hash elements used as subroutine parameters
+are brought into existence if they did not already exist only if the
+argument is actually assigned to.  In Perl versions 5.002 and 5.003,
+such arguments were always brought into existence.  Versions before
+5.002 never brought such arguments into existence.
+For example, after
 
-Perl 5.004 returns to the pre-5.002 behavior of I<not> autovivifying
-array and hash elements used as subroutine parameters.
+     undef @a; undef %a;
+     sub foo { print $_[0] };
+     sub bar { $_[0]++ };
+     foo($a[2]);
+     bar($a{b});
+
+$a{b} exists but $a[2] does not in Perl5.004; in Perl 5.002 and 5.003
+both would exist.
 
 =head2 Fixed Parsing of $$<digit>, &$<digit>, etc.
 
