@@ -7,6 +7,32 @@
 
 /* NO_EMBED is no longer supported. i.e. EMBED is always active. */
 
+/* provide binary compatible (but inconsistent) names */
+#if defined(PERL_BINCOMPAT_5005)
+#  define  Perl_call_argv		perl_call_argv
+#  define  Perl_call_method		perl_call_method
+#  define  Perl_call_pv			perl_call_pv
+#  define  Perl_call_sv			perl_call_sv
+#  define  Perl_get_av			perl_get_av
+#  define  Perl_get_cv			perl_get_cv
+#  define  Perl_get_hv			perl_get_hv
+#  define  Perl_get_sv			perl_get_sv
+#  define  Perl_init_i18nl10n		perl_init_i18nl10n
+#  define  Perl_init_i18nl14n		perl_init_i18nl14n
+#  define  Perl_new_collate		perl_new_collate
+#  define  Perl_new_ctype		perl_new_ctype
+#  define  Perl_new_numeric		perl_new_numeric
+#  define  Perl_require_pv		perl_require_pv
+#  define  Perl_safesyscalloc		Perl_safecalloc
+#  define  Perl_safesysfree		Perl_safefree
+#  define  Perl_safesysmalloc		Perl_safemalloc
+#  define  Perl_safesysrealloc		Perl_saferealloc
+#  define  Perl_set_numeric_local	perl_set_numeric_local
+#  define  Perl_set_numeric_standard	perl_set_numeric_standard
+#  define  PERL_POLLUTE
+#  define  PERL_POLLUTE_MALLOC
+#endif
+
 /* Hide global symbols */
 
 #if !defined(PERL_OBJECT)
@@ -5250,11 +5276,12 @@
    disable them.
  */
 
-#if !defined(PERL_CORE) && !defined(PERL_NOCOMPAT)
-
+#if !defined(PERL_CORE)
 #  define sv_setptrobj(rv,ptr,name)	sv_setref_iv(rv,name,(IV)ptr)
 #  define sv_setptrref(rv,ptr)		sv_setref_iv(rv,Nullch,(IV)ptr)
+#endif
 
+#if !defined(PERL_CORE) && !defined(PERL_NOCOMPAT) && !defined(PERL_BINCOMPAT_5005)
 
 /* Compatibility for various misnamed functions.  All functions
    in the API that begin with "perl_" (not "Perl_") take an explicit

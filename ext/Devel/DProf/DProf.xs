@@ -30,7 +30,7 @@ static U32 dprof_ticks;
 
 /* HZ == clock ticks per second */
 #ifdef VMS
-#  define HZ CLK_TCK
+#  define HZ ((I32)CLK_TCK)
 #  define DPROF_HZ HZ
 #  include <starlet.h>  /* prototype for sys$gettim() */
    clock_t dprof_times(struct tms *bufptr) {
@@ -60,7 +60,7 @@ static U32 dprof_ticks;
 #else
 #  ifndef HZ
 #    ifdef CLK_TCK
-#      define HZ CLK_TCK
+#      define HZ ((I32)CLK_TCK)
 #    else
 #      define HZ 60
 #    endif

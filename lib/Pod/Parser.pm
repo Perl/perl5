@@ -651,9 +651,10 @@ is a reference to the parse-tree object.
 =cut
 
 ## This global regex is used to see if the text before a '>' inside
-## an interior sequence looks like '-' or '=', but not '--' or '=='
+## an interior sequence looks like '-' or '=', but not '--', '==',
+## '$-', or '$='
 use vars qw( $ARROW_RE );
-$ARROW_RE = join('', qw{ (?: [^=]+= | [^-]+- )$ });  
+$ARROW_RE = join('', qw{ (?: [^-+*/=!&|%^x.<>$]= | [^$-]- )$ });  
 #$ARROW_RE = qr/(?:[^=]+=|[^-]+-)$/;  ## 5.005+ only!
 
 sub parse_text {
@@ -914,6 +915,7 @@ sub parse_from_filehandle {
     my $self = shift;
     my %opts = (ref $_[0] eq 'HASH') ? %{ shift() } : ();
     my ($in_fh, $out_fh) = @_;
+    $in_fh = \*STDIN  unless ($in_fh);
     local $_;
 
     ## Put this stream at the top of the stack and do beginning-of-input

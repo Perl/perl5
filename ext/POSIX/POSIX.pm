@@ -1,6 +1,7 @@
 package POSIX;
 
-use vars qw($VERSION @ISA %EXPORT_TAGS @EXPORT_OK $AUTOLOAD); 
+# use vars qw($VERSION @ISA %EXPORT_TAGS @EXPORT_OK $AUTOLOAD); 
+(@ISA, %EXPORT_TAGS,@EXPORT_OK,$AUTOLOAD) = ();
 
 use Carp;
 use AutoLoader;
@@ -11,7 +12,7 @@ require Exporter;
 require DynaLoader;
 @ISA = qw(Exporter DynaLoader);
 
-$VERSION = "1.02" ;
+$VERSION = $VERSION = "1.03" ;
 
 %EXPORT_TAGS = (
 
@@ -161,7 +162,10 @@ $VERSION = "1.02" ;
 
 );
 
-Exporter::export_tags();
+# Exporter::export_tags();
+for (values %EXPORT_TAGS) {
+  push @EXPORT, @$_;
+}
 
 @EXPORT_OK = qw(
     closedir opendir readdir rewinddir

@@ -1,17 +1,17 @@
 package AutoLoader;
 
-use vars qw(@EXPORT @EXPORT_OK $VERSION);
+# use vars qw(@EXPORT @EXPORT_OK $VERSION);
 
 my $is_dosish;
 my $is_vms;
 
 BEGIN {
     require Exporter;
-    @EXPORT = ();
-    @EXPORT_OK = qw(AUTOLOAD);
+    @EXPORT = @EXPORT = ();
+    @EXPORT_OK = @EXPORT_OK = qw(AUTOLOAD);
     $is_dosish = $^O eq 'dos' || $^O eq 'os2' || $^O eq 'MSWin32';
     $is_vms = $^O eq 'VMS';
-    $VERSION = '5.56';
+    $VERSION = $VERSION = '5.57';
 }
 
 AUTOLOAD {
@@ -103,7 +103,10 @@ sub import {
     # Export symbols, but not by accident of inheritance.
     #
 
-    Exporter::export $pkg, $callpkg, @_ if $pkg eq 'AutoLoader';
+    if ($pkg eq 'AutoLoader') {
+      local $Exporter::ExportLevel = 1;
+      Exporter::import $pkg, @_;
+    }
 
     #
     # Try to find the autosplit index file.  Eg., if the call package

@@ -928,6 +928,7 @@ os2/OS2/REXX/t/rx_tieydb.t	DLL access module
 os2/OS2/REXX/t/rx_varset.t	DLL access module
 os2/OS2/REXX/t/rx_vrexx.t	DLL access module
 os2/diff.configure	Patches to Configure
+os2/POSIX.mkfifo	OS2-specific patch
 os2/dl_os2.c		Addon for dl_open
 os2/dlfcn.h		Addon for dl_open
 os2/os2.c		Additional code for OS/2
@@ -1123,6 +1124,7 @@ t/lib/db-recno.t	See if DB_File works
 t/lib/dirhand.t		See if DirHandle works
 t/lib/dosglob.t		See if File::DosGlob works
 t/lib/dprof.t		Perl code profiler testsuite driver
+t/lib/dprof/V.pm	Perl code profiler tests
 t/lib/dprof/test1_t	Perl code profiler tests
 t/lib/dprof/test1_v	Perl code profiler tests
 t/lib/dprof/test2_t	Perl code profiler tests
@@ -1372,6 +1374,7 @@ utils/c2ph.PL		program to translate dbx stabs to perl
 utils/dprofpp.PL	Perl code profile post-processor
 utils/h2ph.PL		A thing to turn C .h files into perl .ph files
 utils/h2xs.PL		Program to make .xs files from C header files
+utils/perlbc.PL		Front-end for byte compiler
 utils/perlbug.PL	A simple tool to submit a bug report
 utils/perlcc.PL		Front-end for compiler
 utils/perldoc.PL	A simple tool to find & display perl's documentation

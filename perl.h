@@ -502,10 +502,12 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 
 #ifdef MYMALLOC
 #  ifdef PERL_POLLUTE_MALLOC
+#   ifndef PERL_EXTMALLOC_DEF
 #    define Perl_malloc		malloc
 #    define Perl_calloc		calloc
 #    define Perl_realloc	realloc
 #    define Perl_mfree		free
+#   endif
 #  else
 #    define EMBEDMYMALLOC	/* for compatibility */
 #  endif

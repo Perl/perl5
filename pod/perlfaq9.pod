@@ -76,7 +76,7 @@ stamp prepended.
 
 =head2 How do I remove HTML from a string?
 
-The most correct way (albeit not the fastest) is to use HTML::Parse
+The most correct way (albeit not the fastest) is to use HTML::Parser
 from CPAN (part of the HTML-Tree package on CPAN).
 
 Many folks attempt a simple-minded regular expression approach, like
@@ -173,7 +173,7 @@ through proxies:
     # or print ASCII from HTML from a URL
     # also need HTML-Tree package from CPAN
     use LWP::Simple;
-    use HTML::Parse;
+    use HTML::Parser;
     use HTML::FormatText;
     my ($html, $ascii);
     $html = get("http://www.perl.com/");
