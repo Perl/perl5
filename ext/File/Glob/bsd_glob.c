@@ -32,6 +32,9 @@
 
 #if defined(LIBC_SCCS) && !defined(lint)
 static char sccsid[] = "@(#)glob.c	8.3 (Berkeley) 10/13/93";
+/* most changes between the version above and the one below have been ported:
+static char sscsid[]=  "$OpenBSD: glob.c,v 1.8.10.1 2001/04/10 jason Exp $";
+ */
 #endif /* LIBC_SCCS and not lint */
 
 /*

@@ -30,6 +30,7 @@
  * SUCH DAMAGE.
  *
  *	@(#)glob.h	8.1 (Berkeley) 6/2/93
+ *	[lots of perl-specific changes since then--see bsd_glob.c]
  */
 
 #ifndef _BSD_GLOB_H_
