@@ -4788,7 +4788,7 @@ PP(pp_gpwent)
 #   ifdef HAS_GETPWENT
 	pwent  = getpwent();
 #   else
-	DIE(aTHX_ PL_no_fun, "getpwent");
+	DIE(aTHX_ PL_no_func, "getpwent");
 #   endif
 	break;
     }
