@@ -153,8 +153,6 @@
 #define ck_subr           CPerlObj::Perl_ck_subr
 #undef  ck_svconst
 #define ck_svconst        CPerlObj::Perl_ck_svconst
-#undef  ck_sysread
-#define ck_sysread        CPerlObj::Perl_ck_sysread
 #undef  ck_trunc
 #define ck_trunc          CPerlObj::Perl_ck_trunc
 #undef  convert

@@ -496,7 +496,7 @@ sselect		select system call	ck_select	t@	S S S S
 select		select			ck_select	st@	F?
 
 getc		getc			ck_eof		st%	F?
-read		read			ck_sysread	imst@	F R S S?
+read		read			ck_fun		imst@	F R S S?
 enterwrite	write			ck_fun		dis%	F?
 leavewrite	write exit		ck_null		1	
 
@@ -505,11 +505,11 @@ print		print			ck_listiob	ims@	F? L
 
 sysopen		sysopen			ck_fun		s@	F S S S?
 sysseek		sysseek			ck_fun		s@	F S S
-sysread		sysread			ck_sysread	imst@	F R S S?
+sysread		sysread			ck_fun		imst@	F R S S?
 syswrite	syswrite		ck_fun		imst@	F S S S?
 
 send		send			ck_fun		imst@	F S S S?
-recv		recv			ck_sysread	imst@	F R S S
+recv		recv			ck_fun		imst@	F R S S
 
 eof		eof			ck_eof		is%	F?
 tell		tell			ck_fun		st%	F?

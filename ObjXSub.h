@@ -801,8 +801,6 @@
 #define ck_subr             pPerl->Perl_ck_subr
 #undef  ck_svconst
 #define ck_svconst          pPerl->Perl_ck_svconst
-#undef  ck_sysread
-#define ck_sysread          pPerl->Perl_ck_sysread
 #undef  ck_trunc
 #define ck_trunc            pPerl->Perl_ck_trunc
 #undef  condpair_magic

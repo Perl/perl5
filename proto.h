@@ -1205,7 +1205,6 @@ OP *ck_sort _((OP *o));
 OP *ck_split _((OP *o));
 OP *ck_subr _((OP *o));
 OP *ck_svconst _((OP *o));
-OP *ck_sysread _((OP *o));
 OP *ck_trunc _((OP *o));
 void unwind_handler_stack _((void *p));
 void restore_magic _((void *p));

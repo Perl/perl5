@@ -898,17 +898,17 @@ OP * (CPERLscope(*check)[]) _((OP *op)) = {
 	ck_select,	/* sselect */
 	ck_select,	/* select */
 	ck_eof,		/* getc */
-	ck_sysread,	/* read */
+	ck_fun,		/* read */
 	ck_fun,		/* enterwrite */
 	ck_null,	/* leavewrite */
 	ck_listiob,	/* prtf */
 	ck_listiob,	/* print */
 	ck_fun,		/* sysopen */
 	ck_fun,		/* sysseek */
-	ck_sysread,	/* sysread */
+	ck_fun,		/* sysread */
 	ck_fun,		/* syswrite */
 	ck_fun,		/* send */
-	ck_sysread,	/* recv */
+	ck_fun,		/* recv */
 	ck_eof,		/* eof */
 	ck_fun,		/* tell */
 	ck_fun,		/* seek */

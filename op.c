@@ -4863,30 +4863,6 @@ ck_svconst(OP *o)
 }
 
 OP *
-ck_sysread(OP *o)
-{
-    if (o->op_flags & OPf_KIDS) {
-	/* get past pushmark */
-	OP *kid = cLISTOPo->op_first->op_sibling;
-	if (kid && (kid = kid->op_sibling)) {
-	    switch (kid->op_type) {
-	    case OP_THREADSV:
-	    case OP_HELEM:
-	    case OP_AELEM:
-	    case OP_SASSIGN:
-	    case OP_AELEMFAST:
-	    case OP_RV2SV:
-	    case OP_PADSV:
-		break;
-	    default:
-		bad_type(2, "scalar", op_desc[o->op_type], kid);
-	    }
-	}
-    }
-    return ck_fun(o);
-}
-
-OP *
 ck_trunc(OP *o)
 {
     if (o->op_flags & OPf_KIDS) {
@@ -4998,7 +4974,7 @@ peep(register OP *o)
 
 	case OP_PADAV:
 	    if (o->op_next->op_type == OP_RV2AV
-		&& (o->op_next->op_flags & OPf_REF))
+		&& (o->op_next->op_flags && OPf_REF))
 	    {
 		null(o->op_next);
 	       	o->op_next = o->op_next->op_next;
@@ -5007,7 +4983,7 @@ peep(register OP *o)
 	
 	case OP_PADHV:
 	    if (o->op_next->op_type == OP_RV2HV
-		&& (o->op_next->op_flags & OPf_REF))
+		&& (o->op_next->op_flags && OPf_REF))
 	    {
 		null(o->op_next);
 	       	o->op_next = o->op_next->op_next;
