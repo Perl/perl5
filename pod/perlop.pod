@@ -220,11 +220,15 @@ Binary "." concatenates two strings.
 
 Binary "<<" returns the value of its left argument shifted left by the
 number of bits specified by the right argument.  Arguments should be
-integers.  (See also L<Integer Arithmetic>.)
+integers.  (See also L<Integer Arithmetic>.)  Shifting more than the
+width of the available integer in bits (usually 32 or 64) produces
+undefined (machine dependent) results.
 
 Binary ">>" returns the value of its left argument shifted right by
 the number of bits specified by the right argument.  Arguments should
-be integers.  (See also L<Integer Arithmetic>.)
+be integers.  (See also L<Integer Arithmetic>.)  Shifting more than the
+width of the available integer in bits (usually 32 or 64) produces
+undefined (machine dependent) results.
 
 =head2 Named Unary Operators
 
