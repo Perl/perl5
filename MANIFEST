@@ -974,7 +974,9 @@ lib/Getopt/Std.t		See if Getopt::Std and Getopt::Long work
 lib/I18N/Collate.pm		Routines to do strxfrm-based collation
 lib/I18N/Collate.t		See if I18N::Collate works
 lib/I18N/LangTags.pm		I18N::LangTags
-lib/I18N/LangTags/List.pod	list of tags for human languages
+lib/I18N/LangTags/ChangeLog	I18N::LangTags
+lib/I18N/LangTags/List.pm	List of tags for human languages
+lib/I18N/LangTags/README	I18N::LangTags
 lib/I18N/LangTags/test.pl	See if I18N::LangTags works
 lib/IPC/Open2.pm		Open a two-ended pipe
 lib/IPC/Open2.t			See if IPC::Open2 works
