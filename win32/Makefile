@@ -577,7 +577,7 @@ WIN32_OBJ	= $(WIN32_SRC:.c=.obj)
 MINICORE_OBJ	= $(MICROCORE_OBJ:..\=.\mini\)	\
 		  $(MINIDIR)\miniperlmain$(o)	\
 		  $(MINIDIR)\perlio$(o)
-MINIWIN32_OBJ	= $(WIN32_OBJ:.\=.\mini\) $(MINIDIR)\win32io$(o)
+MINIWIN32_OBJ	= $(WIN32_OBJ:.\=.\mini\)
 MINI_OBJ	= $(MINICORE_OBJ) $(MINIWIN32_OBJ)
 DLL_OBJ		= $(DLL_SRC:.c=.obj)
 X2P_OBJ		= $(X2P_SRC:.c=.obj)
