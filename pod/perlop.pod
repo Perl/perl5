@@ -1737,7 +1737,7 @@ A (file)glob evaluates its (embedded) argument only when it is
 starting a new list.  All values must be read before it will start
 over.  In list context, this isn't important because you automatically
 get them all anyway.  However, in scalar context the operator returns
-the next value each time it's called, or C
+the next value each time it's called, or C<undef> when the list has
 run out.  As with filehandle reads, an automatic C<defined> is
 generated when the glob occurs in the test part of a C<while>,
 because legal glob returns (e.g. a file called F<0>) would otherwise

@@ -814,7 +814,7 @@ Then
 
     $^M = 'a' x (1 << 16);
 
-would allocate a 64K buffer for use when in emergency.  See the
+would allocate a 64K buffer for use in an emergency.  See the
 F<INSTALL> file in the Perl distribution for information on how to
 enable this option.  To discourage casual use of this advanced
 feature, there is no L<English> long name for this variable.

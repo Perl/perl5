@@ -883,14 +883,17 @@ PP(pp_sort)
 
 	    CATCH_SET(TRUE);
 	    PUSHSTACKi(PERLSI_SORT);
-	    if (PL_sortstash != stash) {
-		PL_firstgv = gv_fetchpv("a", TRUE, SVt_PV);
-		PL_secondgv = gv_fetchpv("b", TRUE, SVt_PV);
-		PL_sortstash = stash;
+	    if (!hasargs && !is_xsub) {
+		if (PL_sortstash != stash || !PL_firstgv || !PL_secondgv) {
+		    SAVESPTR(PL_firstgv);
+		    SAVESPTR(PL_secondgv);
+		    PL_firstgv = gv_fetchpv("a", TRUE, SVt_PV);
+		    PL_secondgv = gv_fetchpv("b", TRUE, SVt_PV);
+		    PL_sortstash = stash;
+		}
+		SAVESPTR(GvSV(PL_firstgv));
+		SAVESPTR(GvSV(PL_secondgv));
 	    }
-
-	    SAVESPTR(GvSV(PL_firstgv));
-	    SAVESPTR(GvSV(PL_secondgv));
 
 	    PUSHBLOCK(cx, CXt_NULL, PL_stack_base);
 	    if (!(PL_op->op_flags & OPf_SPECIAL)) {
@@ -2762,6 +2765,7 @@ S_doeval(pTHX_ int gimme, OP** startop)
     SAVESPTR(PL_beginav);
     PL_beginav = newAV();
     SAVEFREESV(PL_beginav);
+    SAVEI32(PL_error_count);
 
     /* try to compile it */
 

@@ -750,3 +750,4 @@ tt+$	xxxtt	y	-	-
 ^([a-z]:)	C:/	n	-	-
 '^\S\s+aa$'m	\nx aa	y	-	-
 (^|a)b	ab	y	-	-
+(?i)		y	-	-

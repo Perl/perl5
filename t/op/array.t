@@ -139,8 +139,8 @@ t("@foo" eq "bar burbl blah");					# 39
 @foo = ('XXX',@foo, 'YYY');
 t("@foo" eq "XXX bar burbl blah YYY");				# 40
 
-@foo = @foo = qw(foo bar burbl blah);
-t("@foo" eq "foo bar burbl blah");				# 41
+@foo = @foo = qw(foo b\a\r bu\\rbl blah);
+t("@foo" eq 'foo b\a\r bu\\rbl blah');				# 41
 
 @bar = @foo = qw(foo bar);					# 42
 t("@foo" eq "foo bar");

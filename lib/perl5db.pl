@@ -34,7 +34,7 @@ $header = "perl5db.pl version $VERSION";
 # interpreter, though the values used by perl5db.pl have the form
 # "$break_condition\0$action". Values are magical in numeric context.
 #
-# The scalar ${'_<'.$filename} contains "_<$filename".
+# The scalar ${'_<'.$filename} contains $filename.
 #
 # Note that no subroutine call is possible until &DB::sub is defined
 # (for subroutines defined outside of the package DB). In fact the same is

@@ -92,25 +92,21 @@ We build perl using both GNU make and the native make.
 TESTING:
 ========
 
-We still got a few errors during 'make test'.  Most of them are the
+We still got a few errors during 'make test'.  Some of them are the
 result of using bison.  Bison prints 'parser error' instead of 'syntax
-error', so we may ignore them.  One error in the test op/regexp (and
-op/regexp_noamp) seems a bit critical, the result was an 'Out of
-memory' (core dump with op/regexp_noamp).  The following list shows
+error', so we may ignore them.  The following list shows
 our errors, your results may differ:
 
-op/misc.............FAILED tests 45-46
-op/pack.............FAILED tests 58-60
-op/regexp...........FAILED tests 405-492      (core dump)
-op/regexp_noamp.....FAILED tests 405-492      (core dump)
+op/numconvert.......FAILED tests 1409-1440
+op/regexp...........FAILED tests 483, 496
+op/regexp_noamp.....FAILED tests 483, 496
 pragma/overload.....FAILED tests 152-153, 170-171
-pragma/subs.........FAILED tests 1-2
-pragma/warning......FAILED tests 121, 127, 130, 142
-lib/cgi-html........dubious, FAILED tests 1-17 (ALL)
-lib/complex.........FAILED tests 264, 484
-lib/dumper..........FAILED tests MANY
-Failed 7/190 test scripts, 96.32% okay. 234/6549 subtests failed, 96.43% okay.
-
+pragma/warnings.....FAILED tests 14, 82, 129, 155, 192, 205, 207
+lib/bigfloat........FAILED tests 351-352, 355
+lib/bigfltpm........FAILED tests 354-355, 358
+lib/complex.........FAILED tests 267, 487
+lib/dumper..........FAILED tests 43, 45
+Failed 11/231 test scripts, 95.24% okay. 57/10595 subtests failed, 99.46% okay.
 
 INSTALLING:
 ===========

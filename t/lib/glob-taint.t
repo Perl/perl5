@@ -18,7 +18,7 @@ $loaded = 1;
 print "ok 1\n";
 
 # all filenames should be tainted
-@a = File::Glob::glob("*");
+@a = File::Glob::bsd_glob("*");
 eval { $a = join("",@a), kill 0; 1 };
 unless ($@ =~ /Insecure dependency/) {
     print "not ";

@@ -4438,7 +4438,8 @@ PP(pp_pack)
 	    if ((*pat != 'a' && *pat != 'A' && *pat != 'Z') || pat[1] != '*')
 		DIE(aTHX_ "/ must be followed by a*, A* or Z*");
 	    lengthcode = sv_2mortal(newSViv(sv_len(items > 0
-						   ? *MARK : &PL_sv_no)));
+						   ? *MARK : &PL_sv_no)
+                                            + (*pat == 'Z' ? 1 : 0)));
 	}
 	switch(datumtype) {
 	default:

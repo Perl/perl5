@@ -276,6 +276,7 @@ perl_construct(pTHXx)
 
     PL_fdpid = newAV();			/* for remembering popen pids by fd */
     PL_modglobal = newHV();		/* pointers to per-interpreter module globals */
+    PL_errors = newSVpvn("",0);
 
     ENTER;
 }

@@ -2296,8 +2296,14 @@ tryagain:
 	nextchar();
 	ret = reg(1, &flags);
 	if (ret == NULL) {
-		if (flags & TRYAGAIN)
+		if (flags & TRYAGAIN) {
+		    if (PL_regcomp_parse == PL_regxend) {
+			 /* Make parent create an empty node if needed. */
+			*flagp |= TRYAGAIN;
+			return(NULL);
+		    }
 		    goto tryagain;
+		}
 		return(NULL);
 	}
 	*flagp |= flags&(HASWIDTH|SPSTART|SIMPLE);

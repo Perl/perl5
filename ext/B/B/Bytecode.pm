@@ -654,8 +654,8 @@ sub bytecompile_main {
     warn "done main program, now walking symbol table\n" if $debug_bc;
     my ($pack, %exclude);
     foreach $pack (qw(B O AutoLoader DynaLoader XSLoader Config DB VMS strict vars
-		      FileHandle Exporter Carp UNIVERSAL IO Fcntl Symbol
-		      SelectSaver blib Cwd))
+		      FileHandle Exporter Carp UNIVERSAL IO Fcntl Symbol warnings
+		      attributes File::Spec SelectSaver blib Cwd))
     {
 	$exclude{$pack."::"} = 1;
     }
