@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Jan 15 20:37:25 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Fri Jan 18 00:51:01 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -16057,6 +16057,7 @@ $undef)
     # Some Linux distributions such as RedHat 7.1 put the
     # ndbm.h header in /usr/include/gdbm/ndbm.h.
     if $test -f /usr/include/gdbm/ndbm.h; then
+	echo '<gdbm/ndbm.h> found.'
         ccflags="$ccflags -I/usr/include/gdbm"
         cppflags="$cppflags -I/usr/include/gdbm"
         t_ndbm=$define
