@@ -282,20 +282,6 @@ set `echo X "$libswanted "|sed -e 's/ sun / /' -e 's/ crypt / /' -e 's/ bsd / /'
 shift
 libswanted="$*"
 
-#
-# XXX -- This isn't right, since you still don't want perl itself
-# linked with -ldb, even if you *do* build the DB_File extension.
-# Linking perl with -ldb will prevent you from building the
-# Sybase::DBlib extension, due to a conflict between dbopen() in both
-# libdb.so and libsybdb.so.
-#
-case "$i_db" in
-undef)
-    set `echo X "$libswanted "|sed -e 's/ db / /'`
-    shift
-    libswanted="$*" ;;
-esac
-
 cat > UU/usethreads.cbu <<'EOCBU'
 # This script UU/usethreads.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use threads.
