@@ -581,7 +581,7 @@ really does work:
     @( = ('(','');
     @) = (')','');
     ($re=$_)=~s/((BEGIN)|(END)|.)/$)[!$3]\Q$1\E$([!$2]/gs;
-    @$ = (eval{/$re/},$@!~/unmatched/);
+    @$ = (eval{/$re/},$@!~/unmatched/i);
     print join("\n",@$[0..$#$]) if( $$[-1] );
 
 =head2 How do I reverse a string?
