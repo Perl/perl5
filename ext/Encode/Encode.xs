@@ -517,7 +517,11 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 		    sdone += slen;
 		    ddone += dlen;
 		    if (sdone) {
-			need = (tlen*SvLEN(dst)+sdone-1)/sdone+UTF8_MAXLEN;
+			need = (1.0*tlen*SvLEN(dst)+sdone-1)/sdone+UTF8_MAXLEN;
+#if 0
+			Perl_warn(aTHX_ "Done %d/%d had %d need %d",
+                                   sdone, tlen, SvLEN(dst), need);
+#endif
 		    }
 		    else {
 			need = SvLEN(dst) + UTF8_MAXLEN;
