@@ -1,5 +1,9 @@
 package Mac::Glue;
 
+# the code below is SCARY.  please consider your loved ones before
+# venturing within.  it might seem reasonable at first, but then you
+# get sucked in and it's all over.
+
 BEGIN {
 	use vars qw($SERIALIZER);
 	$SERIALIZER =
@@ -27,19 +31,19 @@ use strict;
 use vars qw(
 	$REVISION $VERSION $AUTOLOAD %AE_PUT %AE_GET @SYMS @METHS
 	@EXPORT @EXPORT_OK %EXPORT_TAGS @ISA $GLUEDIR
-	$GENPKG $GENSEQ %OPENGLUES %MERGEDCLASSES @OTHEREVENT
-	@OTHERCLASS %SPECIALEVENT %SPECIALCLASS %DESCS
-	%MERGEDENUM @OTHERENUM %INSL %DESC_TYPE %COMP %LOGI
+	$GENPKG $GENSEQ %OPENGLUES $MERGEDCLASSES $OTHEREVENT
+	$OTHERCLASS %SPECIALEVENT %SPECIALCLASS %DESCS
+	$MERGEDENUM $OTHERENUM %INSL %DESC_TYPE %COMP %LOGI
 	$RESERVED
 );
 
 #=============================================================================#
-# $Id: Glue.pm,v 1.3 2001/10/22 19:41:58 pudge Exp $
-($REVISION) 	= ' $Revision: 1.3 $ ' =~ /\$Revision:\s+([^\s]+)/;
+# $Id: Glue.pm,v 1.4 2001/11/13 03:47:40 pudge Exp $
+($REVISION) 	= ' $Revision: 1.4 $ ' =~ /\$Revision:\s+([^\s]+)/;
 $VERSION	= '1.01';
 @ISA		= 'Exporter';
 @EXPORT		= ();
-$RESERVED	= 'REPLY|SWITCH|MODE|PRIORITY|TIMEOUT|RETOBJ|ERRORS|CALLBACK|CLBK_ARG|ADDRESS';
+$RESERVED	= 'REPLY|SWITCH|MODE|PRIORITY|TIMEOUT|RETOBJ|ERRORS|CALLBACK|CLBK_ARG';
 @SYMS		= qw(
 			obj_form  param_type enum whose range location
 			glueTrue  glueFalse  glueNext gluePrevious
@@ -101,7 +105,7 @@ use constant glueBeginsWith	=> new AEDesc typeEnumerated, kAEBeginsWith;
 use constant glueEndsWith	=> new AEDesc typeEnumerated, kAEEndsWith;
 use constant glueContains	=> new AEDesc typeEnumerated, kAEContains;
 
-
+# short names
 use constant gTrue		=> glueTrue();
 use constant gFalse		=> glueFalse();
 
@@ -221,21 +225,26 @@ sub AUTOLOAD {
 	(my $name = $AUTOLOAD) =~ s/^.*://;
 	my $sub;
 
+	# catch reserved "method" names
 	if ($name eq 'DESTROY') {
 		return;
 	} elsif ($name =~ /^(?:$RESERVED)$/) {
 		$sub = sub { $_[0]->{$name} = $_[1] if $_[1]; $_[0]->{$name} };
 	}
 
+	# catch other-case versions of already-installed methods
 	unless ($sub) {
 		(my $auto = $AUTOLOAD) =~ s/:([^:]+)$/:\L$1/;
 		$sub = $auto if defined &$auto;
 	}
 
+	# define method if we can find it in the glue table
 	unless ($sub) {
 		if (my $event = _find_event($self, lc $name)) {
 			$sub = sub { _primary($_[0], $event, lc $name, @_[1 .. $#_]) }
 		} elsif (! $can) {
+			# should this croak?  probably.  complain and come
+			# up with another idea if you don't like it.
 			croak "No event '$name' available from glue for '$self->{GLUENAME}'";
 		}
 	}
@@ -253,6 +262,8 @@ sub AUTOLOAD {
 #=============================================================================#
 # login using GTQ Login As OSAX
 # will NOT return error if exists, because MacPerl does not handle replies well
+
+# this should be removed, it is a bad idea.
 
 sub login {
 	my($self, $user, $pass) = @_;
@@ -536,6 +547,8 @@ sub _do_obj {
 	}
 
 	# type / keyAEContainer
+	# hm.  why are first two the same?  why didn't i comment this to
+	# begin with?
 	if ($from && $from eq typeCurrentContainer) {
 		AEPutKey($list, keyAEContainer, $from, '')
 			or confess "Can't put from:$from into object: $^E";
@@ -890,7 +903,7 @@ sub _find_event {
 
 	return $SPECIALEVENT{$name} if exists $SPECIALEVENT{$name};
 
-	for ($self->{_DB}{EVENT}, @OTHEREVENT) {
+	for ($self->{_DB}{EVENT}, @$OTHEREVENT) {
 		if (exists $_->{$name}) {
 			$event = $_->{$name};
 			last;
@@ -914,15 +927,17 @@ sub _is_plural {
 #=============================================================================#
 # create an AE object
 
+# heh heh heh ... stupid little shortcut
 sub prop {
 	@_ = ($_[0], 'property', @_[1 .. $#_]);
 	goto &obj;
 }
 
+# this is pretty nasty, just go with it
 sub obj {
 	my($self, @data, $obj, @obj) = @_;
 
-	if (ref($data[-1]) =~ /^(Mac::)?AE(?:Obj)?Desc$/) { # @data % 2 && 
+	if (ref($data[-1]) =~ /^(Mac::)?AE(?:Obj)?Desc$/) {
 		$obj = pop @data;
 	}
 
@@ -999,27 +1014,42 @@ sub _open_others {
 		opendir DIR, $dir or confess "Can't open directory '$dir': $!";
 		chdir $dir or confess "Can't chdir directory '$dir': $!";
 
-		# ### add file type / creator checking
+		# add file type / creator checking ???
+		# maybe add a new file type for glues?  i can do that now,
+		# because i am special or something.
 		for (readdir DIR) {
 			next if $_ eq "Icon\015";
 			next if /\.pod$/;
 			tie my %db, 'MLDBM', $_, O_RDONLY or confess "Can't tie '$_': $!";
-			push @OTHEREVENT, $db{EVENT} if $db{EVENT};
-			push @OTHERCLASS, $db{CLASS} if $db{CLASS};
-			push @OTHERENUM, $db{ENUM} if $db{ENUM};
+			push @$OTHEREVENT, $db{EVENT} if $db{EVENT};
+			push @$OTHERCLASS, $db{CLASS} if $db{CLASS};
+			push @$OTHERENUM,  $db{ENUM}  if $db{ENUM};
 		}
 	}
 	chdir $curdir or confess "Can't chdir to '$curdir': $!";
+
+# would this even help anything?  BAH!
+# 	tie my %merged, 'MLDBM', "$ENV{MACGLUEDIR}gluemergecache", O_RDWR or confess "Can't tie '$_': $!";
+# 	if ($merged{EVENT} ne "@$OTHEREVENT" || $merged{CLASS} ne "@$OTHERCLASS" || $merged{ENUM} ne "@$OTHERENUM") {
+# 		$MERGEDCLASSES	= $merged{CLASSES} = {};
+# 		$MERGEDENUM	= $merged{ENUM} = {};
+# 	} else {
+# 		$MERGEDCLASSES	= $merged{CLASSES};
+# 		$MERGEDENUM	= $merged{ENUM};
+# 	}
 }
 
 #=============================================================================#
 # merge additions, dialect, and glue classes together
+# wow, this is ugly.  i wonder if there is a better/faster way.  probably.
+# or maybe a way to cache the results between iterations ... ?
+# but then, how do we deal with added/removed classes?
 
 sub _merge_classes {
 	my($db) = @_;
-	if (!exists $MERGEDCLASSES{ $db->{ID} }) {
+	if (!exists $MERGEDCLASSES->{ $db->{ID} }) {
 		my($ids, $names) = ({}, {});
-		my($class, @classes) = ($db->{CLASS}, @OTHERCLASS);
+		my($class, @classes) = ($db->{CLASS}, @$OTHERCLASS);
 
 		for my $c (keys %$class) {
 			$names->{$c}{id} = $class->{$c}{id};
@@ -1054,21 +1084,23 @@ sub _merge_classes {
 			}
 		}
 
-		$MERGEDCLASSES{ $db->{ID} } = [$class, $names, $ids];
+		$MERGEDCLASSES->{ $db->{ID} } = [$class, $names, $ids];
 	}
-	return @{$MERGEDCLASSES{ $db->{ID} }};
+	return @{$MERGEDCLASSES->{ $db->{ID} }};
 }
 
 #=============================================================================#
 # "merge" additions, dialect, and glue enumerations together
+# see above about caching results, rethinking logic.  for a really
+# really really really rainy day.
 
 sub _merge_enums {
 	my($db, $self) = @_;
-	if (!exists $MERGEDENUM{ $db->{ID} }) {
+	if (!exists $MERGEDENUM->{ $db->{ID} }) {
 		my $names = $self->{NAMES};
 		my $ids = $self->{IDS};
 
-		for my $tempc (grep defined, $db->{ENUM}, @OTHERENUM) {
+		for my $tempc (grep defined, $db->{ENUM}, @$OTHERENUM) {
 			for my $c (keys %$tempc) {
 				$self->{ENUMTYPE}{$c} = [];
 				for my $n (keys %{$tempc->{$c}}) {
@@ -1079,9 +1111,9 @@ sub _merge_enums {
 				}
 			}
 		}
-		$MERGEDENUM{ $db->{ID} }++;
+		$MERGEDENUM->{ $db->{ID} }++;
 	}
-	$MERGEDENUM{ $db->{ID} };
+	$MERGEDENUM->{ $db->{ID} };
 }
 
 #=============================================================================#
@@ -1338,6 +1370,10 @@ New for Mac OS 9, you can send events over TCP/IP:
 	my $glue = Mac::Glue->new('My App', eppc => 'My App Name',
 		'some.machine.com');
 
+Also, the address can be changed after the fact:
+
+	my $glue = Mac::Glue->new('My App');
+	$glue->ADDRESS(eppc => 'My App Name', 'some.machine.com');
 
 Once you have your glue set up, you start calling events, as they are
 documented in the POD file for the glue.  The events can be called
@@ -2121,7 +2157,7 @@ of the Artistic License, distributed with Perl.
 
 =head1 THANKS
 
-Matthias Neeracher E<lt>neeri@iis.ee.ethz.chE<gt>,
+Matthias Neeracher E<lt>neeracher@mac.comE<gt>,
 David Schooley E<lt>dcschooley@mediaone.netE<gt>,
 Graham Barr E<lt>gbarr@pobox.comE<gt>,
 John W Baxter E<lt>jwblist@olympus.netE<gt>,
@@ -2153,7 +2189,7 @@ Matthew Wickline E<lt>mattheww@wickline.orgE<gt>.
 Mac::AppleEvents, Mac::AppleEvents::Simple, macperlcat, Inside Macintosh: 
 Interapplication Communication.
 
-	http://sourceforge.net/projects/mac-glue/
+	http://sf.net/projects/mac-glue/
 
 =cut
 
