@@ -26,9 +26,9 @@ qw(
 sub new {
   my ($class) = shift;
   my ($foo) = fnorm(shift);
-  panic("Not a number initialized to Math::BigFloat") if $foo eq "NaN";
   bless \$foo, $class;
 }
+
 sub numify { 0 + "${$_[0]}" }	# Not needed, additional overhead
 				# comparing to direct compilation based on
 				# stringify
