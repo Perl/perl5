@@ -325,7 +325,7 @@ EOH
 
 # Order doesn't matter but let's prettyprint anyway.
 foreach my $in (sort { $InId{$a} <=> $InId{$b} } keys %InId) {
-    printf INID "%-40s => %2d,\n", "'$in'", $InId{$in};
+    printf INID "%-40s => %3d,\n", "'$in'", $InId{$in};
 }
 
 print INID ");\n";
