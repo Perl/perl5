@@ -549,13 +549,14 @@ perl.pixie: /usr/bin/pixie perl.pixie.config perl
 perl.config.dashpg:
 	@echo "Checking optimize='-pg' in config.sh..."
 	@grep "^optimize="      config.sh
-	@grep "^optimize='-pg'" config.sh >/dev/null || exit 1
+	@grep "^optimize='.*-pg.*'" config.sh >/dev/null || exit 1
 
 perl.gprof.config: config.sh
 	@echo "To build perl.gprof you must Configure -Doptimize=-pg, checking..."
 	@$(MAKE) perl.config.dashpg
 
 perl.gprof: /usr/bin/gprof perl.gprof.config
+	@-rm -f perl
 	$(MAKE) PERL_SUFFIX=.gprof PERL_PROFILING=-pg perl
 	@echo "Now you may run perl.gprof and then run gprof perl.gprof."
 
