@@ -48,8 +48,7 @@ perlio: argument list not closed for layer "aa(" at - line 6.
 # perlio [PerlIO_parse_layers]
 no warnings 'layer';
 open(F, ">:xyz", "bb");
-#use warnings 'layer';
-use warnings ;
+use warnings 'layer';
 open(F, ">:xyz", "bb");
 EXPECT
 perlio: unknown layer "xyz".
