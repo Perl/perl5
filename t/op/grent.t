@@ -3,6 +3,11 @@
 BEGIN {
     chdir 't' if -d 't';
     unshift @INC, "../lib" if -d "../lib";
+    eval {my @n = getgrgid 0};
+    if ($@ && $@ =~ /(The \w+ function is unimplemented)/) {
+	print "1..0 # Skip: $1\n";
+	exit 0;
+    }
     eval { require Config; import Config; };
     my $reason;
     if ($Config{'i_grp'} ne 'define') {
