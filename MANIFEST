@@ -1831,6 +1831,7 @@ pod/perlmod.pod			Module mechanism info
 pod/perlmodinstall.pod		Installing CPAN Modules
 pod/perlmodlib.PL		Generate pod/perlmodlib.pod
 pod/perlmodlib.pod		Module policy info
+pod/perlmodstyle.pod		Perl module style guide
 pod/perlnewmod.pod		Preparing a new module for distribution
 pod/perlnumber.pod		Semantics of numbers and numeric operations
 pod/perlobj.pod			Object info
