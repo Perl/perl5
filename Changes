@@ -78,6 +78,11 @@ Version 5.005           Production release
 -------------
 
 ____________________________________________________________________________
+[  1647] By: gsar                                  on 1998/07/22  21:11:29
+        Log: sneak in hints/irix_6.sh update
+     Branch: perl
+           ! Changes hints/irix_6.sh
+____________________________________________________________________________
 [  1646] By: gsar                                  on 1998/07/22  21:00:44
         Log: Update perldelta and Changes; refresh perltoc; newer perlembed.pod
              from Jon Orwant <orwant@media.mit.edu>; update guts documentation
