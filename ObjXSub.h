@@ -1191,6 +1191,8 @@
 #define magic_setvec        pPerl->Perl_magic_setvec
 #undef  magic_sizepack
 #define magic_sizepack      pPerl->Perl_magic_sizepack
+#undef  magic_unchain
+#define magic_unchain       pPerl->Perl_magic_unchain
 #undef  magic_wipepack
 #define magic_wipepack      pPerl->Perl_magic_wipepack
 #undef  magicname

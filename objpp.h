@@ -645,6 +645,8 @@
 #define magic_setvec      CPerlObj::Perl_magic_setvec
 #undef  magic_sizepack
 #define magic_sizepack    CPerlObj::Perl_magic_sizepack
+#undef  magic_unchain
+#define magic_unchain     CPerlObj::Perl_magic_unchain
 #undef  magic_wipepack
 #define magic_wipepack    CPerlObj::Perl_magic_wipepack
 #undef  magicname
