@@ -28,6 +28,9 @@ if ($perl =~ m#^\.\.#)
  {
   $perl = "$here\\$perl";
  }
+(my $topdir = $perl) =~ s/\\[^\\]+$//;
+$ENV{PATH} = "$topdir;$ENV{PATH}";	# so miniperl can find perlglob.exe
+#print "PATH=$ENV{PATH}\n";
 my $make = shift;
 $make .= " ".shift while $ARGV[0]=~/^-/;
 my $dep  = shift;
