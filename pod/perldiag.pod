@@ -1223,6 +1223,11 @@ array is empty, just use C<if (@array) { # not empty }> for example.
 checks for an undefined I<scalar> value.  If you want to see if the hash
 is empty, just use C<if (%hash) { # not empty }> for example.
 
+=item %s defines neither package nor VERSION--version check failed
+
+(F) You said something like "use Module 42" but in the Module file
+there are neither package declarations nor a C<$VERSION>.
+
 =item Delimiter for here document is too long
 
 (F) In a here document construct like C<<<FOO>, the label C<FOO> is too
@@ -1265,6 +1270,11 @@ you called it with no args and both C<$@> and C<$_> were empty.
 =item Document contains no data
 
 See Server error.
+
+=item %s does not define %s::VERSION--version check failed
+
+(F) You said something like "use Module 42" but the Module did not
+define a C<$VERSION.>
 
 =item Don't know how to handle magic of type '%s'
 
