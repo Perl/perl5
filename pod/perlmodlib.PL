@@ -157,66 +157,87 @@ modules are:
 =over
 
 =item *
+
 Language Extensions and Documentation Tools
 
 =item *
+
 Development Support
 
 =item *
+
 Operating System Interfaces
 
 =item *
+
 Networking, Device Control (modems) and InterProcess Communication
 
 =item *
+
 Data Types and Data Type Utilities
 
 =item *
+
 Database Interfaces
 
 =item *
+
 User Interfaces
 
 =item *
+
 Interfaces to / Emulations of Other Programming Languages
 
 =item *
+
 File Names, File Systems and File Locking (see also File Handles)
 
 =item *
+
 String Processing, Language Text Processing, Parsing, and Searching
 
 =item *
+
 Option, Argument, Parameter, and Configuration File Processing
 
 =item *
+
 Internationalization and Locale
 
 =item *
+
 Authentication, Security, and Encryption
 
 =item *
+
 World Wide Web, HTML, HTTP, CGI, MIME
 
 =item *
+
 Server and Daemon Utilities
 
 =item *
+
 Archiving and Compression
 
 =item *
+
 Images, Pixmap and Bitmap Manipulation, Drawing, and Graphing
 
 =item *
+
 Mail and Usenet News
 
 =item *
+
 Control Flow Utilities (callbacks and exceptions etc)
 
 =item *
+
 File Handle and Input/Output Stream Utilities
 
 =item *
+
 Miscellaneous Modules
 
 =back
@@ -421,7 +442,9 @@ the AUTOLOAD mechanism.
 
 =over 4
 
-=item Do similar modules already exist in some form?
+=item  *
+
+Do similar modules already exist in some form?
 
 If so, please try to reuse the existing modules either in whole or
 by inheriting useful features into a new class.  If this is not
@@ -435,7 +458,9 @@ modules, please coordinate with the author of the package.  It
 helps if you follow the same naming scheme and module interaction
 scheme as the original author.
 
-=item Try to design the new module to be easy to extend and reuse.
+=item  *
+
+Try to design the new module to be easy to extend and reuse.
 
 Try to C<use warnings;> (or C<use warnings qw(...);>).
 Remember that you can add C<no warnings qw(...);> to individual blocks
@@ -500,7 +525,9 @@ Follow the guidelines in the perlstyle(1) manual.
 
 Always use B<-w>.
 
-=item Some simple style guidelines
+=item  *
+
+Some simple style guidelines
 
 The perlstyle manual supplied with Perl has many helpful points.
 
@@ -532,7 +559,9 @@ e.g., C<< $obj->as_string() >>.
 You can use a leading underscore to indicate that a variable or
 function should not be used outside the package that defined it.
 
-=item Select what to export.
+=item  *
+
+Select what to export.
 
 Do NOT export method names!
 
@@ -556,7 +585,9 @@ As a general rule, if the module is trying to be object oriented
 then export nothing. If it's just a collection of functions then
 @EXPORT_OK anything but use @EXPORT with caution.
 
-=item Select a name for the module.
+=item  *
+
+Select a name for the module.
 
 This name should be as descriptive, accurate, and complete as
 possible.  Avoid any risk of ambiguity. Always try to use two or
@@ -590,7 +621,9 @@ To be portable each component of a module name should be limited to
 11 characters. If it might be used on MS-DOS then try to ensure each is
 unique in the first 8 characters. Nested modules make this easier.
 
-=item Have you got it right?
+=item  *
+
+Have you got it right?
 
 How do you know that you've made the right decisions? Have you
 picked an interface design that will cause problems later? Have
@@ -609,7 +642,9 @@ Don't worry about posting if you can't say when the module will be
 ready - just say so in the message. It might be worth inviting
 others to help you, they may be able to complete it for you!
 
-=item README and other Additional Files.
+=item  *
+
+README and other Additional Files.
 
 It's well known that software developers usually fully document the
 software they write. If, however, the world is in urgent need of
@@ -619,24 +654,31 @@ documentation please at least provide a README file containing:
 =over 10
 
 =item *
+
 A description of the module/package/extension etc.
 
 =item *
+
 A copyright notice - see below.
 
 =item *
+
 Prerequisites - what else you may need to have.
 
 =item *
+
 How to build it - possible changes to Makefile.PL etc.
 
 =item *
+
 How to install it.
 
 =item *
+
 Recent changes in this release, especially incompatibilities
 
 =item *
+
 Changes / enhancements you plan to make in the future.
 
 =back
@@ -648,6 +690,7 @@ Copying, ToDo etc.
 =over 4
 
 =item Adding a Copyright Notice.
+
 
 How you choose to license your work is a personal decision.
 The general mechanism is to assert your Copyright and then make
@@ -668,7 +711,9 @@ This statement should at least appear in the README file. You may
 also wish to include it in a Copying file and your source files.
 Remember to include the other words in addition to the Copyright.
 
-=item Give the module a version/issue/release number.
+=item  *
+
+Give the module a version/issue/release number.
 
 To be fully compatible with the Exporter and MakeMaker modules you
 should store your module's version number in a non-my package
@@ -682,7 +727,9 @@ Use the number in announcements and archive file names when
 releasing the module (ModuleName-1.02.tar.Z).
 See perldoc ExtUtils::MakeMaker.pm for details.
 
-=item How to release and distribute a module.
+=item  *
+
+How to release and distribute a module.
 
 It's good idea to post an announcement of the availability of your
 module (or the module itself if small) to the comp.lang.perl.announce
@@ -721,7 +768,9 @@ CPAN!
 
 Please remember to send me an updated entry for the Module list!
 
-=item Take care when changing a released module.
+=item  *
+
+Take care when changing a released module.
 
 Always strive to remain compatible with previous released versions.
 Otherwise try to add a mechanism to revert to the
@@ -735,26 +784,34 @@ old behavior if people rely on it.  Document incompatible changes.
 
 =over 4
 
-=item There is no requirement to convert anything.
+=item  *
+
+There is no requirement to convert anything.
 
 If it ain't broke, don't fix it! Perl 4 library scripts should
 continue to work with no problems. You may need to make some minor
 changes (like escaping non-array @'s in double quoted strings) but
 there is no need to convert a .pl file into a Module for just that.
 
-=item Consider the implications.
+=item  *
+
+Consider the implications.
 
 All Perl applications that make use of the script will need to
 be changed (slightly) if the script is converted into a module.  Is
 it worth it unless you plan to make other changes at the same time?
 
-=item Make the most of the opportunity.
+=item  *
+
+Make the most of the opportunity.
 
 If you are going to convert the script to a module you can use the
 opportunity to redesign the interface.  The guidelines for module
 creation above include many of the issues you should consider.
 
-=item The pl2pm utility will get you started.
+=item  *
+
+The pl2pm utility will get you started.
 
 This utility will read *.pl files (given as parameters) and write
 corresponding *.pm files. The pl2pm utilities does the following:
@@ -762,15 +819,19 @@ corresponding *.pm files. The pl2pm utilities does the following:
 =over 10
 
 =item *
+
 Adds the standard Module prologue lines
 
 =item *
+
 Converts package specifiers from ' to ::
 
 =item *
+
 Converts die(...) to croak(...)
 
 =item *
+
 Several other minor changes
 
 =back
@@ -785,18 +846,28 @@ Don't delete the original .pl file till the new .pm one works!
 
 =over 4
 
-=item Complete applications rarely belong in the Perl Module Library.
+=item  *
 
-=item Many applications contain some Perl code that could be reused.
+Complete applications rarely belong in the Perl Module Library.
+
+=item  *
+
+Many applications contain some Perl code that could be reused.
 
 Help save the world! Share your code in a form that makes it easy
 to reuse.
 
-=item Break-out the reusable code into one or more separate module files.
+=item  *
 
-=item Take the opportunity to reconsider and redesign the interfaces.
+Break-out the reusable code into one or more separate module files.
 
-=item In some cases the 'application' can then be reduced to a small
+=item  *
+
+Take the opportunity to reconsider and redesign the interfaces.
+
+=item  *
+
+In some cases the 'application' can then be reduced to a small
 
 fragment of code built on top of the reusable modules. In these cases
 the application could invoked as:
