@@ -8341,6 +8341,8 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	}
 	HvPMROOT((HV*)dstr)	= HvPMROOT((HV*)sstr);		/* XXX */
 	HvNAME((HV*)dstr)	= SAVEPV(HvNAME((HV*)sstr));
+    if(HvNAME((HV*)dstr))
+        av_push(PL_clone_callbacks,dstr);
 	break;
     case SVt_PVFM:
 	SvANY(dstr)	= new_XPVFM();
@@ -8975,6 +8977,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     while (i-- > 0) {
 	PL_origargv[i]	= SAVEPV(proto_perl->Iorigargv[i]);
     }
+    PL_clone_callbacks = newAV();   /* Setup array of objects to callbackon */
     PL_envgv		= gv_dup(proto_perl->Ienvgv);
     PL_incgv		= gv_dup(proto_perl->Iincgv);
     PL_hintgv		= gv_dup(proto_perl->Ihintgv);
@@ -9484,6 +9487,24 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     if (!(flags & CLONEf_KEEP_PTR_TABLE)) {
         ptr_table_free(PL_ptr_table);
         PL_ptr_table = NULL;
+    }
+    
+    while(av_len(PL_clone_callbacks) != -1) {
+        HV* stash = (HV*) av_shift(PL_clone_callbacks);
+        CV* cloner = (CV*) gv_fetchmethod_autoload(stash,"CLONE",0);
+        if(cloner) {
+            dSP;
+            cloner = GvCV(cloner);
+            ENTER;
+            SAVETMPS;
+            PUSHMARK(SP);
+            XPUSHs(newSVpv(HvNAME(stash),0));
+            PUTBACK;
+            call_sv((SV*)cloner, G_DISCARD);
+            FREETMPS;
+            LEAVE;
+            
+        }
     }
 
 #ifdef PERL_OBJECT
