@@ -95,16 +95,16 @@ struct regnode_charclass {
     U8  type;
     U16 next_off;
     U32 arg1;
-    char bitmap[ANYOF_BITMAP_SIZE];
+    char bitmap[ANYOF_BITMAP_SIZE];	/* only compile-time */
 };
 
-struct regnode_charclass_class {
-    U8	flags;
+struct regnode_charclass_class {	/* has [[:blah:]] classes */
+    U8	flags;				/* should have ANYOF_CLASS here */
     U8  type;
     U16 next_off;
     U32 arg1;
-    char bitmap[ANYOF_BITMAP_SIZE];
-    char classflags[ANYOF_CLASSBITMAP_SIZE];
+    char bitmap[ANYOF_BITMAP_SIZE];		/* both compile-time */
+    char classflags[ANYOF_CLASSBITMAP_SIZE];	/* and run-time */
 };
 
 /* XXX fix this description.
@@ -182,7 +182,7 @@ struct regnode_charclass_class {
 
 /* Flags for node->flags of ANYOF */
 
-#define ANYOF_CLASS		0x08
+#define ANYOF_CLASS		0x08	/* has [[:blah:]] classes */
 #define ANYOF_INVERT		0x04
 #define ANYOF_FOLD		0x02
 #define ANYOF_LOCALE		0x01
