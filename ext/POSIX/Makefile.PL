@@ -2,7 +2,9 @@ use ExtUtils::MakeMaker;
 use Config;
 my @libs;
 if ($^O ne 'MSWin32') {
-    @libs = ('LIBS' => ["-lm -lposix -lcposix"]);
+    my $libs = "-lm -lposix -lcposix";
+    $Config{gccversion} ne "" and $libs .= " -lgcc";
+    @libs = ('LIBS' => [ $libs ]);
 }
 WriteMakefile(
     NAME	=> 'POSIX',
