@@ -90,7 +90,7 @@ FE70	FEFE	Arabic Presentation Forms-B
 FEFF		Specials
 FF00	FFEF	Halfwidth and Fullwidth Forms
 FFF0	FFFD	Specials
-10300	1032F	Old Italic
+10300	1032F	Old Italic Block
 10330	1034F	Gothic Block
 10400	1044F	Deseret Block
 1D000	1D0FF	Byzantine Musical Symbols

@@ -103,6 +103,9 @@ my %In;
 my $InId = 0;
 my %InIn;
 
+my %InScript;
+my %InBlock;
+
 #
 # Read in the Unicode.txt, the main Unicode database.
 #
@@ -355,8 +358,9 @@ for my $script (sort { $a->[0] <=> $b->[0] } @Scripts) {
 	extend($Script{$name}, $last);
     }
     unless (defined $In{$name}) {
-	$In{$name}   = $InId++;
-	$InIn{$name} = $Script{$name};
+	$InScript{$InId} = $name;
+	$In{$name}       = $InId++;
+	$InIn{$name}     = $Script{$name};
     }
 }
 
@@ -382,11 +386,19 @@ if (open(my $Blocks, "Blocks.txt")) {
 	next unless /^([0-9A-Fa-f]+)\.\.([0-9A-Fa-f]+)\s*;\s*(.+?)\s*$/;
 	
 	my ($first, $last, $name) = ($1, $2, $3);
+	my $origname = $name;
 
 	# If there's a naming conflict (the script names are
 	# in uppercase), the name of the block has " Block"
 	# appended to it.
-	$name = "$name Block" if defined $In{"\U$name"};
+	my $pat = $name;
+	$pat =~ s/([- _])/(?:[-_]|\\s+)?/g;
+	for my $i (values %InScript) {
+	    if ($i =~ /^$pat$/i) {
+		$name .= " Block";
+		last;
+	    }
+	}
 
 	append(\@Blocks,              $first, $name);
 	append($Blocks{$name} ||= [], $first, $name);
@@ -395,8 +407,9 @@ if (open(my $Blocks, "Blocks.txt")) {
 	    extend($Blocks{$name}, $last);
 	}
 	unless (defined $In{$name}) {
-	    $In{$name}   = $InId++;
-	    $InIn{$name} = $Blocks{$name};
+	    $InBlock{$InId} = $origname;
+	    $In{$name}      = $InId++;
+	    $InIn{$name}    = $Blocks{$name};
 	}
     }
 } else {
@@ -590,6 +603,39 @@ EOT
 #
 
 mapping(\%In, "In");
+
+#
+# Append the InScript and InBlock mappings.
+# These are needed only if Script= and Block= syntaxes are used.
+#
+
+if (open(my $In, ">>In.pl")) {
+    print $In <<EOT;
+
+%utf8::InScript =
+(
+EOT
+    for my $i (sort { $a <=> $b } keys %InScript) {
+	printf $In "%4d => '$InScript{$i}',\n", $i;
+    }
+    print $In <<EOT;
+);
+EOT
+
+    print $In <<EOT;
+
+%utf8::InBlock =
+(
+EOT
+    for my $i (sort { $a <=> $b } keys %InBlock) {
+	printf $In "%4d => '$InBlock{$i}',\n", $i;
+    }
+    print $In <<EOT;
+);
+EOT
+} else {
+    die "$0: In.pl: $!\n";
+}
 
 # Easy low-calorie cheat.
 use File::Copy;
