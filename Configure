@@ -8561,6 +8561,7 @@ main()
 {
 #ifdef DB_VERSION_MAJOR	/* DB version >= 2 */
     int Major, Minor, Patch ;
+    unsigned long Version ;
     (void)db_version(&Major, &Minor, &Patch) ;
     printf("You have Berkeley DB Version 2 or greater\n");
 
@@ -8576,9 +8577,15 @@ main()
     }
 
     printf("db.h and libdb are compatible\n") ;
-    /* needs to be >= 2.05 */
-    if (DB_VERSION_MAJOR == 2 && DB_VERSION_MINOR == 0 && DB_VERSION_PATCH < 5) {
-	printf("but Perl needs Berkeley DB 2.0.5 or greater\n") ;
+
+    Version = DB_VERSION_MAJOR * 1000000 + DB_VERSION_MINOR * 1000
+              + DB_VERSION_PATCH ;
+
+    /* needs to be >= 2.3.4 */
+    if (Version < 2003004) {
+    /* if (DB_VERSION_MAJOR == 2 && DB_VERSION_MINOR == 0 && DB_VERSION_PATCH 
+< 5) { */
+	printf("but Perl needs Berkeley DB 2.3.4 or greater\n") ;
         exit(2);	
     }
 
