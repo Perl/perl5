@@ -96,7 +96,8 @@ exec_in_REXX(char *cmd, char * handlerName, RexxFunctionHandler *handler)
     }
     if (rc || SvTRUE(GvSV(PL_errgv))) {
 	if (SvTRUE(GvSV(PL_errgv))) {
-	    die ("Error inside perl function called from REXX compartment.\n%s", SvPV(GvSV(PL_errgv), PL_na)) ;
+	    STRLEN n_a;
+	    die ("Error inside perl function called from REXX compartment.\n%s", SvPV(GvSV(PL_errgv), n_a)) ;
 	}
 	die ("REXX compartment returned non-zero status %li", rc);
     }

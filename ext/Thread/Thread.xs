@@ -122,13 +122,14 @@ threadstart(void *arg)
     retval = SP - (PL_stack_base + oldmark);
     SP = PL_stack_base + oldmark + 1;
     if (SvCUR(thr->errsv)) {
+	STRLEN n_a;
 	MUTEX_LOCK(&thr->mutex);
 	thr->flags |= THRf_DID_DIE;
 	MUTEX_UNLOCK(&thr->mutex);
 	av_store(av, 0, &PL_sv_no);
 	av_store(av, 1, newSVsv(thr->errsv));
 	DEBUG_S(PerlIO_printf(PerlIO_stderr(), "%p died: %s\n",
-			      thr, SvPV(thr->errsv, PL_na)));
+			      thr, SvPV(thr->errsv, n_a)));
     } else {
 	DEBUG_S(STMT_START {
 	    for (i = 1; i <= retval; i++) {
@@ -248,11 +249,13 @@ newthread (SV *startsv, AV *initargs, char *classname)
 	XPUSHs(SvREFCNT_inc(*av_fetch(initargs, i, FALSE)));
     XPUSHs(SvREFCNT_inc(startsv));
     PUTBACK;
+
+    /* On your marks... */
+    MUTEX_LOCK(&thr->mutex);
+
 #ifdef THREAD_CREATE
     err = THREAD_CREATE(thr, threadstart);
 #else    
-    /* On your marks... */
-    MUTEX_LOCK(&thr->mutex);
     /* Get set...  */
     sigfillset(&fullmask);
     if (sigprocmask(SIG_SETMASK, &fullmask, &oldmask) == -1)
@@ -283,10 +286,9 @@ newthread (SV *startsv, AV *initargs, char *classname)
 #else
 	err = pthread_create(&thr->self, &attr, threadstart, (void*) thr);
 #endif
-    /* Go */
-    MUTEX_UNLOCK(&thr->mutex);
 #endif
     if (err) {
+	MUTEX_UNLOCK(&thr->mutex);
         DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			      "%p: create of %p failed %d\n",
 			      savethread, thr, err));
@@ -299,16 +301,23 @@ newthread (SV *startsv, AV *initargs, char *classname)
 	SvREFCNT_dec(startsv);
 	return NULL;
     }
+
 #ifdef THREAD_POST_CREATE
     THREAD_POST_CREATE(thr);
 #else
     if (sigprocmask(SIG_SETMASK, &oldmask, 0))
 	croak("panic: sigprocmask");
 #endif
+
     sv = newSViv(thr->tid);
     sv_magic(sv, thr->oursv, '~', 0, 0);
     SvMAGIC(sv)->mg_private = Thread_MAGIC_SIGNATURE;
-    return sv_bless(newRV_noinc(sv), gv_stashpv(classname, TRUE));
+    sv = sv_bless(newRV_noinc(sv), gv_stashpv(classname, TRUE));
+
+    /* Go */
+    MUTEX_UNLOCK(&thr->mutex);
+
+    return sv;
 #else
     croak("No threads in this perl");
     return &PL_sv_undef;
@@ -375,7 +384,8 @@ join(t)
 	    for (i = 1; i <= AvFILL(av); i++)
 		XPUSHs(sv_2mortal(*av_fetch(av, i, FALSE)));
 	} else {
-	    char *mess = SvPV(*av_fetch(av, 1, FALSE), PL_na);
+	    STRLEN n_a;
+	    char *mess = SvPV(*av_fetch(av, 1, FALSE), n_a);
 	    DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 				  "%p: join propagating die message: %s\n",
 				  thr, mess));

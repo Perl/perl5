@@ -92,7 +92,6 @@ Perl_thread_create(struct perl_thread *thr, thread_func_t *fn)
     DWORD junk;
     unsigned long th;
 
-    MUTEX_LOCK(&thr->mutex);
     DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			  "%p: create OS thread\n", thr));
 #ifdef USE_RTL_THREAD_API
@@ -126,7 +125,6 @@ Perl_thread_create(struct perl_thread *thr, thread_func_t *fn)
 #endif	/* !USE_RTL_THREAD_API */
     DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			  "%p: OS thread = %p, id=%ld\n", thr, thr->self, junk));
-    MUTEX_UNLOCK(&thr->mutex);
     return thr->self ? 0 : -1;
 }
 #endif

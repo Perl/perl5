@@ -341,8 +341,10 @@ magic_len(SV *sv, MAGIC *mg)
 	return (STRLEN)PL_orslen;
     }
     magic_get(sv,mg);
-    if (!SvPOK(sv) && SvNIOK(sv))
-	sv_2pv(sv, &PL_na);
+    if (!SvPOK(sv) && SvNIOK(sv)) {
+	STRLEN n_a;
+	sv_2pv(sv, &n_a);
+    }
     if (SvPOK(sv))
 	return SvCUR(sv);
     return 0;
@@ -721,7 +723,8 @@ magic_setenv(SV *sv, MAGIC *mg)
 int
 magic_clearenv(SV *sv, MAGIC *mg)
 {
-    my_setenv(MgPV(mg,PL_na),Nullch);
+    STRLEN n_a;
+    my_setenv(MgPV(mg,n_a),Nullch);
     return 0;
 }
 
@@ -734,12 +737,13 @@ magic_set_all_env(SV *sv, MAGIC *mg)
     dTHR;
     if (PL_localizing) {
 	HE* entry;
+	STRLEN n_a;
 	magic_clear_all_env(sv,mg);
 	hv_iterinit((HV*)sv);
 	while (entry = hv_iternext((HV*)sv)) {
 	    I32 keylen;
 	    my_setenv(hv_iterkey(entry, &keylen),
-		      SvPV(hv_iterval((HV*)sv, entry), PL_na));
+		      SvPV(hv_iterval((HV*)sv, entry), n_a));
 	}
     }
 #endif
@@ -787,8 +791,9 @@ int
 magic_getsig(SV *sv, MAGIC *mg)
 {
     I32 i;
+    STRLEN n_a;
     /* Are we fetching a signal entry? */
-    i = whichsig(MgPV(mg,PL_na));
+    i = whichsig(MgPV(mg,n_a));
     if (i) {
     	if(psig_ptr[i])
     	    sv_setsv(sv,psig_ptr[i]);
@@ -810,8 +815,9 @@ int
 magic_clearsig(SV *sv, MAGIC *mg)
 {
     I32 i;
+    STRLEN n_a;
     /* Are we clearing a signal entry? */
-    i = whichsig(MgPV(mg,PL_na));
+    i = whichsig(MgPV(mg,n_a));
     if (i) {
     	if(psig_ptr[i]) {
     	    SvREFCNT_dec(psig_ptr[i]);
@@ -832,8 +838,9 @@ magic_setsig(SV *sv, MAGIC *mg)
     register char *s;
     I32 i;
     SV** svp;
+    STRLEN n_a;
 
-    s = MgPV(mg,PL_na);
+    s = MgPV(mg,n_a);
     if (*s == '_') {
 	if (strEQ(s,"__DIE__"))
 	    svp = &PL_diehook;
@@ -870,7 +877,7 @@ magic_setsig(SV *sv, MAGIC *mg)
 	    *svp = SvREFCNT_inc(sv);
 	return 0;
     }
-    s = SvPV_force(sv,PL_na);
+    s = SvPV_force(sv,n_a);
     if (strEQ(s,"IGNORE")) {
 	if (i)
 	    (void)rsignal(i, SIG_IGN);
@@ -1098,11 +1105,12 @@ magic_setdbline(SV *sv, MAGIC *mg)
     I32 i;
     GV* gv;
     SV** svp;
+    STRLEN n_a;
 
     gv = PL_DBline;
     i = SvTRUE(sv);
     svp = av_fetch(GvAV(gv),
-		     atoi(MgPV(mg,PL_na)), FALSE);
+		     atoi(MgPV(mg,n_a)), FALSE);
     if (svp && SvIOKp(*svp) && (o = (OP*)SvSTASH(*svp)))
 	o->op_private = i;
     else
@@ -1198,10 +1206,11 @@ magic_setglob(SV *sv, MAGIC *mg)
 {
     register char *s;
     GV* gv;
+    STRLEN n_a;
 
     if (!SvOK(sv))
 	return 0;
-    s = SvPV(sv, PL_na);
+    s = SvPV(sv, n_a);
     if (*s == '*' && s[1])
 	s++;
     gv = gv_fetchpv(s,TRUE, SVt_PVGV);
@@ -1411,8 +1420,10 @@ vivify_defelem(SV *sv)
 	    if (svp)
 		value = *svp;
 	}
-	if (!value || value == &PL_sv_undef)
-	    croak(no_helem, SvPV(mg->mg_obj, PL_na));
+	if (!value || value == &PL_sv_undef) {
+	    STRLEN n_a;
+	    croak(no_helem, SvPV(mg->mg_obj, n_a));
+	}
     }
     else {
 	AV* av = (AV*)LvTARG(sv);
@@ -1529,7 +1540,7 @@ magic_set(SV *sv, MAGIC *mg)
 	if (PL_inplace)
 	    Safefree(PL_inplace);
 	if (SvOK(sv))
-	    PL_inplace = savepv(SvPV(sv,PL_na));
+	    PL_inplace = savepv(SvPV(sv,len));
 	else
 	    PL_inplace = Nullch;
 	break;
@@ -1537,7 +1548,7 @@ magic_set(SV *sv, MAGIC *mg)
 	if (PL_osname)
 	    Safefree(PL_osname);
 	if (SvOK(sv))
-	    PL_osname = savepv(SvPV(sv,PL_na));
+	    PL_osname = savepv(SvPV(sv,len));
 	else
 	    PL_osname = Nullch;
 	break;
@@ -1564,12 +1575,12 @@ magic_set(SV *sv, MAGIC *mg)
 	break;
     case '^':
 	Safefree(IoTOP_NAME(GvIOp(PL_defoutgv)));
-	IoTOP_NAME(GvIOp(PL_defoutgv)) = s = savepv(SvPV(sv,PL_na));
+	IoTOP_NAME(GvIOp(PL_defoutgv)) = s = savepv(SvPV(sv,len));
 	IoTOP_GV(GvIOp(PL_defoutgv)) = gv_fetchpv(s,TRUE, SVt_PVIO);
 	break;
     case '~':
 	Safefree(IoFMT_NAME(GvIOp(PL_defoutgv)));
-	IoFMT_NAME(GvIOp(PL_defoutgv)) = s = savepv(SvPV(sv,PL_na));
+	IoFMT_NAME(GvIOp(PL_defoutgv)) = s = savepv(SvPV(sv,len));
 	IoFMT_GV(GvIOp(PL_defoutgv)) = gv_fetchpv(s,TRUE, SVt_PVIO);
 	break;
     case '=':
@@ -1626,7 +1637,7 @@ magic_set(SV *sv, MAGIC *mg)
     case '#':
 	if (PL_ofmt)
 	    Safefree(PL_ofmt);
-	PL_ofmt = savepv(SvPV(sv,PL_na));
+	PL_ofmt = savepv(SvPV(sv,len));
 	break;
     case '[':
 	PL_compiling.cop_arybase = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
@@ -1734,7 +1745,7 @@ magic_set(SV *sv, MAGIC *mg)
     case ')':
 #ifdef HAS_SETGROUPS
 	{
-	    char *p = SvPV(sv, PL_na);
+	    char *p = SvPV(sv, len);
 	    Groups_t gary[NGROUPS];
 
 	    SET_NUMERIC_STANDARD();
@@ -1782,7 +1793,7 @@ magic_set(SV *sv, MAGIC *mg)
 	PL_tainting |= (PL_uid && (PL_euid != PL_uid || PL_egid != PL_gid));
 	break;
     case ':':
-	PL_chopset = SvPV_force(sv,PL_na);
+	PL_chopset = SvPV_force(sv,len);
 	break;
     case '0':
 	if (!PL_origalen) {

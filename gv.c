@@ -112,6 +112,7 @@ gv_init(GV *gv, HV *stash, char *name, STRLEN len, int multi)
     if (doproto) {			/* Replicate part of newSUB here. */
 	SvIOK_off(gv);
 	ENTER;
+	/* XXX unsafe for threads if eval_owner isn't held */
 	start_subparse(0,0);		/* Create CV in compcv. */
 	GvCV(gv) = PL_compcv;
 	LEAVE;
@@ -993,6 +994,7 @@ Gv_AMupdate(HV *stash)
   MAGIC* mg=mg_find((SV*)stash,'c');
   AMT *amtp = (mg) ? (AMT*)mg->mg_ptr: (AMT *) NULL;
   AMT amt;
+  STRLEN n_a;
 
   if (mg && amtp->was_ok_am == PL_amagic_generation
       && amtp->was_ok_sub == PL_sub_generation)
@@ -1040,7 +1042,7 @@ Gv_AMupdate(HV *stash)
             default:
               if (!SvROK(sv)) {
                 if (!SvOK(sv)) break;
-		gv = gv_fetchmethod(stash, SvPV(sv, PL_na));
+		gv = gv_fetchmethod(stash, SvPV(sv, n_a));
                 if (gv) cv = GvCV(gv);
                 break;
               }
@@ -1101,7 +1103,7 @@ Gv_AMupdate(HV *stash)
 		GV *ngv;
 		
 		DEBUG_o( deb("Resolving method `%.256s' for overloaded `%s' in package `%.256s'\n", 
-			     SvPV(GvSV(gv), PL_na), cp, HvNAME(stash)) );
+			     SvPV(GvSV(gv), n_a), cp, HvNAME(stash)) );
 		if (!SvPOK(GvSV(gv)) 
 		    || !(ngv = gv_fetchmethod_autoload(stash, SvPVX(GvSV(gv)),
 						       FALSE)))

@@ -239,11 +239,12 @@ dump_op(OP *o)
     case OP_GVSV:
     case OP_GV:
 	if (cGVOPo->op_gv) {
+	    STRLEN n_a;
 	    SV *tmpsv = NEWSV(0,0);
 	    ENTER;
 	    SAVEFREESV(tmpsv);
 	    gv_fullname3(tmpsv, cGVOPo->op_gv, Nullch);
-	    dump("GV = %s\n", SvPV(tmpsv, PL_na));
+	    dump("GV = %s\n", SvPV(tmpsv, n_a));
 	    LEAVE;
 	}
 	else

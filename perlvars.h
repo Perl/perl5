@@ -178,3 +178,6 @@ PERLVARIC(Gpatleave,	char *, "\\.^$@dDwWsSbB+*?|()-nrtfeaxc0123456789[{]}")
 
 PERLVAR(Gspecialsv_list[4],SV *)	/* from byterun.h */
 
+#ifdef USE_THREADS
+PERLVAR(Gcred_mutex,      perl_mutex)     /* altered credentials in effect */
+#endif

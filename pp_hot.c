@@ -304,6 +304,7 @@ PP(pp_print)
     IO *io;
     register PerlIO *fp;
     MAGIC *mg;
+    STRLEN n_a;
 
     if (PL_op->op_flags & OPf_STACKED)
 	gv = (GV*)*++MARK;
@@ -335,7 +336,7 @@ PP(pp_print)
 	if (PL_dowarn) {
 	    SV* sv = sv_newmortal();
             gv_fullname3(sv, gv, Nullch);
-            warn("Filehandle %s never opened", SvPV(sv,PL_na));
+            warn("Filehandle %s never opened", SvPV(sv,n_a));
         }
 
 	SETERRNO(EBADF,RMS$_IFI);
@@ -346,9 +347,9 @@ PP(pp_print)
 	    SV* sv = sv_newmortal();
             gv_fullname3(sv, gv, Nullch);
 	    if (IoIFP(io))
-		warn("Filehandle %s opened only for input", SvPV(sv,PL_na));
+		warn("Filehandle %s opened only for input", SvPV(sv,n_a));
 	    else
-		warn("print on closed filehandle %s", SvPV(sv,PL_na));
+		warn("print on closed filehandle %s", SvPV(sv,n_a));
 	}
 	SETERRNO(EBADF,IoIFP(io)?RMS$_FAC:RMS$_IFI);
 	goto just_say_no;
@@ -425,6 +426,7 @@ PP(pp_rv2av)
 	    
 	    if (SvTYPE(sv) != SVt_PVGV) {
 		char *sym;
+		STRLEN n_a;
 
 		if (SvGMAGICAL(sv)) {
 		    mg_get(sv);
@@ -441,7 +443,7 @@ PP(pp_rv2av)
 			RETURN;
 		    RETPUSHUNDEF;
 		}
-		sym = SvPV(sv,PL_na);
+		sym = SvPV(sv,n_a);
 		if (PL_op->op_private & HINT_STRICT_REFS)
 		    DIE(no_symref, sym, "an ARRAY");
 		gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PVAV);
@@ -509,6 +511,7 @@ PP(pp_rv2hv)
 	    
 	    if (SvTYPE(sv) != SVt_PVGV) {
 		char *sym;
+		STRLEN n_a;
 
 		if (SvGMAGICAL(sv)) {
 		    mg_get(sv);
@@ -527,7 +530,7 @@ PP(pp_rv2hv)
 		    }
 		    RETSETUNDEF;
 		}
-		sym = SvPV(sv,PL_na);
+		sym = SvPV(sv,n_a);
 		if (PL_op->op_private & HINT_STRICT_REFS)
 		    DIE(no_symref, sym, "a HASH");
 		gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PVHV);
@@ -1357,8 +1360,10 @@ PP(pp_helem)
 	if (!svp || *svp == &PL_sv_undef) {
 	    SV* lv;
 	    SV* key2;
-	    if (!defer)
-		DIE(no_helem, SvPV(keysv, PL_na));
+	    if (!defer) {
+		STRLEN n_a;
+		DIE(no_helem, SvPV(keysv, n_a));
+	    }
 	    lv = sv_newmortal();
 	    sv_upgrade(lv, SVt_PVLV);
 	    LvTYPE(lv) = 'y';
@@ -1984,6 +1989,7 @@ PP(pp_entersub)
     default:
 	if (!SvROK(sv)) {
 	    char *sym;
+	    STRLEN n_a;
 
 	    if (sv == &PL_sv_yes) {		/* unfound import, ignore */
 		if (hasargs)
@@ -1995,7 +2001,7 @@ PP(pp_entersub)
 		sym = SvPOKp(sv) ? SvPVX(sv) : Nullch;
 	    }
 	    else
-		sym = SvPV(sv, PL_na);
+		sym = SvPV(sv, n_a);
 	    if (!sym)
 		DIE(no_usym, "a subroutine");
 	    if (PL_op->op_private & HINT_STRICT_REFS)
@@ -2132,8 +2138,7 @@ PP(pp_entersub)
      	 * (3) instead of (2) so we'd have to clone. Would the fact
      	 * that we released the mutex more quickly make up for this?
      	 */
-	if (PL_threadnum &&
-	    (svp = hv_fetch(thr->cvcache, (char *)cv, sizeof(cv), FALSE)))
+	if ((svp = hv_fetch(thr->cvcache, (char *)cv, sizeof(cv), FALSE)))
 	{
 	    /* We already have a clone to use */
 	    MUTEX_UNLOCK(CvMUTEXP(cv));
@@ -2486,7 +2491,7 @@ PP(pp_method)
 	}
     }
 
-    name = SvPV(TOPs, PL_na);
+    name = SvPV(TOPs, packlen);
     sv = *(PL_stack_base + TOPMARK + 1);
     
     if (SvGMAGICAL(sv))

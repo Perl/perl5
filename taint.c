@@ -89,9 +89,10 @@ taint_env(void)
     svp = hv_fetch(GvHVn(PL_envgv),"TERM",4,FALSE);
     if (svp && *svp && SvTAINTED(*svp)) {
     	dTHR;	/* just for taint */
+	STRLEN n_a;
 	bool was_tainted = PL_tainted;
-	char *t = SvPV(*svp, PL_na);
-	char *e = t + PL_na;
+	char *t = SvPV(*svp, n_a);
+	char *e = t + n_a;
 	PL_tainted = was_tainted;
 	if (t < e && isALNUM(*t))
 	    t++;

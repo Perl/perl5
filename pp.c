@@ -224,6 +224,7 @@ PP(pp_rv2gv)
     else {
 	if (SvTYPE(sv) != SVt_PVGV) {
 	    char *sym;
+	    STRLEN n_a;
 
 	    if (SvGMAGICAL(sv)) {
 		mg_get(sv);
@@ -238,7 +239,7 @@ PP(pp_rv2gv)
 		    warn(warn_uninit);
 		RETSETUNDEF;
 	    }
-	    sym = SvPV(sv, PL_na);
+	    sym = SvPV(sv, n_a);
 	    if (PL_op->op_private & HINT_STRICT_REFS)
 		DIE(no_symref, sym, "a symbol");
 	    sv = (SV*)gv_fetchpv(sym, TRUE, SVt_PVGV);
@@ -267,6 +268,7 @@ PP(pp_rv2sv)
     else {
 	GV *gv = (GV*)sv;
 	char *sym;
+	STRLEN n_a;
 
 	if (SvTYPE(gv) != SVt_PVGV) {
 	    if (SvGMAGICAL(sv)) {
@@ -282,7 +284,7 @@ PP(pp_rv2sv)
 		    warn(warn_uninit);
 		RETSETUNDEF;
 	    }
-	    sym = SvPV(sv, PL_na);
+	    sym = SvPV(sv, n_a);
 	    if (PL_op->op_private & HINT_STRICT_REFS)
 		DIE(no_symref, sym, "a SCALAR");
 	    gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PV);
@@ -533,9 +535,10 @@ PP(pp_gelem)
     SV *tmpRef;
     char *elem;
     djSP;
+    STRLEN n_a;
 
     sv = POPs;
-    elem = SvPV(sv, PL_na);
+    elem = SvPV(sv, n_a);
     gv = (GV*)POPs;
     tmpRef = Nullsv;
     sv = Nullsv;
@@ -1792,8 +1795,9 @@ PP(pp_hex)
     djSP; dTARGET;
     char *tmps;
     I32 argtype;
+    STRLEN n_a;
 
-    tmps = POPp;
+    tmps = POPpx;
     XPUSHu(scan_hex(tmps, 99, &argtype));
     RETURN;
 }
@@ -1804,8 +1808,9 @@ PP(pp_oct)
     UV value;
     I32 argtype;
     char *tmps;
+    STRLEN n_a;
 
-    tmps = POPp;
+    tmps = POPpx;
     while (*tmps && isSPACE(*tmps))
 	tmps++;
     if (*tmps == '0')
@@ -1898,7 +1903,8 @@ PP(pp_substr)
 	if (lvalue) {			/* it's an lvalue! */
 	    if (!SvGMAGICAL(sv)) {
 		if (SvROK(sv)) {
-		    SvPV_force(sv,PL_na);
+		    STRLEN n_a;
+		    SvPV_force(sv,n_a);
 		    if (PL_dowarn)
 			warn("Attempt to use reference as lvalue in substr");
 		}
@@ -2099,13 +2105,14 @@ PP(pp_ord)
     djSP; dTARGET;
     I32 value;
     char *tmps;
+    STRLEN n_a;
 
 #ifndef I286
-    tmps = POPp;
+    tmps = POPpx;
     value = (I32) (*tmps & 255);
 #else
     I32 anum;
-    tmps = POPp;
+    tmps = POPpx;
     anum = (I32) *tmps;
     value = (I32) (anum & 255);
 #endif
@@ -2132,12 +2139,13 @@ PP(pp_chr)
 PP(pp_crypt)
 {
     djSP; dTARGET; dPOPTOPssrl;
+    STRLEN n_a;
 #ifdef HAS_CRYPT
-    char *tmps = SvPV(left, PL_na);
+    char *tmps = SvPV(left, n_a);
 #ifdef FCRYPT
-    sv_setpv(TARG, fcrypt(tmps, SvPV(right, PL_na)));
+    sv_setpv(TARG, fcrypt(tmps, SvPV(right, n_a)));
 #else
-    sv_setpv(TARG, PerlProc_crypt(tmps, SvPV(right, PL_na)));
+    sv_setpv(TARG, PerlProc_crypt(tmps, SvPV(right, n_a)));
 #endif
 #else
     DIE(
@@ -2152,6 +2160,7 @@ PP(pp_ucfirst)
     djSP;
     SV *sv = TOPs;
     register char *s;
+    STRLEN n_a;
 
     if (!SvPADTMP(sv)) {
 	dTARGET;
@@ -2159,7 +2168,7 @@ PP(pp_ucfirst)
 	sv = TARG;
 	SETs(sv);
     }
-    s = SvPV_force(sv, PL_na);
+    s = SvPV_force(sv, n_a);
     if (*s) {
 	if (PL_op->op_private & OPpLOCALE) {
 	    TAINT;
@@ -2178,6 +2187,7 @@ PP(pp_lcfirst)
     djSP;
     SV *sv = TOPs;
     register char *s;
+    STRLEN n_a;
 
     if (!SvPADTMP(sv)) {
 	dTARGET;
@@ -2185,7 +2195,7 @@ PP(pp_lcfirst)
 	sv = TARG;
 	SETs(sv);
     }
-    s = SvPV_force(sv, PL_na);
+    s = SvPV_force(sv, n_a);
     if (*s) {
 	if (PL_op->op_private & OPpLOCALE) {
 	    TAINT;
@@ -2460,8 +2470,10 @@ PP(pp_hslice)
 		svp = avhv_fetch_ent((AV*)hv, keysv, lval, 0);
 	    }
 	    if (lval) {
-		if (!svp || *svp == &PL_sv_undef)
-		    DIE(no_helem, SvPV(keysv, PL_na));
+		if (!svp || *svp == &PL_sv_undef) {
+		    STRLEN n_a;
+		    DIE(no_helem, SvPV(keysv, n_a));
+		}
 		if (PL_op->op_private & OPpLVAL_INTRO)
 		    save_helem(hv, keysv, svp);
 	    }
@@ -3451,6 +3463,7 @@ PP(pp_unpack)
 		    }
 		    else if (++bytes >= sizeof(UV)) {	/* promote to string */
 			char *t;
+			STRLEN n_a;
 
 			sv = newSVpvf("%.*Vu", (int)TYPE_DIGITS(UV), auv);
 			while (s < strend) {
@@ -3460,7 +3473,7 @@ PP(pp_unpack)
 				break;
 			    }
 			}
-			t = SvPV(sv, PL_na);
+			t = SvPV(sv, n_a);
 			while (*t == '0')
 			    t++;
 			sv_chop(sv, t);
@@ -3708,8 +3721,9 @@ doencodes(register SV *sv, register char *s, register I32 len)
 STATIC SV      *
 is_an_int(char *s, STRLEN l)
 {
+  STRLEN          n_a;
   SV             *result = newSVpv("", l);
-  char           *result_c = SvPV(result, PL_na);	/* convenience */
+  char           *result_c = SvPV(result, n_a);	/* convenience */
   char           *out = result_c;
   bool            skip = 1;
   bool            ignore = 0;
@@ -4204,6 +4218,7 @@ PP(pp_pack)
 		if (fromstr == &PL_sv_undef)
 		    aptr = NULL;
 		else {
+		    STRLEN n_a;
 		    /* XXX better yet, could spirit away the string to
 		     * a safe spot and hang on to it until the result
 		     * of pack() (and all copies of the result) are
@@ -4212,9 +4227,9 @@ PP(pp_pack)
 		    if (PL_dowarn && (SvTEMP(fromstr) || SvPADTMP(fromstr)))
 			warn("Attempt to pack pointer to temporary value");
 		    if (SvPOK(fromstr) || SvNIOK(fromstr))
-			aptr = SvPV(fromstr,PL_na);
+			aptr = SvPV(fromstr,n_a);
 		    else
-			aptr = SvPV_force(fromstr,PL_na);
+			aptr = SvPV_force(fromstr,n_a);
 		}
 		sv_catpvn(cat, (char*)&aptr, sizeof(char*));
 	    }

@@ -1070,7 +1070,7 @@ sv_peek(SV *sv)
 	while (unref--)
 	    sv_catpv(t, ")");
     }
-    return SvPV(t, PL_na);
+    return SvPV(t, prevlen);
 #else	/* DEBUGGING */
     return "";
 #endif	/* DEBUGGING */
@@ -3892,6 +3892,7 @@ sv_2io(SV *sv)
 {
     IO* io;
     GV* gv;
+    STRLEN n_a;
 
     switch (SvTYPE(sv)) {
     case SVt_PVIO:
@@ -3908,13 +3909,13 @@ sv_2io(SV *sv)
 	    croak(no_usym, "filehandle");
 	if (SvROK(sv))
 	    return sv_2io(SvRV(sv));
-	gv = gv_fetchpv(SvPV(sv,PL_na), FALSE, SVt_PVIO);
+	gv = gv_fetchpv(SvPV(sv,n_a), FALSE, SVt_PVIO);
 	if (gv)
 	    io = GvIO(gv);
 	else
 	    io = 0;
 	if (!io)
-	    croak("Bad filehandle: %s", SvPV(sv,PL_na));
+	    croak("Bad filehandle: %s", SvPV(sv,n_a));
 	break;
     }
     return io;
@@ -3925,6 +3926,7 @@ sv_2cv(SV *sv, HV **st, GV **gvp, I32 lref)
 {
     GV *gv;
     CV *cv;
+    STRLEN n_a;
 
     if (!sv)
 	return *gvp = Nullgv, Nullcv;
@@ -3962,7 +3964,7 @@ sv_2cv(SV *sv, HV **st, GV **gvp, I32 lref)
 	else if (isGV(sv))
 	    gv = (GV*)sv;
 	else
-	    gv = gv_fetchpv(SvPV(sv, PL_na), lref, SVt_PVCV);
+	    gv = gv_fetchpv(SvPV(sv, n_a), lref, SVt_PVCV);
 	*gvp = gv;
 	if (!gv)
 	    return Nullcv;
@@ -3979,7 +3981,7 @@ sv_2cv(SV *sv, HV **st, GV **gvp, I32 lref)
 		   Nullop);
 	    LEAVE;
 	    if (!GvCVu(gv))
-		croak("Unable to create sub named \"%s\"", SvPV(sv,PL_na));
+		croak("Unable to create sub named \"%s\"", SvPV(sv,n_a));
 	}
 	return GvCVu(gv);
     }
@@ -5097,8 +5099,10 @@ sv_dump(SV *sv)
 	    PerlIO_printf(Perl_debug_log, "  NAME = \"%s\"\n", HvNAME(sv));
 	break;
     case SVt_PVCV:
-	if (SvPOK(sv))
-	    PerlIO_printf(Perl_debug_log, "  PROTOTYPE = \"%s\"\n", SvPV(sv,PL_na));
+	if (SvPOK(sv)) {
+	    STRLEN n_a;
+	    PerlIO_printf(Perl_debug_log, "  PROTOTYPE = \"%s\"\n", SvPV(sv,n_a));
+	}
 	/* FALL THROUGH */
     case SVt_PVFM:
 	PerlIO_printf(Perl_debug_log, "  STASH = 0x%lx\n", (long)CvSTASH(sv));

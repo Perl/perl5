@@ -1139,6 +1139,7 @@ CV*
 perl_get_cv(char *name, I32 create)
 {
     GV* gv = gv_fetchpv(name, create, SVt_PVCV);
+    /* XXX unsafe for threads if eval_owner isn't held */
     if (create && !GvCVu(gv))
     	return newSUB(start_subparse(FALSE, 0),
 		      newSVOP(OP_CONST, 0, newSVpv(name,0)),
@@ -1441,8 +1442,10 @@ perl_eval_pv(char *p, I32 croak_on_error)
     sv = POPs;
     PUTBACK;
 
-    if (croak_on_error && SvTRUE(ERRSV))
-	croak(SvPVx(ERRSV, PL_na));
+    if (croak_on_error && SvTRUE(ERRSV)) {
+	STRLEN n_a;
+	croak(SvPVx(ERRSV, n_a));
+    }
 
     return sv;
 }
@@ -2096,6 +2099,7 @@ validate_suid(char *validarg, char *scriptname, int fdscript)
 	croak("Can't stat script \"%s\"",PL_origfilename);
     if (fdscript < 0 && PL_statbuf.st_mode & (S_ISUID|S_ISGID)) {
 	I32 len;
+	STRLEN n_a;
 
 #ifdef IAMSUID
 #ifndef HAS_SETREUID
@@ -2168,12 +2172,12 @@ validate_suid(char *validarg, char *scriptname, int fdscript)
 	PL_doswitches = FALSE;		/* -s is insecure in suid */
 	PL_curcop->cop_line++;
 	if (sv_gets(PL_linestr, PL_rsfp, 0) == Nullch ||
-	  strnNE(SvPV(PL_linestr,PL_na),"#!",2) )	/* required even on Sys V */
+	  strnNE(SvPV(PL_linestr,n_a),"#!",2) )	/* required even on Sys V */
 	    croak("No #! line");
-	s = SvPV(PL_linestr,PL_na)+2;
+	s = SvPV(PL_linestr,n_a)+2;
 	if (*s == ' ') s++;
 	while (!isSPACE(*s)) s++;
-	for (s2 = s;  (s2 > SvPV(PL_linestr,PL_na)+2 &&
+	for (s2 = s;  (s2 > SvPV(PL_linestr,n_a)+2 &&
 		       (isDIGIT(s2[-1]) || strchr("._-", s2[-1])));  s2--) ;
 	if (strnNE(s2-4,"perl",4) && strnNE(s-9,"perl",4))  /* sanity check */
 	    croak("Not a perl script");
@@ -2712,7 +2716,7 @@ incpush(char *p, int addsubdirs)
 	    char *unix;
 	    STRLEN len;
 
-	    if ((unix = tounixspec_ts(SvPV(libdir,PL_na),Nullch)) != Nullch) {
+	    if ((unix = tounixspec_ts(SvPV(libdir,len),Nullch)) != Nullch) {
 		len = strlen(unix);
 		while (unix[len-1] == '/') len--;  /* Cosmetic */
 		sv_usepvn(libdir,unix,len);
@@ -2720,7 +2724,7 @@ incpush(char *p, int addsubdirs)
 	    else
 		PerlIO_printf(PerlIO_stderr(),
 		              "Failed to unixify @INC element \"%s\"\n",
-			      SvPV(libdir,PL_na));
+			      SvPV(libdir,len));
 #endif
 	    /* .../archname/version if -d .../archname/version/auto */
 	    sv_setsv(subdir, libdir);
