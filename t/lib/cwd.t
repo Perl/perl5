@@ -72,8 +72,12 @@ my $getcwd     = getcwd;
 my $fastcwd    = fastcwd;
 my $fastgetcwd = fastgetcwd;
 my $want = "t/pteerslt/path/to/a/dir";
+print "# cwd      = $cwd\n";
+print "# getcwd   = $getcwd\n";
+print "# fastcwd  = $fastcwd\n";
+print "# fastgetcw= $fastgetcwd\n";
 # This checked out OK on ODS-2 and ODS-5:
-$want = "T\.PTEERSLT\.PATH\.TO\.A\.DIR\]";
+$want = "T\.PTEERSLT\.PATH\.TO\.A\.DIR\]" if $^O eq 'VMS';
 print +($cwd        =~ m|$want$| ? "" : "not "), "ok 7\n";
 print +($getcwd     =~ m|$want$| ? "" : "not "), "ok 8\n";
 print +($fastcwd    =~ m|$want$| ? "" : "not "), "ok 9\n";
