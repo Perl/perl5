@@ -187,6 +187,7 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 	for (off = AvFILL(curname); off > 0; off--) {
 	    if ((sv = svp[off]) &&
 		sv != &sv_undef &&
+		!SvFAKE(sv) &&
 		seq <= SvIVX(sv) &&
 		seq > I_32(SvNVX(sv)) &&
 		strEQ(SvPVX(sv), name))
@@ -211,7 +212,7 @@ pad_findlex(char *name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix)
 		    av_store(comppad_name, newoff, sv);
 		    SvNVX(sv) = (double)curcop->cop_seq;
 		    SvIVX(sv) = 999999999;	/* A ref, intro immediately */
-		    SvFLAGS(sv) |= SVf_FAKE;
+		    SvFAKE_on(sv);		/* A ref, not a real var */
 		    if (CvANON(compcv) || SvTYPE(compcv) == SVt_PVFM) {
 			/* "It's closures all the way down." */
 			CvCLONE_on(compcv);
@@ -1379,6 +1380,19 @@ OP *op;
 	peep(main_start);
 	main_cv = compcv;
 	compcv = 0;
+	/* Register with debugger: */
+
+	if (perldb) {
+	    CV *cv = perl_get_cv("DB::postponed", FALSE);
+	
+	    if (cv) {
+		dSP;
+		PUSHMARK(sp);
+		XPUSHs((SV*)compiling.cop_filegv);
+		PUTBACK;
+		perl_call_sv((SV*)cv, G_DISCARD);
+	    }
+	}
     }
 }
 
