@@ -1,18 +1,3 @@
-#
-#  Perl5 Package for complex numbers
-#
-#  1994 by David Nadler
-#  Coding know-how provided by Tom Christiansen, Tim Bunce, and Larry Wall
-#	sqrt() added by Tom Christiansen; beware should have two roots, 
-#			but only returns one.  (use wantarray?)
-#  
-#
-# The functions "Re", "Im", and "arg" are provided.
-# "~" is used as the conjugation operator and "abs" is overloaded.
-#
-# Transcendental functions overloaded: so far only sin, cos, and exp.
-#  
-
 package Math::Complex;
 
 require Exporter;
@@ -21,7 +6,7 @@ require Exporter;
 
 # just to make use happy
 
-%OVERLOAD= (
+use overload
     '+'   => sub  { my($x1,$y1,$x2,$y2) = (@{$_[0]},@{$_[1]});
                       bless [ $x1+$x2, $y1+$y2];
              },
@@ -95,12 +80,12 @@ require Exporter;
       },
 
     qw("" stringify)
-);
+;
 
 sub new {
-    shift;
+    my $class = shift;
     my @C = @_;
-    bless \@C;
+    bless \@C, $class;
 }
 
 sub Re {
@@ -134,3 +119,45 @@ sub stringify {
     $_ = 0 if ($_ eq '');
     return $_;
 }
+
+1;
+__END__
+
+=head1 NAME
+
+Math::Complex - complex numbers package
+
+=head1 SYNOPSIS
+
+  use Math::Complex;
+  $i = new Math::Complex;
+
+=head1 DESCRIPTION
+
+Complex numbers declared as
+
+    $i = Math::Complex->new(1,1);
+
+can be manipulated with overloaded math operators. The operators
+
+  + - * / neg ~ abs cos sin exp sqrt
+
+are supported as well as
+
+  "" (stringify)
+
+The methods
+
+  Re Im arg
+
+are also provided.
+
+=head1 BUGS
+
+sqrt() should return two roots, but only returns one.
+
+=head1 AUTHORS
+
+Dave Nadler, Tom Christiansen, Tim Bunce, Larry Wall.
+
+=cut

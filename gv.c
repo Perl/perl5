@@ -65,7 +65,7 @@ char *name;
     gv = gv_fetchpv(tmpbuf, TRUE, SVt_PVGV);
     sv_setpv(GvSV(gv), name);
     if (*name == '/' && (instr(name,"/lib/") || instr(name,".pm")))
-	SvMULTI_on(gv);
+	GvMULTI_on(gv);
     if (perldb)
 	hv_magic(GvHVn(gv_AVadd(gv)), gv, 'L');
     return gv;
@@ -96,7 +96,7 @@ int multi;
     GvNAME(gv) = savepvn(name, len);
     GvNAMELEN(gv) = len;
     if (multi)
-	SvMULTI_on(gv);
+	GvMULTI_on(gv);
 }
 
 static void
@@ -366,7 +366,7 @@ I32 sv_type;
 		gv = *gvp;
 
 		if (SvTYPE(gv) == SVt_PVGV)
-		    SvMULTI_on(gv);
+		    GvMULTI_on(gv);
 		else if (!add)
 		    return Nullgv;
 		else
@@ -432,15 +432,16 @@ I32 sv_type;
 		{
 		    gvp = (GV**)hv_fetch(stash,name,len,0);
 		    if (!gvp ||
-			    *gvp == (GV*)&sv_undef ||
-			    SvTYPE(*gvp) != SVt_PVGV ||
-			    !(GvFLAGS(*gvp) & GVf_IMPORTED))
-			stash = 0;
-		    else if (sv_type == SVt_PVAV && !GvAV(*gvp) ||
-			     sv_type == SVt_PVHV && !GvHV(*gvp) ||
-			     sv_type == SVt_PV   && !GvSV(*gvp) )
+			*gvp == (GV*)&sv_undef ||
+			SvTYPE(*gvp) != SVt_PVGV)
 		    {
-			warn("Variable \"%c%s\" is not exported",
+			stash = 0;
+		    }
+		    else if (sv_type == SVt_PV   && !GvIMPORTED_SV(*gvp) ||
+			     sv_type == SVt_PVAV && !GvIMPORTED_AV(*gvp) ||
+			     sv_type == SVt_PVHV && !GvIMPORTED_HV(*gvp) )
+		    {
+			warn("Variable \"%c%s\" is not imported",
 			    sv_type == SVt_PVAV ? '@' :
 			    sv_type == SVt_PVHV ? '%' : '$',
 			    name);
@@ -478,7 +479,7 @@ I32 sv_type;
     gv = *gvp;
     if (SvTYPE(gv) == SVt_PVGV) {
 	if (add) {
-	    SvMULTI_on(gv);
+	    GvMULTI_on(gv);
 	    gv_init_sv(gv, sv_type);
 	}
 	return gv;
@@ -502,16 +503,16 @@ I32 sv_type;
     case 'a':
     case 'b':
 	if (len == 1)
-	    SvMULTI_on(gv);
+	    GvMULTI_on(gv);
 	break;
     case 'E':
 	if (strnEQ(name, "EXPORT", 6))
-	    SvMULTI_on(gv);
+	    GvMULTI_on(gv);
 	break;
     case 'I':
 	if (strEQ(name, "ISA")) {
 	    AV* av = GvAVn(gv);
-	    SvMULTI_on(gv);
+	    GvMULTI_on(gv);
 	    sv_magic((SV*)av, (SV*)gv, 'I', Nullch, 0);
 	    if (add & 2 && strEQ(nambeg,"AnyDBM_File::ISA") && AvFILL(av) == -1)
 	    {
@@ -533,7 +534,7 @@ I32 sv_type;
     case 'O':
         if (strEQ(name, "OVERLOAD")) {
             HV* hv = GvHVn(gv);
-            SvMULTI_on(gv);
+            GvMULTI_on(gv);
             sv_magic((SV*)hv, (SV*)gv, 'A', 0, 0);
         }
         break;
@@ -542,7 +543,7 @@ I32 sv_type;
 	if (strEQ(name, "SIG")) {
 	    HV *hv;
 	    siggv = gv;
-	    SvMULTI_on(siggv);
+	    GvMULTI_on(siggv);
 	    hv = GvHVn(siggv);
 	    hv_magic(hv, siggv, 'S');
 
@@ -699,7 +700,7 @@ newIO()
     sv_upgrade((SV *)io,SVt_PVIO);
     SvREFCNT(io) = 1;
     SvOBJECT_on(io);
-    iogv = gv_fetchpv("FileHandle::", TRUE, SVt_PVIO);
+    iogv = gv_fetchpv("FileHandle::", TRUE, SVt_PVHV);
     SvSTASH(io) = (HV*)SvREFCNT_inc(GvHV(iogv));
     return io;
 }
@@ -726,12 +727,12 @@ HV* stash;
 	    }
 	    else if (isALPHA(*entry->hent_key)) {
 		gv = (GV*)entry->hent_val;
-		if (SvMULTI(gv))
+		if (GvMULTI(gv))
 		    continue;
 		curcop->cop_line = GvLINE(gv);
 		filegv = GvFILEGV(gv);
 		curcop->cop_filegv = filegv;
-		if (filegv && SvMULTI(filegv))	/* Filename began with slash */
+		if (filegv && GvMULTI(filegv))	/* Filename began with slash */
 		    continue;
 		warn("Identifier \"%s::%s\" used only once: possible typo",
 			HvNAME(stash), GvNAME(gv));

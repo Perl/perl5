@@ -1,5 +1,5 @@
 # Descrip.MMS for perl5 on VMS
-# Last revised 17-Jan-1995 by Charles Bailey  bailey@genetics.upenn.edu
+# Last revised 22-Feb-1996 by Charles Bailey  bailey@genetics.upenn.edu
 #
 #: This file uses MMS syntax, and can be processed using DEC's MMS product,
 #: or the free MMK clone (available by ftp at ftp.spc.edu).  If you want to
@@ -230,6 +230,9 @@ CRTL = []crtl.opt
 CRTLOPTS =,$(CRTL)/Options
 
 .SUFFIXES
+
+.ifdef LINK_ONLY
+.else
 .SUFFIXES $(O) .c .xs
 
 .xs.c :
@@ -242,12 +245,14 @@ CRTLOPTS =,$(CRTL)/Options
 .xs$(O) :
 	$(XSUBPP) $(MMS$SOURCE) >$(MMS$SOURCE_NAME).c
 	$(CC) $(CFLAGS) $(MMS$SOURCE_NAME).c
+.endif
+
 
 all : base extras archcorefiles preplibrary perlpods
 	@ $(NOOP)
 base : miniperl$(E) perl$(E)
 	@ $(NOOP)
-extras : FileHandle Safe libmods utils podxform
+extras : Fcntl FileHandle Safe libmods utils podxform
 	@ $(NOOP)
 libmods : [.lib]Config.pm [.lib.$(ARCH)]Config.pm [.lib]DynaLoader.pm [.lib.VMS]Filespec.pm 
 	@ $(NOOP)
@@ -286,29 +291,38 @@ $(DBG)libperl$(OLB) : $(obj)
 perlmain.c : miniperlmain.c $(MINIPERL_EXE) [.vms]writemain.pl
 	$(MINIPERL) [.VMS]Writemain.pl "$(EXT)"
 
-perl$(E) : perlmain$(O), perlshr$(E), $(MINIPERL_EXE)
+$(DBG)perl$(E) : perlmain$(O), $(DBG)perlshr$(E), $(MINIPERL_EXE)
 	@ @[.vms]genopt "PerlShr.Opt/Write" "|" "''F$Environment("Default")'$(DBG)PerlShr$(E)/Share"
 .ifdef gnuc
 	@ @[.vms]genopt "PerlShr.Opt/Append" "|" "$(LIBS1)|$(LIBS2)"
 .endif
 	Link $(LINKFLAGS)/Exe=$(DBG)$(MMS$TARGET) perlmain$(O), perlshr.opt/Option, perlshr_attr.opt/Option
-perlshr$(E) : $(DBG)libperl$(OLB) $(extobj) $(DBG)perlshr_xtras.ts
+
+$(DBG)perlshr$(E) : $(DBG)libperl$(OLB) $(extobj) $(DBG)perlshr_xtras.ts
 	Link /NoTrace$(LINKFLAGS)/Share=$(DBG)$(MMS$TARGET) $(extobj) []$(DBG)perlshr_bld.opt/Option, perlshr_attr.opt/Option
+
 # The following files are built in one go by gen_shrfls.pl:
 #  perlshr_attr.opt, $(DBG)perlshr_bld.opt - VAX and AXP
 #  perlshr_gbl*.mar, perlshr_gbl*$(O) - VAX only
+# The song and dance with gen_shrfls.opt accomodates DCL's 255 character
+# line length limit.
 .ifdef PIPES_BROKEN
 # This is a backup target used only with older versions of the DECCRTL which
 # can't deal with pipes properly.  See ReadMe.VMS for details.
 $(DBG)perlshr_xtras.ts : perl.h config.h vmsish.h proto.h [.vms]gen_shrfls.pl $(MINIPERL_EXE) $(MAKEFILE) $(CRTL)
 	$(CC) $(CFLAGS)/NoObject/NoList/PreProcess=perl.i perl.h
-	$(MINIPERL) [.vms]gen_shrfls.pl "~~NOCC~~perl.i~~$(CC)$(CFLAGS)" "$(O)" "$(DBG)" "$(OLB)" "$(EXT)" "$(CRTL)"
-	@ Delete/NoLog/NoConfirm perl.i;
+	@ $(MINIPERL) -e "print join('|',@ARGV),'|';" "~~NOCC~~perl.i~~$(CC)$(CFLAGS)" >gen_shrfls.opt
+	@ $(MINIPERL) -e "print join('|',@ARGV);" "$(O)" "$(DBG)" "$(OLB)" "$(EXT)" "$(CRTL)" >>gen_shrfls.opt
+	$(MINIPERL) [.vms]gen_shrfls.pl -f gen_shrfls.opt
+	@ Delete/NoLog/NoConfirm perl.i;, gen_shrfls.opt;
 	@ If F$Search("$(DBG)perlshr_xtras.ts").nes."" Then Delete/NoLog/NoConfirm $(DBG)perlshr_xtras.ts;*
 	@ Copy NLA0: $(DBG)perlshr_xtras.ts
 .else
 $(DBG)perlshr_xtras.ts : perl.h config.h vmsish.h proto.h [.vms]gen_shrfls.pl $(MINIPERL_EXE) $(MAKEFILE) $(CRTL)
-	$(MINIPERL) [.vms]gen_shrfls.pl "$(CC)$(CFLAGS)" "$(O)" "$(DBG)" "$(OLB)" "$(EXT)" "$(CRTL)"
+	@ $(MINIPERL) -e "print join('|',@ARGV),'|';" "$(CC)$(CFLAGS)" >gen_shrfls.opt
+	@ $(MINIPERL) -e "print join('|',@ARGV);" "$(O)" "$(DBG)" "$(OLB)" "$(EXT)" "$(CRTL)" >>gen_shrfls.opt
+	$(MINIPERL) [.vms]gen_shrfls.pl -f gen_shrfls.opt
+	@ Delete/NoLog/NoConfirm gen_shrfls.opt;
 	@ If F$Search("$(DBG)perlshr_xtras.ts").nes."" Then Delete/NoLog/NoConfirm $(DBG)perlshr_xtras.ts;*
 	@ Copy NLA0: $(DBG)perlshr_xtras.ts
 .endif
@@ -317,8 +331,12 @@ $(DBG)perlshr_xtras.ts : perl.h config.h vmsish.h proto.h [.vms]gen_shrfls.pl $(
 	Create/Directory [.lib.$(ARCH)]
 	Copy $(MMS$SOURCE) $(MMS$TARGET)
 
+# Once again, we accomodate DCL's 255 character buffer
 [.lib]config.pm : [.vms]config.vms [.vms]genconfig.pl $(MINIPERL_EXE)
-	$(MINIPERL) [.VMS]GenConfig.Pl cc=$(CC)$(CFLAGS) ldflags=$(LINKFLAGS) obj_ext=$(O) exe_ext=$(E) lib_ext=$(OLB)
+	@ $(MINIPERL) -e "print join('|',@ARGV),'|';" "cc=$(CC)$(CFLAGS)" >genconfig.opt
+	@ $(MINIPERL) -e "print join('|',@ARGV),'|';" "ldflags=$(LINKFLAGS)|obj_ext=$(O)|exe_ext=$(E)|lib_ext=$(OLB)" >>genconfig.opt
+	$(MINIPERL) [.VMS]GenConfig.Pl -f genconfig.opt
+	@ Delete/NoLog/NoConfirm genconfig.opt;
 	$(MINIPERL) ConfigPM.
 
 [.ext.dynaloader]dl_vms.c : [.ext.dynaloader]dl_vms.xs $(MINIPERL_EXE)
@@ -335,6 +353,7 @@ Safe : [.lib]Safe.pm [.lib.auto]Safe$(E)
 	@ $(NOOP)
 
 [.lib]Safe.pm : [.ext.Safe]Descrip.MMS
+	@ If F$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
 	@ Set Default [.ext.Safe]
 	$(MMS)
 	@ Set Default [--]
@@ -347,12 +366,13 @@ Safe : [.lib]Safe.pm [.lib.auto]Safe$(E)
 # Add "-I[--.lib]" t $(MINIPERL) so we use this copy of lib after C<chdir>
 # ${@} necessary to distract different versions of MM[SK]/make
 [.ext.Safe]Descrip.MMS : [.ext.Safe]Makefile.PL [.lib.$(ARCH)]Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm perlshr$(E)
-	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.Safe]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" 2>_nla0:
+	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.Safe]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]" 2>_nla0:
 
 FileHandle : [.lib]FileHandle.pm [.lib.auto]FileHandle$(E)
 	@ $(NOOP)
 
 [.lib]FileHandle.pm : [.ext.FileHandle]Descrip.MMS
+	@ If F$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
 	@ Set Default [.ext.FileHandle]
 	$(MMS)
 	@ Set Default [--]
@@ -365,7 +385,26 @@ FileHandle : [.lib]FileHandle.pm [.lib.auto]FileHandle$(E)
 # Add "-I[--.lib]" t $(MINIPERL) so we use this copy of lib after C<chdir>
 # ${@} necessary to distract different versions of MM[SK]/make
 [.ext.FileHandle]Descrip.MMS : [.ext.FileHandle]Makefile.PL [.lib.$(ARCH)]Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm perlshr$(E)
-	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.FileHandle]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" 2>_nla0:
+	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.FileHandle]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]" 2>_nla0:
+
+Fcntl : [.lib]Fcntl.pm [.lib.auto]Fcntl$(E)
+	@ $(NOOP)
+
+[.lib]Fcntl.pm : [.ext.Fcntl]Descrip.MMS
+	@ If F$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
+	@ Set Default [.ext.Fcntl]
+	$(MMS)
+	@ Set Default [--]
+
+[.lib.auto]Fcntl$(E) : [.ext.Fcntl]Descrip.MMS
+	@ Set Default [.ext.Fcntl]
+	$(MMS)
+	@ Set Default [--]
+
+# Add "-I[--.lib]" t $(MINIPERL) so we use this copy of lib after C<chdir>
+# ${@} necessary to distract different versions of MM[SK]/make
+[.ext.Fcntl]Descrip.MMS : [.ext.Fcntl]Makefile.PL [.lib.$(ARCH)]Config.pm [.lib.VMS]Filespec.pm [.lib]DynaLoader.pm perlshr$(E)
+	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.Fcntl]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]" 2>_nla0:
 
 [.lib.VMS]Filespec.pm : [.vms.ext]Filespec.pm
 	@ If F$Search("[.lib]VMS.Dir").eqs."" Then Create/Directory [.lib.VMS]
@@ -557,7 +596,17 @@ printconfig :
         @ @[.vms]myconfig "$(CC)" "$(CFLAGS)" "$(LINKFLAGS)" "$(LIBS1)" "$(LIBS2)" "$(SOCKLIB)" "$(EXT)" "$(DBG)"
 
 .ifdef SOCKET
+
+.ifdef LINK_ONLY
+.else
 $(SOCKOBJ) : $(SOCKC) $(SOCKH)
+
+[.ext.Socket]Socket$(O) : [.ext.Socket]Socket.c
+	$(CC) $(CFLAGS) /Object=$(MMS$TARGET) $(MMS$SOURCE)
+
+[.ext.Socket]Socket.c : [.ext.Socket]Socket.xs $(MINIPERL_EXE)
+	$(XSUBPP) $(MMS$SOURCE) >$(MMS$TARGET)
+.endif # !LINK_ONLY
 
 vmsish.h : $(SOCKH)
 
@@ -566,12 +615,6 @@ $(SOCKC) : [.vms]$(SOCKC)
 
 $(SOCKH) : [.vms]$(SOCKH)
 	Copy/Log/NoConfirm [.vms]$(SOCKH) []$(SOCKH)
-
-[.ext.Socket]Socket.c : [.ext.Socket]Socket.xs $(MINIPERL_EXE)
-	$(XSUBPP) $(MMS$SOURCE) >$(MMS$TARGET)
-
-[.ext.Socket]Socket$(O) : [.ext.Socket]Socket.c
-	$(CC) $(CFLAGS) /Object=$(MMS$TARGET) $(MMS$SOURCE)
 
 [.lib]Socket.pm : [.ext.Socket]Socket.pm
 	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
@@ -607,8 +650,11 @@ perly.h : [.vms]perly_h.vms
 # 	rename y.tab.h perly.h
 # 	$(INSTPERL) [.vms]vms_yfix.pl perly.c perly.h [.vms]perly_c.vms [.vms]perly_h.vms
 
+.ifdef LINK_ONLY
+.else
 perly$(O) : perly.c, perly.h, $(h)
 	$(CC) $(CFLAGS) $(MMS$SOURCE)
+.endif
 
 test : all
 	- @[.VMS]Test.Com
@@ -714,6 +760,8 @@ $(ARCHAUTO)time.stamp :
 	@ If F$Search("[.lib.$(ARCH)]auto.dir").eqs."" Then Create/Directory $(ARCHAUTO)
 	@ If F$Search("$(MMS$TARGET)").eqs."" Then Copy/NoConfirm _NLA0: $(MMS$TARGET)
 
+.ifdef LINK_ONLY
+.else
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 av$(O) : EXTERN.h
 av$(O) : av.c
@@ -1340,6 +1388,7 @@ globals$(O) : scope.h
 globals$(O) : sv.h
 globals$(O) : vmsish.h
 globals$(O) : util.h
+.endif # !LINK_ONLY
 
 config.h : [.vms]config.vms
 	Copy/Log/NoConfirm [.vms]config.vms []config.h
@@ -1409,6 +1458,9 @@ clean : tidy
 	- If F$Search("[.Ext.Socket]Socket.C").nes."" Then Delete/NoConfirm/Log [.Ext.Socket]Socket.C;*
 	- If F$Search("[.VMS.Ext...]*.C").nes."" Then Delete/NoConfirm/Log [.VMS.Ext...]*.C;*
 	- If F$Search("[.VMS.Ext...]*$(O)").nes."" Then Delete/NoConfirm/Log [.VMS.Ext...]*$(O);*
+	Set Default [.ext.Fcntl]
+	- $(MMS) clean
+	Set Default [--]
 	Set Default [.ext.FileHandle]
 	- $(MMS) clean
 	Set Default [--]
@@ -1428,6 +1480,9 @@ realclean : clean
 	- If F$Search("[.lib.pod]*.pod").nes."" Then Delete/NoConfirm/Log [.lib.pod]*.pod;*
 	- If F$Search("[.lib.pod]perldoc.").nes."" Then Delete/NoConfirm/Log [.lib.pod]perldoc.;*
 	- If F$Search("[.lib.pod]pod2*.").nes."" Then Delete/NoConfirm/Log [.lib.pod]pod2*.;*
+	Set Default [.ext.Fcntl]
+	- $(MMS) realclean
+	Set Default [--]
 	Set Default [.ext.FileHandle]
 	- $(MMS) realclean
 	Set Default [--]

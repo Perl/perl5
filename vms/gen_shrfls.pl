@@ -34,11 +34,24 @@
 #     (i.e. /Define=DEBUGGING,EMBED,MULTIPLICITY)?
 #
 # Author: Charles Bailey  bailey@genetics.upenn.edu
-# Revised:  4-Dec-1995
+# Revised: 20-Feb-1996
 
 require 5.000;
 
 $debug = $ENV{'GEN_SHRFLS_DEBUG'};
+
+if ($ARGV[0] eq '-f') {
+  open(INP,$ARGV[1]) or die "Can't read input file $ARGV[1]: $!\n";
+  print "Input taken from file $ARGV[1]\n" if $debug;
+  @ARGV = ();
+  while (<INP>) {
+    chomp;
+    push(@ARGV,split(/\|/,$_));
+  }
+  close INP;
+  print "Read input data | ",join(' | ',@ARGV)," |\n" if $debug > 1;
+}
+
 $cc_cmd = shift @ARGV;
 
 # Someday, we'll have $GetSyI built into perl . . .
@@ -75,7 +88,7 @@ if ($docc) {
   else { die "$0: Can't find perl.h\n"; }
 }
 else { 
-  ($junk,$ccvers,$cpp_file,$cc_cmd) = split(/~~/,$cc_cmd,4);
+  ($junk,$junk,$cpp_file,$cc_cmd) = split(/~~/,$cc_cmd,4);
   $isgcc = $cc_cmd =~ /case_hack/i
            or 0;  # for nice debug output
   $isvaxc = (!$isgcc && $cc_cmd !~ /standard=/i)
@@ -158,7 +171,7 @@ if ($docc) {
     or die "$0: Can't preprocess ${dir}perl.h: $!\n";
 }
 else {
-  open(CPP,"$cpp_file") or die "$0: Can't read $cpp_file: $!\n";
+  open(CPP,"$cpp_file") or die "$0: Can't read preprocessed file $cpp_file: $!\n";
 }
 LINE: while (<CPP>) {
   while (/^#.*vmsish\.h/i .. /^#.*perl\.h/i) {
@@ -320,7 +333,7 @@ if ($isvax) {
 # Linker wants /Include and /Library on different lines
 print OPTBLD "$libperl/Include=($incstr)\n";
 print OPTBLD "$libperl/Library\n";
-open(RTLOPT,$rtlopt) or die "$0: Can't read $rtlopt: $!\n";
+open(RTLOPT,$rtlopt) or die "$0: Can't read options file $rtlopt: $!\n";
 while (<RTLOPT>) { print OPTBLD; }
 close RTLOPT;
 close OPTBLD;

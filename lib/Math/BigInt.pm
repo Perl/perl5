@@ -1,7 +1,6 @@
 package Math::BigInt;
 
-%OVERLOAD = ( 
-				# Anonymous subroutines:
+use overload
 '+'	=>	sub {new Math::BigInt &badd},
 '-'	=>	sub {new Math::BigInt
 		       $_[2]? bsub($_[1],${$_[0]}) : bsub(${$_[0]},$_[1])},
@@ -23,57 +22,24 @@ package Math::BigInt;
 qw(
 ""	stringify
 0+	numify)			# Order of arguments unsignificant
-);
+;
 
 $NaNOK=1;
 
 sub new {
-  my $foo = bnorm($_[1]);
+  my($class) = shift;
+  my($foo) = bnorm(shift);
   die "Not a number initialized to Math::BigInt" if !$NaNOK && $foo eq "NaN";
-  bless \$foo;
+  bless \$foo, $class;
 }
 sub stringify { "${$_[0]}" }
 sub numify { 0 + "${$_[0]}" }	# Not needed, additional overhead
 				# comparing to direct compilation based on
 				# stringify
 
-# arbitrary size integer math package
-#
-# by Mark Biggar
-#
-# Canonical Big integer value are strings of the form
-#       /^[+-]\d+$/ with leading zeros suppressed
-# Input values to these routines may be strings of the form
-#       /^\s*[+-]?[\d\s]+$/.
-# Examples:
-#   '+0'                            canonical zero value
-#   '   -123 123 123'               canonical value '-123123123'
-#   '1 23 456 7890'                 canonical value '+1234567890'
-# Output values always always in canonical form
-#
-# Actual math is done in an internal format consisting of an array
-#   whose first element is the sign (/^[+-]$/) and whose remaining 
-#   elements are base 100000 digits with the least significant digit first.
-# The string 'NaN' is used to represent the result when input arguments 
-#   are not numbers, as well as the result of dividing by zero
-#
-# routines provided are:
-#
-#   bneg(BINT) return BINT              negation
-#   babs(BINT) return BINT              absolute value
-#   bcmp(BINT,BINT) return CODE         compare numbers (undef,<0,=0,>0)
-#   badd(BINT,BINT) return BINT         addition
-#   bsub(BINT,BINT) return BINT         subtraction
-#   bmul(BINT,BINT) return BINT         multiplication
-#   bdiv(BINT,BINT) return (BINT,BINT)  division (quo,rem) just quo if scalar
-#   bmod(BINT,BINT) return BINT         modulus
-#   bgcd(BINT,BINT) return BINT         greatest common divisor
-#   bnorm(BINT) return BINT             normalization
-#
-
 $zero = 0;
 
-
+
 # normalize string form of number.   Strip leading zeros.  Strip any
 #   white space and add a sign, if missing.
 # Strings that are not numbers result the value 'NaN'.
@@ -125,7 +91,7 @@ sub abs { # post-normalized abs for internal use
     s/^-/+/;
     $_;
 }
-
+
 # Compares 2 values.  Returns one of undef, <0, =0, >0. (suitable for sort)
 sub bcmp { #(num_str, num_str) return cond_code
     local($x,$y) = (&bnorm($_[$[]),&bnorm($_[$[+1]));
@@ -186,7 +152,7 @@ sub bgcd { #(num_str, num_str) return num_str
 	$x;
     }
 }
-
+
 # routine to add two base 1e5 numbers
 #   stolen from Knuth Vol 2 Algorithm A pg 231
 #   there are separate routines to add and sub as per Kunth pg 233
@@ -252,7 +218,7 @@ sub mul { #(*int_num_array, *int_num_array) return int_num_array
 sub bmod { #(num_str, num_str) return num_str
     (&bdiv(@_))[$[+1];
 }
-
+
 sub bdiv { #(dividend: num_str, divisor: num_str) return num_str
     local (*x, *y); ($x, $y) = (&bnorm($_[$[]), &bnorm($_[$[+1]));
     return wantarray ? ('NaN','NaN') : 'NaN'
@@ -347,3 +313,74 @@ sub bpow { #(num_str, num_str) return num_str
 }
 
 1;
+__END__
+
+=head1 NAME
+
+Math::BigInt - Arbitrary size integer math package
+
+=head1 SYNOPSIS
+
+  use Math::BigInt;
+  $i = Math::BigInt->new($string);
+
+  $i->bneg return BINT               negation
+  $i->babs return BINT               absolute value
+  $i->bcmp(BINT) return CODE         compare numbers (undef,<0,=0,>0)
+  $i->badd(BINT) return BINT         addition
+  $i->bsub(BINT) return BINT         subtraction
+  $i->bmul(BINT) return BINT         multiplication
+  $i->bdiv(BINT) return (BINT,BINT)  division (quo,rem) just quo if scalar
+  $i->bmod(BINT) return BINT         modulus
+  $i->bgcd(BINT) return BINT         greatest common divisor
+  $i->bnorm return BINT              normalization
+
+=head1 DESCRIPTION
+
+All basic math operations are overloaded if you declare your big
+integers as
+
+  $i = new Math::BigInt '123 456 789 123 456 789';
+
+
+=over 2
+
+=item Canonical notation
+
+Big integer value are strings of the form C</^[+-]\d+$/> with leading
+zeros suppressed.
+
+=item Input
+
+Input values to these routines may be strings of the form
+C</^\s*[+-]?[\d\s]+$/>.
+
+=item Output
+
+Output values always always in canonical form
+
+=back
+
+Actual math is done in an internal format consisting of an array
+whose first element is the sign (/^[+-]$/) and whose remaining 
+elements are base 100000 digits with the least significant digit first.
+The string 'NaN' is used to represent the result when input arguments 
+are not numbers, as well as the result of dividing by zero.
+
+=head1 EXAMPLES
+
+   '+0'                            canonical zero value
+   '   -123 123 123'               canonical value '-123123123'
+   '1 23 456 7890'                 canonical value '+1234567890'
+
+
+=head1 BUGS
+
+The current version of this module is a preliminary version of the
+real thing that is currently (as of perl5.002) under development.
+
+=head1 AUTHOR
+
+Mark Biggar, overloaded interface by Ilya Zakharevich.
+
+=cut

@@ -15,6 +15,8 @@ d_setruid='undef'
 
 alignbytes=8
 
+usemymalloc='n'
+
 # Make setsockopt work correctly.  See man page.
 # ccflags='-D_BSD=44'
 

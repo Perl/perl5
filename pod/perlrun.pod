@@ -260,10 +260,18 @@ C<-M>I<module> executes C<use> I<module> C<;> before executing your
 script.  You can use quotes to add extra code after the module name,
 e.g., C<-M'module qw(foo bar)'>.
 
+If the first character after the C<-M> or C<-m> is a dash (C<->)
+then the 'use' is replaced with 'no'.
+
 A little built-in syntactic sugar means you can also say
 C<-mmodule=foo> or C<-Mmodule=foo> as a shortcut for
 C<-M'module qw(foo)'>.  Note that using the C<=> form
 removes the distinction between C<-m> and C<-M>.
+
+To avoid the need to use quotes when importing more that one symbol
+with the C<=> form, the text following the C<=> is split into a list
+on commas (C<,>) rather than whitespace. The actual code generated
+by C<-Mmodule=foo,bar> is C<use module split(/,/,q{foo,bar})>.
 
 =item B<-n>
 

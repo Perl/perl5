@@ -2,9 +2,13 @@
 Version 5.002
 -------------
 
-Nearly all the changes for 5.001 were bug fixes of one variety or another,
-so here's the bug list, along with the "resolution" for each of them.  If
-you wish to correspond about any of them, please include the bug number.
+The main enhancement to the Perl core was the addition of prototypes.
+Many of the modules that come with Perl have been extensively upgraded.
+
+Other than that, nearly all the changes for 5.002 were bug fixes of one
+variety or another, so here's the bug list, along with the "resolution"
+for each of them.  If you wish to correspond about any of them, please
+include the bug number (if any).
 
 Added APPLLIB_EXP for embedded perl library support.
 Files patched: perl.c
@@ -12,88 +16,21 @@ Files patched: perl.c
 Couldn't define autoloaded routine by assignment to typeglob.
 Files patched: pp_hot.c sv.c
 
-NETaa13399: Andy patches.
+NETaa13525: Tiny patch to fix installman -n
 From: Larry Wall
-Files patched: MANIFEST
+Files patched: installman
 
-NETaa13399: Andy's patch 1m
-Files patched: Configure MANIFEST Makefile.SH embed.h embed.pl
-    ext/GDBM_File/GDBM_File.xs global.sym hints/freebsd.sh installman
-    installperl interp.sym keywords.h keywords.pl lib/Exporter.pm
-    lib/ExtUtils/MakeMaker.pm lib/ExtUtils/xsubpp op.c perl.c perl.h perldoc.SH
-    pod/perl.pod pod/pod2html.SH pp.c pp_ctl.c pp_ctl.c pp_hot.c proto.h
-    regcomp.c regcomp.h regexec.c toke.c x2p/util.c x2p/util.h
-
-NETaa13399: Andy's patch.1l
-Files patched: Changes.Conf Configure Makefile.SH README README.vms c2ph.SH
-    config_H config_h.SH configpm configure doio.c embed.h
-    ext/DB_File/DB_File.pm ext/DB_File/DB_File.xs ext/DynaLoader/DynaLoader.pm
-    ext/DynaLoader/Makefile.PL ext/DynaLoader/README ext/DynaLoader/dl_dlopen.xs
-    ext/Fcntl/Fcntl.pm ext/Fcntl/Fcntl.xs ext/GDBM_File/GDBM_File.pm
-    ext/GDBM_File/GDBM_File.xs ext/NDBM_File/hints/solaris.pl
-    ext/ODBM_File/Makefile.PL ext/ODBM_File/hints/sco.pl
-    ext/ODBM_File/hints/solaris.pl ext/ODBM_File/hints/svr4.pl
-    ext/POSIX/POSIX.pm ext/POSIX/POSIX.xs ext/SDBM_File/sdbm/sdbm.c
-    ext/Socket/Socket.pm global.sym h2ph.SH h2xs.SH handy.h hints/README.hints
-    hints/apollo.sh hints/aux.sh hints/cxux.sh hints/dynix.sh hints/epix.sh
-    hints/freebsd.sh hints/hpux_9.sh hints/irix_4.sh hints/irix_5.sh
-    hints/irix_6.sh hints/isc.sh hints/linux.sh hints/netbsd.sh hints/next_3.sh
-    hints/next_3_0.sh hints/powerunix.sh hints/sco_3.sh hints/titanos.sh
-    installman installperl lib/AnyDBM_File.pm lib/AutoLoader.pm lib/AutoSplit.pm
-    lib/Benchmark.pm lib/Carp.pm lib/Cwd.pm lib/English.pm lib/Exporter.pm
-    lib/ExtUtils/Liblist.pm lib/ExtUtils/MakeMaker.pm lib/ExtUtils/Manifest.pm
-    lib/ExtUtils/Mkbootstrap.pm lib/ExtUtils/xsubpp lib/File/Basename.pm
-    lib/File/CheckTree.pm lib/File/Find.pm lib/FileHandle.pm lib/Getopt/Long.pm
-    lib/Getopt/Std.pm lib/I18N/Collate.pm lib/IPC/Open2.pm lib/IPC/Open3.pm
-    lib/Net/Ping.pm lib/Term/Complete.pm lib/Text/Abbrev.pm lib/Text/Tabs.pm
-    lib/ftp.pl lib/getcwd.pl lib/integer.pm lib/less.pm lib/sigtrap.pm
-    lib/strict.pm lib/subs.pm makeaperl.SH makedepend.SH myconfig perl.c perl.h
-    perldoc.SH pod/Makefile pod/perl.pod pod/perlbot.pod pod/perlcall.pod
-    pod/perlfunc.pod pod/perlguts.pod pod/perlop.pod pod/perlre.pod
-    pod/perlxs.pod pod/pod2html.SH pod/pod2latex.SH pod/pod2man.SH pp_ctl.c
-    pp_hot.c pp_sys.c proto.h scope.c sv.c sv.h t/comp/cpp.aux t/comp/cpp.t
-    t/op/misc.t toke.c unixish.h util.c vms/config.vms vms/ext/MM_VMS.pm
-    vms/ext/VMS/stdio/stdio.xs vms/perlvms.pod vms/vms.c x2p/Makefile.SH
-    x2p/find2perl.SH x2p/s2p.SH x2p/str.c
-
-NETaa13399: Jumbo Configure patch (and patch 1)
-Files patched: Changes.Conf
-
-NETaa13399: Jumbo Configure patch (and patch 1)    
-Files patched: Configure INSTALL MANIFEST Makefile.SH README config_H
-    config_h.SH configure embed.h ext/Fcntl/Fcntl.xs ext/ODBM_File/ODBM_File.xs
-    h2xs.SH hints/aix.sh hints/hpux_9.sh hints/isc.sh hints/isc_2.sh
-    hints/solaris_2.sh hints/unicos.sh hints/utekv.sh lib/ExtUtils/MakeMaker.pm
-    makedepend.SH t/README x2p/a2p.h
-
-NETaa13399: Jumbo Configure patch (patches 2 and 3)
-Files patched: Configure INSTALL config_h.SH embed.h ext/Fcntl/Fcntl.xs
-    ext/POSIX/POSIX.xs global.sym mg.c perl.h proto.h
+NETaa13525: de-documented \v
+Files patched: pod/perlop.pod pod/perlre.pod
 
 NETaa13525: doc changes
-From: Larry Wall
 Files patched: pod/perlop.pod pod/perltrap.pod
 
-NETaa13525: random cleanup
-Files patched: Configure MANIFEST Makefile.SH cop.h embed.h global.sym
-    hints/dec_osf.sh hv.c lib/dotsh.pl mg.c op.c op.c op.h perl.c perl.c perly.c
-    perly.c perly.c.diff perly.c.diff perly.h perly.y pod/perl.pod
-    pod/perldiag.pod pod/perlfunc.pod pod/perlfunc.pod pod/perlfunc.pod
-    pod/perlfunc.pod pod/perlop.pod pod/perlre.pod pod/perltrap.pod
-    pod/perlxs.pod pod/perlxs.pod pp_ctl.c pp_ctl.c pp_hot.c pp_sys.c proto.h
-    regcomp.c regexec.c sv.c sv.c sv.c toke.c vms/perly_c.vms vms/perly_h.vms
+NETaa13525: perlxs update from Dean Roehrich
+Files patched: pod/perlxs.pod
 
-NETaa13540: VMS stuff
-From: Larry Wall
-Files patched: EXTERN.h INTERN.h MANIFEST Makefile.SH README.vms av.c embed.h
-    ext/Socket/Socket.pm ext/Socket/Socket.xs global.sym gv.c lib/AutoSplit.pm
-    lib/ExtUtils/MakeMaker.pm lib/ExtUtils/MakeMaker.pm lib/ExtUtils/Manifest.pm
-    lib/ExtUtils/xsubpp lib/File/Find.pm lib/File/Path.pm lib/lib.pm perl.c
-    perl.h pp_ctl.c pp_sys.c proto.h run.c sv.c vms/Makefile vms/Makefile
-    vms/config.vms vms/descrip.mms vms/descrip.mms vms/ext/MM_VMS.pm
-    vms/gen_shrfls.pl vms/perlvms.pod vms/perly_c.vms vms/perly_h.vms
-    vms/sockadapt.c vms/sockadapt.h vms/test.com vms/vms.c vms/vms_yfix.pl
-    vms/vmsish.h
+NETaa13525: rename powerunix to powerux
+Files patched: MANIFEST hints/powerux.sh
 
 NETaa13540: VMS uses CLK_TCK for HZ
 Files patched: pp_sys.c
@@ -115,6 +52,11 @@ From: Tim Bunce
 Files patched: x2p/walk.c
  Consolidated the various declarations and made them consistent with
  the actual definitions.
+
+NETaa13724: -MPackage=args patch
+From: Tim Bunce
+Files patched: perl.c pod/perlrun.pod
+ Added in the -MPackage=args patch too.
 
 NETaa13729: order-of-evaluation dependency in scope.c on leaving REGCONTEXT
 From: "Jason Shirk"
@@ -378,11 +320,6 @@ Files patched: embed.h global.sym op.h pp_ctl.c proto.h
  The expression inside the return was taking its context from the immediately
  surrounding block rather than the innermost surrounding subroutine call.
 
-NETaa13794: TieHash produces ${pack} warnings
-From: Stanley Donald Capelik x74321 24-5200 021876
-Files patched: lib/TieHash.pm
- Changed $pack to $pkg.
-
 NETaa13797: could modify sv_undef through auto-vivification
 From: Ilya Zakharevich
 Files patched: pp.c
@@ -428,6 +365,11 @@ Files patched: pod/perlop.pod
  because the latter will alternate between returning a filename and
  returning FALSE.
  
+
+NETaa13986: split ignored /m pattern modifier
+From: Winfried Koenig
+Files patched: pp.c
+ Fixed to work like m// and s///.
 
 NETaa13992: regexp comments not seen after + in non-extended regexp
 From: Mark Knutsen
@@ -710,6 +652,15 @@ Files patched: Makefile.SH op.c op.c perly.c perly.c.diff perly.h perly.y proto.
  
  Larry
 
+NETaa14422: couldn't take reference of a prototyped function
+Files patched: op.c
+ (same)
+
+NETaa14423: use didn't allow expressions involving the scratch pad
+From: Graham Barr
+Files patched: op.c perly.c perly.c.diff perly.y proto.h vms/perly_c.vms
+ Applied suggested patch.
+
 NETaa14444: lexical scalar didn't autovivify
 From: Gurusamy Sarathy
 Files patched: op.c pp_hot.c
@@ -763,6 +714,11 @@ From: Gurusamy Sarathy
 Files patched: op.c pp.c pp_hot.c regexec.c sv.c toke.c
  Applied most recent suggested patches.
 
+NETaa14537: select() can return too soon
+From: Matt Kimball
+Also: Andreas Gustafsson
+Files patched: pp_sys.c
+
 NETaa14538: method calls were treated like do {} under loop modifiers
 From: Ilya Zakharevich
 Files patched: perly.c perly.y
@@ -775,6 +731,15 @@ Files patched: Todo op.c pp_ctl.c pp_hot.c
  Fixed by doing the foreach(@array) optimization, so it iterates
  directly through the array, and can detect the implicit shift from
  referencing <>.
+
+NETaa14541: new version of perlbug
+From: Kenneth Albanowski
+Files patched: README pod/perl.pod utils/perlbug.PL
+ Brought it up to version 1.09.
+
+NETaa14541: perlbug 1.11
+Files patched: utils/perlbug.PL
+ (same)
 
 NETaa14548: magic sets didn't check private OK bits
 From: W. Bradley Rubenstein
@@ -819,17 +784,31 @@ NETaa14582: sort was letting unsortable values through to comparison routine
 Files patched: pp_ctl.c
  (same)
 
+NETaa14585: globs in pad space weren't properly cleaned up
+From: Gurusamy Sarathy
+Files patched: op.c pp.c pp_hot.c sv.c
+ Applied suggested patch.
+
 NETaa14614: now does dbmopen with perl_eval_sv()
 From: The Man
 Files patched: perl.c pp_sys.c proto.h
  dbmopen now invokes perl_eval_sv(), which should handle error conditions
  better.
 
+NETaa14618: exists doesn't work in GDBM_File
+From: Andrew Wilcox
+Files patched: ext/GDBM_File/GDBM_File.xs
+ Applied suggested patch.
+
+NETaa14619: tied()
+From: Larry Wall
+Also: Paul Marquess
+Files patched: embed.h global.sym keywords.h keywords.pl opcode.h opcode.pl pp_sys.c toke.c
+ Applied suggested patch.
+
 NETaa14636: Jumbo Dynaloader patch
 From: Tim Bunce
-Files patched: ext/DynaLoader/DynaLoader.pm ext/DynaLoader/dl_dld.xs
-    ext/DynaLoader/dl_dlopen.xs ext/DynaLoader/dl_hpux.xs
-    ext/DynaLoader/dl_next.xs ext/DynaLoader/dl_vms.xs ext/DynaLoader/dlutils.c
+Files patched: ext/DynaLoader/DynaLoader.pm ext/DynaLoader/dl_dld.xs ext/DynaLoader/dl_dlopen.xs ext/DynaLoader/dl_hpux.xs ext/DynaLoader/dl_next.xs ext/DynaLoader/dl_vms.xs ext/DynaLoader/dlutils.c
  Applied suggested patches.
 
 NETaa14637: checkcomma routine was stupid about bareword sub calls
@@ -853,11 +832,6 @@ NETaa14655: $? returned negative value on AIX
 From: Kim Frutiger
 Also: Stephen D. Lee
 Files patched: pp_sys.c
- Applied suggested patch.
-
-NETaa14658: infinite loop in c2ph
-From: Nick Gianniotis
-Files patched: c2ph.SH
  Applied suggested patch.
 
 NETaa14668: {2,} could match once
@@ -926,6 +900,12 @@ From: Gerd Knops
 Files patched: sv.c
  Now modifies address to copy if it was reallocated.
 
+NETaa14709: Chip's FileHandle stuff
+From: Larry Wall
+Also: Chip Salzenberg
+Files patched: MANIFEST ext/FileHandle/FileHandle.pm ext/FileHandle/FileHandle.xs ext/FileHandle/Makefile.PL ext/POSIX/POSIX.pm ext/POSIX/POSIX.pod ext/POSIX/POSIX.xs lib/FileCache.pm lib/Symbol.pm t/lib/filehand.t t/lib/posix.t
+ Applied suggested patches.
+
 NETaa14711: added (&) and (*) prototypes for blocks and symbols
 From: Kenneth Albanowski
 Files patched: Makefile.SH op.c perly.c perly.h perly.y toke.c
@@ -950,6 +930,11 @@ Files patched: sv.c sv.c
  The sv_magic() routine didn't properly check to see if it already had a
  magic of that type.  Ordinarily it would have, but it was called during
  mg_get(), which forces the magic flags off temporarily.
+
+NETaa14721: sub defined during erroneous do-FILE caused core dump
+From: David Campbell
+Files patched: op.c
+ Fixed the seg fault.  I couldn't reproduce the return problem.
 
 NETaa14734: ref should never return undef
 From: Dale Amon
@@ -1016,15 +1001,397 @@ NETaa14893: /m modifier was sticky
 Files patched: cop.h pp_hot.c
  (same)
 
+NETaa14916: complete.pl retained old return value
+From: Martyn Pearce
+Files patched: lib/complete.pl
+ Applied suggested patch.
+
+NETaa14928: non-const 3rd arg to split assigned to list could coredump
+From: Hans de Graaff
+Files patched: op.c
+ The optimizer was assuming the OP was an OP_CONST.
+
+NETaa14942: substr as lvalue could disable magic
+From: Darrell Kindred <dkindred+@cmu.edu>
+Files patched: pp.c
+ The substr was disabling the magic of $1.
+
+NETaa14990: "not" not parseable when expecting term
+From: "Randal L. Schwartz"
+Files patched: perly.c perly.c.diff perly.y vms/perly_c.vms
+ The NOTOP production needed to be moved down into the terms.
+
+NETaa14993: Bizarre copy of formline
+From: Tom Christiansen
+Also: Charles Bailey
+Files patched: sv.c
+ Applied suggested patch.
+
+NETaa14998: sv_add_arena() no longer leaks memory
+From: Andreas Koenig
+Files patched: av.c hv.c perl.h sv.c
+ Now keeps one potential arena "on tap", but doesn't use it unless there's
+ demand for SV headers.  When an AV or HV is extended, its old memory
+ becomes the next potential arena unless there already is one, in which
+ case it is simply freed.  This will have the desired property of not
+ stranding medium-sized chunks of memory when extending a single array
+ repeatedly, but will not degrade when there's no SV demand beyond keeping
+ one chunk of memory on tap, which generally will be about 250 bytes big,
+ since it prefers the earlier freed chunk over the later.  See the nice_chunk
+ variable.
+
+NETaa14999: $a and $b now protected from use strict and lexical declaration
+From: Tom Christiansen
+Files patched: gv.c pod/perldiag.pod toke.c
+ Bare $a and $b are now allowed during "use strict".  In addition,
+ the following diag was added:
+ 
+ =item Can't use "my %s" in sort comparison
+ 
+ (F) The global variables $a and $b are reserved for sort comparisons.
+ You mentioned $a or $b in the same line as the <=> or cmp operator,
+ and the variable had earlier been declared as a lexical variable.
+ Either qualify the sort variable with the package name, or rename the
+ lexical variable.
+ 
+
+NETaa15034: use strict refs should allow calls to prototyped functions
+From: Roderick Schertler
+Files patched: perly.c perly.c.diff perly.y toke.c vms/perly_c.vms
+ Applied patch suggested by Chip.
+
+NETaa15083: forced $AUTOLOAD to be untainted
+From: Tim Bunce
+Files patched: gv.c pp_hot.c
+ Stripped any taintmagic from $AUTOLOAD after setting it.
+
+NETaa15084: patch for Term::Cap
+From: Mark Kaehny
+Also: Hugo van der Sanden
+Files patched: lib/Term/Cap.pm
+ Applied suggested patch.
+
+NETaa15086: null pattern could cause coredump in s//_$1_/
+From: "Paul E. Maisano"
+Files patched: cop.h pp_ctl.c
+ If the replacement pattern was complicated enough to cause pp_substcont
+ to be called, then it lost track of which REGEXP* it was supposed to
+ be using.
+
+NETaa15087: t/io/pipe.t didn't work on AIX
+From: Andy Dougherty
+Files patched: t/io/pipe.t
+ Applied suggested patch.
+
+NETaa15088: study was busted
+From: Hugo van der Sanden
+Files patched: opcode.h opcode.pl pp.c
+ It was studying its scratch pad target rather than the argument supplied.
+
+NETaa15090: MSTATS patch
+From: Tim Bunce
+Files patched: global.sym malloc.c perl.c perl.h proto.h
+ Applied suggested patch.
+
+NETaa15098: longjmp out of magic leaks memory
+From: Chip Salzenberg
+Files patched: mg.c sv.c
+ Applied suggested patch.
+
+NETaa15102: getpgrp() is broken if getpgrp2() is available
+From: Roderick Schertler
+Files patched: perl.h pp_sys.c
+ Applied suggested patch.
+
+NETaa15103: prototypes leaked opcodes
+From: Chip Salzenberg
+Files patched: op.c
+ Applied suggested patch.
+
+NETaa15107: quotameta memory bug on all metacharacters
+From: Chip Salzenberg
+Files patched: pp.c
+ Applied suggested patch.
+
+NETaa15108: Fix for incomplete string leak
+From: Chip Salzenberg
+Files patched: toke.c
+ Applied suggested patch.
+
+NETaa15110: couldn't use $/ with 8th bit set on some architectures
+From: Chip Salzenberg
+Files patched: doop.c interp.sym mg.c op.c perl.c perl.h pp_ctl.c pp_hot.c pp_sys.c sv.c toke.c util.c
+ Applied suggested patches.
+
+NETaa15112: { a_1 => 2 } didn't parse as expected
+From: Stuart M. Weinstein
+Files patched: toke.c
+ The little dwimmer was only skipping ALPHA rather than ALNUM chars.
+
+NETaa15123: bitwise ops produce spurious warnings
+From: Hugo van der Sanden
+Also: Chip Salzenberg
+Also: Andreas Gustafsson
+Files patched: sv.c
+ Decided to suppress the warning in the conversion routines if merely converting
+ a temporary, which can never be a user-supplied value anyway.
+
+NETaa15129: #if defined (foo) misparsed in h2ph
+From: Roderick Schertler <roderick@gate.net>
+Files patched: utils/h2ph.PL
+ Applied suggested patch.
+
+NETaa15131: some POSIX functions assumed valid filehandles
+From: Chip Salzenberg
+Files patched: ext/POSIX/POSIX.xs
+ Applied suggested patch.
+
+NETaa15151: don't optimize split on OPpASSIGN_COMMON
+From: Huw Rogers
+Files patched: op.c
+ Had to swap the optimization down to after the assignment op is generated
+ and COMMON is calculated, and then clean up the resultant tree differently.
+
+NETaa15154: MakeMaker-5.18
+From: Andreas Koenig
+Files patched: MANIFEST lib/ExtUtils/Liblist.pm lib/ExtUtils/MM_VMS.pm lib/ExtUtils/MakeMaker.pm lib/ExtUtils/Mksymlists.pm
+ Brought it up to 5.18.
+
+NETaa15156: some Exporter tweaks
+From: Roderick Schertler
+Also: Tim Bunce
+Files patched: lib/Exporter.pm
+ Also did Tim's Tiny Trivial patch.
+
+NETaa15157: new version of Test::Harness
+From: Andreas Koenig
+Files patched: lib/Test/Harness.pm
+ Applied suggested patch.
+
+NETaa15175: overloaded nomethod has garbage 4th op
+From: Ilya Zakharevich
+Files patched: gv.c
+ Applied suggested patch.
+
+NETaa15179: SvPOK_only shouldn't back off on offset pointer
+From: Gutorm.Hogasen@oslo.teamco.telenor.no
+Files patched: sv.h
+ SvPOK_only() was calling SvOOK_off(), which adjusted the string pointer
+ after tr/// has already acquired it.  It shouldn't really be necessary
+ for SvPOK_only() to undo an offset string pointer, since there's no
+ conflict with a possible integer value where the offset is stored.
+
+NETaa15193: & now always bypasses prototype checking
+From: Larry Wall
+Files patched: dump.c op.c op.h perly.c perly.c.diff perly.y pod/perlsub.pod pp_hot.c proto.h toke.c vms/perly_c.vms vms/perly_h.vms
+ Turned out to be a big hairy deal because the lexer turns foo() into &foo().
+ But it works consistently now.  Also fixed pod.
+
+NETaa15197: 5.002b2 is 'appending' to $@
+From: Gurusamy Sarathy
+Files patched: pp_ctl.c
+ Applied suggested patch.
+
+NETaa15201: working around Linux DBL_DIG problems
+From: Kenneth Albanowski
+Files patched: hints/linux.sh sv.c
+ Applied suggested patch.
+
+NETaa15208: SelectSaver
+From: Chip Salzenberg
+Files patched: MANIFEST lib/SelectSaver.pm
+ Applied suggested patch.
+
+NETaa15209: DirHandle
+From: Chip Salzenberg
+Files patched: MANIFEST lib/DirHandle.pm t/lib/dirhand.t
+
+NETaa15210: sysopen()
+From: Chip Salzenberg
+Files patched: doio.c keywords.pl lib/ExtUtils/typemap opcode.pl pod/perlfunc.pod pp_hot.c pp_sys.c proto.h toke.c
+ Applied suggested patch.  Hope it works...
+
+NETaa15211: use mnemonic names in Safe setup
+From: Chip Salzenberg
+Files patched: ext/Safe/Safe.pm
+ Applied suggested patch, more or less.
+
+NETaa15214: prototype()
+From: Chip Salzenberg
+Files patched: ext/Safe/Safe.pm global.sym keywords.pl opcode.pl pp.c toke.c
+ Applied suggested patch.
+
+NETaa15217: -w problem with -d:foo
+From: Tim Bunce
+Files patched: perl.c
+ Applied suggested patch.
+
+NETaa15218: *GLOB{ELEMENT}
+From: Larry Wall
+Files patched: Makefile.SH embed.h ext/Safe/Safe.pm keywords.h opcode.h opcode.h opcode.pl perly.c perly.c.diff perly.y pp_hot.c t/lib/safe.t vms/perly_c.vms
+
+NETaa15219: Make *x=\*y do like *x=*y
+From: Chip Salzenberg
+Files patched: sv.c
+ Applied suggested patch.
+
+NETaa15221: Indigestion with Carp::longmess and big eval '...'s
+From: Tim Bunce
+Files patched: lib/Carp.pm
+ Applied suggested patch.
+
+NETaa15222: VERSION patch for standard extensions
+From: Paul Marquess
+Files patched: ext/DB_File/Makefile.PL ext/DynaLoader/DynaLoader.pm ext/DynaLoader/Makefile.PL ext/Fcntl/Fcntl.pm ext/Fcntl/Makefile.PL ext/GDBM_File/GDBM_File.pm ext/GDBM_File/Makefile.PL ext/NDBM_File/Makefile.PL ext/NDBM_File/NDBM_File.pm ext/ODBM_File/Makefile.PL ext/ODBM_File/ODBM_File.pm ext/POSIX/Makefile.PL ext/POSIX/POSIX.pm ext/SDBM_File/Makefile.PL ext/SDBM_File/SDBM_File.pm ext/Safe/Makefile.PL ext/Safe/Safe.pm ext/Socket/Makefile.PL
+ Applied suggested patch.
+
+NETaa15222: VERSION patch for standard extensions (reprise)
+Files patched: ext/DB_File/DB_File.pm ext/DynaLoader/DynaLoader.pm ext/Fcntl/Fcntl.pm ext/GDBM_File/GDBM_File.pm ext/NDBM_File/NDBM_File.pm ext/ODBM_File/ODBM_File.pm ext/POSIX/POSIX.pm ext/SDBM_File/SDBM_File.pm ext/Safe/Safe.pm ext/Socket/Socket.pm
+ (same)
+
+NETaa15227: $i < 10000 should optimize to integer op
+From: Larry Wall
+Files patched: op.c op.c
+ The program
+ 
+     for ($i = 0; $i < 100000; $i++) {
+ 	push @foo, $i;
+     }
+ 
+ takes about one quarter the memory if the optimizer decides that it can
+ use an integer < comparison rather than floating point.  It now does so
+ if one side is an integer constant and the other side a simple variable.
+ This should really help some of our benchmarks.  You can still force a
+ floating point comparison by using 100000.0 instead.
+
+NETaa15228: CPerl-mode patch
+From: Ilya Zakharevich
+Files patched: emacs/cperl-mode.el
+ Applied suggested patch.
+
+NETaa15231: Symbol::qualify()
+From: Chip Salzenberg
+Files patched: ext/FileHandle/FileHandle.pm gv.c lib/SelectSaver.pm lib/Symbol.pm pp_hot.c
+ Applied suggested patch.
+
+NETaa15236: select select broke under use strict
+From: Chip Salzenberg
+Files patched: op.c
+ Instead of inventing a new bit, I just turned off the HINT_STRICT_REFS bit.
+ I don't think it's worthwhile distinguishing between qualified or unqualified
+ names to select.
+
+NETaa15237: use vars
+From: Larry Wall
+Files patched: MANIFEST gv.c lib/subs.pm lib/vars.pm sv.c
+
+NETaa15240: keep op names _and_ descriptions
+From: Chip Salzenberg
+Files patched: doio.c embed.h ext/Safe/Safe.pm ext/Safe/Safe.xs global.sym op.c opcode.h opcode.pl scope.c sv.c
+ Applied suggested patch.
+
+NETaa15259: study doesn't unset on string modification
+From: Larry Wall
+Files patched: mg.c pp.c
+ Piggybacked on m//g unset magic to unset the study too.
+
+NETaa15276: pick a better initial cxstack_max
+From: Chip Salzenberg
+Files patched: perl.c
+ Added fudge in, and made it calculate how many it could fit into (most of) 8K,
+ to avoid getting 16K of Kingsley malloc.
+
+NETaa15287: numeric comparison optimization adjustments
+From: Clark Cooper
+Files patched: op.c
+ Applied patch suggested by Chip, with liberalization to >= and <=.
+
+NETaa15299: couldn't eval string containing pod or __DATA__     
+From: Andreas Koenig
+Also: Gisle Aas
+Files patched: toke.c
+ Basically, eval didn't know how to bypass pods correctly.
+
+NETaa15300: sv_backoff problems
+From: Paul Marquess
+Also: mtr
+Also: Chip Salzenberg
+Files patched: op.c sv.c sv.h
+ Applied suggested patch.
+
+NETaa15312: Avoid fclose(NULL)
+From: Chip Salzenberg
+Files patched: toke.c
+ Applied suggested patch.
+
+NETaa15318: didn't set up perl_init_i18nl14n for export
+From: Ilya Zakharevich
+Files patched: perl_exp.SH
+ Applied suggested patch.
+
+NETaa15331: File::Path::rmtree followed symlinks
+From: Andreas Koenig
+Files patched: lib/File/Path.pm
+ Added suggested patch, except I did
+ 
+        if (not -l $root and -d _) {
+ 
+ for efficiency, since if -d is true, the -l already called lstat on it.
+
+NETaa15339: sv_gets() didn't reset count
+From: alanburlison@unn.unisys.com
+Files patched: sv.c
+ Applied suggested patch.
+
+NETaa15341: differentiated importation of different types
+From: Chip Salzenberg
+Files patched: gv.c gv.h op.c perl.c pp.c pp_ctl.c sv.c sv.h toke.c
+ Applied suggested patch.
+
+NETaa15342: Consistent handling of e_{fp,tmpname}
+From: Chip Salzenberg
+Files patched: perl.c pp_ctl.c util.c
+ Applied suggested patch.
+
+NETaa15344: Safe gets confused about malloc on AIX
+From: Tim Bunce
+Files patched: ext/Safe/Safe.xs
+ Applied suggested patch.
+
+NETaa15348: -M upgrade
+From: Tim Bunce
+Files patched: perl.c pod/perlrun.pod
+ Applied suggested patch.
+
+NETaa15369: change in split optimization broke scalar context
+From: Ulrich Pfeifer
+Files patched: op.c
+ The earlier patch to make the split optimization pay attention to
+ OPpASSIGN_COMMON rearranged how the syntax tree is constructed, but kept
+ the wrong context flags.  This causes pp_split() do do the wrong thing.
+
+NETaa15423: can't do subversion numbering because of %5.3f assumptions
+From: Andy Dougherty
+Files patched: configpm patchlevel.h perl.c perl.h pp_ctl.c
+ Removed the %5.3f assumptions where appropriate.  patchlevel.h now
+ defines SUBVERSION, which if greater than 0 indicates a development version.
+
+NETaa15424: Sigsetjmp patch
+From: Kenneth Albanowski
+Files patched: Configure config_h.SH op.c perl.c perl.h pp_ctl.c util.c
+ Applied suggested patch.
+
 Needed to make install paths absolute.
 Files patched: installperl
 
-derived it
-Files patched: perly.h
+h2xs 1.14
+Files patched: utils/h2xs.PL
 
 makedir() looped on a symlink to a directory.
 Files patched: installperl
 
+xsubpp 1.932
+Files patched: lib/ExtUtils/xsubpp
 
 -------------
 Version 5.001

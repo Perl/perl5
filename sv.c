@@ -210,6 +210,27 @@ sv_clean_objs()
     register SV* svend;
     SV* rv;
 
+#ifndef DISABLE_DESTRUCTOR_KLUDGE
+    register GV* gv;
+    for (sva = sv_arenaroot; sva; sva = (SV *) SvANY(sva)) {
+	gv = sva + 1;
+	svend = &sva[SvREFCNT(sva)];
+	while (gv < svend) {
+	    if (SvTYPE(gv) == SVt_PVGV && (sv = GvSV(gv)) &&
+		SvROK(sv) && SvOBJECT(rv = SvRV(sv)))
+	    {
+		DEBUG_D((fprintf(stderr, "Cleaning object ref:\n "),
+			 sv_dump(sv));)
+		SvROK_off(sv);
+		SvRV(sv) = 0;
+		SvREFCNT_dec(rv);
+	    }
+	    ++gv;
+	}
+    }
+    if (!sv_objcount)
+	return;
+#endif
     for (sva = sv_arenaroot; sva; sva = (SV *) SvANY(sva)) {
 	sv = sva + 1;
 	svend = &sva[SvREFCNT(sva)];
@@ -503,6 +524,9 @@ U32 mt;
     if (SvTYPE(sv) == mt)
 	return TRUE;
 
+    if (mt < SVt_PVIV)
+	(void)SvOOK_off(sv);
+
     switch (SvTYPE(sv)) {
     case SVt_NULL:
 	pv	= 0;
@@ -719,6 +743,7 @@ U32 mt;
 	GvNAME(sv)	= 0;
 	GvNAMELEN(sv)	= 0;
 	GvSTASH(sv)	= 0;
+	GvFLAGS(sv)	= 0;
 	break;
     case SVt_PVBM:
 	SvANY(sv) = new_XPVBM();
@@ -1004,8 +1029,8 @@ IV i;
 	croak("Can't coerce %s to integer in %s", sv_reftype(sv,0),
 	    op_name[op->op_type]);
     }
-    SvIVX(sv) = i;
     (void)SvIOK_only(sv);			/* validate number */
+    SvIVX(sv) = i;
     SvTAINT(sv);
 }
 
@@ -1157,6 +1182,7 @@ register SV *sv;
 	break;
     }
     if (SvNOKp(sv)) {
+	(void)SvIOK_on(sv);
 	if (SvNVX(sv) < 0.0)
 	    SvIVX(sv) = I_V(SvNVX(sv));
 	else
@@ -1165,6 +1191,7 @@ register SV *sv;
     else if (SvPOKp(sv) && SvLEN(sv)) {
 	if (dowarn && !looks_like_number(sv))
 	    not_a_number(sv);
+	(void)SvIOK_on(sv);
 	SvIVX(sv) = (IV)atol(SvPVX(sv));
     }
     else  {
@@ -1172,7 +1199,6 @@ register SV *sv;
 	    warn(warn_uninit);
 	return 0;
     }
-    (void)SvIOK_on(sv);
     DEBUG_c(fprintf(stderr,"0x%lx 2iv(%ld)\n",
 	(unsigned long)sv,(long)SvIVX(sv)));
     return SvIVX(sv);
@@ -1522,6 +1548,12 @@ register SV *sstr;
 	else if (dtype == SVt_PVGV &&
 		 SvTYPE(SvRV(sstr)) == SVt_PVGV) {
 	    sstr = SvRV(sstr);
+	    if (sstr == dstr) {
+		if (curcop->cop_stash != GvSTASH(dstr))
+		    GvIMPORTED_on(dstr);
+		GvMULTI_on(dstr);
+		return;
+	    }
 	    goto glob_assign;
 	}
 	break;
@@ -1556,9 +1588,7 @@ register SV *sstr;
     case SVt_PVGV:
 	if (dtype <= SVt_PVGV) {
   glob_assign:
-	    if (dtype == SVt_PVGV)
-		GvFLAGS(sstr) |= GVf_IMPORTED;
-	    else {
+	    if (dtype != SVt_PVGV) {
 		char *name = GvNAME(sstr);
 		STRLEN len = GvNAMELEN(sstr);
 		sv_upgrade(dstr, SVt_PVGV);
@@ -1569,12 +1599,13 @@ register SV *sstr;
 		SvFAKE_on(dstr);	/* can coerce to non-glob */
 	    }
 	    (void)SvOK_off(dstr);
-	    if (GvGP(dstr))
-		gp_free(dstr);
+	    GvINTRO_off(dstr);		/* one-shot flag */
+	    gp_free(dstr);
 	    GvGP(dstr) = gp_ref(GvGP(sstr));
 	    SvTAINT(dstr);
-	    GvFLAGS(dstr) &= ~GVf_INTRO;	/* one-shot flag */
-	    SvMULTI_on(dstr);
+	    if (curcop->cop_stash != GvSTASH(dstr))
+		GvIMPORTED_on(dstr);
+	    GvMULTI_on(dstr);
 	    return;
 	}
 	/* FALL THROUGH */
@@ -1593,20 +1624,20 @@ register SV *sstr;
 	    if (dtype == SVt_PVGV) {
 		SV *sref = SvREFCNT_inc(SvRV(sstr));
 		SV *dref = 0;
-		int intro = GvFLAGS(dstr) & GVf_INTRO;
+		int intro = GvINTRO(dstr);
 
 		if (intro) {
 		    GP *gp;
 		    GvGP(dstr)->gp_refcnt--;
+		    GvINTRO_off(dstr);	/* one-shot flag */
 		    Newz(602,gp, 1, GP);
 		    GvGP(dstr) = gp;
 		    GvREFCNT(dstr) = 1;
 		    GvSV(dstr) = NEWSV(72,0);
 		    GvLINE(dstr) = curcop->cop_line;
 		    GvEGV(dstr) = dstr;
-		    GvFLAGS(dstr) &= ~GVf_INTRO;	/* one-shot flag */
 		}
-		SvMULTI_on(dstr);
+		GvMULTI_on(dstr);
 		switch (SvTYPE(sref)) {
 		case SVt_PVAV:
 		    if (intro)
@@ -1614,6 +1645,8 @@ register SV *sstr;
 		    else
 			dref = (SV*)GvAV(dstr);
 		    GvAV(dstr) = (AV*)sref;
+		    if (curcop->cop_stash != GvSTASH(dstr))
+			GvIMPORTED_AV_on(dstr);
 		    break;
 		case SVt_PVHV:
 		    if (intro)
@@ -1621,6 +1654,8 @@ register SV *sstr;
 		    else
 			dref = (SV*)GvHV(dstr);
 		    GvHV(dstr) = (HV*)sref;
+		    if (curcop->cop_stash != GvSTASH(dstr))
+			GvIMPORTED_HV_on(dstr);
 		    break;
 		case SVt_PVCV:
 		    if (intro)
@@ -1637,7 +1672,12 @@ register SV *sstr;
 			    SvFAKE_on(cv);
 			}
 		    }
-		    GvCV(dstr) = (CV*)sref;
+		    if (GvCV(dstr) != (CV*)sref) {
+			GvCV(dstr) = (CV*)sref;
+			GvASSUMECV_on(dstr);
+		    }
+		    if (curcop->cop_stash != GvSTASH(dstr))
+			GvIMPORTED_CV_on(dstr);
 		    break;
 		case SVt_PVIO:
 		    if (intro)
@@ -1652,10 +1692,10 @@ register SV *sstr;
 		    else
 			dref = (SV*)GvSV(dstr);
 		    GvSV(dstr) = sref;
+		    if (curcop->cop_stash != GvSTASH(dstr))
+			GvIMPORTED_SV_on(dstr);
 		    break;
 		}
-		if (curcop->cop_stash != GvSTASH(dstr))
-		    GvFLAGS(dstr) |= GVf_IMPORTED;	/* crude */
 		if (dref)
 		    SvREFCNT_dec(dref);
 		if (intro)
@@ -1694,20 +1734,27 @@ register SV *sstr;
 	 * has to be allocated and SvPVX(sstr) has to be freed.
 	 */
 
-	if (SvTEMP(sstr)) {		/* slated for free anyway? */
+	if (SvTEMP(sstr) &&		/* slated for free anyway? */
+	    !(sflags & SVf_OOK)) 	/* and not involved in OOK hack? */
+	{
 	    if (SvPVX(dstr)) {		/* we know that dtype >= SVt_PV */
-		(void)SvOOK_off(dstr);
-		Safefree(SvPVX(dstr));
+		if (SvOOK(dstr)) {
+		    SvFLAGS(dstr) &= ~SVf_OOK;
+		    Safefree(SvPVX(dstr) - SvIVX(dstr));
+		}
+		else
+		    Safefree(SvPVX(dstr));
 	    }
+	    (void)SvPOK_only(dstr);
 	    SvPV_set(dstr, SvPVX(sstr));
 	    SvLEN_set(dstr, SvLEN(sstr));
 	    SvCUR_set(dstr, SvCUR(sstr));
-	    (void)SvPOK_only(dstr);
 	    SvTEMP_off(dstr);
+	    (void)SvOK_off(sstr);
 	    SvPV_set(sstr, Nullch);
 	    SvLEN_set(sstr, 0);
-	    SvPOK_off(sstr);			/* wipe out any weird flags */
-	    SvPVX(sstr) = 0;			/* so sstr frees uneventfully */
+	    SvCUR_set(sstr, 0);
+	    SvTEMP_off(sstr);
 	}
 	else {					/* have to copy actual string */
 	    STRLEN len = SvCUR(sstr);
@@ -2578,6 +2625,7 @@ I32 append;
 	        memcpy((char*)bp, (char*)ptr, cnt);  /* this     |  eat */    
 		bp += cnt;			     /* screams  |  dust */   
 		ptr += cnt;			     /* louder   |  sed :-) */
+		cnt = 0;
 	    }
 	}
 	
@@ -2696,8 +2744,8 @@ register SV *sv;
 	mg_get(sv);
     flags = SvFLAGS(sv);
     if (flags & SVp_IOK) {
-	++SvIVX(sv);
 	(void)SvIOK_only(sv);
+	++SvIVX(sv);
 	return;
     }
     if (flags & SVp_NOK) {
@@ -2766,8 +2814,8 @@ register SV *sv;
 	mg_get(sv);
     flags = SvFLAGS(sv);
     if (flags & SVp_IOK) {
-	--SvIVX(sv);
 	(void)SvIOK_only(sv);
+	--SvIVX(sv);
 	return;
     }
     if (flags & SVp_NOK) {
@@ -3349,7 +3397,7 @@ SV* sv;
 	gp_free(sv);
     sv_unmagic(sv, '*');
     Safefree(GvNAME(sv));
-    SvMULTI_off(sv);
+    GvMULTI_off(sv);
     SvFLAGS(sv) &= ~SVTYPEMASK;
     SvFLAGS(sv) |= SVt_PVMG;
 }

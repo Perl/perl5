@@ -10,7 +10,7 @@ my $archname = $Config{'archname'};
 
 sub import {
     shift;
-    foreach (@_) {
+    foreach (reverse @_) {
 	unshift(@INC, $_);
 	# Put a corresponding archlib directory infront of $_ if it
 	# looks like $_ has an archlib directory below it.

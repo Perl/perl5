@@ -14,5 +14,6 @@
 
 #define Stat(fname,bufptr) stat((fname),(bufptr))
 #define Fstat(fd,bufptr)   fstat((fd),(bufptr))
+#define Fflush(fp)         fflush(fp)
 
 #define my_getenv(var)  getenv(var)

@@ -61,6 +61,10 @@ __END__
 
 ExtUtils::MM_OS2 - methods to override UN*X behaviour in ExtUtils::MakeMaker
 
+=head1 SYNOPSIS
+
+ use ExtUtils::MM_OS2; # Done internally by ExtUtils::MakeMaker if needed
+
 =head1 DESCRIPTION
 
 See ExtUtils::MM_Unix for a documentation of the methods provided

@@ -24,7 +24,7 @@ ldflags="$ldflags"
 # ANSI C (the -Aa flag) nor can it produce shared libraries.  Thus we have
 # to turn off dynamic loading.
 case "$cc" in
-'') if cc $ccflags -Aa 2>&1 | $contains 'Unknown option "A"' >/dev/null
+'') if cc $ccflags -Aa 2>&1 | $contains 'option' >/dev/null
     then
 	case "$usedl" in
 	 '') usedl="$undef"

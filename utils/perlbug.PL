@@ -51,16 +51,18 @@ use strict;
 sub paraprint;
 
 
-my($Version) = "1.11";
+my($Version) = "1.12";
 
 # Changed in 1.06 to skip Mail::Send and Mail::Util if not available.
-# Changed in 1.07 to see more sendmail execs, and added pipe output
-# Changed in 1.08 to use correct address for sendmail
+# Changed in 1.07 to see more sendmail execs, and added pipe output.
+# Changed in 1.08 to use correct address for sendmail.
 # Changed in 1.09 to close the REP file before calling it up in the editor.
 #                 Also removed some old comments duplicated elsewhere.
 # Changed in 1.10 to run under VMS without Mail::Send; also fixed
-#                 temp filename generation
+#                 temp filename generation.
 # Changed in 1.11 to clean up some text and removed Mail::Send deactivator.
+# Changed in 1.12 to check for editor errors, make save/send distinction
+#                 clearer and add $ENV{REPLYTO}.
 
 # TODO: Allow the user to re-name the file on mail failure, and
 #       make sure failure (transmission-wise) of Mail::Send is 
@@ -204,20 +206,23 @@ EOF
 		    	$guess = "$me\@$domain" if $domain;
 		    	$guess = "$me\@unknown.addresss" unless $domain;
 			}
+			
+		$guess = $ENV{'REPLYTO'} if defined($ENV{'REPLYTO'});
+		$guess = $ENV{"REPLY-TO"} if defined($ENV{'REPLY-TO'});
 	
 		if( $guess ) {
 			paraprint <<EOF;
 
 
-Your e-mail address will be useful if you need to be contacted.
-If the default shown is not your proper address, please correct it.
+Your e-mail address will be useful if you need to be contacted. If the
+default shown is not your full internet e-mail address, please correct it.
 
 EOF
 		} else {
 			paraprint <<EOF;
 
 So that you may be contacted if necessary, please enter 
-your e-mail address here.
+your full internet e-mail address here.
 
 EOF
 		}
@@ -394,10 +399,34 @@ EOF
 sub Edit {
 	# Edit the report
 	
+tryagain:	
 	if(!$file and !$body) {
 		my($sts) = system("$ed $filename");
 		if( $Is_VMS ? !($sts & 1) : $sts ) {
-			print "\nUnable to run editor!\n";
+			#print "\nUnable to run editor!\n";
+			paraprint <<EOF;
+
+The editor you chose (`$ed') could apparently not be run!
+Did you mistype the name of your editor? If so, please
+correct it here, otherwise just press Enter. 
+
+EOF
+			print "Editor [$ed]: ";
+		
+			my($entry) =scalar(<>);
+			chop $entry;
+	
+			if($entry ne "") {
+				$ed = $entry;
+				goto tryagain;
+			} else {
+			
+			paraprint <<EOF;
+
+You may want to save your report to a file, so you can edit and mail it
+yourself.
+EOF
+			}
 		} 
 	}
 }
@@ -418,14 +447,11 @@ You may also save the message as a file to mail at another time.
 
 EOF
 
-			print "Action (Send/Display/Edit/Cancel/File): ";
+			print "Action (Send/Display/Edit/Cancel/Save to File): ";
 			my($action) = scalar(<>);
 			chop $action;
 
-			if($action =~ /^s/i) { # Send
-				# Send the message
-				last;
-			} elsif($action =~ /^f/i) { # File
+			if( $action =~ /^(f|sa)/i ) { # <F>ile/<Sa>ve
 				print "\n\nName of file to save message in [perlbug.rep]: ";
 				my($file) = scalar(<>);
 				chop $file;
@@ -444,15 +470,19 @@ EOF
 				print "\nMessage saved in `$file'.\n";
 				exit;
 
-			} elsif($action =~ /^[drl]/i) { # Display, Redisplay, List
+			} elsif( $action =~ /^(d|l|sh)/i ) { # <D>isplay, <L>ist, <Sh>ow
 				# Display the message
 				open(REP,"<$filename");
 				while(<REP>) { print $_ }
 				close(REP);
-			} elsif($action =~ /^e/i) { # Edit
+			} elsif( $action =~ /^s/i ) { # <S>end
+				# Send the message
+				last;
+			} elsif( $action =~ /^[er]/i ) { # <E>dit, <R>e-edit
 				# edit the message
-				system("$ed $filename");
-			} elsif($action =~ /^[qc]/i) { # Cancel, Quit
+				Edit();
+				#system("$ed $filename");
+			} elsif( $action =~ /^[qc]/i ) { # <C>ancel, <Q>uit
 				1 while unlink($filename);  # remove all versions under VMS
 				print "\nCancelling.\n";
 				exit(0);

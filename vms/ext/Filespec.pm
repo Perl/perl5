@@ -25,7 +25,7 @@ candelete('my:[VMS.or.Unix]file.specification');
 This package provides routines to simplify conversion between VMS and
 Unix syntax when processing file specifications.  This is useful when
 porting scripts designed to run under either OS, and also allows you
-to take advantage of conveniences provided by either syntax (e.g.
+to take advantage of conveniences provided by either syntax (I<e.g.>
 ability to easily concatenate Unix-style specifications).  In
 addition, it provides an additional file test routine, C<candelete>,
 which determines whether you have delete access to a file.
@@ -52,6 +52,12 @@ directory specification which extends above the tope of the current
 directory path (e.g [---.foo] when in dev:[dir.sub]) will cause
 errors.  In general, any legal file specification will be converted
 properly, but garbage input tends to produce garbage output.  
+
+Each of these routines is prototyped as taking a single scalar
+argument, so you can use them as unary operators in complex
+expressions (as long as you don't use the C<&> form of
+subroutine call, which bypasses prototype checking).
+
 
 The routines provided are:
 
@@ -104,11 +110,13 @@ C<candelete> becomes part of the Perl core.
 
 =head1 REVISION
 
-This document was last revised 08-Dec-1995, for Perl 5.002.
+This document was last revised 22-Feb-1996, for Perl 5.002.
 
 =cut
 
 package VMS::Filespec;
+require 5.002;
+
 
 # If you want to use this package on a non-VMS system,
 # uncomment the following line.
@@ -182,7 +190,7 @@ sub rmsexpand {
   $fspec;
 }  
 
-sub vmsify {
+sub vmsify ($) {
   my($fspec) = @_;
   my($hasdev,$dev,$defdirs,$dir,$base,@dirs,@realdirs);
 
@@ -215,7 +223,7 @@ sub vmsify {
   }
 }
 
-sub unixify {
+sub unixify ($) {
   my($fspec) = @_;
 
   return $fspec if $fspec !~ m#[:>\]]#;
@@ -244,7 +252,7 @@ sub unixify {
 }
 
 
-sub fileify {
+sub fileify ($) {
   my($path) = @_;
 
   if (!$path) { return undef }
@@ -279,7 +287,7 @@ sub fileify {
   }
 }
 
-sub pathify {
+sub pathify ($) {
   my($fspec) = @_;
 
   if (!$fspec) { return undef }
@@ -304,15 +312,15 @@ sub pathify {
   }
 }
 
-sub vmspath {
+sub vmspath ($) {
   pathify(vmsify($_[0]));
 }
 
-sub unixpath {
+sub unixpath ($) {
   pathify(unixify($_[0]));
 }
 
-sub candelete {
+sub candelete ($) {
   my($fspec) = @_;
   my($parent);
 

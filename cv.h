@@ -26,10 +26,11 @@ struct xpvcv {
     long	xcv_depth;		/* >= 2 indicates recursive call */
     AV *	xcv_padlist;
     CV *	xcv_outside;
-    bool	xcv_oldstyle;
+    U8		xcv_flags;
 };
 
 #define Nullcv Null(CV*)
+
 #define CvSTASH(sv)	((XPVCV*)SvANY(sv))->xcv_stash
 #define CvSTART(sv)	((XPVCV*)SvANY(sv))->xcv_start
 #define CvROOT(sv)	((XPVCV*)SvANY(sv))->xcv_root
@@ -40,5 +41,25 @@ struct xpvcv {
 #define CvDEPTH(sv)	((XPVCV*)SvANY(sv))->xcv_depth
 #define CvPADLIST(sv)	((XPVCV*)SvANY(sv))->xcv_padlist
 #define CvOUTSIDE(sv)	((XPVCV*)SvANY(sv))->xcv_outside
-#define CvOLDSTYLE(sv)	((XPVCV*)SvANY(sv))->xcv_oldstyle
+#define CvFLAGS(sv)	((XPVCV*)SvANY(sv))->xcv_flags
 
+#define CVf_CLONE	0x01	/* anon CV uses external lexicals */
+#define CVf_CLONED	0x02	/* a clone of one of those */
+#define CVf_ANON	0x04	/* CvGV() can't be trusted */
+#define CVf_OLDSTYLE	0x08
+
+#define CvCLONE(cv)		(CvFLAGS(cv) & CVf_CLONE)
+#define CvCLONE_on(cv)		(CvFLAGS(cv) |= CVf_CLONE)
+#define CvCLONE_off(cv)		(CvFLAGS(cv) &= ~CVf_CLONE)
+
+#define CvCLONED(cv)		(CvFLAGS(cv) & CVf_CLONED)
+#define CvCLONED_on(cv)		(CvFLAGS(cv) |= CVf_CLONED)
+#define CvCLONED_off(cv)	(CvFLAGS(cv) &= ~CVf_CLONED)
+
+#define CvANON(cv)		(CvFLAGS(cv) & CVf_ANON)
+#define CvANON_on(cv)		(CvFLAGS(cv) |= CVf_ANON)
+#define CvANON_off(cv)		(CvFLAGS(cv) &= ~CVf_ANON)
+
+#define CvOLDSTYLE(cv)		(CvFLAGS(cv) & CVf_OLDSTYLE)
+#define CvOLDSTYLE_on(cv)	(CvFLAGS(cv) |= CVf_OLDSTYLE)
+#define CvOLDSTYLE_off(cv)	(CvFLAGS(cv) &= ~CVf_OLDSTYLE)

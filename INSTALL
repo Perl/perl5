@@ -549,6 +549,11 @@ page, however.  You may need to be root to run B<make install>.  If you
 are not root, you must own the directories in question and you should
 ignore any messages about chown not working.
 
+B<Note:>  In the 5.002 release, you will see some harmless error
+messages and warnings from pod2man.  You may safely ignore them.  (Yes,
+they should be fixed, but they didn't seem important enough to warrant
+holding up the entire 5.002 release.)
+
 If you want to see exactly what will happen without installing
 anything, you can run
 
@@ -675,6 +680,6 @@ is sometimes useful for finding things in the library modules.
 Andy Dougherty <doughera@lafcol.lafayette.edu>, borrowing I<very> heavily
 from the original README by Larry Wall.
 
-=head 2 LAST MODIFIED
+=head1 LAST MODIFIED
 
 04 January 1996

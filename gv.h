@@ -20,7 +20,6 @@ struct gp {
     I32		gp_lastexpr;	/* used by nothing_in_common() */
     line_t	gp_line;	/* line first declared at (for -w) */
     GV *	gp_filegv;	/* file first declared in (for -w) */
-    char	gp_flags;
 };
 
 #if defined(CRIPPLED_CC) && (defined(iAPX286) || defined(M_I286) || defined(I80286))
@@ -28,6 +27,12 @@ struct gp {
 #endif
 
 #define GvXPVGV(gv)	((XPVGV*)SvANY(gv))
+
+#define GvGP(gv)	(GvXPVGV(gv)->xgv_gp)
+#define GvNAME(gv)	(GvXPVGV(gv)->xgv_name)
+#define GvNAMELEN(gv)	(GvXPVGV(gv)->xgv_namelen)
+#define GvSTASH(gv)	(GvXPVGV(gv)->xgv_stash)
+#define GvFLAGS(gv)	(GvXPVGV(gv)->xgv_flags)
 
 #define GvSV(gv)	(GvGP(gv)->gp_sv)
 #define GvREFCNT(gv)	(GvGP(gv)->gp_refcnt)
@@ -63,17 +68,50 @@ HV *GvHVn();
 #define GvLINE(gv)	(GvGP(gv)->gp_line)
 #define GvFILEGV(gv)	(GvGP(gv)->gp_filegv)
 
-#define GvFLAGS(gv)	(GvGP(gv)->gp_flags)
-
 #define GvEGV(gv)	(GvGP(gv)->gp_egv)
-
-#define GvGP(gv)	(GvXPVGV(gv)->xgv_gp)
-#define GvNAME(gv)	(GvXPVGV(gv)->xgv_name)
-#define GvNAMELEN(gv)	(GvXPVGV(gv)->xgv_namelen)
 #define GvENAME(gv)	GvNAME(GvEGV(gv) ? GvEGV(gv) : gv)
-
-#define GvSTASH(gv)	(GvXPVGV(gv)->xgv_stash)
 #define GvESTASH(gv)	GvSTASH(GvEGV(gv) ? GvEGV(gv) : gv)
+
+#define GVf_INTRO	0x01
+#define GVf_MULTI	0x02
+#define GVf_ASSUMECV	0x04
+#define GVf_IMPORTED	0xF0
+#define GVf_IMPORTED_SV	  0x10
+#define GVf_IMPORTED_AV	  0x20
+#define GVf_IMPORTED_HV	  0x40
+#define GVf_IMPORTED_CV	  0x80
+
+#define GvINTRO(gv)		(GvFLAGS(gv) & GVf_INTRO)
+#define GvINTRO_on(gv)		(GvFLAGS(gv) |= GVf_INTRO)
+#define GvINTRO_off(gv)		(GvFLAGS(gv) &= ~GVf_INTRO)
+
+#define GvMULTI(gv)		(GvFLAGS(gv) & GVf_MULTI)
+#define GvMULTI_on(gv)		(GvFLAGS(gv) |= GVf_MULTI)
+#define GvMULTI_off(gv)		(GvFLAGS(gv) &= ~GVf_MULTI)
+
+#define GvASSUMECV(gv)		(GvFLAGS(gv) & GVf_ASSUMECV)
+#define GvASSUMECV_on(gv)	(GvFLAGS(gv) |= GVf_ASSUMECV)
+#define GvASSUMECV_off(gv)	(GvFLAGS(gv) &= ~GVf_ASSUMECV)
+
+#define GvIMPORTED(gv)		(GvFLAGS(gv) & GVf_IMPORTED)
+#define GvIMPORTED_on(gv)	(GvFLAGS(gv) |= GVf_IMPORTED)
+#define GvIMPORTED_off(gv)	(GvFLAGS(gv) &= ~GVf_IMPORTED)
+
+#define GvIMPORTED_SV(gv)	(GvFLAGS(gv) & GVf_IMPORTED_SV)
+#define GvIMPORTED_SV_on(gv)	(GvFLAGS(gv) |= GVf_IMPORTED_SV)
+#define GvIMPORTED_SV_off(gv)	(GvFLAGS(gv) &= ~GVf_IMPORTED_SV)
+
+#define GvIMPORTED_AV(gv)	(GvFLAGS(gv) & GVf_IMPORTED_AV)
+#define GvIMPORTED_AV_on(gv)	(GvFLAGS(gv) |= GVf_IMPORTED_AV)
+#define GvIMPORTED_AV_off(gv)	(GvFLAGS(gv) &= ~GVf_IMPORTED_AV)
+
+#define GvIMPORTED_HV(gv)	(GvFLAGS(gv) & GVf_IMPORTED_HV)
+#define GvIMPORTED_HV_on(gv)	(GvFLAGS(gv) |= GVf_IMPORTED_HV)
+#define GvIMPORTED_HV_off(gv)	(GvFLAGS(gv) &= ~GVf_IMPORTED_HV)
+
+#define GvIMPORTED_CV(gv)	(GvFLAGS(gv) & GVf_IMPORTED_CV)
+#define GvIMPORTED_CV_on(gv)	(GvFLAGS(gv) |= GVf_IMPORTED_CV)
+#define GvIMPORTED_CV_off(gv)	(GvFLAGS(gv) &= ~GVf_IMPORTED_CV)
 
 #define Nullgv Null(GV*)
 
@@ -84,9 +122,6 @@ HV *GvHVn();
 #define DM_RGID   0x010
 #define DM_EGID   0x020
 #define DM_DELAY 0x100
-
-#define GVf_INTRO	0x01
-#define GVf_IMPORTED	0x02
 
 #define GV_ADD		0x01
 #define GV_ADDMULTI	0x02

@@ -82,6 +82,7 @@ EOM
     ccflags="-DOVR_DBL_DIG=14 $ccflags"
     so='sa'
     dlext='o'
+    nm_so_opt=' '
     ## If you are using DLD 3.2.4 which does not support shared libs,
     ## uncomment the next two lines:
     #ldflags="-static"

@@ -821,14 +821,13 @@ long a1, a2, a3, a4;
     }
     if (in_eval) {
 	restartop = die_where(message);
-	longjmp(top_env, 3);
+	Siglongjmp(top_env, 3);
     }
     fputs(message,stderr);
-    (void)fflush(stderr);
+    (void)Fflush(stderr);
     if (e_fp) {
-#ifdef DOSISH
-        fclose(e_fp);
-#endif
+	fclose(e_fp);
+	e_fp = Nullfp;
 	(void)UNLINK(e_tmpname);
     }
     statusvalue = SHIFTSTATUS(statusvalue);
@@ -865,7 +864,7 @@ long a1, a2, a3, a4;
 #ifdef LEAKTEST
 	DEBUG_L(xstat());
 #endif
-	(void)fflush(stderr);
+	(void)Fflush(stderr);
     }
 }
 
@@ -981,14 +980,13 @@ croak(pat, va_alist)
     }
     if (in_eval) {
 	restartop = die_where(message);
-	longjmp(top_env, 3);
+	Siglongjmp(top_env, 3);
     }
     fputs(message,stderr);
-    (void)fflush(stderr);
+    (void)Fflush(stderr);
     if (e_fp) {
-#ifdef DOSISH
-        fclose(e_fp);
-#endif
+	fclose(e_fp);
+	e_fp = Nullfp;
 	(void)UNLINK(e_tmpname);
     }
     statusvalue = SHIFTSTATUS(statusvalue);
@@ -1037,7 +1035,7 @@ warn(pat,va_alist)
 #ifdef LEAKTEST
 	DEBUG_L(xstat());
 #endif
-	(void)fflush(stderr);
+	(void)Fflush(stderr);
     }
 }
 #endif /* !defined(I_STDARG) && !defined(I_VARARGS) */

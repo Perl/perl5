@@ -32,6 +32,11 @@ FileHandle - supply object methods for filehandles
         undef $fh;       # automatically closes the file
     }
 
+    $pos = $fh->getpos;
+    $fh->setpos $pos;
+
+    $fh->setvbuf($buffer_var, _IOLBF, 1024);
+
     ($readfh, $writefh) = FileHandle::pipe;
 
     autoflush STDOUT 1;
@@ -59,6 +64,21 @@ the open mode in either Perl form (">", "+<", etc.) or POSIX form
 C<FileHandle::fdopen> is like C<open> except that its first parameter
 is not a filename but rather a file handle name, a FileHandle object,
 or a file descriptor number.
+
+If the C functions fgetpos() and fsetpos() are available, then
+C<FileHandle::getpos> returns an opaque value that represents the
+current position of the FileHandle, and C<FileHandle::setpos> uses
+that value to return to a previously visited position.
+
+If the C function setvbuf() is available, then C<FileHandle::setvbuf>
+sets the buffering policy for the FileHandle.  The calling sequence
+for the Perl function is the same as its C counterpart, including the
+macros C<_IOFBF>, C<_IOLBF>, and C<_IONBF>, except that the buffer
+parameter specifies a scalar variable to use as a buffer.  WARNING: A
+variable used as a buffer by C<FileHandle::setvbuf> must not be
+modified in any way until the FileHandle is closed or until
+C<FileHandle::setvbuf> is called again, or memory corruption may
+result!
 
 See L<perlfunc> for complete descriptions of each of the following
 supported C<FileHandle> methods, which are just front ends for the

@@ -129,12 +129,6 @@ struct io {
 #define SVpbm_CASEFOLD	0x40000000
 #define SVpbm_TAIL	0x20000000
 
-#define SVpgv_MULTI	0x80000000
-
-#define SVpcv_CLONE	0x80000000	/* anon CV uses external lexicals */
-#define SVpcv_CLONED	0x40000000	/* a clone of one of those */
-#define SVpcv_ANON	0x20000000	/* CvGV() can't be trusted */
-
 #ifdef OVERLOAD
 #define SVpgv_AM        0x40000000
 /* #define SVpgv_badAM     0x20000000 */
@@ -203,6 +197,7 @@ struct xpvgv {
     char*	xgv_name;
     STRLEN	xgv_namelen;
     HV*		xgv_stash;
+    U8		xgv_flags;
 };
 
 struct xpvbm {
@@ -301,7 +296,7 @@ struct xpvio {
 #define SvIOK_on(sv)		(SvOOK_off(sv), \
 				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
 #define SvIOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_IOK|SVp_IOK))
-#define SvIOK_only(sv)		(SvOK_off(sv), \
+#define SvIOK_only(sv)		(SvOOK_off(sv), SvOK_off(sv), \
 				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
 
 #define SvNOK(sv)		(SvFLAGS(sv) & SVf_NOK)
@@ -410,10 +405,6 @@ struct xpvio {
 #define SvVALID(sv)		(SvFLAGS(sv) & SVpbm_VALID)
 #define SvVALID_on(sv)		(SvFLAGS(sv) |= SVpbm_VALID)
 #define SvVALID_off(sv)		(SvFLAGS(sv) &= ~SVpbm_VALID)
-
-#define SvMULTI(sv)		(SvFLAGS(sv) & SVpgv_MULTI)
-#define SvMULTI_on(sv)		(SvFLAGS(sv) |= SVpgv_MULTI)
-#define SvMULTI_off(sv)		(SvFLAGS(sv) &= ~SVpgv_MULTI)
 
 #define SvRV(sv) ((XRV*)  SvANY(sv))->xrv_rv
 #define SvRVx(sv) SvRV(sv)

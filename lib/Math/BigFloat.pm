@@ -5,31 +5,31 @@ use Math::BigInt;
 use Exporter;  # just for use to be happy
 @ISA = (Exporter);
 
-%OVERLOAD = ( 
-				# Anonymous subroutines:
-'+'	=>	sub {new BigFloat &fadd},
-'-'	=>	sub {new BigFloat
+use overload
+'+'	=>	sub {new Math::BigFloat &fadd},
+'-'	=>	sub {new Math::BigFloat
 		       $_[2]? fsub($_[1],${$_[0]}) : fsub(${$_[0]},$_[1])},
-'<=>'	=>	sub {new BigFloat
+'<=>'	=>	sub {new Math::BigFloat
 		       $_[2]? fcmp($_[1],${$_[0]}) : fcmp(${$_[0]},$_[1])},
-'cmp'	=>	sub {new BigFloat
+'cmp'	=>	sub {new Math::BigFloat
 		       $_[2]? ($_[1] cmp ${$_[0]}) : (${$_[0]} cmp $_[1])},
-'*'	=>	sub {new BigFloat &fmul},
-'/'	=>	sub {new BigFloat 
+'*'	=>	sub {new Math::BigFloat &fmul},
+'/'	=>	sub {new Math::BigFloat 
 		       $_[2]? scalar fdiv($_[1],${$_[0]}) :
 			 scalar fdiv(${$_[0]},$_[1])},
-'neg'	=>	sub {new BigFloat &fneg},
-'abs'	=>	sub {new BigFloat &fabs},
+'neg'	=>	sub {new Math::BigFloat &fneg},
+'abs'	=>	sub {new Math::BigFloat &fabs},
 
 qw(
 ""	stringify
 0+	numify)			# Order of arguments unsignificant
-);
+;
 
 sub new {
-  my $foo = fnorm($_[1]);
-  panic("Not a number initialized to BigFloat") if $foo eq "NaN";
-  bless \$foo;
+  my ($class) = shift;
+  my ($foo) = fnorm(shift);
+  panic("Not a number initialized to Math::BigFloat") if $foo eq "NaN";
+  bless \$foo, $class;
 }
 sub numify { 0 + "${$_[0]}" }	# Not needed, additional overhead
 				# comparing to direct compilation based on
@@ -58,21 +58,6 @@ sub stringify {
     return $n;
 }
 
-# Arbitrary length float math package
-#
-# by Mark Biggar
-#
-# number format
-#   canonical strings have the form /[+-]\d+E[+-]\d+/
-#   Input values can have inbedded whitespace
-# Error returns
-#   'NaN'           An input parameter was "Not a Number" or 
-#                       divide by zero or sqrt of negative number
-# Division is computed to 
-#   max($div_scale,length(dividend)+length(divisor)) 
-#   digits by default.
-# Also used for default sqrt scale
-
 $div_scale = 40;
 
 # Rounding modes one of 'even', 'odd', '+inf', '-inf', 'zero' or 'trunc'.
@@ -84,21 +69,6 @@ sub fneg; sub fabs; sub fcmp;
 sub fround; sub ffround;
 sub fnorm; sub fsqrt;
 
-#   bigfloat routines
-#
-#   fadd(NSTR, NSTR) return NSTR            addition
-#   fsub(NSTR, NSTR) return NSTR            subtraction
-#   fmul(NSTR, NSTR) return NSTR            multiplication
-#   fdiv(NSTR, NSTR[,SCALE]) returns NSTR   division to SCALE places
-#   fneg(NSTR) return NSTR                  negation
-#   fabs(NSTR) return NSTR                  absolute value
-#   fcmp(NSTR,NSTR) return CODE             compare undef,<0,=0,>0
-#   fround(NSTR, SCALE) return NSTR         round to SCALE digits
-#   ffround(NSTR, SCALE) return NSTR        round at SCALEth place
-#   fnorm(NSTR) return (NSTR)               normalize
-#   fsqrt(NSTR[, SCALE]) return NSTR        sqrt to SCALE places
-
-
 # Convert a number to canonical string form.
 #   Takes something that looks like a number and converts it to
 #   the form /^[+-]\d+E[+-]\d+$/.
@@ -154,7 +124,7 @@ sub fmul { #(fnum_str, fnum_str) return fnum_str
 	&norm(Math::BigInt::bmul($xm,$ym),$xe+$ye);
     }
 }
-
+
 # addition
 sub fadd { #(fnum_str, fnum_str) return fnum_str
     local($x,$y) = (fnorm($_[$[]),fnorm($_[$[+1]));
@@ -192,7 +162,7 @@ sub fdiv #(fnum_str, fnum_str[,scale]) return fnum_str
 	    $xe-$ye-$scale);
     }
 }
-
+
 # round int $q based on fraction $r/$base using $rnd_mode
 sub round { #(int_str, int_str, int_str) return int_str
     local($q,$r,$base) = @_;
@@ -233,7 +203,7 @@ sub fround { #(fnum_str, scale) return fnum_str
 	}
     }
 }
-
+
 # round $x at the 10 to the $scale digit place
 sub ffround { #(fnum_str, scale) return fnum_str
     local($x,$scale) = (fnorm($_[$[]),$_[$[+1]);
@@ -273,7 +243,7 @@ sub fcmp #(fnum_str, fnum_str) return cond_code
 	);
     }
 }
-
+
 # square root by Newtons method.
 sub fsqrt { #(fnum_str[, scale]) return fnum_str
     local($x, $scale) = (fnorm($_[$[]), $_[$[+1]);
@@ -290,8 +260,67 @@ sub fsqrt { #(fnum_str[, scale]) return fnum_str
 	    $guess = fmul(fadd($guess,fdiv($x,$guess,$gs*2)),".5");
 	    $gs *= 2;
 	}
-	new BigFloat &fround($guess, $scale);
+	new Math::BigFloat &fround($guess, $scale);
     }
 }
 
 1;
+__END__
+
+=head1 NAME
+
+Math::BigFloat - Arbitrary length float math package
+
+=head1 SYNOPSIS
+
+  use Math::BogFloat;
+  $f = Math::BigFloat->new($string);
+
+  $f->fadd(NSTR) return NSTR            addition
+  $f->fsub(NSTR) return NSTR            subtraction
+  $f->fmul(NSTR) return NSTR            multiplication
+  $f->fdiv(NSTR[,SCALE]) returns NSTR   division to SCALE places
+  $f->fneg() return NSTR                negation
+  $f->fabs() return NSTR                absolute value
+  $f->fcmp(NSTR) return CODE            compare undef,<0,=0,>0
+  $f->fround(SCALE) return NSTR         round to SCALE digits
+  $f->ffround(SCALE) return NSTR        round at SCALEth place
+  $f->fnorm() return (NSTR)             normalize
+  $f->fsqrt([SCALE]) return NSTR        sqrt to SCALE places
+
+=head1 DESCRIPTION
+
+All basic math operations are overloaded if you declare your big
+floats as
+
+    $float = new Math::BigFloat "2.123123123123123123123123123123123";
+
+=over 2
+
+=item number format
+
+canonical strings have the form /[+-]\d+E[+-]\d+/ .  Input values can
+have inbedded whitespace.
+
+=item Error returns 'NaN'
+
+An input parameter was "Not a Number" or divide by zero or sqrt of
+negative number.
+
+=item Division is computed to 
+
+C<max($div_scale,length(dividend)+length(divisor))> digits by default.
+Also used for default sqrt scale.
+
+=back
+
+=head1 BUGS
+
+The current version of this module is a preliminary version of the
+real thing that is currently (as of perl5.002) under development.
+
+=head1 AUTHOR
+
+Mark Biggar
+
+=cut

@@ -32,7 +32,7 @@ operate on scalar values only, not array values.
     right	= += -= *= etc.
     left	, =>
     nonassoc	list operators (rightward)
-    left	not
+    right	not
     left	and
     left	or xor
 
@@ -562,7 +562,6 @@ are interpolated, as are the following sequences:
     \n		newline
     \r		return
     \f		form feed
-    \v		vertical tab, whatever that is
     \b		backspace
     \a		alarm (bell)
     \e		escape

@@ -1190,7 +1190,7 @@ static char *do_tounixspec(char *spec, char *buf, int ts)
     if (cp1) {
       for (cp1++; *cp1 == '-'; cp1++) dashes++; /* VMS  '-' ==> Unix '../' */
     }
-    New(7015,rslt,retlen+1+2*dashes,char);
+    New(7015,rslt,retlen+2+2*dashes,char);
   }
   else rslt = __tounixspec_retbuf;
   if (strchr(spec,'/') != NULL) {
@@ -1207,12 +1207,16 @@ static char *do_tounixspec(char *spec, char *buf, int ts)
     strcpy(rslt,spec);
     return rslt;
   }
-  if (*cp2 != '[') {
+  if (*cp2 != '[' && *cp2 != '<') {
     *(cp1++) = '/';
   }
   else {  /* the VMS spec begins with directories */
     cp2++;
-    if (*cp2 == '-') {
+    if (*cp2 == ']' || *cp2 == '>') {
+      strcpy(rslt,"./");
+      return rslt;
+    }
+    else if (*cp2 == '-') {
       while (*cp2 == '-') {
         *(cp1++) = '.'; *(cp1++) = '.'; *(cp1++) = '/';
         cp2++;
@@ -1693,7 +1697,7 @@ getredirection(int *ac, char ***av)
 	
     /* Check for input from a pipe (mailbox) */
 
-    if (1 == isapipe(0))
+    if (in == NULL && 1 == isapipe(0))
 	{
 	char mbxname[L_tmpnam];
 	long int bufsize;
@@ -1704,11 +1708,6 @@ getredirection(int *ac, char ***av)
 	/* Input from a pipe, reopen it in binary mode to disable	*/
 	/* carriage control processing.	 				*/
 
-	if (in != NULL)
-	    {
-	    fprintf(stderr,"'|' and '<' may not both be specified on command line");
-	    exit(LIB$_INVARGORD);
-	    }
 	fgetname(stdin, mbxname,1);
 	mbxnam.dsc$a_pointer = mbxname;
 	mbxnam.dsc$w_length = strlen(mbxnam.dsc$a_pointer);	
@@ -2986,7 +2985,7 @@ cando_by_name(I32 bit, I32 effective, char *fname)
   static char usrname[L_cuserid];
   static struct dsc$descriptor_s usrdsc =
          {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, usrname};
-
+  char vmsname[NAM$C_MAXRSS+1], fileified[NAM$C_MAXRSS+1];
   unsigned long int objtyp = ACL$C_FILE, access, retsts, privused, iosb[2];
   unsigned short int retlen;
   struct dsc$descriptor_s namdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
@@ -2997,12 +2996,21 @@ cando_by_name(I32 bit, I32 effective, char *fname)
          {0,0,0,0}};
 
   if (!fname || !*fname) return FALSE;
+  if (!do_tovmsspec(fname,vmsname,1)) return FALSE;
+  retlen = namdsc.dsc$w_length = strlen(vmsname);
+  namdsc.dsc$a_pointer = vmsname;
+  if (vmsname[retlen-1] == ']' || vmsname[retlen-1] == '>' ||
+      vmsname[retlen-1] == ':') {
+    if (!do_fileify_dirspec(vmsname,fileified,1)) return FALSE;
+    namdsc.dsc$w_length = strlen(fileified);
+    namdsc.dsc$a_pointer = fileified;
+  }
+
   if (!usrdsc.dsc$w_length) {
     cuserid(usrname);
     usrdsc.dsc$w_length = strlen(usrname);
   }
-  namdsc.dsc$w_length = strlen(fname);
-  namdsc.dsc$a_pointer = fname;
+
   switch (bit) {
     case S_IXUSR:
     case S_IXGRP:
@@ -3126,6 +3134,158 @@ my_getlogin()
 /*}}}*/
 
 
+/*  rmscopy - copy a file using VMS RMS routines
+ *
+ *  Copies contents and attributes of spec_in to spec_out, except owner
+ *  and protection information.  Name and type of spec_in are used as
+ *  defaults for spec_out.  Returns 1 on success; returns 0 and sets
+ *  errno and vaxc$errno on failure.
+ *
+ *  Copyright 1996 by Charles Bailey <bailey@genetics.upenn.edu>.
+ *  Incorporates, with permission, some code from EZCOPY by Tim Adye
+ *  <T.J.Adye@rl.ac.uk>.  Permission is given to use and distribute this
+ *  code under the same terms as Perl itself.  (See the GNU General Public
+ *  License or the Perl Artistic License supplied as part of the Perl
+ *  distribution.)
+ */
+/*{{{int rmscopy(char *src, char *dst)*/
+int
+rmscopy(char *spec_in, char *spec_out)
+{
+    char vmsin[NAM$C_MAXRSS+1], vmsout[NAM$C_MAXRSS+1], esa[NAM$C_MAXRSS],
+         rsa[NAM$C_MAXRSS], ubf[32256];
+    unsigned long int i, sts, sts2;
+    struct FAB fab_in, fab_out;
+    struct RAB rab_in, rab_out;
+    struct NAM nam;
+    struct XABDAT xabdat;
+    struct XABFHC xabfhc;
+    struct XABRDT xabrdt;
+    struct XABSUM xabsum;
+
+    if (!spec_in  || !*spec_in  || !do_tovmsspec(spec_in,vmsin,1) ||
+        !spec_out || !*spec_out || !do_tovmsspec(spec_out,vmsout,1)) {
+      set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
+      return 0;
+    }
+
+    fab_in = cc$rms_fab;
+    fab_in.fab$l_fna = vmsin;
+    fab_in.fab$b_fns = strlen(vmsin);
+    fab_in.fab$b_shr = FAB$M_SHRPUT | FAB$M_UPI;
+    fab_in.fab$b_fac = FAB$M_BIO | FAB$M_GET;
+    fab_in.fab$l_fop = FAB$M_SQO;
+    fab_in.fab$l_nam =  &nam;
+    fab_in.fab$l_xab = (void*) &xabdat;
+
+    nam = cc$rms_nam;
+    nam.nam$l_rsa = rsa;
+    nam.nam$b_rss = sizeof(rsa);
+    nam.nam$l_esa = esa;
+    nam.nam$b_ess = sizeof (esa);
+    nam.nam$b_esl = nam.nam$b_rsl = 0;
+
+    xabdat = cc$rms_xabdat;        /* To get creation date */
+    xabdat.xab$l_nxt = (void*) &xabfhc;
+
+    xabfhc = cc$rms_xabfhc;        /* To get record length */
+    xabfhc.xab$l_nxt = (void*) &xabsum;
+
+    xabsum = cc$rms_xabsum;        /* To get key and area information */
+
+    if (!((sts = sys$open(&fab_in)) & 1)) {
+      set_vaxc_errno(sts);
+      switch (sts) {
+        case RMS$_FNF:
+        case RMS$_DIR:
+          set_errno(ENOENT); break;
+        case RMS$_DEV:
+          set_errno(ENODEV); break;
+        case RMS$_SYN:
+          set_errno(EINVAL); break;
+        case RMS$_PRV:
+          set_errno(EACCES); break;
+        default:
+          set_errno(EVMSERR);
+      }
+      return 0;
+    }
+
+    fab_out = fab_in;
+    fab_out.fab$w_ifi = 0;
+    fab_out.fab$b_fac = FAB$M_BIO | FAB$M_PUT;
+    fab_out.fab$b_shr = FAB$M_SHRGET | FAB$M_UPI;
+    fab_out.fab$l_fop = FAB$M_SQO;
+    fab_out.fab$l_fna = vmsout;
+    fab_out.fab$b_fns = strlen(vmsout);
+    fab_out.fab$l_dna = nam.nam$l_name;
+    fab_out.fab$b_dns = nam.nam$l_name ? nam.nam$b_name + nam.nam$b_type : 0;
+    if (!((sts = sys$create(&fab_out)) & 1)) {
+      set_vaxc_errno(sts);
+      switch (sts) {
+        case RMS$_DIR:
+          set_errno(ENOENT); break;
+        case RMS$_DEV:
+          set_errno(ENODEV); break;
+        case RMS$_SYN:
+          set_errno(EINVAL); break;
+        case RMS$_PRV:
+          set_errno(EACCES); break;
+        default:
+          set_errno(EVMSERR);
+      }
+      return 0;
+    }
+    fab_out.fab$l_fop |= FAB$M_DLT;  /* in case we have to bail out */
+    /* sys$close() will process xabrdt, not xabdat */
+    xabrdt = cc$rms_xabrdt;
+    xabrdt.xab$q_rdt = xabdat.xab$q_rdt;
+    fab_out.fab$l_xab = &xabrdt;
+
+    rab_in = cc$rms_rab;
+    rab_in.rab$l_fab = &fab_in;
+    rab_in.rab$l_rop = RAB$M_BIO;
+    rab_in.rab$l_ubf = ubf;
+    rab_in.rab$w_usz = sizeof ubf;
+    if (!((sts = sys$connect(&rab_in)) & 1)) {
+      sys$close(&fab_in); sys$close(&fab_out);
+      set_errno(EVMSERR); set_vaxc_errno(sts);
+      return 0;
+    }
+
+    rab_out = cc$rms_rab;
+    rab_out.rab$l_fab = &fab_out;
+    rab_out.rab$l_rbf = ubf;
+    if (!((sts = sys$connect(&rab_out)) & 1)) {
+      sys$close(&fab_in); sys$close(&fab_out);
+      set_errno(EVMSERR); set_vaxc_errno(sts);
+      return 0;
+    }
+
+    while ((sts = sys$read(&rab_in))) {  /* always true  */
+      if (sts == RMS$_EOF) break;
+      rab_out.rab$w_rsz = rab_in.rab$w_rsz;
+      if (!(sts & 1) || !((sts = sys$write(&rab_out)) & 1)) {
+        sys$close(&fab_in); sys$close(&fab_out);
+        set_errno(EVMSERR); set_vaxc_errno(sts);
+        return 0;
+      }
+    }
+
+    fab_out.fab$l_fop &= ~FAB$M_DLT;  /* We got this far; keep the output */
+    sys$close(&fab_in);  sys$close(&fab_out);
+    sts = (fab_in.fab$l_sts & 1) ? fab_out.fab$l_sts : fab_in.fab$l_sts;
+    if (!(sts & 1)) {
+      set_errno(EVMSERR); set_vaxc_errno(sts);
+      return 0;
+    }
+
+    return 1;
+
+}  /* end of rmscopy() */
+/*}}}*/
+
+
 /***  The following glue provides 'hooks' to make some of the routines
  * from this file available from Perl.  These routines are sufficiently
  * basic, and are required sufficiently early in the build process,
@@ -3217,12 +3377,80 @@ void
 candelete_fromperl(CV *cv)
 {
   dXSARGS;
-  char vmsspec[NAM$C_MAXRSS+1];
+  char fspec[NAM$C_MAXRSS+1], *fsp;
+  SV *mysv;
+  IO *io;
 
   if (items != 1) croak("Usage: VMS::Filespec::candelete(spec)");
-  if (do_tovmsspec(SvPV(ST(0),na),buf,0) && cando_by_name(S_IDUSR,0,buf))
-    ST(0) = &sv_yes;
-  else ST(0) = &sv_no;
+
+  mysv = SvROK(ST(0)) ? SvRV(ST(0)) : ST(0);
+  if (SvTYPE(mysv) == SVt_PVGV) {
+    if (!(io = GvIOp(mysv)) || !fgetname(IoIFP(io),fspec)) {
+      set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
+      ST(0) = &sv_no;
+      XSRETURN(1);
+    }
+    fsp = fspec;
+  }
+  else {
+    if (mysv != ST(0) || !(fsp = SvPV(mysv,na)) || !*fsp) {
+      set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
+      ST(0) = &sv_no;
+      XSRETURN(1);
+    }
+  }
+
+  ST(0) = cando_by_name(S_IDUSR,0,fsp) ? &sv_yes : &sv_no;
+  XSRETURN(1);
+}
+
+void
+rmscopy_fromperl(CV *cv)
+{
+  dXSARGS;
+  char inspec[NAM$C_MAXRSS+1], outspec[NAM$C_MAXRSS+1], *inp, *outp;
+  struct dsc$descriptor indsc  = { 0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0},
+                        outdsc = { 0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
+  unsigned long int sts;
+  SV *mysv;
+  IO *io;
+
+  if (items != 2) croak("Usage: File::Copy::rmscopy(from,to)");
+
+  mysv = SvROK(ST(0)) ? SvRV(ST(0)) : ST(0);
+  if (SvTYPE(mysv) == SVt_PVGV) {
+    if (!(io = GvIOp(mysv)) || !fgetname(IoIFP(io),inspec)) {
+      set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
+      ST(0) = &sv_no;
+      XSRETURN(1);
+    }
+    inp = inspec;
+  }
+  else {
+    if (mysv != ST(0) || !(inp = SvPV(mysv,na)) || !*inp) {
+      set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
+      ST(0) = &sv_no;
+      XSRETURN(1);
+    }
+  }
+  mysv = SvROK(ST(1)) ? SvRV(ST(1)) : ST(1);
+  if (SvTYPE(mysv) == SVt_PVGV) {
+    if (!(io = GvIOp(mysv)) || !fgetname(IoIFP(io),outspec)) {
+      set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
+      ST(0) = &sv_no;
+      XSRETURN(1);
+    }
+    outp = outspec;
+  }
+  else {
+    if (mysv != ST(1) || !(outp = SvPV(mysv,na)) || !*outp) {
+      set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
+      ST(0) = &sv_no;
+      XSRETURN(1);
+    }
+  }
+
+  ST(0) = rmscopy(inp,outp) ? &sv_yes : &sv_no;
   XSRETURN(1);
 }
 
@@ -3231,13 +3459,14 @@ init_os_extras()
 {
   char* file = __FILE__;
 
-  newXS("VMS::Filespec::vmsify",vmsify_fromperl,file);
-  newXS("VMS::Filespec::unixify",unixify_fromperl,file);
-  newXS("VMS::Filespec::pathify",pathify_fromperl,file);
-  newXS("VMS::Filespec::fileify",fileify_fromperl,file);
-  newXS("VMS::Filespec::vmspath",vmspath_fromperl,file);
-  newXS("VMS::Filespec::unixpath",unixpath_fromperl,file);
-  newXS("VMS::Filespec::candelete",candelete_fromperl,file);
+  newXSproto("VMS::Filespec::vmsify",vmsify_fromperl,file,"$");
+  newXSproto("VMS::Filespec::unixify",unixify_fromperl,file,"$");
+  newXSproto("VMS::Filespec::pathify",pathify_fromperl,file,"$");
+  newXSproto("VMS::Filespec::fileify",fileify_fromperl,file,"$");
+  newXSproto("VMS::Filespec::vmspath",vmspath_fromperl,file,"$");
+  newXSproto("VMS::Filespec::unixpath",unixpath_fromperl,file,"$");
+  newXSproto("VMS::Filespec::candelete",candelete_fromperl,file,"$");
+  newXS("File::Copy::rmscopy",rmscopy_fromperl,file);
   return;
 }
   

@@ -27,12 +27,11 @@ See L<perlxstut> for a tutorial on the whole extension creation process.
 
 =head2 On The Road
 
-Many of the examples which follow will concentrate on creating an
-interface between Perl and the ONC+ RPC bind library functions.
-Specifically, the rpcb_gettime() function will be used to demonstrate many
-features of the XS language.  This function has two parameters; the first
-is an input parameter and the second is an output parameter.  The function
-also returns a status value.
+Many of the examples which follow will concentrate on creating an interface
+between Perl and the ONC+ RPC bind library functions.  The rpcb_gettime()
+function is used to demonstrate many features of the XS language.  This
+function has two parameters; the first is an input parameter and the second
+is an output parameter.  The function also returns a status value.
 
 	bool_t rpcb_gettime(const char *host, time_t *timep);
 
@@ -845,10 +844,10 @@ the function will be called using the THIS->method() syntax.
 
 The next examples will use the following C++ class.
 
-     class colors {
+     class color {
           public:
-          colors();
-          ~colors();
+          color();
+          ~color();
           int blue();
           void set_blue( int );
 
@@ -1115,9 +1114,9 @@ File C<rpctest.pl>: Perl test program for the RPC extension.
 
 =head1 XS VERSION
 
-This document covers features supported by C<xsubpp> 1.931.
+This document covers features supported by C<xsubpp> 1.933.
 
 =head1 AUTHOR
 
 Dean Roehrich F<E<lt>roehrich@cray.comE<gt>>
-Jan 25, 1996
+Feb 13, 1996

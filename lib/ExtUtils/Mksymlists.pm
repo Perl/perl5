@@ -169,8 +169,8 @@ from which it is usually taken.  Its value is a reference to an
 associative array, in which each key is the name of a package, and
 each value is an a reference to an array of function names which
 should be exported by the extension.  For instance, one might say
-C<DL_FUNCS => { Homer::Iliad   => [ qw(trojans greeks) ],
-Homer::Odyssey => [ qw(travellers family suitors) ] }>.  The
+C<DL_FUNCS =E<gt> { Homer::Iliad   =E<gt> [ qw(trojans greeks) ],
+Homer::Odyssey =E<gt> [ qw(travellers family suitors) ] }>.  The
 function names should be identical to those in the XSUB code;
 C<Mksymlists> will alter the names written to the linker option
 file to match the changes made by F<xsubpp>.  In addition, if
@@ -221,4 +221,4 @@ Charles Bailey I<E<lt>bailey@genetics.upenn.eduE<gt>>
 
 =head1 REVISION
 
-Last revised 14-Jan-1996, for Perl 5.002.
+Last revised 14-Feb-1996, for Perl 5.002.

@@ -937,7 +937,7 @@ die(pat, va_alist)
     }
     restartop = die_where(message);
     if ((!restartop && was_in_eval) || oldrunlevel > 1)
-	longjmp(top_env, 3);
+	Siglongjmp(top_env, 3);
     return restartop;
 }
 
@@ -997,11 +997,10 @@ char *message;
 	}
     }
     fputs(message, stderr);
-    (void)fflush(stderr);
+    (void)Fflush(stderr);
     if (e_fp) {
-#ifdef DOSISH
 	fclose(e_fp);
-#endif 
+	e_fp = Nullfp;
 	(void)UNLINK(e_tmpname);
     }
     statusvalue = SHIFTSTATUS(statusvalue);
@@ -1135,7 +1134,7 @@ PP(pp_caller)
 	    GV* tmpgv;
 	    dbargs = GvAV(gv_AVadd(tmpgv = gv_fetchpv("DB::args", TRUE,
 				SVt_PVAV)));
-	    SvMULTI_on(tmpgv);
+	    GvMULTI_on(tmpgv);
 	    AvREAL_off(dbargs);		/* XXX Should be REIFY */
 	}
 
@@ -1828,6 +1827,9 @@ PP(pp_goto)
     }
 
     if (do_dump) {
+#ifdef VMS
+	if (!retop) retop = main_start;
+#endif
 	restartop = retop;
 	do_undump = TRUE;
 
@@ -1839,7 +1841,7 @@ PP(pp_goto)
 
     if (stack == signalstack) {
         restartop = retop;
-        longjmp(top_env, 3);
+        Siglongjmp(top_env, 3);
     }
 
     RETURNOP(retop);
@@ -2038,9 +2040,9 @@ PP(pp_require)
 
     sv = POPs;
     if (SvNIOKp(sv) && !SvPOKp(sv)) {
-	if (atof(patchlevel) + 0.000999 < SvNV(sv))
-	    DIE("Perl %3.3f required--this is only version %s, stopped",
-		SvNV(sv),patchlevel);
+	if (atof(patchlevel) + 0.00000999 < SvNV(sv))
+	    DIE("Perl %s required--this is only version %s, stopped",
+		SvPV(sv,na),patchlevel);
 	RETPUSHYES;
     }
     name = SvPV(sv, na);

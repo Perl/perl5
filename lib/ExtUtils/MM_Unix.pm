@@ -65,7 +65,7 @@ with a directory
 
 sub catdir  {
     shift;
-    my $result = join('/',@_,'/');
+    my $result = join('/',@_);
     $result =~ s:/\./:/:g;
     $result =~ s:/+:/:g;
     $result;
@@ -689,7 +689,7 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 	    my($c); ($c = $name) =~ s/\.xs$/.c/;
 	    $xs{$name} = $c;
 	    $c{$c} = 1;
-	} elsif ($name =~ /\.c$/i){
+	} elsif ($name =~ /\.c(pp|xx|c)?$/i){  # .c .C .cpp .cxx .cc
 	    $c{$name} = 1
 		unless $name =~ m/perlmain\.c/; # See MAP_TARGET
 	} elsif ($name =~ /\.h$/i){
@@ -772,7 +772,7 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
     $self->{PM}  = \%pm             unless $self->{PM};
     $self->{C}   = [sort keys %c]   unless $self->{C};
     my(@o_files) = @{$self->{C}};
-    $self->{O_FILES} = [grep s/\.c$/$self->{OBJ_EXT}/i, @o_files] ;
+    $self->{O_FILES} = [grep s/\.c(pp|xx|c)?$/$self->{OBJ_EXT}/i, @o_files] ;
     $self->{H}   = [sort keys %h]   unless $self->{H};
     $self->{PL_FILES} = \%pl_files unless $self->{PL_FILES};
 
@@ -1015,7 +1015,8 @@ sub const_config {
     push(@m,"\n# They may have been overridden via Makefile.PL or on the command line\n");
     my(%once_only);
     foreach $m (@{$self->{CONFIG}}){
-	next if $once_only{$m};
+	# SITE*EXP macros are defined in &constants; avoid duplicates here
+	next if $once_only{$m} or $m eq 'SITELIBEXP' or $m eq 'SITEARCHEXP';
 	push @m, "\U$m\E = ".$self->{uc $m}."\n";
 	$once_only{$m} = 1;
     }
@@ -1096,7 +1097,7 @@ MAN3PODS = ".join(" \\\n\t", sort keys %{$self->{MAN3PODS}})."
 # work around a famous dec-osf make(1) feature(?):
 makemakerdflt: all
 
-.SUFFIXES: .xs .c .C \$(OBJ_EXT)
+.SUFFIXES: .xs .c .C .cpp .cxx .cc \$(OBJ_EXT)
 
 # Nick wanted to get rid of .PRECIOUS. I don't remember why. I seem to recall, that
 # some make implementations will delete the Makefile when we rebuild it. Because
@@ -1641,6 +1642,15 @@ sub c_o {
 
 .C$(OBJ_EXT):
 	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.C
+
+.cpp$(OBJ_EXT):
+	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.cpp
+
+.cxx$(OBJ_EXT):
+	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.cxx
+
+.cc$(OBJ_EXT):
+	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.cc
 ';
     join "", @m;
 }
@@ -2449,9 +2459,9 @@ sub install {
     push @m, q{
 install :: all pure_install doc_install
 
-install_perl :: pure_perl_install doc_perl_install
+install_perl :: all pure_perl_install doc_perl_install
 
-install_site :: pure_site_install doc_site_install
+install_site :: all pure_site_install doc_site_install
 
 install_ :: install_site
 	@echo INSTALLDIRS not defined, defaulting to INSTALLDIRS=site

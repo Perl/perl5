@@ -160,15 +160,20 @@ eval {require DynaLoader;};	# Get mod2fname, if defined. Will fail
 }
 
 #
-# No we can can pull in the friends
+# Now we can can pull in the friends
+# Since they will require us back, we would better prepare the needed
+# data _before_ we require them.
 #
+$Is_VMS = ($Config{osname} eq 'VMS');
+$Is_OS2 = ($Config{osname} =~ m|^os/?2$|i);
+
 require ExtUtils::MM_Unix;
-if ($Is_VMS = ($Config{osname} eq 'VMS')) {
+if ($Is_VMS) {
     require ExtUtils::MM_VMS;
     require VMS::Filespec;
     import VMS::Filespec '&vmsify';
 }
-if ($Is_OS2 = $Config{osname} =~ m|^os/?2$|i) {
+if ($Is_OS2) {
     require ExtUtils::MM_OS2;
 }
 
@@ -568,7 +573,7 @@ sub parse_args{
 	    $value = $self->catdir("..",$value)
 		if $Prepend_dot_dot{$name} && ! $value =~ m!^/!;
 	}
-	$self->{$name} = $value;
+	$self->{uc($name)} = $value;
     }
     # This may go away, in mid 1996
     delete $self->{Correct_relativ_directories};
@@ -1758,7 +1763,7 @@ An example:
 Andy Dougherty F<E<lt>doughera@lafcol.lafayette.eduE<gt>>, Andreas
 KE<ouml>nig F<E<lt>A.Koenig@franz.ww.TU-Berlin.DEE<gt>>, Tim Bunce
 F<E<lt>Tim.Bunce@ig.co.ukE<gt>>.  VMS support by Charles Bailey
-F<E<lt>bailey@HMIVAX.HUMGEN.UPENN.EDUE<gt>>. OS/2 support by Ilya
+F<E<lt>bailey@genetics.upenn.eduE<gt>>. OS/2 support by Ilya
 Zakharevich F<E<lt>ilya@math.ohio-state.eduE<gt>>. Contact the
 makemaker mailing list C<mailto:makemaker@franz.ww.tu-berlin.de>, if
 you have any questions.

@@ -23,7 +23,7 @@
 #ifdef USE_OP_MASK
 /*
  * In the following definition, the ", (OP *) op" is just to make the compiler
- * think the expression is of the right type: croak actually does a longjmp.
+ * think the expression is of the right type: croak actually does a Siglongjmp.
  */
 #define CHECKOP(type,op) \
     ((op_mask && op_mask[type]) \
@@ -190,7 +190,7 @@ pad_findlex(char *name, PADOFFSET newoff, I32 seq, CV* startcv, I32 cx_ix)
 		    SvFLAGS(sv) |= SVf_FAKE;
 		}
 		av_store(comppad, newoff, SvREFCNT_inc(oldsv));
-		SvFLAGS(compcv) |= SVpcv_CLONE;
+		CvCLONE_on(compcv);
 		return newoff;
 	    }
 	}
@@ -1424,10 +1424,12 @@ register OP *o;
 	    if (curop->op_type == OP_PADSV || curop->op_type == OP_RV2SV) {
 		if (vars++)
 		    return o;
-		if ((o->op_type == OP_LT && curop == ((BINOP*)o)->op_first) ||
-		    (o->op_type == OP_GT && curop == ((BINOP*)o)->op_last))
+		if (((o->op_type == OP_LT || o->op_type == OP_GE) &&
+			curop == ((BINOP*)o)->op_first ) ||
+		    ((o->op_type == OP_GT || o->op_type == OP_LE) &&
+			curop == ((BINOP*)o)->op_last ))
 		{
-		    /* Allow "$i < 100" and "100 > $i" to integerize */
+		    /* Allow "$i < 100" and variants to integerize */
 		    continue;
 		}
 	    }
@@ -2210,6 +2212,8 @@ OP *right;
 			tmpop->op_sibling = Nullop;	/* don't free split */
 			right->op_next = tmpop->op_next;  /* fix starting loc */
 			op_free(op);			/* blow off assign */
+			right->op_flags &= ~(OPf_KNOW|OPf_LIST);
+				/* "I don't know and I don't care." */
 			return right;
 		    }
 		}
@@ -2301,8 +2305,8 @@ OP *op;
     if (perldb && curstash != debstash) {
 	SV **svp = av_fetch(GvAV(curcop->cop_filegv),(I32)cop->cop_line, FALSE);
 	if (svp && *svp != &sv_undef && !SvIOK(*svp)) {
-	    SvIVX(*svp) = 1;
 	    (void)SvIOK_on(*svp);
+	    SvIVX(*svp) = 1;
 	    SvSTASH(*svp) = (HV*)cop;
 	}
     }
@@ -2675,7 +2679,7 @@ CV *cv;
 	SAVESPTR(curpad);
 	curpad = 0;
 
-	if (!(SvFLAGS(cv) & SVpcv_CLONED))
+	if (!CvCLONED(cv))
 	    op_free(CvROOT(cv));
 	CvROOT(cv) = Nullop;
 	LEAVE;
@@ -2716,7 +2720,7 @@ CV* proto;
 
     cv = compcv = (CV*)NEWSV(1104,0);
     sv_upgrade((SV *)cv, SVt_PVCV);
-    SvFLAGS(cv) |= SVpcv_CLONED;
+    CvCLONED_on(cv);
 
     CvFILEGV(cv)	= CvFILEGV(proto);
     CvGV(cv)		= SvREFCNT_inc(CvGV(proto));
@@ -2791,7 +2795,7 @@ OP *block;
     if (cv = GvCV(gv)) {
 	if (GvCVGEN(gv))
 	    cv = 0;			/* just a cached method */
-	else if (CvROOT(cv) || CvXSUB(cv) || GvFLAGS(gv) & GVf_IMPORTED) {
+	else if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
 	    if (dowarn) {		/* already defined (or promised)? */
 		line_t oldline = curcop->cop_line;
 
@@ -2906,7 +2910,7 @@ OP *block;
     LEAVE_SCOPE(floor);
     if (!op) {
 	GvCV(gv) = 0;	/* Will remember in SVOP instead. */
-	SvFLAGS(cv) |= SVpcv_ANON;
+	CvANON_on(cv);
     }
     return cv;
 }
@@ -2920,7 +2924,7 @@ I32 (*subaddr)();
 char *filename;
 {
     CV* cv = newXS(name, (void(*)())subaddr, filename);
-    CvOLDSTYLE(cv) = TRUE;
+    CvOLDSTYLE_on(cv);
     CvXSUBANY(cv).any_i32 = ix;
     return cv;
 }
@@ -2985,7 +2989,7 @@ char *filename;
     }
     if (!name) {
 	GvCV(gv) = 0;	/* Will remember elsewhere instead. */
-	SvFLAGS(cv) |= SVpcv_ANON;
+	CvANON_on(cv);
     }
     return cv;
 }
@@ -3006,7 +3010,7 @@ OP *block;
     else
 	name = "STDOUT";
     gv = gv_fetchpv(name,TRUE, SVt_PVFM);
-    SvMULTI_on(gv);
+    GvMULTI_on(gv);
     if (cv = GvFORM(gv)) {
 	if (dowarn) {
 	    line_t oldline = curcop->cop_line;

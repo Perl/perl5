@@ -104,6 +104,7 @@ ext/NDBM_File/Makefile.PL	NDBM extension makefile writer
 ext/NDBM_File/NDBM_File.pm	NDBM extension Perl module
 ext/NDBM_File/NDBM_File.xs	NDBM extension external subroutines
 ext/NDBM_File/hints/solaris.pl	Hint for NDBM_File for named architecture
+ext/NDBM_File/hints/svr4.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/typemap		NDBM extension interface types
 ext/ODBM_File/Makefile.PL	ODBM extension makefile writer
 ext/ODBM_File/ODBM_File.pm	ODBM extension Perl module
@@ -368,7 +369,6 @@ os2/diff.Makefile	Patches to Makefile.SH
 os2/diff.c2ph		c2ph patch
 os2/diff.configure	Patches to Configure
 os2/diff.db_file	patch to DB_File
-os2/diff.exec		patch to #ifdef lines to exec with sh
 os2/diff.installman	Patches to installman
 os2/diff.installperl	Patches to installperl
 os2/diff.mkdep		Patches to makedepend.SH
@@ -465,6 +465,7 @@ t/comp/multiline.t	See if multiline strings work
 t/comp/package.t	See if packages work
 t/comp/script.t		See if script invokation works
 t/comp/term.t		See if more terms work
+t/harness		Finer diagnostics from test suite
 t/io/argv.t		See if ARGV stuff works
 t/io/dup.t		See if >& works right
 t/io/fs.t		See if directory manipulations work

@@ -365,7 +365,7 @@ PP(pp_binmode)
 
 #ifdef DOSISH
 #ifdef atarist
-    if (!fflush(fp) && (fp->_flag |= _IOBIN))
+    if (!Fflush(fp) && (fp->_flag |= _IOBIN))
 	RETPUSHYES;
     else
 	RETPUSHUNDEF;
@@ -452,7 +452,7 @@ PP(pp_untie)
 
 PP(pp_tied)
 {
-    dSP; dTARGET ;
+    dSP;
     SV * sv ;
     MAGIC * mg ;
 
@@ -919,7 +919,7 @@ PP(pp_leavewrite)
 	    SvCUR_set(formtarget, 0);
 	    *SvEND(formtarget) = '\0';
 	    if (IoFLAGS(io) & IOf_FLUSH)
-		(void)fflush(fp);
+		(void)Fflush(fp);
 	    PUSHs(&sv_yes);
 	}
     }
@@ -965,7 +965,7 @@ PP(pp_prtf)
 	    goto just_say_no;
 
 	if (IoFLAGS(io) & IOf_FLUSH)
-	    if (fflush(fp) == EOF)
+	    if (Fflush(fp) == EOF)
 		goto just_say_no;
     }
     SvREFCNT_dec(sv);
@@ -982,9 +982,8 @@ PP(pp_prtf)
 
 PP(pp_sysopen)
 {
-    dSP; dTARGET;
+    dSP;
     GV *gv;
-    IO *io;
     SV *sv;
     char *tmps;
     STRLEN len;

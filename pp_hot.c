@@ -373,7 +373,7 @@ PP(pp_print)
 		    goto just_say_no;
 
 	    if (IoFLAGS(io) & IOf_FLUSH)
-		if (fflush(fp) == EOF)
+		if (Fflush(fp) == EOF)
 		    goto just_say_no;
 	}
     }
@@ -1720,8 +1720,10 @@ PP(pp_entersub)
     if ((op->op_private & OPpENTERSUB_DB) && !CvXSUB(cv)) {
 	sv = GvSV(DBsub);
 	save_item(sv);
-	if (SvFLAGS(cv) & (SVpcv_ANON | SVpcv_CLONED)) /* Is GV potentially non-unique? */
+	if (CvFLAGS(cv) & (CVf_ANON | CVf_CLONED)) {
+	    /* GV is potentially non-unique */
 	    sv_setsv(sv, newRV((SV*)cv));
+	}
 	else {
 	    gv = CvGV(cv);
 	    gv_efullname(sv,gv);

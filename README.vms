@@ -172,15 +172,16 @@ you omit this step, you risk ending up with a copy of Perl which
 composed partially of old files and partially of new ones, which may lead
 to strange effects when you try to run Perl.
 
-Note for sites using DECC:  A bug in some early versions of the DECC RTL on the
-AXP causes newlines to be lost when writing to a pipe.  This causes
-Gen_ShrFls.pl to fail, since it can't read the preprocessor output to identify
-global variables and routines.  A different bug in the DECC preprocessor itself
-for some patched versions of DECC 4.0 on the VAX also makes it impossible for
-Gen_ShrFls.pl to parse the preprocessor output.  In either case, the problem is
-generally manifested as missing global symbols when linking PerlShr.Exe or
-Perl.Exe.  You can work around this problem by defining the macro
-DECC_PIPES_BROKEN when you invoke MMS or MMK.
+A bug in some early versions of the DECC RTL on the AXP causes newlines
+to be lost when writing to a pipe.  A different bug in some patched versions
+of DECC 4.0 for VAX can also scramble preprocessor output.  Finally, gcc 2.7.2
+has yet another preprocessor bug, which causes line breaks to be inserted
+into the output at inopportune times.  Each of these bugs causes Gen_ShrFls.pl
+to fail, since it can't parse the preprocessor output to identify global
+variables and routines.  This problem is generally manifested as missing
+global symbols when linking PerlShr.Exe or Perl.Exe.  You can work around
+it by defining the macro PIPES_BROKEN when you invoke MMS or MMK.
+
 
 This will build the following files:
   Miniperl.Exe        - a stand-alone version of without any extensions.

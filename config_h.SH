@@ -1389,6 +1389,28 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #define Gconvert(x,n,t,b) $d_Gconvert
 
+/* Sigjmp_buf:
+ * This is the buffer type to be used with Sigsetjmp and Siglongjmp.
+ */
+/* Sigsetjmp:
+ * This macro is used in the same way as sigsetjmp(), but will invoke
+ * traditional setjmp() if sigsetjmp isn't available.
+ */
+/* Siglongjmp:
+ * This macro is used in the same way as siglongjmp(), but will invoke
+ * traditional longjmp() if siglongjmp isn't available.
+ */
+#$d_sigsetjmp HAS_SIGSETJMP	/**/
+#ifdef HAS_SIGSETJMP
+#define Sigjmp_buf sigjmp_buf
+#define Sigsetjmp(buf,save_mask) sigsetjmp(buf,save_mask)
+#define Siglongjmp(buf,retval) siglongjmp(buf,retval)
+#else
+#define Sigjmp_buf jmp_buf
+#define Sigsetjmp(buf,save_mask) setjmp(buf)
+#define Siglongjmp(buf,retval) longjmp(buf,retval)
+#endif
+
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
  *	some sort is available.

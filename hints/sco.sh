@@ -1,7 +1,19 @@
 # sco_3.sh 
 # Courtesy of Joel Rosi-Schwartz <joel@ftechne.co.uk>
-# To use gcc, do     Configure -Dcc=gcc
-#
+# Additional SCO version info from
+# Peter Wolfe	<wolfe@teloseng.com>
+# Last revised 
+# Tue Feb 13 09:09:10 EST 1996
+
+# To use gcc, use     sh Configure -Dcc=gcc
+
+# figure out what SCO version we are:
+case `uname -X | egrep '^Release'` in
+*3.2v4.2) scorls=3 ;;
+*3.2v5.*) scorls=5 ;;
+*) scorls=3 ;; # this probabaly shouldn't happen
+esac
+
 # Try to use libintl.a since it has strcoll and strxfrm
 libswanted="intl $libswanted"
 # Try to use libdbm.nfs.a since it has dbmclose.
@@ -12,11 +24,11 @@ fi
 set X $libswanted
 shift
 libswanted="$*"
-# 
+
 # We don't want Xenix cross-development libraries
 glibpth=`echo $glibpth | sed -e 's! /usr/lib/386 ! !' -e 's! /lib/386 ! !'`
 xlibpth=''
-# 
+
 case "$cc" in
 gcc)
 	ccflags="$ccflags -U M_XENIX"
@@ -24,10 +36,12 @@ gcc)
 	;;
 scocc)	;;
 
-*)
-	# Apparently, SCO's cc gives rather verbose warnings
+*)	# Apparently, SCO's cc gives rather verbose warnings
 	# Set -w0 to turn them off.
-	ccflags="$ccflags -w0 -U M_XENIX"
+	case $scorls in
+	3) ccflags="$ccflags -W0 -quiet -U M_XENIX" ;;
+	5) ccflags="$ccflags -w0 -U M_XENIX" ;;
+	esac
 	;;
 esac
 i_varargs=undef

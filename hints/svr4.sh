@@ -26,6 +26,12 @@ if [ -r /usr/ucblib/libucb.a ]; then	# If using BSD-compat. library:
 fi
 d_suidsafe='define'	# "./Configure -d" can't figure this out easilly
 usevfork='false'
+
+# Configure may fail to find lstat() since it's a static/inline
+# function in <sys/stat.h> on Unisys U6000 SVR4, and possibly
+# other SVR4 derivatives.
+d_lstat=define
+
 cat <<'EOM' >&4
 
 If you wish to use dynamic linking, you must use 

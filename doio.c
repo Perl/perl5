@@ -278,7 +278,7 @@ FILE *supplied_fp;
     if (saveifp) {		/* must use old fp? */
 	fd = fileno(saveifp);
 	if (saveofp) {
-	    fflush(saveofp);		/* emulate fclose() */
+	    Fflush(saveofp);		/* emulate fclose() */
 	    if (saveofp != saveifp) {	/* was a socket? */
 		fclose(saveofp);
 		if (fd > 2)
@@ -344,7 +344,7 @@ register GV *gv;
     if (!argvoutgv)
 	argvoutgv = gv_fetchpv("ARGVOUT",TRUE,SVt_PVIO);
     if (filemode & (S_ISUID|S_ISGID)) {
-	fflush(IoIFP(GvIOn(argvoutgv)));  /* chmod must follow last write */
+	Fflush(IoIFP(GvIOn(argvoutgv)));  /* chmod must follow last write */
 #ifdef HAS_FCHMOD
 	(void)fchmod(lastfd,filemode);
 #else

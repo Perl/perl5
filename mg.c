@@ -461,7 +461,11 @@ MAGIC *mg;
 	sv_setpv(sv,ofmt);
 	break;
     case '!':
+#ifdef VMS
+	sv_setnv(sv,(double)((errno == EVMSERR) ? vaxc$errno : errno));
+#else
 	sv_setnv(sv,(double)errno);
+#endif
 	sv_setpv(sv, errno ? Strerror(errno) : "");
 	SvNOK_on(sv);	/* what a wonderful hack! */
 	break;
@@ -1137,7 +1141,7 @@ MAGIC* mg;
 	statusvalue = FIXSTATUS(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	break;
     case '!':
-	SETERRNO(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv),SS$_ABORT);		/* will anyone ever use this? */
+	SETERRNO(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv),4);		/* will anyone ever use this? */
 	break;
     case '<':
 	uid = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);

@@ -114,7 +114,13 @@ register PerlInterpreter *sv_interp;
 #endif
 
     init_ids();
+
+#if defined(SUBVERSION) && SUBVERSION > 0
+    sprintf(patchlevel, "%7.5f", 5.0 + (PATCHLEVEL / 1000.0)
+				     + (SUBVERSION / 100000.0));
+#else
     sprintf(patchlevel, "%5.3f", 5.0 + (PATCHLEVEL / 1000.0));
+#endif
 
     fdpid = newAV();	/* for remembering popen pids by fd */
     pidstatus = newHV();/* for remembering status of dead pids */
@@ -263,7 +269,7 @@ setuid perl scripts securely.\n");
 	op_free(main_root);
     main_root = 0;
 
-    switch (setjmp(top_env)) {
+    switch (Sigsetjmp(top_env,1)) {
     case 1:
 #ifdef VMS
 	statusvalue = 255;
@@ -397,7 +403,7 @@ setuid perl scripts securely.\n");
     if (!scriptname)
 	scriptname = argv[0];
     if (e_fp) {
-	if (fflush(e_fp) || ferror(e_fp) || fclose(e_fp))
+	if (Fflush(e_fp) || ferror(e_fp) || fclose(e_fp))
 	    croak("Can't write to temp file for -e: %s", Strerror(errno));
 	argc++,argv--;
 	scriptname = e_tmpname;
@@ -465,6 +471,7 @@ setuid perl scripts securely.\n");
     curstash = defstash;
     preprocess = FALSE;
     if (e_fp) {
+	fclose(e_fp);
 	e_fp = Nullfp;
 	(void)UNLINK(e_tmpname);
     }
@@ -499,7 +506,7 @@ PerlInterpreter *sv_interp;
 {
     if (!(curinterp = sv_interp))
 	return 255;
-    switch (setjmp(top_env)) {
+    switch (Sigsetjmp(top_env,1)) {
     case 1:
 	cxstack_ix = -1;		/* start context stack again */
 	break;
@@ -569,7 +576,7 @@ U32 status;
 	POPBLOCK(cx,curpm);
 	LEAVE;
     }
-    longjmp(top_env, 2);
+    Siglongjmp(top_env, 2);
 }
 
 SV*
@@ -679,7 +686,7 @@ I32 flags;		/* See G_* flags in cop.h */
     SV** sp = stack_sp;
     I32 oldmark = TOPMARK;
     I32 retval;
-    jmp_buf oldtop;
+    Sigjmp_buf oldtop;
     I32 oldscope;
     
     if (flags & G_DISCARD) {
@@ -702,7 +709,7 @@ I32 flags;		/* See G_* flags in cop.h */
       myop.op_flags |= OPf_LIST;
 
     if (flags & G_EVAL) {
-	Copy(top_env, oldtop, 1, jmp_buf);
+	Copy(top_env, oldtop, 1, Sigjmp_buf);
 
 	cLOGOP->op_other = op;
 	markstack_ptr--;
@@ -728,7 +735,7 @@ I32 flags;		/* See G_* flags in cop.h */
 	markstack_ptr++;
 
     restart:
-	switch (setjmp(top_env)) {
+	switch (Sigsetjmp(top_env,1)) {
 	case 0:
 	    break;
 	case 1:
@@ -742,7 +749,7 @@ I32 flags;		/* See G_* flags in cop.h */
 	    /* my_exit() was called */
 	    curstash = defstash;
 	    FREETMPS;
-	    Copy(oldtop, top_env, 1, jmp_buf);
+	    Copy(oldtop, top_env, 1, Sigjmp_buf);
 	    if (statusvalue)
 		croak("Callback called exit");
 	    my_exit(statusvalue);
@@ -787,7 +794,7 @@ I32 flags;		/* See G_* flags in cop.h */
 	    curpm = newpm;
 	    LEAVE;
 	}
-	Copy(oldtop, top_env, 1, jmp_buf);
+	Copy(oldtop, top_env, 1, Sigjmp_buf);
     }
     if (flags & G_DISCARD) {
 	stack_sp = stack_base + oldmark;
@@ -809,7 +816,7 @@ I32 flags;		/* See G_* flags in cop.h */
     SV** sp = stack_sp;
     I32 oldmark = sp - stack_base;
     I32 retval;
-    jmp_buf oldtop;
+    Sigjmp_buf oldtop;
     I32 oldscope;
     
     if (flags & G_DISCARD) {
@@ -831,10 +838,10 @@ I32 flags;		/* See G_* flags in cop.h */
     if (flags & G_ARRAY)
       myop.op_flags |= OPf_LIST;
 
-    Copy(top_env, oldtop, 1, jmp_buf);
+    Copy(top_env, oldtop, 1, Sigjmp_buf);
 
 restart:
-    switch (setjmp(top_env)) {
+    switch (Sigsetjmp(top_env,1)) {
     case 0:
 	break;
     case 1:
@@ -848,7 +855,7 @@ restart:
 	/* my_exit() was called */
 	curstash = defstash;
 	FREETMPS;
-	Copy(oldtop, top_env, 1, jmp_buf);
+	Copy(oldtop, top_env, 1, Sigjmp_buf);
 	if (statusvalue)
 	    croak("Callback called exit");
 	my_exit(statusvalue);
@@ -878,7 +885,7 @@ restart:
 	sv_setpv(GvSV(errgv),"");
 
   cleanup:
-    Copy(oldtop, top_env, 1, jmp_buf);
+    Copy(oldtop, top_env, 1, Sigjmp_buf);
     if (flags & G_DISCARD) {
 	stack_sp = stack_base + oldmark;
 	retval = 0;
@@ -1101,8 +1108,12 @@ char *s;
     case 'm':
 	taint_not("-m");	/* XXX ? */
 	if (*++s) {
-	    char *start = s;
-	    Sv = newSVpv("use ",4);
+	    char *start;
+	    char *use = "use ";
+	    /* -M-foo == 'no foo'	*/
+	    if (*s == '-') { use = "no "; ++s; }
+	    Sv = newSVpv(use,0);
+	    start = s;
 	    /* We allow -M'Module qw(Foo Bar)'	*/
 	    while(isALNUM(*s) || *s==':') ++s;
 	    if (*s != '=') {
@@ -1114,9 +1125,9 @@ char *s;
 		}
 	    } else {
 		sv_catpvn(Sv, start, s-start);
-		sv_catpv(Sv, " qw(");
+		sv_catpv(Sv, " split(/,/,q{");
 		sv_catpv(Sv, ++s);
-		sv_catpv(Sv,    ")");
+		sv_catpv(Sv,    "})");
 	    }
 	    s += strlen(s);
 	    if (preambleav == NULL)
@@ -1152,7 +1163,11 @@ char *s;
 	s++;
 	return s;
     case 'v':
-	printf("\nThis is perl, version %s gamma",patchlevel);
+#if defined(SUBVERSION) && SUBVERSION > 0
+	printf("\nThis is perl, version 5.%03d_%02d", PATCHLEVEL, SUBVERSION);
+#else
+	printf("\nThis is perl, version %s",patchlevel);
+#endif
 
 #if defined(DEBUGGING) || defined(EMBED) || defined(MULTIPLICITY)
 	fputs(" with", stdout);
@@ -1229,7 +1244,12 @@ my_unexec()
 	fprintf(stderr, "unexec of %s into %s failed!\n", tokenbuf, buf);
     exit(status);
 #else
+#  ifdef VMS
+#    include <lib$routines.h>
+     lib$signal(SS$_DEBUG);  /* ssdef.h #included from vmsish.h */
+#else
     ABORT();		/* for use with undump */
+#endif
 #endif
 }
 
@@ -1245,10 +1265,10 @@ init_main_stash()
     SvREADONLY_on(gv);
     HvNAME(defstash) = savepv("main");
     incgv = gv_HVadd(gv_AVadd(gv_fetchpv("INC",TRUE, SVt_PVAV)));
-    SvMULTI_on(incgv);
+    GvMULTI_on(incgv);
     defgv = gv_fetchpv("_",TRUE, SVt_PVAV);
     errgv = gv_HVadd(gv_fetchpv("@", TRUE, SVt_PV));
-    SvMULTI_on(errgv);
+    GvMULTI_on(errgv);
     curstash = defstash;
     compiling.cop_stash = defstash;
     debstash = GvHV(gv_fetchpv("DB::", GV_ADDMULTI, SVt_PVHV));
@@ -1745,9 +1765,9 @@ init_stacks()
     retstack_ix = 0;
     retstack_max = 16;
 
-    New(50,cxstack,129,CONTEXT);	/* XXX should fix CXINC macro */
+    cxstack_max = 8192 / sizeof(CONTEXT) - 2;	/* Use most of 8K. */
+    New(50,cxstack,cxstack_max + 1,CONTEXT);
     cxstack_ix	= -1;
-    cxstack_max	= 128;
 
     New(50,tmps_stack,128,SV*);
     tmps_ix = -1;
@@ -1779,26 +1799,26 @@ init_predump_symbols()
     sv_setpvn(GvSV(gv_fetchpv("\"", TRUE, SVt_PV)), " ", 1);
 
     stdingv = gv_fetchpv("STDIN",TRUE, SVt_PVIO);
-    SvMULTI_on(stdingv);
+    GvMULTI_on(stdingv);
     IoIFP(GvIOp(stdingv)) = stdin;
     tmpgv = gv_fetchpv("stdin",TRUE, SVt_PV);
+    GvMULTI_on(tmpgv);
     GvIOp(tmpgv) = (IO*)SvREFCNT_inc(GvIOp(stdingv));
-    SvMULTI_on(tmpgv);
 
     tmpgv = gv_fetchpv("STDOUT",TRUE, SVt_PVIO);
-    SvMULTI_on(tmpgv);
+    GvMULTI_on(tmpgv);
     IoOFP(GvIOp(tmpgv)) = IoIFP(GvIOp(tmpgv)) = stdout;
     setdefout(tmpgv);
     tmpgv = gv_fetchpv("stdout",TRUE, SVt_PV);
+    GvMULTI_on(tmpgv);
     GvIOp(tmpgv) = (IO*)SvREFCNT_inc(GvIOp(defoutgv));
-    SvMULTI_on(tmpgv);
 
     othergv = gv_fetchpv("STDERR",TRUE, SVt_PVIO);
-    SvMULTI_on(othergv);
+    GvMULTI_on(othergv);
     IoOFP(GvIOp(othergv)) = IoIFP(GvIOp(othergv)) = stderr;
     tmpgv = gv_fetchpv("stderr",TRUE, SVt_PV);
+    GvMULTI_on(tmpgv);
     GvIOp(tmpgv) = (IO*)SvREFCNT_inc(GvIOp(othergv));
-    SvMULTI_on(tmpgv);
 
     statname = NEWSV(66,0);		/* last filename we did stat on */
 }
@@ -1848,7 +1868,7 @@ register char **env;
     if (tmpgv = gv_fetchpv("\030",TRUE, SVt_PV))
 	sv_setpv(GvSV(tmpgv),origargv[0]);
     if (argvgv = gv_fetchpv("ARGV",TRUE, SVt_PVAV)) {
-	SvMULTI_on(argvgv);
+	GvMULTI_on(argvgv);
 	(void)gv_AVadd(argvgv);
 	av_clear(GvAVn(argvgv));
 	for (; argc > 0; argc--,argv++) {
@@ -1857,7 +1877,7 @@ register char **env;
     }
     if (envgv = gv_fetchpv("ENV",TRUE, SVt_PVHV)) {
 	HV *hv;
-	SvMULTI_on(envgv);
+	GvMULTI_on(envgv);
 	hv = GvHVn(envgv);
 	hv_clear(hv);
 #ifndef VMS  /* VMS doesn't have environ array */
@@ -1935,25 +1955,25 @@ void
 calllist(list)
 AV* list;
 {
-    jmp_buf oldtop;
+    Sigjmp_buf oldtop;
     STRLEN len;
     line_t oldline = curcop->cop_line;
 
-    Copy(top_env, oldtop, 1, jmp_buf);
+    Copy(top_env, oldtop, 1, Sigjmp_buf);
 
     while (AvFILL(list) >= 0) {
 	CV *cv = (CV*)av_shift(list);
 
 	SAVEFREESV(cv);
 
-	switch (setjmp(top_env)) {
+	switch (Sigsetjmp(top_env,1)) {
 	case 0: {
 		SV* atsv = GvSV(errgv);
 		PUSHMARK(stack_sp);
 		perl_call_sv((SV*)cv, G_EVAL|G_DISCARD);
 		(void)SvPV(atsv, len);
 		if (len) {
-		    Copy(oldtop, top_env, 1, jmp_buf);
+		    Copy(oldtop, top_env, 1, Sigjmp_buf);
 		    curcop = &compiling;
 		    curcop->cop_line = oldline;
 		    if (list == beginav)
@@ -1977,7 +1997,7 @@ AV* list;
 	    if (endav)
 		calllist(endav);
 	    FREETMPS;
-	    Copy(oldtop, top_env, 1, jmp_buf);
+	    Copy(oldtop, top_env, 1, Sigjmp_buf);
 	    curcop = &compiling;
 	    curcop->cop_line = oldline;
 	    if (statusvalue) {
@@ -1995,13 +2015,13 @@ AV* list;
 		FREETMPS;
 		break;
 	    }
-	    Copy(oldtop, top_env, 1, jmp_buf);
+	    Copy(oldtop, top_env, 1, Sigjmp_buf);
 	    curcop = &compiling;
 	    curcop->cop_line = oldline;
-	    longjmp(top_env, 3);
+	    Siglongjmp(top_env, 3);
 	}
     }
 
-    Copy(oldtop, top_env, 1, jmp_buf);
+    Copy(oldtop, top_env, 1, Sigjmp_buf);
 }
 

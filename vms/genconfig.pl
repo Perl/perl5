@@ -12,6 +12,15 @@
 unshift(@INC,'lib');  # In case someone didn't define Perl_Root
                       # before the build
 
+if ($ARGV[0] eq '-f') {
+  open(ARGS,$ARGV[1]) or die "Can't read data from $ARGV[1]: $!\n";
+  @ARGV = ();
+  while (<ARGS>) {
+    push(@ARGV,split(/\|/,$_));
+  }
+  close ARGS;
+}
+
 if (-f "config.vms") { $infile = "config.vms"; $outdir = "[-]"; }
 elsif (-f "[.vms]config.vms") { $infile = "[.vms]config.vms"; $outdir = "[]"; }
 elsif (-f "config.h") { $infile = "config.h"; $outdir = "[]";}
@@ -194,6 +203,7 @@ $archlib = &VMS::Filespec::vmspath($privlib);
 $installarchlib = &VMS::Filespec::vmspath($installprivlib);
 $sitearch = &VMS::Filespec::vmspath($sitelib);
 $archlib =~ s#\]#.VMS_$archsufx\]#;
+$sitearch =~ s#\]#.VMS_$archsufx\]#;
 print OUT "oldarchlib='$archlib'\n";
 print OUT "oldarchlibexp='$archlib'\n";
 ($vers = $]) =~ tr/./_/;

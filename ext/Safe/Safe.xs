@@ -2,6 +2,9 @@
 #include "perl.h"
 #include "XSUB.h"
 
+/* maxo should never differ from MAXO but leave some room anyway */
+#define OP_MASK_BUF_SIZE (MAXO + 100)
+
 MODULE = Safe	PACKAGE = Safe
 
 void
@@ -13,14 +16,15 @@ safe_call_sv(package, mask, codesv)
 	int i;
 	char *str;
 	STRLEN len;
+	char op_mask_buf[OP_MASK_BUF_SIZE];
 
+	assert(maxo < OP_MASK_BUF_SIZE);
 	ENTER;
 	SAVETMPS;
 	save_hptr(&defstash);
 	save_aptr(&endav);
 	SAVEPPTR(op_mask);
-	Newz(666, op_mask, maxo+1, char);
-	SAVEFREEPV(op_mask);
+	op_mask = &op_mask_buf[0];
 	str = SvPV(mask, len);
 	if (maxo != len)
 	    croak("Bad mask length");
@@ -62,8 +66,8 @@ void
 ops_to_mask(...)
     CODE:
 	int i, j;
-	char *mask, *op;
-	Newz(666, mask, maxo+1, char);
+	char mask[OP_MASK_BUF_SIZE], *op;
+	Zero(mask, sizeof mask, char);
 	for (i = 0; i < items; i++)
 	{
 	    op = SvPV(ST(i), na);
@@ -76,8 +80,7 @@ ops_to_mask(...)
 		croak("bad op name \"%s\" in mask", op);
 	    }
 	}
-	ST(0) = sv_newmortal();
-	sv_usepvn(ST(0), mask, maxo);
+	ST(0) = sv_2mortal(newSVpv(mask,maxo));
 
 void
 opname(...)

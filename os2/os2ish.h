@@ -70,6 +70,7 @@ void settmppath();
 
 #define Stat(fname,bufptr) os2_stat((fname),(bufptr))
 #define Fstat(fd,bufptr)   fstat((fd),(bufptr))
+#define FFlush(fp)         fflush(fp)
 
 #undef S_IFBLK
 #undef S_ISBLK
@@ -80,5 +81,6 @@ void settmppath();
 
 #define Stat(fname,bufptr) stat((fname),(bufptr))
 #define Fstat(fd,bufptr)   fstat((fd),(bufptr))
+#define FFlush(fp)         fflush(fp)
 
 #endif

@@ -133,6 +133,10 @@ which provides a race condition that breaks security.
 (F) Perl can't peek at the stdio buffer of filehandles when it doesn't
 know about your kind of stdio.  You'll have to use a filename instead.
 
+=item 500 Server error
+
+See Server error.
+
 =item ?+* follows nothing in regexp
 
 (F) You started a regular expression with a quantifier.  Backslash it
@@ -1750,6 +1754,15 @@ but has not yet been written.  See L<perlre>.
 
 (F) You used a regular expression extension that doesn't make sense.
 See L<perlre>.
+
+=item Server error
+
+Also known as "500 Server error".  This is a CGI error, not a Perl
+error.  You need to make sure your script is executable, is accessible
+by the user CGI is running the script under (which is probably not
+the user account you tested it under), does not rely on any environment
+variables (like PATH) from the user it isn't running under, and isn't
+in a location where the CGI server can't find it, basically, more or less.
 
 =item setegid() not implemented
 

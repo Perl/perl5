@@ -1206,7 +1206,7 @@ IEXT SV *	Iparsehook;
 /* switches */
 IEXT char *	Icddir;
 IEXT bool	Iminus_c;
-IEXT char	Ipatchlevel[6];
+IEXT char	Ipatchlevel[10];
 IEXT SV *	Inrs;
 IEXT char *	Isplitstr IINIT(" ");
 IEXT bool	Ipreprocess;
@@ -1339,7 +1339,7 @@ IEXT line_t	Icopline IINIT(NOLINE);
 IEXT CONTEXT *	Icxstack;
 IEXT I32	Icxstack_ix IINIT(-1);
 IEXT I32	Icxstack_max IINIT(128);
-IEXT jmp_buf	Itop_env;
+IEXT Sigjmp_buf	Itop_env;
 IEXT I32	Irunlevel;
 
 /* stack stuff */

@@ -132,7 +132,7 @@ PP(pp_rv2gv)
 
 	if (op->op_flags & OPf_SPECIAL) {
 	    GvGP(sv)->gp_refcnt++;		/* will soon be assigned */
-	    GvFLAGS(sv) |= GVf_INTRO;
+	    GvINTRO_on(sv);
 	}
 	else {
 	    GP *gp;
@@ -273,9 +273,8 @@ PP(pp_anoncode)
     CV* cv = (CV*)cSVOP->op_sv;
     EXTEND(SP,1);
 
-    if (SvFLAGS(cv) & SVpcv_CLONE) {
+    if (CvCLONE(cv))
 	cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
-    }
 
     PUSHs((SV*)cv);
     RETURN;

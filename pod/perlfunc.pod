@@ -628,6 +628,21 @@ Examples:
 
 See also undef().
 
+Note: many folks tend to overuse defined(), and then are surprised to
+discover that the number 0 and the null string are, in fact, defined
+concepts.  For example, if you say
+
+    "ab" =~ /a(.*)b/;
+
+the pattern match succeeds, and $1 is defined, despite the fact that it
+matched "nothing".  But it didn't really match nothing--rather, it
+matched something that happened to be 0 characters long.  This is all
+very above-board and honest.  When a function returns an undefined value,
+it's an admission that it couldn't give you an honest answer.  So
+you should only use defined() when you're questioning the integrity
+of what you're trying to do.  At other times, a simple comparison to
+0 or "" is what you want.
+
 =item delete EXPR
 
 Deletes the specified value from its hash array.  Returns the deleted

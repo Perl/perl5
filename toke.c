@@ -276,7 +276,7 @@ void *f;
 
     if (rsfp == stdin)
 	clearerr(rsfp);
-    else if (rsfp != fp)
+    else if (rsfp && (rsfp != fp))
 	fclose(rsfp);
     rsfp = fp;
 }
@@ -1877,6 +1877,24 @@ yylex()
 	if (expect == XSTATE && isALPHA(tmp) &&
 		(s == SvPVX(linestr)+1 || s[-2] == '\n') )
 	{
+	    if (in_eval && !rsfp) {
+		d = bufend;
+		while (s < d) {
+		    if (*s++ == '\n') {
+			incline(s);
+			if (strnEQ(s,"=cut",4)) {
+			    s = strchr(s,'\n');
+			    if (s)
+				s++;
+			    else
+				s = d;
+			    incline(s);
+			    goto retry;
+			}
+		    }
+		}
+		goto retry;
+	    }
 	    s = bufend;
 	    doextract = TRUE;
 	    goto retry;
@@ -2297,10 +2315,9 @@ yylex()
 	if (tmp < 0) {			/* second-class keyword? */
 	    GV* gv;
 	    if (expect != XOPERATOR &&
-	      (*s != ':' || s[1] != ':') &&
-	      (gv = gv_fetchpv(tokenbuf,FALSE, SVt_PVCV)) &&
-	      (GvFLAGS(gv) & GVf_IMPORTED) &&
-	      GvCV(gv))
+		(*s != ':' || s[1] != ':') &&
+		(gv = gv_fetchpv(tokenbuf, FALSE, SVt_PVCV)) &&
+		GvIMPORTED_CV(gv))
 	    {
 		tmp = 0;
 	    }
@@ -2415,8 +2432,8 @@ yylex()
 
 		if (gv && GvCV(gv)) {
 		    CV* cv = GvCV(gv);
-		    nextval[nexttoke].opval = yylval.opval;
 		    if (*s == '(') {
+			nextval[nexttoke].opval = yylval.opval;
 			expect = XTERM;
 			force_next(WORD);
 			yylval.ival = 0;
@@ -2427,6 +2444,9 @@ yylex()
 				tokenbuf, tokenbuf);
 		    last_lop = oldbufptr;
 		    last_lop_op = OP_ENTERSUB;
+		    /* Resolve to GV now. */
+		    op_free(yylval.opval);
+		    yylval.opval = newCVREF(0, newGVOP(OP_GV, 0, gv));
 		    /* Is there a prototype? */
 		    if (SvPOK(cv)) {
 			STRLEN len;
@@ -2440,6 +2460,7 @@ yylex()
 			    PREBLOCK(LSTOPSUB);
 			}
 		    }
+		    nextval[nexttoke].opval = yylval.opval;
 		    expect = XTERM;
 		    force_next(WORD);
 		    TOKEN(NOAMP);
@@ -2492,14 +2513,14 @@ yylex()
 	    GV *gv;
 
 	    /*SUPPRESS 560*/
-	    if (!in_eval || tokenbuf[2] == 'D') {
+	    if (rsfp && (!in_eval || tokenbuf[2] == 'D')) {
 		char dname[256];
 		char *pname = "main";
 		if (tokenbuf[2] == 'D')
 		    pname = HvNAME(curstash ? curstash : defstash);
 		sprintf(dname,"%s::DATA", pname);
 		gv = gv_fetchpv(dname,TRUE, SVt_PVIO);
-		SvMULTI_on(gv);
+		GvMULTI_on(gv);
 		if (!GvIO(gv))
 		    GvIOp(gv) = newIO();
 		IoIFP(GvIOp(gv)) = rsfp;

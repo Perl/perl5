@@ -99,7 +99,7 @@ require Exporter;
 @EXPORT = qw(collate_xfrm setlocale LC_COLLATE);
 @EXPORT_OK = qw();
 
-%OVERLOAD = qw(
+use overload qw(
 fallback	1
 cmp		collate_cmp
 );

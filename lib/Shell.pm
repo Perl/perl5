@@ -75,3 +75,52 @@ AUTOLOAD {
 }
 
 1;
+__END__
+
+=head1 NAME
+
+Shell - run shell commands transparently within perl
+
+=head1 SYNOPSIS
+
+See below.
+
+=head1 DESCRIPTION
+
+  Date: Thu, 22 Sep 94 16:18:16 -0700
+  Message-Id: <9409222318.AA17072@scalpel.netlabs.com>
+  To: perl5-porters@isu.edu
+  From: Larry Wall <lwall@scalpel.netlabs.com>
+  Subject: a new module I just wrote
+
+Here's one that'll whack your mind a little out.
+
+    #!/usr/bin/perl
+
+    use Shell;
+
+    $foo = echo("howdy", "<funny>", "world");
+    print $foo;
+
+    $passwd = cat("</etc/passwd");
+    print $passwd;
+
+    sub ps;
+    print ps -ww;
+
+    cp("/etc/passwd", "/tmp/passwd");
+
+That's maybe too gonzo.  It actually exports an AUTOLOAD to the current
+package (and uncovered a bug in Beta 3, by the way).  Maybe the usual
+usage should be
+
+    use Shell qw(echo cat ps cp);
+
+Larry
+
+
+=head1 AUTHOR
+
+Larry Wall
+
+=cut

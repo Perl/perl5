@@ -16,7 +16,7 @@ $config_pm = $ARGV[0] || 'lib/Config.pm';
 
 
 open CONFIG, ">$config_pm" or die "Can't open $config_pm: $!\n";
-$myver = sprintf("%.3f", $]);
+$myver = $];
 
 print CONFIG <<"ENDOFBEG";
 package Config;
@@ -25,8 +25,8 @@ use Exporter ();
 \@EXPORT = qw(%Config);
 \@EXPORT_OK = qw(myconfig config_sh config_vars);
 
-\$] == $myver or die sprintf
-    "Perl lib version ($myver) doesn't match executable version (%.3f)\\n", \$];
+\$] == $myver
+  or die "Perl lib version ($myver) doesn't match executable version (\$])\\n";
 
 # This file was created by configpm when Perl was built. Any changes
 # made to this file will be lost the next time perl is built.

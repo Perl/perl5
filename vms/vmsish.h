@@ -189,6 +189,9 @@ struct tms {
 #define Stat(name,bufptr) flex_stat(name,bufptr)
 #define Fstat(fd,bufptr) flex_fstat(fd,bufptr)
 
+/* By default, flush data all the way to disk, not just to RMS buffers */
+#define Fflush(fp) ((fflush(fp) || fsync(fileno(fp))) ? EOF : 0)
+
 /* Setup for the dirent routines:
  * opendir(), closedir(), readdir(), seekdir(), telldir(), and
  * vmsreaddirversions(), and preprocessor stuff on which these depend:
@@ -348,6 +351,7 @@ struct passwd *	my_getpwuid _((Uid_t uid));
 struct passwd *	my_getpwent _(());
 void	my_endpwent _(());
 char *	my_getlogin _(());
+int	rmscopy _((char *, char *));
 void	init_os_extras _(());
 typedef char __VMS_SEPYTOTORP__;
 /* prototype section end marker; `typedef' passes through cpp */

@@ -124,7 +124,7 @@
   
 ! miniperl: $& miniperlmain.o $(perllib)
 ! 	$(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain.o $(perllib) $(libs)
-  	@miniperl -w -MExporter -e 0 || $(MAKE) minitest
+  	@./miniperl -w -Ilib -MExporter -e 0 || $(MAKE) minitest
   
 ! miniperlmain.o: miniperlmain.c
   	$(CCCMD) $(PLDLFLAGS) $*.c
@@ -143,7 +143,7 @@
   
 ! miniperl: $& miniperlmain$(OBJ_EXT) $(perllib)
 ! 	$(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain$(OBJ_EXT) $(perllib) $(libs)
-  	@miniperl -w -MExporter -e 0 || $(MAKE) minitest
+  	@./miniperl -w -Ilib -MExporter -e 0 || $(MAKE) minitest
   
 ! miniperlmain$(OBJ_EXT): miniperlmain.c
   	$(CCCMD) $(PLDLFLAGS) $*.c

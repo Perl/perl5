@@ -84,10 +84,6 @@ usedl='define'
 
 #cppflags='-DDOSISH -DOS2=2 -DEMBED -I.'
 
-# This variables taken from recommended config.sh
-# [Does Configure get it wrong?]
-alignbytes='8'
-
 # for speedup: (some patches to ungetc are also needed):
 # Note that without this guy tests 8 and 10 of io/tell.t fail, with it 11 fails
 

@@ -24,6 +24,10 @@ sub copy {
     croak("Usage: copy( file1, file2 [, buffersize]) ")
       unless(@_ == 2 || @_ == 3);
 
+    # VMS: perform RMS copy to preserve file attributes, indices, etc.
+    # This function is always defined under VMS, even in miniperl
+    if (defined(&File::Copy::rmscopy)) { return File::Copy::rmscopy($_[0],$_[1]) }
+
     my $from = shift;
     my $to = shift;
     my $recsep = $\;
@@ -99,11 +103,12 @@ sub copy {
 1;
 
 __END__
+
 =head1 NAME
 
 File::Copy - Copy files or filehandles
 
-=head1 USAGE
+=head1 SYNOPSIS
 
   	use File::Copy;
 
@@ -132,6 +137,10 @@ first file, that wil be held in memory at any given time, before
 being written to the second file. The default buffer size depends
 upon the file, but will generally be the whole file (up to 2Mb), or
 1k for filehandles that do not reference files (eg. sockets).
+
+When running under VMS, this routine performs an RMS copy of
+the file, in order to preserve file attributed, indexed file
+structure, I<etc.>  The buffer size parameter is ignored.
 
 You may use the syntax C<use File::Copy "cp"> to get at the
 "cp" alias for this function. The syntax is I<exactly> the same.

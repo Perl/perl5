@@ -104,7 +104,6 @@ also work:
     \n		newline
     \r		return
     \f		form feed
-    \v		vertical tab, whatever that is
     \a		alarm (bell)
     \e		escape (think troff)
     \033	octal char (think of a PDP-11)
