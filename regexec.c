@@ -965,6 +965,16 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    if (norun && e < s)
 		e = s;			/* Due to minlen logic of intuit() */
 
+	    /* The idea in the EXACTF* cases is to first find the
+	     * first character of the EXACTF* node and then, if
+	     * necessary, case-insensitively compare the full
+	     * text of the node.  The c1 and c2 are the first
+	     * characters (though in Unicode it gets a bit
+	     * more complicated because there are more cases
+	     * than just upper and lower: one is really supposed
+	     * to use the so-called folding case for case-insensitive
+	     * matching (called "loose matching" in Unicode).  */
+
 	    if (do_utf8) {
 	        UV c, f;
 	        U8 tmpbuf [UTF8_MAXLEN+1];
@@ -1009,6 +1019,13 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		    while (s <= e) {
 		        c = utf8_to_uvchr((U8*)s, &len);
 
+			/* Handle some of the three Greek sigmas cases.
+			  * Note that not all the possible combinations
+			  * are handled here: some of them are handled
+			  * handled by the standard folding rules, and
+			  * some of them (the character class or ANYOF
+			  * cases) are handled during compiletime in
+			  * regexec.c:S_regclass(). */
 			if (c == (UV)UNICODE_GREEK_CAPITAL_LETTER_SIGMA ||
 			    c == (UV)UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA)
 			    c = (UV)UNICODE_GREEK_SMALL_LETTER_SIGMA;
@@ -2396,11 +2413,15 @@ S_regmatch(pTHX_ regnode *prog)
 			       U8 lfoldbuf[UTF8_MAXLEN_FOLD+1];
 			       STRLEN lfoldlen;
 
+			       /* Try one of them folded. */
+
 			       to_utf8_fold((U8*)l, lfoldbuf, &lfoldlen);
 			       if (UTF8SKIP(s) != lfoldlen ||
 				   memNE(s, (char*)lfoldbuf, lfoldlen)) {
 				    U8 sfoldbuf[UTF8_MAXLEN_FOLD+1];
 				    STRLEN sfoldlen;
+
+				    /* Try both of them folded. */
 
 				    to_utf8_fold((U8*)s, sfoldbuf, &sfoldlen);
 				    if (sfoldlen != lfoldlen ||
