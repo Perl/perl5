@@ -163,7 +163,15 @@ EXPORTS
 ---EOP---
 }
 elsif ($PLATFORM eq 'aix') {
-    print "#!\n";
+    $OSVER = `uname -v`;
+    chop $OSVER;
+    $OSREL = `uname -r`;
+    chop $OSREL;
+    if ($OSVER > 4 || ($OSVER == 4 && $OSREL >= 3)) {
+	print "#! ..\n";
+    } else {
+	print "#!\n";
+    }
 }
 
 my %skip;

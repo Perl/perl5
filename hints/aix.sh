@@ -55,9 +55,11 @@ esac
 case "$osvers" in
    3.*|4.1.*|4.2.*)
       usenm='undef'
+      usenativedlopen='false'
       ;;
    *)
       usenm='true'
+      usenativedlopen='true'
       ;;
 esac
 
@@ -444,20 +446,26 @@ $define|true|[yY]*)
 esac
 EOCBU
 
-# If the C++ libraries, libC and libC_r, are available we will prefer them
-# over the vanilla libc, because the libC contain loadAndInit() and
-# terminateAndUnload() which work correctly with C++ statics while libc
-# load() and unload() do not.  See ext/DynaLoader/dl_aix.xs.
-# The C-to-C_r switch is done by usethreads.cbu, if needed.
-if test -f /lib/libC.a -a X"`$cc -v 2>&1 | grep gcc`" = X; then
-    # Cify libswanted.
-    set `echo X "$libswanted "| sed -e 's/ c / C c /'`
-    shift
-    libswanted="$*"
-    # Cify lddlflags.
-    set `echo X "$lddlflags "| sed -e 's/ -lc / -lC -lc /'`
-    shift
-    lddlflags="$*"
+if test $usenativedlopen = 'true'
+then
+        ccflags="$ccflags -DUSE_NATIVE_DLOPEN"
+	ldflags="$ldflags -brtl"
+else
+    # If the C++ libraries, libC and libC_r, are available we will prefer them
+    # over the vanilla libc, because the libC contain loadAndInit() and
+    # terminateAndUnload() which work correctly with C++ statics while libc
+    # load() and unload() do not.  See ext/DynaLoader/dl_aix.xs.
+    # The C-to-C_r switch is done by usethreads.cbu, if needed.
+    if test -f /lib/libC.a -a X"`$cc -v 2>&1 | grep gcc`" = X; then
+	# Cify libswanted.
+	set `echo X "$libswanted "| sed -e 's/ c / C c /'`
+	shift
+	libswanted="$*"
+	# Cify lddlflags.
+	set `echo X "$lddlflags "| sed -e 's/ -lc / -lC -lc /'`
+	shift
+	lddlflags="$*"
+    fi
 fi
 
 # EOF
