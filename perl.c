@@ -1,7 +1,7 @@
 /*    perl.c
  *
  *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999,
- *    2000, 2001, 2002, 2003, 2004, by Larry Wall and others
+ *    2000, 2001, 2002, 2003, 2004, 2005, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -3089,7 +3089,7 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv)
 
     CopFILE_free(PL_curcop);
     CopFILE_set(PL_curcop, PL_origfilename);
-    if (strEQ(PL_origfilename,"-"))
+    if (*PL_origfilename == '-' && PL_origfilename[1] == '\0')
 	scriptname = "";
     if (PL_fdscript >= 0) {
 	PL_rsfp = PerlIO_fdopen(PL_fdscript,PERL_SCRIPT_MODE);

@@ -1,7 +1,7 @@
 /*    locale.c
  *
  *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999,
- *    2000, 2001, 2002, 2003, by Larry Wall and others
+ *    2000, 2001, 2002, 2003, 2005, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -127,7 +127,8 @@ Perl_new_numeric(pTHX_ char *newnum)
     if (! PL_numeric_name || strNE(PL_numeric_name, newnum)) {
 	Safefree(PL_numeric_name);
 	PL_numeric_name = stdize_locale(savepv(newnum));
-	PL_numeric_standard = (strEQ(newnum, "C") || strEQ(newnum, "POSIX"));
+	PL_numeric_standard = ((*newnum == 'C' && newnum[1] == '\0')
+			       || strEQ(newnum, "POSIX"));
 	PL_numeric_local = TRUE;
 	set_numeric_radix();
     }
@@ -211,7 +212,8 @@ Perl_new_collate(pTHX_ char *newcoll)
 	++PL_collation_ix;
 	Safefree(PL_collation_name);
 	PL_collation_name = stdize_locale(savepv(newcoll));
-	PL_collation_standard = (strEQ(newcoll, "C") || strEQ(newcoll, "POSIX"));
+	PL_collation_standard = ((*newcoll == 'C' && newcoll[1] == '\0')
+				 || strEQ(newcoll, "POSIX"));
 
 	{
 	  /*  2: at most so many chars ('a', 'b'). */

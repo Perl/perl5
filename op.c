@@ -2763,7 +2763,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	STRLEN plen;
 	SV *pat = ((SVOP*)expr)->op_sv;
 	char *p = SvPV(pat, plen);
-	if ((o->op_flags & OPf_SPECIAL) && strEQ(p, " ")) {
+	if ((o->op_flags & OPf_SPECIAL) && (*p == ' ' && p[1] == '\0')) {
 	    sv_setpvn(pat, "\\s+", 3);
 	    p = SvPV(pat, plen);
 	    pm->op_pmflags |= PMf_SKIPWHITE;
@@ -6029,6 +6029,7 @@ S_simplify_sort(pTHX_ OP *o)
     OP *k;
     int descending;
     GV *gv;
+    const char *gvname;
     if (!(o->op_flags & OPf_STACKED))
 	return;
     GvMULTI_on(gv_fetchpv("a", TRUE, SVt_PV));
@@ -6055,9 +6056,10 @@ S_simplify_sort(pTHX_ OP *o)
     gv = kGVOP_gv;
     if (GvSTASH(gv) != PL_curstash)
 	return;
-    if (strEQ(GvNAME(gv), "a"))
+    gvname = GvNAME(gv);
+    if (*gvname == 'a' && gvname[1] == '\0')
 	descending = 0;
-    else if (strEQ(GvNAME(gv), "b"))
+    else if (*gvname == 'b' && gvname[1] == '\0')
 	descending = 1;
     else
 	return;
@@ -6070,10 +6072,12 @@ S_simplify_sort(pTHX_ OP *o)
 	return;
     kid = kUNOP->op_first;				/* get past rv2sv */
     gv = kGVOP_gv;
-    if (GvSTASH(gv) != PL_curstash
-	|| ( descending
-	    ? strNE(GvNAME(gv), "a")
-	    : strNE(GvNAME(gv), "b")))
+    if (GvSTASH(gv) != PL_curstash)
+	return;
+    gvname = GvNAME(gv);
+    if ( descending
+	 ? !(*gvname == 'a' && gvname[1] == '\0')
+	 : !(*gvname == 'b' && gvname[1] == '\0'))
 	return;
     o->op_flags &= ~(OPf_STACKED | OPf_SPECIAL);
     if (descending)
