@@ -1,11 +1,11 @@
 package CPAN;
 use vars qw{$META $Signal $Cwd $End $Suppress_readline};
 
-$VERSION = '1.08';
+$VERSION = '1.09';
 
-# $Id: CPAN.pm,v 1.92 1996/12/23 13:13:05 k Exp $
+# $Id: CPAN.pm,v 1.94 1996/12/24 00:41:14 k Exp $
 
-# my $version = substr q$Revision: 1.92 $, 10; # only used during development
+# my $version = substr q$Revision: 1.94 $, 10; # only used during development
 
 BEGIN {require 5.003;}
 require UNIVERSAL if $] == 5.003;
@@ -856,7 +856,7 @@ sub localize {
 		CPAN::FTP->ftp_get($host,$dir,$getfile,$aslocal) && return $aslocal;
 	    } elsif (-x $CPAN::Config->{'ftp'}) {
 		my($netrc) = CPAN::FTP::netrc->new;
-		if ($netrc->contains($host)) {
+		if ($netrc->hasdefault() || $netrc->contains($host)) {
 		    print(
 			  qq{
   Trying with external ftp to get $url
@@ -866,7 +866,7 @@ sub localize {
 
 }
 			 );
-		    local(*WTR);
+		    my($fh) = IO::File->new;
 		    my($cwd) = Cwd::cwd();
 		    chdir $aslocal_dir;
 		    my($targetfile) = File::Basename::basename($aslocal);
@@ -874,37 +874,38 @@ sub localize {
 		    push @dialog, map {"cd $_\n"} split "/", $dir;
 		    push @dialog, "get $getfile $targetfile\n";
 		    push @dialog, "quit\n";
-		    open(WTR, "|$CPAN::Config->{'ftp'} $host") or die "Couldn't open ftp: $!";
-		    # pilot blind
-		    for (@dialog) {
-#			print "To WTR>>$_<<\n";
-			print WTR $_;
+		    open($fh, "|$CPAN::Config->{'ftp'} $host") or die "Couldn't open ftp: $!";
+		    # pilot is blind now
+		    foreach (@dialog) {
+			$fh->print($_);
 		    }
-#		    close WTR;
 		    chdir($cwd);
 		    return $aslocal;
 		} else {
-		    my($netrcfile) = $netrc->{netrc};
-		    if ($netrcfile) {
+		    my($netrcfile) = $netrc->netrc();
+		    if ($netrcfile){
 			print qq{  Your $netrcfile does not contain host $host.\n}
-		    } else {
-			print qq{  I could not find or open your $netrcfile.\n}
+ 		    } else {
+			print qq{  I could not find or open your .netrc file.\n}
 		    }
 		    print qq{  If you want to use external ftp,
-  please enter host $host into your .netrc file and retry.
+  please enter the host $host (or a default entry)
+  into your .netrc file and retry.
 
   The format of a proper entry in your .netrc file would be:
+    machine $host
+    login ftp
+    password $Config::Config{cf_email}
 
-machine $host
-login ftp
-password $Config::Config{cf_email}
+  A typical default entry would be:
+    default login ftp password $Config::Config{cf_email}
 
-Please make also sure, your .netrc will not be readable by others.
-You don\'t have to leave and restart CPAN.pm, I\'ll look again next
-time I come around here.
-\n};
-		}
+  Please make also sure, your .netrc will not be readable by others.
+  You don\'t have to leave and restart CPAN.pm, I\'ll look again next
+  time I come around here.\n\n};
+	       }
 	    }
+	    sleep 2;
 	}
 	if (-x $CPAN::Config->{'lynx'}) {
 ##	    $self->debug("Trying with lynx for [$url]") if $CPAN::DEBUG;
@@ -956,26 +957,38 @@ package CPAN::FTP::netrc;
 sub new {
     my($class) = @_;
     my $file = MY->catfile($ENV{HOME},".netrc");
-    my($fh,@machines);
+    my($fh,@machines,$hasdefault);
+    $hasdefault = 0;
     if($fh = IO::File->new($file,"r")){
 	local($/) = "";
-	while (<$fh>) {
-	    next if /\bmacdef\b/;
-	    my($machine) = /\bmachine\s+(\S+)/s;
-	    push @machines, $machine;
+      NETRC: while (<$fh>) {
+	    my(@tokens) = split ' ', $_;
+	  TOKEN: while (@tokens) {
+		my($t) = shift @tokens;
+		$hasdefault++, last NETRC if $t eq "default"; # we will most
+                                                        # probably be
+                                                        # able to anonftp
+		last TOKEN if $t eq "macdef";
+		if ($t eq "machine") {
+		    push @machines, shift @tokens;
+		}
+	    }
 	}
     } else {
 	$file = "";
     }
     bless {
-	   mach => [@machines],
-	   netrc => $file,
+	   'mach' => [@machines],
+	   'netrc' => $file,
+	   'hasdefault' => $hasdefault,
 	  }, $class;
 }
 
+sub hasdefault { shift->{'hasdefault'} }
+sub netrc { shift->{'netrc'} }
 sub contains {
     my($self,$mach) = @_;
-    scalar grep {$_ eq $mach} @{$self->{mach}};
+    scalar grep {$_ eq $mach} @{$self->{'mach'}};
 }
 
 package CPAN::Complete;
@@ -2370,9 +2383,9 @@ Batch mode:
 =head1 DESCRIPTION
 
 The CPAN module is designed to automate the make and install of perl
-modules and extensions. It includes some searching capabilities as
-well knows a how to use Net::FTP or LWP to fetch the raw data from the
-net.
+modules and extensions. It includes some searching capabilities and
+knows how to use Net::FTP or LWP (or lynx or an external ftp client)
+to fetch the raw data from the net.
 
 Modules are fetched from one or more of the mirrored CPAN
 (Comprehensive Perl Archive Network) sites and unpacked in a dedicated
@@ -2386,7 +2399,8 @@ The package contains a session manager and a cache manager. There is
 no status retained between sessions. The session manager keeps track
 of what has been fetched, built and installed in the current
 session. The cache manager keeps track of the disk space occupied by
-the make processes and deletes excess space in a simple FIFO style.
+the make processes and deletes excess space according to a simple FIFO
+mechanism.
 
 All methods provided are accessible in a programmer style and in an
 interactive shell style.
@@ -2411,9 +2425,9 @@ The most common uses of the interactive modes are
 =item Searching for authors, bundles, distribution files and modules
 
 There are corresponding one-letter commands C<a>, C<b>, C<d>, and C<m>
-for each of the four categories and another, C<i> for any of the other
-four. Each of the four entities is implemented as a class with
-slightly differing methods for displaying an object.
+for each of the four categories and another, C<i> for any of the
+mentioned four. Each of the four entities is implemented as a class
+with slightly differing methods for displaying an object.
 
 Arguments you pass to these commands are either strings matching exact
 the identification string of an object or regular expressions that are
@@ -2450,11 +2464,16 @@ might be. Is it a distribution file (recognized by embedded slashes),
 this file is being processed. Is it a module, CPAN determines the
 distribution file where this module is included and processes that.
 
-Any C<make> and C<test> are run unconditionally. An C<install
-E<lt>distribution_fileE<gt>> also is run unconditionally.  But for
-C<install E<lt>module<gt>> CPAN checks if an install is actually
-needed for it and prints I<"Foo up to date"> in case the module
-doesnE<39>t need to be updated.
+Any C<make> and C<test> are run unconditionally. A 
+
+  C<install E<lt>distribution_fileE<gt>>
+
+also is run unconditionally.  But for 
+
+  C<install E<lt>moduleE<gt>>
+
+CPAN checks if an install is actually needed for it and prints
+I<Foo up to date> in case the module doesnE<39>t need to be updated.
 
 CPAN also keeps track of what it has done within the current session
 and doesnE<39>t try to build a package a second time regardless if it
@@ -2489,13 +2508,13 @@ If you do not enter the shell, the available shell commands are both
 available as methods (C<CPAN::Shell-E<gt>install(...)>) and as
 functions in the calling package (C<install(...)>). The
 programmerE<39>s interface has beta status. Do not heavily rely on it,
-changes may still happen.
+changes may still be necessary.
 
 =head2 Cache Manager
 
 Currently the cache manager only keeps track of the build directory
 ($CPAN::Config->{build_dir}). It is a simple FIFO mechanism that
-deletes complete directories below build_dir as soon as the size of
+deletes complete directories below C<build_dir> as soon as the size of
 all directories there gets bigger than $CPAN::Config->{build_cache}
 (in MB). The contents of this cache may be used for later
 re-installations that you intend to do manually, but will never be
@@ -2531,9 +2550,7 @@ of the line is optional. The comment part is delimited by a dash just
 as in the man page header.
 
 The distribution of a bundle should follow the same convention as
-other distributions. The bundle() function in the CPAN module simply
-parses the module that defines the bundle and returns the module names
-that are listed in the described CONTENTS section.
+other distributions.
 
 Bundles are treated specially in the CPAN package. If you say 'install
 Bundle::Tkkit' (assuming such a bundle exists), CPAN will install all
@@ -2549,9 +2566,9 @@ interface looks like.
 
 =head2 autobundle
 
-C<autobundle> writes a bundle file into the 
-C<$CPAN::Config->{cpan_home}/Bundle> directory. The file contains a list
-of all modules that are both available from CPAN and currently
+C<autobundle> writes a bundle file into the
+C<$CPAN::Config-E<gt>{cpan_home}/Bundle> directory. The file contains
+a list of all modules that are both available from CPAN and currently
 installed within @INC. The name of the bundle file is based on the
 current date and a counter.
 
@@ -2565,7 +2582,7 @@ your perl breaks binary compatibility. If one of the modules that CPAN
 uses is in turn depending on binary compatibility (so you cannot run
 CPAN commands), then you should try the CPAN::Nox module for recovery.
 
-A very popular use for recompile is to finish a network
+Another popular use for recompile is to finish a network
 installation. Imagine, you have a common source tree for two different
 architectures. You decide to do a completely independent fresh
 installation. You start on one architecture with the help of a Bundle
@@ -2587,23 +2604,25 @@ use() or require() statements.
 Currently the following keys in the hash reference $CPAN::Config are
 defined:
 
-  build_cache       size of cache for directories to build modules
-  build_dir         locally accessible directory to build modules
-  index_expire      after how many days refetch index files
-  cpan_home         local directory reserved for this package
-  gzip		    location of external program gzip
+  build_cache        size of cache for directories to build modules
+  build_dir          locally accessible directory to build modules
+  index_expire       after how many days refetch index files
+  cpan_home          local directory reserved for this package
+  gzip		     location of external program gzip
+  inactivity_timeout breaks interactive Makefile.PLs after that
+                     many seconds inactivity. Set to 0 to never break.
   inhibit_startup_message
-                    if true, does not print the startup message
-  keep_source       keep the source in a local directory?
-  keep_source_where where keep the source (if we do)
-  make              location of external program make
-  make_arg	    arguments that should always be passed to 'make'
-  make_install_arg  same as make_arg for 'make install'
-  makepl_arg	    arguments passed to 'perl Makefile.PL'
-  pager             location of external program more (or any pager)
-  tar               location of external program tar
-  unzip             location of external program unzip
-  urllist	    arrayref to nearby CPAN sites (or equivalent locations)
+                     if true, does not print the startup message
+  keep_source        keep the source in a local directory?
+  keep_source_where  where keep the source (if we do)
+  make               location of external program make
+  make_arg	     arguments that should always be passed to 'make'
+  make_install_arg   same as make_arg for 'make install'
+  makepl_arg	     arguments passed to 'perl Makefile.PL'
+  pager              location of external program more (or any pager)
+  tar                location of external program tar
+  unzip              location of external program unzip
+  urllist	     arrayref to nearby CPAN sites (or equivalent locations)
 
 You can set and query each of these options interactively in the cpan
 shell with the command set defined within the C<o conf> command:
@@ -2629,8 +2648,7 @@ shifts or pops the array in the I<list option> variable
 
 =item o conf E<lt>list optionE<gt> [unshift|push|splice] E<lt>listE<gt>
 
-works like the corresponding perl commands. Whitespace is used to
-determine the arguments.
+works like the corresponding perl commands.
 
 =back
 
@@ -2641,7 +2659,7 @@ install foreign, unmasked, unsigned code on your machine. We compare
 to a checksum that comes from the net just as the distribution file
 itself. If somebody has managed to tamper with the distribution file,
 they may have as well tampered with the CHECKSUMS file. Future
-development will go towards stong authentification.
+development will go towards strong authentification.
 
 =head1 EXPORT
 
@@ -2667,9 +2685,13 @@ know that "o debug" has built-in completion support.
 
 If you have a local mirror of CPAN and can access all files with
 "file:" URLs, then you only need perl5.003 to run this
-module. Otherwise you need Net::FTP intalled. LWP may be required for
+module. Otherwise Net::FTP is recommended. LWP may be required for
 non-UNIX systems or if your nearest CPAN site is associated with an
 URL that is not C<ftp:>.
+
+If you have neither Net::FTP nor LWP, there is a fallback mechanism
+implemented for an external ftp command or for an external lynx
+command.
 
 This module presumes that all packages on CPAN
 
@@ -2681,12 +2703,12 @@ declare their $VERSION variable in an easy to parse manner. This
 prerequisite can hardly be relaxed because it consumes by far too much
 memory to load all packages into the running program just to determine
 the $VERSION variable . Currently all programs that are dealing with
-VERSION use something like this
+version use something like this
 
     perl -MExtUtils::MakeMaker -le \
         'print MM->parse_version($ARGV[0])' filename
 
-If you are author of a package and wonder if your VERSION can be
+If you are author of a package and wonder if your $VERSION can be
 parsed, please try the above method.
 
 =item *
