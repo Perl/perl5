@@ -250,7 +250,7 @@ struct pmop {
 };
 
 #ifdef USE_ITHREADS
-#define PM_GETRE(o)     ((REGEXP*)SvIV(PL_regex_pad[(o)->op_pmoffset]))
+#define PM_GETRE(o)     ((REGEXP*)SvIVX(PL_regex_pad[(o)->op_pmoffset]))
 #define PM_SETRE(o,r)   (sv_setiv(PL_regex_pad[(o)->op_pmoffset], (IV)r))
 #else
 #define PM_GETRE(o)     ((o)->op_pmregexp)
