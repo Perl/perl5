@@ -1084,6 +1084,11 @@ typedef UVTYPE UV;
 #define IV_DIG (BIT_DIGITS(IVSIZE * 8))
 #define UV_DIG (BIT_DIGITS(UVSIZE * 8))
 
+/* We like our integers to stay integers. */
+#ifndef NO_PERL_PRESERVE_IVUV
+#define PERL_PRESERVE_IVUV
+#endif
+
 /*   
  *  The macros INT2PTR and NUM2PTR are (despite their names)
  *  bi-directional: they will convert int/float to or from pointers.

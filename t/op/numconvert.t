@@ -85,8 +85,15 @@ my @list = (1, $yet_smaller_than_iv, $smaller_than_iv, $max_iv, $max_iv + 1,
 unshift @list, (reverse map -$_, @list), 0; # 15 elts
 @list = map "$_", @list; # Normalize
 
-# print "@list\n";
+print "# @list\n";
 
+# need to special case ++ for max_uv, as ++ "magic" on a string gives
+# another string, whereas ++ magic on a string used as a number gives
+# a number. Not a problem when NV preserves UV, but if it doesn't then
+# stringification of the latter gives something in e notation.
+
+my $max_uv_pp = "$max_uv"; $max_uv_pp++;
+my $max_uv_p1 = "$max_uv"; $max_uv_p1+=0; $max_uv_p1++;
 
 my @opnames = split //, "-+UINPuinp";
 
@@ -178,9 +185,18 @@ for my $num_chain (1..$max_chain) {
 	    }
 	    push @ans, $inpt;
 	  }
-	  $nok++,
-	    print "# '$ans[0]' ne '$ans[1]',\t$num\t=> @opnames[$first,@{$curops[0]},$last] vs @opnames[$first,@{$curops[1]},$last]\n"
-	      if $ans[0] ne $ans[1];
+	  if ($ans[0] ne $ans[1]) {
+	    print "# '$ans[0]' ne '$ans[1]',\t$num\t=> @opnames[$first,@{$curops[0]},$last] vs @opnames[$first,@{$curops[1]},$last]\n";
+	    # XXX ought to check that "+" was in the list of opnames
+	    if ((($ans[0] eq $max_uv_pp) and ($ans[1] eq $max_uv_p1))
+		or (($ans[1] eq $max_uv_pp) and ($ans[0] eq $max_uv_p1))) {
+	      # string ++ versus numeric ++. Tolerate this little
+	      # bit of insanity
+	      print "# ok, as string ++ of max_uv is \"$max_uv_pp\", numeric is $max_uv_p1\n"
+	    } else {
+	      $nok++,
+	    }
+	  }
 	}
 	print "not " if $nok;
 	print "ok $test\n";

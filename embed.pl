@@ -2467,6 +2467,10 @@ s	|void	|sv_del_backref	|SV *sv
 #  if defined(DEBUGGING)
 s	|void	|del_sv	|SV *p
 #  endif
+#  if !defined(NV_PRESERVES_UV)
+s      |int    |sv_2inuv_non_preserve  |SV *sv|I32 numtype
+s      |int    |sv_2iuv_non_preserve   |SV *sv|I32 numtype
+#  endif
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
