@@ -203,7 +203,9 @@ syswrite() on closed filehandle STDIN at - line 6.
 # pp_sys.c [pp_flock]
 use Config; 
 BEGIN { 
-  if ( $^O eq 'VMS' and ! $Config{d_flock}) {
+  if ( !$Config{d_flock} &&
+       !$Config{d_fcntl_can_lock} &&
+       !$Config{d_lockf} ) {
     print <<EOM ;
 SKIPPED
 # flock not present
