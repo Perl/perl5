@@ -725,6 +725,7 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_GGRNAM:
     case OP_GGRGID:
     case OP_GETLOGIN:
+    case OP_PROTOTYPE:
       func_ops:
 	if (!(o->op_private & (OPpLVAL_INTRO|OPpOUR_INTRO)))
 	    useless = OP_DESC(o);
