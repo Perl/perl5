@@ -4,7 +4,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    unshift @INC, '../lib';
+    @INC = '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bODBM_File\b/) {
 	print "1..0 # Skip: ODBM_File was not built\n";

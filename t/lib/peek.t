@@ -2,7 +2,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    unshift @INC, '../lib';
+    @INC = '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bPeek\b/) {
         print "1..0 # Skip: Devel::Peek was not built\n";

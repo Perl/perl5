@@ -2,7 +2,7 @@
 
 BEGIN {
     chdir('t') if -d 't';
-    unshift @INC, '../lib';
+    @INC = '../lib';
 }
 
 use Getopt::Long qw(:config no_ignore_case);

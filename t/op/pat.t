@@ -8,7 +8,7 @@ print "1..223\n";
 
 BEGIN {
     chdir 't' if -d 't';
-    unshift @INC, "../lib" if -d "../lib";
+    @INC = '../lib';
 }
 eval 'use Config';          #  Defaults assumed if this fails
 

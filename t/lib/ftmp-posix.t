@@ -3,7 +3,7 @@
 
 BEGIN {
 	chdir 't' if -d 't';
-	unshift @INC, '../lib';
+	@INC = '../lib';
 	require Test; import Test;
 	plan(tests => 7);
 }

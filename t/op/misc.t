@@ -4,7 +4,7 @@
 # separate executable and can't simply use eval.
 
 chdir 't' if -d 't';
-unshift @INC, "../lib";
+@INC = '../lib';
 $ENV{PERL5LIB} = "../lib";
 
 $|=1;

@@ -3,7 +3,8 @@
 BEGIN {
     chdir 't' if -d 't';
     $dir = "self-$$";
-    unshift @INC, ("./$dir", "../lib");
+    @INC = $dir;
+    push @INC, '../lib';
 
     print "1..19\n";
 

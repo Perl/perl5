@@ -3,7 +3,7 @@
 package Foo;
 
 BEGIN {
-    unshift @INC, "../lib";
+    @INC = '../lib';
 }
 
 use Test;
