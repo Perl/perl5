@@ -81,7 +81,7 @@ is( $res, 'bar', 'bar reported as new' );
 use vars qw($ExtUtils::Manifest::Quiet);
 $ExtUtils::Manifest::Quiet = 1;
 ($res, $warn) = catch_warning( \&ExtUtils::Manifest::skipcheck );
-is( $warn, '', 'disabled warnings' );
+cmp_ok( $warn, ,'eq', '', 'disabled warnings' );
 
 # add a skip file with a rule to skip itself
 add_file( 'MANIFEST.SKIP', "baz\n.SKIP" );
