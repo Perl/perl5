@@ -8,7 +8,7 @@ BEGIN {
 require 'test.pl';
 use strict qw(refs subs);
 
-plan (74);
+plan (89);
 
 # Test glob operations.
 
@@ -377,6 +377,53 @@ like (runperl(
     prog => '$x=bless[]; sub IO::Handle::DESTROY{$_="bad";s/bad/ok/;print}',
     stderr => 1
       ), qr/^(ok)+$/, 'STDOUT destructor');
+
+TODO: {
+    no strict 'refs';
+    $name8 = chr 163;
+    $name_utf8 = $name8 . chr 256;
+    chop $name_utf8;
+
+    is ($$name8, undef, 'Nothing before we start');
+    is ($$name_utf8, undef, 'Nothing before we start');
+    $$name8 = "Pound";
+    is ($$name8, "Pound", 'Accessing via 8 bit symref works');
+    local $TODO = "UTF8 mangled in symrefs";
+    is ($$name_utf8, "Pound", 'Accessing via UTF8 symref works');
+}
+
+TODO: {
+    no strict 'refs';
+    $name_utf8 = $name = chr 9787;
+    utf8::encode $name_utf8;
+
+    is (length $name, 1, "Name is 1 char");
+    is (length $name_utf8, 3, "UTF8 representation is 3 chars");
+
+    is ($$name, undef, 'Nothing before we start');
+    is ($$name_utf8, undef, 'Nothing before we start');
+    $$name = "Face";
+    is ($$name, "Face", 'Accessing via Unicode symref works');
+    local $TODO = "UTF8 mangled in symrefs";
+    is ($$name_utf8, undef,
+	'Accessing via the UTF8 byte sequence gives nothing');
+}
+
+TODO: {
+    no strict 'refs';
+    $name1 = "\0Chalk";
+    $name2 = "\0Cheese";
+
+    isnt ($name1, $name2, "They differ");
+
+    is ($$name1, undef, 'Nothing before we start');
+    is ($$name2, undef, 'Nothing before we start');
+    $$name2 = "Yummy";
+    is ($$name1, "Yummy", 'Accessing via the correct name works');
+    local $TODO = "NUL bytes truncate in symrefs";
+    is ($$name2, undef,
+	'Accessing via a different NUL-containing name gives nothing');
+}
 
 # Bit of a hack to make test.pl happy. There are 3 more tests after it leaves.
 $test = curr_test();
