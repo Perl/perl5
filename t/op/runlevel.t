@@ -33,12 +33,14 @@ for (@prgs){
     print TEST "$prog\n";
     close TEST;
     my $results = $Is_VMS ?
-                  `MCR $^X "-I[-.lib]" $switch $tmpfile 2>&1` :
-		      $Is_MSWin32 ?  
-			  `.\\perl -I../lib $switch $tmpfile 2>&1` :
-		      $Is_NetWare ?  
-			  `perl -I../lib $switch $tmpfile 2>&1` :
-			      `./perl $switch $tmpfile 2>&1`;
+                      `MCR $^X "-I[-.lib]" $switch $tmpfile 2>&1` :
+		  $Is_MSWin32 ?  
+		      `.\\perl -I../lib $switch $tmpfile 2>&1` :
+		  $Is_NetWare ?  
+		      `perl -I../lib $switch $tmpfile 2>&1` :
+		  $Is_MacOS ?
+		      `$^X -I::lib -MMac::err=unix $switch $tmpfile` :
+		  `./perl $switch $tmpfile 2>&1`;
     my $status = $?;
     $results =~ s/\n+$//;
     # allow expected output to be written as if $prog is on STDIN

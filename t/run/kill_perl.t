@@ -75,6 +75,9 @@ foreach my $prog (@prgs) {
     elsif ($^O eq 'NetWare') {
         $results = `perl -I../lib $switch $tmpfile 2>&1`;
     }
+    elsif ($^O eq 'MacOS') {
+	$results = `$^X -I::lib -MMac::err=unix $switch $tmpfile`;
+    }
     else {
       $results = `./perl -I../lib $switch $tmpfile 2>&1`;
     }

@@ -37,21 +37,26 @@ sub skip {
 
 print "1..41\n";
 
-
 $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_NetWare = $^O eq 'NetWare';
 $Is_VMS     = $^O eq 'VMS';
-$Is_Dos   = $^O eq 'dos';
-$Is_os2   = $^O eq 'os2';
-$Is_Cygwin   = $^O eq 'cygwin';
+$Is_Dos     = $^O eq 'dos';
+$Is_os2     = $^O eq 'os2';
+$Is_Cygwin  = $^O eq 'cygwin';
+$Is_MacOS   = $^O eq 'MacOS';
 $Is_MPE     = $^O eq 'mpeix';		
-$PERL = ($Is_MSWin32 ? '.\perl' : ($Is_NetWare ? 'perl' : './perl'));
+
+$PERL = ($Is_NetWare ? 'perl'   :
+	 $Is_MacOS   ? $^X      :
+	 $Is_MSWin32 ? '.\perl' :
+	 './perl');
 
 eval '$ENV{"FOO"} = "hi there";';	# check that ENV is inited inside eval
 # cmd.exe will echo 'variable=value' but 4nt will echo just the value
 # -- Nikola Knezevic
-if ($Is_MSWin32) { ok `set FOO` =~ /^(FOO=)?hi there$/; }
-else             { ok `echo \$FOO` eq "hi there\n"; }
+if ($Is_MSWin32)  { ok `set FOO` =~ /^(FOO=)?hi there$/; }
+elsif ($Is_MacOS) { ok "1 # skipped", 1; }
+else              { ok `echo \$FOO` eq "hi there\n"; }
 
 unlink 'ajslkdfpqjsjfk';
 $! = 0;
@@ -59,7 +64,7 @@ open(FOO,'ajslkdfpqjsjfk');
 ok $!, $!;
 close FOO; # just mention it, squelch used-only-once
 
-if ($Is_MSWin32 || $Is_NetWare || $Is_Dos || $Is_MPE) {
+if ($Is_MSWin32 || $Is_NetWare || $Is_Dos || $Is_MPE || $Is_MacOS) {
     skip() for 1..2;
 }
 else {
@@ -142,10 +147,13 @@ ok $$ > 0, $$;
     elsif($Is_os2) {
        $wd = Cwd::sys_cwd();
     }
+    elsif($Is_MacOS) {
+       $wd = ':';
+    }
     else {
 	$wd = '.';
     }
-    my $perl = "$wd/perl";
+    my $perl = $Is_MacOS ? $^X : "$wd/perl";
     my $headmaybe = '';
     my $tailmaybe = '';
     $script = "$wd/show-shebang";
@@ -170,6 +178,12 @@ EOT
     elsif ($Is_os2) {
       $script = "./show-shebang";
     }
+    elsif ($Is_MacOS) {
+      $script = ":show-shebang";
+    }
+    elsif ($Is_MacOS) {
+      $script = ":show-shebang";
+    }
     if ($^O eq 'os390' or $^O eq 'posix-bc' or $^O eq 'vmesa') {  # no shebang
 	$headmaybe = <<EOH ;
     eval 'exec ./perl -S \$0 \${1+"\$\@"}'
@@ -185,7 +199,7 @@ print "\$^X is $^X, \$0 is $0\n";
 EOF
     ok close(SCRIPT), $!;
     ok chmod(0755, $script), $!;
-    $_ = `$script`;
+    $_ = $Is_MacOS ? `$perl $script` : `$script`;
     s/\.exe//i if $Is_Dos or $Is_Cygwin or $Is_os2;
     s{\bminiperl\b}{perl}; # so that test doesn't fail with miniperl
     s{is perl}{is $perl}; # for systems where $^X is only a basename
@@ -203,7 +217,7 @@ ok $] >= 5.00319, $];
 ok $^O;
 ok $^T > 850000000, $^T;
 
-if ($Is_VMS || $Is_Dos) {
+if ($Is_VMS || $Is_Dos || $Is_MacOS) {
     skip() for 1..2;
 }
 else {
