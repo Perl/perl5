@@ -194,7 +194,6 @@ _thrcnt_dec(ref)
 void 
 unlock_enabled(ref)
 	SV* ref
-	PROTOTYPE: \$
 	CODE:
 	shared_sv* shared;
 	if(SvROK(ref))
@@ -207,7 +206,6 @@ unlock_enabled(ref)
 void
 lock_enabled(ref)
         SV* ref
-        PROTOTYPE: \$
         CODE:
         shared_sv* shared;
         if(SvROK(ref))
@@ -237,6 +235,7 @@ cond_wait_enabled(ref)
 	COND_WAIT(&shared->user_cond, &shared->mutex);
 	shared->owner = PERL_GET_CONTEXT;
 	shared->locks = locks;
+	MUTEX_UNLOCK(&shared->mutex);
 
 void cond_signal_enabled(ref)
 	SV* ref

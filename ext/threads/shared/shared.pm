@@ -9,18 +9,16 @@ use attributes qw(reftype);
 BEGIN {
     if($Config{'useithreads'} && $threads::threads) {
 	*share = \&share_enabled;
-	*cond_wait = \&cond_wait_disabled;
-	*cond_signal = \&cond_signal_disabled;
-	*cond_broadcast = \&cond_broadcast_disabled;
-	*unlock = \&unlock_disabled;
-	*lock = \&lock_disabled;
-    } else {
-	*share = \&share_enabled;
 	*cond_wait = \&cond_wait_enabled;
 	*cond_signal = \&cond_signal_enabled;
 	*cond_broadcast = \&cond_broadcast_enabled;
 	*unlock = \&unlock_enabled;
-	*lock = \&lock_enabled;
+    } else {
+	*share = \&share_disabled;
+	*cond_wait = \&cond_wait_disabled;
+	*cond_signal = \&cond_signal_disabled;
+	*cond_broadcast = \&cond_broadcast_dosabled;
+	*unlock = \&unlock_disabled;
     }
 }
 
@@ -28,7 +26,7 @@ require Exporter;
 require DynaLoader;
 our @ISA = qw(Exporter DynaLoader);
 
-our @EXPORT = qw(share cond_wait cond_broadcast cond_signal unlock lock);
+our @EXPORT = qw(share cond_wait cond_broadcast cond_signal unlock);
 our $VERSION = '0.01';
 
 our %shared;
