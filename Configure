@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Jun 19 23:31:51 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Tue Jun 19 23:54:48 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -13793,8 +13793,9 @@ if $test "X$fflushNULL" = X -o "X$fflushall" = X; then
     if eval $compile; then
 	    $rm -f try.out
  	    $run ./try 2>/dev/null
+	    code="$?"
 	    $from try.out
-	    if $test ! -s try.out -a "X$?" = X42; then
+	    if $test ! -s try.out -a "X$code" = X42; then
 		output=-DTRY_FPUTC
 	    fi
     fi
@@ -13804,8 +13805,9 @@ if $test "X$fflushNULL" = X -o "X$fflushall" = X; then
 	    if eval $compile; then
 		    $rm -f try.out
  		    $run ./try 2>/dev/null
+		    code="$?"
 		    $from try.out
-		    if $test ! -s try.out -a "X$?" = X42; then
+		    if $test ! -s try.out -a "X$code" = X42; then
 			output=-DTRY_FPRINTF
 		    fi
 	    fi
@@ -13943,8 +13945,9 @@ EOM
 EOM
 				$rm -f try.out
 				$run ./try 2>/dev/null
+				code=$?
 				$from try.out
-				if $test -s try.out -a "X$?" = X42; then
+				if $test -s try.out -a "X$code" = X42; then
 					fflushall="`$cat try.out`"
 				fi
 			fi
