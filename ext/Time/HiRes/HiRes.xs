@@ -277,6 +277,7 @@ usleep(useconds)
 
 void
 sleep(...)
+	PROTOTYPE: ;$
 	CODE:
 	if (items > 0)
 	    usleep((int)(SvNV(ST(0)) * 1000000));
