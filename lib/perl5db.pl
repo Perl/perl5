@@ -1511,6 +1511,7 @@ sub eval {
 	local $otrace = $trace;
 	local $osingle = $single;
 	local $od = $^D;
+	{ ($evalarg) = $evalarg =~ /(.*)/s; }
 	@res = eval "$usercontext $evalarg;\n"; # '\n' for nice recursive debug
 	$trace = $otrace;
 	$single = $osingle;
