@@ -222,6 +222,9 @@ XS(epoc_getcwd)   /* more or less stolen from win32.c */
 	EXTEND(SP,1);
 	SvPOK_on(sv);
 	ST(0) = sv;
+#ifndef INCOMPLETE_TAINTS
+	SvTAINTED_on(ST(0));
+#endif
 	XSRETURN(1);
     }
     free( buffer);

@@ -1977,6 +1977,9 @@ XS(XS_Cwd_sys_cwd)
 	RETVAL = _getcwd2(p, MAXPATHLEN);
 	ST(0) = sv_newmortal();
 	sv_setpv((SV*)ST(0), RETVAL);
+#ifndef INCOMPLETE_TAINTS
+	SvTAINTED_on(ST(0));
+#endif
     }
     XSRETURN(1);
 }
