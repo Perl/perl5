@@ -364,7 +364,7 @@ gprofiled Perl executable.
 
 =item *
 
-AIX should now work better with gcc, threads, and 64-bitnes.  Also the
+AIX should now work better with gcc, threads, and 64-bitness.  Also the
 long doubles support in AIX should be better now.  See L<perlaix>.
 
 =item *
