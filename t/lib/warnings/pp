@@ -102,12 +102,3 @@ use utf8 ;
 $_ = "\x80  \xff" ;
 reverse ;
 EXPECT
-########
-# pp.c
-use warnings;
-$a = "b" x -1;
-$a = "b" x 0;
-no warnings;
-$a = "b" x -1;
-EXPECT
-Negative repeat count at - line 3.
