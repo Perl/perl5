@@ -8164,8 +8164,8 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	}
 	HvPMROOT((HV*)dstr)	= HvPMROOT((HV*)sstr);		/* XXX */
 	HvNAME((HV*)dstr)	= SAVEPV(HvNAME((HV*)sstr));
-    if(HvNAME((HV*)dstr))
-        av_push(PL_clone_callbacks,dstr);
+	if(HvNAME((HV*)dstr))
+	    av_push(PL_clone_callbacks, dstr);
 	break;
     case SVt_PVFM:
 	SvANY(dstr)	= new_XPVFM();
