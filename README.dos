@@ -4,12 +4,13 @@ specially designed to be readable as is.
 
 =head1 NAME
 
-perldos - Perl under DOS, W31, W95.
+perldos - Perl under DOS and Windows.
 
 =head1 SYNOPSIS
 
-These are instructions for building Perl under DOS (or w??), using
-DJGPP v2.03 or later.  Under w95 long filenames are supported.
+These are instructions for building Perl under DOS and Windows, using
+DJGPP v2.03 or later.  Under Windows '95, '98, ME, 2000 and XP
+long filenames are supported.
 
 =head1 DESCRIPTION
 
@@ -43,26 +44,25 @@ For more details (FAQ), check out the home of DJGPP at:
 If you have questions about DJGPP, try posting to the DJGPP newsgroup:
 comp.os.msdos.djgpp, or use the email gateway djgpp@delorie.com.
 
-You can find the full DJGPP distribution on any SimTel.Net mirror all over
-the world. Like:
+You can find instructions on how to get DJGPP here:
 
-        ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2*
+        http://www.delorie.com/djgpp/getting.html
 
 You need the following files to build perl (or add new modules):
 
         v2/djdev203.zip
-        v2/bnu2951b.zip
-        v2gnu/gcc2952b.zip
+        v2gnu/bnu213.zip
+        v2gnu/gcc322b.zip
         v2gnu/bsh204b.zip
         v2gnu/mak3791b.zip
-        v2gnu/fil316b.zip
-        v2gnu/sed302b.zip
+        v2gnu/fil41b.zip
+        v2gnu/sed3028b.zip
         v2gnu/txt20b.zip
-        v2gnu/dif272b.zip
+        v2gnu/dif28b.zip
         v2gnu/grep24b.zip
-        v2gnu/shl112b.zip
-        v2gnu/gawk303b.zip
-        v2misc/csdpmi4b.zip
+        v2gnu/shl2011b.zip
+        v2gnu/gawk311b.zip
+        v2misc/csdpmi5b.zip
 
 or possibly any newer version.
 
@@ -104,8 +104,8 @@ sockets
 =item *
 
 Unpack the source package F<perl5.6*.tar.gz> with djtarx. If you want
-to use long file names under w95 and also to get Perl to pass all its
-tests, don't forget to use
+to use long file names under Windows and also to get Perl to pass all
+its tests, don't forget to use
 
         set LFN=y
         set FNCASE=y
@@ -125,11 +125,6 @@ done for you.]
 And make the C<SHELL> environment variable point to this F<sh.exe>:
 
         set SHELL=c:/djgpp/bin/sh.exe (use full path name!)
-
-You can do this in F<djgpp.env> too. Add this line BEFORE any section
-definition:
-
-        +SHELL=%DJDIR%/bin/sh.exe
 
 =item *
 
@@ -324,6 +319,8 @@ by using the command:
 Laszlo Molnar, F<laszlo.molnar@eth.ericsson.se> [Installing/building perl]
 
 Peter J. Farley III F<pjfarley@banet.net> [Building/installing modules]
+
+Richard Dawe F<rich@phekda.freeserve.co.uk> [Updates for Perl 5.6.2]
 
 =head1 SEE ALSO
 
