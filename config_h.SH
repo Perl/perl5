@@ -42,6 +42,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #define MEM_ALIGNBYTES $alignbytes	/**/
 
+/* ARCHLIB_EXP:
+ *	This symbol contains the ~name expanded version of ARCHLIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#$d_archlib ARCHLIB_EXP "$archlibexp"		/**/
+
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
  *	be installed. Program must be prepared to deal with ~name substitution.
@@ -1360,12 +1366,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  *	This symbol holds the complete pathname to the sed program.
  */
 #define LOC_SED 	"$full_sed"	/**/
-
-/* ARCHLIB_EXP:
- *	This symbol contains the ~name expanded version of ARCHLIB, to be used
- *	in programs that are not prepared to deal with ~ expansion at run-time.
- */
-#$d_archlib ARCHLIB_EXP "$archlibexp"		/**/
 
 /* CSH:
  *	This symbol, if defined, indicates that the C-shell exists.

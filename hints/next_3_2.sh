@@ -24,3 +24,10 @@ d_tcsetpgrp='define'
 # running ranlib.  The '5' is an empirical number that's "long enough."
 # (Thanks to Andreas Koenig <k@franz.ww.tu-berlin.de>)
 ranlib='sleep 5; /bin/ranlib' 
+#
+# There where reports that the compiler on HPPA machines
+# fails with the -O flag on pp.c.
+if [ `arch` = "hppa" ]; then
+pp_cflags='optimize="-g"'
+fi
+

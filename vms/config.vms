@@ -719,12 +719,23 @@
  */
 #undef I_SYS_SELECT	/**/
 
+/* I_SYS_STAT:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/stat.h>.
+ */
+#define	I_SYS_STAT		/**/
 
 /* I_SYS_TIMES:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <sys/times.h>.
  */
 #undef	I_SYS_TIMES		/**/
+
+/* I_SYS_TYPES:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/types.h>.
+ */
+#define	I_SYS_TYPES		/**/
 
 /* I_TERMIO:
  *	This symbol, if defined, indicates that the program should include

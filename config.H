@@ -14,7 +14,7 @@
  * $Id: Config_h.U,v 3.0.1.3 1995/01/30 14:25:39 ram Exp $
  */
 
-/* Configuration time: Sat Feb 11 12:02:12 EST 1995
+/* Configuration time: Tue Feb 21 12:13:04 EST 1995
  * Configured by: andy
  * Target system: crystal crystal 3.2 2 i386 
  */
@@ -27,6 +27,12 @@
  *	double. Usual values are 2, 4 and 8.
  */
 #define MEM_ALIGNBYTES 4	/**/
+
+/* ARCHLIB_EXP:
+ *	This symbol contains the ~name expanded version of ARCHLIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#define ARCHLIB_EXP "/usr/local/lib/perl5/i386-isc"		/**/
 
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
@@ -1346,12 +1352,6 @@
  *	This symbol holds the complete pathname to the sed program.
  */
 #define LOC_SED 	"/bin/sed"	/**/
-
-/* ARCHLIB_EXP:
- *	This symbol contains the ~name expanded version of ARCHLIB, to be used
- *	in programs that are not prepared to deal with ~ expansion at run-time.
- */
-#define ARCHLIB_EXP "/usr/local/lib/perl5/i386-isc"		/**/
 
 /* CSH:
  *	This symbol, if defined, indicates that the C-shell exists.

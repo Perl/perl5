@@ -1,2 +1,2 @@
 use ExtUtils::MakeMaker;
-WriteMakefile(LIBS => ["-lgdbm", "-ldbm"]);
+WriteMakefile(LIBS => ["-L/usr/local/lib -lgdbm", "-ldbm"]);

@@ -1,4 +1,27 @@
-#!/usr/bin/perl
+case $CONFIG in
+'')
+	if test -f config.sh; then TOP=.;
+	elif test -f ../config.sh; then TOP=..;
+	elif test -f ../../config.sh; then TOP=../..;
+	elif test -f ../../../config.sh; then TOP=../../..;
+	elif test -f ../../../../config.sh; then TOP=../../../..;
+	else
+		echo "Can't find config.sh."; exit 1
+	fi
+	. $TOP/config.sh
+	;;
+esac
+: This forces SH files to create target in same directory as SH file.
+: This is so that make depend always knows where to find SH derivatives.
+case "$0" in
+*/*) cd `expr X$0 : 'X\(.*\)/'` ;;
+esac
+echo "Extracting h2xs (with variable substitutions)"
+$spitshell >h2xs <<!GROK!THIS!
+#!$bin/perl
+!GROK!THIS!
+
+$spitshell >>h2xs <<'!NO!SUBS!'
 
 =head1 NAME
 
@@ -395,3 +418,6 @@ print PL ");\n";
 
 
 system '/bin/ls > MANIFEST';
+!NO!SUBS!
+chmod 755 h2xs
+$eunicefix h2xs

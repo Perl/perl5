@@ -908,7 +908,12 @@ int arg;
 #endif
 	    break;
 	}
-	if (strEQ(name, "FD_CLOEXEC")) return FD_CLOEXEC;
+	if (strEQ(name, "FD_CLOEXEC"))
+#ifdef FD_CLOEXEC
+	    return FD_CLOEXEC;
+#else
+	    goto not_there;
+#endif
 	if (strEQ(name, "FILENAME_MAX"))
 #ifdef FILENAME_MAX
 	    return FILENAME_MAX;

@@ -317,13 +317,13 @@ $spitshell >>Makefile <<'!NO!SUBS!'
 # DynaLoader may be needed for extensions that use Makefile.PL.
 
 $(DYNALOADER):	miniperl preplibrary FORCE
-	@sh ext/util/make_ext static $@
+	@sh ext/util/make_ext static $@ LIBPERL_A=$(perllib)
 
 d_dummy $(dynamic_ext):	miniperl preplibrary $(DYNALOADER) FORCE
-	@sh ext/util/make_ext dynamic $@
+	@sh ext/util/make_ext dynamic $@ LIBPERL_A=$(perllib)
 
 s_dummy $(static_ext):	miniperl preplibrary $(DYNALOADER) FORCE
-	@sh ext/util/make_ext static $@
+	@sh ext/util/make_ext static $@ LIBPERL_A=$(perllib)
 
 clean:
 	rm -f *.o *.a all perlmain.c

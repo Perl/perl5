@@ -85,22 +85,23 @@ sub fastcwd {
 
     ($cdev, $cino) = stat('.');
     for (;;) {
+	my $direntry;
 	($odev, $oino) = ($cdev, $cino);
 	chdir('..');
 	($cdev, $cino) = stat('.');
 	last if $odev == $cdev && $oino == $cino;
 	opendir(DIR, '.');
 	for (;;) {
-	    $_ = readdir(DIR);
-	    next if $_ eq '.';
-	    next if $_ eq '..';
+	    $direntry = readdir(DIR);
+	    next if $direntry eq '.';
+	    next if $direntry eq '..';
 
-	    last unless defined;
-	    ($tdev, $tino) = lstat($_);
+	    last unless defined $direntry;
+	    ($tdev, $tino) = lstat($direntry);
 	    last unless $tdev != $odev || $tino != $oino;
 	}
 	closedir(DIR);
-	unshift(@path, $_);
+	unshift(@path, $direntry);
     }
     chdir($path = '/' . join('/', @path));
     $path;

@@ -1,4 +1,27 @@
-#!/usr/bin/perl
+case $CONFIG in
+'')
+	if test -f config.sh; then TOP=.;
+	elif test -f ../config.sh; then TOP=..;
+	elif test -f ../../config.sh; then TOP=../..;
+	elif test -f ../../../config.sh; then TOP=../../..;
+	elif test -f ../../../../config.sh; then TOP=../../../..;
+	else
+		echo "Can't find config.sh."; exit 1
+	fi
+	. $TOP/config.sh
+	;;
+esac
+: This forces SH files to create target in same directory as SH file.
+: This is so that make depend always knows where to find SH derivatives.
+case "$0" in
+*/*) cd `expr X$0 : 'X\(.*\)/'` ;;
+esac
+echo "Extracting makeaperl (with variable substitutions)"
+$spitshell >makeaperl <<!GROK!THIS!
+#!$bin/perl
+!GROK!THIS!
+
+$spitshell >>makeaperl <<'!NO!SUBS!'
 
 =head1 NAME
 
@@ -61,7 +84,7 @@ $0 version $Version
 
 $0: [options] [object_files] [static_extensions ...] [directories to search through]
  -l perllibrary     perl library to link from (the first libperl.a found)
- -m makefilename    name of the makefile to be written (/tmp/Makefile.$$)
+ -m makefilename    name of the makefile to be written (/tmp/Makefile.\$\$)
  -o name            name for perl executable (perl)
  -t directory       directory where intermediate files reside (/tmp)
 END
@@ -99,3 +122,6 @@ print MAKE MM->makeaperl('MAKE'    => $opt_m,
 );
 close MAKE;
 (system "make -f $opt_m") == 0 or die "$0 failed: Please check file $opt_m and run make -f $opt_m\n";
+!NO!SUBS!
+chmod 755 makeaperl
+$eunicefix makeaperl

@@ -171,7 +171,7 @@ h2pl/mksizes		Program to make %sizeof array
 h2pl/mkvars		Program to make .pl from .ph files
 h2pl/tcbreak		cbreak test routine using .ph
 h2pl/tcbreak2		cbreak test routine using .pl
-h2xs			Program to make .xs files from C header files
+h2xs.SH			Program to make .xs files from C header files
 handy.h			Handy definitions
 hints/3b1.sh		Hints for named architecture
 hints/3b1cc		Hints for named architecture
@@ -317,7 +317,7 @@ makedir.SH		Precursor to makedir
 malloc.c		A version of malloc you might not want
 mg.c			Magic code
 mg.h			Magic header
-makeaperl		perl script that produces a new perl binary
+makeaperl.SH		perl script that produces a new perl binary
 minimod.PL		Writes lib/ExtUtils/Miniperl.pm
 miniperlmain.c		Basic perl w/o dynamic loading or extensions
 mv-if-diff		Script to mv a file if it changed

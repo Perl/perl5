@@ -2,7 +2,13 @@ usevfork=false
 d_suidsafe=define
 set `echo $glibpth | sed -e 's@/usr/ucblib@@'`
 glibpth="$*"
-set `echo " $libswanted " | sed -e 's@ ld @ @' -e 's@ ucb @ @'`
+# Remove bad libraries.  -lucb contains incompatible routines.
+# -lld doesn't do anything useful.
+# -lmalloc can cause a problem with GNU CC & Solaris.  Specifically,
+# libmalloc.a may allocate memory that is only 4 byte aligned, but
+# GNU CC on the Sparc assumes that doubles are 8 byte aligned.
+# Thanks to  Hallvard B. Furuseth <h.b.furuseth@usit.uio.no>
+set `echo " $libswanted " | sed -e 's@ ld @ @' -e 's@ malloc @ @' -e 's@ ucb @ @'`
 libswanted="$*"
 
 # Look for architecture name.  We want to suggest a useful default
@@ -30,3 +36,4 @@ Remove /usr/ucb from your PATH if you have difficulties.
 END
 ;;
 esac
+
