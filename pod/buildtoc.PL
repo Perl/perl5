@@ -145,6 +145,7 @@ if (-d "pod") {
 
     perlport
     perllocale
+    perlunintro
     perlunicode
     perlebcdic
 
@@ -289,6 +290,7 @@ sub getpods {
 	return if $file eq '../lib/Pod/Functions.pm'; # Used only by pod itself
         return if $file =~ m!lib/Attribute/Handlers/demo/!;
 	return if $file =~ m!lib/Net/FTP/.+\.pm!; # Hi, Graham! :-)
+        return if $file =~ m!lib/Math/BigInt/t/!;
 
 	die "tut $name" if $file =~ /TUT/;
 	unless (open (F, "< $_\0")) {

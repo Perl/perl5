@@ -536,11 +536,11 @@ more elaborate constructs
 
 =over 4
 
-=item Declaration of a ARRAY OF ARRAYS
+=item Declaration of an ARRAY OF ARRAYS
 
-=item Generation of a ARRAY OF ARRAYS
+=item Generation of an ARRAY OF ARRAYS
 
-=item Access and Printing of a ARRAY OF ARRAYS
+=item Access and Printing of an ARRAY OF ARRAYS
 
 =back
 
@@ -560,11 +560,11 @@ more elaborate constructs
 
 =over 4
 
-=item Declaration of a ARRAY OF HASHES
+=item Declaration of an ARRAY OF HASHES
 
-=item Generation of a ARRAY OF HASHES
+=item Generation of an ARRAY OF HASHES
 
-=item Access and Printing of a ARRAY OF HASHES
+=item Access and Printing of an ARRAY OF HASHES
 
 =back
 
@@ -1971,20 +1971,21 @@ http://testers.cpan.org/
 -I<X> FILEHANDLE, -I<X> EXPR, -I<X>, alarm SECONDS, alarm, binmode
 FILEHANDLE, chmod LIST, chown LIST, chroot FILENAME, chroot, crypt
 PLAINTEXT,SALT, dbmclose HASH, dbmopen HASH,DBNAME,MODE, dump LABEL, exec
-LIST, fcntl FILEHANDLE,FUNCTION,SCALAR, flock FILEHANDLE,OPERATION, fork,
-getlogin, getpgrp PID, getppid, getpriority WHICH,WHO, getpwnam NAME,
-getgrnam NAME, getnetbyname NAME, getpwuid UID, getgrgid GID, getnetbyaddr
-ADDR,ADDRTYPE, getprotobynumber NUMBER, getservbyport PORT,PROTO, getpwent,
-getgrent, gethostent, getnetent, getprotoent, getservent, setpwent,
-setgrent, sethostent STAYOPEN, setnetent STAYOPEN, setprotoent STAYOPEN,
-setservent STAYOPEN, endpwent, endgrent, endhostent, endnetent,
-endprotoent, endservent, exit EXPR, exit, getsockopt SOCKET,LEVEL,OPTNAME,
-glob EXPR, glob, ioctl FILEHANDLE,FUNCTION,SCALAR, kill SIGNAL, LIST, link
-OLDFILE,NEWFILE, lstat FILEHANDLE, lstat EXPR, lstat, msgctl ID,CMD,ARG,
-msgget KEY,FLAGS, msgsnd ID,MSG,FLAGS, msgrcv ID,VAR,SIZE,TYPE,FLAGS, open
-FILEHANDLE,EXPR, open FILEHANDLE, pipe READHANDLE,WRITEHANDLE, readlink
-EXPR, readlink, select RBITS,WBITS,EBITS,TIMEOUT, semctl ID,SEMNUM,CMD,ARG,
-semget KEY,NSEMS,FLAGS, semop KEY,OPSTRING, setgrent, setpgrp PID,PGRP,
+LIST, exit EXPR, exit, fcntl FILEHANDLE,FUNCTION,SCALAR, flock
+FILEHANDLE,OPERATION, fork, getlogin, getpgrp PID, getppid, getpriority
+WHICH,WHO, getpwnam NAME, getgrnam NAME, getnetbyname NAME, getpwuid UID,
+getgrgid GID, getnetbyaddr ADDR,ADDRTYPE, getprotobynumber NUMBER,
+getservbyport PORT,PROTO, getpwent, getgrent, gethostent, getnetent,
+getprotoent, getservent, setpwent, setgrent, sethostent STAYOPEN, setnetent
+STAYOPEN, setprotoent STAYOPEN, setservent STAYOPEN, endpwent, endgrent,
+endhostent, endnetent, endprotoent, endservent, getsockopt
+SOCKET,LEVEL,OPTNAME, glob EXPR, glob, ioctl FILEHANDLE,FUNCTION,SCALAR,
+kill SIGNAL, LIST, link OLDFILE,NEWFILE, lstat FILEHANDLE, lstat EXPR,
+lstat, msgctl ID,CMD,ARG, msgget KEY,FLAGS, msgsnd ID,MSG,FLAGS, msgrcv
+ID,VAR,SIZE,TYPE,FLAGS, open FILEHANDLE,EXPR, open FILEHANDLE, pipe
+READHANDLE,WRITEHANDLE, readlink EXPR, readlink, select
+RBITS,WBITS,EBITS,TIMEOUT, semctl ID,SEMNUM,CMD,ARG, semget
+KEY,NSEMS,FLAGS, semop KEY,OPSTRING, setgrent, setpgrp PID,PGRP,
 setpriority WHICH,WHO,PRIORITY, setpwent, setsockopt
 SOCKET,LEVEL,OPTNAME,OPTVAL, shmctl ID,CMD,ARG, shmget KEY,SIZE,FLAGS,
 shmread ID,VAR,POS,SIZE, shmwrite ID,STRING,POS,SIZE, sockatmark SOCKET,
@@ -2109,6 +2110,56 @@ LC_NUMERIC, LC_TIME, LANG
 
 =back
 
+=head2 perlunintro - Perl Unicode introduction
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Unicode
+
+=item Perl's Unicode Support
+
+=item Perl's Unicode Model
+
+=item Creating Unicode
+
+=item Handling Unicode
+
+=item Legacy Encodings
+
+=item Unicode I/O
+
+=item Special Cases
+
+=item Advanced Topics
+
+=item Miscellaneous
+
+=item Questions With Answers
+
+Will My Old Scripts Break?, How Do I Make My Scripts Work With Unicode?,
+How Do I Know Whether My String Is In Unicode?, How Do I Detect Invalid
+UTF-8?, How Do I Convert Data Into UTF-8?  Or Vice Versa?, How Do I Display
+Unicode?  How Do I Input Unicode?, How Does Unicode Work With Traditional
+Locales?
+
+=item Hexadecimal Notation
+
+=item Further Resources
+
+=back
+
+=item SEE ALSO
+
+=item ACKNOWLEDGEMENTS
+
+=item AUTHOR, COPYRIGHT, AND LICENSE
+
+=back
+
 =head2 perlunicode - Unicode support in Perl
 
 =over 4
@@ -2137,6 +2188,19 @@ to enable UTF-8/UTF-EBCDIC in scripts
 =item CAVEATS
 
 =item UNICODE REGULAR EXPRESSION SUPPORT LEVEL
+
+=over 4
+
+=item Unicode Encodings
+
+UTF-8, UTF-16, UTF-16BE, UTF16-LE, Surrogates, and BOMs (Byte Order Marks),
+UTF-32, UTF-32BE, UTF32-LE, UCS-2, UCS-4, UTF-7
+
+=item Security Implications of Malformed UTF-8
+
+=item Unicode in Perl on EBCDIC
+
+=back
 
 =item SEE ALSO
 
@@ -7412,7 +7476,7 @@ semantics
 =back
 
 =head2 charnames - define character names for C<\N{named}> string literal
-escape.
+escapes.
 
 =over 4
 
@@ -7421,6 +7485,8 @@ escape.
 =item DESCRIPTION
 
 =item CUSTOM TRANSLATORS
+
+=item charnames::viacode(code)
 
 =item BUGS
 
@@ -7802,6 +7868,18 @@ utf8::encode($string), $flag = utf8::decode($string)
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=back
+
+=head2 vmsish - Perl pragma to control VMS-specific language features
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+C<vmsish status>, C<vmsish exit>, C<vmsish time>, C<vmsish hushed>
 
 =back
 
@@ -8427,8 +8505,8 @@ TIMEDIFF, [ STYLE, [ FORMAT ] ] )
 =item Optional Exports
 
 clearcache ( COUNT ), clearallcache ( ), cmpthese ( COUT, CODEHASHREF, [
-STYLE ] ), cmpthese ( RESULTSHASHREF ), countit(TIME, CODE), disablecache (
-), enablecache ( ), timesum ( T1, T2 )
+STYLE ] ), cmpthese ( RESULTSHASHREF, [ STYLE ] ), countit(TIME, CODE),
+disablecache ( ), enablecache ( ), timesum ( T1, T2 )
 
 =back
 
@@ -9909,8 +9987,8 @@ Fixed length 32-bit encodings, Multi-byte encodings, "Escape" encodings
 
 =item Encoding Names
 
-The MIME name as defined in IETF RFC-XXXX, The name in the IANA registry,
-The name used by the organization that defined it
+The MIME name as defined in IETF RFCs, The name in the IANA registry, The
+name used by the organization that defined it
 
 =back
 
@@ -13632,7 +13710,7 @@ functions
 
 =over 4
 
-=item How do I download files from a FTP server ?
+=item How do I download files from an FTP server ?
 
 =item How do I transfer files in binary mode ?
 
@@ -13645,13 +13723,13 @@ functions
 
 =item Can I do a reget operation like the ftp command ?
 
-=item How do I get a directory listing from a FTP server ?
+=item How do I get a directory listing from an FTP server ?
 
-=item Changeing directory to "" does not fail ?
+=item Changing directory to "" does not fail ?
 
 =item I am behind a SOCKS firewall, but the Firewall option does not work ?
 
-=item I am behind a FTP proxy firewall, but cannot access machines outside
+=item I am behind an FTP proxy firewall, but cannot access machines outside
 ?
 
 =item My ftp proxy firewall does not listen on port 21
@@ -15429,6 +15507,8 @@ C<Storable::is_retrieving>
 
 =item BUGS
 
+=item LIMITATION
+
 =item COPYRIGHT
 
 =back
@@ -16361,8 +16441,8 @@ function
 
 =item DESCRIPTION
 
-isa ( TYPE ), can ( METHOD ), VERSION ( [ REQUIRE ] ), UNIVERSAL::isa (
-VAL, TYPE ), UNIVERSAL::can ( VAL, METHOD )
+$obj->isa( TYPE ), CLASS->isa( TYPE ), isa( VAL, TYPE ), $obj->can( METHOD
+), CLASS->can( METHOD ), can( VAL, METHOD ), VERSION ( [ REQUIRE ] )
 
 =back
 
@@ -16384,10 +16464,14 @@ undefChar, katakana_before_hiragana, upper_before_lower
 
 =item Other methods
 
-C<@sorted = $UCA-E<gt>sort(@not_sorted)>, C<$result = $UCA-E<gt>cmp($a,
-$b)>, C<$sortKey = $UCA-E<gt>getSortKey($string)>, C<$position =
-$UCA-E<gt>index($string, $substring)>, C<($position, $length) =
-$UCA-E<gt>index($string, $substring)>
+C<@sorted = $Collator-E<gt>sort(@not_sorted)>, C<$result =
+$Collator-E<gt>cmp($a, $b)>, C<$result = $Collator-E<gt>eq($a, $b)>,
+C<$result = $Collator-E<gt>ne($a, $b)>, C<$result = $Collator-E<gt>lt($a,
+$b)>, C<$result = $Collator-E<gt>le($a, $b)>, C<$result =
+$Collator-E<gt>gt($a, $b)>, C<$result = $Collator-E<gt>ge($a, $b)>,
+C<$sortKey = $Collator-E<gt>getSortKey($string)>, C<$position =
+$Collator-E<gt>index($string, $substring)>, C<($position, $length) =
+$Collator-E<gt>index($string, $substring)>
 
 =item EXPORT
 
@@ -16399,8 +16483,7 @@ $UCA-E<gt>index($string, $substring)>
 
 =item SEE ALSO
 
-L<Lingua::KO::Hangul::Util>, L<Unicode::Normalize>, Unicode Collation
-Algorithm - Unicode TR #10
+Unicode Collation Algorithm - Unicode TR #10, L<Unicode::Normalize>
 
 =back
 
