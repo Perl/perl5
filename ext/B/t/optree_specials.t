@@ -3,6 +3,11 @@
 BEGIN {
     chdir 't';
     @INC = ('../lib', '../ext/B/t');
+    require Config;
+    if (($Config::Config{'extensions'} !~ /\bB\b/) ){
+        print "1..0 # Skip -- Perl configured without B module\n";
+        exit 0;
+    }
     require './test.pl';
 }
 
@@ -21,13 +26,7 @@ my $out = runperl(
 
 #print "out:$out\n";
 
-my $src = q{
-    our ($beg, $chk, $init, $end) = "'foo'";
-    BEGIN { $beg++ }
-    CHECK { $chk++ }
-    INIT  { $init++ }
-    END   { $end++ }
-};
+my $src = q[our ($beg, $chk, $init, $end) = qq{'foo'}; BEGIN { $beg++ } CHECK { $chk++ } INIT { $init++ } END { $end++ }];
 
 
 

@@ -3,6 +3,11 @@
 BEGIN {
     chdir q(t);
     @INC = qw(../lib ../ext/B/t);
+    require Config;
+    if (($Config::Config{'extensions'} !~ /\bB\b/) ){
+        print "1..0 # Skip -- Perl configured without B module\n";
+        exit 0;
+    }
     if ($] < 5.009) {
         print "1..0 # Skip -- TODO - provide golden result regexps for 5.8\n";
         exit 0;
