@@ -100,7 +100,9 @@ close(CFG);
 
 # perl.h logic duplication begins
 
-$define{PL_OP_SLAB_ALLOC} = 1;
+if ($define{PERL_IMPLICIT_SYS}) {
+    $define{PL_OP_SLAB_ALLOC} = 1;
+}
 
 if ($define{USE_ITHREADS}) {
     if (!$define{MULTIPLICITY}) {
@@ -729,6 +731,8 @@ unless ($define{'PL_OP_SLAB_ALLOC'}) {
                      PL_OpPtr
                      PL_OpSlab
                      PL_OpSpace
+		     Perl_Slab_Alloc
+		     Perl_Slab_Free
                     )];
 }
 
