@@ -1211,6 +1211,7 @@ lib/Pod/t/basic.pod		podlators test
 lib/Pod/t/basic.t		podlators test
 lib/Pod/t/basic.txt		podlators test
 lib/Pod/t/man.t    		podlators test
+lib/Pod/t/Functions.t		See if Pod::Functions works
 lib/Pod/t/InputObjects.t	See if Pod::InputObjects works
 lib/Pod/t/latex.t		Test for Pod::LaTeX
 lib/Pod/t/parselink.t		podlators test
