@@ -31,6 +31,549 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11443] By: jhi                                   on 2001/07/22  15:02:11
+        Log: Subject: Re: Typo in Porting/pumpkin/pod ?
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Fri, 20 Jul 2001 16:12:49 +0100
+             Message-Id: <E15NbxR-0006HD-00@draco.cus.cam.ac.uk>
+     Branch: perl
+	   ! Porting/pumpkin.pod
+____________________________________________________________________________
+[ 11442] By: jhi                                   on 2001/07/22  14:58:33
+        Log: Subject: Re: [PATCH: perl@11373] pod fixups for pod/perlhack.pod
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 20 Jul 2001 17:04:55 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10107201650510.144528-100000@aspara.forte.com>
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[ 11441] By: jhi                                   on 2001/07/22  14:54:29
+        Log: Subject: [PATCH Test.pm] Getting rid of the expected "UNEXPECTEDLY SUCCEEDED"
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 20 Jul 2001 20:22:35 -0400
+             Message-ID: <20010720202235.O4498@blackrider>
+     Branch: perl
+	   ! lib/Test.pm lib/Test/t/mix.t lib/Test/t/success.t
+	   ! lib/Test/t/todo.t
+____________________________________________________________________________
+[ 11440] By: jhi                                   on 2001/07/22  14:51:14
+        Log: Subject: Re: [ID 20010720.010] WHere's [:isprint:]?
+             From: Jeffrey Friedl <jfriedl@yahoo-inc.com>
+             Message-Id: <200107210559.WAA09160@ventrue.corp.yahoo.com>
+             Date: Fri, 20 Jul 2001 22:59:25 -0700 (PDT)
+     Branch: perl
+	   ! ext/POSIX/POSIX.pod
+____________________________________________________________________________
+[ 11439] By: jhi                                   on 2001/07/22  14:49:25
+        Log: Subject: Re: [ID 20010720.010] WHere's [:isprint:]? 
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Fri, 20 Jul 2001 23:16:54 -0400
+             Message-ID: <20010721031654.21877.qmail@plover.com>
+     Branch: perl
+	   ! ext/POSIX/POSIX.pod
+____________________________________________________________________________
+[ 11438] By: jhi                                   on 2001/07/22  14:41:58
+        Log: Subject: Re: [PATCH O.pm] avoid to clutter output with -l
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Sun, 22 Jul 2001 14:56:09 +0200
+             Message-ID: <20010722145609.A766@rafael>
+     Branch: perl
+	   ! ext/B/O.pm
+____________________________________________________________________________
+[ 11437] By: jhi                                   on 2001/07/22  14:39:07
+        Log: Subject: regexec.c #define cleanup
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Sat, 21 Jul 2001 18:33:25 -0400
+             Message-ID: <20010721223325.3069.qmail@plover.com>
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 11436] By: jhi                                   on 2001/07/22  14:36:43
+        Log: Subject: [PATCH: perl@11373] Win32 update for t/io/fs.t (may effect NetWare)
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Sat, 21 Jul 2001 12:08:29 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0107211156160.17271-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! t/io/fs.t
+____________________________________________________________________________
+[ 11435] By: jhi                                   on 2001/07/22  00:22:51
+        Log: Typo in #11432.
+     Branch: perl
+	   ! ext/POSIX/POSIX.t
+____________________________________________________________________________
+[ 11434] By: jhi                                   on 2001/07/21  23:12:26
+        Log: Integrate (manually) change #11424 from macperl.
+     Branch: perl
+	   ! ext/Filter/t/call.t
+____________________________________________________________________________
+[ 11433] By: jhi                                   on 2001/07/21  23:07:43
+        Log: Integrate change #11408 from macperl.
+     Branch: perl
+	  !> README.macos pod/perlport.pod
+____________________________________________________________________________
+[ 11432] By: jhi                                   on 2001/07/21  23:02:30
+        Log: Integrate change #11388 from macperl (the *.t parts needed hand massage).
+     Branch: perl
+	  +> macos/MacPerlTests.cmd macos/xsubpp.patch
+	   ! ext/DB_File/t/db-btree.t ext/DB_File/t/db-hash.t
+	   ! ext/DB_File/t/db-recno.t ext/NDBM_File/ndbm.t
+	   ! ext/POSIX/POSIX.t
+____________________________________________________________________________
+[ 11431] By: gsar                                  on 2001/07/21  05:03:44
+        Log: pod/*.t tests not picked up by t/TEST either
+     Branch: maint-5.6/perl
+	   ! t/TEST
+____________________________________________________________________________
+[ 11430] By: gsar                                  on 2001/07/21  04:58:12
+        Log: better tweak for change#11429 (windows has both / and \ separated
+             paths in @INC at that point)
+     Branch: maint-5.6/perl
+	   ! t/pod/testp2pt.pl
+____________________________________________________________________________
+[ 11429] By: gsar                                  on 2001/07/21  04:41:15
+        Log: MacOS pod test tweak needs \Escape
+     Branch: maint-5.6/perl
+	   ! t/pod/testp2pt.pl
+____________________________________________________________________________
+[ 11428] By: gsar                                  on 2001/07/21  04:39:34
+        Log: run/runenv.t needs fflushNULL sanity (t/TEST is too dumb to detect
+             resulting duplicate output, but t/harness isn't)
+     Branch: maint-5.6/perl
+	   ! t/run/runenv.t
+____________________________________________________________________________
+[ 11427] By: gsar                                  on 2001/07/21  04:37:26
+        Log: t/harness wasn't picking up all the tests
+     Branch: maint-5.6/perl
+	   ! t/harness
+____________________________________________________________________________
+[ 11426] By: gsar                                  on 2001/07/21  04:09:26
+        Log: update MANIFEST for new file
+     Branch: maint-5.6/perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 11425] By: gsar                                  on 2001/07/21  04:07:46
+        Log: integrate maint-5.6/macperl changes into maint-5.6/perl, with
+             the exception of the macperl/macos/... tree
+     Branch: maint-5.6/perl
+	  +> t/lib/filefind-taint.t
+	  !> (integrate 72 files)
+____________________________________________________________________________
+[ 11424] By: pudge                                 on 2001/07/20  18:55:25
+        Log: Fix test.
+     Branch: maint-5.6/macperl
+	   ! macos/bundled_ext/Filter/t/call.t
+____________________________________________________________________________
+[ 11423] By: gsar                                  on 2001/07/20  18:38:48
+        Log: Make perl fork()-safe (in a slightly limited way) even on
+             platforms that don't have pthread_atfork() (extension of
+             the fix in change#11151).
+             
+             Note that this will not help extensions that call fork()
+             directly in C, or that link to libraries that call fork()
+             directly.  Such cases must be fixed to either call
+             PerlProc_fork(), or call atfork_lock() in parent before the
+             calling the function that forks and call atfork_unlock()
+             in both parent and child immediately after the fork().
+             (There are no worries if C code calls exec() in the child
+             immediately after a fork().  Only cases where the child
+             calls perl's API functions (including New()) after the
+             fork() are problematic.)
+             
+             This change also eliminates the use of vfork() from perl,
+             since all such uses were violating the severe restrictions
+             on modifying the state of the process between the vfork()
+             and the exec().
+             
+             This is a modified version of patches suggested by Abhijit
+             Menon-Sen and Richard Soderberg.
+     Branch: perl
+	   ! embed.h embed.pl global.sym iperlsys.h miniperlmain.c
+	   ! objXSUB.h perl.c perlapi.c pp_sys.c proto.h thread.h util.c
+____________________________________________________________________________
+[ 11422] By: pudge                                 on 2001/07/20  18:16:37
+        Log: Add Filter::Util::Call, Class::ISA, Digest, Filter::Simple,
+             Switch, and Text::Balanced.
+     Branch: maint-5.6/macperl
+	   + macos/bundled_ext/Filter/Util/Call/Call.pm
+	   + macos/bundled_ext/Filter/Util/Call/Call.xs
+	   + macos/bundled_ext/Filter/Util/Call/Makefile.PL
+	   + macos/bundled_ext/Filter/t/MyFilter.pm
+	   + macos/bundled_ext/Filter/t/call.t
+	   + macos/bundled_ext/Filter/t/filter-util.pl
+	   + macos/bundled_lib/blib/lib/Class/ISA.pm
+	   + macos/bundled_lib/blib/lib/Digest.pm
+	   + macos/bundled_lib/blib/lib/Filter/Simple.pm
+	   + macos/bundled_lib/blib/lib/Switch.pm
+	   + macos/bundled_lib/blib/lib/Text/Balanced.pm
+	   + macos/bundled_lib/blib/lib/Text/Balanced.pod
+	   + macos/bundled_lib/t/Class/ISA/test.pl
+	   + macos/bundled_lib/t/Digest/Digest.t
+	   + macos/bundled_lib/t/Filter/Simple/test.pl
+	   + macos/bundled_lib/t/Switch/test.pl
+	   + macos/bundled_lib/t/Text/Balanced/t/genxt.t
+	   + macos/bundled_lib/t/Text/Balanced/t/xbrak.t
+	   + macos/bundled_lib/t/Text/Balanced/t/xcode.t
+	   + macos/bundled_lib/t/Text/Balanced/t/xdeli.t
+	   + macos/bundled_lib/t/Text/Balanced/t/xmult.t
+	   + macos/bundled_lib/t/Text/Balanced/t/xquot.t
+	   + macos/bundled_lib/t/Text/Balanced/t/xtagg.t
+	   + macos/bundled_lib/t/Text/Balanced/t/xvari.t
+____________________________________________________________________________
+[ 11421] By: pudge                                 on 2001/07/20  18:03:28
+        Log: Add Filter::Util::Call to config/make files; edit utils
+             to recognize the module (it was descended too far down).
+             Bump version to 5.6.1a4.
+     Branch: maint-5.6/macperl
+	   ! macos/InstallBLIB macos/MPVersion.r macos/Makefile.mk
+	   ! macos/config.sh macos/lib/ExtUtils/MM_MacOS.pm
+	   ! macos/macperl/Makefile.mk macos/xsubpp.patch
+____________________________________________________________________________
+[ 11420] By: pudge                                 on 2001/07/20  18:02:05
+        Log: Make DB_File the default for MLDBM on MacOS.
+     Branch: maint-5.6/macperl
+	   ! macos/bundled_lib/blib/lib/MLDBM.pm
+____________________________________________________________________________
+[ 11419] By: nick                                  on 2001/07/20  14:51:03
+        Log: Subject:  [PATCH UnicodeCD.pm] Fix erronous documentation
+             From:  Simon Cozens <simon@netthink.co.uk>
+             Date:  Fri, 20 Jul 2001 11:42:35 -0400
+             Message-Id:  <20010720114235.A5235@netthink.co.uk>
+     Branch: perl
+	   ! lib/UnicodeCD.pm
+____________________________________________________________________________
+[ 11418] By: nick                                  on 2001/07/20  14:48:12
+        Log: Subject:  [PATCH regcomp.h] adds a comment
+             From:  Abhijit Menon-Sen <ams@wiw.org>
+             Date:  Fri, 20 Jul 2001 21:05:37 +0530
+             Message-Id:  <20010720210537.A7678@lustre.dyn.wiw.org>
+     Branch: perl
+	   ! regcomp.h
+____________________________________________________________________________
+[ 11417] By: nick                                  on 2001/07/20  14:16:38
+        Log: Subject:  [PATCH 5.7.2] INSTALL updates
+             From:  Andy Dougherty <doughera@lafayette.edu>
+             Date:  Fri, 20 Jul 2001 11:01:40 -0400 (EDT)
+             Message-Id:  <Pine.SOL.4.10.10107201059510.16494-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! INSTALL
+____________________________________________________________________________
+[ 11416] By: nick                                  on 2001/07/20  06:44:44
+        Log: Subject:  Re: [PATCH: perl@11373] pod fixups for pod/perlhack.pod
+             From:  Russ Allbery <rra@stanford.edu>
+             Date:  19 Jul 2001 15:52:37 -0700
+             Message-Id:  <ylvgko4jm2.fsf@windlord.stanford.edu>
+     Branch: perl
+	   ! lib/Pod/Man.pm
+____________________________________________________________________________
+[ 11415] By: nick                                  on 2001/07/20  06:35:11
+        Log: Subject:  [PATCH] defer op_seq allocation
+             From:  Abhijit Menon-Sen <ams@wiw.org>
+             Date:  Thu, 19 Jul 2001 22:12:24 +0530
+             Message-Id:  <20010719221224.A13786@lustre.dyn.wiw.org>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 11414] By: nick                                  on 2001/07/20  06:23:36
+        Log: Subject:  [PATCH] prototype for Time::HiRes::sleep()
+             From:  Abhijit Menon-Sen <ams@wiw.org>
+             Date:  Fri, 20 Jul 2001 01:18:50 +0530
+             Message-Id:  <20010720011850.A19650@lustre.dyn.wiw.org>
+             (Private e-mail)
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.xs
+____________________________________________________________________________
+[ 11413] By: nick                                  on 2001/07/20  06:18:53
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/Encode/Encode/euc-jp-0212.enc t/lib/commonsense.t
+	   - t/base/commonsense.t
+	  !> MANIFEST doio.c ext/B/B/Deparse.pm ext/Encode/Encode/Tcl.pm
+	  !> ext/POSIX/POSIX.t ext/Time/HiRes/HiRes.xs gv.c hints/darwin.sh
+	  !> hints/rhapsody.sh numeric.c pod/perlfunc.pod pod/perlhack.pod
+	  !> pod/perlre.pod pp_sys.c sv.c t/README t/op/arith.t
+	  !> t/op/sprintf.t thread.h utils/h2xs.PL win32/perlhost.h
+	  !> win32/win32.c
+____________________________________________________________________________
+[ 11412] By: nick                                  on 2001/07/19  06:44:27
+        Log: Integrate win32/perlhost.h from maintenance branch.
+             (Rest of $ENV{PATH} / system() fix.)
+     Branch: perl
+	  !> win32/perlhost.h
+____________________________________________________________________________
+[ 11411] By: nick                                  on 2001/07/19  06:41:34
+        Log: Subject:  [DOC PATCH bleadperl] its vs it's in perlhack.pod
+             From:  Philip Newton <Philip.Newton@gmx.net>
+             Date:  Wed, 18 Jul 2001 21:43:57 +0200
+             Message-Id:  <E15Mx9y-0007Oz-00@mserv1b.vianw.co.uk>
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[ 11410] By: nick                                  on 2001/07/19  06:39:35
+        Log: Subject:  Security hole in taint checking in open()
+             From:  deekoo@tentacle.net
+             Date:  Thu, 19 Jul 2001 00:03:46 -0700 (PDT)
+             Message-Id:  <Pine.LNX.4.33.0107182248330.11996-100000@chaos.tentacle.net>
+     Branch: perl
+	   ! doio.c
+____________________________________________________________________________
+[ 11409] By: nick                                  on 2001/07/19  06:28:08
+        Log: Subject:  [PATCH] Re: Time::HiRes qw(sleep) fails
+             From:  Abhijit Menon-Sen <ams@wiw.org>
+             Date:  Thu, 19 Jul 2001 04:30:43 +0530
+             Message-Id:  <20010719043043.A10327@lustre.dyn.wiw.org>
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.xs
+____________________________________________________________________________
+[ 11408] By: pudge                                 on 2001/07/19  03:27:36
+        Log: Update docs with latest implementation information and new URLs.
+     Branch: maint-5.6/macperl
+	   ! README.macos pod/perlport.pod
+____________________________________________________________________________
+[ 11407] By: pudge                                 on 2001/07/19  02:35:46
+        Log: Add Time::HiRes, and add default Makefile.mk for Digest::MD5.
+             Fix BuildRules to accept optimization variables.
+     Branch: maint-5.6/macperl
+	   + macos/bundled_ext/Digest/MD5/Makefile.mk
+	   ! macos/BuildRules.mk macos/Makefile.mk
+	   ! macos/bundled_ext/Time/HiRes/HiRes.xs macos/config.sh
+	   ! macos/macish.c macos/macish.h macos/macperl/Makefile.mk
+____________________________________________________________________________
+[ 11406] By: pudge                                 on 2001/07/19  01:11:39
+        Log: Integrate changes 11399,11401
+     Branch: maint-5.6/macperl
+	  !> win32/perlhost.h win32/win32.c
+____________________________________________________________________________
+[ 11405] By: nick                                  on 2001/07/18  06:50:33
+        Log: Integrate Sarathy's Win32 $ENV{'PATH'}/system fixes (11399, 11400)
+             from perl5.6*
+     Branch: perl
+	  !> win32/perlhost.h win32/win32.c
+____________________________________________________________________________
+[ 11404] By: nick                                  on 2001/07/18  06:43:59
+        Log: Subject:  Re: Perl 5.7.2 Has Been Released 
+             From:  hv@crypt0.demon.co.uk
+             Date:  Wed, 18 Jul 2001 05:58:46 +0100
+             Message-Id:  <200107180458.f6I4wlJ19966@crypt0.demon.co.uk>
+     Branch: perl
+	   ! ext/POSIX/POSIX.t
+____________________________________________________________________________
+[ 11403] By: nick                                  on 2001/07/18  06:38:57
+        Log: Subject:  Re: [ID 20010716.005] numeric conversions in 5.7.[12] changed from perl5.6.1 (leading whitespace) 
+             From:  hv@crypt0.demon.co.uk
+             Date:  Wed, 18 Jul 2001 05:21:54 +0100
+             Message-Id:  <200107180421.f6I4Ltc00987@crypt0.demon.co.uk>
+     Branch: perl
+	   ! numeric.c t/op/arith.t
+____________________________________________________________________________
+[ 11402] By: nick                                  on 2001/07/18  06:19:17
+        Log: Subject:  Doc patch: perlre should mention perlrequick and perlretut
+             From:  mjd@plover.com
+             Date:  17 Jul 2001 17:59:20 -0000
+             Message-Id:  <20010717175920.8177.qmail@plover.com>
+     Branch: perl
+	   ! pod/perlre.pod
+____________________________________________________________________________
+[ 11401] By: gsar                                  on 2001/07/17  21:31:31
+        Log: thinko in change#11400 (duh)
+     Branch: maint-5.6/perl
+	   ! win32/perlhost.h
+____________________________________________________________________________
+[ 11400] By: gsar                                  on 2001/07/17  19:46:34
+        Log: change#11399 revealed another unrelated bug; this is just a temporary
+             bandaid
+     Branch: maint-5.6/perl
+	   ! win32/perlhost.h
+____________________________________________________________________________
+[ 11399] By: gsar                                  on 2001/07/17  19:11:57
+        Log: fix bugs in handling of the virtualized environment under windows;
+             there were bugs in propagating any changes to %ENV down to the real
+             environment when such changes happened in the toplevel process
+             (thanks to Johan Holmberg <holmberg@iar.se> for the excellent
+             problem identification, and for a part of the fix)
+     Branch: maint-5.6/perl
+	   ! win32/perlhost.h win32/win32.c
+____________________________________________________________________________
+[ 11398] By: nick                                  on 2001/07/17  08:26:35
+        Log: Subject: Re: [PATCH: perl@11359] possible fix for sprintf.t on VAX that loads %Config
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Mon, 16 Jul 2001 16:43:14 -0700 (PDT)
+             Message-Id: <Pine.OSF.4.10.10107161631300.464972-100000@aspara.forte.com>
+             
+             Move t/base/commonsense.t to t/lib/commonsense.t - base tests
+             should not depend on existance of Config.pm
+     Branch: perl
+	  +> t/lib/commonsense.t
+	   - t/base/commonsense.t
+	   ! MANIFEST t/README
+____________________________________________________________________________
+[ 11397] By: nick                                  on 2001/07/17  08:09:58
+        Log: Subject:  [PATCH pod/perlhack.pod] Sections on writing tests & patching core mods
+             From:  Michael G Schwern <schwern@pobox.com>
+             Date:  Mon, 16 Jul 2001 18:20:31 -0400
+             Message-Id:  <20010716182031.A1128@blackrider>
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[ 11396] By: nick                                  on 2001/07/17  08:04:11
+        Log: Subject:  [PATCH perlfunc.pod] make printf refer to sprintf
+             From:  Gwyn Judd <b.judd@xtra.co.nz>
+             Date:  Tue, 17 Jul 2001 20:55:58 +1200
+             Message-Id:  <20010717205558.A3107@thislove>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 11395] By: nick                                  on 2001/07/17  08:02:22
+        Log: Subject:  [PATCH: perl@11373] fix t/op/sprintf.t to not load %Config
+             From:  Peter Prymmer <pvhp@forte.com>
+             Date:  Mon, 16 Jul 2001 15:48:33 -0700 (PDT)
+             Message-Id:  <Pine.OSF.4.10.10107161543400.464972-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/op/sprintf.t
+____________________________________________________________________________
+[ 11394] By: nick                                  on 2001/07/17  07:57:06
+        Log: Subject:  Re: [PATCH gv.c] allow ${"1f"} to be non-regex var 
+             From:  Jeff 'Japhy' Pinyan <jeffp@crusoe.net>
+             Date:  Mon, 16 Jul 2001 18:46:53 -0400 (EDT)
+             Message-Id:  <Pine.GSO.4.21.0107161829390.1405-100000@crusoe.crusoe.net>
+     Branch: perl
+	   ! gv.c
+____________________________________________________________________________
+[ 11392] By: nick                                  on 2001/07/17  07:50:12
+        Log: Subject:  [PATCH] fix PTHREAD_ATFORK croaking too early, too often
+             From:  Coral <coral@moonlight.crystalflame.net>
+             Date:  Mon, 16 Jul 2001 14:25:19 -0700 (PDT)
+             Message-Id:  <200107162125.f6GLPJ345261@moonlight.crystalflame.net>
+     Branch: perl
+	   ! pp_sys.c thread.h
+____________________________________________________________________________
+[ 11391] By: nick                                  on 2001/07/17  07:34:28
+        Log: Subject:  Re: [PATCH h2xs.PL ] use Test::More where appropriate (was Re:   
+             From:  Jonathan Stowe <gellyfish@gellyfish.com>
+             Date:  Mon, 16 Jul 2001 18:31:21 +0100 (BST)
+             Message-Id:  <Pine.LNX.4.33.0107161827570.15520-100000@orpheus.gellyfish.com>
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[ 11390] By: pudge                                 on 2001/07/16  23:54:44
+        Log: Add in List::Util, Memoize, NEXT, and a bunch of tests for other
+             modules.  Also added Mac::BuildTools, Mac::AppleEvents::Simple,
+             and Mac::Apps::Launch, which don't work, and Time::HiRes and
+             Time::Piece, which don't yet work.
+     Branch: maint-5.6/macperl
+	   + (add 154 files)
+____________________________________________________________________________
+[ 11389] By: pudge                                 on 2001/07/16  23:13:10
+        Log: Fix %ENV to be tainted [SF bug #231848, Thomas Wegner].
+             Also add hack to get around missing setenv for PERL5DB.
+     Branch: maint-5.6/macperl
+	   ! macos/macish.c macos/macish.h
+____________________________________________________________________________
+[ 11388] By: pudge                                 on 2001/07/16  23:11:26
+        Log: Fix DB_File, and patch tests for it, and NDBM_File, and POSIX.
+     Branch: maint-5.6/macperl
+	   ! macos/MacPerlTests.cmd macos/xsubpp.patch t/lib/db-btree.t
+	   ! t/lib/db-hash.t t/lib/db-recno.t t/lib/ndbm.t t/lib/posix.t
+____________________________________________________________________________
+[ 11387] By: pudge                                 on 2001/07/16  23:05:12
+        Log: Fix up some configuration and make options, add extra
+             extensions.
+     Branch: maint-5.6/macperl
+	   ! macos/ExtBuildRules.mk macos/Makefile.mk macos/config.sh
+	   ! macos/macperl/Makefile.mk
+____________________________________________________________________________
+[ 11386] By: pudge                                 on 2001/07/16  21:22:32
+        Log: From Change 11374 in maintperl.
+     Branch: maint-5.6/macperl
+	  !> utils/h2ph.PL
+____________________________________________________________________________
+[ 11385] By: nick                                  on 2001/07/16  14:12:58
+        Log: Back out change to h2xs till it passes its test.
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[ 11384] By: nick                                  on 2001/07/16  14:00:10
+        Log: Subject:  [PATCH h2xs.PL ] use Test::More where appropriate (was Re: [PATCH]
+             From:  Jonathan Stowe <gellyfish@gellyfish.com>
+             Date:  Mon, 16 Jul 2001 08:37:05 +0100 (BST)
+             Message-Id:  <Pine.LNX.4.33.0107160830480.9915-100000@orpheus.gellyfish.com>
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[ 11383] By: nick                                  on 2001/07/16  13:53:12
+        Log: Subject:  [PATCH hints/darwin.sh] Don't override user-specified optimize flag
+             From:  Robin Houston <robin@kitsite.com>
+             Date:  Sun, 15 Jul 2001 18:22:31 +0100
+             Message-Id:  <20010715182230.A11174@robin>
+     Branch: perl
+	   ! hints/darwin.sh
+____________________________________________________________________________
+[ 11382] By: nick                                  on 2001/07/16  13:52:49
+        Log: Subject:  [PATCH perl@11372] re_dup
+             From:  Radu Greab <radu@netsoft.ro>
+             Date:  Sun, 15 Jul 2001 04:50:06 +0300
+             Message-Id:  <15184.63182.656988.340591@ix.netsoft.ro>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 11379] By: nick                                  on 2001/07/16  13:35:39
+        Log: Subject:  [PATCH B::Deparse] formats can't contain formats
+             From:  Robin Houston <robin@kitsite.com>
+             Date:  Sat, 14 Jul 2001 14:28:50 +0100
+             Message-Id:  <20010714142850.A10205@robin>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 11378] By: nick                                  on 2001/07/16  13:30:36
+        Log: Subject:  [PATCH @11359] Encode::Tcl.pm, EUC-JP with jis-x0212
+             From:  Sadahiro Tomoyuki <BQW10602@nifty.com>
+             Date:  Sat, 14 Jul 2001 22:17:42 +0900
+             Message-Id:  <20010714221736.6CA3.BQW10602@nifty.com>
+     Branch: perl
+	   + ext/Encode/Encode/euc-jp-0212.enc
+	   ! ext/Encode/Encode/Tcl.pm
+____________________________________________________________________________
+[ 11377] By: nick                                  on 2001/07/16  13:17:28
+        Log: Subject:  [PATCH 5.7.2] Remove useless ccflags hints
+             From:  Andy Dougherty <doughera@lafayette.edu>
+             Date:  Sun, 15 Jul 2001 22:52:54 -0400 (EDT)
+             Message-Id:  <Pine.SOL.4.10.10107152250230.10344-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! hints/darwin.sh hints/rhapsody.sh
+____________________________________________________________________________
+[ 11376] By: nick                                  on 2001/07/16  09:05:00
+        Log: Integrate mainline
+     Branch: perlio
+	  +> ext/Encode/Encode/7bit-greek.enc
+	  +> ext/Encode/Encode/7bit-latin1.enc
+	  +> ext/Encode/Encode/cns11643-1.enc
+	  +> ext/Encode/Encode/cns11643-2.enc
+	  +> ext/Encode/Encode/iso2022-cn.enc
+	  +> ext/Encode/Encode/iso2022-jp1.enc
+	  +> ext/Encode/Encode/iso2022-jp2.enc
+	  !> Changes Configure MANIFEST Makefile.SH
+	  !> ext/Encode/Encode/Tcl.pm ext/Encode/Encode/Tcl.t
+	  !> ext/Encode/Encode/iso2022-kr.enc ext/POSIX/POSIX.pm
+	  !> ext/PerlIO/Via/Via.pm handy.h myconfig.SH patchlevel.h
+	  !> pod/perlhack.pod pod/perlre.pod pod/perltoc.pod regcomp.c sv.c
+	  !> t/op/pat.t t/op/sprintf.t utils/h2ph.PL utils/h2xs.PL
+____________________________________________________________________________
+[ 11375] By: gsar                                  on 2001/07/16  02:46:11
+        Log: integrate change#11374 from maint-5.6
+             
+             make h2ph grok ccsymbols fo the form 1234L, 1234ULL etc.
+     Branch: perl
+	  !> utils/h2ph.PL
+____________________________________________________________________________
+[ 11374] By: gsar                                  on 2001/07/16  02:10:51
+        Log: make h2ph grok ccsymbols fo the form 1234L, 1234ULL etc.
+     Branch: maint-5.6/perl
+	   ! utils/h2ph.PL
+____________________________________________________________________________
+[ 11373] By: jhi                                   on 2001/07/14  09:27:10
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 11372] By: jhi                                   on 2001/07/14  09:19:18
         Log: Subject: [PATCH h2xs.PL] use Getopt::Long (was Re: [PATCH] h2xs)
              From: Jonathan Stowe <gellyfish@gellyfish.com>
