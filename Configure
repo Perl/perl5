@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu May 10 17:37:57 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Tue May 15 16:44:30 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1499,7 +1499,7 @@ esac
 
 : script used to extract .SH files with variable substitutions
 cat >extract <<'EOS'
-CONFIGDOTSH=true
+PERL_CONFIG_SH=true
 echo "Doing variable substitutions on .SH files..."
 if test -f $src/MANIFEST; then
 	set x `awk '{print $1}' <$src/MANIFEST | grep '\.SH$'`
@@ -16892,7 +16892,7 @@ $test -f UU/cmdline.opt && $cat UU/cmdline.opt >> config.sh
 : add special variables
 $test -f $src/patchlevel.h && \
 awk '/^#define[ 	]+PERL_/ {printf "%s=%s\n",$2,$3}' $src/patchlevel.h >>config.sh
-echo "CONFIGDOTSH=true" >>config.sh
+echo "PERL_CONFIG_SH=true" >>config.sh
 
 : propagate old symbols
 if $test -f UU/config.sh; then

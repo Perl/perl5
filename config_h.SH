@@ -4,7 +4,7 @@ esac
 case "$CONFIG_H" in
 '') CONFIG_H=config.h ;;
 esac
-case $CONFIG in
+case $PERL_CONFIG_SH in
 '')
 	if test -f $CONFIG_SH; then TOP=.;
 	elif test -f ../$CONFIG_SH; then TOP=..;

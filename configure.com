@@ -5580,7 +5580,7 @@ $ WC "vms_prefix='" + vms_prefix + "'" ! VMS specific
 $ WC "vms_ver='" + vms_ver + "'" ! VMS specific
 $ WC "voidflags='15'"
 $ WC "xs_apiversion='" + version + "'"
-$ WC "CONFIGDOTSH='true'"
+$ WC "PERL_CONFIG_SH='true'"
 $!
 $! ##END WRITE NEW CONSTANTS HERE##
 $!
