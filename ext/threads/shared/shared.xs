@@ -43,7 +43,6 @@ int shared_sv_store_mg (pTHX_ SV* sv, MAGIC *mg) {
     SHAREDSvLOCK(shared);
     if(SvROK(SHAREDSvGET(shared)))
         Perl_sharedsv_thrcnt_dec(aTHX_ (shared_sv*) SvIV(SvRV(SHAREDSvGET(shared))));
-    SHAREDSvEDIT(shared);
     if(SvROK(sv)) {
         shared_sv* target = Perl_sharedsv_find(aTHX_ SvRV(sv));
         if(!target) {
@@ -52,10 +51,12 @@ int shared_sv_store_mg (pTHX_ SV* sv, MAGIC *mg) {
             SHAREDSvUNLOCK(shared);            
             Perl_croak(aTHX_ "You cannot assign a non shared reference to a shared scalar");
         }
+        SHAREDSvEDIT(shared);
         Perl_sv_free(PL_sharedsv_space,SHAREDSvGET(shared));
         SHAREDSvGET(shared) = newRV_noinc(newSViv((IV)target));
     } else {
-        sv_setsv(SHAREDSvGET(shared), sv);
+            SHAREDSvEDIT(shared);
+	sv_setsv(SHAREDSvGET(shared), sv);
     }
     shared->index++;
     mg->mg_private = shared->index;
