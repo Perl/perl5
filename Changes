@@ -28,6 +28,112 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 20991] By: jhi                                   on 2003/09/02  04:39:23
+        Log: Integrate:
+             [ 20978]
+             Subject: [PATCH@20959] some WinCE compilers require a little correction
+             From: Vadim Konovalov <vkonovalov@peterstar.ru>
+             Date: Mon, 1 Sep 2003 02:57:33 +0400
+             Message-ID: <1091134912500.20030901025733@peterstar.ru>
+             
+             [ 20979]
+             Ultrix VAX is like VMS VAX in floating point.
+             
+             [ 20980]
+             Subject: glob() bug
+             From: Gurusamy Sarathy <gsar@ActiveState.com>
+             Date: Mon, 01 Sep 2003 02:25:41 -0700
+             Message-Id: <200309010925.h819Pf0X011457@smtp3.ActiveState.com>
+             
+             [ 20981]
+             Subject: [DOC PATCH] perlfaq4.pod
+             Date: Mon, 1 Sep 2003 12:38:50 +0200
+             From: Elizabeth Mattijsen <liz@dijkmat.nl>
+             Message-Id: <p05111b19bb78d1d7aa70@[192.168.56.4]>
+             
+             [ 20982]
+             Configure -r in AIX bad.
+             
+             [ 20983]
+             From Craig Berry, following the example of the other podxxx.PL
+             in relying on basename($0, '.PL') to Do The Right Thing with
+             regard to the case of the extension, which could be either
+             .pl or .PL on VMS depending on version-specific features.  
+             
+             [ 20989]
+             Subject: [PATCH Porting/valgrindpp.pl] more options for valgrindpp.pl
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Mon, 1 Sep 2003 22:28:58 +0200
+             Message-ID: <007701c370c7$acb85430$0c2f1fac@R2D2>
+             
+             [ 20990]
+             Upgrade to Unicode::Collate 0.27.
+     Branch: maint-5.8/perl
+	  +> lib/Unicode/Collate/t/hangul.t
+	  !> MANIFEST Porting/valgrindpp.pl README.aix
+	  !> lib/Unicode/Collate.pm lib/Unicode/Collate/Changes
+	  !> lib/Unicode/Collate/README op.c pod/perlfaq4.pod
+	  !> pod/pod2usage.PL pod/podselect.PL t/op/sprintf.t
+	  !> t/run/fresh_perl.t wince/Makefile.ce wince/wince.c
+____________________________________________________________________________
+[ 20974] By: jhi                                   on 2003/08/31  15:40:42
+        Log: Integrate:
+             [ 20970]
+             List the switches tested in switches.t.
+             
+             [ 20971]
+             Add test for -v.
+             
+             [ 20972]
+             Add tests for -h and (unknown) -z.
+             
+             [ 20973]
+             Add test for -i.
+     Branch: maint-5.8/perl
+	  !> MANIFEST installperl t/run/switches.t
+____________________________________________________________________________
+[ 20967] By: jhi                                   on 2003/08/31  09:13:01
+        Log: Restore also fields.pm to @20959 state.
+     Branch: maint-5.8/perl
+	   ! lib/fields.pm
+____________________________________________________________________________
+[ 20966] By: jhi                                   on 2003/08/31  08:58:09
+        Log: Integrate:
+             [ 20965]
+             Ouch.  Upgrading to base 2.0 made the threads tests very unhappy
+             both in blead and maint, lots of "Attempt to free non-existent
+             shared string" and "Unbalanced string table refcount" errors.
+             Retract #20960 (and #20963).
+     Branch: maint-5.8/perl
+	   - lib/base/t/base.t lib/base/t/fb18784.t lib/base/t/fb20922.t
+	   - lib/base/t/fields.t lib/base/t/fp560.t lib/base/t/fp580.t
+	  !> MANIFEST lib/base.pm lib/fields.pm
+____________________________________________________________________________
+[ 20963] By: jhi                                   on 2003/08/31  08:16:04
+        Log: Muffle the 'Pseudo-hashes are deprecated' warning for maint.
+     Branch: maint-5.8/perl
+	   ! lib/base/t/fp560.t
+____________________________________________________________________________
+[ 20962] By: jhi                                   on 2003/08/31  08:12:31
+        Log: Integrate:
+             [ 20960]
+             Upgrade to base.pm 2.0.
+             
+             (Rename the tests around a bit to be more 8.3-friendly.)
+             
+             [ 20961]
+             De-cargo-cult.
+     Branch: maint-5.8/perl
+	  +> lib/base/t/base.t lib/base/t/fb18784.t lib/base/t/fb20922.t
+	  +> lib/base/t/fields.t lib/base/t/fp560.t lib/base/t/fp580.t
+	  !> MANIFEST ext/DynaLoader/t/XSLoader.t ext/SDBM_File/t/sdbm.t
+	  !> lib/base.pm lib/fields.pm
+____________________________________________________________________________
+[ 20959] By: jhi                                   on 2003/08/30  19:57:03
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 20958] By: jhi                                   on 2003/08/30  18:55:20
         Log: Integrate:
              [ 20956]
