@@ -783,7 +783,7 @@ SETARGV_OBJ	= setargv$(o)
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
 		Sys/Hostname Storable Filter/Util/Call Encode \
-		Digest/MD5 PerlIO/Scalar MIME/Base64 Time/HiRes \
+		Digest/MD5 PerlIO/scalar MIME/Base64 Time/HiRes \
 		Unicode/Normalize
 STATIC_EXT	= DynaLoader
 NONXS_EXT	= Errno
@@ -1153,7 +1153,7 @@ distclean: clean
 	-del /f $(LIBDIR)\SDBM_File.pm $(LIBDIR)\Socket.pm $(LIBDIR)\POSIX.pm
 	-del /f $(LIBDIR)\B.pm $(LIBDIR)\O.pm $(LIBDIR)\re.pm
 	-del /f $(LIBDIR)\Data\Dumper.pm $(LIBDIR)\ByteLoader.pm
-	-del /f $(LIBDIR)\PerlIO\Scalar.pm
+	-del /f $(LIBDIR)\PerlIO\scalar.pm
 	-del /f $(LIBDIR)\Devel\Peek.pm $(LIBDIR)\Devel\DProf.pm
 	-del /f $(LIBDIR)\File\Glob.pm
 	-del /f $(LIBDIR)\Storable.pm

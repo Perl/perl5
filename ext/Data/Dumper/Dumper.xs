@@ -152,7 +152,16 @@ esc_q_utf8(pTHX_ SV* sv, register char *src, register STRLEN slen)
             else if (k < 0x80)
                 *r++ = (char)k;
             else {
-                r += sprintf(r, "\\x{%"UVxf"}", k);
+	      /* The return value of sprintf() is unportable.
+	       * In modern systems it returns (int) the number of characters,
+	       * but in older systems it might return (char*) the original
+	       * buffer, or it might even be (void).  The easiest portable
+	       * thing to do is probably use sprintf() in void context and
+	       * then strlen(buffer) for the length.  The more proper way
+	       * would of course be to figure out the prototype of sprintf.
+	       * --jhi */
+	        sprintf(r, "\\x{%"UVxf"}", k);
+                r += strlen(r);
             }
         }
         *r++ = '"';

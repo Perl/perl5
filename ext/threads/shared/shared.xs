@@ -743,7 +743,6 @@ Perl_sharedsv_locksv(pTHX_ SV *sv)
 =for apidoc sharedsv_init
 
 Saves a space for keeping SVs wider than an interpreter,
-currently only stores a pointer to the first interpreter.
 
 =cut
 
@@ -955,7 +954,7 @@ CODE:
 	}
 	XSRETURN_UNDEF;
 
-void
+SV*
 share(SV *ref)
 	PROTOTYPE: \[$@%]
 	CODE:
@@ -963,6 +962,9 @@ share(SV *ref)
 	if(SvROK(ref))
 	    ref = SvRV(ref);
 	Perl_sharedsv_share(aTHX_ ref);
+	RETVAL = newRV(ref);
+    	OUTPUT:
+	RETVAL
 
 void
 lock_enabled(SV *ref)

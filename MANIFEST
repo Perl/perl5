@@ -531,17 +531,17 @@ ext/PerlIO/encoding/encoding.xs PerlIO::encoding
 ext/PerlIO/encoding/Makefile.PL PerlIO::encoding makefile writer
 ext/PerlIO/encoding/MANIFEST	PerlIO::encoding list of files
 ext/PerlIO/PerlIO.t		See if PerlIO works
-ext/PerlIO/Scalar/Makefile.PL	PerlIO layer for scalars
-ext/PerlIO/Scalar/Scalar.pm	PerlIO layer for scalars
-ext/PerlIO/Scalar/Scalar.xs	PerlIO layer for scalars
+ext/PerlIO/scalar/Makefile.PL	PerlIO layer for scalars
+ext/PerlIO/scalar/scalar.pm	PerlIO layer for scalars
+ext/PerlIO/scalar/scalar.xs	PerlIO layer for scalars
 ext/PerlIO/t/encoding.t		See if PerlIO encoding conversion works
 ext/PerlIO/t/fail.t		See if bad layers fail
 ext/PerlIO/t/fallback.t		See if PerlIO fallbacks work
-ext/PerlIO/t/scalar.t		See if PerlIO::Scalar works
-ext/PerlIO/t/via.t		See if PerlIO::Via works
-ext/PerlIO/Via/Makefile.PL	PerlIO layer for layers in perl
-ext/PerlIO/Via/Via.pm		PerlIO layer for layers in perl
-ext/PerlIO/Via/Via.xs		PerlIO layer for layers in perl
+ext/PerlIO/t/scalar.t		See if PerlIO::scalar works
+ext/PerlIO/t/via.t		See if PerlIO::via works
+ext/PerlIO/via/Makefile.PL	PerlIO layer for layers in perl
+ext/PerlIO/via/via.pm		PerlIO layer for layers in perl
+ext/PerlIO/via/via.xs		PerlIO layer for layers in perl
 ext/POSIX/hints/bsdos.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/dynixptx.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/freebsd.pl	Hint for POSIX for named architecture
@@ -995,6 +995,7 @@ lib/Class/ISA/test.pl		See if Class::ISA works
 lib/Class/Struct.pm		Declare struct-like datatypes as Perl classes
 lib/Class/Struct.t		See if Class::Struct works
 lib/complete.pl			A command completion subroutine
+lib/Config.t			See if Config works
 lib/constant.pm			For "use constant"
 lib/constant.t			See if compile-time constants work
 lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
@@ -1359,6 +1360,8 @@ lib/overload.pm			Module for overloading perl operators
 lib/overload.t			See if operator overloading works
 lib/perl5db.pl			Perl debugging routines
 lib/PerlIO.pm			PerlIO support module
+lib/PerlIO/via/QuotedPrint.pm	PerlIO::via::QuotedPrint
+lib/PerlIO/via/t/QuotedPrint.t	PerlIO::via::QuotedPrint
 lib/ph.t			See if h2ph works
 lib/Pod/Checker.pm		Pod-Parser - check POD documents for syntax errors
 lib/Pod/Find.pm			used by pod/splitpod
@@ -2824,4 +2827,3 @@ x2p/util.h			Public declarations for the above
 x2p/walk.c			Parse tree walker
 XSUB.h				Include file for extension subroutines
 xsutils.c			Additional bundled package methods not in UNIVERSAL::
-

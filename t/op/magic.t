@@ -232,8 +232,9 @@ EOF
 
     local $ENV{PATH}= ".";
     (my $script_name = $script) =~ s/.*(show-shebang)/$1/;
+    $script_name = "[]$script_name" if $Is_VMS;
     $s1 = "\$^X is $perl, \$0 is $script_name\n" if $Is_MSWin32;
-    $_ = `$script_name`;
+    $_ = $Is_VMS ? `$^X $script_name` : `$script_name`;
     s/\.exe//i if $Is_Dos or $Is_Cygwin or $Is_os2;
     s{\bminiperl\b}{perl}; # so that test doesn't fail with miniperl
     s{is perl}{is $perl}; # for systems where $^X is only a basename

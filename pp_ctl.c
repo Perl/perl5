@@ -3276,7 +3276,7 @@ PP(pp_entereval)
     STRLEN len;
     OP *ret;
 
-    if (!SvPV(sv,len) || !len)
+    if (!SvPV(sv,len))
 	RETPUSHUNDEF;
     TAINT_PROPER("eval");
 

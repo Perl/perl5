@@ -3977,6 +3977,10 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
 
     scalarboolean(first);
     if (first->op_type == OP_CONST) {
+        if (first->op_private & OPpCONST_BARE &&
+           first->op_private & OPpCONST_STRICT) {
+           no_bareword_allowed(first);
+       }
 	if (SvTRUE(((SVOP*)first)->op_sv)) {
 	    op_free(first);
 	    op_free(falseop);
