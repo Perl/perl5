@@ -1968,7 +1968,9 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #ifdef VMS
 		 (SvIV(sv) == EVMSERR) ? 4 : vaxc$errno
 #else
-		 0);
+		 0
+#endif
+		 );
 	break;
     case '<':
 	PL_uid = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
