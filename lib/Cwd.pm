@@ -85,6 +85,8 @@ use base qw/ Exporter /;
 our @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
 our @EXPORT_OK = qw(chdir abs_path fast_abs_path realpath fast_realpath);
 
+# Indicates if the XS portion has been loaded or not
+my $Booted = 0;
 
 # The 'natural and safe form' for UNIX (pwd may be setuid root)
 
@@ -124,12 +126,11 @@ sub getcwd
 # Now a callout to an XSUB.  We have to delay booting of the XSUB
 # until the first time fastcwd is called since Cwd::cwd is needed in the
 # building of perl when dynamic loading may be unavailable
-my $booted = 0;
 sub fastcwd {
-    unless ($booted) {
+    unless ($Booted) {
 	require XSLoader;
         XSLoader::load("Cwd");
-	++$booted;
+	++$Booted;
     }
     return &Cwd::_fastcwd;
 }
@@ -205,61 +206,15 @@ sub chdir {
     1;
 }
 
-# Taken from Cwd.pm It is really getcwd with an optional
-# parameter instead of '.'
-#
-
+# Now a callout to an XSUB
 sub abs_path
 {
-    my $start = @_ ? shift : '.';
-    my($dotdots, $cwd, @pst, @cst, $dir, @tst);
-
-    unless (@cst = stat( $start ))
-    {
-	carp "stat($start): $!";
-	return '';
+    unless ($Booted) {
+        require XSLoader;
+        XSLoader::load("Cwd");
+        ++$Booted;
     }
-    $cwd = '';
-    $dotdots = $start;
-    do
-    {
-	$dotdots .= '/..';
-	@pst = @cst;
-	unless (opendir(PARENT, $dotdots))
-	{
-	    carp "opendir($dotdots): $!";
-	    return '';
-	}
-	unless (@cst = stat($dotdots))
-	{
-	    carp "stat($dotdots): $!";
-	    closedir(PARENT);
-	    return '';
-	}
-	if ($pst[0] == $cst[0] && $pst[1] == $cst[1])
-	{
-	    $dir = undef;
-	}
-	else
-	{
-	    do
-	    {
-		unless (defined ($dir = readdir(PARENT)))
-	        {
-		    carp "readdir($dotdots): $!";
-		    closedir(PARENT);
-		    return '';
-		}
-		$tst[0] = $pst[0]+1 unless (@tst = lstat("$dotdots/$dir"))
-	    }
-	    while ($dir eq '.' || $dir eq '..' || $tst[0] != $pst[0] ||
-		   $tst[1] != $pst[1]);
-	}
-	$cwd = (defined $dir ? "$dir" : "" ) . "/$cwd" ;
-	closedir(PARENT);
-    } while (defined $dir);
-    chop($cwd) unless $cwd eq '/'; # drop the trailing /
-    $cwd;
+    return &Cwd::_abs_path(@_);
 }
 
 # added function alias for those of us more

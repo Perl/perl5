@@ -122,6 +122,91 @@ _cwdxs_fastcwd(void)
   return(path);
 }
 
+char *
+_cwdxs_abs_path(char *start)
+{
+  DIR *parent;
+  Direntry_t *dp;
+  char dotdots[MAXPATHLEN] = "", dir[MAXPATHLEN] = "";
+  char name[FILENAME_MAX] = "";
+  char *cwd;
+  int namelen;
+  struct stat cst, pst, tst;
+
+  if (PerlLIO_stat(start, &cst) < 0) {
+    warn("stat(%s): %s", start, Strerror(errno));
+    return FALSE;
+  }
+
+  Newz(0, cwd, MAXPATHLEN, char);
+  Copy(start, dotdots, strlen(start), char);
+
+  for (;;) {
+    strcat(dotdots, "/..");
+    StructCopy(&cst, &pst, struct stat);
+
+    if (PerlLIO_stat(dotdots, &cst) < 0) {
+      Safefree(cwd);
+      warn("stat(%s): %s", dotdots, Strerror(errno));
+      return FALSE;
+    }
+    
+    if (pst.st_dev == cst.st_dev && pst.st_ino == cst.st_ino) {
+      /* We've reached the root: previous is same as current */
+      break;
+    } else {
+      /* Scan through the dir looking for name of previous */
+      if (!(parent = PerlDir_open(dotdots))) {
+        Safefree(cwd);
+        warn("opendir(%s): %s", dotdots, Strerror(errno));
+        return FALSE;
+      }
+    
+      while ((dp = PerlDir_read(parent)) != NULL) {
+        if (strEQ(dp->d_name, "."))
+          continue;
+        if (strEQ(dp->d_name, ".."))
+          continue;
+        
+        Zero(name, FILENAME_MAX, char);
+        Copy(dotdots, name, strlen(dotdots), char);
+        *(name + strlen(dotdots)) = '/';
+        strcat(name, dp->d_name);
+        
+        if (PerlLIO_lstat(name, &tst) < 0) {
+          Safefree(cwd);
+          PerlDir_close(parent);
+          warn("lstat(%s): %s", name, Strerror(errno));
+          return FALSE;
+        }
+        
+        if (tst.st_dev == pst.st_dev && tst.st_ino == pst.st_ino)
+          break;
+      }
+      
+#ifdef DIRNAMLEN
+      namelen = dp->d_namlen;
+#else
+      namelen = strlen(dp->d_name);
+#endif
+      Move(cwd, cwd + namelen + 1, strlen(cwd), char);
+      Copy(dp->d_name, cwd + 1, namelen, char);
+#ifdef VOID_CLOSEDIR
+      PerlDir_close(dir);
+#else
+      if (PerlDir_close(parent) < 0) {
+        warn("closedir(%s): %s", dotdots, Strerror(errno));
+        Safefree(cwd);
+        return FALSE;
+      }
+#endif
+      *cwd = '/';
+    }
+  }
+
+  return cwd;
+}
+  
 
 MODULE = Cwd		PACKAGE = Cwd
 
@@ -132,6 +217,20 @@ _fastcwd()
 PPCODE:
     char * buf;
     buf = _cwdxs_fastcwd();
+    if (buf) {
+        PUSHs(sv_2mortal(newSVpv(buf, 0)));
+        Safefree(buf);
+    }
+    else
+	XSRETURN_UNDEF;
+
+char *
+_abs_path(start = ".")
+    char * start
+PREINIT:
+    char * buf;
+PPCODE:
+    buf = _cwdxs_abs_path(start);
     if (buf) {
         PUSHs(sv_2mortal(newSVpv(buf, 0)));
         Safefree(buf);
