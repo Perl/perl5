@@ -216,8 +216,11 @@ SKIP: {
     # /dev/stdout might be either character special or a named pipe,
     # or a symlink, or a socket, depending on which OS and how are
     # you running the test, so let's censor that one away.
+    # Similar remarks hold for stderr.
     $DEV =~ s{^[cpls].+?\sstdout$}{}m;
     @DEV =  grep { $_ ne 'stdout' } @DEV;
+    $DEV =~ s{^[cpls].+?\sstderr$}{}m;
+    @DEV =  grep { $_ ne 'stderr' } @DEV;
 
     # /dev/printer is also naughty: in IRIX it shows up as
     # Srwx-----, not srwx------.
