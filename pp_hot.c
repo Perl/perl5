@@ -881,7 +881,8 @@ PP(pp_match)
 	if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG)) {
 	    MAGIC* mg = mg_find(TARG, 'g');
 	    if (mg && mg->mg_len >= 0) {
-		rx->endp[0] = rx->startp[0] = s + mg->mg_len; 
+		if (!(rx->reganch & ROPT_GPOS_SEEN))
+		    rx->endp[0] = rx->startp[0] = s + mg->mg_len; 
 		minmatch = (mg->mg_flags & MGf_MINMATCH);
 		update_minmatch = 0;
 	    }
