@@ -1439,14 +1439,10 @@ win32_uname(struct utsname *name)
 	char *arch;
 	GetSystemInfo(&info);
 
-#ifdef __MINGW32__
-	switch (info.DUMMYUNIONNAME.DUMMYSTRUCTNAME.wProcessorArchitecture) {
-#else
-#ifdef __BORLANDC__
+#if defined(__BORLANDC__) || defined(__MINGW32__)
 	switch (info.u.s.wProcessorArchitecture) {
 #else
 	switch (info.wProcessorArchitecture) {
-#endif
 #endif
 	case PROCESSOR_ARCHITECTURE_INTEL:
 	    arch = "x86"; break;
