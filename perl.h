@@ -2795,4 +2795,7 @@ typedef struct am_table_short AMTS;
 
 #endif /* IAMSUID */
 
+/* and finally... */
+#include "patchlevel.h"
+
 #endif /* Include guard */

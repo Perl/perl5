@@ -49,7 +49,17 @@ while (<DATA>) {
                }
                #print ">>>",$try,"<<<\n";
                $ans1 = eval $try;
-               if ("$ans1" eq $ans) { #bug!
+	       if ($ans =~ m|^/(.*)$|) {
+	           my $pat = $1;
+		   if ($ans1 =~ /$pat/) {
+                       print "ok $test\n";
+		   }
+		   else {
+                       print "not ok $test\n";
+                       print "# '$try' expected: /$pat/ got: '$ans1'\n";
+		   }
+	       }
+               elsif ("$ans1" eq $ans) { #bug!
                        print "ok $test\n";
                } else {
                        print "not ok $test\n";
@@ -429,10 +439,10 @@ $Math::BigFloat::div_scale = 20
 $Math::BigFloat::div_scale = 40
 &fsqrt
 +0:0
--1:NaN
--2:NaN
--16:NaN
--123.456:NaN
+-1:/^(0|NaN)$
+-2:/^(0|NaN)$
+-16:/^(0|NaN)$
+-123.456:/^(0|NaN)$
 +1:1.
 +1.44:1.2
 +2:1.41421356237309504880168872420969807857

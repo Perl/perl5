@@ -46,7 +46,7 @@ else
 open(try, '>Io.argv.tmp') or die "Can't open temp file: $!";
 close try;
 @ARGV = 'Io.argv.tmp';
-$^I = '';
+$^I = '.bak';
 $/ = undef;
 while (<>) {
     s/^/ok 6\n/;
@@ -56,4 +56,4 @@ open(try, '<Io.argv.tmp') or die "Can't open temp file: $!";
 print while <try>;
 close try;
 
-END { unlink 'Io.argv.tmp' }
+END { unlink 'Io.argv.tmp', 'Io.argv.tmp.bak' }

@@ -2380,11 +2380,13 @@ from the user it isn't running under, and isn't in a location where the CGI
 server can't find it, basically, more or less.  Please see the following
 for more information:
 
-	http://www.perl.com/perl/faq/idiots-guide.html
-	http://www.perl.com/perl/faq/perl-cgi-faq.html
+	http://www.perl.com/CPAN/doc/FAQs/cgi/idiots-guide.html
+	http://www.perl.com/CPAN/doc/FAQs/cgi/perl-cgi-faq.html
 	ftp://rtfm.mit.edu/pub/usenet/news.answers/www/cgi-faq
 	http://hoohoo.ncsa.uiuc.edu/cgi/interface.html
 	http://www-genome.wi.mit.edu/WWW/faqs/www-security-faq.html
+
+You should also look at L<perlfaq9>.
 
 =item setegid() not implemented
 
