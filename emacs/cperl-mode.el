@@ -32,7 +32,7 @@
 ;;; Corrections made by Ilya Zakharevich ilya@math.mps.ohio-state.edu
 ;;; XEmacs changes by Peter Arius arius@informatik.uni-erlangen.de
 
-;; $Id: cperl-mode.el,v 1.39 1997/10/14 08:28:00 ilya Exp ilya $
+;; $Id: cperl-mode.el,v 1.41 1997/11/17 18:09:39 ilya Exp ilya $
 
 ;;; To use this mode put the following into your .emacs file:
 
@@ -462,6 +462,28 @@
 ;;;;;;;  s[foo] <blah>e	- e part delimited by different <> (will not match)
 ;;;  `cperl-find-pods-heres' somehow maybe called when string-face is undefined
 ;;;   - put a stupid workaround for 20.1
+
+;;;; After 1.39:
+;;;  Could indent here-docs for comments;
+;;;  These problems fixed:
+;;;;;;;  s/foo/\\bar/	- backslash at start of subst (made into two chunk)
+;;;;;;;  s[foo] <blah>e	- "e" part delimited by "different" <> (will match)
+;;;  Matching brackets honor prefices, may expand abbreviations;
+;;;  When expanding abbrevs, will remove last char only after
+;;;    self-inserted whitespace;
+;;;  More convenient "Refress hard constructs" in menu;
+;;;  `cperl-add-tags-recurse', `cperl-add-tags-recurse-noxs'
+;;;    added (for -batch mode);
+;;;  Better handling of errors when scanning for Perl constructs;
+;;;;;;;  Possible "problem" with class hierarchy in Perl distribution 
+;;;;;;;    directory: ./ext duplicates ./lib;
+;;;  Write relative paths for generated TAGS;
+
+;;;; After 1.40:
+;;;  s  /// may be separated by "\n\f" too;
+;;;  `s  #blah' recognized as a comment;
+;;;  Would highlight s/abc//s wrong;
+;;;  Debugging code in `cperl-electric-keywords' was leaking a message;
 
 (defconst cperl-xemacs-p (string-match "XEmacs\\|Lucid" emacs-version))
 
@@ -965,6 +987,7 @@ progress indicator for indentation (with `imenu' loaded).
 	    cperl-use-syntax-table-text-property]
 	   ["Contract a group in regexp" cperl-contract-level
 	    cperl-use-syntax-table-text-property]
+	   ["Refresh \"hard\" constructions" cperl-find-pods-heres t]
 	   "----"
 	   ["Indent region" cperl-indent-region (cperl-use-region-p)]
 	   ["Comment region" cperl-comment-region (cperl-use-region-p)]
@@ -1004,7 +1027,6 @@ progress indicator for indentation (with `imenu' loaded).
 	      (cperl-write-tags nil t t t) t]
 	     ["Add tags for Perl files in (sub)directories"
 	      (cperl-write-tags nil nil t t) t])
-	    ["Recalculate \"hard\" constructions" cperl-find-pods-heres t]
 	    ["Define word at point" imenu-go-find-at-position 
 	     (fboundp 'imenu-go-find-at-position)]
 	    ["Help on function" cperl-info-on-command t]
@@ -1463,7 +1485,7 @@ char is \"{\", insert extra newline before only if
 		   (if cperl-auto-newline 
 		       (progn (cperl-indent-line) (newline) t) nil)))
 	  (progn
-	    (insert last-command-char)
+	    (self-insert-command (prefix-numeric-value arg))
 	    (cperl-indent-line)
 	    (if cperl-auto-newline
 		(setq insertpos (1- (point))))
@@ -1502,7 +1524,7 @@ char is \"{\", insert extra newline before only if
 	 (save-excursion
 	   (skip-chars-backward "$")
 	   (looking-at "\\(\\$\\$\\)*\\$\\([^\\$]\\|$\\)"))
-	 (insert ? ))
+	 (insert ?\ ))
     (if (cperl-after-expr-p nil "{;)") nil (setq cperl-auto-newline nil))
     (cperl-electric-brace arg)
     (and (cperl-val 'cperl-electric-parens)
@@ -1532,18 +1554,22 @@ char is \"{\", insert extra newline before only if
 	     (>= (save-excursion (cperl-to-comment-or-eol) (point)) (point))
 	     ;;(not (save-excursion (search-backward "#" beg t)))
 	     (if (eq last-command-char ?<)
-		 (cperl-after-expr-p nil "{;(,:=")
+		 (progn
+		   (and abbrev-mode ; later it is too late, may be after `for'
+			(expand-abbrev))
+		   (cperl-after-expr-p nil "{;(,:="))
 	       1))
 	(progn
-	  (insert last-command-char)
+	  (self-insert-command (prefix-numeric-value arg))
 	  (if other-end (goto-char (marker-position other-end)))
-	  (insert (cdr (assoc last-command-char '((?{ .?})
-						  (?[ . ?])
-						  (?( . ?))
-						  (?< . ?>)))))
-	  (forward-char -1))
-      (insert last-command-char)
-      )))
+	  (insert (make-string 
+		   (prefix-numeric-value arg)
+		   (cdr (assoc last-command-char '((?{ .?})
+						   (?[ . ?])
+						   (?( . ?))
+						   (?< . ?>))))))
+	  (forward-char (- (prefix-numeric-value arg))))
+      (self-insert-command (prefix-numeric-value arg)))))
 
 (defun cperl-electric-rparen (arg)
   "Insert a matching pair of parentheses if marking is active.
@@ -1566,21 +1592,25 @@ If not, or if we are not at the end of marking range, would self-insert."
 	     ;;(not (save-excursion (search-backward "#" beg t)))
 	     )
 	(progn
-	  (insert last-command-char)
+	  (self-insert-command (prefix-numeric-value arg))
 	  (setq p (point))
 	  (if other-end (goto-char other-end))
-	  (insert (cdr (assoc last-command-char '((?\} . ?\{)
+	  (insert (make-string
+		   (prefix-numeric-value arg)
+		   (cdr (assoc last-command-char '((?\} . ?\{)
 						  (?\] . ?\[)
 						  (?\) . ?\()
-						  (?\> . ?\<)))))
+						  (?\> . ?\<))))))
 	  (goto-char (1+ p)))
-      (call-interactively 'self-insert-command)
-      )))
+      (self-insert-command (prefix-numeric-value arg)))))
 
 (defun cperl-electric-keyword ()
   "Insert a construction appropriate after a keyword."
   (let ((beg (save-excursion (beginning-of-line) (point))) 
-	(dollar (eq last-command-char ?$)))
+	(dollar (and (eq last-command-char ?$)
+		     (eq this-command 'self-insert-command)))
+	(delete (and (memq last-command-char '(?\ ?\n ?\t ?\f))
+		     (memq this-command '(self-insert-command newline)))))
     (and (save-excursion
 	   (backward-sexp 1)
 	   (cperl-after-expr-p nil "{;:"))
@@ -1609,9 +1639,12 @@ If not, or if we are not at the end of marking range, would self-insert."
 	   (or (looking-at "[ \t]\\|$") (insert " "))
 	   (cperl-indent-line)
 	   (if dollar (progn (search-backward "$")
+			     (delete-char 1)
+			     (forward-char -1)
 			     (forward-char 1))
 	     (search-backward ")"))
-	   (cperl-putback-char del-back-ch)))))
+	   (if delete
+	       (cperl-putback-char del-back-ch))))))
 
 (defun cperl-electric-else ()
   "Insert a construction appropriate after a keyword."
@@ -1754,7 +1787,7 @@ If not, or if we are not at the end of marking range, would self-insert."
 		       (let ((pps (parse-partial-sexp (point) end)))
 			 (or (nth 3 pps) (nth 4 pps) (nth 5 pps))))))))
 	(progn
-	  (insert last-command-char)
+	  (self-insert-command (prefix-numeric-value arg))
 	  ;;(forward-char -1)
 	  (if auto (setq insertpos (point-marker)))
 	  ;;(forward-char 1)
@@ -2435,6 +2468,14 @@ Returns true if comment is found."
 (defvar cperl-st-sfence '(15))		; String-fence
 (defvar cperl-st-punct '(1))
 (defvar cperl-st-word '(2))
+(defvar cperl-st-bra '(4 . ?\>))
+(defvar cperl-st-ket '(5 . ?\<))
+
+(defsubst cperl-modify-syntax-type (at how)
+  (if (< at (point-max))
+      (progn
+	(put-text-property at (1+ at) 'syntax-table how)
+	(put-text-property at (1+ at) 'rear-nonsticky t))))
 
 (defun cperl-protect-defun-start (s e)
   ;; C code looks for "^\\s(" to skip comment backward in "hard" situations
@@ -2448,21 +2489,18 @@ Returns true if comment is found."
       (progn
 	;; We suppose that e is _after_ the end of construction, as after eol.
 	(setq string (if string cperl-st-sfence cperl-st-cfence))
-	(put-text-property bb (1+ bb) 'syntax-table string)
-	(put-text-property bb (1+ bb) 'rear-nonsticky t)
-	(put-text-property (1- e) e 'syntax-table string)
-	(put-text-property (1- e) e 'rear-nonsticky t)
+	(cperl-modify-syntax-type bb string)
+	(cperl-modify-syntax-type (1- e) string)
 	(if (and (eq string cperl-st-sfence) (> (- e 2) bb))
 	    (put-text-property (1+ bb) (1- e) 
 			       'syntax-table cperl-string-syntax-table))
 	(cperl-protect-defun-start bb e))))
 
-(defun cperl-forward-re (is-2arg set-st st-l err-l argument
-				 &optional ostart oend)
-  ;; Unfinished
+(defun cperl-forward-re (lim end is-2arg set-st st-l err-l argument
+			     &optional ostart oend)
   ;; Works *before* syntax recognition is done
   ;; May modify syntax-type text property if the situation is too hard
-  (let (b starter ender st i i2)
+  (let (b starter ender st i i2 go-forward)
     (skip-chars-forward " \t")
     ;; ender means matching-char matcher.
     (setq b (point) 
@@ -2512,22 +2550,20 @@ Returns true if comment is found."
 	  (and is-2arg			; Have trailing part
 	       (not ender)
 	       (eq (following-char) starter) ; Empty trailing part
-	       (if (eq (char-syntax (following-char)) ?.)
-		   (setq is-2arg nil)	; Ignore the tail
-		 ;; Make trailing letter into punctuation
-		 (setq is-2arg nil)	; Ignore the tail
-		 (put-text-property (point) (1+ (point))
-				    'syntax-table cperl-st-punct)
-		 (put-text-property (point) (1+ (point)) 'rear-nonsticky t)))
+	       (progn
+		 (or (eq (char-syntax (following-char)) ?.)
+		     ;; Make trailing letter into punctuation
+		     (cperl-modify-syntax-type (point) cperl-st-punct))
+		 (setq is-2arg nil go-forward t))) ; Ignore the tail
 	  (if is-2arg			; Not number => have second part
 	      (progn
 		(setq i (point) i2 i)
 		(if ender
-		    (if (eq (char-syntax (following-char)) ?\ )
+		    (if (memq (following-char) '(?\  ?\t ?\n ?\f))
 			(progn
-			  (while (looking-at "\\s *#")
-			    (beginning-of-line 2))
-			  (skip-chars-forward " \t\n\f")
+			  (if (looking-at "[ \t\n\f]+\\(#[^\n]*\n[ \t\n\f]*\\)+")
+			      (goto-char (match-end 0))
+			    (skip-chars-forward " \t\n\f"))
 			  (setq i2 (point))))
 		  (forward-char -1))
 		(modify-syntax-entry starter (if (eq starter ?\\) "\\" ".") st)
@@ -2535,22 +2571,24 @@ Returns true if comment is found."
 		(setq set-st nil)
 		(setq 
 		 ender
-		 (cperl-forward-re nil t st-l err-l argument starter ender)
+		 (cperl-forward-re lim end nil t st-l err-l argument starter ender)
 		 ender (nth 2 ender)))))
-      (error (goto-char (point-max))
-	     (message
-	      "End of `%s%s%c ... %c' string not found: %s"
-	      argument
-	      (if ostart (format "%c ... %c" ostart (or oend ostart)) "")
-	      starter (or ender starter) bb)
-	     (or (car err-l) (setcar err-l b))))
+      (error (goto-char lim)
+	     (setq set-st nil)
+	     (or end
+		 (message
+		  "End of `%s%s%c ... %c' string not found: %s"
+		  argument
+		  (if ostart (format "%c ... %c" ostart (or oend ostart)) "")
+		  starter (or ender starter) bb)
+		 (or (car err-l) (setcar err-l b)))))
     (if set-st
 	(progn
 	  (modify-syntax-entry starter (if (eq starter ?\\) "\\" ".") st)
 	  (if ender (modify-syntax-entry ender "." st))))
-    (list i i2 ender starter)))
+    (list i i2 ender starter go-forward)))
 
-(defun cperl-find-pods-heres (&optional min max)
+(defun cperl-find-pods-heres (&optional min max non-inter end)
   "Scans the buffer for hard-to-parse Perl constructions.
 If `cperl-pod-here-fontify' is not-nil after evaluation, will fontify 
 the sections using `cperl-pod-head-face', `cperl-pod-face', 
@@ -2559,11 +2597,11 @@ the sections using `cperl-pod-head-face', `cperl-pod-face',
   (or min (setq min (point-min)))
   (or max (setq max (point-max)))
   (let (face head-face here-face b e bb tag qtag b1 e1 argument i c tail state 
-	     (cperl-pod-here-fontify (eval cperl-pod-here-fontify))
+	     (cperl-pod-here-fontify (eval cperl-pod-here-fontify)) go
 	     (case-fold-search nil) (inhibit-read-only t) (buffer-undo-list t)
 	     (modified (buffer-modified-p))
 	     (after-change-functions nil)
-	     (state-point (point-min)) 
+	     (state-point (point-min))
 	     (st-l '(nil)) (err-l '(nil)) i2
 	     ;; Somehow font-lock may be not loaded yet...
 	     (font-lock-string-face (if (boundp 'font-lock-string-face)
@@ -2614,7 +2652,8 @@ the sections using `cperl-pod-head-face', `cperl-pod-face',
     (unwind-protect
 	(progn
 	  (save-excursion
-	    (message "Scanning for \"hard\" Perl constructions...")
+	    (or non-inter
+		(message "Scanning for \"hard\" Perl constructions..."))
 	    (if cperl-pod-here-fontify
 		;; We had evals here, do not know why...
 		(setq face cperl-pod-face
@@ -2635,14 +2674,14 @@ the sections using `cperl-pod-head-face', `cperl-pod-face',
 		;;  "\\(\\`\n?\\|\n\n\\)=" 
 		(if (looking-at "\n*cut\\>")
 		    (progn
-		      (message "=cut is not preceded by a pod section")
+		      (message "=cut is not preceded by a POD section")
 		      (or (car err-l) (setcar err-l (point))))
 		  (beginning-of-line)
 		
 		  (setq b (point) bb b)
 		  (or (re-search-forward "\n\n=cut\\>" max 'toend)
 		      (progn
-			(message "Cannot find the end of a pod section")
+			(message "End of a POD section not marked by =cut")
 			(or (car err-l) (setcar err-l b))))
 		  (beginning-of-line 2)	; An empty line after =cut is not POD!
 		  (setq e (point))
@@ -2799,7 +2838,7 @@ the sections using `cperl-pod-head-face', `cperl-pod-face',
 		      bb (and		; user variables/whatever
 			  (match-beginning 10)
 			  (or
-			   (memq bb '(?\$ ?\@ ?\% ?\*))
+			   (memq bb '(?\$ ?\@ ?\% ?\* ?\#)) ; $#y
 			   (and (eq bb ?-) (eq c ?s)) ; -s file test
 			   (and (eq bb ?\&) ; &&m/blah/
 				(not (eq (char-after 
@@ -2812,21 +2851,32 @@ the sections using `cperl-pod-head-face', `cperl-pod-face',
 			     (progn
 			       (goto-char (match-beginning b1))
 			       (cperl-backward-to-noncomment (point-min))
-			       (not (or (memq (preceding-char)
-					      (append (if (eq c ?\?)
-							  ;; $a++ ? 1 : 2
-							  "~{(=|&*!,;"
-							"~{(=|&+-*!,;") nil))
-					(and (eq (preceding-char) ?\})
-					     (cperl-after-block-p (point-min)))
-					(and (eq (char-syntax (preceding-char)) ?w)
-					     (progn
-					       (forward-sexp -1)
-					       (looking-at 
-						"\\(while\\|if\\|unless\\|until\\|and\\|or\\|not\\|xor\\|split\\|grep\\|map\\|print\\)\\>")))
-					(and (eq (preceding-char) ?.)
-					     (eq (char-after (- (point) 2)) ?.))
-					(bobp))))
+			       (not 
+				;; What is below: regexp-p?
+				(and
+				 (or (memq (preceding-char)
+					   (append (if (eq c ?\?)
+						       ;; $a++ ? 1 : 2
+						       "~{(=|&*!,;"
+						     "~{(=|&+-*!,;") nil))
+				     (and (eq (preceding-char) ?\})
+					  (cperl-after-block-p (point-min)))
+				     (and (eq (char-syntax (preceding-char)) ?w)
+					  (progn
+					    (forward-sexp -1)
+					    (looking-at 
+					     "\\(while\\|if\\|unless\\|until\\|and\\|or\\|not\\|xor\\|split\\|grep\\|map\\|print\\)\\>")))
+				     (and (eq (preceding-char) ?.)
+					  (eq (char-after (- (point) 2)) ?.))
+				     (bobp))
+				 ;;  m|blah| ? foo : bar;
+				 (not
+				  (and (eq c ?\?)
+				       cperl-use-syntax-table-text-property 
+				       (not (bobp))
+				       (progn
+					 (forward-char -1)
+					 (looking-at "\\s|")))))))
 			     b (1- b))))
 		(or bb (setq state (parse-partial-sexp 
 				    state-point b nil nil state)
@@ -2834,28 +2884,45 @@ the sections using `cperl-pod-head-face', `cperl-pod-face',
 		(goto-char b)
 		(if (or bb (nth 3 state) (nth 4 state))
 		    (goto-char i)
-		  (skip-chars-forward " \t")
+		  (if (looking-at "[ \t\n\f]+\\(#[^\n]*\n[ \t\n\f]*\\)+")
+		      (goto-char (match-end 0))
+		    (skip-chars-forward " \t\n\f"))
 		  ;; qtag means two-arg matcher, may be reset to
 		  ;;   2 or 3 later if some special quoting is needed.
 		  ;; e1 means matching-char matcher.
 		  (setq b (point)
-			i (cperl-forward-re 
+			i (cperl-forward-re max end
 			   (string-match "^\\([sy]\\|tr\\)$" argument)
 			   t st-l err-l argument)
 			i2 (nth 1 i)	; start of the second part
 			e1 (nth 2 i)	; ender, true if matching second part
+			go (nth 4 i)	; There is a 1-char part after the end
 			i (car i)	; intermediate point
-			tail (if (and i (not e1)) (1- (point))))
+			tail (if (and i (not e1)) (1- (point)))
+			e nil)		; need to preserve backslashitis
 		  ;; Commenting \\ is dangerous, what about ( ?
 		  (and i tail
 		       (eq (char-after i) ?\\)
-		       (setq i nil tail nil))
+		       (setq e t))
 		  (if (null i)
-		      (cperl-commentify b (point) t)
+		      (progn
+			(cperl-commentify b (point) t)
+			(if go (forward-char 1)))
 		    (cperl-commentify b i t)
 		    (if (looking-at "\\sw*e") ; s///e
-			(cperl-find-pods-heres i2 (1- (point)))
+			(progn
+			  (and
+			   ;; silent:
+			   (cperl-find-pods-heres i2 (1- (point)) t end)
+			   ;; Error
+			   (goto-char (1+ max)))
+			  (if (and e1 (eq (preceding-char) ?\>))
+			      (progn
+				(cperl-modify-syntax-type (1- (point)) cperl-st-ket)
+				(cperl-modify-syntax-type i cperl-st-bra))))
 		      (cperl-commentify i2 (point) t)
+		      (if e
+		       (cperl-modify-syntax-type (1+ i) cperl-st-punct))
 		      (setq tail nil)))
 		  (if (eq (char-syntax (following-char)) ?w)
 		      (progn
@@ -2883,16 +2950,13 @@ the sections using `cperl-pod-head-face', `cperl-pod-face',
 			     state-point (1- b) nil nil state)
 		      state-point (1- b))
 		(if (nth 3 state)	; in string
-		    (progn
-		      (put-text-property (1- b) b 'syntax-table cperl-st-punct)
-		      (put-text-property (1- b) b 'rear-nonsticky t)))
+		    (cperl-modify-syntax-type (1- b) cperl-st-punct))
 		(goto-char (1+ b)))
 	       ;; 1+6+2+1+1+2=13 extra () before this:
 	       ;;    "\\$\\(['{]\\)"
 	       ((match-beginning 14)	; ${
 		(setq bb (match-beginning 0))
-		(put-text-property bb (1+ bb) 'syntax-table cperl-st-punct)
-		(put-text-property bb (1+ bb) 'rear-nonsticky t))
+		(cperl-modify-syntax-type bb cperl-st-punct))
 	       ;; 1+6+2+1+1+2+1=14 extra () before this:
 	       ;;    "\\(\\<sub[ \t\n\f]+\\|[&*$@%]\\)[a-zA-Z0-9_]*'")
 	       ((match-beginning 15)	; old $abc'efg syntax
@@ -2917,8 +2981,15 @@ the sections using `cperl-pod-head-face', `cperl-pod-face',
 		    nil
 		  ;; (put-text-property b (1+ bb) 'syntax-type 'pod) ; Cheat
 		  (cperl-commentify b bb nil)
-		  )
-		(goto-char bb))))
+		  (setq end t))
+		(goto-char bb)))
+	      (if (> (point) max)
+		  (progn
+		    (if end 
+			(message "Garbage after __END__/__DATA__ ignored")
+		      (message "Unbalanced syntax found while scanning")
+		      (or (car err-l) (setcar err-l b)))
+		    (goto-char max))))
 ;;;	    (while (re-search-forward "\\(\\`\n?\\|\n\n\\)=" max t)
 ;;;	      (if (looking-at "\n*cut\\>")
 ;;;		  (progn
@@ -3013,13 +3084,15 @@ the sections using `cperl-pod-head-face', `cperl-pod-face',
 ;;;					'syntax-type 'format)
 ;;;		     (cperl-put-do-not-fontify b (match-beginning 0)))
 ;;;		    (t (message "End of format `%s' not found." name))))
-)
+	    )
 	  (if (car err-l) (goto-char (car err-l))
-	    (message "Scan for \"hard\" Perl constructions completed.")))
+	    (or noninteractive
+		(message "Scan for \"hard\" Perl constructions completed."))))
       (and (buffer-modified-p)
 	   (not modified)
 	   (set-buffer-modified-p nil))
-      (set-syntax-table cperl-mode-syntax-table))))
+      (set-syntax-table cperl-mode-syntax-table))
+    (car err-l)))
 
 (defun cperl-backward-to-noncomment (lim)
   ;; Stops at lim or after non-whitespace that is not in comment
@@ -3150,9 +3223,12 @@ inclusive."
 	    (cperl-indent-line 'indent-info)
 	    (or comm
 		(progn
-		  (if (setq old-comm-indent (and (cperl-to-comment-or-eol)
-						 (not (eq (get-text-property (point) 'syntax-type) 'pod))
-						 (current-column)))
+		  (if (setq old-comm-indent 
+			    (and (cperl-to-comment-or-eol)
+				 (not (memq (get-text-property (point) 
+							       'syntax-type)
+					    '(pod here-doc)))
+				 (current-column)))
 		      (progn (indent-for-comment)
 			     (skip-chars-backward " \t")
 			     (skip-chars-backward "#")
@@ -3319,13 +3395,16 @@ indentation and initial hashes. Behaves usually outside of comment."
 	packages ends-ranges p
 	(prev-pos 0) char fchar index index1 name (end-range 0) package)
     (goto-char (point-min))
-    (imenu-progress-message prev-pos 0)
+    (if noninteractive
+	(message "Scanning Perl for index")
+      (imenu-progress-message prev-pos 0))
     ;; Search for the function
     (progn ;;save-match-data
       (while (re-search-forward
 	      (or regexp imenu-example--function-name-regexp-perl)
 	      nil t)
-	(imenu-progress-message prev-pos)
+	(or noninteractive
+	    (imenu-progress-message prev-pos))
 	;;(backward-up-list 1)
 	(cond
 	 ((and				; Skip some noise if building tags
@@ -3395,7 +3474,8 @@ indentation and initial hashes. Behaves usually outside of comment."
 	  (setq index1 (cons (concat "=" name) (cdr index)))
 	  (push index index-pod-alist)
 	  (push index1 index-unsorted-alist)))))
-    (imenu-progress-message prev-pos 100)
+    (or noninteractive
+	(imenu-progress-message prev-pos 100))
     (setq index-alist 
 	  (if (default-value 'imenu-sort-function)
 	      (sort index-alist (default-value 'imenu-sort-function))
@@ -4271,13 +4351,16 @@ in subdirectories too."
   (let ((index-alist '()) 
 	(prev-pos 0) index index1 name package prefix)
     (goto-char (point-min))
-    (imenu-progress-message prev-pos 0)
+    (if noninteractive
+	(message "Scanning XSUB for index")
+      (imenu-progress-message prev-pos 0))
     ;; Search for the function
     (progn ;;save-match-data
       (while (re-search-forward
 	      "^\\([ \t]*MODULE\\>[^\n]*\\<PACKAGE[ \t]*=[ \t]*\\([a-zA-Z_][a-zA-Z_0-9:]*\\)\\>\\|\\([a-zA-Z_][a-zA-Z_0-9]*\\)(\\|[ \t]*BOOT:\\)"
 	      nil t)
-	(imenu-progress-message prev-pos)
+	(or noninteractive
+	    (imenu-progress-message prev-pos))
 	(cond
 	 ((match-beginning 2)	; SECTION
 	  (setq package (buffer-substring (match-beginning 2) (match-end 2)))
@@ -4305,24 +4388,28 @@ in subdirectories too."
 	  (setq index (imenu-example--name-and-position))
 	  (setcar index (concat package "::BOOT:"))
 	  (push index index-alist)))))
-    (imenu-progress-message prev-pos 100)
+    (or noninteractive
+	(imenu-progress-message prev-pos 100))
     ;;(setq index-alist 
     ;;      (if (default-value 'imenu-sort-function)
     ;;          (sort index-alist (default-value 'imenu-sort-function))
     ;;          (nreverse index-alist)))
     index-alist))
 
-(defun cperl-find-tags (file xs)
-  (let (ind (b (get-buffer cperl-tmp-buffer)) lst elt pos ret
+(defun cperl-find-tags (file xs topdir)
+  (let (ind (b (get-buffer cperl-tmp-buffer)) lst elt pos ret rel
 	    (cperl-pod-here-fontify nil))
     (save-excursion
       (if b (set-buffer b)
 	  (cperl-setup-tmp-buf))
       (erase-buffer)
       (setq file (car (insert-file-contents file)))
-      (message "Scanning file %s..." file)
-      (if cperl-use-syntax-table-text-property-for-tags
-	  (cperl-find-pods-heres))
+      (message "Scanning file %s ..." file)
+      (if (and cperl-use-syntax-table-text-property-for-tags
+	       (not xs))
+	  (condition-case err		; after __END__ may have garbage
+	      (cperl-find-pods-heres)
+	    (error (message "While scanning for syntax: %s" err))))
       (if xs
 	  (setq lst (cperl-xsub-scan))
 	(setq ind (imenu-example--create-perl-index))
@@ -4370,19 +4457,43 @@ in subdirectories too."
 				  lst))))))
       (setq pos (point))
       (goto-char 1)
-      (insert "\f\n" file "," (number-to-string (1- pos)) "\n")
+      (setq rel file)
+      ;; On case-preserving filesystems (EMX on OS/2) case might be encoded in properties
+      (set-text-properties 0 (length rel) nil rel)
+      (and (equal topdir (substring rel 0 (length topdir)))
+	   (setq rel (substring file (length topdir))))
+      (insert "\f\n" rel "," (number-to-string (1- pos)) "\n")
       (setq ret (buffer-substring 1 (point-max)))
       (erase-buffer)
-      (message "Scanning file %s finished" file)
+      (or noninteractive
+	  (message "Scanning file %s finished" file))
       ret)))
 
-(defun cperl-write-tags (&optional file erase recurse dir inbuffer)
+(defun cperl-add-tags-recurse-noxs ()
+  "Add to TAGS data for Perl and XSUB files in the current directory and kids.
+Use as
+  emacs -batch -q -no-site-file -l emacs/cperl-mode.el \
+        -f cperl-add-tags-recurse 
+"
+  (cperl-write-tags nil nil t t nil t))
+
+(defun cperl-add-tags-recurse ()
+  "Add to TAGS file data for Perl files in the current directory and kids.
+Use as
+  emacs -batch -q -no-site-file -l emacs/cperl-mode.el \
+        -f cperl-add-tags-recurse 
+"
+  (cperl-write-tags nil nil t t))
+
+(defun cperl-write-tags (&optional file erase recurse dir inbuffer noxs topdir)
   ;; If INBUFFER, do not select buffer, and do not save
   ;; If ERASE is `ignore', do not erase, and do not try to delete old info.
   (require 'etags)
   (if file nil
     (setq file (if dir default-directory (buffer-file-name)))
     (if (and (not dir) (buffer-modified-p)) (error "Save buffer first!")))
+  (or topdir
+      (setq topdir default-directory))
   (let ((tags-file-name "TAGS")
 	(case-fold-search (eq system-type 'emx))
 	xs)
@@ -4407,28 +4518,31 @@ in subdirectories too."
 				nil)
 			       ((not (file-directory-p file))
 				(if (string-match cperl-scan-files-regexp file)
-				    (cperl-write-tags file erase recurse nil t)))
+				    (cperl-write-tags file erase recurse nil t noxs topdir)))
 			       ((not recurse) nil)
-			       (t (cperl-write-tags file erase recurse t t)))))
+			       (t (cperl-write-tags file erase recurse t t noxs topdir)))))
 		  files))
 	)
        (t
 	(setq xs (string-match "\\.xs$" file))
-	(cond ((eq erase 'ignore) (goto-char (point-max)))
-	      (erase (erase-buffer))
-	      (t
-	       (goto-char 1)
-	       (if (search-forward (concat "\f\n" file ",") nil t)
-		   (progn
-		     (search-backward "\f\n")
-		     (delete-region (point)
-				    (save-excursion
-				      (forward-char 1)
-				      (if (search-forward "\f\n" nil 'toend)
-				       (- (point) 2)
-				       (point-max)))))
-		 (goto-char (point-max)))))
-	(insert (cperl-find-tags file xs))))
+	(if (not (and xs noxs))
+	    (progn
+	      (cond ((eq erase 'ignore) (goto-char (point-max)))
+		  (erase (erase-buffer))
+		  (t
+		   (goto-char 1)
+		   (if (search-forward (concat "\f\n" file ",") nil t)
+		       (progn
+			 (search-backward "\f\n")
+			 (delete-region (point)
+					(save-excursion
+					  (forward-char 1)
+					  (if (search-forward "\f\n" 
+							      nil 'toend)
+					      (- (point) 2)
+					    (point-max)))))
+		     (goto-char (point-max)))))
+	      (insert (cperl-find-tags file xs topdir))))))
       (if inbuffer nil		; Delegate to the caller
 	(save-buffer 0)		; No backup
 	(if (fboundp 'initialize-new-tags-table) ; Do we need something special in XEmacs?
@@ -4901,7 +5015,7 @@ than a line. Your contribution to update/shorten it is appreciated."
 ... !~ ...	Search pattern, substitution, or translation (negated).
 $!	In numeric context: errno. In a string context: error string.
 $\"	The separator which joins elements of arrays interpolated in strings.
-$#	The output format for printed numbers. Initial value is %.20g.
+$#	The output format for printed numbers. Initial value is %.15g or close.
 $$	Process number of this script. Changes in the fork()ed child process.
 $%	The current page number of the currently selected output channel.
 

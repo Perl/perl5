@@ -110,6 +110,7 @@ eg/van/vanish		A program to put files in a trashcan
 eg/who			A sample who program
 eg/wrapsuid		A setuid script wrapper generator
 emacs/cperl-mode.el	An alternate perl-mode
+emacs/ptags		Creates smart TAGS file
 embed.h			Maps symbols to safer names
 embed.pl		Produces embed.h
 ext/DB_File/DB_File.pm		Berkeley DB extension Perl module
