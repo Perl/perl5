@@ -334,12 +334,14 @@ find it.  It's often a good idea to have both /usr/bin/perl and
 careful, however, not to overwrite a version of perl supplied by your
 vendor unless you are sure you know what you are doing.
 
-By default, Configure will arrange for /usr/bin/perl to be linked to
-the current version of perl.  You can turn off that behavior by running
+By default, Configure will not try to link /usr/bin/perl to
+the current version of perl.  You can turn on that behavior by running
 
-	Configure -Uinstallusrbinperl
+	Configure -Dinstallusrbinperl
 
-or by answering 'no' to the appropriate Configure prompt.
+or by answering 'yes' to the appropriate Configure prompt.
+(Note that before perl 5.8.1, the default behavior was to create
+or overwrite /usr/bin/perl even if it already existed.)
 
 In any case, system administrators are strongly encouraged to
 put (symlinks to) perl and its accompanying utilities, such as perldoc,
