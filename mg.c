@@ -261,6 +261,8 @@ MAGIC*
 Perl_mg_find(pTHX_ SV *sv, int type)
 {
     MAGIC* mg;
+    if (!sv)
+        return 0;
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	if (mg->mg_type == type)
 	    return mg;
