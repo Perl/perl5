@@ -47,7 +47,8 @@ e_fp
 e_tmpname
 endav
 envgv
-errgv
+errhv
+errsv
 eval_root
 eval_start
 fdpid
@@ -61,6 +62,8 @@ in_eval
 incgv
 initav
 inplace
+keys
+keys_mutex
 last_in_gv
 lastfd
 lastretstr
@@ -73,6 +76,7 @@ leftgv
 lineary
 localizing
 localpatches
+magical_keys
 main_cv
 main_root
 main_start

@@ -1338,6 +1338,9 @@ int runops_standard _((void));
 int runops_debug _((void));
 #endif
 
+#define PER_THREAD_MAGICALS "123456789&`'+/.,\\\";^-%=|~:\001\005!@"
+#define N_PER_THREAD_MAGICALS 30
+
 /****************/
 /* Truly global */
 /****************/
@@ -1354,6 +1357,7 @@ EXT struct thread *	eval_owner;	/* Owner thread for doeval */
 EXT int			nthreads;	/* Number of threads currently */
 EXT perl_mutex		threads_mutex;	/* Mutex for nthreads and thread list */
 EXT perl_cond		nthreads_cond;	/* Condition variable for nthreads */
+EXT char *		per_thread_magicals INIT(PER_THREAD_MAGICALS);
 #ifdef FAKE_THREADS
 EXT struct thread *	thr;		/* Currently executing (fake) thread */
 #endif
@@ -1856,7 +1860,8 @@ IEXT I32	Imaxscream IINIT(-1);
 IEXT SV *	Ilastscream;
 
 /* shortcuts to misc objects */
-IEXT GV *	Ierrgv;
+IEXT HV *	Ierrhv;
+IEXT SV *	Ierrsv;
 
 /* shortcuts to debugging objects */
 IEXT GV *	IDBgv;
@@ -1965,6 +1970,10 @@ IEXT SV *	Imess_sv;
 #ifdef USE_THREADS
 /* threads stuff */
 IEXT SV *	Ithrsv;		/* holds struct thread for main thread */
+IEXT perl_mutex	Ikeys_mutex;	/* protects keys and magical_keys */
+IEXT SV *	Ikeys;		/* each char marks a per-thread key in-use */
+IEXT PADOFFSET	Imagical_keys[N_PER_THREAD_MAGICALS];
+				/* index is position in per_thread_magicals */
 #endif /* USE_THREADS */
 
 #undef IEXT

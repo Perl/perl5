@@ -264,6 +264,7 @@ magic_len(sv, mg)
 SV *sv;
 MAGIC *mg;
 {
+    dTHR;
     register I32 paren;
     register char *s;
     register I32 i;
@@ -329,6 +330,7 @@ magic_get(sv, mg)
 SV *sv;
 MAGIC *mg;
 {
+    dTHR;
     register I32 paren;
     register char *s;
     register I32 i;
@@ -415,7 +417,11 @@ MAGIC *mg;
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': case '&':
 	if (curpm && (rx = curpm->op_pmregexp)) {
-	    paren = atoi(GvENAME((GV*)mg->mg_obj));
+	    /*
+	     * Pre-threads, this was paren = atoi(GvENAME((GV*)mg->mg_obj));
+	     * XXX Does the new way break anything?
+	     */
+	    paren = atoi(mg->mg_ptr);
 	  getparen:
 	    if (paren <= rx->nparens &&
 		(s = rx->startp[paren]) &&
@@ -572,6 +578,11 @@ MAGIC *mg;
 	break;
     case '0':
 	break;
+#ifdef USE_THREADS
+    case '@':
+	sv_setsv(sv, errsv);
+	break;
+#endif /* USE_THREADS */
     }
     return 0;
 }
@@ -749,7 +760,6 @@ MAGIC* mg;
     	if(psig_ptr[i])
     	    sv_setsv(sv,psig_ptr[i]);
     	else {
-	    dTHR;		/* just for SvREFCNT_inc */
     	    Sighandler_t sigstate = rsignal_state(i);
 
     	    /* cache state so we don't fetch it again */
@@ -1177,6 +1187,7 @@ magic_gettaint(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
+    dTHR;
     TAINT_IF((mg->mg_len & 1) ||
 	     (mg->mg_len & 2) && mg->mg_obj == sv);	/* kludge */
     return 0;
@@ -1706,6 +1717,11 @@ MAGIC* mg;
 		origargv[i] = Nullch;
 	}
 	break;
+#ifdef USE_THREADS
+    case '@':
+	sv_setsv(errsv, sv);
+	break;
+#endif /* USE_THREADS */
     }
     return 0;
 }

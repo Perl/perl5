@@ -190,6 +190,8 @@ bool	io_close _((IO* io));
 OP*	invert _((OP* cmd));
 OP*	jmaybe _((OP* arg));
 I32	keyword _((char* d, I32 len));
+PADOFFSET	key_create _((void));
+void	key_destroy _((PADOFFSET key));
 void	leave_scope _((I32 base));
 void	lex_end _((void));
 void	lex_start _((SV* line));
@@ -338,6 +340,9 @@ SV*	newSVsv _((SV* old));
 OP*	newUNOP _((I32 type, I32 flags, OP* first));
 OP*	newWHILEOP _((I32 flags, I32 debuggable, LOOP* loop,
 		      I32 whileline, OP* expr, OP* block, OP* cont));
+#ifdef USE_THREADS
+struct thread *	new_struct_thread _((struct thread *t));
+#endif
 PerlIO*	nextargv _((GV* gv));
 char*	ninstr _((char* big, char* bigend, char* little, char* lend));
 OP*	oopsCV _((OP* o));
