@@ -27,8 +27,10 @@ responsibility to ensure that warnings are enabled judiciously.
 =item STOP is a new keyword
 
 In addition to C<BEGIN>, C<INIT>, C<END>, C<DESTROY> and C<AUTOLOAD>,
-subroutines named C<STOP> are now special.  They are queued up for
-execution at the end of compilation, and cannot be called directly.
+subroutines named C<STOP> are now special.  These are queued up during
+compilation and behave similar to END blocks, except they are called at
+the end of compilation rather than at the end of execution.  They cannot
+be called directly.
 
 =item Treatment of list slices of undef has changed
 
@@ -691,13 +693,6 @@ BEGIN blocks are executed under such conditions, this variable
 enables perl code to determine whether actions that make sense
 only during normal running are warranted.  See L<perlvar>.
 
-=head2 STOP blocks
-
-Arbitrary code can be queued for execution when Perl has finished
-parsing the program (i.e. when the compile phase ends) using STOP
-blocks.  These behave similar to END blocks, except for being
-called at the end of compilation rather than at the end of execution.
-
 =head2 Optional Y2K warnings
 
 If Perl is built with the cpp macro C<PERL_Y2KWARN> defined,
@@ -1134,7 +1129,8 @@ to Perl's debugging API.
 
 =item DB_File
 
-[TODO - Paul Marquess <paul.marquess@bt.com>]
+DB_File can now be built with Berkeley DB versions 1, 2 or 3.
+See C<ext/DB_File/Changes>.
 
 =item Devel::DProf
 

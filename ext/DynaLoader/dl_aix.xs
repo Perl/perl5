@@ -558,7 +558,7 @@ static int readExports(ModulePtr mp)
 /* dl_dlopen.xs
  * 
  * Platform:	SunOS/Solaris, possibly others which use dlopen.
- * Author:	Paul Marquess (pmarquess@bfsec.bt.co.uk)
+ * Author:	Paul Marquess (Paul.Marquess@btinternet.com)
  * Created:	10th July 1994
  *
  * Modified:

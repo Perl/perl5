@@ -4,7 +4,7 @@ package Net::Ping;
 #
 # Authors of the original pingecho():
 #           karrer@bernina.ethz.ch (Andreas Karrer)
-#           pmarquess@bfsec.bt.co.uk (Paul Marquess)
+#           Paul.Marquess@btinternet.com (Paul Marquess)
 #
 # Copyright (c) 1996 Russell Mosemann.  All rights reserved.  This
 # program is free software; you may redistribute it and/or modify it
