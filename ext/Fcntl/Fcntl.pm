@@ -60,7 +60,7 @@ our($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS, $AUTOLOAD);
 require Exporter;
 use XSLoader ();
 @ISA = qw(Exporter);
-$VERSION = "1.04";
+$VERSION = "1.05";
 # Items to export into callers namespace by default
 # (move infrequently used names to @EXPORT_OK below)
 @EXPORT =

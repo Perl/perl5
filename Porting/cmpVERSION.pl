@@ -22,9 +22,16 @@ for (@ARGV[0, 1]) {
 my $dir2 = rel2abs($ARGV[1]);
 chdir $ARGV[0] or die "$0: chdir '$ARGV[0]' failed: $!\n";
 
+# Files to skip from the check for one reason or another,
+# usually because they pull in their version from some other file.
+my %skip;
+@skip{'./lib/Exporter/Heavy.pm'} = ();
+
 my @wanted;
 find(
      sub { /\.pm$/ &&
+	       ! exists $skip{$File::Find::name}
+	       &&
 	       do { my $file2 =
 			catfile(catdir($dir2, $File::Find::dir), $_);
 		    return if compare($_, $file2) == 0;

@@ -9,7 +9,7 @@ use vars qw($VERSION @ISA @EXPORT);
 require Exporter;
 @ISA = qw(Exporter);
 
-$VERSION = 0.02;
+$VERSION = 0.03;
 
 @EXPORT = qw(which_perl perl_lib makefile_name makefile_backup
              make make_run run make_macro calibrate_mtime

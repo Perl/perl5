@@ -19,7 +19,7 @@ use File::stat;
 use File::Spec;
 
 @ISA = qw(Tie::Hash Exporter);
-$VERSION = "1.03_00";
+$VERSION = "1.04";
 $VERSION = eval $VERSION;
 @EXPORT_OK = qw(DIR_UNLINK);
 
