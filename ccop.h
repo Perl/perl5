@@ -1,3 +1,7 @@
+#ifndef PATCHLEVEL
+#include "patchlevel.h"
+#endif
+
 typedef enum {
     OPc_NULL,	/* 0 */
     OPc_BASEOP,	/* 1 */
@@ -230,6 +234,9 @@ EXT char *ppnames[] = {
 	"pp_prtf",
 	"pp_print",
 	"pp_sysopen",
+#if PATCHLEVEL > 3
+	"pp_sysseek",
+#endif
 	"pp_sysread",
 	"pp_syswrite",
 	"pp_send",

@@ -404,6 +404,9 @@ static opclass (*ccopaddr[])_((OP *o)) = {
 	cc_listop,		/* prtf */
 	cc_listop,		/* print */
 	cc_listop,		/* sysopen */
+#if PATCHLEVEL > 3
+	cc_listop,		/* sysseek */
+#endif
 	cc_listop,		/* sysread */
 	cc_listop,		/* syswrite */
 	cc_listop,		/* send */
