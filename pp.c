@@ -1968,11 +1968,11 @@ PP(pp_hex)
     dSP; dTARGET;
     char *tmps;
     STRLEN argtype;
-    STRLEN n_a;
+    STRLEN len;
 
-    tmps = POPpx;
+    tmps = (SvPVx(POPs, len));
     argtype = 1;		/* allow underscores */
-    XPUSHn(scan_hex(tmps, 99, &argtype));
+    XPUSHn(scan_hex(tmps, len, &argtype));
     RETURN;
 }
 
@@ -1982,20 +1982,20 @@ PP(pp_oct)
     NV value;
     STRLEN argtype;
     char *tmps;
-    STRLEN n_a;
+    STRLEN len;
 
-    tmps = POPpx;
-    while (*tmps && isSPACE(*tmps))
-	tmps++;
+    tmps = (SvPVx(POPs, len));
+    while (*tmps && len && isSPACE(*tmps))
+       tmps++, len--;
     if (*tmps == '0')
-	tmps++;
+       tmps++, len--;
     argtype = 1;		/* allow underscores */
     if (*tmps == 'x')
-	value = scan_hex(++tmps, 99, &argtype);
+       value = scan_hex(++tmps, --len, &argtype);
     else if (*tmps == 'b')
-	value = scan_bin(++tmps, 99, &argtype);
+       value = scan_bin(++tmps, --len, &argtype);
     else
-	value = scan_oct(tmps, 99, &argtype);
+       value = scan_oct(tmps, len, &argtype);
     XPUSHn(value);
     RETURN;
 }

@@ -73,7 +73,12 @@ while (<PW>) {
     chomp;
     # LIMIT -1 so that users with empty shells don't fall off
     my @s = split /:/, $_, -1;
-    my ($name_s, $passwd_s, $uid_s, $gid_s, $gcos_s, $home_s, $shell_s) = @s;
+    my ($name_s, $passwd_s, $uid_s, $gid_s, $gcos_s, $home_s, $shell_s);
+    if ($^O eq 'darwin') {
+       ($name_s, $passwd_s, $uid_s, $gid_s, $gcos_s, $home_s, $shell_s) = @s[0,1,2,3,7,8,9];
+    } else {
+       ($name_s, $passwd_s, $uid_s, $gid_s, $gcos_s, $home_s, $shell_s) = @s;
+    }
     next if /^\+/; # ignore NIS includes
     if (@s) {
 	push @{ $seen{$name_s} }, $.;
@@ -88,7 +93,7 @@ while (<PW>) {
     }
     # In principle we could whine if @s != 7 but do we know enough
     # of passwd file formats everywhere?
-    if (@s == 7) {
+    if (@s == 7 || ($^O eq 'darwin' && @s == 10)) {
 	@n = getpwuid($uid_s);
 	# 'nobody' et al.
 	next unless @n;

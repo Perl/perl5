@@ -385,8 +385,8 @@ sub concise_op {
 	    } else {
 		$stash = $stash . "::";
 	    }
-	    $h{arg} = "(*$stash" . $gv->NAME . ")";
-	    $h{svval} = "*$stash" . $gv->NAME;
+	    $h{arg} = "(*$stash" . $gv->SAFENAME . ")";
+	    $h{svval} = "*$stash" . $gv->SAFENAME;
 	} else {
 	    while (class($sv) eq "RV") {
 		$h{svval} .= "\\";

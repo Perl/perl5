@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..44\n";
+print "1..50\n";
 
 print +(oct('0b1_0101') ==        0b101_01) ? "ok" : "not ok", " 1\n";
 print +(oct('0b10_101') ==           0_2_5) ? "ok" : "not ok", " 2\n";
@@ -77,3 +77,12 @@ if (ord("\t") != 9) {
 else {
     print "\x2F_" eq "/_"                  ? "ok" : "not ok", " 44\n";
 }
+
+print +(oct('0b'.(  '0'x10).'1_0101') ==  0b101_01) ? "ok" : "not ok", " 45\n";
+print +(oct('0b'.( '0'x100).'1_0101') ==  0b101_01) ? "ok" : "not ok", " 46\n";
+print +(oct('0b'.('0'x1000).'1_0101') ==  0b101_01) ? "ok" : "not ok", " 47\n";
+
+print +(hex((  '0'x10).'01234') ==  0x1234) ? "ok" : "not ok", " 48\n";
+print +(hex(( '0'x100).'01234') ==  0x1234) ? "ok" : "not ok", " 49\n";
+print +(hex(('0'x1000).'01234') ==  0x1234) ? "ok" : "not ok", " 50\n";
+

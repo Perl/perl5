@@ -187,7 +187,8 @@ EOM
 POSIX threads are not supported well by FreeBSD $osvers.
 
 Please consider upgrading to at least FreeBSD 2.2.8,
-or preferably to 3.something.
+or preferably to the most recent -RELEASE or -STABLE
+version (see http://www.freebsd.org/releases/).
 
 (While 2.2.7 does have pthreads, it has some problems
  with the combination of threads and pipes and therefore
