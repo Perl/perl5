@@ -58,10 +58,10 @@ true)
 		shrpldflags="-H512 -T512 -bhalt:4 -bM:SRE -bE:perl.exp"
 		case "$osvers" in
 		3*)
-			shrpldflags="$shrpldflags -e _nostart $ldflags $libs $cryptlib"
+			shrpldflags="$shrpldflags -e _nostart $ldflags $perllibs $cryptlib"
 			;;
 		*)
-			shrpldflags="$shrpldflags -b noentry $ldflags $libs $cryptlib"
+			shrpldflags="$shrpldflags -b noentry $ldflags $perllibs $cryptlib"
 			;;
 		esac
 		aixinstdir=`pwd | sed 's/\/UU$//'`
@@ -155,7 +155,7 @@ nonxs_ext = $nonxs_list
 ext = \$(dynamic_ext) \$(static_ext) \$(nonxs_ext)
 DYNALOADER = lib/auto/DynaLoader/DynaLoader\$(LIB_EXT)
 
-libs = $libs $cryptlib
+libs = $perllibs $cryptlib
 
 public = perl $suidperl utilities translators
 

@@ -208,6 +208,7 @@ mv=''
 nm=''
 nroff=''
 perl=''
+perllibs=''
 pg=''
 pmake=''
 pr=''
@@ -11642,6 +11643,14 @@ set X $dynamic_ext $static_ext $nonxs_ext
 shift
 extensions="$*"
 
+: Remove libraries needed only for extensions
+: The appropriate ext/Foo/Makefile.PL will add them back in, if
+: necessary.
+set X `echo " $libs " | 
+  sed -e 's@ -lndbm @ @' -e 's@ -lgdbm @ @' -e 's@ -ldbm @ @' -e 's@ -ldb @ @'` 
+shift
+perllibs="$*"
+
 : Remove build directory name from cppstdin so it can be used from
 : either the present location or the final installed location.
 echo " "
@@ -12183,6 +12192,7 @@ passcat='$passcat'
 patchlevel='$patchlevel'
 path_sep='$path_sep'
 perl='$perl'
+perllibs='$perllibs'
 perladmin='$perladmin'
 perlpath='$perlpath'
 pg='$pg'
