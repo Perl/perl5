@@ -311,15 +311,19 @@ deleted.
 In our example, 'undef' is really an element containing
 C<$self-E<gt>{ELEMSIZE}> number of spaces.  Observe:
 
-sub STORESIZE {
-  my $self  = shift;
-  my $count = shift;
-  if ( $count > $self->FETCHSIZE() ) {
-    $self->STORE( $_, '' ) foreach $count - $self->FETCHSIZE() + 1 .. $count;
-  } elsif ( $count < $self->FETCHSIZE() ) {
-    $self->POP() foreach 0 .. $self->FETCHSIZE() - $count + 1;
-  }
-}
+    sub STORESIZE {
+      my $self  = shift;
+      my $count = shift;
+      if ( $count > $self->FETCHSIZE() ) {
+        foreach ( $count - $self->FETCHSIZE() .. $count ) {
+          $self->STORE( $_, '' );
+        }
+      } elsif ( $count < $self->FETCHSIZE() ) {
+        foreach ( 0 .. $self->FETCHSIZE() - $count - 2 ) {
+          $self->POP();
+        }
+      }
+    }
 
 =item EXTEND this, count
 
@@ -346,7 +350,9 @@ C<$self-E<gt>{ELEMSIZE}> spaces only, it does not exist:
     sub EXISTS {
       my $self  = shift;
       my $index = shift;
-      return $self->{ARRAY}->[$index] eq ' ' x $self->{ELEMSIZE} ? 0 : 1;
+      return 0 if ! defined $self->{ARRAY}->[$index] ||
+                  $self->{ARRAY}->[$index] eq ' ' x $self->{ELEMSIZE};
+      return 1;
     }
 
 =item DELETE this, key
