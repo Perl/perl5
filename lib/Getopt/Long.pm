@@ -35,7 +35,6 @@ BEGIN {
     require 5.004;
     use Exporter ();
     use vars     qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-#   $VERSION     = sprintf("%d.%02d", q$Revision: 2.18 $ =~ /(\d+)\.(\d+)/);
     $VERSION     = "2.17";
 
     @ISA         = qw(Exporter);
