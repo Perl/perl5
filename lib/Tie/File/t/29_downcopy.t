@@ -273,7 +273,7 @@ sub try {
   local $SIG{ALRM} = sub { die "Alarm clock" };
   my $a_retval = eval { alarm(5) unless $^P; $o->_downcopy($newdata, $pos, $len) };
   my $err = $@;
-  undef $o; untie @lines;
+  undef $o; untie @lines; alarm(0);
   if ($err) {
     if ($err =~ /^Alarm clock/) {
       print "# Timeout\n";
