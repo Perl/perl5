@@ -397,6 +397,9 @@ sub cflags {
 	$pollute = '$(PERL_MALLOC_DEF)';
     }
 
+    $self->{CCFLAGS}  =~ s/([()])/\\$1/g;
+    $self->{OPTIMIZE} =~ s/([()])/\\$1/g;
+
     return $self->{CFLAGS} = qq{
 CCFLAGS = $self->{CCFLAGS}
 OPTIMIZE = $self->{OPTIMIZE}
@@ -502,6 +505,7 @@ sub const_config {
     foreach $m (@{$self->{CONFIG}}){
 	# SITE*EXP macros are defined in &constants; avoid duplicates here
 	next if $once_only{$m} or $m eq 'sitelibexp' or $m eq 'sitearchexp';
+	$self->{uc $m} =~ s/([()])/\\$1/g;
 	push @m, "\U$m\E = ".$self->{uc $m}."\n";
 	$once_only{$m} = 1;
     }

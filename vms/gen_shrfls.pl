@@ -75,13 +75,13 @@ if ($docc) {
   $config = $dir . "config.sh";
   open CONFIG, "< $config";
   while(<CONFIG>) {
-    $use_threads++ if /usethreads='define'/;
-    $use_mymalloc++ if /usemymalloc='Y'/;
-    $care_about_case++ if /d_vms_case_sensitive_symbols='define'/;
-    $debugging_enabled++ if /usedebugging_perl='Y'/;
-    $hide_mymalloc++ if /embedmymalloc='Y'/;
+    $use_threads++ if /usethreads='(define|yes|true|t|y|1)'/i;
+    $use_mymalloc++ if /usemymalloc='(define|yes|true|t|y1)'/i;
+    $care_about_case++ if /d_vms_case_sensitive_symbols='(define|yes|true|t|y|1)'/i;
+    $debugging_enabled++ if /usedebugging_perl='(define|yes|true|t|y|1)'/i;
+    $hide_mymalloc++ if /embedmymalloc='(define|yes|true|t|y|1)'/i;
     $isgcc++ if /gccversion='[^']/;
-    $use_perlio++ if /useperlio='define'/;
+    $use_perlio++ if /useperlio='(define|yes|true|t|y|1)'/i;
   }
   close CONFIG;
   
