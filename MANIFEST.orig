@@ -190,7 +190,6 @@ hints/dec_osf.sh	Hints for named architecture
 hints/dgux.sh		Hints for named architecture
 hints/dnix.sh		Hints for named architecture
 hints/dynix.sh		Hints for named architecture
-hints/dynixptx.sh	Hints for named architecture
 hints/epix.sh		Hints for named architecture
 hints/esix4.sh		Hints for named architecture
 hints/fps.sh		Hints for named architecture
@@ -263,7 +262,6 @@ lib/ExtUtils/MakeMaker.pm	Write Makefiles for extensions
 lib/ExtUtils/Manifest.pm	Utilities to write MANIFEST files
 lib/ExtUtils/Mkbootstrap.pm	Writes a bootstrap file (see MakeMaker)
 lib/ExtUtils/Mksymlists.pm	Writes a linker options file for extensions
-lib/ExtUtils/testlib.pm	Fixes up @INC to use just-built extension
 lib/ExtUtils/typemap		Extension interface types
 lib/ExtUtils/xsubpp		External subroutine preprocessor
 lib/File/Basename.pm	A module to emulate the basename program
@@ -286,7 +284,7 @@ lib/Pod/Text.pm		Convert POD data to formatted ASCII text
 lib/Search/Dict.pm	A module to do binary search on dictionaries
 lib/SelectSaver.pm	A module to enforce proper select scoping
 lib/SelfLoader.pm	A module to load functions only on demand.
-lib/Shell.pm		A module to make AUTOLOADed system() calls
+lib/Shell.pm		A module to make AUTOLOADEed system() calls
 lib/Symbol.pm		Symbol table manipulation routines
 lib/Sys/Hostname.pm	Hostname methods
 lib/Sys/Syslog.pm	Perl module supporting syslogging
@@ -363,12 +361,19 @@ op.c			Opcode syntax tree code
 op.h			Opcode syntax tree header
 opcode.h		Automatically generated opcode header
 opcode.pl		Opcode header generatore
-os2/diff.configure	Patches to Configure
-os2/diff.db_file	patch to DB_File
 os2/Makefile.SHs	Shared library generation for OS/2
 os2/POSIX.mkfifo	POSIX.xs patch.
 os2/README		OS/2 port info.
 os2/README.old		previous OS/2 port info, partially relevant.
+os2/diff.Makefile	Patches to Makefile.SH
+os2/diff.c2ph		c2ph patch
+os2/diff.configure	Patches to Configure
+os2/diff.db_file	patch to DB_File
+os2/diff.installman	Patches to installman
+os2/diff.installperl	Patches to installperl
+os2/diff.mkdep		Patches to makedepend.SH
+os2/diff.rest		old patch to t/TEST which was not applied yet
+os2/diff.x2pMakefile	Patches to x2p/Makefile.SH
 os2/notes		Notes for perl maintainer
 os2/os2.c		Additional code for OS/2
 os2/os2ish.h		Header for OS/2
@@ -555,12 +560,10 @@ vms/Makefile		VMS port
 vms/config.vms		default config.h for VMS
 vms/descrip.mms		MM[SK] description file for build
 vms/ext/Filespec.pm	VMS-Unix file syntax interconversion
-vms/ext/Stdio/0README.txt	ReadMe file for VMS::Stdio
-vms/ext/Stdio/Makefile.PL	MakeMaker driver for VMS::Stdio
-vms/ext/Stdio/Stdio.pm	VMS options to stdio routines
-vms/ext/Stdio/Stdio.xs	VMS options to stdio routines
-vms/ext/Stdio/test.pl	regression tests for VMS::Stdio
-vms/fndvers.com	parse Perl version from patchlevel.h
+vms/ext/MM_VMS.pm	VMS-specific methods for MakeMaker
+vms/ext/stdio/Makefile.PL	MakeMaker driver for VMS::stdio
+vms/ext/stdio/stdio.pm	VMS options to stdio routines
+vms/ext/stdio/stdio.xs	VMS options to stdio routines
 vms/gen_shrfls.pl	generate options files and glue for shareable image
 vms/genconfig.pl	retcon config.sh from config.h
 vms/genopt.com		hack to write options files in case of broken makes
