@@ -14,12 +14,12 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPpLVAL_INTRO OPpOUR_INTRO OPpENTERSUB_AMPER OPpSLICE OPpCONST_BARE
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
 	 OPpCONST_ARYBASE OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER
-	 OPpSORT_REVERSE OPpSORT_INPLACE
+	 OPpSORT_REVERSE OPpSORT_INPLACE OPpSORT_DESCEND
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE SVs_RMG SVs_SMG
          CVf_METHOD CVf_LOCKED CVf_LVALUE CVf_ASSERTION
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = 0.68;
+$VERSION = 0.69;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -2303,18 +2303,22 @@ sub indirop {
 	$kid = $kid->sibling;
     }
     if ($name eq "sort" && $op->private & (OPpSORT_NUMERIC | OPpSORT_INTEGER)) {
-	$indir = ($op->private & OPpSORT_REVERSE) ? '{$b <=> $a} '
+	$indir = ($op->private & OPpSORT_DESCEND) ? '{$b <=> $a} '
 						  : '{$a <=> $b} ';
     }
-    elsif ($name eq "sort" && $op->private & OPpSORT_REVERSE) {
+    elsif ($name eq "sort" && $op->private & OPpSORT_DESCEND) {
 	$indir = '{$b cmp $a} ';
     }
     for (; !null($kid); $kid = $kid->sibling) {
 	$expr = $self->deparse($kid, 6);
 	push @exprs, $expr;
     }
+    my $name2 = $name;
+    if ($name eq "sort" && $op->private & OPpSORT_REVERSE) {
+	$name2 = 'reverse sort';
+    }
     if ($name eq "sort" && ($op->private & OPpSORT_INPLACE)) {
-	return "$exprs[0] = sort $indir $exprs[0]";
+	return "$exprs[0] = $name2 $indir $exprs[0]";
     }
 
     my $args = $indir . join(", ", @exprs);
@@ -2326,12 +2330,12 @@ sub indirop {
 	# neccessary more often that they really are, because we don't
 	# distinguish which side of an assignment we're on.
 	if ($cx >= 5) {
-	    return "($name $args)";
+	    return "($name2 $args)";
 	} else {
-	    return "$name $args";
+	    return "$name2 $args";
 	}
     } else {
-	return $self->maybe_parens_func($name, $args, $cx, 5);
+	return $self->maybe_parens_func($name2, $args, $cx, 5);
     }
 
 }
@@ -2396,7 +2400,12 @@ sub pp_list {
 			&& $lop->first->private & OPpOUR_INTRO) { # our()
 	    ($local = "", last) if $local eq "my" || $local eq "local";
 	    $local = "our";
-	} elsif ($lop->name ne "undef") { # local()
+	} elsif ($lop->name ne "undef"
+		# specifically avoid the "reverse sort" optimisation,
+		# where "reverse" is nullified
+		&& !($lop->name eq 'sort' && ($lop->flags | OPpSORT_REVERSE)))
+	{
+	    # local()
 	    ($local = "", last) if $local eq "my" || $local eq "our";
 	    $local = "local";
 	}
