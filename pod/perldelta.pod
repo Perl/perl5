@@ -296,6 +296,11 @@ Verify operations that access pad objects (lexicals and temporaries).
 
 =over 4
 
+=item caller
+
+Allows modules to inherit pragmatic attributes from the caller's
+context.  C<utf8> is currently the only supported attribute.
+
 =item Dumpvalue
 
 Added Dumpvalue module provides screen dumps of Perl data.

@@ -639,6 +639,7 @@ lib/bigint.pl		An arbitrary precision integer arithmetic package
 lib/bigrat.pl		An arbitrary precision rational arithmetic package
 lib/blib.pm		For "use blib"
 lib/cacheout.pl		Manages output filehandles when you need too many
+lib/caller.pm		Inherit pragmatic attributes from caller's context
 lib/chat2.pl            Obsolete ipc library (use Comm.pm etc instead)
 lib/complete.pl		A command completion subroutine
 lib/constant.pm		For "use constant"

@@ -512,8 +512,8 @@ With EXPR, it returns some extra information that the debugger uses to
 print a stack trace.  The value of EXPR indicates how many call frames
 to go back before the current one.
 
-    ($package, $filename, $line, $subroutine,
-     $hasargs, $wantarray, $evaltext, $is_require) = caller($i);
+    ($package, $filename, $line, $subroutine, $hasargs,
+    $wantarray, $evaltext, $is_require, $hints) = caller($i);
 
 Here $subroutine may be C<"(eval)"> if the frame is not a subroutine
 call, but an C<eval>.  In such a case additional elements $evaltext and
@@ -522,7 +522,9 @@ C<require> or C<use> statement, $evaltext contains the text of the
 C<eval EXPR> statement.  In particular, for a C<eval BLOCK> statement,
 $filename is C<"(eval)">, but $evaltext is undefined.  (Note also that
 each C<use> statement creates a C<require> frame inside an C<eval EXPR>)
-frame.
+frame.  C<$hints> contains pragmatic hints that the caller was
+compiled with.  It currently only reflects the hint corresponding to
+C<use utf8>.
 
 Furthermore, when called from within the DB package, caller returns more
 detailed information: it sets the list variable C<@DB::args> to be the

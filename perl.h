@@ -2286,6 +2286,7 @@ enum {		/* pass one of these to get_vtbl */
 
 				/* Note: the lowest 8 bits are reserved for
 				   stuffing into op->op_private */
+#define HINT_PRIVATE_MASK	0x000000ff
 #define HINT_INTEGER		0x00000001
 #define HINT_STRICT_REFS	0x00000002
 /* #define HINT_notused4	0x00000004 */

@@ -1475,7 +1475,7 @@ PP(pp_caller)
 
     if (MAXARG)
 	count = POPi;
-    EXTEND(SP, 6);
+    EXTEND(SP, 7);
     for (;;) {
 	/* we may be in a higher stacklevel, so dig down deeper */
 	while (cxix < 0 && top_si->si_type != PERLSI_MAIN) {
@@ -1573,6 +1573,11 @@ PP(pp_caller)
 	Copy(AvALLOC(ary), AvARRAY(PL_dbargs), AvFILLp(ary) + 1 + off, SV*);
 	AvFILLp(PL_dbargs) = AvFILLp(ary) + off;
     }
+    /* XXX only hints propagated via op_private are currently
+     * visible (others are not easily accessible, since they
+     * use the global PL_hints) */
+    PUSHs(sv_2mortal(newSViv((I32)cx->blk_oldcop->op_private &
+			     HINT_PRIVATE_MASK)));
     RETURN;
 }
 
