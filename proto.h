@@ -572,6 +572,7 @@ PERL_CALLCONV void	Perl_pad_free(pTHX_ PADOFFSET po);
 PERL_CALLCONV void	Perl_pad_reset(pTHX);
 PERL_CALLCONV void	Perl_pad_swipe(pTHX_ PADOFFSET po);
 PERL_CALLCONV void	Perl_peep(pTHX_ OP* o);
+PERL_CALLCONV PerlIO*	Perl_start_glob(pTHX_ SV* pattern, IO *io);
 #if defined(PERL_OBJECT)
 PERL_CALLCONV void	Perl_construct(pTHX);
 PERL_CALLCONV void	Perl_destruct(pTHX);

@@ -3861,6 +3861,8 @@
 #define pad_swipe		Perl_pad_swipe
 #define Perl_peep		CPerlObj::Perl_peep
 #define peep			Perl_peep
+#define Perl_start_glob		CPerlObj::Perl_start_glob
+#define start_glob		Perl_start_glob
 #if defined(PERL_OBJECT)
 #define Perl_construct		CPerlObj::Perl_construct
 #define Perl_destruct		CPerlObj::Perl_destruct

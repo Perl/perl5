@@ -32,6 +32,235 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8101] By: jhi                                   on 2000/12/13  16:53:41
+        Log: Move the proto of start_glob() to a better place; regen api files.
+     Branch: perl
+	   ! embed.h embed.pl objXSUB.h perlapi.c pod/perlapi.pod proto.h
+____________________________________________________________________________
+[  8100] By: jhi                                   on 2000/12/13  16:47:11
+        Log: Metaconfig change for #8099.
+     Branch: metaconfig
+	   ! U/modified/Head.U
+____________________________________________________________________________
+[  8099] By: jhi                                   on 2000/12/13  16:46:48
+        Log: Subject: Re: [ID 20000328.039] [PATCH] Eliminate Configure use of /tmp
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Wed, 13 Dec 2000 10:36:09 -0500 (EST)
+             Message-ID: <Pine.SOL.4.10.10012131031230.2017-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  8098] By: jhi                                   on 2000/12/13  16:39:02
+        Log: Subject: [20000615.005] [PATCH] Cwd::fastgetcwd broken (or mis-named?) on Unix  
+             From: rspier@pobox.com (Robert Spier)
+             Date: Tue, 12 Dec 2000 21:12:39 -0500
+             Message-ID: <14902.56087.678086.725773@rls.cx>
+             
+             fastgetcwd is defined using a glob alias on a $^O dependent basis -
+             and there was no default assignment or perl subroutine.
+     Branch: perl
+	   ! lib/Cwd.pm
+____________________________________________________________________________
+[  8097] By: jhi                                   on 2000/12/13  16:16:01
+        Log: Subject: [PATCH] move startglob out of pp_hot.c
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Mon, 11 Dec 2000 23:16:39 +0000
+             Message-ID: <20001211231638.A55550@plum.flirble.org>
+     Branch: perl
+	   ! doio.c embed.h embed.pl objXSUB.h pp_hot.c proto.h
+____________________________________________________________________________
+[  8096] By: jhi                                   on 2000/12/13  15:26:23
+        Log: Subject: [8095] HP-UX 11.00 / cc / 64bitint & 64bitall / perlio 
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl> 
+             Date: Wed, 13 Dec 2000 14:01:37 +0100
+             Message-Id: <20001213135318.621A.H.M.BRAND@hccnet.nl>
+             
+             perl/64/HP-UX wants libdb-3.0 to be shared ELF 64 bit which
+             in turn requires libpthread in libswanted.
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[  8095] By: jhi                                   on 2000/12/12  19:51:05
+        Log: The integration wars continue.
+     Branch: perl
+	  !> sv.c
+____________________________________________________________________________
+[  8094] By: jhi                                   on 2000/12/12  19:48:26
+        Log: Subject: [PATCH perl@8070] DB_File-1.74  
+             From: "Paul Marquess" <paul_marquess@yahoo.co.uk> 
+             Date: Mon, 11 Dec 2000 23:07:17 -0000
+             Message-ID: <000001c063c7$1b9d28a0$a20a140a@bfs.phone.com> 
+     Branch: perl
+	   ! ext/DB_File/Changes ext/DB_File/DB_File.pm
+	   ! ext/DB_File/DB_File.xs ext/DB_File/dbinfo ext/DB_File/typemap
+	   ! ext/DB_File/version.c t/lib/db-btree.t t/lib/db-hash.t
+	   ! t/lib/db-recno.t
+____________________________________________________________________________
+[  8093] By: nick                                  on 2000/12/12  19:42:13
+        Log: Integrate/merge mainline with further efficiency tweak to sv.c's utf8 stuff.
+     Branch: perlio
+	   ! sv.c
+	  !> lib/File/DosGlob.pm
+____________________________________________________________________________
+[  8092] By: jhi                                   on 2000/12/12  19:28:11
+        Log: Integrate perlio.
+     Branch: perl
+	  !> sv.c
+____________________________________________________________________________
+[  8091] By: nick                                  on 2000/12/12  18:49:45
+        Log: Fix for Tk, and upgrading shared SVs.
+     Branch: perlio
+	   ! sv.c
+____________________________________________________________________________
+[  8090] By: jhi                                   on 2000/12/12  16:48:59
+        Log: Subject: [PATCH] Re: Breadperl & Tk
+             From: Nick Ing-Simmons <nik@tiuk.ti.com>
+             Date: Tue, 12 Dec 2000 14:48:27 GMT
+             Message-Id: <200012121448.OAA11516@mikado.tiuk.ti.com> 
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  8089] By: jhi                                   on 2000/12/12  03:37:19
+        Log: Subject: DosGlob.pm diff for bash style brace expansion.
+             From: "Mestnik, Mike" <MMestnik@rustconsulting.com>
+             Date: Fri, 8 Dec 2000 10:45:30 -0600
+             Message-ID: <B50C47897E98D3118130009027D3971920F278@EXCHANGE_M1>
+     Branch: perl
+	   ! lib/File/DosGlob.pm
+____________________________________________________________________________
+[  8088] By: nick                                  on 2000/12/11  23:59:59
+        Log: Integrate mainline
+     Branch: perlio
+	  !> ext/B/B.pm ext/B/B/Deparse.pm installperl lib/CGI.pm
+	  !> lib/ExtUtils/Liblist.pm lib/ExtUtils/MM_Unix.pm
+	  !> lib/ExtUtils/MakeMaker.pm lib/File/DosGlob.pm pod/perldiag.pod
+	  !> pod/perlop.pod pp.c pp_hot.c scope.c t/io/utf8.t t/lib/b.t
+	  !> t/op/local.t t/pragma/warn/toke toke.c
+____________________________________________________________________________
+[  8087] By: jhi                                   on 2000/12/11  23:20:23
+        Log: Integrate perlio.
+     Branch: perl
+	  !> ext/Encode/Encode.xs perlio.c perlio.h perliol.h
+____________________________________________________________________________
+[  8086] By: jhi                                   on 2000/12/11  22:50:59
+        Log: Tune further the OS detection of CGI.
+     Branch: perl
+	   ! lib/CGI.pm
+____________________________________________________________________________
+[  8085] By: nick                                  on 2000/12/11  22:50:46
+        Log: Finish 1st pass of "encoding" layer e.g. :
+             open($fh,"<encoding(iso8859-7)",$greek) || die;
+     Branch: perlio
+	   ! ext/Encode/Encode.xs perlio.c perliol.h
+____________________________________________________________________________
+[  8084] By: jhi                                   on 2000/12/11  22:32:06
+        Log: Revert the -f ambiguousity patch, seems to cause
+             too much hassle (the interpret -Q as a function
+             where Q is not a known filetest part is left in).
+     Branch: perl
+	   ! lib/ExtUtils/Liblist.pm pod/perldiag.pod t/pragma/warn/toke
+	   ! toke.c
+____________________________________________________________________________
+[  8083] By: jhi                                   on 2000/12/11  22:27:23
+        Log: (accidentally empty check-in)
+     Branch: perl
+	   ! lib/File/DosGlob.pm
+____________________________________________________________________________
+[  8082] By: nick                                  on 2000/12/11  19:09:51
+        Log: Restore mmap function (broken by tweaks to shared buffer
+             layer for encode(xxxx)).
+     Branch: perlio
+	   ! perlio.c
+____________________________________________________________________________
+[  8081] By: jhi                                   on 2000/12/11  18:29:13
+        Log: Subject: Re: The long awaited feature ...
+             From: Simon Cozens <simon@cozens.net>
+             Date: Mon, 11 Dec 2000 15:54:24 +0000
+             Message-ID: <20001211155424.A17680@deep-dark-truthful-mirror.perlhacker.org>
+             
+             More io/utf8 tests.
+     Branch: perl
+	   ! t/io/utf8.t
+____________________________________________________________________________
+[  8080] By: jhi                                   on 2000/12/11  18:19:36
+        Log: Subject: PATCH MakeMaker manpage clarification
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 10 Dec 2000 20:46:13 +0100
+             Message-ID: <m3aea4kqka.fsf@ak-71.mind.de>
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[  8079] By: jhi                                   on 2000/12/11  15:35:07
+        Log: Subject: Re: [ID 20001204.007] -MO=Deparse -we '{234;}' failing
+             From: Simon Cozens <simon@cozens.net>
+             Date: Sun, 10 Dec 2000 19:06:19 +0000
+             Message-ID: <20001210190619.B21402@deep-dark-truthful-mirror.perlhacker.org>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm t/lib/b.t
+____________________________________________________________________________
+[  8078] By: jhi                                   on 2000/12/11  15:09:11
+        Log: Subject: [PATCH] docs on NaN
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Mon, 11 Dec 2000 01:48:38 +0000
+             Message-ID: <20001211014838.B99205@plum.flirble.org>
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[  8077] By: jhi                                   on 2000/12/11  15:02:21
+        Log: Subject: [PATCH] Re: [Fwd: BUG 20001205.022] Local on Hash elements
+             From: Simon Cozens <simon@cozens.net>
+             Date: Mon, 11 Dec 2000 01:21:45 +0000
+             Message-ID: <20001211012144.A23467@deep-dark-truthful-mirror.perlhacker.org>
+     Branch: perl
+	   ! pp.c pp_hot.c scope.c t/op/local.t
+____________________________________________________________________________
+[  8076] By: nick                                  on 2000/12/10  20:43:32
+        Log: Not merge worthy...
+             Allow arg to layers e.g. open($fh,"<:encode(iso8859-15)",$name)
+             syntax is modelled on attributes.
+             Untested fix for io/utf8 on Win32 etc.
+             Very clumsy start to the encode layer.
+     Branch: perlio
+	   ! ext/Encode/Encode.xs perlio.c perlio.h perliol.h
+____________________________________________________________________________
+[  8075] By: jhi                                   on 2000/12/10  18:39:33
+        Log: Darwin is not Windows.
+     Branch: perl
+	   ! lib/CGI.pm
+____________________________________________________________________________
+[  8074] By: jhi                                   on 2000/12/10  18:31:27
+        Log: Subject: Ambiguous -%c() resolved as a file test
+             From: "Paul Marquess" <Paul.Marquess@openwave.com>
+             Date: Sun, 10 Dec 2000 15:35:07 -0000
+             Message-ID: <002601c062be$c5f749c0$a20a140a@bfs.phone.com>
+     Branch: perl
+	   ! lib/ExtUtils/Liblist.pm lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[  8073] By: jhi                                   on 2000/12/10  18:16:29
+        Log: Subject: PATCH installperl misinformed 
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 10 Dec 2000 13:01:32 +0100 
+             Message-ID: <m3r93glc2r.fsf@ak-71.mind.de>
+     Branch: perl
+	   ! installperl
+____________________________________________________________________________
+[  8072] By: jhi                                   on 2000/12/10  18:07:55
+        Log: The walkoptree confusion rages; walkoptree() seems to be coming
+             from B.xs, while walkoptree_slow() comes from B.pm.
+     Branch: perl
+	   ! ext/B/B.pm
+____________________________________________________________________________
+[  8071] By: nick                                  on 2000/12/10  11:45:47
+        Log: Integrate mainline
+     Branch: perlio
+	  +> t/base/commonsense.t
+	  !> (integrate 37 files)
+____________________________________________________________________________
+[  8070] By: jhi                                   on 2000/12/10  04:46:21
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  8069] By: jhi                                   on 2000/12/10  04:39:19
         Log: Subject: Re: PATCH: Let Test::Harness bail out early (Was: Testing module dependencies)
              From: andreas.koenig@anima.de (Andreas J. Koenig)

@@ -2011,4 +2011,149 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 
 #endif /* SYSV IPC */
 
+/*
+=for apidoc start_glob
 
+Function called by C<do_readline> to spawn a glob (or do the glob inside
+perl on VMS). This code used to be inline, but now perl uses C<File::Glob>
+this glob starter is only used by miniperl during the build proccess.
+Moving it away shrinks pp_hot.c; shrinking pp_hot.c helps speed perl up.
+
+=cut
+*/
+
+PerlIO *
+Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
+{
+    SV *tmpcmd = NEWSV(55, 0);
+    PerlIO *fp;
+    ENTER;
+    SAVEFREESV(tmpcmd);
+#ifdef VMS /* expand the wildcards right here, rather than opening a pipe, */
+           /* since spawning off a process is a real performance hit */
+    {
+#include <descrip.h>
+#include <lib$routines.h>
+#include <nam.h>
+#include <rmsdef.h>
+	char rslt[NAM$C_MAXRSS+1+sizeof(unsigned short int)] = {'\0','\0'};
+	char vmsspec[NAM$C_MAXRSS+1];
+	char *rstr = rslt + sizeof(unsigned short int), *begin, *end, *cp;
+	char tmpfnam[L_tmpnam] = "SYS$SCRATCH:";
+	$DESCRIPTOR(dfltdsc,"SYS$DISK:[]*.*;");
+	PerlIO *tmpfp;
+	STRLEN i;
+	struct dsc$descriptor_s wilddsc
+	    = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
+	struct dsc$descriptor_vs rsdsc
+	    = {sizeof rslt, DSC$K_DTYPE_VT, DSC$K_CLASS_VS, rslt};
+	unsigned long int cxt = 0, sts = 0, ok = 1, hasdir = 0, hasver = 0, isunix = 0;
+
+	/* We could find out if there's an explicit dev/dir or version
+	   by peeking into lib$find_file's internal context at
+	   ((struct NAM *)((struct FAB *)cxt)->fab$l_nam)->nam$l_fnb
+	   but that's unsupported, so I don't want to do it now and
+	   have it bite someone in the future. */
+	strcat(tmpfnam,PerlLIO_tmpnam(NULL));
+	cp = SvPV(tmpglob,i);
+	for (; i; i--) {
+	    if (cp[i] == ';') hasver = 1;
+	    if (cp[i] == '.') {
+		if (sts) hasver = 1;
+		else sts = 1;
+	    }
+	    if (cp[i] == '/') {
+		hasdir = isunix = 1;
+		break;
+	    }
+	    if (cp[i] == ']' || cp[i] == '>' || cp[i] == ':') {
+		hasdir = 1;
+		break;
+	    }
+	}
+	if ((tmpfp = PerlIO_open(tmpfnam,"w+","fop=dlt")) != NULL) {
+	    Stat_t st;
+	    if (!PerlLIO_stat(SvPVX(tmpglob),&st) && S_ISDIR(st.st_mode))
+		ok = ((wilddsc.dsc$a_pointer = tovmspath(SvPVX(tmpglob),vmsspec)) != NULL);
+	    else ok = ((wilddsc.dsc$a_pointer = tovmsspec(SvPVX(tmpglob),vmsspec)) != NULL);
+	    if (ok) wilddsc.dsc$w_length = (unsigned short int) strlen(wilddsc.dsc$a_pointer);
+	    while (ok && ((sts = lib$find_file(&wilddsc,&rsdsc,&cxt,
+					       &dfltdsc,NULL,NULL,NULL))&1)) {
+		end = rstr + (unsigned long int) *rslt;
+		if (!hasver) while (*end != ';') end--;
+		*(end++) = '\n';  *end = '\0';
+		for (cp = rstr; *cp; cp++) *cp = _tolower(*cp);
+		if (hasdir) {
+		    if (isunix) trim_unixpath(rstr,SvPVX(tmpglob),1);
+		    begin = rstr;
+		}
+		else {
+		    begin = end;
+		    while (*(--begin) != ']' && *begin != '>') ;
+		    ++begin;
+		}
+		ok = (PerlIO_puts(tmpfp,begin) != EOF);
+	    }
+	    if (cxt) (void)lib$find_file_end(&cxt);
+	    if (ok && sts != RMS$_NMF &&
+		sts != RMS$_DNF && sts != RMS$_FNF) ok = 0;
+	    if (!ok) {
+		if (!(sts & 1)) {
+		    SETERRNO((sts == RMS$_SYN ? EINVAL : EVMSERR),sts);
+		}
+		PerlIO_close(tmpfp);
+		fp = NULL;
+	    }
+	    else {
+		PerlIO_rewind(tmpfp);
+		IoTYPE(io) = IoTYPE_RDONLY;
+		IoIFP(io) = fp = tmpfp;
+		IoFLAGS(io) &= ~IOf_UNTAINT;  /* maybe redundant */
+	    }
+	}
+    }
+#else /* !VMS */
+#ifdef MACOS_TRADITIONAL
+    sv_setpv(tmpcmd, "glob ");
+    sv_catsv(tmpcmd, tmpglob);
+    sv_catpv(tmpcmd, " |");
+#else
+#ifdef DOSISH
+#ifdef OS2
+    sv_setpv(tmpcmd, "for a in ");
+    sv_catsv(tmpcmd, tmpglob);
+    sv_catpv(tmpcmd, "; do echo \"$a\\0\\c\"; done |");
+#else
+#ifdef DJGPP
+    sv_setpv(tmpcmd, "/dev/dosglob/"); /* File System Extension */
+    sv_catsv(tmpcmd, tmpglob);
+#else
+    sv_setpv(tmpcmd, "perlglob ");
+    sv_catsv(tmpcmd, tmpglob);
+    sv_catpv(tmpcmd, " |");
+#endif /* !DJGPP */
+#endif /* !OS2 */
+#else /* !DOSISH */
+#if defined(CSH)
+    sv_setpvn(tmpcmd, PL_cshname, PL_cshlen);
+    sv_catpv(tmpcmd, " -cf 'set nonomatch; glob ");
+    sv_catsv(tmpcmd, tmpglob);
+    sv_catpv(tmpcmd, "' 2>/dev/null |");
+#else
+    sv_setpv(tmpcmd, "echo ");
+    sv_catsv(tmpcmd, tmpglob);
+#if 'z' - 'a' == 25
+    sv_catpv(tmpcmd, "|tr -s ' \t\f\r' '\\012\\012\\012\\012'|");
+#else
+    sv_catpv(tmpcmd, "|tr -s ' \t\f\r' '\\n\\n\\n\\n'|");
+#endif
+#endif /* !CSH */
+#endif /* !DOSISH */
+#endif /* MACOS_TRADITIONAL */
+    (void)do_open(PL_last_in_gv, SvPVX(tmpcmd), SvCUR(tmpcmd),
+		  FALSE, O_RDONLY, 0, Nullfp);
+    fp = IoIFP(io);
+#endif /* !VMS */
+    LEAVE;
+    return fp;
+}

@@ -3,8 +3,8 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess <Paul.Marquess@btinternet.com>
- last modified 27th April 2000
- version 1.73
+ last modified 10 December 2000
+ version 1.74
 
  All comments/suggestions/problems are welcome
 
@@ -83,6 +83,9 @@
 		Rewrote push
         1.72 -  No change to DB_File.xs
         1.73 -  No change to DB_File.xs
+        1.74 -  A call to open needed parenthesised to stop it clashing
+                with a win32 macro.
+		Added Perl core patches 7703 & 7801.
 
 */
 
@@ -128,7 +131,9 @@
 #    include <db.h>
 #endif
 
+#ifdef CAN_PROTOTYPE
 extern void __getBerkeleyDBInfo(void);
+#endif
 
 #ifndef pTHX
 #    define pTHX
@@ -585,6 +590,7 @@ const DBT * key2 ;
 
     return (retval) ;
 }
+
 
 #ifdef BERKELEY_DB_1_OR_2
 #    define HASH_CB_SIZE_TYPE size_t
@@ -1274,7 +1280,7 @@ SV *   sv ;
             Flags |= DB_TRUNCATE ;
 #endif
 
-        status = RETVAL->dbp->open(RETVAL->dbp, name, NULL, RETVAL->type, 
+        status = (RETVAL->dbp->open)(RETVAL->dbp, name, NULL, RETVAL->type, 
 	    			Flags, mode) ; 
 	/* printf("open returned %d %s\n", status, db_strerror(status)) ; */
 
