@@ -487,6 +487,9 @@ sub sreftest (\$$) {
 }
 
 # test prototypes when they are evaled and there is a syntax error
+#
+# NOTE: evaled syntax errors mean scalar leaks
+#
 for my $p ( "", qw{ () ($) ($@) ($%) ($;$) (&) (&\@) (&@) (%) (\%) (\@) } ) {
   no warnings 'redefine';
   my $eval = "sub evaled_subroutine $p { &void *; }";
