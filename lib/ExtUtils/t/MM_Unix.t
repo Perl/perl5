@@ -1,6 +1,8 @@
 #!./perl -w
 
 # 2001-12-16 Tels first version
+# 2002-01-13 Tels 0.02 added some tests for various functions, added Andreas
+#		       fix to the version test (>= vs ==)
 
 BEGIN {
     chdir 't' if -d 't';
@@ -14,12 +16,13 @@ BEGIN {
         plan skip_all => 'Non-Unix platform';
     }
     else {
-        plan tests => 90; 
+        plan tests => 108; 
     }
 }
 
 BEGIN { use_ok( 'ExtUtils::MM_Unix' ); }
 
+$VERSION = '0.02';
 use strict;
 use File::Spec;
 
@@ -34,7 +37,7 @@ my $os =  ($ExtUtils::MM_Unix::Is_OS2 	|| 0)
 	+ ($ExtUtils::MM_Unix::Is_VMS   || 0); 
 ok ( $os <= 1,  'There can be only one (or none)');
 
-is ($ExtUtils::MM_Unix::VERSION, '1.12605', 'Should be that version');
+cmp_ok ($ExtUtils::MM_Unix::VERSION, '>=', '1.12606', 'Should be at least version 1.12606');
 
 # when the following calls like canonpath, catdir etc are replaced by
 # File::Spec calls, the test's become a bit pointless
@@ -48,6 +51,12 @@ is ($class->catdir('xx','xx'), File::Spec->catdir('xx','xx'),
      'catdir(xx, xx) => xx/xx');
 is ($class->catfile('xx','xx','yy'), File::Spec->catfile('xx','xx','yy'),
      'catfile(xx, xx) => xx/xx');
+
+is ($class->file_name_is_absolute('Bombdadil'), 
+    File::Spec->file_name_is_absolute('Bombdadil'),
+     'file_name_is_absolute()');
+
+is ($class->path(), File::Spec->path(), 'path() same as File::Spec->path()');
 
 foreach (qw/updir curdir rootdir/)
   {
@@ -76,46 +85,32 @@ foreach ( qw /
   exescan
   export_list
   extliblist
-  file_name_is_absolute
   find_perl
   fixin
   force
   guess_name
-  has_link_code
   htmlifypods
   init_dirscan
   init_main
   init_others
   install
   installbin
-  libscan
   linkext
   lsdir
   macro
   makeaperl
   makefile
   manifypods
-  maybe_command
   maybe_command_in_dirs
   needs_linking
-  nicetext
-  parse_version
   pasthru
-  path
-  perl_archive
-  perl_archive_after
-  perl_script
   perldepend
   pm_to_blib
-  post_constants
-  post_initialize
-  postamble
   ppd
   prefixify
   processPL
   quote_paren
   realclean
-  replace_manpage_separator
   static
   static_lib
   staticmake
@@ -136,6 +131,91 @@ foreach ( qw /
   / )
   {
   ok ($class->can ($_), "can $_");
+  }
+
+###############################################################################
+# some more detailed tests for the methods above
+
+ok ( join (' ', $class->dist_basics()), 'distclean :: realclean distcheck');
+
+###############################################################################
+# has_link_code tests
+
+my $t = {}; bless $t,$class;
+$t->{HAS_LINK_CODE} = 1; 
+is ($t->has_link_code(),1,'has_link_code'); is ($t->{HAS_LINK_CODE},1);
+
+$t->{HAS_LINK_CODE} = 0;
+is ($t->has_link_code(),0); is ($t->{HAS_LINK_CODE},0);
+
+delete $t->{HAS_LINK_CODE}; delete $t->{OBJECT};
+is ($t->has_link_code(),0); is ($t->{HAS_LINK_CODE},0);
+
+delete $t->{HAS_LINK_CODE}; $t->{OBJECT} = 1;
+is ($t->has_link_code(),1); is ($t->{HAS_LINK_CODE},1);
+
+delete $t->{HAS_LINK_CODE}; delete $t->{OBJECT}; $t->{MYEXTLIB} = 1;
+is ($t->has_link_code(),1); is ($t->{HAS_LINK_CODE},1);
+
+delete $t->{HAS_LINK_CODE}; delete $t->{MYEXTLIB}; $t->{C} = [ 'Gloin' ];
+is ($t->has_link_code(),1); is ($t->{HAS_LINK_CODE},1);
+
+###############################################################################
+# libscan
+
+is ($t->libscan('RCS'),'','libscan on RCS');
+is ($t->libscan('CVS'),'','libscan on CVS');
+is ($t->libscan('SCCS'),'','libscan on SCCS');
+is ($t->libscan('Fatty'),'Fatty','libscan on something not RCS, CVS or SCCS');
+
+###############################################################################
+# maybe_command
+
+is ($t->maybe_command('blargel'),undef,"'blargel' isn't a command");
+
+###############################################################################
+# nicetext (dummy method)
+
+is ($t->nicetext('LOTR'),'LOTR','nicetext');
+
+###############################################################################
+# parse_version
+
+my $self_name = '../lib/ExtUtils/t/MM_Unix.t';
+
+is ($t->parse_version($self_name),'0.02',
+  'parse_version on ourself');
+
+###############################################################################
+# perl_script (on unix any ordinary, readable file)
+
+is ($t->perl_script($self_name),$self_name, 'we pass as a perl_script()');
+
+###############################################################################
+# perm_rw perm_rwx
+
+is ($t->perm_rw(),'644', 'perm_rw() is 644');
+is ($t->perm_rwx(),'755', 'perm_rwx() is 755');
+
+###############################################################################
+# post_constants, postamble, post_initialize
+
+foreach (qw/ post_constants postamble post_initialize/)
+  {
+  is ($t->$_(),'', "$_() is an empty string");
+  }
+
+###############################################################################
+# replace_manpage_separator 
+
+is ($t->replace_manpage_separator('Foo/Bar'),'Foo::Bar','manpage_separator'); 
+
+###############################################################################
+# export_list, perl_archive, perl_archive_after
+
+foreach (qw/ export_list perl_archive perl_archive_after/)
+  {
+  is ($t->$_(),'',"$_() is empty string on Unix"); 
   }
 
 

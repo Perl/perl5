@@ -215,7 +215,7 @@ EOSCRIPT
     isnt( MM->perl_script( $script_name ),
           "${script_name}$script_ext", 
           "not a perl_script anymore ($script_ext)" );
-    is( MM->perl_script( $script_name ), '',
+    is( MM->perl_script( $script_name ), undef,
         "perl_script ($script_ext) returns empty" );
 }
 unlink "${script_name}$script_ext" if -f "${script_name}$script_ext";
