@@ -54,6 +54,8 @@
 #if defined(MYMALLOC)
 #define malloced_size		Perl_malloced_size
 #endif
+#define get_context		Perl_get_context
+#define set_context		Perl_set_context
 #if defined(PERL_OBJECT)
 #ifndef __BORLANDC__
 #endif
@@ -1503,6 +1505,8 @@
 #if defined(MYMALLOC)
 #define malloced_size		Perl_malloced_size
 #endif
+#define get_context		Perl_get_context
+#define set_context		Perl_set_context
 #if defined(PERL_OBJECT)
 #ifndef __BORLANDC__
 #endif
@@ -2929,6 +2933,8 @@
 #define mfree			Perl_mfree
 #define malloced_size		Perl_malloced_size
 #endif
+#define get_context		Perl_get_context
+#define set_context		Perl_set_context
 #if defined(PERL_OBJECT)
 #ifndef __BORLANDC__
 #endif

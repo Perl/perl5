@@ -319,12 +319,12 @@ Interfaces and implementation are subject to sudden and drastic changes.
 
 The -Dusethreads flag now enables the experimental interpreter-based thread
 support by default.  To get the flavor of experimental threads that was in
-5.005 instead, you need to ask for -Duse5005threads.
+5.005 instead, you need to run Configure with "-Dusethreads -Duse5005threads".
 
 As of v5.5.640, interpreter-threads support is still lacking a way to
 create new threads from Perl (i.e., C<use Thread;> will not work with
 interpreter threads).  C<use Thread;> continues to be available when you
-ask for -Duse5005threads, bugs and all.
+ask for use5005threads, bugs and all.
 
 =head2 New Configure flags
 
@@ -332,15 +332,16 @@ The following new flags may be enabled on the Configure command line
 by running Configure with C<-Dflag>.
 
     usemultiplicity
-    use5005threads
+    usethreads useithreads	(new interpreter threads: no Perl API yet)
+    usethreads use5005threads	(threads as they were in 5.005)
 
-    use64bitint		(equal to now deprecated 'use64bits')
+    use64bitint			(equal to now deprecated 'use64bits')
     use64bitall
 
     uselongdouble
     usemorebits
     uselargefiles
-    usesocks		(only SOCKS v5 supported)
+    usesocks			(only SOCKS v5 supported)
 
 =head2 Threadedness and 64-bitness now more daring
 

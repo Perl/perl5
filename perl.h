@@ -1722,10 +1722,7 @@ typedef pthread_key_t	perl_key;
 #  define PERL_WAIT_FOR_CHILDREN	NOOP
 #endif
 
-/* the traditional thread-unsafe notion of "current interpreter".
- * XXX todo: a thread-safe version that fetches it from TLS (akin to THR)
- * needs to be defined elsewhere (conditional on pthread_getspecific()
- * availability). */
+/* the traditional thread-unsafe notion of "current interpreter". */
 #ifndef PERL_SET_INTERP
 #  define PERL_SET_INTERP(i)		(PL_curinterp = (PerlInterpreter*)(i))
 #endif
@@ -1734,20 +1731,35 @@ typedef pthread_key_t	perl_key;
 #  define PERL_GET_INTERP		(PL_curinterp)
 #endif
 
+#ifndef PERL_SET_CONTEXT
+#  define PERL_SET_CONTEXT(i)		PERL_SET_INTERP(i)
+#endif
+
+#ifndef PERL_GET_CONTEXT
+#  define PERL_GET_CONTEXT		PERL_GET_INTERP
+#endif
+
 #if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_GET_THX)
 #  ifdef USE_THREADS
-#    define PERL_GET_THX		THR
+#    define PERL_GET_THX		((struct perl_thread *)PERL_GET_CONTEXT)
 #  else
 #  ifdef MULTIPLICITY
-#    define PERL_GET_THX		PERL_GET_INTERP
+#    define PERL_GET_THX		((PerlInterpreter *)PERL_GET_CONTEXT)
 #  else
 #  ifdef PERL_OBJECT
-#    define PERL_GET_THX		((CPerlObj*)PERL_GET_INTERP)
-#  else
-#    define PERL_GET_THX		((void*)0)
+#    define PERL_GET_THX		((CPerlObj *)PERL_GET_CONTEXT)
 #  endif
 #  endif
 #  endif
+#  define PERL_SET_THX(t)		PERL_SET_CONTEXT(t)
+#endif
+
+#ifndef PERL_GET_THX
+#  define PERL_GET_THX			((void*)NULL)
+#endif
+
+#ifndef PERL_SET_THX
+#  define PERL_SET_THX(t)		NOOP
 #endif
 
 #ifndef SVf

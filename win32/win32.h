@@ -28,8 +28,9 @@
 #endif
 
 #if defined(PERL_IMPLICIT_CONTEXT)
-#  define PERL_GET_INTERP	((PerlInterpreter*)GetPerlInterpreter())
-#  define PERL_SET_INTERP(i)	(SetPerlInterpreter(i))
+/* compat */
+#  define GetPerlInterpreter	Perl_get_context
+#  define SetPerlInterpreter	Perl_set_context
 #endif
 
 #ifdef __GNUC__
@@ -298,8 +299,6 @@ DllExport void		Perl_win32_init(int *argcp, char ***argvp);
 DllExport void		Perl_init_os_extras();
 DllExport void		win32_str_os_error(void *sv, DWORD err);
 DllExport int		RunPerl(int argc, char **argv, char **env);
-DllExport bool		SetPerlInterpreter(void* interp);
-DllExport void*		GetPerlInterpreter(void);
 
 typedef struct {
     HANDLE	childStdIn;

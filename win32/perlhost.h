@@ -1650,7 +1650,7 @@ win32_start_child(LPVOID arg)
 #endif
 
 
-    PERL_SET_INTERP(my_perl);
+    PERL_SET_THX(my_perl);
 
     /* set $$ to pseudo id */
 #ifdef PERL_SYNC_FORK
@@ -1745,7 +1745,7 @@ PerlProcFork(struct IPerlProc* piPerl)
     new_perl->Isys_intern.internal_host = h;
 #  ifdef PERL_SYNC_FORK
     id = win32_start_child((LPVOID)new_perl);
-    PERL_SET_INTERP(aTHXo);
+    PERL_SET_THX(aTHXo);
 #  else
 #    ifdef USE_RTL_THREAD_API
     handle = (HANDLE)_beginthreadex((void*)NULL, 0, win32_start_child,
@@ -1754,7 +1754,7 @@ PerlProcFork(struct IPerlProc* piPerl)
     handle = CreateThread(NULL, 0, win32_start_child,
 			  (LPVOID)new_perl, 0, &id);
 #    endif
-    PERL_SET_INTERP(aTHXo);	/* XXX perl_clone*() set TLS */
+    PERL_SET_THX(aTHXo);	/* XXX perl_clone*() set TLS */
     if (!handle)
 	Perl_croak(aTHX_ "panic: pseudo fork() failed");
     w32_pseudo_child_handles[w32_num_pseudo_children] = handle;

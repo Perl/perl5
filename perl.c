@@ -59,11 +59,25 @@ perl_alloc_using(struct IPerlMem* ipM, struct IPerlMem* ipMS,
 #ifdef PERL_OBJECT
     my_perl = (PerlInterpreter*)new(ipM) CPerlObj(ipM, ipMS, ipMP, ipE, ipStd,
 						  ipLIO, ipD, ipS, ipP);
-    PERL_SET_INTERP(my_perl);
+    if (!PL_curinterp) {
+	PERL_SET_INTERP(my_perl);
+#if defined(USE_THREADS) || defined(USE_ITHREADS)
+    	INIT_THREADS;
+        ALLOC_THREAD_KEY;
+#endif
+    }
+    PERL_SET_THX(my_perl);
 #else
     /* New() needs interpreter, so call malloc() instead */
     my_perl = (PerlInterpreter*)(*ipM->pMalloc)(ipM, sizeof(PerlInterpreter));
-    PERL_SET_INTERP(my_perl);
+    if (!PL_curinterp) {
+	PERL_SET_INTERP(my_perl);
+#if defined(USE_THREADS) || defined(USE_ITHREADS)
+    	INIT_THREADS;
+        ALLOC_THREAD_KEY;
+#endif
+    }
+    PERL_SET_THX(my_perl);
     Zero(my_perl, 1, PerlInterpreter);
     PL_Mem = ipM;
     PL_MemShared = ipMS;
@@ -95,7 +109,15 @@ perl_alloc(void)
 
     /* New() needs interpreter, so call malloc() instead */
     my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
-    PERL_SET_INTERP(my_perl);
+
+    if (!PL_curinterp) {
+	PERL_SET_INTERP(my_perl);
+#if defined(USE_THREADS) || defined(USE_ITHREADS)
+    	INIT_THREADS;
+        ALLOC_THREAD_KEY;
+#endif
+    }
+    PERL_SET_THX(my_perl);
     Zero(my_perl, 1, PerlInterpreter);
     return my_perl;
 }
@@ -118,7 +140,7 @@ perl_construct(pTHXx)
     struct perl_thread *thr = NULL;
 #endif /* FAKE_THREADS */
 #endif /* USE_THREADS */
-    
+
 #ifdef MULTIPLICITY
     init_interp();
     PL_perl_destruct_level = 1; 
@@ -129,14 +151,7 @@ perl_construct(pTHXx)
 
    /* Init the real globals (and main thread)? */
     if (!PL_linestr) {
-    	INIT_THREADS;
 #ifdef USE_THREADS
-#ifdef ALLOC_THREAD_KEY
-        ALLOC_THREAD_KEY;
-#else
-	if (pthread_key_create(&PL_thr_key, 0))
-	    Perl_croak(aTHX_ "panic: pthread_key_create");
-#endif
 	MUTEX_INIT(&PL_sv_mutex);
 	/*
 	 * Safe to use basic SV functions from now on (though
@@ -146,9 +161,9 @@ perl_construct(pTHXx)
 	COND_INIT(&PL_eval_cond);
 	MUTEX_INIT(&PL_threads_mutex);
 	COND_INIT(&PL_nthreads_cond);
-#ifdef EMULATE_ATOMIC_REFCOUNTS
+#  ifdef EMULATE_ATOMIC_REFCOUNTS
 	MUTEX_INIT(&PL_svref_mutex);
-#endif /* EMULATE_ATOMIC_REFCOUNTS */
+#  endif /* EMULATE_ATOMIC_REFCOUNTS */
 	
 	MUTEX_INIT(&PL_cred_mutex);
 

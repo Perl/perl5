@@ -508,8 +508,6 @@ START_EXTERN_C
 #define PL_sys_intern		(*Perl_Isys_intern_ptr(aTHXo))
 #undef  PL_tainting
 #define PL_tainting		(*Perl_Itainting_ptr(aTHXo))
-#undef  PL_thr_key
-#define PL_thr_key		(*Perl_Ithr_key_ptr(aTHXo))
 #undef  PL_threadnum
 #define PL_threadnum		(*Perl_Ithreadnum_ptr(aTHXo))
 #undef  PL_threads_mutex
@@ -882,6 +880,8 @@ START_EXTERN_C
 #define PL_malloc_mutex		(*Perl_Gmalloc_mutex_ptr(NULL))
 #undef  PL_patleave
 #define PL_patleave		(*Perl_Gpatleave_ptr(NULL))
+#undef  PL_thr_key
+#define PL_thr_key		(*Perl_Gthr_key_ptr(NULL))
 
 #endif /* !PERL_CORE */
 #endif /* PERL_OBJECT || MULTIPLICITY */

@@ -16,7 +16,11 @@
 /* global state */
 PERLVAR(Gcurinterp,	PerlInterpreter *)
 					/* currently running interpreter
-					 * XXX this needs to be in TLS */
+					 * (initial parent interpreter under
+					 * useithreads) */
+#if defined(USE_THREADS) || defined(USE_ITHREADS)
+PERLVAR(Gthr_key,	perl_key)	/* key to retrieve per-thread struct */
+#endif
 
 /* constants (these are not literals to facilitate pointer comparisons) */
 PERLVARIC(GYes,		char *, "1")
