@@ -39,7 +39,7 @@ INST_TOP=$(INST_DRV)\perl5004.5x
 # WARNING: Turning this on/off WILL break binary compatibility with extensions
 # you may have compiled with/without it.  Be prepared to recompile all extensions
 # if you change the default.
-PERL_MALLOC	*= define
+PERL_MALLOC	= define
 
 #
 # set the install locations of the compiler include/libraries
