@@ -2965,9 +2965,11 @@ get_vtbl(int vtbl_id)
     case want_vtbl_regexp:
 	result = &vtbl_regexp;
 	break;
+#ifdef USE_LOCALE_COLLATE
     case want_vtbl_collxfrm:
 	result = &vtbl_collxfrm;
 	break;
+#endif
     case want_vtbl_amagic:
 	result = &vtbl_amagic;
 	break;
