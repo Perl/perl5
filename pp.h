@@ -344,6 +344,7 @@ See C<PUSHu>.
           if (PL_amagic_generation) { \
 	    SV* tmpsv; \
 	    SV* arg= sp[shift]; \
+          if(0) goto am_again;  /* shut up unused warning */ \
 	  am_again: \
 	    if ((SvAMAGIC(arg))&&\
 		(tmpsv=AMG_CALLun(arg,meth))) {\
