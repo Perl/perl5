@@ -559,6 +559,11 @@ pushed. e.g. ":encoding(ascii)" would return an SvPV with value
 "ascii". (I<param> and I<flags> arguments can be ignored in most
 cases)
 
+If the layer's C<Pushed> function uses an extra argument, this
+function is a must if the layer is ever going to be duped, since
+C<Dup> will use C<Getarg> to retrieve the argument originally passed
+to C<Pushed>.
+
 =item Fileno
 
 	IV        (*Fileno)(pTHX_ PerlIO *f);
