@@ -787,8 +787,6 @@
 #define Perl_newRV_noinc  CPerlObj::Perl_newRV_noinc
 #undef  newSV
 #define newSV             CPerlObj::Perl_newSV
-#undef  newSV
-#define newSV             CPerlObj::Perl_newSV
 #undef  newSVREF
 #define newSVREF          CPerlObj::Perl_newSVREF
 #undef  newSVOP
@@ -799,14 +797,14 @@
 #define newSVnv           CPerlObj::Perl_newSVnv
 #undef  newSVpv
 #define newSVpv           CPerlObj::Perl_newSVpv
-#undef  newSVrv
-#define newSVrv           CPerlObj::Perl_newSVrv
-#undef  newSVsv
-#define newSVsv           CPerlObj::Perl_newSVsv
 #undef  newSVpvf
 #define newSVpvf          CPerlObj::Perl_newSVpvf
 #undef  newSVpvn
 #define newSVpvn          CPerlObj::Perl_newSVpvn
+#undef  newSVrv
+#define newSVrv           CPerlObj::Perl_newSVrv
+#undef  newSVsv
+#define newSVsv           CPerlObj::Perl_newSVsv
 #undef  newUNOP
 #define newUNOP           CPerlObj::Perl_newUNOP
 #undef  newWHILEOP

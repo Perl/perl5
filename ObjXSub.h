@@ -1207,8 +1207,6 @@
 #define newRV_noinc           pPerl->Perl_newRV_noinc
 #undef  newSV
 #define newSV                 pPerl->Perl_newSV
-#undef  newSV
-#define newSV                 pPerl->Perl_newSV
 #undef  newSVREF
 #define newSVREF              pPerl->Perl_newSVREF
 #undef  newSVOP
@@ -1219,6 +1217,10 @@
 #define newSVnv               pPerl->Perl_newSVnv
 #undef  newSVpv
 #define newSVpv               pPerl->Perl_newSVpv
+#undef  newSVpvf
+#define newSVpvf              pPerl->Perl_newSVpvf
+#undef  newSVpvn
+#define newSVpvn              pPerl->Perl_newSVpvn
 #undef  newSVrv
 #define newSVrv               pPerl->Perl_newSVrv
 #undef  newSVsv

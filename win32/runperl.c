@@ -762,14 +762,14 @@ public:
     };
     virtual SSize_t Read(PerlIO* pf, void *buffer, Size_t size, int &err)
     {
-	SSize_t i = win32_fread(buffer, size, 1, (FILE*)pf);
+	SSize_t i = win32_fread(buffer, 1, size, (FILE*)pf);
 	if(errno)
 	    err = errno;
 	return i;
     };
     virtual SSize_t Write(PerlIO* pf, const void *buffer, Size_t size, int &err)
     {
-	SSize_t i = win32_fwrite(buffer, size, 1, (FILE*)pf);
+	SSize_t i = win32_fwrite(buffer, 1, size, (FILE*)pf);
 	if(errno)
 	    err = errno;
 	return i;
