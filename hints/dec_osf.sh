@@ -186,18 +186,12 @@ esac
 
 # The patch 23787
 # http://public.activestate.com/cgi-bin/perlbrowse?patch=23787
-# broke things for gcc (at least gcc 3.3) so that many of the
-# pack() checksum tests for formats L, j, J, especially when combined
-# with the < and > specifiers, started to fail if compiled with -O3.
+# broke things for gcc (at least gcc 3.3) so that many of the pack()
+# checksum tests for formats L, j, J, especially when combined
+# with the < and > specifiers, started to fail if compiled with plain -O3.
 case "$isgcc" in
 gcc)
-    cat <<EOM >&4
-
-I'm lowering the optimisation level on pp_pack.c because gcc is known
-to misoptimise certain parts of it in Tru64.
-
-EOM
-pp_pack_cflags='optimize=-O1'
+pp_pack_cflags='optimize="-O3 -fno-cse-skip-blocks"'
 ;;
 esac
 
