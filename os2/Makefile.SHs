@@ -30,6 +30,10 @@ $(AOUT_LIBPERL_DLL): perl.imp perl.dll perl5.def
 
 perl.imp: perl5.def
 	emximp -o perl.imp perl5.def
+	echo	'emx_calloc		emxlibcm	400	?' >> $@
+	echo	'emx_free		emxlibcm	401	?' >> $@
+	echo	'emx_malloc		emxlibcm	402	?' >> $@
+	echo	'emx_realloc		emxlibcm	403	?' >> $@
 
 perl.dll: $(obj) perl5.def perl$(OBJ_EXT)
 	$(LD) $(LDDLFLAGS) -o $@ perl$(OBJ_EXT) $(obj) $(libs) perl5.def

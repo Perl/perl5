@@ -118,3 +118,7 @@ after 5.003_08:
 	should work on OS/2 2.1 again.
 	uses reliable signals when spawing.
 	do not use popen() any more - no intermediate shell unless needed.
+
+after 5.003_11:
+	Functions emx_{malloc,realloc,calloc,free} are exported from DLL.
+	get_sysinfo() bugs corrected (flags were not used and wrongly defined).

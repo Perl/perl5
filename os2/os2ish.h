@@ -109,6 +109,11 @@ char *my_tmpnam (char *);
 
 #define my_getenv(var) getenv(var)
 
+void *emx_calloc (size_t, size_t);
+void emx_free (void *);
+void *emx_malloc (size_t);
+void *emx_realloc (void *, size_t);
+
 /*****************************************************************************/
 
 #include <stdlib.h>	/* before the following definitions */
@@ -203,8 +208,8 @@ char *os2error(int rc);
 	Dos32QuerySysState(flags, 0,  pid, 0, buf, bufsz)
 
 #define QSS_PROCESS	1
-#define QSS_MODULE	2
-#define QSS_SEMAPHORES	4
+#define QSS_MODULE	4
+#define QSS_SEMAPHORES	2
 #define QSS_FILE	8		/* Buggy until fixpack18 */
 #define QSS_SHARED	16
 

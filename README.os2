@@ -20,30 +20,40 @@ be read I<as is>: either as F<README.os2>, or F<pod/perlos2.pod>.
 
 To read the F<.INF> version of documentation (B<very> recommended)
 outside of OS/2, one needs an IBM's reader (may be available on IBM
-ftp sites (?)  (URL anyone?)) or shipped with PC DOS 7.0.
+ftp sites (?)  (URL anyone?)) or shipped with PC DOS 7.0 and IBM's
+Visual Age C++ 3.5.
+
+A copy of a Win* viewer is contained in the "Just add OS/2 Warp" package
+
+  ftp://ftp.software.ibm.com/ps/products/os2/tools/jaow/jaow.zip
+
+in F<?:\JUST_ADD\view.exe>. This gives one an access to B<EMX>'s 
+F<.INF> docs as well (text form is available in F</emx/doc> in 
+B<EMX>'s distribution).
 
 =cut
 
 Contents
  
- perlos2 - Perl under OS/2 
+ perlos2 - Perl under OS/2, DOS, Win0.3*, Win0.95 and WinNT. 
 
-       NAME 
-       SYNOPSIS 
-       DESCRIPTION 
+      NAME 
+      SYNOPSIS 
+      DESCRIPTION 
          -  Target 
          -  Other OSes 
          -  Prerequisites 
          -  Starting Perl programs under OS/2 
          -  Starting OS/2 programs under Perl 
-       Frequently asked questions 
+      Frequently asked questions 
          -  I cannot run external programs 
-         -  I cannot embed perl into my program, or use perl.dll from my program.   
-       INSTALLATION 
+         -  I cannot embed perl into my program, or use perl.dll from my program. 
+         -  `` and pipe-open do not work under DOS. 
+      INSTALLATION 
          -  Automatic binary installation 
          -  Manual binary installation 
          -  Warning 
-       Accessing documentation 
+      Accessing documentation 
          -  OS/2 .INF file 
          -  Plain text 
          -  Manpages 
@@ -51,7 +61,7 @@ Contents
          -  GNU info files 
          -  .PDF files 
          -  LaTeX docs 
-       BUILD 
+      BUILD 
          -  Prerequisites 
          -  Getting perl source 
          -  Application of the patches 
@@ -60,20 +70,21 @@ Contents
          -  Testing 
          -  Installing the built perl 
          -  a.out-style build 
-       Build FAQ 
+      Build FAQ 
          -  Some / became \ in pdksh. 
          -  'errno' - unresolved external 
          -  Problems with tr 
          -  Some problem (forget which ;-) 
          -  Library ... not found 
-         -  Segfault in make
-       Specific (mis)features of OS/2 port 
+         -  Segfault in make 
+      Specific (mis)features of OS/2 port 
          -  setpriority, getpriority 
          -  system() 
          -  Additional modules: 
          -  Prebuilt methods: 
          -  Misfeatures 
-       Perl flavors 
+         -  Modifications 
+      Perl flavors 
          -  perl.exe 
          -  perl_.exe 
          -  perl__.exe 
@@ -81,20 +92,21 @@ Contents
          -  Why strange names? 
          -  Why dynamic linking? 
          -  Why chimera build? 
-       ENVIRONMENT 
+      ENVIRONMENT 
          -  PERLLIB_PREFIX 
          -  PERL_BADLANG 
          -  PERL_BADFREE 
          -  PERL_SH_DIR 
          -  TMP or TEMP 
-       Evolution 
+      Evolution 
          -  Priorities 
          -  DLL name mangling 
          -  Threading 
          -  Calls to external programs 
-       AUTHOR 
-       SEE ALSO 
-
+         -  Memory allocation 
+      AUTHOR 
+      SEE ALSO 
+  
 =head1 DESCRIPTION
 
 =head2 Target
@@ -675,7 +687,7 @@ You need to apply the patches in F<./os2/diff.*> and
 F<./os2/POSIX.mkfifo> like this:
 
   gnupatch -p0 < os2\POSIX.mkfifo
-  gnupatch -p0 < os2\os2\diff.configure
+  gnupatch -p0 < os2\diff.configure
 
 You may also need to apply the patches supplied with the binary
 distribution of perl.
@@ -749,8 +761,8 @@ I submitted a patch to B<EMX> which makes it possible to fork() with EMX
 dynamic libraries loaded, which makes F<lib/io*> tests pass. This means
 that soon the number of failing tests may decrease yet more.
 
-However, the test F<lib/io_udp.t> is disabled, since it never ends, I
-do not know why.
+However, the test F<lib/io_udp.t> is disabled, since it never terminates, I
+do not know why. Comments/fixes welcome.
 
 The reasons for failed tests are:
 
@@ -1326,6 +1338,25 @@ C<CORE::system('cmd.exe', '/c', shift)>.
 If you have some working code for C<OS2::Cmd>, please send it to me,
 I will include it into distribution. I have no need for such a module, so
 cannot test it.
+
+=head2 Memory allocation
+
+Perl uses its own malloc() under OS/2 - interpreters are usually malloc-bound
+for speed, but perl is not, since its malloc is lightning-fast. 
+Unfortunately, it is also quite frivolous with memory usage as well.
+
+Since kitchen-top machines are usually low on memory, perl is compiled with
+all the possible memory-saving options. This probably makes perl's 
+malloc() as greedy with memory as the neighbor's malloc(), but still
+much quickier. Note that this is true only for a "typical" usage,
+it is possible that the perl malloc will be worse for some very special usage.
+
+Combination of perl's malloc() and rigid DLL name resolution creates
+a special problem with library functions which expect their return value to
+be free()d by system's free(). To facilitate extensions which need to call 
+such functions, system memory-allocation functions are still available with
+the prefix C<emx_> added. (Currently only DLL perl has this, it should 
+propagate to F<perl_.exe> shortly.)
 
 =cut
 

@@ -60,7 +60,7 @@ get_sysinfo(ULONG pid, ULONG flags)
     rc = QuerySysState(flags, pid, pbuffer, buf_len);
     while (rc == ERROR_BUFFER_OVERFLOW) {
 	Renew(pbuffer, buf_len *= 2, char);
-	rc = QuerySysState(QSS_PROCESS, pid, pbuffer, buf_len);
+	rc = QuerySysState(flags, pid, pbuffer, buf_len);
     }
     if (rc) {
 	FillOSError(rc);
