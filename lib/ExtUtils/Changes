@@ -1,4 +1,58 @@
-6.10_07
+6.12 Tue Jul 29 22:19:38 PDT 2003
+    - Should any of your prefixes be /, MakeMaker might lose this and
+      prepend your prefix as "prefixyour/directory" rather than
+      "prefix/your/directory" (Ed Moy bleadperl 20283)
+    - Reversing "realclean was duplicating work already done by clean"
+      (CVS 1.124 MM_Unix.pm).  Turns out it wasn't a duplication and this
+      was causing INST_* files to be left behind if your INST_LIB wasn't
+      blib/* as in the perl core.  realclean now removes the files copied
+      to INST_*.
+    - Eliminating xsubpp_version().  No longer relevant.  It was checking
+      for a feature added to xsubpp before 5.003_07 and doing it in a
+      really bizarre way.
+
+6.11 Thu Jul 24 01:24:37 PDT 2003
+    - Small grammatical doc touch up by Sean Burke
+    - Making basic.t clean up better after itself so it can be run
+      twice without setting up and cleaning up Big-Dummy again.
+    * Noting where to find make in the README
+    * Noting that MakeMaker does not produce a GNU make compatible Makefile
+      on Windows.
+    * 6.10_08 with a new version #.
+
+6.10_08 Mon Jul 21 18:17:06 PDT 2003
+    * $Config{installvendorman*dir} was being ignored and our default
+      always used. [rt.cpan.org #2949]
+    * Setting NORECURS to true was still resulting in a Makefile which
+      tried to recurse into subdirectories which contained a Makefile.PL
+      (it simply wouldn't have run them to generate Makefile's).
+      This appears to be a rather old bug.
+      [rt.cpan.org #2951]
+    * [rt.perl.org #4345] Arguments passed to WriteMakefile() would get
+      stopped upon by $self->{PARENT} in recursive builds in the process
+      of prepending a .. onto it.
+    - Command.t now using its own temp directory when testing 
+      expand_wildcards() so no stray files confuse it.
+    * No longer warning about 'postamble' attribute.
+    - Added installvars() to list INSTALL* variables so we don't keep
+      repeating the list all over the code.
+    - Added init_DEST() to create DESTINSTALL* variables for installing
+      with DESTDIR set.
+    * DESTDIR + PREFIX now does not duplicate DESTDIR.  [Redhat #91892
+      and part of rt.cpan.org #2954]
+    * DESTDIR is now not directly prepended to the INSTALL* variables.
+      installation targets now use DESTINSTALL* instead.  This prevents
+      the DESTDIR from showing up in places it shouldn't like perllocal.pod.
+      DESTDIR is still appearing in .packlist (bug). [rt.cpan.org #2954]
+    - MM_VMS->prefixify() wasn't honoring the %Config_Override causing
+      some MakeMaker generated config variables to be ignored.
+    - MM_VMS->prefixify() was only VMSifying part of its filepaths causing 
+      internal comparisions to get confused and think it had to prefixify 
+      when it didn't.
+
+6.10_07 Sat Jul  5 16:12:52 PDT 2003
+    * Fixing location of perllocal.pod so its always in INSTALLARCHLIB
+      instead of one for each perl, site and vendor.
     - Sun's make treats escaped newlines oddly.  Switching oneliner() back
       to using multiple -e's.
     * Bug in libscan() meant that any .pm containing RCS or CVS or SCCS
@@ -6,6 +60,10 @@
     - Command.t was getting confused in the core because it was reading
       files from the core t/ directory, not MakeMaker's t/ directry.
     - MM_OS2 PERL_ARCHIVE_AFTER test wrong for a.out systems (Ilya)
+    - Fixing perllocal.pod and XS installation on VMS.  An extraneous
+      newline was introduced when changing the install macros over to
+      $(ECHO).
+    - Added $(ECHO_N) macro to emulate 'echo -n'
 
 6.10_06 Sat Jun  7 00:55:29 PDT 2003
     - Whoops, Liblist.t busted on VMS after I turned strict on in

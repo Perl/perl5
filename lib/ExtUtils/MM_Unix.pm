@@ -14,13 +14,13 @@ use vars qw($VERSION @ISA
             $Is_Mac $Is_OS2 $Is_VMS $Is_Win32 $Is_Win95  $Is_Dos $Is_VOS
             $Is_QNX $Is_AIX $Is_OSF $Is_IRIX  $Is_NetBSD $Is_BSD
             $Is_SunOS4 $Is_Solaris $Is_SunOS
-            $Verbose %pm %static $Xsubpp_Version
+            $Verbose %pm %static
             %Config_Override
            );
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
-$VERSION = '1.38';
+$VERSION = '1.39';
 
 require ExtUtils::MM_Any;
 @ISA = qw(ExtUtils::MM_Any);
@@ -3406,10 +3406,11 @@ sub prefixify {
     my $path = $self->{uc $var} || 
                $Config_Override{lc $var} || $Config{lc $var} || '';
 
+    $rprefix .= '/' if $sprefix =~ m|/$|;
+
     print STDERR "  prefixify $var => $path\n" if $Verbose >= 2;
     print STDERR "    from $sprefix to $rprefix\n" if $Verbose >= 2;
 
-    $rprefix .= '/' if $sprefix =~ m|/$|; # Compensate for the slash
     if( $path !~ s{^\Q$sprefix\E\b}{$rprefix}s && $self->{ARGS}{PREFIX} ) {
 
         print STDERR "    cannot prefix, using default.\n" if $Verbose >= 2;
@@ -3489,7 +3490,7 @@ realclean purge ::  clean realclean_subdirs
         push(@m, "	\$(RM_F) \$(INST_STATIC)\n");
     }
 
-    my @files = ();
+    my @files = values %{$self->{PM}};
     push @files, $attribs{FILES} if $attribs{FILES};
     push @files, '$(FIRST_MAKEFILE)', '$(MAKEFILE_OLD)';
 
@@ -3952,21 +3953,7 @@ sub tool_xsubpp {
     }
 
 
-    my $xsubpp_version = $self->xsubpp_version($self->catfile($xsdir,"xsubpp"));
-
-    # What are the correct thresholds for version 1 && 2 Paul?
-    if ( $xsubpp_version > 1.923 ){
-	$self->{XSPROTOARG} = "" unless defined $self->{XSPROTOARG};
-    } else {
-	if (defined $self->{XSPROTOARG} && $self->{XSPROTOARG} =~ /\-prototypes/) {
-	    print STDOUT qq{Warning: This extension wants to pass the switch "-prototypes" to xsubpp.
-	Your version of xsubpp is $xsubpp_version and cannot handle this.
-	Please upgrade to a more recent version of xsubpp.
-};
-	} else {
-	    $self->{XSPROTOARG} = "";
-	}
-    }
+    $self->{XSPROTOARG} = "" unless defined $self->{XSPROTOARG};
 
     return qq{
 XSUBPPDIR = $xsdir
@@ -3977,61 +3964,6 @@ XSUBPPARGS = @tmargs
 XSUBPP_EXTRA_ARGS = 
 };
 };
-
-sub xsubpp_version
-{
-    my($self,$xsubpp) = @_;
-    return $Xsubpp_Version if defined $Xsubpp_Version; # global variable
-
-    my ($version) ;
-
-    # try to figure out the version number of the xsubpp on the system
-
-    # first try the -v flag, introduced in 1.921 & 2.000a2
-
-    return "" unless $self->needs_linking;
-
-    my $command = qq{$self->{PERL} "-I$self->{PERL_LIB}" $xsubpp -v 2>&1};
-    print "Running $command\n" if $Verbose >= 2;
-    $version = `$command` ;
-    warn "Running '$command' exits with status " . ($?>>8) if $?;
-    chop $version ;
-
-    return $Xsubpp_Version = $1 if $version =~ /^xsubpp version (.*)/ ;
-
-    # nope, then try something else
-
-    my $counter = '000';
-    my ($file) = 'temp' ;
-    $counter++ while -e "$file$counter"; # don't overwrite anything
-    $file .= $counter;
-
-    open(F, ">$file") or die "Cannot open file '$file': $!\n" ;
-    print F <<EOM ;
-MODULE = fred PACKAGE = fred
-
-int
-fred(a)
-        int     a;
-EOM
-
-    close F ;
-
-    $command = "$self->{PERL} $xsubpp $file 2>&1";
-    print "Running $command\n" if $Verbose >= 2;
-    my $text = `$command` ;
-    warn "Running '$command' exits with status " . ($?>>8) if $?;
-    unlink $file ;
-
-    # gets 1.2 -> 1.92 and 2.000a1
-    return $Xsubpp_Version = $1 if $text =~ /automatically by xsubpp version ([\S]+)\s*/  ;
-
-    # it is either 1.0 or 1.1
-    return $Xsubpp_Version = 1.1 if $text =~ /^Warning: ignored semicolon/ ;
-
-    # none of the above, so 1.0
-    return $Xsubpp_Version = "1.0" ;
-}
 
 
 =item all_target

@@ -12,7 +12,7 @@ require ExtUtils::MM_Unix;
 @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
 
 use vars qw($VERSION);
-$VERSION = '1.06';
+$VERSION = '1.07';
 
 use Config;
 use Cwd 'cwd';
@@ -875,11 +875,6 @@ install install_static install_dynamic ::
 
 .INCLUDE : \$(MACPERL_SRC)BulkBuildRules.mk
 ';
-}
-
-sub xsubpp_version
-{
-    return $ExtUtils::MakeMaker::Version;
 }
 
 
