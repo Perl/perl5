@@ -875,8 +875,8 @@ PP(pp_untie)
 		       (UV)SvREFCNT(obj) - 1 ) ;
            }
         }
-	sv_unmagic(sv, how) ;
     }
+    sv_unmagic(sv, how) ;
     RETPUSHYES;
 }
 

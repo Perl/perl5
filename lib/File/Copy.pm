@@ -180,7 +180,7 @@ sub copy {
 
 sub move {
     my($from,$to) = @_;
-    my($copied,$fromsz,$tosz1,$tomt1,$tosz2,$tomt2,$sts,$ossts);
+    my($fromsz,$tosz1,$tomt1,$tosz2,$tomt2,$sts,$ossts);
 
     if (-d $to && ! -d $from) {
 	$to = _catname($from, $to);
@@ -194,7 +194,6 @@ sub move {
     }
     return 1 if rename $from, $to;
 
-    ($sts,$ossts) = ($! + 0, $^E + 0);
     # Did rename return an error even though it succeeded, because $to
     # is on a remote NFS file system, and NFS lost the server's ack?
     return 1 if defined($fromsz) && !-e $from &&           # $from disappeared
@@ -203,7 +202,8 @@ sub move {
                 $tosz2 == $fromsz;                         # it's all there
 
     ($tosz1,$tomt1) = (stat($to))[7,9];  # just in case rename did something
-    return 1 if ($copied = copy($from,$to)) && unlink($from);
+    return 1 if copy($from,$to) && unlink($from);
+    ($sts,$ossts) = ($! + 0, $^E + 0);
 
     ($tosz2,$tomt2) = ((stat($to))[7,9],0,0) if defined $tomt1;
     unlink($to) if !defined($tomt1) or $tomt1 != $tomt2 or $tosz1 != $tosz2;

@@ -1338,8 +1338,6 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 		sv_setpvn(ERRSV, message, msglen);
 	    }
 	}
-	else
-	    message = SvPVx(ERRSV, msglen);
 
 	while ((cxix = dopoptoeval(cxstack_ix)) < 0
 	       && PL_curstackinfo->si_prev)
@@ -1356,6 +1354,8 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 
 	    POPBLOCK(cx,PL_curpm);
 	    if (CxTYPE(cx) != CXt_EVAL) {
+		if (!message)
+		    message = SvPVx(ERRSV, msglen);
 		PerlIO_write(Perl_error_log, "panic: die ", 11);
 		PerlIO_write(Perl_error_log, message, msglen);
 		my_exit(1);
@@ -2872,13 +2872,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	*startop = PL_eval_root;
     } else
 	SAVEFREEOP(PL_eval_root);
-    if (gimme & G_VOID && ! PL_in_eval & EVAL_INREQUIRE)
-	/*
-	 * EVAL_INREQUIRE (the code is being required) is special-cased :
-	 * in this case we want scalar context to be forced, instead
-	 * of void context, so a proper return value is returned from
-	 * C<require> via this leaveeval op.
-	 */
+    if (gimme & G_VOID)
 	scalarvoid(PL_eval_root);
     else if (gimme & G_ARRAY)
 	list(PL_eval_root);
