@@ -12,6 +12,12 @@
  * Any changes made here will be lost!
  *
  * Edit those files and run 'make regen_headers' to effect changes.
+ *
+ *
+ * Up to the threshold of the door there mounted a flight of twenty-seven
+ * broad stairs, hewn by some unknown art of the same black stone.  This
+ * was the only entrance to the tower.
+ *
  */
 
 #include "EXTERN.h"
