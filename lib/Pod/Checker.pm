@@ -739,6 +739,7 @@ sub end_pod {
     ## print the number of errors found
     my $self   = shift;
     my $infile = $self->input_file();
+    my $out_fh = $self->output_handle();
 
     if(@{$self->{_list_stack}}) {
         # _TODO_ display, but don't count them for now
@@ -789,7 +790,19 @@ sub end_pod {
             -msg => "multiple occurrence of link target '$_'"});
     }
 
-    $self->num_errors(-1) if $self->{_commands} == 0;
+    ## Print the number of errors found
+    my $num_errors = $self->num_errors();
+    if ($num_errors > 0) {
+        printf $out_fh ("$infile has $num_errors pod syntax %s.\n",
+                      ($num_errors == 1) ? "error" : "errors");
+    }
+    elsif($self->{_commands} == 0) {
+        print $out_fh "$infile does not contain any pod commands.\n";
+        $self->num_errors(-1);
+    }
+    else {
+        print $out_fh "$infile pod syntax OK.\n";
+    }
 }
 
 # check a POD command directive
