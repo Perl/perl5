@@ -2800,17 +2800,24 @@ PerlIOBuf_unread(PerlIO *f, const void *vbuf, Size_t count)
    if (PerlIOBase(f)->flags & PERLIO_F_RDBUF)
     {
      avail = (b->ptr - b->buf);
+     if (avail > (SSize_t) count)
+      avail = count;
     }
    else
     {
      avail = b->bufsiz;
+     /* Adjust this here to keep a subsequent tell() correct.
+      * (b->ptr - b->buf) *MUST* be an accurate reflection of the amount
+      * unread in this buffer. (See previous part of the if for an example,
+      * or try PERLIO=unix on t/io/tell.t.)
+      */
+     if (avail > (SSize_t) count)
+      avail = count;
      b->end = b->buf + avail;
      b->ptr = b->end;
      PerlIOBase(f)->flags |= PERLIO_F_RDBUF;
-     b->posn -= b->bufsiz;
+     b->posn -= avail;
     }
-   if (avail > (SSize_t) count)
-    avail = count;
    if (avail > 0)
     {
      b->ptr -= avail;

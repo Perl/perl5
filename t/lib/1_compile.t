@@ -251,6 +251,7 @@ UNIVERSAL
 User::grent
 User::pwent
 XS::Typemap
+attributes
 attrs
 autouse
 base
