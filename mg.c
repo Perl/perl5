@@ -1959,7 +1959,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    }
 	}
 	else if (strEQ(mg->mg_ptr+1, "IDE_SYSTEM_CALLS"))
-	    PL_widesyscalls = SvTRUE(sv);
+	    PL_widesyscalls = (bool)SvTRUE(sv);
 	break;
     case '.':
 	if (PL_localizing) {

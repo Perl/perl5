@@ -3376,9 +3376,6 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
     OP *pack;
     OP *imop;
     OP *veop;
-    char *packname = Nullch;
-    STRLEN packlen = 0;
-    SV *packsv;
 
     if (id->op_type != OP_CONST)
 	Perl_croak(aTHX_ "Module name must be constant");
@@ -3436,15 +3433,6 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
 				   newSVOP(OP_METHOD_NAMED, 0, meth)));
     }
 
-    if (ckWARN(WARN_MISC) &&
-        imop && (imop != arg) && /* no warning on use 5.0; or explicit () */
-        SvPOK(packsv = ((SVOP*)id)->op_sv))
-    {
-        /* BEGIN will free the ops, so we need to make a copy */
-        packlen = SvCUR(packsv);
-        packname = savepvn(SvPVX(packsv), packlen);
-    }
-
     /* Fake up the BEGIN {}, which does its thing immediately. */
     newATTRSUB(floor,
 	newSVOP(OP_CONST, 0, newSVpvn("BEGIN", 5)),
@@ -3456,25 +3444,22 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
 	        newSTATEOP(0, Nullch, veop)),
 	    newSTATEOP(0, Nullch, imop) ));
 
-    if (packname) {
-	 /* The "did you use incorrect case?" warning used to be here.
-	  * The problem is that on case-insensitive filesystems one
-	  * might get false positives for "use" (and "require"):
-	  * "use Strict" or "require CARP" will work.  This causes
-	  * portability problems for the script: in case-strict
-	  * filesystems the script will stop working.
-	  *
-	  * The "incorrect case" warning checked whether "use Foo"
-	  * imported "Foo" to your namespace, but that is wrong, too:
-	  * there is no requirement nor promise in the language that
-	  * a Foo.pm should or would contain anything in package "Foo".
-	  *
-	  * There is very little Configure-wise that can be done, either:
-	  * the case-sensitivity of the build filesystem of Perl does not
-	  * help in guessing the case-sensitivity of the runtime environment.
-	  */
-        safefree(packname);
-    }
+    /* The "did you use incorrect case?" warning used to be here.
+     * The problem is that on case-insensitive filesystems one
+     * might get false positives for "use" (and "require"):
+     * "use Strict" or "require CARP" will work.  This causes
+     * portability problems for the script: in case-strict
+     * filesystems the script will stop working.
+     *
+     * The "incorrect case" warning checked whether "use Foo"
+     * imported "Foo" to your namespace, but that is wrong, too:
+     * there is no requirement nor promise in the language that
+     * a Foo.pm should or would contain anything in package "Foo".
+     *
+     * There is very little Configure-wise that can be done, either:
+     * the case-sensitivity of the build filesystem of Perl does not
+     * help in guessing the case-sensitivity of the runtime environment.
+     */
 
     PL_hints |= HINT_BLOCK_SCOPE;
     PL_copline = NOLINE;

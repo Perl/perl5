@@ -5644,6 +5644,9 @@ specified length.  Produces a fatal error if truncate isn't implemented
 on your system.  Returns true if successful, the undefined value
 otherwise.
 
+The behavior is undefined if LENGTH is greater than the length of the
+file.
+
 =item uc EXPR
 
 =item uc

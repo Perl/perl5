@@ -108,7 +108,7 @@
 #endif
 
 typedef struct RExC_state_t {
-    U16		flags16;		/* are we folding, multilining? */
+    U32		flags;			/* are we folding, multilining? */
     char	*precomp;		/* uncompiled string. */
     regexp	*rx;
     char	*start;			/* Start of input for compile */
@@ -132,7 +132,7 @@ typedef struct RExC_state_t {
 #endif
 } RExC_state_t;
 
-#define RExC_flags16	(pRExC_state->flags16)
+#define RExC_flags	(pRExC_state->flags)
 #define RExC_precomp	(pRExC_state->precomp)
 #define RExC_rx		(pRExC_state->rx)
 #define RExC_start	(pRExC_state->start)
@@ -228,8 +228,8 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 #define SCF_WHILEM_VISITED_POS	0x2000
 
 #define UTF (RExC_utf8 != 0)
-#define LOC ((RExC_flags16 & PMf_LOCALE) != 0)
-#define FOLD ((RExC_flags16 & PMf_FOLD) != 0)
+#define LOC ((RExC_flags & PMf_LOCALE) != 0)
+#define FOLD ((RExC_flags & PMf_FOLD) != 0)
 
 #define OOB_UNICODE		12345678
 #define OOB_NAMEDCLASS		-1
@@ -1746,7 +1746,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 		       PL_colors[4],PL_colors[5],PL_colors[0],
 		       (int)(xend - exp), RExC_precomp, PL_colors[1]);
     });
-    RExC_flags16 = pm->op_pmflags;
+    RExC_flags = pm->op_pmflags;
     RExC_sawback = 0;
 
     RExC_seen = 0;
@@ -1815,7 +1815,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     RExC_rx = r;
 
     /* Second pass: emit code. */
-    RExC_flags16 = pm->op_pmflags;	/* don't let top level (?i) bleed */
+    RExC_flags = pm->op_pmflags;	/* don't let top level (?i) bleed */
     RExC_parse = exp;
     RExC_end = xend;
     RExC_naughty = 0;
@@ -1831,7 +1831,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 
     /* Dig out information for optimizations. */
     r->reganch = pm->op_pmflags & PMf_COMPILETIME; /* Again? */
-    pm->op_pmflags = RExC_flags16;
+    pm->op_pmflags = RExC_flags;
     if (UTF)
         r->reganch |= ROPT_UTF8;	/* Unicode in it? */
     r->regstclass = NULL;
@@ -1959,7 +1959,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	if (longest_float_length
 	    || (data.flags & SF_FL_BEFORE_EOL
 		&& (!(data.flags & SF_FL_BEFORE_MEOL)
-		    || (RExC_flags16 & PMf_MULTILINE)))) {
+		    || (RExC_flags & PMf_MULTILINE)))) {
 	    int t;
 
 	    if (SvCUR(data.longest_fixed) 			/* ok to leave SvCUR */
@@ -1978,7 +1978,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    r->float_max_offset = data.offset_float_max;
 	    t = (data.flags & SF_FL_BEFORE_EOL /* Can't have SEOL and MULTI */
 		       && (!(data.flags & SF_FL_BEFORE_MEOL)
-			   || (RExC_flags16 & PMf_MULTILINE)));
+			   || (RExC_flags & PMf_MULTILINE)));
 	    fbm_compile(data.longest_float, t ? FBMcf_TAIL : 0);
 	}
 	else {
@@ -1992,7 +1992,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	if (longest_fixed_length
 	    || (data.flags & SF_FIX_BEFORE_EOL /* Cannot have SEOL and MULTI */
 		&& (!(data.flags & SF_FIX_BEFORE_MEOL)
-		    || (RExC_flags16 & PMf_MULTILINE)))) {
+		    || (RExC_flags & PMf_MULTILINE)))) {
 	    int t;
 
 	    if (SvUTF8(data.longest_fixed)) {
@@ -2005,7 +2005,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    r->anchored_offset = data.offset_fixed;
 	    t = (data.flags & SF_FIX_BEFORE_EOL /* Can't have SEOL and MULTI */
 		 && (!(data.flags & SF_FIX_BEFORE_MEOL)
-		     || (RExC_flags16 & PMf_MULTILINE)));
+		     || (RExC_flags & PMf_MULTILINE)));
 	    fbm_compile(data.longest_fixed, t ? FBMcf_TAIL : 0);
 	}
 	else {
@@ -2128,7 +2128,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
     register regnode *lastbr;
     register regnode *ender = 0;
     register I32 parno = 0;
-    I32 flags, oregflags = RExC_flags16, have_branch = 0, open = 0;
+    I32 flags, oregflags = RExC_flags, have_branch = 0, open = 0;
 
     /* for (?g), (?gc), and (?o) warnings; warning
        about (?c) will warn about (?g) -- japhy    */
@@ -2371,8 +2371,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 		    ++RExC_parse;
 		    goto parse_flags;
 		}
-		RExC_flags16 |= posflags;
-		RExC_flags16 &= ~negflags;
+		RExC_flags |= posflags;
+		RExC_flags &= ~negflags;
 		if (*RExC_parse == ':') {
 		    RExC_parse++;
 		    paren = ':';
@@ -2501,7 +2501,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 
     /* Check for proper termination. */
     if (paren) {
-	RExC_flags16 = (U16)oregflags;
+	RExC_flags = oregflags;
 	if (RExC_parse >= RExC_end || *nextchar(pRExC_state) != ')') {
 	    RExC_parse = oregcomp_parse;
 	    vFAIL("Unmatched (");
@@ -2783,9 +2783,9 @@ tryagain:
     case '^':
 	RExC_seen_zerolen++;
 	nextchar(pRExC_state);
-	if (RExC_flags16 & PMf_MULTILINE)
+	if (RExC_flags & PMf_MULTILINE)
 	    ret = reg_node(pRExC_state, MBOL);
-	else if (RExC_flags16 & PMf_SINGLELINE)
+	else if (RExC_flags & PMf_SINGLELINE)
 	    ret = reg_node(pRExC_state, SBOL);
 	else
 	    ret = reg_node(pRExC_state, BOL);
@@ -2795,9 +2795,9 @@ tryagain:
 	nextchar(pRExC_state);
 	if (*RExC_parse)
 	    RExC_seen_zerolen++;
-	if (RExC_flags16 & PMf_MULTILINE)
+	if (RExC_flags & PMf_MULTILINE)
 	    ret = reg_node(pRExC_state, MEOL);
-	else if (RExC_flags16 & PMf_SINGLELINE)
+	else if (RExC_flags & PMf_SINGLELINE)
 	    ret = reg_node(pRExC_state, SEOL);
 	else
 	    ret = reg_node(pRExC_state, EOL);
@@ -2805,7 +2805,7 @@ tryagain:
 	break;
     case '.':
 	nextchar(pRExC_state);
-	if (RExC_flags16 & PMf_SINGLELINE)
+	if (RExC_flags & PMf_SINGLELINE)
 	    ret = reg_node(pRExC_state, SANY);
 	else
 	    ret = reg_node(pRExC_state, REG_ANY);
@@ -3040,7 +3040,7 @@ tryagain:
 	break;
 
     case '#':
-	if (RExC_flags16 & PMf_EXTENDED) {
+	if (RExC_flags & PMf_EXTENDED) {
 	    while (RExC_parse < RExC_end && *RExC_parse != '\n') RExC_parse++;
 	    if (RExC_parse < RExC_end)
 		goto tryagain;
@@ -3071,7 +3071,7 @@ tryagain:
 	    {
 		oldp = p;
 
-		if (RExC_flags16 & PMf_EXTENDED)
+		if (RExC_flags & PMf_EXTENDED)
 		    p = regwhite(p, RExC_end);
 		switch (*p) {
 		case '^':
@@ -3196,7 +3196,7 @@ tryagain:
 			ender = *p++;
 		    break;
 		}
-		if (RExC_flags16 & PMf_EXTENDED)
+		if (RExC_flags & PMf_EXTENDED)
 		    p = regwhite(p, RExC_end);
 		if (UTF && FOLD) {
 		    /* Prime the casefolded buffer. */
@@ -4241,7 +4241,7 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 	    RExC_parse++;
 	    continue;
 	}
-	if (RExC_flags16 & PMf_EXTENDED) {
+	if (RExC_flags & PMf_EXTENDED) {
 	    if (isSPACE(*RExC_parse)) {
 		RExC_parse++;
 		continue;
@@ -5017,7 +5017,7 @@ Perl_save_re_context(pTHX)
     SAVEPPTR(RExC_precomp);		/* uncompiled string. */
     SAVEI32(RExC_npar);		/* () count. */
     SAVEI32(RExC_size);		/* Code size. */
-    SAVEI16(RExC_flags16);		/* are we folding, multilining? */
+    SAVEI32(RExC_flags);		/* are we folding, multilining? */
     SAVEVPTR(RExC_rx);		/* from regcomp.c */
     SAVEI32(RExC_seen);		/* from regcomp.c */
     SAVEI32(RExC_sawback);		/* Did we see \1, ...? */

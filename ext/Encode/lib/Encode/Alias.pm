@@ -1,11 +1,10 @@
 package Encode::Alias;
 use strict;
 use Encode;
-our $VERSION = do { my @r = (q$Revision: 1.29 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.30 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
-require Exporter;
 
-our @ISA = qw(Exporter);
+use base qw(Exporter);
 
 # Public, encouraged API is exported by default
 

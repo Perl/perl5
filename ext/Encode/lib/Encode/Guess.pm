@@ -1,9 +1,8 @@
 package Encode::Guess;
 use strict;
-use Carp;
 
 use Encode qw(:fallbacks find_encoding);
-our $VERSION = do { my @r = (q$Revision: 1.2 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.3 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 my $Canon = 'Guess';
 our $DEBUG = 0;
@@ -14,11 +13,9 @@ $Encode::Encoding{$Canon} =
 	   Suspects => { %DEF_SUSPECTS },
 	  } => __PACKAGE__;
 
-sub name { shift->{'Name'} }
-sub new_sequence { $_[0] }
+use base qw(Encode::Encoding);
 sub needs_lines { 1 }
 sub perlio_ok { 0 }
-sub DESTROY{}
 
 our @EXPORT = qw(guess_encoding);
 
@@ -51,14 +48,13 @@ sub add_suspects{
 sub decode($$;$){
     my ($obj, $octet, $chk) = @_;
     my $guessed = guess($obj, $octet);
-    ref($guessed) or croak $guessed;
+    unless (ref($guessed)){
+	require Carp;
+	Carp::croak($guessed);
+    }
     my $utf8 = $guessed->decode($octet, $chk);
     $_[1] = $octet if $chk;
     return $utf8;
-}
-
-sub encode{
-    croak "Tsk, tsk, tsk.  You can't be too lazy here!";
 }
 
 sub guess_encoding{

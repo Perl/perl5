@@ -18,6 +18,8 @@ $q = new threads::shared::queue;
 
 print "1..26\n";
 
+my $test : shared = 1;
+
 sub reader {
     my $tid = threads->self->tid;
     my $i = 0;
@@ -25,7 +27,7 @@ sub reader {
 	$i++;
 #	print "reader (tid $tid): waiting for element $i...\n";
 	my $el = $q->dequeue;
- 	print "ok\n";
+ 	print "ok $test\n"; $test++;
 #	print "reader (tid $tid): dequeued element $i: value $el\n";
 	select(undef, undef, undef, rand(1));
 	if ($el == -1) {
@@ -56,6 +58,6 @@ for(@threads) {
 #	print "waiting for join\n";
 	$_->join();
 }
-print "ok\n";
+print "ok $test\n";
 
 

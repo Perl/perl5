@@ -24,7 +24,7 @@ with all the defaults are:
 
 Each of these is explained in further detail below.
 
-B<NOTE>: starting from the release 5.6.0 Perl will use a version
+B<NOTE>: starting from the release 5.6.0, Perl will use a version
 scheme where even-numbered subreleases (like 5.6) are stable
 maintenance releases and odd-numbered subreleases (like 5.7) are
 unstable development releases.  Development releases should not be
@@ -806,23 +806,23 @@ and the long double support.
 
 =head2 Selecting File IO mechanisms
 
-Executive summary: in Perl 5.8 you should use the default "PerlIO"
+Executive summary: in Perl 5.8, you should use the default "PerlIO"
 as the IO mechanism unless you have a good reason not to.
 
 In more detail: previous versions of perl used the standard IO
 mechanisms as defined in stdio.h.  Versions 5.003_02 and later of perl
-introuced alternate IO mechanisms via a "PerlIO" abstraction, but up
-until and including Perl 5.6 stdio mechanism was still the default and
-the only supported mechanism.
+introduced alternate IO mechanisms via a "PerlIO" abstraction, but up
+until and including Perl 5.6, the stdio mechanism was still the default
+and the only supported mechanism.
 
-Starting from Perl 5.8 the default mechanism is to use the PerlIO
+Starting from Perl 5.8, the default mechanism is to use the PerlIO
 abstraction, because it allows better control of I/O mechanisms,
 instead of having to work with (often, work around) vendors' I/O
 implementations.
 
-This PerlIO abstraction can be disabled (but again, unless you know
-what you are doing, should not) either on the Configure command line
-with
+This PerlIO abstraction can be (but again, unless you know what you
+are doing, should not be) disabled either on the Configure command
+line with
 
 	sh Configure -Uuseperlio
 

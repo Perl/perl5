@@ -55,11 +55,11 @@ B<You have to recompile your XS modules.>
 (Pure Perl modules should continue to work.)
 
 The major reason for the discontinity is the new IO architecture
-called PerlIO.  The PerlIO is the default configuration because
+called PerlIO.  PerlIO is the default configuration because
 without it many new features of Perl 5.8 cannot be used.  In other
 words: you just have to recompile your modules, sorry about that.
 
-In future releases of Perl non-PerlIO aware XS modules may become
+In future releases of Perl, non-PerlIO aware XS modules may become
 completely unsupported.  This shouldn't be too difficult for module
 authors, however: PerlIO has been designed as a drop-in replacement
 (at the source code level) for the stdio interface.
@@ -2791,13 +2791,6 @@ threads are considered fundamentally broken.
  io/fs.t                                  36    1   2.78%  31
  op/numconvert.t                        1440   13   0.90%  208 509-510
  657-658 665-666 829-830 989-990 1149-1150
-
-=head2 UNICOS and UNICOS/mk
-
-The io/fs test #31 is failing because in UNICOS and UNICOS/mk the Perl
-truncate() cannot be used to grow the size of filehandles, only to
-reduce the size.  The workaround is to truncate files instead of
-filehandles.
 
 =head2 UNICOS/mk
 

@@ -3748,7 +3748,7 @@ discovered.  See L<perlre>.
 
 (F) The second argument of 3-argument open() is not among the list
 of valid modes: C<< < >>, C<< > >>, C<<< >> >>>, C<< +< >>,
-C<< +> >>, C<<< +>> >>>, C<-|>, C<|->.
+C<< +> >>, C<<< +>> >>>, C<-|>, C<|->, C<< <& >>, C<< >& >>.
 
 =item Unknown process %x sent message to prime_env_iter: %s
 
