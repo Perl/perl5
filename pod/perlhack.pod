@@ -1891,6 +1891,15 @@ If you plan to use the "Viewer" windows, then you only need this option:
 
     setenv PURIFYOPTIONS "-chain-length=25"
 
+In Bourne-type shells:
+
+    PURIFY_OPTIONS="..."
+    export PURIFY_OPTIONS
+
+or if you have the "env" utility:
+
+    env PURIFY_OPTIONS="..." ../pureperl ...
+
 =head2 Purify on NT
 
 Purify on Windows NT instruments the Perl binary 'perl.exe'

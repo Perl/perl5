@@ -310,6 +310,10 @@ locale "En_US"--and in Cshish shells (B<csh>, B<tcsh>)
 
 	setenv LC_ALL en_US.ISO8859-1
 
+or if you have the "env" application you can do in any shell
+
+	env LC_ALL=en_US.ISO8859-1 perl ...
+
 If you do not know what shell you have, consult your local
 helpdesk or the equivalent.
 

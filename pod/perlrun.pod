@@ -334,6 +334,9 @@ If you're just trying to get a print out of each line of Perl code
 as it executes, the way that C<sh -x> provides for shell scripts,
 you can't use Perl's B<-D> switch.  Instead do this 
 
+  # If you have "env" utility
+  env=PERLDB_OPTS="NonStop=1 AutoTrace=1 frame=2" perl -dS program
+
   # Bourne shell syntax
   $ PERLDB_OPTS="NonStop=1 AutoTrace=1 frame=2" perl -dS program
 
