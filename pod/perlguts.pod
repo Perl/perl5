@@ -843,7 +843,7 @@ stored in the C<mg_type> field. The value of C<how> should be chosen
 from the set of macros C<PERL_MAGIC_foo> found perl.h. Note that before
 these macros were added, Perl internals used to directly use character
 literals, so you may occasionally come across old code or documentation
-referrring to 'U' magic rather than C<PERL_MAGIC_uvar> for example.
+referring to 'U' magic rather than C<PERL_MAGIC_uvar> for example.
 
 The C<obj> argument is stored in the C<mg_obj> field of the C<MAGIC>
 structure.  If it is not the same as the C<sv> argument, the reference
