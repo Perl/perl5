@@ -18,6 +18,8 @@
 #include "perl.h"
 #include "XSUB.h"
 
+#ifdef USE_ITHREADS
+
 #define SHAREDSvPTR(a)      ((a)->sv)
 
 /*
@@ -749,10 +751,13 @@ Perl_sharedsv_init(pTHX)
   PL_sharehook = &Perl_sharedsv_share;
 }
 
+#endif /* USE_ITHREADS */
+
 MODULE = threads::shared	PACKAGE = threads::shared::tie
 
 PROTOTYPES: DISABLE
 
+#ifdef USE_ITHREADS
 
 void
 PUSH(shared_sv *shared, ...)
@@ -1005,7 +1010,14 @@ cond_broadcast_enabled(SV *ref)
 	    croak("cond_broadcast can only be used on shared values");
 	COND_BROADCAST(&shared->user_cond);
 
+#endif /* USE_ITHREADS */
+
 BOOT:
 {
+#ifdef USE_ITHREADS
      Perl_sharedsv_init(aTHX);
+#endif /* USE_ITHREADS */
 }
+
+
+
