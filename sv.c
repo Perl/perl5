@@ -5665,13 +5665,13 @@ Perl_gp_dup(pTHX_ GP *gp)
     if (!gp)
 	return (GP*)NULL;
     /* look for it in the table first */
-    ret = (GP*)sv_table_fetch(PL_sv_table, (SV*)gp);
+    ret = ptr_table_fetch(PL_ptr_table, gp);
     if (ret)
 	return ret;
 
     /* create anew and remember what it is */
     Newz(0, ret, 1, GP);
-    sv_table_store(PL_sv_table, (SV*)gp, (SV*)ret);
+    ptr_table_store(PL_ptr_table, gp, ret);
 
     /* clone */
     ret->gp_refcnt	= 0;			/* must be before any other dups! */
@@ -5739,21 +5739,21 @@ Perl_mg_dup(pTHX_ MAGIC *mg)
     return mgret;
 }
 
-SVTBL *
-Perl_sv_table_new(pTHX)
+PTR_TBL_t *
+Perl_ptr_table_new(pTHX)
 {
-    SVTBL *tbl;
-    Newz(0, tbl, 1, SVTBL);
+    PTR_TBL_t *tbl;
+    Newz(0, tbl, 1, PTR_TBL_t);
     tbl->tbl_max	= 511;
     tbl->tbl_items	= 0;
-    Newz(0, tbl->tbl_ary, tbl->tbl_max + 1, SVTBLENT*);
+    Newz(0, tbl->tbl_ary, tbl->tbl_max + 1, PTR_TBL_ENT_t*);
     return tbl;
 }
 
-SV *
-Perl_sv_table_fetch(pTHX_ SVTBL *tbl, SV *sv)
+void *
+Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, void *sv)
 {
-    SVTBLENT *tblent;
+    PTR_TBL_ENT_t *tblent;
     UV hash = (UV)sv;
     assert(tbl);
     tblent = tbl->tbl_ary[hash & tbl->tbl_max];
@@ -5761,15 +5761,19 @@ Perl_sv_table_fetch(pTHX_ SVTBL *tbl, SV *sv)
 	if (tblent->oldval == sv)
 	    return tblent->newval;
     }
-    return Nullsv;
+    return (void*)NULL;
 }
 
 void
-Perl_sv_table_store(pTHX_ SVTBL *tbl, SV *old, SV *new)
+Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, void *old, void *new)
 {
-    SVTBLENT *tblent, **otblent;
+    PTR_TBL_ENT_t *tblent, **otblent;
+    /* XXX this may be pessimal on platforms where pointers aren't good
+     * hash values e.g. if they grow faster in the most significant
+     * bits */
     UV hash = (UV)old;
     bool i = 1;
+
     assert(tbl);
     otblent = &tbl->tbl_ary[hash & tbl->tbl_max];
     for (tblent = *otblent; tblent; i=0, tblent = tblent->next) {
@@ -5779,30 +5783,30 @@ Perl_sv_table_store(pTHX_ SVTBL *tbl, SV *old, SV *new)
 	    return;
 	}
     }
-    Newz(0, tblent, 1, SVTBLENT);
+    Newz(0, tblent, 1, PTR_TBL_ENT_t);
     tblent->oldval = old;
     tblent->newval = new;
     tblent->next = *otblent;
     *otblent = tblent;
     tbl->tbl_items++;
     if (i && tbl->tbl_items > tbl->tbl_max)
-	sv_table_split(tbl);
+	ptr_table_split(tbl);
 }
 
 void
-Perl_sv_table_split(pTHX_ SVTBL *tbl)
+Perl_ptr_table_split(pTHX_ PTR_TBL_t *tbl)
 {
-    SVTBLENT **ary = tbl->tbl_ary;
+    PTR_TBL_ENT_t **ary = tbl->tbl_ary;
     UV oldsize = tbl->tbl_max + 1;
     UV newsize = oldsize * 2;
     UV i;
 
-    Renew(ary, newsize, SVTBLENT*);
-    Zero(&ary[oldsize], newsize-oldsize, SVTBLENT*);
+    Renew(ary, newsize, PTR_TBL_ENT_t*);
+    Zero(&ary[oldsize], newsize-oldsize, PTR_TBL_ENT_t*);
     tbl->tbl_max = --newsize;
     tbl->tbl_ary = ary;
     for (i=0; i < oldsize; i++, ary++) {
-	SVTBLENT **curentp, **entp, *ent;
+	PTR_TBL_ENT_t **curentp, **entp, *ent;
 	if (!*ary)
 	    continue;
 	curentp = ary + oldsize;
@@ -5834,7 +5838,7 @@ Perl_sv_dup(pTHX_ SV *sstr)
     if (!sstr || SvTYPE(sstr) == SVTYPEMASK)
 	return Nullsv;
     /* look for it in the table first */
-    dstr = sv_table_fetch(PL_sv_table, sstr);
+    dstr = ptr_table_fetch(PL_ptr_table, sstr);
     if (dstr)
 	return dstr;
 
@@ -5842,7 +5846,7 @@ Perl_sv_dup(pTHX_ SV *sstr)
 
     /* create anew and remember what it is */
     new_SV(dstr);
-    sv_table_store(PL_sv_table, sstr, dstr);
+    ptr_table_store(PL_ptr_table, sstr, dstr);
 
     /* clone */
     SvFLAGS(dstr)	= SvFLAGS(sstr);
@@ -6148,7 +6152,7 @@ dup_pvcv:
 }
 
 PerlInterpreter *
-perl_clone_using(PerlInterpreter *proto_perl, IV flags,
+perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 		 struct IPerlMem* ipM, struct IPerlEnv* ipE,
 		 struct IPerlStdIO* ipStd, struct IPerlLIO* ipLIO,
 		 struct IPerlDir* ipD, struct IPerlSock* ipS,
@@ -6161,12 +6165,13 @@ perl_clone_using(PerlInterpreter *proto_perl, IV flags,
     PERL_SET_INTERP(my_perl);
 
 #ifdef DEBUGGING
-    memset(my_perl, 0x0, sizeof(PerlInterpreter));
+    memset(my_perl, 0xab, sizeof(PerlInterpreter));
     PL_markstack = 0;
     PL_scopestack = 0;
     PL_savestack = 0;
     PL_retstack = 0;
 #else
+    Zero(my_perl, 1, PerlInterpreter);
 #  if 0
     Copy(proto_perl, my_perl, 1, PerlInterpreter);
 #  endif
@@ -6210,13 +6215,13 @@ perl_clone_using(PerlInterpreter *proto_perl, IV flags,
     PL_debug		= proto_perl->Idebug;
 
     /* create SV map for pointer relocation */
-    PL_sv_table = sv_table_new();
+    PL_ptr_table = ptr_table_new();
 
     /* initialize these special pointers as early as possible */
     SvANY(&PL_sv_undef)		= NULL;
     SvREFCNT(&PL_sv_undef)	= (~(U32)0)/2;
     SvFLAGS(&PL_sv_undef)	= SVf_READONLY|SVt_NULL;
-    sv_table_store(PL_sv_table, &proto_perl->Isv_undef, &PL_sv_undef);
+    ptr_table_store(PL_ptr_table, &proto_perl->Isv_undef, &PL_sv_undef);
 
     SvANY(&PL_sv_no)		= new_XPVNV();
     SvREFCNT(&PL_sv_no)		= (~(U32)0)/2;
@@ -6225,7 +6230,7 @@ perl_clone_using(PerlInterpreter *proto_perl, IV flags,
     SvCUR(&PL_sv_no)		= 0;
     SvLEN(&PL_sv_no)		= 1;
     SvNVX(&PL_sv_no)		= 0;
-    sv_table_store(PL_sv_table, &proto_perl->Isv_no, &PL_sv_no);
+    ptr_table_store(PL_ptr_table, &proto_perl->Isv_no, &PL_sv_no);
 
     SvANY(&PL_sv_yes)		= new_XPVNV();
     SvREFCNT(&PL_sv_yes)	= (~(U32)0)/2;
@@ -6234,13 +6239,13 @@ perl_clone_using(PerlInterpreter *proto_perl, IV flags,
     SvCUR(&PL_sv_yes)		= 1;
     SvLEN(&PL_sv_yes)		= 2;
     SvNVX(&PL_sv_yes)		= 1;
-    sv_table_store(PL_sv_table, &proto_perl->Isv_yes, &PL_sv_yes);
+    ptr_table_store(PL_ptr_table, &proto_perl->Isv_yes, &PL_sv_yes);
 
     /* create shared string table */
     PL_strtab		= newHV();
     HvSHAREKEYS_off(PL_strtab);
     hv_ksplit(PL_strtab, 512);
-    sv_table_store(PL_sv_table, (SV*)proto_perl->Istrtab, (SV*)PL_strtab);
+    ptr_table_store(PL_ptr_table, proto_perl->Istrtab, PL_strtab);
 
     PL_compiling		= proto_perl->Icompiling;
     PL_compiling.cop_stashpv	= SAVEPV(PL_compiling.cop_stashpv);
@@ -6289,7 +6294,7 @@ perl_clone_using(PerlInterpreter *proto_perl, IV flags,
     PL_perl_destruct_level = proto_perl->Iperl_destruct_level;
 
     /* magical thingies */
-    /* XXX time(&PL_basetime) instead? */
+    /* XXX time(&PL_basetime) when asked for? */
     PL_basetime		= proto_perl->Ibasetime;
     PL_formfeed		= sv_dup(proto_perl->Iformfeed);
 
@@ -6360,12 +6365,15 @@ perl_clone_using(PerlInterpreter *proto_perl, IV flags,
     PL_eval_start	= proto_perl->Ieval_start;
 
     /* runtime control stuff */
-    PL_curcopdb		= proto_perl->Icurcopdb;
+    if (proto_perl->Icurcopdb == &proto_perl->Icompiling)
+	PL_curcopdb	= &PL_compiling;
+    else
+	PL_curcopdb	= proto_perl->Icurcopdb;
     PL_copline		= proto_perl->Icopline;
 
     PL_filemode		= proto_perl->Ifilemode;
     PL_lastfd		= proto_perl->Ilastfd;
-    PL_oldname		= proto_perl->Ioldname;	/* XXX */
+    PL_oldname		= proto_perl->Ioldname;		/* XXX not quite right */
     PL_Argv		= NULL;
     PL_Cmd		= Nullch;
     PL_gensym		= proto_perl->Igensym;
@@ -6389,9 +6397,9 @@ perl_clone_using(PerlInterpreter *proto_perl, IV flags,
 	PL_exitlist	= (PerlExitListEntry*)NULL;
     PL_modglobal	= hv_dup_inc(proto_perl->Imodglobal);
 
-    PL_profiledata	= NULL;			/* XXX */
+    PL_profiledata	= NULL;
     PL_rsfp		= fp_dup(proto_perl->Irsfp, '<');
-    /* XXX PL_rsfp_filters entries have fake IoDIRP() */
+    /* PL_rsfp_filters entries have fake IoDIRP() */
     PL_rsfp_filters	= av_dup_inc(proto_perl->Irsfp_filters);
 
     PL_compcv			= cv_dup(proto_perl->Icompcv);
@@ -6422,9 +6430,9 @@ perl_clone_using(PerlInterpreter *proto_perl, IV flags,
     PL_cop_seqmax	= proto_perl->Icop_seqmax;
     PL_op_seqmax	= proto_perl->Iop_seqmax;
     PL_evalseq		= proto_perl->Ievalseq;
-    PL_origenviron	= proto_perl->Iorigenviron;	/* XXX */
+    PL_origenviron	= proto_perl->Iorigenviron;	/* XXX not quite right */
     PL_origalen		= proto_perl->Iorigalen;
-    PL_pidstatus	= newHV();
+    PL_pidstatus	= newHV();			/* XXX flag for cloning? */
     PL_osname		= SAVEPV(proto_perl->Iosname);
     PL_sh_path		= SAVEPV(proto_perl->Ish_path);
     PL_sighandlerp	= proto_perl->Isighandlerp;
@@ -6432,7 +6440,7 @@ perl_clone_using(PerlInterpreter *proto_perl, IV flags,
 
     PL_runops		= proto_perl->Irunops;
 
-    Copy(proto_perl->Itokenbuf, PL_tokenbuf, 256, char);	/* XXX */
+    Copy(proto_perl->Itokenbuf, PL_tokenbuf, 256, char);
 
 #ifdef CSH
     PL_cshlen		= proto_perl->Icshlen;
@@ -6446,8 +6454,8 @@ perl_clone_using(PerlInterpreter *proto_perl, IV flags,
     PL_lex_fakebrack	= proto_perl->Ilex_fakebrack;
     PL_lex_dojoin	= proto_perl->Ilex_dojoin;
     PL_lex_starts	= proto_perl->Ilex_starts;
-    PL_lex_stuff	= Nullsv;		/* XXX */
-    PL_lex_repl		= Nullsv;		/* XXX */
+    PL_lex_stuff	= sv_dup_inc(proto_perl->Ilex_stuff);
+    PL_lex_repl		= sv_dup_inc(proto_perl->Ilex_repl);
     PL_lex_op		= proto_perl->Ilex_op;
     PL_lex_inpat	= proto_perl->Ilex_inpat;
     PL_lex_inwhat	= proto_perl->Ilex_inwhat;
@@ -6473,7 +6481,7 @@ perl_clone_using(PerlInterpreter *proto_perl, IV flags,
     i = proto_perl->Ilinestart - SvPVX(proto_perl->Ilinestr);
     PL_linestart	= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
     PL_pending_ident	= proto_perl->Ipending_ident;
-    PL_sublex_info	= proto_perl->Isublex_info;	/* XXX */
+    PL_sublex_info	= proto_perl->Isublex_info;	/* XXX not quite right */
 
     PL_expect		= proto_perl->Iexpect;
 
@@ -6542,7 +6550,7 @@ perl_clone_using(PerlInterpreter *proto_perl, IV flags,
     PL_utf8_tolower	= sv_dup_inc(proto_perl->Iutf8_tolower);
 
     /* swatch cache */
-    PL_last_swash_hv	= Nullhv;	/* XXX recreate swatch cache? */
+    PL_last_swash_hv	= Nullhv;	/* reinits on demand */
     PL_last_swash_klen	= 0;
     PL_last_swash_key[0]= '\0';
     PL_last_swash_tmps	= Nullch;
@@ -6558,8 +6566,8 @@ perl_clone_using(PerlInterpreter *proto_perl, IV flags,
 
     PL_glob_index	= proto_perl->Iglob_index;
     PL_srand_called	= proto_perl->Isrand_called;
-    PL_uudmap['M']	= 0;		/* reinit on demand */
-    PL_bitcount		= Nullch;	/* reinit on demand */
+    PL_uudmap['M']	= 0;		/* reinits on demand */
+    PL_bitcount		= Nullch;	/* reinits on demand */
 
 
     /* thrdvar.h stuff */
@@ -6567,10 +6575,44 @@ perl_clone_using(PerlInterpreter *proto_perl, IV flags,
 /*    PL_curstackinfo	= clone_stackinfo(proto_perl->Tcurstackinfo);
     clone_stacks();
     PL_mainstack	= av_dup(proto_perl->Tmainstack);
-    PL_curstack		= av_dup(proto_perl->Tcurstack);*/	/* XXXXXX */
+    PL_curstack		= av_dup(proto_perl->Tcurstack);
+
+    PL_stack_max	= (SV**)0;
+    PL_stack_base	= (SV**)0;
+    PL_stack_sp		= (SV**)0;
+
+    PL_scopestack	= (I32*)0;
+    PL_scopestack_ix	= (I32)0;
+    PL_scopestack_max	= (I32)0;
+
+    PL_savestack	= (ANY*)0;
+    PL_savestack_ix	= (I32)0;
+    PL_savestack_max	= (I32)0;
+
+    PL_tmps_stack	= (SV**)0;
+    PL_tmps_ix		= (I32)-1;
+    PL_tmps_floor	= (I32)-1;
+    PL_tmps_max		= (I32)0;
+
+    PL_markstack	= (I32*)0;
+    PL_markstack_ptr	= (I32*)0;
+    PL_markstack_max	= (I32*)0;
+
+    PL_retstack		= (OP**)0;
+    PL_retstack_ix	= (I32)0;
+    PL_retstack_max	= (I32)0;
+*/	/* XXXXXX */
     init_stacks();
 
+    PL_start_env	= proto_perl->Tstart_env;	/* XXXXXX */
+    PL_top_env		= &PL_start_env;
+
     PL_op		= proto_perl->Top;
+
+    PL_Sv		= Nullsv;
+    PL_Xpv		= (XPV*)NULL;
+    PL_na		= proto_perl->Tna;
+
     PL_statbuf		= proto_perl->Tstatbuf;
     PL_statcache	= proto_perl->Tstatcache;
     PL_statgv		= gv_dup(proto_perl->Tstatgv);
@@ -6587,7 +6629,7 @@ perl_clone_using(PerlInterpreter *proto_perl, IV flags,
     PL_ofslen		= proto_perl->Tofslen;
     PL_ofs		= SAVEPVN(proto_perl->Tofs, PL_ofslen);
     PL_defoutgv		= gv_dup_inc(proto_perl->Tdefoutgv);
-    PL_chopset		= proto_perl->Tchopset;	/* XXX */
+    PL_chopset		= proto_perl->Tchopset;	/* XXX never deallocated */
     PL_toptarget	= sv_dup_inc(proto_perl->Ttoptarget);
     PL_bodytarget	= sv_dup_inc(proto_perl->Tbodytarget);
     PL_formtarget	= sv_dup(proto_perl->Tformtarget);
@@ -6598,8 +6640,6 @@ perl_clone_using(PerlInterpreter *proto_perl, IV flags,
     PL_dirty		= proto_perl->Tdirty;
     PL_localizing	= proto_perl->Tlocalizing;
 
-    PL_start_env	= proto_perl->Tstart_env;	/* XXXXXX */
-    PL_top_env		= &PL_start_env;
     PL_protect		= proto_perl->Tprotect;
     PL_errors		= sv_dup_inc(proto_perl->Terrors);
     PL_av_fetch_sv	= Nullsv;
@@ -6608,17 +6648,78 @@ perl_clone_using(PerlInterpreter *proto_perl, IV flags,
     PL_modcount		= proto_perl->Tmodcount;
     PL_lastgotoprobe	= Nullop;
     PL_dumpindent	= proto_perl->Tdumpindent;
+
+    if (proto_perl->Tsortcop == (OP*)&proto_perl->Icompiling)
+	PL_sortcop	= (OP*)&PL_compiling;
+    else
+	PL_sortcop	= proto_perl->Tsortcop;
     PL_sortstash	= hv_dup(proto_perl->Tsortstash);
     PL_firstgv		= gv_dup(proto_perl->Tfirstgv);
     PL_secondgv		= gv_dup(proto_perl->Tsecondgv);
     PL_sortcxix		= proto_perl->Tsortcxix;
-    PL_efloatbuf	= Nullch;
-    PL_efloatsize	= 0;
+    PL_efloatbuf	= Nullch;		/* reinits on demand */
+    PL_efloatsize	= 0;			/* reinits on demand */
+
+    /* regex stuff */
 
     PL_screamfirst	= NULL;
     PL_screamnext	= NULL;
-    PL_maxscream	= -1;
+    PL_maxscream	= -1;			/* reinits on demand */
     PL_lastscream	= Nullsv;
+
+    PL_watchaddr	= NULL;
+    PL_watchok		= Nullch;
+
+    PL_regdummy		= proto_perl->Tregdummy;
+    PL_regcomp_parse	= Nullch;
+    PL_regxend		= Nullch;
+    PL_regcode		= (regnode*)NULL;
+    PL_regnaughty	= 0;
+    PL_regsawback	= 0;
+    PL_regprecomp	= Nullch;
+    PL_regnpar		= 0;
+    PL_regsize		= 0;
+    PL_regflags		= 0;
+    PL_regseen		= 0;
+    PL_seen_zerolen	= 0;
+    PL_seen_evals	= 0;
+    PL_regcomp_rx	= (regexp*)NULL;
+    PL_extralen		= 0;
+    PL_colorset		= 0;		/* reinits PL_colors[] */
+    /*PL_colors[6]	= {0,0,0,0,0,0};*/
+    PL_reg_whilem_seen	= 0;
+    PL_reginput		= Nullch;
+    PL_regbol		= Nullch;
+    PL_regeol		= Nullch;
+    PL_regstartp	= (I32*)NULL;
+    PL_regendp		= (I32*)NULL;
+    PL_reglastparen	= (U32*)NULL;
+    PL_regtill		= Nullch;
+    PL_regprev		= '\n';
+    PL_reg_start_tmp	= (char**)NULL;
+    PL_reg_start_tmpl	= 0;
+    PL_regdata		= (struct reg_data*)NULL;
+    PL_bostr		= Nullch;
+    PL_reg_flags	= 0;
+    PL_reg_eval_set	= 0;
+    PL_regnarrate	= 0;
+    PL_regprogram	= (regnode*)NULL;
+    PL_regindent	= 0;
+    PL_regcc		= (CURCUR*)NULL;
+    PL_reg_call_cc	= (struct re_cc_state*)NULL;
+    PL_reg_re		= (regexp*)NULL;
+    PL_reg_ganch	= Nullch;
+    PL_reg_sv		= Nullsv;
+    PL_reg_magic	= (MAGIC*)NULL;
+    PL_reg_oldpos	= 0;
+    PL_reg_oldcurpm	= (PMOP*)NULL;
+    PL_reg_curpm	= (PMOP*)NULL;
+    PL_reg_oldsaved	= Nullch;
+    PL_reg_oldsavedlen	= 0;
+    PL_reg_maxiter	= 0;
+    PL_reg_leftiter	= 0;
+    PL_reg_poscache	= Nullch;
+    PL_reg_poscache_size= 0;
 
     /* RE engine - function pointers */
     PL_regcompp		= proto_perl->Tregcompp;
@@ -6627,20 +6728,14 @@ perl_clone_using(PerlInterpreter *proto_perl, IV flags,
     PL_regint_string	= proto_perl->Tregint_string;
     PL_regfree		= proto_perl->Tregfree;
 
-    PL_regindent	= 0;
     PL_reginterp_cnt	= 0;
-    PL_reg_start_tmp	= 0;
-    PL_reg_start_tmpl	= 0;
-    PL_reg_poscache	= Nullch;
-
-    PL_watchaddr	= NULL;
-    PL_watchok		= Nullch;
+    PL_reg_starttry	= 0;
 
     return my_perl;
 }
 
 PerlInterpreter *
-perl_clone(pTHXx_ IV flags)
+perl_clone(pTHXx_ UV flags)
 {
     return perl_clone_using(aTHXx_ flags, PL_Mem, PL_Env, PL_StdIO, PL_LIO,
 			    PL_Dir, PL_Sock, PL_Proc);

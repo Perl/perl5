@@ -1322,8 +1322,8 @@ typedef struct xpvfm XPVFM;
 typedef struct xpvio XPVIO;
 typedef struct mgvtbl MGVTBL;
 typedef union any ANY;
-typedef struct svtblent SVTBLENT;
-typedef struct svtbl SVTBL;
+typedef struct ptr_tbl_ent PTR_TBL_ENT_t;
+typedef struct ptr_tbl PTR_TBL_t;
 
 #include "handy.h"
 
@@ -1754,16 +1754,16 @@ struct scan_data_t;		/* Used in S_* functions in regcomp.c */
 
 typedef I32 CHECKPOINT;
 
-struct svtblent {
-    struct svtblent*	next;
-    SV*			oldval;
-    SV*			newval;
+struct ptr_tbl_ent {
+    struct ptr_tbl_ent*		next;
+    void*			oldval;
+    void*			newval;
 };
 
-struct svtbl {
-    struct svtblent**	tbl_ary;
-    UV			tbl_max;
-    UV			tbl_items;
+struct ptr_tbl {
+    struct ptr_tbl_ent**	tbl_ary;
+    UV				tbl_max;
+    UV				tbl_items;
 };
 
 #if defined(iAPX286) || defined(M_I286) || defined(I80286)

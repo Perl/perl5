@@ -774,10 +774,10 @@
 #if defined(HAVE_INTERP_INTERN)
 #define sys_intern_dup		Perl_sys_intern_dup
 #endif
-#define sv_table_new		Perl_sv_table_new
-#define sv_table_fetch		Perl_sv_table_fetch
-#define sv_table_store		Perl_sv_table_store
-#define sv_table_split		Perl_sv_table_split
+#define ptr_table_new		Perl_ptr_table_new
+#define ptr_table_fetch		Perl_ptr_table_fetch
+#define ptr_table_store		Perl_ptr_table_store
+#define ptr_table_split		Perl_ptr_table_split
 #endif
 #if defined(PERL_OBJECT)
 #endif
@@ -2142,10 +2142,10 @@
 #if defined(HAVE_INTERP_INTERN)
 #define sys_intern_dup(a,b)	Perl_sys_intern_dup(aTHX_ a,b)
 #endif
-#define sv_table_new()		Perl_sv_table_new(aTHX)
-#define sv_table_fetch(a,b)	Perl_sv_table_fetch(aTHX_ a,b)
-#define sv_table_store(a,b,c)	Perl_sv_table_store(aTHX_ a,b,c)
-#define sv_table_split(a)	Perl_sv_table_split(aTHX_ a)
+#define ptr_table_new()		Perl_ptr_table_new(aTHX)
+#define ptr_table_fetch(a,b)	Perl_ptr_table_fetch(aTHX_ a,b)
+#define ptr_table_store(a,b,c)	Perl_ptr_table_store(aTHX_ a,b,c)
+#define ptr_table_split(a)	Perl_ptr_table_split(aTHX_ a)
 #endif
 #if defined(PERL_OBJECT)
 #endif
@@ -4220,14 +4220,16 @@
 #define Perl_sys_intern_dup	CPerlObj::Perl_sys_intern_dup
 #define sys_intern_dup		Perl_sys_intern_dup
 #endif
-#define Perl_sv_table_new	CPerlObj::Perl_sv_table_new
-#define sv_table_new		Perl_sv_table_new
-#define Perl_sv_table_fetch	CPerlObj::Perl_sv_table_fetch
-#define sv_table_fetch		Perl_sv_table_fetch
-#define Perl_sv_table_store	CPerlObj::Perl_sv_table_store
-#define sv_table_store		Perl_sv_table_store
-#define Perl_sv_table_split	CPerlObj::Perl_sv_table_split
-#define sv_table_split		Perl_sv_table_split
+#define Perl_ptr_table_new	CPerlObj::Perl_ptr_table_new
+#define ptr_table_new		Perl_ptr_table_new
+#define Perl_ptr_table_fetch	CPerlObj::Perl_ptr_table_fetch
+#define ptr_table_fetch		Perl_ptr_table_fetch
+#define Perl_ptr_table_store	CPerlObj::Perl_ptr_table_store
+#define ptr_table_store		Perl_ptr_table_store
+#define Perl_ptr_table_split	CPerlObj::Perl_ptr_table_split
+#define ptr_table_split		Perl_ptr_table_split
+#define perl_clone		CPerlObj::perl_clone
+#define perl_clone_using	CPerlObj::perl_clone_using
 #endif
 #if defined(PERL_OBJECT)
 #endif

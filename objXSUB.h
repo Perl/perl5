@@ -366,6 +366,8 @@
 #define PL_preprocess		(*Perl_Ipreprocess_ptr(aTHXo))
 #undef  PL_profiledata
 #define PL_profiledata		(*Perl_Iprofiledata_ptr(aTHXo))
+#undef  PL_ptr_table
+#define PL_ptr_table		(*Perl_Iptr_table_ptr(aTHXo))
 #undef  PL_replgv
 #define PL_replgv		(*Perl_Ireplgv_ptr(aTHXo))
 #undef  PL_rsfp
@@ -418,8 +420,6 @@
 #define PL_sv_objcount		(*Perl_Isv_objcount_ptr(aTHXo))
 #undef  PL_sv_root
 #define PL_sv_root		(*Perl_Isv_root_ptr(aTHXo))
-#undef  PL_sv_table
-#define PL_sv_table		(*Perl_Isv_table_ptr(aTHXo))
 #undef  PL_sv_undef
 #define PL_sv_undef		(*Perl_Isv_undef_ptr(aTHXo))
 #undef  PL_sv_yes
@@ -3568,22 +3568,26 @@
 #undef  sys_intern_dup
 #define sys_intern_dup		Perl_sys_intern_dup
 #endif
-#undef  Perl_sv_table_new
-#define Perl_sv_table_new	pPerl->Perl_sv_table_new
-#undef  sv_table_new
-#define sv_table_new		Perl_sv_table_new
-#undef  Perl_sv_table_fetch
-#define Perl_sv_table_fetch	pPerl->Perl_sv_table_fetch
-#undef  sv_table_fetch
-#define sv_table_fetch		Perl_sv_table_fetch
-#undef  Perl_sv_table_store
-#define Perl_sv_table_store	pPerl->Perl_sv_table_store
-#undef  sv_table_store
-#define sv_table_store		Perl_sv_table_store
-#undef  Perl_sv_table_split
-#define Perl_sv_table_split	pPerl->Perl_sv_table_split
-#undef  sv_table_split
-#define sv_table_split		Perl_sv_table_split
+#undef  Perl_ptr_table_new
+#define Perl_ptr_table_new	pPerl->Perl_ptr_table_new
+#undef  ptr_table_new
+#define ptr_table_new		Perl_ptr_table_new
+#undef  Perl_ptr_table_fetch
+#define Perl_ptr_table_fetch	pPerl->Perl_ptr_table_fetch
+#undef  ptr_table_fetch
+#define ptr_table_fetch		Perl_ptr_table_fetch
+#undef  Perl_ptr_table_store
+#define Perl_ptr_table_store	pPerl->Perl_ptr_table_store
+#undef  ptr_table_store
+#define ptr_table_store		Perl_ptr_table_store
+#undef  Perl_ptr_table_split
+#define Perl_ptr_table_split	pPerl->Perl_ptr_table_split
+#undef  ptr_table_split
+#define ptr_table_split		Perl_ptr_table_split
+#undef  perl_clone
+#define perl_clone		pPerl->perl_clone
+#undef  perl_clone_using
+#define perl_clone_using	pPerl->perl_clone_using
 #endif
 #if defined(PERL_OBJECT)
 #endif

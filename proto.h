@@ -440,11 +440,11 @@ PERL_CALLCONV int	perl_run(void);
 PERL_CALLCONV int	perl_parse(XSINIT_t xsinit, int argc, char** argv, char** env);
 #else
 PERL_CALLCONV PerlInterpreter*	perl_alloc(void);
-PERL_CALLCONV void	perl_construct(PerlInterpreter* sv_interp);
-PERL_CALLCONV void	perl_destruct(PerlInterpreter* sv_interp);
-PERL_CALLCONV void	perl_free(PerlInterpreter* sv_interp);
-PERL_CALLCONV int	perl_run(PerlInterpreter* sv_interp);
-PERL_CALLCONV int	perl_parse(PerlInterpreter* sv_interp, XSINIT_t xsinit, int argc, char** argv, char** env);
+PERL_CALLCONV void	perl_construct(PerlInterpreter* interp);
+PERL_CALLCONV void	perl_destruct(PerlInterpreter* interp);
+PERL_CALLCONV void	perl_free(PerlInterpreter* interp);
+PERL_CALLCONV int	perl_run(PerlInterpreter* interp);
+PERL_CALLCONV int	perl_parse(PerlInterpreter* interp, XSINIT_t xsinit, int argc, char** argv, char** env);
 #if defined(USE_THREADS)
 PERL_CALLCONV struct perl_thread*	Perl_new_struct_thread(pTHX_ struct perl_thread *t);
 #endif
@@ -749,10 +749,12 @@ PERL_CALLCONV SV*	Perl_sv_dup(pTHX_ SV* sstr);
 #if defined(HAVE_INTERP_INTERN)
 PERL_CALLCONV void	Perl_sys_intern_dup(pTHX_ struct interp_intern* src, struct interp_intern* dst);
 #endif
-PERL_CALLCONV SVTBL*	Perl_sv_table_new(pTHX);
-PERL_CALLCONV SV*	Perl_sv_table_fetch(pTHX_ SVTBL *tbl, SV *sv);
-PERL_CALLCONV void	Perl_sv_table_store(pTHX_ SVTBL *tbl, SV *oldsv, SV *newsv);
-PERL_CALLCONV void	Perl_sv_table_split(pTHX_ SVTBL *tbl);
+PERL_CALLCONV PTR_TBL_t*	Perl_ptr_table_new(pTHX);
+PERL_CALLCONV void*	Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, void *sv);
+PERL_CALLCONV void	Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, void *oldsv, void *newsv);
+PERL_CALLCONV void	Perl_ptr_table_split(pTHX_ PTR_TBL_t *tbl);
+PERL_CALLCONV PerlInterpreter*	perl_clone(PerlInterpreter* interp, UV flags);
+PERL_CALLCONV PerlInterpreter*	perl_clone_using(PerlInterpreter *interp, UV flags, struct IPerlMem* m, struct IPerlEnv* e, struct IPerlStdIO* io, struct IPerlLIO* lio, struct IPerlDir* d, struct IPerlSock* s, struct IPerlProc* p);
 #endif
 #if defined(PERL_OBJECT)
 protected:

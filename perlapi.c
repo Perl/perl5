@@ -4915,32 +4915,48 @@ Perl_sys_intern_dup(pTHXo_ struct interp_intern* src, struct interp_intern* dst)
 }
 #endif
 
-#undef  Perl_sv_table_new
-SVTBL*
-Perl_sv_table_new(pTHXo)
+#undef  Perl_ptr_table_new
+PTR_TBL_t*
+Perl_ptr_table_new(pTHXo)
 {
-    return ((CPerlObj*)pPerl)->Perl_sv_table_new();
+    return ((CPerlObj*)pPerl)->Perl_ptr_table_new();
 }
 
-#undef  Perl_sv_table_fetch
-SV*
-Perl_sv_table_fetch(pTHXo_ SVTBL *tbl, SV *sv)
+#undef  Perl_ptr_table_fetch
+void*
+Perl_ptr_table_fetch(pTHXo_ PTR_TBL_t *tbl, void *sv)
 {
-    return ((CPerlObj*)pPerl)->Perl_sv_table_fetch(tbl, sv);
+    return ((CPerlObj*)pPerl)->Perl_ptr_table_fetch(tbl, sv);
 }
 
-#undef  Perl_sv_table_store
+#undef  Perl_ptr_table_store
 void
-Perl_sv_table_store(pTHXo_ SVTBL *tbl, SV *oldsv, SV *newsv)
+Perl_ptr_table_store(pTHXo_ PTR_TBL_t *tbl, void *oldsv, void *newsv)
 {
-    ((CPerlObj*)pPerl)->Perl_sv_table_store(tbl, oldsv, newsv);
+    ((CPerlObj*)pPerl)->Perl_ptr_table_store(tbl, oldsv, newsv);
 }
 
-#undef  Perl_sv_table_split
+#undef  Perl_ptr_table_split
 void
-Perl_sv_table_split(pTHXo_ SVTBL *tbl)
+Perl_ptr_table_split(pTHXo_ PTR_TBL_t *tbl)
 {
-    ((CPerlObj*)pPerl)->Perl_sv_table_split(tbl);
+    ((CPerlObj*)pPerl)->Perl_ptr_table_split(tbl);
+}
+
+#undef  perl_clone
+PerlInterpreter*
+perl_clone(PerlInterpreter* interp, UV flags)
+{
+    dTHXo;
+    return ((CPerlObj*)pPerl)->perl_clone(flags);
+}
+
+#undef  perl_clone_using
+PerlInterpreter*
+perl_clone_using(PerlInterpreter *interp, UV flags, struct IPerlMem* m, struct IPerlEnv* e, struct IPerlStdIO* io, struct IPerlLIO* lio, struct IPerlDir* d, struct IPerlSock* s, struct IPerlProc* p)
+{
+    dTHXo;
+    return ((CPerlObj*)pPerl)->perl_clone_using(interp, flags, m, e, io, lio, d, s, p);
 }
 #endif
 #if defined(PERL_OBJECT)

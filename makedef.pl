@@ -367,7 +367,7 @@ Perl_magic_mutexfree
 unless ($define{'USE_ITHREADS'})
  {
   skip_symbols [qw(
-PL_sv_table
+PL_ptr_table
 Perl_dirp_dup
 Perl_fp_dup
 Perl_gp_dup
@@ -376,10 +376,12 @@ Perl_mg_dup
 Perl_re_dup
 Perl_sv_dup
 Perl_sys_intern_dup
-Perl_sv_table_fetch
-Perl_sv_table_new
-Perl_sv_table_split
-Perl_sv_table_store
+Perl_ptr_table_fetch
+Perl_ptr_table_new
+Perl_ptr_table_split
+Perl_ptr_table_store
+perl_clone
+perl_clone_using
 )];
  }
 
