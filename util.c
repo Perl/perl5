@@ -72,7 +72,9 @@ Perl_safesysmalloc(MEM_SIZE size)
     else if (PL_nomemok)
 	return Nullch;
     else {
-	PerlIO_puts(Perl_error_log,PL_no_mem) FLUSH;
+	/* Can't use PerlIO to write as it allocates memory */
+	PerlLIO_write(PerlIO_fileno(Perl_error_log),
+		      PL_no_mem, strlen(PL_no_mem));
 	my_exit(1);
 	return Nullch;
     }
@@ -119,7 +121,9 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
     else if (PL_nomemok)
 	return Nullch;
     else {
-	PerlIO_puts(Perl_error_log,PL_no_mem) FLUSH;
+	/* Can't use PerlIO to write as it allocates memory */
+	PerlLIO_write(PerlIO_fileno(Perl_error_log),
+		      PL_no_mem, strlen(PL_no_mem));
 	my_exit(1);
 	return Nullch;
     }
@@ -171,7 +175,9 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
     else if (PL_nomemok)
 	return Nullch;
     else {
-	PerlIO_puts(Perl_error_log,PL_no_mem) FLUSH;
+	/* Can't use PerlIO to write as it allocates memory */
+	PerlLIO_write(PerlIO_fileno(Perl_error_log),
+		      PL_no_mem, strlen(PL_no_mem));
 	my_exit(1);
 	return Nullch;
     }
