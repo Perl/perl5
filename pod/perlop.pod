@@ -774,11 +774,11 @@ I<successfully> matched regular expression is used instead.
 
 If the C</g> option is not used, C<m//> in a list context returns a
 list consisting of the subexpressions matched by the parentheses in the
-pattern, i.e., (C<$1>, C<$2>, C<$3>...).  (Note that here
-C<$1> etc. are also set, and
-that this differs from Perl 4's behavior.)  If there are no parentheses,
-the return value is the list C<(1)> for success or C<('')> upon failure.
-With parentheses, C<()> is returned upon failure.
+pattern, i.e., (C<$1>, C<$2>, C<$3>...).  (Note that here C<$1> etc. are
+also set, and that this differs from Perl 4's behavior.)  When there are
+no parentheses in the pattern, the return value is the list C<(1)> for
+success.  With or without parentheses, an empty list is returned upon
+failure.
 
 Examples:
 

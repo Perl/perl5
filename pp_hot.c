@@ -853,8 +853,6 @@ PP(pp_match)
 	    }
 	}
     }
-    if (!rx->nparens && !global)
-	gimme = G_SCALAR;			/* accidental array context? */
     safebase = (((gimme == G_ARRAY) || global || !rx->nparens)
 		&& !sawampersand);
     safebase = safebase ? 0  : REXEC_COPY_STR ;
@@ -958,6 +956,8 @@ play_it_again:
 	    PUTBACK;			/* EVAL blocks may use stack */
 	    goto play_it_again;
 	}
+	else if (!iters)
+	    XPUSHs(&sv_yes);
 	LEAVE_SCOPE(oldsave);
 	RETURN;
     }
