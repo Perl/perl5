@@ -1108,7 +1108,7 @@ Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int mode)
   * This is a stub for any XS code which might have been calling it.
   */
  char *name = ":raw";
-#ifdef PERLIO_CRLF
+#ifdef PERLIO_USING_CRLF
  if (!(mode & O_BINARY)))
      name = ":crlf";
 #endif

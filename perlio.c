@@ -859,7 +859,7 @@ void
 PerlIO_default_buffer(pTHX_ PerlIO_list_t *av)
 {
     PerlIO_funcs *tab = &PerlIO_perlio;
-#ifdef PERLIO_CRLF
+#ifdef PERLIO_USING_CRLF
     tab = &PerlIO_crlf;
 #else
     if (PerlIO_stdio.Set_ptrcnt)
@@ -1076,7 +1076,7 @@ PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
     /* Can't flush if switching encodings. */
     if (!(names && memEQ(names, ":encoding(", 10))) {
         PerlIO_flush(f);
-#ifdef PERLIO_CRLF
+#ifdef PERLIO_USING_CRLF
 	if (!names && (mode & O_BINARY)) {
 	    PerlIO *top = f;
 	    while (*top) {
@@ -1781,7 +1781,7 @@ PerlIO_modestr(PerlIO *f, char *buf)
 	    *s++ = '+';
 	}
     }
-#ifdef PERLIO_CRLF
+#ifdef PERLIO_USING_CRLF
     if (!(flags & PERLIO_F_CRLF))
 	*s++ = 'b';
 #endif
@@ -2367,7 +2367,7 @@ PerlIOStdio_mode(const char *mode, char *tmode)
     while (*mode) {
 	*tmode++ = *mode++;
     }
-#ifdef PERLIO_CRLF
+#ifdef PERLIO_USING_CRLF
     *tmode++ = 'b';
 #endif
     *tmode = '\0';
@@ -2906,7 +2906,7 @@ PerlIOBuf_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 		return NULL;
 	    } else {
 		fd = PerlIO_fileno(f);
-#ifdef PERLIO_CRLF
+#ifdef PERLIO_USING_CRLF
 		/*
 		 * do something about failing setmode()? --jhi
 		 */

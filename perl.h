@@ -3945,11 +3945,11 @@ int flock(int fd, int op);
     /* If you have different O_TEXT and O_BINARY and you are a CLRF shop,
      * that is, you are somehow DOSish. */
 #   if !defined(__BEOS__)
-#      define PERLIO_CLRF 1
+#      define PERLIO_USING_CRLF 1
 #   else
     /* If you have O_TEXT different from your O_BINARY but you still are
      * not a CRLF shop. */
-#       undef PERLIO_CLRF
+#       undef PERLIO_USING_CRLF
 #   endif
 #endif
 
