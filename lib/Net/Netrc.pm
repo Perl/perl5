@@ -11,7 +11,7 @@ use strict;
 use FileHandle;
 use vars qw($VERSION);
 
-$VERSION = "2.11"; # $Id: //depot/libnet/Net/Netrc.pm#10 $
+$VERSION = "2.12"; # $Id: //depot/libnet/Net/Netrc.pm#12 $
 
 my %netrc = ();
 
@@ -27,6 +27,7 @@ sub _readrc
  } else {
    # Some OS's don't have `getpwuid', so we default to $ENV{HOME}
    $home = eval { (getpwuid($>))[7] } || $ENV{HOME};
+   $home ||= $ENV{HOMEDRIVE} . ($ENV{HOMEPATH}||'') if defined $ENV{HOMEDRIVE};
    $file = $home . "/.netrc";
  }
 
@@ -287,6 +288,9 @@ the first entry in the .netrc file for C<MACHINE> will be returned.
 If a matching entry cannot be found, and a default entry exists, then a
 reference to the default entry is returned.
 
+If there is no matching entry found and there is no default defined, or
+no .netrc file is found, then C<undef> is returned.
+
 =back
 
 =head1 METHODS
@@ -328,6 +332,6 @@ it under the same terms as Perl itself.
 
 =for html <hr>
 
-$Id: //depot/libnet/Net/Netrc.pm#10 $
+$Id: //depot/libnet/Net/Netrc.pm#12 $
 
 =cut

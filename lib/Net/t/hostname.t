@@ -1,9 +1,3 @@
-#!./perl -w
-
-BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-}
 
 use Net::Domain qw(hostname domainname hostdomain);
 use Net::Config;

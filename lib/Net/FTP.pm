@@ -19,9 +19,10 @@ use IO::Socket;
 use Time::Local;
 use Net::Cmd;
 use Net::Config;
+use Fcntl qw(O_WRONLY O_RDONLY O_APPEND O_CREAT O_TRUNC);
 # use AutoLoader qw(AUTOLOAD);
 
-$VERSION = "2.58"; # $Id: //depot/libnet/Net/FTP.pm#57 $
+$VERSION = "2.61"; # $Id: //depot/libnet/Net/FTP.pm#61 $
 @ISA     = qw(Exporter Net::Cmd IO::Socket::INET);
 
 # Someday I will "use constant", when I am not bothered to much about
@@ -54,6 +55,7 @@ sub new
 
  my $host = $peer;
  my $fire = undef;
+ my $fire_type = undef;
 
  if(exists($arg{Firewall}) || Net::Config->requires_firewall($peer))
   {
@@ -66,6 +68,9 @@ sub new
     {
      $peer = $fire;
      delete $arg{Port};
+	 $fire_type = $arg{FirewallType}
+	 || $ENV{FTP_FIREWALL_TYPE}
+	 || undef;
     }
   }
 
@@ -83,6 +88,8 @@ sub new
 
  ${*$ftp}{'net_ftp_firewall'} = $fire
 	if(defined $fire);
+ ${*$ftp}{'net_ftp_firewall_type'} = $fire_type
+	if(defined $fire_type);
 
  ${*$ftp}{'net_ftp_passive'} = int
 	exists $arg{Passive}
@@ -115,28 +122,16 @@ sub new
 
 sub hash {
     my $ftp = shift;		# self
-    my $prev = ${*$ftp}{'net_ftp_hash'} || [\*STDERR, 0];
 
-    unless(@_) {
-      return $prev;
-    }
     my($h,$b) = @_;
-    if(@_ == 1) {
-      unless($h) {
-        delete ${*$ftp}{'net_ftp_hash'};
-        return $prev;
-      }
-      elsif(ref($h)) {
-        $b = 1024;
-      }
-      else {
-        ($h,$b) = (\*STDERR,$h);
-      }
+    unless($h) {
+      delete ${*$ftp}{'net_ftp_hash'};
+      return [\*STDERR,0];
     }
+    ($h,$b) = (ref($h)? $h : \*STDERR, $b || 1024);
     select((select($h), $|=1)[0]);
     $b = 512 if $b < 512;
     ${*$ftp}{'net_ftp_hash'} = [$h, $b];
-    $prev;
 }        
 
 sub quit
@@ -221,14 +216,14 @@ sub size {
    my $line;
    foreach $line (@msg) {
      return (split(/\s+/,$line))[4]
-	 if $line =~ /^[-rw]{10}/
+	 if $line =~ /^[-rwx]{10}/
    }
  }
  else {
    my @files = $ftp->dir($file);
    if(@files) {
      return (split(/\s+/,$1))[4]
-	 if $files[0] =~ /^([-rw]{10}.*)$/;
+	 if $files[0] =~ /^([-rwx]{10}.*)$/;
    }
  }
  undef;
@@ -250,7 +245,9 @@ sub login {
   $user ||= "anonymous";
   $ruser = $user;
 
-  $fwtype = $NetConfig{'ftp_firewall_type'} || 0;
+  $fwtype = ${*$ftp}{'net_ftp_firewall_type'}
+  || $NetConfig{'ftp_firewall_type'}
+  || 0;
 
   if ($fwtype && defined ${*$ftp}{'net_ftp_firewall'}) {
     if ($fwtype == 1 || $fwtype == 7) {
@@ -448,7 +445,7 @@ sub get
   {
    $loc = \*FD;
 
-   unless(($where) ? open($loc,">>$local") : open($loc,">$local"))
+   unless(sysopen($loc, $local, O_CREAT | O_WRONLY | ($where ? O_APPEND : O_TRUNC)))
     {
      carp "Cannot open Local file $local: $!\n";
      $data->abort;
@@ -706,7 +703,7 @@ sub _store_cmd
   {
    $loc = \*FD;
 
-   unless(open($loc,"<$local"))
+   unless(sysopen($loc, $local, O_RDONLY))
     {
      carp "Cannot open Local file $local: $!\n";
      return undef;
@@ -848,10 +845,9 @@ sub supported {
     my $text = $ftp->message;
     if($text =~ /following\s+commands/i) {
 	$text =~ s/^.*\n//;
-	$text =~ s/\n/ /sog;
-	while($text =~ /(\w+)([* ])/g) {
-	    $hash->{"\U$1"} = $2 eq " " ? 1 : 0;
-	}
+        while($text =~ /(\*?)(\w+)(\*?)/sg) {
+            $hash->{"\U$2"} = !length("$1$3");
+        }
     }
     else {
 	$hash->{$cmd} = $text !~ /unimplemented/i;
@@ -1262,6 +1258,11 @@ given host cannot be directly connected to, then the
 connection is made to the firewall machine and the string C<@hostname> is
 appended to the login identifier. This kind of setup is also refered to
 as a ftp proxy.
+
+B<FirewallType> - The type of firewall running on the machine indicated by
+B<Firewall>. This can be overridden by an environment variable
+C<FTP_FIREWALL_TYPE>. For a list of permissible types, see the description of
+ftp_firewall_type in L<Net::Config>.
 
 B<BlockSize> - This is the block size that Net::FTP will use when doing
 transfers. (defaults to 10240)
@@ -1717,6 +1718,6 @@ under the same terms as Perl itself.
 
 =for html <hr>
 
-I<$Id: //depot/libnet/Net/FTP.pm#57 $>
+I<$Id: //depot/libnet/Net/FTP.pm#61 $>
 
 =cut
