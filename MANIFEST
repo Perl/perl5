@@ -1919,6 +1919,7 @@ utils/perlcc.PL		Front-end for compiler
 utils/perldoc.PL	A simple tool to find & display perl's documentation
 utils/pl2pm.PL		A pl to pm translator
 utils/splain.PL		Stand-alone version of diagnostics.pm
+uts/strtol_wrap.c	strtol wrapper for UTS
 vmesa/Makefile		VM/ESA Makefile
 vmesa/vmesa.c		VM/ESA-specific C code for Perl core
 vmesa/vmesaish.h	VM/ESA-specific C header for Perl core
