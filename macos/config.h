@@ -640,7 +640,7 @@ First build released to public
  *	This symbol, if defined, indicates that the usleep routine is
  *	available to let the process sleep on a sub-second accuracy.
  */
-/*#define HAS_USLEEP		/ **/
+#define HAS_USLEEP		/**/
 
 /* HASVOLATILE:
  *	This symbol, if defined, indicates that this C compiler knows about
@@ -2079,7 +2079,7 @@ First build released to public
  *	available to do gather reads.  You will also need <sys/uio.h>
  *	and there I_SYSUIO.
  */
-/*#define HAS_READV		/ **/
+#define HAS_READV		/**/
 
 /* HAS_RECVMSG:
  *	This symbol, if defined, indicates that the recvmsg routine is
@@ -2535,7 +2535,7 @@ First build released to public
  *	or time_t on BSD sites (in which case <sys/types.h> should be
  *	included).
  */
-/*#define HAS_TIME		/ **/
+#define HAS_TIME		/**/
 #define Time_t time_t		/* Time type */
 
 /* HAS_TIMES:
@@ -2559,7 +2559,7 @@ First build released to public
  *	This symbol, if defined, indicates that the ualarm routine is
  *	available to do alarms with microsecond granularity.
  */
-/*#define HAS_UALARM		/ **/
+#define HAS_UALARM		/**/
 
 /* HAS_UNION_SEMUN:
  *	This symbol, if defined, indicates that the union semun is
@@ -2627,7 +2627,7 @@ First build released to public
  *	This symbol, if defined, indicates that the writev routine is
  *	available to do scatter writes.
  */
-/*#define HAS_WRITEV		/ **/
+#define HAS_WRITEV		/**/
 
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
@@ -3862,19 +3862,19 @@ First build released to public
  *	to the program to supply one.  A good guess is
  *		extern int usleep(useconds_t);
  */
-/*#define	HAS_USLEEP_PROTO	/ **/
+#define	HAS_USLEEP_PROTO	/**/
 
 /* I_CRYPT:
  *	This symbol, if defined, indicates that <crypt.h> exists and
  *	should be included.
  */
-/*#define	I_CRYPT		/ **/
+#define	I_CRYPT		/**/
 
 /* I_FP:
  *	This symbol, if defined, indicates that <fp.h> exists and
  *	should be included.
  */
-/*#define	I_FP		/ **/
+#define	I_FP		/**/
 
 /* I_LANGINFO:
  *	This symbol, if defined, indicates that <langinfo.h> exists and

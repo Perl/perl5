@@ -81,11 +81,6 @@ void MacPerl_Exit(int status);
 #undef PerlProc_exit
 #define PerlProc_exit(s)	my_exit((s))
 
-/* These defined following should be defined in 5.8 in config.h */
-#define HAS_USLEEP
-#define HAS_UALARM
-
-
 /* HAS_IOCTL:
  *	This symbol, if defined, indicates that the ioctl() routine is
  *	available to set I/O characteristics

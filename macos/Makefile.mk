@@ -205,9 +205,9 @@ private = :lib:Config.pm preplibrary :lib:ExtUtils:Miniperl.pm
 # Files to be built with variable substitution after miniperl is
 # available.  Dependencies handled manually below (for now).
 
-pl = "::pod:pod2html.PL" "::pod:pod2latex.PL" "::pod:pod2man.PL" "::pod:pod2text.PL"
+pl = "::pod:pod2html.PL" "::pod:pod2latex.PL" "::pod:pod2man.PL" "::pod:pod2text.PL" "::lib:lib_pm.PL"
 
-plextract = "::pod:pod2html" "::pod:pod2latex" "::pod:pod2man" "::pod:pod2text"
+plextract = "::pod:pod2html" "::pod:pod2latex" "::pod:pod2man" "::pod:pod2text" "::lib:lib_pm"
 
 addedbyconf = UU $(plextract) pstruct
 

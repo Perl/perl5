@@ -17,10 +17,16 @@ while (<>) {
 	} else {
 		if (/^ok (\d+)/) {
 			$tests[$1]++;
+		} elsif (/^not ok (\d+)[^#]+# TODO/) {
+			$tests[$1]++;
 		} elsif (/^not ok (\d+)/) {
 			$tests[$1] = -1;
 		}
 	}
+}
+if ($script) {
+	$tests{$script}{num}   = $num;
+	$tests{$script}{tests} = [@tests];
 }
 
 for my $script (sort keys %tests) {

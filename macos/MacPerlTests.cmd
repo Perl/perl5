@@ -50,6 +50,8 @@ echo ":perl -I::lib    :comp:cmdopt.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :comp:cmdopt.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :comp:colon.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :comp:colon.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :comp:cpp.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :comp:cpp.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :comp:decl.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :comp:decl.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :comp:multiline.t"  >> ::macos:MacPerlTests.out
@@ -69,10 +71,28 @@ echo ":perl -I::lib    :comp:term.t"  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :comp:use.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :comp:use.t  >> ::macos:MacPerlTests.out
 
+echo ":perl -I::lib    :io:argv.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :io:argv.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :io:binmode.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :io:binmode.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :io:crlf.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :io:crlf.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :io:dup.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :io:dup.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :io:fflush.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :io:fflush.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :io:fs.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :io:fs.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :io:inplace.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :io:inplace.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :io:iprefix.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :io:iprefix.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :io:nargv.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :io:nargv.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :io:open.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :io:open.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :io:openpid.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :io:openpid.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :io:pipe.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :io:pipe.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :io:print.t"  >> ::macos:MacPerlTests.out
@@ -84,10 +104,18 @@ echo ":perl -I::lib    :io:tell.t"  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :io:utf8.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :io:utf8.t  >> ::macos:MacPerlTests.out
 
+echo ":perl -I::lib    :japh:abigail.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :japh:abigail.t  >> ::macos:MacPerlTests.out
+
+echo ":perl -I::lib    :lib:1_compile.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :lib:1_compile.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :lib:commonsense.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :lib:commonsense.t  >> ::macos:MacPerlTests.out
+
 echo ":perl -I::lib    :op:64bitint.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:64bitint.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :op:alarm.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :op:alarm.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:anonsub.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:anonsub.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:append.t"  >> ::macos:MacPerlTests.out
@@ -112,6 +140,8 @@ echo ":perl -I::lib    :op:bop.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:bop.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:chars.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:chars.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :op:chdir.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :op:chdir.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:chop.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:chop.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:closure.t"  >> ::macos:MacPerlTests.out
@@ -132,12 +162,16 @@ echo ":perl -I::lib    :op:delete.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:delete.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:die.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:die.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :op:die_exit.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :op:die_exit.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:do.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:do.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:each.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:each.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:eval.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:eval.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :op:exec.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :op:exec.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:exists_sub.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:exists_sub.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:exp.t"  >> ::macos:MacPerlTests.out
@@ -196,6 +230,8 @@ echo ":perl -I::lib    :op:loopctl.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:loopctl.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:lop.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:lop.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :op:magic.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :op:magic.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:method.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:method.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:mkdir.t"  >> ::macos:MacPerlTests.out
@@ -210,12 +246,16 @@ echo ":perl -I::lib    :op:numconvert.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:numconvert.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:oct.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:oct.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :op:or.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :op:or.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:ord.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:ord.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:override.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:override.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:pack.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:pack.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :op:pat.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :op:pat.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:pos.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:pos.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:pow.t"  >> ::macos:MacPerlTests.out
@@ -232,6 +272,10 @@ echo ":perl -I::lib    :op:rand.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:rand.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:range.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:range.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :op:read.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :op:read.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :op:readdir.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :op:readdir.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:recurse.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:recurse.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:ref.t"  >> ::macos:MacPerlTests.out
@@ -242,8 +286,12 @@ echo ":perl -I::lib    :op:regexp_noamp.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:regexp_noamp.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:regmesg.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:regmesg.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :op:repeat.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :op:repeat.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:reverse.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:reverse.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :op:runlevel.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :op:runlevel.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:sleep.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:sleep.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:sort.t"  >> ::macos:MacPerlTests.out
@@ -256,20 +304,30 @@ echo ":perl -I::lib    :op:sprintf.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:sprintf.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:srand.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:srand.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :op:stat.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :op:stat.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib -T :op:subst.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib -T :op:subst.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:subst_amp.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:subst_amp.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :op:subst_wamp.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :op:subst_wamp.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:substr.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:substr.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib -t :op:sub_lval.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib -t :op:sub_lval.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:sysio.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:sysio.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib -T :op:taint.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib -T :op:taint.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:tie.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:tie.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:tiearray.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:tiearray.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:tiehandle.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:tiehandle.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :op:time.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :op:time.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib -t :op:tr.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib -t :op:tr.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:undef.t"  >> ::macos:MacPerlTests.out
@@ -288,9 +346,13 @@ echo ":perl -I::lib    :op:ver.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:ver.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :op:wantarray.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :op:wantarray.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :op:write.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :op:write.t  >> ::macos:MacPerlTests.out
 
 echo ":perl -I::lib    :pod:emptycmd.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :pod:emptycmd.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :pod:find.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :pod:find.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :pod:for.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :pod:for.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :pod:headings.t"  >> ::macos:MacPerlTests.out
@@ -311,23 +373,40 @@ echo ":perl -I::lib    :pod:oneline_cmds.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :pod:oneline_cmds.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :pod:plainer.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :pod:plainer.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :pod:pod2usage.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :pod:pod2usage.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :pod:poderrs.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :pod:poderrs.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :pod:podselect.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :pod:podselect.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :pod:special_seqs.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :pod:special_seqs.t  >> ::macos:MacPerlTests.out
 
+echo ":perl -I::lib    :run:exit.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :run:exit.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :run:fresh_perl.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :run:fresh_perl.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :run:noswitch.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :run:noswitch.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :run:runenv.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :run:runenv.t  >> ::macos:MacPerlTests.out
-echo ":perl -I::lib    :run:switcha.t"  >> ::macos:MacPerlTests.out
-:perl -I::lib    :run:switcha.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :run:switchF.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :run:switchF.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :run:switchPx.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :run:switchPx.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :run:switcha.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :run:switcha.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :run:switches.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :run:switches.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :run:switchn.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :run:switchn.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :run:switchp.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :run:switchp.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib -t :run:switcht.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib -t :run:switcht.t  >> ::macos:MacPerlTests.out
+echo ":perl -I::lib    :run:switchx.t"  >> ::macos:MacPerlTests.out
+:perl -I::lib    :run:switchx.t  >> ::macos:MacPerlTests.out
+
 echo ":perl -I::lib    :uni:fold.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :uni:fold.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :uni:lower.t"  >> ::macos:MacPerlTests.out
@@ -343,92 +422,15 @@ echo ":perl -I::lib    :win32:longpath.t"  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :win32:system.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :win32:system.t  >> ::macos:MacPerlTests.out
 
-
-echo ":perl -I::lib    :comp:cpp.t"  >> ::macos:MacPerlTests.out
-:perl -I::lib    :comp:cpp.t  >> ::macos:MacPerlTests.out
-echo ":perl -I::lib    :io:argv.t"  >> ::macos:MacPerlTests.out
-:perl -I::lib    :io:argv.t  >> ::macos:MacPerlTests.out
-echo ":perl -I::lib    :io:crlf.t"  >> ::macos:MacPerlTests.out
-:perl -I::lib    :io:crlf.t  >> ::macos:MacPerlTests.out
-echo ":perl -I::lib    :io:dup.t"  >> ::macos:MacPerlTests.out
-:perl -I::lib    :io:dup.t  >> ::macos:MacPerlTests.out
-echo ":perl -I::lib    :io:fs.t"  >> ::macos:MacPerlTests.out
-:perl -I::lib    :io:fs.t  >> ::macos:MacPerlTests.out
-echo ":perl -I::lib    :io:inplace.t"  >> ::macos:MacPerlTests.out
-:perl -I::lib    :io:inplace.t  >> ::macos:MacPerlTests.out
-echo ":perl -I::lib    :io:iprefix.t"  >> ::macos:MacPerlTests.out
-:perl -I::lib    :io:iprefix.t  >> ::macos:MacPerlTests.out
-echo ":perl -I::lib    :io:open.t"  >> ::macos:MacPerlTests.out
-:perl -I::lib    :io:open.t  >> ::macos:MacPerlTests.out
-echo ":perl -I::lib    :lib:1_compile.t"  >> ::macos:MacPerlTests.out
-:perl -I::lib    :lib:1_compile.t  >> ::macos:MacPerlTests.out
-echo ":perl -I::lib    :op:die_exit.t"  >> ::macos:MacPerlTests.out
-:perl -I::lib    :op:die_exit.t  >> ::macos:MacPerlTests.out
-echo ":perl -I::lib    :op:magic.t"  >> ::macos:MacPerlTests.out
-:perl -I::lib    :op:magic.t  >> ::macos:MacPerlTests.out
-echo ":perl -I::lib    :op:or.t"  >> ::macos:MacPerlTests.out
-:perl -I::lib    :op:or.t  >> ::macos:MacPerlTests.out
-echo ":perl -I::lib    :op:readdir.t"  >> ::macos:MacPerlTests.out
-:perl -I::lib    :op:readdir.t  >> ::macos:MacPerlTests.out
-echo ":perl -I::lib    :op:repeat.t"  >> ::macos:MacPerlTests.out
-:perl -I::lib    :op:repeat.t  >> ::macos:MacPerlTests.out
-echo ":perl -I::lib    :op:runlevel.t"  >> ::macos:MacPerlTests.out
-:perl -I::lib    :op:runlevel.t  >> ::macos:MacPerlTests.out
-echo ":perl -I::lib    :op:stat.t"  >> ::macos:MacPerlTests.out
-:perl -I::lib    :op:stat.t  >> ::macos:MacPerlTests.out
-echo ":perl -I::lib -t :op:sub_lval.t"  >> ::macos:MacPerlTests.out
-:perl -I::lib -t :op:sub_lval.t  >> ::macos:MacPerlTests.out
-echo ":perl -I::lib    :pod:find.t"  >> ::macos:MacPerlTests.out
-:perl -I::lib    :pod:find.t  >> ::macos:MacPerlTests.out
-echo ":perl -I::lib    :run:exit.t"  >> ::macos:MacPerlTests.out
-:perl -I::lib    :run:exit.t  >> ::macos:MacPerlTests.out
-echo ":perl -I::lib    :run:switches.t"  >> ::macos:MacPerlTests.out
-:perl -I::lib    :run:switches.t  >> ::macos:MacPerlTests.out
-echo ":perl -I::lib    :run:switchPx.t"  >> ::macos:MacPerlTests.out
-:perl -I::lib    :run:switchPx.t  >> ::macos:MacPerlTests.out
-echo ":perl -I::lib -t :run:switcht.t"  >> ::macos:MacPerlTests.out
-:perl -I::lib -t :run:switcht.t  >> ::macos:MacPerlTests.out
-echo ":perl -I::lib    :run:switchx.t"  >> ::macos:MacPerlTests.out
-:perl -I::lib    :run:switchx.t  >> ::macos:MacPerlTests.out
 echo ":perl -I::lib    :x2p:s2p.t"  >> ::macos:MacPerlTests.out
 :perl -I::lib    :x2p:s2p.t  >> ::macos:MacPerlTests.out
 
+#echo ":perl -I::lib    :op:study.t"  >> ::macos:MacPerlTests.out
+#:perl -I::lib    :op:study.t  >> ::macos:MacPerlTests.out
 
 :perl -I::lib ::macos:MacPerlTests.plx ::macos:MacPerlTests.out >> ::macos:MacPerlTests.out
 
 
-#echo ":perl -I::lib    :io:binmode.t"  >> ::macos:MacPerlTests.out
-#:perl -I::lib    :io:binmode.t  >> ::macos:MacPerlTests.out
-#echo ":perl -I::lib    :io:openpid.t"  >> ::macos:MacPerlTests.out
-#:perl -I::lib    :io:openpid.t  >> ::macos:MacPerlTests.out
-#echo ":perl -I::lib    :japh:abigail.t"  >> ::macos:MacPerlTests.out
-#:perl -I::lib    :japh:abigail.t  >> ::macos:MacPerlTests.out
-#echo ":perl -I::lib    :op:alarm.t"  >> ::macos:MacPerlTests.out
-#:perl -I::lib    :op:alarm.t  >> ::macos:MacPerlTests.out
-#echo ":perl -I::lib    :op:chdir.t"  >> ::macos:MacPerlTests.out
-#:perl -I::lib    :op:chdir.t  >> ::macos:MacPerlTests.out
-#echo ":perl -I::lib    :op:exec.t"  >> ::macos:MacPerlTests.out
-#:perl -I::lib    :op:exec.t  >> ::macos:MacPerlTests.out
-#echo ":perl -I::lib    :op:pat.t"  >> ::macos:MacPerlTests.out
-#:perl -I::lib    :op:pat.t  >> ::macos:MacPerlTests.out
-#echo ":perl -I::lib    :op:read.t"  >> ::macos:MacPerlTests.out
-#:perl -I::lib    :op:read.t  >> ::macos:MacPerlTests.out
-#echo ":perl -I::lib    :op:study.t"  >> ::macos:MacPerlTests.out
-#:perl -I::lib    :op:study.t  >> ::macos:MacPerlTests.out
-#echo ":perl -I::lib    :op:subst_wamp.t"  >> ::macos:MacPerlTests.out
-#:perl -I::lib    :op:subst_wamp.t  >> ::macos:MacPerlTests.out
-#echo ":perl -I::lib -T :op:taint.t"  >> ::macos:MacPerlTests.out
-#:perl -I::lib -T :op:taint.t  >> ::macos:MacPerlTests.out
-#echo ":perl -I::lib    :op:time.t"  >> ::macos:MacPerlTests.out
-#:perl -I::lib    :op:time.t  >> ::macos:MacPerlTests.out
-#echo ":perl -I::lib    :op:write.t"  >> ::macos:MacPerlTests.out
-#:perl -I::lib    :op:write.t  >> ::macos:MacPerlTests.out
-#echo ":perl -I::lib    :pod:pod2usage.t"  >> ::macos:MacPerlTests.out
-#:perl -I::lib    :pod:pod2usage.t  >> ::macos:MacPerlTests.out
-#echo ":perl -I::lib    :pod:podselect.t"  >> ::macos:MacPerlTests.out
-#:perl -I::lib    :pod:podselect.t  >> ::macos:MacPerlTests.out
-#echo ":perl -I::lib    :run:fresh_perl.t"  >> ::macos:MacPerlTests.out
-#:perl -I::lib    :run:fresh_perl.t  >> ::macos:MacPerlTests.out
 
 echo "The following tests mostly work, but fail because of known"
 echo "IO problems.  Feel free to run them, and note the failures."
