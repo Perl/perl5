@@ -836,7 +836,7 @@ setuid perl scripts securely.\n");
 
     PL_origargv = argv;
     PL_origargc = argc;
-#ifndef VMS  /* VMS doesn't have environ array */
+#if !defined( VMS) && !defined(EPOC)  /* VMS doesn't have environ array */
     PL_origenviron = environ;
 #endif
 
@@ -1256,7 +1256,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     if (xsinit)
 	(*xsinit)(aTHXo);	/* in case linked C routines want magical variables */
 #ifndef PERL_MICRO
-#if defined(VMS) || defined(WIN32) || defined(DJGPP) || defined(__CYGWIN__)
+#if defined(VMS) || defined(WIN32) || defined(DJGPP) || defined(__CYGWIN__) || defined(EPOC)
     init_os_extras();
 #endif
 #endif
@@ -3468,7 +3468,7 @@ S_init_perllib(pTHX)
 #endif /* MACOS_TRADITIONAL */
 }
 
-#if defined(DOSISH)
+#if defined(DOSISH) || defined(EPOC)
 #    define PERLLIB_SEP ';'
 #else
 #  if defined(VMS)

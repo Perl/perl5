@@ -3,8 +3,8 @@ Perl 5 README file for the EPOC operating system.
 =====================================================================
 
 Olaf Flebbe <o.flebbe@gmx.de>
-http://www.linuxstart.com/~oflebbe/perl/perl5.html
-2000-05-15
+http://members.linuxstart.com/~oflebbe/perl/perl5.html
+2000-09-18
 
 =====================================================================
 Introduction
@@ -13,10 +13,10 @@ Introduction
 EPOC is a OS for palmtops and mobile phones. For more informations look at:
 http://www.symbian.com/
 
-This is a port of Perl version 5.6.0 to EPOC. It runs on the Perl
-Series 5, Series 5mx and the Psion Revo and on the Ericson M128.
-
-Features are left out, because of restrictions of the POSIX support.
+This is a port of perl to EPOC. It runs on the Psion Series 5, 5mx,
+5mx Pro, Psion Revo and on the Ericson M128. I have no report about
+the Psion Netbook or the S7. For information about this hardware
+please refer to http://www.psion.com.
 
 =====================================================================
 Installation/Usage
@@ -32,12 +32,12 @@ left out unicode support modules and modules which will not work with
 this version. (For details look into epoc/createpkg.pl). If you like
 to use them, you are free to copy them from a current perl release.
 
-Copy eshell.exe from the same page you got perl to your EPOC device.
-Start eshell.exe with a double tap.
+Get ESHELL from symbian: 
+http://developer.epocworld.com/downloads/progs/Eshell.zip
 
 Now you can enter: perl -de 0 in order to run the perl debugger. If
 you are leaving perl, you get into the system screen. You have to
-switch back manually to eshell.exe When perl is running, you will see
+switch back manually to ESHELL. When perl is running, you will see
 a task with the name STDOUT in the task list.
 
 ======================================================================
@@ -58,35 +58,47 @@ output to stdout.
 PATH Names
 ======================================================================
 
-Pathnames to executables in eshell.exe have to be written with
-backslashes '\', file arguments to perl with slashes '/'. The default
-drive of perl is the same as the drive perl.exe is located on, the
-default path seems to be '/'.
+ESHELL looks for executables in ?:/System/Programs. The SIS file
+installs perl in this special folder directory. The default drive and
+path are the same as folder the executable resides. The EPOC
+filesystem is case-preserving, not case-sensitive.
 
-i.e. command lines look a little bit funny:
+EPOC uses the ?: syntax for establishing a search order: First in C: (RAM),
+then on D: (CF Card) and last in Z: (ROM).
 
-D:\perl.exe C:/test.pl >C:/output.txt
+The perl @INC search path is now implemented with '?:'. Your perl
+executable can now live on a different drive than the perl library or
+even your scripts.
+
+ESHELL paths have to be written with backslashes '\', file arguments
+to perl with slashes '/'. Remember that I/O redirection is done
+internally in perl, so please use slashes for redirects.
+
+perl.exe C:/test.pl >C:/output.txt
 
 You can automatically search for file on all EPOC drives with a ? as
-the driver letter. For instance ?:\a.txt seraches for C:\a.txt,
+the driver letter. For instance ?:\a.txt searches for C:\a.txt,
 D:\b.txt (and Z:\a.txt).
 
 ======================================================================
 Editors
 ======================================================================
 
-You may have a problem to create perl scripts. A cumbersome workaround
-is to use the OPL Editor and exporting to text.
+A suitable text-editor can be downloaded 
+from symbian http://developer.epocworld.com/downloads/progs/Editor.zip
 
-The OPL+ Editor is quite good. (Shareware: http://www.twiddlebit.com)
-There is a port of vim around: 
-        http://www.starship.freeserve.co.uk/index.html
+====================================================================
+Features
+====================================================================
+
+The built-in function EPOC::getcwd returns the current directory.
 
 ======================================================================
 Restrictions
 ======================================================================
 
-The following things are left out of this perl port:
+Features are left out, because of restrictions of the POSIX support in
+EPOC:
 
 + backquoting, pipes etc.
 
@@ -118,7 +130,7 @@ Sorry, this is far too short.
     You will need the C++ SDK from http://developer.epocworld.com/. 
 
     You will need to set up the cross SDK from 
-    http://www.linuxstart.com/~oflebbe
+    http://members.linuxstart.com/~oflebbe
 
     You may have to adjust config.sh (cc, cppflags) for your epoc 
     install location.
@@ -130,30 +142,27 @@ Sorry, this is far too short.
     Unpack the sources. 
 
       Build a native perl from this sources... 
+
       cp epoc/* .
       ./Configure -S
-      make perl
+      make perl.a
       cp miniperl.native miniperl
       make perl
+      make ext/Errno/pm_to_blib 
       perl link.pl perlmain.o lib/auto/DynaLoader/DynaLoader.a \
-         lib/auto/Data/Dumper.a \
+         lib/auto/Data/Dumper/Dumper.a \
          lib/auto/File/Glob/Glob.a lib/auto/IO/IO.a \
-         lib/auto/Socket/Socket.a perl.a `cat ext.libs`
+         lib/auto/Socket/Socket.a \
+         lib/auto/Fcntl/Fcntl.a lib/auto/Sys/Hostname/Hostname.a \
+	perl.a `cat ext.libs`
       perl createpkg.pl 
-      wine "G:/bin/makesis perl.pkg perl.sis"
 
+      wine G:/bin/makesis perl.pkg perl.sis
 
-====================================================================
-Wish List
-====================================================================
-
-- Threads ?
-- Acess to the GUI?
 
 ====================================================================
 Support Status
 ====================================================================
 
-I'm offering this port "as is".  You can ask me questions, but I can't
-guarantee I'll be able to answer them; I don't know much about Perl
-internals myself.
+I'm offering this port "as is". You can ask me questions, but I can't
+guarantee I'll be able to answer them.

@@ -2328,6 +2328,10 @@ PP(pp_accept)
     fcntl(fd, F_SETFD, fd > PL_maxsysfd);	/* ensure close-on-exec */
 #endif
 
+#ifdef EPOC
+    len = sizeof saddr;  /* EPOC somehow truncates info */
+#endif
+
     PUSHp((char *)&saddr, len);
     RETURN;
 

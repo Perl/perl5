@@ -2283,7 +2283,7 @@ EXT char *** environ_pointer;
 #    if !defined(DONT_DECLARE_STD) || \
         (defined(__svr4__) && defined(__GNUC__) && defined(sun)) || \
         defined(__sgi) || \
-        defined(__DGUX) || defined(EPOC)
+        defined(__DGUX) 
 extern char **	environ;	/* environment variables supplied via exec */
 #    endif
 #  endif

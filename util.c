@@ -1934,8 +1934,9 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
     }
 }
 
-#ifndef VMS  /* VMS' my_setenv() is in VMS.c */
-#if !defined(WIN32) && !defined(__CYGWIN__)
+#if !defined( VMS) && !defined(EPOC)  
+       /* VMS' and EPOC's my_setenv() is in VMS.c */
+#if !defined(WIN32) && !defined(__CYGWIN__) && 
 void
 Perl_my_setenv(pTHX_ char *nam, char *val)
 {
@@ -2101,7 +2102,7 @@ Perl_setenv_getix(pTHX_ char *nam)
     return i;
 }
 
-#endif /* !VMS */
+#endif /* !VMS && !EPOC*/
 
 #ifdef UNLINK_ALL_VERSIONS
 I32
