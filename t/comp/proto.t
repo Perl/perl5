@@ -547,6 +547,7 @@ print "ok ", $i++, "\n";
 
 # check that obviously bad prototypes are getting warnings
 {
+  use warnings 'syntax';
   my $warn = "";
   local $SIG{__WARN__} = sub { $warn .= join("",@_) };
   

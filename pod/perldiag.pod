@@ -1612,7 +1612,7 @@ to your Perl administrator.
 
 =item Illegal character in prototype for %s : %s
 
-(S) An illegal character was found in a prototype declaration.  Legal
+(W syntax) An illegal character was found in a prototype declaration.  Legal
 characters in prototypes are $, @, %, *, ;, [, ], &, and \.
 
 =item Illegal division by zero

@@ -1021,6 +1021,13 @@ programmers, and that it will not intrude greatly upon the meat of the
 module, nor make it harder to read.  The line noise is visually
 encapsulated into a small pill that's easy to swallow.
 
+If you try to use an alphanumeric sequence in a prototype you will
+generate an optional warning - "Illegal character in prototype...".
+Unfortunately earlier versions of Perl allowed the prototype to be
+used as long as its prefix was a valid prototype.  The warning may be
+upgraded to a fatal error in a future version of Perl once the
+majority of offending code is fixed.
+
 It's probably best to prototype new functions, not retrofit prototyping
 into older ones.  That's because you must be especially careful about
 silent impositions of differing list versus scalar contexts.  For example,

@@ -224,6 +224,13 @@ The tr///C and tr///U features have been removed and will not return;
 the interface was a mistake.  Sorry about that.  For similar
 functionality, see pack('U0', ...) and pack('C0', ...).
 
+=item *
+
+Earlier Perls treated "sub foo (@bar)" as equivalent to "sub foo (@)".
+The prototypes are now checked at compile-time for invalid characters.
+An optional warning is generated ("Illegal character in prototype...")
+but this may be upgraded to a fatal error in a future release.
+
 =back
 
 =head1 Core Enhancements
