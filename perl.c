@@ -3405,9 +3405,15 @@ S_init_ids(pTHX)
 bool
 Perl_doing_taint(int argc, char *argv[], char *envp[])
 {
-#ifdef WIN32
- /* Doh - what is a uid anyway? */
-#else
+#ifndef PERL_IMPLICIT_SYS
+    /* If we have PERL_IMPLICIT_SYS we can't call getuid() et alia
+     * before we have an interpreter-- and the whole point of this
+     * function is to be called at such an early stage.  If you are on
+     * a system with PERL_IMPLICIT_SYS but you do have a concept of
+     * "tainted because running with altered effective ids', you'll
+     * have to add your own checks somewhere in here.  The two most
+     * known samples of 'implicitness' are Win32 and NetWare, neither
+     * of which has much of concept of 'uids'. */
     int uid  = PerlProc_getuid();
     int euid = PerlProc_geteuid();
     int gid  = PerlProc_getgid();
@@ -3419,7 +3425,7 @@ Perl_doing_taint(int argc, char *argv[], char *envp[])
 #endif
     if (uid && (euid != uid || egid != gid))
 	return 1;
-#endif /* Win32 */
+#endif /* !PERL_IMPLICIT_SYS */
     /* This is a really primitive check; environment gets ignored only
      * if -T are the first chars together; otherwise one gets
      *  "Too late" message. */
