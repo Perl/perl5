@@ -1572,7 +1572,7 @@ is used directly as Perl's exit status. (VMS)
 
 =item getsockopt SOCKET,LEVEL,OPTNAME
 
-Not implemented. (S<Mac OS>, Plan9)
+Not implemented. (Plan9)
 
 =item glob EXPR
 
@@ -1690,7 +1690,7 @@ Not implemented. (MPE/iX, Win32)
 
 =item setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL
 
-Not implemented. (S<Mac OS>, Plan9)
+Not implemented. (Plan9)
 
 =item shmctl ID,CMD,ARG
 
