@@ -1155,6 +1155,23 @@ register GV *gv;
 }
 #endif			/* Microport 2.4 hack */
 
+int
+Perl_magic_freeovrld(pTHX_ SV *sv, MAGIC *mg)
+{
+    AMT *amtp = (AMT*)mg->mg_ptr;
+    if (amtp && AMT_AMAGIC(amtp)) {
+	int i;
+	for (i = 1; i < NofAMmeth; i++) {
+	    CV *cv = amtp->table[i];
+	    if (cv != Nullcv) {
+		SvREFCNT_dec((SV *) cv);
+		amtp->table[i] = Nullcv;
+	    }
+	}
+    }
+ return 0;
+}
+
 /* Updates and caches the CV's */
 
 bool
@@ -1170,18 +1187,11 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
   if (mg && amtp->was_ok_am == PL_amagic_generation
       && amtp->was_ok_sub == PL_sub_generation)
       return AMT_OVERLOADED(amtp);
-  if (amtp && AMT_AMAGIC(amtp)) {	/* Have table. */
-    int i;
-    for (i=1; i<NofAMmeth; i++) {
-      if (amtp->table[i]) {
-	SvREFCNT_dec(amtp->table[i]);
-      }
-    }
-  }
   sv_unmagic((SV*)stash, 'c');
 
   DEBUG_o( Perl_deb(aTHX_ "Recalcing overload magic in package %s\n",HvNAME(stash)) );
 
+  Zero(&amt,1,AMT);
   amt.was_ok_am = PL_amagic_generation;
   amt.was_ok_sub = PL_sub_generation;
   amt.fallback = AMGfallNO;

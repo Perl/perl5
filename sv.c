@@ -1322,10 +1322,10 @@ Perl_sv_setuv(pTHX_ register SV *sv, UV u)
 {
     /* With these two if statements:
        u=1.49  s=0.52  cu=72.49  cs=10.64  scripts=270  tests=20865
-       
+
        without
        u=1.35  s=0.47  cu=73.45  cs=11.43  scripts=270  tests=20865
-       
+
        If you wish to remove them, please benchmark to see what the effect is
     */
     if (u <= (UV)IV_MAX) {
@@ -1350,10 +1350,10 @@ Perl_sv_setuv_mg(pTHX_ register SV *sv, UV u)
 {
     /* With these two if statements:
        u=1.49  s=0.52  cu=72.49  cs=10.64  scripts=270  tests=20865
-       
+
        without
        u=1.35  s=0.47  cu=73.45  cs=11.43  scripts=270  tests=20865
-       
+
        If you wish to remove them, please benchmark to see what the effect is
     */
     if (u <= (UV)IV_MAX) {
@@ -1527,7 +1527,7 @@ S_not_a_number(pTHX_ SV *sv)
    Now, "3.2" will become NV=3.2 IV=3 NOK, IOKp, because the flags meaning
    changes - now IV and NV together means that the two are interchangeable
    SvIVX == (IV) SvNVX && SvNVX == (NV) SvIVX;
-   
+
    The benefit of this is operations such as pp_add know that if SvIOK is
    true for both left and right operands, then integer addition can be
    used instead of floating point. (for cases where the result won't
@@ -1792,7 +1792,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 	       (NV)UVX == NVX are both true, but the values differ. :-(
 	       Hopefully for 2s complement IV_MIN is something like
 	       0x8000000000000000 which will be exact. NWC */
-	} 
+	}
 	else {
 	    SvUVX(sv) = U_V(SvNVX(sv));
 	    if (
@@ -2043,7 +2043,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	       (NV)UVX == NVX are both true, but the values differ. :-(
 	       Hopefully for 2s complement IV_MIN is something like
 	       0x8000000000000000 which will be exact. NWC */
-	} 
+	}
 	else {
 	    SvUVX(sv) = U_V(SvNVX(sv));
 	    if (
@@ -2090,7 +2090,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 	    UV u;
 	    char *num_begin = SvPVX(sv);
 	    int save_errno = errno;
-	    
+	
 	    /* seems that strtoul taking numbers that start with - is
 	       implementation dependant, and can't be relied upon.  */
 	    if (numtype & IS_NUMBER_NEG) {
@@ -2101,7 +2101,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 		if (*num_begin == '-')
 		    num_begin++;
 	    }
-    
+
 	    /* Is it an integer that we could convert with strtoul?
 	       So try it, and if it doesn't set errno then it's pukka.
 	       This should be faster than going atof and then thinking.  */
@@ -2110,7 +2110,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 		&& ((errno = 0), 1) /* always true */
 		&& ((u = Strtoul(num_begin, Null(char**), 10)), 1) /* ditto */
 		&& (errno == 0)
-		/* If known to be negative, check it didn't undeflow IV 
+		/* If known to be negative, check it didn't undeflow IV
 		   XXX possibly we should put more negative values as NVs
 		   direct rather than go via atof below */
 		&& ((numtype & IS_NUMBER_NEG) ? (u <= (UV)IV_MIN) : 1)) {
@@ -2417,7 +2417,7 @@ S_asUV(pTHX_ SV *sv)
  * LONG_MAX and LONG_MIN when given out of range values. ANSI says they should
  * do this, and vendors have had 11 years to get it right.
  * However, will try to make it still work with only atol
- *  
+ *
  * IS_NUMBER_TO_INT_BY_ATOL	123456789 or 123456789.3  definitely < IV_MAX
  * IS_NUMBER_TO_INT_BY_STRTOL	123456789 or 123456789.3  if digits = IV_MAX
  * IS_NUMBER_TO_INT_BY_ATOF	123456789e0               or >> IV_MAX
@@ -2471,7 +2471,7 @@ Perl_looks_like_number(pTHX_ SV *sv)
 
     nbegin = s;
     /*
-     * we return IS_NUMBER_TO_INT_BY_ATOL if the number can converted to 
+     * we return IS_NUMBER_TO_INT_BY_ATOL if the number can converted to
      * integer with atol() without overflow, IS_NUMBER_TO_INT_BY_STRTOL if
      * possibly slightly larger than max int, IS_NUMBER_TO_INT_BY_ATOF if you
      * will need (int)atof().
@@ -3923,7 +3923,7 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
         mg->mg_virtual = &PL_vtbl_amagicelem;
         break;
     case 'c':
-        mg->mg_virtual = 0;
+        mg->mg_virtual = &PL_vtbl_ovrld;
         break;
     case 'B':
 	mg->mg_virtual = &PL_vtbl_bm;
@@ -4292,7 +4292,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	    SvREADONLY_on(&tmpref);	/* DESTROY() could be naughty */
 	    SvREFCNT(&tmpref) = 1;
 
-	    do {	    
+	    do {	
 		stash = SvSTASH(sv);
 		destructor = StashHANDLER(stash,DESTROY);
 		if (destructor) {
@@ -5220,7 +5220,7 @@ Perl_sv_inc(pTHX_ register SV *sv)
     if ((flags & (SVp_NOK|SVp_IOK)) == SVp_NOK) {
 	/* It's (privately or publicly) a float, but not tested as an
 	   integer, so test it to see. */
-	(void) SvIV(sv); 
+	(void) SvIV(sv);
 	flags = SvFLAGS(sv);
     }
     if ((flags & SVf_IOK) || ((flags & (SVp_IOK | SVp_NOK)) == SVp_IOK)) {
@@ -5271,7 +5271,7 @@ Perl_sv_inc(pTHX_ register SV *sv)
 	       so $a="9.22337203685478e+18"; $a+0; $a++
 	       needs to be the same as $a="9.22337203685478e+18"; $a++
 	       or we go insane. */
-	    
+	
 	    (void) sv_2iv(sv);
 	    if (SvIOK(sv))
 		goto oops_its_int;
@@ -5414,7 +5414,7 @@ Perl_sv_dec(pTHX_ register SV *sv)
 	       so $a="9.22337203685478e+18"; $a+0; $a--
 	       needs to be the same as $a="9.22337203685478e+18"; $a--
 	       or we go insane. */
-	    
+	
 	    (void) sv_2iv(sv);
 	    if (SvIOK(sv))
 		goto oops_its_int;

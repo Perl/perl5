@@ -343,6 +343,7 @@
 #define magic_clearsig		Perl_magic_clearsig
 #define magic_existspack	Perl_magic_existspack
 #define magic_freeregexp	Perl_magic_freeregexp
+#define magic_freeovrld		Perl_magic_freeovrld
 #define magic_get		Perl_magic_get
 #define magic_getarylen		Perl_magic_getarylen
 #define magic_getdefelem	Perl_magic_getdefelem
@@ -1818,6 +1819,7 @@
 #define magic_clearsig(a,b)	Perl_magic_clearsig(aTHX_ a,b)
 #define magic_existspack(a,b)	Perl_magic_existspack(aTHX_ a,b)
 #define magic_freeregexp(a,b)	Perl_magic_freeregexp(aTHX_ a,b)
+#define magic_freeovrld(a,b)	Perl_magic_freeovrld(aTHX_ a,b)
 #define magic_get(a,b)		Perl_magic_get(aTHX_ a,b)
 #define magic_getarylen(a,b)	Perl_magic_getarylen(aTHX_ a,b)
 #define magic_getdefelem(a,b)	Perl_magic_getdefelem(aTHX_ a,b)
@@ -3567,6 +3569,8 @@
 #define magic_existspack	Perl_magic_existspack
 #define Perl_magic_freeregexp	CPerlObj::Perl_magic_freeregexp
 #define magic_freeregexp	Perl_magic_freeregexp
+#define Perl_magic_freeovrld	CPerlObj::Perl_magic_freeovrld
+#define magic_freeovrld		Perl_magic_freeovrld
 #define Perl_magic_get		CPerlObj::Perl_magic_get
 #define magic_get		Perl_magic_get
 #define Perl_magic_getarylen	CPerlObj::Perl_magic_getarylen

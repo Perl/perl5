@@ -313,11 +313,12 @@ Perl_mg_free(pTHX_ SV *sv)
 	moremagic = mg->mg_moremagic;
 	if (vtbl && vtbl->svt_free)
 	    CALL_FPTR(vtbl->svt_free)(aTHX_ sv, mg);
-	if (mg->mg_ptr && mg->mg_type != 'g')
+	if (mg->mg_ptr && mg->mg_type != 'g') {
 	    if (mg->mg_len >= 0)
 		Safefree(mg->mg_ptr);
 	    else if (mg->mg_len == HEf_SVKEY)
 		SvREFCNT_dec((SV*)mg->mg_ptr);
+	}
 	if (mg->mg_flags & MGf_REFCOUNTED)
 	    SvREFCNT_dec(mg->mg_obj);
 	Safefree(mg);
@@ -325,6 +326,7 @@ Perl_mg_free(pTHX_ SV *sv)
     SvMAGIC(sv) = 0;
     return 0;
 }
+
 
 #if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
 #include <signal.h>
