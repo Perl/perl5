@@ -136,6 +136,13 @@ For ease of access, the Perl manual has been split up into several sections.
     perl5005delta	Perl changes in version 5.005
     perl5004delta	Perl changes in version 5.004
 
+=head2 Language-Specific
+
+    perlcn		Perl for Simplified Chinese (in EUC-CN)
+    perljp		Perl for Japanese (in EUC-JP)
+    perlko		Perl for Korean (in EUC-KR)
+    perltw		Perl for Traditional Chinese (in Big5)
+
 =head2 Platform-Specific
 
     perlaix		Perl notes for AIX

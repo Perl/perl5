@@ -29,6 +29,8 @@ through to locate the proper section you're looking for.
 
 =item Miscellaneous
 
+=item Language-Specific
+
 =item Platform-Specific
 
 =back
@@ -2264,7 +2266,7 @@ to enable UTF-8/UTF-EBCDIC in scripts
 
 =item Unicode Encodings
 
-=item Security Implications of Malformed UTF-8
+=item Security Implications of Unicode
 
 =item Unicode in Perl on EBCDIC
 
@@ -2275,6 +2277,16 @@ to enable UTF-8/UTF-EBCDIC in scripts
 =back
 
 =item BUGS
+
+=over 4
+
+=item Interaction with locales
+
+=item Interaction with extensions
+
+=item speed
+
+=back
 
 =item SEE ALSO
 
@@ -2425,6 +2437,8 @@ chcp, dataset access, OS/390, z/OS iconv, locales
 =item Security Bugs
 
 =item Protecting Your Programs
+
+=item Unicode
 
 =back
 
@@ -2717,8 +2731,8 @@ tarball, Announce to the modules list, Announce to clpa, Fix bugs!
 
 =back
 
-=head2 perlfaq1 - General Questions About Perl ($Revision: 1.7 $, $Date:
-2002/02/21 14:49:15 $)
+=head2 perlfaq1 - General Questions About Perl ($Revision: 1.8 $, $Date:
+2002/04/07 18:46:13 $)
 
 =over 4
 
@@ -2764,8 +2778,8 @@ Scheme, or Tcl?
 
 =back
 
-=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.9 $,
-$Date: 2002/03/09 21:01:13 $)
+=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.12 $,
+$Date: 2002/04/09 17:16:05 $)
 
 =over 4
 
@@ -2820,8 +2834,8 @@ References, Tutorials, Task-Oriented, Special Topics
 
 =back
 
-=head2 perlfaq3 - Programming Tools ($Revision: 1.15 $, $Date: 2002/02/11
-19:29:52 $)
+=head2 perlfaq3 - Programming Tools ($Revision: 1.18 $, $Date: 2002/04/09
+17:11:16 $)
 
 =over 4
 
@@ -2905,8 +2919,8 @@ my C program; what am I doing wrong?
 
 =back
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 1.19 $, $Date: 2002/03/11
-22:15:19 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 1.20 $, $Date: 2002/04/07
+18:46:13 $)
 
 =over 4
 
@@ -3122,8 +3136,8 @@ array of hashes or arrays?
 
 =back
 
-=head2 perlfaq5 - Files and Formats ($Revision: 1.12 $, $Date: 2002/03/11
-22:25:25 $)
+=head2 perlfaq5 - Files and Formats ($Revision: 1.15 $, $Date: 2002/04/12
+02:02:05 $)
 
 =over 4
 
@@ -3215,8 +3229,8 @@ protected files?  Isn't this a bug in Perl?
 
 =back
 
-=head2 perlfaq6 - Regular Expressions ($Revision: 1.8 $, $Date: 2002/01/31
-04:27:55 $)
+=head2 perlfaq6 - Regular Expressions ($Revision: 1.10 $, $Date: 2002/04/07
+18:32:57 $)
 
 =over 4
 
@@ -3282,8 +3296,8 @@ file?
 
 =back
 
-=head2 perlfaq7 - General Perl Language Issues ($Revision: 1.7 $, $Date:
-2002/01/31 04:27:55 $)
+=head2 perlfaq7 - General Perl Language Issues ($Revision: 1.8 $, $Date:
+2002/03/26 15:48:32 $)
 
 =over 4
 
@@ -3489,7 +3503,7 @@ search path?
 
 =back
 
-=head2 perlfaq9 - Networking ($Revision: 1.7 $, $Date: 2002/01/28 04:17:27
+=head2 perlfaq9 - Networking ($Revision: 1.9 $, $Date: 2002/04/07 18:46:13
 $)
 
 =over 4
@@ -3973,6 +3987,8 @@ C<t>, C<p>, C<n>, C<s>
 =item Blessed References and Class Objects
 
 =item Creating New Variables
+
+GV_ADDMULTI, GV_ADDWARN
 
 =item Reference Counts and Mortality
 
@@ -4798,6 +4814,12 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 
 =item Update auxiliary tools
 
+=item Create debugging macros
+
+=item truncate to the people
+
+=item Unicode in Filenames
+
 =back
 
 =item Recently done things
@@ -4917,10 +4939,6 @@ PerlIO_apply_layers(f,mode,layers), PerlIO_binmode(f,ptype,imode,layers),
 =item Make "use utf8" the default
 
 =item Unicode collation and normalization
-
-=item Create debugging macros
-
-=item truncate to the people
 
 =item pack/unpack tutorial
 
@@ -5118,6 +5136,8 @@ I<The Road goes ever on and on, down from the door where it began.>
 =over 4
 
 =item PerlIO is Now The Default
+
+=item Restricted Hashes
 
 =item Safe Signals
 
@@ -8416,7 +8436,7 @@ diagnostics
 
 =item USAGE
 
-use encoding [I<ENCNAME>] ;, use encoding I<ENCNAME> [ STDIN =>
+use encoding [I<ENCNAME>] ;, use encoding I<ENCNAME> [ STDIN =E<gt>
 I<ENCNAME_IN> ...] ;, no encoding;
 
 =item CAVEATS
@@ -8428,6 +8448,10 @@ I<ENCNAME_IN> ...] ;, no encoding;
 =item DO NOT MIX MULTIPLE ENCODINGS
 
 =back
+
+=item NON-ASCII Identifiers and Filter option
+
+use encoding I<ENCNAME> Filter=E<gt>1;
 
 =item EXAMPLE - Greekperl
 
@@ -10431,7 +10455,7 @@ C<orderlib>, C<osname>, C<osvers>, C<otherlibdirs>
 =item p
 
 C<package>, C<pager>, C<passcat>, C<patchlevel>, C<path_sep>, C<perl5>,
-C<perl>, C<perl_patchlevel>
+C<perl5>, C<perl>, C<perl_patchlevel>
 
 =item P
 
@@ -10501,7 +10525,7 @@ C<xlibpth>, C<xs_apiversion>
 
 =item y
 
-C<yacc>, C<yaccflags>
+C<yaccflags>
 
 =item z
 
@@ -11014,11 +11038,15 @@ Perl code
 
 =item PERL ENCODING API
 
-$bytes	= encode(ENCODING, $string[, CHECK]), $string = decode(ENCODING,
-$bytes[, CHECK]), [$length =] from_to($string, FROM_ENCODING, TO_ENCODING[,
-CHECK])
+$octets  = encode(ENCODING, $string[, CHECK]), $string = decode(ENCODING,
+$octets[, CHECK]), [$length =] from_to($string, FROM_ENCODING, TO_ENCODING
+[,CHECK])
 
 =over 4
+
+=item UTF-8 / utf8
+
+$octets = encode_utf8($string);, $string = decode_utf8($octets [, CHECK]);
 
 =item Listing available encodings
 
@@ -11030,16 +11058,6 @@ CHECK])
 
 =item Handling Malformed Data
 
-Scheme 1, Scheme 2, Other Schemes
-
-=over 4
-
-=item UTF-8 / utf8
-
-$bytes = encode_utf8($string);, $string = decode_utf8($bytes [, CHECK]);
-
-=back
-
 =item Defining Encodings
 
 =item Messing with Perl's Internals
@@ -11050,9 +11068,7 @@ is_utf8(STRING [, CHECK]), _utf8_on(STRING), _utf8_off(STRING)
 
 =back
 
-=head2 Encode::10646_1, Encode::10656_1 -- for internal use only
-
-=head2 Encode::Alias - alias defintions to encodings
+=head2 Encode::Alias - alias definitions to encodings
 
 =over 4
 
@@ -11140,9 +11156,9 @@ reference, e.g.:
 
 =item SEE ALSO
 
-=back
+Scheme 1, Scheme 2, Other Schemes
 
-=head2 Encode::Internal -- for internal use only
+=back
 
 =head2 Encode::JP - Japanese Encodings
 
@@ -11162,13 +11178,9 @@ reference, e.g.:
 
 =back
 
-=head2 Encode::JP::2022_JP -- internally used by Encode::JP
-
-=head2 Encode::JP::2022_JP1 -- internally used by Encode::JP
-
 =head2 Encode::JP::H2Z -- internally used by Encode::JP::2022_JP*
 
-=head2 Encode::JP::JIS -- internally used by Encode::JP
+=head2 Encode::JP::JIS7 -- internally used by Encode::JP
 
 =head2 Encode::Supported -- Supported encodings by Encode
 
@@ -11188,6 +11200,8 @@ reference, e.g.:
 
 =item Built-in Encodings
 
+=item Encode::Unicode -- other Unicode encodings
+
 =item Encode::Byte -- Extended ASCII
 
 ISO-8859 and corresponding vendor mappings, KOI8 - De Facto Standard for
@@ -11196,7 +11210,7 @@ Cyrillic world
 =item The CJK: Chinese, Japanese, Korean (Multibyte)
 
 Encode::CN -- Continental China, Encode::JP -- Japan, Encode::KR -- Korea,
-Encode::TW -- Taiwan, Encode::HanExtra -- More Chinese via CPAN
+Encode::HanExtra -- More Chinese via CPAN
 
 =item Miscellaneous encodings
 
@@ -11226,7 +11240,8 @@ KS_C_5601-1987, GB2312, Big5, Shift_JIS
 =item Glossary
 
 character repertoire, coded character set (CCS), character encoding scheme
-(CES), EUC, ISO-2022, UCS, UCS-2, Unicode, UTF, UTF-16
+(CES), charset (in MIME context), EUC, ISO-2022, UCS, UCS-2, Unicode, UTF,
+UTF-16
 
 =item See Also
 
@@ -11239,7 +11254,11 @@ RFC, UC, Unicode Glossary
 
 =item Other Notable Sites
 
-czyborra.com, CJK.inf
+czyborra.com, CJK.inf, Jungshik Shin's Hangul FAQ
+
+=item Offline sources
+
+C<CJKV Information Processing> by Ken Lunde
 
 =back
 
@@ -11275,14 +11294,37 @@ czyborra.com, CJK.inf
 
 =back
 
-=head2 Encode::Unicode -- for internal use only
+=head2 Encode::Unicode -- Various Unicode Transform Format
+
+=over 4
+
+=item SYNOPSIS
+
+=item ABSTRACT
+
+L<http://www.unicode.org/glossary/> says:, Quick Reference
+
+=item Size, Endianness, and BOM
+
+=over 4
+
+=item by Size
+
+=item by Endianness
+
+BOM as integer when fetched in network byte order
+
+=back
+
+=item Surrogate Pairs
+
+=item SEE ALSO
+
+=back
 
 =head2 Encode::XS -- for internal use only
 
-=head2 Encode::lib::Encode::10646_1, Encode::10656_1 -- for internal use
-only
-
-=head2 Encode::lib::Encode::Alias, Encode::Alias - alias defintions to
+=head2 Encode::lib::Encode::Alias, Encode::Alias - alias definitions to
 encodings
 
 =over 4
@@ -11330,22 +11372,15 @@ Implementation Base Class
 
 =item SEE ALSO
 
+Scheme 1, Scheme 2, Other Schemes
+
 =back
-
-=head2 Encode::lib::Encode::Internal, Encode::Internal -- for internal use
-only
-
-=head2 Encode::lib::Encode::JP::2022_JP, Encode::JP::2022_JP -- internally
-used by Encode::JP
-
-=head2 Encode::lib::Encode::JP::2022_JP1, Encode::JP::2022_JP1 --
-internally used by Encode::JP
 
 =head2 Encode::lib::Encode::JP::H2Z, Encode::JP::H2Z -- internally used by
 Encode::JP::2022_JP*
 
-=head2 Encode::lib::Encode::JP::JIS, Encode::JP::JIS -- internally used by
-Encode::JP
+=head2 Encode::lib::Encode::JP::JIS7, Encode::JP::JIS7 -- internally used
+by Encode::JP
 
 =head2 Encode::lib::Encode::Supported, Encode::Supported -- Supported
 encodings by Encode
@@ -11366,6 +11401,8 @@ encodings by Encode
 
 =item Built-in Encodings
 
+=item Encode::Unicode -- other Unicode encodings
+
 =item Encode::Byte -- Extended ASCII
 
 ISO-8859 and corresponding vendor mappings, KOI8 - De Facto Standard for
@@ -11374,7 +11411,7 @@ Cyrillic world
 =item The CJK: Chinese, Japanese, Korean (Multibyte)
 
 Encode::CN -- Continental China, Encode::JP -- Japan, Encode::KR -- Korea,
-Encode::TW -- Taiwan, Encode::HanExtra -- More Chinese via CPAN
+Encode::HanExtra -- More Chinese via CPAN
 
 =item Miscellaneous encodings
 
@@ -11404,7 +11441,8 @@ KS_C_5601-1987, GB2312, Big5, Shift_JIS
 =item Glossary
 
 character repertoire, coded character set (CCS), character encoding scheme
-(CES), EUC, ISO-2022, UCS, UCS-2, Unicode, UTF, UTF-16
+(CES), charset (in MIME context), EUC, ISO-2022, UCS, UCS-2, Unicode, UTF,
+UTF-16
 
 =item See Also
 
@@ -11417,25 +11455,89 @@ RFC, UC, Unicode Glossary
 
 =item Other Notable Sites
 
-czyborra.com, CJK.inf
+czyborra.com, CJK.inf, Jungshik Shin's Hangul FAQ
+
+=item Offline sources
+
+C<CJKV Information Processing> by Ken Lunde
 
 =back
 
 =back
 
-=head2 Encode::lib::Encode::Unicode, Encode::Unicode -- for internal use
-only
+=head2 Encode::lib::Encode::Unicode, Encode::Unicode -- Various Unicode
+Transform Format
+
+=over 4
+
+=item SYNOPSIS
+
+=item ABSTRACT
+
+L<http://www.unicode.org/glossary/> says:, Quick Reference
+
+=item Size, Endianness, and BOM
+
+=over 4
+
+=item by Size
+
+=item by Endianness
+
+BOM as integer when fetched in network byte order
+
+=back
+
+=item Surrogate Pairs
+
+=item SEE ALSO
+
+=back
 
 =head2 Encode::lib::Encode::XS, Encode::XS -- for internal use only
 
-=head2 Encode::lib::Encode::ucs2_le, Encode::ucs2_le -- for internal use
-only
+=head2 Encode::lib::Encoder, Encode::Encoder -- Object Oriented Encoder
 
-=head2 Encode::lib::Encode::utf8, Encode::utf8 -- for internal use only
+=over 4
 
-=head2 Encode::ucs2_le -- for internal use only
+=item SYNOPSIS
 
-=head2 Encode::utf8 -- for internal use only
+  use Encode::Encoder;
+  # Encode::encode("ISO-8859-1", $data); 
+  Encode::Encoder->new($data)->iso_8859_1; # OOP way
+  # shortcut
+  use Encode::Encoder qw(encoder);
+  encoder($data)->iso_8859_1;
+  # you can stack them!
+  encoder($data)->iso_8859_1->base64;  # provided base64() is defined
+  # you can use it as a decoder as well
+  encoder($base64)->bytes('base64')->latin1;
+  # stringified
+  print encoder($data)->utf8->latin1;  # prints the string in latin1
+  # numified
+  encoder("\x{abcd}\x{ef}g")->utf8 == 6; # true. bytes::length($data)
+
+=item ABSTRACT
+
+=item Description
+
+=over 4
+
+=item Predefined Methods
+
+$e = Encode::Encoder-E<gt>new([$data, $encoding]);, encoder(),
+$e-E<gt>data([$data]), $e-E<gt>encoding([$encoding]),
+$e-E<gt>bytes([$encoding])
+
+=item Example: base64 transcoder
+
+=item operator overloading
+
+=back
+
+=item SEE ALSO
+
+=back
 
 =head2 Encodencoding, encoding -  allows you to write your script in
 non-asii or non-utf8
@@ -11448,7 +11550,7 @@ non-asii or non-utf8
 
 =item USAGE
 
-use encoding [I<ENCNAME>] ;, use encoding I<ENCNAME> [ STDIN =>
+use encoding [I<ENCNAME>] ;, use encoding I<ENCNAME> [ STDIN =E<gt>
 I<ENCNAME_IN> ...] ;, no encoding;
 
 =item CAVEATS
@@ -11461,9 +11563,56 @@ I<ENCNAME_IN> ...] ;, no encoding;
 
 =back
 
+=item NON-ASCII Identifiers and Filter option
+
+use encoding I<ENCNAME> Filter=E<gt>1;
+
 =item EXAMPLE - Greekperl
 
 =item KNOWN PROBLEMS
+
+=item SEE ALSO
+
+=back
+
+=head2 Encoder, Encode::Encoder -- Object Oriented Encoder
+
+=over 4
+
+=item SYNOPSIS
+
+  use Encode::Encoder;
+  # Encode::encode("ISO-8859-1", $data); 
+  Encode::Encoder->new($data)->iso_8859_1; # OOP way
+  # shortcut
+  use Encode::Encoder qw(encoder);
+  encoder($data)->iso_8859_1;
+  # you can stack them!
+  encoder($data)->iso_8859_1->base64;  # provided base64() is defined
+  # you can use it as a decoder as well
+  encoder($base64)->bytes('base64')->latin1;
+  # stringified
+  print encoder($data)->utf8->latin1;  # prints the string in latin1
+  # numified
+  encoder("\x{abcd}\x{ef}g")->utf8 == 6; # true. bytes::length($data)
+
+=item ABSTRACT
+
+=item Description
+
+=over 4
+
+=item Predefined Methods
+
+$e = Encode::Encoder-E<gt>new([$data, $encoding]);, encoder(),
+$e-E<gt>data([$data]), $e-E<gt>encoding([$encoding]),
+$e-E<gt>bytes([$encoding])
+
+=item Example: base64 transcoder
+
+=item operator overloading
+
+=back
 
 =item SEE ALSO
 
@@ -12312,15 +12461,18 @@ CONFIGURE, DEFINE, DIR, DISTNAME, DL_FUNCS, DL_VARS, EXCLUDE_EXT,
 EXE_FILES, FIRST_MAKEFILE, FULLPERL, FULLPERLRUN, FULLPERLRUNINST,
 FUNCLIST, H, IMPORTS, INC, INCLUDE_EXT, INSTALLARCHLIB, INSTALLBIN,
 INSTALLDIRS, INSTALLMAN1DIR, INSTALLMAN3DIR, INSTALLPRIVLIB, INSTALLSCRIPT,
-INSTALLSITEARCH, INSTALLSITELIB, INST_ARCHLIB, INST_BIN, INST_LIB,
-INST_MAN1DIR, INST_MAN3DIR, INST_SCRIPT, LDFROM, LIB, LIBPERL_A, LIBS,
-LINKTYPE, MAKEAPERL, MAKEFILE, MAN1PODS, MAN3PODS, MAP_TARGET, MYEXTLIB,
-NAME, NEEDS_LINKING, NOECHO, NORECURS, NO_VC, OBJECT, OPTIMIZE, PERL,
-PERL_CORE, PERLMAINCC, PERL_ARCHLIB, PERL_LIB, PERL_MALLOC_OK, PERLRUN,
-PERLRUNINST, PERL_SRC, PERM_RW, PERM_RWX, PL_FILES, PM, PMLIBDIRS,
+INSTALLSITEARCH, INSTALLSITEBIN, INSTALLSITELIB, INSTALLSITEMAN1DIR,
+INSTALLSITEMAN3DIR, INSTALLVENDORARCH, INSTALLVENDORBIN, INSTALLVENDORLIB,
+INSTALLVENDORMAN1DIR, INSTALLVENDORMAN3DIR, INST_ARCHLIB, INST_BIN,
+INST_LIB, INST_MAN1DIR, INST_MAN3DIR, INST_SCRIPT, LDFROM, LIB, LIBPERL_A,
+LIBS, LINKTYPE, MAKEAPERL, MAKEFILE, MAN1PODS, MAN3PODS, MAP_TARGET,
+MYEXTLIB, NAME, NEEDS_LINKING, NOECHO, NORECURS, NO_VC, OBJECT, OPTIMIZE,
+PERL, PERL_CORE, PERLMAINCC, PERL_ARCHLIB, PERL_LIB, PERL_MALLOC_OK,
+PERLRUN, PERLRUNINST, PERL_SRC, PERM_RW, PERM_RWX, PL_FILES, PM, PMLIBDIRS,
 PM_FILTER, POLLUTE, PPM_INSTALL_EXEC, PPM_INSTALL_SCRIPT, PREFIX,
-PREREQ_PM, PREREQ_FATAL, PREREQ_PRINT, PRINT_PREREQ, SKIP, TYPEMAPS,
-VERSION, VERSION_FROM, XS, XSOPT, XSPROTOARG, XS_VERSION
+PREREQ_PM, PREREQ_FATAL, PREREQ_PRINT, PRINT_PREREQ, SITEPREFIX, SKIP,
+TYPEMAPS, VENDORPREFIX, VERSION, VERSION_FROM, XS, XSOPT, XSPROTOARG,
+XS_VERSION
 
 =item Additional lowercase attributes
 
@@ -12498,6 +12650,10 @@ C<basename>, C<dirname>
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=item AUTHOR
+
+=item HISTORY
 
 =back
 
@@ -13021,6 +13177,10 @@ TopSystemUID
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+cacheout EXPR, cacheout MODE, EXPR
+
+=item CAVEATS
 
 =item BUGS
 

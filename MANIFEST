@@ -2192,6 +2192,10 @@ README.apollo		Notes about Apollo DomainOS port
 README.beos		Notes about BeOS port
 README.bs2000		Notes about BS2000 POSIX port
 README.ce		Notes about WinCE port
+README.cn		About using Perl and Simplified Chinese
+README.jp		About using Perl and Japanese
+README.ko		About using Perl and Korean
+README.tw		About using Perl and Traditional Chinese
 README.cygwin		Notes about Cygwin port
 README.dgux		Notes about DG/UX port
 README.dos		Notes about DOS/DJGPP port
