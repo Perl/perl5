@@ -48,7 +48,7 @@ sub post_initialize
   }
  # Trick case-blind filesystems.
  delete $o{'encode'.$x};
- $o{'Encode'.$x'} = 1;
+ $o{'Encode'.$x} = 1;
  # Reset the variable
  $self->{'O_FILES'} = [sort keys %o];
  my @files;
