@@ -326,7 +326,14 @@ sub begin_is_use {
 
 	return unless $self->const_sv($constop)->PV eq $module;
 	$constop = $constop->sibling;
-	$version = $self->const_sv($constop)->int_value;
+	$version = $self->const_sv($constop);
+	if (class($version) ne "PVMG") {
+	    # version is either an integer or a double
+	    $version = $version->PV;
+	} else {
+	    # version specified as a v-string
+	    $version = 'v'.join '.', map ord, split //, $version->PV;
+	}
 	$constop = $constop->sibling;
 	return if $constop->name ne "method_named";
 	return if $self->const_sv($constop)->PV ne "VERSION";
