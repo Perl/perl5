@@ -380,7 +380,6 @@ CODE:
     SV *bitspec, *opset;
     char *bitmap;
     STRLEN len, on;
-    dMY_CXT;
 
     opset = sv_2mortal(new_opset(aTHX_ Nullsv));
     bitmap = SvPVX(opset);

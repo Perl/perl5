@@ -188,11 +188,11 @@ print "bool isExclusion (UV uv) \n{\nreturn\n\t";
 while(@Exclus) {
   my $cur = shift @Exclus;
   if(@Exclus && $cur + 1 == $Exclus[0]) {
-    print "$cur <= uv && uv <= ";
+    print "($cur <= uv && uv <= ";
     while(@Exclus && $cur + 1 == $Exclus[0]) {
       $cur = shift @Exclus;
     }
-    print $cur;
+    print "$cur)";
     print "\n\t|| " if @Exclus;
   } else {
     print "uv == $cur";

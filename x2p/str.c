@@ -55,7 +55,7 @@ str_2num(register STR *str)
     str->str_nok = 1;
 #ifdef DEBUGGING
     if (debug & 32)
-	fprintf(stderr,"0x%lx num(%"NVgf")\n",(unsigned long)str,str->str_nval);
+	fprintf(stderr,"0x%lx num(%g)\n",(unsigned long)str,str->str_nval);
 #endif
     return str->str_nval;
 }
