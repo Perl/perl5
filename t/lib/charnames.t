@@ -117,6 +117,8 @@ sub to_bytes {
 {
   # 20001114.001	
 
+  no utf8; # so that the naked 8-bit character won't gripe under use utf8
+
   if (ord("Ä") == 0xc4) { # Try to do this only on Latin-1.
       use charnames ':full';
       my $text = "\N{LATIN CAPITAL LETTER A WITH DIAERESIS}";

@@ -10,6 +10,8 @@ BEGIN {
 
 use Locale::Language;
 
+no utf8; # so that the naked 8-bit characters won't gripe under use utf8
+
 #-----------------------------------------------------------------------
 # This is an array of tests. Each test is eval'd as an expression.
 # If it evaluates to FALSE, then "not ok N" is printed for the test,
