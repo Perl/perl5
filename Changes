@@ -142,7 +142,7 @@ ____________________________________________________________________________
 	   ! t/lib/gol-compat.t t/lib/gol-linkage.t
 ____________________________________________________________________________
 [  6575] By: jhi                                   on 2000/08/10  22:02:07
-        Log: Update to ANSIColor 1.03, from Russ Allbery.
+        Log: Update to Term::ANSIColor 1.03, from Russ Allbery.
      Branch: perl
 	   ! lib/Term/ANSIColor.pm t/lib/ansicolor.t
 ____________________________________________________________________________
