@@ -208,13 +208,21 @@ fi
 # Shimpei Yamashita <shimpei@socrates.patnet.caltech.edu>
 # Message-Id: <33EF1634.B36B6500@pobox.com>
 # 
-# MkLinux (osname=linux,archname=ppc-linux), which differs slightly from other
-# linuces, needs special flags passed in order for dynamic loading to work.
+# The DR2 of MkLinux (osname=linux,archname=ppc-linux) may need
+# special flags passed in order for dynamic loading to work.
 # instead of the recommended:
+#
 # ccdlflags='-rdynamic'
 # 
 # it should be:
 # ccdlflags='-Wl,-E'
+#
+# So if your DR2 (DR3 came out summer 1998, consider upgrading)
+# has problems with dynamic loading, uncomment the
+# following three lines, make distclean, and re-Configure:
+#case "`uname -r | sed 's/^[0-9.-]*//'``arch`" in
+#'osfmach3ppc') ccdlflags='-Wl,-E' ;;
+#esac
 
 # This script UU/usethreads.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use threads.
