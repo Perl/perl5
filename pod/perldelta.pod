@@ -778,6 +778,10 @@ The experimental long double support is still very much so in Solaris.
 (Other platforms like Linux and Tru64 are beginning to solidify in
 this area.)
 
+=head2 Linux With Sfio Fails op/misc Test 48
+
+No known fix.
+
 =head2 Storable tests fail in some platforms
 
 If any Storable tests fail the use of Storable is not advisable.
