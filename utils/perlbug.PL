@@ -352,6 +352,7 @@ EOF
 	my($dir) = ($Is_VMS ? 'sys$scratch:' :
 		    ($Is_MSWin32 and $ENV{'TEMP'} ? $ENV{'TEMP'} : '/tmp/'));
 	$filename = "bugrep0$$";
+	$dir .= "\\" if $Is_MSWin32 and $dir !~ m|[\\/]$|;
 	$filename++ while -e "$dir$filename";
 	$filename = "$dir$filename";
 	}
@@ -702,7 +703,7 @@ sub Send {
 				$sendmail = $_, last if -e $_;
 			}
 			
-			paraprint <<"EOF" and die "\n" if $sendmail eq "";
+			paraprint <<"EOF", die "\n" if $sendmail eq "";
 			
 I am terribly sorry, but I cannot find sendmail, or a close equivalent, and
 the perl package Mail::Send has not been installed, so I can't send your bug
