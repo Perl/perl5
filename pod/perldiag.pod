@@ -1498,13 +1498,25 @@ PDP-11 or something?
 to be a read-write filehandle, you needed to open it with "+<" or "+>"
 or "+>>" instead of with "<" or nothing.  If you intended only to write
 the file, use ">" or ">>".  See L<perlfunc/open>.
+The warning will also occur if STDOUT (file descriptor 1) or STDERR
+(file descriptor 2) is opened for input, this is a pre-emptive warning in
+case some other part of your program or a child process is expecting STDOUT
+and STDERR to be writable. This can happen accidentally if you
+C<close(STDOUT)> or STDERR and then C<open> an unrelated handle which
+will resuse the lowest numbered available descriptor.
 
 =item Filehandle %s opened only for output
 
-(W io) You tried to read from a filehandle opened only for writing.  If
-you intended it to be a read/write filehandle, you needed to open it
+(W io) You tried to read from a filehandle opened only for writing.
+If you intended it to be a read/write filehandle, you needed to open it
 with "+<" or "+>" or "+>>" instead of with "<" or nothing.  If you
 intended only to read from the file, use "<".  See L<perlfunc/open>.
+The warning will also occur if STDIN (file descriptor 0) is opened
+for output - this is a pre-emptive warning in case some other part of your
+program or a child process is expecting STDIN to be readable.
+This can happen accidentally if you C<close(STDIN)> and then C<open> an
+unrelated handle which will resuse the lowest numbered available
+descriptor.
 
 =item Final $ should be \$ or $name
 
@@ -3017,7 +3029,7 @@ declared or defined with a different function prototype.
 
 =item Prototype not terminated
 
-(F) You've omitted the closing parenthesis in a function prototype 
+(F) You've omitted the closing parenthesis in a function prototype
 definition.
 
 =item Quantifier in {,} bigger than %d in regex;
@@ -4154,7 +4166,7 @@ a package qualifier, e.g. C<&our()>, or C<Foo::our()>.
 
 =item Use of tainted arguments in %s is deprecated
 
-(W taint) You have supplied C<system()> or C<exec()> with multiple 
+(W taint) You have supplied C<system()> or C<exec()> with multiple
 arguments and at least one of them is tainted.  This used to be allowed
 but will become a fatal error in a future version of perl.  Untaint your
 arguments.  See L<perlsec>.
