@@ -678,6 +678,7 @@ ext/Storable/t/just_plain_nasty.t	See if Storable works
 ext/Storable/t/lock.t		See if Storable works
 ext/Storable/t/make_56_interwork.pl	Make test data for interwork56.t
 ext/Storable/t/make_downgrade.pl	Make test data for downgrade.t
+ext/Storable/t/make_overload.pl	Make test data for overload.t
 ext/Storable/t/malice.t		See if Storable copes with corrupt files
 ext/Storable/t/overload.t	See if Storable works
 ext/Storable/t/recurse.t	See if Storable works
