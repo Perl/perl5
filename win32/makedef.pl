@@ -280,6 +280,11 @@ unless ($define{'DEBUGGING'})
     Perl_watchok)];
  }
 
+if ($define{'HAVE_DES_FCRYPT'})
+ {
+  emit_symbols [qw(win32_crypt)];
+ }
+
 open (GLOBAL, "<../global.sym") || die "failed to open global.sym" . $!;
 while (<GLOBAL>) 
  {

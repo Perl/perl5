@@ -55,6 +55,23 @@ char  szShellPath[MAX_PATH+1];
 char  szPerlLibRoot[MAX_PATH+1];
 HANDLE PerlDllHandle = INVALID_HANDLE_VALUE;
 
+#ifdef USE_THREADS
+#  ifdef USE_DECLSPEC_THREAD
+__declspec(thread) char	strerror_buffer[512];
+#    ifdef HAVE_DES_FCRYPT
+__declspec(thread) char	crypt_buffer[30];
+#    endif
+#  else
+#    define strerror_buffer	(thr->i.Wstrerror_buffer)
+#    define crypt_buffer	(thr->i.Wcrypt_buffer)
+#  endif
+#else
+char	strerror_buffer[512];
+#  ifdef HAVE_DES_FCRYPT
+char	crypt_buffer[30];
+#  endif
+#endif
+
 static int do_spawn2(char *cmd, int exectype);
 
 int 
@@ -733,6 +750,17 @@ win32_alarm(unsigned int sec)
     return 0;
 }
 
+#ifdef HAVE_DES_FCRYPT
+extern char *	des_fcrypt(char *cbuf, const char *txt, const char *salt);
+
+DllExport char *
+win32_crypt(const char *txt, const char *salt)
+{
+    dTHR;
+    return des_fcrypt(crypt_buffer, txt, salt);
+}
+#endif
+
 #ifdef USE_FIXED_OSFHANDLE
 
 EXTERN_C int __cdecl _alloc_osfhnd(void);
@@ -935,16 +963,6 @@ win32_feof(FILE *fp)
  * WSAGetLastError() are not known by the library routine strerror
  * we have to roll our own.
  */
-
-#ifdef USE_THREADS
-#ifdef USE_DECLSPEC_THREAD
-__declspec(thread) char	strerror_buffer[512];
-#else
-#define strerror_buffer (thr->i.Wstrerror_buffer)
-#endif
-#else
-char	strerror_buffer[512];
-#endif
 
 DllExport char *
 win32_strerror(int e) 

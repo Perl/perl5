@@ -212,6 +212,9 @@ struct thread_intern
 {
  char		Wstrerror_buffer[512];
  struct servent Wservent;
+#ifdef HAVE_DES_FCRYPT
+ char		Wcrypt_buffer[30];
+#endif
 };
 #endif
 #endif
