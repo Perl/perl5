@@ -79,6 +79,197 @@ Version v5.5.640        Development release working toward 5.6
 ----------------
 
 ____________________________________________________________________________
+[  4752] By: gsar                                  on 2000/01/04  01:19:20
+        Log: s/USE_TEXTMODE_SCRIPTS/PERL_TEXTMODE_SCRIPTS/g
+     Branch: perl
+	   ! win32/Makefile win32/makefile.mk win32/win32.h
+____________________________________________________________________________
+[  4751] By: gsar                                  on 2000/01/03  18:26:08
+        Log: avoid using (custom) autoloader in MakeMaker (from Andreas Koenig)
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[  4750] By: gsar                                  on 2000/01/02  21:58:02
+        Log: make DProf look at $ENV{PERL_DPROF_OUT_FILE_NAME} to make it possible
+             to write to a file other than tmon.out (suggested by Haakon Alstadheim
+             <Haakon.Alstadheim@sds.no>)
+     Branch: perl
+	   ! ext/Devel/DProf/DProf.pm ext/Devel/DProf/DProf.xs
+____________________________________________________________________________
+[  4749] By: gsar                                  on 2000/01/02  21:37:29
+        Log: disable optimization in change#3612 for join() and quotemeta()--this
+             removes all the gross hacks for the special cases in that change; fix
+             pp_concat() for when TARG == arg (modified version of patch suggested
+             by Ilya Zakharevich)
+     Branch: perl
+	   ! op.c opcode.h opcode.pl pp_hot.c sv.c t/op/lex_assign.t
+____________________________________________________________________________
+[  4748] By: gsar                                  on 2000/01/02  20:26:06
+        Log: MakeMaker should attempt to "require" rather than "use" prerequisites
+             to avoid imports (from Michael G Schwern <schwern@pobox.com>)
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[  4747] By: gsar                                  on 2000/01/02  20:17:36
+        Log: fix 4-arg substr() when used as argument to subroutine
+     Branch: perl
+	   ! pp.c t/op/substr.t
+____________________________________________________________________________
+[  4746] By: gsar                                  on 2000/01/02  18:45:58
+        Log: usethreads build fixups for NeXTstep (as suggested by Hans Mulder)
+     Branch: perl
+	   ! embed.h embed.pl ext/DynaLoader/dl_beos.xs
+	   ! ext/DynaLoader/dl_dlopen.xs ext/DynaLoader/dl_hpux.xs
+	   ! ext/DynaLoader/dl_next.xs ext/DynaLoader/dl_rhapsody.xs
+	   ! perlapi.c proto.h thread.h util.c
+____________________________________________________________________________
+[  4745] By: gsar                                  on 2000/01/02  18:15:44
+        Log: ebcdic fix for Data::Dumper from Peter Prymmer
+     Branch: perl
+	   ! ext/Data/Dumper/Dumper.pm regcomp.c
+____________________________________________________________________________
+[  4744] By: gsar                                  on 1999/12/31  22:42:23
+        Log: missing files in previous submit
+     Branch: perl
+	   ! embed.h embed.pl ext/Devel/DProf/DProf.xs globals.c
+	   ! lib/ExtUtils/MM_Unix.pm objXSUB.h perlapi.c proto.h
+____________________________________________________________________________
+[  4743] By: gsar                                  on 1999/12/31  06:47:18
+        Log: various Windows build tweaks
+     Branch: perl
+	   ! win32/win32.h
+____________________________________________________________________________
+[  4742] By: gsar                                  on 1999/12/30  21:32:36
+        Log: change#4705 breaks code that interpolates $], so leave string value
+             of $] as it was for compatibility (and perhaps introduce $^V or similar
+             for the utf8 representation, maybe?)
+     Branch: perl
+	   ! configpm gv.c
+____________________________________________________________________________
+[  4741] By: gsar                                  on 1999/12/30  19:36:21
+        Log: avoid CRLF in byteloadable files created by perlcc
+     Branch: perl
+	   ! utils/perlcc.PL
+____________________________________________________________________________
+[  4740] By: gsar                                  on 1999/12/30  19:35:07
+        Log: leave DATA open in binmode if __END__ line doesn't have CRLF
+     Branch: perl
+	   ! pod/perldelta.pod toke.c
+____________________________________________________________________________
+[  4739] By: gsar                                  on 1999/12/30  05:44:21
+        Log: enable the PERL_BINMODE_SCRIPTS behavior by default on Windows
+             to allow ByteLoader to work; the DATA filehandles continue to
+             be left open in text mode for compatibility
+     Branch: perl
+	   ! embed.h embed.pl objXSUB.h pod/perldelta.pod proto.h sv.c
+	   ! toke.c win32/Makefile win32/makefile.mk win32/win32.c
+	   ! win32/win32.h
+____________________________________________________________________________
+[  4738] By: gsar                                  on 1999/12/30  04:36:12
+        Log: CR-LF support broken for formats
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  4737] By: gsar                                  on 1999/12/29  22:30:52
+        Log: make DProf functional under pseudo-fork()
+     Branch: perl
+	   ! ext/Devel/DProf/DProf.xs
+____________________________________________________________________________
+[  4736] By: gsar                                  on 1999/12/29  21:04:59
+        Log: slurp mode fix in change#2910 wasn't quite right (spotted by Hans
+             Mulder)
+     Branch: perl
+	   ! doio.c pp_hot.c t/io/argv.t
+____________________________________________________________________________
+[  4735] By: gsar                                  on 1999/12/29  18:12:40
+        Log: re.pm is needed earlier, xsubpp now uses it (spotted by Andreas
+             Koenig)
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  4734] By: gsar                                  on 1999/12/28  21:10:37
+        Log: Windows build tweaks
+     Branch: perl
+	   ! INTERN.h sv.c
+____________________________________________________________________________
+[  4733] By: gsar                                  on 1999/12/28  20:45:15
+        Log: remove never-taken branch for making getc() operate on ARGV (spotted 
+             by Ralph Corderoy <ralph@inputplus.demon.co.uk>)
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[  4732] By: gsar                                  on 1999/12/28  20:42:13
+        Log: tests for change#4642 and pod fixups suggested by Ralph Corderoy
+             <ralph@inputplus.demon.co.uk>
+     Branch: perl
+	   ! pod/perldelta.pod pod/perlfunc.pod pod/perlre.pod t/io/argv.t
+____________________________________________________________________________
+[  4731] By: gsar                                  on 1999/12/28  20:23:17
+        Log: optimize XSUBs to use targets if the -nooptimize xsubpp option is
+             not supplied (variant of patch suggested by Ilya Zakharevich)
+     Branch: perl
+	   ! XSUB.h lib/ExtUtils/xsubpp
+____________________________________________________________________________
+[  4730] By: gsar                                  on 1999/12/28  19:55:56
+        Log: range operator does magical string increment iff both operands
+             are non-numbers, from Tom Phoenix <rootbeer@redcat.com>; fixed
+             the "foreach (RANGE)" case as well
+     Branch: perl
+	   ! pp_ctl.c t/op/range.t
+____________________________________________________________________________
+[  4729] By: gsar                                  on 1999/12/28  18:40:19
+        Log: Win9x + GCC update from Benjamin Stuhl <sho_pi@hotmail.com>
+     Branch: perl
+	   - win32/PerlCRT.def win32/gstartup.c win32/oldnames.def
+	   ! EXTERN.h INTERN.h MANIFEST README.win32 iperlsys.h
+	   ! lib/ExtUtils/MM_Win32.pm makedef.pl win32/Makefile
+	   ! win32/config.gc win32/genmk95.pl win32/makefile.mk
+	   ! win32/perlhost.h win32/perllib.c win32/runperl.c win32/win32.c
+	   ! win32/win32.h
+____________________________________________________________________________
+[  4728] By: gsar                                  on 1999/12/28  07:44:19
+        Log: typecasts needed
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  4727] By: gsar                                  on 1999/12/28  06:23:08
+        Log: change#4721 needed line number adjustments
+     Branch: perl
+	   ! MANIFEST global.sym proto.h t/pragma/warn/doop
+	   ! t/pragma/warn/pp t/pragma/warn/regcomp t/pragma/warn/sv
+	   ! t/pragma/warn/toke t/pragma/warn/utf8
+____________________________________________________________________________
+[  4726] By: gsar                                  on 1999/12/28  04:18:15
+        Log: integrate utfperl contents into mainline
+     Branch: perl
+	  +> lib/byte.pm lib/byte_heavy.pl
+	  !> configpm embed.h embed.pl embedvar.h gv.c intrpvar.h objXSUB.h
+	  !> patchlevel.h perl.c perl.h perlapi.c pp_ctl.c pp_hot.c proto.h
+	  !> regnodes.h sv.c sv.h t/comp/require.t toke.c utf8.h
+____________________________________________________________________________
+[  4725] By: gsar                                  on 1999/12/28  04:08:09
+        Log: integrate mainline contents
+     Branch: utfperl
+	   - ext/DynaLoader/dl_cygwin.xs lib/unicode/Eq/Latin1
+	   - lib/unicode/Eq/Unicode
+	  !> (integrate 60 files)
+____________________________________________________________________________
+[  4724] By: gsar                                  on 1999/12/28  03:44:10
+        Log: fix for /(^|a)b/ breakage from Ilya Zakharevich
+     Branch: perl
+	   ! regcomp.c t/op/re_tests
+____________________________________________________________________________
+[  4723] By: gsar                                  on 1999/12/28  03:28:39
+        Log: more ebcdic testsuite fixups (from Peter Prymmer)
+     Branch: perl
+	   ! Changes lib/bigfloat.pl t/lib/charnames.t t/lib/dumper.t
+	   ! t/pragma/overload.t t/pragma/utf8.t
+____________________________________________________________________________
+[  4722] By: gsar                                  on 1999/12/28  03:14:48
+        Log: avoid "used once" warning
+     Branch: perl
+	   ! lib/diagnostics.pm
+____________________________________________________________________________
 [  4722] By: gsar                                  on 1999/12/28  03:14:48
         Log: avoid "used once" warning
      Branch: perl
