@@ -30,12 +30,14 @@ print "ok 3\n";
 # return the name of the machine instead of "localhost" when resolving
 # 127.0.0.1 or even "localhost"
 
+# VMS returns "LOCALHOST" under tcp/ip services V4.1 ECO 2, possibly others
+
 if ($^O eq 'MSWin32') {
   print "ok $_ # skipped on win32\n" for (4,5);
 } else {
-  print "not " if $h->name ne "localhost";
-  print "ok 4\n";
+  print "not " if $h->name !~ /localhost/i;
+  print "ok 4 # ",$h->name,"\n";
 
-  print "not " if $i->name ne "localhost";
-  print "ok 5\n";
+  print "not " if $i->name !~ /localhost/i;
+  print "ok 5 # ",$i->name,"\n";
 }
