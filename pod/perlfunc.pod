@@ -1184,6 +1184,16 @@ that doesn't implement flock(2), fcntl(2) locking, or lockf(3).  flock()
 is Perl's portable file locking interface, although it locks only entire
 files, not records.
 
+On many platforms, locks established by flock() are B<merely advisory>.
+This means that files locked with flock() may be modified by programs
+which do not also use flock().  See your local documentation for details.
+
+On many platforms (including most versions or clones of Unix), locks
+established by flock() are B<merely advisory>.  This means that files
+locked with flock() may be modified by programs which do not also use
+flock().  Windows NT and OS/2, however, are among the platforms which
+supply mandatory locking.  See your local documentation for details.
+
 OPERATION is one of LOCK_SH, LOCK_EX, or LOCK_UN, possibly combined with
 LOCK_NB.  These constants are traditionally valued 1, 2, 8 and 4, but
 you can use the symbolic names if import them from the Fcntl module,
