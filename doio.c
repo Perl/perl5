@@ -283,29 +283,39 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		strcat(mode, "t");
 
 	    if (*type == '&') {
-		name = type;
 	      duplicity:
 		dodup = 1;
-		name++;
-		if (*name == '=') {
+		type++;
+		if (*type == '=') {
 		    dodup = 0;
-		    name++;
+		    type++;
 		}
-		if (num_svs) {
-		    goto unknown_desr;
-		}
-		if (!*name && supplied_fp)
+		if (!num_svs && !*type && supplied_fp)
 		    /* "<+&" etc. is used by typemaps */
 		    fp = supplied_fp;
 		else {
-		    /*SUPPRESS 530*/
-		    for (; isSPACE(*name); name++) ;
-		    if (isDIGIT(*name))
-			fd = atoi(name);
+		    if (num_svs > 1) {
+			Perl_croak(aTHX_ "More than one argument to '%c&' open",IoTYPE(io));
+		    }
+		    if (num_svs && SvIOK(*svp))
+			fd = SvUV(*svp);
+		    else if (isDIGIT(*type)) {
+			/*SUPPRESS 530*/
+			for (; isSPACE(*type); type++) ;
+			fd = atoi(type);
+		    }
 		    else {
 			IO* thatio;
-			gv = gv_fetchpv(name,FALSE,SVt_PVIO);
-			thatio = GvIO(gv);
+			if (num_svs) {
+			    thatio = sv_2io(*svp);
+			}
+			else {
+			    GV *thatgv;
+			    /*SUPPRESS 530*/
+			    for (; isSPACE(*type); type++) ;
+			    thatgv = gv_fetchpv(type,FALSE,SVt_PVIO);
+			    thatio = GvIO(thatgv);
+			}
 			if (!thatio) {
 #ifdef EINVAL
 			    SETERRNO(EINVAL,SS$_IVCHAN);
@@ -387,7 +397,6 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		strcat(mode, "t");
 
 	    if (*type == '&') {
-		name = type;
 		goto duplicity;
 	    }
 	    if (*type == IoTYPE_STD && (!type[1] || isSPACE(type[1]) || type[1] == ':')) {
@@ -431,8 +440,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    if (num_svs > 1) {
 		fp = PerlProc_popen_list(mode,num_svs,svp);
 	    }
-	    else
-            {
+	    else {
 		fp = PerlProc_popen(name,mode);
 	    }
 	    IoTYPE(io) = IoTYPE_PIPE;
