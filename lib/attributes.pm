@@ -165,6 +165,10 @@ The following are the built-in attributes for subroutines:
 
 =item locked
 
+B<5.005 threads only!  The use of the "locked" attribute currently
+only makes sense if you are using the deprecated "Perl 5.005 threads"
+implementation of threads.>
+
 Setting this attribute is only meaningful when the subroutine or
 method is to be called by multiple threads.  When set on a method
 subroutine (i.e., one marked with the B<method> attribute below),
