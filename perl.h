@@ -2242,5 +2242,28 @@ EXT bool	numeric_local INIT(TRUE);    /* Assume local numerics */
 #define DEFSV GvSV(defgv)
 #define SAVE_DEFSV SAVESPTR(GvSV(defgv))
 
+#ifdef HAS_SEM
+#   ifndef HAS_UNION_SEMUN
+#       include <sys/types.h>
+#       include <sys/ipc.h>
+#       include <sys/sem.h>
+    union semun {
+	int val;
+	struct semid_ds *buf;
+	unsigned short *array;
+    };
+#   endif
+#   ifdef USE_SEMCTL_SEMUN
+#       define Semctl(id, num, cmd, semun) semctl(id, num, cmd, semun)
+#   else
+#       ifdef USE_SEMCTL_SEMID_DS
+#           define Semctl(id, num, cmd, semun) semctl(id, num, cmd, semun.buf)
+#       endif
+#   endif
+#   if defined(IPC_STAT) && !defined(Semctl)
+#       define Semctl(id, num, cmd, semun) croak("semctl not implemented")
+#   endif
+#endif
+
 #endif /* Include guard */
 

@@ -371,6 +371,9 @@ d_sem=''
 d_semctl=''
 d_semget=''
 d_semop=''
+d_union_semun=''
+d_semctl_semun=''
+d_semctl_semid_ds=''
 d_setegid=''
 d_seteuid=''
 d_setlinebuf=''
@@ -7348,6 +7351,131 @@ fi
 set d_sem
 eval $setvar
 
+: see how to do semctl IPC_STAT
+if $h_sem; then
+	$cat > try.c <<'EOF'
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+int main () { union semun su; su.buf = 0; }
+EOF
+	if $cc $ccflags -o try try.c > /dev/null 2>&1; then
+		echo "You have union semun in <sys/sem.h>." >&4
+		val="$define"
+	else
+		echo "You do not have union semun in <sys/sem.h>." >&4
+		val="$undef"
+	fi
+	$rm -f try try.c
+	set d_union_semun
+	eval $setvar
+
+	$cat > try.c <<'EOF'
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <sys/stat.h>
+#include <stdio.h>
+int main() {
+EOF
+	case "$d_union_semun" in
+	$define|true)	
+	$cat >> try.c <<'EOF'
+#define HAS_UNION_SEMUN
+EOF
+	;;
+	*)
+	$cat >> try.c <<'EOF'
+#undef HAS_UNION_SEMUN
+EOF
+	;;
+	esac
+	$cat >> try.c <<'EOF'
+  union semun
+#ifndef HAS_UNION_SEMUN
+  {
+      int val;
+      struct semid_ds *buf;
+      unsigned short *array;
+  }
+#endif
+    arg;
+  int sem, st;
+
+  sem = semget(IPC_PRIVATE,1,S_IRWXU|S_IRWXG|S_IRWXO|IPC_CREAT);
+  if (sem > -1) {
+      struct semid_ds argbuf;
+      arg.buf = &argbuf;
+      st = semctl(sem, 0, IPC_STAT, arg);
+      if (st == 0)
+        printf("semun\n");
+      semctl(sem, 0, IPC_RMID, 0);
+  }
+
+  return 0;
+}
+EOF
+	val="$undef"
+	if $cc $ccflags -o try try.c > /dev/null 2>&1; then
+		d_semctl_semun=`./try`
+		case "$d_semctl_semun" in
+		semun) val="$define" ;;
+		esac
+	fi
+	$rm -f try try.c
+	set d_semctl_semun
+	eval $setvar
+	case "$d_semctl_semun" in
+	$define|true)
+		echo "You can use union semun for semctl IPC_STAT." >&4
+		;;
+	*)
+		echo "You cannot use union semun for semctl IPC_STAT." >&4
+		;;
+	esac
+
+	$cat >> try.c <<'EOF'
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <sys/stat.h>
+#include <stdio.h>
+
+int main() {
+  struct semid_ds arg;
+  int sem, st;
+
+  sem = semget(IPC_PRIVATE,1,S_IRWXU|S_IRWXG|S_IRWXO|IPC_CREAT);
+  if (sem > -1) {
+    st = semctl(sem, 0, IPC_STAT, &arg);
+    if (st == 0)
+      printf("semid_ds\n");
+    semctl(sem, 0, IPC_RMID, 0);
+  }
+
+  return 0;
+}
+EOF
+	val="$undef"
+	if $cc $ccflags -o try try.c > /dev/null 2>&1; then
+		d_semctl_semid_ds=`./try`
+		case "$d_semctl_semid_ds" in
+		semid_ds) val="$define" ;;
+		esac
+	fi
+	$rm -f try try.c
+	set d_semctl_semid_ds
+	eval $setvar
+	case "$d_semctl_semid_ds" in
+	$define|true)
+		echo "You can use struct semid_ds * for semctl IPC_STAT." >&4
+		;;
+	*)
+		echo "You cannot use struct semid_ds * for semctl IPC_STAT." >&4
+		;;
+	esac
+fi
+
 : see if setegid exists
 set setegid d_setegid
 eval $inlibc
@@ -10155,6 +10283,9 @@ d_sem='$d_sem'
 d_semctl='$d_semctl'
 d_semget='$d_semget'
 d_semop='$d_semop'
+d_union_semun='$d_union_semun'
+d_semctl_semun='$d_semctl_semun'
+d_semctl_semid_ds='$d_semctl_semid_ds'
 d_setegid='$d_setegid'
 d_seteuid='$d_seteuid'
 d_setlinebuf='$d_setlinebuf'
