@@ -4114,6 +4114,44 @@ If C<use locale> is in effect, the character used for the decimal
 point in formatted real numbers is affected by the LC_NUMERIC locale.
 See L<perllocale>.
 
+If Perl understands "quads" (64-bit integers) (this requires
+either that the platform natively supports quads or that Perl
+has been specifically compiled to support quads), the flags
+
+	d u o x X b i D U O
+
+print quads, and they may optionally be preceded by
+
+	ll L q
+
+For example
+
+	%lld %16LX %qo
+
+You can find out whether your Perl supports quads via L<Config>:
+
+	use Config;
+	($Config{use64bits} eq 'define' || $Config{longsize} == 8) &&
+		print "quads\n";
+
+If Perl understands "long doubles" (this requires that the platform
+supports long doubles), the flags
+
+	e f g E F G
+
+may optionally be preceded by
+
+	ll L
+
+For example
+
+	%llf %Lg
+
+You can find out whether your Perl supports long doubles via L<Config>:
+
+	use Config;
+	$Config{d_longdbl} eq 'define' && print "long doubles\n";
+
 =item sqrt EXPR
 
 =item sqrt

@@ -79,6 +79,25 @@ Version 5.005_59        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  3879] By: gsar                                  on 1999/08/02  08:18:58
+        Log: integrate cfgperl changes into mainline
+     Branch: perl
+	  !> Configure config_h.SH sv.c
+____________________________________________________________________________
+[  3878] By: gsar                                  on 1999/08/02  08:13:16
+        Log: change#3692 had an unintentional patch leak through!
+             (this would explain the mysterious C<next LABEL> failures
+             people have seen)
+     Branch: perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[  3877] By: gsar                                  on 1999/08/02  08:00:29
+        Log: up patchlevel to 59
+     Branch: perl
+	   ! Changes patchlevel.h pod/perlhist.pod win32/Makefile
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+	   ! win32/makefile.mk
+____________________________________________________________________________
 [  3876] By: gsar                                  on 1999/08/02  07:51:18
         Log: fix coredump under usethreads+debug
      Branch: perl

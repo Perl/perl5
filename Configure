@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Aug  2 10:49:27 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Mon Aug  2 17:42:55 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -6709,8 +6709,7 @@ $rm -f try.c try
 
 echo " "
 
-case "$d_longlong" in
-$define)
+if $test X"$intsize" = X8 -o X"$longsize" = X8 -o X"$d_int64t" = X"$define" -o X"$d_longlong" = X"$define"; then
 
 echo "Checking how to print 64-bit integers..." >&4
 
@@ -6790,7 +6789,7 @@ if $test X"$sPRId64" = X -a X"$d_longlong" = X"$define" -a X"$longlongsize" = X8
 #include <sys/types.h>
 #include <stdio.h>
 int main() {
-  long long q = 12345678901;
+  long long q = 12345678901LL; /* AIX cc requires the LL prefix. */
   printf("%lld\n", q);
 }
 EOCP
@@ -6855,8 +6854,9 @@ if $test X"$sPRId64" = X; then
 	echo "Cannot figure out how to print 64-bit integers." >&4
 fi
 
-;;
-esac # case "$d_longlong"
+$rm -f try try.*
+
+fi # intsize -o longsize -o d_int64t -o d_longlong
 
 case "$sPRId64" in
 '')	d_PRId64="$undef"; d_PRIi64="$undef"; d_PRIu64="$undef"; 
@@ -6866,8 +6866,6 @@ case "$sPRId64" in
 	d_PRIo64="$define"; d_PRIx64="$define"; d_PRIX64="$define"; 
 	;;
 esac
-
-$rm -f try try.*
 
 : check for length of double
 echo " "
@@ -6944,8 +6942,7 @@ $rm -f try.c try
 
 echo " "
 
-case "$d_longdbl" in
-$define)
+if $test X"$d_longdbl" = X"$define"; then
 
 echo "Checking how to print long doubles..." >&4
 
@@ -6969,6 +6966,32 @@ EOCP
 			;;
 		esac
 	fi
+fi
+
+if $test X"$sPRIfldbl" = X; then
+	$cat >try.c <<'EOCP'
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  long double d = 123.456;
+  printf("%.3llf\n", d);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`./try$exe_ext`
+		case "$yyy" in
+		123.456)
+			sPRIfldbl='"llf"'; sPRIgldbl='"llg"'; sPRIeldbl='"lle"';
+                	sPRIFldbl='"llF"'; sPRIGldbl='"llG"'; sPRIEldbl='"llE"';
+			echo "We will use %llf."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRIfldbl" = X; then
+	echo "Cannot figure out how to print long doubles." >&4
 fi
 
 if $test X"$sPRIfldbl" = X; then
@@ -7015,34 +7038,9 @@ EOCP
 	fi
 fi
 
-if $test X"$sPRIfldbl" = X; then
-	$cat >try.c <<'EOCP'
-#include <sys/types.h>
-#include <stdio.h>
-int main() {
-  long double d = 123.456;
-  printf("%.3llf\n", d);
-}
-EOCP
-	set try
-	if eval $compile; then
-		yyy=`./try$exe_ext`
-		case "$yyy" in
-		123.456)
-			sPRIfldbl='"llf"'; sPRIgldbl='"llg"'; sPRIeldbl='"lle"';
-                	sPRIFldbl='"llF"'; sPRIGldbl='"llG"'; sPRIEldbl='"llE"';
-			echo "We will use %llf."
-			;;
-		esac
-	fi
-fi
+$rm -f try try.*
 
-if $test X"$sPRIfldbl" = X; then
-	echo "Cannot figure out how to print long doubles." >&4
-fi
-
-;;
-esac # case "$d_longdbl"
+fi # d_longdbl
 
 case "$sPRIfldbl" in
 '')	d_PRIfldbl="$undef"; d_PRIgldbl="$undef"; d_PRIeldbl="$undef"; 
@@ -7052,8 +7050,6 @@ case "$sPRIfldbl" in
 	d_PRIFldbl="$define"; d_PRIGldbl="$define"; d_PRIEldbl="$define"; 
 	;;
 esac
-
-$rm -f try try.*
 
 : Initialize h_fcntl
 h_fcntl=false

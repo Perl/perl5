@@ -54,12 +54,12 @@ print getc(FOO);
 read(FOO,$_,1);
 no warning 'io' ;
 print STDIN "anc";
-###############################################################
-#                            N O T E                          #
-# This test is known to fail on Linux systems with glibc.     #
-# The glibc development team is aware of the problem, and has #
-# determined a fix for the next release of that library.      #
-###############################################################
+####################################################################
+#                            N O T E                               #
+# This test is known to fail on Linux and *BSD systems with glibc. #
+# The glibc development team is aware of the problem, and has      #
+# determined a fix for the next release of that library.           #
+####################################################################
 EXPECT
 Filehandle main::STDIN opened only for input at - line 3.
 Filehandle main::STDOUT opened only for output at - line 4.

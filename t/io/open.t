@@ -80,7 +80,7 @@ unlink("afile");
 }
 {
 print "# \$!='$!'\nnot " unless open(my $f, '-|', <<'EOC');
-perl -e "print qq(a row\n); print qq(another row\n)"
+./perl -e "print qq(a row\n); print qq(another row\n)"
 EOC
 print "ok 24\n";
 @rows = <$f>;
@@ -91,7 +91,7 @@ print "ok 26\n";
 }
 {
 print "# \$!='$!'\nnot " unless open(my $f, '|-', <<'EOC');
-perl -pe "s/^not //"
+./perl -pe "s/^not //"
 EOC
 print "ok 27\n";
 @rows = <$f>;

@@ -183,10 +183,14 @@ EOM
 		exit 1
 		;;
 	    esac
-	    ccflags="$ccflags `getconf XBS5_LPBIG_OFFBIG_CFLAGS`"
+	    ccflags="$ccflags `getconf XBS5_LPBIG_OFFBIG_CFLAGS 2>/dev/null`"
     	    ccflags="$ccflags -DUSE_LONG_LONG"
+	    case "$cc" in
+	    *c89) ccflags="$ccflags -qlonglong" ;;
+	    # Plus AIX also requires LL prefixes for all long long constants.
+	    esac
 
-	    ldflags="$ldflags `getconf XBS5_LPBIG_OFFBIG_LDFLAGS`"
+	    ldflags="$ldflags `getconf XBS5_LPBIG_OFFBIG_LDFLAGS 2>/dev/null`"
 	    # _Somehow_ in AIX 4.3.1.0 the above getconf call manages to
 	    # insert(?) *something* to $ldflags so that later (in Configure) evaluating
 	    # $ldflags causes a newline after the '-b64' (the result of the getconf).
@@ -197,7 +201,7 @@ EOM
 	    # AIX managed to break. --jhi
 	    ldflags="`echo $ldflags`"
 
-	    libswanted="$libswanted `getconf XBS5_LPBIG_OFFBIG_LIBS|sed -e 's@^-l@@' -e 's@ -l@ @g'`"
+	    libswanted="$libswanted `getconf XBS5_LPBIG_OFFBIG_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g'`"
 	    # When a 64-bit cc becomes available $archname64
 	    # may need setting so that $archname gets it attached.
 	    ;;

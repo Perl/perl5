@@ -6,7 +6,7 @@ BEGIN {
     $ENV{PERL5LIB} = '../lib';
 }
 
-print "1..9\n";
+print "1..12\n";
 
 my $test = 1;
 
@@ -65,6 +65,18 @@ sub ok {
     ok $1, 'NUMERIC';
     $test++;
 
+    $_ = "alpha123numeric456"; 
+    m/([\p{IsDigit}]+)/; 
+    ok $1, '123';
+    $test++;
+
+    $_ = "alpha123numeric456"; 
+    m/([^\p{IsDigit}]+)/; 
+    ok $1, 'alpha';
+    $test++;
+
+    $_ = ",123alpha,456numeric"; 
+    m/([\p{IsAlnum}]+)/; 
+    ok $1, '123alpha';
+    $test++;
 }
-
-

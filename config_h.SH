@@ -2490,12 +2490,17 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol, if defined, contains the string used by stdio to
  *	format 64-bit unsigned decimal numbers (format 'u') for output.
  */
+/* PERL_PRIo64:
+ *	This symbol, if defined, contains the string used by stdio to
+ *	format 64-bit octal numbers (format 'o') for output.
+ */
 /* PERL_PRIx64:
  *	This symbol, if defined, contains the string used by stdio to
  *	format 64-bit hexadecimal numbers (format 'x') for output.
  */
 #$d_PRId64 PERL_PRId64	$sPRId64	/**/
 #$d_PRIu64 PERL_PRIu64	$sPRIu64	/**/
+#$d_PRIo64 PERL_PRIo64	$sPRIo64	/**/
 #$d_PRIx64 PERL_PRIx64	$sPRIx64	/**/
 
 /* SELECT_MIN_BITS:

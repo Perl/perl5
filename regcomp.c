@@ -698,7 +698,11 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		    FAIL("variable length lookbehind not implemented");
 		}
 		else if (minnext > U8_MAX) {
+#ifdef UV_IS_QUAD
+		    FAIL2("lookbehind longer than %" PERL_PRIu64 " not implemented", (UV)U8_MAX);
+#else
 		    FAIL2("lookbehind longer than %d not implemented", U8_MAX);
+#endif
 		}
 		scan->flags = minnext;
 	    }
@@ -2830,8 +2834,13 @@ S_regclassutf8(pTHX)
         if (range) {
 	    if (lastvalue > value)
 		FAIL("invalid [] range in regexp");
+#ifdef UV_IS_QUAD
 	    if (!SIZE_ONLY)
-		Perl_sv_catpvf(aTHX_ listsv, "%04x\t%04x\n", lastvalue, value);
+                Perl_sv_catpvf(aTHX_ listsv, "%04" PERL_PRIx64 "\t%04" PERL_PRIx64 "\n", (UV)lastvalue, (UV)value);
+#else
+	    if (!SIZE_ONLY)
+	        Perl_sv_catpvf(aTHX_ listsv, "%04x\t%04x\n", lastvalue, value);
+#endif
 	    lastvalue = value;
 	    range = 0;
 	}
@@ -2843,8 +2852,13 @@ S_regclassutf8(pTHX)
 		range = 1;
 		continue;	/* do it next time */
 	    }
+#ifdef UV_IS_QUAD
+	    if (!SIZE_ONLY)
+		Perl_sv_catpvf(aTHX_ listsv, "%04" PERL_PRIx64 "\n", (UV)value);
+#else
 	    if (!SIZE_ONLY)
 		Perl_sv_catpvf(aTHX_ listsv, "%04x\n", value);
+#endif
 	}
     }
 
