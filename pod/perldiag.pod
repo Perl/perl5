@@ -517,6 +517,10 @@ Something like this will reproduce the error:
 (F) You called C<perl -x/foo/bar>, but C</foo/bar> is not a directory
 that you can chdir to, possibly because it doesn't exist.
 
+=item Can't check filesystem of script "%s"
+
+(P) For some reason you can't check the filesystem of the script for nosuid.
+
 =item Can't coerce %s to integer in %s
 
 (F) Certain types of SVs, in particular real symbol table entries

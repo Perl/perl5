@@ -191,6 +191,28 @@ esac
 
 pp_sys_cflags='ccflags="$ccflags -DNO_EFF_ONLY_OK"'
 
+# This script UU/usethreads.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use threads.
+cat > UU/usethreads.cbu <<'EOCBU'
+case "$usethreads" in
+$define|true|[yY]*)
+        # Threads interfaces changed with V4.0.
+        case "`uname -r`" in
+        *[123].*)
+	    libswanted="$libswanted pthreads mach exc c_r"
+  	    ccflags="-threads $ccflags"
+	    ;;
+        *)
+	    libswanted="$libswanted pthread exc"
+    	    ccflags="-pthread $ccflags"
+	    ;;
+        esac
+
+        usemymalloc='n'
+	;;
+esac
+EOCBU
+
 #
 # Unset temporary variables no more needed.
 #
@@ -326,3 +348,5 @@ unset _DEC_cc_style
 #	* Set -Olimit to 3200 because perl_yylex.c got too big
 #	  for the optimizer.
 #
+
+

@@ -2778,4 +2778,22 @@ typedef struct am_table_short AMTS;
 #   endif
 #endif
 
+/* Mention INSTALL_USR_BIN_PERL here so that Configure picks it up. */
+
+#ifdef IAMSUID
+
+#ifdef I_SYS_STATVFS
+#   include <sys/statvfs.h>
+#else
+#   ifdef I_SYS_MOUNT
+#       include <sys/mount.h>
+#   else
+#       ifdef I_MNTENT
+#           include <mntent.h>
+#       endif
+#   endif
+#endif
+
+#endif /* IAMSUID */
+
 #endif /* Include guard */

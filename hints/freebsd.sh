@@ -139,4 +139,39 @@ EOM
 signal_t='void'
 d_voidsig='define'
 
+# This script UU/usethreads.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use threads.
+cat > UU/usethreads.cbu <<'EOCBU'
+case "$usethreads" in
+$define|true|[yY]*)
+        case "$osvers" in  
+        [34].*) ldflags="-pthread $ldflags"
+              ;;
+        2.2*) if [ ! -r /usr/lib/libc_r ]; then
+              cat <<'EOM' >&4
+POSIX threads are not supported by default on FreeBSD $osvers.  Follow the
+instructions in 'man pthread' to build and install the needed libraries.
+EOM
+                 exit 1
+              fi
+              set `echo X "$libswanted "| sed -e 's/ c / c_r /'`
+              shift
+              libswanted="$*"
+              # Configure will probably pick the wrong libc to use for nm
+              # scan.
+              # The safest quick-fix is just to not use nm at all.
+              usenm=false
+              ;;
+         *)   cat <<'EOM' >&4
+
+It is not known if FreeBSD $osvers supports POSIX threads or not.
+Consider upgrading to the latest STABLE release.
+
+EOM
+              exit 1
+              ;;
+        esac
+	;;
+esac
+EOCBU
 
