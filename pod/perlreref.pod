@@ -180,7 +180,7 @@ Quantifiers are greedy by default --- match the B<longest> leftmost.
 =head1 VARIABLES
 
    $_    Default variable for operators to use
-   $*    Enable multiline matching (deprecated; not in 5.8.1+)
+   $*    Enable multiline matching (deprecated; not in 5.9.0 or later)
 
    $&    Entire matched string
    $`    Everything prior to matched string
