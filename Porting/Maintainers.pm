@@ -67,10 +67,11 @@ sub get_maintainer_modules {
 
 sub usage {
     print <<__EOF__;
-$0: Usage: $0 [[--maintainer M --module M --files]|file ...]
+$0: Usage: $0 [[--maintainer M --module M --files --check]|file ...]
 --maintainer M	list all maintainers matching M
 --module M	list all modules matching M
 --files		list all files
+--check		check consistency of Maintainers.pl
 Matching is case-ignoring regexp, author matching is both by
 the short id and by the full name and email.  A "module" may
 not be just a module, it may be a file or files or a subdirectory.
@@ -82,6 +83,7 @@ __EOF__
 my $Maintainer;
 my $Module;
 my $Files;
+my $Check;
 
 sub process_options {
     usage()
@@ -90,6 +92,7 @@ sub process_options {
 		       'maintainer=s'	=> \$Maintainer,
 		       'module=s'	=> \$Module,
 		       'files'		=> \$Files,
+		       'check'		=> \$Check,
 		      );
 
     my @Files = @ARGV;
@@ -219,8 +222,25 @@ sub show_results {
 	    }
 	}
     }
+    elsif ($Check) {
+	duplicated_maintainers();
+    }
     else {
 	usage();
+    }
+}
+
+sub duplicated_maintainers {
+    my %files;
+    for my $k (keys %Modules) {
+	for my $f (get_module_files($k)) {
+	    ++$files{$f};
+	}
+    }
+    for my $f (keys %files) {
+	if ($files{$f} > 1) {
+	    warn "File $f appears $files{$f} times in Maintainers.pl\n";
+	}
     }
 }
 
