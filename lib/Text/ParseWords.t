@@ -8,7 +8,7 @@ BEGIN {
 use warnings;
 use Text::ParseWords;
 
-print "1..20\n";
+print "1..21\n";
 
 @words = shellwords(qq(foo "bar quiz" zoo));
 print "not " if $words[0] ne 'foo';
@@ -119,3 +119,9 @@ print "ok 19\n";
 $result = join('|', parse_line("\t", 0, $string));
 print "not " unless $result eq "field1|field2\nstill field2|field3";
 print "ok 20\n";
+
+# unicode
+$string = qq{"field1"\x{1234}"field2\\\x{1234}still field2"\x{1234}"field3"};
+$result = join('|', parse_line("\x{1234}", 0, $string));
+print "not " unless $result eq "field1|field2\x{1234}still field2|field3";
+print "ok 21\n";
