@@ -385,12 +385,13 @@ sub _create_runperl { # Create the string to qx in runperl().
 	_quote_args(\$runperl, $args{switches});
     }
     if (defined $args{prog}) {
-	local $Level = 2;
-	die "test.pl:runperl(): 'progs' must be an ARRAYREF " . _where()
-	    unless ref $args{progs} eq "ARRAY";
+	die "test.pl:runperl(): both 'prog' and 'progs' cannot be used " . _where()
+	    if defined $args{progs};
         $args{progs} = [$args{prog}]
     }
     if (defined $args{progs}) {
+	die "test.pl:runperl(): 'progs' must be an ARRAYREF " . _where()
+	    unless ref $args{progs} eq "ARRAY";
         foreach my $prog (@{$args{progs}}) {
             if ($is_mswin || $is_netware || $is_vms) {
                 $runperl .= qq ( -e "$prog" );
