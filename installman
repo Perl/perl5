@@ -30,7 +30,7 @@ $usage =
 	man3ext = $Config{'man3ext'};
 	--notify (or -n) just lists commands that would be executed.\n";
 
-GetOptions( qw( man1dir=s man1ext=s man3dir=s man3ext=s notify n help S)) 
+GetOptions( qw( man1dir=s man1ext=s man3dir=s man3ext=s notify n help S|silent)) 
 	|| die $usage;
 die $usage if $opt_help;
 
@@ -39,6 +39,7 @@ $man1dir = defined($opt_man1dir) ? $opt_man1dir : $Config{'installman1dir'};
 $man1ext = defined($opt_man1ext) ? $opt_man1ext : $Config{'man1ext'};
 $man3dir = defined($opt_man3dir) ? $opt_man3dir : $Config{'installman3dir'};
 $man3ext = defined($opt_man3ext) ? $opt_man3ext : $Config{'man3ext'};
+$silent  = defined($opt_silent)  ? $opt_silent  : 0;
 
 $notify = $opt_notify || $opt_n;
 
@@ -99,12 +100,12 @@ sub runpod2man {
     my($builddir) = Cwd::getcwd();
 
     if ($mandir eq ' ' or $mandir eq '') {
-	print STDERR "Skipping installation of ",
+	warn "Skipping installation of ",
 	    ($script ? "$poddir/$script man page" : "$poddir man pages"), ".\n";
 	return;
     }
 
-    print STDERR "chdir $poddir\n";
+    warn "chdir $poddir\n" unless $silent;
     chdir $poddir || die "Unable to cd to $poddir directory!\n$!\n";
 
     # We insist on using the current version of pod2man in case there
@@ -149,7 +150,7 @@ sub runpod2man {
 	}
 	$tmp = "${mandir}/${manpage}.tmp";
 	$manpage = "${mandir}/${manpage}.${manext}";
-	if (&cmd("$pod2man $mod > $tmp") == 0 && !$notify && -s $tmp) {
+	if (&cmd("$pod2man $mod > $tmp", $mod) == 0 && !$notify && -s $tmp) {
 	    if (rename($tmp, $manpage)) {
 		$packlist->{$manpage} = { type => 'file' };
 		next;
@@ -160,7 +161,7 @@ sub runpod2man {
 	}
     }
     chdir "$builddir" || die "Unable to cd back to $builddir directory!\n$!\n";
-    print STDERR "chdir $builddir\n";
+    warn "chdir $builddir\n" unless $silent;
 }
 
 sub lsmodpods {
@@ -173,7 +174,7 @@ sub lsmodpods {
 }
 
 $packlist->write() unless $notify;
-print STDERR "  Installation complete\n";
+warn "  Installation complete\n";
 
 exit 0;
     
@@ -182,8 +183,9 @@ exit 0;
 # Utility subroutines from installperl
 
 sub cmd {
-    local($cmd) = @_;
-    print STDERR "  $cmd\n";
+    local($cmd, $mod) = @_;
+    warn "$mod...\n";
+    warn "  $cmd\n" unless $silent;
     unless ($notify) {
 	if ($Config{d_fork}) {
 	    fork ? wait : exec $cmd;  # Allow user to ^C out of command.
@@ -203,7 +205,7 @@ sub unlink {
     foreach $name (@names) {
 	next unless -e $name;
 	chmod 0777, $name if $^O eq 'os2';
-	print STDERR "  unlink $name\n";
+	warn "  unlink $name\n" unless $silent;
 	( CORE::unlink($name) and ++$cnt 
 	    or warn "Couldn't unlink $name: $!\n" ) unless $notify;
     }
@@ -214,7 +216,7 @@ sub link {
     my($from,$to) = @_;
     my($success) = 0;
 
-    print STDERR "  ln $from $to\n";
+    warn "  ln $from $to\n" unless $silent;
     eval {
         CORE::link($from, $to)
             ? $success++
@@ -249,7 +251,7 @@ sub rename {
 sub chmod {
     local($mode,$name) = @_;
 
-    printf STDERR "  chmod %o %s\n", $mode, $name;
+    warn( "  chmod %o %s\n", $mode, $name) unless $silent;
     CORE::chmod($mode,$name) || warn sprintf("Couldn't chmod %o %s: $!\n",$mode,$name)
 	unless $notify;
 }
