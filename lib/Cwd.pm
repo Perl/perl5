@@ -334,7 +334,7 @@ sub _epoc_cwd {
         *fastcwd	= \&_dos_cwd;
         *abs_path	= \&fast_abs_path;
     }
-    elsif ($^O eq 'qnx') {
+    elsif ($^O =~ m/^(?:qnx|nto)$/ ) {
         *cwd		= \&_qnx_cwd;
         *getcwd		= \&_qnx_cwd;
         *fastgetcwd	= \&_qnx_cwd;
