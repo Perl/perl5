@@ -1886,7 +1886,8 @@ open_script(char *scriptname, bool dosearch, SV *sv, int *fdscript)
     dTHR;
     register char *s;
 
-    scriptname = find_script(scriptname, dosearch, NULL, 0);
+    /* scriptname will be non-NULL if find_script() returns */
+    scriptname = find_script(scriptname, dosearch, NULL, 1);
 
     if (strnEQ(scriptname, "/dev/fd/", 8) && isDIGIT(scriptname[8]) ) {
 	char *s = scriptname + 8;
@@ -1898,7 +1899,7 @@ open_script(char *scriptname, bool dosearch, SV *sv, int *fdscript)
     }
     else
 	*fdscript = -1;
-    origfilename = savepv(e_script ? "-e" : scriptname);
+    origfilename = (e_script ? savepv("-e") : scriptname);
     curcop->cop_filegv = gv_fetchfile(origfilename);
     if (strEQ(origfilename,"-"))
 	scriptname = "";
