@@ -28,7 +28,10 @@ case "$prefix" in
 	prefix='/';
 	installprefix='/';
 	bin='/usr/bin';
-	sitebin='/usr/bin';
+	siteprefix='/usr/local';
+	# We don't want /usr/bin/HEAD issues.
+	sitebin='/usr/local/bin';
+	sitescript='/usr/local/bin';
 	installusrbinperl='define'; # You knew what you were doing.
 	privlib="/System/Library/Perl/${version}";
 	sitelib="/Library/Perl/${version}";
@@ -40,6 +43,9 @@ case "$prefix" in
 	# 4BSD uses ${prefix}/share/man, not ${prefix}/man.
 	man1dir='/usr/share/man/man1';
 	man3dir='/usr/share/man/man3';
+	# But users' installs shouldn't touch the system man pages.
+	installsiteman1='/usr/local/share/man/man1';
+	installsiteman3='/usr/local/share/man/man3';
 	;;
   *)	# Anything else; use non-system directories, use Configure defaults
 	;;
