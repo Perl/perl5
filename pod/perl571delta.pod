@@ -199,9 +199,9 @@ C<\s> doesn't.)
 
 =item *
 
-B::Concise is a new compiler back end for walking the Perl syntax tree,
-printing concise info about ops.  The output is highly customizable,
-so customizable that B::Terse has been re-implemented in terms of
+B::Concise is a new compiler backend for walking the Perl syntax tree,
+printing concise info about ops.  The output is highly customisable,
+so customisable that B::Terse has been re-implemented in terms of
 B::Concise.
 
 =item *
@@ -217,7 +217,7 @@ if not possible, the familiar Perl library implementation is used.
 
 =item *
 
-Digest, a front end module for calculating digests (checksums),
+Digest, a frontend module for calculating digests (checksums),
 from Gisle Aas, has been added.
 
 =item *
@@ -241,14 +241,14 @@ Any encoding supported by Encode module is also available to the
 
 =item *
 
-Filter::Simple is an easy-to-use front end to Filter::Util::Call,
+Filter::Simple is an easy-to-use frontend to Filter::Util::Call,
 from Damian Conway.
 
 =item *
 
 Filter::Util::Call, from Paul Marquess, provides you with the
 framework to write I<Source Filters> in Perl.  For most uses
-the front end Filter::Simple is to be preferred.
+the frontend Filter::Simple is to be preferred.
 
 =item *
 
@@ -449,7 +449,7 @@ POSIX standard).  On install README.bs2000 will be installed as L<perlbs2000>.
 =head2 README.macos
 
 In perl 5.7.1 (and in the 5.6.1) the MacPerl sources have been
-synchronized with the standard Perl sources.  To compile MacPerl
+synchronised with the standard Perl sources.  To compile MacPerl
 some additional steps are required, and this file documents those
 steps.  On install README.macos will be installed as L<perlmacos>.
 
@@ -539,14 +539,14 @@ L<perlbs2000> (for POSIX-BC), and L<perlvmesa> for more information.
 =item *
 
 In HP-UX 10.20 Perl threading is now working with the various threading
-packages available fror HP-UX.  See L<perlhpux> (or in the source
+packages available for HP-UX.  See L<perlhpux> (or in the source
 distribution, README.hpux) for more information.
 
 =item *
 
 MacOS Classic (MacPerl has of course been available since
 perl 5.004 but now the source code bases of standard Perl
-and MacPerl have been synchronized)
+and MacPerl have been synchronised)
 
 =item *
 
@@ -580,16 +580,57 @@ which needs them.
 
 =item *
 
-Some new Configure symbols, useful for extension writers: d_cmsghdr
-(for struct cmsgdhr), d_fcntl_can_lock (whether fcntl() can be used
-for file locking), d_fsync, d_getitimer(), d_getpagsz (for getpagesize(),
-though you should prefer POSIX::sysconf(_SC_PAGE_SIZE)), d_msghdr_s
-(for struct msgdhr), need_va_copy (whether one needs to use Perl_va_copy()
-to copy varargs), d_readv, d_recvmsg, d_sendmsg, sig_size (the number
-of elements in an array needed to hold all the available signals),
-d_sockatmark, d_strtoq, d_u32align (whether one needs to access
-character data aligned by U32 sized pointers), d_ualarm, d_usleep,
-d_writev.
+Some new Configure symbols, useful for extension writers:
+
+=over 8
+
+=item d_cmsghdr
+
+For struct cmsghdr.
+
+=item d_fcntl_can_lock
+
+Whether fcntl() can be used for file locking.
+
+=item d_fsync
+
+=item d_getitimer
+
+=item d_getpagsz
+
+For getpagesize(), though you should prefer POSIX::sysconf(_SC_PAGE_SIZE))
+
+=item d_msghdr_s
+
+For struct msghdr.
+
+=item need_va_copy
+
+Whether one needs to use Perl_va_copy() to copy varargs.
+
+=item d_readv
+
+=item d_recvmsg
+
+=item d_sendmsg
+
+=item sig_size
+
+The number of elements in an array needed to hold all the available signals.
+
+=item d_sockatmark
+
+=item d_strtoq
+
+=item d_u32align
+
+Whether one needs to access character data aligned by U32 sized pointers.
+
+=item d_ualarm
+
+=item d_usleep
+
+=back
 
 =item *
 
@@ -679,7 +720,7 @@ Previously DYNIX/ptx had problems in its Configure probe for non-blocking I/O.
 
 Two new debugging options have been added: if you have compiled your
 Perl with debugging, you can use the -DT and -DR options to trace
-tokenizing and to add reference counts to displaying variables,
+tokenising and to add reference counts to displaying variables,
 respectively.
 
 =over 4
@@ -728,7 +769,7 @@ vendors' malloc is generally better in large address space machines
 The test fails in various platforms (PA64 and IA64 are known), but the
 exact cause is still being investigated.
 
-=head2 Localizing a Tied Variable Leaks Memory
+=head2 Localising a Tied Variable Leaks Memory
 
     use Tie::Hash;
     tie my %tie_hash => 'Tie::StdHash';
@@ -772,7 +813,7 @@ If you believe you have an unreported bug, please run the B<perlbug>
 program included with your release.  Be sure to trim your bug down
 to a tiny but sufficient test case.  Your bug report, along with the
 output of C<perl -V>, will be sent off to perlbug@perl.org to be
-analyzed by the Perl porting team.
+analysed by the Perl porting team.
 
 =head1 SEE ALSO
 
