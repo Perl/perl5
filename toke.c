@@ -44,6 +44,7 @@ static I32 sublex_start _((void));
 static int uni _((I32 f, char *s));
 #endif
 static char * filter_gets _((SV *sv, FILE *fp));
+static void restore_rsfp _((void *f));
 
 /* The following are arranged oddly so that the guard on the switch statement
  * can get by with a single comparison (if the compiler is smart enough).
@@ -222,7 +223,7 @@ SV *line;
     SAVESPTR(linestr);
     SAVEPPTR(lex_brackstack);
     SAVEPPTR(lex_casestack);
-    SAVESPTR(rsfp);
+    SAVEDESTRUCTOR(restore_rsfp, rsfp);
 
     lex_state = LEX_NORMAL;
     lex_defer = 0;
@@ -265,6 +266,19 @@ SV *line;
 void
 lex_end()
 {
+}
+
+static void
+restore_rsfp(f)
+void *f;
+{
+    FILE *fp = (FILE*)f;
+
+    if (rsfp == stdin)
+	clearerr(rsfp);
+    else if (rsfp != fp)
+	fclose(rsfp);
+    rsfp = fp;
 }
 
 static void
