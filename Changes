@@ -31,6 +31,306 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11224] By: jhi                                   on 2001/07/08  23:05:41
+        Log: Guard the nl_langinfo() with HAS_NL_LANGINFO 
+             as pointed out by Sarathy.
+     Branch: perl
+	   ! ext/I18N/Langinfo/Langinfo.xs
+____________________________________________________________________________
+[ 11223] By: jhi                                   on 2001/07/08  22:59:01
+        Log: Retract #11212.
+     Branch: perl
+	   ! cv.h ext/Opcode/Opcode.xs op.c pp_hot.c sv.h toke.c
+____________________________________________________________________________
+[ 11222] By: jhi                                   on 2001/07/08  17:41:22
+        Log: Bump up the VERSION of Cwd.xs.
+     Branch: perl
+	   ! ext/Cwd/Makefile.PL
+____________________________________________________________________________
+[ 11221] By: jhi                                   on 2001/07/08  17:13:38
+        Log: Retract #11220, the problem wasn't the missing leading zero.
+             Here's the problem:
+             $ ./perl -we 'chmod(oct("755"), ".")'
+             Non-octal literal mode (493) specified at -e line 1.
+             (Did you mean 0493 instead?)
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 11220] By: jhi                                   on 2001/07/08  17:05:55
+        Log: (Retracted by #11221)
+             Change the PERM_RW and PERM_RWX to 0644 and 0755
+             (add the leading zero).
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 11219] By: jhi                                   on 2001/07/08  16:17:32
+        Log: Integrate changes #11193, 11205, 11209 from macperl.
+             
+             Fix up AutoLoader to fudge for Mac paths in import().
+             
+             Allow symbols in try_symbol() to begin with "_".
+             
+             Small portability fix for Mac OS.
+     Branch: perl
+	  !> lib/AutoLoader.pm lib/Cwd.pm makedef.pl
+____________________________________________________________________________
+[ 11218] By: jhi                                   on 2001/07/08  16:10:30
+        Log: Metaconfig unit change for #11217.
+     Branch: metaconfig/U/perl
+	   ! Extensions.U
+____________________________________________________________________________
+[ 11217] By: jhi                                   on 2001/07/08  16:10:07
+        Log: Detypo, problem noticed by Gerrit P. Haase.
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[ 11216] By: jhi                                   on 2001/07/08  15:58:35
+        Log: Cwd cleanups.
+     Branch: perl
+	   ! ext/Cwd/Cwd.xs
+____________________________________________________________________________
+[ 11215] By: jhi                                   on 2001/07/08  15:52:57
+        Log: Slight tweaks on #11213.
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[ 11214] By: jhi                                   on 2001/07/08  14:32:28
+        Log: A missing dTHX noticed by Gerrit P. Haase.
+     Branch: perl
+	   ! ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[ 11213] By: jhi                                   on 2001/07/08  14:24:44
+        Log: Subject: [PATCH toke.c] Simplify yytoke()
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Sun, 8 Jul 2001 13:24:34 +0100
+             Message-ID: <20010708132434.A9448@deep-dark-truthful-mirror>
+             
+             Split out pending_ident().
+     Branch: perl
+	   ! embed.h embed.pl pod/perlapi.pod proto.h toke.c
+____________________________________________________________________________
+[ 11212] By: jhi                                   on 2001/07/08  14:17:10
+        Log: (Retracted by #11223.)
+             Subject: [PATCH] Re: Problem with Safe.pm and Perl 5.004
+             Date: Wed, 05 Nov 1997 17:22:34 -0600
+             From: Graham Barr <gbarr@ti.com>
+             Message-Id: <3460FFBA.6DA51F46@ti.com>
+     Branch: perl
+	   ! cv.h ext/Opcode/Opcode.xs op.c pp_hot.c sv.h toke.c
+____________________________________________________________________________
+[ 11211] By: jhi                                   on 2001/07/08  13:53:38
+        Log: Fix I18N::Langinfo nits noticed but Philip Newton.
+     Branch: perl
+	   ! ext/I18N/Langinfo/Langinfo.pm ext/I18N/Langinfo/Langinfo.t
+	   ! pod/perllocale.pod
+____________________________________________________________________________
+[ 11210] By: jhi                                   on 2001/07/08  01:34:09
+        Log: Really do the test under the C locale.
+     Branch: perl
+	   ! ext/I18N/Langinfo/Langinfo.t
+____________________________________________________________________________
+[ 11209] By: pudge                                 on 2001/07/08  01:19:25
+        Log: Small portability fix for Mac OS.
+     Branch: maint-5.6/macperl
+	   ! lib/Cwd.pm
+____________________________________________________________________________
+[ 11208] By: jhi                                   on 2001/07/08  01:14:58
+        Log: Metaconfig unit change for #11207.
+     Branch: metaconfig/U/perl
+	   ! Extensions.U
+____________________________________________________________________________
+[ 11207] By: jhi                                   on 2001/07/08  01:14:02
+        Log: Add I18N::Langinfo, which is basically a wrapper around
+             nl_langinfo(), which is an additional way to query locale
+             specific information.
+     Branch: perl
+	   + ext/I18N/Langinfo/Langinfo.pm ext/I18N/Langinfo/Langinfo.t
+	   + ext/I18N/Langinfo/Langinfo.xs ext/I18N/Langinfo/Makefile.PL
+	   ! Configure MANIFEST pod/perl572delta.pod pod/perllocale.pod
+____________________________________________________________________________
+[ 11206] By: pudge                                 on 2001/07/08  00:56:29
+        Log: Bugfixes for some tests.  commonsense.t not in perl 5.6,
+             used in File::Find tests; replace with if.t.
+     Branch: maint-5.6/macperl
+	   ! t/lib/filefind-taint.t t/lib/filefind.t t/op/taint.t
+	   ! t/pragma/warn/op
+____________________________________________________________________________
+[ 11205] By: pudge                                 on 2001/07/07  23:55:56
+        Log: Allow symbols in try_symbol() to begin with "_".
+     Branch: maint-5.6/macperl
+	   ! makedef.pl
+____________________________________________________________________________
+[ 11204] By: pudge                                 on 2001/07/07  23:53:37
+        Log: Sync up the File::Find changes from the rewrite by
+             Thomas Wegner, et al.
+     Branch: maint-5.6/macperl
+	   + t/lib/filefind-taint.t
+	   ! lib/File/Find.pm t/lib/filefind.t
+____________________________________________________________________________
+[ 11203] By: pudge                                 on 2001/07/07  23:43:06
+        Log: Subject: [PATCHES] :t:pod: and :lib:Pod: stuff
+             From: Thomas Wegner <wegner_thomas@yahoo.com>
+             Date: Thu, 5 Jul 2001 20:31:25 +0200
+             Message-Id: <p04320400b76a0fc8dea5@[149.225.100.38]>
+     Branch: maint-5.6/macperl
+	   ! lib/Pod/Find.pm t/pod/find.t t/pod/testp2pt.pl
+____________________________________________________________________________
+[ 11202] By: pudge                                 on 2001/07/07  23:38:36
+        Log: Some more test portability fixes.
+     Branch: maint-5.6/macperl
+	   ! t/lib/filecopy.t t/pragma/warn/pp_sys
+____________________________________________________________________________
+[ 11201] By: jhi                                   on 2001/07/07  22:52:38
+        Log: The #11200 removed wrong (non-existent) target.  Duh.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 11200] By: jhi                                   on 2001/07/07  22:44:14
+        Log: Zap the lib/re.pm before creating it.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 11199] By: pudge                                 on 2001/07/07  20:54:35
+        Log: Another test.  Please ignore.
+     Branch: maint-5.6/macperl
+	   ! README.macos
+____________________________________________________________________________
+[ 11198] By: pudge                                 on 2001/07/07  20:44:12
+        Log: Portability fixes for a lot of tests, especially IO-related
+             tests, and warnings, and the harness script.
+     Branch: maint-5.6/macperl
+	   ! t/harness t/io/argv.t t/io/dup.t t/io/fs.t t/io/inplace.t
+	   ! t/io/iprefix.t t/io/open.t t/io/openpid.t t/lib/filepath.t
+	   ! t/lib/findbin.t t/lib/io_dup.t t/lib/socket.t t/op/die_exit.t
+	   ! t/op/misc.t t/op/read.t t/op/readdir.t t/op/runlevel.t
+	   ! t/op/stat.t t/op/subst_wamp.t t/op/taint.t
+	   ! t/pragma/diagnostics.t t/pragma/subs.t t/pragma/warn/doio
+	   ! t/pragma/warn/mg t/pragma/warn/op t/pragma/warn/pp_sys
+	   ! t/pragma/warnings.t
+____________________________________________________________________________
+[ 11197] By: jhi                                   on 2001/07/07  20:32:28
+        Log: Subject: [PATCH] lib/h2xs.t (was Re: [PATCH] h2xs)
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sat, 7 Jul 2001 21:00:17 +0100
+             Message-ID: <20010707210017.H59620@plum.flirble.org>
+     Branch: perl
+	   ! lib/h2xs.t
+____________________________________________________________________________
+[ 11196] By: jhi                                   on 2001/07/07  20:26:36
+        Log: The UNICOS/mk SysV IPC problem has been fixed.
+     Branch: perl
+	   ! pod/perl572delta.pod
+____________________________________________________________________________
+[ 11195] By: jhi                                   on 2001/07/07  19:59:51
+        Log: Slight update tweaks on perlunicode.pod.
+     Branch: perl
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[ 11194] By: jhi                                   on 2001/07/07  17:53:03
+        Log: Subject: Doc patch DB_File.pm: use umask-friendly modes
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Sat, 07 Jul 2001 13:04:04 -0400
+             Message-ID: <20010707170404.32694.qmail@plover.com>
+     Branch: perl
+	   ! ext/DB_File/DB_File.pm
+____________________________________________________________________________
+[ 11193] By: pudge                                 on 2001/07/07  17:26:28
+        Log: Fix up AutoLoader to fudge for Mac paths in import().
+     Branch: maint-5.6/macperl
+	   ! lib/AutoLoader.pm
+____________________________________________________________________________
+[ 11192] By: jhi                                   on 2001/07/07  17:03:06
+        Log: Try to force the lib/re.pm to be there before entering
+             the extensions builds, should help for parallel makes.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 11191] By: jhi                                   on 2001/07/07  15:26:16
+        Log: Subject: Re: [PATCH ext/POSIX/POSIX.pm] Re: sigaction.t under QNX
+             From: Norton Allen <allen@huarp.harvard.edu>
+             Date: Fri, 6 Jul 2001 12:01:14 -0400 (edt)
+             Message-Id: <200107061601.MAA00597@bottesini.harvard.edu>
+     Branch: perl
+	   ! ext/POSIX/POSIX.xs
+____________________________________________________________________________
+[ 11190] By: jhi                                   on 2001/07/07  15:22:08
+        Log: Subject: [PATCH] Re: op/arith.t
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sat, 7 Jul 2001 13:04:54 +0100
+             Message-ID: <20010707130454.D59620@plum.flirble.org>
+     Branch: perl
+	   ! numeric.c toke.c
+____________________________________________________________________________
+[ 11189] By: jhi                                   on 2001/07/07  15:20:44
+        Log: Subject: [PATCH] h2xs
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Fri, 6 Jul 2001 23:25:14 +0100
+             Message-ID: <20010706232514.X59620@plum.flirble.org>
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[ 11188] By: jhi                                   on 2001/07/07  15:12:36
+        Log: Subject: Re: bleedperl perl_alloc..free leakage
+             From: Radu Greab <radu@netsoft.ro>
+             Date: Fri, 6 Jul 2001 19:48:54 +0300
+             Message-ID: <15173.60406.308246.456184@ix.netsoft.ro>
+             
+             Leak-be-gone.
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 11187] By: pudge                                 on 2001/07/07  02:11:36
+        Log: Test again.  Please ignore.
+     Branch: maint-5.6/macperl
+	   ! README.macos
+____________________________________________________________________________
+[ 11186] By: pudge                                 on 2001/07/07  02:08:13
+        Log: Test.  Please ignore.
+     Branch: maint-5.6/macperl
+	   ! README.macos
+____________________________________________________________________________
+[ 11185] By: pudge                                 on 2001/07/06  23:46:57
+        Log: Include changes already sent in separately as patches,
+             before branch was created.
+     Branch: maint-5.6/macperl
+	   ! ext/File/Glob/bsd_glob.c ext/IO/lib/IO/Dir.pm gv.c
+	   ! lib/DirHandle.pm lib/File/Basename.pm lib/File/Copy.pm
+	   ! lib/File/Find.pm lib/diagnostics.pm perl.c t/base/term.t
+	   ! t/comp/cpp.t t/comp/multiline.t t/comp/script.t t/comp/term.t
+	   ! t/lib/anydbm.t t/lib/autoloader.t t/lib/dirhand.t
+	   ! t/lib/filefind.t t/lib/io_dir.t t/lib/selfloader.t
+	   ! t/op/anonsub.t t/op/closure.t t/op/defins.t t/op/die_exit.t
+	   ! t/op/exec.t t/op/goto.t t/op/misc.t t/op/pack.t t/op/regexp.t
+	   ! t/op/regexp_noamp.t t/op/split.t t/op/write.t
+	   ! t/pragma/strict.t
+____________________________________________________________________________
+[ 11184] By: jhi                                   on 2001/07/06  16:41:30
+        Log: Subject: [PATCH lib/Cwd.pm] QNX patch extended for NTO
+             From: Norton Allen <allen@huarp.harvard.edu>
+             Date: Fri, 6 Jul 2001 09:39:57 -0400 (edt)
+             Message-Id: <200107061339.JAA12582@bottesini.harvard.edu>
+     Branch: perl
+	   ! utf8.h
+____________________________________________________________________________
+[ 11183] By: nick                                  on 2001/07/06  16:27:40
+        Log: Integrate mainline
+     Branch: perlio
+	  +> (branch 42 files)
+	   - NetWare/perlsdio.h ext/util/mkbootstrap lib/Net/DummyInetd.pm
+	   - lib/Net/PH.pm lib/Net/SNPP.pm lib/Net/t/ph.t
+	   - win32/bin/mdelete.bat
+	  !> (integrate 215 files)
+____________________________________________________________________________
+[ 11182] By: jhi                                   on 2001/07/06  15:57:16
+        Log: The #11166 needed also these updated.
+     Branch: perl
+	   ! lib/warnings.pm warnings.h
+____________________________________________________________________________
+[ 11181] By: jhi                                   on 2001/07/06  13:24:42
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 11180] By: jhi                                   on 2001/07/06  13:20:08
         Log: Regen toc.
      Branch: perl
