@@ -282,8 +282,10 @@ BEGIN: {
 # We do this at compile time before the test might have chdir'd around
 # and make sure its absolute in case they do later.
 my $Perl = $^X;
-$Perl = File::Spec->rel2abs(File::Spec->catfile(File::Spec->curdir(), $Perl))
-               if $^X eq "perl$Config{_exe}";
+$Perl =
+    File::Spec->rel2abs(File::Spec->catfile(File::Spec->curdir(),
+					    "perl$Config{_exe}"))
+        if $Perl =~ /^perl\Q$Config{_exe}\E$/i;
 warn "Can't generate which_perl from $^X" unless -f $Perl;
 
 # For subcommands to use.
