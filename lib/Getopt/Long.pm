@@ -599,7 +599,7 @@ sub GetOptions {
 	    # Make sure a valid perl identifier results.
 	    my $ov = $o;
 	    $ov =~ s/\W/_/g;
-	    if ( $c =~ /@/ ) {
+	    if ( $c && $c =~ /@/ ) {
 		print STDERR ("=> link \"$o\" to \@$pkg","::opt_$ov\n")
 		    if $debug;
 		eval ("\$linkage{\$o} = \\\@".$pkg."::opt_$ov;");
