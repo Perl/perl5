@@ -24,6 +24,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  * that running config.h.SH again will wipe out any changes you've made.
  * For a more permanent change edit config.sh and rerun config.h.SH.
  */
+ /*SUPPRESS 460*/
 
 
 /* EUNICE
@@ -55,7 +56,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
 
 /* BYTEORDER
  *	This symbol contains an encoding of the order of bytes in a long.
- *	Usual values (in octal) are 01234, 04321, 02143, 03412...
+ *	Usual values (in hex) are 0x1234, 0x4321, 0x2143, 0x3412...
  */
 #define BYTEORDER 0x$byteorder		/**/
 
@@ -752,9 +753,14 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
 #$i_my_dir	I_MY_DIR	/**/
 #$d_dirnamlen	DIRNAMLEN	/**/
 
+/* MYMALLOC
+ *	This symbol, if defined, indicates that we're using our own malloc.
+ */
 /* MALLOCPTRTYPE
  *	This symbol defines the kind of ptr returned by malloc and realloc.
  */
+#$d_mymalloc MYMALLOC			/**/
+
 #define MALLOCPTRTYPE $mallocptrtype         /**/
 
 

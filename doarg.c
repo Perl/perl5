@@ -1,4 +1,4 @@
-/* $RCSfile: doarg.c,v $$Revision: 4.0.1.3 $$Date: 91/06/10 01:18:41 $
+/* $RCSfile: doarg.c,v $$Revision: 4.0.1.4 $$Date: 91/11/05 16:35:06 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,15 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	doarg.c,v $
+ * Revision 4.0.1.4  91/11/05  16:35:06  lwall
+ * patch11: /$foo/o optimizer could access deallocated data
+ * patch11: minimum match length calculation in regexp is now cumulative
+ * patch11: added some support for 64-bit integers
+ * patch11: prepared for ctype implementations that don't define isascii()
+ * patch11: sprintf() now supports any length of s field
+ * patch11: indirect subroutine calls through magic vars (e.g. &$1) didn't work
+ * patch11: defined(&$foo) and undef(&$foo) didn't work
+ * 
  * Revision 4.0.1.3  91/06/10  01:18:41  lwall
  * patch10: pack(hh,1) dumped core
  * 
@@ -78,9 +87,9 @@ int sp;
 	spat->spat_regexp = regcomp(m,m+dstr->str_cur,
 	    spat->spat_flags & SPAT_FOLD);
 	if (spat->spat_flags & SPAT_KEEP) {
+	    scanconst(spat, m, dstr->str_cur);
 	    arg_free(spat->spat_runtime);	/* it won't change, so */
 	    spat->spat_runtime = Nullarg;	/* no point compiling again */
-	    scanconst(spat, m, dstr->str_cur);
 	    hoistmust(spat);
             if (curcmd->c_expr && (curcmd->c_flags & CF_OPTIMIZE) == CFT_EVAL) {
                 curcmd->c_flags &= ~CF_OPTIMIZE;
@@ -151,7 +160,7 @@ int sp;
 	}
 	c = str_get(dstr);
 	clen = dstr->str_cur;
-	if (clen <= spat->spat_slen + (int)spat->spat_regexp->regback) {
+	if (clen <= spat->spat_regexp->minlen) {
 					/* can do inplace substitution */
 	    if (regexec(spat->spat_regexp, s, strend, orig, 0,
 	      str->str_pok & SP_STUDIED ? str : Nullstr, safebase)) {
@@ -181,6 +190,7 @@ int sp;
 			stack->ary_array[++sp] = arg->arg_ptr.arg_str;
 			return sp;
 		    }
+		    /*SUPPRESS 560*/
 		    else if (i = m - s) {	/* faster from front */
 			d -= clen;
 			m = d;
@@ -217,6 +227,7 @@ int sp;
 		    if (iters++ > maxiters)
 			fatal("Substitution loop");
 		    m = spat->spat_regexp->startp[0];
+		    /*SUPPRESS 560*/
 		    if (i = m - s) {
 			if (s != d)
 			    (void)bcopy(s,d,i);
@@ -407,6 +418,7 @@ int *arglast;
     register int len;
     int datumtype;
     STR *fromstr;
+    /*SUPPRESS 442*/
     static char *null10 = "\0\0\0\0\0\0\0\0\0\0";
     static char *space10 = "          ";
 
@@ -417,6 +429,10 @@ int *arglast;
     unsigned int auint;
     long along;
     unsigned long aulong;
+#ifdef QUAD
+    quad aquad;
+    unsigned quad auquad;
+#endif
     char *aptr;
     float afloat;
     double adouble;
@@ -431,9 +447,9 @@ int *arglast;
 	    len = index("@Xxu",datumtype) ? 0 : items;
 	    pat++;
 	}
-	else if (isdigit(*pat)) {
+	else if (isDIGIT(*pat)) {
 	    len = *pat++ - '0';
-	    while (isdigit(*pat))
+	    while (isDIGIT(*pat))
 		len = (len * 10) + (*pat++ - '0');
 	}
 	else
@@ -573,7 +589,7 @@ int *arglast;
 		items = 0;
 		if (datumtype == 'H') {
 		    for (len = 0; len++ < aint;) {
-			if (isalpha(*pat))
+			if (isALPHA(*pat))
 			    items |= ((*pat++ & 15) + 9) & 15;
 			else
 			    items |= *pat++ & 15;
@@ -587,7 +603,7 @@ int *arglast;
 		}
 		else {
 		    for (len = 0; len++ < aint;) {
-			if (isalpha(*pat))
+			if (isALPHA(*pat))
 			    items |= (((*pat++ & 15) + 9) & 15) << 4;
 			else
 			    items |= (*pat++ & 15) << 4;
@@ -691,6 +707,22 @@ int *arglast;
 		str_ncat(str,(char*)&along,sizeof(long));
 	    }
 	    break;
+#ifdef QUAD
+	case 'Q':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		auquad = (unsigned quad)str_gnum(fromstr);
+		str_ncat(str,(char*)&auquad,sizeof(unsigned quad));
+	    }
+	    break;
+	case 'q':
+	    while (len-- > 0) {
+		fromstr = NEXTFROM;
+		aquad = (quad)str_gnum(fromstr);
+		str_ncat(str,(char*)&aquad,sizeof(quad));
+	    }
+	    break;
+#endif /* QUAD */
 	case 'p':
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
@@ -761,38 +793,49 @@ register STR **sarg;
     register char *t;
     register char *f;
     bool dolong;
+#ifdef QUAD
+    bool doquad;
+#endif /* QUAD */
     char ch;
     static STR *sargnull = &str_no;
     register char *send;
+    register STR *arg;
     char *xs;
     int xlen;
+    int pre;
+    int post;
     double value;
-    char *origs;
 
     str_set(str,"");
     len--;			/* don't count pattern string */
-    origs = t = s = str_get(*sarg);
+    t = s = str_get(*sarg);
     send = s + (*sarg)->str_cur;
     sarg++;
     for ( ; ; len--) {
-	if (len <= 0 || !*sarg) {
-	    sarg = &sargnull;
-	    len = 0;
-	}
+
+	/*SUPPRESS 560*/
+	if (len <= 0 || !(arg = *sarg++))
+	    arg = sargnull;
+
+	/*SUPPRESS 530*/
 	for ( ; t < send && *t != '%'; t++) ;
 	if (t >= send)
 	    break;		/* end of format string, ignore extra args */
 	f = t;
 	*buf = '\0';
 	xs = buf;
+#ifdef QUAD
+	doquad =
+#endif /* QUAD */
 	dolong = FALSE;
+	pre = post = 0;
 	for (t++; t < send; t++) {
 	    switch (*t) {
 	    default:
 		ch = *(++t);
 		*t = '\0';
 		(void)sprintf(xs,f);
-		len++;
+		len++, sarg--;
 		xlen = strlen(xs);
 		break;
 	    case '0': case '1': case '2': case '3': case '4':
@@ -800,12 +843,18 @@ register STR **sarg;
 	    case '.': case '#': case '-': case '+': case ' ':
 		continue;
 	    case 'l':
+#ifdef QUAD
+		if (dolong) {
+		    dolong = FALSE;
+		    doquad = TRUE;
+		} else
+#endif
 		dolong = TRUE;
 		continue;
 	    case 'c':
 		ch = *(++t);
 		*t = '\0';
-		xlen = (int)str_gnum(*(sarg++));
+		xlen = (int)str_gnum(arg);
 		if (strEQ(f,"%c")) { /* some printfs fail on null chars */
 		    *xs = xlen;
 		    xs[1] = '\0';
@@ -822,10 +871,15 @@ register STR **sarg;
 	    case 'd':
 		ch = *(++t);
 		*t = '\0';
-		if (dolong)
-		    (void)sprintf(xs,f,(long)str_gnum(*(sarg++)));
+#ifdef QUAD
+		if (doquad)
+		    (void)sprintf(buf,s,(quad)str_gnum(arg));
 		else
-		    (void)sprintf(xs,f,(int)str_gnum(*(sarg++)));
+#endif
+		if (dolong)
+		    (void)sprintf(xs,f,(long)str_gnum(arg));
+		else
+		    (void)sprintf(xs,f,(int)str_gnum(arg));
 		xlen = strlen(xs);
 		break;
 	    case 'X': case 'O':
@@ -834,7 +888,12 @@ register STR **sarg;
 	    case 'x': case 'o': case 'u':
 		ch = *(++t);
 		*t = '\0';
-		value = str_gnum(*(sarg++));
+		value = str_gnum(arg);
+#ifdef QUAD
+		if (doquad)
+		    (void)sprintf(buf,s,(unsigned quad)value);
+		else
+#endif
 		if (dolong)
 		    (void)sprintf(xs,f,U_L(value));
 		else
@@ -844,28 +903,55 @@ register STR **sarg;
 	    case 'E': case 'e': case 'f': case 'G': case 'g':
 		ch = *(++t);
 		*t = '\0';
-		(void)sprintf(xs,f,str_gnum(*(sarg++)));
+		(void)sprintf(xs,f,str_gnum(arg));
 		xlen = strlen(xs);
 		break;
 	    case 's':
 		ch = *(++t);
 		*t = '\0';
-		xs = str_get(*sarg);
-		xlen = (*sarg)->str_cur;
+		xs = str_get(arg);
+		xlen = arg->str_cur;
 		if (*xs == 'S' && xs[1] == 't' && xs[2] == 'B' && xs[3] == '\0'
 		  && xlen == sizeof(STBP)) {
 		    STR *tmpstr = Str_new(24,0);
 
-		    stab_fullname(tmpstr, ((STAB*)(*sarg))); /* a stab value! */
+		    stab_fullname(tmpstr, ((STAB*)arg)); /* a stab value! */
 		    sprintf(tokenbuf,"*%s",tmpstr->str_ptr);
 					/* reformat to non-binary */
 		    xs = tokenbuf;
 		    xlen = strlen(tokenbuf);
 		    str_free(tmpstr);
 		}
-		sarg++;
 		if (strEQ(f,"%s")) {	/* some printfs fail on >128 chars */
-		    break;		/* so handle simple case */
+		    break;		/* so handle simple cases */
+		}
+		else if (f[1] == '-') {
+		    char *mp = index(f, '.');
+		    int min = atoi(f+2);
+
+		    if (xlen < min)
+			post = min - xlen;
+		    else if (mp) {
+			int max = atoi(mp+1);
+
+			if (xlen > max)
+			    xlen = max;
+		    }
+		    break;
+		}
+		else if (isDIGIT(f[1])) {
+		    char *mp = index(f, '.');
+		    int min = atoi(f+1);
+
+		    if (xlen < min)
+			pre = min - xlen;
+		    else if (mp) {
+			int max = atoi(mp+1);
+
+			if (xlen > max)
+			    xlen = max;
+		    }
+		    break;
 		}
 		strcpy(tokenbuf+64,f);	/* sprintf($s,...$s...) */
 		*t = ch;
@@ -876,9 +962,17 @@ register STR **sarg;
 	    }
 	    /* end of switch, copy results */
 	    *t = ch;
-	    STR_GROW(str, str->str_cur + (f - s) + len + 1);
+	    STR_GROW(str, str->str_cur + (f - s) + xlen + 1 + pre + post);
 	    str_ncat(str, s, f - s);
+	    if (pre) {
+		repeatcpy(str->str_ptr + str->str_cur, " ", 1, pre);
+		str->str_cur += pre;
+	    }
 	    str_ncat(str, xs, xlen);
+	    if (post) {
+		repeatcpy(str->str_ptr + str->str_cur, " ", 1, post);
+		str->str_cur += post;
+	    }
 	    s = t;
 	    break;		/* break from for loop */
 	}
@@ -946,7 +1040,7 @@ int *arglast;
     if ((arg[1].arg_type & A_MASK) == A_WORD)
 	stab = arg[1].arg_ptr.arg_stab;
     else {
-	STR *tmpstr = stab_val(arg[1].arg_ptr.arg_stab);
+	STR *tmpstr = STAB_STR(arg[1].arg_ptr.arg_stab);
 
 	if (tmpstr)
 	    stab = stabent(str_get(tmpstr),TRUE);
@@ -1034,7 +1128,7 @@ int *arglast;
     HASH *hash;
     int i;
 
-    makelocal = (arg->arg_flags & AF_LOCAL);
+    makelocal = (arg->arg_flags & AF_LOCAL) != 0;
     localizing = makelocal;
     delaymagic = DM_DELAY;		/* catch simultaneous items */
 
@@ -1044,6 +1138,7 @@ int *arglast;
      */
     if (arg->arg_flags & AF_COMMON) {
 	for (relem = firstrelem; relem <= lastrelem; relem++) {
+	    /*SUPPRESS 560*/
 	    if (str = *relem)
 		*relem = str_mortal(str);
 	}
@@ -1179,7 +1274,7 @@ int *arglast;
     }
 }
 
-int
+int					/*SUPPRESS 590*/
 do_study(str,arg,gimme,arglast)
 STR *str;
 ARG *arg;
@@ -1254,7 +1349,7 @@ int *arglast;
     return retarg;
 }
 
-int
+int					/*SUPPRESS 590*/
 do_defined(str,arg,gimme,arglast)
 STR *str;
 register ARG *arg;
@@ -1272,8 +1367,15 @@ int *arglast;
     arg = arg[1].arg_ptr.arg_arg;
     type = arg->arg_type;
 
-    if (type == O_SUBR || type == O_DBSUBR)
-	retval = stab_sub(arg[1].arg_ptr.arg_stab) != 0;
+    if (type == O_SUBR || type == O_DBSUBR) {
+	if ((arg[1].arg_type & A_MASK) == A_WORD)
+	    retval = stab_sub(arg[1].arg_ptr.arg_stab) != 0;
+	else {
+	    STR *tmpstr = STAB_STR(arg[1].arg_ptr.arg_stab);
+
+	    retval = tmpstr && stab_sub(stabent(str_get(tmpstr),TRUE)) != 0;
+	}
+    }
     else if (type == O_ARRAY || type == O_LARRAY ||
 	     type == O_ASLICE || type == O_LASLICE )
 	retval = ((ary = stab_xarray(arg[1].arg_ptr.arg_stab)) != 0
@@ -1289,7 +1391,7 @@ int *arglast;
     return retarg;
 }
 
-int
+int						/*SUPPRESS 590*/
 do_undef(str,arg,gimme,arglast)
 STR *str;
 register ARG *arg;
@@ -1325,7 +1427,15 @@ int *arglast;
     }
     else if (type == O_SUBR || type == O_DBSUBR) {
 	stab = arg[1].arg_ptr.arg_stab;
-	if (stab_sub(stab)) {
+	if ((arg[1].arg_type & A_MASK) != A_WORD) {
+	    STR *tmpstr = STAB_STR(arg[1].arg_ptr.arg_stab);
+
+	    if (tmpstr)
+		stab = stabent(str_get(tmpstr),TRUE);
+	    else
+		stab = Nullstab;
+	}
+	if (stab && stab_sub(stab)) {
 	    cmd_free(stab_sub(stab)->cmd);
 	    stab_sub(stab)->cmd = Nullcmd;
 	    afree(stab_sub(stab)->tosave);
@@ -1376,9 +1486,10 @@ int *arglast;
 	    if (size == 8)
 		retnum = s[offset];
 	    else if (size == 16)
-		retnum = (s[offset] << 8) + s[offset+1];
+		retnum = ((unsigned long) s[offset] << 8) + s[offset+1];
 	    else if (size == 32)
-		retnum = (s[offset] << 24) + (s[offset + 1] << 16) +
+		retnum = ((unsigned long) s[offset] << 24) +
+			((unsigned long) s[offset + 1] << 16) +
 			(s[offset + 2] << 8) + s[offset+3];
 	}
 
@@ -1458,6 +1569,7 @@ register STR *str;
     if (str->str_state == SS_HASH) {
 	hash = stab_hash(str->str_u.str_stab);
 	(void)hiterinit(hash);
+	/*SUPPRESS 560*/
 	while (entry = hiternext(hash))
 	    do_chop(astr,hiterval(hash,entry));
 	return;

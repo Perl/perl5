@@ -1,4 +1,4 @@
-/* $RCSfile: consarg.c,v $$Revision: 4.0.1.2 $$Date: 91/06/07 10:33:12 $
+/* $RCSfile: consarg.c,v $$Revision: 4.0.1.3 $$Date: 91/11/05 16:21:16 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,13 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	consarg.c,v $
+ * Revision 4.0.1.3  91/11/05  16:21:16  lwall
+ * patch11: random cleanup
+ * patch11: added eval {}
+ * patch11: added sort {} LIST
+ * patch11: "foo" x -1 dumped core
+ * patch11: substr() and vec() weren't allowed in an lvalue list
+ * 
  * Revision 4.0.1.2  91/06/07  10:33:12  lwall
  * patch4: new copyright notice
  * patch4: length($`), length($&), length($') now optimized to avoid string copy
@@ -54,8 +61,11 @@ ARG *limarg;
 	    arg[3].arg_ptr.arg_arg = limarg;
 	}
     }
-    else
+    else {
+	arg[3].arg_flags = 0;
 	arg[3].arg_type = A_NULL;
+	arg[3].arg_ptr.arg_arg = Nullarg;
+    }
     arg->arg_type = O_SPLIT;
     spat = arg[2].arg_ptr.arg_spat;
     spat->spat_repl = stab2arg(A_STAB,aadd(stab));
@@ -154,6 +164,7 @@ ARG *arg3;
 
     arg = op_new(newlen);
     arg->arg_type = type;
+    /*SUPPRESS 560*/
     if (chld = arg1) {
 	if (chld->arg_type == O_ITEM &&
 	    (hoistable[ i = (chld[1].arg_type&A_MASK)] || i == A_LVAL ||
@@ -173,6 +184,7 @@ ARG *arg3;
 	    arg[1].arg_ptr.arg_arg = chld;
 	}
     }
+    /*SUPPRESS 560*/
     if (chld = arg2) {
 	if (chld->arg_type == O_ITEM && 
 	    (hoistable[chld[1].arg_type&A_MASK] || 
@@ -193,6 +205,7 @@ ARG *arg3;
 	    arg[2].arg_ptr.arg_arg = chld;
 	}
     }
+    /*SUPPRESS 560*/
     if (chld = arg3) {
 	if (chld->arg_type == O_ITEM && hoistable[chld[1].arg_type&A_MASK]) {
 	    arg[3].arg_type = chld[1].arg_type;
@@ -300,6 +313,19 @@ register ARG *arg;
     switch (arg->arg_type) {
     default:
 	return arg;
+    case O_SORT:
+	if (arg[1].arg_type == A_CMD)
+	    arg[1].arg_type |= A_DONT;
+	return arg;
+    case O_EVAL:
+	if (arg[1].arg_type == A_CMD) {
+	    arg->arg_type = O_TRY;
+	    arg[1].arg_type |= A_DONT;
+	    return arg;
+	}
+	CHECK1;
+	arg->arg_type = O_EVALONCE;
+	return arg;
     case O_AELEM:
 	CHECK2;
 	i = (int)str_gnum(s2);
@@ -322,10 +348,12 @@ register ARG *arg;
 	i = (int)str_gnum(s2);
 	tmps = str_get(s1);
 	str_nset(str,"",0);
-	STR_GROW(str, i * s1->str_cur + 1);
-	repeatcpy(str->str_ptr, tmps, s1->str_cur, i);
-	str->str_cur = i * s1->str_cur;
-	str->str_ptr[str->str_cur] = '\0';
+	if (i > 0) {
+	    STR_GROW(str, i * s1->str_cur + 1);
+	    repeatcpy(str->str_ptr, tmps, s1->str_cur, i);
+	    str->str_cur = i * s1->str_cur;
+	    str->str_ptr[str->str_cur] = '\0';
+	}
 	break;
     case O_MULTIPLY:
 	CHECK12;
@@ -338,7 +366,7 @@ register ARG *arg;
 	if (value == 0.0)
 	    yyerror("Illegal division by constant zero");
 	else
-#ifdef cray
+#ifdef SLOPPYDIVIDE
 	/* insure that 20./5. == 4. */
 	{
 	    double x;
@@ -497,7 +525,11 @@ register ARG *arg;
 	break;
     case O_NOT:
 	CHECK1;
+#ifdef NOTNOT
+	{ char xxx = str_true(s1); str_numset(str,(double)!xxx); }
+#else
 	str_numset(str,(double)(!str_true(s1)));
+#endif
 	break;
     case O_COMPLEMENT:
 	CHECK1;
@@ -704,6 +736,12 @@ register ARG *arg;
 		    case O_HSLICE: case O_LHSLICE:
 			arg1[i].arg_ptr.arg_arg->arg_type = O_LHSLICE;
 			break;
+		    case O_SUBSTR: case O_VEC:
+			(void)l(arg1[i].arg_ptr.arg_arg);
+			Renewc(arg1[i].arg_ptr.arg_arg->arg_ptr.arg_str, 1,
+			  struct lstring, STR);
+			    /* grow string struct to hold an lstring struct */
+			break;
 		    default:
 			goto ill_item;
 		    }
@@ -802,10 +840,9 @@ register ARG *arg;
 	    Renewc(arg1->arg_ptr.arg_str, 1, struct lstring, STR);
 			/* grow string struct to hold an lstring struct */
 	}
-	else if (arg1->arg_type == O_ASSIGN) {
-/*	    if (arg->arg_type == O_CHOP)
-		arg[1].arg_flags &= ~AF_ARYOK;	/* grandfather chop idiom */
-	}
+	else if (arg1->arg_type == O_ASSIGN)
+	    /*SUPPRESS 530*/
+	    ;
 	else {
 	    (void)sprintf(tokenbuf,
 	      "Illegal expression (%s) as lvalue",opname[arg1->arg_type]);
@@ -980,7 +1017,7 @@ ARG *
 listish(arg)
 ARG *arg;
 {
-    if (arg->arg_flags & AF_LISTISH)
+    if (arg && arg->arg_flags & AF_LISTISH)
 	arg = make_op(O_LIST,1,arg,Nullarg,Nullarg);
     return arg;
 }

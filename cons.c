@@ -1,4 +1,4 @@
-/* $RCSfile: cons.c,v $$Revision: 4.0.1.1 $$Date: 91/06/07 10:31:15 $
+/* $RCSfile: cons.c,v $$Revision: 4.0.1.2 $$Date: 91/11/05 16:15:13 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	cons.c,v $
+ * Revision 4.0.1.2  91/11/05  16:15:13  lwall
+ * patch11: debugger got confused over nested subroutine definitions
+ * patch11: prepared for ctype implementations that don't define isascii()
+ * 
  * Revision 4.0.1.1  91/06/07  10:31:15  lwall
  * patch4: new copyright notice
  * patch4: added global modifier for pattern matches
@@ -74,8 +78,7 @@ CMD *cmd;
 	STR *str;
 	STR *tmpstr = str_mortal(&str_undef);
 
-	sprintf(buf,"%s:%ld",stab_val(curcmd->c_filestab)->str_ptr,
-	  (long)subline);
+	sprintf(buf,"%s:%ld",stab_val(curcmd->c_filestab)->str_ptr, subline);
 	str = str_make(buf,0);
 	str_cat(str,"-");
 	sprintf(buf,"%ld",(long)curcmd->c_line);
@@ -83,9 +86,7 @@ CMD *cmd;
 	name = str_get(subname);
 	stab_fullname(tmpstr,stab);
 	hstore(stab_xhash(DBsub), tmpstr->str_ptr, tmpstr->str_cur, str, 0);
-	str_set(subname,"main");
     }
-    subline = 0;
     return sub;
 }
 
@@ -732,6 +733,7 @@ int acmd;
 	     arg->arg_type == O_SLT || arg->arg_type == O_SGT) {
 	if (arg[1].arg_type == A_STAB || arg[1].arg_type == A_LVAL) {
 	    if (arg[2].arg_type == A_SINGLE) {
+		/*SUPPRESS 594*/
 		char *junk = str_get(arg[2].arg_ptr.arg_str);
 
 		cmd->c_stab  = arg[1].arg_ptr.arg_stab;
@@ -908,7 +910,7 @@ char *s;
 
     if (bufptr > oldoldbufptr && bufptr - oldoldbufptr < 200 &&
       oldoldbufptr != oldbufptr && oldbufptr != bufptr) {
-	while (isspace(*oldoldbufptr))
+	while (isSPACE(*oldoldbufptr))
 	    oldoldbufptr++;
 	strncpy(tmp2buf, oldoldbufptr, bufptr - oldoldbufptr);
 	tmp2buf[bufptr - oldoldbufptr] = '\0';
@@ -916,7 +918,7 @@ char *s;
     }
     else if (bufptr > oldbufptr && bufptr - oldbufptr < 200 &&
       oldbufptr != bufptr) {
-	while (isspace(*oldbufptr))
+	while (isSPACE(*oldbufptr))
 	    oldbufptr++;
 	strncpy(tmp2buf, oldbufptr, bufptr - oldbufptr);
 	tmp2buf[bufptr - oldbufptr] = '\0';
@@ -1083,6 +1085,7 @@ register CMD *cmd;
 		break;
 	    tail = tail->c_next;
 	}
+	/*SUPPRESS 530*/
 	for ( ; tail->c_next; tail = tail->c_next) ;
     }
 
@@ -1118,7 +1121,7 @@ register CMD *cmd;
     cmd->c_flags &= ~CF_OPTIMIZE;	/* clear optimization type */
     cmd->c_flags |= CFT_ARRAY;		/* and set it to do the iteration */
     cmd->c_stab = eachstab;
-    cmd->c_short = str_new(0);		/* just to save a field in struct cmd */
+    cmd->c_short = Str_new(23,0);	/* just to save a field in struct cmd */
     cmd->c_short->str_u.str_useful = -1;
 
     return cmd;
@@ -1268,6 +1271,7 @@ register SPAT *spat;
 	    for (sp = stash->tbl_spatroot;
 	      sp && sp->spat_next != spat;
 	      sp = sp->spat_next)
+		/*SUPPRESS 530*/
 		;
 	    if (sp)
 		sp->spat_next = spat->spat_next;
