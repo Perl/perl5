@@ -362,8 +362,9 @@ the strings?).
           5.8.1-RC4     2003-Aug-01
           5.8.1-RC5     2003-Sep-22
           5.8.1         2003-Sep-25
+ Nicholas 5.8.2-RC1     2003-Oct-27
 
-Hugo      5.9.0         2003-Oct-27
+ Hugo     5.9.0         2003-Oct-27
 
 =head2 SELECTED RELEASE SIZES
 
