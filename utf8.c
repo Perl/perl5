@@ -285,6 +285,14 @@ Perl_is_uni_alpha(pTHX_ U32 c)
 }
 
 bool
+Perl_is_uni_ascii(pTHX_ U32 c)
+{
+    U8 tmpbuf[10];
+    uv_to_utf8(tmpbuf, (UV)c);
+    return is_utf8_ascii(tmpbuf);
+}
+
+bool
 Perl_is_uni_space(pTHX_ U32 c)
 {
     U8 tmpbuf[10];
@@ -348,6 +356,14 @@ Perl_is_uni_punct(pTHX_ U32 c)
     return is_utf8_punct(tmpbuf);
 }
 
+bool
+Perl_is_uni_xdigit(pTHX_ U32 c)
+{
+    U8 tmpbuf[10];
+    uv_to_utf8(tmpbuf, (UV)c);
+    return is_utf8_xdigit(tmpbuf);
+}
+
 U32
 Perl_to_uni_upper(pTHX_ U32 c)
 {
@@ -399,6 +415,12 @@ Perl_is_uni_alpha_lc(pTHX_ U32 c)
 }
 
 bool
+Perl_is_uni_ascii_lc(pTHX_ U32 c)
+{
+    return is_uni_ascii(c);	/* XXX no locale support yet */
+}
+
+bool
 Perl_is_uni_space_lc(pTHX_ U32 c)
 {
     return is_uni_space(c);	/* XXX no locale support yet */
@@ -444,6 +466,12 @@ bool
 Perl_is_uni_punct_lc(pTHX_ U32 c)
 {
     return is_uni_punct(c);	/* XXX no locale support yet */
+}
+
+bool
+Perl_is_uni_xdigit_lc(pTHX_ U32 c)
+{
+    return is_uni_xdigit(c);	/* XXX no locale support yet */
 }
 
 U32

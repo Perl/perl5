@@ -409,7 +409,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 	    if (data && (flags & SCF_DO_SUBSTR))
 		data->pos_min += l;
 	}
-	else if (strchr(PL_varies,OP(scan))) {
+	else if (strchr((char*)PL_varies,OP(scan))) {
 	    I32 mincount, maxcount, minnext, deltanext, pos_before, fl;
 	    regnode *oscan = scan;
 	    
@@ -484,7 +484,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 
 		    /* Skip open. */
 		    nxt = regnext(nxt);
-		    if (!strchr(PL_simple,OP(nxt))
+		    if (!strchr((char*)PL_simple,OP(nxt))
 			&& !(PL_regkind[(U8)OP(nxt)] == EXACT
 			     && *OPERAND(nxt) == 1)) 
 			goto nogo;
@@ -631,7 +631,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		break;
 	    }
 	}
-	else if (strchr(PL_simple,OP(scan)) || PL_regkind[(U8)OP(scan)] == ANYUTF8) {
+	else if (strchr((char*)PL_simple,OP(scan)) || PL_regkind[(U8)OP(scan)] == ANYUTF8) {
 	    if (flags & SCF_DO_SUBSTR) {
 		scan_commit(data);
 		data->pos_min++;
@@ -896,7 +896,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	/* Starting-point info. */
       again:
 	if (OP(first) == EXACT);	/* Empty, get anchored substr later. */
-	else if (strchr(PL_simple+4,OP(first)))
+	else if (strchr((char*)PL_simple+4,OP(first)))
 	    r->regstclass = first;
 	else if (PL_regkind[(U8)OP(first)] == BOUND ||
 		 PL_regkind[(U8)OP(first)] == NBOUND)

@@ -230,7 +230,7 @@ struct regnode_2 {
  */
 #ifndef lint
 #ifndef CHARMASK
-#define	UCHARAT(p)	((int)*(unsigned char *)(p))
+#define	UCHARAT(p)	((int)*(U8*)(p))
 #else
 #define	UCHARAT(p)	((int)*(p)&CHARMASK)
 #endif
@@ -263,22 +263,22 @@ START_EXTERN_C
 
 #include "regnodes.h"
 
-/* The following have no fixed length. char* since we do strchr on it. */
+/* The following have no fixed length. U8 so we can do strchr() on it. */
 #ifndef DOINIT
-EXTCONST char PL_varies[];
+EXTCONST U8 PL_varies[];
 #else
-EXTCONST char PL_varies[] = {
+EXTCONST U8 PL_varies[] = {
     BRANCH, BACK, STAR, PLUS, CURLY, CURLYX, REF, REFF, REFFL, 
     WHILEM, CURLYM, CURLYN, BRANCHJ, IFTHEN, SUSPEND, CLUMP, 0
 };
 #endif
 
-/* The following always have a length of 1. char* since we do strchr on it. */
-/* (Note that lenght 1 means "one character" under UTF8, not "one octet".) */
+/* The following always have a length of 1. U8 we can do strchr() on it. */
+/* (Note that length 1 means "one character" under UTF8, not "one octet".) */
 #ifndef DOINIT
-EXTCONST char PL_simple[];
+EXTCONST U8 PL_simple[];
 #else
-EXTCONST char PL_simple[] = {
+EXTCONST U8 PL_simple[] = {
     REG_ANY, ANYUTF8, SANY, SANYUTF8, ANYOF, ANYOFUTF8,
     ALNUM, ALNUMUTF8, ALNUML, ALNUMLUTF8,
     NALNUM, NALNUMUTF8, NALNUML, NALNUMLUTF8,
