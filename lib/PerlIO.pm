@@ -1,9 +1,9 @@
 package PerlIO;
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 # Map layer name to package that defines it
-my %alias = (encoding => 'Encode');
+our %alias;
 
 sub import
 {
@@ -98,6 +98,14 @@ and then read it back in.
 	$in = <F>;
 	close(F);
 
+=item bytes
+
+This is the inverse of C<:utf8> layer. It turns off the flag
+on the layer below so that data read from it is considered to
+be "octets" i.e. characters in range 0..255 only. Likewise
+on output perl will warn if a "wide" character is written
+to a such a stream.
+
 =item raw
 
 A pseudo-layer which performs two functions (which is messy, but
@@ -105,7 +113,7 @@ necessary to maintain compatibility with non-PerlIO builds of Perl
 and their way things have been documented elsewhere).
 
 Firstly it forces the file handle to be considered binary at that
-point in the layer stack,
+point in the layer stack, i.e. it turns off any CRLF translation.
 
 Secondly in prevents the IO system seaching back before it in the
 layer specification.  Thus:
