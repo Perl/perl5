@@ -3601,7 +3601,8 @@ create_command_line(char *cname, STRLEN clen, const char * const *args)
 		|| (IsWinNT() && stricmp(&cname[clen-4], ".cmd") == 0)))
 	{
 	    bat_file = TRUE;
-	    len += 3;
+	    if (!IsWin95())
+		len += 3;
 	}
 	else {
 	    char *exe = strrchr(cname, '/');
@@ -3638,7 +3639,7 @@ create_command_line(char *cname, STRLEN clen, const char * const *args)
     New(1310, cmd, len, char);
     ptr = cmd;
 
-    if (bat_file) {
+    if (bat_file && !IsWin95()) {
 	*ptr++ = '"';
 	extra_quotes = TRUE;
     }
