@@ -27,7 +27,7 @@ The following modules have been upgraded :
 
 =item ExtUtils::MakeMaker 6.17
 
-=item File::Spec 0.85
+=item File::Spec 0.86
 
 =item File::Temp 0.14
 
@@ -3657,8 +3657,7 @@ warning.  And in Perl 5.005, this special treatment will cease.
 
 If you find what you think is a bug, you might check the
 articles recently posted to the comp.lang.perl.misc newsgroup.
-There may also be information at http://www.perl.com/, the Perl
-Home Page.
+There may also be information at L<http://www.perl.org/>.
 
 If you believe you have an unreported bug, please run the B<perlbug>
 program included with your release.  Be sure to trim your bug down
