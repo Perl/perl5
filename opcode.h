@@ -1234,7 +1234,7 @@ EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op) = {
 	Perl_ck_fun,	/* unpack */
 	Perl_ck_fun,	/* pack */
 	Perl_ck_split,	/* split */
-	Perl_ck_fun,	/* join */
+	Perl_ck_join,	/* join */
 	Perl_ck_null,	/* list */
 	Perl_ck_null,	/* lslice */
 	Perl_ck_fun,	/* anonlist */

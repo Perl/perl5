@@ -725,6 +725,13 @@ of a subroutine attribute, and it wasn't a semicolon or the start of a
 block.  Perhaps you terminated the parameter list of the previous attribute
 too soon.
 
+=item /%s/ should probably be written as "%s"
+
+(W) You have used a pattern where Perl expected to find a string,
+like in the first argument to C<join>.  Perl will treat the true
+or false result of matching the pattern against $_ as the string,
+which is probably not what you had in mind.
+
 =head1 Obsolete Diagnostics
 
 Todo.

@@ -112,6 +112,13 @@ your signed integers.  See L<perlfunc/unpack>.
 by Perl.  This combination appears in an interpolated variable or a 
 C<'>-delimited regular expression.
 
+=item /%s/ should probably be written as "%s"
+
+(W) You have used a pattern where Perl expected to find a string,
+like in the first argument to C<join>.  Perl will treat the true
+or false result of matching the pattern against $_ as the string,
+which is probably not what you had in mind.
+
 =item %s (...) interpreted as function
 
 (W) You've run afoul of the rule that says that any list operator followed

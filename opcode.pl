@@ -508,7 +508,7 @@ hslice		hash slice		ck_null		m@	H L
 unpack		unpack			ck_fun		@	S S
 pack		pack			ck_fun		mst@	S L
 split		split			ck_split	t@	S S S
-join		join			ck_fun		msT@	S L
+join		join			ck_join		msT@	S L
 
 # List operators.
 

@@ -3650,6 +3650,10 @@
 #define Perl_ck_index		pPerl->Perl_ck_index
 #undef  ck_index
 #define ck_index		Perl_ck_index
+#undef  Perl_ck_join
+#define Perl_ck_join		pPerl->Perl_ck_join
+#undef  ck_join
+#define ck_join			Perl_ck_join
 #undef  Perl_ck_lengthconst
 #define Perl_ck_lengthconst	pPerl->Perl_ck_lengthconst
 #undef  ck_lengthconst

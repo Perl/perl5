@@ -95,6 +95,9 @@
      defined(%hash) is deprecated
      (Maybe you should just omit the defined()?)
 	my %h ; defined %h ;
+    
+     /---/ should probably be written as "---"
+        join(/---/, @foo);
 
     Mandatory Warnings 
     ------------------
@@ -107,8 +110,6 @@
     oops: oopsAV		[oopsAV]	TODO
     oops: oopsHV		[oopsHV]	TODO
     
-    
-
 
 __END__
 # op.c
@@ -787,3 +788,9 @@ EXPECT
 Prototype mismatch: sub main::fred () vs ($) at - line 4.
 Prototype mismatch: sub main::freD () vs ($) at - line 11.
 Prototype mismatch: sub main::FRED () vs ($) at - line 14.
+########
+# op.c
+use warnings 'syntax' ;
+join /---/, 'x', 'y', 'z';
+EXPECT
+/---/ should probably be written as "---" at - line 3.

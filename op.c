@@ -5717,6 +5717,23 @@ Perl_ck_split(pTHX_ OP *o)
 }
 
 OP *
+Perl_ck_join(pTHX_ OP *o) 
+{
+    if (ckWARN(WARN_SYNTAX)) {
+	OP *kid = cLISTOPo->op_first->op_sibling;
+	if (kid && kid->op_type == OP_MATCH) {
+	    char *pmstr = "STRING";
+	    if (kPMOP->op_pmregexp)
+		pmstr = kPMOP->op_pmregexp->precomp;
+	    Perl_warner(aTHX_ WARN_SYNTAX,
+			"/%s/ should probably be written as \"%s\"",
+			pmstr, pmstr);
+	}
+    }
+    return ck_fun(o);
+}
+
+OP *
 Perl_ck_subr(pTHX_ OP *o)
 {
     dTHR;

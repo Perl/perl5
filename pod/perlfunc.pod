@@ -2064,7 +2064,8 @@ separated by the value of EXPR, and returns that new string.  Example:
 
     $rec = join(':', $login,$passwd,$uid,$gid,$gcos,$home,$shell);
 
-See L</split>.
+Beware that unlike C<split>, C<join> doesn't take a pattern as its
+first argument.  Compare L</split>.
 
 =item keys HASH
 
