@@ -199,7 +199,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 	topgv = *gvp;
 	if (SvTYPE(topgv) != SVt_PVGV)
 	    gv_init(topgv, stash, name, len, TRUE);
-	if (cv = GvCV(topgv)) {
+	if ((cv = GvCV(topgv))) {
 	    /* If genuine method or valid cache entry, use it */
 	    if (!GvCVGEN(topgv) || GvCVGEN(topgv) == PL_sub_generation)
 		return topgv;
@@ -265,9 +265,10 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
     if (level == 0 || level == -1) {
 	HV* lastchance;
 
-	if (lastchance = gv_stashpvn("UNIVERSAL", 9, FALSE)) {
-	    if (gv = gv_fetchmeth(lastchance, name, len,
-				  (level >= 0) ? level + 1 : level - 1)) {
+	if ((lastchance = gv_stashpvn("UNIVERSAL", 9, FALSE))) {
+	    if ((gv = gv_fetchmeth(lastchance, name, len,
+				  (level >= 0) ? level + 1 : level - 1)))
+	    {
 	  gotcha:
 		/*
 		 * Cache method in topgv if:
@@ -279,7 +280,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 		    (cv = GvCV(gv)) &&
 		    (CvROOT(cv) || CvXSUB(cv)))
 		{
-		    if (cv = GvCV(topgv))
+		    if ((cv = GvCV(topgv)))
 			SvREFCNT_dec(cv);
 		    GvCV(topgv) = (CV*)SvREFCNT_inc(GvCV(gv));
 		    GvCVGEN(topgv) = PL_sub_generation;
@@ -621,9 +622,9 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 		    {
 			stash = 0;
 		    }
-		    else if (sv_type == SVt_PV   && !GvIMPORTED_SV(*gvp) ||
-			     sv_type == SVt_PVAV && !GvIMPORTED_AV(*gvp) ||
-			     sv_type == SVt_PVHV && !GvIMPORTED_HV(*gvp) )
+		    else if ((sv_type == SVt_PV   && !GvIMPORTED_SV(*gvp)) ||
+			     (sv_type == SVt_PVAV && !GvIMPORTED_AV(*gvp)) ||
+			     (sv_type == SVt_PVHV && !GvIMPORTED_HV(*gvp)) )
 		    {
 			Perl_warn(aTHX_ "Variable \"%c%s\" is not imported",
 			    sv_type == SVt_PVAV ? '@' :
@@ -910,7 +911,7 @@ Perl_gv_fullname3(pTHX_ SV *sv, GV *gv, const char *prefix)
 {
     HV *hv = GvSTASH(gv);
     if (!hv) {
-	SvOK_off(sv);
+	(void)SvOK_off(sv);
 	return;
     }
     sv_setpv(sv, prefix ? prefix : "");
@@ -1043,7 +1044,6 @@ Perl_gp_free(pTHX_ GV *gv)
 {
     dTHR;  
     GP* gp;
-    CV* cv;
 
     if (!gv || !(gp = GvGP(gv)))
 	return;
@@ -1103,15 +1103,17 @@ register GV *gv;
 bool
 Perl_Gv_AMupdate(pTHX_ HV *stash)
 {
-  dTHR;  
-  GV** gvp;
-  HV* hv;
+  dTHR;
   GV* gv;
   CV* cv;
   MAGIC* mg=mg_find((SV*)stash,'c');
   AMT *amtp = (mg) ? (AMT*)mg->mg_ptr: (AMT *) NULL;
   AMT amt;
   STRLEN n_a;
+#ifdef OVERLOAD_VIA_HASH
+  GV** gvp;
+  HV* hv;
+#endif
 
   if (mg && amtp->was_ok_am == PL_amagic_generation
       && amtp->was_ok_sub == PL_sub_generation)
@@ -1192,18 +1194,21 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
     int i;
     const char *cp;
     SV* sv = NULL;
-    SV** svp;
 
     /* Work with "fallback" key, which we assume to be first in PL_AMG_names */
 
-    if ( cp = PL_AMG_names[0] ) {
+    if ((cp = PL_AMG_names[0])) {
 	/* Try to find via inheritance. */
 	gv = gv_fetchmeth(stash, "()", 2, -1); /* A cookie: "()". */
-	if (gv) sv = GvSV(gv);
+	if (gv)
+	    sv = GvSV(gv);
 
-	if (!gv) goto no_table;
-	else if (SvTRUE(sv)) amt.fallback=AMGfallYES;
-	else if (SvOK(sv)) amt.fallback=AMGfallNEVER;
+	if (!gv)
+	    goto no_table;
+	else if (SvTRUE(sv))
+	    amt.fallback=AMGfallYES;
+	else if (SvOK(sv))
+	    amt.fallback=AMGfallNEVER;
     }
 
     for (i = 1; i < NofAMmeth; i++) {
@@ -1359,7 +1364,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	   }
 	   break;
 	 case neg_amg:
-	   if (cv = cvp[off=subtr_amg]) {
+	   if ((cv = cvp[off=subtr_amg])) {
 	     right = left;
 	     left = sv_2mortal(newSViv(0));
 	     lr = 1;
@@ -1527,7 +1532,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     PUSHs((SV*)cv);
     PUTBACK;
 
-    if (PL_op = Perl_pp_entersub(aTHX))
+    if ((PL_op = Perl_pp_entersub(aTHX)))
       CALLRUNOPS(aTHX);
     LEAVE;
     SPAGAIN;

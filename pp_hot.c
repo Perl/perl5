@@ -107,7 +107,6 @@ PP(pp_and)
 PP(pp_sassign)
 {
     djSP; dPOPTOPssrl;
-    MAGIC *mg;
 
     if (PL_op->op_private & OPpASSIGN_BACKWARDS) {
 	SV *temp;
@@ -335,7 +334,7 @@ PP(pp_print)
 	gv = (GV*)*++MARK;
     else
 	gv = PL_defoutgv;
-    if (mg = SvTIED_mg((SV*)gv, 'q')) {
+    if ((mg = SvTIED_mg((SV*)gv, 'q'))) {
 	if (MARK == ORIGMARK) {
 	    /* If using default handle then we need to make space to 
 	     * pass object as 1st arg, so move other args up ...
@@ -626,7 +625,6 @@ S_do_maybe_phash(pTHX_ AV *ary, SV **lelem, SV **firstlelem, SV **relem,
 		 SV **lastrelem)
 {
     OP *leftop;
-    SV *tmpstr;
     I32 i;
 
     leftop = ((BINOP*)PL_op)->op_last;
@@ -737,7 +735,7 @@ PP(pp_aassign)
 	EXTEND_MORTAL(lastrelem - firstrelem + 1);
 	for (relem = firstrelem; relem <= lastrelem; relem++) {
 	    /*SUPPRESS 560*/
-	    if (sv = *relem) {
+	    if ((sv = *relem)) {
 		TAINT_NOT;	/* Each item is independent */
 		*relem = sv_mortalcopy(sv);
 	    }
@@ -979,7 +977,7 @@ PP(pp_match)
     truebase = t = s;
 
     /* XXXX What part of this is needed with true \G-support? */
-    if (global = pm->op_pmflags & PMf_GLOBAL) {
+    if ((global = pm->op_pmflags & PMf_GLOBAL)) {
 	rx->startp[0] = -1;
 	if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG)) {
 	    MAGIC* mg = mg_find(TARG, 'g');
@@ -1157,7 +1155,7 @@ Perl_do_readline(pTHX)
     I32 gimme = GIMME_V;
     MAGIC *mg;
 
-    if (mg = SvTIED_mg((SV*)PL_last_in_gv, 'q')) {
+    if ((mg = SvTIED_mg((SV*)PL_last_in_gv, 'q'))) {
 	PUSHMARK(SP);
 	XPUSHs(SvTIED_obj((SV*)PL_last_in_gv, mg));
 	PUTBACK;
@@ -1659,9 +1657,9 @@ PP(pp_iter)
 
     SvREFCNT_dec(*itersvp);
 
-    if (sv = (SvMAGICAL(av)) 
-	    ? *av_fetch(av, ++cx->blk_loop.iterix, FALSE) 
-	    : AvARRAY(av)[++cx->blk_loop.iterix])
+    if ((sv = SvMAGICAL(av)
+	      ? *av_fetch(av, ++cx->blk_loop.iterix, FALSE) 
+	      : AvARRAY(av)[++cx->blk_loop.iterix]))
 	SvTEMP_off(sv);
     else
 	sv = &PL_sv_undef;
@@ -1712,7 +1710,6 @@ PP(pp_subst)
     STRLEN len;
     int force_on_match = 0;
     I32 oldsave = PL_savestack_ix;
-    I32 update_minmatch = 1;
 
     /* known replacement string? */
     dstr = (pm->op_pmflags & PMf_CONST) ? POPs : Nullsv;
@@ -1818,7 +1815,7 @@ PP(pp_subst)
 		SvCUR_set(TARG, m - s);
 	    }
 	    /*SUPPRESS 560*/
-	    else if (i = m - s) {	/* faster from front */
+	    else if ((i = m - s)) {	/* faster from front */
 		d -= clen;
 		m = d;
 		sv_chop(TARG, d-i);
@@ -1847,7 +1844,7 @@ PP(pp_subst)
 		rxtainted |= RX_MATCH_TAINTED(rx);
 		m = rx->startp[0] + orig;
 		/*SUPPRESS 560*/
-		if (i = m - s) {
+		if ((i = m - s)) {
 		    if (s != d)
 			Move(s, d, i, char);
 		    d += i;
@@ -2145,7 +2142,6 @@ PP(pp_leavesublv)
 			: "an uninitialized value");
 		}
 		else {
-		    mortalize:
 		    /* Can be a localized value subject to deletion. */
 		    PL_tmps_stack[++PL_tmps_ix] = *mark;
 		    (void)SvREFCNT_inc(*mark);
@@ -2223,8 +2219,8 @@ S_get_db_sub(pTHX_ SV **svp, CV *cv)
 	}
     }
     else {
-	SvUPGRADE(dbsv, SVt_PVIV);
-	SvIOK_on(dbsv);
+	(void)SvUPGRADE(dbsv, SVt_PVIV);
+	(void)SvIOK_on(dbsv);
 	SAVEIV(SvIVX(dbsv));
 	SvIVX(dbsv) = PTR2IV(cv);	/* Do it the quickest way  */
     }
@@ -2795,7 +2791,6 @@ PP(pp_method_named)
 STATIC SV *
 S_method_common(pTHX_ SV* meth, U32* hashp)
 {
-    djSP;
     SV* sv;
     SV* ob;
     GV* gv;

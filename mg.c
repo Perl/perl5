@@ -339,10 +339,7 @@ U32
 Perl_magic_regdata_cnt(pTHX_ SV *sv, MAGIC *mg)
 {
     dTHR;
-    register char *s;
-    register I32 i;
     register REGEXP *rx;
-    char *t;
 
     if (PL_curpm && (rx = PL_curpm->op_pmregexp)) {
 	if (mg->mg_obj)		/* @+ */
@@ -387,10 +384,8 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 {
     dTHR;
     register I32 paren;
-    register char *s;
     register I32 i;
     register REGEXP *rx;
-    char *t;
 
     switch (*mg->mg_ptr) {
     case '1': case '2': case '3': case '4':
@@ -458,7 +453,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     register char *s;
     register I32 i;
     register REGEXP *rx;
-    char *t;
 
     switch (*mg->mg_ptr) {
     case '\001':		/* ^A */
@@ -553,7 +547,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	{
 	    dTHR;
 	    if (PL_lex_state != LEX_NOTPARSING)
-		SvOK_off(sv);
+		(void)SvOK_off(sv);
 	    else if (PL_in_eval)
 		sv_setiv(sv, 1);
 	    else
@@ -756,7 +750,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		Perl_sv_catpvf(aTHX_ sv, " %"Gid_t_f, gary[i]);
 	}
 #endif
-	SvIOK_on(sv);	/* what a wonderful hack! */
+	(void)SvIOK_on(sv);	/* what a wonderful hack! */
 	break;
     case '*':
 	break;
@@ -879,7 +873,7 @@ Perl_magic_set_all_env(pTHX_ SV *sv, MAGIC *mg)
 	STRLEN n_a;
 	magic_clear_all_env(sv,mg);
 	hv_iterinit((HV*)sv);
-	while (entry = hv_iternext((HV*)sv)) {
+	while ((entry = hv_iternext((HV*)sv))) {
 	    I32 keylen;
 	    my_setenv(hv_iterkey(entry, &keylen),
 		      SvPV(hv_iterval((HV*)sv, entry), n_a));
@@ -1085,7 +1079,7 @@ Perl_magic_getnkeys(pTHX_ SV *sv, MAGIC *mg)
 	    i = HvKEYS(hv);
 	else {
 	    /*SUPPRESS 560*/
-	    while (entry = hv_iternext(hv)) {
+	    while ((entry = hv_iternext(hv))) {
 		i++;
 	    }
 	}
@@ -1420,7 +1414,7 @@ Perl_magic_gettaint(pTHX_ SV *sv, MAGIC *mg)
 {
     dTHR;
     TAINT_IF((mg->mg_len & 1) ||
-	     (mg->mg_len & 2) && mg->mg_obj == sv);	/* kludge */
+	     ((mg->mg_len & 2) && mg->mg_obj == sv));	/* kludge */
     return 0;
 }
 
@@ -1447,7 +1441,7 @@ Perl_magic_getvec(pTHX_ SV *sv, MAGIC *mg)
     SV *lsv = LvTARG(sv);
 
     if (!lsv) {
-	SvOK_off(sv);
+	(void)SvOK_off(sv);
 	return 0;
     }
 
@@ -1570,7 +1564,7 @@ Perl_magic_killbackrefs(pTHX_ SV *sv, MAGIC *mg)
 		Perl_croak(aTHX_ "panic: magic_killbackrefs");
 	    /* XXX Should we check that it hasn't changed? */
 	    SvRV(svp[i]) = 0;
-	    SvOK_off(svp[i]);
+	    (void)SvOK_off(svp[i]);
 	    SvWEAKREF_off(svp[i]);
 	    svp[i] = &PL_sv_undef;
 	}
@@ -2090,7 +2084,7 @@ Perl_sighandler(int sig)
     CV *cv = Nullcv;
     OP *myop = PL_op;
     U32 flags = 0;
-    I32 o_save_i = PL_savestack_ix, type;
+    I32 o_save_i = PL_savestack_ix;
     XPV *tXpv = PL_Xpv;
     
     if (PL_savestack_ix + 15 <= PL_savestack_max)

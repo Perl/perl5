@@ -46,7 +46,6 @@ Perl_vdeb(pTHX_ const char *pat, va_list *args)
 {
 #ifdef DEBUGGING
     dTHR;
-    register I32 i;
     char* file = CopFILE(PL_curcop);
 
 #ifdef USE_THREADS

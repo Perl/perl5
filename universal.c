@@ -86,7 +86,6 @@ for class names as well as for objects.
 bool
 Perl_sv_derived_from(pTHX_ SV *sv, const char *name)
 {
-    SV *rv;
     char *type;
     HV *stash;
   
@@ -110,7 +109,6 @@ Perl_sv_derived_from(pTHX_ SV *sv, const char *name)
             (stash && isa_lookup(stash, name, strlen(name), 0) == &PL_sv_yes)
         ? TRUE
         : FALSE ;
- 
 }
 
 void XS_UNIVERSAL_isa(pTHXo_ CV *cv);
@@ -250,7 +248,7 @@ XS(XS_UNIVERSAL_VERSION)
 		}
 		/* they said C<use Foo 1.002_003> and $Foo::VERSION
 		 * doesn't look like a float: force numeric compare */
-		SvUPGRADE(sv, SVt_PVNV);
+		(void)SvUPGRADE(sv, SVt_PVNV);
 		SvNVX(sv) = str_to_version(sv);
 		SvPOK_off(sv);
 		SvNOK_on(sv);

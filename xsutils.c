@@ -48,7 +48,7 @@ modify_SV_attributes(pTHXo_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 
     for (nret = 0 ; numattrs && (attr = *attrlist++); numattrs--) {
 	name = SvPV(attr, len);
-	if (negated = (*name == '-')) {
+	if ((negated = (*name == '-'))) {
 	    name++;
 	    len--;
 	}
@@ -271,7 +271,6 @@ usage:
 XS(XS_attributes__warn_reserved)
 {
     dXSARGS;
-    SV *rv, *sv;
 #ifdef dXSTARGET
     dXSTARGET;
 #else

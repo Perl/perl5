@@ -1938,11 +1938,9 @@ Perl_sv_2pv_nolen(pTHX_ register SV *sv)
 static char *
 uiv_2buf(char *buf, IV iv, UV uv, int is_uv, char **peob)
 {
-    STRLEN len;
     char *ptr = buf + TYPE_CHARS(UV);
     char *ebuf = ptr;
     int sign;
-    char *p;
 
     if (is_uv)
 	sign = 0;
@@ -2033,7 +2031,7 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 			    int right = 4;
  			    U16 reganch = (re->reganch & PMf_COMPILETIME) >> 12;
 
- 			    while(ch = *fptr++) {
+ 			    while((ch = *fptr++)) {
  				if(reganch & 1) {
  				    reflags[left++] = ch;
  				}
@@ -3091,7 +3089,7 @@ Perl_sv_catsv(pTHX_ SV *dstr, register SV *sstr)
     STRLEN len;
     if (!sstr)
 	return;
-    if (s = SvPV(sstr, len)) {
+    if ((s = SvPV(sstr, len))) {
 	if (SvUTF8(sstr))
 	    sv_utf8_upgrade(dstr);
 	sv_catpvn(dstr,s,len);
@@ -3502,7 +3500,7 @@ Perl_sv_insert(pTHX_ SV *bigstr, STRLEN offset, STRLEN len, char *little, STRLEN
 	SvCUR_set(bigstr, mid - big);
     }
     /*SUPPRESS 560*/
-    else if (i = mid - big) {	/* faster from front */
+    else if ((i = mid - big)) {	/* faster from front */
 	midend -= littlelen;
 	mid = midend;
 	sv_chop(bigstr,midend-i);
@@ -3949,7 +3947,6 @@ Perl_sv_cmp(pTHX_ register SV *str1, register SV *str2)
     STRLEN cur1, cur2;
     char *pv1, *pv2;
     I32 retval;
-    bool utf1;
 
     if (str1) {
         pv1 = SvPV(str1, cur1);
@@ -5471,7 +5468,7 @@ Perl_sv_tainted(pTHX_ SV *sv)
 {
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
 	MAGIC *mg = mg_find(sv, 't');
-	if (mg && ((mg->mg_len & 1) || (mg->mg_len & 2) && mg->mg_obj == sv))
+	if (mg && ((mg->mg_len & 1) || ((mg->mg_len & 2) && mg->mg_obj == sv)))
 	    return TRUE;
     }
     return FALSE;
@@ -6610,9 +6607,6 @@ char *PL_watch_pvx;
 SV *
 Perl_sv_dup(pTHX_ SV *sstr)
 {
-    U32 sflags;
-    int dtype;
-    int stype;
     SV *dstr;
 
     if (!sstr || SvTYPE(sstr) == SVTYPEMASK)
@@ -6847,7 +6841,6 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	SvSTASH(dstr)	= hv_dup_inc(SvSTASH(sstr));
 	HvRITER((HV*)dstr)	= HvRITER((HV*)sstr);
 	if (HvARRAY((HV*)sstr)) {
-	    HE *entry;
 	    STRLEN i = 0;
 	    XPVHV *dxhv = (XPVHV*)SvANY(dstr);
 	    XPVHV *sxhv = (XPVHV*)SvANY(sstr);
@@ -7334,8 +7327,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
      * their pointers copied. */
 
     IV i;
-    SV *sv;
-    SV **svp;
 #  ifdef PERL_OBJECT
     CPerlObj *pPerl = new(ipM) CPerlObj(ipM, ipMS, ipMP, ipE, ipStd, ipLIO,
 					ipD, ipS, ipP);
@@ -7367,8 +7358,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #  endif	/* PERL_OBJECT */
 #else		/* !PERL_IMPLICIT_SYS */
     IV i;
-    SV *sv;
-    SV **svp;
     PerlInterpreter *my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
     PERL_SET_THX(my_perl);
 
@@ -8011,10 +8000,10 @@ do_clean_named_objs(pTHXo_ SV *sv)
 {
     if (SvTYPE(sv) == SVt_PVGV && GvGP(sv)) {
 	if ( SvOBJECT(GvSV(sv)) ||
-	     GvAV(sv) && SvOBJECT(GvAV(sv)) ||
-	     GvHV(sv) && SvOBJECT(GvHV(sv)) ||
-	     GvIO(sv) && SvOBJECT(GvIO(sv)) ||
-	     GvCV(sv) && SvOBJECT(GvCV(sv)) )
+	     (GvAV(sv) && SvOBJECT(GvAV(sv))) ||
+	     (GvHV(sv) && SvOBJECT(GvHV(sv))) ||
+	     (GvIO(sv) && SvOBJECT(GvIO(sv))) ||
+	     (GvCV(sv) && SvOBJECT(GvCV(sv))) )
 	{
 	    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning named glob object:\n "), sv_dump(sv));)
 	    SvREFCNT_dec(sv);

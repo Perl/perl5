@@ -319,6 +319,7 @@ S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 }
 #endif
 
+#if 0
 STATIC I32
 S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 {
@@ -329,7 +330,6 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 	New(898, tmps, SvCUR(sv) * 3 / 2 + 1, U8);
 	tend = utf16_to_utf8((U16*)SvPVX(sv), tmps, SvCUR(sv));
 	sv_usepvn(sv, (char*)tmps, tend - tmps);
-    
     }
     return count;
 }
@@ -344,10 +344,10 @@ S_utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 	New(898, tmps, SvCUR(sv) * 3 / 2 + 1, U8);
 	tend = utf16_to_utf8_reversed((U16*)SvPVX(sv), tmps, SvCUR(sv));
 	sv_usepvn(sv, (char*)tmps, tend - tmps);
-    
     }
     return count;
 }
+#endif
 
 /*
  * Perl_lex_start
@@ -861,7 +861,7 @@ S_force_version(pTHX_ char *s)
             version = yylval.opval;
 	    ver = cSVOPx(version)->op_sv;
 	    if (SvPOK(ver) && !SvNIOK(ver)) {
-		SvUPGRADE(ver, SVt_PVNV);
+		(void)SvUPGRADE(ver, SVt_PVNV);
 		SvNVX(ver) = str_to_version(ver);
 		SvNOK_on(ver);		/* hint that it is a version */
 	    }
@@ -1269,8 +1269,10 @@ S_scan_const(pTHX_ char *start)
 	    if (s[2] == '#') {
 		while (s < send && *s != ')')
 		    *d++ = *s++;
-	    } else if (s[2] == '{' /* This should match regcomp.c */
-		       || (s[2] == 'p' || s[2] == '?') && s[3] == '{') {	
+	    }
+	    else if (s[2] == '{' /* This should match regcomp.c */
+		     || ((s[2] == 'p' || s[2] == '?') && s[3] == '{'))
+	    {
 		I32 count = 1;
 		char *regparse = s + (s[2] == '{' ? 3 : 4);
 		char c;
@@ -1464,12 +1466,9 @@ S_scan_const(pTHX_ char *start)
  		++s;
  		if (*s == '{') {
  		    char* e = strchr(s, '}');
- 		    HV *hv;
- 		    SV **svp;
- 		    SV *res, *cv;
+ 		    SV *res;
  		    STRLEN len;
  		    char *str;
- 		    char *why = Nullch;
  
  		    if (!e) {
 			yyerror("Missing right brace on \\N{}");
@@ -2613,8 +2612,8 @@ Perl_yylex(pTHX)
 			    }
 			    d = moreswitches(d);
 			} while (d);
-			if (PERLDB_LINE && !oldpdb ||
-			    ( PL_minus_n || PL_minus_p ) && !(oldn || oldp) )
+			if ((PERLDB_LINE && !oldpdb) ||
+			    ((PL_minus_n || PL_minus_p) && !(oldn || oldp)))
 			      /* if we have already added "LINE: while (<>) {",
 			         we must not do it again */
 			{
@@ -3336,7 +3335,7 @@ Perl_yylex(pTHX)
 	    else if (isIDFIRST_lazy_if(s,UTF)) {
 		char tmpbuf[sizeof PL_tokenbuf];
 		scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len);
-		if (tmp = keyword(tmpbuf, len)) {
+		if ((tmp = keyword(tmpbuf, len))) {
 		    /* binary operators exclude handle interpretations */
 		    switch (tmp) {
 		    case -KEY_x:
@@ -3578,7 +3577,6 @@ Perl_yylex(pTHX)
     case 'z': case 'Z':
 
       keylookup: {
-	STRLEN n_a;
 	gv = Nullgv;
 	gvp = 0;
 
@@ -3586,10 +3584,10 @@ Perl_yylex(pTHX)
 	s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
 
 	/* Some keywords can be followed by any delimiter, including ':' */
-	tmp = (len == 1 && strchr("msyq", PL_tokenbuf[0]) ||
-	       len == 2 && ((PL_tokenbuf[0] == 't' && PL_tokenbuf[1] == 'r') ||
-			    (PL_tokenbuf[0] == 'q' &&
-			     strchr("qwxr", PL_tokenbuf[1]))));
+	tmp = ((len == 1 && strchr("msyq", PL_tokenbuf[0])) ||
+	       (len == 2 && ((PL_tokenbuf[0] == 't' && PL_tokenbuf[1] == 'r') ||
+			     (PL_tokenbuf[0] == 'q' &&
+			      strchr("qwxr", PL_tokenbuf[1])))));
 
 	/* x::* is just a word, unless x is "CORE" */
 	if (!tmp && *s == ':' && s[1] == ':' && strNE(PL_tokenbuf, "CORE"))
@@ -3672,7 +3670,7 @@ Perl_yylex(pTHX)
 
 		/* Get the rest if it looks like a package qualifier */
 
-		if (*s == '\'' || *s == ':' && s[1] == ':') {
+		if (*s == '\'' || (*s == ':' && s[1] == ':')) {
 		    STRLEN morelen;
 		    s = scan_word(s, PL_tokenbuf + len, sizeof PL_tokenbuf - len,
 				  TRUE, &morelen);
@@ -5852,7 +5850,7 @@ S_scan_ident(pTHX_ register char *s, register char *send, char *dest, STRLEN des
 	    d++;
 	    if (UTF) {
 		e = s;
-		while (e < send && isALNUM_lazy_if(e,UTF) || *e == ':') {
+		while ((e < send && isALNUM_lazy_if(e,UTF)) || *e == ':') {
 		    e += UTF8SKIP(e);
 		    while (e < send && *e & 0x80 && is_utf8_mark((U8*)e))
 			e += UTF8SKIP(e);
