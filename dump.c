@@ -533,8 +533,6 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
 #endif
 	break;
     case OP_CONST:
-	Perl_dump_indent(aTHX_ level, file, "SV = %s\n", SvPEEK(cSVOPo_sv));
-	break;
     case OP_METHOD_NAMED:
 	Perl_dump_indent(aTHX_ level, file, "SV = %s\n", SvPEEK(cSVOPo->op_sv));
 	break;
