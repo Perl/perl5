@@ -299,8 +299,7 @@ Perl_utf8_to_bytes(pTHX_ U8* s, STRLEN *len)
     /* ensure valid UTF8 and chars < 256 before updating string */
     while (s < send) {
 	U8 c = *s++;
-        if (c >= 0x80 &&
-	    ( (s >= send) || ((*s++ & 0xc0) != 0x80) || ((c & 0xfe) != 0xc2))) {
+        if ( (s >= send) || (*s & 0x80 && c > 0xc3)) {
 	    *len = -1;
 	    return 0;    
 	}
