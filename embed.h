@@ -898,6 +898,7 @@
 #define scalarboolean		S_scalarboolean
 #define too_few_arguments	S_too_few_arguments
 #define too_many_arguments	S_too_many_arguments
+#define trlist_upgrade		S_trlist_upgrade
 #define op_clear		S_op_clear
 #define null			S_null
 #define pad_addlex		S_pad_addlex
@@ -2364,6 +2365,7 @@
 #define scalarboolean(a)	S_scalarboolean(aTHX_ a)
 #define too_few_arguments(a,b)	S_too_few_arguments(aTHX_ a,b)
 #define too_many_arguments(a,b)	S_too_many_arguments(aTHX_ a,b)
+#define trlist_upgrade(a,b)	S_trlist_upgrade(aTHX_ a,b)
 #define op_clear(a)		S_op_clear(aTHX_ a)
 #define null(a)			S_null(aTHX_ a)
 #define pad_addlex(a)		S_pad_addlex(aTHX_ a)
@@ -4621,6 +4623,8 @@
 #define too_few_arguments	S_too_few_arguments
 #define S_too_many_arguments	CPerlObj::S_too_many_arguments
 #define too_many_arguments	S_too_many_arguments
+#define S_trlist_upgrade	CPerlObj::S_trlist_upgrade
+#define trlist_upgrade		S_trlist_upgrade
 #define S_op_clear		CPerlObj::S_op_clear
 #define op_clear		S_op_clear
 #define S_null			CPerlObj::S_null

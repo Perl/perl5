@@ -31,20 +31,17 @@ Perl_uv_to_utf8(pTHX_ U8 *d, UV uv) /* the d must be UTF8_MAXLEN+1 deep */
 {
     if (uv < 0x80) {
 	*d++ = uv;
-	*d   = 0;
 	return d;
     }
     if (uv < 0x800) {
 	*d++ = (( uv >>  6)         | 0xc0);
 	*d++ = (( uv        & 0x3f) | 0x80);
-	*d   = 0;
 	return d;
     }
     if (uv < 0x10000) {
 	*d++ = (( uv >> 12)         | 0xe0);
 	*d++ = (((uv >>  6) & 0x3f) | 0x80);
 	*d++ = (( uv        & 0x3f) | 0x80);
-	*d   = 0;
 	return d;
     }
     if (uv < 0x200000) {
@@ -52,7 +49,6 @@ Perl_uv_to_utf8(pTHX_ U8 *d, UV uv) /* the d must be UTF8_MAXLEN+1 deep */
 	*d++ = (((uv >> 12) & 0x3f) | 0x80);
 	*d++ = (((uv >>  6) & 0x3f) | 0x80);
 	*d++ = (( uv        & 0x3f) | 0x80);
-	*d   = 0;
 	return d;
     }
     if (uv < 0x4000000) {
@@ -61,7 +57,6 @@ Perl_uv_to_utf8(pTHX_ U8 *d, UV uv) /* the d must be UTF8_MAXLEN+1 deep */
 	*d++ = (((uv >> 12) & 0x3f) | 0x80);
 	*d++ = (((uv >>  6) & 0x3f) | 0x80);
 	*d++ = (( uv        & 0x3f) | 0x80);
-	*d   = 0;
 	return d;
     }
     if (uv < 0x80000000) {
@@ -71,7 +66,6 @@ Perl_uv_to_utf8(pTHX_ U8 *d, UV uv) /* the d must be UTF8_MAXLEN+1 deep */
 	*d++ = (((uv >> 12) & 0x3f) | 0x80);
 	*d++ = (((uv >>  6) & 0x3f) | 0x80);
 	*d++ = (( uv        & 0x3f) | 0x80);
-	*d   = 0;
 	return d;
     }
 #ifdef HAS_QUAD
@@ -85,7 +79,6 @@ Perl_uv_to_utf8(pTHX_ U8 *d, UV uv) /* the d must be UTF8_MAXLEN+1 deep */
 	*d++ = (((uv >> 12) & 0x3f) | 0x80);
 	*d++ = (((uv >>  6) & 0x3f) | 0x80);
 	*d++ = (( uv        & 0x3f) | 0x80);
-	*d   = 0;
 	return d;
     }
 #ifdef HAS_QUAD
@@ -103,7 +96,6 @@ Perl_uv_to_utf8(pTHX_ U8 *d, UV uv) /* the d must be UTF8_MAXLEN+1 deep */
 	*d++ = (((uv >> 12) & 0x3f) | 0x80);
 	*d++ = (((uv >>  6) & 0x3f) | 0x80);
 	*d++ = (( uv        & 0x3f) | 0x80);
-	*d   = 0;
 	return d;
     }
 #endif

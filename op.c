@@ -102,6 +102,30 @@ S_no_bareword_allowed(pTHX_ OP *o)
 		     SvPV_nolen(cSVOPo_sv)));
 }
 
+STATIC U8*
+S_trlist_upgrade(pTHX_ U8** sp, U8** ep)
+{
+    U8 *s = *sp;
+    U8 *e = *ep;
+    U8 *d;
+
+    Newz(801, d, (e - s) * 2, U8);
+    *sp = d;
+
+    while (s < e) {
+        if (*s < 0x80 || *s == 0xff)
+            *d++ = *s++;
+	else {
+            U8 c = *s++;
+            *d++ = ((c >> 6)         | 0xc0);
+            *d++ = ((c       & 0x3f) | 0x80);
+        }
+    }
+    *ep = d;
+    return *sp;
+}
+  
+
 /* "register" allocation */
 
 PADOFFSET
@@ -2608,13 +2632,14 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     SV *rstr = ((SVOP*)repl)->op_sv;
     STRLEN tlen;
     STRLEN rlen;
-    register U8 *t = (U8*)SvPV(tstr, tlen);
-    register U8 *r = (U8*)SvPV(rstr, rlen);
+    U8 *t = (U8*)SvPV(tstr, tlen);
+    U8 *r = (U8*)SvPV(rstr, rlen);
     register I32 i;
     register I32 j;
     I32 del;
     I32 complement;
     I32 squash;
+    I32 grows = 0;
     register short *tbl;
 
     complement	= o->op_private & OPpTRANS_COMPLEMENT;
@@ -2643,11 +2668,12 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	I32 none = 0;
 	U32 max = 0;
 	I32 bits;
-	I32 grows = 0;
 	I32 havefinal = 0;
 	U32 final;
 	I32 from_utf	= o->op_private & OPpTRANS_FROM_UTF;
 	I32 to_utf	= o->op_private & OPpTRANS_TO_UTF;
+	U8* tsave = from_utf ? NULL : trlist_upgrade(&t, &tend);
+	U8* rsave = to_utf   ? NULL : trlist_upgrade(&r, &rend);
 
 	if (complement) {
 	    U8 tmpbuf[UTF8_MAXLEN+1];
@@ -2769,20 +2795,8 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		if (rfirst + diff > max)
 		    max = rfirst + diff;
 		rfirst += diff + 1;
-		if (!grows) {
-		    if (rfirst <= 0x80)
-			;
-		    else if (rfirst <= 0x800)
-			grows |= (tfirst < 0x80);
-		    else if (rfirst <= 0x10000)
-			grows |= (tfirst < 0x800);
-		    else if (rfirst <= 0x200000)
-			grows |= (tfirst < 0x10000);
-		    else if (rfirst <= 0x4000000)
-			grows |= (tfirst < 0x200000);
-		    else if (rfirst <= 0x80000000)
-			grows |= (tfirst < 0x4000000);
-		}
+		if (!grows)
+		    grows = (UNISKIP(tfirst) < UNISKIP(rfirst));
 	    }
 	    tfirst += diff + 1;
 	}
@@ -2807,8 +2821,13 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    (void)hv_store((HV*)SvRV((cSVOPo->op_sv)), "FINAL", 5,
 			   newSVuv((UV)final), 0);
 
-	if (grows && to_utf)
+	if (grows)
 	    o->op_private |= OPpTRANS_GROWS;
+
+	if (tsave)
+	    Safefree(tsave);
+	if (rsave)
+	    Safefree(rsave);
 
 	op_free(expr);
 	op_free(repl);
@@ -2830,8 +2849,11 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		    else
 			tbl[i] = i;
 		}
-		else
+		else {
+		    if (i < 128 && r[j] >= 128)
+			grows = 1;
 		    tbl[i] = r[j++];
+		}
 	    }
 	}
     }
@@ -2852,10 +2874,15 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		}
 		--j;
 	    }
-	    if (tbl[t[i]] == -1)
+	    if (tbl[t[i]] == -1) {
+		if (t[i] < 128 && r[j] >= 128)
+		    grows = 1;
 		tbl[t[i]] = r[j];
+	    }
 	}
     }
+    if (grows)
+	o->op_private |= OPpTRANS_GROWS;
     op_free(expr);
     op_free(repl);
 

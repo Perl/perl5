@@ -1202,10 +1202,11 @@ PP(pp_repeat)
     else {	/* Note: mark already snarfed by pp_list */
 	SV *tmpstr = POPs;
 	STRLEN len;
-	bool isutf = DO_UTF8(tmpstr);
+	bool isutf;
 
 	SvSetSV(TARG, tmpstr);
 	SvPV_force(TARG, len);
+	isutf = DO_UTF8(TARG);
 	if (count != 1) {
 	    if (count < 1)
 		SvCUR_set(TARG, 0);

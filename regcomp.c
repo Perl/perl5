@@ -845,11 +845,15 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		if (compat)
 		    ANYOF_BITMAP_SET(data->start_class, uc);
 		data->start_class->flags &= ~ANYOF_EOS;
+		if (uc < 0x100)
+		  data->start_class->flags &= ~ANYOF_UNICODE_ALL;
 	    }
 	    else if (flags & SCF_DO_STCLASS_OR) {
 		/* false positive possible if the class is case-folded */
 		if (uc < 0x100)
-		    ANYOF_BITMAP_SET(data->start_class, uc);	
+		    ANYOF_BITMAP_SET(data->start_class, uc);
+		else
+		    data->start_class->flags |= ANYOF_UNICODE_ALL;
 		data->start_class->flags &= ~ANYOF_EOS;
 		cl_and(data->start_class, &and_with);
 	    }
