@@ -1672,9 +1672,9 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, bool u1, register I32 len1, const char *s2
      register U8 *be = b + len2;
      STRLEN la, lb;
      UV ca, cb;
-     STRLEN ulen1, ulen2;
-     U8 tmpbuf1[UTF8_MAXLEN_FOLD+1];
-     U8 tmpbuf2[UTF8_MAXLEN_FOLD+1];
+     STRLEN foldlen1, foldlen2;
+     U8 foldbuf1[UTF8_MAXLEN_FOLD+1];
+     U8 foldbuf2[UTF8_MAXLEN_FOLD+1];
      
      while (a < ae && b < be) {
 	  if (u1) {
@@ -1682,7 +1682,7 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, bool u1, register I32 len1, const char *s2
 		    break;
 	       ca = utf8_to_uvchr((U8*)a, &la);
 	  } else {
-	       ca = *a;
+	       ca = NATIVE_TO_UNI(*a);
 	       la = 1;
 	  }
 	  if (u2) {
@@ -1690,21 +1690,17 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, bool u1, register I32 len1, const char *s2
 		    break;
 	       cb = utf8_to_uvchr((U8*)b, &lb);
 	  } else {
-	       cb = *b;
+	       cb = NATIVE_TO_UNI(*b);
 	       lb = 1;
 	  }
 	  if (ca != cb) {
-	       if (u1)
-		    to_uni_fold(NATIVE_TO_UNI(ca), tmpbuf1, &ulen1);
-	       else
-		    ulen1 = 1;
-	       if (u2)
-		    to_uni_fold(NATIVE_TO_UNI(cb), tmpbuf2, &ulen2);
-	       else
-		    ulen2 = 1;
-	       if (ulen1 != ulen2
-		   || (ca < 256 && cb < 256 && ca != PL_fold[cb])
-		   || memNE((char *)tmpbuf1, (char *)tmpbuf2, ulen1))
+	       to_uni_fold(ca, foldbuf1, &foldlen1);
+	       ca = utf8_to_uvchr(foldbuf1, 0);
+	       
+	       to_uni_fold(cb, foldbuf2, &foldlen2);
+	       cb = utf8_to_uvchr(foldbuf2, 0);
+
+	       if (ca != cb || foldlen1 != foldlen2)
 		    return 1; /* mismatch */
 	  }
 	  a += la;

@@ -995,7 +995,8 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		        c = utf8_to_uvchr((U8*)s, &len);
 			if ( c == c1
 			     && (ln == len ||
-				 !ibcmp_utf8(s, do_utf8, strend - s,
+				 !ibcmp_utf8(s, do_utf8,
+					     strend - s > ln ? ln : strend - s,
 					     m, UTF, ln))
 			     && (norun || regtry(prog, s)) )
 			    goto got_it;
@@ -1007,7 +1008,8 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 				  && (f == c1 || f == c2)
 				  && (ln == foldlen ||
 				      !ibcmp_utf8((char *)foldbuf,
-						  do_utf8, foldlen,
+						  do_utf8,
+						  foldlen > ln ? ln : foldlen,
 						  m, UTF, ln))
 				  && (norun || regtry(prog, s)) )
 				  goto got_it;
@@ -1032,7 +1034,8 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 
 			if ( (c == c1 || c == c2)
 			     && (ln == len ||
-				 !ibcmp_utf8(s, do_utf8, strend - s,
+				 !ibcmp_utf8(s, do_utf8,
+					     strend - s > ln ? ln : strend - s,
 					     m, UTF, ln))
 			     && (norun || regtry(prog, s)) )
 			    goto got_it;
@@ -1044,7 +1047,8 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 				  && (f == c1 || f == c2)
 				  && (ln == foldlen ||
 				      !ibcmp_utf8((char *)foldbuf,
-						  do_utf8, foldlen,
+						  do_utf8,
+						  foldlen > ln ? ln : foldlen,
 						  m, UTF, ln))
 				  && (norun || regtry(prog, s)) )
 				  goto got_it;

@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..825\n";
+print "1..828\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2519,4 +2519,42 @@ print "# some Unicode properties\n";
 	  /fran(?:c\N{COMBINING CEDILLA}?|\N{LATIN SMALL LETTER C WITH CEDILLA})ais/ &&
 	$& eq "franc\N{COMBINING CEDILLA}ais" ?
 	"ok 825\n" : "not ok 825\n";
+}
+
+{
+    print "# Does lingering (and useless) UTF8 flag mess up /i matching?\n";
+
+    {
+	my $regex  = "ABcde";
+	my $string = "abcDE\x{100}";
+	chop($string);
+	if ($string =~ m/$regex/i) {
+	    print "ok 826\n";
+	} else {
+	    print "not ok 826\n";
+	}
+    }
+
+    {
+	my $regex  = "ABcde\x{100}";
+	my $string = "abcDE";
+	chop($regex);
+	if ($string =~ m/$regex/i) {
+	    print "ok 827\n";
+	} else {
+	    print "not ok 827\n";
+	}
+    }
+
+    {
+	my $regex  = "ABcde\x{100}";
+	my $string = "abcDE\x{100}";
+	chop($regex);
+	chop($string);
+	if ($string =~ m/$regex/i) {
+	    print "ok 828\n";
+	} else {
+	    print "not ok 828\n";
+	}
+    }
 }
