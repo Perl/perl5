@@ -446,9 +446,9 @@ Storable - persistency for perl data structures
 
 =head1 DESCRIPTION
 
-The Storable package brings persistency to your perl data structures
+The Storable package brings persistence to your perl data structures
 containing SCALAR, ARRAY, HASH or REF objects, i.e. anything that can be
-convenientely stored to disk and retrieved at a later time.
+conveniently stored to disk and retrieved at a later time.
 
 It can be used in the regular procedural way by calling C<store> with
 a reference to the object to be stored, along with the file name where
@@ -470,7 +470,7 @@ whole thing, the objects will continue to share what they originally shared.
 At the cost of a slight header overhead, you may store to an already
 opened file descriptor using the C<store_fd> routine, and retrieve
 from a file via C<fd_retrieve>. Those names aren't imported by default,
-so you will have to do that explicitely if you need those routines.
+so you will have to do that explicitly if you need those routines.
 The file descriptor you supply must be already opened, for read
 if you're going to retrieve and for write if you wish to store.
 
@@ -517,7 +517,7 @@ actually achieves a deep cloning of that structure:
 
 Storable provides you with a C<dclone> interface which does not create
 that intermediary scalar but instead freezes the structure in some
-internal memory space and then immediatly thaws it out.
+internal memory space and then immediately thaws it out.
 
 =head1 ADVISORY LOCKING
 
@@ -540,7 +540,7 @@ entry, instead of locking the file descriptor.
 =head1 SPEED
 
 The heart of Storable is written in C for decent speed. Extra low-level
-optimization have been made when manipulating perl internals, to
+optimization have been made when manipulating Perl internals, to
 sacrifice encapsulation for the benefit of a greater speed.
 
 =head1 CANONICAL REPRESENTATION
@@ -555,6 +555,45 @@ creating lookup tables for complicated queries.
 
 Canonical order does not imply network order, those are two orthogonal
 settings.
+
+=head1 FORWARD COMPATIBILITY
+
+This release of Storable can be used on a newer version of Perl to
+serialize data which is not supported by earlier Perls.  By default
+Storable will attempt to do the right thing, by C<croak()>ing if it
+encounters data that it cannot deserialize.  However, the defaults can be
+changed as follows
+
+=over 4
+
+=item utf8 data
+
+Perl 5.6 added support for Unicode characters with code points > 255,
+and Perl 5.8 has full support for Unicode characters in hash keys.
+Perl internally encodes strings with these characters using utf8, and
+Storable serializes them as utf8.  By default, if an older version of
+Perl encounters a utf8 value it cannot represent, it will C<croak()>.
+To change this behaviour so that Storable deserializes utf8 encoded
+values as the string of bytes (effectively dropping the I<is_utf8> flag)
+set C<$Storable::drop_utf8> to some C<TRUE> value.  This is a form of
+data loss, because with C<$drop_utf8> true, it becomes impossible to tell
+whether the original data was the Unicode string, or a series of bytes
+that happen to be valid utf8.
+
+=item restricted hashes
+
+Perl 5.8 adds support for restricted hashes, which have keys restricted to
+a given set, and can have values locked to be read only.  By default
+when Storable encounters a restricted hash on a perl that doesn't support
+them, it will deserialize it as a normal hash, silently discarding any
+placeholder keys and leaving the keys and all values unlocked.  To make
+Storable C<croak()> instead, set C<$Storable::downgrade_restricted> to
+a false value.  To restore the default set it back to some C<TRUE> value.
+
+=back
+
+Both these variables have no effect on a newer Perl which supports the
+relevant feature.
 
 =head1 ERROR REPORTING
 
@@ -576,7 +615,7 @@ Such errors are usually I/O errors (or truncated stream errors at retrieval).
 Any class may define hooks that will be called during the serialization
 and deserialization process on objects that are instances of that class.
 Those hooks can redefine the way serialization is performed (and therefore,
-how the symetrical deserialization should be conducted).
+how the symmetrical deserialization should be conducted).
 
 Since we said earlier:
 
@@ -652,7 +691,7 @@ When the Storable engine does not find any C<STORABLE_thaw> hook routine,
 it tries to load the class by requiring the package dynamically (using
 the blessed package name), and then re-attempts the lookup.  If at that
 time the hook cannot be located, the engine croaks.  Note that this mechanism
-will fail if you define several classes in the same file, but perlmod(1)
+will fail if you define several classes in the same file, but L<perlmod>
 warned you.
 
 It is up to you to use these information to populate I<obj> the way you want.
@@ -663,7 +702,7 @@ Returned value: none.
 
 =head2 Predicates
 
-Predicates are not exportable.  They must be called by explicitely prefixing
+Predicates are not exportable.  They must be called by explicitly prefixing
 them with the Storable package name.
 
 =over 4
@@ -741,7 +780,7 @@ of the data.  Where that configuration file lives depends on the UNIX
 flavour, often it's something like F</usr/share/misc/magic> or
 F</etc/magic>.  Your system administrator needs to do the updating of
 the F<magic> file.  The necessary signature information is output to
-stdout by invoking Storable::show_file_magic().  Note that the open
+STDOUT by invoking Storable::show_file_magic().  Note that the open
 source implementation of the C<file> utility 3.38 (or later)
 is expected to contain the support for recognising Storable files,
 in addition to other kinds of Perl files.
@@ -774,7 +813,7 @@ which prints (on my machine):
 =head1 WARNING
 
 If you're using references as keys within your hash tables, you're bound
-to disapointment when retrieving your data. Indeed, Perl stringifies
+to disappointment when retrieving your data. Indeed, Perl stringifies
 references used as hash table keys. If you later wish to access the
 items via another reference stringification (i.e. using the same
 reference that was used for the key originally to record the value into
@@ -792,7 +831,7 @@ descriptors that you pass to Storable functions.
 
 Storing data canonically that contains large hashes can be
 significantly slower than storing the same data normally, as
-temprorary arrays to hold the keys for each hash have to be allocated,
+temporary arrays to hold the keys for each hash have to be allocated,
 populated, sorted and freed.  Some tests have shown a halving of the
 speed of storing -- the exact penalty will depend on the complexity of
 your data.  There is no slowdown on retrieval.
@@ -827,6 +866,14 @@ system is your problem.  In particular, if host and target use different
 code points to represent the characters used in the text representation
 of floating-point numbers, you will not be able be able to exchange
 floating-point data, even with nstore().
+
+C<Storable::drop_utf8> is a blunt tool.  There is no facility either to
+return B<all> strings as utf8 sequences, or to attempt to convert utf8
+data back to 8 bit and C<croak()> if the conversion fails.
+
+Future compatibility does not yet extend to having the option of loading
+serialized data with higher than current minor version numbers.  This
+ought to be fixed pronto.
 
 =head1 CREDITS
 
@@ -870,7 +917,7 @@ Raphael Manfredi F<E<lt>Raphael_Manfredi@pobox.comE<gt>>
 
 =head1 SEE ALSO
 
-Clone(3).
+L<Clone>.
 
 =cut
 

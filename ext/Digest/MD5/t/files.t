@@ -1,51 +1,67 @@
 BEGIN {
-        chdir 't' if -d 't';
-        @INC = '../lib';
+	if ($ENV{PERL_CORE}) {
+        	chdir 't' if -d 't';
+        	@INC = '../lib';
+        }
 }
 
-print "1..2\n";
+print "1..5\n";
 
 use strict;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
 
 #
-# This is the output of: 'md5sum MD5.pm MD5.xs'
+# This is the output of: 'md5sum Changes README MD5.pm MD5.xs rfc1321.txt'
 #
 my $EXPECT;
 
-if (ord('A') == 193) { # EBCDIC
-$EXPECT = <<EOT;
-ee6a09094632cd610199278bbb0f910e  ext/Digest/MD5/MD5.pm
-94f873d905cd20a12d8ef4cdbdbcd89f  ext/Digest/MD5/MD5.xs
+if (ord "A" == 193) { # EBCDIC
+    $EXPECT = <<EOT;
+23cafa2de11474f0df8f808cc588bcc9  Changes
+3519f3d02c7c91158f732f0f00064657  README
+0268931475ae2a2e843ff58504cfa3f0  MD5.pm
+1be293491bba726810f8e87671ee0328  MD5.xs
+754b9db19f79dbc4992f7166eb0f37ce  rfc1321.txt
 EOT
-} else { # ASCII
-$EXPECT = <<EOT;
-665ddc08b12d6b1bf85ac6dc5aae68b3  ext/Digest/MD5/MD5.pm
-5f21e907b2e7dbffe6aba2c762ea93d0  ext/Digest/MD5/MD5.xs
+} else {
+    $EXPECT = <<EOT;
+3866f3543ef41421c6aed3f198e2e9f5  Changes
+3519f3d02c7c91158f732f0f00064657  README
+01cd8fd24bd46ce1db53074d2af6001a  MD5.pm
+1be293491bba726810f8e87671ee0328  MD5.xs
+754b9db19f79dbc4992f7166eb0f37ce  rfc1321.txt
 EOT
 }
 
-my $B64 = 1;
-eval { require MIME::Base64; };
-if ($@) {
-    print $@;
-    print "# Will not test base64 methods\n";
-    $B64 = 0;
+if (!(-f "README") && -f "../README") {
+   chdir("..") or die "Can't chdir: $!";
 }
 
 my $testno = 0;
 
-use File::Spec;
+my $B64 = 1;
+eval { require MIME::Base64; };
+if ($@) {
+    print "# $@: Will not test base64 methods\n";
+    $B64 = 0;
+}
 
 for (split /^/, $EXPECT) {
      my($md5hex, $file) = split ' ';
-     my @path = split(m:/:, $file);
-     my $last = pop @path;
-     my $path = File::Spec->updir;
-     while (@path) {
-	 $path = File::Spec->catdir($path, shift @path);
+     if ($ENV{PERL_CORE}) {
+         if ($file eq 'rfc1321.txt') { # Don't have it in core.
+	     print "ok ", ++$testno, " # Skip: PERL_CORE\n";
+	     next;
+	 }
+         use File::Spec;
+	 my @path = qw(ext Digest MD5);
+	 my $path = File::Spec->updir;
+	 while (@path) {
+	   $path = File::Spec->catdir($path, shift @path);
+	 }
+	 $file = File::Spec->catfile($path, $file);
      }
-     $file = File::Spec->catfile($path, $last);
+#     print "# file = $file\n";
      my $md5bin = pack("H*", $md5hex);
      my $md5b64;
      if ($B64) {
@@ -53,14 +69,15 @@ for (split /^/, $EXPECT) {
 	 chop($md5b64); chop($md5b64);   # remove padding
      }
      my $failed;
+     my $got;
 
      if (digest_file($file, 'digest') ne $md5bin) {
 	 print "$file: Bad digest\n";
 	 $failed++;
      }
 
-     if (digest_file($file, 'hexdigest') ne $md5hex) {
-	 print "$file: Bad hexdigest\n";
+     if (($got = digest_file($file, 'hexdigest')) ne $md5hex) {
+	 print "$file: Bad hexdigest: got $got expected $md5hex\n";
 	 $failed++;
      }
 
@@ -126,9 +143,6 @@ sub digest_file
     #print "$file $method\n";
 
     open(FILE, $file) or die "Can't open $file: $!";
-# Digests above are generated on UNIX without CRLF
-# so leave handles in text mode
-#    binmode(FILE);
     my $digest = Digest::MD5->new->addfile(*FILE)->$method();
     close(FILE);
 
@@ -140,9 +154,6 @@ sub cat_file
     my($file) = @_;
     local $/;  # slurp
     open(FILE, $file) or die "Can't open $file: $!";
-# Digests above are generated on UNIX without CRLF
-# so leave handles in text mode
-#    binmode(FILE);
     my $tmp = <FILE>;
     close(FILE);
     $tmp;
