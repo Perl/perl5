@@ -1,7 +1,59 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 0.96 2002/03/22 22:22:53 dankogai Exp dankogai $
+# $Id: Changes,v 0.97 2002/03/23 20:24:42 dankogai Exp dankogai $
 #
+
+0.97  Sun Mar 24 2002
+! CN/CN.pm
+! KR/KR.pm
+! TW/TW.pm
+  EBCDIC detection mechanism installed as in JP/JP.pm
+  Message-Id: <20020323211847.G19148@alpha.hut.fi>
+! Byte/Makefile.PL
+! CN/Makefile.PL
+! EBCDIC/Makefile.PL
+! JP/Makefile.PL
+! KR/Makefile.PL
+! Symbol/Makefile.PL
+! TW/Makefile.PL
+  Now all table files used by compile are postfixed '_t' to avoid
+  namespace collisions in case insensitive file systems once for all!
+  inspired by:
+  Message-ID: <58290227735.20020323195659@familiehaase.de>
+! t/Aliases.t
+  Since the Encode::JP is unsupported under EBCDIC we
+  cannot run this test (aliases as such should work fine) -- jhi
+  Message-Id: <20020323202119.D19148@alpha.hut.fi>
+! Byte/Makefile.PL
+  duplicate occurance of ascii.ucm and 8859-1.ucm
+  causes MacOS X dlyd to cloak
+! t/CN.t
+! t/Encode.t
+! t/JP.t
+! t/TW.t
+! t/Tcl.t
+  <     chdir 't' if -d 't';
+  ---
+  >     if (! -d 'blib' and -d 't'){ chdir 't' };
+  When you are "make test"-ing on Encode/ directory, you  must not 
+  change $ENV{PWD}.  t/JP.t has been fixed before but others somehow 
+  remain unchanced.  Also the situation detection was made simpler 
+  in t/JP.t, which was originally;
+  > chdir 't' if -d 't' and $ENV{PWD} !~ m,/Encode[^/]*$,o;
+! Encode.pm
+  "Use of uninitialized value in string eq at Encode.pm line 96."
+! Symbol/Makefile.PL
+! EBCDIC/Makefile.PL
+! AUTHOR
+  -- Problem on case insensitive file systems
+  "coexist of ebcdic.c <> EBCDIC.c on Cygwin not possible"
+  Message-ID: <88254111953.20020323095503@familiehaase.de>
+! compile
+! AUTHOR
+  "So I think it's a bug in gcc, not perl. But it still needs to be 
+   worked around."
+  Message-Id: <20020323145840.GD304@Bagpuss.unfortu.net>
+  Message-Id: <20020323170509.C96475@plum.flirble.org>
 
 0.96  Sat Mar 23 2002
 !     TW/TW.pm

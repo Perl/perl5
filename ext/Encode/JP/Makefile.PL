@@ -3,10 +3,10 @@ use strict;
 use ExtUtils::MakeMaker;
 
 my %tables = (
-	      EUC_JP   => ['euc-jp.ucm'],
-              SHIFTJIS => ['shiftjis.enc'],
-	      MACJAPAN => ['macJapan.enc'],
-	      CP932    => ['cp932.enc'],
+	      euc_jp_t   => ['euc-jp.ucm'],
+              sjis_t     => ['shiftjis.enc'],
+	      mac_jp_t   => ['macJapan.enc'],
+	      cp_jp_t    => ['cp932.enc'],
              );
 
 my $name = 'JP';

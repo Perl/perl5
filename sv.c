@@ -2875,8 +2875,8 @@ uiv_2buf(char *buf, IV iv, UV uv, int is_uv, char **peob)
     return ptr;
 }
 
-/* For backwards-compatibility only. sv_2pv() is normally #def'ed to
- * C<sv_2pv_macro()>. See also C<sv_2pv_flags()>.
+/* sv_2pv() is now a macro using Perl_sv_2pv_flags();
+ * this function provided for binary compatibility only
  */
 
 char *
@@ -3322,6 +3322,11 @@ use the Encode extension for that.
 =cut
 */
 
+/* sv_utf8_upgrade() is now a macro using sv_utf8_upgrade_flags();
+ * this function provided for binary compatibility only
+ */
+
+
 STRLEN
 Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
 {
@@ -3516,9 +3521,10 @@ C<SvSetMagicSV_nosteal>.
 =cut
 */
 
-/* sv_setsv() is aliased to Perl_sv_setsv_macro; this function provided
-   for binary compatibility only
-*/
+/* sv_setsv() is now a macro using Perl_sv_setsv_flags();
+ * this function provided for binary compatibility only
+ */
+
 void
 Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 {
@@ -4247,9 +4253,10 @@ Handles 'get' magic, but not 'set' magic.  See C<sv_catpvn_mg>.
 =cut
 */
 
-/* sv_catpvn() is aliased to Perl_sv_catpvn_macro; this function provided
-   for binary compatibility only
-*/
+/* sv_catpvn() is now a macro using Perl_sv_catpvn_flags();
+ * this function provided for binary compatibility only
+ */
+
 void
 Perl_sv_catpvn(pTHX_ SV *dsv, const char* sstr, STRLEN slen)
 {
@@ -4310,9 +4317,10 @@ not 'set' magic.  See C<sv_catsv_mg>.
 
 =cut */
 
-/* sv_catsv() is aliased to Perl_sv_catsv_macro; this function provided
-   for binary compatibility only
-*/
+/* sv_catsv() is now a macro using Perl_sv_catsv_flags();
+ * this function provided for binary compatibility only
+ */
+
 void
 Perl_sv_catsv(pTHX_ SV *dstr, register SV *sstr)
 {
@@ -6847,11 +6855,15 @@ Perl_sv_nv(pTHX_ register SV *sv)
 /*
 =for apidoc sv_pv
 
-A private implementation of the C<SvPV_nolen> macro for compilers which can't
-cope with complex macro expressions. Always use the macro instead.
+Use the C<SvPV_nolen> macro instead
 
 =cut
 */
+
+/* sv_pv() is now a macro using SvPV_nolen();
+ * this function provided for binary compatibility only
+ */
+
 
 char *
 Perl_sv_pv(pTHX_ SV *sv)
@@ -6883,8 +6895,6 @@ Perl_sv_pvn(pTHX_ SV *sv, STRLEN *lp)
     return sv_2pv(sv, lp);
 }
 
-/* For -DCRIPPLED_CC only. See also C<sv_2pv_flags()>.
- */
 
 char *
 Perl_sv_pvn_nomg(pTHX_ register SV *sv, STRLEN *lp)
@@ -6905,6 +6915,10 @@ can't cope with complex macro expressions. Always use the macro instead.
 
 =cut
 */
+
+/* sv_pvn_force() is now a macro using Perl_sv_pvn_force_flags();
+ * this function provided for binary compatibility only
+ */
 
 char *
 Perl_sv_pvn_force(pTHX_ SV *sv, STRLEN *lp)
@@ -6967,12 +6981,15 @@ Perl_sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
 /*
 =for apidoc sv_pvbyte
 
-A private implementation of the C<SvPVbyte_nolen> macro for compilers
-which can't cope with complex macro expressions. Always use the macro
-instead.
+Use C<SvPVbyte_nolen> instead.
 
 =cut
 */
+
+/* sv_pvbyte () is now a macro using Perl_sv_2pv_flags();
+ * this function provided for binary compatibility only
+ */
+
 
 char *
 Perl_sv_pvbyte(pTHX_ SV *sv)
@@ -7018,12 +7035,14 @@ Perl_sv_pvbyten_force(pTHX_ SV *sv, STRLEN *lp)
 /*
 =for apidoc sv_pvutf8
 
-A private implementation of the C<SvPVutf8_nolen> macro for compilers
-which can't cope with complex macro expressions. Always use the macro
-instead.
+Use the C<SvPVutf8_nolen> macro instead
 
 =cut
 */
+/* sv_pvutf8 () is now a macro using Perl_sv_2pv_flags();
+ * this function provided for binary compatibility only
+ */
+
 
 char *
 Perl_sv_pvutf8(pTHX_ SV *sv)

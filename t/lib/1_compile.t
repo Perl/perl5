@@ -1,118 +1,21 @@
 #!./perl
 
+# Modules should have their own tests.  For historical reasons, some
+# do not.  This does basic compile tests on modules that have no tests
+# of their own.
+
 BEGIN {
-    chdir '..' if -d '../pod' && -d '../t';
-    @INC = 'lib';
+    chdir 't';
+    @INC = '../lib';
 }
 
 use strict;
 use warnings;
-use Config;
-
-my %Core_Modules;
-my %Test;
-
-unless (open(MANIFEST, "MANIFEST")) {
-    die "$0: failed to open 'MANIFEST': $!\n";
-}
-
-sub add_by_name {
-    $Core_Modules{$_[0]}++;
-}
-
-while (<MANIFEST>) {
-    s/_pm\.PL/.pm/; # Don't forget the extracted modules
-    if (m!^(lib)/(\S+?)\.pm\s!) {
-	# Collecting modules names from under ext/ would be
-	# rather painful since the mapping from filenames
-	# to module names is not 100%.
-	my ($dir, $module) = ($1, $2);
-	$module =~ s!/!::!g;
-	add_by_name($module);
-    } elsif (m!^(lib|ext)/(\S+?)(?:\.t|/test.pl)\s!) {
-	my ($dir, $test) = ($1, $2);
-	$test =~ s!(\w+)/\1$!$1! if $dir eq 'ext';
-	$test =~ s!/t/[^/]+$!!;
-	$test =~ s!/!::!g;
-	$Test{$test}++;
-    }
-}
-
-close(MANIFEST);
-
-# Delete stuff that can't be tested here.
-
-sub delete_by_name {
-    delete $Core_Modules{$_[0]};
-}
-
-sub has_extension {
-    $Config{extensions} =~ /\b$_[0]\b/i;
-}
-
-sub delete_unless_has_extension {
-    delete $Core_Modules{$_[0]} unless has_extension($_[0]);
-}
-
-foreach my $known_extension (split(' ', $Config{known_extensions})) {
-    delete_unless_has_extension($known_extension);
-}
-
-sub delete_by_prefix {
-    for my $match (grep { /^$_[0]/ } keys %Core_Modules) {
-	delete_by_name($match);
-    }
-}
-
-delete_by_name('CGI::Fast');		# won't load without FCGI
-
-delete_by_prefix('ExtUtils::MM_');	# ExtUtils::MakeMaker's domain
-
-delete_by_prefix('File::Spec::');	# File::Spec's domain
-add_by_name('File::Spec::Functions');	# put this back
-
-delete_by_prefix('Attribute::Handlers');# we test this, and we have demos
-
-delete_by_prefix('Net::FTP::');		# Net::FTP is tested.
-
-# In this case we could rely on the fake Socket layer the libnet tests
-# use but frankly I think in this case we might as well let it be.
-delete_by_prefix('Net::') unless has_extension('Socket');
-
-sub using_feature {
-    my $use = "use$_[0]";
-    exists $Config{$use} &&
-	defined $Config{$use} &&
-	$Config{$use} eq 'define';
-}
-
-unless (using_feature('threads') && has_extension('Thread')) {
-    delete_by_name('Thread');
-    delete_by_prefix('Thread::');
-}
-
-unless (has_extension('NDBM_File')) {
-    delete_by_name('Memoize::NDBM_File');
-}
-
-if (ord('A') == 193) {
-    delete_by_prefix('Net::') unless eval { require Convert::EBCDIC };
-}
-
-# Delete all modules which have their own tests.
-# This makes this test a lot faster.
-foreach my $mod (sort keys %Test) {
-    delete_by_name($mod);
-}
-foreach my $mod (<DATA>) {
-    chomp $mod;
-    print "### $mod has a test but is in DATA of $0\n" if exists $Test{$mod};
-    delete_by_name($mod);
-}
 
 # Okay, this is the list.
 
-my @Core_Modules = sort keys %Core_Modules;
+my @Core_Modules = grep /\S/, sort <DATA>;
+chomp @Core_Modules;
 
 print "1..".(1+@Core_Modules)."\n";
 
@@ -136,104 +39,31 @@ foreach my $module (@Core_Modules) {
 # out of our namespace.
 sub compile_module {
     my ($module) = $_[0];
-    
-    my $out = scalar `$^X "-Ilib" t/lib/compmod.pl $module`;
+
+    my $out = scalar `$^X "-I../lib" lib/compmod.pl $module`;
     print "# $out";
     return $out =~ /^ok/;
 }
 
-# Add here modules that have their own test scripts and therefore
-# need not be test-compiled by 1_compile.t.
+# These modules have no tests of their own.
+# Keep up to date with
+# http://www.pobox.com/~schwern/cgi-bin/perl-qa-wiki.cgi?UntestedModules
+# and vice-versa.  The list should only shrink.
 __DATA__
-B::ShowLex
-CGI::Apache
-CGI::Carp
-CGI::Cookie
-CGI::Form
-CGI::Pretty
-CGI::Push
-CGI::Switch
-CGI::Util
-Carp::Heavy
-CPAN::Nox
-Exporter::Heavy
-ExtUtils::Command
-ExtUtils::Constant
-ExtUtils::Embed
-ExtUtils::Installed
-ExtUtils::MakeMaker
-ExtUtils::Manifest
-ExtUtils::Mkbootstrap
-ExtUtils::Packlist
-File::Spec::Functions
-Filter::Util::Call
-GDBM_File
-I18N::LangTags::List
-IO::Dir
-IO::File
-IO::Handle
-IO::Pipe
-IO::Poll
-IO::Seekable
-IO::Select
-IO::Socket
-IO::Socket::INET
-IO::Socket::UNIX
-Locale::Constants
-Locale::Country
-Locale::Currency
-Locale::Language
-Locale::Script
-MIME::QuotedPrint
-Math::BigFloat
-Math::BigInt::Calc
-Memoize::AnyDBM_File
-Memoize::Expire
-Memoize::ExpireFile
-Memoize::ExpireTest
-Memoize::NDBM_File
-Memoize::SDBM_File
-Memoize::Storable
-NDBM_File
-Net::Config
-Net::FTP
-Net::Netrc
-Net::NNTP
-Net::SMTP
-Net::Time
-ODBM_File
-Pod::Checker
-Pod::Find
-Pod::Functions
-Pod::Html
-Pod::InputObjects
-Pod::LaTeX
-Pod::Man
-Pod::ParseLink
-Pod::ParseUtils
-Pod::Select
-Pod::Text
-Pod::Text::Overstrike
-Pod::Text::Termcap
-Pod::Usage
-SDBM_File
-Safe
-Scalar::Util
-Sys::Syslog
-Test::Builder
-Test::Harness::Assert
-Test::Harness::Straps
-Test::More
-Test::ParseWords
-Text::Tabs
-Text::Wrap
-Thread
-Tie::Array
-Tie::Handle
-Tie::Hash
-Time::tm
-UNIVERSAL
-attributes
-base
-ops
-warnings::register
+B::CC
+B::Disassembler
+B::Stackobj
+ByteLoader
+CPAN
+CPAN::FirstTime
+DynaLoader
+ExtUtils::MM_NW5
+ExtUtils::Install
+ExtUtils::Liblist
+ExtUtils::Mksymlists
+Net::Cmd
+Net::Domain
+Net::POP3
+O
+Pod::Plainer
+Test::Harness::Iterator

@@ -4,13 +4,13 @@ use ExtUtils::MakeMaker;
 
 my $name = 'Byte';
 my %tables = (
-	      '8bit' => 
+	      byte_t => 
 	      [
-	       'ascii.ucm', 
+	       # 'ascii.ucm', 
 	       'koi8-r.ucm', 
 	       'viscii.ucm',
 	       ],
-	      Mac => 
+	      mac_t => 
 	      [
 	       qw(macCentEuro.enc  macCroatian.enc 
 		 macCyrillic.enc  macDingbats.enc 
@@ -19,7 +19,6 @@ my %tables = (
 		 macSami.enc 	  macThai.enc 
 		 macTurkish.enc	  macUkraine.enc),
 	      ],
-    
              );
 
 opendir(ENC,'../Encode');
@@ -27,7 +26,7 @@ while (defined(my $file = readdir(ENC)))
 {
     if ($file =~ /(8859|ibm).*\.ucm/io)
     {
-	push(@{$tables{$1}},$file);
+	push(@{$tables{$1."_t"}},$file) unless $file eq '8859-1.ucm';
     }
 }
 closedir(ENC);

@@ -4,6 +4,13 @@ use strict;
 use Encode;
 use Encode::Alias;
 
+BEGIN {
+    if (ord("A") == 193) {
+	print "1..0 # Skip: EBCDIC\n";
+	exit 0;
+    }
+}
+
 my %a2c;
 
 BEGIN {

@@ -25,6 +25,7 @@ use Config;
 use File::Basename;
 require Exporter;
 
+use ExtUtils::MakeMaker;
 Exporter::import('ExtUtils::MakeMaker',
        qw( $Verbose &neatvalue));
 

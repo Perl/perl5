@@ -4,7 +4,7 @@ use ExtUtils::MakeMaker;
 
 my $name = 'EBCDIC';
 my %tables = (
-	      ebcdic  => ['cp1047.ucm','cp37.ucm','posix-bc.ucm'],
+	      ebcdic_t  => ['cp1047.ucm','cp37.ucm','posix-bc.ucm'],
 	      );
 
 WriteMakefile(

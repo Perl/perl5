@@ -10,7 +10,7 @@ BEGIN
   my $location = $0; $location =~ s/upgrade.t//;
   unshift @INC, $location; # to locate the testing files
   chdir 't' if -d 't';
-  plan tests => 2056
+  plan tests => 2068
    + 2;			# our own tests
   }
 

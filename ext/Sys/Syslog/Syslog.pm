@@ -7,7 +7,7 @@ use Carp;
 @ISA = qw(Exporter DynaLoader);
 @EXPORT = qw(openlog closelog setlogmask syslog);
 @EXPORT_OK = qw(setlogsock);
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 # it would be nice to try stream/unix first, since that will be
 # most efficient. However streams are dodgy - see _syslog_send_stream
@@ -316,7 +316,7 @@ sub syslog {
 	    disconnect();
 	}
 	&connect unless $connected;
-	$failed = undef if ($current_proto eq $failed);
+	$failed = undef if ($current_proto && $failed && $current_proto eq $failed);
 	if ($syslog_send) {
 	    if (&{$syslog_send}($buf)) {
 		$transmit_ok++;
@@ -400,7 +400,7 @@ sub connect {
 
     $transmit_ok = 0;
     if ($connected) {
-	$current_proto = $proto; 
+	$current_proto = $proto;
         local($old) = select(SYSLOG); $| = 1; select($old);
     } else {
 	@fallbackMethods = ();
@@ -442,7 +442,7 @@ sub connect_tcp {
     }
     setsockopt(SYSLOG, SOL_SOCKET, SO_KEEPALIVE, 1);
     setsockopt(SYSLOG, IPPROTO_TCP, TCP_NODELAY, 1);
-    if (!connect(SYSLOG,$that)) {
+    if (!CORE::connect(SYSLOG,$that)) {
 	push(@{$errs}, "tcp connect: $!");
 	return 0;
     }
@@ -477,7 +477,7 @@ sub connect_udp {
 	push(@{$errs}, "udp socket: $!");
 	return 0;
     }
-    if (!connect(SYSLOG,$that)) {
+    if (!CORE::connect(SYSLOG,$that)) {
 	push(@{$errs}, "udp connect: $!");
 	return 0;
     }
@@ -526,12 +526,12 @@ sub connect_unix {
 	push(@{$errs}, "unix stream socket: $!");
 	return 0;
     }
-    if (!connect(SYSLOG,$that)) {
+    if (!CORE::connect(SYSLOG,$that)) {
         if (!socket(SYSLOG,AF_UNIX,SOCK_DGRAM,0)) {
 	    push(@{$errs}, "unix dgram socket: $!");
 	    return 0;
 	}
-        if (!connect(SYSLOG,$that)) {
+        if (!CORE::connect(SYSLOG,$that)) {
 	    push(@{$errs}, "unix dgram connect: $!");
 	    return 0;
 	}

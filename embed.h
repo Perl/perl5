@@ -855,9 +855,6 @@
 #define sv_2pv_nolen		Perl_sv_2pv_nolen
 #define sv_2pvutf8_nolen	Perl_sv_2pvutf8_nolen
 #define sv_2pvbyte_nolen	Perl_sv_2pvbyte_nolen
-#define sv_pv			Perl_sv_pv
-#define sv_pvutf8		Perl_sv_pvutf8
-#define sv_pvbyte		Perl_sv_pvbyte
 #define sv_utf8_downgrade	Perl_sv_utf8_downgrade
 #define sv_utf8_encode		Perl_sv_utf8_encode
 #define sv_utf8_decode		Perl_sv_utf8_decode
@@ -2406,9 +2403,6 @@
 #define sv_2pv_nolen(a)		Perl_sv_2pv_nolen(aTHX_ a)
 #define sv_2pvutf8_nolen(a)	Perl_sv_2pvutf8_nolen(aTHX_ a)
 #define sv_2pvbyte_nolen(a)	Perl_sv_2pvbyte_nolen(aTHX_ a)
-#define sv_pv(a)		Perl_sv_pv(aTHX_ a)
-#define sv_pvutf8(a)		Perl_sv_pvutf8(aTHX_ a)
-#define sv_pvbyte(a)		Perl_sv_pvbyte(aTHX_ a)
 #define sv_utf8_downgrade(a,b)	Perl_sv_utf8_downgrade(aTHX_ a,b)
 #define sv_utf8_encode(a)	Perl_sv_utf8_encode(aTHX_ a)
 #define sv_utf8_decode(a)	Perl_sv_utf8_decode(aTHX_ a)

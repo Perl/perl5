@@ -928,150 +928,75 @@ otherwise.
 =cut
 */
 
-#define SvPV_force(sv, lp) sv_pvn_force(sv, &lp)
-#define SvPV(sv, lp) sv_pvn(sv, &lp)
-#define SvPV_nolen(sv) sv_pv(sv)
-#define SvPV_nomg(sv, lp) sv_pvn_nomg(sv, &lp)
-#define SvPV_force_flags(sv, lp, flags) sv_pvn_force_flags(sv, &lp, flags)
-
-#define SvPVutf8_force(sv, lp) sv_pvutf8n_force(sv, &lp)
-#define SvPVutf8(sv, lp) sv_pvutf8n(sv, &lp)
-#define SvPVutf8_nolen(sv) sv_pvutf8(sv)
-
-#define SvPVbyte_force(sv, lp) sv_pvbyte_force(sv, &lp)
-#define SvPVbyte(sv, lp) sv_pvbyten(sv, &lp)
-#define SvPVbyte_nolen(sv) sv_pvbyte(sv)
-
-#define SvPVx(sv, lp) sv_pvn(sv, &lp)
-#define SvPVx_force(sv, lp) sv_pvn_force(sv, &lp)
-#define SvPVutf8x(sv, lp) sv_pvutf8n(sv, &lp)
-#define SvPVutf8x_force(sv, lp) sv_pvutf8n_force(sv, &lp)
-#define SvPVbytex(sv, lp) sv_pvbyten(sv, &lp)
-#define SvPVbytex_force(sv, lp) sv_pvbyten_force(sv, &lp)
-
-#define SvIVx(sv) sv_iv(sv)
-#define SvUVx(sv) sv_uv(sv)
-#define SvNVx(sv) sv_nv(sv)
-
-#define SvTRUEx(sv) sv_true(sv)
-
-#define SvIV(sv) SvIVx(sv)
-#define SvNV(sv) SvNVx(sv)
-#define SvUV(sv) SvUVx(sv)
-#define SvTRUE(sv) SvTRUEx(sv)
-
-/* flag values for sv_*_flags functions */
-#define SV_IMMEDIATE_UNREF	1
-#define SV_GMAGIC		2
-
-#define sv_pvn_force_nomg(sv, lp) sv_pvn_force_flags(sv, lp, 0)
-#define sv_utf8_upgrade_nomg(sv) sv_utf8_upgrade_flags(sv, 0)
-#define sv_catpvn_nomg(dsv, sstr, slen) sv_catpvn_flags(dsv, sstr, slen, 0)
-
-/* #ifndef CRIPPLED_CC */
-/* redefine some things to more efficient inlined versions */
-
 /* Let us hope that bitmaps for UV and IV are the same */
-#undef SvIV
 #define SvIV(sv) (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv))
-
-#undef SvUV
 #define SvUV(sv) (SvIOK(sv) ? SvUVX(sv) : sv_2uv(sv))
-
-#undef SvNV
 #define SvNV(sv) (SvNOK(sv) ? SvNVX(sv) : sv_2nv(sv))
 
-#define sv_setsv(dsv, ssv) sv_setsv_flags(dsv, ssv, SV_GMAGIC)
-#define sv_setsv_nomg(dsv, ssv) sv_setsv_flags(dsv, ssv, 0)
-#define sv_catsv(dsv, ssv) sv_catsv_flags(dsv, ssv, SV_GMAGIC)
-#define sv_catsv_nomg(dsv, ssv) sv_catsv_flags(dsv, ssv, 0)
-#define sv_catpvn(dsv, sstr, slen) sv_catpvn_flags(dsv, sstr, slen, SV_GMAGIC)
-#define sv_2pv(sv, lp) sv_2pv_flags(sv, lp, SV_GMAGIC)
-#define sv_2pv_nomg(sv, lp) sv_2pv_flags(sv, lp, 0)
-#define sv_pvn_force(sv, lp) sv_pvn_force_flags(sv, lp, SV_GMAGIC)
-#define sv_utf8_upgrade(sv) sv_utf8_upgrade_flags(sv, SV_GMAGIC)
+/* ----*/
 
-#undef SvPV
 #define SvPV(sv, lp) SvPV_flags(sv, lp, SV_GMAGIC)
 
-#undef SvPV_nomg
-#define SvPV_nomg(sv, lp) SvPV_flags(sv, lp, 0)
-
-#undef SvPV_flags
 #define SvPV_flags(sv, lp, flags) \
     ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pv_flags(sv, &lp, flags))
 
-#undef SvPV_force
 #define SvPV_force(sv, lp) SvPV_force_flags(sv, lp, SV_GMAGIC)
-#undef SvPV_force_nomg
+
 #define SvPV_force_nomg(sv, lp) SvPV_force_flags(sv, lp, 0)
 
-#undef SvPV_force_flags
 #define SvPV_force_flags(sv, lp, flags) \
     ((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST)) == SVf_POK \
     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvn_force_flags(sv, &lp, flags))
 
-#undef SvPV_nolen
 #define SvPV_nolen(sv) \
     ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
      ? SvPVX(sv) : sv_2pv_nolen(sv))
 
-#undef SvPVutf8
+#define SvPV_nomg(sv, lp) SvPV_flags(sv, lp, 0)
+
+/* ----*/
+
 #define SvPVutf8(sv, lp) \
     ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8)) == (SVf_POK|SVf_UTF8) \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pvutf8(sv, &lp))
 
-#undef SvPVutf8_force
 #define SvPVutf8_force(sv, lp) \
     ((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST)) == (SVf_POK|SVf_UTF8) \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvutf8n_force(sv, &lp))
 
-#undef SvPVutf8_nolen
+
 #define SvPVutf8_nolen(sv) \
     ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8)) == (SVf_POK|SVf_UTF8)\
      ? SvPVX(sv) : sv_2pvutf8_nolen(sv))
 
-#undef SvPVutf8
-#define SvPVutf8(sv, lp) \
-    ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8)) == (SVf_POK|SVf_UTF8) \
-     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pvutf8(sv, &lp))
+/* ----*/
 
-#undef SvPVutf8_force
-#define SvPVutf8_force(sv, lp) \
-    ((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST)) == (SVf_POK|SVf_UTF8) \
-     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvutf8n_force(sv, &lp))
-
-#undef SvPVutf8_nolen
-#define SvPVutf8_nolen(sv) \
-    ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8)) == (SVf_POK|SVf_UTF8)\
-     ? SvPVX(sv) : sv_2pvutf8_nolen(sv))
-
-#undef SvPVbyte
 #define SvPVbyte(sv, lp) \
     ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8)) == (SVf_POK) \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pvbyte(sv, &lp))
 
-#undef SvPVbyte_force
 #define SvPVbyte_force(sv, lp) \
     ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVf_THINKFIRST)) == (SVf_POK) \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvbyte_force(sv, &lp))
 
-#undef SvPVbyte_nolen
 #define SvPVbyte_nolen(sv) \
     ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8)) == (SVf_POK)\
      ? SvPVX(sv) : sv_2pvbyte_nolen(sv))
 
 
+    
+/* define FOOx(): idempotent versions of FOO(). If possible, use a local
+ * var to evaluate the arg once; failing that, use a global if possible;
+ * failing that, call a function to do the work
+ */
+
+#define SvPVx_force(sv, lp) sv_pvn_force(sv, &lp)
+#define SvPVutf8x_force(sv, lp) sv_pvutf8n_force(sv, &lp)
+#define SvPVbytex_force(sv, lp) sv_pvbyten_force(sv, &lp)
+
 #ifdef __GNUC__
-#  undef SvIVx
-#  undef SvUVx
-#  undef SvNVx
-#  undef SvPVx
-#  undef SvPVutf8x
-#  undef SvPVbytex
-#  undef SvTRUE
-#  undef SvTRUEx
+
 #  define SvIVx(sv) ({SV *nsv = (SV*)(sv); SvIV(nsv); })
 #  define SvUVx(sv) ({SV *nsv = (SV*)(sv); SvUV(nsv); })
 #  define SvNVx(sv) ({SV *nsv = (SV*)(sv); SvNV(nsv); })
@@ -1095,26 +1020,31 @@ otherwise.
 		? SvNVX(sv) != 0.0				\
 		: sv_2bool(sv) )
 #  define SvTRUEx(sv) ({SV *nsv = (sv); SvTRUE(nsv); })
+
 #else /* __GNUC__ */
-#ifndef USE_5005THREADS
+
+#  ifdef USE_5005THREADS
+#    define SvIVx(sv) sv_iv(sv)
+#    define SvUVx(sv) sv_uv(sv)
+#    define SvNVx(sv) sv_nv(sv)
+#    define SvPVx(sv, lp) sv_pvn(sv, &lp)
+#    define SvPVutf8x(sv, lp) sv_pvutf8n(sv, &lp)
+#    define SvPVbytex(sv, lp) sv_pvbyten(sv, &lp)
+#    define SvTRUE(sv) SvTRUEx(sv)
+#    define SvTRUEx(sv) sv_true(sv)
+
+#  else /* USE_5005THREADS */
+
 /* These inlined macros use globals, which will require a thread
  * declaration in user code, so we avoid them under threads */
 
-#  undef SvIVx
-#  undef SvUVx
-#  undef SvNVx
-#  undef SvPVx
-#  undef SvPVutf8x
-#  undef SvPVbytex
-#  undef SvTRUE
-#  undef SvTRUEx
-#  define SvIVx(sv) ((PL_Sv = (sv)), SvIV(PL_Sv))
-#  define SvUVx(sv) ((PL_Sv = (sv)), SvUV(PL_Sv))
-#  define SvNVx(sv) ((PL_Sv = (sv)), SvNV(PL_Sv))
-#  define SvPVx(sv, lp) ((PL_Sv = (sv)), SvPV(PL_Sv, lp))
-#  define SvPVutf8x(sv, lp) ((PL_Sv = (sv)), SvPVutf8(PL_Sv, lp))
-#  define SvPVbytex(sv, lp) ((PL_Sv = (sv)), SvPVbyte(PL_Sv, lp))
-#  define SvTRUE(sv) (						\
+#    define SvIVx(sv) ((PL_Sv = (sv)), SvIV(PL_Sv))
+#    define SvUVx(sv) ((PL_Sv = (sv)), SvUV(PL_Sv))
+#    define SvNVx(sv) ((PL_Sv = (sv)), SvNV(PL_Sv))
+#    define SvPVx(sv, lp) ((PL_Sv = (sv)), SvPV(PL_Sv, lp))
+#    define SvPVutf8x(sv, lp) ((PL_Sv = (sv)), SvPVutf8(PL_Sv, lp))
+#    define SvPVbytex(sv, lp) ((PL_Sv = (sv)), SvPVbyte(PL_Sv, lp))
+#    define SvTRUE(sv) (						\
     !sv								\
     ? 0								\
     :    SvPOK(sv)						\
@@ -1129,10 +1059,34 @@ otherwise.
 	    :   SvNOK(sv)					\
 		? SvNVX(sv) != 0.0				\
 		: sv_2bool(sv) )
-#  define SvTRUEx(sv) ((PL_Sv = (sv)), SvTRUE(PL_Sv))
-#endif /* !USE_5005THREADS */
-#endif /* !__GNU__ */
-/* #endif !CRIPPLED_CC */ 
+#    define SvTRUEx(sv) ((PL_Sv = (sv)), SvTRUE(PL_Sv))
+#  endif /* USE_5005THREADS */
+#endif /* __GNU__ */
+
+
+/* flag values for sv_*_flags functions */
+#define SV_IMMEDIATE_UNREF	1
+#define SV_GMAGIC		2
+
+/* all these 'functions' are now just macros */
+
+#define sv_pv(sv) SvPV_nolen(sv)
+#define sv_pvutf8(sv) SvPVutf8_nolen(sv)
+#define sv_pvbyte(sv) SvPVbyte_nolen(sv)
+
+#define sv_pvn_force_nomg(sv, lp) sv_pvn_force_flags(sv, lp, 0)
+#define sv_utf8_upgrade_nomg(sv) sv_utf8_upgrade_flags(sv, 0)
+#define sv_catpvn_nomg(dsv, sstr, slen) sv_catpvn_flags(dsv, sstr, slen, 0)
+#define sv_setsv(dsv, ssv) sv_setsv_flags(dsv, ssv, SV_GMAGIC)
+#define sv_setsv_nomg(dsv, ssv) sv_setsv_flags(dsv, ssv, 0)
+#define sv_catsv(dsv, ssv) sv_catsv_flags(dsv, ssv, SV_GMAGIC)
+#define sv_catsv_nomg(dsv, ssv) sv_catsv_flags(dsv, ssv, 0)
+#define sv_catpvn(dsv, sstr, slen) sv_catpvn_flags(dsv, sstr, slen, SV_GMAGIC)
+#define sv_2pv(sv, lp) sv_2pv_flags(sv, lp, SV_GMAGIC)
+#define sv_2pv_nomg(sv, lp) sv_2pv_flags(sv, lp, 0)
+#define sv_pvn_force(sv, lp) sv_pvn_force_flags(sv, lp, SV_GMAGIC)
+#define sv_utf8_upgrade(sv) sv_utf8_upgrade_flags(sv, SV_GMAGIC)
+
 
 /*
 =for apidoc Am|SV*|newRV_inc|SV* sv

@@ -573,9 +573,6 @@ Perl_reginitcolors
 Perl_sv_2pv_nolen
 Perl_sv_2pvutf8_nolen
 Perl_sv_2pvbyte_nolen
-Perl_sv_pv
-Perl_sv_pvutf8
-Perl_sv_pvbyte
 Perl_sv_utf8_downgrade
 Perl_sv_utf8_encode
 Perl_sv_utf8_decode

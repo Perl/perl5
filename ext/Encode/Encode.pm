@@ -1,6 +1,6 @@
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 0.96 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.97 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
 
 require DynaLoader;
@@ -93,7 +93,7 @@ for my $k (qw(centeuro croatian cyrillic dingbats greek
 sub encodings
 {
     my $class = shift;
-    my @modules = ($_[0] eq ":all") ? values %ExtModule : @_;
+    my @modules = (@_ and $_[0] eq ":all") ? values %ExtModule : @_;
     for my $m (@modules)
     {
 	$DEBUG and warn "about to require $m;";

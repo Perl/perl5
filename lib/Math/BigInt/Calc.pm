@@ -8,7 +8,7 @@ require Exporter;
 use vars qw/@ISA $VERSION/;
 @ISA = qw(Exporter);
 
-$VERSION = '0.25';
+$VERSION = '0.26';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -392,7 +392,7 @@ sub _sub
   {
   # (ref to int_num_array, ref to int_num_array, swap)
   # subtract base 1eX numbers -- stolen from Knuth Vol 2 pg 232, $x > $y
-  # subtract Y from X (X is always greater/equal!) by modifying x in place
+  # subtract Y from X by modifying x in place
   my ($c,$sx,$sy,$s) = @_;
  
   my $car = 0; my $i; my $j = 0;
@@ -410,7 +410,9 @@ sub _sub
   #print "case 1 (swap)\n";
   for $i (@$sx)
     {
-    last unless defined $sy->[$j] || $car;
+    # we can't do an early out if $x is than $y, since we
+    # need to copy the high chunks from $y. Found by Bob Mathews.
+    #last unless defined $sy->[$j] || $car;
     $sy->[$j] += $BASE
      if $car = (($sy->[$j] = $i-($sy->[$j]||0) - $car) < 0);
     $j++;
@@ -1174,7 +1176,7 @@ sub _rsft
       $dst++;
       }
     splice (@$x,$dst) if $dst > 0;		# kill left-over array elems
-    pop @$x if $x->[-1] == 0;			# kill last element if 0
+    pop @$x if $x->[-1] == 0 && @$x > 1;	# kill last element if 0
     } # else rem == 0
   $x;
   }
