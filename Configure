@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Jan 23 16:39:46 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Sat Feb  3 18:13:59 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -8798,13 +8798,11 @@ esac
 
 : check for non-blocking I/O stuff
 case "$h_sysfile" in
-true) echo "#include <sys/file.h>" > head.c;;
-*)
-	case "$h_fcntl" in
-	true) echo "#include <fcntl.h>" > head.c;;
-	*) echo "#include <sys/fcntl.h>" > head.c;;
-	esac
-	;;
+true) echo "#include <sys/file.h>" >  head.c;;
+esac
+case "$h_fcntl" in
+true) echo "#include <fcntl.h>"    >> head.c;;
+*) echo "#include <sys/fcntl.h>"   >> head.c;;
 esac
 echo " "
 echo "Figuring out the flag used by open() for non-blocking I/O..." >&4
