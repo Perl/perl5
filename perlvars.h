@@ -60,7 +60,7 @@ PERLVAR(Gnice_chunk,	char *)		/* a nice chunk of memory to reuse */
 PERLVAR(Gnice_chunk_size,	U32)		/* how nice the chunk of memory is */
 
 #ifdef PERL_OBJECT
-PERLVAR(Grunops,	runops_proc_t)	
+PERLVARI(Grunops,	runops_proc_t,	RUNOPS_DEFAULT)	
 #else
 PERLVARI(Grunops,	runops_proc_t *,	RUNOPS_DEFAULT)	
 #endif

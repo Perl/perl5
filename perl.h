@@ -25,6 +25,80 @@
 #endif /* PERL_FOR_X2P */
 
 #ifdef PERL_OBJECT
+
+/* PERL_OBJECT explained  - DickH and DougL @ ActiveState.com
+
+Defining PERL_OBJECT turns on creation of a C++ object that
+contains all writable core perl global variables and functions.
+Stated another way, all necessary global variables and functions
+are members of a big C++ object. This object's class is CPerlObj.
+This allows a Perl Host to have multiple, independent perl
+interpreters in the same process space. This is very important on
+Win32 systems as the overhead of process creation is quite high --
+this could be even higher than the script compile and execute time
+for small scripts.
+
+The perl executable implementation on Win32 is composed of perl.exe
+(the Perl Host) and perlX.dll. (the Perl Core). This allows the
+same Perl Core to easily be embedded in other applications that use
+the perl interpreter.
+
++-----------+
+| Perl Host |
++-----------+
+      ^
+	  |
+	  v
++-----------+   +-----------+
+| Perl Core |<->| Extension |
++-----------+   +-----------+ ...
+
+Defining PERL_OBJECT has the following effects:
+
+PERL CORE
+1. CPerlObj is defined (this is the PERL_OBJECT)
+2. all static functions that needed to access either global
+variables or functions needed are made member functions
+3. all writable static variables are made member variables
+4. all global variables and functions are defined as:
+	#define var CPerlObj::Perl_var
+	#define func CPerlObj::Perl_func
+	* these are in objpp.h
+This necessitated renaming some local variables and functions that
+had the same name as a global variable or function. This was
+probably a _good_ thing anyway.
+
+
+EXTENSIONS
+1. Access to global variables and perl functions is through a
+pointer to the PERL_OBJECT. This pointer type is CPerlObj*. This is
+made transparent to extension developers by the following macros:
+	#define var pPerl->Perl_var
+	#define func pPerl->Perl_func
+	* these are done in ObjXSub.h
+This requires that the extension be compiled as C++, which means
+that the code must be ANSI C and not K&R C. For K&R extensions,
+please see the C API notes located in Win32/GenCAPI.pl. This script
+creates a PerlCAPI.lib that provides a K & R compatible C interface
+to the PERL_OBJECT.
+2. Local variables and functions cannot have the same name as perl's
+variables or functions since the macros will redefine these. Look for
+this if you get some strange error message and it does not look like
+the code that you had written. This often happens with variables that
+are local to a function.
+
+PERL HOST
+1. The perl host is linked with perlX.lib to get perl_alloc. This
+function will return a pointer to CPerlObj (the PERL_OBJECT). It
+takes pointers to the various PerlXXX_YYY interfaces (see ipdir.h for
+information on this).
+2. The perl host calls the same functions as normally would be
+called in setting up and running a perl script, except that the
+functions are now member functions of the PERL_OBJECT.
+
+*/
+
+
 class CPerlObj;
 
 #define STATIC

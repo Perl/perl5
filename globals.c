@@ -1401,10 +1401,22 @@ fprintf(PerlIO *stream, const char *format, ...)
     return PerlIO_vprintf(stream, format, arglist);
 }
 
+#undef PERLVAR
+#define PERLVAR(x, y)
+#undef PERLVARI
+#define PERLVARI(x, y, z) x = z;
+#undef PERLVARIC
+#define PERLVARIC(x, y, z) x = z;
+
 CPerlObj::CPerlObj(IPerlMem* ipM, IPerlEnv* ipE, IPerlStdIO* ipStd,
 					     IPerlLIO* ipLIO, IPerlDir* ipD, IPerlSock* ipS, IPerlProc* ipP)
 {
     memset(((char*)this)+sizeof(void*), 0, sizeof(CPerlObj)-sizeof(void*));
+
+#include "thrdvar.h"
+#include "intrpvar.h"
+#include "perlvars.h"
+
     piMem = ipM;
     piENV = ipE;
     piStdIO = ipStd;
@@ -1432,50 +1444,6 @@ CPerlObj::ErrorNo(void)
 void
 CPerlObj::Init(void)
 {
-    curcop = &compiling;
-    cxstack_ix = -1;
-    cxstack_max = 128;
-    chopset = " \n-";
-#ifdef USE_THREADS
-    threadsv_names = THREADSV_NAMES;
-    tmps_ix = -1;
-    tmps_floor = -1;
-#endif
-    maxo = MAXO;
-    sh_path = SH_PATH;
-    runops = FUNC_NAME_TO_PTR(RUNOPS_DEFAULT);
-#ifdef CSH
-    cshname = CSH;
-#endif
-    rsfp = Nullfp;
-    expect = XSTATE;
-#ifdef USE_LOCALE_COLLATE
-    collation_standard = TRUE;
-    collxfrm_mult = 2;
-#endif
-#ifdef USE_LOCALE_NUMERIC
-    numeric_standard = TRUE;
-    numeric_local = TRUE;
-#endif /* !USE_LOCALE_NUMERIC */
-
-/* constants (these are not literals to facilitate pointer comparisons) */
-    Yes = "1";
-    No = "";
-    hexdigit = "0123456789abcdef0123456789ABCDEFx";
-    patleave = "\\.^$@dDwWsSbB+*?|()-nrtfeaxc0123456789[{]}";
-    splitstr = " ";
-    perl_destruct_level = 0;
-    maxsysfd = MAXSYSFD;
-    statname = Nullsv;
-    maxscream = -1;
-    op_mask = NULL;
-    dlmax = 128;
-    curcopdb = NULL;
-    copline = NOLINE;
-    laststatval = -1;
-    laststype = OP_STAT;
-    generation = 100;
-
 #ifdef WIN32
     New(2904, environ, 1, char*);
     *environ = NULL;
