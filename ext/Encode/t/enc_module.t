@@ -49,7 +49,7 @@ open STDIN, "<", $file0 or die "$file0:$!";
 $obj = Mod_EUCJP->new;
 my $i = 0;
 while(<STDIN>){
-    chomp;
+    s/\r?\n\z//;
     is ($cmp[$i++], $_, "encoding vs. STDIN - $i");
 }
 
