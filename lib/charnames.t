@@ -12,7 +12,7 @@ BEGIN {
 
 $| = 1;
 
-print "1..44\n";
+print "1..46\n";
 
 use charnames ':full';
 
@@ -144,7 +144,7 @@ sub to_bytes {
 
 {
     print "not " unless
-	sprintf "%04X\n", charnames::vianame("GOTHIC LETTER AHSA") eq "10330";
+	sprintf("%04X", charnames::vianame("GOTHIC LETTER AHSA")) eq "10330";
     print "ok 19\n";
 
     print "not " if
@@ -159,7 +159,7 @@ sub to_bytes {
     print "ok 21\n";
 
     print "not " unless
-	sprintf "%04X\n", charnames::vianame("GOTHIC LETTER AHSA") eq "10330";
+	sprintf("%04X", charnames::vianame("GOTHIC LETTER AHSA")) eq "10330";
     print "ok 22\n";
 
 }
@@ -235,8 +235,18 @@ print "ok 41\n";
 print "not " unless "\N{U+263A}" eq "\N{WHITE SMILING FACE}";
 print "ok 42\n";
 
+{
+    print "not " unless
+	0x3093 == charnames::vianame("HIRAGANA LETTER N");
+    print "ok 43\n";
+
+    print "not " unless
+	0x0397 == charnames::vianame("GREEK CAPITAL LETTER ETA");
+    print "ok 44\n";
+}
+
 print "not " if defined charnames::viacode(0x110000);
-print "ok 43\n";
+print "ok 45\n";
 
 print "not " if grep { /you asked for U+110000/ } @WARN;
-print "ok 44\n";
+print "ok 46\n";

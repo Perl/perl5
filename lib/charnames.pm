@@ -235,7 +235,7 @@ sub vianame
 
     $txt = do "unicore/Name.pl" unless $txt;
 
-    if ($txt =~ m/^([0-9A-F]+)\t\t($arg)/m) {
+    if ($txt =~ m/^([0-9A-F]+)\t\t($arg)$/m) {
         return $vianame{$arg} = hex $1;
     } else {
         return;
