@@ -5750,7 +5750,7 @@ using the C<|>-operator.
 
 Some of the most common values are C<O_RDONLY> for opening the file in
 read-only mode, C<O_WRONLY> for opening the file in write-only mode,
-and C<O_RDWR> for opening the file in read-write mode, and.
+and C<O_RDWR> for opening the file in read-write mode.
 
 For historical reasons, some values work on almost every system
 supported by perl: zero means read-only, one means write-only, and two
@@ -5767,10 +5767,15 @@ process's current C<umask>.
 
 In many systems the C<O_EXCL> flag is available for opening files in
 exclusive mode.  This is B<not> locking: exclusiveness means here that
-if the file already exists, sysopen() fails.  The C<O_EXCL> wins
-C<O_TRUNC>.
+if the file already exists, sysopen() fails.  C<O_EXCL> may not work
+on network filesystems, and has no effect unless the C<O_CREAT> flag
+is set as well.  Setting C<O_CREAT|O_EXCL> prevents the file from
+being opened if it is a symbolic link.  It does not protect against
+symbolic links in the file's path.
 
-Sometimes you may want to truncate an already-existing file: C<O_TRUNC>.
+Sometimes you may want to truncate an already-existing file.  This
+can be done using the C<O_TRUNC> flag.  The behavior of
+C<O_TRUNC> with C<O_RDONLY> is undefined.
 
 You should seldom if ever use C<0644> as argument to C<sysopen>, because
 that takes away the user's option to have a more permissive umask.
