@@ -1869,6 +1869,9 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	Perl_croak(aTHX_ "Can't upgrade that kind of scalar");
     }
 
+    SvFLAGS(sv) &= ~SVTYPEMASK;
+    SvFLAGS(sv) |= mt;
+
     switch (mt) {
     case SVt_NULL:
 	Perl_croak(aTHX_ "Can't upgrade to undef");
@@ -2031,8 +2034,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	IoPAGE_LEN(sv)	= 60;
 	break;
     }
-    SvFLAGS(sv) &= ~SVTYPEMASK;
-    SvFLAGS(sv) |= mt;
     return TRUE;
 }
 

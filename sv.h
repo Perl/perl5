@@ -739,8 +739,14 @@ and leaves the UTF-8 status as it was.
 #define SvLENx(sv) SvLEN(sv)
 #define SvEND(sv)(((XPV*)  SvANY(sv))->xpv_pv + ((XPV*)SvANY(sv))->xpv_cur)
 #define SvENDx(sv) ((PL_Sv = (sv)), SvEND(PL_Sv))
+
+#ifdef DEBUGGING
+#define SvMAGIC(sv)	((assert(SvTYPE(sv) >= SVt_PVMG)), ((XPVMG*)  SvANY(sv))->xmg_magic)
+#define SvSTASH(sv)	((XPVMG*)  SvANY(sv))->xmg_stash
+#else
 #define SvMAGIC(sv)	((XPVMG*)  SvANY(sv))->xmg_magic
 #define SvSTASH(sv)	((XPVMG*)  SvANY(sv))->xmg_stash
+#endif
 
 /* Ask a scalar nicely to try to become an IV, if possible.
    Not guaranteed to stay returning void */
