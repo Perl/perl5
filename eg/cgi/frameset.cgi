@@ -47,7 +47,7 @@ sub print_html_header {
 }
 
 sub print_end {
-    print qq{<P><hr><A HREF="cgi_docs.html">Go to the documentation</A>};
+    print qq{<P><hr><A HREF="../index.html" TARGET="_top">More Examples</A>};
     print $query->end_html;
 }
 

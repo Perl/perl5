@@ -28,8 +28,15 @@ $AUTOLOAD_DEBUG=0;
 #    3) print header(-nph=>1)
 $NPH=0;
 
-$CGI::revision = '$Id: CGI.pm,v 2.35 1997/4/20 20:19 lstein Exp $';
-$CGI::VERSION='2.35';
+# Set this to 1 to make the temporary files created
+# during file uploads safe from prying eyes
+# or do...
+#    1) use CGI qw(:private_tempfiles)
+#    2) $CGI::private_tempfiles(1);
+$PRIVATE_TEMPFILES=0;
+
+$CGI::revision = '$Id: CGI.pm,v 2.36 1997/5/10 8:22 lstein Exp $';
+$CGI::VERSION='2.36';
 
 # OVERRIDE THE OS HERE IF CGI.pm GUESSES WRONG
 # $OS = 'UNIX';
@@ -111,7 +118,7 @@ if ($needs_binmode) {
 			 tt i b blockquote pre img a address cite samp dfn html head
 			 base body link nextid title meta kbd start_html end_html
 			 input Select option/],
-	      ':html3'=>[qw/div table caption th td TR Tr super sub strike applet PARAM embed basefont/],
+	      ':html3'=>[qw/div table caption th td TR Tr super sub strike applet PARAM embed basefont style span/],
 	      ':netscape'=>[qw/blink frameset frame script font fontsize center/],
 	      ':form'=>[qw/textfield textarea filefield password_field hidden checkbox checkbox_group 
 		       submit reset defaults radio_group popup_menu button autoEscape
@@ -120,7 +127,7 @@ if ($needs_binmode) {
 	      ':cgi'=>[qw/param path_info path_translated url self_url script_name cookie dump
 		       raw_cookie request_method query_string accept user_agent remote_host 
 		       remote_addr referer server_name server_software server_port server_protocol
-		       virtual_host remote_ident auth_type http
+		       virtual_host remote_ident auth_type http use_named_parameters
 		       remote_user user_name header redirect import_names put/],
 	      ':ssl' => [qw/https/],
 	      ':cgi-lib' => [qw/ReadParse PrintHeader HtmlTop HtmlBot SplitParam/],
@@ -135,6 +142,7 @@ sub import {
     my ($callpack, $callfile, $callline) = caller;
     foreach (@_) {
 	$NPH++, next if $_ eq ':nph';
+	$PRIVATE_TEMPFILES++, next if $_ eq ':private_tempfiles';
 	foreach (&expand_tags($_)) {
 	    tr/a-zA-Z0-9_//cd;  # don't allow weird function names
 	    $EXPORT{$_}++;
@@ -947,8 +955,9 @@ sub header {
     # if the user indicates an expiration time, then we need
     # both an Expires and a Date header (so that the browser is
     # uses OUR clock)
-    push(@header,"Expires: " . &expires($expires)) if $expires;
-    push(@header,"Date: " . &expires(0)) if $expires;
+    push(@header,"Expires: " . &date(&expire_calc($expires),'http'))
+	if $expires;
+    push(@header,"Date: " . &date(&expire_calc(0),'http')) if $expires || $cookie;
     push(@header,"Pragma: no-cache") if $self->cache();
     push(@header,@other);
     push(@header,"Content-type: $type");
@@ -1018,14 +1027,17 @@ END_OF_FUNC
 # $script -> (option) Javascript code (-script)
 # $no_script -> (option) Javascript <noscript> tag (-noscript)
 # $meta -> (optional) Meta information tags
+# $head -> (optional) any other elements you'd like to incorporate into the <HEAD> tag
+#           (a scalar or array ref)
+# $style -> (optional) reference to an external style sheet
 # @other -> (optional) any other named parameters you'd like to incorporate into
 #           the <BODY> tag.
 ####
 'start_html' => <<'END_OF_FUNC',
 sub start_html {
     my($self,@p) = &self_or_default(@_);
-    my($title,$author,$base,$xbase,$script,$noscript,$target,$meta,@other) = 
-	$self->rearrange([TITLE,AUTHOR,BASE,XBASE,SCRIPT,NOSCRIPT,TARGET,META],@p);
+    my($title,$author,$base,$xbase,$script,$noscript,$target,$meta,$head,$style,@other) = 
+	$self->rearrange([TITLE,AUTHOR,BASE,XBASE,SCRIPT,NOSCRIPT,TARGET,META,HEAD,STYLE],@p);
 
     # strangely enough, the title needs to be escaped as HTML
     # while the author needs to be escaped as a URL
@@ -1045,14 +1057,46 @@ sub start_html {
     if ($meta && ref($meta) && (ref($meta) eq 'HASH')) {
 	foreach (keys %$meta) { push(@result,qq(<META NAME="$_" CONTENT="$meta->{$_}">)); }
     }
-    push(@result,<<END) if $script;
-<SCRIPT>
-<!-- Hide script from HTML-compliant browsers
-$script
-// End script hiding. -->
-</SCRIPT>
-END
-    ;
+
+    push(@result,ref($head) ? @$head : $head) if $head;
+
+    # handle various types of -style parameters
+    if ($style) {
+	if (ref($style)) {
+	    my($src,$code,@other) =
+		$self->rearrange([SRC,CODE],
+				 '-foo'=>'bar',	# a trick to allow the '-' to be omitted
+				 ref($style) eq 'ARRAY' ? @$style : %$style);
+	    push(@result,qq/<LINK REL="stylesheet" HREF="$src">/) if $src;
+	    push(@result,style($code)) if $code;
+	} else {
+	    push(@result,style($style))
+	}
+    }
+
+    # handle -script parameter
+    if ($script) {
+	my($src,$code,$language);
+	if (ref($script)) { # script is a hash
+	    ($src,$code,$language) =
+		$self->rearrange([SRC,CODE,LANGUAGE],
+				 '-foo'=>'bar',	# a trick to allow the '-' to be omitted
+				 ref($style) eq 'ARRAY' ? @$script : %$script);
+	
+	} else {
+	    ($src,$code,$language) = ('',$script,'JavaScript');
+	}
+	my(@satts);
+	push(@satts,'src'=>$src) if $src;
+	push(@satts,'language'=>$language || 'JavaScript');
+	$code = "<!-- Hide script\n$code\n// End script hiding -->"
+	    if $code && $language=~/javascript/i;
+	$code = "<!-- Hide script\n$code\n\# End script hiding -->"
+	    if $code && $language=~/perl/i;
+	push(@result,script({@satts},$code));
+    }
+
+    # handle -noscript parameter
     push(@result,<<END) if $noscript;
 <NOSCRIPT>
 $noscript
@@ -1822,7 +1866,7 @@ END_OF_FUNC
 #   -path -> paths for which this cookie is valid (optional)
 #   -domain -> internet domain in which this cookie is valid (optional)
 #   -secure -> if true, cookie only passed through secure channel (optional)
-#   -expires -> expiry date in format Wdy, DD-Mon-YY HH:MM:SS GMT (optional)
+#   -expires -> expiry date in format Wdy, DD-Mon-YYYY HH:MM:SS GMT (optional)
 ####
 'cookie' => <<'END_OF_FUNC',
 # temporary, for debugging.
@@ -1871,7 +1915,8 @@ sub cookie {
     my(@constant_values);
     push(@constant_values,"domain=$domain") if $domain;
     push(@constant_values,"path=$path") if $path;
-    push(@constant_values,"expires=".&expires($expires)) if $expires;
+    push(@constant_values,"expires=".&date(&expire_calc($expires),'cookie'))
+	if $expires;
     push(@constant_values,'secure') if $secure;
 
     my($key) = &escape($name);
@@ -1881,21 +1926,18 @@ sub cookie {
 END_OF_FUNC
 
 
-# This internal routine creates an expires string exactly some number of
-# hours from the current time in GMT.  This is the format
-# required by Netscape cookies, and I think it works for the HTTP
-# Expires: header as well.
-'expires' => <<'END_OF_FUNC',
-sub expires {
+# This internal routine creates an expires time exactly some number of
+# hours from the current time.  It incorporates modifications from 
+# Fisher Mark.
+'expire_calc' => <<'END_OF_FUNC',
+sub expire_calc {
     my($time) = @_;
-    my(@MON)=qw/Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec/;
-    my(@WDAY) = qw/Sunday Monday Tuesday Wednesday Thursday Friday Saturday/;
     my(%mult) = ('s'=>1,
-		 'm'=>60,
-		 'h'=>60*60,
-		 'd'=>60*60*24,
-		 'M'=>60*60*24*30,
-		 'y'=>60*60*24*365);
+                 'm'=>60,
+                 'h'=>60*60,
+                 'd'=>60*60*24,
+                 'M'=>60*60*24*30,
+                 'y'=>60*60*24*365);
     # format for time can be in any of the forms...
     # "now" -- expire immediately
     # "+180s" -- in 180 seconds
@@ -1909,19 +1951,40 @@ sub expires {
     # specifying the date yourself
     my($offset);
     if (!$time || ($time eq 'now')) {
-	$offset = 0;
+        $offset = 0;
     } elsif ($time=~/^([+-]?\d+)([mhdMy]?)/) {
-	$offset = ($mult{$2} || 1)*$1;
+        $offset = ($mult{$2} || 1)*$1;
     } else {
-	return $time;
+        return $time;
     }
-    my($sec,$min,$hour,$mday,$mon,$year,$wday) = gmtime(time+$offset);
-    $year += 1900 unless $year < 100;
-    return sprintf("%s, %02d-%s-%02d %02d:%02d:%02d GMT",
-		   $WDAY[$wday],$mday,$MON[$mon],$year,$hour,$min,$sec);
+    return (time+$offset);
 }
 END_OF_FUNC
 
+# This internal routine creates date strings suitable for use in
+# cookies and HTTP headers.  (They differ, unfortunately.)
+# Thanks to Fisher Mark for this.
+'date' => <<'END_OF_FUNC',
+sub date {
+    my($time,$format) = @_;
+    my(@MON)=qw/Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec/;
+    my(@WDAY) = qw/Sun Mon Tue Wed Thu Fri Sat/;
+
+    # pass through preformatted dates for the sake of expire_calc()
+    if ("$time" =~ m/^[^0-9]/o) {
+        return $time;
+    }
+
+    # make HTTP/cookie date string from GMT'ed time
+    # (cookies use '-' as date separator, HTTP uses ' ')
+    my($sc) = ' ';
+    $sc = '-' if $format eq "cookie";
+    my($sec,$min,$hour,$mday,$mon,$year,$wday) = gmtime($time);
+    $year += 1900;
+    return sprintf("%s, %02d$sc%s$sc%04d %02d:%02d:%02d GMT",
+                   $WDAY[$wday],$mday,$MON[$mon],$year,$hour,$min,$sec);
+}
+END_OF_FUNC
 
 ###############################################
 # OTHER INFORMATION PROVIDED BY THE ENVIRONMENT
@@ -2248,8 +2311,19 @@ END_OF_FUNC
 'nph' => <<'END_OF_FUNC',
 sub nph {
     my ($self,$param) = self_or_CGI(@_);
-    $CGI::nph = $param if defined($param);
-    return $CGI::nph;
+    $CGI::NPH = $param if defined($param);
+    return $CGI::NPH;
+}
+END_OF_FUNC
+
+#### Method: private_tempfiles
+# Set or return the private_tempfiles global flag
+####
+'private_tempfiles' => <<'END_OF_FUNC',
+sub private_tempfiles {
+    my ($self,$param) = self_or_CGI(@_);
+    $CGI::$PRIVATE_TEMPFILES = $param if defined($param);
+    return $CGI::PRIVATE_TEMPFILES;
 }
 END_OF_FUNC
 
@@ -2360,15 +2434,6 @@ sub read_multipart {
 	my($tmpfile) = new TempFile;
 	my $tmp = $tmpfile->as_string;
 	
-	open (OUT,">$tmp") || die "CGI open of $tmpfile: $!\n";
-	$CGI::DefaultClass->binmode(OUT) if $CGI::needs_binmode;
-	chmod 0666,$tmp;    # make sure anyone can delete it.
-	my $data;
-	while ($data = $buffer->read) {
-	    print OUT $data;
-	}
-	close OUT;
-
 	# Now create a new filehandle in the caller's namespace.
 	# The name of this filehandle just happens to be identical
 	# to the original filename (NOT the name of the temporary
@@ -2382,9 +2447,26 @@ sub read_multipart {
 	    $filehandle = "\:\:$filename";
 	}
 
-	open($filehandle,$tmp) || die "CGI open of $tmp: $!\n";
-	$CGI::DefaultClass->binmode($filehandle) if $CGI::needs_binmode;
+        # potential security problem -- this type of line can clobber 
+	# tempfile, and can be abused by malicious users.
+	# open ($filehandle,">$tmp") || die "CGI open of $tmpfile: $!\n";
 
+	# This technique causes open to fail if file already exists.
+	unless (defined(&O_RDWR)) {
+	    require Fcntl;
+	    import Fcntl qw/O_RDWR O_CREAT O_EXCL/;
+	}
+	sysopen($filehandle,$tmp,&O_RDWR|&O_CREAT|&O_EXCL) || die "CGI open of $tmp: $!\n";
+	unlink($tmp) if $PRIVATE_TEMPFILES;
+
+	$CGI::DefaultClass->binmode($filehandle) if $CGI::needs_binmode;
+	chmod 0600,$tmp;    # only the owner can tamper with it
+	my $data;
+	while (defined($data = $buffer->read)) {
+	    print $filehandle $data;
+	}
+
+	seek($filehandle,0,0); #rewind file
 	push(@{$self->{$param}},$filename);
 
 	# Under Unix, it would be safe to let the temporary file
@@ -2397,7 +2479,7 @@ sub read_multipart {
 	# asking for $query->{$query->param('foo')}, where 'foo'
 	# is the name of the file upload field.
 	$self->{'.tmpfiles'}->{$filename}= {
-	    name=>$tmpfile,
+	    name=>($PRIVATE_TEMPFILES ? '' : $tmpfile),
 	    info=>{%header}
 	}
     }
@@ -2407,7 +2489,9 @@ END_OF_FUNC
 'tmpFileName' => <<'END_OF_FUNC',
 sub tmpFileName {
     my($self,$filename) = self_or_default(@_);
-    return $self->{'.tmpfiles'}->{$filename}->{name}->as_string;
+    return $self->{'.tmpfiles'}->{$filename}->{name} ?
+	$self->{'.tmpfiles'}->{$filename}->{name}->as_string
+	    : '';
 }
 END_OF_FUNC
 
@@ -3177,6 +3261,7 @@ expect all their scripts to be NPH.
 			    -target=>'_blank',
 			    -meta=>{'keywords'=>'pharaoh secret mummy',
 				    'copyright'=>'copyright 1996 King Tut'},
+			    -style=>{'src'=>'/styles/style1.css'},
 			    -BGCOLOR=>'blue');
 
    -or-
@@ -3215,7 +3300,31 @@ into a series of header <META> tags that look something like this:
 
 There is no support for the HTTP-EQUIV type of <META> tag.  This is
 because you can modify the HTTP header directly with the B<header()>
-method.
+method.  For example, if you want to send the Refresh: header, do it
+in the header() method:
+
+    print $q->header(-Refresh=>'10; URL=http://www.capricorn.com');
+
+The B<-style> tag is used to incorporate cascading stylesheets into
+your code.  See the section on CASCADING STYLESHEETS for more information.
+
+You can place other arbitrary HTML elements to the <HEAD> section with the
+B<-head> tag.  For example, to place the rarely-used <LINK> element in the
+head section, use this:
+
+    print $q->header(-head=>link({-rel=>'next',
+				  -href=>'http://www.capricorn.com/s2.html'}));
+
+To incorporate multiple HTML elements into the <HEAD> section, just pass an
+array reference:
+
+    print $q->header(-head=>[ link({-rel=>'next',
+				    -href=>'http://www.capricorn.com/s2.html'}),
+			      link({-rel=>'previous',
+				    -href=>'http://www.capricorn.com/s1.html'})
+			     ]
+		     );
+
 
 JAVASCRIPTING: The B<-script>, B<-noScript>, B<-onLoad> and B<-onUnload> parameters
 are used to add Netscape JavaScript calls to your pages.  B<-script>
@@ -3258,6 +3367,24 @@ B<-script> field:
 Use the B<-noScript> parameter to pass some HTML text that will be displayed on 
 browsers that do not have JavaScript (or browsers where JavaScript is turned
 off).
+
+Netscape 3.0 recognizes several attributes of the <SCRIPT> tag,
+including LANGUAGE and SRC.  The latter is particularly interesting,
+as it allows you to keep the JavaScript code in a file or CGI script
+rather than cluttering up each page with the source.  To use these
+attributes pass a HASH reference in the B<-script> parameter containing
+one or more of -language, -src, or -code:
+
+    print $q->start_html(-title=>'The Riddle of the Sphinx',
+			 -script=>{-language=>'JAVASCRIPT',
+                                   -src=>'/javascript/sphinx.js'}
+			 );
+
+    print $q->(-title=>'The Riddle of the Sphinx',
+	       -script=>{-language=>'PERLSCRIPT'},
+			 -code=>'print "hello world!\n;"'
+	       );
+
 
 See
 
@@ -4344,6 +4471,73 @@ a new window will be created.
 The script "frameset.cgi" in the examples directory shows one way to
 create pages in which the fill-out form and the response live in
 side-by-side frames.
+
+=head1 LIMITED SUPPORT FOR CASCADING STYLE SHEETS
+
+CGI.pm has limited support for HTML3's cascading style sheets (css).
+To incorporate a stylesheet into your document, pass the
+start_html() method a B<-style> parameter.  The value of this
+parameter may be a scalar, in which case it is incorporated directly
+into a <STYLE> section, or it may be a hash reference.  In the latter
+case you should provide the hash with one or more of B<-src> or
+B<-code>.  B<-src> points to a URL where an externally-defined
+stylesheet can be found.  B<-code> points to a scalar value to be
+incorporated into a <STYLE> section.  Style definitions in B<-code>
+override similarly-named ones in B<-src>, hence the name "cascading."
+
+To refer to a style within the body of your document, add the
+B<-class> parameter to any HTML element:
+
+    print h1({-class=>'Fancy'},'Welcome to the Party');
+
+Or define styles on the fly with the B<-style> parameter:
+
+    print h1({-style=>'Color: red;'},'Welcome to Hell');
+
+You may also use the new B<span()> element to apply a style to a
+section of text:
+
+    print span({-style=>'Color: red;'},
+	       h1('Welcome to Hell'),
+	       "Where did that handbasket get to?"
+	       );
+
+Note that you must import the ":html3" definitions to have the
+B<span()> method available.  Here's a quick and dirty example of using
+CSS's.  See the CSS specification at
+http://www.w3.org/pub/WWW/TR/Wd-css-1.html for more information.
+
+    use CGI qw/:standard :html3/;
+
+    #here's a stylesheet incorporated directly into the page
+    $newStyle=<<END;
+    <!-- 
+    P.Tip {
+	margin-right: 50pt;
+	margin-left: 50pt;
+        color: red;
+    }
+    P.Alert {
+	font-size: 30pt;
+        font-family: sans-serif;
+      color: red;
+    }
+    -->
+    END
+    print header();
+    print start_html( -title=>'CGI with Style',
+		      -style=>{-src=>'http://www.capricorn.com/style/st1.css',
+		               -code=>$newStyle}
+	             );
+    print h1('CGI with Style'),
+          p({-class=>'Tip'},
+	    "Better read the cascading style sheet spec before playing with this!"),
+          span({-style=>'color: magenta'},
+	       "Look Mom, no hands!",
+	       p(),
+	       "Whooo wee!"
+	       );
+    print end_html;
 
 =head1 DEBUGGING
 

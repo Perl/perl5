@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 
-# This script illustrates how to use JavaScript to validage fill-out
+# This script illustrates how to use JavaScript to validate fill-out
 # forms.
 use CGI qw(:standard);
 
@@ -68,7 +68,7 @@ print header;
 print start_html(-title=>'Personal Profile',-script=>$JSCRIPT);
 
 print h1("Big Brother Wants to Know All About You"),
-    strong("Note: "),"This page uses JavaScript and requires",
+    strong("Note: "),"This page uses JavaScript and requires ",
     "Netscape 2.0 or higher to do anything special.";
 
 &print_prompt();
@@ -97,7 +97,7 @@ sub print_prompt {
 sub print_response {
     import_names('Q');
     print h2("Your profile"),
-	"You are a ",b($Q::age)," year old ",b($Q::color,$Q::gender),".",
+	"You claim to be a ",b($Q::age)," year old ",b($Q::color,$Q::gender),".",
 	"You should be ashamed of yourself for lying so ",
 	"blatantly to big brother!",
 	hr;
