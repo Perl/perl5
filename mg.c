@@ -1747,18 +1747,21 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	            PL_compiling.cop_warnings = pWARN_NONE;
 		    break;
 		}
-                if (isWARN_on(sv, WARN_ALL) && !isWARNf_on(sv, WARN_ALL)) {
-	            PL_compiling.cop_warnings = pWARN_ALL;
-	            PL_dowarn |= G_WARN_ONCE ;
-	        }	
-		else {
+		{
 		    STRLEN len, i;
 		    int accumulate = 0 ;
+		    int any_fatals = 0 ;
 		    char * ptr = (char*)SvPV(sv, len) ;
-		    for (i = 0 ; i < len ; ++i) 
-		        accumulate += ptr[i] ;
+		    for (i = 0 ; i < len ; ++i) {
+		        accumulate |= ptr[i] ;
+		        any_fatals |= (ptr[i] & 0xAA) ;
+		    }
 		    if (!accumulate)
 	                PL_compiling.cop_warnings = pWARN_NONE;
+		    else if (isWARN_on(sv, WARN_ALL) && !any_fatals) {
+	                PL_compiling.cop_warnings = pWARN_ALL;
+	                PL_dowarn |= G_WARN_ONCE ;
+	            }	
                     else {
 	                if (specialWARN(PL_compiling.cop_warnings))
 		            PL_compiling.cop_warnings = newSVsv(sv) ;
@@ -1767,6 +1770,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	                if (isWARN_on(PL_compiling.cop_warnings, WARN_ONCE))
 	                    PL_dowarn |= G_WARN_ONCE ;
 	            }
+
 		}
 	    }
 	}
