@@ -40,11 +40,11 @@ my $compare = join(',', sort qw(
 ));
 if ($^O eq 'VMS') {
     $compare = lc($compare);
-    $result = join(',', sort values %pods);
     my $undollared = $Qlib_dir;
     $undollared =~ s/\$/\\\$/g;
     $undollared =~ s/\-/\\\-/g;
     $result =~ s/$undollared/pod::/g;
+    $result =~ s/\$//g;
     my $count = 0;
     my @result = split(/,/,$result);
     my @compare = split(/,/,$compare);
