@@ -176,6 +176,30 @@ d_sem=${d_sem:-undef}
 d_shm=${d_shm:-undef}
 fi
 
+
+# As of MachTen 4.1.4 the msg* and shm* are in libc but unimplemented
+# (an attempt to use them causes a runtime error)
+# XXX Configure probe for really functional msg*() is needed XXX
+# XXX Configure probe for really functional shm*() is needed XXX
+if test "$d_msg" = ""; then
+    d_msgget=${d_msgget:-undef}
+    d_msgctl=${d_msgctl:-undef}
+    d_msgsnd=${d_msgsnd:-undef}
+    d_msgrcv=${d_msgrcv:-undef}
+    case "$d_msgget$d_msgsnd$d_msgctl$d_msgrcv" in
+    *"undef"*) d_msg="$undef" ;;
+    esac
+fi
+if test "$d_shm" = ""; then
+    d_shmat=${d_shmat:-undef}
+    d_shmdt=${d_shmdt:-undef}
+    d_shmget=${d_shmget:-undef}
+    d_shmctl=${d_shmctl:-undef}
+    case "$d_shmat$d_shmctl$d_shmdt$d_shmget" in
+    *"undef"*) d_shm="$undef" ;;
+    esac
+fi
+
 # Get rid of some extra libs which it takes Configure a tediously
 # long time never to find on MachTen, or which break perl
 set `echo X "$libswanted "|sed -e 's/ net / /' -e 's/ socket / /' \
