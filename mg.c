@@ -406,6 +406,9 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 
     case '\004':		/* ^D */
 	sv_setiv(sv, (IV)(PL_debug & 32767));
+#if defined(YYDEBUG) && defined(DEBUGGING)
+	PL_yydebug = (PL_debug & 1);
+#endif
 	break;
     case '\005':  /* ^E */
 #ifdef MACOS_TRADITIONAL
