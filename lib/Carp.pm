@@ -51,6 +51,11 @@ The Carp routines don't handle exception objects currently.
 If called with a first argument that is a reference, they simply
 call die() or warn(), as appropriate.
 
+However, rather than duplicating this effort in your own exception
+object, you can access the caller information that croak() would supply
+as shortmess(), and the full stack trace that confess() would generate
+as longmess() (Neither of these are exported by default.)
+
 =cut
 
 # This package is heavily used. Be small. Be fast. Be good.
@@ -75,7 +80,7 @@ $CarpInternal{Carp}++;
 require Exporter;
 @ISA = ('Exporter');
 @EXPORT = qw(confess croak carp);
-@EXPORT_OK = qw(cluck verbose);
+@EXPORT_OK = qw(cluck verbose longmess shortmess);
 @EXPORT_FAIL = qw(verbose);	# hook to enable verbose mode
 
 
