@@ -239,6 +239,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
     regnode *scan = *scanp, *next;
     I32 delta = 0;
     int is_inf = (flags & SCF_DO_SUBSTR) && (data->flags & SF_IS_INF);
+    int is_inf_internal = 0;		/* The studied chunk is infinite */
     I32 is_par = OP(scan) == OPEN ? ARG(scan) : 0;
     scan_data_t data_fake;
     
@@ -352,7 +353,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 		    if (max1 < minnext + deltanext)
 			max1 = minnext + deltanext;
 		    if (deltanext == I32_MAX)
-			is_inf = 1;
+			is_inf = is_inf_internal = 1;
 		    scan = next;
 		    if (data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
 			pars++;
@@ -423,7 +424,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 		min++;
 		/* Fall through. */
 	    case STAR:
-		is_inf = 1; 
+		is_inf = is_inf_internal = 1; 
 		scan = regnext(scan);
 		if (flags & SCF_DO_SUBSTR) {
 		    scan_commit(data);
@@ -457,8 +458,10 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 		    && maxcount <= 10000) /* Complement check for big count */
 		    warn("Strange *+?{} on zero-length expression");
 		min += minnext * mincount;
-		is_inf |= (maxcount == REG_INFTY && (minnext + deltanext) > 0
-			   || deltanext == I32_MAX);
+		is_inf_internal |= (maxcount == REG_INFTY 
+				    && (minnext + deltanext) > 0
+				   || deltanext == I32_MAX);
+		is_inf |= is_inf_internal;
 		delta += (minnext + deltanext) * maxcount - minnext * mincount;
 
 		/* Try powerful optimization CURLYX => CURLYN. */
@@ -594,6 +597,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 			}
 			data->longest = &(data->longest_float);
 		    }
+		    SvREFCNT_dec(last_str);
 		}
 		if (data && (fl & SF_HAS_EVAL))
 		    data->flags |= SF_HAS_EVAL;
@@ -609,7 +613,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 		    scan_commit(data);
 		    data->longest = &(data->longest_float);
 		}
-		is_inf = 1;
+		is_inf = is_inf_internal = 1;
 		break;
 	    }
 	} else if (strchr(simple,OP(scan))) {
@@ -661,7 +665,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 
   finish:
     *scanp = scan;
-    *deltap = is_inf ? I32_MAX : delta;
+    *deltap = is_inf_internal ? I32_MAX : delta;
     if (flags & SCF_DO_SUBSTR && is_inf) 
 	data->pos_delta = I32_MAX - data->pos_min;
     if (is_par > U8_MAX)
@@ -911,8 +915,9 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 		&& (!(data.flags & SF_FL_BEFORE_MEOL)
 		    || (PL_regflags & PMf_MULTILINE)))) {
 	    if (SvCUR(data.longest_fixed) 
-		&& data.offset_fixed == data.offset_float_min)
-		goto remove;		/* Like in (a)+. */
+		&& data.offset_fixed == data.offset_float_min
+		&& SvCUR(data.longest_fixed) == SvCUR(data.longest_float))
+		goto remove_float;		/* Like in (a)+. */
 	    
 	    r->float_substr = data.longest_float;
 	    r->float_min_offset = data.offset_float_min;
@@ -924,7 +929,7 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 		    || (PL_regflags & PMf_MULTILINE))) 
 		SvTAIL_on(r->float_substr);
 	} else {
-	  remove:
+	  remove_float:
 	    r->float_substr = Nullsv;
 	    SvREFCNT_dec(data.longest_float);
 	    longest_float_length = 0;
