@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed May  7 21:05:53 EET DST 2003 [metaconfig 3.0 PL70]
+# Generated on Wed May  7 21:09:25 EET DST 2003 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -5693,6 +5693,10 @@ $define)
         esac
 	;;
 esac
+if $test -f archname.cbu; then
+	echo "Your platform has some specific hints for architecture name, using them..."
+	. ./archname.cbu
+fi
 
 : determine root of directory hierarchy where package will be installed.
 case "$prefix" in
