@@ -1002,6 +1002,14 @@ for information on I<Mastering Regular Expressions>.)
 (W) You tried to do a connect on a closed socket.  Did you forget to check
 the return value of your socket() call?  See L<perlfunc/connect>.
 
+=item Constant is not %s reference
+
+(F) A constant value (perhaps declared using the C<use constant> pragma)
+is being dereferenced, but it amounts to the wrong type of reference.  The
+message indicates the type of reference that was expected. This usually
+indicates a syntax error in dereferencing the constant value.
+See L<perlsub/"Constant Functions"> and L<constant>.
+
 =item Constant subroutine %s redefined
 
 (S) You redefined a subroutine which had previously been eligible for
