@@ -493,8 +493,13 @@ nextargv(register GV *gv)
 		sv_setpvn(sv,">",!PL_inplace);
 		sv_catpvn(sv,PL_oldname,oldlen);
 		SETERRNO(0,0);		/* in case sprintf set errno */
+#ifdef VMS
+		if (!do_open(PL_argvoutgv,SvPVX(sv),SvCUR(sv),PL_inplace!=0,
+                 O_WRONLY|O_CREAT|O_TRUNC,0,Nullfp)) { 
+#else
 		if (!do_open(PL_argvoutgv,SvPVX(sv),SvCUR(sv),PL_inplace!=0,
 			     O_WRONLY|O_CREAT|OPEN_EXCL,0666,Nullfp)) {
+#endif
 		    warn("Can't do inplace edit on %s: %s",
 		      PL_oldname, Strerror(errno) );
 		    do_close(gv,FALSE);
