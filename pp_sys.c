@@ -1095,8 +1095,6 @@ PP(pp_getc)
 	gv = PL_stdingv;
     else
 	gv = (GV*)POPs;
-    if (!gv)
-	gv = PL_argvgv;
 
     if (mg = SvTIED_mg((SV*)gv, 'q')) {
 	I32 gimme = GIMME_V;
