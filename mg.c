@@ -2408,7 +2408,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    /* Longer than original, will be truncated. We assume that
              * PL_origalen bytes are available. */
 	    Copy(s, PL_origargv[0], PL_origalen-1, char);
-	    PL_origargv[0][PL_origalen-1] = 0;
 	}
 	else {
 	    /* Shorter than original, will be padded. */
@@ -2421,9 +2420,10 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 		    * --jhi */
 		   (int)' ',
 		   PL_origalen - len - 1);
-	    for (i = 1; i < PL_origargc; i++)
-		 PL_origargv[i] = 0;
 	}
+	PL_origargv[0][PL_origalen-1] = 0;
+	for (i = 1; i < PL_origargc; i++)
+	    PL_origargv[i] = 0;
 	UNLOCK_DOLLARZERO_MUTEX;
 	break;
 #endif
