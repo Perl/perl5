@@ -13,7 +13,7 @@
 /*
  * Package name      : perl5
  * Source directory  : /vos_ftp_site/pub/vos/posix/(alpha|ga)/perl
- * Configuration time: 2000-10-23 18:48 UCT
+ * Configuration time: 2001-02-12 14:16 UTC
  * Configured by     : Paul_Green@stratus.com
  * Target system     : VOS
  */
@@ -165,19 +165,6 @@
  */
 #define HAS_FCNTL		/**/
 
-/* HAS__FWALK:
- *	This symbol, if defined, indicates that the _fwalk system call is
- *	available to apply a function to all the file handles.
- */
-/*#define HAS__FWALK		/ **/
-
-/* FCNTL_CAN_LOCK:
- *	This symbol, if defined, indicates that fcntl() can be used
- *	for file locking.  Normally on Unix systems this is defined.
- *	It may be undefined on VMS.
- */
-#define FCNTL_CAN_LOCK		/**/
-
 /* HAS_FGETPOS:
  *	This symbol, if defined, indicates that the fgetpos routine is
  *	available to get the file position indicator, similar to ftell().
@@ -225,13 +212,6 @@
  *	available to get the login name.
  */
 #define HAS_GETLOGIN		/**/
-
-/* HAS_GETPAGESIZE:
- *	This symbol, if defined, indicates that the getpagesize system call
- *	is available to get system page size, which is the granularity of
- *	many memory management calls.
- */
-/*#define HAS_GETPAGESIZE		/**/
 
 /* HAS_GETPGID:
  *	This symbol, if defined, indicates to the C program that 
@@ -1363,13 +1343,6 @@
  */
 /*#define HAS_FSTATFS		/**/
 
-/* HAS_FSYNC:
- *	This symbol, if defined, indicates that the fsync routine is
- *	available to write a file's modified data and attributes to
- *	permanent storage.
- */
-/*#define HAS_FSYNC		/**/
-
 /* HAS_FTELLO:
  *	This symbol, if defined, indicates that the ftello routine is
  *	available to ftell beyond 32 bits (useful for ILP32 hosts).
@@ -1509,6 +1482,13 @@
  *	them.  See netdbtype.U for probing for various Netdb_xxx_t types.
  */
 #define	HAS_GETNET_PROTOS	/**/
+
+/* HAS_GETPAGESIZE:
+ *	This symbol, if defined, indicates that the getpagesize system call
+ *	is available to get system page size, which is the granularity of
+ *	many memory management calls.
+ */
+/*#define HAS_GETPAGESIZE		/**/
 
 /* HAS_GETPROTOENT:
  *	This symbol, if defined, indicates that the getprotoent() routine is
@@ -1824,15 +1804,6 @@
  *	bits set.  If it is not defined, roll your own version.
  */
 #define HAS_SANE_MEMCMP	/**/
-
-/* HAS_SBRK_PROTO:
- *	This symbol, if defined, indicates that the system provides
- *	a prototype for the sbrk() function.  Otherwise, it is up
- *	to the program to supply one.  Good guesses are
- *		extern void* sbrk _((int));
- *		extern void* sbrk _((size_t));
- */
-/*#define	HAS_SBRK_PROTO	/ **/
 
 /* HAS_SEM:
  *	This symbol, if defined, indicates that the entire sem*(2) library is
@@ -3215,5 +3186,34 @@
  */
 /*#define HAS_SETPGRP		/**/
 /*#define USE_BSD_SETPGRP	/**/
+
+/* HAS__FWALK:
+ *	This symbol, if defined, indicates that the _fwalk system call is
+ *	available to apply a function to all the file handles.
+ */
+/*#define HAS__FWALK		/**/
+
+/* FCNTL_CAN_LOCK:
+ *	This symbol, if defined, indicates that fcntl() can be used
+ *	for file locking.  Normally on Unix systems this is defined.
+ *	It may be undefined on VMS.
+ */
+#define FCNTL_CAN_LOCK		/**/
+
+/* HAS_FSYNC:
+ *	This symbol, if defined, indicates that the fsync routine is
+ *	available to write a file's modified data and attributes to
+ *	permanent storage.
+ */
+/*#define HAS_FSYNC		/**/
+
+/* HAS_SBRK_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the sbrk() function.  Otherwise, it is up
+ *	to the program to supply one.  Good guesses are
+ *		extern void* sbrk _((int));
+ *		extern void* sbrk _((size_t));
+ */
+/*#define	HAS_SBRK_PROTO	/**/
 
 #endif

@@ -8,9 +8,9 @@ README.vos - Perl for Stratus VOS
 
 =head1 SYNOPSIS
 
-This is a port of Perl version 5, revision 7, to VOS.  Perl is a
-scripting or macro language that is popular on many systems.  See your
-local computer bookstore for a number of good books on Perl.
+This is a port of Perl version 5 to VOS.  Perl is a scripting or
+macro language that is popular on many systems.  See your local
+computer bookstore for a number of good books on Perl.
 
 =head2 Stratus POSIX Support
 
@@ -135,7 +135,7 @@ subdirectory into this new directory.  For example, with
 the current directory set to the top-level directory of the
 perl distribution, enter:
 
-          !copy_dir lib >system>ported>perl>lib>5.7
+          !copy_dir lib >system>ported>perl>lib>5.6
 
 =item 5
 
@@ -143,25 +143,25 @@ While there are currently no architecture-specific
 extensions or modules distributed with perl, the following
 directories can be used to hold such files:
 
-          >system>ported>perl>lib>5.7.68k
-          >system>ported>perl>lib>5.7.860
-          >system>ported>perl>lib>5.7.7100
-          >system>ported>perl>lib>5.7.8000
+          >system>ported>perl>lib>5.6.68k
+          >system>ported>perl>lib>5.6.860
+          >system>ported>perl>lib>5.6.7100
+          >system>ported>perl>lib>5.6.8000
 
 =item 6
 
 Site-specific perl extensions and modules can be installed in one of
 two places.  Put architecture-independent files into:
 
-          >system>ported>perl>lib>site>5.7
+          >system>ported>perl>lib>site>5.6
 
 Put architecture-dependent files into one of the following
 directories:
 
-          >system>ported>perl>lib>site>5.7.68k
-          >system>ported>perl>lib>site>5.7.860
-          >system>ported>perl>lib>site>5.7.7100
-          >system>ported>perl>lib>site>5.7.8000
+          >system>ported>perl>lib>site>5.6.68k
+          >system>ported>perl>lib>site>5.6.860
+          >system>ported>perl>lib>site>5.6.7100
+          >system>ported>perl>lib>site>5.6.8000
 
 =item 7
 
@@ -213,6 +213,6 @@ Paul Green (Paul_Green@stratus.com)
 
 =head1 LAST UPDATE
 
-October 24, 2000
+February 13, 2001
 
 =cut
