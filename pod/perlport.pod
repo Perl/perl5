@@ -2115,14 +2115,16 @@ The following platforms worked with the previous releases (5.6 and
 5.7), but we did not manage either to fix or to test these in time
 for the 5.8.0 release.  There is a very good chance that many of these
 will work fine with the 5.8.0.  The only one known for certain to be
-broken for 5.8.0 is the AmigaOS.
+broken for 5.8.0 is the AmigaOS (for which 5.6.1 and 5.7.2 can be used)
 
         AmigaOS
+        BSD/OS
         DomainOS
         Hurd
         LynxOS
         MachTen
         PowerMAX
+        PowerUX
         SCO SV
         SunOS 4
         SVR4
@@ -2139,7 +2141,6 @@ of any trouble.
 
         3b1
         A/UX
-        BSD/OS
         ConvexOS
         CX/UX
         DC/OSx
@@ -2160,16 +2161,14 @@ of any trouble.
         OpenSTEP
         Opus
         Plan 9
-        PowerUX
         RISC/os
-        SCO ODT/OSR     
+        SCO ODT/OSR
         Stellar
         SVR2
         TI1500
         TitanOS
         Ultrix
         Unisys Dynix
-        Unixware
 
 The following platforms have their own source code distributions and
 binaries available via http://www.cpan.org/ports/
