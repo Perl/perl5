@@ -76,8 +76,7 @@ close $F;
 # build the executable
 chdir($testdir);
 END {
-#    chdir($cwd);
-#    rmtree($testdir);
+    chdir($cwd) && rmtree("$cwd/$testdir") if -d "$cwd/$testdir";
 }
 if (open(my $EIN, "$cwd/op/${exename}_exe.uu")) {
     print "# Unpacking $exename.exe\n";

@@ -94,7 +94,9 @@ my $cksum3 = unpack("%32C*", <IN>);
 ok($cksum1 == $cksum2, "CR vs LF");
 ok($cksum1 == $cksum3, "CR vs CRLF");
 ok($cksum2 == $cksum3, "LF vs CRLF");
+close IN;
 
 END {
-  1 while unlink("$$.pod", "$$.in", "$$.o1", "$$.o2", "$$.o3");
+  1 while unlink("$$.pod", "$$.in", "$$.o1", "$$.o2", "$$.o3",
+                 "pod2htmd.x~~", "pod2htmi.x~~");
 }
