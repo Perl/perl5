@@ -374,7 +374,7 @@ lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl minimod.pl lib/Config.pm
 	$(LDLIBPTH) ./miniperl minimod.pl > tmp && mv tmp $@
 
 $(plextract):	miniperl lib/Config.pm
-	echo $(LDLIBPTH) ./miniperl -Ilib $@.PL
+	$(LDLIBPTH) ./miniperl -Ilib $@.PL
 	
 install: all install.perl install.man
 
