@@ -728,6 +728,10 @@ rmlist=''
 
 installusrbinperl=''
 
+ccsymbols=''
+cppsymbols=''
+cppccsymbols=''
+
 : We must find out about Eunice early
 eunicefix=':'
 if test -f /etc/unixtovms; then
@@ -11116,12 +11120,14 @@ $comm -13 ccsym.true ccsym.list >ccsym.own
 $comm -12 ccsym.true ccsym.list >ccsym.com
 $comm -23 ccsym.true ccsym.list >ccsym.cpp
 also=''
-symbols='symbols'
 if $test -z ccsym.raw; then
 	echo "Your C compiler doesn't seem to define any symbol!" >&4
 	echo " "
 	echo "However, your C preprocessor defines the following ones:"
 	$cat Cppsym.true
+    	ccsymbols=''
+	cppsymbols="`$cat Cppsym.true|tr \"$trnl\" ' '`"
+	cppccsymbols="$cppsymbols"
 else
 	if $test -s ccsym.com; then
 		echo "Your C compiler and pre-processor define these symbols:"
@@ -11129,20 +11135,23 @@ else
 		also='also '
 		symbols='ones'
 		$test "$silent" || sleep 1
+		cppccsymbols="`$cat ccsym.com|tr \"$trnl\" ' '`"
 	fi
 	if $test -s ccsym.cpp; then
 		$test "$also" && echo " "
-		echo "Your C pre-processor ${also}defines the following $symbols:"
+		echo "Your C pre-processor ${also}defines the following symbols:"
 		$sed -e 's/\(.*\)=.*/\1/' ccsym.cpp
 		also='further '
 		$test "$silent" || sleep 1
+		cppsymbols="`$cat ccsym.cpp|tr \"$trnl\" ' '`"
 	fi
 	if $test -s ccsym.own; then
 		$test "$also" && echo " "
-		echo "Your C compiler ${also}defines the following cpp variables:"
+		echo "Your C compiler ${also}defines the following cpp symbols:"
 		$sed -e 's/\(.*\)=1/\1/' ccsym.own
 		$sed -e 's/\(.*\)=.*/\1/' ccsym.own | $uniq >>Cppsym.true
 		$test "$silent" || sleep 1
+	        ccsymbols="`$cat ccsym.own|tr \"$trnl\" ' '`"
 	fi
 fi
 $rm -f ccsym*
@@ -11712,6 +11721,7 @@ cc='$cc'
 cccdlflags='$cccdlflags'
 ccdlflags='$ccdlflags'
 ccflags='$ccflags'
+ccsymbols='$ccsymbols'
 cf_by='$cf_by'
 cf_email='$cf_email'
 cf_time='$cf_time'
@@ -11731,6 +11741,8 @@ cpplast='$cpplast'
 cppminus='$cppminus'
 cpprun='$cpprun'
 cppstdin='$cppstdin'
+cppsymbols='$cppsymbols'
+cppccsymbols='$cppccsymbols'
 cryptlib='$cryptlib'
 csh='$csh'
 d_Gconvert='$d_Gconvert'
