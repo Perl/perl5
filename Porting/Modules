@@ -12,6 +12,7 @@ $Maintainers =
 	{
 	'ams'		=> 'Abhijit Menon-Sen <ams@wiw.org>',
 	'andreas'	=> 'Andreas J. Koenig <andreas.koenig@anima.de>',
+	'autarch'	=> 'Dave Rolsky <autarch@urth.org>',
 	'arthur'	=> 'Arthur Bergman <sky@nanisky.com>',
 	'bbb'		=> 'Rob Brown <bbb@cpan.org>',
 	'damian'	=> 'Damian Conway <damian@conway.org>',
@@ -309,6 +310,12 @@ $Modules = {
 		{
 		'MAINTAINER'	=> 'jhi',
 		'FILES'		=> q[ext/Time/HiRes],
+		},
+
+	'Time::Local' =>
+		{
+		'MAINTAINER'	=> 'autarch',
+		'FILES'		=> q[lib/Time/Local.{pm,t}],
 		},
 
 	'Unicode::Collate' =>
