@@ -1,5 +1,5 @@
 
-# Time-stamp: "2004-03-30 17:28:24 AST"
+# Time-stamp: "2004-06-17 22:59:06 PDT"
 
 require 5;
 package I18N::LangTags::Detect;
@@ -11,11 +11,19 @@ use vars qw( @ISA $VERSION $MATCH_SUPERS $USING_LANGUAGE_TAGS
 BEGIN { unless(defined &DEBUG) { *DEBUG = sub () {0} } }
  # define the constant 'DEBUG' at compile-time
 
-$VERSION = "1.01";
+$VERSION = "1.02";
 @ISA = ();
 use I18N::LangTags qw(alternate_language_tags locale2language_tag);
 
-sub uniq { my %seen; return grep(!($seen{$_}++), @_); }
+sub _uniq { my %seen; return grep(!($seen{$_}++), @_); }
+sub _normalize {
+  my(@languages) =
+    map lc($_),
+    grep $_,
+    map {; $_, alternate_language_tags($_) } @_;
+  return _uniq(@languages) if wantarray;
+  return $languages[0];
+}
 
 #---------------------------------------------------------------------------
 # The extent of our functional interface:
@@ -54,11 +62,7 @@ sub ambient_langprefs { # always returns things untainted
     push @languages, Win32::Locale::get_language() || ''
      if defined &Win32::Locale::get_language;
   }
-
-  @languages = map {; $_, alternate_language_tags($_) } @languages;
-
-  return uniq(@languages) if wantarray;
-  return $languages[0];
+  return _normalize @languages;
 }
 
 #---------------------------------------------------------------------------
@@ -78,10 +82,10 @@ sub http_accept_langs {
   
   if( $in =~ m/^\s*([a-zA-Z][-a-zA-Z]+)\s*$/s ) {
     # Very common case: just one language tag
-    return lc $1;
+    return _normalize $1;
   } elsif( $in =~ m/^\s*[a-zA-Z][-a-zA-Z]+(?:\s*,\s*[a-zA-Z][-a-zA-Z]+)*\s*$/s ) {
     # Common case these days: just "foo, bar, baz"
-    return map lc($_), $in =~ m/([a-zA-Z][-a-zA-Z]+)/g;
+    return _normalize( $in =~ m/([a-zA-Z][-a-zA-Z]+)/g );
   }
 
   # Else it's complicated...
@@ -111,10 +115,12 @@ sub http_accept_langs {
     push @{ $pref{$q} }, lc $1;
   }
 
-  return # Read off %pref, in descending key order...
+  return _normalize(
+    # Read off %pref, in descending key order...
     map @{$pref{$_}},
     sort {$b <=> $a}
-    keys %pref;
+    keys %pref
+  );
 }
 
 #===========================================================================
