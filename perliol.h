@@ -90,6 +90,7 @@ struct _PerlIO {
 #define PerlIOBase(f)      (*(f))
 #define PerlIOSelf(f,type) ((type *)PerlIOBase(f))
 #define PerlIONext(f)      (&(PerlIOBase(f)->next))
+#define PerlIOValid(f)     ((f) && *(f))
 
 /*--------------------------------------------------------------------------------------*/
 /* Data exports - EXT rather than extern is needed for Cygwin */
