@@ -514,11 +514,7 @@ S_incline(pTHX_ char *s)
     ch = *t;
     *t = '\0';
     if (t - s > 0) {
-#ifdef USE_ITHREADS
-	Safefree(CopFILE(PL_curcop));
-#else
-	SvREFCNT_dec(CopFILEGV(PL_curcop));
-#endif
+	CopFILE_free(PL_curcop);
 	CopFILE_set(PL_curcop, s);
     }
     *t = ch;

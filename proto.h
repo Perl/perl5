@@ -641,6 +641,7 @@ PERL_CALLCONV void	Perl_rxres_save(pTHX_ void** rsp, REGEXP* prx);
 PERL_CALLCONV I32	Perl_same_dirent(pTHX_ char* a, char* b);
 #endif
 PERL_CALLCONV char*	Perl_savepv(pTHX_ const char* sv);
+PERL_CALLCONV char*	Perl_savesharedpv(pTHX_ const char* sv);
 PERL_CALLCONV char*	Perl_savepvn(pTHX_ const char* sv, I32 len);
 PERL_CALLCONV void	Perl_savestack_grow(pTHX);
 PERL_CALLCONV void	Perl_save_aelem(pTHX_ AV* av, I32 idx, SV **sptr);
@@ -656,6 +657,7 @@ PERL_CALLCONV void	Perl_save_freeop(pTHX_ OP* o);
 PERL_CALLCONV void	Perl_save_freepv(pTHX_ char* pv);
 PERL_CALLCONV void	Perl_save_generic_svref(pTHX_ SV** sptr);
 PERL_CALLCONV void	Perl_save_generic_pvref(pTHX_ char** str);
+PERL_CALLCONV void	Perl_save_shared_pvref(pTHX_ char** str);
 PERL_CALLCONV void	Perl_save_gp(pTHX_ GV* gv, I32 empty);
 PERL_CALLCONV HV*	Perl_save_hash(pTHX_ GV* gv);
 PERL_CALLCONV void	Perl_save_helem(pTHX_ HV* hv, SV *key, SV **sptr);
@@ -1105,7 +1107,7 @@ STATIC I32	S_dopoptoeval(pTHX_ I32 startingblock);
 STATIC I32	S_dopoptolabel(pTHX_ char *label);
 STATIC I32	S_dopoptoloop(pTHX_ I32 startingblock);
 STATIC I32	S_dopoptosub(pTHX_ I32 startingblock);
-STATIC I32	S_dopoptosub_at(pTHX_ PERL_CONTEXT* cxstk, I32 startingblock);
+STATIC I32	S_dopoptosub_at(pTHX_ PERL_CONTEXT* cxstk, I32 startingblock);
 STATIC void	S_save_lines(pTHX_ AV *array, SV *sv);
 STATIC OP*	S_doeval(pTHX_ int gimme, OP** startop);
 STATIC PerlIO *	S_doopen_pmc(pTHX_ const char *name, const char *mode);

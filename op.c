@@ -878,11 +878,7 @@ clear_pmop:
 		    pmop = pmop->op_pmnext;
 		}
 	    }
-#ifdef USE_ITHREADS
-	    Safefree(PmopSTASHPV(cPMOPo));
-#else
-	    /* NOTE: PMOP.op_pmstash is not refcounted */
-#endif
+	    PmopSTASH_free(cPMOPo);
 	}
 	cPMOPo->op_pmreplroot = Nullop;
         /* we use the "SAFE" version of the PM_ macros here
@@ -913,18 +909,20 @@ clear_pmop:
 STATIC void
 S_cop_free(pTHX_ COP* cop)
 {
-    Safefree(cop->cop_label);
-#ifdef USE_ITHREADS
-    Safefree(CopFILE(cop));		/* XXX share in a pvtable? */
-    Safefree(CopSTASHPV(cop));		/* XXX share in a pvtable? */
-#else
-    /* NOTE: COP.cop_stash is not refcounted */
-    SvREFCNT_dec(CopFILEGV(cop));
-#endif
+    Safefree(cop->cop_label);   /* FIXME: treaddead ??? */
+    CopFILE_free(cop);
+    CopSTASH_free(cop);
     if (! specialWARN(cop->cop_warnings))
 	SvREFCNT_dec(cop->cop_warnings);
-    if (! specialCopIO(cop->cop_io))
+    if (! specialCopIO(cop->cop_io)) {
+#ifdef USE_ITHREADS
+	STRLEN len;
+        char *s = SvPV(cop->cop_io,len);
+	Perl_warn(aTHX_ "io='%.*s'",(int) len,s);
+#else
 	SvREFCNT_dec(cop->cop_io);
+#endif
+    }
 }
 
 void
@@ -5171,11 +5169,7 @@ Perl_newCONSTSUB(pTHX_ HV *stash, char *name, SV *sv)
 	SAVESPTR(PL_curstash);
 	SAVECOPSTASH(PL_curcop);
 	PL_curstash = stash;
-#ifdef USE_ITHREADS
-	CopSTASHPV(PL_curcop) = stash ? HvNAME(stash) : Nullch;
-#else
-	CopSTASH(PL_curcop) = stash;
-#endif
+	CopSTASH_set(PL_curcop,stash);
     }
 
     cv = newXS(name, const_sv_xsub, __FILE__);

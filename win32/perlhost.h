@@ -216,9 +216,7 @@ protected:
     static long num_hosts;
 public:
     inline  int LastHost(void) { return num_hosts == 1L; };
-#ifdef CHECK_HOST_INTERP
     struct interpreter *host_perl;
-#endif
 };
 
 long CPerlHost::num_hosts = 0L;
@@ -244,12 +242,12 @@ inline CPerlHost* IPerlMem2Host(struct IPerlMem* piPerl)
 
 inline CPerlHost* IPerlMemShared2Host(struct IPerlMem* piPerl)
 {
-    return STRUCT2PTR(piPerl, m_hostperlMemShared);
+    return STRUCT2RAWPTR(piPerl, m_hostperlMemShared);
 }
 
 inline CPerlHost* IPerlMemParse2Host(struct IPerlMem* piPerl)
 {
-    return STRUCT2PTR(piPerl, m_hostperlMemParse);
+    return STRUCT2RAWPTR(piPerl, m_hostperlMemParse);
 }
 
 inline CPerlHost* IPerlEnv2Host(struct IPerlEnv* piPerl)

@@ -578,6 +578,7 @@
 #define same_dirent		Perl_same_dirent
 #endif
 #define savepv			Perl_savepv
+#define savesharedpv		Perl_savesharedpv
 #define savepvn			Perl_savepvn
 #define savestack_grow		Perl_savestack_grow
 #define save_aelem		Perl_save_aelem
@@ -593,6 +594,7 @@
 #define save_freepv		Perl_save_freepv
 #define save_generic_svref	Perl_save_generic_svref
 #define save_generic_pvref	Perl_save_generic_pvref
+#define save_shared_pvref	Perl_save_shared_pvref
 #define save_gp			Perl_save_gp
 #define save_hash		Perl_save_hash
 #define save_helem		Perl_save_helem
@@ -2128,6 +2130,7 @@
 #define same_dirent(a,b)	Perl_same_dirent(aTHX_ a,b)
 #endif
 #define savepv(a)		Perl_savepv(aTHX_ a)
+#define savesharedpv(a)		Perl_savesharedpv(aTHX_ a)
 #define savepvn(a,b)		Perl_savepvn(aTHX_ a,b)
 #define savestack_grow()	Perl_savestack_grow(aTHX)
 #define save_aelem(a,b,c)	Perl_save_aelem(aTHX_ a,b,c)
@@ -2143,6 +2146,7 @@
 #define save_freepv(a)		Perl_save_freepv(aTHX_ a)
 #define save_generic_svref(a)	Perl_save_generic_svref(aTHX_ a)
 #define save_generic_pvref(a)	Perl_save_generic_pvref(aTHX_ a)
+#define save_shared_pvref(a)	Perl_save_shared_pvref(aTHX_ a)
 #define save_gp(a,b)		Perl_save_gp(aTHX_ a,b)
 #define save_hash(a)		Perl_save_hash(aTHX_ a)
 #define save_helem(a,b,c)	Perl_save_helem(aTHX_ a,b,c)

@@ -613,6 +613,7 @@ p	|void	|rxres_save	|void** rsp|REGEXP* prx
 p	|I32	|same_dirent	|char* a|char* b
 #endif
 Apd	|char*	|savepv		|const char* sv
+Apd	|char*	|savesharedpv	|const char* sv
 Apd	|char*	|savepvn	|const char* sv|I32 len
 Ap	|void	|savestack_grow
 Ap	|void	|save_aelem	|AV* av|I32 idx|SV **sptr
@@ -628,6 +629,7 @@ p	|void	|save_freeop	|OP* o
 Ap	|void	|save_freepv	|char* pv
 Ap	|void	|save_generic_svref|SV** sptr
 Ap	|void	|save_generic_pvref|char** str
+Ap	|void	|save_shared_pvref|char** str
 Ap	|void	|save_gp	|GV* gv|I32 empty
 Ap	|HV*	|save_hash	|GV* gv
 Ap	|void	|save_helem	|HV* hv|SV *key|SV **sptr

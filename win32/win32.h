@@ -383,11 +383,12 @@ struct interp_intern {
     struct thread_intern	thr_intern;
 #endif
     UINT	timerid;
-    HANDLE	msg_event;
+    unsigned 	poll_count;
 };
 
 DllExport int win32_async_check(pTHX);
 
+#define WIN32_POLL_INTERVAL 32768
 #define PERL_ASYNC_CHECK() if (w32_do_async || PL_sig_pending) win32_async_check(aTHX)
 
 #define w32_perlshell_tokens	(PL_sys_intern.perlshell_tokens)
@@ -405,7 +406,8 @@ DllExport int win32_async_check(pTHX);
 #define w32_pseudo_child_handles	(w32_pseudo_children->handles)
 #define w32_internal_host		(PL_sys_intern.internal_host)
 #define w32_timerid			(PL_sys_intern.timerid)
-#define w32_do_async			(w32_timerid != 0)
+#define w32_poll_count			(PL_sys_intern.poll_count)
+#define w32_do_async			(w32_poll_count++ > WIN32_POLL_INTERVAL)
 #ifdef USE_5005THREADS
 #  define w32_strerror_buffer	(thr->i.Wstrerror_buffer)
 #  define w32_getlogin_buffer	(thr->i.Wgetlogin_buffer)

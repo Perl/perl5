@@ -9361,8 +9361,9 @@ Perl_any_dup(pTHX_ void *v, PerlInterpreter *proto_perl)
     /* see if it is part of the interpreter structure */
     if (v >= (void*)proto_perl && v < (void*)(proto_perl+1))
 	ret = (void*)(((char*)aTHX) + (((char*)v) - (char*)proto_perl));
-    else
+    else {
 	ret = v;
+    }
 
     return ret;
 }
@@ -9412,6 +9413,12 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	case SAVEt_GENERIC_PVREF:		/* generic char* */
 	    c = (char*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = pv_dup(c);
+	    ptr = POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
+	    break;
+	case SAVEt_SHARED_PVREF:		/* char* in shared space */
+	    c = (char*)POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = savesharedpv(c);
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
 	    break;
@@ -9784,15 +9791,21 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     SvNVX(&PL_sv_yes)		= 1;
     ptr_table_store(PL_ptr_table, &proto_perl->Isv_yes, &PL_sv_yes);
 
-    /* create shared string table */
+    /* create (a non-shared!) shared string table */
     PL_strtab		= newHV();
     HvSHAREKEYS_off(PL_strtab);
     hv_ksplit(PL_strtab, 512);
     ptr_table_store(PL_ptr_table, proto_perl->Istrtab, PL_strtab);
 
-    PL_compiling		= proto_perl->Icompiling;
-    PL_compiling.cop_stashpv	= SAVEPV(PL_compiling.cop_stashpv);
-    PL_compiling.cop_file	= SAVEPV(PL_compiling.cop_file);
+    PL_compiling = proto_perl->Icompiling;
+
+    /* These two PVs will be free'd special way so must set them same way op.c does */
+    PL_compiling.cop_stashpv = savesharedpv(PL_compiling.cop_stashpv);
+    ptr_table_store(PL_ptr_table, proto_perl->Icompiling.cop_stashpv, PL_compiling.cop_stashpv);
+
+    PL_compiling.cop_file    = savesharedpv(PL_compiling.cop_file);
+    ptr_table_store(PL_ptr_table, proto_perl->Icompiling.cop_file, PL_compiling.cop_file);
+
     ptr_table_store(PL_ptr_table, &proto_perl->Icompiling, &PL_compiling);
     if (!specialWARN(PL_compiling.cop_warnings))
 	PL_compiling.cop_warnings = sv_dup_inc(PL_compiling.cop_warnings, param);

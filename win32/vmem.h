@@ -200,15 +200,17 @@ void VMem::Free(void* pMem)
     if (pMem) {
 	PMEMORY_BLOCK_HEADER ptr = (PMEMORY_BLOCK_HEADER)(((char*)pMem)-sizeof(MEMORY_BLOCK_HEADER));
         if (ptr->owner != this) {
-#if 0
-	    int *nowhere = NULL;
-            *nowhere = 0;
-#else
 	    if (ptr->owner) {
-	        ptr->owner->Free(pMem);	
+#if 1
+		dTHX;
+	    	int *nowhere = NULL;
+	    	Perl_warn(aTHX_ "Free to wrong pool %p not %p",this,ptr->owner);
+            	*nowhere = 0;
+#else
+                ptr->owner->Free(pMem);	
+#endif
 	    }
 	    return;
-#endif
         }
 	GetLock();
 	UnlinkBlock(ptr);
