@@ -32,6 +32,207 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8772] By: jhi                                   on 2001/02/11  18:47:52
+        Log: Subject: Re: [PATCH] pod/perlclib.pod - Replacements for C library functions
+             From: Simon Cozens <simon@cozens.net>
+             Date: Wed, 31 Jan 2001 16:31:43 +0000
+             Message-ID: <20010131163143.A1427@pembro26.pmb.ox.ac.uk>
+     Branch: perl
+	   + pod/perlclib.pod
+	   ! MANIFEST pod/buildtoc.PL pod/perl.pod pod/perlguts.pod
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[  8771] By: jhi                                   on 2001/02/11  18:36:48
+        Log: Upgrade to Unicode 3.1 beta 2001-02-11.
+             
+             Blocks-4d3.beta.txt
+             CaseFolding-3d4.beta.txt
+             CompositionExclusions-3d6.beta.txt
+             EastAsianWidth-4d4.beta.txt
+             LineBreak-6d3.beta.txt
+             NamesList-3.1.0d1.beta.txt
+             PropList-3.1.0d4.beta.txt
+             SpecialCasing-4d1.beta.txt
+             UnicodeData-3.1.0d6.beta.txt
+     Branch: perl
+	   + lib/unicode/Unicode.txt lib/unicode/rename lib/unicode/version
+	  +> lib/unicode/UCD.html lib/unicode/Unicode.html
+	   - lib/unicode/UCD301.html lib/unicode/UCDFF301.html
+	   - lib/unicode/Unicode.301
+	   ! (edit 257 files)
+____________________________________________________________________________
+[  8770] By: jhi                                   on 2001/02/11  17:26:22
+        Log: UTF-8 documentation.
+     Branch: perl
+	   ! utf8.h
+____________________________________________________________________________
+[  8769] By: jhi                                   on 2001/02/11  17:12:49
+        Log: Retract #8762.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[  8768] By: jhi                                   on 2001/02/11  16:54:45
+        Log: Subject: [PATCH] Test::Harness
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 11 Feb 2001 14:37:00 +0100
+             Message-ID: <m3g0hll4sj.fsf@ak-71.mind.de>
+     Branch: perl
+	   ! lib/Test/Harness.pm
+____________________________________________________________________________
+[  8767] By: jhi                                   on 2001/02/11  16:53:52
+        Log: Subject: [PATCH] Document makepatch in Porting/patching
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 11 Feb 2001 16:46:28 +0100
+             Message-ID: <m3bss9kysr.fsf@ak-71.mind.de>
+     Branch: perl
+	   ! Porting/patching.pod
+____________________________________________________________________________
+[  8766] By: jhi                                   on 2001/02/11  06:30:23
+        Log: Subject: Re: [patch] GvSHARED
+             Date: Sat, 10 Feb 2001 14:04:40 -0800 (PST)
+             From: Doug MacEachern <dougm@covalent.net>
+             Message-ID: <Pine.LNX.4.21.0102101356000.15298-100000@mako.covalent.net>
+             
+             Subject: Re: [patch] GvSHARED
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Sat, 10 Feb 2001 15:00:54 -0800 (PST)
+             Message-ID: <Pine.LNX.4.21.0102101453220.15298-100000@mako.covalent.net>
+             
+             Subject: [patch] attributes.pm support for `shared'
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Sat, 10 Feb 2001 20:08:48 -0800 (PST)
+             Message-ID: <Pine.LNX.4.21.0102102004190.15298-100000@mako.covalent.net>
+             
+             our() attributes were ignored, our :shared pieces missing,
+             allow attributes.pm to turn on shared.
+     Branch: perl
+	   ! op.c t/op/attrs.t toke.c xsutils.c
+____________________________________________________________________________
+[  8765] By: alanbur                               on 2001/02/10  23:11:19
+        Log: Resync with parent (hopefully sucessfully this time)
+     Branch: maint-5.6/pureperl
+	  !> MANIFEST README.bs2000 README.hpux README.vmesa installhtml
+	  !> lib/Math/Complex.pm lib/Pod/Find.pm pod/buildtoc.PL
+	  !> pod/perl.pod pod/perlapi.pod pod/perlboot.pod pod/perlcall.pod
+	  !> pod/perlfaq2.pod pod/perlfaq3.pod pod/perlfaq9.pod
+	  !> pod/perlmodlib.PL pod/perlobj.pod pod/perlport.pod
+	  !> pod/perlre.pod pod/perltoc.pod pod/perltoot.pod
+	  !> pod/perltootc.pod win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  8764] By: jhi                                   on 2001/02/10  22:54:38
+        Log: Make TEST and UTEST more verbose in case something goes
+             wrong in running/compiling a script, suggested by Doug
+             MacEachern.
+     Branch: perl
+	   ! t/TEST t/UTEST
+____________________________________________________________________________
+[  8763] By: jhi                                   on 2001/02/10  22:11:34
+        Log: Bogus shebang.
+     Branch: perl
+	   ! t/lib/texttabs.t
+____________________________________________________________________________
+[  8762] By: jhi                                   on 2001/02/10  21:56:02
+        Log: (Retracted by #8769)
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[  8761] By: jhi                                   on 2001/02/10  21:26:15
+        Log: Subject: Re: [patch] GvSHARED 
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Sat, 10 Feb 2001 13:11:14 -0800 (PST)
+             Message-ID: <Pine.LNX.4.21.0102101253070.15298-100000@mako.covalent.net>
+             
+             our @EXPORT : shared = (...);
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  8760] By: jhi                                   on 2001/02/10  21:25:07
+        Log: Subject: [patch] GvSHARED
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Sat, 10 Feb 2001 10:57:12 -0800 (PST)
+             Message-ID: <Pine.LNX.4.21.0102101047320.15298-100000@mako.covalent.net>
+     Branch: perl
+	   ! embed.h embed.pl gv.c gv.h op.c pp_sys.c proto.h sv.c
+____________________________________________________________________________
+[  8759] By: alanbur                               on 2001/02/10  21:24:27
+        Log: Backed out mismerge.
+     Branch: maint-5.6/pureperl
+	   ! MANIFEST README.hpux README.vmesa gv.c installhtml
+	   ! lib/Math/Complex.pm lib/Pod/Find.pm perl.c pod/buildtoc.PL
+	   ! pod/perl.pod pod/perlapi.pod pod/perlboot.pod pod/perlcall.pod
+	   ! pod/perlfaq2.pod pod/perlfaq3.pod pod/perlfaq9.pod
+	   ! pod/perlmodlib.PL pod/perlobj.pod pod/perlport.pod
+	   ! pod/perlre.pod pod/perltoc.pod pod/perltoot.pod
+	   ! pod/perltootc.pod sv.c win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  8758] By: jhi                                   on 2001/02/10  18:01:17
+        Log: Integrate changes #8701,8704,8756 from pureperl to maintperl.
+             
+             Fixed UMRs and leak in Perl_pmtrans()
+             
+             Several leaks an UMRs fixed, mainly in the area of Perl_pmtrans and
+             associated UTFied tr/// code.  Also fixed scoping leak of
+             PL_reg_start_tmp.
+             
+             newATTRSUB leaks when an attempt to redefine the active sort sub is
+             made.
+     Branch: maint-5.6/perl
+	  !> op.c regcomp.c
+____________________________________________________________________________
+[  8757] By: alanbur                               on 2001/02/10  17:56:46
+        Log: Resynchronised with parent
+     Branch: maint-5.6/pureperl
+	  +> README.bs2000
+	   - README.posix-bc
+	   ! gv.c perl.c sv.c
+	  !> MANIFEST README.hpux README.vmesa installhtml
+	  !> lib/Math/Complex.pm lib/Pod/Find.pm pod/buildtoc.PL
+	  !> pod/perl.pod pod/perlapi.pod pod/perlboot.pod pod/perlcall.pod
+	  !> pod/perlfaq2.pod pod/perlfaq3.pod pod/perlfaq9.pod
+	  !> pod/perlmodlib.PL pod/perlobj.pod pod/perlport.pod
+	  !> pod/perlre.pod pod/perltoc.pod pod/perltoot.pod
+	  !> pod/perltootc.pod win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  8756] By: alanbur                               on 2001/02/10  17:51:15
+        Log: newATTRSUB leaks when an attempt to redefine the active sort sub is
+             made.
+     Branch: maint-5.6/pureperl
+	   ! op.c
+____________________________________________________________________________
+[  8755] By: jhi                                   on 2001/02/09  22:41:35
+        Log: Upgrade to CPAN 1.59_54, from Andreas König.
+     Branch: perl
+	   ! lib/CPAN.pm lib/CPAN/FirstTime.pm
+____________________________________________________________________________
+[  8754] By: jhi                                   on 2001/02/09  22:29:20
+        Log: Upgrade to Text-Tabs+Wrap-2001.0131 from David Muir Sharnoff.
+             
+             Didn't upgrade the fill.t since it has a dependency to File::Slurp
+             purely for debugging purposes, the actual test hasn't changed.
+     Branch: perl
+	   ! lib/Text/Tabs.pm lib/Text/Wrap.pm t/lib/texttabs.t
+	   ! t/lib/textwrap.t
+____________________________________________________________________________
+[  8753] By: jhi                                   on 2001/02/09  20:17:50
+        Log: Integrate change #8682 from maintperl.
+             
+             IRIX hints fix from Scott Henry, get Configure -Dcc="cc -64 -mips3"
+             to work correctly.
+     Branch: perl
+	  !> hints/irix_6.sh
+____________________________________________________________________________
+[  8752] By: jhi                                   on 2001/02/09  20:00:46
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[  8751] By: nick                                  on 2001/02/09  19:48:37
+        Log: Integrate mainline
+     Branch: perlio
+	  +> README.bs2000 t/lib/cgi-esc.t
+	   - README.posix-bc
+	  !> (integrate 53 files)
+____________________________________________________________________________
 [  8750] By: nick                                  on 2001/02/09  19:25:16
         Log: Subject: RE: Biannual Competition to Improve Hashing Function
              From: Fisher Mark <fisherm@tce.com>
