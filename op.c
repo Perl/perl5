@@ -3130,6 +3130,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		&& (left->op_private & OPpLVAL_INTRO))
 	{
 	    op_free(right);
+	    left->op_flags &= ~(OPf_REF|OPf_SPECIAL);
 	    return left;
 	}
 	curop = list(force_list(left));
