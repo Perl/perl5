@@ -139,10 +139,8 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 #endif
     ptr = PerlMem_realloc(where,size);
 
-    DEBUG_m( {
-	PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) rfree\n",where,PL_an++);
-	PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) realloc %ld bytes\n",ptr,PL_an++,(long)size);
-    } )
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) rfree\n",where,PL_an++));
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) realloc %ld bytes\n",ptr,PL_an++,(long)size));
 
     if (ptr != Nullch)
 	return ptr;

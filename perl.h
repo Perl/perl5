@@ -1949,7 +1949,10 @@ Gid_t getegid (void);
 #  if defined(PERL_OBJECT)
 #    define DEBUG_m(a) if (PL_debug & 128)	a
 #  else
-#    define DEBUG_m(a) if (PERL_GET_INTERP && PL_debug & 128)	a
+#    define DEBUG_m(a)  \
+    STMT_START {							\
+	if (PERL_GET_INTERP) { dTHX; if (PL_debug & 128) { a; } }	\
+    } STMT_END
 #  endif
 #define DEBUG_f(a) if (PL_debug & 256)	a
 #define DEBUG_r(a) if (PL_debug & 512)	a
