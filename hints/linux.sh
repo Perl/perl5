@@ -219,21 +219,22 @@ fi
 # For this reason I suggest using the much bug-fixed tcsh for globbing
 # where available.
 
-if [  ! "`csh -c 'echo $version' 2>/dev/null`"  ] 
-then
-    echo 'Real csh found (might break); looking for tcsh ...'
-    # Use ./UU/loc to find tcsh.  (We no longer run in the hints/ directory)
+# November 2001:  That warning's pretty old now and probably not so
+# relevant, especially since perl now uses File::Glob for globbing.
+# We'll still look for tcsh, but tone down the warnings.
+# Andy Dougherty, Nov. 6, 2001
+if $csh -c 'echo $version' >/dev/null 2>&1; then
+    echo 'Your csh is really tcsh.  Good.'
+else
     if xxx=`./UU/loc tcsh blurfl $pth`; $test -f "$xxx"; then
 	echo "Found tcsh.  I'll use it for globbing."
 	# We can't change Configure's setting of $csh, due to the way
 	# Configure handles $d_portable and commands found in $loclist.
 	# We can set the value for CSH in config.h by setting full_csh.
 	full_csh=$xxx
-    else
-	echo "Couldn't find tcsh.  BEWARE:  GLOBBING MIGHT BE BROKEN."
+    elif [ -f "$csh" ]; then
+	echo "Couldn't find tcsh.  Csh-based globbing might be broken."
     fi
-else
-    echo 'Your csh is really tcsh.  Good.'
 fi
 
 # Shimpei Yamashita <shimpei@socrates.patnet.caltech.edu>
