@@ -35,6 +35,19 @@ set `echo X "$libswanted "| sed -e 's/ bsd / /' -e 's/ net / /'`
 shift
 libswanted="$*"
 
+# If you have glibc, then report the version for ./myconfig bug reporting.
+# (Configure doesn't need to know the specific version since it just uses
+# gcc to load the library for all tests.)
+# Is this sufficiently robust for libc5 systems as well as
+# glibc-2.1.x systems?
+# We don't use __GLIBC__ and  __GLIBC_MINOR__ because they 
+# are insufficiently precise to distinguish things like
+# libc-2.0.6 and libc-2.0.7.
+if test -L /lib/libc.so.6; then
+    libc=`ls -l /lib/libc.so.6 | awk '{print $NF}'`
+    libc=/lib/$libc
+fi
+
 # Configure may fail to find lstat() since it's a static/inline
 # function in <sys/stat.h>.
 d_lstat=define
