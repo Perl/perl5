@@ -175,6 +175,7 @@ Getopt::Long
 Getopt::Std
 I18N::Langinfo
 I18N::LangTags
+I18N::LangTags::List
 I18N::Collate
 IO::Dir
 IO::File
@@ -199,8 +200,17 @@ MIME::Base64
 MIME::QuotedPrint
 Math::BigFloat
 Math::BigInt
+Math::BigInt::Calc
 Math::Complex
 Math::Trig
+Memoize
+Memoize::AnyDBM_File
+Memoize::Expire
+Memoize::ExpireFile
+Memoize::ExpireTest
+Memoize::NDBM_File
+Memoize::SDBM_File
+Memoize::Storable
 NDBM_File
 NEXT
 Net::hostent
@@ -230,6 +240,8 @@ Sys::Syslog
 Term::ANSIColor
 Test
 Test::Harness
+Test::More
+Test::Simple
 Test::ParseWords
 Text::Abbrev
 Text::Balanced
@@ -250,7 +262,7 @@ Time::Piece
 Time::gmtime
 Time::localtime
 Time::tm
-UnicodeUCD
+UnicodeCD
 UNIVERSAL
 User::grent
 User::pwent
