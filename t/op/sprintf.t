@@ -21,9 +21,9 @@ print '1..', scalar @tests, "\n";
 
 $SIG{__WARN__} = sub {
     if ($_[0] =~ /^Invalid conversion/) {
-    $w = ' INVALID'
+	$w = ' INVALID'
     } else {
-    warn @_;
+	warn @_;
     }
 };
 
@@ -34,17 +34,26 @@ for ($i = 1; @tests; $i++) {
     $x = sprintf(">$template<",
                  defined @$evalData ? @$evalData : $evalData);
     substr($x, -1, 0) = $w if $w;
-	($y = $x) =~ s/([Ee][-+])0(\d)/$1$2/g;	# $y has 3 exponent digits, not 2
+    # $y may have 3 exponent digits, not 2
+    my $r;
+    if (($y = $x) =~ s/([Ee][-+])0(\d)/$1$2/g) {
+	$y =~ s/^>\s+/>/;
+	$y =~ s/\s+<$/</;
+	$r = $result;
+	$r =~ s/^\s+//;
+	$r =~ s/\s+$//;
+    }
+
     if ($x eq ">$result<") {
         print "ok $i\n";
     }
-	elsif ($y eq ">$result<")				# Some C libraries always give
-	{										# three-digit exponent
-		print("ok $i >$result< $x # three-digit exponent accepted\n");
-	}
+    elsif ($r and $y eq ">$r<")	# Some C libraries always give
+    {				# three-digit exponent
+	print("ok $i >$result< $x # three-digit exponent accepted\n");
+    }
     else {
-    print("not ok $i >$template< >$data< >$result< $x",
-        $comment ? " # $comment\n" : "\n");
+	print("not ok $i >$template< >$data< >$result< $x",
+	    $comment ? " # $comment\n" : "\n");
     }
 }
     

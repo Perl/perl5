@@ -973,7 +973,7 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.win32 .\perlwin32.pod
 	$(MAKE) -f ..\win32\pod.mak converters
 	cd ..\lib
-	$(PERLEXE) lib.pm.PL
+	$(PERLEXE) lib_pm.PL
 	cd ..\win32
 	$(PERLEXE) $(PL2BAT) $(UTILS)
 
