@@ -63,7 +63,7 @@ sub parse_line {
 		   ^((?:\\.|[^\\"'])*?)		# an $unquoted text
 		    (\Z(?!\n)|(?-x:$delimiter)|(?!^)(?=["']))  
 		    				# plus EOL, delimiter, or quote
-		  //xs;				# extended layout
+		  //xs or return;		# extended layout
 	my($quote, $quoted, $unquoted, $delim) = ($1, $2, $3, $4);
 	return() unless( defined($quote) || length($unquoted) || length($delim));
 

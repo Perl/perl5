@@ -8,7 +8,7 @@ BEGIN {
 use warnings;
 use Text::ParseWords;
 
-print "1..21\n";
+print "1..22\n";
 
 @words = shellwords(qq(foo "bar quiz" zoo));
 print "not " if $words[0] ne 'foo';
@@ -125,3 +125,10 @@ $string = qq{"field1"\x{1234}"field2\\\x{1234}still field2"\x{1234}"field3"};
 $result = join('|', parse_line("\x{1234}", 0, $string));
 print "not " unless $result eq "field1|field2\x{1234}still field2|field3";
 print "ok 21\n";
+
+# missing quote after matching regex used to hang after change #22997
+"1234" =~ /(1)(2)(3)(4)/;
+$string = qq{"missing quote};
+$result = join('|', shellwords($string));
+print "not " unless $result eq "";
+print "ok 22\n";
