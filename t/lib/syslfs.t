@@ -15,6 +15,7 @@ BEGIN {
 }
 
 use strict;
+
 our @s;
 our $fail;
 
@@ -173,13 +174,12 @@ sub offset ($$) {
     my $offset_is = eval $offset_will_be;
     unless ($offset_is == $offset_want) {
         print "# bad offset $offset_is, want $offset_want\n";
+	my ($offset_func) = ($offset_will_be =~ /^(\w+)/);
 	if (unpack("L", pack("L", $offset_want)) == $offset_is) {
-	    my($offset_func) = ($offset_will_be =~ /^(\w+)/);
 	    print "# 32-bit wraparound suspected in $offset_func() since\n";
-	    print "# $offset_want cast into 32 bits is $offset_is.\n";
+	    print "# $offset_want cast into 32 bits equals $offset_is.\n";
 	} elsif ($offset_want - unpack("L", pack("L", $offset_want)) - 1
-	         == $offset_is){
-	    my($offset_func) = ($offset_will_be =~ /^(\w+)/);
+	         == $offset_is) {
 	    print "# 32-bit wraparound suspected in $offset_func() since\n";
 	    printf "# %s - unpack('L', pack('L', %s)) - 1 equals %s.\n",
 	        $offset_want,
@@ -192,7 +192,7 @@ sub offset ($$) {
 
 print "1..17\n";
 
-my $fail = 0;
+$fail = 0;
 
 fail unless $s[7] == 5_000_000_003;	# exercizes pp_stat
 print "ok 1\n";
