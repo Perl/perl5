@@ -188,7 +188,7 @@ sub chdir_init {
 }
 
 sub chdir {
-    my $newdir = @? ? shift : '';	# allow for no arg (chdir to HOME dir)
+    my $newdir = @_ ? shift : '';	# allow for no arg (chdir to HOME dir)
     $newdir =~ s|///*|/|g unless $^O eq 'MSWin32';
     chdir_init() unless $chdir_init;
     return 0 unless CORE::chdir $newdir;
