@@ -168,10 +168,10 @@ extern long sdbm_hash proto((char *, int));
 #	define free    Perl_free
 #   endif
 
-    Malloc_t malloc _((MEM_SIZE nbytes));
-    Malloc_t calloc _((MEM_SIZE elements, MEM_SIZE size));
-    Malloc_t realloc _((Malloc_t where, MEM_SIZE nbytes));
-    Free_t   free _((Malloc_t where));
+    Malloc_t malloc proto((MEM_SIZE nbytes));
+    Malloc_t calloc proto((MEM_SIZE elements, MEM_SIZE size));
+    Malloc_t realloc proto((Malloc_t where, MEM_SIZE nbytes));
+    Free_t   free proto((Malloc_t where));
 
 #endif /* MYMALLOC && (HIDEMYMALLOC || EMBEDMYMALLOC) */
 
@@ -188,7 +188,7 @@ extern long sdbm_hash proto((char *, int));
 #ifdef HAS_MEMCPY
 #  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
 #    ifndef memcpy
-        extern char * memcpy _((char*, char*, int));
+        extern char * memcpy proto((char*, char*, int));
 #    endif
 #  endif
 #else
@@ -204,7 +204,7 @@ extern long sdbm_hash proto((char *, int));
 #ifdef HAS_MEMSET
 #  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
 #    ifndef memset
-	extern char *memset _((char*, int, int));
+	extern char *memset proto((char*, int, int));
 #    endif
 #  endif
 #  define memzero(d,l) memset(d,0,l)
@@ -225,7 +225,7 @@ extern long sdbm_hash proto((char *, int));
 #if defined(HAS_MEMCMP) && defined(HAS_SANE_MEMCMP)
 #  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
 #    ifndef memcmp
-	extern int memcmp _((char*, char*, int));
+	extern int memcmp proto((char*, char*, int));
 #    endif
 #  endif
 #  ifdef BUGGY_MSC
@@ -239,7 +239,7 @@ extern long sdbm_hash proto((char *, int));
 #	else
 #	    define memcmp Perl_my_memcmp
 #	endif
-	extern int memcmp _((char*, char*, int));
+	extern int memcmp proto((char*, char*, int));
 #   endif
 #endif /* HAS_MEMCMP */
 
