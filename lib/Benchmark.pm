@@ -269,6 +269,35 @@ calls like these:
 Caching is off by default, as it can (usually slightly) decrease
 accuracy and does not usually noticably affect runtimes.
 
+=head1 EXAMPLES
+
+For example,
+
+   use Benchmark;$x=3;cmpthese(-5,{a=>sub{$x*$x},b=>sub{$x**2}})
+
+outputs something like this:
+
+   Benchmark: running a, b, each for at least 5 CPU seconds...
+	    a: 10 wallclock secs ( 5.14 usr +  0.13 sys =  5.27 CPU) @ 3835055.60/s (n=20210743)
+	    b:  5 wallclock secs ( 5.41 usr +  0.00 sys =  5.41 CPU) @ 1574944.92/s (n=8520452)
+	  Rate    b    a
+   b 1574945/s   -- -59%
+   a 3835056/s 144%   --
+
+while 
+
+   use Benchmark;
+   $x=3;
+   $r=timethese(-5,{a=>sub{$x*$x},b=>sub{$x**2}},'none');
+   cmpthese($r);
+
+outputs something like this:
+
+          Rate    b    a
+   b 1559428/s   -- -62%
+   a 4152037/s 166%   --
+
+
 =head1 INHERITANCE
 
 Benchmark inherits from no other class, except of course

@@ -672,7 +672,7 @@ DllExport DIR *
 win32_opendir(char *filename)
 {
     dTHXo;
-    DIR			*p;
+    DIR			*dirp;
     long		len;
     long		idx;
     char		scanname[MAX_PATH+3];
@@ -682,7 +682,7 @@ win32_opendir(char *filename)
     HANDLE		fh;
     char		buffer[MAX_PATH*2];
     WCHAR		wbuffer[MAX_PATH];
-    char*		ptr;		
+    char*		ptr;
 
     len = strlen(filename);
     if (len > MAX_PATH)
@@ -693,9 +693,7 @@ win32_opendir(char *filename)
 	return NULL;
 
     /* Get us a DIR structure */
-    Newz(1303, p, 1, DIR);
-    if (p == NULL)
-	return NULL;
+    Newz(1303, dirp, 1, DIR);
 
     /* Create the search pattern */
     strcpy(scanname, filename);
@@ -719,11 +717,25 @@ win32_opendir(char *filename)
     else {
 	fh = FindFirstFileA(scanname, &aFindData);
     }
+    dirp->handle = fh;
     if (fh == INVALID_HANDLE_VALUE) {
+	DWORD err = GetLastError();
 	/* FindFirstFile() fails on empty drives! */
-	if (GetLastError() == ERROR_FILE_NOT_FOUND)
-	    return p;
-	Safefree( p);
+	switch (err) {
+	case ERROR_FILE_NOT_FOUND:
+	    return dirp;
+	case ERROR_NO_MORE_FILES:
+	case ERROR_PATH_NOT_FOUND:
+	    errno = ENOENT;
+	    break;
+	case ERROR_NOT_ENOUGH_MEMORY:
+	    errno = ENOMEM;
+	    break;
+	default:
+	    errno = EINVAL;
+	    break;
+	}
+	Safefree(dirp);
 	return NULL;
     }
 
@@ -738,39 +750,16 @@ win32_opendir(char *filename)
 	ptr = aFindData.cFileName;
     }
     idx = strlen(ptr)+1;
-    New(1304, p->start, idx, char);
-    if (p->start == NULL)
-	Perl_croak_nocontext("opendir: malloc failed!\n");
-    strcpy(p->start, ptr);
-    p->nfiles++;
-
-    /* loop finding all the files that match the wildcard
-     * (which should be all of them in this directory!).
-     * the variable idx should point one past the null terminator
-     * of the previous string found.
-     */
-    while (USING_WIDE()
-	    ? FindNextFileW(fh, &wFindData)
-	    : FindNextFileA(fh, &aFindData)) {
-	if (USING_WIDE()) {
-	    W2AHELPER(wFindData.cFileName, buffer, sizeof(buffer));
-	}
-	/* ptr is set above to the correct area */
-	len = strlen(ptr);
-	/* bump the string table size by enough for the
-	 * new name and it's null terminator
-	 */
-	Renew(p->start, idx+len+1, char);
-	if (p->start == NULL)
-	    Perl_croak_nocontext("opendir: malloc failed!\n");
-	strcpy(&p->start[idx], ptr);
-	p->nfiles++;
-	idx += len+1;
-    }
-    FindClose(fh);
-    p->size = idx;
-    p->curr = p->start;
-    return p;
+    if (idx < 256)
+	dirp->size = 128;
+    else
+	dirp->size = idx;
+    New(1304, dirp->start, dirp->size, char);
+    strcpy(dirp->start, ptr);
+    dirp->nfiles++;
+    dirp->end = dirp->curr = dirp->start;
+    dirp->end += idx;
+    return dirp;
 }
 
 
@@ -780,8 +769,7 @@ win32_opendir(char *filename)
 DllExport struct direct *
 win32_readdir(DIR *dirp)
 {
-    int         len;
-    static int  dummy = 0;
+    long         len;
 
     if (dirp->curr) {
 	/* first set up the structure to return */
@@ -790,14 +778,51 @@ win32_readdir(DIR *dirp)
 	dirp->dirstr.d_namlen = len;
 
 	/* Fake an inode */
-	dirp->dirstr.d_ino = dummy++;
+	dirp->dirstr.d_ino = dirp->curr - dirp->start;
 
-	/* Now set up for the nDllExport call to readdir */
+	/* Now set up for the next call to readdir */
 	dirp->curr += len + 1;
-	if (dirp->curr >= (dirp->start + dirp->size)) {
-	    dirp->curr = NULL;
-	}
+	if (dirp->curr >= dirp->end) {
+	    dTHXo;
+	    char*		ptr;
+	    BOOL		res;
+	    WIN32_FIND_DATAW	wFindData;
+	    WIN32_FIND_DATAA	aFindData;
+	    char		buffer[MAX_PATH*2];
 
+	    /* finding the next file that matches the wildcard
+	     * (which should be all of them in this directory!).
+	     */
+	    if (USING_WIDE()) {
+		res = FindNextFileW(dirp->handle, &wFindData);
+		if (res) {
+		    W2AHELPER(wFindData.cFileName, buffer, sizeof(buffer));
+		    ptr = buffer;
+		}
+	    }
+	    else {
+		res = FindNextFileA(dirp->handle, &aFindData);
+		if (res)
+		    ptr = aFindData.cFileName;
+	    }
+	    if (res) {
+		long endpos = dirp->end - dirp->start;
+		long newsize = endpos + strlen(ptr) + 1;
+		/* bump the string table size by enough for the
+		 * new name and it's null terminator */
+		while (newsize > dirp->size) {
+		    long curpos = dirp->curr - dirp->start;
+		    dirp->size *= 2;
+		    Renew(dirp->start, dirp->size, char);
+		    dirp->curr = dirp->start + curpos;
+		}
+		strcpy(dirp->start + endpos, ptr);
+		dirp->end = dirp->start + newsize;
+		dirp->nfiles++;
+	    }
+	    else
+		dirp->curr = NULL;
+	}
 	return &(dirp->dirstr);
     } 
     else
@@ -808,17 +833,17 @@ win32_readdir(DIR *dirp)
 DllExport long
 win32_telldir(DIR *dirp)
 {
-    return (long) dirp->curr;
+    return (dirp->curr - dirp->start);
 }
 
 
 /* Seekdir moves the string pointer to a previously saved position
- *(Saved by telldir).
+ * (returned by telldir).
  */
 DllExport void
 win32_seekdir(DIR *dirp, long loc)
 {
-    dirp->curr = (char *)loc;
+    dirp->curr = dirp->start + loc;
 }
 
 /* Rewinddir resets the string pointer to the start */
@@ -833,6 +858,8 @@ DllExport int
 win32_closedir(DIR *dirp)
 {
     dTHXo;
+    if (dirp->handle != INVALID_HANDLE_VALUE)
+	FindClose(dirp->handle);
     Safefree(dirp->start);
     Safefree(dirp);
     return 1;

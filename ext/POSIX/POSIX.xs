@@ -3858,28 +3858,35 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
 	    ** If there is a better way to make it portable, go ahead by
 	    ** all means.
 	    */
-	    if ( ( len > 0 && len < sizeof(tmpbuf) )
-	    		|| ( len == 0 && strlen(fmt) == 0 ) ) {
+	    if ((len > 0 && len < sizeof(tmpbuf)) || (len == 0 && *fmt == '\0'))
 		ST(0) = sv_2mortal(newSVpv(tmpbuf, len));
-	    } else {
+            else {
 		/* Possibly buf overflowed - try again with a bigger buf */
-		int	bufsize = strlen(fmt) + sizeof(tmpbuf);
+                int     fmtlen = strlen(fmt);
+		int	bufsize = fmtlen + sizeof(tmpbuf);
 		char* 	buf;
 		int	buflen;
 
 		New(0, buf, bufsize, char);
-		while( buf ) {
+		while (buf) {
 		    buflen = strftime(buf, bufsize, fmt, &mytm);
-		    if ( buflen > 0 && buflen < bufsize ) break;
+		    if (buflen > 0 && buflen < bufsize)
+                        break;
+                    /* heuristic to prevent out-of-memory errors */
+                    if (bufsize > 100*fmtlen) {
+                        Safefree(buf);
+                        buf = NULL;
+                        break;
+                    }
 		    bufsize *= 2;
 		    Renew(buf, bufsize, char);
 		}
-		if ( buf ) {
+		if (buf) {
 		    ST(0) = sv_2mortal(newSVpvn(buf, buflen));
 		    Safefree(buf);
-		} else {
-		    ST(0) = sv_2mortal(newSVpvn(tmpbuf, len));
 		}
+                else
+		    ST(0) = sv_2mortal(newSVpvn(tmpbuf, len));
 	    }
 	}
 
