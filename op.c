@@ -2285,6 +2285,7 @@ OP *o;
 	sv_setpv(curstname,"<none>");
 	curstash = Nullhv;
     }
+    hints |= HINT_BLOCK_SCOPE;
     copline = NOLINE;
     expect = XSTATE;
 }
