@@ -97,7 +97,7 @@ CCLIBDIR	*= $(CCHOME)\lib
 #
 # specify space-separated list of extra directories to look for libraries
 #
-EXTRALIBDIRS	*=
+EXTRALIBDIRS	*= $(CCHOME)\i386-mingw32\lib
 
 #
 # set this to point to cmd.exe (only needed if you use some
