@@ -330,13 +330,17 @@ SV* sv;
 }
 #endif
 
+static bool in_clean_objs = FALSE;
+
 void
 sv_clean_objs()
 {
+    in_clean_objs = TRUE;
 #ifndef DISABLE_DESTRUCTOR_KLUDGE
     visit(do_clean_named_objs);
 #endif
     visit(do_clean_objs);
+    in_clean_objs = FALSE;
 }
 
 static void
@@ -348,14 +352,14 @@ SV* sv;
     SvREFCNT_dec(sv);
 }
 
-static int in_clean_all = 0;
+static bool in_clean_all = FALSE;
 
 void
 sv_clean_all()
 {
-    in_clean_all = 1;
+    in_clean_all = TRUE;
     visit(do_clean_all);
-    in_clean_all = 0;
+    in_clean_all = FALSE;
 }
 
 void
@@ -2560,6 +2564,7 @@ register SV *nsv;
     }
     SvREFCNT(sv) = 0;
     sv_clear(sv);
+    assert(!SvREFCNT(sv));
     StructCopy(nsv,sv,SV);
     SvREFCNT(sv) = refcnt;
     SvFLAGS(nsv) |= SVTYPEMASK;		/* Mark as freed */
@@ -2608,7 +2613,7 @@ register SV *sv;
 		--sv_objcount;	/* XXX Might want something more general */
 	}
 	if (SvREFCNT(sv)) {
-	    SV *ret;  
+	    SV *ret;
 	    if ( perldb
 		 && (ret = perl_get_sv("DB::ret", FALSE))
 		 && SvROK(ret) && SvRV(ret) == sv && SvREFCNT(sv) == 1) {
@@ -2616,8 +2621,12 @@ register SV *sv;
 		SvRV(ret) = 0;
 		SvROK_off(ret);
 		SvREFCNT(sv) = 0;
-	    } else {
-		croak("DESTROY created new reference to dead object");
+	    }
+	    else {
+		if (in_clean_objs)
+		    croak("DESTROY created new reference to dead object");
+		/* DESTROY gave object new lease on life */
+		return;
 	    }
 	}
     }
@@ -2760,7 +2769,8 @@ SV *sv;
     }
 #endif
     sv_clear(sv);
-    del_SV(sv);
+    if (! SvREFCNT(sv))
+	del_SV(sv);
 }
 
 STRLEN
