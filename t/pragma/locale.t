@@ -278,7 +278,7 @@ Norsk Norwegian:no no\@nynorsk:no:1 15
 Occitan:oc:es:1 15
 Polski Polish:pl:pl:2
 Rumanian:ro:ro:2
-Russki Russian:ru:ru su ua:5 koi8 koi8r KOI8-R koi8u cp1251
+Russki Russian:ru:ru su ua:5 koi8 koi8r KOI8-R koi8u cp1251 cp866
 Serbski Serbian:sr:yu:5
 Slovak:sk:sk:2
 Slovene Slovenian:sl:si:2

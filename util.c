@@ -514,7 +514,7 @@ S_stdize_locale(pTHX_ char *locs)
 
 		if (u[1] == 0) {
 		    STRLEN len = u - s;
-		    Move(t + 1, locs, len, char);
+		    Move(s + 1, locs, len, char);
 		    locs[len] = 0;
 		    okay = TRUE;
 		}
