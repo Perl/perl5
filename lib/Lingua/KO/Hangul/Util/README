@@ -1,0 +1,44 @@
+Lingua/KO/Hangul/Util version 0.02
+==================================
+
+SYNOPSIS
+
+  use Lingua::KO::Hangul::Util;
+
+  decomposeHangul(0xAC00);
+    # (0x1100,0x1161) or "\x{1100}\x{1161}"
+
+  composeHangul("\x{1100}\x{1161}");
+    # "\x{AC00}"
+
+  getHangulName(0xAC00);
+    # "HANGUL SYLLABLE GA"
+
+  parseHangulName("HANGUL SYLLABLE GA");
+    # 0xAC00
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+Perl 5.006 or later
+
+COPYRIGHT AND LICENCE
+
+SADAHIRO Tomoyuki
+
+  bqw10602@nifty.com
+
+  http://homepage1.nifty.com/nomenclator/perl/
+
+  Copyright(C) 2001, SADAHIRO Tomoyuki. Japan. All rights reserved.
+
+  This program is free software; you can redistribute it and/or 
+  modify it under the same terms as Perl itself.

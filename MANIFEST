@@ -945,6 +945,10 @@ lib/IPC/Open3.t			See if IPC::Open3 works
 lib/IPC/SysV.t			See if IPC::SysV works
 lib/less.pm			For "use less"
 lib/lib_pm.PL			For "use lib", produces lib/lib.pm
+lib/Lingua/KO/Hangul/Util/Changes	Lingua::KO::Hangul::Util
+lib/Lingua/KO/Hangul/Util/README	Lingua::KO::Hangul::Util
+lib/Lingua/KO/Hangul/Util/t/test.t		Lingua::KO::Hangul::Util
+lib/Lingua/KO/Hangul/Util.pm		Lingua::KO::Hangul::Util
 lib/locale.pm			For "use locale"
 lib/locale.t			See if locale support works
 lib/Locale/Codes/t/all.t	See if Locale::Codes work
@@ -1175,7 +1179,19 @@ lib/Time/localtime.pm		By-name interface to Perl's builtin localtime
 lib/Time/localtime.t		Test for Time::localtime
 lib/Time/tm.pm			Internal object for Time::{gm,local}time
 lib/timelocal.pl		Perl library supporting inverse of localtime, gmtime
+lib/Unicode/Collate.pm		Unicode::Collate
+lib/Unicode/Collate/Changes	Unicode::Collate
+lib/Unicode/Collate/keys.txt	Unicode::Collate
+lib/Unicode/Collate/README	Unicode::Collate
+lib/Unicode/Collate/t/test.t	Unicode::Collate
+lib/Unicode/Normalize.pm	Unicode::Normalize
+lib/Unicode/Normalize/Changes	Unicode::Normalize
+lib/Unicode/Normalize/README	Unicode::Normalize
+lib/Unicode/Normalize/t/norm.t	Unicode::Normalize
+lib/Unicode/Normalize/t/test.t	Unicode::Normalize
 lib/unicode/README		Explanation why this is there is.
+lib/Unicode/UCD.pm		Unicode character database
+lib/Unicode/UCD.t		See if Unicode character database works
 lib/unicore/ArabLink.pl		Unicode character database
 lib/unicore/ArabLnkGrp.pl	Unicode character database
 lib/unicore/ArabShap.txt	Unicode character database
@@ -1498,8 +1514,6 @@ lib/unicore/UCD.html		Unicode character database
 lib/unicore/Unicode.html	Unicode character database
 lib/unicore/Unicode.txt		Unicode character database
 lib/unicore/version		The version of the Unicode
-lib/Unicode/UCD.pm		Unicode character database
-lib/Unicode/UCD.t		See if Unicode character database works
 lib/UNIVERSAL.pm		Base class for ALL classes
 lib/User/grent.pm		By-name interface to Perl's builtin getgr*
 lib/User/grent.t		See if User::grwent works

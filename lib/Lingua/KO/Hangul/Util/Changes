@@ -1,0 +1,11 @@
+Revision history for Perl extension Lingua::KO::Hangul::Util.
+
+0.02  Sat Aug 11 00:16:02 2001
+	- fix SEE ALSO (the Unicode Normalization Forms is UAX #15)
+	- getHangulName and parseHangulName return
+	  a list (undef) of one element in list context.
+
+0.01  Fri Aug  3 21:25:11 2001
+	- original version; created by h2xs 1.21 with options
+		-A -X -n Lingua::KO::Hangul::Util
+

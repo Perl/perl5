@@ -1,0 +1,16 @@
+Revision history for Perl extension Unicode::Normalize.
+
+0.04  Wed Aug 15 19:02:41 2001
+	- fix: NFD("") and NFKD("") must return "", not but undef.
+
+0.03  Fri Aug 10 22:44:18 2001
+	- rename the module name to Unicode::Normalize.
+	- normalize takes two arguments.
+
+0.02  Thu Aug  9 22:56:36 2001
+	- add function normalize
+
+0.01  Mon Aug  6 21:45:11 2001
+	- original version; created by h2xs 1.21 with options
+		-A -X -n Text::Unicode::Normalize
+
