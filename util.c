@@ -1222,22 +1222,18 @@ mess(const char *pat, va_list *args)
     sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
     if (!SvCUR(sv) || *(SvEND(sv) - 1) != '\n') {
 	dTHR;
-	if (PL_dirty)
-	    sv_catpv(sv, dgd);
-	else {
-	    if (PL_curcop->cop_line)
-		sv_catpvf(sv, " at %_ line %ld",
-			  GvSV(PL_curcop->cop_filegv), (long)PL_curcop->cop_line);
-	    if (GvIO(PL_last_in_gv) && IoLINES(GvIOp(PL_last_in_gv))) {
-		bool line_mode = (RsSIMPLE(PL_rs) &&
-				  SvLEN(PL_rs) == 1 && *SvPVX(PL_rs) == '\n');
-		sv_catpvf(sv, ", <%s> %s %ld",
-			  PL_last_in_gv == PL_argvgv ? "" : GvNAME(PL_last_in_gv),
-			  line_mode ? "line" : "chunk", 
-			  (long)IoLINES(GvIOp(PL_last_in_gv)));
-	    }
-	    sv_catpv(sv, ".\n");
+	if (PL_curcop->cop_line)
+	    sv_catpvf(sv, " at %_ line %ld",
+		      GvSV(PL_curcop->cop_filegv), (long)PL_curcop->cop_line);
+	if (GvIO(PL_last_in_gv) && IoLINES(GvIOp(PL_last_in_gv))) {
+	    bool line_mode = (RsSIMPLE(PL_rs) &&
+			      SvCUR(PL_rs) == 1 && *SvPVX(PL_rs) == '\n');
+	    sv_catpvf(sv, ", <%s> %s %ld",
+		      PL_last_in_gv == PL_argvgv ? "" : GvNAME(PL_last_in_gv),
+		      line_mode ? "line" : "chunk", 
+		      (long)IoLINES(GvIOp(PL_last_in_gv)));
 	}
+	sv_catpv(sv, PL_dirty ? dgd : ".\n");
     }
     return sv;
 }
@@ -2828,11 +2824,11 @@ condpair_magic(SV *sv)
 	COND_INIT(&cp->owner_cond);
 	COND_INIT(&cp->cond);
 	cp->owner = 0;
-	LOCK_SV_MUTEX;
+	MUTEX_LOCK(&PL_cred_mutex);		/* XXX need separate mutex? */
 	mg = mg_find(sv, 'm');
 	if (mg) {
 	    /* someone else beat us to initialising it */
-	    UNLOCK_SV_MUTEX;
+	    MUTEX_UNLOCK(&PL_cred_mutex);	/* XXX need separate mutex? */
 	    MUTEX_DESTROY(&cp->mutex);
 	    COND_DESTROY(&cp->owner_cond);
 	    COND_DESTROY(&cp->cond);
@@ -2843,7 +2839,7 @@ condpair_magic(SV *sv)
 	    mg = SvMAGIC(sv);
 	    mg->mg_ptr = (char *)cp;
 	    mg->mg_len = sizeof(cp);
-	    UNLOCK_SV_MUTEX;
+	    MUTEX_UNLOCK(&PL_cred_mutex);	/* XXX need separate mutex? */
 	    DEBUG_S(WITH_THR(PerlIO_printf(PerlIO_stderr(),
 					   "%p: condpair_magic %p\n", thr, sv));)
 	}

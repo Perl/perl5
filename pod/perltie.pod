@@ -621,7 +621,9 @@ This is partially implemented now.
 
 A class implementing a tied filehandle should define the following
 methods: TIEHANDLE, at least one of PRINT, PRINTF, WRITE, READLINE, GETC,
-READ, and possibly CLOSE and DESTROY.
+READ, and possibly CLOSE and DESTROY.  The class can also provide: BINMODE, 
+OPEN, EOF, FILENO, SEEK, TELL - if the corresponding perl operators are
+used on the handle.
 
 It is especially useful when perl is embedded in some other program,
 where output to STDOUT and STDERR may have to be redirected in some

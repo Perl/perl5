@@ -87,6 +87,6 @@ By default, but can be redefined.
 
 =head1 SEE ALSO
 
-dbm(3), ndbm(3), DB_File(3)
+dbm(3), ndbm(3), DB_File(3), L<perldbmfilter>
 
 =cut

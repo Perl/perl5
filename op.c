@@ -4780,11 +4780,27 @@ ck_fun(OP *o)
 		    }
 		    else {
 			I32 flags = OPf_SPECIAL;
+			I32 private = 0;
 			/* is this op a FH constructor? */
-			if (is_handle_constructor(o,numargs))
-			    flags = 0;
+			if (is_handle_constructor(o,numargs)) {
+			    flags   = 0;                         
+			    /* Set a flag to tell rv2gv to vivify 
+			     * need to "prove" flag does not mean something
+			     * else already - NI-S 1999/05/07
+			     */ 
+			    private = OPpDEREF; 
+#if 0
+			    /* Helps with open($array[$n],...) 
+			       but is too simplistic - need to do selectively
+			    */
+			    mod(kid,type);
+#endif
+			}
 			kid->op_sibling = 0;
 			kid = newUNOP(OP_RV2GV, flags, scalar(kid));
+			if (private) {
+			    kid->op_private |= private;
+			}
 		    }
 		    kid->op_sibling = sibl;
 		    *tokid = kid;
@@ -5572,7 +5588,7 @@ peep(register OP *o)
 	    char *key;
 	    STRLEN keylen;
 	
-	    if (o->op_private & (OPpDEREF_HV|OPpDEREF_AV|OPpLVAL_INTRO)
+	    if ((o->op_private & (OPpLVAL_INTRO))
 		|| ((BINOP*)o)->op_last->op_type != OP_CONST)
 		break;
 	    rop = (UNOP*)((BINOP*)o)->op_first;

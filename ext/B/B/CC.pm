@@ -92,7 +92,7 @@ sub init_hash { map { $_ => 1 } @_ }
 #
 %skip_lexicals = init_hash qw(pp_enter pp_enterloop);
 %skip_invalidate = init_hash qw(pp_enter pp_enterloop);
-%need_curcop = init_hash qw(pp_rv2gv  pp_bless pp_repeat pp_sort pp_caller pp_reset pp_rv2cv pp_entereval pp_require pp_dofile pp_entertry pp_enterloop pp_enteriter );
+%need_curcop = init_hash qw(pp_rv2gv  pp_bless pp_repeat pp_sort pp_caller pp_reset pp_rv2cv pp_entereval pp_require pp_dofile pp_entertry pp_enterloop pp_enteriter pp_entersub pp_enter);
 
 sub debug {
     if ($debug_runtime) {
@@ -399,12 +399,22 @@ sub load_pad {
 	}
 	$pad[$ix] = new B::Stackobj::Padsv ($type, $flags, $ix,
 					    "i_$name", "d_$name");
-	declare("IV", $type == T_INT ? "i_$name = 0" : "i_$name");
-	declare("double", $type == T_DOUBLE ? "d_$name = 0" : "d_$name");
+
 	debug sprintf("PL_curpad[$ix] = %s\n", $pad[$ix]->peek) if $debug_pad;
     }
 }
 
+sub declare_pad {
+    my $ix;
+    for ($ix = 1; $ix <= $#pad; $ix++) {
+	my $type = $pad[$ix]->{type};
+	declare("IV", $type == T_INT ? 
+		sprintf("%s=0",$pad[$ix]->{iv}):$pad[$ix]->{iv}) if $pad[$ix]->save_int;
+	declare("double", $type == T_DOUBLE ?
+		 sprintf("%s = 0",$pad[$ix]->{nv}):$pad[$ix]->{nv} )if $pad[$ix]->save_double;
+
+    }
+}
 #
 # Debugging stuff
 #
@@ -684,6 +694,60 @@ sub numeric_binop {
     return $op->next;
 }
 
+sub pp_ncmp {
+    my ($op) = @_;
+    if ($op->flags & OPf_STACKED) {
+	my $right = pop_numeric();
+	if (@stack >= 1) {
+	    my $left = top_numeric();
+	    runtime sprintf("if (%s > %s){",$left,$right);
+		$stack[-1]->set_int(1);
+	    $stack[-1]->write_back();
+	    runtime sprintf("}else if (%s < %s ) {",$left,$right);
+		$stack[-1]->set_int(-1);
+	    $stack[-1]->write_back();
+	    runtime sprintf("}else if (%s == %s) {",$left,$right);
+		$stack[-1]->set_int(0);
+	    $stack[-1]->write_back();
+	    runtime sprintf("}else {"); 
+		$stack[-1]->set_sv("&PL_sv_undef");
+	    runtime "}";
+	} else {
+	    my $rightruntime = new B::Pseudoreg ("double", "rnv");
+	    runtime(sprintf("$$rightruntime = %s;",$right));
+	    runtime sprintf(qq/if ("TOPn" > %s){/,$rightruntime);
+	    runtime sprintf("sv_setiv(TOPs,1);");
+	    runtime sprintf(qq/}else if ( "TOPn" < %s ) {/,$$rightruntime);
+	    runtime sprintf("sv_setiv(TOPs,-1);");
+	    runtime sprintf(qq/} else if ("TOPn" == %s) {/,$$rightruntime);
+	    runtime sprintf("sv_setiv(TOPs,0);");
+	    runtime sprintf(qq/}else {/); 
+	    runtime sprintf("sv_setiv(TOPs,&PL_sv_undef;");
+	    runtime "}";
+	}
+    } else {
+       	my $targ = $pad[$op->targ];
+	 my $right = new B::Pseudoreg ("double", "rnv");
+	 my $left = new B::Pseudoreg ("double", "lnv");
+	 runtime(sprintf("$$right = %s; $$left = %s;",
+			    pop_numeric(), pop_numeric));
+	runtime sprintf("if (%s > %s){",$$left,$$right);
+		$targ->set_int(1);
+		$targ->write_back();
+	runtime sprintf("}else if (%s < %s ) {",$$left,$$right);
+		$targ->set_int(-1);
+		$targ->write_back();
+	runtime sprintf("}else if (%s == %s) {",$$left,$$right);
+		$targ->set_int(0);
+		$targ->write_back();
+	runtime sprintf("}else {"); 
+		$targ->set_sv("&PL_sv_undef");
+	runtime "}";
+	push(@stack, $targ);
+    }
+    return $op->next;
+}
+
 sub sv_binop {
     my ($op, $operator, $flags) = @_;
     if ($op->flags & OPf_STACKED) {
@@ -779,7 +843,6 @@ BEGIN {
     my $modulo_op = infix_op("%");
     my $lshift_op = infix_op("<<");
     my $rshift_op = infix_op(">>");
-    my $ncmp_op = sub { "($_[0] > $_[1] ? 1 : ($_[0] < $_[1]) ? -1 : 0)" };
     my $scmp_op = prefix_op("sv_cmp");
     my $seq_op = prefix_op("sv_eq");
     my $sne_op = prefix_op("!sv_eq");
@@ -803,7 +866,6 @@ BEGIN {
     sub pp_multiply { numeric_binop($_[0], $multiply_op, INTS_CLOSED) }
     sub pp_divide { numeric_binop($_[0], $divide_op) }
     sub pp_modulo { int_binop($_[0], $modulo_op) } # differs from perl's
-    sub pp_ncmp { numeric_binop($_[0], $ncmp_op, INT_RESULT) }
 
     sub pp_left_shift { int_binop($_[0], $lshift_op) }
     sub pp_right_shift { int_binop($_[0], $rshift_op) }
@@ -933,6 +995,7 @@ sub pp_list {
 
 sub pp_entersub {
     my $op = shift;
+    $curcop->write_back;
     write_back_lexicals(REGISTER|TEMPORARY);
     write_back_stack();
     my $sym = doop($op);
@@ -980,7 +1043,7 @@ sub pp_leavewrite {
     my $sym = doop($op);
     # XXX Is this the right way to distinguish between it returning
     # CvSTART(cv) (via doform) and pop_return()?
-    runtime("if (PL_op) PL_op = (*PL_op->op_ppaddr)(ARGS);");
+    #runtime("if (PL_op) PL_op = (*PL_op->op_ppaddr)(ARGS);");
     runtime("SPAGAIN;");
     $know_op = 0;
     invalidate_lexicals(REGISTER|TEMPORARY);
@@ -1391,6 +1454,7 @@ sub cc {
     if ($debug_timings) {
 	warn sprintf("Saving runtime at %s\n", timing_info);
     }
+    declare_pad(@padlist) ;
     save_runtime();
 }
 

@@ -1414,6 +1414,15 @@ indicate the alternate name on the "make install" line, such as:
 
     make install PERLNAME=myperl
 
+You can separately change the base used for versioned names (like
+"perl5.005") by setting PERLNAME_VERBASE, like
+
+    make install PERLNAME=perl5 PERLNAME_VERBASE=perl
+
+This can be useful if you have to install perl as "perl5" (due to an
+ancient version in /usr/bin supplied by your vendor, eg).  Without this
+the versioned binary would be called "perl55.005".
+
 =head2 Installed files
 
 If you want to see exactly what will happen without installing

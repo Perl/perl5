@@ -12,7 +12,7 @@ require DynaLoader;
 
 @ISA = qw(Tie::Hash DynaLoader);
 
-$VERSION = "1.01";
+$VERSION = "1.02";
 
 bootstrap NDBM_File $VERSION;
 
@@ -35,6 +35,6 @@ NDBM_File - Tied access to ndbm files
 
 =head1 DESCRIPTION
 
-See L<perlfunc/tie>
+See L<perlfunc/tie>, L<perldbmfilter>
 
 =cut

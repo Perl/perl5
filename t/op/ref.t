@@ -241,11 +241,11 @@ print $$_,"\n";
     package A;
     sub new { bless {}, shift }
     DESTROY { print "# destroying 'A'\nok 51\n" }
-    package B;
+    package _B;
     sub new { bless {}, shift }
-    DESTROY { print "# destroying 'B'\nok 50\n"; bless shift, 'A' }
+    DESTROY { print "# destroying '_B'\nok 50\n"; bless shift, 'A' }
     package main;
-    my $b = B->new;
+    my $b = _B->new;
 }
 
 # test if $_[0] is properly protected in DESTROY()

@@ -8,7 +8,7 @@ require DynaLoader;
 
 @ISA = qw(Tie::Hash DynaLoader);
 
-$VERSION = "1.00" ;
+$VERSION = "1.01" ;
 
 bootstrap SDBM_File $VERSION;
 
@@ -30,6 +30,6 @@ SDBM_File - Tied access to sdbm files
 
 =head1 DESCRIPTION
 
-See L<perlfunc/tie>
+See L<perlfunc/tie>, L<perldbmfilter>
 
 =cut

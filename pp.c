@@ -214,7 +214,7 @@ PP(pp_padany)
 
 PP(pp_rv2gv)
 {
-    djSP; dTOPss;
+    djSP; dTOPss;  
 
     if (SvROK(sv)) {
       wasref:
@@ -242,6 +242,24 @@ PP(pp_rv2gv)
 		    goto wasref;
 	    }
 	    if (!SvOK(sv)) {
+		/* If this is a 'my' scalar and flag is set then vivify 
+		 * NI-S 1999/05/07
+		 */ 
+		if (PL_op->op_private & OPpDEREF) {
+		    GV *gv = (GV *) newSV(0);
+		    STRLEN len = 0;
+		    char *name = "";
+		    if (cUNOP->op_first->op_type == OP_PADSV) {
+			SV *padname = *av_fetch(PL_comppad_name, cUNOP->op_first->op_targ, 4);
+			name = SvPV(padname,len);                                                    
+		    }
+		    gv_init(gv, PL_curcop->cop_stash, name, len, 0);
+		    sv_upgrade(sv, SVt_RV);
+		    SvRV(sv) = (SV *) gv;
+		    SvROK_on(sv);
+		    SvSETMAGIC(sv);
+		    goto wasref;
+		}  
 		if (PL_op->op_flags & OPf_REF ||
 		    PL_op->op_private & HINT_STRICT_REFS)
 		    DIE(PL_no_usym, "a symbol");
@@ -637,7 +655,6 @@ PP(pp_gelem)
 PP(pp_study)
 {
     djSP; dPOPss;
-    register UNOP *unop = cUNOP;
     register unsigned char *s;
     register I32 pos;
     register I32 ch;
@@ -959,48 +976,104 @@ PP(pp_modulo)
 {
     djSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
     {
-      UV left;
-      UV right;
-      bool left_neg;
-      bool right_neg;
-      UV ans;
+	UV left;
+	UV right;
+	bool left_neg;
+	bool right_neg;
+	bool use_double = 0;
+	double dright;
+	double dleft;
 
-      if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)) {
-	IV i = SvIVX(POPs);
-	right = (right_neg = (i < 0)) ? -i : i;
-      }
-      else {
-	double n = POPn;
-	right = U_V((right_neg = (n < 0)) ? -n : n);
-      }
+	if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)) {
+	    IV i = SvIVX(POPs);
+	    right = (right_neg = (i < 0)) ? -i : i;
+	}
+	else {
+	    dright = POPn;
+	    use_double = 1;
+	    right_neg = dright < 0;
+	    if (right_neg)
+		dright = -dright;
+	}
 
-      if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)) {
-	IV i = SvIVX(POPs);
-	left = (left_neg = (i < 0)) ? -i : i;
-      }
-      else {
-	double n = POPn;
-	left = U_V((left_neg = (n < 0)) ? -n : n);
-      }
+	if (!use_double && SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)) {
+	    IV i = SvIVX(POPs);
+	    left = (left_neg = (i < 0)) ? -i : i;
+	}
+	else {
+	    dleft = POPn;
+	    if (!use_double) {
+	      use_double = 1;
+	      dright = right;
+	    }
+	    left_neg = dleft < 0;
+	    if (left_neg)
+		dleft = -dleft;
+	}
 
-      if (!right)
-	DIE("Illegal modulus zero");
+	if (use_double) {
+	    double dans;
 
-      ans = left % right;
-      if ((left_neg != right_neg) && ans)
-	ans = right - ans;
-      if (right_neg) {
-	/* XXX may warn: unary minus operator applied to unsigned type */
-	/* could change -foo to be (~foo)+1 instead	*/
-	if (ans <= ~((UV)IV_MAX)+1)
-	  sv_setiv(TARG, ~ans+1);
-	else
-	  sv_setnv(TARG, -(double)ans);
-      }
-      else
-	sv_setuv(TARG, ans);
-      PUSHTARG;
-      RETURN;
+#if 1
+	    /* Tried: DOUBLESIZE <= UV_SIZE = Precision of UV more than of NV.
+	     * But in fact this is an optimization - trunc may be slow */
+
+/* Somehow U_V is pessimized even if CASTFLAGS is 0 */
+#  if CASTFLAGS & 2
+#    define CAST_D2UV(d) U_V(d)
+#  else
+#    define CAST_D2UV(d) ((UV)(d))
+#  endif
+
+	    if (dright <= UV_MAX && dleft <= UV_MAX) {
+		right = CAST_D2UV(dright);
+		left  = CAST_D2UV(dleft);
+		goto do_uv;
+	    }
+#endif
+
+	    /* Backward-compatibility clause: */
+#if 0
+	    dright = trunc(dright + 0.5);
+	    dleft  = trunc(dleft + 0.5);
+#else
+	    dright = floor(dright + 0.5);
+	    dleft  = floor(dleft + 0.5);
+#endif
+
+	    if (!dright)
+		DIE("Illegal modulus zero");
+
+	    dans = fmod(dleft, dright);
+	    if ((left_neg != right_neg) && dans)
+		dans = dright - dans;
+	    if (right_neg)
+		dans = -dans;
+	    sv_setnv(TARG, dans);
+	}
+	else {
+	    UV ans;
+
+	do_uv:
+	    if (!right)
+		DIE("Illegal modulus zero");
+
+	    ans = left % right;
+	    if ((left_neg != right_neg) && ans)
+		ans = right - ans;
+	    if (right_neg) {
+		/* XXX may warn: unary minus operator applied to unsigned type */
+		/* could change -foo to be (~foo)+1 instead	*/
+		if (ans <= ~((UV)IV_MAX)+1)
+		    sv_setiv(TARG, ~ans+1);
+		else
+		    sv_setnv(TARG, -(double)ans);
+	    }
+	    else
+		sv_setuv(TARG, ans);
+	}
+	PUSHTARG;
+	RETURN;
     }
 }
 

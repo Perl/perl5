@@ -82,7 +82,7 @@ my %expect = (
     'Foo::Bar::Baz' => 'b1:1,b2:2,b3:3,foo:4,bar:5,baz:6',
 );
 
-print "1..", int(keys %expect)+3, "\n";
+print "1..", int(keys %expect)+5, "\n";
 my $testno = 0;
 while (my($class, $exp) = each %expect) {
    no strict 'refs';
@@ -110,3 +110,17 @@ print "not " unless $@ && $@ =~ /^No such field "notthere"/;
 print "ok ", ++$testno, "\n";
 
 #fields::_dump();
+
+# check if 
+{
+    package Foo;
+    use fields qw(foo bar);
+    sub new { bless [], $_[0]; }
+
+    package main;
+    my Foo $a = Foo->new();
+    $a->{foo} = ['a', 'ok ' . ++$testno, 'c'];
+    $a->{bar} = { A => 'ok ' . ++$testno };
+    print $a->{foo}[1], "\n";
+    print $a->{bar}->{A}, "\n";
+}

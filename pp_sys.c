@@ -494,6 +494,7 @@ PP(pp_open)
     SV *sv;
     char *tmps;
     STRLEN len;
+    MAGIC *mg;
 
     if (MAXARG > 1)
 	sv = POPs;
@@ -506,6 +507,35 @@ PP(pp_open)
 	DIE(PL_no_usym, "filehandle");
     if (GvIOp(gv))
 	IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT;
+
+#if 0 /* no undef means tmpfile() yet */
+    if (sv == &PL_sv_undef) {
+#ifdef PerlIO
+	PerlIO *fp = PerlIO_tmpfile();
+#else
+	PerlIO *fp = tmpfile();
+#endif                   
+	if (fp != Nullfp && do_open(gv, "+>&", 3, FALSE, 0, 0, fp)) 
+	    PUSHi( (I32)PL_forkprocess );
+	else
+	    RETPUSHUNDEF;
+	RETURN;
+    }   
+#endif /* no undef means tmpfile() yet */
+
+
+    if (mg = SvTIED_mg((SV*)gv, 'q')) {
+	PUSHMARK(SP);
+	XPUSHs(SvTIED_obj((SV*)gv, mg));
+	XPUSHs(sv);
+	PUTBACK;
+	ENTER;
+	perl_call_method("OPEN", G_SCALAR);
+	LEAVE;
+	SPAGAIN;
+	RETURN;
+    }
+
     tmps = SvPV(sv, len);
     if (do_open(gv, tmps, len, FALSE, O_RDONLY, 0, Nullfp))
 	PUSHi( (I32)PL_forkprocess );
@@ -603,9 +633,23 @@ PP(pp_fileno)
     GV *gv;
     IO *io;
     PerlIO *fp;
+    MAGIC  *mg;
+
     if (MAXARG < 1)
 	RETPUSHUNDEF;
     gv = (GV*)POPs;
+
+    if (gv && (mg = SvTIED_mg((SV*)gv, 'q'))) {
+	PUSHMARK(SP);
+	XPUSHs(SvTIED_obj((SV*)gv, mg));
+	PUTBACK;
+	ENTER;
+	perl_call_method("FILENO", G_SCALAR);
+	LEAVE;
+	SPAGAIN;
+	RETURN;
+    }
+
     if (!gv || !(io = GvIO(gv)) || !(fp = IoIFP(io)))
 	RETPUSHUNDEF;
     PUSHi(PerlIO_fileno(fp));
@@ -643,11 +687,23 @@ PP(pp_binmode)
     GV *gv;
     IO *io;
     PerlIO *fp;
+    MAGIC *mg;
 
     if (MAXARG < 1)
 	RETPUSHUNDEF;
 
-    gv = (GV*)POPs;
+    gv = (GV*)POPs; 
+
+    if (gv && (mg = SvTIED_mg((SV*)gv, 'q'))) {
+	PUSHMARK(SP);
+	XPUSHs(SvTIED_obj((SV*)gv, mg));
+	PUTBACK;
+	ENTER;
+	perl_call_method("BINMODE", G_SCALAR);
+	LEAVE;
+	SPAGAIN;
+	RETURN;
+    }
 
     EXTEND(SP, 1);
     if (!(io = GvIO(gv)) || !(fp = IoIFP(io)))
@@ -1337,6 +1393,8 @@ PP(pp_sysopen)
     sv = POPs;
     gv = (GV *)POPs;
 
+    /* Need TIEHANDLE method ? */
+
     tmps = SvPV(sv, len);
     if (do_open(gv, tmps, len, TRUE, mode, perm, Nullfp)) {
 	IoLINES(GvIOp(gv)) = 0;
@@ -1606,11 +1664,24 @@ PP(pp_eof)
 {
     djSP;
     GV *gv;
+    MAGIC *mg;
 
     if (MAXARG <= 0)
 	gv = PL_last_in_gv;
     else
 	gv = PL_last_in_gv = (GV*)POPs;
+
+    if (gv && (mg = SvTIED_mg((SV*)gv, 'q'))) {
+	PUSHMARK(SP);
+	XPUSHs(SvTIED_obj((SV*)gv, mg));
+	PUTBACK;
+	ENTER;
+	perl_call_method("EOF", G_SCALAR);
+	LEAVE;
+	SPAGAIN;
+	RETURN;
+    }
+
     PUSHs(boolSV(!gv || do_eof(gv)));
     RETURN;
 }
@@ -1618,12 +1689,25 @@ PP(pp_eof)
 PP(pp_tell)
 {
     djSP; dTARGET;
-    GV *gv;
+    GV *gv;     
+    MAGIC *mg;
 
     if (MAXARG <= 0)
 	gv = PL_last_in_gv;
     else
 	gv = PL_last_in_gv = (GV*)POPs;
+
+    if (gv && (mg = SvTIED_mg((SV*)gv, 'q'))) {
+	PUSHMARK(SP);
+	XPUSHs(SvTIED_obj((SV*)gv, mg));
+	PUTBACK;
+	ENTER;
+	perl_call_method("TELL", G_SCALAR);
+	LEAVE;
+	SPAGAIN;
+	RETURN;
+    }
+
     PUSHi( do_tell(gv) );
     RETURN;
 }
@@ -1639,8 +1723,23 @@ PP(pp_sysseek)
     GV *gv;
     int whence = POPi;
     Off_t offset = POPl;
+    MAGIC *mg;
 
     gv = PL_last_in_gv = (GV*)POPs;
+
+    if (gv && (mg = SvTIED_mg((SV*)gv, 'q'))) {
+	PUSHMARK(SP);
+	XPUSHs(SvTIED_obj((SV*)gv, mg));
+	XPUSHs(sv_2mortal(newSViv((IV) offset)));
+	XPUSHs(sv_2mortal(newSViv((IV) whence)));
+	PUTBACK;
+	ENTER;
+	perl_call_method("SEEK", G_SCALAR);
+	LEAVE;
+	SPAGAIN;
+	RETURN;
+    }
+
     if (PL_op->op_type == OP_SEEK)
 	PUSHs(boolSV(do_seek(gv, offset, whence)));
     else {

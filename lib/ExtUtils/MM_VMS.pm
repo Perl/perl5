@@ -2315,7 +2315,7 @@ $(MAP_TARGET) :: $(MAKE_APERL_FILE)
     else          { $extralist = ''; }
     # Let ExtUtils::Liblist find the necessary libs for us (but skip PerlShr)
     # that's what we're building here).
-    push @optlibs, grep { !/PerlShr/i } split +($self->ext())[2];
+    push @optlibs, grep { !/PerlShr/i } split ' ', +($self->ext())[2];
     if ($libperl) {
 	unless (-f $libperl || -f ($libperl = $self->catfile($Config{'installarchlib'},'CORE',$libperl))) {
 	    print STDOUT "Warning: $libperl not found\n";

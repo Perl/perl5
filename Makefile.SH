@@ -279,8 +279,8 @@ miniperlmain$(OBJ_EXT): miniperlmain.c
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
 perlmain.c: miniperlmain.c config.sh $(FIRSTMAKEFILE)
-	sh writemain $(DYNALOADER) $(static_ext) > tmp
-	sh mv-if-diff tmp perlmain.c
+	sh writemain $(DYNALOADER) $(static_ext) > writemain.tmp
+	sh mv-if-diff writemain.tmp perlmain.c
 
 perlmain$(OBJ_EXT): perlmain.c
 	$(CCCMD) $(PLDLFLAGS) $*.c
@@ -389,12 +389,12 @@ preplibrary: miniperl lib/Config.pm $(plextract)
 # (If trying to create a new port and having problems with the configpm script, 
 # try 'make minitest' and/or commenting out the tests at the end of configpm.)
 lib/Config.pm: config.sh miniperl configpm
-	$(LDLIBPTH) ./miniperl configpm tmp
-	sh mv-if-diff tmp $@
+	$(LDLIBPTH) ./miniperl configpm configpm.tmp
+	sh mv-if-diff configpm.tmp $@
 
 lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl minimod.pl lib/Config.pm
-	$(LDLIBPTH) ./miniperl minimod.pl > tmp
-	sh mv-if-diff tmp $@
+	$(LDLIBPTH) ./miniperl minimod.pl > minimod.tmp
+	sh mv-if-diff minimod.tmp $@
 
 lib/re.pm: ext/re/re.pm
 	rm -f $@
@@ -595,11 +595,21 @@ makedepend: makedepend.SH config.sh
 test-prep: miniperl perl preplibrary utilities $(dynamic_ext) $(nonxs_ext)
 	cd t && (rm -f perl$(EXE_EXT); $(LNS) ../perl$(EXE_EXT) perl$(EXE_EXT))
 
+# Second branch is for testing without a tty or controling terminal.
+# See t/op/stat.t
 test check: test-prep
-	cd t && $(LDLIBPTH) ./perl TEST </dev/tty
+	if (true </dev/tty) >/dev/null 2>&1; then \
+	  cd t && $(LDLIBPTH) ./perl TEST </dev/tty; \
+	else \
+	  cd t && PERL_SKIP_TTY_TEST=1 $(LDLIBPTH) ./perl TEST; \
+	fi
 
 utest ucheck: test-prep
-	cd t && $(LDLIBPTH) ./perl UTEST </dev/tty
+	if (true </dev/tty) >/dev/null 2>&1; then \
+	  cd t && $(LDLIBPTH) ./perl UTEST </dev/tty; \
+	else \
+	  cd t && PERL_SKIP_TTY_TEST=1 $(LDLIBPTH) ./perl UTEST; \
+	fi
 
 # For testing without a tty or controling terminal. See t/op/stat.t
 test-notty: test-prep

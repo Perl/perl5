@@ -429,13 +429,20 @@ if ($opt_f) {
 
    # Look for our function
    my $found = 0;
+   my $inlist = 0;
    while (<PFUNC>) {
        if (/^=item\s+\Q$search_string\E\b/o)  {
 	   $found = 1;
        } elsif (/^=item/) {
-	   last if $found > 1;
+	   last if $found > 1 and not $inlist;
        }
        next unless $found;
+       if (/^=over/) {
+	   ++$inlist;
+       }
+       elsif (/^=back/) {
+	   --$inlist;
+       }
        push @pod, $_;
        ++$found if /^\w/;	# found descriptive text
    }

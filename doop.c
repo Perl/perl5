@@ -831,6 +831,8 @@ do_chomp(register SV *sv)
 
     if (RsSNARF(PL_rs))
 	return 0;
+    if (RsRECORD(PL_rs))
+      return 0;
     count = 0;
     if (SvTYPE(sv) == SVt_PVAV) {
 	register I32 i;

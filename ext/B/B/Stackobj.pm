@@ -30,6 +30,9 @@ sub VALID_DOUBLE ()	{ 0x02 }
 sub VALID_SV ()		{ 0x04 }
 sub REGISTER ()		{ 0x08 } # no implicit write-back when calling subs
 sub TEMPORARY ()	{ 0x10 } # no implicit write-back needed at all
+sub SAVE_INT () 	{ 0x20 } #if int part needs to be saved at all
+sub SAVE_DOUBLE () 	{ 0x40 } #if double part needs to be saved at all
+
 
 #
 # Callback for runtime code generation
@@ -59,7 +62,7 @@ sub as_int {
     my $obj = shift;
     if (!($obj->{flags} & VALID_INT)) {
 	$obj->load_int;
-	$obj->{flags} |= VALID_INT;
+	$obj->{flags} |= VALID_INT|SAVE_INT;
     }
     return $obj->{iv};
 }
@@ -68,7 +71,7 @@ sub as_double {
     my $obj = shift;
     if (!($obj->{flags} & VALID_DOUBLE)) {
 	$obj->load_double;
-	$obj->{flags} |= VALID_DOUBLE;
+	$obj->{flags} |= VALID_DOUBLE|SAVE_DOUBLE;
     }
     return $obj->{nv};
 }
@@ -137,14 +140,14 @@ sub set_int {
     my ($obj, $expr) = @_;
     runtime("$obj->{iv} = $expr;");
     $obj->{flags} &= ~(VALID_SV | VALID_DOUBLE);
-    $obj->{flags} |= VALID_INT;
+    $obj->{flags} |= VALID_INT|SAVE_INT;
 }
 
 sub set_double {
     my ($obj, $expr) = @_;
     runtime("$obj->{nv} = $expr;");
     $obj->{flags} &= ~(VALID_SV | VALID_INT);
-    $obj->{flags} |= VALID_DOUBLE;
+    $obj->{flags} |= VALID_DOUBLE|SAVE_DOUBLE;
 }
 
 sub set_numeric {
@@ -170,6 +173,8 @@ sub set_sv {
 @B::Stackobj::Padsv::ISA = 'B::Stackobj';
 sub B::Stackobj::Padsv::new {
     my ($class, $type, $extra_flags, $ix, $iname, $dname) = @_;
+    $extra_flags |= SAVE_INT if $extra_flags & VALID_INT;
+    $extra_flags |= SAVE_DOUBLE if $extra_flags & VALID_DOUBLE;
     bless {
 	type => $type,
 	flags => VALID_SV | $extra_flags,
@@ -186,14 +191,23 @@ sub B::Stackobj::Padsv::load_int {
     } else {
 	runtime("$obj->{iv} = SvIV($obj->{sv});");
     }
-    $obj->{flags} |= VALID_INT;
+    $obj->{flags} |= VALID_INT|SAVE_INT;
 }
 
 sub B::Stackobj::Padsv::load_double {
     my $obj = shift;
     $obj->write_back;
     runtime("$obj->{nv} = SvNV($obj->{sv});");
-    $obj->{flags} |= VALID_DOUBLE;
+    $obj->{flags} |= VALID_DOUBLE|SAVE_DOUBLE;
+}
+sub B::Stackobj::Padsv::save_int {
+    my $obj = shift;
+    return $obj->{flags} & SAVE_INT;
+}
+
+sub B::Stackobj::Padsv::save_double {
+    my $obj = shift;
+    return $obj->{flags} & SAVE_DOUBLE;
 }
 
 sub B::Stackobj::Padsv::write_back {

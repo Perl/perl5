@@ -50,6 +50,7 @@ of sections:
     perlbot		Perl OO tricks and examples
     perlipc		Perl interprocess communication
     perlthrtut		Perl threads tutorial
+    perldbmfilter	Perl DBM Filters
 
     perldebug		Perl debugging
     perldiag		Perl diagnostic messages

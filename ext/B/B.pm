@@ -188,7 +188,7 @@ sub walksymtable {
     local(*glob);
     $prefix = '' unless defined $prefix;
     while (($sym, $ref) = each %$symref) {
-	*glob = $ref;
+	*glob = "*main::".$prefix.$sym;
 	if ($sym =~ /::$/) {
 	    $sym = $prefix . $sym;
 	    if ($sym ne "main::" && &$recurse($sym)) {

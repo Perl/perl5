@@ -39,6 +39,14 @@ my $exe_ext = $Config{exe_ext};
 # Allow ``make install PERLNAME=something_besides_perl'':
 my $perl = defined($ENV{PERLNAME}) ? $ENV{PERLNAME} : 'perl';
 
+# This is the base used for versioned names, like "perl5.005".
+# It's separate because a common use of $PERLNAME is to install
+# perl as "perl5", if that's used as base for versioned files you
+# get "perl55.005".
+my $perl_verbase = defined($ENV{PERLNAME_VERBASE})
+		    ? $ENV{PERLNAME_VERBASE}
+		    : $perl;
+
 while (@ARGV) {
     $nonono = 1 if $ARGV[0] eq '-n';
     $versiononly = 1 if $ARGV[0] eq '-v';
@@ -171,20 +179,20 @@ elsif ($^O eq 'mpeix') {
     link($Config{perlpath}, "$installbin/perl$ver$exe_ext");
 }
 elsif ($^O ne 'dos') {
-    safe_unlink("$installbin/$perl$ver$exe_ext");
-    copy("perl$exe_ext", "$installbin/$perl$ver$exe_ext");
-    strip("$installbin/perl$ver$exe_ext") if $^O =~ /^(rhapsody)$/;
-    chmod(0755, "$installbin/$perl$ver$exe_ext");
+    safe_unlink("$installbin/$perl_verbase$ver$exe_ext");
+    copy("perl$exe_ext", "$installbin/$perl_verbase$ver$exe_ext");
+    strip("$installbin/$perl_verbase$ver$exe_ext") if $^O =~ /^(rhapsody)$/;
+    chmod(0755, "$installbin/$perl_verbase$ver$exe_ext");
 }
 else {
     safe_unlink("$installbin/$perl.exe");
     copy("perl.exe", "$installbin/$perl.exe");
 }
 
-safe_unlink("$installbin/s$perl$ver$exe_ext");
+safe_unlink("$installbin/s$perl_verbase$ver$exe_ext");
 if ($d_dosuid) {
-    copy("suidperl$exe_ext", "$installbin/s$perl$ver$exe_ext");
-    chmod(04711, "$installbin/s$perl$ver$exe_ext");
+    copy("suidperl$exe_ext", "$installbin/s$perl_verbase$ver$exe_ext");
+    chmod(04711, "$installbin/s$perl_verbase$ver$exe_ext");
 }
 
 # Install library files.
@@ -253,9 +261,11 @@ if (! $versiononly && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_VM
 	# We don't want another cloned copy.
         symlink($Config{perlpath}, "$installbin/perl$exe_ext");
     } else {
-	link("$installbin/$perl$ver$exe_ext", "$installbin/$perl$exe_ext");
+	link("$installbin/$perl_verbase$ver$exe_ext",
+		"$installbin/$perl$exe_ext");
     }
-    link("$installbin/s$perl$ver$exe_ext", "$installbin/suid$perl$exe_ext") 
+    link("$installbin/s$perl_verbase$ver$exe_ext",
+	    "$installbin/suid$perl$exe_ext") 
       if $d_dosuid;
 }
 
