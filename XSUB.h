@@ -80,14 +80,14 @@
 #endif
 
 #ifdef PERL_OBJECT
-#include "ObjXSub.h"
+#include "objXSUB.h"
 #ifndef NO_XSLOCKS
 #ifdef WIN32
-#include "XSLock.h"
+#include "XSlock.h"
 #endif  /* WIN32 */
 #endif  /* NO_XSLOCKS */
 #else
 #ifdef PERL_CAPI
-#include "PerlCAPI.h"
+#include "perlCAPI.h"
 #endif
 #endif	/* PERL_OBJECT */

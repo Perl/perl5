@@ -267,7 +267,7 @@ EXTUTILSDIR	= $(LIBDIR)\extutils
 !IF "$(OBJECT)" == "-DPERL_OBJECT"
 PERLIMPLIB	= ..\perlcore.lib
 PERLDLL		= ..\perlcore.dll
-CAPILIB		= $(COREDIR)\PerlCAPI.lib
+CAPILIB		= $(COREDIR)\perlCAPI.lib
 !ELSE
 PERLIMPLIB	= ..\perl.lib
 PERLDLL		= ..\perl.dll
@@ -724,15 +724,15 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 	cd ..\..\win32
 
 !IF "$(OBJECT)" == "-DPERL_OBJECT"
-PerlCAPI.cpp : $(MINIPERL)
+perlCAPI.cpp : $(MINIPERL)
 	$(MINIPERL) GenCAPI.pl $(COREDIR)
 
-PerlCAPI$(o) : PerlCAPI.cpp
+perlCAPI$(o) : perlCAPI.cpp
 	$(CC) $(CFLAGS_O) $(RUNTIME) -UPERLDLL -c \
-	    $(OBJOUT_FLAG)PerlCAPI$(o) PerlCAPI.cpp
+	    $(OBJOUT_FLAG)perlCAPI$(o) perlCAPI.cpp
 
-$(CAPILIB) : PerlCAPI.cpp PerlCAPI$(o)
-	lib /OUT:$(CAPILIB) PerlCAPI$(o)
+$(CAPILIB) : perlCAPI.cpp perlCAPI$(o)
+	lib /OUT:$(CAPILIB) perlCAPI$(o)
 !ENDIF
 
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
@@ -912,7 +912,7 @@ clean :
 	-@erase perlmain$(o)
 	-@erase config.w32
 	-@erase /f config.h
-	-@erase PerlCAPI.cpp
+	-@erase perlCAPI.cpp
 	-@erase $(GLOBEXE)
 	-@erase $(PERLEXE)
 	-@erase $(PERLDLL)

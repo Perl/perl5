@@ -1,9 +1,9 @@
 
 # creates a C API file from proto.h
 # takes one argument, the path to lib/CORE directory.
-# creates 2 files: "PerlCAPI.cpp" and "PerlCAPI.h".
+# creates 2 files: "perlCAPI.cpp" and "perlCAPI.h".
 
-my $hdrfile = "$ARGV[0]\\PerlCAPI.h";
+my $hdrfile = "$ARGV[0]\\perlCAPI.h";
 my $infile = '..\\proto.h';
 my $embedfile = '..\\embed.h';
 my $separateObj = 0;
@@ -81,8 +81,8 @@ if (!open(INFILE, "<$infile")) {
     return 1;
 }
 
-if (!open(OUTFILE, ">PerlCAPI.cpp")) {
-    print "open of PerlCAPI.cpp failed: $!\n";
+if (!open(OUTFILE, ">perlCAPI.cpp")) {
+    print "open of perlCAPI.cpp failed: $!\n";
     return 1;
 }
 

@@ -12,7 +12,7 @@ INSTALL			Detailed installation instructions
 INTERN.h		Included before domestic .h files
 MANIFEST		This list of files
 Makefile.SH		A script that generates Makefile
-ObjXSub.h		Scoping macros for Perl Object in extensions
+objXSUB.h		Scoping macros for Perl Object in extensions
 Policy_sh.SH		Hold site-wide preferences between Configure runs.
 Porting/Contract	Social contract for contributed modules in Perl core
 Porting/Glossary	Glossary of config.sh variables
@@ -38,7 +38,7 @@ README.vms		Notes about VMS port
 README.win32		Notes about Win32 port
 Todo			The Wishlist
 Todo-5.005		What needs doing before 5.005 release
-XSLock.h		Include file for extensions built with PERL_OBJECT defined
+XSlock.h		Include file for extensions built with PERL_OBJECT defined
 XSUB.h			Include file for extension subroutines
 av.c			Array value code
 av.h			Array value header

@@ -425,7 +425,7 @@ PERL95EXE	= ..\perl95.exe
 .IF "$(OBJECT)" == "-DPERL_OBJECT"
 PERLIMPLIB	*= ..\perlcore$(a)
 PERLDLL		= ..\perlcore.dll
-CAPILIB		= $(COREDIR)\PerlCAPI$(a)
+CAPILIB		= $(COREDIR)\perlCAPI$(a)
 .ELSE
 PERLIMPLIB	*= ..\perl$(a)
 PERLDLL		= ..\perl.dll
@@ -889,24 +889,24 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 
 .IF "$(OBJECT)" == "-DPERL_OBJECT"
 
-PerlCAPI.cpp : $(MINIPERL)
+perlCAPI.cpp : $(MINIPERL)
 	$(MINIPERL) GenCAPI.pl $(COREDIR)
 
-PerlCAPI$(o) : PerlCAPI.cpp
+perlCAPI$(o) : perlCAPI.cpp
 .IF "$(CCTYPE)" == "BORLAND"
-	$(CC) $(CFLAGS_O) -c $(OBJOUT_FLAG)PerlCAPI$(o) PerlCAPI.cpp
+	$(CC) $(CFLAGS_O) -c $(OBJOUT_FLAG)perlCAPI$(o) perlCAPI.cpp
 .ELIF "$(CCTYPE)" == "GCC"
-	$(CC) $(CFLAGS_O) -c $(OBJOUT_FLAG)PerlCAPI$(o) PerlCAPI.cpp
+	$(CC) $(CFLAGS_O) -c $(OBJOUT_FLAG)perlCAPI$(o) perlCAPI.cpp
 .ELSE
 	$(CC) $(CFLAGS_O) $(RUNTIME) -UPERLDLL -c \
-	    $(OBJOUT_FLAG)PerlCAPI$(o) PerlCAPI.cpp
+	    $(OBJOUT_FLAG)perlCAPI$(o) perlCAPI.cpp
 .ENDIF
 
-$(CAPILIB) : PerlCAPI.cpp PerlCAPI$(o)
+$(CAPILIB) : perlCAPI.cpp perlCAPI$(o)
 .IF "$(CCTYPE)" == "BORLAND"
-	$(LIB32) $(LIBOUT_FLAG)$(CAPILIB) +PerlCAPI$(o)
+	$(LIB32) $(LIBOUT_FLAG)$(CAPILIB) +perlCAPI$(o)
 .ELSE
-	$(LIB32) $(LIBOUT_FLAG)$(CAPILIB) PerlCAPI$(o)
+	$(LIB32) $(LIBOUT_FLAG)$(CAPILIB) perlCAPI$(o)
 .ENDIF
 
 .ENDIF
@@ -1068,7 +1068,7 @@ clean :
 	-@erase $(MINIPERL)
 	-@erase perlglob$(o)
 	-@erase perlmain$(o)
-	-@erase PerlCAPI.cpp
+	-@erase perlCAPI.cpp
 	-@erase config.w32
 	-@erase /f config.h
 	-@erase $(GLOBEXE)

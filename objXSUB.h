@@ -1,5 +1,5 @@
-#ifndef __ObjXSub_h__
-#define __ObjXSub_h__
+#ifndef __objXSUB_h__
+#define __objXSUB_h__
 
 /* Varibles */ 
 
@@ -2051,5 +2051,5 @@
 #define NtGetDebugScriptStr   pPerl->NtGetDebugScriptStr
 #endif /* WIN32 */
 
-#endif	/* __ObjXSub_h__ */ 
+#endif	/* __objXSUB_h__ */ 
 

@@ -75,11 +75,11 @@ pointer to the PERL_OBJECT. This pointer type is CPerlObj*. This is
 made transparent to extension developers by the following macros:
 	#define var pPerl->Perl_var
 	#define func pPerl->Perl_func
-	* these are done in ObjXSub.h
+	* these are done in objXSUB.h
 This requires that the extension be compiled as C++, which means
 that the code must be ANSI C and not K&R C. For K&R extensions,
 please see the C API notes located in Win32/GenCAPI.pl. This script
-creates a PerlCAPI.lib that provides a K & R compatible C interface
+creates a perlCAPI.lib that provides a K & R compatible C interface
 to the PERL_OBJECT.
 2. Local variables and functions cannot have the same name as perl's
 variables or functions since the macros will redefine these. Look for

@@ -1,5 +1,5 @@
-#ifndef __XSLock_h__
-#define __XSLock_h__
+#ifndef __XSlock_h__
+#define __XSlock_h__
 
 class XSLockManager
 {
