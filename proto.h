@@ -1002,7 +1002,7 @@ STATIC void*	S_Slab_Alloc(pTHX_ int m, size_t sz);
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
 STATIC void	S_find_beginning(pTHX);
 STATIC void	S_forbid_setid(pTHX_ char *);
-STATIC void	S_incpush(pTHX_ char *, int);
+STATIC void	S_incpush(pTHX_ char *, int, int);
 STATIC void	S_init_interp(pTHX);
 STATIC void	S_init_ids(pTHX);
 STATIC void	S_init_lexer(pTHX);

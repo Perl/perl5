@@ -3,11 +3,11 @@
 BEGIN {
    chdir 't' if -d 't';
    unshift @INC, '../lib';
-   print "1..13\n";
+   print "1..15\n";
 }
 
 use strict;
-use Fatal qw(open close);
+use Fatal qw(open close :void opendir);
 
 my $i = 1;
 eval { open FOO, '<lkjqweriuapofukndajsdlfjnvcvn' };
@@ -26,3 +26,11 @@ for ('$foo', "'$foo'", "*$foo", "\\*$foo") {
     print "not " if $@;
     print "ok $i\n"; ++$i;
 }
+
+eval { opendir FOO, 'lkjqweriuapofukndajsdlfjnvcvn' };
+print "not " unless $@ =~ /^Can't open/;
+print "ok $i\n"; ++$i;
+
+eval { my $a = opendir FOO, 'lkjqweriuapofukndajsdlfjnvcvn' };
+print "not " if $@ =~ /^Can't open/;
+print "ok $i\n"; ++$i;

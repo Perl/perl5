@@ -431,8 +431,8 @@ byterun(pTHXo_ struct bytestream bs)
 	    }
 	  case INSN_XCV_FLAGS:		/* 52 */
 	    {
-		U8 arg;
-		BGET_U8(arg);
+		U16 arg;
+		BGET_U16(arg);
 		CvFLAGS(bytecode_sv) = arg;
 		break;
 	    }

@@ -2385,10 +2385,12 @@ PP(pp_goto)
 		gotoprobe = PL_main_root;
 		break;
 	    }
-	    retop = dofindlabel(gotoprobe, label,
-				enterops, enterops + GOTO_DEPTH);
-	    if (retop)
-		break;
+	    if (gotoprobe) {
+		retop = dofindlabel(gotoprobe, label,
+				    enterops, enterops + GOTO_DEPTH);
+		if (retop)
+		    break;
+	    }
 	    PL_lastgotoprobe = gotoprobe;
 	}
 	if (!retop)

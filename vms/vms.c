@@ -68,6 +68,9 @@
 #  define prv$v_sysprv  prv$r_prvdef_bits0.prv$v_sysprv
 #endif
 
+#if defined(NEED_AN_H_ERRNO)
+dEXT int h_errno;
+#endif
 
 struct itmlst_3 {
   unsigned short int buflen;

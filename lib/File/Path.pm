@@ -73,7 +73,7 @@ than VMS is settled.  (defaults to FALSE)
 =back
 
 It returns the number of files successfully deleted.  Symlinks are
-treated as ordinary files.
+simply deleted and not followed.
 
 B<NOTE:> If the third parameter is not TRUE, C<rmtree> is B<unsecure>
 in the face of failure or interruption.  Files and directories which

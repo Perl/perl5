@@ -30,8 +30,22 @@ typedef IV IV64;
 	}				\
     } STMT_END
 
-#define BGET_comment_t(arg) \
+#ifdef BYTELOADER_LOG_COMMENTS
+#  define BGET_comment_t(arg) \
+    STMT_START {							\
+	char buf[1024];							\
+	int i = 0;							\
+	do {								\
+	    arg = BGET_FGETC();						\
+	    buf[i++] = (char)arg;					\
+	} while (arg != '\n' && arg != EOF);				\
+	buf[i] = '\0';							\
+	PerlIO_printf(PerlIO_stderr(), "%s", buf);			\
+    } STMT_END
+#else
+#  define BGET_comment_t(arg) \
 	do { arg = BGET_FGETC(); } while (arg != '\n' && arg != EOF)
+#endif
 
 /*
  * In the following, sizeof(IV)*4 is just a way of encoding 32 on 64-bit-IV
@@ -113,7 +127,8 @@ typedef IV IV64;
 	((PMOP*)o)->op_pmregexp = arg ? \
 		CALLREGCOMP(aTHX_ arg, arg + bytecode_pv.xpv_cur, ((PMOP*)o)) : 0
 #define BSET_newsv(sv, arg)	sv = NEWSV(666,0); SvUPGRADE(sv, arg)
-#define BSET_newop(o, arg)	o = (OP*)safemalloc(optype_size[arg])
+#define BSET_newop(o, arg)	((o = (OP*)safemalloc(optype_size[arg])), \
+				 memzero((char*)o,optype_size[arg]))
 #define BSET_newopn(o, arg) STMT_START {	\
 	OP *oldop = o;				\
 	BSET_newop(o, arg);			\

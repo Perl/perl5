@@ -1412,10 +1412,13 @@ sub process_text {
 
 sub process_text1($$;$$){
     my( $lev, $rstr, $func, $closing ) = @_;
-    $lev++ unless defined $func;
     my $res = '';
 
-    $func ||= '';
+    unless (defined $func) {
+	$func = '';
+	$lev++;
+    }
+
     if( $func eq 'B' ){
 	# B<text> - boldface
 	$res = '<STRONG>' . process_text1( $lev, $rstr ) . '</STRONG>';
@@ -1625,7 +1628,7 @@ sub go_ahead($$$){
 #
 sub emit_C($;$$){
     my( $text, $nocode, $args ) = @_;
-    $args ||= '';
+    $args = '' unless defined $args;
     my $res;
     my( $url, $fid ) = coderef( undef(), $text );
 
