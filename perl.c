@@ -3427,7 +3427,7 @@ STATIC void
 S_procself_val(pTHX_ SV *sv, char *arg0)
 {
     char buf[MAXPATHLEN];
-    int len = readlink("/proc/self/exe", buf, sizeof(buf) - 1);
+    int len = readlink(PROCSELFEXE_PATH, buf, sizeof(buf) - 1);
     if (len > 0) {
 	sv_setpvn(sv,buf,len);
     }
