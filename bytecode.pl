@@ -479,7 +479,7 @@ push_end	PL_endav				svindex		x
 curstash	*(SV**)&PL_curstash			svindex
 defstash	*(SV**)&PL_defstash			svindex
 data		none					U8		x
-incav		*(SV**)&GvAVn(PL_incgv)			svindex
+incav		*(SV**)&PL_incgv			svindex
 load_glob	none					svindex		x
 #ifdef USE_ITHREADS
 regex_padav	*(SV**)&PL_regex_padav			svindex

@@ -1031,7 +1031,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		*(SV**)&GvAVn(PL_incgv) = arg;
+		*(SV**)&PL_incgv = arg;
 		break;
 	    }
 	  case INSN_LOAD_GLOB:		/* 139 */
