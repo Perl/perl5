@@ -3727,14 +3727,14 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
     StartupInfo.hStdInput	= tbl.childStdIn;
     StartupInfo.hStdOutput	= tbl.childStdOut;
     StartupInfo.hStdError	= tbl.childStdErr;
-    if (StartupInfo.hStdInput != INVALID_HANDLE_VALUE &&
-	StartupInfo.hStdOutput != INVALID_HANDLE_VALUE &&
-	StartupInfo.hStdError != INVALID_HANDLE_VALUE)
+    if (StartupInfo.hStdInput == INVALID_HANDLE_VALUE &&
+	StartupInfo.hStdOutput == INVALID_HANDLE_VALUE &&
+	StartupInfo.hStdError == INVALID_HANDLE_VALUE)
     {
-	StartupInfo.dwFlags |= STARTF_USESTDHANDLES;
+	create |= CREATE_NEW_CONSOLE;
     }
     else {
-	create |= CREATE_NEW_CONSOLE;
+	StartupInfo.dwFlags |= STARTF_USESTDHANDLES;
     }
     if (w32_use_showwindow) {
         StartupInfo.dwFlags |= STARTF_USESHOWWINDOW;
