@@ -980,7 +980,7 @@ EOP
 			} 
 			$pretype = [$1];
 			next CMD; };
-                   $cmd =~ /^y\s*(\d*)\s*(.*)/ && do {
+                   $cmd =~ /^y(?:\s+(\d*)\s*(.*))?$/ && do {
                        eval { require PadWalker; PadWalker->VERSION(0.08) }
                          or &warn($@ =~ /locate/
                             ? "PadWalker module not found - please install\n"
@@ -990,7 +990,7 @@ EOP
                        defined &main::dumpvar
                           or print $OUT "dumpvar.pl not available.\n"
                           and next CMD;
-                       my @vars = split(' ', $2);
+                       my @vars = split(' ', $2 || '');
                        my $h = eval { PadWalker::peek_my(($1 || 0) + 1) };
                        $@ and $@ =~ s/ at .*//, &warn($@), next CMD;
                        my $savout = select($OUT);
