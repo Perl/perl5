@@ -981,6 +981,8 @@ S_sublex_start(pTHX)
 
 	    p = SvPV(sv, len);
 	    nsv = newSVpvn(p, len);
+            if (SvUTF8(sv))
+               SvUTF8_on(nsv);
 	    SvREFCNT_dec(sv);
 	    sv = nsv;
 	} 

@@ -224,7 +224,7 @@ private = preplibrary lib/ExtUtils/Miniperl.pm lib/Config.pm
 sh = Makefile.SH cflags.SH config_h.SH makeaperl.SH makedepend.SH \
 	makedir.SH myconfig.SH writemain.SH
 
-shextract = Makefile cflags config.h makeaperl makedepend \
+shextract = Makefile cflags config.h uconfig.h makeaperl makedepend \
 	makedir myconfig writemain
 
 # Files to be built with variable substitution after miniperl is
@@ -675,7 +675,7 @@ _mopup:
 	-rm -f perl.exp ext.libs extra.pods
 	-rm -f perl.export perl.dll perl.libexp perl.map perl.def
 	-rm -f perl.loadmap miniperl.loadmap perl.prelmap miniperl.prelmap
-	rm -f perl suidperl miniperl $(LIBPERL)
+	rm -f perl suidperl miniperl $(LIBPERL) libperl.* microperl
 
 # Do not 'make _tidy' directly.
 _tidy:
@@ -696,7 +696,7 @@ _cleaner:
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
 	$(LDLIBPTH) sh ext/util/make_ext realclean $$x MAKE=$(MAKE) ; \
 	done
-	rm -f *.orig */*.orig *~ */*~ core core.*perl.*.? *perl.core t/core t/core.perl.*.? t/*perl.core t/misctmp* t/tmp* t/c t/perl .?*.c so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
+	rm -f *.orig */*.orig *~ */*~ core core.*perl.*.? *perl.core t/core t/core.perl.*.? t/*perl.core t/misctmp* t/forktmp* t/tmp* t/c t/perl .?*.c so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
 	rm -rf $(addedbyconf)
 	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old
 	rm -f $(private)
