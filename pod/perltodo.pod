@@ -78,6 +78,33 @@ This should probably emit a warning (at least).
 
 The string position/offset cache is not optional. It should be.
 
+=head2 Unicode in Filenames
+
+chdir, chmod, chown, chroot, exec, glob, link, lstat, mkdir, open,
+opendir, qx, readdir, readlink, rename, rmdir, stat, symlink, sysopen,
+system, truncate, unlink, utime, -X.  All these could potentially accept
+Unicode filenames either as input or output (and in the case of system
+and qx Unicode in general, as input or output to/from the shell).
+Whether a filesystem - an operating system pair understands Unicode in
+filenames varies.
+
+Known combinations that have some level of understanding include
+Microsoft NTFS, Apple HFS+ (In Mac OS 9 and X) and Apple UFS (in Mac
+OS X), NFS v4 is rumored to be Unicode, and of course Plan 9.  How to
+create Unicode filenames, what forms of Unicode are accepted and used
+(UCS-2, UTF-16, UTF-8), what (if any) is the normalization form used,
+and so on, varies.  Finding the right level of interfacing to Perl
+requires some thought.  Remember that an OS does not implicate a
+filesystem.
+
+(The Windows -C command flag "wide API support" has been at least
+temporarily retired in 5.8.1, and the -C has been repurposed, see
+L<perlrun>.)
+
+=head2 Unicode in %ENV
+
+Currently the %ENV entries are always byte strings.
+
 =head1 Regexps
 
 =head2 regexp optimiser optional
@@ -85,7 +112,7 @@ The string position/offset cache is not optional. It should be.
 The regexp optimiser is not optional. It should configurable to be, to allow
 its performance to be measured, and its bugs to be easily demonstrated.
 
-=head2 common suffices/prefixes in regexps (trie optimization)
+=head2 common suffices/prefices in regexps (trie optimization)
 
 Currently, the user has to optimize C<foo|far> and C<foo|goo> into
 C<f(?:oo|ar)> and C<[fg]oo> by hand; this could be done automatically.
@@ -93,6 +120,9 @@ C<f(?:oo|ar)> and C<[fg]oo> by hand; this could be done automatically.
 =head1 POD
 
 =head2 POD -> HTML conversion still sucks
+
+Which is crazy given just how simple POD purports to be, and how simple HTML
+can be.
 
 =head1 Misc medium sized projects
 
