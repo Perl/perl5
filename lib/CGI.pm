@@ -107,19 +107,17 @@ unless ($OS) {
 	$OS = $Config::Config{'osname'};
     }
 }
-if ($OS=~/win32/i) {
+if ($OS =~ /^MSWin/i) {
   $OS = 'WINDOWS';
-} elsif ($OS=~/vms/i) {
+} elsif ($OS =~ /^VMS/i) {
   $OS = 'VMS';
-} elsif ($OS=~/bsdos/i) {
-  $OS = 'UNIX';
-} elsif ($OS=~/dos/i) {
+} elsif ($OS =~ /^dos/i) {
   $OS = 'DOS';
-} elsif ($OS=~/^MacOS$/i) {
+} elsif ($OS =~ /^MacOS/i) {
     $OS = 'MACINTOSH';
-} elsif ($OS=~/os2/i) {
+} elsif ($OS =~ /^os2/i) {
     $OS = 'OS2';
-} elsif ($OS=~/epoc/) {
+} elsif ($OS =~ /^epoc/i) {
     $OS = 'EPOC';
 } else {
     $OS = 'UNIX';
