@@ -100,7 +100,7 @@ sub autosplit_file{
 	local($", @p)="/";
 	foreach(split(/\//,"$autodir/$modpname")){
 	    push(@p, $_);
-	    next if -d "@p";
+	    next if -d "@p/";
 	    mkdir("@p",0777) or die "AutoSplit unable to mkdir @p: $!";
 	}
     }

@@ -83,11 +83,11 @@ embed_h.SH		Produces embed.h
 ext/DB_File/DB_File.pm		Berkeley DB extension Perl module
 ext/DB_File/DB_File.xs		Berkeley DB extension external subroutines
 ext/DB_File/DB_File_BS		Berkeley DB extension mkbootstrap fodder
-ext/DB_File/Makefile.SH		Berkeley DB extension makefile writer
+ext/DB_File/Makefile.PL		Berkeley DB extension makefile writer
 ext/DB_File/typemap		Berkeley DB extension interface types
 ext/DynaLoader/DynaLoader.doc	Dynamic Loader specification
 ext/DynaLoader/DynaLoader.pm	Dynamic Loader perl module
-ext/DynaLoader/Makefile.SH	Dynamic Loader makefile writer
+ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
 ext/DynaLoader/dl_aix.xs	AIX implementation
 ext/DynaLoader/dl_dld.xs	GNU dld style implementation
@@ -100,29 +100,29 @@ ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
 ext/Fcntl/Fcntl.pm		Fcntl extension Perl module
 ext/Fcntl/Fcntl.xs		Fcntl extension external subroutines
 ext/Fcntl/MANIFEST		Fcntl extension file list
-ext/Fcntl/Makefile.SH		Fcntl extension makefile writer
+ext/Fcntl/Makefile.PL		Fcntl extension makefile writer
 ext/GDBM_File/GDBM_File.pm	GDBM extension Perl module
 ext/GDBM_File/GDBM_File.xs	GDBM extension external subroutines
-ext/GDBM_File/Makefile.SH	GDBM extension makefile writer
+ext/GDBM_File/Makefile.PL	GDBM extension makefile writer
 ext/GDBM_File/typemap		GDBM extension interface types
-ext/NDBM_File/Makefile.SH	NDBM extension makefile writer
+ext/NDBM_File/Makefile.PL	NDBM extension makefile writer
 ext/NDBM_File/NDBM_File.pm	NDBM extension Perl module
 ext/NDBM_File/NDBM_File.xs	NDBM extension external subroutines
 ext/NDBM_File/typemap		NDBM extension interface types
-ext/ODBM_File/Makefile.SH	ODBM extension makefile writer
+ext/ODBM_File/Makefile.PL	ODBM extension makefile writer
 ext/ODBM_File/ODBM_File.pm	ODBM extension Perl module
 ext/ODBM_File/ODBM_File.xs	ODBM extension external subroutines
 ext/ODBM_File/typemap		ODBM extension interface types
-ext/POSIX/Makefile.SH		POSIX extension makefile writer
+ext/POSIX/Makefile.PL		POSIX extension makefile writer
 ext/POSIX/POSIX.pm		POSIX extension Perl module
 ext/POSIX/POSIX.xs		POSIX extension external subroutines
 ext/POSIX/typemap		POSIX extension interface types
-ext/SDBM_File/Makefile.SH	SDBM extension makefile writer
+ext/SDBM_File/Makefile.PL	SDBM extension makefile writer
 ext/SDBM_File/SDBM_File.pm	SDBM extension Perl module
 ext/SDBM_File/SDBM_File.xs	SDBM extension external subroutines
 ext/SDBM_File/sdbm/CHANGES		SDBM kit
 ext/SDBM_File/sdbm/COMPARE		SDBM kit
-ext/SDBM_File/sdbm/Makefile.SH		SDBM kit
+ext/SDBM_File/sdbm/Makefile.PL		SDBM kit
 ext/SDBM_File/sdbm/README		SDBM kit
 ext/SDBM_File/sdbm/README.too		SDBM kit
 ext/SDBM_File/sdbm/biblio		SDBM kit
@@ -147,11 +147,11 @@ ext/SDBM_File/sdbm/sdbm.h		SDBM kit
 ext/SDBM_File/sdbm/tune.h		SDBM kit
 ext/SDBM_File/sdbm/util.c		SDBM kit
 ext/SDBM_File/typemap	SDBM extension interface types
-ext/Socket/Makefile.SH	Socket extension makefile writer
+ext/Socket/Makefile.PL	Socket extension makefile writer
 ext/Socket/Socket.pm	Socket extension Perl module
 ext/Socket/Socket.xs	Socket extension external subroutines
 ext/typemap		Extension interface types
-ext/util/extliblist	Used by extension Makefile.SH to make lib lists
+ext/util/extliblist	Used by extension Makefile.PL to make lib lists
 ext/util/make_ext	Used by Makefile to execute extension Makefiles
 ext/util/mkbootstrap	Turns ext/*/*_BS into bootstrap info
 ext/xsubpp		External subroutine preprocessor

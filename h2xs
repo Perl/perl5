@@ -10,7 +10,6 @@ $usage='h2xs [-Aachfm] [-n module_name] [headerfile [extra_libraries]]
 	-c	Omit the constant() function from the XS file.
 	-A	Equivalent to -a -c 
 	-f	Force creation of the extension even if the C header does not exist.
-	-m	Also create an old-style Makefile.SH
 	-h 	help
 	-n	Specify a name to use for the extension.
 extra_libraries are any libraries that might be needed for loading
@@ -19,7 +18,7 @@ extra_libraries are any libraries that might be needed for loading
 
 sub usage{ die "Usage: $usage\n" }
 
-getopts("fhcaAmn:") || &usage;
+getopts("fhcaAn:") || &usage;
 
 &usage if $opt_h;
 
@@ -34,7 +33,6 @@ $extralibs = "@ARGV";
 if( $opt_A ){
 	$opt_a = $opt_c = 1;
 }
-$write_makefile_sh = ($opt_m) ? 1 : 0;
 
 if( $path_h ){
 	$name = $path_h;
@@ -258,251 +256,21 @@ close XS;
 warn "Writing ext/$modpname/Makefile.PL\n";
 open(PL, ">Makefile.PL") || die "Can't create ext/$modpname/Makefile.PL: $!\n";
 
-# Ideally this should have a #!../.. ... miniperl etc header
 print PL <<'END';
 use ExtUtils::MakeMaker;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
-# the contents of the Makefile being created.
+# the contents of the Makefile that is written.
 END
-print PL "&writeMakefile(\n";
-print PL "	'potential_libs' => '$extralibs',   # e.g., '-lm' \n";
-print PL "	'INC' => '',     # e.g., '-I/usr/include/other' \n";
-print PL "	'DISTNAME' => 'myname',\n";
-print PL "	'VERSION' => '0.1',\n";
+print PL "WriteMakefile(\n";
+print PL "    'NAME'	=> '$module',\n";
+print PL "    'VERSION'	=> '0.1',\n";
+print PL "    'LIBS'	=> ['$extralibs'],   # e.g., '-lm' \n";
+print PL "    'DEFINE'	=> '',     # e.g., '-DHAVE_SOMETHING' \n";
+print PL "    'INC'	=> '',     # e.g., '-I/usr/include/other' \n";
 print PL ");\n";
 }
 
-if ($write_makefile_sh){
-warn "Writing ext/$modpname/Makefile.SH\n";
-open(MF, ">Makefile.SH") || die "Can't create ext/$modpname/Makefile.SH: $!\n";
-print MF <<'END';
-: This forces SH files to create target in same directory as SH file.
-: This is so that make depend always knows where to find SH derivatives.
-
-case "$0" in
-*/*) cd `expr X$0 : 'X\(.*\)/'` ;;
-esac
-
-if test -f config.sh; then TOP=.;
-elif test -f ../config.sh; then TOP=..;
-elif test -f ../../config.sh; then TOP=../..;
-elif test -f ../../../config.sh; then TOP=../../..;
-elif test -f ../../../../config.sh; then TOP=../../../..;
-else
-	echo "Can't find config.sh."; exit 1
-fi
-
-: Find absolute path name for TOP.  This is needed when we cd to TOP
-: to run perl on autosplit.
-oldpwd=`pwd`; cd $TOP; ABSTOP=`pwd`; cd $oldpwd
-
-case $CONFIG in
-'')
-	. $TOP/config.sh
-	;;
-esac
-
-: Find out directory name.  This is also the extension name.
-ext=`pwd | $sed -e 's@.*/@@'`
-
-: This extension might have its own typemap
-if test -f typemap; then
-	exttypemap='typemap'
-else
-	exttypemap=''
-fi
-
-: This extension might need additional libraries.
-END
-print MF "potential_libs=\"$extralibs\"\n";
-print MF <<'END';
-. $TOP/ext/util/extliblist
-
-: This extension might need bootstrap support
-if test -f ${ext}_BS; then
-	bootdep=${ext}_BS
-else
-	bootdep=''
-fi
-
-case "$dlsrc" in
-dl_aix*)
-    echo "#!" > $ext.exp
-    echo "boot_$ext" >> $ext.exp
-    ;;
-esac
-
-echo "Extracting ext/$ext/Makefile (with variable substitutions)"
-: This section of the file will have variable substitutions done on it.
-: Move anything that needs config subs from !NO!SUBS! section to !GROK!THIS!.
-: Protect any dollar signs and backticks that you do not want interpreted
-: by putting a backslash in front.  You may delete these comments.
-$spitshell >Makefile << !GROK!THIS!
-#
-# This Makefile is for the $ext extension to perl.
-# 
-CC = $cc
-RANLIB = $ranlib
-TOP = $TOP
-ABSTOP = $ABSTOP
-LDFLAGS = $ldflags
-CLDFLAGS = $ldflags
-SMALL = $small
-LARGE = $large $split
-
-# To use an alternate make, set \\$altmake in config.sh.
-MAKE = ${altmake-make}
-
-EXT = $ext
-
-# $ext might have its own typemap
-EXTTYPEMAP = $exttypemap
-
-# $ext might have its own bootstrap support
-BOOTDEP  = $bootdep
-BOOTSTRAP  = $ext.bs
-
-# The following are used to build and install shared libraries for
-# dynamic loading.
-LDDLFLAGS = $lddlflags
-CCDLFLAGS = $ccdlflags
-CCCDLFLAGS = $cccdlflags
-SO = $so
-
-# $ext might need to be linked with some extra libraries.
-# EXTRALIBS =  full list of libraries needed for static linking.
-#		Only those libraries that actually exist are included.
-# DYNLOADLIBS = list of those libraries that are needed but can be
-#		linked in dynamically on this platform.  On SunOS, for
-#		example, this would be .so* libraries, but not archive
-#		libraries.  The bootstrap file is installed only if
-#		this list is not empty.
-# STATLOADLIBS = list of those libraries which must be statically
-#		linked into the shared library.  On SunOS 4.1.3, 
-#		for example,  I have only an archive version of
-#		-lm, and it must be linked in statically.
-EXTRALIBS = $extralibs
-DYNALOADLIBS  = $dynaloadlibs
-STATLOADLIBS = $statloadlibs
-
-!GROK!THIS!
-
-$spitshell >>Makefile <<'!NO!SUBS!'
-
-# Where to put things:
-AUTO = $(TOP)/lib/auto
-INSTALLBOOT = $(AUTO)/$(EXT)/$(EXT).bs
-INSTALLDYNAMIC = $(AUTO)/$(EXT)/$(EXT).$(SO)
-INSTALLSTATIC = $(EXT).a
-INSTALLPM = $(TOP)/lib/$(EXT).pm
-
-PERL = $(ABSTOP)/miniperl
-XSUBPP = $(TOP)/ext/xsubpp
-SHELL = /bin/sh
-CCCMD = `sh $(shellflags) $(TOP)/cflags $@`
-
-.c.o:
-	$(CCCMD) $(CCCDLFLAGS) -I$(TOP) $*.c
-
-all:	dynamic
-# Phony target to force checking subdirectories.
-FORCE:
-
-# Target for Dynamic Loading:
-dynamic:	$(INSTALLDYNAMIC) $(INSTALLPM) $(INSTALLBOOT)
-
-$(INSTALLDYNAMIC): $(EXT).o
-	@test -d $(AUTO) || mkdir $(AUTO)
-	@test -d $(AUTO)/$(EXT) || mkdir $(AUTO)/$(EXT)
-	ld $(LDDLFLAGS) -o $@ $(EXT).o $(STATLOADLIBS)
-
-$(BOOTSTRAP):	Makefile $(BOOTDEP)
-	$(PERL) -I$(TOP)/lib $(TOP)/ext/util/mkbootstrap $(DYNALOADLIBS)
-	touch $(BOOTSTRAP)
-
-$(INSTALLBOOT):	$(BOOTSTRAP)
-	@test ! -s $(BOOTSTRAP) || cp $(BOOTSTRAP) $@
-
-# Target for Static Loading:
-static: $(INSTALLSTATIC) $(INSTALLPM)
-
-$(INSTALLSTATIC):	$(EXT).o
-	ar cr $@ $(EXT).o
-	$(RANLIB) $@
-	echo $(EXTRALIBS) >> $(TOP)/ext.libs
-
-$(EXT).c:	$(EXT).xs $(XSUBPP) $(TOP)/ext/typemap $(EXTTYPEMAP) $(TOP)/cflags Makefile
-	$(PERL) $(XSUBPP) $(EXT).xs >tmp
-	mv tmp $@
-
-END
-if( ! $opt_a ){
-print MF <<'END';
-$(INSTALLPM):	$(EXT).pm
-	rm -f $@
-	cp $(EXT).pm $@
-	cd $(TOP); $(PERL) autosplit $(EXT)
-END
-}
-else {
-print MF <<'END';
-$(INSTALLPM):	$(EXT).pm
-	cp $(EXT).pm $@
-END
-}
-print MF <<'END';
-
-clean:
-	rm -f *.o *.a mon.out core $(EXT).c so_locations $(BOOTSTRAP) $(EXT).exp
-
-realclean: 	clean
-	rm -f makefile Makefile
-	rm -f $(INSTALLPM) $(INSTALLDYNAMIC) $(INSTALLSTATIC) $(INSTALLBOOT)
-	rm -rf $(AUTO)/$(EXT)
-
-purge:	realclean
-
-$(EXT).o :	$(TOP)/EXTERN.h
-$(EXT).o :	$(TOP)/perl.h
-$(EXT).o :	$(TOP)/embed.h
-$(EXT).o :	$(TOP)/config.h
-$(EXT).o :	$(TOP)/unixish.h
-$(EXT).o :	$(TOP)/handy.h
-$(EXT).o :	$(TOP)/regexp.h
-$(EXT).o :	$(TOP)/sv.h
-$(EXT).o :	$(TOP)/util.h
-$(EXT).o :	$(TOP)/form.h
-$(EXT).o :	$(TOP)/gv.h
-$(EXT).o :	$(TOP)/cv.h
-$(EXT).o :	$(TOP)/opcode.h
-$(EXT).o :	$(TOP)/op.h
-$(EXT).o :	$(TOP)/cop.h
-$(EXT).o :	$(TOP)/av.h
-$(EXT).o :	$(TOP)/hv.h
-$(EXT).o :	$(TOP)/mg.h
-$(EXT).o :	$(TOP)/scope.h
-$(EXT).o :	$(TOP)/pp.h
-$(EXT).o :	$(TOP)/proto.h
-$(EXT).o :	$(TOP)/XSUB.h 
-
-Makefile:	Makefile.SH $(TOP)/config.sh ; /bin/sh Makefile.SH
-$(TOP)/config.h:	$(TOP)/config.sh; cd $(TOP); /bin/sh config_h.SH
-$(TOP)/embed.h:	$(TOP)/config.sh; cd $(TOP); /bin/sh embed_h.SH
-$(TOP)/cflags:	$(TOP)/config.sh; cd $(TOP); /bin/sh cflags.SH
-
-!NO!SUBS!
-chmod 755 Makefile
-$eunicefix Makefile
-
-END
-close MF;
-}
-
 system '/bin/ls > MANIFEST';
-
-# this needs fixing
-# system '[ -f Makefile.SH ] && sh Makefile.SH';
-# system '[ -f Makefile.PL ] && perl Makefile.PL';
 
 
 ##############################################################################
@@ -534,10 +302,10 @@ then the name of the header file will be used, with the first character
 capitalized.
 .PP
 If the extension might need extra libraries, they should be included
-here.  The extension Makefile.SH will take care of checking whether
+here.  The extension Makefile.PL will take care of checking whether
 the libraries actually exist and how they should be loaded.
 The extra libraries should be specified in the form -lm -lposix, etc,
-just as on the cc command line.  By default, the Makefile.SH will
+just as on the cc command line.  By default, the Makefile.PL will
 search through the library path determined by Configure.  That path
 can be augmented by including arguments of the form -L/another/library/path
 in the extra-libraries argument.
@@ -558,9 +326,6 @@ Specifies a name to be used for the extension.
 .TP
 .B \-A
 Turns on both -a and -c.
-.TP
-.B \-m
-Causes an old-style Makefile.SH to be created.
 .SH EXAMPLES
 .nf
 
@@ -585,7 +350,7 @@ Causes an old-style Makefile.SH to be created.
 	# Extension is ONC::RPC.
 	h2xs -An ONC::RPC
 
-	# Makefile.SH will look for library -lrpc in 
+	# Makefile.PL will look for library -lrpc in 
 	# additional directory /opt/net/lib
 	h2xs rpcsvc/rusers -L/opt/net/lib -lrpc
 
@@ -595,7 +360,7 @@ No environment variables are used.
 .SH AUTHOR
 Larry Wall
 .SH "SEE ALSO"
-perl(1)
+perl(1) ExtUtils::MakeMaker
 .SH DIAGNOSTICS
 The usual warnings if it can't read or write the files involved.
 .ex

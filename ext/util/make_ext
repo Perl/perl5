@@ -7,8 +7,10 @@
 # It may be deleted in a later release of perl so try to
 # avoid using it for other purposes.
 
-linktype=$1
-extspec=$2
+target=$1;  shift
+extspec=$1; shift
+passthru="$*" # allow extra macro=value to be passed through
+echo ""
 
 case $CONFIG in
 '')
@@ -31,32 +33,38 @@ fi
 
 # convert old style Name.a into ext/Name/Name.a format
 case "$extspec" in
-ext/*) ;;
-*) extspec=`echo "$extspec" | sed -e 's:\(.*\)\.\(.*\):ext/\1/\1.\2:'`
+ext/*)	;;
+*::*)	extspec=`echo "$extspec" | sed -e 's!\(.*\)::\(.*\)!ext/\1/\2/\2.a!'` ;;
+*)	extspec=`echo "$extspec" | sed -e 's:\(.*\)\.\(.*\):ext/\1/\1.\2:'` ;;
 esac
 
 # get extension directory path, module name and depth
 pname=`echo "$extspec" | sed -e 's:^ext/::' -e 's:/[^/]*$::'`
 mname=`echo "$pname"   | sed -e 's!/!::!'`
 depth=`echo "$pname"   | sed -e 's![^/][^/]*!..!g'`
+make=${altmake-make}
+makeargs=''
 
 if test ! -d "ext/$pname"; then
-	echo "	Skipping $extspec (directory does not exist)"
-	exit 0 # not an error ?
+    echo "	Skipping $extspec (directory does not exist)"
+    exit 0 # not an error ?
 fi
 
-# check link type and do any preliminaries
-case "$linktype" in
-static)  makeargs='CCCDLFLAGS=' ;;
-dynamic) makeargs='' ;;
-*)	echo "make_ext: unknown link type '$linktype'"; exit 1;;
-'')	echo "make_ext: no link type specified (eg static or dynamic)"; exit 1;;
-esac
 
-echo ""
-echo "	Making $mname ($linktype)"
+echo "	Making $mname ($target)"
 
 cd ext/$pname
+
+# check link type and do any preliminaries
+case "$target" in
+	# convert 'static' or 'dynamic' into 'all LINKTYPE=XXX'
+static)  makeargs="LINKTYPE=static CCCDLFLAGS="; target=all ;;
+dynamic) makeargs="LINKTYPE=dynamic";            target=all ;;
+*clean)	;;
+*)	# for the time being we are strict about what make_ext is used for
+	echo "make_ext: unknown make target '$target'"; exit 1;;
+'')	echo "make_ext: no make target specified (eg static or dynamic)"; exit 1;;
+esac
 
 if test ! -f Makefile ; then
 	test -f Makefile.PL && ../$depth/miniperl -I../$depth/lib Makefile.PL
@@ -65,10 +73,12 @@ if test ! -f Makefile ; then
 	test -f Makefile.SH && sh Makefile.SH
 fi
 
-make=${altmake-make}
+case "$target" in
+clean)		;;
+realclean)	;;
+*)		$make config $passthru;;
+esac
 
-$make config
-
-$make $linktype $makeargs
+$make $target $makeargs $passthru || exit
 
 exit $?

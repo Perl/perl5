@@ -10,10 +10,10 @@ ccdlflags='-bE:perl.exp'
 
 # The first 3 options would not be needed if dynamic libs. could be linked
 # with the compiler instead of ld.
-# -bI:$(TOP)/perl.exp   Read the exported symbols from the perl binary
-# -bE:$(EXT).exp        Export these symbols.  This file contains only one
-#                       symbol: boot_$(EXP)  can it be auto-generated?
-lddlflags='-H512 -T512 -bhalt:4 -bM:SRE -bI:$(TOP)/perl.exp -bE:$(EXT).exp -e _nostart -lc'
+# -bI:$(PERL_INC)/perl.exp  Read the exported symbols from the perl binary
+# -bE:$(BASEEXT).exp        Export these symbols.  This file contains only one
+#                           symbol: boot_$(EXP)  can it be auto-generated?
+lddlflags='-H512 -T512 -bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -e _nostart -lc'
 
 ccflags='-D_ALL_SOURCE'
 # Make setsockopt work correctly.  See man page.

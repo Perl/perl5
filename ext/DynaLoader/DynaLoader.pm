@@ -112,12 +112,11 @@ sub bootstrap {
     # The .bs file can be used to configure @dl_resolve_using etc to
     # match the needs of the individual module on this architecture.
     my $bs = $file;
-    $bs =~ s/\.$dl_dlext$/\.bs/o; # look for .bs 'beside' the library
-    if (-f $bs) {
+    $bs =~ s/(\.\w+)?$/\.bs/; # look for .bs 'beside' the library
+    if (-s $bs) { # only read file if it's not empty
         local($osname, $dlsrc) = @Config{'osname','dlsrc'};
-        print STDERR "$bs ($osname, $dlsrc)\n" if $dl_debug;
-        $@ = "";
-        do $bs;
+        print STDERR "BS: $bs ($osname, $dlsrc)\n" if $dl_debug;
+        eval { do $bs; };
         warn "$bs: $@\n" if $@;
     }
 

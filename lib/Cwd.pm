@@ -21,6 +21,7 @@ sub getcwd
 	return '';
     }
     $cwd = '';
+    $dotdots = '';
     do
     {
 	$dotdots .= '/' if $dotdots;

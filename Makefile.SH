@@ -285,30 +285,25 @@ s_dummy $(static_ext):	miniperl preplibrary $(DYNALOADER) FORCE
 	@sh ext/util/make_ext static $@
 
 clean:
-	rm -f *.o *.a all perl suidperl miniperl
-	rm -f perlmain.c
+	rm -f *.o *.a all perlmain.c
 	rm -f perl.exp ext.libs ext/util/extlibist
 	-cd x2p; $(MAKE) clean
 	-cd pod; $(MAKE) clean
-	-@for x in ext/* ; do \
-	if test -f $$x/Makefile; then \
-	echo "	Making clean in $$x"; \
-	cd $$x; $(MAKE) clean ; cd ../.. ; \
-	fi ; \
+	@for x in $(dynamic_ext) $(static_ext) ; do \
+	sh ext/util/make_ext clean $$x ; \
 	done
+	rm -f perl suidperl miniperl
 
 realclean: clean
 	-cd x2p; $(MAKE) realclean
-	-@for x in ext/* ; do \
-	if test -f $$x/Makefile; then \
-	echo "	Making realclean in $$x"; \
-	cd $$x; $(MAKE) realclean ; cd ../.. ; \
-	fi ; \
+	: could add: "-cd pod; $(MAKE) realclean" here and to pod/Makefile
+	@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) ; do \
+	sh ext/util/make_ext realclean $$x ; \
 	done
-	rm -f *.orig */*.orig *~ */*~ core t/core
+	rm -f *.orig */*.orig *~ */*~ core t/core t/c t/perl
 	rm -rf $(addedbyconf)
 	rm -f Makefile cflags makedepend makedir writemain
-	rm -f config.h t/perl makefile makefile.old
+	rm -f config.h makefile makefile.old
 	rm -f x2p/Makefile x2p/makefile x2p/makefile.old x2p/cflags
 	rm -f lib/Config.pm
 	rm -rf lib/auto
