@@ -3458,13 +3458,13 @@ sub re_dq {
     } elsif ($type eq "concat") {
 	my $first = $self->re_dq($op->first, $extended);
 	my $last  = $self->re_dq($op->last,  $extended);
+
 	# Disambiguate "${foo}bar", "${foo}{bar}", "${foo}[1]"
-	if ($last =~ /^[A-Z\\\^\[\]_?]/) {
-	    $first =~ s/([\$@])\^$/${1}{^}/;
-	}
-	elsif ($last =~ /^[{\[\w]/) {
-	    $first =~ s/([\$@])([A-Za-z_]\w*)$/${1}{$2}/;
-	}
+	($last =~ /^[A-Z\\\^\[\]_?]/ &&
+	    $first =~ s/([\$@])\^$/${1}{^}/)  # "${^}W" etc
+	    || ($last =~ /^[{\[\w_]/ &&
+		$first =~ s/([\$@])([A-Za-z_]\w*)$/${1}{$2}/);
+
 	return $first . $last;
     } elsif ($type eq "uc") {
 	return '\U' . $self->re_dq($op->first->sibling, $extended) . '\E';
