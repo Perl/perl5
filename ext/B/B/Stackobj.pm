@@ -264,13 +264,21 @@ sub B::Stackobj::Const::write_back {
 
 sub B::Stackobj::Const::load_int {
     my $obj = shift;
-    $obj->{iv} = int($obj->{sv}->PV);
+    if (ref($obj->{sv}) eq "B::RV"){
+       $obj->{iv} = int($obj->{sv}->RV->PV);
+    }else{
+       $obj->{iv} = int($obj->{sv}->PV);
+    }
     $obj->{flags} |= VALID_INT;
 }
 
 sub B::Stackobj::Const::load_double {
     my $obj = shift;
-    $obj->{nv} = $obj->{sv}->PV + 0.0;
+    if (ref($obj->{sv}) eq "B::RV"){
+        $obj->{nv} = $obj->{sv}->RV->PV + 0.0;
+    }else{
+        $obj->{nv} = $obj->{sv}->PV + 0.0;
+    }
     $obj->{flags} |= VALID_DOUBLE;
 }
 

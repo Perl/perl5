@@ -551,7 +551,7 @@ sub B::PVMG::save_magic {
 	if ($len == HEf_SVKEY){
 		#The pointer is an SV*
 		$ptrsv=svref_2object($ptr)->save;
-		$init->add(sprintf("sv_magic((SV*)s\\_%x, (SV*)s\\_%x, %s, %s, %d);",
+		$init->add(sprintf("sv_magic((SV*)s\\_%x, (SV*)s\\_%x, %s,(char *) %s, %d);",
 			   $$sv, $$obj, cchar($type),$ptrsv,$len));
 	}else{
 		$init->add(sprintf("sv_magic((SV*)s\\_%x, (SV*)s\\_%x, %s, %s, %d);",
@@ -1330,7 +1330,7 @@ sub save_main {
     my $init_av = init_av->save;
     $init->add(sprintf("PL_main_root = s\\_%x;", ${main_root()}),
 	       sprintf("PL_main_start = s\\_%x;", ${main_start()}),
-	       "PL_initav = $init_av;");
+              "PL_initav = (AV *) $init_av;");                                
     save_context();
     warn "Writing output\n";
     output_boilerplate();

@@ -4,7 +4,9 @@ use Exporter ();
 @EXPORT_OK = qw(find_leaders);
 
 use B qw(peekop walkoptree walkoptree_exec
-	 main_root main_start svref_2object OPf_SPECIAL OPf_STACKED);
+	 main_root main_start svref_2object
+         OPf_SPECIAL OPf_STACKED );
+
 use B::Terse;
 use strict;
 
@@ -17,19 +19,19 @@ sub mark_leader {
 	$bblock->{$$op} = $op;
     }
 }
-sub remove_sortblocks{
-    foreach (keys %$bblock) {
-        my $leader = $$bblock{$_};
-	delete  $$bblock{$_} if ( $leader == 0);
+
+sub remove_sortblock{
+    foreach (keys %$bblock){
+        my $leader=$$bblock{$_};	
+	delete $$bblock{$_} if( $leader == 0);   
     }
 }
-
 sub find_leaders {
     my ($root, $start) = @_;
     $bblock = {};
     mark_leader($start) if ( ref $start ne "B::NULL" );
     walkoptree($root, "mark_if_leader") if ((ref $root) ne "B::NULL") ;
-    remove_sortblocks();
+    remove_sortblock();
     return $bblock;
 }
 
@@ -104,18 +106,19 @@ sub B::CONDOP::mark_if_leader {
     mark_leader($op->false);
 }
 
+
 sub B::LISTOP::mark_if_leader {
     my $op = shift;
     my $first=$op->first;
-    $first=$first->next	while ($first->ppaddr eq "pp_null"); #remove optimed
+    $first=$first->next while ($first->ppaddr eq "pp_null");
     mark_leader($op->first) unless (exists( $bblock->{$$first}));
     mark_leader($op->next);
-    if ($op->ppaddr eq "pp_sort" && $op->flags
-	& OPf_SPECIAL && $op->flags & OPf_STACKED){	
-         my $root=$op->first->sibling->first;
-         my $leader=$root->first;
-         $bblock->{$$leader} = 0;
-}
+    if ($op->ppaddr eq "pp_sort" and $op->flags & OPf_SPECIAL
+	and $op->flags & OPf_STACKED){
+        my $root=$op->first->sibling->first;
+        my $leader=$root->first;
+        $bblock->{$$leader} = 0;
+    }
 }
 
 sub B::PMOP::mark_if_leader {
