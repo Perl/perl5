@@ -648,7 +648,7 @@
 #undef  mg_get
 #define mg_get            CPerlObj::Perl_mg_get
 #undef  mg_length
-#define mg_length         CPerlObj::mg_length
+#define mg_length         CPerlObj::Perl_mg_length
 #undef  mg_magical
 #define mg_magical        CPerlObj::Perl_mg_magical
 #undef  mg_set
@@ -697,6 +697,8 @@
 #define my_pclose         CPerlObj::Perl_my_pclose
 #undef  my_popen
 #define my_popen          CPerlObj::Perl_my_popen
+#undef  my_safemalloc
+#define my_safemalloc     CPerlObj::my_safemalloc
 #undef  my_setenv
 #define my_setenv         CPerlObj::Perl_my_setenv
 #undef  my_stat
@@ -803,6 +805,8 @@
 #define newSVsv           CPerlObj::Perl_newSVsv
 #undef  newSVpvf
 #define newSVpvf          CPerlObj::Perl_newSVpvf
+#undef  newSVpvn
+#define newSVpvn          CPerlObj::Perl_newSVpvn
 #undef  newUNOP
 #define newUNOP           CPerlObj::Perl_newUNOP
 #undef  newWHILEOP
@@ -1007,6 +1011,10 @@
 #define regtry            CPerlObj::regtry
 #undef  repeatcpy
 #define repeatcpy         CPerlObj::Perl_repeatcpy
+#undef  restore_expect
+#define restore_expect    CPerlObj::restore_expect
+#undef  restore_lex_expect
+#define restore_lex_expect CPerlObj::restore_lex_expect
 #undef  restore_magic
 #define restore_magic     CPerlObj::restore_magic
 #undef  restore_rsfp
@@ -1203,12 +1211,20 @@
 #define sv_bless          CPerlObj::Perl_sv_bless
 #undef  sv_catpv
 #define sv_catpv          CPerlObj::Perl_sv_catpv
+#undef  sv_catpv_mg
+#define sv_catpv_mg       CPerlObj::Perl_sv_catpv_mg
 #undef  sv_catpvf
 #define sv_catpvf         CPerlObj::Perl_sv_catpvf
+#undef  sv_catpvf_mg
+#define sv_catpvf_mg      CPerlObj::Perl_sv_catpvf_mg
 #undef  sv_catpvn
 #define sv_catpvn         CPerlObj::Perl_sv_catpvn
+#undef  sv_catpvn_mg
+#define sv_catpvn_mg      CPerlObj::Perl_sv_catpvn_mg
 #undef  sv_catsv
 #define sv_catsv          CPerlObj::Perl_sv_catsv
+#undef  sv_catsv_mg
+#define sv_catsv_mg       CPerlObj::Perl_sv_catsv_mg
 #undef  sv_check_thinkfirst
 #define sv_check_thinkfirst CPerlObj::sv_check_thinkfirst
 #undef  sv_chop
@@ -1283,10 +1299,16 @@
 #define sv_reset          CPerlObj::Perl_sv_reset
 #undef  sv_setiv
 #define sv_setiv          CPerlObj::Perl_sv_setiv
+#undef  sv_setiv_mg
+#define sv_setiv_mg       CPerlObj::Perl_sv_setiv_mg
 #undef  sv_setnv
 #define sv_setnv          CPerlObj::Perl_sv_setnv
+#undef  sv_setnv_mg
+#define sv_setnv_mg       CPerlObj::Perl_sv_setnv_mg
 #undef  sv_setuv
 #define sv_setuv          CPerlObj::Perl_sv_setuv
+#undef  sv_setuv_mg
+#define sv_setuv_mg       CPerlObj::Perl_sv_setuv_mg
 #undef  sv_setref_iv
 #define sv_setref_iv      CPerlObj::Perl_sv_setref_iv
 #undef  sv_setref_nv
@@ -1297,14 +1319,24 @@
 #define sv_setref_pvn     CPerlObj::Perl_sv_setref_pvn
 #undef  sv_setpv
 #define sv_setpv          CPerlObj::Perl_sv_setpv
+#undef  sv_setpv_mg
+#define sv_setpv_mg       CPerlObj::Perl_sv_setpv_mg
 #undef  sv_setpvf
 #define sv_setpvf         CPerlObj::Perl_sv_setpvf
+#undef  sv_setpvf_mg
+#define sv_setpvf_mg      CPerlObj::Perl_sv_setpvf_mg
 #undef  sv_setpviv
 #define sv_setpviv        CPerlObj::Perl_sv_setpviv
+#undef  sv_setpviv_mg
+#define sv_setpviv_mg     CPerlObj::Perl_sv_setpviv_mg
 #undef  sv_setpvn
 #define sv_setpvn         CPerlObj::Perl_sv_setpvn
+#undef  sv_setpvn_mg
+#define sv_setpvn_mg      CPerlObj::Perl_sv_setpvn_mg
 #undef  sv_setsv
 #define sv_setsv          CPerlObj::Perl_sv_setsv
+#undef  sv_setsv_mg
+#define sv_setsv_mg       CPerlObj::Perl_sv_setsv_mg
 #undef  sv_taint
 #define sv_taint          CPerlObj::Perl_sv_taint
 #undef  sv_tainted
@@ -1323,6 +1355,8 @@
 #define sv_upgrade        CPerlObj::Perl_sv_upgrade
 #undef  sv_usepvn
 #define sv_usepvn         CPerlObj::Perl_sv_usepvn
+#undef  sv_usepvn_mg
+#define sv_usepvn_mg      CPerlObj::Perl_sv_usepvn_mg
 #undef  sv_uv
 #define sv_uv             CPerlObj::Perl_sv_uv
 #undef  sv_vcatpvfn

@@ -202,7 +202,7 @@ opmask_addlocal(SV *opset, char *op_mask_buf) /* Localise op_mask then opmask_ad
     char *orig_op_mask = op_mask;
     SAVEPPTR(op_mask);
     if (opcode_debug >= 2)
-	SAVEDESTRUCTOR((void(*)_((void*)))warn,"op_mask restored");
+	SAVEDESTRUCTOR((void(CPERLscope(*))_((void*)))warn,"op_mask restored");
     op_mask = &op_mask_buf[0];
     if (orig_op_mask)
 	Copy(orig_op_mask, op_mask, maxo, char);
@@ -226,8 +226,8 @@ BOOT:
 
 
 void
-_safe_call_sv(package, mask, codesv)
-    char *	package
+_safe_call_sv(Package, mask, codesv)
+    char *	Package
     SV *	mask
     SV *	codesv
     PPCODE:
@@ -243,7 +243,7 @@ _safe_call_sv(package, mask, codesv)
 
     save_hptr(&defstash);		/* save current default stack	*/
     /* the assignment to global defstash changes our sense of 'main'	*/
-    defstash = gv_stashpv(package, GV_ADDWARN); /* should exist already	*/
+    defstash = gv_stashpv(Package, GV_ADDWARN); /* should exist already	*/
 
     /* defstash must itself contain a main:: so we'll add that now	*/
     /* take care with the ref counts (was cause of long standing bug)	*/

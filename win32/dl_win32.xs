@@ -58,7 +58,7 @@ dl_static_linked(char *filename)
 MODULE = DynaLoader	PACKAGE = DynaLoader
 
 BOOT:
-    (void)dl_private_init();
+    (void)dl_private_init(THIS);
 
 void *
 dl_load_file(filename,flags=0)
@@ -74,7 +74,7 @@ dl_load_file(filename,flags=0)
     DLDEBUG(2,PerlIO_printf(PerlIO_stderr()," libref=%x\n", RETVAL));
     ST(0) = sv_newmortal() ;
     if (RETVAL == NULL)
-	SaveError("%d",GetLastError()) ;
+	SaveError(THIS_ "%d",GetLastError()) ;
     else
 	sv_setiv( ST(0), (IV)RETVAL);
 
@@ -90,7 +90,7 @@ dl_find_symbol(libhandle, symbolname)
     DLDEBUG(2,PerlIO_printf(PerlIO_stderr(),"  symbolref = %x\n", RETVAL));
     ST(0) = sv_newmortal() ;
     if (RETVAL == NULL)
-	SaveError("%d",GetLastError()) ;
+	SaveError(THIS_ "%d",GetLastError()) ;
     else
 	sv_setiv( ST(0), (IV)RETVAL);
 
@@ -111,7 +111,7 @@ dl_install_xsub(perl_name, symref, filename="$Package")
     CODE:
     DLDEBUG(2,PerlIO_printf(PerlIO_stderr(),"dl_install_xsub(name=%s, symref=%x)\n",
 		      perl_name, symref));
-    ST(0)=sv_2mortal(newRV((SV*)newXS(perl_name, (void(*)(CV*))symref, filename)));
+    ST(0)=sv_2mortal(newRV((SV*)newXS(perl_name, (void(*)(CPERLarg_ CV*))symref, filename)));
 
 
 char *

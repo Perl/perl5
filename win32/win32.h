@@ -9,6 +9,16 @@
 #ifndef  _INC_WIN32_PERL5
 #define  _INC_WIN32_PERL5
 
+#ifdef PERL_OBJECT
+#define ENV_HV_NAME "ENV_HV_NAME"
+#define DYNAMIC_ENV_FETCH
+#define prime_env_iter()
+#ifdef PERL_GLOBAL_STRUCT
+#error PERL_GLOBAL_STRUCT cannot be defined with PERL_OBJECT
+#endif
+#define win32_perllib_path PerlEnv_lib_path
+#endif
+
 #ifdef __GNUC__
 typedef long long __int64;
 #define Win32_Winsock

@@ -174,6 +174,10 @@ static void xs_init(CPERLarg)
 {
 }
 
+EXTERN_C void boot_DynaLoader _((CPERLarg_ CV* cv))
+{
+}
+
 #else  /* PERL_OBJECT */
 
 /* Say NO to CPP! Hallelujah! */

@@ -90,10 +90,10 @@ VIRTUAL char **	get_op_names _((void));
 VIRTUAL I32	cxinc _((void));
 void	deb _((const char* pat,...)) __attribute__((format(printf,1,2)));
 void	deb_growlevel _((void));
-I32	debop _((OP* o));
 I32	debstackptrs _((void));
 #ifdef DEBUGGING
 void	debprofdump _((void));
+I32	debop _((OP* o));
 #endif
 I32	debstack _((void));
 VIRTUAL char*	delimcpy _((char* to, char* toend, char* from, char* fromend,
@@ -137,7 +137,9 @@ VIRTUAL void	do_vecset _((SV* sv));
 VIRTUAL void	do_vop _((I32 optype, SV* sv, SV* left, SV* right));
 VIRTUAL I32	dowantarray _((void));
 VIRTUAL void	dump_all _((void));
-VIRTUAL void	dump_eval _((void));
+#ifdef DEBUGGING
+void	dump_eval _((void));
+#endif
 #ifdef DUMP_FDS  /* See util.c */
 int	dump_fds _((char* s));
 #endif
@@ -438,12 +440,16 @@ VIRTUAL void	push_scope _((void));
 VIRTUAL regexp*	pregcomp _((char* exp, char* xend, PMOP* pm));
 VIRTUAL OP*	ref _((OP* o, I32 type));
 VIRTUAL OP*	refkids _((OP* o, I32 type));
-VIRTUAL void	regdump _((regexp* r));
+#ifdef DEBUGGING
+void	regdump _((regexp* r));
+#endif
 VIRTUAL I32	pregexec _((regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, U32 nosave));
 VIRTUAL I32	regexec_flags _((regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, void* data, U32 flags));
 VIRTUAL void	pregfree _((struct regexp* r));
 VIRTUAL regnode*regnext _((regnode* p));
-VIRTUAL void	regprop _((SV* sv, regnode* o));
+#ifdef DEBUGGING
+void	regprop _((SV* sv, regnode* o));
+#endif
 VIRTUAL void	repeatcpy _((char* to, char* from, I32 len, I32 count));
 VIRTUAL char*	rninstr _((char* big, char* bigend, char* little, char* lend));
 VIRTUAL Sighandler_t rsignal _((int, Sighandler_t));
@@ -562,7 +568,9 @@ VIRTUAL void	sv_magic _((SV* sv, SV* obj, int how, char* name, I32 namlen));
 VIRTUAL SV*	sv_mortalcopy _((SV* oldsv));
 VIRTUAL SV*	sv_newmortal _((void));
 VIRTUAL SV*	sv_newref _((SV* sv));
-VIRTUAL char*	sv_peek _((SV* sv));
+#ifdef DEBUGGING
+char*	sv_peek _((SV* sv));
+#endif
 VIRTUAL char*	sv_pvn_force _((SV* sv, STRLEN* lp));
 VIRTUAL char*	sv_reftype _((SV* sv, int ob));
 VIRTUAL void	sv_replace _((SV* sv, SV* nsv));
@@ -608,7 +616,9 @@ VIRTUAL void	vivify_defelem _((SV* sv));
 VIRTUAL void	vivify_ref _((SV* sv, U32 to_what));
 VIRTUAL I32	wait4pid _((int pid, int* statusp, int flags));
 VIRTUAL void	warn _((const char* pat,...));
-VIRTUAL void	watch _((char** addr));
+#ifdef DEBUGGING
+void	watch _((char** addr));
+#endif
 VIRTUAL I32	whichsig _((char* sig));
 VIRTUAL int	yyerror _((char* s));
 VIRTUAL int	yylex _((void));
@@ -662,11 +672,29 @@ void del_xrv _((XRV* p));
 void sv_mortalgrow _((void));
 void sv_unglob _((SV* sv));
 void sv_check_thinkfirst _((SV *sv));
+
+SV *newSVpvn _((char *s, STRLEN len));
+
+void sv_catpv_mg _((SV *sv, char *ptr));
+void sv_catpvf_mg _((SV *sv, const char* pat, ...));
+void sv_catpvn_mg _((SV *sv, char *ptr, STRLEN len));
+void sv_catsv_mg _((SV *dstr, SV *sstr));
+void sv_setiv_mg _((SV *sv, IV i));
+void sv_setnv_mg _((SV *sv, double num));
+void sv_setsv_mg _((SV *dstr, SV *sstr));
+void sv_setuv_mg _((SV *sv, UV u));
+void sv_setpv_mg _((SV *sv, const char *ptr));
+void sv_setpvf_mg _((SV *sv, const char* pat, ...));
+void sv_setpviv_mg _((SV *sv, IV iv));
+void sv_setpvn_mg _((SV *sv, const char *ptr, STRLEN len));
+void sv_usepvn_mg _((SV *sv, char *ptr, STRLEN len));
+
 void do_report_used _((SV *sv));
 void do_clean_objs _((SV *sv));
 void do_clean_named_objs _((SV *sv));
 void do_clean_all _((SV *sv));
 void not_a_number _((SV *sv));
+void* my_safemalloc _((MEM_SIZE size));
 
 typedef void (CPerlObj::*SVFUNC) _((SV*));
 void visit _((SVFUNC f));
@@ -785,7 +813,6 @@ void regset _((char *, I32));
 void regtail _((regnode *, regnode *));
 char* nextchar _((void));
 regnode *dumpuntil _((regnode *start, regnode *node, regnode *last, SV* sv, I32 l));
-void debprof _((OP *o));
 void scan_commit _((scan_data_t *data));
 I32 study_chunk _((regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 flags));
 I32 add_data _((I32 n, char *s));
@@ -805,6 +832,7 @@ void BootDynaLoader(void);
 
 #ifdef DEBUGGING
 void del_sv _((SV *p));
+void debprof _((OP *o));
 #endif
 
 #define PPDEF(s) OP* CPerlObj::s _((ARGSproto));

@@ -585,7 +585,7 @@ more_xpv(void)
 #  define my_safemalloc(s) safemalloc(s)
 #  define my_safefree(s) free(s)
 #else
-static void* 
+STATIC void* 
 my_safemalloc(MEM_SIZE size)
 {
     char *p;
@@ -3524,9 +3524,7 @@ newSVpv(char *s, STRLEN len)
 }
 
 SV *
-newSVpvn(s,len)
-char *s;
-STRLEN len;
+newSVpvn(char *s, STRLEN len)
 {
     register SV *sv;
 

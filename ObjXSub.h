@@ -20,6 +20,8 @@
 #define cop_seqmax			pPerl->Perl_cop_seqmax
 #undef  defstash
 #define defstash            pPerl->Perl_defstash
+#undef  dowarn
+#define dowarn              pPerl->Perl_dowarn
 #undef  evalseq
 #define evalseq				pPerl->Perl_evalseq
 #undef  hexdigit
@@ -64,6 +66,10 @@
 #define savestack_ix		pPerl->Perl_savestack_ix
 #undef  savestack_max
 #define savestack_max		pPerl->Perl_savestack_max
+#undef  tmps_floor
+#define tmps_floor          pPerl->Perl_tmps_floor
+#undef  tmps_ix
+#define tmps_ix             pPerl->Perl_tmps_ix
 #undef  retstack
 #define retstack			pPerl->Perl_retstack
 #undef  retstack_ix
@@ -119,16 +125,6 @@
 #define yyval				pPerl->Perl_yyval
 #undef  yylval
 #define yylval				pPerl->Perl_yylval
-#undef  last_hkey
-#define last_hkey			pPerl->Perl_last_hkey
-#undef  valbuf
-#define valbuf				pPerl->Perl_valbuf
-#undef  namebuf
-#define namebuf				pPerl->Perl_namebuf
-#undef  maxvalsz
-#define maxvalsz			pPerl->Perl_maxvalsz
-#undef  maxnamesz
-#define maxnamesz			pPerl->Perl_maxnamesz
 
 // functions
 
@@ -176,6 +172,8 @@
 #define bind_match          pPerl->Perl_bind_match
 #undef  block_end
 #define block_end           pPerl->Perl_block_end
+#undef  block_gimme
+#define block_gimme         pPerl->Perl_block_gimme
 #undef  block_start
 #define block_start         pPerl->Perl_block_start
 #undef  call_list
@@ -330,6 +328,8 @@
 #define force_next          pPerl->Perl_force_next
 #undef  force_word
 #define force_word          pPerl->Perl_force_word
+#undef  form
+#define form                pPerl->Perl_form
 #undef  fold_constants
 #define fold_constants      pPerl->Perl_fold_constants
 #undef  fprintf
@@ -666,6 +666,9 @@
 #define newPVOP               pPerl->Perl_newPVOP
 #undef  newRV
 #define newRV                 pPerl->Perl_newRV
+#undef  newRV_noinc
+#undef  Perl_newRV_noinc
+#define newRV_noinc           pPerl->Perl_newRV_noinc
 #undef  newSV
 #define newSV                 pPerl->Perl_newSV
 #undef  newSV
@@ -970,6 +973,8 @@
 #define sv_bless              pPerl->Perl_sv_bless
 #undef  sv_catpv
 #define sv_catpv              pPerl->Perl_sv_catpv
+#undef  sv_catpvf
+#define sv_catpvf             pPerl->Perl_sv_catpvf
 #undef  sv_catpvn
 #define sv_catpvn             pPerl->Perl_sv_catpvn
 #undef  sv_catsv
@@ -1046,6 +1051,8 @@
 #define sv_setref_pvn         pPerl->Perl_sv_setref_pvn
 #undef  sv_setpv
 #define sv_setpv              pPerl->Perl_sv_setpv
+#undef  sv_setpvf
+#define sv_setpvf             pPerl->Perl_sv_setpvf
 #undef  sv_setpvn
 #define sv_setpvn             pPerl->Perl_sv_setpvn
 #undef  sv_setsv
@@ -1060,6 +1067,8 @@
 #define sv_upgrade            pPerl->Perl_sv_upgrade
 #undef  sv_usepvn
 #define sv_usepvn             pPerl->Perl_sv_usepvn
+#undef  sv_vsetpvfn
+#define sv_vsetpvfn           pPerl->Perl_sv_vsetpvfn
 #undef  taint_env
 #define taint_env			pPerl->Perl_taint_env
 #undef  taint_not
@@ -1088,11 +1097,6 @@
 #define piSock              (pPerl->piSock)
 #undef piProc
 #define piProc              (pPerl->piProc)
-
-#undef SAVETMPS
-#define SAVETMPS			pPerl->SaveTmps()
-#undef FREETMPS
-#define FREETMPS			pPerl->FreeTmps()
 
 #ifndef NO_XSLOCKS
 #undef closedir
@@ -1247,17 +1251,14 @@
 #undef  THIS_
 #define THIS_ pPerl,
 
+#undef  SAVEDESTRUCTOR
+#define SAVEDESTRUCTOR(f,p) pPerl->Perl_save_destructor((f),(p))
+
 #ifdef WIN32
 #undef errno
 #define errno				ErrorNo()
 #undef  ErrorNo
 #define ErrorNo				pPerl->ErrorNo
-#undef  LastOLEError
-#define LastOLEError		pPerl->Perl_LastOLEError
-#undef  bOleInit
-#define bOleInit			pPerl->Perl_bOleInit
-#undef  CreatePerlOLEObject
-#define CreatePerlOLEObject   pPerl->CreatePerlOLEObject
 #undef  NtCrypt
 #define NtCrypt               pPerl->NtCrypt
 #undef  NtGetLib
