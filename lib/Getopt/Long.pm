@@ -6,13 +6,13 @@ package Getopt::Long;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Wed Nov  8 21:36:20 2000
-# Update Count    : 740
+# Last Modified On: Sat Jan  6 17:12:27 2001
+# Update Count    : 748
 # Status          : Released
 
 ################ Copyright ################
 
-# This program is Copyright 1990,2000 by Johan Vromans.
+# This program is Copyright 1990,2001 by Johan Vromans.
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the Perl Artistic License or the
 # GNU General Public License as published by the Free Software
@@ -30,19 +30,24 @@ package Getopt::Long;
 
 ################ Module Preamble ################
 
+use 5.004;
+
 use strict;
 
-BEGIN {
-    require 5.004;
-    use Exporter ();
-    use vars     qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-    $VERSION     = "2.24_01";
+use vars qw($VERSION $VERSION_STRING);
+$VERSION        =  2.24_02;
+$VERSION_STRING = "2.24_02";
 
-    @ISA         = qw(Exporter);
+use Exporter;
+use AutoLoader qw(AUTOLOAD);
+
+use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+@ISA = qw(Exporter);
+%EXPORT_TAGS = qw();
+BEGIN {
+    # Init immediately so their contents can be used in the 'use vars' below.
     @EXPORT      = qw(&GetOptions $REQUIRE_ORDER $PERMUTE $RETURN_IN_ORDER);
-    %EXPORT_TAGS = qw();
     @EXPORT_OK   = qw();
-    use AutoLoader qw(AUTOLOAD);
 }
 
 # User visible variables.
