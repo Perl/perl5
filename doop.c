@@ -629,14 +629,32 @@ dARGS
     if (op->op_type == OP_RV2HV || op->op_type == OP_PADHV) 
 	dokeys = dovalues = TRUE;
 
-    if (!hv)
+    if (!hv) {
+	if (op->op_flags & OPf_MOD) {	/* lvalue */
+	    dTARGET;		/* make sure to clear its target here */
+	    if (SvTYPE(TARG) == SVt_PVLV)
+		LvTARG(TARG) = Nullsv;
+	    PUSHs(TARG);
+	}
 	RETURN;
+    }
 
     (void)hv_iterinit(hv);	/* always reset iterator regardless */
 
     if (GIMME != G_ARRAY) {
 	I32 i;
 	dTARGET;
+
+	if (op->op_flags & OPf_MOD) {	/* lvalue */
+	    if (SvTYPE(TARG) < SVt_PVLV) {
+		sv_upgrade(TARG, SVt_PVLV);
+		sv_magic(TARG, Nullsv, 'k', Nullch, 0);
+	    }
+	    LvTYPE(TARG) = 'k';
+	    LvTARG(TARG) = (SV*)hv;
+	    PUSHs(TARG);
+	    RETURN;
+	}
 
 	if (!SvRMAGICAL(hv) || !mg_find((SV*)hv,'P'))
 	    i = HvKEYS(hv);
