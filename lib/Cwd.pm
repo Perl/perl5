@@ -49,7 +49,7 @@ kept up to date it all packages which use chdir import it from Cwd.
 =cut
 
 @ISA = qw(Exporter);
-@EXPORT = qw(cwd getcwd fastcwd);
+@EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
 @EXPORT_OK = qw(chdir);
 
 # use strict;
@@ -251,6 +251,7 @@ if ($osname eq 'VMS') {
 
     *cwd        = \&_vms_pwd;
     *getcwd     = \&_vms_pwd;
+    *fastcwd    = \&_vms_cwd;
     *fastgetcwd = \&_vms_cwd;
 }
 elsif ($osname eq 'NT') {
