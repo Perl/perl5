@@ -106,6 +106,217 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7414] By: jhi                                   on 2000/10/23  12:39:52
+        Log: Undo the basename() part of #7412 since the lib/basename
+             tests would need upgrading too.
+     Branch: perl
+	   ! lib/File/Basename.pm
+____________________________________________________________________________
+[  7413] By: jhi                                   on 2000/10/23  12:19:27
+        Log: Document PERL_INSTALL_ROOT of #7210.
+     Branch: perl
+	   ! lib/ExtUtils/Install.pm
+____________________________________________________________________________
+[  7412] By: jhi                                   on 2000/10/23  12:16:47
+        Log: Miscellaneous MacOS Classic library updates from Matthias Neeracher.
+     Branch: perl
+	   ! lib/ExtUtils/Mksymlists.pm lib/File/Basename.pm
+	   ! lib/File/Path.pm lib/Term/ReadLine.pm lib/perl5db.pl
+____________________________________________________________________________
+[  7411] By: jhi                                   on 2000/10/23  12:07:41
+        Log: Subject: [PATCH: perl@7386] miscellaneous typos in 3 pods
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Sun, 22 Oct 2000 22:18:40 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0010222214150.11774-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! README.aix pod/perlebcdic.pod vms/ext/Stdio/Stdio.pm
+____________________________________________________________________________
+[  7410] By: jhi                                   on 2000/10/23  04:10:11
+        Log: The change #7187 was not so good on VMS.
+             
+             Subject: [PATCH perl@7369] VMS perldoc.PL fix for double quoted temp filename
+             From: "Craig A. Berry" <craig.berry@psinetcs.com>
+             Date: Sun, 22 Oct 2000 23:03:08 -0500
+             Message-Id: <p04330102b617d093470b@[172.16.52.1]>
+     Branch: perl
+	   ! utils/perldoc.PL
+____________________________________________________________________________
+[  7409] By: jhi                                   on 2000/10/23  03:57:36
+        Log: Avoid Storable locking on DJGPP for now.
+             
+             Subject: [PATCH] Re: [ID 20001020.009] Not OK: perl v5.7.0 +DEVEL7368 on dos-djgpp djgpp
+             From: "Peter J. Farley III" <pjfarley@banet.net>
+             Date: Sun, 22 Oct 2000 20:00:00 -0400
+             Message-Id: <4.3.1.0.20001022194247.00acfee0@pop5.banet.net>
+     Branch: perl
+	   ! ext/Storable/Storable.pm t/lib/st-lock.t
+____________________________________________________________________________
+[  7408] By: jhi                                   on 2000/10/23  03:50:24
+        Log: Subject: Re: [20000731.007] potential syntax error not detected [PATCH]
+             From: Ronald J Kimball <rjk@linguist.dartmouth.edu>
+             Date: Sun, 22 Oct 2000 21:12:22 -0400
+             Message-ID: <20001022211222.A1062496@linguist.dartmouth.edu>
+     Branch: perl
+	   ! lib/vars.pm
+____________________________________________________________________________
+[  7407] By: jhi                                   on 2000/10/23  03:43:12
+        Log: Subject: Re: [ID 20001021.005] SEGV with regex match 
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Mon, 23 Oct 2000 00:47:22 +0100
+             Message-Id: <200010222347.AAA09697@crypt.compulink.co.uk>
+     Branch: perl
+	   ! regexec.c t/op/pat.t
+____________________________________________________________________________
+[  7406] By: jhi                                   on 2000/10/23  03:40:29
+        Log: Retract #7404 with a patch from Robin Barker, via Andy Dougherty.
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[  7405] By: jhi                                   on 2000/10/22  21:32:00
+        Log: Doc patch.
+             
+             Subject: [ID 19991128.002] \&{'foo'} not caught by strict refs
+             From: rspier@pobox.com (Robert Spier)
+             Date: Sun, 22 Oct 2000 15:24:32 -0400 (EDT)
+             Message-ID: <14835.16112.13457.447971@rls.cx>
+     Branch: perl
+	   ! lib/strict.pm
+____________________________________________________________________________
+[  7404] By: jhi                                   on 2000/10/22  21:30:51
+        Log: Subject: [PATCH] Re: [ID 20000121.007] XXX documentation in man ExtUtils::MakeMaker
+             From: rspier@pobox.com (Robert Spier)
+             Date: Sun, 22 Oct 2000 15:43:03 -0400 (EDT)
+             Message-ID: <14835.17223.72448.705566@rls.cx>
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[  7403] By: jhi                                   on 2000/10/22  21:24:11
+        Log: Subject: [PATCH bleadperl] ripples from constsub patch
+             From: John Tobey <jtobey@john-edwin-tobey.org>
+             Date: Sun, 22 Oct 2000 17:10:43 -0400 (EDT)
+             Message-Id: <m13nSOB-000FObC@feynman.localnet>
+     Branch: perl
+	   ! dump.c ext/B/B.pm ext/B/B.xs ext/B/B/Deparse.pm t/lib/b.t
+____________________________________________________________________________
+[  7402] By: jhi                                   on 2000/10/22  20:59:35
+        Log: Support s?printf parameter reordering.
+     Branch: perl
+	   ! pod/perldelta.pod pod/perlfunc.pod sv.c t/op/sprintf.t
+____________________________________________________________________________
+[  7401] By: jhi                                   on 2000/10/22  19:19:14
+        Log: Expand Config variables only if explicitly so requested.
+             
+             Subject: Re: PATCH $Config::Config{ldlibpthname} in ext/DynaLoader/DynaLoader_pm.PL
+             From: Gurusamy Sarathy <gsar@ActiveState.com>
+             Date: Sun, 22 Oct 2000 11:47:32 -0700
+             Message-Id: <200010221847.LAA02167@smtp3.ActiveState.com>            
+     Branch: perl
+	   ! Makefile.SH lib/lib_pm.PL
+____________________________________________________________________________
+[  7400] By: jhi                                   on 2000/10/22  18:24:10
+        Log: Move the #7390 test from warn/op to comp/redef.
+             
+             Subject: Re: Creating const subs for constants.
+             From: John Tobey <jtobey@john-edwin-tobey.org>
+             Date: Sun, 22 Oct 2000 04:04:12 -0400 (EDT)
+             Message-Id: <m13nG72-000FObC@feynman.localnet>               
+     Branch: perl
+	   ! t/comp/redef.t t/pragma/warn/op
+____________________________________________________________________________
+[  7399] By: jhi                                   on 2000/10/22  17:49:59
+        Log: Subject: PATCH $Config::Config{ldlibpthname} in ext/DynaLoader/DynaLoader_pm.PL
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sat, 21 Oct 2000 22:23:19 +0100
+             Message-ID: <20001021222319.B45586@plum.flirble.org>
+     Branch: perl
+	   ! ext/DynaLoader/DynaLoader_pm.PL
+____________________________________________________________________________
+[  7398] By: jhi                                   on 2000/10/22  17:47:35
+        Log: Subject: [PATCH bleadperl] -MO=C falls over on package <none>
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Sat, 21 Oct 2000 18:19:59 +0100
+             Message-Id: <200010211719.SAA02087@crypt.compulink.co.uk>
+     Branch: perl
+	   ! ext/B/B.pm ext/B/B/C.pm
+____________________________________________________________________________
+[  7397] By: jhi                                   on 2000/10/22  17:35:18
+        Log: Subject: [ID 20001021.003] updated hints/openbsd.sh
+             From: "Todd C. Miller" <Todd.Miller@courtesan.com>
+             Date: Sat, 21 Oct 2000 13:55:50 -0600 (MDT)
+             Message-Id: <200010211955.e9LJton24170@xerxes.courtesan.com>
+     Branch: perl
+	   ! hints/openbsd.sh
+____________________________________________________________________________
+[  7396] By: jhi                                   on 2000/10/22  17:19:46
+        Log: Subject: installman go-faster stripes
+             From: Nicholas Clark <nick@talking.bollo.cx>
+             Date: Sat, 21 Oct 2000 17:24:53 +0100
+             Message-ID: <20001021172452.A20371@Bagpuss.unfortu.net>
+             
+             Subject: Re: installman go-faster stripes
+             From: Russ Allbery <rra@stanford.edu>
+             Date: 21 Oct 2000 11:04:13 -0700
+             Message-ID: <ylbswe5aw2.fsf@windlord.stanford.edu>
+     Branch: perl
+	   ! installman pod/pod2man.PL
+____________________________________________________________________________
+[  7395] By: jhi                                   on 2000/10/22  17:17:35
+        Log: Hints tweak from Anton Berezin.
+     Branch: perl
+	   ! hints/freebsd.sh
+____________________________________________________________________________
+[  7394] By: jhi                                   on 2000/10/22  04:50:04
+        Log: Tweak the Is* definitions of Unicode character classes
+             to better match the official categorizations; embrace
+             the official categorizations; add the combining marks
+             as alpha (and -numeric); fix DCinital (a typo and edito)
+             to be DCmedial.
+     Branch: perl
+	   + lib/unicode/Is/DCmedial.pl
+	   - lib/unicode/Is/DCinital.pl
+	   ! MANIFEST lib/unicode/Is/Alnum.pl lib/unicode/Is/Alpha.pl
+	   ! lib/unicode/Is/Graph.pl lib/unicode/Is/Print.pl
+	   ! lib/unicode/Is/Punct.pl lib/unicode/Is/Space.pl
+	   ! lib/unicode/Is/Word.pl lib/unicode/mktables.PL
+____________________________________________________________________________
+[  7393] By: jhi                                   on 2000/10/21  18:06:05
+        Log: Subject: [PATCH@blead Tie/Array.pm] Re: [ID 20001020.002] Tie::Array SPLICE method is buggy
+             From: Daniel Chetlin <daniel@chetlin.com>
+             Date: Sat, 21 Oct 2000 02:57:03 -0700
+             Message-ID: <20001021025703.A2115@darkstar.chetlin.org>
+     Branch: perl
+	   + t/lib/tie-splice.t
+	   ! MANIFEST lib/Tie/Array.pm
+____________________________________________________________________________
+[  7391] By: jhi                                   on 2000/10/21  14:37:49
+        Log: Testcases for a #7383,#7385 related bug.
+             
+             Subject: PATCH Re: [ID 20001020.006] "$2$utf8" == modification of read-only-variable
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sat, 21 Oct 2000 15:04:51 +0100
+             Message-ID: <20001021150451.A51566@plum.flirble.org>
+     Branch: perl
+	   ! t/pragma/utf8.t
+____________________________________________________________________________
+[  7390] By: jhi                                   on 2000/10/21  14:35:57
+        Log: Add a testcase for #7389.
+     Branch: perl
+	   ! t/pragma/warn/op
+____________________________________________________________________________
+[  7389] By: jhi                                   on 2000/10/21  14:26:45
+        Log: Subject: Re: Creating const subs for constants.
+             From: John Tobey <jtobey@john-edwin-tobey.org>
+             Date: Fri, 20 Oct 2000 22:03:27 -0400 (EDT)
+             Message-Id: <m13mo0N-000FObC@feynman.localnet>
+     Branch: perl
+	   ! cv.h embed.h embed.pl objXSUB.h op.c perlapi.c pod/perlapi.pod
+	   ! proto.h sv.c
+____________________________________________________________________________
+[  7386] By: jhi                                   on 2000/10/21  01:31:12
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7385] By: jhi                                   on 2000/10/21  01:28:42
         Log: The #7383 was right only in the context of the original bug report,
              not in more general case.
