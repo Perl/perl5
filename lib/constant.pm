@@ -28,75 +28,93 @@ my %forbidden = (%keywords, %forced_into_main);
 sub import {
     my $class = shift;
     return unless @_;			# Ignore 'use constant;'
-    my $name = shift;
-    unless (defined $name) {
-        require Carp;
-	Carp::croak("Can't use undef as constant name");
+    my %constants = ();
+    my $multiple  = ref $_[0];
+
+    if ( $multiple ) {
+	if (ref $_[0] ne 'HASH') {
+	    require Carp;
+	    Carp::croak("Invalid reference type '".ref(shift)."' not 'HASH'");
+	}
+	%constants = %{+shift};
+    } else {
+	$constants{+shift} = undef;
     }
-    my $pkg = caller;
 
-    # Normal constant name
-    if ($name =~ /^_?[^\W_0-9]\w*\z/ and !$forbidden{$name}) {
-        # Everything is okay
+    foreach my $name ( keys %constants ) {
+	unless (defined $name) {
+	    require Carp;
+	    Carp::croak("Can't use undef as constant name");
+	}
+	my $pkg = caller;
 
-    # Name forced into main, but we're not in main. Fatal.
-    } elsif ($forced_into_main{$name} and $pkg ne 'main') {
-	require Carp;
-	Carp::croak("Constant name '$name' is forced into main::");
+	# Normal constant name
+	if ($name =~ /^_?[^\W_0-9]\w*\z/ and !$forbidden{$name}) {
+	    # Everything is okay
 
-    # Starts with double underscore. Fatal.
-    } elsif ($name =~ /^__/) {
-	require Carp;
-	Carp::croak("Constant name '$name' begins with '__'");
+	# Name forced into main, but we're not in main. Fatal.
+	} elsif ($forced_into_main{$name} and $pkg ne 'main') {
+	    require Carp;
+	    Carp::croak("Constant name '$name' is forced into main::");
 
-    # Maybe the name is tolerable
-    } elsif ($name =~ /^[A-Za-z_]\w*\z/) {
-	# Then we'll warn only if you've asked for warnings
-	if (warnings::enabled()) {
-	    if ($keywords{$name}) {
-		warnings::warn("Constant name '$name' is a Perl keyword");
-	    } elsif ($forced_into_main{$name}) {
-		warnings::warn("Constant name '$name' is " .
-		    "forced into package main::");
+	# Starts with double underscore. Fatal.
+	} elsif ($name =~ /^__/) {
+	    require Carp;
+	    Carp::croak("Constant name '$name' begins with '__'");
+
+	# Maybe the name is tolerable
+	} elsif ($name =~ /^[A-Za-z_]\w*\z/) {
+	    # Then we'll warn only if you've asked for warnings
+	    if (warnings::enabled()) {
+		if ($keywords{$name}) {
+		    warnings::warn("Constant name '$name' is a Perl keyword");
+		} elsif ($forced_into_main{$name}) {
+		    warnings::warn("Constant name '$name' is " .
+			"forced into package main::");
+		} else {
+		    # Catch-all - what did I miss? If you get this error,
+		    # please let me know what your constant's name was.
+		    # Write to <rootbeer@redcat.com>. Thanks!
+		    warnings::warn("Constant name '$name' has unknown problems");
+		}
+	    }
+
+	# Looks like a boolean
+	# use constant FRED == fred;
+	} elsif ($name =~ /^[01]?\z/) {
+            require Carp;
+	    if (@_) {
+		Carp::croak("Constant name '$name' is invalid");
 	    } else {
-		# Catch-all - what did I miss? If you get this error,
-		# please let me know what your constant's name was.
-		# Write to <rootbeer@redcat.com>. Thanks!
-		warnings::warn("Constant name '$name' has unknown problems");
+		Carp::croak("Constant name looks like boolean value");
+	    }
+
+	} else {
+	   # Must have bad characters
+            require Carp;
+	    Carp::croak("Constant name '$name' has invalid characters");
+	}
+
+	{
+	    no strict 'refs';
+	    my $full_name = "${pkg}::$name";
+	    $declared{$full_name}++;
+	    if ($multiple) {
+		my $scalar = $constants{$name};
+		*$full_name = sub () { $scalar };
+	    } else {
+		if (@_ == 1) {
+		    my $scalar = $_[0];
+		    *$full_name = sub () { $scalar };
+		} elsif (@_) {
+		    my @list = @_;
+		    *$full_name = sub () { @list };
+		} else {
+		    *$full_name = sub () { };
+		}
 	    }
 	}
-
-    # Looks like a boolean
-    # 		use constant FRED == fred;
-    } elsif ($name =~ /^[01]?\z/) {
-        require Carp;
-	if (@_) {
-	    Carp::croak("Constant name '$name' is invalid");
-	} else {
-	    Carp::croak("Constant name looks like boolean value");
-	}
-
-    } else {
-	# Must have bad characters
-        require Carp;
-	Carp::croak("Constant name '$name' has invalid characters");
     }
-
-    {
-	no strict 'refs';
-	my $full_name = "${pkg}::$name";
-	$declared{$full_name}++;
-	if (@_ == 1) {
-	    my $scalar = $_[0];
-	    *$full_name = sub () { $scalar };
-	} elsif (@_) {
-	    my @list = @_;
-	    *$full_name = sub () { @list };
-	} else {
-	    *$full_name = sub () { };
-	}
-    }
-
 }
 
 1;
@@ -132,6 +150,17 @@ constant - Perl pragma to declare constants
     print CPSEUDOHASH->{foo};
     print CCODE->("me");
     print CHASH->[10];			# compile-time error
+
+    # declaring multiple constants at once
+    use constant {
+	BUFFER_SIZE	=> 4096,
+	ONE_YEAR	=> 365.2425 * 24 * 60 * 60,
+	PI		=> 4 * atan2( 1, 1 ),
+	DEBUGGING	=> 0,
+	ORACLE		=> 'oracle@cs.indiana.edu',
+	USERNAME	=> scalar getpwuid($<),
+	USERINFO	=> getpwuid($<),
+    };
 
 =head1 DESCRIPTION
 
@@ -176,14 +205,26 @@ Other as C<Other::CONST>.
 As with all C<use> directives, defining a constant happens at
 compile time. Thus, it's probably not correct to put a constant
 declaration inside of a conditional statement (like C<if ($foo)
-{ use constant ... }>).
+{ use constant ... }>).  When defining multiple constants, you
+cannot use the values of other constants within the same declaration
+scope.  This is because the calling package doesn't know about any
+constant within that group until I<after> the C<use> statement is
+finished.
+
+    use constant {
+	AGE    => 20,
+	PERSON => { age => AGE }, # Error!
+    };
+    [...]
+    use constant PERSON => { age => AGE }; # Right
 
 Omitting the value for a symbol gives it the value of C<undef> in
 a scalar context or the empty list, C<()>, in a list context. This
 isn't so nice as it may sound, though, because in this case you
 must either quote the symbol name, or use a big arrow, (C<=E<gt>>),
-with nothing to point to. It is probably best to declare these
-explicitly.
+with nothing to point to. It is also illegal to do when defining
+multiple constants at once, you must declare them explicitly.  It
+is probably best to declare these explicitly.
 
     use constant UNICORNS	=> ();
     use constant LOGFILE	=> undef;
@@ -205,6 +246,11 @@ constants at compile time, allowing for way cool stuff like this.
 Dereferencing constant references incorrectly (such as using an array
 subscript on a constant hash reference, or vice versa) will be trapped at
 compile time.
+
+When declaring multiple constants, all constant values will be a scalar.
+This is because C<constant> can't guess the intent of the programmer
+correctly all the time since values must be expressed in scalar context
+within a hash ref.
 
 In the rare case in which you need to discover at run time whether a
 particular constant has been declared via this module, you may use
@@ -267,6 +313,9 @@ C<CONSTANT =E<gt> 'value'>.
 
 Tom Phoenix, E<lt>F<rootbeer@redcat.com>E<gt>, with help from
 many other folks.
+
+Multiple constant declarations at once added by Casey Tweten,
+E<lt>F<crt@kiski.net>E<gt>.
 
 =head1 COPYRIGHT
 
