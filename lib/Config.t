@@ -6,7 +6,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan tests => 34;
+plan tests => 36;
 
 use_ok('Config');
 
@@ -102,18 +102,25 @@ like($@, qr/Config is read-only/, "no CLEAR");
 
 ok( exists $Config{d_fork}, "still d_fork");
 
-package FakeOut;
+{
+    package FakeOut;
 
-sub TIEHANDLE {
-        bless(\(my $text), $_[0]);
+    sub TIEHANDLE {
+	bless(\(my $text), $_[0]);
+    }
+
+    sub clear {
+	${ $_[0] } = '';
+    }
+
+    sub PRINT {
+	my $self = shift;
+	$$self .= join('', @_);
+    }
 }
 
-sub clear {
-        ${ $_[0] } = '';
-}
+# Signal-related variables
+# (this is actually a regression test for Configure.)
 
-sub PRINT {
-        my $self = shift;
-        $$self .= join('', @_);
-}
-
+ok((split / /, $Config{sig_num}) == $Config{sig_size}, "sig_size");
+like($Config{sig_num}, qr/^[ \d]+\z/, "sig_num has only positive numbers");
