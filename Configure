@@ -1124,6 +1124,7 @@ uselargefiles=''
 uselongdouble=''
 usemorebits=''
 usemultiplicity=''
+mistrustnm=''
 nm_opt=''
 nm_so_opt=''
 runnm=''
@@ -7358,7 +7359,7 @@ csym='tlook=$1;
 case "$3" in
 -v) tf=libc.tmp; tc=""; tdc="";;
 -a) tf=libc.tmp; tc="[0]"; tdc="[]";;
-*) tlook="^$1\$"; tf=libc.list; tc="()"; tdc="()";;
+*) tlook="^$1\$"; tf=libc.list; tc=""; tdc="()";;
 esac;
 tx=yes;
 case "$reuseval-$4" in
@@ -7368,14 +7369,20 @@ esac;
 case "$tx" in
 yes)
 	tval=false;
-	if $test "$runnm" = "true" && $contains $tlook $tf >/dev/null 2>&1; then
-		tval=true;
-	else
-		echo "int main() { extern short $1$tdc; printf(\"%hd\", $1$tc); }" > t.c;
-		if $cc -o t $optimize $ccflags $ldflags t.c $libs >/dev/null 2>&1; then
+	if $test "$runnm" = true; then
+		if $contains $tlook $tf >/dev/null 2>&1; then
 			tval=true;
+		elif $test "$mistrustnm" = compile -o "$mistrustnm" = run; then
+			echo "int main() { extern void *$1$tdc; return(&$1$tc ? 0 : 1); }" > try.c;
+			$cc -o try $optimize $ccflags $ldflags try.c >/dev/null 2>&1 $libs && tval=true;
+			$test "$mistrustnm" = run -a -x try && { $run ./try >/dev/null 2>&1 || tval=false; };
+			$rm -f try try.c core;
 		fi;
-		$rm -f t t.c;
+	else
+		echo "#include <stdio.h>" > try.c;
+		echo "int main() { extern void *$1$tdc; return(&$1$tc ? 0 : 1); }" > try.c;
+		$cc -o try $optimize $ccflags $ldflags try.c $libs >/dev/null 2>&1 && tval=true;
+		$rm -f try try.c;
 	fi;
 	;;
 *)
@@ -21154,6 +21161,7 @@ man3dir='$man3dir'
 man3direxp='$man3direxp'
 man3ext='$man3ext'
 mips_type='$mips_type'
+mistrustnm='$mistrustnm'
 mkdir='$mkdir'
 mmaptype='$mmaptype'
 modetype='$modetype'
