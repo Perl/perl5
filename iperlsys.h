@@ -78,11 +78,17 @@ extern void PerlIO_init (void);
 typedef Signal_t (*Sighandler_t) (int);
 #endif
 
+#ifndef Fpos_t
+#define Fpos_t Off_t
+#endif
+
 #if defined(PERL_IMPLICIT_SYS)
 
 #ifndef PerlIO
-typedef struct _PerlIO PerlIO;
-#endif
+typedef struct _PerlIO PerlIOl;
+typedef PerlIOl *PerlIO;
+#define PerlIO PerlIO
+#endif /* No PerlIO */
 
 /* IPerlStdIO		*/
 struct IPerlStdIO;
@@ -120,7 +126,7 @@ typedef void		(*LPSetCnt)(struct IPerlStdIO*, PerlIO*, int);
 typedef void		(*LPSetPtrCnt)(struct IPerlStdIO*, PerlIO*, char*,
 			    int);
 typedef void		(*LPSetlinebuf)(struct IPerlStdIO*, PerlIO*);
-typedef int		(*LPPrintf)(struct IPerlStdIO*, PerlIO*, const char*, 
+typedef int		(*LPPrintf)(struct IPerlStdIO*, PerlIO*, const char*,
 			    ...);
 typedef int		(*LPVprintf)(struct IPerlStdIO*, PerlIO*, const char*,
 			    va_list);
@@ -134,6 +140,7 @@ typedef int		(*LPSetpos)(struct IPerlStdIO*, PerlIO*,
 typedef void		(*LPInit)(struct IPerlStdIO*);
 typedef void		(*LPInitOSExtras)(struct IPerlStdIO*);
 typedef PerlIO*		(*LPFdupopen)(struct IPerlStdIO*, PerlIO*);
+typedef int		(*LPIsUtf8)(struct IPerlStdIO*, PerlIO*);
 
 struct IPerlStdIO
 {
@@ -176,6 +183,7 @@ struct IPerlStdIO
     LPInit		pInit;
     LPInitOSExtras	pInitOSExtras;
     LPFdupopen		pFdupopen;
+    LPIsUtf8		pIsUtf8;
 };
 
 struct IPerlStdIOInfo
@@ -185,19 +193,19 @@ struct IPerlStdIOInfo
 };
 
 #ifdef USE_STDIO_PTR
-#  define PerlIO_has_cntptr(f)		1       
+#  define PerlIO_has_cntptr(f)		1
 #  ifdef STDIO_PTR_LVALUE
 #    ifdef  STDIO_CNT_LVALUE
-#      define PerlIO_canset_cnt(f)	1      
+#      define PerlIO_canset_cnt(f)	1
 #      ifdef STDIO_PTR_LVAL_NOCHANGE_CNT
-#        define PerlIO_fast_gets(f)	1        
+#        define PerlIO_fast_gets(f)	1
 #      endif
 #    else /* STDIO_CNT_LVALUE */
-#      define PerlIO_canset_cnt(f)	0      
+#      define PerlIO_canset_cnt(f)	0
 #    endif
 #  else /* STDIO_PTR_LVALUE */
 #    ifdef STDIO_PTR_LVAL_SETS_CNT
-#      define PerlIO_fast_gets(f)	1        
+#      define PerlIO_fast_gets(f)	1
 #    endif
 #  endif
 #else  /* USE_STDIO_PTR */
@@ -206,7 +214,7 @@ struct IPerlStdIOInfo
 #endif /* USE_STDIO_PTR */
 
 #ifndef PerlIO_fast_gets
-#define PerlIO_fast_gets(f)		0        
+#define PerlIO_fast_gets(f)		0
 #endif
 
 #ifdef FILE_base
@@ -274,7 +282,7 @@ struct IPerlStdIOInfo
 #define PerlIO_printf		Perl_fprintf_nocontext
 #define PerlIO_stdoutf		*PL_StdIO->pPrintf
 #define PerlIO_vprintf(f,fmt,a)						\
-	(*PL_StdIO->pVprintf)(PL_StdIO, (f),(fmt),a)          
+	(*PL_StdIO->pVprintf)(PL_StdIO, (f),(fmt),a)
 #define PerlIO_tell(f)							\
 	(*PL_StdIO->pTell)(PL_StdIO, (f))
 #define PerlIO_seek(f,o,w)						\
@@ -294,18 +302,22 @@ struct IPerlStdIOInfo
 	(*PL_StdIO->pInitOSExtras)(PL_StdIO)
 #define PerlIO_fdupopen(f)						\
 	(*PL_StdIO->pFdupopen)(PL_StdIO, (f))
+#define PerlIO_isutf8(f)						\
+	(*PL_StdIO->pIsUtf8)(PL_StdIO, (f))
 
 #else	/* PERL_IMPLICIT_SYS */
 
 #include "perlsdio.h"
 #include "perl.h"
 #define PerlIO_fdupopen(f)		(f)
+#define PerlIO_isutf8(f)		0
 
 #endif	/* PERL_IMPLICIT_SYS */
 
 #ifndef PERLIO_IS_STDIO
 #ifdef USE_SFIO
 #include "perlsfio.h"
+#define PerlIO_isutf8(f)		0
 #endif /* USE_SFIO */
 #endif /* PERLIO_IS_STDIO */
 
@@ -331,13 +343,10 @@ struct IPerlStdIOInfo
 #endif
 
 #ifndef PerlIO
-struct _PerlIO;
-#define PerlIO struct _PerlIO
+typedef struct _PerlIO PerlIOl;
+typedef PerlIOl *PerlIO;
+#define PerlIO PerlIO
 #endif /* No PerlIO */
-
-#ifndef Fpos_t
-#define Fpos_t long
-#endif
 
 #ifndef NEXT30_NO_ATTRIBUTE
 #ifndef HASATTRIBUTE       /* disable GNU-cc attribute checking? */
@@ -480,7 +489,9 @@ extern int	PerlIO_setpos		(PerlIO *,const Fpos_t *);
 #ifndef PerlIO_fdupopen
 extern PerlIO *	PerlIO_fdupopen		(PerlIO *);
 #endif
-
+#ifndef PerlIO_isutf8
+extern int	PerlIO_isutf8		(PerlIO *);
+#endif
 
 /*
  *   Interface for directory functions
@@ -558,7 +569,7 @@ struct IPerlDirInfo
 #define PerlDir_mkdir(name, mode)	Mkdir((name), (mode))
 #ifdef VMS
 #  define PerlDir_chdir(n)		Chdir(((n) && *(n)) ? (n) : "SYS$LOGIN")
-#else 
+#else
 #  define PerlDir_chdir(name)		chdir((name))
 #endif
 #define PerlDir_rmdir(name)		rmdir((name))
@@ -1262,7 +1273,7 @@ typedef int		(*LPRecvfrom)(struct IPerlSock*, SOCKET, char*, int,
 typedef int		(*LPSelect)(struct IPerlSock*, int, char*, char*,
 			    char*, const struct timeval*);
 typedef int		(*LPSend)(struct IPerlSock*, SOCKET, const char*, int,
-			    int); 
+			    int);
 typedef int		(*LPSendto)(struct IPerlSock*, SOCKET, const char*,
 			    int, int, const struct sockaddr*, int);
 typedef void		(*LPSethostent)(struct IPerlSock*, int);

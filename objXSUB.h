@@ -1901,7 +1901,7 @@
 #define Perl_whichsig		pPerl->Perl_whichsig
 #undef  whichsig
 #define whichsig		Perl_whichsig
-#if defined(USE_PURE_BISON)
+#ifdef USE_PURE_BISON
 #else
 #endif
 #if defined(MYMALLOC)

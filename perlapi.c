@@ -2237,21 +2237,21 @@ Perl_init_i18nl14n(pTHXo_ int printwarn)
 
 #undef  Perl_new_collate
 void
-Perl_new_collate(pTHXo_ const char* newcoll)
+Perl_new_collate(pTHXo_ char* newcoll)
 {
     ((CPerlObj*)pPerl)->Perl_new_collate(newcoll);
 }
 
 #undef  Perl_new_ctype
 void
-Perl_new_ctype(pTHXo_ const char* newctype)
+Perl_new_ctype(pTHXo_ char* newctype)
 {
     ((CPerlObj*)pPerl)->Perl_new_ctype(newctype);
 }
 
 #undef  Perl_new_numeric
 void
-Perl_new_numeric(pTHXo_ const char* newcoll)
+Perl_new_numeric(pTHXo_ char* newcoll)
 {
     ((CPerlObj*)pPerl)->Perl_new_numeric(newcoll);
 }
@@ -3439,7 +3439,7 @@ Perl_whichsig(pTHXo_ char* sig)
 {
     return ((CPerlObj*)pPerl)->Perl_whichsig(sig);
 }
-#if defined(USE_PURE_BISON)
+#ifdef USE_PURE_BISON
 #else
 #endif
 #if defined(MYMALLOC)
