@@ -58,8 +58,9 @@ isa_ok( $mm, 'ExtUtils::MakeMaker' );
 is( $mm->{NAME}, 'Big::Fat::Dummy',  'NAME' );
 is( $mm->{VERSION}, 0.01,            'VERSION' );
 
-my $config_prefix = $^O eq 'VMS' ? VMS::Filespec::unixify($Config{prefix})
-                                 : $Config{prefix};
+my $config_prefix = $^O eq 'VMS' 
+                        ? VMS::Filespec::unixify($Config{installprefixexp})
+                        : $Config{installprefixexp};
 is( $mm->{PREFIX}, $config_prefix,   'PREFIX' );
 
 is( !!$mm->{PERL_CORE}, !!$ENV{PERL_CORE}, 'PERL_CORE' );
