@@ -40,11 +40,14 @@ curcop
 curcopdb
 curinterp
 curpad
+cv_const_sv
 dc
+debug
 dec_amg
 di
 div_amg
 div_ass_amg
+do_undump
 ds
 egid
 envgv

@@ -34,7 +34,7 @@ Perl. These you won't need to be worried about.
 
 Although Plan 9 Perl currently only  provides static 
 loading, it is built with a number of useful extensions. 
-These include Safe, FileHandle, Fcntl, and POSIX. Expect 
+These include Opcode, FileHandle, Fcntl, and POSIX. Expect 
 to see others (and DynaLoading!) in the future.
 
 =head2 What's not in Plan 9 Perl
@@ -80,7 +80,7 @@ world . . ." - Carl Sagan
 
 =head1 Revision date
 
-This document was revised 04-July-1996 for Perl 5.003_1.
+This document was revised 06-August-1996 for Perl 5.003_2.
 
 =head1 AUTHOR
 

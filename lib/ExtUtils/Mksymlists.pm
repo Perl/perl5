@@ -40,6 +40,7 @@ sub Mksymlists {
     }
 
 #    We'll need this if we ever add any OS which uses mod2fname
+#    not as pseudo-builtin.
 #    require DynaLoader;
     if (defined &DynaLoader::mod2fname and not $spec{DLBASE}) {
         $spec{DLBASE} = DynaLoader::mod2fname([ split(/::/,$spec{NAME}) ]);

@@ -35,6 +35,10 @@ dEXT char rcsid[] = "perl.c\nPatch level: ###\n";
 #endif
 #endif
 
+#ifndef OSNAME
+#define OSNAME "unknown"
+#endif
+
 static void find_beginning _((void));
 static void incpush _((char *));
 static void init_ids _((void));
@@ -131,6 +135,8 @@ register PerlInterpreter *sv_interp;
 #if defined(LOCAL_PATCH_COUNT)
     localpatches = local_patches;	/* For possible -v */
 #endif
+
+    PerlIO_init();      /* Hook to IO system */
 
     fdpid = newAV();	/* for remembering popen pids by fd */
     pidstatus = newHV();/* for remembering status of dead pids */
@@ -337,7 +343,7 @@ setuid perl scripts securely.\n");
 	    calllist(endav);
 	return(statusvalue);	/* my_exit() was called */
     case 3:
-	fprintf(stderr, "panic: top_env\n");
+	PerlIO_printf(PerlIO_stderr(), "panic: top_env\n");
 	return 1;
     }
 
@@ -388,15 +394,15 @@ setuid perl scripts securely.\n");
 		(void)mktemp(e_tmpname);
 		if (!*e_tmpname)
 		    croak("Can't mktemp()");
-		e_fp = fopen(e_tmpname,"w");
+		e_fp = PerlIO_open(e_tmpname,"w");
 		if (!e_fp)
 		    croak("Cannot open temporary file");
 	    }
 	    if (argv[1]) {
-		fputs(argv[1],e_fp);
+		PerlIO_puts(e_fp,argv[1]);
 		argc--,argv++;
 	    }
-	    (void)putc('\n', e_fp);
+	    (void)PerlIO_putc(e_fp,'\n');
 	    break;
 	case 'I':
 	    taint_not("-I");
@@ -500,7 +506,7 @@ setuid perl scripts securely.\n");
     if (!scriptname)
 	scriptname = argv[0];
     if (e_fp) {
-	if (Fflush(e_fp) || ferror(e_fp) || fclose(e_fp))
+	if (PerlIO_flush(e_fp) || PerlIO_error(e_fp) || PerlIO_close(e_fp))
 	    croak("Can't write to temp file for -e: %s", Strerror(errno));
 	e_fp = Nullfp;
 	argc++,argv--;
@@ -508,7 +514,7 @@ setuid perl scripts securely.\n");
     }
     else if (scriptname == Nullch) {
 #ifdef MSDOS
-	if ( isatty(fileno(stdin)) )
+	if ( isatty(PerlIO_fileno(PerlIO_stdin())) )
 	    moreswitches("v");
 #endif
 	scriptname = "-";
@@ -619,7 +625,7 @@ PerlInterpreter *sv_interp;
 	return(statusvalue);		/* my_exit() was called */
     case 3:
 	if (!restartop) {
-	    fprintf(stderr, "panic: restartop\n");
+	    PerlIO_printf(PerlIO_stderr(), "panic: restartop\n");
 	    FREETMPS;
 	    return 1;
 	}
@@ -630,15 +636,15 @@ PerlInterpreter *sv_interp;
 	break;
     }
 
-    DEBUG_r(fprintf(stderr, "%s $` $& $' support.\n",
+    DEBUG_r(PerlIO_printf(PerlIO_stderr(), "%s $` $& $' support.\n",
                     sawampersand ? "Enabling" : "Omitting"));
 
     if (!restartop) {
 	DEBUG_x(dump_all());
-	DEBUG(fprintf(Perl_debug_log,"\nEXECUTING...\n\n"));
+	DEBUG(PerlIO_printf(Perl_debug_log, "\nEXECUTING...\n\n"));
 
 	if (minus_c) {
-	    fprintf(stderr,"%s syntax OK\n", origfilename);
+	    PerlIO_printf(PerlIO_stderr(), "%s syntax OK\n", origfilename);
 	    my_exit(0);
 	}
 	if (perldb && DBsingle)
@@ -1037,6 +1043,9 @@ I32 namlen;
 #    define PERLLIB_SEP ':'
 #  endif
 #endif
+#ifndef PERLLIB_MANGLE
+#  define PERLLIB_MANGLE(s,n) (s)
+#endif 
 
 static void
 incpush(p)
@@ -1056,10 +1065,11 @@ char *p;
 	    p++;
 	}
 	if ( (s = strchr(p, PERLLIB_SEP)) != Nullch ) {
-	    av_push(GvAVn(incgv), newSVpv(p, (STRLEN)(s - p)));
+	    av_push(GvAVn(incgv), newSVpv(PERLLIB_MANGLE(p, (STRLEN)(s - p)), 
+					  (STRLEN)(s - p)));
 	    p = s + 1;
 	} else {
-	    av_push(GvAVn(incgv), newSVpv(p, 0));
+	    av_push(GvAVn(incgv), newSVpv(PERLLIB_MANGLE(p, 0), 0));
 	    break;
 	}
     }
@@ -1277,22 +1287,21 @@ char *s;
 	printf("\nThis is perl, version %s",patchlevel);
 #endif
 
-	fputs("\n\nCopyright 1987-1996, Larry Wall\n",stdout);
-	fputs("\n\t+ suidperl security patch", stdout);
+	printf("\n\nCopyright 1987-1996, Larry Wall\n");
+	printf("\n\t+ suidperl security patch");
 #ifdef MSDOS
-	fputs("MS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n",
-	stdout);
+	printf("MS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n");
 #endif
 #ifdef OS2
-	fputs("OS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
-	    "Version 5 port Copyright (c) 1994-1996, Andreas Kaiser, Ilya Zakharevich\n", stdout);
+	printf("OS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
+	    "Version 5 port Copyright (c) 1994-1996, Andreas Kaiser, Ilya Zakharevich\n");
 #endif
 #ifdef atarist
-	fputs("atariST series port, ++jrb  bammi@cadence.com\n", stdout);
+	printf("atariST series port, ++jrb  bammi@cadence.com\n");
 #endif
-	fputs("\n\
+	printf("\n\
 Perl may be copied only under the terms of either the Artistic License or the\n\
-GNU General Public License, which may be found in the Perl 5.0 source kit.\n\n",stdout);
+GNU General Public License, which may be found in the Perl 5.0 source kit.\n\n");
 #ifdef MSDOS
         usage(origargv[0]);
 #endif
@@ -1337,7 +1346,7 @@ my_unexec()
 
     status = unexec(buf, tokenbuf, &etext, sbrk(0), 0);
     if (status)
-	fprintf(stderr, "unexec of %s into %s failed!\n", tokenbuf, buf);
+	PerlIO_printf(PerlIO_stderr(), "unexec of %s into %s failed!\n", tokenbuf, buf);
     exit(status);
 #else
 #  ifdef VMS
@@ -1456,7 +1465,7 @@ SV *sv;
 		extidx = 0;
 	    do {
 #endif
-	    	DEBUG_p(fprintf(Perl_debug_log,"Looking for %s\n",tokenbuf));
+	    	DEBUG_p(PerlIO_printf(Perl_debug_log, "Looking for %s\n",tokenbuf));
 		retval = Stat(tokenbuf,&statbuf);
 #ifdef SEARCH_EXTS
 	    } while (  retval < 0		/* not there */
@@ -1496,9 +1505,9 @@ SV *sv;
     if (strEQ(origfilename,"-"))
 	scriptname = "";
     if (fdscript >= 0) {
-	rsfp = fdopen(fdscript,"r");
+	rsfp = PerlIO_fdopen(fdscript,"r");
 #if defined(HAS_FCNTL) && defined(F_SETFD)
-	fcntl(fileno(rsfp),F_SETFD,1);	/* ensure close-on-exec */
+	fcntl(PerlIO_fileno(rsfp),F_SETFD,1);	/* ensure close-on-exec */
 #endif
     }
     else if (preprocess) {
@@ -1571,15 +1580,15 @@ sed %s -e \"/^[^#]/b\" \
     }
     else if (!*scriptname) {
 	taint_not("program input from stdin");
-	rsfp = stdin;
+	rsfp = PerlIO_stdin();
     }
     else {
-	rsfp = fopen(scriptname,"r");
+	rsfp = PerlIO_open(scriptname,"r");
 #if defined(HAS_FCNTL) && defined(F_SETFD)
-	fcntl(fileno(rsfp),F_SETFD,1);	/* ensure close-on-exec */
+	fcntl(PerlIO_fileno(rsfp),F_SETFD,1);	/* ensure close-on-exec */
 #endif
     }
-    if ((FILE*)rsfp == Nullfp) {
+    if ((PerlIO*)rsfp == Nullfp) {
 #ifdef DOSUID
 #ifndef IAMSUID		/* in case script is not readable before setuid */
 	if (euid && Stat(SvPVX(GvSV(curcop->cop_filegv)),&statbuf) >= 0 &&
@@ -1625,7 +1634,7 @@ char *scriptname;
 #ifdef DOSUID
     char *s, *s2;
 
-    if (Fstat(fileno(rsfp),&statbuf) < 0)	/* normal stat is insecure */
+    if (Fstat(PerlIO_fileno(rsfp),&statbuf) < 0)	/* normal stat is insecure */
 	croak("Can't stat script \"%s\"",origfilename);
     if (fdscript < 0 && statbuf.st_mode & (S_ISUID|S_ISGID)) {
 	I32 len;
@@ -1665,9 +1674,9 @@ char *scriptname;
 		croak("Permission denied");	/* testing full pathname here */
 	    if (tmpstatbuf.st_dev != statbuf.st_dev ||
 		tmpstatbuf.st_ino != statbuf.st_ino) {
-		(void)fclose(rsfp);
+		(void)PerlIO_close(rsfp);
 		if (rsfp = my_popen("/bin/mail root","w")) {	/* heh, heh */
-		    fprintf(rsfp,
+		    PerlIO_printf(rsfp,
 "User %d tried to run dev %d ino %d in place of dev %d ino %d!\n\
 (Filename of set-id script was %s, uid %d gid %d.)\n\nSincerely,\nperl\n",
 			uid,tmpstatbuf.st_dev, tmpstatbuf.st_ino,
@@ -1700,13 +1709,13 @@ char *scriptname;
 	    croak("Setuid/gid script is writable by world");
 	doswitches = FALSE;		/* -s is insecure in suid */
 	curcop->cop_line++;
-	if (fgets(tokenbuf,sizeof tokenbuf, rsfp) == Nullch ||
-	  strnNE(tokenbuf,"#!",2) )	/* required even on Sys V */
+	if (sv_gets(linestr, rsfp, 0) == Nullch ||
+	  strnNE(SvPV(linestr,na),"#!",2) )	/* required even on Sys V */
 	    croak("No #! line");
-	s = tokenbuf+2;
+	s = SvPV(linestr,na)+2;
 	if (*s == ' ') s++;
 	while (!isSPACE(*s)) s++;
-	for (s2 = s;  (s2 > tokenbuf+2 &&
+	for (s2 = s;  (s2 > SvPV(linestr,na)+2 &&
 		       (isDIGIT(s2[-1]) || strchr("._-", s2[-1])));  s2--) ;
 	if (strnNE(s2-4,"perl",4) && strnNE(s-9,"perl",4))  /* sanity check */
 	    croak("Not a perl script");
@@ -1730,7 +1739,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 #endif /* IAMSUID */
 
 	if (euid) {	/* oops, we're not the setuid root perl */
-	    (void)fclose(rsfp);
+	    (void)PerlIO_close(rsfp);
 #ifndef IAMSUID
 	    (void)sprintf(buf, "%s/sperl%s", BIN, patchlevel);
 	    execv(buf, origargv);	/* try again */
@@ -1805,16 +1814,16 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
     /* We absolutely must clear out any saved ids here, so we */
     /* exec the real perl, substituting fd script for scriptname. */
     /* (We pass script name as "subdir" of fd, which perl will grok.) */
-    rewind(rsfp);
-    lseek(fileno(rsfp),(Off_t)0,0);  /* just in case rewind didn't */
+    PerlIO_rewind(rsfp);
+    lseek(PerlIO_fileno(rsfp),(Off_t)0,0);  /* just in case rewind didn't */
     for (which = 1; origargv[which] && origargv[which] != scriptname; which++) ;
     if (!origargv[which])
 	croak("Permission denied");
-    (void)sprintf(buf, "/dev/fd/%d/%.127s", fileno(rsfp), origargv[which]);
+    (void)sprintf(buf, "/dev/fd/%d/%.127s", PerlIO_fileno(rsfp), origargv[which]);
     origargv[which] = buf;
 
 #if defined(HAS_FCNTL) && defined(F_SETFD)
-    fcntl(fileno(rsfp),F_SETFD,0);	/* ensure no close-on-exec */
+    fcntl(PerlIO_fileno(rsfp),F_SETFD,0);	/* ensure no close-on-exec */
 #endif
 
     (void)sprintf(tokenbuf, "%s/perl%s", BIN, patchlevel);
@@ -1824,7 +1833,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 #else /* !DOSUID */
     if (euid != uid || egid != gid) {	/* (suidperl doesn't exist, in fact) */
 #ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
-	Fstat(fileno(rsfp),&statbuf);	/* may be either wrapped or real suid */
+	Fstat(PerlIO_fileno(rsfp),&statbuf);	/* may be either wrapped or real suid */
 	if ((euid != uid && euid == statbuf.st_uid && statbuf.st_mode & S_ISUID)
 	    ||
 	    (egid != gid && egid == statbuf.st_gid && statbuf.st_mode & S_ISGID)
@@ -1850,7 +1859,7 @@ find_beginning()
 	if ((s = sv_gets(linestr, rsfp, 0)) == Nullch)
 	    croak("No Perl script found in input\n");
 	if (*s == '#' && s[1] == '!' && (s = instr(s,"perl"))) {
-	    ungetc('\n',rsfp);		/* to keep line count right */
+	    PerlIO_ungetc(rsfp, '\n');		/* to keep line count right */
 	    doextract = FALSE;
 	    while (*s && !(isSPACE (*s) || *s == '#')) s++;
 	    s2 = s;
@@ -1965,7 +1974,7 @@ nuke_stacks()
     Safefree(tmps_stack);
 }
 
-static FILE *tmpfp;  /* moved outside init_lexer() because of UNICOS bug */
+static PerlIO *tmpfp;  /* moved outside init_lexer() because of UNICOS bug */
 static void
 init_lexer()
 {
@@ -1986,14 +1995,14 @@ init_predump_symbols()
 
     stdingv = gv_fetchpv("STDIN",TRUE, SVt_PVIO);
     GvMULTI_on(stdingv);
-    IoIFP(GvIOp(stdingv)) = stdin;
+    IoIFP(GvIOp(stdingv)) = PerlIO_stdin();
     tmpgv = gv_fetchpv("stdin",TRUE, SVt_PV);
     GvMULTI_on(tmpgv);
     GvIOp(tmpgv) = (IO*)SvREFCNT_inc(GvIOp(stdingv));
 
     tmpgv = gv_fetchpv("STDOUT",TRUE, SVt_PVIO);
     GvMULTI_on(tmpgv);
-    IoOFP(GvIOp(tmpgv)) = IoIFP(GvIOp(tmpgv)) = stdout;
+    IoOFP(GvIOp(tmpgv)) = IoIFP(GvIOp(tmpgv)) = PerlIO_stdout();
     setdefout(tmpgv);
     tmpgv = gv_fetchpv("stdout",TRUE, SVt_PV);
     GvMULTI_on(tmpgv);
@@ -2001,7 +2010,7 @@ init_predump_symbols()
 
     othergv = gv_fetchpv("STDERR",TRUE, SVt_PVIO);
     GvMULTI_on(othergv);
-    IoOFP(GvIOp(othergv)) = IoIFP(GvIOp(othergv)) = stderr;
+    IoOFP(GvIOp(othergv)) = IoIFP(GvIOp(othergv)) = PerlIO_stderr();
     tmpgv = gv_fetchpv("stderr",TRUE, SVt_PV);
     GvMULTI_on(tmpgv);
     GvIOp(tmpgv) = (IO*)SvREFCNT_inc(GvIOp(othergv));
@@ -2200,7 +2209,7 @@ AV* list;
 	    return;
 	case 3:
 	    if (!restartop) {
-		fprintf(stderr, "panic: restartop\n");
+		PerlIO_printf(PerlIO_stderr(), "panic: restartop\n");
 		FREETMPS;
 		break;
 	    }

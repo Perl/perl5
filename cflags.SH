@@ -123,8 +123,8 @@ for file do
 		optimize="$optdebug"
 	fi
 
-    echo "$cc -c $ccflags $optimize $perltype $large $split"
-    eval "$also "'"$cc -c $ccflags $optimize $perltype $large $split"'
+    echo "$cc -c -DPERL_CORE $ccflags $optimize $perltype $large $split"
+    eval "$also "'"$cc -DPERL_CORE -c $ccflags $optimize $perltype $large $split"'
 
     . $TOP/config.sh
 

@@ -6,6 +6,7 @@
 # Last modified 6/30/96 by:
 # Luther Huffman, Strategic Computer Solutions, Inc., lutherh@stratcom.com
 
+awk -f versnum ../patchlevel.h
 . buildinfo
 builddir = `{ cd .. ; pwd } 
 if(flag a) platforms = (386 mips sparc 68020)

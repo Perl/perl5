@@ -10,6 +10,18 @@
 #define H_PERL 1
 #define OVERLOAD
 
+#ifdef PERL_FOR_X2P
+/*
+ * This file is being used for x2p stuff. 
+ * Above symbol is defined via -D in 'x2p/Makefile.SH'
+ * Decouple x2p stuff from some of perls more extreme eccentricities. 
+ */
+#undef MULTIPLICITY
+#undef EMBED
+#undef USE_STDIO
+#define USE_STDIO
+#endif /* PERL_FOR_X2P */
+
 /*
  * STMT_START { statements; } STMT_END;
  * can be used as a single statement, as in
@@ -101,7 +113,27 @@
 #   endif
 #endif
 
-#include <stdio.h>
+#ifndef _TYPES_		/* If types.h defines this it's easy. */
+#   ifndef major		/* Does everyone's types.h define this? */
+#	include <sys/types.h>
+#   endif
+#endif
+
+#ifdef __cplusplus
+#  ifndef I_STDARG
+#    define I_STDARG 1
+#  endif
+#endif
+
+#ifdef I_STDARG
+#  include <stdarg.h>
+#else
+#  ifdef I_VARARGS
+#    include <varargs.h>
+#  endif
+#endif
+
+#include "perlio.h"
 
 #ifdef USE_NEXT_CTYPE
 
@@ -143,11 +175,11 @@
    proto.h instead.  I guess.  The patch had no explanation.
 */
 #ifdef MYMALLOC
-#   ifndef DONT_HIDEMYMALLOC
-#	define malloc Mymalloc
-#	define realloc Myremalloc
-#	define free Myfree
-#	define calloc Mycalloc
+#   ifdef HIDEMYMALLOC
+#	define malloc Perl_malloc
+#	define realloc Perl_realloc
+#	define free Perl_free
+#	define calloc Perl_calloc
 #   endif
 #   define safemalloc malloc
 #   define saferealloc realloc
@@ -237,12 +269,6 @@
 #	else
 #	    define memmove(d,s,l) my_bcopy(s,d,l)
 #	endif
-#   endif
-#endif
-
-#ifndef _TYPES_		/* If types.h defines this it's easy. */
-#   ifndef major		/* Does everyone's types.h define this? */
-#	include <sys/types.h>
 #   endif
 #endif
 
@@ -527,6 +553,61 @@
     typedef unsigned long UV;
 #endif
 
+/* Previously these definitions used hardcoded figures. 
+ * It is hoped these formula are more portable, although
+ * no data one way or another is presently known to me.
+ * The "PERL_" names are used because these calculated constants
+ * do not meet the ANSI requirements for LONG_MAX, etc., which
+ * need to be constants acceptable to #if - kja
+ *    define PERL_LONG_MAX        2147483647L
+ *    define PERL_LONG_MIN        (-LONG_MAX - 1)
+ *    define PERL ULONG_MAX       4294967295L
+ */
+
+#ifdef I_LIMITS  /* Needed for cast_xxx() functions below. */
+#  include <limits.h>
+#else
+#ifdef I_VALUES
+#  include <values.h>
+#endif
+#endif
+
+#ifdef LONG_MAX
+#define PERL_LONG_MAX LONG_MAX
+#else
+#  ifdef MAXLONG    /* Often used in <values.h> */
+#    define PERL_LONG_MAX MAXLONG
+#  else
+#    define PERL_LONG_MAX        ((long) ((~(unsigned long)0) >> 1))
+#  endif
+#endif
+
+#ifdef LONG_MIN
+#define PERL_LONG_MIN LONG_MIN
+#else
+#  ifdef MINLONG
+#    define PERL_LONG_MIN MINLONG
+#  else
+#    define PERL_LONG_MIN        (-LONG_MAX - ((3 & -1) == 3))
+#  endif
+#endif
+
+#ifdef ULONG_MAX
+#define PERL_ULONG_MAX ULONG_MAX
+#else
+#  ifdef MAXULONG
+#    define PERL_ULONG_MAX MAXULONG
+#  else
+#    define PERL_ULONG_MAX       (~(unsigned long)0)
+#  endif
+#endif
+
+#ifdef ULONG_MIN
+#define PERL_ULONG_MIN ULONG_MIN
+#else
+#  define ULONG_MIN	    0L
+#endif
+
 typedef MEM_SIZE STRLEN;
 
 typedef struct op OP;
@@ -600,6 +681,9 @@ typedef I32 (*filter_t) _((int, SV *, int));
 
 #ifndef SH_PATH			/* May be a variable. */
 #   define SH_PATH BIN_SH
+#ifndef BIN_SH
+#   define BIN_SH "/bin/sh"
+#endif
 #endif
 
 #ifndef HAS_PAUSE
@@ -748,7 +832,7 @@ Gid_t getegid _((void));
 
 #ifdef DEBUGGING
 #ifndef Perl_debug_log
-#define Perl_debug_log	stderr
+#define Perl_debug_log	PerlIO_stderr()
 #endif
 #define YYDEBUG 1
 #define DEB(a)     			a
@@ -869,14 +953,15 @@ I32 unlnk _((char*));
 #define SCAN_TR 1
 #define SCAN_REPL 2
 
+#ifdef MYMALLOC
+# ifndef DEBUGGING_MSTATS
+#  define DEBUGGING_MSTATS
+# endif
+#endif
+
 #ifdef DEBUGGING
 # ifndef register
 #  define register
-# endif
-# ifdef MYMALLOC
-#  ifndef DEBUGGING_MSTATS
-#   define DEBUGGING_MSTATS
-#  endif
 # endif
 # define PAD_SV(po) pad_sv(po)
 #else
@@ -1160,7 +1245,7 @@ EXT YYSTYPE	nextval[5];	/* value of next token, if any */
 EXT I32		nexttype[5];	/* type of next token */
 EXT I32		nexttoke;
 
-EXT FILE * VOL	rsfp INIT(Nullfp);
+EXT PerlIO * VOL	rsfp INIT(Nullfp);
 EXT SV *	linestr;
 EXT char *	bufptr;
 EXT char *	oldbufptr;
@@ -1235,6 +1320,9 @@ EXT char *	regtill;	/* How far we are required to go. */
 EXT U16		regflags;	/* are we folding, multilining? */
 EXT char	regprev;	/* char before regbol, \n if none */
 
+EXT bool	do_undump;	/* -u or dump seen? */
+EXT VOL U32	debug;
+
 /***********************************************/
 /* Global only to current interpreter instance */
 /***********************************************/
@@ -1285,11 +1373,9 @@ IEXT bool	Isawstudy;	/* do fbm_instr on all strings */
 IEXT bool	Isawi;		/* study must assume case insensitive */
 IEXT bool	Isawvec;
 IEXT bool	Iunsafe;
-IEXT bool	Ido_undump;		/* -u or dump seen? */
 IEXT char *	Iinplace;
 IEXT char *	Ie_tmpname;
-IEXT FILE *	Ie_fp;
-IEXT VOL U32	Idebug;
+IEXT PerlIO *	Ie_fp;
 IEXT U32	Iperldb;
 	/* This value may be raised by extensions for testing purposes */
 IEXT int	Iperl_destruct_level;	/* 0=none, 1=full, 2=full with checks */
@@ -1453,20 +1539,6 @@ struct interpreter {
 
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-#ifdef __cplusplus
-#  ifndef I_STDARG
-#    define I_STDARG 1
-#  endif
-#endif
-
-#ifdef I_STDARG
-#  include <stdarg.h>
-#else
-#  ifdef I_VARARGS
-#    include <varargs.h>
-#  endif
 #endif
 
 #include "proto.h"
@@ -1653,5 +1725,13 @@ enum {
   copy_amg,	neg_amg
 };
 #endif /* OVERLOAD */
+
+#if !defined(PERLIO_IS_STDIO) && defined(HAS_ATTRIBUTE)
+/* 
+ * Now we have __attribute__ out of the way 
+ * Remap printf 
+ */
+#define printf PerlIO_stdoutf
+#endif
 
 #endif /* Include guard */

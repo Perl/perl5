@@ -87,7 +87,7 @@ obj = hash$(OBJ_EXT) $(mallocobj) str$(OBJ_EXT) util$(OBJ_EXT) walk$(OBJ_EXT)
 lintflags = -phbvxac
 
 .c$(OBJ_EXT):
-	$(CCCMD) $(MAB) $*.c
+	$(CCCMD) $(MAB) -DPERL_FOR_X2P $*.c
 
 all: $(public) $(private) $(util)
 	touch all
@@ -110,7 +110,7 @@ a2p.c: a2p.y
 	-@touch a2p.c
 
 a2p$(OBJ_EXT): a2p.c a2py.c a2p.h EXTERN.h util.h INTERN.h handy.h ../config.h str.h hash.h
-	$(CCCMD) $(LARGE) $(MAB) a2p.c
+	$(CCCMD) $(LARGE) $(MAB) -DPERL_FOR_X2P a2p.c
 
 clean:
 	rm -f a2p *$(OBJ_EXT)

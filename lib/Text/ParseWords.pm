@@ -115,7 +115,7 @@ sub quotewords {
                last;
 	    }
 	    else {
-                while (length($_) && !(/^$delim/ || /^['"\\]/)) {
+                while ($_ && !(/^$delim/ || /^['"\\]/)) {
 		   $snippet .=  substr($_, 0, 1);
                    substr($_, 0, 1) = '';
                 }

@@ -56,11 +56,14 @@
 #define curcopdb	Perl_curcopdb
 #define curinterp	Perl_curinterp
 #define curpad		Perl_curpad
+#define cv_const_sv	Perl_cv_const_sv
 #define dc		Perl_dc
+#define debug		Perl_debug
 #define dec_amg		Perl_dec_amg
 #define di		Perl_di
 #define div_amg		Perl_div_amg
 #define div_ass_amg	Perl_div_ass_amg
+#define do_undump	Perl_do_undump
 #define ds		Perl_ds
 #define egid		Perl_egid
 #define envgv		Perl_envgv
@@ -519,7 +522,7 @@
 #define my		Perl_my
 #define my_bcopy	Perl_my_bcopy
 #define my_bzero	Perl_my_bzero
-#define my_chsize		Perl_my_chsize
+#define my_chsize	Perl_my_chsize
 #define my_exit		Perl_my_exit
 #define my_htonl	Perl_my_htonl
 #define my_lstat	Perl_my_lstat
@@ -1099,9 +1102,9 @@
 /* Undefine symbols that were defined by EMBED. Somewhat ugly */
 
 #undef curcop
+#undef curcopdb
 #undef envgv
 #undef siggv
-#undef stack
 #undef tainting
 
 #define Argv		(curinterp->IArgv)
@@ -1137,7 +1140,6 @@
 #define debdelim	(curinterp->Idebdelim)
 #define debname		(curinterp->Idebname)
 #define debstash	(curinterp->Idebstash)
-#define debug		(curinterp->Idebug)
 #define defgv		(curinterp->Idefgv)
 #define defoutgv	(curinterp->Idefoutgv)
 #define defstash	(curinterp->Idefstash)
@@ -1146,7 +1148,6 @@
 #define dirty		(curinterp->Idirty)
 #define dlevel		(curinterp->Idlevel)
 #define dlmax		(curinterp->Idlmax)
-#define do_undump	(curinterp->Ido_undump)
 #define doextract	(curinterp->Idoextract)
 #define doswitches	(curinterp->Idoswitches)
 #define dowarn		(curinterp->Idowarn)
@@ -1292,7 +1293,6 @@
 #define Idebdelim	debdelim
 #define Idebname	debname
 #define Idebstash	debstash
-#define Idebug		debug
 #define Idefgv		defgv
 #define Idefoutgv	defoutgv
 #define Idefstash	defstash
@@ -1301,7 +1301,6 @@
 #define Idirty		dirty
 #define Idlevel		dlevel
 #define Idlmax		dlmax
-#define Ido_undump	do_undump
 #define Idoextract	doextract
 #define Idoswitches	doswitches
 #define Idowarn		dowarn

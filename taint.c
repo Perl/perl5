@@ -23,7 +23,7 @@ char *f;
 char *s;
 {
     if (tainting) {
-	DEBUG_u(fprintf(stderr,"%s %d %d %d\n",s,tainted,uid, euid));
+	DEBUG_u(PerlIO_printf(PerlIO_stderr(), "%s %d %d %d\n",s,tainted,uid, euid));
 	if (tainted) {
 	    char *ug = 0;
 	    if (euid != uid)

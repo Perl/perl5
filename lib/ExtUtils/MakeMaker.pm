@@ -25,8 +25,9 @@ use vars qw(
 	   );
 # use strict;
 
-eval {require DynaLoader;};	# Get mod2fname, if defined. Will fail
-                                # with miniperl.
+# &DynaLoader::mod2fname should be available to miniperl, thus 
+# should be a pseudo-builtin (cmp. os2.c).
+#eval {require DynaLoader;};
 
 #
 # Set up the inheritance before we pull in the MM_* packages, because they

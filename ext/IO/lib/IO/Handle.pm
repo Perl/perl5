@@ -186,7 +186,7 @@ require Exporter;
 @FileHandle::ISA = qw(IO::Handle);
 
 
-$VERSION = sprintf("%d.%02d", q$Revision: 1.8 $ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q$Revision: 1.9 $ =~ /(\d+)\.(\d+)/);
 
 @EXPORT_OK = qw(
     autoflush
@@ -259,8 +259,6 @@ sub new_from_fd {
     IO::Handle::fdopen($fh, @_)
 	or return undef;
     bless $fh, $class;
-    $fh->_ref_fd;
-    $fh;
 }
 
 # FileHandle::DESTROY use to call close(). This creates a problem

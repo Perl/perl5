@@ -20,7 +20,7 @@
 
 #define Null(type) ((type)NULL)
 #define Nullch Null(char*)
-#define Nullfp Null(FILE*)
+#define Nullfp Null(PerlIO*)
 #define Nullsv Null(SV*)
 
 #ifdef TRUE

@@ -212,9 +212,9 @@ PP(pp_formline)
 	    case FF_END:	name = "END";		break;
 	    }
 	    if (arg >= 0)
-		fprintf(stderr, "%-16s%ld\n", name, (long) arg);
+		PerlIO_printf(PerlIO_stderr(), "%-16s%ld\n", name, (long) arg);
 	    else
-		fprintf(stderr, "%-16s\n", name);
+		PerlIO_printf(PerlIO_stderr(), "%-16s\n", name);
 	} )
 	switch (*fpc++) {
 	case FF_LINEMARK:
@@ -881,7 +881,7 @@ I32 cxix;
 
     while (cxstack_ix > cxix) {
 	cx = &cxstack[cxstack_ix--];
-	DEBUG_l(fprintf(Perl_debug_log, "Unwinding block %ld, type %s\n", (long) cxstack_ix+1,
+	DEBUG_l(PerlIO_printf(Perl_debug_log, "Unwinding block %ld, type %s\n", (long) cxstack_ix+1,
 		    block_type[cx->cx_type]));
 	/* Note: we don't need to restore the base context info till the end. */
 	switch (cx->cx_type) {
@@ -987,7 +987,7 @@ char *message;
 
 	    POPBLOCK(cx,curpm);
 	    if (cx->cx_type != CXt_EVAL) {
-		fprintf(stderr, "panic: die %s", message);
+		PerlIO_printf(PerlIO_stderr(), "panic: die %s", message);
 		my_exit(1);
 	    }
 	    POPEVAL(cx);
@@ -1003,11 +1003,11 @@ char *message;
 	    return pop_return();
 	}
     }
-    fputs(message, stderr);
-    (void)Fflush(stderr);
+    PerlIO_printf(PerlIO_stderr(), "%s",message);
+    PerlIO_flush(PerlIO_stderr());
     if (e_tmpname) {
 	if (e_fp) {
-	    fclose(e_fp);
+	    PerlIO_close(e_fp);
 	    e_fp = Nullfp;
 	}
 	(void)UNLINK(e_tmpname);
@@ -2064,7 +2064,7 @@ PP(pp_require)
     char *tmpname;
     SV** svp;
     I32 gimme = G_SCALAR;
-    FILE *tryrsfp = 0;
+    PerlIO *tryrsfp = 0;
 
     sv = POPs;
     if (SvNIOKp(sv) && !SvPOKp(sv)) {
@@ -2098,7 +2098,7 @@ PP(pp_require)
 #endif
     )
     {
-	tryrsfp = fopen(tmpname,"r");
+	tryrsfp = PerlIO_open(tmpname,"r");
     }
     else {
 	AV *ar = GvAVn(incgv);
@@ -2113,7 +2113,7 @@ PP(pp_require)
 	    (void)sprintf(buf, "%s/%s",
 		SvPVx(*av_fetch(ar, i, TRUE), na), name);
 #endif
-	    tryrsfp = fopen(buf, "r");
+	    tryrsfp = PerlIO_open(buf, "r");
 	    if (tryrsfp) {
 		char *s = buf;
 
@@ -2225,7 +2225,7 @@ PP(pp_leaveeval)
     I32 gimme;
     register CONTEXT *cx;
     OP *retop;
-    OP *saveop = op;
+    U8 save_flags = op -> op_flags;
     I32 optype;
 
     POPBLOCK(cx,newpm);
@@ -2252,7 +2252,7 @@ PP(pp_leaveeval)
     }
     else {
 	for (mark = newsp + 1; mark <= SP; mark++)
-	    if (!(SvFLAGS(TOPs) & SVs_TEMP))
+	    if (!(SvFLAGS(*mark) & SVs_TEMP))
 		*mark = sv_mortalcopy(*mark);
 		/* in case LEAVE wipes old return values */
     }
@@ -2269,7 +2269,7 @@ PP(pp_leaveeval)
 
     lex_end();
     LEAVE;
-    if (!(saveop->op_flags & OPf_SPECIAL))
+    if (!(save_flags & OPf_SPECIAL))
 	sv_setpv(GvSV(errgv),"");
 
     RETURNOP(retop);
@@ -2328,7 +2328,7 @@ PP(pp_leavetry)
     }
     else {
 	for (mark = newsp + 1; mark <= SP; mark++)
-	    if (!(SvFLAGS(TOPs) & (SVs_PADTMP|SVs_TEMP)))
+	    if (!(SvFLAGS(*mark) & (SVs_PADTMP|SVs_TEMP)))
 		*mark = sv_mortalcopy(*mark);
 		/* in case LEAVE wipes old return values */
     }

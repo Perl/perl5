@@ -273,18 +273,14 @@ DB_File - Perl5 access to Berkeley DB
  [$X =] tie %hash,  'DB_File', [$filename, $flags, $mode, $DB_HASH] ;
  [$X =] tie %hash,  'DB_File', $filename, $flags, $mode, $DB_BTREE ;
  [$X =] tie @array, 'DB_File', $filename, $flags, $mode, $DB_RECNO ;
-  
- [$X =] tie %hash,  DB_File, $filename [, $flags, $mode, $DB_HASH ] ;
- [$X =] tie %hash,  DB_File, $filename, $flags, $mode, $DB_BTREE ;
- [$X =] tie @array, DB_File, $filename, $flags, $mode, $DB_RECNO ;
-   
+
  $status = $X->del($key [, $flags]) ;
  $status = $X->put($key, $value [, $flags]) ;
  $status = $X->get($key, $value [, $flags]) ;
- $status = $X->seq($key, $value , $flags) ;
+ $status = $X->seq($key, $value, $flags) ;
  $status = $X->sync([$flags]) ;
  $status = $X->fd ;
-    
+
  $count = $X->get_dup($key) ;
  @list  = $X->get_dup($key) ;
  %list  = $X->get_dup($key, 1) ;
@@ -320,11 +316,6 @@ A default hashing algorithm, which will be adequate for most
 applications, is built into Berkeley DB. If you do need to use your own
 hashing algorithm it is possible to write your own in Perl and have
 B<DB_File> use it instead.
-
-When opening an existing database, you may omit the final three arguments
-to C<tie>; they default to O_RDWR, 0644, and $DB_HASH.  If you're
-creating a new file, you need to specify at least the C<$flags>
-argument, which must include O_CREAT.
 
 =item B<DB_BTREE>
 

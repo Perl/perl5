@@ -1,10 +1,8 @@
 #define INCL_DOS
 #define INCL_NOPM
 #define INCL_DOSFILEMGR
-#ifndef NO_SYS_ALLOC 
-#  define INCL_DOSMEMMGR
-#  define INCL_DOSERRORS
-#endif /* ! defined NO_SYS_ALLOC */
+#define INCL_DOSMEMMGR
+#define INCL_DOSERRORS
 #include <os2.h>
 
 /*
@@ -137,10 +135,15 @@ result(int flag, int pid)
 	int r, status;
 	Signal_t (*ihand)();     /* place to save signal during system() */
 	Signal_t (*qhand)();     /* place to save signal during system() */
+#ifndef __EMX__
+	RESULTCODES res;
+	int rpid;
+#endif
 
-	if (pid < 0 || flag != 0) 
+	if (pid < 0 || flag != 0)
 		return pid;
 
+#ifdef __EMX__
 	ihand = signal(SIGINT, SIG_IGN);
 	qhand = signal(SIGQUIT, SIG_IGN);
 	do {
@@ -153,6 +156,15 @@ result(int flag, int pid)
 	if (r < 0)
 		return -1;
 	return status & 0xFFFF;
+#else
+	ihand = signal(SIGINT, SIG_IGN);
+	r = DosWaitChild(DCWA_PROCESS, DCWW_WAIT, &res, &rpid, pid);
+	signal(SIGINT, ihand);
+	statusvalue = res.codeResult << 8 | res.codeTerminate;
+	if (r)
+		return -1;
+	return statusvalue;
+#endif
 }
 
 int
@@ -170,7 +182,7 @@ register SV **sp;
 	New(401,Argv, sp - mark + 1, char*);
 	a = Argv;
 
-	if (mark < sp && SvIOKp(*(mark+1))) {
+	if (mark < sp && SvNIOKp(*(mark+1)) && !SvPOKp(*(mark+1))) {
 		++mark;
 		flag = SvIVx(*mark);
 	}
@@ -187,8 +199,12 @@ register SV **sp;
 	if (flag == P_WAIT)
 		flag = P_NOWAIT;
 
-	if (*Argv[0] != '/' && *Argv[0] != '\\') /* will swawnvp use PATH? */
+	if (*Argv[0] != '/' && *Argv[0] != '\\'
+	    && !(*Argv[0] && *Argv[1] == ':' 
+		 && (*Argv[2] == '/' || *Argv[2] != '\\'))
+	    ) /* will swawnvp use PATH? */
 	    TAINT_ENV();	/* testing IFS here is overkill, probably */
+	/* We should check PERL_SH* and PERLLIB_* as well? */
 	if (really && *(tmps = SvPV(really, na)))
 	    rc = result(trueflag, spawnvp(flag,tmps,Argv));
 	else
@@ -203,9 +219,14 @@ register SV **sp;
     return rc;
 }
 
+#define EXECF_SPAWN 0
+#define EXECF_EXEC 1
+#define EXECF_TRUEEXEC 2
+
 int
-do_spawn(cmd)
+do_spawn2(cmd, execf)
 char *cmd;
+int execf;
 {
     register char **a;
     register char *s;
@@ -254,10 +275,17 @@ char *cmd;
 		break;
 	    }
 	  doshell:
+	    if (execf == EXECF_TRUEEXEC)
+                return execl(shell,shell,copt,cmd,(char*)0);
+	    else if (execf == EXECF_EXEC)
+                return spawnl(P_OVERLAY,shell,shell,copt,cmd,(char*)0);
+	    /* In the ak code internal P_NOWAIT is P_WAIT ??? */
 	    rc = result(P_WAIT,
-			  spawnl(P_NOWAIT,shell,shell,copt,cmd,(char*)0));
+			spawnl(P_NOWAIT,shell,shell,copt,cmd,(char*)0));
 	    if (rc < 0 && dowarn)
-		warn("Can't spawn \"%s\": %s", shell, Strerror(errno));
+		warn("Can't %s \"%s\": %s", 
+		     (execf == EXECF_SPAWN ? "spawn" : "exec"),
+		     shell, Strerror(errno));
 	    if (rc < 0) rc = 255 << 8; /* Emulate the fork(). */
 	    return rc;
 	}
@@ -276,14 +304,42 @@ char *cmd;
     }
     *a = Nullch;
     if (Argv[0]) {
-	rc = result(P_WAIT, spawnvp(P_NOWAIT,Argv[0],Argv));
+	if (execf == EXECF_TRUEEXEC)
+	    rc = execvp(Argv[0],Argv);
+	else if (execf == EXECF_EXEC)
+	    rc = spawnvp(P_OVERLAY,Argv[0],Argv);
+        else
+	    rc = result(P_WAIT, spawnvp(P_NOWAIT,Argv[0],Argv));
 	if (rc < 0 && dowarn)
-	    warn("Can't spawn \"%s\": %s", Argv[0], Strerror(errno));
+	    warn("Can't %s \"%s\": %s", 
+		 (execf == EXECF_SPAWN ? "spawn" : "exec"),
+		 Argv[0], Strerror(errno));
 	if (rc < 0) rc = 255 << 8; /* Emulate the fork(). */
     } else
     	rc = -1;
     do_execfree();
     return rc;
+}
+
+int
+do_spawn(cmd)
+char *cmd;
+{
+    return do_spawn2(cmd, EXECF_SPAWN);
+}
+
+bool
+do_exec(cmd)
+char *cmd;
+{
+    return do_spawn2(cmd, EXECF_EXEC);
+}
+
+bool
+os2exec(cmd)
+char *cmd;
+{
+    return do_spawn2(cmd, EXECF_TRUEEXEC);
 }
 
 #ifndef HAS_FORK
@@ -292,6 +348,9 @@ my_popen(cmd,mode)
 char	*cmd;
 char	*mode;
 {
+#ifdef TRYSHELL
+    return popen(cmd, mode);
+#else
     char *shell = getenv("EMXSHELL");
     FILE *res;
     
@@ -299,6 +358,7 @@ char	*mode;
     res = popen(cmd, mode);
     my_setenv("EMXSHELL", shell);
     return res;
+#endif 
 }
 #endif
 
@@ -323,18 +383,54 @@ void *	ctermid(x)	{ return 0; }
 void *	ttyname(x)	{ return 0; }
 #endif
 
-void *	gethostent()	{ return 0; }
-void *	getnetent()	{ return 0; }
-void *	getprotoent()	{ return 0; }
-void *	getservent()	{ return 0; }
-void	sethostent(x)	{}
-void	setnetent(x)	{}
-void	setprotoent(x)	{}
-void	setservent(x)	{}
-void	endhostent(x)	{}
-void	endnetent(x)	{}
-void	endprotoent(x)	{}
-void	endservent(x)	{}
+/*****************************************************************************/
+/* my socket forwarders - EMX lib only provides static forwarders */
+
+static HMODULE htcp = 0;
+
+static void *
+tcp0(char *name)
+{
+    static BYTE buf[20];
+    PFN fcn;
+    if (!htcp)
+	DosLoadModule(buf, sizeof buf, "tcp32dll", &htcp);
+    if (htcp && DosQueryProcAddr(htcp, 0, name, &fcn) == 0)
+	return (void *) ((void * (*)(void)) fcn) ();
+    return 0;
+}
+
+static void
+tcp1(char *name, int arg)
+{
+    static BYTE buf[20];
+    PFN fcn;
+    if (!htcp)
+	DosLoadModule(buf, sizeof buf, "tcp32dll", &htcp);
+    if (htcp && DosQueryProcAddr(htcp, 0, name, &fcn) == 0)
+	((void (*)(int)) fcn) (arg);
+}
+
+void *	gethostent()	{ return tcp0("GETHOSTENT");  }
+void *	getnetent()	{ return tcp0("GETNETENT");   }
+void *	getprotoent()	{ return tcp0("GETPROTOENT"); }
+void *	getservent()	{ return tcp0("GETSERVENT");  }
+void	sethostent(x)	{ tcp1("SETHOSTENT",  x); }
+void	setnetent(x)	{ tcp1("SETNETENT",   x); }
+void	setprotoent(x)	{ tcp1("SETPROTOENT", x); }
+void	setservent(x)	{ tcp1("SETSERVENT",  x); }
+void	endhostent()	{ tcp0("ENDHOSTENT");  }
+void	endnetent()	{ tcp0("ENDNETENT");   }
+void	endprotoent()	{ tcp0("ENDPROTOENT"); }
+void	endservent()	{ tcp0("ENDSERVENT");  }
+
+/*****************************************************************************/
+/* not implemented in C Set++ */
+
+#ifndef __EMX__
+int	setuid(x)	{ errno = EINVAL; return -1; }
+int	setgid(x)	{ errno = EINVAL; return -1; }
+#endif
 
 /*****************************************************************************/
 /* stat() hack for char/block device */
@@ -362,55 +458,22 @@ os2_stat(char *name, struct stat *st)
 
 #endif
 
-#ifndef NO_SYS_ALLOC
+#ifdef USE_PERL_SBRK
 
-static char *oldchunk;
-static long oldsize;
-
-#define _32_K (1<<15)
-#define _64_K (1<<16)
-
-/* The real problem is that DosAllocMem will grant memory on 64K-chunks
- * boundaries only. Note that addressable space for application memory
- * is around 240M, thus we will run out of addressable space if we
- * allocate around 14M worth of 4K segments.
- * Thus we allocate memory in 64K chunks, and abandon the rest of the old
- * chunk if the new is bigger than that rest. Also, we just allocate
- * whatever is requested if the size is bigger that 32K. With this strategy
- * we cannot lose more than 1/2 of addressable space. */
+/* SBRK() emulation, mostly moved to malloc.c. */
 
 void *
-sbrk(int size)
-{
-    char *got;
-    APIRET rc;
-    int small, reqsize;
+sys_alloc(int size) {
+    void *got;
+    APIRET rc = DosAllocMem(&got, size, PAG_COMMIT | PAG_WRITE);
 
-    if (!size) return 0;
-    else if (size <= oldsize) {
-	got = oldchunk;
-	oldchunk += size;
-	oldsize -= size;
-	return (void *)got;
-    } else if (size >= _32_K) {
-	small = 0;
-    } else {
-	reqsize = size;
-	size = _64_K;
-	small = 1;
-    }
-    rc = DosAllocMem((void **)&got, size, PAG_COMMIT | PAG_WRITE);
     if (rc == ERROR_NOT_ENOUGH_MEMORY) {
 	return (void *) -1;
     } else if ( rc ) die("Got an error from DosAllocMem: %li", (long)rc);
-    if (small) {
-	/* Chunk is small, register the rest for future allocs. */
-	oldchunk = got + reqsize;
-	oldsize = size - reqsize;
-    }
-    return (void *)got;
+    return got;
 }
-#endif /* ! defined NO_SYS_ALLOC */
+
+#endif /* USE_PERL_SBRK */
 
 /* tmp path */
 
@@ -463,8 +526,8 @@ mod2fname(sv)
      SV   *sv;
 {
     static char fname[9];
-    int pos = 7;
-    int len;
+    int pos = 6, len, avlen;
+    unsigned int sum = 0;
     AV  *av;
     SV  *svp;
     char *s;
@@ -473,13 +536,30 @@ mod2fname(sv)
     sv = SvRV(sv);
     if (SvTYPE(sv) != SVt_PVAV) 
       croak("Not array reference given to mod2fname");
-    if (av_len((AV*)sv) < 0) 
+
+    avlen = av_len((AV*)sv);
+    if (avlen < 0) 
       croak("Empty array reference given to mod2fname");
-    s = SvPV(*av_fetch((AV*)sv, av_len((AV*)sv), FALSE), na);
+
+    s = SvPV(*av_fetch((AV*)sv, avlen, FALSE), na);
     strncpy(fname, s, 8);
-    if ((len=strlen(s)) < 7) pos = len;
-    fname[pos] = '_';
-    fname[pos + 1] = '\0';
+    len = strlen(s);
+    if (len < 6) pos = len;
+    while (*s) {
+	sum = 33 * sum + *(s++);	/* Checksumming first chars to
+					 * get the capitalization into c.s. */
+    }
+    avlen --;
+    while (avlen >= 0) {
+	s = SvPV(*av_fetch((AV*)sv, avlen, FALSE), na);
+	while (*s) {
+	    sum = 33 * sum + *(s++);	/* 7 is primitive mod 13. */
+	}
+	avlen --;
+    }
+    fname[pos] = 'A' + (sum % 26);
+    fname[pos + 1] = 'A' + (sum / 26 % 26);
+    fname[pos + 2] = '\0';
     return (char *)fname;
 }
 
@@ -525,9 +605,9 @@ Xs_OS2_init()
 	
         newXS("File::Copy::syscopy", XS_File__Copy_syscopy, file);
         newXS("DynaLoader::mod2fname", XS_DynaLoader_mod2fname, file);
-#ifdef PERL_IS_AOUT
 	gv = gv_fetchpv("OS2::is_aout", TRUE, SVt_PV);
 	GvMULTI_on(gv);
+#ifdef PERL_IS_AOUT
 	sv_setiv(GvSV(gv), 1);
 #endif 
     }
@@ -542,10 +622,62 @@ Perl_OS2_init()
     OS2_Perl_data.xs_init = &Xs_OS2_init;
     if ( (shell = getenv("PERL_SH_DRIVE")) ) {
 	sh_path[0] = shell[0];
+    } else if ( (shell = getenv("PERL_SH_DIR")) ) {
+	int l = strlen(shell);
+	if (shell[l-1] == '/' || shell[l-1] == '\\') {
+	    l--;
+	}
+	if (l > STATIC_FILE_LENGTH - 7) {
+	    die("PERL_SH_DIR too long");
+	}
+	strncpy(sh_path, shell, l);
+	strcpy(sh_path + l, "/sh.exe");
     }
 }
 
-char sh_path[33] = BIN_SH;
+char sh_path[STATIC_FILE_LENGTH+1] = BIN_SH;
+
+char *
+perllib_mangle(char *s, unsigned int l)
+{
+    static char *newp, *oldp;
+    static int newl, oldl, notfound;
+    static char ret[STATIC_FILE_LENGTH+1];
+    
+    if (!newp && !notfound) {
+	newp = getenv("PERLLIB_PREFIX");
+	if (newp) {
+	    oldp = newp;
+	    while (*newp && !isSPACE(*newp)) {
+		newp++; oldl++;		/* Skip digits. */
+	    }
+	    while (*newp && (isSPACE(*newp) || *newp == ';')) {
+		newp++;			/* Skip whitespace. */
+	    }
+	    newl = strlen(newp);
+	    if (newl == 0 || oldl == 0) {
+		die("Malformed PERLLIB_PREFIX");
+	    }
+	} else {
+	    notfound = 1;
+	}
+    }
+    if (!newp) {
+	return s;
+    }
+    if (l == 0) {
+	l = strlen(s);
+    }
+    if (l <= oldl || strnicmp(oldp, s, oldl) != 0) {
+	return s;
+    }
+    if (l + newl - oldl > STATIC_FILE_LENGTH || newl > STATIC_FILE_LENGTH) {
+	die("Malformed PERLLIB_PREFIX");
+    }
+    strncpy(ret, newp, newl);
+    strncpy(ret + newl, s + oldl, l - oldl);
+    return ret;
+}
 
 extern void dlopen();
 void *fakedl = &dlopen;		/* Pull in dynaloading part. */

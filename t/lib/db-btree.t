@@ -373,10 +373,12 @@ print( "@unknown" eq "" ? "ok 78\n" : "not ok 78\n") ;
 my @smith = $YY->get_dup('Smith') ;
 print( "@smith" eq "John" ? "ok 79\n" : "not ok 79\n") ;
 
-my @wall = $YY->get_dup('Wall') ;
-my %wall ;
-@wall{@wall} = @wall ;
-print( (@wall == 3 && $wall{'Larry'} && $wall{'Stone'} && $wall{'Brick'}) ? "ok 80\n" : "not ok 80\n") ;
+{
+ my @wall = $YY->get_dup('Wall') ;
+ my %wall ;
+ @wall{@wall} = @wall ;
+ print( (@wall == 3 && $wall{'Larry'} && $wall{'Stone'} && $wall{'Brick'}) ? "ok 80\n" : "not ok 80\n") ;
+}
 
 # hash
 my %unknown = $YY->get_dup('Unknown', 1) ;
@@ -385,7 +387,7 @@ print( keys %unknown == 0 ? "ok 81\n" : "not ok 81\n") ;
 my %smith = $YY->get_dup('Smith', 1) ;
 print( (keys %smith == 1 && $smith{'John'}) ? "ok 82\n" : "not ok 82\n") ;
 
-my %wall = $YY->get_dup('Wall', 1) ;
+%wall = $YY->get_dup('Wall', 1) ;
 print( (keys %wall == 3 && $wall{'Larry'} && $wall{'Stone'} && $wall{'Brick'}) ? "ok 83\n" : "not ok 83\n") ;
 
 undef $YY ;

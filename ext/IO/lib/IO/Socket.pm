@@ -76,7 +76,8 @@ use Exporter;
 @ISA = qw(IO::Handle);
 
 # This one will turn 1.2 => 1.02 and 1.2.3 => 1.0203 and so on ...
-$VERSION = do{my @r=(q$Revision: 1.8$=~/(\d+)/g);sprintf "%d."."%02d"x$#r,@r};
+
+$VERSION = do{my @r=(q$Revision: 1.9 $=~/(\d+)/g);sprintf "%d."."%02d"x$#r,@r};
 
 sub import {
     my $pkg = shift;
@@ -131,7 +132,7 @@ sub connect {
     local($SIG{ALRM}) = $timeout ? sub { undef $fh; }
 				 : $SIG{ALRM} || 'DEFAULT';
 
-    eval {
+     eval {
     	croak 'connect: Bad address'
     	    if(@_ == 2 && !defined $_[1]);
 
@@ -140,17 +141,17 @@ sub connect {
     	    	$timeout = 0;
     	}
 
-    	my $ok = eval { connect($fh, $addr) };
+	my $ok = connect($fh, $addr);
 
     	alarm(0)
     	    if($timeout);
 
-    	croak "connect: timeout"
-    	    unless defined $fh;
+	croak "connect: timeout"
+	    unless defined $fh;
 
-    	undef $fh unless $ok;
-
+	undef $fh unless $ok;
     };
+
     $fh;
 }
 
@@ -544,14 +545,14 @@ Graham Barr <Graham.Barr@tiuk.ti.com>
 
 =head1 REVISION
 
-$Revision: 1.8 $
+$Revision: 1.9 $
 
 The VERSION is derived from the revision turning each number after the
 first dot into a 2 digit number so
 
-       Revision 1.8   => VERSION 1.08
-       Revision 1.2.3 => VERSION 1.0203
- 
+	Revision 1.8   => VERSION 1.08
+	Revision 1.2.3 => VERSION 1.0203
+
 =head1 COPYRIGHT
 
 Copyright (c) 1995 Graham Barr. All rights reserved. This program is free

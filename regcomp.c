@@ -244,7 +244,7 @@ PMOP* pm;
 	if (sawplus && (!sawopen || !regsawback))
 	    r->reganch |= ROPT_SKIP;	/* x+ must match 1st of run */
 
-	DEBUG_r(fprintf(Perl_debug_log,"first %d next %d offset %d\n",
+	DEBUG_r(PerlIO_printf(Perl_debug_log, "first %d next %d offset %d\n",
 	   OP(first), OP(NEXTOPER(first)), first - scan));
 	/*
 	* If there's something expensive in the r.e., find the
@@ -1450,13 +1450,13 @@ regexp *r;
 	    s++;
 #endif
 	op = OP(s);
-	fprintf(Perl_debug_log,"%2d%s", s-r->program, regprop(s));	/* Where, what. */
+	PerlIO_printf(Perl_debug_log, "%2d%s", s-r->program, regprop(s));	/* Where, what. */
 	next = regnext(s);
 	s += regarglen[(U8)op];
 	if (next == NULL)		/* Next ptr. */
-	    fprintf(Perl_debug_log,"(0)");
+	    PerlIO_printf(Perl_debug_log, "(0)");
 	else 
-	    fprintf(Perl_debug_log,"(%d)", (s-r->program)+(next-s));
+	    PerlIO_printf(Perl_debug_log, "(%d)", (s-r->program)+(next-s));
 	s += 3;
 	if (op == ANYOF) {
 	    s += 32;
@@ -1464,34 +1464,34 @@ regexp *r;
 	if (op == EXACTLY) {
 	    /* Literal string, where present. */
 	    s++;
-	    (void)putc(' ', Perl_debug_log);
-	    (void)putc('<', Perl_debug_log);
+	    (void)PerlIO_putc(Perl_debug_log, ' ');
+	    (void)PerlIO_putc(Perl_debug_log, '<');
 	    while (*s != '\0') {
-		(void)putc(*s, Perl_debug_log);
+		(void)PerlIO_putc(Perl_debug_log,*s);
 		s++;
 	    }
-	    (void)putc('>', Perl_debug_log);
+	    (void)PerlIO_putc(Perl_debug_log, '>');
 	    s++;
 	}
-	(void)putc('\n', Perl_debug_log);
+	(void)PerlIO_putc(Perl_debug_log, '\n');
     }
 
     /* Header fields of interest. */
     if (r->regstart)
-	fprintf(Perl_debug_log,"start `%s' ", SvPVX(r->regstart));
+	PerlIO_printf(Perl_debug_log, "start `%s' ", SvPVX(r->regstart));
     if (r->regstclass)
-	fprintf(Perl_debug_log,"stclass `%s' ", regprop(r->regstclass));
+	PerlIO_printf(Perl_debug_log, "stclass `%s' ", regprop(r->regstclass));
     if (r->reganch & ROPT_ANCH)
-	fprintf(Perl_debug_log,"anchored ");
+	PerlIO_printf(Perl_debug_log, "anchored ");
     if (r->reganch & ROPT_SKIP)
-	fprintf(Perl_debug_log,"plus ");
+	PerlIO_printf(Perl_debug_log, "plus ");
     if (r->reganch & ROPT_IMPLICIT)
-	fprintf(Perl_debug_log,"implicit ");
+	PerlIO_printf(Perl_debug_log, "implicit ");
     if (r->regmust != NULL)
-	fprintf(Perl_debug_log,"must have \"%s\" back %ld ", SvPVX(r->regmust),
+	PerlIO_printf(Perl_debug_log, "must have \"%s\" back %ld ", SvPVX(r->regmust),
 	 (long) r->regback);
-    fprintf(Perl_debug_log, "minlen %ld ", (long) r->minlen);
-    fprintf(Perl_debug_log,"\n");
+    PerlIO_printf(Perl_debug_log, "minlen %ld ", (long) r->minlen);
+    PerlIO_printf(Perl_debug_log, "\n");
 }
 
 /*

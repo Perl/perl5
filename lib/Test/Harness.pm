@@ -5,7 +5,10 @@ use Exporter;
 use Benchmark;
 use Config;
 use FileHandle;
-use vars qw($VERSION $verbose $switches $have_devel_corestack);
+use strict;
+
+use vars qw($VERSION $verbose $switches $have_devel_corestack $curtest
+	    @ISA @EXPORT @EXPORT_OK);
 $have_devel_corestack = 0;
 
 $VERSION = "1.12";
@@ -14,6 +17,23 @@ $VERSION = "1.12";
 @EXPORT= qw(&runtests);
 @EXPORT_OK= qw($verbose $switches);
 
+format STDOUT_TOP =
+Failed Test  Status Wstat Total Fail  Failed  List of failed
+------------------------------------------------------------------------------
+.
+
+format STDOUT =
+@<<<<<<<<<<<<<< @>> @>>>> @>>>> @>>> ^##.##%  @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+{ $curtest->{name},
+                $curtest->{estat},
+                    $curtest->{wstat},
+                          $curtest->{max},
+                                $curtest->{failed},
+                                     $curtest->{percent},
+                                              $curtest->{canon}
+}
+.
+
 
 $verbose = 0;
 $switches = "-w";
@@ -21,7 +41,7 @@ $switches = "-w";
 sub runtests {
     my(@tests) = @_;
     local($|) = 1;
-    my($test,$te,$ok,$next,$max,$pct);
+    my($test,$te,$ok,$next,$max,$pct,$totok,@failed,%failedtests);
     my $totmax = 0;
     my $files = 0;
     my $bad = 0;
@@ -82,6 +102,11 @@ sub runtests {
 		}
 	    }
 	    $bad++;
+	    $failedtests{$test} = { canon => '??',  max => $max || '??',
+				    failed => '??', 
+				    name => $test, percent => undef,
+				    estat => $estatus, wstat => $wstatus,
+				  };
 	} elsif ($ok == $max && $next == $max+1) {
 	    if ($max) {
 		print "ok\n";
@@ -94,14 +119,30 @@ sub runtests {
 		push @failed, $next..$max;
 	    }
 	    if (@failed) {
-		print canonfailed($max,@failed);
+		my ($txt, $canon) = canonfailed($max,@failed);
+		print $txt;
+		$failedtests{$test} = { canon => $canon,  max => $max,
+					failed => scalar @failed,
+					name => $test, percent => 100*(scalar @failed)/$max,
+					estat => '', wstat => '',
+				      };
 	    } else {
 		print "Don't know which tests failed: got $ok ok, expected $max\n";
+		$failedtests{$test} = { canon => '??',  max => $max,
+					failed => '??', 
+					name => $test, percent => undef,
+					estat => '', wstat => '',
+				      };
 	    }
 	    $bad++;
 	} elsif ($next == 0) {
 	    print "FAILED before any test output arrived\n";
 	    $bad++;
+	    $failedtests{$test} = { canon => '??',  max => '??',
+				    failed => '??',
+				    name => $test, percent => undef,
+				    estat => '', wstat => '',
+				  };
 	}
     }
     my $t_total = timediff(new Benchmark, $t_start);
@@ -117,9 +158,12 @@ sub runtests {
 	$pct = sprintf("%.2f", $good / $total * 100);
 	my $subpct = sprintf " %d/%d subtests failed, %.2f%% okay.",
 	$totmax - $totok, $totmax, 100*$totok/$totmax;
-	if ($bad == 1) {
-	    die "Failed 1 test script, $pct% okay.$subpct\n";
-	} else {
+	my $script;
+	for $script (sort keys %failedtests) {
+	  $curtest = $failedtests{$script};
+	  write;
+	}
+	if ($bad > 1) {
 	    die "Failed $bad/$total test scripts, $pct% okay.$subpct\n";
 	}
     }
@@ -154,6 +198,7 @@ sub canonfailed ($@) {
     my @canon = ();
     my $min;
     my $last = $min = shift @failed;
+    my $canon;
     if (@failed) {
 	for (@failed, $failed[-1]) { # don't forget the last one
 	    if ($_ > $last+1 || $_ == $last) {
@@ -168,13 +213,16 @@ sub canonfailed ($@) {
 	}
 	local $" = ", ";
 	push @result, "FAILED tests @canon\n";
+	$canon = "@canon";
     } else {
 	push @result, "FAILED test $last\n";
+	$canon = $last;
     }
 
     push @result, "\tFailed $failed/$max tests, ";
     push @result, sprintf("%.2f",100*(1-$failed/$max)), "% okay\n";
-    join "", @result;
+    my $txt = join "", @result;
+    ($txt, $canon);
 }
 
 1;

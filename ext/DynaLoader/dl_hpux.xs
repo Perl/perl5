@@ -52,17 +52,17 @@ dl_load_file(filename)
     max = AvFILL(dl_resolve_using);
     for (i = 0; i <= max; i++) {
 	char *sym = SvPVX(*av_fetch(dl_resolve_using, i, 0));
-	DLDEBUG(1,fprintf(stderr, "dl_load_file(%s) (dependent)\n", sym));
+	DLDEBUG(1,PerlIO_printf(PerlIO_stderr(), "dl_load_file(%s) (dependent)\n", sym));
 	obj = shl_load(sym, bind_type | BIND_NOSTART, 0L);
 	if (obj == NULL) {
 	    goto end;
 	}
     }
 
-    DLDEBUG(1,fprintf(stderr,"dl_load_file(%s): ", filename));
+    DLDEBUG(1,PerlIO_printf(PerlIO_stderr(), "dl_load_file(%s): ", filename));
     obj = shl_load(filename, bind_type | BIND_NOSTART, 0L);
 
-    DLDEBUG(2,fprintf(stderr," libref=%x\n", obj));
+    DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), " libref=%x\n", obj));
 end:
     ST(0) = sv_newmortal() ;
     if (obj == NULL)
@@ -83,17 +83,17 @@ dl_find_symbol(libhandle, symbolname)
     char symbolname_buf[MAXPATHLEN];
     symbolname = dl_add_underscore(symbolname, symbolname_buf);
 #endif
-    DLDEBUG(2,fprintf(stderr,"dl_find_symbol(handle=%x, symbol=%s)\n",
+    DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "dl_find_symbol(handle=%x, symbol=%s)\n",
 		libhandle, symbolname));
     ST(0) = sv_newmortal() ;
     errno = 0;
 
     status = shl_findsym(&obj, symbolname, TYPE_PROCEDURE, &symaddr);
-    DLDEBUG(2,fprintf(stderr,"  symbolref(PROCEDURE) = %x\n", symaddr));
+    DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "  symbolref(PROCEDURE) = %x\n", symaddr));
 
     if (status == -1 && errno == 0) {	/* try TYPE_DATA instead */
 	status = shl_findsym(&obj, symbolname, TYPE_DATA, &symaddr);
-	DLDEBUG(2,fprintf(stderr,"  symbolref(DATA) = %x\n", symaddr));
+	DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "  symbolref(DATA) = %x\n", symaddr));
     }
 
     if (status == -1) {
@@ -117,7 +117,7 @@ dl_install_xsub(perl_name, symref, filename="$Package")
     void *	symref 
     char *	filename
     CODE:
-    DLDEBUG(2,fprintf(stderr,"dl_install_xsub(name=%s, symref=%x)\n",
+    DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "dl_install_xsub(name=%s, symref=%x)\n",
 	    perl_name, symref));
     ST(0)=sv_2mortal(newRV((SV*)newXS(perl_name, (void(*)())symref, filename)));
 

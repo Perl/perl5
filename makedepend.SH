@@ -124,10 +124,12 @@ $sed <$mf >$mf.new -e '1,/^# AUTOMATICALLY/!d'
 $MAKE shlist || ($echo "Searching for .SH files..."; \
 	$echo *.SH | $tr ' ' '\012' | $egrep -v '\*' >.shlist)
 
-# Now extract the dependency on makedepend.SH
-# (it should reside in the main Makefile):
+# Now extract the dependencies on makedepend.SH and Makefile.SH
+# (they should reside in the main Makefile):
 mv .shlist .shlist.old
 $egrep -v '^makedepend\.SH' <.shlist.old >.shlist
+mv .shlist .shlist.old
+$egrep -v '^Makefile\.SH' <.shlist.old >.shlist
 rm .shlist.old
 
 if $test -s .deptmp; then

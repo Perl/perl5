@@ -147,7 +147,7 @@ struct block {
 	cx->blk_oldretsp	= retstack_ix,				\
 	cx->blk_oldpm		= curpm,				\
 	cx->blk_gimme		= gimme;				\
-	DEBUG_l( fprintf(stderr,"Entering block %ld, type %s\n",	\
+	DEBUG_l( PerlIO_printf(PerlIO_stderr(), "Entering block %ld, type %s\n",	\
 		    (long)cxstack_ix, block_type[t]); )
 
 /* Exit a block (RETURN and LAST). */
@@ -159,7 +159,7 @@ struct block {
 	retstack_ix	= cx->blk_oldretsp,				\
 	pm		= cx->blk_oldpm,				\
 	gimme		= cx->blk_gimme;				\
-	DEBUG_l( fprintf(stderr,"Leaving block %ld, type %s\n",		\
+	DEBUG_l( PerlIO_printf(PerlIO_stderr(), "Leaving block %ld, type %s\n",		\
 		    (long)cxstack_ix+1,block_type[cx->cx_type]); )
 
 /* Continue a block elsewhere (NEXT and REDO). */

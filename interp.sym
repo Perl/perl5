@@ -31,7 +31,6 @@ dbargs
 debdelim
 debname
 debstash
-debug
 defgv
 defoutgv
 defstash
@@ -40,7 +39,6 @@ diehook
 dirty
 dlevel
 dlmax
-do_undump
 doextract
 doswitches
 dowarn

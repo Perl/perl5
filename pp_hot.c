@@ -252,8 +252,13 @@ PP(pp_preinc)
 {
     dSP;
     if (SvIOK(TOPs)) {
-	++SvIVX(TOPs);
-	SvFLAGS(TOPs) &= ~(SVf_NOK|SVf_POK|SVp_NOK|SVp_POK);
+    	if (SvIVX(TOPs) == PERL_LONG_MAX) {
+    	    sv_setnv(TOPs, (double)(SvIVX(TOPs)) + 1.0 );
+    	}
+    	else {
+	    ++SvIVX(TOPs);
+	    SvFLAGS(TOPs) &= ~(SVf_NOK|SVf_POK|SVp_NOK|SVp_POK);
+	}
     }
     else
 	sv_inc(TOPs);
@@ -315,7 +320,7 @@ PP(pp_print)
     dSP; dMARK; dORIGMARK;
     GV *gv;
     IO *io;
-    register FILE *fp;
+    register PerlIO *fp;
 
     if (op->op_flags & OPf_STACKED)
 	gv = (GV*)*++MARK;
@@ -351,7 +356,7 @@ PP(pp_print)
 		    break;
 		MARK++;
 		if (MARK <= SP) {
-		    if (fwrite1(ofs, 1, ofslen, fp) == 0 || ferror(fp)) {
+		    if (PerlIO_write(fp, ofs, ofslen) == 0 || PerlIO_error(fp)) {
 			MARK--;
 			break;
 		    }
@@ -369,11 +374,11 @@ PP(pp_print)
 	    goto just_say_no;
 	else {
 	    if (orslen)
-		if (fwrite1(ors, 1, orslen, fp) == 0 || ferror(fp))
+		if (PerlIO_write(fp, ors, orslen) == 0 || PerlIO_error(fp))
 		    goto just_say_no;
 
 	    if (IoFLAGS(io) & IOf_FLUSH)
-		if (Fflush(fp) == EOF)
+		if (PerlIO_flush(fp) == EOF)
 		    goto just_say_no;
 	}
     }
@@ -603,7 +608,6 @@ PP(pp_aassign)
 	    }
 	    break;
 	case SVt_PVHV: {
-		char *tmps;
 		SV *tmpstr;
 
 		hash = (HV*)sv;
@@ -616,16 +620,17 @@ PP(pp_aassign)
 			sv = *(relem++);
 		    else
 			sv = &sv_no, relem++;
-		    tmps = SvPV(sv, len);
 		    tmpstr = NEWSV(29,0);
 		    if (*relem)
 			sv_setsv(tmpstr,*relem);	/* value */
 		    *(relem++) = tmpstr;
-		    (void)hv_store(hash,tmps,len,tmpstr,0);
+		    (void)hv_store_ent(hash,sv,tmpstr,0);
 		    if (magic)
 			mg_set(tmpstr);
 		    tainted = 0;
 		}
+		if (relem == lastrelem)
+		    warn("Odd number of elements in hash list");
 	    }
 	    break;
 	default:
@@ -944,7 +949,7 @@ do_readline()
     register SV *sv;
     STRLEN tmplen = 0;
     STRLEN offset;
-    FILE *fp;
+    PerlIO *fp;
     register IO *io = GvIO(last_in_gv);
     register I32 type = op->op_type;
 
@@ -984,7 +989,7 @@ do_readline()
 		    char *rstr = rslt + sizeof(unsigned short int), *begin, *end, *cp;
 		    char tmpfnam[L_tmpnam] = "SYS$SCRATCH:";
 		    $DESCRIPTOR(dfltdsc,"SYS$DISK:[]*.*;");
-		    FILE *tmpfp;
+		    PerlIO *tmpfp;
 		    STRLEN i;
 		    struct dsc$descriptor_s wilddsc
 		       = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
@@ -1014,7 +1019,7 @@ do_readline()
 		           break;
 		       }
 		    }
-		    if ((tmpfp = fopen(tmpfnam,"w+","fop=dlt")) != NULL) {
+		    if ((tmpfp = PerlIO_open(tmpfnam,"w+","fop=dlt")) != NULL) {
 		        ok = ((wilddsc.dsc$a_pointer = tovmsspec(SvPVX(tmpglob),vmsspec)) != NULL);
 		        if (ok) wilddsc.dsc$w_length = (unsigned short int) strlen(wilddsc.dsc$a_pointer);
 		        while (ok && ((sts = lib$find_file(&wilddsc,&rsdsc,&cxt,
@@ -1032,7 +1037,7 @@ do_readline()
 		                while (*(--begin) != ']' && *begin != '>') ;
 		                ++begin;
 		            }
-		            ok = (fputs(begin,tmpfp) != EOF);
+		            ok = (PerlIO_puts(tmpfp,begin) != EOF);
 		        }
 		        if (cxt) (void)lib$find_file_end(&cxt);
 		        if (ok && sts != RMS$_NMF &&
@@ -1041,11 +1046,11 @@ do_readline()
 		            if (!(sts & 1)) {
 		              SETERRNO((sts == RMS$_SYN ? EINVAL : EVMSERR),sts);
 		            }
-		            fclose(tmpfp);
+		            PerlIO_close(tmpfp);
 		            fp = NULL;
 		        }
 		        else {
-		           rewind(tmpfp);
+		           PerlIO_rewind(tmpfp);
 		           IoTYPE(io) = '<';
 		           IoIFP(io) = fp = tmpfp;
 		        }
@@ -1114,7 +1119,7 @@ do_readline()
     }
     for (;;) {
 	if (!sv_gets(sv, fp, offset)) {
-	    clearerr(fp);
+	    PerlIO_clearerr(fp);
 	    if (IoFLAGS(io) & IOf_ARGV) {
 		fp = nextargv(last_in_gv);
 		if (fp)
@@ -1206,24 +1211,23 @@ PP(pp_helem)
 {
     dSP;
     SV** svp;
+    HE* he;
     SV *keysv = POPs;
-    STRLEN keylen;
-    char *key = SvPV(keysv, keylen);
     HV *hv = (HV*)POPs;
     I32 lval = op->op_flags & OPf_MOD;
 
     if (SvTYPE(hv) != SVt_PVHV)
 	RETPUSHUNDEF;
-    svp = hv_fetch(hv, key, keylen, lval);
+    he = hv_fetch_ent(hv, keysv, lval, 0);
     if (lval) {
-	if (!svp || *svp == &sv_undef)
-	    DIE(no_helem, key);
+	if (!he || HeVAL(he) == &sv_undef)
+	    DIE(no_helem, SvPV(keysv, na));
 	if (op->op_private & OPpLVAL_INTRO)
-	    save_svref(svp);
+	    save_svref(&HeVAL(he));
 	else if (op->op_private & (OPpDEREF_HV|OPpDEREF_AV))
-	    provide_ref(op, *svp);
+	    provide_ref(op, HeVAL(he));
     }
-    PUSHs(svp ? *svp : &sv_undef);
+    PUSHs(he ? HeVAL(he) : &sv_undef);
     RETURN;
 }
 

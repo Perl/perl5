@@ -118,6 +118,19 @@ to the templates.  The default is 0.01.
 Omit the XS portion.  Used to generate templates for a module which is not
 XS-based.
 
+=item B<-x>
+
+Automatically generate XSUBs basing on function declarations in the
+header file.  The package C<C::Scan> should be installed. If this
+option is specified, the name of the header file may look like
+C<NAME1,NAME2>. In this case NAME1 is used instead of the specified string,
+but XSUBS are emited only for the declarations included from file NAME2.
+
+=item B<-F>
+
+Additional flags to specify to C preprocessor when scanning header for
+function declarations. Should not be used without B<-x>.
+
 =back
 
 =head1 EXAMPLES
@@ -158,6 +171,17 @@ XS-based.
         h2xs -n DCE::rgynbase -p sec_rgy_ \
         -s sec_rgy_wildcard_name,sec_rgy_wildcard_sid dce/rgynbase
 
+	# Make XS with defines in perl.h, and function declarations
+	# visible from perl.h. Name of the extension is perl1.
+	# When scanning perl.h, define -DEXT=extern -DdEXT= -DINIT(x)=
+	# Extra backslashes below because the string is passed to shell.
+	h2xs -xn perl1 -F "-DEXT=extern -DdEXT= -DINIT\(x\)=" \
+	../perl5_003_01/perl.h
+
+	# Same with function declaration in proto.h as visible from perl.h.
+	perl H:\get\perl\perl5_003_01.try\utils\h2xs -xn perl1 \
+	../perl5_003_01/perl.h,proto.h
+
 =head1 ENVIRONMENT
 
 No environment variables are used.
@@ -172,11 +196,11 @@ L<perl>, L<perlxstut>, L<ExtUtils::MakeMaker>, and L<AutoLoader>.
 
 =head1 DIAGNOSTICS
 
-The usual warnings if it can't read or write the files involved.
+The usual warnings if it cannot read or write the files involved.
 
 =cut
 
-my( $H2XS_VERSION ) = '$Revision: 1.16 $' =~ /\$Revision:\s+([^\s]+)/;
+my( $H2XS_VERSION ) = ' $Revision: 1.16 $ ' =~ /\$Revision:\s+([^\s]+)/;
 my $TEMPLATE_VERSION = '0.01';
 
 use Getopt::Std;
@@ -195,6 +219,8 @@ version: $H2XS_VERSION
     -P   Omit the stub POD section.
     -X   Omit the XS portion.
     -v   Specify a version number for this extension.
+    -x   Autogenerate XSUBs using C::Scan.
+    -F   Additional flags for C preprocessor (used with -x).
     -h   Display this help message
 extra_libraries
          are any libraries that might be needed for loading the
@@ -203,7 +229,7 @@ extra_libraries
 }
 
 
-getopts("AOPXcfhxv:n:p:s:") || usage;
+getopts("AOPXcfhxv:n:p:s:F:") || usage;
 
 usage if $opt_h;
 
@@ -226,6 +252,8 @@ if( $path_h ){
 	warn "Nesting of headerfile ignored with -n\n";
     }
     $path_h .= ".h" unless $path_h =~ /\.h$/;
+    $fullpath = $path_h;
+    $path_h =~ s/,.*$// if $opt_x;
     if ($^O eq 'VMS') {  # Consider overrides of default location
 	if ($path_h !~ m![:>\[]!) {
 	    my($hadsys) = ($path_h =~ s!^sys/!!i);
@@ -252,7 +280,7 @@ if( $path_h ){
 	    print "Matched $_ ($1)\n";
 	    $_ = $1;
 	    next if /^_.*_h_*$/i; # special case, but for what?
-	    if (defined $opt_p)
+	    if (defined $opt_p) {
 		if (!/^$opt_p(\d)/) {
 		    ++$prefix{$_} if s/^$opt_p//;
 		}
@@ -653,7 +681,16 @@ sub normalize_type {
 if ($opt_x) {
   require C::Scan;		# Run-time directive
   require Config;		# Run-time directive
-  my $c = new C::Scan 'filename' => $path_h;
+  my $c;
+  my $filter;
+  my $filename = $path_h;
+  my $addflags = $opt_F || '';
+  if ($fullpath =~ /,/) {
+    $filename = $`;
+    $filter = $';
+  }
+  $c = new C::Scan 'filename' => $filename, 'filename_filter' => $filter,
+                   'add_cppflags' => $addflags;
   $c->set('includeDirs' => [$Config::Config{shrpdir}]);
   
   my $fdec = $c->get('parsed_fdecls');

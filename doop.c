@@ -320,7 +320,7 @@ register SV **sarg;
 	    /* end of switch, copy results */
 	    *t = ch;
 	    if (xs == buf && xlen >= sizeof(buf)) {	/* Ooops! */
-		fputs("panic: sprintf overflow - memory corrupted!\n",stderr);
+		PerlIO_puts(PerlIO_stderr(),"panic: sprintf overflow - memory corrupted!\n");
 		my_exit(1);
 	    }
 	    SvGROW(sv, SvCUR(sv) + (f - s) + xlen + 1 + pre + post);

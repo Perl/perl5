@@ -7,6 +7,47 @@ site, in the .../src/5.0 directory for full version releases,
 or in the .../src/5/0/unsupported directory for sub-version
 releases.)
 
+----------------
+Version 5.003_02
+----------------
+o Visible Changes to Core Functionality
+  - Redefining constant subs, or changing sub's prototype now give warnings.
+  - Fixes for ++/-- of values close to max/min size of an integer 
+  - Warning for un-qualified bareword as handler in $SIG{}. 
+  - UNIVERSAL::isa can now be called as static method. 
+
+o Changes in Core Internals
+  - PerlIO abstraction added.
+    Perl core and standard extensions no longer assume ANSI C's stdio is IO
+    mechanism, Default Configure mode is still to use stdio via set of C macros.
+    Alternate modes are to use stdio via one perlio.c module, or 
+    to use sfio if available.
+    
+  - Several bug fixs from perl5-porters
+      - Make sources non-ANSI C correct again.
+      - SUPER in gv.c 
+      - Last of shared-hash-key patches
+      - eval '(0,1..3)'; # --> SegFault
+      - coredumps after simple subsitutes.
+      - Correction to UNIVERSAL::VERSION docs.
+      - Fixed io_udp test.
+      - Fixed another abuse of malloc'ed memory.
+  - Enabled DEBUGING_MSTATS whenever perl's malloc() is used.
+  - Reverted to default of not hiding perl's malloc (if used). 
+
+o Changes in the Standard Library and Utilities
+  - Fixed MakeMaker for static SDBM and builing in a link tree.
+  - Upgraded to IO-1.09, and includes latest (still experimental) IO::Select. 
+  - Documentation/test tweak to DB_File
+  - h2xs upgrade to allow use C::Scan module 
+
+o Changes in OS-specific and Build-time Support
+  - Attempted to re-created 5.003_01's NeXT support with metaconfig units.
+  - Updated MANIFEST 
+  - make minitest now depends on lib/Config.pm, as some of tests require it. 
+  - Included latest plan9 sub-directory
+  - Applied OS/2 patches.
+  - Typo patch for VMS.
 
 ----------------
 Version 5.003_01

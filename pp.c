@@ -570,8 +570,13 @@ PP(pp_predec)
 {
     dSP;
     if (SvIOK(TOPs)) {
-	--SvIVX(TOPs);
-	SvFLAGS(TOPs) &= ~(SVf_NOK|SVf_POK|SVp_NOK|SVp_POK);
+    	if (SvIVX(TOPs) == PERL_LONG_MIN) {
+    	    sv_setnv(TOPs, (double)SvIVX(TOPs) - 1.0);
+    	}
+    	else {
+    	    --SvIVX(TOPs);
+	    SvFLAGS(TOPs) &= ~(SVf_NOK|SVf_POK|SVp_NOK|SVp_POK);
+	}
     }
     else
 	sv_dec(TOPs);
@@ -584,8 +589,13 @@ PP(pp_postinc)
     dSP; dTARGET;
     sv_setsv(TARG, TOPs);
     if (SvIOK(TOPs)) {
-	++SvIVX(TOPs);
-	SvFLAGS(TOPs) &= ~(SVf_NOK|SVf_POK|SVp_NOK|SVp_POK);
+    	if (SvIVX(TOPs) == PERL_LONG_MAX) {
+    	    sv_setnv(TOPs, (double)SvIVX(TOPs) + 1.0);
+    	}
+    	else {
+	    ++SvIVX(TOPs);
+	    SvFLAGS(TOPs) &= ~(SVf_NOK|SVf_POK|SVp_NOK|SVp_POK);
+	}
     }
     else
 	sv_inc(TOPs);
@@ -601,8 +611,13 @@ PP(pp_postdec)
     dSP; dTARGET;
     sv_setsv(TARG, TOPs);
     if (SvIOK(TOPs)) {
-	--SvIVX(TOPs);
-	SvFLAGS(TOPs) &= ~(SVf_NOK|SVf_POK|SVp_NOK|SVp_POK);
+    	if (SvIVX(TOPs) == PERL_LONG_MIN) {
+    	    sv_setnv(TOPs, (double)SvIVX(TOPs) - 1.0);
+    	}
+    	else {
+	    --SvIVX(TOPs);
+	    SvFLAGS(TOPs) &= ~(SVf_NOK|SVf_POK|SVp_NOK|SVp_POK);
+	}
     }
     else
 	sv_dec(TOPs);

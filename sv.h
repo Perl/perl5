@@ -247,8 +247,8 @@ struct xpvio {
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
 
-    FILE *	xio_ifp;	/* ifp and ofp are normally the same */
-    FILE *	xio_ofp;	/* but sockets need separate streams */
+    PerlIO *	xio_ifp;	/* ifp and ofp are normally the same */
+    PerlIO *	xio_ofp;	/* but sockets need separate streams */
     DIR *	xio_dirp;	/* for opendir, readdir, etc */
     long	xio_lines;	/* $. */
     long	xio_page;	/* $% */

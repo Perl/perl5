@@ -25,25 +25,13 @@ dump_all()
 #ifdef I_STDARG
 static void dump(char *pat, ...);
 #else
-#  if defined(I_VARARGS)
-/*VARARGS0*/
-static void
-dump(pat, va_alist)
-    char *pat;
-    va_dcl
-#  else
 static void dump();
-#  endif
 #endif
 
 void
 dump_all()
 {
-#ifdef HAS_SETLINEBUF
-    setlinebuf(Perl_debug_log);
-#else
-    setvbuf(Perl_debug_log, Nullch, _IOLBF, 0);
-#endif
+    PerlIO_setlinebuf(Perl_debug_log);
     if (main_root)
 	dump_op(main_root);
     dump_packsubs(defstash);
@@ -119,18 +107,18 @@ register OP *op;
 
     dump("{\n");
     if (op->op_seq)
-	fprintf(Perl_debug_log, "%-4d", op->op_seq);
+	PerlIO_printf(Perl_debug_log, "%-4d", op->op_seq);
     else
-	fprintf(Perl_debug_log, "    ");
+	PerlIO_printf(Perl_debug_log, "    ");
     dump("TYPE = %s  ===> ", op_name[op->op_type]);
     if (op->op_next) {
 	if (op->op_seq)
-	    fprintf(Perl_debug_log, "%d\n", op->op_next->op_seq);
+	    PerlIO_printf(Perl_debug_log, "%d\n", op->op_next->op_seq);
 	else
-	    fprintf(Perl_debug_log, "(%d)\n", op->op_next->op_seq);
+	    PerlIO_printf(Perl_debug_log, "(%d)\n", op->op_next->op_seq);
     }
     else
-	fprintf(Perl_debug_log, "DONE\n");
+	PerlIO_printf(Perl_debug_log, "DONE\n");
     dumplvl++;
     if (op->op_targ) {
 	if (op->op_type == OP_NULL)
@@ -255,31 +243,31 @@ register OP *op;
     case OP_ENTERLOOP:
 	dump("REDO ===> ");
 	if (cLOOP->op_redoop)
-	    fprintf(Perl_debug_log, "%d\n", cLOOP->op_redoop->op_seq);
+	    PerlIO_printf(Perl_debug_log, "%d\n", cLOOP->op_redoop->op_seq);
 	else
-	    fprintf(Perl_debug_log, "DONE\n");
+	    PerlIO_printf(Perl_debug_log, "DONE\n");
 	dump("NEXT ===> ");
 	if (cLOOP->op_nextop)
-	    fprintf(Perl_debug_log, "%d\n", cLOOP->op_nextop->op_seq);
+	    PerlIO_printf(Perl_debug_log, "%d\n", cLOOP->op_nextop->op_seq);
 	else
-	    fprintf(Perl_debug_log, "DONE\n");
+	    PerlIO_printf(Perl_debug_log, "DONE\n");
 	dump("LAST ===> ");
 	if (cLOOP->op_lastop)
-	    fprintf(Perl_debug_log, "%d\n", cLOOP->op_lastop->op_seq);
+	    PerlIO_printf(Perl_debug_log, "%d\n", cLOOP->op_lastop->op_seq);
 	else
-	    fprintf(Perl_debug_log, "DONE\n");
+	    PerlIO_printf(Perl_debug_log, "DONE\n");
 	break;
     case OP_COND_EXPR:
 	dump("TRUE ===> ");
 	if (cCONDOP->op_true)
-	    fprintf(Perl_debug_log, "%d\n", cCONDOP->op_true->op_seq);
+	    PerlIO_printf(Perl_debug_log, "%d\n", cCONDOP->op_true->op_seq);
 	else
-	    fprintf(Perl_debug_log, "DONE\n");
+	    PerlIO_printf(Perl_debug_log, "DONE\n");
 	dump("FALSE ===> ");
 	if (cCONDOP->op_false)
-	    fprintf(Perl_debug_log, "%d\n", cCONDOP->op_false->op_seq);
+	    PerlIO_printf(Perl_debug_log, "%d\n", cCONDOP->op_false->op_seq);
 	else
-	    fprintf(Perl_debug_log, "DONE\n");
+	    PerlIO_printf(Perl_debug_log, "DONE\n");
 	break;
     case OP_MAPWHILE:
     case OP_GREPWHILE:
@@ -287,9 +275,9 @@ register OP *op;
     case OP_AND:
 	dump("OTHER ===> ");
 	if (cLOGOP->op_other)
-	    fprintf(Perl_debug_log, "%d\n", cLOGOP->op_other->op_seq);
+	    PerlIO_printf(Perl_debug_log, "%d\n", cLOGOP->op_other->op_seq);
 	else
-	    fprintf(Perl_debug_log, "DONE\n");
+	    PerlIO_printf(Perl_debug_log, "DONE\n");
 	break;
     case OP_PUSHRE:
     case OP_MATCH:
@@ -315,12 +303,12 @@ register GV *gv;
     SV *sv;
 
     if (!gv) {
-	fprintf(Perl_debug_log,"{}\n");
+	PerlIO_printf(Perl_debug_log, "{}\n");
 	return;
     }
     sv = sv_newmortal();
     dumplvl++;
-    fprintf(Perl_debug_log,"{\n");
+    PerlIO_printf(Perl_debug_log, "{\n");
     gv_fullname(sv,gv);
     dump("GV_NAME = %s", SvPVX(sv));
     if (gv != GvEGV(gv)) {
@@ -400,8 +388,8 @@ long arg2, arg3, arg4, arg5;
     I32 i;
 
     for (i = dumplvl*4; i; i--)
-	(void)putc(' ',Perl_debug_log);
-    fprintf(Perl_debug_log,arg1, arg2, arg3, arg4, arg5);
+	(void)PerlIO_putc(Perl_debug_log,' ');
+    PerlIO_printf(Perl_debug_log, arg1, arg2, arg3, arg4, arg5);
 }
 
 #else
@@ -419,9 +407,6 @@ dump(pat,va_alist)
 {
     I32 i;
     va_list args;
-#ifndef HAS_VPRINTF
-    int vfprintf();
-#endif
 
 #ifdef I_STDARG
     va_start(args, pat);
@@ -429,8 +414,8 @@ dump(pat,va_alist)
     va_start(args);
 #endif
     for (i = dumplvl*4; i; i--)
-	(void)putc(' ',stderr);
-    vfprintf(Perl_debug_log,pat,args);
+	(void)PerlIO_putc(Perl_debug_log,' ');
+    PerlIO_vprintf(Perl_debug_log,pat,args);
     va_end(args);
 }
 #endif

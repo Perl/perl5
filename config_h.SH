@@ -1,4 +1,3 @@
-#! /bin/sh
 case $CONFIG in
 '')
 	if test -f config.sh; then TOP=.;
@@ -12,18 +11,10 @@ case $CONFIG in
 	. $TOP/config.sh
 	;;
 esac
-
-case "$bin_sh" in
-'')
-	bin_sh='/bin/sh'
-	;;
-esac
-
 case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
 echo "Extracting config.h (with variable substitutions)"
-rm -f config.h
 sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
 /*
  * This file was produced by running the config_h.SH script, which
@@ -34,7 +25,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  * that running config_h.SH again will wipe out any changes you've made.
  * For a more permanent change edit config.sh and rerun config_h.SH.
  *
- * \$Id: config_h.SH,v 1.2 1996/07/05 23:49:13 gerti Exp $
+ * \$Id: Config_h.U,v 3.0.1.4 1995/09/25 09:10:49 ram Exp $
  */
 
 /* Configuration time: $cf_time
@@ -1301,16 +1292,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #define Size_t $sizetype	 /* length paramater for string functions */
 
-/* SSize_t:
- *	This symbol holds the type used by functions that return
- *	a count of bytes or an error condition.  It must be a signed type.
- *	It is usually ssize_t, but may be long or int, etc.
- *	It may be necessary to include <sys/types.h> or <unistd.h>
- *	to get any typedef'ed information.
- *	We will pick a type such that sizeof(SSize_t) == sizeof(Size_t).
- */
-#define SSize_t $ssizetype	 /* signed count of bytes */
-
 /* STDCHAR:
  *	This symbol is defined to be the type of char used in stdio.h.
  *	It has the values "unsigned char" or "char".
@@ -1335,33 +1316,36 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #define LOC_SED 	"$full_sed"	/**/
 
+/* OSNAME:
+ *	This symbol contains the name of the operating system, as determined
+ *	by Configure.  You shouldn't rely on it too much; the specific
+ *	feature tests from Configure are generally more reliable.
+ */
+#define OSNAME "$osname"		/**/
+
 /* ARCHLIB_EXP:
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
 #$d_archlib ARCHLIB_EXP "$archlibexp"		/**/
 
-/* OSNAME:
- *	This symbol contains the name of the operating system, as determined
- *	by Configure.
+/* BIN_SH:
+ *	Pathname to /bin/sh equivalent
  */
-#define OSNAME "$osname"		/**/
-
+#define BIN_SH "$bin_sh"	/**/
 /* BYTEORDER:
  *	This symbol hold the hexadecimal constant defined in byteorder,
  *	i.e. 0x1234 or 0x4321, etc...
  */
 #ifndef NeXT
 #define BYTEORDER 0x$byteorder	/* large digits for MSB */
-#else /* NeXT */
-
-#ifdef __BIG_ENDIAN__
-#define BYTEORDER 0x4321
-#else /* __LITTLE_ENDIAN__ */
+#else  /* NeXT */
+#ifdef __LITTLE_ENDIAN__
 #define BYTEORDER 0x1234
+#else /* __BIG_ENDIAN__ */
+#define BYTEORDER 0x4321
 #endif /* ENDIAN CHECK */
-
-#endif /* !NeXT */
+#endif /* NeXT */
 
 /* CSH:
  *	This symbol, if defined, indicates that the C-shell exists.
@@ -1414,26 +1398,40 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #define Gconvert(x,n,t,b) $d_Gconvert
 
+/* PERLIO_IS_STDIO:
+ *	This symbol, if defined, indicates that stdio should
+ *	be used in a fully backward compatible manner.
+ */
+#$d_perlstdio	PERLIO_IS_STDIO		/**/
+
+/* USE_SFIO:
+ *	This symbol, if defined, indicates that sfio should
+ *	be used.
+ */
+#$d_sfio	USE_SFIO		/**/
+
 /* Sigjmp_buf:
- * This is the buffer type to be used with Sigsetjmp and Siglongjmp.
+ *	This is the buffer type to be used with Sigsetjmp and Siglongjmp.
  */
 /* Sigsetjmp:
- * This macro is used in the same way as sigsetjmp(), but will invoke
- * traditional setjmp() if sigsetjmp isn't available.
+ *	This macro is used in the same way as sigsetjmp(), but will invoke
+ *	traditional setjmp() if sigsetjmp isn't available.
+ *	See HAS_SIGSETJMP.
  */
 /* Siglongjmp:
- * This macro is used in the same way as siglongjmp(), but will invoke
- * traditional longjmp() if siglongjmp isn't available.
+ *	This macro is used in the same way as siglongjmp(), but will invoke
+ *	traditional longjmp() if siglongjmp isn't available.
+ *	See HAS_SIGSETJMP.
  */
 #$d_sigsetjmp HAS_SIGSETJMP	/**/
 #ifdef HAS_SIGSETJMP
 #define Sigjmp_buf sigjmp_buf
-#define Sigsetjmp(buf,save_mask) sigsetjmp(buf,save_mask)
-#define Siglongjmp(buf,retval) siglongjmp(buf,retval)
+#define Sigsetjmp(buf,save_mask) sigsetjmp((buf),(save_mask))
+#define Siglongjmp(buf,retval) siglongjmp((buf),(retval))
 #else
 #define Sigjmp_buf jmp_buf
-#define Sigsetjmp(buf,save_mask) setjmp(buf)
-#define Siglongjmp(buf,retval) longjmp(buf,retval)
+#define Sigsetjmp(buf,save_mask) setjmp((buf))
+#define Siglongjmp(buf,retval) longjmp((buf),(retval))
 #endif
 
 /* USE_DYNAMIC_LOADING:
@@ -1459,11 +1457,19 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #$i_locale	I_LOCALE		/**/
 
+/* I_SFIO:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sfio.h>.
+ */
+#$i_sfio	I_SFIO		/**/
+
 /* I_SYS_STAT:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <sys/stat.h>.
  */
 #$i_sysstat	I_SYS_STAT		/**/
+
+#$i_values I_LIMITS		/**/
 
 /* I_STDARG:
  *	This symbol, if defined, indicates that <stdarg.h> exists and should
@@ -1580,17 +1586,22 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #define SITELIB_EXP "$sitelibexp"		/**/
 
+/* SSize_t:
+ *	This symbol holds the type used by functions that return
+ *	a count of bytes or an error condition.  It must be a signed type.
+ *	It is usually ssize_t, but may be long or int, etc.
+ *	It may be necessary to include <sys/types.h> or <unistd.h>
+ *	to get any typedef'ed information.
+ *	We will pick a type such that sizeof(SSize_t) == sizeof(Size_t).
+ */
+#define SSize_t $ssizetype	 /* signed count of bytes */
+
 /* STARTPERL:
  *	This variable contains the string to put in front of a perl
  *	script to make sure (one hopes) that it runs with perl and not
  *	some shell.
  */
 #define STARTPERL "$startperl"		/**/
-
-/* BIN_SH:
- *	This variable contains the path to the shell.
- */
-#define BIN_SH "$bin_sh"		/**/
 
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this

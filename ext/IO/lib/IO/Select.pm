@@ -49,7 +49,9 @@ handle with the same C<fileno> is specified then only the last one is cached.
 
 =item remove ( HANDLES )
 
-Remove all the given handles from the object.
+Remove all the given handles from the object. This method also works
+by the C<fileno> of the handles. So the exact handles that were added
+need not be passed, just handles that have an equivalent C<fileno>
 
 =item can_read ( [ TIMEOUT ] )
 
@@ -65,6 +67,12 @@ Same as C<can_read> except check for handles that can be written to.
 
 Same as C<can_read> except check for handles that have an error condition, for
 example EOF.
+
+=item count ()
+
+Returns the number of handles that the object will check for when
+one of the C<can_> methods is called or the object is passed to
+the C<select> static method.
 
 =item select ( READ, WRITE, ERROR [, TIMEOUT ] )
 
@@ -132,12 +140,16 @@ $VERSION = sprintf("%d.%02d", q$Revision: 1.2 $ =~ /(\d+)\.(\d+)/);
 
 @ISA = qw(Exporter); # This is only so we can do version checking
 
+sub VEC_BITS {0}
+sub FD_COUNT {1}
+sub FIRST_FD {2}
+
 sub new
 {
  my $self = shift;
  my $type = ref($self) || $self;
 
- my $vec = bless [''], $type;
+ my $vec = bless [undef,0], $type;
 
  $vec->add(@_)
     if @_;
@@ -150,14 +162,19 @@ sub add
  my $vec = shift;
  my $f;
 
+ $vec->[VEC_BITS] = '' unless defined $vec->[VEC_BITS];
+
  foreach $f (@_)
   {
    my $fn = $f =~ /^\d+$/ ? $f : fileno($f);
    next
     unless defined $fn;
-   vec($vec->[0],$fn++,1) = 1;
-   $vec->[$fn] = $f;
+   vec($vec->[VEC_BITS],$fn,1) = 1;
+   $vec->[FD_COUNT] += 1
+	unless defined $vec->[$fn+FIRST_FD];
+   $vec->[$fn+FIRST_FD] = $f;
   }
+ $vec->[VEC_BITS] = undef unless $vec->count;
 }
 
 sub remove
@@ -170,9 +187,11 @@ sub remove
    my $fn = $f =~ /^\d+$/ ? $f : fileno($f);
    next
     unless defined $fn;
-   vec($vec->[0],$fn++,1) = 0;
-   $vec->[$fn] = undef;
+   vec($vec->[VEC_BITS],$fn,1) = 0;
+   $vec->[$fn+FIRST_FD] = undef;
+   $vec->[FD_COUNT] -= 1;
   }
+ $vec->[VEC_BITS] = undef unless $vec->count;
 }
 
 sub can_read
@@ -180,7 +199,7 @@ sub can_read
  my $vec = shift;
  my $timeout = shift;
 
- my $r = $vec->[0];
+ my $r = $vec->[VEC_BITS] or return ();
 
  select($r,undef,undef,$timeout) > 0
     ? _handles($vec, $r)
@@ -192,7 +211,7 @@ sub can_write
  my $vec = shift;
  my $timeout = shift;
 
- my $w = $vec->[0];
+ my $w = $vec->[VEC_BITS] or return ();
 
  select(undef,$w,undef,$timeout) > 0
     ? _handles($vec, $w)
@@ -204,11 +223,17 @@ sub has_error
  my $vec = shift;
  my $timeout = shift;
 
- my $e = $vec->[0];
+ my $e = $vec->[VEC_BITS] or return ();
 
  select(undef,undef,$e,$timeout) > 0
     ? _handles($vec, $e)
     : ();
+}
+
+sub count
+{
+ my $vec = shift;
+ $vec->[FD_COUNT];
 }
 
 sub _max
@@ -231,28 +256,28 @@ sub select
  my($r,$w,$e,$t) = @_;
  my @result = ();
 
- my $rb = defined $r ? $r->[0] : undef;
- my $wb = defined $w ? $e->[0] : undef;
- my $eb = defined $e ? $w->[0] : undef;
+ my $rb = defined $r ? $r->[VEC_BITS] : undef;
+ my $wb = defined $w ? $e->[VEC_BITS] : undef;
+ my $eb = defined $e ? $w->[VEC_BITS] : undef;
 
  if(select($rb,$wb,$eb,$t) > 0)
   {
    my @r = ();
    my @w = ();
    my @e = ();
-   my $i = _max(defined $r ? scalar(@$r) : 0,
-                defined $w ? scalar(@$w) : 0,
-                defined $e ? scalar(@$e) : 0);
+   my $i = _max(defined $r ? scalar(@$r)-1 : 0,
+                defined $w ? scalar(@$w)-1 : 0,
+                defined $e ? scalar(@$e)-1 : 0);
 
-   for( ; $i > 0 ; $i--)
+   for( ; $i >= FIRST_FD ; $i--)
     {
-     my $j = $i - 1;
+     my $j = $i - FIRST_FD;
      push(@r, $r->[$i])
-        if defined $r->[$i] && vec($rb, $j, 1);
+        if defined $rb && defined $r->[$i] && vec($rb, $j, 1);
      push(@w, $w->[$i])
-        if defined $w->[$i] && vec($wb, $j, 1);
+        if defined $wb && defined $w->[$i] && vec($wb, $j, 1);
      push(@e, $e->[$i])
-        if defined $e->[$i] && vec($eb, $j, 1);
+        if defined $eb && defined $e->[$i] && vec($eb, $j, 1);
     }
 
    @result = (\@r, \@w, \@e);
@@ -267,14 +292,15 @@ sub _handles
  my @h = ();
  my $i;
 
- for($i = scalar(@$vec) - 1 ; $i > 0 ; $i--)
+ for($i = scalar(@$vec) - 1 ; $i >= FIRST_FD ; $i--)
   {
    next unless defined $vec->[$i];
    push(@h, $vec->[$i])
-      if vec($bits,$i - 1,1);
+      if vec($bits,$i - FIRST_FD,1);
   }
  
  @h;
 }
 
 1;
+

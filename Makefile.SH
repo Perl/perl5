@@ -43,7 +43,13 @@ case "$d_shrplib" in
         # NeXT uses $patchlevel to set the current version of the dynamic
 	# library produced later. And the Major release number in the name
 	plibsuf=.5.$so
-    fi;;
+    fi
+    if test "$osname" = "os2" ; then
+	d_shrplib=custom; 
+	shrpenv=
+	plibsuf=$plibext
+    fi
+    ;;
 *)  plibsuf=$lib_ext
     pldlflags="";;
 esac
@@ -173,18 +179,18 @@ addedbyconf = UU $(shextract) $(plextract) pstruct
 h1 = EXTERN.h INTERN.h XSUB.h av.h config.h cop.h cv.h dosish.h
 h2 = embed.h form.h gv.h handy.h hv.h keywords.h mg.h op.h
 h3 = opcode.h patchlevel.h perl.h perly.h pp.h proto.h regcomp.h
-h4 = regexp.h scope.h sv.h unixish.h util.h
+h4 = regexp.h scope.h sv.h unixish.h util.h perlio.h 
 h = $(h1) $(h2) $(h3) $(h4)
 
 c1 = $(mallocsrc) av.c scope.c op.c doop.c doio.c dump.c hv.c mg.c
 c2 = perl.c perly.c pp.c pp_hot.c pp_ctl.c pp_sys.c regcomp.c regexec.c
-c3 = gv.c sv.c taint.c toke.c util.c deb.c run.c universal.c globals.c
+c3 = gv.c sv.c taint.c toke.c util.c deb.c run.c universal.c globals.c perlio.c
 
 c = $(c1) $(c2) $(c3) miniperlmain.c perlmain.c
 
 obj1 = $(mallocobj) gv$(OBJ_EXT) toke$(OBJ_EXT) perly$(OBJ_EXT) op$(OBJ_EXT) regcomp$(OBJ_EXT) dump$(OBJ_EXT) util$(OBJ_EXT) mg$(OBJ_EXT)
 obj2 = hv$(OBJ_EXT) av$(OBJ_EXT) run$(OBJ_EXT) pp_hot$(OBJ_EXT) sv$(OBJ_EXT) pp$(OBJ_EXT) scope$(OBJ_EXT) pp_ctl$(OBJ_EXT) pp_sys$(OBJ_EXT)
-obj3 = doop$(OBJ_EXT) doio$(OBJ_EXT) regexec$(OBJ_EXT) taint$(OBJ_EXT) deb$(OBJ_EXT) universal$(OBJ_EXT) globals$(OBJ_EXT)
+obj3 = doop$(OBJ_EXT) doio$(OBJ_EXT) regexec$(OBJ_EXT) taint$(OBJ_EXT) deb$(OBJ_EXT) universal$(OBJ_EXT) globals$(OBJ_EXT) perlio$(OBJ_EXT)
 
 obj = $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
 
@@ -251,13 +257,13 @@ ext.libs: $(static_ext)
 	-@test -f ext.libs || touch ext.libs
 
 perl: $& perlmain$(OBJ_EXT) $(perllib) $(DYNALOADER) $(static_ext) ext.libs
-	$(SHRPENV) $(CC) $(LARGE) $(MAB) $(CLDFLAGS) $(CCDLFLAGS) -o perl perlmain$(OBJ_EXT) $(perllib) $(DYNALOADER) $(static_ext) `cat ext.libs` $(libs)
+	$(SHRPENV) $(CC) $(LARGE) $(MAB) $(CLDFLAGS) $(CCDLFLAGS) -o perl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(perllib) `cat ext.libs` $(libs)
 
 pureperl: $& perlmain$(OBJ_EXT) $(perllib) $(DYNALOADER) $(static_ext) ext.libs
-	purify $(CC) $(LARGE) $(MAB) $(CLDFLAGS) $(CCDLFLAGS) -o pureperl perlmain$(OBJ_EXT) $(perllib) $(DYNALOADER) $(static_ext) `cat ext.libs` $(libs)
+	purify $(CC) $(LARGE) $(MAB) $(CLDFLAGS) $(CCDLFLAGS) -o pureperl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(perllib) `cat ext.libs` $(libs)
 
 quantperl: $& perlmain$(OBJ_EXT) $(perllib) $(DYNALOADER) $(static_ext) ext.libs
-	quantify $(CC) $(LARGE) $(MAB) $(CLDFLAGS) $(CCDLFLAGS) -o quantperl perlmain$(OBJ_EXT) $(perllib) $(DYNALOADER) $(static_ext) `cat ext.libs` $(libs)
+	quantify $(CC) $(LARGE) $(MAB) $(CLDFLAGS) $(CCDLFLAGS) -o quantperl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(perllib) `cat ext.libs` $(libs)
 
 $(perllib): $& perl$(OBJ_EXT) $(obj)
 !NO!SUBS!
@@ -272,13 +278,11 @@ $spitshell >>Makefile <<'!NO!SUBS!'
 else
 $spitshell >>Makefile <<!GROK!THIS!
 	version=$patchlevel; \\
+	libtool -dynamic -undefined warning -framework System \\
+	    -compatibility_version 1 -current_version \$\$version \\
+	    -prebind -seg1addr 0x27000000 -install_name \$(shrpdir)/\$@ \\
+	    -o \$@ perl.o \$(obj)
 !GROK!THIS!
-$spitshell >>Makefile <<'!NO!SUBS!'
-	libtool -dynamic -undefined warning -framework System \
-	    -compatibility_version 1 -current_version $$version \
-	    -prebind -seg1addr 0x27000000 -install_name $(shrpdir)/$@ \
-	    -o $@ perl.o $(obj)
-!NO!SUBS!
 fi
 ;;
 custom)
@@ -368,7 +372,7 @@ run_byacc:	FORCE
 	@ echo 'Expect' 130 shift/reduce and 1 reduce/reduce conflict
 	$(BYACC) -d perly.y
 	sh $(shellflags) ./perly.fixer y.tab.c perly.c
-	sed -e s/stderr/Perl_debug_log/g perly.c >perly.tmp && mv perly.tmp perly.c
+	sed -e 's/fprintf *( *stderr *,/PerlIO_printf(Perl_debug_log,/g' perly.c >perly.tmp && mv perly.tmp perly.c
 	mv y.tab.h perly.h
 	echo 'extern YYSTYPE yylval;' >>perly.h
 	- perl vms/vms_yfix.pl perly.c perly.h vms/perly_c.vms vms/perly_h.vms
@@ -483,7 +487,7 @@ makedepend: makedepend.SH config.sh
 test: miniperl perl preplibrary $(dynamic_ext)
 	- cd t && (rm -f perl$(EXE_EXT); $(LNS) ../perl$(EXE_EXT) perl$(EXE_EXT)) && ./perl TEST </dev/tty
 
-minitest: miniperl
+minitest: miniperl lib/Config.pm
 	- cd t && (rm -f perl$(EXE_EXT); $(LNS) ../miniperl$(EXE_EXT) perl$(EXE_EXT)) \
 		&& ./perl TEST base/*.t comp/*.t cmd/*.t io/*.t op/*.t </dev/tty
 
@@ -498,6 +502,15 @@ shlist: $(sh)
 
 pllist: $(pl)
 	echo $(pl) | tr ' ' '\012' >.pllist
+
+Makefile: Makefile.SH ./config.sh 
+	$(SHELL) Makefile.SH
+
+distcheck : FORCE
+	perl '-MExtUtils::Manifest=&fullcheck' -e 'fullcheck()'
+
+manifest  : 
+	perl '-MExtUtils::Manifest=&mkmanifest' -e 'mkmanifest()'
 
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 # If this runs make out of memory, delete /usr/include lines.

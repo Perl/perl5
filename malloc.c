@@ -22,6 +22,11 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+#ifdef DEBUGGING
+#undef DEBUG_m
+#define DEBUG_m(a)  if (debug & 128)   a
+#endif
+
 /* I don't much care whether these are defined in sys/types.h--LAW */
 
 #define u_char unsigned char
@@ -64,7 +69,7 @@ union	overhead {
 #define	ov_rmagic	ovu.ovu_rmagic
 };
 
-#ifdef debug
+#ifdef DEBUGGING
 static void botch _((char *s));
 #endif
 static void morecore _((int bucket));
@@ -160,10 +165,9 @@ extern	char *sbrk();
  * for a given block size.
  */
 static	u_int nmalloc[NBUCKETS];
-#include <stdio.h>
 #endif
 
-#ifdef debug
+#ifdef DEBUGGING
 #define	ASSERT(p)   if (!(p)) botch("p"); else
 static void
 botch(s)
@@ -192,7 +196,7 @@ malloc(nbytes)
 
 #ifdef MSDOS
 	if (nbytes > 0xffff) {
-		fprintf(stderr, "Allocation too large: %lx\n", (long)nbytes);
+		PerlIO_printf(PerlIO_stderr(), "Allocation too large: %lx\n", (long)nbytes);
 		my_exit(1);
 	}
 #endif /* MSDOS */
@@ -231,7 +235,7 @@ malloc(nbytes)
   	if ((p = (union overhead *)nextf[bucket]) == NULL) {
 #ifdef safemalloc
 		if (!nomemok) {
-		    fputs("Out of memory!\n", stderr);
+		    PerlIO_puts(PerlIO_stderr(),"Out of memory!\n");
 		    my_exit(1);
 		}
 #else
@@ -240,14 +244,14 @@ malloc(nbytes)
 	}
 
 #ifdef safemalloc
-    DEBUG_m(fprintf(Perl_debug_log,"0x%lx: (%05d) malloc %ld bytes\n",
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) malloc %ld bytes\n",
 	(unsigned long)(p+1),an++,(long)size));
 #endif /* safemalloc */
 
 	/* remove from linked list */
 #ifdef RCHECK
 	if (*((int*)p) & (sizeof(union overhead) - 1))
-	    fprintf(stderr,"Corrupt malloc ptr 0x%lx at 0x%lx\n",
+	    PerlIO_printf(PerlIO_stderr(), "Corrupt malloc ptr 0x%lx at 0x%lx\n",
 		(unsigned long)*((int*)p),(unsigned long)p);
 #endif
   	nextf[bucket] = p->ov_next;
@@ -390,7 +394,7 @@ free(mp)
 #endif 
 
 #ifdef safemalloc
-    DEBUG_m(fprintf(Perl_debug_log,"0x%lx: (%05d) free\n",(unsigned long)cp,an++));
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) free\n",(unsigned long)cp,an++));
 #endif /* safemalloc */
 
 	if (cp == NULL)
@@ -400,7 +404,7 @@ free(mp)
 #ifdef PACK_MALLOC
 	bucket = OV_INDEX(op);
 #endif 
-#ifdef debug
+#ifdef DEBUGGING
 	ASSERT(OV_MAGIC(op, bucket) == MAGIC); /* make sure it was in use */
 #else
 	if (OV_MAGIC(op, bucket) != MAGIC) {
@@ -467,7 +471,7 @@ realloc(mp, nbytes)
 
 #ifdef MSDOS
 	if (nbytes > 0xffff) {
-		fprintf(stderr, "Reallocation too large: %lx\n", size);
+		PerlIO_printf(PerlIO_stderr(), "Reallocation too large: %lx\n", size);
 		my_exit(1);
 	}
 #endif /* MSDOS */
@@ -542,8 +546,8 @@ realloc(mp, nbytes)
 #ifdef safemalloc
 #ifdef DEBUGGING
     if (debug & 128) {
-	fprintf(stderr,"0x%lx: (%05d) rfree\n",(unsigned long)res,an++);
-	fprintf(stderr,"0x%lx: (%05d) realloc %ld bytes\n",
+	PerlIO_printf(PerlIO_stderr(), "0x%lx: (%05d) rfree\n",(unsigned long)res,an++);
+	PerlIO_printf(PerlIO_stderr(), "0x%lx: (%05d) realloc %ld bytes\n",
 	    (unsigned long)res,an++,(long)size);
     }
 #endif
@@ -616,20 +620,20 @@ dump_mstats(s)
 			topbucket = i;
   	}
   	if (s)
-		fprintf(stderr, "Memory allocation statistics %s (buckets 8..%d)\n",
+		PerlIO_printf(PerlIO_stderr(), "Memory allocation statistics %s (buckets 8..%d)\n",
 			s, (1 << (topbucket + 3)) );
-  	fprintf(stderr, " %7d free: ", totfree);
+  	PerlIO_printf(PerlIO_stderr(), " %7d free: ", totfree);
   	for (i=0; i <= topbucket; i++) {
-  		fprintf(stderr, (i<5)?" %5d":" %3d", nfree[i]);
+  		PerlIO_printf(PerlIO_stderr(), (i<5)?" %5d":" %3d", nfree[i]);
   	}
-  	fprintf(stderr, "\n %7d used: ", totused);
+  	PerlIO_printf(PerlIO_stderr(), "\n %7d used: ", totused);
   	for (i=0; i <= topbucket; i++) {
-  		fprintf(stderr, (i<5)?" %5d":" %3d", nmalloc[i]);
+  		PerlIO_printf(PerlIO_stderr(), (i<5)?" %5d":" %3d", nmalloc[i]);
   	}
-  	fprintf(stderr, "\n");
+  	PerlIO_printf(PerlIO_stderr(), "\n");
 #ifdef PACK_MALLOC
 	if (sbrk_slack || start_slack) {
-  	    fprintf(stderr, "Odd ends: %7d bytes from sbrk(), %7d from malloc.\n",
+  	    PerlIO_printf(PerlIO_stderr(), "Odd ends: %7d bytes from sbrk(), %7d from malloc.\n",
 		    sbrk_slack, start_slack);
 	}
 #endif
@@ -646,32 +650,31 @@ dump_mstats(s)
 
 #ifdef USE_PERL_SBRK
 
-#ifdef NeXT
-#ifdef HIDEMYMALLOC
-#undef malloc
-#else
-#include "Error: -DUSE_PERL_SBRK on the NeXT requires -DHIDEMYMALLOC"
-#endif
+#   ifdef NeXT
+#      define PERL_SBRK_VIA_MALLOC
+#   endif
+
+#   ifdef PERL_SBRK_VIA_MALLOC
+#      ifdef HIDEMYMALLOC
+#         undef malloc
+#      else
+#         include "Error: -DPERL_SBRK_VIA_MALLOC requires -DHIDEMYMALLOC"
+#      endif
 
 /* it may seem schizophrenic to use perl's malloc and let it call system */
 /* malloc, the reason for that is only the 3.2 version of the OS that had */
 /* frequent core dumps within nxzonefreenolock. This sbrk routine put an */
 /* end to the cores */
 
-#define SYSTEM_ALLOC(a) malloc(a)
+#      define SYSTEM_ALLOC(a) malloc(a)
 
-#else
-
-/* OS/2 comes to mind ... */
-
-#endif
-
+#   endif  /* PERL_SBRK_VIA_MALLOC */
 
 static IV Perl_sbrk_oldchunk;
 static long Perl_sbrk_oldsize;
 
-#define PERLSBRK_32_K (1<<15)
-#define PERLSBRK_64_K (1<<16)
+#   define PERLSBRK_32_K (1<<15)
+#   define PERLSBRK_64_K (1<<16)
 
 char *
 Perl_sbrk(size)
@@ -707,7 +710,7 @@ int size;
     }
 
 #ifdef safemalloc
-    DEBUG_m(fprintf(stderr,"sbrk malloc size %ld (reqsize %ld), left size %ld, give addr 0x%lx\n",
+    DEBUG_m(PerlIO_printf(PerlIO_stderr(), "sbrk malloc size %ld (reqsize %ld), left size %ld, give addr 0x%lx\n",
 		    size, reqsize, Perl_sbrk_oldsize, got));
 #endif
 

@@ -16,6 +16,8 @@
 
 bin_sh=`../UU/loc sh.exe /bin c:/bin d:/bin e:/bin f:/bin g:/bin h:/bin /bin`
 echo "####### Shell found at $bin_sh #############" >&4
+sh="$bin_sh"
+startsh="#!$bin_sh"
 
 #osname="OS/2"
 sysman=`../UU/loc . /man/man1 c:/man/man1 c:/usr/man/man1 d:/man/man1 d:/usr/man/man1 e:/man/man1 e:/usr/man/man1 f:/man/man1 f:/usr/man/man1 g:/man/man1 g:/usr/man/man1 /usr/man/man1`
@@ -74,10 +76,10 @@ else
     ar='emxomfar'
     plibext='.lib'
     d_fork='undef'
-    lddlflags='-Zdll -Zomf -Zcrtdll'
+    lddlflags='-Zdll -Zomf -Zmt -Zcrtdll'
     # Recursive regmatch may eat 2.5M of stack alone.
-    ldflags='-Zexe -Zomf -Zcrtdll -Zstack 32000'
-    ccflags='-Zomf -DDOSISH -DOS2=2 -DEMBED -I. -DPACK_MALLOC -DDEBUGGING_MSTATS'
+    ldflags='-Zexe -Zomf -Zmt -Zcrtdll -Zstack 32000'
+    ccflags='-Zomf -Zmt -DDOSISH -DOS2=2 -DEMBED -I. -DPACK_MALLOC -DDEBUGGING_MSTATS'
     use_clib='c_import'
     usedl='define'
 fi
@@ -162,3 +164,35 @@ d_setprior='define'
 
 # Commented:
 #startsh='extproc ksh\\n#! sh'
+
+# Now install the external modules. We are in the ./hints directory.
+
+cd ../os2/OS2
+
+if ! test -d ../../ext/OS2 ; then
+   mkdir ../../ext/OS2
+fi
+
+cp -rfu * ../../ext/OS2/
+
+# Install tests:
+
+for xxx in * ; do
+	if $test -d $xxx/t; then
+		cp -uf $xxx/t/*.t ../../t/lib
+	else
+		if $test -d $xxx; then
+			cd $xxx
+			for yyy in * ; do
+				if $test -d $yyy/t; then
+				    cp -uf $yyy/t/*.t ../../t/lib
+				fi
+			done
+			cd ..
+		fi
+	fi
+done
+
+
+# Now go back
+cd ../../hints

@@ -16,7 +16,8 @@ EOU
 $idir = $Config{installbin};
 $indir =~ s|\\|/|g ;
 
-foreach $file (<$idir/*.>) {
+foreach $file (<$idir/*>) {
+  next if $file =~ /\.exe/i;
   $base = $file;
   $base =~ s/\.$//;		# just in case...
   $base =~ s|.*/||;

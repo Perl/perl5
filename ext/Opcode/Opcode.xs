@@ -233,7 +233,7 @@ PROTOTYPES: ENABLE
 
 BOOT:
     assert(maxo < OP_MASK_BUF_SIZE);
-    opset_len = (maxo / 8) + 1;
+    opset_len = (maxo + 7) / 8;
     if (opcode_debug >= 1)
 	warn("opset_len %d\n", opset_len);
     op_names_init();

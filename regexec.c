@@ -590,7 +590,7 @@ char *prog;
 #define sayNO goto no
 #define saySAME(x) if (x) goto yes; else goto no
 	if (regnarrate) {
-	    fprintf(Perl_debug_log, "%*s%2d%-8.8s\t<%.10s>\n", regindent*2, "",
+	    PerlIO_printf(Perl_debug_log, "%*s%2d%-8.8s\t<%.10s>\n", regindent*2, "",
 		scan - regprogram, regprop(scan), locinput);
 	}
 #else
@@ -806,7 +806,7 @@ char *prog;
 
 #ifdef DEBUGGING
 		if (regnarrate)
-		    fprintf(Perl_debug_log, "%*s  %d  %lx\n", regindent*2, "",
+		    PerlIO_printf(Perl_debug_log, "%*s  %d  %lx\n", regindent*2, "",
 			n, (long)cc);
 #endif
 
@@ -986,7 +986,7 @@ char *prog;
 		sayNO;
 	    break;
 	default:
-	    fprintf(stderr, "%x %d\n",(unsigned)scan,scan[1]);
+	    PerlIO_printf(PerlIO_stderr(), "%x %d\n",(unsigned)scan,scan[1]);
 	    FAIL("regexp memory corruption");
 	}
 	scan = next;

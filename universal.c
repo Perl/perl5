@@ -79,47 +79,32 @@ XS(XS_UNIVERSAL_isa)
 {
     dXSARGS;
     SV *sv, *rv;
-    char *name;
+    char *name, *type;
+    HV *stash;
 
     if (items != 2)
 	croak("Usage: UNIVERSAL::isa(reference, kind)");
 
+    stash = Nullhv;
+    type = Nullch;
     sv = ST(0);
     name = (char *)SvPV(ST(1),na);
 
-    if (!SvROK(sv)) {
-        rv = &sv_no;
-    }
-    else if((sv = (SV*)SvRV(sv)) && SvOBJECT(sv) &&
-     &sv_yes == isa_lookup(SvSTASH(sv), name, strlen(name), 0)) {
-	rv = &sv_yes;
+    if (SvROK(sv)) {
+	sv = SvRV(sv);
+	type = sv_reftype(sv,0);
+	if(SvOBJECT(sv))
+	    stash = SvSTASH(sv);
     }
     else {
-        char *s;
-
-        switch (SvTYPE(sv)) {
-            case SVt_NULL:
-    	    case SVt_IV:
-	    case SVt_NV:
-	    case SVt_RV:
-	    case SVt_PV:
-	    case SVt_PVIV:
-	    case SVt_PVNV:
-	    case SVt_PVBM:
-	    case SVt_PVMG:  s = "SCALAR";       break;
-	    case SVt_PVLV:  s = "LVALUE";       break;
-	    case SVt_PVAV:  s = "ARRAY";        break;
-	    case SVt_PVHV:  s = "HASH";         break;
-	    case SVt_PVCV:  s = "CODE";         break;
-	    case SVt_PVGV:  s = "GLOB";         break;
-	    case SVt_PVFM:  s = "FORMATLINE";   break;
-	    case SVt_PVIO:  s = "FILEHANDLE";   break;
-	    default:        s = "UNKNOWN";      break;
-        }
-        rv = strEQ(s,name) ? &sv_yes : &sv_no;
+	stash = gv_stashsv(sv, FALSE);
     }
 
-    ST(0) = rv;
+    ST(0) = (type && strEQ(type,name)) ||
+	    (stash && isa_lookup(stash, name, strlen(name), 0) == &sv_yes)
+	? &sv_yes
+	: &sv_no;
+
     XSRETURN(1);
 }
 

@@ -44,9 +44,8 @@ static I32 sublex_start _((void));
 #ifdef CRIPPLED_CC
 static int uni _((I32 f, char *s));
 #endif
-static char * filter_gets _((SV *sv, FILE *fp));
+static char * filter_gets _((SV *sv, PerlIO *fp));
 static void restore_rsfp _((void *f));
-static SV * sub_const _((CV *cv));
 
 /* The following are arranged oddly so that the guard on the switch statement
  * can get by with a single comparison (if the compiler is smart enough).
@@ -274,12 +273,12 @@ static void
 restore_rsfp(f)
 void *f;
 {
-    FILE *fp = (FILE*)f;
+    PerlIO *fp = (PerlIO*)f;
 
-    if (rsfp == stdin)
-	clearerr(rsfp);
+    if (rsfp == PerlIO_stdin())
+	PerlIO_clearerr(rsfp);
     else if (rsfp && (rsfp != fp))
-	fclose(rsfp);
+	PerlIO_close(rsfp);
     rsfp = fp;
 }
 
@@ -356,10 +355,10 @@ register char *s;
 	    bufend = SvPVX(linestr) + SvCUR(linestr);
 	    if (preprocess && !in_eval)
 		(void)my_pclose(rsfp);
-	    else if ((FILE*)rsfp == stdin)
-		clearerr(stdin);
+	    else if ((PerlIO*)rsfp == PerlIO_stdin())
+		PerlIO_clearerr(rsfp);
 	    else
-		(void)fclose(rsfp);
+		(void)PerlIO_close(rsfp);
 	    rsfp = Nullfp;
 	    return s;
 	}
@@ -1111,8 +1110,8 @@ filter_read(idx, buf_sv, maxlen)
 
 	    /* ensure buf_sv is large enough */
 	    SvGROW(buf_sv, old_len + maxlen) ;
-	    if ((len = fread(SvPVX(buf_sv) + old_len, 1, maxlen, rsfp)) <= 0){
-		if (ferror(rsfp))
+	    if ((len = PerlIO_read(rsfp, SvPVX(buf_sv) + old_len, maxlen)) <= 0){
+		if (PerlIO_error(rsfp))
 	            return -1;		/* error */
 	        else
 		    return 0 ;		/* end of file */
@@ -1121,7 +1120,7 @@ filter_read(idx, buf_sv, maxlen)
 	} else {
 	    /* Want a line */
             if (sv_gets(buf_sv, rsfp, SvCUR(buf_sv)) == NULL) {
-		if (ferror(rsfp))
+		if (PerlIO_error(rsfp))
 	            return -1;		/* error */
 	        else
 		    return 0 ;		/* end of file */
@@ -1149,7 +1148,7 @@ filter_read(idx, buf_sv, maxlen)
 static char *
 filter_gets(sv,fp)
 register SV *sv;
-register FILE *fp;
+register PerlIO *fp;
 {
     if (rsfp_filters) {
 
@@ -1350,7 +1349,7 @@ yylex()
     oldoldbufptr = oldbufptr;
     oldbufptr = s;
     DEBUG_p( {
-	fprintf(stderr,"### Tokener expecting %s at %s\n", exp_name[expect], s);
+	PerlIO_printf(PerlIO_stderr(), "### Tokener expecting %s at %s\n", exp_name[expect], s);
     } )
 
   retry:
@@ -1423,10 +1422,10 @@ yylex()
 		if (rsfp) {
 		    if (preprocess && !in_eval)
 			(void)my_pclose(rsfp);
-		    else if ((FILE*)rsfp == stdin)
-			clearerr(stdin);
+		    else if ((PerlIO *)rsfp == PerlIO_stdin())
+			PerlIO_clearerr(rsfp);
 		    else
-			(void)fclose(rsfp);
+			(void)PerlIO_close(rsfp);
 		    rsfp = Nullfp;
 		}
 		if (!in_eval && (minus_n || minus_p)) {
@@ -2476,8 +2475,8 @@ yylex()
 		    last_lop = oldbufptr;
 		    last_lop_op = OP_ENTERSUB;
 		    /* Check for a constant sub */
-		    if (SvPOK(cv) && !SvCUR(cv)) {
-			SV *sv = sub_const(cv);
+		    {
+			SV *sv = cv_const_sv(cv);
 			if (sv) {
 			    SvREFCNT_dec(((SVOP*)yylval.opval)->op_sv);
 			    ((SVOP*)yylval.opval)->op_sv = SvREFCNT_inc(sv);
@@ -2568,13 +2567,13 @@ yylex()
 		IoIFP(GvIOp(gv)) = rsfp;
 #if defined(HAS_FCNTL) && defined(F_SETFD)
 		{
-		    int fd = fileno(rsfp);
+		    int fd = PerlIO_fileno(rsfp);
 		    fcntl(fd,F_SETFD,fd >= 3);
 		}
 #endif
 		if (preprocess)
 		    IoTYPE(GvIOp(gv)) = '|';
-		else if ((FILE*)rsfp == stdin)
+		else if ((PerlIO*)rsfp == PerlIO_stdin())
 		    IoTYPE(GvIOp(gv)) = '-';
 		else
 		    IoTYPE(GvIOp(gv)) = '<';
@@ -4987,27 +4986,6 @@ start_subparse()
     return oldsavestack_ix;
 }
 
-SV *
-sub_const(cv)
-CV *cv;
-{
-    OP *o;
-    SV *sv = Nullsv;
-    
-    for (o = CvSTART(cv); o; o = o->op_next) {
-	OPCODE type = o->op_type;
-	
-	if (type == OP_NEXTSTATE || type == OP_NULL || type == OP_PUSHMARK)
-	    continue;
-	if (type == OP_LEAVESUB || type == OP_RETURN)
-	    break;
-	if (type != OP_CONST || sv)
-	    return Nullsv;
-	sv = ((SVOP*)o)->op_sv;
-    }
-    return sv;
-}
-
 int
 yywarn(s)
 char *s;
@@ -5068,7 +5046,7 @@ char *s;
     else if (in_eval)
 	sv_catpv(GvSV(errgv),buf);
     else
-	fputs(buf,stderr);
+	PerlIO_printf(PerlIO_stderr(), "%s",buf);
     if (++error_count >= 10)
 	croak("%s has too many errors.\n",
 	SvPVX(GvSV(curcop->cop_filegv)));

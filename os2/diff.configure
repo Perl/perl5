@@ -288,19 +288,21 @@
   		cryptlib=-lcrypt
   	fi
 ***************
-*** 5198,5204 ****
-  }
+*** 5198,5205 ****
   EOM
+  	: Call the object file tmp-dyna.o in case dlext=o.
   	if $cc $ccflags $cccdlflags -c dyna.c > /dev/null 2>&1 && 
-! 		$ld $lddlflags -o dyna.$dlext dyna.o > /dev/null 2>&1 && 
+! 		mv dyna.o tmp-dyna.o > /dev/null 2>&1 && 
+! 		$ld $lddlflags -o dyna.$dlext tmp-dyna.o > /dev/null 2>&1 && 
   		$cc $ccflags $ldflags $cccdlflags $ccdlflags fred.c -o fred $libs > /dev/null 2>&1; then
   		xxx=`./fred`
   		case $xxx in
---- 5213,5219 ----
-  }
+--- 5213,5220 ----
   EOM
+  	: Call the object file tmp-dyna.o in case dlext=o.
   	if $cc $ccflags $cccdlflags -c dyna.c > /dev/null 2>&1 && 
-! 		$ld $lddlflags -o dyna.$dlext dyna$obj_ext > /dev/null 2>&1 && 
+! 		mv dyna$obj_ext tmp-dyna$obj_ext > /dev/null 2>&1 && 
+! 		$ld $lddlflags -o dyna.$dlext tmp-dyna$obj_ext > /dev/null 2>&1 && 
   		$cc $ccflags $ldflags $cccdlflags $ccdlflags fred.c -o fred $libs > /dev/null 2>&1; then
   		xxx=`./fred`
   		case $xxx in

@@ -1,4 +1,5 @@
 #include "EXTERN.h"
+#define PERLIO_NOT_STDIO 1
 #include "perl.h"
 #include "XSUB.h"
 #include <ctype.h>
@@ -243,13 +244,6 @@ char *cuserid _((char *));
 #endif
 #ifndef HAS_WAITPID
 #define waitpid(a,b,c) not_here("waitpid")
-#endif
-
-#ifndef HAS_FGETPOS
-#define fgetpos(a,b) not_here("fgetpos")
-#endif
-#ifndef HAS_FSETPOS
-#define fsetpos(a,b) not_here("fsetpos")
 #endif
 
 #ifndef HAS_MBLEN

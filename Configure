@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.8 1995/07/25 13:40:02 ram Exp $
 #
-# Generated on Wed Feb 21 14:26:18 EST 1996 [metaconfig 3.0 PL60]
+# Generated on Thu Aug  8 17:48:02 BST 1996 [metaconfig 3.0 PL60]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -226,12 +226,12 @@ baserev=''
 bin=''
 binexp=''
 installbin=''
+bin_sh=''
 byteorder=''
 cc=''
 gccversion=''
 ccflags=''
 cppflags=''
-mab=''
 ldflags=''
 lkflags=''
 locincpth=''
@@ -323,6 +323,7 @@ d_open3=''
 d_fpathconf=''
 d_pathconf=''
 d_pause=''
+d_perlstdio=''
 d_pipe=''
 d_poll=''
 d_portable=''
@@ -356,6 +357,7 @@ d_setreuid=''
 d_setrgid=''
 d_setruid=''
 d_setsid=''
+d_sfio=''
 d_shm=''
 d_shmat=''
 d_shmatprototype=''
@@ -459,6 +461,7 @@ d_pwcomment=''
 d_pwexpire=''
 d_pwquota=''
 i_pwd=''
+i_sfio=''
 i_stddef=''
 i_stdlib=''
 i_string=''
@@ -486,6 +489,7 @@ i_time=''
 timeincl=''
 i_unistd=''
 i_utime=''
+i_values=''
 i_stdarg=''
 i_varargs=''
 i_varhdr=''
@@ -500,6 +504,7 @@ xlibpth=''
 libs=''
 lns=''
 lseektype=''
+mab=''
 d_mymalloc=''
 freetype=''
 mallocobj=''
@@ -542,6 +547,7 @@ package=''
 spackage=''
 pager=''
 patchlevel=''
+subversion=''
 perladmin=''
 perlpath=''
 prefix=''
@@ -572,7 +578,6 @@ ssizetype=''
 startperl=''
 startsh=''
 stdchar=''
-subversion=''
 sysman=''
 uidtype=''
 nm_opt=''
@@ -678,6 +683,7 @@ usesafe=true
 exe_ext='' 
 : Extra object files, if any, needed on this platform.
 archobjs=''
+bin_sh='/bin/sh'
 : Possible local include directories to search.
 : Set locincpth to "" in a hint file to defeat local include searches.
 locincpth="/usr/local/include /opt/local/include /usr/gnu/include"
@@ -703,11 +709,12 @@ glibpth="$glibpth /usr/ccs/lib /usr/ucblib /usr/shlib"
 : machines, like the mips.  Usually, it should be empty.
 plibpth=''
 
+mab=''
 : full support for void wanted by default
 defvoidused=15
 
 : List of libraries we want.
-libswanted='net socket inet nsl nm ndbm gdbm dbm db malloc dl'
+libswanted='sfio net socket inet nsl nm ndbm gdbm dbm db malloc dl'
 libswanted="$libswanted dld ld sun m c cposix posix ndir dir crypt"
 libswanted="$libswanted ucb bsd BSD PW x"
 : We probably want to search /usr/shlib before most other libraries.
@@ -717,8 +724,79 @@ glibpth="/usr/shlib $glibpth"
 : Do not use vfork unless overridden by a hint file.
 usevfork=false
 
+: see if sh knows # comments
+echo " "
+echo "Checking your sh to see if it knows about # comments..." >&4
+if `sh -c '#' >/dev/null 2>&1`; then
+	echo "Your sh handles # comments correctly."
+	shsharp=true
+	spitshell=cat
+	echo " "
+	echo "Okay, let's see if #! works on this system..."
+	xcat=/bin/cat
+	test -f $xcat || xcat=/usr/bin/cat
+	echo "#!$xcat" >try
+	$eunicefix try
+	chmod +x try
+	./try > today
+	if test -s today; then
+		echo "It does."
+		sharpbang='#!'
+	else
+		echo "#! $xcat" > try
+		$eunicefix try
+		chmod +x try
+		./try > today
+		if test -s today; then
+			echo "It does."
+			sharpbang='#! '
+		else
+			echo "It's just a comment."
+			sharpbang=': use '
+		fi
+	fi
+else
+	echo "Your sh doesn't grok # comments--I will strip them later on."
+	shsharp=false
+	cd ..
+	echo "exec grep -v '^[ 	]*#'" >spitshell
+	chmod +x spitshell
+	$eunicefix spitshell
+	spitshell=`pwd`/spitshell
+	cd UU
+	echo "I presume that if # doesn't work, #! won't work either!"
+	sharpbang=': use '
+fi
+rm -f try today
+
+: figure out how to guarantee sh startup
+echo " "
+echo "Checking out how to guarantee sh startup..." >&4
+case "$SYSTYPE" in
+*bsd*|sys5*) startsh=$sharpbang"/$SYSTYPE/bin/sh";;
+*) startsh=$sharpbang'/bin/sh';;
+esac
+echo "Let's see if '$startsh' works..."
+cat >try <<EOSS
+$startsh
+set abc
+test "$?abc" != 1
+EOSS
+
+chmod +x try
+$eunicefix try
+if ./try; then
+	echo "Yup, it does."
+else
+echo "Nope.  You may have to fix up the shell scripts to make sure sh runs them."
+fi
+rm -f try
+
 : script used to extract .SH files with variable substitutions
-cat >extract <<'EOS'
+cat >extract <<EOS
+$startsh
+EOS
+cat >>extract <<'EOS'
 CONFIG=true
 echo "Doing variable substitutions on .SH files..."
 if test -f MANIFEST; then
@@ -1014,7 +1092,7 @@ THIS PACKAGE SEEMS TO BE INCOMPLETE.
 You have the option of continuing the configuration process, despite the
 distinct possibility that your kit is damaged, by typing 'y'es.  If you
 do, don't blame me if something goes wrong.  I advise you to type 'n'o
-and contact the author (doughera@lafcol.lafayette.edu).
+and contact the author (lwall@sems.com).
 
 EOM
 		echo $n "Continue? [n] $c" >&4
@@ -1155,7 +1233,10 @@ EOF
 : general instructions
 needman=true
 firsttime=true
-user=`( (logname) 2>/dev/null || whoami) 2>&1`
+user=`(logname) 2>/dev/null`
+case "$user" in "")
+	user=`whoami 2>&1` ;;
+esac
 if $contains "^$user\$" ../.config/instruct >/dev/null 2>&1; then
 	firsttime=false
 	echo " "
@@ -1211,7 +1292,7 @@ Much effort has been expended to ensure that this shell script will run on any
 Unix system.  If despite that it blows up on yours, your best bet is to edit
 Configure and run it again.  If you can't run Configure for some reason,
 you'll have to generate a config.sh file by hand.  Whatever problems you
-have, let me (doughera@lafcol.lafayette.edu) know how I blew it.
+have, let me (lwall@sems.com) know how I blew it.
 
 This installation script affects things in two ways:
 
@@ -1231,74 +1312,6 @@ EOH
 	true) echo $user >>../.config/instruct;;
 	esac
 fi
-
-: see if sh knows # comments
-echo " "
-echo "Checking your sh to see if it knows about # comments..." >&4
-if `sh -c '#' >/dev/null 2>&1`; then
-	echo "Your sh handles # comments correctly."
-	shsharp=true
-	spitshell=cat
-	echo " "
-	echo "Okay, let's see if #! works on this system..."
-	xcat=/bin/cat
-	test -f $xcat || xcat=/usr/bin/cat
-	echo "#!$xcat" >try
-	$eunicefix try
-	chmod +x try
-	./try > today
-	if test -s today; then
-		echo "It does."
-		sharpbang='#!'
-	else
-		echo "#! $xcat" > try
-		$eunicefix try
-		chmod +x try
-		./try > today
-		if test -s today; then
-			echo "It does."
-			sharpbang='#! '
-		else
-			echo "It's just a comment."
-			sharpbang=': use '
-		fi
-	fi
-else
-	echo "Your sh doesn't grok # comments--I will strip them later on."
-	shsharp=false
-	cd ..
-	echo "exec grep -v '^[ 	]*#'" >spitshell
-	chmod +x spitshell
-	$eunicefix spitshell
-	spitshell=`pwd`/spitshell
-	cd UU
-	echo "I presume that if # doesn't work, #! won't work either!"
-	sharpbang=': use '
-fi
-rm -f try today
-
-: figure out how to guarantee sh startup
-echo " "
-echo "Checking out how to guarantee sh startup..." >&4
-case "$SYSTYPE" in
-*bsd*|sys5*) startsh=$sharpbang"/$SYSTYPE/bin/sh";;
-*) startsh=$sharpbang'/bin/sh';;
-esac
-echo "Let's see if '$startsh' works..."
-cat >try <<EOSS
-$startsh
-set abc
-test "$?abc" != 1
-EOSS
-
-chmod +x try
-$eunicefix try
-if ./try; then
-	echo "Yup, it does."
-else
-echo "Nope.  You may have to fix up the shell scripts to make sure sh runs them."
-fi
-rm -f try
 
 : find out where common programs are
 echo " "
@@ -1555,7 +1568,7 @@ EOM
 	cd hints; ls -C *.sh | $sed 's/\.sh/   /g' >&4
 	dflt=''
 	: Half the following guesses are probably wrong... If you have better
-	: tests or hints, please send them to doughera@lafcol.lafayette.edu
+	: tests or hints, please send them to lwall@sems.com
 	: The metaconfig authors would also appreciate a copy...
 	$test -f /irix && osname=irix
 	$test -f /xenix && osname=sco_xenix
@@ -1626,6 +1639,9 @@ EOM
 			osvers="$3"
 			;;
 		dgux) osname=dgux 
+			osvers="$3"
+			;;
+		dynixptx*) osname=dynixptx
 			osvers="$3"
 			;;
 		freebsd) osname=freebsd 
@@ -1898,6 +1914,8 @@ case "$ans" in
 none)  osname='' ;;
 *) osname=`echo "$ans" | $sed -e 's/[ 	][	]*/_/g' | ./tr '[A-Z]' '[a-z]'`;;
 esac
+
+
 : who configured the system
 cf_time=`$date 2>&1`
 (logname > .temp) >/dev/null 2>&1
@@ -2308,13 +2326,13 @@ baserev=5.0
 echo " "
 echo "Getting the current patchlevel..." >&4
 if $test -r ../patchlevel.h;then
-	patchlevel=`awk '/PATCHLEVEL/ {print $3}' < ../patchlevel.h`
-	subversion=`awk '/SUBVERSION/ {print $3}' < ../patchlevel.h`
+	patchlevel=`awk '/PATCHLEVEL/ {print $3}' ../patchlevel.h`
+	subversion=`awk '/SUBVERSION/ {print $3}' ../patchlevel.h`
 else
 	patchlevel=0
 	subversion=0
 fi
-echo "(You have $package $baserev PL$patchlevel sub$subversion.)"
+echo "(You have $package $baserev patchlevel $patchlevel subversion $subversion.)"
 
 : set the prefixup variable, to restore leading tilda escape
 prefixup='case "$prefixexp" in
@@ -2328,14 +2346,13 @@ eval $prefixit
 case "$archlib" in
 '')
 	case "$privlib" in
-	'')
-		dflt=`./loc . "." $prefixexp/lib /usr/local/lib /usr/lib /lib`
+	'')	dflt=`./loc . "." $prefixexp/lib /usr/local/lib /usr/lib /lib`
 		set dflt
 		eval $prefixup
 		;;
 	*)	version=`LC_ALL=C;export LC_ALL;\
-		    echo $baserev $patchlevel $subversion | \
-		    $awk '{print $1 + $2/1000.0 + $3/100000.0}'`
+			echo $baserev $patchlevel $subversion | \
+			$awk '{print $1 + $2/1000.0 + $3/100000.0}'`
 		dflt="$privlib/$archname/$version"
 		;;
 	esac
@@ -2551,6 +2568,7 @@ EOM
 	fi
 else
 	echo "I don't think setuid scripts are secure (no /dev/fd directory)." >&4
+	echo "(That's for file descriptors, not floppy disks.)"
 	val="$undef"
 fi
 set d_suidsafe
@@ -2693,12 +2711,13 @@ if $test ! -d "$dflt/auto"; then
 fi
 cat <<EOM
 
-In 5.001, Perl stored architecture-dependent library files in a library
+In 5.001, Perl stored architecture-dependent library files in a directory
 with a name such as $privlib/$archname, 
 and this directory contained files from the standard extensions and 
 files from any additional extensions you might have added.  Starting 
 with version 5.002, all the architecture-dependent standard extensions 
-will go into $archlib, 
+will go into a version-specific directory such as
+$archlib, 
 while locally-added extensions will go into
 $sitearch.
 
@@ -2719,6 +2738,34 @@ case "$oldarchlib" in
 esac
 set d_oldarchlib
 eval $setvar
+
+
+case "$usestdio" in
+false) dflt='n';;
+*) dflt='y';;
+esac
+echo "$package can now use alternate file IO mechanisms to ANSI stdio."
+echo "However these are experimental and may cause problems with some"
+echo "extension modules"
+rp="Use stdio as with previous versions?"
+. ./myread
+case "$ans" in
+y|Y) 
+	echo "Ok, doing things the stdio way"
+	val="$define"
+	;;     
+*)      
+	val="$undef"
+	;;
+esac
+set d_perlstdio 
+eval $setvar 
+case "$d_perlstdio" in
+$define) usestdio='true';;
+*) usestdio='false';;
+esac
+
+
 
 : determine where public executables go
 echo " "
@@ -3860,7 +3907,7 @@ case "$optimize" in
 esac
 $cat <<EOH
 
-Some C compilers have problems with their optimizers, by default, $package
+Some C compilers have problems with their optimizers.  By default, $package
 compiles with the -O flag to use the optimizer.  Alternately, you might want
 to use the symbolic debugger, which uses the -g flag (on traditional Unix
 systems).  Either flag can be specified here.  To use neither flag, specify
@@ -4624,10 +4671,6 @@ $cat >try.c <<'EOP'
 #endif
 main() { 
 	char buf[64]; 
-	/* This test must come first. <AlanBurlison@unn.unisys.com> */
-	Gconvert(0.1, 8, 0, buf);
-	if (buf[0] != '.' || buf[1] != '1' || buf[2] != '\0')
-		exit(1);
 	Gconvert(1.0, 8, 0, buf); 
 	if (buf[0] != '1' || buf[1] != '\0')
 		exit(1);
@@ -5653,8 +5696,9 @@ main()
 	exit(0);
 }
 EOM
+	: Call the object file tmp-dyna.o in case dlext=o.
 	if $cc $ccflags $cccdlflags -c dyna.c > /dev/null 2>&1 && 
-		mv dyna.o tmp-dyna.o > /dev/null 2>&1 &&
+		mv dyna.o tmp-dyna.o > /dev/null 2>&1 && 
 		$ld $lddlflags -o dyna.$dlext tmp-dyna.o > /dev/null 2>&1 && 
 		$cc $ccflags $ldflags $cccdlflags $ccdlflags fred.c -o fred $libs > /dev/null 2>&1; then
 		xxx=`./fred`
@@ -6549,6 +6593,57 @@ eval $inlibc
 set setsid d_setsid
 eval $inlibc
 
+: see if sfio.h is available
+set sfio.h i_sfio
+eval $inhdr
+
+
+: see if sfio is available
+case "$i_sfio" in
+$define)
+	val=''
+	set sfreserve val
+	eval $inlibc
+	;;
+*)
+	val="$undef"
+	;;
+esac
+case "$val" in
+$define)
+	case "$usesfio" in
+	true) dflt='y';;
+	*) dflt='n';;
+	esac
+	echo "$package can use sfio library, but this is experimental."
+	rp="You seem to have sfio available, do you want to try using it?"
+	. ./myread
+	case "$ans" in
+	y|Y) 
+		;;     
+	*)      
+		echo "Ok, avoiding sfio this time"
+		val="$undef"
+		;;
+	esac
+	;;
+*)
+	case "$usesfio" in
+	false) ;;
+	*)
+		echo "Sorry cannot find sfio on this machine"
+		;;
+	esac
+	;;
+esac
+set d_sfio 
+eval $setvar 
+case "$d_sfio" in
+$define) usesfio='true';;
+*) usesfio='false';;
+esac
+
+
 : see if shmctl exists
 set shmctl d_shmctl
 eval $inlibc
@@ -6633,12 +6728,11 @@ fi
 set sigaction d_sigaction
 eval $inlibc
 
-
 : see if sigsetjmp exists
 echo " "
 case "$d_sigsetjmp" in
 '')
-	$cat >set.c <<EOP
+	$cat >set.c <<'EOP'
 #include <setjmp.h>
 sigjmp_buf env;
 int set = 1;
@@ -6651,25 +6745,26 @@ main()
 	exit(1);
 }
 EOP
-	if $cc $ccflags $ldflags set.c -o set $libs >/dev/null 2>&1; then
+	if $cc $ccflags $ldflags -o set set.c $libs > /dev/null 2>&1 ; then
 		if ./set >/dev/null 2>&1; then
 			echo "POSIX sigsetjmp found." >&4
 			val="$define"
 		else
-			$cat <<EOM
+			$cat >&4 <<EOM
 Uh-Oh! You have POSIX sigsetjmp and siglongjmp, but they do not work properly!!
+I'll ignore them.
 EOM
 			val="$undef"
 		fi
 	else
-		echo "Sigsetjmp not found." >&4
+		echo "sigsetjmp not found." >&4
 		val="$undef"
 	fi
 	;;
 *) val="$d_sigsetjmp"
 	case "$d_sigsetjmp" in
 	$define) echo "POSIX sigsetjmp found." >&4;;
-	$undef) echo "Sigsetjmp not found." >&4;;
+	$undef) echo "sigsetjmp not found." >&4;;
 	esac
 	;;
 esac
@@ -7462,9 +7557,9 @@ case "$voidflags" in
 '')
 	$cat >try.c <<'EOCP'
 #if TRY & 1
-void main() {
+void sub() {
 #else
-main() {
+sub() {
 #endif
 	extern void moo();	/* function returning void */
 	void (*goo)();		/* ptr to func returning void */
@@ -7482,8 +7577,9 @@ main() {
 #endif
 	exit(0);
 }
+main() { sub(); }
 EOCP
-	if $cc -c -DTRY=$defvoidused try.c >.out 2>&1 ; then
+	if $cc $ccflags -c -DTRY=$defvoidused try.c >.out 2>&1 ; then
 		voidflags=$defvoidused
 	echo "It appears to support void to the level $package wants ($defvoidused)."
 		if $contains warning .out >/dev/null 2>&1; then
@@ -7492,16 +7588,16 @@ EOCP
 		fi
 	else
 echo "Hmm, your compiler has some difficulty with void. Checking further..." >&4
-		if $cc -c -DTRY=1 try.c >/dev/null 2>&1 ; then
+		if $cc $ccflags -c -DTRY=1 try.c >/dev/null 2>&1; then
 			echo "It supports 1..."
-			if $cc -c -DTRY=3 try.c >/dev/null 2>&1 ; then
+			if $cc $ccflags -c -DTRY=3 try.c >/dev/null 2>&1; then
 				echo "It also supports 2..."
-				if $cc -c -DTRY=7 try.c >/dev/null 2>&1 ; then
+				if $cc $ccflags -c -DTRY=7 try.c >/dev/null 2>&1; then
 					voidflags=7
 					echo "And it supports 4 but not 8 definitely."
 				else
 					echo "It doesn't support 4..."
-					if $cc -c -DTRY=11 try.c >/dev/null 2>&1 ; then
+					if $cc $ccflags -c -DTRY=11 try.c >/dev/null 2>&1; then
 						voidflags=11
 						echo "But it supports 8."
 					else
@@ -7511,11 +7607,11 @@ echo "Hmm, your compiler has some difficulty with void. Checking further..." >&4
 				fi
 			else
 				echo "It does not support 2..."
-				if $cc -c -DTRY=13 try.c >/dev/null 2>&1 ; then
+				if $cc $ccflags -c -DTRY=13 try.c >/dev/null 2>&1; then
 					voidflags=13
 					echo "But it supports 4 and 8."
 				else
-					if $cc -c -DTRY=5 try.c >/dev/null 2>&1 ; then
+					if $cc $ccflags -c -DTRY=5 try.c >/dev/null 2>&1; then
 						voidflags=5
 						echo "And it supports 4 but has not heard about 8."
 					else
@@ -8004,13 +8100,59 @@ $cat > signal.c <<'EOP'
 #include <sys/types.h>
 #include <signal.h>
 int main() {
-#ifdef NSIG
+
+/* Strange style to avoid deeply-nested #if/#else/#endif */
+#ifndef NSIG
+#  ifdef _NSIG
+#    define NSIG (_NSIG)
+#  endif
+#endif
+
+#ifndef NSIG
+#  ifdef SIGMAX
+#    define NSIG (SIGMAX+1)
+#  endif
+#endif
+
+#ifndef NSIG
+#  ifdef SIG_MAX
+#    define NSIG (SIG_MAX+1)
+#  endif
+#endif
+
+#ifndef NSIG
+#  ifdef MAXSIG
+#    define NSIG (MAXSIG+1)
+#  endif
+#endif
+
+#ifndef NSIG
+#  ifdef MAX_SIG
+#    define NSIG (MAX_SIG+1)
+#  endif
+#endif
+
+#ifndef NSIG
+#  ifdef SIGARRAYSIZE
+#    define NSIG (SIGARRAYSIZE+1) /* Not sure of the +1 */
+#  endif
+#endif
+
+#ifndef NSIG
+#  ifdef _sys_nsig
+#    define NSIG (_sys_nsig) /* Solaris 2.5 */
+#  endif
+#endif
+
+/* Default to some arbitrary number that's big enough to get most
+   of the common signals.
+*/
+#ifndef NSIG
+#    define NSIG 50
+#endif
+
 printf("NSIG %d\n", NSIG);
-#else
-#ifdef _NSIG
-printf("NSIG %d\n", _NSIG);
-#endif
-#endif
+
 EOP
 echo $xxx | $tr ' ' '\012' | $sort | $uniq | $awk '
 {
@@ -8138,14 +8280,16 @@ main()
 		printf("int\n");
 	else 
 		printf("long\n");
+	exit(0);
 }
 EOM
 echo " "
-if $cc $ccflags $ldflags -o ssize ssize.c $libs > /dev/null 2>&1 ; then
+if $cc $ccflags $ldflags -o ssize ssize.c $libs > /dev/null 2>&1  &&
+		./ssize > /dev/null 2>&1 ; then
 	ssizetype=`./ssize`
 	echo "I'll be using $ssizetype for functions returning a byte count." >&4
 else
-	echo "(I can't compile the test program--please enlighten me!)"
+	echo "(I can't compile and run the test program--please enlighten me!)"
 	$cat <<EOM
 
 I need a type that is the same size as $sizetype, but is guaranteed to
@@ -8684,6 +8828,10 @@ eval $inhdr
 set utime.h i_utime
 eval $inhdr
 
+: see if this is a values.h system
+set values.h i_values
+eval $inhdr
+
 : see if this is a vfork system
 case "$d_vfork" in
 "$define")
@@ -8951,6 +9099,7 @@ awk='$awk'
 baserev='$baserev'
 bash='$bash'
 bin='$bin'
+bin_sh='$bin_sh'
 binexp='$binexp'
 bison='$bison'
 byacc='$byacc'
@@ -9064,6 +9213,7 @@ d_oldsock='$d_oldsock'
 d_open3='$d_open3'
 d_pathconf='$d_pathconf'
 d_pause='$d_pause'
+d_perlstdio='$d_perlstdio'
 d_phostname='$d_phostname'
 d_pipe='$d_pipe'
 d_poll='$d_poll'
@@ -9102,6 +9252,7 @@ d_setreuid='$d_setreuid'
 d_setrgid='$d_setrgid'
 d_setruid='$d_setruid'
 d_setsid='$d_setsid'
+d_sfio='$d_sfio'
 d_shm='$d_shm'
 d_shmat='$d_shmat'
 d_shmatprototype='$d_shmatprototype'
@@ -9209,6 +9360,7 @@ i_neterrno='$i_neterrno'
 i_niin='$i_niin'
 i_pwd='$i_pwd'
 i_rpcsvcdbm='$i_rpcsvcdbm'
+i_sfio='$i_sfio'
 i_sgtty='$i_sgtty'
 i_stdarg='$i_stdarg'
 i_stddef='$i_stddef'
@@ -9234,6 +9386,7 @@ i_termios='$i_termios'
 i_time='$i_time'
 i_unistd='$i_unistd'
 i_utime='$i_utime'
+i_values='$i_values'
 i_varargs='$i_varargs'
 i_varhdr='$i_varhdr'
 i_vfork='$i_vfork'

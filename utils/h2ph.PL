@@ -34,7 +34,7 @@ $Config{'startperl'}
 'ds 00 \"';
 'ig 00 ';
 
-\$perlincl = "$Config{installsitearchlib}";
+\$perlincl = "$Config{archlibexp}";  # or  {sitearchexp}
 
 !GROK!THIS!
 

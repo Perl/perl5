@@ -75,7 +75,7 @@ for file do
     *) ;;
     esac
 
-    ccflags="`echo $ccflags | sed -e 's/-DEMBED//'`"
+    ccflags="`echo $ccflags | sed -e 's/-DMULTIPLICITY//'`"
 
     echo "$cc -c $ccflags $optimize $large $split"
     eval "$also "'"$cc -c $ccflags $optimize $large $split"'

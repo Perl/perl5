@@ -45,7 +45,7 @@
 #endif
 #define ABORT() kill(getpid(),SIGABRT);
 
-#define BIT_BUCKET "/dev/null"  /* Will this work? */
+#define BIT_BUCKET "/dev/nul"  /* Will this work? */
 
 void Perl_OS2_init();
 
@@ -62,8 +62,18 @@ void Perl_OS2_init();
 #define dXSUB_SYS int fake = OS2_XS_init()
 
 #ifdef PERL_IS_AOUT
-#define NO_SYS_ALLOC
-#endif 
+#  define HAS_FORK
+/* #  define HIDEMYMALLOC */
+/* #  define PERL_SBRK_VIA_MALLOC */ /* gets off-page sbrk... */
+#else /* !PERL_IS_AOUT */
+#  ifndef PERL_FOR_X2P
+#    define USE_PERL_SBRK
+#  endif 
+#  define SYSTEM_ALLOC(a) sys_alloc(a)
+
+void *sys_alloc(int size);
+
+#endif /* !PERL_IS_AOUT */
 
 #define TMPPATH tmppath
 #define TMPPATH1 "plXXXXXX"
@@ -160,8 +170,11 @@ extern OS2_Perl_data_t OS2_Perl_data;
 	   set_Perl_HAB_f;						\
 	}
 
-extern char sh_path[33];
+#define STATIC_FILE_LENGTH 127
+extern char sh_path[STATIC_FILE_LENGTH+1];
 #define SH_PATH sh_path
+#define PERLLIB_MANGLE(s, n) perllib_mangle((s), (n))
+char *perllib_mangle(char *, unsigned int);
 
 char *os2error(int rc);
 

@@ -10,7 +10,7 @@
 #
 
 #==== Locations of installed Perl components
-$p9pvers="5.00301";
+$p9pvers="_P9P_VERSION";
 $prefix='';
 $p9p_objtype=$ENV{'objtype'};
 $builddir="/sys/src/cmd/perl/$p9pvers";

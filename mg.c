@@ -99,6 +99,7 @@ SV* sv;
     MGS* mgs;
     MAGIC* mg;
     MAGIC** mgp;
+    int mgp_valid = 0;
 
     ENTER;
     mgs = save_magic(sv);
@@ -109,12 +110,16 @@ SV* sv;
 	if (!(mg->mg_flags & MGf_GSKIP) && vtbl && vtbl->svt_get) {
 	    (*vtbl->svt_get)(sv, mg);
 	    /* Ignore this magic if it's been deleted */
-	    if (*mgp == mg && (mg->mg_flags & MGf_GSKIP))
+	    if ((mg == (mgp_valid ? *mgp : SvMAGIC(sv))) && (mg->mg_flags & MGf_GSKIP))
 		mgs->mgs_flags = 0;
 	}
 	/* Advance to next magic (complicated by possible deletion) */
-	if (*mgp == mg)
+	if (mg == (mgp_valid ? *mgp : SvMAGIC(sv))) {
 	    mgp = &mg->mg_moremagic;
+	    mgp_valid = 1;
+	}
+	else
+	    mgp = &SvMAGIC(sv);	/* Re-establish pointer after sv_upgrade */
     }
 
     LEAVE;
@@ -664,7 +669,7 @@ MAGIC* mg;
     	if(psig_ptr[i])
     	    sv_setsv(sv,psig_ptr[i]);
     	else {
-    	    void (*origsig)(int);
+    	    void (*origsig) _((int));
     	    /* get signal state without losing signals */
     	    sig_trapped=0;
     	    origsig = rsignal(i,sig_trap);
@@ -765,6 +770,8 @@ MAGIC* mg;
 	    *svp = 0;
     }
     else {
+    	if(hints & HINT_STRICT_REFS)
+    		die(no_symref,s,"a subroutine");
 	if (!strchr(s,':') && !strchr(s,'\'')) {
 	    sprintf(tokenbuf, "main::%s",s);
 	    sv_setpv(sv,tokenbuf);
@@ -1454,6 +1461,10 @@ int sig;
     SV *sv;
     CV *cv;
     AV *oldstack;
+    
+    if(!psig_ptr[sig])
+    	die("Signal SIG%s received, but no signal handler set.\n",
+    	sig_name[sig]);
 
     cv = sv_2cv(psig_ptr[sig],&st,&gv,TRUE);
     if (!cv || !CvROOT(cv)) {

@@ -1,13 +1,18 @@
 #include "EXTERN.h"
+#define PERLIO_NOT_STDIO 1
 #include "perl.h"
 #include "XSUB.h"
+
 #ifdef I_UNISTD
 #  include <unistd.h>
 #endif
+#ifdef I_FCNTL
+#  include <fcntl.h>
+#endif
 
 typedef int SysRet;
-typedef FILE * InputStream;
-typedef FILE * OutputStream;
+typedef PerlIO * InputStream;
+typedef PerlIO * OutputStream;
 
 static int
 not_here(s)
@@ -62,12 +67,6 @@ IV *pval;
 #else
 	    return FALSE;
 #endif
-	if (strEQ(name, "SEEK_EOF"))
-#ifdef SEEK_EOF
-	    { *pval = SEEK_EOF; return TRUE; }
-#else
-	    return FALSE;
-#endif
 	break;
     }
 
@@ -81,35 +80,27 @@ SV *
 fgetpos(handle)
 	InputStream	handle
     CODE:
-#ifdef HAS_FGETPOS
 	if (handle) {
 	    Fpos_t pos;
-	    fgetpos(handle, &pos);
+	    PerlIO_getpos(handle, &pos);
 	    ST(0) = sv_2mortal(newSVpv((char*)&pos, sizeof(Fpos_t)));
 	}
 	else {
 	    ST(0) = &sv_undef;
 	    errno = EINVAL;
 	}
-#else
-	ST(0) = (SV *) not_here("IO::Seekable::fgetpos");
-#endif
 
 SysRet
 fsetpos(handle, pos)
 	InputStream	handle
 	SV *		pos
     CODE:
-#ifdef HAS_FSETPOS
 	if (handle)
-	    RETVAL = fsetpos(handle, (Fpos_t*)SvPVX(pos));
+	    RETVAL = PerlIO_setpos(handle, (Fpos_t*)SvPVX(pos));
 	else {
 	    RETVAL = -1;
 	    errno = EINVAL;
 	}
-#else
-	    RETVAL = (SysRet) not_here("IO::Seekable::fsetpos");
-#endif
     OUTPUT:
 	RETVAL
 
@@ -119,7 +110,7 @@ OutputStream
 new_tmpfile(packname = "IO::File")
     char *		packname
     CODE:
-	RETVAL = tmpfile();
+	RETVAL = PerlIO_tmpfile();
     OUTPUT:
 	RETVAL
 
@@ -141,7 +132,7 @@ ungetc(handle, c)
 	int		c
     CODE:
 	if (handle)
-	    RETVAL = ungetc(c, handle);
+	    RETVAL = PerlIO_ungetc(handle, c);
 	else {
 	    RETVAL = -1;
 	    errno = EINVAL;
@@ -154,7 +145,7 @@ ferror(handle)
 	InputStream	handle
     CODE:
 	if (handle)
-	    RETVAL = ferror(handle);
+	    RETVAL = PerlIO_error(handle);
 	else {
 	    RETVAL = -1;
 	    errno = EINVAL;
@@ -167,7 +158,7 @@ fflush(handle)
 	OutputStream	handle
     CODE:
 	if (handle)
-	    RETVAL = Fflush(handle);
+	    RETVAL = PerlIO_flush(handle);
 	else {
 	    RETVAL = -1;
 	    errno = EINVAL;
@@ -181,9 +172,11 @@ setbuf(handle, buf)
 	char *		buf = SvPOK(ST(1)) ? sv_grow(ST(1), BUFSIZ) : 0;
     CODE:
 	if (handle)
+#ifdef PERLIO_IS_STDIO
 	    setbuf(handle, buf);
-
-
+#else
+	    not_here("IO::Handle::setbuf");
+#endif
 
 SysRet
 setvbuf(handle, buf, type, size)
@@ -192,6 +185,7 @@ setvbuf(handle, buf, type, size)
 	int		type
 	int		size
     CODE:
+#ifdef PERLIO_IS_STDIO
 #ifdef _IOFBF   /* Should be HAS_SETVBUF once Configure tests for that */
 	if (handle)
 	    RETVAL = setvbuf(handle, buf, type, size);
@@ -202,6 +196,9 @@ setvbuf(handle, buf, type, size)
 #else
 	    RETVAL = (SysRet) not_here("IO::Handle::setvbuf");
 #endif /* _IOFBF */
+#else
+	    not_here("IO::Handle::setvbuf");
+#endif
     OUTPUT:
 	RETVAL
 

@@ -295,11 +295,14 @@ C<can> checks to see if its object has a method called C<METHOD>,
 if it does then a reference to the sub is returned, if it does not then
 I<undef> is returned.
 
-=item require_version ( VERSION )
+=item VERSION ( [ VERSION ] )
 
-C<require_version> will check that the current version of the package
-is greater than C<VERSION>. This method is normally called as a static method.
-This method is also called when the C<VERSION> form of C<use> is used.
+C<VERSION> returns the VERSION number of the class (package). If
+an argument is given then it will check that the current version is not 
+less that the given argument. This method is normally called as a static
+method. This method is also called when the C<VERSION> form of C<use> is
+used.
+
 
     use A 1.2 qw(some imported subs);
     
@@ -321,12 +324,6 @@ class, false if its object is the class (package) itself. Example
     
     $ref = bless [], 'A';
     $ref->is_instance();    # True
-
-=item require_version ( [ VERSION ] )
-
-C<require_version> returns the VERSION number of the class (package). If
-an argument is given then it will check that the current version is not 
-less that the given argument.
 
 =back
 

@@ -20,6 +20,7 @@ of sections:
 
     perl	Perl overview (this section)
     perltoc	Perl documentation table of contents
+
     perldata	Perl data structures
     perlsyn	Perl syntax
     perlop	Perl operators and precedence
@@ -29,26 +30,31 @@ of sections:
     perlvar	Perl predefined variables
     perlsub	Perl subroutines
     perlmod	Perl modules
+    perlform	Perl formats
+
     perlref	Perl references 
     perldsc	Perl data structures intro
     perllol	Perl data structures: lists of lists
     perlobj	Perl objects
     perltie	Perl objects hidden behind simple variables
     perlbot	Perl OO tricks and examples
+    perlipc	Perl interprocess communication
+
     perldebug	Perl debugging
     perldiag	Perl diagnostic messages
-    perlform	Perl formats
-    perlipc	Perl interprocess communication
     perlsec	Perl security
     perltrap	Perl traps for the unwary
     perlstyle	Perl style guide
+
+    perlpod	Perl plain old documentation
+    perlbook	Perl book information
+
+    perlembed	Perl how to embed perl in your C or C++ app
+    perlapio	Perl internal IO abstraction interface
     perlxs	Perl XS application programming interface
     perlxstut	Perl XS tutorial
     perlguts	Perl internal functions for those doing extensions 
     perlcall	Perl calling conventions from C
-    perlembed	Perl how to embed perl in your C or C++ app
-    perlpod	Perl plain old documentation
-    perlbook	Perl book information
 
 (If you're intending to read these straight through for the first time,
 the suggested order will tend to reduce the number of forward references.)
@@ -59,7 +65,7 @@ Perl, but you'll also find third-party modules there.  You should be able
 to view this with your man(1) program by including the proper directories
 in the appropriate start-up files.  To find out where these are, type:
 
-    perl -le 'use Config; print "@Config{man1dir,man3dir}"'
+    perl -V:man.dir
 
 If the directories were F</usr/local/man/man1> and F</usr/local/man/man3>,
 you would only need to add F</usr/local/man> to your MANPATH.  If 

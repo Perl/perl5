@@ -5,5 +5,10 @@
 ed config.plan9 <<!
 g/_P9P_VERSION/s//$p9pvers/g
 g/_P9P_OBJTYPE/s//$objtype/g
-w $1
+w config.h
+!
+
+ed plan9/genconfig.pl<<!
+g/_P9P_VERSION/s//$p9pvers/g
+w plan9/genconfig.pl
 !

@@ -321,7 +321,7 @@ U32 tmptype;
     }
     SvFLAGS(sv) |= tmptype;
     curpad = AvARRAY(comppad);
-    DEBUG_X(fprintf(Perl_debug_log, "Pad alloc %ld for %s\n", (long) retval, op_name[optype]));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad alloc %ld for %s\n", (long) retval, op_name[optype]));
     return (PADOFFSET)retval;
 }
 
@@ -335,7 +335,7 @@ pad_sv(PADOFFSET po)
 {
     if (!po)
 	croak("panic: pad_sv po");
-    DEBUG_X(fprintf(Perl_debug_log, "Pad sv %d\n", po));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad sv %d\n", po));
     return curpad[po];		/* eventually we'll turn this into a macro */
 }
 
@@ -353,7 +353,7 @@ pad_free(PADOFFSET po)
 	croak("panic: pad_free curpad");
     if (!po)
 	croak("panic: pad_free po");
-    DEBUG_X(fprintf(Perl_debug_log, "Pad free %d\n", po));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad free %d\n", po));
     if (curpad[po] && curpad[po] != &sv_undef)
 	SvPADTMP_off(curpad[po]);
     if ((I32)po < padix)
@@ -372,7 +372,7 @@ pad_swipe(PADOFFSET po)
 	croak("panic: pad_swipe curpad");
     if (!po)
 	croak("panic: pad_swipe po");
-    DEBUG_X(fprintf(Perl_debug_log, "Pad swipe %d\n", po));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad swipe %d\n", po));
     SvPADTMP_off(curpad[po]);
     curpad[po] = NEWSV(1107,0);
     SvPADTMP_on(curpad[po]);
@@ -387,7 +387,7 @@ pad_reset()
 
     if (AvARRAY(comppad) != curpad)
 	croak("panic: pad_reset curpad");
-    DEBUG_X(fprintf(Perl_debug_log, "Pad reset\n"));
+    DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad reset\n"));
     if (!tainting) {	/* Can't mix tainted and non-tainted temporaries. */
 	for (po = AvMAX(comppad); po > padix_floor; po--) {
 	    if (curpad[po] && curpad[po] != &sv_undef)
@@ -2812,6 +2812,30 @@ CV* proto;
     return cv;
 }
 
+SV *
+cv_const_sv(cv)
+CV *cv;
+{
+    OP *o;
+    SV *sv = Nullsv;
+    
+    if(cv && SvPOK(cv) && !SvCUR(cv)) {
+	for (o = CvSTART(cv); o; o = o->op_next) {
+	    OPCODE type = o->op_type;
+	
+	    if (type == OP_NEXTSTATE || type == OP_NULL || type == OP_PUSHMARK)
+		continue;
+	    if (type == OP_LEAVESUB || type == OP_RETURN)
+		break;
+	    if (type != OP_CONST || sv)
+		return Nullsv;
+
+	    sv = ((SVOP*)o)->op_sv;
+	}
+    }
+    return sv;
+}
+
 CV *
 newSUB(floor,op,proto,block)
 I32 floor;
@@ -2832,11 +2856,22 @@ OP *block;
 	if (GvCVGEN(gv))
 	    cv = 0;			/* just a cached method */
 	else if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
-	    if (dowarn && strNE(name, "BEGIN")) {/* already defined (or promised)? */
+	    SV* const_sv = cv_const_sv(cv);
+
+	    char *p = proto ? SvPVx(((SVOP*)proto)->op_sv, na) : Nullch;
+
+	    if((!proto != !SvPOK(cv)) || (p && strNE(SvPV((SV*)cv,na), p))) {
+		warn("Prototype mismatch: (%s) vs (%s)",
+			SvPOK(cv) ? SvPV((SV*)cv,na) : "none",
+			p ? p : "none");
+	    }
+
+	    if ((const_sv || dowarn) && strNE(name, "BEGIN")) {/* already defined (or promised)? */
 		line_t oldline = curcop->cop_line;
 
 		curcop->cop_line = copline;
-		warn("Subroutine %s redefined",name);
+		warn(const_sv ? "Constant subroutine %s redefined"
+			      : "Subroutine %s redefined",name);
 		curcop->cop_line = oldline;
 	    }
 	    SvREFCNT_dec(cv);
@@ -2864,8 +2899,6 @@ OP *block;
 
     if (proto) {
 	char *p = SvPVx(((SVOP*)proto)->op_sv, na);
-	if (SvPOK(cv) && strNE(SvPV((SV*)cv,na), p))
-	    warn("Prototype mismatch: (%s) vs (%s)", SvPV((SV*)cv, na), p);
 	sv_setpv((SV*)cv, p);
 	op_free(proto);
     }

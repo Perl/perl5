@@ -1,6 +1,3 @@
-Content-type: text/plain; charset="us-ascii"
-Content-disposition: attachment; filename="mkfile"
-
 APE=/sys/src/ape
 < $APE/config
 <plan9/buildinfo
@@ -69,7 +66,7 @@ perlmain.c:	miniperl vms/writemain.pl
 			./miniperl vms/writemain.pl $extensions
 
 config.h:		config.plan9 plan9/fndvers
-			plan9/fndvers config.h 
+			plan9/fndvers 
 			cp config.h $archlib/CORE
 
 $perlshr(%):N:	%
@@ -80,8 +77,10 @@ $perlshr:  ${ext_obj:%=$perlshr(%)}
 IO.c:		miniperl ext/IO/IO.xs
 			./miniperl $privlib/ExtUtils/xsubpp -noprototypes -typemap $privlib/ExtUtils/typemap ext/IO/IO.xs > $target
 			cp ext/IO/*.pm $privlib
-			if (test !-d $privlib/IO) mkdir $privlib/IO
+			if (test !-d $privlib/IO) { 
+			mkdir $privlib/IO
 			cp ext/IO/lib/IO/*.pm $privlib/IO
+			 }
 
 Socket.$O:	config.h Socket.c
 			$CCCMD -I plan9 Socket.c
@@ -139,11 +138,9 @@ man:V:		$perlpods pod/pod2man.PL perl
 			for (i in $podnames) pod/pod2man pod/$i.pod > $installman3dir/$i
 			pod/pod2man plan9/perlplan9.pod > $installman3dir/perlplan9
 			
-nuke:V:	
+nuke clean:V:	
 		rm -f *.$O   $extensions^.pm config.sh $perllib config.h $perlshr perlmain.c perl miniperl $archlib/Config.pm $ext_c
-		
-clean:V:
-		rm -f *.$O config.sh  miniperl  t/perl
+		rm -rf $privlib/IO
 
 deleteman:V:
 			rm -f $installman1dir/perl* $installman3dir/perl*

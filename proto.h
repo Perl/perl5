@@ -46,6 +46,7 @@ char*	cpytill _((char* to, char* from, char* fromend, int delim, I32* retlen));
 void	croak _((char* pat,...)) __attribute__((format(printf,1,2),noreturn));
 CV*	cv_clone _((CV* proto));
 void	cv_undef _((CV* cv));
+SV*	cv_const_sv _((CV* cv));
 #ifdef DEBUGGING
 void	cx_dump _((CONTEXT* cs));
 #endif
@@ -82,9 +83,9 @@ I32	do_msgrcv _((SV** mark, SV** sp));
 I32	do_msgsnd _((SV** mark, SV** sp));
 #endif
 bool	do_open _((GV* gv, char* name, I32 len,
-		   int as_raw, int rawmode, int rawperm, FILE* supplied_fp));
+		   int as_raw, int rawmode, int rawperm, PerlIO* supplied_fp));
 void	do_pipe _((SV* sv, GV* rgv, GV* wgv));
-bool	do_print _((SV* sv, FILE* fp));
+bool	do_print _((SV* sv, PerlIO* fp));
 OP *	do_readline _((void));
 I32	do_chomp _((SV* sv));
 bool	do_seek _((GV* gv, long pos, int whence));
@@ -235,8 +236,8 @@ I32	my_lstat _((void));
 #ifndef HAS_MEMCMP
 I32	my_memcmp _((unsigned char* s1, unsigned char* s2, I32 len));
 #endif
-I32	my_pclose _((FILE* ptr));
-FILE*	my_popen _((char* cmd, char* mode));
+I32	my_pclose _((PerlIO* ptr));
+PerlIO*	my_popen _((char* cmd, char* mode));
 void	my_setenv _((char* nam, char* val));
 I32	my_stat _((void));
 #ifdef MYSWAP
@@ -294,7 +295,7 @@ SV*	newSVrv _((SV* rv, char* classname));
 SV*	newSVsv _((SV* old));
 OP*	newUNOP _((I32 type, I32 flags, OP* first));
 OP *	newWHILEOP _((I32 flags, I32 debuggable, LOOP* loop, OP* expr, OP* block, OP* cont));
-FILE*	nextargv _((GV* gv));
+PerlIO*	nextargv _((GV* gv));
 char*	ninstr _((char* big, char* bigend, char* little, char* lend));
 OP *	oopsCV _((OP* o));
 void	op_free _((OP* arg));
@@ -435,7 +436,7 @@ void	sv_dump _((SV* sv));
 I32	sv_eq _((SV* sv1, SV* sv2));
 void	sv_free _((SV* sv));
 void	sv_free_arenas _((void));
-char*	sv_gets _((SV* sv, FILE* fp, I32 append));
+char*	sv_gets _((SV* sv, PerlIO* fp, I32 append));
 #ifndef DOSISH
 char*	sv_grow _((SV* sv, I32 newlen));
 #else

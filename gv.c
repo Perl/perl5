@@ -241,9 +241,10 @@ char* name;
 	/* Failed obvious case - look for SUPER as last element of stash's name */
 	char *packname = HvNAME(stash);
 	STRLEN len     = strlen(packname);
-	if ((len -= 7) >= 0 && strEQ(packname+len,"::SUPER")) {
+	if (len >= 7 && strEQ(packname+len-7,"::SUPER")) {
 	    /* Now look for @.*::SUPER::ISA */
 	    GV** gvp = (GV**)hv_fetch(stash,"ISA",3,FALSE);
+	    len -= 7;
 	    if (!gvp || (gv = *gvp) == (GV*)&sv_undef || !GvAV(gv)) {
 		/* No @ISA in package ending in ::SUPER - drop suffix
 		   and see if there is an @ISA there

@@ -30,7 +30,8 @@ open(GL, "<global.sym") || die "Can't open global.sym: $!\n";
 while(<GL>) {
 	s/[ \t]*#.*//;		# Delete comments.
 	next unless /\S/;
-	s/(.*)/#define $1\t\tPerl_$1/;
+	s/^\s*(\S+).*$/#define $1\t\tPerl_$1/;
+	$global{$1} = 1; 
 	s/(................\t)\t/$1/;
 	print EM $_;
 }
@@ -47,19 +48,25 @@ print EM <<'END';
 
 /* Undefine symbols that were defined by EMBED. Somewhat ugly */
 
-#undef curcop
-#undef envgv
-#undef siggv
-#undef stack
-#undef tainting
-
 END
+
 
 open(INT, "<interp.sym") || die "Can't open interp.sym: $!\n";
 while (<INT>) {
 	s/[ \t]*#.*//;		# Delete comments.
 	next unless /\S/;
-	s/(.*)/#define $1\t\t(curinterp->I$1)/;
+	s/^\s*(\S*).*$/#undef $1/;
+	print EM $_ if (exists $global{$1});
+}
+close(INT) || warn "Can't close interp.sym: $!\n";
+
+print EM "\n";
+
+open(INT, "<interp.sym") || die "Can't open interp.sym: $!\n";
+while (<INT>) {
+	s/[ \t]*#.*//;		# Delete comments.
+	next unless /\S/;
+	s/^\s*(\S+).*$/#define $1\t\t(curinterp->I$1)/;
 	s/(................\t)\t/$1/;
 	print EM $_;
 }
@@ -75,7 +82,7 @@ open(INT, "<interp.sym") || die "Can't open interp.sym: $!\n";
 while (<INT>) {
 	s/[ \t]*#.*//;		# Delete comments.
 	next unless /\S/;
-	s/(.*)/#define I$1\t\t$1/;
+	s/^\s*(\S+).*$/#define I$1\t\t$1/;
 	s/(................\t)\t/$1/;
 	print EM $_;
 }

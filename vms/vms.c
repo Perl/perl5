@@ -349,7 +349,7 @@ kill_file(char *name)
      * VMS seem to return success on the unlock operation anyhow (after all
      * the unlock is successful), but others don't.
      */
-    if (fndsts == RMS$_FNF || fndsts == SS$_NOSUCHOBJECT) fndsts == SS$_NORMAL;
+    if (fndsts == RMS$_FNF || fndsts == SS$_NOSUCHOBJECT) fndsts = SS$_NORMAL;
     if (aclsts & 1) aclsts = fndsts;
     if (!(aclsts & 1)) {
       set_errno(EVMSERR);

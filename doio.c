@@ -60,21 +60,21 @@ register char *name;
 I32 len;
 int as_raw;
 int rawmode, rawperm;
-FILE *supplied_fp;
+PerlIO *supplied_fp;
 {
     register IO *io = GvIOn(gv);
-    FILE *saveifp = Nullfp;
-    FILE *saveofp = Nullfp;
+    PerlIO *saveifp = Nullfp;
+    PerlIO *saveofp = Nullfp;
     char savetype = ' ';
     int writing = 0;
-    FILE *fp;
+    PerlIO *fp;
     int fd;
     int result;
 
     forkprocess = 1;		/* assume true if no fork */
 
     if (IoIFP(io)) {
-	fd = fileno(IoIFP(io));
+	fd = PerlIO_fileno(IoIFP(io));
 	if (IoTYPE(io) == '-')
 	    result = 0;
 	else if (fd <= maxsysfd) {
@@ -87,16 +87,16 @@ FILE *supplied_fp;
 	    result = my_pclose(IoIFP(io));
 	else if (IoIFP(io) != IoOFP(io)) {
 	    if (IoOFP(io)) {
-		result = fclose(IoOFP(io));
-		fclose(IoIFP(io));	/* clear stdio, fd already closed */
+		result = PerlIO_close(IoOFP(io));
+		PerlIO_close(IoIFP(io));	/* clear stdio, fd already closed */
 	    }
 	    else
-		result = fclose(IoIFP(io));
+		result = PerlIO_close(IoIFP(io));
 	}
 	else
-	    result = fclose(IoIFP(io));
+	    result = PerlIO_close(IoIFP(io));
 	if (result == EOF && fd > maxsysfd)
-	    fprintf(stderr,"Warning: unable to close filehandle %s properly.\n",
+	    PerlIO_printf(PerlIO_stderr(), "Warning: unable to close filehandle %s properly.\n",
 	      GvENAME(gv));
 	IoOFP(io) = IoIFP(io) = Nullfp;
     }
@@ -109,7 +109,7 @@ FILE *supplied_fp;
 	if (fd == -1)
 	    fp = NULL;
 	else {
-	    fp = fdopen(fd, ((result == 0) ? "r"
+	    fp = PerlIO_fdopen(fd, ((result == 0) ? "r"
 			     : (result == 1) ? "w"
 			     : "r+"));
 	    if (!fp)
@@ -183,7 +183,7 @@ FILE *supplied_fp;
 			    goto say_false;
 			}
 			if (IoIFP(thatio)) {
-			    fd = fileno(IoIFP(thatio));
+			    fd = PerlIO_fileno(IoIFP(thatio));
 			    if (IoTYPE(thatio) == 's')
 				IoTYPE(io) = 's';
 			}
@@ -192,7 +192,7 @@ FILE *supplied_fp;
 		    }
 		    if (dodup)
 			fd = dup(fd);
-		    if (!(fp = fdopen(fd,mode))) {
+		    if (!(fp = PerlIO_fdopen(fd,mode))) {
 			if (dodup)
 			    close(fd);
 			}
@@ -202,11 +202,11 @@ FILE *supplied_fp;
 		/*SUPPRESS 530*/
 		for (; isSPACE(*name); name++) ;
 		if (strEQ(name,"-")) {
-		    fp = stdout;
+		    fp = PerlIO_stdout();
 		    IoTYPE(io) = '-';
 		}
 		else  {
-		    fp = fopen(name,mode);
+		    fp = PerlIO_open(name,mode);
 		}
 	    }
 	}
@@ -217,11 +217,11 @@ FILE *supplied_fp;
 	    if (*name == '&')
 		goto duplicity;
 	    if (strEQ(name,"-")) {
-		fp = stdin;
+		fp = PerlIO_stdin();
 		IoTYPE(io) = '-';
 	    }
 	    else
-		fp = fopen(name,mode);
+		fp = PerlIO_open(name,mode);
 	}
 	else if (name[len-1] == '|') {
 	    name[--len] = '\0';
@@ -240,11 +240,11 @@ FILE *supplied_fp;
 	    /*SUPPRESS 530*/
 	    for (; isSPACE(*name); name++) ;
 	    if (strEQ(name,"-")) {
-		fp = stdin;
+		fp = PerlIO_stdin();
 		IoTYPE(io) = '-';
 	    }
 	    else
-		fp = fopen(name,"r");
+		fp = PerlIO_open(name,"r");
 	}
     }
     if (!fp) {
@@ -254,8 +254,8 @@ FILE *supplied_fp;
     }
     if (IoTYPE(io) &&
       IoTYPE(io) != '|' && IoTYPE(io) != '-') {
-	if (Fstat(fileno(fp),&statbuf) < 0) {
-	    (void)fclose(fp);
+	if (Fstat(PerlIO_fileno(fp),&statbuf) < 0) {
+	    (void)PerlIO_close(fp);
 	    goto say_false;
 	}
 	if (S_ISSOCK(statbuf.st_mode))
@@ -269,7 +269,7 @@ FILE *supplied_fp;
 #endif
 	) {
 	    int buflen = sizeof tokenbuf;
-	    if (getsockname(fileno(fp), (struct sockaddr *)tokenbuf, &buflen) >= 0
+	    if (getsockname(PerlIO_fileno(fp), (struct sockaddr *)tokenbuf, &buflen) >= 0
 		|| errno != ENOTSOCK)
 		IoTYPE(io) = 's'; /* some OS's return 0 on fstat()ed socket */
 				/* but some return 0 for streams too, sigh */
@@ -277,43 +277,43 @@ FILE *supplied_fp;
 #endif
     }
     if (saveifp) {		/* must use old fp? */
-	fd = fileno(saveifp);
+	fd = PerlIO_fileno(saveifp);
 	if (saveofp) {
-	    Fflush(saveofp);		/* emulate fclose() */
+	    PerlIO_flush(saveofp);		/* emulate PerlIO_close() */
 	    if (saveofp != saveifp) {	/* was a socket? */
-		fclose(saveofp);
+		PerlIO_close(saveofp);
 		if (fd > 2)
 		    Safefree(saveofp);
 	    }
 	}
-	if (fd != fileno(fp)) {
+	if (fd != PerlIO_fileno(fp)) {
 	    int pid;
 	    SV *sv;
 
-	    dup2(fileno(fp), fd);
-	    sv = *av_fetch(fdpid,fileno(fp),TRUE);
+	    dup2(PerlIO_fileno(fp), fd);
+	    sv = *av_fetch(fdpid,PerlIO_fileno(fp),TRUE);
 	    (void)SvUPGRADE(sv, SVt_IV);
 	    pid = SvIVX(sv);
 	    SvIVX(sv) = 0;
 	    sv = *av_fetch(fdpid,fd,TRUE);
 	    (void)SvUPGRADE(sv, SVt_IV);
 	    SvIVX(sv) = pid;
-	    fclose(fp);
+	    PerlIO_close(fp);
 
 	}
 	fp = saveifp;
-	clearerr(fp);
+	PerlIO_clearerr(fp);
     }
 #if defined(HAS_FCNTL) && defined(F_SETFD)
-    fd = fileno(fp);
+    fd = PerlIO_fileno(fp);
     fcntl(fd,F_SETFD,fd > maxsysfd);
 #endif
     IoIFP(io) = fp;
     if (writing) {
 	if (IoTYPE(io) == 's'
 	  || (IoTYPE(io) == '>' && S_ISCHR(statbuf.st_mode)) ) {
-	    if (!(IoOFP(io) = fdopen(fileno(fp),"w"))) {
-		fclose(fp);
+	    if (!(IoOFP(io) = PerlIO_fdopen(PerlIO_fileno(fp),"w"))) {
+		PerlIO_close(fp);
 		IoIFP(io) = Nullfp;
 		goto say_false;
 	    }
@@ -330,7 +330,7 @@ say_false:
     return FALSE;
 }
 
-FILE *
+PerlIO *
 nextargv(gv)
 register GV *gv;
 {
@@ -345,7 +345,7 @@ register GV *gv;
     if (!argvoutgv)
 	argvoutgv = gv_fetchpv("ARGVOUT",TRUE,SVt_PVIO);
     if (filemode & (S_ISUID|S_ISGID)) {
-	Fflush(IoIFP(GvIOn(argvoutgv)));  /* chmod must follow last write */
+	PerlIO_flush(IoIFP(GvIOn(argvoutgv)));  /* chmod must follow last write */
 #ifdef HAS_FCHMOD
 	(void)fchmod(lastfd,filemode);
 #else
@@ -444,7 +444,7 @@ register GV *gv;
 		    continue;
 		}
 		setdefout(argvoutgv);
-		lastfd = fileno(IoIFP(GvIOp(argvoutgv)));
+		lastfd = PerlIO_fileno(IoIFP(GvIOp(argvoutgv)));
 		(void)Fstat(lastfd,&statbuf);
 #ifdef HAS_FCHMOD
 		(void)fchmod(lastfd,filemode);
@@ -464,7 +464,7 @@ register GV *gv;
 	    return IoIFP(GvIOp(gv));
 	}
 	else
-	    fprintf(stderr,"Can't open %s: %s\n",SvPV(sv, na), Strerror(errno));
+	    PerlIO_printf(PerlIO_stderr(), "Can't open %s: %s\n",SvPV(sv, na), Strerror(errno));
     }
     if (inplace) {
 	(void)do_close(argvoutgv,FALSE);
@@ -499,15 +499,15 @@ GV *wgv;
 
     if (pipe(fd) < 0)
 	goto badexit;
-    IoIFP(rstio) = fdopen(fd[0], "r");
-    IoOFP(wstio) = fdopen(fd[1], "w");
+    IoIFP(rstio) = PerlIO_fdopen(fd[0], "r");
+    IoOFP(wstio) = PerlIO_fdopen(fd[1], "w");
     IoIFP(wstio) = IoOFP(wstio);
     IoTYPE(rstio) = '<';
     IoTYPE(wstio) = '>';
     if (!IoIFP(rstio) || !IoOFP(wstio)) {
-	if (IoIFP(rstio)) fclose(IoIFP(rstio));
+	if (IoIFP(rstio)) PerlIO_close(IoIFP(rstio));
 	else close(fd[0]);
-	if (IoOFP(wstio)) fclose(IoOFP(wstio));
+	if (IoOFP(wstio)) PerlIO_close(IoOFP(wstio));
 	else close(fd[1]);
 	goto badexit;
     }
@@ -573,11 +573,11 @@ IO* io;
 	    retval = TRUE;
 	else {
 	    if (IoOFP(io) && IoOFP(io) != IoIFP(io)) {		/* a socket */
-		retval = (fclose(IoOFP(io)) != EOF);
-		fclose(IoIFP(io));	/* clear stdio, fd already closed */
+		retval = (PerlIO_close(IoOFP(io)) != EOF);
+		PerlIO_close(IoIFP(io));	/* clear stdio, fd already closed */
 	    }
 	    else
-		retval = (fclose(IoIFP(io)) != EOF);
+		retval = (PerlIO_close(IoIFP(io)) != EOF);
 	}
 	IoOFP(io) = IoIFP(io) = Nullfp;
     }
@@ -599,20 +599,20 @@ GV *gv;
 
     while (IoIFP(io)) {
 
-#ifdef USE_STDIO_PTR			/* (the code works without this) */
-	if (FILE_cnt(IoIFP(io)) > 0)	/* cheat a little, since */
-	    return FALSE;		/* this is the most usual case */
-#endif
+        if (PerlIO_has_cntptr(IoIFP(io))) {	/* (the code works without this) */
+	    if (PerlIO_get_cnt(IoIFP(io)) > 0)	/* cheat a little, since */
+		return FALSE;			/* this is the most usual case */
+        }
 
-	ch = getc(IoIFP(io));
+	ch = PerlIO_getc(IoIFP(io));
 	if (ch != EOF) {
-	    (void)ungetc(ch, IoIFP(io));
+	    (void)PerlIO_ungetc(IoIFP(io),ch);
 	    return FALSE;
 	}
-#if defined(USE_STDIO_PTR) && defined(STDIO_CNT_LVALUE)
-	if (FILE_cnt(IoIFP(io)) < -1)
-	    FILE_cnt(IoIFP(io)) = -1;
-#endif
+        if (PerlIO_has_cntptr(IoIFP(io)) && PerlIO_canset_cnt(IoIFP(io))) {
+	    if (PerlIO_get_cnt(IoIFP(io)) < -1)
+		PerlIO_set_cnt(IoIFP(io),-1);
+	}
 	if (op->op_flags & OPf_SPECIAL) { /* not necessarily a real EOF yet? */
 	    if (!nextargv(argvgv))	/* get another fp handy */
 		return TRUE;
@@ -637,11 +637,11 @@ GV *gv;
 	goto phooey;
 
 #ifdef ULTRIX_STDIO_BOTCH
-    if (feof(IoIFP(io)))
-	(void)fseek (IoIFP(io), 0L, 2);		/* ultrix 1.2 workaround */
+    if (PerlIO_eof(IoIFP(io)))
+	(void)PerlIO_seek (IoIFP(io), 0L, 2);		/* ultrix 1.2 workaround */
 #endif
 
-    return ftell(IoIFP(io));
+    return PerlIO_tell(IoIFP(io));
 
 phooey:
     if (dowarn)
@@ -666,11 +666,11 @@ int whence;
 	goto nuts;
 
 #ifdef ULTRIX_STDIO_BOTCH
-    if (feof(IoIFP(io)))
-	(void)fseek (IoIFP(io), 0L, 2);		/* ultrix 1.2 workaround */
+    if (PerlIO_eof(IoIFP(io)))
+	(void)PerlIO_seek (IoIFP(io), 0L, 2);		/* ultrix 1.2 workaround */
 #endif
 
-    return fseek(IoIFP(io), pos, whence) >= 0;
+    return PerlIO_seek(IoIFP(io), pos, whence) >= 0;
 
 nuts:
     if (dowarn)
@@ -784,7 +784,7 @@ SV *sv;
 bool
 do_print(sv,fp)
 register SV *sv;
-FILE *fp;
+PerlIO *fp;
 {
     register char *tmps;
     STRLEN len;
@@ -796,13 +796,13 @@ FILE *fp;
 	if (SvGMAGICAL(sv))
 	    mg_get(sv);
         if (SvIOK(sv) && SvIVX(sv) != 0) {
-	    fprintf(fp, ofmt, (double)SvIVX(sv));
-	    return !ferror(fp);
+	    PerlIO_printf(fp, ofmt, (double)SvIVX(sv));
+	    return !PerlIO_error(fp);
 	}
 	if (  (SvNOK(sv) && SvNVX(sv) != 0.0)
 	   || (looks_like_number(sv) && sv_2nv(sv) != 0.0) ) {
-	    fprintf(fp, ofmt, SvNVX(sv));
-	    return !ferror(fp);
+	    PerlIO_printf(fp, ofmt, SvNVX(sv));
+	    return !PerlIO_error(fp);
 	}
     }
     switch (SvTYPE(sv)) {
@@ -814,17 +814,17 @@ FILE *fp;
 	if (SvIOK(sv)) {
 	    if (SvGMAGICAL(sv))
 		mg_get(sv);
-	    fprintf(fp, "%ld", (long)SvIVX(sv));
-	    return !ferror(fp);
+	    PerlIO_printf(fp, "%ld", (long)SvIVX(sv));
+	    return !PerlIO_error(fp);
 	}
 	/* FALL THROUGH */
     default:
 	tmps = SvPV(sv, len);
 	break;
     }
-    if (len && (fwrite1(tmps,1,len,fp) == 0 || ferror(fp)))
+    if (len && (PerlIO_write(fp,tmps,len) == 0 || PerlIO_error(fp)))
 	return FALSE;
-    return TRUE;
+    return !PerlIO_error(fp);
 }
 
 I32
@@ -844,7 +844,7 @@ dARGS
 	    statgv = tmpgv;
 	    sv_setpv(statname,"");
 	    laststype = OP_STAT;
-	    return (laststatval = Fstat(fileno(IoIFP(io)), &statcache));
+	    return (laststatval = Fstat(PerlIO_fileno(IoIFP(io)), &statcache));
 	}
 	else {
 	    if (tmpgv == defgv)
@@ -955,6 +955,8 @@ do_execfree()
     }
 }
 
+#ifndef OS2
+
 bool
 do_exec(cmd)
 char *cmd;
@@ -1043,6 +1045,8 @@ char *cmd;
     do_execfree();
     return FALSE;
 }
+
+#endif 
 
 I32
 apply(type,mark,sp)

@@ -1147,8 +1147,8 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
     foreach $name ($self->lsdir($self->curdir)){
 	next if $name eq $self->curdir or $name eq $self->updir or $ignore{$name};
 	next unless $self->libscan($name);
-	next if -l $name; # We do not support symlinks at all
 	if (-d $name){
+	    next if -l $name; # We do not support symlinks at all
 	    $dir{$name} = $name if (-f $self->catfile($name,"Makefile.PL"));
 	} elsif ($name =~ /\.xs$/){
 	    my($c); ($c = $name) =~ s/\.xs$/.c/;
@@ -1365,14 +1365,11 @@ sub init_main {
     # It may also edit @modparts if required.
     if (defined &DynaLoader::mod2fname) {
         $modfname = &DynaLoader::mod2fname(\@modparts);
-    } elsif ($Is_OS2) {                # Need manual correction if run with miniperl:-(
-        $modfname = substr($modfname, 0, 7) . '_';
-    }
-
+    } 
 
     ($self->{PARENT_NAME}, $self->{BASEEXT}) = $self->{NAME} =~ m!([\w:]+::)?(\w+)$! ;
 
-    if (defined &DynaLoader::mod2fname or $Is_OS2) {
+    if (defined &DynaLoader::mod2fname) {
 	# As of 5.001m, dl_os2 appends '_'
 	$self->{DLBASE} = $modfname;
     } else {
@@ -2609,14 +2606,14 @@ sub static_lib {
     my(@m);
     push(@m, <<'END');
 $(INST_STATIC): $(OBJECT) $(MYEXTLIB) $(INST_ARCHAUTODIR)/.exists
+	$(RM_RF) $@
 END
     # If this extension has it's own library (eg SDBM_File)
     # then copy that to $(INST_STATIC) and add $(OBJECT) into it.
     push(@m, "\t$self->{CP} \$(MYEXTLIB) \$\@\n") if $self->{MYEXTLIB};
 
     push @m,
-q{	$(RM_RF) $@
-	$(AR) $(AR_STATIC_ARGS) $@ $(OBJECT) && $(RANLIB) $@
+q{	$(AR) $(AR_STATIC_ARGS) $@ $(OBJECT) && $(RANLIB) $@
 	}.$self->{NOECHO}.q{echo "$(EXTRALIBS)" > $(INST_ARCHAUTODIR)/extralibs.ld
 	$(CHMOD) 755 $@
 };
