@@ -146,14 +146,15 @@ if (!$have_time) {
 
 unless (defined &Time::HiRes::gettimeofday
 	&& defined &Time::HiRes::ualarm
-	&& defined &Time::HiRes::usleep) {
+	&& defined &Time::HiRes::usleep
+	&& $Config{d_ualarm}) {
     for (15..17) {
 	print "ok $_ # skipped\n";
     }
 } else {
     use Time::HiRes qw (time alarm sleep);
 
-    my ($f, $r, $i);
+    my ($f, $r, $i, $not);
 
     $f = time; 
     print "# time...$f\n";
@@ -169,18 +170,31 @@ unless (defined &Time::HiRes::gettimeofday
     while ($i > 0)
     {
 	alarm(0.3);
-	select (undef, undef, undef, 10);
-	print "# Select returned! $i ", Time::HiRes::tv_interval ($r), "\n";
+	select (undef, undef, undef, 3);
+	my $ival = Time::HiRes::tv_interval ($r);
+	print "# Select returned! $i $ival\n";
+	my $exp = 0.3 * (5 - $i);
+	if (abs($ival/$exp) - 1 > 0.1) {
+	    $not = "$exp sleep took $ival";
+	    last;
+	}
     }
 
     sub tick
     {
 	$i--;
-	print "# Tick! $i ", Time::HiRes::tv_interval ($r), "\n";
+	my $ival = Time::HiRes::tv_interval ($r);
+	print "# Tick! $i $ival\n";
+	my $exp = 0.3 * (5 - $i);
+	if (abs($ival/$exp) - 1 > 0.1) {
+	    $not = "$exp sleep took $ival";
+	    $i = 0;
+	}
     }
+
     alarm(0); # can't cancel usig %SIG
 
-    print "ok 17\n";
+    print $not ? "not ok 17 # $not\n" : "ok 17\n";
 }
 
 unless (defined &Time::HiRes::setitimer
