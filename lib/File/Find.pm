@@ -22,10 +22,10 @@ finddepth - traverse a directory structure depth-first
 =head1 DESCRIPTION
 
 The first argument to find() is either a hash reference describing the
-operations to be performed for each file, or a code reference.  If it
-is a hash reference, then the value for the key C<wanted> should be a
-code reference.  This code reference is called I<the wanted()
-function> below.
+operations to be performed for each file, a code reference, or a string
+that contains a subroutine name.  If it is a hash reference, then the
+value for the key C<wanted> should be a code reference.  This code
+reference is called I<the wanted() function> below.
 
 Currently the only other supported key for the above hash is
 C<bydepth>, in presense of which the walk over directories is
@@ -194,7 +194,7 @@ sub finddir {
 
 sub wrap_wanted {
   my $wanted = shift;
-  defined &$wanted ? {wanted => $wanted} : $wanted;
+  ref($wanted) eq 'HASH' ? $wanted : { wanted => $wanted };
 }
 
 sub find {
