@@ -157,7 +157,7 @@ case "$osvers" in
 *) lddlflags="${ldflags} -bundle -undefined dynamic_lookup"
    case "$ld" in
    *MACOSX_DEVELOPMENT_TARGET*) ;;
-   *) ld="MACOSX_DEPLOYMENT_TARGET=10.3 ${ld}" ;;
+   *) ld="env MACOSX_DEPLOYMENT_TARGET=10.3 ${ld}" ;;
    esac
    ;;
 esac
