@@ -99,7 +99,7 @@ EOF
 	fi
         ;;
 *)	# compile something small: taint.c is fine for this.
-	ccversion=`cc -V | grep 'DEC C' | awk '{print $3}'`
+	ccversion=`cc -V | grep -E '(Compaq|DEC) C' | awk '{print $3}'`
     	# the main point is the '-v' flag of 'cc'.
        	case "`cc -v -I. -c taint.c -o taint$$.o 2>&1`" in
 	*/gemc_cc*)	# we have the new DEC GEM CC
