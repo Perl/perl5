@@ -17,7 +17,7 @@ sub STORESIZE { $#{$_[0]} = $_[1]+1 }
 
 package main;
 
-print "1..6\n";
+print "1..10\n";
 
 $sch = {
     'abc' => 1,
@@ -78,3 +78,21 @@ if ($a->{'abc'} eq 'ABC') {print "ok 5\n";} else {print "not ok 5\n";}
 my $slice = join('', 'x',@$a{'abc','def'},'x');
 print "not " if $slice ne 'xABCx';
 print "ok 6\n";
+
+# evaluation in scalar context
+my $avhv = [{}];
+print "not " if %$avhv;
+print "ok 7\n";
+
+push @$avhv, "a";
+print "not " if %$avhv;
+print "ok 8\n";
+
+$avhv = [];
+eval { $a = %$avhv };
+print "not " unless $@ and $@ =~ /^Can't coerce array into hash/;
+print "ok 9\n";
+
+$avhv = [{foo=>1, bar=>2}];
+print "not " unless %$avhv =~ m,^\d+/\d+,;
+print "ok 10\n";

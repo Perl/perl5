@@ -544,7 +544,8 @@ PP(pp_rv2hv)
     }
     else {
 	dTARGET;
-	/* This bit is OK even when hv is really an AV */
+	if (SvTYPE(hv) == SVt_PVAV)
+	    hv = avhv_keys((AV*)hv);
 	if (HvFILL(hv))
 	    sv_setpvf(TARG, "%ld/%ld",
 		      (long)HvFILL(hv), (long)HvMAX(hv) + 1);
