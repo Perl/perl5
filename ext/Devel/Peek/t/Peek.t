@@ -85,7 +85,7 @@ do_test( 5,
         $c = 456,
 'SV = IV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\(PADMY,IOK,pIOK\\)
+  FLAGS = \\(PADBUSY,PADMY,IOK,pIOK\\)
   IV = 456');
 
 # If perl is built with PERL_PRESERVE_IVUV then maths is done as integers
@@ -206,7 +206,7 @@ do_test(13,
   RV = $ADDR
   SV = PVCV\\($ADDR\\) at $ADDR
     REFCNT = 2
-    FLAGS = \\(PADMY,POK,pPOK,ANON,WEAKOUTSIDE\\)
+    FLAGS = \\(PADBUSY,PADMY,POK,pPOK,ANON,WEAKOUTSIDE\\)
     IV = 0
     NV = 0
     PROTOTYPE = ""
@@ -252,7 +252,7 @@ do_test(14,
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
        \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$pattern"
-      \\d+\\. $ADDR<\\d+> FAKE "\\$DEBUG" flags=0x0 index=0
+      \\d+\\. $ADDR<\\d+> FAKE "\\$DEBUG"
       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$dump"
     OUTSIDE = $ADDR \\(MAIN\\)');
 
@@ -327,7 +327,7 @@ do_test(18,
 	chr(256).chr(0).chr(512),
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\((?:PADTMP,)?POK,READONLY,pPOK,UTF8\\)
+  FLAGS = \\((?:PADBUSY,PADTMP,)?POK,READONLY,pPOK,UTF8\\)
   PV = $ADDR "\\\214\\\101\\\0\\\235\\\101"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
   LEN = \\d+');
@@ -336,7 +336,7 @@ do_test(18,
 	chr(256).chr(0).chr(512),
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\((?:PADTMP,)?POK,READONLY,pPOK,UTF8\\)
+  FLAGS = \\((?:PADBUSY,PADTMP,)?POK,READONLY,pPOK,UTF8\\)
   PV = $ADDR "\\\304\\\200\\\0\\\310\\\200"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
   LEN = \\d+');
@@ -402,7 +402,7 @@ do_test(20,
         $x,
 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\(PADMY,SMG,POK,pPOK\\)
+  FLAGS = \\(PADBUSY,PADMY,SMG,POK,pPOK\\)
   IV = 0
   NV = 0
   PV = $ADDR ""\\\0
