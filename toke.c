@@ -6148,7 +6148,7 @@ scan_formline(register char *s)
 #else
 	    for (t = s+1;*t == ' ' || *t == '\t' || *t == '\r'; t++) ;
 #endif
-	    if (*t == '\n')
+	    if (*t == '\n' || t == PL_bufend)
 		break;
 	}
 	if (PL_in_eval && !PL_rsfp) {
