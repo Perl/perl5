@@ -1686,7 +1686,7 @@ sighandler(int sig)
     OP *myop = op;
     U32 flags = 0;
     I32 o_save_i = savestack_ix, type;
-    CONTEXT *cx;
+    PERL_CONTEXT *cx;
     XPV *tXpv = Xpv;
     
     if (savestack_ix + 15 <= savestack_max)

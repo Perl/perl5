@@ -881,11 +881,6 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 
 #endif
 
-/* Digital UNIX defines a typedef CONTEXT when pthreads is in use */ 
-#if defined(__osf__)
-#  define CONTEXT PERL_CONTEXT
-#endif
-
 typedef MEM_SIZE STRLEN;
 
 typedef struct op OP;
@@ -914,7 +909,7 @@ typedef struct regexp REGEXP;
 typedef struct gp GP;
 typedef struct gv GV;
 typedef struct io IO;
-typedef struct context CONTEXT;
+typedef struct context PERL_CONTEXT;
 typedef struct block BLOCK;
 
 typedef struct magic MAGIC;
@@ -1945,7 +1940,7 @@ IEXT OP *	Ieval_start;
 IEXT COP * VOL	Icurcop IINIT(&compiling);
 IEXT COP *	Icurcopdb IINIT(NULL);
 IEXT line_t	Icopline IINIT(NOLINE);
-IEXT CONTEXT *	Icxstack;
+IEXT PERL_CONTEXT *	Icxstack;
 IEXT I32	Icxstack_ix IINIT(-1);
 IEXT I32	Icxstack_max IINIT(128);
 IEXT JMPENV 	Istart_env;	/* empty startup sigjmp() environment */

@@ -1226,7 +1226,7 @@ perl_call_sv(SV *sv, I32 flags)
 	markstack_ptr--;
 	/* we're trying to emulate pp_entertry() here */
 	{
-	    register CONTEXT *cx;
+	    register PERL_CONTEXT *cx;
 	    I32 gimme = GIMME_V;
 	    
 	    ENTER;
@@ -1294,7 +1294,7 @@ perl_call_sv(SV *sv, I32 flags)
 	    SV **newsp;
 	    PMOP *newpm;
 	    I32 gimme;
-	    register CONTEXT *cx;
+	    register PERL_CONTEXT *cx;
 	    I32 optype;
 
 	    POPBLOCK(cx,newpm);
@@ -2448,8 +2448,8 @@ init_stacks(ARGSproto)
     stack_sp = stack_base;
     stack_max = stack_base + 127;
 
-    cxstack_max = 8192 / sizeof(CONTEXT) - 2;	/* Use most of 8K. */
-    New(50,cxstack,cxstack_max + 1,CONTEXT);
+    cxstack_max = 8192 / sizeof(PERL_CONTEXT) - 2;	/* Use most of 8K. */
+    New(50,cxstack,cxstack_max + 1,PERL_CONTEXT);
     cxstack_ix	= -1;
 
     New(50,tmps_stack,128,SV*);
@@ -2986,7 +2986,7 @@ static void
 my_exit_jump(void)
 {
     dTHR;
-    register CONTEXT *cx;
+    register PERL_CONTEXT *cx;
     I32 gimme;
     SV **newsp;
 

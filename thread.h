@@ -204,7 +204,7 @@ struct thread {
     U8		Tlocalizing;
     COP *	Tcurcop;
 
-    CONTEXT *	Tcxstack;
+    PERL_CONTEXT *	Tcxstack;
     I32		Tcxstack_ix;
     I32		Tcxstack_max;
 
