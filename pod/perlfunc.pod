@@ -2501,7 +2501,7 @@ so you'll probably want to use them instead.  See L</my>.
 
 =item return LIST
 
-Returns from a subroutine or eval with the value specified.  (Note that
+Returns from a subroutine, eval or do with the value specified.  (Note that
 in the absence of a return a subroutine or eval() will automatically
 return the value of the last expression evaluated.)
 
