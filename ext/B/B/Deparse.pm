@@ -995,7 +995,7 @@ sub declare_warnings {
 sub declare_hints {
     my ($from, $to) = @_;
     my $bits = $to;
-    return sprintf "BEGIN {\$^H &= ~0xFF; \$^H |= %x}\n", $bits;
+    return $bits ? (sprintf "BEGIN {\$^H &= ~0xFF; \$^H |= %x}\n", $bits) : '';
 }
 
 sub pp_dbstate { pp_nextstate(@_) }
