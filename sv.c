@@ -2643,7 +2643,7 @@ uiv_2buf(char *buf, IV iv, UV uv, int is_uv, char **peob)
 char *
 Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 {
-    sv_2pv_flags(sv, lp, SV_GMAGIC);
+    return sv_2pv_flags(sv, lp, SV_GMAGIC);
 }
 
 char *
@@ -2972,7 +2972,7 @@ if all the bytes have hibit clear.
 STRLEN
 Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
 {
-    sv_utf8_upgrade_flags(sv, SV_GMAGIC);
+    return sv_utf8_upgrade_flags(sv, SV_GMAGIC);
 }
 
 /*
@@ -6253,7 +6253,7 @@ Get a sensible string out of the SV somehow.
 char *
 Perl_sv_pvn_force(pTHX_ SV *sv, STRLEN *lp)
 {
-    sv_pvn_force_flags(sv, lp, SV_GMAGIC);
+    return sv_pvn_force_flags(sv, lp, SV_GMAGIC);
 }
 
 /*
