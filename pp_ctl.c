@@ -369,15 +369,20 @@ PP(pp_formline)
     bool item_is_utf8 = FALSE;
     bool targ_is_utf8 = FALSE;
     SV * nsv = Nullsv;
+    OP * parseres = 0;
+    char *fmt;
+    bool oneline;
 
     if (!SvMAGICAL(tmpForm) || !SvCOMPILED(tmpForm)) {
 	if (SvREADONLY(tmpForm)) {
 	    SvREADONLY_off(tmpForm);
-	    doparseform(tmpForm);
+	    parseres = doparseform(tmpForm);
 	    SvREADONLY_on(tmpForm);
 	}
 	else
-	    doparseform(tmpForm);
+	    parseres = doparseform(tmpForm);
+	if (parseres)
+	    return parseres;
     }
     SvPV_force(PL_formtarget, len);
     if (DO_UTF8(PL_formtarget))
@@ -413,6 +418,7 @@ PP(pp_formline)
 	    case FF_LINEMARK:	name = "LINEMARK";	break;
 	    case FF_END:	name = "END";		break;
             case FF_0DECIMAL:	name = "0DECIMAL";	break;
+	    case FF_LINESNGL:	name = "LINESNGL";	break;
 	    }
 	    if (arg >= 0)
 		PerlIO_printf(Perl_debug_log, "%-16s%ld\n", name, (long) arg);
@@ -519,6 +525,7 @@ PP(pp_formline)
 			while (s < send) {
 			    if (*s == '\r') {
 				itemsize = s - item;
+				chophere = s;
 				break;
 			    }
 			    if (*s++ & ~31)
@@ -558,6 +565,7 @@ PP(pp_formline)
 		while (s < send) {
 		    if (*s == '\r') {
 			itemsize = s - item;
+			chophere = s;
 			break;
 		    }
 		    if (*s++ & ~31)
@@ -648,7 +656,7 @@ PP(pp_formline)
 		sv_catpvn_utf8_upgrade(PL_formtarget, s, arg, nsv);
 		for (; t < SvEND(PL_formtarget); t++) {
 #ifdef EBCDIC
-		    int ch = *t++ = *s++;
+		    int ch = *t;
 		    if (iscntrl(ch))
 #else
 		    if (!(*t & ~31))
@@ -678,7 +686,13 @@ PP(pp_formline)
 	    SvSETMAGIC(sv);
 	    break;
 
+	case FF_LINESNGL:
+	    chopspace = 0;
+	    oneline = TRUE;
+	    goto ff_line;
 	case FF_LINEGLOB:
+	    oneline = FALSE;
+	ff_line:
 	    item = s = SvPV(sv, len);
 	    itemsize = len;
 	    if ((item_is_utf8 = DO_UTF8(sv)))
@@ -687,20 +701,31 @@ PP(pp_formline)
 		bool chopped = FALSE;
 		gotsome = TRUE;
 		send = s + len;
+		chophere = s + itemsize;
 		while (s < send) {
 		    if (*s++ == '\n') {
-			if (s == send) {
-			    itemsize--;
+		        if (oneline) {
 			    chopped = TRUE;
+			    chophere = s;
+			    break;
+			} else {
+			    if (s == send) {
+			        itemsize--;
+			        chopped = TRUE;
+			    } else
+			        lines++;
 			}
-			else
-			    lines++;
 		    }
 		}
 		SvCUR_set(PL_formtarget, t - SvPVX(PL_formtarget));
 		if (targ_is_utf8)
 		    SvUTF8_on(PL_formtarget);
-		sv_catsv(PL_formtarget, sv);
+		if (oneline) {
+		    SvCUR_set(sv, chophere - item);
+		    sv_catsv(PL_formtarget, sv);
+		    SvCUR_set(sv, itemsize);
+		} else
+		    sv_catsv(PL_formtarget, sv);
 		if (chopped)
 		    SvCUR_set(PL_formtarget, SvCUR(PL_formtarget) - 1);
 		SvGROW(PL_formtarget, SvCUR(PL_formtarget) + fudge + 1);
@@ -710,10 +735,24 @@ PP(pp_formline)
 	    }
 	    break;
 
+	case FF_0DECIMAL:
+	    arg = *fpc++;
+#if defined(USE_LONG_DOUBLE)
+	    fmt = (arg & 256) ? "%#0*.*" PERL_PRIfldbl : "%0*.*" PERL_PRIfldbl;
+#else
+	    fmt = (arg & 256) ? "%#0*.*f"              : "%0*.*f";
+#endif
+	    goto ff_dec;
 	case FF_DECIMAL:
+	    arg = *fpc++;
+#if defined(USE_LONG_DOUBLE)
+ 	    fmt = (arg & 256) ? "%#*.*" PERL_PRIfldbl : "%*.*" PERL_PRIfldbl;
+#else
+            fmt = (arg & 256) ? "%#*.*f"              : "%*.*f";
+#endif
+	ff_dec:
 	    /* If the field is marked with ^ and the value is undefined,
 	       blank it out. */
-	    arg = *fpc++;
 	    if ((arg & 512) && !SvOK(sv)) {
 		arg = fieldsize;
 		while (arg--)
@@ -722,67 +761,22 @@ PP(pp_formline)
 	    }
 	    gotsome = TRUE;
 	    value = SvNV(sv);
+	    /* overflow evidence */
+	    if (num_overflow(value, fieldsize, arg)) { 
+	        arg = fieldsize;
+		while (arg--)
+		    *t++ = '#';
+		break;
+	    }
 	    /* Formats aren't yet marked for locales, so assume "yes". */
 	    {
 		STORE_NUMERIC_STANDARD_SET_LOCAL();
-#if defined(USE_LONG_DOUBLE)
-		if (arg & 256) {
-		    sprintf(t, "%#*.*" PERL_PRIfldbl,
-			    (int) fieldsize, (int) arg & 255, value);
-		} else {
-		    sprintf(t, "%*.0" PERL_PRIfldbl, (int) fieldsize, value);
-		}
-#else
-		if (arg & 256) {
-		    sprintf(t, "%#*.*f",
-			    (int) fieldsize, (int) arg & 255, value);
-		} else {
-		    sprintf(t, "%*.0f",
-			    (int) fieldsize, value);
-		}
-#endif
+		sprintf(t, fmt, (int) fieldsize, (int) arg & 255, value);
 		RESTORE_NUMERIC_STANDARD();
 	    }
 	    t += fieldsize;
 	    break;
 
-	case FF_0DECIMAL:
-	    /* If the field is marked with ^ and the value is undefined,
-	       blank it out. */
-	    arg = *fpc++;
-	    if ((arg & 512) && !SvOK(sv)) {
-		arg = fieldsize;
-		while (arg--)
-		    *t++ = ' ';
-		break;
-	    }
-	    gotsome = TRUE;
-	    value = SvNV(sv);
-	    /* Formats aren't yet marked for locales, so assume "yes". */
-	    {
-		STORE_NUMERIC_STANDARD_SET_LOCAL();
-#if defined(USE_LONG_DOUBLE)
-		if (arg & 256) {
-		    sprintf(t, "%#0*.*" PERL_PRIfldbl,
-			    (int) fieldsize, (int) arg & 255, value);
-/* is this legal? I don't have long doubles */
-		} else {
-		    sprintf(t, "%0*.0" PERL_PRIfldbl, (int) fieldsize, value);
-		}
-#else
-		if (arg & 256) {
-		    sprintf(t, "%#0*.*f",
-			    (int) fieldsize, (int) arg & 255, value);
-		} else {
-		    sprintf(t, "%0*.0f",
-			    (int) fieldsize, value);
-		}
-#endif
-		RESTORE_NUMERIC_STANDARD();
-	    }
-	    t += fieldsize;
-	    break;
-	
 	case FF_NEWLINE:
 	    f++;
 	    while (t-- > linemark && *t == ' ') ;
@@ -3557,7 +3551,7 @@ PP(pp_leavetry)
     RETURNOP(retop);
 }
 
-STATIC void
+STATIC OP *
 S_doparseform(pTHX_ SV *sv)
 {
     STRLEN len;
@@ -3573,14 +3567,15 @@ S_doparseform(pTHX_ SV *sv)
     U32 *linepc = 0;
     register I32 arg;
     bool ischop;
-    int maxops = 2; /* FF_LINEMARK + FF_END) */
+    bool unchopnum = FALSE;
+    int maxops = 12; /* FF_LINEMARK + FF_END + 10 (\0 without preceding \n) */
 
     if (len == 0)
 	Perl_croak(aTHX_ "Null picture in formline");
 
     /* estimate the buffer size needed */
     for (base = s; s <= send; s++) {
-	if (*s == '\n' || *s == '\0' || *s == '@' || *s == '^')
+	if (*s == '\n' || *s == '@' || *s == '^')
 	    maxops += 10;
     }
     s = base;
@@ -3613,8 +3608,12 @@ S_doparseform(pTHX_ SV *sv)
 	case ' ': case '\t':
 	    skipspaces++;
 	    continue;
-	
-	case '\n': case 0:
+        case 0:
+	    if (s < send) {
+	        skipspaces = 0;
+                continue;
+            } /* else FALL THROUGH */
+	case '\n':
 	    arg = s - base;
 	    skipspaces++;
 	    arg -= skipspaces;
@@ -3670,8 +3669,12 @@ S_doparseform(pTHX_ SV *sv)
 	    *fpc++ = FF_FETCH;
 	    if (*s == '*') {
 		s++;
-		*fpc++ = 0;
-		*fpc++ = FF_LINEGLOB;
+		*fpc++ = 2;  /* skip the @* or ^* */
+		if (ischop) {
+		    *fpc++ = FF_LINESNGL;
+		    *fpc++ = FF_CHOP;
+		} else
+		    *fpc++ = FF_LINEGLOB;
 	    }
 	    else if (*s == '#' || (*s == '.' && s[1] == '#')) {
 		arg = ischop ? 512 : 0;
@@ -3689,6 +3692,7 @@ S_doparseform(pTHX_ SV *sv)
 		*fpc++ = s - base;		/* fieldsize for FETCH */
 		*fpc++ = FF_DECIMAL;
                 *fpc++ = (U16)arg;
+                unchopnum |= ! ischop;
             }
             else if (*s == '0' && s[1] == '#') {  /* Zero padded decimals */
                 arg = ischop ? 512 : 0;
@@ -3707,6 +3711,7 @@ S_doparseform(pTHX_ SV *sv)
                 *fpc++ = s - base;                /* fieldsize for FETCH */
                 *fpc++ = FF_0DECIMAL;
 		*fpc++ = (U16)arg;
+                unchopnum |= ! ischop;
 	    }
 	    else {
 		I32 prespace = 0;
@@ -3761,6 +3766,38 @@ S_doparseform(pTHX_ SV *sv)
     Safefree(fops);
     sv_magic(sv, Nullsv, PERL_MAGIC_fm, Nullch, 0);
     SvCOMPILED_on(sv);
+
+    if (unchopnum && repeat) 
+        DIE(aTHX_ "Repeated format line will never terminate (~~ and @#)");
+    return 0;
+}
+
+
+STATIC bool
+S_num_overflow(NV value, I32 fldsize, I32 frcsize)
+{
+    /* Can value be printed in fldsize chars, using %*.*f ? */
+    NV pwr = 1;
+    NV eps = 0.5;
+    bool res = FALSE;
+    int intsize = fldsize - (value < 0 ? 1 : 0);
+
+    if (frcsize & 256)
+        intsize--;
+    frcsize &= 255;
+    intsize -= frcsize;
+
+    while (intsize--) pwr *= 10.0;
+    while (frcsize--) eps /= 10.0;
+
+    if( value >= 0 ){
+        if (value + eps >= pwr)
+	    res = TRUE;
+    } else {
+        if (value - eps <= -pwr)
+	    res = TRUE;
+    }
+    return res;
 }
 
 static I32

@@ -1085,7 +1085,8 @@ s	|void*	|docatch_body
 s	|void*	|vdocatch_body	|va_list args
 #endif
 s	|OP*	|dofindlabel	|OP *o|char *label|OP **opstack|OP **oplimit
-s	|void	|doparseform	|SV *sv
+s	|OP*	|doparseform	|SV *sv
+sn	|bool	|num_overflow	|NV value|I32 fldsize|I32 frcsize
 s	|I32	|dopoptoeval	|I32 startingblock
 s	|I32	|dopoptolabel	|char *label
 s	|I32	|dopoptoloop	|I32 startingblock

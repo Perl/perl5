@@ -24,3 +24,4 @@
 #define FF_BLANK        14
 #define FF_MORE         15
 #define FF_0DECIMAL     16
+#define FF_LINESNGL     17

@@ -1042,7 +1042,8 @@ STATIC void*	S_docatch_body(pTHX);
 STATIC void*	S_vdocatch_body(pTHX_ va_list args);
 #endif
 STATIC OP*	S_dofindlabel(pTHX_ OP *o, char *label, OP **opstack, OP **oplimit);
-STATIC void	S_doparseform(pTHX_ SV *sv);
+STATIC OP*	S_doparseform(pTHX_ SV *sv);
+STATIC bool	S_num_overflow(NV value, I32 fldsize, I32 frcsize);
 STATIC I32	S_dopoptoeval(pTHX_ I32 startingblock);
 STATIC I32	S_dopoptolabel(pTHX_ char *label);
 STATIC I32	S_dopoptoloop(pTHX_ I32 startingblock);
