@@ -114,7 +114,7 @@ struct thread {
 
     AV *	Tstack;
     AV *	Tmainstack;
-    Sigjmp_buf	Ttop_env;
+    JMPENV *	Ttop_env;
     I32		Trunlevel;
 
     /* XXX Sort stuff, firstgv, secongv and so on? */

@@ -2991,11 +2991,15 @@ CV *cv;
 {
     dTHR;
 #ifdef USE_THREADS
-    MUTEX_DESTROY(CvMUTEXP(cv));
-    Safefree(CvMUTEXP(cv));
+    if (CvMUTEXP(cv)) {
+	MUTEX_DESTROY(CvMUTEXP(cv));
+	Safefree(CvMUTEXP(cv));
+	CvMUTEXP(cv) = 0;
+    }
     if (CvCONDP(cv)) {
 	COND_DESTROY(CvCONDP(cv));
 	Safefree(CvCONDP(cv));
+	CvCONDP(cv) = 0;
     }
 #endif /* USE_THREADS */
 
@@ -3284,8 +3288,8 @@ CV* cv;
 	if (type == OP_CONST)
 	    sv = cSVOPo->op_sv;
 	else if (type == OP_PADSV) {
-	    AV* pad = (AV*)(AvARRAY(CvPADLIST(cv))[1]);
-	    sv = pad ? AvARRAY(pad)[o->op_targ] : Nullsv;
+	    AV* padav = (AV*)(AvARRAY(CvPADLIST(cv))[1]);
+	    sv = padav ? AvARRAY(padav)[o->op_targ] : Nullsv;
 	    if (!sv || (!SvREADONLY(sv) && SvREFCNT(sv) > 1))
 		return Nullsv;
 	}
@@ -4701,7 +4705,7 @@ OP *o;
 			o2 = newUNOP(OP_REFGEN, 0, kid);
 			o2->op_sibling = kid->op_sibling;
 			kid->op_sibling = 0;
-			prev->op_sibling = o;
+			prev->op_sibling = o2;
 		    }
 		    break;
 		default: goto oops;
@@ -4824,7 +4828,7 @@ register OP* o;
 		OP* pop = o->op_next->op_next;
 		IV i;
 		if (pop->op_type == OP_CONST &&
-		    (o = pop->op_next) &&
+		    (op = pop->op_next) &&
 		    pop->op_next->op_type == OP_AELEM &&
 		    !(pop->op_next->op_private &
 		      (OPpLVAL_INTRO|OPpLVAL_DEFER|OPpDEREF)) &&

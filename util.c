@@ -1131,6 +1131,7 @@ mess(pat, args)
     sv = mess_sv;
     sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
     if (!SvCUR(sv) || *(SvEND(sv) - 1) != '\n') {
+	dTHR;
 	if (dirty)
 	    sv_catpv(sv, dgd);
 	else {

@@ -1270,6 +1270,7 @@ register SV *sv;
 	if (SvPOKp(sv) && SvLEN(sv))
 	    return asIV(sv);
 	if (!SvROK(sv)) {
+	    dTHR;		/* just for localizing */
 	    if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
 		warn(warn_uninit);
 	    return 0;
@@ -1346,6 +1347,7 @@ register SV *sv;
 	if (SvPOKp(sv) && SvLEN(sv))
 	    return asUV(sv);
 	if (!SvROK(sv)) {
+	    dTHR;		/* just for localizing */
 	    if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
 		warn(warn_uninit);
 	    return 0;
@@ -1391,6 +1393,7 @@ register SV *sv;
 	SvUVX(sv) = asUV(sv);
     }
     else  {
+	dTHR;		/* just for localizing */
 	if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
 	    warn(warn_uninit);
 	return 0;
@@ -1419,6 +1422,7 @@ register SV *sv;
 	if (SvIOKp(sv))
 	    return (double)SvIVX(sv);
         if (!SvROK(sv)) {
+	    dTHR;		/* just for localizing */
 	    if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
 		warn(warn_uninit);
             return 0;
@@ -1626,6 +1630,7 @@ STRLEN *lp;
 	    goto tokensave;
 	}
         if (!SvROK(sv)) {
+	    dTHR;		/* just for localizing */
 	    if (dowarn && !localizing && !(SvFLAGS(sv) & SVs_PADTMP))
 		warn(warn_uninit);
             *lp = 0;
@@ -2410,8 +2415,10 @@ I32 namlen;
     if (name)
 	if (namlen >= 0)
 	    mg->mg_ptr = savepvn(name, namlen);
-	else if (namlen == HEf_SVKEY)
+	else if (namlen == HEf_SVKEY) {
+	    dTHR;		/* just for SvREFCNT_inc */
 	    mg->mg_ptr = (char*)SvREFCNT_inc((SV*)name);
+	}
     
     switch (how) {
     case 0:
@@ -2681,6 +2688,7 @@ register SV *sv;
     assert(SvREFCNT(sv) == 0);
 
     if (SvOBJECT(sv)) {
+	dTHR;
 	if (defstash) {		/* Still have a symbol table? */
 	    dTHR;
 	    dSP;
@@ -4213,6 +4221,7 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
     I32 svmax;
     bool *used_locale;
 {
+    dTHR;
     char *p;
     char *q;
     char *patend;

@@ -288,8 +288,9 @@ startformsub:	/* NULL */	/* start a format subroutine scope */
 			{ $$ = start_subparse(TRUE, 0); }
 	;
 
-subname	:	WORD	{ char *name = SvPVx(((SVOP*)$1)->op_sv, na);
-			  if (strEQ(name, "BEGIN") || strEQ(name, "END"))
+subname	:	WORD	{ char *name = SvPV(((SVOP*)$1)->op_sv, na);
+			  if (strEQ(name, "BEGIN") || strEQ(name, "END")
+			      || strEQ(name, "RESTART"))
 			      CvUNIQUE_on(compcv);
 			  $$ = $1; }
 	;

@@ -58,6 +58,7 @@ GV *
 gv_fetchfile(name)
 char *name;
 {
+    dTHR;
     char smallbuf[256];
     char *tmpbuf;
     STRLEN tmplen;
@@ -182,6 +183,7 @@ I32 level;
 	    basestash = gv_stashpvn(packname, packlen, TRUE);
 	    gvp = (GV**)hv_fetch(basestash, "ISA", 3, FALSE);
 	    if (gvp && (gv = *gvp) != (GV*)&sv_undef && (av = GvAV(gv))) {
+		dTHR;		/* just for SvREFCNT_dec */
 		gvp = (GV**)hv_fetch(stash, "ISA", 3, TRUE);
 		if (!gvp || !(gv = *gvp))
 		    croak("Cannot create %s::ISA", HvNAME(stash));
@@ -231,6 +233,7 @@ I32 level;
 		    (cv = GvCV(gv)) &&
 		    (CvROOT(cv) || CvXSUB(cv)))
 		{
+		    dTHR;	/* just for SvREFCNT_inc */
 		    if (cv = GvCV(topgv))
 			SvREFCNT_dec(cv);
 		    GvCV(topgv) = (CV*)SvREFCNT_inc(GvCV(gv));

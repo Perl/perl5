@@ -3,8 +3,8 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
- last modified 30th Apr 1997
- version 1.14
+ last modified 31st May 1997
+ version 1.15
 
  All comments/suggestions/problems are welcome
 
@@ -42,6 +42,7 @@
 	1.13 -  Tidied up a few casts.
 	1.14 -  Made it illegal to tie an associative array to a RECNO
 	        database and an ordinary array to a HASH or BTREE database.
+	1.15 -  Minor additions to DB_File.xs to support multithreaded perl.
 
 */
 
@@ -134,6 +135,7 @@ btree_compare(key1, key2)
 const DBT * key1 ;
 const DBT * key2 ;
 {
+    dTHR ;
     dSP ;
     void * data1, * data2 ;
     int retval ;
@@ -181,6 +183,7 @@ btree_prefix(key1, key2)
 const DBT * key1 ;
 const DBT * key2 ;
 {
+    dTHR ;
     dSP ;
     void * data1, * data2 ;
     int retval ;
@@ -228,6 +231,7 @@ hash_cb(data, size)
 const void * data ;
 size_t size ;
 {
+    dTHR ;
     dSP ;
     int retval ;
     int count ;

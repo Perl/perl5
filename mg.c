@@ -665,6 +665,7 @@ MAGIC* mg;
     	if(psig_ptr[i])
     	    sv_setsv(sv,psig_ptr[i]);
     	else {
+	    dTHR;		/* just for SvREFCNT_inc */
     	    Sighandler_t sigstate = rsignal_state(i);
 
     	    /* cache state so we don't fetch it again */
@@ -1141,6 +1142,7 @@ MAGIC* mg;
 		targ = AvARRAY(av)[LvTARGOFF(sv)];
 	}
 	if (targ && targ != &sv_undef) {
+	    dTHR;		/* just for SvREFCNT_dec */
 	    /* somebody else defined it for us */
 	    SvREFCNT_dec(LvTARG(sv));
 	    LvTARG(sv) = SvREFCNT_inc(targ);
@@ -1183,6 +1185,7 @@ void
 vivify_defelem(sv)
 SV* sv;
 {
+    dTHR;			/* just for SvREFCNT_inc and SvREFCNT_dec*/
     MAGIC* mg;
     SV* value;
 

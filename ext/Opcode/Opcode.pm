@@ -5,7 +5,7 @@ require 5.002;
 use vars qw($VERSION $XS_VERSION @ISA @EXPORT_OK);
 
 $VERSION = "1.04";
-$XS_VERSION = "1.02";
+$XS_VERSION = "1.03";
 
 use strict;
 use Carp;

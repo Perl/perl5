@@ -830,24 +830,23 @@ print \"  \\@INC:\\n    @INC\\n\";");
     main_cv = compcv = (CV*)NEWSV(1104,0);
     sv_upgrade((SV *)compcv, SVt_PVCV);
     CvUNIQUE_on(compcv);
-#ifdef USE_THREADS
-    CvOWNER(compcv) = 0;
-    New(666, CvMUTEXP(compcv), 1, pthread_mutex_t);
-    MUTEX_INIT(CvMUTEXP(compcv));
-    New(666, CvCONDP(compcv), 1, pthread_cond_t);
-    COND_INIT(CvCONDP(compcv));
-#endif /* USE_THREADS */
 
     comppad = newAV();
     av_push(comppad, Nullsv);
     curpad = AvARRAY(comppad);
     comppad_name = newAV();
     comppad_name_fill = 0;
-#ifdef USE_THREADS
-    av_store(comppad_name, 0, newSVpv("@_", 2));
-#endif /* USE_THREADS */
     min_intro_pending = 0;
     padix = 0;
+#ifdef USE_THREADS
+    av_store(comppad_name, 0, newSVpv("@_", 2));
+    curpad[0] = (SV*)newAV();
+    CvOWNER(compcv) = 0;
+    New(666, CvMUTEXP(compcv), 1, pthread_mutex_t);
+    MUTEX_INIT(CvMUTEXP(compcv));
+    New(666, CvCONDP(compcv), 1, pthread_cond_t);
+    COND_INIT(CvCONDP(compcv));
+#endif /* USE_THREADS */
 
     comppadlist = newAV();
     AvREAL_off(comppadlist);
@@ -1333,6 +1332,7 @@ perl_eval_pv(p, croak_on_error)
 char* p;
 I32 croak_on_error;
 {
+    dTHR;
     dSP;
     SV* sv = newSVpv(p, 0);
 
@@ -2323,6 +2323,7 @@ dARGS
 static void
 nuke_stacks()
 {
+    dTHR;
     Safefree(cxstack);
     Safefree(tmps_stack);
     DEBUG( {
@@ -2748,6 +2749,7 @@ my_failure_exit()
 static void
 my_exit_jump()
 {
+    dTHR;
     register CONTEXT *cx;
     I32 gimme;
     SV **newsp;

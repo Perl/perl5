@@ -177,6 +177,7 @@ save_gp(gv, empty)
 GV *gv;
 I32 empty;
 {
+    dTHR;
     SSCHECK(3);
     SSPUSHPTR(SvREFCNT_inc(gv));
     SSPUSHPTR(GvGP(gv));
@@ -276,6 +277,7 @@ void
 save_I16(intp)
 I16 *intp;
 {
+    dTHR;
     SSCHECK(3);
     SSPUSHINT(*intp);
     SSPUSHPTR(intp);

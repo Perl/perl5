@@ -557,6 +557,7 @@ U32 hash;
 
     if (SvRMAGICAL(hv)) {
 	if (mg_find((SV*)hv,'P')) {
+	    dTHR;		/* just for SvTRUE */
 	    sv = sv_newmortal();
 	    keysv = sv_2mortal(newSVsv(keysv));
 	    mg_copy((SV*)hv, sv, (char*)keysv, HEf_SVKEY); 
@@ -924,6 +925,7 @@ HV *hv;
 	}
 	magic_nextpack((SV*) hv,mg,key);
         if (SvOK(key)) {
+	    dTHR;		/* just for SvREFCNT_inc */
 	    /* force key to stay around until next time */
 	    HeSVKEY_set(entry, SvREFCNT_inc(key));
 	    return entry;		/* beware, hent_val is not set */

@@ -56,9 +56,6 @@ runops() {
 	    DEBUG_s(debstack());
 	    DEBUG_t(debop(op));
 	    DEBUG_P(debprof(op));
-#ifdef USE_THREADS
-	    DEBUG_L(YIELD());	/* shake up scheduling a bit */
-#endif /* USE_THREADS */
 	}
     } while ( op = (*op->op_ppaddr)(ARGS) );
 

@@ -33,9 +33,10 @@ op_names_init()
 
     op_named_bits = newHV();
     for(i=0; i < maxo; ++i) {
-	hv_store(op_named_bits, op_name[i],strlen(op_name[i]),
-		Sv=newSViv(i), 0);
-	SvREADONLY_on(Sv);
+	SV *sv;
+	sv = newSViv(i);
+	SvREADONLY_on(sv);
+	hv_store(op_named_bits, op_name[i], strlen(op_name[i]), sv, 0);
     }
 
     put_op_bitspec(":none",0, sv_2mortal(new_opset(Nullsv)));

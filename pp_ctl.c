@@ -2111,6 +2111,7 @@ static OP *
 docatch(o)
 OP *o;
 {
+    dTHR;
     int ret;
     I32 oldrunlevel = runlevel;
     OP *oldop = op;

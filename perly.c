@@ -1763,8 +1763,9 @@ case 55:
 break;
 case 56:
 #line 291 "perly.y"
-{ char *name = SvPVx(((SVOP*)yyvsp[0].opval)->op_sv, na);
-			  if (strEQ(name, "BEGIN") || strEQ(name, "END"))
+{ char *name = SvPV(((SVOP*)yyvsp[0].opval)->op_sv, na);
+			  if (strEQ(name, "BEGIN") || strEQ(name, "END")
+			      || strEQ(name, "RESTART"))
 			      CvUNIQUE_on(compcv);
 			  yyval.opval = yyvsp[0].opval; }
 break;

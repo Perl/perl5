@@ -385,6 +385,7 @@ SV* sv;
     else if (SvPADTMP(sv))
 	sv = newSVsv(sv);
     else {
+	dTHR;			/* just for SvREFCNT_inc */
 	SvTEMP_off(sv);
 	(void)SvREFCNT_inc(sv);
     }
@@ -1448,6 +1449,7 @@ seed()
 #define   SEED_C3	269
 #define   SEED_C5	26107
 
+    dTHR;
     U32 u;
 #ifdef VMS
 #  include <starlet.h>

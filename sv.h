@@ -243,6 +243,11 @@ struct xpvfm {
     long	xcv_depth;		/* >= 2 indicates recursive call */
     AV *	xcv_padlist;
     CV *	xcv_outside;
+#ifdef USE_THREADS
+    pthread_mutex_t *	xcv_mutexp;
+    pthread_cond_t *	xcv_condp;	/* signalled when owner leaves CV */
+    struct thread *	xcv_owner;	/* current owner thread */
+#endif /* USE_THREADS */
     U8		xcv_flags;
 
     I32		xfm_lines;

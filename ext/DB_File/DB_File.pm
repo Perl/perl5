@@ -1,8 +1,8 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
-# last modified 30th Apr 1997
-# version 1.14
+# last modified 31st May 1997
+# version 1.15
 #
 #     Copyright (c) 1995, 1996, 1997 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -146,7 +146,7 @@ use vars qw($VERSION @ISA @EXPORT $AUTOLOAD $DB_BTREE $DB_HASH $DB_RECNO) ;
 use Carp;
 
 
-$VERSION = "1.14" ;
+$VERSION = "1.15" ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 $DB_BTREE = new DB_File::BTREEINFO ;
@@ -1665,6 +1665,10 @@ Minor changes to DB_FIle.xs and DB_File.pm
 
 Made it illegal to tie an associative array to a RECNO database and an
 ordinary array to a HASH or BTREE database.
+
+=item 1.15
+
+Minor changes to DB_File.xs to support multithreaded perl.
 
 =back
 

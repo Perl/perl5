@@ -536,6 +536,7 @@ int kind;
 	nextval[nexttoke].opval = o;
 	force_next(WORD);
 	if (kind) {
+	    dTHR;		/* just for in_eval */
 	    o->op_private = OPpCONST_ENTERED;
 	    /* XXX see note in pp_entereval() for why we forgo typo
 	       warnings if the symbol must be introduced in an eval.
