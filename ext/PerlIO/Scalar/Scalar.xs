@@ -124,6 +124,7 @@ PerlIOScalar_get_base(PerlIO *f)
    dTHX;
    return (STDCHAR *)SvPV_nolen(s->var);
   }
+ return (STDCHAR *) Nullch;
 }
 
 STDCHAR *
