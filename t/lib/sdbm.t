@@ -28,7 +28,7 @@ if (! -e $Dfile) {
 }
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
    $blksize,$blocks) = stat($Dfile);
-print (($mode & 0777) == 0640 ? "ok 2\n" : "not ok 2\n");
+print (($mode & 0777) == ($^O eq 'os2' ? 0666 : 0640) ? "ok 2\n" : "not ok 2\n");
 while (($key,$value) = each(%h)) {
     $i++;
 }
