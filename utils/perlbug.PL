@@ -48,7 +48,7 @@ use strict;
 sub paraprint;
 
 
-my($Version) = "1.14";
+my($Version) = "1.15";
 
 # Changed in 1.06 to skip Mail::Send and Mail::Util if not available.
 # Changed in 1.07 to see more sendmail execs, and added pipe output.
@@ -64,6 +64,8 @@ my($Version) = "1.14";
 #                 send mail
 # Changed in 1.14 to make the prompts a little more clear on providing
 #                 helpful information. Also let file read fail gracefully.
+# Changed in 1.15 to add warnings to stop people using perlbug for non-bugs.
+#                 Also report selected environment variables.
 
 # TODO: Allow the user to re-name the file on mail failure, and
 #       make sure failure (transmission-wise) of Mail::Send is 
@@ -160,8 +162,11 @@ sub Query {
 	# Explain what perlbug is
 	
 	paraprint <<EOF;
-This program provides an easy way to create a message reporting a bug in
-perl, and e-mail it to $address.
+This program provides an easy way to create a message reporting a bug
+in perl, and e-mail it to $address.  It is *NOT* intended for
+sending test messages or simply verifying that perl works.  It is *ONLY*
+a means of reporting verifiable problems with perl, and any solutions to
+such problems, to the people who maintain perl.
 
 EOF
 
@@ -430,6 +435,20 @@ EOF
 			$value =~ s/'/\\'/g;
 			print OUT "$_='$value'\n";
 		}
+	}
+	print OUT <<EOF;
+
+
+Environment for perl $]:
+EOF
+        for my $env (qw(PATH LD_LIBRARY_PATH
+		    PERL5LIB PERLLIB PERL5DB
+		    LC_ALL LC_COLLATE LC_CTYPE LC_MONETARY LC_NUMERIC LC_TIME
+		    LANG PERL_BADLANG
+		    SHELL HOME LOGDIR)) {
+	    print OUT "    $env",
+                      exists $ENV{$env} ? "=$ENV{$env}" : ' (unset)',
+	              "\n";
 	}
 }
 
