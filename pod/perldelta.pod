@@ -460,6 +460,9 @@ C<perlcc -B> works now at least somewhat better, while C<perlcc -c>
 is rather more broken.  (The Perl compiler suite as a whole continues
 to be experimental.)
 
+C<find2perl> now assumes C<-print> as a default action. It needed to be
+specified explicitly.
+
 =head1 New Documentation
 
 perl573delta has been added to list the differences between the
