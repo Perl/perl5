@@ -2352,9 +2352,10 @@ $   IF ans .EQS. "" THEN ans="''dflt'"
 $   be_case_sensitive = "''ans'"
 $! IEEE math?
 $   echo ""
-$   echo "Perl normally uses G_FLOAT format floating point numbers"
-$   echo "internally, as do most things on VMS.  You can, however, build"
-$   echo "with IEEE floating point numbers instead if you need to."
+$   echo "Perl normally uses IEEE format (T_FLOAT) floating point numbers"
+$   echo "internally on Alpha, but if you need G_FLOAT for binary compatibility"
+$   echo "with an external library or existing data, you may wish to disable"
+$   echo "the IEEE math option."
 $   dflt = use_ieee_math
 $   rp = "Use IEEE math? [''dflt'] "
 $   GOSUB myread

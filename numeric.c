@@ -573,24 +573,21 @@ S_mulexp10(NV value, I32 exponent)
 	exponent = -exponent;
     }
 
-    /* Avoid %SYSTEM-F-FLTOVF_F sans VAXC$ESTABLISH.
-     * In VAX VMS we by default use the D_FLOAT double format,
+    /* On OpenVMS VAX we by default use the D_FLOAT double format,
      * and that format does not have *easy* capabilities [1] for
-     * overflowing doubles 'silently' as IEEE fp does.  Therefore we
-     * need to detect early whether we would overflow (this is
-     * the behaviour of the native string-to-float conversion routines,
-     * and therefore the behaviour of native applications, too.)
+     * overflowing doubles 'silently' as IEEE fp does.  We also need 
+     * to support G_FLOAT on both VAX and Alpha, and though the exponent 
+     * range is much larger than D_FLOAT it still doesn't do silent 
+     * overflow.  Therefore we need to detect early whether we would 
+     * overflow (this is the behaviour of the native string-to-float 
+     * conversion routines, and therefore of native applications, too).
      *
-     * [1] VAXC$EXTABLISH is the capability but it is basically a signal
-     * handler setup routine, and one cannot return from a fp exception
-     * handler and except much anything useful. */
-#if defined(VMS) && !defined(__IEEE_FP)
-#  if defined(__DECC_VER) && __DECC_VER <= 50390006
-    /* __F_FLT_MAX_10_EXP - 5 == 33 */
+     * [1] Trying to establish a condition handler to trap floating point
+     *     exceptions is not a good idea. */
+#if defined(VMS) && !defined(__IEEE_FP) && defined(NV_MAX_10_EXP)
     if (!negative &&
-          (log10(value) + exponent) >= (__F_FLT_MAX_10_EXP - 5))
+        (log10(value) + exponent) >= (NV_MAX_10_EXP))
         return NV_MAX;
-#  endif
 #endif
 
     /* In UNICOS and in certain Cray models (such as T90) there is no
