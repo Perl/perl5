@@ -790,7 +790,7 @@ behavior, END blocks are not executed anymore when the C<-c> switch
 is used.
 
 Note that something resembling the previous behavior can still be
-obtained by putting C<BEGIN { $^C = 0; exit; } at the very end of
+obtained by putting C<BEGIN { $^C = 0; exit; }> at the very end of
 the top level source file.
 
 =head2 Potential to leak DATA filehandles

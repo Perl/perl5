@@ -518,7 +518,9 @@ sub sequence {
     my $command = $seq->cmd_name;
 
     # Zero-width characters.
-    if ($command eq 'Z') { return bless \ '\&', 'Pod::Man::String' }
+    if ($command eq 'Z') {
+	my $v = '\&'; return bless \ $v, 'Pod::Man::String';
+    }
 
     # C<>, L<>, X<>, and E<> don't apply guesswork to their contents.
     local $_ = $self->collapse ($seq->parse_tree, $command =~ /^[CELX]$/);
@@ -554,7 +556,10 @@ sub sequence {
 
     # Handle links.
     if ($command eq 'L') {
-        return bless \ ($self->buildlink ($_)), 'Pod::Man::String';
+	# XXX bug in lvalue subroutines prevents this from working
+        #return bless \ ($self->buildlink ($_)), 'Pod::Man::String';
+        my $v = $self->buildlink($_);
+        return bless \$v, 'Pod::Man::String';
     }
                          
     # Whitespace protection replaces whitespace with "\ ".

@@ -815,7 +815,7 @@ sub parse_text {
        pop @seq_stack;
        my $errmsg = "** Unterminated $cmd<...> at $file line $line\n";
        (ref $errorsub) and &{$errorsub}($errmsg)
-           or (defined $errmsg) and $self->$errorsub($errmsg)
+           or (defined $errorsub) and $self->$errorsub($errmsg)
                or  warn($errmsg);
        $seq_stack[-1]->append($expand_seq ? &$xseq_sub($self,$seq) : $seq);
        $seq = $seq_stack[-1];
