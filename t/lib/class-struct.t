@@ -5,7 +5,7 @@ BEGIN {
 	@INC = '../lib';
 }
 
-print "1..2\n";
+print "1..8\n";
 
 package aClass;
 
@@ -62,8 +62,4 @@ $obk->SomeElem(123);
 
 print "not " unless $obk->SomeElem() == 123;
 print "ok 8\n";
-
-
-
-
 
