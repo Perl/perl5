@@ -5475,7 +5475,7 @@ sub inst_version {
     # compare it           use utility for compare
     # print it             do nothing
 
-    # Alt2 maintain it as what is is
+    # Alt2 maintain it as what it is
     # read index files     convert
     # compare it           use utility because there's still a ">" vs "gt" issue
     # print it             use CPAN::Version for print
@@ -6319,7 +6319,7 @@ current session.
 Changes to the directory where the distribution has been unpacked and
 runs the external command C<make install> there. If C<make> has not
 yet been run, it will be run first. A C<make test> will be issued in
-any case and if this fails, the install will be cancelled. The
+any case and if this fails, the install will be canceled. The
 cancellation can be avoided by letting C<force> run the C<install> for
 you.
 
@@ -6406,7 +6406,7 @@ Runs a cvs_import on the distribution associated with this module.
 
 =item CPAN::Module::description()
 
-Returns a 44 chracter description of this module. Only available for
+Returns a 44 character description of this module. Only available for
 modules listed in The Module List (CPAN/modules/00modlist.long.html
 or 00modlist.long.txt.gz)
 
@@ -6438,7 +6438,7 @@ Runs an C<install> on the distribution associated with this module.
 
 =item CPAN::Module::look()
 
-Changes to the directory where the distribution assoicated with this
+Changes to the directory where the distribution associated with this
 module has been unpacked and opens a subshell there. Exiting the
 subshell returns.
 
@@ -6527,7 +6527,7 @@ If you have a local mirror of CPAN and can access all files with
 "file:" URLs, then you only need a perl better than perl5.003 to run
 this module. Otherwise Net::FTP is strongly recommended. LWP may be
 required for non-UNIX systems or if your nearest CPAN site is
-associated with an URL that is not C<ftp:>.
+associated with a URL that is not C<ftp:>.
 
 If you have neither Net::FTP nor LWP, there is a fallback mechanism
 implemented for an external ftp command or for an external lynx
@@ -6709,7 +6709,7 @@ development will go towards strong authentication.
 
 Most functions in package CPAN are exported per default. The reason
 for this is that the primary use is intended for the cpan shell or for
-oneliners.
+one-liners.
 
 =head1 POPULATE AN INSTALLATION WITH LOTS OF MODULES
 
@@ -6758,14 +6758,14 @@ This is where the firewall machine runs a web server and to access the
 outside world you must do it via the web server. If you set environment
 variables like http_proxy or ftp_proxy to a values beginning with http://
 or in your web browser you have to set proxy information then you know
-you are running a http firewall.
+you are running an http firewall.
 
 To access servers outside these types of firewalls with perl (even for
 ftp) you will need to use LWP.
 
 =item ftp firewall
 
-This where the firewall machine runs a ftp server. This kind of
+This where the firewall machine runs an ftp server. This kind of
 firewall will only let you access ftp servers outside the firewall.
 This is usually done by connecting to the firewall with ftp, then
 entering a username like "user@outside.host.com"
@@ -6775,7 +6775,7 @@ will need to use Net::FTP.
 
 =item One way visibility
 
-I say one way visibility as these firewalls try to make themselve look
+I say one way visibility as these firewalls try to make themselves look
 invisible to the users inside the firewall. An FTP data connection is
 normally created by sending the remote server your IP address and then
 listening for the connection. But the remote server will not be able to
@@ -6819,7 +6819,7 @@ like
 
     o conf ncftp "/usr/bin/ncftp -f /home/scott/ncftplogin.cfg"
 
-Your milage may vary...
+Your mileage may vary...
 
 =head1 FAQ
 

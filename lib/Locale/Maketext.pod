@@ -888,7 +888,7 @@ but since you anticipate localizing this, you write:
   my $lh = ThisProject::I18N->get_handle();
    # For the moment, assume that things are set up so
    # that we load class ThisProject::I18N::en
-   # and that that's the class that $lh belongs to.
+   # and that's the class that $lh belongs to.
   ...
   if(-e $filename) {
     go_process_file($filename)

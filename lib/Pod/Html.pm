@@ -1169,7 +1169,7 @@ sub process_cut {
 }
 
 #
-# process_pod - process a pod pod tag, thus stop ignoring pod directives
+# process_pod - process a pod tag, thus stop ignoring pod directives
 # until we see a corresponding cut.
 #
 sub process_pod {
@@ -1574,7 +1574,7 @@ sub process_text1($$;$$){
             warn "$0: $podfile: cannot resolve L<$opar> in paragraph $paragraph.";
         }
 
-        # now we have an URL or just plain code
+        # now we have a URL or just plain code
         $$rstr = $linktext . '>' . $$rstr;
         if( defined( $url ) ){
             $res = "<A HREF=\"$url\">" . process_text1( $lev, $rstr ) . '</A>';
@@ -1692,7 +1692,7 @@ sub dosify {
 }
 
 #
-# page_sect - make an URL from the text of a L<>
+# page_sect - make a URL from the text of a L<>
 #
 sub page_sect($$) {
     my( $page, $section ) = @_;

@@ -688,7 +688,7 @@ If in doubt:
 
 Assignment of return values from numeric equality tests
 does not work in perl5 when the test evaluates to false (0).
-Logical tests now return an null, instead of 0
+Logical tests now return a null, instead of 0
 
     $p = ($test == 1);
     print $p,"\n";

@@ -82,7 +82,7 @@ same way as on any other platform, by
 	perl foo arg1 arg2 arg3
 
 If you want to specify perl options C<-my_opts> to the perl itself (as
-opposed to to your program), use
+opposed to your program), use
 
 	perl -my_opts foo arg1 arg2 arg3
 

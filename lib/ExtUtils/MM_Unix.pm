@@ -1801,7 +1801,7 @@ usually solves this kind of problem.
     $self->{INST_SCRIPT} ||= $self->catdir($self->curdir,'blib','script');
 
     # The user who requests an installation directory explicitly
-    # should not have to tell us a architecture installation directory
+    # should not have to tell us an architecture installation directory
     # as well. We look if a directory exists that is named after the
     # architecture. If not we take it as a sign that it should be the
     # same as the requested installation directory. Otherwise we take

@@ -112,7 +112,7 @@ as defined by the Unicode standard:
 
 If no match is found, a reference to an empty hash is returned.
 
-The C<block> property is the same as as returned by charinfo().  It is
+The C<block> property is the same as returned by charinfo().  It is
 not defined in the Unicode Character Database proper (Chapter 4 of the
 Unicode 3.0 Standard, aka TUS3) but instead in an auxiliary database
 (Chapter 14 of TUS3).  Similarly for the C<script> property.

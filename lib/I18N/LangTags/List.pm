@@ -1563,7 +1563,7 @@ Copyright (c) 2001 Sean M. Burke. All rights reserved.
 You can redistribute and/or
 modify this document under the same terms as Perl itself.
 
-This document is provided in the the hope that it will be
+This document is provided in the hope that it will be
 useful, but without any warranty;
 without even the implied warranty of accuracy, authoritativeness,
 completeness, merchantability, or fitness for a particular purpose.

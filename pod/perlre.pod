@@ -1024,7 +1024,7 @@ Some people get too used to writing things like:
 
 This is grandfathered for the RHS of a substitute to avoid shocking the
 B<sed> addicts, but it's a dirty habit to get into.  That's because in
-PerlThink, the righthand side of a C<s///> is a double-quoted string.  C<\1> in
+PerlThink, the righthand side of an C<s///> is a double-quoted string.  C<\1> in
 the usual double-quoted string means a control-A.  The customary Unix
 meaning of C<\1> is kludged in for C<s///>.  However, if you get into the habit
 of doing that, you get yourself into trouble if you then add an C</e>

@@ -1292,7 +1292,7 @@ output).
 =item release
 
 Set the centered footer.  By default, this is the version of Perl you run
-Pod::Man under.  Note that some system an macro sets assume that the
+Pod::Man under.  Note that some system macro sets assume that the
 centered footer will be a modification date and will prepend something like
 "Last modified: "; if this is the case, you may want to set C<release> to
 the last modified date and C<date> to the version number.

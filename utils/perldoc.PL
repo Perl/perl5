@@ -713,7 +713,7 @@ the regular expression.
 
 =item B<-X> use an index if present
 
-The B<-X> option looks for a entry whose basename matches the name given on the
+The B<-X> option looks for an entry whose basename matches the name given on the
 command line in the file C<$Config{archlib}/pod.idx>.  The pod.idx file should
 contain fully qualified filenames, one per line.
 
@@ -723,7 +723,7 @@ Because B<perldoc> does not run properly tainted, and is known to
 have security issues, it will not normally execute as the superuser.
 If you use the B<-U> flag, it will do so, but only after setting
 the effective and real IDs to nobody's or nouser's account, or -2
-if unavailable.  If it cannot relinguish its privileges, it will not
+if unavailable.  If it cannot relinquish its privileges, it will not
 run.  
 
 =item B<PageName|ModuleName|ProgramName>

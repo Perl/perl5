@@ -559,7 +559,7 @@ often happens when tests spawn off other processes or call external
 programs to aid in the testing, or when (as noted above) the tests
 assume certain things about the filesystem and paths.  Be careful
 not to depend on a specific output style for errors, such as when
-checking C<$!> after an system call.  Some platforms expect a certain
+checking C<$!> after a system call.  Some platforms expect a certain
 output format, and perl on those platforms may have been adjusted
 accordingly.  Most specifically, don't anchor a regex when testing
 an error value.

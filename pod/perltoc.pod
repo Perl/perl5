@@ -9910,7 +9910,7 @@ Fixed length 32-bit encodings, Multi-byte encodings, "Escape" encodings
 =item Encoding Names
 
 The MIME name as defined in IETF RFC-XXXX, The name in the IANA registry,
-The name used by the the organization that defined it
+The name used by the organization that defined it
 
 =back
 

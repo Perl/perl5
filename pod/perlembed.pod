@@ -792,7 +792,7 @@ Now compile:
 
  % cc -o persistent persistent.c `perl -MExtUtils::Embed -e ccopts -e ldopts`
 
-Here's a example script file:
+Here's an example script file:
 
  #test.pl
  my $string = "hello";

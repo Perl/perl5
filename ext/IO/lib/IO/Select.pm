@@ -281,7 +281,7 @@ cache which is indexed by the C<fileno> of the handle, so if more than one
 handle with the same C<fileno> is specified then only the last one is cached.
 
 Each handle can be an C<IO::Handle> object, an integer or an array
-reference where the first element is a C<IO::Handle> or an integer.
+reference where the first element is an C<IO::Handle> or an integer.
 
 =item remove ( HANDLES )
 

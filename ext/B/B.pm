@@ -867,7 +867,7 @@ print_subs() is a B::GV method you have declared.
 Takes any Perl variable and turns it into an object in the
 appropriate B::OP-derived or B::SV-derived class. Apart from functions
 such as C<main_root>, this is the primary way to get an initial
-"handle" on a internal perl data structure which can then be followed
+"handle" on an internal perl data structure which can then be followed
 with the other access methods.
 
 =item ppname(OPNUM)

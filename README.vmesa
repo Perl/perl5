@@ -82,7 +82,7 @@ statements in the preprocessor output (.i) file.
 =head2 Testing Anomalies of Perl on VM/ESA
 
 The `make test` step runs a Perl Verification Procedure, usually before
-installation.  As the 5.6.1 kit was was being assembled
+installation.  As the 5.6.1 kit was being assembled
 the following "failures" were known to appear on some machines
 during `make test` (mostly due to ASCII vs. EBCDIC conflicts),
 your results may differ:

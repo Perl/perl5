@@ -1136,7 +1136,7 @@ but not so much that it posed any serious problems.
 
 =item Metaconfig worked for me
 
-My system at the time was Interactive 2.2, a SVR3.2/386 derivative that
+My system at the time was Interactive 2.2, an SVR3.2/386 derivative that
 also had some POSIX support.  Metaconfig-generated Configure scripts
 worked fine for me on that system.  On the other hand, autoconf-generated
 scripts usually didn't.  (They did come quite close, though, in some

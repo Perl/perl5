@@ -113,7 +113,7 @@ The constructor returns a new C<Digest::MD5> object which encapsulate
 the state of the MD5 message-digest algorithm.  You can add data to
 the object and finally ask for the digest.
 
-If called as a instance method (i.e. $md5->new) it will just reset the
+If called as an instance method (i.e. $md5->new) it will just reset the
 state the object to the state of a newly created object.  No new
 object is created in this case.
 

@@ -12,7 +12,7 @@ Perl 5 README file for the EPOC operating system.
 
 =head1 INTRODUCTION
 
-EPOC is a OS for palmtops and mobile phones. For more informations look at:
+EPOC is an OS for palmtops and mobile phones. For more informations look at:
 http://www.symbian.com/
 
 This is a port of perl to EPOC. It runs on ER5 machines: Psion 5mx,
@@ -58,7 +58,7 @@ debugger. If you are leaving perl, you get into the system screen. You
 have to switch back manually to ESHELL. When perl is running, you will
 see a task with the name STDOUT in the task list. 
 
-If you have a ER3 machine (i.e. a PSION 5), you may have to supply the
+If you have an ER3 machine (i.e. a PSION 5), you may have to supply the
 full path to the perl executable C:\system\programs\perl.exe.
 
 If you need to set the current directory of perl, please use the

@@ -201,7 +201,7 @@ for details of these functions.
 
 =back
 
-C<IO::Dir> also provides a interface to reading directories via a tied
+C<IO::Dir> also provides an interface to reading directories via a tied
 HASH. The tied HASH extends the interface beyond just the directory
 reading routines by the use of C<lstat>, from the C<File::stat> package,
 C<unlink>, C<rmdir> and C<utime>.

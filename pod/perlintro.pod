@@ -169,7 +169,7 @@ The elements we're getting from the array start with a C<$> because
 we're getting just a single value out of the array -- you ask for a scalar, 
 you get a scalar.
 
-To get multiple values from a array:
+To get multiple values from an array:
 
     @animals[0,1];                  # gives ("camel", "llama");
     @animals[0..2];                 # gives ("camel", "llama", "owl");

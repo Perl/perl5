@@ -1194,7 +1194,7 @@ pattern C<'\s*'> - optional whitespace - is used. If the delimiter set
 is also not specified, the set C</["'`]/> is used. If the text to be processed
 is not specified either, C<$_> is used.
 
-In list context, C<extract_delimited> returns a array of three
+In list context, C<extract_delimited> returns an array of three
 elements, the extracted substring (I<including the surrounding
 delimiters>), the remainder of the text, and the skipped prefix (if
 any). If a suitable delimited substring is not found, the first
@@ -1429,7 +1429,7 @@ C<extract_tagged> returns the complete text up to the point of failure.
 If the string is "PARA", C<extract_tagged> returns only the first paragraph
 after the tag (up to the first line that is either empty or contains
 only whitespace characters).
-If the string is "", the the default behaviour (i.e. failure) is reinstated.
+If the string is "", the default behaviour (i.e. failure) is reinstated.
 
 For example, suppose the start tag "/para" introduces a paragraph, which then
 continues until the next "/endpara" tag or until another "/para" tag is
@@ -1628,7 +1628,7 @@ the right delimiter of the first block of the operation,
 =item [7]
 
 the left delimiter of the second block of the operation
-(that is, if it is a C<s>, C<tr>, or C<y>),
+(that is, if it is an C<s>, C<tr>, or C<y>),
 
 =item [8]
 
@@ -1746,7 +1746,7 @@ However, the matching position of the input variable would be set to
 which would cause the earlier " || die;\nexit;" to be skipped in any
 sequence of code fragment extractions.
 
-To avoid this problem, when it encounters a here document whilst
+To avoid this problem, when it encounters a here document while
 extracting from a modifiable string, C<extract_quotelike> silently
 rearranges the string to an equivalent piece of Perl:
 
@@ -1786,7 +1786,7 @@ Omitting the third argument (prefix argument) implies optional whitespace at the
 Omitting the fourth argument (outermost delimiter brackets) indicates that the
 value of the second argument is to be used for the outermost delimiters.
 
-Once the prefix an dthe outermost opening delimiter bracket have been
+Once the prefix an the outermost opening delimiter bracket have been
 recognized, code blocks are extracted by stepping through the input text and
 trying the following alternatives in sequence:
 
@@ -1873,7 +1873,7 @@ extracted substring removed from it. In all contexts
 C<extract_multiple> starts at the current C<pos> of the string, and
 sets that C<pos> appropriately after it matches.
 
-Hence, the aim of of a call to C<extract_multiple> in a list context
+Hence, the aim of a call to C<extract_multiple> in a list context
 is to split the processed string into as many non-overlapping fields as
 possible, by repeatedly applying each of the specified extractors
 to the remainder of the string. Thus C<extract_multiple> is
@@ -1905,7 +1905,7 @@ is used.
 
 =item 3.
 
-An number specifying the maximum number of fields to return. If this
+A number specifying the maximum number of fields to return. If this
 argument is omitted (or C<undef>), split continues as long as possible.
 
 If the third argument is I<N>, then extraction continues until I<N> fields
@@ -1956,7 +1956,7 @@ If none of the extractor subroutines succeeds, then one
 character is extracted from the start of the text and the extraction
 subroutines reapplied. Characters which are thus removed are accumulated and
 eventually become the next field (unless the fourth argument is true, in which
-case they are disgarded).
+case they are discarded).
 
 For example, the following extracts substrings that are valid Perl variables:
 

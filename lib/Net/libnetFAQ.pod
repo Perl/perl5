@@ -6,8 +6,8 @@ libnetFAQ - libnet Frequently Asked Questions
 
 =head2 Where to get this document
 
-This document is distributed with the libnet disribution, and is also
-avaliable on the libnet web page at
+This document is distributed with the libnet distribution, and is also
+available on the libnet web page at
 
     http://www.pobox.com/~gbarr/libnet/
 
@@ -20,7 +20,7 @@ gbarr@pobox.com.
 
 Copyright (c) 1997-1998 Graham Barr. All rights reserved.
 This document is free; you can redistribute it and/or modify it
-under the terms of the Artistic Licence.
+under the terms of the Artistic License.
 
 =head2 Disclaimer
 
@@ -35,7 +35,7 @@ in respect of this information or its use.
 =head2 What is libnet ?
 
 libnet is a collection of perl5 modules which all related to network
-programming. The majority of the modules avaliable provided the
+programming. The majority of the modules available provided the
 client side of popular server-client protocols that are used in
 the internet community.
 
@@ -55,7 +55,7 @@ these modules.
 
 =head2 What machines support libnet ?
 
-libnet itself is an entirly perl-code distribution so it should work
+libnet itself is an entirely perl-code distribution so it should work
 on any machine that perl runs on. However IO may not work
 with some machines and earlier releases of perl. But this
 should not be the case with perl version 5.004 or later.
@@ -67,14 +67,14 @@ in
 
  http://www.cpan.org/modules/by-module/Net/
 
-The latest release and information is also avaliable on the libnet web page
+The latest release and information is also available on the libnet web page
 at
 
  http://www.pobox.com/~gbarr/libnet/
 
 =head1 Using Net::FTP
 
-=head2 How do I download files from a FTP server ?
+=head2 How do I download files from an FTP server ?
 
 An example taken from an article posted to comp.lang.perl.misc
 
@@ -135,9 +135,9 @@ But this is not guaranteed to work.
 
 =head2 Can I do a reget operation like the ftp command ?
 
-=head2 How do I get a directory listing from a FTP server ?
+=head2 How do I get a directory listing from an FTP server ?
 
-=head2 Changeing directory to "" does not fail ?
+=head2 Changing directory to "" does not fail ?
 
 Passing an argument of "" to ->cwd() has the same affect of calling ->cwd()
 without any arguments. Turn on Debug (I<See below>) and you will see what is
@@ -155,19 +155,19 @@ gives
 =head2 I am behind a SOCKS firewall, but the Firewall option does not work ?
 
 The Firewall option is only for support of one type of firewall. The type
-supported is a ftp proxy.
+supported is an ftp proxy.
 
 To use Net::FTP, or any other module in the libnet distribution,
 through a SOCKS firewall you must create a socks-ified perl executable
 by compiling perl with the socks library.
 
-=head2 I am behind a FTP proxy firewall, but cannot access machines outside ?
+=head2 I am behind an FTP proxy firewall, but cannot access machines outside ?
 
-Net::FTP implements the most popular ftp proxy firewall approach. The sceme
-implemented is that where you loginin to the firewall with C<user@hostname>
+Net::FTP implements the most popular ftp proxy firewall approach. The scheme
+implemented is that where you log in to the firewall with C<user@hostname>
 
 I have heard of one other type of firewall which requires a login to the
-firewall with an accont, then a second login with C<user@hostname>. You can
+firewall with an account, then a second login with C<user@hostname>. You can
 still use Net::FTP to traverse these firewalls, but a more manual approach
 must be taken, eg
 
@@ -178,7 +178,7 @@ must be taken, eg
 =head2 My ftp proxy firewall does not listen on port 21
 
 FTP servers usually listen on the same port number, port 21, as any other
-FTP server. But there is no reason why thi has to be the case.
+FTP server. But there is no reason why this has to be the case.
 
 If you pass a port number to Net::FTP then it assumes this is the port
 number of the final destination. By default Net::FTP will always try
@@ -201,7 +201,7 @@ chmod command via the C<SITE> command. This can be done with
 =head2 I have seen scripts call a method message, but cannot find it documented ?
 
 Net::FTP, like several other packages in libnet, inherits from Net::Cmd, so
-all the methods described in Net::Cmd are also avaliable on Net::FTP
+all the methods described in Net::Cmd are also available on Net::FTP
 objects.
 
 =head2 Why does Net::FTP not implement mput and mget methods
@@ -241,14 +241,14 @@ of this protocol.
 
 =head2 The verify method always returns true ?
 
-Well it may seem thay way, but it does not. The verify method returns true
-if the command suceeded. If you pass verify an address which the
-server would normally have to forward to another machine the the command
-will suceed with something like
+Well it may seem that way, but it does not. The verify method returns true
+if the command succeeded. If you pass verify an address which the
+server would normally have to forward to another machine, the command
+will succeed with something like
 
     252 Couldn't verify <someone@there> but will attempt delivery anyway
 
-This command will only fail if you pass it an address in a domain the
+This command will fail only if you pass it an address in a domain
 the server directly delivers for, and that address does not exist.
 
 =head1 Debugging scripts
@@ -259,7 +259,7 @@ Most of the libnet client classes allow options to be passed to the
 constructor, in most cases one option is called C<Debug>. Passing
 this option with a non-zero value will turn on a protocol trace, which
 will be sent to STDERR. This trace can be useful to see what commands
-are being sent to the remote server and what responces are being
+are being sent to the remote server and what responses are being
 received back.
 
     #!/your/path/to/perl
@@ -287,14 +287,14 @@ this script would output something like
  Net::FTP=GLOB(0x8152974)>>> QUIT
  Net::FTP=GLOB(0x8152974)<<< 221 Goodbye.
 
-The first few lines tell you the modules that Net::FTP uses and thier versions,
-this is usefule data to me when a user reports a bug. The last seven lines
+The first few lines tell you the modules that Net::FTP uses and their versions,
+this is useful data to me when a user reports a bug. The last seven lines
 show the communication with the server. Each line has three parts. The first
 part is the object itself, this is useful for separating the output
-if you are using mutiple objects. The second part is either C<<<<<> to
+if you are using multiple objects. The second part is either C<<<<<> to
 show data coming from the server or C<&gt&gt&gt&gt> to show data
 going to the server. The remainder of the line is the command
-being sent or responce being received.
+being sent or response being received.
 
 =head1 AUTHOR AND COPYRIGHT
 

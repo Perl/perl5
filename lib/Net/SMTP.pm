@@ -444,7 +444,7 @@ known as mailhost:
 =item new Net::SMTP [ HOST, ] [ OPTIONS ]
 
 This is the constructor for a new Net::SMTP object. C<HOST> is the
-name of the remote host to which a SMTP connection is required.
+name of the remote host to which an SMTP connection is required.
 
 If C<HOST> is not given, then the C<SMTP_Host> specified in C<Net::Config>
 will be used.

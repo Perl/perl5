@@ -454,7 +454,7 @@ Returns a boolean indicating whether the SV contains an unsigned integer.
 Returns a boolean indicating whether the SV contains an unsigned integer.
 
 =for apidoc Am|void|SvIOK_notUV|SV* sv
-Returns a boolean indicating whether the SV contains an signed integer.
+Returns a boolean indicating whether the SV contains a signed integer.
 
 =for apidoc Am|bool|SvNOK|SV* sv
 Returns a boolean indicating whether the SV contains a double.
@@ -855,7 +855,7 @@ version which guarantees to evaluate sv only once.
 
 =for apidoc Am|IV|SvIVx|SV* sv
 Coerces the given SV to an integer and returns it. Guarantees to evaluate
-sv only once. Use the more efficent C<SvIV> otherwise.
+sv only once. Use the more efficient C<SvIV> otherwise.
 
 =for apidoc Am|NV|SvNV|SV* sv
 Coerce the given SV to a double and return it. See  C<SvNVx> for a version
@@ -863,7 +863,7 @@ which guarantees to evaluate sv only once.
 
 =for apidoc Am|NV|SvNVx|SV* sv
 Coerces the given SV to a double and returns it. Guarantees to evaluate
-sv only once. Use the more efficent C<SvNV> otherwise.
+sv only once. Use the more efficient C<SvNV> otherwise.
 
 =for apidoc Am|UV|SvUV|SV* sv
 Coerces the given SV to an unsigned integer and returns it.  See C<SvUVx>
@@ -871,7 +871,7 @@ for a version which guarantees to evaluate sv only once.
 
 =for apidoc Am|UV|SvUVx|SV* sv
 Coerces the given SV to an unsigned integer and returns it. Guarantees to
-evaluate sv only once. Use the more efficent C<SvUV> otherwise.
+evaluate sv only once. Use the more efficient C<SvUV> otherwise.
 
 =for apidoc Am|bool|SvTRUE|SV* sv
 Returns a boolean indicating whether Perl would evaluate the SV as true or
@@ -897,22 +897,22 @@ Like C<SvPV_nolen>, but converts sv to byte representation first if necessary.
 
 =for apidoc Am|char*|SvPVutf8x_force|SV* sv|STRLEN len
 Like C<SvPV_force>, but converts sv to utf8 first if necessary.
-Guarantees to evalute sv only once; use the more efficient C<SvPVutf8_force>
+Guarantees to evaluate sv only once; use the more efficient C<SvPVutf8_force>
 otherwise.
 
 =for apidoc Am|char*|SvPVutf8x|SV* sv|STRLEN len
 Like C<SvPV>, but converts sv to utf8 first if necessary.
-Guarantees to evalute sv only once; use the more efficient C<SvPVutf8>
+Guarantees to evaluate sv only once; use the more efficient C<SvPVutf8>
 otherwise.
 
 =for apidoc Am|char*|SvPVbytex_force|SV* sv|STRLEN len
 Like C<SvPV_force>, but converts sv to byte representation first if necessary.
-Guarantees to evalute sv only once; use the more efficient C<SvPVbyte_force>
+Guarantees to evaluate sv only once; use the more efficient C<SvPVbyte_force>
 otherwise.
 
 =for apidoc Am|char*|SvPVbytex|SV* sv|STRLEN len
 Like C<SvPV>, but converts sv to byte representation first if necessary.
-Guarantees to evalute sv only once; use the more efficient C<SvPVbyte>
+Guarantees to evaluate sv only once; use the more efficient C<SvPVbyte>
 otherwise.
 
 

@@ -124,7 +124,7 @@ load the right module on first use.  The second form allow you to use
 algorithm names which contains letters which are not legal perl
 identifiers, e.g. "SHA-1".
 
-If new() is called as a instance method (i.e. $ctx->new) it will just
+If new() is called as an instance method (i.e. $ctx->new) it will just
 reset the state the object to the state of a newly created object.  No
 new object is created in this case, and the return value is the
 reference to the object (i.e. $ctx).

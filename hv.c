@@ -154,7 +154,7 @@ Perl_hv_notallowed(pTHX_ bool is_utf8, const char *key, I32 klen,
 Returns the SV which corresponds to the specified key in the hash.  The
 C<klen> is the length of the key.  If C<lval> is set then the fetch will be
 part of a store.  Check that the return value is non-null before
-dereferencing it to a C<SV*>.
+dereferencing it to an C<SV*>.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
@@ -274,7 +274,7 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval)
     return 0;
 }
 
-/* returns a HE * structure with the all fields set */
+/* returns an HE * structure with the all fields set */
 /* note that hent_val will be a mortal sv for MAGICAL hashes */
 /*
 =for apidoc hv_fetch_ent

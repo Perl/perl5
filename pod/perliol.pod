@@ -19,7 +19,7 @@ C<USE_SFIO> is not).
 
 The PerlIO abstraction was introduced in perl5.003_02 but languished as
 just an abstraction until perl5.7.0. However during that time a number
-of perl extentions switched to using it, so the API is mostly fixed to
+of perl extensions switched to using it, so the API is mostly fixed to
 maintain (source) compatibility.
 
 The aim of the implementation is to provide the PerlIO API in a flexible
@@ -53,7 +53,7 @@ The basic data structure is a PerlIOl:
 	 IV		flags;      /* Various flags for state */
 	};
 
-A C<PerlIOl *> is a pointer to to the struct, and the I<application> level
+A C<PerlIOl *> is a pointer to the struct, and the I<application> level
 C<PerlIO *> is a pointer to a C<PerlIOl *> - i.e. a pointer to a pointer to
 the struct. This allows the application level C<PerlIO *> to remain
 constant while the actual C<PerlIOl *> underneath changes. (Compare perl's
@@ -214,7 +214,7 @@ not having a buffer layer.
 
 Extra layers can be inserted to process the data as it flows through.
 This was the driving need for including the scheme in perl 5.7.0+ - we
-needed a mechanism to allow data to be translated bewteen perl's
+needed a mechanism to allow data to be translated between perl's
 internal encoding (conceptually at least Unicode as UTF-8), and the
 "native" format used by the system. This is provided by the
 ":encoding(xxxx)" layer which typically sits above the buffering layer.
@@ -248,7 +248,7 @@ Reads are permitted i.e. opened "r" or "w+" (or even "a+" - ick).
 
 =item PERLIO_F_ERROR
 
-An error has occured (for C<PerlIO_error()>)
+An error has occurred (for C<PerlIO_error()>)
 
 =item PERLIO_F_TRUNCATE
 
@@ -305,10 +305,10 @@ Handle is open.
 
 This instance of this layer supports the "fast C<gets>" interface.
 Normally set based on C<PERLIO_K_FASTGETS> for the class and by the
-existance of the function(s) in the table. However a class that
+existence of the function(s) in the table. However a class that
 normally provides that interface may need to avoid it on a
 particular instance. The "pending" layer needs to do this when
-it is pushed above an layer which does not support the interface.
+it is pushed above a layer which does not support the interface.
 (Perl's C<sv_gets()> does not expect the streams fast C<gets> behaviour
 to change during one "get".)
 
@@ -320,7 +320,7 @@ to change during one "get".)
 
 =item  IV		(*Pushed)(PerlIO *f,const char *mode, SV *arg);
 
-The only absoultely mandatory method. Called when the layer is pushed onto the stack.
+The only absolutely mandatory method. Called when the layer is pushed onto the stack.
 The C<mode> argument may  be NULL if this occurs post-open. The C<arg> will be non-C<NULL>
 if an argument string was passed. In most cases this should call
 C<PerlIOBase_pushed()> to convert C<mode> into the appropriate
@@ -366,15 +366,15 @@ The C<'I'> prefix is used during creation of C<stdin>..C<stderr> via special
 C<PerlIO_fdopen> calls; the C<'#'> prefix means that this is C<sysopen> and that I<imode> and
 I<perm> should be passed to C<PerlLIO_open3>; C<'r'> means B<r>ead, C<'w'> means B<w>rite
 and C<'a'> means B<a>ppend. The C<'+'> suffix means that both reading and writing/appending
-are permited. The C<'b'> suffix means file should be binary, and C<'t'> means it
+are permitted. The C<'b'> suffix means file should be binary, and C<'t'> means it
 is text. (Binary/Text should be ignored by almost all layers and binary IO done,
 with PerlIO. The C<:crlf> layer should be pushed to handle the distinction.)
 
-If I<old> is not C<NULL> then this is a C<PerlIO_reopen>. Perl iteself does not use
+If I<old> is not C<NULL> then this is a C<PerlIO_reopen>. Perl itself does not use
 this (yet?) and semantics are a little vague.
 
 If I<fd> not negative then it is the numeric file descriptor I<fd>, which will
-be open in an manner compatible with the supplied mode string, the call is
+be open in a manner compatible with the supplied mode string, the call is
 thus equivalent to C<PerlIO_fdopen>. In this case I<nargs> will be zero.
 
 If I<nargs> is greater than zero then it gives the number of arguments passed
@@ -383,7 +383,7 @@ In simple cases SvPV(*args) is the pathname to open.
 
 Having said all that translation-only layers do not need to provide C<Open()> at all,
 but rather leave the opening to a lower level layer and wait to be "pushed".
-If a layer does provide C<Open()> it should normaly call the C<Open()> method
+If a layer does provide C<Open()> it should normally call the C<Open()> method
 of next layer down (if any) and then push itself on top if that succeeds.
 
 =item SV *		(*Getarg)(PerlIO *f);
@@ -394,7 +394,7 @@ return an SvPV with value "ascii".
 
 =item IV	(*Fileno)(PerlIO *f);
 
-Returns the Unix/Posix numeric file decriptor for the handle. Normally
+Returns the Unix/Posix numeric file descriptor for the handle. Normally
 C<PerlIOBase_fileno()> (which just asks next layer down) will suffice
 for this.
 
@@ -437,7 +437,7 @@ structure.
 
 Should make stream's state consistent with layers below. That is, any
 buffered write data should be written, and file position of lower layers
-adjusted for data read fron below but not actually consumed.
+adjusted for data read from below but not actually consumed.
 (Should perhaps C<Unread()> such data to the lower layer.)
 
 =item  IV		(*Fill)(PerlIO *f);

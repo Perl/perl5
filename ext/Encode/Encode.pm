@@ -597,7 +597,7 @@ the encoding by picking the first in the following sequence:
 
 =item * The name in the IANA registry.
 
-=item * The name used by the the organization that defined it.
+=item * The name used by the organization that defined it.
 
 =back
 

@@ -194,7 +194,7 @@ Cozens has some ideas on this.
 
 =head2 DLL Versioning
 
-Windows needs a way to know what version of a XS or C<libperl> DLL it's
+Windows needs a way to know what version of an XS or C<libperl> DLL it's
 loading.
 
 =head2 Introduce @( and @)

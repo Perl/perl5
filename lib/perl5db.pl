@@ -206,7 +206,7 @@ $header = "perl5db.pl version $VERSION";
 #       I<CreateTTY>       bits control attempts to create a new TTY on events:
 #                          1: on fork()   2: debugger is started inside debugger
 #                          4: on startup
-#   c) Code to auto-create a new TTY window on OS/2 (currently one one
+#   c) Code to auto-create a new TTY window on OS/2 (currently one
 #      extra window per session - need named pipes to have more...);
 #   d) Simplified interface for custom createTTY functions (with a backward
 #      compatibility hack); now returns the TTY name to use; return of ''

@@ -9,7 +9,7 @@ internal form (a parse tree) which is then optimized before being
 run.  Since version 5.005, Perl has shipped with a module
 capable of inspecting the optimized parse tree (C<B>), and this has
 been used to write many useful utilities, including a module that lets
-you turn your Perl into C source code that can be compiled into an
+you turn your Perl into C source code that can be compiled into a
 native executable.
 
 The C<B> module provides access to the parse tree, and other modules

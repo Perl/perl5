@@ -3518,7 +3518,7 @@ PerlIOCrlf_get_cnt(PerlIO *f)
 			int code;
 			b->ptr++;	/* say we have read it as far as
 					 * flush() is concerned */
-			b->buf++;	/* Leave space an front of buffer */
+			b->buf++;	/* Leave space in front of buffer */
 			b->bufsiz--;	/* Buffer is thus smaller */
 			code = PerlIO_fill(f);	/* Fetch some more */
 			b->bufsiz++;	/* Restore size for next time */

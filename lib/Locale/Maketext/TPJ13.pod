@@ -48,7 +48,7 @@ messages, like this:
 
   Your query matched 10 files in 4 directories.
 
-So how hard could that be?  You look at the code that produces
+So how hard could that be?  You look at the code that
 produces the first item, and it reads:
 
   printf("I scanned %g directories.",
@@ -222,7 +222,7 @@ ending... The room begins to spin around you, slowly at first...  But
 with I<all other> integer values, since "directory" is an inanimate
 noun, when preceded by a number and in the nominative or accusative
 cases (as it is here, just your luck!), it does stay plural, but it is
-forced into the genitive case -- yet another another ending...  And
+forced into the genitive case -- yet another ending...  And
 you never hear him get to the part about how you're going to run into
 similar (but maybe subtly different) problems with other Slavic
 languages like Polish, because the floor comes up to meet you, and you

@@ -1193,7 +1193,7 @@ STDERR, and return a false result.
 Getopt::Long supports two useful variants of simple options:
 I<negatable> options and I<incremental> options.
 
-A negatable option is specified with a exclamation mark C<!> after the
+A negatable option is specified with an exclamation mark C<!> after the
 option name:
 
     my $verbose = '';	# option variable with default value (false)

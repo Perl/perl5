@@ -432,7 +432,7 @@ is returned.
 =item sockdomain
 
 Returns the numerical number for the socket domain type. For example, for
-a AF_INET socket the value of &AF_INET will be returned.
+an AF_INET socket the value of &AF_INET will be returned.
 
 =item sockopt(OPT [, VAL])
 

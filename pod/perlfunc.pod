@@ -69,7 +69,7 @@ last value in the list.  Some operators return a count of successful
 operations.  In general, they do what you want, unless you want
 consistency.
 
-An named array in scalar context is quite different from what would at
+A named array in scalar context is quite different from what would at
 first glance appear to be a list in scalar context.  You can't get a list
 like C<(1,2,3)> into being in scalar context, because the compiler knows
 the context at compile time.  It would generate the scalar comma operator
@@ -857,7 +857,7 @@ back.  Look at the F<by-module/Crypt> and F<by-module/PGP> directories
 on your favorite CPAN mirror for a slew of potentially useful
 modules.
 
-If using crypt() on an Unicode string (which potentially has
+If using crypt() on a Unicode string (which potentially has
 characters with codepoints above 255), Perl tries to make sense of
 the situation by using only the low eight bits of the characters when
 calling crypt().
@@ -2004,7 +2004,7 @@ C<File::Glob> extension.  See L<File::Glob> for details.
 
 =item gmtime EXPR
 
-Converts a time as returned by the time function to a 8-element list
+Converts a time as returned by the time function to an 8-element list
 with the time localized for the standard Greenwich time zone.
 Typically used as follows:
 
@@ -2327,7 +2327,7 @@ C<redo> work.
 
 =item lc
 
-Returns an lowercased version of EXPR.  This is the internal function
+Returns a lowercased version of EXPR.  This is the internal function
 implementing the C<\L> escape in double-quoted strings.  Respects
 current LC_CTYPE locale if C<use locale> in force.  See L<perllocale>
 and L<perlunicode> for more details about locale and Unicode support.
@@ -3925,7 +3925,7 @@ may vary from one execution to the next (see C<wantarray>).  If no EXPR
 is given, returns an empty list in list context, the undefined value in
 scalar context, and (of course) nothing at all in a void context.
 
-(Note that in the absence of a explicit C<return>, a subroutine, eval,
+(Note that in the absence of an explicit C<return>, a subroutine, eval,
 or do FILE will automatically return the value of the last expression
 evaluated.)
 

@@ -262,7 +262,7 @@ same way as on any other platform, by
 	perl foo.pl arg1 arg2 arg3
 
 If you want to specify perl options C<-my_opts> to the perl itself (as
-opposed to to your program), use
+opposed to your program), use
 
 	perl -my_opts foo.pl arg1 arg2 arg3
 
@@ -386,7 +386,7 @@ there is an executable file F<blah.exe> I<anywhere> on C<PATH>.
 
 Note also that executable files on OS/2 can have an arbitrary extension, 
 but F<.exe> will be automatically appended if no dot is present in the name.  
-The workaround as as simple as that:  since F<blah.> and F<blah> denote the 
+The workaround is as simple as that:  since F<blah.> and F<blah> denote the 
 same file, to start an executable residing in file F<n:/bin/blah> (no 
 extension) give an argument C<n:/bin/blah.> (dot appended) to system().
 
@@ -1185,7 +1185,7 @@ C<BEGIN_LIBPATH>.
 
 Returns	C<undef> if it was not called yet, otherwise bit 1 is
 set if on the previous call do_harderror was enabled, bit
-2 is set if if on previous call do_exception was enabled.
+2 is set if on previous call do_exception was enabled.
 
 This function enables/disables error popups associated with 
 hardware errors (Disk not ready etc.) and software exceptions.
@@ -1639,7 +1639,7 @@ of the F<.EXE> file are loaded is decided at compile-time, thus all the
 processes have these sections loaded at same addresses, and no fixup
 of internal links inside the F<.EXE> is needed.
 
-Since DLLs may be loaded at run time, to have the same mechanism for for DLLs
+Since DLLs may be loaded at run time, to have the same mechanism for DLLs
 one needs to have the address range of I<any of the loaded> DLLs in the
 system to be available I<in all the processes> which did not load a particular
 DLL yet.  This is why the DLLs are mapped to the shared memory region.

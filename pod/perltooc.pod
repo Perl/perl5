@@ -646,7 +646,7 @@ name them whatever you care to.  Blindly and obediently using new()
 for each and every constructor you ever write is to speak Perl with
 such a severe C++ accent that you do a disservice to both languages.
 There's no reason to insist that each class have but one constructor,
-or that that constructor be named new(), or that that constructor be
+or that a constructor be named new(), or that a constructor be
 used solely as a class method and not an object method.
 
 The next section shows how useful it can be to further distance ourselves

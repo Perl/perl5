@@ -1218,8 +1218,8 @@ clear out.
 
 Once the generic server socket has been created using the parameters
 listed above, the server then waits for a new client to connect
-to it.  The server blocks in the C<accept> method, which eventually an
-bidirectional connection to the remote client.  (Make sure to autoflush
+to it.  The server blocks in the C<accept> method, which eventually accepts a
+bidirectional connection from the remote client.  (Make sure to autoflush
 this handle to circumvent buffering.)
 
 To add to user-friendliness, our server prompts the user for commands.

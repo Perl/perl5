@@ -1415,7 +1415,7 @@ naive regexp
     $dna = "ATCGTTGAATGCAAATGACATGAC";
     $dna =~ /TGA/;
 
-doesn't work; it may match an C<TGA>, but there is no guarantee that
+doesn't work; it may match a C<TGA>, but there is no guarantee that
 the match is aligned with codon boundaries, e.g., the substring
 S<C<GTT GAA> > gives a match.  A better solution is
 

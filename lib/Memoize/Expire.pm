@@ -344,7 +344,7 @@ with a lifetime of ten seconds, and you store it at 12:00:00.998 on a
 certain day.  Memoize will look at the clock and see 12:00:00.  Then
 9.01 seconds later, at 12:00:10.008 you try to read it back.  Memoize
 will look at the clock and see 12:00:10 and conclude that the value
-has expired.  This will probably not occur if if you have
+has expired.  This will probably not occur if you have
 C<Time::HiRes> installed.
 
 =head1 AUTHOR

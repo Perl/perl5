@@ -1,7 +1,7 @@
 /*
  * Strong denial of stdio - make all stdio calls (we can think of) errors
  */
-/* This is an 1st attempt to stop other include files pulling
+/* This is a 1st attempt to stop other include files pulling
    in real <stdio.h>.
    A more ambitious set of possible symbols can be found in
    sfio.h (inside an _cplusplus gard).

@@ -4300,7 +4300,7 @@ such as expiration time.  Use the cookie() method to create and retrieve
 session cookies.
 
 The B<-nph> parameter, if set to a true value, will issue the correct
-headers to work with a NPH (no-parse-header) script.  This is important
+headers to work with an NPH (no-parse-header) script.  This is important
 to use with certain servers that expect all their scripts to be NPH.
 
 The B<-charset> parameter can be used to control the character set
@@ -4337,7 +4337,7 @@ You can also use named arguments:
 			   -nph=>1);
 
 The B<-nph> parameter, if set to a true value, will issue the correct
-headers to work with a NPH (no-parse-header) script.  This is important
+headers to work with an NPH (no-parse-header) script.  This is important
 to use with certain servers, such as Microsoft Internet Explorer, which
 expect all their scripts to be NPH.
 
@@ -4723,14 +4723,14 @@ you prefer:
 	   <IMG ALIGN="LEFT" SRC="fred.gif">
 
 Sometimes an HTML tag attribute has no argument.  For example, ordered
-lists can be marked as COMPACT.  The syntax for this is an argument that
+lists can be marked as COMPACT.  The syntax for this is an argument
 that points to an undef string:
 
    print ol({compact=>undef},li('one'),li('two'),li('three'));
 
 Prior to CGI.pm version 2.41, providing an empty ('') string as an
 attribute argument was the same as providing undef.  However, this has
-changed in order to accommodate those who want to create tags of the form 
+changed in order to accommodate those who want to create tags of the form
 <IMG ALT="">.  The difference is shown in these two pieces of code:
 
    CODE                   RESULT

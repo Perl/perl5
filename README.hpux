@@ -127,7 +127,7 @@ chip type used. (Start browsing at the bottom to prevent confusion ;-)
 An executable compiled on a PA-RISC 2.0 platform will not execute on a
 PA-RISC 1.1 platform, even if they are running the same version of
 HP-UX.  If you are building Perl on a PA-RISC 2.0 platform and want that
-Perl to to also run on a PA-RISC 1.1, the compiler flags +DAportable and
+Perl to also run on a PA-RISC 1.1, the compiler flags +DAportable and
 +DS32 should be used.
 
 It is no longer possible to compile PA-RISC 1.0 executables on either

@@ -20,7 +20,7 @@ Other encodings can be converted to perl's encoding on input, or from
 perl's encoding on output by use of the ":encoding(...)" layer.
 See L<open>.
 
-To mark the Perl source itself as being in an particular encoding,
+To mark the Perl source itself as being in a particular encoding,
 see L<encoding>.
 
 =item Regular Expressions

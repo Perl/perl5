@@ -695,7 +695,7 @@ sub idx {
 =item C<$checker-E<gt>hyperlink()>
 
 Add (if argument specified) and retrieve the hyperlinks (as defined by
-C<LE<lt>E<gt>>) of the current POD. They consist of an 2-item array: line
+C<LE<lt>E<gt>>) of the current POD. They consist of a 2-item array: line
 number and C<Pod::Hyperlink> object.
 
 =back

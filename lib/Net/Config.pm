@@ -169,7 +169,7 @@ Your internet domain name
 
 =item ftp_firewall
 
-If you have an FTP proxy firewall (B<NOT> a HTTP or SOCKS firewall)
+If you have an FTP proxy firewall (B<NOT> an HTTP or SOCKS firewall)
 then this value should be set to the firewall hostname. If your firewall
 does not listen to port 21, then this value should be set to
 C<"hostname:port"> (eg C<"hostname:99">)

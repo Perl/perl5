@@ -758,7 +758,7 @@ the CE<lt>interest rate> attribute...'").
 Pod parsers, when processing a series of verbatim paragraphs one
 after another, should consider them to be one large verbatim
 paragraph that happens to contain blank lines.  I.e., these two
-lines, which have an blank line between them:
+lines, which have a blank line between them:
 
 	use Foo;
 

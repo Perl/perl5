@@ -122,7 +122,7 @@ returns UV_MAX, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
 and writes the value to I<*result> (or the value is discarded if I<result>
 is NULL).
 
-The hex number may optinally be prefixed with "0b" or "b" unless
+The hex number may optionally be prefixed with "0b" or "b" unless
 C<PERL_SCAN_DISALLOW_PREFIX> is set in I<*flags> on entry. If
 C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> then the binary
 number may use '_' characters to separate digits.
@@ -178,7 +178,7 @@ Perl_grok_bin(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
             }
             value_nv *= 2.0;
 	    /* If an NV has not enough bits in its mantissa to
-	     * represent an UV this summing of small low-order numbers
+	     * represent a UV this summing of small low-order numbers
 	     * is a waste of time (because the NV cannot preserve
 	     * the low-order bits anyway): we could just remember when
 	     * did we overflow and in the end just multiply value_nv by the
@@ -236,7 +236,7 @@ returns UV_MAX, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
 and writes the value to I<*result> (or the value is discarded if I<result>
 is NULL).
 
-The hex number may optinally be prefixed with "0x" or "x" unless
+The hex number may optionally be prefixed with "0x" or "x" unless
 C<PERL_SCAN_DISALLOW_PREFIX> is set in I<*flags> on entry. If
 C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> then the hex
 number may use '_' characters to separate digits.
@@ -293,7 +293,7 @@ Perl_grok_hex(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
             }
             value_nv *= 16.0;
 	    /* If an NV has not enough bits in its mantissa to
-	     * represent an UV this summing of small low-order numbers
+	     * represent a UV this summing of small low-order numbers
 	     * is a waste of time (because the NV cannot preserve
 	     * the low-order bits anyway): we could just remember when
 	     * did we overflow and in the end just multiply value_nv by the
@@ -375,7 +375,7 @@ Perl_grok_oct(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
             }
             value_nv *= 8.0;
 	    /* If an NV has not enough bits in its mantissa to
-	     * represent an UV this summing of small low-order numbers
+	     * represent a UV this summing of small low-order numbers
 	     * is a waste of time (because the NV cannot preserve
 	     * the low-order bits anyway): we could just remember when
 	     * did we overflow and in the end just multiply value_nv by the

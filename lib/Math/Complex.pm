@@ -1561,7 +1561,7 @@ be called an extension, would it?).
 
 A I<new> operation possible on a complex number that is
 the identity for real numbers is called the I<conjugate>, and is noted
-with an horizontal bar above the number, or C<~z> here.
+with a horizontal bar above the number, or C<~z> here.
 
 	 z = a + bi
 	~z = a - bi
@@ -1660,7 +1660,7 @@ I<arg>, I<abs>, I<log>, I<csc>, I<cot>, I<acsc>, I<acot>, I<csch>,
 I<coth>, I<acosech>, I<acotanh>, have aliases I<rho>, I<theta>, I<ln>,
 I<cosec>, I<cotan>, I<acosec>, I<acotan>, I<cosech>, I<cotanh>,
 I<acosech>, I<acotanh>, respectively.  C<Re>, C<Im>, C<arg>, C<abs>,
-C<rho>, and C<theta> can be used also also mutators.  The C<cbrt>
+C<rho>, and C<theta> can be used also as mutators.  The C<cbrt>
 returns only one of the solutions: if you want all three, use the
 C<root> function.
 
@@ -1836,7 +1836,7 @@ or
 	Died at...
 
 For the C<csc>, C<cot>, C<asec>, C<acsc>, C<acot>, C<csch>, C<coth>,
-C<asech>, C<acsch>, the argument cannot be C<0> (zero).  For the the
+C<asech>, C<acsch>, the argument cannot be C<0> (zero).  For the
 logarithmic functions and the C<atanh>, C<acoth>, the argument cannot
 be C<1> (one).  For the C<atanh>, C<acoth>, the argument cannot be
 C<-1> (minus one).  For the C<atan>, C<acot>, the argument cannot be

@@ -64,7 +64,7 @@ struct xpvhv {
 /*
 =for apidoc AmU||HEf_SVKEY
 This flag, used in the length slot of hash entries and magic structures,
-specifies the structure contains a C<SV*> pointer where a C<char*> pointer
+specifies the structure contains an C<SV*> pointer where a C<char*> pointer
 is to be expected. (For information only--not to be used).
 
 =for apidoc AmU||Nullhv
@@ -119,7 +119,7 @@ C<SV*>.
 */
 
 /* these hash entry flags ride on hent_klen (for use only in magic/tied HVs) */
-#define HEf_SVKEY	-2	/* hent_key is a SV* */
+#define HEf_SVKEY	-2	/* hent_key is an SV* */
 
 
 #define Nullhv Null(HV*)

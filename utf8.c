@@ -1197,7 +1197,7 @@ $utf8::ToLower, which is stored in lib/unicore/To/Lower.pl,
 and loaded by SWASHGET, using lib/utf8_heavy.pl.
 
 The "special" is a string like "utf8::ToSpecLower", which means
-the hash %utf8::ToSpecLower, which is stored in in the same file,
+the hash %utf8::ToSpecLower, which is stored in the same file,
 lib/unicore/To/Lower.pl, and also loaded by SWASHGET.  The access
 to the hash is by Perl_to_utf8_case().
 

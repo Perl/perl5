@@ -49,7 +49,7 @@ following additional items.
 The VOS Standard C Compiler (or the VOS Standard C
 Cross-Compiler) and the VOS C Runtime.  If you are using
 the generally-available version of POSIX support, you may
-instead use the the VOS GNU C/C++ Compiler.  These are
+instead use the VOS GNU C/C++ Compiler.  These are
 standard Stratus products.
 
 =item 2

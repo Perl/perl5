@@ -2437,7 +2437,7 @@ Gid_t getegid (void);
 #endif /* DEBUGGING */
 
 
-/* These constants should be used in preference to to raw characters
+/* These constants should be used in preference to raw characters
  * when using magic. Note that some perl guts still assume
  * certain character properties of these constants, namely that
  * isUPPER() and toLOWER() may do useful mappings.

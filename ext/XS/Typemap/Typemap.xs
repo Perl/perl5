@@ -120,7 +120,7 @@ T_AVREF( av )
 =item T_HVREF
 
 From the perl level this is a reference to a perl hash.
-From the C level this is a pointer to a HV.
+From the C level this is a pointer to an HV.
 
 =cut
 
@@ -201,7 +201,7 @@ T_UV( uv )
 =item T_IV
 
 A signed integer. This is cast to the required  integer type when
-passed to C and converted to a IV when passed back to Perl.
+passed to C and converted to an IV when passed back to Perl.
 
 =cut
 

@@ -504,7 +504,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 	sv_catpvn(sv, "\n", 1);		/* Taken into account in fbm_instr() */
     s = (U8*)SvPV_force(sv, len);
     (void)SvUPGRADE(sv, SVt_PVBM);
-    if (len == 0)		/* TAIL might be on on a zero-length string. */
+    if (len == 0)		/* TAIL might be on a zero-length string. */
 	return;
     if (len > 2) {
 	U8 mlen;

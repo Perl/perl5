@@ -2163,7 +2163,7 @@ Perl_sv_2iv(pTHX_ register SV *sv)
 		    SvIVX(sv) = -(IV)value;
 		} else {
 		    /* Too negative for an IV.  This is a double upgrade, but
-		       I'm assuming it will be be rare.  */
+		       I'm assuming it will be rare.  */
 		    if (SvTYPE(sv) < SVt_PVNV)
 			sv_upgrade(sv, SVt_PVNV);
 		    SvNOK_on(sv);
@@ -2454,7 +2454,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 		    SvIVX(sv) = -(IV)value;
 		} else {
 		    /* Too negative for an IV.  This is a double upgrade, but
-		       I'm assuming it will be be rare.  */
+		       I'm assuming it will be rare.  */
 		    if (SvTYPE(sv) < SVt_PVNV)
 			sv_upgrade(sv, SVt_PVNV);
 		    SvNOK_on(sv);
@@ -5900,7 +5900,7 @@ Perl_sv_inc(pTHX_ register SV *sv)
     while (isDIGIT(*d)) d++;
     if (*d) {
 #ifdef PERL_PRESERVE_IVUV
-	/* Got to punt this an an integer if needs be, but we don't issue
+	/* Got to punt this as an integer if needs be, but we don't issue
 	   warnings. Probably ought to make the sv_iv_please() that does
 	   the conversion if possible, and silently.  */
 	int numtype = grok_number(SvPVX(sv), SvCUR(sv), NULL);

@@ -6,7 +6,7 @@
 # The gross features should work with versions going back to 2.nil but
 # some tweaking will probably be necessary.
 #
-# DGUX is a SVR4 derivative.  It ships with gcc as the standard
+# DGUX is an SVR4 derivative.  It ships with gcc as the standard
 # compiler.  Since version 3.0 it has shipped with Perl 4.036
 # installed in /usr/bin, which is kind of neat.  Be careful when you
 # install that you don't overwrite the system version, though (by

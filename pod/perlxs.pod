@@ -816,7 +816,7 @@ pointer would not modify the Perl parameter, but is put in the output
 list.
 
 The C<OUTLIST>/C<OUT> parameter differ from C<IN_OUTLIST>/C<IN_OUT>
-parameters only by the the initial value of the Perl parameter not
+parameters only by the initial value of the Perl parameter not
 being read (and not being given to the C function - which gets some
 garbage instead).  For example, the same C function as above can be
 interfaced with as
@@ -1344,7 +1344,7 @@ of C<&>, but provide a pointer to this value when the C function is called.
 
 This is useful to avoid a CODE: block for a C function which takes a parameter
 by reference.  Typically, the parameter should be not a pointer type (an
-C<int> or C<long> but not a C<int*> or C<long*>).
+C<int> or C<long> but not an C<int*> or C<long*>).
 
 The following XSUB will generate incorrect C code.  The B<xsubpp> compiler will
 turn this into code which calls C<rpcb_gettime()> with parameters C<(char

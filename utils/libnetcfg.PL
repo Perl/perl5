@@ -41,9 +41,9 @@ libnetcfg - configure libnet
 
 =head1 DESCRIPTION
 
-The libnetcfg utility can be be used to configure the libnet.
+The libnetcfg utility can be used to configure the libnet.
 Starting from perl 5.8 libnet is part of the standard Perl
-distribution, but the libnetcfg can be be used for any libnet
+distribution, but the libnetcfg can be used for any libnet
 installation.
 
 =head1 USAGE

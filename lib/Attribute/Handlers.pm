@@ -279,7 +279,7 @@ attribute C<:ATTR>. For example:
 			"in phase $phase\n";
 	}
 
-This creates an handler for the attribute C<:Loud> in the class LoudDecl.
+This creates a handler for the attribute C<:Loud> in the class LoudDecl.
 Thereafter, any subroutine declared with a C<:Loud> attribute in the class
 LoudDecl:
 
@@ -441,7 +441,7 @@ the data argument (C<$_[4]>) to a useable form before passing it to
 the handler get in the way.
 
 You can turn off that eagerness-to-help by declaring
-an attribute handler with the the keyword C<RAWDATA>. For example:
+an attribute handler with the keyword C<RAWDATA>. For example:
 
         sub Raw          : ATTR(RAWDATA) {...}
         sub Nekkid       : ATTR(SCALAR,RAWDATA) {...}
