@@ -4029,6 +4029,13 @@ use, or using a different name altogether.  The warning can be
 suppressed for subroutine names by either adding a C<&> prefix, or using
 a package qualifier, e.g. C<&our()>, or C<Foo::our()>.
 
+=item Use of tainted arguments in %s is deprecated
+
+(W taint) You have supplied C<system()> or C<exec()> with multiple 
+arguments and at least one of them is tainted.  This used to be allowed
+but will become a fatal error in a future version of perl.  Untaint your
+arguments.  See L<perlsec>.
+
 =item Use of uninitialized value%s
 
 (W uninitialized) An undefined value was used as if it were already

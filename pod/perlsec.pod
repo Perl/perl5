@@ -45,7 +45,10 @@ directories, or processes, B<with the following exceptions>:
 =item *
 
 If you pass more than one argument to either C<system> or C<exec>,
-the arguments are B<not> checked for taintedness.
+the arguments are checked for taintedness B<but> the operation will still
+be attempted, emitting an optional warning.  This will be fatal in a 
+future version of perl so do not rely on it to bypass the tainting 
+mechanism.
 
 =item *
 
@@ -72,7 +75,8 @@ For example:
     $data = 'abc';		# Not tainted
 
     system "echo $arg";		# Insecure
-    system "/bin/echo", $arg;	# Secure (doesn't use sh)
+    system "/bin/echo", $arg;	# Allowed but considered insecure
+				# (Perl doesn't know about /bin/echo)
     system "echo $hid";		# Insecure
     system "echo $data";	# Insecure until PATH set
 
@@ -87,17 +91,17 @@ For example:
     open(FOO, "< $arg");	# OK - read-only file
     open(FOO, "> $arg"); 	# Not OK - trying to write
 
-    open(FOO,"echo $arg|");	# Not OK, but...
+    open(FOO,"echo $arg|");	# Not OK
     open(FOO,"-|")
-	or exec 'echo', $arg;	# OK
+	or exec 'echo', $arg;	# Allowed but not really OK
 
     $shout = `echo $arg`;	# Insecure, $shout now tainted
 
     unlink $data, $arg;		# Insecure
     umask $arg;			# Insecure
 
-    exec "echo $arg";		# Insecure (uses the shell)
-    exec "echo", $arg;		# Secure (doesn't use the shell)
+    exec "echo $arg";		# Insecure
+    exec "echo", $arg;		# Allowed but considered insecure
     exec "sh", '-c', $arg;	# Considered secure, alas!
 
     @files = <*.c>;		# insecure (uses readdir() or similar)
@@ -114,7 +118,8 @@ For example:
 If you try to do something insecure, you will get a fatal error saying
 something like "Insecure dependency" or "Insecure $ENV{PATH}".  Note that you
 can still write an insecure B<system> or B<exec>, but only by explicitly
-doing something like the "considered secure" example above.
+doing something like the "considered secure" example above.  This will not
+be possible in a future version of Perl.
 
 =head2 Laundering and Detecting Tainted Data
 

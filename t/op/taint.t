@@ -119,7 +119,7 @@ print PROG 'print "@ARGV\n"', "\n";
 close PROG;
 my $echo = "$Invoke_Perl $ECHO";
 
-print "1..183\n";
+print "1..203\n";
 
 # First, let's make sure that Perl is checking the dangerous
 # environment variables. Maybe they aren't set yet, so we'll
@@ -837,7 +837,7 @@ else {
 
     use warnings;
 
-    $SIG{__WARN__} = sub { print "not " };
+    local $SIG{__WARN__} = sub { print "not " };
 
     sub fmi {
 	my $divnum = shift()/1;
@@ -926,4 +926,32 @@ else
     local $ENV{PATH} .= $TAINT;
     eval { system { "echo" } "/arg0", "arg1" };
     test 183, $@ =~ /^Insecure \$ENV/;
+}
+{
+    # bug 20020208.005 plus some extras
+    # single arg exec/system are tests 80-83
+    use if $] lt '5.009', warnings => FATAL => 'taint';
+    my $err = $] ge '5.009' ? qr/^Insecure dependency/ 
+                            : qr/^Use of tainted arguments/;
+    test 184, eval { exec $TAINT, $TAINT } eq '', 'exec';
+    test 185, $@ =~ $err, $@;
+    test 186, eval { exec $TAINT $TAINT } eq '', 'exec';
+    test 187, $@ =~ $err, $@;
+    test 188, eval { exec $TAINT $TAINT, $TAINT } eq '', 'exec';
+    test 189, $@ =~ $err, $@;
+    test 190, eval { exec $TAINT 'notaint' } eq '', 'exec';
+    test 191, $@ =~ $err, $@;
+    test 192, eval { exec {'notaint'} $TAINT } eq '', 'exec';
+    test 193, $@ =~ $err, $@;
+
+    test 194, eval { system $TAINT, $TAINT } eq '', 'system';
+    test 195, $@ =~ $err, $@;
+    test 196, eval { system $TAINT $TAINT } eq '', 'exec';
+    test 197, $@ =~ $err, $@;
+    test 198, eval { system $TAINT $TAINT, $TAINT } eq '', 'exec';
+    test 199, $@ =~ $err, $@;
+    test 200, eval { system $TAINT 'notaint' } eq '', 'exec';
+    test 201, $@ =~ $err, $@;
+    test 202, eval { system {'notaint'} $TAINT } eq '', 'exec';
+    test 203, $@ =~ $err, $@;
 }
