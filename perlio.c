@@ -2795,7 +2795,7 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
         int fd = fileno(stdio);
 	int socksfd = 0;
 	int invalidate = 0;
-	IV result;
+	IV result = 0;
 	int saveerr = 0;
 	int dupfd = 0;
 #ifdef SOCKS5_VERSION_NAME
@@ -2830,6 +2830,7 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 	       Use Sarathy's trick from maint-5.6 to invalidate the 
 	       fileno slot of the FILE * 
 	    */ 
+	    result = PerlIO_flush(f);
 	    saveerr = errno;
     	    if (!(invalidate = PerlIOStdio_invalidate_fileno(aTHX_ stdio))) {
 	    	dupfd = PerlLIO_dup(fd);
