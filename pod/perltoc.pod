@@ -6,7 +6,8 @@ perltoc - perl documentation table of contents
 =head1 DESCRIPTION
 
 This page provides a brief table of contents for the rest of the Perl
-documentation set.
+documentation set.  It is meant to be be quickly scanned or grepped
+through to locate the proper section you're looking for.
 
 =head1 BASIC DOCUMENTATION
 
@@ -466,7 +467,7 @@ ExtUtils::Liblist, ExtUtils::MakeMaker, ExtUtils::Manifest,
 ExtUtils::Mkbootstrap, ExtUtils::Miniperl, Fcntl, File::Basename,
 File::CheckTree, File::Find, FileHandle, File::Path, Getopt::Long,
 Getopt::Std, I18N::Collate, IPC::Open2, IPC::Open3, Net::Ping, POSIX,
-SelfLoader, Socket, Test::Harness, Text::Abbrev
+SelfLoader, Safe, Socket, Test::Harness, Text::Abbrev
 
 =item Extension Modules
 
@@ -1942,7 +1943,7 @@ variables
 
 
 
-=head2 Exporter - provide inport/export controls for Perl modules
+=head2 Exporter - Implements default import method for modules
 
 =item SYNOPSIS
 
@@ -1952,7 +1953,19 @@ variables
 
 =over
 
+=item Selecting What To Export
+
+
+=item Specialised Import Lists
+
+
 =item Module Version Checking
+
+
+=item Managing Unknown Symbols
+
+
+=item Tag Handling Utility Functions
 
 
 
@@ -2047,7 +2060,8 @@ INST_ARCHLIB, INST_EXE, INST_LIB, INST_MAN1DIR, INST_MAN3DIR, LDFROM,
 LIBPERL_A, LIBS, LINKTYPE, MAKEAPERL, MAKEFILE, MAN1PODS, MAN3PODS,
 MAP_TARGET, MYEXTLIB, NAME, NEEDS_LINKING, NORECURS, OBJECT, PERL,
 PERLMAINCC, PERL_ARCHLIB, PERL_LIB, PERL_SRC, PL_FILES, PM, PMLIBDIRS,
-PREFIX, PREREQ, SKIP, TYPEMAPS, VERSION, XS, XSOPT, XSPROTOARG
+PREFIX, PREREQ, SKIP, TYPEMAPS, VERSION, XS, XSOPT, XSPROTOARG,
+XS_VERSION
 
 =item Additional lowercase attributes
 
@@ -2114,22 +2128,8 @@ I<$!>, C<Added to MANIFEST:> I<file>
 
 
 
-=head2 ExtUtils::Miniperl, writemain - write the C code for perlmain.c
-
-=item SYNOPSIS
-
-
-=item DESCRIPTION
-
-
-=item SEE ALSO
-
-
-
-
-
-=head2 ExtUtils::Mkbootstrap, Mkbootstrap - make a bootstrap file for
-use by DynaLoader
+=head2 ExtUtils::Mkbootstrap - make a bootstrap file for use by
+DynaLoader
 
 =item SYNOPSIS
 
@@ -2489,6 +2489,23 @@ Constants, Macros
 
 
 
+=head2 Pod::Text - convert POD data to formatted ASCII text
+
+=item SYNOPSIS
+
+
+=item DESCRIPTION
+
+
+=item AUTHOR
+
+
+=item TODO
+
+
+
+
+
 =head2 Safe - Safe extension module for Perl
 
 =item DESCRIPTION
@@ -2563,8 +2580,7 @@ ops_to_mask (OP, ...), mask_to_ops (MASK), opcode (OP, ...), opname
 
 
 =head2 Socket, sockaddr_in, sockaddr_un, inet_aton, inet_ntoa - load
-the C
-    socket.h defines and structure manipulators
+the C socket.h defines and structure manipulators
 
 =item SYNOPSIS
 
