@@ -3,6 +3,10 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    unless (find PerlIO::Layer 'perlio') { # PerlIO::scalar
+	print "1..0 # Skip: not perlio\n";
+	exit 0;
+    }
 }
 
 use strict;
