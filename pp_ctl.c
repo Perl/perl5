@@ -2554,6 +2554,7 @@ PP(pp_require)
 #else
 		sv_setpvf(namesv, "%s/%s", dir, name);
 #endif
+		TAINT_PROPER("require");
 		tryname = SvPVX(namesv);
 		tryrsfp = PerlIO_open(tryname, PERL_SCRIPT_MODE);
 		if (tryrsfp) {
