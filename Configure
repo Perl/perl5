@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat May 24 10:07:39 EET DST 2003 [metaconfig 3.0 PL70]
+# Generated on Sun Jun  8 21:12:45 EET DST 2003 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -188,6 +188,7 @@ run=''
 targetarch=''
 to=''
 usecrosscompile=''
+mistrustnm=''
 perllibs=''
 dynamic_ext=''
 extensions=''
@@ -1124,7 +1125,6 @@ uselargefiles=''
 uselongdouble=''
 usemorebits=''
 usemultiplicity=''
-mistrustnm=''
 nm_opt=''
 nm_so_opt=''
 runnm=''
