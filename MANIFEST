@@ -18,6 +18,8 @@ Porting/Contract	Social contract for contributed modules in Perl core
 Porting/Glossary	Glossary of config.sh variables
 Porting/config.sh	Sample config.sh
 Porting/config_H	Sample config.h
+Porting/findvars	Find occurrences of words
+Porting/fixvars		Find undeclared variables with C compiler and fix em
 Porting/genlog		Generate formatted changelogs by querying p4d
 Porting/makerel		Release making utility
 Porting/p4d2p		Generate standard patches from p4 diffs

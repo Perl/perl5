@@ -78,6 +78,178 @@ Version 5.004_76        5.005 Public Beta, Issue 2
 ----------------
 
 ____________________________________________________________________________
+[  1612] By: gsar                                  on 1998/07/21  07:15:54
+        Log: fixes to enable PERL_OBJECT build with mingw32/egcs-1.0.2
+     Branch: perl
+	   ! ext/Opcode/Opcode.xs proto.h win32/makedef.pl
+	   ! win32/makefile.mk win32/perlhost.h win32/win32.c win32/win32.h
+           ! win32/win32sck.c
+____________________________________________________________________________
+[  1611] By: gsar                                  on 1998/07/21  07:12:00
+        Log: fix bytecode.pl with moved var names
+     Branch: perl
+           ! bytecode.pl byterun.c byterun.h ext/B/B/Asmdata.pm
+____________________________________________________________________________
+[  1610] By: gsar                                  on 1998/07/21  05:51:10
+        Log: tweak toke.c
+     Branch: perl
+           ! toke.c
+____________________________________________________________________________
+[  1609] By: gsar                                  on 1998/07/21  05:46:59
+        Log: change case of PERL_OBJECT filenames, consistent with the rest
+     Branch: perl
+           + XSlock.h objXSUB.h
+           - ObjXSub.h XSLock.h
+	   ! MANIFEST XSUB.h lib/ExtUtils/MM_Win32.pm perl.h
+           ! win32/GenCAPI.pl win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  1608] By: gsar                                  on 1998/07/21  05:31:13
+        Log: part 2 of PERL_OBJECT fixes (globals in bytecode.h moved to intrpvar.h)
+     Branch: perl
+           ! bytecode.h byterun.c embedvar.h interp.sym intrpvar.h
+____________________________________________________________________________
+[  1607] By: gsar                                  on 1998/07/21  05:29:10
+        Log: part 1 of PERL_OBJECT fixes for new var names
+     Branch: perl
+	   ! ObjXSub.h bytecode.h globals.c iperlsys.h perl.h pp_ctl.c
+           ! run.c win32/GenCAPI.pl
+____________________________________________________________________________
+[  1606] By: gsar                                  on 1998/07/21  05:17:26
+        Log: From:    Stephen McCamant <alias@mcs.com>
+             Date:    Mon, 20 Jul 1998 23:53:32 CDT
+             Message-Id: <13748.6947.311341.657005@alias-2.pr.mcs.net>
+             Subject: [PATCH] redundant RV2GVs in ck_fun()
+     Branch: perl
+           ! op.c
+____________________________________________________________________________
+[  1605] By: gsar                                  on 1998/07/21  05:13:28
+        Log: From:    Stephen McCamant <alias@mcs.com>
+             Date:    Mon, 20 Jul 1998 23:32:42 CDT
+             Message-Id: <13748.6392.921893.643238@alias-2.pr.mcs.net>
+             Subject: B::Deparse 0.56 (first testsuite fixes; big)
+     Branch: perl
+           ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  1604] By: gsar                                  on 1998/07/21  05:07:29
+        Log: applied a slightly tweaked version of suggested patch
+             From: Colin Kuskie <ckuskie@cadence.com>
+             Date: Mon, 20 Jul 1998 15:58:31 -0700 (PDT)
+             Message-ID: <Pine.GSO.3.96.980720154841.6188M-100000@pdxmail.cadence.com>
+             Subject: [PATCH _75] More documentation for -i prefix
+     Branch: perl
+           ! pod/perlrun.pod
+____________________________________________________________________________
+[  1603] By: gsar                                  on 1998/07/21  04:59:19
+        Log: disable malloced_size() feedback with -DLEAKTEST
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 20 Jul 1998 21:20:21 -0400 (EDT)
+             Message-Id: <199807210120.VAA15031@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.004_75] -DLEAKTEST broken
+     Branch: perl
+           ! av.c sv.c
+____________________________________________________________________________
+[  1602] By: gsar                                  on 1998/07/21  04:57:43
+        Log: fix hints/hpux.sh for cpp recognition
+             From: Andy Dougherty <doughera@lafcol.lafayette.edu>
+             Date: Mon, 20 Jul 1998 12:46:33 -0400 (EDT)
+             Message-Id: <Pine.SUN.3.96.980720124202.6585B-100000@newton.phys>
+             Subject: RE: Configure misses preprocessor on HP-UX
+     Branch: perl
+           ! hints/hpux.sh
+____________________________________________________________________________
+[  1601] By: gsar                                  on 1998/07/21  04:55:51
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sun, 19 Jul 1998 18:16:38 -0400 (EDT)
+             Message-Id: <199807192216.SAA10482@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.004_72] Compile (?{}) into a correct package
+     Branch: perl
+           ! pp_ctl.c t/op/pat.t
+____________________________________________________________________________
+[  1600] By: gsar                                  on 1998/07/21  04:48:32
+        Log: allocate a whole fd_set for pp_sselect() on more platforms
+             From: Jarkko Hietaniemi <jhi@cc.hut.fi>
+             Date: 20 Jul 1998 00:14:18 +0300
+             Message-ID: <oeen2a5y251.fsf@alpha.hut.fi>
+             Subject: Re: Not OK: perl 5.00475 +DEVEL_BETA_ISSUE_1 on OPENSTEP-Mach 4_1 (UNINSTALLED)
+     Branch: perl
+           ! pp_sys.c
+____________________________________________________________________________
+[  1599] By: gsar                                  on 1998/07/21  04:44:04
+        Log: add tests to check if context propagation works
+             From: Francois Desarmenien <desar@club-internet.fr>
+             Date: Sun, 19 Jul 1998 12:28:33 +0200
+             Message-ID: <35B1CA51.A606AD27@club-internet.fr>
+             Subject: Re: m//g strange behaviour in 5.004
+     Branch: perl
+           + t/op/context.t
+           ! MANIFEST
+____________________________________________________________________________
+[  1598] By: gsar                                  on 1998/07/21  04:37:49
+        Log: applied RE doc patches, with tweaks to the prose
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sat, 18 Jul 1998 23:11:13 -0400 (EDT)
+             Message-Id: <199807190311.XAA25080@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.004_72] Document irregular zero-length matches
+             --
+             Date: Sun, 19 Jul 1998 00:38:44 -0400 (EDT)
+             Message-Id: <199807190438.AAA26226@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.004_72] Another irregularity of expressions documented
+     Branch: perl
+           ! pod/perlre.pod
+____________________________________________________________________________
+[  1597] By: gsar                                  on 1998/07/21  04:16:51
+        Log: pod tweak suggested by Ilya
+     Branch: perl
+           ! pod/perlfunc.pod
+____________________________________________________________________________
+[  1596] By: gsar                                  on 1998/07/21  04:12:39
+        Log: enable color output with -Mre=debugcolor with -DDEBUGGING
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sat, 18 Jul 1998 17:34:00 -0400 (EDT)
+             Message-Id: <199807182134.RAA20644@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.004_72] Better -Mre=colordb
+     Branch: perl
+           ! ext/re/re.xs
+____________________________________________________________________________
+[  1595] By: gsar                                  on 1998/07/21  04:07:44
+        Log: From: "John L. Allen" <allen@grumman.com>
+             Date: Thu, 16 Jul 1998 11:43:54 -0400 (EDT)
+             Message-ID: <Pine.SOL.3.91.980716113018.14617A-100000@gateway.grumman.com>
+             Subject: [PATCH _75 & _05] perlbug does not report usage on invalid flags
+     Branch: perl
+           ! utils/perlbug.PL
+____________________________________________________________________________
+[  1594] By: gsar                                  on 1998/07/21  04:06:06
+        Log: don't use SelectSaver on IO::Handle->input_*() methods
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Thu, 16 Jul 1998 15:00:39 +0100 (BST)
+             Message-Id: <199807161400.PAA25532@tempest.cise.npl.co.uk>
+             Subject: Re: Bug in IO::Handle->input_record_separator
+     Branch: perl
+           ! ext/IO/lib/IO/Handle.pm
+____________________________________________________________________________
+[  1593] By: gsar                                  on 1998/07/21  04:03:46
+        Log: applied a tweaked version of suggested patch
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Wed, 15 Jul 1998 17:02:48 -0400 (EDT)
+             Message-Id: <199807152102.RAA19952@monk.mps.ohio-state.edu>
+             Subject: [PATCH 5.004_72] Enable/document colors in re.pm
+     Branch: perl
+           ! ext/re/re.pm
+____________________________________________________________________________
+[  1592] By: gsar                                  on 1998/07/21  03:49:55
+        Log: remove compat3.sym and rename perld4.pod
+     Branch: perl
+          +> pod/perl5004delta.pod
+           - compat3.sym pod/perld4.pod
+           ! MANIFEST
+____________________________________________________________________________
+[  1591] By: gsar                                  on 1998/07/21  03:38:16
+        Log: update patchlevel, Changes
+     Branch: perl
+	   ! Changes patchlevel.h win32/Makefile win32/config_H.bc
+           ! win32/config_H.gc win32/config_H.vc win32/makefile.mk
+____________________________________________________________________________
 [  1590] By: gsar                                  on 1998/07/21  03:06:04
         Log: documentation tweaks from Abigail <abigail@fnx.com>
              Date: Fri, 17 Jul 1998 20:52:36 -0400 (EDT)

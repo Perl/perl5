@@ -127,10 +127,32 @@ public:
 #endif
 };
 
-#define PerlIO_canset_cnt(f)	1
-#define PerlIO_has_base(f)	1
-#define PerlIO_has_cntptr(f)	1
-#define PerlIO_fast_gets(f)	1
+
+
+#ifdef USE_STDIO_PTR
+#  define PerlIO_has_cntptr(f)		1       
+#  ifdef STDIO_CNT_LVALUE
+#    define PerlIO_canset_cnt(f)	1      
+#    ifdef STDIO_PTR_LVALUE
+#      define PerlIO_fast_gets(f)	1        
+#    endif
+#  else
+#    define PerlIO_canset_cnt(f)	0      
+#  endif
+#else  /* USE_STDIO_PTR */
+#  define PerlIO_has_cntptr(f)		0
+#  define PerlIO_canset_cnt(f)		0
+#endif /* USE_STDIO_PTR */
+
+#ifndef PerlIO_fast_gets
+#define PerlIO_fast_gets(f)		0        
+#endif
+
+#ifdef FILE_base
+#define PerlIO_has_base(f)		1
+#else
+#define PerlIO_has_base(f)		0
+#endif
 
 #define PerlIO_stdin()		PL_piStdIO->Stdin()
 #define PerlIO_stdout()		PL_piStdIO->Stdout()
