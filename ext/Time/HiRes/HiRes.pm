@@ -262,6 +262,12 @@ Here is an example of using NVtime from C:
   myNVtime = (double(*)()) SvIV(*svp);
   printf("The current time is: %f\n", (*myNVtime)());
 
+=head1 CAVEATS
+
+Notice that the core time() maybe rounding rather than truncating.
+What this means that the core time() may be giving time one second
+later than gettimeofday(), also known as Time::HiRes::time().
+
 =head1 AUTHORS
 
 D. Wegscheid <wegscd@whirlpool.com>
