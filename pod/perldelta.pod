@@ -726,7 +726,8 @@ Ilya Zakharevich.
 
 L<libnet> is a collection of perl5 modules related to network
 programming, from Graham Barr.  See L<Net::FTP>, L<Net::NNTP>,
-L<Net::Ping>, L<Net::POP3>, L<Net::SMTP>, and L<Net::Time>.
+L<Net::Ping> (not part of libnet, but related), L<Net::POP3>,
+L<Net::SMTP>, and L<Net::Time>.
 
 Perl installation leaves libnet unconfigured, use F<libnetcfg> to configure.
 
@@ -1115,10 +1116,19 @@ Math::Complex handles inf, NaN etc., better.
 
 =item *
 
-Net::Ping has been muchly enhanced.  Multihoming is now supported.
-There is now "external" protocol which uses Net::Ping::External module
-which runs external ping(1) and parses the output.  A version of
-Net::Ping::External is available in CPAN.
+Net::Ping has been muchly enhanced: multihoming is now supported,
+Win32 functionality is better, there is now time measuring
+functionality (optionally high-resolution using Time::HiRes),
+and there is now "external" protocol which uses Net::Ping::External
+module which runs your external ping utility and parses the output.
+A version of Net::Ping::External is available in CPAN.
+
+Note that some of the Net::Ping tests are disabled when running
+under the Perl distribution since one cannot assume one or more
+of the following: enabled echo port at localhost, full Internet
+connectivity, or sympathetic firewalls.  You can set the environment
+variable PERL_TEST_Net_Ping to "1" (one) before running the Perl test
+suite to enable all the Net::Ping tests.
 
 =item *
 
