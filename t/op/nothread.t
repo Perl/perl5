@@ -9,7 +9,7 @@ BEGIN
   @INC = "../lib";
   require Config;
   import Config;
-  if ($Config{'ccflags'} =~ /USE_THREADS\b/)
+  if ($Config{'usethreads'})
    {
     print "1..0\n";
     exit 0;

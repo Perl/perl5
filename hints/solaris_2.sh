@@ -224,8 +224,7 @@ fi
 rm -f core
 
 if [ "X$usethreads" != "X" ]; then
-    ccflags="-D_REENTRANT -DUSE_THREADS $ccflags"
-    cppflags="-D_REENTRANT -DUSE_THREADS $cppflags"
+    ccflags="-D_REENTRANT $ccflags"
     # -lpthread needs to come before -lc but after other libraries such
     # as -lgdbm and such like. We assume here that -lc is present in
     # libswanted. If that fails to be true in future, then this can be

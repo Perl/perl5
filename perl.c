@@ -2631,7 +2631,7 @@ init_perllib(void)
     }
 
 /* Use the ~-expanded versions of APPLLIB (undocumented),
-    ARCHLIB PRIVLIB SITEARCH SITELIB and OLDARCHLIB
+    ARCHLIB PRIVLIB SITEARCH and SITELIB 
 */
 #ifdef APPLLIB_EXP
     incpush(APPLLIB_EXP, FALSE);
@@ -2651,10 +2651,6 @@ init_perllib(void)
 #ifdef SITELIB_EXP
     incpush(SITELIB_EXP, FALSE);
 #endif
-#ifdef OLDARCHLIB_EXP  /* 5.00[01] compatibility */
-    incpush(OLDARCHLIB_EXP, FALSE);
-#endif
-    
     if (!tainting)
 	incpush(".", FALSE);
 }

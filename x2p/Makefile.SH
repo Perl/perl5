@@ -46,13 +46,12 @@ $make_set_make
 # grrr
 SHELL = $sh
 
-# These variables will be used in a future version to make
-# the make file more portable to non-unix systems.
+# These variables may need to be manually set for non-Unix systems.
 AR = $ar
-EXE_EXT = $exe_ext
-LIB_EXT = $lib_ext
-OBJ_EXT = $obj_ext
-PATH_SEP = $path_sep
+EXE_EXT = $_ext
+LIB_EXT = $_a
+OBJ_EXT = $_o
+PATH_SEP = $p_
 
 FIRSTMAKEFILE = $firstmakefile
 

@@ -363,17 +363,12 @@ above.
 
 The  directories site_perl and site_perl/archname are empty, but are
 intended to be used for installing local or site-wide extensions.  Perl
-will automatically look in these directories.  Previously, most sites
-just put their local extensions in with the standard distribution.
+will automatically look in these directories. 
 
 In order to support using things like #!/usr/local/bin/perl5.004 after
 a later version is released, architecture-dependent libraries are
 stored in a version-specific directory, such as
-/usr/local/lib/perl5/archname/5.004/.  In Perl 5.000 and 5.001, these
-files were just stored in /usr/local/lib/perl5/archname/.  If you will
-not be using 5.001 binaries, you can delete the standard extensions from
-the /usr/local/lib/perl5/archname/ directory.  Locally-added extensions
-can be moved to the site_perl and site_perl/archname directories.
+/usr/local/lib/perl5/archname/5.004/.  
 
 Again, these are just the defaults, and can be changed as you run
 Configure.
@@ -866,8 +861,8 @@ and then re-run
 
 =item No sh
 
-If you don't have sh, you'll have to copy the sample file config_H to
-config.h and edit the config.h to reflect your system's peculiarities.
+If you don't have sh, you'll have to copy the sample file Porting/config_H
+to config.h and edit the config.h to reflect your system's peculiarities.
 You'll probably also have to extensively modify the extension building
 mechanism.
 
