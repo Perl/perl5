@@ -4401,9 +4401,8 @@ is_null_device(name)
 /* Do this via $Check_Access on VMS, since the CRTL stat() returns only a
  * subset of the applicable information.
  */
-/*{{{I32 cando(I32 bit, Uid_t effective, struct stat *statbufp)*/
-I32
-Perl_cando(pTHX_ I32 bit, Uid_t effective, Stat_t *statbufp)
+bool
+Perl_cando(pTHX_ Mode_t bit, Uid_t effective, Stat_t *statbufp)
 {
   if (statbufp == &PL_statcache) return cando_by_name(bit,effective,namecache);
   else {

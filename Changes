@@ -79,6 +79,158 @@ Version 5.005_63        Development release working toward 5.6
 ----------------
 
 ____________________________________________________________________________
+[  4605] By: gsar                                  on 1999/12/01  05:15:27
+        Log: avoid PTR->IV cast warnings
+     Branch: perl
+	   ! mg.c op.c scope.h
+____________________________________________________________________________
+[  4604] By: gsar                                  on 1999/12/01  03:59:56
+        Log: email address changes
+     Branch: perl
+	   ! AUTHORS Changes Porting/genlog Porting/p4d2p Porting/p4desc
+	   ! README.win32 ext/Data/Dumper/Dumper.pm lib/DB.pm
+	   ! lib/File/DosGlob.pm lib/Math/Complex.pm lib/Math/Trig.pm
+	   ! pod/perl5005delta.pod pod/perlport.pod t/op/runlevel.t
+	   ! utils/perlbug.PL utils/perldoc.PL win32/bin/perlglob.pl
+____________________________________________________________________________
+[  4603] By: gsar                                  on 1999/12/01  03:45:13
+        Log: minor USE_ITHREADS tweaks
+     Branch: perl
+	   ! doio.c op.c op.h pp_hot.c pp_sys.c run.c win32/Makefile
+	   ! win32/perllib.c win32/win32.h
+____________________________________________________________________________
+[  4602] By: gsar                                  on 1999/12/01  01:00:09
+        Log: more complete pseudo-fork() support for Windows
+     Branch: perl
+	   + pod/perlfork.pod win32/perlhost.h win32/vdir.h win32/vmem.h
+	   ! MANIFEST XSUB.h cop.h dump.c embed.h embed.pl embedvar.h
+	   ! ext/B/B/CC.pm ext/Opcode/Opcode.xs global.sym globals.c
+	   ! globvar.sym gv.c hv.c intrpvar.h iperlsys.h makedef.pl mg.c
+	   ! mpeix/mpeixish.h objXSUB.h op.c op.h os2/os2ish.h perl.c
+	   ! perl.h perlapi.c plan9/plan9ish.h pod/Makefile pod/buildtoc
+	   ! pod/perl.pod pod/roffitall pp.c pp_ctl.c pp_hot.c pp_sys.c
+	   ! proto.h regcomp.c run.c scope.c scope.h sv.c t/op/fork.t
+	   ! toke.c unixish.h util.c vos/vosish.h win32/Makefile
+	   ! win32/makefile.mk win32/perllib.c win32/win32.c win32/win32.h
+	   ! win32/win32iop.h win32/win32thread.h
+____________________________________________________________________________
+[  4601] By: gsar                                  on 1999/12/01  00:45:38
+        Log: rudimentary support for remote debugging, from aeons ago (somewhat
+             modified)
+             From: Graham TerMarsch <grahamt@ActiveState.com>
+             Date: Sat, 12 Sep 1998 10:46:55 -0700
+             Message-ID: <35FAB38F.EA9AAC50@activestate.com>
+             Subject: Re: Patches to perl5db.pl to allow for remote debugging
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[  4600] By: chip                                  on 1999/11/19  21:16:00
+        Log: Document known limitations of fdopen() on some systems,
+             as they apply to open() and sysopen().
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  4599] By: chip                                  on 1999/11/19  17:20:19
+        Log: Undef printf before redirecting it to PerlIO_stdoutf.
+             (Avoids an irritating warning when compiling with PerlIO.)
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  4598] By: jhi                                   on 1999/11/22  21:30:17
+        Log: Small VMS nits from Craig A. Berry, <craig.berry@metamor.com>.
+     Branch: cfgperl
+	   ! README.vms t/io/open.t
+____________________________________________________________________________
+[  4597] By: jhi                                   on 1999/11/21  16:21:21
+        Log: Replace #4596 with the change done in 5.005_03.
+     Branch: cfgperl
+	   ! ext/Errno/Errno_pm.PL
+____________________________________________________________________________
+[  4596] By: jhi                                   on 1999/11/21  16:07:20
+        Log: Skip processing a file if the file to be opened is '-'
+             (can happen in UNICOS)
+     Branch: cfgperl
+	   ! ext/Errno/Errno_pm.PL
+____________________________________________________________________________
+[  4595] By: jhi                                   on 1999/11/21  14:05:10
+        Log: VMS patches from Peter Prymmer.
+     Branch: cfgperl
+	   ! doio.c mg.c taint.c vms/subconfigure.com vms/vms.c
+____________________________________________________________________________
+[  4594] By: jhi                                   on 1999/11/18  17:07:14
+        Log: The find_byclass prototype is already in proto.h. 
+     Branch: cfgperl
+	   ! regexec.c
+____________________________________________________________________________
+[  4593] By: gsar                                  on 1999/11/16  21:25:21
+        Log: typo in flag checks
+     Branch: utfperl
+	   ! sv.h
+____________________________________________________________________________
+[  4592] By: jhi                                   on 1999/11/16  21:17:25
+        Log: Regen Configure.
+     Branch: cfgperl
+	   ! Configure config_h.SH pp.c pp.h vms/subconfigure.com
+     Branch: metaconfig
+	   ! U/a_dvisory/quadtype.U
+____________________________________________________________________________
+[  4591] By: jhi                                   on 1999/11/16  14:53:19
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> cop.h deb.c embed.h embed.pl global.sym lib/Pod/Checker.pm
+	  !> lib/Pod/InputObjects.pm lib/Pod/Parser.pm lib/Pod/Select.pm
+	  !> lib/Pod/Usage.pm makedef.pl objXSUB.h perl.c perlapi.c
+	  !> pod/podchecker.PL pp_sys.c proto.h sv.c t/pod/poderrs.t
+	  !> t/pod/poderrs.xr
+____________________________________________________________________________
+[  4590] By: gsar                                  on 1999/11/16  05:57:56
+        Log: Pod::Parser updates (v1.091) from Brad Appleton <bradapp@enteract.com>
+     Branch: perl
+	   ! lib/Pod/Checker.pm lib/Pod/InputObjects.pm lib/Pod/Parser.pm
+	   ! lib/Pod/Select.pm lib/Pod/Usage.pm pod/podchecker.PL
+	   ! t/pod/poderrs.t t/pod/poderrs.xr
+____________________________________________________________________________
+[  4589] By: gsar                                  on 1999/11/15  18:47:34
+        Log: add a synchronous stub fork() for USE_ITHREADS to prove that a simple
+             C<if (fork()) { print "parent" } else { print "child" }> works on
+             Windows (incidentally running a cloned^2 interpreter :)
+     Branch: perl
+	   ! embed.h embed.pl global.sym makedef.pl objXSUB.h perlapi.c
+	   ! pp_sys.c proto.h sv.c
+____________________________________________________________________________
+[  4588] By: gsar                                  on 1999/11/15  14:34:36
+        Log: cloning the stack (part 1)
+     Branch: perl
+	   ! cop.h deb.c perl.c sv.c
+____________________________________________________________________________
+[  4587] By: jhi                                   on 1999/11/15  00:22:20
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> Changes embed.h embed.pl embedvar.h global.sym intrpvar.h
+	  !> makedef.pl objXSUB.h op.c perl.h perlapi.c proto.h run.c sv.c
+	  !> win32/perllib.c
+____________________________________________________________________________
+[  4586] By: jhi                                   on 1999/11/14  21:17:26
+        Log: Ilya's "hopscotch" patch, reworked by Ilya to fit.
+     Branch: cfgperl
+	   ! embed.h embed.pl embedvar.h proto.h regexec.c t/op/re_tests
+____________________________________________________________________________
+[  4585] By: gsar                                  on 1999/11/14  20:01:45
+        Log: tweak for win32 build
+     Branch: perl
+	   ! embed.h embed.pl op.c proto.h
+____________________________________________________________________________
+[  4584] By: gsar                                  on 1999/11/14  19:46:25
+        Log: cosmetic tweaks
+     Branch: perl
+	   ! embed.h embed.pl embedvar.h global.sym intrpvar.h makedef.pl
+	   ! objXSUB.h perl.h perlapi.c proto.h sv.c win32/perllib.c
+____________________________________________________________________________
+[  4583] By: gsar                                  on 1999/11/14  17:38:32
+        Log: fix problem pointer casts
+     Branch: perl
+	   ! Changes run.c sv.c
+____________________________________________________________________________
 [  4582] By: jhi                                   on 1999/11/14  17:10:01
         Log: Integrate with Sarathy.
      Branch: cfgperl

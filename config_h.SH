@@ -1000,21 +1000,13 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 
 /* HAS_QUAD:
  *	This symbol, if defined, tells that there's a 64-bit integer type,
- *	Quad_t.
- */
-/* Quad_t:
- *	This symbol holds the type used for 64-bit integers.
- *	It can be int, long, long long, int64_t etc...
- */
-/* Uquad_t:
- *	This symbol holds the type used for unsigned 64-bit integers.
- *	It can be unsigned int, unsigned long, unsigned long long,
- *	uint64_t etc...
+ *	Quad_t, and its unsigned counterpar, Uquad_t. QUADKIND will be one
+ *	of QUAD_IS_INT, QUAD_IS_LONG, QUAD_IS_LONG_LONG, or QUAD_IS_INT64_T.
  */
 #$d_quad HAS_QUAD	/**/
-#$d_quad Quad_t $quadtype	/**/
-#$d_quad Uquad_t $uquadtype	/**/
 #ifdef HAS_QUAD
+#   define Quad_t $quadtype	/**/
+#   define Uquad_t $uquadtype	/**/
 #   define QUADKIND $quadkind	/**/
 #   define QUAD_IS_INT	1
 #   define QUAD_IS_LONG	2
@@ -2554,8 +2546,8 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_strtoull HAS_STRTOULL		/**/
 
 /* USE_64_BITS:
- *	This symbol, if defined, indicates that 64-bit interfaces should
- *	be used when available.  If not defined, the native default interfaces
+ *	This symbol, if defined, indicates that 64-bit integers should
+ *	be used when available.  If not defined, the native integers
  *	will be used (be they 32 or 64 bits).
  */
 #ifndef USE_64_BITS

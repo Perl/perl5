@@ -168,7 +168,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	if (fd == -1)
 	    fp = NULL;
 	else {
-	    const char *fpmode;
+	    char *fpmode;
 	    if (result == O_RDONLY)
 		fpmode = "r";
 #ifdef O_APPEND

@@ -954,6 +954,7 @@
 #define cache_re		S_cache_re
 #define reghop			S_reghop
 #define reghopmaybe		S_reghopmaybe
+#define find_byclass		S_find_byclass
 #endif
 #if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
 #define debprof			S_debprof
@@ -2337,6 +2338,7 @@
 #define cache_re(a)		S_cache_re(aTHX_ a)
 #define reghop(a,b)		S_reghop(aTHX_ a,b)
 #define reghopmaybe(a,b)	S_reghopmaybe(aTHX_ a,b)
+#define find_byclass(a,b,c,d,e,f)	S_find_byclass(aTHX_ a,b,c,d,e,f)
 #endif
 #if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
 #define debprof(a)		S_debprof(aTHX_ a)
@@ -4557,6 +4559,8 @@
 #define reghop			S_reghop
 #define S_reghopmaybe		CPerlObj::S_reghopmaybe
 #define reghopmaybe		S_reghopmaybe
+#define S_find_byclass		CPerlObj::S_find_byclass
+#define find_byclass		S_find_byclass
 #endif
 #if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
 #define S_debprof		CPerlObj::S_debprof

@@ -665,11 +665,15 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '(':
 	sv_setiv(sv, (IV)PL_gid);
+#ifdef HAS_GETGROUPS
 	Perl_sv_setpvf(aTHX_ sv, "%"Gid_t_f, PL_gid);
+#endif
 	goto add_groups;
     case ')':
 	sv_setiv(sv, (IV)PL_egid);
+#ifdef HAS_GETGROUPS
 	Perl_sv_setpvf(aTHX_ sv, "%"Gid_t_f, PL_egid);
+#endif
       add_groups:
 #ifdef HAS_GETGROUPS
 	{

@@ -144,14 +144,14 @@ confident you are, make a bug report to the VMSPerl mailing list.
 If one or more tests fail, you can get more info on the failure by issuing
 this command sequence:
 
-$ @[.VMS]TEST .typ "-v" [.subdir]test.T
+$ @[.VMS]TEST .typ "" "-v" [.subdir]test.T
 
 where ".typ" is the file type of the Perl images you just built (if you
 didn't do anything special, use .EXE), and "[.subdir]test.T" is the test
 that failed. For example, with a normal Perl build, if the test indicated
 that [.op]time failed, then you'd do this:
 
-$ @[.VMS]TEST .EXE "-v" [.OP]TIME.T
+$ @[.VMS]TEST .EXE "" "-v" [.OP]TIME.T
 
 When you send in a bug report for failed tests, please include the output
 from this command, which is run from the main source directory:

@@ -333,20 +333,29 @@ EOM
 esac
 EOCBU
 
-# Turn on largefileness if available.
+# This script UU/uselfs.cbu will get 'called-back' by Configure 
+# after it has prompted the user for whether to use large files.
+cat > UU/uselfs.cbu <<'EOCBU'
+case "$uselargefiles" in
+$define|true|[yY]*)
 	lfcflags="`getconf LFS_CFLAGS 2>/dev/null`"
 	lfldflags="`getconf LFS_LDFLAGS 2>/dev/null`"
 	lflibs="`getconf LFS_LIBS 2>/dev/null|sed -e 's@^-l@@' -e 's@ -l@ @g`"
-case "$lfcflags$lfldflags$lflibs" in
-'');;
-*) ccflags="$ccflags -DUSE_LONG_LONG $lfcflags"
-   ldflags="$ldflags $ldldflags"
-   libswanted="$libswanted $lflibs"
-   ;;
-esac
+	case "$lfcflags$lfldflags$lflibs" in
+	'');;
+	*) uselonglong="$define"
+           echo "(Large files in Solaris require also long longs, using long longs...)"
+	   ccflags="$ccflags -DUSE_LONG_LONG $lfcflags"
+	   ldflags="$ldflags $ldldflags"
+	   libswanted="$libswanted $lflibs"
+	   ;;
+	esac
 	lfcflags=''
 	lfldflags=''
 	lflibs=''
+	;;
+esac
+EOCBU
 
 # This script UU/use64bits.cbu will get 'called-back' by Configure 
 # after it has prompted the user for whether to use 64 bits.
