@@ -146,7 +146,7 @@ clean:
 realclean: clean
 	-rmdir .depending
 	rm -f core $(addedbyconf) all malloc.c
-	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old
+	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old makefile.old
 
 veryclean: realclean
 	rm -f *~ *.orig

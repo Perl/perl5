@@ -931,7 +931,7 @@ _cleaner2:
 	rm -f t/misctmp* t/forktmp* t/tmp* t/c t/perl$(EXE_EXT) t/rantests
 	rm -f so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
 	rm -rf $(addedbyconf)
-	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old
+	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old makefile.old
 	rm -f $(private) lib/Config.pod
 	rm -rf lib/auto
 	rm -f lib/.exists lib/*/.exists lib/*/*/.exists
