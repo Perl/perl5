@@ -736,9 +736,31 @@ static stcxt_t *Context_ptr = &Context;
  * a "minor" version, to better track this kind of evolution from now on.
  * 
  */
-static char old_magicstr[] = "perl-store";	/* Magic number before 0.6 */
-static char magicstr[] = "pst0";			/* Used as a magic number */
+static const char old_magicstr[] = "perl-store"; /* Magic number before 0.6 */
+static const char magicstr[] = "pst0";		 /* Used as a magic number */
 
+#define MAGICSTR_BYTES  'p','s','t','0'
+#define OLDMAGICSTR_BYTES  'p','e','r','l','-','s','t','o','r','e'
+
+#if BYTEORDER == 0x1234
+#define BYTEORDER_BYTES  '1','2','3','4'
+#else
+#if BYTEORDER == 0x12345678
+#define BYTEORDER_BYTES  '1','2','3','4','5','6','7','8'
+#else
+#if BYTEORDER == 0x87654321
+#define BYTEORDER_BYTES  '8','7','6','5','4','3','2','1'
+#else
+#if BYTEORDER == 0x4321
+#define BYTEORDER_BYTES  '4','3','2','1'
+#else
+#error Unknown byteoder. Please append your byteorder to Storable.xs
+#endif
+#endif
+#endif
+#endif
+
+static const char byteorderstr[] = {BYTEORDER_BYTES, 0};
 
 #define STORABLE_BIN_MAJOR	2		/* Binary major "version" */
 #define STORABLE_BIN_MINOR	5		/* Binary minor "version" */
@@ -3158,52 +3180,65 @@ static int store(stcxt_t *cxt, SV *sv)
  */
 static int magic_write(stcxt_t *cxt)
 {
-	char buf[256];	/* Enough room for 256 hexa digits */
-	unsigned char c;
-	int use_network_order = cxt->netorder;
+    /*
+     * Starting with 0.6, the "use_network_order" byte flag is also used to
+     * indicate the version number of the binary image, encoded in the upper
+     * bits. The bit 0 is always used to indicate network order.
+     */
+    /*
+     * Starting with 0.7, a full byte is dedicated to the minor version of
+     * the binary format, which is incremented only when new markers are
+     * introduced, for instance, but when backward compatibility is preserved.
+     */
 
-	TRACEME(("magic_write on fd=%d", cxt->fio ? PerlIO_fileno(cxt->fio)
-                 : -1));
+    /* Make these at compile time.  The WRITE() macro is sufficiently complex
+       that it saves about 200 bytes doing it this way and only using it
+       once.  */
+    static const unsigned char network_file_header[] = {
+        MAGICSTR_BYTES,
+        (STORABLE_BIN_MAJOR << 1) | 1,
+        STORABLE_BIN_WRITE_MINOR
+    };
+    static const unsigned char file_header[] = {
+        MAGICSTR_BYTES,
+        (STORABLE_BIN_MAJOR << 1) | 0,
+        STORABLE_BIN_WRITE_MINOR,
+        /* sizeof the array includes the 0 byte at the end:  */
+        (char) sizeof (byteorderstr) - 1,
+        BYTEORDER_BYTES,
+        (unsigned char) sizeof(int),
+	(unsigned char) sizeof(long),
+        (unsigned char) sizeof(char *),
+	(unsigned char) sizeof(NV)
+    };
+    const unsigned char *header;
+    SSize_t length;
 
-	if (cxt->fio)
-		WRITE(magicstr, (SSize_t)strlen(magicstr));	/* Don't write final \0 */
+    TRACEME(("magic_write on fd=%d", cxt->fio ? PerlIO_fileno(cxt->fio) : -1));
 
-	/*
-	 * Starting with 0.6, the "use_network_order" byte flag is also used to
-	 * indicate the version number of the binary image, encoded in the upper
-	 * bits. The bit 0 is always used to indicate network order.
-	 */
+    if (cxt->netorder) {
+        header = network_file_header;
+        length = sizeof (network_file_header);
+    } else {
+        header = file_header;
+        length = sizeof (file_header);
+    }        
 
-	c = (unsigned char)
-		((use_network_order ? 0x1 : 0x0) | (STORABLE_BIN_MAJOR << 1));
-	PUTMARK(c);
+    if (!cxt->fio) {
+        /* sizeof the array includes the 0 byte at the end.  */
+        header += sizeof (magicstr) - 1;
+        length -= sizeof (magicstr) - 1;
+    }        
 
-	/*
-	 * Starting with 0.7, a full byte is dedicated to the minor version of
-	 * the binary format, which is incremented only when new markers are
-	 * introduced, for instance, but when backward compatibility is preserved.
-	 */
+    WRITE(header, length);
 
-	PUTMARK((unsigned char) STORABLE_BIN_WRITE_MINOR);
-
-	if (use_network_order)
-		return 0;						/* Don't bother with byte ordering */
-
-	sprintf(buf, "%lx", (unsigned long) BYTEORDER);
-	c = (unsigned char) strlen(buf);
-	PUTMARK(c);
-	WRITE(buf, (SSize_t)c);		/* Don't write final \0 */
-	PUTMARK((unsigned char) sizeof(int));
-	PUTMARK((unsigned char) sizeof(long));
-	PUTMARK((unsigned char) sizeof(char *));
-	PUTMARK((unsigned char) sizeof(NV));
-
+    if (!cxt->netorder) {
 	TRACEME(("ok (magic_write byteorder = 0x%lx [%d], I%d L%d P%d D%d)",
-		 (unsigned long) BYTEORDER, (int) c,
+		 (unsigned long) BYTEORDER, (int) sizeof (byteorderstr) - 1,
 		 (int) sizeof(int), (int) sizeof(long),
 		 (int) sizeof(char *), (int) sizeof(NV)));
-
-	return 0;
+    }
+    return 0;
 }
 
 /*
@@ -4916,140 +4951,159 @@ static SV *old_retrieve_hash(stcxt_t *cxt, char *cname)
  */
 static SV *magic_check(stcxt_t *cxt)
 {
-	char buf[256];
-	char byteorder[256];
-	int c;
-	int use_network_order;
-	int version_major;
-	int version_minor = 0;
+    /* The worst case for a malicious header would be old magic (which is
+       longer), major, minor, byteorder length byte of 255, 255 bytes of
+       garbage, sizeof int, long, pointer, NV.
+       So the worse of that we can read is 255 bytes of garbage plus 4.
+       Err, I am assuming 8 bit bytes here. Please file a bug report if you're
+       compiling perl on a system with chars that are larger than 8 bits.
+       (Even Crays aren't *that* perverse).
+    */
+    unsigned char buf[4 + 255];
+    unsigned char *current;
+    int c;
+    int length;
+    int use_network_order;
+    int use_NV_size;
+    int version_major;
+    int version_minor = 0;
 
-	TRACEME(("magic_check"));
+    TRACEME(("magic_check"));
 
-	/*
-	 * The "magic number" is only for files, not when freezing in memory.
-	 */
+    /*
+     * The "magic number" is only for files, not when freezing in memory.
+     */
 
-	if (cxt->fio) {
-		STRLEN len = sizeof(magicstr) - 1;
-		STRLEN old_len;
+    if (cxt->fio) {
+        /* This includes the '\0' at the end.  I want to read the extra byte,
+           which is usually going to be the major version number.  */
+        STRLEN len = sizeof(magicstr);
+        STRLEN old_len;
 
-		READ(buf, (SSize_t)len);			/* Not null-terminated */
-		buf[len] = '\0';				/* Is now */
+        READ(buf, (SSize_t)(len));	/* Not null-terminated */
 
-		if (0 == strcmp(buf, magicstr))
-			goto magic_ok;
+        /* Point at the byte after the byte we read.  */
+        current = buf + --len;	/* Do the -- outside of macros.  */
 
-		/*
-		 * Try to read more bytes to check for the old magic number, which
-		 * was longer.
-		 */
+        if (memNE(buf, magicstr, len)) {
+            /*
+             * Try to read more bytes to check for the old magic number, which
+             * was longer.
+             */
 
-		old_len = sizeof(old_magicstr) - 1;
-		READ(&buf[len], (SSize_t)(old_len - len));
-		buf[old_len] = '\0';			/* Is now null-terminated */
+            TRACEME(("trying for old magic number"));
 
-		if (strcmp(buf, old_magicstr))
-			CROAK(("File is not a perl storable"));
-	}
-
-magic_ok:
-	/*
-	 * Starting with 0.6, the "use_network_order" byte flag is also used to
-	 * indicate the version number of the binary, and therefore governs the
-	 * setting of sv_retrieve_vtbl. See magic_write().
-	 */
-
-	GETMARK(use_network_order);
-	version_major = use_network_order >> 1;
-	cxt->retrieve_vtbl = version_major ? sv_retrieve : sv_old_retrieve;
-
-	TRACEME(("magic_check: netorder = 0x%x", use_network_order));
-
-
-	/*
-	 * Starting with 0.7 (binary major 2), a full byte is dedicated to the
-	 * minor version of the protocol.  See magic_write().
-	 */
-
-	if (version_major > 1)
-		GETMARK(version_minor);
-
-	cxt->ver_major = version_major;
-	cxt->ver_minor = version_minor;
-
-	TRACEME(("binary image version is %d.%d", version_major, version_minor));
-
-	/*
-	 * Inter-operability sanity check: we can't retrieve something stored
-	 * using a format more recent than ours, because we have no way to
-	 * know what has changed, and letting retrieval go would mean a probable
-	 * failure reporting a "corrupted" storable file.
-	 */
-
-	if (
-		version_major > STORABLE_BIN_MAJOR ||
-			(version_major == STORABLE_BIN_MAJOR &&
-			version_minor > STORABLE_BIN_MINOR)
-            ) {
-            int croak_now = 1;
-            TRACEME(("but I am version is %d.%d", STORABLE_BIN_MAJOR,
-                     STORABLE_BIN_MINOR));
-
-            if (version_major == STORABLE_BIN_MAJOR) {
-                TRACEME(("cxt->accept_future_minor is %d",
-                         cxt->accept_future_minor));
-                if (cxt->accept_future_minor < 0)
-                    cxt->accept_future_minor
-                        = (SvTRUE(perl_get_sv("Storable::accept_future_minor",
-                                              TRUE))
-                           ? 1 : 0);
-                if (cxt->accept_future_minor == 1)
-                    croak_now = 0;  /* Don't croak yet.  */
-            }
-            if (croak_now) {
-		CROAK(("Storable binary image v%d.%d more recent than I am (v%d.%d)",
-                       version_major, version_minor,
-                       STORABLE_BIN_MAJOR, STORABLE_BIN_MINOR));
-            }
+            old_len = sizeof(old_magicstr) - 1;
+            READ(current + 1, (SSize_t)(old_len - len));
+            
+            if (memNE(buf, old_magicstr, old_len))
+                CROAK(("File is not a perl storable"));
+            current = buf + old_len;
         }
+        use_network_order = *current;
+    } else
+	GETMARK(use_network_order);
+        
+    /*
+     * Starting with 0.6, the "use_network_order" byte flag is also used to
+     * indicate the version number of the binary, and therefore governs the
+     * setting of sv_retrieve_vtbl. See magic_write().
+     */
 
-	/*
-	 * If they stored using network order, there's no byte ordering
-	 * information to check.
-	 */
+    version_major = use_network_order >> 1;
+    cxt->retrieve_vtbl = version_major ? sv_retrieve : sv_old_retrieve;
 
-	if ((cxt->netorder = (use_network_order & 0x1)))	/* Extra () for -Wall */
-		return &PL_sv_undef;			/* No byte ordering info */
+    TRACEME(("magic_check: netorder = 0x%x", use_network_order));
 
-	sprintf(byteorder, "%lx", (unsigned long) BYTEORDER);
-	GETMARK(c);
-	READ(buf, c);						/* Not null-terminated */
-	buf[c] = '\0';						/* Is now */
 
-	TRACEME(("byte order '%s'", buf));
+    /*
+     * Starting with 0.7 (binary major 2), a full byte is dedicated to the
+     * minor version of the protocol.  See magic_write().
+     */
 
-	if (strcmp(buf, byteorder))
-		CROAK(("Byte order is not compatible"));
-	
-	GETMARK(c);		/* sizeof(int) */
-	if ((int) c != sizeof(int))
-		CROAK(("Integer size is not compatible"));
+    if (version_major > 1)
+        GETMARK(version_minor);
 
-	GETMARK(c);		/* sizeof(long) */
-	if ((int) c != sizeof(long))
-		CROAK(("Long integer size is not compatible"));
+    cxt->ver_major = version_major;
+    cxt->ver_minor = version_minor;
 
-	GETMARK(c);		/* sizeof(char *) */
-	if ((int) c != sizeof(char *))
-		CROAK(("Pointer integer size is not compatible"));
+    TRACEME(("binary image version is %d.%d", version_major, version_minor));
 
-	if (version_major >= 2 && version_minor >= 2) {
-		GETMARK(c);		/* sizeof(NV) */
-		if ((int) c != sizeof(NV))
-			CROAK(("Double size is not compatible"));
-	}
+    /*
+     * Inter-operability sanity check: we can't retrieve something stored
+     * using a format more recent than ours, because we have no way to
+     * know what has changed, and letting retrieval go would mean a probable
+     * failure reporting a "corrupted" storable file.
+     */
 
-	return &PL_sv_undef;	/* OK */
+    if (
+        version_major > STORABLE_BIN_MAJOR ||
+        (version_major == STORABLE_BIN_MAJOR &&
+         version_minor > STORABLE_BIN_MINOR)
+        ) {
+        int croak_now = 1;
+        TRACEME(("but I am version is %d.%d", STORABLE_BIN_MAJOR,
+                 STORABLE_BIN_MINOR));
+
+        if (version_major == STORABLE_BIN_MAJOR) {
+            TRACEME(("cxt->accept_future_minor is %d",
+                     cxt->accept_future_minor));
+            if (cxt->accept_future_minor < 0)
+                cxt->accept_future_minor
+                    = (SvTRUE(perl_get_sv("Storable::accept_future_minor",
+                                          TRUE))
+                       ? 1 : 0);
+            if (cxt->accept_future_minor == 1)
+                croak_now = 0;  /* Don't croak yet.  */
+        }
+        if (croak_now) {
+            CROAK(("Storable binary image v%d.%d more recent than I am (v%d.%d)",
+                   version_major, version_minor,
+                   STORABLE_BIN_MAJOR, STORABLE_BIN_MINOR));
+        }
+    }
+
+    /*
+     * If they stored using network order, there's no byte ordering
+     * information to check.
+     */
+
+    if ((cxt->netorder = (use_network_order & 0x1)))	/* Extra () for -Wall */
+        return &PL_sv_undef;			/* No byte ordering info */
+
+    /* In C truth is 1, falsehood is 0. Very convienient.  */
+    use_NV_size = version_major >= 2 && version_minor >= 2;
+
+    GETMARK(c);
+    length = c + 3 + use_NV_size;
+    READ(buf, length);	/* Not null-terminated */
+
+    TRACEME(("byte order '%.*s' %d", c, buf, c));
+
+    if ((c != (sizeof (byteorderstr) - 1)) || memNE(buf, byteorderstr, c))
+        CROAK(("Byte order is not compatible"));
+
+    current = buf + c;
+    
+    /* sizeof(int) */
+    if ((int) *current++ != sizeof(int))
+        CROAK(("Integer size is not compatible"));
+
+    /* sizeof(long) */
+    if ((int) *current++ != sizeof(long))
+        CROAK(("Long integer size is not compatible"));
+
+    /* sizeof(char *) */
+    if ((int) *current != sizeof(char *))
+        CROAK(("Pointer integer size is not compatible"));
+
+    if (use_NV_size) {
+        /* sizeof(NV) */
+        if ((int) *++current != sizeof(NV))
+            CROAK(("Double size is not compatible"));
+    }
+
+    return &PL_sv_undef;	/* OK */
 }
 
 /*

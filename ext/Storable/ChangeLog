@@ -1,3 +1,15 @@
+Sat May 25 22:38:39 BST 2002   Nicholas Clark <nick@ccl4.org>
+
+. Description:
+
+	Version 2.02
+		
+	Rewrite Storable.xs so that the file header structure for write_magic
+	is built at compile time, and check_magic attempts to the header in
+	blocks rather than byte per byte. These changes make the compiled
+	extension 2.25% smaller, but are not significant enough to give a
+	noticeable speed up.
+
 Thu May 23 22:50:41 BST 2002   Nicholas Clark <nick@ccl4.org>
 
 . Description:
