@@ -3715,36 +3715,36 @@ XS(w32_DomainName)
     EXTEND(SP,1);
     ST(0) = &PL_sv_undef;
 
-    // Get the calling thread's access token.
+    /* Get the calling thread's access token. */
     if (!OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, TRUE, &hToken)) {
         if (GetLastError() != ERROR_NO_TOKEN)
             goto leave;
-        // Retry against process token if no thread token exists.
+        /* Retry against process token if no thread token exists. */
         if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken))
             goto leave;
     }
 
-    // Obtain the size of the user information in the token.
+    /* Obtain the size of the user information in the token. */
     if (GetTokenInformation(hToken, TokenUser, NULL, 0, &cbti)) {
-        // Call should have failed due to zero-length buffer.
+        /* Call should have failed due to zero-length buffer. */
         goto leave;
     }
     else {
-        // Call should have failed due to zero-length buffer.
+        /* Call should have failed due to zero-length buffer. */
         if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
             goto leave;
     }
 
-    // Allocate buffer for user information in the token.
-    ptiUser = (PTOKEN_USER) HeapAlloc(GetProcessHeap(), 0, cbti);
+    /* Allocate buffer for user information in the token. */
+    Newc(0, ptiUser, cbti, char, TOKEN_USER);
     if (!ptiUser)
         goto leave;
 
-    // Retrieve the user information from the token.
+    /* Retrieve the user information from the token. */
     if (!GetTokenInformation(hToken, TokenUser, ptiUser, cbti, &cbti))
         goto leave;
 
-    // Retrieve user name and domain name based on user's SID.
+    /* Retrieve user name and domain name based on user's SID. */
     if (!LookupAccountSid(NULL, ptiUser->User.Sid, szUser, &cchUser,
                           szDomain, &cchDomain, &snu))
         goto leave;
@@ -3755,8 +3755,7 @@ XS(w32_DomainName)
     if (hToken)
         CloseHandle(hToken);
 
-    if (ptiUser)
-        HeapFree(GetProcessHeap(), 0, ptiUser);
+    Safefree(ptiUser);
 
     XSRETURN(1);
 }
