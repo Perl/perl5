@@ -499,7 +499,7 @@ See L<Changing the BTREE sort order> for an example of using the
 C<compare> template.
 
 If you are using the DB_RECNO interface and you intend making use of
-C<bval>, you should check out L<The bval option>.
+C<bval>, you should check out L<The 'bval' Option>.
 
 =head2 Default Parameters
 
@@ -1148,7 +1148,7 @@ destroyed.
     undef $db ;
     untie %hash ;
 
-See L<The untie gotcha> for more details.
+See L<The untie() Gotcha> for more details.
 
 All the functions defined in L<dbopen> are available except for
 close() and dbopen() itself. The B<DB_File> method interface to the
