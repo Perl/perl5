@@ -309,7 +309,7 @@ C<O_DEFER>, C<O_SYNC>, C<O_ASYNC>, C<O_DSYNC>, C<O_RSYNC>,
 C<O_NOCTTY>, C<O_NDELAY> and C<O_LARGEFILE>.  Consult your open(2)
 manpage or its local equivalent for details.  (Note: starting from
 Perl release 5.6 the O_LARGEFILE flag, if available, is automatically
-added to the sysopen() flags because large files are the the default.)
+added to the sysopen() flags because large files are the default.)
 
 Here's how to use C<sysopen> to emulate the simple C<open> calls we had
 before.  We'll omit the C<|| die $!> checks for clarity, but make sure

@@ -11,7 +11,7 @@ call is available, Perl's fork() simply calls it.
 On some platforms such as Windows where the fork() system call is not
 available, Perl can be built to emulate fork() at the interpreter level.
 While the emulation is designed to be as compatible as possible with the
-real fork() at the the level of the Perl program, there are certain
+real fork() at the level of the Perl program, there are certain
 important differences that stem from the fact that all the pseudo child
 "processes" created this way live in the same real process as far as the
 operating system is concerned.

@@ -19,7 +19,7 @@ F<INSTALL> podpage in the Perl source tree.
 
 For example, whenever you call Perl's built-in C<caller> function
 from the package DB, the arguments that the corresponding stack
-frame was called with are copied to the the @DB::args array.  The
+frame was called with are copied to the @DB::args array.  The
 general mechanisms is enabled by calling Perl with the B<-d> switch, the
 following additional features are enabled (cf. L<perlvar/$^P>):
 
@@ -154,7 +154,7 @@ L<perldebug/"Options"> for description of options parsed by
 C<DB::parse_options(string)>.  The function C<DB::dump_trace(skip[,
 count])> skips the specified number of frames and returns a list
 containing information about the calling frames (all of them, if
-C<count> is missing).  Each entry is reference to a a hash with
+C<count> is missing).  Each entry is reference to a hash with
 keys C<context> (either C<.>, C<$>, or C<@>), C<sub> (subroutine
 name, or info about C<eval>), C<args> (C<undef> or a reference to
 an array), C<file>, and C<line>.

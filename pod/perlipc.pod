@@ -922,7 +922,7 @@ For those preferring a higher-level interface to socket programming, the
 IO::Socket module provides an object-oriented approach.  IO::Socket is
 included as part of the standard Perl distribution as of the 5.004
 release.  If you're running an earlier version of Perl, just fetch
-IO::Socket from CPAN, where you'll also find find modules providing easy
+IO::Socket from CPAN, where you'll also find modules providing easy
 interfaces to the following systems: DNS, FTP, Ident (RFC 931), NIS and
 NISPlus, NNTP, Ping, POP3, SMTP, SNMP, SSLeay, Telnet, and Time--just
 to name a few.

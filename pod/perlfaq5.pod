@@ -841,7 +841,7 @@ you see someone do this:
 
 You should think long and hard about why you need everything loaded
 at once.  It's just not a scalable solution.  You might also find it
-more fun to use the the standard DB_File module's $DB_RECNO bindings,
+more fun to use the standard DB_File module's $DB_RECNO bindings,
 which allow you to tie an array to a file so that accessing an element
 the array actually accesses the corresponding line in the file.
 

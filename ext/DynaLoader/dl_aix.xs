@@ -36,6 +36,8 @@
 #include <sys/types.h>
 #include <sys/ldr.h>
 #include <a.out.h>
+#undef FREAD
+#undef FWRITE
 #include <ldfcn.h>
 
 #ifdef USE_64_BIT_ALL
@@ -87,6 +89,8 @@
 
 /* If using PerlIO, redefine these macros from <ldfcn.h> */
 #ifdef USE_PERLIO
+#undef FSEEK
+#undef FREAD
 #define FSEEK(ldptr,o,p)        PerlIO_seek(IOPTR(ldptr),(p==BEGINNING)?(OFFSET(ldptr)+o):o,p)
 #define FREAD(p,s,n,ldptr)      PerlIO_read(IOPTR(ldptr),p,s*n)
 #endif
@@ -116,8 +120,8 @@ typedef struct Module {
 } Module, *ModulePtr;
 
 /*
- * We keep a list of all loaded modules to be able to call the fini
- * handlers at atexit() time.
+ * We keep a list of all loaded modules to be able to reference count
+ * duplicate dlopen's.
  */
 static ModulePtr modList;		/* XXX threaded */
 
@@ -130,7 +134,7 @@ static int errvalid;			/* XXX threaded */
 
 static void caterr(char *);
 static int readExports(ModulePtr);
-static void terminate(void);
+static void *findMain(void);
 
 static char *strerror_failed   = "(strerror failed)";
 static char *strerror_r_failed = "(strerror_r failed)";
@@ -197,15 +201,15 @@ void *dlopen(char *path, int mode)
 {
 	dTHX;
 	register ModulePtr mp;
-	static int inited;			/* XXX threaded */
+	static void *mainModule;		/* XXX threaded */
 
 	/*
 	 * Upon the first call register a terminate handler that will
 	 * close all libraries.
 	 */
-	if (!inited) {
-		inited++;
-		atexit(terminate);
+	if (mainModule == NULL) {
+		if ((mainModule = findMain()) == NULL)
+			return NULL;
 	}
 	/*
 	 * Scan the list of modules if have the module already loaded.
@@ -273,9 +277,13 @@ void *dlopen(char *path, int mode)
 	/*
 	 * Assume anonymous exports come from the module this dlopen
 	 * is linked into, that holds true as long as dlopen and all
-	 * of the perl core are in the same shared object.
+	 * of the perl core are in the same shared object. Also bind
+	 * against the main part, in the case a perl is not the main
+	 * part, e.g mod_perl as DSO in Apache so perl modules can
+	 * also reference Apache symbols.
 	 */
-	if (loadbind(0, (void *)dlopen, mp->entry) == -1) {
+	if (loadbind(0, (void *)dlopen, mp->entry) == -1 ||
+	    loadbind(0, mainModule, mp->entry)) {
 	        int saverrno = errno;
 
 		dlclose(mp);
@@ -391,12 +399,6 @@ int dlclose(void *handle)
 	safefree(mp->name);
 	safefree(mp);
 	return result;
-}
-
-static void terminate(void)
-{
-	while (modList)
-		dlclose(modList);
 }
 
 /* Added by Wayne Scott 
@@ -590,6 +592,52 @@ static int readExports(ModulePtr mp)
 	return 0;
 }
 
+/*
+ * Find the main modules entry point. This is used as export pointer
+ * for loadbind() to be able to resolve references to the main part.
+ */
+static void * findMain(void)
+{
+	struct ld_info *lp;
+	char *buf;
+	int size = 4*1024;
+	int i;
+	void *ret;
+
+	if ((buf = safemalloc(size)) == NULL) {
+		errvalid++;
+		strcpy(errbuf, "findMain: ");
+		strerrorcat(errbuf, errno);
+		return NULL;
+	}
+	while ((i = loadquery(L_GETINFO, buf, size)) == -1 && errno == ENOMEM) {
+		safefree(buf);
+		size += 4*1024;
+		if ((buf = safemalloc(size)) == NULL) {
+			errvalid++;
+			strcpy(errbuf, "findMain: ");
+			strerrorcat(errbuf, errno);
+			return NULL;
+		}
+	}
+	if (i == -1) {
+		errvalid++;
+		strcpy(errbuf, "findMain: ");
+		strerrorcat(errbuf, errno);
+		safefree(buf);
+		return NULL;
+	}
+	/*
+	 * The first entry is the main module. The entry point
+	 * returned by load() does actually point to the data
+	 * segment origin.
+	 */
+	lp = (struct ld_info *)buf;
+	ret = lp->ldinfo_dataorg;
+	safefree(buf);
+	return ret;
+}
+
 /* dl_dlopen.xs
  * 
  * Platform:	SunOS/Solaris, possibly others which use dlopen.
@@ -642,6 +690,17 @@ dl_load_file(filename, flags=0)
 	else
 	    sv_setiv( ST(0), PTR2IV(RETVAL) );
 
+int
+dl_unload_file(libref)
+    void *	libref
+  CODE:
+    DLDEBUG(1,PerlIO_printf(Perl_debug_log, "dl_unload_file(%lx):\n", libref));
+    RETVAL = (dlclose(libref) == 0 ? 1 : 0);
+    if (!RETVAL)
+        SaveError(aTHX_ "%s", dlerror()) ;
+    DLDEBUG(2,PerlIO_printf(Perl_debug_log, " retval = %d\n", RETVAL));
+  OUTPUT:
+    RETVAL
 
 void *
 dl_find_symbol(libhandle, symbolname)

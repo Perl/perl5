@@ -112,11 +112,12 @@ for (@INPUT) {
   $ord++;
   ($op, undef, $comment) = /^([^\#]+)(\#\s+(.*))?/;
   $comment = $op unless defined $comment;
+  chomp;
   $op = "$op==$op" unless $op =~ /==/;
   ($op, $expectop) = $op =~ /(.*)==(.*)/;
   
   $skip = ($op =~ /^'\?\?\?'/ or $comment =~ /skip\(.*\Q$^O\E.*\)/i)
-	  ? "skip" : "not";
+	  ? "skip" : "# '$_'\nnot";
   $integer = ($comment =~ /^i_/) ? "use integer" : '' ;
   (print "#skipping $comment:\nok $ord\n"), next if $skip eq 'skip';
   
@@ -137,7 +138,7 @@ EOE
       print "# skipping $comment: unimplemented:\nok $ord\n";
     } else {
       warn $@;
-      print "not ok $ord\n";
+      print "# '$_'\nnot ok $ord\n";
     }
   }
 }
@@ -146,6 +147,7 @@ for (@simple_input) {
   $ord++;
   ($op, undef, $comment) = /^([^\#]+)(\#\s+(.*))?/;
   $comment = $op unless defined $comment;
+  chomp;
   ($operator, $variable) = /^\s*(\w+)\s*\$(\w+)/ or warn "misprocessed '$_'\n";
   eval <<EOE;
   local \$SIG{__WARN__} = \\&wrn;
@@ -164,7 +166,7 @@ EOE
       print "# skipping $comment: syntax not good for selfassign:\nok $ord\n";
     } else {
       warn $@;
-      print "not ok $ord\n";
+      print "# '$_'\nnot ok $ord\n";
     }
   }
 }
