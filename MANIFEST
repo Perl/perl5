@@ -289,7 +289,6 @@ ext/Encode/Encode/cp950.enc		Encode table
 ext/Encode/Encode/dingbats.enc		Encode table
 ext/Encode/Encode/dingbats.ucm		Encode table
 ext/Encode/Encode/euc-cn.enc		Encode table
-ext/Encode/Encode/euc-jp+0212.ucm	Encode table
 ext/Encode/Encode/euc-jp.enc		Encode table
 ext/Encode/Encode/euc-jp.ucm		Encode table
 ext/Encode/Encode/euc-kr.enc		Encode table
