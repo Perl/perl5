@@ -224,7 +224,7 @@ make_mg_object(pTHX_ SV *arg, MAGIC *mg)
 }
 
 static SV *
-cstring(pTHX_ SV *sv)
+cstring(pTHX_ SV *sv, bool perlstyle)
 {
     SV *sstr = newSVpvn("", 0);
     STRLEN len;
@@ -246,11 +246,15 @@ cstring(pTHX_ SV *sv)
 	    else if (*s == '\\')
 		sv_catpv(sstr, "\\\\");
             /* trigraphs - bleagh */
-            else if (*s == '?' && len>=3 && s[1] == '?')
+            else if (!perlstyle && *s == '?' && len>=3 && s[1] == '?')
             {
                 sprintf(escbuff, "\\%03o", '?');
                 sv_catpv(sstr, escbuff);
             }
+	    else if (perlstyle && *s == '$')
+		sv_catpv(sstr, "\\$");
+	    else if (perlstyle && *s == '@')
+		sv_catpv(sstr, "\\@");
 #ifdef EBCDIC
 	    else if (isPRINT(*s))
 #else
@@ -269,7 +273,7 @@ cstring(pTHX_ SV *sv)
 		sv_catpv(sstr, "\\b");
 	    else if (*s == '\f')
 		sv_catpv(sstr, "\\f");
-	    else if (*s == '\v')
+	    else if (!perlstyle && *s == '\v')
 		sv_catpv(sstr, "\\v");
 	    else
 	    {
@@ -561,7 +565,15 @@ SV *
 cstring(sv)
 	SV *	sv
     CODE:
-	RETVAL = cstring(aTHX_ sv);
+	RETVAL = cstring(aTHX_ sv, 0);
+    OUTPUT:
+	RETVAL
+
+SV *
+perlstring(sv)
+	SV *	sv
+    CODE:
+	RETVAL = cstring(aTHX_ sv, 1);
     OUTPUT:
 	RETVAL
 
