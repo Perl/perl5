@@ -32,6 +32,10 @@ $| = 1;
 
 print "1..8\n";
 
+eval {
+    $SIG{ALRM} = sub { die; };
+    alarm 60;
+};
 
 package Multi;
 require IO::Socket::INET;
