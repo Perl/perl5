@@ -9,7 +9,7 @@
 
 package Data::Dumper;
 
-$VERSION = '2.121';
+$VERSION = '2.121_01';
 
 #$| = 1;
 
@@ -381,7 +381,7 @@ sub _dump {
       if ($s->{deparse}) {
 	require B::Deparse;
 	my $sub =  'sub ' . (B::Deparse->new)->coderef2text($val);
-	$pad    =  $s->{sep} . $s->{pad} . $s->{xpad} . $s->{apad} . '    ';
+	$pad    =  $s->{sep} . $s->{pad} . $s->{apad} . $s->{xpad} x ($s->{level} - 1);
 	$sub    =~ s/\n/$pad/gse;
 	$out   .=  $sub;
       } else {

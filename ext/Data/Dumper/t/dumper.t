@@ -960,8 +960,8 @@ TEST q(Data::Dumper->new([[$c, $d]])->Dumpxs;)
   $WANT = <<'EOT';
 #$VAR1 = {
 #          foo => sub {
-#                         print 'foo';
-#                     }
+#                     print 'foo';
+#                 }
 #        };
 EOT
 
