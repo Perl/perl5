@@ -2988,7 +2988,7 @@ tryagain:
 	    char *oldp, *s;
 	    STRLEN numlen;
 	    STRLEN ulen;
-	    U8 tmpbuf[UTF8_MAXLEN*2+1];
+	    U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
 
             parse_start = RExC_parse - 1;
 

@@ -903,7 +903,7 @@ Perl_is_uni_punct(pTHX_ UV c)
 bool
 Perl_is_uni_xdigit(pTHX_ UV c)
 {
-    U8 tmpbuf[UTF8_MAXLEN*2+1];
+    U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
     uvchr_to_utf8(tmpbuf, (UV)c);
     return is_utf8_xdigit(tmpbuf);
 }
@@ -911,7 +911,7 @@ Perl_is_uni_xdigit(pTHX_ UV c)
 UV
 Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
-    U8 tmpbuf[UTF8_MAXLEN*2+1];
+    U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
     uvchr_to_utf8(tmpbuf, (UV)c);
     return to_utf8_upper(tmpbuf, p, lenp);
 }
@@ -919,7 +919,7 @@ Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
 UV
 Perl_to_uni_title(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
-    U8 tmpbuf[UTF8_MAXLEN*2+1];
+    U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
     uvchr_to_utf8(tmpbuf, (UV)c);
     return to_utf8_title(tmpbuf, p, lenp);
 }
@@ -1596,8 +1596,8 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, bool u1, register I32 len1, const char *s2
      STRLEN la, lb;
      UV ca, cb;
      STRLEN ulen1, ulen2;
-     U8 tmpbuf1[UTF8_MAXLEN*3+1];
-     U8 tmpbuf2[UTF8_MAXLEN*3+1];
+     U8 tmpbuf1[UTF8_MAXLEN_FOLD+1];
+     U8 tmpbuf2[UTF8_MAXLEN_FOLD+1];
      
      while (a < ae && b < be) {
 	  if (u1) {

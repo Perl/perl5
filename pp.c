@@ -3210,7 +3210,7 @@ PP(pp_ucfirst)
     STRLEN slen;
 
     if (DO_UTF8(sv)) {
-	U8 tmpbuf[UTF8_MAXLEN*2+1];
+	U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
 	STRLEN ulen;
 	STRLEN tculen;
 
@@ -3265,7 +3265,7 @@ PP(pp_lcfirst)
 
     if (DO_UTF8(sv) && (s = (U8*)SvPV(sv, slen)) && slen && UTF8_IS_START(*s)) {
 	STRLEN ulen;
-	U8 tmpbuf[UTF8_MAXLEN*2+1];
+	U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
 	U8 *tend;
 	UV uv;
 
@@ -3322,7 +3322,7 @@ PP(pp_uc)
 	STRLEN ulen;
 	register U8 *d;
 	U8 *send;
-	U8 tmpbuf[UTF8_MAXLEN*2+1];
+	U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
 
 	s = (U8*)SvPV(sv,len);
 	if (!len) {
@@ -3389,7 +3389,7 @@ PP(pp_lc)
 	STRLEN ulen;
 	register U8 *d;
 	U8 *send;
-	U8 tmpbuf[UTF8_MAXLEN*2+1];
+	U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
 
 	s = (U8*)SvPV(sv,len);
 	if (!len) {
