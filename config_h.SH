@@ -705,6 +705,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
 #define Shmat_t $shmattype	/**/
 #$d_shmatprototype HAS_SHMAT_PROTOTYPE	/**/
 
+/* HAS_SIGACTION:
+ *	This symbol, if defined, indicates that Vr4's sigaction() routine
+ *	is available.
+ */
+#$d_sigaction HAS_SIGACTION	/**/
+
 /* HAS_SOCKET:
  *	This symbol, if defined, indicates that the BSD socket interface is
  *	supported.
@@ -1526,6 +1532,13 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
 #define SITELIB_EXP "$sitelibexp"		/**/
+
+/* STARTPERL:
+ *	This variable contains the string to put in front of a perl
+ *	script to make sure (one hopes) that it runs with perl and not
+ *	some shell.
+ */
+#define STARTPERL "$startperl"		/**/
 
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this
