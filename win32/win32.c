@@ -1095,10 +1095,10 @@ win32_waitpid(int pid, int *status, int flags)
       return win32_wait(status);
     else {
       rc = cwait(status, pid, WAIT_CHILD);
-    /* cwait() returns differently on Borland */
-#ifdef __BORLANDC__
+    /* cwait() returns "correctly" on Borland */
+#ifndef __BORLANDC__
     if (status)
-	*status =  (((*status >> 8) & 0xff) | ((*status << 8) & 0xff00));
+	*status *= 256;
 #endif
       remove_dead_process((HANDLE)pid);
     }
@@ -1751,12 +1751,11 @@ win32_pclose(FILE *pf)
     /* wait for the child */
     if (cwait(&status, childpid, WAIT_CHILD) == -1)
         return (-1);
-    /* cwait() returns differently on Borland */
-#ifdef __BORLANDC__
-    return (((status >> 8) & 0xff) | ((status << 8) & 0xff00));
-#else
-    return (status);
+    /* cwait() returns "correctly" on Borland */
+#ifndef __BORLANDC__
+    status *= 256;
 #endif
+    return (status);
 
 #endif /* USE_RTL_POPEN */
 }

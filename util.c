@@ -905,7 +905,7 @@ fbm_compile(SV *sv, U32 flags /* not used yet */)
     U32 frequency = 256;
 
     s = (U8*)SvPV_force(sv, len);
-    sv_upgrade(sv, SVt_PVBM);
+    (void)SvUPGRADE(sv, SVt_PVBM);
     if (len > 255 || len == 0)	/* TAIL might be on on a zero-length string. */
 	return;			/* can't have offsets that big */
     if (len > 2) {

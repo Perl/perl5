@@ -653,8 +653,7 @@ do_join(register SV *sv, SV *del, register SV **mark, register SV **sp)
 
     mark++;
     len = (items > 0 ? (delimlen * (items - 1) ) : 0);
-    if (SvTYPE(sv) < SVt_PV)
-	sv_upgrade(sv, SVt_PV);
+    (void)SvUPGRADE(sv, SVt_PV);
     if (SvLEN(sv) < len + items) {	/* current length is way too short */
 	while (items-- > 0) {
 	    if (*mark && !SvGMAGICAL(*mark) && SvOK(*mark)) {

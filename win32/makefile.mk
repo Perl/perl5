@@ -10,6 +10,10 @@
 #
 
 ##
+## Make sure you read README.win32 *before* you mess with anything here!
+##
+
+##
 ## Build configuration.  Edit the values below to suit your needs.
 ##
 
@@ -116,6 +120,7 @@ CCTYPE		*= BORLAND
 
 #
 # set the install locations of the compiler include/libraries
+# Running VCVARS32.BAT is *required* when using Visual C.
 # Some versions of Visual C don't define MSVCDIR in the environment,
 # so you may have to set CCHOME explicitly.
 #
