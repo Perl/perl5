@@ -22,6 +22,8 @@
 #define SAVEt_REGCONTEXT 21
 #define SAVEt_STACK_POS  22
 #define SAVEt_I16	23
+#define SAVEt_AELEM     24
+#define SAVEt_HELEM     25
 #define SAVEt_OP	24
 
 #define SSCHECK(need) if (savestack_ix + need > savestack_max) savestack_grow()
