@@ -733,6 +733,9 @@ typedef struct perl_mstats perl_mstats_t;
 #       undef INCLUDE_PROTOTYPES
 #       undef PERL_SOCKS_NEED_PROTOTYPES
 #   endif
+#   ifdef USE_64_BIT_ALL
+#       define SOCKS_64BIT_BUG /* until proven otherwise */
+#   endif
 # endif 
 # ifdef I_NETDB
 #  include <netdb.h>
