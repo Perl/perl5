@@ -906,9 +906,9 @@ Ap	|void	|reginitcolors
 Apd	|char*	|sv_2pv_nolen	|SV* sv
 Apd	|char*	|sv_2pvutf8_nolen|SV* sv
 Apd	|char*	|sv_2pvbyte_nolen|SV* sv
-Apd	|char*	|sv_pv		|SV *sv
-Apd	|char*	|sv_pvutf8	|SV *sv
-Apd	|char*	|sv_pvbyte	|SV *sv
+Amd	|char*	|sv_pv		|SV *sv
+Amd	|char*	|sv_pvutf8	|SV *sv
+Amd	|char*	|sv_pvbyte	|SV *sv
 Amd	|STRLEN	|sv_utf8_upgrade|SV *sv
 ApdM	|bool	|sv_utf8_downgrade|SV *sv|bool fail_ok
 Apd	|void	|sv_utf8_encode |SV *sv
