@@ -23,10 +23,12 @@
  *			which may or may not check number of children).
  */
 
-#if PTRSIZE == 8
-typedef U64TYPE PADOFFSET;
-#else
+#if PTRSIZE == 4
 typedef U32TYPE PADOFFSET;
+#else
+#   if PTRSIZE == 8
+typedef U64TYPE PADOFFSET;
+#   endif
 #endif
 #define NOT_IN_PAD ((PADOFFSET) -1)
 
