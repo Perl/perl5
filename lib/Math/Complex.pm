@@ -1393,11 +1393,11 @@ sub stringify_polar {
 
 	$t -= int(CORE::abs($t) / pit2) * pit2;
 
-	if ($format{polar_pretty_print}) {
+	if ($format{polar_pretty_print} && $t) {
 	    my ($a, $b);
 	    for $a (2..9) {
 		$b = $t * $a / pi;
-		if (int($b) == $b) {
+		if ($b =~ /^-?\d+$/) {
 		    $b = $b < 0 ? "-" : "" if CORE::abs($b) == 1;
 		    $theta = "${b}pi/$a";
 		    last;
