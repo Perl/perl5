@@ -2876,6 +2876,9 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
     name = SvPV(meth, namelen);
     sv = *(PL_stack_base + TOPMARK + 1);
 
+    if (!sv)
+	Perl_croak(aTHX_ "Can't call method \"%s\" on an undefined value", name);
+
     if (SvGMAGICAL(sv))
         mg_get(sv);
     if (SvROK(sv))
