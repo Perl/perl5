@@ -11,6 +11,9 @@ Many of the bug fixes in 5.8.0 were already seen in the 5.6.1
 maintenance release since the two releases were kept closely
 coordinated.
 
+If you are upgrading from Perl 5.005_03, you might also want
+to read L<perl56delta>.
+
 =head1 Highlights In 5.8.0
 
 =over 4
