@@ -10,10 +10,11 @@ use CGI (':standard','-no_debug','*h3','start_table');
 $loaded = 1;
 print "ok 1\n";
 
-if( $] > 5.006 ) {
-    # no utf8
-    require utf8; # we contain Latin-1
-    utf8->unimport;
+BEGIN {
+    if ($] >= 5.006) {
+	require utf8;	# we contain Latin-1 in subtest #22,
+	utf8->unimport;	# possible "use utf8" must be undone
+    }
 }
 
 ######################### End of black magic.
