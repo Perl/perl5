@@ -1403,6 +1403,31 @@ PP(pp_iter)
 	DIE("panic: pp_iter");
 
     av = cx->blk_loop.iterary;
+    if (SvTYPE(av) != SVt_PVAV) {
+	/* iterate ($min .. $max) */
+	if (cx->blk_loop.iterlval) {
+	    /* string increment */
+	    register SV* cur = cx->blk_loop.iterlval;
+	    STRLEN maxlen;
+	    char *max = SvPV((SV*)av, maxlen);
+	    if (!SvNIOK(cur) && SvCUR(cur) <= maxlen) {
+		sv_setsv(*cx->blk_loop.itervar, cur);
+		if (strEQ(SvPVX(cur), max))
+		    sv_setiv(cur, 0); /* terminate next time */
+		else
+		    sv_inc(cur);
+		RETPUSHYES;
+	    }
+	    RETPUSHNO;
+	}
+	/* integer increment */
+	if (cx->blk_loop.iterix > cx->blk_loop.itermax)
+	    RETPUSHNO;
+	sv_setiv(*cx->blk_loop.itervar, cx->blk_loop.iterix++);
+	RETPUSHYES;
+    }
+
+    /* iterate array */
     if (cx->blk_loop.iterix >= (av == curstack ? cx->blk_oldsp : AvFILL(av)))
 	RETPUSHNO;
 

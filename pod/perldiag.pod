@@ -2047,6 +2047,13 @@ last argument of the previous construct, for example:
 (S) The subroutine being declared or defined had previously been declared
 or defined with a different function prototype.
 
+=item Range iterator outside integer range
+
+(F) One (or both) of the numeric arguments to the range operator ".."
+are outside the range which can be represented by integers internally.
+One possible workaround is to force Perl to use magical string
+increment by prepending "0" to your numbers.
+
 =item Read on closed filehandle E<lt>%sE<gt>
 
 (W) The filehandle you're reading from got itself closed sometime before now.

@@ -3024,12 +3024,44 @@ newFOROP(I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *block,OP *cont
 #endif
     }
     if (expr->op_type == OP_RV2AV || expr->op_type == OP_PADAV) {
-	expr = scalar(ref(expr, OP_ITER));
+	expr = mod(force_list(scalar(ref(expr, OP_ITER))), OP_GREPSTART);
 	iterflags |= OPf_STACKED;
     }
+    else if (expr->op_type == OP_NULL &&
+             (expr->op_flags & OPf_KIDS) &&
+             ((BINOP*)expr)->op_first->op_type == OP_FLOP)
+    {
+	/* Basically turn for($x..$y) into the same as for($x,$y), but we
+	 * set the STACKED flag to indicate that these values are to be
+	 * treated as min/max values by 'pp_iterinit'.
+	 */
+	UNOP* flip = (UNOP*)((UNOP*)((BINOP*)expr)->op_first)->op_first;
+	CONDOP* range = (CONDOP*) flip->op_first;
+	OP* left  = range->op_first;
+	OP* right = left->op_sibling;
+	LISTOP* list;
+
+	range->op_flags &= ~OPf_KIDS;
+	range->op_first = Nullop;
+
+	list = (LISTOP*)newLISTOP(OP_LIST, 0, left, right);
+	list->op_first->op_next = range->op_true;
+	left->op_next = range->op_false;
+	right->op_next = (OP*)list;
+	list->op_next = list->op_first;
+
+	op_free(expr);
+	expr = (OP*)(list);
+        null(expr);
+	iterflags |= OPf_STACKED;
+    }
+    else {
+        expr = mod(force_list(expr), OP_GREPSTART);
+    }
+
+
     loop = (LOOP*)list(convert(OP_ENTERITER, iterflags,
-	append_elem(OP_LIST, mod(force_list(expr), OP_GREPSTART),
-		    scalar(sv))));
+			       append_elem(OP_LIST, expr, scalar(sv))));
     assert(!loop->op_next);
     Renew(loop, 1, LOOP);
     loop->op_targ = padoff;

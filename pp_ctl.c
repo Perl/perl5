@@ -815,6 +815,8 @@ PP(pp_flop)
 	if (SvNIOKp(left) || !SvPOKp(left) ||
 	  (looks_like_number(left) && *SvPVX(left) != '0') )
 	{
+	    if (SvNV(left) < IV_MIN || SvNV(right) >= IV_MAX)
+		croak("Range iterator outside integer range");
 	    i = SvIV(left);
 	    max = SvIV(right);
 	    if (max >= i) {
@@ -832,14 +834,13 @@ PP(pp_flop)
 	    char *tmps = SvPV(final, len);
 
 	    sv = sv_mortalcopy(left);
-	    while (!SvNIOKp(sv) && SvCUR(sv) <= len &&
-		strNE(SvPVX(sv),tmps) ) {
+	    while (!SvNIOKp(sv) && SvCUR(sv) <= len) {
 		XPUSHs(sv);
+	        if (strEQ(SvPVX(sv),tmps))
+	            break;
 		sv = sv_2mortal(newSVsv(sv));
 		sv_inc(sv);
 	    }
-	    if (strEQ(SvPVX(sv),tmps))
-		XPUSHs(sv);
 	}
     }
     else {
@@ -1367,8 +1368,22 @@ PP(pp_enteriter)
 
     PUSHBLOCK(cx, CXt_LOOP, SP);
     PUSHLOOP(cx, svp, MARK);
-    if (op->op_flags & OPf_STACKED)
+    if (op->op_flags & OPf_STACKED) {
 	cx->blk_loop.iterary = (AV*)SvREFCNT_inc(POPs);
+	if (SvTYPE(cx->blk_loop.iterary) != SVt_PVAV) {
+	    dPOPss;
+	    if (SvNIOKp(sv) || !SvPOKp(sv) ||
+		(looks_like_number(sv) && *SvPVX(sv) != '0')) {
+		 if (SvNV(sv) < IV_MIN ||
+		     SvNV((SV*)cx->blk_loop.iterary) >= IV_MAX)
+		     croak("Range iterator outside integer range");
+		 cx->blk_loop.iterix = SvIV(sv);
+		 cx->blk_loop.itermax = SvIV((SV*)cx->blk_loop.iterary);
+	    }
+	    else
+		cx->blk_loop.iterlval = newSVsv(sv);
+	}
+    }
     else {
 	cx->blk_loop.iterary = curstack;
 	AvFILLp(curstack) = SP - stack_base;

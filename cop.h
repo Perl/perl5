@@ -114,7 +114,8 @@ struct block_loop {
     SV *	itersave;
     SV *	iterlval;
     AV *	iterary;
-    I32		iterix;
+    IV		iterix;
+    IV		itermax;
 };
 
 #define PUSHLOOP(cx, ivar, s)						\

@@ -32,7 +32,6 @@ Optimizations
 	constant function cache
 	switch structures
 	eval qw() at compile time
-	foreach (1..1000000)
 	foreach(reverse...)
 	Set KEEP on constant split
 	Cache eval tree (unless lexical outer scope used (mark in &compiling?))
