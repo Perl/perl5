@@ -1757,6 +1757,7 @@ universal.c		The default UNIVERSAL package methods
 unixish.h		Defines that are assumed on Unix
 utf8.c			Unicode routines
 utf8.h			Unicode header
+utfebcdic.h		Unicode on EBCDIC (UTF-EBCDIC, tr16) header
 util.c			Utility routines
 util.h			Dummy header
 utils/Makefile		Extract the utility scripts

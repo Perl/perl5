@@ -46,10 +46,22 @@ is the recommended Unicode-aware way of saying
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {
-    if (uv < 0x80) {
+    if (UTF8_IS_INVARIANT(uv)) {
 	*d++ = uv;
 	return d;
     }
+#if defined(EBCDIC) || 1 /* always for testing */
+    else {
+	STRLEN len  = UNISKIP(uv);
+	U8 *p = d+len-1;
+	while (p > d) {
+	    *p-- = UTF_TO_NATIVE((uv & UTF_CONTINUATION_MASK) | UTF_CONTINUATION_MARK);
+	    uv >>= UTF_ACCUMULATION_SHIFT;
+	}
+	*p = UTF_TO_NATIVE((uv & UTF_START_MASK(len)) | UTF_START_MARK(len));
+	return d+len;
+    }
+#else /* Non loop style */
     if (uv < 0x800) {
 	*d++ = (( uv >>  6)         | 0xc0);
 	*d++ = (( uv        & 0x3f) | 0x80);
@@ -116,6 +128,7 @@ Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 	return d;
     }
 #endif
+#endif /* Loop style */
 }
 
 /*
@@ -148,7 +161,7 @@ Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv)
 =for apidoc A|STRLEN|is_utf8_char|U8 *s
 
 Tests if some arbitrary number of bytes begins in a valid UTF-8
-character.  Note that an ASCII character is a valid UTF-8 character.
+character.  Note that an INVARIANT (i.e. ASCII) character is a valid UTF-8 character.
 The actual number of bytes in the UTF-8 character will be returned if
 it is valid, otherwise 0.
 
@@ -160,7 +173,7 @@ Perl_is_utf8_char(pTHX_ U8 *s)
     STRLEN slen, len;
     UV uv, ouv;
 
-    if (UTF8_IS_ASCII(u))
+    if (UTF8_IS_INVARIANT(u))
 	return 1;
 
     if (!UTF8_IS_START(u))
@@ -173,7 +186,8 @@ Perl_is_utf8_char(pTHX_ U8 *s)
 
     slen = len - 1;
     s++;
-    uv = u;
+    /* The initial value is dubious */
+    uv  = u;
     ouv = uv;
     while (slen--) {
 	if (!UTF8_IS_CONTINUATION(*s))
@@ -276,7 +290,7 @@ Perl_utf8n_to_uvuni(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 	goto malformed;
     }
 
-    if (UTF8_IS_ASCII(uv)) {
+    if (UTF8_IS_INVARIANT(uv)) {
 	if (retlen)
 	    *retlen = 1;
 	return (UV) (*s);
@@ -294,20 +308,29 @@ Perl_utf8n_to_uvuni(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 	goto malformed;
     }
 
+#ifdef EBCDIC
+    uv = NATIVE_TO_UVF(uv);
+#else
     if ((uv == 0xfe || uv == 0xff) &&
 	!(flags & UTF8_ALLOW_FE_FF)) {
 	warning = UTF8_WARN_FE_FF;
 	goto malformed;
     }
-	
+#endif
+
     if      (!(uv & 0x20))	{ len =  2; uv &= 0x1f; }
     else if (!(uv & 0x10))	{ len =  3; uv &= 0x0f; }
     else if (!(uv & 0x08))	{ len =  4; uv &= 0x07; }
     else if (!(uv & 0x04))	{ len =  5; uv &= 0x03; }
+#ifdef EBCDIC
+    else if (!(uv & 0x02))	{ len =  6; uv &= 0x01; }
+    else			{ len =  7; uv &= 0x01; }
+#else
     else if (!(uv & 0x02))	{ len =  6; uv &= 0x01; }
     else if (!(uv & 0x01))	{ len =  7; uv = 0; }
-    else 			{ len = 13; uv = 0; } /* whoa! */
-	
+    else			{ len = 13; uv = 0; } /* whoa! */
+#endif
+
     if (retlen)
 	*retlen = len;
 
@@ -634,9 +657,9 @@ Perl_utf8_to_bytes(pTHX_ U8* s, STRLEN *len)
     for (send = s + *len; s < send; ) {
         U8 c = *s++;
 
-        if (c >= 0x80 &&
-            ((s >= send) ||
-	     ((*s++ & 0xc0) != 0x80) || ((c & 0xfe) != 0xc2))) {
+        if (!UTF8_IS_INVARIANT(c) &&
+            (!UTF8_IS_DOWNGRADEABLE_START(c) || (s >= send)
+	     || !(c = *s++) || !UTF8_IS_CONTINUATION(c))) {
             *len = -1;
             return 0;
         }
@@ -679,7 +702,7 @@ Perl_bytes_from_utf8(pTHX_ U8* s, STRLEN *len, bool *is_utf8)
     /* ensure valid UTF8 and chars < 256 before converting string */
     for (send = s + *len; s < send;) {
 	U8 c = *s++;
-	if (!UTF8_IS_ASCII(c)) {
+	if (!UTF8_IS_INVARIANT(c)) {
 	    if (UTF8_IS_DOWNGRADEABLE_START(c) && s < send &&
                 (c = *s++) && UTF8_IS_CONTINUATION(c))
 		count++;
@@ -700,7 +723,7 @@ Perl_bytes_from_utf8(pTHX_ U8* s, STRLEN *len, bool *is_utf8)
     s = start; start = d;
     while (s < send) {
 	U8 c = *s++;
-	if (!UTF8_IS_ASCII(c))
+	if (!UTF8_IS_INVARIANT(c))
 	    c = UTF8_ACCUMULATE(c, *s++);
 	*d++ = ASCII_TO_NATIVE(c);
     }
@@ -732,7 +755,7 @@ Perl_bytes_to_utf8(pTHX_ U8* s, STRLEN *len)
 
     while (s < send) {
         UV uv = NATIVE_TO_ASCII(*s++);
-        if (UTF8_IS_ASCII(uv))
+        if (UTF8_IS_INVARIANT(uv))
             *d++ = uv;
         else {
             *d++ = UTF8_EIGHT_BIT_HI(uv);
