@@ -39,6 +39,8 @@ static I32 amagic_ncmp(pTHXo_ SV *a, SV *b);
 static I32 amagic_i_ncmp(pTHXo_ SV *a, SV *b);
 static I32 amagic_cmp(pTHXo_ SV *a, SV *b);
 static I32 amagic_cmp_locale(pTHXo_ SV *a, SV *b);
+static I32 run_user_filter(pTHXo_ int idx, SV *buf_sv, int maxlen);
+
 #ifdef PERL_OBJECT
 static I32 sv_cmp_static(pTHXo_ SV *a, SV *b);
 static I32 sv_cmp_locale_static(pTHXo_ SV *a, SV *b);
@@ -2742,6 +2744,10 @@ PP(pp_require)
     I32 gimme = G_SCALAR;
     PerlIO *tryrsfp = 0;
     STRLEN n_a;
+    int filter_has_file = 0;
+    GV *filter_child_proc = 0;
+    SV *filter_state = 0;
+    SV *filter_sub = 0;
 
     sv = POPs;
     if (SvNIOKp(sv) && !SvPOKp(sv)) {
@@ -2790,23 +2796,131 @@ PP(pp_require)
 	{
 	    namesv = NEWSV(806, 0);
 	    for (i = 0; i <= AvFILL(ar); i++) {
-		char *dir = SvPVx(*av_fetch(ar, i, TRUE), n_a);
+		SV *dirsv = *av_fetch(ar, i, TRUE);
+
+		if (SvROK(dirsv)) {
+		    int count;
+		    SV *loader = dirsv;
+
+		    if (SvTYPE(SvRV(loader)) == SVt_PVAV) {
+			loader = *av_fetch((AV *)SvRV(loader), 0, TRUE);
+		    }
+
+		    Perl_sv_setpvf(aTHX_ namesv, "/loader/0x%lx/%s",
+				   SvANY(loader), name);
+		    tryname = SvPVX(namesv);
+		    tryrsfp = 0;
+
+		    ENTER;
+		    SAVETMPS;
+		    EXTEND(SP, 2);
+
+		    PUSHMARK(SP);
+		    PUSHs(dirsv);
+		    PUSHs(sv);
+		    PUTBACK;
+		    count = call_sv(loader, G_ARRAY);
+		    SPAGAIN;
+
+		    if (count > 0) {
+			int i = 0;
+			SV *arg;
+
+			SP -= count - 1;
+			arg = SP[i++];
+
+			if (SvROK(arg) && SvTYPE(SvRV(arg)) == SVt_PVGV) {
+			    arg = SvRV(arg);
+			}
+
+			if (SvTYPE(arg) == SVt_PVGV) {
+			    IO *io = GvIO((GV *)arg);
+
+			    ++filter_has_file;
+
+			    if (io) {
+				tryrsfp = IoIFP(io);
+				if (IoTYPE(io) == '|') {
+				    /* reading from a child process doesn't
+				       nest -- when returning from reading
+				       the inner module, the outer one is
+				       unreadable (closed?)  I've tried to
+				       save the gv to manage the lifespan of
+				       the pipe, but this didn't help. XXX */
+				    filter_child_proc = (GV *)arg;
+				    SvREFCNT_inc(filter_child_proc);
+				}
+				else {
+				    if (IoOFP(io) && IoOFP(io) != IoIFP(io)) {
+					PerlIO_close(IoOFP(io));
+				    }
+				    IoIFP(io) = Nullfp;
+				    IoOFP(io) = Nullfp;
+				}
+			    }
+
+			    if (i < count) {
+				arg = SP[i++];
+			    }
+			}
+
+			if (SvROK(arg) && SvTYPE(SvRV(arg)) == SVt_PVCV) {
+			    filter_sub = arg;
+			    SvREFCNT_inc(filter_sub);
+
+			    if (i < count) {
+				filter_state = SP[i];
+				SvREFCNT_inc(filter_state);
+			    }
+
+			    if (tryrsfp == 0) {
+				tryrsfp = PerlIO_open("/dev/null",
+						      PERL_SCRIPT_MODE);
+			    }
+			}
+		    }
+
+		    PUTBACK;
+		    FREETMPS;
+		    LEAVE;
+
+		    if (tryrsfp) {
+			break;
+		    }
+
+		    filter_has_file = 0;
+		    if (filter_child_proc) {
+			SvREFCNT_dec(filter_child_proc);
+			filter_child_proc = 0;
+		    }
+		    if (filter_state) {
+			SvREFCNT_dec(filter_state);
+			filter_state = 0;
+		    }
+		    if (filter_sub) {
+			SvREFCNT_dec(filter_sub);
+			filter_sub = 0;
+		    }
+		}
+		else {
+		    char *dir = SvPVx(dirsv, n_a);
 #ifdef VMS
-		char *unixdir;
-		if ((unixdir = tounixpath(dir, Nullch)) == Nullch)
-		    continue;
-		sv_setpv(namesv, unixdir);
-		sv_catpv(namesv, unixname);
+		    char *unixdir;
+		    if ((unixdir = tounixpath(dir, Nullch)) == Nullch)
+			continue;
+		    sv_setpv(namesv, unixdir);
+		    sv_catpv(namesv, unixname);
 #else
-		Perl_sv_setpvf(aTHX_ namesv, "%s/%s", dir, name);
+		    Perl_sv_setpvf(aTHX_ namesv, "%s/%s", dir, name);
 #endif
-		TAINT_PROPER("require");
-		tryname = SvPVX(namesv);
-		tryrsfp = doopen_pmc(tryname, PERL_SCRIPT_MODE);
-		if (tryrsfp) {
-		    if (tryname[0] == '.' && tryname[1] == '/')
-			tryname += 2;
-		    break;
+		    TAINT_PROPER("require");
+		    tryname = SvPVX(namesv);
+		    tryrsfp = doopen_pmc(tryname, PERL_SCRIPT_MODE);
+		    if (tryrsfp) {
+			if (tryname[0] == '.' && tryname[1] == '/')
+			    tryname += 2;
+			break;
+		    }
 		}
 	    }
 	}
@@ -2867,9 +2981,16 @@ PP(pp_require)
         PL_compiling.cop_warnings = WARN_NONE ;
     else 
         PL_compiling.cop_warnings = WARN_STD ;
-    
-    /* switch to eval mode */
 
+    if (filter_sub || filter_child_proc) {
+	SV *datasv = filter_add(run_user_filter, Nullsv);
+	IoLINES(datasv) = filter_has_file;
+	IoFMT_GV(datasv) = (GV *)filter_child_proc;
+	IoTOP_GV(datasv) = (GV *)filter_state;
+	IoBOTTOM_GV(datasv) = (GV *)filter_sub;
+    }
+
+    /* switch to eval mode */
     push_return(PL_op->op_next);
     PUSHBLOCK(cx, CXt_EVAL, SP);
     PUSHEVAL(cx, name, PL_compiling.cop_filegv);
@@ -4099,6 +4220,76 @@ amagic_cmp_locale(pTHXo_ register SV *str1, register SV *str2)
         return d? -1 : 0;
     }
     return sv_cmp_locale(str1, str2);
+}
+
+static I32
+run_user_filter(pTHXo_ int idx, SV *buf_sv, int maxlen)
+{
+    SV *datasv = FILTER_DATA(idx);
+    int filter_has_file = IoLINES(datasv);
+    GV *filter_child_proc = (GV *)IoFMT_GV(datasv);
+    SV *filter_state = (SV *)IoTOP_GV(datasv);
+    SV *filter_sub = (SV *)IoBOTTOM_GV(datasv);
+    int len = 0;
+
+    /* I was having segfault trouble under Linux 2.2.5 after a
+       parse error occured.  (Had to hack around it with a test
+       for PL_error_count == 0.)  Solaris doesn't segfault --
+       not sure where the trouble is yet.  XXX */
+
+    if (filter_has_file) {
+	len = FILTER_READ(idx+1, buf_sv, maxlen);
+    }
+
+    if (filter_sub && len >= 0) {
+	djSP;
+	int count;
+
+	ENTER;
+	SAVE_DEFSV;
+	SAVETMPS;
+	EXTEND(SP, 2);
+
+	DEFSV = buf_sv;
+	PUSHMARK(SP);
+	PUSHs(sv_2mortal(newSViv(maxlen)));
+	if (filter_state) {
+	    PUSHs(filter_state);
+	}
+	PUTBACK;
+	count = call_sv(filter_sub, G_SCALAR);
+	SPAGAIN;
+
+	if (count > 0) {
+	    SV *out = POPs;
+	    if (SvOK(out)) {
+		len = SvIV(out);
+	    }
+	}
+
+	PUTBACK;
+	FREETMPS;
+	LEAVE;
+    }
+
+    if (len <= 0) {
+	IoLINES(datasv) = 0;
+	if (filter_child_proc) {
+	    SvREFCNT_dec(filter_child_proc);
+	    IoFMT_GV(datasv) = Nullgv;
+	}
+	if (filter_state) {
+	    SvREFCNT_dec(filter_state);
+	    IoTOP_GV(datasv) = Nullgv;
+	}
+	if (filter_sub) {
+	    SvREFCNT_dec(filter_sub);
+	    IoBOTTOM_GV(datasv) = Nullgv;
+	}
+	filter_del(run_user_filter);
+    }
+
+    return len;
 }
 
 #ifdef PERL_OBJECT
