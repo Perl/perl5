@@ -36,10 +36,6 @@
 #endif
 #endif
 
-#if defined(USE_STDIO_PTR) && defined(STDIO_PTR_LVALUE) && defined(STDIO_CNT_LVALUE) && !defined(__QNX__)
-#  define FAST_SV_GETS
-#endif
-
 #ifdef PERL_OBJECT
 #define FCALL this->*f
 #define VTBL this->*vtbl
