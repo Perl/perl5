@@ -29,6 +29,7 @@ no warnings 'layer';
 open(F, ">:-aa", "bb");
 use warnings 'layer';
 open(F, ">:-aa", "bb");
+close F;
 EXPECT
 perlio: invalid separator character '-' in layer specification list -aa at - line 6.
 ########
@@ -38,6 +39,7 @@ no warnings 'layer';
 open(F, ">:aa(", "bb");
 use warnings 'layer';
 open(F, ">:aa(", "bb");
+close F;
 EXPECT
 perlio: argument list not closed for layer "aa(" at - line 6.
 ########
@@ -50,6 +52,7 @@ no warnings 'layer';
 open(F, ">:xyz", "bb");
 use warnings 'layer';
 open(F, ">:xyz", "bb");
+close F;
 END { 1 while unlink "bb" } # KEEP THIS WITH THE LAST TEST.
 EXPECT
 perlio: unknown layer "xyz".

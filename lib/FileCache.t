@@ -24,11 +24,11 @@ my @files = qw(foo bar baz quux);
     my @cat;
     for my $path ( @files ){
 	print $path "$path 2\n";
-      close($path);
+        close($path);
 	open($path, $path);
 	<$path>;
 	push @cat, <$path>;
-      close($path);
+        close($path);
     }
     print "not " if (grep {/foo|bar/} @cat) && ! (grep {/baz|quux/} @cat);
     print "ok 2\n" ;
@@ -57,6 +57,7 @@ my @files = qw(foo bar baz quux);
      cacheout '<', "foo";
      print "not " unless <foo> eq "foo 2\n";
      print "ok 4\n";
+     close(foo);
 }
 
 {# Test 5: that close is overridden properly
@@ -68,6 +69,7 @@ my @files = qw(foo bar baz quux);
      seek($_, 0, 0);
      print "not " unless <$_> eq "$_\n";
      print "ok 5\n";
+     close($_);
 }
 
 q(
@@ -82,6 +84,7 @@ q(
      seek($_, 0, 0);
      print "not " unless <$_> eq "$_\n";
      print "ok 5\n";
+     close($_);
 }
 );
 
