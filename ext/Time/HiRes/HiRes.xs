@@ -276,11 +276,12 @@ usleep(useconds)
         int useconds 
 
 void
-sleep(fseconds)
-        NV fseconds 
+sleep(...)
 	CODE:
-	int useconds = fseconds * 1000000;
-	usleep (useconds);
+	if (items > 0)
+	    usleep((int)(SvNV(ST(0)) * 1000000));
+	else
+	    PerlProc_pause();
 
 #endif
 
