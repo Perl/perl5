@@ -196,8 +196,8 @@ getpgrp				# getpgrp
 getpriority $$, $$		# getpriority
 '???'				# setpriority
 time				# time
-localtime			# localtime
-gmtime				# gmtime
+localtime $^T			# localtime
+gmtime $^T			# gmtime
 sleep 1				# sleep
 '???'				# alarm
 '???'				# shmget

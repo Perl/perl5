@@ -124,7 +124,7 @@ if($pid = fork()) {
     }
 
     # some machines seem to suffer from a race condition here
-#    sleep(1);
+    sleep(1);
 
     $sock = IO::Socket::INET->new("127.0.0.1:$port");
     if ($sock) {
