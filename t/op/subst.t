@@ -408,7 +408,7 @@ is($pv1, $pv2);
     $a = "\x{100}\x{101}";
     $a =~ s/\x{101}/\xFF/;
     like($a, qr/\xFF/);
-    is(length($a), 2);
+    is(length($a), 2, "SADAHIRO utf8 s///");
 
     $a = "\x{100}\x{101}";
     $a =~ s/\x{101}/"\xFF"/e;

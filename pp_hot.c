@@ -1983,16 +1983,20 @@ PP(pp_subst)
 
     /* known replacement string? */
     if (dstr) {
-        c = SvPV(dstr, clen);
-	doutf8 = DO_UTF8(dstr);
 	/* replacement needing upgrading? */
 	if (DO_UTF8(TARG) && !doutf8) {
-	     SV *nsv = sv_2mortal(newSVpvn(c, clen));
+	     SV *nsv = sv_newmortal();
+	     SvSetSV(nsv, dstr);
 	     if (PL_encoding)
 		  sv_recode_to_utf8(nsv, PL_encoding);
 	     else
 		  sv_utf8_upgrade(nsv);
 	     c = SvPV(nsv, clen);
+	     doutf8 = TRUE;
+	}
+	else {
+	    c = SvPV(dstr, clen);
+	    doutf8 = DO_UTF8(dstr);
 	}
     }
     else {
