@@ -721,6 +721,10 @@ lib/Getopt/Std.pm	Fetch command options (getopt, getopts)
 lib/I18N/Collate.pm	Routines to do strxfrm-based collation
 lib/IPC/Open2.pm	Open a two-ended pipe
 lib/IPC/Open3.pm	Open a three-ended pipe!
+lib/Locale/Constants.pm	Locale::Codes
+lib/Locale/Country.pm	Locale::Codes
+lib/Locale/Currency.pm	Locale::Codes
+lib/Locale/Language.pm	Locale::Codes
 lib/Math/BigFloat.pm	An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm	An arbitrary precision integer arithmetic package
 lib/Math/Complex.pm	A Complex package
@@ -1475,6 +1479,12 @@ t/lib/io_udp.t		See if UDP socket-related methods from IO work
 t/lib/io_unix.t		See if UNIX socket-related methods from IO work
 t/lib/io_xs.t		See if XSUB methods from IO work
 t/lib/ipc_sysv.t	See if IPC::SysV works
+t/lib/lc-all.t	See if Locale::Codes work
+t/lib/lc-constants.t	See if Locale::Codes work
+t/lib/lc-country.t	See if Locale::Codes work
+t/lib/lc-currency.t	See if Locale::Codes work
+t/lib/lc-language.t	See if Locale::Codes work
+t/lib/lc-uk.t	See if Locale::Codes work
 t/lib/ndbm.t		See if NDBM_File works
 t/lib/net-hostent.t	See if Net::hostent works
 t/lib/odbm.t		See if ODBM_File works
