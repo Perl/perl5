@@ -96,7 +96,7 @@ CCTYPE		*= MSVC60
 
 #
 # uncomment this if your Borland compiler is older than v5.4.
-BCCOLD = define
+#BCCOLD = define
 #
 # uncomment this if you want to use Borland's VCL as your CRT
 #BCCVCL = define
@@ -163,9 +163,13 @@ CFG		*= Debug
 # so you may have to set CCHOME explicitly (spaces in the path name should
 # not be quoted)
 #
-#CCHOME		*= F:\borland\bc5
+.IF "$(CCTYPE)" == "BORLAND"
+CCHOME		*= C:\borland\bcc55
+.ELIF "$(CCTYPE)" == "GCC"
+CCHOME		*= C:\MinGW
+.ELSE
 CCHOME		*= $(MSVCDIR)
-#CCHOME		*= c:\gcc-2.95.2
+.ENDIF
 CCINCDIR	*= $(CCHOME)\include
 CCLIBDIR	*= $(CCHOME)\lib
 
