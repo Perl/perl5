@@ -1,7 +1,7 @@
+require 5.002; # MakeMaker 5.17 was the last MakeMaker that was compatible with perl5.001m
+
 package main;
 use vars qw(%att);
-
-# $Id: MakeMaker.pm,v 1.174 1996/02/06 17:03:12 k Exp $
 
 package ExtUtils::MakeMaker::TieAtt;
 # this package will go away again, when we don't have modules around
@@ -14,111 +14,27 @@ package ExtUtils::MakeMaker::TieAtt;
 
 $Enough_limit = 5;
 
-sub TIEHASH {
-    bless { SECRETHASH => $_[1]};
-}
-
-sub FETCH {
-    print "Warning (non-fatal): Importing of %att is deprecated [$_[1]]
-	use \$self instead\n" unless ++$Enough>$Enough_limit;
-    print "Further ExtUtils::MakeMaker::TieAtt warnings suppressed\n" if $Enough==$Enough_limit;
-    $_[0]->{SECRETHASH}->{$_[1]};
-}
-
-sub STORE {
-    print "Warning (non-fatal): Importing of %att is deprecated [$_[1]][$_[2]]
-	use \$self instead\n" unless ++$Enough>$Enough_limit;
-    print "Further ExtUtils::MakeMaker::TieAtt warnings suppressed\n" if $Enough==$Enough_limit;
-    $_[0]->{SECRETHASH}->{$_[1]} = $_[2];
-}
-
-sub FIRSTKEY {
-    print "Warning (non-fatal): Importing of %att is deprecated [FIRSTKEY]
-	use \$self instead\n" unless ++$Enough>$Enough_limit;
-    print "Further ExtUtils::MakeMaker::TieAtt warnings suppressed\n" if $Enough==$Enough_limit;
-    each %{$_[0]->{SECRETHASH}};
-}
-
-sub NEXTKEY {
-    each %{$_[0]->{SECRETHASH}};
-}
-
-sub DESTROY {
-}
-
-sub warndirectuse {
-    my($caller) = @_;
-    return if $Enough>$Enough_limit;
-    print STDOUT "Warning (non-fatal): Direct use of class methods deprecated; use\n";
-    my($method) = $caller =~ /.*:(\w+)$/;
-    print STDOUT
-'		my $self = shift;
-		$self->MM::', $method, "();
-	instead\n";
-    print "Further ExtUtils::MakeMaker::TieAtt warnings suppressed\n"
-	if ++$Enough==$Enough_limit;
-}
-
-
-
-
-
-
 package ExtUtils::MakeMaker;
 
-$Version = $VERSION = "5.21";
+$Version = $VERSION = "5.26";
 $Version_OK = "5.05";	# Makefiles older than $Version_OK will die
 			# (Will be checked from MakeMaker version 4.13 onwards)
-($Revision = substr(q$Revision: 1.174 $, 10)) =~ s/\s+$//;
+($Revision = substr(q$Revision: 1.187 $, 10)) =~ s/\s+$//;
 
 
 
-use Config;
-use Carp;
-use Cwd;
 require Exporter;
-require ExtUtils::Manifest;
-{
-    # Current (5.21) FileHandle doesn't work with miniperl, so we roll our own
-    # that's all copy & paste code from FileHandle.pm, version of perl5.002b3
-    package FileHandle;
-    use Symbol;
-    sub new {
-	@_ >= 1 && @_ <= 3 or croak('usage: new FileHandle [FILENAME [,MODE]]');
-	my $class = shift;
-	my $fh = gensym;
-	if (@_) {
-	    FileHandle::open($fh, @_)
-		or return undef;
-	}
-	bless $fh, $class;
-    }
-    sub open {
-	@_ >= 2 && @_ <= 4 or croak('usage: $fh->open(FILENAME [,MODE [,PERMS]])');
-	my ($fh, $file) = @_;
-	if (@_ > 2) {
-	    my ($mode, $perms) = @_[2, 3];
-	    if ($mode =~ /^\d+$/) {
-		defined $perms or $perms = 0666;
-		return sysopen($fh, $file, $mode, $perms);
-	    }
-	    $file = "./" . $file unless $file =~ m#^/#;
-	    $file = _open_mode_string($mode) . " $file\0";
-	}
-	open($fh, $file);
-    }
-    sub close {
-	@_ == 1 or croak('usage: $fh->close()');
-	close($_[0]);
-    }
-}
+use Config;
+use Carp ();
+#use FileHandle ();
 
 use vars qw(
 	    $VERSION $Version_OK $Revision
-	    $Verbose %MM_Sections
+	    $Verbose %MM_Sections $ISA_TTY
 	    @MM_Sections %Recognized_Att_Keys @Get_from_Config
 	    %Prepend_dot_dot %Config @Parent %NORMAL_INC
-	    $Setup_done
+	    $Setup_done %Keep_after_flush
+	    @Overridable
 	   );
 #use strict qw(refs);
 
@@ -131,7 +47,7 @@ eval {require DynaLoader;};	# Get mod2fname, if defined. Will fail
 #
 @ISA = qw(Exporter);
 @EXPORT = qw(&WriteMakefile &writeMakefile $Verbose &prompt);
-@EXPORT_OK = qw($VERSION &Version_check &help &neatvalue &mkbootstrap &mksymlists
+@EXPORT_OK = qw($VERSION &Version_check &neatvalue &mkbootstrap &mksymlists
 		$Version %att);  ## Import of %att is deprecated, please use OO features!
 		# $Version in mixed case will go away!
 
@@ -151,55 +67,69 @@ eval {require DynaLoader;};	# Get mod2fname, if defined. Will fail
 {
     package MY;
     @ISA = qw(MM);
-}
-
-{
     package MM;
-    # From somwhere they will want to inherit DESTROY
     sub DESTROY {}
 }
 
+# "predeclare the package: we only load it via AUTOLOAD
+# but we have already mentioned it in @ISA
+package ExtUtils::Liblist;
+
+package ExtUtils::MakeMaker;
 #
 # Now we can can pull in the friends
-# Since they will require us back, we would better prepare the needed
-# data _before_ we require them.
 #
-$Is_VMS = ($Config{osname} eq 'VMS');
-$Is_OS2 = ($Config{osname} =~ m|^os/?2$|i);
+$Is_VMS = $^O eq 'VMS';
+$Is_OS2 = $^O eq 'os2';
 
 require ExtUtils::MM_Unix;
+
 if ($Is_VMS) {
     require ExtUtils::MM_VMS;
-    require VMS::Filespec;
-    import VMS::Filespec '&vmsify';
 }
 if ($Is_OS2) {
     require ExtUtils::MM_OS2;
 }
 
 %NORMAL_INC = %INC;
-# package name for the classes into which the first object will be blessed
-$PACKNAME = "PACK000";
-
- #####
-#     #  #    #  #####
-#        #    #  #    #
- #####   #    #  #####
-      #  #    #  #    #
-#     #  #    #  #    #
- #####    ####   #####
+@NORMAL_INC{qw|File/Find.pm Cwd.pm ExtUtils/Manifest.pm ExtUtils/Liblist.pm|} = (1) x 4;
 
 
-#
-# MakeMaker serves currently (v 5.20) only for two purposes:
-# Version_Check, and WriteMakefile. For WriteMakefile SelfLoader
-# doesn't buy us anything. But for Version_Check we win with
-# SelfLoader more than a second.
-#
+# This has to go one day...
+$SIG{__WARN__} = sub {
+    $_[0] =~ /^Use of uninitialized value/ && return;
+    $_[0] =~ /used only once/ && return;
+    $_[0] =~ /^Subroutine\s+[\w:]+\s+redefined/ && return;
+    warn @_;
+};
+
+# The SelfLoader would bring a lot of overhead for MakeMaker, because
+# we know for sure we will use most of the autoloaded functions once
+# we have to use one of them. So we write our own loader
+
+sub AUTOLOAD {
+    my $code;
+    if (defined fileno(DATA)) {
+	while (<DATA>) {
+	    last if /^__END__/;
+	    $code .= $_;
+	}
+	close DATA;
+	eval $code;
+	if ($@) {
+	    $@ =~ s/ at .*\n//;
+	    Carp::croak $@;
+	}
+    } else {
+	warn "AUTOLOAD called unexpectedly for $AUTOLOAD"; 
+    }
+    defined(&$AUTOLOAD) or die "Myloader inconsistency error";
+    goto &$AUTOLOAD;
+}
+
 # The only subroutine we do not SelfLoad is Version_Check because it's
 # called so often. Loading this minimum still requires 1.2 secs on my
 # Indy :-(
-#
 
 sub Version_check {
     my($checkversion) = @_;
@@ -213,123 +143,146 @@ Please rerun 'perl Makefile.PL' to regenerate the Makefile.\n"
 	unless $checkversion == $VERSION;
 }
 
-# We don't selfload this, because chdir sometimes has problems
+sub ExtUtils::MakeMaker::eval_in_subdirs ;
+sub ExtUtils::MakeMaker::eval_in_x ;
+sub ExtUtils::MakeMaker::full_setup ;
+sub ExtUtils::MakeMaker::writeMakefile ;
+sub ExtUtils::MakeMaker::new ;
+sub ExtUtils::MakeMaker::check_manifest ;
+sub ExtUtils::MakeMaker::parse_args ;
+sub ExtUtils::MakeMaker::check_hints ;
+sub ExtUtils::MakeMaker::mv_all_methods ;
+sub ExtUtils::MakeMaker::skipcheck ;
+sub ExtUtils::MakeMaker::flush ;
+sub ExtUtils::MakeMaker::mkbootstrap ;
+sub ExtUtils::MakeMaker::mksymlists ;
+sub ExtUtils::MakeMaker::neatvalue ;
+sub ExtUtils::MakeMaker::selfdocument ;
+sub ExtUtils::MakeMaker::WriteMakefile ;
+sub ExtUtils::MakeMaker::prompt ;
+sub ExtUtils::MakeMaker::TieAtt::TIEHASH ;
+sub ExtUtils::MakeMaker::TieAtt::FETCH ;
+sub ExtUtils::MakeMaker::TieAtt::STORE ;
+sub ExtUtils::MakeMaker::TieAtt::FIRSTKEY ;
+sub ExtUtils::MakeMaker::TieAtt::NEXTKEY ;
+sub ExtUtils::MakeMaker::TieAtt::DESTROY ;
+sub ExtUtils::MakeMaker::TieAtt::warndirectuse ;
+
+__DATA__
+package ExtUtils::MakeMaker;
+
+sub WriteMakefile {
+    Carp::croak "WriteMakefile: Need even number of args" if @_ % 2;
+    unless ($Setup_done++){
+	full_setup();
+	undef &ExtUtils::MakeMaker::full_setup; #safe memory
+    }
+    my %att = @_;
+    MM->new(\%att)->flush;
+}
+
+sub prompt {
+    my($mess,$def)=@_;
+    $ISA_TTY = -t STDIN && -t STDOUT ;
+    Carp::confess("prompt function called without an argument") unless defined $mess;
+    $def = "" unless defined $def;
+    my $dispdef = "[$def] ";
+    my $ans;
+    if ($ISA_TTY) {
+	local $|=1;
+	print "$mess $dispdef";
+	chop($ans = <STDIN>);
+    }
+    return $ans if defined $ans;
+    return $def;
+}
+
 sub eval_in_subdirs {
     my($self) = @_;
     my($dir);
-#    print "Starting to wade through directories:\n";
-#    print join "\n", @{$self->{DIR}}, "\n";
+    use Cwd 'cwd';
     my $pwd = cwd();
 
-    # As strange things happened twice in the history of MakeMaker to $self->{DIR},
-    # lets be careful, maybe it helps some:
-#    my(@copy_of_DIR) = @{$self->{DIR}};
-#    my %copy;
-#    @copy{@copy_od_DIR} = (1) x @copy_of_DIR;
-
-    # with Tk-9.02 these give me as third directory "1":
-    # foreach $dir (@($self->{DIR}){
-    # foreach $dir (@copy_of_DIR){
-
-    # this gives mi as third directory a core dump:
-    # while ($dir = shift @copy_of_DIR){
-
-    # this finishes the loop immediately:
-#     foreach $dir (keys %copy){
-# 	  print "Next to come: $dir\n";
-# 	  chdir $dir or die "Couldn't change to directory $dir: $!";
-# 	  package main;
-# 	  my $fh = new FileHandle;
-# 	  $fh->open("Makefile.PL") or carp("Couldn't open Makefile.PL in $dir");
-# 	  my $eval = join "", <$fh>;
-# 	  $fh->close;
-# 	  eval $eval;
-# 	  warn "WARNING from evaluation of $dir/Makefile.PL: $@" if $@;
-# 	  chdir $pwd or die "Couldn't change to directory $pwd: $!";
-#     }
-
-
-    # So this did the trick (did it?)
     foreach $dir (@{$self->{DIR}}){
-#	print "Next to come: $dir\n";
 	my($abs) = $self->catdir($pwd,$dir);
 	$self->eval_in_x($abs);
     }
-
     chdir $pwd;
-
-#    print "Proudly presenting you self->{DIR}:\n";
-#    print join "\n", @{$self->{DIR}}, "\n";
-
 }
 
 sub eval_in_x {
     my($self,$dir) = @_;
     package main;
-    chdir $dir or carp("Couldn't change to directory $dir: $!");
-    my $fh = new FileHandle;
-    $fh->open("Makefile.PL") or carp("Couldn't open Makefile.PL in $dir");
-    my $eval = join "", <$fh>;
-    $fh->close;
+    chdir $dir or Carp::carp("Couldn't change to directory $dir: $!");
+#    use FileHandle ();
+#    my $fh = new FileHandle;
+#    $fh->open("Makefile.PL") or Carp::carp("Couldn't open Makefile.PL in $dir");
+    local *FH;
+    open(FH,"Makefile.PL") or Carp::carp("Couldn't open Makefile.PL in $dir");
+#    my $eval = join "", <$fh>;
+    my $eval = join "", <FH>;
+#    $fh->close;
+    close FH;
     eval $eval;
     warn "WARNING from evaluation of $dir/Makefile.PL: $@" if $@;
 }
 
-# use SelfLoader;
-# sub ExtUtils::MakeMaker::full_setup ;
-# sub ExtUtils::MakeMaker::attrib_help ;
-# sub ExtUtils::MakeMaker::writeMakefile ;
-# sub ExtUtils::MakeMaker::WriteMakefile ;
-# sub ExtUtils::MakeMaker::new ;
-# sub ExtUtils::MakeMaker::check_manifest ;
-# sub ExtUtils::MakeMaker::parse_args ;
-# sub ExtUtils::MakeMaker::check_hints ;
-# sub ExtUtils::MakeMaker::mv_all_methods ;
-# sub ExtUtils::MakeMaker::prompt ;
-# sub ExtUtils::MakeMaker::help ;
-# sub ExtUtils::MakeMaker::skipcheck ;
-# sub ExtUtils::MakeMaker::flush ;
-# sub ExtUtils::MakeMaker::mkbootstrap ;
-# sub ExtUtils::MakeMaker::mksymlists ;
-# sub ExtUtils::MakeMaker::neatvalue ;
-# sub ExtUtils::MakeMaker::selfdocument ;
-
-# 1;
-
-# __DATA__
-
-#
-# We're done with inheritance setup. As we have two frequently called
-# things: Check_Version() and mod_install(), we want to reduce startup
-# time. Only WriteMakefile needs all the power here. 
-#
-
 sub full_setup {
     $Verbose ||= 0;
     $^W=1;
-    $SIG{__WARN__} = sub {
-	$_[0] =~ /^Use of uninitialized value/ && return;
-	$_[0] =~ /used only once/ && return;
-	$_[0] =~ /^Subroutine\s+[\w:]+\s+redefined/ && return;
-	warn @_;
-    };
+
+# package name for the classes into which the first object will be blessed
+    $PACKNAME = "PACK000";
+
+    @Attrib_help = qw/
+
+    C CONFIG CONFIGURE DEFINE DIR DISTNAME DL_FUNCS DL_VARS EXE_FILES
+    NO_VC FIRST_MAKEFILE FULLPERL H INC INSTALLARCHLIB INSTALLBIN
+    INSTALLDIRS INSTALLMAN1DIR INSTALLMAN3DIR INSTALLPRIVLIB
+    INSTALLSITEARCH INSTALLSITELIB INST_ARCHLIB INST_EXE INST_LIB
+    INST_MAN1DIR INST_MAN3DIR LDFROM LIBPERL_A LIBS LINKTYPE MAKEAPERL
+    MAKEFILE MAN1PODS MAN3PODS MAP_TARGET MYEXTLIB NAME NEEDS_LINKING
+    NOECHO NORECURS OBJECT OPTIMIZE PERL PERLMAINCC PERL_ARCHLIB
+    PERL_LIB PERL_SRC PL_FILES PM PMLIBDIRS PREFIX PREREQ SKIP
+    TYPEMAPS VERSION VERSION_FROM XS XSOPT XSPROTOARG XS_VERSION clean
+    depend dist dynamic_lib linkext macro realclean tool_autosplit
+
+    installpm
+
+	/;
+
+
+    # @Overridable is close to MM_Sections
 
     @MM_Sections = 
 	qw(
-	post_initialize const_config constants const_loadlibs
-	const_cccmd tool_autosplit tool_xsubpp tools_other dist macro
-	depend post_constants pasthru c_o xs_c xs_o top_targets
-	linkext dlsyms dynamic dynamic_bs dynamic_lib static
-	static_lib installpm manifypods processPL installbin subdirs
-	clean realclean dist_basics dist_core dist_dir dist_test
-	dist_ci install force perldepend makefile staticmake test
-	postamble selfdocument
+
+	post_initialize const_config constants tool_autosplit
+	tool_xsubpp tools_other dist macro depend post_constants
+	pasthru c_o xs_c xs_o top_targets linkext dlsyms dynamic
+	dynamic_bs dynamic_lib static static_lib manifypods processPL
+	installbin subdirs clean realclean dist_basics dist_core
+	dist_dir dist_test dist_ci install force perldepend makefile
+	staticmake test postamble
+
 	  ); # loses section ordering
 
-    @MM_Sections{@MM_Sections} = {} x @MM_Sections;
+    @Overridable = @MM_Sections;
+    push @Overridable, qw[ dir_target
+			   libscan makeaperl
+			   needs_linking subdir_x test_via_harness
+			   test_via_script ];
+    push @MM_Sections, qw[
+			  pm_to_blib selfdocument cflags const_loadlibs
+			  const_cccmd
+			 ];
+
+
+    #### Can we drop this?
+    #### @MM_Sections{@MM_Sections} = {} x @MM_Sections;
 
     # All sections are valid keys.
-    %Recognized_Att_Keys = %MM_Sections;
+    @Recognized_Att_Keys{@MM_Sections} = (1) x @MM_Sections;
 
     # we will use all these variables in the Makefile
     @Get_from_Config = 
@@ -339,10 +292,8 @@ sub full_setup {
 	  );
 
     my $item;
-    foreach $item (split(/\n/,attrib_help())){
-	next unless $item =~ m/^=item\s+(\w+)\s*$/;
-	$Recognized_Att_Keys{$1} = $2;
-	print "Attribute '$1' => '$2'\n" if ($Verbose >= 2);
+    foreach $item (@Attrib_help){
+	$Recognized_Att_Keys{$item} = 1;
     }
     foreach $item (@Get_from_Config) {
 	$Recognized_Att_Keys{uc $item} = $Config{$item};
@@ -351,8 +302,9 @@ sub full_setup {
     }
 
     #
-    # When we pass these through to a Makefile.PL in a subdirectory, we prepend
-    # "..", so that all files to be installed end up below ./blib
+    # When we eval a Makefile.PL in a subdirectory, that one will ask
+    # us (the parent) for the values and will prepend "..", so that
+    # all files to be installed end up below OUR ./blib
     #
     %Prepend_dot_dot = 
 	qw(
@@ -360,21 +312,10 @@ sub full_setup {
 	   PERL_SRC 1 PERL 1 FULLPERL 1
 	  );
 
-}
-
-sub attrib_help {
-    return $Attrib_Help if $Attrib_Help;
-    my $switch = 0;
-    my $help = "";
-    my $line;
-    while ($line = <DATA>) {
-	$switch ||= $line =~ /^=item C\s*$/;
-	next unless $switch;
-	last if $line =~ /^=cut/;
-	$help .= $line;
-    }
-#    close DATA;
-    $Attrib_Help = $help;
+    my @keep = qw/
+	NEEDS_LINKING HAS_LINK_CODE
+	/;
+    @Keep_after_flush{@keep} = (1) x @keep;
 }
 
 sub writeMakefile {
@@ -397,16 +338,8 @@ The MakeMaker team
 END
 }
 
-sub WriteMakefile {
-    Carp::croak "WriteMakefile: Need even number of args" if @_ % 2;
-    my %att = @_;
-    MM->new(\%att)->flush;
-}
-
-sub new {
+sub ExtUtils::MakeMaker::new {
     my($class,$self) = @_;
-    full_setup() unless $Setup_done++;
-
     my($key);
 
     print STDOUT "MakeMaker (v$VERSION)\n" if $Verbose;
@@ -424,14 +357,14 @@ sub new {
 	if (ref $self->{CONFIGURE} eq 'CODE') {
 	    $self = { %$self, %{&{$self->{CONFIGURE}}}};
 	} else {
-	    croak "Attribute 'CONFIGURE' to WriteMakefile() not a code reference\n";
+	    Carp::croak "Attribute 'CONFIGURE' to WriteMakefile() not a code reference\n";
 	}
     }
 
     # This is for old Makefiles written pre 5.00, will go away
     if ( Carp::longmess("") =~ /runsubdirpl/s ){
 	#$self->{Correct_relativ_directories}++;
-	carp("WARNING: Please rerun 'perl Makefile.PL' to regenerate your Makefiles\n");
+	Carp::carp("WARNING: Please rerun 'perl Makefile.PL' to regenerate your Makefiles\n");
     } else {
 	$self->{Correct_relativ_directories}=0;
     }
@@ -453,7 +386,7 @@ sub new {
 	    next unless defined $self->{PARENT}{$key};
 	    $self->{$key} = $self->{PARENT}{$key};
 	    $self->{$key} = $self->catdir("..",$self->{$key})
-		unless $self->{$key} =~ m!^/!;
+		unless $self->file_name_is_absolute($self->{$key});
 	}
 	$self->{PARENT}->{CHILDREN}->{$class} = $self if $self->{PARENT};
     } else {
@@ -468,7 +401,7 @@ sub new {
 
     if (! $self->{PERL_SRC} ) {
 	my($pthinks) = $INC{'Config.pm'};
-	$pthinks = vmsify($pthinks) if $Is_VMS;
+	$pthinks = VMS::Filespec::vmsify($pthinks) if $Is_VMS;
 	if ($pthinks ne $self->catfile($Config{archlibexp},'Config.pm')){
 	    $pthinks =~ s!/Config\.pm$!!;
 	    $pthinks =~ s!.*/!!;
@@ -510,6 +443,13 @@ END
     for $skip (@{$self->{SKIP} || []}) {
 	$self->{SKIPHASH}{$skip} = 1;
     }
+    delete $self->{SKIP}; # free memory
+
+    if ($self->{PARENT}) {
+	for (qw/install dist dist_basics dist_core dist_dir dist_test dist_ci/) {
+	    $self->{SKIPHASH}{$_} = 1;
+	}
+    }
 
     # We run all the subdirectories now. They don't have much to query
     # from the parent, but the parent has to query them: if they need linking!
@@ -540,6 +480,7 @@ END
 
 sub check_manifest {
     print STDOUT "Checking if your kit is complete...\n";
+    require ExtUtils::Manifest;
     $ExtUtils::Manifest::Quiet=$ExtUtils::Manifest::Quiet=1; #avoid warning
     my(@missed)=ExtUtils::Manifest::manicheck();
     if (@missed){
@@ -571,7 +512,7 @@ sub parse_args{
 	# This may go away, in mid 1996
 	if ($self->{Correct_relativ_directories}){
 	    $value = $self->catdir("..",$value)
-		if $Prepend_dot_dot{$name} && ! $value =~ m!^/!;
+		if $Prepend_dot_dot{$name} && ! $self->file_name_is_absolute($value);
 	}
 	$self->{uc($name)} = $value;
     }
@@ -640,10 +581,15 @@ sub check_hints {
     return unless -f "hints/$hint.pl";    # really there
 
     # execute the hintsfile:
-    my $fh = new FileHandle;
-    $fh->open("hints/$hint.pl");
-    @goodhints = <$fh>;
-    $fh->close;
+#    use FileHandle ();
+#    my $fh = new FileHandle;
+#    $fh->open("hints/$hint.pl");
+    local *FH;
+    open(FH,"hints/$hint.pl");
+#    @goodhints = <$fh>;
+    @goodhints = <FH>;
+#    $fh->close;
+    close FH;
     print STDOUT "Processing hints file hints/$hint.pl\n";
     eval join('',@goodhints);
     print STDOUT $@ if $@;
@@ -660,30 +606,31 @@ sub mv_all_methods {
     # still trying to reduce the list to some reasonable minimum --
     # because I want to make it easier for the user. A.K.
 
-    foreach $method (@MM_Sections, qw[ dir_target
-fileparse fileparse_set_fstype installpm_x libscan makeaperl
-mksymlists needs_linking subdir_x test_via_harness
-test_via_script writedoc ]) {
+    foreach $method (@Overridable) {
 
 	# We cannot say "next" here. Nick might call MY->makeaperl
 	# which isn't defined right now
 
-	# next unless defined &{"${from}::$method"};
+	# Above statement was written at 4.23 time when Tk-b8 was
+	# around. As Tk-b9 only builds with 5.002something and MM 5 is
+	# standard, we try to enable the next line again. It was
+	# commented out until MM 5.23
+
+	next unless defined &{"${from}::$method"};
 
 	*{"${to}::$method"} = \&{"${from}::$method"};
 
 	# delete would do, if we were sure, nobody ever called
 	# MY->makeaperl directly
-
+	
 	# delete $symtab->{$method};
-
+	
 	# If we delete a method, then it will be undefined and cannot
 	# be called.  But as long as we have Makefile.PLs that rely on
 	# %MY:: being intact, we have to fill the hole with an
 	# inheriting method:
 
 	eval "package MY; sub $method {local *$method; shift->MY::$method(\@_); }";
-
     }
 
     # We have to clean out %INC also, because the current directory is
@@ -700,25 +647,7 @@ test_via_script writedoc ]) {
 
 }
 
-sub prompt {
-    my($mess,$def)=@_;
-    BEGIN { $ISA_TTY = -t STDIN && -t STDOUT }
-    Carp::confess("prompt function called without an argument") unless defined $mess;
-    $def = "" unless defined $def;
-    my $dispdef = "[$def] ";
-    my $ans;
-    if ($ISA_TTY) {
-	local $|=1;
-	print "$mess $dispdef";
-	chop($ans = <STDIN>);
-    }
-    return $ans if defined $ans;
-    return $def;
-}
-
-sub help {print &attrib_help, "\n";}
-
-sub skipcheck{
+sub skipcheck {
     my($self) = shift;
     my($section) = @_;
     if ($section eq 'dynamic') {
@@ -746,20 +675,32 @@ sub skipcheck{
 sub flush {
     my $self = shift;
     my($chunk);
-    my $fh = new FileHandle;
+#    use FileHandle ();
+#    my $fh = new FileHandle;
+    local *FH;
     print STDOUT "Writing $self->{MAKEFILE} for $self->{NAME}\n";
 
     unlink($self->{MAKEFILE}, "MakeMaker.tmp", $Is_VMS ? 'Descrip.MMS' : '');
-    $fh->open(">MakeMaker.tmp") or die "Unable to open MakeMaker.tmp: $!";
+#    $fh->open(">MakeMaker.tmp") or die "Unable to open MakeMaker.tmp: $!";
+    open(FH,">MakeMaker.tmp") or die "Unable to open MakeMaker.tmp: $!";
 
     for $chunk (@{$self->{RESULT}}) {
-	print $fh "$chunk\n";
+#	print $fh "$chunk\n";
+	print FH "$chunk\n";
     }
 
-    $fh->close;
+#    $fh->close;
+    close FH;
     my($finalname) = $self->{MAKEFILE};
     rename("MakeMaker.tmp", $finalname);
     chmod 0644, $finalname unless $Is_VMS;
+
+    if ($self->{PARENT}) {
+	foreach (keys %$self) { # safe memory
+	    delete $self->{$_} unless $Keep_after_flush{$_};
+	}
+    }
+
     system("$Config::Config{eunicefix} $finalname") unless $Config::Config{eunicefix} eq ":";
 }
 
@@ -800,7 +741,10 @@ sub neatvalue {
     }
     return "$v" unless $t eq 'HASH';
     my(@m, $key, $val);
-    push(@m,"$key=>".neatvalue($val)) while (($key,$val) = each %$v);
+    while (($key,$val) = each %$v){
+	last unless defined $key; # cautious programming in case (undef,undef) is true
+	push(@m,"$key=>".neatvalue($val)) ;
+    }
     return "{ ".join(', ',@m)." }";
 }
 
@@ -820,16 +764,57 @@ sub selfdocument {
     join "\n", @m;
 }
 
+package ExtUtils::MakeMaker::TieAtt;
+
+sub TIEHASH {
+    bless { SECRETHASH => $_[1]};
+}
+
+sub FETCH {
+    print "Warning (non-fatal): Importing of %att is deprecated [$_[1]]
+	use \$self instead\n" unless ++$Enough>$Enough_limit;
+    print "Further ExtUtils::MakeMaker::TieAtt warnings suppressed\n" if $Enough==$Enough_limit;
+    $_[0]->{SECRETHASH}->{$_[1]};
+}
+
+sub STORE {
+    print "Warning (non-fatal): Importing of %att is deprecated [$_[1]][$_[2]]
+	use \$self instead\n" unless ++$Enough>$Enough_limit;
+    print "Further ExtUtils::MakeMaker::TieAtt warnings suppressed\n" if $Enough==$Enough_limit;
+    $_[0]->{SECRETHASH}->{$_[1]} = $_[2];
+}
+
+sub FIRSTKEY {
+    print "Warning (non-fatal): Importing of %att is deprecated [FIRSTKEY]
+	use \$self instead\n" unless ++$Enough>$Enough_limit;
+    print "Further ExtUtils::MakeMaker::TieAtt warnings suppressed\n" if $Enough==$Enough_limit;
+    each %{$_[0]->{SECRETHASH}};
+}
+
+sub NEXTKEY {
+    each %{$_[0]->{SECRETHASH}};
+}
+
+sub DESTROY {
+}
+
+sub warndirectuse {
+    my($caller) = @_;
+    return if $Enough>$Enough_limit;
+    print STDOUT "Warning (non-fatal): Direct use of class methods deprecated; use\n";
+    my($method) = $caller =~ /.*:(\w+)$/;
+    print STDOUT
+'		my $self = shift;
+		$self->MM::', $method, "();
+	instead\n";
+    print "Further ExtUtils::MakeMaker::TieAtt warnings suppressed\n"
+	if ++$Enough==$Enough_limit;
+}
+
 package ExtUtils::MakeMaker;
 1;
 
-# Without selfLoader we need
-__DATA__
-
-
-# For SelfLoader we need 
-# __END__ DATA
-
+__END__
 
 =head1 NAME
 
@@ -926,9 +911,13 @@ directory and run
 
 That's actually fun to watch :)
 
+Do not use exit() in your Makefile.PL. MakeMaker tries hard to enable
+multi-module builds in one go.
+
 Final suggestion: Try to delete all of your MY:: subroutines and
 watch, if you really still need them. MakeMaker might already do what
-you want without them. That's all about it.
+you want without them. If you see no way to avoid your own subroutine
+solution, please let us know about the problem.
 
 
 =head2 Default Makefile Behaviour
@@ -983,14 +972,20 @@ INSTALLDIRS according to the following table:
 		       	   INSTALLDIRS set to
        	       	        perl   	          site
 
-    INST_LIB        INSTALLPRIVLIB    INSTALLSITELIB
     INST_ARCHLIB    INSTALLARCHLIB    INSTALLSITEARCH
+    INST_LIB        INSTALLPRIVLIB    INSTALLSITELIB
     INST_EXE                   INSTALLBIN
     INST_MAN1DIR             INSTALLMAN1DIR
     INST_MAN3DIR             INSTALLMAN3DIR
 
 The INSTALL... macros in turn default to their %Config
 ($Config{installprivlib}, $Config{installarchlib}, etc.) counterparts.
+
+You can check the values of these variables on your system with
+
+    perl -MConfig -le 'print join $/, map 
+        sprintf("%20s: %s", $_, $Config{$_}),
+        grep /^install/, keys %Config'
 
 If you don't want to keep the defaults, MakeMaker helps you to
 minimize the typing needed: the usual relationship between
@@ -1007,8 +1002,11 @@ internal variables and get different results. It is worth to mention,
 that make(1) also lets you configure most of the variables that are
 used in the Makefile. But in the majority of situations this will not
 be necessary, and should only be done, if the author of a package
-recommends it.
+recommends it (or you know what you're doing).
 
+=cut
+
+#'
 
 =head2 PREFIX attribute
 
@@ -1246,6 +1244,13 @@ Ref to array of executable files. The files will be copied to the
 INST_EXE directory. Make realclean will delete them from there
 again.
 
+=item NO_VC
+
+In general any generated Makefile checks for the current version of
+MakeMaker and the version the Makefile was built under. If NO_VC is
+set, the version check is neglected. Do not write this into your
+Makefile.PL, use it interactively instead.
+
 =item FIRST_MAKEFILE
 
 The name of the Makefile to be produced. Defaults to the contents of
@@ -1430,6 +1435,11 @@ List of object files, defaults to '$(BASEEXT)$(OBJ_EXT)', but can be a long
 string containing all object files, e.g. "tkpBind.o
 tkpButton.o tkpCanvas.o"
 
+=item OPTIMIZE
+
+Defaults to C<-O>. Set it to C<-g> to turn debugging on. The flag is
+passed to subdirectory makes.
+
 =item PERL
 
 Perl binary for tasks that can be done by miniperl
@@ -1533,7 +1543,7 @@ B<after> the eval() will be assigned to the VERSION attribute of the
 MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
-    ( $VERSION ) = '$Revision: 1.174 $ ' =~ /\$Revision:\s+([^\s]+)/;
+    ( $VERSION ) = '$Revision: 1.187 $ ' =~ /\$Revision:\s+([^\s]+)/;
     $FOO::VERSION = '1.10';
 
 but these will fail:
@@ -1592,7 +1602,8 @@ part of the Makefile. These are not normally required:
 =item dist
 
   {TARFLAGS => 'cvfF', COMPRESS => 'gzip', SUFFIX => 'gz',
-  SHAR => 'shar -m', DIST_CP => 'ln'}
+  SHAR => 'shar -m', DIST_CP => 'ln', ZIP => '/bin/zip',
+  ZIPFLAGS => '-rl'}
 
 If you specify COMPRESS, then SUFFIX should also be altered, as it is
 needed to tell make the target file of the compression. Setting
@@ -1607,7 +1618,7 @@ links the rest. Default is 'best'.
 
 =item installpm
 
-  {SPLITLIB => '$(INST_LIB)' (default) or '$(INST_ARCHLIB)'}
+Deprecated as of MakeMaker 5.23. See L<ExtUtils::MM_Unix/pm_to_blib>.
 
 =item linkext
 
@@ -1668,6 +1679,19 @@ If you still need a different solution, try to develop another
 subroutine, that fits your needs and submit the diffs to
 F<perl5-porters@nicoh.com> or F<comp.lang.perl.misc> as appropriate.
 
+For a complete description of all MakeMaker methods see L<ExtUtils::MM_Unix>.
+
+Here is a simple example of how to add a new target to the generated
+Makefile:
+
+    sub MY::postamble {
+	'
+    $(MYEXTLIB): sdbm/Makefile
+	    cd sdbm && $(MAKE) all
+    ';
+    }
+
+
 =head2 Distribution Support
 
 For authors of extensions MakeMaker provides several Makefile
@@ -1712,10 +1736,10 @@ a make test in that directory.
 
 =item    make tardist
 
-First does a command $(PREOP) which defaults to a null command. Does a
-distdir next and runs C<tar> on that directory into a tarfile. Then
-deletes the distdir. Finishes with a command $(POSTOP) which defaults
-to a null command.
+First does a distdir. Then a command $(PREOP) which defaults to a null
+command. Next it runs C<tar> on that directory into a tarfile and
+deletes the directory. Finishes with a command $(POSTOP) which
+defaults to a null command.
 
 =item    make dist
 
@@ -1727,11 +1751,18 @@ Runs a tardist first and uuencodes the tarfile.
 
 =item    make shdist
 
-First does a command $(PREOP) which defaults to a null command. Does a
-distdir next and runs C<shar> on that directory into a sharfile. Then
-deletes the distdir. Finishes with a command $(POSTOP) which defaults
-to a null command.  Note: For shdist to work properly a C<shar>
-program that can handle directories is mandatory.
+First does a distdir. Then a command $(PREOP) which defaults to a null
+command. Next it runs C<shar> on that directory into a sharfile and
+deletes the intermediate directory again. Finishes with a command
+$(POSTOP) which defaults to a null command.  Note: For shdist to work
+properly a C<shar> program that can handle directories is mandatory.
+
+=item    make zipdist
+
+First does a distdir. Then a command $(PREOP) which defaults to a null
+command. Runs C<$(ZIP) $(ZIPFLAGS)> on that directory into a
+zipfile. Then deletes that directory. Finishes with a command
+$(POSTOP) which defaults to a null command.
 
 =item    make ci
 
@@ -1752,6 +1783,8 @@ following parameters are recognized:
     SUFFIX       ('Z')
     TAR          ('tar')
     TARFLAGS     ('cvf')
+    ZIP          ('zip')
+    ZIPFLAGS     ('-r')
 
 An example:
 
