@@ -1427,6 +1427,7 @@ t/lib/io_unix.t		See if UNIX socket-related methods from IO work
 t/lib/io_xs.t		See if XSUB methods from IO work
 t/lib/ipc_sysv.t	See if IPC::SysV works
 t/lib/ndbm.t		See if NDBM_File works
+t/lib/net-hostent.t	See if Net::hostent works
 t/lib/odbm.t		See if ODBM_File works
 t/lib/opcode.t		See if Opcode works
 t/lib/open2.t		See if IPC::Open2 works
