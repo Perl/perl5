@@ -113,9 +113,8 @@ use IO::Seekable;
 use File::Spec;
 
 require Exporter;
-require DynaLoader;
 
-@ISA = qw(IO::Handle IO::Seekable Exporter DynaLoader);
+@ISA = qw(IO::Handle IO::Seekable Exporter);
 
 $VERSION = "1.08";
 
