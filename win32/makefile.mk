@@ -155,14 +155,14 @@ CRYPT_SRC	*= fcrypt.c
 # extensions if you change the default.  Currently, this cannot be enabled
 # if you ask for USE_IMP_SYS above.
 #
-PERL_MALLOC	*= define
+#PERL_MALLOC	*= define
 
 #
 # set this to enable debugging mstats
 # This must be enabled to use the Devel::Peek::mstat() function.  This cannot
 # be enabled without PERL_MALLOC as well.
 #
-DEBUG_MSTATS  = define
+#DEBUG_MSTATS  = define
 
 #
 # set the install locations of the compiler include/libraries
@@ -257,6 +257,10 @@ DEBUG_MSTATS   = undef
 
 .IF "$(DEBUG_MSTATS)" == "define"
 BUILDOPT       += -DPERL_DEBUGGING_MSTATS
+.ENDIF
+
+.IF "$(USE_IMP_SYS)" == "define"
+PERL_MALLOC	= undef
 .ENDIF
 
 .IF "$(USE_IMP_SYS)$(USE_MULTI)" == "defineundef"
