@@ -805,7 +805,7 @@ Data_Dumper_Dumpxs(href, ...)
 		    if ((svp = av_fetch(namesav, i, TRUE)))
 			sv_setsv(name, *svp);
 		    else
-			SvOK_off(name);
+			(void)SvOK_off(name);
 		    
 		    if (SvOK(name)) {
 			if ((SvPVX(name))[0] == '*') {

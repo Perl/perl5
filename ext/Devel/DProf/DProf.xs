@@ -276,10 +276,6 @@ prof_mark(pTHX_ opcode ptype)
 {
     struct tms t;
     clock_t realtime, rdelta, udelta, sdelta;
-    char *name, *pv;
-    char *hvname;
-    STRLEN len;
-    SV *sv;
     U32 id;
     SV *Sub = GvSV(PL_DBsub);	/* name of current sub */
 
@@ -472,8 +468,6 @@ prof_record(pTHX)
     /* Now that we know the runtimes, fill them in at the recorded
        location -JH */
 
-    clock_t r, u, s;
-
     if (g_SAVE_STACK) {
 	prof_dump_until(aTHX_ g_profstack_ix);
     }
@@ -542,6 +536,7 @@ XS(XS_DB_sub)
         prof_mark(aTHX_ OP_ENTERSUB);
         PUSHMARK(ORIGMARK);
         perl_call_sv(INT2PTR(SV*,SvIV(Sub)), GIMME | G_NODEBUG);
+        PL_curstash = oldstash;
         prof_mark(aTHX_ OP_LEAVESUB);
 	g_depth--;
     }

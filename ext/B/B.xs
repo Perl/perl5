@@ -582,11 +582,12 @@ char *
 OP_name(o)
 	B::OP		o
     CODE:
-	ST(0) = sv_newmortal();
-	sv_setpv(ST(0), PL_op_name[o->op_type]);
+	RETVAL = PL_op_name[o->op_type];
+    OUTPUT:
+	RETVAL
 
 
-char *
+void
 OP_ppaddr(o)
 	B::OP		o
     PREINIT:
@@ -656,11 +657,12 @@ LISTOP_children(o)
 	OP *		kid = NO_INIT
 	int		i = NO_INIT
     CODE:
-	ST(0) = sv_newmortal();
 	i = 0;
 	for (kid = o->op_first; kid; kid = kid->op_sibling)
 	    i++;
-	sv_setiv(ST(0), i);
+	RETVAL = i;
+    OUTPUT:
+        RETVAL
 
 #define PMOP_pmreplroot(o)	o->op_pmreplroot
 #define PMOP_pmreplstart(o)	o->op_pmreplstart
@@ -1278,7 +1280,7 @@ HvARRAY(hv)
 	    I32 len;
 	    (void)hv_iterinit(hv);
 	    EXTEND(sp, HvKEYS(hv) * 2);
-	    while (sv = hv_iternextsv(hv, &key, &len)) {
+	    while ((sv = hv_iternextsv(hv, &key, &len))) {
 		PUSHs(newSVpvn(key, len));
 		PUSHs(make_sv_object(aTHX_ sv_newmortal(), sv));
 	    }

@@ -4,15 +4,8 @@
 
 #include "bsd_glob.h"
 
+/* XXX: need some thread awareness */
 static int GLOB_ERROR = 0;
-
-static int
-not_here(char *s)
-{
-    croak("%s not implemented on this architecture", s);
-    return -1;
-}
-
 
 static double
 constant(char *name, int arg)
