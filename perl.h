@@ -2202,7 +2202,6 @@ struct ufuncs {
  * like the following:
  
 #ifndef PERL_MG_UFUNC
-/* the old way, without pTHX_ */
 #define PERL_MG_UFUNC(name,ix,sv) I32 name(IV ix, SV *sv)
 #endif
 
@@ -2216,7 +2215,9 @@ static PERL_MG_UFUNC(foo_get, index, val)
 
 */
 
+#ifndef PERL_MG_UFUNC
 #define PERL_MG_UFUNC(name,ix,sv) I32 name(pTHX_ IV ix, SV *sv)
+#endif
 
 /* Fix these up for __STDC__ */
 #ifndef DONT_DECLARE_STD
