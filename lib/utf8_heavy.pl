@@ -34,11 +34,16 @@ sub SWASHNEW {
     } else {
 	$file =~ s#^(Is|To)([A-Z].*)#$1/$2#;
     }
-    $list ||= ($caller ne 'main' && eval { $caller->$type(); })
-	|| do "$file.pl"
-	|| do "$encoding/$file.pl"
-	|| do "$encoding/Is/${type}.pl"
-	|| croak("Can't find $encoding character property \"$type\"");
+
+    {
+	local $@;
+
+	$list ||= ($caller ne 'main' && eval { $caller->$type(); })
+	    || do "$file.pl"
+	    || do "$encoding/$file.pl"
+	    || do "$encoding/Is/${type}.pl"
+	    || croak("Can't find $encoding character property \"$type\"");
+    }
 
     $| = 1;
 
