@@ -904,7 +904,7 @@ else {
 }
 
 
-ok( ${^TAINT},  '$^TAINT is on' );
+ok( ${^TAINT} == 1, '$^TAINT is on' );
 
 eval { ${^TAINT} = 0 };
 ok( ${^TAINT},  '$^TAINT is not assignable' );

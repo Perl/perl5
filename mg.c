@@ -658,7 +658,9 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 #endif
         }
         else if (strEQ(mg->mg_ptr, "\024AINT"))
-            sv_setiv(sv, PL_tainting);
+            sv_setiv(sv, PL_tainting
+		    ? (PL_taint_warn || PL_unsafe ? -1 : 1)
+		    : 0);
         break;
     case '\027':		/* ^W  & $^WARNING_BITS & ^WIDE_SYSTEM_CALLS */
 	if (*(mg->mg_ptr+1) == '\0')

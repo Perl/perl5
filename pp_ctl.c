@@ -1015,6 +1015,16 @@ PP(pp_flop)
 
 /* Control. */
 
+static char *context_name[] = {
+    "pseudo-block",
+    "subroutine",
+    "eval",
+    "loop",
+    "substitution",
+    "block",
+    "format"
+};
+
 STATIC I32
 S_dopoptolabel(pTHX_ char *label)
 {
@@ -1025,30 +1035,16 @@ S_dopoptolabel(pTHX_ char *label)
 	cx = &cxstack[i];
 	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
-	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting substitution via %s",
-			OP_NAME(PL_op));
-	    break;
 	case CXt_SUB:
-	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting subroutine via %s",
-			OP_NAME(PL_op));
-	    break;
 	case CXt_FORMAT:
-	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting format via %s",
-			OP_NAME(PL_op));
-	    break;
 	case CXt_EVAL:
-	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting eval via %s",
-			OP_NAME(PL_op));
-	    break;
 	case CXt_NULL:
 	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting pseudo-block via %s",
-			OP_NAME(PL_op));
-	    return -1;
+		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting %s via %s",
+			context_name[CxTYPE(cx)], OP_NAME(PL_op));
+	    if (CxTYPE(cx) == CXt_NULL)
+		return -1;
+	    break;
 	case CXt_LOOP:
 	    if (!cx->blk_loop.label ||
 	      strNE(label, cx->blk_loop.label) ) {
@@ -1160,30 +1156,16 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 	cx = &cxstack[i];
 	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
-	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting substitution via %s",
-			OP_NAME(PL_op));
-	    break;
 	case CXt_SUB:
-	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting subroutine via %s",
-			OP_NAME(PL_op));
-	    break;
 	case CXt_FORMAT:
-	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting format via %s",
-			OP_NAME(PL_op));
-	    break;
 	case CXt_EVAL:
-	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting eval via %s",
-			OP_NAME(PL_op));
-	    break;
 	case CXt_NULL:
 	    if (ckWARN(WARN_EXITING))
-		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting pseudo-block via %s",
-			OP_NAME(PL_op));
-	    return -1;
+		Perl_warner(aTHX_ packWARN(WARN_EXITING), "Exiting %s via %s",
+			context_name[CxTYPE(cx)], OP_NAME(PL_op));
+	    if ((CxTYPE(cx)) == CXt_NULL)
+		return -1;
+	    break;
 	case CXt_LOOP:
 	    DEBUG_l( Perl_deb(aTHX_ "(Found loop #%ld)\n", (long)i));
 	    return i;
@@ -1820,7 +1802,7 @@ PP(pp_return)
 	    /* Unassume the success we assumed earlier. */
 	    SV *nsv = cx->blk_eval.old_namesv;
 	    (void)hv_delete(GvHVn(PL_incgv), SvPVX(nsv), SvCUR(nsv), G_DISCARD);
-	    DIE(aTHX_ "%s did not return a true value", SvPVX(nsv));
+	    DIE(aTHX_ "%"SVf" did not return a true value", nsv);
 	}
 	break;
     case CXt_FORMAT:
@@ -2048,11 +2030,15 @@ S_dofindlabel(pTHX_ OP *o, char *label, OP **opstack, OP **oplimit)
 	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
 	    if (kid == PL_lastgotoprobe)
 		continue;
-	    if ((kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) &&
-		(ops == opstack ||
-		 (ops[-1]->op_type != OP_NEXTSTATE &&
-		  ops[-1]->op_type != OP_DBSTATE)))
-		*ops++ = kid;
+	    if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) {
+	        if (ops == opstack)
+		    *ops++ = kid;
+		else if (ops[-1]->op_type == OP_NEXTSTATE ||
+		         ops[-1]->op_type == OP_DBSTATE)
+		    ops[-1] = kid;
+		else
+		    *ops++ = kid;
+	    }
 	    if ((o = dofindlabel(kid, label, ops, oplimit)))
 		return o;
 	}
@@ -2108,7 +2094,7 @@ PP(pp_goto)
 			goto retry;
 		    tmpstr = sv_newmortal();
 		    gv_efullname3(tmpstr, gv, Nullch);
-		    DIE(aTHX_ "Goto undefined subroutine &%s",SvPVX(tmpstr));
+		    DIE(aTHX_ "Goto undefined subroutine &%"SVf"",tmpstr);
 		}
 		DIE(aTHX_ "Goto undefined subroutine");
 	    }
@@ -3363,7 +3349,7 @@ PP(pp_leaveeval)
 	/* Unassume the success we assumed earlier. */
 	SV *nsv = cx->blk_eval.old_namesv;
 	(void)hv_delete(GvHVn(PL_incgv), SvPVX(nsv), SvCUR(nsv), G_DISCARD);
-	retop = Perl_die(aTHX_ "%s did not return a true value", SvPVX(nsv));
+	retop = Perl_die(aTHX_ "%"SVf" did not return a true value", nsv);
 	/* die_where() did LEAVE, or we won't be here */
     }
     else {

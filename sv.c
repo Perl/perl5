@@ -3762,7 +3762,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		switch (SvTYPE(sref)) {
 		case SVt_PVAV:
 		    if (intro)
-			SAVESPTR(GvAV(dstr));
+			SAVEGENERICSV(GvAV(dstr));
 		    else
 			dref = (SV*)GvAV(dstr);
 		    GvAV(dstr) = (AV*)sref;
@@ -3774,7 +3774,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		    break;
 		case SVt_PVHV:
 		    if (intro)
-			SAVESPTR(GvHV(dstr));
+			SAVEGENERICSV(GvHV(dstr));
 		    else
 			dref = (SV*)GvHV(dstr);
 		    GvHV(dstr) = (HV*)sref;
@@ -3792,7 +3792,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 			    GvCVGEN(dstr) = 0; /* Switch off cacheness. */
 			    PL_sub_generation++;
 			}
-			SAVESPTR(GvCV(dstr));
+			SAVEGENERICSV(GvCV(dstr));
 		    }
 		    else
 			dref = (SV*)GvCV(dstr);
@@ -3842,21 +3842,21 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		    break;
 		case SVt_PVIO:
 		    if (intro)
-			SAVESPTR(GvIOp(dstr));
+			SAVEGENERICSV(GvIOp(dstr));
 		    else
 			dref = (SV*)GvIOp(dstr);
 		    GvIOp(dstr) = (IO*)sref;
 		    break;
 		case SVt_PVFM:
 		    if (intro)
-			SAVESPTR(GvFORM(dstr));
+			SAVEGENERICSV(GvFORM(dstr));
 		    else
 			dref = (SV*)GvFORM(dstr);
 		    GvFORM(dstr) = (CV*)sref;
 		    break;
 		default:
 		    if (intro)
-			SAVESPTR(GvSV(dstr));
+			SAVEGENERICSV(GvSV(dstr));
 		    else
 			dref = (SV*)GvSV(dstr);
 		    GvSV(dstr) = sref;
@@ -3869,8 +3869,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		}
 		if (dref)
 		    SvREFCNT_dec(dref);
-		if (intro)
-		    SAVEFREESV(sref);
 		if (SvTAINTED(sstr))
 		    SvTAINT(dstr);
 		return;
@@ -6913,7 +6911,7 @@ Perl_sv_2io(pTHX_ SV *sv)
 	else
 	    io = 0;
 	if (!io)
-	    Perl_croak(aTHX_ "Bad filehandle: %s", SvPV(sv,n_a));
+	    Perl_croak(aTHX_ "Bad filehandle: %"SVf, sv);
 	break;
     }
     return io;
@@ -6994,7 +6992,8 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 		   Nullop);
 	    LEAVE;
 	    if (!GvCVu(gv))
-		Perl_croak(aTHX_ "Unable to create sub named \"%s\"", SvPV(sv,n_a));
+		Perl_croak(aTHX_ "Unable to create sub named \"%"SVf"\"",
+			   sv);
 	}
 	return GvCVu(gv);
     }
@@ -8720,8 +8719,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if (!args && ckWARN(WARN_PRINTF) &&
 		  (PL_op->op_type == OP_PRTF || PL_op->op_type == OP_SPRINTF)) {
 		SV *msg = sv_newmortal();
-		Perl_sv_setpvf(aTHX_ msg, "Invalid conversion in %s: ",
-			  (PL_op->op_type == OP_PRTF) ? "printf" : "sprintf");
+		Perl_sv_setpvf(aTHX_ msg, "Invalid conversion in %sprintf: ",
+			  (PL_op->op_type == OP_PRTF) ? "" : "s");
 		if (c) {
 		    if (isPRINT(c))
 			Perl_sv_catpvf(aTHX_ msg,
@@ -9347,6 +9346,18 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
     dstr = (SV*)ptr_table_fetch(PL_ptr_table, sstr);
     if (dstr)
 	return dstr;
+
+    if(param->flags & CLONEf_JOIN_IN) {
+        /** We are joining here so we don't want do clone
+	    something that is bad **/
+
+        if(SvTYPE(sstr) == SVt_PVHV &&
+	   HvNAME(sstr)) {
+	    /** don't clone stashes if they already exist **/
+	    HV* old_stash = gv_stashpv(HvNAME(sstr),0);
+	    return (SV*) old_stash;
+        }
+    }
 
     /* create anew and remember what it is */
     new_SV(dstr);

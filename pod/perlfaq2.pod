@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.17 $, $Date: 2002/11/16 23:33:08 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.18 $, $Date: 2002/12/06 07:40:11 $)
 
 =head1 DESCRIPTION
 
@@ -204,7 +204,7 @@ see their FAQ ( http://www.faqs.org/faqs/alt-sources-intro/ ) for details.
 
 If you're just looking for software, first use Google
 ( http://www.google.com ), Google's usenet search interface
-( http://groups.google.com ),  and CPAN Search ( http://search.cpan.org ).  
+( http://groups.google.com ),  and CPAN Search ( http://search.cpan.org ).
 This is faster and more productive than just posting a request.
 
 =head2 Perl Books
@@ -419,7 +419,7 @@ A comprehensive list of Perl related mailing lists can be found at:
 =head2 Archives of comp.lang.perl.misc
 
 The Google search engine now carries archived and searchable newsgroup
-content. 
+content.
 
 http://groups.google.com/groups?group=comp.lang.perl.misc
 

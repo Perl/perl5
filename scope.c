@@ -548,6 +548,7 @@ Perl_save_clearsv(pTHX_ SV **svp)
     SSCHECK(2);
     SSPUSHLONG((long)(svp-PL_curpad));
     SSPUSHINT(SAVEt_CLEARSV);
+    SvPADSTALE_off(*svp); /* mark lexical as active */
 }
 
 void
@@ -918,16 +919,19 @@ Perl_leave_scope(pTHX_ I32 base)
 		    (void)SvOOK_off(sv);
 		    break;
 		}
+		SvPADSTALE_on(sv); /* mark as no longer live */
 	    }
 	    else {	/* Someone has a claim on this, so abandon it. */
-		U32 padflags = SvFLAGS(sv) & (SVs_PADBUSY|SVs_PADMY|SVs_PADTMP);
+		U32 padflags = SvFLAGS(sv) & (SVs_PADMY|SVs_PADTMP);
 		switch (SvTYPE(sv)) {	/* Console ourselves with a new value */
 		case SVt_PVAV:	*(SV**)ptr = (SV*)newAV();	break;
 		case SVt_PVHV:	*(SV**)ptr = (SV*)newHV();	break;
 		default:	*(SV**)ptr = NEWSV(0,0);	break;
 		}
 		SvREFCNT_dec(sv);	/* Cast current value to the winds. */
-		SvFLAGS(*(SV**)ptr) |= padflags; /* preserve pad nature */
+		/* preserve pad nature, but also mark as not live
+		 * for any closure capturing */
+		SvFLAGS(*(SV**)ptr) |= padflags & SVs_PADSTALE;
 	    }
 	    break;
 	case SAVEt_DELETE:

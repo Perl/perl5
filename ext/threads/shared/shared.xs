@@ -813,8 +813,9 @@ CODE:
 	SHARED_CONTEXT;
 	sv = av_pop((AV*)SHAREDSvPTR(shared));
 	CALLER_CONTEXT;
-	ST(0) = Nullsv;
+	ST(0) = sv_newmortal();
 	Perl_sharedsv_associate(aTHX_ &ST(0), sv, 0);
+	SvREFCNT_dec(sv);
 	LEAVE_LOCK;
 	XSRETURN(1);
 
@@ -827,8 +828,9 @@ CODE:
 	SHARED_CONTEXT;
 	sv = av_shift((AV*)SHAREDSvPTR(shared));
 	CALLER_CONTEXT;
-	ST(0) = Nullsv;
+	ST(0) = sv_newmortal();
 	Perl_sharedsv_associate(aTHX_ &ST(0), sv, 0);
+	SvREFCNT_dec(sv);
 	LEAVE_LOCK;
 	XSRETURN(1);
 

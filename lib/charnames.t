@@ -6,6 +6,7 @@ BEGIN {
     unless(grep /blib/, @INC) {
 	chdir 't' if -d 't';
 	@INC = '../lib';
+	require './test.pl';
     }
     $SIG{__WARN__} = sub { push @WARN, @_ };
 }
@@ -292,11 +293,9 @@ for (@prgs) {
 	print $ali $fil;
 	close $ali or die "Could not close $alifile: $!";
 	}
-    my $res =
-	$^O eq "MSWin32" ? `.\\perl -I../lib $switch $tmpfile 2>&1` :
-	$^O eq "NetWare" ? `perl    -I../lib $switch $tmpfile 2>&1` :
-	$^O eq "MacOS"   ? `$^X     -I::lib -MMac::err=unix $switch $tmpfile` :
-			   `./perl -I. -I../lib $switch $tmpfile 2>&1`;
+    my $res = runperl( switches => $switch, 
+                       progfile => $tmpfile,
+                       stderr => 1 );
     my $status = $?;
     $res =~ s/[\r\n]+$//;
     $res =~ s/tmp\d+/-/g;			# fake $prog from STDIN

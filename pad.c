@@ -378,9 +378,7 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
     if (PL_pad_reset_pending)
 	pad_reset();
     if (tmptype & SVs_PADMY) {
-	do {
-	    sv = *av_fetch(PL_comppad, AvFILLp(PL_comppad) + 1, TRUE);
-	} while (SvPADBUSY(sv));		/* need a fresh one */
+	sv = *av_fetch(PL_comppad, AvFILLp(PL_comppad) + 1, TRUE);
 	retval = AvFILLp(PL_comppad);
     }
     else {
@@ -916,7 +914,7 @@ Perl_pad_leavemy(pTHX)
 	    if ((sv = svp[off]) && sv != &PL_sv_undef
 		    && !SvFAKE(sv) && ckWARN_d(WARN_INTERNAL))
 		Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
-					"%s never introduced", SvPVX(sv));
+					"%"SVf" never introduced", sv);
 	}
     }
     /* "Deintroduce" my variables that are leaving with this scope. */
@@ -1175,21 +1173,21 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
 	if (namesv) {
 	    if (SvFAKE(namesv))
 		Perl_dump_indent(aTHX_ level+1, file,
-		    "%2d. 0x%"UVxf"<%lu> FAKE \"%s\"\n",
+		    "%2d. 0x%"UVxf"<%lu> FAKE \"%"SVf"\"\n",
 		    (int) ix,
 		    PTR2UV(ppad[ix]),
 		    (unsigned long) (ppad[ix] ? SvREFCNT(ppad[ix]) : 0),
-		    SvPVX(namesv)
+		    namesv
 		);
 	    else
 		Perl_dump_indent(aTHX_ level+1, file,
-		    "%2d. 0x%"UVxf"<%lu> (%lu,%lu) \"%s\"\n",
+		    "%2d. 0x%"UVxf"<%lu> (%lu,%lu) \"%"SVf"\"\n",
 		    (int) ix,
 		    PTR2UV(ppad[ix]),
 		    (unsigned long) (ppad[ix] ? SvREFCNT(ppad[ix]) : 0),
 		    (unsigned long)I_32(SvNVX(namesv)),
 		    (unsigned long)SvIVX(namesv),
-		    SvPVX(namesv)
+		    namesv
 		);
 	}
 	else if (full) {
@@ -1344,8 +1342,7 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
 		    sv = (SV*)newHV();
 		else
 		    sv = NEWSV(0, 0);
-		if (!SvPADBUSY(sv))
-		    SvPADMY_on(sv);
+		SvPADMY_on(sv);
 		PL_curpad[ix] = sv;
 	    }
 	}

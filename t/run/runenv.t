@@ -150,7 +150,7 @@ try({PERL5OPT => '-w -w'},
 
 try({PERL5OPT => '-t'},
     ['-e', 'print ${^TAINT}'],
-    '1',
+    '-1',
     '');
 
 try({PERLLIB => "foobar$Config{path_sep}42"},

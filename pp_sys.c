@@ -762,7 +762,6 @@ PP(pp_tie)
     char *methname;
     int how = PERL_MAGIC_tied;
     U32 items;
-    STRLEN n_a;
 
     varsv = *++MARK;
     switch(SvTYPE(varsv)) {
@@ -809,8 +808,8 @@ PP(pp_tie)
 	 */
 	stash = gv_stashsv(*MARK, FALSE);
 	if (!stash || !(gv = gv_fetchmethod(stash, methname))) {
-	    DIE(aTHX_ "Can't locate object method \"%s\" via package \"%s\"",
-		 methname, SvPV(*MARK,n_a));
+	    DIE(aTHX_ "Can't locate object method \"%s\" via package \"%"SVf"\"",
+		 methname, *MARK);
 	}
 	ENTER;
 	PUSHSTACKi(PERLSI_MAGIC);
@@ -1364,21 +1363,8 @@ PP(pp_leavewrite)
     fp = IoOFP(io);
     if (!fp) {
 	if (ckWARN2(WARN_CLOSED,WARN_IO)) {
-	    if (IoIFP(io)) {
-		/* integrate with report_evil_fh()? */
-	        char *name = NULL;
-		if (isGV(gv)) {
-		    SV* sv = sv_newmortal();
-		    gv_efullname4(sv, gv, Nullch, FALSE);
-		    name = SvPV_nolen(sv);
-		}
-		if (name && *name)
-		    Perl_warner(aTHX_ packWARN(WARN_IO),
-				"Filehandle %s opened only for input", name);
-		else
-		    Perl_warner(aTHX_ packWARN(WARN_IO),
-				"Filehandle opened only for input");
-	    }
+	    if (IoIFP(io))
+		report_evil_fh(gv, io, OP_phoney_INPUT_ONLY);
 	    else if (ckWARN(WARN_CLOSED))
 		report_evil_fh(gv, io, PL_op->op_type);
 	}
@@ -1451,20 +1437,8 @@ PP(pp_prtf)
     }
     else if (!(fp = IoOFP(io))) {
 	if (ckWARN2(WARN_CLOSED,WARN_IO))  {
-	    /* integrate with report_evil_fh()? */
-	    if (IoIFP(io)) {
-	        char *name = NULL;
-		if (isGV(gv)) {
-		    gv_efullname4(sv, gv, Nullch, FALSE);
-		    name = SvPV_nolen(sv);
-		}
-		if (name && *name)
-		    Perl_warner(aTHX_ packWARN(WARN_IO),
-				"Filehandle %s opened only for input", name);
-		else
-		    Perl_warner(aTHX_ packWARN(WARN_IO),
-				"Filehandle opened only for input");
-	    }
+	    if (IoIFP(io))
+		report_evil_fh(gv, io, OP_phoney_INPUT_ONLY);
 	    else if (ckWARN(WARN_CLOSED))
 		report_evil_fh(gv, io, PL_op->op_type);
 	}
@@ -1691,21 +1665,7 @@ PP(pp_sysread)
     }
     if (count < 0) {
 	if ((IoTYPE(io) == IoTYPE_WRONLY) && ckWARN(WARN_IO))
-	{
-	    /* integrate with report_evil_fh()? */
-	    char *name = NULL;
-	    if (isGV(gv)) {
-		SV* sv = sv_newmortal();
-		gv_efullname4(sv, gv, Nullch, FALSE);
-		name = SvPV_nolen(sv);
-	    }
-	    if (name && *name)
-		Perl_warner(aTHX_ packWARN(WARN_IO),
-			    "Filehandle %s opened only for output", name);
-	    else
-		Perl_warner(aTHX_ packWARN(WARN_IO),
-			    "Filehandle opened only for output");
-	}
+		report_evil_fh(gv, io, OP_phoney_OUTPUT_ONLY);
 	goto say_undef;
     }
     SvCUR_set(bufsv, count+(buffer - SvPVX(bufsv)));

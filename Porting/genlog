@@ -1,4 +1,4 @@
-#!/l/local/bin/perl -w
+#!/usr/local/bin/perl -w
 #
 # Generate a nice changelist by querying perforce.
 #

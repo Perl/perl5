@@ -36,6 +36,12 @@ Starting from OS/400 V5R2 the IBM Visual Age compiler is supported
 on OS/400 PASE, so it is possible to build Perl natively on OS/400.  
 The easier way, however, is to compile in AIX, as just described.
 
+If you don't want to install the compiled Perl in AIX into /QOpenSys
+(for packaging it before copying it to PASE), you can use a Configure
+parameter: -Dinstallprefix=/tmp/QOpenSys/perl.  This will cause the
+"make install" to install everything into that directory, while the
+installed files still think they are (will be) in /QOpenSys/perl.
+
 If building natively on PASE, please do the build under the /QOpenSys
 directory, since Perl is happier when built on a case sensitive filesystem.
 

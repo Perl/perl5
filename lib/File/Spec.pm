@@ -175,7 +175,7 @@ join is the same as catfile.
 =item splitpath
 
 Splits a path in to volume, directory, and filename portions. On systems
-with no concept of volume, returns undef for volume. 
+with no concept of volume, returns '' for volume. 
 
     ($volume,$directories,$file) = File::Spec->splitpath( $path );
     ($volume,$directories,$file) = File::Spec->splitpath( $path, $no_file );
