@@ -264,7 +264,7 @@ case "$use64bitall" in
 $define|true|[yY]*)
 	ccflags="`echo $ccflags|sed -e 's%-n32%%'` -64"
 	ldflags="`echo $ldflags|sed -e 's%-n32%%'` -64"
-	lddlflags="`echo $ldfdllags|sed -e 's%-n32%%'` -64"
+	lddlflags="`echo $lddlflags|sed -e 's%-n32%%'` -64"
 	loclibpth="$loclibpth /usr/lib64"
 	libscheck='case "`file $xxx`" in
 *64-bit*) ;;
