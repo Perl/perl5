@@ -1265,7 +1265,9 @@ sub declare_warnings {
     elsif (($to & WARN_MASK) eq "\0"x length($to)) {
 	return "no warnings;\n";
     }
-    return "BEGIN {\${^WARNING_BITS} = ".cstring($to)."}\n";
+    my $wb = cstring($to);
+    $wb =~ s/([\$@])/\\$1/g;
+    return "BEGIN {\${^WARNING_BITS} = $wb}\n";
 }
 
 sub declare_hints {
