@@ -318,7 +318,7 @@ package Maintainers;
 	'PerlIO' =>
 		{
 		'MAINTAINER'	=> 'p5p',
-		'FILES'		=> q[ext/PerlIO lib/PerlIO],
+		'FILES'		=> q[ext/PerlIO],
 		'CPAN'		=> 1,
 		},
 
@@ -331,7 +331,7 @@ package Maintainers;
 		'CPAN'		=> 0,
 		},
 
-	'Perlio::via::QuotedPrint' =>
+	'PerlIO::via::QuotedPrint' =>
 		{
 		'MAINTAINER'	=> 'elizabeth',
 		'FILES'		=> q[lib/PerlIO/via/QuotedPrint.pm
@@ -367,17 +367,9 @@ package Maintainers;
 		'CPAN'		=> 0,
 		},
 
-	'Pod::Checker' => {	
+	'PodParser' => {
 		'MAINTAINER'	=> 'marekr',
-		'FILES' => q[lib/Pod/Checker.pm pod/podchecker.PL
-					t/pod/testpchk.pl],
-		'CPAN'		=> 1,
-		},
-
-	'Pod::Find' =>
-		{
-		'MAINTAINER'	=> 'marekr',
-		'FILES'		=> q[lib/Pod/Find.pm t/pod/find.t],
+		'FILES' => q[lib/Pod/{InputObjects,Parser,ParseUtils,Select,PlainText,Usage,Checker,Find}.pm pod/pod{select,2usage,checker}.PL t/pod/testcmp.pl t/pod/testp2pt.pl t/pod/testpchk.pl t/pod/emptycmd.* t/pod/find.t t/pod/for.* t/pod/headings.* t/pod/include.* t/pod/included.* t/pod/lref.* t/pod/multiline_items.* t/pod/nested_items.* t/pod/nested_seqs.* t/pod/oneline_cmds.* t/pod/poderrs.* t/pod/pod2usage.* t/pod/podselect.* t/pod/special_seqs.*],
 		'CPAN'		=> 1,
 		},
 
@@ -391,16 +383,7 @@ package Maintainers;
 	'podlators' =>
 		{
 		'MAINTAINER'	=> 'rra',
-		'FILES'		=> q[lib/Pod/{Checker,Find,Html,InputObjects,Man,ParseLink,Parser,ParseUtils,PlainText,Select,Text,Text/{Color,Overstrike,Termcap},Usage}.pm pod/pod2man.PL pod/pod2text.PL lib/Pod/t/{basic.*,{basic,man,parselink,text*}.t} lib/Pod/t/{InputObjects,Select,Usage,utils}.t],
-		'CPAN'		=> 1,
-		},
-
-	'Pod::Parser' => {
-		'MAINTAINER'	=> 'marekr',
-		'FILES' => q[lib/Pod/{InputObjects,Parse{r,Utils}}.pm	
-				t/pod/testcmp.pl 
-				t/pod/{emptycmd,for,headings,include{,d},lref,{multiline,nested}_items,{nested,special}_seqs,oneline_cmds,poderrs}.{t,xr}
-			    ],
+		'FILES'		=> q[lib/Pod/{Html,Man,ParseLink,Text,Text/{Color,Overstrike,Termcap}}.pm pod/pod2man.PL pod/pod2text.PL lib/Pod/t/{basic.*,{man,parselink,text*}.t}],
 		'CPAN'		=> 1,
 		},
 
@@ -416,26 +399,6 @@ package Maintainers;
 		'MAINTAINER'	=> 'rmbarker',
 		'FILES'		=> q[lib/Pod/Plainer.pm t/pod/plainer.t],
 		'CPAN'		=> 0,
-		},
-
-	'Pod::PlainText' => {
-		'MAINTAINER'	=> 'marekr',
-		'FILES' => q[lib/Pod/PlainText.pm t/pod/testp2pt.pl],
-		'CPAN'		=> 1,
-		},
-
-	'Pod::Select'	 => {
-		'MAINTAINER'	=> 'marekr',
-		'FILES' => q[lib/Pod/Select.pm pod/podselect.PL
-					t/pod/podselect.{t,xr}],
-		'CPAN'		=> 1,
-		},
-
-	'Pod::Usage' => {	
-		'MAINTAINER'	=> 'marekr',
-		'FILES' => q[lib/Pod/Usage.pm pod/pod2usage.PL
-					t/pod/pod2usage.{t,xr}],
-		'CPAN'		=> 1,
 		},
 
 	'Safe' =>
