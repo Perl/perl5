@@ -335,6 +335,9 @@ EOCBU
 # The -n32 makes off_t to be 8 bytes, so we should have largefileness.
 
 # Until we figure out what to be probe for in Configure (ditto for hpux.sh)
+case "$usemorebits" in # Need to expand this now, then.
+$define|true|[yY]*) use64bitint="$define"; uselongdouble="$define" ;;
+esac
 case "$use64bitint" in
 $define|true|[yY]*) ;;
 *) d_casti32='undef' ;;

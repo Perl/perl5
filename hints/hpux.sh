@@ -155,6 +155,9 @@ fi
 case "$use64bitall" in
 $define|true|[yY]*) use64bitint="$define" ;;
 esac
+case "$usemorebits" in
+$define|true|[yY]*) use64bitint="$define"; uselongdouble="$define" ;;
+esac
 case "$use64bitint" in
 $define|true|[yY]*)
     if [ "$xxOsRevMajor" -lt 11 ]; then
