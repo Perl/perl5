@@ -473,14 +473,19 @@ sub bits {
 
 sub import {
     shift;
-    ${^WARNING_BITS} |= bits(@_ ? @_ : 'all') ;
+    my $mask = ${^WARNING_BITS} ;
+    if (vec($mask, $Offsets{'all'}, 1)) {
+        $mask |= $Bits{'all'} ;
+        $mask |= $DeadBits{'all'} if vec($mask, $Offsets{'all'}+1, 1);
+    }
+    ${^WARNING_BITS} = $mask | bits(@_ ? @_ : 'all') ;
 }
 
 sub unimport {
     shift;
     my $mask = ${^WARNING_BITS} ;
     if (vec($mask, $Offsets{'all'}, 1)) {
-        $mask = $Bits{'all'} ;
+        $mask |= $Bits{'all'} ;
         $mask |= $DeadBits{'all'} if vec($mask, $Offsets{'all'}+1, 1);
     }
     ${^WARNING_BITS} = $mask & ~ (bits(@_ ? @_ : 'all') | $All) ;

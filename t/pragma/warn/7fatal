@@ -276,3 +276,37 @@ $a =+ 1 ;
 print STDERR "The End.\n" ;
 EXPECT
 Reversed += operator at - line 8.
+########
+
+use warnings 'void' ;
+
+time ;
+
+{
+    use warnings FATAL => qw(void) ;
+    length "abc" ;
+}
+
+join "", 1,2,3 ;
+
+print "done\n" ;
+EXPECT
+Useless use of time in void context at - line 4.
+Useless use of length in void context at - line 8.
+########
+
+use warnings ;
+
+time ;
+
+{
+    use warnings FATAL => qw(void) ;
+    length "abc" ;
+}
+
+join "", 1,2,3 ;
+
+print "done\n" ;
+EXPECT
+Useless use of time in void context at - line 4.
+Useless use of length in void context at - line 8.
