@@ -138,8 +138,13 @@
 /* All of these are in stdlib.h or time.h for ANSI C */
 Time_t time();
 struct tm *gmtime(), *localtime();
+#if defined(OEMVS) || defined(__OPEN_VM)
+char *(strchr)(), *(strrchr)();
+char *(strcpy)(), *(strcat)();
+#else
 char *strchr(), *strrchr();
 char *strcpy(), *strcat();
+#endif
 #endif /* ! STANDARD_C */
 
 #ifdef VMS

@@ -10,7 +10,7 @@ BEGIN {
 
 BEGIN {$| = 1; print "1..17\n"; }
 BEGIN {$eol = $^O eq 'VMS' ? "\n" : "\cM\cJ";
-       $eol = "\r\n" if $^O eq 'os390'; }
+       $eol = "\r\n" if $^O eq 'os390' or $^O eq 'vmesa'; }
 END {print "not ok 1\n" unless $loaded;}
 use CGI (':standard','-no_debug');
 $loaded = 1;

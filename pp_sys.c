@@ -1467,6 +1467,13 @@ PP(pp_sysread)
 
 PP(pp_syswrite)
 {
+    djSP;
+    int items = (SP - PL_stack_base) - TOPMARK;
+    if (items == 2) {
+        EXTEND(SP, 1);
+        PUSHs(sv_2mortal(newSViv(sv_len(*SP))));
+        PUTBACK;
+    }
     return pp_send(ARGS);
 }
 
@@ -3448,7 +3455,14 @@ PP(pp_exec)
 #ifdef VMS
 	value = (I32)vms_do_aexec(Nullsv, MARK, SP);
 #else
+#  ifdef __OPEN_VM
+	{
+	   (void ) do_aspawn(Nullsv, MARK, SP);
+	   value = 0;
+	}
+#  else
 	value = (I32)do_aexec(Nullsv, MARK, SP);
+#  endif
 #endif
     else {
 	if (PL_tainting) {
@@ -3459,7 +3473,12 @@ PP(pp_exec)
 #ifdef VMS
 	value = (I32)vms_do_exec(SvPVx(sv_mortalcopy(*SP), PL_na));
 #else
+#  ifdef __OPEN_VM
+	(void) do_spawn(SvPVx(sv_mortalcopy(*SP), PL_na));
+	value = 0;
+#  else
 	value = (I32)do_exec(SvPVx(sv_mortalcopy(*SP), PL_na));
+#  endif
 #endif
     }
     SP = ORIGMARK;

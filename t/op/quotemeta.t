@@ -2,7 +2,7 @@
 
 print "1..15\n";
 
-if ($^O eq 'os390') { # An EBCDIC variant.
+if ($^O eq 'os390' or $^O eq 'vmesa') { # EBCDIC.
     $_=join "", map chr($_), 129..233;
 
     # 105 characters - 52 letters = 53 backslashes

@@ -1878,7 +1878,7 @@ VTOH(vtohl,long)
 #endif
 
     /* VMS' my_popen() is in VMS.c, same with OS/2. */
-#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS)
+#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM)
 PerlIO *
 my_popen(char *cmd, char *mode)
 {
@@ -2130,7 +2130,7 @@ rsignal_restore(int signo, Sigsave_t *save)
 #endif /* !HAS_SIGACTION */
 
     /* VMS' my_pclose() is in VMS.c; same with OS/2 */
-#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS)
+#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM)
 I32
 my_pclose(PerlIO *ptr)
 {
@@ -2451,7 +2451,7 @@ scan_hex(char *start, I32 len, I32 *retlen)
     while (len-- && *s) {
 	tmp = strchr((char *) PL_hexdigit, *s++);
 	if (!tmp) {
-	    if (*s == '_')
+	    if (*(s-1) == '_')
 		continue;
 	    else {
 		dTHR;

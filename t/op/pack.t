@@ -31,7 +31,7 @@ print +($x = unpack("%32B69", "\001\002\004\010\020\040\100\200\017")) == 9
 	? "ok 6\n" : "not ok 6 $x\n";
 
 my $sum = 129; # ASCII
-$sum = 103 if ($^O eq 'os390'); # An EBCDIC variant.
+$sum = 103 if ($^O eq 'os390' or $^O eq 'vmesa'); # EBCDIC.
 
 print +($x = unpack("%32B*", "Now is the time for all good blurfl")) == $sum
 	? "ok 7\n" : "not ok 7 $x\n";

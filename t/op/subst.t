@@ -183,7 +183,7 @@ tr/a-z/A-Z/;
 print $_ eq 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' ? "ok 52\n" : "not ok 52\n";
 
 # same as tr/A-Z/a-z/;
-if ($^O eq 'os390') {	# An EBCDIC variant.
+if ($^O eq 'os390' or $^O eq 'vmesa') {	# EBCDIC.
     no utf8;
     y[\301-\351][\201-\251];
 } else {		# Ye Olde ASCII.  Or something like it.

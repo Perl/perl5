@@ -27,7 +27,7 @@ dep(void)
 %start prog
 
 %{
-#ifndef OEMVS
+#if !defined(OEMVS) && !defined(__OPEN_VM)
 %}
 
 %union {
@@ -38,7 +38,7 @@ dep(void)
 }
 
 %{
-#endif /* OEMVS */
+#endif /* !OEMVS && !__OPEN_VM*/
 %}
 
 %token <ival> '{' ')'
