@@ -4935,7 +4935,7 @@ char *start;
 	if (lex_stuff)
 	    SvREFCNT_dec(lex_stuff);
 	lex_stuff = Nullsv;
-	croak("Translation pattern not terminated");
+	croak("Transliteration pattern not terminated");
     }
     if (s[-1] == multi_open)
 	s--;
@@ -4948,7 +4948,7 @@ char *start;
 	if (lex_repl)
 	    SvREFCNT_dec(lex_repl);
 	lex_repl = Nullsv;
-	croak("Translation replacement not terminated");
+	croak("Transliteration replacement not terminated");
     }
 
     New(803,tbl,256,short);
