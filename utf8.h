@@ -31,7 +31,11 @@ END_EXTERN_C
 
 /* #define IN_UTF8 (PL_curcop->op_private & HINT_UTF8) */
 #define IN_BYTE (PL_curcop->op_private & HINT_BYTE)
+#ifdef USE_BYTES_DOWNGRADES
+#define DO_UTF8(sv) (SvUTF8(sv) && !(IN_BYTE && sv_utf8_downgrade(sv,0)))
+#else
 #define DO_UTF8(sv) (SvUTF8(sv) && !IN_BYTE)
+#endif
 
 #define UTF8_ALLOW_EMPTY		0x0001
 #define UTF8_ALLOW_CONTINUATION		0x0002
