@@ -41,6 +41,45 @@ EXPECT
 "my" variable $y masks earlier declaration in same statement at - line 5.
 ########
 # pad.c
+use warnings 'misc' ;
+our $x ;
+our $x ;
+our $y = our $y ;
+no warnings 'misc' ;
+our $x ;
+our $y ;
+EXPECT
+"our" variable $x masks earlier declaration in same scope at - line 4.
+"our" variable $y masks earlier declaration in same statement at - line 5.
+########
+# pad.c
+use warnings 'misc' ;
+our $x ;
+my $x ;
+our $y = my $y ;
+no warnings 'misc' ;
+our $z ;
+my $z ;
+our $t = my $t ;
+EXPECT
+"my" variable $x masks earlier declaration in same scope at - line 4.
+"my" variable $y masks earlier declaration in same statement at - line 5.
+########
+# pad.c
+# TODO not implemented yet
+use warnings 'misc' ;
+my $x ;
+our $x ;
+my $y = our $y ;
+no warnings 'misc' ;
+my $z ;
+our $z ;
+my $t = our $t ;
+EXPECT
+"our" variable $x masks earlier declaration in same scope at - line 5.
+"our" variable $y masks earlier declaration in same statement at - line 6.
+########
+# pad.c
 use warnings 'closure' ;
 sub x {
       my $x;
