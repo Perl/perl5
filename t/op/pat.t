@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..1012\n";
+print "1..1015\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1368,8 +1368,7 @@ print "ok 247\n";
 SKIP: {
     my $test = 264; # till 575
 
-    eval 'use charnames ":full"';
-    skip($@, 312) if $@ =~ /dynamic loading not available/;
+    use charnames ":full";
 
     # This is far from complete testing, there are dozens of character
     # classes in Unicode.  The mixing of literals and \N{...} is
@@ -3213,5 +3212,14 @@ ok("  \x{10428}" =~ qr/\x{10400}/i,
 ok("  \x{1E01}x" =~ qr/\x{1E00}X/i,
    "<20030808193656.5109.1@llama.ni-s.u-net.com>");
 
-# last test 1012
+# \x{301} is COMBINING ACUTE ACCENT
+
+# Word boundary should not separate base character from its modifiers.
+# (Unicode UTS#18, "Simple word boundaries")
+
+ok("A\x{301}-" =~ /(.*)\b(.*)/, "UTS#18 Simple Word Boundaries");
+ok($1 eq "A\x{301}", "ditto");
+ok($2 eq "-", "ditto");
+
+# last test 1015
 
