@@ -176,7 +176,7 @@ sub fileparse {
       $dirpath ||= '';  # should always be defined
     }
   }
-  if ($fstype =~ /^MS(DOS|Win32)/i) {
+  if ($fstype =~ /^MS(DOS|Win32)|epoc/i) {
     ($dirpath,$basename) = ($fullname =~ /^((?:.*[:\\\/])?)(.*)/s);
     $dirpath .= '.\\' unless $dirpath =~ /[\\\/]\z/;
   }

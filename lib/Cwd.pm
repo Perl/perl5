@@ -408,7 +408,8 @@ sub _epoc_cwd {
         *abs_path	= \&fast_abs_path;
     }
     elsif ($^O eq 'epoc') {
-        *getcwd	= \&_epoc_cwd;
+        *cwd            = \&_epoc_cwd;
+        *getcwd	        = \&_epoc_cwd;
         *fastgetcwd	= \&_epoc_cwd;
         *fastcwd	= \&_epoc_cwd;
         *abs_path	= \&fast_abs_path;

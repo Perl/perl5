@@ -839,7 +839,7 @@ setuid perl scripts securely.\n");
 
     PL_origargv = argv;
     PL_origargc = argc;
-#if !defined( VMS) && !defined(EPOC)  /* VMS doesn't have environ array */
+#ifdef  USE_ENVIRON_ARRAY
     PL_origenviron = environ;
 #endif
 
@@ -3322,7 +3322,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	GvMULTI_on(PL_envgv);
 	hv = GvHVn(PL_envgv);
 	hv_magic(hv, PL_envgv, 'E');
-#if !defined( VMS) && !defined(EPOC) && !defined(MACOS_TRADITIONAL) /* VMS doesn't have environ array */
+#ifdef USE_ENVIRON_ARRAY
 	/* Note that if the supplied env parameter is actually a copy
 	   of the global environ then it may now point to free'd memory
 	   if the environment has been modified since. To avoid this

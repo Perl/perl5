@@ -675,6 +675,7 @@ lib/File/Spec/OS2.pm	portable operations on OS2 file names
 lib/File/Spec/Unix.pm	portable operations on Unix file names
 lib/File/Spec/VMS.pm	portable operations on VMS file names
 lib/File/Spec/Win32.pm	portable operations on Win32 file names
+lib/File/Spec/Epoc.pm	portable operations on EPOC file names
 lib/File/Temp.pm	create safe temporary files and file handles
 lib/File/stat.pm	By-name interface to Perl's builtin stat
 lib/FileCache.pm	Keep more files open than the system permits
