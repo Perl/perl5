@@ -104,9 +104,9 @@ use constant TRAILING	=> '12 cats';
 }
 test 25, TRAILING eq '12 cats';
 
-use constant LEADING	=> " \t\n1234";
+use constant LEADING	=> " \t1234";
 test 26, LEADING == 1234;
-test 27, LEADING eq " \t\n1234";
+test 27, LEADING eq " \t1234";
 
 use constant ZERO1	=> 0;
 use constant ZERO2	=> 0.0;
