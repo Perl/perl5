@@ -250,6 +250,8 @@ The following reserved ranges have C<In> tests:
     Low Surrogate
     Private Surrogate
     CJK Ideograph Extension B
+    Plane 15 Private Use
+    Plane 16 Private Use
 
 For example C<"\x{AC00}" =~ \p{HangulSyllable}> will test true.
 (Handling of surrogates is not implemented yet.)
