@@ -30,7 +30,11 @@ my %bincompat5005 =
        Perl_safesysmalloc	=>	"Perl_safemalloc",
        Perl_safesysrealloc	=>	"Perl_saferealloc",
        Perl_set_numeric_local	=>	"perl_set_numeric_local",
-       Perl_set_numeric_standard  =>	"perl_set_numeric_standard");
+       Perl_set_numeric_standard  =>	"perl_set_numeric_standard",
+       Perl_malloc		=>	"malloc",
+       Perl_mfree		=>	"free",
+       Perl_realloc		=>	"realloc",
+       Perl_calloc		=>	"calloc",);
 
 my $bincompat5005 = join("|", keys %bincompat5005);
 
