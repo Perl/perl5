@@ -2662,11 +2662,13 @@ PerlIOStdio_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
      */
     if ((f = PerlIOBase_dup(aTHX_ f, o, param, flags))) {
 	FILE *stdio = PerlIOSelf(o, PerlIOStdio)->stdio;
+	int fd = fileno(stdio);
+	char mode[8];
 	if (flags & PERLIO_DUP_FD) {
-	    int fd = PerlLIO_dup(fileno(stdio));
-	    if (fd >= 0) {
-		char mode[8];
-		stdio = PerlSIO_fdopen(fd, PerlIO_modestr(o,mode));
+	    int dfd = PerlLIO_dup(fileno(stdio));
+	    if (dfd >= 0) {
+		stdio = PerlSIO_fdopen(dfd, PerlIO_modestr(o,mode));
+		goto set_this;
 	    }
 	    else {
 		/* FIXME: To avoid messy error recovery if dup fails
@@ -2674,6 +2676,8 @@ PerlIOStdio_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 		 */
 	    }
 	}
+    	stdio = PerlSIO_fdopen(fd, PerlIO_modestr(o,mode));
+    set_this:
 	PerlIOSelf(f, PerlIOStdio)->stdio = stdio;
 	PerlIOUnix_refcnt_inc(fileno(stdio));
     }
@@ -2692,11 +2696,22 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 	errno = EBADF;
 	return -1;
     }
-    if (PerlIOUnix_refcnt_dec(fileno(stdio)) > 0) {
-	/* Do not close it but do flush any buffers */
-	return PerlIO_flush(f);
-    }
-    return (
+    else {
+        int fd = fileno(stdio);
+	int dupfd = -1;
+	IV result;
+    	if (PerlIOUnix_refcnt_dec(fd) > 0) {
+	    /* File descriptor still in use */
+	    if (fd < 3) {
+	    	/* For STD* handles don't close the stdio at all */
+	    	return PerlIO_flush(f);
+	    }
+	    else {
+            	/* Tricky - must fclose(stdio) to free memory but not close(fd) */ 
+	    	dupfd = PerlLIO_dup(fd);
+	    }
+	}    
+        result = (
 #ifdef SOCKS5_VERSION_NAME
 	       (getsockopt
 		(PerlIO_fileno(f), SOL_SOCKET, SO_TYPE, (void *) &optval,
@@ -2706,6 +2721,15 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 	       PerlSIO_fclose(stdio)
 #endif
 	);
+	if (dupfd >= 0) {
+	    /* We need to restore fd from the saved copy */
+	    if (PerlLIO_dup2(dupfd,fd) != fd)
+	      result = -1;
+	    if (PerlLIO_close(dupfd) != 0)
+	      result = -1; 
+	}
+	return result;
+    } 
 
 }
 
