@@ -32,6 +32,160 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7733] By: jhi                                   on 2000/11/18  00:32:54
+        Log: Subject: [PATCH 5.7.0] restore match data on backtracing
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Fri, 17 Nov 2000 17:28:02 -0500
+             Message-ID: <20001117172802.A1032@monk.mps.ohio-state.edu>
+     Branch: perl
+	   ! regcomp.c regexec.c t/op/re_tests
+____________________________________________________________________________
+[  7732] By: jhi                                   on 2000/11/18  00:28:56
+        Log: Sparc 64-bit pack() fix from Jens Hamisch.
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[  7731] By: jhi                                   on 2000/11/18  00:18:39
+        Log: Explain in more detail the {} syntax ambiguousity.
+             
+             Subject: [PATCH] Re: [ID 20001117.003] map { "$_", 1} @array is syntax error
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Fri, 17 Nov 2000 22:10:28 +0000
+             Message-ID: <20001117221028.A88930@plum.flirble.org>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[  7730] By: jhi                                   on 2000/11/18  00:12:18
+        Log: Subject: Fix for README.amiga (20000323.033)
+             From: "Stephen P. Potter" <spp@spotter.yi.org>
+             Date: Fri, 17 Nov 2000 12:25:51 -0500
+             Message-Id: <200011171725.MAA05768@spotter.yi.org>
+     Branch: perl
+	   ! README.amiga
+____________________________________________________________________________
+[  7729] By: jhi                                   on 2000/11/18  00:08:34
+        Log: Subject: [PATCH 5.6.0 README.win32] very minor typos
+             From: "A. C. Yardley" <yardley@tanet.net>
+             Date: Mon, 3 Apr 2000 11:35:33 -0700
+             Message-ID: <3483.000403@tanet.net>
+     Branch: perl
+	   ! README.win32
+____________________________________________________________________________
+[  7726] By: jhi                                   on 2000/11/17  14:15:49
+        Log: Subject: Fix for 20000815.006
+             From: "Stephen P. Potter" <spp@spotter.yi.org>
+             Date: Fri, 17 Nov 2000 08:57:45 -0500
+             Message-Id: <200011171357.IAA05122@spotter.yi.org>
+             
+             It's really 20000518.006.
+     Branch: perl
+	   ! pod/perlmodlib.PL
+____________________________________________________________________________
+[  7725] By: jhi                                   on 2000/11/17  14:12:31
+        Log: Subject: Fix for 20000409.001
+             From: "Stephen P. Potter" <spp@spotter.yi.org>
+             Date: Fri, 17 Nov 2000 08:55:45 -0500
+             Message-Id: <200011171355.IAA05104@spotter.yi.org>
+     Branch: perl
+	   ! pod/perlfaq9.pod
+____________________________________________________________________________
+[  7724] By: jhi                                   on 2000/11/17  14:08:58
+        Log: Undo #7627 now that we have =head3.
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[  7723] By: jhi                                   on 2000/11/17  14:04:09
+        Log: As surmised the #7719 wasn't a good move.
+     Branch: perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[  7722] By: jhi                                   on 2000/11/17  13:59:04
+        Log: Also the 64bitall hints can be either here or there.
+     Branch: perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[  7721] By: jhi                                   on 2000/11/17  02:26:23
+        Log: Test tweak for the open pragma.
+     Branch: perl
+	   ! t/lib/b.t
+____________________________________________________________________________
+[  7720] By: jhi                                   on 2000/11/17  00:23:22
+        Log: The long double hints can be here or there.
+     Branch: perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[  7719] By: jhi                                   on 2000/11/17  00:14:06
+        Log: For Solaris use64bitall the stdchar needs a little bit of help.
+     Branch: perl
+	   ! hints/solaris_2.sh
+____________________________________________________________________________
+[  7718] By: jhi                                   on 2000/11/16  23:27:34
+        Log: Subject: Re: Bug in Carp::Heavy/5.6.0?
+             From: Wolfgang Laun <Wolfgang.Laun@alcatel.at>
+             Date: Wed, 15 Nov 2000 08:56:32 +0100
+             Message-ID: <3A1241B0.64477E00@alcatel.at>
+     Branch: perl
+	   ! lib/Carp/Heavy.pm
+____________________________________________________________________________
+[  7717] By: jhi                                   on 2000/11/16  23:23:29
+        Log: Subject: [PATCH] Re: 20001101.003 PDL
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Thu, 16 Nov 2000 16:48:25 +0000
+             Message-ID: <20001116164825.B93487@plum.flirble.org>
+     Branch: perl
+	   ! lib/ExtUtils/xsubpp pod/perlxs.pod pod/perlxstut.pod
+____________________________________________________________________________
+[  7716] By: jhi                                   on 2000/11/16  23:21:31
+        Log: Subject: [PATCH] Re: [p5p] [PATCH perlpod.pod] Digging into the =head
+             From: "Casey R. Tweten" <crt@kiski.net>
+             Date: Thu, 16 Nov 2000 12:02:47 -0500 (EST)
+             Message-ID: <Pine.OSF.4.21.0011161200410.700-100000@home.kiski.net>
+     Branch: perl
+	   ! lib/Pod/Checker.pm pod/perlpod.pod
+____________________________________________________________________________
+[  7715] By: jhi                                   on 2000/11/16  23:19:40
+        Log: Avoid an infinite loop in VMS when utils scripts are run
+             with no arguments, from Charles Lane.
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[  7714] By: jhi                                   on 2000/11/16  23:17:08
+        Log: Subject: perllocale.pod changes
+             From: "Konovalov, Vadim" <vkonovalov@lucent.com>
+             Date: Mon, 13 Nov 2000 10:09:22 +0300
+             Message-ID: <402099F49BEED211999700805FC7359F825416@ru0028exch01.spb.lucent.com>
+     Branch: perl
+	   ! pod/perllocale.pod
+____________________________________________________________________________
+[  7713] By: jhi                                   on 2000/11/16  23:14:06
+        Log: Integrate perlio.
+     Branch: perl
+	  !> doio.c perlio.c perlio.h util.c
+____________________________________________________________________________
+[  7710] By: jhi                                   on 2000/11/16  15:46:05
+        Log: Add HAS_SBRK_PROTO.
+     Branch: metaconfig/U/perl
+	   + d_sbrkproto.U
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH configure.com epoc/config.sh malloc.c uconfig.h
+	   ! uconfig.sh vos/config.alpha.def vos/config.alpha.h
+	   ! vos/config.ga.def vos/config.ga.h win32/config.bc
+	   ! win32/config.gc win32/config.vc
+____________________________________________________________________________
+[  7708] By: jhi                                   on 2000/11/16  05:33:03
+        Log: These files are text, not binary.
+     Branch: perl
+	   ! ext/Encode/Encode/iso8859-10.enc
+	   ! ext/Encode/Encode/iso8859-13.enc
+	   ! ext/Encode/Encode/iso8859-14.enc
+	   ! ext/Encode/Encode/iso8859-15.enc
+____________________________________________________________________________
+[  7707] By: jhi                                   on 2000/11/16  01:53:37
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7706] By: jhi                                   on 2000/11/16  01:35:59
         Log: More #undefing of stdio.
      Branch: perl

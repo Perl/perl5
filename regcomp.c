@@ -151,6 +151,7 @@ typedef struct scan_data_t {
     I32 offset_float_max;
     I32 flags;
     I32 whilem_c;
+    I32 *last_closep;
     struct regnode_charclass_class *start_class;
 } scan_data_t;
 
@@ -159,7 +160,7 @@ typedef struct scan_data_t {
  */
 
 static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-				      0, 0, 0, 0, 0 };
+				      0, 0, 0, 0, 0, 0};
 
 #define SF_BEFORE_EOL		(SF_BEFORE_SEOL|SF_BEFORE_MEOL)
 #define SF_BEFORE_SEOL		0x1
@@ -665,13 +666,17 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		if (flags & SCF_DO_STCLASS)
 		    cl_init_zero(&accum);
 		while (OP(scan) == code) {
-		    I32 deltanext, minnext, f = 0;
+		    I32 deltanext, minnext, f = 0, fake = 0;
 		    struct regnode_charclass_class this_class;
 
 		    num++;
 		    data_fake.flags = 0;
-		    if (data)
+		    if (data) {		    
 			data_fake.whilem_c = data->whilem_c;
+			data_fake.last_closep = data->last_closep;
+		    }
+		    else
+			data_fake.last_closep = &fake;
 		    next = regnext(scan);
 		    scan = NEXTOPER(scan);
 		    if (code != BRANCH)
@@ -887,6 +892,11 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		mincount = ARG1(scan); 
 		maxcount = ARG2(scan);
 		next = regnext(scan);
+		if (OP(scan) == CURLYX) {
+		    I32 lp = (data ? *(data->last_closep) : 0);
+
+		    scan->flags = ((lp <= U8_MAX) ? lp : U8_MAX);
+		}
 		scan = NEXTOPER(scan) + EXTRA_STEP_2ARGS;
 	      do_curly:
 		if (flags & SCF_DO_SUBSTR) {
@@ -1356,14 +1366,18 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		   && (scan->flags || data || (flags & SCF_DO_STCLASS))
 		   && (OP(scan) == IFMATCH || OP(scan) == UNLESSM)) {
 	    /* Lookahead/lookbehind */
-	    I32 deltanext, minnext;
+	    I32 deltanext, minnext, fake = 0;
 	    regnode *nscan;
 	    struct regnode_charclass_class intrnl;
 	    int f = 0;
 
 	    data_fake.flags = 0;
-	    if (data)
+	    if (data) {		    
 		data_fake.whilem_c = data->whilem_c;
+		data_fake.last_closep = data->last_closep;
+	    }
+	    else
+		data_fake.last_closep = &fake;
 	    if ( flags & SCF_DO_STCLASS && !scan->flags
 		 && OP(scan) == IFMATCH ) { /* Lookahead */
 		cl_init(&intrnl);
@@ -1399,11 +1413,15 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 	else if (OP(scan) == OPEN) {
 	    pars++;
 	}
-	else if (OP(scan) == CLOSE && ARG(scan) == is_par) {
-	    next = regnext(scan);
+	else if (OP(scan) == CLOSE) {
+	    if (ARG(scan) == is_par) {
+		next = regnext(scan);
 
-	    if ( next && (OP(next) != WHILEM) && next < last)
-		is_par = 0;		/* Disable optimization */
+		if ( next && (OP(next) != WHILEM) && next < last)
+		    is_par = 0;		/* Disable optimization */
+	    }
+	    if (data)
+		*(data->last_closep) = ARG(scan);
 	}
 	else if (OP(scan) == EVAL) {
 		if (data)
@@ -1625,6 +1643,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	STRLEN longest_float_length, longest_fixed_length;
 	struct regnode_charclass_class ch_class;
 	int stclass_flag;
+	I32 last_close = 0;
 
 	first = scan;
 	/* Skip introductions and multiplicators >= 1. */
@@ -1717,6 +1736,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    stclass_flag = SCF_DO_STCLASS_AND;
 	} else				/* XXXX Check for BOUND? */
 	    stclass_flag = 0;
+	data.last_closep = &last_close;
 
 	minlen = study_chunk(&first, &fake, scan + PL_regsize, /* Up to end */
 			     &data, SCF_DO_SUBSTR | stclass_flag);
@@ -1821,11 +1841,13 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	/* Several toplevels. Best we can is to set minlen. */
 	I32 fake;
 	struct regnode_charclass_class ch_class;
+	I32 last_close = 0;
 	
 	DEBUG_r(PerlIO_printf(Perl_debug_log, "\n"));
 	scan = r->program + 1;
 	cl_init(&ch_class);
 	data.start_class = &ch_class;
+	data.last_closep = &last_close;
 	minlen = study_chunk(&scan, &fake, scan + PL_regsize, &data, SCF_DO_STCLASS_AND);
 	r->check_substr = r->anchored_substr = r->float_substr = Nullsv;
 	if (!(data.start_class->flags & ANYOF_EOS)
@@ -4233,7 +4255,7 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 	Perl_sv_catpvf(aTHX_ sv, " <%s%.*s%s>", PL_colors[0],
 		       STR_LEN(o), STRING(o), PL_colors[1]);
     else if (k == CURLY) {
-	if (OP(o) == CURLYM || OP(o) == CURLYN)
+	if (OP(o) == CURLYM || OP(o) == CURLYN || OP(o) == CURLYX)
 	    Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags); /* Parenth number */
 	Perl_sv_catpvf(aTHX_ sv, " {%d,%d}", ARG1(o), ARG2(o));
     }

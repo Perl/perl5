@@ -3936,7 +3936,6 @@ PP(pp_unpack)
 	    if (checksum) {
 #if LONGSIZE != SIZE32
 		if (natint) {
-		    long along;
 		    while (len-- > 0) {
 			COPYNN(s, &along, sizeof(long));
 			s += sizeof(long);
@@ -3950,6 +3949,9 @@ PP(pp_unpack)
 #endif
                 {
 		    while (len-- > 0) {
+#if LONGSIZE > SIZE32 && INTSIZE == SIZE32
+			I32 along;
+#endif
 			COPY32(s, &along);
 #if LONGSIZE > SIZE32
 			if (along > 2147483647)
@@ -3968,7 +3970,6 @@ PP(pp_unpack)
 		EXTEND_MORTAL(len);
 #if LONGSIZE != SIZE32
 		if (natint) {
-		    long along;
 		    while (len-- > 0) {
 			COPYNN(s, &along, sizeof(long));
 			s += sizeof(long);
@@ -3981,6 +3982,9 @@ PP(pp_unpack)
 #endif
                 {
 		    while (len-- > 0) {
+#if LONGSIZE > SIZE32 && INTSIZE == SIZE32
+			I32 along;
+#endif
 			COPY32(s, &along);
 #if LONGSIZE > SIZE32
 			if (along > 2147483647)
