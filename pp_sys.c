@@ -1820,7 +1820,11 @@ PP(pp_send)
     }
 
     if (PerlIO_isutf8(IoIFP(io))) {
-	buffer = SvPVutf8(bufsv, blen);
+	if (!SvUTF8(bufsv)) {
+	    bufsv = sv_2mortal(newSVsv(bufsv));
+	    buffer = sv_2pvutf8(bufsv, &blen);
+	} else
+	    buffer = SvPV(bufsv, blen);
     }
     else {
 	 if (DO_UTF8(bufsv)) {
