@@ -16,7 +16,7 @@ use FileHandle ();
 use File::Basename ();
 use File::Path ();
 use vars qw($VERSION);
-$VERSION = substr q$Revision: 1.37 $, 10;
+$VERSION = substr q$Revision: 1.38 $, 10;
 
 =head1 NAME
 
@@ -360,17 +360,19 @@ sub conf_sites {
     require File::Copy;
     File::Copy::copy($m,$mby) or die "Could not update $mby: $!";
   }
+  my $loopcount = 0;
   while () {
     if ( ! -f $mby ){
       print qq{You have no $mby
   I\'m trying to fetch one
 };
       $mby = CPAN::FTP->localize($m,$mby,3);
-    } elsif (-M $mby > 30 ) {
-      print qq{Your $mby is older than 30 days,
+    } elsif (-M $mby > 60 && $loopcount == 0) {
+      print qq{Your $mby is older than 60 days,
   I\'m trying to fetch one
 };
       $mby = CPAN::FTP->localize($m,$mby,3);
+      $loopcount++;
     } elsif (-s $mby == 0) {
       print qq{You have an empty $mby,
   I\'m trying to fetch one
