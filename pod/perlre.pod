@@ -250,7 +250,7 @@ The assumedly non-obviously named classes are:
 Any control character.  Usually characters that don't produce output as
 such but instead control the terminal somehow: for example newline and
 backspace are control characters.  All characters with ord() less than
-32 are most often control classified as characters.
+32 are most often classified as control characters.
 
 =item graph
 
