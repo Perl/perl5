@@ -20,6 +20,13 @@ else                   { print "1..78\n";  }
 
 use File::Find;
 use File::Spec;
+if ($^O eq 'MSWin32')
+ {
+  # This is a hack - at present File::Find does not produce native names on Win32
+  # So force File::Spec to use Unix names.
+  require File::Spec::Unix;
+  @File::Spec::ISA = 'File::Spec::Unix';
+ }
 
 cleanup();
 
