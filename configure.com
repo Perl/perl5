@@ -2764,6 +2764,8 @@ $   d_frexpl = "undef"
 $   d_isnanl = "undef"
 $   d_modfl = "undef"
 $ ENDIF
+$ d_SCNfldbl = d_PRIfldbl
+$ sSCNfldbl = sPRIfldbl ! expect consistency
 $!
 $! Now some that we build up
 $!
@@ -4641,6 +4643,7 @@ $ WC "d_PRIgldbl='" + d_PRIgldbl + "'"
 $ WC "d_PRIo64='" + d_PRIo64 + "'"
 $ WC "d_PRIu64='" + d_PRIu64 + "'"
 $ WC "d_PRIx64='" + d_PRIx64 + "'"
+$ WC "d_SCNfldbl='" + d_SCNfldbl + "'"
 $ WC "d_access='" + d_access + "'"
 $ WC "d_accessx='undef'"
 $ WC "d_alarm='define'"
@@ -5120,6 +5123,7 @@ $! WC "sPRIi64='" + sPRIi64 + "'"
 $ WC "sPRIo64='" + sPRIo64 + "'"
 $ WC "sPRIu64='" + sPRIu64 + "'"
 $ WC "sPRIx64='" + sPRIx64 + "'"
+$ WC "sSCNfldbl='" + sSCNfldbl + "'"
 $ WC "sched_yield='" + sched_yield + "'"
 $ WC "seedfunc='" + seedfunc + "'"
 $ WC "selectminbits='32'"
