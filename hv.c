@@ -21,6 +21,13 @@ static void hfreeentries _((HV *hv));
 static HE* more_he _((void));
 #endif
 
+#if defined(STRANGE_MALLOC) || defined(MYMALLOC)
+#  define ARRAY_ALLOC_BYTES(size) ( (size)*sizeof(HE*) )
+#else
+#  define MALLOC_OVERHEAD 16
+#  define ARRAY_ALLOC_BYTES(size) ( (size)*sizeof(HE*)*2 - MALLOC_OVERHEAD )
+#endif
+
 STATIC HE*
 new_he(void)
 {
@@ -121,7 +128,7 @@ hv_fetch(HV *hv, char *key, U32 klen, I32 lval)
 	         || (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME))
 #endif
 	                                                          )
-	    Newz(503,xhv->xhv_array, sizeof(HE*) * (xhv->xhv_max + 1), char);
+	    Newz(503,xhv->xhv_array, ARRAY_ALLOC_BYTES(xhv->xhv_max + 1), char);
 	else
 	    return 0;
     }
@@ -209,7 +216,7 @@ hv_fetch_ent(HV *hv, SV *keysv, I32 lval, register U32 hash)
 	         || (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME))
 #endif
 	                                                          )
-	    Newz(503,xhv->xhv_array, sizeof(HE*) * (xhv->xhv_max + 1), char);
+	    Newz(503,xhv->xhv_array, ARRAY_ALLOC_BYTES(xhv->xhv_max + 1), char);
 	else
 	    return 0;
     }
@@ -299,7 +306,7 @@ hv_store(HV *hv, char *key, U32 klen, SV *val, register U32 hash)
 	PERL_HASH(hash, key, klen);
 
     if (!xhv->xhv_array)
-	Newz(505, xhv->xhv_array, sizeof(HE*) * (xhv->xhv_max + 1), char);
+	Newz(505, xhv->xhv_array, ARRAY_ALLOC_BYTES(xhv->xhv_max + 1), char);
 
     oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     i = 1;
@@ -380,7 +387,7 @@ hv_store_ent(HV *hv, SV *keysv, SV *val, register U32 hash)
 	PERL_HASH(hash, key, klen);
 
     if (!xhv->xhv_array)
-	Newz(505, xhv->xhv_array, sizeof(HE*) * (xhv->xhv_max + 1), char);
+	Newz(505, xhv->xhv_array, ARRAY_ALLOC_BYTES(xhv->xhv_max + 1), char);
 
     oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     i = 1;
@@ -673,22 +680,21 @@ hsplit(HV *hv)
 
     nomemok = TRUE;
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)
-    Renew(a, newsize * sizeof(HE*), char);
+    Renew(a, ARRAY_ALLOC_BYTES(newsize), char);
     if (!a) {
       nomemok = FALSE;
       return;
     }
 #else
 #define MALLOC_OVERHEAD 16
-    New(2, a, newsize*sizeof(HE*) * 2 - MALLOC_OVERHEAD, char);
+    New(2, a, ARRAY_ALLOC_BYTES(newsize), char);
     if (!a) {
       nomemok = FALSE;
       return;
     }
     Copy(xhv->xhv_array, a, oldsize * sizeof(HE*), char);
     if (oldsize >= 64) {
-	offer_nice_chunk(xhv->xhv_array,
-			 oldsize * sizeof(HE*) * 2 - MALLOC_OVERHEAD);
+	offer_nice_chunk(xhv->xhv_array, ARRAY_ALLOC_BYTES(oldsize));
     }
     else
 	Safefree(xhv->xhv_array);
@@ -749,21 +755,20 @@ hv_ksplit(HV *hv, IV newmax)
     if (a) {
 	nomemok = TRUE;
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)
-	Renew(a, newsize * sizeof(HE*), char);
+	Renew(a, ARRAY_ALLOC_BYTES(newsize), char);
         if (!a) {
 	  nomemok = FALSE;
 	  return;
 	}
 #else
-	New(2, a, newsize * sizeof(HE*) * 2 - MALLOC_OVERHEAD, char);
+	New(2, a, ARRAY_ALLOC_BYTES(newsize), char);
         if (!a) {
 	  nomemok = FALSE;
 	  return;
 	}
 	Copy(xhv->xhv_array, a, oldsize * sizeof(HE*), char);
 	if (oldsize >= 64) {
-	    offer_nice_chunk(xhv->xhv_array,
-			     oldsize * sizeof(HE*) * 2 - MALLOC_OVERHEAD);
+	    offer_nice_chunk(xhv->xhv_array, ARRAY_ALLOC_BYTES(oldsize));
 	}
 	else
 	    Safefree(xhv->xhv_array);
@@ -772,11 +777,7 @@ hv_ksplit(HV *hv, IV newmax)
 	Zero(&a[oldsize * sizeof(HE*)], (newsize-oldsize) * sizeof(HE*), char); /* zero 2nd half*/
     }
     else {
-#if defined(STRANGE_MALLOC) || defined(MYMALLOC)
-	Newz(0, a, newsize * sizeof(HE*), char);
-#else
-	Newz(0, a, newsize * sizeof(HE*) * 2 - MALLOC_OVERHEAD, char);
-#endif
+	Newz(0, a, ARRAY_ALLOC_BYTES(newsize), char);
     }
     xhv->xhv_max = --newsize;
     xhv->xhv_array = a;
@@ -1045,7 +1046,7 @@ hv_iternext(HV *hv)
     }
 
     if (!xhv->xhv_array)
-	Newz(506,xhv->xhv_array, sizeof(HE*) * (xhv->xhv_max + 1), char);
+	Newz(506,xhv->xhv_array, ARRAY_ALLOC_BYTES(xhv->xhv_max + 1), char);
     if (entry)
 	entry = HeNEXT(entry);
     while (!entry) {
