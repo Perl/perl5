@@ -233,30 +233,18 @@ if (not $JPL::_env_) {
     $JVM = GetJavaVM("$JAVALIB/libjava.so",@JVM_ARGS);
 }
 
-# Preloaded methods go here.
-
-# Autoload methods go after =cut, and are processed by the autosplit program.
-
 1;
 __END__
-# Below is the stub of documentation for your module. You better edit it!
 
 =head1 NAME
 
-JNI - Perl extension for blah blah blah
+JNI - Perl encapsulation of the Java Native Interface
 
 =head1 SYNOPSIS
 
   use JNI;
-  blah blah blah
 
 =head1 DESCRIPTION
-
-Stub documentation for JNI was created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
 
 =head1 Exported constants
 
@@ -271,7 +259,9 @@ Blah blah blah.
 
 =head1 AUTHOR
 
-A. U. Thor, a.u.thor@a.galaxy.far.far.away
+Copyright 1998, O'Reilly & Associates, Inc.
+
+This package may be copied under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
