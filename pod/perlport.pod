@@ -448,6 +448,36 @@ directories.
 
 Don't count on specific values of C<$!>.
 
+=head2 Command names versus file pathnames
+
+Don't assume that the name used to invoke a command or program with
+C<system> or C<exec> can also be used to test for the existence of the
+file that holds the executable code for that command or program.
+First, many operating systems have "internal" commands that are
+built-in to the OS and while these commands can be invoked, there is
+no corresponding file.  Second, some operating systems (Cygwin, DJGPP,
+OS/2, and VOS) have required suffixes for executable files; these
+suffixes are generally permitted on the command name but are not
+required.  Thus, a command like "perl" might exist in a file named
+"perl", "perl.exe", or "perl.pm", depending on the operating system.
+The variable "_exe" in the Config module holds the executable suffix,
+if any.  Third, VMS files always end in a version number, which comes
+after the executable suffix.
+
+To convert $^X to a file pathname, taking account of the requirements
+of the various operating system possibilities, say:
+  use Config;
+  use File::Spec;
+  $thisperl = $^X;
+  $thisperl .= $Config{_exe} unless $thisperl ~= m/$Config{_exe}([;\d]*)$/i;
+
+To convert $Config{perlpath} to a file pathname, say:
+
+  use Config;
+  use File::Spec;
+  $thisperl = File::Spec->canonpath($Config{perlpath});
+  $thisperl .= $Config{_exe} unless $thisperl ~= m/$Config{_exe}([;\d]*)$/i;
+
 =head2 Interprocess Communication (IPC)
 
 In general, don't directly access the system in code meant to be

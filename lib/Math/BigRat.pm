@@ -21,7 +21,7 @@ use vars qw($VERSION @ISA $PACKAGE @EXPORT_OK $upgrade $downgrade
 @ISA = qw(Exporter Math::BigFloat);
 @EXPORT_OK = qw();
 
-$VERSION = '0.05';
+$VERSION = '0.06';
 
 use overload;				# inherit from Math::BigFloat
 
@@ -38,6 +38,7 @@ $downgrade = undef;
 
 my $nan = 'NaN';
 my $class = 'Math::BigRat';
+my $MBI = 'Math::BigInt';
 
 sub isa
   {
@@ -56,7 +57,7 @@ sub _new_from_float
 
   #print "f $f caller", join(' ',caller()),"\n";
   $self->{_n} = $f->{_m}->copy();			# mantissa
-  $self->{_d} = Math::BigInt->bone();
+  $self->{_d} = $MBI->bone();
   $self->{sign} = $f->{sign}; $self->{_n}->{sign} = '+';
   if ($f->{_e}->{sign} eq '-')
     {
@@ -82,17 +83,21 @@ sub new
 
   my $self = { }; bless $self,$class;
  
-#  print "ref ",ref($d),"\n";
-#  if (ref($d))
+#  print "ref ",ref($n),"\n";
+#  if (ref($n))
 #    {
-#  print "isa float ",$d->isa('Math::BigFloat'),"\n";
-#  print "isa int ",$d->isa('Math::BigInt'),"\n";
-#  print "isa rat ",$d->isa('Math::BigRat'),"\n";
+#  print "isa float " if $n->isa('Math::BigFloat');
+#  print "isa int " if $n->isa('Math::BigInt');
+#  print "isa rat " if $n->isa('Math::BigRat');
+#  print "isa lite " if $n->isa('Math::BigInt::Lite');
 #    }
-
+#  else
+#    {
+#    print "scalar $n\n";
+#    }
   # input like (BigInt,BigInt) or (BigFloat,BigFloat) not handled yet
 
-  if ((ref $n) && (!$n->isa('Math::BigRat')))
+  if ((!defined $d) && (ref $n) && (!$n->isa('Math::BigRat')))
     {
 #    print "is ref, but not rat\n";
     if ($n->isa('Math::BigFloat'))
@@ -102,17 +107,16 @@ sub new
       }
     if ($n->isa('Math::BigInt'))
       {
-#      print "is ref, and int\n";
       $self->{_n} = $n->copy();				# "mantissa" = $n
-      $self->{_d} = Math::BigInt->bone();
+      $self->{_d} = $MBI->bone();
       $self->{sign} = $self->{_n}->{sign}; $self->{_n}->{sign} = '+';
       return $self->bnorm();
       }
     if ($n->isa('Math::BigInt::Lite'))
       {
 #      print "is ref, and lite\n";
-      $self->{_n} = Math::BigInt->new($$n);		# "mantissa" = $n
-      $self->{_d} = Math::BigInt->bone();
+      $self->{_n} = $MBI->new($$n);		# "mantissa" = $n
+      $self->{_d} = $MBI->bone();
       $self->{sign} = $self->{_n}->{sign}; $self->{_n}->{sign} = '+';
       return $self->bnorm();
       }
@@ -123,8 +127,8 @@ sub new
 
   if (!defined $n)
     {
-    $self->{_n} = Math::BigInt->bzero();	# undef => 0
-    $self->{_d} = Math::BigInt->bone();
+    $self->{_n} = $MBI->bzero();	# undef => 0
+    $self->{_d} = $MBI->bone();
     $self->{sign} = '+';
     return $self->bnorm();
     }
@@ -153,8 +157,8 @@ sub new
       }
     else
       {
-      $self->{_n} = Math::BigInt->new($n);
-      $self->{_d} = Math::BigInt->new($d);
+      $self->{_n} = $MBI->new($n);
+      $self->{_d} = $MBI->new($d);
       return $self->bnan() if $self->{_n}->is_nan() || $self->{_d}->is_nan();
       # inf handling is missing here
  
@@ -175,8 +179,8 @@ sub new
     }
   else
     {
-    $self->{_n} = Math::BigInt->new($n);
-    $self->{_d} = Math::BigInt->bone();
+    $self->{_n} = $MBI->new($n);
+    $self->{_d} = $MBI->bone();
     $self->{sign} = $self->{_n}->{sign}; $self->{_n}->{sign} = '+';
     }
   $self->bnorm();
@@ -221,6 +225,12 @@ sub bnorm
   # don't reduce again)
   my ($self,$x) = ref($_[0]) ? (ref($_[0]),$_[0]) : objectify(1,@_);
 
+  # both parts must be BigInt's
+  die ("n is not $MBI but (".ref($x->{_n}).')')
+    if ref($x->{_n}) ne $MBI;
+  die ("d is not $MBI but (".ref($x->{_d}).')')
+    if ref($x->{_d}) ne $MBI;
+
   # this is to prevent automatically rounding when MBI's globals are set
   $x->{_d}->{_f} = MB_NEVER_ROUND;
   $x->{_n}->{_f} = MB_NEVER_ROUND;
@@ -228,16 +238,22 @@ sub bnorm
   $x->{_d}->{_a} = undef; $x->{_n}->{_a} = undef;
   $x->{_d}->{_p} = undef; $x->{_n}->{_p} = undef; 
 
+#  print "$x->{sign} $x->{_n} / $x->{_d} => ";
+
+  # no normalize for NaN, inf etc.
+  return $x if $x->{sign} !~ /^[+-]$/;
+
   # normalize zeros to 0/1
   if (($x->{sign} =~ /^[+-]$/) &&
       ($x->{_n}->is_zero()))
     {
     $x->{sign} = '+';						# never -0
-    $x->{_d} = Math::BigInt->bone() unless $x->{_d}->is_one();
+    $x->{_d} = $MBI->bone() unless $x->{_d}->is_one();
     return $x;
     }
 
-#  print "$x->{_n} / $x->{_d} => ";
+  return $x if $x->{_d}->is_one();
+
   # reduce other numbers
   # print "bgcd $x->{_n} (",ref($x->{_n}),") $x->{_d} (",ref($x->{_d}),")\n";
   # disable upgrade in BigInt, otherwise deep recursion
@@ -246,8 +262,10 @@ sub bnorm
 
   if (!$gcd->is_one())
     {
+#    print "normalize $x->{_d} / $x->{_n} => ";
     $x->{_n}->bdiv($gcd);
     $x->{_d}->bdiv($gcd);
+#    print "$x->{_d} / $x->{_n}\n";
     }
 #  print "$x->{_n} / $x->{_d}\n";
   $x;
@@ -296,8 +314,13 @@ sub badd
   # add two rationals
   my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
 
-  $x = $class->new($x) unless $x->isa($class);
-  $y = $class->new($y) unless $y->isa($class);
+#  print "rat badd\n";
+#  print "ref($x) = ",ref($x),"\n";
+#  print "ref($y) = ",ref($y),"\n";
+  $x = $self->new($x) unless $x->isa($self);
+  $y = $self->new($y) unless $y->isa($self);
+#  print "ref($x) = ",ref($x),"\n";
+#  print "ref($y) = ",ref($y),"\n";
 
   return $x->bnan() if ($x->{sign} eq 'NaN' || $y->{sign} eq 'NaN');
 
@@ -411,6 +434,7 @@ sub bdiv
   $x = $class->new($x) unless $x->isa($class);
   $y = $class->new($y) unless $y->isa($class);
 
+#  print "rat bdiv $x $y ",ref($x)," ",ref($y),"\n";
   return $self->_div_inf($x,$y)
    if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/) || $y->is_zero());
 
@@ -425,10 +449,13 @@ sub bdiv
   $x->{_n}->bmul($y->{_d});
   $x->{_d}->bmul($y->{_n});
 
+#  print "result $x->{_d} $x->{_n}\n";
   # compute new sign 
   $x->{sign} = $x->{sign} eq $y->{sign} ? '+' : '-';
 
   $x->bnorm()->round($a,$p,$r);
+#  print "result $x->{_d} $x->{_n}\n";
+  $x;
   }
 
 ##############################################################################
@@ -709,13 +736,85 @@ sub as_number
   $t;
   }
 
-#sub import
-#  {
-#  my $self = shift;
-#  Math::BigInt->import(@_);
-#  $self->SUPER::import(@_);                     # need it for subclasses
-#  #$self->export_to_level(1,$self,@_);          # need this ?
-#  }
+sub import
+  {
+  my $self = shift;
+  my $l = scalar @_;
+  my $lib = ''; my @a;
+  for ( my $i = 0; $i < $l ; $i++)
+    {
+#    print "at $_[$i] (",$_[$i+1]||'undef',")\n";
+    if ( $_[$i] eq ':constant' )
+      {
+      # this rest causes overlord er load to step in
+      # print "overload @_\n";
+      overload::constant float => sub { $self->new(shift); };
+      }
+#    elsif ($_[$i] eq 'upgrade')
+#      {
+#     # this causes upgrading
+#      $upgrade = $_[$i+1];              # or undef to disable
+#      $i++;
+#      }
+    elsif ($_[$i] eq 'downgrade')
+      {
+      # this causes downgrading
+      $downgrade = $_[$i+1];            # or undef to disable
+      $i++;
+      }
+    elsif ($_[$i] eq 'lib')
+      {
+      $lib = $_[$i+1] || '';            # default Calc
+      $i++;
+      }
+    elsif ($_[$i] eq 'with')
+      {
+      $MBI = $_[$i+1] || 'Math::BigInt';        # default Math::BigInt
+      $i++;
+      }
+    else
+      {
+      push @a, $_[$i];
+      }
+    }
+  # let use Math::BigInt lib => 'GMP'; use Math::BigFloat; still work
+  my $mbilib = eval { Math::BigInt->config()->{lib} };
+  if ((defined $mbilib) && ($MBI eq 'Math::BigInt'))
+    {
+    # MBI already loaded
+    $MBI->import('lib',"$lib,$mbilib", 'objectify');
+    }
+  else
+    {
+    # MBI not loaded, or with ne "Math::BigInt"
+    $lib .= ",$mbilib" if defined $mbilib;
+
+#  my @parts = split /::/, $MBI;                # Math::BigInt => Math BigInt
+#  my $file = pop @parts; $file .= '.pm';       # BigInt => BigInt.pm
+#  $file = File::Spec->catfile (@parts, $file);
+
+    if ($] < 5.006)
+      {
+      # Perl < 5.6.0 dies with "out of memory!" when eval() and ':constant' is
+      # used in the same script, or eval inside import().
+      my @parts = split /::/, $MBI;             # Math::BigInt => Math BigInt
+      my $file = pop @parts; $file .= '.pm';    # BigInt => BigInt.pm
+      $file = File::Spec->catfile (@parts, $file);
+      eval { require $file; $MBI->import( lib => '$lib', 'objectify' ); }
+      }
+    else
+      {
+      my $rc = "use $MBI lib => '$lib', 'objectify';";
+      eval $rc;
+      }
+    }
+  die ("Couldn't load $MBI: $! $@") if $@;
+
+  # any non :constant stuff is handled by our parent, Exporter
+  # even if @_ is empty, to give it a chance
+  $self->SUPER::import(@a);             # for subclasses
+  $self->export_to_level(1,$self,@a);   # need this, too
+  }
 
 1;
 
@@ -763,7 +862,11 @@ details.
 
 =head1 METHODS
 
-=head2 new
+Any method not listed here is dervied from Math::BigFloat (or
+Math::BigInt), so make sure you check these two modules for further
+information.
+
+=head2 new()
 
 	$x = Math::BigRat->new('1/3');
 
@@ -774,29 +877,58 @@ Create a new Math::BigRat object. Input can come in various forms:
 	$x = Math::BigRat->new('1 / 0.1');			# w/ floats
 	$x = Math::BigRat->new(Math::BigInt->new(3));		# BigInt
 	$x = Math::BigRat->new(Math::BigFloat->new('3.1'));	# BigFloat
+	$x = Math::BigRat->new(Math::BigInt::Lite->new('2'));	# BigLite
 
-=head2 numerator
+=head2 numerator()
 
 	$n = $x->numerator();
 
 Returns a copy of the numerator (the part above the line) as signed BigInt.
 
-=head2 denominator
+=head2 denominator()
 	
 	$d = $x->denominator();
 
 Returns a copy of the denominator (the part under the line) as positive BigInt.
 
-=head2 parts
+=head2 parts()
 
 	($n,$d) = $x->parts();
 
 Return a list consisting of (signed) numerator and (unsigned) denominator as
 BigInts.
 
+=head2 as_number()
+
+Returns a copy of the object as BigInt by truncating it to integer.
+
+=head2 bfac()/blog()
+
+Are not yet implemented.
+
+=head2 bround()/round()/bfround()
+
+Are not yet implemented.
+
+
 =head1 BUGS
 
-None know yet. Please see also L<Math::BigInt>.
+=over 2
+
+=item perl -Mbigrat -le 'print 1 + 2/3'
+
+This produces wrongly NaN. It is unclear why. The following variants all work:
+
+	perl -Mbigrat -le 'print 1/3 + 2/3'
+	perl -Mbigrat -le 'print 1/3 + 2'
+
+This also does not work:
+
+	perl -Mbigrat -le 'print 1+3+1/2'
+
+=back
+
+Please see also L<Math::BigInt>.
 
 =head1 LICENSE
 

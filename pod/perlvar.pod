@@ -1158,7 +1158,8 @@ a relative or absolute pathname of the perl program file, or may
 be the string used to invoke perl but not the pathname of the
 perl program file.  Also, most operating systems permit invoking
 programs that are not in the PATH environment variable, so there
-is no guarantee that the value of $^X is in PATH.
+is no guarantee that the value of $^X is in PATH.  For VMS, the
+value may or may not include a version number.
 
 You usually can use the value of $^X to re-invoke an independent
 copy of the same perl that is currently running, e.g.,
@@ -1179,8 +1180,8 @@ following statements:
   use Config;
   use File::Spec;
   $this_perl = File::Spec->canonpath($^X);
-  $this_perl .= $Config{exe_ext}
-          unless $this_perl =~ m/$Config{exe_ext}$/i;
+  $this_perl .= $Config{_ext}
+          unless $this_perl =~ m/$Config{_ext}([;\d]*)$/i;
 
 Because many operating systems permit anyone with read access to
 the Perl program file to make a copy of it, patch the copy, and
@@ -1193,8 +1194,8 @@ command or referenced as a file.
   use Config;
   use File::Spec;
   $secure_perl_path = File::Spec->canonpath($Config{perlpath});
-  $secure_perl_path .= $Config{exe_ext}
-          unless $secure_perl_path =~ m/$Config{exe_ext}$/i;
+  $secure_perl_path .= $Config{_ext}
+          unless $secure_perl_path =~ m/$Config{_ext}([;\d]*)$/i;
 
 =item ARGV
 

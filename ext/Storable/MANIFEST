@@ -13,8 +13,10 @@ t/downgrade.t		    See if Storable works
 t/forgive.t		    See if Storable works
 t/freeze.t		    See if Storable works
 t/integer.t		    For "use integer" testing
+t/interwork56.t		    Test combatibility kludge for 64bit data under 5.6.x
 t/lock.t		    See if Storable works
-t/make_downgrade.pl	    See if Storable works
+t/make_56_interwork.pl	    Make test data for interwork56.t
+t/make_downgrade.pl	    Make test data for downgrade.t
 t/malice.t		    See if Storable copes with corrupt files
 t/overload.t		    See if Storable works
 t/recurse.t		    See if Storable works

@@ -613,8 +613,10 @@ ext/Storable/t/downgrade.t	See if Storable works
 ext/Storable/t/forgive.t	See if Storable works
 ext/Storable/t/freeze.t		See if Storable works
 ext/Storable/t/integer.t	See if Storable works
+ext/Storable/t/interwork56.t	Test combatibility kludge for 64bit data under 5.6.x
 ext/Storable/t/lock.t		See if Storable works
-ext/Storable/t/make_downgrade.pl	See if Storable works
+ext/Storable/t/make_56_interwork.pl	Make test data for interwork56.t
+ext/Storable/t/make_downgrade.pl	Make test data for downgrade.t
 ext/Storable/t/malice.t		See if Storable copes with corrupt files
 ext/Storable/t/overload.t	See if Storable works
 ext/Storable/t/recurse.t	See if Storable works
@@ -1069,6 +1071,7 @@ lib/ExtUtils/t/prefixify.t	See if MakeMaker can apply a PREFIX
 lib/ExtUtils/t/problems.t	How MakeMaker reacts to build problems
 lib/ExtUtils/t/testlib.t	See if ExtUtils::testlib works
 lib/ExtUtils/t/VERSION_FROM.t	See if MakeMaker's VERSION_FROM works
+lib/ExtUtils/t/writemakefile_args.t   See if WriteMakefile works
 lib/ExtUtils/t/zz_cleanup_dummy.t   Cleanup MakeMaker test module
 lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
 lib/ExtUtils/typemap		Extension interface types
@@ -1953,7 +1956,6 @@ NetWare/bat/Setmpksdk.bat	NetWare port
 NetWare/bat/Setnlmsdk.bat	NetWare port
 NetWare/bat/SetNWBld.bat	NetWare port
 NetWare/bat/SetNWDef.bat	NetWare port
-NetWare/bat/Setwatcom.bat	NetWare port
 NetWare/bat/ToggleD2.bat	NetWare port
 NetWare/bat/ToggleXDC.bat	NetWare port
 NetWare/CLIBsdio.h		NetWare port
@@ -2380,7 +2382,10 @@ t/lib/sample-tests/shbang_misparse	Test data for Test::Harness
 t/lib/sample-tests/simple		Test data for Test::Harness
 t/lib/sample-tests/simple_fail		Test data for Test::Harness
 t/lib/sample-tests/skip			Test data for Test::Harness
+t/lib/sample-tests/skipall	Test data for Test::Harness
+t/lib/sample-tests/skipall_nomsg	Test data for Test::Harness
 t/lib/sample-tests/skip_all		Test data for Test::Harness
+t/lib/sample-tests/skip_nomsg	Test data for Test::Harness
 t/lib/sample-tests/skip_no_msg		Test data for Test::Harness
 t/lib/sample-tests/taint		Test data for Test::Harness
 t/lib/sample-tests/todo			Test data for Test::Harness

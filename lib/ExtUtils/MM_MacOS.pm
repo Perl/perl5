@@ -4,6 +4,7 @@
 #   built-in ExtUtils::MM_Unix methods if MakeMaker.pm is run under MacOS.
 #
 #   Author:  Matthias Neeracher <neeracher@mac.com>
+#   Maintainer: Chris Nandor <pudge@pobox.com>
 
 package ExtUtils::MM_MacOS;
 require ExtUtils::MM_Any;
@@ -11,7 +12,7 @@ require ExtUtils::MM_Unix;
 @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
 
 use vars qw($VERSION);
-$VERSION = '1.00';
+$VERSION = '1.01';
 
 use Config;
 use Cwd 'cwd';
@@ -60,27 +61,54 @@ sub new {
 	}
     }
 
-    $class = ++$ExtUtils::MakeMaker::PACKNAME;
+    my $newclass = ++$ExtUtils::MakeMaker::PACKNAME;
+    local @ExtUtils::MakeMaker::Parent = @ExtUtils::MakeMaker::Parent;    # Protect against non-local exits
     {
-	print "Blessing Object into class [$class]\n" if $Verbose>=2;
-	ExtUtils::MakeMaker::mv_all_methods("MY",$class);
-	bless $self, $class;
-	push @Parent, $self;
-	@{"$class\:\:ISA"} = 'MM';
+        no strict 'refs';
+        print "Blessing Object into class [$newclass]\n" if $Verbose>=2;
+        ExtUtils::MakeMaker::mv_all_methods("MY",$newclass);
+        bless $self, $newclass;
+        push @Parent, $self;
+        require ExtUtils::MY;
+        @{"$newclass\:\:ISA"} = 'MM';
     }
 
-    if (defined $Parent[-2]){
-	$self->{PARENT} = $Parent[-2];
-	my $key;
-	for $key (keys %Prepend_dot_dot) {
-	    next unless defined $self->{PARENT}{$key};
-	    $self->{$key} = $self->{PARENT}{$key};
-	    $self->{$key} = File::Spec->catdir("::",$self->{$key})
-		unless File::Spec->file_name_is_absolute($self->{$key});
-	}
-	$self->{PARENT}->{CHILDREN}->{$class} = $self if $self->{PARENT};
+    if (defined $ExtUtils::MakeMaker::Parent[-2]){
+        $self->{PARENT} = $ExtUtils::MakeMaker::Parent[-2];
+        my $key;
+        for $key (@ExtUtils::MakeMaker::Prepend_parent) {
+            next unless defined $self->{PARENT}{$key};
+            $self->{$key} = $self->{PARENT}{$key};
+            unless ($^O eq 'VMS' && $key =~ /PERL$/) {
+                $self->{$key} = $self->catdir("..",$self->{$key})
+                  unless $self->file_name_is_absolute($self->{$key});
+            } else {
+                # PERL or FULLPERL will be a command verb or even a
+                # command with an argument instead of a full file
+                # specification under VMS.  So, don't turn the command
+                # into a filespec, but do add a level to the path of
+                # the argument if not already absolute.
+                my @cmd = split /\s+/, $self->{$key};
+                $cmd[1] = $self->catfile('[-]',$cmd[1])
+                  unless (@cmd < 2) || $self->file_name_is_absolute($cmd[1]);
+                $self->{$key} = join(' ', @cmd);
+            }
+        }
+        if ($self->{PARENT}) {
+            $self->{PARENT}->{CHILDREN}->{$newclass} = $self;
+            foreach my $opt (qw(POLLUTE PERL_CORE)) {
+                if (exists $self->{PARENT}->{$opt}
+                    and not exists $self->{$opt})
+                    {
+                        # inherit, but only if already unspecified
+                        $self->{$opt} = $self->{PARENT}->{$opt};
+                    }
+            }
+        }
+        my @fm = grep /^FIRST_MAKEFILE=/, @ARGV;
+        $self->parse_args(@fm) if @fm;
     } else {
-	$self->parse_args(@ARGV);
+        $self->parse_args(split(' ', $ENV{PERL_MM_OPT} || ''),@ARGV);
     }
 
     $self->{NAME} ||= $self->guess_name;
@@ -118,7 +146,7 @@ END
     delete $self->{SKIP}; # free memory
 
     # We skip many sections for MacOS, but we don't say anything about it in the Makefile
-    for (qw/post_initialize const_config tool_autosplit
+    for (qw/ const_config tool_autosplit
 	    tool_xsubpp tools_other dist macro depend post_constants
 	    pasthru c_o xs_c xs_o top_targets linkext 
 	    dynamic_bs dynamic_lib static_lib manifypods
@@ -268,10 +296,6 @@ LIBPERL_A, VERSION_FROM, VERSION, DISTNAME, VERSION_SYM.
 
 sub init_main {
     my($self) = @_;
-    unless (ref $self){
-	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
-	$self = $ExtUtils::MakeMaker::Parent[-1];
-    }
 
     # --- Initialize Module Name and Paths
 
@@ -404,10 +428,6 @@ Initializes LDLOADLIBS, LIBS
 
 sub init_others {	# --- Initialize Other Attributes
     my($self) = shift;
-    unless (ref $self){
-	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
-	$self = $ExtUtils::MakeMaker::Parent[-1];
-    }
 
     if ( !$self->{OBJECT} ) {
 	# init_dirscan should have found out, if we have C files
@@ -444,10 +464,6 @@ Initializes DIR, XS, PM, C, O_FILES, H, PL_FILES, MAN*PODS, EXE_FILES.
 
 sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
     my($self) = @_;
-    unless (ref $self){
-	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
-	$self = $ExtUtils::MakeMaker::Parent[-1];
-    }
     my($name, %dir, %xs, %c, %h, %ignore, %pl_files, %manifypods);
     local(%pm); #the sub in find() has to see this hash
 
@@ -582,10 +598,6 @@ Initializes lots of constants and .SUFFIXES and .PHONY
 
 sub constants {
     my($self) = @_;
-    unless (ref $self){
-	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
-	$self = $ExtUtils::MakeMaker::Parent[-1];
-    }
     my(@m,$tmp);
 
     for $tmp (qw/
@@ -630,10 +642,10 @@ MM_VERSION = $ExtUtils::MakeMaker::VERSION
 
     if ($self->{DEFINE}) {
     	$self->{DEFINE} =~ s/-D/-d /g; # Preprocessor definitions may be useful
-    	$self->{DEFINE} =~ s/-I\S+//g; # UN*X includes probably are not useful
+    	$self->{DEFINE} =~ s/-I\S+/_include($1)/eg; # UN*X includes probably are not useful
     }
     if ($self->{INC}) {
-    	$self->{INC} =~ s/-I\S+//g; # UN*X includes probably are not useful
+    	$self->{INC} =~ s/-I(\S+)/_include($1)/eg; # UN*X includes probably are not useful
     }
     for $tmp (qw/
 	      FULLEXT BASEEXT ROOTEXT DEFINE INC
@@ -667,10 +679,6 @@ sub static {
 # --- Static Loading Sections ---
 
     my($self) = shift;
-    unless (ref $self){
-	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
-	$self = $ExtUtils::MakeMaker::Parent[-1];
-    }
     my($extlib) = $self->{MYEXTLIB} ? "\nstatic :: myextlib\n" : "";
     '
 all :: static
@@ -690,10 +698,6 @@ files.
 
 sub dlsyms {
     my($self,%attribs) = @_;
-    unless (ref $self){
-	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
-	$self = $ExtUtils::MakeMaker::Parent[-1];
-    }
 
     return '' unless !$self->{SKIPHASH}{'dynamic'};
 
@@ -728,10 +732,6 @@ sub dynamic {
 # --- dynamic Loading Sections ---
 
     my($self) = shift;
-    unless (ref $self){
-	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
-	$self = $ExtUtils::MakeMaker::Parent[-1];
-    }
     '
 all :: dynamic
 
@@ -752,10 +752,6 @@ sub clean {
 # --- Cleanup and Distribution Sections ---
 
     my($self, %attribs) = @_;
-    unless (ref $self){
-	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
-	$self = $ExtUtils::MakeMaker::Parent[-1];
-    }
     my(@m,$dir);
     push(@m, '
 # Delete temporary files but do not touch installed files. We don\'t delete
@@ -795,10 +791,6 @@ Defines the realclean target.
 
 sub realclean {
     my($self, %attribs) = @_;
-    unless (ref $self){
-	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
-	$self = $ExtUtils::MakeMaker::Parent[-1];
-    }
     my(@m);
     push(@m,'
 # Delete temporary files (via clean) and also delete installed files
@@ -832,10 +824,6 @@ realclean purge ::  clean
 
 sub rulez {
     my($self) = shift;
-    unless (ref $self){
-	ExtUtils::MakeMaker::TieAtt::warndirectuse((caller(0))[3]);
-	$self = $ExtUtils::MakeMaker::Parent[-1];
-    }
     qq'
 install install_static install_dynamic :: 
 \t\$(MACPERL_SRC)PerlInstall -l \$(PERL_LIB)
@@ -875,6 +863,18 @@ $target :: $plfile
 	}
     }
     join "", @m;
+}
+
+sub _include {  # for Unix-style includes, with -I instead of -i
+	my($inc) = @_;
+	require File::Spec::Unix;
+
+	# allow only relative paths
+	if (File::Spec::Unix->file_name_is_absolute($inc)) {
+		return '';
+	} else {
+		return '-i ' . macify($inc);
+	}
 }
 
 1;

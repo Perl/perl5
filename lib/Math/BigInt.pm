@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 require 5.005;
 
-$VERSION = '1.56';
+$VERSION = '1.57';
 use Exporter;
 @ISA =       qw( Exporter );
 @EXPORT_OK = qw( objectify _swap bgcd blcm); 
@@ -1292,6 +1292,7 @@ sub bdiv
   return $self->_div_inf($x,$y)
    if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/) || $y->is_zero());
 
+  #print "mbi bdiv $x $y\n";
   return $upgrade->bdiv($upgrade->new($x),$y,@r)
    if defined $upgrade && !$y->isa($self);
 
@@ -1355,6 +1356,9 @@ sub bdiv
   $x->round(@r); 
   }
 
+###############################################################################
+# modulus functions
+
 sub bmod 
   {
   # modulus (or remainder)
@@ -1393,6 +1397,97 @@ sub bmod
     }
   $x;
   }
+
+sub bmodinv_not_yet_implemented
+  {
+  # modular inverse.  given a number which is (hopefully) relatively
+  # prime to the modulus, calculate its inverse using Euclid's
+  # alogrithm.  if the number is not relatively prime to the modulus
+  # (i.e. their gcd is not one) then NaN is returned.
+
+  my ($self,$num,$mod,@r) = objectify(2,@_);
+
+  return $num if $num->modify('bmodinv');
+
+  return $num->bnan()
+	if ($mod->{sign} ne '+'				# -, NaN, +inf, -inf
+         || $num->is_zero()				# or num == 0
+	 || $num->{sign} !~ /^[+-]$/			# or num NaN, inf, -inf
+        );
+#  return $num                        # i.e., NaN or some kind of infinity,
+#      if ($num->{sign} =~ /\w/);
+
+  # the remaining case, nonpositive case, $num < 0, is addressed below.
+
+  my ($u, $u1) = ($self->bzero(), $self->bone());
+  my ($a, $b) = ($mod->copy(), $num->copy());
+
+  # put least residue into $b if $num was negative
+  $b %= $mod if $b->{sign} eq '-';
+
+    # Euclid's Algorithm
+    while( ! $b->is_zero()) {
+      ($a, my $q, $b) = ($b, $self->bdiv( $a->copy(), $b));
+      ($u, $u1) = ($u1, $u - $u1 * $q);
+    }
+
+    # if the gcd is not 1, then return NaN!  It would be pointless to
+    # have called bgcd first, because we would then be performing the
+    # same Euclidean Algorithm *twice*
+    return $self->bnan() unless $a->is_one();
+
+    $u %= $mod;
+    return $u;
+  }
+
+sub bmodpow_not_yet_implemented
+  {
+  # takes a very large number to a very large exponent in a given very
+  # large modulus, quickly, thanks to binary exponentation.  supports
+  # negative exponents.
+  my ($self,$num,$exp,$mod,@r) = objectify(3,@_);
+
+  return $num if $num->modify('bmodpow');
+
+  # check modulus for valid values
+  return $num->bnan() if ($mod->{sign} ne '+'		# NaN, - , -inf, +inf
+                       || $mod->is_zero());
+
+  # check exponent for valid values
+  if ($exp->{sign} =~ /\w/) 
+    {
+    # i.e., if it's NaN, +inf, or -inf...
+    return $num->bnan();
+    }
+  elsif ($exp->{sign} eq '-')
+    {
+    $exp->babs();
+    $num->bmodinv ($mod);
+    return $num if $num->{sign} !~ /^[+-]/; 	# i.e. if there was no inverse
+    }
+
+    # check num for valid values
+    return $num->bnan() if $num->{sign} !~ /^[+-]$/;
+
+    # in the trivial case,
+    return $num->bzero() if $mod->is_one();
+    return $num->bone() if $num->is_zero() or $num->is_one();
+
+    my $acc = $num->copy(); $num->bone();	# keep ref to $num
+
+      print "$num $acc $exp\n";	
+    while( !$exp->is_zero() ) {
+      if( $exp->is_odd() ) {
+       $num->bmul($acc)->bmod($mod);
+      }
+      $acc->bmul($acc)->bmod($mod);
+      $exp->brsft( 1, 2);      		# remove last (binary) digit
+      print "$num $acc $exp\n";	
+    }
+  return $num;
+  }
+
+###############################################################################
 
 sub bfac
   {
@@ -2097,6 +2192,7 @@ sub objectify
     ${"$a[0]::downgrade"} = undef;
     }
 
+  my $up = ${"$a[0]::upgrade"};
   # print "Now in objectify, my class is today $a[0]\n";
   if ($count == 0)
     {
@@ -2107,7 +2203,7 @@ sub objectify
         {
         $k = $a[0]->new($k);
         }
-      elsif (ref($k) ne $a[0])
+      elsif (!defined $up && ref($k) ne $a[0])
 	{
 	# foreign object, try to convert to integer
         $k->can('as_number') ?  $k = $k->as_number() : $k = $a[0]->new($k);
@@ -2125,7 +2221,7 @@ sub objectify
         {
         $k = $a[0]->new($k);
         }
-      elsif (ref($k) ne $a[0])
+      elsif (!defined $up && ref($k) ne $a[0])
 	{
 	# foreign object, try to convert to integer
         $k->can('as_number') ?  $k = $k->as_number() : $k = $a[0]->new($k);
@@ -2147,7 +2243,6 @@ sub import
   my @a; my $l = scalar @_;
   for ( my $i = 0; $i < $l ; $i++ )
     {
-#    print "at $_[$i]\n";
     if ($_[$i] eq ':constant')
       {
       # this causes overlord er load to step in
@@ -2171,7 +2266,6 @@ sub import
       push @a, $_[$i];
       }
     }
-#  print "a @a\n";
   # any non :constant stuff is handled by our parent, Exporter
   # even if @_ is empty, to give it a chance 
   $self->SUPER::import(@a);			# need it for subclasses
@@ -2515,6 +2609,7 @@ Math::BigInt - Arbitrary size integer math package
 				# return (quo,rem) or quo if scalar
 
   $x->bmod($y);			# modulus (x % y)
+
   $x->bpow($y);			# power of arguments (x ** y)
   $x->blsft($y);		# left shift
   $x->brsft($y);		# right shift 
@@ -2834,6 +2929,39 @@ numbers.
 =head2 bmod
 
   $x->bmod($y);			# modulus (x % y)
+
+=head2 bmodinv
+
+Not yet implemented.
+
+  bmodinv($num,$mod);          # modular inverse (no OO style)
+
+Returns the inverse of C<$num> in the given modulus C<$mod>.  'C<NaN>' is
+returned unless C<$num> is relatively prime to C<$mod>, i.e. unless
+C<bgcd($num, $mod)==1>.
+
+=head2 bmodpow
+
+Not yet implemented.
+
+  bmodpow($num,$exp,$mod);     # modular exponentation ($num**$exp % $mod)
+
+Returns the value of C<$num> taken to the power C<$exp> in the modulus
+C<$mod> using binary exponentation.  C<bmodpow> is far superior to
+writing
+
+  $num ** $exp % $mod
+
+because C<bmodpow> is much faster--it reduces internal variables into
+the modulus whenever possible, so it operates on smaller numbers.
+
+C<bmodpow> also supports negative exponents.
+
+  bmodpow($num, -1, $mod)
+
+is exactly equivalent to
+
+  bmodinv($num, $mod)
 
 =head2 bpow
 

@@ -8,12 +8,19 @@ BEGIN
   $| = 1;
   chdir 't' if -d 't';
   unshift @INC, '../lib'; # for running manually
-  plan tests => 61;
+  plan tests => 83;
   }
 
 # testing of Math::BigRat
 
 use Math::BigRat;
+use Math::BigInt;
+use Math::BigFloat;
+
+# shortcuts
+my $cr = 'Math::BigRat';		
+my $mbi = 'Math::BigInt';
+my $mbf = 'Math::BigFloat';
 
 my ($x,$y,$z);
 
@@ -23,27 +30,38 @@ ok (!$x->isa('Math::BigFloat'));
 ok (!$x->isa('Math::BigInt'));
 
 ##############################################################################
-# new
+# new and bnorm()
 
-$x = Math::BigRat->new(1234); 		ok ($x,1234);
-$x = Math::BigRat->new('1234/1'); 	ok ($x,1234);
-$x = Math::BigRat->new('1234/2'); 	ok ($x,617);
+foreach my $func (qw/new bnorm/)
+  {
+  $x = $cr->$func(1234); 	ok ($x,1234);
 
-$x = Math::BigRat->new('100/1.0');	ok ($x,100);
-$x = Math::BigRat->new('10.0/1.0');	ok ($x,10);
-$x = Math::BigRat->new('0.1/10');	ok ($x,'1/100');
-$x = Math::BigRat->new('0.1/0.1');	ok ($x,'1');
-$x = Math::BigRat->new('1e2/10');	ok ($x,10);
-$x = Math::BigRat->new('1e2/1e1');	ok ($x,10);
-$x = Math::BigRat->new('1 / 3');	ok ($x,'1/3');
-$x = Math::BigRat->new('-1 / 3');	ok ($x,'-1/3');
-$x = Math::BigRat->new('NaN');		ok ($x,'NaN');
-$x = Math::BigRat->new('inf');		ok ($x,'inf');
-$x = Math::BigRat->new('-inf');		ok ($x,'-inf');
-$x = Math::BigRat->new('1/');		ok ($x,'NaN');
+  $x = $cr->$func('1234/1'); 	ok ($x,1234);
+  $x = $cr->$func('1234/2'); 	ok ($x,617);
 
-# input ala '1+1/3' isn't parsed ok yet
-$x = Math::BigRat->new('1+1/3');		ok ($x,'NaN');
+  $x = $cr->$func('100/1.0');	ok ($x,100);
+  $x = $cr->$func('10.0/1.0');	ok ($x,10);
+  $x = $cr->$func('0.1/10');	ok ($x,'1/100');
+  $x = $cr->$func('0.1/0.1');	ok ($x,'1');
+  $x = $cr->$func('1e2/10');	ok ($x,10);
+  $x = $cr->$func('1e2/1e1');	ok ($x,10);
+  $x = $cr->$func('1 / 3');		ok ($x,'1/3');
+  $x = $cr->$func('-1 / 3');	ok ($x,'-1/3');
+  $x = $cr->$func('NaN');		ok ($x,'NaN');
+  $x = $cr->$func('inf');		ok ($x,'inf');
+  $x = $cr->$func('-inf');		ok ($x,'-inf');
+  $x = $cr->$func('1/');		ok ($x,'NaN');
+
+  # input ala '1+1/3' isn't parsed ok yet
+  $x = $cr->$func('1+1/3');		ok ($x,'NaN');
+
+  ############################################################################
+  # other classes as input
+
+  $x = $cr->$func($mbi->new(1231));		ok ($x,'1231');
+  $x = $cr->$func($mbf->new(1232));		ok ($x,'1232');
+  $x = $cr->$func($mbf->new(1232.3));	ok ($x,'12323/10');
+  }
 
 ##############################################################################
 # mixed arguments

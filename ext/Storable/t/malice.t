@@ -32,21 +32,6 @@ use vars qw($file_magic_str $other_magic $network_magic $byteorder
 
 $byteorder = $Config{byteorder};
 
-if ($] < 5.007003 && $] >= 5.006 && $^O ne 'MSWin32'
-    && $Config{longsize} != $Config{ivsize}) {
-  # 5.6.x, not on Windows, built with IVs as long long
-  # config.h and Config.sh differ in their idea of the value of byteorder
-  # Storable's header is written out using C (hence config.h), but we're
-  # testing with perl
-  if ($byteorder eq '12345678') {
-    $byteorder = '1234';
-  } elsif ($byteorder eq '87654321') {
-    $byteorder = '4321';
-  } else {
-    die "I don't recognise Your byteorder: '$byteorder'";
-  }
-}
-
 $file_magic_str = 'pst0';
 $other_magic = 7 + length $byteorder;
 $network_magic = 2;

@@ -52,7 +52,7 @@ my ($f,$z,$a,$exp,@a,$m,$e,$round_mode,$expected_class);
 
 while (<DATA>) 
   {
-  chop;
+  chomp;
   next if /^#/;	# skip comments
   if (s/^&//) 
     {

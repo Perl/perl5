@@ -1,3 +1,20 @@
+6.01 Thu May 30 14:48:57 EDT 2002
+    - MacOS Classic fixes from Pudge: recursive make repair,
+      post_initialize() now used, DEFINE & INC work with relative paths,
+      removed dead hybrid method/function call code.
+    * WriteMakefile now a bit more tolerant of wrong arguments, it will
+      warn and try to soldier on rather than just vomiting.
+    - Netware whitespace nits (bleadperl@16811)
+    - Netware Perl version number tag when building dynamic libraries
+      needs to match the current perl version instead of being hard coded
+      (a mutation of bleadperl@16851)
+    - OS/2 bug in TEST_F target found by John Poltorak (bleadperl@16839)
+    - README in 6.00 still declared this as alpha.
+
+6.00 Sat May 25 17:14:09 EDT 2002
+    - VMS 8-level limit test tweak (bleadperl@16764)
+    * Here goes nothing.
+
 5.96_01 Wed May 22 19:11:09 EDT 2002
     - Fixed ExtUtils::testlib so it doesn't taint @INC.
     - Fixed ExtUtils::Command so it groks % shell wildcard on VMS.

@@ -57,27 +57,18 @@ please email me.
 Tom Spindler
 dogcow@isi.net
 
-=head2 Update 2002-05-25
+=head2 Update 2002-05-30
 
 The following tests fail on 5.8.0 Perl in BeOS Personal 5.03:
 
- t/op/lfs............................FAILED at test 17
- t/op/magic..........................FAILED at test 24
- ext/Fcntl/t/syslfs..................FAILED at test 17
- ext/File/Glob/t/basic...............FAILED at test 3
- ext/POSIX/t/sigaction...............FAILED at test 13
- ext/POSIX/t/waitpid.................FAILED at test 1
- lib/Tie/File/t/16_handle............FAILED at test 39
+  t/op/magic..........................FAILED at test 24
+  ext/File/Glob/t/basic...............FAILED at test 3
+  ext/POSIX/t/sigaction...............FAILED at test 13
+  ext/POSIX/t/waitpid.................FAILED at test 1
 
 The reasons for the failures are as follows: 
 
 =over 4
-
-=item *
-
-The op/lfs and Fcntl/t/syslfs seem to hit a real bug: though we can
-seek around past the 2GB limit, reading from there doesn't work.
-Therefore, please don't try doing large files in BeOS with Perl.
 
 =item *
 
@@ -101,11 +92,6 @@ if sigaction returns early.
 The waitpid failure means that after there are no more child
 processes, waitpid is supposed to start returning -1 (and set
 errno to ECHILD).  In BeOS, it doesn't seem to.
-
-=item *
-
-The Tie/File/t/16_handle seems to indicate some brokenness
-(non-UNIXness) in how BeOS handles pipes.
 
 =back
 

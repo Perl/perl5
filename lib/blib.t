@@ -57,7 +57,12 @@ _mkdirs( @blib_dirs );
 is( @INC, 3, '@INC now has 3 elements' );
 is( $INC[2],    '../lib',       'blib added to the front of @INC' );
 
-ok( grep(m|$blib_lib$|, @INC[0,1])  == 1,     '  blib/lib in @INC');
-ok( grep(m|$blib_arch$|, @INC[0,1]) == 1,     '  blib/arch in @INC');
+if ($^O eq 'VMS') {
+    # Unix syntax is accepted going in but it's not what comes out
+    $blib_arch = 'blib.arch]';
+    $blib_lib = 'blib.lib]';
+}
+ok( grep(m|\Q$blib_lib\E$|, @INC[0,1])  == 1,     '  blib/lib in @INC');
+ok( grep(m|\Q$blib_arch\E$|, @INC[0,1]) == 1,     '  blib/arch in @INC');
 
 END { _cleanup( @blib_dirs ); }
