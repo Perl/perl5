@@ -70,16 +70,17 @@ sub no_plan {
 }
 
 
-
-$| = 1;
-open(*TESTOUT, ">&STDOUT") or _whoa(1, "Can't dup STDOUT!");
-open(*TESTERR, ">&STDOUT") or _whoa(1, "Can't dup STDOUT!");
-{
-    my $orig_fh = select TESTOUT;
+unless( $^C ) {    
     $| = 1;
-    select TESTERR;
-    $| = 1;
-    select $orig_fh;
+    open(*TESTOUT, ">&STDOUT") or _whoa(1, "Can't dup STDOUT!");
+    open(*TESTERR, ">&STDOUT") or _whoa(1, "Can't dup STDOUT!");
+    {
+        my $orig_fh = select TESTOUT;
+        $| = 1;
+        select TESTERR;
+        $| = 1;
+        select $orig_fh;
+    }
 }
 
 =head1 NAME

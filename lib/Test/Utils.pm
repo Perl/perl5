@@ -17,6 +17,8 @@ $VERSION = '0.02';
 sub my_print (*@) {
     my($fh, @args) = @_;
 
+    return 1 if $^C;
+
     local $\;
     print $fh @args;
 }
