@@ -795,6 +795,7 @@ PP(pp_rv2hv)
 {
     dSP; dTOPss;
     HV *hv;
+    I32 gimme = GIMME_V;
 
     if (SvROK(sv)) {
       wasref:
@@ -808,7 +809,7 @@ PP(pp_rv2hv)
 	    RETURN;
 	}
 	else if (LVRET) {
-	    if (GIMME == G_SCALAR)
+	    if (GIMME != G_SCALAR)
 		Perl_croak(aTHX_ "Can't return hash to lvalue scalar context");
 	    SETs((SV*)hv);
 	    RETURN;
