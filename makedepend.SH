@@ -18,16 +18,13 @@ case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
 
-: ${bin_sh=/bin/sh}
-
 echo "Extracting makedepend (with variable substitutions)"
 rm -f makedepend
 $spitshell >makedepend <<!GROK!THIS!
 $startsh
 # makedepend.SH
 #
-## To use an alternate make, set \$altmake in config.sh.
-MAKE=${altmake-make}
+MAKE=$make
 !GROK!THIS!
 $spitshell >>makedepend <<'!NO!SUBS!'
 
@@ -135,7 +132,7 @@ rm .shlist.old
 if $test -s .deptmp; then
     for file in `cat .shlist`; do
 	$echo `$expr X$file : 'X\(.*\).SH'`: $file $TOP/config.sh \; \
-	    $bin_sh $file >> .deptmp
+	    $sh $file >> .deptmp
     done
     $echo "Updating $mf..."
     $echo "# If this runs make out of memory, delete /usr/include lines." \
@@ -162,7 +159,7 @@ else
        $sed -f .hsed >> $mf.new
     for file in `$cat .shlist`; do
 	$echo `$expr X$file : 'X\(.*\).SH'`: $file $TOP/config.sh \; \
-	    $bin_sh $file >> $mf.new
+	    $sh $file >> $mf.new
     done
 fi
 $rm -f $mf.old
