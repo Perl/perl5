@@ -1540,12 +1540,12 @@ $ WRITE CONFIG "        exit(0);"
 $ WRITE CONFIG "}"
 $ CLOSE CONFIG
 $!
-$! DEFINE SYS$ERROR _NLA0:
-$! DEFINE SYS$OUTPUT _NLA0:
+$ SET NOON
+$ DEFINE/USER_MODE SYS$ERROR _NLA0:
+$ DEFINE/USER_MODE SYS$OUTPUT _NLA0:
 $ cc/NoObj/list=ccvms.lis ccvms.c
 $ tmp = $status
-$! DEASSIGN SYS$OUTPUT
-$! DEASSIGN SYS$ERROR
+$ SET ON
 $ IF (silent) THEN GOSUB Shut_up
 $ IF tmp.NE.%X10B90001
 $ THEN 
@@ -1565,9 +1565,9 @@ $   IF .NOT.silent
 $   THEN 
 $     echo "Will try cc/decc..."
 $   ENDIF
+$   SET NOON
 $   DEFINE/USER_MODE SYS$ERROR NL:
 $   DEFINE/USER_MODE SYS$OUTPUT NL:
-$   SET NOON
 $   cc/decc/NoObj/list=ccvms.lis ccvms.c
 $   tmp = $status
 $   SET ON
@@ -1591,10 +1591,12 @@ $!
 $Gcc_initial_check:
 $ echo "Checking for gcc"
 $ OPEN/WRITE CONFIG gccvers.lis
+$ SET NOON
 $ DEFINE/USER_MODE SYS$ERROR CONFIG
 $ DEFINE/USER_MODE SYS$OUTPUT CONFIG
 $ 'gcc_symbol'/noobj/version _nla0:
 $ tmp = $status
+$ SET ON
 $ IF (silent) THEN GOSUB Shut_up
 $ CLOSE CONFIG
 $ IF (tmp.NE.%X10000001).and.(tmp.ne.%X00030001)
@@ -2337,7 +2339,7 @@ $     echo ""
 $     bool_dflt = "y"
 $     if f$type(useithreads) .nes. ""
 $     then
-$         if .not. useithreads .or. useithreads .eqs. "undef" then bool_dflt="n"
+$         if useithreads .eqs. "undef" then bool_dflt="n"
 $     endif
 $     if f$type(use5005threads) .nes. ""
 $     then
@@ -3373,6 +3375,25 @@ $ i_netdb = "undef"
 $ tmp = "unistd.h"
 $ GOSUB inhdr
 $ i_unistd = tmp
+$!
+$! do we have getppid()?
+$!
+$ IF i_unistd .EQS. "define"
+$ THEN
+$   OS
+$   WS "#include <stdio.h>"
+$   WS "#include <unistd.h>"
+$   WS "int main() {"
+$   WS "printf(""%d\n"",getppid());"
+$   WS "return(0);"
+$   WS "}"
+$   CS
+$   tmp = "getppid"
+$   GOSUB inlibc
+$   d_getppid = tmp
+$ ELSE
+$   d_getppid = "undef"
+$ ENDIF
 $!
 $!: see if this is a libutil.h system
 $!
@@ -5253,7 +5274,7 @@ $ WC "d_getpent='" + d_getpent + "'"
 $ WC "d_getpgid='undef'"
 $ WC "d_getpgrp2='undef'"
 $ WC "d_getpgrp='undef'"
-$ WC "d_getppid='undef'"
+$ WC "d_getppid='" + d_getppid + "'"
 $ WC "d_getprior='undef'"
 $ WC "d_getprotoprotos='" + d_getprotoprotos + "'"
 $ WC "d_getprpwnam='undef'"
