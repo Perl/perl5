@@ -43,6 +43,7 @@ README.epoc		Notes about EPOC port
 README.hpux		Notes about HP-UX port
 README.hurd		Notes about GNU/Hurd port
 README.machten		Notes about Power MachTen port
+README.macos		Notes about Mac OS (Classic)
 README.mint		Notes about Atari MiNT port
 README.mpeix		Notes about MPE/iX port
 README.os2		Notes about OS/2 port
