@@ -1402,7 +1402,7 @@ p	|int	|runops_standard
 p	|int	|runops_debug
 
 #if defined(WIN32)
-p	|int&	|ErrorNo
+p	|int* 	|ErrorNo
 #endif
 p	|void	|sv_catpvf_mg	|SV *sv|const char* pat|...
 p	|void	|sv_catpv_mg	|SV *sv|const char *ptr

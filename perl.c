@@ -83,7 +83,6 @@ perl_construct(register PerlInterpreter *my_perl)
 #endif
 
 #ifdef MULTIPLICITY
-    ++PL_ninterps;
     Zero(my_perl, 1, PerlInterpreter);
 #endif
 
@@ -307,10 +306,6 @@ perl_destruct(register PerlInterpreter *my_perl)
 
     LEAVE;
     FREETMPS;
-
-#ifdef MULTIPLICITY
-    --PL_ninterps;
-#endif
 
     /* We must account for everything.  */
 

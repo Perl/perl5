@@ -296,11 +296,6 @@ Verify operations that access pad objects (lexicals and temporaries).
 
 =over 4
 
-=item caller
-
-Allows modules to inherit pragmatic attributes from the caller's
-context.  C<utf8> is currently the only supported attribute.
-
 =item Dumpvalue
 
 Added Dumpvalue module provides screen dumps of Perl data.
@@ -428,6 +423,10 @@ See L<perldbmfilter> for further information.
 =head2 Pragmata
 
 C<use utf8> to enable UTF-8 and Unicode support.
+
+C<use caller 'encoding'> allows modules to inherit pragmatic attributes
+from the caller's context.  C<encoding> is currently the only supported
+attribute.
 
 Lexical warnings pragma, C<use warning;>, to control optional warnings.
 

@@ -647,7 +647,7 @@ void	Perl_yydestruct(pTHX_ void *ptr);
 int	Perl_runops_standard(pTHX);
 int	Perl_runops_debug(pTHX);
 #if defined(WIN32)
-int&	Perl_ErrorNo(pTHX);
+int*	Perl_ErrorNo(pTHX);
 #endif
 void	Perl_sv_catpvf_mg(pTHX_ SV *sv, const char* pat, ...);
 void	Perl_sv_catpv_mg(pTHX_ SV *sv, const char *ptr);
