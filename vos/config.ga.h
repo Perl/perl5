@@ -3216,4 +3216,15 @@
 /*#define HAS_SETPGRP		/**/
 /*#define USE_BSD_SETPGRP	/**/
 
+/* NEED_VA_COPY:
+ *	This symbol, if defined, indicates that the system stores
+ *	the variable argument list datatype, va_list, in a format
+ *	that cannot be copied by simple assignment, so that some
+ *	other means must be used when copying is required.
+ *	As such systems vary in their provision (or non-provision)
+ *	of copying mechanisms, handy.h defines a platform-
+ *	independent macro, Perl_va_copy(src, dst), to do the job.
+ */
+/*#define	NEED_VA_COPY		/ **/
+
 #endif

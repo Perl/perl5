@@ -431,6 +431,7 @@ modetype=int
 multiarch='undef'
 myarchname='unknown'
 myuname='unknown'
+need_va_copy='undef'
 netdb_hlen_type='int'
 netdb_host_type='const char *'
 netdb_name_type='const char *'

@@ -88,7 +88,7 @@ unless ($PLATFORM eq 'win32') {
 	}
 	if ($PLATFORM eq 'os2') {
 	    $CONFIG_ARGS = $1 if /^(?:config_args)='(.+)'$/;
-	    $ARCHNAME = $1 if /^(?:archname)='(.+)'$/;
+	    $ARCHNAME =    $1 if /^(?:archname)='(.+)'$/;
 	}
     }
     close(CFG);
@@ -97,12 +97,9 @@ unless ($PLATFORM eq 'win32') {
 open(CFG,$config_h) || die "Cannot open $config_h: $!\n";
 while (<CFG>) {
     $define{$1} = 1 if /^\s*#\s*define\s+(MYMALLOC)\b/;
-    $define{$1} = 1 if /^\s*#\s*define\s+(USE_5005THREADS)\b/;
-    $define{$1} = 1 if /^\s*#\s*define\s+(USE_ITHREADS)\b/;
-    $define{$1} = 1 if /^\s*#\s*define\s+(USE_PERLIO)\b/;
     $define{$1} = 1 if /^\s*#\s*define\s+(MULTIPLICITY)\b/;
-    $define{$1} = 1 if /^\s*#\s*define\s+(PERL_IMPLICIT_SYS)\b/;
-    $define{$1} = 1 if /^\s*#\s*define\s+(PERL_BINCOMPAT_5005)\b/;
+    $define{$1} = 1 if /^\s*#\s*define\s+(PERL_\w+)\b/;
+    $define{$1} = 1 if /^\s*#\s*define\s+(USE_\w+)\b/;
 }
 close(CFG);
 
@@ -478,6 +475,18 @@ unless ($define{'PERL_IMPLICIT_SYS'}) {
 
 unless ($define{'FAKE_THREADS'}) {
     skip_symbols [qw(PL_curthr)];
+}
+
+# All quad int platforms are assumed to have broken SOCKS
+unless ($define{USE_SOCKS} && $define{USE_64_BIT_ALL}) {
+    skip_symbols [qw(
+		     Perl_do_s64_fread
+		     Perl_do_s64_getc
+		     Perl_do_s64_delete_buffer
+		     Perl_do_s64_seek
+		     Perl_do_s64_tell
+		     Perl_do_s64_tell
+		    )];
 }
 
 sub readvar {

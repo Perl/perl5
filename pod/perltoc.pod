@@ -3809,7 +3809,7 @@ C<!!!>, C<!!>, C<!>
 
 =item The & Unary Operator
 
-=item Inserting Comments and C Preprocessor Directives
+=item Inserting POD, Comments and C Preprocessor Directives
 
 =item Using XS With C++
 
@@ -4590,16 +4590,9 @@ work?, Patches speak louder than words
 =item Keeping in sync
 
 rsync'ing the source tree, Using rsync over the LAN, Using pushing over the
-NFS, rsync'ing the patches
-
-=item Why rsync the source tree
-
-It's easier, It's more recent, It's more reliable
-
-=item Why rsync the patches
-
-It's easier, It's a good reference, Finding a start point, Finding how to
-fix a bug, Finding the source of misbehaviour
+NFS, rsync'ing the patches, It's easier, It's more recent, It's more
+reliable, It's easier, It's a good reference, Finding a start point,
+Finding how to fix a bug, Finding the source of misbehaviour
 
 =item Submitting patches
 
@@ -7966,7 +7959,7 @@ on first try?, 8) In our intranet we have many modules for internal use.
 How	  can I integrate these modules with CPAN.pm but without uploading 
      the modules to CPAN?, 9) When I run CPAN's shell, I get error msg
 about line 1 to 4,	 setting meta input/output via the /etc/inputrc
-file
+file, 10) Some authors have strange characters in their names
 
 =item BUGS
 
@@ -8106,11 +8099,11 @@ C<cppstdin>, C<cppsymbols>, C<crosscompile>, C<cryptlib>, C<csh>
 
 =item d
 
-C<d_access>, C<d_accessx>, C<d_alarm>, C<d_archlib>, C<d_atolf>,
-C<d_atoll>, C<d_attribut>, C<d_bcmp>, C<d_bcopy>, C<d_bincompat5005>,
-C<d_bsd>, C<d_bsdgetpgrp>, C<d_bsdsetpgrp>, C<d_bzero>, C<d_casti32>,
-C<d_castneg>, C<d_charvspr>, C<d_chown>, C<d_chroot>, C<d_chsize>,
-C<d_closedir>, C<d_const>, C<d_crypt>, C<d_csh>, C<d_cuserid>,
+C<d__fwalk>, C<d_access>, C<d_accessx>, C<d_alarm>, C<d_archlib>,
+C<d_atolf>, C<d_atoll>, C<d_attribut>, C<d_bcmp>, C<d_bcopy>,
+C<d_bincompat5005>, C<d_bsd>, C<d_bsdgetpgrp>, C<d_bsdsetpgrp>, C<d_bzero>,
+C<d_casti32>, C<d_castneg>, C<d_charvspr>, C<d_chown>, C<d_chroot>,
+C<d_chsize>, C<d_closedir>, C<d_const>, C<d_crypt>, C<d_csh>, C<d_cuserid>,
 C<d_dbl_dig>, C<d_difftime>, C<d_dirnamlen>, C<d_dlerror>, C<d_dlopen>,
 C<d_dlsymun>, C<d_dosuid>, C<d_drand48proto>, C<d_dup2>, C<d_eaccess>,
 C<d_endgrent>, C<d_endhent>, C<d_endnent>, C<d_endpent>, C<d_endpwent>,
@@ -8148,32 +8141,33 @@ C<d_PRIu64>, C<d_PRIx64>, C<d_PRIXU64>, C<d_pthread_yield>, C<d_pwage>,
 C<d_pwchange>, C<d_pwclass>, C<d_pwcomment>, C<d_pwexpire>, C<d_pwgecos>,
 C<d_pwpasswd>, C<d_pwquota>, C<d_qgcvt>, C<d_quad>, C<d_readdir>,
 C<d_readlink>, C<d_rename>, C<d_rewinddir>, C<d_rmdir>, C<d_safebcpy>,
-C<d_safemcpy>, C<d_sanemcmp>, C<d_sched_yield>, C<d_scm_rights>,
-C<d_SCNfldbl>, C<d_seekdir>, C<d_select>, C<d_sem>, C<d_semctl>,
-C<d_semctl_semid_ds>, C<d_semctl_semun>, C<d_semget>, C<d_semop>,
-C<d_setegid>, C<d_seteuid>, C<d_setgrent>, C<d_setgrps>, C<d_sethent>,
-C<d_setlinebuf>, C<d_setlocale>, C<d_setnent>, C<d_setpent>, C<d_setpgid>,
-C<d_setpgrp2>, C<d_setpgrp>, C<d_setprior>, C<d_setproctitle>,
-C<d_setpwent>, C<d_setregid>, C<d_setresgid>, C<d_setresuid>,
-C<d_setreuid>, C<d_setrgid>, C<d_setruid>, C<d_setsent>, C<d_setsid>,
-C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>, C<d_shmatprototype>,
-C<d_shmctl>, C<d_shmdt>, C<d_shmget>, C<d_sigaction>, C<d_sigsetjmp>,
-C<d_socket>, C<d_socklen_t>, C<d_sockpair>, C<d_socks5_init>, C<d_sqrtl>,
-C<d_statblks>, C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>,
-C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>, C<d_stdio_ptr_lval_nochange_cnt>,
-C<d_stdio_ptr_lval_sets_cnt>, C<d_stdio_stream_array>, C<d_stdiobase>,
-C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>,
-C<d_strerror>, C<d_strtod>, C<d_strtol>, C<d_strtold>, C<d_strtoll>,
-C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>,
-C<d_symlink>, C<d_syscall>, C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>,
-C<d_system>, C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>,
-C<d_telldirproto>, C<d_time>, C<d_times>, C<d_truncate>, C<d_tzname>,
-C<d_umask>, C<d_uname>, C<d_union_semun>, C<d_ustat>, C<d_vendorarch>,
-C<d_vendorbin>, C<d_vendorlib>, C<d_vfork>, C<d_void_closedir>,
-C<d_voidsig>, C<d_voidtty>, C<d_volatile>, C<d_vprintf>, C<d_wait4>,
-C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>, C<d_xenix>, C<date>,
-C<db_hashtype>, C<db_prefixtype>, C<defvoidused>, C<direntrytype>,
-C<dlext>, C<dlsrc>, C<doublesize>, C<drand01>, C<dynamic_ext>
+C<d_safemcpy>, C<d_sanemcmp>, C<d_sbrkproto>, C<d_sched_yield>,
+C<d_scm_rights>, C<d_SCNfldbl>, C<d_seekdir>, C<d_select>, C<d_sem>,
+C<d_semctl>, C<d_semctl_semid_ds>, C<d_semctl_semun>, C<d_semget>,
+C<d_semop>, C<d_setegid>, C<d_seteuid>, C<d_setgrent>, C<d_setgrps>,
+C<d_sethent>, C<d_setlinebuf>, C<d_setlocale>, C<d_setnent>, C<d_setpent>,
+C<d_setpgid>, C<d_setpgrp2>, C<d_setpgrp>, C<d_setprior>,
+C<d_setproctitle>, C<d_setpwent>, C<d_setregid>, C<d_setresgid>,
+C<d_setresuid>, C<d_setreuid>, C<d_setrgid>, C<d_setruid>, C<d_setsent>,
+C<d_setsid>, C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>,
+C<d_shmatprototype>, C<d_shmctl>, C<d_shmdt>, C<d_shmget>, C<d_sigaction>,
+C<d_sigsetjmp>, C<d_socket>, C<d_socklen_t>, C<d_sockpair>,
+C<d_socks5_init>, C<d_sqrtl>, C<d_statblks>, C<d_statfs_f_flags>,
+C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>,
+C<d_stdio_ptr_lval_nochange_cnt>, C<d_stdio_ptr_lval_sets_cnt>,
+C<d_stdio_stream_array>, C<d_stdiobase>, C<d_stdstdio>, C<d_strchr>,
+C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>, C<d_strerror>, C<d_strtod>,
+C<d_strtol>, C<d_strtold>, C<d_strtoll>, C<d_strtoul>, C<d_strtoull>,
+C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>, C<d_symlink>, C<d_syscall>,
+C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>,
+C<d_tcsetpgrp>, C<d_telldir>, C<d_telldirproto>, C<d_time>, C<d_times>,
+C<d_truncate>, C<d_tzname>, C<d_umask>, C<d_uname>, C<d_union_semun>,
+C<d_ustat>, C<d_vendorarch>, C<d_vendorbin>, C<d_vendorlib>, C<d_vfork>,
+C<d_void_closedir>, C<d_voidsig>, C<d_voidtty>, C<d_volatile>,
+C<d_vprintf>, C<d_wait4>, C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>,
+C<d_xenix>, C<date>, C<db_hashtype>, C<db_prefixtype>, C<defvoidused>,
+C<direntrytype>, C<dlext>, C<dlsrc>, C<doublesize>, C<drand01>,
+C<dynamic_ext>
 
 =item e
 
@@ -9677,6 +9671,40 @@ C<GLOB_NOSPACE>, C<GLOB_ABEND>
 =item SEE ALSO
 
 =item AUTHORS
+
+=back
+
+=head2 File::Spec::Epoc - methods for Epoc file specs
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+devnull
+
+=back
+
+tmpdir
+
+path
+
+canonpath
+
+splitpath
+
+splitdir
+
+catpath
+
+abs2rel
+
+rel2abs
+
+=over 4
+
+=item SEE ALSO
 
 =back
 
