@@ -1164,7 +1164,6 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_DBSTATE:
     case OP_ENTERTRY:
     case OP_ENTER:
-    case OP_SCALAR:
 	if (!(o->op_flags & OPf_KIDS))
 	    break;
 	/* FALL THROUGH */
@@ -1183,6 +1182,8 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_REQUIRE:
 	/* all requires must return a boolean value */
 	o->op_flags &= ~OPf_WANT;
+	/* FALL THROUGH */
+    case OP_SCALAR:
 	return scalar(o);
     case OP_SPLIT:
 	if ((kid = cLISTOPo->op_first) && kid->op_type == OP_PUSHRE) {
