@@ -1827,6 +1827,8 @@ my_popen(char *cmd, char *mode)
     if (pid == 0) {
 	GV* tmpgv;
 
+#undef THIS
+#undef THAT
 #define THIS that
 #define THAT This
 	PerlLIO_close(p[THAT]);
