@@ -3,13 +3,18 @@
 # Comments, questions, and improvements welcome!
 #
 # MachTen does not support dynamic loading. If you wish to, you
-# can get <ftp://tsx-11.mit.edu/pub/linux/sources/libs/dld-src-3.2.4.tar.gz>
-# compile and install. This is the version of DLD that works with the
-# ext/DynaLoader/dl_dld.xs in the perl5 package. Have fun!
+# can fetch, compile, and install the dld package.
+# This ought to work with the ext/DynaLoader/dl_dld.xs in the 
+# perl5 package. Have fun!
+# Some possible locations for dld:
+# ftp-swiss.ai.mit.edu:pub/scm/dld-3.2.7.tar.gz
+# prep.ai.mit.edu:/pub/gnu/jacal/dld-3.2.7.tar.gz
+# ftp.cs.indiana.edu:/pub/scheme-repository/imp/SCM-support/dld-3.2.7.tar.gz
+# tsx-11.mit.edu:/pub/linux/sources/libs/dld-3.2.7.tar.gz
 #
 #  Original version was for MachTen 2.1.1.
 #  Last modified by Andy Dougherty   <doughera@lafcol.lafayette.edu>
-#  Fri Feb  9 13:04:45 EST 1996
+#  Tue Aug 13 12:31:01 EDT 1996
 
 # I don't know why this is needed.  It might be similar to NeXT's
 # problem.  See hints/next_3.sh.
