@@ -2,7 +2,7 @@
 
 # $RCSfile: index.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:59 $
 
-print "1..24\n";
+print "1..28\n";
 
 $foo = 'Now is the time for all good men to come to the aid of their country.';
 
@@ -47,3 +47,25 @@ print index($a, "bar",    ) == 5 ? "ok 22\n" : "not ok 22\n";
 
 print rindex($a, "\x{1234}") == 4 ? "ok 23\n" : "not ok 23\n";
 print rindex($a, "foo",    ) == 0 ? "ok 24\n" : "not ok 24\n";
+
+{
+    # [perl #22375] 'split'/'index' problem for utf8
+    my $t = 25;
+    my $needle = "\x{1230}\x{1270}";
+    my @needles = split ( //, $needle );
+    my $haystack = "\x{1228}\x{1228}\x{1230}\x{1270}";
+    foreach ( @needles ) {
+	my $a = index ( "\x{1228}\x{1228}\x{1230}\x{1270}", $_ );
+	my $b = index ( $haystack, $_ );
+	print $a == $b ? "ok $t\n" : "not ok $t # - $a != $b\n";
+	$t++;
+    }
+    $needle = "\x{1270}\x{1230}"; # Transpose them.
+    @needles = split ( //, $needle );
+    foreach ( @needles ) {
+	my $a = index ( "\x{1228}\x{1228}\x{1230}\x{1270}", $_ );
+	my $b = index ( $haystack, $_ );
+	print $a == $b ? "ok $t\n" : "not ok $t # - $a != $b\n";
+	$t++;
+    }
+}

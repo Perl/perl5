@@ -5952,8 +5952,6 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 			}
 
 			cache[0] -= ubackw;
-
-			return;
 		    }
 		}
 	    }
