@@ -1,11 +1,12 @@
 name: perl
-version: 5.009
+version: 5.009001
 abstract: Practical Extraction and Reporting Language
 author: perl5-porters@perl.org
 license: perl
 distribution_type: core
 private:
   directory:
+    - ext/Cwd
     - ext/Data/Dumper
     - ext/DB_File
     - ext/Devel/PPPort
@@ -14,17 +15,17 @@ private:
     - ext/Filter/Util/Call
     - ext/List/Util
     - ext/MIME/Base64
-    - ext/PerlIO
     - ext/Safe
     - ext/Storable
-    - ext/threads
     - ext/Time/HiRes
     - ext/Unicode/Normalize
     - lib/Attribute/Handlers
+    - lib/base
     - lib/bignum
     - lib/CGI
     - lib/Class/ISA
     - lib/CPAN
+    - lib/Digest
     - lib/ExtUtils/t
     - lib/File/Spec
     - lib/File/Temp
@@ -40,7 +41,6 @@ private:
     - lib/Net/Ping
     - lib/Net/t
     - lib/NEXT
-    - lib/PerlIO
     - lib/Pod/Perldoc
     - lib/Switch
     - lib/Term/ANSIColor
@@ -60,14 +60,15 @@ private:
   file:
     - ext/Filter/t/call.t
     - lib/Attribute/Handlers.pm
+    - lib/base.pm
     - lib/bigint.pm
     - lib/bignum.pm
     - lib/bigrat.pm
     - lib/CGI.pm
     - lib/Class/ISA.pm
     - lib/CPAN.pm
+    - lib/Cwd.pm
     - lib/Digest.pm
-    - lib/Digest.t
     - lib/ExtUtils/Command
     - lib/ExtUtils/Command.pm
     - lib/ExtUtils/Install.pm
@@ -95,6 +96,7 @@ private:
     - lib/ExtUtils/MY.pm
     - lib/ExtUtils/Packlist.pm
     - lib/ExtUtils/testlib.pm
+    - lib/fields.pm
     - lib/File/Spec.pm
     - lib/File/Temp.pm
     - lib/Filter/Simple.pm
@@ -134,24 +136,19 @@ private:
     - lib/Net/SMTP.pm
     - lib/Net/Time.pm
     - lib/NEXT.pm
+    - lib/PerlIO/via/QuotedPrint.pm
+    - lib/PerlIO/via/t/QuotedPrint.t
     - lib/Pod/Checker.pm
-    - lib/Pod/Checker.pm
-    - lib/Pod/Find.pm
     - lib/Pod/Find.pm
     - lib/Pod/Html.pm
-    - lib/Pod/InputObjects.pm
     - lib/Pod/InputObjects.pm
     - lib/Pod/LaTeX.pm
     - lib/Pod/Man.pm
     - lib/Pod/ParseLink.pm
     - lib/Pod/Parser.pm
-    - lib/Pod/Parser.pm
-    - lib/Pod/ParseUtils.pm
     - lib/Pod/ParseUtils.pm
     - lib/Pod/Perldoc.pm
     - lib/Pod/PlainText.pm
-    - lib/Pod/PlainText.pm
-    - lib/Pod/Select.pm
     - lib/Pod/Select.pm
     - lib/Pod/t/basic.cap
     - lib/Pod/t/basic.clr
@@ -159,23 +156,17 @@ private:
     - lib/Pod/t/basic.ovr
     - lib/Pod/t/basic.pod
     - lib/Pod/t/basic.t
-    - lib/Pod/t/basic.t
     - lib/Pod/t/basic.txt
-    - lib/Pod/t/InputObjects.t
     - lib/Pod/t/man.t
     - lib/Pod/t/parselink.t
     - lib/Pod/t/pod2latex.t
-    - lib/Pod/t/Select.t
     - lib/Pod/t/text-errors.t
     - lib/Pod/t/text-options.t
     - lib/Pod/t/text.t
-    - lib/Pod/t/Usage.t
-    - lib/Pod/t/utils.t
     - lib/Pod/Text.pm
     - lib/Pod/Text/Color.pm
     - lib/Pod/Text/Overstrike.pm
     - lib/Pod/Text/Termcap.pm
-    - lib/Pod/Usage.pm
     - lib/Pod/Usage.pm
     - lib/Switch.pm
     - lib/Term/ANSIColor.pm
