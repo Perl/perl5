@@ -11,7 +11,7 @@ use vars qw($VERSION $verbose $switches $have_devel_corestack $curtest
 	    @ISA @EXPORT @EXPORT_OK);
 $have_devel_corestack = 0;
 
-$VERSION = "1.12";
+$VERSION = "1.13";
 
 @ISA=('Exporter');
 @EXPORT= qw(&runtests);
@@ -47,6 +47,7 @@ sub runtests {
     my $bad = 0;
     my $good = 0;
     my $total = @tests;
+    my $old5lib = $ENV{PERL5LIB};
     local($ENV{'PERL5LIB'}) = join($Config{path_sep}, @INC); # pass -I flags to children
 
     my $t_start = new Benchmark;
@@ -55,7 +56,8 @@ sub runtests {
 	chop($te);
 	print "$te" . '.' x (20 - length($te));
 	my $fh = new FileHandle;
-	$fh->open("$^X $switches $test|") || (print "can't run. $!\n");
+	if ($^O eq 'VMS') { $fh->open("MCR $^X $switches $test|") || (print "can't run. $!\n"); }
+	else              { $fh->open("$^X $switches $test|")     || (print "can't run. $!\n"); }
 	$ok = $next = $max = 0;
 	@failed = ();
 	while (<$fh>) {
@@ -147,6 +149,7 @@ sub runtests {
     }
     my $t_total = timediff(new Benchmark, $t_start);
     
+    if ($^O eq 'VMS' and defined($old5lib)) { $ENV{PERL5LIB} = $old5lib; }
     if ($bad == 0 && $totmax) {
 	    print "All tests successful.\n";
     } elsif ($total==0){
@@ -302,7 +305,7 @@ above are printed.
 
 =item C<Test returned status %d (wstat %d)>
 
-Scripts that return a non-zero exit status, both $?>>8 and $? are
+Scripts that return a non-zero exit status, both C<$? E<gt>E<gt> 8> and C<$?> are
 printed in a message similar to the above.
 
 =item C<Failed 1 test, %.2f%% okay. %s>

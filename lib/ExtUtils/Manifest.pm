@@ -25,6 +25,7 @@ $MANIFEST = 'MANIFEST';
 
 # Really cool fix from Ilya :)
 unless (defined $Config{d_link}) {
+    local($^W) = 0;  # avoid sub redefined message
     *ln = \&cp;
 }
 
@@ -356,7 +357,7 @@ C<MANIFEST.SKIP> file. This is useful if you want to maintain
 different distributions for different audiences (say a user version
 and a developer version including RCS).
 
-<$ExtUtils::Manifest::Quiet> defaults to 0. If set to a true value,
+C<$ExtUtils::Manifest::Quiet> defaults to 0. If set to a true value,
 all functions act silently.
 
 =head1 DIAGNOSTICS
@@ -393,6 +394,6 @@ L<ExtUtils::MakeMaker> which has handy targets for most of the functionality.
 
 =head1 AUTHOR
 
-Andreas Koenig F<E<lt>koenig@franz.ww.TU-Berlin.DEE<gt>>
+Andreas Koenig E<lt>F<koenig@franz.ww.TU-Berlin.DE>E<gt>
 
 =cut

@@ -6,7 +6,7 @@
 #   Author:  Charles Bailey  bailey@genetics.upenn.edu
 
 package ExtUtils::MM_VMS;
-$ExtUtils::MM_VMS::Revision=$ExtUtils::MM_VMS::Revision = '5.36 (10-Jul-1996)';
+$ExtUtils::MM_VMS::Revision=$ExtUtils::MM_VMS::Revision = '5.38 (02-Oct-1996)';
 unshift @MM::ISA, 'ExtUtils::MM_VMS';
 
 use Config;
@@ -102,6 +102,8 @@ sub fixpath {
     }
     # Convert names without directory or type to paths
     if (!$force_path and $fixedpath !~ /[:>(.\]]/) { $fixedpath = vmspath($fixedpath); }
+    # Trim off root dirname if it's had other dirs inserted in front of it.
+    $fixedpath =~ s/\.000000([\]>])/$1/;
     print "fixpath($path) = |$fixedpath|\n" if $Verbose >= 3;
     $fixedpath;
 }
@@ -323,10 +325,11 @@ invoke Perl images.
 sub find_perl {
     my($self, $ver, $names, $dirs, $trace) = @_;
     my($name,$dir,$vmsfile,@sdirs,@snames,@cand);
+    my($inabs) = 0;
     # Check in relative directories first, so we pick up the current
     # version of Perl if we're running MakeMaker as part of the main build.
-    @sdirs = sort { my($absa) = file_name_is_absolute($a);
-                    my($absb) = file_name_is_absolute($b);
+    @sdirs = sort { my($absa) = $self->file_name_is_absolute($a);
+                    my($absb) = $self->file_name_is_absolute($b);
                     if ($absa && $absb) { return $a cmp $b }
                     else { return $absa ? 1 : ($absb ? -1 : ($a cmp $b)); }
                   } @$dirs;
@@ -335,8 +338,15 @@ sub find_perl {
     # executable that's less likely to be from an old installation.
     @snames = sort { my($ba) = $a =~ m!([^:>\]/]+)$!;  # basename
                      my($bb) = $b =~ m!([^:>\]/]+)$!;
-                     substr($ba,0,1) cmp substr($bb,0,1)
-                     or -1*(length($ba) <=> length($bb)) } @$names;
+                     my($ahasdir) = (length($a) - length($ba) > 0);
+                     my($bhasdir) = (length($b) - length($bb) > 0);
+                     if    ($ahasdir and not $bhasdir) { return 1; }
+                     elsif ($bhasdir and not $ahasdir) { return -1; }
+                     else { $bb =~ /\d/ <=> $ba =~ /\d/
+                            or substr($ba,0,1) cmp substr($bb,0,1)
+                            or length($bb) <=> length($ba) } } @$names;
+    # Image names containing Perl version use '_' instead of '.' under VMS
+    foreach $name (@snames) { $name =~ s/\.(\d+)$/_$1/; }
     if ($trace >= 2){
 	print "Looking for perl $ver by these names:\n";
 	print "\t@snames,\n";
@@ -345,6 +355,14 @@ sub find_perl {
     }
     foreach $dir (@sdirs){
 	next unless defined $dir; # $self->{PERL_SRC} may be undefined
+	$inabs++ if $self->file_name_is_absolute($dir);
+	if ($inabs == 1) {
+	    # We've covered relative dirs; everything else is an absolute
+	    # dir (probably an installed location).  First, we'll try potential
+	    # command names, to see whether we can avoid a long MCR expression.
+	    foreach $name (@snames) { push(@cand,$name) if $name =~ /^[\w\-\$]+$/; }
+	    $inabs++; # Should happen above in next $dir, but just in case . . .
+	}
 	foreach $name (@snames){
 	    if ($name !~ m![/:>\]]!) { push(@cand,$self->catfile($dir,$name)); }
 	    else                     { push(@cand,$self->fixpath($name));      }
@@ -352,12 +370,18 @@ sub find_perl {
     }
     foreach $name (@cand) {
 	print "Checking $name\n" if ($trace >= 2);
+	# If it looks like a potential command, try it without the MCR
+	if ($name =~ /^[\w\-\$]+$/ &&
+	    `$name -e "require $ver; print ""VER_OK\n"""` =~ /VER_OK/) {
+	    print "Using PERL=$name\n" if $trace;
+	    return $name;
+	}
 	next unless $vmsfile = $self->maybe_command($name);
 	$vmsfile =~ s/;[\d\-]*$//;  # Clip off version number; we can use a newer version as well
 	print "Executing $vmsfile\n" if ($trace >= 2);
 	if (`MCR $vmsfile -e "require $ver; print ""VER_OK\n"""` =~ /VER_OK/) {
 	    print "Using PERL=MCR $vmsfile\n" if $trace;
-	    return "MCR $vmsfile"
+	    return "MCR $vmsfile";
 	}
     }
     print STDOUT "Unable to find a perl $ver (by these names: @$names, in these dirs: @$dirs)\n";
@@ -427,7 +451,7 @@ sub maybe_command_in_dirs {	# $ver is optional argument if looking for perl
 	    if (defined $ver) {
 		print "Executing $abs\n" if ($trace >= 2);
 		if (`$abs -e 'require $ver; print "VER_OK\n" ' 2>&1` =~ /VER_OK/) {
-		    print "Using PERL=$abs\n" if $trace;
+		    print "Using $abs\n" if $trace;
 		    return $abs;
 		}
 	    } else { # Do not look for perl
@@ -459,8 +483,8 @@ Checks for VMS directory spec as well as Unix separators.
 =cut
 
 sub file_name_is_absolute {
-    my($self,$file);
-    $file =~ m!^/! or $file =~ m![:<\[][^.\-]!;
+    my($self,$file) = @_;
+    $file =~ m!^/! or $file =~ m![<\[][^.\-\]>]! or $file =~ /:[^<\[]/;
 }
 
 =item replace_manpage_separator
@@ -794,7 +818,7 @@ LARGE =
 =item const_cccmd (override)
 
 Adds directives to point C preprocessor to the right place when
-handling #include <sys/foo.h> directives.  Also constructs CC
+handling #include E<lt>sys/foo.hE<gt> directives.  Also constructs CC
 command line a bit differently than MM_Unix method.
 
 =cut
@@ -948,8 +972,8 @@ XSUBPPARGS = @tmargs
 
 =item xsubpp_version (override)
 
-Test xsubpp exit status according to VMS rules ($sts & 1 ==> good)
-rather than Unix rules ($sts == 0 ==> good).
+Test xsubpp exit status according to VMS rules ($sts & 1 ==E<gt> good)
+rather than Unix rules ($sts == 0 ==E<gt> good).
 
 =cut
 
@@ -1042,7 +1066,7 @@ EQUALIZE_TIMESTAMP = \$(PERL) -we "open F,qq{>\$ARGV[1]};close F;utime(0,(stat(\
 !. ($self->{PARENT} ? '' : 
 qq!WARN_IF_OLD_PACKLIST = \$(PERL) -e "if (-f \$ARGV[0]){print qq[WARNING: Old package found (\$ARGV[0]); please check for collisions\\n]}"
 MOD_INSTALL = \$(PERL) "-I\$(PERL_LIB)" "-MExtUtils::Install" -e "install({split(' ',<STDIN>)},1);"
-DOC_INSTALL = \$(PERL) -e "\@ARGV=split('|',<STDIN>);print '=head3 ',scalar(localtime),': C<',shift,qq[>\\n\\n=over 4\\n\\n];while(\$key=shift && \$val=shift){print qq[=item *\\n\\nC<\$key: \$val>\\n\\n];}print qq[=back\\n\\n]"
+DOC_INSTALL = \$(PERL) -e "\@ARGV=split(/\\|/,<STDIN>);print '=head2 ',scalar(localtime),': C<',shift,qq[>\\n\\n=over 4\\n\\n];while(\$key=shift && \$val=shift){print qq[=item *\\n\\nC<\$key: \$val>\\n\\n];}print qq[=back\\n\\n]"
 UNINSTALL = \$(PERL) "-I\$(PERL_LIB)" "-MExtUtils::Install" -e "uninstall(\$ARGV[0],1);"
 !);
 }
@@ -1761,7 +1785,7 @@ pure_install :: pure_$(INSTALLDIRS)_install
 	$(NOECHO) $(NOOP)
 
 doc_install :: doc_$(INSTALLDIRS)_install
-	$(NOECHO) Write Sys$Output "Appending installation info to $(INST_ARCHLIB)perllocal.pod"
+	$(NOECHO) Write Sys$Output "Appending installation info to $(INSTALLARCHLIB)perllocal.pod"
 
 pure__install : pure_site_install
 	$(NOECHO) Write Sys$Output "INSTALLDIRS not defined, defaulting to INSTALLDIRS=site"
@@ -1803,11 +1827,11 @@ doc_perl_install ::
 	$(NOECHO) $(PERL) -e "print 'LINKTYPE|$(LINKTYPE)|VERSION|$(VERSION)|'" >>.MM_tmp
 	$(NOECHO) $(PERL) -e "print 'LINKTYPE|$(LINKTYPE)|VERSION|$(VERSION)|EXE_FILES|'" >>.MM_tmp
 ],@docfiles,
-q[	$(NOECHO) $(PERL) -e "print q[@ARGV=split('|',<STDIN>);]" >.MM2_tmp
-	$(NOECHO) $(PERL) -e "print q[print '=head3',scalar(localtime),': C<',shift,qq[>\\n\\n=over 4\\n\\n];]" >>.MM2_tmp
+q%	$(NOECHO) $(PERL) -e "print q[@ARGV=split(/\\|/,<STDIN>);]" >.MM2_tmp
+	$(NOECHO) $(PERL) -e "print q[print '=head3 ',scalar(localtime),': C<',shift,qq[>\\n\\n=over 4\\n\\n];]" >>.MM2_tmp
 	$(NOECHO) $(PERL) -e "print q[while(($key=shift) && ($val=shift)) ]" >>.MM2_tmp
 	$(NOECHO) $(PERL) -e "print q[{print qq[=item *\\n\\nC<$key: $val>\\n\\n];}print qq[=back\\n\\n];]" >>.MM2_tmp
-	$(NOECHO) $(PERL) .MM2_tmp <.MM_tmp >>].$self->catfile('$(INSTALLARCHLIB)','perllocal.pod').q[
+	$(NOECHO) $(PERL) .MM2_tmp <.MM_tmp >>%.$self->catfile('$(INSTALLARCHLIB)','perllocal.pod').q[
 	$(NOECHO) Delete/NoLog/NoConfirm .MM_tmp;,.MM2_tmp;
 
 # And again
@@ -1816,11 +1840,11 @@ doc_site_install ::
 	$(NOECHO) $(PERL) -e "print 'LINKTYPE|$(LINKTYPE)|VERSION|$(VERSION)|'" >>.MM_tmp
 	$(NOECHO) $(PERL) -e "print 'LINKTYPE|$(LINKTYPE)|VERSION|$(VERSION)|EXE_FILES|'" >>.MM_tmp
 ],@docfiles,
-q[	$(NOECHO) $(PERL) -e "print q[@ARGV=split('|',<STDIN>);]" >.MM2_tmp
-	$(NOECHO) $(PERL) -e "print q[print '=head3',scalar(localtime),': C<',shift,qq[>\\n\\n=over 4\\n\\n];]" >>.MM2_tmp
+q%	$(NOECHO) $(PERL) -e "print q[@ARGV=split(/\\|/,<STDIN>);]" >.MM2_tmp
+	$(NOECHO) $(PERL) -e "print q[print '=head3 ',scalar(localtime),': C<',shift,qq[>\\n\\n=over 4\\n\\n];]" >>.MM2_tmp
 	$(NOECHO) $(PERL) -e "print q[while(($key=shift) && ($val=shift)) ]" >>.MM2_tmp
 	$(NOECHO) $(PERL) -e "print q[{print qq[=item *\\n\\nC<$key: $val>\\n\\n];}print qq[=back\\n\\n];]" >>.MM2_tmp
-	$(NOECHO) $(PERL) .MM2_tmp <.MM_tmp >>].$self->catfile('$(INSTALLARCHLIB)','perllocal.pod').q[
+	$(NOECHO) $(PERL) .MM2_tmp <.MM_tmp >>%.$self->catfile('$(INSTALLARCHLIB)','perllocal.pod').q[
 	$(NOECHO) Delete/NoLog/NoConfirm .MM_tmp;,.MM2_tmp;
 
 ];
