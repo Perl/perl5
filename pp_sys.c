@@ -1296,7 +1296,7 @@ PP(pp_sysread)
 	RETURN;
     }
 #else
-    if (op->op_type == OP_RECV)
+    if (PL_op->op_type == OP_RECV)
 	DIE(no_sock_func, "recv");
 #endif
     if (offset < 0) {
@@ -2876,7 +2876,7 @@ char *filename;
 	}
 	else {	/* some mkdirs return no failure indication */
 	    anum = (PerlLIO_stat(save_filename, &statbuf) >= 0);
-	    if (op->op_type == OP_RMDIR)
+	    if (PL_op->op_type == OP_RMDIR)
 		anum = !anum;
 	    if (anum)
 		SETERRNO(0,0);
@@ -3220,7 +3220,7 @@ PP(pp_system)
     }
     PerlProc__exit(-1);
 #else /* ! FORK or VMS or OS/2 */
-    if (op->op_flags & OPf_STACKED) {
+    if (PL_op->op_flags & OPf_STACKED) {
 	SV *really = *++MARK;
 	value = (I32)do_aspawn(really, (void **)MARK, (void **)SP);
     }
