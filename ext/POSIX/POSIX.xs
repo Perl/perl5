@@ -2567,7 +2567,7 @@ new(packname = "POSIX::SigSet", ...)
     CODE:
 	{
 	    int i;
-	    RETVAL = (sigset_t*)safemalloc(sizeof(sigset_t));
+	    New(0, RETVAL, 1, sigset_t);
 	    sigemptyset(RETVAL);
 	    for (i = 1; i < items; i++)
 		sigaddset(RETVAL, SvIV(ST(i)));
@@ -2579,7 +2579,7 @@ void
 DESTROY(sigset)
 	POSIX::SigSet	sigset
     CODE:
-	safefree((char *)sigset);
+	Safefree(sigset);
 
 SysRet
 sigaddset(sigset, sig)
@@ -2613,7 +2613,7 @@ new(packname = "POSIX::Termios", ...)
     CODE:
 	{
 #ifdef I_TERMIOS
-	    RETVAL = (struct termios*)safemalloc(sizeof(struct termios));
+	    New(0, RETVAL, 1, struct termios);
 #else
 	    not_here("termios");
         RETVAL = 0;
@@ -2627,7 +2627,7 @@ DESTROY(termios_ref)
 	POSIX::Termios	termios_ref
     CODE:
 #ifdef I_TERMIOS
-	safefree((char *)termios_ref);
+	Safefree(termios_ref);
 #else
 	    not_here("termios");
 #endif
@@ -3233,7 +3233,7 @@ sigaction(sig, action, oldaction = 0)
 		    sigset = (sigset_t*) tmp;
 		}
 		else {
-		    sigset = (sigset_t*)safemalloc(sizeof(sigset_t));
+		    New(0, sigset, 1, sigset_t);
 		    sv_setptrobj(*svp, sigset, "POSIX::SigSet");
 		}
 		*sigset = oact.sa_mask;
@@ -3265,7 +3265,7 @@ INIT:
 	    oldsigset = (POSIX__SigSet) tmp;
 	}
 	else {
-	    oldsigset = (sigset_t*)safemalloc(sizeof(sigset_t));
+	    New(0, oldsigset, 1, sigset_t);
 	    sigemptyset(oldsigset);
 	    sv_setref_pv(ST(2), "POSIX::SigSet", (void*)oldsigset);
 	}
@@ -3651,17 +3651,19 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
 	    } else {
 		/* Possibly buf overflowed - try again with a bigger buf */
 		int	bufsize = strlen(fmt) + sizeof(tmpbuf);
-		char* 	buf = (char *) safemalloc(bufsize);
+		char* 	buf;
 		int	buflen;
+
+		New(0, buf, bufsize, char);
 		while( buf ) {
 		    buflen = strftime(buf, bufsize, fmt, &mytm);
 		    if ( buflen > 0 && buflen < bufsize ) break;
 		    bufsize *= 2;
-		    buf = (char *) saferealloc(buf, bufsize);
+		    Renew(buf, bufsize, char);
 		}
 		if ( buf ) {
 		    ST(0) = sv_2mortal(newSVpv(buf, buflen));
-		    safefree(buf);
+		    Safefree(buf);
 		} else {
 		    ST(0) = sv_2mortal(newSVpv(tmpbuf, len));
 		}
