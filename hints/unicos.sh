@@ -22,8 +22,9 @@ case "$usemymalloc" in
     usemymalloc='n'
     ;;
 esac
-# Configure gets fooled for some reason.  There is no getpgid().
+# Configure gets fooled for some reason, these do not exist.
 d_getpgid='undef'
+d_setitimer='undef'
 # These exist but do not really work.
 d_setregid='undef'
 d_setreuid='undef'

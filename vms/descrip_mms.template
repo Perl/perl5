@@ -908,10 +908,16 @@ perly$(O) : perly.c, perly.h, $(h)
 [.t.lib]vmsish.t : [.vms.ext]vmsish.t
 	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
 
+[.t.lib]vms_dclsym.t : [.vms.ext.DCLsym]test.pl
+	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
+
+[.t.lib]vms_stdio.t : [.vms.ext.Stdio]test.pl
+	Copy/Log/NoConfirm $(MMS$SOURCE) $(MMS$TARGET)
+
 check : test
 	@ Continue
 
-test : all [.t.lib]vmsfspec.t [.t.lib]vmsish.t
+test : all [.t.lib]vmsfspec.t [.t.lib]vmsish.t [.t.lib]vms_dclsym.t [.t.lib]vms_stdio.t
 	- @[.VMS]Test.Com "$(E)" "$(__DEBUG__)"
 	@ $(MINIPERL) -e "print ""Ran tests"";" > [.t]rantests.
 
@@ -1316,6 +1322,10 @@ realclean : clean
 	- If F$Search("[...]*$(E)").nes."" Then Delete/NoConfirm/Log [...]*$(E);*
 	- If F$Search("[.vms]Perl_Setup.Com").nes."" Then Delete/NoConfirm/Log [.vms]Perl_Setup.Com;*
 	- If F$Search("[.t]rantests.").nes."" Then Delete/NoConfirm/Log [.t]rantests.;*
+	- If F$Search("[.t.lib]vmsfspec.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vmsfspec.t;*
+	- If F$Search("[.t.lib]vmsish.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vmsish.t;*
+	- If F$Search("[.t.lib]vms_dclsym.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vms_dclsym.t;*
+	- If F$Search("[.t.lib]vms_stdio.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vms_stdio.t;*
 
 cleansrc : clean
 !GROK!THIS!
