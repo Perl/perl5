@@ -104,10 +104,10 @@ esac
 #                           symbol: boot_$(EXP)  can it be auto-generated?
 case "$osvers" in
 3*) 
-    lddlflags='-H512 -T512 -bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -e _nostart'
+    lddlflags="$lddlflags -H512 -T512 -bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -e _nostart"
     ;;
 *) 
-    lddlflags='-bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -b noentry'
+    lddlflags="$lddlflags -bhalt:4 -bM:SRE -bI:$(PERL_INC)/perl.exp -bE:$(BASEEXT).exp -b noentry"
     ;;
 esac
 
@@ -224,6 +224,6 @@ EOM
 	;;
 esac
 
-lddlflags="$lddlflags $lddllibc"
-
 EOCBU
+
+lddlflags="$lddlflags $lddllibc"
