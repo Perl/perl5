@@ -2125,7 +2125,7 @@ available at http://www.cpan.org/src/index.html
         ReliantUNIX     (formerly SINIX)
         OpenBSD
         OpenVMS         (formerly VMS)
-        Open UNIX       (formerly Unixware) (since Perl 5.8.1/5.9.0)
+        Open UNIX       (Unixware) (since Perl 5.8.1/5.9.0)
         OS/2
         OS/400          (using the PASE) (since Perl 5.8.1/5.9.0)
         PowerUX
