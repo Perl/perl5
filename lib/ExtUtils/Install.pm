@@ -394,4 +394,7 @@ of the hash to the corresponding values efficiently. Filenames with
 the extension pm are autosplit. Second argument is the autosplit
 directory.
 
+You can have an environment variable PERL_INSTALL_ROOT set which will
+be prepended as a directory to each installed file (and directory).
+
 =cut
