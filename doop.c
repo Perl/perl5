@@ -179,6 +179,7 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
 		s++;
 	    }
 	}
+	*d = '\0';
 	SvCUR_set(sv, d - dstart);
     }
     else { /* isutf8 */
