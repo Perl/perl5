@@ -2412,8 +2412,14 @@ cast_i32(double f)
 IV
 cast_iv(double f)
 {
-    if (f >= IV_MAX)
-	return (IV) IV_MAX;
+    if (f >= IV_MAX) {
+	UV uv;
+	
+	if (f >= (double)UV_MAX)
+	    return (IV) UV_MAX;	
+	uv = (UV) f;
+	return (IV)uv;
+    }
     if (f <= IV_MIN)
 	return (IV) IV_MIN;
     return (IV) f;
@@ -2424,6 +2430,14 @@ cast_uv(double f)
 {
     if (f >= MY_UV_MAX)
 	return (UV) MY_UV_MAX;
+    if (f < 0) {
+	IV iv;
+	
+	if (f < IV_MIN)
+	    return (UV)IV_MIN;
+	iv = (IV) f;
+	return (UV) iv;
+    }
     return (UV) f;
 }
 

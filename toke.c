@@ -823,7 +823,7 @@ sublex_done(void)
 	PL_lex_casemods = 0;
 	*PL_lex_casestack = '\0';
 	PL_lex_starts = 0;
-	if (SvCOMPILED(PL_lex_repl)) {
+	if (SvEVALED(PL_lex_repl)) {
 	    PL_lex_state = LEX_INTERPNORMAL;
 	    PL_lex_starts++;
 	    /*	we don't clear PL_lex_repl here, so that we can check later
@@ -1854,7 +1854,7 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 	    return ')';
 	}
 	if (PL_lex_inwhat == OP_SUBST && PL_linestr == PL_lex_repl
-	    && SvCOMPILED(PL_lex_repl))
+	    && SvEVALED(PL_lex_repl))
 	{
 	    if (PL_bufptr != PL_bufend)
 		croak("Bad evalled substitution pattern");
@@ -5363,7 +5363,7 @@ scan_subst(char *start)
 	sv_catpvn(repl, "{ ", 2);
 	sv_catsv(repl, PL_lex_repl);
 	sv_catpvn(repl, " };", 2);
-	SvCOMPILED_on(repl);
+	SvEVALED_on(repl);
 	SvREFCNT_dec(PL_lex_repl);
 	PL_lex_repl = repl;
     }

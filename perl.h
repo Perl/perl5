@@ -1652,6 +1652,11 @@ typedef I32 CHECKPOINT;
 #define U_V(what) (cast_uv((double)(what)))
 #endif
 
+/* Used with UV/IV arguments: */
+					/* XXXX: need to speed it up */
+#define CLUMP_2UV(iv)	((iv) < 0 ? 0 : (UV)(iv))
+#define CLUMP_2IV(uv)	((uv) > (UV)IV_MAX ? IV_MAX : (IV)(uv))
+
 struct Outrec {
     I32		o_lines;
     char	*o_str;

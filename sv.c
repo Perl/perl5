@@ -1034,10 +1034,9 @@ sv_setiv_mg(register SV *sv, IV i)
 void
 sv_setuv(register SV *sv, UV u)
 {
-    if (u <= IV_MAX)
-	sv_setiv(sv, u);
-    else
-	sv_setnv(sv, (double)u);
+    sv_setiv(sv, 0);
+    SvIsUV_on(sv);
+    SvUVX(sv) = u;
 }
 
 void
@@ -1141,6 +1140,15 @@ not_a_number(SV *sv)
 	warner(WARN_NUMERIC, "Argument \"%s\" isn't numeric", tmpbuf);
 }
 
+/* the number can be converted to _integer_ with atol() */
+#define IS_NUMBER_TO_INT_BY_ATOL 0x01
+#define IS_NUMBER_TO_INT_BY_ATOF 0x02 /* atol() may be != atof() */
+#define IS_NUMBER_NOT_IV	 0x04 /* (IV)atof() may be != atof() */
+#define IS_NUMBER_NEG		 0x08 /* not good to cache UV */
+
+/* Actually, ISO C leaves conversion of UV to IV undefined, but
+   until proven guilty, assume that things are not that bad... */
+
 IV
 sv_2iv(register SV *sv)
 {
@@ -1151,10 +1159,7 @@ sv_2iv(register SV *sv)
 	if (SvIOKp(sv))
 	    return SvIVX(sv);
 	if (SvNOKp(sv)) {
-	    if (SvNVX(sv) < 0.0)
-		return I_V(SvNVX(sv));
-	    else
-		return (IV) U_V(SvNVX(sv));
+	    return I_V(SvNVX(sv));
 	}
 	if (SvPOKp(sv) && SvLEN(sv))
 	    return asIV(sv);
@@ -1176,10 +1181,7 @@ sv_2iv(register SV *sv)
 	}
 	if (SvREADONLY(sv)) {
 	    if (SvNOKp(sv)) {
-		if (SvNVX(sv) < 0.0)
-		    return I_V(SvNVX(sv));
-		else
-		    return (IV) U_V(SvNVX(sv));
+		return I_V(SvNVX(sv));
 	    }
 	    if (SvPOKp(sv) && SvLEN(sv))
 		return asIV(sv);
@@ -1191,37 +1193,103 @@ sv_2iv(register SV *sv)
 	    return 0;
 	}
     }
-    switch (SvTYPE(sv)) {
-    case SVt_NULL:
-	sv_upgrade(sv, SVt_IV);
-	break;
-    case SVt_PV:
-	sv_upgrade(sv, SVt_PVIV);
-	break;
-    case SVt_NV:
-	sv_upgrade(sv, SVt_PVNV);
-	break;
+    if (SvIOKp(sv)) {
+	if (SvIsUV(sv)) {
+	    return (IV)(SvUVX(sv));
+	}
+	else {
+	    return SvIVX(sv);
+	}
     }
     if (SvNOKp(sv)) {
+	/* We can cache the IV/UV value even if it not good enough
+	 * to reconstruct NV, since the conversion to PV will prefer
+	 * NV over IV/UV.				XXXX 64-bit?
+	 */
+
+	if (SvTYPE(sv) == SVt_NV)
+	    sv_upgrade(sv, SVt_PVNV);
+
 	(void)SvIOK_on(sv);
-	if (SvNVX(sv) < 0.0)
+	if (SvNVX(sv) < (double)IV_MAX + 0.5)
 	    SvIVX(sv) = I_V(SvNVX(sv));
-	else
+	else {
 	    SvUVX(sv) = U_V(SvNVX(sv));
+	    SvIsUV_on(sv);
+	  ret_iv_max:
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, 
+				  "0x%lx 2iv(%lu => %ld) (as unsigned)\n",
+				  (unsigned long)sv,
+				  (unsigned long)SvUVX(sv), (long)(IV)SvUVX(sv)));
+	    return (IV)SvUVX(sv);
+	}
     }
     else if (SvPOKp(sv) && SvLEN(sv)) {
-	(void)SvIOK_on(sv);
-	SvIVX(sv) = asIV(sv);
+	I32 numtype = looks_like_number(sv);
+
+	/* We want to avoid a possible problem when we cache an IV which
+	   may be later translated to an NV, and the resulting NV is not
+	   the translation of the initial data.
+	  
+	   This means that if we cache such an IV, we need to cache the
+	   NV as well.  Moreover, we trade speed for space, and do not
+	   cache the NV if not needed.
+	 */
+	if (numtype & IS_NUMBER_NOT_IV) {
+	    /* May be not an integer.  Need to cache NV if we cache IV
+	     * - otherwise future conversion to NV will be wrong.  */
+	    double d;
+
+	    SET_NUMERIC_STANDARD();
+	    d = atof(SvPVX(sv));
+
+	    if (SvTYPE(sv) < SVt_PVNV)
+		sv_upgrade(sv, SVt_PVNV);
+	    SvNVX(sv) = d;
+	    (void)SvNOK_on(sv);
+	    (void)SvIOK_on(sv);
+	    DEBUG_c(PerlIO_printf(Perl_debug_log,
+				  "0x%lx 2nv(%g)\n",(unsigned long)sv,
+				  SvNVX(sv)));
+	    if (SvNVX(sv) < (double)IV_MAX + 0.5)
+		SvIVX(sv) = I_V(SvNVX(sv));
+	    else {
+		SvUVX(sv) = U_V(SvNVX(sv));
+		SvIsUV_on(sv);
+		goto ret_iv_max;
+	    }
+	}
+	else if (numtype) {
+	    /* The NV may be reconstructed from IV - safe to cache IV,
+	       which may be calculated by atol(). */
+	    if (SvTYPE(sv) == SVt_PV)
+		sv_upgrade(sv, SVt_PVIV);
+	    (void)SvIOK_on(sv);
+	    SvIVX(sv) = atol(SvPVX(sv)); /* XXXX 64-bit? */
+	}
+	else {				/* Not a number.  Cache 0. */
+	    dTHR;
+
+	    if (SvTYPE(sv) < SVt_PVIV)
+		sv_upgrade(sv, SVt_PVIV);
+	    SvIVX(sv) = 0;
+	    (void)SvIOK_on(sv);
+	    if (ckWARN(WARN_NUMERIC))
+		not_a_number(sv);
+	}
     }
     else  {
 	dTHR;
 	if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
 	    warner(WARN_UNINITIALIZED, PL_warn_uninit);
+	if (SvTYPE(sv) < SVt_IV)
+	    /* Typically the caller expects that sv_any is not NULL now.  */
+	    sv_upgrade(sv, SVt_IV);
 	return 0;
     }
     DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2iv(%ld)\n",
 	(unsigned long)sv,(long)SvIVX(sv)));
-    return SvIVX(sv);
+    return SvIsUV(sv) ? (IV)SvUVX(sv) : SvIVX(sv);
 }
 
 UV
@@ -1267,24 +1335,105 @@ sv_2uv(register SV *sv)
 	    return 0;
 	}
     }
-    switch (SvTYPE(sv)) {
-    case SVt_NULL:
-	sv_upgrade(sv, SVt_IV);
-	break;
-    case SVt_PV:
-	sv_upgrade(sv, SVt_PVIV);
-	break;
-    case SVt_NV:
-	sv_upgrade(sv, SVt_PVNV);
-	break;
+    if (SvIOKp(sv)) {
+	if (SvIsUV(sv)) {
+	    return SvUVX(sv);
+	}
+	else {
+	    return (UV)SvIVX(sv);
+	}
     }
     if (SvNOKp(sv)) {
+	/* We can cache the IV/UV value even if it not good enough
+	 * to reconstruct NV, since the conversion to PV will prefer
+	 * NV over IV/UV.				XXXX 64-bit?
+	 */
+	if (SvTYPE(sv) == SVt_NV)
+	    sv_upgrade(sv, SVt_PVNV);
 	(void)SvIOK_on(sv);
-	SvUVX(sv) = U_V(SvNVX(sv));
+	if (SvNVX(sv) >= -0.5) {
+	    SvIsUV_on(sv);
+	    SvUVX(sv) = U_V(SvNVX(sv));
+	}
+	else {
+	    SvIVX(sv) = I_V(SvNVX(sv));
+	  ret_zero:
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, 
+				  "0x%lx 2uv(%ld => %lu) (as signed)\n",
+				  (unsigned long)sv,(long)SvIVX(sv),
+				  (long)(UV)SvIVX(sv)));
+	    return (UV)SvIVX(sv);
+	}
     }
     else if (SvPOKp(sv) && SvLEN(sv)) {
-	(void)SvIOK_on(sv);
-	SvUVX(sv) = asUV(sv);
+	I32 numtype = looks_like_number(sv);
+
+	/* We want to avoid a possible problem when we cache a UV which
+	   may be later translated to an NV, and the resulting NV is not
+	   the translation of the initial data.
+	  
+	   This means that if we cache such a UV, we need to cache the
+	   NV as well.  Moreover, we trade speed for space, and do not
+	   cache the NV if not needed.
+	 */
+	if (numtype & IS_NUMBER_NOT_IV) {
+	    /* May be not an integer.  Need to cache NV if we cache IV
+	     * - otherwise future conversion to NV will be wrong.  */
+	    double d;
+
+	    SET_NUMERIC_STANDARD();
+	    d = atof(SvPVX(sv));	/* XXXX 64-bit? */
+
+	    if (SvTYPE(sv) < SVt_PVNV)
+		sv_upgrade(sv, SVt_PVNV);
+	    SvNVX(sv) = d;
+	    (void)SvNOK_on(sv);
+	    (void)SvIOK_on(sv);
+	    DEBUG_c(PerlIO_printf(Perl_debug_log,
+				  "0x%lx 2nv(%g)\n",(unsigned long)sv,
+				  SvNVX(sv)));
+	    if (SvNVX(sv) < -0.5) {
+		SvIVX(sv) = I_V(SvNVX(sv));
+		goto ret_zero;
+	    } else {
+		SvUVX(sv) = U_V(SvNVX(sv));
+		SvIsUV_on(sv);
+	    }
+	}
+	else if (numtype & IS_NUMBER_NEG) {
+	    /* The NV may be reconstructed from IV - safe to cache IV,
+	       which may be calculated by atol(). */
+	    if (SvTYPE(sv) == SVt_PV)
+		sv_upgrade(sv, SVt_PVIV);
+	    (void)SvIOK_on(sv);
+	    SvIVX(sv) = (IV)atol(SvPVX(sv)); /* XXXX 64-bit? */
+	}
+	else if (numtype) {		/* Non-negative */
+	    /* The NV may be reconstructed from UV - safe to cache UV,
+	       which may be calculated by strtoul()/atol. */
+	    if (SvTYPE(sv) == SVt_PV)
+		sv_upgrade(sv, SVt_PVIV);
+	    (void)SvIOK_on(sv);
+	    (void)SvIsUV_on(sv);
+#ifdef HAS_STRTOUL
+	    SvUVX(sv) = strtoul(SvPVX(sv), Null(char**), 10); /* XXXX 64-bit? */
+#else			/* no atou(), but we know the number fits into IV... */
+	    		/* The only problem may be if it is negative... */
+	    SvUVX(sv) = (UV)atol(SvPVX(sv)); /* XXXX 64-bit? */
+#endif
+	}
+	else {				/* Not a number.  Cache 0. */
+	    dTHR;
+
+	    if (SvTYPE(sv) < SVt_PVIV)
+		sv_upgrade(sv, SVt_PVIV);
+	    SvUVX(sv) = 0;		/* We assume that 0s have the
+					   same bitmap in IV and UV. */
+	    (void)SvIOK_on(sv);
+	    (void)SvIsUV_on(sv);
+	    if (ckWARN(WARN_NUMERIC))
+		not_a_number(sv);
+	}
     }
     else  {
 	if (!(SvFLAGS(sv) & SVs_PADTMP)) {
@@ -1292,11 +1441,15 @@ sv_2uv(register SV *sv)
 	    if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
 		warner(WARN_UNINITIALIZED, PL_warn_uninit);
 	}
+	if (SvTYPE(sv) < SVt_IV)
+	    /* Typically the caller expects that sv_any is not NULL now.  */
+	    sv_upgrade(sv, SVt_IV);
 	return 0;
     }
+
     DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2uv(%lu)\n",
 	(unsigned long)sv,SvUVX(sv)));
-    return SvUVX(sv);
+    return SvIsUV(sv) ? SvUVX(sv) : (UV)SvIVX(sv);
 }
 
 double
@@ -1315,8 +1468,12 @@ sv_2nv(register SV *sv)
 	    SET_NUMERIC_STANDARD();
 	    return atof(SvPVX(sv));
 	}
-	if (SvIOKp(sv))
-	    return (double)SvIVX(sv);
+	if (SvIOKp(sv)) {
+	    if (SvIsUV(sv)) 
+		return (double)SvUVX(sv);
+	    else
+		return (double)SvIVX(sv);
+	}	
         if (!SvROK(sv)) {
 	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
@@ -1341,8 +1498,12 @@ sv_2nv(register SV *sv)
 		SET_NUMERIC_STANDARD();
 		return atof(SvPVX(sv));
 	    }
-	    if (SvIOKp(sv))
-		return (double)SvIVX(sv);
+	    if (SvIOKp(sv)) {
+		if (SvIsUV(sv)) 
+		    return (double)SvUVX(sv);
+		else
+		    return (double)SvIVX(sv);
+	    }
 	    if (ckWARN(WARN_UNINITIALIZED))
 		warner(WARN_UNINITIALIZED, PL_warn_uninit);
 	    return 0.0;
@@ -1362,7 +1523,7 @@ sv_2nv(register SV *sv)
     if (SvIOKp(sv) &&
 	    (!SvPOKp(sv) || !strchr(SvPVX(sv),'.') || !looks_like_number(sv)))
     {
-	SvNVX(sv) = (double)SvIVX(sv);
+	SvNVX(sv) = SvIsUV(sv) ? (double)SvUVX(sv) : (double)SvIVX(sv);
     }
     else if (SvPOKp(sv) && SvLEN(sv)) {
 	dTHR;
@@ -1375,6 +1536,9 @@ sv_2nv(register SV *sv)
 	dTHR;
 	if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
 	    warner(WARN_UNINITIALIZED, PL_warn_uninit);
+	if (SvTYPE(sv) < SVt_NV)
+	    /* Typically the caller expects that sv_any is not NULL now.  */
+	    sv_upgrade(sv, SVt_NV);
 	return 0.0;
     }
     SvNOK_on(sv);
@@ -1390,8 +1554,8 @@ asIV(SV *sv)
     I32 numtype = looks_like_number(sv);
     double d;
 
-    if (numtype == 1)
-	return atol(SvPVX(sv));
+    if (numtype & IS_NUMBER_TO_INT_BY_ATOL)
+	return atol(SvPVX(sv));		/* XXXX 64-bit? */
     if (!numtype) {
 	dTHR;
 	if (ckWARN(WARN_NUMERIC))
@@ -1399,10 +1563,7 @@ asIV(SV *sv)
     }
     SET_NUMERIC_STANDARD();
     d = atof(SvPVX(sv));
-    if (d < 0.0)
-	return I_V(d);
-    else
-	return (IV) U_V(d);
+    return I_V(d);
 }
 
 STATIC UV
@@ -1411,7 +1572,7 @@ asUV(SV *sv)
     I32 numtype = looks_like_number(sv);
 
 #ifdef HAS_STRTOUL
-    if (numtype == 1)
+    if (numtype & IS_NUMBER_TO_INT_BY_ATOL)
 	return strtoul(SvPVX(sv), Null(char**), 10);
 #endif
     if (!numtype) {
@@ -1423,13 +1584,29 @@ asUV(SV *sv)
     return U_V(atof(SvPVX(sv)));
 }
 
+/*
+ * Returns a combination of (advisory only - can get false negatives)
+ * 	IS_NUMBER_TO_INT_BY_ATOL, IS_NUMBER_TO_INT_BY_ATOF, IS_NUMBER_NOT_IV,
+ *	IS_NUMBER_NEG
+ * 0 if does not look like number.
+ *
+ * In fact possible values are 0 and
+ * IS_NUMBER_TO_INT_BY_ATOL				123
+ * IS_NUMBER_TO_INT_BY_ATOL | IS_NUMBER_NOT_IV		123.1
+ * IS_NUMBER_TO_INT_BY_ATOF | IS_NUMBER_NOT_IV		123e0
+ * with a possible addition of IS_NUMBER_NEG.
+ */
+
 I32
 looks_like_number(SV *sv)
 {
+    /* XXXX 64-bit?  It may be not IS_NUMBER_TO_INT_BY_ATOL, but
+     * using atof() may lose precision. */
     register char *s;
     register char *send;
     register char *sbegin;
-    I32 numtype;
+    register char *nbegin;
+    I32 numtype = 0;
     STRLEN len;
 
     if (SvPOK(sv)) {
@@ -1445,22 +1622,40 @@ looks_like_number(SV *sv)
     s = sbegin;
     while (isSPACE(*s))
 	s++;
-    if (*s == '+' || *s == '-')
+    if (*s == '-') {
 	s++;
+	numtype = IS_NUMBER_NEG;
+    }
+    else if (*s == '+')
+	s++;
+
+    nbegin = s;
+    /*
+     * we return 1 if the number can be converted to _integer_ with atol()
+     * and 2 if you need (int)atof().
+     */
 
     /* next must be digit or '.' */
     if (isDIGIT(*s)) {
         do {
 	    s++;
         } while (isDIGIT(*s));
+
+	if (s - nbegin >= TYPE_DIGITS(IV))	/* Cannot cache ato[ul]() */
+	    numtype |= IS_NUMBER_TO_INT_BY_ATOF | IS_NUMBER_NOT_IV;
+	else
+	    numtype |= IS_NUMBER_TO_INT_BY_ATOL;
+
         if (*s == '.') {
 	    s++;
+	    numtype |= IS_NUMBER_NOT_IV;
             while (isDIGIT(*s))  /* optional digits after "." */
                 s++;
         }
     }
     else if (*s == '.') {
         s++;
+	numtype |= IS_NUMBER_TO_INT_BY_ATOL | IS_NUMBER_NOT_IV;
         /* no digits before '.' means we need digits after it */
         if (isDIGIT(*s)) {
 	    do {
@@ -1473,15 +1668,10 @@ looks_like_number(SV *sv)
     else
         return 0;
 
-    /*
-     * we return 1 if the number can be converted to _integer_ with atol()
-     * and 2 if you need (int)atof().
-     */
-    numtype = 1;
-
     /* we can have an optional exponent part */
     if (*s == 'e' || *s == 'E') {
-	numtype = 2;
+	numtype &= ~IS_NUMBER_NEG;
+	numtype |= IS_NUMBER_TO_INT_BY_ATOF | IS_NUMBER_NOT_IV;
 	s++;
 	if (*s == '+' || *s == '-')
 	    s++;
@@ -1498,7 +1688,7 @@ looks_like_number(SV *sv)
     if (s >= send)
 	return numtype;
     if (len == 10 && memEQ(sbegin, "0 but true", 10))
-	return 1;
+	return IS_NUMBER_TO_INT_BY_ATOL;
     return 0;
 }
 
@@ -1509,13 +1699,42 @@ sv_2pv_nolen(register SV *sv)
     return sv_2pv(sv, &n_a);
 }
 
+/* We assume that buf is at least TYPE_CHARS(UV) long. */
+STATIC char *
+uiv_2buf(char *buf, IV iv, UV uv, int is_uv, char **peob)
+{
+    STRLEN len;
+    char *ptr = buf + TYPE_CHARS(UV);
+    char *ebuf = ptr;
+    int sign;
+    char *p;
+
+    if (is_uv)
+	sign = 0;
+    else if (iv >= 0) {
+	uv = iv;
+	sign = 0;
+    } else {
+	uv = -iv;
+	sign = 1;
+    }
+    do {
+	*--ptr = '0' + (uv % 10);
+    } while (uv /= 10);
+    if (sign)
+	*--ptr = '-';
+    *peob = ebuf;
+    return ptr;
+}
+
 char *
 sv_2pv(register SV *sv, STRLEN *lp)
 {
     register char *s;
     int olderrno;
     SV *tsv;
-    char tmpbuf[64];	/* Must fit sprintf/Gconvert of longest IV/NV */
+    char tbuf[64];	/* Must fit sprintf/Gconvert of longest IV/NV */
+    char *tmpbuf = tbuf;
 
     if (!sv) {
 	*lp = 0;
@@ -1527,8 +1746,11 @@ sv_2pv(register SV *sv, STRLEN *lp)
 	    *lp = SvCUR(sv);
 	    return SvPVX(sv);
 	}
-	if (SvIOKp(sv)) {
-	    (void)sprintf(tmpbuf,"%ld",(long)SvIVX(sv));
+	if (SvIOKp(sv)) {		/* XXXX 64-bit? */
+	    if (SvIsUV(sv)) 
+		(void)sprintf(tmpbuf,"%lu",(unsigned long)SvUVX(sv));
+	    else
+		(void)sprintf(tmpbuf,"%ld",(long)SvIVX(sv));
 	    tsv = Nullsv;
 	    goto tokensave;
 	}
@@ -1627,6 +1849,7 @@ sv_2pv(register SV *sv, STRLEN *lp)
 		    sv_setpvf(tsv, "%s=%s", HvNAME(SvSTASH(sv)), s);
 		else
 		    sv_setpv(tsv, s);
+		/* XXXX 64-bit? */
 		sv_catpvf(tsv, "(0x%lx)", (unsigned long)sv);
 		goto tokensaveref;
 	    }
@@ -1634,14 +1857,21 @@ sv_2pv(register SV *sv, STRLEN *lp)
 	    return s;
 	}
 	if (SvREADONLY(sv)) {
-	    if (SvNOKp(sv)) {
+	    if (SvNOKp(sv)) {		/* See note in sv_2uv() */
+		/* XXXX 64-bit?  IV may have better precision... */
 		SET_NUMERIC_STANDARD();
 		Gconvert(SvNVX(sv), DBL_DIG, 0, tmpbuf);
 		tsv = Nullsv;
 		goto tokensave;
 	    }
 	    if (SvIOKp(sv)) {
-		(void)sprintf(tmpbuf,"%ld",(long)SvIVX(sv));
+		char *ebuf;
+
+		if (SvIsUV(sv))
+		    tmpbuf = uiv_2buf(tbuf, 0, SvUVX(sv), 1, &ebuf);
+		else
+		    tmpbuf = uiv_2buf(tbuf, SvIVX(sv), 0, 0, &ebuf);
+		*ebuf = 0;
 		tsv = Nullsv;
 		goto tokensave;
 	    }
@@ -1654,8 +1884,8 @@ sv_2pv(register SV *sv, STRLEN *lp)
 	    return "";
 	}
     }
-    (void)SvUPGRADE(sv, SVt_PV);
-    if (SvNOKp(sv)) {
+    if (SvNOKp(sv)) {			/* See note in sv_2uv() */
+	/* XXXX 64-bit?  IV may have better precision... */
 	if (SvTYPE(sv) < SVt_PVNV)
 	    sv_upgrade(sv, SVt_PVNV);
 	SvGROW(sv, 28);
@@ -1682,14 +1912,23 @@ sv_2pv(register SV *sv, STRLEN *lp)
 #endif
     }
     else if (SvIOKp(sv)) {
-	U32 oldIOK = SvIOK(sv);
+	U32 isIOK = SvIOK(sv);
+	char buf[TYPE_CHARS(UV)];
+	char *ebuf, *ptr;
+
 	if (SvTYPE(sv) < SVt_PVIV)
 	    sv_upgrade(sv, SVt_PVIV);
-	olderrno = errno;	/* some Xenix systems wipe out errno here */
-	sv_setpviv(sv, SvIVX(sv));
-	errno = olderrno;
+	if (SvIsUV(sv)) {
+	    ptr = uiv_2buf(buf, 0, SvUVX(sv), 1, &ebuf);
+	    sv_setpvn(sv, ptr, ebuf - ptr);
+	    SvIsUV_on(sv);
+	}
+	else {
+	    ptr = uiv_2buf(buf, SvIVX(sv), 0, 0, &ebuf);
+	    sv_setpvn(sv, ptr, ebuf - ptr);
+	}
 	s = SvEND(sv);
-	if (oldIOK)
+	if (isIOK)
 	    SvIOK_on(sv);
 	else
 	    SvIOKp_on(sv);
@@ -1699,6 +1938,9 @@ sv_2pv(register SV *sv, STRLEN *lp)
 	if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
 	    warner(WARN_UNINITIALIZED, PL_warn_uninit);
 	*lp = 0;
+	if (SvTYPE(sv) < SVt_PV)
+	    /* Typically the caller expects that sv_any is not NULL now.  */
+	    sv_upgrade(sv, SVt_PV);
 	return "";
     }
     *lp = s - SvPVX(sv);
@@ -1834,6 +2076,8 @@ sv_setsv(SV *dstr, register SV *sstr)
 	    }
 	    (void)SvIOK_only(dstr);
 	    SvIVX(dstr) = SvIVX(sstr);
+	    if (SvIsUV(sstr))
+		SvIsUV_on(dstr);
 	    SvTAINT(dstr);
 	    return;
 	}
@@ -2076,6 +2320,8 @@ sv_setsv(SV *dstr, register SV *sstr)
 	if (sflags & SVp_IOK) {
 	    (void)SvIOK_on(dstr);
 	    SvIVX(dstr) = SvIVX(sstr);
+	    if (SvIsUV(sstr))
+		SvIsUV_on(dstr);
 	}
 	if (SvAMAGIC(sstr)) {
 	    SvAMAGIC_on(dstr);
@@ -2130,6 +2376,8 @@ sv_setsv(SV *dstr, register SV *sstr)
 	if (sflags & SVp_IOK) {
 	    (void)SvIOK_on(dstr);
 	    SvIVX(dstr) = SvIVX(sstr);
+	    if (SvIsUV(sstr))
+		SvIsUV_on(dstr);
 	}
     }
     else if (sflags & SVp_NOK) {
@@ -2138,11 +2386,16 @@ sv_setsv(SV *dstr, register SV *sstr)
 	if (SvIOK(sstr)) {
 	    (void)SvIOK_on(dstr);
 	    SvIVX(dstr) = SvIVX(sstr);
+	    /* XXXX Do we want to set IsUV for IV(ROK)?  Be extra safe... */
+	    if (SvIsUV(sstr))
+		SvIsUV_on(dstr);
 	}
     }
     else if (sflags & SVp_IOK) {
 	(void)SvIOK_only(dstr);
 	SvIVX(dstr) = SvIVX(sstr);
+	if (SvIsUV(sstr))
+	    SvIsUV_on(dstr);
     }
     else {
 	if (dtype == SVt_PVGV) {
@@ -2284,7 +2537,7 @@ sv_chop(register SV *sv, register char *ptr)	/* like set but assuming ptr is in 
 	SvIVX(sv) = 0;
 	SvFLAGS(sv) |= SVf_OOK;
     }
-    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVp_IOK|SVp_NOK);
+    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVp_IOK|SVp_NOK|SVf_IVisUV);
     delta = ptr - SvPVX(sv);
     SvLEN(sv) -= delta;
     SvCUR(sv) -= delta;
@@ -3452,11 +3705,19 @@ sv_inc(register SV *sv)
 	return;
     }
     if (flags & SVp_IOK) {
-	if (SvIVX(sv) == IV_MAX)
-	    sv_setnv(sv, (double)IV_MAX + 1.0);
-	else {
-	    (void)SvIOK_only(sv);
-	    ++SvIVX(sv);
+	if (SvIsUV(sv)) {
+	    if (SvUVX(sv) == UV_MAX)
+		sv_setnv(sv, (double)UV_MAX + 1.0);
+	    else
+		(void)SvIOK_only_UV(sv);
+		++SvUVX(sv);
+	} else {
+	    if (SvIVX(sv) == IV_MAX)
+		sv_setnv(sv, (double)IV_MAX + 1.0);
+	    else {
+		(void)SvIOK_only(sv);
+		++SvIVX(sv);
+	    }	    
 	}
 	return;
     }
@@ -3545,11 +3806,22 @@ sv_dec(register SV *sv)
 	return;
     }
     if (flags & SVp_IOK) {
-	if (SvIVX(sv) == IV_MIN)
-	    sv_setnv(sv, (double)IV_MIN - 1.0);
-	else {
-	    (void)SvIOK_only(sv);
-	    --SvIVX(sv);
+	if (SvIsUV(sv)) {
+	    if (SvUVX(sv) == 0) {
+		(void)SvIOK_only(sv);
+		SvIVX(sv) = -1;
+	    }
+	    else {
+		(void)SvIOK_only_UV(sv);
+		--SvUVX(sv);
+	    }	    
+	} else {
+	    if (SvIVX(sv) == IV_MIN)
+		sv_setnv(sv, (double)IV_MIN - 1.0);
+	    else {
+		(void)SvIOK_only(sv);
+		--SvIVX(sv);
+	    }	    
 	}
 	return;
     }
@@ -3919,16 +4191,22 @@ sv_true(register SV *sv)
 IV
 sv_iv(register SV *sv)
 {
-    if (SvIOK(sv))
+    if (SvIOK(sv)) {
+	if (SvIsUV(sv))
+	    return (IV)SvUVX(sv);
 	return SvIVX(sv);
+    }
     return sv_2iv(sv);
 }
 
 UV
 sv_uv(register SV *sv)
 {
-    if (SvIOK(sv))
-	return SvUVX(sv);
+    if (SvIOK(sv)) {
+	if (SvIsUV(sv))
+	    return SvUVX(sv);
+	return (UV)SvIVX(sv);
+    }
     return sv_2uv(sv);
 }
 
@@ -4213,41 +4491,22 @@ sv_tainted(SV *sv)
 void
 sv_setpviv(SV *sv, IV iv)
 {
-    STRLEN len;
-    char buf[TYPE_DIGITS(UV)];
-    char *ptr = buf + sizeof(buf);
-    int sign;
-    UV uv;
-    char *p;
+    char buf[TYPE_CHARS(UV)];
+    char *ebuf;
+    char *ptr = uiv_2buf(buf, iv, 0, 0, &ebuf);
 
-    sv_setpvn(sv, "", 0);
-    if (iv >= 0) {
-	uv = iv;
-	sign = 0;
-    } else {
-	uv = -iv;
-	sign = 1;
-    }
-    do {
-	*--ptr = '0' + (uv % 10);
-    } while (uv /= 10);
-    len = (buf + sizeof(buf)) - ptr;
-    /* taking advantage of SvCUR(sv) == 0 */
-    SvGROW(sv, sign + len + 1);
-    p = SvPVX(sv);
-    if (sign)
-	*p++ = '-';
-    memcpy(p, ptr, len);
-    p += len;
-    *p = '\0';
-    SvCUR(sv) = p - SvPVX(sv);
+    sv_setpvn(sv, ptr, ebuf - ptr);
 }
 
 
 void
 sv_setpviv_mg(SV *sv, IV iv)
 {
-    sv_setpviv(sv,iv);
+    char buf[TYPE_CHARS(UV)];
+    char *ebuf;
+    char *ptr = uiv_2buf(buf, iv, 0, 0, &ebuf);
+
+    sv_setpvn(sv, ptr, ebuf - ptr);
     SvSETMAGIC(sv);
 }
 

@@ -913,7 +913,10 @@ do_print(register SV *sv, PerlIO *fp)
 	if (SvIOK(sv)) {
 	    if (SvGMAGICAL(sv))
 		mg_get(sv);
-	    PerlIO_printf(fp, "%ld", (long)SvIVX(sv));
+	    if (SvIsUV(sv))		/* XXXX 64-bit? */
+		PerlIO_printf(fp, "%lu", (unsigned long)SvUVX(sv));
+	    else
+		PerlIO_printf(fp, "%ld", (long)SvIVX(sv));
 	    return !PerlIO_error(fp);
 	}
 	/* FALL THROUGH */

@@ -233,7 +233,7 @@ PP(pp_preinc)
     djSP;
     if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
 	croak(PL_no_modify);
-    if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
+    if (SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
     	SvIVX(TOPs) != IV_MAX)
     {
 	++SvIVX(TOPs);

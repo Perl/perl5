@@ -869,7 +869,7 @@ PP(pp_predec)
     djSP;
     if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
 	croak(PL_no_modify);
-    if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
+    if (SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
     	SvIVX(TOPs) != IV_MIN)
     {
 	--SvIVX(TOPs);
@@ -887,7 +887,7 @@ PP(pp_postinc)
     if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
 	croak(PL_no_modify);
     sv_setsv(TARG, TOPs);
-    if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
+    if (SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
     	SvIVX(TOPs) != IV_MAX)
     {
 	++SvIVX(TOPs);
@@ -908,7 +908,7 @@ PP(pp_postdec)
     if(SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
 	croak(PL_no_modify);
     sv_setsv(TARG, TOPs);
-    if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
+    if (SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
     	SvIVX(TOPs) != IV_MIN)
     {
 	--SvIVX(TOPs);

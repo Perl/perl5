@@ -279,8 +279,12 @@ sv_peek(SV *sv)
 	SET_NUMERIC_STANDARD();
 	sv_catpvf(t, "(%g)",SvNVX(sv));
     }
-    else if (SvIOKp(sv))
-	sv_catpvf(t, "(%ld)",(long)SvIVX(sv));
+    else if (SvIOKp(sv)) {		/* XXXX: IV, UV? */
+	if (SvIsUV(sv))
+	    sv_catpvf(t, "(%lu)",(unsigned long)SvUVX(sv));
+	else
+            sv_catpvf(t, "(%ld)",(long)SvIVX(sv));
+    }
     else
 	sv_catpv(t, "()");
     
@@ -781,6 +785,7 @@ do_sv_dump(I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bool dumpops,
 	if (CvCLONE(sv))	sv_catpv(d, "CLONE,");
 	if (CvCLONED(sv))	sv_catpv(d, "CLONED,");
 	if (CvNODEBUG(sv))	sv_catpv(d, "NODEBUG,");
+	if (SvCOMPILED(sv))	sv_catpv(d, "COMPILED,");
 	break;
     case SVt_PVHV:
 	if (HvSHAREKEYS(sv))	sv_catpv(d, "SHAREKEYS,");
@@ -803,9 +808,14 @@ do_sv_dump(I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bool dumpops,
 		sv_catpv(d, " ),");
 	    }
 	}
+	/* FALL THROGH */
+    default:
+	if (SvEVALED(sv))	sv_catpv(d, "EVALED,");
+	if (SvIsUV(sv))		sv_catpv(d, "IsUV,");
+	break;
     case SVt_PVBM:
 	if (SvTAIL(sv))		sv_catpv(d, "TAIL,");
-	if (SvCOMPILED(sv))	sv_catpv(d, "COMPILED,");
+	if (SvVALID(sv))	sv_catpv(d, "VALID,");
 	break;
     }
 
@@ -869,7 +879,10 @@ do_sv_dump(I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bool dumpops,
 	return;
     }
     if (type >= SVt_PVIV || type == SVt_IV) {
-	dump_indent(level, file, "  IV = %ld", (long)SvIVX(sv));
+	if (SvIsUV(sv))
+	    dump_indent(level, file, "  UV = %lu", (unsigned long)SvUVX(sv));
+	else
+	    dump_indent(level, file, "  IV = %ld", (long)SvIVX(sv));
 	if (SvOOK(sv))
 	    PerlIO_printf(file, "  (OFFSET)");
 	PerlIO_putc(file, '\n');
