@@ -163,7 +163,7 @@ ok ($ol > 3, "check encoding on EBCDIC");
 %u = ($d => "downgrade");
 for (keys %u) {
     ok (length == 3, "check length"); 
-    is ($_, "\xe3\x81\xAF", "check value");
+    is ($_, pack("U*", 0xe3, 0x81, 0xAF), "check value");
 }
 {
     { use bytes; ok (bytes::length($d) == $ol) }

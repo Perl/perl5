@@ -110,18 +110,13 @@ if ($^O eq 'VMS') {
    }
 }
 my $status;
-my $display_cmd = "@cmd";
-chomp($display_cmd); # where is the newline coming from? ldopts()?
-print "# $display_cmd\n"; 
-
 # On OS/2 the linker will always emit an empty line to STDOUT; filter these
-$status = -1;
-{
-  open my $cmdfh, '-|', join(' ',@cmd) or last;
-  print "#$_" while <$cmdfh>;
-  close $cmdfh;
-  $status = $?;
-}
+my $cmd = join ' ', @cmd;
+chomp($cmd); # where is the newline coming from? ldopts()?
+print "# $cmd\n";
+my @out = `$cmd`;
+$status = $?;
+print "# $_\n" foreach @out;
 
 if ($^O eq 'VMS' && !$status) {
   print "# @cmd2\n";

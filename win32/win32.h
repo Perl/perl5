@@ -353,6 +353,8 @@ struct thread_intern {
 #    ifdef USE_RTL_THREAD_API
     void *		retv;	/* slot for thread return value */
 #    endif
+    BOOL               Wuse_showwindow;
+    WORD               Wshowwindow;
 };
 
 #ifdef USE_5005THREADS
@@ -421,12 +423,16 @@ DllExport int win32_async_check(pTHX);
 #  define w32_crypt_buffer	(thr->i.Wcrypt_buffer)
 #  define w32_servent		(thr->i.Wservent)
 #  define w32_init_socktype	(thr->i.Winit_socktype)
+#  define w32_use_showwindow	(thr->i.Wuse_showwindow)
+#  define w32_showwindow	(thr->i.Wshowwindow)
 #else
 #  define w32_strerror_buffer	(PL_sys_intern.thr_intern.Wstrerror_buffer)
 #  define w32_getlogin_buffer	(PL_sys_intern.thr_intern.Wgetlogin_buffer)
 #  define w32_crypt_buffer	(PL_sys_intern.thr_intern.Wcrypt_buffer)
 #  define w32_servent		(PL_sys_intern.thr_intern.Wservent)
 #  define w32_init_socktype	(PL_sys_intern.thr_intern.Winit_socktype)
+#  define w32_use_showwindow	(PL_sys_intern.thr_intern.Wuse_showwindow)
+#  define w32_showwindow	(PL_sys_intern.thr_intern.Wshowwindow)
 #endif /* USE_5005THREADS */
 
 /* UNICODE<>ANSI translation helpers */

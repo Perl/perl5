@@ -33,7 +33,7 @@ print "ok 3\n";
 }
 
 {
-    my $a = pack("U", 0x80);
+    my $a = pack("U", 0xFF);
 
     print "not " unless length($a) == 1;
     print "ok 6\n";
@@ -42,12 +42,12 @@ print "ok 3\n";
     use bytes;
     if (ord('A') == 193)
      {
-      printf "#%vx for 0x80\n",$a;
-      print "not " unless $a eq "\x8a\x67" && length($a) == 2;
+      printf "#%vx for 0xFF\n",$a;
+      print "not " unless $a eq "\x80\x45" && length($a) == 2;
      }
     else
      {
-      print "not " unless $a eq "\xc2\x80" && length($a) == 2;
+      print "not " unless $a eq "\xc3\xbf" && length($a) == 2;
      }
     print "ok 7\n";
     $test++;
