@@ -200,7 +200,6 @@
 #define PL_bufend		(PERL_GET_INTERP->Ibufend)
 #define PL_bufptr		(PERL_GET_INTERP->Ibufptr)
 #define PL_checkav		(PERL_GET_INTERP->Icheckav)
-#define PL_clone_callbacks	(PERL_GET_INTERP->Iclone_callbacks)
 #define PL_collation_ix		(PERL_GET_INTERP->Icollation_ix)
 #define PL_collation_name	(PERL_GET_INTERP->Icollation_name)
 #define PL_collation_standard	(PERL_GET_INTERP->Icollation_standard)
@@ -483,7 +482,6 @@
 #define PL_bufend		(vTHX->Ibufend)
 #define PL_bufptr		(vTHX->Ibufptr)
 #define PL_checkav		(vTHX->Icheckav)
-#define PL_clone_callbacks	(vTHX->Iclone_callbacks)
 #define PL_collation_ix		(vTHX->Icollation_ix)
 #define PL_collation_name	(vTHX->Icollation_name)
 #define PL_collation_standard	(vTHX->Icollation_standard)
@@ -902,7 +900,6 @@
 #define PL_bufend		(aTHXo->interp.Ibufend)
 #define PL_bufptr		(aTHXo->interp.Ibufptr)
 #define PL_checkav		(aTHXo->interp.Icheckav)
-#define PL_clone_callbacks	(aTHXo->interp.Iclone_callbacks)
 #define PL_collation_ix		(aTHXo->interp.Icollation_ix)
 #define PL_collation_name	(aTHXo->interp.Icollation_name)
 #define PL_collation_standard	(aTHXo->interp.Icollation_standard)
@@ -1186,7 +1183,6 @@
 #define PL_Ibufend		PL_bufend
 #define PL_Ibufptr		PL_bufptr
 #define PL_Icheckav		PL_checkav
-#define PL_Iclone_callbacks	PL_clone_callbacks
 #define PL_Icollation_ix	PL_collation_ix
 #define PL_Icollation_name	PL_collation_name
 #define PL_Icollation_standard	PL_collation_standard
