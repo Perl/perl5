@@ -1900,6 +1900,7 @@ int gimme;
     dSP;
     OP *saveop = op;
     HV *newstash;
+    CV *caller;
     AV* comppadlist;
 
     in_eval = 1;
@@ -1916,9 +1917,11 @@ int gimme;
     SAVEI32(min_intro_pending);
     SAVEI32(max_intro_pending);
 
+    caller = compcv;
     SAVESPTR(compcv);
     compcv = (CV*)NEWSV(1104,0);
     sv_upgrade((SV *)compcv, SVt_PVCV);
+    CvOUTSIDE(compcv) = (CV*)SvREFCNT_inc(caller);
 
     comppad = newAV();
     comppad_name = newAV();
