@@ -103,7 +103,7 @@ END { unlink($written) }
 
 close($tst);
 open($tst,">$written")  || die "Cannot open $written:$!";
-binmode $TST if $Is_Dosish;
+binmode $tst if $Is_Dosish;
 
 if (tell($tst) == 0) { print "ok 24\n"; } else { print "not ok 24\n"; }
 
@@ -118,7 +118,7 @@ if (tell($tst) == 10) { print "ok 26\n"; } else { print "not ok 26\n"; }
 close($tst);
 
 open($tst,"+>>$written")  || die "Cannot open $written:$!";
-binmode $TST if $Is_Dosish;
+binmode $tst if $Is_Dosish;
 
 if (0) 
 {
