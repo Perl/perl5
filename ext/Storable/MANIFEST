@@ -6,6 +6,7 @@ Storable.xs		    The C side of Storable
 ChangeLog		    Changes since baseline
 hints/linux.pl		    Hint file to drop gcc to -O2
 t/HAS_HOOK.pm		    For auto-requiring of modules for STORABLE_thaw
+t/HAS_OVERLOAD.pm	    For auto-requiring of mdoules for overload
 t/blessed.t		    See if Storable works
 t/canonical.t		    See if Storable works
 t/code.t		    Test (de)serialization of code references

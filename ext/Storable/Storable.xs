@@ -4286,14 +4286,32 @@ static SV *retrieve_overloaded(stcxt_t *cxt, char *cname)
 	/*
 	 * Restore overloading magic.
 	 */
-	if (!SvTYPE(sv)
-	    || !(stash = (HV *) SvSTASH (sv))
-	    || !Gv_AMG(stash))
+
+	stash = SvTYPE(sv) ? (HV *) SvSTASH (sv) : 0;
+	if (!stash) {
 		CROAK(("Cannot restore overloading on %s(0x%"UVxf
-		       ") (package %s)",
+		       ") (package <unknown>)",
 		       sv_reftype(sv, FALSE),
-		       PTR2UV(sv),
-			   stash ? HvNAME(stash) : "<unknown>"));
+		       PTR2UV(sv)));
+	}
+	if (!Gv_AMG(stash)) {
+		SV *psv = newSVpvn("require ", 8);
+		const char *package = HvNAME(stash);
+		sv_catpv(psv, package);
+
+		TRACEME(("No overloading defined for package %s", package));
+		TRACEME(("Going to require module '%s' with '%s'", package, SvPVX(psv)));
+
+		perl_eval_sv(psv, G_DISCARD);
+		sv_free(psv);
+		if (!Gv_AMG(stash)) {
+			CROAK(("Cannot restore overloading on %s(0x%"UVxf
+			       ") (package %s) (even after a \"require %s;\")",
+			       sv_reftype(sv, FALSE),
+			       PTR2UV(sv),
+			       package, package));
+		}
+	}
 
 	SvAMAGIC_on(rv);
 

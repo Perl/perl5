@@ -651,6 +651,7 @@ ext/Storable/README		Storable extension
 ext/Storable/Storable.pm	Storable extension
 ext/Storable/Storable.xs	Storable extension
 ext/Storable/t/HAS_HOOK.pm	For auto-requiring of modules for STORABLE_thaw
+ext/Storable/t/HAS_OVERLOAD.pm	For auto-requiring of mdoules for overload
 ext/Storable/t/blessed.t	See if Storable works
 ext/Storable/t/canonical.t	See if Storable works
 ext/Storable/t/code.t		See if Storable works
