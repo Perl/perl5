@@ -25,9 +25,9 @@
 #  endif
 #endif
 
-/* if you only have signal() and it resets on each signal, SIGNAL_FIX fixes */
+/* if you only have signal() and it resets on each signal, FAKE_PERSISTENT_SIGNAL_HANDLERS fixes */
 #if !defined(HAS_SIGACTION) && defined(VMS)
-#  define  SIGNAL_FIX
+#  define  FAKE_PERSISTENT_SIGNAL_HANDLERS
 #endif
 
 static void restore_magic(pTHX_ void *p);
@@ -990,7 +990,7 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
     return 0;
 }
 
-#ifdef SIGNAL_FIX   
+#ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS   
 static int sig_ignoring_initted = 0;
 static int sig_ignoring[SIG_SIZE];      /* which signals we are ignoring */
 #endif
@@ -1008,7 +1008,7 @@ Perl_magic_getsig(pTHX_ SV *sv, MAGIC *mg)
     	    sv_setsv(sv,PL_psig_ptr[i]);
     	else {
     	    Sighandler_t sigstate;
-#ifdef SIGNAL_FIX
+#ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
     	    if (sig_ignoring_initted && sig_ignoring[i]) 
     	      sigstate = SIG_IGN;
     	    else
@@ -1061,7 +1061,7 @@ Perl_csighandler(int sig)
 #ifndef PERL_OLD_SIGNALS
     dTHX;
 #endif
-#ifdef SIGNAL_FIX
+#ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
     (void) rsignal(sig, &Perl_csighandler);
     if (sig_ignoring[sig]) return;
 #endif
@@ -1115,7 +1115,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 		Perl_warner(aTHX_ WARN_SIGNAL, "No such signal: SIG%s", s);
 	    return 0;
 	}
-#ifdef SIGNAL_FIX
+#ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
 	if (!sig_ignoring_initted) {
 	    int j;
 	    for (j = 0; j < SIG_SIZE; j++) sig_ignoring[j] = 0;
@@ -1140,7 +1140,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
     s = SvPV_force(sv,len);
     if (strEQ(s,"IGNORE")) {
 	if (i) {
-#ifdef SIGNAL_FIX
+#ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
 	    sig_ignoring[i] = 1;
 	    (void)rsignal(i, &Perl_csighandler);
 #else
