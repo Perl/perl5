@@ -1487,7 +1487,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 			|| kid->op_type == OP_METHOD)
 		    {
 			UNOP *newop;
-			
+
 			NewOp(1101, newop, 1, UNOP);
 			newop->op_type = OP_RV2CV;
 			newop->op_ppaddr = PL_ppaddr[OP_RV2CV];
@@ -1497,7 +1497,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 			newop->op_private |= OPpLVAL_INTRO;
 			break;
 		    }
-		
+
 		    if (kid->op_type != OP_RV2CV)
 			Perl_croak(aTHX_
 				   "panic: unexpected lvalue entersub "
@@ -1506,12 +1506,12 @@ Perl_mod(pTHX_ OP *o, I32 type)
 		    kid->op_private |= OPpLVAL_INTRO;
 		    break;	/* Postpone until runtime */
 		}
-		
-		okid = kid;		
+
+		okid = kid;
 		kid = kUNOP->op_first;
 		if (kid->op_type == OP_NULL && kid->op_targ == OP_RV2SV)
 		    kid = kUNOP->op_first;
-		if (kid->op_type == OP_NULL)		
+		if (kid->op_type == OP_NULL)
 		    Perl_croak(aTHX_
 			       "Unexpected constant lvalue entersub "
 			       "entry via type/targ %ld:%"UVuf,
@@ -1531,7 +1531,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 		    okid->op_private |= OPpLVAL_INTRO;
 		    break;
 		}
-		
+
 		cv = GvCV(kGVOP_gv);
 		if (!cv)
 		    goto restore_2cv;
@@ -1578,7 +1578,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	    goto nomod;
 	PL_modcount++;
 	break;
-	
+
     case OP_COND_EXPR:
 	for (kid = cUNOPo->op_first->op_sibling; kid; kid = kid->op_sibling)
 	    mod(kid, type);
@@ -1649,7 +1649,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 
     case OP_PUSHMARK:
 	break;
-	
+
     case OP_KEYS:
 	if (type != OP_SASSIGN)
 	    goto nomod;
@@ -3714,7 +3714,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 			    if (gv == PL_defgv || SvCUR(gv) == PL_generation)
 				break;
 			    SvCUR(gv) = PL_generation;
-			}	
+			}
 		    }
 		    else
 			break;
@@ -4431,7 +4431,8 @@ Perl_cv_undef(pTHX_ CV *cv)
 		for (ix = AvFILLp(comppad_name); ix > 0; ix--) {
 		    SV *namesv = namepad[ix];
 		    if (namesv && namesv != &PL_sv_undef
-			&& *SvPVX(namesv) == '&')
+			&& *SvPVX(namesv) == '&'
+			&& ix <= AvFILLp(comppad))
 		    {
 			CV *innercv = (CV*)curpad[ix];
 			if (innercv && SvTYPE(innercv) == SVt_PVCV
@@ -5421,7 +5422,7 @@ Perl_oopsAV(pTHX_ OP *o)
 	o->op_type = OP_PADAV;
 	o->op_ppaddr = PL_ppaddr[OP_PADAV];
 	return ref(o, OP_RV2AV);
-	
+
     case OP_RV2SV:
 	o->op_type = OP_RV2AV;
 	o->op_ppaddr = PL_ppaddr[OP_RV2AV];
@@ -5582,7 +5583,7 @@ Perl_ck_spair(pTHX_ OP *o)
 	     !(PL_opargs[newop->op_type] & OA_RETSCALAR) ||
 	     newop->op_type == OP_PADAV || newop->op_type == OP_PADHV ||
 	     newop->op_type == OP_RV2AV || newop->op_type == OP_RV2HV)) {
-	
+
 	    return o;
 	}
 	op_free(kUNOP->op_first);
@@ -5949,7 +5950,7 @@ Perl_ck_fun(pTHX_ OP *o)
 		    Perl_warner(aTHX_ WARN_SYNTAX,
 			"Useless use of %s with no values",
 			PL_op_desc[type]);
-		
+
 		if (kid->op_type == OP_CONST &&
 		    (kid->op_private & OPpCONST_BARE))
 		{
@@ -6299,7 +6300,7 @@ Perl_ck_listiob(pTHX_ OP *o)
 	    kid = kid->op_sibling;
 	}
     }
-	
+
     if (!kid)
 	append_elem(o->op_type, o, newDEFSVOP());
 
@@ -6507,7 +6508,7 @@ Perl_ck_shift(pTHX_ OP *o)
 
     if (!(o->op_flags & OPf_KIDS)) {
 	OP *argop;
-	
+
 	op_free(o);
 #ifdef USE_5005THREADS
 	if (!CvUNIQUE(PL_compcv)) {
@@ -7208,7 +7209,7 @@ Perl_peep(pTHX_ register OP *o)
 		}
 	    }
 	    break;
-	
+
 	case OP_HELEM: {
 	    UNOP *rop;
 	    SV *lexname;
@@ -7217,7 +7218,7 @@ Perl_peep(pTHX_ register OP *o)
 	    I32 ind;
 	    char *key = NULL;
 	    STRLEN keylen;
-	
+
 	    o->op_seq = PL_op_seqmax++;
 
 	    if (((BINOP*)o)->op_last->op_type != OP_CONST)
@@ -7269,7 +7270,7 @@ Perl_peep(pTHX_ register OP *o)
 	    *svp = sv;
 	    break;
 	}
-	
+
 	case OP_HSLICE: {
 	    UNOP *rop;
 	    SV *lexname;
@@ -7399,4 +7400,3 @@ const_sv_xsub(pTHX_ CV* cv)
     ST(0) = (SV*)XSANY.any_ptr;
     XSRETURN(1);
 }
-

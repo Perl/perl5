@@ -84,9 +84,8 @@ Perl_ithread_destruct (pTHX_ ithread* thread)
 	MUTEX_LOCK(&thread->mutex);
 	if (thread->count != 0) {
 		MUTEX_UNLOCK(&thread->mutex);
-		return;	
+		return;
 	}
-	MUTEX_UNLOCK(&thread->mutex);
 	MUTEX_LOCK(&create_mutex);
 	/* Remove from circular list of threads */
 	if (thread->next == thread) {
@@ -114,6 +113,7 @@ Perl_ithread_destruct (pTHX_ ithread* thread)
 	    thread->interp = NULL;
 	}
 	PERL_SET_CONTEXT(aTHX);
+	MUTEX_UNLOCK(&thread->mutex);
 }
 
 
@@ -316,11 +316,11 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 	{
 	    dTHXa(thread->interp);
 
-            clone_param.flags = 0;	
+            clone_param.flags = 0;
 	    thread->init_function = sv_dup(init_function, &clone_param);
 	    if (SvREFCNT(thread->init_function) == 0) {
 		SvREFCNT_inc(thread->init_function);
-	    }	
+	    }
 
 	    thread->params = sv_dup(params, &clone_param);
 	    SvREFCNT_inc(thread->params);
@@ -328,7 +328,7 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 	    ptr_table_free(PL_ptr_table);
 	    PL_ptr_table = NULL;
 	}
-	
+
 	PERL_SET_CONTEXT(aTHX);
 
 	/* Start the thread */
@@ -363,7 +363,7 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 #endif
 	}
 #endif
-	MUTEX_UNLOCK(&create_mutex);	
+	MUTEX_UNLOCK(&create_mutex);
 	return ithread_to_SV(aTHX_ obj, thread, classname, FALSE);
 }
 
@@ -516,5 +516,4 @@ BOOT:
 	PERL_THREAD_SETSPECIFIC(self_key,thread);
 	MUTEX_UNLOCK(&create_mutex);
 }
-
 

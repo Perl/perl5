@@ -1,13 +1,13 @@
 /* WIN32.C
  *
- * (c) 1995 Microsoft Corporation. All rights reserved. 
+ * (c) 1995 Microsoft Corporation. All rights reserved.
  * 		Developed by hip communications inc., http://info.hip.com/info/
  * Portions (c) 1993 Intergraph Corporation. All rights reserved.
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  */
-#define PERLIO_NOT_STDIO 0 
+#define PERLIO_NOT_STDIO 0
 #define WIN32_LEAN_AND_MEAN
 #define WIN32IO_IS_STDIO
 #include <tchar.h>
@@ -54,7 +54,7 @@
 #include <utime.h>
 #endif
 #ifdef __GNUC__
-/* Mingw32 defaults to globing command line 
+/* Mingw32 defaults to globing command line
  * So we turn it off like this:
  */
 int _CRT_glob = 0;
@@ -118,7 +118,7 @@ static DWORD	w32_platform = (DWORD)-1;
 
 #define ONE_K_BUFSIZE	1024
 
-int 
+int
 IsWin95(void)
 {
     return (win32_os_id() == VER_PLATFORM_WIN32_WINDOWS);
@@ -549,7 +549,7 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
 	    argv[index++] = "";
     }
     argv[index++] = 0;
-   
+
     status = win32_spawnvp(flag,
 			   (const char*)(really ? SvPV_nolen(really) : argv[0]),
 			   (const char* const*)argv);
@@ -562,7 +562,7 @@ do_aspawn(void *vreally, void **vmark, void **vsp)
 	    argv[index+sh_items] = argv[index];
 	while (--sh_items >= 0)
 	    argv[sh_items] = w32_perlshell_vec[sh_items];
-   
+
 	status = win32_spawnvp(flag,
 			       (const char*)(really ? SvPV_nolen(really) : argv[0]),
 			       (const char* const*)argv);
@@ -881,7 +881,7 @@ win32_readdir(DIR *dirp)
 		dirp->curr = NULL;
 	}
 	return &(dirp->dirstr);
-    } 
+    }
     else
 	return NULL;
 }
@@ -963,7 +963,7 @@ getegid(void)
 
 int
 setuid(uid_t auid)
-{ 
+{
     return (auid == ROOT_UID ? 0 : -1);
 }
 
@@ -1096,7 +1096,7 @@ win32_kill(int pid, int sig)
 	    default:
 		/* We fake signals to pseudo-processes using Win32 message queue */
 		if (PostThreadMessage(-pid,WM_USER,sig,0)) {
-		    /* It might be us ... */ 
+		    /* It might be us ... */
 		    PERL_ASYNC_CHECK();
 		    return 0;
 		}
@@ -1162,7 +1162,7 @@ DllExport int
 win32_stat(const char *path, struct stat *sbuf)
 {
     dTHX;
-    char	buffer[MAX_PATH+1]; 
+    char	buffer[MAX_PATH+1];
     int		l = strlen(path);
     int		res;
     WCHAR	wbuffer[MAX_PATH+1];
@@ -1477,14 +1477,14 @@ win32_times(struct tms *timebuf)
     FILETIME user;
     FILETIME kernel;
     FILETIME dummy;
-    if (GetProcessTimes(GetCurrentProcess(), &dummy, &dummy, 
+    if (GetProcessTimes(GetCurrentProcess(), &dummy, &dummy,
                         &kernel,&user)) {
 	timebuf->tms_utime = filetime_to_clock(&user);
 	timebuf->tms_stime = filetime_to_clock(&kernel);
 	timebuf->tms_cutime = 0;
 	timebuf->tms_cstime = 0;
-        
-    } else { 
+
+    } else {
         /* That failed - e.g. Win95 fallback to clock() */
         clock_t t = clock();
 	timebuf->tms_utime = t;
@@ -1714,6 +1714,49 @@ win32_uname(struct utsname *name)
 
 /* Timing related stuff */
 
+int
+do_raise(pTHX_ int sig) 
+{
+    if (sig < SIG_SIZE) {
+	Sighandler_t handler = w32_sighandler[sig];
+	if (handler == SIG_IGN) {
+	    return 0;
+	}
+	else if (handler != SIG_DFL) {
+	    (*handler)(sig);
+	    return 0;
+	}
+	else {
+	    /* Choose correct default behaviour */
+	    switch (sig) {
+#ifdef SIGCLD
+		case SIGCLD:
+#endif
+#ifdef SIGCHLD
+		case SIGCHLD:
+#endif
+		case 0:
+		    return 0;
+		case SIGTERM:
+		default:
+		    break;
+	    }
+	}
+    }
+    /* Tell caller to exit thread/process as approriate */
+    return 1;
+}
+
+void
+sig_terminate(pTHX_ int sig)
+{
+    Perl_warn(aTHX_ "Terminating on signal SIG%s(%d)\n",PL_sig_name[sig], sig);
+    /* exit() seems to be safe, my_exit() or die() is a problem in ^C 
+       thread 
+     */
+    exit(sig);
+}
+
 DllExport int
 win32_async_check(pTHX)
 {
@@ -1721,33 +1764,41 @@ win32_async_check(pTHX)
     int ours = 1;
     /* Passing PeekMessage -1 as HWND (2nd arg) only get PostThreadMessage() messages
      * and ignores window messages - should co-exist better with windows apps e.g. Tk
-     */ 
+     */
     while (PeekMessage(&msg, (HWND)-1, 0, 0, PM_REMOVE|PM_NOYIELD)) {
+	int sig;
 	switch(msg.message) {
 
 #if 0
     /* Perhaps some other messages could map to signals ? ... */
         case WM_CLOSE:
-        case WM_QUIT: 
+        case WM_QUIT:
 	    /* Treat WM_QUIT like SIGHUP?  */
-	    CALL_FPTR(PL_sighandlerp)(1);
+	    sig = SIGHUP;
+	    goto Raise;
 	    break;
 #endif
 
 	/* We use WM_USER to fake kill() with other signals */
 	case WM_USER: {
-	    CALL_FPTR(PL_sighandlerp)(msg.wParam);
+	    sig = msg.wParam;
+	Raise:
+	    if (do_raise(aTHX_ sig)) {
+		   sig_terminate(aTHX_ sig);
+	    }
 	    break;
 	}
-	
+
 	case WM_TIMER: {
 	    /* alarm() is a one-shot but SetTimer() repeats so kill it */
 	    if (w32_timerid) {
 	    	KillTimer(NULL,w32_timerid);
-	    	w32_timerid=0;  
-            }
+	    	w32_timerid=0;
+	    }
 	    /* Now fake a call to signal handler */
-	    CALL_FPTR(PL_sighandlerp)(14);
+	    if (do_raise(aTHX_ 14)) {
+	    	sig_terminate(aTHX_ 14);
+	    }
 	    break;
 	}
 
@@ -1765,7 +1816,7 @@ win32_async_check(pTHX)
     if (PL_sig_pending) {
 	despatch_signals();
     }
-    return ours; 
+    return ours;
 }
 
 DllExport DWORD
@@ -1782,9 +1833,9 @@ win32_msgwait(pTHX_ DWORD count, LPHANDLE handles, DWORD timeout, LPDWORD result
 	if (resultp)
 	   *resultp = result;
 	if (result == WAIT_TIMEOUT) {
-	    /* Ran out of time - explicit return of zero to avoid -ve if we 
-	       have scheduling issues 
-             */	
+	    /* Ran out of time - explicit return of zero to avoid -ve if we
+	       have scheduling issues
+             */
 	    return 0;
 	}
 	if (timeout != INFINITE) {
@@ -1952,7 +2003,7 @@ alien_process:
 		errno = ECHILD;
 	}
     }
-    return retval >= 0 ? pid : retval;                
+    return retval >= 0 ? pid : retval;
 }
 
 DllExport int
@@ -1972,12 +2023,12 @@ win32_sleep(unsigned int t)
 DllExport unsigned int
 win32_alarm(unsigned int sec)
 {
-    /* 
+    /*
      * the 'obvious' implentation is SetTimer() with a callback
-     * which does whatever receiving SIGALRM would do 
-     * we cannot use SIGALRM even via raise() as it is not 
+     * which does whatever receiving SIGALRM would do
+     * we cannot use SIGALRM even via raise() as it is not
      * one of the supported codes in <signal.h>
-     */ 
+     */
     dTHX;
     if (sec) {
 	w32_timerid = SetTimer(NULL,w32_timerid,sec*1000,NULL);
@@ -1985,9 +2036,9 @@ win32_alarm(unsigned int sec)
     else {
     	if (w32_timerid) {
             KillTimer(NULL,w32_timerid);
-  	    w32_timerid=0;  
+  	    w32_timerid=0;
     	}
-    }	
+    }
     return 0;
 }
 
@@ -2195,13 +2246,13 @@ win32_feof(FILE *fp)
 }
 
 /*
- * Since the errors returned by the socket error function 
+ * Since the errors returned by the socket error function
  * WSAGetLastError() are not known by the library routine strerror
  * we have to roll our own.
  */
 
 DllExport char *
-win32_strerror(int e) 
+win32_strerror(int e)
 {
 #if !defined __BORLANDC__ && !defined __MINGW32__      /* compiler intolerance */
     extern int sys_nerr;
@@ -2215,7 +2266,7 @@ win32_strerror(int e)
 
 	if (FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, &source, e, 0,
 			  w32_strerror_buffer,
-			  sizeof(w32_strerror_buffer), NULL) == 0) 
+			  sizeof(w32_strerror_buffer), NULL) == 0)
 	    strcpy(w32_strerror_buffer, "Unknown Error");
 
 	return w32_strerror_buffer;
@@ -2305,7 +2356,7 @@ win32_fopen(const char *filename, const char *mode)
     dTHX;
     WCHAR wMode[MODE_SIZE], wBuffer[MAX_PATH+1];
     FILE *f;
-    
+
     if (!*filename)
 	return NULL;
 
@@ -2488,7 +2539,7 @@ win32_fstat(int fd,struct stat *sbufptr)
     /* A file designated by filehandle is not shown as accessible
      * for write operations, probably because it is opened for reading.
      * --Vadim Konovalov
-     */ 
+     */
     int rc = fstat(fd,sbufptr);
     BY_HANDLE_FILE_INFORMATION bhfi;
     if (GetFileInformationByHandle((HANDLE)_get_osfhandle(fd), &bhfi)) {
@@ -3122,7 +3173,7 @@ _fixed_read(int fh, void *buf, unsigned cnt)
         bytes_read = q - (char *)buf;
     }
 
-functionexit:	
+functionexit:
     if (_pioinfo(fh)->lockinitflag)
 	LeaveCriticalSection(&(_pioinfo(fh)->lock));    /* unlock file */
 
@@ -3524,7 +3575,7 @@ win32_free_childdir(char* d)
  * This doesn't significantly affect perl itself, because we
  * always invoke things using PERL5SHELL if a direct attempt to
  * spawn the executable fails.
- * 
+ *
  * XXX splitting and rejoining the commandline between do_aspawn()
  * and win32_spawnvp() could also be avoided.
  */
@@ -3578,10 +3629,10 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
 	    ret = -1;
 	    goto RETVAL;
 	}
-	/* Create a new process group so we can use GenerateConsoleCtrlEvent() 
+	/* Create a new process group so we can use GenerateConsoleCtrlEvent()
 	 * in win32_kill()
 	 */
-        create |= CREATE_NEW_PROCESS_GROUP;  
+        create |= CREATE_NEW_PROCESS_GROUP;
 	/* FALL THROUGH */
 
     case P_WAIT:	/* synchronous execution */
@@ -3596,14 +3647,14 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
     memset(&tbl,0,sizeof(tbl));
     PerlEnv_get_child_IO(&tbl);
     StartupInfo.dwFlags		= tbl.dwFlags;
-    StartupInfo.dwX		= tbl.dwX; 
-    StartupInfo.dwY		= tbl.dwY; 
-    StartupInfo.dwXSize		= tbl.dwXSize; 
-    StartupInfo.dwYSize		= tbl.dwYSize; 
-    StartupInfo.dwXCountChars	= tbl.dwXCountChars; 
-    StartupInfo.dwYCountChars	= tbl.dwYCountChars; 
-    StartupInfo.dwFillAttribute	= tbl.dwFillAttribute; 
-    StartupInfo.wShowWindow	= tbl.wShowWindow; 
+    StartupInfo.dwX		= tbl.dwX;
+    StartupInfo.dwY		= tbl.dwY;
+    StartupInfo.dwXSize		= tbl.dwXSize;
+    StartupInfo.dwYSize		= tbl.dwYSize;
+    StartupInfo.dwXCountChars	= tbl.dwXCountChars;
+    StartupInfo.dwYCountChars	= tbl.dwYCountChars;
+    StartupInfo.dwFillAttribute	= tbl.dwFillAttribute;
+    StartupInfo.wShowWindow	= tbl.wShowWindow;
     StartupInfo.hStdInput	= tbl.childStdIn;
     StartupInfo.hStdOutput	= tbl.childStdOut;
     StartupInfo.hStdError	= tbl.childStdErr;
@@ -3817,7 +3868,7 @@ sbrk(int need)
    allocsize = info.dwAllocationGranularity;
   }
  /* This scheme fails eventually if request for contiguous
-  * block is denied so reserve big blocks - this is only 
+  * block is denied so reserve big blocks - this is only
   * address space not memory ...
   */
  if (brk+need >= reserved)
@@ -3831,7 +3882,7 @@ sbrk(int need)
      if (addr)
       committed = reserved;
     }
-   /* Reserve some (more) space 
+   /* Reserve some (more) space
     * Note this is a little sneaky, 1st call passes NULL as reserved
     * so lets system choose where we start, subsequent calls pass
     * the old end address so ask for a contiguous block
@@ -3957,10 +4008,10 @@ XS(w32_GetCwd)
     dXSARGS;
     /* Make the host for current directory */
     char* ptr = PerlEnv_get_childdir();
-    /* 
-     * If ptr != Nullch 
-     *   then it worked, set PV valid, 
-     *   else return 'undef' 
+    /*
+     * If ptr != Nullch
+     *   then it worked, set PV valid,
+     *   else return 'undef'
      */
     if (ptr) {
 	SV *sv = sv_newmortal();
@@ -4457,11 +4508,11 @@ win32_signal_context(void)
     if (!my_perl) {
 	my_perl = PL_curinterp;
 	PERL_SET_THX(my_perl);
-    } 
+    }
     return my_perl;
 }
 
-BOOL WINAPI 
+BOOL WINAPI
 win32_ctrlhandler(DWORD dwCtrlType)
 {
     dTHXa(PERL_GET_SIG_CONTEXT);
@@ -4471,43 +4522,45 @@ win32_ctrlhandler(DWORD dwCtrlType)
 
     switch(dwCtrlType) {
     case CTRL_CLOSE_EVENT:
-     /*  A signal that the system sends to all processes attached to a console when 
-         the user closes the console (either by choosing the Close command from the 
-         console window's System menu, or by choosing the End Task command from the 
+     /*  A signal that the system sends to all processes attached to a console when
+         the user closes the console (either by choosing the Close command from the
+         console window's System menu, or by choosing the End Task command from the
          Task List
       */
-	CALL_FPTR(PL_sighandlerp)(1); /* SIGHUP */
-	return TRUE;	
+	if (do_raise(aTHX_ 1))	      /* SIGHUP */
+	    sig_terminate(aTHX_ 1);
+	return TRUE;
 
     case CTRL_C_EVENT:
 	/*  A CTRL+c signal was received */
-	CALL_FPTR(PL_sighandlerp)(SIGINT); /* SIGINT */
-	return TRUE;	
+	if (do_raise(aTHX_ SIGINT))
+	    sig_terminate(aTHX_ SIGINT);
+	return TRUE;
 
     case CTRL_BREAK_EVENT:
 	/*  A CTRL+BREAK signal was received */
-	CALL_FPTR(PL_sighandlerp)(SIGBREAK); /* unix calls it SIGQUIT */
-	return TRUE;	
+	if (do_raise(aTHX_ SIGBREAK))
+	    sig_terminate(aTHX_ SIGBREAK);
+	return TRUE;
 
     case CTRL_LOGOFF_EVENT:
-      /*  A signal that the system sends to all console processes when a user is logging 
-          off. This signal does not indicate which user is logging off, so no 
-          assumptions can be made. 
+      /*  A signal that the system sends to all console processes when a user is logging
+          off. This signal does not indicate which user is logging off, so no
+          assumptions can be made.
        */
-	break;	
+	break;
     case CTRL_SHUTDOWN_EVENT:
-      /*  A signal that the system sends to all console processes when the system is 
-          shutting down. 
+      /*  A signal that the system sends to all console processes when the system is
+          shutting down.
        */
-	CALL_FPTR(PL_sighandlerp)(SIGTERM); 
-	return TRUE;	
-	break;	
+	if (do_raise(aTHX_ SIGTERM))
+	    sig_terminate(aTHX_ SIGTERM);
+	return TRUE;
     default:
-	break;	
+	break;
     }
     return FALSE;
 }
- 
 
 
 void
@@ -4533,6 +4586,27 @@ win32_get_child_IO(child_IO_table* ptbl)
     ptbl->childStdErr	= GetStdHandle(STD_ERROR_HANDLE);
 }
 
+Sighandler_t
+win32_signal(int sig, Sighandler_t subcode)
+{
+    dTHX;
+    if (sig < SIG_SIZE) {
+	int save_errno = errno;
+	Sighandler_t result = signal(sig, subcode);
+	if (result == SIG_ERR) {
+	    result = w32_sighandler[sig];
+	    errno = save_errno;
+	}
+	w32_sighandler[sig] = subcode;
+	return result;
+    }
+    else {
+	errno = EINVAL;
+	return SIG_ERR;
+    }
+}
+
+
 #ifdef HAVE_INTERP_INTERN
 
 
@@ -4549,6 +4623,7 @@ win32_csighandler(int sig)
 void
 Perl_sys_intern_init(pTHX)
 {
+    int i;
     w32_perlshell_tokens	= Nullch;
     w32_perlshell_vec		= (char**)NULL;
     w32_perlshell_items		= 0;
@@ -4563,11 +4638,14 @@ Perl_sys_intern_init(pTHX)
     w32_init_socktype		= 0;
     w32_timerid                 = 0;
     w32_poll_count              = 0;
+    for (i=0; i < SIG_SIZE; i++) {
+    	w32_sighandler[i] = SIG_DFL;
+    }
     if (my_perl == PL_curinterp) {
-        /* Force C runtime signal stuff to set its console handler */
+	/* Force C runtime signal stuff to set its console handler */
 	signal(SIGINT,&win32_csighandler);
 	signal(SIGBREAK,&win32_csighandler);
-        /* Push our handler on top */
+	/* Push our handler on top */
 	SetConsoleCtrlHandler(win32_ctrlhandler,TRUE);
     }
 }
@@ -4581,7 +4659,7 @@ Perl_sys_intern_clear(pTHX)
     Safefree(w32_children);
     if (w32_timerid) {
     	KillTimer(NULL,w32_timerid);
-    	w32_timerid=0;  
+    	w32_timerid=0;
     }
     if (my_perl == PL_curinterp) {
 	SetConsoleCtrlHandler(win32_ctrlhandler,FALSE);
@@ -4606,6 +4684,7 @@ Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
     dst->thr_intern.Winit_socktype = 0;
     dst->timerid                 = 0;
     dst->poll_count              = 0;
+    Copy(src->sigtable,dst->sigtable,SIG_SIZE,Sighandler_t);
 }
 #  endif /* USE_ITHREADS */
 #endif /* HAVE_INTERP_INTERN */
@@ -4638,7 +4717,3 @@ win32_argv2utf8(int argc, char** argv)
     }
     GlobalFree((HGLOBAL)lpwStr);
 }
-
-
-
-

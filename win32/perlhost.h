@@ -225,7 +225,7 @@ extern "C" void win32_checkTLS(struct interpreter *host_perl);
 
 #define STRUCT2RAWPTR(x, y) (CPerlHost*)(((LPBYTE)x)-offsetof(CPerlHost, y))
 #ifdef CHECK_HOST_INTERP
-inline CPerlHost* CheckInterp(CPerlHost *host) 
+inline CPerlHost* CheckInterp(CPerlHost *host)
 {
  win32_checkTLS(host->host_perl);
  return host;
@@ -1678,7 +1678,7 @@ PerlProcWaitpid(struct IPerlProc* piPerl, int pid, int *status, int flags)
 Sighandler_t
 PerlProcSignal(struct IPerlProc* piPerl, int sig, Sighandler_t subcode)
 {
-    return signal(sig, subcode);
+    return win32_signal(sig, subcode);
 }
 
 #ifdef USE_ITHREADS
@@ -2162,7 +2162,7 @@ compare(const void *arg1, const void *arg2)
 	    if(c1 != c2) {
 		if(c1 < c2)
 		    return -1; // string 1 < string 2
-	
+
 		return 1; // string 1 > string 2
 	    }
 	}
@@ -2290,7 +2290,7 @@ CPerlHost::CreateLocalEnvironmentStrings(VDir &vDir)
 		lpStr += nLength;
 		lpEnvPtr += nLength;
 	    }
-	    else {	
+	    else {
 		// determine which string to copy next
 		compVal = compare(&lpEnvPtr, &lpLocalEnv);
 		if(compVal < 0) {
@@ -2434,4 +2434,3 @@ CPerlHost::Chdir(const char *dirname)
 }
 
 #endif /* ___PerlHost_H___ */
-
