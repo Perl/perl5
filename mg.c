@@ -2072,7 +2072,8 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '\020':	/* ^P */
 	PL_perldb = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
-	if (PL_perldb && !PL_DBsingle)
+	if ((PERLDB_SUB || PERLDB_LINE || PERLDB_SUBLINE || PERLDB_ASSERTION)
+		&& !PL_DBsingle)
 	    init_debugger();
 	break;
     case '\024':	/* ^T */
