@@ -3,11 +3,11 @@
 use File::Find;
 use Cwd;
 
-$VERSION="5.5";
-$PATCH="650";
-$EPOC_VERSION=19;
+$VERSION="5.6";
+$PATCH="0";
+$EPOC_VERSION=20;
 $CROSSCOMPILEPATH=cwd;
-$CROSSREPLACEPATH="H:\\devel\\perl5.5.650";
+$CROSSREPLACEPATH="H:\\perl";
 
 
 sub filefound {

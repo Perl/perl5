@@ -7,7 +7,7 @@ BEGIN {
 
 # don't make this lexical
 $i = 1;
-print "1..20\n";
+print "1..23\n";
 
 sub do_require {
     %INC = ();
@@ -123,6 +123,16 @@ dofile();
 sub dofile { do "bleah.do"; };
 print $x;
 $i++;
+
+# UTF-encoded things
+my $utf8 = chr(0xFEFF);
+my $utf16 = chr(255).chr(254);
+do_require("${utf8}print \"ok $i\n\"; 1;\n");
+$i++;
+do_require("$utf8\nprint \"ok $i\n\"; 1;\n");
+$i++;
+do_require("$utf16\n1;");
+print "ok $i\n" if $@ =~ /Unsupported script encoding/;
 
 END { 1 while unlink 'bleah.pm'; 1 while unlink 'bleah.do'; }
 

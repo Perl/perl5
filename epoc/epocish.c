@@ -6,7 +6,7 @@
  *
  */
 
-/* This is indeed C++ Code !! */
+/* This is C++ Code !! */
 
 #include <e32std.h>
 
@@ -31,4 +31,25 @@ epoc_spawn( char *cmd, char *cmdline) {
   return 0;
 }
 
+
+  /* Workaround for defect atof(), see java defect list for epoc */
+  double epoc_atof( const char* str) {
+    TReal64 aRes;
+
+    TLex lex( _L( str));
+    TInt err = lex.Val( aRes, TChar( '.'));
+    return aRes;
+  }
+
+  void epoc_gcvt( double x, int digits, unsigned char *buf) {
+    TRealFormat trel;
+
+    trel.iPlaces = digits;
+    trel.iPoint = TChar( '.');
+
+    TPtr result( buf, 80);
+
+    result.Num( x, trel);
+    result.Append( TChar( 0));
+  }
 }

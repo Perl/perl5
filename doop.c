@@ -19,14 +19,27 @@
 #include <signal.h>
 #endif
 
+
+#define HALF_UPGRADE(start,end) {                                    \
+                                U8* new;                             \
+                                STRLEN len;                          \
+                                len = end-start;                     \
+                                new = bytes_to_utf8(start, &len);    \
+                                Copy(new,start,len,U8*);             \
+                                end = start + len;                   \
+                                }
+
+
 STATIC I32
-S_do_trans_simple(pTHX_ SV *sv) /* SPC - OK */
+S_do_trans_simple(pTHX_ SV *sv)
 {
     dTHR;
     U8 *s;
+    U8 *d;
     U8 *send;
+    U8 *dstart;
     I32 matches = 0;
-    I32 hasutf = SvUTF8(sv);
+    I32 sutf = SvUTF8(sv);
     STRLEN len;
     short *tbl;
     I32 ch;
@@ -38,19 +51,46 @@ S_do_trans_simple(pTHX_ SV *sv) /* SPC - OK */
     s = (U8*)SvPV(sv, len);
     send = s + len;
 
+    /* First, take care of non-UTF8 input strings, because they're easy */
+    if (!sutf) {
     while (s < send) {
-        if (hasutf && *s & 0x80)
-            s+=UTF8SKIP(s); /* Given that we're here because tbl is !UTF8...*/
-        else {
 	    if ((ch = tbl[*s]) >= 0) {
 	        matches++;
-	        *s = ch;
-	    }
+                *s++ = ch;
+            } else
 	s++;
         }
-    }
     SvSETMAGIC(sv);
+        return matches;
+    }
 
+    /* Allow for expansion: $_="a".chr(400); tr/a/\xFE/, FE needs encoding */
+    Newz(0, d, len*2+1, U8);
+    dstart = d;
+    while (s < send) {
+        I32 ulen;
+        short c;
+
+        ulen = 1;
+        /* Need to check this, otherwise 128..255 won't match */
+	c = utf8_to_uv(s, &ulen);
+        if (c < 0x100 && (ch = tbl[(short)c]) >= 0) {
+            matches++;
+            if (ch < 0x80) 
+                *d++ = ch;
+            else         
+                d = uv_to_utf8(d,ch);
+            s += ulen;
+        } else { /* No match -> copy */
+            while (ulen--)
+                *d++ = *s++;
+        }
+    }
+    *d='\0';
+    sv_setpvn(sv, dstart, d - dstart);
+    SvUTF8_on(sv);
+    SvLEN_set(sv, 2*len+1);
+    SvSETMAGIC(sv);
     return matches;
 }
 
@@ -76,9 +116,16 @@ S_do_trans_count(pTHX_ SV *sv)/* SPC - OK */
         if (hasutf && *s & 0x80)
             s+=UTF8SKIP(s);
         else {
-            if (tbl[*s] >= 0)
+            UV c;
+            I32 ulen;
+            ulen = 1;
+            if (hasutf)
+                c = utf8_to_uv(s,&ulen);
+            else
+                c = *s;
+            if (c < 0x100 && tbl[c] >= 0)
                 matches++;
-            s++;
+            s+=ulen;
         }
     }
 
@@ -86,7 +133,7 @@ S_do_trans_count(pTHX_ SV *sv)/* SPC - OK */
 }
 
 STATIC I32
-S_do_trans_complex(pTHX_ SV *sv)/* SPC - OK */
+S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
 {
     dTHR;
     U8 *s;
@@ -189,30 +236,15 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)/* SPC - OK */
 	if ((uv = swash_fetch(rv, s)) < none) {
 	    s += UTF8SKIP(s);
 	    matches++;
-        if (uv & 0x80 && !isutf) {  
-            /* Sneaky-upgrade dstart...d */
-            U8* new;
-            STRLEN len;
-            len = dstart - d;
-            new = bytes_to_utf8(dstart, &len);
-            Copy(new,dstart,len,U8*);
-            d = dstart + len;
-            isutf++;
-        }
+            if (uv & 0x80 && !isutf++)
+                HALF_UPGRADE(dstart,d);
 	    d = uv_to_utf8(d, uv);
 	}
 	else if (uv == none) {
 	    int i;
         i = UTF8SKIP(s);
-        if (i > 1 && !isutf) {
-            U8* new;
-            STRLEN len;
-            len = dstart - d;
-            new = bytes_to_utf8(dstart, &len);
-            Copy(new,dstart,len,U8*);
-            d = dstart + len;
-            isutf++;
-        }
+            if (i > 1 && !isutf++)
+                HALF_UPGRADE(dstart,d);
 	    while(i--)
             *d++ = *s++;
 	}
@@ -221,23 +253,15 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)/* SPC - OK */
         i = UTF8SKIP(s);
 	    s += i;
 	    matches++;
-        if (i > 1 && !isutf) {
-            U8* new;
-            STRLEN len;
-            len = dstart - d;
-            new = bytes_to_utf8(dstart, &len);
-            Copy(new,dstart,len,U8*);
-            d = dstart + len;
-            isutf++;
-        }
+            if (i > 1 && !isutf++) 
+                HALF_UPGRADE(dstart,d);
 	    d = uv_to_utf8(d, final);
 	}
 	else
 	    s += UTF8SKIP(s);
     }
     *d = '\0';
-    SvPV_set(sv, dstart);
-    SvCUR_set(sv, d - dstart);
+    sv_setpvn(sv, dstart, d - dstart);
     SvSETMAGIC(sv);
     if (isutf)
         SvUTF8_on(sv);
@@ -283,8 +307,6 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
     U8 *d;
     I32 matches = 0;
     I32 squash   = PL_op->op_private & OPpTRANS_SQUASH;
-    I32 from_utf = PL_op->op_private & OPpTRANS_FROM_UTF;
-    I32 to_utf   = PL_op->op_private & OPpTRANS_TO_UTF;
     I32 del      = PL_op->op_private & OPpTRANS_DELETE;
     SV* rv = (SV*)cSVOP->op_sv;
     HV* hv = (HV*)SvRV(rv);
@@ -295,6 +317,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
     UV uv;
     STRLEN len;
     U8 *dst;
+    I32 isutf = SvUTF8(sv);
 
     s = (U8*)SvPV(sv, len);
     send = s + len;
@@ -303,27 +326,14 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
     if (svp)
 	final = SvUV(*svp);
 
-    if (PL_op->op_private & OPpTRANS_GROWS) {
-	I32 bits = 16;
-
-	svp = hv_fetch(hv, "BITS", 4, FALSE);
-	if (svp)
-	    bits = (I32)SvIV(*svp);
-
-	Newz(801, d, len * (bits >> 3) + 1, U8);
+    Newz(0, d, len*2+1, U8);
 	dst = d;
-    }
-    else {
-	d = s;
-	dst = 0;
-    }
 
     if (squash) {
 	UV puv = 0xfeedface;
 	while (s < send) {
-	    if (from_utf) {
+            if (SvUTF8(sv)) 
 		uv = swash_fetch(rv, s);
-	    }
 	    else {
 		U8 tmpbuf[2];
 		uv = *s++;
@@ -335,63 +345,42 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 		}
 		uv = swash_fetch(rv, tmpbuf);
 	    }
+
 	    if (uv < none) {
 		matches++;
 		if (uv != puv) {
-		    if (uv >= 0x80 && to_utf)
+                    if (uv & 0x80 && !isutf++) 
+                        HALF_UPGRADE(dst,d);
 			d = uv_to_utf8(d, uv);
-		    else
-			*d++ = (U8)uv;
 		    puv = uv;
 		}
-		if (from_utf)
 		    s += UTF8SKIP(s);
 		continue;
 	    }
 	    else if (uv == none) {	/* "none" is unmapped character */
-		if (from_utf) {
-		    if (*s < 0x80)
-			*d++ = *s++;
-		    else if (to_utf) {
-			int i;
-			for (i = UTF8SKIP(s); i; --i)
-			    *d++ = *s++;
-		    }
-		    else {
 			I32 ulen;
 			*d++ = (U8)utf8_to_uv(s, &ulen);
 			s += ulen;
-		    }
-		}
-		else {	/* must be to_utf only */
-		    d = uv_to_utf8(d, s[-1]);
-		}
 		puv = 0xfeedface;
 		continue;
 	    }
 	    else if (uv == extra && !del) {
 		matches++;
 		if (uv != puv) {
-		    if (final >= 0x80 && to_utf)
 			d = uv_to_utf8(d, final);
-		    else
-			*d++ = (U8)final;
 		    puv = final;
 		}
-		if (from_utf)
 		    s += UTF8SKIP(s);
 		continue;
 	    }
 	    matches++;		/* "none+1" is delete character */
-	    if (from_utf)
 		s += UTF8SKIP(s);
 	}
     }
     else {
 	while (s < send) {
-	    if (from_utf) {
+            if (SvUTF8(sv)) 
 		uv = swash_fetch(rv, s);
-	    }
 	    else {
 		U8 tmpbuf[2];
 		uv = *s++;
@@ -405,46 +394,23 @@ S_do_trans_complex_utf8(pTHX_ SV *sv) /* SPC - NOT OK */
 	    }
 	    if (uv < none) {
 		matches++;
-		if (uv >= 0x80 && to_utf)
 		    d = uv_to_utf8(d, uv);
-		else
-		    *d++ = (U8)uv;
-		if (from_utf)
 		    s += UTF8SKIP(s);
 		continue;
 	    }
 	    else if (uv == none) {	/* "none" is unmapped character */
-		if (from_utf) {
-		    if (*s < 0x80)
-			*d++ = *s++;
-		    else if (to_utf) {
-			int i;
-			for (i = UTF8SKIP(s); i; --i)
-			    *d++ = *s++;
-		    }
-		    else {
 			I32 ulen;
 			*d++ = (U8)utf8_to_uv(s, &ulen);
 			s += ulen;
-		    }
-		}
-		else {	/* must be to_utf only */
-		    d = uv_to_utf8(d, s[-1]);
-		}
 		continue;
 	    }
 	    else if (uv == extra && !del) {
 		matches++;
-		if (final >= 0x80 && to_utf)
 		    d = uv_to_utf8(d, final);
-		else
-		    *d++ = (U8)final;
-		if (from_utf)
 		    s += UTF8SKIP(s);
 		continue;
 	    }
 	    matches++;		/* "none+1" is delete character */
-	    if (from_utf)
 		s += UTF8SKIP(s);
 	}
     }
