@@ -45,7 +45,7 @@ S_save_magic(pTHX_ I32 mgs_ix, SV *sv)
     MGS* mgs;
     assert(SvMAGICAL(sv));
 
-    SAVEDESTRUCTOR_X(restore_magic, INT2PTR(void*,mgs_ix));
+    SAVEDESTRUCTOR_X(restore_magic, INT2PTR(void*, (IV)mgs_ix));
 
     mgs = SSPTR(mgs_ix, MGS*);
     mgs->mgs_sv = sv;
@@ -120,7 +120,7 @@ Perl_mg_get(pTHX_ SV *sv)
 	    mgp = &SvMAGIC(sv);	/* Re-establish pointer after sv_upgrade */
     }
 
-    restore_magic(aTHXo_ INT2PTR(void*,mgs_ix));
+    restore_magic(aTHXo_ INT2PTR(void*, (IV)mgs_ix));
     return 0;
 }
 
@@ -153,7 +153,7 @@ Perl_mg_set(pTHX_ SV *sv)
 	    CALL_FPTR(vtbl->svt_set)(aTHX_ sv, mg);
     }
 
-    restore_magic(aTHXo_ INT2PTR(void*,mgs_ix));
+    restore_magic(aTHXo_ INT2PTR(void*, (IV)mgs_ix));
     return 0;
 }
 
@@ -181,7 +181,7 @@ Perl_mg_length(pTHX_ SV *sv)
 	    save_magic(mgs_ix, sv);
 	    /* omit MGf_GSKIP -- not changed here */
 	    len = CALL_FPTR(vtbl->svt_len)(aTHX_ sv, mg);
-	    restore_magic(aTHXo_ INT2PTR(void*,mgs_ix));
+	    restore_magic(aTHXo_ INT2PTR(void*, (IV)mgs_ix));
 	    return len;
 	}
     }
@@ -205,7 +205,7 @@ Perl_mg_size(pTHX_ SV *sv)
 	    save_magic(mgs_ix, sv);
 	    /* omit MGf_GSKIP -- not changed here */
 	    len = CALL_FPTR(vtbl->svt_len)(aTHX_ sv, mg);
-	    restore_magic(aTHXo_ INT2PTR(void*,mgs_ix));
+	    restore_magic(aTHXo_ INT2PTR(void*, (IV)mgs_ix));
 	    return len;
 	}
     }
@@ -248,7 +248,7 @@ Perl_mg_clear(pTHX_ SV *sv)
 	    CALL_FPTR(vtbl->svt_clear)(aTHX_ sv, mg);
     }
 
-    restore_magic(aTHXo_ INT2PTR(void*,mgs_ix));
+    restore_magic(aTHXo_ INT2PTR(void*, (IV)mgs_ix));
     return 0;
 }
 
