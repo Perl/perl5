@@ -4,7 +4,7 @@ use Carp;
 
 use vars qw($VERSION);
 
-$VERSION = '1.02';
+$VERSION = '1.03';
 
 # Version undef: Thu Dec 14 20:02:42 CST 1995 by sanders@bsdi.com
 # Version 1.00:  Thu Nov 30 23:34:29 EST 2000 by schwern@pobox.com
@@ -15,6 +15,8 @@ $VERSION = '1.02';
 #       Altered layout of the POD
 #       Added Test::More to PREREQ_PM in Makefile.PL
 #       Fixed no argument Tgetent()
+# Version 1.03:  Wed Nov 28 10:09:38 GMT 2001
+#       VMS Support from Charles Lane <lane@DUPHY4.Physics.Drexel.Edu>
 
 # TODO:
 # support Berkeley DB termcaps
@@ -184,29 +186,18 @@ sub Tgetent { ## public -- static method
     {
 	# last resort--fake up a termcap from terminfo 
 	local $ENV{TERM} = $term;
-	if ($^O eq 'VMS') {  # we use REAL dec terminals, not stinkin' emulators!
-    $entry = 'vt220|vt200|DEC VT220 in vt100 emulation mode:'
-           .'am:mi:xn:xo:'
-           .'co#80:li#24:'
-           .'RA=\E[?7l:SA=\E[?7h:'
-           .'ac=kkllmmjjnnwwqquuttvvxx:ae=\E(B:al=\E[L:as=\E(0:'
-           .'bl=^G:cd=\E[J:ce=\E[K:cl=\E[H\E[2J:cm=\E[%i%d;%dH:'
-           .'cr=^M:cs=\E[%i%d;%dr:dc=\E[P:dl=\E[M:do=\E[B:'
-           .'ei=\E[4l:ho=\E[H:im=\E[4h:'
-           .'is=\E[1;24r\E[24;1H:'
-           .'nd=\E[C:'
-           .'kd=\E[B::kl=\E[D:kr=\E[C:ku=\E[A:le=^H:'
-           .'mb=\E[5m:md=\E[1m:me=\E[m:mr=\E[7m:'
-           .'kb=\0177:'
-           .'r2=\E>\E[24;1H\E[?3l\E[?4l\E[?5l\E[?7h\E[?8h\E=:rc=\E8:'
-           .'sc=\E7:se=\E[27m:sf=\ED:so=\E[7m:sr=\EM:ta=^I:'
-           .'ue=\E[24m:up=\E[A:us=\E[4m:ve=\E[?25h:vi=\E[?25l:';
-	} else {
-	eval
-	{
-	    $entry = `infocmp -C 2>/dev/null`;
-	}
-    }
+
+         if ( $^O eq 'VMS' ) {
+	     chomp(my @entry = <DATA>);
+	     $entry = join '', @entry;
+         }
+         else {
+	     eval
+	     {
+		 $entry = `infocmp -C 2>/dev/null`;
+	     }
+	 }
+
     }
 
     croak "Can't find a valid termcap file" unless @termcap_path || $entry;
@@ -562,9 +553,6 @@ sub Trequire { ## public
     croak "Terminal does not support: (@undefined)" if @undefined;
 }
 
-1;
-__END__
-
 =back
 
 =head1 EXAMPLES
@@ -610,3 +598,25 @@ for CPAN by Jonathan Stowe <jns@gellyfish.com>.
 termcap(5)
 
 =cut
+
+# Below is a default entry for systems where there are terminals but no
+# termcap
+1;
+__END__
+vt220|vt200|DEC VT220 in vt100 emulation mode:
+am:mi:xn:xo:
+co#80:li#24:
+RA=\E[?7l:SA=\E[?7h:
+ac=kkllmmjjnnwwqquuttvvxx:ae=\E(B:al=\E[L:as=\E(0:
+bl=^G:cd=\E[J:ce=\E[K:cl=\E[H\E[2J:cm=\E[%i%d;%dH:
+cr=^M:cs=\E[%i%d;%dr:dc=\E[P:dl=\E[M:do=\E[B:
+ei=\E[4l:ho=\E[H:im=\E[4h:
+is=\E[1;24r\E[24;1H:
+nd=\E[C:
+kd=\E[B::kl=\E[D:kr=\E[C:ku=\E[A:le=^H:
+mb=\E[5m:md=\E[1m:me=\E[m:mr=\E[7m:
+kb=\0177:
+r2=\E>\E[24;1H\E[?3l\E[?4l\E[?5l\E[?7h\E[?8h\E=:rc=\E8:
+sc=\E7:se=\E[27m:sf=\ED:so=\E[7m:sr=\EM:ta=^I:
+ue=\E[24m:up=\E[A:us=\E[4m:ve=\E[?25h:vi=\E[?25l:
+
