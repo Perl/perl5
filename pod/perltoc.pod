@@ -927,6 +927,8 @@ ${^WIDE_SYSTEM_CALLS}, $EXECUTABLE_NAME, $^X, $ARGV, @ARGV, @INC, @_, %INC,
 
 =item DESCRIPTION
 
+=over 4
+
 =item Declaration and Access of Arrays of Arrays
 
 =item Growing Your Own
@@ -934,6 +936,8 @@ ${^WIDE_SYSTEM_CALLS}, $EXECUTABLE_NAME, $^X, $ARGV, @ARGV, @INC, @_, %INC,
 =item Access and Printing
 
 =item Slices
+
+=back
 
 =item SEE ALSO
 
@@ -1816,8 +1820,6 @@ http://testers.cpan.org/
 
 =item DOS and Derivatives
 
-Build instructions for OS/2, L<perlos2>
-
 =item S<Mac OS>
 
 =item VMS
@@ -2306,8 +2308,8 @@ Look around, Check it's new, Discuss the need, Choose a name, Check again
 =item Step-by-step: Making the module
 
 Start with F<h2xs>, Use L<strict|strict> and L<warnings|warnings>, Use
-L<Carp|Carp>, Use L<Exporter|Exporter> - wisely!,
-Use L<plain old documentation|perlpod>, Write tests, Write the README
+L<Carp|Carp>, Use L<Exporter|Exporter> - wisely!, Use L<plain old
+documentation|perlpod>, Write tests, Write the README
 
 =item Step-by-step: Distributing your module
 
@@ -4903,7 +4905,7 @@ Thread, attrs, fields, re
 =item Changes in existing modules
 
 Benchmark, Carp, CGI, Fcntl, Math::Complex, Math::Trig, POSIX, DB_File,
-MakeMaker, CPAN, Cwd, Benchmark
+MakeMaker, CPAN, Cwd
 
 =back
 
@@ -5582,6 +5584,8 @@ EMX, RSX, HPFS, pdksh
 
 =over 4
 
+=item "It does not work"
+
 =item I cannot run external programs
 
 =item I cannot embed perl into my program, or use F<perl.dll> from my
@@ -5640,6 +5644,8 @@ Perl manual in F<.INF> format, Pdksh
 
 =over 4
 
+=item The short story
+
 =item Prerequisites
 
 =item Getting perl source
@@ -5653,7 +5659,7 @@ Perl manual in F<.INF> format, Pdksh
 =item Testing
 
 A lot of C<bad free>, Process terminated by SIGTERM/SIGINT, F<op/fs.t>,
-F<lib/io_pipe.t>, F<lib/io_sock.t>, F<op/stat.t>, F<lib/io_udp.t>
+F<op/stat.t>
 
 =item Installing the built perl
 
@@ -5700,13 +5706,29 @@ C<File::Copy::syscopy>, C<DynaLoader::mod2fname>,  C<Cwd::current_drive()>,
 C<Cwd::sys_is_absolute(name)>,	C<Cwd::sys_is_rooted(name)>, 
 C<Cwd::sys_is_relative(name)>,	C<Cwd::sys_cwd(name)>, 
 C<Cwd::sys_abspath(name, dir)>,  C<Cwd::extLibpath([type])>, 
-C<Cwd::extLibpath_set( path [, type ] )>
+C<Cwd::extLibpath_set( path [, type ] )>,
+C<OS2::Error(do_harderror,do_exception)>, C<OS2::Errors2Drive(drive)>,
+OS2::SysInfo(), OS2::BootDrive(), C<OS2::MorphPM(serve)>,
+C<OS2::UnMorphPM(serve)>, C<OS2::Serve_Messages(force)>,
+C<OS2::Process_Messages(force [, cnt])>, C<OS2::_control87(new,mask)>,
+OS2::get_control87(), C<OS2::set_control87_em(new=MCW_EM,mask=MCW_EM)>
+
+=item Prebuilt variables:
+
+$OS2::emx_rev, $OS2::emx_env, $OS2::os_ver
 
 =item Misfeatures
 
 =item Modifications
 
-C<popen>, C<tmpnam>, C<tmpfile>, C<ctermid>, C<stat>, C<flock>
+C<popen>, C<tmpnam>, C<tmpfile>, C<ctermid>, C<stat>, C<mkdir>, C<rmdir>,
+C<flock>
+
+=item Identifying DLLs
+
+=item Centralized management of resources
+
+C<HAB>, C<HMQ>
 
 =back
 
@@ -5727,8 +5749,6 @@ C<popen>, C<tmpnam>, C<tmpfile>, C<ctermid>, C<stat>, C<flock>
 =item Why dynamic linking?
 
 =item Why chimera build?
-
-explicit fork(), open FH, "|-", open FH, "-|"
 
 =back
 
@@ -6340,8 +6360,8 @@ new, phash
 
 =back
 
-=head2 integer - Perl pragma to compute arithmetic in integer instead of
-double
+=head2 integer - Perl pragma to use integer arithmetic instead of floating
+point
 
 =over 4
 
@@ -7959,23 +7979,23 @@ C<d_setproctitle>, C<d_setpwent>, C<d_setregid>, C<d_setresgid>,
 C<d_setresuid>, C<d_setreuid>, C<d_setrgid>, C<d_setruid>, C<d_setsent>,
 C<d_setsid>, C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>,
 C<d_shmatprototype>, C<d_shmctl>, C<d_shmdt>, C<d_shmget>, C<d_sigaction>,
-C<d_sigsetjmp>, C<d_socket>, C<d_socklen_t>, C<d_sockpair>,
-C<d_socks5_init>, C<d_sqrtl>, C<d_statblks>, C<d_statfs_f_flags>,
-C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>,
-C<d_stdio_ptr_lval_nochange_cnt>, C<d_stdio_ptr_lval_sets_cnt>,
-C<d_stdio_stream_array>, C<d_stdiobase>, C<d_stdstdio>, C<d_strchr>,
-C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>, C<d_strerror>, C<d_strtod>,
-C<d_strtol>, C<d_strtold>, C<d_strtoll>, C<d_strtoul>, C<d_strtoull>,
-C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>, C<d_symlink>, C<d_syscall>,
-C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>,
-C<d_tcsetpgrp>, C<d_telldir>, C<d_telldirproto>, C<d_time>, C<d_times>,
-C<d_truncate>, C<d_tzname>, C<d_umask>, C<d_uname>, C<d_union_semun>,
-C<d_ustat>, C<d_vendorarch>, C<d_vendorbin>, C<d_vendorlib>, C<d_vfork>,
-C<d_void_closedir>, C<d_voidsig>, C<d_voidtty>, C<d_volatile>,
-C<d_vprintf>, C<d_wait4>, C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>,
-C<d_xenix>, C<date>, C<db_hashtype>, C<db_prefixtype>, C<defvoidused>,
-C<direntrytype>, C<dlext>, C<dlsrc>, C<doublesize>, C<drand01>,
-C<dynamic_ext>
+C<d_sigprocmask>, C<d_sigsetjmp>, C<d_socket>, C<d_socklen_t>,
+C<d_sockpair>, C<d_socks5_init>, C<d_sqrtl>, C<d_statblks>,
+C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>,
+C<d_stdio_ptr_lval>, C<d_stdio_ptr_lval_nochange_cnt>,
+C<d_stdio_ptr_lval_sets_cnt>, C<d_stdio_stream_array>, C<d_stdiobase>,
+C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>,
+C<d_strerror>, C<d_strtod>, C<d_strtol>, C<d_strtold>, C<d_strtoll>,
+C<d_strtoq>, C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>,
+C<d_suidsafe>, C<d_symlink>, C<d_syscall>, C<d_sysconf>, C<d_sysernlst>,
+C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>,
+C<d_telldirproto>, C<d_time>, C<d_times>, C<d_truncate>, C<d_tzname>,
+C<d_umask>, C<d_uname>, C<d_union_semun>, C<d_ustat>, C<d_vendorarch>,
+C<d_vendorbin>, C<d_vendorlib>, C<d_vfork>, C<d_void_closedir>,
+C<d_voidsig>, C<d_voidtty>, C<d_volatile>, C<d_vprintf>, C<d_wait4>,
+C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>, C<d_xenix>, C<date>,
+C<db_hashtype>, C<db_prefixtype>, C<defvoidused>, C<direntrytype>,
+C<dlext>, C<dlsrc>, C<doublesize>, C<drand01>, C<dynamic_ext>
 
 =item e
 
@@ -8020,7 +8040,8 @@ C<installarchlib>, C<installbin>, C<installman1dir>, C<installman3dir>,
 C<installprefix>, C<installprefixexp>, C<installprivlib>, C<installscript>,
 C<installsitearch>, C<installsitebin>, C<installsitelib>, C<installstyle>,
 C<installusrbinperl>, C<installvendorarch>, C<installvendorbin>,
-C<installvendorlib>, C<intsize>, C<ivdformat>, C<ivsize>, C<ivtype>
+C<installvendorlib>, C<intsize>, C<issymlink>, C<ivdformat>, C<ivsize>,
+C<ivtype>
 
 =item k
 
@@ -8048,10 +8069,10 @@ C<multiarch>, C<mv>, C<myarchname>, C<mydomain>, C<myhostname>, C<myuname>
 
 =item n
 
-C<n>, C<netdb_hlen_type>, C<netdb_host_type>, C<netdb_name_type>,
-C<netdb_net_type>, C<nm>, C<nm_opt>, C<nm_so_opt>, C<nonxs_ext>, C<nroff>,
-C<nveformat>, C<nvEUformat>, C<nvfformat>, C<nvFUformat>, C<nvgformat>,
-C<nvGUformat>, C<nvsize>, C<nvtype>
+C<n>, C<need_va_copy>, C<netdb_hlen_type>, C<netdb_host_type>,
+C<netdb_name_type>, C<netdb_net_type>, C<nm>, C<nm_opt>, C<nm_so_opt>,
+C<nonxs_ext>, C<nroff>, C<nveformat>, C<nvEUformat>, C<nvfformat>,
+C<nvFUformat>, C<nvgformat>, C<nvGUformat>, C<nvsize>, C<nvtype>
 
 =item o
 
@@ -8084,17 +8105,17 @@ C<revision>, C<rm>, C<rmail>, C<runnm>
 C<sched_yield>, C<scriptdir>, C<scriptdirexp>, C<sed>, C<seedfunc>,
 C<selectminbits>, C<selecttype>, C<sendmail>, C<sh>, C<shar>, C<sharpbang>,
 C<shmattype>, C<shortsize>, C<shrpenv>, C<shsharp>, C<sig_count>,
-C<sig_name>, C<sig_name_init>, C<sig_num>, C<sig_num_init>, C<signal_t>,
-C<sitearch>, C<sitearchexp>, C<sitebin>, C<sitebinexp>, C<sitelib>,
-C<sitelib_stem>, C<sitelibexp>, C<siteprefix>, C<siteprefixexp>,
-C<sizesize>, C<sizetype>, C<sleep>, C<smail>, C<so>, C<sockethdr>,
-C<socketlib>, C<socksizetype>, C<sort>, C<spackage>, C<spitshell>,
-C<sPRId64>, C<sPRIeldbl>, C<sPRIEUldbl>, C<sPRIfldbl>, C<sPRIFUldbl>,
-C<sPRIgldbl>, C<sPRIGUldbl>, C<sPRIi64>, C<sPRIo64>, C<sPRIu64>,
-C<sPRIx64>, C<sPRIXU64>, C<src>, C<sSCNfldbl>, C<ssizetype>, C<startperl>,
-C<startsh>, C<static_ext>, C<stdchar>, C<stdio_base>, C<stdio_bufsiz>,
-C<stdio_cnt>, C<stdio_filbuf>, C<stdio_ptr>, C<stdio_stream_array>,
-C<strings>, C<submit>, C<subversion>, C<sysman>
+C<sig_name>, C<sig_name_init>, C<sig_num>, C<sig_num_init>, C<sig_size>,
+C<signal_t>, C<sitearch>, C<sitearchexp>, C<sitebin>, C<sitebinexp>,
+C<sitelib>, C<sitelib_stem>, C<sitelibexp>, C<siteprefix>,
+C<siteprefixexp>, C<sizesize>, C<sizetype>, C<sleep>, C<smail>, C<so>,
+C<sockethdr>, C<socketlib>, C<socksizetype>, C<sort>, C<spackage>,
+C<spitshell>, C<sPRId64>, C<sPRIeldbl>, C<sPRIEUldbl>, C<sPRIfldbl>,
+C<sPRIFUldbl>, C<sPRIgldbl>, C<sPRIGUldbl>, C<sPRIi64>, C<sPRIo64>,
+C<sPRIu64>, C<sPRIx64>, C<sPRIXU64>, C<src>, C<sSCNfldbl>, C<ssizetype>,
+C<startperl>, C<startsh>, C<static_ext>, C<stdchar>, C<stdio_base>,
+C<stdio_bufsiz>, C<stdio_cnt>, C<stdio_filbuf>, C<stdio_ptr>,
+C<stdio_stream_array>, C<strings>, C<submit>, C<subversion>, C<sysman>
 
 =item t
 
@@ -8739,6 +8760,8 @@ canonpath, cflags, manifypods, perl_archive
 
 =back
 
+perl_archive_after
+
 =head2 ExtUtils::MM_OS2 - methods to override UN*X behaviour in
 ExtUtils::MakeMaker
 
@@ -8947,6 +8970,8 @@ xs_cpp (o)
 xs_o (o)
 
 perl_archive
+
+perl_archive_after
 
 export_list
 
@@ -11134,18 +11159,16 @@ after =back
 =item Warnings
 
 multiple occurence of link target I<name>, line containing nothing but
-whitespace in paragraph, file does not start with =head, No numeric
-argument for =over, previous =item has no contents, preceding non-item
-paragraph(s), =item type mismatch (I<one> vs. I<two>), I<N> unescaped
-C<E<lt>E<gt>> in paragraph, Unknown entity, No items in =over, No argument
-for =item, empty section in previous paragraph, Verbatim paragraph in NAME
-section
+whitespace in paragraph, file does not start with =head, previous =item has
+no contents, preceding non-item paragraph(s), =item type mismatch (I<one>
+vs. I<two>), I<N> unescaped C<E<lt>E<gt>> in paragraph, Unknown entity, No
+items in =over, No argument for =item, empty section in previous paragraph,
+Verbatim paragraph in NAME section
 
 =item Hyperlinks
 
-collapsing newlines to blanks, ignoring leading/trailing whitespace in
-link, (section) in '$page' deprecated, alternative text/node '%s' contains
-non-escaped | or /
+ignoring leading/trailing whitespace in link, (section) in '$page'
+deprecated, alternative text/node '%s' contains non-escaped | or /
 
 =back
 
