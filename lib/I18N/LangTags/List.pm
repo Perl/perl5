@@ -1,10 +1,10 @@
 
 require 5;
 package I18N::LangTags::List;
-#  Time-stamp: "2001-06-20 12:01:15 MDT"
+#  Time-stamp: "2002-02-02 20:13:58 MST"
 use strict;
 use vars qw(%Name $Debug $VERSION);
-$VERSION = '0.24';
+$VERSION = '0.25';
 # POD at the end.
 
 #----------------------------------------------------------------------
@@ -117,7 +117,7 @@ when qualified by a country code ("en-US").  Less well-known are the
 arbitrary-length non-ISO codes (like "i-mingo"), and the 
 recently (in 2001) introduced three-letter ISO-639-2 codes.
 
-Remember this important facts:
+Remember these important facts:
 
 =over
 
@@ -128,7 +128,7 @@ instead of a "-", (almost?) always matches C<m/^\w\w_\w\w\b/>, and
 I<means> something different than a language tag.  A language tag
 denotes a language.  A locale ID denotes a language I<as used in>
 a particular place, in combination with non-linguistic
-location-specific information such as what currency in used
+location-specific information such as what currency is used
 there.  Locales I<also> often denote character set information,
 as in "en_US.ISO8859-1".
 
@@ -139,7 +139,7 @@ Language tags are not for computer languages.
 =item *
 
 "Dialect" is not a useful term, since there is no objective
-criterion for establishing when two languages are
+criterion for establishing when two language-forms are
 dialects of eachother, or are separate languages.
 
 =item *
@@ -157,7 +157,7 @@ bibliographic tags that classify whole groups of languages, as
 with cus "Cushitic (Other)" (i.e., a
 language that has been classed as Cushtic, but which has no more
 specific code) or the even less linguistically coherent
-sai for "South American Indian (Other)".  While useful in
+sai for "South American Indian (Other)".  Though useful in
 bibliography, B<SUCH TAGS ARE NOT
 FOR GENERAL USE>.  For further guidance, email me.
 
@@ -1339,8 +1339,8 @@ eq Kiswahili
 =item {sv} : Swedish
 
 Notable forms:
-sv-se {Sweden Swedish};
-sv-fi {Finland Swedish}.
+{sv-se} Sweden Swedish;
+{sv-fi} Finland Swedish.
 
 =item {syr} : Syriac
 
@@ -1558,7 +1558,7 @@ L<I18N::LangTags|I18N::LangTags> and its "See Also" section.
 
 =head1 COPYRIGHT AND DISCLAIMER
 
-Copyright (c) 2001 Sean M. Burke. All rights reserved.
+Copyright (c) 2001,2002 Sean M. Burke. All rights reserved.
 
 You can redistribute and/or
 modify this document under the same terms as Perl itself.
