@@ -6,10 +6,6 @@ Multi-threading
     without USE_THREADS, change extern variable for dTHR
     consistent semantics for exit/die in threads
     SvREFCNT_dec(curstack) in threadstart() in Thread.xs
-    $@ and other magic globals:
-	global pseudo-lexical pad with auto-binding for magicals
-	move magicals that should be per-thread into thread.h
-	sv_magic for the necessary global pad entries
     Thread::Pool
     more Configure support
 
