@@ -8,10 +8,11 @@ Tie Modules
 	ShiftSplice		Defines shift et al in terms of splice method
 
 Would be nice to have
-	pack "(stuff)*", "(stuff)4", ...
+	pack "(stuff)*", "(stuff)?", "(stuff)+", "(stuff)4", ...
 	contiguous bitfields in pack/unpack
 	lexperl
-	bundled perl preprocessor
+	bundled perl preprocessor/macro facility
+	    this would solve many of the syntactic nice-to-haves
 	use posix calls internally where possible
 	gettimeofday (possibly best left for a module?)
 	format BOTTOM
@@ -21,34 +22,26 @@ Would be nice to have
 	support in perlmain to rerun debugger
 	regression tests using __DIE__ hook
 	lexically scoped functions: my sub foo { ... }
-	lvalue functions
-	    wantlvalue?  more generalized want()/caller()?
+        wantlvalue?  more generalized want()/caller()?
 	named prototypes: sub foo ($foo, @bar) { ... } ?
 	regression/sanity tests for suidperl
 	iterators/lazy evaluation/continuations/first/
 	    first_defined/short-circuiting grep/??
 	    This is a very thorny and hotly debated subject,
 	    tread carefully and do your homework first
-	full 64 bit support (i.e. "long long").  Things to consider:
-	    how to store/retrieve 32+ integers into/from Perl scalars?
-	    32+ constants in Perl code? (non-portable!)
-	    32+ arguments/return values to/from system calls? (seek et al)
-	    32+ bit ops (&|^~, currently explicitly disabled)
 	generalise Errno way of extracting cpp symbols and use that in
-	    Errno and Fcntl (ExtUtils::CppSymbol?)
+	    Errno, Fcntl, POSIX (ExtUtils::CppSymbol?)
 	the _r-problem: for all the {set,get,end}*() system database
 	     calls (and a couple more: readdir, *rand*, crypt, *time,
 	     tmpnam) there are in many systems the _r versions
 	     to be used in re-entrant (=multithreaded) code
 	     Icky things: the _r API is not standardized and
 	     the _r-forms require per-thread data to store their state
-	memory profiler: turn malloc.c:Perl_dump_mstats() into
+	memory profiler: turn malloc.c:Perl_get_mstats() into
 	    an extension (Devel::MProf?) that would return the malloc
 	    stats in a nice Perl datastructure (also a simple interface
 	    to return just the grand total would be good)
-	Unicode: [=bar=], combining characters equivalence
-	    (U+4001 + U+0308 should be equal to U+00C4, in other words
-             A+diaereres should equal Ä), Unicode collation
+	a pragma to make << and >> to shit bitvectors instead of numbers
 
 Possible pragmas
 	debugger
@@ -58,12 +51,12 @@ Optimizations
 	constant function cache
 	switch structures
 	foreach(reverse...)
-	optimize away constant split at compile time (a la qw[f o o])
 	cache eval tree (unless lexical outer scope used (mark in &compiling?))
 	rcatmaybe
 	shrink opcode tables via multiple implementations selected in peep
 	cache hash value?  (Not a win, according to Guido)
 	optimize away @_ where possible
+	tail recursion removal
 	"one pass" global destruction
 	rewrite regexp parser for better integrated optimization
 	LRU cache of regexp: foreach $pat (@pats) { foo() if /$pat/ }
