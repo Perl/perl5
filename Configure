@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Feb  2 14:26:31 EET 1999 [metaconfig 3.0 PL70]
+# Generated on Tue Feb  2 14:48:18 EET 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -2510,7 +2510,7 @@ case "$usethreads" in
 	*)
 	        cat >&4 <<EOM
 $osname is not known to support threads.
-Please let me (jhi@iki.fi) know how to do that.
+Please let perlbug@perl.com know how to do that.
 
 Cannot continue, aborting.
 EOM
@@ -2585,7 +2585,7 @@ case "$use64bits" in
 	*)
 		cat >&4 <<EOM
 $osname is not known to support 64-bit interfaces.
-Please let me (jhi@iki.fi) know how to do that.
+Please let perlbug@perl.com know how to do that.
 
 Cannot continue, aborting.
 EOM
