@@ -2,8 +2,8 @@
  *
  * VMS-specific routines for perl5
  *
- * Last revised: 27-Feb-1998 by Charles Bailey  bailey@newman.upenn.edu
- * Version: 5.4.61
+ * Last revised: 13-Sep-1998 by Charles Bailey  bailey@newman.upenn.edu
+ * Version: 5.5.2
  */
 
 #include <acedef.h>
@@ -21,6 +21,7 @@
 #include <iodef.h>
 #include <jpidef.h>
 #include <kgbdef.h>
+#include <libclidef.h>
 #include <libdef.h>
 #include <lib$routines.h>
 #include <lnmdef.h>
@@ -77,55 +78,140 @@ static char *__mystrtolower(char *str)
   return str;
 }
 
-int
-my_trnlnm(char *lnm, char *eqv, unsigned long int idx)
-{
-    static char __my_trnlnm_eqv[LNM$C_NAMLENGTH+1];
-    unsigned short int eqvlen;
-    unsigned long int retsts, attr = LNM$M_CASE_BLIND;
-    $DESCRIPTOR(tabdsc,"LNM$FILE_DEV");
-    struct dsc$descriptor_s lnmdsc = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,0};
-    struct itmlst_3 lnmlst[3] = {{sizeof idx,      LNM$_INDEX,  &idx, 0},
-                                 {LNM$C_NAMLENGTH, LNM$_STRING, 0,    &eqvlen},
-                                 {0, 0, 0, 0}};
+static struct dsc$descriptor_s fildevdsc = 
+  { 12, DSC$K_DTYPE_T, DSC$K_CLASS_S, "LNM$FILE_DEV" };
+static struct dsc$descriptor_s crtlenvdsc = 
+  { 8, DSC$K_DTYPE_T, DSC$K_CLASS_S, "CRTL_ENV" };
+static struct dsc$descriptor_s *fildev[] = { &fildevdsc, NULL };
+static struct dsc$descriptor_s *defenv[] = { &fildevdsc, &crtlenvdsc, NULL };
+static struct dsc$descriptor_s **env_tables = defenv;
+static bool will_taint = FALSE;  /* tainting active, but no PL_curinterp yet */
 
-    if (!lnm || idx > LNM$_MAX_INDEX) {
+/*{{{int vmstrnenv(const char *lnm, char *eqv, unsigned long int idx, struct dsc$descriptor_s **tabvec, unsigned long int flags) */
+int
+vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
+  struct dsc$descriptor_s **tabvec, unsigned long int flags)
+{
+    char uplnm[LNM$C_NAMLENGTH], *cp1, *cp2;
+    unsigned short int eqvlen, curtab, ivlnm = 0, ivsym = 0, ivenv = 0, secure;
+    unsigned long int retsts, attr = LNM$M_CASE_BLIND;
+    unsigned char acmode;
+    struct dsc$descriptor_s lnmdsc = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,0},
+                            tmpdsc = {6,DSC$K_DTYPE_T,DSC$K_CLASS_S,0};
+    struct itmlst_3 lnmlst[3] = {{sizeof idx, LNM$_INDEX, &idx, 0},
+                                 {LNM$C_NAMLENGTH, LNM$_STRING, eqv, &eqvlen},
+                                 {0, 0, 0, 0}};
+    $DESCRIPTOR(crtlenv,"CRTL_ENV");  $DESCRIPTOR(clisym,"CLISYM");
+
+    if (!lnm || !eqv || idx > LNM$_MAX_INDEX) {
       set_errno(EINVAL); set_vaxc_errno(SS$_BADPARAM); return 0;
     }
-    if (!eqv) eqv = __my_trnlnm_eqv;
-    lnmlst[1].bufadr = (void *)eqv;
-    lnmdsc.dsc$a_pointer = lnm;
-    lnmdsc.dsc$w_length = strlen(lnm);
-    retsts = sys$trnlnm(&attr,&tabdsc,&lnmdsc,0,lnmlst);
-    if (retsts == SS$_NOLOGNAM || retsts == SS$_IVLOGNAM) {
-      set_vaxc_errno(retsts); set_errno(EINVAL); return 0;
+    for (cp1 = (char *)lnm, cp2 = uplnm; *cp1; cp1++, cp2++) {
+      *cp2 = _toupper(*cp1);
+      if (cp1 - lnm > LNM$C_NAMLENGTH) {
+        set_errno(EINVAL); set_vaxc_errno(SS$_IVLOGNAM);
+        return 0;
+      }
     }
-    else if (retsts & 1) {
-      eqv[eqvlen] = '\0';
-      return eqvlen;
-    }
-    _ckvmssts(retsts);  /* Must be an error */
-    return 0;      /* Not reached, assuming _ckvmssts() bails out */
+    lnmdsc.dsc$w_length = cp1 - lnm;
+    lnmdsc.dsc$a_pointer = uplnm;
+    secure = flags & PERL__TRNENV_SECURE;
+    acmode = secure ? PSL$C_EXEC : PSL$C_USER;
+    if (!tabvec || !*tabvec) tabvec = env_tables;
 
-}  /* end of my_trnlnm */
+    for (curtab = 0; tabvec[curtab]; curtab++) {
+      if (!str$case_blind_compare(tabvec[curtab],&crtlenv)) {
+        if (!ivenv && !secure) {
+          char *eq, *end;
+          int i;
+          if (!environ) {
+            ivenv = 1; 
+            warn("Can't read CRTL environ\n");
+            continue;
+          }
+          retsts = SS$_NOLOGNAM;
+          for (i = 0; environ[i]; i++) { 
+            if ((eq = strchr(environ[i],'=')) && 
+                !strncmp(environ[i],uplnm,eq - environ[i])) {
+              eq++;
+              for (eqvlen = 0; eq[eqvlen]; eqvlen++) eqv[eqvlen] = eq[eqvlen];
+              if (!eqvlen) continue;
+              retsts = SS$_NORMAL;
+              break;
+            }
+          }
+          if (retsts != SS$_NOLOGNAM) break;
+        }
+      }
+      else if ((tmpdsc.dsc$a_pointer = tabvec[curtab]->dsc$a_pointer) &&
+               !str$case_blind_compare(&tmpdsc,&clisym)) {
+        if (!ivsym && !secure) {
+          unsigned short int deflen = LNM$C_NAMLENGTH;
+          struct dsc$descriptor_d eqvdsc = {0,DSC$K_DTYPE_T,DSC$K_CLASS_D,0};
+          /* dynamic dsc to accomodate possible long value */
+          _ckvmssts(lib$sget1_dd(&deflen,&eqvdsc));
+          retsts = lib$get_symbol(&lnmdsc,&eqvdsc,&eqvlen,0);
+          if (retsts & 1) { 
+            if (eqvlen > 1024) {
+              if (PL_curinterp && PL_dowarn) warn("Value of CLI symbol \"%s\" too long",lnm);
+              eqvlen = 1024;
+              set_errno(EVMSERR); set_vaxc_errno(LIB$_STRTRU);
+            }
+            strncpy(eqv,eqvdsc.dsc$a_pointer,eqvlen);
+          }
+          _ckvmssts(lib$sfree1_dd(&eqvdsc));
+          if (retsts == LIB$_INVSYMNAM) { ivsym = 1; continue; }
+          if (retsts == LIB$_NOSUCHSYM) continue;
+          break;
+        }
+      }
+      else if (!ivlnm) {
+        retsts = sys$trnlnm(&attr,tabvec[curtab],&lnmdsc,&acmode,lnmlst);
+        if (retsts == SS$_IVLOGNAM) { ivlnm = 1; continue; }
+        if (retsts == SS$_NOLOGNAM) continue;
+        break;
+      }
+    }
+    if (retsts & 1) { eqv[eqvlen] = '\0'; return eqvlen; }
+    else if (retsts == LIB$_NOSUCHSYM || retsts == LIB$_INVSYMNAM ||
+             retsts == SS$_IVLOGNAM   || retsts == SS$_IVLOGTAB   ||
+             retsts == SS$_NOLOGNAM) {
+      set_errno(EINVAL);  set_vaxc_errno(retsts);
+    }
+    else _ckvmssts(retsts);
+    return 0;
+}  /* end of vmstrnenv */
+/*}}}*/
+
+
+/*{{{ int my_trnlnm(const char *lnm, char *eqv, unsigned long int idx)*/
+/* Define as a function so we can access statics. */
+int my_trnlnm(const char *lnm, char *eqv, unsigned long int idx)
+{
+  return vmstrnenv(lnm,eqv,idx,fildev,                                   
+#ifdef SECURE_INTERNAL_GETENV
+                   (PL_curinterp ? PL_tainting : will_taint) ? PERL__TRNENV_SECURE : 0
+#else
+                   0
+#endif
+                                                                              );
+}
+/*}}}*/
 
 /* my_getenv
- * Translate a logical name.  Substitute for CRTL getenv() to avoid
- * memory leak, and to keep my_getenv() and my_setenv() in the same
- * domain (mostly - my_getenv() need not return a translation from
- * the process logical name table)
- *
  * Note: Uses Perl temp to store result so char * can be returned to
  * caller; this pointer will be invalidated at next Perl statement
  * transition.
+ * We define this as a function rather than a macro in terms of my_getenv_sv()
+ * so that it'll work when PL_curinterp is undefined (and we therefore can't
+ * allocate SVs).
  */
-/*{{{ char *my_getenv(const char *lnm)*/
+/*{{{ char *my_getenv(const char *lnm, bool sys)*/
 char *
-my_getenv(const char *lnm)
+my_getenv(const char *lnm, bool sys)
 {
     static char __my_getenv_eqv[LNM$C_NAMLENGTH+1];
-    char uplnm[LNM$C_NAMLENGTH+1], *cp2, *eqv;
-    const char *cp1;
+    char uplnm[LNM$C_NAMLENGTH+1], *cp1, *cp2, *eqv;
     unsigned long int idx = 0;
     int trnsuccess;
     SV *tmpsv;
@@ -138,42 +224,64 @@ my_getenv(const char *lnm)
       eqv = SvPVX(tmpsv);
     }
     else eqv = __my_getenv_eqv;  /* Assume no interpreter ==> single thread */
-    for (cp1 = lnm, cp2= uplnm; *cp1; cp1++, cp2++) *cp2 = _toupper(*cp1);
-    *cp2 = '\0';
-    if (cp1 - lnm == 7 && !strncmp(uplnm,"DEFAULT",7)) {
+    for (cp1 = (char *) lnm, cp2 = eqv; *cp1; cp1++,cp2++) *cp2 = _toupper(*cp1);
+    if (cp1 - lnm == 7 && !strncmp(eqv,"DEFAULT",7)) {
       getcwd(eqv,LNM$C_NAMLENGTH);
       return eqv;
     }
     else {
-      if ((cp2 = strchr(uplnm,';')) != NULL) {
-        *cp2 = '\0';
+      if ((cp2 = strchr(lnm,';')) != NULL) {
+        strcpy(uplnm,lnm);
+        uplnm[cp2-lnm] = '\0';
         idx = strtoul(cp2+1,NULL,0);
+        lnm = uplnm;
       }
-      trnsuccess = my_trnlnm(uplnm,eqv,idx);
-      /* If we had a translation index, we're only interested in lnms */
-      if (!trnsuccess && cp2 != NULL) return Nullch;
-      if (trnsuccess) return eqv;
-      else {
-        unsigned long int retsts;
-        struct dsc$descriptor_s symdsc = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,0},
-                                valdsc = {LNM$C_NAMLENGTH,DSC$K_DTYPE_T,
-                                          DSC$K_CLASS_S, eqv};
-        symdsc.dsc$w_length = cp1 - lnm;
-        symdsc.dsc$a_pointer = uplnm;
-        retsts = lib$get_symbol(&symdsc,&valdsc,&(valdsc.dsc$w_length),0);
-        if (retsts == LIB$_INVSYMNAM) return Nullch;
-        if (retsts != LIB$_NOSUCHSYM) {
-          /* We want to return only logical names or CRTL Unix emulations */
-          if (retsts & 1) return Nullch;
-          _ckvmssts(retsts);
-        }
-        /* Try for CRTL emulation of a Unix/POSIX name */
-        else return getenv(uplnm);
-      }
+      if (vmstrnenv(lnm,eqv,idx,
+                    sys ? fildev : NULL,
+#ifdef SECURE_INTERNAL_GETENV
+                    sys ? PERL__TRNENV_SECURE : 0
+#else
+                                                0
+#endif
+                                                 )) return eqv;
+      else return Nullch;
     }
-    return Nullch;
 
 }  /* end of my_getenv() */
+/*}}}*/
+
+
+/*{{{ SV *my_getenv_sv(const char *lnm, bool sys)*/
+SV *
+my_getenv_sv(const char *lnm, bool sys)
+{
+    char buf[LNM$C_NAMLENGTH+1], *cp1, *cp2;
+    unsigned long int len, idx = 0;
+
+    for (cp1 = (char *)lnm, cp2 = buf; *cp1; cp1++,cp2++) *cp2 = _toupper(*cp1);
+    if (cp1 - lnm == 7 && !strncmp(buf,"DEFAULT",7)) {
+      getcwd(buf,LNM$C_NAMLENGTH);
+      return newSVpv(buf,0);
+    }
+    else {
+      if ((cp2 = strchr(lnm,';')) != NULL) {
+        strcpy(buf,lnm);
+        buf[cp2-lnm] = '\0';
+        idx = strtoul(cp2+1,NULL,0);
+        lnm = buf;
+      }
+      if ((len = vmstrnenv(lnm,buf,idx,
+                           sys ? fildev : NULL,
+#ifdef SECURE_INTERNAL_GETENV
+                           sys ? PERL__TRNENV_SECURE : 0
+#else
+                                                       0
+#endif
+                                                         ))) return newSVpv(buf,len);
+      else return &PL_sv_undef;
+    }
+
+}  /* end of my_getenv_sv() */
 /*}}}*/
 
 static void create_mbx(unsigned short int *, struct dsc$descriptor_s *);
@@ -189,20 +297,21 @@ prime_env_iter(void)
 {
   dTHR;
   static int primed = 0;
-  HV *envhv = GvHVn(PL_envgv);
-  PerlIO *sholog;
-  char eqv[LNM$C_NAMLENGTH+1],mbxnam[LNM$C_NAMLENGTH+1],*start,*end;
+  HV *seenhv = NULL, *envhv = GvHVn(PL_envgv);
+  char cmd[LNM$C_NAMLENGTH+24], mbxnam[LNM$C_NAMLENGTH], *buf = Nullch;
   unsigned short int chan;
 #ifndef CLI$M_TRUSTED
 #  define CLI$M_TRUSTED 0x40  /* Missing from VAXC headers */
 #endif
-  unsigned long int flags = CLI$M_NOWAIT | CLI$M_NOCLISYM | CLI$M_NOKEYPAD | CLI$M_TRUSTED;
-  unsigned long int i, retsts, substs = 0, wakect = 0;
-  STRLEN eqvlen;
-  SV *oldrs, *linesv, *eqvsv;
-  $DESCRIPTOR(cmddsc,"Show Logical *"); $DESCRIPTOR(nldsc,"_NLA0:");
-  $DESCRIPTOR(clidsc,"DCL");            $DESCRIPTOR(tabdsc,"DCLTABLES");
-  $DESCRIPTOR(mbxdsc,mbxnam); 
+  unsigned long int defflags = CLI$M_NOWAIT | CLI$M_NOKEYPAD | CLI$M_TRUSTED;
+  unsigned long int mbxbufsiz, flags, retsts, subpid = 0, substs = 0, wakect = 0;
+  long int i;
+  bool have_sym = FALSE, have_lnm = FALSE;
+  struct dsc$descriptor_s tmpdsc = {6,DSC$K_DTYPE_T,DSC$K_CLASS_S,0};
+  $DESCRIPTOR(cmddsc,cmd);    $DESCRIPTOR(nldsc,"_NLA0:");
+  $DESCRIPTOR(clidsc,"DCL");  $DESCRIPTOR(clitabdsc,"DCLTABLES");
+  $DESCRIPTOR(crtlenv,"CRTL_ENV");  $DESCRIPTOR(clisym,"CLISYM");
+  $DESCRIPTOR(local,"_LOCAL"); $DESCRIPTOR(mbxdsc,mbxnam); 
 #ifdef USE_THREADS
   static perl_mutex primenv_mutex;
   MUTEX_INIT(&primenv_mutex);
@@ -214,113 +323,276 @@ prime_env_iter(void)
   /* Perform a dummy fetch as an lval to insure that the hash table is
    * set up.  Otherwise, the hv_store() will turn into a nullop. */
   (void) hv_fetch(envhv,"DEFAULT",7,TRUE);
-  /* Also, set up any "special" keys that the CRTL defines,
-   * either by itself or becasue we were called from a C program
-   * using exec[lv]e() */
-  for (i = 0; environ[i]; i++) { 
-    if (!(start = strchr(environ[i],'='))) {
-      warn("Ill-formed CRTL environ value \"%s\"\n",environ[i]);
-    }
-    else {
-      start++;
-      (void) hv_store(envhv,environ[i],start - environ[i] - 1,newSVpv(start,0),0);
-    }
+
+  for (i = 0; env_tables[i]; i++) {
+     if (!have_sym && (tmpdsc.dsc$a_pointer = env_tables[i]->dsc$a_pointer) &&
+         !str$case_blind_compare(&tmpdsc,&clisym)) have_sym = 1;
+     if (!have_lnm && !str$case_blind_compare(env_tables[i],&crtlenv)) have_lnm = 1;
+  }
+  if (have_sym || have_lnm) {
+    long int syiitm = SYI$_MAXBUF, dviitm = DVI$_DEVNAM;
+    _ckvmssts(lib$getsyi(&syiitm, &mbxbufsiz, 0, 0, 0, 0));
+    _ckvmssts(sys$crembx(0,&chan,mbxbufsiz,mbxbufsiz,0xff0f,0,0));
+    _ckvmssts(lib$getdvi(&dviitm, &chan, NULL, NULL, &mbxdsc, &mbxdsc.dsc$w_length));
   }
 
-  /* Now, go get the logical names */
-  create_mbx(&chan,&mbxdsc);
-  if ((sholog = PerlIO_open(mbxnam,"r")) != Nullfp) {
-    if ((retsts = sys$dassgn(chan)) & 1) {
-      /* Be certain that subprocess is using the CLI and command tables we
-       * expect, and don't pass symbols through so that we insure that
-       * "Show Logical" can't be subverted.
-       */
-      do {
-        retsts = lib$spawn(&cmddsc,&nldsc,&mbxdsc,&flags,0,0,&substs,
-                           0,&riseandshine,0,0,&clidsc,&tabdsc);
-        flags &= ~CLI$M_TRUSTED; /* Just in case we hit a really old version */
-      } while (retsts == LIB$_INVARG && (flags | CLI$M_TRUSTED));
+  for (i--; i >= 0; i--) {
+    if (!str$case_blind_compare(env_tables[i],&crtlenv)) {
+      char *start;
+      int j;
+      for (j = 0; environ[j]; j++) { 
+        if (!(start = strchr(environ[j],'='))) {
+          if (PL_curinterp && PL_dowarn) 
+            warn("Ill-formed CRTL environ value \"%s\"\n",environ[j]);
+        }
+        else {
+          start++;
+          (void) hv_store(envhv,environ[j],start - environ[j] - 1,
+                          newSVpv(start,0),0);
+        }
+      }
+      continue;
     }
-  }
-  if (sholog == Nullfp || !(retsts & 1)) {
-    if (sholog != Nullfp) PerlIO_close(sholog);
-    MUTEX_UNLOCK(&primenv_mutex);
-    _ckvmssts(sholog == Nullfp ? vaxc$errno : retsts);
-  }
-  /* We use Perl's sv_gets to read from the pipe, since PerlIO_open is
-   * tied to Perl's I/O layer, so it may not return a simple FILE * */
-  oldrs = PL_rs;
-  PL_rs = newSVpv("\n",1);
-  linesv = newSVpv("",0);
-  while (1) {
-    if ((start = sv_gets(linesv,sholog,0)) == Nullch) {
-      PerlIO_close(sholog);
-      SvREFCNT_dec(linesv); SvREFCNT_dec(PL_rs); PL_rs = oldrs;
-      primed = 1;
-      /* Wait for subprocess to clean up (we know subproc won't return 0) */
-      while (substs == 0) { sys$hiber(); wakect++;}
-      if (wakect > 1) sys$wake(0,0);  /* Stole someone else's wake */
-      _ckvmssts(substs);
-      MUTEX_UNLOCK(&primenv_mutex);
-      return;
+    else if ((tmpdsc.dsc$a_pointer = env_tables[i]->dsc$a_pointer) &&
+             !str$case_blind_compare(&tmpdsc,&clisym)) {
+      strcpy(cmd,"Show Symbol/Global *");
+      cmddsc.dsc$w_length = 20;
+      if (env_tables[i]->dsc$w_length == 12 &&
+          (tmpdsc.dsc$a_pointer = env_tables[i]->dsc$a_pointer + 6) &&
+          !str$case_blind_compare(&tmpdsc,&local)) strcpy(cmd+12,"Local  *");
+      flags = defflags | CLI$M_NOLOGNAM;
     }
-    while (*start != '"' && *start != '=' && *start) start++;
-    if (*start != '"') continue;
-    for (end = ++start; *end && *end != '"'; end++) ;
-    if (*end) *end = '\0';
-    else end = Nullch;
-    if ((eqvlen = my_trnlnm(start,eqv,0)) == 0) {
-      if (vaxc$errno == SS$_NOLOGNAM || vaxc$errno == SS$_IVLOGNAM) {
-        if (PL_dowarn)
-          warn("Ill-formed logical name |%s| in prime_env_iter",start);
+    else {
+      strcpy(cmd,"Show Logical *");
+      if (str$case_blind_compare(env_tables[i],&fildevdsc)) {
+        strcat(cmd," /Table=");
+        strncat(cmd,env_tables[i]->dsc$a_pointer,env_tables[i]->dsc$w_length);
+        cmddsc.dsc$w_length = strlen(cmd);
+      }
+      else cmddsc.dsc$w_length = 14;  /* N.B. We test this below */
+      flags = defflags | CLI$M_NOCLISYM;
+    }
+    
+    /* Create a new subprocess to execute each command, to exclude the
+     * remote possibility that someone could subvert a mbx or file used
+     * to write multiple commands to a single subprocess.
+     */
+    do {
+      retsts = lib$spawn(&cmddsc,&nldsc,&mbxdsc,&flags,0,&subpid,&substs,
+                         0,&riseandshine,0,0,&clidsc,&clitabdsc);
+      flags &= ~CLI$M_TRUSTED; /* Just in case we hit a really old version */
+      defflags &= ~CLI$M_TRUSTED;
+    } while (retsts == LIB$_INVARG && (flags | CLI$M_TRUSTED));
+    _ckvmssts(retsts);
+    if (!buf) New(1322,buf,mbxbufsiz + 1,char);
+    if (seenhv) SvREFCNT_dec(seenhv);
+    seenhv = newHV();
+    while (1) {
+      char *cp1, *cp2, *key;
+      unsigned long int sts, iosb[2], retlen, keylen;
+      register U32 hash;
+
+      sts = sys$qiow(0,chan,IO$_READVBLK,iosb,0,0,buf,mbxbufsiz,0,0,0,0);
+      if (sts & 1) sts = iosb[0] & 0xffff;
+      if (sts == SS$_ENDOFFILE) {
+        int wakect = 0;
+        while (substs == 0) { sys$hiber(); wakect++;}
+        if (wakect > 1) sys$wake(0,0);  /* Stole someone else's wake */
+        _ckvmssts(substs);
+        break;
+      }
+      _ckvmssts(sts);
+      retlen = iosb[0] >> 16;      
+      if (!retlen) continue;  /* blank line */
+      buf[retlen] = '\0';
+      if (iosb[1] != subpid) {
+        if (iosb[1]) {
+          croak("Unknown process %x sent message to prime_env_iter: %s",buf);
+        }
         continue;
       }
-      else { MUTEX_UNLOCK(&primenv_mutex); _ckvmssts(vaxc$errno); }
+      if (sts == SS$_BUFFEROVF && PL_curinterp && PL_dowarn)
+        warn("Buffer overflow in prime_env_iter: %s",buf);
+
+      for (cp1 = buf; *cp1 && isspace(*cp1); cp1++) ;
+      if (*cp1 == '(' || /* Logical name table name */
+          *cp1 == '='    /* Next eqv of searchlist  */) continue;
+      if (*cp1 == '"') cp1++;
+      for (cp2 = cp1; *cp2 && *cp2 != '"' && *cp2 != ' '; cp2++) ;
+      key = cp1;  keylen = cp2 - cp1;
+      if (keylen && hv_exists(seenhv,key,keylen)) continue;
+      while (*cp2 && *cp2 != '=') cp2++;
+      while (*cp2 && *cp2 != '"') cp2++;
+      for (cp1 = buf + retlen; *cp1 != '"'; cp1--) ;
+      if (!keylen || (cp1 - cp2 <= 0)) {
+        warn("Ill-formed message in prime_env_iter: |%s|",buf);
+        continue;
+      }
+      /* Skip "" surrounding translation */
+      PERL_HASH(hash,key,keylen);
+      hv_store(envhv,key,keylen,newSVpv(cp2+1,cp1 - cp2 - 1),hash);
+      hv_store(seenhv,key,keylen,&PL_sv_yes,hash);
     }
-    else {
-      eqvsv = newSVpv(eqv,eqvlen);
-      hv_store(envhv,start,(end ? end - start : strlen(start)),eqvsv,0);
-    }
-  }
-}  /* end of prime_env_iter */
-/*}}}*/
-  
-
-/*{{{ void  my_setenv(char *lnm, char *eqv)*/
-void
-my_setenv(char *lnm,char *eqv)
-/* Define a supervisor-mode logical name in the process table.
- * In the future we'll add tables, attribs, and acmodes,
- * probably through a different call.
- */
-{
-    char uplnm[LNM$C_NAMLENGTH], *cp1, *cp2;
-    unsigned long int retsts, usermode = PSL$C_USER;
-    $DESCRIPTOR(tabdsc,"LNM$PROCESS");
-    struct dsc$descriptor_s lnmdsc = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,uplnm},
-                            eqvdsc = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,0};
-
-    for(cp1 = lnm, cp2 = uplnm; *cp1; cp1++, cp2++) *cp2 = _toupper(*cp1);
-    lnmdsc.dsc$w_length = cp1 - lnm;
-
-    if (!eqv || !*eqv) {  /* we're deleting a logical name */
-      retsts = sys$dellnm(&tabdsc,&lnmdsc,&usermode); /* try user mode first */
-      if (retsts == SS$_IVLOGNAM) return;
-      if (retsts != SS$_NOLOGNAM) _ckvmssts(retsts);
-      if (!(retsts & 1)) {
-        retsts = lib$delete_logical(&lnmdsc,&tabdsc); /* then supervisor mode */
-        if (retsts != SS$_NOLOGNAM) _ckvmssts(retsts);
+    if (cmddsc.dsc$w_length == 14) { /* We just read LNM$FILE_DEV */
+      /* get the PPFs for this process, not the subprocess */
+      char *ppfs[] = {"SYS$COMMAND", "SYS$INPUT", "SYS$OUTPUT", "SYS$ERROR", NULL};
+      char eqv[LNM$C_NAMLENGTH+1];
+      int trnlen, i;
+      for (i = 0; ppfs[i]; i++) {
+        trnlen = vmstrnenv(ppfs[i],eqv,0,fildev,0);
+        hv_store(envhv,ppfs[i],strlen(ppfs[i]),newSVpv(eqv,trnlen),0);
       }
     }
-    else {
-      eqvdsc.dsc$w_length = strlen(eqv);
-      eqvdsc.dsc$a_pointer = eqv;
+  }
+  primed = 1;
+  if (have_sym || have_lnm) _ckvmssts(sys$dassgn(chan));
+  if (buf) Safefree(buf);
+  if (seenhv) SvREFCNT_dec(seenhv);
+  MUTEX_UNLOCK(&primenv_mutex);
+  return;
 
-      _ckvmssts(lib$set_logical(&lnmdsc,&eqvdsc,&tabdsc,0,0));
+}  /* end of prime_env_iter */
+/*}}}*/
+
+
+/*{{{ int  vmssetenv(char *lnm, char *eqv)*/
+/* Define or delete an element in the same "environment" as
+ * vmstrnenv().  If an element is to be deleted, it's removed from
+ * the first place it's found.  If it's to be set, it's set in the
+ * place designated by the first element of the table vector.
+ */
+int
+vmssetenv(char *lnm, char *eqv, struct dsc$descriptor_s **tabvec)
+{
+    char uplnm[LNM$C_NAMLENGTH], *cp1, *cp2;
+    unsigned short int curtab, ivlnm = 0, ivsym = 0, ivenv = 0;
+    unsigned long int retsts, usermode = PSL$C_USER;
+    struct dsc$descriptor_s lnmdsc = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,uplnm},
+                            eqvdsc = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,0},
+                            tmpdsc = {6,DSC$K_DTYPE_T,DSC$K_CLASS_S,0};
+    $DESCRIPTOR(crtlenv,"CRTL_ENV");  $DESCRIPTOR(clisym,"CLISYM");
+    $DESCRIPTOR(local,"_LOCAL");
+
+    for (cp1 = lnm, cp2 = uplnm; *cp1; cp1++, cp2++) {
+      *cp2 = _toupper(*cp1);
+      if (cp1 - lnm > LNM$C_NAMLENGTH) {
+        set_errno(EINVAL); set_vaxc_errno(SS$_IVLOGNAM);
+        return SS$_IVLOGNAM;
+      }
+    }
+    lnmdsc.dsc$w_length = cp1 - lnm;
+    if (!tabvec || !*tabvec) tabvec = env_tables;
+
+    if (!eqv || !*eqv) {  /* we're deleting a symbol */
+      for (curtab = 0; tabvec[curtab]; curtab++) {
+        if (!ivenv && !str$case_blind_compare(tabvec[curtab],&crtlenv)) {
+        int i;
+#ifdef HAS_SETENV
+          for (i = 0; environ[i]; i++) { /* Iff it's an environ elt, reset */
+            if ((cp1 = strchr(environ[i],'=')) && 
+                !strncmp(environ[i],lnm,cp1 - environ[i])) {
+              setenv(lnm,eqv,1);
+              return;
+            }
+          }
+          ivenv = 1; retsts = SS$_NOLOGNAM;
+#else
+          if (PL_curinterp && PL_dowarn)
+            warn("This Perl can't reset CRTL environ elements (%s)",lnm)
+          ivenv = 1; retsts = SS$_NOSUCHPGM;
+#endif
+        }
+        else if ((tmpdsc.dsc$a_pointer = tabvec[curtab]->dsc$a_pointer) &&
+                 !str$case_blind_compare(&tmpdsc,&clisym)) {
+          unsigned int symtype;
+          if (tabvec[curtab]->dsc$w_length == 12 &&
+              (tmpdsc.dsc$a_pointer = tabvec[curtab]->dsc$a_pointer + 6) &&
+              !str$case_blind_compare(&tmpdsc,&local)) 
+            symtype = LIB$K_CLI_LOCAL_SYM;
+          else symtype = LIB$K_CLI_GLOBAL_SYM;
+          retsts = lib$delete_symbol(&lnmdsc,&symtype);
+          if (retsts = LIB$_INVSYMNAM) { ivsym = 1; continue; }
+          if (retsts = LIB$_NOSUCHSYM) continue;
+          break;
+        }
+        else if (!ivlnm) {
+          retsts = sys$dellnm(tabvec[curtab],&lnmdsc,&usermode); /* try user mode first */
+          if (retsts == SS$_IVLOGNAM) { ivlnm = 1; continue; }
+          if (retsts != SS$_NOLOGNAM && retsts != SS$_NOLOGTAB) break;
+          retsts = lib$delete_logical(&lnmdsc,tabvec[curtab]); /* then supervisor mode */
+          if (retsts != SS$_NOLOGNAM && retsts != SS$_NOLOGTAB) break;
+        }
+      }
+    }
+    else {  /* we're defining a value */
+      if (!ivenv && !str$case_blind_compare(tabvec[0],&crtlenv)) {
+#ifdef HAS_SETENV
+        return setenv(lnm,eqv,1) ? vaxc$errno : SS$_NORMAL;
+#else
+        if (PL_curinterp && PL_dowarn)
+          warn("This Perl can't set CRTL environ elements (%s=%s)",lnm,eqv)
+        retsts = SS$_NOSUCHPGM;
+#endif
+      }
+      else {
+        eqvdsc.dsc$a_pointer = eqv;
+        eqvdsc.dsc$w_length  = strlen(eqv);
+        if ((tmpdsc.dsc$a_pointer = tabvec[0]->dsc$a_pointer) &&
+            !str$case_blind_compare(&tmpdsc,&clisym)) {
+          unsigned int symtype;
+          if (tabvec[0]->dsc$w_length == 12 &&
+              (tmpdsc.dsc$a_pointer = tabvec[0]->dsc$a_pointer + 6) &&
+               !str$case_blind_compare(&tmpdsc,&local)) 
+            symtype = LIB$K_CLI_LOCAL_SYM;
+          else symtype = LIB$K_CLI_GLOBAL_SYM;
+          retsts = lib$set_symbol(&lnmdsc,&eqvdsc,&symtype);
+        }
+        else retsts = lib$set_logical(&lnmdsc,&eqvdsc,tabvec[0],0,0);
+      }
+    }
+    if (!(retsts & 1)) {
+      switch (retsts) {
+        case LIB$_AMBSYMDEF: case LIB$_INSCLIMEM:
+        case SS$_NOLOGTAB: case SS$_TOOMANYLNAM: case SS$_IVLOGTAB:
+          set_errno(EVMSERR); break;
+        case LIB$_INVARG: case LIB$_INVSYMNAM: case SS$_IVLOGNAM: 
+        case LIB$_NOSUCHSYM: case SS$_NOLOGNAM:
+          set_errno(EINVAL); break;
+        case SS$_NOPRIV:
+          set_errno(EACCES);
+        default:
+          _ckvmssts(retsts);
+          set_errno(EVMSERR);
+       }
+       set_vaxc_errno(retsts);
+       return (int) retsts || 44; /* retsts should never be 0, but just in case */
+    }
+    else if (retsts != SS$_NORMAL) {  /* alternate success codes */
+      set_errno(0); set_vaxc_errno(retsts);
+      return 0;
     }
 
-}  /* end of my_setenv() */
+}  /* end of vmssetenv() */
 /*}}}*/
+
+/*{{{ void  my_setenv(char *lnm, char *eqv)*/
+/* This has to be a function since there's a prototype for it in proto.h */
+void
+my_setenv(char *lnm,char *eqv)
+{
+  if (lnm && *lnm && strlen(lnm) == 7) {
+    char uplnm[8];
+    int i;
+    for (i = 0; lnm[i]; i++) uplnm[i] = _toupper(lnm[i]);
+    if (!strcmp(uplnm,"DEFAULT")) {
+      if (eqv && *eqv) chdir(eqv);
+      return;
+    }
+  }
+  (void) vmssetenv(lnm,eqv,NULL);
+}
+/*}}}*/
+
 
 
 /*{{{ char *my_crypt(const char *textpasswd, const char *usrname)*/
@@ -1530,7 +1802,7 @@ static char *do_tounixspec(char *spec, char *buf, int ts)
         while (*cp3 != ':' && *cp3) cp3++;
         *(cp3++) = '\0';
         if (strchr(cp3,']') != NULL) break;
-      } while (((cp3 = my_getenv(tmp)) != NULL) && strcpy(tmp,cp3));
+      } while (vmstrnenv(tmp,tmp,0,fildev,0));
       if (ts && !buf &&
           ((devlen = strlen(tmp)) + (dirlen = strlen(cp2)) + 1 > retlen)) {
         retlen = devlen + dirlen;
@@ -2113,14 +2385,18 @@ int isunix = 0;
 char *had_version;
 char *had_device;
 int had_directory;
-char *devdir;
+char *devdir,*cp;
 char vmsspec[NAM$C_MAXRSS+1];
 $DESCRIPTOR(filespec, "");
 $DESCRIPTOR(defaultspec, "SYS$DISK:[]");
 $DESCRIPTOR(resultspec, "");
 unsigned long int zero = 0, sts;
 
-    if (strcspn(item, "*%") == strlen(item) || strchr(item,' ') != NULL)
+    for (cp = item; *cp; cp++) {
+	if (*cp == '*' || *cp == '%' || isspace(*cp)) break;
+	if (*cp == '.' && *(cp-1) == '.' && *(cp-2) =='.') break;
+    }
+    if (!*cp || isspace(*cp))
 	{
 	add_item(head, tail, item, count);
 	return;
@@ -2331,9 +2607,12 @@ unsigned long int flags = 17, one = 1, retsts;
 void
 vms_image_init(int *argcp, char ***argvp)
 {
-  unsigned long int *mask, iosb[2], i, rlst[128], rsz, add_taint = FALSE;
+  char eqv[LNM$C_NAMLENGTH+1] = "";
+  unsigned int len, tabct = 8, tabidx = 0;
+  unsigned long int *mask, iosb[2], i, rlst[128], rsz;
   unsigned long int iprv[(sizeof(union prvdef) + sizeof(unsigned long int) - 1) / sizeof(unsigned long int)];
   unsigned short int dummy, rlen;
+  struct dsc$descriptor_s **tabvec;
   struct itmlst_3 jpilist[4] = { {sizeof iprv,    JPI$_IMAGPRIV, iprv, &dummy},
                                  {sizeof rlst,  JPI$_RIGHTSLIST, rlst,  &rlen},
                                  { sizeof rsz, JPI$_RIGHTS_SIZE, &rsz, &dummy},
@@ -2344,12 +2623,12 @@ vms_image_init(int *argcp, char ***argvp)
   for (i = 0; i < sizeof iprv / sizeof(unsigned long int); i++) {
     if (iprv[i]) {           /* Running image installed with privs? */
       _ckvmssts(sys$setprv(0,iprv,0,NULL));       /* Turn 'em off. */
-      add_taint = TRUE;
+      will_taint = TRUE;
       break;
     }
   }
   /* Rights identifiers might trigger tainting as well. */
-  if (!add_taint && (rlen || rsz)) {
+  if (!will_taint && (rlen || rsz)) {
     while (rlen < rsz) {
       /* We didn't get all the identifiers on the first pass.  Allocate a
        * buffer much larger than $GETJPI wants (rsz is size in bytes that
@@ -2368,7 +2647,7 @@ vms_image_init(int *argcp, char ***argvp)
      */
     for (i = 1; i < (rlen + sizeof(unsigned long int) - 1) / sizeof(unsigned long int); i += 2) {
       if (mask[i] & KGB$M_SUBSYSTEM) {
-        add_taint = TRUE;
+        will_taint = TRUE;
         break;
       }
     }
@@ -2378,7 +2657,7 @@ vms_image_init(int *argcp, char ***argvp)
    * since its tainting flag may be part of the PL_curinterp struct, which
    * hasn't been allocated when vms_image_init() is called.
    */
-  if (add_taint) {
+  if (will_taint) {
     char ***newap;
     New(1320,newap,*argcp+2,char **);
     newap[0] = argvp[0];
@@ -2389,6 +2668,37 @@ vms_image_init(int *argcp, char ***argvp)
      */
     *argcp++; argvp = newap;
   }
+  else {  /* Did user explicitly request tainting? */
+    int i;
+    char *cp, **av = *argvp;
+    for (i = 1; i < *argcp; i++) {
+      if (*av[i] != '-') break;
+      for (cp = av[i]+1; *cp; cp++) {
+        if (*cp == 'T') { will_taint = 1; break; }
+        else if ( (*cp == 'd' || *cp == 'V') && *(cp+1) == ':' ||
+                  strchr("DFIiMmx",*cp)) break;
+      }
+      if (will_taint) break;
+    }
+  }
+
+  for (tabidx = 0;
+       len = my_trnlnm("PERL_ENV_TABLES",eqv,tabidx);
+       tabidx++) {
+    if (!tabidx) New(1321,tabvec,tabct,struct dsc$descriptor_s *);
+    else if (tabidx >= tabct) {
+      tabct += 8;
+      Renew(tabvec,tabct,struct dsc$descriptor_s *);
+    }
+    New(1322,tabvec[tabidx],1,struct dsc$descriptor_s);
+    tabvec[tabidx]->dsc$w_length  = 0;
+    tabvec[tabidx]->dsc$b_dtype   = DSC$K_DTYPE_T;
+    tabvec[tabidx]->dsc$b_class   = DSC$K_CLASS_D;
+    tabvec[tabidx]->dsc$a_pointer = NULL;
+    _ckvmssts(lib$scopy_r_dx(&len,eqv,tabvec[tabidx]));
+  }
+  if (tabidx) { tabvec[tabidx] = NULL; env_tables = tabvec; }
+
   getredirection(argcp,argvp);
 #if defined(USE_THREADS) && defined(__DECC)
   {
@@ -2727,7 +3037,8 @@ readdir(DIR *dd)
     dd->count++;
     /* Force the buffer to end with a NUL, and downcase name to match C convention. */
     buff[sizeof buff - 1] = '\0';
-    for (p = buff; !isspace(*p); p++) *p = _tolower(*p);
+    for (p = buff; *p; p++) *p = _tolower(*p);
+    while (--p >= buff) if (!isspace(*p)) break;  /* Do we really need this? */
     *p = '\0';
 
     /* Skip any directory component and just copy the name. */
@@ -3547,10 +3858,10 @@ time_t my_time(time_t *timep)
 
     gmtime_emulation_type++;
     if ((tm_p = gmtime(&base)) == NULL) { /* CRTL gmtime() is a fake */
-      char *off;
+      char off[LNM$C_NAMLENGTH+1];;
 
       gmtime_emulation_type++;
-      if ((off = my_getenv("SYS$TIMEZONE_DIFFERENTIAL")) == NULL) {
+      if (!vmstrnenv("SYS$TIMEZONE_DIFFERENTIAL",off,0,fildev,0)) {
         gmtime_emulation_type++;
         warn("no UTC offset information; assuming local time is UTC");
       }
@@ -4153,49 +4464,6 @@ flex_stat(char *fspec, Stat_t *statbufp)
 }  /* end of flex_stat() */
 /*}}}*/
 
-/* Insures that no carriage-control translation will be done on a file. */
-/*{{{FILE *my_binmode(FILE *fp, char iotype)*/
-FILE *
-my_binmode(FILE *fp, char iotype)
-{
-    char filespec[NAM$C_MAXRSS], *acmode, *s, *colon, *dirend = Nullch;
-    int ret = 0, saverrno = errno, savevmserrno = vaxc$errno;
-    fpos_t pos;
-
-    if (!fgetname(fp,filespec,1)) return NULL;
-    for (s = filespec; *s; s++) {
-      if (*s == ':') colon = s;
-      else if (*s == ']' || *s == '>') dirend = s;
-    }
-    /* Looks like a tmpfile, which will go away if reopened */
-    if (s == dirend + 3) return fp;
-    /* If we've got a non-file-structured device, clip off the trailing
-     * junk, and don't lose sleep if we can't get a stream position.  */
-    if (dirend == Nullch) *(colon+1) = '\0'; 
-    if (iotype != '-'&& (ret = fgetpos(fp, &pos)) == -1 && dirend) return NULL;
-    switch (iotype) {
-      case '<': case 'r':           acmode = "rb";                      break;
-      case '>': case 'w': case '|':
-        /* use 'a' instead of 'w' to avoid creating new file;
-           fsetpos below will take care of restoring file position */
-      case 'a':                     acmode = "ab";                      break;
-      case '+':  case 's':          acmode = "rb+";                     break;
-      case '-':                     acmode = fileno(fp) ? "ab" : "rb";  break;
-      /* iotype'll be null for the SYS$INPUT:/SYS$OUTPUT:/SYS$ERROR: files */
-      /* since we didn't really open them and can't really */
-      /* reopen them */
-      case 0:                       return NULL;                        break;
-      default:
-        warn("Unrecognized iotype %x for %s in my_binmode",iotype, filespec);
-        acmode = "rb+";
-    }
-    if (freopen(filespec,acmode,fp) == NULL) return NULL;
-    if (iotype != '-' && ret != -1 && fsetpos(fp,&pos) == -1) return NULL;
-    if (ret == -1) { set_errno(saverrno); set_vaxc_errno(savevmserrno); }
-    return fp;
-}  /* end of my_binmode() */
-/*}}}*/
-
 
 /*{{{char *my_getlogin()*/
 /* VMS cuserid == Unix getlogin, except calling sequence */
@@ -4607,10 +4875,6 @@ init_os_extras()
   newXSproto("VMS::Filespec::unixpath",unixpath_fromperl,file,"$");
   newXSproto("VMS::Filespec::candelete",candelete_fromperl,file,"$");
   newXS("File::Copy::rmscopy",rmscopy_fromperl,file);
-
-#ifdef PRIME_ENV_AT_STARTUP
-  prime_env_iter();
-#endif
 
   return;
 }

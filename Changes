@@ -79,6 +79,116 @@ Version 5.005_57        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  3305] By: gsar                                  on 1999/05/05  16:20:19
+        Log: make perldoc use backslashed pathnames within system() on win32
+     Branch: perl
+           ! pod/perldiag.pod pod/perlthrtut.pod utils/perldoc.PL
+____________________________________________________________________________
+[  3304] By: gsar                                  on 1999/05/05  07:29:43
+        Log: upgrade Pod::Parser to v1.081 from CPAN
+     Branch: perl
+	   ! lib/Pod/Checker.pm lib/Pod/InputObjects.pm lib/Pod/Parser.pm
+	   ! lib/Pod/PlainText.pm lib/Pod/Select.pm lib/Pod/Usage.pm
+           ! t/pod/special_seqs.t t/pod/special_seqs.xr t/pod/testp2pt.pl
+____________________________________________________________________________
+[  3303] By: gsar                                  on 1999/05/05  07:02:07
+        Log: From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Fri, 19 Mar 1999 12:31:35 -0500 (EST)
+             Message-Id: <Pine.GSU.4.05.9903191208250.8899-100000@newton.phys>
+             Subject: [PATCH 5.005_03-MT3] INSTALL patches
+     Branch: perl
+           ! INSTALL
+____________________________________________________________________________
+[  3302] By: gsar                                  on 1999/05/05  06:55:21
+        Log: load base packages based on nonexistent $VERSION
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 19 Mar 1999 06:00:28 +0100
+             Message-ID: <sfcsob2m5ub.fsf@dubravka.in-berlin.de>
+             Subject: Re: base.pm flaw
+     Branch: perl
+           ! lib/base.pm lib/locale.pm
+____________________________________________________________________________
+[  3301] By: gsar                                  on 1999/05/04  05:41:08
+        Log: pod2man outputs switched date and revision label (fix suggested by
+             EthanSasiela@mede.com)
+     Branch: perl
+           ! pod/pod2man.PL
+____________________________________________________________________________
+[  3300] By: gsar                                  on 1999/05/03  18:48:25
+        Log: adjust win32_stat() to cope with FindFirstFile() and stat() bugs
+             (makes opendir(D,"c:") work reliably)
+     Branch: perl
+           ! win32/win32.c
+____________________________________________________________________________
+[  3299] By: gsar                                  on 1999/05/02  19:39:55
+        Log: add test case for change#3298
+     Branch: perl
+           ! sv.c t/op/readdir.t
+____________________________________________________________________________
+[  3298] By: gsar                                  on 1999/05/02  19:24:41
+        Log: close directory handles properly when localized
+     Branch: perl
+           ! sv.c
+____________________________________________________________________________
+[  3297] By: jhi                                   on 1999/04/30  11:42:14
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+	  !> Changes config_h.SH configure.com lib/AutoLoader.pm
+	  !> lib/AutoSplit.pm lib/File/Path.pm pod/perlre.pod pp.c pp_ctl.c
+	  !> pp_sys.c proto.h regcomp.c t/op/die.t t/op/ref.t util.c
+	  !> vms/descrip_mms.template vms/gen_shrfls.pl vms/munchconfig.c
+          !> vms/subconfigure.com win32/win32.c
+____________________________________________________________________________
+[  3293] By: chip                                  on 1999/04/29  18:50:49
+        Log: Fix shebang lines.
+     Branch: maint-5.004/perl
+	   ! Porting/p4d2p h2pl/mksizes pod/checkpods.PL pod/pod2html.PL
+	   ! pod/pod2latex.PL pod/pod2man.PL pod/pod2text.PL utils/c2ph.PL
+	   ! utils/h2ph.PL utils/h2xs.PL utils/perlbug.PL utils/perldoc.PL
+	   ! utils/pl2pm.PL utils/splain.PL win32/bin/search.pl
+           ! x2p/find2perl.PL x2p/s2p.PL
+____________________________________________________________________________
+[  3284] By: gsar                                  on 1999/04/27  00:48:42
+        Log: integrate change#3279 from maint-5.004
+     Branch: perl
+           ! lib/AutoLoader.pm
+____________________________________________________________________________
+[  3279] By: chip                                  on 1999/04/26  23:09:26
+        Log: Make &AutoLoad::AUTOLOAD reentrant.
+     Branch: maint-5.004/perl
+           ! lib/AutoLoader.pm
+____________________________________________________________________________
+[  3276] By: chip                                  on 1999/04/26  22:34:36
+        Log: Make porting scripts executable.
+     Branch: maint-5.004/perl
+	   ! Changes Porting/genlog Porting/makerel Porting/p4desc
+           ! Porting/patchls
+____________________________________________________________________________
+[  3274] By: gsar                                  on 1999/04/26  17:30:31
+        Log: allow embedded null characters in diagnostics
+     Branch: perl
+           ! pp_ctl.c pp_sys.c proto.h regcomp.c t/op/die.t util.c
+____________________________________________________________________________
+[  3273] By: gsar                                  on 1999/04/26  08:27:22
+        Log: hand-applied conflicting parts of suggested patch
+             From: Charles Bailey <BAILEY@newman.upenn.edu>
+             Date: Wed, 17 Mar 1999 23:55:23 -0400 (EDT)
+             Message-id: <01J8YELSL7WK001E7S@mail.newman.upenn.edu>
+             Subject: [PATCH 5.005_56] VMS configuration/build
+     Branch: perl
+	   ! configure.com vms/descrip_mms.template vms/gen_shrfls.pl
+           ! vms/munchconfig.c vms/subconfigure.com
+____________________________________________________________________________
+[  3272] By: gsar                                  on 1999/04/26  08:25:41
+        Log: update Changes; tweak minor regressions
+     Branch: perl
+           ! Changes lib/AutoSplit.pm lib/File/Path.pm
+____________________________________________________________________________
+[  3271] By: gsar                                  on 1999/04/26  07:52:51
+        Log: integrate change#3229 from maint-5.004
+     Branch: perl
+           ! pp_ctl.c util.c
+____________________________________________________________________________
 [  3270] By: gsar                                  on 1999/04/25  22:58:27
         Log: fix buggy reference count on refs to SVs with autoviv magic
              (resulted in C<my @a; $a[1] = 1; print \$_ for @a> and Data::Dumper

@@ -150,10 +150,7 @@ hv_fetch(HV *hv, const char *key, U32 klen, I32 lval)
     }
 #ifdef DYNAMIC_ENV_FETCH  /* %ENV lookup?  If so, try to fetch the value now */
     if (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME)) {
-      char *gotenv;
-
-      if ((gotenv = PerlEnv_getenv(key)) != Nullch) {
-        sv = newSVpvn(gotenv,strlen(gotenv));
+      if ((sv = PerlEnv_ENVgetenv_sv(key)) != &PL_sv_undef) {
         SvTAINTED_on(sv);
         return hv_store(hv,key,klen,sv,hash);
       }
@@ -241,10 +238,7 @@ hv_fetch_ent(HV *hv, SV *keysv, I32 lval, register U32 hash)
     }
 #ifdef DYNAMIC_ENV_FETCH  /* %ENV lookup?  If so, try to fetch the value now */
     if (HvNAME(hv) && strEQ(HvNAME(hv),ENV_HV_NAME)) {
-      char *gotenv;
-
-      if ((gotenv = PerlEnv_getenv(key)) != Nullch) {
-        sv = newSVpvn(gotenv,strlen(gotenv));
+      if ((sv = PerlEnv_ENVgetenv_sv(key)) != &PL_sv_undef) {
         SvTAINTED_on(sv);
         return hv_store_ent(hv,keysv,sv,hash);
       }
@@ -597,11 +591,17 @@ hv_exists(HV *hv, const char *key, U32 klen)
     }
 
     xhv = (XPVHV*)SvANY(hv);
+#ifndef DYNAMIC_ENV_FETCH
     if (!xhv->xhv_array)
 	return 0; 
+#endif
 
     PERL_HASH(hash, key, klen);
 
+#ifdef DYNAMIC_ENV_FETCH
+    if (!xhv->xhv_array) entry = Null(HE*);
+    else
+#endif
     entry = ((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     for (; entry; entry = HeNEXT(entry)) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
@@ -612,6 +612,14 @@ hv_exists(HV *hv, const char *key, U32 klen)
 	    continue;
 	return TRUE;
     }
+#ifdef DYNAMIC_ENV_FETCH  /* is it out there? */
+    if (HvNAME(hv) && strEQ(HvNAME(hv), ENV_HV_NAME) &&
+        (sv = PerlEnv_ENVgetenv_sv(key)) != &PL_sv_undef) {
+	SvTAINTED_on(sv);
+	hv_store(hv,key,klen,sv,hash);
+	return TRUE;
+    }
+#endif
     return FALSE;
 }
 
@@ -648,13 +656,19 @@ hv_exists_ent(HV *hv, SV *keysv, U32 hash)
     }
 
     xhv = (XPVHV*)SvANY(hv);
+#ifndef DYNAMIC_ENV_FETCH
     if (!xhv->xhv_array)
 	return 0; 
+#endif
 
     key = SvPV(keysv, klen);
     if (!hash)
 	PERL_HASH(hash, key, klen);
 
+#ifdef DYNAMIC_ENV_FETCH
+    if (!xhv->xhv_array) entry = Null(HE*);
+    else
+#endif
     entry = ((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
     for (; entry; entry = HeNEXT(entry)) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
@@ -665,6 +679,14 @@ hv_exists_ent(HV *hv, SV *keysv, U32 hash)
 	    continue;
 	return TRUE;
     }
+#ifdef DYNAMIC_ENV_FETCH  /* is it out there? */
+    if (HvNAME(hv) && strEQ(HvNAME(hv), ENV_HV_NAME) &&
+        (sv = PerlEnv_ENVgetenv_sv(key)) != &PL_sv_undef) {
+	SvTAINTED_on(sv);
+	hv_store_ent(hv,keysv,sv,hash);
+	return TRUE;
+    }
+#endif
     return FALSE;
 }
 
@@ -990,10 +1012,6 @@ hv_iterinit(HV *hv)
 	croak("Bad hash");
     xhv = (XPVHV*)SvANY(hv);
     entry = xhv->xhv_eiter;
-#ifdef DYNAMIC_ENV_FETCH  /* set up %ENV for iteration */
-    if (HvNAME(hv) && strEQ(HvNAME(hv), ENV_HV_NAME))
-	prime_env_iter();
-#endif
     if (entry && HvLAZYDEL(hv)) {	/* was deleted earlier? */
 	HvLAZYDEL_off(hv);
 	hv_free_ent(hv, entry);
@@ -1046,6 +1064,10 @@ hv_iternext(HV *hv)
 	xhv->xhv_eiter = Null(HE*);
 	return Null(HE*);
     }
+#ifdef DYNAMIC_ENV_FETCH  /* set up %ENV for iteration */
+    if (!entry && HvNAME(hv) && strEQ(HvNAME(hv), ENV_HV_NAME))
+	prime_env_iter();
+#endif
 
     if (!xhv->xhv_array)
 	Newz(506,xhv->xhv_array, ARRAY_ALLOC_BYTES(xhv->xhv_max + 1), char);

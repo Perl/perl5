@@ -3026,6 +3026,21 @@ get_specialsv_list(void)
  return PL_specialsv_list;
 }
 
+#ifndef HAS_GETENV_SV
+SV *
+getenv_sv(char *env_elem)
+{
+  char *env_trans;
+  SV *temp_sv;
+  if ((env_trans = PerlEnv_getenv(env_elem)) != Nullch) {
+    temp_sv = newSVpv(env_trans, strlen(env_trans));
+    return temp_sv;
+  } else {
+    return &PL_sv_undef;
+  }
+}
+#endif
+
 
 MGVTBL*
 get_vtbl(int vtbl_id)

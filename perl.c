@@ -895,7 +895,11 @@ print \"  \\@INC:\\n    @INC\\n\";");
     }
   switch_end:
 
-    if (!PL_tainting && (s = PerlEnv_getenv("PERL5OPT"))) {
+    if (
+#ifndef SECURE_INTERNAL_GETENV
+        !PL_tainting &&
+#endif
+                        (s = PerlEnv_getenv("PERL5OPT"))) {
 	while (isSPACE(*s))
 	    s++;
 	if (*s == '-' && *(s+1) == 'T')
