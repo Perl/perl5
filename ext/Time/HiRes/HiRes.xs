@@ -94,6 +94,7 @@ gettimeofday (struct timeval *tp, void *not_used)
 #if !defined(HAS_GETTIMEOFDAY) && defined(VMS)
 #define HAS_GETTIMEOFDAY
 
+#include <lnmdef.h>
 #include <time.h> /* gettimeofday */
 #include <stdlib.h> /* qdiv */
 #include <starlet.h> /* sys$gettim */
@@ -121,6 +122,90 @@ static long base_adjust[2]={0L,0L};
 #else
 static __int64 base_adjust=0;
 #endif
+
+/* 
+
+   If we don't have gettimeofday, then likely we are on a VMS machine that
+   operates on local time rather than UTC...so we have to zone-adjust.
+   This code gleefully swiped from VMS.C 
+
+*/
+/* method used to handle UTC conversions:
+ *   1 == CRTL gmtime();  2 == SYS$TIMEZONE_DIFFERENTIAL;  3 == no correction
+ */
+static int gmtime_emulation_type;
+/* number of secs to add to UTC POSIX-style time to get local time */
+static long int utc_offset_secs;
+static struct dsc$descriptor_s fildevdsc = 
+  { 12, DSC$K_DTYPE_T, DSC$K_CLASS_S, "LNM$FILE_DEV" };
+static struct dsc$descriptor_s *fildev[] = { &fildevdsc, NULL };
+
+static time_t toutc_dst(time_t loc) {
+  struct tm *rsltmp;
+
+  if ((rsltmp = localtime(&loc)) == NULL) return -1;
+  loc -= utc_offset_secs;
+  if (rsltmp->tm_isdst) loc -= 3600;
+  return loc;
+}
+
+static time_t toloc_dst(time_t utc) {
+  struct tm *rsltmp;
+
+  utc += utc_offset_secs;
+  if ((rsltmp = localtime(&utc)) == NULL) return -1;
+  if (rsltmp->tm_isdst) utc += 3600;
+  return utc;
+}
+
+#define _toutc(secs)  ((secs) == (time_t) -1 ? (time_t) -1 : \
+       ((gmtime_emulation_type || timezone_setup()), \
+       (gmtime_emulation_type == 1 ? toutc_dst(secs) : \
+       ((secs) - utc_offset_secs))))
+
+#define _toloc(secs)  ((secs) == (time_t) -1 ? (time_t) -1 : \
+       ((gmtime_emulation_type || timezone_setup()), \
+       (gmtime_emulation_type == 1 ? toloc_dst(secs) : \
+       ((secs) + utc_offset_secs))))
+
+static int
+timezone_setup(void) 
+{
+  struct tm *tm_p;
+
+  if (gmtime_emulation_type == 0) {
+    int dstnow;
+    time_t base = 15 * 86400; /* 15jan71; to avoid month/year ends between    */
+                              /* results of calls to gmtime() and localtime() */
+                              /* for same &base */
+
+    gmtime_emulation_type++;
+    if ((tm_p = gmtime(&base)) == NULL) { /* CRTL gmtime() is a fake */
+      char off[LNM$C_NAMLENGTH+1];;
+
+      gmtime_emulation_type++;
+      if (!Perl_vmstrnenv("SYS$TIMEZONE_DIFFERENTIAL",off,0,fildev,0)) {
+        gmtime_emulation_type++;
+        utc_offset_secs = 0;
+        Perl_warn(aTHX_ "no UTC offset information; assuming local time is UTC");
+      }
+      else { utc_offset_secs = atol(off); }
+    }
+    else { /* We've got a working gmtime() */
+      struct tm gmt, local;
+
+      gmt = *tm_p;
+      tm_p = localtime(&base);
+      local = *tm_p;
+      utc_offset_secs  = (local.tm_mday - gmt.tm_mday) * 86400;
+      utc_offset_secs += (local.tm_hour - gmt.tm_hour) * 3600;
+      utc_offset_secs += (local.tm_min  - gmt.tm_min)  * 60;
+      utc_offset_secs += (local.tm_sec  - gmt.tm_sec);
+    }
+  }
+  return 1;
+}
+
 
 int
 gettimeofday (struct timeval *tp, void *tpz)
@@ -181,6 +266,13 @@ gettimeofday (struct timeval *tp, void *tpz)
         tp->tv_sec = ret;
         return -1;
  }
+# ifdef VMSISH_TIME
+# ifdef RTL_USES_UTC
+  if (VMSISH_TIME) tp->tv_sec = _toloc(tp->tv_sec);
+# else
+  if (!VMSISH_TIME) tp->tv_sec = _toutc(tp->tv_sec);
+# endif
+# endif
  return 0;
 }
 #endif
