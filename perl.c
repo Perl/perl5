@@ -34,6 +34,45 @@ dEXTCONST char rcsid[] = "perl.c\nPatch level: ###\n";
 #endif
 #endif
 
+#ifdef USE_LOCALE_COLLATE 
+#define I_REINIT_LOCALE_C \
+    collation_standard = TRUE; \
+    collxfrm_mult = 2 
+#else
+#define I_REINIT_LOCALE_C
+#endif 
+
+#ifdef USE_LOCALE_NUMERIC 
+#define I_REINIT_LOCALE_N \
+    numeric_standard = TRUE; \
+    numeric_local    = TRUE
+#else
+#define I_REINIT_LOCALE_N
+#endif 
+
+#define I_REINIT \
+    chopset	= " \n-"; \
+    copline	= NOLINE; \
+    curcop	= &compiling; \
+    curcopdb    = NULL; \
+    cxstack_ix  = -1; \
+    cxstack_max = 128; \
+    dbargs	= 0; \
+    dlmax	= 128; \
+    laststatval	= -1; \
+    laststype	= OP_STAT; \
+    maxscream	= -1; \
+    maxsysfd	= MAXSYSFD; \
+    statname	= Nullsv; \
+    tmps_floor	= -1; \
+    tmps_ix     = -1; \
+    op_mask     = NULL; \
+    dlmax       = 128; \
+    laststatval = -1; \
+    laststype   = OP_STAT; \
+    I_REINIT_LOCALE_C; \
+    I_REINIT_LOCALE_N
+
 static void find_beginning _((void));
 static void forbid_setid _((char *));
 static void incpush _((char *));
@@ -105,19 +144,12 @@ register PerlInterpreter *sv_interp;
     }
 
 #ifdef MULTIPLICITY
-    chopset	= " \n-";
-    copline	= NOLINE;
-    curcop	= &compiling;
-    dbargs	= 0;
-    dlmax	= 128;
-    laststatval	= -1;
-    laststype	= OP_STAT;
-    maxscream	= -1;
-    maxsysfd	= MAXSYSFD;
-    rsfp	= Nullfp;
-    statname	= Nullsv;
-    tmps_floor	= -1;
-    perl_destruct_level = 1;
+I_REINIT;
+perl_destruct_level = 1; 
+#else
+   if(perl_destruct_level > 0) {
+       I_REINIT;
+   }
 #endif
 
     init_ids();
@@ -208,21 +240,178 @@ register PerlInterpreter *sv_interp;
 
     setdefout(Nullgv);
 
-    sv_free(nrs);
-    nrs = Nullsv;
+    /* script file pointer */
+    if(rsfp) {
+      (void)PerlIO_close(rsfp);
+      rsfp = Nullfp;
+    }
 
-    sv_free(lastscream);
-    lastscream = Nullsv;
+    /* Package::DATA, etc */
+    /* sv_clean_all() will remove these from the registry
+      if(rsfp_filters) {
+          sv_free((SV*)rsfp_filters);
+          rsfp_filters = Nullav;
+      }
+      */
+
+    /* pseudo environmental stuff */
+    /* sv_clean_all() takes care of %ENV, %SIG 
+       envgv = Nullgv; 
+       siggv = Nullgv;
+       sv_free((SV*)incgv);
+       incgv = Nullgv;
+       */
+
+    /* switches */
+    preprocess   = FALSE;
+    minus_n      = FALSE;
+    minus_p      = FALSE;
+    minus_l      = FALSE;
+    minus_a      = FALSE;
+    minus_F      = FALSE;
+    doswitches   = FALSE;
+    dowarn       = FALSE;
+    doextract    = FALSE;
+    sawampersand = FALSE;	/* must save all match strings */
+    sawstudy     = FALSE;	/* do fbm_instr on all strings */
+    sawvec       = FALSE;
+    unsafe       = FALSE;
+    if(inplace) {
+      Safefree(inplace);
+      inplace = Nullch;
+    }
+    if(e_tmpname) {
+      	Safefree(e_tmpname);
+	e_tmpname = Nullch;
+    }
+    if (e_fp) {
+      PerlIO_close(e_fp);
+      e_fp = Nullfp;
+    }
+
+    /* magical thingies */
+    if (ofs) { /* $, */
+      Safefree(ofs);
+      ofs = Nullch;
+    }
+    if (ors) { /* $\ */
+      Safefree(ors);
+      ors = Nullch;
+    }
+    multiline = 0; /* $* */
 
     sv_free(statname);
     statname = Nullsv;
-    statgv = Nullgv;
-    laststatval = -1;
+    /*statgv = Nullgv;*/
 
-    sv_free((SV*)beginav);
-    beginav = Nullav;
-    sv_free((SV*)endav);
-    endav = Nullav;
+    /* shortcuts to various I/O objects */
+
+    sv_free((SV*)stdingv);
+    stdingv = Nullgv;
+    /*
+    if(last_in_gv) {
+      sv_free((SV*)last_in_gv);
+      last_in_gv = Nullgv;
+    }
+      */
+    /* defgv, aka *_ should be taken care of elsewhere */
+
+    /* @ARGV */
+    if(SvREFCNT(argvgv)) {
+      sv_free((SV*)argvgv);
+      argvgv = Nullgv;
+    }
+    /* reset so print() ends up where we expect */
+    sv_free((SV*)defoutgv);
+    defoutgv = Nullgv;
+
+    /* be sure to get rid of -i inplace fds */
+    if(argvoutgv) {
+      sv_free((SV*)argvoutgv);
+      argvoutgv = Nullgv;
+    }
+
+#if 0 /* just about all regexp stuff, seems to be ok */
+    /* shortcuts to regexp stuff */
+    if(leftgv) {
+      sv_free((SV*)leftgv);
+      leftgv = Nullgv;
+    }
+    if(ampergv) {
+      sv_free((SV*)ampergv);
+      ampergv = Nullgv;
+    }
+    SAVEFREEOP(curpm);
+    SAVEFREEOP(oldlastpm); /* for saving regexp context during debugger */
+
+    regprecomp = NULL;	/* uncompiled string. */
+    regparse = NULL;	/* Input-scan pointer. */
+    regxend = NULL;	/* End of input for compile */
+    regnpar = 0;	/* () count. */
+    regcode = NULL;	/* Code-emit pointer; &regdummy = don't. */
+    regsize = 0;	/* Code size. */
+    regnaughty = 0;	/* How bad is this pattern? */
+    regsawback = 0;	/* Did we see \1, ...? */
+
+    reginput = NULL;	/* String-input pointer. */
+    regbol = NULL;		/* Beginning of input, for ^ check. */
+    regeol = NULL;		/* End of input, for $ check. */
+    regstartp = (char **)NULL;	/* Pointer to startp array. */
+    regendp = (char **)NULL;	/* Ditto for endp. */
+    reglastparen = 0;	/* Similarly for lastparen. */
+    regtill = NULL;	/* How far we are required to go. */
+    regflags = 0;	/* are we folding, multilining? */
+    regprev = (char)NULL;	/* char before regbol, \n if none */
+#endif /* if 0 */
+
+    /* clean up after study() */
+    if(lastscream) {
+      sv_free(lastscream);
+      lastscream = Nullsv;
+    }
+    if(screamfirst) {
+      Safefree(screamfirst);
+      screamfirst = 0;
+    }
+    if(screamnext) {
+      Safefree(screamnext);
+      screamnext  = 0;
+    }
+
+    /* shortcuts to misc objects */
+    sv_free((SV*)errgv);
+    errgv = Nullgv;
+    
+    sv_free(nrs); 
+    nrs = Nullsv;
+
+    /* symbol tables */
+    if(beginav) {
+      sv_free((SV*)beginav); /* names of BEGIN subroutines */
+      beginav = Nullav;
+    }
+    if(endav) {
+      sv_free((SV*)endav); /* names of END subroutines */
+      endav = Nullav;
+    }
+
+    /* subprocess state */
+    /* keep fd-to-pid mappings for my_popen */
+    /* don't, CORE::stat() will core dump
+      sv_free((SV*)fdpid);	
+      fdpid = Nullav;
+      */
+    /* keep pid-to-status mappings for waitpid */
+    sv_free((SV*)pidstatus);	
+    pidstatus = Nullhv;
+
+    /*  statics for shared library purposes */
+
+    /* temp stack during pp_sort() */
+    if(sortstack) {
+      sv_free((SV*)sortstack);	
+      sortstack = Nullav;
+    }
 
     /* Prepare to destruct main symbol table.  */
 

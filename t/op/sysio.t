@@ -168,6 +168,8 @@ close(I);
 
 unlink $outfile;
 
+chdir('..'); 
+
 1;
 
 # eof
