@@ -3630,8 +3630,8 @@ PerlIOMmap_map(PerlIO *f)
     if (flags & PERLIO_F_CANREAD) {
 	PerlIOBuf *b = PerlIOSelf(f, PerlIOBuf);
 	int fd = PerlIO_fileno(f);
-	struct stat st;
-	code = fstat(fd, &st);
+	Stat_t st;
+	code = Fstat(fd, &st);
 	if (code == 0 && S_ISREG(st.st_mode)) {
 	    SSize_t len = st.st_size - b->posn;
 	    if (len > 0) {
