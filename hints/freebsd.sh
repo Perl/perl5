@@ -17,6 +17,10 @@
 # Additional 2.2 defines from
 # Mark Murray <mark@grondar.za>
 # Date: Wed, 6 Nov 1996 09:44:58 +0200 (MET)
+#
+# Support for FreeBSD/ELF
+# Ollivier Robert <roberto@keltia.freenix.fr>
+# Date: Wed Sep  2 16:22:12 CEST 1998
 # 
 # The two flags "-fpic -DPIC" are used to indicate a
 # will-be-shared object.  Configure will guess the -fpic, (and the
@@ -27,9 +31,6 @@
 # before 2.1-current (before approx date 4/15/95). It is fixed in 2.0.5
 # and what-will-be-2.1
 #
-
-signal_t='void'
-d_voidsig='define'
 
 case "$osvers" in
 0.*|1.0*)
@@ -92,9 +93,27 @@ esac
 # out here to avoid duplicating them everywhere.
 case "$osvers" in
 0.*|1.0*) ;;
-*)	cccdlflags='-DPIC -fpic'
-	lddlflags="-Bshareable $lddlflags"
-	;;
+
+3.*|4.0*)
+	objformat=`/usr/bin/objformat`
+        if [ x$objformat = xelf ]; then
+            libpth="/usr/lib /usr/local/lib"
+            glibpth="/usr/lib /usr/local/lib"
+            ldflags="-Wl,-E "
+            lddlflags="-shared "
+        else
+            if [ -e /usr/lib/aout ]; then
+                libpth="/usr/lib/aout /usr/local/lib /usr/lib"
+                glibpth="/usr/lib/aout /usr/local/lib /usr/lib"
+            fi
+            lddlflags='-Bshareable'
+        fi
+        cccdlflags='-DPIC -fpic'
+        ;;
+
+*)      cccdlflags='-DPIC -fpic'
+        lddlflags="-Bshareable $lddlflags"
+        ;;
 esac
 
 # Avoid telldir prototype conflict in pp_sys.c  (FreeBSD uses const DIR *)
@@ -111,3 +130,30 @@ problem.  Try
 
 EOM
 
+# From: Anton Berezin <tobez@plab.ku.dk>
+# To: perl5-porters@perl.org
+# Subject: [PATCH 5.005_54] Configure - hints/freebsd.sh signal handler type
+# Date: 30 Nov 1998 19:46:24 +0100
+# Message-ID: <864srhhvcv.fsf@lion.plab.ku.dk>
+
+signal_t='void'
+d_voidsig='define'
+
+# set libperl.so.X.X for 2.2.X
+case "$osvers" in
+2.2*)
+    # unfortunately this code gets executed before
+    # the equivalent in the main Configure so we copy a little
+    # from Configure XXX Configure should be fixed.
+    if $test -r $src/patchlevel.h;then
+       patchlevel=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $src/patchlevel.h`
+       subversion=`awk '/define[ 	]+PERL_SUBVERSION/ {print $3}' $src/patchlevel.h`
+    else
+       patchlevel=0
+       subversion=0
+    fi
+    libperl="libperl.so.$patchlevel.$subversion"
+    unset patchlevel
+    unset subversion
+    ;;
+esac
