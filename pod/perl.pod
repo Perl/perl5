@@ -330,10 +330,9 @@ given variable name may not be longer than 255 characters, and no
 component of your PATH may be longer than 255 if you use B<-S>.  A regular
 expression may not compile to more than 32767 bytes internally.
 
-See the perl bugs database at F<http://www.perl.com/perl/bugs/>.  You may
-mail your bug reports (be sure to include full configuration information
-as output by the myconfig program in the perl source tree, or by C<perl -V>) to
-F<perlbug@perl.com>.
+You may mail your bug reports (be sure to include full configuration
+information as output by the myconfig program in the perl source tree,
+or by C<perl -V>) to F<perlbug@perl.com>.
 If you've succeeded in compiling perl, the perlbug script in the utils/
 subdirectory can be used to help mail in a bug report.
 
