@@ -107,6 +107,9 @@ Deprecated.  Use C<GIMME_V> instead.
 	      : G_SCALAR)						\
 	   : dowantarray())
 
+/* NOTE: OP_NEXTSTATE, OP_DBSTATE, and OP_SETSTATE (i.e. COPs) carry lower
+ * bits of PL_hints in op_private */
+
 /* Private for lvalues */
 #define OPpLVAL_INTRO	128	/* Lvalue must be localized or lvalue sub */
 

@@ -1,5 +1,7 @@
 package utf8;
 
+$^U = 1;
+
 sub import {
     $^H |= 0x00000008;
     $enc{caller()} = $_[1] if $_[1];

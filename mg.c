@@ -567,6 +567,9 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	sv_setiv(sv, (IV)PL_basetime);
 #endif
 	break;
+    case '\025':		/* ^U */
+	sv_setiv(sv, (IV)PL_bigchar);
+	break;
     case '\027':		/* ^W  & $^Warnings*/
 	if (*(mg->mg_ptr+1) == '\0')
 	    sv_setiv(sv, (IV)((PL_dowarn & G_WARN_ON) ? TRUE : FALSE));
@@ -1706,6 +1709,9 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #else
 	PL_basetime = (Time_t)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 #endif
+	break;
+    case '\025':	/* ^U */
+	PL_bigchar = SvTRUE(sv);
 	break;
     case '\027':	/* ^W & $^Warnings */
 	if (*(mg->mg_ptr+1) == '\0') {

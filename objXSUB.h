@@ -1208,6 +1208,10 @@
 #define Perl_regdump		pPerl->Perl_regdump
 #undef  regdump
 #define regdump			Perl_regdump
+#undef  Perl_pregexec
+#define Perl_pregexec		pPerl->Perl_pregexec
+#undef  pregexec
+#define pregexec		Perl_pregexec
 #undef  Perl_pregfree
 #define Perl_pregfree		pPerl->Perl_pregfree
 #undef  pregfree

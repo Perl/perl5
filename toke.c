@@ -1275,11 +1275,14 @@ S_scan_const(pTHX_ char *start)
 	    if (ckWARN(WARN_UTF8)) {
 		(void)utf8_to_uv((U8*)s, &len);	/* could cvt latin-1 to utf8 here... */
 		if (len) {
+		    has_utf = TRUE;
 		    while (len--)
 			*d++ = *s++;
 		    continue;
 		}
 	    }
+	    else
+		has_utf = TRUE;		/* assume valid utf8 */
 	}
 
 	/* backslashes */
@@ -6398,6 +6401,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
     register char term;			/* terminating character */
     register char *to;			/* current position in the sv's data */
     I32 brackets = 1;			/* bracket nesting level */
+    bool has_utf = FALSE;		/* is there any utf8 content? */
 
     /* skip space before the delimiter */
     if (isSPACE(*s))
@@ -6408,6 +6412,9 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 
     /* after skipping whitespace, the next character is the terminator */
     term = *s;
+    if ((term & 0x80) && UTF)
+	has_utf = TRUE;
+
     /* mark where we are */
     PL_multi_start = CopLINE(PL_curcop);
     PL_multi_open = term;
@@ -6452,6 +6459,8 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 		   have found the terminator */
 		else if (*s == term)
 		    break;
+		else if (!has_utf && (*s & 0x80) && UTF)
+		    has_utf = TRUE;
 		*to = *s;
 	    }
 	}
@@ -6479,6 +6488,8 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 		    break;
 		else if (*s == PL_multi_open)
 		    brackets++;
+		else if (!has_utf && (*s & 0x80) && UTF)
+		    has_utf = TRUE;
 		*to = *s;
 	    }
 	}
@@ -6490,7 +6501,8 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 	 * this next chunk reads more into the buffer if we're not done yet
 	 */
 
-  	if (s < PL_bufend) break;	/* handle case where we are done yet :-) */
+  	if (s < PL_bufend)
+	    break;		/* handle case where we are done yet :-) */
 
 #ifndef PERL_STRICT_CR
 	if (to - SvPVX(sv) >= 2) {
@@ -6537,6 +6549,8 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 
     if (keep_delims)
 	sv_catpvn(sv, s, 1);
+    if (has_utf)
+	SvUTF8_on(sv);
     PL_multi_end = CopLINE(PL_curcop);
     s++;
 

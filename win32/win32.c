@@ -1030,10 +1030,10 @@ win32_sleep(unsigned int t)
 }
 
 DllExport int
-win32_stat(const char *path, struct stat *buffer)
+win32_stat(const char *path, struct stat *sbuf)
 {
     dTHXo;
-    char	t[MAX_PATH+1]; 
+    char	buffer[MAX_PATH+1]; 
     int		l = strlen(path);
     int		res;
     WCHAR	wbuffer[MAX_PATH+1];
@@ -1045,17 +1045,20 @@ win32_stat(const char *path, struct stat *buffer)
 	/* FindFirstFile() and stat() are buggy with a trailing
 	 * backslash, so change it to a forward slash :-( */
 	case '\\':
-	    strncpy(t, path, l-1);
-	    t[l - 1] = '/';
-	    t[l] = '\0';
-	    path = t;
+	    strncpy(buffer, path, l-1);
+	    buffer[l - 1] = '/';
+	    buffer[l] = '\0';
+	    path = buffer;
 	    break;
 	/* FindFirstFile() is buggy with "x:", so add a dot :-( */
 	case ':':
 	    if (l == 2 && isALPHA(path[0])) {
-		t[0] = path[0]; t[1] = ':'; t[2] = '.'; t[3] = '\0';
+		buffer[0] = path[0];
+		buffer[1] = ':';
+		buffer[2] = '.';
+		buffer[3] = '\0';
 		l = 3;
-		path = t;
+		path = buffer;
 	    }
 	    break;
 	}
@@ -1070,8 +1073,8 @@ win32_stat(const char *path, struct stat *buffer)
 	handle = CreateFileW(wbuffer, 0, 0, NULL, OPEN_EXISTING, 0, NULL);
     }
     else {
-	path = PerlDir_mapA(path);
-	handle = CreateFileA(path, 0, 0, NULL, OPEN_EXISTING, 0, NULL);
+	strcpy(buffer, PerlDir_mapA(path));
+	handle = CreateFileA(buffer, 0, 0, NULL, OPEN_EXISTING, 0, NULL);
     }
     if (handle != INVALID_HANDLE_VALUE) {
 	BY_HANDLE_FILE_INFORMATION bhi;
@@ -1082,32 +1085,32 @@ win32_stat(const char *path, struct stat *buffer)
 
     /* wbuffer or path will be mapped correctly above */
     if (USING_WIDE()) {
-	res = _wstat(wbuffer, (struct _stat *)buffer);
+	res = _wstat(wbuffer, (struct _stat *)sbuf);
     }
     else {
-	res = stat(path, buffer);
+	res = stat(buffer, sbuf);
     }
-    buffer->st_nlink = nlink;
+    sbuf->st_nlink = nlink;
 
     if (res < 0) {
 	/* CRT is buggy on sharenames, so make sure it really isn't.
 	 * XXX using GetFileAttributesEx() will enable us to set
-	 * buffer->st_*time (but note that's not available on the
+	 * sbuf->st_*time (but note that's not available on the
 	 * Windows of 1995) */
 	DWORD r;
 	if (USING_WIDE()) {
 	    r = GetFileAttributesW(wbuffer);
 	}
 	else {
-	    r = GetFileAttributesA(path);
+	    r = GetFileAttributesA(buffer);
 	}
 	if (r != 0xffffffff && (r & FILE_ATTRIBUTE_DIRECTORY)) {
-	    /* buffer may still contain old garbage since stat() failed */
-	    Zero(buffer, 1, struct stat);
-	    buffer->st_mode = S_IFDIR | S_IREAD;
+	    /* sbuf may still contain old garbage since stat() failed */
+	    Zero(sbuf, 1, struct stat);
+	    sbuf->st_mode = S_IFDIR | S_IREAD;
 	    errno = 0;
 	    if (!(r & FILE_ATTRIBUTE_READONLY))
-		buffer->st_mode |= S_IWRITE | S_IEXEC;
+		sbuf->st_mode |= S_IWRITE | S_IEXEC;
 	    return 0;
 	}
     }
@@ -1118,27 +1121,27 @@ win32_stat(const char *path, struct stat *buffer)
 	    /* The drive can be inaccessible, some _stat()s are buggy */
 	    if (USING_WIDE()
 		? !GetVolumeInformationW(wbuffer,NULL,0,NULL,NULL,NULL,NULL,0)
-		: !GetVolumeInformationA(path,NULL,0,NULL,NULL,NULL,NULL,0)) {
+		: !GetVolumeInformationA(buffer,NULL,0,NULL,NULL,NULL,NULL,0)) {
 		errno = ENOENT;
 		return -1;
 	    }
 	}
 #ifdef __BORLANDC__
-	if (S_ISDIR(buffer->st_mode))
-	    buffer->st_mode |= S_IWRITE | S_IEXEC;
-	else if (S_ISREG(buffer->st_mode)) {
+	if (S_ISDIR(sbuf->st_mode))
+	    sbuf->st_mode |= S_IWRITE | S_IEXEC;
+	else if (S_ISREG(sbuf->st_mode)) {
 	    if (l >= 4 && path[l-4] == '.') {
 		const char *e = path + l - 3;
 		if (strnicmp(e,"exe",3)
 		    && strnicmp(e,"bat",3)
 		    && strnicmp(e,"com",3)
 		    && (IsWin95() || strnicmp(e,"cmd",3)))
-		    buffer->st_mode &= ~S_IEXEC;
+		    sbuf->st_mode &= ~S_IEXEC;
 		else
-		    buffer->st_mode |= S_IEXEC;
+		    sbuf->st_mode |= S_IEXEC;
 	    }
 	    else
-		buffer->st_mode &= ~S_IEXEC;
+		sbuf->st_mode &= ~S_IEXEC;
 	}
 #endif
     }
@@ -1409,18 +1412,19 @@ win32_unlink(const char *filename)
 	    ret = _wunlink(wBuffer);
     }
     else {
-	filename = PerlDir_mapA(filename);
-	attrs = GetFileAttributesA(filename);
+	char buffer[MAX_PATH+1];
+	strcpy(buffer, PerlDir_mapA(filename));
+	attrs = GetFileAttributesA(buffer);
 	if (attrs == 0xFFFFFFFF)
 	    goto fail;
 	if (attrs & FILE_ATTRIBUTE_READONLY) {
-	    (void)SetFileAttributesA(filename, attrs & ~FILE_ATTRIBUTE_READONLY);
-	    ret = unlink(filename);
+	    (void)SetFileAttributesA(buffer, attrs & ~FILE_ATTRIBUTE_READONLY);
+	    ret = unlink(buffer);
 	    if (ret == -1)
-		(void)SetFileAttributesA(filename, attrs);
+		(void)SetFileAttributesA(buffer, attrs);
 	}
 	else
-	    ret = unlink(filename);
+	    ret = unlink(buffer);
     }
     return ret;
 fail:
@@ -1438,6 +1442,7 @@ win32_utime(const char *filename, struct utimbuf *times)
     FILETIME ftWrite;
     struct utimbuf TimeBuffer;
     WCHAR wbuffer[MAX_PATH+1];
+    char buffer[MAX_PATH+1];
 
     int rc;
     if (USING_WIDE()) {
@@ -1446,8 +1451,8 @@ win32_utime(const char *filename, struct utimbuf *times)
 	rc = _wutime(wbuffer, (struct _utimbuf*)times);
     }
     else {
-	filename = PerlDir_mapA(filename);
-	rc = utime(filename, times);
+	strcpy(buffer, PerlDir_mapA(filename));
+	rc = utime(buffer, times);
     }
     /* EACCES: path specifies directory or readonly file */
     if (rc == 0 || errno != EACCES /* || !IsWinNT() */)
@@ -1466,7 +1471,7 @@ win32_utime(const char *filename, struct utimbuf *times)
 			    OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
     }
     else {
-	handle = CreateFileA(filename, GENERIC_READ | GENERIC_WRITE,
+	handle = CreateFileA(buffer, GENERIC_READ | GENERIC_WRITE,
 			    FILE_SHARE_READ | FILE_SHARE_DELETE, NULL,
 			    OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
     }

@@ -2212,6 +2212,13 @@ Perl_regdump(pTHXo_ regexp* r)
     ((CPerlObj*)pPerl)->Perl_regdump(r);
 }
 
+#undef  Perl_pregexec
+I32
+Perl_pregexec(pTHXo_ regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, U32 nosave)
+{
+    return ((CPerlObj*)pPerl)->Perl_pregexec(prog, stringarg, strend, strbeg, minend, screamer, nosave);
+}
+
 #undef  Perl_pregfree
 void
 Perl_pregfree(pTHXo_ struct regexp* r)

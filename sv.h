@@ -503,9 +503,10 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 
 #define SvOK(sv)		(SvFLAGS(sv) & SVf_OK)
 #define SvOK_off(sv)		(SvFLAGS(sv) &=	~(SVf_OK|SVf_AMAGIC|	\
-						  SVf_IVisUV),		\
+						  SVf_IVisUV|SVf_UTF8),	\
 							SvOOK_off(sv))
-#define SvOK_off_exc_UV(sv)	(SvFLAGS(sv) &=	~(SVf_OK|SVf_AMAGIC),	\
+#define SvOK_off_exc_UV(sv)	(SvFLAGS(sv) &=	~(SVf_OK|SVf_AMAGIC|	\
+						  SVf_UTF8),		\
 							SvOOK_off(sv))
 
 #define SvOKp(sv)		(SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK))
@@ -547,7 +548,11 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 #define SvPOK(sv)		(SvFLAGS(sv) & SVf_POK)
 #define SvPOK_on(sv)		(SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 #define SvPOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_POK|SVp_POK))
-#define SvPOK_only(sv)		(SvFLAGS(sv) &= ~(SVf_OK|SVf_AMAGIC|SVf_IVisUV),	\
+#define SvPOK_only(sv)		(SvFLAGS(sv) &= ~(SVf_OK|SVf_AMAGIC|	\
+						  SVf_IVisUV|SVf_UTF8),	\
+				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
+#define SvPOK_only_UTF8(sv)	(SvFLAGS(sv) &= ~(SVf_OK|SVf_AMAGIC|	\
+						  SVf_IVisUV),		\
 				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 
 #define SvOOK(sv)		(SvFLAGS(sv) & SVf_OOK)

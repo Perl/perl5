@@ -1827,7 +1827,7 @@ Ap	|void	|push_scope
 p	|OP*	|ref		|OP* o|I32 type
 p	|OP*	|refkids	|OP* o|I32 type
 Ap	|void	|regdump	|regexp* r
-p	|I32	|pregexec	|regexp* prog|char* stringarg \
+Ap	|I32	|pregexec	|regexp* prog|char* stringarg \
 				|char* strend|char* strbeg|I32 minend \
 				|SV* screamer|U32 nosave
 Ap	|void	|pregfree	|struct regexp* r
