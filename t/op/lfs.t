@@ -100,10 +100,12 @@ unless ($print && $close) {
     } else {
         print "# close failed: $!\n"
     }
-    if ($! =~/File too large/) {
-	print "1..0\n# writing past 2GB failed\n";
-	explain();
+    if ($! =~/too large/i) {
+	print "1..0\n# writing past 2GB failed: process limits?\n";
+    } elsif ($! =~ /quota/i) {
+	print "1..0\n# filesystem quota limits?\n";
     }
+ ain();
     bye();
 }
 
