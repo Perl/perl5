@@ -15,6 +15,7 @@ my $Perl = which_perl();
 
 $Is_Amiga   = $^O eq 'amigaos';
 $Is_Cygwin  = $^O eq 'cygwin';
+$Is_Darwin  = $^O eq 'darwin';
 $Is_Dos     = $^O eq 'dos';
 $Is_MPE     = $^O eq 'mpeix';
 $Is_MSWin32 = $^O eq 'MSWin32';
@@ -25,6 +26,8 @@ $Is_VMS     = $^O eq 'VMS';
 $Is_DGUX    = $^O eq 'dgux';
 
 $Is_Dosish  = $Is_Dos || $Is_OS2 || $Is_MSWin32 || $Is_NetWare || $Is_Cygwin;
+
+$Is_UFS     = $Is_Darwin && (() = `df -t ufs .`) == 2;
 
 my($DEV, $INO, $MODE, $NLINK, $UID, $GID, $RDEV, $SIZE,
    $ATIME, $MTIME, $CTIME, $BLKSIZE, $BLOCKS) = (0..12);
@@ -100,10 +103,12 @@ SKIP: {
         # no ctime concept $ctime is ALWAYS == $mtime
         # expect netware to be the same ...
         skip "No ctime concept on this OS", 2
-                                     if $Is_MSWin32;
+                                     if $Is_MSWin32 || 
+                                        ($Is_Darwin && $Is_UFS);
+
         if( !ok($mtime, 'hard link mtime') ||
             !isnt($mtime, $ctime, 'hard link ctime != mtime') ) {
-            print <<DIAG;
+            print STDERR <<DIAG;
 # Check if you are on a tmpfs of some sort.  Building in /tmp sometimes
 # has this problem.  Also building on the ClearCase VOBS filesystem may
 # cause this failure.
