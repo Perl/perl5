@@ -1,5 +1,5 @@
 # machten.sh
-# This is for MachTen 4.0.2.  It might work on other versions too.
+# This is for MachTen 4.0.3.  It might work on other versions too.
 #
 # MachTen users might need a fixed tr from ftp.tenon.com.  This should
 # be described in the MachTen release notes.
@@ -13,6 +13,7 @@
 #	Martijn Koster <m.koster@webcrawler.com>
 #	Richard Yeh <rcyeh@cco.caltech.edu>
 #
+# Warn about test failure due to old Berkeley db -- Dominc Dunlop 970105
 # Do not use perl's malloc; SysV IPC OK -- Neil Cutcliffe, Tenon 961030
 # File::Find's use of link count disabled by Dominic Dunlop 960528
 # Perl's use of sigsetjmp etc. disabled by Dominic Dunlop 960521
@@ -23,8 +24,7 @@
 # know how to use it yet.
 #
 #  Updated by Dominic Dunlop <domo@tcp.ip.lu>
-#  Wed Nov 13 11:47:09 WET 1996
-
+#  Sun Jan  5 11:33:51 WET 1997
 
 # Power MachTen is a real memory system and its standard malloc
 # has been optimized for this. Using this malloc instead of Perl's
@@ -70,3 +70,4 @@ Hmm...You had some extra variables I don't know about...I'll try to keep 'em.
 Read the File::Find documentation for more information.
 
 EOM
+test -r ./broken-db.msg && . ./broken-db.msg
