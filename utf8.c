@@ -1198,7 +1198,7 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp,char *normal
 	 uv = utf8_to_uvchr(p, 0);
 
 	 if ((hv    = get_hv(special, FALSE)) &&
-	     (keysv = sv_2mortal(Perl_newSVpvf(aTHX_ "%"UVuf, uv))) &&
+	     (keysv = sv_2mortal(Perl_newSVpvf(aTHX_ "%04"UVXf, uv))) &&
 	     (he    = hv_fetch_ent(hv, keysv, FALSE, 0))) {
 	      SV *val = HeVAL(he);
 	      char *s = SvPV(val, *lenp);

@@ -759,7 +759,7 @@ EOT
 	    my ($ix, $code, $to) = @$prop;
 	    my $tostr =
 		join "", map { sprintf "\\x{%s}", $_ } split ' ', $to;
-	    print $Case qq['$ix' => "$tostr",\n];
+	    printf $Case qq['%04X' => "$tostr",\n], $ix;
 	}
 	print $Case <<EOT;
 );
@@ -811,7 +811,7 @@ EOT
         for my $code (sort { $a <=> $b } keys %Fold) {
 	    my $foldstr =
 		join "", map { sprintf "\\x{%s}", $_ } split ' ', $Fold{$code};
-	    print $Fold qq['$code' => "$foldstr",\n];
+	    printf $Fold qq['%04X' => "$foldstr",\n], $code;
 	}
 	print $Fold <<EOT;
 );
