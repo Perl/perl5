@@ -1,4 +1,7 @@
 package Thread::Queue;
+
+our $VERSION = '1.00';
+
 use Thread qw(cond_wait cond_broadcast);
 
 =head1 NAME

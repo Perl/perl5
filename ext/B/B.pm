@@ -6,6 +6,9 @@
 #      License or the Artistic License, as specified in the README file.
 #
 package B;
+
+our $VERSION = '1.00';
+
 use XSLoader ();
 require Exporter;
 @ISA = qw(Exporter);

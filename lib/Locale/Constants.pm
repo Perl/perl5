@@ -18,6 +18,8 @@ use constant LOCALE_CODE_ALPHA_2 => 1;
 use constant LOCALE_CODE_ALPHA_3 => 2;
 use constant LOCALE_CODE_NUMERIC => 3;
 
+$VERSION = '1.00';
+
 use constant LOCALE_CODE_DEFAULT => LOCALE_CODE_ALPHA_2;
 
 1;

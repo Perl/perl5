@@ -1,4 +1,7 @@
 package B::Bblock;
+
+our $VERSION = '1.00';
+
 use Exporter ();
 @ISA = "Exporter";
 @EXPORT_OK = qw(find_leaders);

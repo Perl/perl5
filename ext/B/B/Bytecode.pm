@@ -7,6 +7,8 @@
 #
 package B::Bytecode;
 
+our $VERSION = '1.00';
+
 use strict;
 use Carp;
 use B qw(main_cv main_root main_start comppadlist

@@ -1,5 +1,7 @@
 package ExtUtils::MM_NW5;
 
+our $VERSION = '1.00';
+
 =head1 NAME
 
 ExtUtils::MM_NW5 - methods to override UN*X behaviour in ExtUtils::MakeMaker

@@ -1,4 +1,7 @@
 package FindExt;
+
+our $VERSION = '1.00';
+
 use strict;
 use File::Find;
 use File::Basename;

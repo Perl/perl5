@@ -1,6 +1,8 @@
 package Thread::Signal;
 use Thread qw(async);
 
+our $VERSION = '1.00';
+
 =head1 NAME
 
 Thread::Signal - Start a thread which runs signal handlers reliably

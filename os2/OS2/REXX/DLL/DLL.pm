@@ -1,5 +1,7 @@
 package OS2::DLL;
 
+our $VERSION = '1.00';
+
 use Carp;
 use DynaLoader;
 
