@@ -82,7 +82,7 @@ typedef PerlIOl *PerlIO;
 
 extern void	PerlIO_define_layer	(PerlIO_funcs *tab);
 extern SV *	PerlIO_find_layer	(const char *name, STRLEN len);
-extern PerlIO *	PerlIO_push		(PerlIO *f,PerlIO_funcs *tab,const char *mode);
+extern PerlIO *	PerlIO_push		(PerlIO *f,PerlIO_funcs *tab,const char *mode,const char *arg,STRLEN len);
 extern void	PerlIO_pop		(PerlIO *f);
 
 #endif /* PerlIO */
