@@ -963,6 +963,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (GvSHARED(sv))       sv_catpv(d, "SHARED,");
 	if (GvASSUMECV(sv))	sv_catpv(d, "ASSUMECV,");
 	if (GvIN_PAD(sv))       sv_catpv(d, "IN_PAD,");
+	if (flags & SVpad_OUR)	sv_catpv(d, "OUR,");
 	if (GvIMPORTED(sv)) {
 	    sv_catpv(d, "IMPORT");
 	    if (GvIMPORTED(sv) == GVf_IMPORTED)
@@ -976,7 +977,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		sv_catpv(d, " ),");
 	    }
 	}
-	/* FALL THROGH */
+	/* FALL THROUGH */
     default:
 	if (SvEVALED(sv))	sv_catpv(d, "EVALED,");
 	if (SvIsUV(sv))		sv_catpv(d, "IsUV,");
@@ -985,6 +986,10 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     case SVt_PVBM:
 	if (SvTAIL(sv))		sv_catpv(d, "TAIL,");
 	if (SvVALID(sv))	sv_catpv(d, "VALID,");
+	break;
+    case SVt_PVMG:
+	if (flags & SVpad_TYPED)
+				sv_catpv(d, "TYPED,");
 	break;
     }
 
