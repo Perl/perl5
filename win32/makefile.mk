@@ -840,8 +840,8 @@ CFG_VARS	=					\
 		usethreads=$(USE_5005THREADS)	~	\
 		usemultiplicity=$(USE_MULTI)	~	\
 		useperlio=$(USE_PERLIO)		~	\
-		uselargefiles=$(USE_LARGE_FILES) ~	\
-		LINK_FLAGS=$(LINK_FLAGS:s/\/\\/) ~	\
+		uselargefiles=$(USE_LARGE_FILES)	~	\
+		LINK_FLAGS=$(LINK_FLAGS:s/\/\\/)	~	\
 		optimize=$(OPTIMIZE)
 
 #
