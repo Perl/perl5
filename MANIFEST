@@ -255,9 +255,8 @@ hints/i386.sh		Hints for named architecture
 hints/irix_4.sh		Hints for named architecture
 hints/irix_5.sh		Hints for named architecture
 hints/irix_6.sh		Hints for named architecture
-hints/irix_6_2.sh	Hints for named architecture
-hints/irix_6_3.sh	Hints for named architecture
-hints/irix_6_4.sh	Hints for named architecture
+hints/irix_6_0.sh	Hints for named architecture
+hints/irix_6_1.sh	Hints for named architecture
 hints/isc.sh		Hints for named architecture
 hints/isc_2.sh		Hints for named architecture
 hints/linux.sh		Hints for named architecture
