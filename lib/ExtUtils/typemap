@@ -15,7 +15,7 @@ caddr_t			T_PV
 wchar_t *		T_PV
 wchar_t			T_IV
 bool_t			T_IV
-size_t			T_IV
+size_t			T_UV
 ssize_t			T_IV
 time_t			T_NV
 unsigned long *		T_OPAQUEPTR
@@ -34,7 +34,7 @@ NV                      T_NV
 I32			T_IV
 I16			T_IV
 I8			T_IV
-STRLEN			T_IV
+STRLEN			T_UV
 U32			T_U_LONG
 U16			T_U_SHORT
 U8			T_UV
