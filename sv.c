@@ -1195,9 +1195,11 @@ SV *sv;
     char tmpbuf[64];
     char *d = tmpbuf;
     char *s;
-    int i;
+    char *limit = tmpbuf + sizeof(tmpbuf) - 8;
+                  /* each *s can expand to 4 chars + "...\0",
+                     i.e. need room for 8 chars */
 
-    for (s = SvPVX(sv), i = 50; *s && i; s++,i--) {
+    for (s = SvPVX(sv); *s && d < limit; s++) {
 	int ch = *s & 0xFF;
 	if (ch & 128 && !isPRINT_LC(ch)) {
 	    *d++ = 'M';
