@@ -283,7 +283,7 @@ ac7 = $(ARCHCORE)pad.h $(ARCHCORE)patchlevel.h $(ARCHCORE)perl.h
 ac8 = $(ARCHCORE)perlapi.h $(ARCHCORE)perlio.h $(ARCHCORE)perlsdio.h
 ac9 = $(ARCHCORE)perlsfio.h $(ARCHCORE)perlvars.h $(ARCHCORE)perly.h $(ARCHCORE)pp.h
 .ifdef THREADED
-ac10 = $(ARCHCORE)pp_proto.h $(ARCHCORE)proto.h $(ARCHCORE)reentr.h $(ARCHCORE)regcomp.h
+ac10 = $(ARCHCORE)pp_proto.h $(ARCHCORE)proto.h $(ARCHCORE)reentr.h $(ARCHCORE)reentr.inc $(ARCHCORE)regcomp.h
 .else
 ac10 = $(ARCHCORE)pp_proto.h $(ARCHCORE)proto.h $(ARCHCORE)regcomp.h
 .endif
@@ -1367,6 +1367,9 @@ $(ARCHCORE)proto.h : proto.h
 	Copy/NoConfirm/Log $(MMS$SOURCE) $(ARCHCORE)
 .ifdef THREADED
 $(ARCHCORE)reentr.h : reentr.h
+	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
+	Copy/NoConfirm/Log $(MMS$SOURCE) $(ARCHCORE)
+$(ARCHCORE)reentr.inc : reentr.inc
 	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/NoConfirm/Log $(MMS$SOURCE) $(ARCHCORE)
 .endif
