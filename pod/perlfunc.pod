@@ -3038,7 +3038,7 @@ This is the internal function implementing the C<qx/EXPR/>
 operator, but you can use it directly.  The C<qx/EXPR/>
 operator is discussed in more detail in L<perlop/"I/O Operators">.
 
-=item recv SOCKET,SCALAR,LEN,FLAGS
+=item recv SOCKET,SCALAR,LENGTH,FLAGS
 
 Receives a message on a socket.  Attempts to receive LENGTH bytes of
 data into variable SCALAR from the specified SOCKET filehandle.

@@ -2421,7 +2421,7 @@ scan_bin(char *start, I32 len, I32 *retlen)
     if (len && (*s >= '2' || *s <= '9')) {
       dTHR;
       if (ckWARN(WARN_UNSAFE))
-          warner(WARN_UNSAFE, "Illegal binary digit ignored");
+          warner(WARN_UNSAFE, "Illegal binary digit '%c' ignored", *s);
     }
     *retlen = s - start;
     return retval;
@@ -2445,7 +2445,7 @@ scan_oct(char *start, I32 len, I32 *retlen)
     if (len && (*s == '8' || *s == '9')) {
 	dTHR;
 	if (ckWARN(WARN_OCTAL))
-	    warner(WARN_OCTAL, "Illegal octal digit ignored");
+	    warner(WARN_OCTAL, "Illegal octal digit '%c' ignored", *s);
     }
     *retlen = s - start;
     return retval;
@@ -2469,7 +2469,7 @@ scan_hex(char *start, I32 len, I32 *retlen)
 		dTHR;
 		--s;
 		if (ckWARN(WARN_UNSAFE))
-		    warner(WARN_UNSAFE,"Illegal hex digit ignored");
+		    warner(WARN_UNSAFE,"Illegal hex digit '%c' ignored", *s);
 		break;
 	    }
 	}

@@ -6058,17 +6058,17 @@ scan_num(char *start)
 		/* 8 and 9 are not octal */
 		case '8': case '9':
 		    if (shift == 3)
-			yyerror("Illegal octal digit");
+			yyerror(form("Illegal octal digit '%c'", *s));
 		    else
 			if (shift == 1)
-			    yyerror("Illegal binary digit");
+			    yyerror(form("Illegal binary digit '%c'", *s));
 		    /* FALL THROUGH */
 
 	        /* octal digits */
 		case '2': case '3': case '4':
 		case '5': case '6': case '7':
 		    if (shift == 1)
-			yyerror("Illegal binary digit");
+			yyerror(form("Illegal binary digit '%c'", *s));
 		    /* FALL THROUGH */
 
 		case '0': case '1':

@@ -14,16 +14,16 @@ __END__
 use warning 'octal' ;
 my $a = oct "029" ;
 EXPECT
-Illegal octal digit ignored at - line 3.
+Illegal octal digit '9' ignored at - line 3.
 ########
 # util.c
 use warning 'unsafe' ;
 *a =  hex "0xv9" ;
 EXPECT
-Illegal hex digit ignored at - line 3.
+Illegal hex digit 'v' ignored at - line 3.
 ########
 # util.c
 use warning 'unsafe' ;
 *a =  oct "0b9" ;
 EXPECT
-Illegal binary digit ignored at - line 3.
+Illegal binary digit '9' ignored at - line 3.
