@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..25\n";
+print "1..30\n";
 
 print join(':',1..5) eq '1:2:3:4:5' ? "ok 1\n" : "not ok 1\n";
 
@@ -89,3 +89,19 @@ print join(":","".."B") eq '' ? "ok 22\n" : "not ok 22\n";
 print join(":",undef.."B") eq '' ? "ok 23\n" : "not ok 23\n";
 print join(":","B".."") eq '' ? "ok 24\n" : "not ok 24\n";
 print join(":","B"..undef) eq '' ? "ok 25\n" : "not ok 25\n";
+
+# undef..undef used to segfault and should be 0..0
+print join(":",undef..undef) eq '0' ? "ok 26\n" : "not ok 26\n";
+
+# also test undef in foreach loops
+@foo=(); push @foo, $_ for undef..2;
+print join(":",@foo) eq '0:1:2' ? "ok 27\n" : "not ok 27\n";
+
+@foo=(); push @foo, $_ for -2..undef;
+print join(":",@foo) eq '-2:-1:0' ? "ok 28\n" : "not ok 28\n";
+
+@foo=(); push @foo, $_ for undef.."B";
+print join(":",@foo) eq '' ? "ok 29\n" : "not ok 29\n";
+
+@foo=(); push @foo, $_ for "B"..undef;
+print join(":",@foo) eq '' ? "ok 30\n" : "not ok 30\n";
