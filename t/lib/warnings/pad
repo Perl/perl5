@@ -159,6 +159,15 @@ f2();
 EXPECT
 Variable "$x" is not available at (eval 1) line 2.
 ########
+use warnings 'closure' ;
+for my $x (1,2,3) {
+    sub f { eval '$x' }
+    f();
+}
+f();
+EXPECT
+Variable "$x" is not available at (eval 4) line 2.
+########
 # pad.c
 no warnings 'closure' ;
 sub x {

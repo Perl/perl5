@@ -1731,6 +1731,11 @@ PP(pp_enteriter)
     SAVETMPS;
 
     if (PL_op->op_targ) {
+	if (PL_op->op_private & OPpLVAL_INTRO) { /* for my $x (...) */
+	    SvPADSTALE_off(PAD_SVl(PL_op->op_targ));
+	    SAVESETSVFLAGS(PAD_SVl(PL_op->op_targ),
+		    SVs_PADSTALE, SVs_PADSTALE);
+	}
 #ifndef USE_ITHREADS
 	svp = &PAD_SVl(PL_op->op_targ);		/* "my" variable */
 	SAVESPTR(*svp);

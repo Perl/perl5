@@ -281,6 +281,18 @@ Perl_save_shared_pvref(pTHX_ char **str)
     SSPUSHINT(SAVEt_SHARED_PVREF);
 }
 
+/* set the SvFLAGS specified by mask to the values in val */
+
+void
+Perl_save_set_svflags(pTHX_ SV* sv, U32 mask, U32 val)
+{
+    SSCHECK(4);
+    SSPUSHPTR(sv);
+    SSPUSHINT(mask);
+    SSPUSHINT(val);
+    SSPUSHINT(SAVEt_SET_SVFLAGS);
+}
+
 void
 Perl_save_gp(pTHX_ GV *gv, I32 empty)
 {
@@ -1034,6 +1046,15 @@ Perl_leave_scope(pTHX_ I32 base)
 		ptr = SSPOPPTR;
 		if (ptr)
 		    AvARRAY((PAD*)ptr)[off] = (SV*)SSPOPPTR;
+	    }
+	    break;
+	case SAVEt_SET_SVFLAGS:
+	    {
+		U32 val  = (U32)SSPOPINT;
+		U32 mask = (U32)SSPOPINT;
+		sv = (SV*)SSPOPPTR;
+		SvFLAGS(sv) &= ~mask;
+		SvFLAGS(sv) |= val;
 	    }
 	    break;
 	default:

@@ -1391,6 +1391,7 @@ p	|void	|free_tied_hv_pool
 #if defined(DEBUGGING)
 p	|int	|get_debug_opts	|char **s
 #endif
+Ap	|void	|save_set_svflags|SV* sv|U32 mask|U32 val
 
 
 

@@ -3751,7 +3751,7 @@ Perl_newFOROP(pTHX_ I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *blo
 			       append_elem(OP_LIST, expr, scalar(sv))));
     assert(!loop->op_next);
     /* for my  $x () sets OPpLVAL_INTRO;
-     * for our $x () sets OPpOUR_INTRO; both only used by Deparse.pm */
+     * for our $x () sets OPpOUR_INTRO */
     loop->op_private = (U8)iterpflags;
 #ifdef PL_OP_SLAB_ALLOC
     {

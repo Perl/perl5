@@ -660,3 +660,4 @@ Perl_PerlIO_get_cnt
 Perl_PerlIO_stdin
 Perl_PerlIO_stdout
 Perl_PerlIO_stderr
+Perl_save_set_svflags

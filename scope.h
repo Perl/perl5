@@ -47,6 +47,7 @@
 #define SAVEt_MORTALIZESV	36
 #define SAVEt_SHARED_PVREF	37
 #define SAVEt_BOOL		38
+#define SAVEt_SET_SVFLAGS	39
 
 #ifndef SCOPE_SAVES_SIGNAL_MASK
 #define SCOPE_SAVES_SIGNAL_MASK 0
@@ -132,6 +133,7 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 #define SAVEGENERICSV(s)	save_generic_svref((SV**)&(s))
 #define SAVEGENERICPV(s)	save_generic_pvref((char**)&(s))
 #define SAVESHAREDPV(s)		save_shared_pvref((char**)&(s))
+#define SAVESETSVFLAGS(sv,mask,val)	save_set_svflags(sv,mask,val)
 #define SAVEDELETE(h,k,l) \
 	  save_delete(SOFT_CAST(HV*)(h), SOFT_CAST(char*)(k), (I32)(l))
 #define SAVEDESTRUCTOR(f,p) \
