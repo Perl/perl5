@@ -56,13 +56,13 @@ for most things.  Some things to watch out for are:
 this port does support dynamic loading but it's not had much testing
 
 =item *
-	
+
 Don't turn on the compiler optimization flag "-O".  There's
 a bug in the compiler (APAR PQ18812) that generates some bad code
 the optimizer is on.
 
 =item *
-	
+
 As VM/ESA doesn't fully support the fork() API programs relying on
 this call will not work. I've replaced fork()/exec() with spawn()
 and the standalone exec() with spawn(). This has a side effect when
@@ -90,7 +90,7 @@ your results may differ:
 [the list of failures being compiled]
 
 =head2 Usage Hints
-	
+
 When using perl on VM/ESA please keep in mind that the EBCDIC and ASCII
 character sets are different.  Perl builtin functions that may behave
 differently under EBCDIC are mentioned in the perlport.pod document.

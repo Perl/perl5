@@ -6,7 +6,6 @@ designed to be readable as is.
 
 README.macos - Perl under Mac OS (Classic)
 
-
 =head1 SYNOPSIS
 
 This document briefly describes perl under Mac OS (Classic).
@@ -15,7 +14,6 @@ here (unless you are in the Classic environment under Mac OS X).
 
 When we say "Mac OS" below, we mean pre-Mac OS X, which includes
 Mac OS 7, 8, and 9.
-
 
 =head1 DESCRIPTION
 

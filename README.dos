@@ -227,7 +227,7 @@ goes under C<($DJDIR)/lib/perl5/pod>.
 =head1 BUILDING AND INSTALLING MODULES
 
 
-=head2 Prerequisites
+=head2 Building Prerequisites
 
 For building and installing non-XS modules, all you need is a working
 perl under DJGPP.  Non-XS modules do not require re-linking the perl
