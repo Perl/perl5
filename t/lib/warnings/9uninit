@@ -1156,9 +1156,9 @@ our ($g1);
 eval { my $x; seek    $x,$m1, $g1 };
 eval { my $x; sysseek $x,$m1, $g1 };
 eval { syswrite $m1, $g1 };
-eval { syswrite STDERR, $m1 };
-eval { syswrite STDERR, $m1, $g1 };
-eval { syswrite STDERR, $m1, $g1, $m2 };
+# eval { syswrite STDERR, $m1 };        # XXX under utf8, can give
+# eval { syswrite STDERR, $m1, $g1 };   # XXX different warnings
+# eval { syswrite STDERR, $m1, $g1, $m2 };
 eval { my $x; flock $x, $g1 };
 eval { my $x; socket $x, $m1, $g1, $m2 };
 eval { my ($x,$y); socketpair $x, $y, $m1, $g1, $m2 };
@@ -1171,13 +1171,6 @@ Use of uninitialized value $g1 in sysseek at - line 6.
 Use of uninitialized value $m1 in sysseek at - line 6.
 Use of uninitialized value $m1 in ref-to-glob cast at - line 7.
 Use of uninitialized value $g1 in syswrite at - line 7.
-Use of uninitialized value $m1 in syswrite at - line 8.
-Use of uninitialized value $m1 in syswrite at - line 8.
-Use of uninitialized value $g1 in syswrite at - line 9.
-Use of uninitialized value $m1 in syswrite at - line 9.
-Use of uninitialized value $g1 in syswrite at - line 10.
-Use of uninitialized value $m1 in syswrite at - line 10.
-Use of uninitialized value $m2 in syswrite at - line 10.
 Use of uninitialized value $x in ref-to-glob cast at - line 11.
 Use of uninitialized value $g1 in flock at - line 11.
 Use of uninitialized value $m2 in socket at - line 12.
@@ -1219,7 +1212,7 @@ $v = -p $m1;
 $v = -l $m1;
 $v = -u $m1;
 $v = -g $m1;
-$v = -k $m1;
+# $v = -k $m1; # XXX this is a no-op under win32
 $v = -t $m1;
 $v = -T $m1;
 $v = -B $m1;
@@ -1252,7 +1245,6 @@ Use of uninitialized value $m1 in -l at - line 30.
 Use of uninitialized value $m1 in -l at - line 30.
 Use of uninitialized value $m1 in -u at - line 31.
 Use of uninitialized value $m1 in -g at - line 32.
-Use of uninitialized value $m1 in -k at - line 33.
 Use of uninitialized value $m1 in -t at - line 34.
 Use of uninitialized value $m1 in -T at - line 35.
 Use of uninitialized value $m1 in -B at - line 36.
