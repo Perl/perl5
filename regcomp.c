@@ -4983,8 +4983,13 @@ Perl_pregfree(pTHX_ struct regexp *r)
 		    (SvTYPE(new_comppad) == SVt_PVAV) ?
 		    		new_comppad : Null(PAD *)
 		);
+		OP_REFCNT_LOCK;
 		if (!OpREFCNT_dec((OP_4tree*)r->data->data[n])) {
+		    OP_REFCNT_UNLOCK;
                     op_free((OP_4tree*)r->data->data[n]);
+		}
+		else {
+		    OP_REFCNT_UNLOCK;
 		}
 
 		PAD_RESTORE_LOCAL(old_comppad);

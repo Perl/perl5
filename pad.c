@@ -1410,7 +1410,9 @@ Perl_cv_clone(pTHX_ CV *proto)
 #endif
     CvGV(cv)		= CvGV(proto);
     CvSTASH(cv)		= CvSTASH(proto);
+    OP_REFCNT_LOCK;
     CvROOT(cv)		= OpREFCNT_inc(CvROOT(proto));
+    OP_REFCNT_UNLOCK;
     CvSTART(cv)		= CvSTART(proto);
     CvOUTSIDE(cv)	= (CV*)SvREFCNT_inc(outside);
     CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(proto);

@@ -10244,7 +10244,9 @@ Perl_re_dup(pTHX_ REGEXP *r, CLONE_PARAMS *param)
 	    case 'o':
 		/* Compiled op trees are readonly, and can thus be
 		   shared without duplication. */
+		OP_REFCNT_LOCK;
 		d->data[i] = (void*)OpREFCNT_inc((OP*)r->data->data[i]);
+		OP_REFCNT_UNLOCK;
 		break;
 	    case 'n':
 		d->data[i] = r->data->data[i];
@@ -10955,7 +10957,9 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	CvSTASH(dstr)	= hv_dup(CvSTASH(sstr), param); /* NOTE: not refcounted */
 	CvSTART(dstr)	= CvSTART(sstr);
+	OP_REFCNT_LOCK;
 	CvROOT(dstr)	= OpREFCNT_inc(CvROOT(sstr));
+	OP_REFCNT_UNLOCK;
 	CvXSUB(dstr)	= CvXSUB(sstr);
 	CvXSUBANY(dstr)	= CvXSUBANY(sstr);
 	if (CvCONST(sstr)) {
