@@ -1014,14 +1014,6 @@
 #define BIN "c:\\perl\\5.7.3\\bin\\MSWin32-x86-multi-thread"	/**/
 #define BIN_EXP "c:\\perl\\5.7.3\\bin\\MSWin32-x86-multi-thread"	/**/
 
-/* PERL_BINCOMPAT_5005:
- *	This symbol, if defined, indicates that this version of Perl should be
- *	binary-compatible with Perl 5.005.  This is impossible for builds
- *	that use features like threads and multiplicity it is always undef
- *	for those versions.
- */
-/*#define PERL_BINCOMPAT_5005			/**/
-
 /* BYTEORDER:
  *	This symbol holds the hexadecimal constant defined in byteorder,
  *	i.e. 0x1234 or 0x4321, etc...

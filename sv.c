@@ -2875,16 +2875,6 @@ uiv_2buf(char *buf, IV iv, UV uv, int is_uv, char **peob)
     return ptr;
 }
 
-/* sv_2pv() is now a macro using Perl_sv_2pv_flags();
- * this function provided for binary compatibility only
- */
-
-char *
-Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
-{
-    return sv_2pv_flags(sv, lp, SV_GMAGIC);
-}
-
 /*
 =for apidoc sv_2pv_flags
 
@@ -3354,21 +3344,6 @@ if all the bytes have hibit clear.
 This is not as a general purpose byte encoding to Unicode interface:
 use the Encode extension for that.
 
-=cut
-*/
-
-/* sv_utf8_upgrade() is now a macro using sv_utf8_upgrade_flags();
- * this function provided for binary compatibility only
- */
-
-
-STRLEN
-Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
-{
-    return sv_utf8_upgrade_flags(sv, SV_GMAGIC);
-}
-
-/*
 =for apidoc sv_utf8_upgrade_flags
 
 Convert the PV of an SV to its UTF8-encoded form.
@@ -3552,21 +3527,6 @@ You probably want to use one of the assortment of wrappers, such as
 C<SvSetSV>, C<SvSetSV_nosteal>, C<SvSetMagicSV> and
 C<SvSetMagicSV_nosteal>.
 
-
-=cut
-*/
-
-/* sv_setsv() is now a macro using Perl_sv_setsv_flags();
- * this function provided for binary compatibility only
- */
-
-void
-Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
-{
-    sv_setsv_flags(dstr, sstr, SV_GMAGIC);
-}
-
-/*
 =for apidoc sv_setsv_flags
 
 Copies the contents of the source SV C<ssv> into the destination SV
@@ -4286,20 +4246,6 @@ C<len> indicates number of bytes to copy.  If the SV has the UTF8
 status set, then the bytes appended should be valid UTF8.
 Handles 'get' magic, but not 'set' magic.  See C<sv_catpvn_mg>.
 
-=cut
-*/
-
-/* sv_catpvn() is now a macro using Perl_sv_catpvn_flags();
- * this function provided for binary compatibility only
- */
-
-void
-Perl_sv_catpvn(pTHX_ SV *dsv, const char* sstr, STRLEN slen)
-{
-    sv_catpvn_flags(dsv, sstr, slen, SV_GMAGIC);
-}
-
-/*
 =for apidoc sv_catpvn_flags
 
 Concatenates the string onto the end of the string which is in the SV.  The
@@ -4351,19 +4297,6 @@ Concatenates the string from SV C<ssv> onto the end of the string in
 SV C<dsv>.  Modifies C<dsv> but not C<ssv>.  Handles 'get' magic, but
 not 'set' magic.  See C<sv_catsv_mg>.
 
-=cut */
-
-/* sv_catsv() is now a macro using Perl_sv_catsv_flags();
- * this function provided for binary compatibility only
- */
-
-void
-Perl_sv_catsv(pTHX_ SV *dstr, register SV *sstr)
-{
-    sv_catsv_flags(dstr, sstr, SV_GMAGIC);
-}
-
-/*
 =for apidoc sv_catsv_flags
 
 Concatenates the string from SV C<ssv> onto the end of the string in
@@ -6893,26 +6826,6 @@ Perl_sv_nv(pTHX_ register SV *sv)
 
 Use the C<SvPV_nolen> macro instead
 
-=cut
-*/
-
-/* sv_pv() is now a macro using SvPV_nolen();
- * this function provided for binary compatibility only
- */
-
-
-char *
-Perl_sv_pv(pTHX_ SV *sv)
-{
-    STRLEN n_a;
-
-    if (SvPOK(sv))
-	return SvPVX(sv);
-
-    return sv_2pv(sv, &n_a);
-}
-
-/*
 =for apidoc sv_pvn
 
 A private implementation of the C<SvPV> macro for compilers which can't
@@ -6949,20 +6862,6 @@ Get a sensible string out of the SV somehow.
 A private implementation of the C<SvPV_force> macro for compilers which
 can't cope with complex macro expressions. Always use the macro instead.
 
-=cut
-*/
-
-/* sv_pvn_force() is now a macro using Perl_sv_pvn_force_flags();
- * this function provided for binary compatibility only
- */
-
-char *
-Perl_sv_pvn_force(pTHX_ SV *sv, STRLEN *lp)
-{
-    return sv_pvn_force_flags(sv, lp, SV_GMAGIC);
-}
-
-/*
 =for apidoc sv_pvn_force_flags
 
 Get a sensible string out of the SV somehow.
@@ -7019,22 +6918,6 @@ Perl_sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
 
 Use C<SvPVbyte_nolen> instead.
 
-=cut
-*/
-
-/* sv_pvbyte () is now a macro using Perl_sv_2pv_flags();
- * this function provided for binary compatibility only
- */
-
-
-char *
-Perl_sv_pvbyte(pTHX_ SV *sv)
-{
-    sv_utf8_downgrade(sv,0);
-    return sv_pv(sv);
-}
-
-/*
 =for apidoc sv_pvbyten
 
 A private implementation of the C<SvPVbyte> macro for compilers
@@ -7073,21 +6956,6 @@ Perl_sv_pvbyten_force(pTHX_ SV *sv, STRLEN *lp)
 
 Use the C<SvPVutf8_nolen> macro instead
 
-=cut
-*/
-/* sv_pvutf8 () is now a macro using Perl_sv_2pv_flags();
- * this function provided for binary compatibility only
- */
-
-
-char *
-Perl_sv_pvutf8(pTHX_ SV *sv)
-{
-    sv_utf8_upgrade(sv);
-    return sv_pv(sv);
-}
-
-/*
 =for apidoc sv_pvutf8n
 
 A private implementation of the C<SvPVutf8> macro for compilers
@@ -7550,44 +7418,6 @@ Perl_sv_tainted(pTHX_ SV *sv)
 	    return TRUE;
     }
     return FALSE;
-}
-
-/*
-=for apidoc sv_setpviv
-
-Copies an integer into the given SV, also updating its string value.
-Does not handle 'set' magic.  See C<sv_setpviv_mg>.
-
-=cut
-*/
-
-void
-Perl_sv_setpviv(pTHX_ SV *sv, IV iv)
-{
-    char buf[TYPE_CHARS(UV)];
-    char *ebuf;
-    char *ptr = uiv_2buf(buf, iv, 0, 0, &ebuf);
-
-    sv_setpvn(sv, ptr, ebuf - ptr);
-}
-
-/*
-=for apidoc sv_setpviv_mg
-
-Like C<sv_setpviv>, but also handles 'set' magic.
-
-=cut
-*/
-
-void
-Perl_sv_setpviv_mg(pTHX_ SV *sv, IV iv)
-{
-    char buf[TYPE_CHARS(UV)];
-    char *ebuf;
-    char *ptr = uiv_2buf(buf, iv, 0, 0, &ebuf);
-
-    sv_setpvn(sv, ptr, ebuf - ptr);
-    SvSETMAGIC(sv);
 }
 
 #if defined(PERL_IMPLICIT_CONTEXT)

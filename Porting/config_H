@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Tue Apr 23 06:32:48 EET DST 2002
+ * Configuration time: Wed May  1 06:32:57 EET DST 2002
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1017,14 +1017,6 @@
  */
 #define BIN "/opt/perl/bin"	/**/
 #define BIN_EXP "/opt/perl/bin"	/**/
-
-/* PERL_BINCOMPAT_5005:
- *	This symbol, if defined, indicates that this version of Perl should be
- *	binary-compatible with Perl 5.005.  This is impossible for builds
- *	that use features like threads and multiplicity it is always 
- *	for those versions.
- */
-#define PERL_BINCOMPAT_5005			/**/
 
 /* BYTEORDER:
  *	This symbol holds the hexadecimal constant defined in byteorder,
@@ -3584,8 +3576,8 @@
  *	See INSTALL for how this works.
  *	The versioned site_perl directory was introduced in 5.005,
  *	so that is the lowest possible value.
- *	Since this can depend on compile time options (such as
- *	bincompat) it is set by Configure.  Other non-default sources
+ *	Since this can depend on compile time options
+ *	it is set by Configure.  Other non-default sources
  *	of potential incompatibility, such as multiplicity, threads,
  *	debugging, 64bits, sfio, etc., are not checked for currently,
  *	though in principle we could go snooping around in old
@@ -3606,7 +3598,7 @@
  *	(presumably) be similar.
  *	See the INSTALL file for how this works.
  */
-#define PERL_XS_APIVERSION "5.005"
+#define PERL_XS_APIVERSION "5.7.3"
 #define PERL_PM_APIVERSION "5.005"
 
 /* HAS_CRYPT:

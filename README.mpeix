@@ -42,9 +42,6 @@ mod_perl, you MUST download and install this version of Perl/iX!
 
 =item *
 
-bincompat5005="undef": sorry, but you will have to recompile any
-binary 5.005 extensions that you may be using (if any; there is no
-5.005 code in what you download from bixby.org)
 uselargefiles="undef": not available in MPE for POSIX files yet.
 
 =item *

@@ -297,6 +297,8 @@ Sort an array. Here is an example:
 
     sortsv(AvARRAY(av), av_len(av)+1, Perl_sv_cmp_locale);
 
+See lib/sort.pm for details about controlling the sorting algorithm.
+
 	void	sortsv(SV ** array, size_t num_elts, SVCOMPARE_t cmp)
 
 =for hackers
@@ -1098,6 +1100,7 @@ NOTE: Before version 5.004_65, C<hv_iterinit> used to return the number of
 hash buckets that happen to be in use.  If you still need that esoteric
 value, you can get it through the macro C<HvFILL(tb)>.
 
+
 	I32	hv_iterinit(HV* tb)
 
 =for hackers
@@ -1128,6 +1131,14 @@ Found in file hv.c
 
 Returns entries from a hash iterator.  See C<hv_iterinit>.
 
+You may call C<hv_delete> or C<hv_delete_ent> on the hash entry that the
+iterator currently points to, without losing your place or invalidating your
+iterator.  Note that in this case the current entry is deleted from the hash
+with your iterator holding the last reference to it.  Your iterator is flagged
+to free the entry on the next call to C<hv_iternext>, so you must not discard
+your iterator immediately else the entry will leak - call C<hv_iternext> to
+trigger the resource deallocation.
+
 	HE*	hv_iternext(HV* tb)
 
 =for hackers
@@ -1139,6 +1150,26 @@ Performs an C<hv_iternext>, C<hv_iterkey>, and C<hv_iterval> in one
 operation.
 
 	SV*	hv_iternextsv(HV* hv, char** key, I32* retlen)
+
+=for hackers
+Found in file hv.c
+
+=item hv_iternext_flags
+
+Returns entries from a hash iterator.  See C<hv_iterinit> and C<hv_iternext>.
+The C<flags> value will normally be zero; if HV_ITERNEXT_WANTPLACEHOLDERS is
+set the placeholders keys (for restricted hashes) will be returned in addition
+to normal keys. By default placeholders are automatically skipped over.
+Currently a placeholder is implemented with a value that is literally
+<&Perl_sv_undef> (a regular C<undef> value is a normal read-write SV for which
+C<!SvOK> is false). Note that the implementation of placeholders and
+restricted hashes may change, and the implementation currently is
+insufficiently abstracted for any change to be tidy.
+
+NOTE: this function is experimental and may change or be
+removed without notice.
+
+	HE*	hv_iternext_flags(HV* tb, I32 flags)
 
 =for hackers
 Found in file hv.c
@@ -1486,30 +1517,34 @@ Found in file handy.h
 
 =item savepv
 
-Copy a string to a safe spot.  This does not use an SV.
+Perl's version of C<strdup()>. Returns a pointer to a newly allocated
+string which is a duplicate of C<pv>. The size of the string is
+determined by C<strlen()>. The memory allocated for the new string can
+be freed with the C<Safefree()> function.
 
-	char*	savepv(const char* sv)
+	char*	savepv(const char* pv)
 
 =for hackers
 Found in file util.c
 
 =item savepvn
 
-Copy a string to a safe spot.  The C<len> indicates number of bytes to
-copy. If pointer is NULL allocate space for a string of size specified.
-This does not use an SV.
+Perl's version of what C<strndup()> would be if it existed. Returns a
+pointer to a newly allocated string which is a duplicate of the first
+C<len> bytes from C<pv>. The memory allocated for the new string can be
+freed with the C<Safefree()> function.
 
-	char*	savepvn(const char* sv, I32 len)
+	char*	savepvn(const char* pv, I32 len)
 
 =for hackers
 Found in file util.c
 
 =item savesharedpv
 
-Copy a string to a safe spot in memory shared between threads.
-This does not use an SV.
+A version of C<savepv()> which allocates the duplicate string in memory
+which is shared between threads.
 
-	char*	savesharedpv(const char* sv)
+	char*	savesharedpv(const char* pv)
 
 =for hackers
 Found in file util.c
@@ -4067,25 +4102,6 @@ Like C<sv_setpvf>, but also handles 'set' magic.
 =for hackers
 Found in file sv.c
 
-=item sv_setpviv
-
-Copies an integer into the given SV, also updating its string value.
-Does not handle 'set' magic.  See C<sv_setpviv_mg>.
-
-	void	sv_setpviv(SV* sv, IV num)
-
-=for hackers
-Found in file sv.c
-
-=item sv_setpviv_mg
-
-Like C<sv_setpviv>, but also handles 'set' magic.
-
-	void	sv_setpviv_mg(SV *sv, IV iv)
-
-=for hackers
-Found in file sv.c
-
 =item sv_setpvn
 
 Copies a string into an SV.  The C<len> parameter indicates the number of
@@ -4199,7 +4215,6 @@ content of the destination.
 You probably want to use one of the assortment of wrappers, such as
 C<SvSetSV>, C<SvSetSV_nosteal>, C<SvSetMagicSV> and
 C<SvSetMagicSV_nosteal>.
-
 
 	void	sv_setsv(SV* dsv, SV* ssv)
 
@@ -4544,9 +4559,9 @@ Found in file utf8.c
 =item is_utf8_char
 
 Tests if some arbitrary number of bytes begins in a valid UTF-8
-character.  Note that an INVARIANT (i.e. ASCII) character is a valid UTF-8 character.
-The actual number of bytes in the UTF-8 character will be returned if
-it is valid, otherwise 0.
+character.  Note that an INVARIANT (i.e. ASCII) character is a valid
+UTF-8 character.  The actual number of bytes in the UTF-8 character
+will be returned if it is valid, otherwise 0.
 
 	STRLEN	is_utf8_char(U8 *p)
 
