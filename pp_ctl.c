@@ -3160,7 +3160,7 @@ trylocal: {
 		    }
 
 		    Perl_sv_setpvf(aTHX_ namesv, "/loader/0x%"UVxf"/%s",
-				   PTR2UV(SvANY(loader)), name);
+				   PTR2UV(SvRV(dirsv)), name);
 		    tryname = SvPVX(namesv);
 		    tryrsfp = 0;
 

@@ -1080,6 +1080,11 @@ value is the location of the file found.  The C<require>
 operator uses this hash to determine whether a particular file has
 already been included.
 
+If the file was loaded via a hook (see L<perlfunc/require> for a
+description of these hooks), a fake filename is inserted into %INC. It
+looks like F</loader/0x81095c8/Foo.pm>, where the hexadecimal number
+corresponds to the reference that was put in @INC.
+
 =item %ENV
 
 =item $ENV{expr}
