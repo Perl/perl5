@@ -2752,7 +2752,7 @@ I32 Perl_my_pclose(pTHX_ PerlIO *fp)
 
 }  /* end of my_pclose() */
 
-#if defined(__CRTL_VER) && __CRTL_VER >= 70100322
+#if defined(__CRTL_VER) && __CRTL_VER >= 70200000
   /* Roll our own prototype because we want this regardless of whether
    * _VMS_WAIT is defined.
    */
@@ -2801,7 +2801,7 @@ Perl_my_waitpid(pTHX_ Pid_t pid, int *statusp, int flags)
 
     /* fall through if this child is not one of our own pipe children */
 
-#if defined(__CRTL_VER) && __CRTL_VER >= 70100322
+#if defined(__CRTL_VER) && __CRTL_VER >= 70200000
 
       /* waitpid() became available in the CRTL as of VMS 7.0, but only
        * in 7.2 did we get a version that fills in the VMS completion
@@ -2820,7 +2820,7 @@ Perl_my_waitpid(pTHX_ Pid_t pid, int *statusp, int flags)
        * of the current process.
        */
 
-#endif /* defined(__CRTL_VER) && __CRTL_VER >= 70100322 */
+#endif /* defined(__CRTL_VER) && __CRTL_VER >= 70200000 */
 
     {
       $DESCRIPTOR(intdsc,"0 00:00:01");
