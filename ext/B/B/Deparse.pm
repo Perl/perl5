@@ -15,7 +15,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
 	 OPpCONST_ARYBASE OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER
 	 OPpSORT_REVERSE
-	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE
+	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE SVs_RMG
          CVf_METHOD CVf_LOCKED CVf_LVALUE CVf_ASSERTION
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
@@ -289,7 +289,17 @@ sub next_todo {
 	    my $file = $gv->FILE;
 	    $l = "\n\f#line $line \"$file\"\n";
 	}
-        return "${l}sub $name " . $self->deparse_sub($cv);
+	my $p = '';
+	if (class($cv->STASH) ne "SPECIAL") {
+	    my $stash = $cv->STASH->NAME;
+	    if ($stash ne $self->{'curstash'}) {
+		$p = "package $stash;\n";
+		$name = "$self->{'curstash'}::$name" unless $name =~ /::/;
+		$self->{'curstash'} = $stash;
+	    }
+	    $name =~ s/^\Q$stash\E:://;
+	}
+        return "${p}${l}sub $name " . $self->deparse_sub($cv);
     }
 }
 
@@ -585,6 +595,8 @@ sub compile {
 	my $laststash = defined $self->{'curcop'}
 	    ? $self->{'curcop'}->stash->NAME : $self->{'curstash'};
 	if (defined *{$laststash."::DATA"}{IO}) {
+	    print "package $laststash;\n"
+		unless $laststash eq $self->{'curstash'};
 	    print "__DATA__\n";
 	    print readline(*{$laststash."::DATA"});
 	}
@@ -1603,7 +1615,7 @@ sub pp_refgen {
             {
                 # The @a in \(@a) isn't in ref context, but only when the
                 # parens are there.
-                return "\\(" . $self->deparse($kid->sibling, 1) . ")";
+		return "\\(" . $self->pp_list($op->first) . ")";
             } elsif ($sib_name eq 'entersub') {
                 my $text = $self->deparse($kid->sibling, 1);
                 # Always show parens for \(&func()), but only with -p otherwise
@@ -2596,7 +2608,14 @@ sub pp_rv2av {
     my $kid = $op->first;
     if ($kid->name eq "const") { # constant list
 	my $av = $self->const_sv($kid);
-	return "(" . join(", ", map(const($_), $av->ARRAY)) . ")";
+	my @a = map const($_), $av->ARRAY;
+	if ( @a > 2 and !grep(!/^-?\d+$/, @a)) {
+	    # collapse (-1,0,1,2) into (-1..2)
+	    my ($s, $e) = @a[0,-1];
+	    my $i = $s;
+	    return "($s..$e)" unless grep $i++ != $_, @a;
+	}
+	return "(" . join(", ", @a) . ")";
     } else {
 	return $self->maybe_local($op, $cx, $self->rv2x($op, $cx, "\@"));
     }
@@ -3195,7 +3214,15 @@ sub const {
 	return ('undef', '1', '(!1)')[$$sv-1]; # sv_undef, sv_yes, sv_no
     } elsif (class($sv) eq "NULL") {
        return 'undef';
-    } elsif ($sv->FLAGS & SVf_IOK) {
+    }
+    # convert a version object into the "v1.2.3" string in its V magic
+    if ($sv->FLAGS & SVs_RMG) {
+	for (my $mg = $sv->MAGIC; $mg; $mg = $mg->MOREMAGIC) {
+	    return $mg->PTR if $mg->TYPE eq 'V';
+	}
+    }
+
+    if ($sv->FLAGS & SVf_IOK) {
 	return $sv->int_value;
     } elsif ($sv->FLAGS & SVf_NOK) {
 	# try the default stringification

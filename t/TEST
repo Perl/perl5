@@ -228,7 +228,7 @@ EOT
 	my $testswitch = '-I. -MTestInit'; # -T will strict . from @INC
 	if ($type eq 'deparse') {
 	    my $deparse =
-		"./perl $testswitch $switch -I../lib -MO=-qq,Deparse,".
+		"./perl $testswitch $switch -I../lib -MO=-qq,Deparse,-sv1.,".
 		"-l$deparse_opts$file_opts ".
 		"$test > $test.dp ".
 		"&& ./perl $testswitch $switch -I../lib $test.dp |";
