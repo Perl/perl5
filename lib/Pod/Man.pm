@@ -685,7 +685,7 @@ sub cmd_item {
     my $index;
     if (/\w/ && !/^\w[.\)]\s*$/) {
         $index = $_;
-        $index =~ s/^\s*[-*+o.]?\s*//;
+        $index =~ s/^\s*[-*+o.]?(?:\s+|\Z)//;
     }
     s/^\*(\s|\Z)/\\\(bu$1/;
     if ($$self{WEIRDINDENT}) {
