@@ -1515,6 +1515,31 @@ The execution order is indicated by C<===E<gt>> marks, thus it is C<3
 4 5 6> (node C<6> is not included into above listing), i.e.,
 C<gvsv gvsv add whatever>.
 
+Each of these nodes represents an op, a fundamental operation inside the
+Perl core. The code which implements each operation can be found in the
+F<pp*.c> files; the function which implements the op with type C<gvsv>
+is C<pp_gvsv>, and so on. As the tree above shows, different ops have
+different numbers of children: C<add> is a binary operator, as one would
+expect, and so has two children. To accommodate the various different
+numbers of children, there are various types of op data structure, and
+they link together in different ways.
+
+The simplest type of op structure is C<OP>: this has no children. Unary
+operators, C<UNOP>s, have one child, and this is pointed to by the
+C<op_first> field. Binary operators (C<BINOP>s) have not only an
+C<op_first> field but also an C<op_last> field. The most complex type of
+op is a C<LISTOP>, which has any number of children. In this case, the
+first child is pointed to by C<op_first> and the last child by
+C<op_last>. The children in between can be found by iteratively
+following the C<op_sibling> pointer from the first child to the last.
+
+There are also two other op types: a C<PMOP> holds a regular expression,
+and has no children, and a C<LOOP> may or may not have children. If the
+C<op_children> field is non-zero, it behaves like a C<LISTOP>. To
+complicate matters, if a C<UNOP> is actually a C<null> op after
+optimization (see L</Compile pass 2: context propagation>) it will still
+have children in accordance with its former type.
+
 =head2 Compile pass 1: check routines
 
 The tree is created by the compiler while I<yacc> code feeds it
@@ -1574,6 +1599,41 @@ is neither top-down or bottom-up, but in the execution order (with
 additional complications for conditionals).  These optimizations are
 done in the subroutine peep().  Optimizations performed at this stage
 are subject to the same restrictions as in the pass 2.
+
+=head1 Examining internal data structures with the C<dump> functions
+
+To aid debugging, the source file F<dump.c> contains a number of
+functions which produce formatted output of internal data structures.
+
+The most commonly used of these functions is C<Perl_sv_dump>; it's used
+for dumping SVs, AVs, HVs, and CVs. The C<Devel::Peek> module calls
+C<sv_dump> to produce debugging output from Perl-space, so users of that
+module should already be familiar with its format. 
+
+C<Perl_op_dump> can be used to dump an C<OP> structure or any of its
+derivatives, and produces output similiar to C<perl -Dx>; in fact,
+C<Perl_dump_eval> will dump the main root of the code being evaluated,
+exactly like C<-Dx>.
+
+Other useful functions are C<Perl_dump_sub>, which turns a C<GV> into an
+op tree, C<Perl_dump_packsubs> which calls C<Perl_dump_sub> on all the
+subroutines in a package like so: (Thankfully, these are all xsubs, so
+there is no op tree)
+
+    (gdb) print Perl_dump_packsubs(PL_defstash)
+
+    SUB attributes::bootstrap = (xsub 0x811fedc 0)
+
+    SUB UNIVERSAL::can = (xsub 0x811f50c 0)
+
+    SUB UNIVERSAL::isa = (xsub 0x811f304 0)
+
+    SUB UNIVERSAL::VERSION = (xsub 0x811f7ac 0)
+
+    SUB DynaLoader::boot_DynaLoader = (xsub 0x805b188 0)
+
+and C<Perl_dump_all>, which dumps all the subroutines in the stash and
+the op tree of the main root.
 
 =head1 How multiple interpreters and concurrency are supported
 

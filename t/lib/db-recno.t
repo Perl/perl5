@@ -99,7 +99,7 @@ sub bad_one
 EOM
 }
 
-print "1..126\n";
+print "1..127\n";
 
 my $Dfile = "recno.tmp";
 unlink $Dfile ;
@@ -834,6 +834,28 @@ REVERSE again
 0: first
 EOM
    
+}
+
+{
+    # Bug ID 20001013.009
+    #
+    # test that $hash{KEY} = undef doesn't produce the warning
+    #     Use of uninitialized value in null operation 
+    use warnings ;
+    use strict ;
+    use DB_File ;
+
+    unlink $Dfile;
+    my @h ;
+    my $a = "";
+    local $SIG{__WARN__} = sub {$a = $_[0]} ;
+    
+    tie @h, 'DB_File', $Dfile,  O_RDWR|O_CREAT, 0664, $DB_RECNO 
+	or die "Can't open file: $!\n" ;
+    $h[0] = undef;
+    ok(127, $a eq "") ;
+    untie @h;
+    unlink $Dfile;
 }
 
 exit ;

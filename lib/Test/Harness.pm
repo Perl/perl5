@@ -1,3 +1,4 @@
+# -*- Mode: cperl; cperl-indent-level: 4 -*-
 package Test::Harness;
 
 use 5.005_64;
@@ -11,7 +12,7 @@ our($VERSION, $verbose, $switches, $have_devel_corestack, $curtest,
     $columns, @ISA, @EXPORT, @EXPORT_OK);
 $have_devel_corestack = 0;
 
-$VERSION = "1.1605";
+$VERSION = "1.1606";
 
 $ENV{HARNESS_ACTIVE} = 1;
 
@@ -158,7 +159,9 @@ sub runtests {
 		    $next = $this;
 		}
 		$next = $this + 1;
-	    }
+	    } elsif (/^Bail out!\s*(.*)/i) { # magic words
+                die "FAILED--Further testing stopped" . ($1 ? ": $1\n" : ".\n");
+            }
 	}
 	$fh->close; # must close to reap child resource values
 	my $wstatus = $ignore_exitcode ? 0 : $?;	# Can trust $? ?
@@ -259,7 +262,7 @@ sub runtests {
 	}
     }
     my $t_total = timediff(new Benchmark, $t_start);
-    
+
     if ($^O eq 'VMS') {
 	if (defined $old5lib) {
 	    $ENV{PERL5LIB} = $old5lib;
@@ -462,7 +465,7 @@ script supplies test numbers again. So the following test script
     ok
     END
 
-will generate 
+will generate
 
     FAILED tests 1, 3, 6
     Failed 3/6 tests, 50.00% okay
@@ -487,6 +490,15 @@ for skipping.  Similarly, one can include a similar explanation in a
 C<1..0> line emitted if the test is skipped completely:
 
   1..0 # Skipped: no leverage found
+
+As an emergency measure, a test script can decide that further tests
+are useless (e.g. missing dependencies) and testing should stop
+immediately. In that case the test script prints the magic words
+
+  Bail out!
+
+to standard output. Any message after these words will be displayed by
+C<Test::Harness> as the reason why testing is stopped.
 
 =head1 EXPORT
 
@@ -517,6 +529,11 @@ printed in a message similar to the above.
 
 If not all tests were successful, the script dies with one of the
 above messages.
+
+=item C<FAILED--Further testing stopped%s>
+
+If a single subtest decides that further testing will not make sense,
+the script dies with this message.
 
 =back
 

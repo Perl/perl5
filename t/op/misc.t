@@ -595,3 +595,8 @@ for (@locales) {
     print "$_ $s\n";
 }
 EXPECT
+########
+die qr(x)
+EXPECT
+(?-xism:x) at - line 1.
+########

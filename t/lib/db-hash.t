@@ -12,7 +12,7 @@ BEGIN {
 use DB_File; 
 use Fcntl;
 
-print "1..109\n";
+print "1..110\n";
 
 sub ok
 {
@@ -680,6 +680,27 @@ tomato -> red
 banana -> yellow
 EOM
    
+}
+
+{
+    # Bug ID 20001013.009
+    #
+    # test that $hash{KEY} = undef doesn't produce the warning
+    #     Use of uninitialized value in null operation 
+    use warnings ;
+    use strict ;
+    use DB_File ;
+
+    unlink $Dfile;
+    my %h ;
+    my $a = "";
+    local $SIG{__WARN__} = sub {$a = $_[0]} ;
+    
+    tie %h, 'DB_File', $Dfile or die "Can't open file: $!\n" ;
+    $h{ABC} = undef;
+    ok(110, $a eq "") ;
+    untie %h;
+    unlink $Dfile;
 }
 
 exit ;

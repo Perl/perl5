@@ -44,9 +44,29 @@ print "ok 5\n";
 if ($^O eq 'MSWin32' or $^O eq 'cygwin') {
   print "ok $_ # skipped on win32\n" for (6,7);
 } else {
-  print "not " unless $h->name =~ /^localhost(?:\..+)?$/i;
-  print "ok 6 # ",$h->name,"\n";
+  my $in_alias;
+  unless ($h->name =~ /^localhost(?:\..+)?$/i) {
+    foreach (@{$h->aliases}) {
+      if (/^localhost(?:\..+)?$/i) {
+       $in_alias = 1;
+       last;
+      }
+    }
+    print "not " unless $in_alias;
+  } # Else we found it as the hostname
+  print "ok 6 # ",$h->name, " ", join (",", @{$h->aliases}), "\n";
 
-  print "not " unless $i->name =~ /^localhost(?:\..+)?$/i;
-  print "ok 7 # ",$i->name,"\n";
+  if ($in_alias) {
+    # If we found it in the aliases before, expect to find it there again.
+    foreach (@{$h->aliases}) {
+      if (/^localhost(?:\..+)?$/i) {
+       undef $in_alias; # This time, clear the flag if we see "localhost"
+       last;
+      }
+    }
+    print "not " if $in_alias;
+  } else {
+    print "not " unless $i->name =~ /^localhost(?:\..+)?$/i;
+  }
+  print "ok 7 # ",$h->name, " ", join (",", @{$h->aliases}), "\n";
 }

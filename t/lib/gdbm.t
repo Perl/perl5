@@ -13,7 +13,7 @@ BEGIN {
 
 use GDBM_File;
 
-print "1..66\n";
+print "1..68\n";
 
 unlink <Op.dbmx*>;
 
@@ -178,6 +178,7 @@ EOM
     close FILE ;
 
     BEGIN { push @INC, '.'; }
+    unlink <dbhash.tmp*> ;
 
     eval 'use SubDB ; ';
     main::ok(13, $@ eq "") ;
@@ -391,4 +392,25 @@ EOM
    undef $db ;
    untie %h;
    unlink <Op.dbmx*>;
+}
+
+{
+    # Bug ID 20001013.009
+    #
+    # test that $hash{KEY} = undef doesn't produce the warning
+    #     Use of uninitialized value in null operation 
+    use warnings ;
+    use strict ;
+    use GDBM_File ;
+
+    unlink <Op.dbmx*>;
+    my %h ;
+    my $a = "";
+    local $SIG{__WARN__} = sub {$a = $_[0]} ;
+    
+    ok(67, tie(%h, 'GDBM_File','Op.dbmx', &GDBM_WRCREAT, 0640));
+    $h{ABC} = undef;
+    ok(68, $a eq "") ;
+    untie %h;
+    unlink <Op.dbmx*>;
 }
