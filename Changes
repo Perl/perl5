@@ -495,7 +495,7 @@ ____________________________________________________________________________
 	   ! ext/Devel/PPPort/Makefile.PL
 ____________________________________________________________________________
 [ 15042] By: jhi                                   on 2002/03/05  13:33:55
-        Log: Real patch from SADAHIRO Tomoyusi to remove the HZ tests.
+        Log: Real patch from SADAHIRO Tomoyuki to remove the HZ tests.
      Branch: perl
 	   ! ext/Encode/t/Tcl.t
 ____________________________________________________________________________
