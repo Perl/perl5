@@ -1452,13 +1452,13 @@ in the Winsock API does. (Win32)
 
 Available only for socket handles. (S<RISC OS>)
 
-=item kill LIST
+=item kill SIGNAL, LIST
 
 Not implemented, hence not useful for taint checking. (S<Mac OS>,
 S<RISC OS>)
 
-Available only for process handles returned by the C<system(1, ...)>
-method of spawning a process. (Win32)
+Unlike Unix platforms, C<kill(0, $pid)> will actually terminate
+the process.  (Win32)
 
 =item link OLDFILE,NEWFILE
 

@@ -935,7 +935,7 @@ the current process group of your controlling terminal as follows:
 =head2 How do I timeout a slow event?
 
 Use the alarm() function, probably in conjunction with a signal
-handler, as documented L<perlipc/"Signals"> and chapter 6 of the
+handler, as documented in L<perlipc/"Signals"> and chapter 6 of the
 Camel.  You may instead use the more flexible Sys::AlarmCall module
 available from CPAN.
 
