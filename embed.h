@@ -822,6 +822,7 @@
 #define pp_socket		Perl_pp_socket
 #define pp_sockpair		Perl_pp_sockpair
 #define pp_sort			Perl_pp_sort
+#define pp_specific		Perl_pp_specific
 #define pp_splice		Perl_pp_splice
 #define pp_split		Perl_pp_split
 #define pp_sprintf		Perl_pp_sprintf
@@ -1280,8 +1281,6 @@
 #define incgv			(curinterp->Iincgv)
 #define initav			(curinterp->Iinitav)
 #define inplace			(curinterp->Iinplace)
-#define keys			(curinterp->Ikeys)
-#define keys_mutex		(curinterp->Ikeys_mutex)
 #define last_in_gv		(curinterp->Ilast_in_gv)
 #define lastfd			(curinterp->Ilastfd)
 #define lastretstr		(curinterp->Ilastretstr)
@@ -1294,7 +1293,6 @@
 #define lineary			(curinterp->Ilineary)
 #define localizing		(curinterp->Ilocalizing)
 #define localpatches		(curinterp->Ilocalpatches)
-#define magical_keys		(curinterp->Imagical_keys)
 #define main_cv			(curinterp->Imain_cv)
 #define main_root		(curinterp->Imain_root)
 #define main_start		(curinterp->Imain_start)
@@ -1436,8 +1434,6 @@
 #define Iincgv			incgv
 #define Iinitav			initav
 #define Iinplace		inplace
-#define Ikeys			keys
-#define Ikeys_mutex		keys_mutex
 #define Ilast_in_gv		last_in_gv
 #define Ilastfd			lastfd
 #define Ilastretstr		lastretstr
@@ -1450,7 +1446,6 @@
 #define Ilineary		lineary
 #define Ilocalizing		localizing
 #define Ilocalpatches		localpatches
-#define Imagical_keys		magical_keys
 #define Imain_cv		main_cv
 #define Imain_root		main_root
 #define Imain_start		main_start
@@ -1601,8 +1596,6 @@
 #define incgv			Perl_incgv
 #define initav			Perl_initav
 #define inplace			Perl_inplace
-#define keys			Perl_keys
-#define keys_mutex		Perl_keys_mutex
 #define last_in_gv		Perl_last_in_gv
 #define lastfd			Perl_lastfd
 #define lastretstr		Perl_lastretstr
@@ -1615,7 +1608,6 @@
 #define lineary			Perl_lineary
 #define localizing		Perl_localizing
 #define localpatches		Perl_localpatches
-#define magical_keys		Perl_magical_keys
 #define main_cv			Perl_main_cv
 #define main_root		Perl_main_root
 #define main_start		Perl_main_start

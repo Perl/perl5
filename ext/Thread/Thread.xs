@@ -143,6 +143,8 @@ void *arg;
     SvREFCNT_dec(curstack);
 #endif
     SvREFCNT_dec(cvcache);
+    SvREFCNT_dec(thr->magicals);
+    SvREFCNT_dec(thr->specific);
     Safefree(markstack);
     Safefree(scopestack);
     Safefree(savestack);

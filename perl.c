@@ -138,7 +138,6 @@ register PerlInterpreter *sv_interp;
 	COND_INIT(&eval_cond);
 	MUTEX_INIT(&threads_mutex);
 	COND_INIT(&nthreads_cond);
-	MUTEX_INIT(&keys_mutex);
 	
 	thr = new_struct_thread(0);
 #endif /* USE_THREADS */
@@ -210,9 +209,6 @@ register PerlInterpreter *sv_interp;
 
     fdpid = newAV();	/* for remembering popen pids by fd */
 
-    for (i = 0; i < N_PER_THREAD_MAGICALS; i++)
-	magical_keys[i] = NOT_IN_PAD;
-    keys = newSVpv("", 0);
     init_stacks(ARGS);
     DEBUG( {
 	New(51,debname,128,char);
@@ -973,7 +969,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     SvREFCNT_dec(rs);
     rs = SvREFCNT_inc(nrs);
 #ifdef USE_THREADS
-    sv_setsv(*av_fetch(thr->specific, find_thread_magical("/"), TRUE), rs); 
+    sv_setsv(*av_fetch(thr->magicals, find_thread_magical("/"), FALSE), rs); 
 #else
     sv_setsv(GvSV(gv_fetchpv("/", TRUE, SVt_PV)), rs);
 #endif /* USE_THREADS */
@@ -2546,7 +2542,7 @@ init_predump_symbols()
     GV *othergv;
 
 #ifdef USE_THREADS
-    sv_setpvn(*av_fetch(thr->specific,find_thread_magical("\""),TRUE), " ", 1);
+    sv_setpvn(*av_fetch(thr->magicals,find_thread_magical("\""),FALSE)," ", 1);
 #else
     sv_setpvn(GvSV(gv_fetchpv("\"", TRUE, SVt_PV)), " ", 1);
 #endif /* USE_THREADS */
@@ -2848,21 +2844,20 @@ AV* list;
 	JMPENV_PUSH(ret);
 	switch (ret) {
 	case 0: {
-		SV* atsv = sv_mortalcopy(errsv);
 		PUSHMARK(stack_sp);
 		perl_call_sv((SV*)cv, G_EVAL|G_DISCARD);
-		(void)SvPV(atsv, len);
+		(void)SvPV(errsv, len);
 		if (len) {
 		    JMPENV_POP;
 		    curcop = &compiling;
 		    curcop->cop_line = oldline;
 		    if (list == beginav)
-			sv_catpv(atsv, "BEGIN failed--compilation aborted");
+			sv_catpv(errsv, "BEGIN failed--compilation aborted");
 		    else
-			sv_catpv(atsv, "END failed--cleanup aborted");
+			sv_catpv(errsv, "END failed--cleanup aborted");
 		    while (scopestack_ix > oldscope)
 			LEAVE;
-		    croak("%s", SvPVX(atsv));
+		    croak("%s", SvPVX(errsv));
 		}
 	    }
 	    break;

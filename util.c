@@ -2502,6 +2502,7 @@ struct thread *t;
     Newz(53, thr, 1, struct thread);
     cvcache = newHV();
     curcop = &compiling;
+    thr->magicals = newAV();
     thr->specific = newAV();
     thr->flags = THRf_R_JOINABLE;
     MUTEX_INIT(&thr->mutex);
@@ -2541,7 +2542,6 @@ struct thread *t;
 	formtarget = newSVsv(t->Tformtarget);
 	bodytarget = newSVsv(t->Tbodytarget);
 	toptarget = newSVsv(t->Ttoptarget);
-	keys = newSVpv("", 0);
     } else {
 	curcop = &compiling;
 	chopset = " \n-";
@@ -2580,39 +2580,6 @@ struct thread *t;
 	formtarget = bodytarget;
     }
     return thr;
-}
-
-PADOFFSET
-key_create()
-{
-    char *s;
-    STRLEN len;
-    PADOFFSET i;
-    MUTEX_LOCK(&keys_mutex);
-    s = SvPV(keys, len);
-    for (i = 0; i < len; i++) {
-	if (!s[i]) {
-	    s[i] = 1;
-	    break;
-	}
-    }
-    if (i == len)
-	sv_catpvn(keys, "\1", 1);
-    MUTEX_UNLOCK(&keys_mutex);
-    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "key_create: %d\n", (int)i));
-    return i;
-}
-
-void
-key_destroy(key)
-PADOFFSET key;
-{
-    char *s;
-    MUTEX_LOCK(&keys_mutex);
-    s = SvPVX(keys);
-    s[key] = 0;
-    MUTEX_UNLOCK(&keys_mutex);
-    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "key_destroy: %d\n", (int)key));
 }
 #endif /* USE_THREADS */
 

@@ -217,7 +217,8 @@ struct thread {
     HV *	Tcvcache;
     perl_thread	self;			/* Underlying thread object */
     U32		flags;
-    AV *	specific;		/* Thread specific data (& magicals) */
+    AV *	magicals;		/* Per-thread magicals */
+    AV *	specific;		/* Thread-specific user data */
     perl_mutex	mutex;			/* For the fields others can change */
     U32		tid;
     struct thread *next, *prev;		/* Circular linked list of threads */
