@@ -21,7 +21,7 @@ isa_lookup(HV *stash, char *name, int len, int level)
 	return &sv_yes;
 
     if (level > 100)
-	croak("Recursive inheritance detected");
+	croak("Recursive inheritance detected in package '%s'", HvNAME(stash));
 
     gvp = (GV**)hv_fetch(stash, "::ISA::CACHE::", 14, FALSE);
 

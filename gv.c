@@ -162,7 +162,8 @@ gv_fetchmeth(HV *stash, char *name, STRLEN len, I32 level)
     if (!stash)
 	return 0;
     if ((level > 100) || (level < -100))
-	croak("Recursive inheritance detected");
+	croak("Recursive inheritance detected while looking for method '%s' in package '%s'",
+	      name, HvNAME(stash));
 
     DEBUG_o( deb("Looking for method %s in package %s\n",name,HvNAME(stash)) );
 

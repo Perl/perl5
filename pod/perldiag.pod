@@ -2069,10 +2069,15 @@ Check your logic flow.
 desired output is compiled into Perl, which entails some overhead,
 which is why it's currently left out of your copy.
 
-=item Recursive inheritance detected
+=item Recursive inheritance detected in package '%s'
 
 (F) More than 100 levels of inheritance were used.  Probably indicates
 an unintended loop in your inheritance hierarchy.
+
+=item Recursive inheritance detected while looking for method '%s' in package '%s'
+
+(F) More than 100 levels of inheritance were encountered while invoking a
+method.  Probably indicates an unintended loop in your inheritance hierarchy.
 
 =item Reference found where even-sized list expected
 
