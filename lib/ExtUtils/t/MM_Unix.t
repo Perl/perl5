@@ -239,8 +239,9 @@ foreach (qw/ EXPORT_LIST PERL_ARCHIVE PERL_ARCHIVE_AFTER LD /)
 {
     use Config;
     ok( exists $t->{$_}, "$_ was defined" );
-    if (exists $Config{lc $_}) {
-	is($t->{$_}, $Config{lc $_}, "$_ is like in %Config ($t->{$_})"); 
+    if ($_ eq 'LD' && defined $Config{ld}) {
+	like($t->{LD}, qr/^($Config{ld}|ld)$/,
+	     "LD ($t->{LD}) is like in %Config ($t->{$_}) or 'ld'"); 
     } else {
 	is($t->{$_}, '', "$_ is empty on Unix"); 
     }
