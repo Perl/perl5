@@ -821,8 +821,8 @@ sub load_imports {
 		_POSIX_PATH_MAX _POSIX_PIPE_BUF _POSIX_SSIZE_MAX
 		_POSIX_STREAM_MAX _POSIX_TZNAME_MAX)],
 
-    locale_h =>	[qw(LC_ALL LC_COLLATE LC_CTYPE LC_MONETARY LC_NUMERIC
-		LC_TIME NULL localeconv setlocale)],
+    locale_h =>	[qw(LC_ALL LC_COLLATE LC_CTYPE LC_MESSAGES LC_MONETARY
+		LC_NUMERIC LC_TIME NULL localeconv setlocale)],
 
     math_h =>	[qw(HUGE_VAL acos asin atan ceil cosh fabs floor fmod
 		frexp ldexp log10 modf pow sinh tan tanh)],

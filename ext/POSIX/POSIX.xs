@@ -1646,6 +1646,12 @@ constant(char *name, int arg)
 #else
 		goto not_there;
 #endif
+	    if (strEQ(name, "LC_MESSAGES"))
+#ifdef LC_MESSAGES
+		return LC_MESSAGES;
+#else
+		goto not_there;
+#endif
 	    if (strEQ(name, "LC_MONETARY"))
 #ifdef LC_MONETARY
 		return LC_MONETARY;
