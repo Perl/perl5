@@ -14,18 +14,27 @@ The basic steps to build and install perl5 are:
 
 Each of these is explained in further detail below.
 
+=head1 DESCRIPTION
+
 You should probably at least skim through this entire document before
 proceeding.  Special notes specific to this release are identified
 by B<NOTE>.
+
+This document is written in pod format as an easy way to indicate its
+structure.  The pod format is described in pod/perlpod.pod, but you can
+read it as is with any pager or editor.
 
 If you're building Perl on a non-Unix system, you should also read
 the README file specific to your operating system, since this may
 provide additional or different instructions for building Perl.
 
-=head1 DESCRIPTION
+=head1 Space Requirements.
 
-The following is the procedures you need to follow in order to successfully
-build perl.
+The complete perl5 source tree takes up about 7 MB of disk space.
+The complete tree after completing C<make> takes roughly
+15 MB, though the actual total is likely to be quite
+system-dependent.  The installation directories need something
+on the order of 7 MB, though again that value is system-dependent.
 
 =head1 Start with a Fresh Distribution.
 
@@ -33,7 +42,7 @@ If you have built perl before, you should clean out the build directory
 with the command
 
 	make realclean
-	
+
 The results of a Configure run are stored in the config.sh file.  If
 you are upgrading from a previous version of perl, or if you change
 systems or compilers or make other significant changes, or if you are
@@ -97,9 +106,9 @@ DynaLoader, Fcntl and FileHandle are always built by default.
 Configure does not contain code to test for POSIX compliance, so POSIX
 is always built by default as well.  If you wish to skip POSIX, you can
 set the Configure variable useposix=false either in a hint file or from
-the Configure command line.  Similarly, the Safe extension is always
+the Configure command line.  Similarly, the Opcode extension is always
 built by default, but you can skip it by setting the Configure variable
-usesafe=false either in a hint file for from the command line.
+useopcode=false either in a hint file for from the command line.
 
 In summary, here are the Configure command-line variables you can set
 to turn off each extension:
@@ -113,7 +122,7 @@ to turn off each extension:
     ODBM_File		i_dbm
     POSIX		useposix
     SDBM_File		(Always included by default)
-    Safe		usesafe
+    Opcode		useopcode
     Socket		d_socket
 
 Thus to skip the NDBM_File extension, you can use
@@ -319,7 +328,6 @@ directory of your choice):
     installscript=`echo $installscript | sed "s!$prefix!$installprefix!"`
     installsitelib=`echo $installsitelib | sed "s!$prefix!$installprefix!"`
     installsitearch=`echo $installsitearch | sed "s!$prefix!$installprefix!"`
-    shrpdir=`echo $shrpdir | sed "s!$prefix!$installprefix!"`
 
 Then, you can Configure and install in the usual way:
 
@@ -346,6 +354,118 @@ installed on multiple systems.  Here's one way to do that:
     cd /usr/local  # Or wherever you specified as $prefix
     tar xvf perl5-archive.tar
 
+=head2 Building a shared libperl5.so Perl library.
+
+Currently, for most systems, the main perl executable is built by
+linking the "perl library" libperl.a with perlmain.o, your static
+extensions (usually just DynaLoader.a) and various extra libraries,
+such as -lm.
+
+On systems that support dynamic loading, it may be possible to replace
+libperl.a with a shared libperl5.so.  If you anticipate building
+several different perl binaries (e.g. by embedding libperl into
+different programs, or by using the optional compiler extension), then
+you might wish to build a shared libperl5.so so that all your binaries
+can share the same library.
+
+The disadvantages are that there may be a significant performance
+penalty associated with the shared libperl5.so, and that the overall
+meachanism is still rather fragile with respect to different versions
+and upgrades.
+
+In terms of performance, on my test system (Solaris 2.5_x86) the perl
+test suite took roughly 15% longer to run with the shared libperl5.so.
+Your system and typical applications may well give quite different
+results.
+
+The default name for the shared library is typically something like
+libperl5.so.3.2 (for perl5.003_02) or libperl5.so.302 or simply
+libperl5.so.  Configure tries to guess a sensible naming convention
+based on your C library name.  Since the library gets installed in a
+version-specific architecture-dependent directory, the exact name
+isn't very important anyway, as long as your linker is happy.
+
+For some systems (mostly SVR4), building a shared libperl is required
+for dynamic loading to work, and hence is already the default.
+
+You can elect to build a shared libperl by
+
+	sh Configure -Duseshrplib
+
+To actually build perl, you must add the current working directory to your
+LD_LIBRARY_PATH environtment variable before running make.  You can do
+this with
+
+   LD_LIBRARY_PATH=`pwd`:$LD_LIBRARY_PATH; export LD_LIBRARY_PATH
+
+for Bourne-style shells, or
+
+   setenv LD_LIBRARY_PATH `pwd`
+
+for Csh-style shells.  You *MUST* do this before running make.
+Folks running NeXT OPENSTEP must substitute DYLD_LIBRARY_PATH for
+LD_LIBRARY_PATH above.
+
+=head2 Selecting File IO mechanisms
+
+Previous version of perl used the standard IO mechanisms as defined in
+<stdio.h>.  Versions 5.003_02 and later of perl allow alternate IO
+mechanisms via a "PerlIO" abstraction, but the stdio mechanism is still
+the default and is the only supported mechanism.
+
+This PerlIO abstraction can be enabled either on the Configure command
+line with
+
+	sh Configure -Duseperlio
+
+or interactively at the appropriate Configure prompt.
+
+If you choose to use the PerlIO abstraction layer, there are two
+(experimental) possibilities for the underlying IO calls.  These have been
+tested to some extent on some platforms, but are not guaranteed to work
+everywhere.
+
+=over 4
+
+=item 1.
+
+AT&T's "sfio".  This has superior performance to <stdio.h> in many
+cases, and is extensible by the use of "disipline" modules.  Sfio
+currently only builds on a subset of the UNIX platforms perl supports.
+Because the data structures are completely different from stdio, perl
+extension modules or external libraries may not work.  This
+configuration exists to allow these issues to be worked on.
+
+This option requires the 'sfio' package to have been built and installed.
+A (fairly old) version of sfio is in CPAN, and work is in progress to make
+it more easily buildable by adding Configure support.
+
+You select this option by
+
+	sh Configure -Duseperlio -Dusesfio
+
+If you have already selected -Duseperlio, and if Configure detects
+that you have sfio, then sfio will be the default suggested by
+Configure.
+
+=item 2.
+
+Normal stdio IO, but with all IO going through calls to the PerlIO
+abstraction layer.  This configuration can be used to check that perl and
+extension modules have been correctly converted to use the PerlIO
+abstraction.
+
+This configuration should work on all platforms (but currently does not).
+
+You select this option via :
+
+	sh Configure -Duseperlio -Uusesfio
+
+If you have already selected -Duseperlio, and if Configure does not
+detect sfio, then this will be the default suggested by Configure.
+
+=back
+
 =head2 What if it doesn't work?
 
 =over 4
@@ -358,7 +478,7 @@ guesses.
 
 All the installation questions have been moved to the top, so you don't
 have to wait for them.  Once you've handled them (and your C compiler &
-flags) you can type C<&-d> at the next Configure prompt and Configure
+flags) you can type   C<&-d>  at the next Configure prompt and Configure
 will use the defaults from then on.
 
 If you find yourself trying obscure command line incantations and
@@ -406,7 +526,7 @@ Now, Configure will find your gdbm library and will issue a message:
 	Keep the previous value? [y]
 
 In this case, you do I<not> want to keep the previous value, so you
-should answer 'n'.  (You'll also have to manuually add GDBM_File to
+should answer 'n'.  (You'll also have to manually add GDBM_File to
 the list of dynamic extensions to build.)
 
 =item Changing Compilers
@@ -419,7 +539,7 @@ with the options you want to use.
 This is a common source of problems.  If you change from B<cc> to
 B<gcc>, you should almost always remove your old config.sh.
 
-=item Propagating your changes
+=item Propagating your changes to config.sh
 
 If you later make any changes to F<config.sh>, you should propagate
 them to all the .SH files by running  B<sh Configure -S>.
@@ -462,6 +582,13 @@ config.h and edit the config.h to reflect your system's peculiarities.
 You'll probably also have to extensively modify the extension building
 mechanism.
 
+=item Porting information
+
+Specific information for the OS/2, Plan9, and VMS ports are in the
+corresponing subdirectories.  Additional information, including
+a glossary of all those config.sh variables, is in the Porting
+subdirectory.
+
 =back
 
 =head1 make depend
@@ -471,7 +598,9 @@ The output is stored in F<makefile>.  The only difference between
 F<Makefile> and F<makefile> is the dependencies at the bottom of
 F<makefile>.  If you have to make any changes, you should edit
 F<makefile>, not F<Makefile> since the Unix B<make> command reads
-F<makefile> first.
+F<makefile> first.  (On non-Unix systems, the output may be stored in
+a different file.  Check the value of $firstmakefile in your config.sh
+if in doubt.)
 
 Configure will offer to do this step for you, so it isn't listed
 explicitly above.
@@ -488,6 +617,96 @@ If you can't compile successfully, try some of the following ideas.
 
 If you used a hint file, try reading the comments in the hint file
 for further tips and information.
+
+=item *
+
+If you can successfully build F<miniperl>, but the process crashes
+during the building of extensions, you should run
+
+    	make minitest
+
+to test your version of miniperl.
+
+=item *
+
+If you get duplicates upon linking for malloc et al, say -DHIDEMYMALLOC.
+
+=item *
+
+If you get varargs problems with gcc, be sure that gcc is installed
+correctly.  When using gcc, you should probably have i_stdarg='define'
+and i_varargs='undef' in config.sh.  The problem is usually solved by
+running fixincludes correctly.  If you do change config.sh, don't
+forget to propagate your changes with C<sh Configure -S>.  See also the
+vsprintf item below.
+
+=item *
+
+If you get error messages such as the following (the exact line
+numbers will vary in different versions of perl):
+
+    util.c: In function `Perl_croak':
+    util.c:962: number of arguments doesn't match prototype
+    proto.h:45: prototype declaration
+
+it might well be a symptom of the gcc "varargs problem".  See the
+previous item.
+
+=item *
+
+If you have problems with dynamic loading using gcc on SunOS or
+Solaris, and you are using GNU as and GNU ld, you may need to add
+B<-B/bin/> (for SunOS) or B<-B/usr/ccs/bin/> (for Solaris) to your
+$ccflags, $ldflags, and $lddlflags so that the system's versions of as
+and ld are used.  Alternatively, you can use the GCC_EXEC_PREFIX
+environment variable to ensure that Sun's as and ld are used.  Consult
+your gcc documentation for further information on the B<-B> option and
+the GCC_EXEC_PREFIX variable.
+
+=item *
+
+If you run into dynamic loading problems, check your setting of
+the LD_LIBRARY_PATH environment variable.  Perl should build
+fine with LD_LIBRARY_PATH unset, though that may depend on details
+of your local set-up.
+
+=item dlopen: stub interception failed
+
+The primary cause of the 'dlopen: stub interception failed' message is
+that the LD_LIBRARY_PATH environment variable includes a directory
+which is a symlink to /usr/lib (such as /lib).
+
+The reason this causes a problem is quite subtle. The file libdl.so.1.0
+actually *only* contains functions which generate 'stub interception
+failed' errors!  The runtime linker intercepts links to
+"/usr/lib/libdl.so.1.0" and links in internal implementation of those
+functions instead.  [Thanks to Tim Bunce for this explanation.]
+
+=item *
+
+If Configure seems to be having trouble finding library functions,
+try not using nm extraction.  You can do this from the command line
+with
+
+	sh Configure -Uusenm
+
+or by answering the nm extraction question interactively.
+If you have previously run Configure, you should I<not> reuse your old
+config.sh.
+
+=item *
+
+If you run into problems with vsprintf in compiling util.c, the
+problem is probably that Configure failed to detect your system's
+version of vsprintf().  Check whether your system has vprintf().
+(Virtually all modern Unix systems do.)  Then, check the variable
+d_vprintf in config.sh.  If your system has vprintf, it should be:
+
+	d_vprintf='define'
+
+If Configure guessed wrong, it is likely that Configure guessed wrong
+on a number of other common functions too.  You are probably better off
+re-running Configure without using nm extraction (see previous item).
 
 =item *
 
@@ -510,12 +729,8 @@ specific rule.
 
 =item *
 
-If you can successfully build F<miniperl>, but the process crashes
-during the building of extensions, you should run
-
-    	make minitest
-
-to test your version of miniperl.
+SCO prior to 3.2.4 may be missing dbmclose().  An upgrade to 3.2.4
+that includes libdbm.nfs (which includes dbmclose()) may be available.
 
 =item *
 
@@ -531,36 +746,6 @@ If you get syntax errors on '(', try -DCRIPPLED_CC.
 
 Machines with half-implemented dbm routines will need to #undef I_ODBM
 
-SCO prior to 3.2.4 may be missing dbmclose().  An upgrade to 3.2.4
-that includes libdbm.nfs (which includes dbmclose()) may be available.
-
-If you get duplicates upon linking for malloc et al, say -DHIDEMYMALLOC.
-
-If you get duplicate function definitions (a perl function has the
-same name as another function on your system) try -DEMBED.
-
-If you get varags problems with gcc, be sure that gcc is installed
-correctly.  When using gcc, you should probably have i_stdarg='define'
-and i_varags='undef' in config.sh.  The problem is usually solved
-by running fixincludes correctly.
-
-If you have problems with dynamic loading using gcc on SunOS or
-Solaris, and you are using GNU as and GNU ld, you may need to add
-B<-B/bin/> (for SunOS) or B<-B/usr/ccs/bin/> (for Solaris) to your
-$ccflags, $ldflags, and $lddlflags so that the system's versions of as
-and ld are used.
-
-If you run into dynamic loading problems, check your setting of
-the LD_LIBRARY_PATH environment variable.  Perl should build
-fine with LD_LIBRARY_PATH unset, though that may depend on details
-of your local set-up.
-
-If Configure seems to be having trouble finding library functions,
-try not using nm extraction.  You can do this from the command line
-with
-
-	sh Configure -Uusenm
-
 =back
 
 =head1 make test
@@ -568,26 +753,29 @@ with
 This will run the regression tests on the perl you just made.  If it
 doesn't say "All tests successful" then something went wrong.  See the
 file F<t/README> in the F<t> subdirectory.  Note that you can't run it
-in background if this disables opening of /dev/tty.  If B<make test>
-bombs out, just B<cd> to the F<t> directory and run B<TEST> by hand
-to see if it makes any difference.
-If individual tests bomb, you can run them by hand, e.g.,
+in background if this disables opening of /dev/tty.
+
+If B<make test> bombs out, just B<cd> to the F<t> directory and run
+B<TEST> by hand to see if it makes any difference.  If individual tests
+bomb, you can run them by hand, e.g.,
 
 	./perl op/groups.t
 
+You can also read the individual tests to see if there are any helpful
+comments that apply to your system.
+
 B<Note>: one possible reason for errors is that some external programs
 may be broken due to the combination of your environment and the way
-C<make test> exercises them. This may happen for example if you have
-one or more of these environment variables set:
-C<LC_ALL LC_CTYPE LANG>. In certain UNIXes especially the non-English
-locales are known to cause programs to exhibit mysterious errors.
-If you have any of the above environment variables set, please try
-C<setenv LC_ALL C> or <LC_ALL=C;export LC_ALL>, for C<csh>-style and
-C<Bourne>-style shells, respectively, from the command line and then
-retry C<make test>. If the tests then succeed, you may have a broken
-program that is confusing the testing. Please run the troublesome test
-by hand as shown above and see whether you can locate the program.
-Look for things like:
+C<make test> exercises them.  For example, this may happen if you have
+one or more of these environment variables set: C<LC_ALL LC_CTYPE
+LANG>.  In some versions of UNIX, the non-English locales are known to
+cause programs to exhibit mysterious errors.  If you have any of the
+above environment variables set, please try C<setenv LC_ALL C> (for
+C shell) or <LC_ALL=C;export LC_ALL> (for Bourne or Korn shell) from the
+command line and then retry C<make test>. If the tests then succeed,
+you may have a broken program that is confusing the testing. Please run
+the troublesome test by hand as shown above and see whether you can
+locate the program.  Look for things like:
 C<exec, `backquoted command`, system, open("|...")> or C<open("...|")>.
 All these mean that Perl is trying to run some external program.
 
@@ -602,10 +790,9 @@ page, however.  You may need to be root to run B<make install>.  If you
 are not root, you must own the directories in question and you should
 ignore any messages about chown not working.
 
-B<NOTE:>  In the 5.002 release, you will see some harmless error
-messages and warnings from pod2man.  You may safely ignore them.  (Yes,
-they should be fixed, but they didn't seem important enough to warrant
-holding up the entire 5.002 release.)
+You may see some harmless error messages and warnings from pod2man.
+You may safely ignore them.  (Yes, they should be fixed, but they
+didn't seem important enough to warrant holding up the entire release.)
 
 If you want to see exactly what will happen without installing
 anything, you can run
@@ -682,10 +869,10 @@ F</usr/local/lib/perl5/ARCH/VERSION>, where B<ARCH> is your architecture
 building (for example, C<5.003>).
 
 B<NOTE:> Due to differences in the C and perl languages, the conversion of
-the header files in not perfect.  You may have to hand edit some of the 
+the header files in not perfect.  You may have to hand edit some of the
 converted files to get them to parse correctly.  For example, it breaks
 spectacularly on type casting and certain structures.
- 
+
 =head1 Coexistence with earlier versions of perl5.
 
 You can safely install the current version of perl5 and still run scripts
@@ -706,7 +893,7 @@ you will not be using 5.000 or 5.001, you may safely remove those
 files.
 
 The standard library files in F</usr/local/lib/perl5>
-should be useable by all versions of perl5 since perl5.002.
+should be usable by all versions of perl5.
 
 Most extensions will probably not need to be recompiled to use with a newer
 version of perl.  If you do run into problems, and you want to continue
@@ -768,4 +955,4 @@ from the original README by Larry Wall.
 
 =head1 LAST MODIFIED
 
-07 July 1996
+21 August 1996
