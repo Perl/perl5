@@ -342,6 +342,7 @@ PP(pp_formline)
 	    case FF_MORE:	name = "MORE";		break;
 	    case FF_LINEMARK:	name = "LINEMARK";	break;
 	    case FF_END:	name = "END";		break;
+            case FF_0DECIMAL:	name = "0DECIMAL";	break;
 	    }
 	    if (arg >= 0)
 		PerlIO_printf(Perl_debug_log, "%-16s%ld\n", name, (long) arg);
@@ -620,6 +621,43 @@ PP(pp_formline)
 	    t += fieldsize;
 	    break;
 
+	case FF_0DECIMAL:
+	    /* If the field is marked with ^ and the value is undefined,
+	       blank it out. */
+	    arg = *fpc++;
+	    if ((arg & 512) && !SvOK(sv)) {
+		arg = fieldsize;
+		while (arg--)
+		    *t++ = ' ';
+		break;
+	    }
+	    gotsome = TRUE;
+	    value = SvNV(sv);
+	    /* Formats aren't yet marked for locales, so assume "yes". */
+	    {
+		STORE_NUMERIC_STANDARD_SET_LOCAL();
+#if defined(USE_LONG_DOUBLE)
+		if (arg & 256) {
+		    sprintf(t, "%#0*.*" PERL_PRIfldbl,
+			    (int) fieldsize, (int) arg & 255, value); 
+/* is this legal? I don't have long doubles */      
+		} else {
+		    sprintf(t, "%0*.0" PERL_PRIfldbl, (int) fieldsize, value);
+		}
+#else
+		if (arg & 256) {
+		    sprintf(t, "%#0*.*f",
+			    (int) fieldsize, (int) arg & 255, value);
+		} else {
+		    sprintf(t, "%0*.0f",
+			    (int) fieldsize, value);
+		}
+#endif
+		RESTORE_NUMERIC_STANDARD();
+	    }
+	    t += fieldsize;
+	    break;
+	    
 	case FF_NEWLINE:
 	    f++;
 	    while (t-- > linemark && *t == ' ') ;
@@ -3632,6 +3670,24 @@ S_doparseform(pTHX_ SV *sv)
 		}
 		*fpc++ = s - base;		/* fieldsize for FETCH */
 		*fpc++ = FF_DECIMAL;
+                *fpc++ = arg;
+            }
+            else if (*s == '0' && s[1] == '#') {  /* Zero padded decimals */
+                arg = ischop ? 512 : 0;
+		base = s - 1;
+                s++;                                /* skip the '0' first */
+                while (*s == '#')
+                    s++;
+                if (*s == '.') {
+                    char *f;
+                    s++;
+                    f = s;
+                    while (*s == '#')
+                        s++;
+                    arg |= 256 + (s - f);
+                }
+                *fpc++ = s - base;                /* fieldsize for FETCH */
+                *fpc++ = FF_0DECIMAL;
 		*fpc++ = arg;
 	    }
 	    else {

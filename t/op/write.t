@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..9\n";
+print "1..11\n";
 
 my $CAT = ($^O eq 'MSWin32') ? 'type' : 'cat';
 
@@ -43,7 +43,7 @@ of huma...
 now is the time for all good men to come to\n";
 
 if (`$CAT Op_write.tmp` eq $right)
-    { print "ok 1\n"; unlink 'Op_write.tmp'; }
+    { print "ok 1\n"; 1 while unlink 'Op_write.tmp'; }
 else
     { print "not ok 1\n"; }
 
@@ -85,7 +85,7 @@ necessary
 now is the time for all good men to come to\n";
 
 if (`$CAT Op_write.tmp` eq $right)
-    { print "ok 2\n"; unlink 'Op_write.tmp'; }
+    { print "ok 2\n"; 1 while unlink 'Op_write.tmp'; }
 else
     { print "not ok 2\n"; }
 
@@ -129,7 +129,7 @@ necessary
 now is the time for all good men to come to\n";
 
 if (`$CAT Op_write.tmp` eq $right)
-    { print "ok 3\n"; unlink 'Op_write.tmp'; }
+    { print "ok 3\n"; 1 while unlink 'Op_write.tmp'; }
 else
     { print "not ok 3\n"; }
 
@@ -184,7 +184,7 @@ $right =
 "fit\n";
 
 if (`$CAT Op_write.tmp` eq $right)
-    { print "ok 6\n"; unlink 'Op_write.tmp'; }
+    { print "ok 6\n"; 1 while unlink 'Op_write.tmp'; }
 else
     { print "not ok 6\n"; }
 
@@ -213,8 +213,53 @@ write (OUT4);
 close  OUT4;
 if (`$CAT Op_write.tmp` eq "1\n") {
     print "ok 9\n";
-    unlink "Op_write.tmp";
+    1 while unlink "Op_write.tmp";
     }
 else {
     print "not ok 9\n";
     }
+
+eval <<'EOFORMAT';
+format OUT10 =
+@####.## @0###.##
+$test1, $test1
+.
+EOFORMAT
+
+open(OUT10, '>Op_write.tmp') || die "Can't create Op_write.tmp";
+
+$test1 = 12.95;
+write(OUT10);
+close OUT10;
+
+$right = "   12.95 00012.95\n";
+if (`$CAT Op_write.tmp` eq $right)
+    { print "ok 10\n"; 1 while unlink 'Op_write.tmp'; }
+else
+    { print "not ok 10\n"; }
+
+eval <<'EOFORMAT';
+format OUT11 =
+@0###.## 
+$test1
+@ 0#
+$test1
+@0 # 
+$test1
+.
+EOFORMAT
+
+open(OUT11, '>Op_write.tmp') || die "Can't create Op_write.tmp";
+
+$test1 = 12.95;
+write(OUT11);
+close OUT11;
+
+$right = 
+"00012.95
+1 0#
+10 #\n";
+if (`$CAT Op_write.tmp` eq $right)
+    { print "ok 11\n"; 1 while unlink 'Op_write.tmp'; }
+else
+    { print "not ok 11\n"; }

@@ -109,6 +109,10 @@ functionality, see pack('U0', ...) and pack('C0', ...).
 
 =item *
 
+Formats now support zero-padded decimal fields.
+
+=item *
+
 C<perl -d:Module=arg,arg,arg> now works (previously one couldn't pass
 in multiple arguments.)
 
