@@ -37,7 +37,7 @@ $CheckModTime = 1;
 $IndexFile = "autosplit.ix";	# file also serves as timestamp
 $maxflen = 255;
 $maxflen = 14 if $Config{'d_flexfnam'} ne 'define';
-$vms = ($Config{'osname'} eq 'VMS');
+$Is_VMS = ($^O eq 'VMS');
 
 
 sub autosplit{
@@ -62,7 +62,7 @@ sub autosplit_lib_modules{
 	s#::#/#g;	# incase specified as ABC::XYZ
 	s|\\|/|g;		# bug in ksh OS/2
 	s#^lib/##; # incase specified as lib/*.pm
-	if ($vms && /[:>\]]/) { # may need to convert VMS-style filespecs
+	if ($Is_VMS && /[:>\]]/) { # may need to convert VMS-style filespecs
 	    my ($dir,$name) = (/(.*])(.*)/);
 	    $dir =~ s/.*lib[\.\]]//;
 	    $dir =~ s#[\.\]]#/#g;
@@ -82,9 +82,7 @@ sub autosplit_file{
 
     # where to write output files
     $autodir = "lib/auto" unless $autodir;
-    if ($Config{'osname'} eq 'VMS') {
-	($autodir = VMS::Filespec::unixpath($autodir)) =~ s#/$##;
-    }
+    ($autodir = VMS::Filespec::unixpath($autodir)) =~ s#/$## if $Is_VMS;
     unless (-d $autodir){
 	local($", @p)="/";
 	foreach(split(/\//,$autodir)){
@@ -130,7 +128,7 @@ sub autosplit_file{
 
     die "Package $package does not match filename $filename"
 	    unless ($filename =~ m/$modpname.pm$/ or
-	            $vms && $filename =~ m/$modpname.pm/i);
+	            $Is_VMS && $filename =~ m/$modpname.pm/i);
 
     if ($check_mod_time){
 	my($al_ts_time) = (stat("$al_idx_file"))[9] || 1;

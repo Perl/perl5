@@ -1,11 +1,6 @@
 package Cwd;
 require 5.000;
 require Exporter;
-require Config;
-
-# Use osname for portability switches (doubled to cheaply avoid -w warning)
-my $osname = $Config::Config{'osname'} || $Config::Config{'osname'};
-
 
 =head1 NAME
 
@@ -177,7 +172,7 @@ sub fastcwd {
 my $chdir_init = 0;
 
 sub chdir_init {
-    if ($ENV{'PWD'} and $osname ne 'os2') {
+    if ($ENV{'PWD'} and $^O ne 'os2') {
 	my($dd,$di) = stat('.');
 	my($pd,$pi) = stat($ENV{'PWD'});
 	if (!defined $dd or !defined $pd or $di != $pi or $dd != $pd) {
@@ -203,7 +198,7 @@ sub chdir {
     $newdir =~ s|///*|/|g;
     chdir_init() unless $chdir_init;
     return 0 unless CORE::chdir $newdir;
-    if ($osname eq 'VMS') { return $ENV{'PWD'} = $ENV{'DEFAULT'} }
+    if ($^O eq 'VMS') { return $ENV{'PWD'} = $ENV{'DEFAULT'} }
 
     if ($newdir =~ m#^/#) {
 	$ENV{'PWD'} = $newdir;
@@ -225,20 +220,15 @@ sub chdir {
 # --- PORTING SECTION ---
 
 # VMS: $ENV{'DEFAULT'} points to default directory at all times
-# 08-Dec-1994  Charles Bailey  bailey@genetics.upenn.edu
-# Note: Use of Cwd::getcwd() or Cwd::chdir() (but not Cwd::fastcwd())
-#   causes the logical name PWD to be defined in the process 
-#   logical name table as the default device and directory 
+# 06-Mar-1996  Charles Bailey  bailey@genetics.upenn.edu
+# Note: Use of Cwd::chdir() causes the logical name PWD to be defined
+#   in the process logical name table as the default device and directory 
 #   seen by Perl. This may not be the same as the default device 
 #   and directory seen by DCL after Perl exits, since the effects
 #   the CRTL chdir() function persist only until Perl exits.
-# This does not apply to other systems (where only chdir() sets PWD).
 
 sub _vms_cwd {
     return $ENV{'DEFAULT'}
-}
-sub _vms_pwd {
-    return $ENV{'PWD'} = $ENV{'DEFAULT'}
 }
 sub _os2_cwd {
     $ENV{'PWD'} = `cmd /c cd`;
@@ -247,24 +237,27 @@ sub _os2_cwd {
     return $ENV{'PWD'};
 }
 
-if ($osname eq 'VMS') {
+my($oldw) = $^W;
+$^W = 0;  # assignments trigger 'subroutine redefined' warning
+if ($^O eq 'VMS') {
 
-    *cwd        = \&_vms_pwd;
-    *getcwd     = \&_vms_pwd;
+    *cwd        = \&_vms_cwd;
+    *getcwd     = \&_vms_cwd;
     *fastcwd    = \&_vms_cwd;
     *fastgetcwd = \&_vms_cwd;
 }
-elsif ($osname eq 'NT') {
+elsif ($^O eq 'NT') {
 
     *getcwd     = \&cwd;
     *fastgetcwd = \&cwd;
 }
-elsif ($osname eq 'os2') {
+elsif ($^O eq 'os2') {
     *cwd     = \&_os2_cwd;
     *getcwd     = \&_os2_cwd;
     *fastgetcwd = \&_os2_cwd;
     *fastcwd = \&_os2_cwd;
 }
+$^W = $oldw;
 
 # package main; eval join('',<DATA>) || die $@;	# quick test
 
