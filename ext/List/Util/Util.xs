@@ -411,6 +411,8 @@ refaddr(sv)
 PROTOTYPE: $
 CODE:
 {
+    if (SvMAGICAL(sv))
+	mg_get(sv);
     if(!SvROK(sv)) {
 	XSRETURN_UNDEF;
     }
