@@ -2105,7 +2105,7 @@ PP(pp_crypt)
 #ifdef FCRYPT
     sv_setpv(TARG, fcrypt(tmps, SvPV(right, PL_na)));
 #else
-    sv_setpv(TARG, crypt(tmps, SvPV(right, PL_na)));
+    sv_setpv(TARG, PerlProc_crypt(tmps, SvPV(right, PL_na)));
 #endif
 #else
     DIE(

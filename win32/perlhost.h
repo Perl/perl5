@@ -468,6 +468,10 @@ public:
     {
 	win32_abort();
     };
+    virtual char * Crypt(const char* clear, const char* salt)
+    {
+	return win32_crypt(clear, salt);
+    };
     virtual void Exit(int status)
     {
 	exit(status);

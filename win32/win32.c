@@ -1162,14 +1162,20 @@ win32_alarm(unsigned int sec)
     return 0;
 }
 
+#if defined(HAVE_DES_FCRYPT) || defined(PERL_OBJECT)
 #ifdef HAVE_DES_FCRYPT
 extern char *	des_fcrypt(char *cbuf, const char *txt, const char *salt);
+#endif
 
 DllExport char *
 win32_crypt(const char *txt, const char *salt)
 {
+#ifdef HAVE_DES_FCRYPT
     dTHR;
     return des_fcrypt(crypt_buffer, txt, salt);
+#else
+    die("The crypt() function is unimplemented due to excessive paranoia.");
+#endif
 }
 #endif
 

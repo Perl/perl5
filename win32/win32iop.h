@@ -127,7 +127,7 @@ DllExport  int		win32_wait(int *status);
 DllExport  int		win32_waitpid(int pid, int *status, int flags);
 DllExport  int		win32_kill(int pid, int sig);
 
-#ifdef HAVE_DES_FCRYPT
+#if defined(HAVE_DES_FCRYPT) || defined(PERL_OBJECT)
 DllExport char *	win32_crypt(const char *txt, const char *salt);
 #endif
 

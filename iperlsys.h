@@ -634,6 +634,7 @@ class IPerlProc
 {
 public:
     virtual void	Abort(void) = 0;
+    virtual char *	Crypt(const char* clear, const char* salt) = 0;
     virtual void	Exit(int status) = 0;
     virtual void	_Exit(int status) = 0;
     virtual int		Execl(const char *cmdname, const char *arg0,
@@ -671,6 +672,7 @@ public:
 };
 
 #define PerlProc_abort()	PL_piProc->Abort()
+#define PerlProc_crypt(c,s)	PL_piProc->Crypt((c), (s))
 #define PerlProc_exit(s)	PL_piProc->Exit((s))
 #define PerlProc__exit(s)	PL_piProc->_Exit((s))
 #define PerlProc_execl(c, w, x, y, z)					\
@@ -713,6 +715,7 @@ public:
 #else	/* PERL_OBJECT */
 
 #define PerlProc_abort()	abort()
+#define PerlProc_crypt(c,s)	crypt((c), (s))
 #define PerlProc_exit(s)	exit((s))
 #define PerlProc__exit(s)	_exit((s))
 #define PerlProc_execl(c,w,x,y,z)					\

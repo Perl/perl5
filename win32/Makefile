@@ -68,7 +68,7 @@ INST_VER	= \5.005
 #
 # if you have the source for des_fcrypt(), uncomment this and make sure the
 # file exists (see README.win32).  File should be located in the same
-# directory as this file.  Not (yet) supported with PERL_OBJECT.
+# directory as this file.
 #
 #CRYPT_SRC	= des_fcrypt.c
 
