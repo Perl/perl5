@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Feb  2 13:59:11 EET 1999 [metaconfig 3.0 PL70]
+# Generated on Tue Feb  2 14:26:31 EET 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -3369,7 +3369,7 @@ fi
 case "$models" in
 '')
 	$cat >pdp11.c <<'EOP'
-main() {
+int main() {
 #ifdef pdp11
 	exit(0);
 #else
@@ -4199,7 +4199,7 @@ echo " "
 echo "Checking your choice of C compiler and flags for coherency..." >&4
 $cat > try.c <<'EOF'
 #include <stdio.h>
-main() { printf("Ok\n"); exit(0); }
+int main() { printf("Ok\n"); exit(0); }
 EOF
 set X $cc $optimize $ccflags -o try $ldflags try.c $libs
 shift
@@ -4975,7 +4975,7 @@ yes)
 		else tval=false;
 		fi;;
 	*)
-		echo "main() { extern short $1$tdc; printf(\"%hd\", $1$tc); }" > t.c;
+		echo "int main() { extern short $1$tdc; printf(\"%hd\", $1$tc); }" > t.c;
 		if $cc $optimize $ccflags $ldflags -o t t.c $libs >/dev/null 2>&1;
 		then tval=true;
 		else tval=false;
@@ -6354,7 +6354,7 @@ case "$d_access" in
 #ifdef I_UNISTD
 #include <unistd.h>
 #endif
-main() {
+int main() {
 	exit(R_OK);
 }
 EOCP
@@ -6554,7 +6554,7 @@ case "$intsize" in
 	echo "Checking to see how big your integers are..." >&4
 	$cat >intsize.c <<'EOCP'
 #include <stdio.h>
-main()
+int main()
 {
 	printf("intsize=%d;\n", sizeof(int));
 	printf("longsize=%d;\n", sizeof(long));
@@ -6650,7 +6650,7 @@ $cat >try.c <<EOCP
 #include <sys/types.h>
 #include <signal.h>
 $signal_t blech(s) int s; { exit(3); }
-main()
+int main()
 {
 	$xxx i32;
 	double f, g;
@@ -6708,7 +6708,7 @@ $signal_t blech_in_list(s) int s; { exit(4); }
 unsigned long dummy_long(p) unsigned long p; { return p; }
 unsigned int dummy_int(p) unsigned int p; { return p; }
 unsigned short dummy_short(p) unsigned short p; { return p; }
-main()
+int main()
 {
 	double f;
 	unsigned long along;
@@ -6800,7 +6800,7 @@ if set vprintf val -f d_vprintf; eval $csym; $val; then
 	$cat >vprintf.c <<'EOF'
 #include <varargs.h>
 
-main() { xxx("foo"); }
+int main() { xxx("foo"); }
 
 xxx(va_alist)
 va_dcl
@@ -7517,7 +7517,7 @@ $cat >open3.c <<'EOCP'
 #ifdef I_SYS_FILE
 #include <sys/file.h>
 #endif
-main() {
+int main() {
 	if(O_RDONLY);
 #ifdef O_TRUNC
 	exit(0);
@@ -7573,7 +7573,7 @@ case "$o_nonblock" in
 '')
 	$cat head.c > try.c
 	$cat >>try.c <<'EOCP'
-main() {
+int main() {
 #ifdef O_NONBLOCK
 	printf("O_NONBLOCK\n");
 	exit(0);
@@ -7620,7 +7620,7 @@ extern int errno;
 $signal_t blech(x) int x; { exit(3); }
 EOCP
 	$cat >> try.c <<'EOCP'
-main()
+int main()
 {
 	int pd[2];
 	int pu[2];
@@ -7769,7 +7769,7 @@ if test "X$timeincl" = X; then
 #ifdef I_SYSSELECT
 #include <sys/select.h>
 #endif
-main()
+int main()
 {
 	struct tm foo;
 #ifdef S_TIMEVAL
@@ -7853,7 +7853,7 @@ $cat >fd_set.c <<EOCP
 #ifdef I_SYS_SELECT
 #include <sys/select.h>
 #endif
-main() {
+int main() {
 	fd_set fds;
 
 #ifdef TRYBITS
@@ -8407,7 +8407,7 @@ echo " "
 $cat >isascii.c <<'EOCP'
 #include <stdio.h>
 #include <ctype.h>
-main() {
+int main() {
 	int c = 'A';
 	if (isascii(c))
 		exit(0);
@@ -8482,7 +8482,7 @@ case "$doublesize" in
 	$echo $n "Checking to see how big your double precision numbers are...$c" >&4
 	$cat >try.c <<'EOCP'
 #include <stdio.h>
-main()
+int main()
 {
 	printf("%d\n", sizeof(double));
 }
@@ -9000,7 +9000,7 @@ EOCP
 #ifdef I_UNISTD
 #  include <unistd.h>  /* Needed for NetBSD */
 #endif
-main()
+int main()
 {
 char buf[128], abc[128];
 char *b;
@@ -9076,7 +9076,7 @@ EOCP
 #ifdef I_UNISTD
 #  include <unistd.h>  /* Needed for NetBSD */
 #endif
-main()
+int main()
 {
 char buf[128], abc[128];
 char *b;
@@ -9154,7 +9154,7 @@ EOCP
 #ifdef I_UNISTD
 #  include <unistd.h>  /* Needed for NetBSD */
 #endif
-main()
+int main()
 {
 char a = -1;
 char b = 0;
@@ -9639,7 +9639,7 @@ if set sigaction val -f d_sigaction; eval $csym; $val; then
 #include <stdio.h>
 #include <sys/types.h>
 #include <signal.h>
-main()
+int main()
 {
     struct sigaction act, oact;
 }
@@ -9666,7 +9666,7 @@ case "$d_sigsetjmp" in
 #include <setjmp.h>
 sigjmp_buf env;
 int set = 1;
-main()
+int main()
 {
 	if (sigsetjmp(env,1))
 		exit(set);
@@ -9756,7 +9756,7 @@ $cat >try.c <<EOP
 #include <stdio.h>
 #define FILE_ptr(fp)	$stdio_ptr
 #define FILE_cnt(fp)	$stdio_cnt
-main() {
+int main() {
 	FILE *fp = fopen("try.c", "r");
 	char c = getc(fp);
 	if (
@@ -9807,7 +9807,7 @@ $define)
 #include <stdio.h>
 #define FILE_base(fp)	$stdio_base
 #define FILE_bufsiz(fp)	$stdio_bufsiz
-main() {
+int main() {
 	FILE *fp = fopen("try.c", "r");
 	char c = getc(fp);
 	if (
@@ -10214,7 +10214,7 @@ struct foobar {
 	char foo;
 	double bar;
 } try;
-main()
+int main()
 {
 	printf("%d\n", (char *)&try.bar - (char *)&try.foo);
 }
@@ -10249,7 +10249,7 @@ I'm now running the test program...
 EOM
 	$cat >try.c <<'EOCP'
 #include <stdio.h>
-main()
+int main()
 {
 	int i;
 	union {
@@ -10344,7 +10344,7 @@ $define)
 #include <sys/types.h>
 #include <stdio.h>
 #include <db.h>
-main()
+int main()
 {
 #ifdef DB_VERSION_MAJOR	/* DB version >= 2 */
     int Major, Minor, Patch ;
@@ -10427,7 +10427,7 @@ size_t size;
 {
 }
 HASHINFO info;
-main()
+int main()
 {
 	info.hash = hash_cb;
 }
@@ -10472,7 +10472,7 @@ const DBT *key2;
 {
 }
 BTREEINFO info;
-main()
+int main()
 {
 	info.prefix = prefix_cb;
 }
@@ -10525,7 +10525,7 @@ sub() {
 #endif
 	exit(0);
 }
-main() { sub(); }
+int main() { sub(); }
 EOCP
 	if $cc $ccflags -c -DTRY=$defvoidused try.c >.out 2>&1 ; then
 		voidflags=$defvoidused
@@ -10666,7 +10666,7 @@ echo "Checking to see how many bits your $randfunc() function produces..." >&4
 #ifdef I_STDLIB
 #  include <stdlib.h>
 #endif
-main()
+int main()
 {
 	register int i;
 	register unsigned long tmp;
@@ -11078,7 +11078,7 @@ case "$ptrsize" in
 	fi
 	$cat >>try.c <<'EOCP'
 #include <stdio.h>
-main()
+int main()
 {
 	printf("%d\n", sizeof(VOID_PTR));
 	exit(0);
@@ -11105,7 +11105,7 @@ echo "Checking how to generate random libraries on your machine..." >&4
 echo 'int bar1() { return bar2(); }' > bar1.c
 echo 'int bar2() { return 2; }' > bar2.c
 $cat > foo.c <<'EOP'
-main() { printf("%d\n", bar1()); exit(0); }
+int main() { printf("%d\n", bar1()); exit(0); }
 EOP
 $cc $ccflags -c bar1.c >/dev/null 2>&1
 $cc $ccflags -c bar2.c >/dev/null 2>&1
@@ -11541,7 +11541,7 @@ $cat > ssize.c <<EOM
 #include <sys/types.h>
 #define Size_t $sizetype
 #define SSize_t $dflt
-main()
+int main()
 {
 	if (sizeof(Size_t) == sizeof(SSize_t))
 		printf("$dflt\n");
