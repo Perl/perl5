@@ -67,6 +67,15 @@ lives in a non-current package but begins with an underscore ("_").
 Warnings aren't issued for the special case of the single character
 name "_" by itself (e.g. $_ and @_).
 
+=item B<undefined-subs>
+
+This option warns whenever an undefined subroutine is invoked.
+This option will only catch explicitly invoked subroutines such
+as C<foo()> and not indirect invocations such as C<&$subref()>
+or C<$obj-E<gt>meth()>. Note that some programs or modules delay
+definition of subs until runtime by means of the AUTOLOAD
+mechanism.
+
 =item B<all>
 
 Turn all warnings on.
@@ -129,7 +138,7 @@ my %valid_check;
 BEGIN {
     map($valid_check{$_}++,
 	qw(context implicit_read implicit_write dollar_underscore
-	   private_names));
+	   private_names undefined_subs));
 }
 
 # Debugging options
@@ -237,6 +246,17 @@ sub B::GVOP::lint {
 	    && $gv->NAME =~ /^_./ && $gv->STASH->NAME ne $curstash)
 	{
 	    warning('Illegal reference to private name %s', $gv->NAME);
+	}
+    }
+    if ($check{undefined_subs}) {
+	if ($op->ppaddr eq "pp_gv" && $op->next->ppaddr eq "pp_entersub") {
+	    my $gv = $op->gv;
+	    my $subname = $gv->STASH->NAME . "::" . $gv->NAME;
+	    no strict 'refs';
+	    if (!defined(&$subname)) {
+		$subname =~ s/^main:://;
+		warning('Undefined subroutine %s called', $subname);
+	    }
 	}
     }
 }
