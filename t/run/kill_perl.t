@@ -804,3 +804,8 @@ Execution of - aborted due to compilation errors.
 BEGIN { print "ok\n" }
 EXPECT
 ok
+######## read($var, FILE, 1) segfaults on 5.6.1 [ID 20011025.054]
+read($bla, FILE, 1);
+EXPECT
+Can't modify constant item in read at - line 1, near "1)"
+Execution of - aborted due to compilation errors.
