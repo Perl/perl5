@@ -47,7 +47,7 @@ sub longmess {
 	        if ($require) {
 		    $sub = "require $eval";
 		} else {
-		    $eval =~ s/[\\\']/\\$&/g;
+		    $eval =~ s/([\\\'])/\\$1/g;
 		    if ($MaxEvalLen && length($eval) > $MaxEvalLen) {
 			substr($eval,$MaxEvalLen) = '...';
 		    }
@@ -66,20 +66,40 @@ sub longmess {
 
 sub shortmess {	# Short-circuit &longmess if called via multiple packages
     my $error = $_[0];	# Instead of "shift"
-    my ($curpack) = caller(1);
+    my ($prevpack) = caller(1);
     my $extra = $CarpLevel;
     my $i = 2;
     my ($pack,$file,$line);
+    my %isa = ($prevpack,1);
+
+    @isa{@{"${prevpack}::ISA"}} = ()
+	if(defined @{"${prevpack}::ISA"});
+
     while (($pack,$file,$line) = caller($i++)) {
-	if ($pack ne $curpack) {
-	    if ($extra-- > 0) {
-		$curpack = $pack;
-	    }
-	    else {
-		return "$error at $file line $line\n";
-	    }
+	if(defined @{$pack . "::ISA"}) {
+	    my @i = @{$pack . "::ISA"};
+	    my %i;
+	    @i{@i} = ();
+	    @isa{@i,$pack} = ()
+		if(exists $i{$prevpack} || exists $isa{$pack});
+	}
+
+	next
+	    if(exists $isa{$pack});
+
+	if ($extra-- > 0) {
+	    %isa = ($pack,1);
+	    @isa{@{$pack . "::ISA"}} = ()
+		if(defined @{$pack . "::ISA"});
+	}
+	else {
+	    return "$error at $file line $line\n";
 	}
     }
+    continue {
+	$prevpack = $pack;
+    }
+
     goto &longmess;
 }
 
