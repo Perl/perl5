@@ -954,7 +954,6 @@ vms/ext/XSSymSet.pm	manage linker symbols when building extensions
 vms/ext/filespec.t	See if VMS::Filespec funtions work
 vms/ext/vmsish.pm	Control VMS-specific behavior of Perl core
 vms/ext/vmsish.t	Tests for vmsish.pm
-vms/fndvers.com		parse Perl version from patchlevel.h
 vms/gen_shrfls.pl	generate options files and glue for shareable image
 vms/genconfig.pl	retcon config.sh from config.h
 vms/genopt.com		hack to write options files in case of broken makes
