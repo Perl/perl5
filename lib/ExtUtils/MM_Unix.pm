@@ -80,13 +80,13 @@ path. On UNIX eliminated successive slashes and successive "/.".
 sub canonpath {
     my($self,$path) = @_;
     my $node = '';
-    if ( $^O eq 'qnx' && $path =~ s|^(//\d+)/|/| ) {
+    if ( $^O eq 'qnx' && $path =~ s|^(//\d+)/|/|s ) {
       $node = $1;
     }
     $path =~ s|(?<=[^/])/+|/|g ;                   # xx////xx  -> xx/xx
     $path =~ s|(/\.)+/|/|g ;                       # xx/././xx -> xx/xx
-    $path =~ s|^(\./)+|| unless $path eq "./";     # ./xx      -> xx
-    $path =~ s|(?<=[^/])/$|| ;                     # xx/       -> xx
+    $path =~ s|^(\./)+||s unless $path eq "./";    # ./xx      -> xx
+    $path =~ s|(?<=[^/])/\z|| ;                    # xx/       -> xx
     "$node$path";
 }
 
@@ -738,7 +738,7 @@ sub dir_target {
 	my($targ) = $self->catfile($dir,'.exists');
 	# catfile may have adapted syntax of $dir to target OS, so...
 	if ($Is_VMS) { # Just remove file name; dirspec is often in macro
-	    ($targdir = $targ) =~ s:/?\.exists$::;
+	    ($targdir = $targ) =~ s:/?\.exists\z::;
 	}
 	else { # while elsewhere we expect to see the dir separator in $targ
 	    $targdir = dirname($targ);
@@ -1124,10 +1124,10 @@ Takes as argument a path and returns true, if it is an absolute path.
 sub file_name_is_absolute {
     my($self,$file) = @_;
     if ($Is_Dos){
-        $file =~ m{^([a-z]:)?[\\/]}i ;
+        $file =~ m{^([a-z]:)?[\\/]}is ;
     }
     else {
-        $file =~ m:^/: ;
+        $file =~ m:^/:s ;
     }
 }
 
@@ -1310,7 +1310,7 @@ sub guess_name {
     my($self) = @_;
     use Cwd 'cwd';
     my $name = basename(cwd());
-    $name =~ s|[\-_][\d\.\-]+$||;   # this is new with MM 5.00, we
+    $name =~ s|[\-_][\d\.\-]+\z||;  # this is new with MM 5.00, we
                                     # strip minus or underline
                                     # followed by a float or some such
     print "Warning: Guessing NAME [$name] from current directory name.\n";
@@ -1405,26 +1405,26 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 	if (-d $name){
 	    next if -l $name; # We do not support symlinks at all
 	    $dir{$name} = $name if (-f $self->catfile($name,"Makefile.PL"));
-	} elsif ($name =~ /\.xs$/){
-	    my($c); ($c = $name) =~ s/\.xs$/.c/;
+	} elsif ($name =~ /\.xs\z/){
+	    my($c); ($c = $name) =~ s/\.xs\z/.c/;
 	    $xs{$name} = $c;
 	    $c{$c} = 1;
-	} elsif ($name =~ /\.c(pp|xx|c)?$/i){  # .c .C .cpp .cxx .cc
+	} elsif ($name =~ /\.c(pp|xx|c)?\z/i){  # .c .C .cpp .cxx .cc
 	    $c{$name} = 1
 		unless $name =~ m/perlmain\.c/; # See MAP_TARGET
-	} elsif ($name =~ /\.h$/i){
+	} elsif ($name =~ /\.h\z/i){
 	    $h{$name} = 1;
-	} elsif ($name =~ /\.PL$/) {
-	    ($pl_files{$name} = $name) =~ s/\.PL$// ;
+	} elsif ($name =~ /\.PL\z/) {
+	    ($pl_files{$name} = $name) =~ s/\.PL\z// ;
 	} elsif (($Is_VMS || $Is_Dos) && $name =~ /[._]pl$/i) {
 	    # case-insensitive filesystem, one dot per name, so foo.h.PL
 	    # under Unix appears as foo.h_pl under VMS or fooh.pl on Dos
 	    local($/); open(PL,$name); my $txt = <PL>; close PL;
 	    if ($txt =~ /Extracting \S+ \(with variable substitutions/) {
-		($pl_files{$name} = $name) =~ s/[._]pl$//i ;
+		($pl_files{$name} = $name) =~ s/[._]pl\z//i ;
 	    }
 	    else { $pm{$name} = $self->catfile('$(INST_LIBDIR)',$name); }
-	} elsif ($name =~ /\.(p[ml]|pod)$/){
+	} elsif ($name =~ /\.(p[ml]|pod)\z/){
 	    $pm{$name} = $self->catfile('$(INST_LIBDIR)',$name);
 	}
     }
@@ -1499,7 +1499,7 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
     $self->{PM}  = \%pm             unless $self->{PM};
     $self->{C}   = [sort keys %c]   unless $self->{C};
     my(@o_files) = @{$self->{C}};
-    $self->{O_FILES} = [grep s/\.c(pp|xx|c)?$/$self->{OBJ_EXT}/i, @o_files] ;
+    $self->{O_FILES} = [grep s/\.c(pp|xx|c)?\z/$self->{OBJ_EXT}/i, @o_files] ;
     $self->{H}   = [sort keys %h]   unless $self->{H};
     $self->{PL_FILES} = \%pl_files unless $self->{PL_FILES};
 
@@ -1545,9 +1545,9 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 	my %manifypods = (); # we collect the keys first, i.e. the files
 			     # we have to convert to pod
 	foreach $name (keys %{$self->{PM}}) {
-	    if ($name =~ /\.pod$/ ) {
+	    if ($name =~ /\.pod\z/ ) {
 		$manifypods{$name} = $self->{PM}{$name};
-	    } elsif ($name =~ /\.p[ml]$/ ) {
+	    } elsif ($name =~ /\.p[ml]\z/ ) {
 		local *FH;
 		my($ispod)=0;
 		if (open(FH,"<$name")) {
@@ -1570,17 +1570,17 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 	# Remove "Configure.pm" and similar, if it's not the only pod listed
 	# To force inclusion, just name it "Configure.pod", or override MAN3PODS
 	foreach $name (keys %manifypods) {
-	    if ($name =~ /(config|setup).*\.pm/i) {
+	    if ($name =~ /(config|setup).*\.pm/is) {
 		delete $manifypods{$name};
 		next;
 	    }
 	    my($manpagename) = $name;
-	    $manpagename =~ s/\.p(od|m|l)$//;
+	    $manpagename =~ s/\.p(od|m|l)\z//;
 	    if ($pods{HTMLLIB}) {
 		$self->{HTMLLIBPODS}->{$name} =
 		  $self->catfile("\$(INST_HTMLLIBDIR)", "$manpagename.\$(HTMLEXT)");
 	    }
-	    unless ($manpagename =~ s!^\W*lib\W+!!) { # everything below lib is ok
+	    unless ($manpagename =~ s!^\W*lib\W+!!s) { # everything below lib is ok
 		$manpagename = $self->catfile(split(/::/,$self->{PARENT_NAME}),$manpagename);
 	    }
 	    if ($pods{MAN3}) {
@@ -1629,7 +1629,7 @@ sub init_main {
         $modfname = &DynaLoader::mod2fname(\@modparts);
     }
 
-    ($self->{PARENT_NAME}, $self->{BASEEXT}) = $self->{NAME} =~ m!(?:([\w:]+)::)?(\w+)$! ;
+    ($self->{PARENT_NAME}, $self->{BASEEXT}) = $self->{NAME} =~ m!(?:([\w:]+)::)?(\w+)\z! ;
 
     if (defined &DynaLoader::mod2fname) {
 	# As of 5.001m, dl_os2 appends '_'
@@ -2385,7 +2385,7 @@ $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE)
 		my $incl;
 		my $xx;
 
-		($xx = $File::Find::name) =~ s,.*?/auto/,,;
+		($xx = $File::Find::name) =~ s,.*?/auto/,,s;
 		$xx =~ s,/?$_,,;
 		$xx =~ s,/,::,g;
 
@@ -2403,7 +2403,7 @@ $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE)
 		my $excl;
 		my $xx;
 
-		($xx = $File::Find::name) =~ s,.*?/auto/,,;
+		($xx = $File::Find::name) =~ s,.*?/auto/,,s;
 		$xx =~ s,/?$_,,;
 		$xx =~ s,/,::,g;
 
@@ -2420,7 +2420,7 @@ $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE)
 
 	# Once the patch to minimod.PL is in the distribution, I can
 	# drop it
-	return if $File::Find::name =~ m:auto/$self->{FULLEXT}/$self->{BASEEXT}$self->{LIB_EXT}$:;
+	return if $File::Find::name =~ m:auto/$self->{FULLEXT}/$self->{BASEEXT}$self->{LIB_EXT}\z:;
 	use Cwd 'cwd';
 	$static{cwd() . "/" . $_}++;
     }, grep( -d $_, @{$searchdirs || []}) );
@@ -2431,7 +2431,7 @@ $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE)
 
     $extra = [] unless $extra && ref $extra eq 'ARRAY';
     for (sort keys %static) {
-	next unless /\Q$self->{LIB_EXT}\E$/;
+	next unless /\Q$self->{LIB_EXT}\E\z/;
 	$_ = dirname($_) . "/extralibs.ld";
 	push @$extra, $_;
     }
@@ -2516,7 +2516,7 @@ $tmp/perlmain\$(OBJ_EXT): $tmp/perlmain.c
 $tmp/perlmain.c: $makefilename}, q{
 	}.$self->{NOECHO}.q{echo Writing $@
 	}.$self->{NOECHO}.q{$(PERL) $(MAP_PERLINC) -MExtUtils::Miniperl \\
-		-e "writemain(grep s#.*/auto/##, split(q| |, q|$(MAP_STATIC)|))" > $@t && $(MV) $@t $@
+		-e "writemain(grep s#.*/auto/##s, split(q| |, q|$(MAP_STATIC)|))" > $@t && $(MV) $@t $@
 
 };
     push @m, "\t",$self->{NOECHO}.q{$(PERL) $(INSTALLSCRIPT)/fixpmain
@@ -3093,7 +3093,7 @@ sub prefixify {
     my($self,$var,$sprefix,$rprefix) = @_;
     $self->{uc $var} ||= $Config{lc $var};
     $self->{uc $var} = VMS::Filespec::unixpath($self->{uc $var}) if $Is_VMS;
-    $self->{uc $var} =~ s/\Q$sprefix\E/$rprefix/;
+    $self->{uc $var} =~ s/\Q$sprefix\E/$rprefix/s;
 }
 
 =item processPL (o)

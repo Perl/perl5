@@ -115,7 +115,7 @@ sub _unix_os2_ext {
 	    } elsif (-f ($fullname="$thispth/Slib$thislib$Config_libext")){
 	    } elsif ($^O eq 'dgux'
 		 && -l ($fullname="$thispth/lib$thislib$Config_libext")
-		 && readlink($fullname) =~ /^elink:/) {
+		 && readlink($fullname) =~ /^elink:/s) {
 		 # Some of DG's libraries look like misconnected symbolic
 		 # links, but development tools can follow them.  (They
 		 # look like this:
@@ -137,7 +137,7 @@ sub _unix_os2_ext {
 	    # Now update library lists
 
 	    # what do we know about this library...
-	    my $is_dyna = ($fullname !~ /\Q$Config_libext\E$/);
+	    my $is_dyna = ($fullname !~ /\Q$Config_libext\E\z/);
 	    my $in_perl = ($libs =~ /\B-l\Q$ {thislib}\E\b/s);
 
 	    # Do not add it into the list if it is already linked in

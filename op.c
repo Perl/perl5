@@ -173,7 +173,7 @@ Perl_pad_allocmy(pTHX_ char *name)
 	    }
 	}
 	if (PL_in_my == KEY_our) {
-	    while (off >= 0 && off <= top) {
+	    while (off <= top) {
 		if ((sv = svp[off])
 		    && sv != &PL_sv_undef
 		    && ((SvFLAGS(sv) & SVpad_OUR) && GvSTASH(sv) == ourstash)

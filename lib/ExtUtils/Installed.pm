@@ -67,8 +67,8 @@ my $sub = sub
 
    # Hack of the leading bits of the paths & convert to a module name
    my $module = $File::Find::name;
-   $module =~ s!$Config{archlib}/auto/(.*)/.packlist!$1!;
-   $module =~ s!$Config{sitearch}/auto/(.*)/.packlist!$1!;
+   $module =~ s!$Config{archlib}/auto/(.*)/.packlist!$1!s;
+   $module =~ s!$Config{sitearch}/auto/(.*)/.packlist!$1!s;
    my $modfile = "$module.pm";
    $module =~ s!/!::!g;
 
