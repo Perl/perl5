@@ -106,7 +106,6 @@ sv_derived_from(SV *sv, char *name)
 
 #include "XSUB.h"
 
-static
 XS(XS_UNIVERSAL_isa)
 {
     dXSARGS;
@@ -123,7 +122,6 @@ XS(XS_UNIVERSAL_isa)
     XSRETURN(1);
 }
 
-static
 XS(XS_UNIVERSAL_can)
 {
     dXSARGS;
@@ -158,7 +156,6 @@ XS(XS_UNIVERSAL_can)
     XSRETURN(1);
 }
 
-static
 XS(XS_UNIVERSAL_VERSION)
 {
     dXSARGS;
