@@ -2452,10 +2452,15 @@ PerlIOUnix_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
     while (1) {
 	SSize_t len = PerlLIO_read(fd, vbuf, count);
 	if (len >= 0 || errno != EINTR) {
-	    if (len < 0)
-		PerlIOBase(f)->flags |= PERLIO_F_ERROR;
-	    else if (len == 0 && count != 0)
+	    if (len < 0) {
+		if (errno != EAGAIN) {
+		    PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+		}
+	    }
+	    else if (len == 0 && count != 0) {
 		PerlIOBase(f)->flags |= PERLIO_F_EOF;
+		SETERRNO(0,0);
+	    }
 	    return len;
 	}
 	PERL_ASYNC_CHECK();
@@ -2469,8 +2474,11 @@ PerlIOUnix_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
     while (1) {
 	SSize_t len = PerlLIO_write(fd, vbuf, count);
 	if (len >= 0 || errno != EINTR) {
-	    if (len < 0)
-		PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+	    if (len < 0) {
+		if (errno != EAGAIN) {
+		    PerlIOBase(f)->flags |= PERLIO_F_ERROR;
+		}
+	    }
 	    return len;
 	}
 	PERL_ASYNC_CHECK();
