@@ -536,7 +536,6 @@ XS(XS_utf8_is_utf8)
     {
 	SV *	sv = ST(0);
  {
-  STRLEN len;
   if (SvUTF8(sv))
    XSRETURN_YES;
   else
