@@ -7,7 +7,7 @@
 BEGIN {
     if ($ENV{'PERL_CORE'}){
         chdir 't';
-        unshift @INC, '../lib';
+        @INC = '../lib';
     }
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bEncode\b/) {
@@ -30,7 +30,6 @@ BEGIN {
 }
 
 use strict;
-#use Test::More qw(no_plan);
 use Test::More tests => 6;
 use Encode;
 use encoding 'euc-jp';
