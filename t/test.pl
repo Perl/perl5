@@ -295,6 +295,9 @@ sub eq_array {
     my ($ra, $rb) = @_;
     return 0 unless $#$ra == $#$rb;
     for my $i (0..$#$ra) {
+	next     if !defined $ra->[$i] && !defined $rb->[$i]; 
+	return 0 if !defined $ra->[$i];
+	return 0 if !defined $rb->[$i];
 	return 0 unless $ra->[$i] eq $rb->[$i];
     }
     return 1;
