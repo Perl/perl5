@@ -2764,7 +2764,10 @@ XS(w32_GetTickCount)
 {
     dXSARGS;
     EXTEND(SP,1);
-    XSRETURN_IV(GetTickCount());
+    DWORD msec = GetTickCount();
+    if ((IV)msec > 0)
+	XSRETURN_IV(msec);
+    XSRETURN_NV(msec);
 }
 
 static
