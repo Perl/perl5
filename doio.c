@@ -413,7 +413,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    }
 	}
 	if (fd != PerlIO_fileno(fp)) {
-	    int pid;
+	    Pid_t pid;
 	    SV *sv;
 
 	    PerlLIO_dup2(PerlIO_fileno(fp), fd);

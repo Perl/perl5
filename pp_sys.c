@@ -3764,7 +3764,7 @@ PP(pp_getpgrp)
 {
 #ifdef HAS_GETPGRP
     djSP; dTARGET;
-    int pid;
+    Pid_t pid;
     I32 value;
 
     if (MAXARG < 1)
@@ -3789,8 +3789,8 @@ PP(pp_setpgrp)
 {
 #ifdef HAS_SETPGRP
     djSP; dTARGET;
-    int pgrp;
-    int pid;
+    Pid_t pgrp;
+    Pid_t pid;
     if (MAXARG < 2) {
 	pgrp = 0;
 	pid = 0;

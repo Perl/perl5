@@ -2218,7 +2218,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 {
     int p[2];
     register I32 This, that;
-    register I32 pid;
+    register Pid_t pid;
     SV *sv;
     I32 doexec = strNE(cmd,"-");
     I32 did_pipes = 0;
@@ -2289,7 +2289,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 #endif	/* defined OS2 */
 	/*SUPPRESS 560*/
 	if (tmpgv = gv_fetchpv("$",TRUE, SVt_PV))
-	    sv_setiv(GvSV(tmpgv), (IV)getpid());
+	    sv_setiv(GvSV(tmpgv), getpid());
 	PL_forkprocess = 0;
 	hv_clear(PL_pidstatus);	/* we have no children */
 	return Nullfp;
@@ -2511,8 +2511,8 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     Sigsave_t hstat, istat, qstat;
     int status;
     SV **svp;
-    int pid;
-    int pid2;
+    Pid_t pid;
+    Pid_t pid2;
     bool close_failed;
     int saved_errno;
 #ifdef VMS
@@ -2523,7 +2523,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 #endif
 
     svp = av_fetch(PL_fdpid,PerlIO_fileno(ptr),TRUE);
-    pid = (int)SvIVX(*svp);
+    pid = SvIVX(*svp);
     SvREFCNT_dec(*svp);
     *svp = &PL_sv_undef;
 #ifdef OS2
@@ -2562,7 +2562,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 
 #if  !defined(DOSISH) || defined(OS2) || defined(WIN32)
 I32
-Perl_wait4pid(pTHX_ int pid, int *statusp, int flags)
+Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 {
     SV *sv;
     SV** svp;
@@ -2622,7 +2622,7 @@ Perl_wait4pid(pTHX_ int pid, int *statusp, int flags)
 
 void
 /*SUPPRESS 590*/
-Perl_pidgone(pTHX_ int pid, int status)
+Perl_pidgone(pTHX_ Pid_t pid, int status)
 {
     register SV *sv;
     char spid[TYPE_CHARS(int)];

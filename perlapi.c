@@ -3008,7 +3008,7 @@ Perl_require_pv(pTHXo_ const char* pv)
 
 #undef  Perl_pidgone
 void
-Perl_pidgone(pTHXo_ int pid, int status)
+Perl_pidgone(pTHXo_ Pid_t pid, int status)
 {
     ((CPerlObj*)pPerl)->Perl_pidgone(pid, status);
 }
@@ -4285,7 +4285,7 @@ Perl_vivify_ref(pTHXo_ SV* sv, U32 to_what)
 
 #undef  Perl_wait4pid
 I32
-Perl_wait4pid(pTHXo_ int pid, int* statusp, int flags)
+Perl_wait4pid(pTHXo_ Pid_t pid, int* statusp, int flags)
 {
     return ((CPerlObj*)pPerl)->Perl_wait4pid(pid, statusp, flags);
 }
