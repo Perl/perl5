@@ -42,9 +42,9 @@ yet.
 to try to declare one with a package qualifier on the front.  Use local()
 if you want to localize a package variable.
 
-=item "my" variable %s masks earlier declaration in same %s
+=item "%s" variable %s masks earlier declaration in same %s
 
-(W) A lexical variable has been redeclared in the current scope or statement,
+(W) A "my" or "our" variable has been redeclared in the current scope or statement,
 effectively eliminating all access to the previous instance.  This is almost
 always a typographical error.  Note that the earlier variable will still exist
 until the end of the scope or until all closure referents to it are
@@ -684,10 +684,16 @@ only with arrays that have a hash reference at index 0.
 (P) An error peculiar to VMS.  The process is suffering from exhausted quotas
 or other plumbing problems.
 
-=item Can't declare %s in my
+=item Can't declare class for non-scalar %s in "%s"
 
-(F) Only scalar, array, and hash variables may be declared as lexical variables.
-They must have ordinary identifiers as names.
+(S) Currently, only scalar variables can declared with a specific class
+qualifier in a "my" or "our" declaration.  The semantics may be extended
+for other types of variables in future.
+
+=item Can't declare %s in "%s"
+
+(F) Only scalar, array, and hash variables may be declared as "my" or
+"our" variables.  They must have ordinary identifiers as names.
 
 =item Can't do inplace edit on %s: %s
 
@@ -1514,8 +1520,9 @@ the line, and you really meant a "less than".
 =item Global symbol "%s" requires explicit package name
 
 (F) You've said "use strict vars", which indicates that all variables
-must either be lexically scoped (using "my"), or explicitly qualified to
-say which package the global variable is in (using "::").
+must either be lexically scoped (using "my"), declared beforehand using
+"our", or explicitly qualified to say which package the global variable
+is in (using "::").
 
 =item goto must have label
 
@@ -2395,7 +2402,7 @@ when you meant
 
     my ($foo, $bar) = @_;
 
-Remember that "my" and "local" bind closer than comma.
+Remember that "my", "our" and "local" bind closer than comma.
 
 =item Perl %3.3f required--this is only version %s, stopped
 

@@ -178,8 +178,8 @@ Perl_pad_allocmy(pTHX_ char *name)
     sv_setpv(sv, name);
     if (PL_in_my_stash) {
 	if (*name != '$')
-	    yyerror(Perl_form(aTHX_ "Can't declare class for non-scalar %s in \"my\"",
-			 name));
+	    yyerror(Perl_form(aTHX_ "Can't declare class for non-scalar %s in \"%s\"",
+			 name, PL_in_my == KEY_our ? "our" : "my"));
 	SvOBJECT_on(sv);
 	(void)SvUPGRADE(sv, SVt_PVMG);
 	SvSTASH(sv) = (HV*)SvREFCNT_inc(PL_in_my_stash);
@@ -1869,13 +1869,18 @@ S_my_kid(pTHX_ OP *o, OP *attrs)
 	     type != OP_PADHV &&
 	     type != OP_PUSHMARK)
     {
-	yyerror(Perl_form(aTHX_ "Can't declare %s in my", PL_op_desc[o->op_type]));
+	yyerror(Perl_form(aTHX_ "Can't declare %s in \"%s\"",
+			  PL_op_desc[o->op_type],
+			  PL_in_my == KEY_our ? "our" : "my"));
 	return o;
     }
     else if (attrs && type != OP_PUSHMARK) {
 	HV *stash;
 	SV *padsv;
 	SV **namesvp;
+
+	PL_in_my = FALSE;
+	PL_in_my_stash = Nullhv;
 
 	/* check for C<my Dog $spot> when deciding package */
 	namesvp = av_fetch(PL_comppad_name, o->op_targ, FALSE);
@@ -1896,11 +1901,12 @@ Perl_my_attrs(pTHX_ OP *o, OP *attrs)
 {
     if (o->op_flags & OPf_PARENS)
 	list(o);
-    PL_in_my = FALSE;
-    PL_in_my_stash = Nullhv;
     if (attrs)
 	SAVEFREEOP(attrs);
-    return my_kid(o, attrs);
+    o = my_kid(o, attrs);
+    PL_in_my = FALSE;
+    PL_in_my_stash = Nullhv;
+    return o;
 }
 
 OP *
@@ -2111,16 +2117,18 @@ Perl_localize(pTHX_ OP *o, I32 lex)
 	    char *s;
 	    for (s = PL_bufptr; *s && (isALNUM(*s) || (*s & 0x80) || strchr("@$%, ",*s)); s++) ;
 	    if (*s == ';' || *s == '=')
-		Perl_warner(aTHX_ WARN_PARENTHESIS, "Parentheses missing around \"%s\" list",
-				lex ? "my" : "local");
+		Perl_warner(aTHX_ WARN_PARENTHESIS,
+			    "Parentheses missing around \"%s\" list",
+			    lex ? (PL_in_my == KEY_our ? "our" : "my") : "local");
 	}
     }
+    if (lex)
+	o = my(o);
+    else
+	o = mod(o, OP_NULL);		/* a bit kludgey */
     PL_in_my = FALSE;
     PL_in_my_stash = Nullhv;
-    if (lex)
-	return my(o);
-    else
-	return mod(o, OP_NULL);		/* a bit kludgey */
+    return o;
 }
 
 OP *
