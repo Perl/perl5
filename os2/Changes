@@ -214,6 +214,8 @@ after 5.005_02:
 	$^E was reset on the second read, and contained ".\r\n" at the end.
 
 after 5.005_53:
+	Would segfault system()ing non-existing program;
+	AOUT build was hosed;
 	warning-test for getpriority() might lock the system hard on 
 		pre-fixpak22 configuration (calling getpriority() on 
 		non-existing process triggers a system-wide bug).
