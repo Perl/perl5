@@ -576,6 +576,7 @@ union	overhead {
 		u_char	ovu_index;	/* bucket # */
 		u_char	ovu_magic;	/* magic number */
 #ifdef RCHECK
+	    /* Subtract one to fit into u_short for an extra bucket */
 		u_short	ovu_size;	/* block size (requested + overhead - 1) */
 		u_int	ovu_rmagic;	/* range magic number */
 #endif
@@ -591,14 +592,14 @@ union	overhead {
 #define RMAGIC_C	0x55		/* magic # on range info */
 
 #ifdef RCHECK
-#  define	RSLOP		sizeof (u_int)
+#  define	RMAGIC_SZ	sizeof (u_int) /* Overhead at end of bucket */
 #  ifdef TWO_POT_OPTIMIZE
 #    define MAX_SHORT_BUCKET (12 * BUCKETS_PER_POW2) /* size-1 fits in short */
 #  else
 #    define MAX_SHORT_BUCKET (13 * BUCKETS_PER_POW2)
 #  endif 
 #else
-#  define	RSLOP		0
+#  define	RMAGIC_SZ	0
 #endif
 
 #if !defined(PACK_MALLOC) && defined(BUCKETS_ROOT2)
@@ -634,15 +635,16 @@ static u_short buck_size[MAX_BUCKET_BY_TABLE + 1] =
   { 
       0, 0, 0, 0, 4, 4, 8, 12, 16, 24, 32, 48, 64, 80,
   };
-#  define BUCKET_SIZE(i) ((i) % 2 ? buck_size[i] : (1 << ((i) >> BUCKET_POW2_SHIFT)))
+#  define BUCKET_SIZE_NO_SURPLUS(i) ((i) % 2 ? buck_size[i] : (1 << ((i) >> BUCKET_POW2_SHIFT)))
 #  define BUCKET_SIZE_REAL(i) ((i) <= MAX_BUCKET_BY_TABLE		\
 			       ? buck_size[i] 				\
 			       : ((1 << ((i) >> BUCKET_POW2_SHIFT))	\
 				  - MEM_OVERHEAD(i)			\
 				  + POW2_OPTIMIZE_SURPLUS(i)))
 #else
-#  define BUCKET_SIZE(i) (1 << ((i) >> BUCKET_POW2_SHIFT))
-#  define BUCKET_SIZE_REAL(i) (BUCKET_SIZE(i) - MEM_OVERHEAD(i) + POW2_OPTIMIZE_SURPLUS(i))
+#  define BUCKET_SIZE_NO_SURPLUS(i) (1 << ((i) >> BUCKET_POW2_SHIFT))
+#  define BUCKET_SIZE(i) (BUCKET_SIZE_NO_SURPLUS(i) + POW2_OPTIMIZE_SURPLUS(i))
+#  define BUCKET_SIZE_REAL(i) (BUCKET_SIZE(i) - MEM_OVERHEAD(i))
 #endif 
 
 
@@ -787,7 +789,7 @@ static u_short buck_size[MAX_BUCKET_BY_TABLE + 1] =
 #ifdef IGNORE_SMALL_BAD_FREE
 #define FIRST_BUCKET_WITH_CHECK (6 * BUCKETS_PER_POW2) /* 64 */
 #  define N_BLKS(bucket) ( (bucket) < FIRST_BUCKET_WITH_CHECK 		\
-			 ? ((1<<LOG_OF_MIN_ARENA) - 1)/BUCKET_SIZE(bucket) \
+			 ? ((1<<LOG_OF_MIN_ARENA) - 1)/BUCKET_SIZE_NO_SURPLUS(bucket) \
 			 : n_blks[bucket] )
 #else
 #  define N_BLKS(bucket) n_blks[bucket]
@@ -810,7 +812,7 @@ static u_short n_blks[LOG_OF_MIN_ARENA * BUCKETS_PER_POW2] =
 #ifdef IGNORE_SMALL_BAD_FREE
 #  define BLK_SHIFT(bucket) ( (bucket) < FIRST_BUCKET_WITH_CHECK 	\
 			      ? ((1<<LOG_OF_MIN_ARENA)			\
-				 - BUCKET_SIZE(bucket) * N_BLKS(bucket)) \
+				 - BUCKET_SIZE_NO_SURPLUS(bucket) * N_BLKS(bucket)) \
 			      : blk_shift[bucket])
 #else
 #  define BLK_SHIFT(bucket) blk_shift[bucket]
@@ -851,7 +853,7 @@ static u_short blk_shift[LOG_OF_MIN_ARENA * BUCKETS_PER_POW2] =
 
 #endif /* !PACK_MALLOC */
 
-#define M_OVERHEAD (sizeof(union overhead) + RSLOP)
+#define M_OVERHEAD (sizeof(union overhead) + RMAGIC_SZ) /* overhead at start+end */
 
 #ifdef PACK_MALLOC
 #  define MEM_OVERHEAD(bucket) \
@@ -1510,7 +1512,7 @@ Perl_malloc(register size_t nbytes)
 			      (long)size));
 
 	FILLCHECK_DEADBEEF((unsigned char*)(p + CHUNK_SHIFT),
-			   BUCKET_SIZE_REAL(bucket));
+			   BUCKET_SIZE_REAL(bucket) + RMAGIC_SZ);
 
 #ifdef IGNORE_SMALL_BAD_FREE
 	if (bucket >= FIRST_BUCKET_WITH_CHECK)
@@ -1530,13 +1532,14 @@ Perl_malloc(register size_t nbytes)
 	    
 	    nbytes = size + M_OVERHEAD; 
 	    p->ov_size = nbytes - 1;
-	    if ((i = nbytes & 3)) {
-		i = 4 - i;
-		while (i--)
-		    *((char *)((caddr_t)p + nbytes - RSLOP + i)) = RMAGIC_C;
+	    if ((i = nbytes & (RMAGIC_SZ-1))) {
+		i = RMAGIC_SZ - i;
+		while (i--) /* nbytes - RMAGIC_SZ is end of alloced area */
+		    ((caddr_t)p + nbytes - RMAGIC_SZ)[i] = RMAGIC_C;
 	    }
-	    nbytes = (nbytes + 3) &~ 3; 
-	    *((u_int *)((caddr_t)p + nbytes - RSLOP)) = RMAGIC;
+	    /* Same at RMAGIC_SZ-aligned RMAGIC */
+	    nbytes = (nbytes + RMAGIC_SZ - 1) & ~(RMAGIC_SZ - 1);
+	    ((u_int *)((caddr_t)p + nbytes))[-1] = RMAGIC;
 	}
 	FILL_FEEDADAD((unsigned char *)(p + CHUNK_SHIFT), size);
 #endif
@@ -1631,7 +1634,7 @@ get_from_bigger_buckets(int bucket, MEM_SIZE size)
 	    nmalloc[bucket]--;
 	    start_slack -= M_OVERHEAD;
 #endif 
-	    add_to_chain(ret, (BUCKET_SIZE(bucket) +
+	    add_to_chain(ret, (BUCKET_SIZE_NO_SURPLUS(bucket) +
 			       POW2_OPTIMIZE_SURPLUS(bucket)), 
 			 size);
 	    return ret;
@@ -1936,7 +1939,7 @@ morecore(register int bucket)
 	 * Add new memory allocated to that on
 	 * free list for this hash bucket.
 	 */
-  	siz = BUCKET_SIZE(bucket);
+  	siz = BUCKET_SIZE_NO_SURPLUS(bucket); /* No surplus if nblks > 1 */
 #ifdef PACK_MALLOC
 	*(u_char*)ovp = bucket;	/* Fill index. */
 	if (bucket <= MAX_PACKED) {
@@ -2047,19 +2050,22 @@ Perl_mfree(void *mp)
 	    int i;
 	    MEM_SIZE nbytes = ovp->ov_size + 1;
 
-	    if ((i = nbytes & 3)) {
-		i = 4 - i;
-		while (i--) {
-		    ASSERT(*((char *)((caddr_t)ovp + nbytes - RSLOP + i))
-			   == RMAGIC_C, "chunk's tail overwrite");
+	    if ((i = nbytes & (RMAGIC_SZ-1))) {
+		i = RMAGIC_SZ - i;
+		while (i--) {	/* nbytes - RMAGIC_SZ is end of alloced area */
+		    ASSERT(((caddr_t)ovp + nbytes - RMAGIC_SZ)[i] == RMAGIC_C,
+			   "chunk's tail overwrite");
 		}
 	    }
-	    nbytes = (nbytes + 3) &~ 3; 
-	    ASSERT(*(u_int *)((caddr_t)ovp + nbytes - RSLOP) == RMAGIC, "chunk's tail overwrite");	    
-	    FILLCHECK_DEADBEEF((unsigned char*)((caddr_t)ovp + nbytes - RSLOP + sizeof(u_int)),
-			       BUCKET_SIZE_REAL(OV_INDEX(ovp)) - (nbytes - RSLOP + sizeof(u_int)));
+	    /* Same at RMAGIC_SZ-aligned RMAGIC */
+	    nbytes = (nbytes + (RMAGIC_SZ-1)) & ~(RMAGIC_SZ-1);
+	    ASSERT(((u_int *)((caddr_t)ovp + nbytes))[-1] == RMAGIC,
+		   "chunk's tail overwrite");	    
+	    FILLCHECK_DEADBEEF((unsigned char*)((caddr_t)ovp + nbytes),
+			       BUCKET_SIZE(OV_INDEX(ovp)) - nbytes);
 	}
-	FILL_DEADBEEF((unsigned char*)(ovp+1), BUCKET_SIZE_REAL(OV_INDEX(ovp)));
+	FILL_DEADBEEF((unsigned char*)(ovp+CHUNK_SHIFT),
+		      BUCKET_SIZE_REAL(OV_INDEX(ovp)) + RMAGIC_SZ);
 	ovp->ov_rmagic = RMAGIC - 1;
 #endif
   	ASSERT(OV_INDEX(ovp) < NBUCKETS, "chunk's head overwrite");
@@ -2189,22 +2195,24 @@ Perl_realloc(void *mp, size_t nbytes)
 		if (OV_INDEX(ovp) <= MAX_SHORT_BUCKET) {
 		       int i, nb = ovp->ov_size + 1;
 
-		       if ((i = nb & 3)) {
-			   i = 4 - i;
-			   while (i--) {
-			       ASSERT(*((char *)((caddr_t)ovp + nb - RSLOP + i)) == RMAGIC_C, "chunk's tail overwrite");
+		       if ((i = nb & (RMAGIC_SZ-1))) {
+			   i = RMAGIC_SZ - i;
+			   while (i--) { /* nb - RMAGIC_SZ is end of alloced area */
+			       ASSERT(((caddr_t)ovp + nb - RMAGIC_SZ)[i] == RMAGIC_C, "chunk's tail overwrite");
 			   }
 		       }
-		       nb = (nb + 3) &~ 3; 
-		       ASSERT(*(u_int *)((caddr_t)ovp + nb - RSLOP) == RMAGIC, "chunk's tail overwrite");
-		       FILLCHECK_DEADBEEF((unsigned char*)((caddr_t)ovp + nb - RSLOP + sizeof(u_int)),
-			       BUCKET_SIZE_REAL(OV_INDEX(ovp)) - (nb - RSLOP + sizeof(u_int)));
+		       /* Same at RMAGIC_SZ-aligned RMAGIC */
+		       nb = (nb + (RMAGIC_SZ-1)) & ~(RMAGIC_SZ-1);
+		       ASSERT(((u_int *)((caddr_t)ovp + nb))[-1] == RMAGIC,
+			      "chunk's tail overwrite");
+		       FILLCHECK_DEADBEEF((unsigned char*)((caddr_t)ovp + nb),
+					  BUCKET_SIZE(OV_INDEX(ovp)) - nb);
 		       if (nbytes > ovp->ov_size + 1 - M_OVERHEAD)
 			   FILL_FEEDADAD((unsigned char*)cp + ovp->ov_size + 1 - M_OVERHEAD,
 				     nbytes - (ovp->ov_size + 1 - M_OVERHEAD));
 		       else
 			   FILL_DEADBEEF((unsigned char*)cp + nbytes,
-					 nb - M_OVERHEAD + RSLOP - nbytes);
+					 nb - M_OVERHEAD + RMAGIC_SZ - nbytes);
 			/*
 			 * Convert amount of memory requested into
 			 * closest block size stored in hash buckets
@@ -2213,14 +2221,15 @@ Perl_realloc(void *mp, size_t nbytes)
 			 */
 			nbytes += M_OVERHEAD;
 			ovp->ov_size = nbytes - 1;
-			if ((i = nbytes & 3)) {
-			    i = 4 - i;
-			    while (i--)
-				*((char *)((caddr_t)ovp + nbytes - RSLOP + i))
+			if ((i = nbytes & (RMAGIC_SZ-1))) {
+			    i = RMAGIC_SZ - i;
+			    while (i--)	/* nbytes - RMAGIC_SZ is end of alloced area */
+				((caddr_t)ovp + nbytes - RMAGIC_SZ)[i]
 				    = RMAGIC_C;
 			}
-			nbytes = (nbytes + 3) &~ 3; 
-			*((u_int *)((caddr_t)ovp + nbytes - RSLOP)) = RMAGIC;
+			/* Same at RMAGIC_SZ-aligned RMAGIC */
+			nbytes = (nbytes + (RMAGIC_SZ-1)) & ~(RMAGIC_SZ - 1);
+			((u_int *)((caddr_t)ovp + nbytes))[-1] = RMAGIC;
 		}
 #endif
 		res = cp;
@@ -2337,7 +2346,7 @@ Perl_malloced_size(void *p)
     if (bucket <= MAX_SHORT_BUCKET) {
 	MEM_SIZE size = BUCKET_SIZE_REAL(bucket);
 	ovp->ov_size = size + M_OVERHEAD - 1;
-	*((u_int *)((caddr_t)ovp + size + M_OVERHEAD - RSLOP)) = RMAGIC;
+	*((u_int *)((caddr_t)ovp + size + M_OVERHEAD - RMAGIC_SZ)) = RMAGIC;
     }
 #endif
     return BUCKET_SIZE_REAL(bucket);
@@ -2393,7 +2402,7 @@ Perl_get_mstats(pTHX_ perl_mstats_t *buf, int buflen, int level)
 	    for (i = MIN_BUCKET ; i < NBUCKETS; i++) {
 		if (i >= buflen)
 		    break;
-		buf->bucket_mem_size[i] = BUCKET_SIZE(i);
+		buf->bucket_mem_size[i] = BUCKET_SIZE_NO_SURPLUS(i);
 		buf->bucket_available_size[i] = BUCKET_SIZE_REAL(i);
 	    }
 	}
@@ -2425,9 +2434,9 @@ Perl_dump_mstats(pTHX_ char *s)
 			  "Memory allocation statistics %s (buckets %"IVdf"(%"IVdf")..%"IVdf"(%"IVdf")\n",
 			  s, 
 			  (IV)BUCKET_SIZE_REAL(MIN_BUCKET), 
-			  (IV)BUCKET_SIZE(MIN_BUCKET),
+			  (IV)BUCKET_SIZE_NO_SURPLUS(MIN_BUCKET),
 			  (IV)BUCKET_SIZE_REAL(buffer.topbucket), 
-			  (IV)BUCKET_SIZE(buffer.topbucket));
+			  (IV)BUCKET_SIZE_NO_SURPLUS(buffer.topbucket));
   	PerlIO_printf(Perl_error_log, "%8"IVdf" free:", buffer.totfree);
   	for (i = MIN_EVEN_REPORT; i <= buffer.topbucket; i += BUCKETS_PER_POW2) {
   		PerlIO_printf(Perl_error_log, 
