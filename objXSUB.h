@@ -2292,8 +2292,6 @@
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #  if defined(DEBUGGING)
 #  endif
-#  if !defined(NV_PRESERVES_UV)
-#  endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #if 0

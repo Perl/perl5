@@ -925,114 +925,6 @@ PP(pp_pow)
 PP(pp_multiply)
 {
     djSP; dATARGET; tryAMAGICbin(mult,opASSIGN);
-#ifdef PERL_PRESERVE_IVUV
-    SvIV_please(TOPs);
-    if (SvIOK(TOPs)) {
-	/* Unless the left argument is integer in range we are going to have to
-	   use NV maths. Hence only attempt to coerce the right argument if
-	   we know the left is integer.  */
-	/* Left operand is defined, so is it IV? */
-	SvIV_please(TOPm1s);
-	if (SvIOK(TOPm1s)) {
-	    bool auvok = SvUOK(TOPm1s);
-	    bool buvok = SvUOK(TOPs);
-	    const UV topmask = (~ (UV)0) << (4 * sizeof (UV));
-	    const UV botmask = ~((~ (UV)0) << (4 * sizeof (UV)));
-	    UV alow;
-	    UV ahigh;
-	    UV blow;
-	    UV bhigh;
-
-	    if (auvok) {
-		alow = SvUVX(TOPm1s);
-	    } else {
-		IV aiv = SvIVX(TOPm1s);
-		if (aiv >= 0) {
-		    alow = aiv;
-		    auvok = TRUE; /* effectively it's a UV now */
-		} else {
-		    alow = -aiv; /* abs, auvok == false records sign */
-		}
-	    }
-	    if (buvok) {
-		blow = SvUVX(TOPs);
-	    } else {
-		IV biv = SvIVX(TOPs);
-		if (biv >= 0) {
-		    blow = biv;
-		    buvok = TRUE; /* effectively it's a UV now */
-		} else {
-		    blow = -biv; /* abs, buvok == false records sign */
-		}
-	    }
-
-	    /* If this does sign extension on unsigned it's time for plan B  */
-	    ahigh = alow >> (4 * sizeof (UV));
-	    alow &= botmask;
-	    bhigh = blow >> (4 * sizeof (UV));
-	    blow &= botmask;
-	    if (ahigh && bhigh) {
-		/* eg 32 bit is at least 0x10000 * 0x10000 == 0x100000000
-		   which is overflow. Drop to NVs below.  */
-	    } else if (!ahigh && !bhigh) {
-		/* eg 32 bit is at most 0xFFFF * 0xFFFF == 0xFFFE0001
-		   so the unsigned multiply cannot overflow.  */
-		UV product = alow * blow;
-		if (auvok == buvok) {
-		    /* -ve * -ve or +ve * +ve gives a +ve result.  */
-		    SP--;
-		    SETu( product );
-		    RETURN;
-		} else if (product <= (UV)IV_MIN) {
-		    /* 2s complement assumption that (UV)-IV_MIN is correct.  */
-		    /* -ve result, which could overflow an IV  */
-		    SP--;
-		    SETi( -product );
-		    RETURN;
-		} /* else drop to NVs below. */
-	    } else {
-		/* One operand is large, 1 small */
-		UV product_middle;
-		if (bhigh) {
-		    /* swap the operands */
-		    ahigh = bhigh;
-		    bhigh = blow; /* bhigh now the temp var for the swap */
-		    blow = alow;
-		    alow = bhigh;
-		}
-		/* now, ((ahigh * blow) << half_UV_len) + (alow * blow)
-		   multiplies can't overflow. shift can, add can, -ve can.  */
-		product_middle = ahigh * blow;
-		if (!(product_middle & topmask)) {
-		    /* OK, (ahigh * blow) won't lose bits when we shift it.  */
-		    UV product_low;
-		    product_middle <<= (4 * sizeof (UV));
-		    product_low = alow * blow;
-
-		    /* as for pp_add, UV + something mustn't get smaller.
-		       IIRC ANSI mandates this wrapping *behaviour* for
-		       unsigned whatever the actual representation*/
-		    product_low += product_middle;
-		    if (product_low >= product_middle) {
-			/* didn't overflow */
-			if (auvok == buvok) {
-			    /* -ve * -ve or +ve * +ve gives a +ve result.  */
-			    SP--;
-			    SETu( product_low );
-			    RETURN;
-			} else if (product_low <= (UV)IV_MIN) {
-			    /* 2s complement assumption again  */
-			    /* -ve result, which could overflow an IV  */
-			    SP--;
-			    SETi( -product_low );
-			    RETURN;
-			} /* else drop to NVs below. */
-		    }
-		} /* product_middle too large */
-	    } /* ahigh && bhigh */
-	} /* SvIOK(TOPm1s) */
-    } /* SvIOK(TOPs) */
-#endif
     {
       dPOPTOPnnrl;
       SETn( left * right );
@@ -1224,146 +1116,11 @@ PP(pp_repeat)
 
 PP(pp_subtract)
 {
-    djSP; dATARGET; bool useleft; tryAMAGICbin(subtr,opASSIGN);
-    useleft = USE_LEFT(TOPm1s);
-#ifdef PERL_PRESERVE_IVUV
-    /* We must see if we can perform the addition with integers if possible,
-       as the integer code detects overflow while the NV code doesn't.
-       If either argument hasn't had a numeric conversion yet attempt to get
-       the IV. It's important to do this now, rather than just assuming that
-       it's not IOK as a PV of "9223372036854775806" may not take well to NV
-       addition, and an SV which is NOK, NV=6.0 ought to be coerced to
-       integer in case the second argument is IV=9223372036854775806
-       We can (now) rely on sv_2iv to do the right thing, only setting the
-       public IOK flag if the value in the NV (or PV) slot is truly integer.
-
-       A side effect is that this also aggressively prefers integer maths over
-       fp maths for integer values.  */
-    SvIV_please(TOPs);
-    if (SvIOK(TOPs)) {
-	/* Unless the left argument is integer in range we are going to have to
-	   use NV maths. Hence only attempt to coerce the right argument if
-	   we know the left is integer.  */
-	if (!useleft) {
-	    /* left operand is undef, treat as zero. + 0 is identity. */
-	    if (SvUOK(TOPs)) {
-		dPOPuv; /* Scary macros. Lets put a sequence point (;) here */
-		if (value <= (UV)IV_MIN) {
-		    /* 2s complement assumption.  */
-		    SETi(-(IV)value);
-		    RETURN;
-		} /* else drop through into NVs below */
-	    } else {
-		dPOPiv;
-		SETu((UV)-value);
-		RETURN;
-	    }
-	} else {
-	    /* Left operand is defined, so is it IV? */
-	    SvIV_please(TOPm1s);
-	    if (SvIOK(TOPm1s)) {
-		bool auvok = SvUOK(TOPm1s);
-		bool buvok = SvUOK(TOPs);
-	    
-		if (!auvok && !buvok) { /* ## IV - IV ## */
-		    IV aiv = SvIVX(TOPm1s);
-		    IV biv = SvIVX(TOPs);
-		    IV result = aiv - biv;
-		
-		    if (biv >= 0 ? (result < aiv) : (result >= aiv)) {
-			SP--;
-			SETi( result );
-			RETURN;
-		    }
-		    /* +ve - +ve can't overflow. (worst case 0 - IV_MAX) */
-		    /* -ve - -ve can't overflow. (worst case -1 - IV_MIN) */
-		    /* -ve - +ve can only overflow too negative. */
-		    /* leaving +ve - -ve, which will go UV */
-		    if (aiv >= 0 && biv < 0) { /* assert don't need biv <0 */
-			/* 2s complement assumption for IV_MIN */
-			UV result = (UV)aiv + (UV)-biv;
-			/* UV + UV must get bigger. +ve IV + +ve IV +1 can't
-			   overflow UV (2s complement assumption */
-			assert (result >= (UV) aiv);
-			SP--;
-			SETu( result );
-			RETURN;
-		    }
-		    /* Overflow, drop through to NVs */
-		} else if (auvok && buvok) {	/* ## UV - UV ## */
-		    UV auv = SvUVX(TOPm1s);
-		    UV buv = SvUVX(TOPs);
-		    IV result;
-		    
-		    if (auv >= buv) {
-			SP--;
-			SETu( auv - buv );
-			RETURN;
-		    }
-		    /* Blatant 2s complement assumption.  */
-		    result = (IV)(auv - buv);
-		    if (result < 0) {
-			SP--;
-			SETi( result );
-			RETURN;
-		    }
-		    /* Overflow on IV - IV, drop through to NVs */
-		} else if (auvok) {	/* ## Mixed UV - IV ## */
-		    UV auv = SvUVX(TOPm1s);
-		    IV biv = SvIVX(TOPs);
-
-		    if (biv < 0) {
-			/* 2s complement assumptions for IV_MIN */
-			UV result = auv + ((UV)-biv);
-			/* UV + UV can only get bigger... */
-			if (result >= auv) {
-			    SP--;
-			    SETu( result );
-			    RETURN;
-			}
-			/* and if it gets too big for UV then it's NV time.  */
-		    } else if (auv > (UV)IV_MAX) {
-			/* I think I'm making an implicit 2s complement
-			   assumption that IV_MIN == -IV_MAX - 1 */
-			/* biv is >= 0 */
-			UV result = auv - (UV)biv;
-			assert (result <= auv);
-			SP--;
-			SETu( result );
-			RETURN;
-		    } else {
-			/* biv is >= 0 */
-			IV result = (IV)auv - biv;
-			assert (result <= (IV)auv);
-			SP--;
-			SETi( result );
-			RETURN;
-		    }
-		} else {		/* ## Mixed IV - UV ## */
-		    IV aiv = SvIVX(TOPm1s);
-		    UV buv = SvUVX(TOPs);
-		    IV result = aiv - (IV)buv; /* 2s complement assumption. */
-		
-		    /* result must not get larger. */
-		    if (result <= aiv) {
-			SP--;
-			SETi( result );
-			RETURN;
-		    } /* end of IV-IV / UV-UV / UV-IV / IV-UV */
-		}
-	    }
-	}
-    }
-#endif
+    djSP; dATARGET; tryAMAGICbin(subtr,opASSIGN);
     {
-	dPOPnv;
-	if (!useleft) {
-	    /* left operand is undef, treat as zero - value */
-	    SETn(-value);
-	    RETURN;
-	}
-	SETn( TOPn - value );
-	RETURN;
+      dPOPTOPnnrl_ul;
+      SETn( left - right );
+      RETURN;
     }
 }
 
@@ -1404,74 +1161,6 @@ PP(pp_right_shift)
 PP(pp_lt)
 {
     djSP; tryAMAGICbinSET(lt,0);
-#ifdef PERL_PRESERVE_IVUV
-    SvIV_please(TOPs);
-    if (SvIOK(TOPs)) {
-	SvIV_please(TOPm1s);
-	if (SvIOK(TOPm1s)) {
-	    bool auvok = SvUOK(TOPm1s);
-	    bool buvok = SvUOK(TOPs);
-	    
-	    if (!auvok && !buvok) { /* ## IV < IV ## */
-		IV aiv = SvIVX(TOPm1s);
-		IV biv = SvIVX(TOPs);
-		
-		SP--;
-		SETs(boolSV(aiv < biv));
-		RETURN;
-	    }
-	    if (auvok && buvok) { /* ## UV < UV ## */
-		UV auv = SvUVX(TOPm1s);
-		UV buv = SvUVX(TOPs);
-		
-		SP--;
-		SETs(boolSV(auv < buv));
-		RETURN;
-	    }
-	    if (auvok) { /* ## UV < IV ## */
-		UV auv;
-		IV biv;
-		
-		biv = SvIVX(TOPs);
-		SP--;
-		if (biv < 0) {
-		    /* As (a) is a UV, it's >=0, so it cannot be < */
-		    SETs(&PL_sv_no);
-		    RETURN;
-		}
-		auv = SvUVX(TOPs);
-		if (auv >= (UV) IV_MAX) {
-		    /* As (b) is an IV, it cannot be > IV_MAX */
-		    SETs(&PL_sv_no);
-		    RETURN;
-		}
-		SETs(boolSV(auv < (UV)biv));
-		RETURN;
-	    }
-	    { /* ## IV < UV ## */
-		IV aiv;
-		UV buv;
-		
-		aiv = SvIVX(TOPm1s);
-		if (aiv < 0) {
-		    /* As (b) is a UV, it's >=0, so it must be < */
-		    SP--;
-		    SETs(&PL_sv_yes);
-		    RETURN;
-		}
-		buv = SvUVX(TOPs);
-		SP--;
-		if (buv > (UV) IV_MAX) {
-		    /* As (a) is an IV, it cannot be > IV_MAX */
-		    SETs(&PL_sv_yes);
-		    RETURN;
-		}
-		SETs(boolSV((UV)aiv < buv));
-		RETURN;
-	    }
-	}
-    }
-#endif
     {
       dPOPnv;
       SETs(boolSV(TOPn < value));
@@ -1482,74 +1171,6 @@ PP(pp_lt)
 PP(pp_gt)
 {
     djSP; tryAMAGICbinSET(gt,0);
-#ifdef PERL_PRESERVE_IVUV
-    SvIV_please(TOPs);
-    if (SvIOK(TOPs)) {
-	SvIV_please(TOPm1s);
-	if (SvIOK(TOPm1s)) {
-	    bool auvok = SvUOK(TOPm1s);
-	    bool buvok = SvUOK(TOPs);
-	    
-	    if (!auvok && !buvok) { /* ## IV > IV ## */
-		IV aiv = SvIVX(TOPm1s);
-		IV biv = SvIVX(TOPs);
-		
-		SP--;
-		SETs(boolSV(aiv > biv));
-		RETURN;
-	    }
-	    if (auvok && buvok) { /* ## UV > UV ## */
-		UV auv = SvUVX(TOPm1s);
-		UV buv = SvUVX(TOPs);
-		
-		SP--;
-		SETs(boolSV(auv > buv));
-		RETURN;
-	    }
-	    if (auvok) { /* ## UV > IV ## */
-		UV auv;
-		IV biv;
-		
-		biv = SvIVX(TOPs);
-		SP--;
-		if (biv < 0) {
-		    /* As (a) is a UV, it's >=0, so it must be > */
-		    SETs(&PL_sv_yes);
-		    RETURN;
-		}
-		auv = SvUVX(TOPs);
-		if (auv > (UV) IV_MAX) {
-		    /* As (b) is an IV, it cannot be > IV_MAX */
-		    SETs(&PL_sv_yes);
-		    RETURN;
-		}
-		SETs(boolSV(auv > (UV)biv));
-		RETURN;
-	    }
-	    { /* ## IV > UV ## */
-		IV aiv;
-		UV buv;
-		
-		aiv = SvIVX(TOPm1s);
-		if (aiv < 0) {
-		    /* As (b) is a UV, it's >=0, so it cannot be > */
-		    SP--;
-		    SETs(&PL_sv_no);
-		    RETURN;
-		}
-		buv = SvUVX(TOPs);
-		SP--;
-		if (buv >= (UV) IV_MAX) {
-		    /* As (a) is an IV, it cannot be > IV_MAX */
-		    SETs(&PL_sv_no);
-		    RETURN;
-		}
-		SETs(boolSV((UV)aiv > buv));
-		RETURN;
-	    }
-	}
-    }
-#endif
     {
       dPOPnv;
       SETs(boolSV(TOPn > value));
@@ -1560,74 +1181,6 @@ PP(pp_gt)
 PP(pp_le)
 {
     djSP; tryAMAGICbinSET(le,0);
-#ifdef PERL_PRESERVE_IVUV
-    SvIV_please(TOPs);
-    if (SvIOK(TOPs)) {
-	SvIV_please(TOPm1s);
-	if (SvIOK(TOPm1s)) {
-	    bool auvok = SvUOK(TOPm1s);
-	    bool buvok = SvUOK(TOPs);
-	    
-	    if (!auvok && !buvok) { /* ## IV <= IV ## */
-		IV aiv = SvIVX(TOPm1s);
-		IV biv = SvIVX(TOPs);
-		
-		SP--;
-		SETs(boolSV(aiv <= biv));
-		RETURN;
-	    }
-	    if (auvok && buvok) { /* ## UV <= UV ## */
-		UV auv = SvUVX(TOPm1s);
-		UV buv = SvUVX(TOPs);
-		
-		SP--;
-		SETs(boolSV(auv <= buv));
-		RETURN;
-	    }
-	    if (auvok) { /* ## UV <= IV ## */
-		UV auv;
-		IV biv;
-		
-		biv = SvIVX(TOPs);
-		SP--;
-		if (biv < 0) {
-		    /* As (a) is a UV, it's >=0, so a cannot be <= */
-		    SETs(&PL_sv_no);
-		    RETURN;
-		}
-		auv = SvUVX(TOPs);
-		if (auv > (UV) IV_MAX) {
-		    /* As (b) is an IV, it cannot be > IV_MAX */
-		    SETs(&PL_sv_no);
-		    RETURN;
-		}
-		SETs(boolSV(auv <= (UV)biv));
-		RETURN;
-	    }
-	    { /* ## IV <= UV ## */
-		IV aiv;
-		UV buv;
-		
-		aiv = SvIVX(TOPm1s);
-		if (aiv < 0) {
-		    /* As (b) is a UV, it's >=0, so a must be <= */
-		    SP--;
-		    SETs(&PL_sv_yes);
-		    RETURN;
-		}
-		buv = SvUVX(TOPs);
-		SP--;
-		if (buv >= (UV) IV_MAX) {
-		    /* As (a) is an IV, it cannot be > IV_MAX */
-		    SETs(&PL_sv_yes);
-		    RETURN;
-		}
-		SETs(boolSV((UV)aiv <= buv));
-		RETURN;
-	    }
-	}
-    }
-#endif
     {
       dPOPnv;
       SETs(boolSV(TOPn <= value));
@@ -1638,74 +1191,6 @@ PP(pp_le)
 PP(pp_ge)
 {
     djSP; tryAMAGICbinSET(ge,0);
-#ifdef PERL_PRESERVE_IVUV
-    SvIV_please(TOPs);
-    if (SvIOK(TOPs)) {
-	SvIV_please(TOPm1s);
-	if (SvIOK(TOPm1s)) {
-	    bool auvok = SvUOK(TOPm1s);
-	    bool buvok = SvUOK(TOPs);
-	    
-	    if (!auvok && !buvok) { /* ## IV >= IV ## */
-		IV aiv = SvIVX(TOPm1s);
-		IV biv = SvIVX(TOPs);
-		
-		SP--;
-		SETs(boolSV(aiv >= biv));
-		RETURN;
-	    }
-	    if (auvok && buvok) { /* ## UV >= UV ## */
-		UV auv = SvUVX(TOPm1s);
-		UV buv = SvUVX(TOPs);
-		
-		SP--;
-		SETs(boolSV(auv >= buv));
-		RETURN;
-	    }
-	    if (auvok) { /* ## UV >= IV ## */
-		UV auv;
-		IV biv;
-		
-		biv = SvIVX(TOPs);
-		SP--;
-		if (biv < 0) {
-		    /* As (a) is a UV, it's >=0, so it must be >= */
-		    SETs(&PL_sv_yes);
-		    RETURN;
-		}
-		auv = SvUVX(TOPs);
-		if (auv >= (UV) IV_MAX) {
-		    /* As (b) is an IV, it cannot be > IV_MAX */
-		    SETs(&PL_sv_yes);
-		    RETURN;
-		}
-		SETs(boolSV(auv >= (UV)biv));
-		RETURN;
-	    }
-	    { /* ## IV >= UV ## */
-		IV aiv;
-		UV buv;
-		
-		aiv = SvIVX(TOPm1s);
-		if (aiv < 0) {
-		    /* As (b) is a UV, it's >=0, so a cannot be >= */
-		    SP--;
-		    SETs(&PL_sv_no);
-		    RETURN;
-		}
-		buv = SvUVX(TOPs);
-		SP--;
-		if (buv > (UV) IV_MAX) {
-		    /* As (a) is an IV, it cannot be > IV_MAX */
-		    SETs(&PL_sv_no);
-		    RETURN;
-		}
-		SETs(boolSV((UV)aiv >= buv));
-		RETURN;
-	    }
-	}
-    }
-#endif
     {
       dPOPnv;
       SETs(boolSV(TOPn >= value));
@@ -1716,66 +1201,6 @@ PP(pp_ge)
 PP(pp_ne)
 {
     djSP; tryAMAGICbinSET(ne,0);
-#ifdef PERL_PRESERVE_IVUV
-    SvIV_please(TOPs);
-    if (SvIOK(TOPs)) {
-	SvIV_please(TOPm1s);
-	if (SvIOK(TOPm1s)) {
-	    bool auvok = SvUOK(TOPm1s);
-	    bool buvok = SvUOK(TOPs);
-	    
-	    if (!auvok && !buvok) { /* ## IV <=> IV ## */
-		IV aiv = SvIVX(TOPm1s);
-		IV biv = SvIVX(TOPs);
-		
-		SP--;
-		SETs(boolSV(aiv != biv));
-		RETURN;
-	    }
-	    if (auvok && buvok) { /* ## UV != UV ## */
-		UV auv = SvUVX(TOPm1s);
-		UV buv = SvUVX(TOPs);
-		
-		SP--;
-		SETs(boolSV(auv != buv));
-		RETURN;
-	    }
-	    {			/* ## Mixed IV,UV ## */
-		IV iv;
-		UV uv;
-		
-		/* != is commutative so swap if needed (save code) */
-		if (auvok) {
-		    /* swap. top of stack (b) is the iv */
-		    iv = SvIVX(TOPs);
-		    SP--;
-		    if (iv < 0) {
-			/* As (a) is a UV, it's >0, so it cannot be == */
-			SETs(&PL_sv_yes);
-			RETURN;
-		    }
-		    uv = SvUVX(TOPs);
-		} else {
-		    iv = SvIVX(TOPm1s);
-		    SP--;
-		    if (iv < 0) {
-			/* As (b) is a UV, it's >0, so it cannot be == */
-			SETs(&PL_sv_yes);
-			RETURN;
-		    }
-		    uv = SvUVX(*(SP+1)); /* Do I want TOPp1s() ? */
-		}
-		/* we know iv is >= 0 */
-		if (uv > (UV) IV_MAX) {
-		    SETs(&PL_sv_yes);
-		    RETURN;
-		}
-		SETs(boolSV((UV)iv != uv));
-		RETURN;
-	    }
-	}
-    }
-#endif
     {
       dPOPnv;
       SETs(boolSV(TOPn != value));
@@ -1786,84 +1211,6 @@ PP(pp_ne)
 PP(pp_ncmp)
 {
     djSP; dTARGET; tryAMAGICbin(ncmp,0);
-#ifdef PERL_PRESERVE_IVUV
-    /* Fortunately it seems NaN isn't IOK */
-    SvIV_please(TOPs);
-    if (SvIOK(TOPs)) {
-	SvIV_please(TOPm1s);
-	if (SvIOK(TOPm1s)) {
-	    bool leftuvok = SvUOK(TOPm1s);
-	    bool rightuvok = SvUOK(TOPs);
-	    I32 value;
-	    if (!leftuvok && !rightuvok) { /* ## IV <=> IV ## */
-		IV leftiv = SvIVX(TOPm1s);
-		IV rightiv = SvIVX(TOPs);
-		
-		if (leftiv > rightiv)
-		    value = 1;
-		else if (leftiv < rightiv)
-		    value = -1;
-		else
-		    value = 0;
-	    } else if (leftuvok && rightuvok) { /* ## UV <=> UV ## */
-		UV leftuv = SvUVX(TOPm1s);
-		UV rightuv = SvUVX(TOPs);
-		
-		if (leftuv > rightuv)
-		    value = 1;
-		else if (leftuv < rightuv)
-		    value = -1;
-		else
-		    value = 0;
-	    } else if (leftuvok) { /* ## UV <=> IV ## */
-		UV leftuv;
-		IV rightiv;
-		
-		rightiv = SvIVX(TOPs);
-		if (rightiv < 0) {
-		    /* As (a) is a UV, it's >=0, so it cannot be < */
-		    value = 1;
-		} else {
-		    leftuv = SvUVX(TOPm1s);
-		    if (leftuv > (UV) IV_MAX) {
-			/* As (b) is an IV, it cannot be > IV_MAX */
-			value = 1;
-		    } else if (leftuv > (UV)rightiv) {
-			value = 1;
-		    } else if (leftuv < (UV)rightiv) {
-			value = -1;
-		    } else {
-			value = 0;
-		    }
-		}
-	    } else { /* ## IV <=> UV ## */
-		IV leftiv;
-		UV rightuv;
-		
-		leftiv = SvIVX(TOPm1s);
-		if (leftiv < 0) {
-		    /* As (b) is a UV, it's >=0, so it must be < */
-		    value = -1;
-		} else {
-		    rightuv = SvUVX(TOPs);
-		    if (rightuv > (UV) IV_MAX) {
-			/* As (a) is an IV, it cannot be > IV_MAX */
-			value = -1;
-		    } else if (leftiv > (UV)rightuv) {
-			value = 1;
-		    } else if (leftiv < (UV)rightuv) {
-			value = -1;
-		    } else {
-			value = 0;
-		    }
-		}
-	    }
-	    SP--;
-	    SETi(value);
-	    RETURN;
-	}
-    }
-#endif
     {
       dPOPTOPnnrl;
       I32 value;
@@ -2050,15 +1397,11 @@ PP(pp_negate)
     djSP; dTARGET; tryAMAGICun(neg);
     {
 	dTOPss;
-	int flags = SvFLAGS(sv);
 	if (SvGMAGICAL(sv))
 	    mg_get(sv);
-	if ((flags & SVf_IOK) || ((flags & (SVp_IOK | SVp_NOK)) == SVp_IOK)) {
-	    /* It's publicly an integer, or privately an integer-not-float */
-	oops_its_an_int:
+	if (SvIOKp(sv) && !SvNOKp(sv) && !SvPOKp(sv)) {
 	    if (SvIsUV(sv)) {
 		if (SvIVX(sv) == IV_MIN) {
-		    /* 2s complement assumption. */
 		    SETi(SvIVX(sv));	/* special case: -((UV)IV_MAX+1) == IV_MIN */
 		    RETURN;
 		}
@@ -2071,12 +1414,6 @@ PP(pp_negate)
 		SETi(-SvIVX(sv));
 		RETURN;
 	    }
-#ifdef PERL_PRESERVE_IVUV
-	    else {
-		SETu((UV)IV_MIN);
-		RETURN;
-	    }
-#endif
 	}
 	if (SvNIOKp(sv))
 	    SETn(-SvNV(sv));
@@ -2095,12 +1432,8 @@ PP(pp_negate)
 		sv_setpvn(TARG, "-", 1);
 		sv_catsv(TARG, sv);
 	    }
-	    else {
-	      SvIV_please(sv);
-	      if (SvIOK(sv))
-		goto oops_its_an_int;
-	      sv_setnv(TARG, -SvNV(sv));
-	    }
+	    else
+		sv_setnv(TARG, -SvNV(sv));
 	    SETTARG;
 	}
 	else
@@ -2563,49 +1896,38 @@ PP(pp_int)
 {
     djSP; dTARGET;
     {
-      NV value;
-      IV iv = TOPi; /* attempt to convert to IV if possible. */
-      /* XXX it's arguable that compiler casting to IV might be subtly
-	 different from modf (for numbers inside (IV_MIN,UV_MAX)) in which
-	 else preferring IV has introduced a subtle behaviour change bug. OTOH
-	 relying on floating point to be accurate is a bug.  */
+      NV value = TOPn;
+      IV iv;
 
-      if (SvIOK(TOPs)) {
-	if (SvIsUV(TOPs)) {
-	    UV uv = TOPu;
-	    SETu(uv);
-	} else
-	    SETi(iv);
-      } else {
-	  value = TOPn;
+      if (SvIOKp(TOPs) && !SvNOKp(TOPs) && !SvPOKp(TOPs)) {
+	iv = SvIVX(TOPs);
+	SETi(iv);
+      }
+      else {
 	  if (value >= 0.0) {
-	      if (value < (NV)UV_MAX + 0.5) {
-		  SETu(U_V(value));
-	      } else {
 #if defined(HAS_MODFL) || defined(LONG_DOUBLE_EQUALS_DOUBLE)
-		  (void)Perl_modf(value, &value);
+	      (void)Perl_modf(value, &value);
 #else
-		  double tmp = (double)value;
-		  (void)Perl_modf(tmp, &tmp);
-		  value = (NV)tmp;
+	      double tmp = (double)value;
+	      (void)Perl_modf(tmp, &tmp);
+	      value = (NV)tmp;
 #endif
-	      }
 	  }
-	  else {
-	      if (value > (NV)IV_MIN - 0.5) {
-		  SETi(I_V(value));
-	      } else {
+	else {
 #if defined(HAS_MODFL) || defined(LONG_DOUBLE_EQUALS_DOUBLE)
-		  (void)Perl_modf(-value, &value);
-		  value = -value;
+	    (void)Perl_modf(-value, &value);
+	    value = -value;
 #else
-		  double tmp = (double)value;
-		  (void)Perl_modf(-tmp, &tmp);
-		  value = -(NV)tmp;
+	    double tmp = (double)value;
+	    (void)Perl_modf(-tmp, &tmp);
+	    value = -(NV)tmp;
 #endif
-		  SETn(value);
-	      }
-	  }
+	}
+	iv = I_V(value);
+	if (iv == value)
+	  SETi(iv);
+	else
+	  SETn(value);
       }
     }
     RETURN;
@@ -2615,30 +1937,18 @@ PP(pp_abs)
 {
     djSP; dTARGET; tryAMAGICun(abs);
     {
-      /* This will cache the NV value if string isn't actually integer  */
-      IV iv = TOPi;
-      
-      if (SvIOK(TOPs)) {
-	/* IVX is precise  */
-	if (SvIsUV(TOPs)) {
-	  SETu(TOPu);	/* force it to be numeric only */
-	} else {
-	  if (iv >= 0) {
-	    SETi(iv);
-	  } else {
-	    if (iv != IV_MIN) {
-	      SETi(-iv);
-	    } else {
-	      /* 2s complement assumption. Also, not really needed as
-		 IV_MIN and -IV_MIN should both be %100...00 and NV-able  */
-	      SETu(IV_MIN);
-	    }
-	  } 
-	}
-      } else{
-	NV value = TOPn;
+      NV value = TOPn;
+      IV iv;
+
+      if (SvIOKp(TOPs) && !SvNOKp(TOPs) && !SvPOKp(TOPs) &&
+	  (iv = SvIVX(TOPs)) != IV_MIN) {
+	if (iv < 0)
+	  iv = -iv;
+	SETi(iv);
+      }
+      else {
 	if (value < 0.0)
-	  value = -value;
+	    value = -value;
 	SETn(value);
       }
     }

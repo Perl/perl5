@@ -192,11 +192,6 @@ ext/DynaLoader/hints/netbsd.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/openbsd.pl	Hint for DynaLoader for named architecture
 ext/Encode/Encode.pm		Encode extension
 ext/Encode/Encode.xs		Encode extension
-ext/Encode/encode.h		Encode extension
-ext/Encode/encengine.c		Encode extension
-ext/Encode/compile		Encode extension
-ext/Encode/Makefile.PL		Encode extension
-ext/Encode/Todo			Encode extension
 ext/Encode/Encode/EncodeFormat.pod	Encoding table format
 ext/Encode/Encode/ascii.enc	Encoding tables
 ext/Encode/Encode/big5.enc	Encoding tables
@@ -279,6 +274,8 @@ ext/Encode/Encode/macUkraine.enc	Encoding tables
 ext/Encode/Encode/posix-bc.enc		Encoding tables
 ext/Encode/Encode/shiftjis.enc		Encoding tables
 ext/Encode/Encode/symbol.enc		Encoding tables
+ext/Encode/Makefile.PL		Encode extension
+ext/Encode/Todo			Encode extension
 ext/Encode/compile		Encode extension
 ext/Encode/encengine.c		Encode extension
 ext/Encode/encode.h		Encode extension
@@ -406,8 +403,8 @@ ext/Socket/Makefile.PL	Socket extension makefile writer
 ext/Socket/Socket.pm	Socket extension Perl module
 ext/Socket/Socket.xs	Socket extension external subroutines
 ext/Storable/ChangeLog		Storable extension
-ext/Storable/Makefile.PL	Storable extension
 ext/Storable/MANIFEST		Storable extension
+ext/Storable/Makefile.PL	Storable extension
 ext/Storable/README		Storable extension
 ext/Storable/Storable.pm	Storable extension
 ext/Storable/Storable.xs	Storable extension
@@ -453,8 +450,8 @@ ext/re/re.pm		re extension Perl module
 ext/re/re.xs		re extension external subroutines
 ext/util/make_ext	Used by Makefile to execute extension Makefiles
 ext/util/mkbootstrap	Turns ext/*/*_BS into bootstrap info
-fakethr.h		Fake threads header
 fakesdio.h		stdio in terms of PerlIO
+fakethr.h		Fake threads header
 form.h			Public declarations for the above
 global.sym		Symbols that need hiding when embedded
 globals.c		File to declare global symbols (for shared library)
@@ -682,13 +679,13 @@ lib/File/DosGlob.pm	Win32 DOS-globbing module
 lib/File/Find.pm	Routines to do a find
 lib/File/Path.pm	Do things like `mkdir -p' and `rm -r'
 lib/File/Spec.pm	portable operations on file names
+lib/File/Spec/Epoc.pm	portable operations on EPOC file names
 lib/File/Spec/Functions.pm	Function interface to File::Spec object methods
 lib/File/Spec/Mac.pm	portable operations on Mac file names
 lib/File/Spec/OS2.pm	portable operations on OS2 file names
 lib/File/Spec/Unix.pm	portable operations on Unix file names
 lib/File/Spec/VMS.pm	portable operations on VMS file names
 lib/File/Spec/Win32.pm	portable operations on Win32 file names
-lib/File/Spec/Epoc.pm	portable operations on EPOC file names
 lib/File/Temp.pm	create safe temporary files and file handles
 lib/File/stat.pm	By-name interface to Perl's builtin stat
 lib/FileCache.pm	Keep more files open than the system permits
@@ -1166,8 +1163,8 @@ perlapi.c		Perl API functions
 perlapi.h		Perl API function declarations
 perlio.c		C code for PerlIO abstraction
 perlio.h		PerlIO abstraction
-perliol.h		PerlIO Layer definition
 perlio.sym		Symbols for PerlIO abstraction
+perliol.h		PerlIO Layer definition
 perlsdio.h		Fake stdio using perlio
 perlsfio.h		Prototype sfio mapping for PerlIO
 perlsh			A poor man's perl shell
@@ -1389,9 +1386,9 @@ t/lib/dprof/test6_t	Perl code profiler tests
 t/lib/dprof/test6_v	Perl code profiler tests
 t/lib/dumper-ovl.t	See if Data::Dumper works for overloaded data
 t/lib/dumper.t		See if Data::Dumper works
+t/lib/encode.t		See if Encode works
 t/lib/english.t		See if English works
 t/lib/env-array.t	See if Env works for arrays
-t/lib/encode.t		See if Encode works
 t/lib/env.t		See if Env works
 t/lib/errno.t		See if Errno works
 t/lib/fatal.t           See if Fatal works
@@ -1403,8 +1400,8 @@ t/lib/filefunc.t	See if File::Spec::Functions works
 t/lib/filehand.t	See if FileHandle works
 t/lib/filepath.t	See if File::Path works
 t/lib/filespec.t	See if File::Spec works
-t/lib/filter-util.t	See if Filter::Util::Call works
 t/lib/filter-util.pl	See if Filter::Util::Call works
+t/lib/filter-util.t	See if Filter::Util::Call works
 t/lib/findbin.t		See if FindBin works
 t/lib/ftmp-mktemp.t	See if File::Temp works
 t/lib/ftmp-posix.t	See if File::Temp works
@@ -1737,8 +1734,8 @@ vos/Changes		Changes made to port Perl to the VOS operating system
 vos/build.cm		VOS command macro to build Perl
 vos/compile_perl.cm	VOS command macro to build multiple version of Perl
 vos/config.alpha.def	definitions used by config.pl
-vos/config.ga.def	definitions used by config.pl
 vos/config.alpha.h	config.h for use with alpha VOS POSIX.1 support
+vos/config.ga.def	definitions used by config.pl
 vos/config.ga.h		config.h for use with generally-available VOS POSIX.1 support
 vos/config.pl		script to convert a config_h.SH to a config.h
 vos/configure_perl.cm	VOS command macro to configure perl before building

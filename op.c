@@ -2249,11 +2249,13 @@ Perl_fold_constants(pTHX_ register OP *o)
 	if ((SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK)) == SVf_NOK &&
 	    type != OP_NEGATE)
 	{
-#ifdef PERL_PRESERVE_IVUV
-	    /* Only bother to attempt to fold to IV if
-	       most operators will benefit  */
-	    SvIV_please(sv);
-#endif
+	    IV iv = SvIV(sv);
+	    if ((NV)iv == SvNV(sv)) {
+		SvREFCNT_dec(sv);
+		sv = newSViv(iv);
+	    }
+	    else
+		SvIOK_off(sv);			/* undo SvIV() damage */
 	}
 	return newSVOP(OP_CONST, 0, sv);
     }

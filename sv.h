@@ -448,9 +448,6 @@ Tells and SV that it is an unsigned integer and disables all other OK bits.
 =for apidoc Am|void|SvIOK_UV|SV* sv
 Returns a boolean indicating whether the SV contains an unsigned integer.
 
-=for apidoc Am|void|SvUOK|SV* sv
-Returns a boolean indicating whether the SV contains an unsigned integer.
-
 =for apidoc Am|void|SvIOK_notUV|SV* sv
 Returns a boolean indicating whether the SV contains an signed integer.
 
@@ -565,7 +562,6 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 
 #define SvIOK_UV(sv)		((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV))	\
 				 == (SVf_IOK|SVf_IVisUV))
-#define SvUOK(sv)		SvIOK_UV(sv)
 #define SvIOK_notUV(sv)		((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV))	\
 				 == SVf_IOK)
 
@@ -718,12 +714,6 @@ and disables all other OK bits.
 #define SvMAGIC(sv)	((XPVMG*)  SvANY(sv))->xmg_magic
 #define SvSTASH(sv)	((XPVMG*)  SvANY(sv))->xmg_stash
 
-/* Ask a scalar nicely to try to become an IV, if possible.
-   Not guaranteed to stay returning void */
-/* Macro won't actually call sv_2iv if already IOK */
-#define SvIV_please(sv) \
-	STMT_START {if (!SvIOKp(sv) && (SvNOK(sv) || SvPOK(sv))) \
-		(void) SvIV(sv); } STMT_END
 #define SvIV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) == SVt_IV || SvTYPE(sv) >= SVt_PVIV); \
 		(((XPVIV*)  SvANY(sv))->xiv_iv = val); } STMT_END
