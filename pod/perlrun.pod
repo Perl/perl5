@@ -1140,13 +1140,17 @@ This means that each different run of Perl will have a different
 ordering of the results of keys(), values(), and each().
 
 See L<perlsec/"Algorithmic Complexity Attacks"> for more information,
-and also L</PERL_HASH_SEED>.
+and also L</PERL_HASH_SEED_DEBUG>.
 
 =item PERL_HASH_SEED_DEBUG
 
-(Since Perl 5.8.1.)  Set to "1" to display (to STDERR) the value of
-the hash seed at the beginning of execution.
-See also hash_seed() of L<Hash::Util>.
+(Since Perl 5.8.1.)  Set to one to display (to STDERR) the value of
+the hash seed at the beginning of execution.  B<Note that the hash
+seed is sensitive information>: by knowing it one can craft a
+denial-of-service attack against Perl code, even remotely, see
+L<perlsec/"Algorithmic Complexity Attacks"> for more information.
+B<Do not disclose the hash seed> to people who don't need to know it.
+See also hashes_random() of L<Hash::Util>.
 
 =item PERL_ROOT (specific to the VMS port)
 
