@@ -22,9 +22,11 @@ BEGIN {
     unless (@grent) { plan skip_all => "no gid 0"; }
 }
 
-plan tests => 5;
+BEGIN {
+    plan tests => 5;
+    use_ok('User::grent');
+}
 
-BEGIN { use_ok('User::grent'); }
 can_ok(__PACKAGE__, 'getgrgid');
 
 my $grent = getgrgid 0;
