@@ -3069,6 +3069,16 @@ destination and autosplits them. See L<ExtUtils::Install/DESCRIPTION>
 
 =cut
 
+sub _pm_to_blib_flush {
+    my ($self, $autodir, $rr, $ra, $rl) = @_;
+    $$rr .= 
+q{	}.$self->{NOECHO}.q[$(PERLRUNINST) -MExtUtils::Install \
+	-e "pm_to_blib({qw{].qq[@$ra].q[}},'].$autodir.q{','$(PM_FILTER)')"
+};
+    @$ra = ();
+    $$rl = 0;
+}
+
 sub pm_to_blib {
     my $self = shift;
     my($autodir) = $self->catdir('$(INST_LIB)','auto');
@@ -3078,24 +3088,16 @@ pm_to_blib: $(TO_INST_PM)
     my %pm_to_blib = %{$self->{PM}};
     my @a;
     my $l;
-    sub _pm_to_blib_flush {
-	$r .= 
-q{	}.$self->{NOECHO}.q[$(PERLRUNINST) -MExtUtils::Install \
-	-e "pm_to_blib({qw{].qq[@a].q[}},'].$autodir.q{','$(PM_FILTER)')"
-};
-        @a = ();
-        $l = 0;
-    }
     while (my ($pm, $blib) = each %pm_to_blib) {
 	my $la = length $pm;
 	my $lb = length $blib;
-	if ($l + $la + $lb + @a / 2 > 200) {
-	    _pm_to_blib_flush();
+	if ($l + $la + $lb + @a / 2 > 200) { # limit line length
+	    _pm_to_blib_flush($self, $autodir, \$r, \@a, \$l);
         }
         push @a, $pm, $blib;
 	$l += $la + $lb;
     }
-    _pm_to_blib_flush();
+    _pm_to_blib_flush($self, $autodir, \$r, \@a, \$l);
     return $r.q{	}.$self->{NOECHO}.q{$(TOUCH) $@};
 }
 
