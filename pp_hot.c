@@ -16,6 +16,7 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_PP_HOT_C
 #include "perl.h"
 
 #ifdef I_UNISTD
@@ -33,8 +34,8 @@
 /* Hot code. */
 
 #ifdef USE_THREADS
-static void
-unset_cvowner(void *cvarg)
+STATIC void
+unset_cvowner(pTHX_ void *cvarg)
 {
     register CV* cv = (CV *) cvarg;
 #ifdef DEBUGGING
@@ -338,7 +339,7 @@ PP(pp_print)
 	*MARK = SvTIED_obj((SV*)gv, mg);
 	PUTBACK;
 	ENTER;
-	perl_call_method("PRINT", G_SCALAR);
+	call_method("PRINT", G_SCALAR);
 	LEAVE;
 	SPAGAIN;
 	MARK = ORIGMARK + 1;
@@ -1119,7 +1120,7 @@ ret_no:
 }
 
 OP *
-do_readline(void)
+Perl_do_readline(pTHX)
 {
     dSP; dTARGETSTACKED;
     register SV *sv;
@@ -1136,7 +1137,7 @@ do_readline(void)
 	XPUSHs(SvTIED_obj((SV*)PL_last_in_gv, mg));
 	PUTBACK;
 	ENTER;
-	perl_call_method("READLINE", gimme);
+	call_method("READLINE", gimme);
 	LEAVE;
 	SPAGAIN;
 	if (gimme == G_SCALAR)
@@ -2040,7 +2041,7 @@ PP(pp_leavesub)
 }
 
 STATIC CV *
-get_db_sub(SV **svp, CV *cv)
+get_db_sub(pTHX_ SV **svp, CV *cv)
 {
     dTHR;
     SV *dbsv = GvSV(PL_DBsub);
@@ -2108,7 +2109,7 @@ PP(pp_entersub)
 		DIE(PL_no_usym, "a subroutine");
 	    if (PL_op->op_private & HINT_STRICT_REFS)
 		DIE(PL_no_symref, sym, "a subroutine");
-	    cv = perl_get_cv(sym, TRUE);
+	    cv = get_cv(sym, TRUE);
 	    break;
 	}
 	{
@@ -2511,7 +2512,7 @@ try_autoload:
 }
 
 void
-sub_crush_depth(CV *cv)
+Perl_sub_crush_depth(pTHX_ CV *cv)
 {
     if (CvANON(cv))
 	warner(WARN_RECURSION, "Deep recursion on anonymous subroutine");
@@ -2566,7 +2567,7 @@ PP(pp_aelem)
 }
 
 void
-vivify_ref(SV *sv, U32 to_what)
+Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
 {
     if (SvGMAGICAL(sv))
 	mg_get(sv);

@@ -8,9 +8,10 @@
 
 
 #include "EXTERN.h"
+#define PERL_IN_MINIPERLMAIN_C
 #include "perl.h"
 
-static void xs_init (void);
+static void xs_init (pTHX);
 static PerlInterpreter *my_perl;
 
 #if defined (__MINT__) || defined (atarist)
@@ -36,7 +37,7 @@ main(int argc, char **argv, char **env)
 
     PERL_SYS_INIT(&argc,&argv);
 
-    perl_init_i18nl10n(1);
+    init_i18nl10n(1);
 
     if (!PL_do_undump) {
 	my_perl = perl_alloc();
@@ -65,7 +66,7 @@ main(int argc, char **argv, char **env)
 /* Do not delete this line--writemain depends on it */
 
 static void
-xs_init(void)
+xs_init(pTHX)
 {
   dXSUB_SYS;
 }

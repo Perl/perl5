@@ -13,6 +13,7 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_MG_C
 #include "perl.h"
 
 /* XXX If this causes problems, set i_unistd=undef in the hint file.  */
@@ -30,8 +31,6 @@
 #  define VTBL            this->*vtbl
 #else
 #  define VTBL			*vtbl
-static void restore_magic (void *p);
-static int magic_methcall(SV *sv, MAGIC *mg, char *meth, I32 f, int n, SV *val);
 #endif
 
 /*
@@ -46,7 +45,7 @@ struct magic_state {
 /* MGS is typedef'ed to struct magic_state in perl.h */
 
 STATIC void
-save_magic(I32 mgs_ix, SV *sv)
+save_magic(pTHX_ I32 mgs_ix, SV *sv)
 {
     dTHR;
     MGS* mgs;
@@ -65,7 +64,7 @@ save_magic(I32 mgs_ix, SV *sv)
 }
 
 STATIC void
-restore_magic(void *p)
+restore_magic(pTHX_ void *p)
 {
     dTHR;
     MGS* mgs = SSPTR((I32)p, MGS*);
@@ -107,7 +106,7 @@ restore_magic(void *p)
 }
 
 void
-mg_magical(SV *sv)
+Perl_mg_magical(pTHX_ SV *sv)
 {
     MAGIC* mg;
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
@@ -124,7 +123,7 @@ mg_magical(SV *sv)
 }
 
 int
-mg_get(SV *sv)
+Perl_mg_get(pTHX_ SV *sv)
 {
     dTHR;
     I32 mgs_ix;
@@ -159,7 +158,7 @@ mg_get(SV *sv)
 }
 
 int
-mg_set(SV *sv)
+Perl_mg_set(pTHX_ SV *sv)
 {
     dTHR;
     I32 mgs_ix;
@@ -185,7 +184,7 @@ mg_set(SV *sv)
 }
 
 U32
-mg_length(SV *sv)
+Perl_mg_length(pTHX_ SV *sv)
 {
     MAGIC* mg;
     char *junk;
@@ -210,7 +209,7 @@ mg_length(SV *sv)
 }
 
 I32
-mg_size(SV *sv)
+Perl_mg_size(pTHX_ SV *sv)
 {
     MAGIC* mg;
     I32 len;
@@ -243,7 +242,7 @@ mg_size(SV *sv)
 }
 
 int
-mg_clear(SV *sv)
+Perl_mg_clear(pTHX_ SV *sv)
 {
     I32 mgs_ix;
     MAGIC* mg;
@@ -264,7 +263,7 @@ mg_clear(SV *sv)
 }
 
 MAGIC*
-mg_find(SV *sv, int type)
+Perl_mg_find(pTHX_ SV *sv, int type)
 {
     MAGIC* mg;
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
@@ -275,7 +274,7 @@ mg_find(SV *sv, int type)
 }
 
 int
-mg_copy(SV *sv, SV *nsv, const char *key, I32 klen)
+Perl_mg_copy(pTHX_ SV *sv, SV *nsv, const char *key, I32 klen)
 {
     int count = 0;
     MAGIC* mg;
@@ -291,7 +290,7 @@ mg_copy(SV *sv, SV *nsv, const char *key, I32 klen)
 }
 
 int
-mg_free(SV *sv)
+Perl_mg_free(pTHX_ SV *sv)
 {
     MAGIC* mg;
     MAGIC* moremagic;
@@ -318,7 +317,7 @@ mg_free(SV *sv)
 #endif
 
 U32
-magic_regdata_cnt(SV *sv, MAGIC *mg)
+Perl_magic_regdata_cnt(pTHX_ SV *sv, MAGIC *mg)
 {
     dTHR;
     register char *s;
@@ -337,7 +336,7 @@ magic_regdata_cnt(SV *sv, MAGIC *mg)
 }
 
 int
-magic_regdatum_get(SV *sv, MAGIC *mg)
+Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 {
     dTHR;
     register I32 paren;
@@ -365,7 +364,7 @@ magic_regdatum_get(SV *sv, MAGIC *mg)
 }
 
 U32
-magic_len(SV *sv, MAGIC *mg)
+Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 {
     dTHR;
     register I32 paren;
@@ -460,7 +459,7 @@ printW(SV *sv)
 #endif
 
 int
-magic_get(SV *sv, MAGIC *mg)
+Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 {
     dTHR;
     register I32 paren;
@@ -764,7 +763,7 @@ magic_get(SV *sv, MAGIC *mg)
 }
 
 int
-magic_getuvar(SV *sv, MAGIC *mg)
+Perl_magic_getuvar(pTHX_ SV *sv, MAGIC *mg)
 {
     struct ufuncs *uf = (struct ufuncs *)mg->mg_ptr;
 
@@ -774,7 +773,7 @@ magic_getuvar(SV *sv, MAGIC *mg)
 }
 
 int
-magic_setenv(SV *sv, MAGIC *mg)
+Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 {
     register char *s;
     char *ptr;
@@ -850,7 +849,7 @@ magic_setenv(SV *sv, MAGIC *mg)
 }
 
 int
-magic_clearenv(SV *sv, MAGIC *mg)
+Perl_magic_clearenv(pTHX_ SV *sv, MAGIC *mg)
 {
     STRLEN n_a;
     my_setenv(MgPV(mg,n_a),Nullch);
@@ -858,7 +857,7 @@ magic_clearenv(SV *sv, MAGIC *mg)
 }
 
 int
-magic_set_all_env(SV *sv, MAGIC *mg)
+Perl_magic_set_all_env(pTHX_ SV *sv, MAGIC *mg)
 {
 #if defined(VMS)
     die("Can't make list assignment to %%ENV on this system");
@@ -880,7 +879,7 @@ magic_set_all_env(SV *sv, MAGIC *mg)
 }
 
 int
-magic_clear_all_env(SV *sv, MAGIC *mg)
+Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
 {
 #if defined(VMS)
     die("Can't make list assignment to %%ENV on this system");
@@ -920,7 +919,7 @@ magic_clear_all_env(SV *sv, MAGIC *mg)
 }
 
 int
-magic_getsig(SV *sv, MAGIC *mg)
+Perl_magic_getsig(pTHX_ SV *sv, MAGIC *mg)
 {
     I32 i;
     STRLEN n_a;
@@ -944,7 +943,7 @@ magic_getsig(SV *sv, MAGIC *mg)
     return 0;
 }
 int
-magic_clearsig(SV *sv, MAGIC *mg)
+Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
 {
     I32 i;
     STRLEN n_a;
@@ -964,7 +963,7 @@ magic_clearsig(SV *sv, MAGIC *mg)
 }
 
 int
-magic_setsig(SV *sv, MAGIC *mg)
+Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 {
     dTHR;
     register char *s;
@@ -1039,14 +1038,14 @@ magic_setsig(SV *sv, MAGIC *mg)
 }
 
 int
-magic_setisa(SV *sv, MAGIC *mg)
+Perl_magic_setisa(pTHX_ SV *sv, MAGIC *mg)
 {
     PL_sub_generation++;
     return 0;
 }
 
 int
-magic_setamagic(SV *sv, MAGIC *mg)
+Perl_magic_setamagic(pTHX_ SV *sv, MAGIC *mg)
 {
     /* HV_badAMAGIC_on(Sv_STASH(sv)); */
     PL_amagic_generation++;
@@ -1055,7 +1054,7 @@ magic_setamagic(SV *sv, MAGIC *mg)
 }
 
 int
-magic_getnkeys(SV *sv, MAGIC *mg)
+Perl_magic_getnkeys(pTHX_ SV *sv, MAGIC *mg)
 {
     HV *hv = (HV*)LvTARG(sv);
     HE *entry;
@@ -1078,7 +1077,7 @@ magic_getnkeys(SV *sv, MAGIC *mg)
 }
 
 int
-magic_setnkeys(SV *sv, MAGIC *mg)
+Perl_magic_setnkeys(pTHX_ SV *sv, MAGIC *mg)
 {
     if (LvTARG(sv)) {
 	hv_ksplit((HV*)LvTARG(sv), SvIV(sv));
@@ -1088,7 +1087,7 @@ magic_setnkeys(SV *sv, MAGIC *mg)
 
 /* caller is responsible for stack switching/cleanup */
 STATIC int
-magic_methcall(SV *sv, MAGIC *mg, char *meth, I32 flags, int n, SV *val)
+magic_methcall(pTHX_ SV *sv, MAGIC *mg, char *meth, I32 flags, int n, SV *val)
 {
     dSP;
 
@@ -1111,11 +1110,11 @@ magic_methcall(SV *sv, MAGIC *mg, char *meth, I32 flags, int n, SV *val)
     }
     PUTBACK;
 
-    return perl_call_method(meth, flags);
+    return call_method(meth, flags);
 }
 
 STATIC int
-magic_methpack(SV *sv, MAGIC *mg, char *meth)
+magic_methpack(pTHX_ SV *sv, MAGIC *mg, char *meth)
 {
     dSP;
 
@@ -1134,7 +1133,7 @@ magic_methpack(SV *sv, MAGIC *mg, char *meth)
 }
 
 int
-magic_getpack(SV *sv, MAGIC *mg)
+Perl_magic_getpack(pTHX_ SV *sv, MAGIC *mg)
 {
     magic_methpack(sv,mg,"FETCH");
     if (mg->mg_ptr)
@@ -1143,7 +1142,7 @@ magic_getpack(SV *sv, MAGIC *mg)
 }
 
 int
-magic_setpack(SV *sv, MAGIC *mg)
+Perl_magic_setpack(pTHX_ SV *sv, MAGIC *mg)
 {
     dSP;
     ENTER;
@@ -1155,14 +1154,14 @@ magic_setpack(SV *sv, MAGIC *mg)
 }
 
 int
-magic_clearpack(SV *sv, MAGIC *mg)
+Perl_magic_clearpack(pTHX_ SV *sv, MAGIC *mg)
 {
     return magic_methpack(sv,mg,"DELETE");
 }
 
 
 U32
-magic_sizepack(SV *sv, MAGIC *mg)
+Perl_magic_sizepack(pTHX_ SV *sv, MAGIC *mg)
 {         
     dSP;
     U32 retval = 0;
@@ -1189,14 +1188,14 @@ int magic_wipepack(SV *sv, MAGIC *mg)
     PUSHMARK(SP);
     XPUSHs(SvTIED_obj(sv, mg));
     PUTBACK;
-    perl_call_method("CLEAR", G_SCALAR|G_DISCARD);
+    call_method("CLEAR", G_SCALAR|G_DISCARD);
     POPSTACK;
     LEAVE;
     return 0;
 }
 
 int
-magic_nextpack(SV *sv, MAGIC *mg, SV *key)
+Perl_magic_nextpack(pTHX_ SV *sv, MAGIC *mg, SV *key)
 {
     dSP;
     char *meth = SvOK(key) ? "NEXTKEY" : "FIRSTKEY";
@@ -1211,7 +1210,7 @@ magic_nextpack(SV *sv, MAGIC *mg, SV *key)
 	PUSHs(key);
     PUTBACK;
 
-    if (perl_call_method(meth, G_SCALAR))
+    if (call_method(meth, G_SCALAR))
 	sv_setsv(key, *PL_stack_sp--);
 
     POPSTACK;
@@ -1221,13 +1220,13 @@ magic_nextpack(SV *sv, MAGIC *mg, SV *key)
 }
 
 int
-magic_existspack(SV *sv, MAGIC *mg)
+Perl_magic_existspack(pTHX_ SV *sv, MAGIC *mg)
 {
     return magic_methpack(sv,mg,"EXISTS");
 } 
 
 int
-magic_setdbline(SV *sv, MAGIC *mg)
+Perl_magic_setdbline(pTHX_ SV *sv, MAGIC *mg)
 {
     dTHR;
     OP *o;
@@ -1248,7 +1247,7 @@ magic_setdbline(SV *sv, MAGIC *mg)
 }
 
 int
-magic_getarylen(SV *sv, MAGIC *mg)
+Perl_magic_getarylen(pTHX_ SV *sv, MAGIC *mg)
 {
     dTHR;
     sv_setiv(sv, AvFILL((AV*)mg->mg_obj) + PL_curcop->cop_arybase);
@@ -1256,7 +1255,7 @@ magic_getarylen(SV *sv, MAGIC *mg)
 }
 
 int
-magic_setarylen(SV *sv, MAGIC *mg)
+Perl_magic_setarylen(pTHX_ SV *sv, MAGIC *mg)
 {
     dTHR;
     av_fill((AV*)mg->mg_obj, SvIV(sv) - PL_curcop->cop_arybase);
@@ -1264,7 +1263,7 @@ magic_setarylen(SV *sv, MAGIC *mg)
 }
 
 int
-magic_getpos(SV *sv, MAGIC *mg)
+Perl_magic_getpos(pTHX_ SV *sv, MAGIC *mg)
 {
     SV* lsv = LvTARG(sv);
     
@@ -1284,7 +1283,7 @@ magic_getpos(SV *sv, MAGIC *mg)
 }
 
 int
-magic_setpos(SV *sv, MAGIC *mg)
+Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
 {
     SV* lsv = LvTARG(sv);
     SSize_t pos;
@@ -1339,7 +1338,7 @@ magic_setpos(SV *sv, MAGIC *mg)
 }
 
 int
-magic_getglob(SV *sv, MAGIC *mg)
+Perl_magic_getglob(pTHX_ SV *sv, MAGIC *mg)
 {
     if (SvFAKE(sv)) {			/* FAKE globs can get coerced */
 	SvFAKE_off(sv);
@@ -1352,7 +1351,7 @@ magic_getglob(SV *sv, MAGIC *mg)
 }
 
 int
-magic_setglob(SV *sv, MAGIC *mg)
+Perl_magic_setglob(pTHX_ SV *sv, MAGIC *mg)
 {
     register char *s;
     GV* gv;
@@ -1373,7 +1372,7 @@ magic_setglob(SV *sv, MAGIC *mg)
 }
 
 int
-magic_getsubstr(SV *sv, MAGIC *mg)
+Perl_magic_getsubstr(pTHX_ SV *sv, MAGIC *mg)
 {
     STRLEN len;
     SV *lsv = LvTARG(sv);
@@ -1390,7 +1389,7 @@ magic_getsubstr(SV *sv, MAGIC *mg)
 }
 
 int
-magic_setsubstr(SV *sv, MAGIC *mg)
+Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 {
     STRLEN len;
     char *tmps = SvPV(sv,len);
@@ -1399,7 +1398,7 @@ magic_setsubstr(SV *sv, MAGIC *mg)
 }
 
 int
-magic_gettaint(SV *sv, MAGIC *mg)
+Perl_magic_gettaint(pTHX_ SV *sv, MAGIC *mg)
 {
     dTHR;
     TAINT_IF((mg->mg_len & 1) ||
@@ -1408,7 +1407,7 @@ magic_gettaint(SV *sv, MAGIC *mg)
 }
 
 int
-magic_settaint(SV *sv, MAGIC *mg)
+Perl_magic_settaint(pTHX_ SV *sv, MAGIC *mg)
 {
     dTHR;
     if (PL_localizing) {
@@ -1425,7 +1424,7 @@ magic_settaint(SV *sv, MAGIC *mg)
 }
 
 int
-magic_getvec(SV *sv, MAGIC *mg)
+Perl_magic_getvec(pTHX_ SV *sv, MAGIC *mg)
 {
     SV *lsv = LvTARG(sv);
     unsigned char *s;
@@ -1491,14 +1490,14 @@ magic_getvec(SV *sv, MAGIC *mg)
 }
 
 int
-magic_setvec(SV *sv, MAGIC *mg)
+Perl_magic_setvec(pTHX_ SV *sv, MAGIC *mg)
 {
     do_vecset(sv);	/* XXX slurp this routine */
     return 0;
 }
 
 int
-magic_getdefelem(SV *sv, MAGIC *mg)
+Perl_magic_getdefelem(pTHX_ SV *sv, MAGIC *mg)
 {
     SV *targ = Nullsv;
     if (LvTARGLEN(sv)) {
@@ -1538,7 +1537,7 @@ magic_getdefelem(SV *sv, MAGIC *mg)
 }
 
 int
-magic_setdefelem(SV *sv, MAGIC *mg)
+Perl_magic_setdefelem(pTHX_ SV *sv, MAGIC *mg)
 {
     if (LvTARGLEN(sv))
 	vivify_defelem(sv);
@@ -1550,7 +1549,7 @@ magic_setdefelem(SV *sv, MAGIC *mg)
 }
 
 void
-vivify_defelem(SV *sv)
+Perl_vivify_defelem(pTHX_ SV *sv)
 {
     dTHR;			/* just for SvREFCNT_inc and SvREFCNT_dec*/
     MAGIC *mg;
@@ -1594,7 +1593,7 @@ vivify_defelem(SV *sv)
 }
 
 int
-magic_killbackrefs(SV *sv, MAGIC *mg)
+Perl_magic_killbackrefs(pTHX_ SV *sv, MAGIC *mg)
 {
     AV *av = (AV*)mg->mg_obj;
     SV **svp = AvARRAY(av);
@@ -1615,7 +1614,7 @@ magic_killbackrefs(SV *sv, MAGIC *mg)
 }
 
 int
-magic_setmglob(SV *sv, MAGIC *mg)
+Perl_magic_setmglob(pTHX_ SV *sv, MAGIC *mg)
 {
     mg->mg_len = -1;
     SvSCREAM_off(sv);
@@ -1623,7 +1622,7 @@ magic_setmglob(SV *sv, MAGIC *mg)
 }
 
 int
-magic_setbm(SV *sv, MAGIC *mg)
+Perl_magic_setbm(pTHX_ SV *sv, MAGIC *mg)
 {
     sv_unmagic(sv, 'B');
     SvVALID_off(sv);
@@ -1631,7 +1630,7 @@ magic_setbm(SV *sv, MAGIC *mg)
 }
 
 int
-magic_setfm(SV *sv, MAGIC *mg)
+Perl_magic_setfm(pTHX_ SV *sv, MAGIC *mg)
 {
     sv_unmagic(sv, 'f');
     SvCOMPILED_off(sv);
@@ -1639,7 +1638,7 @@ magic_setfm(SV *sv, MAGIC *mg)
 }
 
 int
-magic_setuvar(SV *sv, MAGIC *mg)
+Perl_magic_setuvar(pTHX_ SV *sv, MAGIC *mg)
 {
     struct ufuncs *uf = (struct ufuncs *)mg->mg_ptr;
 
@@ -1649,7 +1648,7 @@ magic_setuvar(SV *sv, MAGIC *mg)
 }
 
 int
-magic_freeregexp(SV *sv, MAGIC *mg)
+Perl_magic_freeregexp(pTHX_ SV *sv, MAGIC *mg)
 {
     regexp *re = (regexp *)mg->mg_obj;
     ReREFCNT_dec(re);
@@ -1658,7 +1657,7 @@ magic_freeregexp(SV *sv, MAGIC *mg)
 
 #ifdef USE_LOCALE_COLLATE
 int
-magic_setcollxfrm(SV *sv, MAGIC *mg)
+Perl_magic_setcollxfrm(pTHX_ SV *sv, MAGIC *mg)
 {
     /*
      * RenE<eacute> Descartes said "I think not."
@@ -1674,7 +1673,7 @@ magic_setcollxfrm(SV *sv, MAGIC *mg)
 #endif /* USE_LOCALE_COLLATE */
 
 int
-magic_set(SV *sv, MAGIC *mg)
+Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 {
     dTHR;
     register char *s;
@@ -2056,7 +2055,7 @@ magic_set(SV *sv, MAGIC *mg)
 
 #ifdef USE_THREADS
 int
-magic_mutexfree(SV *sv, MAGIC *mg)
+Perl_magic_mutexfree(pTHX_ SV *sv, MAGIC *mg)
 {
     dTHR;
     DEBUG_S(PerlIO_printf(PerlIO_stderr(), "0x%lx: magic_mutexfree 0x%lx\n",
@@ -2070,7 +2069,7 @@ magic_mutexfree(SV *sv, MAGIC *mg)
 #endif /* USE_THREADS */
 
 I32
-whichsig(char *sig)
+Perl_whichsig(pTHX_ char *sig)
 {
     register char **sigv;
 
@@ -2091,7 +2090,7 @@ whichsig(char *sig)
 static SV* sig_sv;
 
 STATIC void
-unwind_handler_stack(void *p)
+unwind_handler_stack(pTHX_ void *p)
 {
     dTHR;
     U32 flags = *(U32*)p;
@@ -2104,7 +2103,7 @@ unwind_handler_stack(void *p)
 }
 
 Signal_t
-sighandler(int sig)
+Perl_sighandler(pTHX_ int sig)
 {
     dSP;
     GV *gv = Nullgv;
@@ -2173,7 +2172,7 @@ sighandler(int sig)
     PUSHs(sv);
     PUTBACK;
 
-    perl_call_sv((SV*)cv, G_DISCARD);
+    call_sv((SV*)cv, G_DISCARD);
 
     POPSTACK;
 cleanup:

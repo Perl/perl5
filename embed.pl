@@ -109,7 +109,8 @@ sub hide ($$) {
 
 sub embed ($) {
     my ($sym) = @_;
-    hide($sym, "Perl_$sym");
+    my $def = $sym;
+    hide($def, $sym) if $def =~ s/^Perl_//;
 }
 
 sub embedobj ($) {
@@ -165,6 +166,7 @@ print EM <<'END';
 END
 
 for $sym (sort keys %global) {
+    next if $sym =~ /^Perl_(malloc|calloc|realloc|mfree)$/;
     print EM embed($sym);
 }
 
@@ -402,6 +404,7 @@ my @staticfuncs = qw(
 );
 
 for $sym (sort(keys(%global),@staticfuncs)) {
+    next if $sym =~ /^Perl_(malloc|calloc|realloc|mfree)$/;
     print EM embedobj($sym);
 }
 
@@ -413,6 +416,23 @@ print EM <<'END';
 
 #define sv_setptrobj(rv,ptr,name)	sv_setref_iv(rv,name,(IV)ptr)
 #define sv_setptrref(rv,ptr)		sv_setref_iv(rv,Nullch,(IV)ptr)
+#define perl_atexit			call_atexit
+#define perl_call_argv			call_argv
+#define perl_call_pv			call_pv
+#define perl_call_method		call_method
+#define perl_call_sv			call_sv
+#define perl_eval_sv			eval_sv
+#define perl_eval_pv			eval_pv
+#define perl_require_pv			require_pv
+#define perl_get_sv			get_sv
+#define perl_get_av			get_av
+#define perl_get_hv			get_hv
+#define perl_get_cv			get_cv
+#define perl_init_i18nl10n		init_i18nl10n
+#define perl_init_i18nl14n		init_i18nl14n
+#define perl_new_ctype			new_ctype
+#define perl_new_collate		new_collate
+#define perl_new_numeric		new_numeric
 
 END
 

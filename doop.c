@@ -12,27 +12,15 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_DOOP_C
 #include "perl.h"
 
 #if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
 #include <signal.h>
 #endif
 
-#ifndef PERL_OBJECT
-static I32 do_trans_CC_simple (SV *sv);
-static I32 do_trans_CC_count (SV *sv);
-static I32 do_trans_CC_complex (SV *sv);
-static I32 do_trans_UU_simple (SV *sv);
-static I32 do_trans_UU_count (SV *sv);
-static I32 do_trans_UU_complex (SV *sv);
-static I32 do_trans_UC_simple (SV *sv);
-static I32 do_trans_CU_simple (SV *sv);
-static I32 do_trans_UC_trivial (SV *sv);
-static I32 do_trans_CU_trivial (SV *sv);
-#endif
-
 STATIC I32
-do_trans_CC_simple(SV *sv)
+do_trans_CC_simple(pTHX_ SV *sv)
 {
     dTHR;
     U8 *s;
@@ -62,7 +50,7 @@ do_trans_CC_simple(SV *sv)
 }
 
 STATIC I32
-do_trans_CC_count(SV *sv)
+do_trans_CC_count(pTHX_ SV *sv)
 {
     dTHR;
     U8 *s;
@@ -88,7 +76,7 @@ do_trans_CC_count(SV *sv)
 }
 
 STATIC I32
-do_trans_CC_complex(SV *sv)
+do_trans_CC_complex(pTHX_ SV *sv)
 {
     dTHR;
     U8 *s;
@@ -145,7 +133,7 @@ do_trans_CC_complex(SV *sv)
 }
 
 STATIC I32
-do_trans_UU_simple(SV *sv)
+do_trans_UU_simple(pTHX_ SV *sv)
 {
     dTHR;
     U8 *s;
@@ -197,7 +185,7 @@ do_trans_UU_simple(SV *sv)
 }
 
 STATIC I32
-do_trans_UU_count(SV *sv)
+do_trans_UU_count(pTHX_ SV *sv)
 {
     dTHR;
     U8 *s;
@@ -224,7 +212,7 @@ do_trans_UU_count(SV *sv)
 }
 
 STATIC I32
-do_trans_UC_simple(SV *sv)
+do_trans_UC_simple(pTHX_ SV *sv)
 {
     dTHR;
     U8 *s;
@@ -277,7 +265,7 @@ do_trans_UC_simple(SV *sv)
 }
 
 STATIC I32
-do_trans_CU_simple(SV *sv)
+do_trans_CU_simple(pTHX_ SV *sv)
 {
     dTHR;
     U8 *s;
@@ -340,7 +328,7 @@ do_trans_CU_simple(SV *sv)
 /* utf-8 to latin-1 */
 
 STATIC I32
-do_trans_UC_trivial(SV *sv)
+do_trans_UC_trivial(pTHX_ SV *sv)
 {
     dTHR;
     U8 *s;
@@ -372,7 +360,7 @@ do_trans_UC_trivial(SV *sv)
 /* latin-1 to utf-8 */
 
 STATIC I32
-do_trans_CU_trivial(SV *sv)
+do_trans_CU_trivial(pTHX_ SV *sv)
 {
     dTHR;
     U8 *s;
@@ -406,7 +394,7 @@ do_trans_CU_trivial(SV *sv)
 }
 
 STATIC I32
-do_trans_UU_complex(SV *sv)
+do_trans_UU_complex(pTHX_ SV *sv)
 {
     dTHR;
     U8 *s;
@@ -591,7 +579,7 @@ do_trans_UU_complex(SV *sv)
 }
 
 I32
-do_trans(SV *sv)
+Perl_do_trans(pTHX_ SV *sv)
 {
     dTHR;
     STRLEN len;
@@ -642,7 +630,7 @@ do_trans(SV *sv)
 }
 
 void
-do_join(register SV *sv, SV *del, register SV **mark, register SV **sp)
+Perl_do_join(pTHX_ register SV *sv, SV *del, register SV **mark, register SV **sp)
 {
     SV **oldmark = mark;
     register I32 items = sp - mark;
@@ -697,7 +685,7 @@ do_join(register SV *sv, SV *del, register SV **mark, register SV **sp)
 }
 
 void
-do_sprintf(SV *sv, I32 len, SV **sarg)
+Perl_do_sprintf(pTHX_ SV *sv, I32 len, SV **sarg)
 {
     STRLEN patlen;
     char *pat = SvPV(*sarg, patlen);
@@ -710,7 +698,7 @@ do_sprintf(SV *sv, I32 len, SV **sarg)
 }
 
 void
-do_vecset(SV *sv)
+Perl_do_vecset(pTHX_ SV *sv)
 {
     SV *targ = LvTARG(sv);
     register I32 offset;
@@ -761,7 +749,7 @@ do_vecset(SV *sv)
 }
 
 void
-do_chop(register SV *astr, register SV *sv)
+Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
 {
     STRLEN len;
     char *s;
@@ -824,7 +812,7 @@ do_chop(register SV *astr, register SV *sv)
 } 
 
 I32
-do_chomp(register SV *sv)
+Perl_do_chomp(pTHX_ register SV *sv)
 {
     dTHR;
     register I32 count;
@@ -902,7 +890,7 @@ do_chomp(register SV *sv)
 } 
 
 void
-do_vop(I32 optype, SV *sv, SV *left, SV *right)
+Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 {
     dTHR;	/* just for taint */
 #ifdef LIBERAL
@@ -1017,7 +1005,7 @@ do_vop(I32 optype, SV *sv, SV *left, SV *right)
 }
 
 OP *
-do_kv(ARGSproto)
+Perl_do_kv(pTHX_ ARGSproto)
 {
     djSP;
     HV *hv = (HV*)POPs;

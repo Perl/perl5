@@ -12,15 +12,8 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_HV_C
 #include "perl.h"
-
-static void hv_magic_check (HV *hv, bool *needs_copy, bool *needs_store);
-#ifndef PERL_OBJECT
-static void hsplit (HV *hv);
-static void hfreeentries (HV *hv);
-static void more_he (void);
-static HEK *save_hek (const char *str, I32 len, U32 hash);
-#endif
 
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)
 #  define ARRAY_ALLOC_BYTES(size) ( (size)*sizeof(HE*) )
@@ -32,7 +25,7 @@ static HEK *save_hek (const char *str, I32 len, U32 hash);
 #endif
 
 STATIC HE*
-new_he(void)
+new_he(pTHX)
 {
     HE* he;
     LOCK_SV_MUTEX;
@@ -45,7 +38,7 @@ new_he(void)
 }
 
 STATIC void
-del_he(HE *p)
+del_he(pTHX_ HE *p)
 {
     LOCK_SV_MUTEX;
     HeNEXT(p) = (HE*)PL_he_root;
@@ -54,7 +47,7 @@ del_he(HE *p)
 }
 
 STATIC void
-more_he(void)
+more_he(pTHX)
 {
     register HE* he;
     register HE* heend;
@@ -69,7 +62,7 @@ more_he(void)
 }
 
 STATIC HEK *
-save_hek(const char *str, I32 len, U32 hash)
+save_hek(pTHX_ const char *str, I32 len, U32 hash)
 {
     char *k;
     register HEK *hek;
@@ -84,7 +77,7 @@ save_hek(const char *str, I32 len, U32 hash)
 }
 
 void
-unshare_hek(HEK *hek)
+Perl_unshare_hek(pTHX_ HEK *hek)
 {
     unsharepvn(HEK_KEY(hek),HEK_LEN(hek),HEK_HASH(hek));
 }
@@ -93,7 +86,7 @@ unshare_hek(HEK *hek)
  * contains an SV* */
 
 SV**
-hv_fetch(HV *hv, const char *key, U32 klen, I32 lval)
+Perl_hv_fetch(pTHX_ HV *hv, const char *key, U32 klen, I32 lval)
 {
     register XPVHV* xhv;
     register U32 hash;
@@ -171,7 +164,7 @@ hv_fetch(HV *hv, const char *key, U32 klen, I32 lval)
 /* returns a HE * structure with the all fields set */
 /* note that hent_val will be a mortal sv for MAGICAL hashes */
 HE *
-hv_fetch_ent(HV *hv, SV *keysv, I32 lval, register U32 hash)
+Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 {
     register XPVHV* xhv;
     register char *key;
@@ -259,8 +252,8 @@ hv_fetch_ent(HV *hv, SV *keysv, I32 lval, register U32 hash)
     return 0;
 }
 
-static void
-hv_magic_check (HV *hv, bool *needs_copy, bool *needs_store)
+STATIC void
+hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store)
 {
     MAGIC *mg = SvMAGIC(hv);
     *needs_copy = FALSE;
@@ -279,7 +272,7 @@ hv_magic_check (HV *hv, bool *needs_copy, bool *needs_store)
 }
 
 SV**
-hv_store(HV *hv, const char *key, U32 klen, SV *val, register U32 hash)
+Perl_hv_store(pTHX_ HV *hv, const char *key, U32 klen, SV *val, register U32 hash)
 {
     register XPVHV* xhv;
     register I32 i;
@@ -348,7 +341,7 @@ hv_store(HV *hv, const char *key, U32 klen, SV *val, register U32 hash)
 }
 
 HE *
-hv_store_ent(HV *hv, SV *keysv, SV *val, register U32 hash)
+Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
 {
     register XPVHV* xhv;
     register char *key;
@@ -429,7 +422,7 @@ hv_store_ent(HV *hv, SV *keysv, SV *val, register U32 hash)
 }
 
 SV *
-hv_delete(HV *hv, const char *key, U32 klen, I32 flags)
+Perl_hv_delete(pTHX_ HV *hv, const char *key, U32 klen, I32 flags)
 {
     register XPVHV* xhv;
     register I32 i;
@@ -498,7 +491,7 @@ hv_delete(HV *hv, const char *key, U32 klen, I32 flags)
 }
 
 SV *
-hv_delete_ent(HV *hv, SV *keysv, I32 flags, U32 hash)
+Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 {
     register XPVHV* xhv;
     register I32 i;
@@ -572,7 +565,7 @@ hv_delete_ent(HV *hv, SV *keysv, I32 flags, U32 hash)
 }
 
 bool
-hv_exists(HV *hv, const char *key, U32 klen)
+Perl_hv_exists(pTHX_ HV *hv, const char *key, U32 klen)
 {
     register XPVHV* xhv;
     register U32 hash;
@@ -637,7 +630,7 @@ hv_exists(HV *hv, const char *key, U32 klen)
 
 
 bool
-hv_exists_ent(HV *hv, SV *keysv, U32 hash)
+Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 {
     register XPVHV* xhv;
     register char *key;
@@ -707,7 +700,7 @@ hv_exists_ent(HV *hv, SV *keysv, U32 hash)
 }
 
 STATIC void
-hsplit(HV *hv)
+hsplit(pTHX_ HV *hv)
 {
     register XPVHV* xhv = (XPVHV*)SvANY(hv);
     I32 oldsize = (I32) xhv->xhv_max + 1; /* sic(k) */
@@ -769,7 +762,7 @@ hsplit(HV *hv)
 }
 
 void
-hv_ksplit(HV *hv, IV newmax)
+Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 {
     register XPVHV* xhv = (XPVHV*)SvANY(hv);
     I32 oldsize = (I32) xhv->xhv_max + 1; /* sic(k) */
@@ -847,7 +840,7 @@ hv_ksplit(HV *hv, IV newmax)
 }
 
 HV *
-newHV(void)
+Perl_newHV(pTHX)
 {
     register HV *hv;
     register XPVHV* xhv;
@@ -868,7 +861,7 @@ newHV(void)
 }
 
 HV *
-newHVhv(HV *ohv)
+Perl_newHVhv(pTHX_ HV *ohv)
 {
     register HV *hv;
     STRLEN hv_max = ohv ? HvMAX(ohv) : 0;
@@ -906,7 +899,7 @@ newHVhv(HV *ohv)
 }
 
 void
-hv_free_ent(HV *hv, register HE *entry)
+Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
 {
     SV *val;
 
@@ -928,7 +921,7 @@ hv_free_ent(HV *hv, register HE *entry)
 }
 
 void
-hv_delayfree_ent(HV *hv, register HE *entry)
+Perl_hv_delayfree_ent(pTHX_ HV *hv, register HE *entry)
 {
     if (!entry)
 	return;
@@ -947,7 +940,7 @@ hv_delayfree_ent(HV *hv, register HE *entry)
 }
 
 void
-hv_clear(HV *hv)
+Perl_hv_clear(pTHX_ HV *hv)
 {
     register XPVHV* xhv;
     if (!hv)
@@ -964,7 +957,7 @@ hv_clear(HV *hv)
 }
 
 STATIC void
-hfreeentries(HV *hv)
+hfreeentries(pTHX_ HV *hv)
 {
     register HE **array;
     register HE *entry;
@@ -997,7 +990,7 @@ hfreeentries(HV *hv)
 }
 
 void
-hv_undef(HV *hv)
+Perl_hv_undef(pTHX_ HV *hv)
 {
     register XPVHV* xhv;
     if (!hv)
@@ -1019,7 +1012,7 @@ hv_undef(HV *hv)
 }
 
 I32
-hv_iterinit(HV *hv)
+Perl_hv_iterinit(pTHX_ HV *hv)
 {
     register XPVHV* xhv;
     HE *entry;
@@ -1038,7 +1031,7 @@ hv_iterinit(HV *hv)
 }
 
 HE *
-hv_iternext(HV *hv)
+Perl_hv_iternext(pTHX_ HV *hv)
 {
     register XPVHV* xhv;
     register HE *entry;
@@ -1108,7 +1101,7 @@ hv_iternext(HV *hv)
 }
 
 char *
-hv_iterkey(register HE *entry, I32 *retlen)
+Perl_hv_iterkey(pTHX_ register HE *entry, I32 *retlen)
 {
     if (HeKLEN(entry) == HEf_SVKEY) {
 	STRLEN len;
@@ -1124,7 +1117,7 @@ hv_iterkey(register HE *entry, I32 *retlen)
 
 /* unlike hv_iterval(), this always returns a mortal copy of the key */
 SV *
-hv_iterkeysv(register HE *entry)
+Perl_hv_iterkeysv(pTHX_ register HE *entry)
 {
     if (HeKLEN(entry) == HEf_SVKEY)
 	return sv_mortalcopy(HeKEY_sv(entry));
@@ -1134,7 +1127,7 @@ hv_iterkeysv(register HE *entry)
 }
 
 SV *
-hv_iterval(HV *hv, register HE *entry)
+Perl_hv_iterval(pTHX_ HV *hv, register HE *entry)
 {
     if (SvRMAGICAL(hv)) {
 	if (mg_find((SV*)hv,'P')) {
@@ -1149,7 +1142,7 @@ hv_iterval(HV *hv, register HE *entry)
 }
 
 SV *
-hv_iternextsv(HV *hv, char **key, I32 *retlen)
+Perl_hv_iternextsv(pTHX_ HV *hv, char **key, I32 *retlen)
 {
     HE *he;
     if ( (he = hv_iternext(hv)) == NULL)
@@ -1159,13 +1152,13 @@ hv_iternextsv(HV *hv, char **key, I32 *retlen)
 }
 
 void
-hv_magic(HV *hv, GV *gv, int how)
+Perl_hv_magic(pTHX_ HV *hv, GV *gv, int how)
 {
     sv_magic((SV*)hv, (SV*)gv, how, Nullch, 0);
 }
 
 char*	
-sharepvn(const char *sv, I32 len, U32 hash)
+Perl_sharepvn(pTHX_ const char *sv, I32 len, U32 hash)
 {
     return HEK_KEY(share_hek(sv, len, hash));
 }
@@ -1174,7 +1167,7 @@ sharepvn(const char *sv, I32 len, U32 hash)
  * len and hash must both be valid for str.
  */
 void
-unsharepvn(const char *str, I32 len, U32 hash)
+Perl_unsharepvn(pTHX_ const char *str, I32 len, U32 hash)
 {
     register XPVHV* xhv;
     register HE *entry;
@@ -1220,7 +1213,7 @@ unsharepvn(const char *str, I32 len, U32 hash)
  * len and hash must both be valid for str.
  */
 HEK *
-share_hek(const char *str, I32 len, register U32 hash)
+Perl_share_hek(pTHX_ const char *str, I32 len, register U32 hash)
 {
     register XPVHV* xhv;
     register HE *entry;

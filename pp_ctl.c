@@ -17,6 +17,7 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_PP_CTL_C
 #include "perl.h"
 
 #ifndef WORD_ALIGN
@@ -29,27 +30,6 @@
 #define CALLOP this->*PL_op
 #else
 #define CALLOP *PL_op
-static void *docatch_body (va_list args);
-static OP *docatch (OP *o);
-static OP *dofindlabel (OP *o, char *label, OP **opstack, OP **oplimit);
-static void doparseform (SV *sv);
-static I32 dopoptoeval (I32 startingblock);
-static I32 dopoptolabel (char *label);
-static I32 dopoptoloop (I32 startingblock);
-static I32 dopoptosub (I32 startingblock);
-static I32 dopoptosub_at (PERL_CONTEXT *cxstk, I32 startingblock);
-static void save_lines (AV *array, SV *sv);
-static I32 sortcv (SV *a, SV *b);
-static void qsortsv (SV **array, size_t num_elts, I32 (*fun)(SV *a, SV *b));
-static OP *doeval (int gimme, OP** startop);
-static PerlIO *doopen_pmc (const char *name, const char *mode);
-static I32 sv_ncmp (SV *a, SV *b);
-static I32 sv_i_ncmp (SV *a, SV *b);
-static I32 amagic_ncmp (SV *a, SV *b);
-static I32 amagic_i_ncmp (SV *a, SV *b);
-static I32 amagic_cmp (SV *str1, SV *str2);
-static I32 amagic_cmp_locale (SV *str1, SV *str2);
-static void free_closures (void);
 #endif
 
 PP(pp_wantarray)
@@ -218,7 +198,7 @@ PP(pp_substcont)
 }
 
 void
-rxres_save(void **rsp, REGEXP *rx)
+Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
 {
     UV *p = (UV*)*rsp;
     U32 i;
@@ -246,7 +226,7 @@ rxres_save(void **rsp, REGEXP *rx)
 }
 
 void
-rxres_restore(void **rsp, REGEXP *rx)
+Perl_rxres_restore(pTHX_ void **rsp, REGEXP *rx)
 {
     UV *p = (UV*)*rsp;
     U32 i;
@@ -267,7 +247,7 @@ rxres_restore(void **rsp, REGEXP *rx)
 }
 
 void
-rxres_free(void **rsp)
+Perl_rxres_free(pTHX_ void **rsp)
 {
     UV *p = (UV*)*rsp;
 
@@ -762,14 +742,15 @@ PP(pp_mapwhile)
 }
 
 STATIC I32
-sv_ncmp (SV *a, SV *b)
+sv_ncmp(pTHX_ SV *a, SV *b)
 {
     double nv1 = SvNV(a);
     double nv2 = SvNV(b);
     return nv1 < nv2 ? -1 : nv1 > nv2 ? 1 : 0;
 }
+
 STATIC I32
-sv_i_ncmp (SV *a, SV *b)
+sv_i_ncmp(pTHX_ SV *a, SV *b)
 {
     IV iv1 = SvIV(a);
     IV iv2 = SvIV(b);
@@ -787,7 +768,7 @@ sv_i_ncmp (SV *a, SV *b)
 	} STMT_END
 
 STATIC I32
-amagic_ncmp(register SV *a, register SV *b)
+amagic_ncmp(pTHX_ register SV *a, register SV *b)
 {
     SV *tmpsv;
     tryCALL_AMAGICbin(a,b,ncmp,&tmpsv);
@@ -809,7 +790,7 @@ amagic_ncmp(register SV *a, register SV *b)
 }
 
 STATIC I32
-amagic_i_ncmp(register SV *a, register SV *b)
+amagic_i_ncmp(pTHX_ register SV *a, register SV *b)
 {
     SV *tmpsv;
     tryCALL_AMAGICbin(a,b,ncmp,&tmpsv);
@@ -831,7 +812,7 @@ amagic_i_ncmp(register SV *a, register SV *b)
 }
 
 STATIC I32
-amagic_cmp(register SV *str1, register SV *str2)
+amagic_cmp(pTHX_ register SV *str1, register SV *str2)
 {
     SV *tmpsv;
     tryCALL_AMAGICbin(str1,str2,scmp,&tmpsv);
@@ -853,7 +834,7 @@ amagic_cmp(register SV *str1, register SV *str2)
 }
 
 STATIC I32
-amagic_cmp_locale(register SV *str1, register SV *str2)
+amagic_cmp_locale(pTHX_ register SV *str1, register SV *str2)
 {
     SV *tmpsv;
     tryCALL_AMAGICbin(str1,str2,scmp,&tmpsv);
@@ -1135,7 +1116,7 @@ PP(pp_flop)
 /* Control. */
 
 STATIC I32
-dopoptolabel(char *label)
+dopoptolabel(pTHX_ char *label)
 {
     dTHR;
     register I32 i;
@@ -1179,14 +1160,14 @@ dopoptolabel(char *label)
 }
 
 I32
-dowantarray(void)
+Perl_dowantarray(pTHX)
 {
     I32 gimme = block_gimme();
     return (gimme == G_VOID) ? G_SCALAR : gimme;
 }
 
 I32
-block_gimme(void)
+Perl_block_gimme(pTHX)
 {
     dTHR;
     I32 cxix;
@@ -1210,14 +1191,14 @@ block_gimme(void)
 }
 
 STATIC I32
-dopoptosub(I32 startingblock)
+dopoptosub(pTHX_ I32 startingblock)
 {
     dTHR;
     return dopoptosub_at(cxstack, startingblock);
 }
 
 STATIC I32
-dopoptosub_at(PERL_CONTEXT *cxstk, I32 startingblock)
+dopoptosub_at(pTHX_ PERL_CONTEXT *cxstk, I32 startingblock)
 {
     dTHR;
     I32 i;
@@ -1237,7 +1218,7 @@ dopoptosub_at(PERL_CONTEXT *cxstk, I32 startingblock)
 }
 
 STATIC I32
-dopoptoeval(I32 startingblock)
+dopoptoeval(pTHX_ I32 startingblock)
 {
     dTHR;
     I32 i;
@@ -1256,7 +1237,7 @@ dopoptoeval(I32 startingblock)
 }
 
 STATIC I32
-dopoptoloop(I32 startingblock)
+dopoptoloop(pTHX_ I32 startingblock)
 {
     dTHR;
     I32 i;
@@ -1293,7 +1274,7 @@ dopoptoloop(I32 startingblock)
 }
 
 void
-dounwind(I32 cxix)
+Perl_dounwind(pTHX_ I32 cxix)
 {
     dTHR;
     register PERL_CONTEXT *cx;
@@ -1335,7 +1316,7 @@ dounwind(I32 cxix)
  * relying on the incidental global values.
  */
 STATIC void
-free_closures(void)
+free_closures(pTHX)
 {
     dTHR;
     SV **svp = AvARRAY(PL_comppad_name);
@@ -1362,7 +1343,7 @@ free_closures(void)
 }
 
 OP *
-die_where(char *message, STRLEN msglen)
+Perl_die_where(pTHX_ char *message, STRLEN msglen)
 {
     dSP;
     STRLEN n_a;
@@ -1596,7 +1577,7 @@ PP(pp_caller)
 }
 
 STATIC I32
-sortcv(SV *a, SV *b)
+sortcv(pTHX_ SV *a, SV *b)
 {
     dTHR;
     I32 oldsaveix = PL_savestack_ix;
@@ -2029,7 +2010,7 @@ PP(pp_redo)
 }
 
 STATIC OP *
-dofindlabel(OP *o, char *label, OP **opstack, OP **oplimit)
+dofindlabel(pTHX_ OP *o, char *label, OP **opstack, OP **oplimit)
 {
     OP *kid;
     OP **ops = opstack;
@@ -2335,9 +2316,9 @@ PP(pp_goto)
 			gv_efullname3(sv, CvGV(cv), Nullch);
 		    }
 		    if (  PERLDB_GOTO
-			  && (gotocv = perl_get_cv("DB::goto", FALSE)) ) {
+			  && (gotocv = get_cv("DB::goto", FALSE)) ) {
 			PUSHMARK( PL_stack_sp );
-			perl_call_sv((SV*)gotocv, G_SCALAR | G_NODEBUG);
+			call_sv((SV*)gotocv, G_SCALAR | G_NODEBUG);
 			PL_stack_sp--;
 		    }
 		}
@@ -2513,7 +2494,7 @@ PP(pp_cswitch)
 /* Eval. */
 
 STATIC void
-save_lines(AV *array, SV *sv)
+save_lines(pTHX_ AV *array, SV *sv)
 {
     register char *s = SvPVX(sv);
     register char *send = SvPVX(sv) + SvCUR(sv);
@@ -2537,14 +2518,14 @@ save_lines(AV *array, SV *sv)
 }
 
 STATIC void *
-docatch_body(va_list args)
+docatch_body(pTHX_ va_list args)
 {
     CALLRUNOPS();
     return NULL;
 }
 
 STATIC OP *
-docatch(OP *o)
+docatch(pTHX_ OP *o)
 {
     dTHR;
     int ret;
@@ -2576,7 +2557,7 @@ docatch(OP *o)
 }
 
 OP *
-sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
+Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
 /* sv Text to convert to OP tree. */
 /* startop op_free() this to undo. */
 /* code Short string id of the caller. */
@@ -2644,7 +2625,7 @@ sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
 
 /* With USE_THREADS, eval_owner must be held on entry to doeval */
 STATIC OP *
-doeval(int gimme, OP** startop)
+doeval(pTHX_ int gimme, OP** startop)
 {
     dSP;
     OP *saveop = PL_op;
@@ -2795,13 +2776,13 @@ doeval(int gimme, OP** startop)
 
     /* Register with debugger: */
     if (PERLDB_INTER && saveop->op_type == OP_REQUIRE) {
-	CV *cv = perl_get_cv("DB::postponed", FALSE);
+	CV *cv = get_cv("DB::postponed", FALSE);
 	if (cv) {
 	    dSP;
 	    PUSHMARK(SP);
 	    XPUSHs((SV*)PL_compiling.cop_filegv);
 	    PUTBACK;
-	    perl_call_sv((SV*)cv, G_DISCARD);
+	    call_sv((SV*)cv, G_DISCARD);
 	}
     }
 
@@ -2821,7 +2802,7 @@ doeval(int gimme, OP** startop)
 }
 
 STATIC PerlIO *
-doopen_pmc(const char *name, const char *mode)
+doopen_pmc(pTHX_ const char *name, const char *mode)
 {
     STRLEN namelen = strlen(name);
     PerlIO *fp;
@@ -3218,7 +3199,7 @@ PP(pp_leavetry)
 }
 
 STATIC void
-doparseform(SV *sv)
+doparseform(pTHX_ SV *sv)
 {
     STRLEN len;
     register char *s = SvPV_force(sv, len);
@@ -3506,7 +3487,7 @@ struct partition_stack_entry {
    ((this->*compare)(array[elt1], array[elt2]))
 #else
 #define qsort_cmp(elt1, elt2) \
-   ((*compare)(array[elt1], array[elt2]))
+   ((*compare)(aTHX_ array[elt1], array[elt2]))
 #endif
 
 #ifdef QSORT_ORDER_GUESS
@@ -3588,11 +3569,7 @@ doqsort_all_asserts(
 /* ****************************************************************** qsort */
 
 STATIC void
-#ifdef PERL_OBJECT
-qsortsv(SV ** array, size_t num_elts, SVCOMPARE compare)
-#else
-qsortsv(SV ** array, size_t num_elts, I32 (*compare)(SV *a, SV *b))
-#endif
+qsortsv(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t compare)
 {
    register SV * temp;
 

@@ -1,4 +1,5 @@
 #include "EXTERN.h"
+#define PERL_IN_EBCDIC_C
 #include "perl.h"
 
 /* in ASCII order, not that it matters */

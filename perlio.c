@@ -21,6 +21,7 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_PERLIO_C
 #include "perl.h"
 
 #ifdef PERLIO_IS_STDIO 

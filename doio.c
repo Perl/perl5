@@ -15,6 +15,7 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_DOIO_C
 #include "perl.h"
 
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
@@ -81,7 +82,7 @@
 #endif
 
 bool
-do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp)
+Perl_do_open(pTHX_ GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp)
 {
     register IO *io = GvIOn(gv);
     PerlIO *saveifp = Nullfp;
@@ -410,7 +411,7 @@ say_false:
 }
 
 PerlIO *
-nextargv(register GV *gv)
+Perl_nextargv(pTHX_ register GV *gv)
 {
     register SV *sv;
 #ifndef FLEXFILENAMES
@@ -580,7 +581,7 @@ nextargv(register GV *gv)
 
 #ifdef HAS_PIPE
 void
-do_pipe(SV *sv, GV *rgv, GV *wgv)
+Perl_do_pipe(pTHX_ SV *sv, GV *rgv, GV *wgv)
 {
     register IO *rstio;
     register IO *wstio;
@@ -625,7 +626,7 @@ badexit:
 
 /* explicit renamed to avoid C++ conflict    -- kja */
 bool
-do_close(GV *gv, bool not_implicit)
+Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 {
     bool retval;
     IO *io;
@@ -659,7 +660,7 @@ do_close(GV *gv, bool not_implicit)
 }
 
 bool
-io_close(IO *io)
+Perl_io_close(pTHX_ IO *io)
 {
     bool retval = FALSE;
     int status;
@@ -690,7 +691,7 @@ io_close(IO *io)
 }
 
 bool
-do_eof(GV *gv)
+Perl_do_eof(pTHX_ GV *gv)
 {
     dTHR;
     register IO *io;
@@ -728,7 +729,7 @@ do_eof(GV *gv)
 }
 
 Off_t
-do_tell(GV *gv)
+Perl_do_tell(pTHX_ GV *gv)
 {
     register IO *io;
     register PerlIO *fp;
@@ -750,7 +751,7 @@ do_tell(GV *gv)
 }
 
 bool
-do_seek(GV *gv, Off_t pos, int whence)
+Perl_do_seek(pTHX_ GV *gv, Off_t pos, int whence)
 {
     register IO *io;
     register PerlIO *fp;
@@ -772,7 +773,7 @@ do_seek(GV *gv, Off_t pos, int whence)
 }
 
 Off_t
-do_sysseek(GV *gv, Off_t pos, int whence)
+Perl_do_sysseek(pTHX_ GV *gv, Off_t pos, int whence)
 {
     register IO *io;
     register PerlIO *fp;
@@ -789,7 +790,7 @@ do_sysseek(GV *gv, Off_t pos, int whence)
 }
 
 int
-do_binmode(PerlIO *fp, int iotype, int flag)
+Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int flag)
 {
     if (flag != TRUE)
 	croak("panic: unsetting binmode"); /* Not implemented yet */
@@ -880,7 +881,7 @@ Off_t length;		/* length to set file to */
 #endif /* F_FREESP */
 
 bool
-do_print(register SV *sv, PerlIO *fp)
+Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 {
     register char *tmps;
     STRLEN len;
@@ -930,7 +931,7 @@ do_print(register SV *sv, PerlIO *fp)
 }
 
 I32
-my_stat(ARGSproto)
+Perl_my_stat(pTHX_ ARGSproto)
 {
     djSP;
     IO *io;
@@ -984,7 +985,7 @@ my_stat(ARGSproto)
 }
 
 I32
-my_lstat(ARGSproto)
+Perl_my_lstat(pTHX_ ARGSproto)
 {
     djSP;
     SV *sv;
@@ -1011,7 +1012,7 @@ my_lstat(ARGSproto)
 }
 
 bool
-do_aexec(SV *really, register SV **mark, register SV **sp)
+Perl_do_aexec(pTHX_ SV *really, register SV **mark, register SV **sp)
 {
     register char **a;
     char *tmps;
@@ -1043,7 +1044,7 @@ do_aexec(SV *really, register SV **mark, register SV **sp)
 }
 
 void
-do_execfree(void)
+Perl_do_execfree(pTHX)
 {
     if (PL_Argv) {
 	Safefree(PL_Argv);
@@ -1058,13 +1059,13 @@ do_execfree(void)
 #if !defined(OS2) && !defined(WIN32) && !defined(DJGPP)
 
 bool
-do_exec(char *cmd)
+Perl_do_exec(pTHX_ char *cmd)
 {
     return do_exec3(cmd,0,0);
 }
 
 bool
-do_exec3(char *cmd, int fd, int do_report)
+Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
 {
     register char **a;
     register char *s;
@@ -1164,7 +1165,7 @@ do_exec3(char *cmd, int fd, int do_report)
 #endif /* OS2 || WIN32 */
 
 I32
-apply(I32 type, register SV **mark, register SV **sp)
+Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 {
     dTHR;
     register I32 val;
@@ -1366,7 +1367,7 @@ nothing in the core.
 /* Do the permissions allow some operation?  Assumes statcache already set. */
 #ifndef VMS /* VMS' cando is in vms.c */
 I32
-cando(I32 bit, I32 effective, register struct stat *statbufp)
+Perl_cando(pTHX_ I32 bit, I32 effective, register struct stat *statbufp)
 {
 #ifdef DOSISH
     /* [Comments and code from Len Reed]
@@ -1418,7 +1419,7 @@ cando(I32 bit, I32 effective, register struct stat *statbufp)
 #endif /* ! VMS */
 
 I32
-ingroup(I32 testgid, I32 effective)
+Perl_ingroup(pTHX_ I32 testgid, I32 effective)
 {
     if (testgid == (effective ? PL_egid : PL_gid))
 	return TRUE;
@@ -1442,7 +1443,7 @@ ingroup(I32 testgid, I32 effective)
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 
 I32
-do_ipcget(I32 optype, SV **mark, SV **sp)
+Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
 {
     dTHR;
     key_t key;
@@ -1475,7 +1476,7 @@ do_ipcget(I32 optype, SV **mark, SV **sp)
 }
 
 I32
-do_ipcctl(I32 optype, SV **mark, SV **sp)
+Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
 {
     dTHR;
     SV *astr;
@@ -1592,7 +1593,7 @@ do_ipcctl(I32 optype, SV **mark, SV **sp)
 }
 
 I32
-do_msgsnd(SV **mark, SV **sp)
+Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
 {
 #ifdef HAS_MSG
     dTHR;
@@ -1615,7 +1616,7 @@ do_msgsnd(SV **mark, SV **sp)
 }
 
 I32
-do_msgrcv(SV **mark, SV **sp)
+Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
 {
 #ifdef HAS_MSG
     dTHR;
@@ -1646,7 +1647,7 @@ do_msgrcv(SV **mark, SV **sp)
 }
 
 I32
-do_semop(SV **mark, SV **sp)
+Perl_do_semop(pTHX_ SV **mark, SV **sp)
 {
 #ifdef HAS_SEM
     dTHR;
@@ -1671,7 +1672,7 @@ do_semop(SV **mark, SV **sp)
 }
 
 I32
-do_shmio(I32 optype, SV **mark, SV **sp)
+Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 {
 #ifdef HAS_SHM
     dTHR;

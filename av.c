@@ -13,10 +13,11 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_AV_C
 #include "perl.h"
 
 void
-av_reify(AV *av)
+Perl_av_reify(pTHX_ AV *av)
 {
     I32 key;
     SV* sv;
@@ -46,7 +47,7 @@ av_reify(AV *av)
 }
 
 void
-av_extend(AV *av, I32 key)
+Perl_av_extend(pTHX_ AV *av, I32 key)
 {
     dTHR;			/* only necessary if we have to extend stack */
     MAGIC *mg;
@@ -60,7 +61,7 @@ av_extend(AV *av, I32 key)
 	PUSHs(SvTIED_obj((SV*)av, mg));
 	PUSHs(sv_2mortal(newSViv(key+1)));
         PUTBACK;
-	perl_call_method("EXTEND", G_SCALAR|G_DISCARD);
+	call_method("EXTEND", G_SCALAR|G_DISCARD);
 	POPSTACK;
 	FREETMPS;
 	LEAVE;
@@ -149,7 +150,7 @@ av_extend(AV *av, I32 key)
 }
 
 SV**
-av_fetch(register AV *av, I32 key, I32 lval)
+Perl_av_fetch(pTHX_ register AV *av, I32 key, I32 lval)
 {
     SV *sv;
 
@@ -196,7 +197,7 @@ av_fetch(register AV *av, I32 key, I32 lval)
 }
 
 SV**
-av_store(register AV *av, I32 key, SV *val)
+Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
 {
     SV** ary;
     U32  fill;
@@ -255,7 +256,7 @@ av_store(register AV *av, I32 key, SV *val)
 }
 
 AV *
-newAV(void)
+Perl_newAV(pTHX)
 {
     register AV *av;
 
@@ -269,7 +270,7 @@ newAV(void)
 }
 
 AV *
-av_make(register I32 size, register SV **strp)
+Perl_av_make(pTHX_ register I32 size, register SV **strp)
 {
     register AV *av;
     register I32 i;
@@ -295,7 +296,7 @@ av_make(register I32 size, register SV **strp)
 }
 
 AV *
-av_fake(register I32 size, register SV **strp)
+Perl_av_fake(pTHX_ register I32 size, register SV **strp)
 {
     register AV *av;
     register SV** ary;
@@ -318,7 +319,7 @@ av_fake(register I32 size, register SV **strp)
 }
 
 void
-av_clear(register AV *av)
+Perl_av_clear(pTHX_ register AV *av)
 {
     register I32 key;
     SV** ary;
@@ -359,7 +360,7 @@ av_clear(register AV *av)
 }
 
 void
-av_undef(register AV *av)
+Perl_av_undef(pTHX_ register AV *av)
 {
     register I32 key;
 
@@ -387,7 +388,7 @@ av_undef(register AV *av)
 }
 
 void
-av_push(register AV *av, SV *val)
+Perl_av_push(pTHX_ register AV *av, SV *val)
 {             
     MAGIC *mg;
     if (!av)
@@ -404,7 +405,7 @@ av_push(register AV *av, SV *val)
 	PUSHs(val);
 	PUTBACK;
 	ENTER;
-	perl_call_method("PUSH", G_SCALAR|G_DISCARD);
+	call_method("PUSH", G_SCALAR|G_DISCARD);
 	LEAVE;
 	POPSTACK;
 	return;
@@ -413,7 +414,7 @@ av_push(register AV *av, SV *val)
 }
 
 SV *
-av_pop(register AV *av)
+Perl_av_pop(pTHX_ register AV *av)
 {
     SV *retval;
     MAGIC* mg;
@@ -429,7 +430,7 @@ av_pop(register AV *av)
 	XPUSHs(SvTIED_obj((SV*)av, mg));
 	PUTBACK;
 	ENTER;
-	if (perl_call_method("POP", G_SCALAR)) {
+	if (call_method("POP", G_SCALAR)) {
 	    retval = newSVsv(*PL_stack_sp--);    
 	} else {    
 	    retval = &PL_sv_undef;
@@ -446,7 +447,7 @@ av_pop(register AV *av)
 }
 
 void
-av_unshift(register AV *av, register I32 num)
+Perl_av_unshift(pTHX_ register AV *av, register I32 num)
 {
     register I32 i;
     register SV **ary;
@@ -468,7 +469,7 @@ av_unshift(register AV *av, register I32 num)
 	}
 	PUTBACK;
 	ENTER;
-	perl_call_method("UNSHIFT", G_SCALAR|G_DISCARD);
+	call_method("UNSHIFT", G_SCALAR|G_DISCARD);
 	LEAVE;
 	POPSTACK;
 	return;
@@ -499,7 +500,7 @@ av_unshift(register AV *av, register I32 num)
 }
 
 SV *
-av_shift(register AV *av)
+Perl_av_shift(pTHX_ register AV *av)
 {
     SV *retval;
     MAGIC* mg;
@@ -515,7 +516,7 @@ av_shift(register AV *av)
 	XPUSHs(SvTIED_obj((SV*)av, mg));
 	PUTBACK;
 	ENTER;
-	if (perl_call_method("SHIFT", G_SCALAR)) {
+	if (call_method("SHIFT", G_SCALAR)) {
 	    retval = newSVsv(*PL_stack_sp--);            
 	} else {    
 	    retval = &PL_sv_undef;
@@ -536,13 +537,13 @@ av_shift(register AV *av)
 }
 
 I32
-av_len(register AV *av)
+Perl_av_len(pTHX_ register AV *av)
 {
     return AvFILL(av);
 }
 
 void
-av_fill(register AV *av, I32 fill)
+Perl_av_fill(pTHX_ register AV *av, I32 fill)
 {
     MAGIC *mg;
     if (!av)
@@ -559,7 +560,7 @@ av_fill(register AV *av, I32 fill)
 	PUSHs(SvTIED_obj((SV*)av, mg));
 	PUSHs(sv_2mortal(newSViv(fill+1)));
 	PUTBACK;
-	perl_call_method("STORESIZE", G_SCALAR|G_DISCARD);
+	call_method("STORESIZE", G_SCALAR|G_DISCARD);
 	POPSTACK;
 	FREETMPS;
 	LEAVE;
@@ -595,7 +596,7 @@ av_fill(register AV *av, I32 fill)
  */
 
 STATIC I32
-avhv_index_sv(SV* sv)
+avhv_index_sv(pTHX_ SV* sv)
 {
     I32 index = SvIV(sv);
     if (index < 1)
@@ -604,7 +605,7 @@ avhv_index_sv(SV* sv)
 }
 
 HV*
-avhv_keys(AV *av)
+Perl_avhv_keys(pTHX_ AV *av)
 {
     SV **keysp = av_fetch(av, 0, FALSE);
     if (keysp) {
@@ -622,7 +623,7 @@ avhv_keys(AV *av)
 }
 
 SV**
-avhv_fetch_ent(AV *av, SV *keysv, I32 lval, U32 hash)
+Perl_avhv_fetch_ent(pTHX_ AV *av, SV *keysv, I32 lval, U32 hash)
 {
     SV **indsvp;
     HV *keys = avhv_keys(av);
@@ -635,21 +636,21 @@ avhv_fetch_ent(AV *av, SV *keysv, I32 lval, U32 hash)
 }
 
 bool
-avhv_exists_ent(AV *av, SV *keysv, U32 hash)
+Perl_avhv_exists_ent(pTHX_ AV *av, SV *keysv, U32 hash)
 {
     HV *keys = avhv_keys(av);
     return hv_exists_ent(keys, keysv, hash);
 }
 
 HE *
-avhv_iternext(AV *av)
+Perl_avhv_iternext(pTHX_ AV *av)
 {
     HV *keys = avhv_keys(av);
     return hv_iternext(keys);
 }
 
 SV *
-avhv_iterval(AV *av, register HE *entry)
+Perl_avhv_iterval(pTHX_ AV *av, register HE *entry)
 {
     SV *sv = hv_iterval(avhv_keys(av), entry);
     return *av_fetch(av, avhv_index_sv(sv), TRUE);

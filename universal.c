@@ -1,4 +1,5 @@
 #include "EXTERN.h"
+#define PERL_IN_UNIVERSAL_C
 #include "perl.h"
 
 /*
@@ -7,7 +8,7 @@
  */
 
 STATIC SV *
-isa_lookup(HV *stash, const char *name, int len, int level)
+isa_lookup(pTHX_ HV *stash, const char *name, int len, int level)
 {
     AV* av;
     GV* gv;
@@ -73,7 +74,7 @@ isa_lookup(HV *stash, const char *name, int len, int level)
 }
 
 bool
-sv_derived_from(SV *sv, const char *name)
+Perl_sv_derived_from(pTHX_ SV *sv, const char *name)
 {
     SV *rv;
     char *type;
@@ -211,7 +212,7 @@ XS(XS_UNIVERSAL_VERSION)
 #endif
 
 void
-boot_core_UNIVERSAL(void)
+Perl_boot_core_UNIVERSAL(pTHX)
 {
     char *file = __FILE__;
 

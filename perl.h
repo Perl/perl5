@@ -1522,6 +1522,22 @@ union any {
             (PerlLIO_setmode(PerlIO_fileno(fp), O_BINARY) != -1 ? TRUE : NULL)
 #endif
 
+#ifndef pTHX
+#  define pTHX void
+#  define pTHX_
+#  define _pTHX
+#endif
+
+#ifndef aTHX
+#  define aTHX
+#  define aTHX_
+#  define _aTHX
+#endif
+
+#ifndef STATIC
+#  define STATIC static
+#endif
+
 #include "regexp.h"
 #include "sv.h"
 #include "util.h"
@@ -1565,7 +1581,8 @@ struct _sublex_info {
 
 typedef struct magic_state MGS;	/* struct magic_state defined in mg.c */
 
-#ifdef PERL_OBJECT
+/* Length of a variant. */
+
 typedef struct {
     I32 len_min;
     I32 len_delta;
@@ -1585,7 +1602,6 @@ typedef struct {
 } scan_data_t;
 
 typedef I32 CHECKPOINT;
-#endif /* PERL_OBJECT */
 
 #if defined(iAPX286) || defined(M_I286) || defined(I80286)
 #   define I286
@@ -2377,7 +2393,45 @@ typedef void *Thread;
 
 #include "thread.h"
 #include "pp.h"
+
+#ifndef PERL_CALLCONV
+#  define PERL_CALLCONV
+#endif 
+
+#ifdef PERL_OBJECT
+#  define VIRTUAL virtual PERL_CALLCONV
+#else
+#  define VIRTUAL PERL_CALLCONV
+START_EXTERN_C
+#endif
+
+#ifndef NEXT30_NO_ATTRIBUTE
+#  ifndef HASATTRIBUTE       /* disable GNU-cc attribute checking? */
+#    ifdef  __attribute__      /* Avoid possible redefinition errors */
+#      undef  __attribute__
+#    endif
+#    define __attribute__(attr)
+#  endif
+#endif
+
+#ifdef USE_PURE_BISON
+int Perl_yylex(pTHX_ YYSTYPE *lvalp, int *lcharp);
+#endif
+
+typedef void (*DESTRUCTORFUNC_t) (pTHX_ void*);
+typedef void (*SVFUNC_t) (pTHX_ SV*);
+typedef I32 (*SVCOMPARE_t) (pTHX_ SV*, SV*);
+typedef void (*XSINIT_t) (pTHX);
+typedef void (*ATEXIT_t) (pTHX_ void*);
+typedef void (*XSUBADDR_t) (pTHX_ CV *);
+
 #include "proto.h"
+
+#include "pp_proto.h"
+
+#ifndef PERL_OBJECT
+END_EXTERN_C
+#endif
 
 /* The following must follow proto.h as #defines mess up syntax */
 
@@ -2733,14 +2787,14 @@ typedef struct am_table_short AMTS;
 
 #define SET_NUMERIC_STANDARD() \
     STMT_START {				\
-	if (! PL_numeric_standard)			\
-	    perl_set_numeric_standard();	\
+	if (! PL_numeric_standard)		\
+	    set_numeric_standard();		\
     } STMT_END
 
 #define SET_NUMERIC_LOCAL() \
     STMT_START {				\
 	if (! PL_numeric_local)			\
-	    perl_set_numeric_local();		\
+	    set_numeric_local();		\
     } STMT_END
 
 #else /* !USE_LOCALE_NUMERIC */

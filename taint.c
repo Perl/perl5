@@ -5,10 +5,11 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_TAINT_C
 #include "perl.h"
 
 void
-taint_proper(const char *f, char *s)
+Perl_taint_proper(pTHX_ const char *f, char *s)
 {
     dTHR;	/* just for taint */
     char *ug;
@@ -33,7 +34,7 @@ taint_proper(const char *f, char *s)
 }
 
 void
-taint_env(void)
+Perl_taint_env(pTHX)
 {
     SV** svp;
     MAGIC* mg;

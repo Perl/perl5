@@ -1,7 +1,7 @@
-#define pp_i_preinc pp_preinc
-#define pp_i_predec pp_predec
-#define pp_i_postinc pp_postinc
-#define pp_i_postdec pp_postdec
+#define Perl_pp_i_preinc Perl_pp_preinc
+#define Perl_pp_i_predec Perl_pp_predec
+#define Perl_pp_i_postinc Perl_pp_postinc
+#define Perl_pp_i_postdec Perl_pp_postdec
 
 typedef enum {
 	OP_NULL,	/* 0 */
@@ -1072,8 +1072,8 @@ START_EXTERN_C
 
 #undef PERL_CKDEF
 #undef PERL_PPDEF
-#define PERL_CKDEF(s) OP *s (OP *o);
-#define PERL_PPDEF(s) OP *s (ARGSproto);
+#define PERL_CKDEF(s) OP *s (pTHX_ OP *o);
+#define PERL_PPDEF(s) OP *s (pTHX_ ARGSproto);
 
 #include "pp_proto.h"
 
@@ -1085,354 +1085,354 @@ END_EXTERN_C
 EXT OP * (CPERLscope(*PL_ppaddr)[])(ARGSproto);
 #else
 EXT OP * (CPERLscope(*PL_ppaddr)[])(ARGSproto) = {
-	pp_null,
-	pp_stub,
-	pp_scalar,
-	pp_pushmark,
-	pp_wantarray,
-	pp_const,
-	pp_gvsv,
-	pp_gv,
-	pp_gelem,
-	pp_padsv,
-	pp_padav,
-	pp_padhv,
-	pp_padany,
-	pp_pushre,
-	pp_rv2gv,
-	pp_rv2sv,
-	pp_av2arylen,
-	pp_rv2cv,
-	pp_anoncode,
-	pp_prototype,
-	pp_refgen,
-	pp_srefgen,
-	pp_ref,
-	pp_bless,
-	pp_backtick,
-	pp_glob,
-	pp_readline,
-	pp_rcatline,
-	pp_regcmaybe,
-	pp_regcreset,
-	pp_regcomp,
-	pp_match,
-	pp_qr,
-	pp_subst,
-	pp_substcont,
-	pp_trans,
-	pp_sassign,
-	pp_aassign,
-	pp_chop,
-	pp_schop,
-	pp_chomp,
-	pp_schomp,
-	pp_defined,
-	pp_undef,
-	pp_study,
-	pp_pos,
-	pp_preinc,
-	pp_i_preinc,
-	pp_predec,
-	pp_i_predec,
-	pp_postinc,
-	pp_i_postinc,
-	pp_postdec,
-	pp_i_postdec,
-	pp_pow,
-	pp_multiply,
-	pp_i_multiply,
-	pp_divide,
-	pp_i_divide,
-	pp_modulo,
-	pp_i_modulo,
-	pp_repeat,
-	pp_add,
-	pp_i_add,
-	pp_subtract,
-	pp_i_subtract,
-	pp_concat,
-	pp_stringify,
-	pp_left_shift,
-	pp_right_shift,
-	pp_lt,
-	pp_i_lt,
-	pp_gt,
-	pp_i_gt,
-	pp_le,
-	pp_i_le,
-	pp_ge,
-	pp_i_ge,
-	pp_eq,
-	pp_i_eq,
-	pp_ne,
-	pp_i_ne,
-	pp_ncmp,
-	pp_i_ncmp,
-	pp_slt,
-	pp_sgt,
-	pp_sle,
-	pp_sge,
-	pp_seq,
-	pp_sne,
-	pp_scmp,
-	pp_bit_and,
-	pp_bit_xor,
-	pp_bit_or,
-	pp_negate,
-	pp_i_negate,
-	pp_not,
-	pp_complement,
-	pp_atan2,
-	pp_sin,
-	pp_cos,
-	pp_rand,
-	pp_srand,
-	pp_exp,
-	pp_log,
-	pp_sqrt,
-	pp_int,
-	pp_hex,
-	pp_oct,
-	pp_abs,
-	pp_length,
-	pp_substr,
-	pp_vec,
-	pp_index,
-	pp_rindex,
-	pp_sprintf,
-	pp_formline,
-	pp_ord,
-	pp_chr,
-	pp_crypt,
-	pp_ucfirst,
-	pp_lcfirst,
-	pp_uc,
-	pp_lc,
-	pp_quotemeta,
-	pp_rv2av,
-	pp_aelemfast,
-	pp_aelem,
-	pp_aslice,
-	pp_each,
-	pp_values,
-	pp_keys,
-	pp_delete,
-	pp_exists,
-	pp_rv2hv,
-	pp_helem,
-	pp_hslice,
-	pp_unpack,
-	pp_pack,
-	pp_split,
-	pp_join,
-	pp_list,
-	pp_lslice,
-	pp_anonlist,
-	pp_anonhash,
-	pp_splice,
-	pp_push,
-	pp_pop,
-	pp_shift,
-	pp_unshift,
-	pp_sort,
-	pp_reverse,
-	pp_grepstart,
-	pp_grepwhile,
-	pp_mapstart,
-	pp_mapwhile,
-	pp_range,
-	pp_flip,
-	pp_flop,
-	pp_and,
-	pp_or,
-	pp_xor,
-	pp_cond_expr,
-	pp_andassign,
-	pp_orassign,
-	pp_method,
-	pp_entersub,
-	pp_leavesub,
-	pp_caller,
-	pp_warn,
-	pp_die,
-	pp_reset,
-	pp_lineseq,
-	pp_nextstate,
-	pp_dbstate,
-	pp_unstack,
-	pp_enter,
-	pp_leave,
-	pp_scope,
-	pp_enteriter,
-	pp_iter,
-	pp_enterloop,
-	pp_leaveloop,
-	pp_return,
-	pp_last,
-	pp_next,
-	pp_redo,
-	pp_dump,
-	pp_goto,
-	pp_exit,
-	pp_open,
-	pp_close,
-	pp_pipe_op,
-	pp_fileno,
-	pp_umask,
-	pp_binmode,
-	pp_tie,
-	pp_untie,
-	pp_tied,
-	pp_dbmopen,
-	pp_dbmclose,
-	pp_sselect,
-	pp_select,
-	pp_getc,
-	pp_read,
-	pp_enterwrite,
-	pp_leavewrite,
-	pp_prtf,
-	pp_print,
-	pp_sysopen,
-	pp_sysseek,
-	pp_sysread,
-	pp_syswrite,
-	pp_send,
-	pp_recv,
-	pp_eof,
-	pp_tell,
-	pp_seek,
-	pp_truncate,
-	pp_fcntl,
-	pp_ioctl,
-	pp_flock,
-	pp_socket,
-	pp_sockpair,
-	pp_bind,
-	pp_connect,
-	pp_listen,
-	pp_accept,
-	pp_shutdown,
-	pp_gsockopt,
-	pp_ssockopt,
-	pp_getsockname,
-	pp_getpeername,
-	pp_lstat,
-	pp_stat,
-	pp_ftrread,
-	pp_ftrwrite,
-	pp_ftrexec,
-	pp_fteread,
-	pp_ftewrite,
-	pp_fteexec,
-	pp_ftis,
-	pp_fteowned,
-	pp_ftrowned,
-	pp_ftzero,
-	pp_ftsize,
-	pp_ftmtime,
-	pp_ftatime,
-	pp_ftctime,
-	pp_ftsock,
-	pp_ftchr,
-	pp_ftblk,
-	pp_ftfile,
-	pp_ftdir,
-	pp_ftpipe,
-	pp_ftlink,
-	pp_ftsuid,
-	pp_ftsgid,
-	pp_ftsvtx,
-	pp_fttty,
-	pp_fttext,
-	pp_ftbinary,
-	pp_chdir,
-	pp_chown,
-	pp_chroot,
-	pp_unlink,
-	pp_chmod,
-	pp_utime,
-	pp_rename,
-	pp_link,
-	pp_symlink,
-	pp_readlink,
-	pp_mkdir,
-	pp_rmdir,
-	pp_open_dir,
-	pp_readdir,
-	pp_telldir,
-	pp_seekdir,
-	pp_rewinddir,
-	pp_closedir,
-	pp_fork,
-	pp_wait,
-	pp_waitpid,
-	pp_system,
-	pp_exec,
-	pp_kill,
-	pp_getppid,
-	pp_getpgrp,
-	pp_setpgrp,
-	pp_getpriority,
-	pp_setpriority,
-	pp_time,
-	pp_tms,
-	pp_localtime,
-	pp_gmtime,
-	pp_alarm,
-	pp_sleep,
-	pp_shmget,
-	pp_shmctl,
-	pp_shmread,
-	pp_shmwrite,
-	pp_msgget,
-	pp_msgctl,
-	pp_msgsnd,
-	pp_msgrcv,
-	pp_semget,
-	pp_semctl,
-	pp_semop,
-	pp_require,
-	pp_dofile,
-	pp_entereval,
-	pp_leaveeval,
-	pp_entertry,
-	pp_leavetry,
-	pp_ghbyname,
-	pp_ghbyaddr,
-	pp_ghostent,
-	pp_gnbyname,
-	pp_gnbyaddr,
-	pp_gnetent,
-	pp_gpbyname,
-	pp_gpbynumber,
-	pp_gprotoent,
-	pp_gsbyname,
-	pp_gsbyport,
-	pp_gservent,
-	pp_shostent,
-	pp_snetent,
-	pp_sprotoent,
-	pp_sservent,
-	pp_ehostent,
-	pp_enetent,
-	pp_eprotoent,
-	pp_eservent,
-	pp_gpwnam,
-	pp_gpwuid,
-	pp_gpwent,
-	pp_spwent,
-	pp_epwent,
-	pp_ggrnam,
-	pp_ggrgid,
-	pp_ggrent,
-	pp_sgrent,
-	pp_egrent,
-	pp_getlogin,
-	pp_syscall,
-	pp_lock,
-	pp_threadsv,
+	Perl_pp_null,
+	Perl_pp_stub,
+	Perl_pp_scalar,
+	Perl_pp_pushmark,
+	Perl_pp_wantarray,
+	Perl_pp_const,
+	Perl_pp_gvsv,
+	Perl_pp_gv,
+	Perl_pp_gelem,
+	Perl_pp_padsv,
+	Perl_pp_padav,
+	Perl_pp_padhv,
+	Perl_pp_padany,
+	Perl_pp_pushre,
+	Perl_pp_rv2gv,
+	Perl_pp_rv2sv,
+	Perl_pp_av2arylen,
+	Perl_pp_rv2cv,
+	Perl_pp_anoncode,
+	Perl_pp_prototype,
+	Perl_pp_refgen,
+	Perl_pp_srefgen,
+	Perl_pp_ref,
+	Perl_pp_bless,
+	Perl_pp_backtick,
+	Perl_pp_glob,
+	Perl_pp_readline,
+	Perl_pp_rcatline,
+	Perl_pp_regcmaybe,
+	Perl_pp_regcreset,
+	Perl_pp_regcomp,
+	Perl_pp_match,
+	Perl_pp_qr,
+	Perl_pp_subst,
+	Perl_pp_substcont,
+	Perl_pp_trans,
+	Perl_pp_sassign,
+	Perl_pp_aassign,
+	Perl_pp_chop,
+	Perl_pp_schop,
+	Perl_pp_chomp,
+	Perl_pp_schomp,
+	Perl_pp_defined,
+	Perl_pp_undef,
+	Perl_pp_study,
+	Perl_pp_pos,
+	Perl_pp_preinc,
+	Perl_pp_i_preinc,
+	Perl_pp_predec,
+	Perl_pp_i_predec,
+	Perl_pp_postinc,
+	Perl_pp_i_postinc,
+	Perl_pp_postdec,
+	Perl_pp_i_postdec,
+	Perl_pp_pow,
+	Perl_pp_multiply,
+	Perl_pp_i_multiply,
+	Perl_pp_divide,
+	Perl_pp_i_divide,
+	Perl_pp_modulo,
+	Perl_pp_i_modulo,
+	Perl_pp_repeat,
+	Perl_pp_add,
+	Perl_pp_i_add,
+	Perl_pp_subtract,
+	Perl_pp_i_subtract,
+	Perl_pp_concat,
+	Perl_pp_stringify,
+	Perl_pp_left_shift,
+	Perl_pp_right_shift,
+	Perl_pp_lt,
+	Perl_pp_i_lt,
+	Perl_pp_gt,
+	Perl_pp_i_gt,
+	Perl_pp_le,
+	Perl_pp_i_le,
+	Perl_pp_ge,
+	Perl_pp_i_ge,
+	Perl_pp_eq,
+	Perl_pp_i_eq,
+	Perl_pp_ne,
+	Perl_pp_i_ne,
+	Perl_pp_ncmp,
+	Perl_pp_i_ncmp,
+	Perl_pp_slt,
+	Perl_pp_sgt,
+	Perl_pp_sle,
+	Perl_pp_sge,
+	Perl_pp_seq,
+	Perl_pp_sne,
+	Perl_pp_scmp,
+	Perl_pp_bit_and,
+	Perl_pp_bit_xor,
+	Perl_pp_bit_or,
+	Perl_pp_negate,
+	Perl_pp_i_negate,
+	Perl_pp_not,
+	Perl_pp_complement,
+	Perl_pp_atan2,
+	Perl_pp_sin,
+	Perl_pp_cos,
+	Perl_pp_rand,
+	Perl_pp_srand,
+	Perl_pp_exp,
+	Perl_pp_log,
+	Perl_pp_sqrt,
+	Perl_pp_int,
+	Perl_pp_hex,
+	Perl_pp_oct,
+	Perl_pp_abs,
+	Perl_pp_length,
+	Perl_pp_substr,
+	Perl_pp_vec,
+	Perl_pp_index,
+	Perl_pp_rindex,
+	Perl_pp_sprintf,
+	Perl_pp_formline,
+	Perl_pp_ord,
+	Perl_pp_chr,
+	Perl_pp_crypt,
+	Perl_pp_ucfirst,
+	Perl_pp_lcfirst,
+	Perl_pp_uc,
+	Perl_pp_lc,
+	Perl_pp_quotemeta,
+	Perl_pp_rv2av,
+	Perl_pp_aelemfast,
+	Perl_pp_aelem,
+	Perl_pp_aslice,
+	Perl_pp_each,
+	Perl_pp_values,
+	Perl_pp_keys,
+	Perl_pp_delete,
+	Perl_pp_exists,
+	Perl_pp_rv2hv,
+	Perl_pp_helem,
+	Perl_pp_hslice,
+	Perl_pp_unpack,
+	Perl_pp_pack,
+	Perl_pp_split,
+	Perl_pp_join,
+	Perl_pp_list,
+	Perl_pp_lslice,
+	Perl_pp_anonlist,
+	Perl_pp_anonhash,
+	Perl_pp_splice,
+	Perl_pp_push,
+	Perl_pp_pop,
+	Perl_pp_shift,
+	Perl_pp_unshift,
+	Perl_pp_sort,
+	Perl_pp_reverse,
+	Perl_pp_grepstart,
+	Perl_pp_grepwhile,
+	Perl_pp_mapstart,
+	Perl_pp_mapwhile,
+	Perl_pp_range,
+	Perl_pp_flip,
+	Perl_pp_flop,
+	Perl_pp_and,
+	Perl_pp_or,
+	Perl_pp_xor,
+	Perl_pp_cond_expr,
+	Perl_pp_andassign,
+	Perl_pp_orassign,
+	Perl_pp_method,
+	Perl_pp_entersub,
+	Perl_pp_leavesub,
+	Perl_pp_caller,
+	Perl_pp_warn,
+	Perl_pp_die,
+	Perl_pp_reset,
+	Perl_pp_lineseq,
+	Perl_pp_nextstate,
+	Perl_pp_dbstate,
+	Perl_pp_unstack,
+	Perl_pp_enter,
+	Perl_pp_leave,
+	Perl_pp_scope,
+	Perl_pp_enteriter,
+	Perl_pp_iter,
+	Perl_pp_enterloop,
+	Perl_pp_leaveloop,
+	Perl_pp_return,
+	Perl_pp_last,
+	Perl_pp_next,
+	Perl_pp_redo,
+	Perl_pp_dump,
+	Perl_pp_goto,
+	Perl_pp_exit,
+	Perl_pp_open,
+	Perl_pp_close,
+	Perl_pp_pipe_op,
+	Perl_pp_fileno,
+	Perl_pp_umask,
+	Perl_pp_binmode,
+	Perl_pp_tie,
+	Perl_pp_untie,
+	Perl_pp_tied,
+	Perl_pp_dbmopen,
+	Perl_pp_dbmclose,
+	Perl_pp_sselect,
+	Perl_pp_select,
+	Perl_pp_getc,
+	Perl_pp_read,
+	Perl_pp_enterwrite,
+	Perl_pp_leavewrite,
+	Perl_pp_prtf,
+	Perl_pp_print,
+	Perl_pp_sysopen,
+	Perl_pp_sysseek,
+	Perl_pp_sysread,
+	Perl_pp_syswrite,
+	Perl_pp_send,
+	Perl_pp_recv,
+	Perl_pp_eof,
+	Perl_pp_tell,
+	Perl_pp_seek,
+	Perl_pp_truncate,
+	Perl_pp_fcntl,
+	Perl_pp_ioctl,
+	Perl_pp_flock,
+	Perl_pp_socket,
+	Perl_pp_sockpair,
+	Perl_pp_bind,
+	Perl_pp_connect,
+	Perl_pp_listen,
+	Perl_pp_accept,
+	Perl_pp_shutdown,
+	Perl_pp_gsockopt,
+	Perl_pp_ssockopt,
+	Perl_pp_getsockname,
+	Perl_pp_getpeername,
+	Perl_pp_lstat,
+	Perl_pp_stat,
+	Perl_pp_ftrread,
+	Perl_pp_ftrwrite,
+	Perl_pp_ftrexec,
+	Perl_pp_fteread,
+	Perl_pp_ftewrite,
+	Perl_pp_fteexec,
+	Perl_pp_ftis,
+	Perl_pp_fteowned,
+	Perl_pp_ftrowned,
+	Perl_pp_ftzero,
+	Perl_pp_ftsize,
+	Perl_pp_ftmtime,
+	Perl_pp_ftatime,
+	Perl_pp_ftctime,
+	Perl_pp_ftsock,
+	Perl_pp_ftchr,
+	Perl_pp_ftblk,
+	Perl_pp_ftfile,
+	Perl_pp_ftdir,
+	Perl_pp_ftpipe,
+	Perl_pp_ftlink,
+	Perl_pp_ftsuid,
+	Perl_pp_ftsgid,
+	Perl_pp_ftsvtx,
+	Perl_pp_fttty,
+	Perl_pp_fttext,
+	Perl_pp_ftbinary,
+	Perl_pp_chdir,
+	Perl_pp_chown,
+	Perl_pp_chroot,
+	Perl_pp_unlink,
+	Perl_pp_chmod,
+	Perl_pp_utime,
+	Perl_pp_rename,
+	Perl_pp_link,
+	Perl_pp_symlink,
+	Perl_pp_readlink,
+	Perl_pp_mkdir,
+	Perl_pp_rmdir,
+	Perl_pp_open_dir,
+	Perl_pp_readdir,
+	Perl_pp_telldir,
+	Perl_pp_seekdir,
+	Perl_pp_rewinddir,
+	Perl_pp_closedir,
+	Perl_pp_fork,
+	Perl_pp_wait,
+	Perl_pp_waitpid,
+	Perl_pp_system,
+	Perl_pp_exec,
+	Perl_pp_kill,
+	Perl_pp_getppid,
+	Perl_pp_getpgrp,
+	Perl_pp_setpgrp,
+	Perl_pp_getpriority,
+	Perl_pp_setpriority,
+	Perl_pp_time,
+	Perl_pp_tms,
+	Perl_pp_localtime,
+	Perl_pp_gmtime,
+	Perl_pp_alarm,
+	Perl_pp_sleep,
+	Perl_pp_shmget,
+	Perl_pp_shmctl,
+	Perl_pp_shmread,
+	Perl_pp_shmwrite,
+	Perl_pp_msgget,
+	Perl_pp_msgctl,
+	Perl_pp_msgsnd,
+	Perl_pp_msgrcv,
+	Perl_pp_semget,
+	Perl_pp_semctl,
+	Perl_pp_semop,
+	Perl_pp_require,
+	Perl_pp_dofile,
+	Perl_pp_entereval,
+	Perl_pp_leaveeval,
+	Perl_pp_entertry,
+	Perl_pp_leavetry,
+	Perl_pp_ghbyname,
+	Perl_pp_ghbyaddr,
+	Perl_pp_ghostent,
+	Perl_pp_gnbyname,
+	Perl_pp_gnbyaddr,
+	Perl_pp_gnetent,
+	Perl_pp_gpbyname,
+	Perl_pp_gpbynumber,
+	Perl_pp_gprotoent,
+	Perl_pp_gsbyname,
+	Perl_pp_gsbyport,
+	Perl_pp_gservent,
+	Perl_pp_shostent,
+	Perl_pp_snetent,
+	Perl_pp_sprotoent,
+	Perl_pp_sservent,
+	Perl_pp_ehostent,
+	Perl_pp_enetent,
+	Perl_pp_eprotoent,
+	Perl_pp_eservent,
+	Perl_pp_gpwnam,
+	Perl_pp_gpwuid,
+	Perl_pp_gpwent,
+	Perl_pp_spwent,
+	Perl_pp_epwent,
+	Perl_pp_ggrnam,
+	Perl_pp_ggrgid,
+	Perl_pp_ggrent,
+	Perl_pp_sgrent,
+	Perl_pp_egrent,
+	Perl_pp_getlogin,
+	Perl_pp_syscall,
+	Perl_pp_lock,
+	Perl_pp_threadsv,
 };
 #endif
 
@@ -1440,354 +1440,354 @@ EXT OP * (CPERLscope(*PL_ppaddr)[])(ARGSproto) = {
 EXT OP * (CPERLscope(*PL_check)[]) (OP *op);
 #else
 EXT OP * (CPERLscope(*PL_check)[]) (OP *op) = {
-	ck_null,	/* null */
-	ck_null,	/* stub */
-	ck_fun,		/* scalar */
-	ck_null,	/* pushmark */
-	ck_null,	/* wantarray */
-	ck_svconst,	/* const */
-	ck_null,	/* gvsv */
-	ck_null,	/* gv */
-	ck_null,	/* gelem */
-	ck_null,	/* padsv */
-	ck_null,	/* padav */
-	ck_null,	/* padhv */
-	ck_null,	/* padany */
-	ck_null,	/* pushre */
-	ck_rvconst,	/* rv2gv */
-	ck_rvconst,	/* rv2sv */
-	ck_null,	/* av2arylen */
-	ck_rvconst,	/* rv2cv */
-	ck_anoncode,	/* anoncode */
-	ck_null,	/* prototype */
-	ck_spair,	/* refgen */
-	ck_null,	/* srefgen */
-	ck_fun,		/* ref */
-	ck_fun,		/* bless */
-	ck_null,	/* backtick */
-	ck_glob,	/* glob */
-	ck_null,	/* readline */
-	ck_null,	/* rcatline */
-	ck_fun,		/* regcmaybe */
-	ck_fun,		/* regcreset */
-	ck_null,	/* regcomp */
-	ck_match,	/* match */
-	ck_match,	/* qr */
-	ck_null,	/* subst */
-	ck_null,	/* substcont */
-	ck_null,	/* trans */
-	ck_null,	/* sassign */
-	ck_null,	/* aassign */
-	ck_spair,	/* chop */
-	ck_null,	/* schop */
-	ck_spair,	/* chomp */
-	ck_null,	/* schomp */
-	ck_defined,	/* defined */
-	ck_lfun,	/* undef */
-	ck_fun,		/* study */
-	ck_lfun,	/* pos */
-	ck_lfun,	/* preinc */
-	ck_lfun,	/* i_preinc */
-	ck_lfun,	/* predec */
-	ck_lfun,	/* i_predec */
-	ck_lfun,	/* postinc */
-	ck_lfun,	/* i_postinc */
-	ck_lfun,	/* postdec */
-	ck_lfun,	/* i_postdec */
-	ck_null,	/* pow */
-	ck_null,	/* multiply */
-	ck_null,	/* i_multiply */
-	ck_null,	/* divide */
-	ck_null,	/* i_divide */
-	ck_null,	/* modulo */
-	ck_null,	/* i_modulo */
-	ck_repeat,	/* repeat */
-	ck_null,	/* add */
-	ck_null,	/* i_add */
-	ck_null,	/* subtract */
-	ck_null,	/* i_subtract */
-	ck_concat,	/* concat */
-	ck_fun,		/* stringify */
-	ck_bitop,	/* left_shift */
-	ck_bitop,	/* right_shift */
-	ck_null,	/* lt */
-	ck_null,	/* i_lt */
-	ck_null,	/* gt */
-	ck_null,	/* i_gt */
-	ck_null,	/* le */
-	ck_null,	/* i_le */
-	ck_null,	/* ge */
-	ck_null,	/* i_ge */
-	ck_null,	/* eq */
-	ck_null,	/* i_eq */
-	ck_null,	/* ne */
-	ck_null,	/* i_ne */
-	ck_null,	/* ncmp */
-	ck_null,	/* i_ncmp */
-	ck_scmp,	/* slt */
-	ck_scmp,	/* sgt */
-	ck_scmp,	/* sle */
-	ck_scmp,	/* sge */
-	ck_null,	/* seq */
-	ck_null,	/* sne */
-	ck_scmp,	/* scmp */
-	ck_bitop,	/* bit_and */
-	ck_bitop,	/* bit_xor */
-	ck_bitop,	/* bit_or */
-	ck_null,	/* negate */
-	ck_null,	/* i_negate */
-	ck_null,	/* not */
-	ck_bitop,	/* complement */
-	ck_fun,		/* atan2 */
-	ck_fun,		/* sin */
-	ck_fun,		/* cos */
-	ck_fun,		/* rand */
-	ck_fun,		/* srand */
-	ck_fun,		/* exp */
-	ck_fun,		/* log */
-	ck_fun,		/* sqrt */
-	ck_fun,		/* int */
-	ck_fun,		/* hex */
-	ck_fun,		/* oct */
-	ck_fun,		/* abs */
-	ck_lengthconst,	/* length */
-	ck_fun,		/* substr */
-	ck_fun,		/* vec */
-	ck_index,	/* index */
-	ck_index,	/* rindex */
-	ck_fun_locale,	/* sprintf */
-	ck_fun,		/* formline */
-	ck_fun,		/* ord */
-	ck_fun,		/* chr */
-	ck_fun,		/* crypt */
-	ck_fun_locale,	/* ucfirst */
-	ck_fun_locale,	/* lcfirst */
-	ck_fun_locale,	/* uc */
-	ck_fun_locale,	/* lc */
-	ck_fun,		/* quotemeta */
-	ck_rvconst,	/* rv2av */
-	ck_null,	/* aelemfast */
-	ck_null,	/* aelem */
-	ck_null,	/* aslice */
-	ck_fun,		/* each */
-	ck_fun,		/* values */
-	ck_fun,		/* keys */
-	ck_delete,	/* delete */
-	ck_exists,	/* exists */
-	ck_rvconst,	/* rv2hv */
-	ck_null,	/* helem */
-	ck_null,	/* hslice */
-	ck_fun,		/* unpack */
-	ck_fun,		/* pack */
-	ck_split,	/* split */
-	ck_fun,		/* join */
-	ck_null,	/* list */
-	ck_null,	/* lslice */
-	ck_fun,		/* anonlist */
-	ck_fun,		/* anonhash */
-	ck_fun,		/* splice */
-	ck_fun,		/* push */
-	ck_shift,	/* pop */
-	ck_shift,	/* shift */
-	ck_fun,		/* unshift */
-	ck_sort,	/* sort */
-	ck_fun,		/* reverse */
-	ck_grep,	/* grepstart */
-	ck_null,	/* grepwhile */
-	ck_grep,	/* mapstart */
-	ck_null,	/* mapwhile */
-	ck_null,	/* range */
-	ck_null,	/* flip */
-	ck_null,	/* flop */
-	ck_null,	/* and */
-	ck_null,	/* or */
-	ck_null,	/* xor */
-	ck_null,	/* cond_expr */
-	ck_null,	/* andassign */
-	ck_null,	/* orassign */
-	ck_null,	/* method */
-	ck_subr,	/* entersub */
-	ck_null,	/* leavesub */
-	ck_fun,		/* caller */
-	ck_fun,		/* warn */
-	ck_fun,		/* die */
-	ck_fun,		/* reset */
-	ck_null,	/* lineseq */
-	ck_null,	/* nextstate */
-	ck_null,	/* dbstate */
-	ck_null,	/* unstack */
-	ck_null,	/* enter */
-	ck_null,	/* leave */
-	ck_null,	/* scope */
-	ck_null,	/* enteriter */
-	ck_null,	/* iter */
-	ck_null,	/* enterloop */
-	ck_null,	/* leaveloop */
-	ck_null,	/* return */
-	ck_null,	/* last */
-	ck_null,	/* next */
-	ck_null,	/* redo */
-	ck_null,	/* dump */
-	ck_null,	/* goto */
-	ck_fun,		/* exit */
-	ck_fun,		/* open */
-	ck_fun,		/* close */
-	ck_fun,		/* pipe_op */
-	ck_fun,		/* fileno */
-	ck_fun,		/* umask */
-	ck_fun,		/* binmode */
-	ck_fun,		/* tie */
-	ck_fun,		/* untie */
-	ck_fun,		/* tied */
-	ck_fun,		/* dbmopen */
-	ck_fun,		/* dbmclose */
-	ck_select,	/* sselect */
-	ck_select,	/* select */
-	ck_eof,		/* getc */
-	ck_fun,		/* read */
-	ck_fun,		/* enterwrite */
-	ck_null,	/* leavewrite */
-	ck_listiob,	/* prtf */
-	ck_listiob,	/* print */
-	ck_fun,		/* sysopen */
-	ck_fun,		/* sysseek */
-	ck_fun,		/* sysread */
-	ck_fun,		/* syswrite */
-	ck_fun,		/* send */
-	ck_fun,		/* recv */
-	ck_eof,		/* eof */
-	ck_fun,		/* tell */
-	ck_fun,		/* seek */
-	ck_trunc,	/* truncate */
-	ck_fun,		/* fcntl */
-	ck_fun,		/* ioctl */
-	ck_fun,		/* flock */
-	ck_fun,		/* socket */
-	ck_fun,		/* sockpair */
-	ck_fun,		/* bind */
-	ck_fun,		/* connect */
-	ck_fun,		/* listen */
-	ck_fun,		/* accept */
-	ck_fun,		/* shutdown */
-	ck_fun,		/* gsockopt */
-	ck_fun,		/* ssockopt */
-	ck_fun,		/* getsockname */
-	ck_fun,		/* getpeername */
-	ck_ftst,	/* lstat */
-	ck_ftst,	/* stat */
-	ck_ftst,	/* ftrread */
-	ck_ftst,	/* ftrwrite */
-	ck_ftst,	/* ftrexec */
-	ck_ftst,	/* fteread */
-	ck_ftst,	/* ftewrite */
-	ck_ftst,	/* fteexec */
-	ck_ftst,	/* ftis */
-	ck_ftst,	/* fteowned */
-	ck_ftst,	/* ftrowned */
-	ck_ftst,	/* ftzero */
-	ck_ftst,	/* ftsize */
-	ck_ftst,	/* ftmtime */
-	ck_ftst,	/* ftatime */
-	ck_ftst,	/* ftctime */
-	ck_ftst,	/* ftsock */
-	ck_ftst,	/* ftchr */
-	ck_ftst,	/* ftblk */
-	ck_ftst,	/* ftfile */
-	ck_ftst,	/* ftdir */
-	ck_ftst,	/* ftpipe */
-	ck_ftst,	/* ftlink */
-	ck_ftst,	/* ftsuid */
-	ck_ftst,	/* ftsgid */
-	ck_ftst,	/* ftsvtx */
-	ck_ftst,	/* fttty */
-	ck_ftst,	/* fttext */
-	ck_ftst,	/* ftbinary */
-	ck_fun,		/* chdir */
-	ck_fun,		/* chown */
-	ck_fun,		/* chroot */
-	ck_fun,		/* unlink */
-	ck_fun,		/* chmod */
-	ck_fun,		/* utime */
-	ck_fun,		/* rename */
-	ck_fun,		/* link */
-	ck_fun,		/* symlink */
-	ck_fun,		/* readlink */
-	ck_fun,		/* mkdir */
-	ck_fun,		/* rmdir */
-	ck_fun,		/* open_dir */
-	ck_fun,		/* readdir */
-	ck_fun,		/* telldir */
-	ck_fun,		/* seekdir */
-	ck_fun,		/* rewinddir */
-	ck_fun,		/* closedir */
-	ck_null,	/* fork */
-	ck_null,	/* wait */
-	ck_fun,		/* waitpid */
-	ck_exec,	/* system */
-	ck_exec,	/* exec */
-	ck_fun,		/* kill */
-	ck_null,	/* getppid */
-	ck_fun,		/* getpgrp */
-	ck_fun,		/* setpgrp */
-	ck_fun,		/* getpriority */
-	ck_fun,		/* setpriority */
-	ck_null,	/* time */
-	ck_null,	/* tms */
-	ck_fun,		/* localtime */
-	ck_fun,		/* gmtime */
-	ck_fun,		/* alarm */
-	ck_fun,		/* sleep */
-	ck_fun,		/* shmget */
-	ck_fun,		/* shmctl */
-	ck_fun,		/* shmread */
-	ck_fun,		/* shmwrite */
-	ck_fun,		/* msgget */
-	ck_fun,		/* msgctl */
-	ck_fun,		/* msgsnd */
-	ck_fun,		/* msgrcv */
-	ck_fun,		/* semget */
-	ck_fun,		/* semctl */
-	ck_fun,		/* semop */
-	ck_require,	/* require */
-	ck_fun,		/* dofile */
-	ck_eval,	/* entereval */
-	ck_null,	/* leaveeval */
-	ck_null,	/* entertry */
-	ck_null,	/* leavetry */
-	ck_fun,		/* ghbyname */
-	ck_fun,		/* ghbyaddr */
-	ck_null,	/* ghostent */
-	ck_fun,		/* gnbyname */
-	ck_fun,		/* gnbyaddr */
-	ck_null,	/* gnetent */
-	ck_fun,		/* gpbyname */
-	ck_fun,		/* gpbynumber */
-	ck_null,	/* gprotoent */
-	ck_fun,		/* gsbyname */
-	ck_fun,		/* gsbyport */
-	ck_null,	/* gservent */
-	ck_fun,		/* shostent */
-	ck_fun,		/* snetent */
-	ck_fun,		/* sprotoent */
-	ck_fun,		/* sservent */
-	ck_null,	/* ehostent */
-	ck_null,	/* enetent */
-	ck_null,	/* eprotoent */
-	ck_null,	/* eservent */
-	ck_fun,		/* gpwnam */
-	ck_fun,		/* gpwuid */
-	ck_null,	/* gpwent */
-	ck_null,	/* spwent */
-	ck_null,	/* epwent */
-	ck_fun,		/* ggrnam */
-	ck_fun,		/* ggrgid */
-	ck_null,	/* ggrent */
-	ck_null,	/* sgrent */
-	ck_null,	/* egrent */
-	ck_null,	/* getlogin */
-	ck_fun,		/* syscall */
-	ck_rfun,	/* lock */
-	ck_null,	/* threadsv */
+	Perl_ck_null,	/* null */
+	Perl_ck_null,	/* stub */
+	Perl_ck_fun,	/* scalar */
+	Perl_ck_null,	/* pushmark */
+	Perl_ck_null,	/* wantarray */
+	Perl_ck_svconst,/* const */
+	Perl_ck_null,	/* gvsv */
+	Perl_ck_null,	/* gv */
+	Perl_ck_null,	/* gelem */
+	Perl_ck_null,	/* padsv */
+	Perl_ck_null,	/* padav */
+	Perl_ck_null,	/* padhv */
+	Perl_ck_null,	/* padany */
+	Perl_ck_null,	/* pushre */
+	Perl_ck_rvconst,/* rv2gv */
+	Perl_ck_rvconst,/* rv2sv */
+	Perl_ck_null,	/* av2arylen */
+	Perl_ck_rvconst,/* rv2cv */
+	Perl_ck_anoncode,/* anoncode */
+	Perl_ck_null,	/* prototype */
+	Perl_ck_spair,	/* refgen */
+	Perl_ck_null,	/* srefgen */
+	Perl_ck_fun,	/* ref */
+	Perl_ck_fun,	/* bless */
+	Perl_ck_null,	/* backtick */
+	Perl_ck_glob,	/* glob */
+	Perl_ck_null,	/* readline */
+	Perl_ck_null,	/* rcatline */
+	Perl_ck_fun,	/* regcmaybe */
+	Perl_ck_fun,	/* regcreset */
+	Perl_ck_null,	/* regcomp */
+	Perl_ck_match,	/* match */
+	Perl_ck_match,	/* qr */
+	Perl_ck_null,	/* subst */
+	Perl_ck_null,	/* substcont */
+	Perl_ck_null,	/* trans */
+	Perl_ck_null,	/* sassign */
+	Perl_ck_null,	/* aassign */
+	Perl_ck_spair,	/* chop */
+	Perl_ck_null,	/* schop */
+	Perl_ck_spair,	/* chomp */
+	Perl_ck_null,	/* schomp */
+	Perl_ck_defined,/* defined */
+	Perl_ck_lfun,	/* undef */
+	Perl_ck_fun,	/* study */
+	Perl_ck_lfun,	/* pos */
+	Perl_ck_lfun,	/* preinc */
+	Perl_ck_lfun,	/* i_preinc */
+	Perl_ck_lfun,	/* predec */
+	Perl_ck_lfun,	/* i_predec */
+	Perl_ck_lfun,	/* postinc */
+	Perl_ck_lfun,	/* i_postinc */
+	Perl_ck_lfun,	/* postdec */
+	Perl_ck_lfun,	/* i_postdec */
+	Perl_ck_null,	/* pow */
+	Perl_ck_null,	/* multiply */
+	Perl_ck_null,	/* i_multiply */
+	Perl_ck_null,	/* divide */
+	Perl_ck_null,	/* i_divide */
+	Perl_ck_null,	/* modulo */
+	Perl_ck_null,	/* i_modulo */
+	Perl_ck_repeat,	/* repeat */
+	Perl_ck_null,	/* add */
+	Perl_ck_null,	/* i_add */
+	Perl_ck_null,	/* subtract */
+	Perl_ck_null,	/* i_subtract */
+	Perl_ck_concat,	/* concat */
+	Perl_ck_fun,	/* stringify */
+	Perl_ck_bitop,	/* left_shift */
+	Perl_ck_bitop,	/* right_shift */
+	Perl_ck_null,	/* lt */
+	Perl_ck_null,	/* i_lt */
+	Perl_ck_null,	/* gt */
+	Perl_ck_null,	/* i_gt */
+	Perl_ck_null,	/* le */
+	Perl_ck_null,	/* i_le */
+	Perl_ck_null,	/* ge */
+	Perl_ck_null,	/* i_ge */
+	Perl_ck_null,	/* eq */
+	Perl_ck_null,	/* i_eq */
+	Perl_ck_null,	/* ne */
+	Perl_ck_null,	/* i_ne */
+	Perl_ck_null,	/* ncmp */
+	Perl_ck_null,	/* i_ncmp */
+	Perl_ck_scmp,	/* slt */
+	Perl_ck_scmp,	/* sgt */
+	Perl_ck_scmp,	/* sle */
+	Perl_ck_scmp,	/* sge */
+	Perl_ck_null,	/* seq */
+	Perl_ck_null,	/* sne */
+	Perl_ck_scmp,	/* scmp */
+	Perl_ck_bitop,	/* bit_and */
+	Perl_ck_bitop,	/* bit_xor */
+	Perl_ck_bitop,	/* bit_or */
+	Perl_ck_null,	/* negate */
+	Perl_ck_null,	/* i_negate */
+	Perl_ck_null,	/* not */
+	Perl_ck_bitop,	/* complement */
+	Perl_ck_fun,	/* atan2 */
+	Perl_ck_fun,	/* sin */
+	Perl_ck_fun,	/* cos */
+	Perl_ck_fun,	/* rand */
+	Perl_ck_fun,	/* srand */
+	Perl_ck_fun,	/* exp */
+	Perl_ck_fun,	/* log */
+	Perl_ck_fun,	/* sqrt */
+	Perl_ck_fun,	/* int */
+	Perl_ck_fun,	/* hex */
+	Perl_ck_fun,	/* oct */
+	Perl_ck_fun,	/* abs */
+	Perl_ck_lengthconst,/* length */
+	Perl_ck_fun,	/* substr */
+	Perl_ck_fun,	/* vec */
+	Perl_ck_index,	/* index */
+	Perl_ck_index,	/* rindex */
+	Perl_ck_fun_locale,/* sprintf */
+	Perl_ck_fun,	/* formline */
+	Perl_ck_fun,	/* ord */
+	Perl_ck_fun,	/* chr */
+	Perl_ck_fun,	/* crypt */
+	Perl_ck_fun_locale,/* ucfirst */
+	Perl_ck_fun_locale,/* lcfirst */
+	Perl_ck_fun_locale,/* uc */
+	Perl_ck_fun_locale,/* lc */
+	Perl_ck_fun,	/* quotemeta */
+	Perl_ck_rvconst,/* rv2av */
+	Perl_ck_null,	/* aelemfast */
+	Perl_ck_null,	/* aelem */
+	Perl_ck_null,	/* aslice */
+	Perl_ck_fun,	/* each */
+	Perl_ck_fun,	/* values */
+	Perl_ck_fun,	/* keys */
+	Perl_ck_delete,	/* delete */
+	Perl_ck_exists,	/* exists */
+	Perl_ck_rvconst,/* rv2hv */
+	Perl_ck_null,	/* helem */
+	Perl_ck_null,	/* hslice */
+	Perl_ck_fun,	/* unpack */
+	Perl_ck_fun,	/* pack */
+	Perl_ck_split,	/* split */
+	Perl_ck_fun,	/* join */
+	Perl_ck_null,	/* list */
+	Perl_ck_null,	/* lslice */
+	Perl_ck_fun,	/* anonlist */
+	Perl_ck_fun,	/* anonhash */
+	Perl_ck_fun,	/* splice */
+	Perl_ck_fun,	/* push */
+	Perl_ck_shift,	/* pop */
+	Perl_ck_shift,	/* shift */
+	Perl_ck_fun,	/* unshift */
+	Perl_ck_sort,	/* sort */
+	Perl_ck_fun,	/* reverse */
+	Perl_ck_grep,	/* grepstart */
+	Perl_ck_null,	/* grepwhile */
+	Perl_ck_grep,	/* mapstart */
+	Perl_ck_null,	/* mapwhile */
+	Perl_ck_null,	/* range */
+	Perl_ck_null,	/* flip */
+	Perl_ck_null,	/* flop */
+	Perl_ck_null,	/* and */
+	Perl_ck_null,	/* or */
+	Perl_ck_null,	/* xor */
+	Perl_ck_null,	/* cond_expr */
+	Perl_ck_null,	/* andassign */
+	Perl_ck_null,	/* orassign */
+	Perl_ck_null,	/* method */
+	Perl_ck_subr,	/* entersub */
+	Perl_ck_null,	/* leavesub */
+	Perl_ck_fun,	/* caller */
+	Perl_ck_fun,	/* warn */
+	Perl_ck_fun,	/* die */
+	Perl_ck_fun,	/* reset */
+	Perl_ck_null,	/* lineseq */
+	Perl_ck_null,	/* nextstate */
+	Perl_ck_null,	/* dbstate */
+	Perl_ck_null,	/* unstack */
+	Perl_ck_null,	/* enter */
+	Perl_ck_null,	/* leave */
+	Perl_ck_null,	/* scope */
+	Perl_ck_null,	/* enteriter */
+	Perl_ck_null,	/* iter */
+	Perl_ck_null,	/* enterloop */
+	Perl_ck_null,	/* leaveloop */
+	Perl_ck_null,	/* return */
+	Perl_ck_null,	/* last */
+	Perl_ck_null,	/* next */
+	Perl_ck_null,	/* redo */
+	Perl_ck_null,	/* dump */
+	Perl_ck_null,	/* goto */
+	Perl_ck_fun,	/* exit */
+	Perl_ck_fun,	/* open */
+	Perl_ck_fun,	/* close */
+	Perl_ck_fun,	/* pipe_op */
+	Perl_ck_fun,	/* fileno */
+	Perl_ck_fun,	/* umask */
+	Perl_ck_fun,	/* binmode */
+	Perl_ck_fun,	/* tie */
+	Perl_ck_fun,	/* untie */
+	Perl_ck_fun,	/* tied */
+	Perl_ck_fun,	/* dbmopen */
+	Perl_ck_fun,	/* dbmclose */
+	Perl_ck_select,	/* sselect */
+	Perl_ck_select,	/* select */
+	Perl_ck_eof,	/* getc */
+	Perl_ck_fun,	/* read */
+	Perl_ck_fun,	/* enterwrite */
+	Perl_ck_null,	/* leavewrite */
+	Perl_ck_listiob,/* prtf */
+	Perl_ck_listiob,/* print */
+	Perl_ck_fun,	/* sysopen */
+	Perl_ck_fun,	/* sysseek */
+	Perl_ck_fun,	/* sysread */
+	Perl_ck_fun,	/* syswrite */
+	Perl_ck_fun,	/* send */
+	Perl_ck_fun,	/* recv */
+	Perl_ck_eof,	/* eof */
+	Perl_ck_fun,	/* tell */
+	Perl_ck_fun,	/* seek */
+	Perl_ck_trunc,	/* truncate */
+	Perl_ck_fun,	/* fcntl */
+	Perl_ck_fun,	/* ioctl */
+	Perl_ck_fun,	/* flock */
+	Perl_ck_fun,	/* socket */
+	Perl_ck_fun,	/* sockpair */
+	Perl_ck_fun,	/* bind */
+	Perl_ck_fun,	/* connect */
+	Perl_ck_fun,	/* listen */
+	Perl_ck_fun,	/* accept */
+	Perl_ck_fun,	/* shutdown */
+	Perl_ck_fun,	/* gsockopt */
+	Perl_ck_fun,	/* ssockopt */
+	Perl_ck_fun,	/* getsockname */
+	Perl_ck_fun,	/* getpeername */
+	Perl_ck_ftst,	/* lstat */
+	Perl_ck_ftst,	/* stat */
+	Perl_ck_ftst,	/* ftrread */
+	Perl_ck_ftst,	/* ftrwrite */
+	Perl_ck_ftst,	/* ftrexec */
+	Perl_ck_ftst,	/* fteread */
+	Perl_ck_ftst,	/* ftewrite */
+	Perl_ck_ftst,	/* fteexec */
+	Perl_ck_ftst,	/* ftis */
+	Perl_ck_ftst,	/* fteowned */
+	Perl_ck_ftst,	/* ftrowned */
+	Perl_ck_ftst,	/* ftzero */
+	Perl_ck_ftst,	/* ftsize */
+	Perl_ck_ftst,	/* ftmtime */
+	Perl_ck_ftst,	/* ftatime */
+	Perl_ck_ftst,	/* ftctime */
+	Perl_ck_ftst,	/* ftsock */
+	Perl_ck_ftst,	/* ftchr */
+	Perl_ck_ftst,	/* ftblk */
+	Perl_ck_ftst,	/* ftfile */
+	Perl_ck_ftst,	/* ftdir */
+	Perl_ck_ftst,	/* ftpipe */
+	Perl_ck_ftst,	/* ftlink */
+	Perl_ck_ftst,	/* ftsuid */
+	Perl_ck_ftst,	/* ftsgid */
+	Perl_ck_ftst,	/* ftsvtx */
+	Perl_ck_ftst,	/* fttty */
+	Perl_ck_ftst,	/* fttext */
+	Perl_ck_ftst,	/* ftbinary */
+	Perl_ck_fun,	/* chdir */
+	Perl_ck_fun,	/* chown */
+	Perl_ck_fun,	/* chroot */
+	Perl_ck_fun,	/* unlink */
+	Perl_ck_fun,	/* chmod */
+	Perl_ck_fun,	/* utime */
+	Perl_ck_fun,	/* rename */
+	Perl_ck_fun,	/* link */
+	Perl_ck_fun,	/* symlink */
+	Perl_ck_fun,	/* readlink */
+	Perl_ck_fun,	/* mkdir */
+	Perl_ck_fun,	/* rmdir */
+	Perl_ck_fun,	/* open_dir */
+	Perl_ck_fun,	/* readdir */
+	Perl_ck_fun,	/* telldir */
+	Perl_ck_fun,	/* seekdir */
+	Perl_ck_fun,	/* rewinddir */
+	Perl_ck_fun,	/* closedir */
+	Perl_ck_null,	/* fork */
+	Perl_ck_null,	/* wait */
+	Perl_ck_fun,	/* waitpid */
+	Perl_ck_exec,	/* system */
+	Perl_ck_exec,	/* exec */
+	Perl_ck_fun,	/* kill */
+	Perl_ck_null,	/* getppid */
+	Perl_ck_fun,	/* getpgrp */
+	Perl_ck_fun,	/* setpgrp */
+	Perl_ck_fun,	/* getpriority */
+	Perl_ck_fun,	/* setpriority */
+	Perl_ck_null,	/* time */
+	Perl_ck_null,	/* tms */
+	Perl_ck_fun,	/* localtime */
+	Perl_ck_fun,	/* gmtime */
+	Perl_ck_fun,	/* alarm */
+	Perl_ck_fun,	/* sleep */
+	Perl_ck_fun,	/* shmget */
+	Perl_ck_fun,	/* shmctl */
+	Perl_ck_fun,	/* shmread */
+	Perl_ck_fun,	/* shmwrite */
+	Perl_ck_fun,	/* msgget */
+	Perl_ck_fun,	/* msgctl */
+	Perl_ck_fun,	/* msgsnd */
+	Perl_ck_fun,	/* msgrcv */
+	Perl_ck_fun,	/* semget */
+	Perl_ck_fun,	/* semctl */
+	Perl_ck_fun,	/* semop */
+	Perl_ck_require,/* require */
+	Perl_ck_fun,	/* dofile */
+	Perl_ck_eval,	/* entereval */
+	Perl_ck_null,	/* leaveeval */
+	Perl_ck_null,	/* entertry */
+	Perl_ck_null,	/* leavetry */
+	Perl_ck_fun,	/* ghbyname */
+	Perl_ck_fun,	/* ghbyaddr */
+	Perl_ck_null,	/* ghostent */
+	Perl_ck_fun,	/* gnbyname */
+	Perl_ck_fun,	/* gnbyaddr */
+	Perl_ck_null,	/* gnetent */
+	Perl_ck_fun,	/* gpbyname */
+	Perl_ck_fun,	/* gpbynumber */
+	Perl_ck_null,	/* gprotoent */
+	Perl_ck_fun,	/* gsbyname */
+	Perl_ck_fun,	/* gsbyport */
+	Perl_ck_null,	/* gservent */
+	Perl_ck_fun,	/* shostent */
+	Perl_ck_fun,	/* snetent */
+	Perl_ck_fun,	/* sprotoent */
+	Perl_ck_fun,	/* sservent */
+	Perl_ck_null,	/* ehostent */
+	Perl_ck_null,	/* enetent */
+	Perl_ck_null,	/* eprotoent */
+	Perl_ck_null,	/* eservent */
+	Perl_ck_fun,	/* gpwnam */
+	Perl_ck_fun,	/* gpwuid */
+	Perl_ck_null,	/* gpwent */
+	Perl_ck_null,	/* spwent */
+	Perl_ck_null,	/* epwent */
+	Perl_ck_fun,	/* ggrnam */
+	Perl_ck_fun,	/* ggrgid */
+	Perl_ck_null,	/* ggrent */
+	Perl_ck_null,	/* sgrent */
+	Perl_ck_null,	/* egrent */
+	Perl_ck_null,	/* getlogin */
+	Perl_ck_fun,	/* syscall */
+	Perl_ck_rfun,	/* lock */
+	Perl_ck_null,	/* threadsv */
 };
 #endif
 

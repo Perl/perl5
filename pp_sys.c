@@ -15,6 +15,7 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_PP_SYS_C
 #include "perl.h"
 
 #ifdef I_SHADOW
@@ -124,10 +125,6 @@ extern int h_errno;
 #  endif
 #endif
 
-#if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
-static int dooneliner (char *cmd, char *filename);
-#endif
-
 #ifdef HAS_CHSIZE
 # ifdef my_chsize  /* Probably #defined to Perl_my_chsize in embed.h */
 #   undef my_chsize
@@ -230,7 +227,7 @@ static char zero_but_true[ZBTLEN + 1] = "0 but true";
 	|| defined(HAS_SETREGID) || defined(HAS_SETRESGID))
 /* The Hard Way. */
 STATIC int
-emulate_eaccess (const char* path, int mode)
+emulate_eaccess(pTHX_ const char* path, int mode)
 {
     Uid_t ruid = getuid();
     Uid_t euid = geteuid();
@@ -295,7 +292,7 @@ emulate_eaccess (const char* path, int mode)
 
 #if !defined(PERL_EFF_ACCESS_R_OK)
 STATIC int
-emulate_eaccess (const char* path, int mode)
+emulate_eaccess(pTHX_ const char* path, int mode)
 {
     croak("switching effective uid is not implemented");
     /*NOTREACHED*/
@@ -474,8 +471,8 @@ PP(pp_die)
 		    PUSHs(file);
  		    PUSHs(line);
 		    PUTBACK;
-		    perl_call_sv((SV*)GvCV(gv),
-				 G_SCALAR|G_EVAL|G_KEEPERR);
+		    call_sv((SV*)GvCV(gv),
+			    G_SCALAR|G_EVAL|G_KEEPERR);
 		    sv_setsv(error,*PL_stack_sp--);
 		}
 	    }
@@ -539,7 +536,7 @@ PP(pp_open)
 	XPUSHs(sv);
 	PUTBACK;
 	ENTER;
-	perl_call_method("OPEN", G_SCALAR);
+	call_method("OPEN", G_SCALAR);
 	LEAVE;
 	SPAGAIN;
 	RETURN;
@@ -571,7 +568,7 @@ PP(pp_close)
 	XPUSHs(SvTIED_obj((SV*)gv, mg));
 	PUTBACK;
 	ENTER;
-	perl_call_method("CLOSE", G_SCALAR);
+	call_method("CLOSE", G_SCALAR);
 	LEAVE;
 	SPAGAIN;
 	RETURN;
@@ -653,7 +650,7 @@ PP(pp_fileno)
 	XPUSHs(SvTIED_obj((SV*)gv, mg));
 	PUTBACK;
 	ENTER;
-	perl_call_method("FILENO", G_SCALAR);
+	call_method("FILENO", G_SCALAR);
 	LEAVE;
 	SPAGAIN;
 	RETURN;
@@ -708,7 +705,7 @@ PP(pp_binmode)
 	XPUSHs(SvTIED_obj((SV*)gv, mg));
 	PUTBACK;
 	ENTER;
-	perl_call_method("BINMODE", G_SCALAR);
+	call_method("BINMODE", G_SCALAR);
 	LEAVE;
 	SPAGAIN;
 	RETURN;
@@ -765,10 +762,10 @@ PP(pp_tie)
 	while (items--)
 	    PUSHs(*MARK++);
 	PUTBACK;
-	perl_call_method(methname, G_SCALAR);
+	call_method(methname, G_SCALAR);
     } 
     else {
-	/* Not clear why we don't call perl_call_method here too.
+	/* Not clear why we don't call call_method here too.
 	 * perhaps to get different error message ?
 	 */
 	stash = gv_stashsv(*MARK, FALSE);
@@ -783,7 +780,7 @@ PP(pp_tie)
 	while (items--)
 	    PUSHs(*MARK++);
 	PUTBACK;
-	perl_call_sv((SV*)GvCV(gv), G_SCALAR);
+	call_sv((SV*)GvCV(gv), G_SCALAR);
     }
     SPAGAIN;
 
@@ -852,7 +849,7 @@ PP(pp_dbmopen)
     stash = gv_stashsv(sv, FALSE);
     if (!stash || !(gv = gv_fetchmethod(stash, "TIEHASH"))) {
 	PUTBACK;
-	perl_require_pv("AnyDBM_File.pm");
+	require_pv("AnyDBM_File.pm");
 	SPAGAIN;
 	if (!(gv = gv_fetchmethod(stash, "TIEHASH")))
 	    DIE("No dbm on this machine");
@@ -870,7 +867,7 @@ PP(pp_dbmopen)
 	PUSHs(sv_2mortal(newSViv(O_RDWR)));
     PUSHs(right);
     PUTBACK;
-    perl_call_sv((SV*)GvCV(gv), G_SCALAR);
+    call_sv((SV*)GvCV(gv), G_SCALAR);
     SPAGAIN;
 
     if (!sv_isobject(TOPs)) {
@@ -881,7 +878,7 @@ PP(pp_dbmopen)
 	PUSHs(sv_2mortal(newSViv(O_RDONLY)));
 	PUSHs(right);
 	PUTBACK;
-	perl_call_sv((SV*)GvCV(gv), G_SCALAR);
+	call_sv((SV*)GvCV(gv), G_SCALAR);
 	SPAGAIN;
     }
 
@@ -1040,7 +1037,7 @@ PP(pp_sselect)
 }
 
 void
-setdefout(GV *gv)
+Perl_setdefout(pTHX_ GV *gv)
 {
     dTHR;
     if (gv)
@@ -1103,7 +1100,7 @@ PP(pp_getc)
 	XPUSHs(SvTIED_obj((SV*)gv, mg));
 	PUTBACK;
 	ENTER;
-	perl_call_method("GETC", gimme);
+	call_method("GETC", gimme);
 	LEAVE;
 	SPAGAIN;
 	if (gimme == G_SCALAR)
@@ -1125,7 +1122,7 @@ PP(pp_read)
 }
 
 STATIC OP *
-doform(CV *cv, GV *gv, OP *retop)
+doform(pTHX_ CV *cv, GV *gv, OP *retop)
 {
     dTHR;
     register PERL_CONTEXT *cx;
@@ -1327,7 +1324,7 @@ PP(pp_prtf)
 	*MARK = SvTIED_obj((SV*)gv, mg);
 	PUTBACK;
 	ENTER;
-	perl_call_method("PRINTF", G_SCALAR);
+	call_method("PRINTF", G_SCALAR);
 	LEAVE;
 	SPAGAIN;
 	MARK = ORIGMARK + 1;
@@ -1437,7 +1434,7 @@ PP(pp_sysread)
 	PUSHMARK(MARK-1);
 	*MARK = SvTIED_obj((SV*)gv, mg);
 	ENTER;
-	perl_call_method("READ", G_SCALAR);
+	call_method("READ", G_SCALAR);
 	LEAVE;
 	SPAGAIN;
 	sv = POPs;
@@ -1587,7 +1584,7 @@ PP(pp_send)
 	PUSHMARK(MARK-1);
 	*MARK = SvTIED_obj((SV*)gv, mg);
 	ENTER;
-	perl_call_method("WRITE", G_SCALAR);
+	call_method("WRITE", G_SCALAR);
 	LEAVE;
 	SPAGAIN;
 	sv = POPs;
@@ -1685,7 +1682,7 @@ PP(pp_eof)
 	XPUSHs(SvTIED_obj((SV*)gv, mg));
 	PUTBACK;
 	ENTER;
-	perl_call_method("EOF", G_SCALAR);
+	call_method("EOF", G_SCALAR);
 	LEAVE;
 	SPAGAIN;
 	RETURN;
@@ -1711,7 +1708,7 @@ PP(pp_tell)
 	XPUSHs(SvTIED_obj((SV*)gv, mg));
 	PUTBACK;
 	ENTER;
-	perl_call_method("TELL", G_SCALAR);
+	call_method("TELL", G_SCALAR);
 	LEAVE;
 	SPAGAIN;
 	RETURN;
@@ -1743,7 +1740,7 @@ PP(pp_sysseek)
 	XPUSHs(sv_2mortal(newSViv((IV) whence)));
 	PUTBACK;
 	ENTER;
-	perl_call_method("SEEK", G_SCALAR);
+	call_method("SEEK", G_SCALAR);
 	LEAVE;
 	SPAGAIN;
 	RETURN;
@@ -3178,7 +3175,7 @@ PP(pp_readlink)
 
 #if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 STATIC int
-dooneliner(char *cmd, char *filename)
+dooneliner(pTHX_ char *cmd, char *filename)
 {
     char *save_filename = filename;
     char *cmdline;
@@ -4909,8 +4906,8 @@ PP(pp_syscall)
     What's really needed is a good file locking module.
 */
 
-static int
-fcntl_emulate_flock(int fd, int operation)
+STATIC int
+fcntl_emulate_flock(pTHX_ int fd, int operation)
 {
     struct flock flock;
  
@@ -4967,7 +4964,7 @@ fcntl_emulate_flock(int fd, int operation)
 # endif
 
 STATIC int
-lockf_emulate_flock (int fd, int operation)
+lockf_emulate_flock(pTHX_ int fd, int operation)
 {
     int i;
     int save_errno;

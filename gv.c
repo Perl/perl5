@@ -17,10 +17,11 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_GV_C
 #include "perl.h"
 
 GV *
-gv_AVadd(register GV *gv)
+Perl_gv_AVadd(pTHX_ register GV *gv)
 {
     if (!gv || SvTYPE((SV*)gv) != SVt_PVGV)
 	croak("Bad symbol for array");
@@ -30,7 +31,7 @@ gv_AVadd(register GV *gv)
 }
 
 GV *
-gv_HVadd(register GV *gv)
+Perl_gv_HVadd(pTHX_ register GV *gv)
 {
     if (!gv || SvTYPE((SV*)gv) != SVt_PVGV)
 	croak("Bad symbol for hash");
@@ -40,7 +41,7 @@ gv_HVadd(register GV *gv)
 }
 
 GV *
-gv_IOadd(register GV *gv)
+Perl_gv_IOadd(pTHX_ register GV *gv)
 {
     if (!gv || SvTYPE((SV*)gv) != SVt_PVGV)
 	croak("Bad symbol for filehandle");
@@ -50,7 +51,7 @@ gv_IOadd(register GV *gv)
 }
 
 GV *
-gv_fetchfile(const char *name)
+Perl_gv_fetchfile(pTHX_ const char *name)
 {
     dTHR;
     char smallbuf[256];
@@ -80,7 +81,7 @@ gv_fetchfile(const char *name)
 }
 
 void
-gv_init(GV *gv, HV *stash, const char *name, STRLEN len, int multi)
+Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 {
     dTHR;
     register GP *gp;
@@ -136,7 +137,7 @@ gv_init(GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 }
 
 STATIC void
-gv_init_sv(GV *gv, I32 sv_type)
+gv_init_sv(pTHX_ GV *gv, I32 sv_type)
 {
     switch (sv_type) {
     case SVt_PVIO:
@@ -152,7 +153,7 @@ gv_init_sv(GV *gv, I32 sv_type)
 }
 
 GV *
-gv_fetchmeth(HV *stash, const char *name, STRLEN len, I32 level)
+Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 {
     AV* av;
     GV* topgv;
@@ -273,13 +274,13 @@ gv_fetchmeth(HV *stash, const char *name, STRLEN len, I32 level)
 }
 
 GV *
-gv_fetchmethod(HV *stash, const char *name)
+Perl_gv_fetchmethod(pTHX_ HV *stash, const char *name)
 {
     return gv_fetchmethod_autoload(stash, name, TRUE);
 }
 
 GV *
-gv_fetchmethod_autoload(HV *stash, const char *name, I32 autoload)
+Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 {
     dTHR;
     register const char *nend;
@@ -340,7 +341,7 @@ gv_fetchmethod_autoload(HV *stash, const char *name, I32 autoload)
 }
 
 GV*
-gv_autoload4(HV *stash, const char *name, STRLEN len, I32 method)
+Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 {
     dTHR;
     static char autoload[] = "AUTOLOAD";
@@ -385,13 +386,13 @@ gv_autoload4(HV *stash, const char *name, STRLEN len, I32 method)
 }
 
 HV*
-gv_stashpv(const char *name, I32 create)
+Perl_gv_stashpv(pTHX_ const char *name, I32 create)
 {
     return gv_stashpvn(name, strlen(name), create);
 }
 
 HV*
-gv_stashpvn(const char *name, U32 namelen, I32 create)
+Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 create)
 {
     char smallbuf[256];
     char *tmpbuf;
@@ -420,7 +421,7 @@ gv_stashpvn(const char *name, U32 namelen, I32 create)
 }
 
 HV*
-gv_stashsv(SV *sv, I32 create)
+Perl_gv_stashsv(pTHX_ SV *sv, I32 create)
 {
     register char *ptr;
     STRLEN len;
@@ -430,7 +431,7 @@ gv_stashsv(SV *sv, I32 create)
 
 
 GV *
-gv_fetchpv(const char *nambeg, I32 add, I32 sv_type)
+Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 {
     dTHR;
     register const char *name = nambeg;
@@ -820,7 +821,7 @@ gv_fetchpv(const char *nambeg, I32 add, I32 sv_type)
 }
 
 void
-gv_fullname3(SV *sv, GV *gv, const char *prefix)
+Perl_gv_fullname3(pTHX_ SV *sv, GV *gv, const char *prefix)
 {
     HV *hv = GvSTASH(gv);
     if (!hv) {
@@ -834,7 +835,7 @@ gv_fullname3(SV *sv, GV *gv, const char *prefix)
 }
 
 void
-gv_efullname3(SV *sv, GV *gv, const char *prefix)
+Perl_gv_efullname3(pTHX_ SV *sv, GV *gv, const char *prefix)
 {
     GV *egv = GvEGV(gv);
     if (!egv)
@@ -844,20 +845,20 @@ gv_efullname3(SV *sv, GV *gv, const char *prefix)
 
 /* XXX compatibility with versions <= 5.003. */
 void
-gv_fullname(SV *sv, GV *gv)
+Perl_gv_fullname(pTHX_ SV *sv, GV *gv)
 {
     gv_fullname3(sv, gv, sv == (SV*)gv ? "*" : "");
 }
 
 /* XXX compatibility with versions <= 5.003. */
 void
-gv_efullname(SV *sv, GV *gv)
+Perl_gv_efullname(pTHX_ SV *sv, GV *gv)
 {
     gv_efullname3(sv, gv, sv == (SV*)gv ? "*" : "");
 }
 
 IO *
-newIO(void)
+Perl_newIO(pTHX)
 {
     dTHR;
     IO *io;
@@ -876,7 +877,7 @@ newIO(void)
 }
 
 void
-gv_check(HV *stash)
+Perl_gv_check(pTHX_ HV *stash)
 {
     dTHR;
     register HE *entry;
@@ -913,7 +914,7 @@ gv_check(HV *stash)
 }
 
 GV *
-newGVgen(char *pack)
+Perl_newGVgen(pTHX_ char *pack)
 {
     return gv_fetchpv(form("%s::_GEN_%ld", pack, (long)PL_gensym++),
 		      TRUE, SVt_PVGV);
@@ -922,7 +923,7 @@ newGVgen(char *pack)
 /* hopefully this is only called on local symbol table entries */
 
 GP*
-gp_ref(GP *gp)
+Perl_gp_ref(pTHX_ GP *gp)
 {
     gp->gp_refcnt++;
     if (gp->gp_cv) {
@@ -941,7 +942,7 @@ gp_ref(GP *gp)
 }
 
 void
-gp_free(GV *gv)
+Perl_gp_free(pTHX_ GV *gv)
 {
     GP* gp;
     CV* cv;
@@ -1000,7 +1001,7 @@ register GV *gv;
 /* Updates and caches the CV's */
 
 bool
-Gv_AMupdate(HV *stash)
+Perl_Gv_AMupdate(pTHX_ HV *stash)
 {
   dTHR;  
   GV** gvp;
@@ -1158,7 +1159,7 @@ Gv_AMupdate(HV *stash)
 }
 
 SV*
-amagic_call(SV *left, SV *right, int method, int flags)
+Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 {
   dTHR;
   MAGIC *mg; 

@@ -13,6 +13,7 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_UTIL_C
 #include "perl.h"
 
 #if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
@@ -54,7 +55,6 @@
 
 #ifdef LEAKTEST
 
-static void xstat (int);
 long xcount[MAXXCOUNT];
 long lastxcount[MAXXCOUNT];
 long xycount[MAXXCOUNT][MAXYCOUNT];
@@ -71,7 +71,7 @@ long lastxycount[MAXXCOUNT][MAXYCOUNT];
  */
 
 Malloc_t
-safesysmalloc(MEM_SIZE size)
+Perl_safesysmalloc(pTHX_ MEM_SIZE size)
 {
     Malloc_t ptr;
 #ifdef HAS_64K_LIMIT
@@ -105,7 +105,7 @@ safesysmalloc(MEM_SIZE size)
 /* paranoid version of system's realloc() */
 
 Malloc_t
-safesysrealloc(Malloc_t where,MEM_SIZE size)
+Perl_safesysrealloc(pTHX_ Malloc_t where,MEM_SIZE size)
 {
     Malloc_t ptr;
 #if !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE)
@@ -159,7 +159,7 @@ safesysrealloc(Malloc_t where,MEM_SIZE size)
 /* safe version of system's free() */
 
 Free_t
-safesysfree(Malloc_t where)
+Perl_safesysfree(pTHX_ Malloc_t where)
 {
 #if !(defined(I286) || defined(atarist))
     DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%x: (%05d) free\n",(char *) where,PL_an++));
@@ -175,7 +175,7 @@ safesysfree(Malloc_t where)
 /* safe version of system's calloc() */
 
 Malloc_t
-safesyscalloc(MEM_SIZE count, MEM_SIZE size)
+Perl_safesyscalloc(pTHX_ MEM_SIZE count, MEM_SIZE size)
 {
     Malloc_t ptr;
 
@@ -235,7 +235,7 @@ struct mem_test_strut {
 			      : ((size) - 1)/4))
 
 Malloc_t
-safexmalloc(I32 x, MEM_SIZE size)
+Perl_safexmalloc(pTHX_ I32 x, MEM_SIZE size)
 {
     register char* where = (char*)safemalloc(size + ALIGN);
 
@@ -247,7 +247,7 @@ safexmalloc(I32 x, MEM_SIZE size)
 }
 
 Malloc_t
-safexrealloc(Malloc_t wh, MEM_SIZE size)
+Perl_safexrealloc(pTHX_ Malloc_t wh, MEM_SIZE size)
 {
     char *where = (char*)wh;
 
@@ -268,7 +268,7 @@ safexrealloc(Malloc_t wh, MEM_SIZE size)
 }
 
 void
-safexfree(Malloc_t wh)
+Perl_safexfree(pTHX_ Malloc_t wh)
 {
     I32 x;
     char *where = (char*)wh;
@@ -285,7 +285,7 @@ safexfree(Malloc_t wh)
 }
 
 Malloc_t
-safexcalloc(I32 x,MEM_SIZE count, MEM_SIZE size)
+Perl_safexcalloc(pTHX_ I32 x,MEM_SIZE count, MEM_SIZE size)
 {
     register char * where = (char*)safexmalloc(x, size * count + ALIGN);
     xcount[x] += size;
@@ -296,8 +296,8 @@ safexcalloc(I32 x,MEM_SIZE count, MEM_SIZE size)
     return (Malloc_t)(where + ALIGN);
 }
 
-static void
-xstat(int flag)
+STATIC void
+xstat(pTHX_ int flag)
 {
     register I32 i, j, total = 0;
     I32 subtot[MAXYCOUNT];
@@ -356,7 +356,7 @@ xstat(int flag)
 /* copy a string up to some (non-backslashed) delimiter, if any */
 
 char *
-delimcpy(register char *to, register char *toend, register char *from, register char *fromend, register int delim, I32 *retlen)
+Perl_delimcpy(pTHX_ register char *to, register char *toend, register char *from, register char *fromend, register int delim, I32 *retlen)
 {
     register I32 tolen;
     for (tolen = 0; from < fromend; from++, tolen++) {
@@ -385,7 +385,7 @@ delimcpy(register char *to, register char *toend, register char *from, register 
 /* This routine was donated by Corey Satten. */
 
 char *
-instr(register const char *big, register const char *little)
+Perl_instr(pTHX_ register const char *big, register const char *little)
 {
     register const char *s, *x;
     register I32 first;
@@ -415,7 +415,7 @@ instr(register const char *big, register const char *little)
 /* same as instr but allow embedded nulls */
 
 char *
-ninstr(register const char *big, register const char *bigend, const char *little, const char *lend)
+Perl_ninstr(pTHX_ register const char *big, register const char *bigend, const char *little, const char *lend)
 {
     register const char *s, *x;
     register I32 first = *little;
@@ -444,7 +444,7 @@ ninstr(register const char *big, register const char *bigend, const char *little
 /* reverse of the above--find last substring */
 
 char *
-rninstr(register const char *big, const char *bigend, const char *little, const char *lend)
+Perl_rninstr(pTHX_ register const char *big, const char *bigend, const char *little, const char *lend)
 {
     register const char *bigbeg;
     register const char *s, *x;
@@ -474,7 +474,7 @@ rninstr(register const char *big, const char *bigend, const char *little, const 
  * Set up for a new ctype locale.
  */
 void
-perl_new_ctype(const char *newctype)
+Perl_new_ctype(pTHX_ const char *newctype)
 {
 #ifdef USE_LOCALE_CTYPE
 
@@ -496,7 +496,7 @@ perl_new_ctype(const char *newctype)
  * Set up for a new collation locale.
  */
 void
-perl_new_collate(const char *newcoll)
+Perl_new_collate(pTHX_ const char *newcoll)
 {
 #ifdef USE_LOCALE_COLLATE
 
@@ -540,7 +540,7 @@ perl_new_collate(const char *newcoll)
  * Set up for a new numeric locale.
  */
 void
-perl_new_numeric(const char *newnum)
+Perl_new_numeric(pTHX_ const char *newnum)
 {
 #ifdef USE_LOCALE_NUMERIC
 
@@ -565,7 +565,7 @@ perl_new_numeric(const char *newnum)
 }
 
 void
-perl_set_numeric_standard(void)
+Perl_set_numeric_standard(pTHX)
 {
 #ifdef USE_LOCALE_NUMERIC
 
@@ -579,7 +579,7 @@ perl_set_numeric_standard(void)
 }
 
 void
-perl_set_numeric_local(void)
+Perl_set_numeric_local(pTHX)
 {
 #ifdef USE_LOCALE_NUMERIC
 
@@ -597,7 +597,7 @@ perl_set_numeric_local(void)
  * Initialize locale awareness.
  */
 int
-perl_init_i18nl10n(int printwarn)
+Perl_init_i18nl10n(pTHX_ int printwarn)
 {
     int ok = 1;
     /* returns
@@ -807,15 +807,15 @@ perl_init_i18nl10n(int printwarn)
     }
 
 #ifdef USE_LOCALE_CTYPE
-    perl_new_ctype(curctype);
+    new_ctype(curctype);
 #endif /* USE_LOCALE_CTYPE */
 
 #ifdef USE_LOCALE_COLLATE
-    perl_new_collate(curcoll);
+    new_collate(curcoll);
 #endif /* USE_LOCALE_COLLATE */
 
 #ifdef USE_LOCALE_NUMERIC
-    perl_new_numeric(curnum);
+    new_numeric(curnum);
 #endif /* USE_LOCALE_NUMERIC */
 
 #endif /* USE_LOCALE */
@@ -825,9 +825,9 @@ perl_init_i18nl10n(int printwarn)
 
 /* Backwards compatibility. */
 int
-perl_init_i18nl14n(int printwarn)
+Perl_init_i18nl14n(pTHX_ int printwarn)
 {
-    return perl_init_i18nl10n(printwarn);
+    return init_i18nl10n(printwarn);
 }
 
 #ifdef USE_LOCALE_COLLATE
@@ -840,7 +840,7 @@ perl_init_i18nl14n(int printwarn)
  * Please see sv_collxfrm() to see how this is used.
  */
 char *
-mem_collxfrm(const char *s, STRLEN len, STRLEN *xlen)
+Perl_mem_collxfrm(pTHX_ const char *s, STRLEN len, STRLEN *xlen)
 {
     char *xbuf;
     STRLEN xAlloc, xin, xout; /* xalloc is a reserved word in VC */
@@ -898,7 +898,7 @@ mem_collxfrm(const char *s, STRLEN len, STRLEN *xlen)
    If FBMcf_TAIL, the table is created as if the string has a trailing \n. */
 
 void
-fbm_compile(SV *sv, U32 flags /* not used yet */)
+Perl_fbm_compile(pTHX_ SV *sv, U32 flags /* not used yet */)
 {
     register U8 *s;
     register U8 *table;
@@ -957,7 +957,7 @@ fbm_compile(SV *sv, U32 flags /* not used yet */)
    if multiline */
 
 char *
-fbm_instr(unsigned char *big, register unsigned char *bigend, SV *littlestr, U32 flags)
+Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *littlestr, U32 flags)
 {
     register unsigned char *s;
     STRLEN l;
@@ -1158,7 +1158,7 @@ fbm_instr(unsigned char *big, register unsigned char *bigend, SV *littlestr, U32
    is not supported yet. */
 
 char *
-screaminstr(SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift, I32 *old_posp, I32 last)
+Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift, I32 *old_posp, I32 last)
 {
     dTHR;
     register unsigned char *s, *x;
@@ -1257,7 +1257,7 @@ screaminstr(SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift, I32 *old_
 }
 
 I32
-ibcmp(const char *s1, const char *s2, register I32 len)
+Perl_ibcmp(pTHX_ const char *s1, const char *s2, register I32 len)
 {
     register U8 *a = (U8 *)s1;
     register U8 *b = (U8 *)s2;
@@ -1270,7 +1270,7 @@ ibcmp(const char *s1, const char *s2, register I32 len)
 }
 
 I32
-ibcmp_locale(const char *s1, const char *s2, register I32 len)
+Perl_ibcmp_locale(pTHX_ const char *s1, const char *s2, register I32 len)
 {
     register U8 *a = (U8 *)s1;
     register U8 *b = (U8 *)s2;
@@ -1285,7 +1285,7 @@ ibcmp_locale(const char *s1, const char *s2, register I32 len)
 /* copy a string to a safe spot */
 
 char *
-savepv(const char *sv)
+Perl_savepv(pTHX_ const char *sv)
 {
     register char *newaddr;
 
@@ -1297,7 +1297,7 @@ savepv(const char *sv)
 /* same thing but with a known length */
 
 char *
-savepvn(const char *sv, register I32 len)
+Perl_savepvn(pTHX_ const char *sv, register I32 len)
 {
     register char *newaddr;
 
@@ -1310,7 +1310,7 @@ savepvn(const char *sv, register I32 len)
 /* the SV for form() and mess() is not kept in an arena */
 
 STATIC SV *
-mess_alloc(void)
+mess_alloc(pTHX)
 {
     dTHR;
     SV *sv;
@@ -1333,7 +1333,7 @@ mess_alloc(void)
 }
 
 char *
-form(const char* pat, ...)
+Perl_form(pTHX_ const char* pat, ...)
 {
     SV *sv = mess_alloc();
     va_list args;
@@ -1344,7 +1344,7 @@ form(const char* pat, ...)
 }
 
 SV *
-mess(const char *pat, va_list *args)
+Perl_mess(pTHX_ const char *pat, va_list *args)
 {
     SV *sv = mess_alloc();
     static char dgd[] = " during global destruction.\n";
@@ -1369,7 +1369,7 @@ mess(const char *pat, va_list *args)
 }
 
 OP *
-die(const char* pat, ...)
+Perl_die(pTHX_ const char* pat, ...)
 {
     dTHR;
     va_list args;
@@ -1424,7 +1424,7 @@ die(const char* pat, ...)
 	    PUSHMARK(SP);
 	    XPUSHs(msg);
 	    PUTBACK;
-	    perl_call_sv((SV*)cv, G_DISCARD);
+	    call_sv((SV*)cv, G_DISCARD);
 	    POPSTACK;
 	    LEAVE;
 	}
@@ -1440,7 +1440,7 @@ die(const char* pat, ...)
 }
 
 void
-croak(const char* pat, ...)
+Perl_croak(pTHX_ const char* pat, ...)
 {
     dTHR;
     va_list args;
@@ -1477,7 +1477,7 @@ croak(const char* pat, ...)
 	    PUSHMARK(SP);
 	    XPUSHs(msg);
 	    PUTBACK;
-	    perl_call_sv((SV*)cv, G_DISCARD);
+	    call_sv((SV*)cv, G_DISCARD);
 	    POPSTACK;
 	    LEAVE;
 	}
@@ -1501,7 +1501,7 @@ croak(const char* pat, ...)
 }
 
 void
-warn(const char* pat,...)
+Perl_warn(pTHX_ const char* pat,...)
 {
     va_list args;
     char *message;
@@ -1538,7 +1538,7 @@ warn(const char* pat,...)
 	    PUSHMARK(SP);
 	    XPUSHs(msg);
 	    PUTBACK;
-	    perl_call_sv((SV*)cv, G_DISCARD);
+	    call_sv((SV*)cv, G_DISCARD);
 	    POPSTACK;
 	    LEAVE;
 	    return;
@@ -1557,7 +1557,7 @@ warn(const char* pat,...)
 }
 
 void
-warner(U32  err, const char* pat,...)
+Perl_warner(pTHX_ U32  err, const char* pat,...)
 {
     dTHR;
     va_list args;
@@ -1597,7 +1597,7 @@ warner(U32  err, const char* pat,...)
                 PUSHMARK(sp);
                 XPUSHs(msg);
                 PUTBACK;
-                perl_call_sv((SV*)cv, G_DISCARD);
+                call_sv((SV*)cv, G_DISCARD);
  
                 LEAVE;
             }
@@ -1633,7 +1633,7 @@ warner(U32  err, const char* pat,...)
                 PUSHMARK(sp);
                 XPUSHs(msg);
                 PUTBACK;
-                perl_call_sv((SV*)cv, G_DISCARD);
+                call_sv((SV*)cv, G_DISCARD);
  
                 LEAVE;
                 return;
@@ -1650,7 +1650,7 @@ warner(U32  err, const char* pat,...)
 #ifndef VMS  /* VMS' my_setenv() is in VMS.c */
 #if !defined(WIN32) && !defined(CYGWIN32)
 void
-my_setenv(char *nam, char *val)
+Perl_my_setenv(pTHX_ char *nam, char *val)
 {
 #ifndef PERL_USE_SAFE_PUTENV
     /* most putenv()s leak, so we manipulate environ directly */
@@ -1716,7 +1716,7 @@ my_setenv(char *nam, char *val)
 #else /* if WIN32 */
 
 void
-my_setenv(char *nam,char *val)
+Perl_my_setenv(pTHX_ char *nam,char *val)
 {
 
 #ifdef USE_WIN32_RTL_ENV
@@ -1776,7 +1776,7 @@ my_setenv(char *nam,char *val)
 #endif /* WIN32 */
 
 I32
-setenv_getix(char *nam)
+Perl_setenv_getix(pTHX_ char *nam)
 {
     register I32 i, len = strlen(nam);
 
@@ -1797,7 +1797,7 @@ setenv_getix(char *nam)
 
 #ifdef UNLINK_ALL_VERSIONS
 I32
-unlnk(char *f)	/* unlink all versions of a file */
+Perl_unlnk(pTHX_ char *f)	/* unlink all versions of a file */
 {
     I32 i;
 
@@ -1808,7 +1808,7 @@ unlnk(char *f)	/* unlink all versions of a file */
 
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
 char *
-my_bcopy(register const char *from,register char *to,register I32 len)
+Perl_my_bcopy(pTHX_ register const char *from,register char *to,register I32 len)
 {
     char *retval = to;
 
@@ -1828,7 +1828,7 @@ my_bcopy(register const char *from,register char *to,register I32 len)
 
 #ifndef HAS_MEMSET
 void *
-my_memset(register char *loc, register I32 ch, register I32 len)
+Perl_my_memset(pTHX_ register char *loc, register I32 ch, register I32 len)
 {
     char *retval = loc;
 
@@ -1840,7 +1840,7 @@ my_memset(register char *loc, register I32 ch, register I32 len)
 
 #if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
 char *
-my_bzero(register char *loc, register I32 len)
+Perl_my_bzero(pTHX_ register char *loc, register I32 len)
 {
     char *retval = loc;
 
@@ -1852,7 +1852,7 @@ my_bzero(register char *loc, register I32 len)
 
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
 I32
-my_memcmp(const char *s1, const char *s2, register I32 len)
+Perl_my_memcmp(pTHX_ const char *s1, const char *s2, register I32 len)
 {
     register U8 *a = (U8 *)s1;
     register U8 *b = (U8 *)s2;
@@ -1897,7 +1897,7 @@ vsprintf(char *dest, const char *pat, char *args)
 #ifdef MYSWAP
 #if BYTEORDER != 0x4321
 short
-my_swap(short s)
+Perl_my_swap(pTHX_ short s)
 {
 #if (BYTEORDER & 1) == 0
     short result;
@@ -1910,7 +1910,7 @@ my_swap(short s)
 }
 
 long
-my_htonl(long l)
+Perl_my_htonl(pTHX_ long l)
 {
     union {
 	long result;
@@ -1939,7 +1939,7 @@ my_htonl(long l)
 }
 
 long
-my_ntohl(long l)
+Perl_my_ntohl(pTHX_ long l)
 {
     union {
 	long l;
@@ -2030,7 +2030,7 @@ VTOH(vtohl,long)
     /* VMS' my_popen() is in VMS.c, same with OS/2. */
 #if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM)
 PerlIO *
-my_popen(char *cmd, char *mode)
+Perl_my_popen(pTHX_ char *cmd, char *mode)
 {
     int p[2];
     register I32 This, that;
@@ -2153,7 +2153,7 @@ my_popen(char *cmd, char *mode)
 #if defined(atarist) || defined(DJGPP)
 FILE *popen();
 PerlIO *
-my_popen(char *cmd, char *mode)
+Perl_my_popen(pTHX_ char *cmd, char *mode)
 {
     /* Needs work for PerlIO ! */
     /* used 0 for 2nd parameter to PerlIO-exportFILE; apparently not used */
@@ -2166,7 +2166,7 @@ my_popen(char *cmd, char *mode)
 
 #ifdef DUMP_FDS
 void
-dump_fds(char *s)
+Perl_dump_fds(pTHX_ char *s)
 {
     int fd;
     struct stat tmpstatbuf;
@@ -2218,7 +2218,7 @@ dup2(int oldfd, int newfd)
 #ifdef HAS_SIGACTION
 
 Sighandler_t
-rsignal(int signo, Sighandler_t handler)
+Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
 {
     struct sigaction act, oact;
 
@@ -2239,7 +2239,7 @@ rsignal(int signo, Sighandler_t handler)
 }
 
 Sighandler_t
-rsignal_state(int signo)
+Perl_rsignal_state(pTHX_ int signo)
 {
     struct sigaction oact;
 
@@ -2250,7 +2250,7 @@ rsignal_state(int signo)
 }
 
 int
-rsignal_save(int signo, Sighandler_t handler, Sigsave_t *save)
+Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
 {
     struct sigaction act;
 
@@ -2268,7 +2268,7 @@ rsignal_save(int signo, Sighandler_t handler, Sigsave_t *save)
 }
 
 int
-rsignal_restore(int signo, Sigsave_t *save)
+Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 {
     return sigaction(signo, save, (struct sigaction *)NULL);
 }
@@ -2276,7 +2276,7 @@ rsignal_restore(int signo, Sigsave_t *save)
 #else /* !HAS_SIGACTION */
 
 Sighandler_t
-rsignal(int signo, Sighandler_t handler)
+Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
 {
     return PerlProc_signal(signo, handler);
 }
@@ -2291,7 +2291,7 @@ sig_trap(int signo)
 }
 
 Sighandler_t
-rsignal_state(int signo)
+Perl_rsignal_state(pTHX_ int signo)
 {
     Sighandler_t oldsig;
 
@@ -2304,14 +2304,14 @@ rsignal_state(int signo)
 }
 
 int
-rsignal_save(int signo, Sighandler_t handler, Sigsave_t *save)
+Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
 {
     *save = PerlProc_signal(signo, handler);
     return (*save == SIG_ERR) ? -1 : 0;
 }
 
 int
-rsignal_restore(int signo, Sigsave_t *save)
+Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 {
     return (PerlProc_signal(signo, *save) == SIG_ERR) ? -1 : 0;
 }
@@ -2321,7 +2321,7 @@ rsignal_restore(int signo, Sigsave_t *save)
     /* VMS' my_pclose() is in VMS.c; same with OS/2 */
 #if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM)
 I32
-my_pclose(PerlIO *ptr)
+Perl_my_pclose(pTHX_ PerlIO *ptr)
 {
     Sigsave_t hstat, istat, qstat;
     int status;
@@ -2377,7 +2377,7 @@ my_pclose(PerlIO *ptr)
 
 #if  !defined(DOSISH) || defined(OS2) || defined(WIN32) || defined(CYGWIN32)
 I32
-wait4pid(int pid, int *statusp, int flags)
+Perl_wait4pid(pTHX_ int pid, int *statusp, int flags)
 {
     SV *sv;
     SV** svp;
@@ -2437,7 +2437,7 @@ wait4pid(int pid, int *statusp, int flags)
 
 void
 /*SUPPRESS 590*/
-pidgone(int pid, int status)
+Perl_pidgone(pTHX_ int pid, int status)
 {
     register SV *sv;
     char spid[TYPE_CHARS(int)];
@@ -2457,7 +2457,7 @@ int					/* Cannot prototype with I32
 my_syspclose(PerlIO *ptr)
 #else
 I32
-my_pclose(PerlIO *ptr)
+Perl_my_pclose(pTHX_ PerlIO *ptr)
 #endif 
 {
     /* Needs work for PerlIO ! */
@@ -2469,7 +2469,7 @@ my_pclose(PerlIO *ptr)
 #endif
 
 void
-repeatcpy(register char *to, register const char *from, I32 len, register I32 count)
+Perl_repeatcpy(pTHX_ register char *to, register const char *from, I32 len, register I32 count)
 {
     register I32 todo;
     register const char *frombase = from;
@@ -2489,7 +2489,7 @@ repeatcpy(register char *to, register const char *from, I32 len, register I32 co
 }
 
 U32
-cast_ulong(double f)
+Perl_cast_ulong(pTHX_ double f)
 {
     long along;
 
@@ -2526,7 +2526,7 @@ cast_ulong(double f)
 #endif
 
 I32
-cast_i32(double f)
+Perl_cast_i32(pTHX_ double f)
 {
     if (f >= I32_MAX)
 	return (I32) I32_MAX;
@@ -2536,7 +2536,7 @@ cast_i32(double f)
 }
 
 IV
-cast_iv(double f)
+Perl_cast_iv(pTHX_ double f)
 {
     if (f >= IV_MAX) {
 	UV uv;
@@ -2552,7 +2552,7 @@ cast_iv(double f)
 }
 
 UV
-cast_uv(double f)
+Perl_cast_uv(pTHX_ double f)
 {
     if (f >= MY_UV_MAX)
 	return (UV) MY_UV_MAX;
@@ -2569,7 +2569,7 @@ cast_uv(double f)
 
 #ifndef HAS_RENAME
 I32
-same_dirent(char *a, char *b)
+Perl_same_dirent(pTHX_ char *a, char *b)
 {
     char *fa = strrchr(a,'/');
     char *fb = strrchr(b,'/');
@@ -2605,7 +2605,7 @@ same_dirent(char *a, char *b)
 #endif /* !HAS_RENAME */
 
 UV
-scan_bin(char *start, I32 len, I32 *retlen)
+Perl_scan_bin(pTHX_ char *start, I32 len, I32 *retlen)
 {
     register char *s = start;
     register UV retval = 0;
@@ -2628,7 +2628,7 @@ scan_bin(char *start, I32 len, I32 *retlen)
     return retval;
 }
 UV
-scan_oct(char *start, I32 len, I32 *retlen)
+Perl_scan_oct(pTHX_ char *start, I32 len, I32 *retlen)
 {
     register char *s = start;
     register UV retval = 0;
@@ -2653,7 +2653,7 @@ scan_oct(char *start, I32 len, I32 *retlen)
 }
 
 UV
-scan_hex(char *start, I32 len, I32 *retlen)
+Perl_scan_hex(pTHX_ char *start, I32 len, I32 *retlen)
 {
     register char *s = start;
     register UV retval = 0;
@@ -2686,7 +2686,7 @@ scan_hex(char *start, I32 len, I32 *retlen)
 }
 
 char*
-find_script(char *scriptname, bool dosearch, char **search_ext, I32 flags)
+Perl_find_script(pTHX_ char *scriptname, bool dosearch, char **search_ext, I32 flags)
 {
     dTHR;
     char *xfound = Nullch;
@@ -2911,13 +2911,13 @@ schedule(void)
 }
 
 void
-perl_cond_init(perl_cond *cp)
+Perl_cond_init(pTHX_ perl_cond *cp)
 {
     *cp = 0;
 }
 
 void
-perl_cond_signal(perl_cond *cp)
+Perl_cond_signal(pTHX_ perl_cond *cp)
 {
     perl_os_thread t;
     perl_cond cond = *cp;
@@ -2937,7 +2937,7 @@ perl_cond_signal(perl_cond *cp)
 }
 
 void
-perl_cond_broadcast(perl_cond *cp)
+Perl_cond_broadcast(pTHX_ perl_cond *cp)
 {
     perl_os_thread t;
     perl_cond cond, cond_next;
@@ -2958,7 +2958,7 @@ perl_cond_broadcast(perl_cond *cp)
 }
 
 void
-perl_cond_wait(perl_cond *cp)
+Perl_cond_wait(pTHX_ perl_cond *cp)
 {
     perl_cond cond;
 
@@ -2978,7 +2978,7 @@ perl_cond_wait(perl_cond *cp)
 
 #ifdef PTHREAD_GETSPECIFIC_INT
 struct perl_thread *
-getTHR(void)
+Perl_getTHR(pTHX)
 {
     pthread_addr_t t;
 
@@ -2989,7 +2989,7 @@ getTHR(void)
 #endif
 
 MAGIC *
-condpair_magic(SV *sv)
+Perl_condpair_magic(pTHX_ SV *sv)
 {
     MAGIC *mg;
     
@@ -3034,7 +3034,7 @@ condpair_magic(SV *sv)
  * thread calling new_struct_thread) clearly satisfies this constraint.
  */
 struct perl_thread *
-new_struct_thread(struct perl_thread *t)
+Perl_new_struct_thread(pTHX_ struct perl_thread *t)
 {
     struct perl_thread *thr;
     SV *sv;
@@ -3169,39 +3169,39 @@ Perl_huge(void)
 
 #ifdef PERL_GLOBAL_STRUCT
 struct perl_vars *
-Perl_GetVars(void)
+Perl_GetVars(pTHX)
 {
  return &PL_Vars;
 }
 #endif
 
 char **
-get_op_names(void)
+Perl_get_op_names(pTHX)
 {
  return PL_op_name;
 }
 
 char **
-get_op_descs(void)
+Perl_get_op_descs(pTHX)
 {
  return PL_op_desc;
 }
 
 char *
-get_no_modify(void)
+Perl_get_no_modify(pTHX)
 {
  return (char*)PL_no_modify;
 }
 
 U32 *
-get_opargs(void)
+Perl_get_opargs(pTHX)
 {
  return PL_opargs;
 }
 
 #ifndef HAS_GETENV_LEN
 char *
-getenv_len(char *env_elem, unsigned long *len)
+Perl_getenv_len(pTHX_ char *env_elem, unsigned long *len)
 {
     char *env_trans = PerlEnv_getenv(env_elem);
     if (env_trans)
@@ -3212,7 +3212,7 @@ getenv_len(char *env_elem, unsigned long *len)
 
 
 MGVTBL*
-get_vtbl(int vtbl_id)
+Perl_get_vtbl(pTHX_ int vtbl_id)
 {
     MGVTBL* result = Null(MGVTBL*);
 
@@ -3316,7 +3316,7 @@ get_vtbl(int vtbl_id)
 }
 
 I32
-my_fflush_all(void)
+Perl_my_fflush_all(pTHX)
 {
 #ifdef FFLUSH_NULL
     return PerlIO_flush(NULL);

@@ -13,6 +13,7 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_DUMP_C
 #include "perl.h"
 
 #ifndef DBL_DIG
@@ -20,7 +21,7 @@
 #endif
 
 void
-dump_indent(I32 level, PerlIO *file, const char* pat, ...)
+Perl_dump_indent(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
 {
     dTHR;
     va_list args;
@@ -32,7 +33,7 @@ dump_indent(I32 level, PerlIO *file, const char* pat, ...)
 }
 
 void
-dump_all(void)
+Perl_dump_all(pTHX)
 {
     dTHR;
     PerlIO_setlinebuf(Perl_debug_log);
@@ -42,7 +43,7 @@ dump_all(void)
 }
 
 void
-dump_packsubs(HV *stash)
+Perl_dump_packsubs(pTHX_ HV *stash)
 {
     dTHR;
     I32	i;
@@ -68,7 +69,7 @@ dump_packsubs(HV *stash)
 }
 
 void
-dump_sub(GV *gv)
+Perl_dump_sub(pTHX_ GV *gv)
 {
     SV *sv = sv_newmortal();
 
@@ -85,7 +86,7 @@ dump_sub(GV *gv)
 }
 
 void
-dump_form(GV *gv)
+Perl_dump_form(pTHX_ GV *gv)
 {
     SV *sv = sv_newmortal();
 
@@ -98,13 +99,13 @@ dump_form(GV *gv)
 }
 
 void
-dump_eval(void)
+Perl_dump_eval(pTHX)
 {
     op_dump(PL_eval_root);
 }
 
 char *
-pv_display(SV *sv, char *pv, STRLEN cur, STRLEN len, STRLEN pvlim)
+Perl_pv_display(pTHX_ SV *sv, char *pv, STRLEN cur, STRLEN len, STRLEN pvlim)
 {
     int truncated = 0;
     int nul_terminated = len > cur && pv[cur] == '\0';
@@ -143,7 +144,7 @@ pv_display(SV *sv, char *pv, STRLEN cur, STRLEN len, STRLEN pvlim)
 }
 
 char *
-sv_peek(SV *sv)
+Perl_sv_peek(pTHX_ SV *sv)
 {
     SV *t = sv_newmortal();
     STRLEN n_a;
@@ -297,7 +298,7 @@ sv_peek(SV *sv)
 }
 
 void
-do_pmop_dump(I32 level, PerlIO *file, PMOP *pm)
+Perl_do_pmop_dump(pTHX_ I32 level, PerlIO *file, PMOP *pm)
 {
     char ch;
 
@@ -357,13 +358,13 @@ do_pmop_dump(I32 level, PerlIO *file, PMOP *pm)
 }
 
 void
-pmop_dump(PMOP *pm)
+Perl_pmop_dump(pTHX_ PMOP *pm)
 {
     do_pmop_dump(0, Perl_debug_log, pm);
 }
 
 void
-do_op_dump(I32 level, PerlIO *file, OP *o)
+Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, OP *o)
 {
     dTHR;
     STRLEN n_a;
@@ -580,13 +581,13 @@ do_op_dump(I32 level, PerlIO *file, OP *o)
 }
 
 void
-op_dump(OP *o)
+Perl_op_dump(pTHX_ OP *o)
 {
     do_op_dump(0, Perl_debug_log, o);
 }
 
 void
-gv_dump(GV *gv)
+Perl_gv_dump(pTHX_ GV *gv)
 {
     SV *sv;
 
@@ -607,7 +608,7 @@ gv_dump(GV *gv)
 }
 
 void
-do_magic_dump(I32 level, PerlIO *file, MAGIC *mg, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim)
+Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, MAGIC *mg, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim)
 {
     for (; mg; mg = mg->mg_moremagic) {
  	dump_indent(level, file, "  MAGIC = 0x%lx\n", (long)mg);
@@ -695,13 +696,13 @@ do_magic_dump(I32 level, PerlIO *file, MAGIC *mg, I32 nest, I32 maxnest, bool du
 }
 
 void
-magic_dump(MAGIC *mg)
+Perl_magic_dump(pTHX_ MAGIC *mg)
 {
     do_magic_dump(0, Perl_debug_log, mg, 0, 0, 0, 0);
 }
 
 void
-do_hv_dump(I32 level, PerlIO *file, char *name, HV *sv)
+Perl_do_hv_dump(pTHX_ I32 level, PerlIO *file, char *name, HV *sv)
 {
     dump_indent(level, file, "%s = 0x%lx", name, (long)sv);
     if (sv && HvNAME(sv))
@@ -711,7 +712,7 @@ do_hv_dump(I32 level, PerlIO *file, char *name, HV *sv)
 }
 
 void
-do_gv_dump(I32 level, PerlIO *file, char *name, GV *sv)
+Perl_do_gv_dump(pTHX_ I32 level, PerlIO *file, char *name, GV *sv)
 {
     dump_indent(level, file, "%s = 0x%lx", name, (long)sv);
     if (sv && GvNAME(sv))
@@ -721,7 +722,7 @@ do_gv_dump(I32 level, PerlIO *file, char *name, GV *sv)
 }
 
 void
-do_gvgv_dump(I32 level, PerlIO *file, char *name, GV *sv)
+Perl_do_gvgv_dump(pTHX_ I32 level, PerlIO *file, char *name, GV *sv)
 {
     dump_indent(level, file, "%s = 0x%lx", name, (long)sv);
     if (sv && GvNAME(sv)) {
@@ -735,7 +736,7 @@ do_gvgv_dump(I32 level, PerlIO *file, char *name, GV *sv)
 }
 
 void
-do_sv_dump(I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim)
+Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim)
 {
     dTHR;
     SV *d = sv_newmortal();
@@ -1139,7 +1140,7 @@ do_sv_dump(I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bool dumpops,
 }
 
 void
-sv_dump(SV *sv)
+Perl_sv_dump(pTHX_ SV *sv)
 {
     do_sv_dump(0, Perl_debug_log, sv, 0, 0, 0, 0);
 }

@@ -227,6 +227,7 @@
 
 #ifdef PERL_CORE
 #  include "EXTERN.h"
+#define PERL_IN_MALLOC_C
 #  include "perl.h"
 #else
 #  ifdef PERL_FOR_X2P
@@ -410,13 +411,6 @@ union	overhead {
 #define	ov_size		ovu.ovu_size
 #define	ov_rmagic	ovu.ovu_rmagic
 };
-
-#ifdef DEBUGGING
-static void botch (char *diag, char *s);
-#endif
-static void morecore (int bucket);
-static int findbucket (union overhead *freep, int srchlen);
-static void add_to_chain(void *p, MEM_SIZE size, MEM_SIZE chip);
 
 #define	MAGIC		0xff		/* magic # on accounting info */
 #define RMAGIC		0x55555555	/* magic # on range info */
@@ -715,10 +709,9 @@ static char bucket_of[] =
 
 static char *emergency_buffer;
 static MEM_SIZE emergency_buffer_size;
-static Malloc_t emergency_sbrk(MEM_SIZE size);
 
-static Malloc_t
-emergency_sbrk(MEM_SIZE size)
+STATIC Malloc_t
+emergency_sbrk(pTHX_ MEM_SIZE size)
 {
     MEM_SIZE rsize = (((size - 1)>>LOG_OF_MIN_ARENA) + 1)<<LOG_OF_MIN_ARENA;
 
@@ -816,8 +809,8 @@ static	u_int goodsbrk;
 #ifdef DEBUGGING
 #undef ASSERT
 #define	ASSERT(p,diag)   if (!(p)) botch(diag,STRINGIFY(p));  else
-static void
-botch(char *diag, char *s)
+STATIC void
+botch(pTHX_ char *diag, char *s)
 {
 	PerlIO_printf(PerlIO_stderr(), "assertion botched (%s?): %s\n", diag, s);
 	PerlProc_abort();
@@ -954,8 +947,8 @@ static int n_chunks;
 static char max_bucket;
 
 /* Cutoff a piece of one of the chunks in the chain.  Prefer smaller chunk. */
-static void *
-get_from_chain(MEM_SIZE size)
+STATIC void *
+get_from_chain(pTHX_ MEM_SIZE size)
 {
     struct chunk_chain_s *elt = chunk_chain, **oldp = &chunk_chain;
     struct chunk_chain_s **oldgoodp = NULL;
@@ -992,8 +985,8 @@ get_from_chain(MEM_SIZE size)
     }
 }
 
-static void
-add_to_chain(void *p, MEM_SIZE size, MEM_SIZE chip)
+STATIC void
+add_to_chain(pTHX_ void *p, MEM_SIZE size, MEM_SIZE chip)
 {
     struct chunk_chain_s *next = chunk_chain;
     char *cp = (char*)p;
@@ -1005,8 +998,8 @@ add_to_chain(void *p, MEM_SIZE size, MEM_SIZE chip)
     n_chunks++;
 }
 
-static void *
-get_from_bigger_buckets(int bucket, MEM_SIZE size)
+STATIC void *
+get_from_bigger_buckets(pTHX_ int bucket, MEM_SIZE size)
 {
     int price = 1;
     static int bucketprice[NBUCKETS];
@@ -1035,8 +1028,8 @@ get_from_bigger_buckets(int bucket, MEM_SIZE size)
     return NULL;
 }
 
-static union overhead *
-getpages(int needed, int *nblksp, int bucket)
+STATIC union overhead *
+getpages(pTHX_ int needed, int *nblksp, int bucket)
 {
     /* Need to do (possibly expensive) system call. Try to
        optimize it for rare calling. */
@@ -1188,8 +1181,8 @@ getpages(int needed, int *nblksp, int bucket)
     return ovp;
 }
 
-static int
-getpages_adjacent(int require)
+STATIC int
+getpages_adjacent(pTHX_ int require)
 {	    
     if (require <= sbrked_remains) {
 	sbrked_remains -= require;
@@ -1232,8 +1225,8 @@ getpages_adjacent(int require)
 /*
  * Allocate more memory to the indicated bucket.
  */
-static void
-morecore(register int bucket)
+STATIC void
+morecore(pTHX_ register int bucket)
 {
   	register union overhead *ovp;
   	register int rnu;       /* 2^rnu bytes will be requested */
@@ -1613,7 +1606,7 @@ Perl_calloc(register size_t elements, register size_t size)
 }
 
 MEM_SIZE
-malloced_size(void *p)
+Perl_malloced_size(pTHX_ void *p)
 {
     union overhead *ovp = (union overhead *)
 	((caddr_t)p - sizeof (union overhead) * CHUNK_SHIFT);
@@ -1643,7 +1636,7 @@ malloced_size(void *p)
  * frees for each size category.
  */
 void
-dump_mstats(char *s)
+Perl_dump_mstats(pTHX_ char *s)
 {
 #ifdef DEBUGGING_MSTATS
   	register int i, j;

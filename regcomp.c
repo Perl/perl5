@@ -77,6 +77,7 @@
  * regular-expression syntax might require a total rethink.
  */
 #include "EXTERN.h"
+#define PERL_IN_REGCOMP_C
 #include "perl.h"
 
 #ifndef PERL_IN_XSUB_RE
@@ -128,50 +129,6 @@
  * Forward declarations for pregcomp()'s friends.
  */
 
-#ifndef PERL_OBJECT
-static regnode *reg (I32, I32 *);
-static regnode *reganode (U8, U32);
-static regnode *regatom (I32 *);
-static regnode *regbranch (I32 *, I32);
-static void regc (U8, char *);
-static void reguni (UV, char *, I32*);
-static regnode *regclass (void);
-static regnode *regclassutf8 (void);
-STATIC I32 regcurly (char *);
-static regnode *reg_node (U8);
-static regnode *regpiece (I32 *);
-static void reginsert (U8, regnode *);
-static void regoptail (regnode *, regnode *);
-static void regtail (regnode *, regnode *);
-static char* regwhite (char *, char *);
-static char* nextchar (void);
-static void re_croak2 (const char* pat1,const char* pat2,...) __attribute__((noreturn));
-static char* regpposixcc (I32 value);
-static void clear_re (void *r);
-#endif
-
-/* Length of a variant. */
-
-#ifndef PERL_OBJECT
-typedef struct {
-    I32 len_min;
-    I32 len_delta;
-    I32 pos_min;			/* CC */
-    I32 pos_delta;			/* CC */
-    SV *last_found;
-    I32 last_end;			/* min value, <0 unless valid. */
-    I32 last_start_min;			/* CC */
-    I32 last_start_max;			/* CC */
-    SV **longest;			/* Either &l_fixed, or &l_float. */
-    SV *longest_fixed;
-    I32 offset_fixed;			/* CC */
-    SV *longest_float;
-    I32 offset_float_min;		/* CC */
-    I32 offset_float_max;		/* CC */
-    I32 flags;
-} scan_data_t;
-#endif
-
 static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 				      0, 0, 0 };
 
@@ -209,13 +166,13 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 #define CHR_DIST(a,b) (UTF ? utf8_distance(a,b) : a - b)
 
 STATIC void
-clear_re(void *r)
+clear_re(pTHX_ void *r)
 {
     ReREFCNT_dec((regexp *)r);
 }
 
 STATIC void
-scan_commit(scan_data_t *data)
+scan_commit(pTHX_ scan_data_t *data)
 {
     dTHR;
     STRLEN l = CHR_SVLEN(data->last_found);
@@ -252,7 +209,7 @@ scan_commit(scan_data_t *data)
    to the position after last scanned or to NULL. */
 
 STATIC I32
-study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 flags)
+study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 flags)
 			/* scanp: Start here (read-write). */
 			/* deltap: Write maxlen-minlen here. */
 			/* last: Stop before this one. */
@@ -749,7 +706,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 }
 
 STATIC I32
-add_data(I32 n, char *s)
+add_data(pTHX_ I32 n, char *s)
 {
     dTHR;
     if (PL_regcomp_rx->data) {
@@ -770,7 +727,7 @@ add_data(I32 n, char *s)
 }
 
 void
-reginitcolors(void)
+Perl_reginitcolors(pTHX)
 {
     dTHR;
     int i = 0;
@@ -810,7 +767,7 @@ reginitcolors(void)
  * of the structure of the compiled regexp.  [I'll say.]
  */
 regexp *
-pregcomp(char *exp, char *xend, PMOP *pm)
+Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 {
     dTHR;
     register regexp *r;
@@ -1087,7 +1044,7 @@ pregcomp(char *exp, char *xend, PMOP *pm)
  * follows makes it hard to avoid.
  */
 STATIC regnode *
-reg(I32 paren, I32 *flagp)
+reg(pTHX_ I32 paren, I32 *flagp)
     /* paren: Parenthesized? 0=top, 1=(, inside: changed to letter. */
 {
     dTHR;
@@ -1416,7 +1373,7 @@ reg(I32 paren, I32 *flagp)
  * Implements the concatenation operator.
  */
 STATIC regnode *
-regbranch(I32 *flagp, I32 first)
+regbranch(pTHX_ I32 *flagp, I32 first)
 {
     dTHR;
     register regnode *ret;
@@ -1482,7 +1439,7 @@ regbranch(I32 *flagp, I32 first)
  * endmarker role is not redundant.
  */
 STATIC regnode *
-regpiece(I32 *flagp)
+regpiece(pTHX_ I32 *flagp)
 {
     dTHR;
     register regnode *ret;
@@ -1633,7 +1590,7 @@ regpiece(I32 *flagp)
  * [Yes, it is worth fixing, some scripts can run twice the speed.]
  */
 STATIC regnode *
-regatom(I32 *flagp)
+regatom(pTHX_ I32 *flagp)
 {
     dTHR;
     register regnode *ret = 0;
@@ -2101,7 +2058,7 @@ tryagain:
 }
 
 STATIC char *
-regwhite(char *p, char *e)
+regwhite(pTHX_ char *p, char *e)
 {
     while (p < e) {
 	if (isSPACE(*p))
@@ -2119,7 +2076,7 @@ regwhite(char *p, char *e)
 
 /* parse POSIX character classes like [[:foo:]] */
 STATIC char*
-regpposixcc(I32 value)
+regpposixcc(pTHX_ I32 value)
 {
     dTHR;
     char *posixcc = 0;
@@ -2161,7 +2118,7 @@ regpposixcc(I32 value)
 }
 
 STATIC regnode *
-regclass(void)
+regclass(pTHX)
 {
     dTHR;
     register char *opnd, *s;
@@ -2359,7 +2316,7 @@ regclass(void)
 }
 
 STATIC regnode *
-regclassutf8(void)
+regclassutf8(pTHX)
 {
     register char *opnd, *e;
     register U32 value;
@@ -2558,7 +2515,7 @@ regclassutf8(void)
 }
 
 STATIC char*
-nextchar(void)
+nextchar(pTHX)
 {
     dTHR;
     char* retval = PL_regcomp_parse++;
@@ -2591,7 +2548,7 @@ nextchar(void)
 - reg_node - emit a node
 */
 STATIC regnode *			/* Location. */
-reg_node(U8 op)
+reg_node(pTHX_ U8 op)
 {
     dTHR;
     register regnode *ret;
@@ -2616,7 +2573,7 @@ reg_node(U8 op)
 - reganode - emit a node with an argument
 */
 STATIC regnode *			/* Location. */
-reganode(U8 op, U32 arg)
+reganode(pTHX_ U8 op, U32 arg)
 {
     dTHR;
     register regnode *ret;
@@ -2641,7 +2598,7 @@ reganode(U8 op, U32 arg)
 - regc - emit (if appropriate) a Unicode character
 */
 STATIC void
-reguni(UV uv, char* s, I32* lenp)
+reguni(pTHX_ UV uv, char* s, I32* lenp)
 {
     dTHR;
     if (SIZE_ONLY) {
@@ -2657,7 +2614,7 @@ reguni(UV uv, char* s, I32* lenp)
 - regc - emit (if appropriate) a byte of code
 */
 STATIC void
-regc(U8 b, char* s)
+regc(pTHX_ U8 b, char* s)
 {
     dTHR;
     if (!SIZE_ONLY)
@@ -2670,7 +2627,7 @@ regc(U8 b, char* s)
 * Means relocating the operand.
 */
 STATIC void
-reginsert(U8 op, regnode *opnd)
+reginsert(pTHX_ U8 op, regnode *opnd)
 {
     dTHR;
     register regnode *src;
@@ -2701,7 +2658,7 @@ reginsert(U8 op, regnode *opnd)
 - regtail - set the next-pointer at the end of a node chain of p to val.
 */
 STATIC void
-regtail(regnode *p, regnode *val)
+regtail(pTHX_ regnode *p, regnode *val)
 {
     dTHR;
     register regnode *scan;
@@ -2732,7 +2689,7 @@ regtail(regnode *p, regnode *val)
 - regoptail - regtail on operand of first argument; nop if operandless
 */
 STATIC void
-regoptail(regnode *p, regnode *val)
+regoptail(pTHX_ regnode *p, regnode *val)
 {
     dTHR;
     /* "Operandless" and "op != BRANCH" are synonymous in practice. */
@@ -2752,7 +2709,7 @@ regoptail(regnode *p, regnode *val)
  - regcurly - a little FSA that accepts {\d+,?\d*}
  */
 STATIC I32
-regcurly(register char *s)
+regcurly(pTHX_ register char *s)
 {
     if (*s++ != '{')
 	return FALSE;
@@ -2771,7 +2728,7 @@ regcurly(register char *s)
 
 
 STATIC regnode *
-dumpuntil(regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
+dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 {
 #ifdef DEBUGGING
     register char op = EXACT;	/* Arbitrary non-END op. */
@@ -2845,7 +2802,7 @@ dumpuntil(regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
  - regdump - dump a regexp onto Perl_debug_log in vaguely comprehensible form
  */
 void
-regdump(regexp *r)
+Perl_regdump(pTHX_ regexp *r)
 {
 #ifdef DEBUGGING
     dTHR;
@@ -2910,7 +2867,7 @@ regdump(regexp *r)
 - regprop - printable representation of opcode
 */
 void
-regprop(SV *sv, regnode *o)
+Perl_regprop(pTHX_ SV *sv, regnode *o)
 {
 #ifdef DEBUGGING
     dTHR;
@@ -2940,7 +2897,7 @@ regprop(SV *sv, regnode *o)
 }
 
 void
-pregfree(struct regexp *r)
+Perl_pregfree(pTHX_ struct regexp *r)
 {
     dTHR;
     if (!r || (--r->refcnt > 0))
@@ -3004,7 +2961,7 @@ pregfree(struct regexp *r)
  * that bypass this code for speed.]
  */
 regnode *
-regnext(register regnode *p)
+Perl_regnext(pTHX_ register regnode *p)
 {
     dTHR;
     register I32 offset;
@@ -3020,7 +2977,7 @@ regnext(register regnode *p)
 }
 
 STATIC void	
-re_croak2(const char* pat1,const char* pat2,...)
+re_croak2(pTHX_ const char* pat1,const char* pat2,...)
 {
     va_list args;
     STRLEN l1 = strlen(pat1);
@@ -3056,7 +3013,7 @@ re_croak2(const char* pat1,const char* pat2,...)
 /* XXX Here's a total kludge.  But we need to re-enter for swash routines. */
 
 void
-save_re_context(void)
+Perl_save_re_context(pTHX)
 {                   
     dTHR;
     SAVEPPTR(PL_bostr);

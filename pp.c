@@ -13,6 +13,7 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_PP_C
 #include "perl.h"
 
 /*
@@ -108,12 +109,6 @@ typedef unsigned UBW;
 #  define COPYNN(s,p,n) Copy(s, (char *)(p), n, char)
 #  define CAT16(sv,p)  sv_catpvn(sv, (char*)(p), SIZE16)
 #  define CAT32(sv,p)  sv_catpvn(sv, (char*)(p), SIZE32)
-#endif
-
-#ifndef PERL_OBJECT
-static void doencodes (SV* sv, char* s, I32 len);
-static SV* refto (SV* sv);
-static U32 seed (void);
 #endif
 
 /* variations on pp_null */
@@ -521,7 +516,7 @@ PP(pp_refgen)
 }
 
 STATIC SV*
-refto(SV *sv)
+refto(pTHX_ SV *sv)
 {
     SV* rv;
 
@@ -1707,7 +1702,7 @@ PP(pp_srand)
 }
 
 STATIC U32
-seed(void)
+seed(pTHX)
 {
     /*
      * This is really just a quick hack which grabs various garbage
@@ -2895,7 +2890,7 @@ PP(pp_splice)
 	PUSHMARK(MARK);
 	PUTBACK;
 	ENTER;
-	perl_call_method("SPLICE",GIMME_V);
+	call_method("SPLICE",GIMME_V);
 	LEAVE;
 	SPAGAIN;
 	RETURN;
@@ -3089,7 +3084,7 @@ PP(pp_push)
 	PUSHMARK(MARK);
 	PUTBACK;
 	ENTER;
-	perl_call_method("PUSH",G_SCALAR|G_DISCARD);
+	call_method("PUSH",G_SCALAR|G_DISCARD);
 	LEAVE;
 	SPAGAIN;
     }
@@ -3145,7 +3140,7 @@ PP(pp_unshift)
 	PUSHMARK(MARK);
 	PUTBACK;
 	ENTER;
-	perl_call_method("UNSHIFT",G_SCALAR|G_DISCARD);
+	call_method("UNSHIFT",G_SCALAR|G_DISCARD);
 	LEAVE;
 	SPAGAIN;
     }
@@ -3229,8 +3224,8 @@ PP(pp_reverse)
     RETURN;
 }
 
-STATIC SV      *
-mul128(SV *sv, U8 m)
+STATIC SV *
+mul128(pTHX_ SV *sv, U8 m)
 {
   STRLEN          len;
   char           *s = SvPV(sv, len);
@@ -4215,7 +4210,7 @@ PP(pp_unpack)
 }
 
 STATIC void
-doencodes(register SV *sv, register char *s, register I32 len)
+doencodes(pTHX_ register SV *sv, register char *s, register I32 len)
 {
     char hunk[5];
 
@@ -4243,7 +4238,7 @@ doencodes(register SV *sv, register char *s, register I32 len)
 }
 
 STATIC SV *
-is_an_int(char *s, STRLEN l)
+is_an_int(pTHX_ char *s, STRLEN l)
 {
   STRLEN	 n_a;
   SV             *result = newSVpvn(s, l);
@@ -4291,10 +4286,9 @@ is_an_int(char *s, STRLEN l)
   return (result);
 }
 
+/* pnum must be '\0' terminated */
 STATIC int
-div128(SV *pnum, bool *done)
-                          		    /* must be '\0' terminated */
-
+div128(pTHX_ SV *pnum, bool *done)
 {
   STRLEN          len;
   char           *s = SvPV(pnum, len);
@@ -5115,7 +5109,7 @@ PP(pp_split)
 	else {
 	    PUTBACK;
 	    ENTER;
-	    perl_call_method("PUSH",G_SCALAR|G_DISCARD);
+	    call_method("PUSH",G_SCALAR|G_DISCARD);
 	    LEAVE;
 	    SPAGAIN;
 	    if (gimme == G_ARRAY) {
@@ -5143,7 +5137,7 @@ PP(pp_split)
 
 #ifdef USE_THREADS
 void
-unlock_condpair(void *svv)
+Perl_unlock_condpair(pTHX_ void *svv)
 {
     dTHR;
     MAGIC *mg = mg_find((SV*)svv, 'm');

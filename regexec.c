@@ -73,6 +73,7 @@
  * regular-expression syntax might require a total rethink.
  */
 #include "EXTERN.h"
+#define PERL_IN_REGEXEC_C
 #include "perl.h"
 
 #include "regcomp.h"
@@ -91,26 +92,9 @@
 #define	STATIC	static
 #endif
 
-#ifndef PERL_OBJECT
-typedef I32 CHECKPOINT;
-
 /*
  * Forwards.
  */
-
-static I32 regmatch (regnode *prog);
-static I32 regrepeat (regnode *p, I32 max);
-static I32 regrepeat_hard (regnode *p, I32 max, I32 *lp);
-static I32 regtry (regexp *prog, char *startpos);
-
-static bool reginclass (char *p, I32 c);
-static bool reginclassutf8 (regnode *f, U8* p);
-static CHECKPOINT regcppush (I32 parenfloor);
-static char * regcppop (void);
-static char * regcp_set_to (I32 ss);
-static void cache_re (regexp *prog);
-static void restore_pos (void *arg);
-#endif
 
 #define REGINCLASS(p,c)  (*(p) ? reginclass(p,c) : ANYOF_TEST(p,c))
 #define REGINCLASSUTF8(f,p)  (ARG1(f) ? reginclassutf8(f,p) : swash_fetch((SV*)PL_regdata->data[ARG2(f)],p))
@@ -118,10 +102,6 @@ static void restore_pos (void *arg);
 #define CHR_SVLEN(sv) (UTF ? sv_len_utf8(sv) : SvCUR(sv))
 #define CHR_DIST(a,b) (UTF ? utf8_distance(a,b) : a - b)
 
-#ifndef PERL_OBJECT
-static U8 * reghop (U8 *pos, I32 off);
-static U8 * reghopmaybe (U8 *pos, I32 off);
-#endif
 #define reghop_c(pos,off) ((char*)reghop((U8*)pos, off))
 #define reghopmaybe_c(pos,off) ((char*)reghopmaybe((U8*)pos, off))
 #define HOP(pos,off) (UTF ? reghop((U8*)pos, off) : (U8*)(pos + off))
@@ -130,7 +110,7 @@ static U8 * reghopmaybe (U8 *pos, I32 off);
 #define HOPMAYBEc(pos,off) ((char*)HOPMAYBE(pos,off))
 
 STATIC CHECKPOINT
-regcppush(I32 parenfloor)
+regcppush(pTHX_ I32 parenfloor)
 {
     dTHR;
     int retval = PL_savestack_ix;
@@ -163,7 +143,7 @@ regcppush(I32 parenfloor)
 				lastcp, PL_savestack_ix) : 0); regcpblow(lastcp)
 
 STATIC char *
-regcppop(void)
+regcppop(pTHX)
 {
     dTHR;
     I32 i = SSPOPINT;
@@ -207,7 +187,7 @@ regcppop(void)
 }
 
 STATIC char *
-regcp_set_to(I32 ss)
+regcp_set_to(pTHX_ I32 ss)
 {
     dTHR;
     I32 tmp = PL_savestack_ix;
@@ -237,7 +217,7 @@ typedef struct re_cc_state
  - pregexec - match a regexp against a string
  */
 I32
-pregexec(register regexp *prog, char *stringarg, register char *strend,
+Perl_pregexec(pTHX_ register regexp *prog, char *stringarg, register char *strend,
 	 char *strbeg, I32 minend, SV *screamer, U32 nosave)
 /* strend: pointer to null at end of string */
 /* strbeg: real beginning of string */
@@ -250,7 +230,7 @@ pregexec(register regexp *prog, char *stringarg, register char *strend,
 }
 
 STATIC void
-cache_re(regexp *prog)
+cache_re(pTHX_ regexp *prog)
 {
     dTHR;
     PL_regprecomp = prog->precomp;		/* Needed for FAIL. */
@@ -263,7 +243,7 @@ cache_re(regexp *prog)
 }
 
 STATIC void
-restore_pos(void *arg)
+restore_pos(pTHX_ void *arg)
 {
     dTHR;
     if (PL_reg_eval_set) {
@@ -283,7 +263,7 @@ restore_pos(void *arg)
  - regexec_flags - match a regexp against a string
  */
 I32
-regexec_flags(register regexp *prog, char *stringarg, register char *strend,
+Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *strend,
 	      char *strbeg, I32 minend, SV *sv, void *data, U32 flags)
 /* strend: pointer to null at end of string */
 /* strbeg: real beginning of string */
@@ -1050,7 +1030,7 @@ phooey:
  - regtry - try match at specific point
  */
 STATIC I32			/* 0 failure, 1 success */
-regtry(regexp *prog, char *startpos)
+regtry(pTHX_ regexp *prog, char *startpos)
 {
     dTHR;
     register I32 i;
@@ -1162,7 +1142,7 @@ regtry(regexp *prog, char *startpos)
  * advantage of machines that use a register save mask on subroutine entry.
  */
 STATIC I32			/* 0 failure, 1 success */
-regmatch(regnode *prog)
+regmatch(pTHX_ regnode *prog)
 {
     dTHR;
     register regnode *scan;	/* Current node. */
@@ -2509,7 +2489,7 @@ no:
  * rather than incrementing count on every character.  [Er, except utf8.]]
  */
 STATIC I32
-regrepeat(regnode *p, I32 max)
+regrepeat(pTHX_ regnode *p, I32 max)
 {
     dTHR;
     register char *scan;
@@ -2723,7 +2703,7 @@ regrepeat(regnode *p, I32 max)
  */
 
 STATIC I32
-regrepeat_hard(regnode *p, I32 max, I32 *lp)
+regrepeat_hard(pTHX_ regnode *p, I32 max, I32 *lp)
 {
     dTHR;
     register char *scan;
@@ -2774,7 +2754,7 @@ regrepeat_hard(regnode *p, I32 max, I32 *lp)
  */
 
 STATIC bool
-reginclass(register char *p, register I32 c)
+reginclass(pTHX_ register char *p, register I32 c)
 {
     dTHR;
     char flags = *p;
@@ -2811,7 +2791,7 @@ reginclass(register char *p, register I32 c)
 }
 
 STATIC bool
-reginclassutf8(regnode *f, U8 *p)
+reginclassutf8(pTHX_ regnode *f, U8 *p)
 {                                           
     dTHR;
     char flags = ARG1(f);
@@ -2849,7 +2829,7 @@ reginclassutf8(regnode *f, U8 *p)
 }
 
 STATIC U8 *
-reghop(U8 *s, I32 off)
+reghop(pTHX_ U8 *s, I32 off)
 {                               
     dTHR;
     if (off >= 0) {
@@ -2871,7 +2851,7 @@ reghop(U8 *s, I32 off)
 }
 
 STATIC U8 *
-reghopmaybe(U8* s, I32 off)
+reghopmaybe(pTHX_ U8* s, I32 off)
 {
     dTHR;
     if (off >= 0) {

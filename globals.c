@@ -1,4 +1,5 @@
 #include "INTERN.h"
+#define PERL_IN_GLOBALS_C
 #include "perl.h"
 
 #ifdef PERL_OBJECT
@@ -11,7 +12,8 @@
 #define PERLVARIC(x, y, z) PL_##x = z;
 
 CPerlObj::CPerlObj(IPerlMem* ipM, IPerlEnv* ipE, IPerlStdIO* ipStd,
-					     IPerlLIO* ipLIO, IPerlDir* ipD, IPerlSock* ipS, IPerlProc* ipP)
+		   IPerlLIO* ipLIO, IPerlDir* ipD, IPerlSock* ipS,
+		   IPerlProc* ipP)
 {
     memset(((char*)this)+sizeof(void*), 0, sizeof(CPerlObj)-sizeof(void*));
 
@@ -48,23 +50,15 @@ CPerlObj::Init(void)
 {
 }
 
-int
-fprintf(PerlIO *stream, const char *format, ...)
-{
-    va_list(arglist);
-    va_start(arglist, format);
-    return PerlIO_vprintf(stream, format, arglist);
-}
-
 #ifdef WIN32		/* XXX why are these needed? */
 bool
-do_exec(char *cmd)
+Perl_do_exec(pTHX_ char *cmd)
 {
     return PerlProc_Cmd(cmd);
 }
 
 int
-do_aspawn(void *vreally, void **vmark, void **vsp)
+do_aspawn(pTHX_ void *vreally, void **vmark, void **vsp)
 {
     return PerlProc_aspawn(vreally, vmark, vsp);
 }

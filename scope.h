@@ -82,16 +82,13 @@
 #define SAVEDELETE(h,k,l) \
 	  save_delete(SOFT_CAST(HV*)(h), SOFT_CAST(char*)(k), (I32)(l))
 #ifdef PERL_OBJECT
-#define CALLDESTRUCTOR this->*SSPOPDPTR
-#define SAVEDESTRUCTOR(f,p) \
-	  save_destructor((DESTRUCTORFUNC)(FUNC_NAME_TO_PTR(f)),	\
-			  SOFT_CAST(void*)(p))
+#define CALLDESTRUCTOR(p) this->*SSPOPDPTR(p)
 #else
-#define CALLDESTRUCTOR *SSPOPDPTR
-#define SAVEDESTRUCTOR(f,p) \
-	  save_destructor(SOFT_CAST(void(*)(void*))(FUNC_NAME_TO_PTR(f)), \
-			  SOFT_CAST(void*)(p))
+#define CALLDESTRUCTOR(p) (*SSPOPDPTR)(aTHX_ p)
 #endif
+#define SAVEDESTRUCTOR(f,p) \
+	  save_destructor((DESTRUCTORFUNC_t)(FUNC_NAME_TO_PTR(f)),	\
+			  SOFT_CAST(void*)(p))
 
 #define SAVESTACK_POS() \
     STMT_START {				\

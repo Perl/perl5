@@ -12,51 +12,11 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_TOKE_C
 #include "perl.h"
 
 #define yychar	PL_yychar
 #define yylval	PL_yylval
-
-#ifndef PERL_OBJECT
-static void check_uni (void);
-static void  force_next (I32 type);
-static char *force_version (char *start);
-static char *force_word (char *start, int token, int check_keyword, int allow_pack, int allow_tick);
-static SV *tokeq (SV *sv);
-static char *scan_const (char *start);
-static char *scan_formline (char *s);
-static char *scan_heredoc (char *s);
-static char *scan_ident (char *s, char *send, char *dest, STRLEN destlen,
-			 I32 ck_uni);
-static char *scan_inputsymbol (char *start);
-static char *scan_pat (char *start, I32 type);
-static char *scan_str (char *start);
-static char *scan_subst (char *start);
-static char *scan_trans (char *start);
-static char *scan_word (char *s, char *dest, STRLEN destlen,
-			int allow_package, STRLEN *slp);
-static char *skipspace (char *s);
-static void checkcomma (char *s, char *name, char *what);
-static void force_ident (char *s, int kind);
-static void incline (char *s);
-static int intuit_method (char *s, GV *gv);
-static int intuit_more (char *s);
-static I32 lop (I32 f, expectation x, char *s);
-static void missingterm (char *s);
-static void no_op (char *what, char *s);
-static void set_csh (void);
-static I32 sublex_done (void);
-static I32 sublex_push (void);
-static I32 sublex_start (void);
-#ifdef CRIPPLED_CC
-static int uni (I32 f, char *s);
-#endif
-static char * filter_gets (SV *sv, PerlIO *fp, STRLEN append);
-static void restore_rsfp (void *f);
-static SV *new_constant (char *s, STRLEN len, char *key, SV *sv, SV *pv, char *type);
-static void restore_expect (void *e);
-static void restore_lex_expect (void *e);
-#endif /* PERL_OBJECT */
 
 static char ident_too_long[] = "Identifier too long";
 
@@ -121,6 +81,7 @@ int* yychar_pointer = NULL;
 #  define yylval (*yylval_pointer)
 #  define yychar (*yychar_pointer)
 #  define PERL_YYLEX_PARAM yylval_pointer,yychar_pointer
+#  define yylex(a,b)	Perl_yylex(aTHX_ a, b)
 #else
 #  define PERL_YYLEX_PARAM
 #endif
@@ -172,7 +133,7 @@ int* yychar_pointer = NULL;
 #define OLDLOP(f) return(yylval.ival=f,PL_expect = XTERM,PL_bufptr = s,(int)LSTOP)
 
 STATIC int
-ao(int toketype)
+ao(pTHX_ int toketype)
 {
     if (*PL_bufptr == '=') {
 	PL_bufptr++;
@@ -186,7 +147,7 @@ ao(int toketype)
 }
 
 STATIC void
-no_op(char *what, char *s)
+no_op(pTHX_ char *what, char *s)
 {
     char *oldbp = PL_bufptr;
     bool is_first = (PL_oldbufptr == PL_linestart);
@@ -211,7 +172,7 @@ no_op(char *what, char *s)
 }
 
 STATIC void
-missingterm(char *s)
+missingterm(pTHX_ char *s)
 {
     char tmpbuf[3];
     char q;
@@ -243,7 +204,7 @@ missingterm(char *s)
 }
 
 void
-deprecate(char *s)
+Perl_deprecate(pTHX_ char *s)
 {
     dTHR;
     if (ckWARN(WARN_DEPRECATED))
@@ -251,7 +212,7 @@ deprecate(char *s)
 }
 
 STATIC void
-depcom(void)
+depcom(pTHX)
 {
     deprecate("comma-less variable list");
 }
@@ -259,7 +220,7 @@ depcom(void)
 #ifdef WIN32
 
 STATIC I32
-win32_textfilter(int idx, SV *sv, int maxlen)
+win32_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 {
  I32 count = FILTER_READ(idx+1, sv, maxlen);
  if (count > 0 && !maxlen)
@@ -268,10 +229,8 @@ win32_textfilter(int idx, SV *sv, int maxlen)
 }
 #endif
 
-#ifndef PERL_OBJECT
-
 STATIC I32
-utf16_textfilter(int idx, SV *sv, int maxlen)
+utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 {
     I32 count = FILTER_READ(idx+1, sv, maxlen);
     if (count) {
@@ -286,7 +245,7 @@ utf16_textfilter(int idx, SV *sv, int maxlen)
 }
 
 STATIC I32
-utf16rev_textfilter(int idx, SV *sv, int maxlen)
+utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 {
     I32 count = FILTER_READ(idx+1, sv, maxlen);
     if (count) {
@@ -300,10 +259,8 @@ utf16rev_textfilter(int idx, SV *sv, int maxlen)
     return count;
 }
 
-#endif
-
 void
-lex_start(SV *line)
+Perl_lex_start(pTHX_ SV *line)
 {
     dTHR;
     char *s;
@@ -368,13 +325,13 @@ lex_start(SV *line)
 }
 
 void
-lex_end(void)
+Perl_lex_end(pTHX)
 {
     PL_doextract = FALSE;
 }
 
 STATIC void
-restore_rsfp(void *f)
+restore_rsfp(pTHX_ void *f)
 {
     PerlIO *fp = (PerlIO*)f;
 
@@ -386,21 +343,21 @@ restore_rsfp(void *f)
 }
 
 STATIC void
-restore_expect(void *e)
+restore_expect(pTHX_ void *e)
 {
     /* a safe way to store a small integer in a pointer */
     PL_expect = (expectation)((char *)e - PL_tokenbuf);
 }
 
 STATIC void
-restore_lex_expect(void *e)
+restore_lex_expect(pTHX_ void *e)
 {
     /* a safe way to store a small integer in a pointer */
     PL_lex_expect = (expectation)((char *)e - PL_tokenbuf);
 }
 
 STATIC void
-incline(char *s)
+incline(pTHX_ char *s)
 {
     dTHR;
     char *t;
@@ -441,7 +398,7 @@ incline(char *s)
 }
 
 STATIC char *
-skipspace(register char *s)
+skipspace(pTHX_ register char *s)
 {
     dTHR;
     if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
@@ -504,7 +461,7 @@ skipspace(register char *s)
 }
 
 STATIC void
-check_uni(void)
+check_uni(pTHX)
 {
     char *s;
     char ch;
@@ -529,7 +486,7 @@ check_uni(void)
 #define UNI(f) return uni(f,s)
 
 STATIC int
-uni(I32 f, char *s)
+uni(pTHX_ I32 f, char *s)
 {
     yylval.ival = f;
     PL_expect = XTERM;
@@ -550,7 +507,7 @@ uni(I32 f, char *s)
 #define LOP(f,x) return lop(f,x,s)
 
 STATIC I32
-lop(I32 f, expectation x, char *s)
+lop(pTHX_ I32 f, expectation x, char *s)
 {
     dTHR;
     yylval.ival = f;
@@ -571,7 +528,7 @@ lop(I32 f, expectation x, char *s)
 }
 
 STATIC void 
-force_next(I32 type)
+force_next(pTHX_ I32 type)
 {
     PL_nexttype[PL_nexttoke] = type;
     PL_nexttoke++;
@@ -583,7 +540,7 @@ force_next(I32 type)
 }
 
 STATIC char *
-force_word(register char *start, int token, int check_keyword, int allow_pack, int allow_initial_tick)
+force_word(pTHX_ register char *start, int token, int check_keyword, int allow_pack, int allow_initial_tick)
 {
     register char *s;
     STRLEN len;
@@ -613,7 +570,7 @@ force_word(register char *start, int token, int check_keyword, int allow_pack, i
 }
 
 STATIC void
-force_ident(register char *s, int kind)
+force_ident(pTHX_ register char *s, int kind)
 {
     if (s && *s) {
 	OP* o = (OP*)newSVOP(OP_CONST, 0, newSVpv(s,0));
@@ -636,7 +593,7 @@ force_ident(register char *s, int kind)
 }
 
 STATIC char *
-force_version(char *s)
+force_version(pTHX_ char *s)
 {
     OP *version = Nullop;
 
@@ -663,7 +620,7 @@ force_version(char *s)
 }
 
 STATIC SV *
-tokeq(SV *sv)
+tokeq(pTHX_ SV *sv)
 {
     register char *s;
     register char *send;
@@ -701,7 +658,7 @@ tokeq(SV *sv)
 }
 
 STATIC I32
-sublex_start(void)
+sublex_start(pTHX)
 {
     register I32 op_type = yylval.ival;
 
@@ -745,7 +702,7 @@ sublex_start(void)
 }
 
 STATIC I32
-sublex_push(void)
+sublex_push(pTHX)
 {
     dTHR;
     ENTER;
@@ -798,7 +755,7 @@ sublex_push(void)
 }
 
 STATIC I32
-sublex_done(void)
+sublex_done(pTHX)
 {
     if (!PL_lex_starts++) {
 	PL_expect = XOPERATOR;
@@ -921,7 +878,7 @@ sublex_done(void)
 */
 
 STATIC char *
-scan_const(char *start)
+scan_const(pTHX_ char *start)
 {
     register char *send = PL_bufend;		/* end of the constant */
     SV *sv = NEWSV(93, send - start);		/* sv for the constant */
@@ -1235,7 +1192,7 @@ scan_const(char *start)
 
 /* This is the one truly awful dwimmer necessary to conflate C and sed. */
 STATIC int
-intuit_more(register char *s)
+intuit_more(pTHX_ register char *s)
 {
     if (PL_lex_brackets)
 	return TRUE;
@@ -1365,7 +1322,7 @@ intuit_more(register char *s)
 }
 
 STATIC int
-intuit_method(char *start, GV *gv)
+intuit_method(pTHX_ char *start, GV *gv)
 {
     char *s = start + (*start == '$');
     char tmpbuf[sizeof PL_tokenbuf];
@@ -1424,7 +1381,7 @@ intuit_method(char *start, GV *gv)
 }
 
 STATIC char*
-incl_perldb(void)
+incl_perldb(pTHX)
 {
     if (PL_perldb) {
 	char *pdb = PerlEnv_getenv("PERL5DB");
@@ -1455,7 +1412,7 @@ incl_perldb(void)
  */
 
 SV *
-filter_add(filter_t funcp, SV *datasv)
+Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
 {
     if (!funcp){ /* temporary handy debugging hack to be deleted */
 	PL_filter_debug = atoi((char*)datasv);
@@ -1480,7 +1437,7 @@ filter_add(filter_t funcp, SV *datasv)
 
 /* Delete most recently added instance of this filter function.	*/
 void
-filter_del(filter_t funcp)
+Perl_filter_del(pTHX_ filter_t funcp)
 {
     if (PL_filter_debug)
 	warn("filter_del func %p", funcp);
@@ -1500,7 +1457,7 @@ filter_del(filter_t funcp)
 
 /* Invoke the n'th filter function for the current rsfp.	 */
 I32
-filter_read(int idx, SV *buf_sv, int maxlen)
+Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
             
                
                		/* 0 = read one text line */
@@ -1560,7 +1517,7 @@ filter_read(int idx, SV *buf_sv, int maxlen)
 }
 
 STATIC char *
-filter_gets(register SV *sv, register PerlIO *fp, STRLEN append)
+filter_gets(pTHX_ register SV *sv, register PerlIO *fp, STRLEN append)
 {
 #ifdef WIN32FILTER
     if (!PL_rsfp_filters) {
@@ -1611,7 +1568,12 @@ filter_gets(register SV *sv, register PerlIO *fp, STRLEN append)
       if we already built the token before, use it.
 */
 
-int yylex(PERL_YYLEX_PARAM_DECL)
+int
+#ifdef USE_PURE_BISON
+yylex(pTHX_ YYSTYPE *lvalp, int *lcharp)
+#else
+yylex(pTHX)
+#endif
 {
     dTHR;
     register char *s;
@@ -2758,7 +2720,7 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 		    if (isIDFIRST_lazy(t)) {
 			t = scan_word(t, tmpbuf, sizeof tmpbuf, TRUE, &len);
 		        for (; isSPACE(*t); t++) ;
-			if (*t == ';' && perl_get_cv(tmpbuf, FALSE))
+			if (*t == ';' && get_cv(tmpbuf, FALSE))
 			    warner(WARN_SYNTAX,
 				"You need to quote \"%s\"", tmpbuf);
 		    }
@@ -4308,7 +4270,7 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 }
 
 I32
-keyword(register char *d, I32 len)
+Perl_keyword(pTHX_ register char *d, I32 len)
 {
     switch (*d) {
     case '_':
@@ -4927,7 +4889,7 @@ keyword(register char *d, I32 len)
 }
 
 STATIC void
-checkcomma(register char *s, char *name, char *what)
+checkcomma(pTHX_ register char *s, char *name, char *what)
 {
     char *w;
 
@@ -4962,7 +4924,7 @@ checkcomma(register char *s, char *name, char *what)
 	if (*s == ',') {
 	    int kw;
 	    *s = '\0';
-	    kw = keyword(w, s - w) || perl_get_cv(w, FALSE) != 0;
+	    kw = keyword(w, s - w) || get_cv(w, FALSE) != 0;
 	    *s = ',';
 	    if (kw)
 		return;
@@ -4972,7 +4934,7 @@ checkcomma(register char *s, char *name, char *what)
 }
 
 STATIC SV *
-new_constant(char *s, STRLEN len, char *key, SV *sv, SV *pv, char *type) 
+new_constant(pTHX_ char *s, STRLEN len, char *key, SV *sv, SV *pv, char *type) 
 {
     dSP;
     HV *table = GvHV(PL_hintgv);		 /* ^H */
@@ -5042,7 +5004,7 @@ new_constant(char *s, STRLEN len, char *key, SV *sv, SV *pv, char *type)
 }
 
 STATIC char *
-scan_word(register char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp)
+scan_word(pTHX_ register char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp)
 {
     register char *d = dest;
     register char *e = d + destlen - 3;  /* two-character token, ending NUL */
@@ -5079,7 +5041,7 @@ scan_word(register char *s, char *dest, STRLEN destlen, int allow_package, STRLE
 }
 
 STATIC char *
-scan_ident(register char *s, register char *send, char *dest, STRLEN destlen, I32 ck_uni)
+scan_ident(pTHX_ register char *s, register char *send, char *dest, STRLEN destlen, I32 ck_uni)
 {
     register char *d;
     register char *e;
@@ -5220,7 +5182,7 @@ scan_ident(register char *s, register char *send, char *dest, STRLEN destlen, I3
 	    if (PL_lex_state == LEX_NORMAL) {
 		dTHR;			/* only for ckWARN */
 		if (ckWARN(WARN_AMBIGUOUS) &&
-		    (keyword(dest, d - dest) || perl_get_cv(dest, FALSE)))
+		    (keyword(dest, d - dest) || get_cv(dest, FALSE)))
 		{
 		    warner(WARN_AMBIGUOUS,
 			"Ambiguous use of %c{%s} resolved to %c%s",
@@ -5257,7 +5219,7 @@ void pmflag(U16 *pmfl, int ch)
 }
 
 STATIC char *
-scan_pat(char *start, I32 type)
+scan_pat(pTHX_ char *start, I32 type)
 {
     PMOP *pm;
     char *s;
@@ -5289,7 +5251,7 @@ scan_pat(char *start, I32 type)
 }
 
 STATIC char *
-scan_subst(char *start)
+scan_subst(pTHX_ char *start)
 {
     register char *s;
     register PMOP *pm;
@@ -5359,7 +5321,7 @@ scan_subst(char *start)
 }
 
 STATIC char *
-scan_trans(char *start)
+scan_trans(pTHX_ char *start)
 {
     register char* s;
     OP *o;
@@ -5439,7 +5401,7 @@ scan_trans(char *start)
 }
 
 STATIC char *
-scan_heredoc(register char *s)
+scan_heredoc(pTHX_ register char *s)
 {
     dTHR;
     SV *herewas;
@@ -5649,7 +5611,7 @@ retval:
 */
 
 STATIC char *
-scan_inputsymbol(char *start)
+scan_inputsymbol(pTHX_ char *start)
 {
     register char *s = start;		/* current position in buffer */
     register char *d;
@@ -5789,7 +5751,7 @@ scan_inputsymbol(char *start)
 */
 
 STATIC char *
-scan_str(char *start)
+scan_str(pTHX_ char *start)
 {
     dTHR;
     SV *sv;				/* scalar value: string */
@@ -5976,7 +5938,7 @@ scan_str(char *start)
 */
   
 char *
-scan_num(char *start)
+Perl_scan_num(pTHX_ char *start)
 {
     register char *s = start;		/* current position in buffer */
     register char *d;			/* destination in temp buffer */
@@ -6217,7 +6179,7 @@ scan_num(char *start)
 }
 
 STATIC char *
-scan_formline(register char *s)
+scan_formline(pTHX_ register char *s)
 {
     dTHR;
     register char *eol;
@@ -6291,7 +6253,7 @@ scan_formline(register char *s)
 }
 
 STATIC void
-set_csh(void)
+set_csh(pTHX)
 {
 #ifdef CSH
     if (!PL_cshlen)
@@ -6300,7 +6262,7 @@ set_csh(void)
 }
 
 I32
-start_subparse(I32 is_format, U32 flags)
+Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
 {
     dTHR;
     I32 oldsavestack_ix = PL_savestack_ix;
@@ -6357,7 +6319,7 @@ start_subparse(I32 is_format, U32 flags)
 }
 
 int
-yywarn(char *s)
+Perl_yywarn(pTHX_ char *s)
 {
     dTHR;
     --PL_error_count;
@@ -6368,7 +6330,7 @@ yywarn(char *s)
 }
 
 int
-yyerror(char *s)
+Perl_yyerror(pTHX_ char *s)
 {
     dTHR;
     char *where = NULL;

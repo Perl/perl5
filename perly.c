@@ -4,6 +4,7 @@ static char yysccsid[] = "@(#)yaccpar 1.8 (Berkeley) 01/20/91";
 #define YYBYACC 1
 #line 16 "perly.y"
 #include "EXTERN.h"
+#define PERL_IN_PERLY_C
 #include "perl.h"
 
 #define yydebug	    PL_yydebug
@@ -13,20 +14,7 @@ static char yysccsid[] = "@(#)yaccpar 1.8 (Berkeley) 01/20/91";
 #define yyval	    PL_yyval
 #define yylval	    PL_yylval
 
-#ifdef PERL_OBJECT
-static void
-Dep(CPerlObj *pPerl)
-{
-    pPerl->deprecate("\"do\" to call subroutines");
-}
-#define dep() Dep(this)
-#else
-static void
-dep(void)
-{
-    deprecate("\"do\" to call subroutines");
-}
-#endif
+#define dep() deprecate("\"do\" to call subroutines")
 
 #line 30 "perly.y"
 #define YYERRCODE 256
@@ -1329,7 +1317,7 @@ struct ysv {
 };
 
 void
-yydestruct(void *ptr)
+Perl_yydestruct(pTHX_ void *ptr)
 {
     struct ysv* ysave = (struct ysv*)ptr;
     if (ysave->yyss) Safefree(ysave->yyss);
@@ -1344,7 +1332,7 @@ yydestruct(void *ptr)
 }
 
 int
-yyparse(void)
+Perl_yyparse(pTHX)
 {
     register int yym, yyn, yystate;
     register short *yyssp;

@@ -69,11 +69,11 @@
 	    tmpsv = ST(1);						\
 	else {								\
 	    /* XXX GV_ADDWARN */					\
-	    tmpsv = perl_get_sv(form("%s::%s", module,			\
-				  vn = "XS_VERSION"), FALSE);		\
+	    tmpsv = get_sv(form("%s::%s", module,			\
+				vn = "XS_VERSION"), FALSE);		\
 	    if (!tmpsv || !SvOK(tmpsv))					\
-		tmpsv = perl_get_sv(form("%s::%s", module,		\
-				      vn = "VERSION"), FALSE);		\
+		tmpsv = get_sv(form("%s::%s", module,			\
+				    vn = "VERSION"), FALSE);		\
 	}								\
 	if (tmpsv && (!SvOK(tmpsv) || strNE(XS_VERSION, SvPV(tmpsv, n_a))))	\
 	    croak("%s object version %s does not match %s%s%s%s %_",	\

@@ -29,10 +29,10 @@ while (<DATA>) {
 
 $i = 0;
 print <<"END";
-#define pp_i_preinc pp_preinc
-#define pp_i_predec pp_predec
-#define pp_i_postinc pp_postinc
-#define pp_i_postdec pp_postdec
+#define Perl_pp_i_preinc Perl_pp_preinc
+#define Perl_pp_i_predec Perl_pp_predec
+#define Perl_pp_i_postinc Perl_pp_postinc
+#define Perl_pp_i_postdec Perl_pp_postdec
 
 typedef enum {
 END
@@ -82,8 +82,8 @@ START_EXTERN_C
 
 #undef PERL_CKDEF
 #undef PERL_PPDEF
-#define PERL_CKDEF(s) OP *s (OP *o);
-#define PERL_PPDEF(s) OP *s (ARGSproto);
+#define PERL_CKDEF(s) OP *s (pTHX_ OP *o);
+#define PERL_PPDEF(s) OP *s (pTHX_ ARGSproto);
 
 #include "pp_proto.h"
 
@@ -115,7 +115,7 @@ EXT OP * (CPERLscope(*PL_ppaddr)[])(ARGSproto) = {
 END
 
 for (@ops) {
-    print "\tpp_$_,\n";
+    print "\tPerl_pp_$_,\n";
 }
 
 print <<END;
@@ -134,7 +134,7 @@ EXT OP * (CPERLscope(*PL_check)[]) (OP *op) = {
 END
 
 for (@ops) {
-    print "\t", &tab(3, "$check{$_},"), "/* $_ */\n";
+    print "\t", &tab(3, "Perl_$check{$_},"), "/* $_ */\n";
 }
 
 print <<END;
@@ -218,8 +218,8 @@ open PP, '>pp_proto.h' or die "Error creating pp_proto.h: $!";
 open PPSYM, '>pp.sym' or die "Error creating pp.sym: $!";
 
 for (sort keys %ckname) {
-    print PP "PERL_CKDEF($_)\n";
-    print PPSYM "$_\n";
+    print PP "PERL_CKDEF(Perl_$_)\n";
+    print PPSYM "Perl_$_\n";
 #OP *\t", &tab(3,$_),"(OP* o);\n";
 }
 
@@ -227,8 +227,8 @@ print PP "\n\n";
 
 for (@ops) {
     next if /^i_(pre|post)(inc|dec)$/;
-    print PP "PERL_PPDEF(pp_$_)\n";
-    print PPSYM "pp_$_\n";
+    print PP "PERL_PPDEF(Perl_pp_$_)\n";
+    print PPSYM "Perl_pp_$_\n";
 }
 
 close PP or die "Error closing pp_proto.h: $!";

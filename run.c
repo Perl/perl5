@@ -8,6 +8,7 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_RUN_C
 #include "perl.h"
 
 /*
@@ -23,7 +24,7 @@
 #endif
 
 int
-runops_standard(void)
+Perl_runops_standard(pTHX)
 {
     dTHR;
 
@@ -33,15 +34,8 @@ runops_standard(void)
     return 0;
 }
 
-#ifdef DEBUGGING
-#ifndef PERL_OBJECT
-static void debprof (OP*o);
-#endif
-
-#endif	/* DEBUGGING */
-
 int
-runops_debug(void)
+Perl_runops_debug(pTHX)
 {
 #ifdef DEBUGGING
     dTHR;
@@ -69,7 +63,7 @@ runops_debug(void)
 }
 
 I32
-debop(OP *o)
+Perl_debop(pTHX_ OP *o)
 {
 #ifdef DEBUGGING
     SV *sv;
@@ -99,7 +93,7 @@ debop(OP *o)
 }
 
 void
-watch(char **addr)
+Perl_watch(pTHX_ char **addr)
 {
 #ifdef DEBUGGING
     dTHR;
@@ -111,7 +105,7 @@ watch(char **addr)
 }
 
 STATIC void
-debprof(OP *o)
+debprof(pTHX_ OP *o)
 {
 #ifdef DEBUGGING
     if (!PL_profiledata)
@@ -121,7 +115,7 @@ debprof(OP *o)
 }
 
 void
-debprofdump(void)
+Perl_debprofdump(pTHX)
 {
 #ifdef DEBUGGING
     unsigned i;
