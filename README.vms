@@ -87,23 +87,25 @@ You may also want to have on hand:
 =item 1  GUNZIP/GZIP.EXE for VMS 
 
 A de-compressor for *.gz and *.tgz files available from a number 
-of web/ftp sites.
+of web/ftp sites and is distributed on the OpenVMS Freeware CD-ROM 
+from Compaq.
 
     http://www.fsf.org/order/ftp.html
     ftp://ftp.uu.net/archive/systems/gnu/diffutils*.tar.gz
     ftp://gatekeeper.dec.com/pub/GNU/diffutils*.tar.gz
     ftp://ftp.gnu.org/pub/gnu/diffutils*.tar.gz 
-    http://www.openvms.digital.com/cd/GZIP/
-    ftp://ftp.digital.com/pub/VMS/
+    http://www.openvms.compaq.com/freeware/GZIP/
+    ftp://ftp.compaq.com/pub/VMS/
 
 =item 2  VMS TAR 
 
 For reading and writing unix tape archives (*.tar files).  Vmstar is also 
-available from a number of web/ftp sites.
+available from a number of web/ftp sites and is distributed on the OpenVMS
+Freeware CD-ROM from Compaq.
 
     ftp://ftp.lp.se/vms/
-    http://www.openvms.digital.com/cd/VMSTAR/
-    ftp://ftp.digital.com/pub/VMS/
+    http://www.openvms.compaq.com/freeware/VMSTAR/
+    ftp://ftp.compaq.com/pub/VMS/
 
 =item 3  UNZIP.EXE for VMS
 
@@ -111,9 +113,9 @@ A combination decompressor and archive reader/writer for *.zip files.
 Unzip is available from a number of web/ftp sites.
 
     http://www.cdrom.com/pub/infozip/UnZip.html
-    http://www.openvms.digital.com/cd/INFO-ZIP/
-    ftp://ftp.digital.com/pub/VMS/
-    ftp://ftp.openvms.digital.com/
+    http://www.openvms.compaq.com/freeware/INFO-ZIP/
+    ftp://ftp.compaq.com/pub/VMS/
+    ftp://ftp.openvms.compaq.com/
     ftp://ftp.madgoat.com/madgoat/
     ftp://ftp.wku.edu/vms/
 
@@ -131,10 +133,10 @@ library on VMS.  Most and slang are available from:
 
 Please note that UNZIP and GUNZIP are not the same thing (they work with
 different formats).  Many of the useful files from CPAN (the Comprehensive
-Perl Archive Network) are in *.tar.gz format (this includes copies of the
-source code for perl as well as modules and scripts that you may wish to
-add later) hence you probably want to have GUNZIP.EXE and VMSTAR.EXE on
-your VMS machine.
+Perl Archive Network) are in *.tar.gz or *.tgz format (this includes copies 
+of the source code for perl as well as modules and scripts that you may 
+wish to add later) hence you probably want to have GUNZIP.EXE and 
+VMSTAR.EXE on your VMS machine.
 
 If you want to include socket support, you'll need a TCP/IP stack and either
 DEC C, or socket libraries.  See the "Socket Support (optional)" topic 
@@ -511,7 +513,7 @@ though the call specified that the change should not persist after
 Perl exited.  This is fixed by DEC CSC patch ALPACRT04_061 or later.
 See also:
 
-    http://ftp.service.digital.com/patches/.new/openvms.html
+    http://ftp.service.compaq.com/patches/.new/openvms.html
 
 =back
 
