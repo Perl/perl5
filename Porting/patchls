@@ -17,7 +17,7 @@ use Text::Tabs qw(expand unexpand);
 use strict;
 use vars qw($VERSION);
 
-$VERSION = 2.10;
+$VERSION = 2.11;
 
 sub usage {
 die qq{
@@ -35,6 +35,7 @@ die qq{
            (F has \$ appended unless it contains a /).
     -e     Expect patched files to Exist (relative to current directory)
            Will print warnings for files which don't. Also affects -4 option.
+    -      Read patch from STDIN
   other options for special uses:
     -I     just gather and display summary Information about the patches.
     -4     write to stdout the PerForce commands to prepare for patching.
@@ -159,7 +160,9 @@ foreach my $argv (@ARGV) {
 	warn "Ignored directory $in\n";
 	next;
     }
-    unless (open F, "<$in") {
+    if ($in eq "-") {
+      *F = \*STDIN;
+    } elsif (not open F, "<$in") {
 	warn "Unable to open $in: $!\n";
 	next;
     }
