@@ -534,6 +534,7 @@ ext/Thread/unsync2.tx		Test thread implicit synchronisation
 ext/Thread/unsync3.tx		Test thread implicit synchronisation
 ext/Thread/unsync4.tx		Test thread implicit synchronisation
 ext/Time/HiRes/Changes		Time::HiRes extension
+ext/Time/HiRes/hints/sco.pl	Hints for Time::HiRes for named architecture
 ext/Time/HiRes/HiRes.pm		Time::HiRes extension
 ext/Time/HiRes/HiRes.t		Test for Time::HiRes
 ext/Time/HiRes/HiRes.xs		Time::HiRes extension
