@@ -1,0 +1,39 @@
+#!/usr/local/bin/perl
+
+# This script is run Test::Harness on the tests found under the
+# "t" directory.
+
+# First we check if we already are within the "t" directory
+unless (-d "base") {
+    # try to move into test directory
+    chdir "t" or die "Can't chdir: $!";
+
+    # fix all relative library locations
+    foreach (@INC) {
+	$_ = "../$_" unless m,^/,;
+    }
+}
+# Pick up the library files from the ../blib directory
+unshift(@INC, "../blib/lib", "../blib/arch");
+#print "@INC\n";
+
+
+use Test::Harness;
+$Test::Harness::verbose = shift
+  if $ARGV[0] =~ /^\d+$/ || $ARGV[0] eq "-v";
+
+if (@ARGV) {
+    for (@ARGV) {
+	if (-d $_) {
+	    push(@tests, <$_/*.t>);
+	} else {
+            $_ .= ".t" unless /\.t$/;
+	    push(@tests, $_);
+	}
+    }
+} else {
+    @tests = (<base/*.t>, <html/*.t>, <robot/*.t>, <local/*.t>);
+    push(@tests, <net/*.t>) if -f "net/config.pl";
+}
+
+runtests @tests;

@@ -1,0 +1,26 @@
+#!/usr/local/bin/perl
+
+# This script outputs some data slowly. It can be used to check that
+# pipelined processing of response content really works.  We use syswrite
+# so that the script will notice when the connection is broken.
+
+out("HTTP/1.0 200 OK\r
+Content-Type: text/plain\r
+\r
+");
+
+for (1..5) {
+    out("The number is now $_\n");
+    sleep(1);
+}
+exit;
+
+
+sub out
+{
+    my $data = shift;
+    my $l = length $data;
+    if (syswrite(STDOUT, $data, $l) != $l) {
+	exit 1;
+    }
+}

@@ -1,0 +1,92 @@
+<HTML><HEAD>
+<TITLE>Examples of Resolving Relative URLs, Part 5</TITLE>
+<BASE href="http:///s//a/b/c">
+</HEAD><BODY>
+<H1>Examples of Resolving Relative URLs, Part 5</H1>
+
+This document has an embedded base URL of
+<PRE>
+   Content-Base: http:///s//a/b/c
+</PRE>
+in order to test a notion that Tim Berners-Lee mentioned regarding
+the ability of URIs to have a triple-slash (or even more slashes)
+to indicate higher levels of hierarchy than those already used by URLs.
+This is the same as Part 4, except that the scheme "fred" is replaced
+with "http" for clients that stupidly change their parsing behavior
+based on the scheme name.
+
+<H2>Tested Clients and Client Libraries</H2>
+
+<DL COMPACT>
+<DT>[R]
+<DD>RFC 2396 (the right way to parse)
+<DT>Tim
+<DD>Tim Berners-Lee's proposed interpretation
+<DT>[1]
+<DD>Mozilla/4.03 [en] (X11; U; SunOS 5.5 sun4u; Nav)
+<DT>[2]
+<DD>Lynx/2.7.1 libwww-FM/2.14
+<DT>[3]
+<DD>MSIE 3.01; Windows 95
+<DT>[4]
+<DD>NCSA_Mosaic/2.6 (X11;SunOS 4.1.2 sun4m)
+</DL>
+
+<H3>Synopsis</H3>
+
+RFC 1808 specified that the highest level for relative URLs is indicated
+by a double-slash "//", and therefore that any triple-slash would be
+considered a null site component, rather than a higher-level component
+than the site component (as proposed by Tim).<P>
+
+Draft 09 assumes that a triple-slash means an empty site component,
+as does Netscape Navigator if the scheme is known.
+Oddly, Lynx seems to straddle both sides.
+
+<H2>Examples</H2>
+<PRE>
+                  RESULTS                       from
+
+<a href="g:h">g:h</a>            =  g:h                           [R,Tim,2,3]
+                  http:///s//a/b/g:h            [1]
+
+<a href="g">g</a>              =  http:///s//a/b/g              [R,Tim,1,2,3]
+
+<a href="./g">./g</a>            =  http:///s//a/b/g              [R,Tim,1,2,3]
+
+<a href="g/">g/</a>             =  http:///s//a/b/g/             [R,Tim,1,2,3]
+
+<a href="/g">/g</a>             =  http:///g                     [R,1,2,3]
+                  http:///s//a/g                [Tim]
+
+<a href="//g">//g</a>            =  http://g                      [R,1,2,3]
+                  http:///s//g                  [Tim]
+
+<a href="//g/x">//g/x</a>          =  http://g/x                    [R,1,2,3]
+                  http:///s//g/x                [Tim]
+
+<a href="///g">///g</a>           =  http:///g                     [R,Tim,1,2,3]
+
+<a href="./">./</a>             =  http:///s//a/b/               [R,Tim,1,2,3]
+
+<a href="../">../</a>            =  http:///s//a/                 [R,Tim,1,2,3]
+
+<a href="../g">../g</a>           =  http:///s//a/g                [R,Tim,1,2,3]
+
+<a href="../../">../../</a>         =  http:///s//                   [R,1]
+                  http:///s//a/../              [Tim,2]
+                  http:///s//a/                 [3]
+
+<a href="../../g">../../g</a>        =  http:///s//g                  [R,1]
+                  http:///s//a/../g             [Tim,2]
+                  http:///s//a/g                [3]
+
+<a href="../../../g">../../../g</a>     =  http:///s/g                   [R,1]
+                  http:///s//a/../../g          [Tim,2]
+                  http:///s//a/g                [3]
+
+<a href="../../../../g">../../../../g</a>  =  http:///g                     [R,1]
+                  http:///s//a/../../../g       [Tim,2]
+                  http:///s//a/g                [3]
+</PRE>
+</BODY></HTML>

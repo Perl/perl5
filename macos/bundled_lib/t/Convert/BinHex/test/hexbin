@@ -1,0 +1,81 @@
+#!/usr/bin/perl
+use lib "./lib";
+use Convert::BinHex;
+use Getopt::Std;
+
+my $bytes;
+
+@ARGV or usage();
+
+
+# Get options:
+getopts("vhn:o:");
+my $dir = $opt_o ||= ".";
+
+# Process files:
+my $infile;
+my $nfiles = int(@ARGV);
+my $file_i = 0;
+foreach $infile (@ARGV) {
+    ++$file_i;
+
+    # Read header:
+    print STDERR "\nReading $infile\n";
+    my $HQX = Convert::BinHex->open(Expr=>"<$infile") 
+	|| die "open $ARGV[0]: ";
+    
+    $HQX->read_header;
+    print STDERR $HQX->header_as_string if ($opt_v or $opt_h);
+    next if $opt_h;
+
+    # Get output filename:
+    my $name;
+    if ($opt_n) {
+        $name = $opt_n . (($nfiles > 1) ? "-$file_i" : '');
+    }
+    else {
+	($name = $HQX->filename) =~ s/[^A-Za-z0-9_\.-]/_/g;
+    } 
+    my $fname;
+
+    # Output data fork:
+    $fname = "$dir/$name";
+    print STDERR "Writing $fname (data fork)\n";
+    printf STDERR "Expecting: %6d bytes\n", $HQX->data_length    if $opt_v;
+    open DATA, ">$fname" or die "open $fname: $!";
+    while ($bytes = $HQX->read_data) {
+	print DATA $bytes;
+    }
+    close DATA;
+    printf STDERR "Wrote:     %6d bytes\n", (-s $fname)    if $opt_v;
+
+    # Output resource fork:
+    $fname = "$dir/$name.rsrc";
+    print STDERR "Writing $fname (resource fork)\n";
+    printf STDERR "Expecting: %6d bytes\n", $HQX->resource_length    if $opt_v;
+    open RESOURCE, ">$fname" or die "open $fname: $!";
+    while ($bytes = $HQX->read_resource) {
+	print RESOURCE $bytes;
+    }
+    close RESOURCE;
+    printf STDERR "Wrote:     %6d bytes\n", (-s $fname)    if $opt_v;
+    1;
+}
+exit(0);
+
+sub usage {
+    print STDERR <<EOF;
+    
+Usage: hexbin [opts] [-] file.hqx  
+     -h          output header information only; don't convert
+     -n name     name output files (default taken from .hqx)
+     -o dir      output directory
+     -v          verbose output
+
+EOF
+   exit(-1);
+}
+
+
+__END__
+1;

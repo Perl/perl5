@@ -1,0 +1,89 @@
+<HTML><HEAD>
+<TITLE>Examples of Resolving Relative URLs, Part 3</TITLE>
+<BASE href="http://a/b/c/d;p=1/2?q">
+</HEAD><BODY>
+<H1>Examples of Resolving Relative URLs, Part 3</H1>
+
+This document has an embedded base URL of
+<PRE>
+   Content-Base: http://a/b/c/d;p=1/2?q
+</PRE>
+the relative URLs should be resolved as shown below.  For this test page,
+I am particularly interested in testing whether "/" in parameters is or is not
+treated as part of the path hierarchy.
+<P>
+I will need your help testing the examples on multiple browsers. 
+What you need to do is point to the example anchor and compare it to the
+resolved URL in your browser (most browsers have a feature by which you
+can see the resolved URL at the bottom of the window/screen when the anchor
+is active).
+
+<H2>Tested Clients and Client Libraries</H2>
+
+<DL COMPACT>
+<DT>[R]
+<DD>RFC 2396 (the right way to parse)
+<DT>[X]
+<DD>RFC 1808
+<DT>[1]
+<DD>Mozilla/4.03 [en] (X11; U; SunOS 5.5 sun4u; Nav)
+<DT>[2]
+<DD>Lynx/2.7.1 libwww-FM/2.14
+<DT>[3]
+<DD>MSIE 3.01; Windows 95
+<DT>[4]
+<DD>NCSA_Mosaic/2.6 (X11;SunOS 4.1.2 sun4m) libwww/2.12
+</DL>
+
+<H3>Synopsis</H3>
+
+RFC 1808 specified that the "/" character within parameter information
+does not affect the hierarchy within URL parsing.  It would appear that
+it does in current practice.  This implies that the parameters should
+be part of each path segment and not outside the path.  The URI draft has
+been written accordingly.
+
+<H2>Examples</H2>
+<PRE>
+              RESULTS                     from
+
+<a href="g">g</a>          =  http://a/b/c/d;p=1/g        [R,1,2,3,4]
+              http://a/b/c/g              [X]
+
+<a href="./g">./g</a>        =  http://a/b/c/d;p=1/g        [R,1,2,3,4]
+              http://a/b/c/g              [X]
+
+<a href="g/">g/</a>         =  http://a/b/c/d;p=1/g/       [R,1,2,3,4]
+              http://a/b/c/g/             [X]
+
+<a href="g?y">g?y</a>        =  http://a/b/c/d;p=1/g?y      [R,1,2,3,4]
+              http://a/b/c/g?y            [X]
+
+<a href=";x">;x</a>         =  http://a/b/c/d;p=1/;x       [R,1,2,3,4]
+              http://a/b/c/d;x            [X]
+
+<a href="g;x">g;x</a>        =  http://a/b/c/d;p=1/g;x      [R,1,2,3,4]
+              http://a/b/c/g;x            [X]
+
+<a href="g;x=1/./y">g;x=1/./y</a>  =  http://a/b/c/d;p=1/g;x=1/y  [R,1,2,3,4]
+              http://a/b/c/g;x=1/./y      [X]
+
+<a href="g;x=1/../y">g;x=1/../y</a> =  http://a/b/c/d;p=1/y        [R,1,2,3,4]
+              http://a/b/c/g;x=1/../y     [X]
+
+<a href="./">./</a>         =  http://a/b/c/d;p=1/         [R,1,2,3,4]
+              http://a/b/c/               [X]
+
+<a href="../">../</a>        =  http://a/b/c/               [R,1,2,3,4]
+              http://a/b/                 [X]
+
+<a href="../g">../g</a>       =  http://a/b/c/g              [R,1,2,3,4]
+              http://a/b/g                [X]
+
+<a href="../../">../../</a>     =  http://a/b/                 [R,1,2,3,4]
+              http://a/                   [X]
+
+<a href="../../g">../../g</a>    =  http://a/b/g                [R,1,2,3,4]
+              http://a/g                  [X]
+</PRE>
+</BODY></HTML>

@@ -1,0 +1,24 @@
+Self test suite for the libwww-perl library
+-------------------------------------------
+
+Tests are invoked by running the ./TEST script, but usually you run
+the tests with "make test" at the top libwww-perl directory.  Use -v
+option for verbose tests.  You might run an individual test like this:
+
+  ./TEST -v base/date
+
+or all tests in a directory like this
+
+  ./TEST base
+
+You enable network tests by creating the "net/config.pl" file.  A good
+start is to make a copy of the "net/config.pl.dist" file.  For network
+tests you should also make a link from the cgi-bin directory of your
+http server to the "net/cgi-bin" directory.  You might also have to
+check that the interpreter line (#!.../perl) in the scripts is ok for
+your system.  The following setup works for my site:
+
+  ln -s `pwd`/net/cgi-bin ~www/cgi-bin/lwp
+  cp net/config.pl.dist net/config.pl
+  emacs net/config.pl                        # fix if necessary
+  ./TEST net

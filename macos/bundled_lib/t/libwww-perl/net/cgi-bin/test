@@ -1,0 +1,28 @@
+#!/usr/local/bin/perl
+
+$| = 1;
+print "Content-type: text/plain
+
+";
+
+if (@ARGV) {
+    print "ARGS: ";
+    print join(", ", map { $_ = qq{"$_"} } @ARGV);
+    print "\n\n";
+} else {
+    print "No command line arguments passed to script\n\n";
+}
+
+while (($key,$val) = each %ENV) {
+   print "$key=$val\n";
+}
+
+if ($ENV{CONTENT_LENGTH}) {
+    $len = $ENV{CONTENT_LENGTH};
+    while ($len) {
+	$n = sysread(STDIN, $content, $len, length $content);
+	last unless defined $n;
+	$len -= $n;
+    }
+    print "\nContent\n-------\n$content";
+}
