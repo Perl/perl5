@@ -3406,90 +3406,125 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value)
 	else {
 	    char* t = RExC_parse++; /* skip over the c */
 
+	    assert(*t == c);
+
   	    if (UCHARAT(RExC_parse) == ']') {
   		RExC_parse++; /* skip over the ending ] */
   		posixcc = s + 1;
 		if (*s == ':') {
 		    I32 complement = *posixcc == '^' ? *posixcc++ : 0;
-		    I32 skip = 5; /* the most common skip */
+		    I32 skip = t - posixcc;
 
-		    switch (*posixcc) {
-		    case 'a':
-			if (strnEQ(posixcc, "alnum", 5))
-			    namedclass =
-				complement ? ANYOF_NALNUMC : ANYOF_ALNUMC;
-			else if (strnEQ(posixcc, "alpha", 5))
-			    namedclass =
-				complement ? ANYOF_NALPHA : ANYOF_ALPHA;
-			else if (strnEQ(posixcc, "ascii", 5))
-			    namedclass =
-				complement ? ANYOF_NASCII : ANYOF_ASCII;
-			break;
-		    case 'b':
-			if (strnEQ(posixcc, "blank", 5))
-			    namedclass =
-				complement ? ANYOF_NBLANK : ANYOF_BLANK;
-			break;
-		    case 'c':
-			if (strnEQ(posixcc, "cntrl", 5))
-			    namedclass =
-				complement ? ANYOF_NCNTRL : ANYOF_CNTRL;
-			break;
-		    case 'd':
-			if (strnEQ(posixcc, "digit", 5))
-			    namedclass =
-				complement ? ANYOF_NDIGIT : ANYOF_DIGIT;
-			break;
-		    case 'g':
-			if (strnEQ(posixcc, "graph", 5))
-			    namedclass =
-				complement ? ANYOF_NGRAPH : ANYOF_GRAPH;
-			break;
-		    case 'l':
-			if (strnEQ(posixcc, "lower", 5))
-			    namedclass =
-				complement ? ANYOF_NLOWER : ANYOF_LOWER;
-			break;
-		    case 'p':
-			if (strnEQ(posixcc, "print", 5))
-			    namedclass =
-				complement ? ANYOF_NPRINT : ANYOF_PRINT;
-			else if (strnEQ(posixcc, "punct", 5))
-			    namedclass =
-				complement ? ANYOF_NPUNCT : ANYOF_PUNCT;
-			break;
-		    case 's':
-			if (strnEQ(posixcc, "space", 5))
-			    namedclass =
-				complement ? ANYOF_NPSXSPC : ANYOF_PSXSPC;
-			break;
-		    case 'u':
-			if (strnEQ(posixcc, "upper", 5))
-			    namedclass =
-				complement ? ANYOF_NUPPER : ANYOF_UPPER;
- 			break;
-		    case 'w': /* this is not POSIX, this is the Perl \w */
-			if (strnEQ(posixcc, "word", 4)) {
-			    namedclass =
-				complement ? ANYOF_NALNUM : ANYOF_ALNUM;
-			    skip = 4;
+		    /* Initially switch on the length of the name.  */
+		    switch (skip) {
+		    case 4:
+			if (memEQ(posixcc, "word", 4)) {
+			    /* this is not POSIX, this is the Perl \w */;
+			    namedclass
+				= complement ? ANYOF_NALNUM : ANYOF_ALNUM;
 			}
 			break;
-		    case 'x':
-			if (strnEQ(posixcc, "xdigit", 6)) {
-			    namedclass =
-				complement ? ANYOF_NXDIGIT : ANYOF_XDIGIT;
-			    skip = 6;
+		    case 5:
+			/* Names all of length 5.  */
+			/* alnum alpha ascii blank cntrl digit graph lower
+			   print punct space upper  */
+			/* Offset 4 gives the best switch position.  */
+			switch (posixcc[4]) {
+			case 'a':
+			    if (memEQ(posixcc, "alph", 4)) {
+				/*                  a     */
+				namedclass
+				    = complement ? ANYOF_NALPHA : ANYOF_ALPHA;
+			    }
+			    break;
+			case 'e':
+			    if (memEQ(posixcc, "spac", 4)) {
+				/*                  e     */
+				namedclass
+				    = complement ? ANYOF_NPSXSPC : ANYOF_PSXSPC;
+			    }
+			    break;
+			case 'h':
+			    if (memEQ(posixcc, "grap", 4)) {
+				/*                  h     */
+				namedclass
+				    = complement ? ANYOF_NGRAPH : ANYOF_GRAPH;
+			    }
+			    break;
+			case 'i':
+			    if (memEQ(posixcc, "asci", 4)) {
+				/*                  i     */
+				namedclass
+				    = complement ? ANYOF_NASCII : ANYOF_ASCII;
+			    }
+			    break;
+			case 'k':
+			    if (memEQ(posixcc, "blan", 4)) {
+				/*                  k     */
+				namedclass
+				    = complement ? ANYOF_NBLANK : ANYOF_BLANK;
+			    }
+			    break;
+			case 'l':
+			    if (memEQ(posixcc, "cntr", 4)) {
+				/*                  l     */
+				namedclass
+				    = complement ? ANYOF_NCNTRL : ANYOF_CNTRL;
+			    }
+			    break;
+			case 'm':
+			    if (memEQ(posixcc, "alnu", 4)) {
+				/*                  m     */
+				namedclass
+				    = complement ? ANYOF_NALNUMC : ANYOF_ALNUMC;
+			    }
+			    break;
+			case 'r':
+			    if (memEQ(posixcc, "lowe", 4)) {
+				/*                  r     */
+				namedclass
+				    = complement ? ANYOF_NLOWER : ANYOF_LOWER;
+			    }
+			    if (memEQ(posixcc, "uppe", 4)) {
+				/*                      r     */
+				namedclass
+				    = complement ? ANYOF_NUPPER : ANYOF_UPPER;
+			    }
+			    break;
+			case 't':
+			    if (memEQ(posixcc, "digi", 4)) {
+				/*                  t     */
+				namedclass
+				    = complement ? ANYOF_NDIGIT : ANYOF_DIGIT;
+			    }
+			    if (memEQ(posixcc, "prin", 4)) {
+				/*                      t     */
+				namedclass
+				    = complement ? ANYOF_NPRINT : ANYOF_PRINT;
+			    }
+			    if (memEQ(posixcc, "punc", 4)) {
+				/*                  t     */
+				namedclass
+				    = complement ? ANYOF_NPUNCT : ANYOF_PUNCT;
+			    }
+			    break;
+			}
+			break;
+		    case 6:
+			if (memEQ(posixcc, "xdigit", 6)) {
+			    namedclass
+				= complement ? ANYOF_NXDIGIT : ANYOF_XDIGIT;
 			}
 			break;
 		    }
-		    if (namedclass == OOB_NAMEDCLASS ||
-			posixcc[skip] != ':' ||
-			posixcc[skip+1] != ']')
+
+		    if (namedclass == OOB_NAMEDCLASS)
 		    {
 			Simple_vFAIL3("POSIX class [:%.*s:] unknown",
 				      t - s - 1, s + 1);
 		    }
+		    assert (posixcc[skip] == ':');
+		    assert (posixcc[skip+1] == ']');
 		} else if (!SIZE_ONLY) {
 		    /* [[=foo=]] and [[.foo.]] are still future. */
 
