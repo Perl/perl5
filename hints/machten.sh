@@ -13,6 +13,8 @@
 #	Martijn Koster <m.koster@webcrawler.com>
 #	Richard Yeh <rcyeh@cco.caltech.edu>
 #
+# Raise perl's stack size again; cut down reg_infty; document
+#                      -- Dominic Dunlop <domo@computer.org> 980619
 # Use of semctl() can crash system: disable -- Dominic Dunlop 980506
 # Raise stack size further; slight tweaks to accomodate MT 4.1
 #                      -- Dominic Dunlop <domo@computer.org> 980211
@@ -37,10 +39,61 @@ usemymalloc='false'
 # Make symbol table listings les voluminous
 nmopts=-gp
 
-# Increase perl's stack size.  Without this, lib/complex.t crashes out.
-# Particularly perverse programs may require that perl has an even larger
-# stack allocation than that specified here.  (See  man setstackspace )
-ldflags='-Xlstack=0x018000'
+# Set reg_infty -- the maximum allowable number of repeats in regular
+# expressions such as  /a{1,$max_repeats}/, and the maximum number of
+# times /a*/ will match.  Setting this too high without having a stack
+# large enough to accommodate deep recursion in the regular expression
+# engine allows perl to crash your Mac due to stack overrun if it
+# encounters a pathological regular expression.  The default is a
+# compromise between capability and required stack size (see below).
+# You may override the default value from the Configure command-line
+# like this:
+#
+#   Configure -Dreg_infty=16368 ...
+
+reg_infty=${reg_infty:-2047}
+
+# If you want to have many perl processes active simultaneously --
+# processing CGI forms -- for example, you should opt for a small stack.
+# For safety, you should set reg_infty no larger than the corresponding
+# value given in this table:
+#
+# Stack size  reg_infty value supported
+# ----------  -------------------------
+# 128k        2**8-1    (256)
+# 256k        2**9-1    (511)
+# 512k        2**10-1  (1023)
+#   1M        2**11-1  (2047)
+# ...
+#  16M        2**15-1 (32767) (perl's default value)
+
+# This script selects a safe stack size based on the value of reg_infty
+# specified above.  However, you may choose to take a risk and set
+# stack size lower: pathological regular expressions are rare in real-world
+# programs.  But be aware that, if perl does encounter one, it WILL
+# crash your system.  Do not set stack size lower than 96k unless
+# you want perl's installation tests ( make test ) to crash your system.
+#
+# You may override the default value from the Configure command-line
+# by specifying the required size in kilobytes like this:
+#
+#   Configure -Dstack_size=96
+
+if [ "X$stack_size" = 'X' ]
+then
+    stack_size=128
+    X=`expr $reg_infty / 256`
+
+    while [ $X -gt 0 ]
+    do
+	X=`expr $X / 2`
+	stack_size=`expr $stack_size \* 2`
+    done
+fi
+
+X=`expr $stack_size \* 1024`
+ldflags="$ldflags -Xlstack=$X"
+ccflags="$ccflags -DREG_INFTY=$reg_infty"
 
 # Install in /usr/local by default
 prefix='/usr/local'
@@ -77,12 +130,12 @@ libswanted="$*"
 #	Propagating recommended variable dont_use_nlink
 dont_use_nlink=define
 
-cat <<'EOM' >&4
+cat <<EOM >&4
 
 During Configure, you may see the message
 
 *** WHOA THERE!!! ***
-    The recommended value for $d_semctl on this machine was "undef"!
+    The recommended value for \$d_semctl on this machine was "undef"!
     Keep the recommended value? [y]
 
 Select the default answer: semctl() is buggy, and perl should be built
@@ -93,7 +146,12 @@ At the end of Configure, you will see a harmless message
 Hmm...You had some extra variables I don't know about...I'll try to keep 'em.
 	Propagating recommended variable dont_use_nlink
         Propagating recommended variable nmopts
+        Propagating recommended variable reg_infty
 Read the File::Find documentation for more information about dont_use_nlink
+
+Your perl will be built with a stack size of ${stack_size}k and a regular
+expression repeat count limit of $reg_infty.  If you want alternative
+values, see the file hints/machten.sh for advice on how to change them.
 
 Tests
 	io/fs test 4  and
@@ -104,3 +162,5 @@ on directories.
 EOM
 expr "$osvers" \< "4.1" >/dev/null && test -r ./broken-db.msg && \
     . ./broken-db.msg
+
+unset stack_size X
