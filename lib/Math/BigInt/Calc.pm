@@ -8,7 +8,7 @@ require Exporter;
 use vars qw/@ISA $VERSION/;
 @ISA = qw(Exporter);
 
-$VERSION = '0.10';
+$VERSION = '0.11';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -19,7 +19,8 @@ $VERSION = '0.10';
 # - fully remove funky $# stuff (maybe)
 
 # USE_MUL: due to problems on certain os (os390, posix-bc) "* 1e-5" is used
-# instead of "/ 1e5" at some places, (marked with USE_MUL).
+# instead of "/ 1e5" at some places, (marked with USE_MUL). Other platforms
+# BS2000, some Crays need USE_DIV instead.
 # The BEGIN block is used to determine which of the two variants gives the
 # correct result.
 
@@ -29,9 +30,7 @@ $VERSION = '0.10';
 # constants for easier life
 my $nan = 'NaN';
 
-my $BASE_LEN = 7;
-my $BASE = int("1e".$BASE_LEN);		# var for trying to change it to 1e7
-my $RBASE = abs('1e-'.$BASE_LEN);	# see USE_MUL
+my ($BASE,$RBASE,$BASE_LEN);
 
 BEGIN
   {
@@ -46,6 +45,17 @@ BEGIN
   $BASE_LEN = $e-1;
   $BASE = int("1e".$BASE_LEN);
   $RBASE = abs('1e-'.$BASE_LEN);	# see USE_MUL
+  if (int($BASE * $RBASE) == 0)		# should be 1
+    {
+    # USE_DIV instead
+    *{_mul} = \&_mul_use_div;
+    *{_div} = \&_div_use_div;
+    }
+  else
+    {
+    *{_mul} = \&_mul_use_mul;
+    *{_div} = \&_div_use_mul;
+    }
   }
 
 # for quering and setting, to debug/benchmark things
@@ -208,7 +218,7 @@ sub _sub
     }
   }                                                                             
 
-sub _mul
+sub _mul_use_mul
   {
   # (BINT, BINT) return nothing
   # multiply two numbers in internal representation
