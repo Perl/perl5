@@ -3357,7 +3357,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	    if (!(s = strchr(*env,'=')))
 		continue;
 	    *s++ = '\0';
-#if defined(MSDOS)
+#if defined(MSDOS) && !defined(DJGPP)
 	    (void)strupr(*env);
 #endif
 	    sv = newSVpv(s--,0);
