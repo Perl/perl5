@@ -3533,6 +3533,15 @@ Perl_runops_debug(pTHXo)
 {
     return ((CPerlObj*)pPerl)->Perl_runops_debug();
 }
+#if defined(USE_THREADS)
+
+#undef  Perl_sv_lock
+SV*
+Perl_sv_lock(pTHXo_ SV *sv)
+{
+    return ((CPerlObj*)pPerl)->Perl_sv_lock(sv);
+}
+#endif
 
 #undef  Perl_sv_catpvf_mg
 void

@@ -2106,6 +2106,9 @@ Ap	|struct perl_vars *|GetVars
 #endif
 Ap	|int	|runops_standard
 Ap	|int	|runops_debug
+#if defined(USE_THREADS)
+Ap	|SV*	|sv_lock	|SV *sv
+#endif
 Afpd	|void	|sv_catpvf_mg	|SV *sv|const char* pat|...
 Ap	|void	|sv_vcatpvf_mg	|SV* sv|const char* pat|va_list* args
 Apd	|void	|sv_catpv_mg	|SV *sv|const char *ptr
@@ -2513,8 +2516,6 @@ s	|SV*	|mess_alloc
 s	|void	|xstat		|int
 #  endif
 #endif
-
-Arp	|SV*	|lock		|SV *sv
 
 #if defined(PERL_OBJECT)
 };

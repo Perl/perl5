@@ -1875,7 +1875,7 @@ S_incl_perldb(pTHX)
  * store private buffers and state information.
  *
  * The supplied datasv parameter is upgraded to a PVIO type
- * and the IoDIRP field is used to store the function pointer,
+ * and the IoDIRP/IoANY field is used to store the function pointer,
  * and IOf_FAKE_DIRP is enabled on datasv to mark this as such.
  * Note that IoTOP_NAME, IoFMT_NAME, IoBOTTOM_NAME, if set for
  * private use must be set using malloc'd pointers.
@@ -1893,7 +1893,7 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
 	datasv = NEWSV(255,0);
     if (!SvUPGRADE(datasv, SVt_PVIO))
         Perl_die(aTHX_ "Can't upgrade filter_add data to SVt_PVIO");
-    IoDIRP(datasv) = (DIR*)funcp; /* stash funcp into spare field */
+    IoANY(datasv) = (void *)funcp; /* stash funcp into spare field */
     IoFLAGS(datasv) |= IOf_FAKE_DIRP;
     DEBUG_P(PerlIO_printf(Perl_debug_log, "filter_add func %p (%s)\n",
 			  funcp, SvPV_nolen(datasv)));
@@ -1913,9 +1913,9 @@ Perl_filter_del(pTHX_ filter_t funcp)
 	return;
     /* if filter is on top of stack (usual case) just pop it off */
     datasv = FILTER_DATA(AvFILLp(PL_rsfp_filters));
-    if (IoDIRP(datasv) == (DIR*)funcp) {
+    if (IoANY(datasv) == (void *)funcp) {
 	IoFLAGS(datasv) &= ~IOf_FAKE_DIRP;
-	IoDIRP(datasv) = (DIR*)NULL;
+	IoANY(datasv) = (void *)NULL;
 	sv_free(av_pop(PL_rsfp_filters));
 
         return;
@@ -1975,7 +1975,7 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
 	return FILTER_READ(idx+1, buf_sv, maxlen); /* recurse */
     }
     /* Get function pointer hidden within datasv	*/
-    funcp = (filter_t)IoDIRP(datasv);
+    funcp = (filter_t)IoANY(datasv);
     DEBUG_P(PerlIO_printf(Perl_debug_log,
 			  "filter_read %d: via function %p (%s)\n",
 			  idx, funcp, SvPV_nolen(datasv)));
@@ -7391,27 +7391,6 @@ Perl_yyerror(pTHX_ char *s)
 }
 
 
-#ifdef PERL_OBJECT
-#include "XSUB.h"
-#endif
-
-/*
- * restore_rsfp
- * Restore a source filter.
- */
-
-static void
-restore_rsfp(pTHXo_ void *f)
-{
-    PerlIO *fp = (PerlIO*)f;
-
-    if (PL_rsfp == PerlIO_stdin())
-	PerlIO_clearerr(PL_rsfp);
-    else if (PL_rsfp && (PL_rsfp != fp))
-	PerlIO_close(PL_rsfp);
-    PL_rsfp = fp;
-}
-
 STATIC char*
 S_swallow_bom(pTHX_ char *s) {
     STRLEN slen;
@@ -7462,4 +7441,25 @@ S_swallow_bom(pTHX_ char *s) {
        Perl_croak(aTHX_ "Unsupported script encoding");
 } 
 return s;
+}
+
+#ifdef PERL_OBJECT
+#include "XSUB.h"
+#endif
+
+/*
+ * restore_rsfp
+ * Restore a source filter.
+ */
+
+static void
+restore_rsfp(pTHXo_ void *f)
+{
+    PerlIO *fp = (PerlIO*)f;
+
+    if (PL_rsfp == PerlIO_stdin())
+	PerlIO_clearerr(PL_rsfp);
+    else if (PL_rsfp && (PL_rsfp != fp))
+	PerlIO_close(PL_rsfp);
+    PL_rsfp = fp;
 }

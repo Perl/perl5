@@ -865,6 +865,9 @@ PERL_CALLCONV struct perl_vars *	Perl_GetVars(pTHX);
 #endif
 PERL_CALLCONV int	Perl_runops_standard(pTHX);
 PERL_CALLCONV int	Perl_runops_debug(pTHX);
+#if defined(USE_THREADS)
+PERL_CALLCONV SV*	Perl_sv_lock(pTHX_ SV *sv);
+#endif
 PERL_CALLCONV void	Perl_sv_catpvf_mg(pTHX_ SV *sv, const char* pat, ...)
 #ifdef CHECK_FORMAT
  __attribute__((format(printf,pTHX_2,pTHX_3)))
@@ -1266,8 +1269,6 @@ STATIC SV*	S_mess_alloc(pTHX);
 STATIC void	S_xstat(pTHX_ int);
 #  endif
 #endif
-
-PERL_CALLCONV SV*	Perl_lock(pTHX_ SV *sv) __attribute__((noreturn));
 
 #if defined(PERL_OBJECT)
 };

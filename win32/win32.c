@@ -2393,9 +2393,9 @@ win32_popen(const char *command, const char *mode)
 	/* close saved handle */
 	win32_close(oldfd);
 
-	MUTEX_LOCK(&PL_fdpid_mutex);
+	LOCK_FDPID_MUTEX;
 	sv_setiv(*av_fetch(w32_fdpid, p[parent], TRUE), childpid);
-	MUTEX_UNLOCK(&PL_fdpid_mutex);
+	UNLOCK_FDPID_MUTEX;
 
 	/* set process id so that it can be returned by perl's open() */
 	PL_forkprocess = childpid;
@@ -2431,9 +2431,9 @@ win32_pclose(FILE *pf)
     int childpid, status;
     SV *sv;
 
-    MUTEX_LOCK(&PL_fdpid_mutex);
+    LOCK_FDPID_MUTEX;
     sv = *av_fetch(w32_fdpid, win32_fileno(pf), TRUE);
-    MUTEX_UNLOCK(&PL_fdpid_mutex);
+
     if (SvIOK(sv))
 	childpid = SvIVX(sv);
     else
@@ -2446,6 +2446,7 @@ win32_pclose(FILE *pf)
 
     win32_fclose(pf);
     SvIVX(sv) = 0;
+    UNLOCK_FDPID_MUTEX;
 
     if (win32_waitpid(childpid, &status, 0) == -1)
         return -1;

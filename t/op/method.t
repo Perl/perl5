@@ -4,6 +4,11 @@
 # test method calls and autoloading.
 #
 
+BEGIN {
+    chdir 't' if -d 't';
+    unshift @INC, '../lib' if -d '../lib';
+}
+
 print "1..53\n";
 
 @A::ISA = 'B';
