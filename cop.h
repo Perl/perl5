@@ -241,12 +241,16 @@ struct block_loop {
 #  define CX_ITERDATA_SET(cx,idata)					\
 	cx->blk_loop.oldcurpad = PL_curpad;				\
 	if ((cx->blk_loop.iterdata = (idata)))				\
-	    cx->blk_loop.itersave = SvREFCNT_inc(*CxITERVAR(cx));
+	    cx->blk_loop.itersave = SvREFCNT_inc(*CxITERVAR(cx));	\
+	else								\
+	    cx->blk_loop.itersave = Nullsv;
 #else
 #  define CxITERVAR(c)		((c)->blk_loop.itervar)
 #  define CX_ITERDATA_SET(cx,ivar)					\
 	if ((cx->blk_loop.itervar = (SV**)(ivar)))			\
-	    cx->blk_loop.itersave = SvREFCNT_inc(*CxITERVAR(cx));
+	    cx->blk_loop.itersave = SvREFCNT_inc(*CxITERVAR(cx));	\
+	else								\
+	    cx->blk_loop.itersave = Nullsv;
 #endif
 
 #define PUSHLOOP(cx, dat, s)						\
