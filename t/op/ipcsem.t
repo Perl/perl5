@@ -27,7 +27,7 @@ use vars map { '$' . $_ } @define;
 BEGIN {
     unless($Config{'d_semget'} eq 'define' &&
 	   $Config{'d_semctl'} eq 'define') {
-	print "0..0\n";
+	print "1..0\n";
 	exit;
     }
     my @incpath = (split(/\s+/, $Config{usrinc}), split(/\s+/ ,$Config{locincpth}));

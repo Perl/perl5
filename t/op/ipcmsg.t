@@ -27,7 +27,7 @@ BEGIN {
 	   $Config{'d_msgctl'} eq 'define' &&
 	   $Config{'d_msgsnd'} eq 'define' &&
 	   $Config{'d_msgrcv'} eq 'define') {
-	print "0..0\n";
+	print "1..0\n";
 	exit;
     }
     my @incpath = (split(/\s+/, $Config{usrinc}), split(/\s+/ ,$Config{locincpth}));
