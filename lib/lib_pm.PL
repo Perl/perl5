@@ -112,11 +112,11 @@ sub unimport {
 
     my %names;
     foreach (@_) {
-	local $_ = _nativize($_);
+	my $path = _nativize($_);
 
 	my($arch_auto_dir, $arch_dir, $version_dir, $version_arch_dir)
-	    = _get_dirs($_);
-	++$names{$_};
+	    = _get_dirs($path);
+	++$names{$path};
 	++$names{$arch_dir}         if -d $arch_auto_dir;
 	++$names{$version_dir}      if -d $version_dir;
 	++$names{$version_arch_dir} if -d $version_arch_dir;
@@ -134,15 +134,15 @@ sub _get_dirs {
     # we could use this for all platforms in the future, but leave it
     # Mac-only for now, until there is more time for testing it.
     if ($Is_MacOS) {
-	$arch_auto_dir    = File::Spec->catdir( $_, $archname, 'auto' );
-	$arch_dir         = File::Spec->catdir( $_, $archname, );
-	$version_dir      = File::Spec->catdir( $_, $version );
-	$version_arch_dir = File::Spec->catdir( $_, $version, $archname );
+	$arch_auto_dir    = File::Spec->catdir( $dir, $archname, 'auto' );
+	$arch_dir         = File::Spec->catdir( $dir, $archname, );
+	$version_dir      = File::Spec->catdir( $dir, $version );
+	$version_arch_dir = File::Spec->catdir( $dir, $version, $archname );
     } else {
-	$arch_auto_dir    = "$_/$archname/auto";
-	$arch_dir         = "$_/$archname";
-	$version_dir      = "$_/$version";
-	$version_arch_dir = "$_/$version/$archname";
+	$arch_auto_dir    = "$dir/$archname/auto";
+	$arch_dir         = "$dir/$archname";
+	$version_dir      = "$dir/$version";
+	$version_arch_dir = "$dir/$version/$archname";
     }
     return($arch_auto_dir, $arch_dir, $version_dir, $version_arch_dir);
 }
