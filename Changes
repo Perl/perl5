@@ -1001,7 +1001,7 @@ ____________________________________________________________________________
         Log: It seems that Tru64 has "naturally" threadsafe APIs only for
              of the usual suspects (like getpwent) but not for others
              (like localtime and rand).  The _r versions are available
-             for all of them, so lets use them.
+             for all of them, so let's use them.
      Branch: perl
 	   ! perl.h
 ____________________________________________________________________________
