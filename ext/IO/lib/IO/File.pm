@@ -110,6 +110,7 @@ use Carp;
 use Symbol;
 use SelectSaver;
 use IO::Seekable;
+use File::Spec;
 
 require Exporter;
 require DynaLoader;
@@ -158,7 +159,9 @@ sub open {
 	    defined $perms or $perms = 0666;
 	    return sysopen($fh, $file, $mode, $perms);
 	}
-	$file = './' . $file if $file =~ m{\A[^\\/\w]};
+	if (! File::Spec->file_name_is_absolute($file)) {
+            $file = File::Spec->catfile(File::Spec->curdir(),$file);
+        }
 	$file = IO::Handle::_open_mode_string($mode) . " $file\0";
     }
     open($fh, $file);

@@ -805,6 +805,10 @@ Perl_scalar(pTHX_ OP *o)
 	 || o->op_type == OP_RETURN)
 	return o;
 
+    if ((o->op_private & OPpTARGET_MY)
+	&& (PL_opargs[o->op_type] & OA_TARGLEX)) /* OPp share the meaning */
+	return scalar(o);			/* As if inside SASSIGN */
+    
     o->op_flags = (o->op_flags & ~OPf_WANT) | OPf_WANT_SCALAR;
 
     switch (o->op_type) {
@@ -884,6 +888,10 @@ Perl_scalarvoid(pTHX_ OP *o)
 	 || o->op_type == OP_RETURN)
 	return o;
 
+    if ((o->op_private & OPpTARGET_MY)
+	&& (PL_opargs[o->op_type] & OA_TARGLEX)) /* OPp share the meaning */
+	return scalar(o);			/* As if inside SASSIGN */
+    
     o->op_flags = (o->op_flags & ~OPf_WANT) | OPf_WANT_VOID;
 
     switch (o->op_type) {
@@ -1083,6 +1091,10 @@ Perl_list(pTHX_ OP *o)
 	 || o->op_type == OP_RETURN)
 	return o;
 
+    if ((o->op_private & OPpTARGET_MY)
+	&& (PL_opargs[o->op_type] & OA_TARGLEX)) /* OPp share the meaning */
+	return o;				/* As if inside SASSIGN */
+    
     o->op_flags = (o->op_flags & ~OPf_WANT) | OPf_WANT_LIST;
 
     switch (o->op_type) {
@@ -1190,6 +1202,10 @@ Perl_mod(pTHX_ OP *o, I32 type)
     if (!o || PL_error_count)
 	return o;
 
+    if ((o->op_private & OPpTARGET_MY)
+	&& (PL_opargs[o->op_type] & OA_TARGLEX)) /* OPp share the meaning */
+	return o;
+    
     switch (o->op_type) {
     case OP_UNDEF:
 	PL_modcount++;
@@ -1830,7 +1846,7 @@ Perl_fold_constants(pTHX_ register OP *o)
 
     if (PL_opargs[type] & OA_RETSCALAR)
 	scalar(o);
-    if (PL_opargs[type] & OA_TARGET)
+    if (PL_opargs[type] & OA_TARGET && !o->op_targ)
 	o->op_targ = pad_alloc(type, SVs_PADTMP);
 
     /* integerize op, unless it happens to be C<-foo>.
@@ -2191,7 +2207,7 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
     }
 
     binop = (BINOP*)CHECKOP(type, binop);
-    if (binop->op_next)
+    if (binop->op_next || binop->op_type != type)
 	return (OP*)binop;
 
     binop->op_last = binop->op_first->op_sibling;
@@ -5084,6 +5100,38 @@ Perl_ck_fun_locale(pTHX_ OP *o)
 }
 
 OP *
+Perl_ck_sassign(pTHX_ OP *o)
+{
+    OP *kid = cLISTOPo->op_first;
+    /* has a disposable target? */
+    if ((PL_opargs[kid->op_type] & OA_TARGLEX)
+	&& !(kid->op_flags & OPf_STACKED))
+    {
+	OP *kkid = kid->op_sibling;
+
+	/* Can just relocate the target. */
+	if (kkid && kkid->op_type == OP_PADSV) {
+	    /* Concat has problems if target is equal to right arg. */
+	    if (kid->op_type == OP_CONCAT
+		&& kLISTOP->op_first->op_sibling->op_type == OP_PADSV
+		&& kLISTOP->op_first->op_sibling->op_targ == kkid->op_targ)
+	    {
+		return o;
+	    }
+	    kid->op_targ = kkid->op_targ;
+	    /* Now we do not need PADSV and SASSIGN. */
+	    kid->op_sibling = o->op_sibling;	/* NULL */
+	    cLISTOPo->op_first = NULL;
+	    op_free(o);
+	    op_free(kkid);
+	    kid->op_private |= OPpTARGET_MY;	/* Used for context settings */
+	    return kid;
+	}
+    }
+    return o;
+}
+
+OP *
 Perl_ck_scmp(pTHX_ OP *o)
 {
     o->op_private = 0;
@@ -5592,8 +5640,24 @@ Perl_peep(pTHX_ register OP *o)
 	case OP_LC:
 	case OP_LCFIRST:
 	case OP_QUOTEMETA:
-	    if (o->op_next && o->op_next->op_type == OP_STRINGIFY)
+	    if (o->op_next && o->op_next->op_type == OP_STRINGIFY) {
+		if (o->op_next->op_private & OPpTARGET_MY) {
+		    if ((o->op_type == OP_CONST) /* no target */
+			|| (o->op_flags & OPf_STACKED) /* chained concats */
+			|| (o->op_type == OP_CONCAT
+	    /* Concat has problems if target is equal to right arg. */
+			    && (((LISTOP*)o)->op_first->op_sibling->op_type
+				== OP_PADSV)
+			    && (((LISTOP*)o)->op_first->op_sibling->op_targ
+				== o->op_next->op_targ))) {
+			goto ignore_optimization;
+		    } else {
+			o->op_targ = o->op_next->op_targ;
+		    }
+		}
 		null(o->op_next);
+	    }
+	  ignore_optimization:
 	    o->op_seq = PL_op_seqmax++;
 	    break;
 	case OP_STUB:

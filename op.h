@@ -131,6 +131,10 @@ typedef U32 PADOFFSET;
 #define OPpLVAL_DEFER		16	/* Defer creation of array/hash elem */
   /* for OP_RV2?V, lower bits carry hints */
 
+/* Private for OPs with TARGLEX */
+  /* (lower bits may carry MAXARG) */
+#define OPpTARGET_MY		16	/* Target is PADMY. */
+
 /* Private for OP_CONST */
 #define	OPpCONST_STRICT		8	/* bearword subject to strict 'subs' */
 #define OPpCONST_ENTERED	16	/* Has been entered as symbol. */
@@ -302,27 +306,30 @@ struct loop {
 #define OA_OTHERINT 32
 #define OA_DANGEROUS 64
 #define OA_DEFGV 128
+#define OA_TARGLEX 256
 
 /* The next 4 bits encode op class information */
-#define OA_CLASS_MASK (15 << 8)
+#define OCSHIFT 9
 
-#define OA_BASEOP (0 << 8)
-#define OA_UNOP (1 << 8)
-#define OA_BINOP (2 << 8)
-#define OA_LOGOP (3 << 8)
-#define OA_CONDOP (4 << 8)
-#define OA_LISTOP (5 << 8)
-#define OA_PMOP (6 << 8)
-#define OA_SVOP (7 << 8)
-#define OA_GVOP (8 << 8)
-#define OA_PVOP_OR_SVOP (9 << 8)
-#define OA_LOOP (10 << 8)
-#define OA_COP (11 << 8)
-#define OA_BASEOP_OR_UNOP (12 << 8)
-#define OA_FILESTATOP (13 << 8)
-#define OA_LOOPEXOP (14 << 8)
+#define OA_CLASS_MASK (15 << OCSHIFT)
 
-#define OASHIFT 12
+#define OA_BASEOP (0 << OCSHIFT)
+#define OA_UNOP (1 << OCSHIFT)
+#define OA_BINOP (2 << OCSHIFT)
+#define OA_LOGOP (3 << OCSHIFT)
+#define OA_CONDOP (4 << OCSHIFT)
+#define OA_LISTOP (5 << OCSHIFT)
+#define OA_PMOP (6 << OCSHIFT)
+#define OA_SVOP (7 << OCSHIFT)
+#define OA_GVOP (8 << OCSHIFT)
+#define OA_PVOP_OR_SVOP (9 << OCSHIFT)
+#define OA_LOOP (10 << OCSHIFT)
+#define OA_COP (11 << OCSHIFT)
+#define OA_BASEOP_OR_UNOP (12 << OCSHIFT)
+#define OA_FILESTATOP (13 << OCSHIFT)
+#define OA_LOOPEXOP (14 << OCSHIFT)
+
+#define OASHIFT 13
 
 /* Remaining nybbles of PL_opargs */
 #define OA_SCALAR 1

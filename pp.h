@@ -98,6 +98,7 @@
 #define XPUSHn(n)	STMT_START { sv_setnv(TARG, (NV)(n)); XPUSHTARG; } STMT_END
 #define XPUSHi(i)	STMT_START { sv_setiv(TARG, (IV)(i)); XPUSHTARG; } STMT_END
 #define XPUSHu(u)	STMT_START { sv_setuv(TARG, (UV)(u)); XPUSHTARG; } STMT_END
+#define XPUSHundef	STMT_START { SvOK_off(TARG); XPUSHs(TARG); } STMT_END
 
 #define SETs(s)		(*sp = s)
 #define SETTARG		STMT_START { SvSETMAGIC(TARG); SETs(TARG); } STMT_END
@@ -151,7 +152,9 @@
 #define RETSETUNDEF	RETURNX(SETs(&PL_sv_undef))
 
 #define ARGTARG		PL_op->op_targ
-#define MAXARG		PL_op->op_private
+
+    /* See OPpTARGET_MY: */
+#define MAXARG		(PL_op->op_private & 15)
 
 #define SWITCHSTACK(f,t) \
     STMT_START {							\
@@ -209,8 +212,8 @@
 
 #define FORCE_SETs(sv) STMT_START { sv_setsv(TARG, (sv)); SETTARG; } STMT_END
 
-#define tryAMAGICun	tryAMAGICunSET
-#define tryAMAGICunSET(meth) tryAMAGICunW(meth,SETs,0,RETURN)
+#define tryAMAGICun(meth)	tryAMAGICunW(meth,SETsvUN,0,RETURN)
+#define tryAMAGICunSET(meth)	tryAMAGICunW(meth,SETs,0,RETURN)
 #define tryAMAGICunTARGET(meth, shift)					\
 	{ dSP; sp--; 	/* get TARGET from below PL_stack_sp */		\
 	    { dTARGETSTACKED; 						\
@@ -225,7 +228,13 @@
 
 #define opASSIGN (PL_op->op_flags & OPf_STACKED)
 #define SETsv(sv)	STMT_START {					\
-		if (opASSIGN) { sv_setsv(TARG, (sv)); SETTARG; }	\
+		if (opASSIGN || (SvFLAGS(TARG) & SVs_PADMY))		\
+		   { sv_setsv(TARG, (sv)); SETTARG; }			\
+		else SETs(sv); } STMT_END
+
+#define SETsvUN(sv)	STMT_START {					\
+		if (SvFLAGS(TARG) & SVs_PADMY)		\
+		   { sv_setsv(TARG, (sv)); SETTARG; }			\
 		else SETs(sv); } STMT_END
 
 /* newSVsv does not behave as advertised, so we copy missing

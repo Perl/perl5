@@ -22,6 +22,7 @@ Perl_ck_repeat
 Perl_ck_require
 Perl_ck_rfun
 Perl_ck_rvconst
+Perl_ck_sassign
 Perl_ck_scmp
 Perl_ck_select
 Perl_ck_shift
