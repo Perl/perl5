@@ -2772,28 +2772,6 @@ PP(pp_sqrt)
     }
 }
 
-/*
- * There are strange code-generation bugs caused on sparc64 by gcc-2.95.2.
- * These need to be revisited when a newer toolchain becomes available.
- */
-#if defined(__sparc64__) && defined(__GNUC__)
-#   if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 96)
-#       undef  SPARC64_MODF_WORKAROUND
-#       define SPARC64_MODF_WORKAROUND 1
-#   endif
-#endif
-
-#if defined(SPARC64_MODF_WORKAROUND)
-static NV
-sparc64_workaround_modf(NV theVal, NV *theIntRes)
-{
-    NV res, ret;
-    ret = Perl_modf(theVal, &res);
-    *theIntRes = res;
-    return ret;
-}
-#endif
-
 PP(pp_int)
 {
     dSP; dTARGET; tryAMAGICun(int);
@@ -2817,34 +2795,15 @@ PP(pp_int)
 	      if (value < (NV)UV_MAX + 0.5) {
 		  SETu(U_V(value));
 	      } else {
-#if defined(SPARC64_MODF_WORKAROUND)
-                  (void)sparc64_workaround_modf(value, &value);
-#elif defined(HAS_MODFL_POW32_BUG)
-/* some versions of glibc split (i + d) into (i-1, d+1) for 2^32 <= i < 2^64 */
-                  NV offset = Perl_modf(value, &value);
-                  (void)Perl_modf(offset, &offset);
-                  value += offset;
-#else
-                  (void)Perl_modf(value, &value);
-#endif
-		  SETn(value);
+		  SETn(Perl_floor(value));
 	      }
 	  }
 	  else {
 	      if (value > (NV)IV_MIN - 0.5) {
 		  SETi(I_V(value));
 	      } else {
-#if defined(SPARC64_MODF_WORKAROUND)
-                  (void)sparc64_workaround_modf(-value, &value);
-#elif defined(HAS_MODFL_POW32_BUG)
-/* some versions of glibc split (i + d) into (i-1, d+1) for 2^32 <= i < 2^64 */
-                  NV offset = Perl_modf(-value, &value);
-                  (void)Perl_modf(offset, &offset);
-                  value += offset;
-#else
-		  (void)Perl_modf(-value, &value);
-#endif
-		  SETn(-value);
+		/* This is maint, and we don't have Perl_ceil in perl.h  */
+		  SETn(-Perl_floor(-value));
 	      }
 	  }
       }
