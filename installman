@@ -9,8 +9,7 @@ use File::Path qw(mkpath);
 use ExtUtils::Packlist;
 use Pod::Man;
 use subs qw(unlink chmod rename link);
-use vars qw($packlist @modpods);
-require Cwd;
+use vars qw($packlist);
 
 if ($Config{d_umask}) {
     umask(022); # umasks like 077 aren't that useful for installations
@@ -97,13 +96,6 @@ sub pod2man {
     # @script is scripts names if we are installing manpages embedded 
     # in scripts, () otherwise
     my($poddir, $mandir, $manext, @script) = @_;
-
-    my($downdir); # can't just use .. when installing xsubpp manpage
-
-    $downdir = $poddir;
-    $downdir =~ s:[^/]+:..:g;
-    my($builddir) = Cwd::getcwd();
-
     if ($mandir eq ' ' or $mandir eq '') {
 	if (@script) {
 	    warn "Skipping installation of $poddir/$_ man page.\n"
@@ -114,27 +106,37 @@ sub pod2man {
 	return;
     }
 
-    print "chdir $poddir\n" if $opts{verbose};
-    chdir $poddir || die "Unable to cd to $poddir directory!\n$!\n";
+    print "installing from $poddir\n" if $opts{verbose};
 
     mkpath($mandir, $opts{verbose}, 0777) unless $opts{notify};  # In File::Path
-    # Make a list of all the .pm and .pod files in the directory.  We will
-    # always run from the lib directory and use the full pathname
-    # of the pod.
+    # Make a list of all the .pm and .pod files in the directory.  We avoid
+    # chdir because we are running with @INC = '../lib', and modules may wish
+    # to dynamically require Carp::Heavy or other diagnostics warnings.
+    # Hash the names of files we find, keys are names relative to perl build
+    # dir ('.'), values are names relative to $poddir.
+    my %modpods;
     if (@script) {
-	@modpods = @script;
+	%modpods = (map {+"$poddir/$_", $_} @script);
     }
     else {
-	@modpods = ();
-	File::Find::find(\&lsmodpods, '.');
+	File::Find::find({no_chdir=>1,
+                          wanted => sub {
+                              # $_ is $File::Find::name when using no_chdir
+                              if (-f $_ and /\.p(?:m|od)$/) {
+                                  my $fullname = $_;
+                                  s!^\Q$poddir\E/!!;
+                                  $modpods{$fullname} = $_;
+                              }
+                          }},
+                         $poddir);
     }
     my @to_process;
-    foreach my $mod (@modpods) {
-	my $manpage = $mod;
+    foreach my $mod (sort keys %modpods) {
+        my $manpage = $modpods{$mod};
 	my $tmp;
 	# Skip .pm files that have corresponding .pod files, and Functions.pm.
 	next if (($tmp = $mod) =~ s/\.pm$/.pod/ && -f $tmp);
-	next if ($mod eq 'Pod/Functions.pm');	#### Used only by pod itself
+	next if ($manpage eq 'Pod/Functions.pm'); #### Used only by pod itself
 
 	# Convert name from  File/Basename.pm to File::Basename.3 format,
 	# if necessary.
@@ -167,17 +169,6 @@ sub pod2man {
             }
             unlink($tmp);
 	}
-    }
-    chdir "$builddir" || die "Unable to cd back to $builddir directory!\n$!\n";
-    print "  chdir $builddir\n" if $opts{verbose};
-}
-
-sub lsmodpods {
-    my $dir  = $File::Find::dir;
-    my $name = $File::Find::name;
-    if (-f $_) {
-        $name =~ s#^\./##;
-	push(@modpods, $name) if ($name =~ /\.p(m|od)$/);
     }
 }
 
