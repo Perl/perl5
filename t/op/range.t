@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..16\n";
+print "1..19\n";
 
 print join(':',1..5) eq '1:2:3:4:5' ? "ok 1\n" : "not ok 1\n";
 
