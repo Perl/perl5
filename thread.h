@@ -250,7 +250,12 @@
 #endif /* JOIN */
 
 #ifndef PERL_GET_CONTEXT
-#  define PERL_GET_CONTEXT	pthread_getspecific(PL_thr_key)
+/* True for Tru64 version 4.0 and up as well */
+#  if defined(__ALPHA) && (__VMS_VER >= 70000000)
+#    define PERL_GET_CONTEXT	pthread_unchecked_getspecific_np(PL_thr_key)
+#  else
+#    define PERL_GET_CONTEXT	pthread_getspecific(PL_thr_key)
+#  endif
 #endif
 
 #ifndef PERL_SET_CONTEXT

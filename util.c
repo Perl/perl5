@@ -3489,10 +3489,14 @@ Perl_get_context(void)
 	Perl_croak_nocontext("panic: pthread_getspecific");
     return (void*)t;
 #  else
-#  ifdef I_MACH_CTHREADS
-    return (void*)cthread_data(cthread_self());
-#  else
-    return (void*)pthread_getspecific(PL_thr_key);
+#    ifdef I_MACH_CTHREADS
+      return (void*)cthread_data(cthread_self());
+#    else
+#      if defined(__ALPHA) && (__VMS_VER >= 70000000)
+         return (void*)pthread_unchecked_getspecific_np(PL_thr_key);
+#      else
+         return (void*)pthread_getspecific(PL_thr_key);
+#      endif 
 #  endif
 #  endif
 #else
