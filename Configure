@@ -14315,6 +14315,7 @@ if $contains 'unsigned.*char.*_ptr;' stdioh >/dev/null 2>&1 ; then
 else	
 	echo "Your stdio uses signed chars." >&4
 	stdchar="char"
+fi
 $rm -f stdioh
 
 : see if time exists
