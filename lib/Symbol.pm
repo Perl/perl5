@@ -23,6 +23,10 @@ Symbol - manipulate Perl symbols and their names
     print qualify(\*x), "\n";              # returns \*x
     print qualify(\*x, "FOO"), "\n";       # returns \*x
 
+    use strict refs;
+    print { ref_qualify $fh } "foo!\n";
+    $ref = ref_qualify $name, $pkg;
+
 =head1 DESCRIPTION
 
 C<Symbol::gensym> creates an anonymous glob and returns a reference
@@ -44,6 +48,10 @@ Qualification applies only to symbol names (strings).  References are
 left unchanged under the assumption that they are glob references,
 which are qualified by their nature.
 
+C<Symbol::ref_qualify> is just like C<Symbol::qualify> except that it
+returns a glob ref rather than a symbol name.  You can use the result
+even if C<use strict 'refs'> is in effect.
+
 =cut
 
 BEGIN { require 5.002; }
@@ -51,7 +59,9 @@ BEGIN { require 5.002; }
 require Exporter;
 @ISA = qw(Exporter);
 
-@EXPORT = qw(gensym ungensym qualify);
+@EXPORT = qw(gensym ungensym qualify ref_qualify);
+
+$VERSION = 1.02;
 
 my $genpkg = "Symbol::";
 my $genseq = 0;
@@ -86,6 +96,10 @@ sub qualify ($;$) {
 	$name = $pkg . "::" . $name;
     }
     $name;
+}
+
+sub ref_qualify ($;$) {
+    return \*{ qualify $_[0], @_ > 1 ? $_[1] : caller };
 }
 
 1;
