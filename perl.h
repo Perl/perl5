@@ -1086,6 +1086,25 @@ typedef UVTYPE UV;
 #  endif
 #endif
 
+/*
+  I've tracked down a weird bug in Perl5.6.1 to the UTS compiler's
+  mishandling of MY_UV_MAX in util.c.  It is defined as
+    #ifndef MY_UV_MAX
+    #  define MY_UV_MAX ((UV)IV_MAX * (UV)2 + (UV)1)
+    #endif
+  The compiler handles {double floating point value} >= MY_UV_MAX as if
+  MY_UV_MAX were the signed integer -1.  In fact it will do the same
+  thing with (UV)(0xffffffff), in place of MY_UV_MAX, though 0xffffffff
+  *without* the typecast to UV works fine.
+
+  hom00@utsglobal.com (Hal Morris) 2001-05-02
+
+  */
+
+#ifdef UTS
+#  define MY_UV_MAX 0xffffffff 
+#endif
+
 #define IV_DIG (BIT_DIGITS(IVSIZE * 8))
 #define UV_DIG (BIT_DIGITS(UVSIZE * 8))
 
