@@ -23,7 +23,7 @@ sweep:
 Harness.c module2.c module3.c :	ppport.h
 
 ppport.h: ../PPPort.pm
-	$(PERL) -I../../../../lib -e 'require "../PPPort.pm"; Devel::PPPort::WriteFile("ppport.h")'
+	$(PERL) -I../../../../lib -e "require '../PPPort.pm'; Devel::PPPort::WriteFile('ppport.h')"
 	
 EOM
 
