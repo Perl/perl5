@@ -230,7 +230,7 @@ use Carp;
 sub read
 {
  my ($obj,$fh,$name) = @_;
- my(%tbl, @esc, $enc);
+ my(%tbl, @seq, $enc, @esc);
  while (<$fh>)
   {
    my ($key,$val) = /^(\S+)\s+(.*)$/;
@@ -238,13 +238,15 @@ sub read
    $val =~ s/\\x([0-9a-f]{2})/chr(hex($1))/ge;
    if($enc = Encode->getEncoding($key)){
      $tbl{$val} = ref($enc) eq 'Encode::Tcl' ? $enc->loadEncoding : $enc;
-     push @esc, $val;
+     push @seq, $val;
    }else{
      $obj->{$key} = $val;
    }
+   if($val =~ /^\e(.*)/){ push(@esc, quotemeta $1) }
   }
- $obj->{'Ctl'} = \@esc;
- $obj->{'Tbl'} = \%tbl;
+ $obj->{'Seq'} = \@seq; # escape sequences
+ $obj->{'Tbl'} = \%tbl; # encoding tables
+ $obj->{'Esc'} = join('|', @esc); # regex of sequences following ESC
  return $obj;
 }
 
@@ -252,33 +254,41 @@ sub decode
 {
  my ($obj,$str,$chk) = @_;
  my $tbl = $obj->{'Tbl'};
- my $ctl = $obj->{'Ctl'};
+ my $seq = $obj->{'Seq'};
+ my $esc = $obj->{'Esc'};
  my $ini = $obj->{'init'};
  my $fin = $obj->{'final'};
- my $std = $ctl->[0];
+ my $std = $seq->[0];
  my $cur = $std;
  my $uni;
  while (length($str)){
    my $uch = substr($str,0,1,'');
    if($uch eq "\e"){
-    $str =~ s/^([\x20-\x2F]*[\x30-\x7E](?:\x1b[\x20-\x2F]*[\x30-\x7E])*)//;
-    my $esc = "\e$1";
-    if($tbl->{$esc}){ $cur = $esc }
-    elsif($esc eq $ini || $esc eq $fin){ $cur = $std }
-    else{carp "unknown escape sequence" }
+    if($str =~ s/^($esc)//)
+     {
+      my $esc = "\e$1";
+      $cur = $tbl->{$esc} ? $esc :
+             ($esc eq $ini || $esc eq $fin) ? $std :
+             $cur;
+     }
+    else
+     {
+      $str =~ s/^([\x20-\x2F]*[\x30-\x7E])//;
+      carp "unknown escape sequence: ESC $1";
+     }
     next;
    }
    if($uch eq "\x0e" || $uch eq "\x0f"){
     $cur = $uch and next;
    }
-   my $x;
    if(ref($tbl->{$cur}) eq 'Encode::XS'){
      $uni .= $tbl->{$cur}->decode($uch);
      next;
    }
-   my $ch = ord($uch);
+   my $ch    = ord($uch);
    my $rep   = $tbl->{$cur}->{'Rep'};
    my $touni = $tbl->{$cur}->{'ToUni'};
+   my $x;
    if (&$rep($ch) eq 'C')
     {
      $x = $touni->[0][$ch];
@@ -303,10 +313,10 @@ sub encode
 {
  my ($obj,$uni,$chk) = @_;
  my $tbl = $obj->{'Tbl'};
- my $ctl = $obj->{'Ctl'};
+ my $seq = $obj->{'Seq'};
  my $ini = $obj->{'init'};
  my $fin = $obj->{'final'};
- my $std = $ctl->[0];
+ my $std = $seq->[0];
  my $str = $ini;
  my $pre = $std;
  my $cur = $pre;
@@ -318,11 +328,11 @@ sub encode
 	: $tbl->{$pre}->{FmUni}->{$ch};
 
   unless(defined $x){
-   foreach my $esc (@$ctl){
-    $x = ref($tbl->{$esc}) eq 'Encode::XS'
-	? $tbl->{$esc}->encode($ch,1)
-	: $tbl->{$esc}->{FmUni}->{$ch};
-    $cur = $esc and last if defined $x;
+   foreach my $e_seq (@$seq){
+    $x = ref($tbl->{$e_seq}) eq 'Encode::XS'
+	? $tbl->{$e_seq}->encode($ch,1)
+	: $tbl->{$e_seq}->{FmUni}->{$ch};
+    $cur = $e_seq and last if defined $x;
    }
   }
   if($x == 0x0d && !($ini eq '' && $fin eq '') && substr($uni,0,1) eq "\x0a")
