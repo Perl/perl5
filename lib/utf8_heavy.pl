@@ -69,7 +69,7 @@ sub SWASHNEW {
     my @extras;
     for my $x ($extras) {
 	pos $x = 0;
-	while ($x =~ /^([^0-9a-fA-F])(.*)/mg) {
+	while ($x =~ /^([^0-9a-fA-F\n])(.*)/mg) {
 	    my $char = $1;
 	    my $name = $2;
 	    # print STDERR "$1 => $2\n" if $DEBUG;
@@ -99,10 +99,10 @@ sub SWASHNEW {
 sub SWASHGET {
     my ($self, $start, $len) = @_;
     local $^D = 0 if $^D;
-    print STDERR "SWASHGET @_\n" if $DEBUG;
     my $type = $self->{TYPE};
     my $bits = $self->{BITS};
     my $none = $self->{NONE};
+    print STDERR "SWASHGET @_ [$type/$bits/$none]\n" if $DEBUG;
     my $end = $start + $len;
     my $swatch = "";
     my $key;
@@ -166,45 +166,43 @@ sub SWASHGET {
     }
     for my $x ($self->{EXTRAS}) {
 	pos $x = 0;
-	while ($x =~ /^([^0-9a-fA-F])(.*)/mg) {
+	while ($x =~ /^([-+!])(.*)/mg) {
 	    my $char = $1;
 	    my $name = $2;
 	    print STDERR "INDIRECT $1 $2\n" if $DEBUG;
-	    if ($char =~ /^[-+!]$/) {
-		my $otherbits = $self->{$name}->{BITS};
-		croak("SWASHGET size mismatch") if $bits < $otherbits;
-		my $other = $self->{$name}->SWASHGET($start, $len);
-		if ($char eq '+') {
-		    if ($bits == 1 and $otherbits == 1) {
-			$swatch |= $other;
+	    my $otherbits = $self->{$name}->{BITS};
+	    croak("SWASHGET size mismatch") if $bits < $otherbits;
+	    my $other = $self->{$name}->SWASHGET($start, $len);
+	    if ($char eq '+') {
+		if ($bits == 1 and $otherbits == 1) {
+		    $swatch |= $other;
+		}
+		else {
+		    for ($key = 0; $key < $len; $key++) {
+			vec($swatch, $key, $bits) = vec($other, $key, $otherbits);
 		    }
-		    else {
-			for ($key = 0; $key < $len; $key++) {
-			    vec($swatch, $key, $bits) = vec($other, $key, $otherbits);
+		}
+	    }
+	    elsif ($char eq '!') {
+		if ($bits == 1 and $otherbits == 1) {
+		    $swatch |= ~$other;
+		}
+		else {
+		    for ($key = 0; $key < $len; $key++) {
+			if (!vec($other, $key, $otherbits)) {
+			    vec($swatch, $key, $bits) = 1;
 			}
 		    }
 		}
-		elsif ($char eq '!') {
-		    if ($bits == 1 and $otherbits == 1) {
-			$swatch |= ~$other;
-		    }
-		    else {
-			for ($key = 0; $key < $len; $key++) {
-			    if (!vec($other, $key, $otherbits)) {
-				vec($swatch, $key, $bits) = 1;
-			    }
-			}
-		    }
+	    }
+	    elsif ($char eq '-') {
+		if ($bits == 1 and $otherbits == 1) {
+		    $swatch &= ~$other;
 		}
-		elsif ($char eq '-') {
-		    if ($bits == 1 and $otherbits == 1) {
-			$swatch &= ~$other;
-		    }
-		    else {
-			for ($key = 0; $key < $len; $key++) {
-			    if (vec($other, $key, $otherbits)) {
-				vec($swatch, $key, $bits) = 0;
-			    }
+		else {
+		    for ($key = 0; $key < $len; $key++) {
+			if (vec($other, $key, $otherbits)) {
+			    vec($swatch, $key, $bits) = 0;
 			}
 		    }
 		}
