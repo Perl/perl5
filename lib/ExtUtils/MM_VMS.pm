@@ -12,10 +12,11 @@ use Config;
 require Exporter;
 use VMS::Filespec;
 use File::Basename;
-
-use vars qw($Revision);
+use File::Spec;
+use vars qw($Revision @ISA);
 $Revision = '5.56 (27-Apr-1999)';
 
+@ISA = qw( File::Spec );
 unshift @MM::ISA, 'ExtUtils::MM_VMS';
 
 Exporter::import('ExtUtils::MakeMaker', '$Verbose', '&neatvalue');
@@ -37,157 +38,6 @@ the semantics.
 =head2 Methods always loaded
 
 =over
-
-=item eliminate_macros
-
-Expands MM[KS]/Make macros in a text string, using the contents of
-identically named elements of C<%$self>, and returns the result
-as a file specification in Unix syntax.
-
-=cut
-
-sub eliminate_macros {
-    my($self,$path) = @_;
-    unless ($path) {
-	print "eliminate_macros('') = ||\n" if $Verbose >= 3;
-	return '';
-    }
-    my($npath) = join(' ', map(unixify($_), split(/\s+/, $path)));
-    my($complex) = 0;
-    my($head,$macro,$tail);
-
-    # perform m##g in scalar context so it acts as an iterator
-    while ($npath =~ m#(.*?)\$\((\S+?)\)(.*)#g) { 
-        if ($self->{$2}) {
-            ($head,$macro,$tail) = ($1,$2,$3);
-            if (ref $self->{$macro}) {
-                if (ref $self->{$macro} eq 'ARRAY') {
-                    print "Note: expanded array macro \$($macro) in $path\n" if $Verbose;
-                    $macro = join ' ', @{$self->{$macro}};
-                }
-                else {
-                    print "Note: can't expand macro \$($macro) containing ",ref($self->{$macro}),
-                          "\n\t(using MMK-specific deferred substitution; MMS will break)\n";
-                    $macro = "\cB$macro\cB";
-                    $complex = 1;
-                }
-            }
-            else { ($macro = unixify($self->{$macro})) =~ s#/$##; }
-            $npath = "$head$macro$tail";
-        }
-    }
-    if ($complex) { $npath =~ s#\cB(.*?)\cB#\${$1}#g; }
-    print "eliminate_macros($path) = |$npath|\n" if $Verbose >= 3;
-    $npath;
-}
-
-=item fixpath
-
-Catchall routine to clean up problem MM[SK]/Make macros.  Expands macros
-in any directory specification, in order to avoid juxtaposing two
-VMS-syntax directories when MM[SK] is run.  Also expands expressions which
-are all macro, so that we can tell how long the expansion is, and avoid
-overrunning DCL's command buffer when MM[KS] is running.
-
-If optional second argument has a TRUE value, then the return string is
-a VMS-syntax directory specification, if it is FALSE, the return string
-is a VMS-syntax file specification, and if it is not specified, fixpath()
-checks to see whether it matches the name of a directory in the current
-default directory, and returns a directory or file specification accordingly.
-
-=cut
-
-sub fixpath {
-    my($self,$path,$force_path) = @_;
-    unless ($path) {
-	print "eliminate_macros('') = ||\n" if $Verbose >= 3;
-	return '';
-    }
-    my($fixedpath,$prefix,$name);
-
-    if ($path =~ m#^\$\([^\)]+\)$# || $path =~ m#[/:>\]]#) { 
-        if ($force_path or $path =~ /(?:DIR\)|\])$/) {
-            $fixedpath = join(' ', map(vmspath($_),split(/\s+/, $self->eliminate_macros($path))));
-        }
-        else {
-            $fixedpath = join(' ', map(vmsify($_),split(/\s+/, $self->eliminate_macros($path))));
-
-        }
-    }
-    elsif ((($prefix,$name) = ($path =~ m#^\$\(([^\)]+)\)(.+)#)) && $self->{$prefix}) {
-        my($vmspre) = $self->eliminate_macros("\$($prefix)");
-        # is it a dir or just a name?
-        $vmspre = ($vmspre =~ m|/| or $prefix =~ /DIR$/) ? vmspath($vmspre) : '';
-        $fixedpath = ($vmspre ? $vmspre : $self->{$prefix}) . $name;
-        $fixedpath = vmspath($fixedpath) if $force_path;
-    }
-    else {
-        $fixedpath = $path;
-        $fixedpath = vmspath($fixedpath) if $force_path;
-    }
-    # No hints, so we try to guess
-    if (!defined($force_path) and $fixedpath !~ /[:>(.\]]/) {
-        $fixedpath = vmspath($fixedpath) if -d $fixedpath;
-    }
-    # Trim off root dirname if it's had other dirs inserted in front of it.
-    $fixedpath =~ s/\.000000([\]>])/$1/;
-    print "fixpath($path) = |$fixedpath|\n" if $Verbose >= 3;
-    $fixedpath;
-}
-
-=item catdir
-
-Concatenates a list of file specifications, and returns the result as a
-VMS-syntax directory specification.
-
-=cut
-
-sub catdir {
-    my($self,@dirs) = @_;
-    my($dir) = pop @dirs;
-    @dirs = grep($_,@dirs);
-    my($rslt);
-    if (@dirs) {
-      my($path) = (@dirs == 1 ? $dirs[0] : $self->catdir(@dirs));
-      my($spath,$sdir) = ($path,$dir);
-      $spath =~ s/.dir$//; $sdir =~ s/.dir$//; 
-      $sdir = $self->eliminate_macros($sdir) unless $sdir =~ /^[\w\-]+$/;
-      $rslt = $self->fixpath($self->eliminate_macros($spath)."/$sdir",1);
-    }
-    else { 
-      if ($dir =~ /^\$\([^\)]+\)$/) { $rslt = $dir; }
-      else                          { $rslt = vmspath($dir); }
-    }
-    print "catdir(",join(',',@_[1..$#_]),") = |$rslt|\n" if $Verbose >= 3;
-    $rslt;
-}
-
-=item catfile
-
-Concatenates a list of file specifications, and returns the result as a
-VMS-syntax directory specification.
-
-=cut
-
-sub catfile {
-    my($self,@files) = @_;
-    my($file) = pop @files;
-    @files = grep($_,@files);
-    my($rslt);
-    if (@files) {
-      my($path) = (@files == 1 ? $files[0] : $self->catdir(@files));
-      my($spath) = $path;
-      $spath =~ s/.dir$//;
-      if ( $spath =~ /^[^\)\]\/:>]+\)$/ && basename($file) eq $file) { $rslt = "$spath$file"; }
-      else {
-          $rslt = $self->eliminate_macros($spath);
-          $rslt = vmsify($rslt.($rslt ? '/' : '').unixify($file));
-      }
-    }
-    else { $rslt = vmsify($file); }
-    print "catfile(",join(',',@_[1..$#_]),") = |$rslt|\n" if $Verbose >= 3;
-    $rslt;
-}
 
 =item wraplist
 
@@ -213,16 +63,6 @@ sub wraplist {
     $line;
 }
 
-=item curdir (override)
-
-Returns a string representing of the current directory.
-
-=cut
-
-sub curdir {
-    return '[]';
-}
-
 =item rootdir (override)
 
 Returns a string representing of the root directory.
@@ -231,16 +71,6 @@ Returns a string representing of the root directory.
 
 sub rootdir {
     return '';
-}
-
-=item updir (override)
-
-Returns a string representing of the parent directory.
-
-=cut
-
-sub updir {
-    return '[-]';
 }
 
 package ExtUtils::MM_VMS;
@@ -626,6 +456,9 @@ sub constants {
     my($self) = @_;
     my(@m,$def,$macro);
 
+    # Be kind about case for pollution
+    for (@ARGV) { $_ = uc($_) if /POLLUTE/i; }
+
     if ($self->{DEFINE} ne '') {
 	my(@terms) = split(/\s+/,$self->{DEFINE});
 	my(@defs,@udefs);
@@ -844,6 +677,7 @@ sub cflags {
 	warn "MM_VMS: Ignoring unrecognized CCFLAGS elements \"$quals\"\n";
 	$quals = '';
     }
+    $definestr .= q["PERL_POLLUTE",] if $self->{POLLUTE};
     if (length $definestr) { chop($definestr); $quals .= "/Define=($definestr)"; }
     if (length $undefstr)  { chop($undefstr);  $quals .= "/Undef=($undefstr)";   }
     # Deal with $self->{DEFINE} here since some C compilers pay attention
@@ -1343,7 +1177,7 @@ static :: $(INST_ARCHAUTODIR)$(BASEEXT).opt
 	$(NOECHO) $(NOOP)
 ') unless $self->{SKIPHASH}{'static'};
 
-    push(@m,'
+    push @m,'
 $(INST_ARCHAUTODIR)$(BASEEXT).opt : $(BASEEXT).opt
 	$(CP) $(MMS$SOURCE) $(MMS$TARGET)
 
@@ -1351,9 +1185,26 @@ $(BASEEXT).opt : Makefile.PL
 	$(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -e "use ExtUtils::Mksymlists;" -
 	',qq[-e "Mksymlists('NAME' => '$self->{NAME}', 'DL_FUNCS' => ],
 	neatvalue($funcs),q[, 'DL_VARS' => ],neatvalue($vars),
-	q[, 'FUNCLIST' => ],neatvalue($funclist),')"
-	$(PERL) -e "print ""$(INST_STATIC)/Include=$(BASEEXT)\n$(INST_STATIC)/Library\n"";" >>$(MMS$TARGET)
-');
+	q[, 'FUNCLIST' => ],neatvalue($funclist),qq[)"\n];
+
+    push @m, '	$(PERL) -e "print ""$(INST_STATIC)/Include=';
+    if ($self->{OBJECT} =~ /\bBASEEXT\b/ or
+        $self->{OBJECT} =~ /\b$self->{BASEEXT}\b/i) { push @m, '$(BASEEXT)'; }
+    else {  # We don't have a "main" object file, so pull 'em all in
+	my(@omods) = map { s/\.[^.]*$//;         # Trim off file type
+	                   s[\$\(\w+_EXT\)][];   # even as a macro
+	                   s/.*[:>\/\]]//;       # Trim off dir spec
+	                   $_; } split ' ', $self->eliminate_macros($self->{OBJECT});
+	my($tmp,@lines,$elt) = '';
+	my $tmp = shift @omods;
+	foreach $elt (@omods) {
+	    $tmp .= ",$elt";
+		if (length($tmp) > 80) { push @lines, $tmp;  $tmp = ''; }
+	}
+	push @lines, $tmp;
+	push @m, '(', join( qq[, -\\n\\t"";" >>\$(MMS\$TARGET)\n\t\$(PERL) -e "print ""], @lines),')';
+    }
+	push @m, '\n$(INST_STATIC)/Library\n"";" >>$(MMS$TARGET)',"\n";
 
     if (length $self->{LDLOADLIBS}) {
 	my($lib); my($line) = '';
@@ -2192,12 +2043,13 @@ $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE)
 	$(NOECHO) $(PERL) "-I$(INST_ARCHLIB)" "-I$(INST_LIB)" "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" \
 		Makefile.PL DIR=}, $dir, q{ \
 		MAKEFILE=$(MAKE_APERL_FILE) LINKTYPE=static \
-		MAKEAPERL=1 NORECURS=1
+		MAKEAPERL=1 NORECURS=1 };
+
+	push @m, map(q[ \\\n\t\t"$_"], @ARGV),q{
 
 $(MAP_TARGET) :: $(MAKE_APERL_FILE)
 	$(MMS)$(MMSQUALIFIERS)$(USEMAKEFILE)$(MAKE_APERL_FILE) static $(MMS$TARGET)
 };
-	push @m, map( " \\\n\t\t$_", @ARGV );
 	push @m, "\n";
 
 	return join '', @m;

@@ -113,6 +113,7 @@ $!
 $!: set up default values
 $ fastread=""
 $ reuseval="false"
+$ maniskip = "false"
 $ config_sh=""
 $ alldone=""
 $ error=""
@@ -185,6 +186,13 @@ $   THEN
 $     error = "true"
 $     gotopt = "t"
 $     P'i' = P'i' - "h"
+$     gotshortopt = "t"
+$   ENDIF
+$   IF (F$EXTRACT(0,1,P'i') .EQS. "m")
+$   THEN
+$     maniskip = "true"
+$     gotopt = "t"
+$     P'i' = P'i' - "m"
 $     gotshortopt = "t"
 $   ENDIF
 $   IF (F$EXTRACT(0,1,P'i') .EQS. "r")
@@ -290,13 +298,14 @@ $!
 $ IF (error)
 $ THEN
 $   me = F$PARSE(me,,,"DIRECTORY")+ F$PARSE(me,,,"NAME")
-$   echo "Usage: @''me' [-dehrEKOSV] [-fconfig.sh] [-Dsymbol] [-Dsymbol=value]"
-$   echo "                [-Usymbol] [-Usymbol=]"
+$   echo "Usage: @''me' [-dehmrEKOSV] [-fconfig.sh] [-Dsymbol] [-Dsymbol=value]"
+$   echo "                [-Usymbol]  [-Usymbol=]"
 $   TYPE SYS$INPUT
  "-d" : use defaults for all answers.
  "-e" : go on without questioning past the production of config.sh.    *
  "-f" : specify an alternate default configuration file.
  "-h" : print this help message and exit (with an error status).
+ "-m" : skip the MANIFEST check to see that all files are present
  "-r" : reuse C symbols value if possible (skips costly nm extraction).*
  "-s" : silent mode, only echoes questions and essential information.
  -"D" : define symbol to have some value:                              *
@@ -420,8 +429,11 @@ $!
 $     OPEN/WRITE MISSING MISSING.
 $!change to "FALSE" if you wish to skip the manifest search 
 $!(which after all is rather slow in DCL :-)
-$     IF ("TRUE")	
+$     IF (maniskip)
 $     THEN
+$       echo "Skipping MANIFEST check as requested"
+$     ELSE
+$!
 $       OPEN/READ CONFIG 'manifestfound'
 $Read_loop_manifest:
 $       READ/END_OF_FILE = Done_manifest CONFIG line
@@ -1707,6 +1719,48 @@ $ THEN
 $   use_multiplicity="Y"
 $ ELSE
 $   use_multiplicity="N"
+$ ENDIF
+$!
+$! Ask if they want to build with 64-bit support
+$ if (Archname.eqs."VMS_AXP").and.("''f$extract(1,3, f$getsyi(""version""))'".ges."7.1")
+$ THEN
+$   echo "This version of perl has experimental support for building wtih
+$   echo "64 bit integers and 128 bit floating point variables. This gives
+$   echo "a much larger range for perl's mathematical operations. (Note that
+$   echo "does *not* enable 64-bit fileops at the moment, as Dec C doesn't
+$   echo "do that yet)"
+$   echo ""
+$   dflt = use_64bit
+$   rp = "Build with 64 bits? [''dflt'] "
+$   GOSUB myread
+$     if ans.eqs."" then ans = dflt
+$   if (f$extract(0, 1, "''ans'").eqs."Y").or.(f$extract(0, 1, "''ans'").eqs."y")
+$   THEN
+$     use_64bit="Y"
+$   ELSE
+$     use_64bit="N"
+$   ENDIF
+$ ENDIF
+$!
+$! Ask if they want to build with 64-bit support
+$ if (Archname.eqs."VMS_AXP").and.("''f$extract(1,3, f$getsyi(""version""))'".ges."7.1")
+$ THEN
+$   echo "This version of perl has experimental support for building wtih
+$   echo "64 bit integers and 128 bit floating point variables. This gives
+$   echo "a much larger range for perl's mathematical operations. (Note that
+$   echo "does *not* enable 64-bit fileops at the moment, as Dec C doesn't
+$   echo "do that yet)"
+$   echo ""
+$   dflt = use_64bit
+$   rp = "Build with 64 bits? [''dflt'] "
+$   GOSUB myread
+$     if ans.eqs."" then ans = dflt
+$   if (f$extract(0, 1, "''ans'").eqs."Y").or.(f$extract(0, 1, "''ans'").eqs."y")
+$   THEN
+$     use_64bit="Y"
+$   ELSE
+$     use_64bit="N"
+$   ENDIF
 $ ENDIF
 $!
 $! Ask if they want to build with 64-bit support
