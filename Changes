@@ -31,6 +31,150 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10516] By: jhi                                   on 2001/06/11  14:46:33
+        Log: Add the modfl_pow32_bug (anti)definition also to VOS headers.
+     Branch: perl
+	   ! vos/config.alpha.h vos/config.ga.h
+____________________________________________________________________________
+[ 10515] By: jhi                                   on 2001/06/11  14:39:05
+        Log: VOS updates from Paul Green for @10476.
+     Branch: perl
+	   ! README.vos vos/Changes vos/build.cm vos/compile_perl.cm
+	   ! vos/config.alpha.def vos/config.alpha.h vos/config.ga.def
+	   ! vos/config.ga.h vos/configure_perl.cm
+____________________________________________________________________________
+[ 10514] By: jhi                                   on 2001/06/11  12:58:43
+        Log: Subject: [PATCH] Not many people know this ...
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Mon, 11 Jun 2001 14:55:15 +0100
+             Message-Id: <E159S9z-00015D-00@draco.cus.cam.ac.uk>
+     Branch: perl
+	   ! pod/perldebug.pod
+____________________________________________________________________________
+[ 10513] By: jhi                                   on 2001/06/11  12:30:06
+        Log: Add final commas to lists as suggested by Philip Newton.
+     Branch: perl
+	   ! lib/ExtUtils/Constant.pm t/lib/extutils.t
+____________________________________________________________________________
+[ 10512] By: jhi                                   on 2001/06/11  12:28:49
+        Log: Subject: [MacPerl-Porters] [PATCH] Mac OS Compatability for bleadperl
+             Date: Sun, 10 Jun 2001 23:35:38 -0400
+             From: Chris Nandor <pudge@pobox.com>
+             Message-Id: <p05100306b749ec0eaade@[10.0.1.177]>
+     Branch: perl
+	   ! lib/DirHandle.pm lib/File/Basename.pm lib/diagnostics.pm
+	   ! perl.c t/base/term.t t/comp/cpp.t t/comp/multiline.t
+	   ! t/comp/script.t t/lib/anydbm.t t/lib/autoloader.t
+	   ! t/lib/dirhand.t t/lib/selfloader.t t/op/anonsub.t
+	   ! t/op/closure.t t/op/defins.t t/op/exec.t t/op/goto.t
+	   ! t/op/pack.t t/op/regexp.t t/op/regexp_noamp.t t/op/split.t
+	   ! t/op/write.t t/pragma/strict.t
+____________________________________________________________________________
+[ 10511] By: jhi                                   on 2001/06/11  12:13:31
+        Log: Subject: [RESEND] [PATCH] Mac OS lib patches for bleadperl
+             From: Chris Nandor <pudge@pobox.com>
+             Date: Mon, 11 Jun 2001 08:24:28 -0400
+             Message-Id: <p05100303b74a66faf625@[10.0.1.177]>
+     Branch: perl
+	   ! ext/IO/lib/IO/Dir.pm lib/File/Copy.pm t/lib/filecopy.t
+	   ! t/lib/io_dir.t
+____________________________________________________________________________
+[ 10510] By: jhi                                   on 2001/06/11  12:03:16
+        Log: One more run_byacc (a hand-tweaked version had slipped in).
+     Branch: perl
+	   ! perly.c vms/perly_c.vms
+____________________________________________________________________________
+[ 10509] By: nick                                  on 2001/06/11  07:49:15
+        Log: Integrate mainline
+     Branch: perlio
+	  !> Makefile.SH embed.h embed.pl global.sym
+	  !> lib/ExtUtils/Constant.pm lib/ExtUtils/Manifest.pm objXSUB.h
+	  !> perl.h perlapi.c perlapi.h perly.c perly.fixer perly.h perly.y
+	  !> perly_c.diff pod/perl572delta.pod pod/perlapi.pod proto.h sv.c
+	  !> t/lib/extutils.t util.c vms/perly_c.vms vms/perly_h.vms
+____________________________________________________________________________
+[ 10508] By: jhi                                   on 2001/06/10  22:38:05
+        Log: Subject: [PATCH] ExtUtils::Manifest not -w clean
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Reply-To: mjtg@cam.ac.uk
+             Message-Id: <E159Ei8-0006Tz-00@draco.cus.cam.ac.uk>
+     Branch: perl
+	   ! lib/ExtUtils/Manifest.pm
+____________________________________________________________________________
+[ 10507] By: jhi                                   on 2001/06/10  22:37:16
+        Log: Subject: [PATCH] ExtUtils::Constant
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sun, 10 Jun 2001 23:25:41 +0100
+             Message-ID: <20010610232540.C76396@plum.flirble.org>
+     Branch: perl
+	   ! lib/ExtUtils/Constant.pm t/lib/extutils.t
+____________________________________________________________________________
+[ 10506] By: jhi                                   on 2001/06/10  20:57:20
+        Log: Integrate perlio.
+     Branch: perl
+	  !> iperlsys.h
+____________________________________________________________________________
+[ 10505] By: jhi                                   on 2001/06/10  18:37:57
+        Log: Move the grok_number and its lieutenant grok_numeric_radix
+             from sv.c statics to util.c and public.
+     Branch: perl
+	   ! embed.h embed.pl global.sym objXSUB.h perl.h perlapi.c
+	   ! perlapi.h pod/perlapi.pod proto.h sv.c util.c
+____________________________________________________________________________
+[ 10504] By: nick                                  on 2001/06/10  17:47:06
+        Log: Fix (valid) -Wall warnings in perlio.c
+     Branch: perlio
+	   ! iperlsys.h
+____________________________________________________________________________
+[ 10503] By: jhi                                   on 2001/06/10  17:38:28
+        Log: Update perly_c.diff, update perly.fixer to edit away
+             some of the -Wall noise.
+     Branch: perl
+	   ! perly.c perly.fixer perly_c.diff vms/perly_c.vms
+____________________________________________________________________________
+[ 10502] By: jhi                                   on 2001/06/10  17:09:42
+        Log: Check the version of byacc.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 10501] By: jhi                                   on 2001/06/10  17:00:08
+        Log: Subject: [PATCH] perly.y overhaul
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Sun, 10 Jun 2001 16:56:54 +0100
+             Message-ID: <20010610165654.A16597@deep-dark-truthful-mirror.pmb.ox.ac.uk>
+             
+             Plus make run_byacc.
+     Branch: perl
+	   ! perly.c perly.h perly.y vms/perly_c.vms vms/perly_h.vms
+____________________________________________________________________________
+[ 10500] By: jhi                                   on 2001/06/10  16:07:28
+        Log: Integrate perlio.
+     Branch: perl
+	  !> perlio.c perlsfio.h
+____________________________________________________________________________
+[ 10499] By: nick                                  on 2001/06/10  15:01:08
+        Log: Integrate mainline
+     Branch: perlio
+	  !> Changes Configure embed.h embed.pl patchlevel.h proto.h sv.c
+	  !> t/pragma/locale.t util.c
+____________________________________________________________________________
+[ 10498] By: jhi                                   on 2001/06/10  13:49:23
+        Log: Put some meat on the perl572delta bones.  The list of
+             selected bug fixes needs more work, as does still the
+             whole document.
+     Branch: perl
+	   ! pod/perl572delta.pod
+____________________________________________________________________________
+[ 10497] By: nick                                  on 2001/06/10  12:27:51
+        Log: Paper over a crack or two with USE_SFIO
+     Branch: perlio
+	   ! perlio.c perlsfio.h
+____________________________________________________________________________
+[ 10496] By: jhi                                   on 2001/06/10  11:04:22
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10495] By: jhi                                   on 2001/06/10  10:55:34
         Log: Subject: Re: pragma/locale.t #107
              From: Hugo <hv@crypt.compulink.co.uk>
