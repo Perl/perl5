@@ -5640,7 +5640,7 @@ S_checkcomma(pTHX_ register char *s, char *name, char *what)
 
 STATIC SV *
 S_new_constant(pTHX_ char *s, STRLEN len, const char *key, SV *sv, SV *pv,
-	       const char *type) 
+	       const char *type)
 {
     dSP;
     HV *table = GvHV(PL_hintgv);		 /* ^H */
@@ -5700,8 +5700,7 @@ S_new_constant(pTHX_ char *s, STRLEN len, const char *key, SV *sv, SV *pv,
     SPAGAIN ;
     
     /* Check the eval first */
-    if (!PL_in_eval && SvTRUE(ERRSV))
-    {
+    if (!PL_in_eval && SvTRUE(ERRSV)) {
 	STRLEN n_a;
  	sv_catpv(ERRSV, "Propagated");
 	yyerror(SvPV(ERRSV, n_a)); /* Duplicates the message inside eval */
@@ -5724,9 +5723,9 @@ S_new_constant(pTHX_ char *s, STRLEN len, const char *key, SV *sv, SV *pv,
  	why2 = key;
  	sv = res;
  	goto report;
-     }
+    }
 
-     return res;
+    return res;
 }
   
 STATIC char *
@@ -6684,11 +6683,12 @@ Perl_scan_num(pTHX_ char *start)
     register char *s = start;		/* current position in buffer */
     register char *d;			/* destination in temp buffer */
     register char *e;			/* end of temp buffer */
+    IV tryiv;				/* used to see if it can be an IV */
+    UV tryuv;				/* used to see if it can be an UV */
 #if ( defined(USE_64_BIT_INT) && \
 	(!defined(HAS_STRTOLL)|| !defined(HAS_STRTOULL))) || \
     (!defined(USE_64_BIT_INT) && \
         (!defined(HAS_STRTOL) || !defined(HAS_STRTOUL)))
-    IV tryiv;				/* used to see if it can be an IV */
 #endif
     NV value;				/* number read, as a double */
     SV *sv = Nullsv;			/* place to put the converted number */
@@ -6969,9 +6969,13 @@ Perl_scan_num(pTHX_ char *start)
 	   Note: if floatit is true, then we don't need to do the
 	   conversion at all.
 	*/
-	tryiv = I_V(value);
-	if (!floatit && (NV)tryiv == value)
-	    sv_setiv(sv, tryiv);
+	tryuv = U_V(value);
+	if (!floatit && (NV)tryuv == value) {
+	    if (tryuv <= IV_MAX)
+		sv_setiv(sv, (IV)tryuv);
+	    else
+		sv_setuv(sv, tryuv);
+	}
 	else
 	    sv_setnv(sv, value);
 #else
