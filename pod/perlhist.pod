@@ -368,6 +368,7 @@ the strings?).
  Nicholas 5.8.2-RC1     2003-Oct-27
           5.8.2-RC2     2003-Nov-03
           5.8.2         2003-Nov-05
+          5.8.3-RC1     2004-Jan-07
 
  Hugo     5.9.0         2003-Oct-27
 
