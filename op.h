@@ -156,7 +156,9 @@ Deprecated.  Use C<GIMME_V> instead.
   /* OP_?ELEM only */
 #define OPpLVAL_DEFER		16	/* Defer creation of array/hash elem */
   /* OP_RV2?V, OP_GVSV only */
-#define OPpOUR_INTRO		16	/* Defer creation of array/hash elem */
+#define OPpOUR_INTRO		16	/* Variable was in an our() */
+  /* OP_RV2[AH]V, OP_PAD[AH]V, OP_[AH]ELEM */
+#define OPpMAYBE_LVSUB		8	/* We might be an lvalue to return */
   /* for OP_RV2?V, lower bits carry hints (currently only HINT_STRICT_REFS) */
 
 /* Private for OPs with TARGLEX */

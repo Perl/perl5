@@ -1559,9 +1559,12 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	    goto nomod;
 	ref(cUNOPo->op_first, o->op_type);
 	/* FALL THROUGH */
-    case OP_AASSIGN:
     case OP_ASLICE:
     case OP_HSLICE:
+	if (type == OP_LEAVESUBLV)
+	    o->op_private |= OPpMAYBE_LVSUB;
+	/* FALL THROUGH */
+    case OP_AASSIGN:
     case OP_NEXTSTATE:
     case OP_DBSTATE:
     case OP_REFGEN:
@@ -1590,6 +1593,8 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	    return o;		/* Treat \(@foo) like ordinary list. */
 	if (scalar_mod_type(o, type))
 	    goto nomod;
+	if (type == OP_LEAVESUBLV)
+	    o->op_private |= OPpMAYBE_LVSUB;
 	/* FALL THROUGH */
     case OP_PADSV:
 	PL_modcount++;
@@ -1617,6 +1622,8 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	/* FALL THROUGH */
     case OP_POS:
     case OP_VEC:
+	if (type == OP_LEAVESUBLV)
+	    o->op_private |= OPpMAYBE_LVSUB;
       lvalue_func:
 	pad_free(o->op_targ);
 	o->op_targ = pad_alloc(o->op_type, SVs_PADMY);
@@ -1631,12 +1638,15 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	if (type == OP_ENTERSUB &&
 	     !(o->op_private & (OPpLVAL_INTRO | OPpDEREF)))
 	    o->op_private |= OPpLVAL_DEFER;
+	if (type == OP_LEAVESUBLV)
+	    o->op_private |= OPpMAYBE_LVSUB;
 	PL_modcount++;
 	break;
 
     case OP_SCOPE:
     case OP_LEAVE:
     case OP_ENTER:
+    case OP_LINESEQ:
 	if (o->op_flags & OPf_KIDS)
 	    mod(cLISTOPo->op_last, type);
 	break;
@@ -1655,8 +1665,14 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	for (kid = cLISTOPo->op_first; kid; kid = kid->op_sibling)
 	    mod(kid, type);
 	break;
+
+    case OP_RETURN:
+	if (type != OP_LEAVESUBLV)
+	    goto nomod;
+	break; /* mod()ing was handled by ck_return() */
     }
-    o->op_flags |= OPf_MOD;
+    if (type != OP_LEAVESUBLV)
+        o->op_flags |= OPf_MOD;
 
     if (type == OP_AASSIGN || type == OP_SASSIGN)
 	o->op_flags |= OPf_SPECIAL|OPf_REF;
@@ -1665,7 +1681,8 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	o->op_flags &= ~OPf_SPECIAL;
 	PL_hints |= HINT_BLOCK_SCOPE;
     }
-    else if (type != OP_GREPSTART && type != OP_ENTERSUB)
+    else if (type != OP_GREPSTART && type != OP_ENTERSUB
+             && type != OP_LEAVESUBLV)
 	o->op_flags |= OPf_REF;
     return o;
 }
@@ -4689,7 +4706,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	av_store(PL_comppad_name, AvFILLp(PL_comppad), Nullsv);
 
     if (CvLVALUE(cv)) {
-	CvROOT(cv) = newUNOP(OP_LEAVESUBLV, 0, scalarseq(block));
+	CvROOT(cv) = newUNOP(OP_LEAVESUBLV, 0,
+			     mod(scalarseq(block), OP_LEAVESUBLV));
     }
     else {
 	CvROOT(cv) = newUNOP(OP_LEAVESUB, 0, scalarseq(block));
@@ -6090,6 +6108,17 @@ Perl_ck_require(pTHX_ OP *o)
     return ck_fun(o);
 }
 
+OP *
+Perl_ck_return(pTHX_ OP *o)
+{
+    OP *kid;
+    if (CvLVALUE(PL_compcv)) {
+	for (kid = cLISTOPo->op_first->op_sibling; kid; kid = kid->op_sibling)
+	    mod(kid, OP_LEAVESUBLV);
+    }
+    return o;
+}
+
 #if 0
 OP *
 Perl_ck_retarget(pTHX_ OP *o)
@@ -6569,7 +6598,6 @@ Perl_peep(pTHX_ register OP *o)
 {
     register OP* oldop = 0;
     STRLEN n_a;
-    OP *last_composite = Nullop;
 
     if (!o || o->op_seq)
 	return;
@@ -6588,7 +6616,6 @@ Perl_peep(pTHX_ register OP *o)
 	case OP_DBSTATE:
 	    PL_curcop = ((COP*)o);		/* for warnings */
 	    o->op_seq = PL_op_seqmax++;
-	    last_composite = Nullop;
 	    break;
 
 	case OP_CONST:
@@ -6681,7 +6708,7 @@ Perl_peep(pTHX_ register OP *o)
 		    (PL_op = pop->op_next) &&
 		    pop->op_next->op_type == OP_AELEM &&
 		    !(pop->op_next->op_private &
-		      (OPpLVAL_INTRO|OPpLVAL_DEFER|OPpDEREF)) &&
+		      (OPpLVAL_INTRO|OPpLVAL_DEFER|OPpDEREF|OPpMAYBE_LVSUB)) &&
 		    (i = SvIV(((SVOP*)pop)->op_sv) - PL_compiling.cop_arybase)
 				<= 255 &&
 		    i >= 0)
@@ -6897,42 +6924,6 @@ Perl_peep(pTHX_ register OP *o)
 	    }
 	    break;
 	}
-
-	case OP_RV2AV:
-	case OP_RV2HV:
-	    if (!(o->op_flags & OPf_WANT)
-		|| (o->op_flags & OPf_WANT) == OPf_WANT_LIST)
-	    {
-		last_composite = o;
-	    }
-	    o->op_seq = PL_op_seqmax++;
-	    break;
-
-	case OP_RETURN:
-	    if (o->op_next && o->op_next->op_type != OP_LEAVESUBLV) {
-		o->op_seq = PL_op_seqmax++;
-		break;
-	    }
-	    /* FALL THROUGH */
-
-	case OP_LEAVESUBLV:
-	    if (last_composite) {
-		OP *r = last_composite;
-
-		while (r->op_sibling)
-		   r = r->op_sibling;
-		if (r->op_next == o
-		    || (r->op_next->op_type == OP_LIST
-			&& r->op_next->op_next == o))
-		{
-		    if (last_composite->op_type == OP_RV2AV)
-			yyerror("Lvalue subs returning arrays not implemented yet");
-		    else
-			yyerror("Lvalue subs returning hashes not implemented yet");
-			;
-		}		
-	    }
-	    /* FALL THROUGH */
 
 	default:
 	    o->op_seq = PL_op_seqmax++;

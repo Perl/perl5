@@ -274,6 +274,7 @@
 #define io_close		Perl_io_close
 #define invert			Perl_invert
 #define is_gv_magical		Perl_is_gv_magical
+#define is_lvalue_sub		Perl_is_lvalue_sub
 #define is_uni_alnum		Perl_is_uni_alnum
 #define is_uni_alnumc		Perl_is_uni_alnumc
 #define is_uni_idfirst		Perl_is_uni_idfirst
@@ -1181,6 +1182,7 @@
 #define ck_open			Perl_ck_open
 #define ck_repeat		Perl_ck_repeat
 #define ck_require		Perl_ck_require
+#define ck_return		Perl_ck_return
 #define ck_rfun			Perl_ck_rfun
 #define ck_rvconst		Perl_ck_rvconst
 #define ck_sassign		Perl_ck_sassign
@@ -1752,6 +1754,7 @@
 #define io_close(a,b)		Perl_io_close(aTHX_ a,b)
 #define invert(a)		Perl_invert(aTHX_ a)
 #define is_gv_magical(a,b,c)	Perl_is_gv_magical(aTHX_ a,b,c)
+#define is_lvalue_sub()		Perl_is_lvalue_sub(aTHX)
 #define is_uni_alnum(a)		Perl_is_uni_alnum(aTHX_ a)
 #define is_uni_alnumc(a)	Perl_is_uni_alnumc(aTHX_ a)
 #define is_uni_idfirst(a)	Perl_is_uni_idfirst(aTHX_ a)
@@ -2647,6 +2650,7 @@
 #define ck_open(a)		Perl_ck_open(aTHX_ a)
 #define ck_repeat(a)		Perl_ck_repeat(aTHX_ a)
 #define ck_require(a)		Perl_ck_require(aTHX_ a)
+#define ck_return(a)		Perl_ck_return(aTHX_ a)
 #define ck_rfun(a)		Perl_ck_rfun(aTHX_ a)
 #define ck_rvconst(a)		Perl_ck_rvconst(aTHX_ a)
 #define ck_sassign(a)		Perl_ck_sassign(aTHX_ a)
@@ -3433,6 +3437,8 @@
 #define invert			Perl_invert
 #define Perl_is_gv_magical	CPerlObj::Perl_is_gv_magical
 #define is_gv_magical		Perl_is_gv_magical
+#define Perl_is_lvalue_sub	CPerlObj::Perl_is_lvalue_sub
+#define is_lvalue_sub		Perl_is_lvalue_sub
 #define Perl_is_uni_alnum	CPerlObj::Perl_is_uni_alnum
 #define is_uni_alnum		Perl_is_uni_alnum
 #define Perl_is_uni_alnumc	CPerlObj::Perl_is_uni_alnumc
@@ -5136,6 +5142,8 @@
 #define ck_repeat		Perl_ck_repeat
 #define Perl_ck_require		CPerlObj::Perl_ck_require
 #define ck_require		Perl_ck_require
+#define Perl_ck_return		CPerlObj::Perl_ck_return
+#define ck_return		Perl_ck_return
 #define Perl_ck_rfun		CPerlObj::Perl_ck_rfun
 #define ck_rfun			Perl_ck_rfun
 #define Perl_ck_rvconst		CPerlObj::Perl_ck_rvconst

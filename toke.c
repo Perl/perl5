@@ -3024,9 +3024,21 @@ Perl_yylex(pTHX)
 		    PL_lex_stuff = Nullsv;
 		}
 		else {
-		    attrs = append_elem(OP_LIST, attrs,
-					newSVOP(OP_CONST, 0,
-						newSVpvn(s, len)));
+		    if (!PL_in_my && len == 6 && strnEQ(s, "lvalue", len))
+			CvLVALUE_on(PL_compcv);
+		    else if (!PL_in_my && len == 6 && strnEQ(s, "locked", len))
+			CvLOCKED_on(PL_compcv);
+		    else if (!PL_in_my && len == 6 && strnEQ(s, "method", len))
+			CvMETHOD_on(PL_compcv);
+		    /* After we've set the flags, it could be argued that
+		       we don't need to do the attributes.pm-based setting
+		       process, and shouldn't bother appending recognized
+		       flags. To experiment with that, uncomment the
+		       following "else": */
+		    /* else */
+		        attrs = append_elem(OP_LIST, attrs,
+					    newSVOP(OP_CONST, 0,
+					      	    newSVpvn(s, len)));
 		}
 		s = skipspace(d);
 		if (*s == ':' && s[1] != ':')

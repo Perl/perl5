@@ -380,3 +380,10 @@ See C<PUSHu>.
     SvREFCNT_dec(tmpRef);                   \
     SvRV(rv)=AMG_CALLun(rv,copy);        \
   } } STMT_END
+
+/*
+=for apidoc mU||LVRET
+True if this op will be the return value of an lvalue subroutine
+
+=cut */
+#define LVRET ((PL_op->op_private & OPpMAYBE_LVSUB) && Perl_is_lvalue_sub())
