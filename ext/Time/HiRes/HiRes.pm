@@ -15,7 +15,7 @@ require DynaLoader;
 		 d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
 		 d_nanosleep);
 	
-$VERSION = '1.52';
+$VERSION = '1.55';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -343,7 +343,7 @@ G. Aas <gisle@aas.no>
 
 Copyright (c) 1996-2002 Douglas E. Wegscheid.  All rights reserved.
 
-Copyright (c) 2002,2003 Jarkko Hietaniemi.  All rights reserved.
+Copyright (c) 2002,2003,2004 Jarkko Hietaniemi.  All rights reserved.
 
 This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
