@@ -685,8 +685,12 @@ setuid perl scripts securely.\n");
     if (!scriptname)
 	scriptname = argv[0];
     if (e_fp) {
-	if (PerlIO_flush(e_fp) || PerlIO_error(e_fp) || PerlIO_close(e_fp))
+	if (PerlIO_flush(e_fp) || PerlIO_error(e_fp) || PerlIO_close(e_fp)) {
+#ifndef MULTIPLICITY
+	    warn("Did you forget to compile with -DMULTIPLICITY?");
+#endif	    
 	    croak("Can't write to temp file for -e: %s", Strerror(errno));
+	}
 	e_fp = Nullfp;
 	argc++,argv--;
 	scriptname = e_tmpname;
