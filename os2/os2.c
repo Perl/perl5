@@ -199,9 +199,11 @@ register SV **sp;
 	if (flag == P_WAIT)
 		flag = P_NOWAIT;
 
-	if (*Argv[0] != '/' && *Argv[0] != '\\'
-	    && !(*Argv[0] && *Argv[1] == ':' 
-		 && (*Argv[2] == '/' || *Argv[2] != '\\'))
+	if (strEQ(Argv[0],"/bin/sh")) Argv[0] = SH_PATH;
+
+	if (Argv[0][0] != '/' && Argv[0][0] != '\\'
+	    && !(Argv[0][0] && Argv[0][1] == ':' 
+		 && (Argv[0][2] == '/' || Argv[0][2] != '\\'))
 	    ) /* will swawnvp use PATH? */
 	    TAINT_ENV();	/* testing IFS here is overkill, probably */
 	/* We should check PERL_SH* and PERLLIB_* as well? */
@@ -231,7 +233,7 @@ int execf;
     register char **a;
     register char *s;
     char flags[10];
-    char *shell, *copt;
+    char *shell, *copt, *news = NULL;
     int rc;
 
 #ifdef TRYSHELL
@@ -255,6 +257,15 @@ int execf;
     while (*cmd && isSPACE(*cmd))
 	cmd++;
 
+    if (strnEQ(cmd,"/bin/sh",7) && isSPACE(cmd[7])) {
+	STRLEN l = strlen(SH_PATH);
+	
+	New(4545, news, strlen(cmd) - 7 + l, char);
+	strcpy(news, SH_PATH);
+	strcpy(news + l, cmd + 7);
+	cmd = news;
+    }
+
     /* save an extra exec if possible */
     /* see if there are shell metacharacters in it */
 
@@ -270,7 +281,7 @@ int execf;
 
     for (s = cmd; *s; s++) {
 	if (*s != ' ' && !isALPHA(*s) && strchr("$&*(){}[]'\";\\|?<>~`\n",*s)) {
-	    if (*s == '\n' && !s[1]) {
+	    if (*s == '\n' && s[1] == '\0') {
 		*s = '\0';
 		break;
 	    }
@@ -287,6 +298,7 @@ int execf;
 		     (execf == EXECF_SPAWN ? "spawn" : "exec"),
 		     shell, Strerror(errno));
 	    if (rc < 0) rc = 255 << 8; /* Emulate the fork(). */
+	    if (news) Safefree(news);
 	    return rc;
 	}
     }
@@ -317,6 +329,7 @@ int execf;
 	if (rc < 0) rc = 255 << 8; /* Emulate the fork(). */
     } else
     	rc = -1;
+    if (news) Safefree(news);
     do_execfree();
     return rc;
 }
@@ -342,27 +355,30 @@ char *cmd;
     return do_spawn2(cmd, EXECF_TRUEEXEC);
 }
 
-#ifndef HAS_FORK
-FILE *
-my_popen(cmd,mode)
+PerlIO *
+my_syspopen(cmd,mode)
 char	*cmd;
 char	*mode;
 {
+    PerlIO *res;
+    SV *sv;
+
 #ifdef TRYSHELL
-    return popen(cmd, mode);
+    res = popen(cmd, mode);
 #else
     char *shell = getenv("EMXSHELL");
-    FILE *res;
-    
+
     my_setenv("EMXSHELL", SH_PATH);
     res = popen(cmd, mode);
     my_setenv("EMXSHELL", shell);
-    return res;
 #endif 
+    sv = *av_fetch(fdpid, PerlIO_fileno(res), TRUE);
+    (void)SvUPGRADE(sv,SVt_IV);
+    SvIVX(sv) = -1;			/* A cooky. */
+    return res;
 }
-#endif
 
-/*****************************************************************************/
+/******************************************************************/
 
 #ifndef HAS_FORK
 int
@@ -374,7 +390,7 @@ fork(void)
 }
 #endif
 
-/*****************************************************************************/
+/*******************************************************************/
 /* not implemented in EMX 0.9a */
 
 void *	ctermid(x)	{ return 0; }
@@ -383,7 +399,7 @@ void *	ctermid(x)	{ return 0; }
 void *	ttyname(x)	{ return 0; }
 #endif
 
-/*****************************************************************************/
+/******************************************************************/
 /* my socket forwarders - EMX lib only provides static forwarders */
 
 static HMODULE htcp = 0;
@@ -594,47 +610,6 @@ os2error(int rc)
 	return buf;
 }
 
-OS2_Perl_data_t OS2_Perl_data;
-
-int
-Xs_OS2_init()
-{
-    char *file = __FILE__;
-    {
-	GV *gv;
-	
-        newXS("File::Copy::syscopy", XS_File__Copy_syscopy, file);
-        newXS("DynaLoader::mod2fname", XS_DynaLoader_mod2fname, file);
-	gv = gv_fetchpv("OS2::is_aout", TRUE, SVt_PV);
-	GvMULTI_on(gv);
-#ifdef PERL_IS_AOUT
-	sv_setiv(GvSV(gv), 1);
-#endif 
-    }
-}
-
-void
-Perl_OS2_init()
-{
-    char *shell;
-
-    settmppath();
-    OS2_Perl_data.xs_init = &Xs_OS2_init;
-    if ( (shell = getenv("PERL_SH_DRIVE")) ) {
-	sh_path[0] = shell[0];
-    } else if ( (shell = getenv("PERL_SH_DIR")) ) {
-	int l = strlen(shell);
-	if (shell[l-1] == '/' || shell[l-1] == '\\') {
-	    l--;
-	}
-	if (l > STATIC_FILE_LENGTH - 7) {
-	    die("PERL_SH_DIR too long");
-	}
-	strncpy(sh_path, shell, l);
-	strcpy(sh_path + l, "/sh.exe");
-    }
-}
-
 char sh_path[STATIC_FILE_LENGTH+1] = SH_PATH_INI;
 
 char *
@@ -668,7 +643,7 @@ perllib_mangle(char *s, unsigned int l)
     if (l == 0) {
 	l = strlen(s);
     }
-    if (l <= oldl || strnicmp(oldp, s, oldl) != 0) {
+    if (l < oldl || strnicmp(oldp, s, oldl) != 0) {
 	return s;
     }
     if (l + newl - oldl > STATIC_FILE_LENGTH || newl > STATIC_FILE_LENGTH) {
@@ -681,3 +656,339 @@ perllib_mangle(char *s, unsigned int l)
 
 extern void dlopen();
 void *fakedl = &dlopen;		/* Pull in dynaloading part. */
+
+#define sys_is_absolute(path) ( isALPHA((path)[0]) && (path)[1] == ':' \
+				&& ((path)[2] == '/' || (path)[2] == '\\'))
+#define sys_is_rooted _fnisabs
+#define sys_is_relative _fnisrel
+#define current_drive _getdrive
+
+#undef chdir				/* Was _chdir2. */
+#define sys_chdir(p) (chdir(p) == 0)
+#define change_drive(d) (_chdrive(d), (current_drive() == toupper(d)))
+
+XS(XS_Cwd_current_drive)
+{
+    dXSARGS;
+    if (items != 0)
+	croak("Usage: Cwd::current_drive()");
+    {
+	char	RETVAL;
+
+	RETVAL = current_drive();
+	ST(0) = sv_newmortal();
+	sv_setpvn(ST(0), (char *)&RETVAL, 1);
+    }
+    XSRETURN(1);
+}
+
+XS(XS_Cwd_sys_chdir)
+{
+    dXSARGS;
+    if (items != 1)
+	croak("Usage: Cwd::sys_chdir(path)");
+    {
+	char *	path = (char *)SvPV(ST(0),na);
+	bool	RETVAL;
+
+	RETVAL = sys_chdir(path);
+	ST(0) = RETVAL ? &sv_yes : &sv_no;
+	if (SvREFCNT(ST(0))) sv_2mortal(ST(0));
+    }
+    XSRETURN(1);
+}
+
+XS(XS_Cwd_change_drive)
+{
+    dXSARGS;
+    if (items != 1)
+	croak("Usage: Cwd::change_drive(d)");
+    {
+	char	d = (char)*SvPV(ST(0),na);
+	bool	RETVAL;
+
+	RETVAL = change_drive(d);
+	ST(0) = RETVAL ? &sv_yes : &sv_no;
+	if (SvREFCNT(ST(0))) sv_2mortal(ST(0));
+    }
+    XSRETURN(1);
+}
+
+XS(XS_Cwd_sys_is_absolute)
+{
+    dXSARGS;
+    if (items != 1)
+	croak("Usage: Cwd::sys_is_absolute(path)");
+    {
+	char *	path = (char *)SvPV(ST(0),na);
+	bool	RETVAL;
+
+	RETVAL = sys_is_absolute(path);
+	ST(0) = RETVAL ? &sv_yes : &sv_no;
+	if (SvREFCNT(ST(0))) sv_2mortal(ST(0));
+    }
+    XSRETURN(1);
+}
+
+XS(XS_Cwd_sys_is_rooted)
+{
+    dXSARGS;
+    if (items != 1)
+	croak("Usage: Cwd::sys_is_rooted(path)");
+    {
+	char *	path = (char *)SvPV(ST(0),na);
+	bool	RETVAL;
+
+	RETVAL = sys_is_rooted(path);
+	ST(0) = RETVAL ? &sv_yes : &sv_no;
+	if (SvREFCNT(ST(0))) sv_2mortal(ST(0));
+    }
+    XSRETURN(1);
+}
+
+XS(XS_Cwd_sys_is_relative)
+{
+    dXSARGS;
+    if (items != 1)
+	croak("Usage: Cwd::sys_is_relative(path)");
+    {
+	char *	path = (char *)SvPV(ST(0),na);
+	bool	RETVAL;
+
+	RETVAL = sys_is_relative(path);
+	ST(0) = RETVAL ? &sv_yes : &sv_no;
+	if (SvREFCNT(ST(0))) sv_2mortal(ST(0));
+    }
+    XSRETURN(1);
+}
+
+XS(XS_Cwd_sys_cwd)
+{
+    dXSARGS;
+    if (items != 0)
+	croak("Usage: Cwd::sys_cwd()");
+    {
+	char p[MAXPATHLEN];
+	char *	RETVAL;
+	RETVAL = _getcwd2(p, MAXPATHLEN);
+	ST(0) = sv_newmortal();
+	sv_setpv((SV*)ST(0), RETVAL);
+    }
+    XSRETURN(1);
+}
+
+XS(XS_Cwd_sys_abspath)
+{
+    dXSARGS;
+    if (items < 1 || items > 2)
+	croak("Usage: Cwd::sys_abspath(path, dir = NULL)");
+    {
+	char *	path = (char *)SvPV(ST(0),na);
+	char *	dir;
+	char p[MAXPATHLEN];
+	char *	RETVAL;
+
+	if (items < 2)
+	    dir = NULL;
+	else {
+	    dir = (char *)SvPV(ST(1),na);
+	}
+	if (path[0] == '.' && (path[1] == '/' || path[1] == '\\')) {
+	    path += 2;
+	}
+	if (dir == NULL) {
+	    if (_abspath(p, path, MAXPATHLEN) == 0) {
+		RETVAL = p;
+	    } else {
+		RETVAL = NULL;
+	    }
+	} else {
+	    /* Absolute with drive: */
+	    if ( sys_is_absolute(path) ) {
+		if (_abspath(p, path, MAXPATHLEN) == 0) {
+		    RETVAL = p;
+		} else {
+		    RETVAL = NULL;
+		}
+	    } else if (path[0] == '/' || path[0] == '\\') {
+		/* Rooted, but maybe on different drive. */
+		if (isALPHA(dir[0]) && dir[1] == ':' ) {
+		    char p1[MAXPATHLEN];
+
+		    /* Need to prepend the drive. */
+		    p1[0] = dir[0];
+		    p1[1] = dir[1];
+		    Copy(path, p1 + 2, strlen(path) + 1, char);
+		    RETVAL = p;
+		    if (_abspath(p, p1, MAXPATHLEN) == 0) {
+			RETVAL = p;
+		    } else {
+			RETVAL = NULL;
+		    }
+		} else if (_abspath(p, path, MAXPATHLEN) == 0) {
+		    RETVAL = p;
+		} else {
+		    RETVAL = NULL;
+		}
+	    } else {
+		/* Either path is relative, or starts with a drive letter. */
+		/* If the path starts with a drive letter, then dir is
+		   relevant only if 
+		   a/b)	it is absolute/x:relative on the same drive.  
+		   c)	path is on current drive, and dir is rooted
+		   In all the cases it is safe to drop the drive part
+		   of the path. */
+		if ( !sys_is_relative(path) ) {
+		    int is_drived;
+
+		    if ( ( ( sys_is_absolute(dir)
+			     || (isALPHA(dir[0]) && dir[1] == ':' 
+				 && strnicmp(dir, path,1) == 0)) 
+			   && strnicmp(dir, path,1) == 0)
+			 || ( !(isALPHA(dir[0]) && dir[1] == ':')
+			      && toupper(path[0]) == current_drive())) {
+			path += 2;
+		    } else if (_abspath(p, path, MAXPATHLEN) == 0) {
+			RETVAL = p; goto done;
+		    } else {
+			RETVAL = NULL; goto done;
+		    }
+		}
+		{
+		    /* Need to prepend the absolute path of dir. */
+		    char p1[MAXPATHLEN];
+
+		    if (_abspath(p1, dir, MAXPATHLEN) == 0) {
+			int l = strlen(p1);
+
+			if (p1[ l - 1 ] != '/') {
+			    p1[ l ] = '/';
+			    l++;
+			}
+			Copy(path, p1 + l, strlen(path) + 1, char);
+			if (_abspath(p, p1, MAXPATHLEN) == 0) {
+			    RETVAL = p;
+			} else {
+			    RETVAL = NULL;
+			}
+		    } else {
+			RETVAL = NULL;
+		    }
+		}
+	      done:
+	    }
+	}
+	ST(0) = sv_newmortal();
+	sv_setpv((SV*)ST(0), RETVAL);
+    }
+    XSRETURN(1);
+}
+
+#define extLibpath(type) 					\
+    (CheckOSError(DosQueryExtLIBPATH(to, ((type) ? END_LIBPATH	\
+					  : BEGIN_LIBPATH)))	\
+     ? NULL : to )
+
+#define extLibpath_set(p,type) 					\
+    (!CheckOSError(DosSetExtLIBPATH((p), ((type) ? END_LIBPATH	\
+					  : BEGIN_LIBPATH))))
+
+XS(XS_Cwd_extLibpath)
+{
+    dXSARGS;
+    if (items < 0 || items > 1)
+	croak("Usage: Cwd::extLibpath(type = 0)");
+    {
+	bool	type;
+	char	to[1024];
+	U32	rc;
+	char *	RETVAL;
+
+	if (items < 1)
+	    type = 0;
+	else {
+	    type = (int)SvIV(ST(0));
+	}
+
+	RETVAL = extLibpath(type);
+	ST(0) = sv_newmortal();
+	sv_setpv((SV*)ST(0), RETVAL);
+    }
+    XSRETURN(1);
+}
+
+XS(XS_Cwd_extLibpath_set)
+{
+    dXSARGS;
+    if (items < 1 || items > 2)
+	croak("Usage: Cwd::extLibpath_set(s, type = 0)");
+    {
+	char *	s = (char *)SvPV(ST(0),na);
+	bool	type;
+	U32	rc;
+	bool	RETVAL;
+
+	if (items < 2)
+	    type = 0;
+	else {
+	    type = (int)SvIV(ST(1));
+	}
+
+	RETVAL = extLibpath_set(s, type);
+	ST(0) = RETVAL ? &sv_yes : &sv_no;
+	if (SvREFCNT(ST(0))) sv_2mortal(ST(0));
+    }
+    XSRETURN(1);
+}
+
+int
+Xs_OS2_init()
+{
+    char *file = __FILE__;
+    {
+	GV *gv;
+	
+        newXS("File::Copy::syscopy", XS_File__Copy_syscopy, file);
+        newXS("DynaLoader::mod2fname", XS_DynaLoader_mod2fname, file);
+        newXS("Cwd::current_drive", XS_Cwd_current_drive, file);
+        newXS("Cwd::sys_chdir", XS_Cwd_sys_chdir, file);
+        newXS("Cwd::change_drive", XS_Cwd_change_drive, file);
+        newXS("Cwd::sys_is_absolute", XS_Cwd_sys_is_absolute, file);
+        newXS("Cwd::sys_is_rooted", XS_Cwd_sys_is_rooted, file);
+        newXS("Cwd::sys_is_relative", XS_Cwd_sys_is_relative, file);
+        newXS("Cwd::sys_cwd", XS_Cwd_sys_cwd, file);
+        newXS("Cwd::sys_abspath", XS_Cwd_sys_abspath, file);
+        newXS("Cwd::extLibpath", XS_Cwd_extLibpath, file);
+        newXS("Cwd::extLibpath_set", XS_Cwd_extLibpath_set, file);
+	gv = gv_fetchpv("OS2::is_aout", TRUE, SVt_PV);
+	GvMULTI_on(gv);
+#ifdef PERL_IS_AOUT
+	sv_setiv(GvSV(gv), 1);
+#endif 
+    }
+}
+
+OS2_Perl_data_t OS2_Perl_data;
+
+void
+Perl_OS2_init()
+{
+    char *shell;
+
+    settmppath();
+    OS2_Perl_data.xs_init = &Xs_OS2_init;
+    if ( (shell = getenv("PERL_SH_DRIVE")) ) {
+	sh_path[0] = shell[0];
+    } else if ( (shell = getenv("PERL_SH_DIR")) ) {
+	int l = strlen(shell);
+	if (shell[l-1] == '/' || shell[l-1] == '\\') {
+	    l--;
+	}
+	if (l > STATIC_FILE_LENGTH - 7) {
+	    die("PERL_SH_DIR too long");
+	}
+	strncpy(sh_path, shell, l);
+	strcpy(sh_path + l, "/sh.exe");
+    }
+}
+
