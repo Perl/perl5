@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Sep 13 18:34:32 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Mon Sep 13 19:24:34 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -9227,12 +9227,9 @@ set nice d_nice
 eval $inlibc
 
 : see if POSIX threads are available
-if test "X$usethreads" = "X$define"; then
-	set pthread.h i_pthread
-	eval $inhdr
-else
-	i_pthread="$undef"
-fi
+set pthread.h i_pthread
+eval $inhdr
+
 
 
 

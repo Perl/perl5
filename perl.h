@@ -389,7 +389,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 /* HP-UX 10.X CMA (Common Multithreaded Architecure) insists that
    pthread.h must be included before all other header files.
 */
-#if defined(USE_THREADS) && defined(PTHREAD_H_FIRST)
+#if defined(USE_THREADS) && defined(PTHREAD_H_FIRST) && defined(I_PTHREAD)
 #  include <pthread.h>
 #endif
 
@@ -1616,7 +1616,9 @@ typedef mutex_t		perl_mutex;
 typedef condition_t	perl_cond;
 typedef void *		perl_key;
 #        else /* Posix threads */
-#          include <pthread.h>
+#          ifdef I_PTHREAD
+#            include <pthread.h>
+#          endif
 typedef pthread_t	perl_os_thread;
 typedef pthread_mutex_t	perl_mutex;
 typedef pthread_cond_t	perl_cond;
