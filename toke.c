@@ -5051,6 +5051,7 @@ register char *s;
 	}
 	sv_setpvn(tmpstr,d+1,s-d);
 	s += len - 1;
+	curcop->cop_line++;	/* the preceding stmt passes a newline */
 	sv_catpvn(herewas,s,bufend-s);
 	sv_setsv(linestr,herewas);
 	oldoldbufptr = oldbufptr = bufptr = s = linestart = SvPVX(linestr);
