@@ -1904,7 +1904,7 @@ Apd	|void	|sv_usepvn_mg	|SV *sv|char *ptr|STRLEN len
 Ap	|MGVTBL*|get_vtbl	|int vtbl_id
 p	|char*	|pv_display	|SV *dsv|char *pv|STRLEN cur|STRLEN len \
 				|STRLEN pvlim
-p	|char*	|sv_uni_display	|SV *dsv|SV *ssv|STRLEN pvlim
+p	|char*	|sv_uni_display	|SV *dsv|SV *ssv|STRLEN pvlim|UV flags
 Afp	|void	|dump_indent	|I32 level|PerlIO *file|const char* pat|...
 Ap	|void	|dump_vindent	|I32 level|PerlIO *file|const char* pat \
 				|va_list *args

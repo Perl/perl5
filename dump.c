@@ -143,12 +143,12 @@ Perl_pv_display(pTHX_ SV *dsv, char *pv, STRLEN cur, STRLEN len, STRLEN pvlim)
 }
 
 char *
-Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim)
+Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
 {
     int truncated = 0;
     char *s, *e;
 
-    sv_setpvn(dsv, "\"", 1);
+    sv_setpvn(dsv, "", 0);
     for (s = SvPVX(ssv), e = s + SvCUR(ssv); s < e; s += UTF8SKIP(s)) {
 	 UV u;
 	 if (pvlim && SvCUR(dsv) >= pvlim) {
@@ -158,7 +158,6 @@ Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim)
 	 u = utf8_to_uvchr((U8*)s, 0);
 	 Perl_sv_catpvf(aTHX_ dsv, "\\x{%"UVxf"}", u);
     }
-    sv_catpvn(dsv, "\"", 1);
     if (truncated)
 	 sv_catpvn(dsv, "...", 3);
     
@@ -301,8 +300,8 @@ Perl_sv_peek(pTHX_ SV *sv)
 		Perl_sv_catpvf(aTHX_ t, "[%s]", pv_display(tmp, SvPVX(sv)-SvIVX(sv), SvIVX(sv), 0, 127));
 	    Perl_sv_catpvf(aTHX_ t, "%s)", pv_display(tmp, SvPVX(sv), SvCUR(sv), SvLEN(sv), 127));
 	    if (SvUTF8(sv))
-		Perl_sv_catpvf(aTHX_ t, " [UTF8 %s]",
-			       sv_uni_display(tmp, sv, 8 * sv_len_utf8(sv)));
+		Perl_sv_catpvf(aTHX_ t, " [UTF8 \"%s\"]",
+			       sv_uni_display(tmp, sv, 8 * sv_len_utf8(sv), 0));
 	    SvREFCNT_dec(tmp);
 	}
     }
@@ -1135,7 +1134,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		PerlIO_printf(file, "( %s . ) ", pv_display(d, SvPVX(sv)-SvIVX(sv), SvIVX(sv), 0, pvlim));
 	    PerlIO_printf(file, "%s", pv_display(d, SvPVX(sv), SvCUR(sv), SvLEN(sv), pvlim));
 	    if (SvUTF8(sv)) /* the 8?  \x{....} */
-	        PerlIO_printf(file, " [UTF8 %s]", sv_uni_display(d, sv, 8 * sv_len_utf8(sv)));
+	        PerlIO_printf(file, " [UTF8 \"%s\"]", sv_uni_display(d, sv, 8 * sv_len_utf8(sv), 0));
 	    PerlIO_printf(file, "\n");
 	    Perl_dump_indent(aTHX_ level, file, "  CUR = %"IVdf"\n", (IV)SvCUR(sv));
 	    Perl_dump_indent(aTHX_ level, file, "  LEN = %"IVdf"\n", (IV)SvLEN(sv));
@@ -1267,7 +1266,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		elt = hv_iterval(hv, he);
 		Perl_dump_indent(aTHX_ level+1, file, "Elt %s ", pv_display(d, keypv, len, 0, pvlim));
 		if (SvUTF8(keysv))
-		    PerlIO_printf(file, "[UTF8 %s] ", sv_uni_display(d, keysv, 8 * sv_len_utf8(keysv)));
+		    PerlIO_printf(file, "[UTF8 \"%s\"] ", sv_uni_display(d, keysv, 8 * sv_len_utf8(keysv), 0));
 		PerlIO_printf(file, "HASH = 0x%"UVxf"\n", (UV)hash);
 		do_sv_dump(level+1, file, elt, nest+1, maxnest, dumpops, pvlim);
 	    }
