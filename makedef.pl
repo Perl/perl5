@@ -29,6 +29,16 @@ my %PLATFORM;
 defined $PLATFORM || die "PLATFORM undefined, must be one of: @PLATFORM\n";
 exists $PLATFORM{$PLATFORM} || die "PLATFORM must be one of: @PLATFORM\n";
 
+my %exportperlmalloc =
+    (
+       Perl_malloc		=>	"malloc",
+       Perl_mfree		=>	"free",
+       Perl_realloc		=>	"realloc",
+       Perl_calloc		=>	"calloc",
+    );
+
+my $exportperlmalloc = $PLATFORM eq 'os2';
+
 my $config_sh   = "config.sh";
 my $config_h    = "config.h";
 my $thrdvar_h   = "thrdvar.h";
@@ -126,7 +136,7 @@ elsif ($PLATFORM eq 'os2') {
 	last if /^\s*EXPORTS\b/;
       }
       while (<$fh>) {
-	$ordinal{$1} = $2 if /^\s*"(\w+)"\s*\@(\d+)\s*$/;
+	$ordinal{$1} = $2 if /^\s*"(\w+)"\s*(?:=\s*"\w+"\s*)?\@(\d+)\s*$/;
 	# This allows skipping ordinals which were used in older versions
 	$sym_ord = $1 if /^\s*;\s*LAST_ORDINAL\s*=\s*(\d+)\s*$/;
       }
@@ -1138,6 +1148,7 @@ elsif ($PLATFORM eq 'os2') {
 
     @missing = grep { !exists $mapped{$_} }
 		    keys %export;
+    @missing = grep { !exists $exportperlmalloc{$_} } @missing;
     delete $export{$_} foreach @missing;
 }
 elsif ($PLATFORM eq 'MacOS') {
@@ -1339,6 +1350,10 @@ sub output_symbol {
     elsif ($PLATFORM eq 'os2') {
 	printf qq(    %-31s \@%s\n),
 	  qq("$symbol"), $ordinal{$symbol} || ++$sym_ord;
+	printf qq(    %-31s \@%s\n),
+	  qq("$exportperlmalloc{$symbol}" = "$symbol"),
+	  $ordinal{$exportperlmalloc{$symbol}} || ++$sym_ord
+	  if $exportperlmalloc and exists $exportperlmalloc{$symbol};
     }
     elsif ($PLATFORM eq 'aix' || $PLATFORM eq 'MacOS') {
 	print "$symbol\n";

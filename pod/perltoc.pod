@@ -1852,8 +1852,8 @@ application, Thread-safety of extensions
 
 =item Flavors of Perl numeric operations
 
-Arithmetic operators except, C<no integer>, Arithmetic operators except,
-C<use integer>, Bitwise operators, C<no integer>, Bitwise operators, C<use
+Arithmetic operators, ++, Arithmetic operators during C<use integer>, Other
+mathematical operators, Bitwise operators, Bitwise operators during C<use
 integer>, Operators which expect an integer, Operators which expect a
 string
 
@@ -5290,7 +5290,7 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item IEEE-format Floating Point Default on OpenVMS Alpha
 
-=item New Unicode Semantics (no more C<use utf8>)
+=item New Unicode Semantics (no more C<use utf8>, almost)
 
 =item New Unicode Properties
 
@@ -5420,7 +5420,7 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =item Cygwin ndbm tests fail on FAT
 
-=item DJGPP does not build
+=item DJGPP Failures
 
 =item FreeBSD built with ithreads coredumps reading large directories
 

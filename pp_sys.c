@@ -2053,7 +2053,7 @@ PP(pp_truncate)
     /* XXX Configure probe for the length type of *truncate() needed XXX */
     Off_t len;
 
-#if Size_t_size > IVSIZE
+#if Off_t_size > IVSIZE
     len = (Off_t)POPn;
 #else
     len = (Off_t)POPi;

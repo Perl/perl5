@@ -118,7 +118,7 @@ point format on OpenVMS Alpha, potentially breaking binary compatibility
 with external libraries or existing data.  G_FLOAT is still available as
 a configuration option.  The default on VAX (D_FLOAT) has not changed.
 
-=head2 New Unicode Semantics (no more C<use utf8>)
+=head2 New Unicode Semantics (no more C<use utf8>, almost)
 
 Previously in Perl 5.6 to use Unicode one would say "use utf8" and
 then the operations (like string concatenation) were Unicode-aware
@@ -128,7 +128,10 @@ This was found to be an inconvenient interface, and in Perl 5.8 the
 Unicode model has completely changed: now the "Unicodeness" is bound
 to the data itself, and for most of the time "use utf8" is not needed
 at all.  The only remaining use of "use utf8" is when the Perl script
-itself has been written in the UTF-8 encoding of Unicode.
+itself has been written in the UTF-8 encoding of Unicode.  (UTF-8 has
+not been made the default since there are many Perl scripts out there
+that are using various national eight-bit character sets, which would
+be illegal in UTF-8.)
 
 See L<perluniintro> for the explanation of the current model,
 and L<utf8> for the current use of the utf8 pragma.
@@ -3384,6 +3387,28 @@ failures are expected:
 
 NDBM_File fails and ODBM_File just coredumps.
 
+=head2 DJGPP Failures
+
+ t/op/stat............................FAILED at test 29
+ lib/File/Find/t/find.................FAILED at test 1
+ lib/File/Find/t/taint................FAILED at test 1
+ lib/h2xs.............................FAILED at test 15
+ lib/Pod/t/eol........................FAILED at test 1
+ lib/Test/Harness/t/strap-analyze.....FAILED at test 8
+ lib/Test/Harness/t/test-harness......FAILED at test 23
+ lib/Test/Simple/t/exit...............FAILED at test 1
+
+The above failures are known as of 5.8.0 with native builds with long
+filenames, but there are a few more if running under dosemu because of
+limitations (and maybe bugs) of dosemu:
+
+ t/comp/cpp...........................FAILED at test 3
+ t/op/inccode.........................(crash)
+
+and a few lib/ExtUtils tests, and several hundred Encode/t/Aliases.t
+failures that work fine with long filenames.  So you really might
+prefer native builds and long filenames.
+
 =head2 FreeBSD built with ithreads coredumps reading large directories
 
 This is a known bug in FreeBSD 4.5's readdir_r(), it has been fixed in
@@ -3465,10 +3490,11 @@ symbols, for example
 you probably have an old pre-Perl-5.8.0 installation (or parts of one)
 in /Library/Perl (the undefined symbols used to exist in pre-5.8.0 Perls).
 It seems that for some reason "make install" doesn't always completely
-overwrite the files in /Library/Perl.  You can remove the Perl
-shared library like this:
+overwrite the files in /Library/Perl.  You can move the old Perl
+shared library out of the way like this:
 
-   rm /Library/Perl/darwin/CORE/libperl.dylib
+    cd /Library/Perl/darwin/CORE
+    mv libperl.dylib libperlold.dylib
 
 and then reissue "make install".  Note that the above of course is
 extremely disruptive for anything using the /usr/local/bin/perl.
