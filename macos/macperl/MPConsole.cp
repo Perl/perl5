@@ -5,6 +5,12 @@ Author	:	Matthias Neeracher
 Language	:	MPW C/C++
 
 $Log: MPConsole.cp,v $
+Revision 1.6  2001/11/02 22:36:17  pudge
+Sync with perforce
+
+Revision 1.5  2001/10/29 10:38:01  neeri
+Another go at our perennial favorite (MacPerl Bug #422129)
+
 Revision 1.4  2001/10/11 05:19:31  neeri
 Fix exit code (MacPerl bug #422129)
 
@@ -599,14 +605,14 @@ found:
 
 /********************* A kinder, gentler, spin **********************/
 
-extern "C" void Perl_my_exit(int status);
-
 bool MPConsoleSpin(bool /* wait */)
 {
 	if (gAborting && gRunningPerl) {
 		ResetConsole();
 
-		MacPerl_Exit(-128);
+		raise(SIGINT);
+		// don't raise SIGINT again
+		gAborting = false;
 	} 
 		
 	// 

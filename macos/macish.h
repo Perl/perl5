@@ -221,7 +221,6 @@ typedef struct MacPerl_AsyncTask {
 	void     (*fProc)(struct MacPerl_AsyncTask * task); /* Procedure to call */
 } MacPerl_AsyncTask;
 Boolean MacPerl_QueueAsyncTask(MacPerl_AsyncTask * task);
-Boolean	MacPerl_QueueAsyncExit();
 
 #define PERL_WRITE_MSG_TO_CONSOLE(io, msg, len) MacPerl_WriteMsg(io, msg, len)
 

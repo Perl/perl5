@@ -811,6 +811,17 @@ void MacPerl_DoAsyncTasks()
 	}
 }
 
+void MacPerl_ClearAsyncTasks()
+{
+	QElemPtr			elem;
+	MacPerl_AsyncTask * task;
+	
+	gMacPerl_HasAsyncTasks = false;
+	while (elem = sMacPerlAsyncQueue.qHead) {
+		Dequeue(elem, &sMacPerlAsyncQueue);
+	}
+}
+
 /*
  * Asynchronous tasks come in handy to exit gracefully from the middle of a script
  */
@@ -893,6 +904,8 @@ void MacPerl_init()
 {
 	gMacPerl_StartClock = LMGetTicks();
 
+	MacPerl_ClearAsyncTasks();
+
 	sSpinControl.fTask.fPending		=  	false;
 	sSpinControl.fTask.fProc		= 	StartSpinControl;
 
@@ -910,11 +923,11 @@ Perl_my_setenv(pTHX_ char *env, char *val)
 		gMacPerl_Perl5DB = val;
 }
 
-static const char * strnstr(const char * msg, const char * str, size_t len)
+static const char * strnstr(const char * msg, const char * str, int len)
 {
 	char s1 = *str++;
 	
-	while (len--)
+	while (len-- > 0)
 		if (*msg++ == s1) {
 			const char * s = str;
 			const char * m = msg;
@@ -961,6 +974,10 @@ void MacPerl_WriteMsg(void * io, const char * msg, size_t len)
 
 	/* Look for " line \d" */
 	while (line = strnstr(line+1, " line ", msg+len-line-1)) {
+		/* Invariants:
+		 * To process: [msg, msg+len[
+		 * msg < line < msg+len
+		 */
 		if (line[6] >= '0' && line[6] <= '9') {
 			/* Got line, now look for end of line number */
 			const char * endline = line+7;
@@ -981,6 +998,7 @@ void MacPerl_WriteMsg(void * io, const char * msg, size_t len)
 			at	= strnstr(msg, " at ", line-msg-1);
 	
 			if (at) {
+				/* msg <= at < line */
 				const char * anotherat;
 				
 				/* Look for intervening "at". This part gives misleading results if the filename
