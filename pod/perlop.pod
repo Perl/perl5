@@ -521,7 +521,27 @@ As a scalar operator:
         close ARGV if eof;             # reset $. each file
     }
 
-As a list operator:
+Here's a simple example to illustrate the difference between
+the two range operators:
+
+    @lines = ("   - Foo",
+              "01 - Bar",
+              "1  - Baz",
+              "   - Quux");
+
+    foreach(@lines)
+    {
+        if (/0/ .. /1/)
+        {
+            print "$_\n";
+        }
+    }
+
+This program will print only the line containing "Bar". If 
+the range operator is changed to C<...>, it will also print the 
+"Baz" line.
+
+And now some examples as a list operator:
 
     for (101 .. 200) { print; }	# print $_ 100 times
     @foo = @foo[0 .. $#foo];	# an expensive no-op

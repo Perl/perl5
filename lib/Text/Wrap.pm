@@ -120,7 +120,7 @@ B<Example 1>
 	print wrap($initial_tab, $subsequent_tab, @text);
 	print fill($initial_tab, $subsequent_tab, @text);
 
-	@lines = wrap($initial_tab, $subsequent_tab, @text);
+	$lines = wrap($initial_tab, $subsequent_tab, @text);
 
 	@paragraphs = fill($initial_tab, $subsequent_tab, @text);
 

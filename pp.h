@@ -28,7 +28,7 @@ C<SPAGAIN>.
 =for apidoc AmU||MARK
 Stack marker variable for the XSUB.  See C<dMARK>.
 
-=for apidoc Ams||PUSHMARK
+=for apidoc Am|void|PUSHMARK|SP
 Opening bracket for arguments on a callback.  See C<PUTBACK> and
 L<perlcall>.
 
