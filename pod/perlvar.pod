@@ -242,7 +242,7 @@ Assigning a non-numerical value to C<$*> triggers a warning (and makes
 C<$*> act if C<$* == 0>), while assigning a numerical value to C<$*>
 makes that an implicit C<int> is applied on the value.
 
-=item input_line_number HANDLE EXPR
+=item HANDLE->input_line_number(EXPR)
 
 =item $INPUT_LINE_NUMBER
 
@@ -250,20 +250,33 @@ makes that an implicit C<int> is applied on the value.
 
 =item $.
 
-The current input record number for the last file handle from which
-you just read() (or called a C<seek> or C<tell> on).  The value
-may be different from the actual physical line number in the file,
-depending on what notion of "line" is in effect--see C<$/> on how
-to change that.  An explicit close on a filehandle resets the line
-number.  Because C<< <> >> never does an explicit close, line
-numbers increase across ARGV files (but see examples in L<perlfunc/eof>).
-Consider this variable read-only: setting it does not reposition
-the seek pointer; you'll have to do that on your own.  Localizing C<$.>
-has the effect of also localizing Perl's notion of "the last read
-filehandle".  (Mnemonic: many programs use "." to mean the current line
-number.)
+Current line number for the last filehandle accessed. 
 
-=item IO::Handle->input_record_separator EXPR
+Each filehandle in Perl counts the number of lines that have been read
+from it.  (Depending on the value of C<$/>, Perl's idea of what
+constitutes a line may not match yours.)  When a line is read from a
+filehandle (via readline() or C<< <> >>), or when tell() or seek() is
+called on it, C<$.> becomes an alias to the line counter for that
+filehandle.
+
+You can adjust the counter by assigning to C<$.>, but this will not
+actually move the seek pointer.  I<Localizing C<$.> will not localize
+the filehandle's line count>.  Instead, it will localize perl's notion
+of which filehandle C<$.> is currently aliased to.
+
+C<$.> is reset when the filehandle is closed, but B<not> when an open
+filehandle is reopened without an intervening close().  For more
+details, see L<perlop/"I/O Operators">.  Because C<< <> >> never does
+an explicit close, line numbers increase across ARGV files (but see
+examples in L<perlfunc/eof>).
+
+You can also use C<< HANDLE->input_line_number(EXPR) >> to access the
+line counter for a given filehandle without having to worry about
+which handle you last accessed.
+
+(Mnemonic: many programs use "." to mean the current line number.)
+
+=item IO::Handle->input_record_separator(EXPR)
 
 =item $INPUT_RECORD_SEPARATOR
 
@@ -316,7 +329,7 @@ non-record reads of a file.
 
 See also L<perlport/"Newlines">.  Also see C<$.>.
 
-=item autoflush HANDLE EXPR
+=item HANDLE->autoflush(EXPR)
 
 =item $OUTPUT_AUTOFLUSH
 
@@ -420,7 +433,7 @@ explicitly to get B<awk>'s value.  (Mnemonic: # is the number sign.)
 
 Use of C<$#> is deprecated.
 
-=item format_page_number HANDLE EXPR
+=item HANDLE->format_page_number(EXPR)
 
 =item $FORMAT_PAGE_NUMBER
 
@@ -430,7 +443,7 @@ The current page number of the currently selected output channel.
 Used with formats.
 (Mnemonic: % is page number in B<nroff>.)
 
-=item format_lines_per_page HANDLE EXPR
+=item HANDLE->format_lines_per_page(EXPR)
 
 =item $FORMAT_LINES_PER_PAGE
 
@@ -441,7 +454,7 @@ output channel.  Default is 60.
 Used with formats.
 (Mnemonic: = has horizontal lines.)
 
-=item format_lines_left HANDLE EXPR
+=item HANDLE->format_lines_left(EXPR)
 
 =item $FORMAT_LINES_LEFT
 
@@ -493,7 +506,7 @@ After a match against some variable $var:
 
 =back
 
-=item format_name HANDLE EXPR
+=item HANDLE->format_name(EXPR)
 
 =item $FORMAT_NAME
 
@@ -503,7 +516,7 @@ The name of the current report format for the currently selected output
 channel.  Default is the name of the filehandle.  (Mnemonic: brother to
 C<$^>.)
 
-=item format_top_name HANDLE EXPR
+=item HANDLE->format_top_name(EXPR)
 
 =item $FORMAT_TOP_NAME
 
