@@ -684,8 +684,10 @@ PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
               return -1;
             }
           }
-         else
+         else {
           Perl_warn(aTHX_ "perlio: unknown layer \"%.*s\"",(int)llen,s);
+	  return -1;
+	 }
         }
        s = e;
       }
