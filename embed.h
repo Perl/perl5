@@ -439,6 +439,7 @@
 #endif
 #define my_setenv		Perl_my_setenv
 #define my_stat			Perl_my_stat
+#define my_strftime		Perl_my_strftime
 #if defined(MYSWAP)
 #define my_swap			Perl_my_swap
 #define my_htonl		Perl_my_htonl
@@ -1934,6 +1935,7 @@
 #endif
 #define my_setenv(a,b)		Perl_my_setenv(aTHX_ a,b)
 #define my_stat()		Perl_my_stat(aTHX)
+#define my_strftime(a,b,c,d,e,f,g,h,i,j)	Perl_my_strftime(aTHX_ a,b,c,d,e,f,g,h,i,j)
 #if defined(MYSWAP)
 #define my_swap(a)		Perl_my_swap(aTHX_ a)
 #define my_htonl(a)		Perl_my_htonl(aTHX_ a)
@@ -3786,6 +3788,8 @@
 #define my_setenv		Perl_my_setenv
 #define Perl_my_stat		CPerlObj::Perl_my_stat
 #define my_stat			Perl_my_stat
+#define Perl_my_strftime	CPerlObj::Perl_my_strftime
+#define my_strftime		Perl_my_strftime
 #if defined(MYSWAP)
 #define Perl_my_swap		CPerlObj::Perl_my_swap
 #define my_swap			Perl_my_swap

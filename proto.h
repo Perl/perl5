@@ -505,6 +505,7 @@ PERL_CALLCONV PerlIO*	Perl_my_popen_list(pTHX_ char* mode, int n, SV ** args);
 #endif
 PERL_CALLCONV void	Perl_my_setenv(pTHX_ char* nam, char* val);
 PERL_CALLCONV I32	Perl_my_stat(pTHX);
+PERL_CALLCONV char *	Perl_my_strftime(pTHX_ char *fmt, int sec, int min, int hour, int mday, int mon, int year, int wday, int yday, int isdst);
 #if defined(MYSWAP)
 PERL_CALLCONV short	Perl_my_swap(pTHX_ short s);
 PERL_CALLCONV long	Perl_my_htonl(pTHX_ long l);

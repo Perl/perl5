@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Apr  8 02:03:47 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Thu Apr 19 03:28:20 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -567,6 +567,7 @@ d_strerrm=''
 d_strerror=''
 d_sysernlst=''
 d_syserrlst=''
+d_strftime=''
 d_strtod=''
 d_strtol=''
 d_strtold=''
@@ -12229,6 +12230,10 @@ if test "X$d_strerror" = X -o "X$d_syserrlst" = X; then
     fi
 fi
 
+: see if strftime exists
+set strftime d_strftime
+eval $inlibc
+
 : see if strtod exists
 set strtod d_strtod
 eval $inlibc
@@ -16407,6 +16412,7 @@ d_strcoll='$d_strcoll'
 d_strctcpy='$d_strctcpy'
 d_strerrm='$d_strerrm'
 d_strerror='$d_strerror'
+d_strftime='$d_strftime'
 d_strtod='$d_strtod'
 d_strtol='$d_strtol'
 d_strtold='$d_strtold'

@@ -3322,6 +3322,12 @@
  */
 /*#define HAS_SOCKATMARK		/ **/
 
+/* HAS_STRFTIME:
+ *	This symbol, if defined, indicates that the strftime routine is
+ *	available to do time formatting.
+ */
+/*#define HAS_STRFTIME		/ **/
+
 /* U32_ALIGNMENT_REQUIRED:
  *	This symbol, if defined, indicates that you must access
  *	character data through U32-aligned pointers.

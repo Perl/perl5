@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Sun Apr  8 02:05:27 EET DST 2001
+ * Configuration time: Thu Apr 19 03:59:37 EET DST 2001
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -3325,6 +3325,12 @@
  *	available to test whether a socket is at the out-of-band mark.
  */
 /*#define HAS_SOCKATMARK		/ **/
+
+/* HAS_STRFTIME:
+ *	This symbol, if defined, indicates that the strftime routine is
+ *	available to do time formatting.
+ */
+#define HAS_STRFTIME		/**/
 
 /* U32_ALIGNMENT_REQUIRED:
  *	This symbol, if defined, indicates that you must access

@@ -1584,6 +1584,10 @@ d_strerror (d_strerror.U):
 	This variable conditionally defines HAS_STRERROR if strerror() is
 	available to translate error numbers to strings.
 
+d_strftime (d_strftime.U):
+	This variable conditionally defines the HAS_STRFTIME symbol, which
+	indicates to the C program that the strftime() routine is available.
+
 d_strtod (d_strtod.U):
 	This variable conditionally defines the HAS_STRTOD symbol, which
 	indicates to the C program that the strtod() routine is available

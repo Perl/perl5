@@ -3665,65 +3665,9 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
 	int		isdst
     CODE:
 	{
-	    char tmpbuf[128];
-	    struct tm mytm;
-	    int len;
-	    init_tm(&mytm);	/* XXX workaround - see init_tm() above */
-	    mytm.tm_sec = sec;
-	    mytm.tm_min = min;
-	    mytm.tm_hour = hour;
-	    mytm.tm_mday = mday;
-	    mytm.tm_mon = mon;
-	    mytm.tm_year = year;
-	    mytm.tm_wday = wday;
-	    mytm.tm_yday = yday;
-	    mytm.tm_isdst = isdst;
-	    mini_mktime(&mytm);
-	    len = strftime(tmpbuf, sizeof tmpbuf, fmt, &mytm);
-	    /*
-	    ** The following is needed to handle to the situation where 
-	    ** tmpbuf overflows.  Basically we want to allocate a buffer
-	    ** and try repeatedly.  The reason why it is so complicated
-	    ** is that getting a return value of 0 from strftime can indicate
-	    ** one of the following:
-	    ** 1. buffer overflowed,
-	    ** 2. illegal conversion specifier, or
-	    ** 3. the format string specifies nothing to be returned(not
-	    **	  an error).  This could be because format is an empty string
-	    **    or it specifies %p that yields an empty string in some locale.
-	    ** If there is a better way to make it portable, go ahead by
-	    ** all means.
-	    */
-	    if ((len > 0 && len < sizeof(tmpbuf)) || (len == 0 && *fmt == '\0'))
-		ST(0) = sv_2mortal(newSVpv(tmpbuf, len));
-            else {
-		/* Possibly buf overflowed - try again with a bigger buf */
-                int     fmtlen = strlen(fmt);
-		int	bufsize = fmtlen + sizeof(tmpbuf);
-		char* 	buf;
-		int	buflen;
-
-		New(0, buf, bufsize, char);
-		while (buf) {
-		    buflen = strftime(buf, bufsize, fmt, &mytm);
-		    if (buflen > 0 && buflen < bufsize)
-                        break;
-                    /* heuristic to prevent out-of-memory errors */
-                    if (bufsize > 100*fmtlen) {
-                        Safefree(buf);
-                        buf = NULL;
-                        break;
-                    }
-		    bufsize *= 2;
-		    Renew(buf, bufsize, char);
-		}
-		if (buf) {
-		    ST(0) = sv_2mortal(newSVpvn(buf, buflen));
-		    Safefree(buf);
-		}
-                else
-		    ST(0) = sv_2mortal(newSVpvn(tmpbuf, len));
-	    }
+	    char *buf = my_strftime(fmt, sec, min, hour, mday, mon, year, wday, yday, isdst);
+	    ST(0) = sv_2mortal(newSVpv(buf, 0));
+	    free(buf);
 	}
 
 void

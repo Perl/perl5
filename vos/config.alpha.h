@@ -3329,4 +3329,10 @@
  */
 #define U32_ALIGNMENT_REQUIRED	/**/
 
+/* HAS_STRFTIME:
+ *	This symbol, if defined, indicates that the strftime routine is
+ *	available to do time formatting.
+ */
+#define HAS_STRFTIME		/**/
+
 #endif

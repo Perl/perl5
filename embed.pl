@@ -1778,6 +1778,7 @@ Ap	|PerlIO*|my_popen_list	|char* mode|int n|SV ** args
 #endif
 Ap	|void	|my_setenv	|char* nam|char* val
 Ap	|I32	|my_stat
+p	|char *	|my_strftime	|char *fmt|int sec|int min|int hour|int mday|int mon|int year|int wday|int yday|int isdst
 #if defined(MYSWAP)
 Ap	|short	|my_swap	|short s
 Ap	|long	|my_htonl	|long l
