@@ -891,11 +891,11 @@ Copy a string to a safe spot.  This does not use an SV.
 char *
 Perl_savepv(pTHX_ const char *sv)
 {
-    register char *newaddr = sv;
+    register char *newaddr = Nullch;
     if (sv) {
 	New(902,newaddr,strlen(sv)+1,char);
 	(void)strcpy(newaddr,sv);
-    } 
+    }
     return newaddr;
 }
 
@@ -932,7 +932,7 @@ This does not use an SV.
 char *
 Perl_savesharedpv(pTHX_ const char *sv)
 {
-    register char *newaddr = sv;
+    register char *newaddr = Nullch;
     if (sv) {
 	newaddr = PerlMemShared_malloc(strlen(sv)+1);
     	(void)strcpy(newaddr,sv);
