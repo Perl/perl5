@@ -31,6 +31,258 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 15036] By: jhi                                   on 2002/03/05  03:11:17
+        Log: Regen perlapi.
+     Branch: perl
+	   ! pod/perlapi.pod
+____________________________________________________________________________
+[ 15035] By: jhi                                   on 2002/03/05  03:08:50
+        Log: Tie::File doc tweak for Win32 from mjd. 
+     Branch: perl
+	   ! lib/Tie/File.pm
+____________________________________________________________________________
+[ 15034] By: jhi                                   on 2002/03/05  02:51:47
+        Log: Regen toc.
+     Branch: perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 15033] By: jhi                                   on 2002/03/05  02:34:32
+        Log: Decommission Encode::Tcl HZ testing for now.
+     Branch: perl
+	   ! ext/Encode/t/Tcl.t
+____________________________________________________________________________
+[ 15032] By: jhi                                   on 2002/03/05  02:05:23
+        Log: Must have a return.
+     Branch: perl
+	   ! pp_pack.c
+____________________________________________________________________________
+[ 15031] By: jhi                                   on 2002/03/05  01:45:21
+        Log: The very latest win32 score from Jan Dubois.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 15030] By: ams                                   on 2002/03/05  01:40:01
+        Log: Subject: [PATCH] README.macos
+             From: Chris Nandor <pudge@pobox.com>
+             Date: Mon, 04 Mar 2002 17:37:59 -0500
+             Message-Id: <pudge-AB6431.17375904032002@onion.valueclick.com>
+     Branch: perl
+	   ! README.macos
+____________________________________________________________________________
+[ 15029] By: jhi                                   on 2002/03/05  01:39:29
+        Log: "The last pieces of Chinese puzzle" from Autrijus.
+     Branch: perl
+	   + ext/Encode/lib/Encode/CN/HZ.pm
+	   - ext/Encode/Encode/HZ.enc
+	   ! MANIFEST ext/Encode/CN/CN.pm ext/Encode/Encode.pm
+	   ! ext/Encode/KR/KR.pm ext/Encode/MANIFEST ext/Encode/TW/TW.pm
+____________________________________________________________________________
+[ 15028] By: jhi                                   on 2002/03/05  00:53:36
+        Log: Known test failures updates.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 15027] By: jhi                                   on 2002/03/04  23:48:07
+        Log: One more nit from mjd.
+     Branch: perl
+	   ! lib/Tie/File/t/16_handle.t
+____________________________________________________________________________
+[ 15026] By: jhi                                   on 2002/03/04  23:42:28
+        Log: Upgrade to Tie::File 0.17 from mjd.
+     Branch: perl
+	   ! lib/Tie/File.pm lib/Tie/File/t/05_size.t
+	   ! lib/Tie/File/t/16_handle.t lib/Tie/File/t/17_misc_meth.t
+____________________________________________________________________________
+[ 15025] By: jhi                                   on 2002/03/04  23:14:54
+        Log: Subject: Re: [PATCH] Re: For 5.7.3, known failure for rel2abs2rel.t on FreeBSD 4.5
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Mon, 4 Mar 2002 23:33:52 +0000
+             Message-ID: <20020304233351.GB4284@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 15024] By: jhi                                   on 2002/03/04  22:21:44
+        Log: Escapee.
+     Branch: perl
+	   ! proto.h
+____________________________________________________________________________
+[ 15023] By: jhi                                   on 2002/03/04  22:17:56
+        Log: Subject: [PATCH] (was Re: [PATCH @13746] h2xs)
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Mon, 4 Mar 2002 22:48:38 +0000
+             Message-ID: <20020304224837.GA4284@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! ext/Fcntl/Fcntl.xs ext/Fcntl/Makefile.PL ext/File/Glob/Glob.xs
+	   ! ext/File/Glob/Makefile.PL ext/GDBM_File/GDBM_File.xs
+	   ! ext/GDBM_File/Makefile.PL ext/I18N/Langinfo/Langinfo.xs
+	   ! ext/I18N/Langinfo/Makefile.PL ext/POSIX/Makefile.PL
+	   ! ext/POSIX/POSIX.xs ext/Socket/Makefile.PL ext/Socket/Socket.xs
+	   ! ext/Sys/Syslog/Makefile.PL ext/Sys/Syslog/Syslog.xs
+	   ! lib/ExtUtils/Constant.pm lib/h2xs.t utils/h2xs.PL
+____________________________________________________________________________
+[ 15022] By: jhi                                   on 2002/03/04  22:09:39
+        Log: Cleaner.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 15021] By: jhi                                   on 2002/03/04  22:06:22
+        Log: Subject: [PATCH] small doc update to promote '-no_match_vars' of 'use English'
+             From: Jeffrey Friedl <jfriedl@yahoo.com>
+             Date: Mon, 4 Mar 2002 12:14:45 -0800 (PST)
+             Message-Id: <200203042014.g24KEjP08407@ventrue.corp.yahoo.com>
+     Branch: perl
+	   ! pod/perlform.pod pod/perlipc.pod pod/perlsec.pod
+	   ! pod/perlvar.pod
+____________________________________________________________________________
+[ 15020] By: jhi                                   on 2002/03/04  21:44:42
+        Log: More Han tweaks from Autrjius Tang: most importantly,
+             gbk is identical to cp936, so gbk can be removed and
+             taken care of by an alias.
+     Branch: perl
+	   - ext/Encode/Encode/gbk.enc
+	   ! MANIFEST ext/Encode/CN/CN.pm ext/Encode/CN/Makefile.PL
+	   ! ext/Encode/Encode.pm ext/Encode/KR/KR.pm
+	   ! ext/Encode/KR/Makefile.PL ext/Encode/MANIFEST
+	   ! ext/Encode/TW/Makefile.PL ext/Encode/TW/TW.pm
+____________________________________________________________________________
+[ 15019] By: jhi                                   on 2002/03/04  21:23:42
+        Log: Subject: [PATCH] Re: For 5.7.3, known failure for rel2abs2rel.t on FreeBSD 4.5
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Mon, 4 Mar 2002 22:20:13 +0000
+             Message-ID: <20020304222012.GE334@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 15018] By: jhi                                   on 2002/03/04  21:19:31
+        Log: Based on
+             
+             Subject: Re[2]: [ID 20020303.005] Patch perlinicode C API description
+             From: Anton Tagunov <tagunov@motor.ru>
+             Date: Mon, 4 Mar 2002 21:14:39 +0300
+             Message-ID: <1814137429.20020304211439@motor.ru>
+     Branch: perl
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[ 15017] By: jhi                                   on 2002/03/04  20:43:05
+        Log: Subject: [PATCH] enhance xsubpp to support OVERLOAD: keyword
+             From: John Peacock <jpeacock@rowman.com>
+             Date: Mon, 04 Mar 2002 16:18:42 -0500
+             Message-ID: <3C83E4B2.3060700@rowman.com>
+             
+             Subject: Re: [PATCH] enhance xsubpp to support OVERLOAD: keyword
+             From: John Peacock <jpeacock@rowman.com>
+             Date: Mon, 04 Mar 2002 16:42:55 -0500
+             Message-ID: <3C83EA5F.80303@rowman.com>
+     Branch: perl
+	   ! lib/ExtUtils/xsubpp pod/perlxs.pod
+____________________________________________________________________________
+[ 15016] By: jhi                                   on 2002/03/04  20:07:04
+        Log: Subject: [PATCH @15001] ISO-IR-165 --> ISO_IR_165
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 04 Mar 2002 14:47:59 -0600
+             Message-Id: <5.1.0.14.2.20020304144257.0366deb0@exchi01>
+             
+             Subject: Re: [PATCH @15001] ISO-IR-165 --> ISO_IR_165
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 04 Mar 2002 15:04:58 -0600
+             Message-Id: <5.1.0.14.2.20020304150245.01ae4968@mail.mac.com>
+     Branch: perl
+	   ! ext/Encode/CN/Makefile.PL ext/Encode/TW/Makefile.PL
+____________________________________________________________________________
+[ 15015] By: jhi                                   on 2002/03/04  18:58:03
+        Log: metaconfig unit change for #15014.
+     Branch: metaconfig/U/perl
+	   ! Extensions.U
+____________________________________________________________________________
+[ 15014] By: jhi                                   on 2002/03/04  18:57:23
+        Log: Add Encode::CN, Encode::KR, and Encode::TW to the list
+             of known extensions, where Encode::JP already is.
+     Branch: perl
+	   ! Configure Porting/config.sh Porting/config_H uconfig.h
+____________________________________________________________________________
+[ 15013] By: jhi                                   on 2002/03/04  18:36:05
+        Log: SJIS, from Dan Kogai.
+     Branch: perl
+	   ! ext/Encode/JP/JP.pm ext/Encode/JP/Makefile.PL
+____________________________________________________________________________
+[ 15012] By: nick                                  on 2002/03/04  17:35:50
+        Log: Intergrate perlio's Encode/compile
+     Branch: perl
+	  !> ext/Encode/compile
+____________________________________________________________________________
+[ 15011] By: nick                                  on 2002/03/04  17:29:54
+        Log: Avoid $Id$ cleverness and just have a $VERSION.
+     Branch: perlio
+	   ! ext/Encode/compile
+____________________________________________________________________________
+[ 15010] By: nick                                  on 2002/03/04  17:29:14
+        Log: Integrate mainline
+     Branch: perlio
+	  +> lib/Math/BigInt/t/isa.t
+	  !> MANIFEST embed.fnc embed.h ext/Encode/t/JP.t gv.c
+	  !> lib/warnings.pm op.c perly.c pod/perldelta.pod
+	  !> pod/perllexwarn.pod pp.c pp_sys.c proto.h regcomp.c
+	  !> t/lib/warnings/regcomp t/op/taint.t toke.c warnings.h
+	  !> warnings.pl
+____________________________________________________________________________
+[ 15009] By: jhi                                   on 2002/03/04  17:24:30
+        Log: Integrate ext/Encode/compile from perlio.
+     Branch: perl
+	  !> ext/Encode/compile
+____________________________________________________________________________
+[ 15008] By: jhi                                   on 2002/03/04  17:11:19
+        Log: Integrate perlio: win32 tweaks.  (ext/Encode/compile
+             updates not integrated, something odd going on in there.)
+     Branch: perl
+	  !> ext/Encode/t/JP.t ext/threads/shared/shared.xs
+	  !> lib/Tie/File/t/16_handle.t
+____________________________________________________________________________
+[ 15007] By: nick                                  on 2002/03/04  17:08:17
+        Log: Integrate mainline
+     Branch: perlio
+	  !> AUTHORS Changes Porting/Glossary Porting/config.sh
+	  !> Porting/config_H ext/Encode/Encode.pm patchlevel.h
+	  !> pod/perltoc.pod
+____________________________________________________________________________
+[ 15006] By: jhi                                   on 2002/03/04  16:46:49
+        Log: A new M::BI test.
+     Branch: perl
+	   + lib/Math/BigInt/t/isa.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 15005] By: jhi                                   on 2002/03/04  16:43:53
+        Log: Subject: VMS test and perldelta update
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 04 Mar 2002 11:03:37 -0600
+             Message-Id: <5.1.0.14.2.20020304105500.01ae4968@exchi01>
+     Branch: perl
+	   ! ext/Encode/t/JP.t pod/perldelta.pod t/op/taint.t
+____________________________________________________________________________
+[ 15004] By: jhi                                   on 2002/03/04  16:41:50
+        Log: Needed for threaded builds.
+     Branch: perl
+	   ! embed.fnc embed.h
+____________________________________________________________________________
+[ 15003] By: jhi                                   on 2002/03/04  16:37:13
+        Log: Subject: [PATCH] taint + deprecated warnings
+             From: "Paul Marquess" <paul_marquess@yahoo.co.uk>
+             Date: Mon, 4 Mar 2002 16:33:23 -0000
+             Message-ID: <AIEAJICLCBDNAAOLLOKLCEKGDOAA.paul_marquess@yahoo.co.uk>
+     Branch: perl
+	   ! embed.h gv.c lib/warnings.pm op.c perly.c pod/perldelta.pod
+	   ! pod/perllexwarn.pod pp.c pp_sys.c proto.h regcomp.c
+	   ! t/lib/warnings/regcomp toke.c warnings.h warnings.pl
+____________________________________________________________________________
+[ 15002] By: nick                                  on 2002/03/04  16:19:06
+        Log: Win32 tweak
+     Branch: perlio
+	   ! lib/Tie/File/t/16_handle.t
+____________________________________________________________________________
+[ 15001] By: jhi                                   on 2002/03/04  15:39:11
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 15000] By: jhi                                   on 2002/03/04  15:28:01
         Log: AUTHORS updates.
      Branch: perl
