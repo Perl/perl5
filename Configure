@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Feb  9 21:43:07 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Fri Feb 11 21:50:12 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -7044,21 +7044,25 @@ EOM
 	;;
 esac
 
+case "$uselonglong" in
+''|true|[yY]*) uselonglong="$define" ;;
+*) case "$ccflags" in
+   *-DUSE_LONG_LONG*) uselonglong="$define" ;;
+   *) uselonglong="$undef" ;;
+   esac
+   ;;
+esac
+case "$uselonglong" in
+$define)	dflt='y';;
+*)		dflt='n';;
+esac
 cat <<EOM
 
 Perl can be built to take advantage of long longs which
 (if available) may give more range for integer numbers.
 
-If this doesn't make any sense to you, just accept the default 'n'.
+If this doesn't make any sense to you, just accept the default '$dflt'.
 EOM
-
-case "$ccflags" in
-*-DUSE_LONG_LONG*) uselonglong="$define" ;;
-esac
-
-case "$uselonglong" in
-'')	dflt='y';;
-esac
 rp='Try to use long longs if available?'
 . ./myread
 case "$ans" in
@@ -7067,11 +7071,6 @@ y|Y) 	val="$define"	;;
 esac
 set uselonglong
 eval $setvar
-
-case "$uselonglong" in
-true|[yY]*) uselonglong="$define" ;;
-esac
-
 case "$uselonglong" in
 $define)
 : Look for a hint-file generated 'call-back-unit'.  If the
