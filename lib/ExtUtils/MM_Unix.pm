@@ -2956,8 +2956,9 @@ DOC_INSTALL = $(PERL) -e '$$\="\n\n";' \
 -e 'print "=back";'
 
 UNINSTALL =   $(PERL) -MExtUtils::Install \
--e 'uninstall($$ARGV[0],1);'
-
+-e 'uninstall($$ARGV[0],1,1); print "\nUninstall is deprecated. Please check the";' \
+-e 'print " packlist above carefully.\n  There may be errors. Remove the";' \
+-e 'print " appropriate files manually.\n  Sorry for the inconveniences.\n"'
 };
 
     return join "", @m;
