@@ -23,7 +23,7 @@ EXT I32 obj_list_fill INIT(-1);
 	 bs.fread((char*)(argp),(len),(nelem),bs.data)
 #define BGET_FGETC() bs.fgetc(bs.data)
 #else
-#define BGET_FREAD(argp, len, nelem) PerlIO_fread((argp), (len), (nelem), fp)
+#define BGET_FREAD(argp, len, nelem) PerlIO_read(fp, (argp), (len)*(nelem))
 #define BGET_FGETC() PerlIO_getc(fp)
 #endif /* INDIRECT_BGET_MACROS */
 
@@ -51,7 +51,7 @@ EXT I32 obj_list_fill INIT(-1);
 	BGET_U32(arg);				\
 	if (arg) {				\
 	    New(666, pv.xpv_pv, arg, char);	\
-	    PerlIO_fread(pv.xpv_pv, 1, arg, fp);\
+	    PerlIO_read(fp, pv.xpv_pv, arg);	\
 	    pv.xpv_len = arg;			\
 	    pv.xpv_cur = arg - 1;		\
 	} else {				\
