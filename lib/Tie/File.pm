@@ -2303,11 +2303,6 @@ internally.  If you passed it a filehandle as above, you "own" the
 filehandle, and are responsible for closing it after you have untied
 the @array.
 
-Note that Tie::File will only close any filehandles that it opened
-internally.  If you passed it a filehandle as above, you "own" the
-filehandle, and are responsible for closing it after you have untied
-the @array.
-
 =head1 Deferred Writing
 
 (This is an advanced feature.  Skip this section on first reading.)
