@@ -34,7 +34,7 @@ Exporter::export_ok_tags ('constants');
 
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.
-$VERSION = 1.05;
+$VERSION = 1.06;
 
 ##############################################################################
 # Internal data structures
