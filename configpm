@@ -264,6 +264,7 @@ if ($s == 4 || $s == 8) {
     my $list = join ',', reverse(2..$s);
     my $format = 'a'x$s;
     $byteorder_code = <<"EOT";
+
 my \$i = 0;
 foreach my \$c ($list) { \$i |= ord(\$c); \$i <<= 8 }
 \$i |= ord(1);
@@ -272,7 +273,6 @@ EOT
 } else {
     $byteorder_code = "our \$byteorder = '?'x$s;\n";
 }
-print CONFIG $byteorder_code;
 
 print CONFIG_HEAVY @non_v, "\n";
 
@@ -301,10 +301,17 @@ local *_ = \my $a;
 $_ = <<'!END!';
 EOT
 
-print CONFIG_HEAVY join("", @v_fast, sort @v_others);
+print CONFIG_HEAVY join('', @v_fast, sort @v_others), "!END!\n";
+
+# Only need the dynamic byteorder code in Config.pm if 'byteorder' is one of
+# the precached keys
+if ($Common{byteorder}) {
+    print CONFIG $byteorder_code;
+} else {
+    print CONFIG_HEAVY $byteorder_code;
+}
 
 print CONFIG_HEAVY <<'EOT';
-!END!
 s/(byteorder=)(['"]).*?\2/$1$2$Config::byteorder$2/m;
 
 my $config_sh_len = length $_;
@@ -475,8 +482,11 @@ foreach my $key (keys %Common) {
     }
     $Common{$key} = "$qkey => $value";
 }
-my $fast_config = join '', map { "    $_,\n" }
-    sort (values %Common, 'byteorder => $byteorder');
+
+if ($Common{byteorder}) {
+    $Common{byteorder} = 'byteorder => $byteorder';
+}
+my $fast_config = join '', map { "    $_,\n" } sort values %Common;
 
 print CONFIG sprintf <<'ENDOFTIE', $fast_config;
 
