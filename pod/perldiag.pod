@@ -3269,7 +3269,7 @@ e.g. C<&our()>, or C<Foo::our()>.
 because there's a better way to do it, and also because the old way has
 bad side effects.
 
-=item Use of uninitialized value
+=item Use of uninitialized value%s
 
 (W) An undefined value was used as if it were already defined.  It was
 interpreted as a "" or a 0, but maybe it was a mistake.  To suppress this
