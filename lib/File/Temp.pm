@@ -17,7 +17,7 @@ that have to be solved:
 
 =item *
 
-Can the OS unlink an open file? If it can't then the
+Can the OS unlink an open file? If it can not then the
 C<_can_unlink_opened_file> method should be modified.
 
 =item *
@@ -166,7 +166,7 @@ Exporter::export_tags('POSIX','mktemp');
 
 # Version number 
 
-$VERSION = '0.11';
+$VERSION = '0.12';
 
 # This is a list of characters that can be used in random filenames
 
@@ -200,7 +200,14 @@ my $OPENFLAGS = O_CREAT | O_EXCL | O_RDWR;
 for my $oflag (qw/ FOLLOW BINARY LARGEFILE EXLOCK NOINHERIT /) {
   my ($bit, $func) = (0, "Fcntl::O_" . $oflag);
   no strict 'refs';
-  $OPENFLAGS |= $bit if eval { $bit = &$func(); 1 };
+  $OPENFLAGS |= $bit if eval {
+    # Make sure that redefined die handlers do not cause problems
+    # eg CGI::Carp
+    local $SIG{__DIE__} = sub {};
+    local $SIG{__WARN__} = sub {};
+    $bit = &$func();
+    1;
+  };
 }
 
 # On some systems the O_TEMPORARY flag can be used to tell the OS
@@ -214,9 +221,15 @@ my $OPENTEMPFLAGS = $OPENFLAGS;
 for my $oflag (qw/ TEMPORARY /) {
   my ($bit, $func) = (0, "Fcntl::O_" . $oflag);
   no strict 'refs';
-  $OPENTEMPFLAGS |= $bit if eval { $bit = &$func(); 1 };
+  $OPENTEMPFLAGS |= $bit if eval {
+    # Make sure that redefined die handlers do not cause problems
+    # eg CGI::Carp
+    local $SIG{__DIE__} = sub {};
+    local $SIG{__WARN__} = sub {};
+    $bit = &$func();
+    1;
+  };
 }
-
 
 # INTERNAL ROUTINES - not to be used outside of package
 
@@ -243,6 +256,9 @@ for my $oflag (qw/ TEMPORARY /) {
 #                        use of the O_TEMPORARY flag to sysopen. 
 #                        Usually irrelevant on unix
 
+# Optionally a reference to a scalar can be passed into the function
+# On error this will be used to store the reason for the error
+#   "ErrStr"  => \$errstr
 # "open" and "mkdir" can not both be true
 # "unlink_on_close" is not used when "mkdir" is true.
 
@@ -256,30 +272,37 @@ for my $oflag (qw/ TEMPORARY /) {
 #   ($fh, $name) = _gettemp($template, "open" => 1);
 
 # for the current version, failures are associated with
-# a carp to give the reason whilst debugging
-
+# stored in an error string and returned to give the reason whilst debugging
+# This routine is not called by any external function
 sub _gettemp {
 
   croak 'Usage: ($fh, $name) = _gettemp($template, OPTIONS);'
     unless scalar(@_) >= 1;
 
+  # the internal error string - expect it to be overridden
+  # Need this in case the caller decides not to supply us a value
+  # need an anonymous scalar
+  my $tempErrStr;
   # Default options
   my %options = (
 		 "open" => 0,
 		 "mkdir" => 0,
 		 "suffixlen" => 0,
 		 "unlink_on_close" => 0,
+		 "ErrStr" => \$tempErrStr,
 		);
 
   # Read the template
   my $template = shift;
   if (ref($template)) {
+    # Use a warning here since we have not yet merged ErrStr
     carp "File::Temp::_gettemp: template must not be a reference";
     return ();
   }
 
   # Check that the number of entries on stack are even
   if (scalar(@_) % 2 != 0) {
+    # Use a warning here since we have not yet merged ErrStr
     carp "File::Temp::_gettemp: Must have even number of options";
     return ();
   }
@@ -287,9 +310,11 @@ sub _gettemp {
   # Read the options and merge with defaults
   %options = (%options, @_)  if @_;
 
+  # Make sure the error string is set to undef
+  ${$options{ErrStr}} = undef;
   # Can not open the file and make a directory in a single call
   if ($options{"open"} && $options{"mkdir"}) {
-    carp "File::Temp::_gettemp: doopen and domkdir can not both be true\n";
+    ${$options{ErrStr}} = "doopen and domkdir can not both be true\n";
     return ();
   }
 
@@ -304,7 +329,8 @@ sub _gettemp {
   # we know where we are looking and what we are looking for
 
   if (substr($template, $start - MINX + 1, MINX) ne 'X' x MINX) {
-    carp "File::Temp::_gettemp: The template must contain at least ". MINX ." 'X' characters\n";
+    ${$options{ErrStr}} = "The template must contain at least ".
+      MINX . " 'X' characters\n";
     return ();
   }
 
@@ -371,9 +397,12 @@ sub _gettemp {
   # not a file -- no point returning a name that includes a directory
   # that does not exist or is not writable
 
-  unless (-d $parent && -w _) {
-    carp "File::Temp::_gettemp: Parent directory ($parent) is not a directory"
-      . " or is not writable\n";
+  unless (-d $parent) {
+    ${$options{ErrStr}} = "Parent directory ($parent) is not a directory";
+    return ();
+  }
+  unless (-w _) {
+    ${$options{ErrStr}} = "Parent directory ($parent) is not writable\n";
       return ();
   }
 
@@ -382,13 +411,15 @@ sub _gettemp {
   # must be set
 
   if (File::Temp->safe_level == MEDIUM) {
-    unless (_is_safe($parent)) {
-      carp "File::Temp::_gettemp: Parent directory ($parent) is not safe (sticky bit not set when world writable?)";
+    my $safeerr;
+    unless (_is_safe($parent,\$safeerr)) {
+      ${$options{ErrStr}} = "Parent directory ($parent) is not safe ($safeerr)";
       return ();
     }
   } elsif (File::Temp->safe_level == HIGH) {
-    unless (_is_verysafe($parent)) {
-      carp "File::Temp::_gettemp: Parent directory ($parent) is not safe (sticky bit not set when world writable?)";
+    my $safeerr;
+    unless (_is_verysafe($parent, \$safeerr)) {
+      ${$options{ErrStr}} = "Parent directory ($parent) is not safe ($safeerr)";
       return ();
     }
   }
@@ -409,7 +440,7 @@ sub _gettemp {
       # Try to make sure this will be marked close-on-exec
       # XXX: Win32 doesn't respect this, nor the proper fcntl,
       #      but may have O_NOINHERIT. This may or may not be in Fcntl.
-      local $^F = 2; 
+      local $^F = 2;
 
       # Store callers umask
       my $umask = umask();
@@ -444,7 +475,7 @@ sub _gettemp {
 	# Error opening file - abort with error
 	# if the reason was anything but EEXIST
 	unless ($!{EEXIST}) {
-	  carp "File::Temp: Could not create temp file $path: $!";
+	  ${$options{ErrStr}} = "Could not create temp file $path: $!";
 	  return ();
 	}
 
@@ -474,7 +505,7 @@ sub _gettemp {
 	# Abort with error if the reason for failure was anything
 	# except EEXIST
 	unless ($!{EEXIST}) {
-	  carp "File::Temp: Could not create directory $path: $!";
+	  ${$options{ErrStr}} = "Could not create directory $path: $!";
 	  return ();
 	}
 
@@ -519,15 +550,15 @@ sub _gettemp {
 
     # Check for out of control looping
     if ($counter > $MAX_GUESS) {
-      carp "Tried to get a new temp name different to the previous value $MAX_GUESS times.\nSomething wrong with template?? ($template)";
+      ${$options{ErrStr}} = "Tried to get a new temp name different to the previous value $MAX_GUESS times.\nSomething wrong with template?? ($template)";
       return ();
     }
 
   }
 
   # If we get here, we have run out of tries
-  carp "Have exceeded the maximum number of attempts (".MAX_TRIES .
-    ") to open temp file/dir";
+  ${ $options{ErrStr} } = "Have exceeded the maximum number of attempts ("
+    . MAX_TRIES . ") to open temp file/dir";
 
   return ();
 
@@ -588,6 +619,7 @@ sub _replace_XX {
 # Will not work on systems that do not support sticky bit
 
 #Args:  directory path to check
+#       Optionally: reference to scalar to contain error message
 # Returns true if the path is safe and false otherwise.
 # Returns undef if can not even run stat() on the path
 
@@ -600,10 +632,14 @@ sub _replace_XX {
 sub _is_safe {
 
   my $path = shift;
+  my $err_ref = shift;
 
   # Stat path
   my @info = stat($path);
-  return 0 unless scalar(@info);
+  unless (scalar(@info)) {
+    $$err_ref = "stat(path) returned no values";
+    return 0;
+  };
   return 1 if $^O eq 'VMS';  # owner delete control at file level
 
   # Check to see whether owner is neither superuser (or a system uid) nor me
@@ -614,7 +650,8 @@ sub _is_safe {
     Carp::cluck(sprintf "uid=$info[4] topuid=%s \$<=$< path='$path'",
 		File::Temp->top_system_uid());
 
-    carp "Directory owned neither by root nor the current user.";
+    $$err_ref = "Directory owned neither by root nor the current user"
+      if ref($err_ref);
     return 0;
   }
 
@@ -625,8 +662,18 @@ sub _is_safe {
   # mode is in info[2]
   if (($info[2] & &Fcntl::S_IWGRP) ||   # Is group writable?
       ($info[2] & &Fcntl::S_IWOTH) ) {  # Is world writable?
-    return 0 unless -d _;       # Must be a directory
-    return 0 unless -k _;       # Must be sticky
+    # Must be a directory
+    unless (-d _) {
+      $$err_ref = "Path ($path) is not a directory"
+      if ref($err_ref);
+      return 0;
+    }
+    # Must have sticky bit set
+    unless (-k _) {
+      $$err_ref = "Sticky bit not set on $path when dir is group|world writable"
+	if ref($err_ref);
+      return 0;
+    }
   }
 
   return 1;
@@ -640,14 +687,17 @@ sub _is_safe {
 # If _PC_CHOWN_RESTRICTED is not set, does the full test of each
 # directory anyway.
 
+# Takes optional second arg as scalar ref to error reason
 sub _is_verysafe {
 
   # Need POSIX - but only want to bother if really necessary due to overhead
   require POSIX;
 
   my $path = shift;
+  print "_is_verysafe testing $path\n" if $DEBUG;
   return 1 if $^O eq 'VMS';  # owner delete control at file level
 
+  my $err_ref = shift;
   # Should Get the value of _PC_CHOWN_RESTRICTED if it is defined
   # and If it is not there do the extensive test
   my $chown_restricted;
@@ -658,7 +708,7 @@ sub _is_verysafe {
   if (defined $chown_restricted) {
 
     # Return if the current directory is safe
-    return _is_safe($path) if POSIX::sysconf( $chown_restricted );
+    return _is_safe($path,$err_ref) if POSIX::sysconf( $chown_restricted );
 
   }
 
@@ -693,7 +743,7 @@ sub _is_verysafe {
     print "TESTING DIR $dir\n" if $DEBUG;
 
     # Check the directory
-    return 0 unless _is_safe($dir);
+    return 0 unless _is_safe($dir,$err_ref);
 
   }
 
@@ -790,7 +840,6 @@ sub _can_do_level {
       }
     }
 
-
   }
 
   # This is the sub called to register a file for deferred unlinking
@@ -819,7 +868,7 @@ sub _can_do_level {
 	push (@dirs_to_unlink, $fname);
 
       } else {
-	carp "Request to remove directory $fname could not be completed since it does not exist!\n";
+	carp "Request to remove directory $fname could not be completed since it does not exist!\n" if $^W;
       }
 
     } else {
@@ -830,7 +879,7 @@ sub _can_do_level {
 	push(@files_to_unlink, [$fh, $fname]);
 
       } else {
-	carp "Request to remove file $fname could not be completed since it is not there!\n";
+	carp "Request to remove file $fname could not be completed since it is not there!\n" if $^W;
       }
 
     }
@@ -901,7 +950,6 @@ an open file or can not mark a file as temporary when it is opened
 (for example, Windows NT uses the C<O_TEMPORARY> flag))
 the file is marked for deletion when the program ends (equivalent
 to setting UNLINK to 1). The C<UNLINK> flag is ignored if present.
-
 
   (undef, $filename) = tempfile($template, OPEN => 0);
 
@@ -994,13 +1042,14 @@ sub tempfile {
   my $unlink_on_close = ( wantarray ? 0 : 1);
 
   # Create the file
-  my ($fh, $path);
-  croak "Error in tempfile() using $template"
+  my ($fh, $path, $errstr);
+  croak "Error in tempfile() using $template: $errstr"
     unless (($fh, $path) = _gettemp($template,
 				    "open" => $options{'OPEN'},
 				    "mkdir"=> 0 ,
                                     "unlink_on_close" => $unlink_on_close,
 				    "suffixlen" => length($options{'SUFFIX'}),
+				    "ErrStr" => \$errstr,
 				   ) );
 
   # Set up an exit handler that can do whatever is right for the
@@ -1158,11 +1207,13 @@ sub tempdir  {
     $template =~ m/([\.\]:>]+)$/;
     $suffixlen = length($1);
   }
-  croak "Error in tempdir() using $template"
+  my $errstr;
+  croak "Error in tempdir() using $template: $errstr"
     unless ((undef, $tempdir) = _gettemp($template,
 				    "open" => 0,
 				    "mkdir"=> 1 ,
 				    "suffixlen" => $suffixlen,
+				    "ErrStr" => \$errstr,
 				   ) );
 
   # Install exit handler; must be dynamic to get lexical
@@ -1208,12 +1259,13 @@ sub mkstemp {
 
   my $template = shift;
 
-  my ($fh, $path);
-  croak "Error in mkstemp using $template"
+  my ($fh, $path, $errstr);
+  croak "Error in mkstemp using $template: $errstr"
     unless (($fh, $path) = _gettemp($template,
 				    "open" => 1,
 				    "mkdir"=> 0 ,
 				    "suffixlen" => 0,
+				    "ErrStr" => \$errstr,
 				   ) );
 
   if (wantarray()) {
@@ -1250,12 +1302,13 @@ sub mkstemps {
 
   $template .= $suffix;
 
-  my ($fh, $path);
-  croak "Error in mkstemps using $template"
+  my ($fh, $path, $errstr);
+  croak "Error in mkstemps using $template: $errstr"
     unless (($fh, $path) = _gettemp($template,
-				    "open" => 1, 
+				    "open" => 1,
 				    "mkdir"=> 0 ,
 				    "suffixlen" => length($suffix),
+				    "ErrStr" => \$errstr,
 				   ) );
 
   if (wantarray()) {
@@ -1293,12 +1346,13 @@ sub mkdtemp {
     $template =~ m/([\.\]:>]+)$/;
     $suffixlen = length($1);
   }
-  my ($junk, $tmpdir);
-  croak "Error creating temp directory from template $template\n"
+  my ($junk, $tmpdir, $errstr);
+  croak "Error creating temp directory from template $template\: $errstr"
     unless (($junk, $tmpdir) = _gettemp($template,
 					"open" => 0,
 					"mkdir"=> 1 ,
 					"suffixlen" => $suffixlen,
+					"ErrStr" => \$errstr,
 				       ) );
 
   return $tmpdir;
@@ -1323,12 +1377,13 @@ sub mktemp {
 
   my $template = shift;
 
-  my ($tmpname, $junk);
-  croak "Error getting name to temp file from template $template\n"
+  my ($tmpname, $junk, $errstr);
+  croak "Error getting name to temp file from template $template: $errstr"
     unless (($junk, $tmpname) = _gettemp($template,
 					 "open" => 0,
 					 "mkdir"=> 0 ,
 					 "suffixlen" => 0,
+					 "ErrStr" => \$errstr,
 					 ) );
 
   return $tmpname;
@@ -1523,7 +1578,7 @@ sub unlink0 {
   my @fh = stat $fh;
 
   if ($fh[3] > 1 && $^W) {
-    carp "unlink0: fstat found too many links; SB=@fh";
+    carp "unlink0: fstat found too many links; SB=@fh" if $^W;
   }
 
   # Stat the path
@@ -1677,7 +1732,7 @@ simply examine the return value of C<safe_level>.
     if (@_) { 
       my $level = shift;
       if (($level != STANDARD) && ($level != MEDIUM) && ($level != HIGH)) {
-	carp "safe_level: Specified level ($level) not STANDARD, MEDIUM or HIGH - ignoring\n";
+	carp "safe_level: Specified level ($level) not STANDARD, MEDIUM or HIGH - ignoring\n" if $^W;
       } else {
 	# Dont allow this on perl 5.005 or earlier
 	if ($] < 5.006 && $level != STANDARD) {
