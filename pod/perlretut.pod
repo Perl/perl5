@@ -1720,29 +1720,32 @@ characters,
     $x =~ /^\p{IsLower}/;   # doesn't match, lowercase char class
     $x =~ /^\P{IsLower}/;   # matches, char class sans lowercase
 
-If a C<name> is just one letter, the braces can be dropped.  For
-instance, C<\pM> is the character class of Unicode 'marks'.  Here is
-the association between some Perl named classes and the traditional
-Unicode classes:
+Here is the association between some Perl named classes and the
+traditional Unicode classes:
 
-    Perl class name  Unicode class name
+    Perl class name  Unicode class name or regular expression
 
-    IsAlpha          Lu, Ll, or Lo
-    IsAlnum          Lu, Ll, Lo, or Nd
+    IsAlpha          ^[LM]
+    IsAlnum          ^[LMN]
     IsASCII          $code le 127
-    IsCntrl          C
+    IsCntrl          ^C
+    IsBlank          ^Z[^lp] or $code eq "0009"
     IsDigit          Nd
-    IsGraph          [^C] and $code ne "0020"
+    IsGraph          ^([LMNPS]|Co)
     IsLower          Ll
-    IsPrint          [^C]
-    IsPunct          P
-    IsSpace          Z, or ($code lt "0020" and chr(hex $code) is a \s)
-    IsUpper          Lu
-    IsWord           Lu, Ll, Lo, Nd or $code eq "005F"
+    IsPrint          ^([LMNPS]|Co|Zs)
+    IsPunct          ^P
+    IsSpace          ^Z or ($code =~ /^(0009|000A|000B|000C|000D)$/
+    IsSpacePerl      ^Z or ($code =~ /^(0009|000A|000C|000D)$/
+    IsUpper          ^L[ut]
+    IsWord           ^[LMN] or $code eq "005F"
     IsXDigit         $code =~ /^00(3[0-9]|[46][1-6])$/
 
-For a full list of Perl class names, consult the mktables.PL program
-in the lib/perl5/5.6.0/unicode directory.
+You can also use the official Unicode class names with the C<\p> and
+C<\P>, like C<\p{L}> for Unicode 'letters', or C<\p{Lu}> for uppercase
+letters, or C<\P{Nd}> for non-digits.  If a C<name> is just one
+letter, the braces can be dropped.  For instance, C<\pM> is the
+character class of Unicode 'marks'.
 
 C<\X> is an abbreviation for a character class sequence that includes
 the Unicode 'combining character sequences'.  A 'combining character
