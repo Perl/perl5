@@ -430,10 +430,8 @@ banner.
 
 sub pasthru {
     my($self) = shift;
-    my $pasthru = $self->SUPER::pasthru();
-    $pasthru =~ s/PASTHRU\s*=\s*/PASTHRU = -nologo / if $NMAKE;
-    return $pasthru;                                                           
- }
+    return "PASTHRU = " . ($NMAKE ? "-nologo" : "");
+}
 
 
 =item oneliner (o)

@@ -9,7 +9,6 @@ use Carp;
 use Config         qw(%Config);
 use File::Basename qw(basename dirname fileparse);
 use DirHandle;
-use Text::ParseWords;
 
 use vars qw($VERSION @ISA
             $Is_Mac $Is_OS2 $Is_VMS $Is_Win32 $Is_Win95  $Is_Dos $Is_VOS
@@ -128,30 +127,30 @@ sub c_o {
         $cpp_cmd =~ s/^CCCMD\s*=\s*\$\(CC\)/$cpp/;
         push @m, '
 .c.i:
-	'. $cpp_cmd . ' $(CCCDLFLAGS) "-I$(PERL_INC)" $(DEFINE) $(PASTHRU_DEFINE) $*.c > $*.i
+	'. $cpp_cmd . ' $(CCCDLFLAGS) "-I$(PERL_INC)" $(PASTHRU_DEFINE) $(DEFINE) $*.c > $*.i
 ';
     }
     push @m, '
 .c.s:
-	$(CCCMD) -S $(CCCDLFLAGS) "-I$(PERL_INC)" $(DEFINE) $(PASTHRU_DEFINE) $*.c
+	$(CCCMD) -S $(CCCDLFLAGS) "-I$(PERL_INC)" $(PASTHRU_DEFINE) $(DEFINE) $*.c
 ';
     push @m, '
 .c$(OBJ_EXT):
-	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(DEFINE) $(PASTHRU_DEFINE) $*.c
+	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(PASTHRU_DEFINE) $(DEFINE) $*.c
 ';
     push @m, '
 .C$(OBJ_EXT):
-	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(DEFINE) $(PASTHRU_DEFINE) $*.C
+	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(PASTHRU_DEFINE) $(DEFINE) $*.C
 ' if !$Is_OS2 and !$Is_Win32 and !$Is_Dos; #Case-specific
     push @m, '
 .cpp$(OBJ_EXT):
-	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(DEFINE) $(PASTHRU_DEFINE) $*.cpp
+	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(PASTHRU_DEFINE) $(DEFINE) $*.cpp
 
 .cxx$(OBJ_EXT):
-	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(DEFINE) $(PASTHRU_DEFINE) $*.cxx
+	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(PASTHRU_DEFINE) $(DEFINE) $*.cxx
 
 .cc$(OBJ_EXT):
-	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(DEFINE) $(PASTHRU_DEFINE) $*.cc
+	$(CCCMD) $(CCCDLFLAGS) "-I$(PERL_INC)" $(PASTHRU_DEFINE) $(DEFINE) $*.cc
 ';
     join "", @m;
 }
@@ -364,10 +363,8 @@ sub const_cccmd {
     my($self,$libperl)=@_;
     return $self->{CONST_CCCMD} if $self->{CONST_CCCMD};
     return '' unless $self->needs_linking();
-    # PASTHRU_INC is defined explicitly by extensions
-    # wanting to do complex things.
     return $self->{CONST_CCCMD} =
-	q{CCCMD = $(CC) -c $(INC) $(PASTHRU_INC) \\
+	q{CCCMD = $(CC) -c $(PASTHRU_INC) $(INC) \\
 	$(CCFLAGS) $(OPTIMIZE) \\
 	$(PERLTYPE) $(MPOLLUTE) $(DEFINE_VERSION) \\
 	$(XS_DEFINE_VERSION)};
@@ -3111,27 +3108,10 @@ sub pasthru {
     my($sep) = $Is_VMS ? ',' : '';
     $sep .= "\\\n\t";
 
-    foreach $key (qw(LIB LIBPERL_A LINKTYPE PREFIX OPTIMIZE INC DEFINE)) {
-	next unless defined $self->{$key};
-	if ($key eq 'INC') {
-	    # For INC we need to prepend parent directory but
-	    # only iff the parent directory is not absolute.
-	    my ($o, $i) = $Is_VMS ? ('/Include=', 'i') : ('-I', '');
-	    my $inc = '';
-	    foreach (grep { /\S/ } parse_line(qr/\s*(?$i)$o/, 1, $self->{INC})) {
-		s/^"(.+)"\s*$/$1/o;
-		my $dir = File::Spec->file_name_is_absolute($_) ? $_ : File::Spec->catdir(File::Spec->updir, $_);
-		$dir = qq["$dir"] if $dir =~ / /;
-		$inc .= " $o$dir";
-	    }
-	    push @pasthru, "INC=\"$inc\"";
-	} else {
-	    push @pasthru, "$key=\"\$($key)\"";
-	}
+    foreach $key (qw(LIB LIBPERL_A LINKTYPE PREFIX OPTIMIZE)) {
+	push @pasthru, "$key=\"\$($key)\"";
     }
 
-    # PASTHRU_DEFINE and PASTHRU_INC are defined explicitly
-    # by extensions wanting to do really complex things.
     foreach $key (qw(DEFINE INC)) {
 	push @pasthru, "PASTHRU_$key=\"\$(PASTHRU_$key)\"";
     }
