@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Apr 26 00:02:55 EET DST 2003 [metaconfig 3.0 PL70]
+# Generated on Sat Apr 26 00:34:39 EET DST 2003 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -20114,6 +20114,39 @@ set X $avail_ext
 shift
 avail_ext="$*"
 
+case "$onlyextensions" in
+'') ;;
+*)  keepextensions=''
+    echo "You have requested that only certains extensions be included..." >&4
+    for i in $onlyextensions; do
+        case " $avail_ext " in
+        *" $i "*)
+            echo "Keeping extension $i."
+            keepextensions="$keepextensions $i"
+            ;;
+        *) echo "Ignoring extension $i." ;;
+        esac
+    done
+    avail_ext="$keepextensions"
+    ;;
+esac
+
+case "$noextensions" in
+'') ;;
+*)  keepextensions=''
+    echo "You have requested that certain extensions be ignored..." >&4
+    for i in $avail_ext; do
+        case " $i " in
+        " $noextensions ") echo "Ignoring extension $i." ;;
+        *) echo "Keeping extension $i.";
+           keepextensions="$keepextensions $i"
+           ;;
+        esac
+    done
+    avail_ext="$keepextensions"
+    ;;
+esac
+
 : Now see which nonxs extensions are supported on this system.
 : For now assume all are.
 nonxs_ext=''
@@ -20265,39 +20298,6 @@ esac
 set X $dynamic_ext $static_ext $nonxs_ext
 shift
 extensions="$*"
-
-case "$onlyextensions" in
-'') ;;
-*)  keepextensions=''
-    echo "You have requested that only certains extensions be included..." >&4
-    for i in $onlyextensions; do
-        case " $extensions " in
-        *" $i "*)
-            echo "Keeping extension $i."
-            keepextensions="$keepextensions $i"
-            ;;
-        *) echo "Ignoring extension $i." ;;
-        esac
-    done
-    extensions="$keepextensions"
-    ;;
-esac
-
-case "$noextensions" in
-'') ;;
-*)  keepextensions=''
-    echo "You have requested that certain extensions be ignored..." >&4
-    for i in $extensions; do
-        case " $i " in
-        " $noextensions ") echo "Ignoring extension $i." ;;
-        *) echo "Keeping extension $i.";
-           keepextensions="$keepextensions $i"
-           ;;
-        esac
-    done
-    extensions="$keepextensions"
-    ;;
-esac
 
 # Sanity check:  We require an extension suitable for use with
 # AnyDBM_File, as well as Fcntl and IO.  (Failure to have these
