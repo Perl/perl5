@@ -219,6 +219,11 @@ register PerlInterpreter *sv_interp;
     statgv = Nullgv;
     laststatval = -1;
 
+    sv_free((SV*)beginav);
+    beginav = Nullav;
+    sv_free((SV*)endav);
+    endav = Nullav;
+
     /* Prepare to destruct main symbol table.  */
 
     hv = defstash;
