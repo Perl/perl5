@@ -678,7 +678,7 @@ Perl_scalarvoid(pTHX_ OP *o)
 	    if (ckWARN(WARN_VOID)) {
 		useless = "a constant";
 		/* don't warn on optimised away booleans, eg 
-		 * use constant F, 5; Foo || print; */
+		 * use constant Foo, 5; Foo || print; */
 		if (cSVOPo->op_private & OPpCONST_SHORTCIRCUIT)
 		    useless = 0;
 		/* the constants 0 and 1 are permitted as they are
