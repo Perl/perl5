@@ -186,7 +186,10 @@ sub cat_file
     my($file) = @_;
     local $/;  # slurp
     open(FILE, $file) or die "Can't open $file: $!";
-    binmode(FILE);
+
+    # For PerlIO (Perl 5.8.0 and later) in case of UTF-8 locales.
+    eval { binmode(FILE, ":bytes"); };
+
     my $tmp = <FILE>;
     close(FILE);
     $tmp;
