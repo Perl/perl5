@@ -437,11 +437,13 @@ sub _vms_abs_path {
 sub _os2_cwd {
     $ENV{'PWD'} = `cmd /c cd`;
     chop $ENV{'PWD'};
+    $ENV{'PWD'} =~ s:\\:/:g ;
     return $ENV{'PWD'};
 }
 
 sub _win32_cwd {
     $ENV{'PWD'} = Win32::GetCwd();
+    $ENV{'PWD'} =~ s:\\:/:g ;
     return $ENV{'PWD'};
 }
 
@@ -454,6 +456,7 @@ sub _dos_cwd {
     if (!defined &Dos::GetCwd) {
         $ENV{'PWD'} = `command /c cd`;
         chop $ENV{'PWD'};
+        $ENV{'PWD'} =~ s:\\:/:g ;
     } else {
         $ENV{'PWD'} = Dos::GetCwd();
     }
