@@ -466,7 +466,7 @@ while( my($test, $expect) = each %samples ) {
     }
 
     my $strap = Test::Harness::Straps->new;
-    my %results = $strap->analyze_file($^O eq 'macos' ?
+    my %results = $strap->analyze_file($^O eq 'MacOS' ?
                                        catfile($SAMPLE_TESTS, $test) :
                                        "$SAMPLE_TESTS/$test");
 
