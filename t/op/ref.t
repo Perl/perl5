@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..50\n";
+print "1..51\n";
 
 # Test glob operations.
 
@@ -223,12 +223,20 @@ sub moe::DESTROY   { print "# moe\nok 47\n"; }
 
 print "# left block\n";
 
+# another glob test
+
+$foo = "not ok 48";
+{ local(*bar) = "foo" }
+$bar = "ok 48";
+local(*bar) = *bar;
+print "$bar\n";
+
 package FINALE;
 
 {
-    $ref3 = bless ["ok 50\n"];		# package destruction
-    my $ref2 = bless ["ok 49\n"];	# lexical destruction
-    local $ref1 = bless ["ok 48\n"];	# dynamic destruction
+    $ref3 = bless ["ok 51\n"];		# package destruction
+    my $ref2 = bless ["ok 50\n"];	# lexical destruction
+    local $ref1 = bless ["ok 49\n"];	# dynamic destruction
     1;					# flush any temp values on stack
 }
 

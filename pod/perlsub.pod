@@ -872,6 +872,12 @@ via the import syntax, and these names may then override the builtin ones:
     chdir $somewhere;
     sub chdir { ... }
 
+To unambiguously refer to the builtin form, one may precede the
+builtin name with the special package qualifier C<CORE::>.  For example,
+saying C<CORE::open()> will always refer to the builtin C<open()>, even
+if the current package has imported some other subroutine called
+C<&open()> from elsewhere.
+
 Library modules should not in general export builtin names like "open"
 or "chdir" as part of their default @EXPORT list, because these may
 sneak into someone else's namespace and change the semantics unexpectedly.
@@ -886,6 +892,10 @@ and it would import the open override, but if they said
     use Module;
 
 they would get the default imports without the overrides.
+
+Note that such overriding is restricted to the package that requests
+the import.  Some means of "globally" overriding builtins may become
+available in future.
 
 =head2 Autoloading
 

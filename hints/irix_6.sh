@@ -63,6 +63,10 @@ case "$cc" in
 	ld=ld
 	ldflags=' -L/usr/local/lib -L/usr/lib32 -L/lib32'
 	cccdlflags=' '
+    # From: David Billinghurst <David.Billinghurst@riotinto.com.au>
+    # If you get complaints about so_locations then change the following
+    # line to something like:
+    #	lddlflags="-n32 -shared -check_registry /usr/lib32/so_locations"
 	lddlflags="-n32 -shared"
 	libc='/usr/lib32/libc.so'
 	plibpth='/usr/lib32 /lib32 /usr/ccs/lib'

@@ -294,7 +294,7 @@ int execf;
     register char *s;
     char flags[10];
     char *shell, *copt, *news = NULL;
-    int rc, added_shell = 0, err;
+    int rc, added_shell = 0, err, seenspace = 0;
     char fullcmd[MAXNAMLEN + 1];
 
 #ifdef TRYSHELL
@@ -346,6 +346,8 @@ int execf;
 	    if (*s == '\n' && s[1] == '\0') {
 		*s = '\0';
 		break;
+	    } else if (*s == '\\' && !seenspace) {
+		continue;		/* Allow backslashes in names */
 	    }
 	  doshell:
 	    if (execf == EXECF_TRUEEXEC)
@@ -364,6 +366,8 @@ int execf;
 	    if (rc < 0) rc = 255 << 8; /* Emulate the fork(). */
 	    if (news) Safefree(news);
 	    return rc;
+	} else if (*s == ' ' || *s == '\t') {
+	    seenspace = 1;
 	}
     }
 

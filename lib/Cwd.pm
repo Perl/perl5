@@ -26,14 +26,22 @@ The getcwd() function re-implements the getcwd(3) (or getwd(3)) functions
 in Perl.
 
 The fastcwd() function looks the same as getcwd(), but runs faster.
-It's also more dangerous because you might conceivably chdir() out of a
-directory that you can't chdir() back into.
+It's also more dangerous because it might conceivably chdir() you out
+of a directory that it can't chdir() you back into.  If fastcwd
+encounters a problem it will return undef but will probably leave you
+in a different directory.  For a measure of extra security, if
+everything appears to have worked, the fastcwd() function will check
+that it leaves you in the same directory that it started in. If it has
+changed it will C<die> with the message "Unstable directory path,
+current directory changed unexpectedly". That should never happen.
 
 The cwd() function looks the same as getcwd and fastgetcwd but is
 implemented using the most natural and safe form for the current
 architecture. For most systems it is identical to `pwd` (but without
-the trailing line terminator). It is recommended that cwd (or another
-*cwd() function) is used in I<all> code to ensure portability.
+the trailing line terminator).
+
+It is recommended that cwd (or another *cwd() function) is used in
+I<all> code to ensure portability.
 
 If you ask to override your chdir() built-in function, then your PWD
 environment variable will be kept up to date.  (See
@@ -101,7 +109,7 @@ sub getcwd
 	}
 	if ($pst[0] == $cst[0] && $pst[1] == $cst[1])
 	{
-	    $dir = '';
+	    $dir = undef;
 	}
 	else
 	{
@@ -125,9 +133,9 @@ sub getcwd
 	    while ($dir eq '.' || $dir eq '..' || $tst[0] != $pst[0] ||
 		   $tst[1] != $pst[1]);
 	}
-	$cwd = "$dir/$cwd";
+	$cwd = (defined $dir ? "$dir" : "" ) . "/$cwd" ;
 	closedir(PARENT);
-    } while ($dir);
+    } while (defined $dir);
     chop($cwd) unless $cwd eq '/'; # drop the trailing /
     $cwd;
 }
@@ -140,33 +148,45 @@ sub getcwd
 #
 # This is a faster version of getcwd.  It's also more dangerous because
 # you might chdir out of a directory that you can't chdir back into.
+    
+# List of metachars taken from do_exec() in doio.c
+my $quoted_shell_meta = quotemeta('$&*(){}[]";\\|?<>~`'."'\n");
 
 sub fastcwd {
     my($odev, $oino, $cdev, $cino, $tdev, $tino);
     my(@path, $path);
     local(*DIR);
 
-    ($cdev, $cino) = stat('.');
+    my($orig_cdev, $orig_cino) = stat('.');
+    ($cdev, $cino) = ($orig_cdev, $orig_cino);
     for (;;) {
 	my $direntry;
 	($odev, $oino) = ($cdev, $cino);
-	chdir('..');
+	chdir('..') || return undef;
 	($cdev, $cino) = stat('.');
 	last if $odev == $cdev && $oino == $cino;
-	opendir(DIR, '.');
+	opendir(DIR, '.') || return undef;
 	for (;;) {
 	    $direntry = readdir(DIR);
+	    last unless defined $direntry;
 	    next if $direntry eq '.';
 	    next if $direntry eq '..';
 
-	    last unless defined $direntry;
 	    ($tdev, $tino) = lstat($direntry);
 	    last unless $tdev != $odev || $tino != $oino;
 	}
 	closedir(DIR);
+	return undef unless defined $direntry; # should never happen
 	unshift(@path, $direntry);
     }
-    chdir($path = '/' . join('/', @path));
+    $path = '/' . join('/', @path);
+    # At this point $path may be tainted (if tainting) and chdir would fail.
+    # To be more useful we untaint it then check that we landed where we started.
+    $path = $1 if $path =~ /^(.*)$/;	# untaint
+    chdir($path) || return undef;
+    ($cdev, $cino) = stat('.');
+    die "Unstable directory path, current directory changed unexpectedly"
+	if $cdev != $orig_cdev || $cino != $orig_cino;
     $path;
 }
 

@@ -66,6 +66,8 @@ static struct {
  * can get by with a single comparison (if the compiler is smart enough).
  */
 
+/* #define LEX_NOTPARSING		11 is done in perl.h. */
+
 #define LEX_NORMAL		10
 #define LEX_INTERPNORMAL	 9
 #define LEX_INTERPCASEMOD	 8
@@ -3996,7 +3998,7 @@ I32 len;
 	case 4:
 	    if (strEQ(d,"grep"))		return KEY_grep;
 	    if (strEQ(d,"goto"))		return KEY_goto;
-	    if (strEQ(d,"glob"))		return -KEY_glob;
+	    if (strEQ(d,"glob"))		return KEY_glob;
 	    break;
 	case 6:
 	    if (strEQ(d,"gmtime"))		return -KEY_gmtime;
@@ -4980,13 +4982,8 @@ char *start;
     register char *to;
     I32 brackets = 1;
 
-    if (isSPACE(*s)) {
-	/* "#" is allowed as delimiter if on same line */
-	while (*s == ' ' || *s == '\t')
-	    s++;
-	if (isSPACE(*s))
-	    s = skipspace(s);
-    }
+    if (isSPACE(*s))
+	s = skipspace(s);
     CLINE;
     term = *s;
     multi_start = curcop->cop_line;

@@ -394,13 +394,26 @@ for (map { chr } 0..255) {
 }
 print "ok 101\n";
 
+# Test for read-onlys.
+
+{
+    no locale;
+    $a = "qwerty";
+    {
+	use locale;
+	print "not " if $a cmp "qwerty";
+    }
+}
+print "ok 102\n";
+
+# This test must be the last one because its failure is not fatal.
 # The @Locale should be internally consistent.
 # Thanks to Hallvard Furuseth <h.b.furuseth@usit.uio.no>
 # for inventing a way to test for ordering consistency
 # without requiring any particular order.
 # ++$jhi;#@iki.fi
 
-print "# testing 102\n";
+print "# testing 103\n";
 {
     my ($from, $to, $lesser, $greater, @test, %test, $test, $yes, $no, $sign);
 
@@ -422,14 +435,14 @@ print "# testing 102\n";
 	    (
 	     $no.'    ($lesser  lt $greater)',  # 0
 	     $no.'    ($lesser  le $greater)',  # 1
-	     $no.'    ($lesser  ne $greater)',  # 2
-	     $yes.'    ($lesser  eq $greater)', # 3
+	     'not      ($lesser  ne $greater)', # 2
+	     '         ($lesser  eq $greater)', # 3
 	     $yes.'    ($lesser  ge $greater)', # 4
 	     $yes.'    ($lesser  gt $greater)', # 5
 	     $yes.'    ($greater lt $lesser )', # 6
 	     $yes.'    ($greater le $lesser )', # 7
-	     $no.'     ($greater ne $lesser )', # 8
-	     $yes.'    ($greater eq $lesser )', # 9
+	     'not      ($greater ne $lesser )', # 8
+	     '         ($greater eq $lesser )', # 9
 	     $no.'     ($greater ge $lesser )', # 10
 	     $no.'     ($greater gt $lesser )', # 11
 	     'not (($lesser cmp $greater) == -$sign)' # 12
@@ -438,7 +451,7 @@ print "# testing 102\n";
 	$test = 0;
 	for my $ti (@test) { $test{$ti} = eval $ti ; $test ||= $test{$ti} }
 	if ($test) {
-	    print "# failed 102 at:\n";
+	    print "# failed 103 at:\n";
 	    print "# lesser  = '$lesser'\n";
 	    print "# greater = '$greater'\n";
 	    print "# lesser cmp greater = ", $lesser cmp $greater, "\n";
@@ -453,11 +466,10 @@ print "# testing 102\n";
 		print "\n";
 	    }
 
-	    print 'not ';
+	    warn "The locale definition on your system may have errors.\n";
 	    last;
 	}
     }
 }
-print "ok 102\n";
 
 # eof

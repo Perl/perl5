@@ -189,6 +189,7 @@ register PerlInterpreter *sv_interp;
 #endif
 
     init_ids();
+    lex_state = LEX_NOTPARSING;
 
     start_env.je_prev = NULL;
     start_env.je_ret = -1;
@@ -729,20 +730,23 @@ setuid perl scripts securely.\n");
 		croak("No code specified for -e");
 	    (void)PerlIO_putc(e_fp,'\n');
 	    break;
-	case 'I':
+	case 'I':	/* -I handled both here and in moreswitches() */
 	    forbid_setid("-I");
-	    sv_catpv(sv,"-");
-	    sv_catpv(sv,s);
-	    sv_catpv(sv," ");
-	    if (*++s) {
-		incpush(s, TRUE);
-	    }
-	    else if (argv[1]) {
-		incpush(argv[1], TRUE);
-		sv_catpv(sv,argv[1]);
+	    if (!*++s && (s=argv[1]) != Nullch) {
 		argc--,argv++;
-		sv_catpv(sv," ");
 	    }
+	    while (s && isSPACE(*s))
+		++s;
+	    if (s && *s) {
+		char *e, *p;
+		for (e = s; *e && !isSPACE(*e); e++) ;
+		p = savepvn(s, e-s);
+		incpush(p, TRUE);
+		sv_catpv(sv,"-I");
+		sv_catpv(sv,p);
+		sv_catpv(sv," ");
+		Safefree(p);
+	    }	/* XXX else croak? */
 	    break;
 	case 'P':
 	    forbid_setid("-P");
@@ -817,22 +821,24 @@ print \"  \\@INC:\\n    @INC\\n\";");
 	    if (*s)
 		cddir = savepv(s);
 	    break;
-	case '-':
-	    if (*++s) { /* catch use of gnu style long options */
-		if (strEQ(s, "version")) {
-		    s = "v";
-		    goto reswitch;
-		}
-		if (strEQ(s, "help")) {
-		    s = "h";
-		    goto reswitch;
-		}
-		croak("Unrecognized switch: --%s  (-h will show valid options)",s);
-	    }
-	    argc--,argv++;
-	    goto switch_end;
 	case 0:
 	    break;
+	case '-':
+	    if (!*++s || isSPACE(*s)) {
+		argc--,argv++;
+		goto switch_end;
+	    }
+	    /* catch use of gnu style long options */
+	    if (strEQ(s, "version")) {
+		s = "v";
+		goto reswitch;
+	    }
+	    if (strEQ(s, "help")) {
+		s = "h";
+		goto reswitch;
+	    }
+	    s--;
+	    /* FALL THROUGH */
 	default:
 	    croak("Unrecognized switch: -%s  (-h will show valid options)",s);
 	}
@@ -840,7 +846,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
   switch_end:
 
     if (!tainting && (s = getenv("PERL5OPT"))) {
-	for (;;) {
+	while (s && *s) {
 	    while (isSPACE(*s))
 		s++;
 	    if (*s == '-') {
@@ -1021,7 +1027,7 @@ PerlInterpreter *sv_interp;
 	break;
     }
 
-    DEBUG_r(PerlIO_printf(PerlIO_stderr(), "%s $` $& $' support.\n",
+    DEBUG_r(PerlIO_printf(Perl_debug_log, "%s $` $& $' support.\n",
                     sawampersand ? "Enabling" : "Omitting"));
 
     if (!restartop) {
@@ -1447,30 +1453,39 @@ char *name;
 {
     /* This message really ought to be max 23 lines.
      * Removed -h because the user already knows that opton. Others? */
+
+    static char *usage[] = {
+"-0[octal]       specify record separator (\\0, if no argument)",
+"-a              autosplit mode with -n or -p (splits $_ into @F)",
+"-c              check syntax only (runs BEGIN and END blocks)",
+"-d[:debugger]   run scripts under debugger",
+"-D[number/list] set debugging flags (argument is a bit mask or flags)",
+"-e 'command'    one line of script. Several -e's allowed. Omit [programfile].",
+"-F/pattern/     split() pattern for autosplit (-a). The //'s are optional.",
+"-i[extension]   edit <> files in place (make backup if extension supplied)",
+"-Idirectory     specify @INC/#include directory (may be used more than once)",
+"-l[octal]       enable line ending processing, specifies line terminator",
+"-[mM][-]module.. executes `use/no module...' before executing your script.",
+"-n              assume 'while (<>) { ... }' loop around your script",
+"-p              assume loop like -n but print line also like sed",
+"-P              run script through C preprocessor before compilation",
+"-s              enable some switch parsing for switches after script name",
+"-S              look for the script using PATH environment variable",
+"-T              turn on tainting checks",
+"-u              dump core after parsing script",
+"-U              allow unsafe operations",
+"-v              print version number and patchlevel of perl",
+"-V[:variable]   print perl configuration information",
+"-w              TURN WARNINGS ON FOR COMPILATION OF YOUR SCRIPT. Recommended.",
+"-x[directory]   strip off text before #!perl line and perhaps cd to directory",
+"\n",
+NULL
+};
+    char **p = usage;
+
     printf("\nUsage: %s [switches] [--] [programfile] [arguments]", name);
-    printf("\n  -0[octal]       specify record separator (\\0, if no argument)");
-    printf("\n  -a              autosplit mode with -n or -p (splits $_ into @F)");
-    printf("\n  -c              check syntax only (runs BEGIN and END blocks)");
-    printf("\n  -d[:debugger]   run scripts under debugger");
-    printf("\n  -D[number/list] set debugging flags (argument is a bit mask or flags)");
-    printf("\n  -e 'command'    one line of script. Several -e's allowed. Omit [programfile].");
-    printf("\n  -F/pattern/     split() pattern for autosplit (-a). The //'s are optional.");
-    printf("\n  -i[extension]   edit <> files in place (make backup if extension supplied)");
-    printf("\n  -Idirectory     specify @INC/#include directory (may be used more than once)");
-    printf("\n  -l[octal]       enable line ending processing, specifies line terminator");
-    printf("\n  -[mM][-]module.. executes `use/no module...' before executing your script.");
-    printf("\n  -n              assume 'while (<>) { ... }' loop around your script");
-    printf("\n  -p              assume loop like -n but print line also like sed");
-    printf("\n  -P              run script through C preprocessor before compilation");
-    printf("\n  -s              enable some switch parsing for switches after script name");
-    printf("\n  -S              look for the script using PATH environment variable");
-    printf("\n  -T              turn on tainting checks");
-    printf("\n  -u              dump core after parsing script");
-    printf("\n  -U              allow unsafe operations");
-    printf("\n  -v              print version number and patchlevel of perl");
-    printf("\n  -V[:variable]   print perl configuration information");
-    printf("\n  -w              TURN WARNINGS ON FOR COMPILATION OF YOUR SCRIPT. Recommended.");
-    printf("\n  -x[directory]   strip off text before #!perl line and perhaps cd to directory\n");
+    while (*p)
+	printf("\n  %s", *p++);
 }
 
 /* This routine handles any switches that can be given during run */
@@ -1550,22 +1565,25 @@ char *s;
 	inplace = savepv(s+1);
 	/*SUPPRESS 530*/
 	for (s = inplace; *s && !isSPACE(*s); s++) ;
-	*s = '\0';
-	break;
-    case 'I':
+	if (*s)
+	    *s++ = '\0';
+	return s;
+    case 'I':	/* -I handled both here and in parse_perl() */
 	forbid_setid("-I");
-	if (*++s) {
+	++s;
+	while (*s && isSPACE(*s))
+	    ++s;
+	if (*s) {
 	    char *e, *p;
 	    for (e = s; *e && !isSPACE(*e); e++) ;
 	    p = savepvn(s, e-s);
 	    incpush(p, TRUE);
 	    Safefree(p);
-	    if (*e)
-		return e;
+	    s = e;
 	}
 	else
 	    croak("No space allowed after -I");
-	break;
+	return s;
     case 'l':
 	minus_l = TRUE;
 	s++;
@@ -1651,14 +1669,21 @@ char *s;
 	return s;
     case 'v':
 #if defined(SUBVERSION) && SUBVERSION > 0
-	printf("\nThis is perl, version 5.%03d_%02d", PATCHLEVEL, SUBVERSION);
+	printf("\nThis is perl, version 5.%03d_%02d built for %s",
+	    PATCHLEVEL, SUBVERSION, ARCHNAME);
 #else
-	printf("\nThis is perl, version %s",patchlevel);
+	printf("\nThis is perl, version %s built for %s",
+		patchlevel, ARCHNAME);
+#endif
+#if defined(LOCAL_PATCH_COUNT)
+	if (LOCAL_PATCH_COUNT > 0)
+	    printf("\n(with %d registered patch%s, see perl -V for more detail)",
+		LOCAL_PATCH_COUNT, (LOCAL_PATCH_COUNT!=1) ? "es" : "");
 #endif
 
 	printf("\n\nCopyright 1987-1997, Larry Wall\n");
 #ifdef MSDOS
-	printf("\n\nMS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n");
+	printf("\nMS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n");
 #endif
 #ifdef DJGPP
 	printf("djgpp v2 port (jpl5003c) by Hirofumi Watanabe, 1996\n");

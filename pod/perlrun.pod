@@ -62,6 +62,11 @@ getting a - instead of a complete switch could cause Perl to try to
 execute standard input instead of your script.  And a partial B<-I> switch
 could also cause odd results.
 
+Some switches do care if they are processed twice, for instance combinations
+of B<-l> and B<-0>.  Either put all the switches after the 32 character
+boundary (if applicable), or replace the use of B<-0>I<digits> by 
+C<BEGIN{ $/ = "\0digits"; }>.
+
 Parsing of the #! switches starts wherever "perl" is mentioned in the line.
 The sequences "-*" and "- " are specifically ignored so that you could,
 if you were so inclined, say
@@ -500,7 +505,9 @@ Perl.
 allows Perl to do unsafe operations.  Currently the only "unsafe"
 operations are the unlinking of directories while running as superuser,
 and running setuid programs with fatal taint checks turned into
-warnings.
+warnings. Note that the B<-w> switch (or the C<$^W> variable) must
+be used along with this option to actually B<generate> the
+taint-check warnings.
 
 =item B<-v>
 

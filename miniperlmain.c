@@ -2,6 +2,10 @@
  * "The Road goes ever on and on, down from the door where it began."
  */
 
+#ifdef OEMVS
+#pragma runopts(HEAP(1M,32K,ANYWHERE,KEEP,8K,4K))
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

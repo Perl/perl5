@@ -3025,7 +3025,7 @@ sv_collxfrm(sv, nxp)
 	    if (SvREADONLY(sv)) {
 		SAVEFREEPV(xf);
 		*nxp = xlen;
-		return xf;
+		return xf + sizeof(collation_ix);
 	    }
 	    if (! mg) {
 		sv_magic(sv, 0, 'o', 0, 0);
@@ -3230,8 +3230,8 @@ thats_really_all_folks:
     *bp = '\0';
     SvCUR_set(sv, bp - (STDCHAR*)SvPVX(sv));	/* set length */
     DEBUG_P(PerlIO_printf(Perl_debug_log,
-	"Screamer: done, len=%d, string=|%.*s|\n",
-	SvCUR(sv),(int)SvCUR(sv),SvPVX(sv)));
+	"Screamer: done, len=%ld, string=|%.*s|\n",
+	(long)SvCUR(sv),(int)SvCUR(sv),SvPVX(sv)));
     }
    else
     {
@@ -4155,7 +4155,6 @@ IV iv;
     int sign;
     UV uv;
     char *p;
-    int i;
 
     sv_setpvn(sv, "", 0);
     if (iv >= 0) {
@@ -4683,10 +4682,21 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 		    sv_catpv(msg, "end of string");
 		warn("%_", msg); /* yes, this is reentrant */
 	    }
-	    /* output mangled stuff */
+
+	    /* output mangled stuff ... */
+	    if (c == '\0')
+		--q;
 	    eptr = p;
 	    elen = q - p;
-	    break;
+
+	    /* ... right here, because formatting flags should not apply */
+	    SvGROW(sv, SvCUR(sv) + elen + 1);
+	    p = SvEND(sv);
+	    memcpy(p, eptr, elen);
+	    p += elen;
+	    *p = '\0';
+	    SvCUR(sv) = p - SvPVX(sv);
+	    continue;	/* not "break" */
 	}
 
 	have = esignlen + zeros + elen;

@@ -47,7 +47,11 @@
  *	where library files may be held under a private library, for
  *	instance.
  */
-#define ARCHNAME "MSWin32"		/**/
+#ifdef _ALPHA_
+#define ARCHNAME "alpha-mswin32"              /**/
+#else
+#define ARCHNAME "x86-mswin32"              /**/
+#endif
 
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will

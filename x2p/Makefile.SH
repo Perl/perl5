@@ -132,7 +132,7 @@ lint:
 	lint $(lintflags) $(defs) $(c) > a2p.fuzz
 
 depend: $(mallocsrc) ../makedepend
-	sh ../makedepend
+	sh ../makedepend MAKE=$(MAKE)
 
 clist:
 	echo $(c) | tr ' ' '\012' >.clist

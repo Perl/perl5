@@ -78,6 +78,19 @@ sub hostname {
 	syscall(&main::SYS_gethostname, $host, 65) == 0;
     }
 
+    # method 2a - syscall using systeminfo instead of gethostname
+    #           -- needed on systems like Solaris
+    || eval {
+	local $SIG{__DIE__};
+	{
+	    package main;
+	    require "sys/syscall.ph";
+	    require "sys/systeminfo.ph";
+	}
+	$host = "\0" x 65; ## preload scalar
+	syscall(&main::SYS_systeminfo, &main::SI_HOSTNAME, $host, 65) != -1;
+    }
+
     # method 3 - trusty old hostname command
     || eval {
 	local $SIG{__DIE__};

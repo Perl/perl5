@@ -2,7 +2,7 @@ package DB;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 
-$VERSION = 1.00;
+$VERSION = 1.01;
 $header = "perl5db.pl version $VERSION";
 
 # Enhanced by ilya@math.ohio-state.edu (Ilya Zakharevich)
@@ -808,9 +808,11 @@ sub DB {
 			last CMD; };
 		    $cmd =~ /^c\b\s*([\w:]*)\s*$/ && do {
 		        end_report(), next CMD if $finished and $level <= 1;
-			$i = $1;
+			$subname = $i = $1;
 			if ($i =~ /\D/) { # subroutine name
-			    ($file,$i) = (find_sub($i) =~ /^(.*):(.*)$/);
+			    $subname = $package."::".$subname 
+			        unless $subname =~ /::/;
+			    ($file,$i) = (find_sub($subname) =~ /^(.*):(.*)$/);
 			    $i += 0;
 			    if ($i) {
 			        $filename = $file;
@@ -1128,7 +1130,11 @@ sub sub {
 	  $doret = -2 if $doret eq $#stack or $frame & 16;
 	@ret;
     } else {
-	$ret = &$sub;
+        if (defined wantarray) {
+	    $ret = &$sub;
+        } else {
+            &$sub; undef $ret;
+        };
 	$single |= pop(@stack);
 	($frame & 4 
 	 ? ( (print $LINEINFO ' ' x $#stack, "out "), 
@@ -1178,8 +1184,8 @@ sub postponed_sub {
     my $offset = $1 || 0;
     # Filename below can contain ':'
     my ($file,$i) = (find_sub($subname) =~ /^(.*):(\d+)-.*$/);
-    $i += $offset;
     if ($i) {
+      $i += $offset;
       local *dbline = $main::{'_<' . $file};
       local $^W = 0;		# != 0 is magical below
       $had_breakpoints{$file}++;
@@ -1822,18 +1828,15 @@ sub dbwarn {
   local $doret = -2;
   local $SIG{__WARN__} = '';
   local $SIG{__DIE__} = '';
-  eval { require Carp };	# If error/warning during compilation,
-                                # require may be broken.
-  warn(@_, "\nPossible unrecoverable error"), warn("\nTry to decrease warnLevel `O'ption!\n"), return
-    unless defined &Carp::longmess;
-  #&warn("Entering dbwarn\n");
+  eval { require Carp } if defined $^S;	# If error/warning during compilation,
+                                        # require may be broken.
+  warn(@_, "\nCannot print stack trace, load with -MCarp option to see stack"),
+    return unless defined &Carp::longmess;
   my ($mysingle,$mytrace) = ($single,$trace);
   $single = 0; $trace = 0;
   my $mess = Carp::longmess(@_);
   ($single,$trace) = ($mysingle,$mytrace);
-  #&warn("Warning in dbwarn\n");
   &warn($mess); 
-  #&warn("Exiting dbwarn\n");
 }
 
 sub dbdie {
@@ -1842,28 +1845,24 @@ sub dbdie {
   local $SIG{__DIE__} = '';
   local $SIG{__WARN__} = '';
   my $i = 0; my $ineval = 0; my $sub;
-  #&warn("Entering dbdie\n");
-  if ($dieLevel != 2) {
-    while ((undef,undef,undef,$sub) = caller(++$i)) {
-      $ineval = 1, last if $sub eq '(eval)';
-    }
-    {
+  if ($dieLevel > 2) {
       local $SIG{__WARN__} = \&dbwarn;
-      &warn(@_) if $dieLevel > 2; # Ineval is false during destruction?
-    }
-    #&warn("dieing quietly in dbdie\n") if $ineval and $dieLevel < 2;
-    die @_ if $ineval and $dieLevel < 2;
+      &warn(@_);		# Yell no matter what
+      return;
   }
-  eval { require Carp };	# If error/warning during compilation,
-                                # require may be broken.
-  die(@_, "\nUnrecoverable error") unless defined &Carp::longmess;
+  if ($dieLevel < 2) {
+    die @_ if $^S;		# in eval propagate
+  }
+  eval { require Carp } if defined $^S;	# If error/warning during compilation,
+                                	# require may be broken.
+  die(@_, "\nCannot print stack trace, load with -MCarp option to see stack")
+    unless defined &Carp::longmess;
   # We do not want to debug this chunk (automatic disabling works
   # inside DB::DB, but not in Carp).
   my ($mysingle,$mytrace) = ($single,$trace);
   $single = 0; $trace = 0;
   my $mess = Carp::longmess(@_);
   ($single,$trace) = ($mysingle,$mytrace);
-  #&warn("dieing loudly in dbdie\n");
   die $mess;
 }
 

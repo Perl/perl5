@@ -1,5 +1,8 @@
 #!./perl
 
+# NOTE: Please don't add tests to this file unless they *need* to be run in
+# separate executable and can't simply use eval.
+
 chdir 't' if -d 't';
 @INC = "../lib";
 $ENV{PERL5LIB} = "../lib";
@@ -18,8 +21,8 @@ $CAT = (($^O eq 'MSWin32') ? '.\perl -e "print <>"' : 'cat');
 
 for (@prgs){
     my $switch;
-    if (s/^\s*-\w+//){
-	$switch = $&;
+    if (s/^\s*(-\w.*)//){
+	$switch = $1;
     }
     my($prog,$expected) = split(/\nEXPECT\n/, $_);
     if ($^O eq 'MSWin32') {

@@ -238,6 +238,7 @@ my_flock(int fd, int oper)
 #undef LK_ERR
 #undef LK_LEN
 
+EXT int		my_fclose(FILE *pf);
 
 #ifdef PERLDLL
 __declspec(dllexport)
@@ -259,7 +260,7 @@ WIN32_IOSUBSYSTEM	win32stdio = {
     fopen,		/* (*pfunc_fopen)(const char *path, const char *mode); */
     fdopen,		/* (*pfunc_fdopen)(int fh, const char *mode); */
     freopen,		/* (*pfunc_freopen)(const char *path, const char *mode, FILE *pf); */
-    fclose,		/* (*pfunc_fclose)(FILE *pf); */
+    my_fclose,		/* (*pfunc_fclose)(FILE *pf); */
     fputs,		/* (*pfunc_fputs)(const char *s,FILE *pf); */
     fputc,		/* (*pfunc_fputc)(int c,FILE *pf); */
     ungetc,		/* (*pfunc_ungetc)(int c,FILE *pf); */

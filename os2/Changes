@@ -158,3 +158,8 @@ before 5.004_02:
 	will work.  Perl will also look in the current directory first.
 	Moreover, a bug with \; in PATH being non-separator is fixed.
 
+after 5.004_03:
+	$^E tracks calls to CRT now.  (May break if Perl masks some
+	changes to errno?)
+	$0 may be edited to longer lengths (at least under OS/2).
+	OS2::REXX->loads looks in the OS/2-ish fashion too.

@@ -128,9 +128,9 @@ push(@corefiles,'perl.exp') if $^O eq 'aix';
 push(@corefiles,'sperl.o') if -f 'sperl.o';
 foreach $file (@corefiles) {
     # HP-UX (at least) needs to maintain execute permissions
-    # on dynamically-loaded libraries.
+    # on dynamically-loadable libraries. So we do it for all.
     copy_if_diff($file,"$installarchlib/CORE/$file")
-	and chmod($file =~ /^\.(so|$dlext)$/ ? 0555 : 0444,
+	and chmod($file =~ /\.(so|\Q$dlext\E)$/ ? 0555 : 0444,
 		   "$installarchlib/CORE/$file");
 }
 
@@ -401,6 +401,11 @@ sub installlib {
     local($depth) = $dir ? "lib/$dir" : "lib";
 
     my $name = $_;
+
+    if ($name eq 'CVS' && -d $name) {
+	$File::Find::prune = 1;
+	return;
+    }
     
     # ignore patch backups and the .exists files.
     return if $name =~ m{\.orig$|~$|^\.exists};

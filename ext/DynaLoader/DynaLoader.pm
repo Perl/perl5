@@ -12,15 +12,20 @@ package DynaLoader;
 #
 # Tim.Bunce@ig.co.uk, August 1994
 
-use vars qw($VERSION);
+$VERSION = $VERSION = "1.03";	# avoid typo warning
 
-$VERSION = "1.02";
-
-require Carp;
 require Config;
 
 require AutoLoader;
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;
+
+# The following require can't be removed during maintenance
+# releases, sadly, because of the risk of buggy code that does 
+# require Carp; Carp::croak "..."; without brackets dying 
+# if Carp hasn't been loaded in earlier compile time. :-( 
+# We'll let those bugs get found on the development track.
+require Carp if $] < 5.00450; 
+
 
 # enable debug/trace messages from DynaLoader perl code
 $dl_debug = $ENV{PERL_DL_DEBUG} || 0 unless defined $dl_debug;
@@ -82,6 +87,8 @@ if ($dl_debug) {
 1; # End of main code
 
 
+sub croak   { require Carp; Carp::croak(@_)   }
+
 # The bootstrap function cannot be autoloaded (without complications)
 # so we define it here:
 
@@ -91,11 +98,14 @@ sub bootstrap {
     local($module) = $args[0];
     local(@dirs, $file);
 
-    Carp::confess("Usage: DynaLoader::bootstrap(module)") unless $module;
+    unless ($module) {
+	require Carp;
+	Carp::confess("Usage: DynaLoader::bootstrap(module)");
+    }
 
     # A common error on platforms which don't support dynamic loading.
     # Since it's fatal and potentially confusing we give a detailed message.
-    Carp::croak("Can't load module $module, dynamic loading not available in this perl.\n".
+    croak("Can't load module $module, dynamic loading not available in this perl.\n".
 	"  (You may need to build a new perl executable which either supports\n".
 	"  dynamic loading or has the $module module statically linked into it.)\n")
 	unless defined(&dl_load_file);
@@ -119,16 +129,17 @@ sub bootstrap {
 	next unless -d $dir; # skip over uninteresting directories
 
 	# check for common cases to avoid autoload of dl_findfile
-	last if ($file=_check_file("$dir/$modfname.$dl_dlext"));
+	my $try = "$dir/$modfname.$dl_dlext";
+	last if $file = ($do_expand) ? dl_expandspec($try) : (-f $try && $try);
 
 	# no luck here, save dir for possible later dl_findfile search
-	push(@dirs, "-L$dir");
+	push @dirs, $dir;
     }
     # last resort, let dl_findfile have a go in all known locations
-    $file = dl_findfile(@dirs, map("-L$_",@INC), $modfname) unless $file;
+    $file = dl_findfile(map("-L$_",@dirs,@INC), $modfname) unless $file;
 
-    Carp::croak("Can't find loadable object for module $module in \@INC (@INC)")
-	unless $file;
+    croak("Can't locate loadable object for module $module in \@INC (\@INC contains: @INC)")
+	unless $file;	# wording similar to error from 'require'
 
     my $bootname = "boot_$module";
     $bootname =~ s/\W/_/g;
@@ -153,16 +164,18 @@ sub bootstrap {
     # it executed.
 
     my $libref = dl_load_file($file, $module->dl_load_flags) or
-	Carp::croak("Can't load '$file' for module $module: ".dl_error()."\n");
+	croak("Can't load '$file' for module $module: ".dl_error()."\n");
 
     push(@dl_librefs,$libref);  # record loaded object
 
     my @unresolved = dl_undef_symbols();
-    Carp::carp("Undefined symbols present after loading $file: @unresolved\n")
-        if @unresolved;
+    if (@unresolved) {
+	require Carp;
+	Carp::carp("Undefined symbols present after loading $file: @unresolved\n");
+    }
 
     my $boot_symbol_ref = dl_find_symbol($libref, $bootname) or
-         Carp::croak("Can't find '$bootname' symbol in $file\n");
+         croak("Can't find '$bootname' symbol in $file\n");
 
     my $xs = dl_install_xsub("${module}::bootstrap", $boot_symbol_ref, $file);
 
@@ -173,12 +186,12 @@ sub bootstrap {
 }
 
 
-sub _check_file {   # private utility to handle dl_expandspec vs -f tests
-    my($file) = @_;
-    return $file if (!$do_expand && -f $file); # the common case
-    return $file if ( $do_expand && ($file=dl_expandspec($file)));
-    return undef;
-}
+#sub _check_file {   # private utility to handle dl_expandspec vs -f tests
+#    my($file) = @_;
+#    return $file if (!$do_expand && -f $file); # the common case
+#    return $file if ( $do_expand && ($file=dl_expandspec($file)));
+#    return undef;
+#}
 
 
 # Let autosplit and the autoloader deal with these functions:
@@ -243,7 +256,8 @@ sub dl_findfile {
             foreach $name (@names) {
 		my($file) = "$dir/$name";
                 print STDERR " checking in $dir for $name\n" if $dl_debug;
-		$file = _check_file($file);
+		$file = ($do_expand) ? dl_expandspec($file) : (-f $file && $file);
+		#$file = _check_file($file);
 		if ($file) {
                     push(@found, $file);
                     next arg; # no need to look any further
@@ -279,6 +293,7 @@ sub dl_expandspec {
     my $file = $spec; # default output to input
 
     if ($Is_VMS) { # dl_expandspec should be defined in dl_vms.xs
+	require Carp;
 	Carp::croak("dl_expandspec: should be defined in XS file!\n");
     } else {
 	return undef unless -f $file;

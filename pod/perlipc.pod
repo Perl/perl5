@@ -71,9 +71,9 @@ values are "inherited" by functions called from within that block.)
     }
 
 Sending a signal to a negative process ID means that you send the signal
-to the entire Unix process-group.  This code send a hang-up signal to all
-processes in the current process group I<except for> the current process
-itself:
+to the entire Unix process-group.  This code sends a hang-up signal to all
+processes in the current process group (and sets $SIG{HUP} to IGNORE so
+it doesn't kill itself):
 
     {
 	local $SIG{HUP} = 'IGNORE';

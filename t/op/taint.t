@@ -82,7 +82,7 @@ print PROG 'print "@ARGV\n"', "\n";
 close PROG;
 my $echo = "$Invoke_Perl $ECHO";
 
-print "1..135\n";
+print "1..140\n";
 
 # First, let's make sure that Perl is checking the dangerous
 # environment variables. Maybe they aren't set yet, so we'll
@@ -515,3 +515,60 @@ else {
     test 134,     tainted $corge[1];
     test 135, not tainted $corge[2];
 }
+
+# Test for system/library calls returning string data of dubious origin.
+{
+    # No reliable %Config check for getpw*
+    if (eval { setpwent(); getpwent(); 1 }) {
+	setpwent();
+	my @getpwent = getpwent();
+	die "getpwent: $!\n" unless (@getpwent);
+	test 136,(    not tainted $getpwent[0]
+	          and not tainted $getpwent[1]
+	          and not tainted $getpwent[2]
+	          and not tainted $getpwent[3]
+	          and not tainted $getpwent[4]
+	          and not tainted $getpwent[5]
+	          and     tainted $getpwent[6] # gecos
+	          and not tainted $getpwent[7]
+		  and not tainted $getpwent[8]);
+	endpwent();
+    } else {
+	print "# getpwent() is not available\n";
+	print "ok 136\n";
+    }
+
+    if ($Config{d_readdir}) { # pretty hard to imagine not
+	local(*D);
+	opendir(D, "op") or die "opendir: $!\n";
+	my $readdir = readdir(D);
+	test 137, tainted $readdir;
+	closedir(OP);
+    } else {
+	print "# readdir() is not available\n";
+	print "ok 137\n";
+    }
+
+    if ($Config{d_readlink} && $Config{d_symlink}) {
+	my $symlink = "sl$$";
+	unlink($symlink);
+	symlink("/something/naughty", $symlink) or die "symlink: $!\n";
+	my $readlink = readlink($symlink);
+	test 138, tainted $readlink;
+	unlink($symlink);
+    } else {
+	print "# readlink() or symlink() is not available\n";
+	print "ok 138\n";
+    }
+}
+
+# test bitwise ops (regression bug)
+{
+    my $why = "y";
+    my $j = "x" | $why;
+    test 139, not tainted $j;
+    $why = $TAINT."y";
+    $j = "x" | $why;
+    test 140,     tainted $j;
+}
+

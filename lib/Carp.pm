@@ -53,7 +53,7 @@ $MaxArgLen = 64;        # How much of each argument to print. 0 = all.
 $MaxArgNums = 8;        # How many arguments to print. 0 = all.
 
 require Exporter;
-@ISA = Exporter;
+@ISA = ('Exporter');
 @EXPORT = qw(confess croak carp);
 @EXPORT_OK = qw(cluck verbose);
 @EXPORT_FAIL = qw(verbose);	# hook to enable verbose mode

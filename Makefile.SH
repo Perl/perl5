@@ -52,6 +52,9 @@ true)
 		aixinstdir=`pwd | sed 's/\/UU$//'`
 		linklibperl="-L $archlibexp/CORE -L $aixinstdir -lperl"
 		;;
+	hpux10*)
+		linklibperl="-L `pwd | sed 's/\/UU$//'` -Wl,+b$archlibexp/CORE -lperl"
+		;;
 	esac
 	;;
 *)	pldlflags=''
@@ -303,13 +306,13 @@ perl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
 	$(SHRPENV) $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o perl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 pureperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
-	purify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o pureperl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
+	$(SHRPENV) purify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o pureperl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 purecovperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
-	purecov $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o purecovperl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
+	$(SHRPENV) purecov $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o purecovperl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 quantperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
-	quantify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o quantperl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
+	$(SHRPENV) quantify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o quantperl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 # This version, if specified in Configure, does ONLY those scripts which need
 # set-id emulation.  Suidperl must be setuid root.  It contains the "taint"
@@ -317,7 +320,7 @@ quantperl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
 # has been invoked correctly.
 
 suidperl: $& sperl$(OBJ_EXT) perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
-	$(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o suidperl perlmain$(OBJ_EXT) sperl$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
+	$(SHRPENV) $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o suidperl perlmain$(OBJ_EXT) sperl$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 !NO!SUBS!
 
@@ -341,6 +344,8 @@ preplibrary: miniperl lib/Config.pm $(plextract)
 		autosplit_lib_modules(@ARGV)' lib/*.pm lib/*/*.pm
 
 # Take care to avoid modifying lib/Config.pm without reason
+# (If trying to create a new port and having problems with the configpm script, 
+# try 'make minitest' and/or commenting out the tests at the end of configpm.)
 lib/Config.pm: config.sh miniperl configpm
 	./miniperl configpm tmp
 	sh mv-if-diff tmp lib/Config.pm
@@ -382,12 +387,14 @@ install.html: all installhtml
 run_byacc:	FORCE
 	@ echo 'Expect' 113 shift/reduce and 1 reduce/reduce conflict
 	$(BYACC) -d perly.y
+	chmod 664 perly.c
 	sh $(shellflags) ./perly.fixer y.tab.c perly.c
 	sed -e 's/fprintf *( *stderr *,/PerlIO_printf(Perl_debug_log,/g' \
 	    -e 's/y\.tab/perly/g' perly.c >perly.tmp && mv perly.tmp perly.c
 	echo 'extern YYSTYPE yylval;' >>y.tab.h
 	cmp -s y.tab.h perly.h && rm -f y.tab.h || mv y.tab.h perly.h
-	- perl vms/vms_yfix.pl perly.c perly.h vms/perly_c.vms vms/perly_h.vms
+	chmod 664 vms/perly_c.vms vms/perly_h.vms
+	perl vms/vms_yfix.pl perly.c perly.h vms/perly_c.vms vms/perly_h.vms
 
 # We don't want to regenerate perly.c and perly.h, but they might
 # appear out-of-date after a patch is applied or a new distribution is
@@ -422,13 +429,13 @@ regen_headers:	FORCE
 # DynaLoader may be needed for extensions that use Makefile.PL.
 
 $(DYNALOADER):	miniperl preplibrary FORCE
-	@sh ext/util/make_ext static $@ LIBPERL_A=$(LIBPERL)
+	@sh ext/util/make_ext static $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 d_dummy $(dynamic_ext):	miniperl preplibrary $(DYNALOADER) FORCE
-	@sh ext/util/make_ext dynamic $@ LIBPERL_A=$(LIBPERL)
+	@sh ext/util/make_ext dynamic $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 s_dummy $(static_ext):	miniperl preplibrary $(DYNALOADER) FORCE
-	@sh ext/util/make_ext static $@ LIBPERL_A=$(LIBPERL)
+	@sh ext/util/make_ext static $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 
 clean:		_tidy _mopup
 
@@ -453,7 +460,7 @@ _tidy:
 	-cd utils; $(MAKE) clean
 	-cd x2p; $(MAKE) clean
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) ; do \
-	sh ext/util/make_ext clean $$x ; \
+	sh ext/util/make_ext clean $$x MAKE=$(MAKE) ; \
 	done
 
 # Do not 'make _cleaner' directly.
@@ -463,7 +470,7 @@ _cleaner:
 	-cd utils; $(MAKE) realclean
 	-cd x2p; $(MAKE) realclean
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) ; do \
-	sh ext/util/make_ext realclean $$x ; \
+	sh ext/util/make_ext realclean $$x MAKE=$(MAKE) ; \
 	done
 	rm -f *.orig */*.orig *~ */*~ core t/core t/c t/perl
 	rm -rf $(addedbyconf)
@@ -482,11 +489,13 @@ _cleaner:
 lint: perly.c $(c)
 	lint $(lintflags) $(defs) perly.c $(c) > perl.fuzz
 
-# Need to unset during recursion to go out of loop
+# Need to unset during recursion to go out of loop.
+# The README below ensures that the dependency list is never empty and
+# that when MAKEDEPEND is empty $(FIRSTMAKEFILE) doesn't need rebuilding.
 
 MAKEDEPEND = Makefile makedepend
 
-$(FIRSTMAKEFILE):	$(MAKEDEPEND)
+$(FIRSTMAKEFILE):	README $(MAKEDEPEND)
 	$(MAKE) depend MAKEDEPEND=
 
 config.h: config_h.SH config.sh
@@ -497,7 +506,7 @@ perl.exp: perl_exp.SH config.sh
 
 # When done, touch perlmain.c so that it doesn't get remade each time.
 depend: makedepend
-	sh ./makedepend
+	sh ./makedepend MAKE=$(MAKE)
 	- test -s perlmain.c && touch perlmain.c
 	cd x2p; $(MAKE) depend
 
@@ -523,8 +532,10 @@ minitest: miniperl
 	- cd t && (rm -f perl$(EXE_EXT); $(LNS) ../miniperl$(EXE_EXT) perl$(EXE_EXT)) \
 		&& ./perl TEST base/*.t comp/*.t cmd/*.t io/*.t op/*.t pragma/*.t </dev/tty
 
-# handy way to run perlbug -ok without having to install and run the
+# Handy way to run perlbug -ok without having to install and run the
 # installed perlbug. We don't re-run the tests here - we trust the user.
+# Please *don't* use this unless all tests pass.
+# If you want to report test failures, just use "perlbug -Ilib".
 ok:
 	./perl -Ilib utils/perlbug -ok -s '(UNINSTALLED)'
 

@@ -49,9 +49,9 @@ sub import {
 	}
 
 	my $load_sub = sub {
-	    unless ($INC{pm}) {
-		require $pm;
-		die $@ if $@;
+	    unless ($INC{$pm}) {
+		eval {require $pm};
+		die if $@;
 		vet_import $module;
 	    }
 	    *$closure_import_func = \&{"${module}::$closure_func"};
@@ -73,7 +73,7 @@ sub vet_import ($) {
     my $module = shift;
     if (my $import = $module->can('import')) {
 	croak "autoused module has unique import() method"
-	    unless defined(\&Exporter::import)
+	    unless defined(&Exporter::import)
 		   && $import == \&Exporter::import;
     }
 }
