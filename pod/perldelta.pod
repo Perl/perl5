@@ -1583,8 +1583,9 @@ warning that there may be trouble ahead.
 
 =item *
 
-If binary compatibility with the 5.005 release is not wanted, Configure
-no longer suggests including the 5.005 modules in @INC.
+Since Perl 5.8 is not binary-compatible with previous releases
+of Perl, Configure no longer suggests including the 5.005
+modules in @INC.
 
 =item *
 
@@ -1726,6 +1727,15 @@ floating-point numbers is now more picky about using sprintf %.*g
 rules for the conversion.  Some platforms that used to use gcvt may
 now resort to the slower sprintf.
 
+=item *
+
+The obsolete method of making a special (e.g., debugging) flavor
+of perl by saying
+
+	make LIBPERL=libperld.a
+
+has been removed. Use -DDEBUGGING instead.
+
 =back
 
 =head2 New Or Improved Platforms
@@ -1817,6 +1827,13 @@ Perl has been tested with the GNU pth userlevel thread package
 ( http://www.gnu.org/software/pth/pth.html ) . All but one thread
 test worked, and that one failure was because of test results arriving
 in unexpected order.
+
+=item *
+
+Stratus VOS is now supported using Perl's native build method
+(Configure).  This is the recommended method to build Perl on
+VOS.  The older methods, which build miniperl, are still
+available.  See L<perlvos>.
 
 =item *
 
@@ -2327,6 +2344,15 @@ Solaris
 
 =item *
 
+Stratus VOS
+
+The native build method requires at least VOS Release 14.5.0
+and GNU C++/GNU Tools 2.0.1 or later.  The Perl pack function
+now maps overflowed values to +infinity and underflowed values
+to -infinity.
+
+=item *
+
 Tru64 (aka Digital UNIX, aka DEC OSF/1)
 
 The operating system version letter now recorded in $Config{osvers}.
@@ -2823,6 +2849,12 @@ they produce "0" and "-0".)
 In case you are still using Solaris 2.5 (aka SunOS 5.5), you may
 experience failures (the test core dumping) in lib/locale.t.
 The suggested cure is to upgrade your Solaris.
+
+=head2 Stratus VOS
+
+When Perl is built using the native build process on VOS Release
+14.5.0 and GNU C++/GNU Tools 2.0.1, all attempted tests either
+pass or result in TODO (ignored) failures.
 
 =head2 Failure of Thread (5.005-style) tests
 
