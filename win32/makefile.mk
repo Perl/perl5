@@ -1205,7 +1205,7 @@ $(STORABLE_DLL): $(PERLDEP) $(STORABLE).xs
 
 $(FILTER_DLL): $(PERLDEP) $(FILTER).xs
 	cd $(EXTDIR)\Filter\Util\Call && \
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL INSTALLDIRS=perl
+	..\..\..\..\miniperl -I..\..\..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\Filter\Util\Call && $(MAKE)
 
 $(ERRNO_PM): $(PERLDEP) $(ERRNO)_pm.PL
