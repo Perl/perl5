@@ -72,3 +72,5 @@ while( @tests ){
 		verify $test;
 	}
 }
+
+unlink("tmon.out");
