@@ -48,19 +48,41 @@ typedef struct
  SV *		enc;
 } PerlIOEncode;
 
+SV *
+PerlIOEncode_getarg(PerlIO *f)
+{
+ PerlIOEncode *e = PerlIOSelf(f,PerlIOEncode);
+ SV *sv = &PL_sv_undef;
+ if (e->enc)
+  {
+   dSP;
+   ENTER;
+   SAVETMPS;
+   PUSHMARK(sp);
+   XPUSHs(e->enc);
+   PUTBACK;
+   if (perl_call_method("name",G_SCALAR) == 1)
+    {
+     SPAGAIN;
+     sv = newSVsv(POPs);
+     PUTBACK;
+    }
+  }
+ return sv;
+}
 
 IV
-PerlIOEncode_pushed(PerlIO *f, const char *mode,const char *arg,STRLEN len)
+PerlIOEncode_pushed(PerlIO *f, const char *mode, SV *arg)
 {
  PerlIOEncode *e = PerlIOSelf(f,PerlIOEncode);
  dTHX;
  dSP;
  IV code;
- code = PerlIOBuf_pushed(f,mode,Nullch,0);
+ code = PerlIOBuf_pushed(f,mode,Nullsv);
  ENTER;
  SAVETMPS;
  PUSHMARK(sp);
- XPUSHs(sv_2mortal(newSVpvn(arg,len)));
+ XPUSHs(arg);
  PUTBACK;
  if (perl_call_pv("Encode::find_encoding",G_SCALAR) != 1)
   {
@@ -75,7 +97,7 @@ PerlIOEncode_pushed(PerlIO *f, const char *mode,const char *arg,STRLEN len)
   {
    e->enc = Nullsv;
    errno  = EINVAL;
-   Perl_warner(aTHX_ WARN_IO, "Cannot find encoding \"%.*s\"", (int) len, arg);
+   Perl_warner(aTHX_ WARN_IO, "Cannot find encoding \"%_\"", arg);
    return -1;
   }
  SvREFCNT_inc(e->enc);
@@ -267,6 +289,7 @@ PerlIOEncode_close(PerlIO *f)
 Off_t
 PerlIOEncode_tell(PerlIO *f)
 {
+ dTHX;
  PerlIOBuf *b = PerlIOSelf(f,PerlIOBuf);
  /* Unfortunately the only way to get a postion is to back-translate,
     the UTF8-bytes we have buf..ptr and adjust accordingly.
@@ -276,7 +299,7 @@ PerlIOEncode_tell(PerlIO *f)
  if ((PerlIOBase(f)->flags & PERLIO_F_RDBUF) && b->ptr < b->end)
   {
    Size_t count = b->end - b->ptr;
-   PerlIO_push(f,&PerlIO_pending,"r",Nullch,0);
+   PerlIO_push(aTHX_ f,&PerlIO_pending,"r",Nullsv);
    /* Save what we have left to read */
    PerlIOSelf(f,PerlIOBuf)->bufsiz = count;
    PerlIO_unread(f,b->ptr,count);
@@ -300,12 +323,11 @@ PerlIO_funcs PerlIO_encode = {
  "encoding",
  sizeof(PerlIOEncode),
  PERLIO_K_BUFFERED,
- PerlIOBase_fileno,
- PerlIOBuf_fdopen,
- PerlIOBuf_open,
- PerlIOBuf_reopen,
  PerlIOEncode_pushed,
  PerlIOEncode_popped,
+ PerlIOBuf_open,
+ PerlIOEncode_getarg,
+ PerlIOBase_fileno,
  PerlIOBuf_read,
  PerlIOBuf_unread,
  PerlIOBuf_write,
@@ -609,7 +631,7 @@ _utf8_off(sv)
 BOOT:
 {
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
- PerlIO_define_layer(&PerlIO_encode);
+ PerlIO_define_layer(aTHX_ &PerlIO_encode);
 #endif
 #include "iso8859.def"
 #include "EBCDIC.def"

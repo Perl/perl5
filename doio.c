@@ -76,6 +76,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     register IO *io = GvIOn(gv);
     PerlIO *saveifp = Nullfp;
     PerlIO *saveofp = Nullfp;
+    int savefd = -1;
     char savetype = IoTYPE_CLOSED;
     int writing = 0;
     PerlIO *fp;
@@ -84,8 +85,8 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     bool was_fdopen = FALSE;
     bool in_raw = 0, in_crlf = 0, out_raw = 0, out_crlf = 0;
     char *type  = NULL;
-    char mode[4];		/* stdio file mode ("r\0", "rb\0", "r+b\0" etc.) */
-    SV *svs = (num_svs) ? *svp : Nullsv;
+    char mode[8];		/* stdio file mode ("r\0", "rb\0", "r+b\0" etc.) */
+    SV *namesv;
 
     Zero(mode,sizeof(mode),char);
     PL_forkprocess = 1;		/* assume true if no fork */
@@ -103,13 +104,17 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     /* If currently open - close before we re-open */
     if (IoIFP(io)) {
 	fd = PerlIO_fileno(IoIFP(io));
-	if (IoTYPE(io) == IoTYPE_STD)
+	if (IoTYPE(io) == IoTYPE_STD) {
+	    /* This is a clone of one of STD* handles */
 	    result = 0;
-	else if (fd <= PL_maxsysfd) {
-	    saveifp = IoIFP(io);
-	    saveofp = IoOFP(io);
+	}
+	else if (fd >= 0 && fd <= PL_maxsysfd) {
+	    /* This is one of the original STD* handles */
+	    saveifp  = IoIFP(io);
+	    saveofp  = IoOFP(io);
 	    savetype = IoTYPE(io);
-	    result = 0;
+	    savefd   = fd;
+	    result   = 0;
 	}
 	else if (IoTYPE(io) == IoTYPE_PIPE)
 	    result = PerlProc_pclose(IoIFP(io));
@@ -123,18 +128,22 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	}
 	else
 	    result = PerlIO_close(IoIFP(io));
-	if (result == EOF && fd > PL_maxsysfd)
+	if (result == EOF && fd > PL_maxsysfd) {
+	    /* Why is this not Perl_warn*() call ? */
 	    PerlIO_printf(Perl_error_log,
 			  "Warning: unable to close filehandle %s properly.\n",
 			  GvENAME(gv));
+	}
 	IoOFP(io) = IoIFP(io) = Nullfp;
     }
 
     if (as_raw) {
         /* sysopen style args, i.e. integer mode and permissions */
+	STRLEN ix = 0;
 	if (num_svs != 0) {
 	     Perl_croak(aTHX_ "panic:sysopen with multiple args");
 	}
+	mode[ix++] = '#'; /* Marker to openn to use numeric "sysopen" */
 
 #if defined(USE_64_BIT_RAWIO) && defined(O_LARGEFILE)
 	rawmode |= O_LARGEFILE;
@@ -156,39 +165,35 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	     IoTYPE(io) = IoTYPE_RDWR;
 	     break;
 	}
-
 	writing = (result > 0);
-	fd = PerlLIO_open3(name, rawmode, rawperm);
 
-	if (fd == -1)
-	    fp = NULL;
-	else {
-	    STRLEN ix = 0;
-	    if (result == O_RDONLY) {
-		mode[ix++] = 'r';
-	    }
-#ifdef O_APPEND
-	    else if (rawmode & O_APPEND) {
-		mode[ix++] = 'a';
-		if (result != O_WRONLY)
-		    mode[ix++] = '+';
-	    }
-#endif
-	    else {
-		if (result == O_WRONLY)
-		    mode[ix++] = 'w';
-		else {
-		    mode[ix++] = 'r';
-		    mode[ix++] = '+';
-		}
-	    }
-	    if (rawmode & O_BINARY)
-		mode[ix++] = 'b';
-	    mode[ix] = '\0';
-	    fp = PerlIO_fdopen(fd, mode);
-	    if (!fp)
-		PerlLIO_close(fd);
+	if (result == O_RDONLY) {
+	    mode[ix++] = 'r';
 	}
+#ifdef O_APPEND
+	else if (rawmode & O_APPEND) {
+	    mode[ix++] = 'a';
+	    if (result != O_WRONLY)
+		mode[ix++] = '+';
+	}
+#endif
+	else {
+	    if (result == O_WRONLY)
+		mode[ix++] = 'w';
+	    else {
+		mode[ix++] = 'r';
+		mode[ix++] = '+';
+	    }
+	}
+	if (rawmode & O_BINARY)
+	    mode[ix++] = 'b';
+	mode[ix] = '\0';
+
+	namesv = sv_2mortal(newSVpvn(name,strlen(name)));
+	num_svs = 1;
+	svp = &namesv;
+        type = Nullch;
+	fp = PerlIO_openn(aTHX_ type,mode, -1, rawmode, rawperm, NULL, num_svs, svp);
     }
     else {
 	/* Regular (non-sys) open */
@@ -206,7 +211,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	if (num_svs) {
 	    /* New style explict name, type is just mode and discipline/layer info */
 	    STRLEN l;
-	    name = SvPV(svs, l) ;
+	    name = SvPV(*svp, l) ;
 	    len = (I32)l;
 	    name = savepvn(name, len);
 	    SAVEFREEPV(name);
@@ -273,8 +278,9 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		mode[0] = IoTYPE(io) = IoTYPE_APPEND;
 		type++;
 	    }
-	    else
+	    else {
 		mode[0] = 'w';
+	    }
 	    writing = 1;
 
 	    if (out_raw)
@@ -290,15 +296,17 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		    dodup = 0;
 		    type++;
 		}
-		if (!num_svs && !*type && supplied_fp)
+		if (!num_svs && !*type && supplied_fp) {
 		    /* "<+&" etc. is used by typemaps */
 		    fp = supplied_fp;
+		}
 		else {
 		    if (num_svs > 1) {
 			Perl_croak(aTHX_ "More than one argument to '%c&' open",IoTYPE(io));
 		    }
-		    if (num_svs && SvIOK(*svp))
+		    if (num_svs && SvIOK(*svp)) {
 			fd = SvUV(*svp);
+		    }
 		    else if (isDIGIT(*type)) {
 			/*SUPPRESS 530*/
 			for (; isSPACE(*type); type++) ;
@@ -361,12 +369,14 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 			fd = PerlLIO_dup(fd);
 		    else
 			was_fdopen = TRUE;
-		    if (!(fp = PerlIO_fdopen(fd,mode))) {
+		    if (!num_svs)
+			type = Nullch;
+		    if (!(fp = PerlIO_openn(aTHX_ type,mode,fd,0,0,NULL,num_svs,svp))) {
 			if (dodup)
 			    PerlLIO_close(fd);
 		    }
 		}
-	    }
+	    } /* & */
 	    else {
 		if (num_svs > 1) {
 		    Perl_croak(aTHX_ "More than one argument to '>' open");
@@ -380,9 +390,15 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		    IoTYPE(io) = IoTYPE_STD;
 		}
 		else  {
-		    fp = PerlIO_open((num_svs ? name : type), mode);
+		    if (!num_svs) {
+			namesv = sv_2mortal(newSVpvn(type,strlen(type)));
+			num_svs = 1;
+			svp = &namesv;
+		        type = Nullch;
+		    }
+		    fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
 		}
-	    }
+	    } /* !& */
 	}
 	else if (*type == IoTYPE_RDONLY) {
 	    if (num_svs > 1) {
@@ -405,8 +421,15 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		fp = PerlIO_stdin();
 		IoTYPE(io) = IoTYPE_STD;
 	    }
-	    else
-		fp = PerlIO_open((num_svs ? name : type), mode);
+	    else {
+		if (!num_svs) {
+		    namesv = sv_2mortal(newSVpvn(type,strlen(type)));
+		    num_svs = 1;
+		    svp = &namesv;
+		    type = Nullch;
+		}
+		fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
+	    }
 	}
 	else if ((num_svs && type[0] == IoTYPE_STD && type[1] == IoTYPE_PIPE) ||
 	         (!num_svs && tend > type+1 && tend[-1] == IoTYPE_PIPE)) {
@@ -462,7 +485,13 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		IoTYPE(io) = IoTYPE_STD;
 	    }
 	    else {
-		fp = PerlIO_open(name,mode);
+		if (!num_svs) {
+		    namesv = sv_2mortal(newSVpvn(type,strlen(type)));
+		    num_svs = 1;
+		    svp = &namesv;
+		    type = Nullch;
+		}
+		fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
 	    }
 	}
     }
@@ -478,7 +507,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		Perl_warner(aTHX_ WARN_IO, "'std%s' opened only for input",
 				(fp == PerlIO_stdout()) ? "out" : "err");
 	}
-	else if ((IoTYPE(io) == IoTYPE_WRONLY) && fp == PerlIO_stdout()) {
+	else if ((IoTYPE(io) == IoTYPE_WRONLY) && fp == PerlIO_stdin()) {
 		Perl_warner(aTHX_ WARN_IO, "'stdin' opened only for output");
 	}
     }
@@ -514,42 +543,37 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
         /* If fd is less that PL_maxsysfd i.e. STDIN..STDERR
            then dup the new fileno down
          */
-	fd = PerlIO_fileno(saveifp);
+        fd = PerlIO_fileno(fp);
 	if (saveofp) {
 	    PerlIO_flush(saveofp);	/* emulate PerlIO_close() */
 	    if (saveofp != saveifp) {	/* was a socket? */
 		PerlIO_close(saveofp);
-                /* This looks very suspect - NI-S 24 Nov 2000 */
-		if (fd > 2)
-		    Safefree(saveofp);  /* ??? */
 	    }
 	}
-	if (fd != PerlIO_fileno(fp)) {
+	if (savefd != fd) {
 	    Pid_t pid;
 	    SV *sv;
-
-	    PerlLIO_dup2(PerlIO_fileno(fp), fd);
+	    PerlLIO_dup2(fd, savefd);
 #ifdef VMS
-	    if (fd != PerlIO_fileno(PerlIO_stdin())) {
+	    if (savefd != PerlIO_fileno(PerlIO_stdin())) {
 	      char newname[FILENAME_MAX+1];
 	      if (fgetname(fp, newname)) {
-	        if (fd == PerlIO_fileno(PerlIO_stdout())) Perl_vmssetuserlnm("SYS$OUTPUT", newname);
-	        if (fd == PerlIO_fileno(PerlIO_stderr())) Perl_vmssetuserlnm("SYS$ERROR",  newname);
+	        if (savefd == PerlIO_fileno(PerlIO_stdout())) Perl_vmssetuserlnm("SYS$OUTPUT", newname);
+	        if (savefd == PerlIO_fileno(PerlIO_stderr())) Perl_vmssetuserlnm("SYS$ERROR",  newname);
 	      }
 	    }
 #endif
 	    LOCK_FDPID_MUTEX;
-	    sv = *av_fetch(PL_fdpid,PerlIO_fileno(fp),TRUE);
+	    sv = *av_fetch(PL_fdpid,fd,TRUE);
 	    (void)SvUPGRADE(sv, SVt_IV);
 	    pid = SvIVX(sv);
 	    SvIVX(sv) = 0;
-	    sv = *av_fetch(PL_fdpid,fd,TRUE);
+	    sv = *av_fetch(PL_fdpid,savefd,TRUE);
 	    UNLOCK_FDPID_MUTEX;
 	    (void)SvUPGRADE(sv, SVt_IV);
 	    SvIVX(sv) = pid;
 	    if (!was_fdopen)
 		PerlIO_close(fp);
-
 	}
 	fp = saveifp;
 	PerlIO_clearerr(fp);
@@ -563,51 +587,16 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     }
 #endif
     IoIFP(io) = fp;
-    if (!num_svs) {
-	/* Need to supply default type info from open.pm */
-	SV *layers = PL_curcop->cop_io;
-	type = NULL;
-	if (layers) {
-	    STRLEN len;
-	    type = SvPV(layers,len);
-	    if (type && mode[0] != 'r') {
-		/* Skip to write part */
-		char *s = strchr(type,0);
-		if (s && (s-type) < len) {
-		    type = s+1;
-		}
-	    }
-	}
-    }
-    if (type) {
-	while (isSPACE(*type)) type++;
-	if (*type) {
-	   errno = 0;
-	   if (PerlIO_apply_layers(aTHX_ IoIFP(io),mode,type) != 0) {
-		goto say_false;
-	   }
-	}
-    }
 
     IoFLAGS(io) &= ~IOf_NOLINE;
     if (writing) {
 	if (IoTYPE(io) == IoTYPE_SOCKET
-	    || (IoTYPE(io) == IoTYPE_WRONLY && S_ISCHR(PL_statbuf.st_mode)) )
-	{
+	    || (IoTYPE(io) == IoTYPE_WRONLY && S_ISCHR(PL_statbuf.st_mode)) ) {
 	    mode[0] = 'w';
-	    if (!(IoOFP(io) = PerlIO_fdopen(PerlIO_fileno(fp),mode))) {
+	    if (!(IoOFP(io) = PerlIO_openn(aTHX_ type,mode,PerlIO_fileno(fp),0,0,NULL,num_svs,svp))) {
 		PerlIO_close(fp);
 		IoIFP(io) = Nullfp;
 		goto say_false;
-	    }
-	    if (type && *type) {
-		if (PerlIO_apply_layers(aTHX_ IoOFP(io),mode,type) != 0) {
-		    PerlIO_close(IoOFP(io));
-		    PerlIO_close(fp);
-		    IoIFP(io) = Nullfp;
-		    IoOFP(io) = Nullfp;
-		    goto say_false;
-		}
 	    }
 	}
 	else

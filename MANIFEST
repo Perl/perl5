@@ -741,6 +741,7 @@ lib/Net/hostent.pm	By-name interface to Perl's builtin gethost*
 lib/Net/netent.pm	By-name interface to Perl's builtin getnet*
 lib/Net/protoent.pm	By-name interface to Perl's builtin getproto*
 lib/Net/servent.pm	By-name interface to Perl's builtin getserv*
+lib/PerlIO.pm		PerlIO support module
 lib/Pod/Checker.pm	Pod-Parser - check POD documents for syntax errors
 lib/Pod/Find.pm		used by pod/splitpod
 lib/Pod/Functions.pm	used by pod/splitpod
