@@ -233,6 +233,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	}
 	IoTYPE(io) = *type;
 	if ((*type == IoTYPE_RDWR) && /* scary */
+           (*(type+1) == IoTYPE_RDONLY || *(type+1) == IoTYPE_WRONLY) &&
 	    ((!num_svs || (tend > type+1 && tend[-1] != IoTYPE_PIPE)))) {
 	    mode[1] = *type++;
 	    writing = 1;
