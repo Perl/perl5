@@ -2472,18 +2472,23 @@ Perl_yylex(pTHX)
 			      && strchr(PL_splitstr + 1, *PL_splitstr))
 			    Perl_sv_catpvf(aTHX_ PL_linestr, "our @F=split(%s);", PL_splitstr);
 			else {
-			    char delim;
-			    s = "'~#\200\1'"; /* surely one char is unused...*/
-			    while (s[1] && strchr(PL_splitstr, *s))  s++;
-			    delim = *s;
-			    Perl_sv_catpvf(aTHX_ PL_linestr, "our @F=split(%s%c",
-				      "q" + (delim == '\''), delim);
-			    for (s = PL_splitstr; *s; s++) {
+			    /* "q\0${splitstr}\0" is legal perl. Yes, even NUL
+			       bytes can be used as quoting characters.  :-) */
+			    /* The count here deliberately includes the NUL
+			       that terminates the C string constant.  This
+			       embeds the opening NUL into the string.  */
+			    sv_catpvn(PL_linestr, "our @F=split(q", 15);
+			    s = PL_splitstr;
+			    do {
+				/* Need to \ \s  */
 				if (*s == '\\')
-				    sv_catpvn(PL_linestr, "\\", 1);
+				    sv_catpvn(PL_linestr, s, 1);
 				sv_catpvn(PL_linestr, s, 1);
-			    }
-			    Perl_sv_catpvf(aTHX_ PL_linestr, "%c);", delim);
+			    } while (*s++);
+			    /* This loop will embed the trailing NUL of
+			       PL_linestr as the last thing it does before
+			       terminating.  */
+			    sv_catpvn(PL_linestr, ");", 2);
 			}
 		    }
 		    else
@@ -2890,7 +2895,7 @@ Perl_yylex(pTHX)
 		 * subroutine call (or a -bareword), then. */
 		DEBUG_T( { PerlIO_printf(Perl_debug_log,
 			"### '-%c' looked like a file test but was not\n",
-			tmp);
+			(int) tmp);
 		} );
 		s = --PL_bufptr;
 	    }
@@ -7986,7 +7991,7 @@ utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
     I32 count = FILTER_READ(idx+1, sv, maxlen);
     DEBUG_P(PerlIO_printf(Perl_debug_log,
 			  "utf16_textfilter(%p): %d %d (%d)\n",
-			  utf16_textfilter, idx, maxlen, count));
+			  utf16_textfilter, idx, maxlen, (int) count));
     if (count) {
 	U8* tmps;
 	I32 newlen;
@@ -8007,7 +8012,7 @@ utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen)
     I32 count = FILTER_READ(idx+1, sv, maxlen);
     DEBUG_P(PerlIO_printf(Perl_debug_log,
 			  "utf16rev_textfilter(%p): %d %d (%d)\n",
-			  utf16rev_textfilter, idx, maxlen, count));
+			  utf16rev_textfilter, idx, maxlen, (int) count));
     if (count) {
 	U8* tmps;
 	I32 newlen;
