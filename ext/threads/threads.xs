@@ -746,7 +746,7 @@ BOOT:
 	thread->tid = tid_counter++;
 	known_threads++;
 	active_threads++;
-	thread->state = 1;
+	thread->state = PERL_ITHR_DETACHED;
 #ifdef WIN32
 	thread->thr = GetCurrentThreadId();
 #else
