@@ -1059,7 +1059,7 @@ do_readline(void)
 		       ((struct NAM *)((struct FAB *)cxt)->fab$l_nam)->nam$l_fnb
 		       but that's unsupported, so I don't want to do it now and
 		       have it bite someone in the future. */
-		    strcat(tmpfnam,tmpnam(NULL));
+		    strcat(tmpfnam,PerlLIO_tmpnam(NULL));
 		    cp = SvPV(tmpglob,i);
 		    for (; i; i--) {
 		       if (cp[i] == ';') hasver = 1;

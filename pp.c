@@ -3107,7 +3107,7 @@ PP(pp_unpack)
 		    s += SIZE16;
 #ifdef HAS_NTOHS
 		    if (datumtype == 'n')
-			aushort = ntohs(aushort);
+			aushort = PerlSock_ntohs(aushort);
 #endif
 #ifdef HAS_VTOHS
 		    if (datumtype == 'v')
@@ -3125,7 +3125,7 @@ PP(pp_unpack)
 		    sv = NEWSV(39, 0);
 #ifdef HAS_NTOHS
 		    if (datumtype == 'n')
-			aushort = ntohs(aushort);
+			aushort = PerlSock_ntohs(aushort);
 #endif
 #ifdef HAS_VTOHS
 		    if (datumtype == 'v')
@@ -3226,7 +3226,7 @@ PP(pp_unpack)
 		    s += SIZE32;
 #ifdef HAS_NTOHL
 		    if (datumtype == 'N')
-			aulong = ntohl(aulong);
+			aulong = PerlSock_ntohl(aulong);
 #endif
 #ifdef HAS_VTOHL
 		    if (datumtype == 'V')
@@ -3246,7 +3246,7 @@ PP(pp_unpack)
 		    s += SIZE32;
 #ifdef HAS_NTOHL
 		    if (datumtype == 'N')
-			aulong = ntohl(aulong);
+			aulong = PerlSock_ntohl(aulong);
 #endif
 #ifdef HAS_VTOHL
 		    if (datumtype == 'V')
@@ -3856,7 +3856,7 @@ PP(pp_pack)
 		fromstr = NEXTFROM;
 		ashort = (I16)SvIV(fromstr);
 #ifdef HAS_HTONS
-		ashort = htons(ashort);
+		ashort = PerlSock_htons(ashort);
 #endif
 		CAT16(cat, &ashort);
 	    }
@@ -3968,7 +3968,7 @@ PP(pp_pack)
 		fromstr = NEXTFROM;
 		aulong = SvUV(fromstr);
 #ifdef HAS_HTONL
-		aulong = htonl(aulong);
+		aulong = PerlSock_htonl(aulong);
 #endif
 		CAT32(cat, &aulong);
 	    }
