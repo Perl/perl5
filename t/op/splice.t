@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..9\n";
+print "1..10\n";
 
 @a = (1..10);
 
@@ -32,3 +32,9 @@ print "ok 8\n";
 
 print "not " unless j(splice(@a,-3,-2,2)) eq j(7) && j(@a) eq j(1,2,7,3);
 print "ok 9\n";
+
+# Bug 20000223.001 - no test for splice(@array).  Destructive test!
+print "not " unless j(splice(@a)) eq j(1,2,7,3) && j(@a) eq '';
+print "ok 10\n";
+
+
