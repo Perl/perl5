@@ -9,7 +9,7 @@ BEGIN {
 
 use Config;
 
-$Is_Dos=$^O eq 'dos';
+$Is_Dosish = ($^O eq 'dos' or $^O eq 'os2');
 
 # avoid win32 (for now)
 do { print "1..0\n"; exit(0); } if $^O eq 'MSWin32';
@@ -32,35 +32,56 @@ close(fh);
 open(fh,'>a') || die "Can't create a";
 close(fh);
 
-if (eval {link('a','b')} || $Is_Dos) {print "ok 2\n";} else {print "not ok 2\n";}
+if ($Is_Dosish) {print "ok 2 # skipped: no link\n";} 
+elsif (eval {link('a','b')}) {print "ok 2\n";} 
+else {print "not ok 2\n";}
 
-if (eval {link('b','c')} || $Is_Dos) {print "ok 3\n";} else {print "not ok 3\n";}
+if ($Is_Dosish) {print "ok 3 # skipped: no link\n";} 
+elsif (eval {link('b','c')}) {print "ok 3\n";} 
+else {print "not ok 3\n";}
 
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('c');
 
-if ($Config{dont_use_nlink} || $nlink == 3 || $Is_Dos)
-    {print "ok 4\n";} else {print "not ok 4\n";}
+if ($Config{dont_use_nlink} || $Is_Dosish)
+    {print "ok 4 # skipped: no link\n";} 
+elsif ($nlink == 3)
+    {print "ok 4\n";} 
+else {print "not ok 4\n";}
 
-if (($mode & 0777) == 0666 || $^O eq 'amigaos' || $Is_Dos)
-    {print "ok 5\n";} else {print "not ok 5\n";}
+if ($^O eq 'amigaos' || $Is_Dosish)
+    {print "ok 5 # skipped: no link\n";} 
+elsif (($mode & 0777) == 0666)
+    {print "ok 5\n";} 
+else {print "not ok 5\n";}
 
 if ((chmod 0777,'a') == 1) {print "ok 6\n";} else {print "not ok 6\n";}
 
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('c');
-if (($mode & 0777) == 0777 || $Is_Dos) {print "ok 7\n";} else {print "not ok 7\n";}
+if ($Is_Dosish) {print "ok 7 # skipped: no link\n";} 
+elsif (($mode & 0777) == 0777) {print "ok 7\n";} 
+else {print "not ok 7\n";}
 
-if ((chmod 0700,'c','x') == 2 || $Is_Dos) {print "ok 8\n";} else {print "not ok 8\n";}
+if ($Is_Dosish) {print "ok 8 # skipped: no link\n";} 
+elsif ((chmod 0700,'c','x') == 2) {print "ok 8\n";} 
+else {print "not ok 8\n";}
 
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('c');
-if (($mode & 0777) == 0700 || $Is_Dos) {print "ok 9\n";} else {print "not ok 9\n";}
+if ($Is_Dosish) {print "ok 9 # skipped: no link\n";} 
+elsif (($mode & 0777) == 0700) {print "ok 9\n";} 
+else {print "not ok 9\n";}
+
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('x');
-if (($mode & 0777) == 0700 || $Is_Dos) {print "ok 10\n";} else {print "not ok 10\n";}
+if ($Is_Dosish) {print "ok 10 # skipped: no link\n";} 
+elsif (($mode & 0777) == 0700) {print "ok 10\n";} 
+else {print "not ok 10\n";}
 
-if ((unlink 'b','x') == 2 || $Is_Dos) {print "ok 11\n";} else {print "not ok 11\n";}
+if ($Is_Dosish) {print "ok 11 # skipped: no link\n"; unlink 'b','x'; } 
+elsif ((unlink 'b','x') == 2) {print "ok 11\n";} 
+else {print "not ok 11\n";}
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('b');
 if ($ino == 0) {print "ok 12\n";} else {print "not ok 12\n";}
@@ -72,13 +93,15 @@ if (rename('a','b')) {print "ok 14\n";} else {print "not ok 14\n";}
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('a');
 if ($ino == 0) {print "ok 15\n";} else {print "not ok 15\n";}
-$foo = (utime 500000000,500000001,'b');
+$delta = $Is_Dosish ? 2 : 1;	# Granularity of time on the filesystem
+$foo = (utime 500000000,500000000 + $delta,'b');
 if ($foo == 1) {print "ok 16\n";} else {print "not ok 16 $foo\n";}
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('b');
 if ($ino) {print "ok 17\n";} else {print "not ok 17\n";}
-if (($atime == 500000000 && $mtime == 500000001)
-	|| $wd =~ m#/afs/# || $^O eq 'amigaos' || $Is_Dos)
+if ($wd =~ m#/afs/# || $^O eq 'amigaos')
+    {print "ok 18 # skipped: granularity of the filetime\n";}
+elsif ($atime == 500000000 && $mtime == 500000000 + $delta)
     {print "ok 18\n";}
 else
     {print "not ok 18 $atime $mtime\n";}
@@ -122,12 +145,12 @@ else {
   { select FH; $| = 1; select STDOUT }
   print FH "helloworld\n";
   truncate FH, 5;
-  if ($Is_Dos) {
+  if ($^O eq 'dos') {
       close (FH); open (FH, ">>Iofs.tmp") or die "Can't reopen Iofs.tmp";
   }
   if (-s "Iofs.tmp" == 5) {print "ok 25\n"} else {print "not ok 25\n"}
   truncate FH, 0;
-  if ($Is_Dos) {
+  if ($^O eq 'dos') {
       close (FH); open (FH, ">>Iofs.tmp") or die "Can't reopen Iofs.tmp";
   }
   if (-z "Iofs.tmp") {print "ok 26\n"} else {print "not ok 26\n"}

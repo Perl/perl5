@@ -32,6 +32,13 @@ $listen = IO::Socket::INET->new(Listen => 2,
 
 print "ok 1\n";
 
+# Check if can fork with dynamic extensions (bug in CRT):
+if ($^O eq 'os2' and
+    system "$^X -I../lib -MOpcode -e 'defined fork or die'  > /dev/null 2>&1") {
+    print "ok $_ # skipped: broken fork\n" for 2..5;
+    exit 0;
+}
+
 $port = $listen->sockport;
 
 if($pid = fork()) {
