@@ -1487,6 +1487,17 @@ will extend the buffer and zero pad the new area.
 (F) An attempt was made to use an entry in an overloading table that
 somehow no longer points to a valid method.  See L<overload>.
 
+=item Stub found while resolving method `%s' overloading `%s' in package `%s'
+
+(P) Overloading resolution over @ISA tree may be broken by importing stubs.
+Stubs should never be implicitely created, but explicit calls to C<can>
+may break this.
+
+=item Cannot resolve method `%s' overloading `%s' in package `s'
+
+(P) Internal error trying to resolve overloading specified by a method
+name (as opposed to a subroutine reference).
+
 =item Operator or semicolon missing before %s
 
 (S) You used a variable or subroutine call where the parser was

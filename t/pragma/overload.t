@@ -291,7 +291,7 @@ test($@ =~ /no method found/);	# 96
   sub { *{"Oscalar::$AUTOLOAD"} = sub {"_!_" . shift() . "_!_"} ;
 	goto &{"Oscalar::$AUTOLOAD"}};
 
-eval "package Oscalar; use overload '~' => 'comple'";
+eval "package Oscalar; sub comple; use overload '~' => 'comple'";
 
 $na = eval { ~$a };		# Hash was not updated
 test($@ =~ /no method found/);	# 97
@@ -299,6 +299,7 @@ test($@ =~ /no method found/);	# 97
 bless \$x, Oscalar;
 
 $na = eval { ~$a };		# Hash updated
+warn "`$na', $@" if $@;
 test !$@;			# 98
 test($na eq '_!_xx_!_');	# 99
 
@@ -315,7 +316,7 @@ print $@;
 test !$@;			# 101
 test($na eq '_!_xx_!_');	# 102
 
-eval "package Oscalar; use overload '>>' => 'rshft'";
+eval "package Oscalar; sub rshft; use overload '>>' => 'rshft'";
 
 $na = eval { $aI >> 1 };	# Hash was not updated
 test($@ =~ /no method found/);	# 103
@@ -330,6 +331,7 @@ print $@;
 test !$@;			# 104
 test($na eq '_!_xx_!_');	# 105
 
+# warn overload::Method($a, '0+'), "\n";
 test (overload::Method($a, '0+') eq \&Oscalar::numify); # 106
 test (overload::Method($aI,'0+') eq \&Oscalar::numify); # 107
 test (overload::Overloaded($aI)); # 108
@@ -341,5 +343,21 @@ test (! defined overload::Method($a, '<')); # 111
 test (overload::StrVal($aI) =~ /^OscalarI=SCALAR\(0x[\da-fA-F]+\)$/); # 112
 test (overload::StrVal(\$aI) eq "@{[\$aI]}"); # 113
 
+# Check overloading by methods (specified deep in the ISA tree).
+{
+  package OscalarII;
+  @ISA = 'OscalarI';
+  sub Oscalar::lshft {"_<<_" . shift() . "_<<_"}
+  eval "package OscalarI; use overload '<<' => 'lshft', '|' => 'lshft'";
+}
+
+$aaII = "087";
+$aII = \$aaII;
+bless $aII, 'OscalarII';
+bless \$fake, 'OscalarI';		# update the hash
+test(($aI | 3) eq '_<<_xx_<<_');	# 114
+# warn $aII << 3;
+test(($aII << 3) eq '_<<_087_<<_');	# 115
+
 # Last test is:
-sub last {113}
+sub last {115}

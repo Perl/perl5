@@ -129,7 +129,7 @@ STRLEN len;
 I32 level;
 {
     AV* av;
-    GV* topgv;
+    GV* topgv = NULL;
     GV* gv;
     GV** gvp;
     HV* lastchance;
@@ -137,12 +137,14 @@ I32 level;
 
     if (!stash)
 	return 0;
-    if (level > 100)
+    if ((level > 100) || (level < -100))
 	croak("Recursive inheritance detected");
 
-    gvp = (GV**)hv_fetch(stash, name, len, TRUE);
+    gvp = (GV**)hv_fetch(stash, name, len, (level >= 0));
 
     DEBUG_o( deb("Looking for method %s in package %s\n",name,HvNAME(stash)) );
+    if (!gvp) goto recurse;
+
     topgv = *gvp;
     if (SvTYPE(topgv) != SVt_PVGV)
 	gv_init(topgv, stash, name, len, TRUE);
@@ -162,6 +164,7 @@ I32 level;
     }
     /* Now cv = 0, and there is no cv in topgv. */
 
+  recurse:
     gvp = (GV**)hv_fetch(stash,"ISA",3,FALSE);
     if (gvp && (gv = *gvp) != (GV*)&sv_undef && (av = GvAV(gv))) {
 	SV** svp = AvARRAY(av);
@@ -175,19 +178,19 @@ I32 level;
 			SvPVX(sv), HvNAME(stash));
 		continue;
 	    }
-	    gv = gv_fetchmeth(basestash, name, len, level + 1);
-	    if (gv) {
+	    gv = gv_fetchmeth(basestash, name, len, level + (level >= 0 ? 1 : -1));
+	    if (gv && topgv) {
 		GvCV(topgv) = GvCV(gv);			/* cache the CV */
 		GvCVGEN(topgv) = sub_generation;	/* valid for now */
 		SvREFCNT_inc(GvCV(gv));
 		return gv;
-	    }
+	    } else if (gv) return gv;
 	}
     }
 
-    if (!level) {
+    if ((level == 0) || (level == -1)) { /* topgv is present. */
 	if (lastchance = gv_stashpvn("UNIVERSAL", 9, FALSE)) {
-	    if (gv = gv_fetchmeth(lastchance, name, len, level + 1)) {
+	    if (gv = gv_fetchmeth(lastchance, name, len, level + (level >= 0 ? 1 : -1))) {
 		GvCV(topgv) = GvCV(gv);			/* cache the CV */
 		GvCVGEN(topgv) = sub_generation;	/* valid for now */
 		SvREFCNT_inc(GvCV(gv));
@@ -968,8 +971,42 @@ HV* stash;
       
 	*buf = '(';			/* A cooky: "(". */
 	strcpy(buf + 1, cp);
-	gv = gv_fetchmeth(stash, buf, strlen(buf), 0); /* fills the stash! */
-        if(gv && (cv = GvCV(gv))) filled = 1;
+	DEBUG_o( deb("Checking overloading of `%s' in package `%.256s'\n",
+		     cp, HvNAME(stash)) );
+	gv = gv_fetchmeth(stash, buf, strlen(buf), -1); /* no filling stash! */
+        if(gv && (cv = GvCV(gv))) {
+	    char *name = buf;
+	    if (GvNAMELEN(CvGV(cv)) == 3 && strEQ(GvNAME(CvGV(cv)), "nil")
+		&& strEQ(HvNAME(GvSTASH(CvGV(cv))), "overload")) {
+		/* GvSV contains the name of the method. */
+		GV *ngv;
+		
+		DEBUG_o( deb("Resolving method `%.256s' for overloaded `%s' in package `%.256s'\n", 
+			     SvPV(GvSV(gv), na), cp, HvNAME(stash)) );
+		if (SvPOK(GvSV(gv)) 
+		    && (ngv = gv_fetchmethod(stash, SvPVX(GvSV(gv))))) {
+		    name = SvPVX(GvSV(gv));
+		    cv = GvCV(gv = ngv);
+		} else {
+		    /* Can be an import stub (created by `can'). */
+		    if (GvCVGEN(gv)) {
+			croak("Stub found while resolving method `%.256s' overloading `%s' in package `%.256s'", 
+			      (SvPOK(GvSV(gv)) ?  SvPVX(GvSV(gv)) : "???" ),
+			      cp, HvNAME(stash));
+		    } else
+			croak("Cannot resolve method `%.256s' overloading `%s' in package `%.256s'", 
+			      (SvPOK(GvSV(gv)) ?  SvPVX(GvSV(gv)) : "???" ),
+			      cp, HvNAME(stash));
+		}
+	        /* If the sub is only a stub then we may have a gv to AUTOLOAD */
+	        gv = (GV*)*hv_fetch(GvSTASH(gv), name, strlen(name), TRUE);
+	        cv = GvCV(gv);
+	    }
+	    DEBUG_o( deb("Overloading `%s' in package `%.256s' via `%.256s::%.256s' \n",
+			 cp, HvNAME(stash), HvNAME(GvSTASH(CvGV(cv))),
+			 GvNAME(CvGV(cv))) );
+	    filled = 1;
+	}
 #endif 
 	amt.table[i]=(CV*)SvREFCNT_inc(cv);
     }
@@ -1255,7 +1292,7 @@ int flags;
       case dec_amg:
 	SvSetSV(left,res); return left;
       case not_amg:
-ans=!SvOK(res); break;
+	ans=!SvOK(res); break;
       }
       return ans? &sv_yes: &sv_no;
     } else if (method==copy_amg) {

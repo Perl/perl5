@@ -119,6 +119,8 @@ PP(pp_rv2gv)
 	    GvIOp(gv) = (IO *)sv;
 	    SvREFCNT_inc(sv);
 	    sv = (SV*) gv;
+	} else if (SvTYPE(sv) == SVt_PVCV) {
+	    sv = (SV*) CvGV(sv);
 	} else if (SvTYPE(sv) != SVt_PVGV)
 	    DIE("Not a GLOB reference");
     }
