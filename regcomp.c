@@ -429,7 +429,7 @@ static scan_data_t zero_scan_data = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 
 /* Allow for side effects in s */
-#define REGC(c,s) STMT_START { if (!SIZE_ONLY) *(s) = (c); else (s);} STMT_END
+#define REGC(c,s) STMT_START { if (!SIZE_ONLY) *(s) = (c); else (void)(s);} STMT_END
 
 /* Macros for recording node offsets.   20001227 mjd@plover.com 
  * Nodes are numbered 1, 2, 3, 4.  Node #n's position is recorded in
