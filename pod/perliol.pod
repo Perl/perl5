@@ -324,7 +324,7 @@ to change during one "get".)
 
 =over 4
 
-=item size
+=item fsize
 
 	Size_t fsize;
 
