@@ -401,6 +401,7 @@ sub expr {
 sub next_line
 {
     my ($in, $out);
+    my $pre_sub_tri_graphs = 1;
 
     READ: while (not eof IN) {
         $in  .= <IN>;
@@ -408,6 +409,19 @@ sub next_line
         next unless length $in;
 
         while (length $in) {
+            if ($pre_sub_tri_graphs) {
+                # Preprocess all tri-graphs 
+                # including things stuck in quoted string constants.
+                $in =~ s/\?\?=/#/g;                         # | ??=|  #|
+                $in =~ s/\?\?\!/|/g;                        # | ??!|  ||
+                $in =~ s/\?\?'/^/g;                         # | ??'|  ^|
+                $in =~ s/\?\?\(/[/g;                        # | ??(|  [|
+                $in =~ s/\?\?\)/]/g;                        # | ??)|  ]|
+                $in =~ s/\?\?\-/~/g;                        # | ??-|  ~|
+                $in =~ s/\?\?\//\\/g;                       # | ??/|  \|
+                $in =~ s/\?\?</{/g;                         # | ??<|  {|
+                $in =~ s/\?\?>/}/g;                         # | ??>|  }|
+            }
             if ($in =~ s/\\$//) {                           # \-newline
                 $out    .= ' ';
                 next READ;

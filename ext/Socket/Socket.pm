@@ -1,7 +1,7 @@
 package Socket;
 
 our($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-$VERSION = "1.73";
+$VERSION = "1.74";
 
 =head1 NAME
 
@@ -334,7 +334,7 @@ sub AUTOLOAD {
     if ($error) {
 	croak $error;
     }
-    eval "sub $AUTOLOAD () { $val }";
+    *$AUTOLOAD = sub { $val };
     goto &$AUTOLOAD;
 }
 

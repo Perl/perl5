@@ -1,6 +1,6 @@
 #!./perl -w
 
-print "1..24\n";
+print "1..26\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -47,6 +47,9 @@ my %compass = (
 N => 0, NE => 45, E => 90, SE => 135, S => 180, SW => 225, W => 270, NW => 315
 );
 
+my $parent_rfc1149 =
+  'A Standard for the Transmission of IP Datagrams on Avian Carriers';
+
 my @names = ("FIVE", {name=>"OK6", type=>"PV",},
              {name=>"OK7", type=>"PVN",
               value=>['"not ok 7\\n\\0ok 7\\n"', 15]},
@@ -60,6 +63,12 @@ my @names = ("FIVE", {name=>"OK6", type=>"PV",},
              {name => "Yes", type=>"YES"},
              {name => "No", type=>"NO"},
              {name => "Undef", type=>"UNDEF"},
+# OK. It wasn't really designed to allow the creation of dual valued constants.
+# It was more for INADDR_ANY INADDR_BROADCAST INADDR_LOOPBACK INADDR_NONE
+             {name=>"RFC1149", type=>"SV", value=>"sv_2mortal(temp_sv)",
+              pre=>"SV *temp_sv = newSVpv(RFC1149, 0); "
+              	   . "(void) SvUPGRADE(temp_sv,SVt_PVIV); SvIOK_on(temp_sv); "
+                   . "SvIVX(temp_sv) = 1149;"},
 );
 
 push @names, $_ foreach keys %compass;
@@ -76,7 +85,7 @@ my $XS_constant = XS_constant ($package, $types); # XS for ExtTest::constant
 my $header = catfile($dir, "test.h");
 push @files, "test.h";
 open FH, ">$header" or die "open >$header: $!\n";
-print FH <<'EOT';
+print FH <<"EOT";
 #define FIVE 5
 #define OK6 "ok 6\n"
 #define OK7 1
@@ -85,7 +94,7 @@ print FH <<'EOT';
 #define Yes 0
 #define No 1
 #define Undef 1
-
+#define RFC1149 "$parent_rfc1149"
 #undef NOTDEF
 
 EOT
@@ -299,6 +308,20 @@ if ($fail) {
 
 EOT
 
+print FH <<"EOT";
+my \$rfc1149 = RFC1149;
+if (\$rfc1149 ne "$parent_rfc1149") {
+  print "not ok 20 # '\$rfc1149' ne '$parent_rfc1149'\n";
+} else {
+  print "ok 20\n";
+}
+
+if (\$rfc1149 != 1149) {
+  printf "not ok 21 # %d != 1149\n", \$rfc1149;
+} else {
+  print "ok 21\n";
+}
+EOT
 close FH or die "close $testpl: $!\n";
 
 ################ Makefile.PL
@@ -374,7 +397,7 @@ if ($Config{usedl}) {
   }
 }
 
-my $test = 20;
+my $test = 22;
 my $maketest = "$make test";
 print "# make = '$maketest'\n";
 $makeout = `$maketest`;

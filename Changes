@@ -31,6 +31,299 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10610] By: jhi                                   on 2001/06/15  14:20:33
+        Log: Upping the test count.
+     Branch: perl
+	   ! t/lib/filefind.t
+____________________________________________________________________________
+[ 10609] By: jhi                                   on 2001/06/15  14:13:29
+        Log: Integrate perlio.
+     Branch: perl
+	  !> win32/config_H.bc win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[ 10608] By: jhi                                   on 2001/06/15  14:12:31
+        Log: Subject: Re: [ID 20010608.010] File::Find re-entrancy
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 15 Jun 2001 13:30:39 +0200
+             Message-ID: <m3hexikmjk.fsf@ak-71.mind.de>
+             
+             Record the grim history.
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[ 10607] By: jhi                                   on 2001/06/15  14:08:19
+        Log: Subject: Re: [ID 20010608.010] File::Find re-entrancy
+             From: Brian McCauley <nobull@mail.com>
+             Date: 15 Jun 2001 07:51:26 +0100
+             Message-Id: <200106150923.f5F9NpG02725@wcl-l.bham.ac.uk>
+     Branch: perl
+	   ! lib/File/Find.pm t/lib/filefind.t
+____________________________________________________________________________
+[ 10606] By: nick                                  on 2001/06/15  14:00:08
+        Log: regen_config_h for Win32.
+     Branch: perlio
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[ 10605] By: jhi                                   on 2001/06/15  13:49:55
+        Log: Subject: [PATCH: perl@10576] handle tri graphs in h2ph.PL -> h2ph*
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Thu, 14 Jun 2001 16:25:33 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10106141608080.110974-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/lib/h2ph.h t/lib/h2ph.pht t/lib/h2ph.t utils/h2ph.PL
+____________________________________________________________________________
+[ 10604] By: jhi                                   on 2001/06/15  13:45:03
+        Log: Some filesystems require writability for rename/unlink.
+     Branch: perl
+	   ! opcode.pl
+____________________________________________________________________________
+[ 10603] By: jhi                                   on 2001/06/15  13:41:34
+        Log: Subject: Re: [PATCH} perlio and threading @ 10576 + report 
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl> 
+             Date: Fri, 15 Jun 2001 12:08:53 +0200
+             Message-Id: <20010615120320.F009.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! perlio.c
+____________________________________________________________________________
+[ 10602] By: jhi                                   on 2001/06/15  13:27:04
+        Log: Subject: Re: [PATCH] opcode.pl is chmod'ing the original source tree
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Fri, 15 Jun 2001 14:11:49 +0100
+             Message-Id: <E15AtO9-0006Nd-00@draco.cus.cam.ac.uk>
+     Branch: perl
+	   ! opcode.pl
+____________________________________________________________________________
+[ 10601] By: jhi                                   on 2001/06/15  13:21:18
+        Log: Subject: [PATCH ?] INADDR_ANY INADDR_BROADCAST INADDR_LOOPBACK INADDR_NONE
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Thu, 14 Jun 2001 23:52:56 +0100
+             Message-ID: <20010614235256.G98663@plum.flirble.org>
+     Branch: perl
+	   ! ext/Socket/Socket.pm ext/Socket/Socket.xs
+	   ! lib/ExtUtils/Constant.pm t/lib/extutils.t
+____________________________________________________________________________
+[ 10600] By: jhi                                   on 2001/06/15  13:16:56
+        Log: Subject: Re: [PATCH] GDBM_File (wasRe: ext/ + -Wall)
+             From: Russ Allbery <rra@stanford.edu>
+             Date: 14 Jun 2001 13:24:43 -0700
+             Message-ID: <ylzobaizck.fsf@windlord.stanford.edu>
+     Branch: perl
+	   ! ext/GDBM_File/GDBM_File.pm
+____________________________________________________________________________
+[ 10599] By: jhi                                   on 2001/06/15  13:15:26
+        Log: Subject: [PATCH] GDBM_File (wasRe: ext/ + -Wall)
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Thu, 14 Jun 2001 20:37:47 +0100
+             Message-ID: <20010614203747.F98663@plum.flirble.org>
+     Branch: perl
+	   ! ext/GDBM_File/GDBM_File.pm ext/GDBM_File/GDBM_File.xs
+	   ! t/lib/gdbm.t
+____________________________________________________________________________
+[ 10598] By: jhi                                   on 2001/06/15  13:13:13
+        Log: Integrate perlio.
+     Branch: perl
+	  !> makedef.pl sv.c
+____________________________________________________________________________
+[ 10597] By: nick                                  on 2001/06/15  11:08:13
+        Log: Check that HVs with HvNAME() != NULL are really stashes before
+             treating them as such. Also be more defensive on the GvCV.
+             Win32 fork and dprof now working again. 
+     Branch: perlio
+	   ! sv.c
+____________________________________________________________________________
+[ 10596] By: nick                                  on 2001/06/15  10:11:20
+        Log: Integrate mainline.
+     Branch: perlio
+	  +> Cross/README
+	  !> Configure Makefile.SH Porting/Glossary Porting/config.sh
+	  !> Porting/config_H config_h.SH configure.com epoc/config.sh
+	  !> hints/linux.sh pod/perltoc.pod uconfig.h uconfig.sh
+	  !> vos/config.alpha.def vos/config.alpha.h vos/config.ga.def
+	  !> vos/config.ga.h win32/config.bc win32/config.gc
+	  !> win32/config.vc win32/config_H.bc win32/config_H.gc
+	  !> win32/config_H.vc
+____________________________________________________________________________
+[ 10595] By: nick                                  on 2001/06/15  09:37:17
+        Log: Skip Perl_my_bcopy in .def file as we do not provide it.
+             - Win32 (VC++) now builds but fails:
+             filefind.t - suspect Win32's builtin cwd is not doing insecure dir test
+             fork.t     - No &___ENV_HV_NAME___::CLONE method ???
+             write.t    - open(...,"|-") not implemented on Win32 
+     Branch: perlio
+	   ! makedef.pl
+____________________________________________________________________________
+[ 10594] By: jhi                                   on 2001/06/15  00:17:16
+        Log: Integrate perlio.
+     Branch: perl
+	  !> perlio.c win32/makefile.mk
+____________________________________________________________________________
+[ 10593] By: jhi                                   on 2001/06/15  00:16:44
+        Log: Metaconfig unit changes for #10592.
+     Branch: metaconfig
+	   + U/modified/i_varhdr.U U/modified/startsh.U
+	   - U/a_dvisory/crosscompile.U U/target/Target.U
+	   ! U/a_dvisory/intsize.U U/compline/alignbytes.U
+	   ! U/compline/bitpbyte.U U/compline/byteorder.U
+	   ! U/compline/ccflags.U U/compline/charsize.U
+	   ! U/compline/d_casti32.U U/compline/d_castneg.U
+	   ! U/compline/d_closedir.U U/compline/d_fd_set.U
+	   ! U/compline/d_gconvert.U U/compline/d_gnulibc.U
+	   ! U/compline/d_keepsig.U U/compline/d_open3.U
+	   ! U/compline/d_safebcpy.U U/compline/d_safemcpy.U
+	   ! U/compline/d_sanemcmp.U U/compline/d_scannl.U
+	   ! U/compline/d_sgndchr.U U/compline/d_sigsetjmp.U
+	   ! U/compline/d_stdstdio.U U/compline/d_vprintf.U
+	   ! U/compline/doublesize.U U/compline/floatsize.U
+	   ! U/compline/nblock_io.U U/compline/orderlib.U
+	   ! U/compline/ptrsize.U U/compline/ssizetype.U U/ebcdic/ebcdic.U
+	   ! U/modified/Cppsym.U U/modified/Oldconfig.U U/modified/Signal.U
+	   ! U/modified/d_getpgrp.U U/modified/d_longdbl.U
+	   ! U/modified/d_longlong.U U/modified/d_setpgrp.U
+	   ! U/modified/d_strtoul.U U/modified/d_union_semun.U
+	   ! U/modified/spitshell.U U/threads/archname.U
+	   ! U/threads/d_pthreadj.U U/typedefs/gidsign.U
+	   ! U/typedefs/gidsize.U U/typedefs/lseektype.U
+	   ! U/typedefs/pidsign.U U/typedefs/pidsize.U
+	   ! U/typedefs/sizesize.U U/typedefs/ssizesize.U
+	   ! U/typedefs/uidsign.U U/typedefs/uidsize.U
+     Branch: metaconfig/U/perl
+	   + Cross.U
+	   ! d_dlsymun.U d_fcntl_can_lock.U d_modfl.U d_printfed.U
+	   ! d_strtoll.U d_strtoull.U d_strtouq.U d_u32align.U dlsrc.U
+	   ! fflushall.U fpossize.U gccvers.U i_db.U longdblfio.U
+	   ! need_va_copy.U perlxv.U quadfio.U selectminbits.U
+	   ! stdio_streams.U uselfs.U
+____________________________________________________________________________
+[ 10592] By: jhi                                   on 2001/06/15  00:15:52
+        Log: The first steps towards cross-compilation.
+             
+             Abstract execution of compiled test executables with $run,
+             and abstract transfer of files with $to and $from.
+             
+             Under cross-compilation the $run, $to, and $from will point
+             to appropriate wrapper scripts, by default ssh and scp,
+             but also rsh, rcp, and cp are supported.  If not
+             cross-compiling, they will be set to '', ':', and ':',
+             respectively.
+             
+             With these patches I was able to get Configure for
+             iPAQ ARM Linux on an Intel Linux about 95% right
+             (only a few tests failed to execute or they produced
+             incorrect results), and I was able to compile
+             a functional miniperl.
+             
+             The symbol crosscompile renamed to be usecrosscompile,
+             the corresponding C symbol from CROSSCOMPILE to
+             USE_CROSS_COMPILE.
+     Branch: perl
+	   ! Configure Cross/README Makefile.SH Porting/Glossary
+	   ! Porting/config.sh Porting/config_H config_h.SH configure.com
+	   ! epoc/config.sh hints/linux.sh pod/perltoc.pod uconfig.h
+	   ! uconfig.sh vos/config.alpha.def vos/config.alpha.h
+	   ! vos/config.ga.def vos/config.ga.h win32/config.bc
+	   ! win32/config.gc win32/config.vc win32/config_H.bc
+	   ! win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[ 10591] By: nick                                  on 2001/06/14  20:00:12
+        Log: Steps along the road toward Win32 building again.
+     Branch: perlio
+	   ! perlio.c win32/makefile.mk
+____________________________________________________________________________
+[ 10590] By: jhi                                   on 2001/06/14  16:11:11
+        Log: Integrate perlio.
+     Branch: perl
+	  !> win32/config_H.bc win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[ 10589] By: nick                                  on 2001/06/14  13:54:07
+        Log: Routine regen_config_h for Win32
+     Branch: perlio
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[ 10588] By: jhi                                   on 2001/06/14  12:30:46
+        Log: Integrate perlio.
+     Branch: perl
+	  +> perlyline.pl
+	  !> MANIFEST Makefile.SH perly.c t/lib/filefind.t
+____________________________________________________________________________
+[ 10587] By: jhi                                   on 2001/06/14  12:23:24
+        Log: A placeholder.
+     Branch: perl
+	   + Cross/README
+____________________________________________________________________________
+[ 10586] By: nick                                  on 2001/06/14  08:25:07
+        Log: Add new step to run_byacc which:
+             A. Corrects #line NNN "perly.c" lines so warnings etc. are trackable
+             B. Adds extra () to the two if (var = ...) constructs gcc -Wall winges about.
+     Branch: perlio
+	   + perlyline.pl
+	   ! MANIFEST Makefile.SH perly.c
+____________________________________________________________________________
+[ 10585] By: nick                                  on 2001/06/14  08:22:29
+        Log: Integrate mainline
+     Branch: perlio
+	  +> locale.c numeric.c
+	  !> Changes cygwin/Makefile.SHs embed.h embed.pl
+	  !> ext/re/Makefile.PL lib/Math/BigFloat.pm lib/Math/BigInt.pm
+	  !> objXSUB.h opcode.pl patchlevel.h perlapi.c pod/perlapi.pod
+	  !> proto.h t/lib/bigfltpm.t t/lib/bigintpm.t util.c
+	  !> x2p/Makefile.SH
+____________________________________________________________________________
+[ 10584] By: nick                                  on 2001/06/14  08:05:53
+        Log: Hack to remove insecure directories from PATH so test will run.
+     Branch: perlio
+	   ! t/lib/filefind.t
+____________________________________________________________________________
+[ 10583] By: jhi                                   on 2001/06/14  03:11:16
+        Log: The test doesn't work (yet?), Math::BigInt::round_mode() is missing.
+     Branch: perl
+	   - t/lib/mbimbf.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 10582] By: jhi                                   on 2001/06/14  03:04:51
+        Log: Detypo.
+     Branch: perl
+	   ! x2p/Makefile.SH
+____________________________________________________________________________
+[ 10581] By: jhi                                   on 2001/06/14  03:03:14
+        Log: de-$CONFIG continues.
+     Branch: perl
+	   ! cygwin/Makefile.SHs x2p/Makefile.SH
+____________________________________________________________________________
+[ 10580] By: jhi                                   on 2001/06/13  23:56:59
+        Log: Subject: [PATCH] opcode.pl is chmod'ing the original source tree
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 13 Jun 2001 21:20:13 +0100
+             Message-ID: <20010613212013.D98663@plum.flirble.org>
+     Branch: perl
+	   ! opcode.pl
+____________________________________________________________________________
+[ 10579] By: jhi                                   on 2001/06/13  23:55:29
+        Log: Subject: splitting util.c
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Thu, 14 Jun 2001 00:41:08 +0100
+             Message-Id: <200106132341.AAA24935@crypt.compulink.co.uk>
+     Branch: perl
+	   + locale.c numeric.c
+	   ! MANIFEST Makefile.SH embed.h embed.pl objXSUB.h perlapi.c
+	   ! pod/perlapi.pod proto.h util.c
+____________________________________________________________________________
+[ 10578] By: jhi                                   on 2001/06/13  23:45:11
+        Log: Upgrade to Math::BigInt 1.34 from Tels.
+     Branch: perl
+	   + t/lib/mbimbf.t
+	   ! MANIFEST lib/Math/BigFloat.pm lib/Math/BigInt.pm
+	   ! t/lib/bigfltpm.t t/lib/bigintpm.t
+____________________________________________________________________________
+[ 10577] By: nick                                  on 2001/06/13  19:02:48
+        Log: Integrate mainline. Storable fail has gone, insecure dependancy still there.
+     Branch: perlio
+	  !> (integrate 125 files)
+____________________________________________________________________________
+[ 10576] By: jhi                                   on 2001/06/13  18:10:01
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10575] By: jhi                                   on 2001/06/13  18:05:09
         Log: Subject: Re: [PATCH perl@10538] make ext/re play nice with DEBUGGING override
              From: "Craig A. Berry" <craigberry@mac.com>

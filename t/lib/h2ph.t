@@ -8,6 +8,13 @@ BEGIN {
     @INC = '../lib';
 }
 
+my $extracted_program = '../utils/h2ph'; # unix, nt, ...
+if ($^O eq 'VMS') { $extracted_program = '[-.utils]h2ph.com'; }
+if (!(-e $extracted_program)) {
+    print "1..0 # Skip: $extracted_program was not built\n";
+    exit 0;
+}
+
 print "1..2\n";
 
 # quickly compare two text files
@@ -17,19 +24,14 @@ sub txt_compare {
     $A cmp $B;
 }
 
-unless(-e '../utils/h2ph') {
-    print("ok 1\nok 2\n");
-    # i'll probably get in trouble for this :)
-} else {
-    # does it run?
-    $ok = system("./perl -I../lib ../utils/h2ph -d. -Q lib/h2ph.h");
-    print(($ok == 0 ? "" : "not "), "ok 1\n");
+# does it run?
+$ok = system("$^X \"-I../lib\" $extracted_program -d. \"-Q\" lib/h2ph.h");
+print(($ok == 0 ? "" : "not "), "ok 1\n");
     
-    # does it work? well, does it do what we expect? :-)
-    $ok = txt_compare("lib/h2ph.ph", "lib/h2ph.pht");
-    print(($ok == 0 ? "" : "not "), "ok 2\n");
+# does it work? well, does it do what we expect? :-)
+$ok = txt_compare("lib/h2ph.ph", "lib/h2ph.pht");
+print(($ok == 0 ? "" : "not "), "ok 2\n");
     
-    # cleanup - should this be in an END block?
-    unlink("lib/h2ph.ph");
-    unlink("_h2ph_pre.ph");
-}
+# cleanup - should this be in an END block?
+unlink("lib/h2ph.ph");
+unlink("_h2ph_pre.ph");

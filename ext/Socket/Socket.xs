@@ -177,52 +177,17 @@ not_here(char *s)
 #define PERL_constant_NOTFOUND	1
 #define PERL_constant_NOTDEF	2
 #define PERL_constant_ISIV	3
-#define PERL_constant_ISNV	4
-#define PERL_constant_ISPV	5
-#define PERL_constant_ISPVN	6
-#define PERL_constant_ISUV	7
-
-#ifndef NVTYPE
-typedef double NV; /* 5.6 and later define NVTYPE, and typedef NV to it.  */
-#endif
-
-static int
-constant_5 (const char *name, IV *iv_return) {
-  /* Names all of length 5.  */
-  /* When generated this function returned values for the list of names given
-     here.  However, subsequent manual editing may have added or removed some.
-     AF_NS PF_NS */
-  /* Offset 0 gives the best switch position.  */
-  switch (name[0]) {
-  case 'A':
-    if (memEQ(name, "AF_NS", 5)) {
-    /*               ^          */
-#ifdef AF_NS
-      *iv_return = AF_NS;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
-  case 'P':
-    if (memEQ(name, "PF_NS", 5)) {
-    /*               ^          */
-#ifdef PF_NS
-      *iv_return = PF_NS;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
-  }
-  return PERL_constant_NOTFOUND;
-}
+#define PERL_constant_ISNO	4
+#define PERL_constant_ISNV	5
+#define PERL_constant_ISPV	6
+#define PERL_constant_ISPVN	7
+#define PERL_constant_ISSV	8
+#define PERL_constant_ISUNDEF	9
+#define PERL_constant_ISUV	10
+#define PERL_constant_ISYES	11
 
 static int
-constant_6 (const char *name, IV *iv_return) {
-  /* Names all of length 6.  */
+constant_6 (const char *name, IV *iv_return, SV **sv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
      AF_802 AF_DLI AF_LAT AF_MAX AF_NBS AF_NIT AF_OSI AF_PUP AF_SNA AF_X25
@@ -432,8 +397,7 @@ constant_6 (const char *name, IV *iv_return) {
 }
 
 static int
-constant_7 (const char *name, IV *iv_return) {
-  /* Names all of length 7.  */
+constant_7 (const char *name, IV *iv_return, SV **sv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
      AF_ECMA AF_INET AF_UNIX IOV_MAX MSG_EOF MSG_EOR MSG_FIN MSG_OOB MSG_RST
@@ -542,7 +506,7 @@ constant_7 (const char *name, IV *iv_return) {
     break;
   case 'O':
     if (memEQ(name, "MSG_OOB", 7)) {
-    /*                    ^       */
+    /*                   ^        */
 #if defined(MSG_OOB) || defined(HAS_MSG_OOB) /* might be an enum */
       *iv_return = MSG_OOB;
       return PERL_constant_ISIV;
@@ -622,8 +586,7 @@ constant_7 (const char *name, IV *iv_return) {
 }
 
 static int
-constant_8 (const char *name, IV *iv_return) {
-  /* Names all of length 8.  */
+constant_8 (const char *name, IV *iv_return, SV **sv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
      AF_CCITT AF_CHAOS AF_GOSIP MSG_PEEK PF_CCITT PF_CHAOS PF_GOSIP SOCK_RAW
@@ -750,8 +713,7 @@ constant_8 (const char *name, IV *iv_return) {
 }
 
 static int
-constant_9 (const char *name, IV *iv_return) {
-  /* Names all of length 9.  */
+constant_9 (const char *name, IV *iv_return, SV **sv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
      AF_DECnet AF_HYLINK AF_OSINET AF_UNSPEC MSG_BCAST MSG_MCAST MSG_PROXY
@@ -960,12 +922,11 @@ constant_9 (const char *name, IV *iv_return) {
 }
 
 static int
-constant_10 (const char *name, IV *iv_return) {
-  /* Names all of length 10.  */
+constant_10 (const char *name, IV *iv_return, SV **sv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
-     AF_DATAKIT AF_IMPLINK MSG_CTRUNC PF_DATAKIT PF_IMPLINK SCM_RIGHTS
-     SOCK_DGRAM SOL_SOCKET TCP_MAXSEG TCP_STDURG UIO_MAXIOV */
+     AF_DATAKIT AF_IMPLINK INADDR_ANY MSG_CTRUNC PF_DATAKIT PF_IMPLINK
+     SCM_RIGHTS SOCK_DGRAM SOL_SOCKET TCP_MAXSEG TCP_STDURG UIO_MAXIOV */
   /* Offset 6 gives the best switch position.  */
   switch (name[6]) {
   case 'A':
@@ -1081,42 +1042,55 @@ constant_10 (const char *name, IV *iv_return) {
 #endif
     }
     break;
+  case '_':
+    if (memEQ(name, "INADDR_ANY", 10)) {
+    /*                     ^          */
+#ifdef INADDR_ANY
+      {
+struct in_addr ip_address; ip_address.s_addr = htonl(INADDR_ANY);
+        *sv_return =  sv_2mortal(newSVpvn((char *)&ip_address,sizeof ip_address ));
+        return PERL_constant_ISSV;
+      }
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
   }
   return PERL_constant_NOTFOUND;
 }
 
 static int
-constant_11 (const char *name, IV *iv_return) {
-  /* Names all of length 11.  */
+constant_11 (const char *name, IV *iv_return, SV **sv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
-     IPPROTO_TCP MSG_WAITALL SCM_CONNECT SOCK_STREAM SO_RCVLOWAT SO_RCVTIMEO
-     SO_SNDLOWAT SO_SNDTIMEO TCP_NODELAY */
-  /* Offset 7 gives the best switch position.  */
-  switch (name[7]) {
-  case 'E':
-    if (memEQ(name, "TCP_NODELAY", 11)) {
-    /*                      ^          */
-#ifdef TCP_NODELAY
-      *iv_return = TCP_NODELAY;
+     INADDR_NONE IPPROTO_TCP MSG_WAITALL SCM_CONNECT SOCK_STREAM SO_RCVLOWAT
+     SO_RCVTIMEO SO_SNDLOWAT SO_SNDTIMEO TCP_NODELAY */
+  /* Offset 5 gives the best switch position.  */
+  switch (name[5]) {
+  case 'A':
+    if (memEQ(name, "MSG_WAITALL", 11)) {
+    /*                    ^            */
+#ifdef MSG_WAITALL
+      *iv_return = MSG_WAITALL;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
 #endif
     }
     break;
-  case 'I':
-    if (memEQ(name, "SO_RCVTIMEO", 11)) {
-    /*                      ^          */
-#ifdef SO_RCVTIMEO
-      *iv_return = SO_RCVTIMEO;
+  case 'D':
+    if (memEQ(name, "SO_SNDLOWAT", 11)) {
+    /*                    ^            */
+#ifdef SO_SNDLOWAT
+      *iv_return = SO_SNDLOWAT;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
 #endif
     }
     if (memEQ(name, "SO_SNDTIMEO", 11)) {
-    /*                      ^          */
+    /*                    ^            */
 #ifdef SO_SNDTIMEO
       *iv_return = SO_SNDTIMEO;
       return PERL_constant_ISIV;
@@ -1125,9 +1099,9 @@ constant_11 (const char *name, IV *iv_return) {
 #endif
     }
     break;
-  case 'N':
+  case 'O':
     if (memEQ(name, "SCM_CONNECT", 11)) {
-    /*                      ^          */
+    /*                    ^            */
 #ifdef SCM_CONNECT
       *iv_return = SCM_CONNECT;
       return PERL_constant_ISIV;
@@ -1135,21 +1109,10 @@ constant_11 (const char *name, IV *iv_return) {
       return PERL_constant_NOTDEF;
 #endif
     }
-    break;
-  case 'O':
-    if (memEQ(name, "SO_RCVLOWAT", 11)) {
-    /*                      ^          */
-#ifdef SO_RCVLOWAT
-      *iv_return = SO_RCVLOWAT;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    if (memEQ(name, "SO_SNDLOWAT", 11)) {
-    /*                      ^          */
-#ifdef SO_SNDLOWAT
-      *iv_return = SO_SNDLOWAT;
+    if (memEQ(name, "TCP_NODELAY", 11)) {
+    /*                    ^            */
+#ifdef TCP_NODELAY
+      *iv_return = TCP_NODELAY;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
@@ -1157,8 +1120,22 @@ constant_11 (const char *name, IV *iv_return) {
     }
     break;
   case 'R':
+    if (memEQ(name, "INADDR_NONE", 11)) {
+    /*                    ^            */
+#ifdef INADDR_NONE
+      {
+struct in_addr ip_address; ip_address.s_addr = htonl(INADDR_NONE);
+        *sv_return =  sv_2mortal(newSVpvn((char *)&ip_address,sizeof ip_address ));
+        return PERL_constant_ISSV;
+      }
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    break;
+  case 'S':
     if (memEQ(name, "SOCK_STREAM", 11)) {
-    /*                      ^          */
+    /*                    ^            */
 #ifdef SOCK_STREAM
       *iv_return = SOCK_STREAM;
       return PERL_constant_ISIV;
@@ -1168,21 +1145,30 @@ constant_11 (const char *name, IV *iv_return) {
     }
     break;
   case 'T':
-    if (memEQ(name, "MSG_WAITALL", 11)) {
-    /*                      ^          */
-#ifdef MSG_WAITALL
-      *iv_return = MSG_WAITALL;
+    if (memEQ(name, "IPPROTO_TCP", 11)) {
+    /*                    ^            */
+#ifdef IPPROTO_TCP
+      *iv_return = IPPROTO_TCP;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
 #endif
     }
     break;
-  case '_':
-    if (memEQ(name, "IPPROTO_TCP", 11)) {
-    /*                      ^          */
-#ifdef IPPROTO_TCP
-      *iv_return = IPPROTO_TCP;
+  case 'V':
+    if (memEQ(name, "SO_RCVLOWAT", 11)) {
+    /*                    ^            */
+#ifdef SO_RCVLOWAT
+      *iv_return = SO_RCVLOWAT;
+      return PERL_constant_ISIV;
+#else
+      return PERL_constant_NOTDEF;
+#endif
+    }
+    if (memEQ(name, "SO_RCVTIMEO", 11)) {
+    /*                    ^            */
+#ifdef SO_RCVTIMEO
+      *iv_return = SO_RCVTIMEO;
       return PERL_constant_ISIV;
 #else
       return PERL_constant_NOTDEF;
@@ -1194,8 +1180,7 @@ constant_11 (const char *name, IV *iv_return) {
 }
 
 static int
-constant_12 (const char *name, IV *iv_return) {
-  /* Names all of length 12.  */
+constant_12 (const char *name, IV *iv_return, SV **sv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
      AF_APPLETALK MSG_CTLFLAGS MSG_DONTWAIT MSG_ERRQUEUE MSG_NOSIGNAL
@@ -1338,8 +1323,7 @@ constant_12 (const char *name, IV *iv_return) {
 }
 
 static int
-constant_13 (const char *name, IV *iv_return) {
-  /* Names all of length 13.  */
+constant_13 (const char *name, IV *iv_return, SV **sv_return) {
   /* When generated this function returned values for the list of names given
      here.  However, subsequent manual editing may have added or removed some.
      MSG_CTLIGNORE MSG_DONTROUTE MSG_MAXIOVLEN SCM_TIMESTAMP SO_ACCEPTCONN
@@ -1428,41 +1412,7 @@ constant_13 (const char *name, IV *iv_return) {
 }
 
 static int
-constant_14 (const char *name, IV *iv_return) {
-  /* Names all of length 14.  */
-  /* When generated this function returned values for the list of names given
-     here.  However, subsequent manual editing may have added or removed some.
-     SOCK_SEQPACKET SO_USELOOPBACK */
-  /* Offset 8 gives the best switch position.  */
-  switch (name[8]) {
-  case 'O':
-    if (memEQ(name, "SO_USELOOPBACK", 14)) {
-    /*                       ^            */
-#ifdef SO_USELOOPBACK
-      *iv_return = SO_USELOOPBACK;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
-  case 'P':
-    if (memEQ(name, "SOCK_SEQPACKET", 14)) {
-    /*                       ^            */
-#ifdef SOCK_SEQPACKET
-      *iv_return = SOCK_SEQPACKET;
-      return PERL_constant_ISIV;
-#else
-      return PERL_constant_NOTDEF;
-#endif
-    }
-    break;
-  }
-  return PERL_constant_NOTFOUND;
-}
-
-static int
-constant (const char *name, STRLEN len, IV *iv_return) {
+constant (const char *name, STRLEN len, IV *iv_return, SV **sv_return) {
   /* Initially switch on the length of the name.  */
   /* When generated this function returned values for the list of names given
      in this section of perl code.  Rather than manually editing these functions
@@ -1474,28 +1424,32 @@ constant (const char *name, STRLEN len, IV *iv_return) {
      Regenerate these constant functions by feeding this entire source file to
      perl -x
 
-#!perl -w
+#!../../perl -w
 use ExtUtils::Constant qw (constant_types C_constant XS_constant);
 
-my $types = {IV => 1};
+my $types = {map {($_, 1)} qw(IV SV)};
 my @names = (qw(AF_802 AF_APPLETALK AF_CCITT AF_CHAOS AF_DATAKIT AF_DECnet
 	       AF_DLI AF_ECMA AF_GOSIP AF_HYLINK AF_IMPLINK AF_INET AF_LAT
 	       AF_MAX AF_NBS AF_NIT AF_NS AF_OSI AF_OSINET AF_PUP AF_SNA
 	       AF_UNIX AF_UNSPEC AF_X25 IOV_MAX IPPROTO_TCP MSG_BCAST
 	       MSG_CTLFLAGS MSG_CTLIGNORE MSG_DONTWAIT MSG_EOF MSG_EOR
 	       MSG_ERRQUEUE MSG_FIN MSG_MAXIOVLEN MSG_MCAST MSG_NOSIGNAL
-	       MSG_RST MSG_SYN MSG_TRUNC MSG_WAITALL PF_802 PF_APPLETALK
-	       PF_CCITT PF_CHAOS PF_DATAKIT PF_DECnet PF_DLI PF_ECMA PF_GOSIP
-	       PF_HYLINK PF_IMPLINK PF_INET PF_LAT PF_MAX PF_NBS PF_NIT PF_NS
-	       PF_OSI PF_OSINET PF_PUP PF_SNA PF_UNIX PF_UNSPEC PF_X25
-	       SCM_CONNECT SCM_CREDENTIALS SCM_CREDS SCM_TIMESTAMP SOCK_DGRAM
-	       SOCK_RAW SOCK_RDM SOCK_SEQPACKET SOCK_STREAM SOL_SOCKET
-	       SOMAXCONN SO_ACCEPTCONN SO_BROADCAST SO_DEBUG SO_DONTLINGER
-	       SO_DONTROUTE SO_ERROR SO_KEEPALIVE SO_LINGER SO_OOBINLINE
-	       SO_RCVBUF SO_RCVLOWAT SO_RCVTIMEO SO_REUSEADDR SO_REUSEPORT
-	       SO_SNDBUF SO_SNDLOWAT SO_SNDTIMEO SO_TYPE SO_USELOOPBACK
-	       TCP_KEEPALIVE TCP_MAXRT TCP_MAXSEG TCP_NODELAY TCP_STDURG
-	       UIO_MAXIOV MSG_URG),
+	       MSG_RST MSG_SYN MSG_TRUNC MSG_URG MSG_WAITALL PF_802
+	       PF_APPLETALK PF_CCITT PF_CHAOS PF_DATAKIT PF_DECnet PF_DLI
+	       PF_ECMA PF_GOSIP PF_HYLINK PF_IMPLINK PF_INET PF_LAT PF_MAX
+	       PF_NBS PF_NIT PF_NS PF_OSI PF_OSINET PF_PUP PF_SNA PF_UNIX
+	       PF_UNSPEC PF_X25 SCM_CONNECT SCM_CREDENTIALS SCM_CREDS
+	       SCM_TIMESTAMP SOCK_DGRAM SOCK_RAW SOCK_RDM SOCK_SEQPACKET
+	       SOCK_STREAM SOL_SOCKET SOMAXCONN SO_ACCEPTCONN SO_BROADCAST
+	       SO_DEBUG SO_DONTLINGER SO_DONTROUTE SO_ERROR SO_KEEPALIVE
+	       SO_LINGER SO_OOBINLINE SO_RCVBUF SO_RCVLOWAT SO_RCVTIMEO
+	       SO_REUSEADDR SO_REUSEPORT SO_SNDBUF SO_SNDLOWAT SO_SNDTIMEO
+	       SO_TYPE SO_USELOOPBACK TCP_KEEPALIVE TCP_MAXRT TCP_MAXSEG
+	       TCP_NODELAY TCP_STDURG UIO_MAXIOV),
+            {name=>"INADDR_ANY", type=>"SV", value=>"sv_2mortal(newSVpvn((char *)&ip_address,sizeof ip_address ))", pre=>"struct in_addr ip_address; ip_address.s_addr = htonl(INADDR_ANY);"},
+            {name=>"INADDR_BROADCAST", type=>"SV", value=>"sv_2mortal(newSVpvn((char *)&ip_address,sizeof ip_address ))", pre=>"struct in_addr ip_address; ip_address.s_addr = htonl(INADDR_BROADCAST);"},
+            {name=>"INADDR_LOOPBACK", type=>"SV", value=>"sv_2mortal(newSVpvn((char *)&ip_address,sizeof ip_address ))", pre=>"struct in_addr ip_address; ip_address.s_addr = htonl(INADDR_LOOPBACK);"},
+            {name=>"INADDR_NONE", type=>"SV", value=>"sv_2mortal(newSVpvn((char *)&ip_address,sizeof ip_address ))", pre=>"struct in_addr ip_address; ip_address.s_addr = htonl(INADDR_NONE);"},
             {name=>"MSG_CTRUNC", type=>"IV", macro=>["#if defined(MSG_CTRUNC) || defined(HAS_MSG_CTRUNC) /" . "* might be an enum *" . "/\n", "#endif\n"]},
             {name=>"MSG_DONTROUTE", type=>"IV", macro=>["#if defined(MSG_DONTROUTE) || defined(HAS_MSG_DONTROUTE) /" . "* might be an enum *" . "/\n", "#endif\n"]},
             {name=>"MSG_OOB", type=>"IV", macro=>["#if defined(MSG_OOB) || defined(HAS_MSG_OOB) /" . "* might be an enum *" . "/\n", "#endif\n"]},
@@ -1507,7 +1461,7 @@ my @names = (qw(AF_802 AF_APPLETALK AF_CCITT AF_CHAOS AF_DATAKIT AF_DECnet
             {name=>"SHUT_WR", type=>"IV", default=>["IV", "1"]});
 
 print constant_types(); # macro defs
-foreach (C_constant ("Socket", 'constant', 'IV', $types, undef, undef, @names) ) {
+foreach (C_constant ("Socket", 'constant', 'IV', $types, undef, 3, @names) ) {
     print $_, "\n"; # C constant subs
 }
 print "#### XS Section:\n";
@@ -1517,40 +1471,127 @@ __END__
 
   switch (len) {
   case 5:
-    return constant_5 (name, iv_return);
+    /* Names all of length 5.  */
+    /* AF_NS PF_NS */
+    /* Offset 0 gives the best switch position.  */
+    switch (name[0]) {
+    case 'A':
+      if (memEQ(name, "AF_NS", 5)) {
+      /*               ^          */
+#ifdef AF_NS
+        *iv_return = AF_NS;
+        return PERL_constant_ISIV;
+#else
+        return PERL_constant_NOTDEF;
+#endif
+      }
+      break;
+    case 'P':
+      if (memEQ(name, "PF_NS", 5)) {
+      /*               ^          */
+#ifdef PF_NS
+        *iv_return = PF_NS;
+        return PERL_constant_ISIV;
+#else
+        return PERL_constant_NOTDEF;
+#endif
+      }
+      break;
+    }
     break;
   case 6:
-    return constant_6 (name, iv_return);
+    return constant_6 (name, iv_return, sv_return);
     break;
   case 7:
-    return constant_7 (name, iv_return);
+    return constant_7 (name, iv_return, sv_return);
     break;
   case 8:
-    return constant_8 (name, iv_return);
+    return constant_8 (name, iv_return, sv_return);
     break;
   case 9:
-    return constant_9 (name, iv_return);
+    return constant_9 (name, iv_return, sv_return);
     break;
   case 10:
-    return constant_10 (name, iv_return);
+    return constant_10 (name, iv_return, sv_return);
     break;
   case 11:
-    return constant_11 (name, iv_return);
+    return constant_11 (name, iv_return, sv_return);
     break;
   case 12:
-    return constant_12 (name, iv_return);
+    return constant_12 (name, iv_return, sv_return);
     break;
   case 13:
-    return constant_13 (name, iv_return);
+    return constant_13 (name, iv_return, sv_return);
     break;
   case 14:
-    return constant_14 (name, iv_return);
+    /* Names all of length 14.  */
+    /* SOCK_SEQPACKET SO_USELOOPBACK */
+    /* Offset 8 gives the best switch position.  */
+    switch (name[8]) {
+    case 'O':
+      if (memEQ(name, "SO_USELOOPBACK", 14)) {
+      /*                       ^            */
+#ifdef SO_USELOOPBACK
+        *iv_return = SO_USELOOPBACK;
+        return PERL_constant_ISIV;
+#else
+        return PERL_constant_NOTDEF;
+#endif
+      }
+      break;
+    case 'P':
+      if (memEQ(name, "SOCK_SEQPACKET", 14)) {
+      /*                       ^            */
+#ifdef SOCK_SEQPACKET
+        *iv_return = SOCK_SEQPACKET;
+        return PERL_constant_ISIV;
+#else
+        return PERL_constant_NOTDEF;
+#endif
+      }
+      break;
+    }
     break;
   case 15:
-    if (memEQ(name, "SCM_CREDENTIALS", 15)) {
+    /* Names all of length 15.  */
+    /* INADDR_LOOPBACK SCM_CREDENTIALS */
+    /* Offset 4 gives the best switch position.  */
+    switch (name[4]) {
+    case 'C':
+      if (memEQ(name, "SCM_CREDENTIALS", 15)) {
+      /*                   ^                 */
 #ifdef SCM_CREDENTIALS
-      *iv_return = SCM_CREDENTIALS;
-      return PERL_constant_ISIV;
+        *iv_return = SCM_CREDENTIALS;
+        return PERL_constant_ISIV;
+#else
+        return PERL_constant_NOTDEF;
+#endif
+      }
+      break;
+    case 'D':
+      if (memEQ(name, "INADDR_LOOPBACK", 15)) {
+      /*                   ^                 */
+#ifdef INADDR_LOOPBACK
+        {
+struct in_addr ip_address; ip_address.s_addr = htonl(INADDR_LOOPBACK);
+          *sv_return =  sv_2mortal(newSVpvn((char *)&ip_address,sizeof ip_address ));
+          return PERL_constant_ISSV;
+        }
+#else
+        return PERL_constant_NOTDEF;
+#endif
+      }
+      break;
+    }
+    break;
+  case 16:
+    if (memEQ(name, "INADDR_BROADCAST", 16)) {
+#ifdef INADDR_BROADCAST
+      {
+struct in_addr ip_address; ip_address.s_addr = htonl(INADDR_BROADCAST);
+        *sv_return =  sv_2mortal(newSVpvn((char *)&ip_address,sizeof ip_address ));
+        return PERL_constant_ISSV;
+      }
 #else
       return PERL_constant_NOTDEF;
 #endif
@@ -1566,11 +1607,7 @@ MODULE = Socket		PACKAGE = Socket
 void
 constant(sv)
     PREINIT:
-#ifdef dXSTARG
-	dXSTARG; /* Faster if we have it.  */
-#else
-	dTARGET;
-#endif
+	dXSTARG;
 	STRLEN		len;
         int		type;
 	IV		iv;
@@ -1582,7 +1619,7 @@ constant(sv)
     PPCODE:
         /* Change this to constant(s, len, &iv, &nv);
            if you need to return both NVs and IVs */
-	type = constant(s, len, &iv);
+	type = constant(s, len, &iv, &sv);
       /* Return 1 or 2 items. First is error message, or undef if no error.
            Second, if present, is found value */
         switch (type) {
@@ -1600,6 +1637,11 @@ constant(sv)
           PUSHs(&PL_sv_undef);
           PUSHi(iv);
           break;
+        case PERL_constant_ISSV:
+          EXTEND(SP, 1);
+          PUSHs(&PL_sv_undef);
+          PUSHs(sv);
+          break;
 	/* Uncomment this if you need to return UVs
         case PERL_constant_ISUV:
           EXTEND(SP, 1);
@@ -1608,7 +1650,7 @@ constant(sv)
           break; */
         default:
           sv = sv_2mortal(newSVpvf(
-	    "Unexpected return type %d while processing Socket macro %s used",
+	    "Unexpected return type %d while processing Socket macro %s, used",
                type, s));
           PUSHs(sv);
         }
@@ -1781,40 +1823,4 @@ unpack_sockaddr_in(sin_sv)
 	EXTEND(SP, 2);
 	PUSHs(sv_2mortal(newSViv((IV) port)));
 	PUSHs(sv_2mortal(newSVpvn((char *)&ip_address,sizeof ip_address)));
-	}
-
-void
-INADDR_ANY()
-	CODE:
-	{
-	struct in_addr	ip_address;
-	ip_address.s_addr = htonl(INADDR_ANY);
-	ST(0) = sv_2mortal(newSVpvn((char *)&ip_address,sizeof ip_address ));
-	}
-
-void
-INADDR_LOOPBACK()
-	CODE:
-	{
-	struct in_addr	ip_address;
-	ip_address.s_addr = htonl(INADDR_LOOPBACK);
-	ST(0) = sv_2mortal(newSVpvn((char *)&ip_address,sizeof ip_address));
-	}
-
-void
-INADDR_NONE()
-	CODE:
-	{
-	struct in_addr	ip_address;
-	ip_address.s_addr = htonl(INADDR_NONE);
-	ST(0) = sv_2mortal(newSVpvn((char *)&ip_address,sizeof ip_address));
-	}
-
-void
-INADDR_BROADCAST()
-	CODE:
-	{
-	struct in_addr	ip_address;
-	ip_address.s_addr = htonl(INADDR_BROADCAST);
-	ST(0) = sv_2mortal(newSVpvn((char *)&ip_address,sizeof ip_address));
 	}
