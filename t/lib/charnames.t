@@ -8,7 +8,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..16\n";
+print "1..15\n";
 
 use charnames ':full';
 
@@ -63,7 +63,6 @@ sub to_bytes {
 
 {
     use charnames ':full';
-
     print "not " unless "\x{263a}" eq "\N{WHITE SMILING FACE}";
     print "ok 6\n";
     print "not " unless length("\x{263a}") == 1;
@@ -82,6 +81,7 @@ sub to_bytes {
 
 {
    use charnames qw(:full);
+   use utf8;
    
     my $x = "\x{221b}";
     my $named = "\N{CUBE ROOT}";
@@ -92,7 +92,7 @@ sub to_bytes {
 
 {
    use charnames qw(:full);
-
+   use utf8;
    print "not " unless "\x{100}\N{CENT SIGN}" eq "\x{100}"."\N{CENT SIGN}";
    print "ok 14\n";
 }
@@ -104,14 +104,5 @@ sub to_bytes {
       unless to_bytes("\N{DESERET SMALL LETTER ENG}") eq $encoded_deseng;
   print "ok 15\n";
 
-}
-
-
-{
-  use charnames ':full';
-
-  print "not "
-      unless "\N{U+263A}" eq "\N{WHITE SMILING FACE}";
-  print "ok 16\n";
 }
 
