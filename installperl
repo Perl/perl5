@@ -102,7 +102,7 @@ my (@scripts, @tolink);
 open SCRIPTS, "utils.lst" or die "Can't open utils.lst: $!";
 while (<SCRIPTS>) {
     next if /^#/;
-    next if /#\s*pod\s*=/; # Binary programs need separate treatment
+    next if /#\s*pod\s*=/; # The pods are provided separately
     chomp;
     if (/(\S*)\s*#\s*link\s*=\s*(\S*)/) {
 	push @scripts, $1;
