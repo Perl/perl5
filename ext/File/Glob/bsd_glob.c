@@ -1209,7 +1209,7 @@ qprintf(const char *str, register Char *s)
 
 #ifdef MACOS_TRADITIONAL
 
-/* Replace the last occurence of the pattern ":[^:]+::", e.g. ":lib::",
+/* Replace the last occurrence of the pattern ":[^:]+::", e.g. ":lib::",
    with a single ':', if possible. It is not an error, if the pattern
    doesn't match (we return -1), but if there are two consecutive colons
    '::', there must be a preceding ':[^:]+'. Hence,  a volume path like

@@ -15,7 +15,7 @@ and
 --do  Executes on local computer command that is presented by arguments
       immediately following after --do
       Most reason why you may want to execute script in this mode is that
-      arguments preprocessed to replace [p] occurences into current perl
+      arguments preprocessed to replace [p] occurrences into current perl
       location. Typically it is handy to run
   perl comp.pl --do cecopy pc:..\lib\Exporter.pm ce:[p]\lib
 

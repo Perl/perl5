@@ -16575,7 +16575,7 @@ after =back
 
 =item Warnings
 
-multiple occurence of link target I<name>, line containing nothing but
+multiple occurrence of link target I<name>, line containing nothing but
 whitespace in paragraph, file does not start with =head, previous =item has
 no contents, preceding non-item paragraph(s), =item type mismatch (I<one>
 vs. I<two>), I<N> unescaped C<E<lt>E<gt>> in paragraph, Unknown entity, No

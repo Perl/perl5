@@ -202,7 +202,7 @@ These may not necessarily cause trouble, but indicate mediocre style.
 
 =over 4
 
-=item * multiple occurence of link target I<name>
+=item * multiple occurrence of link target I<name>
 
 The POD file has some C<=item> and/or C<=head> commands that have
 the same text. Potential hyperlinks to such a text cannot be unique then.
@@ -646,7 +646,7 @@ sub name {
 
 Add (if argument specified) and retrieve the nodes (as defined by C<=headX>
 and C<=item>) of the current POD. The nodes are returned in the order of
-their occurence. They consist of plain text, each piece of whitespace is
+their occurrence. They consist of plain text, each piece of whitespace is
 collapsed to a single blank.
 
 =cut
@@ -767,7 +767,7 @@ sub end_pod {
       keys %{$self->{_unique_nodes}})) {
         $self->poderror({ -line => '-', -file => $infile,
             -severity => 'WARNING',
-            -msg => "multiple occurence of link target '$_'"});
+            -msg => "multiple occurrence of link target '$_'"});
     }
 
     ## Print the number of errors found
