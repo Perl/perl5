@@ -38,9 +38,22 @@ msgrcv(), the password, gcos and shell fields returned by the
 getpwxxx() calls), and all file input are marked as "tainted".
 Tainted data may not be used directly or indirectly in any command
 that invokes a sub-shell, nor in any command that modifies files,
-directories, or processes. (B<Important exception>: If you pass a list
-of arguments to either C<system> or C<exec>, the elements of that list
-are B<NOT> checked for taintedness.) Any variable set to a value
+directories, or processes, B<with the following exceptions>:
+
+=over 4
+
+=item *
+
+If you pass a list of arguments to either C<system> or C<exec>,
+the elements of that list are B<not> checked for taintedness.
+
+=item *
+
+Arguments to C<print> and C<syswrite> are B<not> checked for taintedness.
+
+=back
+
+Any variable set to a value
 derived from tainted data will itself be tainted, even if it is
 logically impossible for the tainted data to alter the variable.
 Because taintedness is associated with each scalar value, some
