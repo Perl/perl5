@@ -95,8 +95,8 @@ a[\S]b	a-b	y	-	-
 ab|cd	abc	y	$&	ab
 ab|cd	abcd	y	$&	ab
 ()ef	def	y	$&-$1	ef-
-*a	-	c	-	/*a/: ?+*{} follows nothing in regexp
-(*)b	-	c	-	/(*)b/: ?+*{} follows nothing in regexp
+*a	-	c	-	Quantifier follows nothing in regexp
+(*)b	-	c	-	Quantifier follows nothing in regexp
 $b	b	n	-	-
 a\	-	c	-	Search pattern not terminated
 a\(b	a(b	y	$&-$1	a(b-
@@ -109,7 +109,7 @@ abc)	-	c	-	/abc)/: unmatched () in regexp
 (a)b(c)	abc	y	$&-$1-$2	abc-a-c
 a+b+c	aabbabc	y	$&	abc
 a{1,}b{1,}c	aabbabc	y	$&	abc
-a**	-	c	-	/a**/: nested *?+ in regexp
+a**	-	c	-	Nested quantifiers in regexp
 a.+?c	abcabc	y	$&	abc
 (a+|b)*	ab	y	$&-$1	ab-b
 (a+|b){0,}	ab	y	$&-$1	ab-b
@@ -164,11 +164,11 @@ a(bc)d	abcd	y	$1-\$1-\\$1	bc-$1-\bc
 a[-]?c	ac	y	$&	ac
 (abc)\1	abcabc	y	$1	abc
 ([a-c]*)\1	abcabc	y	$1	abc
-\1	-	c	-	/\1/: reference to nonexistent group
-\2	-	c	-	/\2/: reference to nonexistent group
+\1	-	c	-	Reference to nonexistent group
+\2	-	c	-	Reference to nonexistent group
 (a)|\1	a	y	-	-
 (a)|\1	x	n	-	-
-(a)|\2	-	c	-	/(a)|\2/: reference to nonexistent group
+(a)|\2	-	c	-	Reference to nonexistent group
 (([a-c])b*?\2)*	ababbbcbc	y	$&-$1-$2	ababb-bb-b
 (([a-c])b*?\2){3}	ababbbcbc	y	$&-$1-$2	ababbbcbc-cbc-c
 ((\3|b)\2(a)x)+	aaxabxbaxbbx	n	-	-
@@ -232,8 +232,8 @@ a[-]?c	ac	y	$&	ac
 'ab|cd'i	ABC	y	$&	AB
 'ab|cd'i	ABCD	y	$&	AB
 '()ef'i	DEF	y	$&-$1	EF-
-'*a'i	-	c	-	/*a/: ?+*{} follows nothing in regexp
-'(*)b'i	-	c	-	/(*)b/: ?+*{} follows nothing in regexp
+'*a'i	-	c	-	Quantifier follows nothing in regexp
+'(*)b'i	-	c	-	Quantifier follows nothing in regexp
 '$b'i	B	n	-	-
 'a\'i	-	c	-	Search pattern not terminated
 'a\(b'i	A(B	y	$&-$1	A(B-
@@ -246,7 +246,7 @@ a[-]?c	ac	y	$&	ac
 '(a)b(c)'i	ABC	y	$&-$1-$2	ABC-A-C
 'a+b+c'i	AABBABC	y	$&	ABC
 'a{1,}b{1,}c'i	AABBABC	y	$&	ABC
-'a**'i	-	c	-	/a**/: nested *?+ in regexp
+'a**'i	-	c	-	Nested quantifiers in regexp
 'a.+?c'i	ABCABC	y	$&	ABC
 'a.*?c'i	ABCABC	y	$&	ABC
 'a.{0,5}?c'i	ABCABC	y	$&	ABC
@@ -318,7 +318,7 @@ a(?:b|c|d){2}(.)	acdbcdbe	y	$1	b
 a(?:b|c|d){4,5}(.)	acdbcdbe	y	$1	b
 a(?:b|c|d){4,5}?(.)	acdbcdbe	y	$1	d
 ((foo)|(bar))*	foobar	y	$1-$2-$3	bar-foo-bar
-:(?:	-	c	-	/(?/: Sequence (? incomplete
+:(?:	-	c	-	Sequence (? incomplete
 a(?:b|c|d){6,7}(.)	acdbcdbe	y	$1	e
 a(?:b|c|d){6,7}?(.)	acdbcdbe	y	$1	e
 a(?:b|c|d){5,6}(.)	acdbcdbe	y	$1	e
@@ -346,7 +346,7 @@ a(?:b|(c|e){1,2}?|d)+?(.)	ace	y	$1$2	ce
 (?<!c)b	cb	n	-	-
 (?<!c)b	b	y	-	-
 (?<!c)b	b	y	$&	b
-(?<%)b	-	c	-	/(?<%)b/: Sequence (?%...) not recognized
+(?<%)b	-	c	-	Sequence (?%...) not recognized
 (?:..)*a	aba	y	$&	aba
 (?:..)*?a	aba	y	$&	a
 ^(?:b|a(?=(.)))*\1	abc	y	$&	ab
@@ -441,8 +441,8 @@ x(~~)*(?:(?:F)?)?	x~~	y	-	-
 ^(\(+)?blah(?(1)(\)))$	blah	y	($2)	()
 ^(\(+)?blah(?(1)(\)))$	blah)	n	-	-
 ^(\(+)?blah(?(1)(\)))$	(blah	n	-	-
-(?(1?)a|b)	a	c	-	/(?(1?)a|b)/: Switch (?(number? not recognized
-(?(1)a|b|c)	a	c	-	/(?(1)a|b|c)/: Switch (?(condition)... contains too many branches
+(?(1?)a|b)	a	c	-	Switch (?(number? not recognized
+(?(1)a|b|c)	a	c	-	Switch (?(condition)... contains too many branches
 (?(?{0})a|b)	a	n	-	-
 (?(?{0})b|a)	a	y	$&	a
 (?(?{1})b|a)	a	n	-	-
@@ -508,8 +508,8 @@ $(?<=^(a))	a	y	$1	a
 ((?>a+)b)	aaab	y	$1	aaab
 (?>(a+))b	aaab	y	$1	aaa
 ((?>[^()]+)|\([^()]*\))+	((abc(ade)ufh()()x	y	$&	abc(ade)ufh()()x
-(?<=x+)y	-	c	-	/(?<=x+)y/: variable length lookbehind not implemented
-a{37,17}	-	c	-	/a{37,17}/: Can't do {n,m} with n > m
+(?<=x+)y	-	c	-	Variable length lookbehind not implemented
+a{37,17}	-	c	-	Can't do {n,m} with n > m
 \Z	a\nb\n	y	$-[0]	3
 \z	a\nb\n	y	$-[0]	4
 $	a\nb\n	y	$-[0]	3

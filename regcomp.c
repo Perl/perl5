@@ -1217,10 +1217,10 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 	    minnext = study_chunk(&nscan, &deltanext, last, &data_fake, f);
 	    if (scan->flags) {
 		if (deltanext) {
-		    vFAIL("variable length lookbehind not implemented");
+		    vFAIL("Variable length lookbehind not implemented");
 		}
 		else if (minnext > U8_MAX) {
-		    vFAIL2("lookbehind longer than %"UVuf" not implemented", (UV)U8_MAX);
+		    vFAIL2("Lookbehind longer than %"UVuf" not implemented", (UV)U8_MAX);
 		}
 		scan->flags = minnext;
 	    }
@@ -2249,7 +2249,7 @@ S_regpiece(pTHX_ I32 *flagp)
 	regtail(ret, ret + NODE_STEP_REGNODE);
     }
     if (ISMULT2(PL_regcomp_parse))
-	vFAIL("nested quantifiers in regexp");
+	vFAIL("Nested quantifiers in regexp");
 
     return(ret);
 }
@@ -2356,7 +2356,7 @@ tryagain:
     case '?':
     case '+':
     case '*':
-	vFAIL("quantifier follows nothing in regexp");
+	vFAIL("Quantifier follows nothing in regexp");
 	break;
     case '\\':
 	switch (*++PL_regcomp_parse) {
@@ -2515,7 +2515,7 @@ tryagain:
 		    goto defchar;
 		else {
 		    if (!SIZE_ONLY && num > PL_regcomp_rx->nparens)
-			vFAIL("reference to nonexistent group");
+			vFAIL("Reference to nonexistent group");
 		    PL_regsawback = 1;
 		    ret = reganode(FOLD
 				   ? (LOC ? REFFL : REFF)

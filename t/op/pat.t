@@ -266,12 +266,12 @@ print "ok 68\n";
 
 undef $@;
 eval "'aaa' =~ /a{1,$reg_infty}/";
-print "not " if $@ !~ m%^\Q/a{1,$reg_infty}/: Quantifier in {,} bigger than%;
+print "not " if $@ !~ m%^\QQuantifier in {,} bigger than%;
 print "ok 69\n";
 
 eval "'aaa' =~ /a{1,$reg_infty_p}/";
 print "not "
-	if $@ !~ m%^\Q/a{1,$reg_infty_p}/: Quantifier in {,} bigger than%;
+	if $@ !~ m%^\QQuantifier in {,} bigger than%;
 print "ok 70\n";
 undef $@;
 
@@ -279,7 +279,7 @@ undef $@;
 
 $context = 'x' x 256;
 eval qq("${context}y" =~ /(?<=$context)y/);
-print "not " if $@ !~ m%^\Q/(?<=\Ex+/: lookbehind longer than 255 not%;
+print "not " if $@ !~ m%^\QLookbehind longer than 255 not%;
 print "ok 71\n";
 
 # removed test
@@ -588,8 +588,12 @@ sub make_must_warn {
 my $for_future = make_must_warn('reserved for future extensions');
 
 &$for_future('q(a:[b]:) =~ /[x[:foo:]]/');
-&$for_future('q(a=[b]=) =~ /[x[=foo=]]/');
-&$for_future('q(a.[b].) =~ /[x[.foo.]]/');
+
+#&$for_future('q(a=[b]=) =~ /[x[=foo=]]/');
+print "ok $test\n"; $test++; # now a fatal croak
+
+#&$for_future('q(a.[b].) =~ /[x[.foo.]]/');
+print "ok $test\n"; $test++; # now a fatal croak
 
 # test if failure of patterns returns empty list
 $_ = 'aaa';

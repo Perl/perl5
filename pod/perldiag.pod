@@ -1779,6 +1779,11 @@ effective uids or gids failed.
 to check the return value of your socket() call?  See
 L<perlfunc/listen>.
 
+=item Lookbehind longer than %d not implemented at {#} mark in regex 5s
+
+There is an upper limit to the depth of lookbehind in the (?<=
+regular expression construct.
+
 =item lstat() on filehandle %s
 
 (W io) You tried to do a lstat on a filehandle.  What did you mean
@@ -1967,7 +1972,7 @@ provided for this purpose.
 (F) You tried to do a read/write/send/recv operation with a buffer
 length that is less than 0.  This is difficult to imagine.
 
-=item nested *?+ in regexp
+=item Nested quantifiers in regexp
 
 (F) You can't quantify a quantifier without intervening parentheses.  So
 things like ** or +* or ?* are illegal.
@@ -2705,6 +2710,15 @@ in L<perlos2>.
 (S unsafe) The subroutine being declared or defined had previously been
 declared or defined with a different function prototype.
 
+=item Quantifier in {,} bigger than %d at {#} mark in regex %s
+
+(F) There is an upper limit to the number of allowed repetitions in the {,}
+regular expression construct.
+
+=item Quantifier follows nothing in rgexp
+
+(F) Quantifiers like * are suffixes, they quantify something preceding them.
+
 =item Range iterator outside integer range
 
 (F) One (or both) of the numeric arguments to the range operator ".."
@@ -2764,6 +2778,11 @@ Doing so has no effect.
 
 (W internal) The internal sv_replace() function was handed a new SV with
 a reference count of other than 1.
+
+=item Reference to nonexistent group
+
+(F) In a regexp you tried to reference (\1, \2, ...) a group that
+doesn't exist.  Count your parentheses.
 
 =item regexp memory corruption
 
@@ -3639,6 +3658,10 @@ you apparently thought was imported from another module, because
 something else of the same name (usually a subroutine) is exported by
 that module.  It usually means you put the wrong funny character on the
 front of your variable.
+
+=item Variable length lookbehind not implemented
+
+(F) Lookbehind currently only works for fixed-length regular expressions.
 
 =item "%s" variable %s masks earlier declaration in same %s
 
