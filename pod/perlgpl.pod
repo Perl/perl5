@@ -16,9 +16,13 @@ perlgpl -- the GNU Public General Public License, version 2
 
 =head1 DESCRIPTION
 
-[This is the B<The "GNU General Public License, version 2">.  It's here
-so that modules/programs/etc that want to declare this as their
-distribution license, can link to it.]
+This is B<"The GNU General Public License, version 2">.  It's here so
+that modules, programs, etc., that want to declare this as their
+distribution license, can link to it.
+
+It is also one of the two licenses Perl allows itself to be
+redistributed and/or modified; for the other one, the Perl Artistic
+License, see the L<perlartistic>.
 
 =head1 GNU GENERAL PUBLIC LICENSE
 

@@ -10,9 +10,13 @@ perlartistic -- the Perl Artistic License
 
 =head1 DESCRIPTION
 
-[This is the B<The "Artistic License">. It's here so that
-modules/programs/etc that want to declare this as their distribution
-license, can link to it.]
+This is B<"The Artistic License">. It's here so that modules,
+programs, etc., that want to declare this as their distribution
+license, can link to it.
+
+It is also one of the two licenses Perl allows itself to be
+redistributed and/or modified; for the other one, the GNU General
+Public License, see the L<perlgpl>.
 
 =head1 The "Artistic License"
 
