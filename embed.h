@@ -888,6 +888,7 @@
 #define save_freeop		Perl_save_freeop
 #define save_freepv		Perl_save_freepv
 #define save_freesv		Perl_save_freesv
+#define save_generic_svref	Perl_save_generic_svref
 #define save_gp			Perl_save_gp
 #define save_hash		Perl_save_hash
 #define save_helem		Perl_save_helem

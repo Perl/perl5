@@ -937,6 +937,7 @@ save_destructor
 save_freeop
 save_freepv
 save_freesv
+save_generic_svref
 save_gp
 save_hash
 save_helem

@@ -204,6 +204,18 @@ save_svref(SV **sptr)
     return save_scalar_at(sptr);
 }
 
+/* Like save_svref(), but doesn't deal with magic.  Can be used to
+ * restore a global SV to its prior contents, freeing new value. */
+void
+save_generic_svref(SV **sptr)
+{
+    dTHR;
+    SSCHECK(3);
+    SSPUSHPTR(sptr);
+    SSPUSHPTR(SvREFCNT_inc(*sptr));
+    SSPUSHINT(SAVEt_GENERIC_SVREF);
+}
+
 void
 save_gp(GV *gv, I32 empty)
 {
@@ -578,6 +590,16 @@ leave_scope(I32 base)
 	    ptr = &GvSV(gv);
 	    SvREFCNT_dec(gv);
 	    goto restore_sv;
+        case SAVEt_GENERIC_SVREF:		/* generic sv */
+	    value = (SV*)SSPOPPTR;
+	    ptr = SSPOPPTR;
+	    if (ptr) {
+		sv = *(SV**)ptr;
+		*(SV**)ptr = value;
+		SvREFCNT_dec(sv);
+	    }
+	    SvREFCNT_dec(value);
+	    break;
         case SAVEt_SVREF:			/* scalar reference */
 	    value = (SV*)SSPOPPTR;
 	    ptr = SSPOPPTR;
