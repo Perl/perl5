@@ -229,6 +229,12 @@ The accessors methods Re, Im, arg, abs, rho, theta, methods can
 A little bit of radial trigonometry (cylindrical and spherical) added,
 for example the great circle distance.
 
+=item Time::Local
+
+The timelocal() and timegm() functions used to silently return bogus
+results when the date exceeded the machine's integer range.  They
+consistently croak() if the date falls in an unsupported range.
+
 =back
 
 =head2 Pragmata
