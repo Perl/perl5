@@ -105,9 +105,8 @@ sub bits {
     foreach my $s (@_){
       if ($s eq 'debug' or $s eq 'debugcolor') {
  	  setcolor() if $s eq 'debugcolor';
-	  require DynaLoader;
-	  @ISA = ('DynaLoader');
-	  bootstrap re;
+	  require XSLoader;
+	  XSLoader::load('re');
 	  install() if $on;
 	  uninstall() unless $on;
 	  next;

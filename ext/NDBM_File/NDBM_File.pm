@@ -8,13 +8,13 @@ BEGIN {
 use vars qw($VERSION @ISA); 
 
 require Tie::Hash;
-require DynaLoader;
+use DynaLoader ();
 
-@ISA = qw(Tie::Hash DynaLoader);
+@ISA = qw(Tie::Hash);
 
 $VERSION = "1.03";
 
-bootstrap NDBM_File $VERSION;
+XSLoader::load 'NDBM_File', $VERSION;
 
 1;
 

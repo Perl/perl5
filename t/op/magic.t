@@ -23,7 +23,7 @@ $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_VMS     = $^O eq 'VMS';
 $Is_Dos   = $^O eq 'dos';
 $Is_os2   = $^O eq 'os2';
-$Is_Cygwin   = $^O =~ /cygwin/;
+$Is_Cygwin   = $^O eq 'cygwin';
 $PERL = ($Is_MSWin32 ? '.\perl' : './perl');
 
 print "1..35\n";

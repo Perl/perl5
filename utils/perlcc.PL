@@ -253,20 +253,22 @@ sub _createCode
 {
     my ( $backend, $generated_file, $file, $final_output ) = @_;
     my $return;
+    my $output_switch = "o";
 
     local($") = " -I";
-
-    open(GENFILE, "> $generated_file") || die "Can't open $generated_file: $!";
 
     if ($backend eq "Bytecode")
     {
         require ByteLoader;
 
+	open(GENFILE, "> $generated_file") || die "Can't open $generated_file: $!";
+	binmode GENFILE;
         print GENFILE "#!$^X\n" if @_ == 3;
         print GENFILE "use ByteLoader $ByteLoader::VERSION;\n";
-    }
+	close(GENFILE);
 
-    close(GENFILE);
+	$output_switch ="a";
+    }
 
     if (@_ == 3)                                   # compiling a program   
     {
@@ -278,7 +280,7 @@ sub _createCode
         chomp $stash;
 
         _print( "$^X -I@INC -MO=$backend,$stash $file\n", 36);
-        $return =  _run("$^X -I@INC -MO=$backend,$stash,-o$generated_file $file", 9);
+        $return =  _run("$^X -I@INC -MO=$backend,$stash,-$output_switch$generated_file $file", 9);
         $return;
     }
     else                                           # compiling a shared object
@@ -286,7 +288,7 @@ sub _createCode
         _print( 
             "$^X -I@INC -MO=$backend,-m$final_output $file\n", 36);
         $return = 
-        _run("$^X -I@INC -MO=$backend,-m$final_output,-o$generated_file $file  ", 9);
+        _run("$^X -I@INC -MO=$backend,-m$final_output,-$output_switch$generated_file $file  ", 9);
         $return;
     }
 }
@@ -366,6 +368,8 @@ sub _ccharness
 	my $lperl = $^O eq 'os2' ? '-llibperl' 
 	   : $^O eq 'MSWin32' ? "$Config{archlibexp}\\CORE\\perl.lib"
 	   : '-lperl';
+       ($lperl = $Config{libperl}) =~ s/lib(.*)\Q$Config{_a}\E/-l$1/
+	    if($^O eq 'cygwin');
 
 	$optimize = $Config{'optimize'} =~ /-O\d/ ? '' : $Config{'optimize'};
 
@@ -374,9 +378,11 @@ sub _ccharness
     }
 
     my $libs = _getSharedObjects($sourceprog);
+    @$libs = grep { !(/DynaLoader\.a$/ && ($dynaloader = $_)) } @$libs
+	if($^O eq 'cygwin');
 
     my $ccflags = $Config{ccflags};
-    $ccflags .= ' -DUSEIMPORTLIB' if $Config{osname} =~ /cygwin/i;
+    $ccflags .= ' -DUSEIMPORTLIB' if $^O eq 'cygwin';
     my $cccmd = "$Config{cc} $ccflags $optimize $incdir "
 		."@args $dynaloader $linkargs @$libs";
 

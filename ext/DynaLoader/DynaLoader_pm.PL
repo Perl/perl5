@@ -28,7 +28,7 @@ package DynaLoader;
 #
 # Tim.Bunce@ig.co.uk, August 1994
 
-$VERSION = $VERSION = "1.03";	# avoid typo warning
+$VERSION = "1.03";	# avoid typo warning
 
 require AutoLoader;
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;
@@ -128,6 +128,14 @@ if ($dl_debug) {
 
 
 sub croak   { require Carp; Carp::croak(@_)   }
+
+sub bootstrap_inherit {
+    my $module = $_[0];
+    local *isa = *{"$module\::ISA"};
+    local @isa = (@isa, 'DynaLoader');
+    # Cannot goto due to delocalization.  Will report errors on a wrong line?
+    bootstrap(@_);
+}
 
 # The bootstrap function cannot be autoloaded (without complications)
 # so we define it here:

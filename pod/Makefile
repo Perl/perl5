@@ -31,6 +31,7 @@ POD = \
 	perlmod.pod	\
 	perlmodlib.pod	\
 	perlmodinstall.pod	\
+	perlfork.pod	\
 	perlform.pod	\
 	perllocale.pod	\
 	perlref.pod	\
@@ -92,6 +93,7 @@ MAN = \
 	perlmod.man	\
 	perlmodlib.man	\
 	perlmodinstall.man	\
+	perlfork.man	\
 	perlform.man	\
 	perllocale.man	\
 	perlref.man	\
@@ -153,6 +155,7 @@ HTML = \
 	perlmod.html	\
 	perlmodlib.html	\
 	perlmodinstall.html	\
+	perlfork.html	\
 	perlform.html	\
 	perllocale.html	\
 	perlref.html	\
@@ -214,6 +217,7 @@ TEX = \
 	perlmod.tex	\
 	perlmodlib.tex	\
 	perlmodinstall.tex	\
+	perlfork.tex	\
 	perlform.tex	\
 	perllocale.tex	\
 	perlref.tex	\

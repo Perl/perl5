@@ -29,6 +29,8 @@
 #define SAVEt_ALLOC		28
 #define SAVEt_GENERIC_SVREF	29
 #define SAVEt_DESTRUCTOR_X	30
+#define SAVEt_VPTR		31
+#define SAVEt_I8		32
 
 #define SSCHECK(need) if (PL_savestack_ix + need > PL_savestack_max) savestack_grow()
 #define SSPUSHINT(i) (PL_savestack[PL_savestack_ix++].any_i32 = (I32)(i))
@@ -70,6 +72,7 @@
  * Not using SOFT_CAST on SAVESPTR, SAVEGENERICSV and SAVEFREESV
  * because these are used for several kinds of pointer values
  */
+#define SAVEI8(i)	save_I8(SOFT_CAST(I8*)&(i))
 #define SAVEI16(i)	save_I16(SOFT_CAST(I16*)&(i))
 #define SAVEI32(i)	save_I32(SOFT_CAST(I32*)&(i))
 #define SAVEINT(i)	save_int(SOFT_CAST(int*)&(i))
@@ -77,6 +80,7 @@
 #define SAVELONG(l)	save_long(SOFT_CAST(long*)&(l))
 #define SAVESPTR(s)	save_sptr((SV**)&(s))
 #define SAVEPPTR(s)	save_pptr(SOFT_CAST(char**)&(s))
+#define SAVEVPTR(s)	save_vptr((void*)&(s))
 #define SAVEFREESV(s)	save_freesv((SV*)(s))
 #define SAVEFREEOP(o)	save_freeop(SOFT_CAST(OP*)(o))
 #define SAVEFREEPV(p)	save_freepv(SOFT_CAST(char*)(p))

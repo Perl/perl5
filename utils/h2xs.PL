@@ -630,13 +630,14 @@ warn "Writing $ext$modpname/$modfname.pm\n";
 print PM <<"END";
 package $module;
 
+require 5.005_62;
 use strict;
 END
 
 if( $opt_X || $opt_c || $opt_A ){
 	# we won't have our own AUTOLOAD(), so won't have $AUTOLOAD
 	print PM <<'END';
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+our @EXPORT_OK;
 END
 }
 else{
@@ -644,7 +645,7 @@ else{
 	# will want Carp.
 	print PM <<'END';
 use Carp;
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $AUTOLOAD);
+our @EXPORT_OK;
 END
 }
 
@@ -669,7 +670,7 @@ unless ($opt_A) { # no autoloader whatsoever.
 }
 
 # Determine @ISA.
-my $myISA = '@ISA = qw(Exporter';	# We seem to always want this.
+my $myISA = 'our @ISA = qw(Exporter';	# We seem to always want this.
 $myISA .= ' DynaLoader' 	unless $opt_X;  # no XS
 $myISA .= ');';
 print PM "\n$myISA\n\n";
@@ -684,16 +685,16 @@ print PM<<"END";
 # This allows declaration	use $module ':all';
 # If you do not need this, moving things directly into \@EXPORT or \@EXPORT_OK
 # will save memory.
-%EXPORT_TAGS = ( 'all' => [ qw(
+our %EXPORT_TAGS = ( 'all' => [ qw(
 	@exported_names
 ) ] );
 
-\@EXPORT_OK = ( \@{ \$EXPORT_TAGS{'all'} } );
+our \@EXPORT_OK = ( \@{ \$EXPORT_TAGS{'all'} } );
 
-\@EXPORT = (
-
+our \@EXPORT = qw(
+	@const_names
 );
-\$VERSION = '$TEMPLATE_VERSION';
+our \$VERSION = '$TEMPLATE_VERSION';
 
 END
 
@@ -704,6 +705,7 @@ sub AUTOLOAD {
     # to the AUTOLOAD in AutoLoader.
 
     my \$constname;
+    our \$AUTOLOAD;
     (\$constname = \$AUTOLOAD) =~ s/.*:://;
     croak "&$module::constant not defined" if \$constname eq 'constant';
     my \$val = constant(\$constname, \@_ ? \$_[0] : 0);

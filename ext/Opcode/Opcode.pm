@@ -10,8 +10,8 @@ $XS_VERSION = "1.03";
 use strict;
 use Carp;
 use Exporter ();
-use DynaLoader ();
-@ISA = qw(Exporter DynaLoader);
+use XSLoader ();
+@ISA = qw(Exporter);
 
 BEGIN {
     @EXPORT_OK = qw(
@@ -28,7 +28,7 @@ sub opset_to_hex ($);
 sub opdump (;$);
 use subs @EXPORT_OK;
 
-bootstrap Opcode $XS_VERSION;
+XSLoader::load 'Opcode', $XS_VERSION;
 
 _init_optags();
 

@@ -14,9 +14,9 @@ END { print @warnings }
 
 ######################### We start with some black magic to print on failure.
 
-BEGIN { $| = 1; print "1..46\n"; }
+BEGIN { $| = 1; print "1..58\n"; }
 END {print "not ok 1\n" unless $loaded;}
-use constant;
+use constant 1.01;
 $loaded = 1;
 #print "# Version: $constant::VERSION\n";
 print "ok 1\n";
@@ -155,3 +155,42 @@ test 44, scalar($@ =~ /^No such pseudo-hash field/);
 print CCODE->(45);
 eval q{ CCODE->{foo} };
 test 46, scalar($@ =~ /^Constant is not a HASH/);
+
+# Allow leading underscore
+use constant _PRIVATE => 47;
+test 47, _PRIVATE == 47;
+
+# Disallow doubled leading underscore
+eval q{
+    use constant __DISALLOWED => "Oops";
+};
+test 48, $@ =~ /begins with '__'/;
+
+# Check on declared() and %declared. This sub should be EXACTLY the
+# same as the one quoted in the docs!
+sub declared ($) {
+    use constant 1.01;              # don't omit this!
+    my $name = shift;
+    $name =~ s/^::/main::/;
+    my $pkg = caller;
+    my $full_name = $name =~ /::/ ? $name : "${pkg}::$name";
+    $constant::declared{$full_name};
+}
+
+test 49, declared 'PI';
+test 50, $constant::declared{'main::PI'};
+
+test 51, !declared 'PIE';
+test 52, !$constant::declared{'main::PIE'};
+
+{
+    package Other;
+    use constant IN_OTHER_PACK => 42;
+    ::test 53, ::declared 'IN_OTHER_PACK';
+    ::test 54, $constant::declared{'Other::IN_OTHER_PACK'};
+    ::test 55, ::declared 'main::PI';
+    ::test 56, $constant::declared{'main::PI'};
+}
+
+test 57, declared 'Other::IN_OTHER_PACK';
+test 58, $constant::declared{'Other::IN_OTHER_PACK'};

@@ -679,9 +679,8 @@ PMOP_precomp(o)
 	if (rx)
 	    sv_setpvn(ST(0), rx->precomp, rx->prelen);
 
-#define SVOP_sv(o)	o->op_sv
-#define SVOP_gv(o)	((SvTYPE(o->op_sv) == SVt_PVGV) \
-			 ? (GV*)o->op_sv : Nullgv)
+#define SVOP_sv(o)	cSVOPx_sv(o)
+#define SVOP_gv(o)	cGVOPx_gv(o)
 
 MODULE = B	PACKAGE = B::SVOP		PREFIX = SVOP_
 

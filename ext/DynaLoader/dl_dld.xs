@@ -52,8 +52,8 @@ dl_private_init(pTHX)
 {
     int dlderr;
     dl_generic_private_init(aTHX);
-    dl_resolve_using   = get_av("DynaLoader::dl_resolve_using",   0x4);
-    dl_require_symbols = get_av("DynaLoader::dl_require_symbols", 0x4);
+    dl_resolve_using   = get_av("DynaLoader::dl_resolve_using", GV_ADDMULTI);
+    dl_require_symbols = get_av("DynaLoader::dl_require_symbols", GV_ADDMULTI);
 #ifdef __linux__
     dlderr = dld_init("/proc/self/exe");
     if (dlderr) {

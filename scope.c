@@ -405,6 +405,16 @@ Perl_save_I16(pTHX_ I16 *intp)
 }
 
 void
+Perl_save_I8(pTHX_ I8 *bytep)
+{
+    dTHR;
+    SSCHECK(3);
+    SSPUSHINT(*bytep);
+    SSPUSHPTR(bytep);
+    SSPUSHINT(SAVEt_I8);
+}
+
+void
 Perl_save_iv(pTHX_ IV *ivp)
 {
     dTHR;
@@ -425,6 +435,16 @@ Perl_save_pptr(pTHX_ char **pptr)
     SSPUSHPTR(*pptr);
     SSPUSHPTR(pptr);
     SSPUSHINT(SAVEt_PPTR);
+}
+
+void
+Perl_save_vptr(pTHX_ void *ptr)
+{
+    dTHR;
+    SSCHECK(3);
+    SSPUSHPTR(*(char**)ptr);
+    SSPUSHPTR(ptr);
+    SSPUSHINT(SAVEt_VPTR);
 }
 
 void
@@ -741,6 +761,10 @@ Perl_leave_scope(pTHX_ I32 base)
 	    ptr = SSPOPPTR;
 	    *(I16*)ptr = (I16)SSPOPINT;
 	    break;
+	case SAVEt_I8:				/* I8 reference */
+	    ptr = SSPOPPTR;
+	    *(I8*)ptr = (I8)SSPOPINT;
+	    break;
 	case SAVEt_IV:				/* IV reference */
 	    ptr = SSPOPPTR;
 	    *(IV*)ptr = (IV)SSPOPIV;
@@ -749,6 +773,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    ptr = SSPOPPTR;
 	    *(SV**)ptr = (SV*)SSPOPPTR;
 	    break;
+	case SAVEt_VPTR:			/* random* reference */
 	case SAVEt_PPTR:			/* char* reference */
 	    ptr = SSPOPPTR;
 	    *(char**)ptr = (char*)SSPOPPTR;
@@ -936,17 +961,25 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
     case CXt_NULL:
     case CXt_BLOCK:
 	break;
-    case CXt_SUB:
+    case CXt_FORMAT:
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.CV = 0x%"UVxf"\n",
 		PTR2UV(cx->blk_sub.cv));
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.GV = 0x%"UVxf"\n",
 		PTR2UV(cx->blk_sub.gv));
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.DFOUTGV = 0x%"UVxf"\n",
 		PTR2UV(cx->blk_sub.dfoutgv));
+	PerlIO_printf(Perl_debug_log, "BLK_SUB.HASARGS = %d\n",
+		(int)cx->blk_sub.hasargs);
+	break;
+    case CXt_SUB:
+	PerlIO_printf(Perl_debug_log, "BLK_SUB.CV = 0x%"UVxf"\n",
+		PTR2UV(cx->blk_sub.cv));
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.OLDDEPTH = %ld\n",
 		(long)cx->blk_sub.olddepth);
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.HASARGS = %d\n",
 		(int)cx->blk_sub.hasargs);
+	PerlIO_printf(Perl_debug_log, "BLK_SUB.LVAL = %d\n",
+		(int)cx->blk_sub.lval);
 	break;
     case CXt_EVAL:
 	PerlIO_printf(Perl_debug_log, "BLK_EVAL.OLD_IN_EVAL = %ld\n",
@@ -976,8 +1009,8 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERARY = 0x%"UVxf"\n",
 		PTR2UV(cx->blk_loop.iterary));
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERVAR = 0x%"UVxf"\n",
-		PTR2UV(cx->blk_loop.itervar));
-	if (cx->blk_loop.itervar)
+		PTR2UV(CxITERVAR(cx)));
+	if (CxITERVAR(cx))
 	    PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERSAVE = 0x%"UVxf"\n",
 		PTR2UV(cx->blk_loop.itersave));
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERLVAL = 0x%"UVxf"\n",

@@ -66,7 +66,7 @@ $glob = "ok 11\n";
 sub sayok { print "ok @_\n" }
 
 $cpt->share(qw($foo %bar @baz *glob sayok));
-$cpt->share('$"') unless $Config{archname} =~ /-thread$/;
+$cpt->share('$"') unless $Config{use5005threads};
 
 $cpt->reval(q{
     package other;

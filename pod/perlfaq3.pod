@@ -483,7 +483,7 @@ The Win95/NT installation, when using the ActiveState port of Perl,
 will modify the Registry to associate the C<.pl> extension with the
 perl interpreter.  If you install another port, perhaps even building
 your own Win95/NT Perl from the standard sources by using a Windows port
-of gcc (e.g., with cygwin32 or mingw32), then you'll have to modify
+of gcc (e.g., with cygwin or mingw32), then you'll have to modify
 the Registry yourself.  In addition to associating C<.pl> with the
 interpreter, NT people can use: C<SET PATHEXT=%PATHEXT%;.PL> to let them
 run the program C<install-linux.pl> merely by typing C<install-linux>.

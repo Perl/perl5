@@ -118,3 +118,18 @@
 
 #define dXSUB_SYS
 
+/* getsockname returns the size of struct sockaddr_in *without* padding */
+#define  BOGUS_GETNAME_RETURN 8
+
+/* Yes, size_t is size_t */
+#define Sock_size_t size_t
+
+/* 
+   read() on a socket blocks until buf is filled completly, 
+   recv() returns each massage 
+*/
+#define PERL_SOCK_SYSREAD_IS_RECV
+
+/* No /dev/random available*/
+
+#define PERL_NO_DEV_RANDOM

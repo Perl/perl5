@@ -338,9 +338,10 @@ sub initialize {
     # but we shouldn't need that any more.  Get the version from the running
     # Perl.
     if (!defined $$self{release}) {
-        my ($version, $patch) = ($] =~ /^(.{5})(\d{2})?/);
-        $$self{release}  = "perl $version";
-        $$self{release} .= ", patch $patch" if $patch;
+        my ($rev, $ver, $sver) = ($] =~ /^(\d+)\.(\d{3})(\d{0,3})$/);
+	$sver ||= 0; $sver *= 10 ** (3-length($sver));
+	$rev += 0; $ver += 0; $sver += 0;
+        $$self{release}  = "perl v$rev.$ver.$sver";
     }
 
     # Double quotes in things that will be quoted.

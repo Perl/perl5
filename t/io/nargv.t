@@ -56,7 +56,7 @@ sub other {
 }
 
 sub mkfiles {
-    my @files = map { "scratch.$_" } @_;
+    my @files = map { "scratch$_" } @_;
     return wantarray ? @files : $files[-1];
 }
 

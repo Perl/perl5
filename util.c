@@ -1889,7 +1889,7 @@ Perl_my_setenv_init(char ***penviron)
 }
 
 void
-my_setenv(char *nam, char *val)
+Perl_my_setenv(pTHX_ char *nam, char *val)
 {
     /* You can not directly manipulate the environ[] array because
      * the routines do some additional work that syncs the Cygwin
@@ -1901,13 +1901,13 @@ my_setenv(char *nam, char *val)
        if (!oldstr)
            return;
        unsetenv(nam);
-       Safefree(oldstr);
+       safesysfree(oldstr);
        return;
     }
     setenv(nam, val, 1);
     environ = *Perl_main_environ; /* environ realloc can occur in setenv */
     if(oldstr && environ[setenv_getix(nam)] != oldstr)
-       Safefree(oldstr);
+       safesysfree(oldstr);
 }
 #else /* if WIN32 */
 
@@ -2003,9 +2003,10 @@ Perl_unlnk(pTHX_ char *f)	/* unlink all versions of a file */
 }
 #endif
 
+/* this is a drop-in replacement for bcopy() */
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
 char *
-Perl_my_bcopy(pTHX_ register const char *from,register char *to,register I32 len)
+Perl_my_bcopy(register const char *from,register char *to,register I32 len)
 {
     char *retval = to;
 
@@ -2023,9 +2024,10 @@ Perl_my_bcopy(pTHX_ register const char *from,register char *to,register I32 len
 }
 #endif
 
+/* this is a drop-in replacement for memset() */
 #ifndef HAS_MEMSET
 void *
-Perl_my_memset(pTHX_ register char *loc, register I32 ch, register I32 len)
+Perl_my_memset(register char *loc, register I32 ch, register I32 len)
 {
     char *retval = loc;
 
@@ -2035,9 +2037,10 @@ Perl_my_memset(pTHX_ register char *loc, register I32 ch, register I32 len)
 }
 #endif
 
+/* this is a drop-in replacement for bzero() */
 #if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
 char *
-Perl_my_bzero(pTHX_ register char *loc, register I32 len)
+Perl_my_bzero(register char *loc, register I32 len)
 {
     char *retval = loc;
 
@@ -2047,9 +2050,10 @@ Perl_my_bzero(pTHX_ register char *loc, register I32 len)
 }
 #endif
 
+/* this is a drop-in replacement for memcmp() */
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
 I32
-Perl_my_memcmp(pTHX_ const char *s1, const char *s2, register I32 len)
+Perl_my_memcmp(const char *s1, const char *s2, register I32 len)
 {
     register U8 *a = (U8 *)s1;
     register U8 *b = (U8 *)s2;
@@ -2302,7 +2306,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 #endif	/* defined OS2 */
 	/*SUPPRESS 560*/
 	if (tmpgv = gv_fetchpv("$",TRUE, SVt_PV))
-	    sv_setiv(GvSV(tmpgv), getpid());
+	    sv_setiv(GvSV(tmpgv), PerlProc_getpid());
 	PL_forkprocess = 0;
 	hv_clear(PL_pidstatus);	/* we have no children */
 	return Nullfp;
@@ -2497,7 +2501,7 @@ Perl_rsignal_state(pTHX_ int signo)
     oldsig = PerlProc_signal(signo, sig_trap);
     PerlProc_signal(signo, oldsig);
     if (sig_trapped)
-        PerlProc_kill(getpid(), signo);
+        PerlProc_kill(PerlProc_getpid(), signo);
     return oldsig;
 }
 
@@ -3339,11 +3343,11 @@ Perl_condpair_magic(pTHX_ SV *sv)
 	COND_INIT(&cp->owner_cond);
 	COND_INIT(&cp->cond);
 	cp->owner = 0;
-	MUTEX_LOCK(&PL_cred_mutex);		/* XXX need separate mutex? */
+	LOCK_CRED_MUTEX;		/* XXX need separate mutex? */
 	mg = mg_find(sv, 'm');
 	if (mg) {
 	    /* someone else beat us to initialising it */
-	    MUTEX_UNLOCK(&PL_cred_mutex);	/* XXX need separate mutex? */
+	    UNLOCK_CRED_MUTEX;		/* XXX need separate mutex? */
 	    MUTEX_DESTROY(&cp->mutex);
 	    COND_DESTROY(&cp->owner_cond);
 	    COND_DESTROY(&cp->cond);
@@ -3354,7 +3358,7 @@ Perl_condpair_magic(pTHX_ SV *sv)
 	    mg = SvMAGIC(sv);
 	    mg->mg_ptr = (char *)cp;
 	    mg->mg_len = sizeof(cp);
-	    MUTEX_UNLOCK(&PL_cred_mutex);	/* XXX need separate mutex? */
+	    UNLOCK_CRED_MUTEX;		/* XXX need separate mutex? */
 	    DEBUG_S(WITH_THR(PerlIO_printf(Perl_debug_log,
 					   "%p: condpair_magic %p\n", thr, sv));)
 	}

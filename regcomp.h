@@ -185,7 +185,12 @@ struct regnode_charclass_class {
 #define ANYOF_FOLD	0x02
 #define ANYOF_LOCALE	0x01
 
+/* Used for regstclass only */
+#define ANYOF_EOS	0x10		/* Can match an empty string too */
+
 /* Character classes for node->classflags of ANYOF */
+/* Should be synchronized with a table in regprop() */
+/* 2n should pair with 2n+1 */
 
 #define ANYOF_ALNUM	 0	/* \w, utf8::IsWord, isALNUM() */
 #define ANYOF_NALNUM	 1

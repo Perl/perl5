@@ -12,7 +12,7 @@
 #
 # Outputs the changelist to stdout.
 #
-# Gurusamy Sarathy <gsar@umich.edu>
+# Gurusamy Sarathy <gsar@activestate.com>
 #
 
 use Text::Wrap;

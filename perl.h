@@ -23,6 +23,17 @@
 #define VOIDUSED 1
 #include "config.h"
 
+#if defined(USE_ITHREADS) && defined(USE_5005THREADS)
+#  include "error: USE_ITHREADS and USE_5005THREADS are incompatible"
+#endif
+
+/* XXX This next guard can disappear if the sources are revised
+   to use USE_5005THREADS throughout. -- A.D  1/6/2000
+*/
+#if defined(USE_ITHREADS) && defined(USE_THREADS)
+#  include "error: USE_ITHREADS and USE_THREADS are incompatible"
+#endif
+
 /* See L<perlguts/"The Perl API"> for detailed notes on
  * PERL_IMPLICIT_CONTEXT and PERL_IMPLICIT_SYS */
 
@@ -30,26 +41,19 @@
 #  ifndef PERL_IMPLICIT_CONTEXT
 #    define PERL_IMPLICIT_CONTEXT
 #  endif
-#  ifndef PERL_IMPLICIT_SYS
-#    if defined(WIN32) && !defined(__MINGW32__)
-#      define PERL_IMPLICIT_SYS		/* XXX not implemented everywhere yet */
-#    endif
-#  endif
 #endif
 
 #if defined(MULTIPLICITY)
 #  ifndef PERL_IMPLICIT_CONTEXT
 #    define PERL_IMPLICIT_CONTEXT
 #  endif
-#  ifndef PERL_IMPLICIT_SYS
-#    if defined(WIN32) && !defined(__MINGW32__)
-#      define PERL_IMPLICIT_SYS		/* XXX not implemented everywhere yet */
-#    endif
-#  endif
 #endif
 
 #ifdef PERL_CAPI
 #  undef PERL_OBJECT
+#  ifndef MULTIPLICITY
+#    define MULTIPLICITY
+#  endif
 #  ifndef PERL_IMPLICIT_CONTEXT
 #    define PERL_IMPLICIT_CONTEXT
 #  endif
@@ -65,6 +69,10 @@
 #  ifndef PERL_IMPLICIT_SYS
 #    define PERL_IMPLICIT_SYS
 #  endif
+#endif
+
+#if defined(USE_ITHREADS) && !defined(MULTIPLICITY) && !defined(PERL_OBJECT)
+#  include "error: USE_ITHREADS must be built with MULTIPLICITY"
 #endif
 
 #ifdef PERL_OBJECT
@@ -146,7 +154,7 @@ class CPerlObj;
 
 #define STATIC
 #define CPERLscope(x)		CPerlObj::x
-#define CALL_FPTR(fptr)		(this->*fptr)
+#define CALL_FPTR(fptr)		(aTHXo->*fptr)
 
 #define pTHXo			CPerlObj *pPerl
 #define pTHXo_			pTHXo,
@@ -393,7 +401,8 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 /* HP-UX 10.X CMA (Common Multithreaded Architecure) insists that
    pthread.h must be included before all other header files.
 */
-#if defined(USE_THREADS) && defined(PTHREAD_H_FIRST) && defined(I_PTHREAD)
+#if (defined(USE_THREADS) || defined(USE_ITHREADS)) \
+    && defined(PTHREAD_H_FIRST) && defined(I_PTHREAD)
 #  include <pthread.h>
 #endif
 
@@ -1479,10 +1488,6 @@ typedef struct ptr_tbl PTR_TBL_t;
 #  define PERL_SYS_INIT3(argvp,argcp,envp) PERL_SYS_INIT(argvp,argcp)
 #endif
 
-#ifndef PERL_SYS_INIT3
-#  define PERL_SYS_INIT3(argvp,argcp,envp) PERL_SYS_INIT(argvp,argcp)
-#endif
-
 #ifndef MAXPATHLEN
 #  ifdef PATH_MAX
 #    ifdef _POSIX_PATH_MAX
@@ -1512,11 +1517,12 @@ typedef struct ptr_tbl PTR_TBL_t;
  * May make sense to have threads after "*ish.h" anyway
  */
 
-#ifdef USE_THREADS
+#if defined(USE_THREADS) || defined(USE_ITHREADS)
+#  if defined(USE_THREADS)
    /* pending resolution of licensing issues, we avoid the erstwhile
     * atomic.h everywhere */
 #  define EMULATE_ATOMIC_REFCOUNTS
-
+#  endif
 #  ifdef FAKE_THREADS
 #    include "fakethr.h"
 #  else
@@ -1547,10 +1553,10 @@ typedef pthread_key_t	perl_key;
 #      endif /* OS2 */
 #    endif /* WIN32 */
 #  endif /* FAKE_THREADS */
-#endif /* USE_THREADS */
+#endif /* USE_THREADS || USE_ITHREADS */
 
 #ifdef WIN32
-#include "win32.h"
+#  include "win32.h"
 #endif
 
 #ifdef VMS
@@ -1602,8 +1608,17 @@ typedef pthread_key_t	perl_key;
 #   define STATUS_ALL_FAILURE	(PL_statusvalue = 1)
 #endif
 
+/* flags in PL_exit_flags for nature of exit() */
+#define PERL_EXIT_EXPECTED	0x01
+
 #ifndef MEMBER_TO_FPTR
-#define MEMBER_TO_FPTR(name)		name
+#  define MEMBER_TO_FPTR(name)		name
+#endif
+
+/* format to use for version numbers in file/directory names */
+/* XXX move to Configure? */
+#ifndef PERL_FS_VER_FMT
+#  define PERL_FS_VER_FMT	"%d.%d.%d"
 #endif
 
 /* This defines a way to flush all output buffers.  This may be a
@@ -1619,6 +1634,10 @@ typedef pthread_key_t	perl_key;
 #   define PERL_FLUSHALL_FOR_CHILD	NOOP
 #  endif
 # endif
+#endif
+
+#ifndef PERL_WAIT_FOR_CHILDREN
+#  define PERL_WAIT_FOR_CHILDREN	NOOP
 #endif
 
 /* the traditional thread-unsafe notion of "current interpreter".
@@ -1751,6 +1770,7 @@ struct _sublex_info {
 typedef struct magic_state MGS;	/* struct magic_state defined in mg.c */
 
 struct scan_data_t;		/* Used in S_* functions in regcomp.c */
+struct regnode_charclass_class;	/* Used in S_* functions in regcomp.c */
 
 typedef I32 CHECKPOINT;
 
@@ -1870,6 +1890,7 @@ Gid_t getegid (void);
 
 #ifndef Perl_error_log
 #  define Perl_error_log	(PL_stderrgv			\
+				 && IoOFP(GvIOp(PL_stderrgv))	\
 				 ? IoOFP(GvIOp(PL_stderrgv))	\
 				 : PerlIO_stderr())
 #endif
@@ -1989,9 +2010,9 @@ END_EXTERN_C
 #  if defined(NeXT) || defined(__NeXT__) /* or whatever catches all NeXTs */
 char *crypt ();       /* Maybe more hosts will need the unprototyped version */
 #  else
-#    if !defined(WIN32) || !defined(HAVE_DES_FCRYPT)
+#    if !defined(WIN32)
 char *crypt (const char*, const char*);
-#    endif /* !WIN32 && !HAVE_CRYPT_SOURCE */
+#    endif /* !WIN32 */
 #  endif /* !NeXT && !__NeXT__ */
 #  ifndef DONT_DECLARE_STD
 #    ifndef getenv
@@ -2105,7 +2126,7 @@ START_EXTERN_C
 
 /* handy constants */
 EXTCONST char PL_warn_uninit[]
-  INIT("Use of uninitialized value");
+  INIT("Use of uninitialized value%s%s");
 EXTCONST char PL_warn_nosemi[]
   INIT("Semicolon seems to be missing");
 EXTCONST char PL_warn_reserved[]
@@ -2144,13 +2165,9 @@ EXTCONST char PL_uuemap[65]
 #ifdef DOINIT
 EXT char *PL_sig_name[] = { SIG_NAME };
 EXT int   PL_sig_num[]  = { SIG_NUM };
-EXT SV	* PL_psig_ptr[sizeof(PL_sig_num)/sizeof(*PL_sig_num)];
-EXT SV  * PL_psig_name[sizeof(PL_sig_num)/sizeof(*PL_sig_num)];
 #else
 EXT char *PL_sig_name[];
 EXT int   PL_sig_num[];
-EXT SV  * PL_psig_ptr[];
-EXT SV  * PL_psig_name[];
 #endif
 
 /* fast case folding tables */
@@ -2425,7 +2442,7 @@ enum {		/* pass one of these to get_vtbl */
 #define HINT_STRICT_REFS	0x00000002
 /* #define HINT_notused4	0x00000004 */
 #define HINT_UTF8		0x00000008
-/* #define HINT_notused10	0x00000010 */
+#define HINT_BYTE		0x00000010
 				/* Note: 20,40,80 used for NATIVE_HINTS */
 
 #define HINT_BLOCK_SCOPE	0x00000100
@@ -2487,44 +2504,25 @@ typedef struct exitlistentry {
     void *ptr;
 } PerlExitListEntry;
 
-#ifdef PERL_OBJECT
-#undef perl_alloc
-#define perl_alloc Perl_alloc
-CPerlObj* Perl_alloc (IPerlMem*, IPerlEnv*, IPerlStdIO*, IPerlLIO*, IPerlDir*, IPerlSock*, IPerlProc*);
-
-#undef EXT
-#define EXT
-#undef EXTCONST
-#define EXTCONST
-#undef INIT
-#define INIT(x)
-
-class CPerlObj {
-public:
-	CPerlObj(IPerlMem*, IPerlEnv*, IPerlStdIO*, IPerlLIO*, IPerlDir*, IPerlSock*, IPerlProc*);
-	void Init(void);
-	void* operator new(size_t nSize, IPerlMem *pvtbl);
-	static void operator delete(void* pPerl, IPerlMem *pvtbl);
-#endif /* PERL_OBJECT */
-
 #ifdef PERL_GLOBAL_STRUCT
 struct perl_vars {
-#include "perlvars.h"
+#  include "perlvars.h"
 };
 
-#ifdef PERL_CORE
+#  ifdef PERL_CORE
 EXT struct perl_vars PL_Vars;
 EXT struct perl_vars *PL_VarsPtr INIT(&PL_Vars);
-#else /* PERL_CORE */
-#if !defined(__GNUC__) || !defined(WIN32)
+#  else /* PERL_CORE */
+#    if !defined(__GNUC__) || !defined(WIN32)
 EXT
-#endif /* WIN32 */
+#    endif /* WIN32 */
 struct perl_vars *PL_VarsPtr;
-#define PL_Vars (*((PL_VarsPtr) ? PL_VarsPtr : (PL_VarsPtr = Perl_GetVars(aTHX))))
-#endif /* PERL_CORE */
+#    define PL_Vars (*((PL_VarsPtr) \
+		       ? PL_VarsPtr : (PL_VarsPtr = Perl_GetVars(aTHX))))
+#  endif /* PERL_CORE */
 #endif /* PERL_GLOBAL_STRUCT */
 
-#ifdef MULTIPLICITY
+#if defined(MULTIPLICITY) || defined(PERL_OBJECT)
 /* If we have multiple interpreters define a struct 
    holding variables which must be per-interpreter
    If we don't have threads anything that would have 
@@ -2532,17 +2530,22 @@ struct perl_vars *PL_VarsPtr;
 */
 
 struct interpreter {
-#ifndef USE_THREADS
-#  include "thrdvar.h"
-#endif
-#include "intrpvar.h"
+#  ifndef USE_THREADS
+#    include "thrdvar.h"
+#  endif
+#  include "intrpvar.h"
+/*
+ * The following is a buffer where new variables must
+ * be defined to maintain binary compatibility with PERL_OBJECT
+ */
+PERLVARA(object_compatibility,30,	char)
 };
 
 #else
 struct interpreter {
     char broiled;
 };
-#endif
+#endif /* MULTIPLICITY || PERL_OBJECT */
 
 #ifdef USE_THREADS
 /* If we have threads define a struct with all the variables
@@ -2583,25 +2586,18 @@ typedef void *Thread;
 #endif
 
 #ifdef PERL_OBJECT
-#define PERL_DECL_PROT
-#define perl_alloc Perl_alloc
+#  define PERL_DECL_PROT
 #endif
-
-#include "proto.h"
 
 #undef PERL_CKDEF
 #undef PERL_PPDEF
 #define PERL_CKDEF(s)	OP *s (pTHX_ OP *o);
 #define PERL_PPDEF(s)	OP *s (pTHX);
-#ifdef PERL_OBJECT
-public:
-#endif
 
-#include "pp_proto.h"
+#include "proto.h"
 
 #ifdef PERL_OBJECT
-int CPerlObj::do_aspawn (void *vreally, void **vmark, void **vsp);
-#undef PERL_DECL_PROT
+#  undef PERL_DECL_PROT
 #endif
 
 #ifndef PERL_OBJECT
@@ -2625,29 +2621,17 @@ int CPerlObj::do_aspawn (void *vreally, void **vmark, void **vsp);
 #define PERLVARI(var,type,init) EXT type  PL_##var INIT(init);
 #define PERLVARIC(var,type,init) EXTCONST type PL_##var INIT(init);
 
-#ifndef MULTIPLICITY
-
+#if !defined(MULTIPLICITY) && !defined(PERL_OBJECT)
+START_EXTERN_C
 #  include "intrpvar.h"
 #  ifndef USE_THREADS
 #    include "thrdvar.h"
 #  endif
-
+END_EXTERN_C
 #endif
 
 #ifdef PERL_OBJECT
-/*
- * The following is a buffer where new variables must
- * be defined to maintain binary compatibility with PERL_OBJECT
- * for 5.005
- */
-PERLVARA(object_compatibility,30,	char)
-};
-
-
 #  include "embed.h"
-#  if defined(WIN32) && !defined(WIN32IO_IS_STDIO)
-#    define errno	CPerlObj::ErrorNo()
-#  endif
 
 #  ifdef DOINIT
 #    include "INTERN.h"
@@ -3012,6 +2996,7 @@ typedef struct am_table_short AMTS;
  * Now we have __attribute__ out of the way 
  * Remap printf 
  */
+#undef printf
 #define printf PerlIO_stdoutf
 #endif
 
@@ -3106,7 +3091,13 @@ typedef struct am_table_short AMTS;
 #   include <sys/statfs.h>      /* for some statfs() */
 #endif
 #ifdef I_SYS_VFS
-#   include <sys/vfs.h>         /* for some statfs() */
+#  ifdef __sgi
+#    define sv IRIX_sv		/* kludge: IRIX has an sv of its own */
+#  endif
+#    include <sys/vfs.h>	/* for some statfs() */
+#  ifdef __sgi
+#    undef IRIX_sv
+#  endif
 #endif
 #ifdef I_USTAT
 #   include <ustat.h>           /* for ustat() */

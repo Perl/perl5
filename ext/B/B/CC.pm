@@ -1644,8 +1644,8 @@ XS(boot_$cmodule)
     perl_init();
     ENTER;
     SAVETMPS;
-    SAVESPTR(PL_curpad);
-    SAVESPTR(PL_op);
+    SAVEVPTR(PL_curpad);
+    SAVEVPTR(PL_op);
     PL_curpad = AvARRAY($curpad_sym);
     PL_op = $start;
     pp_main(aTHX);

@@ -9,6 +9,10 @@
 #ifndef  _INC_WIN32_PERL5
 #define  _INC_WIN32_PERL5
 
+#ifndef _WIN32_WINNT
+#  define _WIN32_WINNT 0x0400     /* needed for TryEnterCriticalSection() etc. */
+#endif
+
 #if defined(PERL_OBJECT) || defined(PERL_IMPLICIT_SYS) || defined(PERL_CAPI)
 #  define DYNAMIC_ENV_FETCH
 #  define ENV_HV_NAME "___ENV_HV_NAME___"
@@ -33,18 +37,6 @@
 #    define __int64 long long
 #  endif
 #  define Win32_Winsock
-/* GCC does not do __declspec() - render it a nop 
- * and turn on options to avoid importing data 
- */
-#ifndef __declspec
-#  define __declspec(x)
-#endif
-#  ifndef PERL_OBJECT
-#    define PERL_GLOBAL_STRUCT
-#    ifndef MULTIPLICITY
-#      define MULTIPLICITY
-#    endif
-#  endif
 #endif
 
 /* Define DllExport akin to perl's EXT, 
@@ -52,6 +44,8 @@
  * then Export the symbol, 
  * otherwise import it.
  */
+
+/* now even GCC supports __declspec() */
 
 #if defined(PERL_OBJECT)
 #define DllExport
@@ -165,6 +159,7 @@ struct utsname {
 
 #define _access access
 #define _chdir chdir
+#define _getpid getpid
 #include <sys/types.h>
 
 #ifndef DllMain
@@ -187,6 +182,9 @@ struct utsname {
 #  define MEMBER_TO_FPTR(name)	&(name)
 #endif
 
+/* Borland C thinks that a pointer to a member variable is 12 bytes in size. */
+#define PERL_MEMBER_PTR_SIZE	12
+
 #endif
 
 #ifdef _MSC_VER			/* Microsoft Visual C++ */
@@ -196,45 +194,8 @@ typedef long		gid_t;
 typedef unsigned short	mode_t;
 #pragma  warning(disable: 4018 4035 4101 4102 4244 4245 4761)
 
-#ifndef PERL_OBJECT
-
 /* Visual C thinks that a pointer to a member variable is 16 bytes in size. */
-#define STRUCT_MGVTBL_DEFINITION					\
-struct mgvtbl {								\
-    union {								\
-	int	    (CPERLscope(*svt_get))(pTHX_ SV *sv, MAGIC* mg);	\
-	char	    handle_VC_problem1[16];				\
-    };									\
-    union {								\
-	int	    (CPERLscope(*svt_set))(pTHX_ SV *sv, MAGIC* mg);	\
-	char	    handle_VC_problem2[16];				\
-    };									\
-    union {								\
-	U32	    (CPERLscope(*svt_len))(pTHX_ SV *sv, MAGIC* mg);	\
-	char	    handle_VC_problem3[16];				\
-    };									\
-    union {								\
-	int	    (CPERLscope(*svt_clear))(pTHX_ SV *sv, MAGIC* mg);	\
-	char	    handle_VC_problem4[16];				\
-    };									\
-    union {								\
-	int	    (CPERLscope(*svt_free))(pTHX_ SV *sv, MAGIC* mg);	\
-	char	    handle_VC_problem5[16];				\
-    };									\
-}
-
-#define BASEOP_DEFINITION		\
-    OP*		op_next;		\
-    OP*		op_sibling;		\
-    OP*		(CPERLscope(*op_ppaddr))(pTHX);		\
-    char	handle_VC_problem[12];	\
-    PADOFFSET	op_targ;		\
-    OPCODE	op_type;		\
-    U16		op_seq;			\
-    U8		op_flags;		\
-    U8		op_private;
-
-#endif /* PERL_OBJECT */
+#define PERL_MEMBER_PTR_SIZE	16
 
 #endif /* _MSC_VER */
 
@@ -247,9 +208,6 @@ typedef long		gid_t;
 #endif
 #define flushall	_flushall
 #define fcloseall	_fcloseall
-
-#undef __attribute__
-#define __attribute__(x)
 
 #ifndef CP_UTF8
 #  define CP_UTF8	65001
@@ -266,16 +224,48 @@ typedef long		gid_t;
 #  endif
 #endif
 
-#ifndef _O_NOINHERIT
-#  define _O_NOINHERIT	0x0080
-#  ifndef _NO_OLDNAMES
-#    define O_NOINHERIT	_O_NOINHERIT
-#  endif
-#endif
-
 #endif /* __MINGW32__ */
 
 /* compatibility stuff for other compilers goes here */
+
+
+#if !defined(PERL_OBJECT) && defined(PERL_MEMBER_PTR_SIZE)
+#  define STRUCT_MGVTBL_DEFINITION \
+struct mgvtbl {								\
+    union {								\
+	int	    (CPERLscope(*svt_get))(pTHX_ SV *sv, MAGIC* mg);	\
+	char	    handle_VC_problem1[PERL_MEMBER_PTR_SIZE];		\
+    };									\
+    union {								\
+	int	    (CPERLscope(*svt_set))(pTHX_ SV *sv, MAGIC* mg);	\
+	char	    handle_VC_problem2[PERL_MEMBER_PTR_SIZE];		\
+    };									\
+    union {								\
+	U32	    (CPERLscope(*svt_len))(pTHX_ SV *sv, MAGIC* mg);	\
+	char	    handle_VC_problem3[PERL_MEMBER_PTR_SIZE];		\
+    };									\
+    union {								\
+	int	    (CPERLscope(*svt_clear))(pTHX_ SV *sv, MAGIC* mg);	\
+	char	    handle_VC_problem4[PERL_MEMBER_PTR_SIZE];		\
+    };									\
+    union {								\
+	int	    (CPERLscope(*svt_free))(pTHX_ SV *sv, MAGIC* mg);	\
+	char	    handle_VC_problem5[PERL_MEMBER_PTR_SIZE];		\
+    };									\
+}
+
+#  define BASEOP_DEFINITION \
+    OP*		op_next;						\
+    OP*		op_sibling;						\
+    OP*		(CPERLscope(*op_ppaddr))(pTHX);				\
+    char	handle_VC_problem[PERL_MEMBER_PTR_SIZE-sizeof(OP*)];	\
+    PADOFFSET	op_targ;						\
+    OPCODE	op_type;						\
+    U16		op_seq;							\
+    U8		op_flags;						\
+    U8		op_private;
+
+#endif /* !PERL_OBJECT && PERL_MEMBER_PTR_SIZE */
 
 
 START_EXTERN_C
@@ -340,12 +330,10 @@ typedef  char *		caddr_t;	/* In malloc.c (core address). */
 #define PERL_CORE
 #endif
 
-#ifdef USE_BINMODE_SCRIPTS
-#define PERL_SCRIPT_MODE "rb"
-EXT void win32_strip_return(struct sv *sv);
+#ifdef PERL_TEXTMODE_SCRIPTS
+#  define PERL_SCRIPT_MODE		"r"
 #else
-#define PERL_SCRIPT_MODE "r"
-#define win32_strip_return(sv) NOOP
+#  define PERL_SCRIPT_MODE		"rb"
 #endif
 
 /* 
@@ -378,13 +366,8 @@ struct thread_intern {
 typedef struct {
     long	num;
     DWORD	pids[MAXIMUM_WAIT_OBJECTS];
+    HANDLE	handles[MAXIMUM_WAIT_OBJECTS];
 } child_tab;
-
-struct host_link {
-    char *	nameId;
-    void *	host_data;
-    struct host_link *	next;
-};
 
 struct interp_intern {
     char *	perlshell_tokens;
@@ -392,8 +375,11 @@ struct interp_intern {
     long	perlshell_items;
     struct av *	fdpid;
     child_tab *	children;
-    HANDLE	child_handles[MAXIMUM_WAIT_OBJECTS];
-    struct host_link *	hostlist;
+#ifdef USE_ITHREADS
+    DWORD	pseudo_id;
+    child_tab *	pseudo_children;
+#endif
+    void *	internal_host;
 #ifndef USE_THREADS
     struct thread_intern	thr_intern;
 #endif
@@ -407,8 +393,13 @@ struct interp_intern {
 #define w32_children		(PL_sys_intern.children)
 #define w32_num_children	(w32_children->num)
 #define w32_child_pids		(w32_children->pids)
-#define w32_child_handles	(PL_sys_intern.child_handles)
-#define w32_host_link		(PL_sys_intern.hostlist)
+#define w32_child_handles	(w32_children->handles)
+#define w32_pseudo_id		(PL_sys_intern.pseudo_id)
+#define w32_pseudo_children	(PL_sys_intern.pseudo_children)
+#define w32_num_pseudo_children		(w32_pseudo_children->num)
+#define w32_pseudo_child_pids		(w32_pseudo_children->pids)
+#define w32_pseudo_child_handles	(w32_pseudo_children->handles)
+#define w32_internal_host		(PL_sys_intern.internal_host)
 #ifdef USE_THREADS
 #  define w32_strerror_buffer	(thr->i.Wstrerror_buffer)
 #  define w32_getlogin_buffer	(thr->i.Wgetlogin_buffer)
@@ -434,6 +425,20 @@ struct interp_intern {
     lpa[0] = '\0', WideCharToMultiByte((IN_UTF8) ? CP_UTF8 : CP_ACP, 0, lpw, -1, (LPSTR)lpa, nChars, NULL, NULL)
 
 #define USING_WIDE()	(PerlEnv_os_id() == VER_PLATFORM_WIN32_NT)
+
+#ifdef USE_ITHREADS
+#  define PERL_WAIT_FOR_CHILDREN \
+    STMT_START {							\
+	if (w32_pseudo_children && w32_num_pseudo_children) {		\
+	    long children = w32_num_pseudo_children;			\
+	    WaitForMultipleObjects(children,				\
+				   w32_pseudo_child_handles,		\
+				   TRUE, INFINITE);			\
+	    while (children)						\
+		CloseHandle(w32_pseudo_child_handles[--children]);	\
+	}								\
+    } STMT_END
+#endif
 
 /*
  * This provides a layer of functions and macros to ensure extensions will

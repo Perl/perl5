@@ -96,19 +96,27 @@ struct block_sub {
 	(void)SvREFCNT_inc(cx->blk_sub.dfoutgv)
 
 #ifdef USE_THREADS
-#define POPSAVEARRAY() NOOP
+#  define POP_SAVEARRAY() NOOP
 #else
-#define POPSAVEARRAY()							\
+#  define POP_SAVEARRAY()						\
     STMT_START {							\
 	SvREFCNT_dec(GvAV(PL_defgv));					\
 	GvAV(PL_defgv) = cx->blk_sub.savearray;				\
     } STMT_END
 #endif /* USE_THREADS */
 
+#ifdef USE_ITHREADS
+   /* junk in @_ spells trouble when cloning CVs, so don't leave any */
+#  define CLEAR_ARGARRAY()	av_clear(cx->blk_sub.argarray)
+#else
+#  define CLEAR_ARGARRAY()	NOOP
+#endif /* USE_ITHREADS */
+
+
 #define POPSUB(cx,sv)							\
     STMT_START {							\
 	if (cx->blk_sub.hasargs) {					\
-	    POPSAVEARRAY();						\
+	    POP_SAVEARRAY();						\
 	    /* abandon @_ if it got reified */				\
 	    if (AvREAL(cx->blk_sub.argarray)) {				\
 		SSize_t fill = AvFILLp(cx->blk_sub.argarray);		\
@@ -117,6 +125,9 @@ struct block_sub {
 		av_extend(cx->blk_sub.argarray, fill);			\
 		AvFLAGS(cx->blk_sub.argarray) = AVf_REIFY;		\
 		PL_curpad[0] = (SV*)cx->blk_sub.argarray;		\
+	    }								\
+	    else {							\
+		CLEAR_ARGARRAY();					\
 	    }								\
 	}								\
 	sv = (SV*)cx->blk_sub.cv;					\
@@ -146,14 +157,15 @@ struct block_eval {
 #define PUSHEVAL(cx,n,fgv)						\
 	cx->blk_eval.old_in_eval = PL_in_eval;				\
 	cx->blk_eval.old_op_type = PL_op->op_type;			\
-	cx->blk_eval.old_name = n;					\
+	cx->blk_eval.old_name = (n ? savepv(n) : Nullch);		\
 	cx->blk_eval.old_eval_root = PL_eval_root;			\
 	cx->blk_eval.cur_text = PL_linestr;
 
 #define POPEVAL(cx)							\
 	PL_in_eval = cx->blk_eval.old_in_eval;				\
 	optype = cx->blk_eval.old_op_type;				\
-	PL_eval_root = cx->blk_eval.old_eval_root;
+	PL_eval_root = cx->blk_eval.old_eval_root;			\
+	Safefree(cx->blk_eval.old_name);
 
 /* loop context */
 struct block_loop {
@@ -162,7 +174,11 @@ struct block_loop {
     OP *	redo_op;
     OP *	next_op;
     OP *	last_op;
+#ifdef USE_ITHREADS
+    void *	iterdata;
+#else
     SV **	itervar;
+#endif
     SV *	itersave;
     SV *	iterlval;
     AV *	iterary;
@@ -170,23 +186,40 @@ struct block_loop {
     IV		itermax;
 };
 
-#define PUSHLOOP(cx, ivar, s)						\
+#ifdef USE_ITHREADS
+#  define CxITERVAR(c)							\
+	((c)->blk_loop.iterdata						\
+	 ? (CxPADLOOP(cx) 						\
+	    ? &PL_curpad[(PADOFFSET)(c)->blk_loop.iterdata]		\
+	    : &GvSV((GV*)(c)->blk_loop.iterdata))			\
+	 : (SV**)NULL)
+#  define CX_ITERDATA_SET(cx,idata)					\
+	if (cx->blk_loop.iterdata = (idata))				\
+	    cx->blk_loop.itersave = SvREFCNT_inc(*CxITERVAR(cx));
+#else
+#  define CxITERVAR(c)		((c)->blk_loop.itervar)
+#  define CX_ITERDATA_SET(cx,ivar)					\
+	if (cx->blk_loop.itervar = (SV**)(ivar))			\
+	    cx->blk_loop.itersave = SvREFCNT_inc(*CxITERVAR(cx));
+#endif
+
+#define PUSHLOOP(cx, dat, s)						\
 	cx->blk_loop.label = PL_curcop->cop_label;			\
 	cx->blk_loop.resetsp = s - PL_stack_base;			\
 	cx->blk_loop.redo_op = cLOOP->op_redoop;			\
 	cx->blk_loop.next_op = cLOOP->op_nextop;			\
 	cx->blk_loop.last_op = cLOOP->op_lastop;			\
-	if (cx->blk_loop.itervar = (ivar))				\
-	    cx->blk_loop.itersave = SvREFCNT_inc(*cx->blk_loop.itervar);\
 	cx->blk_loop.iterlval = Nullsv;					\
 	cx->blk_loop.iterary = Nullav;					\
-	cx->blk_loop.iterix = -1;
+	cx->blk_loop.iterix = -1;					\
+	CX_ITERDATA_SET(cx,dat);
 
 #define POPLOOP(cx)							\
 	SvREFCNT_dec(cx->blk_loop.iterlval);				\
-	if (cx->blk_loop.itervar) {					\
-	    sv_2mortal(*(cx->blk_loop.itervar));			\
-	    *(cx->blk_loop.itervar) = cx->blk_loop.itersave;		\
+	if (CxITERVAR(cx)) {						\
+	    SV **s_v_p = CxITERVAR(cx);					\
+	    sv_2mortal(*s_v_p);						\
+	    *s_v_p = cx->blk_loop.itersave;				\
 	}								\
 	if (cx->blk_loop.iterary && cx->blk_loop.iterary != PL_curstack)\
 	    SvREFCNT_dec(cx->blk_loop.iterary);
@@ -319,12 +352,23 @@ struct context {
 #define CXt_LOOP	3
 #define CXt_SUBST	4
 #define CXt_BLOCK	5
+#define CXt_FORMAT	6
 
 /* private flags for CXt_EVAL */
 #define CXp_REAL	0x00000100	/* truly eval'', not a lookalike */
 
+#ifdef USE_ITHREADS
+/* private flags for CXt_LOOP */
+#  define CXp_PADVAR	0x00000100	/* itervar lives on pad, iterdata
+					   has pad offset; if not set,
+					   iterdata holds GV* */
+#  define CxPADLOOP(c)	(((c)->cx_type & (CXt_LOOP|CXp_PADVAR))		\
+			 == (CXt_LOOP|CXp_PADVAR))
+#endif
+
 #define CxTYPE(c)	((c)->cx_type & CXTYPEMASK)
-#define CxREALEVAL(c)	(((c)->cx_type & (CXt_EVAL|CXp_REAL)) == (CXt_EVAL|CXp_REAL))
+#define CxREALEVAL(c)	(((c)->cx_type & (CXt_EVAL|CXp_REAL))		\
+			 == (CXt_EVAL|CXp_REAL))
 
 #define CXINC (cxstack_ix < cxstack_max ? ++cxstack_ix : (cxstack_ix = cxinc()))
 

@@ -23,7 +23,7 @@ EOMessage
     }
 }
 
-use File::Glob 'globally';
+use File::Glob ':globally';
 $loaded = 1;
 print "ok 1\n";
 
@@ -81,7 +81,7 @@ print "ok 8\n";
 
 # how about in a different package, like?
 package Foo;
-use File::Glob 'globally';
+use File::Glob ':globally';
 @s = ();
 while (glob '*/*.t') {
     #print "# $_\n";

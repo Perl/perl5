@@ -2,15 +2,11 @@
 
 package IO;
 
-require DynaLoader;
-require Exporter;
+use XSLoader ();
 use Carp;
 
-use vars qw(@ISA $VERSION @EXPORT);
-
-@ISA = qw(DynaLoader);
 $VERSION = "1.20";
-bootstrap IO $VERSION;
+XSLoader::load 'IO', $VERSION;
 
 sub import {
     shift;

@@ -2,24 +2,26 @@ package File::Glob;
 
 use strict;
 use Carp;
-use vars qw($VERSION @ISA @EXPORT_OK @EXPORT_FAIL %EXPORT_TAGS $AUTOLOAD);
+use vars qw($VERSION @ISA @EXPORT_OK @EXPORT_FAIL
+            %EXPORT_TAGS $AUTOLOAD $DEFAULT_FLAGS);
 
 require Exporter;
-require DynaLoader;
+use XSLoader ();
 require AutoLoader;
 
-@ISA = qw(Exporter DynaLoader AutoLoader);
+@ISA = qw(Exporter AutoLoader);
 
 @EXPORT_OK   = qw(
-    globally
     csh_glob
     glob
     GLOB_ABEND
     GLOB_ALTDIRFUNC
     GLOB_BRACE
+    GLOB_CSH
     GLOB_ERR
     GLOB_ERROR
     GLOB_MARK
+    GLOB_NOCASE
     GLOB_NOCHECK
     GLOB_NOMAGIC
     GLOB_NOSORT
@@ -28,16 +30,16 @@ require AutoLoader;
     GLOB_TILDE
 );
 
-@EXPORT_FAIL = ( 'globally' );
-
 %EXPORT_TAGS = (
     'glob' => [ qw(
         GLOB_ABEND
         GLOB_ALTDIRFUNC
         GLOB_BRACE
+        GLOB_CSH
         GLOB_ERR
         GLOB_ERROR
         GLOB_MARK
+        GLOB_NOCASE
         GLOB_NOCHECK
         GLOB_NOMAGIC
         GLOB_NOSORT
@@ -48,18 +50,24 @@ require AutoLoader;
     ) ],
 );
 
-$VERSION = '0.99';
+$VERSION = '0.991';
 
-sub export_fail {
-    shift;
-
-    if ($_[0] eq 'globally') {
-        local $^W;
-        *CORE::GLOBAL::glob = \&File::Glob::csh_glob;
-        shift;
+sub import {
+    my $i = 1;
+    while ($i < @_) {
+	if ($_[$i] =~ /^:(case|nocase|globally)$/) {
+	    splice(@_, $i, 1);
+	    $DEFAULT_FLAGS &= ~GLOB_NOCASE() if $1 eq 'case';
+	    $DEFAULT_FLAGS |= GLOB_NOCASE() if $1 eq 'nocase';
+	    if ($1 eq 'globally') {
+		local $^W;
+		*CORE::GLOBAL::glob = \&File::Glob::csh_glob;
+	    }
+	    next;
+	}
+	++$i;
     }
-
-    @_;
+    goto &Exporter::import;
 }
 
 sub AUTOLOAD {
@@ -83,7 +91,7 @@ sub AUTOLOAD {
     goto &$AUTOLOAD;
 }
 
-bootstrap File::Glob $VERSION;
+XSLoader::load 'File::Glob', $VERSION;
 
 # Preloaded methods go here.
 
@@ -92,6 +100,11 @@ sub GLOB_ERROR {
 }
 
 sub GLOB_CSH () { GLOB_BRACE() | GLOB_NOMAGIC() | GLOB_QUOTE() | GLOB_TILDE() }
+
+$DEFAULT_FLAGS = GLOB_CSH();
+if ($^O =~ /^(?:MSWin32|VMS|os2|dos|riscos|MacOS)$/) {
+    $DEFAULT_FLAGS |= GLOB_NOCASE();
+}
 
 # Autoload methods go after =cut, and are processed by the autosplit program.
 
@@ -127,10 +140,10 @@ sub csh_glob {
     # if we're just beginning, do it all first
     if ($iter{$cxix} == 0) {
 	if (@pat) {
-	    $entries{$cxix} = [ map { doglob($_, GLOB_CSH) } @pat ];
+	    $entries{$cxix} = [ map { doglob($_, $DEFAULT_FLAGS) } @pat ];
 	}
 	else {
-	    $entries{$cxix} = [ doglob($pat, GLOB_CSH) ];
+	    $entries{$cxix} = [ doglob($pat, $DEFAULT_FLAGS) ];
 	}
     }
 
@@ -169,7 +182,15 @@ File::Glob - Perl extension for BSD glob routine
   }
 
   ## override the core glob (even with -T)
-  use File::Glob 'globally';
+  use File::Glob ':globally';
+  my @sources = <*.{c,h,y}>
+
+  ## override the core glob, forcing case sensitivity
+  use File::Glob qw(:globally :case);
+  my @sources = <*.{c,h,y}>
+
+  ## override the core glob forcing case insensitivity
+  use File::Glob qw(:globally :nocase);
   my @sources = <*.{c,h,y}>
 
 =head1 DESCRIPTION
@@ -192,6 +213,11 @@ cannot open or read.  Ordinarily glob() continues to find matches.
 
 Each pathname that is a directory that matches the pattern has a slash
 appended.
+
+=item C<GLOB_NOCASE>
+
+By default, file names are assumed to be case sensitive; this flag
+makes glob() treat case differences as not significant.
 
 =item C<GLOB_NOCHECK>
 
@@ -228,6 +254,7 @@ behaviour and should probably not be used anywhere else.
 Use the backslash ('\') character for quoting: every occurrence of a
 backslash followed by a character in the pattern is replaced by that
 character, avoiding any special interpretation of the character.
+(But see below for exceptions on DOSISH systems).
 
 =item C<GLOB_TILDE>
 
@@ -285,6 +312,18 @@ If you want to use multiple patterns, e.g. C<glob "a* b*">, you should
 probably throw them in a set as in C<glob "{a*,b*}>.  This is because
 the argument to glob isn't subjected to parsing by the C shell.  Remember
 that you can use a backslash to escape things.
+
+=item *
+
+On DOSISH systems, backslash is a valid directory separator character.
+In this case, use of backslash as a quoting character (via GLOB_QUOTE)
+interferes with the use of backslash as a directory separator. The
+best (simplest, most portable) solution is to use forward slashes for
+directory separators, and backslashes for quoting. However, this does
+not match "normal practice" on these systems. As a concession to user
+expectation, therefore, backslashes (under GLOB_QUOTE) only quote the
+glob metacharacters '[', ']', '{', '}', '-', '~', and backslash itself.
+All other backslashes are passed through unchanged.
 
 =item *
 

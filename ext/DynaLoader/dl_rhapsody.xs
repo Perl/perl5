@@ -85,11 +85,11 @@ static void TranslateError
 	index = number;
 	if (index > NUM_OFI_ERRORS - 1)
 	    index = NUM_OFI_ERRORS - 1;
-	error = form(OFIErrorStrings[index], path, number);
+	error = Perl_form_nocontext(OFIErrorStrings[index], path, number);
 	break;
 
     default:
-	error = form("%s(%d): Totally unknown error type %d\n",
+	error = Perl_form_nocontext("%s(%d): Totally unknown error type %d\n",
 		     path, number, type);
 	break;
     }
@@ -140,7 +140,7 @@ static void
 dl_private_init(pTHX)
 {
     (void)dl_generic_private_init(aTHX);
-    dl_resolve_using = get_av("DynaLoader::dl_resolve_using", 0x4);
+    dl_resolve_using = get_av("DynaLoader::dl_resolve_using", GV_ADDMULTI);
 }
 
 MODULE = DynaLoader     PACKAGE = DynaLoader
@@ -174,7 +174,7 @@ dl_find_symbol(libhandle, symbolname)
     void *		libhandle
     char *		symbolname
     CODE:
-    symbolname = form("_%s", symbolname);
+    symbolname = Perl_form_nocontext("_%s", symbolname);
     DLDEBUG(2, PerlIO_printf(Perl_debug_log,
 			     "dl_find_symbol(handle=%lx, symbol=%s)\n",
 			     (unsigned long) libhandle, symbolname));

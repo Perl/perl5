@@ -56,7 +56,7 @@ my $self = {};
 # Read the core packlist
 $self->{Perl}{packlist} =
    ExtUtils::Packlist->new("$Config{installarchlib}/.packlist");
-$self->{Perl}{version} = $];
+$self->{Perl}{version} = $Config{version};
 
 # Read the module packlists
 my $sub = sub

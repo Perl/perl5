@@ -1948,7 +1948,7 @@ L<perlxs>, L<perlguts>, L<perlembed>
 
 =head1 AUTHOR
 
-Paul Marquess <F<pmarquess@bfsec.bt.co.uk>>
+Paul Marquess 
 
 Special thanks to the following people who assisted in the creation of
 the document.

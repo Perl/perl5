@@ -299,7 +299,6 @@ cop_arybase %d
 cop_line $line
 cop_warnings $warningsix
 EOT
-    $stash->bytecode;
 }
 
 sub B::PMOP::bytecode {
@@ -705,6 +704,10 @@ sub compile {
 	    $arg ||= shift @options;
 	    open(OUT, ">$arg") or return "$arg: $!\n";
 	    binmode OUT;
+	} elsif ($opt eq "a") {
+	    $arg ||= shift @options;
+	    open(OUT, ">>$arg") or return "$arg: $!\n";
+	    binmode OUT;
 	} elsif ($opt eq "D") {
 	    $arg ||= shift @options;
 	    foreach $arg (split(//, $arg)) {
@@ -813,6 +816,10 @@ extra arguments, it saves the main program.
 =item B<-ofilename>
 
 Output to filename instead of STDOUT.
+
+=item B<-afilename>
+
+Append output to filename.
 
 =item B<-->
 

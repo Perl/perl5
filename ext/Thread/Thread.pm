@@ -1,11 +1,11 @@
 package Thread;
 require Exporter;
-require DynaLoader;
+use XSLoader ();
 use vars qw($VERSION @ISA @EXPORT);
 
 $VERSION = "1.0";
 
-@ISA = qw(Exporter DynaLoader);
+@ISA = qw(Exporter);
 @EXPORT_OK = qw(yield cond_signal cond_broadcast cond_wait async);
 
 =head1 NAME
@@ -204,6 +204,6 @@ sub eval {
     return eval { shift->join; };
 }
 
-bootstrap Thread;
+XSLoader::load 'Thread';
 
 1;

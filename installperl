@@ -14,7 +14,7 @@ BEGIN {
     $Is_VMS = $^O eq 'VMS';
     $Is_W32 = $^O eq 'MSWin32';
     $Is_OS2 = $^O eq 'os2';
-    $Is_Cygwin = $^O =~ /cygwin/i;
+    $Is_Cygwin = $^O eq 'cygwin';
     if ($Is_VMS) { eval 'use VMS::Filespec;' }
 }
 
@@ -40,10 +40,10 @@ my $exe_ext = $Config{exe_ext};
 # Allow ``make install PERLNAME=something_besides_perl'':
 my $perl = defined($ENV{PERLNAME}) ? $ENV{PERLNAME} : 'perl';
 
-# This is the base used for versioned names, like "perl5.005".
+# This is the base used for versioned names, like "perl5.6.0".
 # It's separate because a common use of $PERLNAME is to install
 # perl as "perl5", if that's used as base for versioned files you
-# get "perl55.005".
+# get "perl55.6.0".
 my $perl_verbase = defined($ENV{PERLNAME_VERBASE})
 		    ? $ENV{PERLNAME_VERBASE}
 		    : $perl;
@@ -53,8 +53,6 @@ while (@ARGV) {
     $versiononly = 1 if $ARGV[0] eq '-v';
     shift;
 }
-
-umask 022 unless $Is_VMS;
 
 my @scripts = qw(utils/c2ph utils/h2ph utils/h2xs utils/perlbug utils/perldoc
 		utils/pl2pm utils/splain utils/perlcc utils/dprofpp
@@ -93,9 +91,9 @@ find(sub {
 	}
     }, 'ext');
 
-my $ver = $];
-my $release = substr($ver,0,3);   # Not used presently.
-my $patchlevel = substr($ver,3,2);
+my $ver = $Config{version};
+my $release = substr($],0,3);   # Not used presently.
+my $patchlevel = substr($],3,2);
 die "Patchlevel of perl ($patchlevel)",
     "and patchlevel of config.sh ($Config{'PERL_VERSION'}) don't match\n"
 	if $patchlevel != $Config{'PERL_VERSION'};
@@ -164,13 +162,13 @@ if ($Is_Cygwin) {
 
    if ($dlsrc ne "dl_none.xs") {
       -f $perldll || die "No perl DLL built\n";
-
+   }
 # Install the DLL
 
-      safe_unlink("$installbin/$perldll");
-      copy("$perldll", "$installbin/$perldll");
-      chmod(0755, "$installbin/$perldll");
-   }
+   safe_unlink("$installbin/$perldll");
+   copy("$perldll", "$installbin/$perldll");
+   chmod(0755, "$installbin/$perldll");
+   
 } # if ($Is_W32 or $Is_Cygwin)
 
 # This will be used to store the packlist
@@ -225,7 +223,7 @@ mkpath($installsitearch, 1, 0777) if ($installsitearch);
 if (chdir "lib") {
     $do_installarchlib = ! samepath($installarchlib, '.');
     $do_installprivlib = ! samepath($installprivlib, '.');
-    $do_installprivlib = 0 if $versiononly && !($installprivlib =~ m/\Q$]/);
+    $do_installprivlib = 0 if $versiononly && !($installprivlib =~ m/\Q$ver/);
 
     if ($do_installarchlib || $do_installprivlib) {
 	find(\&installlib, '.');
@@ -240,7 +238,7 @@ else {
 mkpath("$installarchlib/CORE", 1, 0777);
 my @corefiles;
 if ($Is_VMS) {  # We did core file selection during build
-    my $coredir = "lib/$Config{'arch'}/$]";
+    my $coredir = "lib/$Config{'arch'}/$ver";
     $coredir =~ tr/./_/;
     @corefiles = <$coredir/*.*>;
 }
@@ -372,7 +370,7 @@ if (! $versiononly) {
 # ($installprivlib/pods for cygwin).
 
 my $pod = $Is_Cygwin ? 'pods' : 'pod';
-unless ( $versiononly && !($installprivlib =~ m/\Q$]/)) {
+unless ( $versiononly && !($installprivlib =~ m/\Q$ver/)) {
     mkpath("${installprivlib}/$pod", 1, 0777);
 
     # If Perl 5.003's perldiag.pod is there, rename it.
@@ -405,7 +403,7 @@ unless ( $versiononly && !($installprivlib =~ m/\Q$]/)) {
 # installed perl.
 
 if (!$versiononly) {
-	my ($path, @path);
+    my ($path, @path);
     my $dirsep = ($Is_OS2 || $Is_W32) ? ';' : ':' ;
     ($path = $ENV{"PATH"}) =~ s:\\:/:g ;
     @path = split(/$dirsep/, $path);
@@ -514,11 +512,13 @@ sub link {
 	    ? $success++
 	    : ($from =~ m#^/afs/# || $to =~ m#^/afs/#)
 	      ? die "AFS"  # okay inside eval {}
-	      : warn "Couldn't link $from to $to: $!\n"
+	      : die "Couldn't link $from to $to: $!\n"
 	  unless $nonono;
         $packlist->{$to} = { from => $from, type => 'link' };
     };
     if ($@) {
+	warn $@;
+	print "  cp $from $to\n";
 	print "  creating new version of $to\n" if $Is_VMS and -e $to;
 	File::Copy::copy($from, $to)
 	    ? $success++

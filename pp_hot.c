@@ -29,7 +29,6 @@
 #include <sys/file.h>
 #endif
 
-#define HOP(pos,off) (IN_UTF8 ? utf8_hop(pos, off) : (pos + off))
 
 /* Hot code. */
 
@@ -40,7 +39,7 @@ static void unset_cvowner(pTHXo_ void *cvarg);
 PP(pp_const)
 {
     djSP;
-    XPUSHs(cSVOP->op_sv);
+    XPUSHs(cSVOP_sv);
     RETURN;
 }
 
@@ -58,9 +57,9 @@ PP(pp_gvsv)
     djSP;
     EXTEND(SP,1);
     if (PL_op->op_private & OPpLVAL_INTRO)
-	PUSHs(save_scalar(cGVOP));
+	PUSHs(save_scalar(cGVOP_gv));
     else
-	PUSHs(GvSV(cGVOP));
+	PUSHs(GvSV(cGVOP_gv));
     RETURN;
 }
 
@@ -95,7 +94,7 @@ PP(pp_stringify)
 PP(pp_gv)
 {
     djSP;
-    XPUSHs((SV*)cGVOP);
+    XPUSHs((SV*)cGVOP_gv);
     RETURN;
 }
 
@@ -153,8 +152,14 @@ PP(pp_concat)
     dPOPTOPssrl;
     STRLEN len;
     char *s;
+
     if (TARG != left) {
 	s = SvPV(left,len);
+	if (TARG == right) {
+	    sv_insert(TARG, 0, 0, s, len);
+	    SETs(TARG);
+	    RETURN;
+	}
 	sv_setpvn(TARG,s,len);
     }
     else if (SvGMAGICAL(TARG))
@@ -271,7 +276,7 @@ PP(pp_add)
 PP(pp_aelemfast)
 {
     djSP;
-    AV *av = GvAV(cGVOP);
+    AV *av = GvAV(cGVOP_gv);
     U32 lval = PL_op->op_flags & OPf_MOD;
     SV** svp = av_fetch(av, PL_op->op_private, lval);
     SV *sv = (svp ? *svp : &PL_sv_undef);
@@ -368,7 +373,7 @@ PP(pp_print)
 			    SvPV(sv,n_a));
 	    else if (ckWARN(WARN_CLOSED))
 		Perl_warner(aTHX_ WARN_CLOSED,
-			    "print on closed filehandle %s", SvPV(sv,n_a));
+			    "print() on closed filehandle %s", SvPV(sv,n_a));
 	}
 	SETERRNO(EBADF,IoIFP(io)?RMS$_FAC:RMS$_IFI);
 	goto just_say_no;
@@ -459,7 +464,7 @@ PP(pp_rv2av)
 		      PL_op->op_private & HINT_STRICT_REFS)
 			DIE(aTHX_ PL_no_usym, "an ARRAY");
 		    if (ckWARN(WARN_UNINITIALIZED))
-			Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+			report_uninit();
 		    if (GIMME == G_ARRAY) {
 			(void)POPs;
 			RETURN;
@@ -559,7 +564,7 @@ PP(pp_rv2hv)
 		      PL_op->op_private & HINT_STRICT_REFS)
 			DIE(aTHX_ PL_no_usym, "a HASH");
 		    if (ckWARN(WARN_UNINITIALIZED))
-			Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+			report_uninit();
 		    if (GIMME == G_ARRAY) {
 			SP--;
 			RETURN;
@@ -1255,7 +1260,7 @@ Perl_do_readline(pTHX)
 		SV* sv = sv_newmortal();
 		gv_efullname3(sv, PL_last_in_gv, Nullch);
 		Perl_warner(aTHX_ WARN_CLOSED,
-			    "Read on closed filehandle %s",
+			    "readline() on closed filehandle %s",
 			    SvPV_nolen(sv));
 	    }
 	}
@@ -1284,12 +1289,11 @@ Perl_do_readline(pTHX)
 	offset = 0;
     }
 
-/* flip-flop EOF state for a snarfed empty file */
+/* delay EOF state for a snarfed empty file */
 #define SNARF_EOF(gimme,rs,io,sv) \
-    ((gimme != G_SCALAR || SvCUR(sv)					\
-      || (IoFLAGS(io) & IOf_NOLINE) || IoLINES(io) || !RsSNARF(rs))	\
-	? ((IoFLAGS(io) &= ~IOf_NOLINE), TRUE)				\
-	: ((IoFLAGS(io) |= IOf_NOLINE), FALSE))
+    (gimme != G_SCALAR || SvCUR(sv)					\
+     || !RsSNARF(rs) || (IoFLAGS(io) & IOf_NOLINE)			\
+     || ((IoFLAGS(io) |= IOf_NOLINE), FALSE))
 
     for (;;) {
 	if (!sv_gets(sv, fp, offset)
@@ -1509,12 +1513,14 @@ PP(pp_iter)
     register PERL_CONTEXT *cx;
     SV* sv;
     AV* av;
+    SV **itersvp;
 
     EXTEND(SP, 1);
     cx = &cxstack[cxstack_ix];
     if (CxTYPE(cx) != CXt_LOOP)
 	DIE(aTHX_ "panic: pp_iter");
 
+    itersvp = CxITERVAR(cx);
     av = cx->blk_loop.iterary;
     if (SvTYPE(av) != SVt_PVAV) {
 	/* iterate ($min .. $max) */
@@ -1525,11 +1531,9 @@ PP(pp_iter)
 	    char *max = SvPV((SV*)av, maxlen);
 	    if (!SvNIOK(cur) && SvCUR(cur) <= maxlen) {
 #ifndef USE_THREADS			  /* don't risk potential race */
-		if (SvREFCNT(*cx->blk_loop.itervar) == 1
-		    && !SvMAGICAL(*cx->blk_loop.itervar))
-		{
+		if (SvREFCNT(*itersvp) == 1 && !SvMAGICAL(*itersvp)) {
 		    /* safe to reuse old SV */
-		    sv_setsv(*cx->blk_loop.itervar, cur);
+		    sv_setsv(*itersvp, cur);
 		}
 		else 
 #endif
@@ -1537,8 +1541,8 @@ PP(pp_iter)
 		    /* we need a fresh SV every time so that loop body sees a
 		     * completely new SV for closures/references to work as
 		     * they used to */
-		    SvREFCNT_dec(*cx->blk_loop.itervar);
-		    *cx->blk_loop.itervar = newSVsv(cur);
+		    SvREFCNT_dec(*itersvp);
+		    *itersvp = newSVsv(cur);
 		}
 		if (strEQ(SvPVX(cur), max))
 		    sv_setiv(cur, 0); /* terminate next time */
@@ -1553,11 +1557,9 @@ PP(pp_iter)
 	    RETPUSHNO;
 
 #ifndef USE_THREADS			  /* don't risk potential race */
-	if (SvREFCNT(*cx->blk_loop.itervar) == 1
-	    && !SvMAGICAL(*cx->blk_loop.itervar))
-	{
+	if (SvREFCNT(*itersvp) == 1 && !SvMAGICAL(*itersvp)) {
 	    /* safe to reuse old SV */
-	    sv_setiv(*cx->blk_loop.itervar, cx->blk_loop.iterix++);
+	    sv_setiv(*itersvp, cx->blk_loop.iterix++);
 	}
 	else 
 #endif
@@ -1565,8 +1567,8 @@ PP(pp_iter)
 	    /* we need a fresh SV every time so that loop body sees a
 	     * completely new SV for closures/references to work as they
 	     * used to */
-	    SvREFCNT_dec(*cx->blk_loop.itervar);
-	    *cx->blk_loop.itervar = newSViv(cx->blk_loop.iterix++);
+	    SvREFCNT_dec(*itersvp);
+	    *itersvp = newSViv(cx->blk_loop.iterix++);
 	}
 	RETPUSHYES;
     }
@@ -1575,7 +1577,7 @@ PP(pp_iter)
     if (cx->blk_loop.iterix >= (av == PL_curstack ? cx->blk_oldsp : AvFILL(av)))
 	RETPUSHNO;
 
-    SvREFCNT_dec(*cx->blk_loop.itervar);
+    SvREFCNT_dec(*itersvp);
 
     if (sv = (SvMAGICAL(av)) 
 	    ? *av_fetch(av, ++cx->blk_loop.iterix, FALSE) 
@@ -1603,7 +1605,7 @@ PP(pp_iter)
 	sv = (SV*)lv;
     }
 
-    *cx->blk_loop.itervar = SvREFCNT_inc(sv);
+    *itersvp = SvREFCNT_inc(sv);
     RETPUSHYES;
 }
 
@@ -1900,7 +1902,7 @@ PP(pp_grepwhile)
 	SV *src;
 
 	ENTER;					/* enter inner scope */
-	SAVESPTR(PL_curpm);
+	SAVEVPTR(PL_curpm);
 
 	src = PL_stack_base[*PL_markstack_ptr];
 	SvTEMP_off(src);
@@ -2403,7 +2405,7 @@ try_autoload:
 		SP--;
 	    }
 	    PL_stack_sp = mark + 1;
-	    fp3 = (I32(*)(int,int,int)))CvXSUB(cv;
+	    fp3 = (I32(*)(int,int,int))CvXSUB(cv);
 	    items = (*fp3)(CvXSUBANY(cv).any_i32, 
 			   MARK - PL_stack_base + 1,
 			   items);
@@ -2439,7 +2441,7 @@ try_autoload:
 	    }
 	    /* We assume first XSUB in &DB::sub is the called one. */
 	    if (PL_curcopdb) {
-		SAVESPTR(PL_curcop);
+		SAVEVPTR(PL_curcop);
 		PL_curcop = PL_curcopdb;
 		PL_curcopdb = NULL;
 	    }
@@ -2481,9 +2483,10 @@ try_autoload:
 		AV *newpad = newAV();
 		SV **oldpad = AvARRAY(svp[CvDEPTH(cv)-1]);
 		I32 ix = AvFILLp((AV*)svp[1]);
+		I32 names_fill = AvFILLp((AV*)svp[0]);
 		svp = AvARRAY(svp[0]);
 		for ( ;ix > 0; ix--) {
-		    if (svp[ix] != &PL_sv_undef) {
+		    if (names_fill >= ix && svp[ix] != &PL_sv_undef) {
 			char *name = SvPVX(svp[ix]);
 			if ((SvFLAGS(svp[ix]) & SVf_FAKE) /* outer lexical? */
 			    || *name == '&')		  /* anonymous code? */
@@ -2500,7 +2503,7 @@ try_autoload:
 			    SvPADMY_on(sv);
 			}
 		    }
-		    else if (IS_PADGV(oldpad[ix])) {
+		    else if (IS_PADGV(oldpad[ix]) || IS_PADCONST(oldpad[ix])) {
 			av_store(newpad, ix, sv = SvREFCNT_inc(oldpad[ix]));
 		    }
 		    else {
@@ -2531,7 +2534,7 @@ try_autoload:
 	    }
 	}
 #endif /* USE_THREADS */		
-	SAVESPTR(PL_curpad);
+	SAVEVPTR(PL_curpad);
     	PL_curpad = AvARRAY((AV*)svp[CvDEPTH(cv)]);
 #ifndef USE_THREADS
 	if (hasargs)

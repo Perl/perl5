@@ -46,8 +46,8 @@ require Carp;
 require Tie::Hash;
 require Exporter;
 use AutoLoader;
-require DynaLoader;
-@ISA = qw(Tie::Hash Exporter DynaLoader);
+use XSLoader ();
+@ISA = qw(Tie::Hash Exporter);
 @EXPORT = qw(
 	GDBM_CACHESIZE
 	GDBM_FAST
@@ -78,7 +78,7 @@ sub AUTOLOAD {
     goto &$AUTOLOAD;
 }
 
-bootstrap GDBM_File $VERSION;
+XSLoader::load 'GDBM_File', $VERSION;
 
 # Preloaded methods go here.  Autoload methods go after __END__, and are
 # processed by the autosplit program.

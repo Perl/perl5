@@ -252,6 +252,8 @@
 #define HAS_KILL
 #define HAS_WAIT
 
+#define PERL_FS_VER_FMT		"%d_%d_%d"
+
 /* VMS:
  *	This symbol, if defined, indicates that the program is running under
  *	VMS.  It's a symbol automagically defined by all VMS C compilers I've seen.

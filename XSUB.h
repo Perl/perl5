@@ -17,6 +17,9 @@
 #define dXSTARG SV * targ = ((PL_op->op_private & OPpENTERSUB_HASTARG) \
 			     ? PAD_SV(PL_op->op_targ) : sv_newmortal())
 
+/* Should be used before final PUSHi etc. if not in PPCODE section. */
+#define XSprePUSH (sp = PL_stack_base + ax - 1)
+
 #define XSANY CvXSUBANY(cv)
 
 #define dXSI32 I32 ix = XSANY.any_i32
@@ -238,6 +241,7 @@
 #    define setjmp		PerlProc_setjmp
 #    define longjmp		PerlProc_longjmp
 #    define signal		PerlProc_signal
+#    define getpid		PerlProc_getpid
 #    define htonl		PerlSock_htonl
 #    define htons		PerlSock_htons
 #    define ntohl		PerlSock_ntohl

@@ -4,6 +4,7 @@ use vars qw(@ORIG_INC);
 use Config;
 
 my $archname = $Config{'archname'};
+my $ver = $Config{'version'};
 
 @ORIG_INC = @INC;	# take a handy copy of 'original' value
 
@@ -26,7 +27,7 @@ sub import {
 	# looks like $_ has an archlib directory below it.
 	if (-d "$_/$archname") {
 	    unshift(@INC, "$_/$archname")    if -d "$_/$archname/auto";
-	    unshift(@INC, "$_/$archname/$]") if -d "$_/$archname/$]/auto";
+	    unshift(@INC, "$_/$archname/$ver") if -d "$_/$archname/$ver/auto";
 	}
     }
 

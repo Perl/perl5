@@ -721,10 +721,10 @@ and others.
 #       Robin Barker <rmb1@cise.npl.co.uk>
 #	-strict, -w cleanups
 # Version 1.13: Fri Feb 27 16:20:50 EST 1997
-#       Gurusamy Sarathy <gsar@umich.edu>
+#       Gurusamy Sarathy <gsar@activestate.com>
 #	-doc tweaks for -F and -X options
 # Version 1.12: Sat Apr 12 22:41:09 EST 1997
-#       Gurusamy Sarathy <gsar@umich.edu>
+#       Gurusamy Sarathy <gsar@activestate.com>
 #	-various fixes for win32
 # Version 1.11: Tue Dec 26 09:54:33 EST 1995
 #       Kenneth Albanowski <kjahds@kjahds.com>

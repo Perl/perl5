@@ -25,7 +25,7 @@ PERLVAR(Iwarnhook,	SV *)
 
 /* switches */
 PERLVAR(Iminus_c,	bool)
-PERLVARA(Ipatchlevel,10,char)
+PERLVAR(Ipatchlevel,	SV *)
 PERLVAR(Ilocalpatches,	char **)
 PERLVARI(Isplitstr,	char *,	" ")
 PERLVAR(Ipreprocess,	bool)
@@ -56,6 +56,7 @@ PERLVARI(Imaxsysfd,	I32,	MAXSYSFD)
 					/* top fd to pass to subprocesses */
 PERLVAR(Imultiline,	int)		/* $*--do strings hold >1 line? */
 PERLVAR(Istatusvalue,	I32)		/* $? */
+PERLVAR(Iexit_flags,	U8)		/* was exit() unexpected, etc. */
 #ifdef VMS
 PERLVAR(Istatusvalue_vms,U32)
 #endif
@@ -169,7 +170,6 @@ PERLVAR(Isys_intern,	struct interp_intern)
 /* more statics moved here */
 PERLVARI(Igeneration,	int,	100)	/* from op.c */
 PERLVAR(IDBcv,		CV *)		/* from perl.c */
-PERLVAR(Iarchpat_auto,	char*)		/* from perl.c */
 
 PERLVARI(Iin_clean_objs,bool,    FALSE)	/* from sv.c */
 PERLVARI(Iin_clean_all,	bool,    FALSE)	/* from sv.c */
@@ -233,10 +233,9 @@ PERLVAR(Icshlen,	I32)
 
 PERLVAR(Ilex_state,	U32)		/* next token is determined */
 PERLVAR(Ilex_defer,	U32)		/* state after determined token */
-PERLVAR(Ilex_expect,	expectation)	/* expect after determined token */
+PERLVAR(Ilex_expect,	int)		/* expect after determined token */
 PERLVAR(Ilex_brackets,	I32)		/* bracket count */
 PERLVAR(Ilex_formbrack,	I32)		/* bracket count at outer format level */
-PERLVAR(Ilex_fakebrack,	I32)		/* outer bracket is mere delimiter */
 PERLVAR(Ilex_casemods,	I32)		/* casemod count */
 PERLVAR(Ilex_dojoin,	I32)		/* doing an array interpolation */
 PERLVAR(Ilex_starts,	I32)		/* how many interps done on level */
@@ -258,7 +257,7 @@ PERLVAR(Ibufptr,	char *)
 PERLVAR(Ioldbufptr,	char *)
 PERLVAR(Ioldoldbufptr,	char *)
 PERLVAR(Ibufend,	char *)
-PERLVARI(Iexpect,expectation,	XSTATE)	/* how to interpret ambiguous tokens */
+PERLVARI(Iexpect,int,	XSTATE)		/* how to interpret ambiguous tokens */
 
 PERLVAR(Imulti_start,	I32)		/* 1st line of multi-line string */
 PERLVAR(Imulti_end,	I32)		/* last line of multi-line string */
@@ -369,8 +368,13 @@ PERLVAR(Icred_mutex,	perl_mutex)	/* altered credentials in effect */
 
 #endif /* USE_THREADS */
 
+PERLVAR(Ipsig_ptr, SV**)
+PERLVAR(Ipsig_name, SV**)
+
 #if defined(PERL_IMPLICIT_SYS)
 PERLVAR(IMem,		struct IPerlMem*)
+PERLVAR(IMemShared,	struct IPerlMem*)
+PERLVAR(IMemParse,	struct IPerlMem*)
 PERLVAR(IEnv,		struct IPerlEnv*)
 PERLVAR(IStdIO,		struct IPerlStdIO*)
 PERLVAR(ILIO,		struct IPerlLIO*)

@@ -81,8 +81,16 @@ Perl_he_dup(pTHX_ HE *e, bool shared)
 
     if (!e)
 	return Nullhe;
+    /* look for it in the table first */
+    ret = (HE*)ptr_table_fetch(PL_ptr_table, e);
+    if (ret)
+	return ret;
+
+    /* create anew and remember what it is */
     ret = new_he();
-    HeNEXT(ret) = (HE*)NULL;
+    ptr_table_store(PL_ptr_table, e, ret);
+
+    HeNEXT(ret) = he_dup(HeNEXT(e),shared);
     if (HeKLEN(e) == HEf_SVKEY)
 	HeKEY_sv(ret) = SvREFCNT_inc(sv_dup(HeKEY_sv(e)));
     else if (shared)
@@ -494,8 +502,10 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, U32 klen, I32 flags)
 	    xhv->xhv_fill--;
 	if (flags & G_DISCARD)
 	    sv = Nullsv;
-	else
-	    sv = sv_mortalcopy(HeVAL(entry));
+	else {
+	    sv = sv_2mortal(HeVAL(entry));
+	    HeVAL(entry) = &PL_sv_undef;
+	}
 	if (entry == xhv->xhv_eiter)
 	    HvLAZYDEL_on(hv);
 	else
@@ -568,8 +578,10 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 	    xhv->xhv_fill--;
 	if (flags & G_DISCARD)
 	    sv = Nullsv;
-	else
-	    sv = sv_mortalcopy(HeVAL(entry));
+	else {
+	    sv = sv_2mortal(HeVAL(entry));
+	    HeVAL(entry) = &PL_sv_undef;
+	}
 	if (entry == xhv->xhv_eiter)
 	    HvLAZYDEL_on(hv);
 	else

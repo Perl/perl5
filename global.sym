@@ -4,17 +4,34 @@
 # and run 'make regen_headers' to effect changes.
 #
 
+perl_alloc_using
+perl_alloc
+perl_construct
+perl_destruct
+perl_free
+perl_run
+perl_parse
+perl_clone
+perl_clone_using
+Perl_malloc
+Perl_calloc
+Perl_realloc
+Perl_mfree
+Perl_malloced_size
 Perl_amagic_call
 Perl_Gv_AMupdate
 Perl_append_elem
 Perl_append_list
 Perl_apply
+Perl_avhv_delete_ent
 Perl_avhv_exists_ent
 Perl_avhv_fetch_ent
 Perl_avhv_iternext
 Perl_avhv_iterval
 Perl_avhv_keys
 Perl_av_clear
+Perl_av_delete
+Perl_av_exists
 Perl_av_extend
 Perl_av_fake
 Perl_av_fetch
@@ -292,7 +309,6 @@ Perl_magic_set_all_env
 Perl_magic_sizepack
 Perl_magic_wipepack
 Perl_magicname
-Perl_malloced_size
 Perl_markstack_grow
 Perl_mem_collxfrm
 Perl_mess
@@ -393,17 +409,6 @@ Perl_pad_free
 Perl_pad_reset
 Perl_pad_swipe
 Perl_peep
-perl_construct
-perl_destruct
-perl_free
-perl_run
-perl_parse
-perl_alloc
-perl_construct
-perl_destruct
-perl_free
-perl_run
-perl_parse
 Perl_new_struct_thread
 Perl_call_atexit
 Perl_call_argv
@@ -477,6 +482,7 @@ Perl_save_hints
 Perl_save_hptr
 Perl_save_I16
 Perl_save_I32
+Perl_save_I8
 Perl_save_int
 Perl_save_item
 Perl_save_iv
@@ -486,6 +492,7 @@ Perl_save_nogv
 Perl_save_op
 Perl_save_scalar
 Perl_save_pptr
+Perl_save_vptr
 Perl_save_re_context
 Perl_save_sptr
 Perl_save_svref
@@ -516,11 +523,15 @@ Perl_sv_2iv
 Perl_sv_2mortal
 Perl_sv_2nv
 Perl_sv_2pv
+Perl_sv_2pvutf8
+Perl_sv_2pvbyte
 Perl_sv_2uv
 Perl_sv_iv
 Perl_sv_uv
 Perl_sv_nv
 Perl_sv_pvn
+Perl_sv_pvutf8n
+Perl_sv_pvbyten
 Perl_sv_true
 Perl_sv_add_arena
 Perl_sv_backoff
@@ -560,6 +571,8 @@ Perl_sv_peek
 Perl_sv_pos_u2b
 Perl_sv_pos_b2u
 Perl_sv_pvn_force
+Perl_sv_pvutf8n_force
+Perl_sv_pvbyten_force
 Perl_sv_reftype
 Perl_sv_replace
 Perl_sv_report_used
@@ -607,6 +620,7 @@ Perl_uv_to_utf8
 Perl_vivify_defelem
 Perl_vivify_ref
 Perl_wait4pid
+Perl_report_uninit
 Perl_warn
 Perl_vwarn
 Perl_warner
@@ -619,10 +633,6 @@ Perl_yylex
 Perl_yyparse
 Perl_yywarn
 Perl_dump_mstats
-Perl_malloc
-Perl_calloc
-Perl_realloc
-Perl_mfree
 Perl_safesysmalloc
 Perl_safesyscalloc
 Perl_safesysrealloc
@@ -665,7 +675,11 @@ Perl_default_protect
 Perl_vdefault_protect
 Perl_reginitcolors
 Perl_sv_2pv_nolen
+Perl_sv_2pvutf8_nolen
+Perl_sv_2pvbyte_nolen
 Perl_sv_pv
+Perl_sv_pvutf8
+Perl_sv_pvbyte
 Perl_sv_force_normal
 Perl_tmps_grow
 Perl_sv_rvweaken
@@ -678,6 +692,7 @@ Perl_boot_core_xsutils
 Perl_cx_dup
 Perl_si_dup
 Perl_ss_dup
+Perl_any_dup
 Perl_he_dup
 Perl_re_dup
 Perl_fp_dup
@@ -690,5 +705,3 @@ Perl_ptr_table_new
 Perl_ptr_table_fetch
 Perl_ptr_table_store
 Perl_ptr_table_split
-perl_clone
-perl_clone_using

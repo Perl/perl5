@@ -71,13 +71,13 @@ Perl_debop(pTHX_ OP *o)
     Perl_deb(aTHX_ "%s", PL_op_name[o->op_type]);
     switch (o->op_type) {
     case OP_CONST:
-	PerlIO_printf(Perl_debug_log, "(%s)", SvPEEK(cSVOPo->op_sv));
+	PerlIO_printf(Perl_debug_log, "(%s)", SvPEEK(cSVOPo_sv));
 	break;
     case OP_GVSV:
     case OP_GV:
-	if (cGVOPo) {
+	if (cGVOPo_gv) {
 	    sv = NEWSV(0,0);
-	    gv_fullname3(sv, cGVOPo, Nullch);
+	    gv_fullname3(sv, cGVOPo_gv, Nullch);
 	    PerlIO_printf(Perl_debug_log, "(%s)", SvPV(sv, n_a));
 	    SvREFCNT_dec(sv);
 	}

@@ -261,7 +261,7 @@ lintflags = -hbvxac
 .c$(OBJ_EXT):
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
-all: $(FIRSTMAKEFILE) miniperl $(private) $(public) $(dynamic_ext) $(nonxs_ext)
+all: $(FIRSTMAKEFILE) miniperl extra.pods $(private) $(public) $(dynamic_ext) $(nonxs_ext)
 	@echo " ";
 	@echo "	Everything is up to date. 'make test' to run test suite."
 
@@ -285,6 +285,9 @@ utilities:	miniperl lib/Config.pm $(plextract) FORCE
 # Apparently some makes require an action for the FORCE target.
 FORCE:
 	@sh -c true
+
+opmini$(OBJ_EXT): op.c
+	$(CCCMD) $(PLDLFLAGS) -DPERL_EXTERNAL_GLOB -o opmini$(OBJ_EXT) op.c
 
 miniperlmain$(OBJ_EXT): miniperlmain.c
 	$(CCCMD) $(PLDLFLAGS) $*.c
@@ -336,8 +339,7 @@ $(LIBPERL_NONSHR): perl$(OBJ_EXT) $(obj)
 	$(RMS) $(LIBPERL_NONSHR)
 	$(AR) rcu $(LIBPERL_NONSHR) perl$(OBJ_EXT) $(obj)
 
-$(MINIPERL_NONSHR): $(LIBPERL_NONSHR) miniperlmain$(OBJ_EXT)
-	$(CCCMD) $(PLDLFLAGS) -DMINIPERL_BUILD -o opmini$(OBJ_EXT) op.c
+$(MINIPERL_NONSHR): $(LIBPERL_NONSHR) miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT)
 	$(CC) $(LDFLAGS) -o $(MINIPERL_NONSHR) miniperlmain$(OBJ_EXT) \
 	    opmini$(OBJ_EXT) $(LIBPERL_NONSHR) $(LIBS)
 
@@ -421,11 +423,28 @@ $(LIBPERL): $& perl$(OBJ_EXT) $(obj) $(LIBPERLEXPORT)
 # build problems but that's not obvious to the novice.
 # The Module used here must not depend on Config or any extensions.
 
-miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL)
-	$(CCCMD) $(PLDLFLAGS) -DMINIPERL_BUILD -o opmini$(OBJ_EXT) op.c
+!NO!SUBS!
+
+	case "${osname}${osvers}" in
+	next4*)
+		$spitshell >>Makefile <<'!NO!SUBS!'
+miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
+	$(CC) -o miniperl `echo $(obj) | sed 's/ op$(OBJ_EXT) / /'` \
+	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) perl$(OBJ_EXT) $(libs)
+	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
+!NO!SUBS!
+		;;
+	*)
+		$spitshell >>Makefile <<'!NO!SUBS!'
+miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
 	$(LDLIBPTH) $(CC) $(LARGE) $(CLDFLAGS) -o miniperl \
 	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) $(LLIBPERL) $(libs)
-	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e 0 || $(MAKE) minitest
+	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
+!NO!SUBS!
+		;;
+	esac
+
+	$spitshell >>Makefile <<'!NO!SUBS!'
 
 perl: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs $(PERLEXPORT)
 	$(SHRPENV) $(LDLIBPTH) $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o perl perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
@@ -471,7 +490,7 @@ preplibrary: miniperl lib/Config.pm
 # Take care to avoid modifying lib/Config.pm without reason
 # (If trying to create a new port and having problems with the configpm script, 
 # try 'make minitest' and/or commenting out the tests at the end of configpm.)
-lib/Config.pm: config.sh miniperl configpm
+lib/Config.pm: config.sh miniperl configpm lib/re.pm
 	$(LDLIBPTH) ./miniperl configpm configpm.tmp
 	sh mv-if-diff configpm.tmp $@
 
@@ -483,10 +502,11 @@ lib/re.pm: ext/re/re.pm
 	rm -f $@
 	cat ext/re/re.pm > $@
 
-$(plextract):	miniperl lib/Config.pm lib/re.pm
+$(plextract):	miniperl lib/Config.pm
 	$(LDLIBPTH) ./miniperl -Ilib $@.PL
 
-extra.pods: perl
+extra.pods: miniperl
+	-@test -f extra.pods && rm -f `cat extra.pods`
 	-@rm -f extra.pods
 	-@for x in `grep -l '^=[a-z]' README.*` ; do \
 	    nx=`echo $$x | sed -e "s/README\.//"`; \
@@ -494,7 +514,7 @@ extra.pods: perl
 	    echo "pod/perl"$$nx".pod" >> extra.pods ; \
 	done
 
-install: all install.perl install.man extra.pods
+install: all install.perl install.man
 
 install.perl:	all installperl
 	if [ -n "$(COMPILE)" ]; \

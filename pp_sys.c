@@ -247,7 +247,7 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
     Gid_t egid = getegid();
     int res;
 
-    MUTEX_LOCK(&PL_cred_mutex);
+    LOCK_CRED_MUTEX;
 #if !defined(HAS_SETREUID) && !defined(HAS_SETRESUID)
     Perl_croak(aTHX_ "switching effective uid is not implemented");
 #else
@@ -293,7 +293,7 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 #endif
 #endif
 	Perl_croak(aTHX_ "leaving effective gid failed");
-    MUTEX_UNLOCK(&PL_cred_mutex);
+    UNLOCK_CRED_MUTEX;
 
     return res;
 }
@@ -411,7 +411,7 @@ PP(pp_indread)
 
 PP(pp_rcatline)
 {
-    PL_last_in_gv = cGVOP;
+    PL_last_in_gv = cGVOP_gv;
     return do_readline();
 }
 
@@ -1095,8 +1095,6 @@ PP(pp_getc)
 	gv = PL_stdingv;
     else
 	gv = (GV*)POPs;
-    if (!gv)
-	gv = PL_argvgv;
 
     if (mg = SvTIED_mg((SV*)gv, 'q')) {
 	I32 gimme = GIMME_V;
@@ -1138,9 +1136,9 @@ S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
     SAVETMPS;
 
     push_return(retop);
-    PUSHBLOCK(cx, CXt_SUB, PL_stack_sp);
+    PUSHBLOCK(cx, CXt_FORMAT, PL_stack_sp);
     PUSHFORMAT(cx);
-    SAVESPTR(PL_curpad);
+    SAVEVPTR(PL_curpad);
     PL_curpad = AvARRAY((AV*)svp[1]);
 
     setdefout(gv);	    /* locally select filehandle so $% et al work */
@@ -1281,7 +1279,7 @@ PP(pp_leavewrite)
 			    SvPV_nolen(sv));
 	    else if (ckWARN(WARN_CLOSED))
 		Perl_warner(aTHX_ WARN_CLOSED,
-			    "Write on closed filehandle %s", SvPV_nolen(sv));
+			    "write() on closed filehandle %s", SvPV_nolen(sv));
 	}
 	PUSHs(&PL_sv_no);
     }
@@ -1361,7 +1359,7 @@ PP(pp_prtf)
 			    SvPV(sv,n_a));
 	    else if (ckWARN(WARN_CLOSED))
 		Perl_warner(aTHX_ WARN_CLOSED,
-			    "printf on closed filehandle %s", SvPV(sv,n_a));
+			    "printf() on closed filehandle %s", SvPV(sv,n_a));
 	}
 	SETERRNO(EBADF,IoIFP(io)?RMS$_FAC:RMS$_IFI);
 	goto just_say_no;
@@ -1631,9 +1629,9 @@ PP(pp_send)
 	length = -1;
 	if (ckWARN(WARN_CLOSED)) {
 	    if (PL_op->op_type == OP_SYSWRITE)
-		Perl_warner(aTHX_ WARN_CLOSED, "Syswrite on closed filehandle");
+		Perl_warner(aTHX_ WARN_CLOSED, "syswrite() on closed filehandle");
 	    else
-		Perl_warner(aTHX_ WARN_CLOSED, "Send on closed socket");
+		Perl_warner(aTHX_ WARN_CLOSED, "send() on closed socket");
 	}
     }
     else if (PL_op->op_type == OP_SYSWRITE) {
@@ -1703,10 +1701,28 @@ PP(pp_eof)
     GV *gv;
     MAGIC *mg;
 
-    if (MAXARG <= 0)
-	gv = PL_last_in_gv;
+    if (MAXARG <= 0) {
+	if (PL_op->op_flags & OPf_SPECIAL) {	/* eof() */
+	    IO *io;
+	    gv = PL_last_in_gv = PL_argvgv;
+	    io = GvIO(gv);
+	    if (io && !IoIFP(io)) {
+		if ((IoFLAGS(io) & IOf_START) && av_len(GvAVn(gv)) < 0) {
+		    IoLINES(io) = 0;
+		    IoFLAGS(io) &= ~IOf_START;
+		    do_open(gv, "-", 1, FALSE, O_RDONLY, 0, Nullfp);
+		    sv_setpvn(GvSV(gv), "-", 1);
+		    SvSETMAGIC(GvSV(gv));
+		}
+		else if (!nextargv(gv))
+		    RETPUSHYES;
+	    }
+	}
+	else
+	    gv = PL_last_in_gv;			/* eof */
+    }
     else
-	gv = PL_last_in_gv = (GV*)POPs;
+	gv = PL_last_in_gv = (GV*)POPs;		/* eof(FH) */
 
     if (gv && (mg = SvTIED_mg((SV*)gv, 'q'))) {
 	PUSHMARK(SP);
@@ -2122,7 +2138,7 @@ PP(pp_bind)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	Perl_warner(aTHX_ WARN_CLOSED, "bind() on closed fd");
+	Perl_warner(aTHX_ WARN_CLOSED, "bind() on closed socket");
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2152,7 +2168,7 @@ PP(pp_connect)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	Perl_warner(aTHX_ WARN_CLOSED, "connect() on closed fd");
+	Perl_warner(aTHX_ WARN_CLOSED, "connect() on closed socket");
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2178,7 +2194,7 @@ PP(pp_listen)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	Perl_warner(aTHX_ WARN_CLOSED, "listen() on closed fd");
+	Perl_warner(aTHX_ WARN_CLOSED, "listen() on closed socket");
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2232,7 +2248,7 @@ PP(pp_accept)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	Perl_warner(aTHX_ WARN_CLOSED, "accept() on closed fd");
+	Perl_warner(aTHX_ WARN_CLOSED, "accept() on closed socket");
     SETERRNO(EBADF,SS$_IVCHAN);
 
 badexit:
@@ -2259,7 +2275,7 @@ PP(pp_shutdown)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	Perl_warner(aTHX_ WARN_CLOSED, "shutdown() on closed fd");
+	Perl_warner(aTHX_ WARN_CLOSED, "shutdown() on closed socket");
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2338,7 +2354,8 @@ PP(pp_ssockopt)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	Perl_warner(aTHX_ WARN_CLOSED, "[gs]etsockopt() on closed fd");
+	Perl_warner(aTHX_ WARN_CLOSED, "%cetsockopt() on closed socket",
+		    optype == OP_GSOCKOPT ? 'g' : 's');
     SETERRNO(EBADF,SS$_IVCHAN);
 nuts2:
     RETPUSHUNDEF;
@@ -2411,7 +2428,8 @@ PP(pp_getpeername)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	Perl_warner(aTHX_ WARN_CLOSED, "get{sock, peer}name() on closed fd");
+	Perl_warner(aTHX_ WARN_CLOSED, "get%sname() on closed socket",
+		    optype == OP_GETSOCKNAME ? "sock" : "peer");
     SETERRNO(EBADF,SS$_IVCHAN);
 nuts2:
     RETPUSHUNDEF;
@@ -2437,7 +2455,7 @@ PP(pp_stat)
     STRLEN n_a;
 
     if (PL_op->op_flags & OPf_REF) {
-	tmpgv = cGVOP;
+	tmpgv = cGVOP_gv;
       do_fstat:
 	if (tmpgv != PL_defgv) {
 	    PL_laststype = OP_STAT;
@@ -2899,7 +2917,7 @@ PP(pp_fttty)
     STRLEN n_a;
 
     if (PL_op->op_flags & OPf_REF)
-	gv = cGVOP;
+	gv = cGVOP_gv;
     else if (isGV(TOPs))
 	gv = (GV*)POPs;
     else if (SvROK(TOPs) && isGV(SvRV(TOPs)))
@@ -2941,7 +2959,7 @@ PP(pp_fttext)
     PerlIO *fp;
 
     if (PL_op->op_flags & OPf_REF)
-	gv = cGVOP;
+	gv = cGVOP_gv;
     else if (isGV(TOPs))
 	gv = (GV*)POPs;
     else if (SvROK(TOPs) && isGV(SvRV(TOPs)))
@@ -2990,9 +3008,11 @@ PP(pp_fttext)
 		len = 512;
 	}
 	else {
-	    if (ckWARN(WARN_UNOPENED))
+	    if (ckWARN(WARN_UNOPENED)) {
+		gv = cGVOP_gv;
 		Perl_warner(aTHX_ WARN_UNOPENED, "Test on unopened file <%s>",
-			    GvENAME(cGVOP));
+			    GvENAME(gv));
+	    }
 	    SETERRNO(EBADF,RMS$_IFI);
 	    RETPUSHUNDEF;
 	}
@@ -3576,24 +3596,20 @@ PP(pp_fork)
     if (!childpid) {
 	/*SUPPRESS 560*/
 	if (tmpgv = gv_fetchpv("$", TRUE, SVt_PV))
-	    sv_setiv(GvSV(tmpgv), (IV)getpid());
+	    sv_setiv(GvSV(tmpgv), (IV)PerlProc_getpid());
 	hv_clear(PL_pidstatus);	/* no kids, so don't wait for 'em */
     }
     PUSHi(childpid);
     RETURN;
 #else
-#  ifdef USE_ITHREADS
-    /* XXXXXX testing */
+#  if defined(USE_ITHREADS) && defined(PERL_IMPLICIT_SYS)
     djSP; dTARGET;
-    /* XXX this just an approximation of what will eventually be run
-     * in a different thread */
-    PerlInterpreter *new_perl = perl_clone(my_perl, 0);
-    Perl_pp_enter(new_perl);
-    new_perl->Top = new_perl->Top->op_next; /* continue from next op */
-    CALLRUNOPS(new_perl);
+    Pid_t childpid;
 
-    /* parent returns with negative pseudo-pid */
-    PUSHi(-1);
+    EXTEND(SP, 1);
+    PERL_FLUSHALL_FOR_CHILD;
+    childpid = PerlProc_fork();
+    PUSHi(childpid);
     RETURN;
 #  else
     DIE(aTHX_ PL_no_func, "Unsupported function fork");
@@ -3783,6 +3799,12 @@ PP(pp_exec)
 #  endif
 #endif
     }
+
+#if !defined(HAS_FORK) && defined(USE_ITHREADS) && defined(PERL_IMPLICIT_SYS)
+    if (value >= 0)
+	my_exit(value);
+#endif
+
     SP = ORIGMARK;
     PUSHi(value);
     RETURN;
@@ -3827,7 +3849,7 @@ PP(pp_getpgrp)
 #ifdef BSD_GETPGRP
     pgrp = (I32)BSD_GETPGRP(pid);
 #else
-    if (pid != 0 && pid != getpid())
+    if (pid != 0 && pid != PerlProc_getpid())
 	DIE(aTHX_ "POSIX getpgrp can't take an argument");
     pgrp = getpgrp();
 #endif
@@ -3857,8 +3879,11 @@ PP(pp_setpgrp)
 #ifdef BSD_SETPGRP
     SETi( BSD_SETPGRP(pid, pgrp) >= 0 );
 #else
-    if ((pgrp != 0 && pgrp != getpid()) || (pid != 0 && pid != getpid()))
+    if ((pgrp != 0 && pgrp != PerlProc_getpid())
+	|| (pid != 0 && pid != PerlProc_getpid()))
+    {
 	DIE(aTHX_ "setpgrp can't take arguments");
+    }
     SETi( setpgrp() >= 0 );
 #endif /* USE_BSDPGRP */
     RETURN;

@@ -9,7 +9,7 @@ use Math::BigFloat;
 
 $test = 0;
 $| = 1;
-print "1..358\n";
+print "1..362\n";
 while (<DATA>) {
        chop;
        if (s/^&//) {
@@ -41,15 +41,15 @@ while (<DATA>) {
                    $try .= "0+\$x->fsqrt;";
                } else {
                    $try .= "\$y = new Math::BigFloat \"$args[1]\";";
-                   if ($f eq fcmp){
+                   if ($f eq "fcmp") {
                        $try .= "\$x <=> \$y;";
-                   }elsif ($f eq fadd){
+                   } elsif ($f eq "fadd") {
                        $try .= "\$x + \$y;";
-                   }elsif ($f eq fsub){
+                   } elsif ($f eq "fsub") {
                        $try .= "\$x - \$y;";
-                   }elsif ($f eq fmul){
+                   } elsif ($f eq "fmul") {
                        $try .= "\$x * \$y;";
-                   }elsif ($f eq fdiv){
+                   } elsif ($f eq "fdiv") {
                        $try .= "\$x / \$y;";
                    } else { warn "Unknown op"; }
                }
@@ -271,6 +271,10 @@ abc:+0:
 +1:-1:1
 -1:-1:0
 +1:+1:0
+-1.1:0:-1
++0:-1.1:1
++1.1:+0:1
++0:+1.1:-1
 +123:+123:0
 +123:+12:1
 +12:+123:-1

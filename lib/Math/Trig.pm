@@ -435,7 +435,7 @@ an answer instead of giving a fatal runtime error.
 =head1 AUTHORS
 
 Jarkko Hietaniemi <F<jhi@iki.fi>> and 
-Raphael Manfredi <F<Raphael_Manfredi@grenoble.hp.com>>.
+Raphael Manfredi <F<Raphael_Manfredi@pobox.com>>.
 
 =cut
 

@@ -86,4 +86,7 @@ Kenneth Albanowski <F<kjahds@kjahds.com>>, Andy Dougherty
 <F<A.Koenig@franz.ww.TU-Berlin.DE>>, Tim Bunce <F<Tim.Bunce@ig.co.uk>>. VMS
 support by Charles Bailey <F<bailey@newman.upenn.edu>>.  OS/2 support by
 Ilya Zakharevich <F<ilya@math.ohio-state.edu>>. Mac support by Paul Schinder
-<F<schinder@pobox.com>>.
+<F<schinder@pobox.com>>.  abs2rel() and rel2abs() written by
+Shigio Yamaguchi <F<shigio@tamacom.com>>, modified by Barrie Slaymaker
+<F<barries@slaysys.com>>.  splitpath(), splitdir(), catpath() and catdir()
+by Barrie Slaymaker.

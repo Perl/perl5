@@ -4,8 +4,8 @@ BEGIN {
     chdir 't' if -d 't';
     unshift @INC, '../lib';
     require Config; import Config;
-    if (! $Config{'usethreads'}) {
-	print "1..0 # Skip: this perl is not threaded\n";
+    if (! $Config{'use5005threads'}) {
+	print "1..0 # Skip: not use5005threads\n";
 	exit 0;
     }
 
@@ -13,8 +13,8 @@ BEGIN {
     $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3;
 }
 $| = 1;
-print "1..18\n";
-use Thread;
+print "1..21\n";
+use Thread 'yield';
 print "ok 1\n";
 
 sub content
@@ -82,3 +82,37 @@ Loch::Ness->monster(15);
 Loch::Ness->new->monster(16);
 Loch::Ness->gollum(17);
 Loch::Ness->new->gollum(18);
+
+my $short = "This is a long string that goes on and on.";
+my $shorte = " a long string that goes on and on.";
+my $long  = "This is short.";
+my $longe  = " short.";
+my $thr1 = new Thread \&threaded, $short, $shorte, "19";
+my $thr2 = new Thread \&threaded, $long, $longe, "20";
+
+sub threaded {
+  my ($string, $string_end, $testno) = @_;
+
+  # Do the match, saving the output in appropriate variables
+  $string =~ /(.*)(is)(.*)/;
+  # Yield control, allowing the other thread to fill in the match variables
+  yield();
+  # Examine the match variable contents; on broken perls this fails
+  if ($3 eq $string_end) {
+    print "ok $testno\n";
+  }
+  else {
+    warn <<EOT;
+
+#
+# This is a KNOWN FAILURE, and one of the reasons why threading
+# is still an experimental feature.  It is here to stop people
+# from deploying threads in production. ;-)
+#
+EOT
+    print "not ok $testno # other thread filled in match variables\n";
+  }
+}
+$thr1->join;
+$thr2->join;
+print "ok 21\n";

@@ -1,4 +1,4 @@
-#ifdef USE_THREADS
+#if defined(USE_THREADS) || defined(USE_ITHREADS)
 
 #ifdef WIN32
 #  include <win32thread.h>
@@ -73,7 +73,9 @@ struct perl_thread *getTHR (void);
 	} STMT_END
 
 #define MUTEX_LOCK(m)		mutex_lock(*m)
+#define MUTEX_LOCK_NOCONTEXT(m)	mutex_lock(*m)
 #define MUTEX_UNLOCK(m)		mutex_unlock(*m)
+#define MUTEX_UNLOCK_NOCONTEXT(m) mutex_unlock(*m)
 #define MUTEX_DESTROY(m)				\
 	STMT_START {					\
 		mutex_free(*m);				\
@@ -109,7 +111,7 @@ struct perl_thread *getTHR (void);
 #define JOIN(t, avp)		(*(avp) = (AV *)cthread_join(t->self))
 
 #define SET_THR(thr)		cthread_set_data(cthread_self(), thr)
-#define THR			cthread_data(cthread_self())
+#define THR			((struct perl_thread *)cthread_data(cthread_self()))
 
 #define INIT_THREADS		cthread_init()
 #define YIELD			cthread_yield()
@@ -236,9 +238,18 @@ struct perl_thread *getTHR (void);
     } STMT_END
 #endif /* SET_THR */
 
-#ifndef THR
-#define THR ((struct perl_thread *) pthread_getspecific(PL_thr_key))
+#ifndef INIT_THREADS
+#  ifdef NEED_PTHREAD_INIT
+#    define INIT_THREADS pthread_init()
+#  endif
 #endif
+
+#ifndef THREAD_RET_TYPE
+#  define THREAD_RET_TYPE	void *
+#  define THREAD_RET_CAST(p)	((void *)(p))
+#endif /* THREAD_RET */
+
+#if defined(USE_THREADS)
 
 /*
  * dTHR is performance-critical. Here, we only do the pthread_get_specific
@@ -249,21 +260,18 @@ struct perl_thread *getTHR (void);
  *
  * The use of PL_threadnum should be safe here.
  */
-#ifndef dTHR
-#  define dTHR \
-    struct perl_thread *thr = PL_threadnum? THR : (struct perl_thread*)SvPVX(PL_thrsv)
-#endif /* dTHR */
+#  if !defined(dTHR)
+#    define dTHR \
+    struct perl_thread *thr = PL_threadnum ? THR : (struct perl_thread*)SvPVX(PL_thrsv)
+#  endif /* dTHR */
 
-#ifndef INIT_THREADS
-#  ifdef NEED_PTHREAD_INIT
-#    define INIT_THREADS pthread_init()
-#  else
-#    define INIT_THREADS NOOP
+#  if !defined(THR)
+#    define THR ((struct perl_thread *) pthread_getspecific(PL_thr_key))
 #  endif
-#endif
+
 
 /* Accessor for per-thread SVs */
-#define THREADSV(i) (thr->threadsvp[i])
+#  define THREADSV(i) (thr->threadsvp[i])
 
 /*
  * LOCK_SV_MUTEX and UNLOCK_SV_MUTEX are performance-critical. Here, we
@@ -272,31 +280,12 @@ struct perl_thread *getTHR (void);
  * remove the "if (threadnum) ..." test.
  * XXX do NOT use C<if (PL_threadnum) ...> -- it sets up race conditions!
  */
-#define LOCK_SV_MUTEX				\
-    STMT_START {				\
-	MUTEX_LOCK(&PL_sv_mutex);		\
-    } STMT_END
-
-#define UNLOCK_SV_MUTEX				\
-    STMT_START {				\
-	MUTEX_UNLOCK(&PL_sv_mutex);		\
-    } STMT_END
-
-/* Likewise for strtab_mutex */
-#define LOCK_STRTAB_MUTEX			\
-    STMT_START {				\
-	MUTEX_LOCK(&PL_strtab_mutex);		\
-    } STMT_END
-
-#define UNLOCK_STRTAB_MUTEX			\
-    STMT_START {				\
-	MUTEX_UNLOCK(&PL_strtab_mutex);		\
-    } STMT_END
-
-#ifndef THREAD_RET_TYPE
-#  define THREAD_RET_TYPE	void *
-#  define THREAD_RET_CAST(p)	((void *)(p))
-#endif /* THREAD_RET */
+#  define LOCK_SV_MUTEX		MUTEX_LOCK(&PL_sv_mutex)
+#  define UNLOCK_SV_MUTEX	MUTEX_UNLOCK(&PL_sv_mutex)
+#  define LOCK_STRTAB_MUTEX	MUTEX_LOCK(&PL_strtab_mutex)
+#  define UNLOCK_STRTAB_MUTEX	MUTEX_UNLOCK(&PL_strtab_mutex)
+#  define LOCK_CRED_MUTEX	MUTEX_LOCK(&PL_cred_mutex)
+#  define UNLOCK_CRED_MUTEX	MUTEX_UNLOCK(&PL_cred_mutex)
 
 
 /* Values and macros for thr->flags */
@@ -330,24 +319,85 @@ typedef struct condpair {
 #define MgCONDP(mg) (&((condpair_t *)(mg->mg_ptr))->cond)
 #define MgOWNER(mg) ((condpair_t *)(mg->mg_ptr))->owner
 
-#else
-/* USE_THREADS is not defined */
-#define MUTEX_LOCK(m)
-#define MUTEX_LOCK_NOCONTEXT(m)
-#define MUTEX_UNLOCK(m)
-#define MUTEX_UNLOCK_NOCONTEXT(m)
-#define MUTEX_INIT(m)
-#define MUTEX_DESTROY(m)
-#define COND_INIT(c)
-#define COND_SIGNAL(c)
-#define COND_BROADCAST(c)
-#define COND_WAIT(c, m)
-#define COND_DESTROY(c)
-#define LOCK_SV_MUTEX
-#define UNLOCK_SV_MUTEX
-#define LOCK_STRTAB_MUTEX
-#define UNLOCK_STRTAB_MUTEX
-
-#define THR
-#define dTHR dNOOP
 #endif /* USE_THREADS */
+#endif /* USE_THREADS || USE_ITHREADS */
+
+#ifndef MUTEX_LOCK
+#  define MUTEX_LOCK(m)
+#endif
+
+#ifndef MUTEX_LOCK_NOCONTEXT
+#  define MUTEX_LOCK_NOCONTEXT(m)
+#endif
+
+#ifndef MUTEX_UNLOCK
+#  define MUTEX_UNLOCK(m)
+#endif
+
+#ifndef MUTEX_UNLOCK_NOCONTEXT
+#  define MUTEX_UNLOCK_NOCONTEXT(m)
+#endif
+
+#ifndef MUTEX_INIT
+#  define MUTEX_INIT(m)
+#endif
+
+#ifndef MUTEX_DESTROY
+#  define MUTEX_DESTROY(m)
+#endif
+
+#ifndef COND_INIT
+#  define COND_INIT(c)
+#endif
+
+#ifndef COND_SIGNAL
+#  define COND_SIGNAL(c)
+#endif
+
+#ifndef COND_BROADCAST
+#  define COND_BROADCAST(c)
+#endif
+
+#ifndef COND_WAIT
+#  define COND_WAIT(c, m)
+#endif
+
+#ifndef COND_DESTROY
+#  define COND_DESTROY(c)
+#endif
+
+#ifndef LOCK_SV_MUTEX
+#  define LOCK_SV_MUTEX
+#endif
+
+#ifndef UNLOCK_SV_MUTEX
+#  define UNLOCK_SV_MUTEX
+#endif
+
+#ifndef LOCK_STRTAB_MUTEX
+#  define LOCK_STRTAB_MUTEX
+#endif
+
+#ifndef UNLOCK_STRTAB_MUTEX
+#  define UNLOCK_STRTAB_MUTEX
+#endif
+
+#ifndef LOCK_CRED_MUTEX
+#  define LOCK_CRED_MUTEX
+#endif
+
+#ifndef UNLOCK_CRED_MUTEX
+#  define UNLOCK_CRED_MUTEX
+#endif
+
+#ifndef THR
+#  define THR
+#endif
+
+#ifndef dTHR
+#  define dTHR dNOOP
+#endif
+
+#ifndef INIT_THREADS
+#  define INIT_THREADS NOOP
+#endif

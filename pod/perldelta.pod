@@ -1,6 +1,6 @@
 =head1 NAME
 
-perldelta - what's new for perl v5.6 (as of v5.005_62)
+perldelta - what's new for perl v5.6 (as of v5.005_64)
 
 =head1 DESCRIPTION
 
@@ -15,8 +15,8 @@ This document describes differences between the 5.005 release and this one.
 
 =head2 Perl Source Incompatibilities
 
-Beware that any new warnings that have been added or enhanced old
-warnings are B<not> considered incompatible changes.
+Beware that any new warnings that have been added or old ones
+that have been enhanced are B<not> considered incompatible changes.
 
 Since all new warnings must be explicitly requested via the C<-w>
 switch or the C<warnings> pragma, it is ultimately the programmer's
@@ -26,9 +26,11 @@ responsibility to ensure that warnings are enabled judiciously.
 
 =item STOP is a new keyword
 
-In addition to C<BEGIN>, C<INIT> and C<END>, subroutines named
-C<STOP> are now special.  They are queued up for execution at the
-end of compilation, and cannot be called directly.
+In addition to C<BEGIN>, C<INIT>, C<END>, C<DESTROY> and C<AUTOLOAD>,
+subroutines named C<STOP> are now special.  These are queued up during
+compilation and behave similar to END blocks, except they are called at
+the end of compilation rather than at the end of execution.  They cannot
+be called directly.
 
 =item Treatment of list slices of undef has changed
 
@@ -95,9 +97,9 @@ but still allowed it.
 
 In Perl 5.6 and later, C<"$$1"> always means C<"${$1}">.
 
-=item values(%h) and C<\(%h)> operate on aliases to values, not copies
+=item delete(), values() and C<\(%h)> operate on aliases to values, not copies
 
-each(), values() and hashes in a list context return the actual
+delete(), each(), values() and hashes in a list context return the actual
 values in the hash, instead of copies (as they used to in earlier
 versions).  Typical idioms for using these constructs copy the
 returned values, but this can make a significant difference when
@@ -125,6 +127,28 @@ The undocumented special variable C<%@> that used to accumulate
 has been removed, because it could potentially result in memory
 leaks.
 
+=item Parenthesized not() behaves like a list operator
+
+The C<not> operator now falls under the "if it looks like a function,
+it behaves like a function" rule.
+
+As a result, the parenthesized form can be used with C<grep> and C<map>.
+The following construct used to be a syntax error before, but it works
+as expected now:
+
+    grep not($_), @things;
+
+On the other hand, using C<not> with a literal list slice may not
+work.  The following previously allowed construct:
+
+    print not (1,2,3)[0];
+
+needs to be written with additional parentheses now:
+
+    print not((1,2,3)[0]);
+
+The behavior remains unaffected when C<not> is not followed by parentheses.
+
 =back
 
 =head2 C Source Incompatibilities
@@ -144,6 +168,10 @@ specified via MakeMaker:
 
 =item C<PERL_IMPLICIT_CONTEXT>
 
+PERL_IMPLICIT_CONTEXT is automatically enabled whenever Perl is built
+with one of -Dusethreads, -Dusemultiplicity, or both.  It is not
+intended to be enabled by users at this time.
+
 This new build option provides a set of macros for all API functions
 such that an implicit interpreter/thread context argument is passed to
 every API function.  As a result of this, something like C<sv_setsv(foo,bar)>
@@ -159,9 +187,6 @@ functions.
 Note that the above issue is not relevant to the default build of
 Perl, whose interfaces continue to match those of prior versions
 (but subject to the other options described here).
-
-PERL_IMPLICIT_CONTEXT is automatically enabled whenever Perl is built
-with one of -Dusethreads, -Dusemultiplicity, or both.
 
 See L<perlguts/"The Perl API"> for detailed information on the
 ramifications of building Perl using this option.
@@ -298,6 +323,52 @@ Perl can optionally use UTF-8 as its internal representation for character
 strings.  The C<utf8> pragma enables this support in the current lexical
 scope.  See L<utf8> for more information.
 
+=head2 Interpreter threads
+
+WARNING: This is an experimental feature in a pre-alpha state.  Use
+at your own risk.
+
+Perl 5.005_63 introduces the beginnings of support for running multiple
+interpreters concurrently in different threads.  In conjunction with
+the perl_clone() API call, which can be used to selectively duplicate
+the state of any given interpreter, it is possible to compile a
+piece of code once in an interpreter, clone that interpreter
+one or more times, and run all the resulting interpreters in distinct
+threads.
+
+On Windows, this feature is used to emulate fork() at the interpreter
+level.  See L<perlfork>.
+
+This feature is still in evolution.  It is eventually meant to be used
+to selectively clone a subroutine and data reachable from that
+subroutine in a separate interpreter and run the cloned subroutine
+in a separate thread.  Since there is no shared data between the
+interpreters, little or no locking will be needed (unless parts of
+the symbol table are explicitly shared).  This is obviously intended
+to be an easy-to-use replacement for the existing threads support.
+
+Support for cloning interpreters must currently be manually enabled
+by defining the cpp macro USE_ITHREADS on non-Windows platforms.
+(See win32/Makefile for how to enable it on Windows.)  The resulting
+perl executable will be functionally identical to one that was built
+without USE_ITHREADS, but the perl_clone() API call will only be
+available in the former.
+
+USE_ITHREADS enables Perl source code changes that provide a clear
+separation between the op tree and the data it operates with.  The
+former is considered immutable, and can therefore be shared between
+an interpreter and all of its clones, while the latter is considered
+local to each interpreter, and is therefore copied for each clone.
+
+Note that building Perl with the -Dusemultiplicity Configure option
+is adequate if you wish to run multiple B<independent> interpreters
+concurrently in different threads.  USE_ITHREADS only needs to be
+enabled if you wish to obtain access to perl_clone() and cloned
+interpreters.
+
+[XXX TODO - the Compiler backends may be broken when USE_ITHREADS is
+enabled.]
+
 =head2 Lexically scoped warning categories
 
 You can now control the granularity of warnings emitted by perl at a finer
@@ -333,9 +404,9 @@ change#3385, also need perlguts documentation
 WARNING: This is currently an experimental feature.  Interfaces and
 implementation are likely to change.
 
-Perl can be compiled with -DPERL_INTERNAL_GLOB to use the File::Glob
-implementation of the glob() operator.  This avoids using an external
-csh process and the problems associated with it.
+Perl now uses the File::Glob implementation of the glob() operator
+automatically.  This avoids using an external csh process and the
+problems associated with it.
 
 =head2 Binary numbers supported
 
@@ -354,17 +425,38 @@ This is rather similar to how the arrow may be omitted from
 C<$foo[10]->{'foo'}>.  Note however, that the arrow is still
 required for C<foo(10)->('bar')>.
 
+=head2 exists() and delete() are supported on array elements
+
+The exists() and delete() builtins now work on simple arrays as well.
+The behavior is similar to that on hash elements.
+
+exists() can be used to check whether an array element has been
+initialized without autovivifying it.  If the array is tied, the
+EXISTS() method in the corresponding tied package will be invoked.
+
+delete() may be used to remove an element from the array and return
+it.  The array element at that position returns to its unintialized
+state, so that testing for the same element with exists() will return
+false.  If the element happens to be the one at the end, the size of
+the array also shrinks by one.  If the array is tied, the DELETE() method
+in the corresponding tied package will be invoked.
+
+See L<perlfunc/exists> and L<perlfunc/delete> for examples.
+
 =head2 syswrite() ease-of-use
 
 The length argument of C<syswrite()> has become optional.
 
 =head2 Filehandles can be autovivified
 
-The construct C<open(my $fh, ...)> can be used to create filehandles
-more easily.  The filehandle will be automatically closed at the end
-of the scope of $fh, provided there are no other references to it.  This
-largely eliminates the need for typeglobs when opening filehandles
-that must be passed around, as in the following example:
+Similar to how constructs such as C<$x->[0]> autovivify a reference,
+open() now autovivifies a filehandle if the first argument is an
+uninitialized variable.  This allows the constructs C<open(my $fh, ...)> and
+C<open(local $fh,...)> to be used to create filehandles that will
+conveniently be closed automatically when the scope ends, provided there
+are no other references to them.  This largely eliminates the need for
+typeglobs when opening filehandles that must be passed around, as in the
+following example:
 
     sub myopen {
         open my $fh, "@_"
@@ -468,6 +560,16 @@ this support (if it is available).
 
 You can Configure -Dusemorebits to turn on both the 64-bit support
 and the long double support.
+
+=head2 Enhanced support for sort() subroutines
+
+Perl subroutines with a prototype of C<($$)> and XSUBs in general can
+now be used as sort subroutines.  In either case, the two elements to
+be compared are passed as normal parameters in @_.  See L<perlfunc/sort>.
+
+For unprototyped sort subroutines, the historical behavior of passing 
+the elements to be compared as the global variables $a and $b remains
+unchanged.
 
 =head2 Better syntax checks on parenthesized unary operators
 
@@ -609,13 +711,6 @@ BEGIN blocks are executed under such conditions, this variable
 enables perl code to determine whether actions that make sense
 only during normal running are warranted.  See L<perlvar>.
 
-=head2 STOP blocks
-
-Arbitrary code can be queued for execution when Perl has finished
-parsing the program (i.e. when the compile phase ends) using STOP
-blocks.  These behave similar to END blocks, except for being
-called at the end of compilation rather than at the end of execution.
-
 =head2 Optional Y2K warnings
 
 If Perl is built with the cpp macro C<PERL_Y2KWARN> defined,
@@ -698,6 +793,12 @@ on C<NEW> will return the same data as the corresponding operation
 on C<OLD>.  Formerly, it would have returned the data from the start
 of the following disk block instead.
 
+=head2 eof() has the same old magic as <>
+
+C<eof()> would return true if no attempt to read from C<E<lt>E<gt>> had
+yet been made.  C<eof()> has been changed to have a little magic of its
+own, it now opens the C<E<lt>E<gt>> files.
+
 =head2 system(), backticks and pipe open now reflect exec() failure
 
 On Unix and similar platforms, system(), qx() and open(FOO, "cmd |")
@@ -728,6 +829,10 @@ been corrected.
 
 When applied to a pseudo-hash element, exists() now reports whether
 the specified value exists, not merely if the key is valid.
+
+delete() now works on pseudo-hashes.  When given a pseudo-hash element
+or slice it deletes the values corresponding to the keys (but not the keys
+themselves).  See L<perlref/"Pseudo-hashes: Using an array as a hash">.
 
 =head2 C<goto &sub> and AUTOLOAD
 
@@ -960,6 +1065,13 @@ The C<Shell> module is supported.
 Rudimentary support for building under command.com in Windows 95
 has been added.
 
+Scripts are read in binary mode by default to allow ByteLoader (and
+the filter mechanism in general) to work properly.  For compatibility,
+the DATA filehandle will be set to text mode if a carriage return is
+detected at the end of the line containing the __END__ or __DATA__
+token; if not, the DATA filehandle will be left open in binary mode.
+Earlier versions always opened the DATA filehandle in text mode.
+
 [TODO - GSAR]
 
 =head1 New tests
@@ -1031,7 +1143,17 @@ Perl bytecode.  See L<ByteLoader>.
 
 =item constant
 
-References can now be used.  See L<constant>.
+References can now be used.
+
+The new version also allows a leading underscore in constant names, but
+disallows a double leading underscore (as in "__LINE__").  Some other names
+are disallowed or warned against, including BEGIN, END, etc.  Some names
+which were forced into main:: used to fail silently in some cases; now they're
+fatal (outside of main::) and an optional warning (inside of main::).
+The ability to detect whether a constant had been set with a given name has
+been added.
+
+See L<constant>.
 
 =item charnames
 
@@ -1052,7 +1174,8 @@ to Perl's debugging API.
 
 =item DB_File
 
-[TODO - Paul Marquess <paul.marquess@bt.com>]
+DB_File can now be built with Berkeley DB versions 1, 2 or 3.
+See C<ext/DB_File/Changes>.
 
 =item Devel::DProf
 
@@ -1134,11 +1257,19 @@ autoloaded or is a symbolic reference.
 A bug that caused File::Find to lose track of the working directory
 when pruning top-level directories has been fixed.
 
+File::Find now also supports several other options to control its
+behavior.  It can follow symbolic links if the C<follow> option is
+specified.  Enabling the C<no_chdir> option will make File::Find skip
+changing the current directory when walking directories.  The C<untaint>
+flag can be useful when running with taint checks enabled.
+
+See L<File::Find>.
+
 =item File::Glob
 
-This extension implements BSD-style file globbing.  It will also be
-used for the internal implementation of the glob() operator if
-Perl was compiled with -DPERL_INTERNAL_GLOB.  See L<File::Glob>.
+This extension implements BSD-style file globbing.  By default,
+it will also be used for the internal implementation of the glob()
+operator.  See L<File::Glob>.
 
 =item File::Spec
 

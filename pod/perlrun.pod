@@ -742,10 +742,13 @@ used.
 
 A colon-separated list of directories in which to look for Perl library
 files before looking in the standard library and the current
-directory.  If PERL5LIB is not defined, PERLLIB is used.  When running
-taint checks (because the program was running setuid or setgid, or the
-B<-T> switch was used), neither variable is used.  The program should
-instead say
+directory.  Any architecture-specific directories under the specified
+locations are automatically included if they exist.  If PERL5LIB is not
+defined, PERLLIB is used.
+
+When running taint checks (either because the program was running setuid
+or setgid, or the B<-T> switch was used), neither variable is used.
+The program should instead say:
 
     use lib "/my/directory";
 

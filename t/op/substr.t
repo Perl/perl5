@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..106\n";
+print "1..108\n";
 
 #P = start of string  Q = start of substr  R = end of substr  S = end of string
 
@@ -209,3 +209,9 @@ print "ok 105\n";
 eval 'substr($a,0,0,"") = "abc"';
 print "not " unless $@ && $@ =~ /Can't modify substr/ && $a eq "foo";
 print "ok 106\n";
+
+$a = "abcdefgh";
+print "not " unless sub { shift }->(substr($a, 0, 4, "xxxx")) eq 'abcd';
+print "ok 107\n";
+print "not " unless $a eq 'xxxxefgh';
+print "ok 108\n";

@@ -14,9 +14,10 @@ print "1..58\n";
 $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_Dos = $^O eq 'dos';
 $Is_Dosish = $Is_Dos || $^O eq 'os2' || $Is_MSWin32;
+$Is_Cygwin = $^O eq 'cygwin';
 chop($cwd = ($Is_MSWin32 ? `cd` : `pwd`));
 
-$DEV = `ls -l /dev` unless $Is_Dosish;
+$DEV = `ls -l /dev` unless $Is_Dosish or $Is_Cygwin;
 
 unlink "Op.stat.tmp";
 if (open(FOO, ">Op.stat.tmp")) {
@@ -163,7 +164,7 @@ else
     {print "not ok 33\n";}
 if (! -b '.') {print "ok 34\n";} else {print "not ok 34\n";}
 
-if ($^O eq 'amigaos' or $Is_Dosish) {
+if ($^O eq 'amigaos' or $Is_Dosish or $Is_Cygwin) {
   print "ok 35 # skipped: no -u\n"; goto tty_test;
 }
 

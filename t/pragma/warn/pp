@@ -85,7 +85,7 @@ my $b = $$a;
 no warnings 'uninitialized' ;
 my $c = $$a;
 EXPECT
-Use of uninitialized value at - line 4.
+Use of uninitialized value in scalar dereference at - line 4.
 ########
 # pp.c
 use warnings 'unsafe' ;
@@ -112,6 +112,12 @@ EXPECT
 Malformed UTF-8 character at - line 4.
 ########
 # pp.c
+BEGIN {
+    if (ord("\t") == 5) {
+        print "SKIPPED\n# Character codes differ on ebcdic machines.";
+        exit 0;
+    }
+}
 use warnings 'utf8'  ;
 use utf8 ;
 $_ = "\x80  \xff" ;
@@ -120,6 +126,6 @@ no warnings 'utf8'  ;
 $_ = "\x80  \xff" ;
 reverse ;
 EXPECT
-\x80 will produce malformed UTF-8 character; use \x{80} for that at - line 4.
-\xff will produce malformed UTF-8 character; use \x{ff} for that at - line 4.
-Malformed UTF-8 character at - line 5.
+\x80 will produce malformed UTF-8 character; use \x{80} for that at - line 10.
+\xff will produce malformed UTF-8 character; use \x{ff} for that at - line 10.
+Malformed UTF-8 character at - line 11.

@@ -30,7 +30,8 @@ dl_generic_private_init(pTHXo)	/* called by dl_*.xs dl_private_init() */
 {
     char *perl_dl_nonlazy;
 #ifdef DEBUGGING
-    dl_debug = SvIV(get_sv("DynaLoader::dl_debug", 0x04) );
+    SV *sv = get_sv("DynaLoader::dl_debug", 0);
+    dl_debug = sv ? SvIV(sv) : 0;
 #endif
     if ( (perl_dl_nonlazy = getenv("PERL_DL_NONLAZY")) != NULL )
 	dl_nonlazy = atoi(perl_dl_nonlazy);

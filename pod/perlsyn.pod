@@ -163,6 +163,8 @@ If the LABEL is omitted, the loop control statement
 refers to the innermost enclosing loop.  This may include dynamically
 looking back your call-stack at run time to find the LABEL.  Such
 desperate behavior triggers a warning if you use the B<-w> flag.
+Unlike a C<foreach> statement, a C<while> statement never implicitly
+localises any variables.
 
 If there is a C<continue> BLOCK, it is always executed just before the
 conditional is about to be evaluated again, just like the third part of a

@@ -24,7 +24,7 @@ sub subb {"in s"}
 
 @INPUT = <DATA>;
 @simple_input = grep /^\s*\w+\s*\$\w+\s*[#\n]/, @INPUT;
-print "1..", (8 + @INPUT + @simple_input), "\n";
+print "1..", (9 + @INPUT + @simple_input), "\n";
 $ord = 0;
 
 sub wrn {"@_"}
@@ -51,6 +51,12 @@ $b = $a+5;
 
 $ord++;
 print "not " unless $dc == 1;
+print "ok $ord\n";
+
+$ord++;
+my $xxx = 'b';
+$xxx = 'c' . ($xxx || 'e');
+print "not " unless $xxx eq 'cb';
 print "ok $ord\n";
 
 {				# Check calling STORE

@@ -12,7 +12,7 @@ print "1..5\n";
 
 use charnames ':full';
 
-print "not " unless "Here\N{EXCLAMATION MARK}?" eq 'Here!?';
+print "not " unless "Here\N{EXCLAMATION MARK}?" eq "Here\041?";
 print "ok 1\n";
 
 {

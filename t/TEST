@@ -153,7 +153,7 @@ EOT
 	}
     }
     else {
-	$pct = sprintf("%.2f", ($files - $bad) / $files * 100);
+	$pct = $files ? sprintf("%.2f", ($files - $bad) / $files * 100) : "0.00";
 	if ($bad == 1) {
 	    warn "Failed 1 test script out of $files, $pct% okay.\n";
 	}

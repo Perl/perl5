@@ -794,7 +794,7 @@ highly experimental and subject to change.
 
 =head1 AUTHOR
 
-Gurusamy Sarathy	gsar@umich.edu
+Gurusamy Sarathy	gsar@activestate.com
 
 This code heavily adapted from an early version of perl5db.pl attributable
 to Larry Wall and the Perl Porters.

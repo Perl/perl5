@@ -68,6 +68,7 @@ no warnings 'unsafe' ;
 /[[.foo.]]/;
 /[[=bar=]]/;
 /[:zog:]/;
+BEGIN { $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3 }
 /[[:zog:]]/;
 EXPECT
 Character class syntax [: :] belongs inside character classes at - line 4.
@@ -78,7 +79,7 @@ Character class syntax [= =] is reserved for future extensions at - line 6.
 Character class syntax [. .] is reserved for future extensions at - line 8.
 Character class syntax [= =] is reserved for future extensions at - line 9.
 Character class syntax [: :] belongs inside character classes at - line 10.
-Character class [:zog:] unknown at - line 19.
+Character class [:zog:] unknown at - line 20.
 ########
 # regcomp.c [S_regclass]
 $_ = "";
@@ -113,6 +114,12 @@ EXPECT
 /[[:digit:]-[:alpha:]]/: false [] range "[:digit:]-" in regexp at - line 12.
 ########
 # regcomp.c [S_regclassutf8]
+BEGIN {
+    if (ord("\t") == 5) {
+        print "SKIPPED\n# ebcdic regular expression ranges differ.";
+        exit 0;
+    }
+}
 use utf8;
 $_ = "";
 use warnings 'unsafe' ;
@@ -136,14 +143,14 @@ no warnings 'unsafe' ;
 /[[:alpha:]-[:digit:]]/;
 /[[:digit:]-[:alpha:]]/;
 EXPECT
-/[a-\d]/: false [] range "a-\d" in regexp at - line 6.
-/[\d-b]/: false [] range "\d-" in regexp at - line 7.
-/[\s-\d]/: false [] range "\s-" in regexp at - line 8.
-/[\d-\s]/: false [] range "\d-" in regexp at - line 9.
-/[a-[:digit:]]/: false [] range "a-[:digit:]" in regexp at - line 10.
-/[[:digit:]-b]/: false [] range "[:digit:]-" in regexp at - line 11.
-/[[:alpha:]-[:digit:]]/: false [] range "[:alpha:]-" in regexp at - line 12.
-/[[:digit:]-[:alpha:]]/: false [] range "[:digit:]-" in regexp at - line 13.
+/[a-\d]/: false [] range "a-\d" in regexp at - line 12.
+/[\d-b]/: false [] range "\d-" in regexp at - line 13.
+/[\s-\d]/: false [] range "\s-" in regexp at - line 14.
+/[\d-\s]/: false [] range "\d-" in regexp at - line 15.
+/[a-[:digit:]]/: false [] range "a-[:digit:]" in regexp at - line 16.
+/[[:digit:]-b]/: false [] range "[:digit:]-" in regexp at - line 17.
+/[[:alpha:]-[:digit:]]/: false [] range "[:alpha:]-" in regexp at - line 18.
+/[[:digit:]-[:alpha:]]/: false [] range "[:digit:]-" in regexp at - line 19.
 ########
 # regcomp.c [S_regclass S_regclassutf8]
 use warnings 'unsafe' ;

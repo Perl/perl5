@@ -406,6 +406,9 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 
     case '\004':		/* ^D */
 	sv_setiv(sv, (IV)(PL_debug & 32767));
+#if defined(YYDEBUG) && defined(DEBUGGING)
+	PL_yydebug = (PL_debug & 1);
+#endif
 	break;
     case '\005':  /* ^E */
 #ifdef MACOS_TRADITIONAL
@@ -822,7 +825,10 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
 #if defined(VMS)
     Perl_die(aTHX_ "Can't make list assignment to %%ENV on this system");
 #else
-#  ifdef WIN32
+#   ifdef PERL_IMPLICIT_SYS
+    PerlEnv_clearenv();
+#   else
+#	ifdef WIN32
     char *envv = GetEnvironmentStrings();
     char *cur = envv;
     STRLEN len;
@@ -838,13 +844,13 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
 	    cur += len+1;
     }
     FreeEnvironmentStrings(envv);
-#  else
-#    ifdef CYGWIN
+#   else
+#	ifdef CYGWIN
     I32 i;
     for (i = 0; environ[i]; i++)
-       Safefree(environ[i]);
-#    else
-#      ifndef PERL_USE_SAFE_PUTENV
+       safesysfree(environ[i]);
+#	else
+#	    ifndef PERL_USE_SAFE_PUTENV
     I32 i;
 
     if (environ == PL_origenviron)
@@ -852,12 +858,13 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
     else
 	for (i = 0; environ[i]; i++)
 	    safesysfree(environ[i]);
-#      endif /* PERL_USE_SAFE_PUTENV */
-#    endif /* CYGWIN */
+#	    endif /* PERL_USE_SAFE_PUTENV */
+#	endif /* CYGWIN */
 
     environ[0] = Nullch;
 
-#  endif /* WIN32 */
+#	endif /* WIN32 */
+#   endif /* PERL_IMPLICIT_SYS */
 #endif /* VMS */
     return 0;
 }
@@ -1182,7 +1189,7 @@ Perl_magic_setdbline(pTHX_ SV *sv, MAGIC *mg)
     i = SvTRUE(sv);
     svp = av_fetch(GvAV(gv),
 		     atoi(MgPV(mg,n_a)), FALSE);
-    if (svp && SvIOKp(*svp) && (o = (OP*)SvSTASH(*svp)))
+    if (svp && SvIOKp(*svp) && (o = INT2PTR(OP*,SvIVX(*svp))))
 	o->op_private = i;
     else if (ckWARN_d(WARN_INTERNAL))
 	Perl_warner(aTHX_ WARN_INTERNAL, "Can't break at that line\n");
@@ -1664,7 +1671,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     case '.':
 	if (PL_localizing) {
 	    if (PL_localizing == 1)
-		save_sptr((SV**)&PL_last_in_gv);
+		SAVESPTR(PL_last_in_gv);
 	}
 	else if (SvOK(sv) && GvIO(PL_last_in_gv))
 	    IoLINES(GvIOp(PL_last_in_gv)) = (long)SvIV(sv);

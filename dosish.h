@@ -19,6 +19,7 @@
 #  ifdef USE_THREADS
 #    define OLD_PTHREADS_API
 #  endif
+#  define PERL_FS_VER_FMT	"%d_%d_%d"
 #else	/* DJGPP */
 #  ifdef WIN32
 #    define PERL_SYS_INIT(c,v)	Perl_win32_init(c,v)

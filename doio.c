@@ -183,28 +183,29 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	}
     }
     else {
-	char *myname;
-	char *type = name;
-	char *otype = name;
+	char *type;
+	char *oname = name;
 	STRLEN tlen;
-	STRLEN otlen = len;
+	STRLEN olen = len;
 	char mode[3];		/* stdio file mode ("r\0" or "r+\0") */
 	int dodup;
 
+	type = savepvn(name, len);
+	tlen = len;
+	SAVEFREEPV(type);
 	if (num_svs) {
-	    type = name;
-	    name = SvPV(svs, tlen) ;
-	    len = (I32)tlen;
+	    STRLEN l;
+	    name = SvPV(svs, l) ;
+	    len = (I32)l;
+	    name = savepvn(name, len);
+	    SAVEFREEPV(name);
 	}
-
-	tlen = otlen;
-	myname = savepvn(name, len);
-	SAVEFREEPV(myname);
-	name = myname;
-	if (!num_svs)
+	else {
 	    while (tlen && isSPACE(type[tlen-1]))
 		type[--tlen] = '\0';
-
+	    name = type;
+	    len = tlen;
+	}
 	mode[0] = mode[1] = mode[2] = '\0';
 	IoTYPE(io) = *type;
 	if (*type == '+' && tlen > 1 && type[tlen-1] != '|') { /* scary */
@@ -216,12 +217,14 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	if (*type == '|') {
 	    if (num_svs && (tlen != 2 || type[1] != '-')) {
 	      unknown_desr:
-		Perl_croak(aTHX_ "Unknown open() mode '%.*s'", otlen, otype);
+		Perl_croak(aTHX_ "Unknown open() mode '%.*s'", olen, oname);
 	    }
 	    /*SUPPRESS 530*/
-	    for (type++; isSPACE(*type); type++) ;
-	    if (!num_svs)
+	    for (type++, tlen--; isSPACE(*type); type++, tlen--) ;
+	    if (!num_svs) {
 		name = type;
+		len = tlen;
+	    }
 	    if (*name == '\0') { /* command is missing 19990114 */
 		dTHR;
 		if (ckWARN(WARN_PIPE))
@@ -232,11 +235,11 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    if (strNE(name,"-") || num_svs)
 		TAINT_ENV();
 	    TAINT_PROPER("piped open");
-	    if (name[strlen(name)-1] == '|') {
+	    if (name[len-1] == '|') {
 		dTHR;
-		name[strlen(name)-1] = '\0' ;
+		name[--len] = '\0' ;
 		if (ckWARN(WARN_PIPE))
-		    Perl_warner(aTHX_ WARN_PIPE, "Can't do bidirectional pipe");
+		    Perl_warner(aTHX_ WARN_PIPE, "Can't open bidirectional pipe");
 	    }
 	    fp = PerlProc_popen(name,"w");
 	    writing = 1;
@@ -308,7 +311,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		    if (!(fp = PerlIO_fdopen(fd,mode))) {
 			if (dodup)
 			    PerlLIO_close(fd);
-			}
+		    }
 		}
 	    }
 	    else {
@@ -452,6 +455,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
     }
 #endif
     IoIFP(io) = fp;
+    IoFLAGS(io) &= ~IOf_NOLINE;
     if (writing) {
 	dTHR;
 	if (IoTYPE(io) == 's'
@@ -660,9 +664,9 @@ Perl_nextargv(pTHX_ register GV *gv)
 		if (!S_ISREG(PL_statbuf.st_mode))	
 		    Perl_warner(aTHX_ WARN_INPLACE,
 				"Can't do inplace edit: %s is not a regular file",
-				PL_oldname );
+				PL_oldname);
 		else
-		    Perl_warner(aTHX_ WARN_INPLACE, "Can't open %s: %s\n",
+		    Perl_warner(aTHX_ WARN_INPLACE, "Can't open %s: %s",
 				PL_oldname, Strerror(errno));
 	    }
 	}
@@ -1026,7 +1030,7 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 	{
 	    dTHR;
 	    if (ckWARN(WARN_UNINITIALIZED))
-		Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
+		report_uninit();
 	}
 	return TRUE;
     case SVt_IV:
@@ -1064,7 +1068,7 @@ Perl_my_stat(pTHX)
 
     if (PL_op->op_flags & OPf_REF) {
 	EXTEND(SP,1);
-	tmpgv = cGVOP;
+	tmpgv = cGVOP_gv;
       do_fstat:
 	io = GvIO(tmpgv);
 	if (io && IoIFP(io)) {
@@ -1117,7 +1121,7 @@ Perl_my_lstat(pTHX)
     STRLEN n_a;
     if (PL_op->op_flags & OPf_REF) {
 	EXTEND(SP,1);
-	if (cGVOP == PL_defgv) {
+	if (cGVOP_gv == PL_defgv) {
 	    if (PL_laststype != OP_LSTAT)
 		Perl_croak(aTHX_ "The stat preceding -l _ wasn't an lstat");
 	    return PL_laststatval;

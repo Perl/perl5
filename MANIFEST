@@ -153,15 +153,13 @@ emacs/ptags		Creates smart TAGS file
 embed.h			Maps symbols to safer names
 embed.pl		Produces {embed,embedvar,objXSUB,proto}.h, global.sym
 embedvar.h		C namespace management
-epoc/autosplit.pl	EPOC port
-epoc/config.h		EPOC port
-epoc/Config.pm		EPOC port
-epoc/createpkg.pl	EPOC port
+epoc/config.sh		EPOC port config.sh template
+epoc/createpkg.pl	EPOC port generate PKG file
 epoc/epoc.c		EPOC port
 epoc/epoc_stubs.c	EPOC port
+epoc/epocish.c		EPOC port
 epoc/epocish.h		EPOC port
-epoc/perl.mmp		EPOC port
-epoc/perl.pkg		EPOC port
+epoc/link.pl            EPOC port link a exe
 ext/B/B.pm		Compiler backend support functions and methods
 ext/B/B.xs		Compiler backend external subroutines
 ext/B/B/Asmdata.pm	Compiler backend data for assembler
@@ -231,9 +229,9 @@ ext/Devel/Peek/Peek.xs		Data debugging tool, externals
 ext/DynaLoader/DynaLoader_pm.PL	Dynamic Loader perl module
 ext/DynaLoader/Makefile.PL	Dynamic Loader makefile writer
 ext/DynaLoader/README		Dynamic Loader notes and intro
+ext/DynaLoader/XSLoader_pm.PL	Simple XS Loader perl module
 ext/DynaLoader/dl_aix.xs	AIX implementation
 ext/DynaLoader/dl_beos.xs	BeOS implementation
-ext/DynaLoader/dl_cygwin.xs	Cygwin implementation
 ext/DynaLoader/dl_dld.xs	GNU dld style implementation
 ext/DynaLoader/dl_dlopen.xs	BSD/SunOS4&5 dlopen() style implementation
 ext/DynaLoader/dl_hpux.xs	HP-UX implementation
@@ -246,6 +244,7 @@ ext/DynaLoader/dl_vms.xs	VMS implementation
 ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
 ext/DynaLoader/hints/aix.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/linux.pl	Hint for DynaLoader for named architecture
+ext/DynaLoader/hints/openbsd.pl	Hint for DynaLoader for named architecture
 ext/Errno/ChangeLog		Errno perl module change log
 ext/Errno/Errno_pm.PL		Errno perl module create script
 ext/Errno/Makefile.PL		Errno extension makefile writer
@@ -289,12 +288,14 @@ ext/IPC/SysV/README		IPC::SysV extension Perl module
 ext/IPC/SysV/Semaphore.pm	IPC::SysV extension Perl module
 ext/IPC/SysV/SysV.pm		IPC::SysV extension Perl module
 ext/IPC/SysV/SysV.xs		IPC::SysV extension Perl module
+ext/IPC/SysV/hints/cygwin.pl	Hint for IPC::SysV for named architecture
 ext/IPC/SysV/hints/next_3.pl	Hint for IPC::SysV for named architecture
 ext/IPC/SysV/t/msg.t		IPC::SysV extension Perl module
 ext/IPC/SysV/t/sem.t		IPC::SysV extension Perl module
 ext/NDBM_File/Makefile.PL	NDBM extension makefile writer
 ext/NDBM_File/NDBM_File.pm	NDBM extension Perl module
 ext/NDBM_File/NDBM_File.xs	NDBM extension external subroutines
+ext/NDBM_File/hints/cygwin.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/dec_osf.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/dynixptx.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/solaris.pl	Hint for NDBM_File for named architecture
@@ -304,6 +305,7 @@ ext/NDBM_File/typemap		NDBM extension interface types
 ext/ODBM_File/Makefile.PL	ODBM extension makefile writer
 ext/ODBM_File/ODBM_File.pm	ODBM extension Perl module
 ext/ODBM_File/ODBM_File.xs	ODBM extension external subroutines
+ext/ODBM_File/hints/cygwin.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/dec_osf.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/hpux.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/sco.pl	Hint for ODBM_File for named architecture
@@ -673,6 +675,8 @@ lib/bigfloat.pl		An arbitrary precision floating point package
 lib/bigint.pl		An arbitrary precision integer arithmetic package
 lib/bigrat.pl		An arbitrary precision rational arithmetic package
 lib/blib.pm		For "use blib"
+lib/byte.pm		Pragma to enable byte operations
+lib/byte_heavy.pl	Support routines for byte pragma
 lib/cacheout.pl		Manages output filehandles when you need too many
 lib/caller.pm		Inherit pragmatic attributes from caller's context
 lib/charnames.pm	Character names
@@ -996,7 +1000,6 @@ os2/OS2/REXX/t/rx_tievar.t	DLL access module
 os2/OS2/REXX/t/rx_tieydb.t	DLL access module
 os2/OS2/REXX/t/rx_varset.t	DLL access module
 os2/OS2/REXX/t/rx_vrexx.t	DLL access module
-os2/POSIX.mkfifo	OS2-specific patch
 os2/diff.configure	Patches to Configure
 os2/dl_os2.c		Addon for dl_open
 os2/dlfcn.h		Addon for dl_open
@@ -1067,6 +1070,7 @@ pod/perlfaq7.pod	Frequently Asked Questions, Part 7
 pod/perlfaq8.pod	Frequently Asked Questions, Part 8
 pod/perlfaq9.pod	Frequently Asked Questions, Part 9
 pod/perlfilter.pod	Source filters info
+pod/perlfork.pod	Info about fork()
 pod/perlform.pod	Format info
 pod/perlfunc.pod	Function info
 pod/perlguts.pod	Internals info
@@ -1230,6 +1234,7 @@ t/lib/findbin.t		See if FindBin works
 t/lib/gdbm.t		See if GDBM_File works
 t/lib/getopt.t		See if Getopt::Std and Getopt::Long work
 t/lib/glob-basic.t	See if File::Glob works
+t/lib/glob-case.t	See if File::Glob works
 t/lib/glob-global.t	See if File::Glob works
 t/lib/glob-taint.t	See if File::Glob works
 t/lib/gol-basic.t	See if Getopt::Long works
@@ -1538,17 +1543,20 @@ win32/config_h.PL	Perl code to convert Win32 config.sh to config.h
 win32/config_sh.PL	Perl code to update Win32 config.sh from Makefile 
 win32/des_fcrypt.patch	Win32 port
 win32/dl_win32.xs	Win32 port
-win32/genmk95.pl	Perl code to generate command.com-usable makew95.mk
+win32/genmk95.pl        Perl code to generate command.com-usable makefile.95
 win32/include/arpa/inet.h	Win32 port
 win32/include/dirent.h		Win32 port
 win32/include/netdb.h		Win32 port
 win32/include/sys/socket.h	Win32 port
-win32/makefile.mk	Win32 makefile for DMAKE (BC++, VC++ builds)
+win32/makefile.mk       Win32 makefile for DMAKE (BC++, VC++ builds)
 win32/perlglob.c	Win32 port
+win32/perlhost.h	Perl "host" implementation
 win32/perllib.c		Win32 port
 win32/pod.mak		Win32 port
 win32/runperl.c		Win32 port
 win32/splittree.pl	Win32 port
+win32/vdir.h		Perl "host" virtual directory manager
+win32/vmem.h		Perl "host" memory manager
 win32/win32.c		Win32 port
 win32/win32.h		Win32 port
 win32/win32iop.h	Win32 port

@@ -191,7 +191,7 @@ $ perl_d_mknod="undef"
 $ perl_d_union_semun="undef"
 $ perl_d_semctl_semun="undef"
 $ perl_d_semctl_semid_ds="undef"
-$ IF (sharedperl.EQS."Y")
+$ IF (sharedperl.EQS."Y" .AND. F$GETSYI("HW_MODEL").GE.1024)
 $ THEN
 $ perl_obj_ext=".abj"
 $ perl_so="axe"
@@ -3727,6 +3727,7 @@ $    WRITE CONFIG "#define USE_LONG_LONG"
 $    WRITE CONFIG "#define USE_LONG_DOUBLE"
 $ ENDIF
 $ WRITE CONFIG "#define HAS_ENVGETENV"
+$ WRITE CONFIG "#define PERL_EXTERNAL_GLOB"
 $ CLOSE CONFIG
 $!
 $! Now build the normal config.h
@@ -3793,7 +3794,7 @@ $ echo "Extracting Build_Ext.Com"
 $ Create Sys$Disk:[-]Build_Ext.Com
 $ Deck/Dollar="$EndOfTpl$"
 $!++ Build_Ext.Com
-$!   NOTE: This files is extracted as part of the VMS configuration process.
+$!   NOTE: This file is extracted as part of the VMS configuration process.
 $!   Any changes made to it directly will be lost.  If you need to make any
 $!   changes, please edit the template in [.vms]SubConfigure.Com instead.
 $    def = F$Environment("Default")

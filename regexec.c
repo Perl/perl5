@@ -335,6 +335,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	DEBUG_r(PerlIO_printf(Perl_debug_log, "String too short...\n"));
 	goto fail;
     }
+    check = prog->check_substr;
     if (prog->reganch & ROPT_ANCH) {	/* Match at beg-of-str or after \n */
 	ml_anch = !( (prog->reganch & ROPT_ANCH_SINGLE)
 		     || ( (prog->reganch & ROPT_ANCH_BOL)
@@ -351,8 +352,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    }
 	    PL_regeol = strend;			/* Used in HOP() */
 	    s = HOPc(strpos, prog->check_offset_min);
-	    if (SvTAIL(prog->check_substr)) {
-		slen = SvCUR(prog->check_substr);	/* >= 1 */
+	    if (SvTAIL(check)) {
+		slen = SvCUR(check);	/* >= 1 */
 
 		if ( strend - s > slen || strend - s < slen - 1 
 		     || (strend - s == slen && strend[-1] != '\n')) {
@@ -361,29 +362,28 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		}
 		/* Now should match s[0..slen-2] */
 		slen--;
-		if (slen && (*SvPVX(prog->check_substr) != *s
+		if (slen && (*SvPVX(check) != *s
 			     || (slen > 1
-				 && memNE(SvPVX(prog->check_substr), s, slen)))) {
+				 && memNE(SvPVX(check), s, slen)))) {
 		  report_neq:
 		    DEBUG_r(PerlIO_printf(Perl_debug_log, "String not equal...\n"));
 		    goto fail_finish;
 		}
 	    }
-	    else if (*SvPVX(prog->check_substr) != *s
-		     || ((slen = SvCUR(prog->check_substr)) > 1
-			 && memNE(SvPVX(prog->check_substr), s, slen)))
+	    else if (*SvPVX(check) != *s
+		     || ((slen = SvCUR(check)) > 1
+			 && memNE(SvPVX(check), s, slen)))
 		goto report_neq;
 	    goto success_at_start;
 	}
 	/* Match is anchored, but substr is not anchored wrt beg-of-str. */
 	s = strpos;
 	start_shift = prog->check_offset_min; /* okay to underestimate on CC */
-	/* Should be nonnegative! */
 	end_shift = prog->minlen - start_shift -
-	    CHR_SVLEN(prog->check_substr) + (SvTAIL(prog->check_substr) != 0);
+	    CHR_SVLEN(check) + (SvTAIL(check) != 0);
 	if (!ml_anch) {
-	    I32 end = prog->check_offset_max + CHR_SVLEN(prog->check_substr)
-					 - (SvTAIL(prog->check_substr) != 0);
+	    I32 end = prog->check_offset_max + CHR_SVLEN(check)
+					 - (SvTAIL(check) != 0);
 	    I32 eshift = strend - s - end;
 
 	    if (end_shift < eshift)
@@ -396,7 +396,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	start_shift = prog->check_offset_min; /* okay to underestimate on CC */
 	/* Should be nonnegative! */
 	end_shift = prog->minlen - start_shift -
-	    CHR_SVLEN(prog->check_substr) + (SvTAIL(prog->check_substr) != 0);
+	    CHR_SVLEN(check) + (SvTAIL(check) != 0);
     }
 
 #ifdef DEBUGGING	/* 7/99: reports of failure (with the older version) */
@@ -404,7 +404,6 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	Perl_croak(aTHX_ "panic: end_shift");
 #endif
 
-    check = prog->check_substr;
   restart:
     /* Find a possible match in the region s..strend by looking for
        the "check" substring in the region corrected by start/end_shift. */
@@ -640,7 +639,10 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	/* Even in this situation we may use MBOL flag if strpos is offset
 	   wrt the start of the string. */
 	if (ml_anch && sv
-	    && (strpos + SvCUR(sv) != strend) && strpos[-1] != '\n') {
+	    && (strpos + SvCUR(sv) != strend) && strpos[-1] != '\n'
+	    /* May be due to an implicit anchor of m{.*foo}  */
+	    && !(prog->reganch & ROPT_IMPLICIT))
+	{
 	    t = strpos;
 	    goto find_anchor;
 	}
@@ -650,8 +652,10 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	);
       success_at_start:
 	if (!(prog->reganch & ROPT_NAUGHTY)	/* XXXX If strpos moved? */
+	    && prog->check_substr		/* Could be deleted already */
 	    && --BmUSEFUL(prog->check_substr) < 0
-	    && prog->check_substr == prog->float_substr) { /* boo */
+	    && prog->check_substr == prog->float_substr)
+	{
 	    /* If flags & SOMETHING - do not do it many times on the same match */
 	    SvREFCNT_dec(prog->check_substr);
 	    prog->check_substr = Nullsv;	/* disable */
@@ -677,13 +681,20 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	   regstclass does not come from lookahead...  */
 	/* If regstclass takes bytelength more than 1: If charlength==1, OK.
 	   This leaves EXACTF only, which is dealt with in find_byclass().  */
+	int cl_l = (PL_regkind[(U8)OP(prog->regstclass)] == EXACT
+		    ? STR_LEN(prog->regstclass)
+		    : 1);
 	char *endpos = (prog->anchored_substr || ml_anch)
-		? s + (prog->minlen? 1 : 0)
-		: (prog->float_substr ? check_at - start_shift + 1
+		? s + (prog->minlen? cl_l : 0)
+		: (prog->float_substr ? check_at - start_shift + cl_l
 				      : strend) ;
 	char *startpos = sv ? strend - SvCUR(sv) : s;
 
 	t = s;
+	if (prog->reganch & ROPT_UTF8) {	
+	    PL_regdata = prog->data;	/* Used by REGINCLASS UTF logic */
+	    PL_bostr = startpos;
+	}
         s = find_byclass(prog, prog->regstclass, s, endpos, startpos, 1);
 	if (!s) {
 #ifdef DEBUGGING
@@ -694,30 +705,49 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 				"Could not match STCLASS...\n") );
 		goto fail;
 	    }
+	    DEBUG_r( PerlIO_printf(Perl_debug_log,
+				   "This position contradicts STCLASS...\n") );
+	    if ((prog->reganch & ROPT_ANCH) && !ml_anch)
+		goto fail;
 	    /* Contradict one of substrings */
 	    if (prog->anchored_substr) {
-		DEBUG_r( PerlIO_printf(Perl_debug_log,
-				"This position contradicts STCLASS...\n") );
 		if (prog->anchored_substr == check) {
 		    DEBUG_r( what = "anchored" );
 		  hop_and_restart:
 		    PL_regeol = strend;	/* Used in HOP() */
 		    s = HOPc(t, 1);
+		    if (s + start_shift + end_shift > strend) {
+			/* XXXX Should be taken into account earlier? */
+			DEBUG_r( PerlIO_printf(Perl_debug_log,
+					       "Could not match STCLASS...\n") );
+			goto fail;
+		    }
 		    DEBUG_r( PerlIO_printf(Perl_debug_log,
-				"trying %s substr starting at offset %ld...\n",
+				"Trying %s substr starting at offset %ld...\n",
 				 what, (long)(s + start_shift - i_strpos)) );
 		    goto restart;
 		}
-		/* Have both, check is floating */
+		/* Have both, check_string is floating */
 		if (t + start_shift >= check_at) /* Contradicts floating=check */
 		    goto retry_floating_check;
 		/* Recheck anchored substring, but not floating... */
 		s = check_at; 
 		DEBUG_r( PerlIO_printf(Perl_debug_log,
-			  "trying anchored substr starting at offset %ld...\n",
+			  "Trying anchored substr starting at offset %ld...\n",
 			  (long)(other_last - i_strpos)) );
 		goto do_other_anchored;
 	    }
+	    /* Another way we could have checked stclass at the
+               current position only: */
+	    if (ml_anch) {
+		s = t = t + 1;
+		DEBUG_r( PerlIO_printf(Perl_debug_log,
+			  "Trying /^/m starting at offset %ld...\n",
+			  (long)(t - i_strpos)) );
+		goto try_at_offset;
+	    }
+	    if (!prog->float_substr)	/* Could have been deleted */
+		goto fail;
 	    /* Check is floating subtring. */
 	  retry_floating_check:
 	    t = check_at - start_shift;
@@ -737,7 +767,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     return s;
 
   fail_finish:				/* Substring not found */
-    BmUSEFUL(prog->check_substr) += 5;	/* hooray */
+    if (prog->check_substr)		/* could be removed already */
+	BmUSEFUL(prog->check_substr) += 5; /* hooray */
   fail:
     DEBUG_r(PerlIO_printf(Perl_debug_log, "%sMatch rejected by optimizer%s\n",
 			  PL_colors[4],PL_colors[5]));
@@ -745,8 +776,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 }
 
 /* We know what class REx starts with.  Try to find this position... */
-static char *
-find_byclass(regexp * prog, regnode *c, char *s, char *strend, char *startpos, I32 norun)
+STATIC char *
+S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *startpos, I32 norun)
 {
 	I32 doevery = (prog->reganch & ROPT_SKIP) == 0;
 	char *m;
@@ -804,9 +835,9 @@ find_byclass(regexp * prog, regnode *c, char *s, char *strend, char *startpos, I
 	    if (c1 == c2) {
 		while (s <= e) {
 		    if ( *s == c1
-			 && (ln == 1 || (OP(c) == EXACTF
-					 ? ibcmp(s, m, ln)
-					 : ibcmp_locale(s, m, ln)))
+			 && (ln == 1 || !(OP(c) == EXACTF
+					  ? ibcmp(s, m, ln)
+					  : ibcmp_locale(s, m, ln)))
 			 && (norun || regtry(prog, s)) )
 			goto got_it;
 		    s++;
@@ -814,9 +845,9 @@ find_byclass(regexp * prog, regnode *c, char *s, char *strend, char *startpos, I
 	    } else {
 		while (s <= e) {
 		    if ( (*s == c1 || *s == c2)
-			 && (ln == 1 || (OP(c) == EXACTF
-					 ? ibcmp(s, m, ln)
-					 : ibcmp_locale(s, m, ln)))
+			 && (ln == 1 || !(OP(c) == EXACTF
+					  ? ibcmp(s, m, ln)
+					  : ibcmp_locale(s, m, ln)))
 			 && (norun || regtry(prog, s)) )
 			goto got_it;
 		    s++;
@@ -845,9 +876,9 @@ find_byclass(regexp * prog, regnode *c, char *s, char *strend, char *startpos, I
 	    /* FALL THROUGH */
 	case BOUNDUTF8:
 	    tmp = (I32)(s != startpos) ? utf8_to_uv(reghop((U8*)s, -1), 0) : '\n';
-	    tmp = ((OP(c) == BOUND ? isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
+	    tmp = ((OP(c) == BOUNDUTF8 ? isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
 	    while (s < strend) {
-		if (tmp == !(OP(c) == BOUND ?
+		if (tmp == !(OP(c) == BOUNDUTF8 ?
 			     swash_fetch(PL_utf8_alnum, (U8*)s) :
 			     isALNUM_LC_utf8((U8*)s)))
 		{
@@ -880,12 +911,10 @@ find_byclass(regexp * prog, regnode *c, char *s, char *strend, char *startpos, I
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case NBOUNDUTF8:
-	    if (prog->minlen)
-		strend = reghop_c(strend, -1);
 	    tmp = (I32)(s != startpos) ? utf8_to_uv(reghop((U8*)s, -1), 0) : '\n';
-	    tmp = ((OP(c) == NBOUND ? isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
+	    tmp = ((OP(c) == NBOUNDUTF8 ? isALNUM_uni(tmp) : isALNUM_LC_uni(tmp)) != 0);
 	    while (s < strend) {
-		if (tmp == !(OP(c) == NBOUND ?
+		if (tmp == !(OP(c) == NBOUNDUTF8 ?
 			     swash_fetch(PL_utf8_alnum, (U8*)s) :
 			     isALNUM_LC_utf8((U8*)s)))
 		    tmp = !tmp;
@@ -1221,11 +1250,8 @@ find_byclass(regexp * prog, regnode *c, char *s, char *strend, char *startpos, I
 	    }
 	    break;
 	default:
-	    {
-		dTHX;
-		Perl_croak(aTHX_ "panic: unknown regstclass %d", (int)OP(c));
-		break;
-	    }
+	    Perl_croak(aTHX_ "panic: unknown regstclass %d", (int)OP(c));
+	    break;
 	}
 	return 0;
       got_it:
@@ -1491,7 +1517,8 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	goto phooey;
     }
     else if (c = prog->regstclass) {
-	if (minlen)		/* don't bother with what can't match */
+	if (minlen && PL_regkind[(U8)OP(prog->regstclass)] != EXACT)
+	    /* don't bother with what can't match */
 	    strend = HOPc(strend, -(minlen - 1));
   	if (find_byclass(prog, c, s, strend, startpos, 0))
 	    goto got_it;
@@ -1615,12 +1642,12 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 	    PerlIO_printf(Perl_debug_log, "  setting stack tmpbase at %"IVdf"\n",
 			  (IV)(PL_stack_sp - PL_stack_base));
 	    ));
-	SAVEINT(cxstack[cxstack_ix].blk_oldsp);
+	SAVEI32(cxstack[cxstack_ix].blk_oldsp);
 	cxstack[cxstack_ix].blk_oldsp = PL_stack_sp - PL_stack_base;
 	/* Otherwise OP_NEXTSTATE will free whatever on stack now.  */
 	SAVETMPS;
 	/* Apparently this is not needed, judging by wantarray. */
-	/* SAVEINT(cxstack[cxstack_ix].blk_gimme);
+	/* SAVEI8(cxstack[cxstack_ix].blk_gimme);
 	   cxstack[cxstack_ix].blk_gimme = G_SCALAR; */
 
 	if (PL_reg_sv) {
