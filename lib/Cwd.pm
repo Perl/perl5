@@ -114,8 +114,10 @@ sub getcwd
 		unless (@tst = lstat("$dotdots/$dir"))
 		{
 		    warn "lstat($dotdots/$dir): $!";
-		    closedir(PARENT);
-		    return '';
+		    # Just because you can't lstat this directory
+		    # doesn't mean you'll never find the right one.
+		    # closedir(PARENT);
+		    # return '';
 		}
 	    }
 	    while ($dir eq '.' || $dir eq '..' || $tst[0] != $pst[0] ||

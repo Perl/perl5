@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.8 1995/07/25 13:40:02 ram Exp $
 #
-# Generated on Sat Dec  2 15:29:39 EST 1995 [metaconfig 3.0 PL58]
+# Generated on Fri Dec  8 11:19:33 EST 1995 [metaconfig 3.0 PL58]
 
 cat >/tmp/c1$$ <<EOF
 ARGGGHHHH!!!!!
@@ -1343,7 +1343,6 @@ mkdir
 rm
 sed
 sort
-tail
 touch
 tr
 uniq
@@ -2361,10 +2360,58 @@ else
 	d_archlib="$define"
 fi
 
-: determine where site specific architecture-dependent libraries go.
-
-set dflt sitearch lib/site_perl/$archname
+: determine where site specific libraries go.
+set sitelib sitelib
 eval $prefixit
+case "$sitelib" in
+'')	dflt="$privlib/site_perl" ;;
+*)	dflt="$sitelib" ;;
+esac
+$cat <<EOM
+
+The installation process will also create a directory for
+site-specific extensions and modules.  Some users find it convenient
+to place all local files in this directory rather than in the main
+distribution directory.
+
+EOM
+fn=d~+
+rp='Pathname for the site-specific library files?'
+. ./getfile
+if $test "X$sitelibexp" != "X$ansexp"; then
+	installsitelib=''
+fi
+sitelib="$ans"
+sitelibexp="$ansexp"
+if $afs; then
+	$cat <<EOM
+
+Since you are running AFS, I need to distinguish the directory in which
+private files reside from the directory in which they are installed (and from
+which they are presumably copied to the former directory by occult means).
+
+EOM
+	case "$installsitelib" in
+	'') dflt=`echo $sitelibexp | sed 's#^/afs/#/afs/.#'`;;
+	*) dflt="$installsitelib";;
+	esac
+	fn=de~
+	rp='Where will private files be installed?'
+	. ./getfile
+	installsitelib="$ans"
+else
+	installsitelib="$sitelibexp"
+fi
+
+: determine where site specific architecture-dependent libraries go.
+xxx=`echo $sitelib/$archname | sed 's!^$prefix!!'`
+: xxx is usuually lib/site_perl/archname.
+set sitearch sitearch none
+eval $prefixit
+case "$sitearch" in
+'')	dflt="$sitelib/$archname" ;;
+*)	dflt="$sitearch" ;;
+esac
 $cat <<EOM
 
 The installation process will also create a directory for
@@ -2802,45 +2849,6 @@ else
 	installscript="$scriptdirexp"
 fi
 
-: determine where site specific libraries go.
-set dflt sitelib lib/site_perl
-eval $prefixit
-$cat <<EOM
-
-The installation process will also create a directory for
-site-specific extensions and modules.  Some users find it convenient
-to place all local files in this directory rather than in the main
-distribution directory.
-
-EOM
-fn=d~+
-rp='Pathname for the site-specific library files?'
-. ./getfile
-if $test "X$sitelibexp" != "X$ansexp"; then
-	installsitelib=''
-fi
-sitelib="$ans"
-sitelibexp="$ansexp"
-if $afs; then
-	$cat <<EOM
-
-Since you are running AFS, I need to distinguish the directory in which
-private files reside from the directory in which they are installed (and from
-which they are presumably copied to the former directory by occult means).
-
-EOM
-	case "$installsitelib" in
-	'') dflt=`echo $sitelibexp | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installsitelib";;
-	esac
-	fn=de~
-	rp='Where will private files be installed?'
-	. ./getfile
-	installsitelib="$ans"
-else
-	installsitelib="$sitelibexp"
-fi
-
 : determine perl absolute location
 case "$perlpath" in
 '')	perlpath=$binexp/perl ;;
@@ -2860,12 +2868,12 @@ want to share those scripts and perl is not in a standard place
 a shell by starting the script with a single ':' character.
 
 EOH
-		dflt=y
-		rp='Shall I use #! to start up perl?'
+		dflt=$perlpath
+		rp='What shall I put after the #! to start up perl ("none" to not use #!)?'
 		. ./myread
 		case "$ans" in
-		y*|Y*) startperl="#!$perlpath";;
-		*) startperl=": # use perl";;
+		none) startperl=": # use perl";;
+		*) startperl="#!$ans";;
 		esac
 		;;
 	*) startperl=": # use perl"

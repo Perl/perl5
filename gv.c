@@ -225,7 +225,7 @@ char* name;
 	*nsplit = '\0';
 	if (strEQ(origname,"SUPER")) {
 	    /* Degenerate case ->SUPER::method should really lookup in original stash */
-	    SV *tmpstr = sv_2mortal(newSVpv(HvNAME(stash),0));
+	    SV *tmpstr = sv_2mortal(newSVpv(HvNAME(curcop->cop_stash),0));
 	    sv_catpvn(tmpstr, "::SUPER", 7);
 	    stash = gv_stashpv(SvPV(tmpstr,na),TRUE);
 	    *nsplit = ch;

@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 eval 'exec perl -S $0  ${1+"$@"}'
-    if $0;
+    if 0;
 
 use Config;
 $diagnostics::PODFILE= $Config{privlib} . "/pod/perldiag.pod";
@@ -406,14 +406,14 @@ sub warn_trap {
     if (caller eq $WHOAMI or !splainthis($warning)) {
 	print STDERR $warning;
     } 
-    &$oldwarn if $oldwarn and $oldwarn ne \&warn_trap;
+    &$oldwarn if defined $oldwarn and $oldwarn and $oldwarn ne \&warn_trap;
 };
 
 sub death_trap {
     my $exception = $_[0];
     splainthis($exception);
     if (caller eq $WHOAMI) { print STDERR "INTERNAL EXCEPTION: $exception"; } 
-    &$olddie if defined $olddie and $olddie ne \&death_trap;
+    &$olddie if defined $olddie and $olddie and $olddie ne \&death_trap;
     $SIG{__DIE__} = $SIG{__WARN__} = '';
     confess "Uncaught exception from user code:\n\t$exception    Bailing out";
 	# up we go; where we stop, nobody knows, but i think we die now

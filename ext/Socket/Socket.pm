@@ -244,8 +244,8 @@ sub sockaddr_un {
 	croak "usage:   (filename) = sockaddr_un(sun_sv)" unless @_ == 1;
         unpack_sockaddr_un(@_);
     } else {
-	croak "usage:   sun_sv = sockaddr_un(filename))" unless @_ == 1;
-        pack_sockaddr_in(@_);
+	croak "usage:   sun_sv = sockaddr_un(filename)" unless @_ == 1;
+        pack_sockaddr_un(@_);
     }
 }
 

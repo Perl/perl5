@@ -113,6 +113,7 @@ ext/ODBM_File/hints/svr4.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/typemap		ODBM extension interface types
 ext/POSIX/Makefile.PL		POSIX extension makefile writer
 ext/POSIX/POSIX.pm		POSIX extension Perl module
+ext/POSIX/POSIX.pod		POSIX extension documentation
 ext/POSIX/POSIX.xs		POSIX extension external subroutines
 ext/POSIX/typemap		POSIX extension interface types
 ext/SDBM_File/Makefile.PL	SDBM extension makefile writer
@@ -333,7 +334,7 @@ makedir.SH		Precursor to makedir
 malloc.c		A version of malloc you might not want
 mg.c			Magic code
 mg.h			Magic header
-minimod.PL		Writes lib/ExtUtils/Miniperl.pm
+minimod.pl		Writes lib/ExtUtils/Miniperl.pm
 miniperlmain.c		Basic perl w/o dynamic loading or extensions
 mv-if-diff		Script to mv a file if it changed
 myconfig		Prints summary of the current configuration
@@ -453,6 +454,7 @@ t/lib/ndbm.t		See if NDBM_File works
 t/lib/odbm.t		See if ODBM_File works
 t/lib/posix.t		See if POSIX works
 t/lib/sdbm.t		See if SDBM_File works
+t/lib/socket.t		See if Socket works
 t/lib/soundex.t		See if Soundex works
 t/op/append.t		See if . works
 t/op/array.t		See if array operations work

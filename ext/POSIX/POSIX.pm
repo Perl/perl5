@@ -1,61 +1,5 @@
 package POSIX;
 
-=head1 NAME
-
-POSIX - Perl interface to IEEE 1003.1 namespace
-
-=head1 SYNOPSIS
-
-    use POSIX;
-    use POSIX 'strftime';
-
-=head1 DESCRIPTION
-
-The POSIX module permits you to access all (or nearly all) the standard
-POSIX 1003.1 identifiers.  Things which are C<#defines> in C, like EINTR
-or O_NDELAY, are automatically exported into your namespace.  All
-functions are only exported if you ask for them explicitly.  Most likely
-people will prefer to use the fully-qualified function names.
-
-To get a list of all the possible identifiers available to you--and
-their semantics--you should pick up a 1003.1 spec, or look in the
-F<POSIX.pm> module.
-
-=head1 EXAMPLES
-
-    printf "EINTR is %d\n", EINTR;
-
-    POSIX::setsid(0);
-
-    $fd = POSIX::open($path, O_CREAT|O_EXCL|O_WRONLY, 0644);
-	# note: that's a filedescriptor, *NOT* a filehandle
-
-=head1 NOTE
-
-The POSIX module is probably the most complex Perl module supplied with
-the standard distribution.  It incorporates autoloading, namespace games,
-and dynamic loading of code that's in Perl, C, or both.  It's a great
-source of wisdom.
-
-=head1 CAVEATS 
-
-A few functions are not implemented because they are C specific.  If you
-attempt to call these, they will print a message telling you that they
-aren't implemented, and suggest using the Perl equivalent should one
-exist.  For example, trying to access the setjmp() call will elicit the
-message "setjmp() is C-specific: use eval {} instead".
-
-Furthermore, some evil vendors will claim 1003.1 compliance, but in fact
-are not so: they will not pass the PCTS (POSIX Compliance Test Suites).
-For example, one vendor may not define EDEADLK, or the semantics of the
-errno values set by open(2) might not be quite right.  Perl does not
-attempt to verify POSIX compliance.  That means you can currently
-successfully say "use POSIX",  and then later in your program you find
-that your vendor has been lax and there's no usable ICANON macro after
-all.  This could be construed to be a bug.
-
-=cut
-
 use Carp;
 require Exporter;
 use AutoLoader;
@@ -513,35 +457,35 @@ sub offsetof {
 }
 
 sub clearerr {
-    redef "$filehandle->clearerr(filehandle)";
+    redef "FileHandle::clearerr()";
 }
 
 sub fclose {
-    redef "$filehandle->fclose(filehandle)";
+    redef "FileHandle::close()";
 }
 
 sub fdopen {
-    redef "FileHandle->new_from_fd(fd,mode)";
+    redef "FileHandle::new_from_fd()";
 }
 
 sub feof {
-    redef "$filehandle->eof()";
+    redef "FileHandle::eof()";
 }
 
 sub fgetc {
-    redef "$filehandle->getc()";
+    redef "FileHandle::getc()";
 }
 
 sub fgets {
-    redef "$filehandle->gets()";
+    redef "FileHandle::gets()";
 }
 
 sub fileno {
-    redef "$filehandle->fileno()";
+    redef "FileHandle::fileno()";
 }
 
 sub fopen {
-    redef "FileHandle->open()";
+    redef "FileHandle::open()";
 }
 
 sub fprintf {
@@ -569,27 +513,27 @@ sub fscanf {
 }
 
 sub fseek {
-    redef "$filehandle->seek(pos,whence)";
+    redef "FileHandle::seek()";
 }
 
 sub ferror {
-    redef "$filehandle->error()";
+    redef "FileHandle::error()";
 }
 
 sub fflush {
-    redef "$filehandle->flush()";
+    redef "FileHandle::flush()";
 }
 
 sub fgetpos {
-    redef "$filehandle->getpos()";
+    redef "FileHandle::getpos()";
 }
 
 sub fsetpos {
-    redef "$filehandle->setpos(pos)";
+    redef "FileHandle::setpos()";
 }
 
 sub ftell {
-    redef "$filehandle->tell()";
+    redef "FileHandle::tell()";
 }
 
 sub fwrite {
@@ -662,11 +606,11 @@ sub sscanf {
 }
 
 sub tmpfile {
-    redef "FileHandle->new_tmpfile()";
+    redef "FileHandle::new_tmpfile()";
 }
 
 sub ungetc {
-    redef "$filehandle->ungetc(char)";
+    redef "FileHandle::ungetc()";
 }
 
 sub vfprintf {
@@ -703,8 +647,7 @@ sub atol {
 }
 
 sub bsearch {
-    unimpl "bsearch(xxx)" if @_ != 123;
-    bsearch($_[0]);
+    unimpl "bsearch() not supplied";
 }
 
 sub calloc {
@@ -722,7 +665,6 @@ sub exit {
 
 sub free {
     unimpl "free() is C-specific, stopped";
-    free($_[0]);
 }
 
 sub getenv {
@@ -785,7 +727,7 @@ sub memcmp {
 
 sub memcpy {
     unimpl "memcpy() is C-specific, use = instead";
-    memcpy($_[0]);
+}
 
 sub memmove {
     unimpl "memmove() is C-specific, use = instead";
@@ -887,11 +829,6 @@ sub umask {
     umask($_[0]);
 }
 
-sub times {
-    usage "times()" if @_ != 0;
-    times();
-}
-
 sub wait {
     usage "wait(statusvariable)" if @_ != 1;
     local $result = wait();
@@ -917,7 +854,7 @@ sub localtime {
 }
 
 sub time {
-    unimpl "time()" if @_ != 0;
+    usage "time()" if @_ != 0;
     time;
 }
 
@@ -938,32 +875,26 @@ sub chown {
 
 sub execl {
     unimpl "execl() is C-specific, stopped";
-    execl($_[0]);
 }
 
 sub execle {
     unimpl "execle() is C-specific, stopped";
-    execle($_[0]);
 }
 
 sub execlp {
     unimpl "execlp() is C-specific, stopped";
-    execlp($_[0]);
 }
 
 sub execv {
     unimpl "execv() is C-specific, stopped";
-    execv($_[0]);
 }
 
 sub execve {
     unimpl "execve() is C-specific, stopped";
-    execve($_[0]);
 }
 
 sub execvp {
     unimpl "execvp() is C-specific, stopped";
-    execvp($_[0]);
 }
 
 sub fork {

@@ -1069,13 +1069,21 @@ filter_read(idx, buf_sv, maxlen)
 
 	    /* ensure buf_sv is large enough */
 	    SvGROW(buf_sv, old_len + maxlen) ;
-	    if ((len = fread(SvPVX(buf_sv) + old_len, 1, maxlen, rsfp)) <= 0)
-		return len ;
+	    if ((len = fread(SvPVX(buf_sv) + old_len, 1, maxlen, rsfp)) <= 0){
+		if (ferror(rsfp))
+	            return -1;		/* error */
+	        else
+		    return 0 ;		/* end of file */
+	    }
 	    SvCUR_set(buf_sv, old_len + len) ;
 	} else {
 	    /* Want a line */
-            if (sv_gets(buf_sv, rsfp, SvCUR(buf_sv)) == NULL)
-	        return -1;		/* end of file */
+            if (sv_gets(buf_sv, rsfp, SvCUR(buf_sv)) == NULL) {
+		if (ferror(rsfp))
+	            return -1;		/* error */
+	        else
+		    return 0 ;		/* end of file */
+	    }
 	}
 	return SvCUR(buf_sv);
     }
@@ -1092,7 +1100,7 @@ filter_read(idx, buf_sv, maxlen)
 		idx, funcp, SvPV(datasv,na));
     /* Call function. The function is expected to 	*/
     /* call "FILTER_READ(idx+1, buf_sv)" first.		*/
-    /* Return: <0:error/eof, >=0:not eof (see yylex())	*/
+    /* Return: <0:error, =0:eof, >0:not eof 		*/
     return (*funcp)(idx, buf_sv, maxlen);
 }
 

@@ -296,8 +296,8 @@ lib/Config.pm: config.sh miniperl
 	./miniperl configpm tmp
 	sh mv-if-diff tmp lib/Config.pm
 
-lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl minimod.PL lib/Config.pm
-	./miniperl minimod.PL > tmp && mv tmp $@
+lib/ExtUtils/Miniperl.pm: miniperlmain.c miniperl minimod.pl lib/Config.pm
+	./miniperl minimod.pl > tmp && mv tmp $@
 
 $(plextract):	miniperl lib/Config.pm
 	./miniperl -Ilib $@.PL

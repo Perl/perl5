@@ -2890,20 +2890,12 @@ read(fd, buffer, nbytes)
 	}
 
 SysRet
-setgid(gid)
-	Gid_t		gid
-
-SysRet
 setpgid(pid, pgid)
 	pid_t		pid
 	pid_t		pgid
 
 pid_t
 setsid()
-
-SysRet
-setuid(uid)
-	Uid_t		uid
 
 pid_t
 tcgetpgrp(fd)
@@ -3063,6 +3055,19 @@ clock()
 char *
 ctime(time)
 	Time_t		&time
+
+void
+times()
+	PPCODE:
+	struct tms tms;
+	clock_t realtime;
+	realtime = times( &tms );
+	EXTEND(sp,5);
+	PUSHs( sv_2mortal( newSVnv( realtime ) ) );
+	PUSHs( sv_2mortal( newSVnv( tms.tms_utime ) ) );
+	PUSHs( sv_2mortal( newSVnv( tms.tms_stime ) ) );
+	PUSHs( sv_2mortal( newSVnv( tms.tms_cutime ) ) );
+	PUSHs( sv_2mortal( newSVnv( tms.tms_cstime ) ) );
 
 double
 difftime(time1, time2)

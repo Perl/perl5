@@ -6,6 +6,9 @@ use Carp;
 @ISA = qw(Exporter);
 @EXPORT = qw(openlog closelog setlogmask syslog);
 
+use Socket;
+use Sys::Hostname;
+
 #
 # syslog.pl
 #
@@ -34,7 +37,7 @@ use Carp;
 #	$! = 55;
 #	syslog('info','problem was %m'); # %m == $! in syslog(3)
 
-$host = 'localhost' unless $host;	# set $Syslog::host to change
+$host = hostname() unless $host;	# set $Syslog::host to change
 
 require 'syslog.ph';
 
@@ -146,11 +149,11 @@ sub xlate {
 sub connect {
     $pat = 'S n C4 x8';
 
-    $af_unix = 1;
-    $af_inet = 2;
+    $af_unix = AF_UNIX();
+    $af_inet = AF_INET();
 
-    $stream = 1;
-    $datagram = 2;
+    $stream = SOCK_STREAM();
+    $datagram = SOCK_DGRAM();
 
     ($name,$aliases,$proto) = getprotobyname('udp');
     $udp = $proto;
@@ -158,7 +161,7 @@ sub connect {
     ($name,$aliase,$port,$proto) = getservbyname('syslog','udp');
     $syslog = $port;
 
-    if (chop($myname = `hostname`)) {
+    if ($myname = hostname()) {
 	($name,$aliases,$addrtype,$length,@addrs) = gethostbyname($myname);
 	croak "Can't lookup $myname" unless $name;
 	@bytes = unpack("C4",$addrs[0]);
