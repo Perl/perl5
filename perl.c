@@ -442,10 +442,10 @@ perl_destruct(pTHXx)
 
     /* magical thingies */
 
-    Safefree(PL_ofs);	/* $, */
+    Safefree(PL_ofs);		/* $, */
     PL_ofs = Nullch;
 
-    Safefree(PL_ors);	/* $\ */
+    Safefree(PL_ors);		/* $\ */
     PL_ors = Nullch;
 
     SvREFCNT_dec(PL_rs);	/* $/ */
@@ -454,7 +454,9 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_nrs);	/* $/ helper */
     PL_nrs = Nullsv;
 
-    PL_multiline = 0;	/* $* */
+    PL_multiline = 0;		/* $* */
+    Safefree(PL_osname);	/* $^O */
+    PL_osname = Nullch;
 
     SvREFCNT_dec(PL_statname);
     PL_statname = Nullsv;
@@ -504,8 +506,6 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_argvout_stack);
     PL_argvout_stack = Nullav;
 
-    SvREFCNT_dec(PL_fdpid);
-    PL_fdpid = Nullav;
     SvREFCNT_dec(PL_modglobal);
     PL_modglobal = Nullhv;
     SvREFCNT_dec(PL_preambleav);
@@ -521,6 +521,13 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_bodytarget);
     PL_bodytarget = Nullsv;
     PL_formtarget = Nullsv;
+
+    /* free locale stuff */
+    Safefree(PL_collation_name);
+    PL_collation_name = Nullch;
+
+    Safefree(PL_numeric_name);
+    PL_numeric_name = Nullch;
 
     /* clear utf8 character classes */
     SvREFCNT_dec(PL_utf8_alnum);
@@ -593,14 +600,21 @@ perl_destruct(pTHXx)
 
     /* Now absolutely destruct everything, somehow or other, loops or no. */
     last_sv_count = 0;
+    SvFLAGS(PL_fdpid) |= SVTYPEMASK;		/* don't clean out pid table now */
     SvFLAGS(PL_strtab) |= SVTYPEMASK;		/* don't clean out strtab now */
     while (PL_sv_count != 0 && PL_sv_count != last_sv_count) {
 	last_sv_count = PL_sv_count;
 	sv_clean_all();
     }
+    SvFLAGS(PL_fdpid) &= ~SVTYPEMASK;
+    SvFLAGS(PL_fdpid) |= SVt_PVAV;
     SvFLAGS(PL_strtab) &= ~SVTYPEMASK;
     SvFLAGS(PL_strtab) |= SVt_PVHV;
-    
+
+    AvREAL_off(PL_fdpid);		/* no surviving entries */
+    SvREFCNT_dec(PL_fdpid);		/* needed in io_close() */
+    PL_fdpid = Nullav;
+
     /* Destruct the global string table. */
     {
 	/* Yell and reset the HeVAL() slots that are still holding refcounts,
@@ -631,6 +645,16 @@ perl_destruct(pTHXx)
 	}
     }
     SvREFCNT_dec(PL_strtab);
+
+    /* free special SVs */
+
+    SvREFCNT(&PL_sv_yes) = 0;
+    sv_clear(&PL_sv_yes);
+    SvANY(&PL_sv_yes) = NULL;
+
+    SvREFCNT(&PL_sv_no) = 0;
+    sv_clear(&PL_sv_no);
+    SvANY(&PL_sv_no) = NULL;
 
     if (PL_sv_count != 0 && ckWARN_d(WARN_INTERNAL))
 	Perl_warner(aTHX_ WARN_INTERNAL,"Scalars leaked: %ld\n", (long)PL_sv_count);
@@ -665,7 +689,7 @@ perl_destruct(pTHXx)
     Safefree(PL_thrsv);
     PL_thrsv = Nullsv;
 #endif /* USE_THREADS */
-    
+
     /* As the absolutely last thing, free the non-arena SV for mess() */
 
     if (PL_mess_sv) {
@@ -1459,6 +1483,8 @@ Perl_call_method(pTHX_ const char *methname, I32 flags)
     XPUSHs(sv_2mortal(newSVpv(methname,0)));
     PUTBACK;
     pp_method();
+    if (PL_op == &myop)
+	PL_op = Nullop;
     return call_sv(*PL_stack_sp--, flags);
 }
 

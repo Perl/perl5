@@ -80,7 +80,7 @@ sdbm_DESTROY(db)
 	    SvREFCNT_dec(db->filter_fetch_value) ;
 	  if (db->filter_store_value)
 	    SvREFCNT_dec(db->filter_store_value) ;
-	  Safefree(db) ;	
+	  safefree(db) ;
 
 datum_value
 sdbm_FETCH(db, key)

@@ -1033,7 +1033,6 @@
 #define sv_unglob		S_sv_unglob
 #define not_a_number		S_not_a_number
 #define visit			S_visit
-#define my_safemalloc		S_my_safemalloc
 #define sv_add_backref		S_sv_add_backref
 #define sv_del_backref		S_sv_del_backref
 #  if defined(DEBUGGING)
@@ -2440,7 +2439,6 @@
 #define sv_unglob(a)		S_sv_unglob(aTHX_ a)
 #define not_a_number(a)		S_not_a_number(aTHX_ a)
 #define visit(a)		S_visit(aTHX_ a)
-#define my_safemalloc		S_my_safemalloc
 #define sv_add_backref(a,b)	S_sv_add_backref(aTHX_ a,b)
 #define sv_del_backref(a)	S_sv_del_backref(aTHX_ a)
 #  if defined(DEBUGGING)
@@ -4753,8 +4751,6 @@
 #define not_a_number		S_not_a_number
 #define S_visit			CPerlObj::S_visit
 #define visit			S_visit
-#define S_my_safemalloc		CPerlObj::S_my_safemalloc
-#define my_safemalloc		S_my_safemalloc
 #define S_sv_add_backref	CPerlObj::S_sv_add_backref
 #define sv_add_backref		S_sv_add_backref
 #define S_sv_del_backref	CPerlObj::S_sv_del_backref

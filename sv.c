@@ -700,59 +700,100 @@ S_more_xpvbm(pTHX)
     xpvbm->xpv_pv = 0;
 }
 
-#define new_XIV() (void*)new_xiv()
-#define del_XIV(p) del_xiv((XPVIV*) p)
+#ifdef LEAKTEST
+#  define my_safemalloc(s)	(void*)safexmalloc(717,s)
+#  define my_safefree(p)	safexfree((char*)p)
+#else
+#  define my_safemalloc(s)	(void*)safemalloc(s)
+#  define my_safefree(p)	safefree((char*)p)
+#endif
 
-#define new_XNV() (void*)new_xnv()
-#define del_XNV(p) del_xnv((XPVNV*) p)
+#ifdef PURIFY
 
-#define new_XRV() (void*)new_xrv()
-#define del_XRV(p) del_xrv((XRV*) p)
+#define new_XIV()	my_safemalloc(sizeof(XPVIV))
+#define del_XIV(p)	my_safefree(p)
 
-#define new_XPV() (void*)new_xpv()
-#define del_XPV(p) del_xpv((XPV *)p)
+#define new_XNV()	my_safemalloc(sizeof(XPVNV))
+#define del_XNV(p)	my_safefree(p)
 
-STATIC void* 
-S_my_safemalloc(MEM_SIZE size)
-{
-    char *p;
-    New(717, p, size, char);
-    return (void*)p;
-}
-#  define my_safefree(s) Safefree(s)
+#define new_XRV()	my_safemalloc(sizeof(XRV))
+#define del_XRV(p)	my_safefree(p)
 
-#define new_XPVIV() (void*)new_xpviv()
-#define del_XPVIV(p) del_xpviv((XPVIV *)p)
+#define new_XPV()	my_safemalloc(sizeof(XPV))
+#define del_XPV(p)	my_safefree(p)
 
-#define new_XPVNV() (void*)new_xpvnv()
-#define del_XPVNV(p) del_xpvnv((XPVNV *)p)
+#define new_XPVIV()	my_safemalloc(sizeof(XPVIV))
+#define del_XPVIV(p)	my_safefree(p)
 
-#define new_XPVCV() (void*)new_xpvcv()
-#define del_XPVCV(p) del_xpvcv((XPVCV *)p)
+#define new_XPVNV()	my_safemalloc(sizeof(XPVNV))
+#define del_XPVNV(p)	my_safefree(p)
 
-#define new_XPVAV() (void*)new_xpvav()
-#define del_XPVAV(p) del_xpvav((XPVAV *)p)
+#define new_XPVCV()	my_safemalloc(sizeof(XPVCV))
+#define del_XPVCV(p)	my_safefree(p)
 
-#define new_XPVHV() (void*)new_xpvhv()
-#define del_XPVHV(p) del_xpvhv((XPVHV *)p)
+#define new_XPVAV()	my_safemalloc(sizeof(XPVAV))
+#define del_XPVAV(p)	my_safefree(p)
+
+#define new_XPVHV()	my_safemalloc(sizeof(XPVHV))
+#define del_XPVHV(p)	my_safefree(p)
   
-#define new_XPVMG() (void*)new_xpvmg()
-#define del_XPVMG(p) del_xpvmg((XPVMG *)p)
+#define new_XPVMG()	my_safemalloc(sizeof(XPVMG))
+#define del_XPVMG(p)	my_safefree(p)
 
-#define new_XPVLV() (void*)new_xpvlv()
-#define del_XPVLV(p) del_xpvlv((XPVLV *)p)
+#define new_XPVLV()	my_safemalloc(sizeof(XPVLV))
+#define del_XPVLV(p)	my_safefree(p)
 
-#define new_XPVGV() (void*)my_safemalloc(sizeof(XPVGV))
-#define del_XPVGV(p) my_safefree((char*)p)
+#define new_XPVBM()	my_safemalloc(sizeof(XPVBM))
+#define del_XPVBM(p)	my_safefree(p)
+
+#else /* !PURIFY */
+
+#define new_XIV()	(void*)new_xiv()
+#define del_XIV(p)	del_xiv((XPVIV*) p)
+
+#define new_XNV()	(void*)new_xnv()
+#define del_XNV(p)	del_xnv((XPVNV*) p)
+
+#define new_XRV()	(void*)new_xrv()
+#define del_XRV(p)	del_xrv((XRV*) p)
+
+#define new_XPV()	(void*)new_xpv()
+#define del_XPV(p)	del_xpv((XPV *)p)
+
+#define new_XPVIV()	(void*)new_xpviv()
+#define del_XPVIV(p)	del_xpviv((XPVIV *)p)
+
+#define new_XPVNV()	(void*)new_xpvnv()
+#define del_XPVNV(p)	del_xpvnv((XPVNV *)p)
+
+#define new_XPVCV()	(void*)new_xpvcv()
+#define del_XPVCV(p)	del_xpvcv((XPVCV *)p)
+
+#define new_XPVAV()	(void*)new_xpvav()
+#define del_XPVAV(p)	del_xpvav((XPVAV *)p)
+
+#define new_XPVHV()	(void*)new_xpvhv()
+#define del_XPVHV(p)	del_xpvhv((XPVHV *)p)
   
-#define new_XPVBM() (void*)new_xpvbm()
-#define del_XPVBM(p) del_xpvbm((XPVBM *)p)
+#define new_XPVMG()	(void*)new_xpvmg()
+#define del_XPVMG(p)	del_xpvmg((XPVMG *)p)
 
-#define new_XPVFM() (void*)my_safemalloc(sizeof(XPVFM))
-#define del_XPVFM(p) my_safefree((char*)p)
+#define new_XPVLV()	(void*)new_xpvlv()
+#define del_XPVLV(p)	del_xpvlv((XPVLV *)p)
+
+#define new_XPVBM()	(void*)new_xpvbm()
+#define del_XPVBM(p)	del_xpvbm((XPVBM *)p)
+
+#endif /* PURIFY */
+
+#define new_XPVGV()	my_safemalloc(sizeof(XPVGV))
+#define del_XPVGV(p)	my_safefree(p)
+ 
+#define new_XPVFM()	my_safemalloc(sizeof(XPVFM))
+#define del_XPVFM(p)	my_safefree(p)
   
-#define new_XPVIO() (void*)my_safemalloc(sizeof(XPVIO))
-#define del_XPVIO(p) my_safefree((char*)p)
+#define new_XPVIO()	my_safemalloc(sizeof(XPVIO))
+#define del_XPVIO(p)	my_safefree(p)
 
 /*
 =for apidoc sv_upgrade
@@ -5183,6 +5224,8 @@ Perl_sv_bless(pTHX_ SV *sv, HV *stash)
 STATIC void
 S_sv_unglob(pTHX_ SV *sv)
 {
+    void *xpvmg;
+
     assert(SvTYPE(sv) == SVt_PVGV);
     SvFAKE_off(sv);
     if (GvGP(sv))
@@ -5194,6 +5237,13 @@ S_sv_unglob(pTHX_ SV *sv)
     sv_unmagic(sv, '*');
     Safefree(GvNAME(sv));
     GvMULTI_off(sv);
+
+    /* need to keep SvANY(sv) in the right arena */
+    xpvmg = new_XPVMG();
+    StructCopy(SvANY(sv), xpvmg, XPVMG);
+    del_XPVGV(SvANY(sv));
+    SvANY(sv) = xpvmg;
+
     SvFLAGS(sv) &= ~SVTYPEMASK;
     SvFLAGS(sv) |= SVt_PVMG;
 }

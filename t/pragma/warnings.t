@@ -88,6 +88,8 @@ for (@prgs){
 # bison says 'parse error' instead of 'syntax error',
 # various yaccs may or may not capitalize 'syntax'.
     $results =~ s/^(syntax|parse) error/syntax error/mig;
+    # allow all tests to run when there are leaks
+    $results =~ s/Scalars leaked: \d+\n//g;
     $expected =~ s/\n+$//;
     my $prefix = ($results =~ s/^PREFIX\n//) ;
     # any special options? (OPTIONS foo bar zap)

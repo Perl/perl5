@@ -701,7 +701,7 @@ supports dynamic loading, you can also test static loading with
 You can also hand-tweak your config.h to try out different #ifdef
 branches.
 
-=head1 Purify runs
+=head1 Running Purify
 
 Purify is a commercial tool that is helpful in identifying memory
 overruns, wild pointers, memory leaks and other such badness.  Perl
@@ -715,6 +715,7 @@ Use the following commands to test perl with Purify:
 	make all pureperl
 	cd t
 	ln -s ../pureperl perl
+	setenv PERL_DESTRUCT_LEVEL 5
 	./perl TEST
 
 Disabling Perl's malloc allows Purify to monitor allocations and leaks
