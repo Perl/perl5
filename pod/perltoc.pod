@@ -2262,9 +2262,9 @@ B<-X>, B<-x> I<directory>
 HOME, LOGDIR, PATH, PERL5LIB, PERL5OPT, PERLIO, :bytes, :crlf, :mmap,
 :perlio, :pop, :raw, :stdio, :unix, :utf8, :win32, PERLIO_DEBUG, PERLLIB,
 PERL5DB, PERL5SHELL (specific to the Win32 port), PERL_DEBUG_MSTATS,
-PERL_DESTRUCT_LEVEL, PERL_ENCODING, PERL_HASH_SEED, PERL_HASH_SEED_DEBUG,
-PERL_ROOT (specific to the VMS port), PERL_SIGNALS, PERL_UNICODE, SYS$LOGIN
-(specific to the VMS port)
+PERL_DESTRUCT_LEVEL, PERL_DL_NONLAZY, PERL_ENCODING, PERL_HASH_SEED,
+PERL_HASH_SEED_DEBUG, PERL_ROOT (specific to the VMS port), PERL_SIGNALS,
+PERL_UNICODE, SYS$LOGIN (specific to the VMS port)
 
 =back
 
@@ -4470,7 +4470,7 @@ save_hptr(HV **hptr)>
 
 =item Internal Functions
 
-A, p, d, s, n, r, f, M, o, j, x
+A, p, d, s, n, r, f, M, o, x, m, X, E, b
 
 =over 4
 
@@ -4652,8 +4652,8 @@ HEf_SVKEY, Nullch, Nullsv
 =item Hash Manipulation Functions
 
 get_hv, HeHASH, HeKEY, HeKLEN, HePV, HeSVKEY, HeSVKEY_force, HeSVKEY_set,
-HeVAL, HvNAME, hv_clear, hv_delete, hv_delete_ent, hv_exists,
-hv_exists_ent, hv_fetch, hv_fetch_ent, hv_iterinit, hv_iterkey,
+HeVAL, HvNAME, hv_clear, hv_clear_placeholders, hv_delete, hv_delete_ent,
+hv_exists, hv_exists_ent, hv_fetch, hv_fetch_ent, hv_iterinit, hv_iterkey,
 hv_iterkeysv, hv_iternext, hv_iternextsv, hv_iternext_flags, hv_iterval,
 hv_magic, hv_store, hv_store_ent, hv_undef, newHV, Nullhv
 
@@ -5480,7 +5480,7 @@ B<-V>
 
 =back
 
-=head2 perldelta - what is new for perl v5.8.2
+=head2 perldelta - what is new for perl v5.8.3
 
 =over 4
 
@@ -5511,6 +5511,50 @@ B<-V>
 =item Known Problems
 
 =item Platform Specific Problems
+
+=item Reporting Bugs
+
+=item SEE ALSO
+
+=back
+
+=head2 perl582delta, perldelta - what is new for perl v5.8.2
+
+=over 4
+
+=item DESCRIPTION
+
+=item Incompatible Changes
+
+=item Core Enhancements
+
+=over 4
+
+=item Hash Randomisation
+
+=item Threading
+
+=back
+
+=item Modules and Pragmata
+
+=over 4
+
+=item Updated Modules And Pragmata
+
+Devel::PPPort, Digest::MD5, I18N::LangTags, libnet, MIME::Base64,
+Pod::Perldoc, strict, Tie::Hash, Time::HiRes, Unicode::Collate,
+Unicode::Normalize, UNIVERSAL
+
+=back
+
+=item Selected Bug Fixes
+
+=item Changed Internals
+
+=item Platform Specific Problems
+
+=item Future Directions
 
 =item Reporting Bugs
 
@@ -7645,6 +7689,34 @@ R4 x86, R4 PPC
 
 =back
 
+=over 4
+
+=item Name
+
+=item Description
+
+=item Build
+
+=over 4
+
+=item Tools & SDK
+
+Microsoft Embedded Visual Tools, Microsoft Visual C++, Rainer Keuchel's
+celib-sources, Rainer Keuchel's console-sources
+
+=item Make
+
+go to ./wince subdirectory, edit file compile.bat, run	  compile.bat, run 
+  compile.bat dist
+
+=back
+
+=item Acknowledgements
+
+=item AUTHORS
+
+=back
+
 =head2 perlcygwin, README.cygwin - Perl for Cygwin
 
 =over 4
@@ -7750,6 +7822,50 @@ Source, Compiled Module Source, Perl Modules/Scripts
 =item Testing Perl on DG/UX
 
 =item Installing the built perl on DG/UX
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 perldos - Perl under DOS, W31, W95.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Prerequisites for Compiling Perl on DOS
+
+DJGPP, Pthreads
+
+=item Shortcomings of Perl under DOS
+
+=item Building Perl on DOS
+
+=item Testing Perl on DOS
+
+=item Installation of Perl on DOS
+
+=back
+
+=item BUILDING AND INSTALLING MODULES ON DOS
+
+=over 4
+
+=item Building Prerequisites for Perl on DOS
+
+=item Unpacking CPAN Modules on DOS
+
+=item Building Non-XS Modules on DOS
+
+=item Building XS Modules on DOS
 
 =back
 
@@ -8762,6 +8878,53 @@ LIST, waitpid PID,FLAGS
 =item AUTHOR
 
 =item LAST UPDATE
+
+=back
+
+=head2 perlwin32 - Perl under Windows
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Setting Up Perl on Win32
+
+Make, Command Shell, Borland C++, Microsoft Visual C++, Microsoft Platform
+SDK 64-bit Compiler, MinGW32 with gcc, MinGW release 1
+
+=item Building
+
+=item Testing Perl on Win32
+
+=item Installation of Perl on Win32
+
+=item Usage Hints for Perl on Win32
+
+Environment Variables, File Globbing, Using perl from the command line,
+Building Extensions, Command-line Wildcard Expansion, Win32 Specific
+Extensions, Notes on 64-bit Windows
+
+=item Running Perl Scripts
+
+Miscellaneous Things
+
+=back
+
+=item BUGS AND CAVEATS
+
+=item AUTHORS
+
+Gary Ng E<lt>71564.1743@CompuServe.COME<gt>, Gurusamy Sarathy
+E<lt>gsar@activestate.comE<gt>, Nick Ing-Simmons
+E<lt>nick@ing-simmons.netE<gt>
+
+=item SEE ALSO
+
+=item HISTORY
 
 =back
 
@@ -12974,11 +13137,7 @@ all_target
 
 metafile_target
 
-signature_target
-
 metafile_addtomanifest_target
-
-signature_addtomanifest_target
 
 =over 4
 
@@ -13681,8 +13840,8 @@ OPTIMIZE, PERL, PERL_CORE, PERLMAINCC, PERL_ARCHLIB, PERL_LIB,
 PERL_MALLOC_OK, PERLPREFIX, PERLRUN, PERLRUNINST, PERL_SRC, PERM_RW,
 PERM_RWX, PL_FILES, PM, PMLIBDIRS, PM_FILTER, POLLUTE, PPM_INSTALL_EXEC,
 PPM_INSTALL_SCRIPT, PREFIX, PREREQ_FATAL, PREREQ_PM, PREREQ_PRINT,
-PRINT_PREREQ, SITEPREFIX, SIGN, SKIP, TYPEMAPS, VENDORPREFIX, VERBINST,
-VERSION, VERSION_FROM, VERSION_SYM, XS, XSOPT, XSPROTOARG, XS_VERSION
+PRINT_PREREQ, SITEPREFIX, SKIP, TYPEMAPS, VENDORPREFIX, VERBINST, VERSION,
+VERSION_FROM, VERSION_SYM, XS, XSOPT, XSPROTOARG, XS_VERSION
 
 =item Additional lowercase attributes
 
@@ -17470,7 +17629,7 @@ name space
 
 =item DESCRIPTION
 
-unix, stdio, perlio, crlf, utf8, bytes, raw, pop
+:unix, :stdio, :perlio, :crlf, :mmap, :utf8, :bytes, :raw, :pop, :win32
 
 =over 4
 
