@@ -212,9 +212,7 @@ my ($x,@a);
 $x=1 for @a;
 >>>>
 my($x, @a);
-foreach $_ (@a) {
-    $x = 1;
-}
+$x = 1 foreach (@a);
 ####
 # 19
 for (my $i = 0; $i < 2;) {
