@@ -498,7 +498,7 @@ A contact email address for the author/maintainer
 The level of detail in Perl module documentation generally goes from
 less detailed to more detailed.  Your SYNOPSIS section should contain a
 minimal example of use (perhaps as little as one line of code; skip the
-unusual use cases or or anything not needed by most users); the
+unusual use cases or anything not needed by most users); the
 DESCRIPTION should describe your module in broad terms, generally in
 just a few paragraphs; more detail of the module's routines or methods,
 lengthy code examples, or other in-depth material should be given in 

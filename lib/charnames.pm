@@ -45,7 +45,7 @@ sub charnames {
     my $fname = substr $txt, $off[0] + 2, $off[1] - $off[0] - 2;
     die "Character 0x$hex with name '$fname' is above 0xFF";
   }
-  return chr $ord;
+  return pack "U", $ord;
 }
 
 sub import {

@@ -9,7 +9,7 @@ BEGIN {
 
 use Config;
 
-print "1..58\n";
+print "1..59\n";
 
 $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_NetWare = $^O eq 'NetWare';
@@ -281,3 +281,7 @@ if (-f) {print "ok 57\n";} else {print "not ok 57\n";}
 if (-f()) {print "ok 58\n";} else {print "not ok 58\n";}
 
 unlink 'Op.stat.tmp' or print "# unlink failed: $!\n";
+
+# bug id 20011101.069
+my @r = \stat(".");
+if (@r == 13) { print "ok 59\n" } else { print "not ok 59\n" }

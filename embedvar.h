@@ -418,6 +418,7 @@
 #define PL_utf8_print		(PERL_GET_INTERP->Iutf8_print)
 #define PL_utf8_punct		(PERL_GET_INTERP->Iutf8_punct)
 #define PL_utf8_space		(PERL_GET_INTERP->Iutf8_space)
+#define PL_utf8_tofold		(PERL_GET_INTERP->Iutf8_tofold)
 #define PL_utf8_tolower		(PERL_GET_INTERP->Iutf8_tolower)
 #define PL_utf8_totitle		(PERL_GET_INTERP->Iutf8_totitle)
 #define PL_utf8_toupper		(PERL_GET_INTERP->Iutf8_toupper)
@@ -710,6 +711,7 @@
 #define PL_utf8_print		(vTHX->Iutf8_print)
 #define PL_utf8_punct		(vTHX->Iutf8_punct)
 #define PL_utf8_space		(vTHX->Iutf8_space)
+#define PL_utf8_tofold		(vTHX->Iutf8_tofold)
 #define PL_utf8_tolower		(vTHX->Iutf8_tolower)
 #define PL_utf8_totitle		(vTHX->Iutf8_totitle)
 #define PL_utf8_toupper		(vTHX->Iutf8_toupper)
@@ -1005,6 +1007,7 @@
 #define PL_Iutf8_print		PL_utf8_print
 #define PL_Iutf8_punct		PL_utf8_punct
 #define PL_Iutf8_space		PL_utf8_space
+#define PL_Iutf8_tofold		PL_utf8_tofold
 #define PL_Iutf8_tolower	PL_utf8_tolower
 #define PL_Iutf8_totitle	PL_utf8_totitle
 #define PL_Iutf8_toupper	PL_utf8_toupper

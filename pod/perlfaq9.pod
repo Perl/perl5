@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq9 - Networking ($Revision: 1.3 $, $Date: 2001/10/16 13:27:22 $)
+perlfaq9 - Networking ($Revision: 1.4 $, $Date: 2001/10/31 23:54:56 $)
 
 =head1 DESCRIPTION
 
@@ -143,22 +143,28 @@ on text like this:
 
 =head2 How do I extract URLs?
 
-A quick but imperfect approach is
+You can easily extract all sorts of URLs from HTML with
+C<HTML::SimpleLinkExtor> which handles anchors, images, objects,
+frames, and many other tags that can contain a URL.  If you need 
+anything more complex, you can create your own subclass of 
+C<HTML::LinkExtor> or C<HTML::Parser>.  You might even use 
+C<HTML::SimpleLinkExtor> as an example for something specifically
+suited to your needs.
 
-    #!/usr/bin/perl -n00
-    # qxurl - tchrist@perl.com
-    print "$2\n" while m{
-	< \s*
-	  A \s+ HREF \s* = \s* (["']) (.*?) \1
-	\s* >
-    }gsix;
+Less complete solutions involving regular expressions can save 
+you a lot of processing time if you know that the input is simple.  One
+solution from Tom Christiansen runs 100 times faster than most
+module based approaches but only extracts URLs from anchors where the first
+attribute is HREF and there are no other attributes. 
 
-This version does not adjust relative URLs, understand alternate
-bases, deal with HTML comments, deal with HREF and NAME attributes
-in the same tag, understand extra qualifiers like TARGET, or accept
-URLs themselves as arguments.  It also runs about 100x faster than a
-more "complete" solution using the LWP suite of modules, such as the
-http://www.perl.com/CPAN/authors/Tom_Christiansen/scripts/xurl.gz program.
+        #!/usr/bin/perl -n00
+        # qxurl - tchrist@perl.com
+        print "$2\n" while m{
+            < \s*
+              A \s+ HREF \s* = \s* (["']) (.*?) \1
+            \s* >
+        }gsix;
+
 
 =head2 How do I download a file from the user's machine?  How do I open a file on another machine?
 

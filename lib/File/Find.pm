@@ -2,7 +2,8 @@ package File::Find;
 use 5.006;
 use strict;
 use warnings;
-our $VERSION = '1.03';
+use warnings::register;
+our $VERSION = '1.04';
 require Exporter;
 require Cwd;
 
@@ -189,6 +190,17 @@ links that don't resolve:
 
 See also the script C<pfind> on CPAN for a nice application of this
 module.
+
+=head1 WARNINGS
+
+If you run your program with the C<-w> switch, or if you use the
+C<warnings> pragma, File::Find will report warnings for several weird
+situations. You can disable these warnings by putting the statement
+
+    no warnings 'File::Find';
+
+in the appropriate scope. See L<perllexwarn> for more info about lexical
+warnings.
 
 =head1 CAVEAT
 
@@ -452,7 +464,7 @@ sub Follow_SymLink($) {
 	return undef unless defined $DEV;  #  dangling symbolic link
     }
 
-    if ($full_check && $SLnkSeen{$DEV, $INO}++) {
+    if ($full_check && defined $DEV && $SLnkSeen{$DEV, $INO}++) {
 	if ( ($follow_skip < 1) || ((-d _) && ($follow_skip < 2)) ) {
 	    die "$AbsName encountered a second time";
 	}
@@ -542,7 +554,7 @@ sub _find_opt {
 		else {
 		    $abs_dir = contract_name_Mac($cwd, $top_item);
 		    unless (defined $abs_dir) {
-			warn "Can't determine absolute path for $top_item (No such file or directory)\n" if $^W;
+			warnings::warnif "Can't determine absolute path for $top_item (No such file or directory)\n";
 			next Proc_Top_Item;
 		    }
 		}
@@ -565,7 +577,7 @@ sub _find_opt {
 		    if (ref $dangling_symlinks eq 'CODE') {
 			$dangling_symlinks->($top_item, $cwd);
 		    } else {
-			warn "$top_item is a dangling symbolic link\n" if $^W;
+			warnings::warnif "$top_item is a dangling symbolic link\n";
 		    }
 		}
 		next Proc_Top_Item;
@@ -579,7 +591,7 @@ sub _find_opt {
 	else { # no follow
 	    $topdir = $top_item;
 	    unless (defined $topnlink) {
-		warn "Can't stat $top_item: $!\n" if $^W;
+		warnings::warnif "Can't stat $top_item: $!\n";
 		next Proc_Top_Item;
 	    }
 	    if (-d _) {
@@ -616,7 +628,7 @@ sub _find_opt {
 	    }
 
 	    unless ($no_chdir || chdir $abs_dir) {
-		warn "Couldn't chdir $abs_dir: $!\n" if $^W;
+		warnings::warnif "Couldn't chdir $abs_dir: $!\n";
 		next Proc_Top_Item;
 	    }
 
@@ -684,7 +696,7 @@ sub _find_dir($$$) {
 	    }
 	}
 	unless (chdir $udir) {
-	    warn "Can't cd to $udir: $!\n" if $^W;
+	    warnings::warnif "Can't cd to $udir: $!\n";
 	    return;
 	}
     }
@@ -727,10 +739,11 @@ sub _find_dir($$$) {
 	    }
 	    unless (chdir $udir) {
 		if ($Is_MacOS) {
-		    warn "Can't cd to ($p_dir) $udir: $!\n" if $^W;
+		    warnings::warnif "Can't cd to ($p_dir) $udir: $!\n";
 		}
 		else {
-		    warn "Can't cd to (" . ($p_dir ne '/' ? $p_dir : '') . "/) $udir: $!\n" if $^W;
+		    warnings::warnif "Can't cd to (" .
+			($p_dir ne '/' ? $p_dir : '') . "/) $udir: $!\n";
 		}
 		next;
 	    }
@@ -745,7 +758,7 @@ sub _find_dir($$$) {
 
 	# Get the list of files in the current directory.
 	unless (opendir DIR, ($no_chdir ? $dir_name : $File::Find::current_dir)) {
-	    warn "Can't opendir($dir_name): $!\n" if $^W;
+	    warnings::warnif "Can't opendir($dir_name): $!\n";
 	    next;
 	}
 	@filenames = readdir DIR;
@@ -914,7 +927,7 @@ sub _find_dir_symlnk($$$) {
 	}
 	$ok = chdir($updir_loc) unless ($p_dir eq $File::Find::current_dir);
 	unless ($ok) {
-	    warn "Can't cd to $updir_loc: $!\n" if $^W;
+	    warnings::warnif "Can't cd to $updir_loc: $!\n";
 	    return;
 	}
     }
@@ -931,7 +944,7 @@ sub _find_dir_symlnk($$$) {
 	    # change (back) to parent directory (always untainted)
 	    unless ($no_chdir) {
 		unless (chdir $updir_loc) {
-		    warn "Can't cd to $updir_loc: $!\n" if $^W;
+		    warnings::warnif "Can't cd to $updir_loc: $!\n";
 		    next;
 		}
 	    }
@@ -962,7 +975,7 @@ sub _find_dir_symlnk($$$) {
 		}
 	    }
 	    unless (chdir $updir_loc) {
-		warn "Can't cd to $updir_loc: $!\n" if $^W;
+		warnings::warnif "Can't cd to $updir_loc: $!\n";
 		next;
 	    }
 	}
@@ -975,7 +988,7 @@ sub _find_dir_symlnk($$$) {
 
 	# Get the list of files in the current directory.
 	unless (opendir DIR, ($no_chdir ? $dir_loc : $File::Find::current_dir)) {
-	    warn "Can't opendir($dir_loc): $!\n" if $^W;
+	    warnings::warnif "Can't opendir($dir_loc): $!\n";
 	    next;
 	}
 	@filenames = readdir DIR;
@@ -1020,7 +1033,7 @@ sub _find_dir_symlnk($$$) {
 	    if ( $byd_flag < 0 ) {  # must be finddepth, report dirname now
 		unless ($no_chdir || ($dir_rel eq $File::Find::current_dir)) {
 		    unless (chdir $updir_loc) { # $updir_loc (parent dir) is always untainted 
-			warn "Can't cd to $updir_loc: $!\n" if $^W;
+			warnings::warnif "Can't cd to $updir_loc: $!\n";
 			next;
 		    }
 		}

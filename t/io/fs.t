@@ -172,7 +172,7 @@ else {
         print "ok 21 # skipped: no link\nok 22 # skipped: no link\n";
     }
     else {
-        print "ok 21 # skipped: $^O is neither 'MSWin32' nor 'NetWare'\nok 22 # skipped: $^O is neither 'MSWin32' nor 'NetWare'\n";
+        print "ok 21 # skipped: '$^O' is neither 'MSWin32' nor 'NetWare'\nok 22 # skipped: $^O is neither 'MSWin32' nor 'NetWare'\n";
     }
 }
 

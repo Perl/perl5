@@ -5,6 +5,7 @@ use Encode;
 sub import {
     my ($class, $name) = @_;
     $name = $ENV{PERL_ENCODING} if @_ < 2;
+    $name = "latin1" unless defined $name;
     my $enc = find_encoding($name);
     unless (defined $enc) {
 	require Carp;
@@ -23,13 +24,29 @@ encoding - pragma to control the conversion of legacy data into Unicode
 
     use encoding "iso 8859-7";
 
+    # The \xDF of ISO 8859-7 (Greek) is \x{3af} in Unicode.
+
     $a = "\xDF";
     $b = "\x{100}";
+
+    printf "%#x\n", ord($a); # will print 0x3af, not 0xdf
 
     $c = $a . $b;
 
     # $c will be "\x{3af}\x{100}", not "\x{df}\x{100}".
-    # The \xDF of ISO 8859-7 is \x{3af} in Unicode.
+
+    # chr() is affected, and ...
+
+    print "mega\n"  if ord(chr(0xdf)) == 0x3af;
+
+    # ... ord() is affected by the encoding pragma ...
+
+    print "tera\n" if ord(pack("C", 0xdf)) == 0x3af;
+
+    # but pack/unpack are not affected, in case you still
+    # want back to your native encoding
+
+    print "peta\n" if unpack("C", (pack("C", 0xdf))) == 0xdf;
 
 =head1 DESCRIPTION
 
@@ -38,16 +55,20 @@ expected to be Latin-1 (or EBCDIC in EBCDIC platforms).  With the
 encoding pragma you can change this default.
 
 The pragma is a per script, not a per block lexical.  Only the last
-'use encoding' seen matters.
+C<use encoding> matters, and it affects B<the whole script>.
 
-=head1 FUTURE POSSIBILITIES
+If no encoding is specified, the environment variable L<PERL_ENCODING>
+is consulted.  If that fails, "latin1" (ISO 8859-1) is assumed.  If no
+encoding can be found, C<Unknown encoding '...'> error will be thrown.
 
-The C<\x..> and C<\0...> in literals and regular expressions are not
-affected by this pragma.  They probably should.  Ditto C<\N{...}>.
+=head1 KNOWN PROBLEMS
+
+Literals in regular expressions are not affected by this pragma.
+They very probably should.
 
 =head1 SEE ALSO
 
-L<perlunicode>
+L<perlunicode>, L<Encode>
 
 =cut
 

@@ -306,7 +306,7 @@ string is the earliest point at which the regexp can match.
     /[yY][eE][sS]/;      # match 'yes' in a case-insensitive way
                          # 'yes', 'Yes', 'YES', etc.
 
-This regexp displays a common task: perform a a case-insensitive
+This regexp displays a common task: perform a case-insensitive
 match.  Perl provides away of avoiding all those brackets by simply
 appending an C<'i'> to the end of the match.  Then C</[yY][eE][sS]/;>
 can be rewritten as C</yes/i;>.  The C<'i'> stands for
@@ -561,7 +561,7 @@ regexp, but sometime we want alternatives for just part of a
 regexp.  For instance, suppose we want to search for housecats or
 housekeepers.  The regexp C<housecat|housekeeper> fits the bill, but is
 inefficient because we had to type C<house> twice.  It would be nice to
-have parts of the regexp be constant, like C<house>, and and some
+have parts of the regexp be constant, like C<house>, and some
 parts have alternatives, like C<cat|keeper>.
 
 The B<grouping> metacharacters C<()> solve this problem.  Grouping
@@ -670,7 +670,7 @@ wins.  Second, we were able to get a match at the first character
 position of the string 'a'.  If there were no matches at the first
 position, perl would move to the second character position 'b' and
 attempt the match all over again.  Only when all possible paths at all
-possible character positions have been exhausted does perl give give
+possible character positions have been exhausted does perl give
 up and declare S<C<$string =~ /(abd|abc)(df|d|de)/;> > to be false.
 
 Even with all this work, regexp matching happens remarkably fast.  To
@@ -1336,7 +1336,7 @@ the regexp in the I<last successful match> is used instead.  So we have
     "dogbert =~ //;  # this matches the 'd' regexp used before
 
 The final two modifiers C<//g> and C<//c> concern multiple matches.
-The modifier C<//g> stands for global matching and allows the the
+The modifier C<//g> stands for global matching and allows the
 matching operator to match within a string as many times as possible.
 In scalar context, successive invocations against a string will have
 `C<//g> jump from match to match, keeping track of position in the
@@ -1585,7 +1585,7 @@ OK, you know the basics of regexps and you want to know more.  If
 matching regular expressions is analogous to a walk in the woods, then
 the tools discussed in Part 1 are analogous to topo maps and a
 compass, basic tools we use all the time.  Most of the tools in part 2
-are are analogous to flare guns and satellite phones.  They aren't used
+are analogous to flare guns and satellite phones.  They aren't used
 too often on a hike, but when we are stuck, they can be invaluable.
 
 What follows are the more advanced, less used, or sometimes esoteric
@@ -1766,7 +1766,7 @@ S<C<COMBINING RING> >, which translates in Danish to A with the circle
 atop it, as in the word Angstrom.  C<\X> is equivalent to C<\PM\pM*}>,
 i.e., a non-mark followed by one or more marks.
 
-For the the full and latest information about Unicode see the latest
+For the full and latest information about Unicode see the latest
 Unicode standard, or the Unicode Consortium's website http://www.unicode.org/
 
 As if all those classes weren't enough, Perl also defines POSIX style
@@ -2032,7 +2032,7 @@ Contrast that with an independent subexpression:
 The independent subexpression C<< (?>a*) >> doesn't care about the rest
 of the regexp, so it sees an C<a> and grabs it.  Then the rest of the
 regexp C<ab> cannot match.  Because C<< (?>a*) >> is independent, there
-is no backtracking and and the independent subexpression does not give
+is no backtracking and the independent subexpression does not give
 up its C<a>.  Thus the match of the regexp as a whole fails.  A similar
 behavior occurs with completely independent regexps:
 
@@ -2124,7 +2124,7 @@ conditional are not needed.
 
 Normally, regexps are a part of Perl expressions.
 S<B<Code evaluation> > expressions turn that around by allowing
-arbitrary Perl code to be a part of of a regexp.  A code evaluation
+arbitrary Perl code to be a part of a regexp.  A code evaluation
 expression is denoted C<(?{code})>, with C<code> a string of Perl
 statements.
 

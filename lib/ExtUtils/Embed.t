@@ -42,7 +42,12 @@ if ($^O eq 'MSWin32') {
 else {
     push(@cmd,"-L$lib",'-lperl');
 }
-push(@cmd,ldopts());
+{
+    local $SIG{__WARN__} = sub {
+	warn $_[0] unless $_[0] =~ /No library found for -lperl/
+    };
+    push(@cmd,ldopts());
+}
 
 if ($^O eq 'aix') { # AIX needs an explicit symbol export list.
     my ($perl_exp) = grep { -f } qw(perl.exp ../perl.exp);

@@ -666,6 +666,7 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_utf8_toupper);
     SvREFCNT_dec(PL_utf8_totitle);
     SvREFCNT_dec(PL_utf8_tolower);
+    SvREFCNT_dec(PL_utf8_tofold);
     PL_utf8_alnum	= Nullsv;
     PL_utf8_alnumc	= Nullsv;
     PL_utf8_ascii	= Nullsv;
@@ -683,6 +684,7 @@ perl_destruct(pTHXx)
     PL_utf8_toupper	= Nullsv;
     PL_utf8_totitle	= Nullsv;
     PL_utf8_tolower	= Nullsv;
+    PL_utf8_tofold	= Nullsv;
 
     if (!specialWARN(PL_compiling.cop_warnings))
 	SvREFCNT_dec(PL_compiling.cop_warnings);

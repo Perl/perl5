@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..750\n";
+print "1..753\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2258,3 +2258,16 @@ print "# some Unicode properties\n";
     print "ok 750\n";
 }
 
+{
+    # 0100;LATIN CAPITAL LETTER A WITH MACRON;Lu;0;L;0041 0304;;;;N;LATIN CAPITAL LETTER A MACRON;;;0101;
+    print "not " unless "\x{0100}" =~ /\w/;
+    print "ok 751\n";
+
+    # 0660;ARABIC-INDIC DIGIT ZERO;Nd;0;AN;;0;0;0;N;;;;;
+    print "not " unless "\x{0660}" =~ /\d/;
+    print "ok 752\n";
+
+    # 1680;OGHAM SPACE MARK;Zs;0;WS;;;;;N;;;;;
+    print "not " unless "\x{1680}" =~ /\s/;
+    print "ok 753\n";
+}

@@ -1,4 +1,4 @@
-#!./perl
+#!./perl -wT
 
 BEGIN {
     chdir 't' if -d 't';

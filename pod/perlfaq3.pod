@@ -51,7 +51,7 @@ Which includes the following description:
     of a Unix shell with the power of Perl. The goal is to eventually
     have a full featured shell that behaves as expected for normal
     shell activity. But, the Perl Shell will use Perl syntax and
-    functionality for for control-flow statements and other things.
+    functionality for control-flow statements and other things.
 
 The Shell.pm module (distributed with Perl) makes Perl try commands
 which aren't part of the Perl language as shell commands.  perlsh

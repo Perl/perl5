@@ -351,7 +351,7 @@ Exactly like C:
     }
 
 The C style for loop is rarely needed in Perl since Perl provides
-the the more friendly list scanning C<foreach> loop.
+the more friendly list scanning C<foreach> loop.
 
 =item foreach
 

@@ -1,8 +1,5 @@
 #!./perl -w
 
-use warnings;
-use strict;
-
 BEGIN {
     unless(grep /blib/, @INC) {
         chdir 't' if -d 't';
@@ -10,12 +7,14 @@ BEGIN {
     }
 }
  
+use warnings;
+use strict;
 use Config;
  
 BEGIN {
     if(-d "lib" && -f "TEST") {
         if ($Config{'extensions'} !~ /\bDB_File\b/ ) {
-            print "1..163\n";
+            print "1..0 # Skip: DB_File was not built\n";
             exit 0;
         }
     }

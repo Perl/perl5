@@ -147,7 +147,7 @@ Functions to support Perl's traditional "fast" access to the buffer.
 =back
 
 A layer does not have to implement all the functions, but the whole table has
-to be present. Unimplemented slots can be NULL (which will will result in an error
+to be present. Unimplemented slots can be NULL (which will result in an error
 when called) or can be filled in with stubs to "inherit" behaviour from
 a "base class". This "inheritance" is fixed for all instances of the layer,
 but as the layer chooses which stubs to populate the table, limited

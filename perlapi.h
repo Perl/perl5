@@ -573,6 +573,8 @@ END_EXTERN_C
 #define PL_utf8_punct		(*Perl_Iutf8_punct_ptr(aTHX))
 #undef  PL_utf8_space
 #define PL_utf8_space		(*Perl_Iutf8_space_ptr(aTHX))
+#undef  PL_utf8_tofold
+#define PL_utf8_tofold		(*Perl_Iutf8_tofold_ptr(aTHX))
 #undef  PL_utf8_tolower
 #define PL_utf8_tolower		(*Perl_Iutf8_tolower_ptr(aTHX))
 #undef  PL_utf8_totitle

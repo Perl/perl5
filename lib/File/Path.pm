@@ -98,7 +98,7 @@ use Exporter ();
 use strict;
 use warnings;
 
-our $VERSION = "1.0405";
+our $VERSION = "1.05";
 our @ISA = qw( Exporter );
 our @EXPORT = qw( mkpath rmtree );
 
@@ -180,7 +180,13 @@ sub rmtree {
 		unless $safe;
 
 	    if (opendir my $d, $root) {
-		@files = readdir $d;
+		no strict 'refs';
+		if (!defined ${"\cTAINT"} or ${"\cTAINT"}) {
+		    # Blindly untaint dir names
+		    @files = map { /^(.*)$/s ; $1 } readdir $d;
+		} else {
+		    @files = readdir $d;
+		}
 		closedir $d;
 	    }
 	    else {

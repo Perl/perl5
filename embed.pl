@@ -1819,11 +1819,12 @@ Ap	|SV*	|swash_init	|char* pkg|char* name|SV* listsv \
 Ap	|UV	|swash_fetch	|SV *sv|U8 *ptr|bool do_utf8
 Ap	|void	|taint_env
 Ap	|void	|taint_proper	|const char* f|const char* s
-Ap	|UV	|to_utf8_case	|U8 *p|U8* ustrp|STRLEN *lenp \
+Apd	|UV	|to_utf8_case	|U8 *p|U8* ustrp|STRLEN *lenp \
 				|SV **swash|char *normal|char *special
 Ap	|UV	|to_utf8_lower	|U8 *p|U8* ustrp|STRLEN *lenp
 Ap	|UV	|to_utf8_upper	|U8 *p|U8* ustrp|STRLEN *lenp
 Ap	|UV	|to_utf8_title	|U8 *p|U8* ustrp|STRLEN *lenp
+Ap	|UV	|to_utf8_fold	|U8 *p|U8* ustrp|STRLEN *lenp
 #if defined(UNLINK_ALL_VERSIONS)
 Ap	|I32	|unlnk		|char* f
 #endif
