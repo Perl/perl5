@@ -418,3 +418,15 @@ EXPECT
 destroyed
 destroyed
 ########
+BEGIN {
+  $| = 1;
+  $SIG{__WARN__} = sub {
+    eval { print $_[0] };
+    die "bar\n";
+  };
+  warn "foo\n";
+}
+EXPECT
+foo
+bar
+BEGIN failed--compilation aborted at - line 8.

@@ -2308,15 +2308,14 @@ docatch(OP *o)
     JMPENV_PUSH(ret);
     switch (ret) {
     default:				/* topmost level handles it */
+pass_the_buck:
 	JMPENV_POP;
 	PL_op = oldop;
 	JMPENV_JUMP(ret);
 	/* NOTREACHED */
     case 3:
-	if (!PL_restartop) {
-	    PerlIO_printf(PerlIO_stderr(), "panic: restartop\n");
-	    break;
-	}
+	if (!PL_restartop)
+	    goto pass_the_buck;
 	PL_op = PL_restartop;
 	PL_restartop = 0;
 	/* FALL THROUGH */
