@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..44\n";
+print "1..45\n";
 
 $FS = ':';
 
@@ -244,3 +244,13 @@ print "ok 32\n";
     print "ok 44\n";
 }
 
+{
+    # check that PMf_WHITE is cleared after \s+ is used
+    # reported in <20010627113312.RWGY6087.viemta06@localhost>
+    my $r;
+    foreach my $pat ( qr/\s+/, qr/ll/ ) {
+	$r = join ':' => split($pat, "hello cruel world");
+    }
+    print "not " unless $r eq "he:o cruel world";
+    print "ok 45\n";
+}
