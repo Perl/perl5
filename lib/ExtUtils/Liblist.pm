@@ -240,8 +240,8 @@ sub _win32_ext {
 
 	# if searching is disabled, do compiler-specific translations
 	unless ($search) {
-	    s/^-L/-libpath:/ if $VC;
 	    s/^-l(.+)$/$1.lib/ unless $GC;
+	    s/^-L/-libpath:/ if $VC;
 	    push(@extralibs, $_);
 	    $found++;
 	    next;
