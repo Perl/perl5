@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-use Test::More tests => 4;
+use Test::More tests => 5;
 
 my $v_plus = $] + 1;
 my $v_minus = $] - 1;
@@ -23,4 +23,7 @@ ok( eval "use if ($v_plus > \$]), strict => 'subs'; \${'f'} = 12" eq 12,
 ok( (not defined eval "use if ($v_plus > \$]), strict => 'refs'; \${'f'} = 12"
      and $@ =~ /while "strict refs" in use/),
     '"use if" with a true condition and a pragma');
+
+ok( eval "use if 1, Cwd; cwd() || 1;",
+    '"use if" with a true condition, module, no arguments, exports');
 
