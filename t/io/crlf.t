@@ -15,29 +15,30 @@ END {
 }
 
 if (find PerlIO::Layer 'perlio') {
- plan(tests => 6);
+ plan(tests => 7);
  ok(open(FOO,">:crlf",$file));
  ok(print FOO 'a'.((('a' x 14).qq{\n}) x 2000) || close(FOO));
  ok(open(FOO,"<:crlf",$file));
- my $seen = 0;
- my $cr = "\r";
- while (<FOO>)
-  {
-   $seen += tr/[\015]//;
-  }
- is($seen,0);
+
+ my $text;
+ { local $/; $text = <FOO> }
+ is(count_chars($text, "\015\012"), 0);
+ is(count_chars($text, "\n"), 2000);
+
  binmode(FOO);
  seek(FOO,0,0);
- $seen = 0;
- while (<FOO>)
-  {
-   $seen += tr/[\015]//;
-  }
- is($seen,2000);
+ { local $/; $text = <FOO> }
+ is(count_chars($text, "\015\012"), 2000);
+
  ok(close(FOO));
 }
 else {
  skip_all("No perlio, so no :crlf");
 }
 
-
+sub count_chars {
+  my($text, $chars) = @_;
+  my $seen = 0;
+  $seen++ while $text =~ /$chars/g;
+  return $seen;
+}
