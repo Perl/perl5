@@ -183,6 +183,32 @@ If you like a more web-like approach, a good start point can be
 http://www14.software.ibm.com/webapp/download/downloadaz.jsp and click
 "C for AIX", and follow the instructions.
 
+=head2 The usenm option
+
+If linking miniperl
+
+ cc -o miniperl ... miniperlmain.o opmini.o perl.o ... -lm -lc ...
+
+causes error like this
+
+ ld: 0711-317 ERROR: Undefined symbol: .aintl
+ ld: 0711-317 ERROR: Undefined symbol: .copysignl
+ ld: 0711-317 ERROR: Undefined symbol: .syscall
+ ld: 0711-317 ERROR: Undefined symbol: .eaccess
+ ld: 0711-317 ERROR: Undefined symbol: .setresuid
+ ld: 0711-317 ERROR: Undefined symbol: .setresgid
+ ld: 0711-317 ERROR: Undefined symbol: .setproctitle
+ ld: 0711-345 Use the -bloadmap or -bnoquiet option to obtain more information.
+
+you could retry with
+
+ make realclean
+ rm config.sh
+ ./Configure -Dusenm ...
+
+which makes Configure to use the C<nm> tool when scanning for library
+symbols, which usually is not done in AIX.
+
 =head2 Using GNU's gcc for building perl
 
 Using gcc-3.x (tested with 3.0.4, 3.1, and 3.2) now works out of the box,

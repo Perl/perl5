@@ -1367,10 +1367,10 @@ print "ok 247\n";
     print "ok 263\n";
 }
 
-{
+SKIP: {
     my $test = 264; # till 575
 
-    use charnames ':full';
+    use charnames ":full";
 
     # This is far from complete testing, there are dozens of character
     # classes in Unicode.  The mixing of literals and \N{...} is
