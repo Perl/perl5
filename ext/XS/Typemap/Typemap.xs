@@ -764,7 +764,7 @@ the subtype.
 
 intArray *
 T_ARRAY( dummy, array, ... )
-  int dummy = NO_INIT
+  int dummy = 0;
   intArray * array
  PREINIT:
   U32 size_RETVAL;
