@@ -128,7 +128,7 @@ esc_q_utf8(pTHX_ SV* sv, register char *src, register STRLEN slen)
 	    r[j++] = '\\';
 	    r[j++] = 'x';
 	    r[j++] = '{';
-	    j += sprintf(r + j, "%x", k);
+	    j += sprintf(r + j, "%"UVxf, k);
 	    r[j++] = '}';
 	    dquote = TRUE;
 	}

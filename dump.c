@@ -195,7 +195,7 @@ Perl_sv_peek(pTHX_ SV *sv)
 	unref++;
     }
     else if (DEBUG_R_TEST && SvREFCNT(sv) > 1) {
-	Perl_sv_catpvf(aTHX_ t, "<%u>", SvREFCNT(sv));
+	Perl_sv_catpvf(aTHX_ t, "<%"UVuf">", (UV)SvREFCNT(sv));
     }
 
 

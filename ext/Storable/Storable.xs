@@ -3086,7 +3086,8 @@ static SV *retrieve_idx_blessed(stcxt_t *cxt, char *cname)
 
 	sva = av_fetch(cxt->aclass, idx, FALSE);
 	if (!sva)
-		CROAK(("Class name #%d should have been seen already", idx));
+		CROAK(("Class name #%"IVdf" should have been seen already",
+			(IV)idx));
 
 	class = SvPVX(*sva);	/* We know it's a PV, by construction */
 
@@ -3281,7 +3282,8 @@ static SV *retrieve_hook(stcxt_t *cxt, char *cname)
 
 		sva = av_fetch(cxt->aclass, idx, FALSE);
 		if (!sva)
-			CROAK(("Class name #%d should have been seen already", idx));
+		    CROAK(("Class name #%"IVdf" should have been seen already", 
+			    (IV)idx));
 
 		class = SvPVX(*sva);	/* We know it's a PV, by construction */
 		TRACEME(("class ID %d => %s", idx, class));
@@ -3382,7 +3384,7 @@ static SV *retrieve_hook(stcxt_t *cxt, char *cname)
 			tag = ntohl(tag);
 			svh = av_fetch(cxt->aseen, tag, FALSE);
 			if (!svh)
-				CROAK(("Object #%d should have been retrieved already", tag));
+				CROAK(("Object #%"IVdf" should have been retrieved already", (IV)tag));
 			xsv = *svh;
 			ary[i] = SvREFCNT_inc(xsv);
 		}
@@ -4532,7 +4534,7 @@ static SV *retrieve(stcxt_t *cxt, char *cname)
 			I32 tagn;
 			svh = hv_fetch(cxt->hseen, (char *) &tag, sizeof(tag), FALSE);
 			if (!svh)
-				CROAK(("Old tag 0x%x should have been mapped already", tag));
+				CROAK(("Old tag 0x%"UVxf" should have been mapped already", (UV)tag));
 			tagn = SvIV(*svh);	/* Mapped tag number computed earlier below */
 
 			/*
@@ -4541,7 +4543,7 @@ static SV *retrieve(stcxt_t *cxt, char *cname)
 
 			svh = av_fetch(cxt->aseen, tagn, FALSE);
 			if (!svh)
-				CROAK(("Object #%d should have been retrieved already", tagn));
+				CROAK(("Object #%"IVdf" should have been retrieved already", (IV)tagn));
 			sv = *svh;
 			TRACEME(("has retrieved #%d at 0x%"UVxf, tagn, PTR2UV(sv)));
 			SvREFCNT_inc(sv);	/* One more reference to this same sv */
@@ -4582,7 +4584,8 @@ again:
 		tag = ntohl(tag);
 		svh = av_fetch(cxt->aseen, tag, FALSE);
 		if (!svh)
-			CROAK(("Object #%d should have been retrieved already", tag));
+		    CROAK(("Object #%"IVdf" should have been retrieved already",
+			    (IV)tag));
 		sv = *svh;
 		TRACEME(("had retrieved #%d at 0x%"UVxf, tag, PTR2UV(sv)));
 		SvREFCNT_inc(sv);	/* One more reference to this same sv */

@@ -187,7 +187,8 @@ S_tokereport(pTHX_ char *thing, char* s, I32 rv)
     SV *report;
     DEBUG_T({
         report = newSVpv(thing, 0);
-        Perl_sv_catpvf(aTHX_ report, ":line %i:%i:", CopLINE(PL_curcop), rv);
+        Perl_sv_catpvf(aTHX_ report, ":line %d:%"IVdf":", CopLINE(PL_curcop),
+		(IV)rv);
 
         if (s - PL_bufptr > 0)
             sv_catpvn(report, PL_bufptr, s - PL_bufptr);
