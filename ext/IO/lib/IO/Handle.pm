@@ -143,6 +143,19 @@ Returns true if the object is currently a valid file descriptor.
 
 =back
 
+Lastly, a special method for working under B<-T> and setuid/gid scripts:
+
+=over
+
+=item $fh->untaint
+
+Marks the object as taint-clean, and as such data read from it will also
+be considered taint-clean. Note that this is a very trusting action to
+take, and appropriate consideration for the data source and potential
+vulnerability should be kept in mind.
+
+=back
+
 =head1 NOTE
 
 A C<IO::Handle> object is a GLOB reference. Some modules that
