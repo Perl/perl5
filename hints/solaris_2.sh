@@ -123,17 +123,18 @@ rm -f make.vers
 #   - check as(1) and ld(1), they should not be GNU
 #
 # Watch out in case they have not set $cc.
-case "`${cc:-cc} -v 2>&1`" in
-*gcc*)
+
+# Get gcc to share its secrets.
+echo 'main() { return 0; }' > try.c
+verbose=`${cc:-cc} -v -o try try.c 2>&1`
+rm -f try try.c
+
+if echo "$verbose" | grep '^Reading specs from' >/devv/null 2>&1; then
 	#
 	# Using gcc.
 	#
 	#echo Using gcc
 
-	# Get gcc to share its secrets.
-	echo 'main() { return 0; }' > try.c
-	verbose=`${cc:-cc} -v -o try try.c 2>&1`
-	rm -f try try.c
 	tmp=`echo "$verbose" | grep '^Reading' |
 		awk '{print $NF}'  | sed 's/specs$/include/'`
 
@@ -141,36 +142,36 @@ case "`${cc:-cc} -v 2>&1`" in
 	# Doesn't work anymore for gcc-2.7.2.
 
 	# See if as(1) is GNU as(1).  GNU as(1) won't work for this job.
-	case $verbose in
-	*/usr/ccs/bin/as*) ;;
-	*)
+	if echo "$verbose" | grep ' /usr/ccs/bin/as ' >/dev/null 2>&1; then
+	    :
+	else
 	    cat <<END >&2
 
 NOTE: You are using GNU as(1).  GNU as(1) will not build Perl.
-You must arrange to use /usr/ccs/bin/as, perhaps by setting
-GCC_EXEC_PREFIX or by including -B/usr/ccs/bin/ in your cc command.
+I'm arranging to use /usr/ccs/bin/as by setting including
+-B/usr/ccs/bin/ in your ${cc:-cc} command.
 (Note that the trailing "/" is required.)
 
 END
-	;;
-	esac
+	    cc="${cc:-cc} -B/usr/ccs/bin/"
+	fi
 
 	# See if ld(1) is GNU ld(1).  GNU ld(1) won't work for this job.
-	case $verbose in
-	*/usr/ccs/bin/ld*) ;;
-	*)
+	if echo "$verbose" | grep ' /usr/ccs/bin/as ' >/dev/null 2>&1; then
+	    :
+	else
 	    cat <<END >&2
 
-NOTE: You are using GNU ld(1).  GNU ld(1) will not build Perl.
-You must arrange to use /usr/ccs/bin/ld, perhaps by setting
-GCC_EXEC_PREFIX or by including -B/usr/ccs/bin/ in your cc command.
+NOTE: You are using GNU as(1).  GNU as(1) will not build Perl.
+I'm arranging to use /usr/ccs/bin/as by setting including
+-B/usr/ccs/bin/ in your ${cc:-cc} command.
+(Note that the trailing "/" is required.)
 
 END
-	;;
-	esac
+	    cc="${cc:-cc} -B/usr/ccs/bin/"
+	fi
 
-	;; #using gcc
-*)
+else
 	#
 	# Not using gcc.
 	#
@@ -217,8 +218,7 @@ beginning of your PATH.
 END
 	fi
 
-	;; #not using gcc
-esac
+fi
 
 # as --version or ld --version might dump core.
 rm -f core
