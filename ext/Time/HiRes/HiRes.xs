@@ -92,6 +92,9 @@ gettimeofday (struct timeval *tp, int nothing)
 #include <stdlib.h> /* qdiv */
 #include <starlet.h> /* sys$gettim */
 #include <descrip.h>
+#ifdef __VAX
+#include <lib$routines.h> /* lib$ediv() */
+#endif
 
 /*
         VMS binary time is expressed in 100 nano-seconds since
@@ -108,7 +111,7 @@ gettimeofday (struct timeval *tp, int nothing)
 static $DESCRIPTOR(dscepoch,"01-JAN-1970 00:00:00.00");
 
 #ifdef __VAX
-static long base_adjust=0L;
+static long base_adjust[2]={0L,0L};
 #else
 static __int64 base_adjust=0;
 #endif
@@ -118,8 +121,12 @@ gettimeofday (struct timeval *tp, void *tpz)
 {
  long ret;
 #ifdef __VAX
- long quad;
- div_t ans1,ans2;
+ long quad[2];
+ long quad1[2];
+ long div_100ns_to_secs;
+ long div_100ns_to_usecs;
+ long quo,rem;
+ long quo1,rem1;
 #else
  __int64 quad;
  __qdiv_t ans1,ans2;
@@ -132,7 +139,11 @@ gettimeofday (struct timeval *tp, void *tpz)
 
  tp->tv_usec = 0;
 
+#ifdef __VAX
+ if (base_adjust[0]==0 && base_adjust[1]==0) {
+#else
  if (base_adjust==0) { /* Need to determine epoch adjustment */
+#endif
         ret=sys$bintim(&dscepoch,&base_adjust);
         if (1 != (ret &&1)) {
                 tp->tv_sec = ret;
@@ -142,16 +153,24 @@ gettimeofday (struct timeval *tp, void *tpz)
 
  ret=sys$gettim(&quad); /* Get VMS system time */
  if ((1 && ret) == 1) {
-        quad -= base_adjust; /* convert to epoch offset */
 #ifdef __VAX
-        ans1=div(quad,DIV_100NS_TO_SECS);
-        ans2=div(ans1.rem,DIV_100NS_TO_USECS);
+        quad[0] -= base_adjust[0]; /* convert to epoch offset */
+        quad[1] -= base_adjust[1]; /* convert 2nd half of quadword */
+        div_100ns_to_secs = DIV_100NS_TO_SECS;
+        div_100ns_to_usecs = DIV_100NS_TO_USECS;
+        lib$ediv(&div_100ns_to_secs,&quad,&quo,&rem);
+        quad1[0] = rem;
+        quad1[1] = 0L;
+        lib$ediv(&div_100ns_to_usecs,&quad1,&quo1,&rem1);
+        tp->tv_sec = quo; /* Whole seconds */
+        tp->tv_usec = quo1; /* Micro-seconds */
 #else
+        quad -= base_adjust; /* convert to epoch offset */
         ans1=qdiv(quad,DIV_100NS_TO_SECS);
         ans2=qdiv(ans1.rem,DIV_100NS_TO_USECS);
-#endif
         tp->tv_sec = ans1.quot; /* Whole seconds */
         tp->tv_usec = ans2.quot; /* Micro-seconds */
+#endif
  } else {
         tp->tv_sec = ret;
         return -1;
