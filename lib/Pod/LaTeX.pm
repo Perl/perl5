@@ -53,7 +53,7 @@ $VERSION = '0.54';
 %HTML_Escapes = (
     # lt, gt and verbar are inserted without math mode
     # since the $$ will be added during general correction
-    # for those escpae characters
+    # for those escape characters
     'amp'       =>      '\&',      #   ampersand
     'lt'        =>      '<',    #   ' left chevron, less-than
     'gt'        =>      '>',    #   ' right chevron, greater-than
@@ -336,8 +336,8 @@ of arguments when using the C<new()> constructor.
 =item B<AddPreamble>
 
 Logical to control whether a C<latex> preamble is to be written.
-If true, a valid C<latex> preamble is written before the pod data is written.
-This is similar to:
+If true, a valid C<latex> preamble is written before the pod data
+is written.  This is similar to:
 
   \documentclass{article}
   \begin{document}
@@ -363,13 +363,13 @@ sub AddPreamble {
 
 =item B<AddPostamble>
 
-Logical to control whether a standard C<latex> ending is written to the output
-file after the document has been processed.
-In its simplest form this is simply:
+Logical to control whether a standard C<latex> ending is written to
+the output file after the document has been processed.  In its
+simplest form this is simply:
 
   \end{document}
 
-but can be more complicated if a index is required.
+but can be more complicated if an index is required.
 Can be used to set or retrieve the current value.
 
   $add = $parser->AddPostamble();
@@ -408,10 +408,10 @@ Can be used to set or retrieve the current value:
   $parser->Head1Level(2);
   $sect = $parser->Head1Level;
 
-Setting this number too high can result in sections that may not be reproducible
-in the expected way. For example, setting this to 4 would imply that C<=head3>
-do not have a corresponding C<latex> section (C<=head1> would correspond to
-a C<paragraph>).
+Setting this number too high can result in sections that may not be
+reproducible in the expected way. For example, setting this to 4 would
+imply that C<=head3> do not have a corresponding C<latex> section
+(C<=head1> would correspond to a C<paragraph>).
 
 A check is made to ensure that the supplied value is an integer in the
 range 0 to 5.
@@ -502,8 +502,8 @@ into the preamble and postamble
   $makeindex = $parser->MakeIndex;
   $parser->MakeIndex(0);
 
-Irrelevant if both C<AddPreamble> and C<AddPostamble> are false (or equivalently,
-C<UserPreamble> and C<UserPostamble> are set).
+Irrelevant if both C<AddPreamble> and C<AddPostamble> are false
+(or equivalently, C<UserPreamble> and C<UserPostamble> are set).
 
 Default is for an index to be created.
 
@@ -632,8 +632,8 @@ sub UniqueLabels {
 User supplied C<latex> preamble. Added before the pod translation
 data. 
 
-If set, the contents will be prepended to the output file before the translated 
-data regardless of the value of C<AddPreamble>.
+If set, the contents will be prepended to the output file before
+the translated data regardless of the value of C<AddPreamble>.
 C<MakeIndex> and C<TableOfContents> will also be ignored.
 
 =cut
@@ -651,8 +651,8 @@ sub UserPreamble {
 User supplied C<latex> postamble. Added after the pod translation
 data. 
 
-If set, the contents will be prepended to the output file after the translated 
-data regardless of the value of C<AddPostamble>.
+If set, the contents will be prepended to the output file after
+the translated data regardless of the value of C<AddPostamble>.
 C<MakeIndex> will also be ignored.
 
 =cut
