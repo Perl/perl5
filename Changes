@@ -31,6 +31,409 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 12493] By: jhi                                   on 2001/10/18  12:58:31
+        Log: Add the lib/unicore/To/Spec*.pl to the MANIFEST.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 12492] By: jhi                                   on 2001/10/18  12:37:28
+        Log: Wrong skip() arguments.
+     Branch: perl
+	   ! ext/B/t/terse.t
+____________________________________________________________________________
+[ 12491] By: jhi                                   on 2001/10/18  12:17:16
+        Log: Subject: try#2: [proposed PATCH Perl@12401] ieee floats, rand() & old systems  
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date: Wed, 17 Oct 2001 09:10:53 EDT 
+             Message-Id: <011017090944.15ad2e@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! configure.com embedvar.h opcode.pl perlapi.h perlvars.h
+	   ! pod/perlapi.pod vms/vms.c
+____________________________________________________________________________
+[ 12490] By: ams                                   on 2001/10/18  09:31:00
+        Log: Subject: PATCH perl.pod: Suggested reorganization of table of contents
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Thu, 18 Oct 2001 06:25:35 -0400
+             Message-Id: <20011018102535.19264.qmail@plover.com>
+     Branch: perl
+	   ! pod/perl.pod
+____________________________________________________________________________
+[ 12489] By: jhi                                   on 2001/10/18  02:24:52
+        Log: Prettyprinting.
+     Branch: perl
+	   ! lib/unicore/In.pl lib/unicore/Is.pl lib/unicore/mktables
+____________________________________________________________________________
+[ 12488] By: jhi                                   on 2001/10/18  00:47:19
+        Log: Regen toc.
+     Branch: perl
+	   ! pod/buildtoc.PL pod/perl.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 12487] By: jhi                                   on 2001/10/18  00:43:18
+        Log: Add perlintro, from Skud.
+     Branch: perl
+	   + pod/perlintro.pod
+	   ! MANIFEST
+____________________________________________________________________________
+[ 12486] By: jhi                                   on 2001/10/18  00:10:44
+        Log: FAQ sync.
+     Branch: perl
+	   ! pod/perlfaq.pod pod/perlfaq2.pod pod/perlfaq3.pod
+	   ! pod/perlfaq5.pod pod/perlfaq6.pod pod/perlfaq7.pod
+	   ! pod/perlfaq8.pod pod/perlfaq9.pod
+____________________________________________________________________________
+[ 12485] By: jhi                                   on 2001/10/17  23:57:15
+        Log: Oh, bother. In Tru64 cc -std1 was looking rather nice
+             in speed (upto 20% speedup in certain operations) but meanwhile
+             regexps and arithmetics got slower (5-10%) (according to
+             perlbench average speedup is negligible, and within measuring
+             flutter, 1%).  Therefore retracting all the changes
+             aimed at getting -std1 to compile cleanly:  #12475, #12476,
+             #12479, #12480, #12481, #12482, #12483, #12484.
+     Branch: perl
+	   ! doio.c mg.c miniperlmain.c perl.c perl.h perlio.c pp_ctl.c
+	   ! pp_hot.c pp_sys.c toke.c
+____________________________________________________________________________
+[ 12484] By: jhi                                   on 2001/10/17  21:58:40
+        Log: (retracted by #12485)
+             Strict ANSI doesn't like the third argument of main()
+             so enable ignoring it if using ultra picky compiler.
+     Branch: perl
+	   ! miniperlmain.c
+____________________________________________________________________________
+[ 12483] By: jhi                                   on 2001/10/17  21:48:24
+        Log: (retracted by #12485)
+             Move the VMS_FOO_ERROR codes next to the SETERRNO() definition.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 12482] By: jhi                                   on 2001/10/17  21:42:57
+        Log: (retracted by #12485)
+             Add explanatory comment.
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[ 12481] By: jhi                                   on 2001/10/17  20:50:37
+        Log: (retracted by #12485)
+             More dollar$hiding.
+     Branch: perl
+	   ! doio.c perl.h pp_sys.c
+____________________________________________________________________________
+[ 12480] By: jhi                                   on 2001/10/17  20:27:34
+        Log: (retracted by #12485)
+             KISS.
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[ 12479] By: jhi                                   on 2001/10/17  19:57:34
+        Log: (retracted by #12485)
+             Thou shalt not #ifdef inside macro invocations,
+             noticed by Rafael Garcia-Suarez.
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[ 12478] By: ams                                   on 2001/10/17  18:50:55
+        Log: Subject: [PATCH pp_sys.c] coredump fix in pp_accept()
+             From: Anton Berezin <tobez@tobez.org>
+             Date: Wed, 17 Oct 2001 18:25:48 +0200
+             Message-Id: <20011017182548.A12082@heechee.tobez.org>
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 12476] By: jhi                                   on 2001/10/17  16:46:50
+        Log: (retracted by #12485)
+             Unterminated #ifdef.
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[ 12475] By: jhi                                   on 2001/10/17  16:42:49
+        Log: (retracted by #12485)
+             Avoid dollar signs in identifiers (in non-VMS) to
+             placate ultra picky ANSI compilers (such as DEC^WCPQ^WHP).
+     Branch: perl
+	   ! doio.c mg.c perl.c perl.h perlio.c pp_ctl.c pp_hot.c pp_sys.c
+	   ! toke.c
+____________________________________________________________________________
+[ 12474] By: ams                                   on 2001/10/17  15:14:50
+        Log: Subject: Two AIX patches
+             From: H.Merijn Brand <h.m.brand@hccnet.nl>
+             Date: Wed, 17 Oct 2001 18:04:35 +0200
+             Message-Id: <20011017180223.1346.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! hints/aix.sh makedef.pl
+____________________________________________________________________________
+[ 12473] By: jhi                                   on 2001/10/17  14:48:38
+        Log: Limiting the Time::HiRes::sleep and usleep to
+             one second is not a good policy if drop-in
+             replacement is still a goal.
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.pm ext/Time/HiRes/HiRes.t
+	   ! ext/Time/HiRes/HiRes.xs
+____________________________________________________________________________
+[ 12472] By: jhi                                   on 2001/10/17  11:00:54
+        Log: Subject: [PATCH] Test::Simple 0.32
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Wed, 17 Oct 2001 03:42:41 -0400
+             Message-ID: <20011017034241.A25038@blackrider>
+     Branch: perl
+	   + lib/Test/Builder.pm lib/Test/Simple/t/Builder.t
+	   + lib/Test/Simple/t/filehandles.t lib/Test/Simple/t/import.t
+	   + lib/Test/Simple/t/is_deeply.t lib/Test/Simple/t/no_ending.t
+	   + lib/Test/Simple/t/no_header.t lib/Test/Simple/t/output.t
+	   + lib/Test/Simple/t/plan.t lib/Test/Simple/t/plan_no_plan.t
+	   + lib/Test/Simple/t/plan_skip_all.t lib/Test/Simple/t/use_ok.t
+	   - lib/Test/Utils.pm t/lib/Test/Simple/Catch/More.pm
+	   ! MANIFEST lib/Test/More.pm lib/Test/Simple.pm
+	   ! lib/Test/Simple/Changes lib/Test/Simple/t/More.t
+	   ! lib/Test/Simple/t/exit.t lib/Test/Simple/t/extra.t
+	   ! lib/Test/Simple/t/fail-like.t lib/Test/Simple/t/fail-more.t
+	   ! lib/Test/Simple/t/fail.t lib/Test/Simple/t/missing.t
+	   ! lib/Test/Simple/t/no_plan.t lib/Test/Simple/t/plan_is_noplan.t
+	   ! lib/Test/Simple/t/simple.t lib/Test/Simple/t/skip.t
+	   ! lib/Test/Simple/t/skipall.t lib/Test/Simple/t/todo.t
+	   ! lib/Test/Simple/t/undef.t lib/Test/Simple/t/useing.t
+	   ! t/lib/Test/Simple/Catch.pm
+	   ! t/lib/Test/Simple/sample_tests/five_fail.plx
+____________________________________________________________________________
+[ 12471] By: jhi                                   on 2001/10/17  10:25:06
+        Log: Subject: [PATCH t/TEST t/harness vms/test.com] Set PERL_CORE environment var   
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Wed, 17 Oct 2001 04:04:13 -0400
+             Message-ID: <20011017040413.C25550@blackrider>
+     Branch: perl
+	   ! t/TEST t/harness vms/test.com
+____________________________________________________________________________
+[ 12470] By: jhi                                   on 2001/10/17  02:25:01
+        Log: Regen doc with perlmodstyle added.
+     Branch: perl
+	   ! pod/buildtoc.PL pod/perl.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 12469] By: jhi                                   on 2001/10/17  02:24:02
+        Log: Pod cleanup.
+     Branch: perl
+	   ! lib/File/Spec.pm lib/File/Spec/Mac.pm
+____________________________________________________________________________
+[ 12468] By: jhi                                   on 2001/10/17  02:16:11
+        Log: Subject: perlmodstyle as a patch
+             From: Kirrily Robert <skud@infotrope.net>
+             Date: Tue, 16 Oct 2001 22:47:23 -0400
+             Message-ID: <20011016224723.A20673@infotrope.net>
+     Branch: perl
+	   + pod/perlmodstyle.pod
+	   ! MANIFEST
+____________________________________________________________________________
+[ 12467] By: jhi                                   on 2001/10/17  00:59:43
+        Log: Subject: [PATCH] for perlhack.pod - no p5p archive on deja/google
+             From: Ian Phillipps <Ian_Phillipps@yahoo.co.uk>
+             Date: Thu, 6 Sep 2001 11:09:40 +0100
+             Message-ID: <20010906110939.A914@homer.diplex.co.uk>
+             
+             Mention also the develooper p5p archive.
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[ 12466] By: jhi                                   on 2001/10/17  00:57:38
+        Log: Subject: [PATCH lib/ExtUtils/MakeMaker.pm] PREREQ_PM does not really require.
+             From: Kay Röpke <kroepke@dolphin-services.de>
+             Date: Tue, 16 Oct 2001 17:23:52 +0200
+             Message-Id: <E15tW4O-0003J7-00@mrvdom03.schlund.de>
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[ 12465] By: jhi                                   on 2001/10/17  00:54:28
+        Log: Add the special casing mappings (from SpecCase.txt)
+             (except for the hyper special case mappings that have
+             the condition list); the special casing mappings are
+             unused for now.  Small tidying up on mktables.
+     Branch: perl
+	   + lib/unicore/To/SpecLower.pl lib/unicore/To/SpecTitle.pl
+	   + lib/unicore/To/SpecUpper.pl
+	   ! lib/unicore/mktables
+____________________________________________________________________________
+[ 12464] By: jhi                                   on 2001/10/16  22:38:24
+        Log: Subject: [PATCH] Doc patch on here-docs (perlop and perldata)
+             From: "David H. Adler" <dha@panix.com>       
+             Date: Tue, 16 Oct 2001 11:59:35 -0400
+             Message-ID: <20011016115935.A13078@panix.com>
+             
+             Subject: [ PATCH ] perldata patch, revised
+             From: "David H. Adler" <dha@panix.com>     
+             Date: Tue, 16 Oct 2001 18:26:49 -0400
+             Message-ID: <20011016182649.C23970@panix.com>
+     Branch: perl
+	   ! pod/perldata.pod pod/perlop.pod
+____________________________________________________________________________
+[ 12463] By: jhi                                   on 2001/10/16  19:39:25
+        Log: Integrate perlio: PerlIO_dup (for all but Win32).
+     Branch: perl
+	  !> embed.h embed.pl ext/Encode/Encode.xs
+	  !> ext/PerlIO/Scalar/Scalar.xs ext/PerlIO/Via/Via.xs hv.c perl.h
+	  !> perlio.c perlio.h perliol.h pod/perlapi.pod proto.h sv.c sv.h
+	  !> win32/win32io.c
+____________________________________________________________________________
+[ 12462] By: nick                                  on 2001/10/16  19:11:30
+        Log: PerlIOXxxx_dups for all but Win32
+     Branch: perlio
+	   ! ext/Encode/Encode.xs ext/PerlIO/Scalar/Scalar.xs
+	   ! ext/PerlIO/Via/Via.xs
+____________________________________________________________________________
+[ 12461] By: nick                                  on 2001/10/16  18:28:48
+        Log: Implement PerlIOStdio_dup (explains core dumps - dup
+             was not setting up a FILE * to be fclosed()).
+     Branch: perlio
+	   ! perlio.c
+____________________________________________________________________________
+[ 12460] By: nick                                  on 2001/10/16  17:31:47
+        Log: When USE_ITHREADS avoid SV * in PerlIO_debug, at risk of buffer
+             overflow.
+     Branch: perlio
+	   ! perlio.c
+____________________________________________________________________________
+[ 12459] By: jhi                                   on 2001/10/16  17:10:22
+        Log: Subject: [PATCH perl@12443] VMS 64-bit configure
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Tue, 16 Oct 2001 13:08:38 -0500
+             Message-Id: <5.1.0.14.2.20011016122704.029eaea8@exchi01>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 12458] By: jhi                                   on 2001/10/16  17:07:20
+        Log: Can't expect too much accuracy from a sleep of one second.
+             (I think this will also fail with high load.)
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.t
+____________________________________________________________________________
+[ 12457] By: jhi                                   on 2001/10/16  16:50:24
+        Log: Subject: WIN64 (Itanium) port of Perl 5.6.1
+             From: "Werner, Randolf" <randolf.werner@sap.com>
+             Date: Tue, 16 Oct 2001 18:33:02 +0200
+             Message-ID: <816D93CCC927D31188570008C75D1DE10A5CB1F8@dbwdfx1a.wdf.sap-ag.de>
+     Branch: perl
+	   + win32/Makefile.win64 win32/config.win64 win32/config_H.win64
+	   ! MANIFEST Porting/makerel ext/SDBM_File/sdbm/sdbm.c
+____________________________________________________________________________
+[ 12456] By: nick                                  on 2001/10/16  14:08:16
+        Log: Builds under ithreads (but fails all threads tests)
+     Branch: perlio
+	   ! hv.c perlio.c sv.c
+____________________________________________________________________________
+[ 12455] By: jhi                                   on 2001/10/16  13:59:32
+        Log: I think the Perl_sortsv needs *not* be skipped?
+     Branch: perl
+	   ! makedef.pl
+____________________________________________________________________________
+[ 12454] By: jhi                                   on 2001/10/16  13:05:38
+        Log: Subject: [ PATCH ] maint/perl/t/op/groups.t for build on Cygwin
+             From: "Gerrit P. Haase" <gerrit.haase@convey.de>
+             Date: Tue, 16 Oct 2001 15:32:44 +0200
+             Message-ID: <3BCC531C.11494.3E433F@localhost>
+     Branch: perl
+	   ! t/op/groups.t
+____________________________________________________________________________
+[ 12453] By: jhi                                   on 2001/10/16  13:04:38
+        Log: Subject: [ PATCH ] maint/perl/t/io/fs.t for build on Cygwin
+             From: "Gerrit P. Haase" <gerrit.haase@convey.de>
+             Date: Tue, 16 Oct 2001 15:01:04 +0200
+             Message-ID: <3BCC4BB0.30935.2145B7@localhost>
+     Branch: perl
+	   ! t/io/fs.t
+____________________________________________________________________________
+[ 12452] By: jhi                                   on 2001/10/16  12:03:49
+        Log: A forgotten deletion.
+     Branch: perl
+	   - lib/unicore/mktables.PL
+____________________________________________________________________________
+[ 12451] By: nick                                  on 2001/10/16  11:32:48
+        Log: Skeleton of "PerlIO_dup" coded.
+             Still-passes all tests non-threaded (well it would wouldn't it!)
+     Branch: perlio
+	   ! embed.h embed.pl ext/Encode/Encode.xs
+	   ! ext/PerlIO/Scalar/Scalar.xs ext/PerlIO/Via/Via.xs perl.h
+	   ! perlio.c perlio.h perliol.h pod/perlapi.pod proto.h sv.c sv.h
+	   ! win32/win32io.c
+____________________________________________________________________________
+[ 12450] By: jhi                                   on 2001/10/16  02:27:51
+        Log: Document the problem with the swash_fetch() API that affects
+             more complex case conversions.
+     Branch: perl
+	   ! lib/utf8_heavy.pl utf8.c
+____________________________________________________________________________
+[ 12449] By: jhi                                   on 2001/10/16  01:55:48
+        Log: Make Time::HiRes::sleep() and usleep() to return
+             the number of seconds (a floating point value) and 
+             microseconds (an integer) actually slept (well,
+             modulo the time spent in measuring the time actually
+             slept...), to be a better drop-in replacement for
+             the builtin sleep().  Noticed by Chris Nandor.
+             
+             Also make usleep() to croak if fed illegal number
+             of useconds (anything greater than 1_000_000).
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.pm ext/Time/HiRes/HiRes.t
+	   ! ext/Time/HiRes/HiRes.xs
+____________________________________________________________________________
+[ 12448] By: jhi                                   on 2001/10/16  00:57:05
+        Log: A missing SvREFCNT_dec.
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[ 12447] By: nick                                  on 2001/10/15  20:27:53
+        Log: Beginings of PerlIO_dup support (unstable)
+     Branch: perlio
+	   ! perlio.c perliol.h
+____________________________________________________________________________
+[ 12446] By: jhi                                   on 2001/10/15  18:44:19
+        Log: In AIX vac 5 just can't seem to get regcomp right.
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[ 12445] By: jhi                                   on 2001/10/15  16:44:04
+        Log: Bump the version number to agree with the maintperl one.
+     Branch: perl
+	   ! lib/Tie/RefHash.pm
+____________________________________________________________________________
+[ 12444] By: nick                                  on 2001/10/15  15:59:57
+        Log: Integrate mainline
+     Branch: perlio
+	  +> lib/Math/BigInt/t/Math/Subclass.pm
+	  +> lib/Math/BigInt/t/bigfltpm.inc lib/Math/BigInt/t/calling.t
+	  +> lib/Math/BigInt/t/subclass.t lib/unicore/In/163.pl
+	  +> lib/unicore/In/164.pl lib/unicore/In/165.pl
+	  +> lib/unicore/In/166.pl lib/unicore/In/167.pl
+	  +> lib/unicore/In/168.pl lib/unicore/In/169.pl
+	  +> lib/unicore/In/170.pl lib/unicore/In/171.pl lib/unicore/Is.pl
+	  +> lib/unicore/Is/Title.pl lib/unicore/Lbrk.pl
+	  +> lib/unicore/mktables
+	   - lib/unicore/Is/SylA.pl lib/unicore/Is/SylAA.pl
+	   - lib/unicore/Is/SylAAI.pl lib/unicore/Is/SylAI.pl
+	   - lib/unicore/Is/SylC.pl lib/unicore/Is/SylE.pl
+	   - lib/unicore/Is/SylEE.pl lib/unicore/Is/SylI.pl
+	   - lib/unicore/Is/SylII.pl lib/unicore/Is/SylN.pl
+	   - lib/unicore/Is/SylO.pl lib/unicore/Is/SylOO.pl
+	   - lib/unicore/Is/SylU.pl lib/unicore/Is/SylV.pl
+	   - lib/unicore/Is/SylWA.pl lib/unicore/Is/SylWAA.pl
+	   - lib/unicore/Is/SylWC.pl lib/unicore/Is/SylWE.pl
+	   - lib/unicore/Is/SylWEE.pl lib/unicore/Is/SylWI.pl
+	   - lib/unicore/Is/SylWII.pl lib/unicore/Is/SylWO.pl
+	   - lib/unicore/Is/SylWOO.pl lib/unicore/Is/SylWU.pl
+	   - lib/unicore/Is/SylWV.pl lib/unicore/Is/Syllable.pl
+	   - lib/unicore/syllables.txt
+	  !> (integrate 344 files)
+____________________________________________________________________________
+[ 12443] By: jhi                                   on 2001/10/15  13:40:20
+        Log: Casting tweak from Paul Marquess, helps Merijn on AIX.
+     Branch: perl
+	   ! ext/DB_File/DB_File.xs
+____________________________________________________________________________
+[ 12442] By: jhi                                   on 2001/10/15  13:35:36
+        Log: Sync the skip() amounts with the number of tests.
+     Branch: perl
+	   ! lib/Term/Complete.t
+____________________________________________________________________________
+[ 12441] By: jhi                                   on 2001/10/15  13:11:03
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 12440] By: jhi                                   on 2001/10/15  12:58:24
         Log: MacOS Classic catdir() rewrite from Thomas Wegner
              (backward incompatibility, but a deliberate one,
