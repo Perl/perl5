@@ -79,6 +79,12 @@ Version 5.005_04        Fourth maintenance release of 5.005
 ----------------
 
 ____________________________________________________________________________
+[ 22274] By: acme                                  on 2004/02/06  15:16:07
+        Log: Add META.yml and NINJA support
+     Branch: maint-5.005/perl
+           + META.yml NINJA
+           ! MANIFEST
+____________________________________________________________________________
 [ 22270] By: acme                                  on 2004/02/04  20:50:31
         Log: Bump up patchlevel for release
      Branch: maint-5.005/perl
