@@ -1,12 +1,35 @@
+use Config;
+use File::Basename qw(&basename &dirname);
+use File::Spec;
+use Cwd;
+
+my $origdir = cwd;
+chdir dirname($0);
+my $file = basename($0, '.PL');
+
+my $Config_archname = defined($Config{'archname'}) ? $Config{'archname'} : '';
+my $Config_ver = defined($Config{'version'}) ? $Config{'version'} : '';
+my @Config_inc_version_list = defined($Config{'inc_version_list'}) ?
+  reverse split / /, $Config{'inc_version_list'} : ();
+ 
+open OUT,">$file" or die "Can't create $file: $!";
+ 
+print "Extracting $file (with variable substitutions)\n";
+ 
+# In this section, perl variables will be expanded during extraction.
+# You can use $Config{...} to use Configure variables.
+ 
+print OUT <<"!GROK!THIS!";
 package lib;
 
 use 5.005_64;
-use Config;
 
-my $archname = defined($Config{'archname'}) ? $Config{'archname'} : '';
-my $ver = defined($Config{'version'}) ? $Config{'version'} : '';
-my @inc_version_list = defined($Config{'inc_version_list'}) ?
-   reverse split / /, $Config{'inc_version_list'} : ();
+my \$archname = "$Config_archname";
+my \$ver = "$Config_ver";
+my \@inc_version_list = qw(@Config_inc_version_list);
+
+!GROK!THIS!
+print OUT <<'!NO!SUBS!';
 
 our @ORIG_INC = @INC;	# take a handy copy of 'original' value
 our $VERSION = '0.5564';
@@ -131,3 +154,7 @@ FindBin - optional module which deals with paths relative to the source file.
 Tim Bunce, 2nd June 1995.
 
 =cut
+!NO!SUBS!
+
+close OUT or die "Can't close $file: $!";
+chdir $origdir;
