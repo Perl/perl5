@@ -9,9 +9,6 @@
 # we should test as many as we can.
 #
 
-# XXX known to leak scalars
-$ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3;
-
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
