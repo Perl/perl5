@@ -720,6 +720,8 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		}
 	    }
 	    else {
+                if (len && (flags & UNPACK_ONLY_ONE))
+                    len = 1;
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
@@ -748,6 +750,8 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		}
 	    }
 	    else {
+                if (len && (flags & UNPACK_ONLY_ONE))
+                    len = 1;
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
@@ -780,6 +784,8 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		}
 	    }
 	    else {
+                if (len && (flags & UNPACK_ONLY_ONE))
+                    len = 1;
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 		while (len-- > 0 && s < strend) {
@@ -833,6 +839,8 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		}
 	    }
 	    else {
+                if (len && (flags & UNPACK_ONLY_ONE))
+                    len = 1;
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 #if SHORTSIZE != SIZE16
@@ -909,6 +917,8 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		}
 	    }
 	    else {
+                if (len && (flags & UNPACK_ONLY_ONE))
+                    len = 1;
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 #if SHORTSIZE != SIZE16
@@ -958,6 +968,8 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		}
 	    }
 	    else {
+                if (len && (flags & UNPACK_ONLY_ONE))
+                    len = 1;
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
@@ -1009,6 +1021,8 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		}
 	    }
 	    else {
+                if (len && (flags & UNPACK_ONLY_ONE))
+                    len = 1;
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
@@ -1042,6 +1056,8 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		}
 	    }
 	    else {
+                if (len && (flags & UNPACK_ONLY_ONE))
+                    len = 1;
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
@@ -1068,6 +1084,8 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		}
 	    }
 	    else {
+                if (len && (flags & UNPACK_ONLY_ONE))
+                    len = 1;
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
@@ -1120,6 +1138,8 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		}
 	    }
 	    else {
+                if (len && (flags & UNPACK_ONLY_ONE))
+                    len = 1;
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 #if LONGSIZE != SIZE32
@@ -1198,6 +1218,8 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		}
 	    }
 	    else {
+                if (len && (flags & UNPACK_ONLY_ONE))
+                    len = 1;
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 #if LONGSIZE != SIZE32
@@ -1252,6 +1274,8 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 	    }
 	    break;
 	case 'w':
+            if (len && (flags & UNPACK_ONLY_ONE))
+                len = 1;
 	    EXTEND(SP, len);
 	    EXTEND_MORTAL(len);
 	    {
@@ -1325,6 +1349,8 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		}
 	    }
             else {
+                if (len && (flags & UNPACK_ONLY_ONE))
+                    len = 1;
                 EXTEND(SP, len);
                 EXTEND_MORTAL(len);
                 while (len-- > 0) {
@@ -1358,6 +1384,8 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		}
 	    }
             else {
+                if (len && (flags & UNPACK_ONLY_ONE))
+                    len = 1;
                 EXTEND(SP, len);
                 EXTEND_MORTAL(len);
                 while (len-- > 0) {
@@ -1390,6 +1418,8 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		}
 	    }
 	    else {
+                if (len && (flags & UNPACK_ONLY_ONE))
+                    len = 1;
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
@@ -1413,6 +1443,8 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		}
 	    }
 	    else {
+                if (len && (flags & UNPACK_ONLY_ONE))
+                    len = 1;
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
@@ -1436,6 +1468,8 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		}
 	    }
 	    else {
+                if (len && (flags & UNPACK_ONLY_ONE))
+                    len = 1;
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
@@ -1460,6 +1494,8 @@ Perl_unpack_str(pTHX_ char *pat, register char *patend, register char *s, char *
 		}
 	    }
 	    else {
+                if (len && (flags & UNPACK_ONLY_ONE))
+                    len = 1;
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 		while (len-- > 0) {
