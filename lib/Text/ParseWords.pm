@@ -1,7 +1,7 @@
 package Text::ParseWords;
 
 use vars qw($VERSION @ISA @EXPORT $PERL_SINGLE_QUOTE);
-$VERSION = "3.21";
+$VERSION = "3.22";
 
 require 5.000;
 
@@ -59,11 +59,11 @@ sub parse_line {
 
 	($quote, $quoted, undef, $unquoted, $delim, undef) =
 	    $line =~ m/^(["'])                 # a $quote
-                        ((?:\\.|(?!\1)[^\\])*)    # and $quoted text
+                        ((?:\\[\000-\377]|(?!\1)[^\\])*)  # and $quoted text
                         \1 		       # followed by the same quote
                         ([\000-\377]*)	       # and the rest
 		       |                       # --OR--
-                       ^((?:\\.|[^\\"'])*?)    # an $unquoted text
+                       ^((?:\\[\000-\377]|[^\\"'])*?)     # an $unquoted text
 		      (\Z(?!\n)|(?-x:$delimiter)|(?!^)(?=["']))  
                                                # plus EOL, delimiter, or quote
                       ([\000-\377]*)	       # the rest
@@ -76,9 +76,9 @@ sub parse_line {
 	    $quoted = "$quote$quoted$quote";
 	}
         else {
-	    $unquoted =~ s/\\(.)/$1/g;
+	    $unquoted =~ s/\\([\000-\377])/$1/g;
 	    if (defined $quote) {
-		$quoted =~ s/\\(.)/$1/g if ($quote eq '"');
+		$quoted =~ s/\\([\000-\377])/$1/g if ($quote eq '"');
 		$quoted =~ s/\\([\\'])/$1/g if ( $PERL_SINGLE_QUOTE && $quote eq "'");
             }
 	}
