@@ -450,10 +450,6 @@ LIBC	= msvcrt.lib
 LIBC	= PerlCRT.lib
 .ENDIF
 
-PERLEXE_ICO	= .\perlexe.ico
-PERLEXE_RES	= .\perlexe.res
-PERLDLL_RES	=
-
 .IF  "$(CFG)" == "Debug"
 .IF "$(CCTYPE)" == "MSVC20"
 OPTIMIZE	= -Od -MD -Z7 -DDEBUGGING
@@ -570,6 +566,10 @@ GLOBEXE		= ..\perlglob.exe
 CONFIGPM	= ..\lib\Config.pm
 MINIMOD		= ..\lib\ExtUtils\Miniperl.pm
 X2P		= ..\x2p\a2p.exe
+
+PERLEXE_ICO	= .\perlexe.ico
+PERLEXE_RES	= .\perlexe.res
+PERLDLL_RES	=
 
 # Nominate a target which causes extensions to be re-built
 # This used to be $(PERLEXE), but at worst it is the .dll that they depend
