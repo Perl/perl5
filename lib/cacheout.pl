@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 # Open in their package.
 
 sub cacheout'open {

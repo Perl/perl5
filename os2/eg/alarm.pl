@@ -4,9 +4,10 @@ sub handler {
   exit(0);
 }
 
-$SIG{'INT'} = 'handler';
-$SIG{'QUIT'} = 'handler';
 $SIG{'ALRM'} = 'handler';
+$SIG{'INT'} = 'handler';	# Ctrl-C pressed
+$SIG{'BREAK'} = 'handler';	# Ctrl-Break pressed
+$SIG{'TERM'} = 'handler';	# Killed by another process
 
 print "Starting execution ...\n";
 alarm(10);

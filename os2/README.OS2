@@ -376,7 +376,7 @@ especially not with -DDEBUGGING
   construct a makefile ...
 + If you have GNU gdbm, you can define NDBM in config.h and link with a
   large model library of gdbm.
-+ I am not shure if I can verify the OS/2 port with each release
++ I am not sure if I can verify the OS/2 port with each release
   from Larry Wall. Therefore, in future releases there may be
   changes required to compile perl for OS/2.
  				October 1990
@@ -392,6 +392,34 @@ Some bugs were fixed. Added alarm() support (using PD implementation).
 
                                 Kai Uwe Rommel
                                 rommel@lan.informatik.tu-muenchen.dbp.de
+Verified perl 4.0 at patchlevel 10
+Changes:
+- some minor corrections and updates in various files
+- new os2/config.h created from original config.H
+- added support for crypt(), PD routine by A.Tanenbaum in new os2/crypt.c
+- added support for wait4pid() in os2.c
+- fixed/added support for -P option (requires a standard CPP for OS/2)
+- os2/mktemp.c deleted, no longer needed
+- new Makefile created for MS C 6.00 and it's NMAKE
+- with os2/perl.cs, bison has no longer to be called manually
+I have successfully run most tests. Diffs are in os2/tests.dif.
+Often, only command names, shell expansion etc. have to be changed.
+Test that still don't run are Unix-specific ones or fail because
+of CR/LF-problems:
+- io/argv.t, io/inplace.t, op/exec.t, op/glob.t  (minor problems)
+- io/fs.t, io/pipe.t op/fork.t, op/magic.t, op/time.t
+   (under OS/2 not supported features of Unix)
+- op/pat.t (bug, not yet fixed)
+Remember to remove the HAS_GDBM symbol from os2/config.h or
+get GNU gdbm for OS/2.
+				June 1991
+                                Kai Uwe Rommel
+                                rommel@lan.informatik.tu-muenchen.dbp.de
+Verified perl 4.0 at patchlevel 19
+Minor fixes. Previous fixes at PL10 were not included into distribution.
+				November 1991
+                                Kai Uwe Rommel
+                                rommel@informatik.tu-muenchen.dbp.de
 
 
 Verified patchlevel 44.

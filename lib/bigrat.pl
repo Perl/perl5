@@ -3,6 +3,8 @@ require "bigint.pl";
 
 # Arbitrary size rational math package
 #
+# by Mark Biggar
+#
 # Input values to these routines consist of strings of the form 
 #   m|^\s*[+-]?[\d\s]+(/[\d\s]+)?$|.
 # Examples:

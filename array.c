@@ -1,4 +1,4 @@
-/* $RCSfile: array.c,v $$Revision: 4.0.1.2 $$Date: 91/11/05 16:00:14 $
+/* $RCSfile: array.c,v $$Revision: 4.0.1.3 $$Date: 92/06/08 11:45:05 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	array.c,v $
+ * Revision 4.0.1.3  92/06/08  11:45:05  lwall
+ * patch20: Perl now distinguishes overlapped copies from non-overlapped
+ * 
  * Revision 4.0.1.2  91/11/05  16:00:14  lwall
  * patch11: random cleanup
  * patch11: passing non-existend array elements to subrouting caused core dump
@@ -67,7 +70,7 @@ STR *val;
 
 	if (ar->ary_alloc != ar->ary_array) {
 	    retval = ar->ary_array - ar->ary_alloc;
-	    Copy(ar->ary_array, ar->ary_alloc, ar->ary_max+1, STR*);
+	    Move(ar->ary_array, ar->ary_alloc, ar->ary_max+1, STR*);
 	    Zero(ar->ary_alloc+ar->ary_max+1, retval, STR*);
 	    ar->ary_max += retval;
 	    ar->ary_array -= retval;
@@ -212,6 +215,7 @@ register ARRAY *ar;
     return retval;
 }
 
+void
 aunshift(ar,num)
 register ARRAY *ar;
 register int num;
@@ -266,6 +270,7 @@ register ARRAY *ar;
     return ar->ary_fill;
 }
 
+void
 afill(ar, fill)
 register ARRAY *ar;
 int fill;

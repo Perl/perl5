@@ -1,5 +1,5 @@
 %{
-/* $RCSfile: a2p.y,v $$Revision: 4.0.1.1 $$Date: 91/06/07 12:12:41 $
+/* $RCSfile: a2p.y,v $$Revision: 4.0.1.2 $$Date: 92/06/08 16:13:03 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -7,6 +7,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	a2p.y,v $
+ * Revision 4.0.1.2  92/06/08  16:13:03  lwall
+ * patch20: in a2p, getline should allow variable to be array element
+ * 
  * Revision 4.0.1.1  91/06/07  12:12:41  lwall
  * patch4: new copyright notice
  * 
@@ -184,18 +187,18 @@ term	: variable
 		{ $$ = oper1(OPAREN,$2); }
 	| GETLINE
 		{ $$ = oper0(OGETLINE); }
-	| GETLINE VAR
+	| GETLINE variable
 		{ $$ = oper1(OGETLINE,$2); }
 	| GETLINE '<' expr
 		{ $$ = oper3(OGETLINE,Nullop,string("<",1),$3);
 		    if (ops[$3].ival != OSTR + (1<<8)) do_fancy_opens = TRUE; }
-	| GETLINE VAR '<' expr
+	| GETLINE variable '<' expr
 		{ $$ = oper3(OGETLINE,$2,string("<",1),$4);
 		    if (ops[$4].ival != OSTR + (1<<8)) do_fancy_opens = TRUE; }
 	| term 'p' GETLINE
 		{ $$ = oper3(OGETLINE,Nullop,string("|",1),$1);
 		    if (ops[$1].ival != OSTR + (1<<8)) do_fancy_opens = TRUE; }
-	| term 'p' GETLINE VAR
+	| term 'p' GETLINE variable
 		{ $$ = oper3(OGETLINE,$4,string("|",1),$1);
 		    if (ops[$1].ival != OSTR + (1<<8)) do_fancy_opens = TRUE; }
 	| FUN1

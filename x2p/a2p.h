@@ -1,4 +1,4 @@
-/* $RCSfile: a2p.h,v $$Revision: 4.0.1.1 $$Date: 91/06/07 12:12:27 $
+/* $RCSfile: a2p.h,v $$Revision: 4.0.1.2 $$Date: 92/06/08 16:12:23 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	a2p.h,v $
+ * Revision 4.0.1.2  92/06/08  16:12:23  lwall
+ * patch20: hash tables now split only if the memory is available to do so
+ * 
  * Revision 4.0.1.1  91/06/07  12:12:27  lwall
  * patch4: new copyright notice
  * 
@@ -294,6 +297,8 @@ EXT bool do_chop INIT(FALSE);
 EXT bool need_entire INIT(FALSE);
 EXT bool absmaxfld INIT(FALSE);
 EXT bool saw_altinput INIT(FALSE);
+
+EXT bool nomemok INIT(FALSE);
 
 EXT char const_FS INIT(0);
 EXT char *namelist INIT(Nullch);

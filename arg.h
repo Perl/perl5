@@ -1,4 +1,4 @@
-/* $RCSfile: arg.h,v $$Revision: 4.0.1.2 $$Date: 91/11/05 15:51:05 $
+/* $RCSfile: arg.h,v $$Revision: 4.0.1.3 $$Date: 92/06/08 11:44:06 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	arg.h,v $
+ * Revision 4.0.1.3  92/06/08  11:44:06  lwall
+ * patch20: O_PIPE conflicted with Atari
+ * patch20: clarified debugging output for literals and double-quoted strings
+ * 
  * Revision 4.0.1.2  91/11/05  15:51:05  lwall
  * patch11: added eval {}
  * patch11: added sort {} LIST
@@ -286,7 +290,7 @@
 #define O_REWINDDIR 263
 #define O_CLOSEDIR 264
 #define O_SYSCALL 265
-#define O_PIPE 266
+#define O_PIPE_OP 266
 #define O_TRY 267
 #define O_EVALONCE 268
 #define MAXO 269
@@ -603,8 +607,8 @@ char *argname[] = {
     "CMD",
     "STAB",
     "LVAL",
-    "SINGLE",
-    "DOUBLE",
+    "LITERAL",
+    "DOUBLEQUOTE",
     "BACKTICK",
     "READ",
     "SPAT",

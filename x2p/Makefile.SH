@@ -14,10 +14,16 @@ case $CONFIG in
     ;;
 esac
 echo "Extracting x2p/Makefile (with variable substitutions)"
+rm -f Makefile
 cat >Makefile <<!GROK!THIS!
-# $RCSfile: Makefile.SH,v $$Revision: 4.0.1.2 $$Date: 91/11/05 19:19:04 $
+# $RCSfile: Makefile.SH,v $$Revision: 4.0.1.3 $$Date: 92/06/08 16:11:32 $
 #
 # $Log:	Makefile.SH,v $
+# Revision 4.0.1.3  92/06/08  16:11:32  lwall
+# patch20: SH files didn't work well with symbolic links
+# patch20: cray didn't give enough memory to /bin/sh
+# patch20: makefiles now display new shift/reduce expectations
+# 
 # Revision 4.0.1.2  91/11/05  19:19:04  lwall
 # patch11: random cleanup
 # 
@@ -40,13 +46,14 @@ SMALL = $small
 LARGE = $large $split
 mallocsrc = $mallocsrc
 mallocobj = $mallocobj
+shellflags = $shellflags
 
 libs = $libs
 !GROK!THIS!
 
 cat >>Makefile <<'!NO!SUBS!'
 
-CCCMD = `sh cflags $@`
+CCCMD = `sh $(shellflags) cflags $@`
 
 public = a2p s2p find2perl
 
@@ -58,7 +65,7 @@ util =
 
 sh = Makefile.SH makedepend.SH
 
-h = EXTERN.h INTERN.h config.h handy.h hash.h a2p.h str.h util.h
+h = EXTERN.h INTERN.h ../config.h handy.h hash.h a2p.h str.h util.h
 
 c = hash.c $(mallocsrc) str.c util.c walk.c
 
@@ -81,7 +88,7 @@ a2p: $(obj) a2p.o
 	$(CC) $(LDFLAGS) $(obj) a2p.o $(libs) -o a2p
 
 a2p.c: a2p.y
-	@ echo Expect 226 shift/reduce conflicts...
+	@ echo Expect 231 shift/reduce conflicts...
 	$(YACC) a2p.y
 	mv y.tab.c a2p.c
 
@@ -105,7 +112,7 @@ done; \
 fi
 
 clean:
-	rm -f a2p *.o
+	rm -f a2p *.o a2p.c
 
 realclean: clean
 	rm -f *.orig */*.orig core $(addedbyconf) a2p.c s2p find2perl all cflags
@@ -141,7 +148,7 @@ malloc.c: ../malloc.c
 $(obj):
 	@ echo "You haven't done a "'"make depend" yet!'; exit 1
 makedepend: makedepend.SH
-	/bin/sh makedepend.SH
+	/bin/sh $(shellflags) makedepend.SH
 !NO!SUBS!
 $eunicefix Makefile
 case `pwd` in

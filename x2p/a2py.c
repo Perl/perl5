@@ -1,4 +1,4 @@
-/* $RCSfile: a2py.c,v $$Revision: 4.0.1.1 $$Date: 91/06/07 12:12:59 $
+/* $RCSfile: a2py.c,v $$Revision: 4.0.1.2 $$Date: 92/06/08 16:15:16 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	a2py.c,v $
+ * Revision 4.0.1.2  92/06/08  16:15:16  lwall
+ * patch20: in a2p, now warns about spurious backslashes
+ * patch20: in a2p, now allows [ to be backslashed in pattern
+ * patch20: in a2p, now allows numbers of the form 2.
+ * 
  * Revision 4.0.1.1  91/06/07  12:12:59  lwall
  * patch4: new copyright notice
  * 
@@ -14,8 +19,8 @@
  * 
  */
 
-#ifdef MSDOS
-#include "../patchlev.h"
+#ifdef OS2
+#include "../patchlevel.h"
 #endif
 #include "util.h"
 char *index();
@@ -26,10 +31,10 @@ char *myname;
 int checkers = 0;
 STR *walk();
 
-#ifdef MSDOS
+#ifdef OS2
 usage()
 {
-    printf("\nThis is the AWK to PERL translator, version 3.0, patchlevel %d\n", PATCHLEVEL);
+    printf("\nThis is the AWK to PERL translator, version 4.0, patchlevel %d\n", PATCHLEVEL);
     printf("\nUsage: %s [-D<number>] [-F<char>] [-n<fieldlist>] [-<number>] filename\n", myname);
     printf("\n  -D<number>      sets debugging flags."
            "\n  -F<character>   the awk script to translate is always invoked with"
@@ -85,7 +90,7 @@ register char **env;
 	    break;
 	default:
 	    fatal("Unrecognized switch: %s\n",argv[0]);
-#ifdef MSDOS
+#ifdef OS2
             usage();
 #endif
 	}
@@ -95,7 +100,7 @@ register char **env;
     /* open script */
 
     if (argv[0] == Nullch) {
-#ifdef MSDOS
+#ifdef OS2
 	if ( isatty(fileno(stdin)) )
 	    usage();
 #endif
@@ -216,6 +221,12 @@ yylex()
 	     *s++,filename,line);
 	goto retry;
     case '\\':
+	s++;
+	if (*s && *s != '\n') {
+	    yyerror("Ignoring spurious backslash");
+	    goto retry;
+	}
+	/*FALLSTHROUGH*/
     case 0:
 	s = str_get(linestr);
 	*s = '\0';
@@ -802,6 +813,8 @@ register char *s;
 		*d++ = *s++;
 	    else if (s[1] == '\\')
 		*d++ = *s++;
+	    else if (s[1] == '[')
+		*d++ = *s++;
 	}
 	else if (*s == '[') {
 	    *d++ = *s++;
@@ -846,11 +859,15 @@ register char *s;
 	while (isdigit(*s)) {
 	    *d++ = *s++;
 	}
-	if (*s == '.' && index("0123456789eE",s[1])) {
-	    *d++ = *s++;
-	    while (isdigit(*s)) {
+	if (*s == '.') {
+	    if (isdigit(s[1])) {
 		*d++ = *s++;
+		while (isdigit(*s)) {
+		    *d++ = *s++;
+		}
 	    }
+	    else
+		s++;
 	}
 	if (index("eE",*s) && index("+-0123456789",s[1])) {
 	    *d++ = *s++;
@@ -1265,7 +1282,6 @@ int prevargs;
 
 	sprintf(tmpbuf,"%s:%d",name,prevargs);
 	str = hfetch(curarghash,tmpbuf);
-	fprintf(stderr,"Looking for %s\n",tmpbuf);
 	if (str && strEQ(str->str_ptr,"*")) {
 	    if (type == OVAR || type == OSTAR) {
 		ops[arg].ival &= ~255;
