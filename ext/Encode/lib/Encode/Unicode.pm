@@ -3,7 +3,7 @@ package Encode::Unicode;
 use strict;
 use warnings;
 
-our $VERSION = do { my @r = (q$Revision: 1.29 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.30 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 #
 # Aux. subs & constants
@@ -403,7 +403,7 @@ up to \x{10ffff} even with 16-bit encodings.  This pair of
 half-character is now called a I<Surrogate Pair> and UTF-16 is the
 name of the encoding that embraces them.
 
-Here is a fomula to ensurrogate a Unicode character \x{10000} and
+Here is a formula to ensurrogate a Unicode character \x{10000} and
 above;
 
   $hi = ($uni - 0x10000) / 0x400 + 0xD800;

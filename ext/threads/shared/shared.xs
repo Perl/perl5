@@ -462,7 +462,6 @@ sharedsv_scalar_mg_free(pTHX_ SV *sv, MAGIC *mg)
 int
 sharedsv_scalar_mg_clear(pTHX_ SV *sv, MAGIC *mg)
 {
-    shared_sv *shared = (shared_sv *) mg->mg_ptr;
     return 0;
 }
 
@@ -536,7 +535,6 @@ int
 sharedsv_elem_mg_STORE(pTHX_ SV *sv, MAGIC *mg)
 {
     dTHXc;
-    bool allowed;
     shared_sv *shared = SV_to_sharedsv(aTHX_ mg->mg_obj);
     shared_sv *target;
     SV **svp;
@@ -573,7 +571,6 @@ sharedsv_elem_mg_DELETE(pTHX_ SV *sv, MAGIC *mg)
 {
     dTHXc;
     shared_sv *shared = SV_to_sharedsv(aTHX_ mg->mg_obj);
-    SV* ssv;
     ENTER_LOCK;
     sharedsv_elem_mg_FETCH(aTHX_ sv, mg);
     if (SvTYPE(SHAREDSvPTR(shared)) == SVt_PVAV) {

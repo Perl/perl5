@@ -489,7 +489,7 @@ with Encode. See L<Encode::KR> for details.
 
   UTF-16 UTF-16BE UTF-16LE
 
-are a IANA-registered C<charset>s. See [RFC 2781] for details.
+are IANA-registered C<charset>s. See [RFC 2781] for details.
 Jungshik Shin reports that UTF-16 with a BOM is well accepted
 by MS IE 5/6 and NS 4/6. Beware however that
 
@@ -525,7 +525,6 @@ you're doing and unless you really benefit from using C<UTF-16>.
 
 
   ISO-IR-165    [RFC1345]
-  GBK
   VISCII
   GB 12345
   GB 18030 (**)  (see links bellow)
@@ -712,7 +711,7 @@ L<http://www.ecma.ch>
 
 L<http://www.ecma.ch/ecma1/STAND/ECMA-035.HTM> 
 
-The very dspecification of ISO-2022 is available from the link above.
+The very specification of ISO-2022 is available from the link above.
 
 =back
 
@@ -729,7 +728,7 @@ L<http://www.iana.org/assignments/character-sets>
 
 Most of the C<canonical names> in Encode derive from this list
 so you can directly apply the string you have extracted from MIME
-header of mails and we pages.
+header of mails and web pages.
 
 =back
 

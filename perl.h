@@ -2146,6 +2146,22 @@ typedef I32 (*filter_t) (pTHX_ int, SV *, int);
 #define FILTER_DATA(idx)	   (AvARRAY(PL_rsfp_filters)[idx])
 #define FILTER_ISREADER(idx)	   (idx >= AvFILLp(PL_rsfp_filters))
 
+#if defined(_AIX) && !defined(_AIX43)
+#if defined(USE_REENTRANT) || defined(_REENTRANT) || defined(_THREAD_SAFE)
+/* We cannot include <crypt.h> to get the struct crypt_data
+ * because of setkey prototype problems when threading */
+typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
+    /* From OSF, Not needed in AIX
+       char C[28], D[28];
+    */
+    char E[48];
+    char KS[16][48];
+    char block[66];
+    char iobuf[16];
+} CRYPTD;
+#endif /* threading */
+#endif /* AIX */
+
 #if !defined(OS2) && !defined(MACOS_TRADITIONAL)
 #  include "iperlsys.h"
 #endif

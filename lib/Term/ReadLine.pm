@@ -6,11 +6,11 @@ no real package is found, substitutes stubs instead of basic functions.
 =head1 SYNOPSIS
 
   use Term::ReadLine;
-  $term = new Term::ReadLine 'Simple Perl calc';
-  $prompt = "Enter your arithmetic expression: ";
-  $OUT = $term->OUT || STDOUT;
+  my $term = new Term::ReadLine 'Simple Perl calc';
+  my $prompt = "Enter your arithmetic expression: ";
+  my $OUT = $term->OUT || \*STDOUT;
   while ( defined ($_ = $term->readline($prompt)) ) {
-    $res = eval($_), "\n";
+    my $res = eval($_), "\n";
     warn $@ if $@;
     print $OUT $res, "\n" unless $@;
     $term->addhistory($_) if /\S/;

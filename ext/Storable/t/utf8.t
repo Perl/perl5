@@ -18,11 +18,13 @@ sub BEGIN {
 	print "1..0 # Skip: no utf8 support\n";
 	exit 0;
     }
-    chdir('t') if -d 't';
-    @INC = '.'; 
-    push @INC, '../lib';
+    if ($ENV{PERL_CORE}){
+	chdir('t') if -d 't';
+	@INC = '.'; 
+	push @INC, '../lib';
+    }
     require Config; import Config;
-    if ($Config{'extensions'} !~ /\bStorable\b/) {
+    if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bStorable\b/) {
         print "1..0 # Skip: Storable was not built\n";
         exit 0;
     }

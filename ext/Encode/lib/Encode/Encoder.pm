@@ -1,14 +1,14 @@
 #
-# $Id: Encoder.pm,v 0.2 2002/04/08 18:08:07 dankogai Exp $
+# $Id: Encoder.pm,v 0.3 2002/04/10 22:28:40 dankogai Exp dankogai $
 #
 package Encode::Encoder;
 use strict;
 use warnings;
-our $VERSION = do { my @r = (q$Revision: 0.2 $ =~ /\d+/g); sprintf "%d."."%02d"  x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.3 $ =~ /\d+/g); sprintf "%d."."%02d"  x $#r, @r };
 
 require Exporter;
 our @ISA = qw(Exporter);
-our @EXPORT = qw ( encoder );
+our @EXPORT_OK = qw ( encoder );
 
 our $AUTOLOAD;
 our $DEBUG = 0;
@@ -34,7 +34,7 @@ sub new{
 sub encoder{ __PACKAGE__->new(@_) }
 
 sub data{
-    my ($self, $data) = shift;
+    my ($self, $data) = @_;
     if (defined $data){
 	$self->{data} = $data;
 	return $data;
@@ -106,6 +106,7 @@ Encode::Encoder -- Object Oriented Encoder
   # Encode::encode("ISO-8859-1", $data); 
   Encoder->new($data)->iso_8859_1; # OOP way
   # shortcut
+  use Encode::Encoder qw(encoder);
   encoder($data)->iso_8859_1;
   # you can stack them!
   encoder($data)->iso_8859_1->base64;  # provided base64() is defined
@@ -166,7 +167,7 @@ This module predefines the methods below;
 
 =item $e = Encode::Encoder-E<gt>new([$data, $encoding]);
 
-returns the encoder object.  Its data is initialized with $data if
+returns an encoder object.  Its data is initialized with $data if
 there, and its encoding is set to $encoding if there.
 
 When $encoding is omitted, it defaults to utf8 if $data is already in
@@ -174,8 +175,7 @@ utf8 or "" (empty string) otherwise.
 
 =item encoder()
 
-is an alias of Encode::Encoder-E<gt>new().  This one is exported for
-convenience.
+is an alias of Encode::Encoder-E<gt>new().  This one is exported on demand.
 
 =item $e-E<gt>data([$data])
 

@@ -120,7 +120,6 @@ Perl_ithread_destruct (pTHX_ ithread* thread, const char *why)
 	MUTEX_UNLOCK(&create_destruct_mutex);
 	/* Thread is now disowned */
 	if (thread->interp) {
-	    dTHXa(thread->interp);
 	    PERL_SET_CONTEXT(thread->interp);
 	    perl_destruct(thread->interp);
 	    perl_free(thread->interp);
@@ -407,7 +406,6 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 	{
 	  static pthread_attr_t attr;
 	  static int attr_inited = 0;
-	  sigset_t fullmask, oldmask;
 	  static int attr_joinable = PTHREAD_CREATE_JOINABLE;
 	  if (!attr_inited) {
 	    attr_inited = 1;

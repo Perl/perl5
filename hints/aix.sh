@@ -253,6 +253,10 @@ $define|true|[yY]*)
 	    # (e.g. pragma/overload core dumps)	 Let's suspect xlC_r, too.
 	    # --jhi@iki.fi
 	    cc=cc_r
+
+           case "`oslevel`" in
+               4.2.1.*) i_crypt='undef' ;;
+               esac
 	    ;;
 	'') 
 	    cc=cc_r

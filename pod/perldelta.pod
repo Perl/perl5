@@ -742,7 +742,7 @@ sum(), min(), first(), and shuffle(), by Graham Barr.  See L<List::Util>.
 C<Locale::Constants>, C<Locale::Country>, C<Locale::Currency>
 C<Locale::Language>, and L<Locale::Script>, from Neil Bowers, have
 been added.  They provide the codes for various locale standards, such
-as "fr" for France, "usd" for US Dollar, and "jp" for Japanese.
+as "fr" for France, "usd" for US Dollar, and "ja" for Japanese.
 
     use Locale::Country;
 
