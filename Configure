@@ -10730,7 +10730,7 @@ esac
 case \$# in
 0) exit 1;;
 esac
-echo \$* | $tr ' ' $trnl | $sed -e 's/\(.*\)/\\
+echo \$* | $tr ' ' '$trnl' | $sed -e 's/\(.*\)/\\
 #ifdef \1\\
 exit 0; _ _ _ _\1\\	 \1\\
 #endif\\

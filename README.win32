@@ -50,7 +50,8 @@ following compilers:
       Mingw32 with EGCS		version 1.0.2
       Mingw32 with GCC		version 2.8.1
 
-The last two of these are high quality freeware compilers.
+The last two of these are high quality freeware compilers.  Support
+for them is still experimental.
 
 This port currently supports MakeMaker (the set of modules that
 is used to build extensions to perl).  Therefore, you should be
@@ -145,7 +146,8 @@ a perl interpreter that supports the Perl Object abstraction (courtesy
 ActiveState Tool Corp.)  PERL_OBJECT uses C++, and the binaries are
 therefore incompatible with the regular C build.  However, the
 PERL_OBJECT build does provide something called the C-API, for linking
-it with extensions that won't compile under PERL_OBJECT.
+it with extensions that won't compile under PERL_OBJECT.  PERL_OBJECT
+cannot be enabled when using GCC or EGCS, yet.
 
 Beginning with version 5.005, there is experimental support for building
 a perl interpreter that is capable of native threading.  Binaries built

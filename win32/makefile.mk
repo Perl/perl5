@@ -3,7 +3,7 @@
 # Supported compilers:
 #	Visual C++ 2.0 thro 5.0
 #	Borland C++ 5.02
-#	Mingw32 with gcc-2.8.1 or egcs-1.0.2
+#	Mingw32 with gcc-2.8.1 or egcs-1.0.2  **experimental**
 #
 # This is set up to build a perl.exe that runs off a shared library
 # (perl.dll).  Also makes individual DLLs for the XS extensions.
@@ -46,7 +46,8 @@ CCTYPE		*= BORLAND
 
 #
 # uncomment next line if you want to use the perl object
-# Currently, this cannot be enabled if you ask for threads above
+# Currently, this cannot be enabled if you ask for threads above, or
+# if you are using GCC or EGCS.
 #
 #OBJECT		*= -DPERL_OBJECT
 

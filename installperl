@@ -1,13 +1,16 @@
 #!./perl
 
-use strict;
-use vars qw($Is_VMS $Is_W32 $Is_OS2 $nonono $versiononly $depth);
-
 BEGIN {
     require 5.004;
     chdir '..' if !-d 'lib' and -d '..\lib';
     @INC = 'lib';
     $ENV{PERL5LIB} = 'lib';
+}
+
+use strict;
+use vars qw($Is_VMS $Is_W32 $Is_OS2 $nonono $versiononly $depth);
+
+BEGIN {
     $Is_VMS = $^O eq 'VMS';
     $Is_W32 = $^O eq 'MSWin32';
     $Is_OS2 = $^O eq 'os2';
