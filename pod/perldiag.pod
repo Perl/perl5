@@ -1711,10 +1711,10 @@ about 250 characters.  You've exceeded that length.  Future versions of
 Perl are likely to eliminate this arbitrary limitation.  In the meantime,
 try using scientific notation (e.g. "1e6" instead of "1_000_000").
 
-=item Odd number of elements in hash list
+=item Odd number of elements in hash assignment
 
-(S) You specified an odd number of elements to a hash list, which is odd,
-because hash lists come in key/value pairs.
+(S) You specified an odd number of elements to initialize a hash, which
+is odd, because hashes come in key/value pairs.
 
 =item Offset outside string
 
@@ -2062,6 +2062,18 @@ which is why it's currently left out of your copy.
 
 (F) More than 100 levels of inheritance were used.  Probably indicates
 an unintended loop in your inheritance hierarchy.
+
+=item Reference found where even-sized list expected
+
+(W) You gave a single reference where Perl was expecting a list with
+an even number of elements (for assignment to a hash). This
+usually means that you used the anon hash constructor when you meant 
+to use parens. In any case, a hash requires key/value B<pairs>.
+
+    %hash = { one => 1, two => 2, };	# WRONG
+    %hash = [ qw/ an anon array / ];	# WRONG
+    %hash = ( one => 1, two => 2, );	# right
+    %hash = qw( one 1 two 2 );			# also fine
 
 =item Reference miscount in sv_replace()
 

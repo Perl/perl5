@@ -644,8 +644,15 @@ PP(pp_aassign)
 		    }
 		    TAINT_NOT;
 		}
-		if (relem == lastrelem && dowarn)
-		    warn("Odd number of elements in hash list");
+		if (relem == lastrelem && dowarn) {
+		    if (relem == firstrelem &&
+			SvROK(*relem) &&
+			( SvTYPE(SvRV(*relem)) == SVt_PVAV ||
+			  SvTYPE(SvRV(*relem)) == SVt_PVHV ) )
+			warn("Reference found where even-sized list expected");
+		    else
+			warn("Odd number of elements in hash assignment");
+		}
 	    }
 	    break;
 	default:
