@@ -8440,6 +8440,18 @@ Perl_mg_dup(pTHX_ MAGIC *mg, clone_params* param)
 	if (mg->mg_type == PERL_MAGIC_qr) {
 	    nmg->mg_obj	= (SV*)re_dup((REGEXP*)mg->mg_obj);
 	}
+	else if(mg->mg_type == PERL_MAGIC_backref) {
+	     AV *av = (AV*) mg->mg_obj;
+	     SV **svp;
+	     I32 i;
+	     nmg->mg_obj = (SV*)newAV();
+	     svp = AvARRAY(av);
+	     i = AvFILLp(av);
+	     while (i >= 0) {
+		  av_push((AV*)nmg->mg_obj,sv_dup(svp[i],param));
+		  i--;
+	     }
+	}
 	else {
 	    nmg->mg_obj	= (mg->mg_flags & MGf_REFCOUNTED)
 			      ? sv_dup_inc(mg->mg_obj, param)
@@ -8627,18 +8639,6 @@ S_gv_share(pTHX_ SV *sstr)
     }
     else if (!GvCV(gv)) {
         GvCV(gv) = (CV*)sv;
-    }
-   else if(mg->mg_type == PERL_MAGIC_backref) {
-       AV *av = (AV*) mg->mg_obj;
-       SV **svp;
-       I32 i;
-       nmg->mg_obj = (SV*)newAV();
-       svp = AvARRAY(av);
-       i = AvFILLp(av);
-       while (i >= 0) {
-           av_push((AV*)nmg->mg_obj,sv_dup(svp[i],param));
-           i--;
-       }
     }
     else {
         /* CvPADLISTs cannot be shared */
