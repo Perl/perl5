@@ -351,6 +351,7 @@ my @staticfuncs = qw(
     study_chunk
     add_data
     re_croak2
+    regpposixcc
     regmatch
     regrepeat
     regrepeat_hard

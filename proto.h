@@ -864,6 +864,7 @@ void scan_commit _((scan_data_t *data));
 I32 study_chunk _((regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 flags));
 I32 add_data _((I32 n, char *s));
 void	re_croak2 _((const char* pat1,const char* pat2,...)) __attribute__((noreturn));
+char* regpposixcc _((I32 value));
 I32 regmatch _((regnode *prog));
 I32 regrepeat _((regnode *p, I32 max));
 I32 regrepeat_hard _((regnode *p, I32 max, I32 *lp));
