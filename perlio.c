@@ -2662,11 +2662,13 @@ PerlIOStdio_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
      */
     if ((f = PerlIOBase_dup(aTHX_ f, o, param, flags))) {
 	FILE *stdio = PerlIOSelf(o, PerlIOStdio)->stdio;
+	int fd = fileno(stdio);
+	char mode[8];
 	if (flags & PERLIO_DUP_FD) {
-	    int fd = PerlLIO_dup(fileno(stdio));
-	    if (fd >= 0) {
-		char mode[8];
-		stdio = PerlSIO_fdopen(fd, PerlIO_modestr(o,mode));
+	    int dfd = PerlLIO_dup(fileno(stdio));
+	    if (dfd >= 0) {
+		stdio = PerlSIO_fdopen(dfd, PerlIO_modestr(o,mode));
+		goto set_this;
 	    }
 	    else {
 		/* FIXME: To avoid messy error recovery if dup fails
@@ -2674,6 +2676,8 @@ PerlIOStdio_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 		 */
 	    }
 	}
+    	stdio = PerlSIO_fdopen(fd, PerlIO_modestr(o,mode));
+    set_this:
 	PerlIOSelf(f, PerlIOStdio)->stdio = stdio;
 	PerlIOUnix_refcnt_inc(fileno(stdio));
     }
@@ -2692,11 +2696,29 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 	errno = EBADF;
 	return -1;
     }
-    if (PerlIOUnix_refcnt_dec(fileno(stdio)) > 0) {
-	/* Do not close it but do flush any buffers */
-	return PerlIO_flush(f);
-    }
-    return (
+    else {
+        int fd = fileno(stdio);
+	int dupfd = -1;
+	IV result;
+    	if (PerlIOUnix_refcnt_dec(fd) > 0) {
+	    /* File descriptor still in use */
+	    if (fd < 3) {
+	    	/* For STD* handles don't close the stdio at all */
+	    	return PerlIO_flush(f);
+	    }
+	    else {
+            	/* Tricky - must fclose(stdio) to free memory but not close(fd) */ 
+#ifdef USE_THREADS
+    	    	/* Sarathy pointed out that another thread could reuse
+		   fd after fclose() but before we dup2() below
+		   so take out a MUTEX to shut them out 
+		 */  
+    	    	MUTEX_LOCK(&PerlIO_mutex);
+#endif
+	    	dupfd = PerlLIO_dup(fd);
+	    }
+	}    
+        result = (
 #ifdef SOCKS5_VERSION_NAME
 	       (getsockopt
 		(PerlIO_fileno(f), SOL_SOCKET, SO_TYPE, (void *) &optval,
@@ -2706,7 +2728,18 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 	       PerlSIO_fclose(stdio)
 #endif
 	);
-
+	if (dupfd >= 0) {
+	    /* We need to restore fd from the saved copy */
+	    if (PerlLIO_dup2(dupfd,fd) != fd)
+	      result = -1;
+#ifdef USE_THREADS
+    	    MUTEX_UNLOCK(&PerlIO_mutex);
+#endif
+	    if (PerlLIO_close(dupfd) != 0)
+	      result = -1; 
+	}
+	return result;
+    } 
 }
 
 
@@ -3403,6 +3436,11 @@ PerlIOBuf_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 	PerlIO_get_base(f);
     if (!(PerlIOBase(f)->flags & PERLIO_F_CANWRITE))
 	return 0;
+    if (PerlIOBase(f)->flags & PERLIO_F_RDBUF) {
+    	if (PerlIO_flush(f) != 0) {
+	    return 0;
+	}
+    }	
     while (count > 0) {
 	SSize_t avail = b->bufsiz - (b->ptr - b->buf);
 	if ((SSize_t) count < avail)
@@ -3461,6 +3499,19 @@ PerlIOBuf_tell(pTHX_ PerlIO *f)
      * b->posn is file position where b->buf was read, or will be written
      */
     Off_t posn = b->posn;
+    if ((PerlIOBase(f)->flags & PERLIO_F_APPEND) && 
+        (PerlIOBase(f)->flags & PERLIO_F_WRBUF)) {
+#if 1
+    	/* As O_APPEND files are normally shared in some sense it is better
+	   to flush :
+	 */  	
+	PerlIO_flush(f);
+#else	
+        /* when file is NOT shared then this is sufficient */ 
+	PerlIO_seek(PerlIONext(f),0, SEEK_END);
+#endif
+	posn = b->posn = PerlIO_tell(PerlIONext(f));
+    }
     if (b->buf) {
 	/*
 	 * If buffer is valid adjust position by amount in buffer

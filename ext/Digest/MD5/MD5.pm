@@ -3,7 +3,7 @@ package Digest::MD5;
 use strict;
 use vars qw($VERSION @ISA @EXPORT_OK);
 
-$VERSION = '2.21';  # $Date: 2002/12/28 05:30:03 $
+$VERSION = '2.22';  # $Date: 2003/01/05 00:56:14 $
 
 require Exporter;
 *import = \&Exporter::import;
@@ -117,6 +117,14 @@ If called as an instance method (i.e. $md5->new) it will just reset the
 state the object to the state of a newly created object.  No new
 object is created in this case.
 
+=item $md5->clone
+
+This is a copy constructor returning a clone of the $md5 object. It is
+useful when you do not want to destroy the digests state, but need an
+intermediate value of the digest, e.g. when calculating digests
+iteratively on a continuous data stream in order to obtain a copy which
+may be destroyed.
+
 =item $md5->reset
 
 This is just an alias for $md5->new.
@@ -142,7 +150,8 @@ Return the binary digest for the message.
 Note that the C<digest> operation is effectively a destructive,
 read-once operation. Once it has been performed, the C<Digest::MD5>
 object is automatically C<reset> and can be used to calculate another
-digest value.
+digest value.  Call $md5->clone->digest if you want to calculate the
+digest without reseting the digest state.
 
 =item $md5->hexdigest
 
@@ -253,7 +262,7 @@ RFC 1321
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
- Copyright 1998-2002 Gisle Aas.
+ Copyright 1998-2003 Gisle Aas.
  Copyright 1995-1996 Neil Winton.
  Copyright 1991-1992 RSA Data Security, Inc.
 
