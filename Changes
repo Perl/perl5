@@ -28,6 +28,45 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.5		Maintenance release working toward v5.8.5
 --------------
 ____________________________________________________________________________
+[ 23067] By: nicholas                              on 2004/07/08  13:25:33
+        Log: Rebuild toc. Resort MANIFEST
+     Branch: maint-5.8/perl
+	   ! MANIFEST pod/perltoc.pod
+____________________________________________________________________________
+[ 23066] By: nicholas                              on 2004/07/08  13:10:35
+        Log: Integrate:
+             [ 23062]
+             First stab at explaining that CLONE may get more parameters in future.
+             More eloquent rewording desired. Patches welcome.
+             
+             [ 23065]
+             Randal notes:
+             
+             "perldoc perldelta" still says 5.8.3 to 5.8.4, even though there
+             *is* a "perldoc perl583delta" properly.
+             
+             This is because perl584delta still thinks it's the perldelta
+     Branch: maint-5.8/perl
+	  !> pod/perl584delta.pod pod/perlmod.pod
+____________________________________________________________________________
+[ 23064] By: nicholas                              on 2004/07/08  13:06:35
+        Log: Integrate:
+             [ 23063]
+             Make Perl_sv_utf8_upgrade_flags tolerate PL_sv_undef
+             as an argument.
+     Branch: maint-5.8/perl
+	  !> sv.c
+____________________________________________________________________________
+[ 23057] By: nicholas                              on 2004/07/06  13:00:52
+        Log: This is RC1
+     Branch: maint-5.8/perl
+	   ! patchlevel.h pod/perlhist.pod
+____________________________________________________________________________
+[ 23056] By: nicholas                              on 2004/07/06  12:45:46
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 23055] By: nicholas                              on 2004/07/06  11:35:31
         Log: Cargo cult 5.8.5 upgrade
      Branch: maint-5.8/perl

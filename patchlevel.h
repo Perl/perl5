@@ -121,6 +121,7 @@ hunk.
 static	char	*local_patches[] = {
         NULL
 	,"RC1"
+	,"MAINT23067"
 	,NULL
 };
 
