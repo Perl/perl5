@@ -447,12 +447,14 @@ probably get away with setting an environment variable:
 If you want finer granularity than the 1 second that the sleep()
 function provides, the easiest way is to use the select() function as
 documented in L<perlfunc/"select">.  Try the Time::HiRes and
-the BSD::Itimer modules (available from CPAN).
+the BSD::Itimer modules (available from CPAN, and starting from
+Perl 5.8 Time::HiRes is part of the standard distribution).
 
 =head2 How can I measure time under a second?
 
 In general, you may not be able to.  The Time::HiRes module (available
-from CPAN) provides this functionality for some systems.
+from CPAN, and starting from Perl 5.8 part of the standard distribution)
+provides this functionality for some systems.
 
 If your system supports both the syscall() function in Perl as well as
 a system call like gettimeofday(2), then you may be able to do

@@ -393,8 +393,18 @@ structures.
     }
 
 There is no official C<switch> statement in Perl, because there are
-already several ways to write the equivalent.  In addition to the
-above, you could write
+already several ways to write the equivalent.
+
+However, starting from Perl 5.8 to get switch and case one can use
+the Switch extension and say:
+
+	use Switch;
+
+after which one has switch and case.  It is not as fast as it could be
+because it's not really part of the language (it's done using source
+filters) but it is available, and it's very flexible.
+
+In addition to the above BLOCK construct, you could write
 
     SWITCH: {
 	$abc = 1, last SWITCH  if /^abc/;

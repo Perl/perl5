@@ -58,6 +58,7 @@ sub stub {
 	    push(@AFTER_DATA,$line);
 	}
     }
+    close($fh);
     unless ($JUST_STUBS) {
     	print @BEFORE_DATA;
     }

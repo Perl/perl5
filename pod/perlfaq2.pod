@@ -41,7 +41,7 @@ get free compilers for, not for Unix systems.
 Some URLs that might help you are:
 
     http://www.cpan.org/ports/
-    http://language.perl.com/info/software.html
+    http://www.perl.com/pub/language/info/software.html
 
 Someone looking for a Perl for Win16 might look to Laszlo Molnar's djgpp
 port in http://www.cpan.org/ports/#msdos , which comes with clear
@@ -224,30 +224,39 @@ of real-world examples, mini-tutorials, and complete programs is:
 	ISBN 1-56592-243-3 [1st Edition August 1998]
 	http://perl.oreilly.com/cookbook/
 
-If you're already a hard-core systems programmer, then the Camel Book
-might suffice for you to learn Perl from.  If you're not, check out
+If you're already a seasoned programmer, then the Camel Book might
+suffice for you to learn Perl from.  If you're not, check out the
+Llama book:
 
-    Learning Perl (the "Llama Book"):
-	by Randal Schwartz and Tom Christiansen
-	    with Foreword by Larry Wall
-	ISBN 1-56592-284-0 [2nd Edition July 1997]
-	http://www.oreilly.com/catalog/lperl2/
+    Learning Perl (the "Llama Book")
+	by Randal L. Schwartz and Tom Phoenix
+	ISBN 0-596-00132-0 [3rd edition July 2001]
+	http://www.oreilly.com/catalog/lperl3/
 
-Despite the picture at the URL above, the second edition of "Llama
-Book" really has a blue cover and was updated for the 5.004 release
-of Perl.  Various foreign language editions are available, including
-I<Learning Perl on Win32 Systems> (the "Gecko Book").
+If you're not an accidental programmer, but a more serious and
+possibly even degreed computer scientist who doesn't need as much
+hand-holding as we try to provide in the Llama, please check out the
+delightful book
 
-If you're not an accidental programmer, but a more serious and possibly
-even degreed computer scientist who doesn't need as much hand-holding as
-we try to provide in the Llama or its defurred cousin the Gecko, please
-check out the delightful book, I<Perl: The Programmer's Companion>,
-written by Nigel Chapman.
+    Perl: The Programmer's Companion
+        by Nigel Chapman
+        ISBN 0-471-97563-X [1997, 3rd printing Spring 1998]
+        http://www.wiley.com/compbooks/catalog/97563-X.htm
+        http://www.wiley.com/compbooks/chapman/perl/perltpc.html (errata etc)
+
+If you are more at home in Windows the following is available
+(though unfortunately rather dated).
+
+    Learning Perl on Win32 Systems (the "Gecko Book")
+	by Randal L. Schwartz, Erik Olson, and Tom Christiansen,
+	    with foreword by Larry Wall
+	ISBN 1-56592-324-3 [1st edition August 1997]
+	http://www.oreilly.com/catalog/lperlwin/
 
 Addison-Wesley (http://www.awlonline.com/) and Manning
 (http://www.manning.com/) are also publishers of some fine Perl books
-such as Object Oriented Programming with Perl by Damian Conway and
-Network Programming with Perl by Lincoln Stein.
+such as I<Object Oriented Programming with Perl> by Damian Conway and
+I<Network Programming with Perl> by Lincoln Stein.
 
 An excellent technical book discounter is Bookpool at
 http://www.bookpool.com/ where a 30% discount or more is not unusual.
@@ -284,10 +293,9 @@ Recommended books on (or mostly on) Perl follow.
 	http://www.manning.com/Johnson/
 
     Learning Perl
-	by Randal L. Schwartz and Tom Christiansen
-	    with foreword by Larry Wall
-	ISBN 1-56592-284-0 [2nd edition July 1997]
-	http://www.oreilly.com/catalog/lperl2/
+	by Randal L. Schwartz and Tom Phoenix
+	ISBN 0-596-00132-0 [3rd edition July 2001]
+	http://www.oreilly.com/catalog/lperl3/
 
     Learning Perl on Win32 Systems
 	by Randal L. Schwartz, Erik Olson, and Tom Christiansen,
@@ -297,8 +305,9 @@ Recommended books on (or mostly on) Perl follow.
 
     Perl: The Programmer's Companion
 	by Nigel Chapman
-	ISBN 0-471-97563-X  [1st edition October 1997]
-	http://catalog.wiley.com/title.cgi?isbn=047197563X
+	ISBN 0-471-97563-X [1997, 3rd printing Spring 1998]
+        http://www.wiley.com/compbooks/catalog/97563-X.htm
+        http://www.wiley.com/compbooks/chapman/perl/perltpc.html (errata etc)
 
     Cross-Platform Perl
 	by Eric Foster-Johnson
@@ -358,19 +367,18 @@ Recommended books on (or mostly on) Perl follow.
 =head2 Perl in Magazines
 
 The first and only periodical devoted to All Things Perl, I<The
-Perl Journal> contained tutorials, demonstrations, case studies,
-announcements, contests, and much more.  I<TPJ> had columns on web
+Perl Journal> contains tutorials, demonstrations, case studies,
+announcements, contests, and much more.  I<TPJ> has columns on web
 development, databases, Win32 Perl, graphical programming, regular
 expressions, and networking, and sponsored the Obfuscated Perl
-Contest. Sadly, this publication is no longer in circulation, but
-should it be resurrected, it will most likely be announced on
-http://use.perl.org/ .
+Contest. For more details on I<The Perl Journal>, see
+http://www.tpj.com/
 
 Beyond this, magazines that frequently carry high-quality articles
 on Perl are I<Web Techniques> (see http://www.webtechniques.com/),
 I<Performance Computing> (http://www.performance-computing.com/), and Usenix's
 newsletter/magazine to its members, I<login:>, at http://www.usenix.org/.
-Randal's Web Technique's columns are available on the web at
+Randal's Web Techniques columns are available on the web at
 http://www.stonehenge.com/merlyn/WebTechniques/ .
 
 =head2 Perl on the Net: FTP and WWW Access
@@ -480,13 +488,8 @@ Read the perlbug(1) man page (perl5.004 or later) for more information.
 
 =head2 What is perl.com? Perl Mongers? pm.org? perl.org?
 
-The Perl Home Page at http://www.perl.com/ is currently hosted on a
-T3 line courtesy of Songline Systems, a software-oriented subsidiary of
-O'Reilly and Associates. Other starting points include
-
-    http://language.perl.com/
-    http://conference.perl.com/
-    http://reference.perl.com/
+The Perl Home Page at http://www.perl.com/ is currently hosted by
+The O'Reilly Network, a subsidiary of O'Reilly and Associates.
 
 Perl Mongers is an advocacy organization for the Perl language which
 maintains the web site http://www.perl.org/ as a general advocacy

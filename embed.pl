@@ -2451,6 +2451,7 @@ s	|char*	|find_byclass	|regexp * prog|regnode *c|char *s|char *strend|char *star
 #endif
 
 #if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
+s	|CV*	|deb_curcv	|I32 ix
 s	|void	|debprof	|OP *o
 #endif
 

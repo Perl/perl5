@@ -5210,6 +5210,11 @@ Perl_newAVREF(pTHX_ OP *o)
 	o->op_ppaddr = PL_ppaddr[OP_PADAV];
 	return o;
     }
+    else if ((o->op_type == OP_RV2AV || o->op_type == OP_PADAV)
+		&& ckWARN(WARN_DEPRECATED)) {
+	Perl_warner(aTHX_ WARN_DEPRECATED,
+		"Using an array as a reference is deprecated");
+    }
     return newUNOP(OP_RV2AV, 0, scalar(o));
 }
 
@@ -5228,6 +5233,11 @@ Perl_newHVREF(pTHX_ OP *o)
 	o->op_type = OP_PADHV;
 	o->op_ppaddr = PL_ppaddr[OP_PADHV];
 	return o;
+    }
+    else if ((o->op_type == OP_RV2HV || o->op_type == OP_PADHV)
+		&& ckWARN(WARN_DEPRECATED)) {
+	Perl_warner(aTHX_ WARN_DEPRECATED,
+		"Using a hash as a reference is deprecated");
     }
     return newUNOP(OP_RV2HV, 0, scalar(o));
 }

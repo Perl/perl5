@@ -156,7 +156,7 @@ sub testpodplaintext( @ ) {
    for $podfile (@testpods) {
       ($testname, $_) = fileparse($podfile);
       $testdir ||=  $_;
-      $testname  =~ s/\.t$//;
+      $testname  =~ s/\..*$//;
       $cmpfile   =  $testdir . $testname . '.xr';
       $outfile   =  $testdir . $testname . '.OUT';
 

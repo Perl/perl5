@@ -343,10 +343,11 @@ determine the insecure things and exploit them without viewing the
 source.  Security through obscurity, the name for hiding your bugs
 instead of fixing them, is little security indeed.
 
-You can try using encryption via source filters (Filter::* from CPAN).
-But crackers might be able to decrypt it.  You can try using the
-byte code compiler and interpreter described below, but crackers might
-be able to de-compile it.  You can try using the native-code compiler
+You can try using encryption via source filters (Filter::* from CPAN,
+or Filter::Util::Call and Filter::Simple since Perl 5.8).
+But crackers might be able to decrypt it.  You can try using the byte
+code compiler and interpreter described below, but crackers might be
+able to de-compile it.  You can try using the native-code compiler
 described below, but crackers might be able to disassemble it.  These
 pose varying degrees of difficulty to people wanting to get at your
 code, but none can definitively conceal it (this is true of every

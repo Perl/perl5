@@ -2751,7 +2751,7 @@ could be a potential Year 2000 problem.
 
 =item pragma "attrs" is deprecated, use "sub NAME : ATTRS" instead
 
-(W deprecated) You have written something like this:
+(D deprecated) You have written something like this:
 
     sub doit
     {
@@ -3811,6 +3811,19 @@ appear literally in your program.  For example, C<"that $foo"> is
 usually optimized into C<"that " . $foo>, and the warning will refer to
 the C<concatenation (.)> operator, even though there is no C<.> in your
 program.
+
+=item Using a hash as a reference is deprecated
+
+(D deprecated) You tried to use a hash as a reference, as in C<%foo->{"bar"}>
+or C<%$ref->{"hello"}.  Versions of perl <= 5.6.1 used to allow this syntax,
+but shouldn't have. It is now deprecated, and will be removed in a future
+version.
+
+=item Using an array as a reference is deprecated
+
+(D deprecated) You tried to use an array as a reference, as in C<@foo->[23]>
+or C<@$ref->[99]>.  Versions of perl <= 5.6.1 used to allow this syntax, but
+shouldn't have. It is now deprecated, and will be removed in a future version.
 
 =item Value of %s can be "0"; test with defined()
 

@@ -183,10 +183,10 @@ does not work with some C++ compilers.
 
 =head1 Space Requirements
 
-The complete perl5 source tree takes up about 20 MB of disk space.
-After completing make, it takes up roughly 30 MB, though the actual
+The complete perl5 source tree takes up about 35 MB of disk space.
+After completing make, it takes up roughly 50 MB, though the actual
 total is likely to be quite system-dependent.  The installation
-directories need something on the order of 20 MB, though again that
+directories need something on the order of 30 MB, though again that
 value is system-dependent.
 
 =head1 Start with a Fresh Distribution

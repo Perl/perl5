@@ -129,7 +129,7 @@ a2p$(OBJ_EXT): a2p.c a2py.c a2p.h EXTERN.h util.h INTERN.h \
 	$(CCCMD) a2p.c
 
 clean:
-	rm -f a2p *$(OBJ_EXT) $(plexe) $(plc) $(plm)
+	rm -f a2p psed *$(OBJ_EXT) $(plexe) $(plc) $(plm)
 
 realclean: clean
 	rm -f core $(addedbyconf) all malloc.c

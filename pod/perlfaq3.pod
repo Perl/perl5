@@ -163,39 +163,54 @@ If you're on Unix, you already have an IDE--Unix itself.  The UNIX
 philosophy is the philosophy of several small tools that each do one
 thing and do it well.  It's like a carpenter's toolbox.
 
-If you want a Windows IDE, check the following:
+If you want an IDE, check the following:
 
 =over 4
 
-=item CodeMagicCD
-
-http://www.codemagiccd.com/
-
 =item Komodo
 
-ActiveState's cross-platform, multi-language IDE has Perl support,
-including a regular expression debugger and remote debugging
-(http://www.ActiveState.com/Products/Komodo/index.html).
-(Visual Perl, a Visual Studio.NET plug-in is currently (early 2001)
-in beta (http://www.ActiveState.com/Products/VisualPerl/index.html)).
+ActiveState's cross-platform (as of April 2001 Windows and Linux),
+multi-language IDE has Perl support, including a regular expression
+debugger and remote debugging
+(http://www.ActiveState.com/Products/Komodo/index.html).  (Visual
+Perl, a Visual Studio.NET plug-in is currently (early 2001) in beta
+(http://www.ActiveState.com/Products/VisualPerl/index.html)).
 
 =item The Object System
 
 (http://www.castlelink.co.uk/object_system/) is a Perl web
-applications development IDE.
+applications development IDE, apparently for any platform
+that runs Perl.
+
+=item Open Perl IDE
+
+( http://open-perl-ide.sourceforge.net/ )
+Open Perl IDE is an integrated development environment for writing
+and debugging Perl scripts with ActiveState's ActivePerl distribution
+under Windows 95/98/NT/2000.
 
 =item PerlBuilder
 
 (http://www.solutionsoft.com/perl.htm) is an integrated development
 environment for Windows that supports Perl development.
 
-=item Perl code magic
-
-(http://www.petes-place.com/codemagic.html).
-
 =item visiPerl+
 
-http://helpconsulting.net/visiperl/, from Help Consulting.
+( http://helpconsulting.net/visiperl/ )
+From Help Consulting, for Windows.
+
+=back
+
+For Windows there's also the
+
+=over 4
+
+=item CodeMagicCD
+
+( http://www.codemagiccd.com/ ) Collection of various programming
+tools for Windows: Perl (5.005_03), TclTk, Python, GNU programming
+tools, REBOL, wxWindows toolkit, the MinGW GNU C/C++ compiler, DJGPP
+GNU C/C++ compiler, Cint C interpreter, YaBasic.
 
 =back
 
@@ -557,14 +572,15 @@ determine the insecure things and exploit them without viewing the
 source.  Security through obscurity, the name for hiding your bugs
 instead of fixing them, is little security indeed.
 
-You can try using encryption via source filters (Filter::* from CPAN),
-but any decent programmer will be able to decrypt it.  You can try using
-the byte code compiler and interpreter described below, but the curious
-might still be able to de-compile it.  You can try using the native-code
-compiler described below, but crackers might be able to disassemble it.
-These pose varying degrees of difficulty to people wanting to get at
-your code, but none can definitively conceal it (true of every
-language, not just Perl).
+You can try using encryption via source filters (Starting from Perl
+5.8 the Filter::Simple and Filter::Util::Call modules are included in
+the standard distribution), but any decent programmer will be able to
+decrypt it.  You can try using the byte code compiler and interpreter
+described below, but the curious might still be able to de-compile it.
+You can try using the native-code compiler described below, but
+crackers might be able to disassemble it.  These pose varying degrees
+of difficulty to people wanting to get at your code, but none can
+definitively conceal it (true of every language, not just Perl).
 
 If you're concerned about people profiting from your code, then the
 bottom line is that nothing but a restrictive license will give you

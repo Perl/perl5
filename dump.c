@@ -838,6 +838,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     case SVt_PVGV:
 	if (GvINTRO(sv))	sv_catpv(d, "INTRO,");
 	if (GvMULTI(sv))	sv_catpv(d, "MULTI,");
+	if (GvSHARED(sv))       sv_catpv(d, "SHARED,");
 	if (GvASSUMECV(sv))	sv_catpv(d, "ASSUMECV,");
 	if (GvIN_PAD(sv))       sv_catpv(d, "IN_PAD,");
 	if (GvIMPORTED(sv)) {

@@ -120,7 +120,7 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd, int imode, int 
       {
        fd = PerlLIO_open3(name,imode,perm);
        if (fd >= 0)
-        return PerlIO_fdopen(fd,mode+1);
+        return PerlIO_fdopen(fd,(char *)mode+1);
       }
      else if (old)
       {
@@ -134,7 +134,7 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd, int imode, int 
   }
  else
   {
-   return PerlIO_fdopen(fd,mode);
+   return PerlIO_fdopen(fd,(char *)mode);
   }
  return NULL;
 }

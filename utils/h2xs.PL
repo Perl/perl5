@@ -1853,24 +1853,46 @@ unless (-d "$testdir") {
   mkdir "$testdir" or die "Cannot mkdir $testdir: $!\n";
 }
 warn "Writing $ext$modpname/$testfile\n";
+my $tests = @const_names ? 2 : 1;
+
 open EX, ">$testfile" or die "Can't create $ext$modpname/$testfile: $!\n";
-print EX <<'_END_';
+print EX <<_END_;
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl 1.t'
 
 #########################
 
-# change 'tests => 1' to 'tests => last_test_to_print';
+# change 'tests => $tests' to 'tests => last_test_to_print';
 
 use Test;
-BEGIN { plan tests => 1 };
-_END_
-print EX <<_END_;
+BEGIN { plan tests => $tests };
 use $module;
-_END_
-print EX <<'_END_';
 ok(1); # If we made it this far, we're ok.
 
+_END_
+if (@const_names) {
+  my $const_names = join " ", @const_names;
+  print EX <<_END_;
+
+my \$fail;
+foreach my \$constname qw($const_names) {
+  next if (eval "my \\\$a = \$constname; 1");
+  if (\$\@ =~ /^Your vendor has not defined $module macro \$constname/) {
+    print "# pass: \$\@";
+  } else {
+    print "# fail: \$\@";
+    \$fail = 1;    
+  }
+}
+if (\$fail) {
+  print "not ok 2\\n";
+} else {
+  print "ok 2\\n";
+}
+
+_END_
+}
+print EX <<'_END_';
 #########################
 
 # Insert your test code below, the Test module is use()ed here so read

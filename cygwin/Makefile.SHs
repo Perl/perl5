@@ -36,7 +36,7 @@ ld2: $& Makefile perlld ${src}/cygwin/ld2.in
 # install is included in Cygwin distributions, and we make a note of th
 # requirement in the README.cygwin file. However, let's give them
 # a warning.
-	@install -c -m 755 ld2 ${installbin}/ld2
+	@/usr/bin/install -c -m 755 ld2 ${installbin}/ld2
 	@if test ! -f  ${installbin}/ld2; then \
 		echo "*************************************************" ; \
 		echo "Make will probably fail in a few more steps." ; \

@@ -73,7 +73,7 @@ case "$prefix" in
 
 case `$cc -v 2>&1`"" in
     *gcc*)  ccisgcc="$define"
-	    ccflags="$cc_cppflags"
+	    ccflags="$cc_cppflags -Wl,+vnocompatwarnings"
 	    case "`getconf KERNEL_BITS 2>/dev/null`" in
 		*64*)   ldflags="$ldflags -Wl,+vnocompatwarnings"
 			ccflags="$ccflags -Wl,+vnocompatwarnings -Wa,+DA2.0"
@@ -82,12 +82,12 @@ case `$cc -v 2>&1`"" in
 	    ;;
     *)      ccisgcc=''
 	    ccversion=`which cc | xargs what | awk '/Compiler/{print $2}'`
-	    ccflags="-Ae $cc_cppflags"
-           # Needed because cpp does only support -Aa (not -Ae)
-           cpplast='-'
-           cppminus='-'
-           cppstdin='cc -E -Aa -D__STDC_EXT__'
-           cpprun=$cppstdin
+	    ccflags="-Ae $cc_cppflags -Wl,+vnocompatwarnings"
+	    # Needed because cpp does only support -Aa (not -Ae)
+	    cpplast='-'
+	    cppminus='-'
+	    cppstdin='cc -E -Aa -D__STDC_EXT__'
+	    cpprun=$cppstdin
 	    case "$d_casti32" in
 		"") d_casti32='undef' ;;
 		esac
@@ -185,10 +185,10 @@ case "$ccisgcc" in
 	    *O[3456789]*) optimize=`echo "$optimize" | sed -e 's/O[3-9]/O2/'` ;;
 	    esac
 	#ld="$cc"
-	ld="/usr/bin/ld"
+	ld=/usr/bin/ld
 	cccdlflags='-fPIC'
 	#lddlflags='-shared'
-	lddlflags='-b +vnocompatwarnings'
+	lddlflags='-b'
 	case "$optimize" in
 	    *-g*-O*|*-O*-g*)
 		# gcc without gas will not accept -g
@@ -206,7 +206,7 @@ case "$ccisgcc" in
 
     *)	# HP's compiler cannot combine -g and -O
 	case "$optimize" in
-           "")           optimize="+O2 +Onolimit" ;;
+	    "")           optimize="+O2 +Onolimit" ;;
 	    *O[3456789]*) optimize=`echo "$optimize" | sed -e 's/O[3-9]/O2/'` ;;
 	    esac
 	ld=/usr/bin/ld

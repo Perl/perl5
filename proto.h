@@ -1175,6 +1175,7 @@ STATIC char*	S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *stre
 #endif
 
 #if defined(PERL_IN_RUN_C) || defined(PERL_DECL_PROT)
+STATIC CV*	S_deb_curcv(pTHX_ I32 ix);
 STATIC void	S_debprof(pTHX_ OP *o);
 #endif
 

@@ -14,6 +14,7 @@ use constant MyClass => 'Foo::Bar::Biz::Baz';
 
 {
     package Foo::Bar::Biz::Baz;
+    1;
 }
 
 for (qw(Foo Foo:: MyClass __PACKAGE__)) {

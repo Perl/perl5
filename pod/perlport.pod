@@ -229,8 +229,8 @@ transferring or storing raw binary numbers.
 One can circumnavigate both these problems in two ways.  Either
 transfer and store numbers always in text format, instead of raw
 binary, or else consider using modules like Data::Dumper (included in
-the standard distribution as of Perl 5.005) and Storable.  Keeping
-all data as text significantly simplifies matters.
+the standard distribution as of Perl 5.005) and Storable (included as
+of perl 5.8).  Keeping all data as text significantly simplifies matters.
 
 =head2 Files and Filesystems
 
