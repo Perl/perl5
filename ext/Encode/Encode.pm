@@ -188,14 +188,14 @@ sub from_to
 sub encode_utf8
 {
  my ($str) = @_;
- utf8_encode($str);
+ utf8::encode($str);
  return $str;
 }
 
 sub decode_utf8
 {
  my ($str) = @_;
- return undef unless utf8_decode($str);
+ return undef unless utf8::decode($str);
  return $str;
 }
 
@@ -226,14 +226,14 @@ package Encode::Unicode;
 use base 'Encode::Encoding';
 
 # Dummy package that provides the encode interface but leaves data
-# as UTF-8 encoded. It is here so that from_to() works.
+# as UTF-X encoded. It is here so that from_to() works.
 
 __PACKAGE__->Define('Unicode');
 
 sub decode
 {
  my ($obj,$str,$chk) = @_;
- Encode::utf8_upgrade($str);
+ utf8::upgrade($str);
  $_[1] = '' if $chk;
  return $str;
 }
@@ -716,17 +716,6 @@ The following API uses parts of perl's internals in the current implementation.
 As such they are efficient, but may change.
 
 =over 4
-
-=item *
-
-        $num_octets = utf8_upgrade($string);
-
-Converts internal representation of string to the UTF-8 form.
-Returns the number of octets necessary to represent the string as UTF-8.
-
-=item * utf8_downgrade($string[, CHECK])
-
-Converts internal representation of string to be un-encoded bytes.
 
 =item * is_utf8(STRING [, CHECK])
 

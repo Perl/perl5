@@ -52,7 +52,7 @@ source text.  Until UTF-8 becomes the default format for source
 text, this pragma should be used to recognize UTF-8 in the source.
 When UTF-8 becomes the standard source format, this pragma will
 effectively become a no-op.  This pragma already is a no-op on
-EBCDIC platforms (where it is alright to code perl in EBCDIC 
+EBCDIC platforms (where it is alright to code perl in EBCDIC
 rather than UTF-8).
 
 Enabling the C<utf8> pragma has the following effects:
@@ -78,6 +78,32 @@ of byte semantics.
 	use utf8;			# force char semantics
 	@chars = split //, $data;	# splits characters
     }
+
+=back
+
+=head2 Utility functions
+
+The following functions are defined in the C<utf8::> package by the perl core.
+
+=over 4
+
+=item * $num_octets = utf8::upgrade($string);
+
+Converts internal representation of string to the perls internal UTF-X form.
+Returns the number of octets necessary to represent the string as UTF-X.
+
+=item * utf8::downgrade($string[, CHECK])
+
+Converts internal representation of string to be un-encoded bytes.
+
+=item * utf8::encode($string)
+
+Converts (in-place) I<$string> from logical characters to octet sequence
+representing it in perl's UTF-X encoding.
+
+=item * $flag = utf8::decode($string)
+
+Attempts to converts I<$string> in-place from perl's UTF-X encoding into logical characters.
 
 =back
 

@@ -1282,8 +1282,9 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
     SV* retval;
     SV* tokenbufsv = sv_2mortal(NEWSV(0,0));
     dSP;
+    HV *stash = gv_stashpvn(pkg, strlen(pkg), FALSE);
 
-    if (!gv_stashpv(pkg, 0)) {	/* demand load utf8 */
+    if (!gv_fetchmeth(stash, "SWASHNEW", 8, -1)) {	/* demand load utf8 */
 	ENTER;
 	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, newSVpv(pkg,0), Nullsv);
 	LEAVE;

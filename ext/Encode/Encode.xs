@@ -433,38 +433,6 @@ encode_method(pTHX_ encode_t *enc, encpage_t *dir, SV *src, int check)
  return dst;
 }
 
-MODULE = Encode		PACKAGE = Encode	PREFIX = sv_
-
-void
-valid_utf8(sv)
-SV *	sv
-CODE:
- {
-  STRLEN len;
-  char *s = SvPV(sv,len);
-  if (!SvUTF8(sv) || is_utf8_string((U8*)s,len))
-   XSRETURN_YES;
-  else
-   XSRETURN_NO;
- }
-
-void
-sv_utf8_encode(sv)
-SV *	sv
-
-bool
-sv_utf8_decode(sv)
-SV *	sv
-
-STRLEN
-sv_utf8_upgrade(sv)
-SV *	sv
-
-bool
-sv_utf8_downgrade(sv,failok=0)
-SV *	sv
-bool	failok
-
 MODULE = Encode		PACKAGE = Encode::XS	PREFIX = Method_
 
 PROTOTYPES: ENABLE

@@ -8,23 +8,16 @@ use Getopt::Std;
 my @orig_ARGV = @ARGV;
 my $perforce  = '$Id$';
 
-
 sub encode_U
 {
  # UTF-8 encode long hand - only covers part of perl's range
  my $uv = shift;
- if ($uv < 0x80)
-  {
-   return chr($uv)
-  }
- if ($uv < 0x800)
-  {
-   return chr(($uv >> 6)        | 0xC0).
-          chr(($uv & 0x3F)      | 0x80);
-  }
- return chr(($uv >> 12)         | 0xE0).
-        chr((($uv >> 6) & 0x3F) | 0x80).
-        chr(($uv & 0x3F)        | 0x80);
+ # chr() works in native space so convert value from table
+ # into that space before using chr().
+ my $ch = chr(utf8::unicode_to_native($uv));
+ # Now get core perl to encode that the way it likes.
+ utf8::encode($ch);
+ return $ch;
 }
 
 sub encode_S

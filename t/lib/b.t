@@ -2,11 +2,11 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    if ($^O eq 'MacOS') { 
-	@INC = qw(: ::lib ::macos:lib); 
-    } else { 
-	@INC = '.'; 
-	push @INC, '../lib'; 
+    if ($^O eq 'MacOS') {
+	@INC = qw(: ::lib ::macos:lib);
+    } else {
+	@INC = '.';
+	push @INC, '../lib';
     }
 }
 
@@ -141,7 +141,7 @@ $a =~ s/-u(Cwd|File|File::Copy|OS2),//g if $^O eq 'os2';
 $a =~ s/-uCwd,// if $^O eq 'cygwin';
 if ($Config{static_ext} eq ' ') {
   $b = '-uCarp,-uCarp::Heavy,-uDB,-uExporter,-uExporter::Heavy,-uattributes,'
-     . '-umain,-ustrict,-uwarnings';
+     . '-umain,-ustrict,-uutf8,-uwarnings';
   if (ord('A') == 193) { # EBCDIC sort order is qw(a A) not qw(A a)
       $b = join ',', sort split /,/, $b;
   }
@@ -157,7 +157,7 @@ if ($is_thread) {
     $a = `$^X $path "-MO=Showlex" -e "my %one" $redir`;
     if (ord('A') != 193) { # ASCIIish
         print "# [$a]\nnot " unless $a =~ /sv_undef.*PVNV.*%one.*sv_undef.*HV/s;
-    } 
+    }
     else { # EBCDICish C<1: PVNV (0x1a7ede34) "%\226\225\205">
         print "# [$a]\nnot " unless $a =~ /sv_undef.*PVNV.*%\\[0-9].*sv_undef.*HV/s;
     }
@@ -171,6 +171,6 @@ my $foo = $deparse->coderef2text(sub { { 234; }});
 print "not " unless $foo =~ /{.*{.*234;.*}.*}/sm;
 ok;
 $foo = $deparse->coderef2text(sub { { 234; } continue { 123; } });
-print "not " unless $foo =~ /{.*{.*234;.*}.*continue.*{.*123.*}/sm; 
+print "not " unless $foo =~ /{.*{.*234;.*}.*continue.*{.*123.*}/sm;
 ok;
 }
