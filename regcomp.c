@@ -4267,8 +4267,11 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
     for (;;) {
 	if (*RExC_parse == '(' && RExC_parse[1] == '?' &&
 		RExC_parse[2] == '#') {
-	    while (*RExC_parse && *RExC_parse != ')')
+	    while (*RExC_parse != ')') {
+		if (RExC_parse == RExC_end)
+		    FAIL("Sequence (?#... not terminated");
 		RExC_parse++;
+	    }
 	    RExC_parse++;
 	    continue;
 	}
@@ -4278,10 +4281,8 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 		continue;
 	    }
 	    else if (*RExC_parse == '#') {
-		while (*RExC_parse && *RExC_parse != '\n')
-		    RExC_parse++;
-		if (*RExC_parse)
-		    RExC_parse++;
+		while (RExC_parse < RExC_end)
+		    if (*RExC_parse++ == '\n') break;
 		continue;
 	    }
 	}
