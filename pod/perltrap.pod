@@ -267,6 +267,13 @@ The arguments are available via @ARGV, not $1, $2, etc.
 The environment is not automatically made available as separate scalar
 variables.
 
+=item *
+
+The shell's C<test> uses "=", "!=", "<" etc for string comparisons and "-eq",
+"-ne", "-lt" etc for numeric comparisons. This is the reverse of Perl, which
+uses C<eq>, C<ne>, C<lt> for string comparisons, and C<==>, C<!=> C<< < >> etc
+for numeric comparisons.
+
 =back
 
 =head2 Perl Traps
