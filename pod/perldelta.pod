@@ -299,6 +299,42 @@ behaviour. See L<"Localising Tied Arrays and Hashes Is Broken">.
 
 =head1 Core Enhancements
 
+=head2 Unicode Overhaul
+
+Unicode in general should be now much more usable than in Perl 5.6.0
+(or even in 5.6.1).  Unicode can be used in hash keys, Unicode in
+regular expressions should work now, Unicode in tr/// should work now,
+Unicode in I/O should work now.  See L<perluniintro> for introduction
+and L<perlunicode> for details.
+
+=over 4
+
+=item *
+
+The Unicode Character Database coming with Perl has been upgraded
+to Unicode 3.2.0.  For more information, see http://www.unicode.org/ .
+[561+] (5.6.1 has UCD 3.0.1.)
+
+=item *
+
+For developers interested in enhancing Perl's Unicode capabilities:
+almost all the UCD files are included with the Perl distribution in
+the F<lib/unicore> subdirectory.  The most notable omission, for space
+considerations, is the Unihan database.
+
+=item *
+
+The properties \p{Blank} and \p{SpacePerl} have been added. "Blank" is like
+C isblank(), that is, it contains only "horizontal whitespace" (the space
+character is, the newline isn't), and the "SpacePerl" is the Unicode
+equivalent of C<\s> (\p{Space} isn't, since that includes the vertical
+tabulator character, whereas C<\s> doesn't.)
+
+See "New Unicode Properties" earlier in this document for additional
+information on changes with Unicode properties.
+
+=back
+
 =head2 PerlIO is Now The Default
 
 =over 4
@@ -410,6 +446,18 @@ B<any subsequent file open>, is UTF-8.
 
 =back
 
+=head2 ithreads
+
+The new interpreter threads ("ithreads" for short) implementation of
+multithreading, by Arthur Bergman, replaces the old "5.005 threads"
+implementation.  In the ithreads model any data sharing between
+threads must be explicit, as opposed to the model where data sharing
+was implicit.  See L<threads> and L<threads::shared>, and
+L<perlthrtut>.
+
+As a part of the ithreads implementation Perl will also use
+any necessary and detectable reentrant libc interfaces.
+
 =head2 Restricted Hashes
 
 A restricted hash is restricted to a certain set of keys, no keys
@@ -431,42 +479,6 @@ arrived signals (and before starting the next operation).  No more corrupt
 internal state since the current operation is always finished first,
 but the signal may take more time to get heard.  Note that breaking
 out from potentially blocking operations should still work, though.
-
-=head2 Unicode Overhaul
-
-Unicode in general should be now much more usable than in Perl 5.6.0
-(or even in 5.6.1).  Unicode can be used in hash keys, Unicode in
-regular expressions should work now, Unicode in tr/// should work now,
-Unicode in I/O should work now.  See L<perluniintro> for introduction
-and L<perlunicode> for details.
-
-=over 4
-
-=item *
-
-The Unicode Character Database coming with Perl has been upgraded
-to Unicode 3.2.0.  For more information, see http://www.unicode.org/ .
-[561+] (5.6.1 has UCD 3.0.1.)
-
-=item *
-
-For developers interested in enhancing Perl's Unicode capabilities:
-almost all the UCD files are included with the Perl distribution in
-the F<lib/unicore> subdirectory.  The most notable omission, for space
-considerations, is the Unihan database.
-
-=item *
-
-The properties \p{Blank} and \p{SpacePerl} have been added. "Blank" is like
-C isblank(), that is, it contains only "horizontal whitespace" (the space
-character is, the newline isn't), and the "SpacePerl" is the Unicode
-equivalent of C<\s> (\p{Space} isn't, since that includes the vertical
-tabulator character, whereas C<\s> doesn't.)
-
-See "New Unicode Properties" earlier in this document for additional
-information on changes with Unicode properties.
-
-=back
 
 =head2 Understanding of Numbers
 
@@ -1128,9 +1140,7 @@ L<threads::shared>, and L<perlthrtut>.
 =item *
 
 C<threads::shared>, by Arthur Bergman, allows data sharing for
-interpreter threads.  In the ithreads model any data sharing between
-threads must be explicit, as opposed to the old 5.005 thread model
-where data sharing was implicit.  See L<threads::shared>.
+interpreter threads.  See L<threads::shared>.
 
 =item *
 
