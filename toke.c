@@ -1311,29 +1311,6 @@ S_scan_const(pTHX_ char *start)
 		break;		/* in regexp, $ might be tail anchor */
 	}
 
-	/* (now in tr/// code again) */
-
-	if (*s & 0x80 && (this_utf8 || has_utf8)) {
-	    STRLEN len = (STRLEN) -1;
-	    UV uv;
-	    if (this_utf8) {
-		uv = utf8_to_uv((U8*)s, send - s, &len, UTF8_CHECK_ONLY);
-	    }
-	    if (len == (STRLEN)-1) {
-		/* Illegal UTF8 (a high-bit byte), make it valid. */
-		char *old_pvx = SvPVX(sv);
-		/* need space for one extra char (NOTE: SvCUR() not set here) */
-		d = SvGROW(sv, SvLEN(sv) + 1) + (d - old_pvx);
-		d = (char*)uv_to_utf8((U8*)d, (U8)*s++);
-	    }
-	    else {
-		while (len--)
-		    *d++ = *s++;
-	    }
-	    has_utf8 = TRUE;
-	    continue;
-	}
-
 	/* backslashes */
 	if (*s == '\\' && s+1 < send) {
 	    bool to_be_utf8 = FALSE;
@@ -1567,6 +1544,29 @@ S_scan_const(pTHX_ char *start)
 	    s++;
 	    continue;
 	} /* end if (backslash) */
+
+       /* (now in tr/// code again) */
+
+       if (*s & 0x80 && (this_utf8 || has_utf8)) {
+           STRLEN len = (STRLEN) -1;
+           UV uv;
+           if (this_utf8) {
+               uv = utf8_to_uv((U8*)s, send - s, &len, UTF8_CHECK_ONLY);
+           }
+           if (len == (STRLEN)-1) {
+               /* Illegal UTF8 (a high-bit byte), make it valid. */
+               char *old_pvx = SvPVX(sv);
+               /* need space for one extra char (NOTE: SvCUR() not set here) */
+               d = SvGROW(sv, SvLEN(sv) + 1) + (d - old_pvx);
+               d = (char*)uv_to_utf8((U8*)d, (U8)*s++);
+           }
+           else {
+               while (len--)
+                   *d++ = *s++;
+           }
+           has_utf8 = TRUE;
+           continue;
+       }
 
 	*d++ = *s++;
     } /* while loop to process each character */
