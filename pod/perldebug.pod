@@ -8,6 +8,14 @@ First of all, have you tried using the B<-w> switch?
 
 =head1 The Perl Debugger
 
+"As soon as we started programming, we found to our
+surprise that it wasn't as easy to get programs right
+as we had thought.  Debugging had to be discovered.
+I can remember the exact instant when I realized that
+a large part of my life from then on was going to be
+spent in finding mistakes in my own programs."
+--Maurice Wilkes, 1949
+
 If you invoke Perl with the B<-d> switch, your script runs under the
 Perl source debugger.  This works like an interactive Perl
 environment, prompting for debugger commands that let you examine
