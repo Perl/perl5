@@ -2074,8 +2074,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/perl/lib/5.00560/epoc"               /**/
-#define ARCHLIB_EXP "/perl/lib/5.00560/epoc"		/**/
+#define ARCHLIB "/perl/lib/5.00562/epoc"               /**/
+#define ARCHLIB_EXP "/perl/lib/5.00562/epoc"		/**/
 
 /* DLSYM_NEEDS_UNDERSCORE:
  *	This symbol, if defined, indicates that we need to prepend an
@@ -2265,8 +2265,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/perl/lib/5.00560"		/**/
-#define PRIVLIB_EXP "/perl/lib/5.00560"		/**/
+#define PRIVLIB "/perl/lib/5.00562"		/**/
+#define PRIVLIB_EXP "/perl/lib/5.00562"		/**/
 
 /* SELECT_MIN_BITS:
  *	This symbol holds the minimum number of bits operated by select.
@@ -2290,8 +2290,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "/perl/lib/site_perl/5.00556/epoc"		/**/
-#define SITEARCH_EXP "/perl/lib/site_perl/5.00560/epoc"		/**/
+#define SITEARCH "/perl/lib/site_perl/5.00562/epoc"		/**/
+#define SITEARCH_EXP "/perl/lib/site_perl/5.00562/epoc"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -2306,8 +2306,8 @@
  *	This symbol contains the ~name expanded version of SITELIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITELIB "/perl/lib/site_perl/5.00560"		/**/
-#define SITELIB_EXP "/perl/lib/site_perl/5.00560"		/**/
+#define SITELIB "/perl/lib/site_perl/5.00562"		/**/
+#define SITELIB_EXP "/perl/lib/site_perl/5.00562"		/**/
 
 /* STARTPERL:
  *	This variable contains the string to put in front of a perl
