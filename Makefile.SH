@@ -1053,6 +1053,7 @@ makedepend: makedepend.SH config.sh
 .PHONY: test check test_prep test_prep_nodll test_prep_pre _test_prep \
 	test_tty test-tty _test_tty test_notty test-notty _test_notty \
 	utest ucheck test.utf8 check.utf8 test.torture torturetest \
+	test.utf16 check.utf16 utest.utf16 ucheck.utf16 \
 	test.third check.third utest.third ucheck.third test_notty.third \
 	test.deparse test_notty.deparse test_harness test_harness_notty \
 	test.bytecompile minitest coretest test.taintwarn
@@ -1114,6 +1115,18 @@ test-notty:	test_notty
 test.torture torturetest:	test_prep
 	PERL=./perl TEST_ARGS=-torture $(MAKE) _test
 
+# Targets for UTF16 testing:
+
+minitest.utf16: minitest.prep
+	- cd t && (rm -f perl$(EXE_EXT); $(LNS) ../miniperl$(EXE_EXT) perl$(EXE_EXT)) \
+		&& $(LDLIBPTH) ./perl TEST -minitest -utf16 base/*.t comp/*.t cmd/*.t run/*.t io/*.t op/*.t uni/*.t </dev/tty
+
+test.utf16 check.utf16: test_prep
+	PERL=./perl $(MAKE) TEST_ARGS=-utf16 _test
+
+utest.utf16 ucheck.utf16: test_prep
+	PERL=./perl $(MAKE) TEST_ARGS="-utf8 -utf16" _test
+
 # Targets for valgrind testing:
 
 test_prep.valgrind: test_prep perl.valgrind
@@ -1160,15 +1173,17 @@ test_notty.deparse:	test_prep
 test.taintwarn:	test_prep
 	PERL=./perl TEST_ARGS=-taintwarn $(MAKE) _test
 
-# Can't depend on lib/Config.pm because that might be where miniperl
-# is crashing.
-minitest: miniperl$(EXE_EXT) lib/re.pm
+minitest.prep:
 	-@test -f lib/lib.pm && test -f lib/Config.pm || \
 	  $(MAKE) lib/Config.pm lib/lib.pm $(unidatafiles)
 	@echo " "
 	@echo "You may see some irrelevant test failures if you have been unable"
 	@echo "to build lib/Config.pm, lib/lib.pm or the Unicode data files."
 	@echo " "
+
+# Can't depend on lib/Config.pm because that might be where miniperl
+# is crashing.
+minitest: miniperl$(EXE_EXT) lib/re.pm minitest.prep
 	- cd t && (rm -f perl$(EXE_EXT); $(LNS) ../miniperl$(EXE_EXT) perl$(EXE_EXT)) \
 		&& $(LDLIBPTH) ./perl TEST -minitest base/*.t comp/*.t cmd/*.t run/*.t io/*.t op/*.t uni/*.t </dev/tty
 

@@ -2157,19 +2157,17 @@ Perl_filter_del(pTHX_ filter_t funcp)
 }
 
 
-/* Invoke the n'th filter function for the current rsfp.	 */
+/* Invoke the idxth filter function for the current rsfp.	 */
+/* maxlen 0 = read one text line */
 I32
 Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
-
-
-               		/* 0 = read one text line */
 {
     filter_t funcp;
     SV *datasv = NULL;
 
     if (!PL_rsfp_filters)
 	return -1;
-    if (idx > AvFILLp(PL_rsfp_filters)){       /* Any more filters?	*/
+    if (idx > AvFILLp(PL_rsfp_filters)) {       /* Any more filters?	*/
 	/* Provide a default input filter to make life easy.	*/
 	/* Note that we append to the line. This is handy.	*/
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
@@ -2200,7 +2198,7 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
 	return SvCUR(buf_sv);
     }
     /* Skip this filter slot if filter has been deleted	*/
-    if ( (datasv = FILTER_DATA(idx)) == &PL_sv_undef){
+    if ( (datasv = FILTER_DATA(idx)) == &PL_sv_undef) {
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
 			      "filter_read %d: skipped (filter deleted)\n",
 			      idx));
@@ -2226,7 +2224,6 @@ S_filter_gets(pTHX_ register SV *sv, register PerlIO *fp, STRLEN append)
     }
 #endif
     if (PL_rsfp_filters) {
-
 	if (!append)
             SvCUR_set(sv, 0);	/* start with empty line	*/
         if (FILTER_READ(0, sv, 0) > 0)
@@ -6834,10 +6831,11 @@ S_scan_heredoc(pTHX_ register char *s)
 	    av_store(CopFILEAV(PL_curcop), (I32)CopLINE(PL_curcop),sv);
 	}
 	if (*s == term && memEQ(s,PL_tokenbuf,len)) {
-	    s = PL_bufend - 1;
-	    *s = ' ';
+	    STRLEN off = PL_bufend - 1 - SvPVX(PL_linestr);
+	    *(SvPVX(PL_linestr) + off ) = ' ';
 	    sv_catsv(PL_linestr,herewas);
 	    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
+	    s = SvPVX(PL_linestr) + off; /* In case PV of PL_linestr moved. */
 	}
 	else {
 	    s = PL_bufend;
@@ -7999,10 +7997,9 @@ S_swallow_bom(pTHX_ U8 *s)
 
 		filter_add(utf16rev_textfilter, NULL);
 		New(898, news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
-		PL_bufend =
-		     (char*)utf16_to_utf8_reversed(s, news,
-						   PL_bufend - (char*)s - 1,
-						   &newlen);
+		utf16_to_utf8_reversed(s, news,
+				       PL_bufend - (char*)s - 1,
+				       &newlen);
 		sv_setpvn(PL_linestr, (const char*)news, newlen);
 		Safefree(news);
 		SvUTF8_on(PL_linestr);
@@ -8026,10 +8023,9 @@ S_swallow_bom(pTHX_ U8 *s)
 
 		filter_add(utf16_textfilter, NULL);
 		New(898, news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
-		PL_bufend =
-		     (char*)utf16_to_utf8(s, news,
-					  PL_bufend - (char*)s,
-					  &newlen);
+		utf16_to_utf8(s, news,
+			      PL_bufend - (char*)s,
+			      &newlen);
 		sv_setpvn(PL_linestr, (const char*)news, newlen);
 		Safefree(news);
 		SvUTF8_on(PL_linestr);
@@ -8096,38 +8092,42 @@ restore_rsfp(pTHX_ void *f)
 static I32
 utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 {
+    STRLEN old = SvCUR(sv);
     I32 count = FILTER_READ(idx+1, sv, maxlen);
+    DEBUG_P(PerlIO_printf(Perl_debug_log,
+			  "utf16_textfilter(%p): %d %d (%d)\n",
+			  utf16_textfilter, idx, maxlen, count));
     if (count) {
 	U8* tmps;
-	U8* tend;
 	I32 newlen;
 	New(898, tmps, SvCUR(sv) * 3 / 2 + 1, U8);
-	if (!*SvPV_nolen(sv))
-	/* Game over, but don't feed an odd-length string to utf16_to_utf8 */
-	return count;
-
-	tend = utf16_to_utf8((U8*)SvPVX(sv), tmps, SvCUR(sv), &newlen);
-	sv_usepvn(sv, (char*)tmps, tend - tmps);
+	Copy(SvPVX(sv), tmps, old, char);
+	utf16_to_utf8((U8*)SvPVX(sv) + old, tmps + old,
+		      SvCUR(sv) - old, &newlen);
+	sv_usepvn(sv, (char*)tmps, (STRLEN)newlen + old);
     }
-    return count;
+    DEBUG_P({sv_dump(sv);});
+    return SvCUR(sv);
 }
 
 static I32
 utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 {
+    STRLEN old = SvCUR(sv);
     I32 count = FILTER_READ(idx+1, sv, maxlen);
+    DEBUG_P(PerlIO_printf(Perl_debug_log,
+			  "utf16rev_textfilter(%p): %d %d (%d)\n",
+			  utf16rev_textfilter, idx, maxlen, count));
     if (count) {
 	U8* tmps;
-	U8* tend;
 	I32 newlen;
-	if (!*SvPV_nolen(sv))
-	/* Game over, but don't feed an odd-length string to utf16_to_utf8 */
-	return count;
-
 	New(898, tmps, SvCUR(sv) * 3 / 2 + 1, U8);
-	tend = utf16_to_utf8_reversed((U8*)SvPVX(sv), tmps, SvCUR(sv), &newlen);
-	sv_usepvn(sv, (char*)tmps, tend - tmps);
+	Copy(SvPVX(sv), tmps, old, char);
+	utf16_to_utf8((U8*)SvPVX(sv) + old, tmps + old,
+		      SvCUR(sv) - old, &newlen);
+	sv_usepvn(sv, (char*)tmps, (STRLEN)newlen + old);
     }
+    DEBUG_P({ sv_dump(sv); });
     return count;
 }
 #endif
