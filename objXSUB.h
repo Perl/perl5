@@ -510,6 +510,8 @@
 #define PL_reg_start_tmp	pPerl->PL_reg_start_tmp
 #undef  PL_reg_start_tmpl
 #define PL_reg_start_tmpl	pPerl->PL_reg_start_tmpl
+#undef  PL_reg_starttry
+#define PL_reg_starttry		pPerl->PL_reg_starttry
 #undef  PL_reg_sv
 #define PL_reg_sv		pPerl->PL_reg_sv
 #undef  PL_regbol

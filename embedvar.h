@@ -61,6 +61,7 @@
 #define PL_reg_re		(PL_curinterp->Treg_re)
 #define PL_reg_start_tmp	(PL_curinterp->Treg_start_tmp)
 #define PL_reg_start_tmpl	(PL_curinterp->Treg_start_tmpl)
+#define PL_reg_starttry		(PL_curinterp->Treg_starttry)
 #define PL_reg_sv		(PL_curinterp->Treg_sv)
 #define PL_regbol		(PL_curinterp->Tregbol)
 #define PL_regcc		(PL_curinterp->Tregcc)
@@ -449,6 +450,7 @@
 #define PL_Treg_re		PL_reg_re
 #define PL_Treg_start_tmp	PL_reg_start_tmp
 #define PL_Treg_start_tmpl	PL_reg_start_tmpl
+#define PL_Treg_starttry	PL_reg_starttry
 #define PL_Treg_sv		PL_reg_sv
 #define PL_Tregbol		PL_regbol
 #define PL_Tregcc		PL_regcc
@@ -580,6 +582,7 @@
 #define PL_reg_re		(thr->Treg_re)
 #define PL_reg_start_tmp	(thr->Treg_start_tmp)
 #define PL_reg_start_tmpl	(thr->Treg_start_tmpl)
+#define PL_reg_starttry		(thr->Treg_starttry)
 #define PL_reg_sv		(thr->Treg_sv)
 #define PL_regbol		(thr->Tregbol)
 #define PL_regcc		(thr->Tregcc)

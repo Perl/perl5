@@ -1080,6 +1080,7 @@ regtry(regexp *prog, char *startpos)
     PL_reglastparen = &prog->lastparen;
     prog->lastparen = 0;
     PL_regsize = 0;
+    DEBUG_r(PL_reg_starttry = startpos);
     if (PL_reg_start_tmpl <= prog->nparens) {
 	PL_reg_start_tmpl = prog->nparens*3/2 + 3;
         if(PL_reg_start_tmp)
@@ -1161,7 +1162,7 @@ regmatch(regnode *prog)
 	    int l = (PL_regeol - locinput > taill ? taill : PL_regeol - locinput);
 	    int pref_len = (locinput - PL_bostr > (5 + taill) - l 
 			    ? (5 + taill) - l : locinput - PL_bostr);
-	    int pref0_len = pref_len  - (locinput - PL_reginput);
+	    int pref0_len = pref_len  - (locinput - PL_reg_starttry);
 
 	    if (l + pref_len < (5 + taill) && l < PL_regeol - locinput)
 		l = ( PL_regeol - locinput > (5 + taill) - pref_len 
