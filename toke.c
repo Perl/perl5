@@ -1540,6 +1540,16 @@ S_scan_const(pTHX_ char *start)
 			e = s - 1;
 			goto cont_scan;
 		    }
+		    if (e > s + 2 && s[1] == 'U' && s[2] == '+') {
+		        /* \N{U+...} */
+		        I32 flags = PERL_SCAN_ALLOW_UNDERSCORES |
+			  PERL_SCAN_DISALLOW_PREFIX;
+		        s += 3;
+			len = e - s;
+			uv = grok_hex(s, &len, &flags, NULL);
+			s = e + 1;
+			goto NUM_ESCAPE_INSERT;
+		    }
 		    res = newSVpvn(s + 1, e - s - 1);
 		    res = new_constant( Nullch, 0, "charnames",
 					res, Nullsv, "\\N{...}" );
