@@ -940,3 +940,4 @@ a(b)??	abc	y	<$1>	<>	# undef [perl #16773]
 ^(?:f|o|b){2,3}?(.+?)\1\z	foobarbar	y	$1	bar
 ^.{2,3}?((?:b|a|r)+?)\1\z	foobarbar	y	$1	bar
 ^(?:f|o|b){2,3}?((?:b|a|r)+?)\1\z	foobarbar	y	$1	bar
+.*a(?!(b|cd)*e).*f	......abef	n	-	-	# [perl #23030]

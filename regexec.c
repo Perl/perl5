@@ -87,6 +87,7 @@
 #define RF_warned	2		/* warned about big count? */
 #define RF_evaled	4		/* Did an EVAL with setting? */
 #define RF_utf8		8		/* String contains multibyte chars? */
+#define RF_false	16		/* odd number of nested negatives */
 
 #define UTF ((PL_reg_flags & RF_utf8) != 0)
 
@@ -3204,7 +3205,10 @@ S_regmatch(pTHX_ regnode *prog)
 				      "%*s  already tried at this position...\n",
 				      REPORT_CODE_OFF+PL_regindent*2, "")
 			);
-			sayNO_SILENT;
+			if (PL_reg_flags & RF_false)
+			    sayYES;
+			else
+			    sayNO_SILENT;
 		    }
 		    PL_reg_poscache[o] |= (1<<b);
 		}
@@ -3854,6 +3858,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    }
 	    else
 		PL_reginput = locinput;
+	    PL_reg_flags ^= RF_false;
 	    goto do_ifmatch;
 	case IFMATCH:
 	    n = 1;
@@ -3869,6 +3874,8 @@ S_regmatch(pTHX_ regnode *prog)
 	  do_ifmatch:
 	    inner = NEXTOPER(NEXTOPER(scan));
 	    if (regmatch(inner) != n) {
+		if (n == 0)
+		    PL_reg_flags ^= RF_false;
 	      say_no:
 		if (logical) {
 		    logical = 0;
@@ -3878,6 +3885,8 @@ S_regmatch(pTHX_ regnode *prog)
 		else
 		    sayNO;
 	    }
+	    if (n == 0)
+		PL_reg_flags ^= RF_false;
 	  say_yes:
 	    if (logical) {
 		logical = 0;
