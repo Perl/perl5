@@ -22,7 +22,7 @@ behaviour by using C<use bytes>.
 
 To be consistent with pack(), the C<C0> in unpack() templates indicates
 that the data is to be processed in character mode, i.e. character by
-character; at the contrary, C<U0> in unpack() indicates UTF-8 mode, where
+character; on the contrary, C<U0> in unpack() indicates UTF-8 mode, where
 the packed string is processed in its UTF-8-encoded Unicode form on a byte
 by byte basis. This is reversed with regard to perl 5.8.X.
 
@@ -54,7 +54,7 @@ such as newline and backspace are output in C<\x> notation, rather than
 octal.
 
 The B<-C> option can no longer be used on the C<#!> line. It wasn't
-working anyway.
+working there anyway.
 
 =head1 Core Enhancements
 
@@ -90,6 +90,14 @@ For new projects the core perl team would strongly recommend that you use
 dedicated, single purpose security tools such as C<sudo> in preference to
 C<suidperl>.
 
+=head2 PERLIO_DEBUG
+
+The C<PERLIO_DEBUG> environment variable has no longer any effect for
+setuid scripts and for scripts run with B<-T>.
+
+Moreover, with a thread-enabled perl, using C<PERLIO_DEBUG> could lead to
+an internal buffer overflow. This has been fixed.
+
 =head2 Formats
 
 In addition to bug fixes, C<format>'s features have been enhanced. See
@@ -109,6 +117,11 @@ There are two new byte-order modifiers, C<E<gt>> (big-endian) and C<E<lt>>
 characters and groups to force a certain byte-order for that type or group.
 See L<perlfunc/pack> and L<perlpacktut> for details.
 
+=head2 Byte count feature in pack()
+
+A new pack() template character, C<".">, returns the number of characters
+read so far.
+
 =head2 New variables
 
 A new variable, ${^RE_DEBUG_FLAGS}, controls what debug flags are in
@@ -123,6 +136,12 @@ by perl at startup.
 =head2 New modules
 
 =over 4
+
+=item *
+
+C<encoding::warnings>, by Autrijus Tang, is a module to emit warnings
+whenever an ASCII character string containing high-bit bytes is implicitly
+converted into UTF-8.
 
 =item *
 
@@ -141,8 +160,6 @@ The dual-lived modules which contain an C<_> in their version number are
 actually I<ahead> of the corresponding CPAN release.
 
 =over 4
-
-=item *
 
 =item B::Concise
 
@@ -169,7 +186,7 @@ Detached threads are now also supported on Windows.
 
 =item *
 
-The C<corelist> utility is now installed with perl (see L</"New Modules">
+The C<corelist> utility is now installed with perl (see L</"New modules">
 above).
 
 =item *
@@ -196,8 +213,6 @@ debugger.
 
 =back
 
-=head1 Documentation
-
 =head1 Performance Enhancements
 
 =over 4
@@ -214,7 +229,7 @@ a temporary intermediate list.
 
 =item *
 
-Unnecessary assignment optimised away in
+Unnecessary assignments are optimised away in
 
   my $s = undef;
   my @a = ();
@@ -222,18 +237,23 @@ Unnecessary assignment optimised away in
 
 =item *
 
-Optimised C<map> in scalar context
+C<map> in scalar context is now optimized.
 
 =item *
 
 The regexp engine now implements the trie optimization : it's able to
 factorize common prefixes and suffixes in regular expressions. A new
-special variable, ${^RE_TRIE_MAXBUF}, has been added to fine tune this
+special variable, ${^RE_TRIE_MAXBUF}, has been added to fine-tune this
 optimization.
 
 =back
 
 =head1 Installation and Configuration Improvements
+
+Run-time customization of @INC can be enabled by passing the
+C<-Dusesitecustomize> flag to configure. When enabled, this will make perl
+run F<$sitelibexp/sitecustomize.pl> before anything else.  This script can
+then be set up to add additional entries to @INC.
 
 There is alpha support for relocatable @INC entries.
 
@@ -241,9 +261,9 @@ Perl should build on Interix and on GNU/kFreeBSD.
 
 =head1 Selected Bug Fixes
 
-Most of those bugs were reported in the perl 5.8.x maintainance track.
+Most of those bugs were reported in the perl 5.8.x maintenance track.
 Notably, quite a few utf8 bugs were fixed, and several memory leaks were
-suppressed.
+suppressed. The perl58Xdelta manpages have more details on them.
 
 Development-only bug fixes include :
 
@@ -267,14 +287,30 @@ the comma between arguments. This makes it much easier for tools such as
 web browsers to wrap it, but might confuse any automatic tools which perform
 detailed parsing of Carp output.
 
-Perl -V has several improvements, making it more useable from shell
-scripts.
+C<perl -V> has several improvements, making it more useable from shell
+scripts to get the value of configuration variables. See L<perlrun> for
+details.
 
 =head1 Changed Internals
 
+The perl core has been refactored and reorganised in several places.
+In short, this release will not be binary compatible with any previous
+perl release.
+
 =head1 Known Problems
 
-=head2 Platform Specific Problems
+For threaded builds, F<ext/threads/shared/t/wait.t> has been reported to
+fail some tests on HP-UX 10.20.
+
+F<t/io/dup.t> and F<t/io/open.t> fail some tests on some BSD flavours.
+
+=head1 Plans for the next release
+
+The current plan for perl 5.9.3 is to add CPANPLUS as a core module.
+More regular expression optimizations are also in the works.
+
+It is planned to release a development version of perl more frequently,
+i.e. each time something major changes.
 
 =head1 Reporting Bugs
 
