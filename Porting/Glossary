@@ -4113,9 +4113,9 @@ spackage (package.U):
 
 spitshell (spitshell.U):
 	This variable contains the command necessary to spit out a runnable
-	shell on this system.  It is either cat or a grep -v for # comments.
-
 	shell on this system.  It is either cat or a grep '-v' for # comments.
+
+srand48_r_proto (d_srand48_r.U):
 	This variable encodes the prototype of srand48_r.
 	It is zero if d_srand48_r is undef, and one of the
 	REENTRANT_PROTO_T_ABC macros of reentr.h if d_srand48_r
@@ -4441,8 +4441,8 @@ usesfio (d_sfio.U):
 	d_sfio without running into a "WHOA THERE".
 
 useshrplib (libperl.U):
-	This variable is set to 'yes' if the user wishes
-	to build a shared libperl, and 'no' otherwise.
+	This variable is set to 'true' if the user wishes
+	to build a shared libperl, and 'false' otherwise.
 
 usesocks (usesocks.U):
 	This variable conditionally defines the USE_SOCKS symbol,
