@@ -2267,12 +2267,24 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define ARCHNAME "$archname"		/**/
 
+/* HAS_PTHREAD_YIELD:
+ *	This symbol, if defined, indicates that the pthread_yield 
+ *	routine is available to yield the execution of the current
+ *	thread.	 sched_yield is preferable to pthread_yield.
+ */
 /* SCHED_YIELD:
  *	This symbol defines the way to yield the execution of
  *	the current thread.  Known ways are sched_yield,
  *	pthread_yield, and pthread_yield with NULL.
  */
+/* HAS_SCHED_YIELD:
+ *	This symbol, if defined, indicates that the sched_yield
+ *	routine is available to yield the execution of the current
+ *	thread.	 sched_yield is preferable to pthread_yield.
+ */
+#$d_pthread_yield HAS_PTHREAD_YIELD	/**/
 #define SCHED_YIELD	$sched_yield	/**/
+#$d_sched_yield HAS_SCHED_YIELD	/**/
 
 /* PTHREADS_CREATED_JOINABLE:
  *	This symbol, if defined, indicates that pthreads are created

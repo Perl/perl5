@@ -4450,8 +4450,46 @@ ck_rvconst(register OP *o)
 	char *name;
 	int iscv;
 	GV *gv;
+	SV *kidsv = kid->op_sv;
 
-	name = SvPV(kid->op_sv, PL_na);
+	/* Is it a constant from cv_const_sv()? */
+	if (SvROK(kidsv) && SvREADONLY(kidsv)) {
+	    SV *rsv = SvRV(kidsv);
+	    int svtype = SvTYPE(rsv);
+	    char *badtype = Nullch;
+
+	    switch (o->op_type) {
+	    case OP_RV2SV:
+		if (svtype > SVt_PVMG)
+		    badtype = "a SCALAR";
+		break;
+	    case OP_RV2AV:
+		if (svtype != SVt_PVAV)
+		    badtype = "an ARRAY";
+		break;
+	    case OP_RV2HV:
+		if (svtype != SVt_PVHV) {
+		    if (svtype == SVt_PVAV) {	/* pseudohash? */
+			SV **ksv = av_fetch((AV*)rsv, 0, FALSE);
+			if (ksv && SvROK(*ksv)
+			    && SvTYPE(SvRV(*ksv)) == SVt_PVHV)
+			{
+				break;
+			}
+		    }
+		    badtype = "a HASH";
+		}
+		break;
+	    case OP_RV2CV:
+		if (svtype != SVt_PVCV)
+		    badtype = "a CODE";
+		break;
+	    }
+	    if (badtype)
+		croak("Constant is not %s reference", badtype);
+	    return o;
+	}
+	name = SvPV(kidsv, PL_na);
 	if ((PL_hints & HINT_STRICT_REFS) && (kid->op_private & OPpCONST_BARE)) {
 	    char *badthing = Nullch;
 	    switch (o->op_type) {
