@@ -926,8 +926,10 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 		if (strEQ(name2, "AINT"))
 		    goto ro_magicalize;
 		break;
-	    case '\025':	/* $^UNICODE */
+	    case '\025':	/* ${^UNICODE}, ${^UTF8LOCALE} */
 		if (strEQ(name2, "NICODE")) 
+		    goto ro_magicalize;
+		if (strEQ(name2, "TF8LOCALE")) 
 		    goto ro_magicalize;
 		break;
 	    case '\027':	/* $^WARNING_BITS */
@@ -1862,6 +1864,8 @@ Perl_is_gv_magical(pTHX_ char *name, STRLEN len, U32 flags)
 	    break;
 	case '\025':	/* ${^UNICODE} */
 	    if (strEQ(name1, "NICODE"))
+		goto yes;
+	    if (strEQ(name1, "TF8LOCALE")) 
 		goto yes;
 	    break;
 	case '\027':   /* ${^WARNING_BITS} */

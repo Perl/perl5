@@ -715,9 +715,11 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		    ? (PL_taint_warn || PL_unsafe ? -1 : 1)
 		    : 0);
         break;
-    case '\025':		/* $^UNICODE */
+    case '\025':		/* $^UNICODE, $^UTF8LOCALE */
         if (strEQ(mg->mg_ptr, "\025NICODE"))
 	    sv_setuv(sv, (UV) PL_unicode);
+        else if (strEQ(mg->mg_ptr, "\025TF8LOCALE"))
+	    sv_setuv(sv, (UV) PL_utf8locale);
         break;
     case '\027':		/* ^W  & $^WARNING_BITS */
 	if (*(mg->mg_ptr+1) == '\0')
