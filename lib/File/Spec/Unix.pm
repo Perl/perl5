@@ -133,9 +133,12 @@ my $tmpdir;
 sub tmpdir {
     return $tmpdir if defined $tmpdir;
     my @dirlist = ($ENV{TMPDIR}, "/tmp");
-    if (${"\cTAINT"}) { # Check for taint mode on perl >= 5.8.0
-        require Scalar::Util;
-        shift @dirlist if Scalar::Util::tainted($ENV{TMPDIR});
+    {
+	no strict 'refs';
+	if (${"\cTAINT"}) { # Check for taint mode on perl >= 5.8.0
+            require Scalar::Util;
+	    shift @dirlist if Scalar::Util::tainted($ENV{TMPDIR});
+	}
     }
     foreach (@dirlist) {
 	next unless defined && -d && -w _;
