@@ -235,11 +235,11 @@ ext/DynaLoader/dl_aix.xs	AIX implementation
 ext/DynaLoader/dl_beos.xs	BeOS implementation
 ext/DynaLoader/dl_dld.xs	GNU dld style implementation
 ext/DynaLoader/dl_dlopen.xs	BSD/SunOS4&5 dlopen() style implementation
+ext/DynaLoader/dl_dyld.xs	NeXT/Apple dyld implementation
 ext/DynaLoader/dl_hpux.xs	HP-UX implementation
 ext/DynaLoader/dl_mpeix.xs	MPE/iX implementation
-ext/DynaLoader/dl_next.xs	Next implementation
+ext/DynaLoader/dl_next.xs	NeXT implementation
 ext/DynaLoader/dl_none.xs	Stub implementation
-ext/DynaLoader/dl_rhapsody.xs	Rhapsody implementation
 ext/DynaLoader/dl_vmesa.xs	VM/ESA implementation
 ext/DynaLoader/dl_vms.xs	VMS implementation
 ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
@@ -440,6 +440,7 @@ hints/bsdos.sh		Hints for named architecture
 hints/convexos.sh	Hints for named architecture
 hints/cxux.sh		Hints for named architecture
 hints/cygwin.sh		Hints for named architecture
+hints/darwin.sh		Hints for named architecture
 hints/dcosx.sh		Hints for named architecture
 hints/dec_osf.sh	Hints for named architecture
 hints/dgux.sh		Hints for named architecture

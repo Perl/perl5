@@ -45,6 +45,14 @@ true)
 		-compatibility_version 1 -current_version $patchlevel \
 		-prebind -seg1addr 0x27000000 -install_name \$(shrpdir)/\$@"
 		;;
+	rhapsody*|darwin*)
+		shrpldflags="${ldflags} -dynamiclib \
+			     -compatibility_version 1 \
+			     -current_version \
+				${api_version}.${api_subversion} \
+			     -image_base 0x4be00000 \
+			     -install_name \$(shrpdir)/\$@"
+		;;
 	cygwin*)
 		linklibperl="-lperl"
 		;;
@@ -76,9 +84,6 @@ true)
 	    os2)
 	        ldlibpth=''
 	        ;;
-	    rhapsody)
-		eval "ldlibpth=\"$ldlibpthname=`pwd`/Perl:\$$ldlibpthname\""
-		;;
 	    *)
 		eval "ldlibpth=\"$ldlibpthname=`pwd`:\$$ldlibpthname\""
 		;;
@@ -532,6 +537,9 @@ extra.pods: miniperl
 	-@test -f README.vms && $(LNS) ../README.vms pod/README_vms.pod && echo "pod/README_vms.pod" >> extra.pods
 	-@test -f vms/perlvms.pod && $(LNS) ../vms/perlvms.pod pod/perlvms.pod && echo "pod/perlvms.pod" >> extra.pods
 
+install-strip:
+	$(MAKE) STRIPFLAGS=-s install
+
 install: all install.perl install.man
 
 install.perl:	all installperl
@@ -542,7 +550,7 @@ install.perl:	all installperl
 		cd ../pod; $(MAKE) compile; \
 	else :; \
 	fi
-	$(LDLIBPTH) ./perl installperl
+	$(LDLIBPTH) ./perl installperl $(STRIPFLAGS)
 
 install.man:	all installman
 	$(LDLIBPTH) ./perl installman

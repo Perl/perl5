@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Feb 26 04:42:42 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Sat Feb 26 05:10:12 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -11644,7 +11644,7 @@ case "$crosscompile" in
 esac
 
 case "$osname" in
-next|rhapsody) multiarch="$define" ;;
+next|rhapsody|darwin) multiarch="$define" ;;
 esac
 case "$multiarch" in
 ''|[nN]*) multiarch="$undef" ;;
