@@ -366,7 +366,7 @@ remove all the versions because by default the native tools on those
 platforms remove just the most recent version, too).  The portable
 idiom to remove all the versions of a file is
 
-    1 while unlink "file" or die $!;
+    1 while unlink "file";
 
 This will terminate if the file is undeleteable for some reason
 (protected, not there, and so on).
