@@ -262,6 +262,7 @@
 #define ibcmp			Perl_ibcmp
 #define ibcmp_locale		Perl_ibcmp_locale
 #define ingroup			Perl_ingroup
+#define init_argv_symbols	Perl_init_argv_symbols
 #define init_debugger		Perl_init_debugger
 #define init_stacks		Perl_init_stacks
 #define init_tm			Perl_init_tm
@@ -1781,6 +1782,7 @@
 #define ibcmp(a,b,c)		Perl_ibcmp(aTHX_ a,b,c)
 #define ibcmp_locale(a,b,c)	Perl_ibcmp_locale(aTHX_ a,b,c)
 #define ingroup(a,b)		Perl_ingroup(aTHX_ a,b)
+#define init_argv_symbols(a,b)	Perl_init_argv_symbols(aTHX_ a,b)
 #define init_debugger()		Perl_init_debugger(aTHX)
 #define init_stacks()		Perl_init_stacks(aTHX)
 #define init_tm(a)		Perl_init_tm(aTHX_ a)

@@ -2688,6 +2688,7 @@ Perl_yylex(pTHX)
 		    while (SPACE_OR_TAB(*d)) d++;
 
 		    if (*d++ == '-') {
+			bool switches_done = PL_doswitches;
 			do {
 			    if (*d == 'M' || *d == 'm') {
 				char *m = d;
@@ -2710,6 +2711,14 @@ Perl_yylex(pTHX)
 			    if (PERLDB_LINE)
 				(void)gv_fetchfile(PL_origfilename);
 			    goto retry;
+			}
+			if (PL_doswitches && !switches_done) {
+			    int argc = PL_origargc;
+			    char **argv = PL_origargv;
+			    do {
+				argc--,argv++;
+			    } while (argc && argv[0][0] == '-' && argv[0][1]);
+			    init_argv_symbols(argc,argv);
 			}
 		    }
 		}

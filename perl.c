@@ -3370,17 +3370,10 @@ S_init_predump_symbols(pTHX)
     PL_osname = savepv(OSNAME);
 }
 
-STATIC void
-S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register char **env)
+void
+Perl_init_argv_symbols(pTHX_ register int argc, register char **argv)
 {
     char *s;
-    SV *sv;
-    GV* tmpgv;
-#ifdef NEED_ENVIRON_DUP_FOR_MODIFY
-    char **dup_env_base = 0;
-    int dup_env_count = 0;
-#endif
-
     argc--,argv++;	/* skip name of script */
     if (PL_doswitches) {
 	for (; argc > 0 && **argv == '-'; argc--,argv++) {
@@ -3398,6 +3391,30 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 		sv_setiv(GvSV(gv_fetchpv(argv[0]+1,TRUE, SVt_PV)),1);
 	}
     }
+    if ((PL_argvgv = gv_fetchpv("ARGV",TRUE, SVt_PVAV))) {
+	GvMULTI_on(PL_argvgv);
+	(void)gv_AVadd(PL_argvgv);
+	av_clear(GvAVn(PL_argvgv));
+	for (; argc > 0; argc--,argv++) {
+	    SV *sv = newSVpv(argv[0],0);
+	    av_push(GvAVn(PL_argvgv),sv);
+	    if (PL_widesyscalls)
+		(void)sv_utf8_decode(sv);
+	}
+    }
+}
+
+STATIC void
+S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register char **env)
+{
+    char *s;
+    SV *sv;
+    GV* tmpgv;
+#ifdef NEED_ENVIRON_DUP_FOR_MODIFY
+    char **dup_env_base = 0;
+    int dup_env_count = 0;
+#endif
+
     PL_toptarget = NEWSV(0,0);
     sv_upgrade(PL_toptarget, SVt_PVFM);
     sv_setpvn(PL_toptarget, "", 0);
@@ -3407,6 +3424,9 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
     PL_formtarget = PL_bodytarget;
 
     TAINT;
+
+    init_argv_symbols(argc,argv);
+
     if ((tmpgv = gv_fetchpv("0",TRUE, SVt_PV))) {
 #ifdef MACOS_TRADITIONAL
 	/* $0 is not majick on a Mac */
@@ -3422,17 +3442,6 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 #else
 	sv_setpv(GvSV(tmpgv),PL_origargv[0]);
 #endif
-    if ((PL_argvgv = gv_fetchpv("ARGV",TRUE, SVt_PVAV))) {
-	GvMULTI_on(PL_argvgv);
-	(void)gv_AVadd(PL_argvgv);
-	av_clear(GvAVn(PL_argvgv));
-	for (; argc > 0; argc--,argv++) {
-	    SV *sv = newSVpv(argv[0],0);
-	    av_push(GvAVn(PL_argvgv),sv);
-	    if (PL_widesyscalls)
-		(void)sv_utf8_decode(sv);
-	}
-    }
     if ((PL_envgv = gv_fetchpv("ENV",TRUE, SVt_PVHV))) {
 	HV *hv;
 	GvMULTI_on(PL_envgv);
