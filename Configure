@@ -9829,6 +9829,10 @@ for xxx in $known_extensions ; do
 	    $define) avail_ext="$avail_ext $xxx" ;;
 	    esac
 	    ;;
+    Thread) case "$usethreads" in 
+	    $define) avail_ext="$avail_ext $xxx" ;;
+	    esac
+	    ;;
     *)      avail_ext="$avail_ext $xxx"
 	    ;;
     esac
