@@ -1490,8 +1490,11 @@ Perl_do_readline(pTHX)
 	call_method("READLINE", gimme);
 	LEAVE;
 	SPAGAIN;
-	if (gimme == G_SCALAR)
-	    SvSetMagicSV_nosteal(TARG, TOPs);
+	if (gimme == G_SCALAR) {
+	    SV* result = POPs;
+	    SvSetSV_nosteal(TARG, result);
+	    PUSHTARG;
+	}
 	RETURN;
     }
     fp = Nullfp;
