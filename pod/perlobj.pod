@@ -275,8 +275,8 @@ current class's C<@ISA> list.
         $self->SUPER::display("Name", @args);
     }
 
-It is important to note that C<SUPER> refers to the superclass of the
-I<current package> and not to the superclass of the object. Also, the
+It is important to note that C<SUPER> refers to the superclass(es) of the
+I<current package> and not to the superclass(es) of the object. Also, the
 C<SUPER> pseudo-class can only currently be used as a modifier to a method
 name, but not in any of the other ways that class names are normally used,
 eg:
