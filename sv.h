@@ -801,7 +801,6 @@ Taints an SV if tainting is enabled
 #define SvTAINT(sv)			\
     STMT_START {			\
 	if (PL_tainting) {		\
-	    dTHR;			\
 	    if (PL_tainted)		\
 		SvTAINTED_on(sv);	\
 	}				\
