@@ -2472,7 +2472,7 @@ PP(pp_i_modulo_0)
      }
 }
 
-#ifdef __GLIBC__
+#if defined(__GLIBC__) && IVSIZE == 8
 STATIC
 PP(pp_i_modulo_1)
 {
