@@ -51,7 +51,7 @@ dl_load_file(filename, flags=0)
     ST(0) = sv_newmortal() ;
     if (bogo < 0) {
 	SaveError("%s", strerror(bogo));
-	fprintf(stderr, "load_add_on(%s) : %d (%s)\n", path, bogo, strerror(bogo));
+	PerlIO_printf(PerlIO_stderr(), "load_add_on(%s) : %d (%s)\n", path, bogo, strerror(bogo));
     } else {
 	RETVAL = (void *) bogo;
 	sv_setiv( ST(0), (IV)RETVAL);
@@ -81,7 +81,7 @@ dl_find_symbol(libhandle, symbolname)
     ST(0) = sv_newmortal() ;
     if (RETVAL == NULL) {
 	SaveError("%s", strerror(retcode)) ;
-	fprintf(stderr, "retcode = %p (%s)\n", retcode, strerror(retcode));
+	PerlIO_printf(PerlIO_stderr(), "retcode = %p (%s)\n", retcode, strerror(retcode));
     } else
 	sv_setiv( ST(0), (IV)RETVAL);
 

@@ -479,6 +479,7 @@ sub AUTOLOAD {
 		croak "Your vendor has not defined $module macro \$constname";
 	}
     }
+    no strict 'refs';
     *\$AUTOLOAD = sub () { \$val };
     goto &\$AUTOLOAD;
 }

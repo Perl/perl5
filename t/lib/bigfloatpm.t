@@ -18,8 +18,14 @@ while (<DATA>) {
 		eval "$_;";
        } else {
                ++$test;
-               @args = split(/:/,$_,99);
-               $ans = pop(@args);
+	       if (m|^(.*?):(/.+)$|) {
+	           $ans = $2;
+                   @args = split(/:/,$1,99);
+	       }
+	       else {
+                   @args = split(/:/,$_,99);
+                   $ans = pop(@args);
+	       }
                $try = "\$x = new Math::BigFloat \"$args[0]\";";
                if ($f eq "fnorm"){
                    $try .= "\$x+0;";
@@ -439,10 +445,10 @@ $Math::BigFloat::div_scale = 20
 $Math::BigFloat::div_scale = 40
 &fsqrt
 +0:0
--1:/^(0|NaN)$
--2:/^(0|NaN)$
--16:/^(0|NaN)$
--123.456:/^(0|NaN)$
+-1:/^(?i:0|NaNQ?)$
+-2:/^(?i:0|NaNQ?)$
+-16:/^(?i:0|NaNQ?)$
+-123.456:/^(?i:0|NaNQ?)$
 +1:1.
 +1.44:1.2
 +2:1.41421356237309504880168872420969807857

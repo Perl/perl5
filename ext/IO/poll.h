@@ -10,11 +10,8 @@
 #ifndef POLL_H
 #  define POLL_H
 
-#if defined(I_POLL) || defined(POLLWRBAND)
+#if (defined(HAS_POLL) && defined(I_POLL)) || defined(POLLWRBAND)
 #  include <poll.h>
-#  ifndef HAS_POLL
-#    define HAS_POLL
-#  endif
 #else
 #ifdef HAS_SELECT
 

@@ -447,7 +447,6 @@ if ($opt_q) {
    local @ARGV = @found;	# I'm lazy, sue me.
    my $found = 0;
    my %found_in;
-   my @pod;
 
    while (<>) {
       if (/^=head2\s+.*(?:$opt_q)/oi) {

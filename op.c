@@ -358,8 +358,8 @@ pad_findmy(char *name)
     /* Check if if we're compiling an eval'', and adjust seq to be the
      * eval's seq number.  This depends on eval'' having a non-null
      * CvOUTSIDE() while it is being compiled.  The eval'' itself is
-     * identified by CvUNIQUE being set and CvGV being null. */
-    if (outside && CvUNIQUE(PL_compcv) && !CvGV(PL_compcv) && cxstack_ix >= 0) {
+     * identified by CvEVAL being true and CvGV being null. */
+    if (outside && CvEVAL(PL_compcv) && !CvGV(PL_compcv) && cxstack_ix >= 0) {
 	cx = &cxstack[cxstack_ix];
 	if (CxREALEVAL(cx))
 	    seq = cx->blk_oldcop->cop_seq;
@@ -5303,19 +5303,13 @@ ck_subr(OP *o)
 		    bad_type(arg, "block", gv_ename(namegv), o2);
 		break;
 	    case '*':
+		/* '*' allows any scalar type, including bareword */
 		proto++;
 		arg++;
 		if (o2->op_type == OP_RV2GV)
-		    goto wrapref;
-		{
-		    OP* kid = o2;
-		    OP* sib = kid->op_sibling;
-		    kid->op_sibling = 0;
-		    o2 = newUNOP(OP_RV2GV, 0, kid);
-		    o2->op_sibling = sib;
-		    prev->op_sibling = o2;
-		}
-		goto wrapref;
+		    goto wrapref;	/* autoconvert GLOB -> GLOBref */
+		scalar(o2);
+		break;
 	    case '\\':
 		proto++;
 		arg++;

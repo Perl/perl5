@@ -26,7 +26,9 @@
 #
 sub dotsh {
    local(@sh) = @_;
-   local($tmp,$key,$shell,*dotsh,$command,$args,$vars) = '';
+   local($tmp,$key,$shell,$command,$args,$vars) = '';
+   local(*dotsh);
+   undef *dotsh;
    $dotsh = shift(@sh);
    @dotsh = split (/\s/, $dotsh);
    $command = shift (@dotsh);
@@ -37,7 +39,7 @@ sub dotsh {
    $shell = "$1 -c" if ($_ =~ /^\#\!\s*(\S+(\/sh|\/ksh|\/zsh|\/csh))\s*$/);
    close (_SH_ENV);
    if (!$shell) {
-      if ($ENV{'SHELL'} =~ /\/sh$|\/ksh$|\/zsh$|\/csh$/) {
+      if ($ENV{'SHELL'} =~ /\/sh$|\/ksh$|\/zsh$|\/bash$|\/csh$/) {
 	 $shell = "$ENV{'SHELL'} -c";
       } else {
 	 print "SHELL not recognized!\nUsing /bin/sh...\n";

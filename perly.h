@@ -1,3 +1,4 @@
+#ifdef PERL_CORE
 #define WORD 257
 #define METHOD 258
 #define FUNCMETH 259
@@ -56,6 +57,8 @@
 #define POSTINC 312
 #define POSTDEC 313
 #define ARROW 314
+#endif /* PERL_CORE */
+
 typedef union {
     I32	ival;
     char *pval;

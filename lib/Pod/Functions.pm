@@ -210,9 +210,11 @@ qq/STRING/	String	doubly quote a string
 quotemeta	Regexp	quote regular expression magic characters
 qw/STRING/	LIST	quote a list of words
 qx/STRING/	Process	backquote quote a string
+qr/PATTERN/	Regexp	Compile pattern 
 rand	Math	retrieve the next pseudorandom number 
 read	I/O,Binary	fixed-length buffered input from a filehandle
 readdir	I/O	get a directory from a directory handle
+readline	I/O	fetch a record from a file
 readlink	File	determine where a symbolic link is pointing
 recv	Socket	receive a message over a Socket
 redo	Flow	start this loop iteration over again
@@ -266,6 +268,7 @@ substr	String	get or alter a portion of a stirng
 symlink	File	create a symbolic link to a file
 syscall	I/O,Binary	execute an arbitrary system call
 sysread	I/O,Binary	fixed-length unbuffered input from a filehandle
+sysseek	I/O,Binary	position I/O pointer on handle used with sysread and syswrite
 system	Process	run a separate program 
 syswrite	I/O,Binary	fixed-length unbuffered output to a filehandle
 tell	I/O	get current seekpointer on a filehandle

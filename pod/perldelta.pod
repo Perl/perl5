@@ -1,6 +1,6 @@
 =head1 NAME
 
-perldelta - what's new for perl5.006 (as of 5.005_54)
+perldelta - what's new for perl5.006 (as of 5.005_56)
 
 =head1 DESCRIPTION
 
@@ -81,6 +81,17 @@ This release is not binary compatible with the 5.005 release and its
 maintenance versions.
 
 =head1 Core Changes
+
+=head2 Unicode and UTF-8 support
+
+Perl can optionally use UTF-8 as its internal representation for character
+strings.  The C<use utf8> pragma enables this support in the current lexical
+scope.  See L<utf8> for more information.
+
+=head2 Lexically scoped warning categories
+
+You can now control the granularity of warnings emitted by perl at a finer
+level using the C<use warning> pragma.  See L<warning> for details.
 
 =head2 Binary numbers supported
 
@@ -183,7 +194,8 @@ Siemens BS2000 is now supported under the POSIX Shell.
 
 =item *
 
-The Mach CThreads (NEXTSTEP, OPENSTEP) are now supported by the Thread extension.
+The Mach CThreads (NEXTSTEP, OPENSTEP) are now supported by the Thread
+extension.
 
 =item *
 
@@ -268,9 +280,11 @@ consistently croak() if the date falls in an unsupported range.
 
 =head2 Pragmata
 
-Lexical warnings pragma, "use warning;", to control optional warnings.
+C<use utf8;>, to enable UTF-8 and Unicode support.
 
-Filetest pragma, to control the behaviour of filetests (C<-r> C<-w> ...).
+Lexical warnings pragma, C<use warning;>, to control optional warnings.
+
+C<use filetest;>, to control the behaviour of filetests (C<-r> C<-w> ...).
 Currently only one subpragma implemented, "use filetest 'access';",
 that enables the use of access(2) or equivalent to check the
 permissions instead of using stat(2) as usual.  This matters

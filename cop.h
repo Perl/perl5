@@ -181,17 +181,17 @@ struct block {
 	cx->cx_type		= t,					\
 	cx->blk_oldsp		= sp - PL_stack_base,			\
 	cx->blk_oldcop		= PL_curcop,				\
-	cx->blk_oldmarksp	= PL_markstack_ptr - PL_markstack,		\
+	cx->blk_oldmarksp	= PL_markstack_ptr - PL_markstack,	\
 	cx->blk_oldscopesp	= PL_scopestack_ix,			\
-	cx->blk_oldretsp	= PL_retstack_ix,				\
+	cx->blk_oldretsp	= PL_retstack_ix,			\
 	cx->blk_oldpm		= PL_curpm,				\
 	cx->blk_gimme		= gimme;				\
 	DEBUG_l( PerlIO_printf(PerlIO_stderr(), "Entering block %ld, type %s\n",	\
-		    (long)cxstack_ix, PL_block_type[t]); )
+		    (long)cxstack_ix, PL_block_type[CxTYPE(cx)]); )
 
 /* Exit a block (RETURN and LAST). */
 #define POPBLOCK(cx,pm) cx = &cxstack[cxstack_ix--],			\
-	newsp		 = PL_stack_base + cx->blk_oldsp,			\
+	newsp		 = PL_stack_base + cx->blk_oldsp,		\
 	PL_curcop	 = cx->blk_oldcop,				\
 	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
 	PL_scopestack_ix = cx->blk_oldscopesp,				\
@@ -203,7 +203,7 @@ struct block {
 
 /* Continue a block elsewhere (NEXT and REDO). */
 #define TOPBLOCK(cx) cx  = &cxstack[cxstack_ix],			\
-	PL_stack_sp	 = PL_stack_base + cx->blk_oldsp,			\
+	PL_stack_sp	 = PL_stack_base + cx->blk_oldsp,		\
 	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
 	PL_scopestack_ix = cx->blk_oldscopesp,				\
 	PL_retstack_ix	 = cx->blk_oldretsp,				\

@@ -1324,18 +1324,18 @@ nothing in the core.
 	    struct utimbuf utbuf;
 #else
 	    struct {
-		long    actime;
-		long	modtime;
+		Time_t	actime;
+		Time_t	modtime;
 	    } utbuf;
 #endif
 
 	    Zero(&utbuf, sizeof utbuf, char);
 #ifdef BIG_TIME
-	    utbuf.actime = (Time_t)SvNVx(*++mark);    /* time accessed */
-	    utbuf.modtime = (Time_t)SvNVx(*++mark);    /* time modified */
+	    utbuf.actime = (Time_t)SvNVx(*++mark);	/* time accessed */
+	    utbuf.modtime = (Time_t)SvNVx(*++mark);	/* time modified */
 #else
-	    utbuf.actime = SvIVx(*++mark);    /* time accessed */
-	    utbuf.modtime = SvIVx(*++mark);    /* time modified */
+	    utbuf.actime = (Time_t)SvIVx(*++mark);	/* time accessed */
+	    utbuf.modtime = (Time_t)SvIVx(*++mark);	/* time modified */
 #endif
 	    APPLY_TAINT_PROPER();
 	    tot = sp - mark;

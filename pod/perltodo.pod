@@ -90,12 +90,6 @@ slower, and see if there's a way to make them faster.
 
 =back
 
-=head2 Filenames
-
-Make filenames in the distribution and in the standard module set
-be 8.3 friendly where feasible.  Good luck changing the standard
-modules, though.  B<Done>.
-
 =head1 Configure
 
 Andy Dougherty maintain(ed|s) a list of "todo" items for the configure
@@ -162,20 +156,11 @@ setuid environments.  Decide between Glob::BSD and File::KGlob, move
 it into the core, and make Perl use it for globbing.  Ben Holzman and
 Tye McQueen have claimed the pumpkin for this.
 
-=head2 Proper tied array support
-
-This was B<done> in 5.005 by Nick Ing-Simmons.
-
 =head1 Perl Internals
 
 =head2 magic_setisa
 
 C<magic_setisa> should be made to update %FIELDS [???]
-
-=head2 Foreign lines
-
-Perl should be more generous in accepting foreign line terminations.
-Mostly B<done> in 5.005.
 
 =head2 Garbage Collection
 
@@ -249,13 +234,7 @@ will be difficult.
 
 =head2 Namespace cleanup
 
-    symbol-space: "pl_" prefix for all global vars
-                  "Perl_" prefix for all functions
-
-B<Done>.
-
-    CPP-space:	  restrict what we export from headers
-                  stop malloc()/free() pollution unless asked
+    CPP-space:    restrict CPP symbols exported from headers
     header-space: move into CORE/perl/
     API-space:    begin list of things that constitute public api
 
@@ -412,6 +391,11 @@ to be that, but no longer.  The things in perldelta never seemed to
 get placed in the right places in the real manpages, either.  This
 needs work.
 
+=head2 Adapt www.linuxhq.com for Perl
+
+This should help glorify documentation and get more people involved in
+perl development.
+
 =head2 Replace man with a perl program
 
 Can we reimplement man in Perl?  Tom has a start.  I believe some of
@@ -422,11 +406,6 @@ perldoc to remove the unfeatures like "is slow" and "has no apropos".
 
 We could use more work on helping people understand Perl's new
 Unicode support that Larry has created.
-
-=head2 Explain tool
-
-Given a piece of Perl code, say what it does.  B::Deparse is doing
-this.  B<Done>.
 
 =head1 Modules
 
@@ -447,10 +426,6 @@ that we should be including?
 
 Which modules should be added to the standard distribution?  This ties
 in with the SDK discussed on the perl-sdk list at perl.org.
-
-=head2 ISA.pm
-
-Rename and alter ISA.pm.  B<Done>.  It is now base.pm.
 
 =head2 Profiler
 
@@ -479,14 +454,6 @@ Implement array using a file
 Defines shift et al in terms of splice method
 
 =back
-
-=head2 Exceptions
-
-Figure out a coherent exception model, and implement it.  Graham's
-Error.pm is an OO module that (I believe) requires core support.
-Are objects the right basis for this?  Can it be done using the same
-text that the rest of Perl works on?  The builtins will need to agree
-on a system.
 
 =head2 Procedural options
 
@@ -622,10 +589,6 @@ pointed out that perllib_mangle() is good for this.
 
 =head1 Win32 Stuff
 
-=head2 Automate maintenance of most PERL_OBJECT code
-
-B<Done>, says Sarathy.
-
 =head2 Get PERL_OBJECT building under gcc
 
 B<Part done>, according to Sarathy.  It builds under egcs on win32,
@@ -656,15 +619,7 @@ breed of chicken to sacrifice, please speak up.
 
 =item Use posix calls internally where possible
 
-=item gettimeofday
-
-Joshua Pritikin sent patches to p5p in early December 1998.
-
 =item format BOTTOM
-
-=item -iprefix.
-
-Added in 5.004_70.  B<Done>
 
 =item -i rename file only when successfully changed
 
@@ -673,10 +628,6 @@ Added in 5.004_70.  B<Done>
 =item report HANDLE [formats].
 
 =item support in perlmain to rerun debugger
-
-=item reference to compiled regexp
-
-B<done>  This is the qr// support in 5.005.
 
 =item lvalue functions
 
@@ -696,16 +647,6 @@ not just subs.
 =head1 Optimizations
 
 =head2 constant function cache
-
-=head2 eval qw() at compile time
-
-qw() is presently compiled as a call to split.  This means the split
-happens at runtime.  Change this so qw() is compiled as a real list
-assignment.  This also avoids surprises like:
-
-    $a = () = qw(What will $a hold?);
-
-B<Done>.  Tom Hughes submitted a patch that went into 5.005_55.
 
 =head2 foreach(reverse...)
 
@@ -756,12 +697,6 @@ with syntax, please.
 
 =item structured types
 
-=item autocroak?
-
-B<Done>.  This is the Fatal.pm module, so any builtin that that does
-not return success automatically die()s.  If you're feeling brave, tie
-this in with the unified exceptions scheme.
-
 =item Modifiable $1 et al
 
 The intent is for this to be a means of editing the matched portions of
@@ -793,31 +728,15 @@ which is almost (but not):
 
 but if the first argument was given and is "0", then it will be
 considered false by C<||> and C<5> used instead.  Really we want
-an C<||>-like construct that behaves like:
+an C<||>-like operator that behaves like:
 
     $children = shift;
     $children = 5 unless defined $children;
 
-Namely, a C<||> that tests defined-ness rather than truth.  One
-was discussed, and a patch submitted, but the objections were many:
-
-=over 4
-
-=item Punctuation
-
-We're running out of punctuation.  C<|||>, the suggested operator, is
-very very verbose.
-
-=item Orthogonality
-
-To work like the other logical operators, there'd need to be C<|||=>
-and "English" equivalents (as there is "or" for "||").  We couldn't
-settle on an equivalent we liked.  Does there also have to be an "&&"
-that tests truth?
-
-=back
-
-While there were objections, many still feel the need.
+Namely, a C<||> that tests defined-ness rather than truth.  One was
+discussed, and a patch submitted, but the objections were many.  While
+there were objections, many still feel the need.  At least it was
+decided that C<??> is the best name for the operator.
 
 =head2 "dynamic" lexicals
 
@@ -901,10 +820,6 @@ Typed lexicals should affect B::CC::load_pad.
 
 Workarounds to help Win32 dynamic loading.
 
-=head2 Status variable
-
-$^C to track compiler/checker status.  B<Done> in 5.005_54.
-
 =head2 END blocks
 
 END blocks need saving in compiled output.
@@ -921,5 +836,74 @@ from where newASSIGNOP steals the field).
 =head2 Cached compilation
 
 Can we install modules as bytecode?
+
+=head1 Recently Finished Tasks
+
+=head2 Filenames
+
+Make filenames in the distribution and in the standard module set
+be 8.3 friendly where feasible.  Good luck changing the standard
+modules, though.  B<Done>.
+
+=head2 Proper tied array support
+
+This was B<done> in 5.005 by Nick Ing-Simmons.
+
+=head2 Foreign lines
+
+Perl should be more generous in accepting foreign line terminations.
+Mostly B<done> in 5.005.
+
+=head2 Namespace cleanup
+
+    symbol-space: "pl_" prefix for all global vars
+                  "Perl_" prefix for all functions
+
+    CPP-space:	  stop malloc()/free() pollution unless asked
+
+=head2 Explain tool
+
+Given a piece of Perl code, say what it does.  B::Deparse is doing
+this.  B<Done>.
+
+=head2 ISA.pm
+
+Rename and alter ISA.pm.  B<Done>.  It is now base.pm.
+
+=head2 Automate maintenance of most PERL_OBJECT code
+
+B<Done>, says Sarathy.
+
+=head2 -iprefix.
+
+Added in 5.004_70.  B<Done>
+
+=head2 gettimeofday
+
+See Time::HiRes.
+
+=head2 reference to compiled regexp
+
+B<done>  This is the qr// support in 5.005.
+
+=head2 eval qw() at compile time
+
+qw() is presently compiled as a call to split.  This means the split
+happens at runtime.  Change this so qw() is compiled as a real list
+assignment.  This also avoids surprises like:
+
+    $a = () = qw(What will $a hold?);
+
+B<Done>.  Tom Hughes submitted a patch that went into 5.005_55.
+
+=head2 autocroak?
+
+B<Done>.  This is the Fatal.pm module, so any builtin that that does
+not return success automatically die()s.  If you're feeling brave, tie
+this in with the unified exceptions scheme.
+
+=head2 Status variable
+
+$^C to track compiler/checker status.  B<Done> in 5.005_54.
 
 =cut

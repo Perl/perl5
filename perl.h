@@ -1380,7 +1380,7 @@ typedef I32 (*filter_t) _((int, SV *, int));
 #      else
 #        ifdef I_MACH_CTHREADS
 #          include <mach/cthreads.h>
-#          ifdef NeXT
+#          if defined(__NeXT__) && defined(PERL_POLLUTE_MALLOC)
 #            define MUTEX_INIT_CALLS_MALLOC
 #          endif
 typedef cthread_t	perl_os_thread;
