@@ -388,8 +388,9 @@ C<%\d+\$> and C<*\d+\$> syntaxes.  For example
 
     print "%2\$s %1\$s\n", "foo", "bar";
 
-will print "bar foo\n"; This feature helps in writing
-internationalised software.
+will print "bar foo\n".  This feature helps in writing
+internationalised software, and in general when the order
+of the parameters can vary.
 
 =item *
 
@@ -912,18 +913,18 @@ CPAN and in 5.7.2 the Net::Ping::External may be integrated to Perl.
 
 =item *
 
-C<POSIX::sigaction()> is now much more flexible and robust.
+POSIX::sigaction() is now much more flexible and robust.
 You can now install coderef handlers, 'DEFAULT', and 'IGNORE'
 handlers, installing new handlers was not atomic.
 
 =item *
 
-In C<Safe> the C<%INC> now localised in a Safe compartment so that
+In Safe the C<%INC> now localised in a Safe compartment so that
 use/require work.
 
 =item *
 
-In C<Search::Dict> one can now have a pre-processing hook for the
+In Search::Dict one can now have a pre-processing hook for the
 lines being searched.
 
 =item *
@@ -936,7 +937,7 @@ The Test module has been significantly enhanced.
 
 =item *
 
-The C<vars> pragma now supports declaring fully qualified variables.
+The vars pragma now supports declaring fully qualified variables.
 (Something that C<our()> does not and will not support.)
 
 =item *
@@ -1680,7 +1681,7 @@ data lying around in them.
 
 =item *
 
-C<Sys::Syslog> ignored the C<LOG_AUTH> constant.
+Sys::Syslog ignored the C<LOG_AUTH> constant.
 
 =item *
 
@@ -2147,10 +2148,6 @@ The tests are now reported in a different order than in earlier Perls.
 to be closer to the library/extension they are testing.)
 
 =head1 Known Problems
-
-Note that unlike other sections in this document (which describe
-changes since 5.7.0) this section is cumulative containing known
-problems for all the 5.7 releases.
 
 =head2 AIX
 
