@@ -143,6 +143,9 @@ protected:
     long		m_lAllocSize;		    // current alloc size
     long		m_lRefCount;		    // number of current users
     CRITICAL_SECTION	m_cs;			    // access lock
+#ifdef _DEBUG_MEM
+    FILE*		m_pLog;
+#endif
 };
 
 // #define _DEBUG_MEM
@@ -185,6 +188,9 @@ VMem::VMem()
     ASSERT(bRet);
 
     InitializeCriticalSection(&m_cs);
+#ifdef _DEBUG_MEM
+    m_pLog = 0;
+#endif
 
     Init();
 }
@@ -193,6 +199,9 @@ VMem::~VMem(void)
 {
     ASSERT(HeapValidate(m_hHeap, HEAP_NO_SERIALIZE, NULL));
     WALKHEAPTRACE();
+#ifdef _DEBUG_MEM
+    MemoryUsageMessage(NULL, 0, 0, 0);
+#endif
     DeleteCriticalSection(&m_cs);
     BOOL bRet = HeapDestroy(m_hHeap);
     ASSERT(bRet);
@@ -642,21 +651,21 @@ void* VMem::Expand(void* block, size_t size)
 }
 
 #ifdef _DEBUG_MEM
-#define LOG_FILENAME "P:\\Apps\\Perl\\Result.txt"
+#define LOG_FILENAME ".\\MemLog.txt"
 
 void MemoryUsageMessage(char *str, long x, long y, int c)
 {
-    static FILE* fp = NULL;
     char szBuffer[512];
     if(str) {
-	if(!fp)
-	    fp = fopen(LOG_FILENAME, "w");
+	if(!m_pLog)
+	    m_pLog = fopen(LOG_FILENAME, "w");
 	sprintf(szBuffer, str, x, y, c);
-	fputs(szBuffer, fp);
+	fputs(szBuffer, m_pLog);
     }
     else {
-	fflush(fp);
-	fclose(fp);
+	fflush(m_pLog);
+	fclose(m_pLog);
+	m_pLog = 0;
     }
 }
 

@@ -902,26 +902,9 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
 #if defined(VMS) || defined(EPOC)
     Perl_die(aTHX_ "Can't make list assignment to %%ENV on this system");
 #else
-#   ifdef PERL_IMPLICIT_SYS
+#   if defined(PERL_IMPLICIT_SYS) || defined(WIN32)
     PerlEnv_clearenv();
 #   else
-#	ifdef WIN32
-    char *envv = GetEnvironmentStrings();
-    char *cur = envv;
-    STRLEN len;
-    while (*cur) {
-	char *end = strchr(cur,'=');
-	if (end && end != cur) {
-	    *end = '\0';
-	    my_setenv(cur,Nullch);
-	    *end = '=';
-	    cur = end + strlen(end+1)+2;
-	}
-	else if ((len = strlen(cur)))
-	    cur += len+1;
-    }
-    FreeEnvironmentStrings(envv);
-#	else
 #if !defined(MACOS_TRADITIONAL)
 #	    ifndef PERL_USE_SAFE_PUTENV
     I32 i;
@@ -936,7 +919,6 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
     environ[0] = Nullch;
 
 #endif /* !defined(MACOS_TRADITIONAL) */
-#	endif /* WIN32 */
 #   endif /* PERL_IMPLICIT_SYS */
 #endif /* VMS */
     return 0;
@@ -2123,7 +2105,9 @@ Perl_whichsig(pTHX_ char *sig)
     return 0;
 }
 
+#if !defined(PERL_IMPLICIT_CONTEXT)
 static SV* sig_sv;
+#endif
 
 Signal_t
 Perl_sighandler(int sig)
@@ -2193,7 +2177,9 @@ Perl_sighandler(int sig)
     if(PL_psig_name[sig]) {
     	sv = SvREFCNT_inc(PL_psig_name[sig]);
 	flags |= 64;
+#if !defined(PERL_IMPLICIT_CONTEXT)
 	sig_sv = sv;
+#endif
     } else {
 	sv = sv_newmortal();
 	sv_setpv(sv,PL_sig_name[sig]);
@@ -2279,6 +2265,8 @@ unwind_handler_stack(pTHXo_ void *p)
     if (flags & 1)
 	PL_savestack_ix -= 5; /* Unprotect save in progress. */
     /* cxstack_ix-- Not needed, die already unwound it. */
+#if !defined(PERL_IMPLICIT_CONTEXT)
     if (flags & 64)
 	SvREFCNT_dec(sig_sv);
+#endif
 }

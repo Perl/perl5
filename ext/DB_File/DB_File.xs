@@ -420,10 +420,21 @@ typedef DBT DBTKEY ;
 
 
 /* Internal Global Data */
-static recno_t Value ; 
-static recno_t zero = 0 ;
-static DB_File CurrentDB ;
-static DBTKEY empty ;
+#define MY_CXT_KEY "DB_File::_guts" XS_VERSION
+
+typedef struct {
+    recno_t	x_Value; 
+    recno_t	x_zero;
+    DB_File	x_CurrentDB;
+    DBTKEY	x_empty;
+} my_cxt_t;
+
+START_MY_CXT
+
+#define Value		(MY_CXT.x_Value)
+#define zero		(MY_CXT.x_zero)
+#define CurrentDB	(MY_CXT.x_CurrentDB)
+#define empty		(MY_CXT.x_empty)
 
 #ifdef DB_VERSION_MAJOR
 
@@ -517,6 +528,7 @@ const DBT * key2 ;
     dTHX;
 #endif    
     dSP ;
+    dMY_CXT;
     void * data1, * data2 ;
     int retval ;
     int count ;
@@ -588,6 +600,7 @@ const DBT * key2 ;
     dTHX;
 #endif    
     dSP ;
+    dMY_CXT;
     void * data1, * data2 ;
     int retval ;
     int count ;
@@ -666,6 +679,7 @@ HASH_CB_SIZE_TYPE size ;
     dTHX;
 #endif    
     dSP ;
+    dMY_CXT;
     int retval ;
     int count ;
 
@@ -841,6 +855,7 @@ SV *   sv ;
     void *	openinfo = NULL ;
     INFO	* info  = &RETVAL->info ;
     STRLEN	n_a;
+    dMY_CXT;
 
 /* printf("In ParseOpenInfo name=[%s] flags=[%d] mode = [%d]\n", name, flags, mode) ;  */
     Zero(RETVAL, 1, DB_File_type) ;
@@ -1114,6 +1129,7 @@ SV *   sv ;
     DB *	dbp ;
     STRLEN	n_a;
     int		status ;
+    dMY_CXT;
 
 /* printf("In ParseOpenInfo name=[%s] flags=[%d] mode = [%d]\n", name, flags, mode) ;  */
     Zero(RETVAL, 1, DB_File_type) ;
@@ -1596,6 +1612,7 @@ MODULE = DB_File	PACKAGE = DB_File	PREFIX = db_
 
 BOOT:
   {
+    MY_CXT_INIT;
     __getBerkeleyDBInfo() ;
  
     DBT_clear(empty) ; 
@@ -1637,6 +1654,8 @@ db_DoTie_(isHASH, dbtype, name=undef, flags=O_CREAT|O_RDWR, mode=0666, type=DB_H
 int
 db_DESTROY(db)
 	DB_File		db
+	PREINIT:
+	  dMY_CXT;
 	INIT:
 	  CurrentDB = db ;
 	CLEANUP:
@@ -1668,6 +1687,8 @@ db_DELETE(db, key, flags=0)
 	DB_File		db
 	DBTKEY		key
 	u_int		flags
+	PREINIT:
+	  dMY_CXT;
 	INIT:
 	  CurrentDB = db ;
 
@@ -1676,6 +1697,8 @@ int
 db_EXISTS(db, key)
 	DB_File		db
 	DBTKEY		key
+	PREINIT:
+	  dMY_CXT;
 	CODE:
 	{
           DBT		value ;
@@ -1692,6 +1715,8 @@ db_FETCH(db, key, flags=0)
 	DB_File		db
 	DBTKEY		key
 	u_int		flags
+	PREINIT:
+	  dMY_CXT;
 	CODE:
 	{
             DBT		value ;
@@ -1710,6 +1735,8 @@ db_STORE(db, key, value, flags=0)
 	DBTKEY		key
 	DBT		value
 	u_int		flags
+	PREINIT:
+	  dMY_CXT;
 	INIT:
 	  CurrentDB = db ;
 
@@ -1717,6 +1744,8 @@ db_STORE(db, key, value, flags=0)
 int
 db_FIRSTKEY(db)
 	DB_File		db
+	PREINIT:
+	  dMY_CXT;
 	CODE:
 	{
 	    DBTKEY	key ;
@@ -1734,6 +1763,8 @@ int
 db_NEXTKEY(db, key)
 	DB_File		db
 	DBTKEY		key
+	PREINIT:
+	  dMY_CXT;
 	CODE:
 	{
 	    DBT		value ;
@@ -1753,6 +1784,8 @@ int
 unshift(db, ...)
 	DB_File		db
 	ALIAS:		UNSHIFT = 1
+	PREINIT:
+	  dMY_CXT;
 	CODE:
 	{
 	    DBTKEY	key ;
@@ -1794,6 +1827,8 @@ unshift(db, ...)
 I32
 pop(db)
 	DB_File		db
+	PREINIT:
+	  dMY_CXT;
 	ALIAS:		POP = 1
 	CODE:
 	{
@@ -1821,6 +1856,8 @@ pop(db)
 I32
 shift(db)
 	DB_File		db
+	PREINIT:
+	  dMY_CXT;
 	ALIAS:		SHIFT = 1
 	CODE:
 	{
@@ -1848,6 +1885,8 @@ shift(db)
 I32
 push(db, ...)
 	DB_File		db
+	PREINIT:
+	  dMY_CXT;
 	ALIAS:		PUSH = 1
 	CODE:
 	{
@@ -1890,6 +1929,8 @@ push(db, ...)
 I32
 length(db)
 	DB_File		db
+	PREINIT:
+	  dMY_CXT;
 	ALIAS:		FETCHSIZE = 1
 	CODE:
 	    CurrentDB = db ;
@@ -1907,6 +1948,8 @@ db_del(db, key, flags=0)
 	DB_File		db
 	DBTKEY		key
 	u_int		flags
+	PREINIT:
+	  dMY_CXT;
 	CODE:
 	  CurrentDB = db ;
 	  RETVAL = db_del(db, key, flags) ;
@@ -1926,6 +1969,8 @@ db_get(db, key, value, flags=0)
 	DBTKEY		key
 	DBT		value = NO_INIT
 	u_int		flags
+	PREINIT:
+	  dMY_CXT;
 	CODE:
 	  CurrentDB = db ;
 	  DBT_clear(value) ; 
@@ -1946,6 +1991,8 @@ db_put(db, key, value, flags=0)
 	DBTKEY		key
 	DBT		value
 	u_int		flags
+	PREINIT:
+	  dMY_CXT;
 	CODE:
 	  CurrentDB = db ;
 	  RETVAL = db_put(db, key, value, flags) ;
@@ -1963,6 +2010,8 @@ int
 db_fd(db)
 	DB_File		db
 	int		status = 0 ;
+	PREINIT:
+	  dMY_CXT;
 	CODE:
 	  CurrentDB = db ;
 #ifdef DB_VERSION_MAJOR
@@ -1984,6 +2033,8 @@ int
 db_sync(db, flags=0)
 	DB_File		db
 	u_int		flags
+	PREINIT:
+	  dMY_CXT;
 	CODE:
 	  CurrentDB = db ;
 	  RETVAL = db_sync(db, flags) ;
@@ -2001,6 +2052,8 @@ db_seq(db, key, value, flags)
 	DBTKEY		key 
 	DBT		value = NO_INIT
 	u_int		flags
+	PREINIT:
+	  dMY_CXT;
 	CODE:
 	  CurrentDB = db ;
 	  DBT_clear(value) ; 

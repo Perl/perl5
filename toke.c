@@ -5136,10 +5136,9 @@ Perl_yylex(pTHX)
 	case KEY_write:
 #ifdef EBCDIC
 	{
-	    static char ctl_l[2];
-
-	    if (ctl_l[0] == '\0')
- 		ctl_l[0] = toCTRL('L');
+	    char ctl_l[2];
+	    ctl_l[0] = toCTRL('L');
+	    ctl_l[1] = '\0';
 	    gv_fetchpv(ctl_l,TRUE, SVt_PV);
 	}
 #else

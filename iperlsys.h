@@ -692,11 +692,6 @@ struct IPerlEnvInfo
 #define PerlEnv_putenv(str)		putenv((str))
 #define PerlEnv_getenv(str)		getenv((str))
 #define PerlEnv_getenv_len(str,l)	getenv_len((str), (l))
-#define PerlEnv_clearenv()		clearenv()
-#define PerlEnv_get_childenv()		get_childenv()
-#define PerlEnv_free_childenv(e)	free_childenv((e))
-#define PerlEnv_get_childdir()		get_childdir()
-#define PerlEnv_free_childdir(d)	free_childdir((d))
 #ifdef HAS_ENVGETENV
 #  define PerlEnv_ENVgetenv(str)	ENVgetenv((str))
 #  define PerlEnv_ENVgetenv_len(str,l)	ENVgetenv_len((str), (l))
@@ -712,6 +707,17 @@ struct IPerlEnvInfo
 #define PerlEnv_sitelib_path(str)	win32_get_sitelib(str)
 #define PerlEnv_vendorlib_path(str)	win32_get_vendorlib(str)
 #define PerlEnv_get_child_IO(ptr)	win32_get_child_IO(ptr)
+#define PerlEnv_clearenv()		win32_clearenv()
+#define PerlEnv_get_childenv()		win32_get_childenv()
+#define PerlEnv_free_childenv(e)	win32_free_childenv((e))
+#define PerlEnv_get_childdir()		win32_get_childdir()
+#define PerlEnv_free_childdir(d)	win32_free_childdir((d))
+#else
+#define PerlEnv_clearenv()		clearenv()
+#define PerlEnv_get_childenv()		get_childenv()
+#define PerlEnv_free_childenv(e)	free_childenv((e))
+#define PerlEnv_get_childdir()		get_childdir()
+#define PerlEnv_free_childdir(d)	free_childdir((d))
 #endif
 
 #endif	/* PERL_IMPLICIT_SYS */

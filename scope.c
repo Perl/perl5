@@ -50,19 +50,11 @@ Perl_vdefault_protect(pTHX_ volatile JMPENV *pcur_env, int *excpt,
 SV**
 Perl_stack_grow(pTHX_ SV **sp, SV **p, int n)
 {
-#if defined(DEBUGGING) && !defined(USE_THREADS)
-    static int growing = 0;
-    if (growing++)
-      abort();
-#endif
     PL_stack_sp = sp;
 #ifndef STRESS_REALLOC
     av_extend(PL_curstack, (p - PL_stack_base) + (n) + 128);
 #else
     av_extend(PL_curstack, (p - PL_stack_base) + (n) + 1);
-#endif
-#if defined(DEBUGGING) && !defined(USE_THREADS)
-    growing--;
 #endif
     return PL_stack_sp;
 }

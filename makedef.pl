@@ -807,6 +807,11 @@ if ($PLATFORM eq 'win32') {
 			    win32_getpid
 			    win32_crypt
 			    win32_dynaload
+			    win32_get_childenv
+			    win32_free_childenv
+			    win32_clearenv
+			    win32_get_childdir
+			    win32_free_childdir
 			   ))
     {
 	try_symbol($symbol);

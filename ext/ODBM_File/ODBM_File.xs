@@ -70,13 +70,26 @@ typedef datum datum_value ;
 #define odbm_FIRSTKEY(db)			firstkey()
 #define odbm_NEXTKEY(db,key)			nextkey(key)
 
-static int dbmrefcnt;
+#define MY_CXT_KEY "ODBM_File::_guts" XS_VERSION
+
+typedef struct {
+    int		x_dbmrefcnt;
+} my_cxt_t;
+
+START_MY_CXT
+
+#define dbmrefcnt	(MY_CXT.x_dbmrefcnt)
 
 #ifndef DBM_REPLACE
 #define DBM_REPLACE 0
 #endif
 
 MODULE = ODBM_File	PACKAGE = ODBM_File	PREFIX = odbm_
+
+BOOT:
+{
+    MY_CXT_INIT;
+}
 
 ODBM_File
 odbm_TIEHASH(dbtype, filename, flags, mode)
@@ -88,6 +101,8 @@ odbm_TIEHASH(dbtype, filename, flags, mode)
 	{
 	    char *tmpbuf;
 	    void * dbp ;
+	    dMY_CXT;
+
 	    if (dbmrefcnt++)
 		croak("Old dbm can only open one database");
 	    New(0, tmpbuf, strlen(filename) + 5, char);
@@ -116,6 +131,7 @@ void
 DESTROY(db)
 	ODBM_File	db
 	CODE:
+	dMY_CXT;
 	dbmrefcnt--;
 	dbmclose();
 	safefree(db);
