@@ -166,3 +166,15 @@ sub Self::DESTROY { $b = $_[0] + 0; }
 }
 die unless $a == $b;
 EXPECT
+########
+# Interaction of tie and vec
+
+my ($a, $b);
+use Tie::Scalar;
+tie $a,Tie::StdScalar or die;
+vec($b,1,1)=1;
+$a = $b;
+vec($a,1,1)=0;
+vec($b,1,1)=0;
+die unless $a eq $b;
+EXPECT
