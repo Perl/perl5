@@ -1389,7 +1389,7 @@ END
     push @m,
 qq[POD2MAN_EXE = $pod2man_exe\n],
 q[POD2MAN = $(PERL) -we "%m=@ARGV;for (keys %m){" -
--e "system(""MCR $^X "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" $(POD2MAN_EXE) $_ >$m{$_}"");}"
+-e "system(qq/MCR $^X ""-I$(PERL_ARCHLIB)"" ""-I$(PERL_LIB)"" $(POD2MAN_EXE) $_ >$m{$_}/);}"
 ];
     push @m, "\nmanifypods : \$(MAN1PODS) \$(MAN3PODS)\n";
     if (%{$self->{MAN1PODS}} || %{$self->{MAN3PODS}}) {
