@@ -1,4 +1,4 @@
-Unicode/Normalize version 0.12
+Unicode/Normalize version 0.14
 ===================================
 
 Unicode::Normalize - normalized forms of Unicode text
@@ -40,6 +40,15 @@ type the following:
    make test
    make install
 
+If you decide to install the NoXS version after trying to build the XS,
+type the following:
+
+   make clean
+   perl Makefile.PL noxs
+   make
+   make test
+   make install
+
 DEPENDENCIES
 
 This module requires these other modules and libraries:
@@ -48,12 +57,23 @@ Carp
 Exporter
 File::Copy
 File::Spec
-unicore/CombiningClass.pl         or unicode/CombiningClass.pl
-unicore/Decomposition.pl          or unicode/Decomposition.pl
-unicore/CompositionExclusions.txt or unicode/CompExcl.txt
 
-and for the Non-XS version, in addition to the above,
-Lingua::KO::Hangul::Util 0.06
+unicore/CombiningClass.pl
+  (or unicode/CombiningClass.pl)
+unicore/Decomposition.pl
+  (or unicode/Decomposition.pl)
+unicore/CompositionExclusions.txt
+  (or unicode/CompExcl.txt)
+
+# CAVEAT:
+# In bleadperl, unicore/CompExcl.txt is renamed
+# unicore/CompositionExclusions.txt.
+
+And for the NoXS version, in addition to the above,
+
+  Lingua::KO::Hangul::Util 0.06
+
+is required.
 
 COPYRIGHT AND LICENCE
 
@@ -61,8 +81,8 @@ SADAHIRO Tomoyuki, E<lt>SADAHIRO@cpan.orgE<gt>
 
   http://homepage1.nifty.com/nomenclator/perl/
 
-  Copyright(C) 2001, SADAHIRO Tomoyuki. Japan. All rights reserved.
+  Copyright(C) 2001-2002, SADAHIRO Tomoyuki. Japan. All rights reserved.
 
-  This program is free software; you can redistribute it and/or 
+  This program is free software; you can redistribute it and/or
   modify it under the same terms as Perl itself.
 

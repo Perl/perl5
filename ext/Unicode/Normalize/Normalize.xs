@@ -16,9 +16,9 @@
 #endif /* uvuni_to_utf8 */ 
 
 /* Perl 5.6.1 ? */
-#ifndef utf8n_to_uvchr
-#define utf8n_to_uvchr  utf8_to_uv
-#endif /* utf8n_to_uvchr */ 
+#ifndef utf8n_to_uvuni
+#define utf8n_to_uvuni  utf8_to_uv
+#endif /* utf8n_to_uvuni */ 
 
 /* At present, char > 0x10ffff are unaffected without complaint, right? */
 #define VALID_UTF_MAX    (0x10ffff)
@@ -172,7 +172,7 @@ decompose(arg, compat = &PL_sv_no)
     s = (U8*)SvPV(src,srclen);
     e = s + srclen;
     for(p = s; p < e;){
-	uv = utf8n_to_uvchr(p, e - p, &retlen, 0);
+	uv = utf8n_to_uvuni(p, e - p, &retlen, 0);
 	p += retlen;
 	if(Hangul_IsS(uv)) sv_cat_decompHangul(dst, uv);
 	else {
@@ -211,7 +211,7 @@ reorder(arg)
 	U8 *cc_in;
 	STRLEN cc_len, cc_iter, cc_pos;
 
-	uv = utf8n_to_uvchr(p, e - p, &retlen, 0);
+	uv = utf8n_to_uvuni(p, e - p, &retlen, 0);
 	curCC = getCombinClass(uv);
 	p += retlen;
 
@@ -223,7 +223,7 @@ reorder(arg)
 	stk_cc[cc_pos].pos = cc_pos;
 
 	while(p < e) {
-	    uv = utf8n_to_uvchr(p, e - p, &retlen, 0);
+	    uv = utf8n_to_uvuni(p, e - p, &retlen, 0);
 	    curCC = getCombinClass(uv);
 	    if(!curCC) break;
 	    p += retlen;
@@ -288,7 +288,7 @@ compose(arg)
 
     for(p = s; p < e;){
 	if(beginning) {
-	    uvS = utf8n_to_uvchr(p, e - p, &retlen, 0);
+	    uvS = utf8n_to_uvuni(p, e - p, &retlen, 0);
 	    p += retlen;
 
             if (getCombinClass(uvS)){ /* no Starter found yet */
@@ -304,7 +304,7 @@ compose(arg)
 
     /* to the next Starter */
 	while(p < e) {
-	    uv = utf8n_to_uvchr(p, e - p, &retlen, 0);
+	    uv = utf8n_to_uvuni(p, e - p, &retlen, 0);
 	    p += retlen;
 	    curCC = getCombinClass(uv);
 
@@ -345,7 +345,6 @@ compose(arg)
 	}
 	uvS = uv;
     } /* for */
-
     SvCUR_set(dst, d - (U8*)SvPVX(dst));
     RETVAL = dst;
   OUTPUT:

@@ -66,8 +66,8 @@ print ! defined getComposite( 0,  0)
    && 0x1E14 == getComposite(0x0112, 0x0300)
    && 0xAC00 == getComposite(0x1100, 0x1161)
    && 0xADF8 == getComposite(0x1100, 0x1173)
-   && ! getComposite(0x1100, 0x11AF)
-   && ! getComposite(0x1173, 0x11AF)
+   && ! defined getComposite(0x1100, 0x11AF)
+   && ! defined getComposite(0x1173, 0x11AF)
    && 0xAE00 == getComposite(0xADF8, 0x11AF)
   ? "ok" : "not ok", " 5\n";
 
