@@ -194,6 +194,7 @@ ext/DynaLoader/hints/openbsd.pl	Hint for DynaLoader for named architecture
 ext/Encode/Encode.pm		Encode extension
 ext/Encode/Encode.xs		Encode extension
 ext/Encode/Encode/EncodeFormat.pod	Encoding table format
+ext/Encode/Encode/Tcl.pm	Encode extension
 ext/Encode/Encode/ascii.enc	Encoding tables
 ext/Encode/Encode/ascii.ucm	Encoding tables
 ext/Encode/Encode/big5.enc	Encoding tables
