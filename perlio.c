@@ -350,8 +350,22 @@ PerlIO_find_layer(pTHX_ const char *name, STRLEN len)
  if ((SSize_t) len <= 0)
   len = strlen(name);
  svp  = hv_fetch(PerlIO_layer_hv,name,len,0);
- if (svp && (sv = *svp) && SvROK(sv))
-  return *svp;
+ if (!svp && PL_subname && PerlIO_layer_av && av_len(PerlIO_layer_av)+1 >= 2)
+  {
+   SV *pkgsv  = newSVpvn("PerlIO",6);
+   SV *layer  = newSVpvn(name,len);
+   ENTER;
+   /* The two SVs are magically freed by load_module */
+   Perl_load_module(aTHX_ 0, pkgsv, Nullsv, layer, Nullsv);
+   LEAVE;
+   /* Say this is lvalue so we get an 'undef' if still not there */
+   svp  = hv_fetch(PerlIO_layer_hv,name,len,1);
+  }
+ if (svp && (sv = *svp))
+  {
+   if (SvROK(sv))
+    return *svp;
+  }
  return NULL;
 }
 
@@ -452,8 +466,91 @@ PerlIO_define_layer(pTHX_ PerlIO_funcs *tab)
  PerlIO_debug("define %s %p\n",tab->name,tab);
 }
 
+int
+PerlIO_parse_layers(pTHX_ AV *av, const char *names)
+{
+ if (names)
+  {
+   const char *s = names;
+   while (*s)
+    {
+     while (isSPACE(*s) || *s == ':')
+      s++;
+     if (*s)
+      {
+       STRLEN llen = 0;
+       const char *e = s;
+       const char *as = Nullch;
+       STRLEN alen = 0;
+       if (!isIDFIRST(*s))
+        {
+         /* Message is consistent with how attribute lists are passed.
+            Even though this means "foo : : bar" is seen as an invalid separator
+            character.  */
+         char q = ((*s == '\'') ? '"' : '\'');
+         Perl_warn(aTHX_ "perlio: invalid separator character %c%c%c in layer specification list", q, *s, q);
+         return -1;
+        }
+       do
+        {
+         e++;
+        } while (isALNUM(*e));
+       llen = e-s;
+       if (*e == '(')
+        {
+         int nesting = 1;
+         as = ++e;
+         while (nesting)
+          {
+           switch (*e++)
+            {
+             case ')':
+              if (--nesting == 0)
+               alen = (e-1)-as;
+              break;
+             case '(':
+              ++nesting;
+              break;
+             case '\\':
+              /* It's a nul terminated string, not allowed to \ the terminating null.
+                 Anything other character is passed over.  */
+              if (*e++)
+               {
+                break;
+               }
+              /* Drop through */
+             case '\0':
+              e--;
+              Perl_warn(aTHX_ "perlio: argument list not closed for layer \"%.*s\"",(int)(e - s),s);
+              return -1;
+             default:
+              /* boring.  */
+              break;
+            }
+          }
+        }
+       if (e > s)
+        {
+         SV *layer = PerlIO_find_layer(aTHX_ s,llen);
+         if (layer)
+          {
+           av_push(av,SvREFCNT_inc(layer));
+           av_push(av,(as) ? newSVpvn(as,alen) : &PL_sv_undef);
+          }
+         else {
+          Perl_warn(aTHX_ "perlio: unknown layer \"%.*s\"",(int)llen,s);
+	  return -1;
+	 }
+        }
+       s = e;
+      }
+    }
+  }
+ return 0;
+}
+
 void
-PerlIO_default_buffer(pTHX)
+PerlIO_default_buffer(pTHX_ AV *av)
 {
  PerlIO_funcs *tab = &PerlIO_perlio;
  if (O_BINARY != O_TEXT)
@@ -468,10 +565,9 @@ PerlIO_default_buffer(pTHX)
     }
   }
  PerlIO_debug("Pushing %s\n",tab->name);
- av_push(PerlIO_layer_av,SvREFCNT_inc(PerlIO_find_layer(aTHX_ tab->name,0)));
+ av_push(av,SvREFCNT_inc(PerlIO_find_layer(aTHX_ tab->name,0)));
+ av_push(av,&PL_sv_undef);
 }
-
-
 
 PerlIO_funcs *
 PerlIO_default_layer(pTHX_ I32 n)
@@ -482,7 +578,7 @@ PerlIO_default_layer(pTHX_ I32 n)
  int len;
  if (!PerlIO_layer_av)
   {
-   const char *s  = PerlEnv_getenv("PERLIO");
+   const char *s  = (PL_tainting) ? Nullch : PerlEnv_getenv("PERLIO");
    PerlIO_layer_av = get_av("open::layers",GV_ADD|GV_ADDMULTI);
    newXS("perlio::import",XS_perlio_import,__FILE__);
    newXS("perlio::unimport",XS_perlio_unimport,__FILE__);
@@ -500,55 +596,31 @@ PerlIO_default_layer(pTHX_ I32 n)
    PerlIO_define_layer(aTHX_ &PerlIO_utf8);
    PerlIO_define_layer(aTHX_ &PerlIO_byte);
    av_push(PerlIO_layer_av,SvREFCNT_inc(PerlIO_find_layer(aTHX_ PerlIO_unix.name,0)));
+   av_push(PerlIO_layer_av,&PL_sv_undef);
    if (s)
     {
-     IV buffered = 0;
-     while (*s)
-      {
-       while (*s && isSPACE((unsigned char)*s))
-        s++;
-       if (*s)
-        {
-         const char *e = s;
-         SV *layer;
-         while (*e && !isSPACE((unsigned char)*e))
-          e++;
-         if (*s == ':')
-          s++;
-         layer = PerlIO_find_layer(aTHX_ s,e-s);
-         if (layer)
-          {
-           PerlIO_funcs *tab = INT2PTR(PerlIO_funcs *, SvIV(SvRV(layer)));
-           if ((tab->kind & PERLIO_K_DUMMY) && (tab->kind & PERLIO_K_BUFFERED))
-            {
-             if (!buffered)
-              PerlIO_default_buffer(aTHX);
-            }
-           PerlIO_debug("Pushing %.*s\n",(e-s),s);
-           av_push(PerlIO_layer_av,SvREFCNT_inc(layer));
-           buffered |= (tab->kind & PERLIO_K_BUFFERED);
-          }
-         else
-          Perl_warn(aTHX_ "perlio: unknown layer \"%.*s\"",(e-s),s);
-         s = e;
-        }
-      }
+     PerlIO_parse_layers(aTHX_ PerlIO_layer_av,s);
+    }
+   else
+    {
+     PerlIO_default_buffer(aTHX_ PerlIO_layer_av);
     }
   }
- len  = av_len(PerlIO_layer_av);
- if (len < 1)
+ len  = av_len(PerlIO_layer_av)+1;
+ if (len < 2)
   {
-   PerlIO_default_buffer(aTHX);
+   PerlIO_default_buffer(aTHX_ PerlIO_layer_av);
    len  = av_len(PerlIO_layer_av);
   }
+ n *= 2;
  if (n < 0)
-  n += len+1;
- svp = av_fetch(PerlIO_layer_av,n,0);
+  n += len;
+ svp = av_fetch(PerlIO_layer_av,n,FALSE);
  if (svp && (layer = *svp) && SvROK(layer) && SvIOK((layer = SvRV(layer))))
   {
    tab = INT2PTR(PerlIO_funcs *, SvIV(layer));
   }
- /* PerlIO_debug("Layer %d is %s\n",n,tab->name); */
+ /* PerlIO_debug("Layer %d is %s\n",n/2,tab->name); */
  return tab;
 }
 
@@ -556,11 +628,10 @@ PerlIO_default_layer(pTHX_ I32 n)
 #define PerlIO_default_btm() PerlIO_default_layer(aTHX_ 0)
 
 void
-PerlIO_stdstreams()
+PerlIO_stdstreams(pTHX)
 {
  if (!_perlio)
   {
-   dTHX;
    PerlIO_allocate(aTHX);
    PerlIO_fdopen(0,"Ir" PERLIO_STDTEXT);
    PerlIO_fdopen(1,"Iw" PERLIO_STDTEXT);
@@ -640,90 +711,36 @@ PerlIORaw_pushed(PerlIO *f, const char *mode, const char *arg, STRLEN len)
 int
 PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
 {
+ int code = 0;
  if (names)
   {
-   const char *s = names;
-   while (*s)
+   AV *layers = newAV();
+   code = PerlIO_parse_layers(aTHX_ layers,names);
+   if (code == 0)
     {
-     while (isSPACE(*s) || *s == ':')
-      s++;
-     if (*s)
+     IV max = av_len(layers)+1;
+     IV i;
+     for (i=0; i < max; i += 2)
       {
-       STRLEN llen = 0;
-       const char *e = s;
-       const char *as = Nullch;
-       STRLEN alen = 0;
-       if (!isIDFIRST(*s))
+       SV *layer = *av_fetch(layers,i,FALSE);
+       PerlIO_funcs *tab = INT2PTR(PerlIO_funcs *, SvIV(SvRV(layer)));
+       if (tab)
         {
-         /* Message is consistent with how attribute lists are passed.
-            Even though this means "foo : : bar" is seen as an invalid separator
-            character.  */
-         char q = ((*s == '\'') ? '"' : '\'');
-         Perl_warn(aTHX_ "perlio: invalid separator character %c%c%c in layer specification list", q, *s, q);
-         return -1;
-        }
-       do
-        {
-         e++;
-        } while (isALNUM(*e));
-       llen = e-s;
-       if (*e == '(')
-        {
-         int nesting = 1;
-         as = ++e;
-         while (nesting)
+         SV **argp = av_fetch(layers,i+1,FALSE);
+         STRLEN alen = 0;
+         char *as  = (argp && SvOK(*argp)) ? SvPV(*argp,alen) : Nullch;
+         if (!PerlIO_push(aTHX_ f,tab,mode,as,alen))
           {
-           switch (*e++)
-            {
-             case ')':
-              if (--nesting == 0)
-               alen = (e-1)-as;
-              break;
-             case '(':
-              ++nesting;
-              break;
-             case '\\':
-              /* It's a nul terminated string, not allowed to \ the terminating null.
-                 Anything other character is passed over.  */
-              if (*e++)
-               {
-                break;
-               }
-              /* Drop through */
-             case '\0':
-              e--;
-              Perl_warn(aTHX_ "perlio: argument list not closed for layer \"%.*s\"",(int)(e - s),s);
-              return -1;
-             default:
-              /* boring.  */
-              break;
-            }
+           code -1;
+           break;
           }
         }
-       if (e > s)
-        {
-         SV *layer = PerlIO_find_layer(aTHX_ s,llen);
-         if (layer)
-          {
-           PerlIO_funcs *tab = INT2PTR(PerlIO_funcs *, SvIV(SvRV(layer)));
-           if (tab)
-            {
-             if (!PerlIO_push(aTHX_ f,tab,mode,as,alen))
-              return -1;
-            }
-          }
-         else {
-          Perl_warn(aTHX_ "perlio: unknown layer \"%.*s\"",(int)llen,s);
-	  return -1;
-	 }
-        }
-       s = e;
       }
     }
+   SvREFCNT_dec((SV *) layers);
   }
- return 0;
+ return code;
 }
-
 
 
 /*--------------------------------------------------------------------------------------*/
@@ -794,9 +811,37 @@ PerlIO_fileno(PerlIO *f)
  return (*PerlIOBase(f)->tab->Fileno)(f);
 }
 
-PerlIO_funcs *
-PerlIO_top_layer(pTHX_ const char *layers)
+static const char *
+PerlIO_context_layers(pTHX_ const char *mode)
 {
+ const char *type = NULL;
+ /* Need to supply default layer info from open.pm */
+ if (PL_curcop)
+  {
+   SV *layers = PL_curcop->cop_io;
+   if (layers)
+    {
+     STRLEN len;
+     type = SvPV(layers,len);
+     if (type && mode[0] != 'r')
+      {
+       /* Skip to write part */
+       const char *s = strchr(type,0);
+       if (s && (s-type) < len)
+        {
+         type = s+1;
+        }
+      }
+    }
+  }
+ return type;
+}
+
+PerlIO_funcs *
+PerlIO_top_layer(pTHX_ const char *layers,const char *mode,int narg, SV **args)
+{
+ if (!layers)
+  layers = PerlIO_context_layers(aTHX_ mode);
  /* FIXME !!! */
  return PerlIO_default_top();
 }
@@ -804,9 +849,10 @@ PerlIO_top_layer(pTHX_ const char *layers)
 PerlIO *
 PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd, int imode, int perm, PerlIO *f, int narg, SV **args)
 {
- PerlIO_funcs *tab = (f && *f) ? PerlIOBase(f)->tab : PerlIO_top_layer(aTHX_ layers);
+ PerlIO_funcs *tab = (f && *f) ? PerlIOBase(f)->tab
+                               : PerlIO_top_layer(aTHX_ layers, mode, narg, args);
  if (!_perlio)
-  PerlIO_stdstreams();
+  PerlIO_stdstreams(aTHX);
  PerlIO_debug("openn(%s,'%s','%s',%d,%x,%o,%p,%d,%p)\n",
               tab->name,layers,mode,fd,imode,perm,f,narg,args);
  f = (*tab->Open)(aTHX_ tab,mode,fd,imode,perm,f,narg,args);
@@ -1463,26 +1509,6 @@ PerlIOUnix_pushed(PerlIO *f, const char *mode, const char *arg, STRLEN len)
 }
 
 PerlIO *
-PerlIOUnix_fdopen(PerlIO_funcs *self, int fd,const char *mode)
-{
- dTHX;
- PerlIO *f = NULL;
- if (*mode == 'I')
-  mode++;
- if (fd >= 0)
-  {
-   int oflags = PerlIOUnix_oflags(mode);
-   if (oflags != -1)
-    {
-     PerlIOUnix *s = PerlIOSelf(PerlIO_push(aTHX_ (f = PerlIO_allocate(aTHX)),self,mode,Nullch,0),PerlIOUnix);
-     s->fd     = fd;
-     s->oflags = oflags;
-    }
-  }
- return f;
-}
-
-PerlIO *
 PerlIOUnix_open(pTHX_ PerlIO_funcs *self, const char *mode, int fd, int imode, int perm, PerlIO *f, int narg, SV **args)
 {
  if (f)
@@ -1668,15 +1694,6 @@ PerlIOStdio_mode(const char *mode,char *tmode)
   }
  *tmode = '\0';
  return ret;
-}
-
-PerlIO *
-PerlIOStdio_fdopen(PerlIO_funcs *self, int fd,const char *mode)
-{
- dTHX;
- PerlIO *f = NULL;
- int init = 0;
- char tmode[8];
 }
 
 /* This isn't used yet ... */
@@ -2643,7 +2660,6 @@ PerlIOPending_read(PerlIO *f, void *vbuf, Size_t count)
  return got;
 }
 
-
 PerlIO_funcs PerlIO_pending = {
  "pending",
  sizeof(PerlIOBuf),
@@ -3293,14 +3309,15 @@ PerlIO_init(void)
   }
 }
 
-
-
 #undef PerlIO_stdin
 PerlIO *
 PerlIO_stdin(void)
 {
  if (!_perlio)
-  PerlIO_stdstreams();
+  {
+   dTHX;
+   PerlIO_stdstreams(aTHX);
+  }
  return &_perlio[1];
 }
 
@@ -3309,7 +3326,10 @@ PerlIO *
 PerlIO_stdout(void)
 {
  if (!_perlio)
-  PerlIO_stdstreams();
+  {
+   dTHX;
+   PerlIO_stdstreams(aTHX);
+  }
  return &_perlio[2];
 }
 
@@ -3318,7 +3338,10 @@ PerlIO *
 PerlIO_stderr(void)
 {
  if (!_perlio)
-  PerlIO_stdstreams();
+  {
+   dTHX;
+   PerlIO_stdstreams(aTHX);
+  }
  return &_perlio[3];
 }
 

@@ -68,28 +68,6 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		    supplied_fp, &svs, 1);
 }
 
-static char *S_layers(pTHX_ char *mode);
-
-static char *
-S_layers(pTHX_ char *mode)
-{
-    char *type = NULL;
-     /* Need to supply default layer info from open.pm */
-    SV *layers = PL_curcop->cop_io;
-    if (layers) {
-        STRLEN len;
-        type = SvPV(layers,len);
-        if (type && mode[0] != 'r') {
-	    /* Skip to write part */
-	    char *s = strchr(type,0);
-	    if (s && (s-type) < len) {
-		type = s+1;
-	    }
-        }
-    }
-   return type;
-}
-
 bool
 Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	      int rawmode, int rawperm, PerlIO *supplied_fp, SV **svp,
@@ -214,7 +192,8 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	namesv = sv_2mortal(newSVpvn(name,strlen(name)));
 	num_svs = 1;
 	svp = &namesv;
-	fp = PerlIO_openn(aTHX_ S_layers(aTHX_ mode),mode, -1, rawmode, rawperm, NULL, num_svs, svp);
+        type = Nullch;
+	fp = PerlIO_openn(aTHX_ type,mode, -1, rawmode, rawperm, NULL, num_svs, svp);
     }
     else {
 	/* Regular (non-sys) open */
@@ -391,7 +370,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		    else
 			was_fdopen = TRUE;
 		    if (!num_svs)
-			type = S_layers(aTHX_ mode);
+			type = Nullch;
 		    if (!(fp = PerlIO_openn(aTHX_ type,mode,fd,0,0,NULL,num_svs,svp))) {
 			if (dodup)
 			    PerlLIO_close(fd);
@@ -415,7 +394,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 			namesv = sv_2mortal(newSVpvn(type,strlen(type)));
 			num_svs = 1;
 			svp = &namesv;
-		        type = S_layers(aTHX_ mode);
+		        type = Nullch;
 		    }
 		    fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
 		}
@@ -447,7 +426,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		    namesv = sv_2mortal(newSVpvn(type,strlen(type)));
 		    num_svs = 1;
 		    svp = &namesv;
-		    type = S_layers(aTHX_ mode);
+		    type = Nullch;
 		}
 		fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
 	    }
@@ -510,7 +489,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		    namesv = sv_2mortal(newSVpvn(type,strlen(type)));
 		    num_svs = 1;
 		    svp = &namesv;
-		    type = S_layers(aTHX_ mode);
+		    type = Nullch;
 		}
 		fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
 	    }
@@ -614,7 +593,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	if (IoTYPE(io) == IoTYPE_SOCKET
 	    || (IoTYPE(io) == IoTYPE_WRONLY && S_ISCHR(PL_statbuf.st_mode)) ) {
 	    mode[0] = 'w';
-	    if (!(IoOFP(io) = PerlIO_openn(aTHX_ S_layers(aTHX_ mode),mode,PerlIO_fileno(fp),0,0,NULL,num_svs,svp))) {
+	    if (!(IoOFP(io) = PerlIO_openn(aTHX_ type,mode,PerlIO_fileno(fp),0,0,NULL,num_svs,svp))) {
 		PerlIO_close(fp);
 		IoIFP(io) = Nullfp;
 		goto say_false;
