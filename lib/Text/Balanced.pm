@@ -30,6 +30,15 @@ $VERSION = '1.89';
 
 Exporter::export_ok_tags('ALL');
 
+##
+## These shenanagins are to avoid using $& in perl5.6+
+##
+my $GetMatchedText = ($] < 5.006) ? eval 'sub { $& } '
+                                  : eval 'sub { 
+                                           substr($_[0], $-[0], $+[0] - $-[0])
+                                          }';
+
+
 # PROTOTYPES
 
 sub _match_bracketed($$$$$$);
@@ -328,7 +337,8 @@ sub _match_tagged	# ($$$$$$$)
 
 	if (!defined $rdel)
 	{
-		$rdelspec = $&;
+		$rdelspec = &$GetMatchedText($$textref);
+
 		unless ($rdelspec =~ s/\A([[(<{]+)($XMLNAME).*/ quotemeta "$1\/$2". revbracket($1) /oes)
 		{
 			_failmsg "Unable to construct closing tag to match: $rdel",
@@ -911,7 +921,8 @@ sub extract_multiple (;$$$$)	# ($text, $functions_ref, $max_fields, $ignoreunkno
 				elsif (ref($func) eq 'Text::Balanced::Extractor')
 					{ @bits = $field = $func->extract($$textref) }
 				elsif( $$textref =~ m/\G$func/gc )
-					{ @bits = $field = defined($1) ? $1 : $& }
+					{ @bits = $field = defined($1) ? $1 : &$GetMatchedText($$textref) }
+                                       # substr() on previous line is "$&", without the pain
 				$pref ||= "";
 				if (defined($field) && length($field))
 				{

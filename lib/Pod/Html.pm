@@ -1255,9 +1255,9 @@ sub process_pre {
     $rest = $$text;
 
     # insert spaces in place of tabs
-    $rest =~ s#.*#
-	    my $line = $&;
-	    1 while $line =~ s/\t+/' ' x (length($&) * 8 - length($`) % 8)/e;
+    $rest =~ s#(.+)#
+	    my $line = $1;
+            1 while $line =~ s/(\t+)/' ' x ((length($1) * 8) - $-[0] % 8)/e;
 	    $line;
 	#eg;
 
