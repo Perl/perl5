@@ -2,6 +2,8 @@
 #include "perl.h"
 #include "XSUB.h"
 
+#include "patchlevel.h"
+
 #if PATCHLEVEL < 5
 #  ifndef PL_sv_undef
 #    define PL_sv_undef	sv_undef

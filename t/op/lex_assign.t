@@ -33,7 +33,8 @@ for (@INPUT) {
   $op = "$op==$op" unless $op =~ /==/;
   ($op, $expectop) = $op =~ /(.*)==(.*)/;
   
-  $skip = ($op =~ /^'\?\?\?'/) ? "skip" : "not";
+  $skip = ($op =~ /^'\?\?\?'/ or $comment =~ /skip\(.*\Q$^O\E.*\)/i)
+	  ? "skip" : "not";
   $integer = ($comment =~ /^i_/) ? "use integer" : '' ;
   (print "#skipping $comment:\nok $ord\n"), next if $skip eq 'skip';
   
@@ -61,8 +62,8 @@ EOE
 __END__
 ref $xref			# ref
 ref $cstr			# ref nonref
-`ls`				# backtick
-`$undefed`			# backtick undef
+`ls`				# backtick skip(MSWin32)
+`$undefed`			# backtick undef skip(MSWin32)
 <*>				# glob
 <OP>				# readline
 'faked'				# rcatline
@@ -186,9 +187,9 @@ readlink 'non-existent', 'non-existent1' # readlink
 '???'				# fork
 '???'				# wait
 '???'				# waitpid
-system 'sh -c true'		# system
+system "$^X -e 0"		# system
 '???'				# exec
-kill 0, $$			# kill
+'???'				# kill
 getppid				# getppid
 getpgrp				# getpgrp
 '???'				# setpgrp

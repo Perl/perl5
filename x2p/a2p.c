@@ -2087,8 +2087,9 @@ yyparse()
     register int yym, yyn, yystate;
 #if YYDEBUG
     register char *yys;
+#ifndef __cplusplus
     extern char *getenv();
-
+#endif
     if (yys = getenv("YYDEBUG"))
     {
         yyn = *yys;

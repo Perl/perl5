@@ -221,7 +221,7 @@
       croak("Overloaded dereference did not return a reference");	\
   goto am_again;
 
-#define tryAMAGICunDEREF(meth) tryAMAGICunW(meth,setAGAIN,0,)
+#define tryAMAGICunDEREF(meth) tryAMAGICunW(meth,setAGAIN,0,(void)0)
 
 #define opASSIGN (PL_op->op_flags & OPf_STACKED)
 #define SETsv(sv)	STMT_START {					\
