@@ -31,6 +31,201 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14368] By: jhi                                   on 2002/01/21  14:56:42
+        Log: Subject: RE: BCC for Win32 is unhappy @14331
+             From: "Konovalov, Vadim" <vkonovalov@spb.Lucent.com>
+             Date: Mon, 21 Jan 2002 09:48:40 +0300
+             Message-ID: <80C37C8B4041FB4F9135D70A0AAD71B30F00E5@ru0028exch01.spb.lucent.com>
+             
+             (using IV instead of int)
+     Branch: perl
+	   ! hv.h
+____________________________________________________________________________
+[ 14367] By: jhi                                   on 2002/01/21  14:29:05
+        Log: path_is_absolute() needs a prototype (and maybe
+             a better name, but that's another story).
+     Branch: perl
+	   ! embed.fnc embed.h pp_ctl.c proto.h
+____________________________________________________________________________
+[ 14366] By: jhi                                   on 2002/01/21  14:07:35
+        Log: Subject: Re: coderefs in @INC
+             From: Chris Nandor <pudge@pobox.com>
+             Date: Thu, 17 Jan 2002 11:26:02 -0500
+             Message-Id: <p0510030eb86ca7bc03e0@[10.0.1.177]>
+     Branch: perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[ 14365] By: jhi                                   on 2002/01/21  14:06:11
+        Log: Subject: Re: [PATCH warnings, perldiag] document diagnostics
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Sun, 20 Jan 2002 22:53:56 +0100
+             Message-ID: <20020120225356.A12093@rafael>
+     Branch: perl
+	   ! lib/warnings.pm pod/perldiag.pod t/lib/warnings/2use
+	   ! t/lib/warnings/9enabled warnings.h warnings.pl
+____________________________________________________________________________
+[ 14364] By: jhi                                   on 2002/01/21  03:53:08
+        Log: Subject: [PATCH] MakeMaker.pm sub-Makefile.PL tweak for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sun, 20 Jan 2002 22:49:42 -0600
+             Message-Id: <a05101004b8714273d60c@[172.16.52.1]>
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[ 14360] By: jhi                                   on 2002/01/20  17:11:12
+        Log: Subject: [PATCH] lib/ExtUtils/t/Command.t -- VOS Fixes
+             From: Paul_GreenVOS@vos.stratus.com
+             Date: Sat, 19 Jan 02 17:17 est
+             Message-Id: <200201192218.RAA07911@mailhub1.stratus.com>
+             
+             Subject: [PATCH] lib/ExtUtils/t/Command.t -- add more tests
+             From: Paul_GreenVOS@vos.stratus.com
+             Date: Sat, 19 Jan 02 17:19 est
+             Message-Id: <200201192218.RAA12331@mailhub2.stratus.com>
+     Branch: perl
+	   ! lib/ExtUtils/t/Command.t
+____________________________________________________________________________
+[ 14359] By: jhi                                   on 2002/01/20  17:09:40
+        Log: Subject: [PATCH] lib/AnyDBM_File.t -- VOS fix         
+             From: Paul_GreenVOS@vos.stratus.com
+             Date: Sat, 19 Jan 02 14:30 est
+             Message-Id: <200201191932.OAA05601@mailhub1.stratus.com>
+     Branch: perl
+	   ! lib/AnyDBM_File.t
+____________________________________________________________________________
+[ 14358] By: jhi                                   on 2002/01/20  17:01:38
+        Log: Subject: [REPATCH] Re: [PATCH] ext/File/Glob/t/basic.t - VOS patch
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr> 
+             Date: Sun, 20 Jan 2002 13:51:36 +0100
+             Message-ID: <20020120135136.A710@rafael>
+     Branch: perl
+	   ! ext/File/Glob/t/basic.t
+____________________________________________________________________________
+[ 14354] By: jhi                                   on 2002/01/20  06:35:54
+        Log: Make also hex() and oct() to croak if their arguments
+             cannot be downgraded (that is, if they contain wide
+             characters), just like crypt() does (and use the croak
+             feature of sv_utf8_downgrade()).
+     Branch: perl
+	   ! pp.c t/op/oct.t
+____________________________________________________________________________
+[ 14351] By: jhi                                   on 2002/01/19  21:06:58
+        Log: Regen toc.
+     Branch: perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 14350] By: jhi                                   on 2002/01/19  21:03:07
+        Log: Subject: Re: some file names inside pod/perl*delta files don't match .pod names
+             From: David Dyck <dcd@tc.fluke.com>
+             Date: Sat, 19 Jan 2002 13:31:36 -0800 (PST) 
+             Message-ID: <Pine.LNX.4.33.0201191329420.21630-100000@dd.tc.fluke.com>
+     Branch: perl
+	   ! pod/perl5004delta.pod pod/perl5005delta.pod
+	   ! pod/perl561delta.pod pod/perl56delta.pod
+____________________________________________________________________________
+[ 14349] By: jhi                                   on 2002/01/19  20:07:17
+        Log: FAQ sync.
+     Branch: perl
+	   ! pod/perlfaq1.pod pod/perlfaq2.pod
+____________________________________________________________________________
+[ 14348] By: jhi                                   on 2002/01/19  17:58:34
+        Log: Subject: [PATCH lib/Pod/t/Usage.t]
+             From: Abe Timmerman <abe@ztreet.demon.nl>
+             Date: Sat, 19 Jan 2002 19:57:57 +0100
+             Message-ID: <f1gj4usu5m76bv88a3ldptnmo6ld7d44ri@4ax.com>
+     Branch: perl
+	   + lib/Pod/t/Usage.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 14347] By: jhi                                   on 2002/01/19  17:57:08
+        Log: Subject: [PATCH] ext/SDBM_File/sdbm.t -- VOS fix
+             From: Paul_GreenVOS@vos.stratus.com
+             Date: Sat, 19 Jan 02 13:15 est
+             Message-Id: <200201191814.NAA09367@mailhub2.stratus.com>
+     Branch: perl
+	   ! ext/SDBM_File/sdbm.t
+____________________________________________________________________________
+[ 14346] By: jhi                                   on 2002/01/19  17:55:55
+        Log: Integrate perlio; Split out core of sv_magic() into sv_magicext().
+     Branch: perl
+	  !> embed.fnc embed.h embedvar.h global.sym perlapi.c perlapi.h
+	  !> pod/perlapi.pod pod/perlintern.pod proto.h sv.c util.c
+____________________________________________________________________________
+[ 14345] By: gbarr                                 on 2002/01/19  16:51:23
+        Log: Alternative Time::Local algorithm that uses matematical formula
+             for timegm instead of progressive guessing
+     Branch: perl
+	   ! lib/Time/Local.pm
+____________________________________________________________________________
+[ 14344] By: jhi                                   on 2002/01/19  16:11:09
+        Log: Subject: [PATCH] ext/File/Glob/t/basic.t - VOS patch
+             From: Paul_GreenVOS@vos.stratus.com
+             Date: Sat, 19 Jan 02 11:20 est
+             Message-Id: <200201191619.LAA07751@mailhub2.stratus.com>
+     Branch: perl
+	   ! ext/File/Glob/t/basic.t
+____________________________________________________________________________
+[ 14343] By: jhi                                   on 2002/01/19  16:09:52
+        Log: Subject: [PATCH] ext/Cwd/t/cwd.t -- for VOS
+             From: Paul_GreenVOS@vos.stratus.com
+             Date: Fri, 18 Jan 02 22:56 est
+             Message-Id: <200201190400.XAA16899@mailhub1.stratus.com>       
+     Branch: perl
+	   ! ext/Cwd/t/cwd.t
+____________________________________________________________________________
+[ 14342] By: jhi                                   on 2002/01/19  16:08:19
+        Log: Subject: [PATCH] lib/Time/Local.t patch w/o 2038 check           
+             From: Paul_GreenVOS@vos.stratus.com
+             Date: Fri, 18 Jan 02 22:48 est
+             Message-Id: <200201190349.WAA28294@mailhub2.stratus.com>
+     Branch: perl
+	   ! lib/Time/Local.t
+____________________________________________________________________________
+[ 14341] By: jhi                                   on 2002/01/19  16:06:56
+        Log: Subject: [PATCH] ext/Devel/DProf/DProf.t - different way
+             From: Paul_GreenVOS@vos.stratus.com
+             Date: Fri, 18 Jan 02 16:22 est
+             Message-Id: <200201182125.QAA08563@mailhub1.stratus.com>
+     Branch: perl
+	   ! ext/Devel/DProf/DProf.t
+____________________________________________________________________________
+[ 14340] By: jhi                                   on 2002/01/19  03:00:26
+        Log: Subject: [PATCH] Re: ext/Devel/DProf/DProf.t -- use exe_ext
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Fri, 18 Jan 2002 22:07:14 +0100 (CET) 
+             Message-Id: <200201182106.XAA19133@taku.hut.fi>
+     Branch: perl
+	   ! t/comp/script.t t/op/stat.t t/run/fresh_perl.t
+____________________________________________________________________________
+[ 14339] By: jhi                                   on 2002/01/19  02:56:26
+        Log: Don't do socketpair udp unless you've got all what it takes.
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[ 14338] By: jhi                                   on 2002/01/19  02:51:34
+        Log: Subject: [PATCH] Re: perl@14331 - BeOS now quite happy  
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Fri, 18 Jan 2002 23:07:01 +0100 (CET) 
+             Message-Id: <200201182206.AAA15310@taku.hut.fi>
+     Branch: perl
+	   ! lib/ExtUtils/MM_BeOS.pm
+____________________________________________________________________________
+[ 14336] By: jhi                                   on 2002/01/19  02:47:50
+        Log: Avoid bare "set", and kiss .uucp goodbye.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 14334] By: jhi                                   on 2002/01/18  21:16:08
+        Log: Retract #14327 for now, going to the limit seems
+             to be too much for many platforms.
+     Branch: perl
+	   ! lib/Time/Local.t
+____________________________________________________________________________
+[ 14331] By: jhi                                   on 2002/01/18  16:09:38
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14330] By: jhi                                   on 2002/01/18  15:07:49
         Log: Try to make the connect/read/write timeouting.
      Branch: perl
