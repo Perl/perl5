@@ -678,7 +678,7 @@ always spell them out in full for legibility and future compatibility.
 
 Other examples include
 
-    $ PERLDB_OPTS="NonStop frame=2" perl -d myprogram
+    $ PERLDB_OPTS="NonStop LineInfo=listing frame=2" perl -d myprogram
 
 which runs script non-interactively, printing info on each entry
 into a subroutine and each executed line into the file named F<listing>.
