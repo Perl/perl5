@@ -63,6 +63,7 @@ ndbm_DESTROY(db)
 	NDBM_File	db
 	CODE:
 	dbm_close(db->dbp);
+	safefree(db);
 
 #define ndbm_FETCH(db,key)			dbm_fetch(db->dbp,key)
 datum_value

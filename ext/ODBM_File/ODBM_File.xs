@@ -120,6 +120,7 @@ DESTROY(db)
 	CODE:
 	dbmrefcnt--;
 	dbmclose();
+	safefree(db);
 
 datum_value
 odbm_FETCH(db, key)
