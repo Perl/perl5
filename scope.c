@@ -214,7 +214,7 @@ S_save_scalar_at(pTHX_ SV **sptr)
 	    PL_tainted = oldtainted;
 	}
 	SvMAGIC(sv) = SvMAGIC(osv);
-	SvFLAGS(sv) |= SvMAGICAL(osv) | SvREADONLY(osv);
+	SvFLAGS(sv) |= SvMAGICAL(osv);
 	/* XXX SvMAGIC() is *shared* between osv and sv.  This can
 	 * lead to coredumps when both SVs are destroyed without one
 	 * of their SvMAGIC() slots being NULLed. */
