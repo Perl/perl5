@@ -1433,6 +1433,14 @@ EOP
 			    } 
 			}
 			next CMD; };
+		    $cmd =~ /^\@\s*(.*\S)/ && do {
+		      if (open my $fh, $1) {
+			push @cmdfhs, $fh;
+		      }
+		      else {
+			&warn("Can't execute `$1': $!\n");
+		      }
+		      next CMD; };
 		    $cmd =~ /^\|\|?\s*[^|]/ && do {
 			if ($pager =~ /^\|/) {
 			    open(SAVEOUT,">&STDOUT") || &warn("Can't save STDOUT");
@@ -2105,6 +2113,11 @@ sub readline {
   }
   local $frame = 0;
   local $doret = -2;
+  while (@cmdfhs) {
+    my $line = CORE::readline($cmdfhs[-1]);
+    defined $line ? (print $OUT ">> $line" and return $line)
+                  : close pop @cmdfhs;
+  }
   if (ref $OUT and UNIVERSAL::isa($OUT, 'IO::Socket::INET')) {
     $OUT->write(join('', @_));
     my $stuff;
@@ -2487,6 +2500,7 @@ B<$psh$psh> I<cmd>  	Run cmd in a subprocess (reads from DB::IN, writes to DB::O
   . ( $rc eq $sh ? "" : "
 B<$psh> [I<cmd>] 	Run I<cmd> in subshell (forces \"\$SHELL -c 'cmd'\")." ) . "
 		See 'B<O> I<shellBang>' too.
+B<@>I<file>		Execute I<file> containing debugger commands (may nest).
 B<H> I<-number>	Display last number commands (default all).
 B<p> I<expr>		Same as \"I<print {DB::OUT} expr>\" in current package.
 B<|>I<dbcmd>		Run debugger command, piping DB::OUT to current pager.

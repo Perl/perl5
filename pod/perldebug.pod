@@ -387,6 +387,11 @@ their C<$ENV{SHELL}> variable) will be used, which can interfere
 with proper interpretation of exit status or signal and coredump
 information.
 
+=item @ file
+
+Read and execute debugger commands from I<file>.  I<file> may itself contain
+C<@> commands.
+
 =item H -number
 
 Display last n commands.  Only commands longer than one character are
