@@ -3875,10 +3875,10 @@ Perl_sv_pvbyte(pTHXo_ SV *sv)
 }
 
 #undef  Perl_sv_utf8_upgrade
-void
+STRLEN
 Perl_sv_utf8_upgrade(pTHXo_ SV *sv)
 {
-    ((CPerlObj*)pPerl)->Perl_sv_utf8_upgrade(sv);
+    return ((CPerlObj*)pPerl)->Perl_sv_utf8_upgrade(sv);
 }
 
 #undef  Perl_sv_utf8_downgrade

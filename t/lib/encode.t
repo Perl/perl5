@@ -8,7 +8,7 @@ BEGIN {
     }
 }
 use Test;
-use Encode qw(from_to);
+use Encode qw(from_to encode decode encode_utf8 decode_utf8);
 use charnames qw(greek);
 my @encodings = grep(/iso8859/,Encode::encodings());
 my $n = 2;
@@ -16,7 +16,7 @@ my @character_set = ('0'..'9', 'A'..'Z', 'a'..'z');
 my @source = qw(ascii iso8859-1 cp1250);
 my @destiny = qw(cp1047 cp37 posix-bc);
 my @ebcdic_sets = qw(cp1047 cp37 posix-bc);
-plan test => 21+$n*@encodings + 2*@source*@destiny*@character_set + 2*@ebcdic_sets*256;
+plan test => 33+$n*@encodings + 2*@source*@destiny*@character_set + 2*@ebcdic_sets*256;
 my $str = join('',map(chr($_),0x20..0x7E));
 my $cpy = $str;
 ok(length($str),from_to($cpy,'iso8859-1','Unicode'),"Length Wrong");
@@ -91,7 +91,7 @@ foreach my $enc_eb (@ebcdic_sets)
    }
  }
 
-for $i (256,128,129,256)
+for my $i (256,128,129,256)
  {
   my $c = chr($i);
   my $s = "$c\n".sprintf("%02X",$i);
@@ -99,4 +99,15 @@ for $i (256,128,129,256)
   Encode::utf8_upgrade($s);
   ok(Encode::valid_utf8($s),1,"concat of $i botched");
  }
+
+# Spot check a few points in/out of utf8
+for my $i (0x41,128,256,0x20AC)
+ {
+  my $c = chr($i);
+  my $o = encode_utf8($c);
+  ok(decode_utf8($o),$c,"decode_utf8 not inverse of encode_utf8 for $i");
+  ok(encode('utf8',$c),$o,"utf8 encode by name broken for $i");
+  ok(decode('utf8',$o),$c,"utf8 decode by name broken for $i");
+ }
+
 

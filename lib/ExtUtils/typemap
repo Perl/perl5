@@ -32,6 +32,7 @@ UV			T_UV
 I32			T_IV
 I16			T_IV
 I8			T_IV
+STRLEN			T_IV
 U32			T_U_LONG
 U16			T_U_SHORT
 U8			T_UV
