@@ -6,7 +6,7 @@ BEGIN {
     require "test.pl";
 }
 
-plan tests => 23;
+plan tests => 25;
 
 $a = "B\x{fc}f";
 $b = "G\x{100}r";
@@ -123,4 +123,17 @@ $c = 0x200;
     $a = sprintf "\x{1234}%s", "\x{5678}";
     is((sprintf "%x %x %d", unpack("U*", $a), length($a)), "1234 5678 2",
        '\x{1234}%s \x{5678}');
+}
+
+{
+    # check that utf8ness doesn't "accumulate"
+
+    my $w = "w\x{fc}";
+    my $sprintf;
+
+    $sprintf = sprintf "%s%s", $w, "$w\x{100}";
+    is(substr($sprintf,0,2), $w, "utf8 echo");
+
+    $sprintf = sprintf "%s%s", $w, "$w\x{100}";    
+    is(substr($sprintf,0,2), $w, "utf8 echo echo");
 }
