@@ -1009,7 +1009,13 @@ sub pp_grepstart {
 	$need_freetmps = 0;
     }
     write_back_stack();
-    doop($op);
+    my $sym= doop($op);
+    my $next=$op->next;
+    $next->save;
+    my $nexttonext=$next->next;
+    $nexttonext->save;
+    runtime(sprintf("if (PL_op == (($sym)->op_next)->op_next) goto %s;",
+		    label($nexttonext)));
     return $op->next->other;
 }
 
@@ -1027,7 +1033,8 @@ sub pp_mapstart {
     $next->save;
     my $nexttonext=$next->next;
     $nexttonext->save;
-    runtime(sprintf("if (PL_op == (($sym)->op_next)->op_next) goto %s;", label($nexttonext)));
+    runtime(sprintf("if (PL_op == (($sym)->op_next)->op_next) goto %s;",
+		    label($nexttonext)));
     return $op->next->other;
 }
 

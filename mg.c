@@ -890,7 +890,7 @@ magic_clear_all_env(SV *sv, MAGIC *mg)
 	    *end = '\0';
 	    my_setenv(cur,Nullch);
 	    *end = '=';
-	    cur += strlen(end+1)+1;
+	    cur = end + strlen(end+1)+2;
 	}
 	else if ((len = strlen(cur)))
 	    cur += len+1;
@@ -1040,8 +1040,6 @@ magic_setisa(SV *sv, MAGIC *mg)
     return 0;
 }
 
-#ifdef OVERLOAD
-
 int
 magic_setamagic(SV *sv, MAGIC *mg)
 {
@@ -1050,7 +1048,6 @@ magic_setamagic(SV *sv, MAGIC *mg)
 
     return 0;
 }
-#endif /* OVERLOAD */
 
 int
 magic_getnkeys(SV *sv, MAGIC *mg)

@@ -1173,11 +1173,9 @@ sv_2iv(register SV *sv)
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
-#ifdef OVERLOAD
 	  SV* tmpstr;
 	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv, numer)))
-	    return SvIV(tmpstr);
-#endif /* OVERLOAD */
+	      return SvIV(tmpstr);
 	  return (IV)SvRV(sv);
 	}
 	if (SvREADONLY(sv)) {
@@ -1254,11 +1252,9 @@ sv_2uv(register SV *sv)
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
-#ifdef OVERLOAD
 	  SV* tmpstr;
 	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv, numer)))
-	    return SvUV(tmpstr);
-#endif /* OVERLOAD */
+	      return SvUV(tmpstr);
 	  return (UV)SvRV(sv);
 	}
 	if (SvREADONLY(sv)) {
@@ -1336,11 +1332,9 @@ sv_2nv(register SV *sv)
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
-#ifdef OVERLOAD
 	  SV* tmpstr;
 	  if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)))
-	    return SvNV(tmpstr);
-#endif /* OVERLOAD */
+	      return SvNV(tmpstr);
 	  return (double)(unsigned long)SvRV(sv);
 	}
 	if (SvREADONLY(sv)) {
@@ -1553,11 +1547,9 @@ sv_2pv(register SV *sv, STRLEN *lp)
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
-#ifdef OVERLOAD
 	    SV* tmpstr;
 	    if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,string)))
-	      return SvPV(tmpstr,*lp);
-#endif /* OVERLOAD */
+		return SvPV(tmpstr,*lp);
 	    sv = (SV*)SvRV(sv);
 	    if (!sv)
 		s = "NULLREF";
@@ -1762,14 +1754,10 @@ sv_2bool(register SV *sv)
     if (!SvOK(sv))
 	return 0;
     if (SvROK(sv)) {
-#ifdef OVERLOAD
-      {
 	dTHR;
 	SV* tmpsv;
 	if (SvAMAGIC(sv) && (tmpsv = AMG_CALLun(sv,bool_)))
-	  return SvTRUE(tmpsv);
-      }
-#endif /* OVERLOAD */
+	    return SvTRUE(tmpsv);
       return SvRV(sv) != 0;
     }
     if (SvPOKp(sv)) {
@@ -1822,9 +1810,8 @@ sv_setsv(SV *dstr, register SV *sstr)
         dtype = SvTYPE(dstr);
     }
 
-#ifdef OVERLOAD
     SvAMAGIC_off(dstr);
-#endif /* OVERLOAD */
+
     /* There's a lot of redundancy below but we're going for speed here */
 
     switch (stype) {
@@ -2093,11 +2080,9 @@ sv_setsv(SV *dstr, register SV *sstr)
 	    (void)SvIOK_on(dstr);
 	    SvIVX(dstr) = SvIVX(sstr);
 	}
-#ifdef OVERLOAD
 	if (SvAMAGIC(sstr)) {
 	    SvAMAGIC_on(dstr);
 	}
-#endif /* OVERLOAD */
     }
     else if (sflags & SVp_POK) {
 
@@ -2441,7 +2426,6 @@ sv_magic(register SV *sv, SV *obj, int how, char *name, I32 namlen)
     case 0:
 	mg->mg_virtual = &PL_vtbl_sv;
 	break;
-#ifdef OVERLOAD
     case 'A':
         mg->mg_virtual = &PL_vtbl_amagic;
         break;
@@ -2451,7 +2435,6 @@ sv_magic(register SV *sv, SV *obj, int how, char *name, I32 namlen)
     case 'c':
         mg->mg_virtual = 0;
         break;
-#endif /* OVERLOAD */
     case 'B':
 	mg->mg_virtual = &PL_vtbl_bm;
 	break;
@@ -3453,9 +3436,8 @@ sv_inc(register SV *sv)
 	}
 	if (SvROK(sv)) {
 	    IV i;
-#ifdef OVERLOAD
-	    if (SvAMAGIC(sv) && AMG_CALLun(sv,inc)) return;
-#endif /* OVERLOAD */
+	    if (SvAMAGIC(sv) && AMG_CALLun(sv,inc))
+		return;
 	    i = (IV)SvRV(sv);
 	    sv_unref(sv);
 	    sv_setiv(sv, i);
@@ -3547,9 +3529,8 @@ sv_dec(register SV *sv)
 	}
 	if (SvROK(sv)) {
 	    IV i;
-#ifdef OVERLOAD
-	    if (SvAMAGIC(sv) && AMG_CALLun(sv,dec)) return;
-#endif /* OVERLOAD */
+	    if (SvAMAGIC(sv) && AMG_CALLun(sv,dec))
+		return;
 	    i = (IV)SvRV(sv);
 	    sv_unref(sv);
 	    sv_setiv(sv, i);
@@ -4128,9 +4109,7 @@ newSVrv(SV *rv, char *classname)
     SvFLAGS(sv) = 0;
 
     SV_CHECK_THINKFIRST(rv);
-#ifdef OVERLOAD
     SvAMAGIC_off(rv);
-#endif /* OVERLOAD */
 
     if (SvTYPE(rv) < SVt_RV)
       sv_upgrade(rv, SVt_RV);
@@ -4202,12 +4181,10 @@ sv_bless(SV *sv, HV *stash)
     (void)SvUPGRADE(tmpRef, SVt_PVMG);
     SvSTASH(tmpRef) = (HV*)SvREFCNT_inc(stash);
 
-#ifdef OVERLOAD
     if (Gv_AMG(stash))
 	SvAMAGIC_on(sv);
     else
 	SvAMAGIC_off(sv);
-#endif /* OVERLOAD */
 
     return sv;
 }

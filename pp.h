@@ -168,8 +168,6 @@
 		Renew(PL_tmps_stack, PL_tmps_max = PL_tmps_ix + (n) + 1, SV*); \
 	} STMT_END
 
-#ifdef OVERLOAD
-
 #define AMGf_noright	1
 #define AMGf_noleft	2
 #define AMGf_assign	4
@@ -240,11 +238,3 @@
     SvREFCNT_dec(tmpRef);                   \
     SvRV(rv)=AMG_CALLun(rv,copy);        \
   } } STMT_END
-#else
-
-#define tryAMAGICbin(a,b)
-#define tryAMAGICbinSET(a,b)
-#define tryAMAGICun(a)
-#define tryAMAGICunSET(a)
-
-#endif /* OVERLOAD */

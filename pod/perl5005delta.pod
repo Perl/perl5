@@ -310,7 +310,7 @@ and in XSUBs.
 Perl used to complain if it encountered literal carriage returns in
 scripts.  Now they are mostly treated like whitespace within program text.
 Inside string literals and here documents, literal carriage returns are
-ignored if they occur paired with newlines, or get interpreted as newlines
+ignored if they occur paired with linefeeds, or get interpreted as whitespace
 if they stand alone.  This behavior means that literal carriage returns
 in files should be avoided.  You can get the older, more compatible (but
 less generous) behavior by defining the preprocessor symbol

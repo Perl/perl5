@@ -7,7 +7,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib' if -e '../lib';
+    unshift @INC, '../lib' if -e '../lib';
 }
 my $perl = -e '../perl' ? '../perl' : -e './perl' ? './perl' : 'perl';
 

@@ -6,7 +6,7 @@
 # Currently it only tests the untie warning 
 
 chdir 't' if -d 't';
-@INC = "../lib";
+unshift @INC, "../lib";
 $ENV{PERL5LIB} = "../lib";
 
 $|=1;

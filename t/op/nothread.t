@@ -6,7 +6,7 @@
 BEGIN
  {
   chdir 't' if -d 't';
-  @INC = "../lib";
+  unshift @INC, "../lib";
   require Config;
   import Config;
   if ($Config{'usethreads'})

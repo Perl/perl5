@@ -646,6 +646,9 @@ emacs/cperl-mode.elc: emacs/cperl-mode.el
 
 etags:	emacs/cperl-mode.elc
 	sh emacs/ptags
+	perl emacs/e2ctags.pl TAGS > tags
+
+ctags:	etags
 
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 # If this runs make out of memory, delete /usr/include lines.

@@ -6,6 +6,7 @@ my $test = 0;
 
 # symbolic filehandles should only result in glob entries with FH constructors
 
+$|=1;
 my $a = "SYM000";
 print "not " if defined(fileno($a)) or defined *{$a};
 ++$test; print "ok $test\n";

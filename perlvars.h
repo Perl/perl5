@@ -141,12 +141,7 @@ PERLVAR(Ghints,	U32)			/* pragma-tic compile-time flags */
 PERLVAR(Gdo_undump,	bool)		/* -u or dump seen? */
 PERLVAR(Gdebug,		VOL U32)	/* flags given to -D switch */
 
-
-#ifdef OVERLOAD
-
 PERLVAR(Gamagic_generation,	long)
-
-#endif
 
 #ifdef USE_LOCALE_COLLATE
 PERLVAR(Gcollation_ix,	U32)		/* Collation generation index */

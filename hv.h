@@ -71,8 +71,6 @@ struct xpvhv {
 #define HvLAZYDEL_on(hv)	(SvFLAGS(hv) |= SVphv_LAZYDEL)
 #define HvLAZYDEL_off(hv)	(SvFLAGS(hv) &= ~SVphv_LAZYDEL)
 
-#ifdef OVERLOAD
-
 /* Maybe amagical: */
 /* #define HV_AMAGICmb(hv)      (SvFLAGS(hv) & (SVpgv_badAM | SVpgv_AM)) */
 
@@ -85,8 +83,6 @@ struct xpvhv {
 #define HV_badAMAGIC_on(hv)  (SvFLAGS(hv) |= SVpgv_badAM)
 #define HV_badAMAGIC_off(hv) (SvFLAGS(hv) &= ~SVpgv_badAM)
 */
-
-#endif /* OVERLOAD */
 
 #define Nullhe Null(HE*)
 #define HeNEXT(he)		(he)->hent_next

@@ -8,7 +8,6 @@
  */
 #ifndef H_PERL
 #define H_PERL 1
-#define OVERLOAD
 
 #ifdef PERL_FOR_X2P
 /*
@@ -2495,12 +2494,10 @@ EXT MGVTBL PL_vtbl_collxfrm = {0,
 					0,	0,	0};
 #endif
 
-#ifdef OVERLOAD
 EXT MGVTBL PL_vtbl_amagic =       {0,     magic_setamagic,
                                         0,      0,      magic_setamagic};
 EXT MGVTBL PL_vtbl_amagicelem =   {0,     magic_setamagic,
                                         0,      0,      magic_setamagic};
-#endif /* OVERLOAD */
 
 #else /* !DOINIT */
 
@@ -2539,14 +2536,10 @@ EXT MGVTBL PL_vtbl_regdatum;
 EXT MGVTBL PL_vtbl_collxfrm;
 #endif
 
-#ifdef OVERLOAD
 EXT MGVTBL PL_vtbl_amagic;
 EXT MGVTBL PL_vtbl_amagicelem;
-#endif /* OVERLOAD */
 
 #endif /* !DOINIT */
-
-#ifdef OVERLOAD
 
 enum {
   fallback_amg,        abs_amg,
@@ -2681,8 +2674,6 @@ typedef struct am_table_short AMTS;
 #       define F_sqrt_amg   sqrt_amg
 #   endif
 #endif /* _FASTMATH */
-
-#endif /* OVERLOAD */
 
 #define PERLDB_ALL	0x3f		/* No _NONAME, _GOTO */
 #define PERLDBf_SUB	0x01		/* Debug sub enter/exit. */

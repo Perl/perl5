@@ -1250,6 +1250,8 @@ mod(OP *o, I32 type)
     case OP_AV2ARYLEN:
 	PL_hints |= HINT_BLOCK_SCOPE;
     case OP_SASSIGN:
+    case OP_ANDASSIGN:
+    case OP_ORASSIGN:
     case OP_AELEMFAST:
 	PL_modcount++;
 	break;
@@ -1380,8 +1382,8 @@ scalar_mod_type(OP *o, I32 type)
     case OP_READ:
     case OP_SYSREAD:
     case OP_RECV:
-    case OP_ANDASSIGN:	/* may work later */
-    case OP_ORASSIGN:	/* may work later */
+    case OP_ANDASSIGN:
+    case OP_ORASSIGN:
 	return TRUE;
     default:
 	return FALSE;

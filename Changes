@@ -79,6 +79,201 @@ Version 5.005_55        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  2890] By: gsar                                  on 1999/02/12  10:00:30
+        Log: add $AutoLoader::VERSION
+     Branch: perl
+           ! lib/AutoLoader.pm
+____________________________________________________________________________
+[  2889] By: gsar                                  on 1999/02/12  09:55:48
+        Log: tweak PERL_STRICT_CR notes
+     Branch: perl
+           ! pod/perl5005delta.pod
+____________________________________________________________________________
+[  2888] By: gsar                                  on 1999/02/12  09:41:45
+        Log: add note about test-notty target
+     Branch: perl
+           ! README.win32
+____________________________________________________________________________
+[  2887] By: gsar                                  on 1999/02/12  09:37:37
+        Log: add perltodo.pod
+     Branch: perl
+           + pod/perltodo.pod
+	   ! MANIFEST Todo pod/Makefile pod/perl.pod pod/roffitall
+           ! win32/pod.mak
+____________________________________________________________________________
+[  2886] By: jhi                                   on 1999/02/12  08:52:14
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+          +> t/op/fh.t
+          !> (integrate 30 files)
+____________________________________________________________________________
+[  2885] By: gsar                                  on 1999/02/12  08:42:10
+        Log: note how to find REG_INFTY limit
+     Branch: perl
+           ! pod/perlre.pod
+____________________________________________________________________________
+[  2884] By: jhi                                   on 1999/02/12  08:36:14
+        Log: OpenBSD pthreads awareness, thanks to
+             David Leonard <david.leonard@csee.uq.edu.au>
+     Branch: maint-5.005/perl
+           ! Configure hints/openbsd.sh
+____________________________________________________________________________
+[  2883] By: jhi                                   on 1999/02/12  08:29:51
+        Log: AVAILABILITY sync.
+     Branch: maint-5.005/perl
+           ! pod/perl.pod
+____________________________________________________________________________
+[  2882] By: gsar                                  on 1999/02/12  08:05:20
+        Log: IO is maintained by p5p (per Graham Barr's wishes)
+     Branch: perl
+	   ! MAINTAIN ext/IO/ChangeLog ext/IO/README ext/IO/lib/IO/Dir.pm
+	   ! ext/IO/lib/IO/Pipe.pm ext/IO/lib/IO/Poll.pm
+	   ! ext/IO/lib/IO/Select.pm ext/IO/lib/IO/Socket.pm
+           ! ext/IO/lib/IO/Socket/INET.pm ext/IO/lib/IO/Socket/UNIX.pm
+____________________________________________________________________________
+[  2881] By: gsar                                  on 1999/02/12  07:57:13
+        Log: fh.t typo
+     Branch: perl
+           ! t/op/fh.t
+____________________________________________________________________________
+[  2880] By: gsar                                  on 1999/02/12  07:38:16
+        Log: PERL5OPT=-T enables taint mode (suggested by Jason Riedy <ejr@cise.ufl.edu>)
+     Branch: perl
+           ! perl.c pod/perlrun.pod
+____________________________________________________________________________
+[  2879] By: gsar                                  on 1999/02/12  05:39:29
+        Log: fix ops that are not filehandle constructors to not create GV if it
+             doesn't already exist (avoids leaks); extend semantics of defined()
+             so that defined(*{$foo}) works (experimental)
+     Branch: perl
+           + t/op/fh.t
+	   ! MANIFEST embed.h embed.pl objXSUB.h op.c pod/perldiag.pod pp.c
+           ! pp_hot.c pp_sys.c proto.h t/op/gv.t t/op/misc.t
+____________________________________________________________________________
+[  2878] By: jhi                                   on 1999/02/11  22:00:50
+        Log: Replace changes #2783, #2784, #2785, with a single tested
+             patch from Francois Desarmenien <desar@club-internet.fr>. 
+     Branch: maint-5.005/perl
+	   ! MANIFEST ext/GDBM_File/hints/sco.pl ext/IPC/SysV/SysV.xs
+           ! hints/sco.sh
+____________________________________________________________________________
+[  2877] By: jhi                                   on 1999/02/11  20:44:00
+        Log: From: Chris Nandor <pudge@pobox.com>
+             To: perl5-porters@perl.org
+             Subject: [PATCH] perlport.pod 1.39
+             Date: Thu, 11 Feb 1999 12:28:35 -0500
+             Message-Id: <v04020a2db2e8c3177123@[192.168.0.77]>
+     Branch: cfgperl
+           ! pod/perlport.pod
+____________________________________________________________________________
+[  2876] By: jhi                                   on 1999/02/11  20:43:17
+        Log: From: Chris Nandor <pudge@pobox.com>
+             To: perl5-porters@perl.org
+             Subject: [PATCH] perlport.pod 1.39
+             Date: Thu, 11 Feb 1999 12:28:35 -0500
+             Message-Id: <v04020a2db2e8c3177123@[192.168.0.77]>
+     Branch: maint-5.005/perl
+           ! pod/perlport.pod
+____________________________________________________________________________
+[  2875] By: jhi                                   on 1999/02/11  20:35:08
+        Log: The fpsetmask() really is SCO5 only.
+     Branch: maint-5.005/perl
+           ! unixish.h
+____________________________________________________________________________
+[  2874] By: jhi                                   on 1999/02/11  20:32:06
+        Log: Change #2783 missed these.
+     Branch: maint-5.005/perl
+           ! ext/IPC/SysV/SysV.xs unixish.h
+____________________________________________________________________________
+[  2873] By: jhi                                   on 1999/02/11  20:27:45
+        Log: Import the change #2810 from cfgperl.
+     Branch: maint-5.005/perl
+           + ext/GDBM_File/hints/sco.pl
+           ! MANIFEST hints/sco.sh unixish.h
+____________________________________________________________________________
+[  2872] By: jhi                                   on 1999/02/11  19:57:37
+        Log: Sync the current AVAILABILITY.
+     Branch: maint-5.005/perl
+           ! pod/perl.pod pod/perldelta.pod
+____________________________________________________________________________
+[  2871] By: jhi                                   on 1999/02/11  19:42:54
+        Log: Copied the GNU/Hurd hints file over from cfgperl
+             because it works well enough (there are still some
+             rough edges in Hurd), verified via private
+             email from Mark Kettenis <kettenis@wins.uva.nl>
+     Branch: maint-5.005/perl
+           + hints/gnu.sh
+____________________________________________________________________________
+[  2870] By: gsar                                  on 1999/02/11  11:17:08
+        Log: remove double typeglob deref (suggested by RonaldWS <ronaldws@aol.com>)
+     Branch: perl
+           ! ext/IO/lib/IO/Pipe.pm
+____________________________________________________________________________
+[  2869] By: gsar                                  on 1999/02/11  11:00:56
+        Log: update win32/pod.mak
+     Branch: perl
+           ! win32/pod.mak
+____________________________________________________________________________
+[  2868] By: gsar                                  on 1999/02/11  10:42:44
+        Log: From: Benjamin Low <b.d.low@unsw.edu.au>
+             Date: Fri, 08 Jan 1999 14:36:53 +1100
+             Message-ID: <36957D55.1D65A0B2@unsw.edu.au>
+             Subject: Re: [Fwd: IO::Socket::connect and blocking]
+     Branch: perl
+           ! ext/IO/lib/IO/Socket.pm
+____________________________________________________________________________
+[  2867] By: gsar                                  on 1999/02/11  09:43:03
+        Log: av_extend() doc tweak from Jan Dubois
+     Branch: perl
+           ! pod/perlguts.pod
+____________________________________________________________________________
+[  2866] By: gsar                                  on 1999/02/11  09:27:17
+        Log: display full pathname of unreadable files
+     Branch: perl
+           ! utils/perldoc.PL
+____________________________________________________________________________
+[  2865] By: gsar                                  on 1999/02/11  09:02:31
+        Log: missing patch in change#2522
+     Branch: perl
+           ! lib/Pod/Text.pm
+____________________________________________________________________________
+[  2864] By: jhi                                   on 1999/02/11  08:45:00
+        Log: From: Spider Boardman <spider@zk3.dec.com>
+             To: perlbug@perl.com
+             Subject: Not OK: perl 5.00503 +MAINT_TRIAL_5 on RISC-ultrix 4.4 (UNINSTALLED)
+             Date: Wed, 10 Feb 1999 23:33:31 -0500
+             Message-Id: <9902110433.AA12816@abyss.zk3.dec.com>
+     Branch: maint-5.005/perl
+           ! doio.c ext/IPC/SysV/SysV.xs hints/ultrix_4.sh
+____________________________________________________________________________
+[  2863] By: jhi                                   on 1999/02/11  08:35:35
+        Log: AVAILABILITY.
+     Branch: maint-5.005/perl
+           ! pod/perl.pod
+____________________________________________________________________________
+[  2862] By: gsar                                  on 1999/02/11  08:14:34
+        Log: integrate changes#2738,2740 from maint-5.005
+     Branch: perl
+          !> lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[  2861] By: jhi                                   on 1999/02/11  08:04:25
+        Log: Integrate from mainperl.
+     Branch: cfgperl
+	  !> Changes perl.h pod/perl5005delta.pod pp_ctl.c t/op/local.t
+          !> t/op/range.t win32/config.gc
+____________________________________________________________________________
+[  2860] By: gsar                                  on 1999/02/11  07:30:08
+        Log: binmode() support for cygwin32 (suggested by Steven Morlock
+             <newspost@morlock.net>)
+     Branch: perl
+           ! perl.h
+____________________________________________________________________________
+[  2859] By: gsar                                  on 1999/02/11  07:14:21
+        Log: update Changes
+     Branch: perl
+           ! Changes
+          !> pod/perl5005delta.pod
+____________________________________________________________________________
 [  2858] By: gsar                                  on 1999/02/11  07:10:59
         Log: remove dup hunk
      Branch: maint-5.005/perl

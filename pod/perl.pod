@@ -34,7 +34,6 @@ of sections:
     perlopentut		Perl open() tutorial
     perlvar		Perl predefined variables
     perlsub		Perl subroutines
-    perlopentut		Perl opening things tutorial
     perlmod		Perl modules: how they work
     perlmodlib		Perl modules: how to write and use
     perlmodinstall	Perl modules: how to install from CPAN
@@ -69,6 +68,7 @@ of sections:
     perlguts		Perl internal functions for those doing extensions
     perlcall		Perl calling conventions from C
 
+    perltodo		Perl things to do
     perlhist		Perl history records
 
 (If you're intending to read these straight through for the first time,

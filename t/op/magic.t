@@ -4,7 +4,7 @@ BEGIN {
     $^W = 1;
     $| = 1;
     chdir 't' if -d 't';
-    @INC = '../lib';
+    unshift @INC, '../lib';
     $SIG{__WARN__} = sub { die "Dying on warning: ", @_ };
 }
 

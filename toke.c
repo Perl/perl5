@@ -1849,7 +1849,9 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 	    PL_lex_state = LEX_INTERPCONCAT;
 	    return ')';
 	}
-	if (PL_lex_inwhat == OP_SUBST && PL_lex_repl && SvCOMPILED(PL_lex_repl)) {
+	if (PL_lex_inwhat == OP_SUBST && PL_linestr == PL_lex_repl
+	    && SvCOMPILED(PL_lex_repl))
+	{
 	    if (PL_bufptr != PL_bufend)
 		croak("Bad evalled substitution pattern");
 	    PL_lex_repl = Nullsv;
