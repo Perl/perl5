@@ -31,6 +31,191 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10132] By: jhi                                   on 2001/05/16  14:50:55
+        Log: Deprecate pseudo-hashes.
+     Branch: perl
+	   ! pod/perl572delta.pod pod/perlref.pod pod/perltodo.pod
+____________________________________________________________________________
+[ 10131] By: jhi                                   on 2001/05/16  14:26:01
+        Log: HP-UX hints update from Merijn.
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[ 10130] By: jhi                                   on 2001/05/16  14:23:01
+        Log: README.hpux update from Merijn.
+     Branch: perl
+	   ! README.hpux
+____________________________________________________________________________
+[ 10129] By: jhi                                   on 2001/05/16  14:18:56
+        Log: Subject: Re: [PATCH] Abstract "utility" information from installman
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Wed, 16 May 2001 15:57:55 +0100
+             Message-ID: <20010516155755.A4728@netthink.co.uk>
+     Branch: perl
+	   + utils.lst
+	   ! MANIFEST installman installperl
+____________________________________________________________________________
+[ 10128] By: jhi                                   on 2001/05/16  14:15:36
+        Log: Subject: Re: [ID 20010515.001] -DPERL_Y2KWARN doesn't do what it should (Not OK: perl v5.7.1 +DEVEL10104 on i586-linux 2.2.16-22 (UNINST
+             From: "Philip Newton" <pnewton@gmx.de>
+             Date: Tue, 15 May 2001 16:31:05 +0200
+             Message-ID: <3B0159C9.1905.1C6AEF9@localhost>
+             
+             Fix PERL_Y2KWARN test to check before rather than after appending.
+     Branch: perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[ 10127] By: jhi                                   on 2001/05/16  14:08:15
+        Log: Regen Porting stuff.
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH
+____________________________________________________________________________
+[ 10126] By: jhi                                   on 2001/05/16  13:41:50
+        Log: Metaconfig unit change for #10125.
+     Branch: metaconfig
+	   ! U/modified/Oldconfig.U
+____________________________________________________________________________
+[ 10125] By: jhi                                   on 2001/05/16  13:41:35
+        Log: Use OSVERS.
+     Branch: perl
+	   ! Configure config_h.SH perl.c
+____________________________________________________________________________
+[ 10124] By: jhi                                   on 2001/05/16  13:41:09
+        Log: Regen toc.
+     Branch: perl
+	   ! pod/buildtoc.PL pod/perl.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 10123] By: jhi                                   on 2001/05/16  13:25:38
+        Log: Adding the README.dgux to the MANIFEST would be a good idea.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 10122] By: jhi                                   on 2001/05/16  13:08:33
+        Log: Move the stack desire definition to thread.h.
+     Branch: perl
+	   ! ext/Thread/Thread.xs thread.h
+____________________________________________________________________________
+[ 10121] By: jhi                                   on 2001/05/16  13:00:12
+        Log: DG-UX threading patches, including a README.dgux,
+             from Takis Psarogiannakopoulos.
+     Branch: perl
+	   + README.dgux
+	   ! config_h.SH ext/Thread/Thread.xs hints/dgux.sh perl.c
+____________________________________________________________________________
+[ 10120] By: jhi                                   on 2001/05/16  12:55:33
+        Log: Subject: [PATCH B::Deparse] More on /x regexes
+             From: Robin Houston <robin@kitsite.com>
+             Date: Tue, 15 May 2001 19:09:35 +0100
+             Message-ID: <20010515190935.A27268@penderel>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 10119] By: jhi                                   on 2001/05/16  12:45:29
+        Log: Document that the core time() may be rounding rather
+             than truncating, would have saved at least my confusion.
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.pm
+____________________________________________________________________________
+[ 10118] By: jhi                                   on 2001/05/16  12:37:57
+        Log: Subject: perl-current/t/time-hires.t
+             From: John Peacock <jpeacock@rowman.com>
+             Date: Fri, 11 May 2001 14:09:41 -0400
+             Message-ID: <3AFC2AE5.5E787E54@rowman.com>
+     Branch: perl
+	   ! t/lib/time-hires.t
+____________________________________________________________________________
+[ 10117] By: jhi                                   on 2001/05/15  13:40:33
+        Log: Subject: [PATCH dump.c] Op private flags
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Sun, 13 May 2001 20:20:36 +0100
+             Message-ID: <20010513202036.A21896@netthink.co.uk>
+     Branch: perl
+	   ! dump.c
+____________________________________________________________________________
+[ 10116] By: jhi                                   on 2001/05/15  13:28:26
+        Log: Upgrade to Switch 2.03.
+     Branch: perl
+	   ! lib/Switch.pm
+____________________________________________________________________________
+[ 10115] By: jhi                                   on 2001/05/15  13:19:01
+        Log: Integrate change #10113 from mainline: rename CONFIGDOTSH
+             to PERL_CONFIG_SH and use it consistently.
+     Branch: maint-5.6/perl
+	  !> Configure Makefile.SH Policy_sh.SH cflags.SH config_h.SH
+	  !> configpm configure.com makeaperl.SH makedepend.SH makedir.SH
+	  !> myconfig.SH writemain.SH
+____________________________________________________________________________
+[ 10114] By: jhi                                   on 2001/05/15  13:13:21
+        Log: Metaconfig units changes for #10113.
+     Branch: metaconfig
+	   ! U/modified/Config_h.U U/modified/Extract.U U/modified/Oldsym.U
+____________________________________________________________________________
+[ 10113] By: jhi                                   on 2001/05/15  13:12:40
+        Log: The problem described in 20010514.031 still wasn't
+             fully cured, there were remnants of $CONFIG when
+             $CONFIGDOTSH was expected.  Now renamed to PERL_CONFIG_SH
+             to avoid future conflicts.
+     Branch: perl
+	   ! Configure Makefile.SH Policy_sh.SH cflags.SH config_h.SH
+	   ! configpm configure.com makeaperl.SH makedepend.SH makedir.SH
+	   ! myconfig.SH writemain.SH
+____________________________________________________________________________
+[ 10112] By: jhi                                   on 2001/05/15  11:55:44
+        Log: Half of #10107 got lost.
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 10111] By: nick                                  on 2001/05/15  08:39:14
+        Log: Integrate mainline.
+     Branch: perlio
+	  +> ext/POSIX/hints/uts.pl
+	   - Todo Todo-5.6 t/camel-III/vstring.t
+	  !> (integrate 48 files)
+____________________________________________________________________________
+[ 10110] By: jhi                                   on 2001/05/15  02:04:05
+        Log: Subject: [PATCH TestInit.pm] Give Deparse tester a fair chance
+             From: Robin Houston <robin@kitsite.com>
+             Date: Mon, 14 May 2001 22:27:08 +0100
+             Message-ID: <20010514222708.A22963@penderel>
+     Branch: perl
+	   ! t/TestInit.pm
+____________________________________________________________________________
+[ 10109] By: jhi                                   on 2001/05/15  02:03:12
+        Log: Subject: [PATCH B::Deparse] Lvaluable method calls
+             From: Robin Houston <robin@kitsite.com>
+             Date: Mon, 14 May 2001 22:16:43 +0100
+             Message-ID: <20010514221643.A22437@penderel>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 10108] By: jhi                                   on 2001/05/15  02:02:17
+        Log: Subject: [PATCH B::Deparse] C<$foo =~ give_me_a_regex>; /x modifier
+             From: Robin Houston <robin@kitsite.com>
+             Date: Mon, 14 May 2001 22:03:44 +0100
+             Message-ID: <20010514220344.A20643@penderel>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 10107] By: jhi                                   on 2001/05/15  02:01:24
+        Log: Subject: [PATCH B::Deparse] "${foo}_bar"
+             From: Robin Houston <robin@kitsite.com>
+             Date: Mon, 14 May 2001 22:10:07 +0100
+             Message-ID: <20010514221007.A21118@penderel>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 10106] By: jhi                                   on 2001/05/15  01:41:26
+        Log: Fix for 20010514.037; substr() didn't invalidate the locale
+             collation magic.
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[ 10105] By: jhi                                   on 2001/05/14  18:18:24
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10104] By: jhi                                   on 2001/05/14  18:09:07
         Log: Retract #10094.
      Branch: perl
