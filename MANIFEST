@@ -775,6 +775,7 @@ lib/attributes.pm		For "sub foo : attrlist"
 lib/AutoLoader.pm		Autoloader base class
 lib/AutoLoader.t		See if AutoLoader works
 lib/AutoSplit.pm		Split up autoload functions
+lib/AutoSplit.t			See if AutoSplit works
 lib/autouse.pm			Load and call a function only when it's used
 lib/autouse.t			See if autouse works
 lib/base.pm			Establish IS-A relationship at compile time
