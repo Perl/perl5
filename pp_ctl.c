@@ -2463,8 +2463,8 @@ PP(pp_exit)
 	anum = 0;
     else {
 	anum = SvIVx(POPs);
-#ifdef VMSISH_EXIT
-	if (anum == 1 && VMSISH_EXIT)
+#ifdef VMS
+        if (anum == 1 && (PL_op->op_private & OPpEXIT_VMSISH))
 	    anum = 0;
 #endif
     }

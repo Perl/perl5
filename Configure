@@ -13881,7 +13881,7 @@ EOM
 	esac
 	;;
 *)	: no sockets, so pick relatively harmless defaults
-	socksizetype='char *'
+	socksizetype='unsigned'
 	;;
 esac
 

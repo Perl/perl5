@@ -13,6 +13,15 @@ print "1..49\n";
   $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3;
 }
 
+# these shouldn't hang
+{
+    no warnings;
+    sort { for ($_ = 0;; $_++) {} } @a;
+    sort { while(1) {}            } @a;
+    sort { while(1) { last; }     } @a;
+    sort { while(0) { last; }     } @a;
+}
+
 sub Backwards { $a lt $b ? 1 : $a gt $b ? -1 : 0 }
 sub Backwards_stacked($$) { my($a,$b) = @_; $a lt $b ? 1 : $a gt $b ? -1 : 0 }
 

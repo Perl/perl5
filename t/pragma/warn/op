@@ -808,3 +808,54 @@ joe() ;
 sub joe ($$) {}
 EXPECT
 main::fred() called too early to check prototype at - line 3.
+########
+# op.c [Perl_newATTRSUB]
+--FILE-- abc.pm
+use warnings 'void' ;
+BEGIN { $| = 1; print "in begin\n"; }
+CHECK { print "in check\n"; }
+INIT { print "in init\n"; }
+END { print "in end\n"; }
+print "in mainline\n";
+1;
+--FILE--
+use abc;
+delete $INC{"abc.pm"};
+require abc;
+do "abc.pm";
+EXPECT
+in begin
+in mainline
+in check
+in init
+in begin
+Too late to run CHECK block at abc.pm line 3.
+Too late to run INIT block at abc.pm line 4.
+in mainline
+in begin
+Too late to run CHECK block at abc.pm line 3.
+Too late to run INIT block at abc.pm line 4.
+in mainline
+in end
+in end
+in end
+########
+# op.c [Perl_newATTRSUB]
+--FILE-- abc.pm
+no warnings 'void' ;
+BEGIN { $| = 1; print "in begin\n"; }
+CHECK { print "in check\n"; }
+INIT { print "in init\n"; }
+END { print "in end\n"; }
+print "in mainline\n";
+1;
+--FILE--
+require abc;
+do "abc.pm";
+EXPECT
+in begin
+in mainline
+in begin
+in mainline
+in end
+in end

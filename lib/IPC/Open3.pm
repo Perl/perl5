@@ -49,6 +49,13 @@ failure: it just raises an exception matching C</^open3:/>.  However,
 C<exec> failures in the child are not detected.  You'll have to 
 trap SIGPIPE yourself.
 
+open2() does not wait for and reap the child process after it exits.  
+Except for short programs where it's acceptable to let the operating system
+take care of this, you need to do this yourself.  This is normally as 
+simple as calling C<waitpid $pid, 0> when you're done with the process.
+Failing to do this can result in an accumulation of defunct or "zombie"
+processes.  See L<perlfunc/waitpid> for more information.
+
 If you try to read from the child's stdout writer and their stderr
 writer, you'll have problems with blocking, which means you'll want
 to use select() or the IO::Select, which means you'd best use

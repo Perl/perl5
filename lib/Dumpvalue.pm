@@ -404,7 +404,8 @@ sub dumpvars {
     next if @vars && !grep( matchvar($key, $_), @vars );
     if ($self->{usageOnly}) {
       $self->globUsage(\$val, $key)
-	unless $package eq 'Dumpvalue' and $key eq 'stab';
+	if ($package ne 'Dumpvalue' or $key ne 'stab')
+	   and ref(\$val) eq 'GLOB';
     } else {
       $self->dumpglob($package, 0,$key, $val);
     }

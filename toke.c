@@ -5648,30 +5648,28 @@ S_new_constant(pTHX_ char *s, STRLEN len, const char *key, SV *sv, SV *pv,
     SV *res;
     SV **cvp;
     SV *cv, *typesv;
-    const char *why, *why1, *why2;
+    const char *why1, *why2, *why3;
     
-    if (!(PL_hints & HINT_LOCALIZE_HH)) {
+    if (!table || !(PL_hints & HINT_LOCALIZE_HH)) {
 	SV *msg;
 	
-	why = "%^H is not localized";
-    report_short:
-	why1 = why2 = "";
+	why1 = "%^H is not consistent";
+	why2 = strEQ(key,"charnames")
+	       ? " (missing \"use charnames ...\"?)"
+	       : "";
+	why3 = "";
     report:
 	msg = Perl_newSVpvf(aTHX_ "constant(%s): %s%s%s", 
-			    (type ? type: "undef"), why1, why2, why);
+			    (type ? type: "undef"), why1, why2, why3);
 	yyerror(SvPVX(msg));
  	SvREFCNT_dec(msg);
   	return sv;
     }
-    if (!table) {
-	why = "%^H is not defined";
-	goto report_short;
-    }
     cvp = hv_fetch(table, key, strlen(key), FALSE);
     if (!cvp || !SvOK(*cvp)) {
-	why = "} is not defined";
 	why1 = "$^H{";
 	why2 = key;
+	why3 = "} is not defined";
 	goto report;
     }
     sv_2mortal(sv);			/* Parent created it permanently */
@@ -5719,9 +5717,9 @@ S_new_constant(pTHX_ char *s, STRLEN len, const char *key, SV *sv, SV *pv,
     POPSTACK;
     
     if (!SvOK(res)) {
- 	why = "}} did not return a defined value";
  	why1 = "Call to &{$^H{";
  	why2 = key;
+ 	why3 = "}} did not return a defined value";
  	sv = res;
  	goto report;
     }

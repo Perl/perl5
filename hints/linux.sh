@@ -63,7 +63,7 @@ ignore_versioned_solibs='y'
 # intending to replace /usr/bin/perl (at least just yet).
 # This change makes linux consistent with most other unix platforms
 # in having a default of prefix=/usr/local.
-# These notes can probably safely be removed in 5.006_50 and beyond.
+# These notes can probably safely be removed in 5.005_50 and beyond.
 #
 #	9 April 1999  Andy Dougherty  <doughera@lafayette.edu>
 #

@@ -95,6 +95,188 @@ Version v5.6.0
 --------------
 
 ____________________________________________________________________________
+[  5828] By: gsar                                  on 2000/03/19  16:47:14
+        Log: squelch known scalar leak due to compile failure
+     Branch: perl
+	   ! t/pragma/strict-vars
+____________________________________________________________________________
+[  5827] By: gsar                                  on 2000/03/19  09:20:22
+        Log: mention how to look up perllocal.pod (from Michael G Schwern)
+     Branch: perl
+	   ! pod/perlapi.pod pod/perlmodinstall.pod pod/perlmodlib.pod
+____________________________________________________________________________
+[  5826] By: gsar                                  on 2000/03/19  08:49:27
+        Log: mention need to wait for children (from Russ Allbery)
+     Branch: perl
+	   ! lib/IPC/Open2.pm lib/IPC/Open3.pm pod/perldelta.pod
+____________________________________________________________________________
+[  5825] By: gsar                                  on 2000/03/19  08:47:52
+        Log: Pod::Man should strip leading lib/ for module manpages (from
+             Russ Allbery)
+     Branch: perl
+	   ! lib/Pod/Man.pm
+____________________________________________________________________________
+[  5824] By: gsar                                  on 2000/03/19  08:17:49
+        Log: User::pwent fixups for additional fields (from Tom Christiansen);
+             fix bug in pw_has(); tolerate absense of pw{change,age,quota}
+             and pw{comment,class} (Debian 2.1 doesn't have either of these)
+     Branch: perl
+	   ! lib/User/pwent.pm
+____________________________________________________________________________
+[  5823] By: gsar                                  on 2000/03/19  07:41:46
+        Log: pod typo fixes (from Marcel Grunauer <marcel.grunauer@lovely.net>)
+     Branch: perl
+	   ! embed.pl embedvar.h hints/linux.sh pod/perlhack.pod
+	   ! pod/perlnumber.pod pod/perlthrtut.pod vms/ext/Stdio/Stdio.pm
+____________________________________________________________________________
+[  5822] By: gsar                                  on 2000/03/19  07:34:29
+        Log: integrate cfgperl contents into mainline
+     Branch: perl
+	   ! ext/Thread/Thread.pm pod/perlthrtut.pod
+	  !> (integrate 41 files)
+____________________________________________________________________________
+[  5821] By: gsar                                  on 2000/03/19  07:14:38
+        Log: remove dead code
+     Branch: perl
+	   ! lib/charnames.pm
+____________________________________________________________________________
+[  5820] By: gsar                                  on 2000/03/19  07:13:01
+        Log: fix typo
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[  5819] By: gsar                                  on 2000/03/19  07:09:32
+        Log: produce better error message when \N{...} is used without
+             "use charnames ..."
+     Branch: perl
+	   ! pod/perldelta.pod pod/perldiag.pod toke.c
+____________________________________________________________________________
+[  5818] By: gsar                                  on 2000/03/19  06:30:11
+        Log: default warnLevel and dieLevel to 0 in debugger (from Tom
+             Christiansen); make dumpvar.pl safe against non-glob entries
+             in stashes
+     Branch: perl
+	   ! lib/Dumpvalue.pm lib/dumpvar.pl lib/perl5db.pl
+	   ! pod/perldebug.pod
+____________________________________________________________________________
+[  5817] By: gsar                                  on 2000/03/19  06:18:24
+        Log: better notes on s///ee (from Simon Cozens <simon@cozens.net>)
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[  5816] By: gsar                                  on 2000/03/19  05:55:52
+        Log: support for C<use vmsish 'hushed'>; move VMSISH_EXIT out of
+             op_private (from Charles Lane <lane@DUPHY4.Physics.Drexel.Edu>)
+     Branch: perl
+	   ! embed.pl op.c op.h opcode.h opcode.pl perl.h pp.sym pp_ctl.c
+	   ! pp_proto.h vms/ext/vmsish.pm vms/ext/vmsish.t vms/vmsish.h
+____________________________________________________________________________
+[  5815] By: gsar                                  on 2000/03/19  05:27:31
+        Log: fix sort optimizer to not hang inside loops
+     Branch: perl
+	   ! op.c t/op/sort.t
+____________________________________________________________________________
+[  5814] By: gsar                                  on 2000/03/19  03:59:29
+        Log: fixes for alias handling in debugger (from Tom Christiansen)
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[  5813] By: gsar                                  on 2000/03/19  03:38:10
+        Log: warn about CHECK and INIT blocks encountered at run time
+     Branch: perl
+	   ! op.c pod/perldelta.pod pod/perldiag.pod t/pragma/warn/op
+____________________________________________________________________________
+[  5812] By: jhi                                   on 2000/03/19  03:15:58
+        Log: Taint msgrcv() messages; general SysV IPC cleanup.
+     Branch: cfgperl
+	   ! doio.c ext/IPC/SysV/Msg.pm pod/perldelta.pod pod/perlfunc.pod
+	   ! pod/perlipc.pod pod/perlsec.pod t/lib/ipc_sysv.t t/op/taint.t
+____________________________________________________________________________
+[  5811] By: jhi                                   on 2000/03/19  01:48:47
+        Log: Taint shmread().
+     Branch: cfgperl
+	   ! doio.c pod/perldelta.pod pod/perlfunc.pod pod/perlsec.pod
+	   ! t/op/taint.t
+____________________________________________________________________________
+[  5810] By: jhi                                   on 2000/03/19  01:22:47
+        Log: Taint also the passwd field of the getpw*().
+     Branch: cfgperl
+	   ! pod/perldelta.pod pod/perlfunc.pod pod/perlsec.pod pp_sys.c
+	   ! t/op/taint.t
+____________________________________________________________________________
+[  5809] By: jhi                                   on 2000/03/18  21:44:34
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> t/pragma/strict-vars toke.c
+____________________________________________________________________________
+[  5808] By: jhi                                   on 2000/03/18  21:40:55
+        Log: (Re-)introduce $uidsign and $gidsign.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH epoc/config.sh pp_sys.c vms/subconfigure.com
+	   ! vos/config.def vos/config.h vos/config_h.SH_orig
+	   ! win32/config.bc win32/config.gc win32/config.vc
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+	   ! win32/config_h.PL win32/config_sh.PL
+     Branch: metaconfig
+	   ! U/modified/groupstype.U U/typedefs/gidtype.U
+____________________________________________________________________________
+[  5807] By: jhi                                   on 2000/03/18  20:38:12
+        Log: The #5805 requires a test change, too.
+     Branch: cfgperl
+	   ! t/op/taint.t
+____________________________________________________________________________
+[  5806] By: gsar                                  on 2000/03/18  20:10:29
+        Log: queued errors may not be displayed after the PL_error_count limit
+     Branch: perl
+	   ! t/pragma/strict-vars toke.c
+____________________________________________________________________________
+[  5805] By: jhi                                   on 2000/03/18  19:56:12
+        Log: Taint the shell from the getpw*. 
+     Branch: cfgperl
+	   ! pod/perldelta.pod pod/perlfunc.pod pod/perlsec.pod pp_sys.c
+____________________________________________________________________________
+[  5804] By: jhi                                   on 2000/03/18  19:37:01
+        Log: Use the newSVuv().
+     Branch: cfgperl
+	   ! embed.h op.c pp_sys.c toke.c
+____________________________________________________________________________
+[  5803] By: jhi                                   on 2000/03/18  19:08:40
+        Log: Add newSVuv().
+     Branch: cfgperl
+	   ! Configure embed.pl global.sym objXSUB.h perlapi.c perlapi.h
+	   ! pod/perlapi.pod proto.h sv.c
+____________________________________________________________________________
+[  5802] By: jhi                                   on 2000/03/18  17:11:07
+        Log: Configure nits: rewording from Sarathy (aka #5796),
+             and installation directories patch from Robin Parker.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH vos/config.h vos/config_h.SH_orig
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+     Branch: metaconfig
+	   ! U/modified/Getfile.U
+     Branch: metaconfig/U/perl
+	   ! bincompat5005.U
+____________________________________________________________________________
+[  5801] By: jhi                                   on 2000/03/18  16:41:31
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> Changes Configure hints/dos_djgpp.sh lib/ExtUtils/xsubpp
+	  !> lib/Getopt/Long.pm mg.c pod/perlpod.pod pp_hot.c
+	  !> t/lib/charnames.t t/pragma/utf8.t toke.c
+____________________________________________________________________________
+[  5800] By: gsar                                  on 2000/03/18  05:16:32
+        Log: force i_ieeefp=undef on dos_djgpp (it reportedly causes failures
+             in system includes)
+     Branch: perl
+	   ! hints/dos_djgpp.sh
+____________________________________________________________________________
+[  5799] By: gsar                                  on 2000/03/18  05:12:00
+        Log: Getopt::Long 2.23 update (from Johan Vromans)
+     Branch: perl
+	   ! Changes lib/Getopt/Long.pm
+____________________________________________________________________________
 [  5798] By: gsar                                  on 2000/03/18  05:03:20
         Log: recognize single-line declarations in xsubpp; add switches to
              disable newfangled features (from Ilya Zakharevich)

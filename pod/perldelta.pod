@@ -206,18 +206,20 @@ will produce different results on platforms that have different
 $Config{ivsize}.  For portability, be sure to mask off the excess bits
 in the result of unary C<~>, e.g., C<~$x & 0xffffffff>.
 
-=head2 The passwd and shell returned by the getpwxxx() are now tainted
+=head2 More builtins taint their results
 
-Because the user can affect her own encrypted password and login shell
-the password and shell returned by the getpwent(), getpwnam(), and
-getpwuid() functions are tainted.
+The C<passwd> and C<shell> fields returned by the getpwent(), getpwnam(),
+and getpwuid() are now tainted, because the user can affect their own
+encrypted password and login shell.
 
-=head2 The msgrcv() and shmread() now taint
+The variable modified by shmread(), and messages returned by msgrcv()
+(and its object-oriented interface IPC::SysV::Msg::rcv) are also tainted,
+because other untrusted processes can modify messages and shared memory
+segments for their own nefarious purposes.
 
-Because other (untrusted) processes can modify messages and shared
-memory segments for their own nefarious purposes, the messages
-returned by msgrcv() (and its object-oriented interface,
-IPC::SysV::Msg::rcv) and the variable modified by shmread() are tainted.
+To avoid these new tainting behaviors, you can build Perl with the
+Configure option C<-Accflags=-DINCOMPLETE_TAINTS>.  Beware that the
+ensuing perl binary may be insecure.
 
 =back
 
@@ -1972,7 +1974,7 @@ An introduction to Unicode support features in Perl.
 
 =item "%s" variable %s masks earlier declaration in same %s
 
-(W) A "my" or "our" variable has been redeclared in the current scope or statement,
+(W misc) A "my" or "our" variable has been redeclared in the current scope or statement,
 effectively eliminating all access to the previous instance.  This is almost
 always a typographical error.  Note that the earlier variable will still exist
 until the end of the scope or until all closure referents to it are
@@ -1985,7 +1987,7 @@ yet.
 
 =item "our" variable %s redeclared
 
-(W) You seem to have already declared the same global once before in the
+(W misc) You seem to have already declared the same global once before in the
 current lexical scope.
 
 =item '!' allowed only after types %s
@@ -2020,25 +2022,25 @@ See L<perlfunc/pack>.
 
 =item /%s/: Unrecognized escape \\%c passed through
 
-(W) You used a backslash-character combination which is not recognized
+(W regexp) You used a backslash-character combination which is not recognized
 by Perl.  This combination appears in an interpolated variable or a
 C<'>-delimited regular expression.  The character was understood literally.
 
 =item /%s/: Unrecognized escape \\%c in character class passed through
 
-(W) You used a backslash-character combination which is not recognized
+(W regexp) You used a backslash-character combination which is not recognized
 by Perl inside character classes.  The character was understood literally.
 
 =item /%s/ should probably be written as "%s"
 
-(W) You have used a pattern where Perl expected to find a string,
+(W syntax) You have used a pattern where Perl expected to find a string,
 as in the first argument to C<join>.  Perl will treat the true
 or false result of matching the pattern against $_ as the string,
 which is probably not what you had in mind.
 
 =item %s() called too early to check prototype
 
-(W) You've called a function that has a prototype before the parser saw a
+(W prototype) You've called a function that has a prototype before the parser saw a
 definition or declaration for it, and Perl could not check that the call
 conforms to the prototype.  You need to either add an early prototype
 declaration for the subroutine in question, or move the subroutine
@@ -2072,14 +2074,14 @@ name, and not a subroutine call.  C<exists &sub()> will generate this error.
 
 =item %s package attribute may clash with future reserved word: %s
 
-(W) A lowercase attribute name was used that had a package-specific handler.
+(W reserved) A lowercase attribute name was used that had a package-specific handler.
 That name might have a meaning to Perl itself some day, even though it
 doesn't yet.  Perhaps you should use a mixed-case attribute name, instead.
 See L<attributes>.
 
 =item         (in cleanup) %s
 
-(W) This prefix usually indicates that a DESTROY() method raised
+(W misc) This prefix usually indicates that a DESTROY() method raised
 the indicated exception.  Since destructors are usually called by
 the system at arbitrary points during execution, and often a vast
 number of times, the warning is issued only once for any number
@@ -2114,7 +2116,7 @@ setting environment variable C<PERL_BADFREE> to 1.
 
 =item Bareword found in conditional
 
-(W) The compiler found a bareword where it expected a conditional,
+(W bareword) The compiler found a bareword where it expected a conditional,
 which often indicates that an || or && was parsed as part of the
 last argument of the previous construct, for example:
 
@@ -2130,17 +2132,17 @@ The C<strict> pragma is useful in avoiding such errors.
 
 =item Binary number > 0b11111111111111111111111111111111 non-portable
 
-(W) The binary number you specified is larger than 2**32-1
+(W portable) The binary number you specified is larger than 2**32-1
 (4294967295) and therefore non-portable between systems.  See
 L<perlport> for more on portability concerns.
 
 =item Bit vector size > 32 non-portable
 
-(W) Using bit vector sizes larger than 32 is non-portable.
+(W portable) Using bit vector sizes larger than 32 is non-portable.
 
 =item Buffer overflow in prime_env_iter: %s
 
-(W) A warning peculiar to VMS.  While Perl was preparing to iterate over
+(W internal) A warning peculiar to VMS.  While Perl was preparing to iterate over
 %ENV, it encountered a logical name or symbol definition which was too long,
 so it was truncated to the string shown.
 
@@ -2161,7 +2163,7 @@ for other types of variables in future.
 
 =item Can't ignore signal CHLD, forcing to default
 
-(W) Perl has detected that it is being run with the SIGCHLD signal
+(W signal) Perl has detected that it is being run with the SIGCHLD signal
 (sometimes known as SIGCLD) disabled.  Since disabling this signal
 will interfere with proper determination of exit status of child
 processes, Perl has reset the signal to its default value.
@@ -2204,7 +2206,7 @@ See L<perlre>.
 
 =item Character class syntax [%s] belongs inside character classes
 
-(W) The character class constructs [: :], [= =], and [. .]  go
+(W unsafe) The character class constructs [: :], [= =], and [. .]  go
 I<inside> character classes, the [] are part of the construct,
 for example: /[012[:alpha:]345]/.  Note that [= =] and [. .]
 are not currently implemented; they are simply placeholders for
@@ -2218,15 +2220,12 @@ message indicates the type of reference that was expected. This usually
 indicates a syntax error in dereferencing the constant value.
 See L<perlsub/"Constant Functions"> and L<constant>.
 
-=item constant(%s): %%^H is not localized
-
-(F) When setting compile-time-lexicalized hash %^H one should set the 
-corresponding bit of $^H as well.
-
 =item constant(%s): %s
 
-(F) Compile-time-substitutions (such as overloaded constants and
-character names) were not correctly set up.
+(F) The parser found inconsistencies either while attempting to define an
+overloaded constant, or when trying to find the character name specified
+in the C<\N{...}> escape.  Perhaps you forgot to load the corresponding
+C<overload> or C<charnames> pragma?  See L<charnames> and L<overload>.
 
 =item CORE::%s is not a keyword
 
@@ -2250,7 +2249,7 @@ See Server error.
 
 =item Did you mean "local" instead of "our"?
 
-(W) Remember that "our" does not localize the declared global variable.
+(W misc) Remember that "our" does not localize the declared global variable.
 You have declared it again in the same lexical scope, which seems superfluous.
 
 =item Document contains no data
@@ -2264,14 +2263,14 @@ effective uids or gids failed.
 
 =item false [] range "%s" in regexp
 
-(W) A character class range must start and end at a literal character, not
+(W regexp) A character class range must start and end at a literal character, not
 another character class like C<\d> or C<[:alpha:]>.  The "-" in your false
 range is interpreted as a literal "-".  Consider quoting the "-",  "\-".
 See L<perlre>.
 
 =item Filehandle %s opened only for output
 
-(W) You tried to read from a filehandle opened only for writing.  If you
+(W io) You tried to read from a filehandle opened only for writing.  If you
 intended it to be a read/write filehandle, you needed to open it with
 "+<" or "+>" or "+>>" instead of with "<" or nothing.  If
 you intended only to read from the file, use "<".  See
@@ -2279,7 +2278,7 @@ L<perlfunc/open>.
 
 =item flock() on closed filehandle %s
 
-(W) The filehandle you're attempting to flock() got itself closed some
+(W closed) The filehandle you're attempting to flock() got itself closed some
 time before now.  Check your logic flow.  flock() operates on filehandles.
 Are you attempting to call flock() on a dirhandle by the same name?
 
@@ -2292,19 +2291,19 @@ is in (using "::").
 
 =item Hexadecimal number > 0xffffffff non-portable
 
-(W) The hexadecimal number you specified is larger than 2**32-1
+(W portable) The hexadecimal number you specified is larger than 2**32-1
 (4294967295) and therefore non-portable between systems.  See
 L<perlport> for more on portability concerns.
 
 =item Ill-formed CRTL environ value "%s"
 
-(W) A warning peculiar to VMS.  Perl tried to read the CRTL's internal
+(W internal) A warning peculiar to VMS.  Perl tried to read the CRTL's internal
 environ array, and encountered an element without the C<=> delimiter
 used to spearate keys from values.  The element is ignored.
 
 =item Ill-formed message in prime_env_iter: |%s|
 
-(W) A warning peculiar to VMS.  Perl tried to read a logical name
+(W internal) A warning peculiar to VMS.  Perl tried to read a logical name
 or CLI symbol definition when preparing to iterate over %ENV, and
 didn't see the expected delimiter between key and value, so the
 line was ignored.
@@ -2315,7 +2314,7 @@ line was ignored.
 
 =item Illegal binary digit %s ignored
 
-(W) You may have tried to use a digit other than 0 or 1 in a binary number.
+(W digit) You may have tried to use a digit other than 0 or 1 in a binary number.
 Interpretation of the binary number stopped before the offending digit.
 
 =item Illegal number of bits in vec
@@ -2325,7 +2324,7 @@ two from 1 to 32 (or 64, if your platform supports that).
 
 =item Integer overflow in %s number
 
-(W) The hexadecimal, octal or binary number you have specified either
+(W overflow) The hexadecimal, octal or binary number you have specified either
 as a literal or as an argument to hex() or oct() is too big for your
 architecture, and has been converted to a floating point number.  On a
 32-bit architecture the largest hexadecimal, octal or binary number
@@ -2385,7 +2384,7 @@ double-quotish context.
 
 =item Missing command in piped open
 
-(W) You used the C<open(FH, "| command")> or C<open(FH, "command |")>
+(W pipe) You used the C<open(FH, "| command")> or C<open(FH, "command |")>
 construction, but the command was missing or blank.
 
 =item Missing name in "my sub"
@@ -2419,7 +2418,7 @@ get local time.
 
 =item Octal number > 037777777777 non-portable
 
-(W) The octal number you specified is larger than 2**32-1 (4294967295)
+(W portable) The octal number you specified is larger than 2**32-1 (4294967295)
 and therefore non-portable between systems.  See L<perlport> for more
 on portability concerns.
 
@@ -2441,7 +2440,7 @@ references to an object.
 
 =item Parentheses missing around "%s" list
 
-(W) You said something like
+(W parenthesis) You said something like
 
     my $foo, $bar = @_;
 
@@ -2453,12 +2452,12 @@ Remember that "my", "our", and "local" bind tighter than comma.
 
 =item Possible Y2K bug: %s
 
-(W) You are concatenating the number 19 with another number, which
+(W y2k) You are concatenating the number 19 with another number, which
 could be a potential Year 2000 problem.
 
 =item pragma "attrs" is deprecated, use "sub NAME : ATTRS" instead
 
-(W) You have written somehing like this:
+(W deprecated) You have written somehing like this:
 
     sub doit
     {
@@ -2496,7 +2495,7 @@ been freed.
 
 =item Reference is already weak
 
-(W) You have attempted to weaken a reference that is already weak.
+(W misc) You have attempted to weaken a reference that is already weak.
 Doing so has no effect.
 
 =item setpgrp can't take arguments
@@ -2506,7 +2505,7 @@ unlike POSIX setpgid(), which takes a process ID and process group ID.
 
 =item Strange *+?{} on zero-length expression
 
-(W) You applied a regular expression quantifier in a place where it
+(W regexp) You applied a regular expression quantifier in a place where it
 makes no sense, such as on a zero-width assertion.
 Try putting the quantifier inside the assertion instead.  For example,
 the way to match "abc" provided that it is followed by three
@@ -2521,12 +2520,20 @@ real and effective uids or gids.
 
 =item This Perl can't set CRTL environ elements (%s=%s)
 
-(W) Warnings peculiar to VMS.  You tried to change or delete an element
+(W internal) Warnings peculiar to VMS.  You tried to change or delete an element
 of the CRTL's internal environ array, but your copy of Perl wasn't
 built with a CRTL that contained the setenv() function.  You'll need to
 rebuild Perl with a CRTL that does, or redefine F<PERL_ENV_TABLES> (see
 L<perlvms>) so that the environ array isn't the target of the change to
 %ENV which produced the warning.
+
+=item Too late to run %s block
+
+(W void) A CHECK or INIT block is being defined during run time proper,
+when the opportunity to run them has already passed.  Perhaps you are
+loading a file with C<require> or C<do> when you should be using
+C<use> instead.  Or perhaps you should put the C<require> or C<do>
+inside a BEGIN block.
 
 =item Unknown open() mode '%s'
 
@@ -2543,7 +2550,7 @@ subvert Perl's population of %ENV for nefarious purposes.
 
 =item Unrecognized escape \\%c passed through
 
-(W) You used a backslash-character combination which is not recognized
+(W misc) You used a backslash-character combination which is not recognized
 by Perl.  The character was understood literally.
 
 =item Unterminated attribute parameter in attribute list
@@ -2576,7 +2583,7 @@ too soon.
 
 =item Value of CLI symbol "%s" too long
 
-(W) A warning peculiar to VMS.  Perl tried to read the value of an %ENV
+(W misc) A warning peculiar to VMS.  Perl tried to read the value of an %ENV
 element from a CLI symbol table, and found a resultant string longer
 than 1024 characters.  The return value has been truncated to 1024
 characters.
@@ -2642,17 +2649,19 @@ warning.  And in Perl 5.005, this special treatment will cease.
 
 =head1 Known Problems
 
-=head2 Thread tests failing
+=head2 Thread test failures
 
-The subtests 19 and 20 of the lib/thread test are known to fail in
-many platforms.
+The subtests 19 and 20 of lib/thread.t test are known to fail due to
+fundamental problems in the 5.005 threading implementation.  These are
+not new failures--Perl 5.005_0x has the same bugs, but didn't have these
+tests.
 
 =head2 EBCDIC platforms not supported
 
-In earlier releases of Perl the EBCDIC environments like OS390 (also
-known as Open Edition MVS) and VM-ESA were supported.  Due to the
-changes required by the UTF-8 (Unicode) support in Perl 5.6 the EBCDIC
-platforms are not supported in Perl 5.6.0.
+In earlier releases of Perl, EBCDIC environments like OS390 (also
+known as Open Edition MVS) and VM-ESA were supported.  Due to changes
+required by the UTF-8 (Unicode) support, the EBCDIC platforms are not
+supported in Perl 5.6.0.
 
 =head2 NEXTSTEP 3.3 POSIX test failure
 
@@ -2679,10 +2688,10 @@ these days.
 
 =head2 Many features still experimental
 
-As discussed above, many features are still experimental, to a greater
-or lesser degree.  Interfaces and implementation are subject to
-change, in extreme cases even subject to removal in some future
-release of Perl.  These features include the following:
+As discussed above, many features are still experimental.  Interfaces and
+implementation of these features are subject to change, and in extreme cases,
+even subject to removal in some future release of Perl.  These features
+include the following:
 
 =over 4
 
@@ -2698,9 +2707,9 @@ release of Perl.  These features include the following:
 
 =item The Compiler suite
 
-=item the DB module
+=item The DB module
 
-=item the regular expression constructs C<(?{ code })> and C<(??{ code })>
+=item The regular expression constructs C<(?{ code })> and C<(??{ code })>
 
 =back
 

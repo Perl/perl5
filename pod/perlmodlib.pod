@@ -802,17 +802,22 @@ By-name interface to Perl's built-in getpw*() functions
 
 To find out I<all> modules installed on your system, including
 those without documentation or outside the standard release, 
-jus tdo this:
+just do this:
 
     % find `perl -e 'print "@INC"'` -name '*.pm' -print
 
-They should all have their own documentation installed and accessible
-via your system man(1) command.  If you do not have a B<find>
+To get a log of all module distributions which have been installed
+since perl was installed, just do:
+
+    % perldoc perllocal
+
+Modules should all have their own documentation installed and accessible
+via your system man(1) command, or via the C<perldoc> program.  If you do
+not have a B<find>
 program, you can use the Perl B<find2perl> program instead, which
 generates Perl code as output you can run through perl.  If you
 have a B<man> program but it doesn't find your modules, you'll have
-to fix your manpath.  See L<perl> for details.  If you have no
-system B<man> command, you might try the B<perldoc> program.
+to fix your manpath.  See L<perl> for details.
 
 =head2 Extension Modules
 

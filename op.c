@@ -4656,6 +4656,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    if (!PL_checkav)
 		PL_checkav = newAV();
 	    DEBUG_x( dump_sub(gv) );
+	    if (PL_main_start && ckWARN(WARN_VOID))
+		Perl_warner(aTHX_ WARN_VOID, "Too late to run CHECK block");
 	    av_unshift(PL_checkav, 1);
 	    av_store(PL_checkav, 0, SvREFCNT_inc(cv));
 	    GvCV(gv) = 0;
@@ -4664,6 +4666,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    if (!PL_initav)
 		PL_initav = newAV();
 	    DEBUG_x( dump_sub(gv) );
+	    if (PL_main_start && ckWARN(WARN_VOID))
+		Perl_warner(aTHX_ WARN_VOID, "Too late to run INIT block");
 	    av_push(PL_initav, SvREFCNT_inc(cv));
 	    GvCV(gv) = 0;
 	}
@@ -4804,6 +4808,8 @@ Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
 	else if (strEQ(s, "CHECK")) {
 	    if (!PL_checkav)
 		PL_checkav = newAV();
+	    if (PL_main_start && ckWARN(WARN_VOID))
+		Perl_warner(aTHX_ WARN_VOID, "Too late to run CHECK block");
 	    av_unshift(PL_checkav, 1);
 	    av_store(PL_checkav, 0, SvREFCNT_inc(cv));
 	    GvCV(gv) = 0;
@@ -4811,6 +4817,8 @@ Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
 	else if (strEQ(s, "INIT")) {
 	    if (!PL_initav)
 		PL_initav = newAV();
+	    if (PL_main_start && ckWARN(WARN_VOID))
+		Perl_warner(aTHX_ WARN_VOID, "Too late to run INIT block");
 	    av_push(PL_initav, SvREFCNT_inc(cv));
 	    GvCV(gv) = 0;
 	}
@@ -5153,6 +5161,20 @@ Perl_ck_eval(pTHX_ OP *o)
     }
     o->op_targ = (PADOFFSET)PL_hints;
     return o;
+}
+
+OP *
+Perl_ck_exit(pTHX_ OP *o)
+{
+#ifdef VMS
+    HV *table = GvHV(PL_hintgv);
+    if (table) {
+       SV **svp = hv_fetch(table, "vmsish_exit", 11, FALSE);
+       if (svp && *svp && SvTRUE(*svp))
+           o->op_private |= OPpEXIT_VMSISH;
+    }
+#endif
+    return ck_fun(o);
 }
 
 OP *
@@ -5992,6 +6014,12 @@ Perl_ck_sort(pTHX_ OP *o)
 		    for (k = kLISTOP->op_first->op_next; k; k = k->op_next) {
 			if (k->op_next == kid)
 			    k->op_next = 0;
+			/* don't descend into loops */
+			else if (k->op_type == OP_ENTERLOOP
+				 || k->op_type == OP_ENTERITER)
+			{
+			    k = cLOOPx(k)->op_lastop;
+			}
 		    }
 		}
 		else

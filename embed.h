@@ -1134,6 +1134,7 @@
 #define ck_eval			Perl_ck_eval
 #define ck_exec			Perl_ck_exec
 #define ck_exists		Perl_ck_exists
+#define ck_exit			Perl_ck_exit
 #define ck_ftst			Perl_ck_ftst
 #define ck_fun			Perl_ck_fun
 #define ck_fun_locale		Perl_ck_fun_locale
@@ -2568,6 +2569,7 @@
 #define ck_eval(a)		Perl_ck_eval(aTHX_ a)
 #define ck_exec(a)		Perl_ck_exec(aTHX_ a)
 #define ck_exists(a)		Perl_ck_exists(aTHX_ a)
+#define ck_exit(a)		Perl_ck_exit(aTHX_ a)
 #define ck_ftst(a)		Perl_ck_ftst(aTHX_ a)
 #define ck_fun(a)		Perl_ck_fun(aTHX_ a)
 #define ck_fun_locale(a)	Perl_ck_fun_locale(aTHX_ a)
@@ -4982,6 +4984,8 @@
 #define ck_exec			Perl_ck_exec
 #define Perl_ck_exists		CPerlObj::Perl_ck_exists
 #define ck_exists		Perl_ck_exists
+#define Perl_ck_exit		CPerlObj::Perl_ck_exit
+#define ck_exit			Perl_ck_exit
 #define Perl_ck_ftst		CPerlObj::Perl_ck_ftst
 #define ck_ftst			Perl_ck_ftst
 #define Perl_ck_fun		CPerlObj::Perl_ck_fun

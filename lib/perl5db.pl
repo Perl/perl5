@@ -273,13 +273,13 @@ $inhibit_exit = $option{PrintRet} = 1;
 		 );
 
 # These guys may be defined in $ENV{PERL5DB} :
-$rl = 1 unless defined $rl;
-$warnLevel = 1 unless defined $warnLevel;
-$dieLevel = 1 unless defined $dieLevel;
-$signalLevel = 1 unless defined $signalLevel;
-$pre = [] unless defined $pre;
-$post = [] unless defined $post;
-$pretype = [] unless defined $pretype;
+$rl		= 1	unless defined $rl;
+$warnLevel	= 0	unless defined $warnLevel;
+$dieLevel	= 0	unless defined $dieLevel;
+$signalLevel	= 1	unless defined $signalLevel;
+$pre		= []	unless defined $pre;
+$post		= []	unless defined $post;
+$pretype	= []	unless defined $pretype;
 
 warnLevel($warnLevel);
 dieLevel($dieLevel);
@@ -604,16 +604,19 @@ EOP
 		$cmd =~ /^$/ && ($cmd = $laststep);
 		push(@hist,$cmd) if length($cmd) > 1;
 	      PIPE: {
-		    ($i) = split(/\s+/,$cmd);
-		    #eval "\$cmd =~ $alias{$i}", print $OUT $@ if $alias{$i};
-		    if ($alias{$i}) { 
-			print STDERR "ALIAS $cmd INTO ";
-			eval "\$cmd =~ $alias{$i}";
-			print "$cmd\n";
-			print $OUT $@;
-		    }
 		    $cmd =~ s/^\s+//s;   # trim annoying leading whitespace
 		    $cmd =~ s/\s+$//s;   # trim annoying trailing whitespace
+		    ($i) = split(/\s+/,$cmd);
+		    if ($alias{$i}) { 
+			# squelch the sigmangler
+			local $SIG{__DIE__};
+			local $SIG{__WARN__};
+			eval "\$cmd =~ $alias{$i}";
+			if ($@) {
+			    print $OUT "Couldn't evaluate `$i' alias: $@";
+			    next CMD;
+			} 
+		    }
 		    $cmd =~ /^q$/ && ($exiting = 1) && exit 0;
 		    $cmd =~ /^h$/ && do {
 			print_help($help);
@@ -1211,6 +1214,9 @@ EOP
 			$inpat = $1;
 			$inpat =~ s:([^\\])/$:$1:;
 			if ($inpat ne "") {
+			    # squelch the sigmangler
+			    local $SIG{__DIE__};
+			    local $SIG{__WARN__};
 			    eval '$inpat =~ m'."\a$inpat\a";	
 			    if ($@ ne "") {
 				print $OUT "$@";
@@ -1240,9 +1246,12 @@ EOP
 			$inpat = $1;
 			$inpat =~ s:([^\\])\?$:$1:;
 			if ($inpat ne "") {
+			    # squelch the sigmangler
+			    local $SIG{__DIE__};
+			    local $SIG{__WARN__};
 			    eval '$inpat =~ m'."\a$inpat\a";	
 			    if ($@ ne "") {
-				print $OUT "$@";
+				print $OUT $@;
 				next CMD;
 			    }
 			    $pat = $inpat;
@@ -1308,19 +1317,39 @@ EOP
 			next CMD; };
 		    $cmd =~ s/^p$/print {\$DB::OUT} \$_/;
 		    $cmd =~ s/^p\b/print {\$DB::OUT} /;
-		    $cmd =~ /^=/ && do {
-			if (local($k,$v) = ($cmd =~ /^=\s*(\S+)\s+(.*)/)) {
-			    $alias{$k}="s~$k~$v~";
-			    print $OUT "$k = $v\n";
-			} elsif ($cmd =~ /^=\s*$/) {
-			    foreach $k (sort keys(%alias)) {
-				if (($v = $alias{$k}) =~ s~^s\~$k\~(.*)\~$~$1~) {
-				    print $OUT "$k = $v\n";
-				} else {
+		    $cmd =~ s/^=\s*// && do {
+			my @keys;
+			if (length $cmd == 0) {
+			    @keys = sort keys %alias;
+			} 
+                        elsif (my($k,$v) = ($cmd =~ /^(\S+)\s+(\S.*)/)) {
+			    # can't use $_ or kill //g state
+			    for my $x ($k, $v) { $x =~ s/\a/\\a/g }
+			    $alias{$k} = "s\a$k\a$v\a";
+			    # squelch the sigmangler
+			    local $SIG{__DIE__};
+			    local $SIG{__WARN__};
+			    unless (eval "sub { s\a$k\a$v\a }; 1") {
+				print $OUT "Can't alias $k to $v: $@\n"; 
+				delete $alias{$k};
+				next CMD;
+			    } 
+			    @keys = ($k);
+			} 
+			else {
+			    @keys = ($cmd);
+			} 
+			for my $k (@keys) {
+			    if ((my $v = $alias{$k}) =~ ss\a$k\a(.*)\a$1) {
+				print $OUT "$k\t= $1\n";
+			    } 
+			    elsif (defined $alias{$k}) {
 				    print $OUT "$k\t$alias{$k}\n";
-				};
-			    };
-			};
+			    } 
+			    else {
+				print "No alias for $k\n";
+			    } 
+			}
 			next CMD; };
 		    $cmd =~ /^\|\|?\s*[^|]/ && do {
 			if ($pager =~ /^\|/) {
@@ -1716,7 +1745,7 @@ sub setterm {
 	    $| = 1;
 	    select($sel);
 	} else {
-	    eval "require Term::Rendezvous;" or die $@;
+	    eval "require Term::Rendezvous;" or die;
 	    my $rv = $ENV{PERLDB_NOTTY} || "/tmp/perldbtty$$";
 	    my $term_rv = new Term::Rendezvous $rv;
 	    $IN = $term_rv->IN;

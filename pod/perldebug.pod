@@ -488,16 +488,23 @@ Run Tk while prompting (with ReadLine).
 
 =item C<signalLevel>, C<warnLevel>, C<dieLevel>
 
-Level of verbosity.  By default, the debugger prints backtraces
-upon receiving any kind of warning (this is often annoying) and
-fatal exceptions (this is often valuable).  It will attempt to print
-a message when uncaught INT, BUS, or SEGV signals arrive.
+Level of verbosity.  By default, the debugger leaves your exceptions
+and warnings alone, because altering them can break correctly running
+programs.  It will attempt to print a message when uncaught INT, BUS, or
+SEGV signals arrive.  (But see the mention of signals in L<BUGS> below.)
 
-To disable this behaviour, set these values to 0.  If C<dieLevel>
-is 2, the debugger usurps your own exception handler and prints out
-a trace of these, replacing your exceptions with its own.  This may
-be useful for some tracing purposes, but tends to hopelessly destroy
-any program that takes its exception handling seriously.
+To disable this default safe mode, set these values to something higher
+than 0.  At a level of 1, you get backtraces upon receiving any kind
+of warning (this is often annoying) or exception (this is
+often valuable).  Unfortunately, the debugger cannot discern fatal
+exceptions from non-fatal ones.  If C<dieLevel> is even 1, then your
+non-fatal exceptions are also traced and unceremoniously altered if they
+came from C<eval'd> strings or from any kind of C<eval> within modules
+you're attempting to load.  If C<dieLevel> is 2, the debugger doesn't
+care where they came from:  It usurps your exception handler and prints
+out a trace, then modifies all exceptions with its own embellishments.
+This may perhaps be useful for some tracing purposes, but tends to hopelessly
+destroy any program that takes its exception handling seriously.
 
 =item C<AutoTrace>
 
@@ -929,3 +936,9 @@ that were not compiled by Perl, such as those from C or C++ extensions.
 
 If you alter your @_ arguments in a subroutine (such as with B<shift>
 or B<pop>, the stack backtrace will not show the original values.
+
+If you're in a slow syscall (like C<wait>ing, C<accept>ing, or C<read>ing
+from your keyboard or a socket) and haven't set up your own C<$SIG{INT}>
+handler, then you won't be able to CTRL-C your way back to the debugger,
+because the debugger's own C<$SIG{INT}> handler doesn't understand that
+it needs to raise an exception to longjmp(3) out of slow syscalls.

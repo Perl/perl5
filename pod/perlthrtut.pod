@@ -4,6 +4,14 @@ perlthrtut - tutorial on threads in Perl
 
 =head1 DESCRIPTION
 
+    WARNING: Threading is an experimental feature.  Both the interface
+    and implementation are subject to change drastically.  In fact, this
+    documentation describes the flavor of threads that was in version
+    5.005.  Perl 5.6.0 and later have the beginnings of support for
+    interpreter threads, which (when finished) is expected to be
+    significantly different from what is described here.  The information
+    contained here may therefore soon be obsolete.  Use at your own risk!
+
 One of the most prominent new features of Perl 5.005 is the inclusion
 of threads.  Threads make a number of things a lot easier, and are a
 very useful addition to your bag of programming tricks.
@@ -389,7 +397,7 @@ to get them.
 
 =head2 Ignoring A Thread
 
-join() does three things:it waits for a thread to exit, cleans up
+join() does three things: it waits for a thread to exit, cleans up
 after it, and returns any data the thread may have produced.  But what
 if you're not interested in the thread's return values, and you don't
 really care when the thread finishes? All you want is for the thread
@@ -435,10 +443,10 @@ more than one thread can be accessing this data at once.
 Perl's scoping rules don't change because you're using threads.  If a
 subroutine (or block, in the case of async()) could see a variable if
 you weren't running with threads, it can see it if you are.  This is
-especially important for the subroutines that create, and makes my
+especially important for the subroutines that create, and makes C<my>
 variables even more important.  Remember--if your variables aren't
-lexically scoped (declared with C<my>) you're probably sharing it between
-threads.
+lexically scoped (declared with C<my>) you're probably sharing them
+between threads.
 
 =head2 Thread Pitfall: Races
 

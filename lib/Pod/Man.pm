@@ -1,5 +1,5 @@
 # Pod::Man -- Convert POD data to formatted *roff input.
-# $Id: Man.pm,v 1.1 2000/03/16 22:00:36 eagle Exp $
+# $Id: Man.pm,v 1.2 2000/03/19 07:30:13 eagle Exp $
 #
 # Copyright 1999, 2000 by Russ Allbery <rra@stanford.edu>
 #
@@ -38,7 +38,7 @@ use vars qw(@ISA %ESCAPES $PREAMBLE $VERSION);
 # Perl core and too many things could munge CVS magic revision strings.
 # This number should ideally be the same as the CVS revision in podlators,
 # however.
-$VERSION = 1.01;
+$VERSION = 1.02;
 
 
 ############################################################################
@@ -396,7 +396,8 @@ sub begin_pod {
             #     */lib/*perl*      standard or site_perl module
             #     */*perl*/lib      from -D prefix=/opt/perl
             #     */*perl*/         random module hierarchy
-            # which works.  Should be fixed to use File::Spec.
+            # which works.  Should be fixed to use File::Spec.  Also handle
+            # a leading lib/ since that's what ExtUtils::MakeMaker creates.
             for ($name) {
                 s%//+%/%g;
                 if (     s%^.*?/lib/[^/]*perl[^/]*/%%si
@@ -405,6 +406,7 @@ sub begin_pod {
                     s%^(.*-$^O|$^O-.*)/%%so;  # arch
                     s%^\d+\.\d+%%s;           # version
                 }
+                s%^lib/%%;
                 s%/%::%g;
             }
         }
