@@ -122,6 +122,9 @@ define_alias( qr/^iso8859(\d+)$/i => '"iso-8859-$1"' );
 # More HP stuff.
 define_alias( qr/^(?:hp-)?(arabic|greek|hebrew|kana|roman|thai|turkish)8$/i => '"${1}8"' );
 
+# The Official name of ASCII. 
+define_alias( qr/^ANSI[-_]?X3\.4[-_]?1968$/i => '"ascii"' );
+
 # This is a font issue, not an encoding issue.
 # (The currency symbol of the Latin 1 upper half
 #  has been redefined as the euro symbol.)
