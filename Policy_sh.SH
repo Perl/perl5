@@ -111,7 +111,7 @@ $spitshell <<!GROK!THIS! >>Policy.sh
 #  Lastly, you may add additional items here.  For example, to set the 
 #  pager to your local favorite value, uncomment the following line in
 #  the original Policy_sh.SH file and re-run   sh Policy_sh.SH.
-# $pager='$pager'
+# pager='$pager'
 #
 #  A full Glossary of all the config.sh variables is in the file
 #  Porting/Glossary.
