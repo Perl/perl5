@@ -1071,35 +1071,65 @@ PerlIO_reopen(const char *path, const char *mode, PerlIO *f)
 SSize_t
 PerlIO_read(PerlIO *f, void *vbuf, Size_t count)
 {
- return (*PerlIOBase(f)->tab->Read)(f,vbuf,count);
+ if (f && *f)
+   return (*PerlIOBase(f)->tab->Read)(f,vbuf,count);
+ else
+  {
+   SETERRNO(EBADF,SS$_IVCHAN);
+   return -1;
+  }
 }
 
 #undef PerlIO_unread
 SSize_t
 PerlIO_unread(PerlIO *f, const void *vbuf, Size_t count)
 {
- return (*PerlIOBase(f)->tab->Unread)(f,vbuf,count);
+ if (f && *f)
+  return (*PerlIOBase(f)->tab->Unread)(f,vbuf,count);
+ else
+  {
+   SETERRNO(EBADF,SS$_IVCHAN);
+   return -1;
+  }
 }
 
 #undef PerlIO_write
 SSize_t
 PerlIO_write(PerlIO *f, const void *vbuf, Size_t count)
 {
- return (*PerlIOBase(f)->tab->Write)(f,vbuf,count);
+ if (f && *f)
+   return (*PerlIOBase(f)->tab->Write)(f,vbuf,count);
+ else
+  {
+   SETERRNO(EBADF,SS$_IVCHAN);
+   return -1;
+  }
 }
 
 #undef PerlIO_seek
 int
 PerlIO_seek(PerlIO *f, Off_t offset, int whence)
 {
- return (*PerlIOBase(f)->tab->Seek)(f,offset,whence);
+ if (f && *f)
+  return (*PerlIOBase(f)->tab->Seek)(f,offset,whence);
+ else
+  {
+   SETERRNO(EBADF,SS$_IVCHAN);
+   return -1;
+  }
 }
 
 #undef PerlIO_tell
 Off_t
 PerlIO_tell(PerlIO *f)
 {
- return (*PerlIOBase(f)->tab->Tell)(f);
+  if (f && *f)
+   return (*PerlIOBase(f)->tab->Tell)(f);
+  else
+   {
+    SETERRNO(EBADF,SS$_IVCHAN);
+    return -1;
+   }
 }
 
 #undef PerlIO_flush
@@ -1108,20 +1138,35 @@ PerlIO_flush(PerlIO *f)
 {
  if (f)
   {
-   PerlIO_funcs *tab = PerlIOBase(f)->tab;
-   if (tab && tab->Flush)
+   if (*f)
     {
-     return (*tab->Flush)(f);
+     PerlIO_funcs *tab = PerlIOBase(f)->tab;
+     if (tab && tab->Flush)
+      {
+       return (*tab->Flush)(f);
+      }
+     else
+      {
+       PerlIO_debug("Cannot flush f=%p :%s\n",f,tab->name);
+       SETERRNO(EBADF,SS$_IVCHAN);
+       return -1;
+      }
     }
    else
     {
-     PerlIO_debug("Cannot flush f=%p :%s\n",f,tab->name);
-     errno = EINVAL;
+     PerlIO_debug("Cannot flush f=%p\n",f);
+     SETERRNO(EBADF,SS$_IVCHAN);
      return -1;
     }
   }
- else
-  {
+ else  
+  {   
+   /* Is it good API design to do flush-all on NULL,
+    * a potentially errorneous input?  Maybe some magical
+    * value (PerlIO* PERLIO_FLUSH_ALL = (PerlIO*)-1;)?
+    * Yes, stdio does similar things on fflush(NULL),
+    * but should we be bound by their design decisions?
+    * --jhi */
    PerlIO **table = &_perlio;
    int code = 0;
    while ((f = *table))
@@ -1162,28 +1207,52 @@ PerlIOBase_flush_linebuf()
 int
 PerlIO_fill(PerlIO *f)
 {
- return (*PerlIOBase(f)->tab->Fill)(f);
+ if (f && *f)
+  return (*PerlIOBase(f)->tab->Fill)(f);
+ else
+  {
+   SETERRNO(EBADF,SS$_IVCHAN);
+   return -1;
+  } 
 }
 
 #undef PerlIO_isutf8
 int
 PerlIO_isutf8(PerlIO *f)
 {
- return (PerlIOBase(f)->flags & PERLIO_F_UTF8) != 0;
+ if (f && *f)
+  return (PerlIOBase(f)->flags & PERLIO_F_UTF8) != 0;
+ else
+  {
+   SETERRNO(EBADF,SS$_IVCHAN);
+   return -1;
+  }
 }
 
 #undef PerlIO_eof
 int
 PerlIO_eof(PerlIO *f)
 {
- return (*PerlIOBase(f)->tab->Eof)(f);
+ if (f && *f)
+  return (*PerlIOBase(f)->tab->Eof)(f);
+ else
+  {
+   SETERRNO(EBADF,SS$_IVCHAN);
+   return -1;
+  }
 }
 
 #undef PerlIO_error
 int
 PerlIO_error(PerlIO *f)
 {
- return (*PerlIOBase(f)->tab->Error)(f);
+ if (f && *f)
+  return (*PerlIOBase(f)->tab->Error)(f);
+ else
+  {
+   SETERRNO(EBADF,SS$_IVCHAN);
+   return -1;
+  }
 }
 
 #undef PerlIO_clearerr
@@ -1192,23 +1261,25 @@ PerlIO_clearerr(PerlIO *f)
 {
  if (f && *f)
   (*PerlIOBase(f)->tab->Clearerr)(f);
+ else
+  SETERRNO(EBADF,SS$_IVCHAN);
 }
 
 #undef PerlIO_setlinebuf
 void
 PerlIO_setlinebuf(PerlIO *f)
 {
- (*PerlIOBase(f)->tab->Setlinebuf)(f);
+ if (f && *f)
+  (*PerlIOBase(f)->tab->Setlinebuf)(f);
+ else
+  SETERRNO(EBADF,SS$_IVCHAN);
 }
 
 #undef PerlIO_has_base
 int
 PerlIO_has_base(PerlIO *f)
 {
- if (f && *f)
-  {
-   return (PerlIOBase(f)->tab->Get_base != NULL);
-  }
+ if (f && *f) { return (PerlIOBase(f)->tab->Get_base != NULL); }
  return 0;
 }
 
@@ -1252,14 +1323,18 @@ PerlIO_canset_cnt(PerlIO *f)
 STDCHAR *
 PerlIO_get_base(PerlIO *f)
 {
- return (*PerlIOBase(f)->tab->Get_base)(f);
+ if (f && *f)
+  return (*PerlIOBase(f)->tab->Get_base)(f);
+ return NULL;
 }
 
 #undef PerlIO_get_bufsiz
 int
 PerlIO_get_bufsiz(PerlIO *f)
 {
- return (*PerlIOBase(f)->tab->Get_bufsiz)(f);
+ if (f && *f)
+  return (*PerlIOBase(f)->tab->Get_bufsiz)(f);
+ return 0;
 }
 
 #undef PerlIO_get_ptr
@@ -1484,7 +1559,7 @@ PerlIOBase_pushed(PerlIO *f, const char *mode, SV *arg)
       l->flags |= PERLIO_F_TRUNCATE|PERLIO_F_CANWRITE;
       break;
      default:
-      errno = EINVAL;
+      SETERRNO(EINVAL,LIB$_INVARG);
       return -1;
     }
    while (*mode)
@@ -1501,8 +1576,8 @@ PerlIOBase_pushed(PerlIO *f, const char *mode, SV *arg)
         l->flags |= PERLIO_F_CRLF;
         break;
       default:
-       errno = EINVAL;
-       return -1;
+        SETERRNO(EINVAL,LIB$_INVARG);
+        return -1;
       }
     }
   }
@@ -1700,7 +1775,7 @@ PerlIOUnix_oflags(const char *mode)
  oflags |= O_BINARY;
  if (*mode || oflags == -1)
   {
-   errno = EINVAL;
+   SETERRNO(EINVAL,LIB$_INVARG);
    oflags = -1;
   }
  return oflags;
@@ -3714,7 +3789,7 @@ PerlIO_setpos(PerlIO *f, SV *pos)
    if (f && len == sizeof(Off_t))
     return PerlIO_seek(f,*posn,SEEK_SET);
   }
- errno = EINVAL;
+ SETERRNO(EINVAL,SS$_IVCHAN);
  return -1;
 }
 #else
@@ -3736,7 +3811,7 @@ PerlIO_setpos(PerlIO *f, SV *pos)
 #endif
     }
   }
- errno = EINVAL;
+ SETERRNO(EINVAL,SS$_IVCHAN);
  return -1;
 }
 #endif
