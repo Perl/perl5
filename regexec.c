@@ -129,9 +129,18 @@
 #define LOAD_UTF8_CHARCLASS(a,b) STMT_START { if (!CAT2(PL_utf8_,a)) (void)CAT2(is_utf8_, a)((U8*)b); } STMT_END
 
 /* for use after a quantifier and before an EXACT-like node -- japhy */
-#define NEXT_IMPT(to_rn) STMT_START { \
-    while (OP(to_rn) == OPEN || OP(to_rn) == CLOSE || OP(to_rn) == EVAL) \
-	to_rn += NEXT_OFF(to_rn); \
+#define JUMPABLE(rn) ( \
+    OP(rn) == OPEN || OP(rn) == CLOSE || OP(rn) == EVAL || \
+    OP(rn) == SUSPEND || OP(rn) == IFMATCH \
+)
+
+#define NEAR_EXACT(rn) (PL_regkind[(U8)OP(rn)] == EXACT || JUMPABLE(rn))
+
+#define NEXT_IMPT(rn) STMT_START { \
+    while (JUMPABLE(rn)) \
+	if (OP(rn) == SUSPEND || OP(rn) == IFMATCH) \
+	    rn = NEXTOPER(NEXTOPER(rn)); \
+	else rn += NEXT_OFF(rn); \
 } STMT_END 
 
 static void restore_pos(pTHX_ void *arg);
@@ -3043,12 +3052,7 @@ S_regmatch(pTHX_ regnode *prog)
 		if (ln && l == 0)
 		    n = ln;	/* don't backtrack */
 		locinput = PL_reginput;
-		if (
-		    PL_regkind[(U8)OP(next)] == EXACT ||
-		    OP(next) == OPEN ||
-		    OP(next) == CLOSE ||
-		    OP(next) == EVAL
-		) {
+		if (NEAR_EXACT(next)) {
 		    regnode *text_node = next;
 
 		    if (PL_regkind[(U8)OP(next)] != EXACT)
@@ -3117,12 +3121,7 @@ S_regmatch(pTHX_ regnode *prog)
 				  (IV) n, (IV)l)
 		    );
 		if (n >= ln) {
-		    if (
-			PL_regkind[(U8)OP(next)] == EXACT ||
-			OP(next) == OPEN ||
-			OP(next) == CLOSE ||
-			OP(next) == EVAL
-		    ) {
+		    if (NEAR_EXACT(next)) {
 			regnode *text_node = next;
 
 			if (PL_regkind[(U8)OP(next)] != EXACT)
@@ -3216,12 +3215,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    * of the quantifier and the EXACT-like node.  -- japhy
 	    */
 
-	    if (
-		PL_regkind[(U8)OP(next)] == EXACT ||
-		OP(next) == OPEN ||
-		OP(next) == CLOSE ||
-		OP(next) == EVAL
-	    ) {
+	    if (NEAR_EXACT(next)) {
 		U8 *s;
 		regnode *text_node = next;
 
@@ -3288,7 +3282,7 @@ S_regmatch(pTHX_ regnode *prog)
 			/* Find place 'next' could work */
 			if (!do_utf8) {
 			    if (c1 == c2) {
-				while (locinput <= e && *locinput != c1)
+				while (locinput <= e && (U8) *locinput != (U8) c1)
 				    locinput++;
 			    } else {
 				while (locinput <= e
