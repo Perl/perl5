@@ -225,6 +225,8 @@ the undefined value if the file doesn't exist.  Despite the funny
 names, precedence is the same as any other named unary operator, and
 the argument may be parenthesized like any other unary operator.  The
 operator may be any of:
+X<-r>X<-w>X<-x>X<-o>X<-R>X<-W>X<-X>X<-O>X<-e>X<-z>X<-s>X<-f>X<-d>X<-l>X<-p>
+X<-S>X<-b>X<-c>X<-t>X<-u>X<-g>X<-k>X<-T>X<-B>X<-M>X<-A>X<-C>
 
     -r	File is readable by effective uid/gid.
     -w	File is writable by effective uid/gid.
