@@ -4990,7 +4990,13 @@ $ WC "cpplast='" + cpplast + "'"
 $ WC "cppminus='" + cppminus + "'"
 $ WC "cpprun='" + cpprun + "'"
 $ WC "cppstdin='" + cppstdin + "'"
-$ WC "d_Gconvert='my_gconvert(x,n,t,b)'"
+$ IF use64bitint .OR. use64bitint .EQS. "define"
+$ THEN
+$!  gcvt() does not work for > 16 decimal places; fallback to sprintf
+$   WC "d_Gconvert='sprintf((b),""%.*" + (nvgformat-"""") + ",(n),(x))'"
+$ ELSE
+$   WC "d_Gconvert='my_gconvert(x,n,t,b)'"
+$ ENDIF
 $ WC "d_PRIEldbl='" + d_PRIEUldbl + "'"
 $ WC "d_PRIFldbl='" + d_PRIFUldbl + "'"
 $ WC "d_PRIGldbl='" + d_PRIGUldbl + "'"
