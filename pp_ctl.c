@@ -3176,6 +3176,7 @@ PP(pp_require)
 						      PERL_SCRIPT_MODE);
 			    }
 			}
+			SP--;
 		    }
 
 		    PUTBACK;
