@@ -2188,22 +2188,22 @@ sub broot
   #my $lastlast = $x+$y;
   my $divider = $self->new(2);
   my $up = $y-1;
-  print "start $org divider $divider up $up\n";
+  #print "start $org divider $divider up $up\n";
   while ($last != $x && $lastlast != $x)
     {
-    print "at $x ($last $lastlast)\n";
+    #print "at $x ($last $lastlast)\n";
     $lastlast = $last; $last = $x->copy(); 
-    print "at $x ($last ",($org / ($x ** $up)),"\n";
+    #print "at $x ($last ",($org / ($x ** $up)),"\n";
     $x->badd($org / ($x ** 2)); 
     $x->bdiv($divider);
     }
-  print $x ** $y," org ",$org,"\n";
+    #print $x ** $y," org ",$org,"\n";
   # correct overshot
   while ($x ** $y < $org)
     {
-    print "correcting $x to ";
+    #print "correcting $x to ";
     $x->binc();
-    print "$x ( $x ** $y == ",$x ** $y,")\n";
+    #print "$x ( $x ** $y == ",$x ** $y,")\n";
     }
   $x->round(@r);
   }
