@@ -162,7 +162,7 @@ is( scalar @files, 1, '... should find doc file in correct dir' );
 like( $files[0], qr/foobar$/, '... checking file name' );
 @files = $ei->files('goodmod');
 is( scalar @files, 4, '... should find all files with no type specified' );
-my %dirnames = map { lc($_) => dirname(lc($_)) } @files;
+my %dirnames = map { lc($_) => dirname($_) } @files;
 
 # directories
 my @dirs = $ei->directories('goodmod', 'prog', 'fake');
