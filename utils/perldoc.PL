@@ -30,22 +30,35 @@ $Config{startperl}
     eval 'exec $Config{perlpath} -S \$0 \${1+"\$@"}'
 	if 0;
 
+use warnings;
 use strict;
+
+# make sure creat()s are neither too much nor too little
+INIT { eval { umask(0077) } }   # doubtless someone has no mask
+
 my \@pagers = ();
 push \@pagers, "$Config{'pager'}" if -x "$Config{'pager'}";
+
 !GROK!THIS!
 
 # In the following, perl variables are not expanded during extraction.
 
 print OUT <<'!NO!SUBS!';
 
+use Fcntl;    # for sysopen
+use Getopt::Std;
+use Config '%Config';
+
 #
 # Perldoc revision #1 -- look up a piece of documentation in .pod format that
 # is embedded in the perl installation tree.
 #
-# This is not to be confused with Tom Christianson's perlman, which is a
+# This is not to be confused with Tom Christiansen's perlman, which is a
 # man replacement, written in perl. This perldoc is strictly for reading
 # the perl manuals, though it too is written in perl.
+# 
+# Massive security and correctness patches applied to this
+# noisome program by Tom Christiansen Sat Mar 11 15:22:33 MST 2000 
 
 if (@ARGV<1) {
 	my $me = $0;		# Editing $0 is unportable
@@ -60,15 +73,20 @@ acquainted with the system.
 EOF
 }
 
-use Getopt::Std;
-use Config '%Config';
-
 my @global_found = ();
 my $global_target = "";
 
 my $Is_VMS = $^O eq 'VMS';
 my $Is_MSWin32 = $^O eq 'MSWin32';
 my $Is_Dos = $^O eq 'dos';
+
+# refuse to run if we should be tainting and aren't
+# (but regular users deserve protection too, though!)
+if (!($Is_VMS || $Is_MSWin32 || $Is_Dos) && ($> == 0 || $< == 0)
+     && !am_taint_checking()) 
+{ 
+    die "Superuser must not run $0 without security audit and taint checks.\n";
+} 
 
 sub usage{
     warn "@_\n" if @_;
@@ -141,14 +159,14 @@ if ($opt_X) {
     $podidx = "" unless -f $podidx && -r _ && -M _ <= 7;
 }
 
-if ((my $opts = do{ local $^W; $opt_t + $opt_u + $opt_m + $opt_l }) > 1) {
+if ((my $opts = do{ no warnings; $opt_t + $opt_u + $opt_m + $opt_l }) > 1) {
     usage("only one of -t, -u, -m or -l")
 }
 elsif ($Is_MSWin32
        || $Is_Dos
-       || !(exists $ENV{TERM} && $ENV{TERM} !~ /dumb|emacs|none|unknown/i))
+       || !($ENV{TERM} && $ENV{TERM} !~ /dumb|emacs|none|unknown/i))
 {
-    $opt_t = 1 unless $opts
+    $opt_t = 1 unless $opts;
 }
 
 if ($opt_t) { require Pod::Text; import Pod::Text; }
@@ -166,30 +184,34 @@ else {
 
 # Does this look like a module or extension directory?
 if (-f "Makefile.PL") {
-	# Add ., lib and blib/* libs to @INC (if they exist)
-	unshift(@INC, '.');
-	unshift(@INC, 'lib') if -d 'lib';
-	require ExtUtils::testlib;
+
+    # Add ., lib to @INC (if they exist)
+    eval q{ use lib qw(. lib); 1; } or die;
+
+    # don't add if superuser
+    if ($< && $>) {   # don't be looking too hard now!
+	eval q{ use blib; 1 } or die;
+    }
 }
 
 sub containspod {
     my($file, $readit) = @_;
-    return 1 if !$readit && $file =~ /\.pod$/i;
+    return 1 if !$readit && $file =~ /\.pod\z/i;
     local($_);
-    open(TEST,"<$file");
+    open(TEST,"<", $file) 	or die "Can't open $file: $!";
     while (<TEST>) {
 	if (/^=head/) {
-	    close(TEST);
+	    close(TEST) 	or die "Can't close $file: $!";
 	    return 1;
 	}
     }
-    close(TEST);
+    close(TEST) 		or die "Can't close $file: $!";
     return 0;
 }
 
 sub minus_f_nocase {
      my($dir,$file) = @_;
-     my $path = join('/',$dir,$file);
+     my $path = join('/',$dir,$file);	# XXX: dirseps
      return $path if -f $path and -r _;
      if (!$opt_i or $Is_VMS or $Is_MSWin32 or $Is_Dos or $^O eq 'os2') {
         # on a case-forgiving file system or if case is important
@@ -198,16 +220,18 @@ sub minus_f_nocase {
 	return '';
      }
      local *DIR;
+     # this is completely wicked.  don't mess with $", and if 
+     # you do, don't assume / is the dirsep!
      local($")="/";
      my @p = ($dir);
      my($p,$cip);
-     foreach $p (split(/\//, $file)){
+     foreach $p (split(m!/!, $file)){	# XXX: dirseps
 	my $try = "@p/$p";
 	stat $try;
  	if (-d _) {
  	    push @p, $p;
 	    if ( $p eq $global_target) {
-		my $tmp_path = join ('/', @p);
+		my $tmp_path = join ('/', @p);  # XXX: dirseps
 		my $path_f = 0;
 		for (@global_found) {
 		    $path_f = 1 if $_ eq $tmp_path;
@@ -222,17 +246,17 @@ sub minus_f_nocase {
 	elsif (-f _) {
 	    warn "Ignored $try: unreadable\n";
  	}
-	else {
+	elsif (-d "@p") {
  	    my $found=0;
  	    my $lcp = lc $p;
- 	    opendir DIR, "@p";
+ 	    opendir DIR, "@p" 	    or die "opendir @p: $!";
  	    while ($cip=readdir(DIR)) {
  		if (lc $cip eq $lcp){
  		    $found++;
  		    last;
  		}
  	    }
- 	    closedir DIR;
+ 	    closedir DIR	    or die "closedir @p: $!";
  	    return "" unless $found;
  	    push @p, $cip;
  	    return "@p" if -f "@p" and -r _;
@@ -266,10 +290,10 @@ sub searchfor {
     my $ret;
     my $i;
     my $dir;
-    $global_target = (split('/', $s))[-1];
+    $global_target = (split(m!/!, $s))[-1];   # XXX: dirseps
     for ($i=0; $i<@dirs; $i++) {
 	$dir = $dirs[$i];
-	($dir = VMS::Filespec::unixpath($dir)) =~ s!/$!! if $Is_VMS;
+	($dir = VMS::Filespec::unixpath($dir)) =~ s!/\z!! if $Is_VMS;
 	if (       ( $ret = check_file $dir,"$s.pod")
 		or ( $ret = check_file $dir,"$s.pm")
 		or ( $ret = check_file $dir,$s)
@@ -288,15 +312,16 @@ sub searchfor {
 	}
 
 	if ($recurse) {
-	    opendir(D,$dir);
-	    my @newdirs = map "$dir/$_", grep {
-		not /^\.\.?$/ and
-		not /^auto$/  and   # save time! don't search auto dirs
-		-d  "$dir/$_"
+	    opendir(D,$dir)	or die "Can't opendir $dir: $!";
+	    my @newdirs = map "$dir/$_", grep {  # XXX: dirseps
+		not /^\.\.?\z/s and
+		not /^auto\z/s  and   # save time! don't search auto dirs
+		-d  "$dir/$_"  # XXX: dirseps
 	    } readdir D;
-	    closedir(D);
+	    closedir(D)		or die "Can't closedir $dir: $!";
 	    next unless @newdirs;
-	    @newdirs = map((s/.dir$//,$_)[1],@newdirs) if $Is_VMS;
+	    # what a wicked map!
+	    @newdirs = map((s/\.dir\z//,$_)[1],@newdirs) if $Is_VMS;
 	    print STDERR "Also looking in @newdirs\n" if $opt_v;
 	    push(@dirs,@newdirs);
 	}
@@ -318,45 +343,58 @@ sub printout {
     my $err;
 
     if ($opt_t) {
-	open(OUT,">>$tmp") or warn("Can't open $tmp: $!"), return;
+	# why was this append?
+	sysopen(OUT, $tmp, O_WRONLY | O_EXCL | O_CREAT, 0600)
+	    or die ("Can't open $tmp: $!");
 	Pod::Text->new()->parse_from_file($file,\*OUT);
-	close OUT;
+	close OUT   or die "can't close $tmp: $!";
     }
     elsif (not $opt_u) {
-	my $cmd = "pod2man --lax $_ | $opt_n -man";
+	my $cmd = "pod2man --lax $file | $opt_n -man";
 	$cmd .= " | col -x" if $^O =~ /hpux/;
 	my $rslt = `$cmd`;
 	$rslt = filter_nroff($rslt) if $filter;
 	unless (($err = $?)) {
-	    open(TMP,">>$tmp") or warn("Can't open $tmp: $!"), return;
-	    print TMP $rslt;
-	    close TMP;
+	    # why was this append?
+	    sysopen(TMP, $tmp, O_WRONLY | O_EXCL | O_CREAT, 0600)
+		or die "Can't open $tmp: $!";
+	    print TMP $rslt
+		or die "Can't print $tmp: $!";
+	    close TMP
+		or die "Can't close $tmp: $!";
 	}
     }
-    if ($opt_u or $err or -z $tmp) {
-	open(OUT,">>$tmp") or warn("Can't open $tmp: $!"), return;
-	open(IN,"<$file") or warn("Can't open $file: $!"), return;
+    if ($opt_u or $err or -z $tmp) {  # XXX: race with -z
+	# why was this append?
+	sysopen(OUT, $tmp, O_WRONLY | O_EXCL | O_CREAT, 0600)
+	    or die "Can't open $tmp: $!";
+	open(IN,"<", $file)   or die("Can't open $file: $!");
 	my $cut = 1;
+	local $_;
 	while (<IN>) {
 	    $cut = $1 eq 'cut' if /^=(\w+)/;
 	    next if $cut;
-	    print OUT;
+	    print OUT
+		or die "Can't print $tmp: $!";
 	}
-	close IN;
-	close OUT;
+	close IN    or die "Can't close $file: $!";
+	close OUT   or die "Can't close $tmp: $!";
     }
 }
 
 sub page {
     my ($tmp, $no_tty, @pagers) = @_;
     if ($no_tty) {
-	open(TMP,"<$tmp") or warn("Can't open $tmp: $!"), return;
-	print while <TMP>;
-	close TMP;
+	open(TMP,"<", $tmp) 	or die "Can't open $tmp: $!";
+	local $_;
+	while (<TMP>) {
+	    print or die "Can't print to stdout: $!";
+	} 
+	close TMP		or die "Can't close while $tmp: $!";
     }
     else {
 	foreach my $pager (@pagers) {
-	    system("$pager $tmp") or last;
+	    last if system("$pager $tmp") == 0;
 	}
     }
 }
@@ -364,34 +402,26 @@ sub page {
 sub cleanup {
     my @files = @_;
     for (@files) {
-	1 while unlink($_); #Possibly pointless VMSism
+	if ($Is_VMS) { 
+	    1 while unlink($_);    # XXX: expect failure
+	} else {
+	    unlink($_);		   # or die "Can't unlink $_: $!";
+	} 
     }
-}
-
-sub safe_exit {
-    my ($val, @files) = @_;
-    cleanup(@files);
-    exit $val;
-}
-
-sub safe_die {
-    my ($msg, @files) = @_;
-    cleanup(@files);
-    die $msg;
 }
 
 my @found;
 foreach (@pages) {
     if ($podidx && open(PODIDX, $podidx)) {
 	my $searchfor = $_;
-	local($_);
-	$searchfor =~ s,::,/,g;
+	$searchfor =~ s,::,/,g;	    # XXX: dirseps
 	print STDERR "Searching for '$searchfor' in $podidx\n" if $opt_v;
+	local $_;
 	while (<PODIDX>) {
 	    chomp;
-	    push(@found, $_) if m,/$searchfor(?:\.(?:pod|pm))?$,i;
+	    push(@found, $_) if m,/$searchfor(?:\.(?:pod|pm))?\z,i;
 	}
-	close(PODIDX);
+	close(PODIDX)	    or die "Can't close $podidx: $!";
 	next;
     }
     print STDERR "Searching for $_\n" if $opt_v;
@@ -422,7 +452,7 @@ foreach (@pages) {
     }
     else {
 	# no match, try recursive search
-	@searchdirs = grep(!/^\.$/,@INC);
+	@searchdirs = grep(!/^\.\z/s,@INC);
 	@files= searchfor(1,$_,@searchdirs) if $opt_r;
 	if (@files) {
 	    print STDERR "Loosely found as @files\n" if $opt_v;
@@ -432,13 +462,13 @@ foreach (@pages) {
 	    if (@global_found) {
 		print STDERR "However, try\n";
 		for my $dir (@global_found) {
-		    opendir(DIR, $dir) or die "$!";
+		    opendir(DIR, $dir) or die "opendir $dir: $!";
 		    while (my $file = readdir(DIR)) {
-			next if ($file =~ /^\./);
-			$file =~ s/\.(pm|pod)$//;
+			next if ($file =~ /^\./s);
+			$file =~ s/\.(pm|pod)\z//;  # XXX: badfs
 			print STDERR "\tperldoc $_\::$file\n";
 		    }
-		    closedir DIR;
+		    closedir DIR    or die "closedir $dir: $!";
 		}
 	    }
 	}
@@ -459,10 +489,12 @@ my $lines = $ENV{LINES} || 24;
 
 my $no_tty;
 if (! -t STDOUT) { $no_tty = 1 }
+END { close(STDOUT) || die "Can't close STDOUT: $!" }
 
 # until here we could simply exit or die
 # now we create temporary files that we have to clean up
 # namely $tmp, $buffer
+# that's because you did it wrong, should be descriptor based --tchrist
 
 my $tmp;
 my $buffer;
@@ -494,38 +526,51 @@ else {
       unshift @pagers, 'less', 'cmd /c more <';
     }
     else {
-      $tmp = "/tmp/perldoc1.$$";
-      $buffer = "/tmp/perldoc1.b$$";
+      # XXX: this is not secure, because it doesn't open it
+      ($tmp, $buffer) = eval { require POSIX } 
+	    ? (POSIX::tmpnam(),    POSIX::tmpnam()     )
+	    : ("/tmp/perldoc1.$$", "/tmp/perldoc1.b$$" );
     }
     push @pagers, qw( more less pg view cat );
     unshift @pagers, $ENV{PAGER}  if $ENV{PAGER};
 }
 unshift @pagers, $ENV{PERLDOC_PAGER} if $ENV{PERLDOC_PAGER};
 
-# all exit calls from here on have to be safe_exit calls (see above)
-# and all die calls safe_die calls to guarantee removal of files and
-# dir as needed
+# make sure cleanup called
+eval q{
+    sub END { cleanup($tmp, $buffer) } 
+    1;
+} || die;
+eval q{ use sigtrap qw(die INT TERM HUP QUIT) };
 
 if ($opt_m) {
     foreach my $pager (@pagers) {
-	system("$pager @found") or safe_exit(0, $tmp, $buffer);
+	if (system($pager, @found) == 0) {
+	    exit;
     }
-    if ($Is_VMS) { eval 'use vmsish qw(status exit); exit $?' }
-    # I don't get the line above. Please patch yourself as needed.
-    safe_exit(1, $tmp, $buffer);
+    }
+    if ($Is_VMS) { 
+	eval q{
+	    use vmsish qw(status exit); 
+	    exit $?;
+	    1;
+	} or die;
+    }
+    exit(1);
 }
 
 my @pod;
 if ($opt_f) {
     my $perlfunc = shift @found;
-    open(PFUNC, $perlfunc)
-	or safe_die("Can't open $perlfunc: $!", $tmp, $buffer);
+    open(PFUNC, "<", $perlfunc)
+	or die("Can't open $perlfunc: $!");
 
     # Functions like -r, -e, etc. are listed under `-X'.
     my $search_string = ($opt_f =~ /^-[rwxoRWXOeszfdlpSbctugkTBMAC]$/)
 			? 'I<-X' : $opt_f ;
 
     # Skip introduction
+    local $_;
     while (<PFUNC>) {
 	last if /^=head2 Alphabetical Listing of Perl Functions/;
     }
@@ -553,20 +598,22 @@ if ($opt_f) {
     if (!@pod) {
 	die "No documentation for perl function `$opt_f' found\n";
     }
+    close PFUNC		or die "Can't open $perlfunc: $!";
 }
 
 if ($opt_q) {
     local @ARGV = @found;	# I'm lazy, sue me.
     my $found = 0;
     my %found_in;
-    my $rx = eval { qr/$opt_q/ };
-    die <<EOD unless $rx;
+    my $rx = eval { qr/$opt_q/ } or die <<EOD;
 Invalid regular expression '$opt_q' given as -q pattern:
   $@
 Did you mean \\Q$opt_q ?
 
 EOD
 
+    for (@found) { die "invalid file spec: $!" if /[<>|]/ } 
+    local $_;
     while (<>) {
 	if (/^=head2\s+.*(?:$opt_q)/oi) {
 	    $found = 1;
@@ -579,19 +626,19 @@ EOD
 	push @pod, $_;
     }
     if (!@pod) {
-	safe_die("No documentation for perl FAQ keyword `$opt_q' found\n",
-		 $tmp, $buffer);
+	die("No documentation for perl FAQ keyword `$opt_q' found\n");
     }
 }
 
 my $filter;
 
 if (@pod) {
-    open(TMP,">$buffer") or safe_die("Can't open '$buffer': $!", $tmp, $buffer);
+    sysopen(TMP, $buffer, O_WRONLY | O_EXCL | O_CREAT)
+	or die("Can't open $buffer: $!");
     print TMP "=over 8\n\n";
-    print TMP @pod;
+    print TMP @pod	or die "Can't print $buffer: $!";
     print TMP "=back\n";
-    close TMP;
+    close TMP		or die "Can't close $buffer: $!";
     @found = $buffer;
     $filter = 1;
 }
@@ -601,7 +648,21 @@ foreach (@found) {
 }
 page($tmp, $no_tty, @pagers);
 
-safe_exit(0, $tmp, $buffer);
+exit;
+
+sub is_tainted {
+    my $arg = shift;
+    my $nada = substr($arg, 0, 0);  # zero-length
+    local $@;  # preserve caller's version
+    eval { eval "# $nada" };
+    return length($@) != 0;
+}
+
+sub am_taint_checking {
+    my($k,$v) = each %ENV;
+    return is_tainted($v);  
+}
+
 
 __END__
 
@@ -708,7 +769,7 @@ One useful value for C<PERLDOC_PAGER> is C<less -+C -E>.
 
 =head1 VERSION
 
-This is perldoc v2.0.
+This is perldoc v2.01.
 
 =head1 AUTHOR
 
@@ -720,6 +781,11 @@ and others.
 =cut
 
 #
+# Version 2.01: Sat Mar 11 15:22:33 MST 2000 
+#       Tom Christiansen <tchrist@perl.com>, querulously.
+#       Security and correctness patches.
+#       What a twisted bit of distasteful spaghetti code.
+# Version 2.0: ????
 # Version 1.15: Tue Aug 24 01:50:20 EST 1999
 #       Charles Wilson <cwilson@ece.gatech.edu>
 #	changed /pod/ directory to /pods/ for cygwin
