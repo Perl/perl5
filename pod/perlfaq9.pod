@@ -20,7 +20,7 @@ may not be so well received.
 The useful FAQs and related documents are:
 
     CGI FAQ
-        http://www.webthing.com/page.cgi/cgifaq
+        http://www.webthing.com/tutorials/cgifaq.html
 
     Web FAQ
         http://www.boutell.com/faq/
