@@ -668,7 +668,7 @@ sub _find_opt {
 		next Proc_Top_Item;
 	    }
 	    if (-d _) {
-		$top_item =~ s/\.dir\z// if $Is_VMS;
+		$top_item =~ s/\.dir\z//i if $Is_VMS;
 		_find_dir($wanted, $top_item, $topnlink);
 		$Is_Dir= 1;
 	    }
@@ -769,7 +769,7 @@ sub _find_dir($$$) {
 		}
 	    }
 	}
-	unless (chdir $udir) {
+	unless (chdir ($Is_VMS && $udir !~ /\// ? "./$udir" : $udir)) {
 	    warnings::warnif "Can't cd to $udir: $!\n";
 	    return;
 	}
@@ -811,7 +811,7 @@ sub _find_dir($$$) {
 		    }
 		}
 	    }
-	    unless (chdir $udir) {
+	    unless (chdir ($Is_VMS && $udir !~ /\// ? "./$udir" : $udir)) {
 		if ($Is_MacOS) {
 		    warnings::warnif "Can't cd to ($p_dir) $udir: $!\n";
 		}
@@ -876,7 +876,7 @@ sub _find_dir($$$) {
 
 		    if (-d _) {
 			--$subcount;
-			$FN =~ s/\.dir\z// if $Is_VMS;
+			$FN =~ s/\.dir\z//i if $Is_VMS;
 			# HACK: replace push to preserve dir traversal order
 			#push @Stack,[$CdLvl,$dir_name,$FN,$sub_nlink];
 			splice @Stack, $stack_top, 0,
