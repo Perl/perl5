@@ -102,7 +102,7 @@ case "$verbose" in
 *) copt="$copt -d";;
 esac
 
-set X ./Configure $copt $create $opts
+set X sh Configure $copt $create $opts
 shift
 echo "$@"
 exec "$@"
