@@ -29,6 +29,16 @@ my %PLATFORM;
 defined $PLATFORM || die "PLATFORM undefined, must be one of: @PLATFORM\n";
 exists $PLATFORM{$PLATFORM} || die "PLATFORM must be one of: @PLATFORM\n";
 
+my %exportperlmalloc =
+    (
+       Perl_malloc		=>	"malloc",
+       Perl_mfree		=>	"free",
+       Perl_realloc		=>	"realloc",
+       Perl_calloc		=>	"calloc",
+    );
+
+my $exportperlmalloc = $PLATFORM eq 'os2';
+
 my $config_sh   = "config.sh";
 my $config_h    = "config.h";
 my $thrdvar_h   = "thrdvar.h";
@@ -1138,6 +1148,7 @@ elsif ($PLATFORM eq 'os2') {
 
     @missing = grep { !exists $mapped{$_} }
 		    keys %export;
+    @missing = grep { !exists $exportperlmalloc{$_} } @missing;
     delete $export{$_} foreach @missing;
 }
 elsif ($PLATFORM eq 'MacOS') {
@@ -1339,6 +1350,10 @@ sub output_symbol {
     elsif ($PLATFORM eq 'os2') {
 	printf qq(    %-31s \@%s\n),
 	  qq("$symbol"), $ordinal{$symbol} || ++$sym_ord;
+	if (exists $exportperlmalloc{$symbol}) {
+	  printf qq(    %-31s \@%s\n),
+	    qq("$exportperlmalloc{$symbol}" = "$symbol"), ++$sym_ord;
+	}
     }
     elsif ($PLATFORM eq 'aix' || $PLATFORM eq 'MacOS') {
 	print "$symbol\n";
