@@ -698,7 +698,7 @@ perl_destruct(pTHXx)
     }
     SvREFCNT_dec(PL_strtab);
 
-#ifdef USE_THREADS
+#ifdef USE_ITHREADS
     /* free the pointer table used for cloning */
     ptr_table_free(PL_ptr_table);
 #endif
