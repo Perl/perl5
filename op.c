@@ -142,7 +142,7 @@ Perl_pad_allocmy(pTHX_ char *name)
 	(PL_hints & HINT_UTF8 && (name[1] & 0xc0) == 0xc0) ||
 	name[1] == '_' && (int)strlen(name) > 2))
     {
-	if (!isPRINT(name[1])) {
+	if (!isPRINT(name[1]) || strchr("\t\n\r\f", name[1])) {
 	    /* 1999-02-27 mjd@plover.com */
 	    char *p;
 	    p = strchr(name, '\0');
