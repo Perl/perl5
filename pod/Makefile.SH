@@ -82,7 +82,7 @@ html:	pod2html $(HTML)
 tex:	pod2latex $(TEX)
 
 toc perltoc.pod:	buildtoc
-	$(PERLILIB) buildtoc
+	$(PERLILIB) buildtoc --build-toc
 
 .SUFFIXES: .pm .pod
 
