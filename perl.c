@@ -2339,6 +2339,10 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_vcall_body),
 		(OP*)&myop, TRUE);
 #else
+    /* fail now; otherwise we could fail after the JMPENV_PUSH but
+     * before a PUSHEVAL, which corrupts the stack after a croak */
+    TAINT_PROPER("eval_sv()");
+
     JMPENV_PUSH(ret);
 #endif
     switch (ret) {
@@ -3240,9 +3244,8 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv)
 #endif /* IAMSUID */
     if (!PL_rsfp) {
 	/* PSz 16 Sep 03  Keep neat error message */
-	Perl_croak(aTHX_ "Can't open perl script \"%s\": %s%s\n",
-		CopFILE(PL_curcop), Strerror(errno),
-		".\nUse -S to search $PATH for it.");
+	Perl_croak(aTHX_ "Can't open perl script \"%s\": %s\n",
+		CopFILE(PL_curcop), Strerror(errno));
     }
 }
 

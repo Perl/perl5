@@ -1039,6 +1039,15 @@ Perl_leave_scope(pTHX_ I32 base)
 		    AvARRAY((PAD*)ptr)[off] = (SV*)SSPOPPTR;
 	    }
 	    break;
+	case SAVEt_SAVESWITCHSTACK:
+	    {
+		dSP;
+		AV* t = (AV*)SSPOPPTR;
+		AV* f = (AV*)SSPOPPTR;
+		SWITCHSTACK(t,f);
+		PL_curstackinfo->si_stack = f;
+	    }
+	    break;
 	default:
 	    Perl_croak(aTHX_ "panic: leave_scope inconsistency");
 	}
