@@ -2352,13 +2352,13 @@ char *b;
 	sv_setpv(tmpsv, ".");
     else
 	sv_setpvn(tmpsv, a, fa - a);
-    if (Stat(SvPVX(tmpsv), &tmpstatbuf1) < 0)
+    if (PerlLIO_stat(SvPVX(tmpsv), &tmpstatbuf1) < 0)
 	return FALSE;
     if (fb == b)
 	sv_setpv(tmpsv, ".");
     else
 	sv_setpvn(tmpsv, b, fb - b);
-    if (Stat(SvPVX(tmpsv), &tmpstatbuf2) < 0)
+    if (PerlLIO_stat(SvPVX(tmpsv), &tmpstatbuf2) < 0)
 	return FALSE;
     return tmpstatbuf1.st_dev == tmpstatbuf2.st_dev &&
 	   tmpstatbuf1.st_ino == tmpstatbuf2.st_ino;

@@ -1861,7 +1861,7 @@ open_script(char *scriptname, bool dosearch, SV *sv)
 #endif
 	    DEBUG_p(PerlIO_printf(Perl_debug_log,
 				  "Looking for %s\n",cur));
-	    if (Stat(cur,&statbuf) >= 0) {
+	    if (PerlLIO_stat(cur,&statbuf) >= 0) {
 		dosearch = 0;
 		scriptname = cur;
 #ifdef SEARCH_EXTS
@@ -1929,7 +1929,7 @@ open_script(char *scriptname, bool dosearch, SV *sv)
 	    do {
 #endif
 	    	DEBUG_p(PerlIO_printf(Perl_debug_log, "Looking for %s\n",tokenbuf));
-		retval = Stat(tokenbuf,&statbuf);
+		retval = PerlLIO_stat(tokenbuf,&statbuf);
 #ifdef SEARCH_EXTS
 	    } while (  retval < 0		/* not there */
 		    && extidx>=0 && ext[extidx]	/* try an extension? */
@@ -1952,7 +1952,7 @@ open_script(char *scriptname, bool dosearch, SV *sv)
 		xfailed = savepv(tokenbuf);
 	}
 #ifndef DOSISH
-	if (!xfound && !seen_dot && !xfailed && (Stat(scriptname,&statbuf) < 0))
+	if (!xfound && !seen_dot && !xfailed && (PerlLIO_stat(scriptname,&statbuf) < 0))
 #endif
 	    seen_dot = 1;			/* Disable message. */
 	if (!xfound)
@@ -2077,7 +2077,7 @@ sed %s -e \"/^[^#]/b\" \
     if (!rsfp) {
 #ifdef DOSUID
 #ifndef IAMSUID		/* in case script is not readable before setuid */
-	if (euid && Stat(SvPVX(GvSV(curcop->cop_filegv)),&statbuf) >= 0 &&
+	if (euid && PerlLIO_stat(SvPVX(GvSV(curcop->cop_filegv)),&statbuf) >= 0 &&
 	  statbuf.st_mode & (S_ISUID|S_ISGID)) {
 	    /* try again */
 	    PerlProc_execv(form("%s/sperl%s", BIN_EXP, patchlevel), origargv);
@@ -2155,7 +2155,7 @@ validate_suid(char *validarg, char *scriptname)
 #endif
 		|| getuid() != euid || geteuid() != uid)
 		croak("Can't swap uid and euid");	/* really paranoid */
-	    if (Stat(SvPVX(GvSV(curcop->cop_filegv)),&tmpstatbuf) < 0)
+	    if (PerlLIO_stat(SvPVX(GvSV(curcop->cop_filegv)),&tmpstatbuf) < 0)
 		croak("Permission denied");	/* testing full pathname here */
 	    if (tmpstatbuf.st_dev != statbuf.st_dev ||
 		tmpstatbuf.st_ino != statbuf.st_ino) {
@@ -2749,7 +2749,7 @@ incpush(char *p, int addsubdirs)
 	    /* .../archname/version if -d .../archname/version/auto */
 	    sv_setsv(subdir, libdir);
 	    sv_catpv(subdir, archpat_auto);
-	    if (Stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
+	    if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
 		  S_ISDIR(tmpstatbuf.st_mode))
 		av_push(GvAVn(incgv),
 			newSVpv(SvPVX(subdir), SvCUR(subdir) - sizeof "auto"));
@@ -2757,7 +2757,7 @@ incpush(char *p, int addsubdirs)
 	    /* .../archname if -d .../archname/auto */
 	    sv_insert(subdir, SvCUR(libdir) + sizeof(ARCHNAME),
 		      strlen(patchlevel) + 1, "", 0);
-	    if (Stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
+	    if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
 		  S_ISDIR(tmpstatbuf.st_mode))
 		av_push(GvAVn(incgv),
 			newSVpv(SvPVX(subdir), SvCUR(subdir) - sizeof "auto"));

@@ -2093,7 +2093,7 @@ PP(pp_stat)
 	    laststatval = PerlLIO_lstat(SvPV(statname, na), &statcache);
 	else
 #endif
-	    laststatval = Stat(SvPV(statname, na), &statcache);
+	    laststatval = PerlLIO_stat(SvPV(statname, na), &statcache);
 	if (laststatval < 0) {
 	    if (dowarn && strchr(SvPV(statname, na), '\n'))
 		warn(warn_nl, "stat");
@@ -2664,11 +2664,11 @@ PP(pp_rename)
 #ifdef HAS_RENAME
     anum = rename(tmps, tmps2);
 #else
-    if (!(anum = Stat(tmps, &statbuf))) {
+    if (!(anum = PerlLIO_stat(tmps, &statbuf))) {
 	if (same_dirent(tmps2, tmps))	/* can always rename to same name */
 	    anum = 1;
 	else {
-	    if (euid || Stat(tmps2, &statbuf) < 0 || !S_ISDIR(statbuf.st_mode))
+	    if (euid || PerlLIO_stat(tmps2, &statbuf) < 0 || !S_ISDIR(statbuf.st_mode))
 		(void)UNLINK(tmps2);
 	    if (!(anum = link(tmps, tmps2)))
 		anum = UNLINK(tmps);
@@ -2805,7 +2805,7 @@ char *filename;
 	    return 0;
 	}
 	else {	/* some mkdirs return no failure indication */
-	    anum = (Stat(save_filename, &statbuf) >= 0);
+	    anum = (PerlLIO_stat(save_filename, &statbuf) >= 0);
 	    if (op->op_type == OP_RMDIR)
 		anum = !anum;
 	    if (anum)

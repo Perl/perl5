@@ -72,7 +72,7 @@ The sequences "-*" and "- " are specifically ignored so that you could,
 if you were so inclined, say
 
     #!/bin/sh -- # -*- perl -*- -p
-    eval 'exec /usr/bin/perl $0 -S ${1+"$@"}'
+    eval 'exec /usr/bin/perl -S $0 ${1+"$@"}'
         if $running_under_some_shell;
 
 to let Perl see the B<-p> switch.
