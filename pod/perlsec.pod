@@ -54,6 +54,23 @@ mechanism.
 
 Arguments to C<print> and C<syswrite> are B<not> checked for taintedness.
 
+=item *
+
+Symbolic methods
+
+    $obj->$method(@args);
+
+and symbolic sub references
+
+    &{$foo}(@args);
+    $foo->(@args);
+
+are not checked for taintedness.  This requires extra carefulness
+unless you want external data to affect your control flow.  Unless
+you carefully limit what these symbolic values are, people are able
+to call functions B<outside> your Perl code, such as POSIX::system,
+in which case they are able to run arbitrary external code.
+
 =back
 
 The value of an expression containing tainted data will itself be
@@ -372,6 +389,13 @@ statements like "This is unpublished proprietary software of XYZ Corp.
 Your access to it does not give you permission to use it blah blah
 blah."  You should see a lawyer to be sure your licence's wording will
 stand up in court.
+
+=head2 Unicode
+
+Unicode is a new and complex technology and one may easily overlook
+certain security pitfalls.  See L<perluniintro> for an overview and
+L<perlunicode> for details, and L<perlunicode/"Security Implications
+of Unicode"> for security implications in particular.
 
 =head1 SEE ALSO
 

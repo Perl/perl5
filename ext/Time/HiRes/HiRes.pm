@@ -168,10 +168,10 @@ replacement for the C<alarm> provided with perl, see the EXAMPLES below.
 
 C<setitimer ( $which, $floating_seconds [, $interval_floating_seconds ] )>
 
-Start up an interval timer: after a certain time, a signal is arrives,
-and more may keep arriving at certain intervals.  To disable a timer,
-use time of zero.  If interval is set to zero (or unspecified), the
-timer is disabled after the next delivered signal.
+Start up an interval timer: after a certain time, a signal arrives,
+and more signals may keep arriving at certain intervals.  To disable
+a timer, use time of zero.  If interval is set to zero (or unspecified),
+the timer is disabled B<after> the next delivered signal.
 
 Use of interval timers may interfere with alarm(), sleep(), and usleep().
 In standard-speak the "interaction is unspecified", which means that
@@ -189,9 +189,9 @@ I<real time>, that is, wallclock time.  SIGALRM is delivered when
 the timer expires.
 
 ITIMER_VIRTUAL counts time in (process) I<virtual time>, that is, only
-when the process is running.  In multiprocessing/user/CPU systems this
-may be much less than real time.  (This time is also known as the
-I<user time>.)  SIGVTALRM is delivered when the timer expires.
+when the process is running.  In multiprocessor/user/CPU systems this
+may be more or less than real or wallclock time.  (This time is also
+known as the I<user time>.)  SIGVTALRM is delivered when the timer expires.
 
 ITIMER_PROF counts time when either the process virtual time or when
 the operating system is running on behalf of the process (such as

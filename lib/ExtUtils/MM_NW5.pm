@@ -73,7 +73,7 @@ sub const_cccmd {
     return '' unless $self->needs_linking();
     return $self->{CONST_CCCMD} =
 	q{CCCMD = $(CC) $(INC) $(CCFLAGS) $(OPTIMIZE) \\
-	$(PERLTYPE) $(LARGE) $(SPLIT) $(MPOLLUTE) \\
+	$(PERLTYPE) $(MPOLLUTE) \\
 	-DVERSION="$(VERSION)" -DXS_VERSION="$(XS_VERSION)"};
 }
 

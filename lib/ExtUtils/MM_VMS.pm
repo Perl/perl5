@@ -422,11 +422,14 @@ sub constants {
 
 
     foreach $macro ( qw [
-            INST_BIN INST_SCRIPT INST_LIB INST_ARCHLIB INSTALLPRIVLIB
-            INSTALLARCHLIB INSTALLSCRIPT INSTALLBIN PERL_LIB PERL_ARCHLIB
-            PERL_INC PERL_SRC FULLEXT INST_MAN1DIR INSTALLMAN1DIR
-            INST_MAN3DIR INSTALLMAN3DIR INSTALLSITELIB INSTALLSITEARCH
-            SITELIBEXP SITEARCHEXP ] ) {
+            INST_BIN INST_SCRIPT INST_LIB INST_ARCHLIB 
+            INSTALLPRIVLIB  INSTALLSITELIB  INSTALLVENDORLIB
+	    INSTALLARCHLIB  INSTALLSITEARCH INSTALLVENDORARCH
+            INSTALLBIN      INSTALLSITEBIN  INSTALLVENDORBIN  INSTALLSCRIPT 
+            INSTALLMAN1DIR INSTALLSITEMAN1DIR INSTALLVENDORMAN1DIR
+            INSTALLMAN3DIR INSTALLSITEMAN3DIR INSTALLVENDORMAN3DIR
+            PERL_LIB PERL_ARCHLIB
+            PERL_INC PERL_SRC FULLEXT ] ) {
 	next unless defined $self->{$macro};
 	$self->{$macro} = $self->fixpath($self->{$macro},1);
     }
@@ -442,15 +445,21 @@ sub constants {
     }
 
     foreach $macro (qw/
-	      AR_STATIC_ARGS NAME DISTNAME NAME_SYM VERSION VERSION_SYM XS_VERSION
-	      INST_BIN INST_LIB INST_ARCHLIB INST_SCRIPT PREFIX
-	      INSTALLDIRS INSTALLPRIVLIB  INSTALLARCHLIB INSTALLSITELIB
-	      INSTALLSITEARCH INSTALLBIN INSTALLSCRIPT PERL_LIB
-	      PERL_ARCHLIB SITELIBEXP SITEARCHEXP LIBPERL_A MYEXTLIB
+	      AR_STATIC_ARGS NAME DISTNAME NAME_SYM VERSION VERSION_SYM 
+              XS_VERSION
+	      INST_BIN INST_LIB INST_ARCHLIB INST_SCRIPT 
+              INSTALLDIRS
+              PREFIX          SITEPREFIX      VENDORPREFIX
+	      INSTALLPRIVLIB  INSTALLSITELIB  INSTALLVENDORLIB
+	      INSTALLARCHLIB  INSTALLSITEARCH INSTALLVENDORARCH
+              INSTALLBIN      INSTALLSITEBIN  INSTALLVENDORBIN  INSTALLSCRIPT 
+	      PERL_LIB PERL_ARCHLIB 
+              SITELIBEXP SITEARCHEXP 
+              LIBPERL_A MYEXTLIB
 	      FIRST_MAKEFILE MAKE_APERL_FILE PERLMAINCC PERL_SRC PERL_VMS
 	      PERL_INC PERL FULLPERL PERLRUN FULLPERLRUN PERLRUNINST
-          FULLPERLRUNINST ABSPERL ABSPERLRUN ABSPERLRUNINST
-          PERL_CORE NOECHO NOOP
+              FULLPERLRUNINST ABSPERL ABSPERLRUN ABSPERLRUNINST
+              PERL_CORE NOECHO NOOP
 	      / ) {
 	next unless defined $self->{$macro};
 	push @m, "$macro = $self->{$macro}\n";
@@ -520,7 +529,10 @@ MAN3PODS = ',$self->wraplist(sort keys %{$self->{MAN3PODS}}),'
 ';
 
     for my $tmp (qw/
-	      INST_MAN1DIR INSTALLMAN1DIR MAN1EXT INST_MAN3DIR INSTALLMAN3DIR MAN3EXT
+	      INST_MAN1DIR  MAN1EXT 
+              INSTALLMAN1DIR INSTALLSITEMAN1DIR INSTALLVENDORMAN1DIR
+	      INST_MAN3DIR  MAN3EXT
+              INSTALLMAN3DIR INSTALLSITEMAN3DIR INSTALLVENDORMAN3DIR
 	      /) {
 	next unless defined $self->{$tmp};
 	push @m, "$tmp = $self->{$tmp}\n";
@@ -669,8 +681,6 @@ sub cflags {
 CCFLAGS = $self->{CCFLAGS}
 OPTIMIZE = $self->{OPTIMIZE}
 PERLTYPE = $self->{PERLTYPE}
-SPLIT =
-LARGE =
 };
 }
 
@@ -1676,13 +1686,23 @@ pure_site_install ::
 	$(NOECHO) $(PERLRUN) "-MFile::Spec" -e "print 'write '.File::Spec->catfile('$(INSTALLSITEARCH)','auto','$(FULLEXT)','.packlist').' '" >>.MM_tmp
 	$(NOECHO) $(PERL) -e "print '$(INST_LIB) $(INSTALLSITELIB) '" >>.MM_tmp
 	$(NOECHO) $(PERL) -e "print '$(INST_ARCHLIB) $(INSTALLSITEARCH) '" >>.MM_tmp
-	$(NOECHO) $(PERL) -e "print '$(INST_BIN) $(INSTALLBIN) '" >>.MM_tmp
+	$(NOECHO) $(PERL) -e "print '$(INST_BIN) $(INSTALLSITEBIN) '" >>.MM_tmp
 	$(NOECHO) $(PERL) -e "print '$(INST_SCRIPT) $(INSTALLSCRIPT) '" >>.MM_tmp
-	$(NOECHO) $(PERL) -e "print '$(INST_MAN1DIR) $(INSTALLMAN1DIR) '" >>.MM_tmp
-	$(NOECHO) $(PERL) -e "print '$(INST_MAN3DIR) $(INSTALLMAN3DIR) '" >>.MM_tmp
+	$(NOECHO) $(PERL) -e "print '$(INST_MAN1DIR) $(INSTALLSITEMAN1DIR) '" >>.MM_tmp
+	$(NOECHO) $(PERL) -e "print '$(INST_MAN3DIR) $(INSTALLSITEMAN3DIR) '" >>.MM_tmp
 	$(MOD_INSTALL) <.MM_tmp
 	$(NOECHO) Delete/NoLog/NoConfirm .MM_tmp;
 	$(NOECHO) $(WARN_IF_OLD_PACKLIST) ].File::Spec->catfile($self->{PERL_ARCHLIB},'auto',$self->{FULLEXT},'.packlist').q[
+
+pure_vendor_install ::
+	$(NOECHO) $(PERL) -e "print '$(INST_LIB) $(INSTALLVENDORLIB) '" >>.MM_tmp
+	$(NOECHO) $(PERL) -e "print '$(INST_ARCHLIB) $(INSTALLVENDORARCH) '" >>.MM_tmp
+	$(NOECHO) $(PERL) -e "print '$(INST_BIN) $(INSTALLVENDORBIN) '" >>.MM_tmp
+	$(NOECHO) $(PERL) -e "print '$(INST_SCRIPT) $(INSTALLSCRIPT) '" >>.MM_tmp
+	$(NOECHO) $(PERL) -e "print '$(INST_MAN1DIR) $(INSTALLVENDORMAN1DIR) '" >>.MM_tmp
+	$(NOECHO) $(PERL) -e "print '$(INST_MAN3DIR) $(INSTALLVENDORMAN3DIR) '" >>.MM_tmp
+	$(MOD_INSTALL) <.MM_tmp
+	$(NOECHO) Delete/NoLog/NoConfirm .MM_tmp;
 
 # Ditto
 doc_perl_install ::
@@ -1707,6 +1727,8 @@ q%	$(NOECHO) $(PERL) -e "print q[@ARGV=split(/\\|/,<STDIN>);]" >.MM2_tmp
 	$(NOECHO) $(PERL) -e "print q[{print qq[=item *\\n\\nC<$key: $val>\\n\\n];}print qq[=back\\n\\n];]" >>.MM2_tmp
 	$(NOECHO) $(PERL) .MM2_tmp <.MM_tmp >>%.File::Spec->catfile($self->{INSTALLARCHLIB},'perllocal.pod').q[
 	$(NOECHO) Delete/NoLog/NoConfirm .MM_tmp;,.MM2_tmp;
+
+doc_vendor_install ::
 
 ];
 

@@ -12,7 +12,7 @@ BEGIN {
 
 $| = 1;
 
-print "1..39\n";
+print "1..41\n";
 
 use charnames ':full';
 
@@ -226,3 +226,9 @@ print "ok 38\n";
     print "ok 39\n";
 }
 
+
+print "not " unless ord("\N{ZWNJ}") == 0x200C;
+print "ok 40\n";
+
+print "not " unless ord("\N{ZWJ}") == 0x200D;
+print "ok 41\n";

@@ -116,7 +116,7 @@ chdir(File::Spec->updir) or die "cannot change to parent of t/ directory: $!";
 # cd directive followed by relative paths, followed by full paths
 {
     my ($num_warnings, @warnings, $path_to_libFile, $path_to_dist);
-    $path_to_libFile = File::Spec->rel2abs('lib/File');
+    $path_to_libFile = File::Spec->rel2abs(File::Spec->catdir('lib','File'));
     $path_to_dist    = File::Spec->rel2abs(File::Spec->curdir);
 
     local $SIG{__WARN__} = sub { push @warnings, "@_" };

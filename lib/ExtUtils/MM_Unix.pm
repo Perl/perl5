@@ -13,11 +13,13 @@ use DirHandle;
 use strict;
 use vars qw($VERSION @ISA
             $Is_Mac $Is_OS2 $Is_VMS $Is_Win32 $Is_Dos $Is_VOS
-            $Verbose %pm %static $Xsubpp_Version);
+            $Verbose %pm %static $Xsubpp_Version
+            %Config_Override
+           );
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
-$VERSION = '1.20_01';
+$VERSION = '1.30_01';
 
 require ExtUtils::MM_Any;
 @ISA = qw(ExtUtils::MM_Any);
@@ -479,17 +481,23 @@ sub constants {
     for $tmp (qw/
 
 	      AR_STATIC_ARGS NAME DISTNAME NAME_SYM VERSION
-	      VERSION_SYM XS_VERSION INST_BIN INST_LIB
-	      INST_ARCHLIB INST_SCRIPT PREFIX  INSTALLDIRS
-	      INSTALLPRIVLIB INSTALLARCHLIB INSTALLSITELIB
-	      INSTALLSITEARCH INSTALLBIN INSTALLSCRIPT PERL_LIB
-	      PERL_ARCHLIB SITELIBEXP SITEARCHEXP LIBPERL_A MYEXTLIB
+	      VERSION_SYM XS_VERSION 
+	      INST_ARCHLIB INST_SCRIPT INST_BIN INST_LIB
+              INSTALLDIRS
+              PREFIX          SITEPREFIX      VENDORPREFIX
+	      INSTALLPRIVLIB  INSTALLSITELIB  INSTALLVENDORLIB
+	      INSTALLARCHLIB  INSTALLSITEARCH INSTALLVENDORARCH
+              INSTALLBIN      INSTALLSITEBIN  INSTALLVENDORBIN  INSTALLSCRIPT 
+              PERL_LIB        PERL_ARCHLIB 
+              SITELIBEXP      SITEARCHEXP 
+              LIBPERL_A MYEXTLIB
 	      FIRST_MAKEFILE MAKE_APERL_FILE PERLMAINCC PERL_SRC
 	      PERL_INC PERL FULLPERL PERLRUN FULLPERLRUN PERLRUNINST 
               FULLPERLRUNINST ABSPERL ABSPERLRUN ABSPERLRUNINST
               FULL_AR PERL_CORE NOOP NOECHO
 
-	      / ) {
+	      / ) 
+    {
 	next unless defined $self->{$tmp};
 
         # pathnames can have sharp signs in them; escape them so
@@ -521,7 +529,8 @@ MM_VERSION = $ExtUtils::MakeMaker::VERSION
     for $tmp (qw/
 	      FULLEXT BASEEXT PARENT_NAME DLBASE VERSION_FROM INC DEFINE OBJECT
 	      LDFROM LINKTYPE PM_FILTER
-	      /	) {
+	      /	) 
+    {
 	next unless defined $self->{$tmp};
 	push @m, "$tmp = $self->{$tmp}\n";
     }
@@ -537,9 +546,12 @@ MAN3PODS = ".join(" \\\n\t", sort keys %{$self->{MAN3PODS}})."
 ";
 
     for $tmp (qw/
-	      INST_MAN1DIR        INSTALLMAN1DIR MAN1EXT
-	      INST_MAN3DIR        INSTALLMAN3DIR MAN3EXT
-	      /) {
+	      INST_MAN1DIR  MAN1EXT 
+              INSTALLMAN1DIR INSTALLSITEMAN1DIR INSTALLVENDORMAN1DIR
+	      INST_MAN3DIR  MAN3EXT
+              INSTALLMAN3DIR INSTALLSITEMAN3DIR INSTALLVENDORMAN3DIR
+	      /) 
+    {
 	next unless defined $self->{$tmp};
 	push @m, "$tmp = $self->{$tmp}\n";
     }
@@ -547,7 +559,8 @@ MAN3PODS = ".join(" \\\n\t", sort keys %{$self->{MAN3PODS}})."
     for $tmp (qw(
 		PERM_RW PERM_RWX
 		)
-	     ) {
+	     ) 
+    {
         my $method = lc($tmp);
 	# warn "self[$self] method[$method]";
         push @m, "$tmp = ", $self->$method(), "\n";
@@ -1857,87 +1870,159 @@ sub init_INSTALL {
         }
     }
 
-    # we have to look at the relation between $Config{prefix} and the
-    # requested values. We're going to set the $Config{prefix} part of
-    # all the installation path variables to literally $(PREFIX), so
-    # the user can still say make PREFIX=foo
-    my($configure_prefix) = $Config{'prefix'};
-    $configure_prefix = VMS::Filespec::unixify($configure_prefix) if $Is_VMS;
-    $self->{PREFIX} ||= $configure_prefix;
+    # There are no Config.pm defaults for these.
+    $Config_Override{installsiteman1dir} = 
+        "$Config{siteprefixexp}/man/man\$(MAN1EXT)";
+    $Config_Override{installsiteman3dir} = 
+        "$Config{siteprefixexp}/man/man\$(MAN3EXT)";
+    $Config_Override{installvendorman1dir} =
+        "$Config{vendorprefixexp}/man/man\$(MAN1EXT)";
+    $Config_Override{installvendorman3dir} =
+        "$Config{vendorprefixexp}/man/man\$(MAN3EXT)";
 
+    my $iprefix = $Config{installprefixexp} || '';
+    my $vprefix = $Config{vendorprefixexp}  || $iprefix;
+    my $sprefix = $Config{siteprefixexp}    || '';
 
-    my($search_prefix, $replace_prefix);
-    # If the prefix contains perl, Configure shapes the tree as follows:
-    #    perlprefix/lib/                INSTALLPRIVLIB
-    #    perlprefix/lib/pod/
-    #    perlprefix/lib/site_perl/      INSTALLSITELIB
-    #    perlprefix/bin/                INSTALLBIN
-    #    perlprefix/man/                INSTALLMAN1DIR
-    # else
-    #    prefix/lib/perl5/              INSTALLPRIVLIB
-    #    prefix/lib/perl5/pod/
-    #    prefix/lib/perl5/site_perl/    INSTALLSITELIB
-    #    prefix/bin/                    INSTALLBIN
-    #    prefix/lib/perl5/man/          INSTALLMAN1DIR
-    #
-    # The above results in various kinds of breakage on various
-    # platforms, so we cope with it as follows: if prefix/lib/perl5
-    # or prefix/lib/perl5/man exist, we'll replace those instead
-    # of /prefix/{lib,man}
+    my $u_prefix  = $self->{PREFIX}       || '';
+    my $u_sprefix = $self->{SITEPREFIX}   || $u_prefix;
+    my $u_vprefix = $self->{VENDORPREFIX} || $u_prefix;
 
-    $replace_prefix = '$(PREFIX)';
-    for my $install_variable (qw/INSTALLBIN INSTALLSCRIPT/)
-    {
-        $self->prefixify($install_variable,$configure_prefix,$replace_prefix);
+    $self->{PREFIX}       ||= $u_prefix  || $iprefix;
+    $self->{SITEPREFIX}   ||= $u_sprefix || $sprefix;
+    $self->{VENDORPREFIX} ||= $u_vprefix || $vprefix;
+
+    my $arch    = $Config{archname};
+    my $version = $Config{version};
+
+    # default style
+    my $libstyle = 'lib/perl5';
+    my $manstyle = '';
+
+    if( $self->{LIBSTYLE} ) {
+        $libstyle = $self->{LIBSTYLE};
+        $manstyle = $self->{LIBSTYLE} eq 'lib/perl5' ? 'lib/perl5' : '';
     }
 
-    my $funkylibdir = File::Spec->catdir($configure_prefix,"lib","perl5");
-    $funkylibdir = '' unless -d $funkylibdir;
-    $search_prefix = $funkylibdir || 
-                     File::Spec->catdir($configure_prefix,"lib");
+    my %bin_layouts = 
+    (
+        bin         => { s => $iprefix,
+                         r => '$(PREFIX)',
+                         d => 'bin' },
+        vendorbin   => { s => $vprefix,
+                         r => '$(VENDORPREFIX)',
+                         d => 'bin' },
+        sitebin     => { s => $sprefix,
+                         r => '$(SITEPREFIX)',
+                         d => 'bin' },
+        script      => { s => $iprefix,
+                         r => '$(PREFIX)',
+                         d => 'bin' },
+    );
+    
+    my %man_layouts =
+    (
+        man1dir         => { s => $iprefix,
+                             r => '$(PREFIX)',
+                             d => 'man/man$(MAN1EXT)',
+                             style => $manstyle, },
+        siteman1dir     => { s => $sprefix,
+                             r => '$(SITEPREFIX)',
+                             d => 'man/man$(MAN1EXT)',
+                             style => $manstyle, },
+        vendorman1dir   => { s => $vprefix,
+                             r => '$(VENDORPREFIX)',
+                             d => 'man/man$(MAN1EXT)',
+                             style => $manstyle, },
 
-    if ($self->{LIB}) {
-        $self->{INSTALLPRIVLIB} = $self->{INSTALLSITELIB} = $self->{LIB};
-        $self->{INSTALLARCHLIB} = $self->{INSTALLSITEARCH} = 
-            File::Spec->catdir($self->{LIB},$Config{'archname'});
+        man3dir         => { s => $iprefix,
+                             r => '$(PREFIX)',
+                             d => 'man/man$(MAN3EXT)',
+                             style => $manstyle, },
+        siteman3dir     => { s => $sprefix,
+                             r => '$(SITEPREFIX)',
+                             d => 'man/man$(MAN3EXT)',
+                             style => $manstyle, },
+        vendorman3dir   => { s => $vprefix,
+                             r => '$(VENDORPREFIX)',
+                             d => 'man/man$(MAN3EXT)',
+                             style => $manstyle, },
+    );
+
+    my %lib_layouts =
+    (
+        privlib     => { s => $iprefix,
+                         r => '$(PREFIX)',
+                         d => '',
+                         style => $libstyle, },
+        vendorlib   => { s => $vprefix,
+                         r => '$(VENDORPREFIX)',
+                         d => '',
+                         style => $libstyle, },
+        sitelib     => { s => $sprefix,
+                         r => '$(SITEPREFIX)',
+                         d => 'site_perl',
+                         style => $libstyle, },
+        
+        archlib     => { s => $iprefix,
+                         r => '$(PREFIX)',
+                         d => "$version/$arch",
+                         style => $libstyle },
+        vendorarch  => { s => $vprefix,
+                         r => '$(VENDORPREFIX)',
+                         d => "$version/$arch",
+                         style => $libstyle },
+        sitearch    => { s => $sprefix,
+                         r => '$(SITEPREFIX)',
+                         d => "site_perl/$version/$arch",
+                         style => $libstyle },
+    );
+
+
+    # Special case for LIB.
+    if( $self->{LIB} ) {
+        foreach my $var (keys %lib_layouts) {
+            my $Installvar = uc "install$var";
+
+            if( $var =~ /arch/ ) {
+                $self->{$Installvar} ||= 
+                  File::Spec->catdir($self->{LIB}, $Config{archname});
+            }
+            else {
+                $self->{$Installvar} ||= $self->{LIB};
+            }
+        }
     }
-    else {
-        if (-d File::Spec->catdir($self->{PREFIX},"lib","perl5")) {
-            $replace_prefix = File::Spec->catdir(qq[\$\(PREFIX\)],"lib", 
-                                                 "perl5");
+
+
+    my %layouts = (%bin_layouts, %man_layouts, %lib_layouts);
+    while( my($var, $layout) = each(%layouts) ) {
+        my($s, $r, $d, $style) = @{$layout}{qw(s r d style)};
+
+        print STDERR "Prefixing $var\n" if $Verbose >= 2;
+
+        my $installvar = "install$var";
+        my $Installvar = uc $installvar;
+        next if $self->{$Installvar};
+
+        if( $r ) {
+            $d = "$style/$d" if $style;
+            $self->prefixify($installvar, $s, $r, $d);
         }
         else {
-            $replace_prefix = File::Spec->catdir(qq[\$\(PREFIX\)],"lib");
+            $self->{$Installvar} = $Config_Override{$installvar} || 
+                                   $Config{$installvar};
         }
-        for my $install_variable (qw/
-                               INSTALLPRIVLIB
-                               INSTALLARCHLIB
-                               INSTALLSITELIB
-                               INSTALLSITEARCH
-                               /)
-        {
-            $self->prefixify($install_variable,$search_prefix,$replace_prefix);
-        }
+
+        print STDERR "  $Installvar == $self->{$Installvar}\n" 
+          if $Verbose >= 2;
     }
-    my $funkymandir = File::Spec->catdir($configure_prefix,"lib","perl5","man");
-    $funkymandir = '' unless -d $funkymandir;
-    $search_prefix = $funkymandir || File::Spec->catdir($configure_prefix,"man");
-    if (-d File::Spec->catdir($self->{PREFIX},"lib","perl5", "man")) {
-        $replace_prefix = File::Spec->catdir(qq[\$\(PREFIX\)],"lib", "perl5", "man");
-    }
-    else {
-        $replace_prefix = File::Spec->catdir(qq[\$\(PREFIX\)],"man");
-    }
-    for my $install_variable (qw/
-                           INSTALLMAN1DIR
-                           INSTALLMAN3DIR
-                           /)
-    {
-        $self->prefixify($install_variable,$search_prefix,$replace_prefix);
-    }
+
+    $self->{PREFIX} ||= $iprefix;
 
     return 1;
 }
+
 
 =item init_PERL
 
@@ -2059,6 +2144,8 @@ install_perl :: all pure_perl_install doc_perl_install
 
 install_site :: all pure_site_install doc_site_install
 
+install_vendor :: all pure_vendor_install doc_vendor_install
+
 pure_install :: pure_$(INSTALLDIRS)_install
 
 doc_install :: doc_$(INSTALLDIRS)_install
@@ -2090,12 +2177,21 @@ pure_site_install ::
 		write }.File::Spec->catfile('$(INSTALLSITEARCH)','auto','$(FULLEXT)','.packlist').q{ \
 		$(INST_LIB) $(INSTALLSITELIB) \
 		$(INST_ARCHLIB) $(INSTALLSITEARCH) \
-		$(INST_BIN) $(INSTALLBIN) \
+		$(INST_BIN) $(INSTALLSITEBIN) \
 		$(INST_SCRIPT) $(INSTALLSCRIPT) \
-		$(INST_MAN1DIR) $(INSTALLMAN1DIR) \
-		$(INST_MAN3DIR) $(INSTALLMAN3DIR)
+		$(INST_MAN1DIR) $(INSTALLSITEMAN1DIR) \
+		$(INST_MAN3DIR) $(INSTALLSITEMAN3DIR)
 	}.$self->{NOECHO}.q{$(WARN_IF_OLD_PACKLIST) \
 		}.File::Spec->catdir('$(PERL_ARCHLIB)','auto','$(FULLEXT)').q{
+
+pure_vendor_install ::
+	}.$self->{NOECHO}.q{$(MOD_INSTALL) \
+		$(INST_LIB) $(INSTALLVENDORLIB) \
+		$(INST_ARCHLIB) $(INSTALLVENDORARCH) \
+		$(INST_BIN) $(INSTALLVENDORBIN) \
+		$(INST_SCRIPT) $(INSTALLSCRIPT) \
+		$(INST_MAN1DIR) $(INSTALLVENDORMAN1DIR) \
+		$(INST_MAN3DIR) $(INSTALLVENDORMAN3DIR)
 
 doc_perl_install ::
 	-}.$self->{NOECHO}.q{$(MKPATH) $(INSTALLARCHLIB)
@@ -2115,7 +2211,9 @@ doc_site_install ::
 		LINKTYPE "$(LINKTYPE)" \
 		VERSION "$(VERSION)" \
 		EXE_FILES "$(EXE_FILES)" \
-		>> }.File::Spec->catfile('$(INSTALLARCHLIB)','perllocal.pod').q{
+		>> }.File::Spec->catfile('$(INSTALLSITEARCH)','perllocal.pod').q{
+
+doc_vendor_install ::
 
 };
 
@@ -3076,23 +3174,24 @@ simply use '/home/foo/man/man1'.
 sub prefixify {
     my($self,$var,$sprefix,$rprefix,$default) = @_;
 
-    my $path = $self->{uc $var} || $Config{lc $var};
+    my $path = $self->{uc $var} || 
+               $Config_Override{lc $var} || $Config{lc $var};
 
-    print STDERR "Prefixing $var=$path\n" if $Verbose >= 2;
-    print STDERR "  from $sprefix to $rprefix\n" 
+    print STDERR "  prefixify $var=$path\n" if $Verbose >= 2;
+    print STDERR "    from $sprefix to $rprefix\n" 
       if $Verbose >= 2;
 
     $path = VMS::Filespec::unixpath($path) if $Is_VMS;
 
     unless( $path =~ s,^\Q$sprefix\E(?=/|\z),$rprefix,s ) {
 
-        print STDERR "  cannot prefix, using default.\n" if $Verbose >= 2;
-        print STDERR "  no default!\n" if $Verbose >= 2;
+        print STDERR "    cannot prefix, using default.\n" if $Verbose >= 2;
+        print STDERR "    no default!\n" if !$default && $Verbose >= 2;
 
         $path = File::Spec->catdir($rprefix, $default) if $default;
     }
 
-    print "  now $path\n" if $Verbose >= 2;
+    print "    now $path\n" if $Verbose >= 2;
     return $self->{uc $var} = $path;
 }
 

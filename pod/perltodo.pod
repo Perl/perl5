@@ -610,6 +610,51 @@ modules have tests.
 
 The code we ship with Perl should look like good Perl 5.
 
+=head2 Create debugging macros
+
+Debugging macros (like printsv, dump) can make debugging perl inside a
+C debugger much easier.  A good set for gdb comes with mod_perl.
+Something similar should be distributed with perl.
+
+The proper way to do this is to use and extend Devel::DebugInit.
+Devel::DebugInit also needs to be extended to support threads.
+
+See p5p archives for late May/early June 2001 for a recent discussion
+on this topic.
+
+=head2 truncate to the people
+
+One can emulate ftruncate() using F_FREESP and F_CHSIZ fcntls
+(see the UNIX FAQ for details).  This needs to go somewhere near
+pp_sys.c:pp_truncate().
+
+One can emulate truncate() easily if one has ftruncate().
+This emulation should also go near pp_sys.pp_truncate().
+
+=head2 Unicode in Filenames
+
+chdir, chmod, chown, chroot, exec, glob, link, lstat, mkdir, open, qx,
+readdir, readlink, rename, rmdir, stat, symlink, sysopen, system,
+truncate, unlink, utime.  All these could potentially accept Unicode
+filenames either as input or output (and in the case of system and qx
+Unicode in general, as input or output to/from the shell).  Whether a
+filesystem - an operating system pair understands Unicode in filenames
+varies.
+
+Known combinations that have some level of understanding include
+Microsoft NTFS, Apple HFS+ (In Mac OS 9 and X) and Apple UFS (in Mac
+OS X), NFS v4 is rumored to be Unicode, and of course Plan 9.  How to
+create Unicode filenames, what forms of Unicode are accepted and used
+(UCS-2, UTF-16, UTF-8), what (if any) is the normalization form used,
+and so on, varies.  Finding the right level of interfacing to Perl
+requires some thought.  Remember that an OS does not implicate a
+filesystem.
+
+Note that in Windows the -C command line flag already does quite
+a bit of the above (but even there the support is not complete:
+for example the exec/spawn are not Unicode-aware) by turning on
+the so-called "wide API support". 
+
 =head1 Recently done things
 
 These are things which have been on the todo lists in previous releases
@@ -872,27 +917,6 @@ by SADAHIRO Tomoyuki have been included since 5.8.0.
 
     Collation?     http://www.unicode.org/unicode/reports/tr10/
     Normalization? http://www.unicode.org/unicode/reports/tr15/
-
-=head2 Create debugging macros
-
-Debugging macros (like printsv, dump) can make debugging perl inside a
-C debugger much easier.  A good set for gdb comes with mod_perl.
-Something similar should be distributed with perl.
-
-The proper way to do this is to use and extend Devel::DebugInit.
-Devel::DebugInit also needs to be extended to support threads.
-
-See p5p archives for late May/early June 2001 for a recent discussion
-on this topic.
-
-=head2 truncate to the people
-
-One can emulate ftruncate() using F_FREESP and F_CHSIZ fcntls
-(see the UNIX FAQ for details).  This needs to go somewhere near
-pp_sys.c:pp_truncate().
-
-One can emulate truncate() easily if one has ftruncate().
-This emulation should also go near pp_sys.pp_truncate().
 
 =head2 pack/unpack tutorial
 

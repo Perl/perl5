@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 # Wherein we ensure the INST_* and INSTALL* variables are set correctly
-# in a default Makefile.PL run
+# when various PREFIX variables are set.
 #
 # Essentially, this test is a Makefile.PL.
 
@@ -16,7 +16,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 17;
+use Test::More tests => 24;
 use MakeMaker::Test::Utils;
 use ExtUtils::MakeMaker;
 use File::Spec;
@@ -42,6 +42,7 @@ my $mm = WriteMakefile(
     VERSION_FROM  => 'lib/Big/Fat/Dummy.pm',
     PREREQ_PM     => {},
     PERL_CORE     => $ENV{PERL_CORE},
+    PREFIX        => 'foo/bar',
 );
 like( $stdout->read, qr{
                         Writing\ $Makefile\ for\ Big::Fat::Liar\n
@@ -58,9 +59,7 @@ isa_ok( $mm, 'ExtUtils::MakeMaker' );
 is( $mm->{NAME}, 'Big::Fat::Dummy',  'NAME' );
 is( $mm->{VERSION}, 0.01,            'VERSION' );
 
-my $config_prefix = $^O eq 'VMS' ? VMS::Filespec::unixify($Config{prefix})
-                                 : $Config{prefix};
-is( $mm->{PREFIX}, $config_prefix,   'PREFIX' );
+is( $mm->{PREFIX}, 'foo/bar',   'PREFIX' );
 
 is( !!$mm->{PERL_CORE}, !!$ENV{PERL_CORE}, 'PERL_CORE' );
 
@@ -77,34 +76,24 @@ else {
 is( $mm_perl_src, $perl_src,     'PERL_SRC' );
 
 
-# PERM_*
-is( $mm->{PERM_RW},  644,    'PERM_RW' );
-is( $mm->{PERM_RWX}, 755,    'PERM_RWX' );
+# Every INSTALL* variable must start with some PREFIX.
+my @Perl_Install = qw(archlib    privlib   bin     script 
+                      man1dir       man3dir);
+my @Site_Install = qw(sitearch   sitelib   sitebin        
+                      siteman1dir siteman3dir);
+my @Vend_Install = qw(vendorarch vendorlib vendorbin 
+                      vendorman1dir vendorman3dir);
 
+foreach my $var (@Perl_Install) {
+    like( $mm->{uc "install$var"}, qr/^\$\(PREFIX\)/, "PREFIX + $var" );
+}
 
-# INST_*
-is( $mm->{INST_ARCHLIB}, 
-    $mm->{PERL_CORE} ? $mm->{PERL_ARCHLIB}
-                     : File::Spec->catdir($Curdir, 'blib', 'arch'),
-                                     'INST_ARCHLIB');
-is( $mm->{INST_BIN},     File::Spec->catdir($Curdir, 'blib', 'bin'),
-                                     'INST_BIN' );
+foreach my $var (@Site_Install) {
+    like( $mm->{uc "install$var"}, qr/^\$\(SITEPREFIX\)/, 
+                                                    "SITEPREFIX + $var" );
+}
 
-is( keys %{$mm->{CHILDREN}}, 1 );
-my($child_pack) = keys %{$mm->{CHILDREN}};
-my $c_mm = $mm->{CHILDREN}{$child_pack};
-is( $c_mm->{INST_ARCHLIB}, 
-    $c_mm->{PERL_CORE} ? $c_mm->{PERL_ARCHLIB}
-                       : File::Spec->catdir($Updir, 'blib', 'arch'),
-                                     'CHILD INST_ARCHLIB');
-is( $c_mm->{INST_BIN},     File::Spec->catdir($Updir, 'blib', 'bin'),
-                                     'CHILD INST_BIN' );
-
-
-my $inst_lib = File::Spec->catdir($Curdir, 'blib', 'lib');
-is( $mm->{INST_LIB}, 
-    $mm->{PERL_CORE} ? $mm->{PERL_LIB} : $inst_lib,     'INST_LIB' );
-
-
-# INSTALL*
-is( $mm->{INSTALLDIRS}, 'site',     'INSTALLDIRS' );
+foreach my $var (@Vend_Install) {
+    like( $mm->{uc "install$var"}, qr/^\$\(VENDORPREFIX\)/,
+                                                    "VENDORPREFIX + $var" );
+}
