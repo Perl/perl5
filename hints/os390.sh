@@ -206,8 +206,7 @@ fi
 # Most of the time gcvt() seems to work fine but
 # sometimes values like 0.1, 0.2, come out as "10", "20",
 # a trivial Perl demonstration snippet is 'print 0.1'.
-# Yes, a flagrant bug, but unfortunately not trivial to
-# reproduce in C using gcvt().
+# The -W 0,float(ieee) seems to be the switch breaking gcvt().
 # sprintf() seems to get things right(er).
 d_Gconvert='sprintf((b),"%.*g",(n),(x))'
 
