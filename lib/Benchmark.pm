@@ -8,7 +8,11 @@ timethis - run a chunk of code several times
 
 timethese - run several chunks of code several times
 
+cmpthese - print results of timethese as a comparison chart
+
 timeit - run a chunk of code and see how long it goes
+
+countit - see how many times a chunk of code runs in a given time
 
 =head1 SYNOPSIS
 
@@ -26,7 +30,32 @@ timeit - run a chunk of code and see how long it goes
 	'Name2' => sub { ...code2... },
     });
 
+    # cmpthese can be used both ways as well
+    cmpthese($count, {
+	'Name1' => '...code1...',
+	'Name2' => '...code2...',
+    });
+
+    cmpthese($count, {
+	'Name1' => sub { ...code1... },
+	'Name2' => sub { ...code2... },
+    });
+
+    # ...or in two stages
+    $results = timethese($count, 
+        {
+	    'Name1' => sub { ...code1... },
+	    'Name2' => sub { ...code2... },
+        },
+	'none'
+    );
+    cmpthese( $results ) ;
+
     $t = timeit($count, '...other code...')
+    print "$count loops of other code took:",timestr($t),"\n";
+
+    $t = countit($time, '...other code...')
+    $count = $t->iters ;
     print "$count loops of other code took:",timestr($t),"\n";
 
 =head1 DESCRIPTION
@@ -57,6 +86,10 @@ Enables or disable debugging by setting the C<$Benchmark::Debug> flag:
     $t = timeit(10, ' 5 ** $Global ');
     debug Benchmark 0;
 
+=item iters
+
+Returns the number of iterations.
+
 =back
 
 =head2 Standard Exports
@@ -65,6 +98,34 @@ The following routines will be exported into your namespace
 if you use the Benchmark module:
 
 =over 10
+
+=item cmpthese ( COUT, CODEHASHREF, [ STYLE ] )
+
+=item cmpthese ( RESULTSHASHREF )
+
+Optionally calls timethese(), then outputs comparison chart.  This 
+chart is sorted from slowest to highest, and shows the percent 
+speed difference between each pair of tests.  Can also be passed 
+the data structure that timethese() returns:
+
+    $results = timethese( .... );
+    cmpthese( $results );
+
+Returns the data structure returned by timethese().
+
+=item countit(TIME, CODE)
+
+Arguments: TIME is the minimum length of time to run CODE for, and CODE is
+the code to run.  CODE may be either a code reference or a string to
+be eval'd; either way it will be run in the caller's package.
+
+TIME is I<not> negative.  countit() will run the loop many times to
+calculate the speed of CODE before running it for TIME.  The actual
+time run for will usually be greater than TIME due to system clock
+resolution, so it's best to look at the number of iterations divided
+by the times that you are concerned with, not just the iterations.
+
+Returns: a Benchmark object.
 
 =item timeit(COUNT, CODE)
 
@@ -165,20 +226,6 @@ Clear the cached time for COUNT rounds of the null loop.
 
 Clear all cached times.
 
-=item cmpthese ( COUT, CODEHASHREF, [ STYLE ] )
-
-=item cmpthese ( RESULTSHASHREF )
-
-Optionally calls timethese(), then outputs comparison chart.  This 
-chart is sorted from slowest to highest, and shows the percent 
-speed difference between each pair of tests.  Can also be passed 
-the data structure that timethese() returns:
-
-    $results = timethese( .... );
-    cmpthese( $results );
-
-Returns the data structure returned by timethese().
-
 =item disablecache ( )
 
 Disable caching of timings for the null loop. This will force Benchmark
@@ -197,7 +244,7 @@ different COUNT used.
 The data is stored as a list of values from the time and times
 functions:
 
-      ($real, $user, $system, $children_user, $children_system)
+      ($real, $user, $system, $children_user, $children_system, $iters)
 
 in seconds for the whole loop (not divided by the number of rounds).
 
@@ -230,7 +277,7 @@ for Exporter.
 =head1 CAVEATS
 
 Comparing eval'd strings with code references will give you
-inaccurate results: a code reference will show a slower
+inaccurate results: a code reference will show a slightly slower
 execution time than the equivalent eval'd string.
 
 The real time timing is done using time(2) and
@@ -263,7 +310,7 @@ functionality.
 
 September, 1999; by Barrie Slaymaker: math fixes and accuracy and 
 efficiency tweaks.  Added cmpthese().  A result is now returned from 
-timethese().
+timethese().  Exposed countit() (was runfor()).
 
 =cut
 
@@ -277,8 +324,8 @@ sub _doeval { eval shift }
 use Carp;
 use Exporter;
 @ISA=(Exporter);
-@EXPORT=qw(timeit timethis timethese timediff timesum timestr);
-@EXPORT_OK=qw(clearcache clearallcache cmpthese disablecache enablecache);
+@EXPORT=qw(cmpthese countit timeit timethis timethese timediff timestr);
+@EXPORT_OK=qw(clearcache clearallcache disablecache enablecache);
 
 &init;
 
@@ -314,6 +361,7 @@ sub cpu_p { my($r,$pu,$ps,$cu,$cs) = @{$_[0]}; $pu+$ps         ; }
 sub cpu_c { my($r,$pu,$ps,$cu,$cs) = @{$_[0]};         $cu+$cs ; }
 sub cpu_a { my($r,$pu,$ps,$cu,$cs) = @{$_[0]}; $pu+$ps+$cu+$cs ; }
 sub real  { my($r,$pu,$ps,$cu,$cs) = @{$_[0]}; $r              ; }
+sub iters { $_[0]->[5] ; }
 
 sub timediff {
     my($a, $b) = @_;
@@ -392,7 +440,7 @@ sub runloop {
     # -0.01, +0.  If we don't wait, then it's more like -0.01, +0.01.  This
     # may not seem important, but it significantly reduces the chances of
     # getting a too low initial $n in the initial, 'find the minimum' loop
-    # in &runfor.  This, in turn, can reduce the number of calls to
+    # in &countit.  This, in turn, can reduce the number of calls to
     # &runloop a lot, and thus reduce additive errors.
     my $tbase = Benchmark->new(0)->[1];
     do {
@@ -437,8 +485,8 @@ my $default_for = 3;
 my $min_for     = 0.1;
 
 
-sub runfor {
-    my ($code, $tmax) = @_;
+sub countit {
+    my ( $tmax, $code ) = @_;
 
     if ( not defined $tmax or $tmax == 0 ) {
 	$tmax = $default_for;
@@ -446,7 +494,7 @@ sub runfor {
 	$tmax = -$tmax;
     }
 
-    die "runfor(..., $tmax): timelimit cannot be less than $min_for.\n"
+    die "countit($tmax, ...): timelimit cannot be less than $min_for.\n"
 	if $tmax < $min_for;
 
     my ($n, $tc);
@@ -523,7 +571,7 @@ sub timethis{
 	$title = "timethis $n" unless defined $title;
     } else {
 	$fort  = n_to_for( $n );
-	$t     = runfor($code, $fort);
+	$t     = countit( $fort, $code );
 	$title = "timethis for $fort" unless defined $title;
 	$forn  = $t->[-1];
     }
