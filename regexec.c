@@ -917,7 +917,6 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     }
     else if (c = prog->regstclass) {
 	I32 doevery = (prog->reganch & ROPT_SKIP) == 0;
-	char *cc;
 	char *m;
 	int ln;
 	int c1;
@@ -931,7 +930,6 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	/* We know what class it must start with. */
 	switch (OP(c)) {
 	case ANYOFUTF8:
-	    cc = MASK(c);
 	    while (s < strend) {
 		if (REGINCLASSUTF8(c, (U8*)s)) {
 		    if (tmp && regtry(prog, s))
@@ -945,9 +943,8 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    }
 	    break;
 	case ANYOF:
-	    cc = MASK(c);
 	    while (s < strend) {
-		if (REGINCLASS(cc, *s)) {
+		if (REGINCLASS(c, *s)) {
 		    if (tmp && regtry(prog, s))
 			goto got_it;
 		    else
@@ -1847,7 +1844,6 @@ S_regmatch(pTHX_ regnode *prog)
 	    nextchr = UCHARAT(locinput);
 	    break;
 	case ANYOFUTF8:
-	    s = MASK(scan);
 	    if (!REGINCLASSUTF8(scan, (U8*)locinput))
 		sayNO;
 	    if (locinput >= PL_regeol)
@@ -1856,10 +1852,9 @@ S_regmatch(pTHX_ regnode *prog)
 	    nextchr = UCHARAT(locinput);
 	    break;
 	case ANYOF:
-	    s = MASK(scan);
 	    if (nextchr < 0)
 		nextchr = UCHARAT(locinput);
-	    if (!REGINCLASS(s, nextchr))
+	    if (!REGINCLASS(scan, nextchr))
 		sayNO;
 	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
@@ -3157,7 +3152,6 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
 {
     dTHR;
     register char *scan;
-    register char *opnd;
     register I32 c;
     register char *loceol = PL_regeol;
     register I32 hardcount = 0;
@@ -3213,8 +3207,7 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
 	}
 	break;
     case ANYOF:
-	opnd = MASK(p);
-	while (scan < loceol && REGINCLASS(opnd, *scan))
+	while (scan < loceol && REGINCLASS(p, *scan))
 	    scan++;
 	break;
     case ALNUM:
@@ -3418,7 +3411,7 @@ S_regrepeat_hard(pTHX_ regnode *p, I32 max, I32 *lp)
  */
 
 STATIC bool
-S_reginclass(pTHX_ register char *p, register I32 c)
+S_reginclass(pTHX_ register regnode *p, register I32 c)
 {
     dTHR;
     char flags = ANYOF_FLAGS(p);

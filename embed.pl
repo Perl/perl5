@@ -1944,7 +1944,7 @@ s	|I32	|regmatch	|regnode *prog
 s	|I32	|regrepeat	|regnode *p|I32 max
 s	|I32	|regrepeat_hard	|regnode *p|I32 max|I32 *lp
 s	|I32	|regtry		|regexp *prog|char *startpos
-s	|bool	|reginclass	|char *p|I32 c
+s	|bool	|reginclass	|regnode *p|I32 c
 s	|bool	|reginclassutf8	|regnode *f|U8* p
 s	|CHECKPOINT|regcppush	|I32 parenfloor
 s	|char*|regcppop

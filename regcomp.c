@@ -2161,7 +2161,7 @@ S_regpposixcc(pTHX_ I32 value)
 {
     dTHR;
     char *posixcc = 0;
-    I32 namedclass = -1;
+    I32 namedclass = OOB_NAMEDCLASS;
 
     if (value == '[' && PL_regcomp_parse + 1 < PL_regxend &&
 	/* I smell either [: or [= or [. -- POSIX has been here, right? */
@@ -2274,7 +2274,7 @@ S_regpposixcc(pTHX_ I32 value)
 STATIC void
 S_checkposixcc(pTHX)
 {
-    if (ckWARN(WARN_UNSAFE) && !SIZE_ONLY &&
+    if (!SIZE_ONLY && ckWARN(WARN_UNSAFE) &&
 	(*PL_regcomp_parse == ':' ||
 	 *PL_regcomp_parse == '=' ||
 	 *PL_regcomp_parse == '.')) {
@@ -2297,7 +2297,6 @@ STATIC regnode *
 S_regclass(pTHX)
 {
     dTHR;
-    register char *opnd, *s;
     register I32 value;
     register I32 lastvalue = OOB_CHAR8;
     register I32 range = 0;
@@ -2306,29 +2305,29 @@ S_regclass(pTHX)
     I32 numlen;
     I32 namedclass;
     char *rangebegin;
+    bool need_class = 0;
 
-    s = opnd = MASK(PL_regcode);
     ret = reg_node(ANYOF);
-    for (value = 0; value < ANYOF_SIZE; value++)
-	REGC(0, s++);
+    if (SIZE_ONLY)
+	PL_regsize += ANYOF_SKIP;
+    else {
+	ret->flags = 0;
+	ANYOF_BITMAP_ZERO(ret);
+ 	PL_regcode += ANYOF_SKIP;
+	if (FOLD)
+	    ANYOF_FLAGS(ret) |= ANYOF_FOLD;
+	if (LOC)
+	    ANYOF_FLAGS(ret) |= ANYOF_LOCALE;
+    }
     if (*PL_regcomp_parse == '^') {	/* Complement of range. */
 	PL_regnaughty++;
 	PL_regcomp_parse++;
 	if (!SIZE_ONLY)
-	    ANYOF_FLAGS(opnd) |= ANYOF_INVERT;
-    }
-    if (!SIZE_ONLY) {
- 	PL_regcode += ANY_SKIP;
-	if (FOLD)
-	    ANYOF_FLAGS(opnd) |= ANYOF_FOLD;
-	if (LOC)
-	    ANYOF_FLAGS(opnd) |= ANYOF_LOCALE;
-    }
-    else {
-	PL_regsize += ANY_SKIP;
+	    ANYOF_FLAGS(ret) |= ANYOF_INVERT;
     }
 
-    checkposixcc();
+    if (!SIZE_ONLY && ckWARN(WARN_UNSAFE))
+	checkposixcc();
 
     if (*PL_regcomp_parse == ']' || *PL_regcomp_parse == '-')
 	goto skipcond;		/* allow 1st char to be ] or - */
@@ -2379,6 +2378,9 @@ S_regclass(pTHX)
 	    }
 	}
 	if (namedclass > OOB_NAMEDCLASS) {
+	    if (!need_class && !SIZE_ONLY)
+		ANYOF_CLASS_ZERO(ret);
+	    need_class = 1;
 	    if (range) { /* a-\d, a-[:digit:] */
 		if (!SIZE_ONLY) {
 		    if (ckWARN(WARN_UNSAFE))
@@ -2388,8 +2390,8 @@ S_regclass(pTHX)
 				    PL_regcomp_parse - rangebegin,
 				    PL_regcomp_parse - rangebegin,
 				    rangebegin);
-		    ANYOF_BITMAP_SET(opnd, lastvalue);
-		    ANYOF_BITMAP_SET(opnd, '-');
+		    ANYOF_BITMAP_SET(ret, lastvalue);
+		    ANYOF_BITMAP_SET(ret, '-');
 		}
 		range = 0; /* this is not a true range */
 	    }
@@ -2397,235 +2399,235 @@ S_regclass(pTHX)
 		switch (namedclass) {
 		case ANYOF_ALNUM:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_ALNUM);
+			ANYOF_CLASS_SET(ret, ANYOF_ALNUM);
 		    else {
 			for (value = 0; value < 256; value++)
 			    if (isALNUM(value))
-				ANYOF_BITMAP_SET(opnd, value);
+				ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
 		case ANYOF_NALNUM:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_NALNUM);
+			ANYOF_CLASS_SET(ret, ANYOF_NALNUM);
 		    else {
 			for (value = 0; value < 256; value++)
 			    if (!isALNUM(value))
-				ANYOF_BITMAP_SET(opnd, value);
+				ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
 		case ANYOF_SPACE:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_SPACE);
+			ANYOF_CLASS_SET(ret, ANYOF_SPACE);
 		    else {
 			for (value = 0; value < 256; value++)
 			    if (isSPACE(value))
-				ANYOF_BITMAP_SET(opnd, value);
+				ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
 		case ANYOF_NSPACE:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_NSPACE);
+			ANYOF_CLASS_SET(ret, ANYOF_NSPACE);
 		    else {
 			for (value = 0; value < 256; value++)
 			    if (!isSPACE(value))
-				ANYOF_BITMAP_SET(opnd, value);
+				ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
 		case ANYOF_DIGIT:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_DIGIT);
+			ANYOF_CLASS_SET(ret, ANYOF_DIGIT);
 		    else {
 			for (value = '0'; value <= '9'; value++)
-			    ANYOF_BITMAP_SET(opnd, value);
+			    ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
 		case ANYOF_NDIGIT:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_NDIGIT);
+			ANYOF_CLASS_SET(ret, ANYOF_NDIGIT);
 		    else {
 			for (value = 0; value < '0'; value++)
-			    ANYOF_BITMAP_SET(opnd, value);
+			    ANYOF_BITMAP_SET(ret, value);
 			for (value = '9' + 1; value < 256; value++)
-			    ANYOF_BITMAP_SET(opnd, value);
+			    ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
 		case ANYOF_NALNUMC:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_NALNUMC);
+			ANYOF_CLASS_SET(ret, ANYOF_NALNUMC);
 		    else {
 			for (value = 0; value < 256; value++)
 			    if (!isALNUMC(value))
-				ANYOF_BITMAP_SET(opnd, value);
+				ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
 		case ANYOF_ALNUMC:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_ALNUMC);
+			ANYOF_CLASS_SET(ret, ANYOF_ALNUMC);
 		    else {
 			for (value = 0; value < 256; value++)
 			    if (isALNUMC(value))
-				ANYOF_BITMAP_SET(opnd, value);
+				ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
 		case ANYOF_ALPHA:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_ALPHA);
+			ANYOF_CLASS_SET(ret, ANYOF_ALPHA);
 		    else {
 			for (value = 0; value < 256; value++)
 			    if (isALPHA(value))
-				ANYOF_BITMAP_SET(opnd, value);
+				ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
 		case ANYOF_NALPHA:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_NALPHA);
+			ANYOF_CLASS_SET(ret, ANYOF_NALPHA);
 		    else {
 			for (value = 0; value < 256; value++)
 			    if (!isALPHA(value))
-				ANYOF_BITMAP_SET(opnd, value);
+				ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
 		case ANYOF_ASCII:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_ASCII);
+			ANYOF_CLASS_SET(ret, ANYOF_ASCII);
 		    else {
 			for (value = 0; value < 128; value++)
-			    ANYOF_BITMAP_SET(opnd, value);
+			    ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
 		case ANYOF_NASCII:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_NASCII);
+			ANYOF_CLASS_SET(ret, ANYOF_NASCII);
 		    else {
 			for (value = 128; value < 256; value++)
-			    ANYOF_BITMAP_SET(opnd, value);
+			    ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
 		case ANYOF_CNTRL:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_CNTRL);
+			ANYOF_CLASS_SET(ret, ANYOF_CNTRL);
 		    else {
 			for (value = 0; value < 256; value++)
 			    if (isCNTRL(value))
-				ANYOF_BITMAP_SET(opnd, value);
+				ANYOF_BITMAP_SET(ret, value);
 		    }
 		    lastvalue = OOB_CHAR8;
 		    break;
 		case ANYOF_NCNTRL:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_NCNTRL);
+			ANYOF_CLASS_SET(ret, ANYOF_NCNTRL);
 		    else {
 			for (value = 0; value < 256; value++)
 			    if (!isCNTRL(value))
-				ANYOF_BITMAP_SET(opnd, value);
+				ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
 		case ANYOF_GRAPH:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_GRAPH);
+			ANYOF_CLASS_SET(ret, ANYOF_GRAPH);
 		    else {
 			for (value = 0; value < 256; value++)
 			    if (isGRAPH(value))
-				ANYOF_BITMAP_SET(opnd, value);
+				ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
 		case ANYOF_NGRAPH:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_NGRAPH);
+			ANYOF_CLASS_SET(ret, ANYOF_NGRAPH);
 		    else {
 			for (value = 0; value < 256; value++)
 			    if (!isGRAPH(value))
-				ANYOF_BITMAP_SET(opnd, value);
+				ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
 		case ANYOF_LOWER:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_LOWER);
+			ANYOF_CLASS_SET(ret, ANYOF_LOWER);
 		    else {
 			for (value = 0; value < 256; value++)
 			    if (isLOWER(value))
-				ANYOF_BITMAP_SET(opnd, value);
+				ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
 		case ANYOF_NLOWER:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_NLOWER);
+			ANYOF_CLASS_SET(ret, ANYOF_NLOWER);
 		    else {
 			for (value = 0; value < 256; value++)
 			    if (!isLOWER(value))
-				ANYOF_BITMAP_SET(opnd, value);
+				ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
 		case ANYOF_PRINT:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_PRINT);
+			ANYOF_CLASS_SET(ret, ANYOF_PRINT);
 		    else {
 			for (value = 0; value < 256; value++)
 			    if (isPRINT(value))
-				ANYOF_BITMAP_SET(opnd, value);
+				ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
 		case ANYOF_NPRINT:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_NPRINT);
+			ANYOF_CLASS_SET(ret, ANYOF_NPRINT);
 		    else {
 			for (value = 0; value < 256; value++)
 			    if (!isPRINT(value))
-				ANYOF_BITMAP_SET(opnd, value);
+				ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
 		case ANYOF_PUNCT:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_PUNCT);
+			ANYOF_CLASS_SET(ret, ANYOF_PUNCT);
 		    else {
 			for (value = 0; value < 256; value++)
 			    if (isPUNCT(value))
-				ANYOF_BITMAP_SET(opnd, value);
+				ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
 		case ANYOF_NPUNCT:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_NPUNCT);
+			ANYOF_CLASS_SET(ret, ANYOF_NPUNCT);
 		    else {
 			for (value = 0; value < 256; value++)
 			    if (!isPUNCT(value))
-				ANYOF_BITMAP_SET(opnd, value);
+				ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
 		case ANYOF_UPPER:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_UPPER);
+			ANYOF_CLASS_SET(ret, ANYOF_UPPER);
 		    else {
 			for (value = 0; value < 256; value++)
 			    if (isUPPER(value))
-				ANYOF_BITMAP_SET(opnd, value);
+				ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
 		case ANYOF_NUPPER:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_NUPPER);
+			ANYOF_CLASS_SET(ret, ANYOF_NUPPER);
 		    else {
 			for (value = 0; value < 256; value++)
 			    if (!isUPPER(value))
-				ANYOF_BITMAP_SET(opnd, value);
+				ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
 		case ANYOF_XDIGIT:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_XDIGIT);
+			ANYOF_CLASS_SET(ret, ANYOF_XDIGIT);
 		    else {
 			for (value = 0; value < 256; value++)
 			    if (isXDIGIT(value))
-				ANYOF_BITMAP_SET(opnd, value);
+				ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
 		case ANYOF_NXDIGIT:
 		    if (LOC)
-			ANYOF_CLASS_SET(opnd, ANYOF_NXDIGIT);
+			ANYOF_CLASS_SET(ret, ANYOF_NXDIGIT);
 		    else {
 			for (value = 0; value < 256; value++)
 			    if (!isXDIGIT(value))
-				ANYOF_BITMAP_SET(opnd, value);
+				ANYOF_BITMAP_SET(ret, value);
 		    }
 		    break;
 		default:
@@ -2633,7 +2635,7 @@ S_regclass(pTHX)
 		    break;
 		}
 		if (LOC)
-		    ANYOF_FLAGS(opnd) |= ANYOF_CLASS;
+		    ANYOF_FLAGS(ret) |= ANYOF_CLASS;
 		continue;
 	    }
 	}
@@ -2662,7 +2664,7 @@ S_regclass(pTHX)
 				    PL_regcomp_parse - rangebegin,
 				    rangebegin);
 		    if (!SIZE_ONLY)
-			ANYOF_BITMAP_SET(opnd, '-');
+			ANYOF_BITMAP_SET(ret, '-');
 		} else
 		    range = 1;
 		continue;	/* do it next time */
@@ -2678,36 +2680,42 @@ S_regclass(pTHX)
  		if (isLOWER(lastvalue)) {
  		    for (i = lastvalue; i <= value; i++)
 			if (isLOWER(i))
-			    ANYOF_BITMAP_SET(opnd, i);
+			    ANYOF_BITMAP_SET(ret, i);
  		} else {
  		    for (i = lastvalue; i <= value; i++)
 			if (isUPPER(i))
-			    ANYOF_BITMAP_SET(opnd, i);
+			    ANYOF_BITMAP_SET(ret, i);
 		}
 	    }
 	    else
 #endif
 		for ( ; lastvalue <= value; lastvalue++)
-		    ANYOF_BITMAP_SET(opnd, lastvalue);
+		    ANYOF_BITMAP_SET(ret, lastvalue);
         }
 	range = 0;
     }
+    if (need_class) {
+	if (SIZE_ONLY)
+	    PL_regsize += ANYOF_CLASS_ADD_SKIP;
+	else
+	    PL_regcode += ANYOF_CLASS_ADD_SKIP;
+    }
     /* optimize case-insensitive simple patterns (e.g. /[a-z]/i) */
     if (!SIZE_ONLY &&
-	(ANYOF_FLAGS(opnd) & (ANYOF_FLAGS_ALL ^ ANYOF_INVERT)) == ANYOF_FOLD) {
+	(ANYOF_FLAGS(ret) & (ANYOF_FLAGS_ALL ^ ANYOF_INVERT)) == ANYOF_FOLD) {
 	for (value = 0; value < 256; ++value) {
-	    if (ANYOF_BITMAP_TEST(opnd, value)) {
+	    if (ANYOF_BITMAP_TEST(ret, value)) {
 		I32 cf = PL_fold[value];
-		ANYOF_BITMAP_SET(opnd, cf);
+		ANYOF_BITMAP_SET(ret, cf);
 	    }
 	}
-	ANYOF_FLAGS(opnd) &= ~ANYOF_FOLD;
+	ANYOF_FLAGS(ret) &= ~ANYOF_FOLD;
     }
     /* optimize inverted simple patterns (e.g. [^a-z]) */
-    if (!SIZE_ONLY && (ANYOF_FLAGS(opnd) & ANYOF_FLAGS_ALL) == ANYOF_INVERT) {
+    if (!SIZE_ONLY && (ANYOF_FLAGS(ret) & ANYOF_FLAGS_ALL) == ANYOF_INVERT) {
 	for (value = 0; value < ANYOF_BITMAP_SIZE; ++value)
-	    opnd[ANYOF_BITMAP_OFFSET + value] ^= ANYOF_FLAGS_ALL;
-	ANYOF_FLAGS(opnd) = 0;
+	    ANYOF_BITMAP(ret)[value] ^= ANYOF_FLAGS_ALL;
+	ANYOF_FLAGS(ret) = 0;
     }
     return ret;
 }
@@ -2716,7 +2724,7 @@ STATIC regnode *
 S_regclassutf8(pTHX)
 {
     dTHR;
-    register char *opnd, *e;
+    register char *e;
     register U32 value;
     register U32 lastvalue = OOB_UTF8;
     register I32 range = 0;
@@ -2742,7 +2750,8 @@ S_regclassutf8(pTHX)
 	listsv = newSVpvn("# comment\n",10);
     }
 
-    checkposixcc();
+    if (!SIZE_ONLY && ckWARN(WARN_UNSAFE))
+	checkposixcc();
 
     if (*PL_regcomp_parse == ']' || *PL_regcomp_parse == '-')
 	goto skipcond;		/* allow 1st char to be ] or - */
@@ -3210,7 +3219,7 @@ S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 	}
 	else if (op == ANYOF) {
 	    node = NEXTOPER(node);
-	    node += ANY_SKIP;
+	    node += ANYOF_SKIP;
 	}
 	else if (PL_regkind[(U8)op] == EXACT) {
             /* Literal string, where present. */
