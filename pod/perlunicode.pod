@@ -1149,7 +1149,7 @@ Unicode model is not to use UTF-8 until it is absolutely necessary.
 
 =item *
 
-C<uvuni_to_utf8(buf, chr>) writes a Unicode character code point into
+C<uvuni_to_utf8(buf, chr)> writes a Unicode character code point into
 a buffer encoding the code point as UTF-8, and returns a pointer
 pointing after the UTF-8 bytes.
 
