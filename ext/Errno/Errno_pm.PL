@@ -38,7 +38,7 @@ sub process_file {
     }
     while(<FH>) {
 	$err{$1} = 1
-	    if /^#\s*define\s+(E\w+)\s+/;
+	   if /^\s*#\s*define\s+(E\w+)\s+/;
    }
    close(FH);
 }
@@ -72,7 +72,7 @@ sub get_files {
 	    $pat = '^/\*\s+(.+)\s+\d+\s*:\s+\*/';
 	}
 	else {
-	    $pat = '^#(?:line)?\s+\d+\s+"([^"]+)"';
+	    $pat = '^#(?:line)?\s*\d+\s+"([^"]+)"';
 	}
 	while(<CPPO>) {
 	    $file{$1} = 1 if /$pat/o;
@@ -104,6 +104,9 @@ sub write_errno_pm {
 	$cpp =~ s/sys\$input//i;
 	open(CPPO,"$cpp  errno.c |") or
           die "Cannot exec $Config{cppstdin}";
+    } elsif ($^O eq 'next') {
+	my $cpp = "$Config{cppstdin} $Config{cppflags} $Config{cppminus}";
+	open(CPPO,"$cpp < errno.c |") or die "Cannot exec $cpp";
     } else {
 	open(CPPO,"$Config{cpprun} $Config{cppflags} errno.c |") or
 	    die "Cannot exec $Config{cpprun}";
