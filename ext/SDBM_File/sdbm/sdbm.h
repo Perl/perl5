@@ -245,7 +245,7 @@ Free_t   Perl_mfree proto((Malloc_t where));
 #    endif
 #  endif
 #  ifdef BUGGY_MSC
-  #  pragma function(memcmp)
+#    pragma function(memcmp)
 #  endif
 #else
 #   ifndef memcmp

@@ -96,12 +96,12 @@
 #endif /* op */
 
 #ifdef MSDOS
-# if defined(BUGGY_MSC6)
+#  if defined(BUGGY_MSC6)
  /* MSC 6.00A breaks on op/regexp.t test 85 unless we turn this off */
- # pragma optimize("a",off)
+#    pragma optimize("a",off)
  /* But MSC 6.00A is happy with 'w', for aliases only across function calls*/
- # pragma optimize("w",on )
-# endif /* BUGGY_MSC6 */
+#    pragma optimize("w",on )
+#  endif /* BUGGY_MSC6 */
 #endif /* MSDOS */
 
 #ifndef STATIC

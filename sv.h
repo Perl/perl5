@@ -552,7 +552,7 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 						  SVp_IOK|SVp_NOK|SVf_IVisUV))
 
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
-#define assert_not_ROK(sv)	({assert(!SvROK(sv) || !SvRV(sv))}),
+#define assert_not_ROK(sv)	({assert(!SvROK(sv) || !SvRV(sv));}),
 #else
 #define assert_not_ROK(sv)	
 #endif

@@ -810,7 +810,7 @@ struct IPerlMemInfo
 /* Shared memory macros */
 #ifdef NETWARE
 
- #define PerlMemShared_malloc(size)			    \
+#define PerlMemShared_malloc(size)			    \
 	(*PL_Mem->pMalloc)(PL_Mem, (size))
 #define PerlMemShared_realloc(buf, size)		    \
 	(*PL_Mem->pRealloc)(PL_Mem, (buf), (size))

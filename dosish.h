@@ -63,9 +63,9 @@
  * if you need the last, try #DEFINE MEM_SIZE unsigned long.
  */
 #ifdef MSDOS
- #ifndef DJGPP
-  #define HAS_64K_LIMIT
- #endif
+#  ifndef DJGPP
+#    define HAS_64K_LIMIT
+#  endif
 #endif
 
 /* USEMYBINMODE
