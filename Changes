@@ -79,6 +79,67 @@ Version v5.5.640        Development release working toward 5.6
 ----------------
 
 ____________________________________________________________________________
+[  4764] By: gsar                                  on 2000/01/06  19:51:08
+        Log: add undocumented globals for compatibility--find.pl, and find2perl
+             generated code need them (from Helmut Jarausch <jarausch@igpm.rwth-aachen.de>)
+     Branch: perl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[  4763] By: gsar                                  on 2000/01/06  10:51:07
+        Log: fix various C-backend shenanigans
+     Branch: perl
+	   ! ext/B/B/C.pm
+____________________________________________________________________________
+[  4762] By: gsar                                  on 2000/01/06  04:09:00
+        Log: tweak test in change#4757 for Windows
+     Branch: perl
+	   ! t/io/open.t
+____________________________________________________________________________
+[  4761] By: gsar                                  on 2000/01/06  02:55:30
+        Log: USE_ITHREADS tweak (reused pad values could be SvREADONLY if
+             they belonged to freed OP_CONSTs)
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  4760] By: gsar                                  on 2000/01/06  00:22:40
+        Log: constant ranges could escape bareword check in list context
+     Branch: perl
+	   ! op.c t/pragma/strict-subs
+____________________________________________________________________________
+[  4759] By: gsar                                  on 2000/01/05  20:52:50
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Wed, 05 Jan 2000 15:23:18 EST
+             Message-Id: <20000105152318.A7400@monk.mps.ohio-state.edu>
+             Subject: Re: minimal m//g matches appear busted
+     Branch: perl
+	   ! regexec.c t/op/pat.t
+____________________________________________________________________________
+[  4758] By: gsar                                  on 2000/01/05  12:49:40
+        Log: various nits identified by warnings unmasked by recent changes
+     Branch: perl
+	   ! ext/B/Makefile.PL lib/ExtUtils/Install.pm pod/perlfunc.pod
+____________________________________________________________________________
+[  4757] By: gsar                                  on 2000/01/05  12:48:10
+        Log: severe bugs in change#3786 fixed
+     Branch: perl
+	   ! doio.c t/io/open.t
+____________________________________________________________________________
+[  4756] By: gsar                                  on 2000/01/05  11:25:10
+        Log: tweak change#4745 to make ebcdic output match for chars <= 037
+     Branch: perl
+	   ! ext/Data/Dumper/Dumper.pm
+____________________________________________________________________________
+[  4755] By: gsar                                  on 2000/01/05  06:56:05
+        Log: cygwin support tweaks (from Eric Fifer <EFifer@sanwaint.com>)
+     Branch: perl
+	   ! Configure util.c utils/perlcc.PL
+____________________________________________________________________________
+[  4754] By: gsar                                  on 2000/01/05  06:52:25
+        Log: avoid expensive Version_check (from Andreas Koenig)
+     Branch: perl
+	   ! Changes lib/ExtUtils/MM_Unix.pm lib/ExtUtils/MM_VMS.pm
+	   ! lib/ExtUtils/MM_Win32.pm lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
 [  4753] By: gsar                                  on 2000/01/05  06:48:22
         Log: From: andreas.koenig@anima.de (Andreas J. Koenig)
              Date: 03 Jan 2000 21:56:02 +0100

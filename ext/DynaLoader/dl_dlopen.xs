@@ -146,9 +146,20 @@ void *
 dl_load_file(filename, flags=0)
     char *	filename
     int		flags
-    PREINIT:
+  PREINIT:
     int mode = RTLD_LAZY;
-    CODE:
+  CODE:
+{
+#if defined(DLOPEN_WONT_DO_RELATIVE_PATHS)
+    char pathbuf[PATH_MAX + 2];
+    if (*filename != '/' && strchr(filename, '/')) {
+	if (getcwd(pathbuf, PATH_MAX - strlen(filename))) {
+	    strcat(pathbuf, "/");
+	    strcat(pathbuf, filename);
+	    filename = pathbuf;
+	}
+    }
+#endif
 #ifdef RTLD_NOW
     if (dl_nonlazy)
 	mode = RTLD_NOW;
@@ -167,7 +178,7 @@ dl_load_file(filename, flags=0)
 	SaveError(aTHX_ "%s",dlerror()) ;
     else
 	sv_setiv( ST(0), PTR2IV(RETVAL));
-
+}
 
 void *
 dl_find_symbol(libhandle, symbolname)
