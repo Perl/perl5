@@ -320,8 +320,8 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	$(XCOPY) ..\*.h ..\lib\CORE\*.*
 	$(XCOPY) *.h ..\lib\CORE\*.*
 	$(RCOPY) include ..\lib\CORE\*.*
-	$(MINIPERL) -I..\lib config_h.PL || $(MAKE) CCTYPE=$(CCTYPE) \
-	    RUNTIME=$(RUNTIME) CFG=$(CFG) $(CONFIGPM)
+	$(MINIPERL) -I..\lib config_h.PL || $(MAKE) -f makegcc.mk \
+	    CCTYPE=$(CCTYPE) RUNTIME=$(RUNTIME) CFG=$(CFG) $(CONFIGPM)
 
 LKPRE = INPUT (
 LKPOST = )

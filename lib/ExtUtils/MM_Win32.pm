@@ -352,7 +352,9 @@ END
     push(@m, "\t$self->{CP} \$(MYEXTLIB) \$\@\n") if $self->{MYEXTLIB};
 
     push @m,
-q{	$(AR) }.($BORLAND ? '$@ $(OBJECT:^"+")' : '-out:$@ $(OBJECT)').q{
+q{	$(AR) }.($BORLAND ? '$@ $(OBJECT:^"+")'
+			  : ($GCC ? '-ru $@ $(OBJECT)'
+			          : '-out:$@ $(OBJECT)')).q{
 	}.$self->{NOECHO}.q{echo "$(EXTRALIBS)" > $(INST_ARCHAUTODIR)\extralibs.ld
 	$(CHMOD) 755 $@
 };
@@ -425,7 +427,8 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)\.exists 
 ');
     if ($GCC) {
       push(@m,  
-       q{	$(LD) -o $@ -Wl,--base-file -Wl,dll.base $(LDDLFLAGS) }.$ldfrom.q{ $(OTHERLDFLAGS) $(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) dll.exp 
+       q{	dlltool --def $(EXPORT_LIST) --output-exp dll.exp
+	$(LD) -o $@ -Wl,--base-file -Wl,dll.base $(LDDLFLAGS) }.$ldfrom.q{ $(OTHERLDFLAGS) $(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) dll.exp
 	dlltool --def $(EXPORT_LIST) --base-file dll.base --output-exp dll.exp
 	$(LD) -o $@ $(LDDLFLAGS) }.$ldfrom.q{ $(OTHERLDFLAGS) $(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) dll.exp });
     } else {

@@ -12,6 +12,9 @@
 INST_DRV=c:
 INST_TOP=$(INST_DRV)\perl5004.5x
 BUILDOPT=-DUSE_THREADS
+#BUILDOPT=-DMULTIPLICITY 
+#BUILDOPT=-DMULTIPLICITY -DUSE_THREADS
+#BUILDOPT=-DPERL_GLOBAL_STRUCT -DMULTIPLICITY 
 
 # -DUSE_PERLIO -D__STDC__=1 -DUSE_SFIO -DI_SFIO -I\sfio97\include
 
@@ -72,14 +75,14 @@ LIBFILES = import32.lib $(LIBC) odbc32.lib odbccp32.lib
 WINIOMAYBE =
 
 .IF  "$(CFG)" == "Debug"
-OPTIMIZE = -v $(RUNTIME)
+OPTIMIZE = -v $(RUNTIME) -DDEBUGGING
 LINK_DBG = -v
 .ELSE
 OPTIMIZE = -5 -O2 $(RUNTIME)
 LINK_DBG = 
 .ENDIF
 
-CFLAGS   = -w -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
+CFLAGS   = -w -d -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
 LINK_FLAGS  = $(LINK_DBG) -L$(CCLIBDIR)
 OBJOUT_FLAG = -o
 
@@ -110,9 +113,9 @@ WINIOMAYBE =
 
 .IF  "$(CFG)" == "Debug"
 .IF "$(CCTYPE)" == "MSVC20"
-OPTIMIZE = -Od $(RUNTIME) -Z7 -D_DEBUG
+OPTIMIZE = -Od $(RUNTIME) -Z7 -D_DEBUG -DDEBUGGING
 .ELSE
-OPTIMIZE = -Od $(RUNTIME)d -Z7 -D_DEBUG
+OPTIMIZE = -Od $(RUNTIME)d -Z7 -D_DEBUG -DDEBUGGING
 .ENDIF
 LINK_DBG = -debug -pdb:none
 .ELSE
@@ -262,7 +265,7 @@ CORE_OBJ= ..\av.obj	\
 	..\taint.obj	\
 	..\toke.obj	\
 	..\universal.obj\
-	..\util.obj     \
+	..\util.obj	\
 	..\malloc.obj
 
 WIN32_C = perllib.c \
@@ -309,6 +312,9 @@ CORE_H = ..\av.h	\
 	..\XSUB.h	\
 	.\config.h	\
 	..\EXTERN.h	\
+	..\perlvars.h	\
+	..\intrpvar.h	\
+	..\thrdvar.h	\
 	.\include\dirent.h	\
 	.\include\netdb.h	\
 	.\include\sys\socket.h	\
@@ -384,13 +390,21 @@ config.w32 : $(CFGSH_TMPL)
 	copy $(CFGH_TMPL) config.h
 
 ..\config.sh : config.w32 $(MINIPERL) config_sh.PL
-	$(MINIPERL) -I..\lib config_sh.PL "INST_DRV=$(INST_DRV)" \
-	    "INST_TOP=$(INST_TOP)" "cc=$(CC)" "ccflags=$(OPTIMIZE) $(DEFINES)" \
-	    "cf_email=$(EMAIL)" "libs=$(LIBFILES:f)" "incpath=$(CCINCDIR)" \
-	    "libpth=$(strip $(CCLIBDIR) $(LIBFILES:d))" "libc=$(LIBC)" \
-            "static_ext=$(STATIC_EXT)" "dynamic_ext=$(DYNAMIC_EXT)" \
-            "ldflags=$(LINK_FLAGS)" "optimize=$(OPTIMIZE)" \
-	    config.w32 > ..\config.sh
+	$(MINIPERL) -I..\lib config_sh.PL	\
+	    "INST_DRV=$(INST_DRV)"		\
+	    "INST_TOP=$(INST_TOP)"		\
+	    "cc=$(CC)"				\
+	    "ccflags=$(OPTIMIZE) $(DEFINES)"	\
+	    "cf_email=$(EMAIL)"			\
+	    "libs=$(LIBFILES:f)"		\
+	    "incpath=$(CCINCDIR)"		\
+	    "libpth=$(strip $(CCLIBDIR) $(LIBFILES:d))" \
+	    "libc=$(LIBC)"			\
+	    "static_ext=$(STATIC_EXT)"		\
+	    "dynamic_ext=$(DYNAMIC_EXT)"	\
+	    "ldflags=$(LINK_FLAGS)"		\
+	    "optimize=$(OPTIMIZE)"		\
+	    config.w32				> ..\config.sh
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	cd .. && miniperl configpm
@@ -417,7 +431,8 @@ $(CORE_OBJ)  : $(CORE_H)
 $(DLL_OBJ)   : $(CORE_H) 
 
 perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym makedef.pl
-	$(MINIPERL) -w makedef.pl $(DEFINES) $(CCTYPE) > perldll.def
+	$(MINIPERL) -w makedef.pl $(OPTIMIZE) $(DEFINES) \
+	    CCTYPE=$(CCTYPE) > perldll.def
 
 $(PERLDLL): perldll.def $(CORE_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
 .IF "$(CCTYPE)" == "BORLAND"
@@ -447,7 +462,6 @@ perlmain.c : runperl.c
 perlmain.obj : perlmain.c
 	$(CC) $(CFLAGS) -UPERLDLL -c perlmain.c
 
-
 $(PERLEXE): $(PERLDLL) $(CONFIGPM) perlmain.obj  
 .IF "$(CCTYPE)" == "BORLAND"
 	$(LINK32) -Tpe -ap $(LINK_FLAGS) \
@@ -469,13 +483,13 @@ perl95.c : runperl.c
 	copy runperl.c perl95.c
 
 perl95.obj : perl95.c
-	$(CC) $(CFLAGS) -MT -UPERLDLL -c perl95.c
+	$(CC) $(CFLAGS) -MT -UPERLDLL -DWIN95FIX -c perl95.c
 
 win32sckmt.obj : win32sck.c
-	$(CC) $(CFLAGS) -MT -c $(OBJOUT_FLAG)win32sckmt.obj win32sck.c
+	$(CC) $(CFLAGS) -MT -UPERLDLL -DWIN95FIX -c $(OBJOUT_FLAG)win32sckmt.obj win32sck.c
 
 win32mt.obj : win32.c
-	$(CC) $(CFLAGS) -MT -c $(OBJOUT_FLAG)win32mt.obj win32.c
+	$(CC) $(CFLAGS) -MT -UPERLDLL -DWIN95FIX -c $(OBJOUT_FLAG)win32mt.obj win32.c
 
 $(PERL95EXE): $(PERLDLL) $(CONFIGPM) $(PERL95_OBJ)
 	$(LINK32) -subsystem:console -out:perl95.exe $(LINK_FLAGS) $(LIBFILES) \
