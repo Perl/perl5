@@ -23,7 +23,7 @@ sub main'dumpvar {
 		}
 		print ")\n";
 	    }
-	    if ($key ne "_$package" && defined %entry) {
+	    if ($key ne "_$package" && $key ne "_DB" && defined %entry) {
 		print "\%$key = (\n";
 		foreach $key (sort keys(%entry)) {
 		    print "  $key\t'",&unctrl($entry{$key}),"'\n";

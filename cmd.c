@@ -1,4 +1,4 @@
-/* $Header: cmd.c,v 4.0 91/03/20 01:04:18 lwall Locked $
+/* $RCSfile: cmd.c,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:36:16 $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	cmd.c,v $
+ * Revision 4.0.1.1  91/04/11  17:36:16  lwall
+ * patch1: you may now use "die" and "caller" in a signal handler
+ * 
  * Revision 4.0  91/03/20  01:04:18  lwall
  * 4.0 baseline.
  * 
@@ -908,7 +911,7 @@ until_loop:
 }
 
 #ifdef DEBUGGING
-#  ifndef VARARGS
+#  ifndef I_VARARGS
 /*VARARGS1*/
 deb(pat,a1,a2,a3,a4,a5,a6,a7,a8)
 char *pat;
@@ -1086,6 +1089,23 @@ HASH **hptr;
 }
 
 void
+saveaptr(aptr)
+ARRAY **aptr;
+{
+    register STR *str;
+
+    str = Str_new(17,0);
+    str->str_state = SS_SAPTR;
+    str->str_u.str_array = *aptr;	/* remember value */
+    if (str->str_ptr) {
+	Safefree(str->str_ptr);
+	str->str_len = 0;
+    }
+    str->str_ptr = (char*)aptr;		/* remember pointer */
+    (void)apush(savestack,str);
+}
+
+void
 savelist(sarg,maxsarg)
 register STR **sarg;
 int maxsarg;
@@ -1153,6 +1173,11 @@ int base;
 	    break;
 	case SS_SHPTR:				/* HASH* reference */
 	    *((HASH**)value->str_ptr) = value->str_u.str_hash;
+	    value->str_ptr = Nullch;
+	    str_free(value);
+	    break;
+	case SS_SAPTR:				/* ARRAY* reference */
+	    *((ARRAY**)value->str_ptr) = value->str_u.str_array;
 	    value->str_ptr = Nullch;
 	    str_free(value);
 	    break;

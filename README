@@ -69,8 +69,11 @@ Installation
     Most of them should have been taken care of by running the Configure script.
 
     If you have any additional changes to make to the C definitions, they
-    can be done in the Makefile, or in config.h.  Bear in mind that they will
-    get undone next time you run Configure.
+    can be done in cflags.SH.  For instance, to turn off the optimizer
+    on eval.c, find the line in the switch structure for eval.c and
+    put the command $optimize='-g' before the ;;.  You will probably
+    want to change the entry for teval.c too.  To change the C flags
+    for all the files, edit config.sh and change either $ccflags or $optimize.
 
 3)  make depend
 
@@ -91,9 +94,12 @@ Installation
 
     Some compilers will not compile or optimize the larger files without
     some extra switches to use larger jump offsets or allocate larger
-    internal tables.  It's okay to insert rules for specific files into
+    internal tables.  You can customize the switches for each file in
+    cflags.SH.  It's okay to insert rules for specific files into
     Makefile.SH, since a default rule only takes effect in the
     absence of a specific rule.
+
+    Most of the following hints are now done automatically by Configure.
 
     The 3b2 needs to turn off -O.
     Compilers with limited switch tables may have to define -DSMALLSWITCHES
@@ -106,7 +112,7 @@ Installation
     SGI machines may need -Ddouble="long float" and -O1.
     Vax-based systems may need to hand assemble teval.s with a -J switch.
     Ultrix on MIPS machines may need -DLANGUAGE_C.
-    Ultrix 4.0 on MIPS machines may need -Olimit 2820 or so.
+    Ultrix 4.0 on MIPS machines may need -Olimit 2900 or so.
     Ultrix 3.[01] on MIPS needs to undefine WAITPID--the system call is busted.
     MIPS machines may need to undef d_volatile.
     MIPS machines may need to turn off -O on cmd.c, perl.c and tperl.c.
@@ -138,7 +144,8 @@ Installation
     See the README in the t subdirectory.  Note that you can't run it
     in background if this disables opening of /dev/tty.  If "make test"
     bombs out, just cd to the t directory and run TEST by hand to see if
-    it makes any difference.
+    it makes any difference.  If individual tests bomb, you can run
+    them by hand, e.g., ./perl op/groups.t
 
 6)  make install
 

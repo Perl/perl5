@@ -1,4 +1,4 @@
-/* $Header: handy.h,v 4.0 91/03/20 01:57:45 lwall Locked $
+/* $RCSfile: handy.h,v $$Revision: 4.0.1.1 $$Date: 91/04/12 09:29:08 $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	handy.h,v $
+ * Revision 4.0.1.1  91/04/12  09:29:08  lwall
+ * patch1: random cleanup in cpp namespace
+ * 
  * Revision 4.0  91/03/20  01:57:45  lwall
  * 4.0 baseline.
  * 
@@ -16,6 +19,12 @@
 #define Nullfp Null(FILE*)
 
 #define bool char
+#ifdef TRUE
+#undef TRUE
+#endif
+#ifdef FALSE
+#undef FALSE
+#endif
 #define TRUE (1)
 #define FALSE (0)
 

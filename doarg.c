@@ -1,4 +1,4 @@
-/* $Header: doarg.c,v 4.0 91/03/20 01:06:42 lwall Locked $
+/* $RCSfile: doarg.c,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:40:14 $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doarg.c,v $
+ * Revision 4.0.1.1  91/04/11  17:40:14  lwall
+ * patch1: fixed undefined environ problem
+ * patch1: fixed debugger coredump on subroutines
+ * 
  * Revision 4.0  91/03/20  01:06:42  lwall
  * 4.0 baseline.
  * 
@@ -19,10 +23,6 @@
 #endif
 
 extern unsigned char fold[];
-
-#ifndef __STDC__
-extern char **environ;
-#endif /* ! __STDC__ */
 
 #ifdef BUGGY_MSC
  #pragma function(memcmp)
@@ -831,8 +831,8 @@ register STR **sarg;
 		*t = '\0';
 		xs = str_get(*sarg);
 		xlen = (*sarg)->str_cur;
-		if (*xs == 'S' && xs[1] == 't' && xs[2] == 'B'
-		  && xlen == sizeof(STBP) && strlen(xs) < xlen) {
+		if (*xs == 'S' && xs[1] == 't' && xs[2] == 'B' && xs[3] == '\0'
+		  && xlen == sizeof(STBP)) {
 		    STR *tmpstr = Str_new(24,0);
 
 		    stab_fullname(tmpstr, ((STAB*)(*sarg))); /* a stab value! */
@@ -934,6 +934,12 @@ int *arglast;
     }
     if (!stab)
 	fatal("Undefined subroutine called");
+    if (!(sub = stab_sub(stab))) {
+	STR *tmpstr = arg[0].arg_ptr.arg_str;
+
+	stab_fullname(tmpstr, stab);
+	fatal("Undefined subroutine \"%s\" called",tmpstr->str_ptr);
+    }
     if (arg->arg_type == O_DBSUBR && !sub->usersub) {
 	str = stab_val(DBsub);
 	saveitem(str);
@@ -941,14 +947,6 @@ int *arglast;
 	sub = stab_sub(DBsub);
 	if (!sub)
 	    fatal("No DBsub routine");
-    }
-    else {
-	if (!(sub = stab_sub(stab))) {
-	    STR *tmpstr = arg[0].arg_ptr.arg_str;
-
-	    stab_fullname(tmpstr, stab);
-	    fatal("Undefined subroutine \"%s\" called",tmpstr->str_ptr);
-	}
     }
     str = Str_new(15, sizeof(CSV));
     str->str_state = SS_SCSV;

@@ -1,4 +1,4 @@
-/* $Header: eval.c,v 4.0 91/03/20 01:16:48 lwall Locked $
+/* $RCSfile: eval.c,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:43:48 $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	eval.c,v $
+ * Revision 4.0.1.1  91/04/11  17:43:48  lwall
+ * patch1: fixed failed fork to return undef as documented
+ * patch1: reduced maximum branch distance in eval.c
+ * 
  * Revision 4.0  91/03/20  01:16:48  lwall
  * 4.0 baseline.
  * 
@@ -1857,6 +1861,8 @@ register int sp;
     case O_FORK:
 #ifdef HAS_FORK
 	anum = fork();
+	if (anum < 0)
+	    goto say_undef;
 	if (!anum) {
 	    if (tmpstab = stabent("$",allstabs))
 		str_numset(STAB_STR(tmpstab),(double)getpid());
@@ -1978,6 +1984,62 @@ register int sp;
 	else
 	    value = (double)scanoct(tmps, 99, &argtype);
 	goto donumset;
+
+/* These common exits are hidden here in the middle of the switches for the
+/* benefit of those machines with limited branch addressing.  Sigh.  */
+
+array_return:
+#ifdef DEBUGGING
+    if (debug) {
+	dlevel--;
+	if (debug & 8) {
+	    anum = sp - arglast[0];
+	    switch (anum) {
+	    case 0:
+		deb("%s RETURNS ()\n",opname[optype]);
+		break;
+	    case 1:
+		deb("%s RETURNS (\"%s\")\n",opname[optype],str_get(st[1]));
+		break;
+	    default:
+		tmps = str_get(st[1]);
+		deb("%s RETURNS %d ARGS (\"%s\",%s\"%s\")\n",opname[optype],
+		  anum,tmps,anum==2?"":"...,",str_get(st[anum]));
+		break;
+	    }
+	}
+    }
+#endif
+    return sp;
+
+say_yes:
+    str = &str_yes;
+    goto normal_return;
+
+say_no:
+    str = &str_no;
+    goto normal_return;
+
+say_undef:
+    str = &str_undef;
+    goto normal_return;
+
+say_zero:
+    value = 0.0;
+    /* FALL THROUGH */
+
+donumset:
+    str_numset(str,value);
+    STABSET(str);
+    st[1] = str;
+#ifdef DEBUGGING
+    if (debug) {
+	dlevel--;
+	if (debug & 8)
+	    deb("%s RETURNS \"%f\"\n",opname[optype],value);
+    }
+#endif
+    return arglast[0] + 1;
 #ifdef SMALLSWITCHES
     }
     else
@@ -2834,59 +2896,6 @@ register int sp;
 	dlevel--;
 	if (debug & 8)
 	    deb("%s RETURNS \"%s\"\n",opname[optype],str_get(str));
-    }
-#endif
-    return arglast[0] + 1;
-
-array_return:
-#ifdef DEBUGGING
-    if (debug) {
-	dlevel--;
-	if (debug & 8) {
-	    anum = sp - arglast[0];
-	    switch (anum) {
-	    case 0:
-		deb("%s RETURNS ()\n",opname[optype]);
-		break;
-	    case 1:
-		deb("%s RETURNS (\"%s\")\n",opname[optype],str_get(st[1]));
-		break;
-	    default:
-		tmps = str_get(st[1]);
-		deb("%s RETURNS %d ARGS (\"%s\",%s\"%s\")\n",opname[optype],
-		  anum,tmps,anum==2?"":"...,",str_get(st[anum]));
-		break;
-	    }
-	}
-    }
-#endif
-    return sp;
-
-say_yes:
-    str = &str_yes;
-    goto normal_return;
-
-say_no:
-    str = &str_no;
-    goto normal_return;
-
-say_undef:
-    str = &str_undef;
-    goto normal_return;
-
-say_zero:
-    value = 0.0;
-    /* FALL THROUGH */
-
-donumset:
-    str_numset(str,value);
-    STABSET(str);
-    st[1] = str;
-#ifdef DEBUGGING
-    if (debug) {
-	dlevel--;
-	if (debug & 8)
-	    deb("%s RETURNS \"%f\"\n",opname[optype],value);
     }
 #endif
     return arglast[0] + 1;

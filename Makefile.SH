@@ -25,9 +25,12 @@ esac
 
 echo "Extracting Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 4.0 91/03/20 00:58:54 lwall Locked $
+# $RCSfile: Makefile.SH,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:30:39 $
 #
 # $Log:	Makefile.SH,v $
+# Revision 4.0.1.1  91/04/11  17:30:39  lwall
+# patch1: C flags are now settable on a per-file basis
+# 
 # Revision 4.0  91/03/20  00:58:54  lwall
 # 4.0 baseline.
 # 
@@ -40,7 +43,6 @@ scriptdir = $scriptdir
 privlib = $installprivlib
 mansrc = $mansrc
 manext = $manext
-CFLAGS = $ccflags $optimize
 LDFLAGS = $ldflags
 CLDFLAGS = $ldflags
 SMALL = $small
@@ -56,6 +58,9 @@ public = perl taintperl $suidperl
 !GROK!THIS!
 
 cat >>Makefile <<'!NO!SUBS!'
+
+CFLAGS = `sh cflags.SH $@`
+
 private = 
 
 scripts = h2ph
@@ -99,7 +104,7 @@ addedbyconf = Makefile.old bsd eunice filexp loc pdp11 usg v7
 SHELL = /bin/sh
 
 .c.o:
-	$(CC) -c $(CFLAGS) $(LARGE) $*.c
+	$(CC) -c $(CFLAGS) $*.c
 
 all: $(public) $(private) $(util) uperl.o $(scripts)
 	cd x2p; $(MAKE) all
@@ -107,6 +112,8 @@ all: $(public) $(private) $(util) uperl.o $(scripts)
 
 # This is the standard version that contains no "taint" checks and is
 # used for all scripts that aren't set-id or running under something set-id.
+# The $& notation is tells Sequent machines that it can do a parallel make,
+# and is harmless otherwise.
 
 perl: $& perly.o $(obj) usersub.o
 	$(CC) $(LARGE) $(CLDFLAGS) $(obj) perly.o usersub.o $(libs) -o perl
@@ -140,121 +147,121 @@ taintperl: $& tperly.o tperl.o $(tobj) usersub.o
 tperly.o: perly.c perly.h $(h)
 	/bin/rm -f tperly.c
 	$(SLN) perly.c tperly.c
-	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tperly.c
+	$(CC) -c -DTAINT $(CFLAGS) tperly.c
 	/bin/rm -f tperly.c
 
 tperl.o: perl.c perly.h patchlevel.h perl.h $(h)
 	/bin/rm -f tperl.c
 	$(SLN) perl.c tperl.c
-	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tperl.c
+	$(CC) -c -DTAINT $(CFLAGS) tperl.c
 	/bin/rm -f tperl.c
 
 sperl.o: perl.c perly.h patchlevel.h $(h)
 	/bin/rm -f sperl.c
 	$(SLN) perl.c sperl.c
-	$(CC) -c -DTAINT -DIAMSUID $(CFLAGS) $(LARGE) sperl.c
+	$(CC) -c -DTAINT -DIAMSUID $(CFLAGS) sperl.c
 	/bin/rm -f sperl.c
 
 tarray.o: array.c $(h)
 	/bin/rm -f tarray.c
 	$(SLN) array.c tarray.c
-	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tarray.c
+	$(CC) -c -DTAINT $(CFLAGS) tarray.c
 	/bin/rm -f tarray.c
 
 tcmd.o: cmd.c $(h)
 	/bin/rm -f tcmd.c
 	$(SLN) cmd.c tcmd.c
-	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tcmd.c
+	$(CC) -c -DTAINT $(CFLAGS) tcmd.c
 	/bin/rm -f tcmd.c
 
 tcons.o: cons.c $(h) perly.h
 	/bin/rm -f tcons.c
 	$(SLN) cons.c tcons.c
-	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tcons.c
+	$(CC) -c -DTAINT $(CFLAGS) tcons.c
 	/bin/rm -f tcons.c
 
 tconsarg.o: consarg.c $(h)
 	/bin/rm -f tconsarg.c
 	$(SLN) consarg.c tconsarg.c
-	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tconsarg.c
+	$(CC) -c -DTAINT $(CFLAGS) tconsarg.c
 	/bin/rm -f tconsarg.c
 
 tdoarg.o: doarg.c $(h)
 	/bin/rm -f tdoarg.c
 	$(SLN) doarg.c tdoarg.c
-	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tdoarg.c
+	$(CC) -c -DTAINT $(CFLAGS) tdoarg.c
 	/bin/rm -f tdoarg.c
 
 tdoio.o: doio.c $(h)
 	/bin/rm -f tdoio.c
 	$(SLN) doio.c tdoio.c
-	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tdoio.c
+	$(CC) -c -DTAINT $(CFLAGS) tdoio.c
 	/bin/rm -f tdoio.c
 
 tdolist.o: dolist.c $(h)
 	/bin/rm -f tdolist.c
 	$(SLN) dolist.c tdolist.c
-	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tdolist.c
+	$(CC) -c -DTAINT $(CFLAGS) tdolist.c
 	/bin/rm -f tdolist.c
 
 tdump.o: dump.c $(h)
 	/bin/rm -f tdump.c
 	$(SLN) dump.c tdump.c
-	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tdump.c
+	$(CC) -c -DTAINT $(CFLAGS) tdump.c
 	/bin/rm -f tdump.c
 
 teval.o: eval.c $(h)
 	/bin/rm -f teval.c
 	$(SLN) eval.c teval.c
-	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) teval.c
+	$(CC) -c -DTAINT $(CFLAGS) teval.c
 	/bin/rm -f teval.c
 
 tform.o: form.c $(h)
 	/bin/rm -f tform.c
 	$(SLN) form.c tform.c
-	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tform.c
+	$(CC) -c -DTAINT $(CFLAGS) tform.c
 	/bin/rm -f tform.c
 
 thash.o: hash.c $(h)
 	/bin/rm -f thash.c
 	$(SLN) hash.c thash.c
-	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) thash.c
+	$(CC) -c -DTAINT $(CFLAGS) thash.c
 	/bin/rm -f thash.c
 
 tregcomp.o: regcomp.c $(h)
 	/bin/rm -f tregcomp.c
 	$(SLN) regcomp.c tregcomp.c
-	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tregcomp.c
+	$(CC) -c -DTAINT $(CFLAGS) tregcomp.c
 	/bin/rm -f tregcomp.c
 
 tregexec.o: regexec.c $(h)
 	/bin/rm -f tregexec.c
 	$(SLN) regexec.c tregexec.c
-	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tregexec.c
+	$(CC) -c -DTAINT $(CFLAGS) tregexec.c
 	/bin/rm -f tregexec.c
 
 tstab.o: stab.c $(h)
 	/bin/rm -f tstab.c
 	$(SLN) stab.c tstab.c
-	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tstab.c
+	$(CC) -c -DTAINT $(CFLAGS) tstab.c
 	/bin/rm -f tstab.c
 
 tstr.o: str.c $(h) perly.h
 	/bin/rm -f tstr.c
 	$(SLN) str.c tstr.c
-	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tstr.c
+	$(CC) -c -DTAINT $(CFLAGS) tstr.c
 	/bin/rm -f tstr.c
 
 ttoke.o: toke.c $(h) perly.h
 	/bin/rm -f ttoke.c
 	$(SLN) toke.c ttoke.c
-	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) ttoke.c
+	$(CC) -c -DTAINT $(CFLAGS) ttoke.c
 	/bin/rm -f ttoke.c
 
 tutil.o: util.c $(h)
 	/bin/rm -f tutil.c
 	$(SLN) util.c tutil.c
-	$(CC) -c -DTAINT $(CFLAGS) $(LARGE) tutil.c
+	$(CC) -c -DTAINT $(CFLAGS) tutil.c
 	/bin/rm -f tutil.c
 
 perly.h: perly.c
@@ -270,7 +277,7 @@ perly.c: perly.y
 	echo 'extern YYSTYPE yylval;' >>perly.h
 
 perly.o: perly.c perly.h $(h)
-	$(CC) -c $(CFLAGS) $(LARGE) perly.c
+	$(CC) -c $(CFLAGS) perly.c
 
 install: all
 	./perl installperl

@@ -202,7 +202,8 @@ while (@ARGV) {
     }
     if (@ARGV) {
 	if ($ARGV[0] eq '-o') {
-	    local($indent) = $indent - 4;
+	    $statdone = 0 if $indent == 1 && $delayedstat;
+	    $saw_or++;
 	    $out .= "\n" . &tab . "||\n";
 	    shift;
 	}
@@ -317,6 +318,7 @@ sub dodir {
 	    next if $_ eq '.';
 	    next if $_ eq '..';
 	    $name = "$dir/$_";
+	    $nlink = 0;
 	    &wanted;
 	}
     }
@@ -627,11 +629,21 @@ sub tab {
     local($tabstring);
 
     $tabstring = "\t" x ($indent / 2) . ' ' x ($indent % 2 * 4);
-    if ($_ !~ /^(name|print)/) {
-	if (!$statdone) {
-	    $tabstring .= <<'ENDOFSTAT' . $tabstring;
+    if (!$statdone) {
+	if ($_ =~ /^(name|print)/) {
+	    $delayedstat++;
+	}
+	else {
+	    if ($saw_or) {
+		$tabstring .= <<'ENDOFSTAT' . $tabstring;
+($nlink || (($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_))) &&
+ENDOFSTAT
+	    }
+	    else {
+		$tabstring .= <<'ENDOFSTAT' . $tabstring;
 (($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_)) &&
 ENDOFSTAT
+	    }
 	    $statdone = 1;
 	}
     }
@@ -650,7 +662,8 @@ sub fileglob_to_re {
 sub n {
     local($n) = @_;
 
-    $n =~ s/^-0*/< / || $n =~ s/^\+0*/> / || $n =~ s/^0*/== /;
+    $n =~ s/^-/< / || $n =~ s/^\+/> / || $n =~ s/^/== /;
+    $n =~ s/ 0*(\d)/ $1/;
     $n;
 }
 

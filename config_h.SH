@@ -591,6 +591,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  */
 #define GIDTYPE $gidtype		/**/
 
+/* GROUPSTYPE
+ *	This symbol has a value like gid_t, int, ushort, or whatever type is
+ *	used in the return value of getgroups().
+ */
+#define GROUPSTYPE $groupstype		/**/
+
 /* I_FCNTL
  *	This manifest constant tells the C program to include <fcntl.h>.
  */
@@ -739,6 +745,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
 #$i_sys_ndir	I_SYS_NDIR	/**/
 #$i_my_dir	I_MY_DIR	/**/
 #$d_dirnamlen	DIRNAMLEN	/**/
+
+/* MALLOCPTRTYPE
+ *	This symbol defines the kind of ptr returned by malloc and realloc.
+ */
+#define MALLOCPTRTYPE $mallocptrtype         /**/
 
 
 /* RANDBITS

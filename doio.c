@@ -1,4 +1,4 @@
-/* $Header: doio.c,v 4.0 91/03/20 01:07:06 lwall Locked $
+/* $RCSfile: doio.c,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:41:06 $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	doio.c,v $
+ * Revision 4.0.1.1  91/04/11  17:41:06  lwall
+ * patch1: hopefully straightened out some of the Xenix mess
+ * 
  * Revision 4.0  91/03/20  01:07:06  lwall
  * 4.0 baseline.
  * 
@@ -19,15 +22,11 @@
 #include <netdb.h>
 #endif
 
-#ifdef M_UNIX
-#if defined(HAS_SELECT) && !defined(I_SYS_TIME)
-#include <sys/select.h>
-#endif
-#endif
-
-#ifdef M_XENIX
 #ifdef HAS_SELECT
+#ifdef I_SYS_SELECT
+#ifndef I_SYS_TIME
 #include <sys/select.h>
+#endif
 #endif
 #endif
 
@@ -2430,7 +2429,7 @@ int effective;
 #define NGROUPS 32
 #endif
     {
-	GIDTYPE gary[NGROUPS];
+	GROUPSTYPE gary[NGROUPS];
 	int anum;
 
 	anum = getgroups(NGROUPS,gary);

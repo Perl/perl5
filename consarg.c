@@ -1,4 +1,4 @@
-/* $Header: consarg.c,v 4.0 91/03/20 01:06:15 lwall Locked $
+/* $RCSfile: consarg.c,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:38:34 $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	consarg.c,v $
+ * Revision 4.0.1.1  91/04/11  17:38:34  lwall
+ * patch1: fixed "Bad free" error
+ * 
  * Revision 4.0  91/03/20  01:06:15  lwall
  * 4.0 baseline.
  * 
@@ -555,10 +558,12 @@ register ARG *arg;
 	if (str) {
 	    arg->arg_type = O_ITEM;	/* note arg1 type is already SINGLE */
 	    str_free(s1);
-	    str_free(s2);
 	    arg[1].arg_ptr.arg_str = str;
-	    arg[2].arg_ptr.arg_str = Nullstr;
-	    arg[2].arg_type = A_NULL;
+	    if (s2) {
+		str_free(s2);
+		arg[2].arg_ptr.arg_str = Nullstr;
+		arg[2].arg_type = A_NULL;
+	    }
 	}
     }
 }
