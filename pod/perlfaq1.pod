@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq1 - General Questions About Perl ($Revision: 1.11 $, $Date: 2002/12/06 07:40:11 $)
+perlfaq1 - General Questions About Perl ($Revision: 1.12 $, $Date: 2003/07/09 15:47:28 $)
 
 =head1 DESCRIPTION
 
@@ -91,6 +91,16 @@ simply use "perl" to refer to the latest version of perl and avoid using
 "perl5" altogether.  It's not really that big a deal, though.
 
 See L<perlhist> for a history of Perl revisions.
+
+=head2 What is Ponie?
+
+At The O'Reilly Open Source Software Convention in 2003, Artur
+Bergman, Fotango, and The Perl Foundation announced a project to
+run perl5 on the Parrot virtual machine named Ponie. Ponie stands for
+Perl On New Internal Engine.  The Perl 5.10 language implementation
+will be used for Ponie, and there will be no language level
+differences between perl5 and ponie.  Ponie is not a complete rewrite
+of perl5.
 
 =head2 What is perl6?
 
