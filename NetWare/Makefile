@@ -15,7 +15,7 @@
 ## This file is created by using the makefile that creates Windows Perl as the reference
 ## Author: sgp
 ## Date Created: 13th July 2000
-## Date Modified: 03th April 2001
+## Date Modified: 19th June 2001
 
 # Name of the NLM
 NLM_NAME		= perl.nlm
@@ -686,33 +686,36 @@ XSUBPP		= ..\$(MINIPERL) -I..\..\lib ..\$(EXTUTILSDIR)\xsubpp \
 		-C++ -prototypes
 
 MICROCORE_SRC	=		\
-		..\av.c		\
-		..\deb.c	\
-		..\doio.c	\
-		..\doop.c	\
-		..\dump.c	\
+		..\av.c			\
+		..\deb.c		\
+		..\doio.c		\
+		..\doop.c		\
+		..\dump.c		\
 		..\globals.c	\
-		..\gv.c		\
-		..\hv.c		\
-		..\mg.c		\
-		..\op.c		\
-		..\perl.c	\
+		..\gv.c			\
+		..\hv.c			\
+		..\locale.c		\
+		..\mg.c			\
+		..\numeric.c	\
+		..\op.c			\
+		..\perl.c		\
 		..\perlapi.c	\
-		..\perly.c	\
-		..\pp.c		\
-		..\pp_ctl.c	\
-		..\pp_hot.c	\
-		..\pp_sys.c	\
+		..\perly.c		\
+		..\pp.c			\
+		..\pp_ctl.c		\
+		..\pp_hot.c		\
+		..\pp_pack.c	\
+		..\pp_sys.c		\
 		..\regcomp.c	\
 		..\regexec.c	\
-		..\run.c	\
-		..\scope.c	\
-		..\sv.c		\
-		..\taint.c	\
-		..\toke.c	\
+		..\run.c		\
+		..\scope.c		\
+		..\sv.c			\
+		..\taint.c		\
+		..\toke.c		\
 		..\universal.c	\
-		..\utf8.c	\
-		..\util.c	\
+		..\utf8.c		\
+		..\util.c		\
 		..\xsutils.c
 
 #EXTRACORE_SRC	= $(EXTRACORE_SRC) perllib.c

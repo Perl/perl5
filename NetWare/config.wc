@@ -1,7 +1,7 @@
 ## Configured by: ~cf_email~
 ## Target system: NetWare 
 Author='Guruprasad'
-CONFIGDOTSH='true'
+PERL_CONFIG_SH='true'
 Date='$Date'
 Header=''
 Id='$Id'
