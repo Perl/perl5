@@ -2507,7 +2507,7 @@ PP(pp_method)
     SV* sv = TOPs;
 
     if (SvROK(sv)) {
-	SV* rsv = SvRV(rsv);
+	SV* rsv = SvRV(sv);
 	if (SvTYPE(rsv) == SVt_PVCV) {
 	    SETs(rsv);
 	    RETURN;

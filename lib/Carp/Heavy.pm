@@ -95,7 +95,7 @@ sub longmess_heavy {
 	    # here's where the error message, $mess, gets constructed
 	    $mess .= "\t$sub " if $error eq "called";
 	    $mess .= "$error at $file line $line";
-	    if (exists $main::{'Thread::'}) {
+	    if (defined &Thread::tid) {
 		my $tid = Thread->self->tid;
 		$mess .= " thread $tid" if $tid;
 	    }
@@ -180,7 +180,7 @@ sub shortmess_heavy {	# Short-circuit &longmess if called via multiple packages
 	    # remove them first.
 	    my $msg;
 	    $msg = "$error at $file line $line";
-	    if (exists $main::{'Thread::'}) {
+	    if (defined &Thread::tid) {
 		my $tid = Thread->self->tid;
 		$mess .= " thread $tid" if $tid;
 	    }
