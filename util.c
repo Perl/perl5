@@ -948,6 +948,25 @@ Perl_form_nocontext(const char* pat, ...)
 }
 #endif /* PERL_IMPLICIT_CONTEXT */
 
+/*
+=for apidoc form
+
+Takes a sprintf-style format pattern and conventional
+(non-SV) arguments and returns the formatted string.
+
+    (char *) Perl_form(pTHX_ const char* pat, ...)
+
+can be used any place a string (char *) is required:
+
+    char * s = Perl_form("%d.%d",major,minor);
+
+Uses a single private buffer so if you want to format several strings you
+must explicitly copy the earlier strings away (and free the copies when you
+are done).
+
+=cut
+*/
+
 char *
 Perl_form(pTHX_ const char* pat, ...)
 {

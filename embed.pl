@@ -1277,7 +1277,7 @@ p	|PADOFFSET|find_threadsv|const char *name
 #endif
 p	|OP*	|force_list	|OP* arg
 p	|OP*	|fold_constants	|OP* arg
-Afp	|char*	|form		|const char* pat|...
+Afpd	|char*	|form		|const char* pat|...
 Ap	|char*	|vform		|const char* pat|va_list* args
 Ap	|void	|free_tmps
 p	|OP*	|gen_constant_list|OP* o

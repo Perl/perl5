@@ -1203,6 +1203,9 @@
 #define sv_pvn_force_flags	Perl_sv_pvn_force_flags
 #define sv_2pv_flags		Perl_sv_2pv_flags
 #define my_atof2		Perl_my_atof2
+#if !defined(HAS_SOCKETPAIR) && defined(HAS_SOCKET)
+#define my_socketpair		Perl_my_socketpair
+#endif
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
 #define PerlIO_close		Perl_PerlIO_close
 #define PerlIO_fill		Perl_PerlIO_fill
@@ -2741,6 +2744,9 @@
 #define sv_pvn_force_flags(a,b,c)	Perl_sv_pvn_force_flags(aTHX_ a,b,c)
 #define sv_2pv_flags(a,b,c)	Perl_sv_2pv_flags(aTHX_ a,b,c)
 #define my_atof2(a,b)		Perl_my_atof2(aTHX_ a,b)
+#if !defined(HAS_SOCKETPAIR) && defined(HAS_SOCKET)
+#define my_socketpair(a,b,c,d)	Perl_my_socketpair(aTHX_ a,b,c,d)
+#endif
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
 #define PerlIO_close(a)		Perl_PerlIO_close(aTHX_ a)
 #define PerlIO_fill(a)		Perl_PerlIO_fill(aTHX_ a)
