@@ -5,6 +5,9 @@
 # version 1.01
 
 package DB_File::HASHINFO ;
+
+use strict;
+use vars qw(%elements);
 use Carp;
 
 sub TIEHASH
@@ -58,6 +61,9 @@ sub EXISTS { croak "DB_File::HASHINFO::EXISTS is not implemented" }
 sub CLEAR { croak "DB_File::HASHINFO::CLEAR is not implemented" }
 
 package DB_File::BTREEINFO ;
+
+use strict;
+use vars qw(%elements);
 use Carp;
 
 sub TIEHASH
@@ -113,6 +119,9 @@ sub EXISTS { croak "DB_File::BTREEINFO::EXISTS is not implemented" }
 sub CLEAR { croak "DB_File::BTREEINFO::CLEAR is not implemented" }
 
 package DB_File::RECNOINFO ;
+
+use strict;
+use vars qw(%elements);
 use Carp;
 
 sub TIEHASH
@@ -168,20 +177,24 @@ sub CLEAR { croak "DB_File::BTREEINFO::CLEAR is not implemented" }
 
 
 package DB_File ;
+
+use strict;
+use vars qw($VERSION @ISA @EXPORT $AUTOLOAD $DB_BTREE $DB_HASH $DB_RECNO) ;
 use Carp;
 
-$VERSION = $VERSION = 1.01 ;
+
+$VERSION = "1.01" ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
-$DB_BTREE = $DB_BTREE = TIEHASH DB_File::BTREEINFO ;
-$DB_HASH  = $DB_HASH  = TIEHASH DB_File::HASHINFO ;
-$DB_RECNO = $DB_RECNO = TIEHASH DB_File::RECNOINFO ;
+$DB_BTREE = TIEHASH DB_File::BTREEINFO ;
+$DB_HASH  = TIEHASH DB_File::HASHINFO ;
+$DB_RECNO = TIEHASH DB_File::RECNOINFO ;
 
-require TieHash;
+require Tie::Hash;
 require Exporter;
 use AutoLoader;
 require DynaLoader;
-@ISA = qw(TieHash Exporter DynaLoader);
+@ISA = qw(Tie::Hash Exporter DynaLoader);
 @EXPORT = qw(
         $DB_BTREE $DB_HASH $DB_RECNO 
 	BTREEMAGIC
@@ -215,16 +228,16 @@ require DynaLoader;
 );
 
 sub AUTOLOAD {
-    local($constname);
+    my($constname);
     ($constname = $AUTOLOAD) =~ s/.*:://;
-    $val = constant($constname, @_ ? $_[0] : 0);
+    my $val = constant($constname, @_ ? $_[0] : 0);
     if ($! != 0) {
 	if ($! =~ /Invalid/) {
 	    $AutoLoader::AUTOLOAD = $AUTOLOAD;
 	    goto &AutoLoader::AUTOLOAD;
 	}
 	else {
-	    ($pack,$file,$line) = caller;
+	    my($pack,$file,$line) = caller;
 	    croak "Your vendor has not defined DB macro $constname, used at $file line $line.
 ";
 	}
@@ -233,7 +246,7 @@ sub AUTOLOAD {
     goto &$AUTOLOAD;
 }
 
-bootstrap DB_File ;
+bootstrap DB_File $VERSION;
 
 # Preloaded methods go here.  Autoload methods go after __END__, and are
 # processed by the autosplit program.
@@ -359,7 +372,7 @@ C<ffactor>, C<hash>, C<lorder> and C<nelem>.
 
 To change one of these elements, just assign to it like this
 
-	$DB_HASH{cachesize} = 10000 ;
+	$DB_HASH->{cachesize} = 10000 ;
 
 
 =head2 RECNO
@@ -372,7 +385,7 @@ RECNO arrays begins at 0 rather than 1 as in Berkeley DB.
 =head2 In Memory Databases
 
 Berkeley DB allows the creation of in-memory databases by using NULL
-(that is, a C<(char *)0 in C) in place of the filename.  B<DB_File>
+(that is, a C<(char *)0> in C) in place of the filename.  B<DB_File>
 uses C<undef> instead of NULL to provide this functionality.
 
 
