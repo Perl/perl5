@@ -282,7 +282,7 @@ do_test(17,
 	*a,
 'SV = PVGV\\($ADDR\\) at $ADDR
   REFCNT = 5
-  FLAGS = \\(GMG,SMG,MULTI\\)
+  FLAGS = \\(GMG,SMG,MULTI(?:,IN_PAD)?\\)
   IV = 0
   NV = 0
   MAGIC = $ADDR
