@@ -331,7 +331,7 @@ or else see L</select()> below.  It is not advised to intermix alarm()
 and sleep() calls.
 
 If you want to use alarm() to time out a system call you need to use an
-eval/die pair. You can't rely on the alarm causing the system call to
+eval/die pair.  You can't rely on the alarm causing the system call to
 fail with $! set to EINTR because Perl sets up signal handlers to
 restart system calls on some systems.  Using eval/die always works.
 
@@ -410,10 +410,10 @@ to go back before the current one.
      $hasargs, $wantarray, $evaltext, $is_require) = caller($i);
 
 Here $subroutine may be C<"(eval)"> if the frame is not a subroutine
-call, but C<L<eval>>. In such a case additional elements $evaltext and
+call, but C<L<eval>>.  In such a case additional elements $evaltext and
 $is_require are set: $is_require is true if the frame is created by
 C<L<require>> or C<L<use>> statement, $evaltext contains the text of
-C<L<eval EXPR>> statement. In particular, for C<L<eval BLOCK>>
+C<L<eval EXPR>> statement.  In particular, for C<L<eval BLOCK>>
 statement $filename is C<"(eval)">, but $evaltext is undefined. (Note
 also that C<L<use>> statement creates a C<L<require>> frame inside
 an C<L<eval EXPR>>) frame.
@@ -432,10 +432,15 @@ otherwise.  See example under die().
 
 Changes the permissions of a list of files.  The first element of the
 list must be the numerical mode, which should probably be an octal
-number.  Returns the number of files successfully changed.
+number, and which definitely should I<not> a string of octal digits:
+C<0644> is okay, C<'0644'> is not.  Returns the number of files
+successfully changed.  See also L<oct>, if all you have is a string.
 
     $cnt = chmod 0755, 'foo', 'bar';
     chmod 0755, @executables;
+    $mode = '0644'; chmod $mode, 'foo';      # !!! sets mode to --w----r-T
+    $mode = '0644'; chmod oct($mode), 'foo'; # this is better
+    $mode = 0644;   chmod $mode, 'foo';      # this is best
 
 =item chomp VARIABLE
 
@@ -527,7 +532,7 @@ restrictions may be relaxed, but this is not a portable assumption.
 =item chr 
 
 Returns the character represented by that NUMBER in the character set.
-For example, C<chr(65)> is "A" in ASCII.
+For example, C<chr(65)> is "A" in ASCII.  For the reverse, use L<ord>.
 
 If NUMBER is omitted, uses $_.
 
@@ -601,6 +606,9 @@ extirpated as a potential munition).  This can prove useful for checking
 the password file for lousy passwords, amongst other things.  Only the
 guys wearing white hats should do this.
 
+Note that there is no corresponding decrypt, so this fucntion isn't
+all that useful for cryptography. (For that, see your nearby CPAN mirror.)
+
 Here's an example that makes sure that whoever runs this program knows
 their own password:
 
@@ -667,18 +675,28 @@ rich implementation.
 
 =item defined 
 
-Returns a boolean value saying whether EXPR has a real value
-or not. If EXPR is not present, $_ will be checked. Many operations
-return the undefined value under exceptional conditions, such as end of
-file, uninitialized variable, system error and such.  This function
-allows you to distinguish between an undefined
-null scalar and a defined null scalar with operations that might return
-a real null string, such as referencing elements of an array.  You may
-also check to see if arrays or subroutines exist.  Use of defined on
-predefined variables is not guaranteed to produce intuitive results.
+Returns a Boolean value telling whether EXPR has a value other than
+the undefined value C<undef>.  If EXPR is not present, C<$_> will be
+checked.
 
-When used on a hash array element, it tells you whether the value is
-defined, not whether the key exists in the hash.  Use exists() for that.
+Many operations return C<undef> to indicate failure, end of file,
+system error, uninitialized variable, and other exceptional
+conditions.  This function allows you to distinguish C<undef> from
+other values.  (A simple Boolean test will not distinguish among
+C<undef>, zero, the empty string, and "0", which are all equally
+false.)  Note that since C<undef> is a valid scalar, its presence
+doesn't I<necessarily> indicate an exceptional condition: pop()
+returns C<undef> when its argument is an empty array, I<or> when the
+element to return happens to be C<undef>.
+
+You may also use defined() to check whether a subroutine exists.  On
+the other hand, use of defined() upon aggregates (hashes and arrays)
+is not guaranteed to produce intuitive results, and should probably be
+avoided.
+
+When used on a hash element, it tells you whether the value is defined,
+not whether the key exists in the hash.  Use L<exists> for the latter
+purpose.
 
 Examples:
 
@@ -689,12 +707,11 @@ Examples:
     eval '@foo = ()' if defined(@foo);
     die "No XYZ package defined" unless defined %_XYZ;
     sub foo { defined &$bar ? &$bar(@_) : die "No bar"; }
+    $debugging = 0 unless defined $debugging;
 
-See also undef().
-
-Note: many folks tend to overuse defined(), and then are surprised to
-discover that the number 0 and the null string are, in fact, defined
-concepts.  For example, if you say
+Note:  Many folks tend to overuse defined(), and then are surprised to
+discover that the number 0 and "" (the zero-length string) are, in fact,
+defined values.  For example, if you say
 
     "ab" =~ /a(.*)b/;
 
@@ -702,17 +719,16 @@ the pattern match succeeds, and $1 is defined, despite the fact that it
 matched "nothing".  But it didn't really match nothing--rather, it
 matched something that happened to be 0 characters long.  This is all
 very above-board and honest.  When a function returns an undefined value,
-it's an admission that it couldn't give you an honest answer.  So
-you should use defined() only when you're questioning the integrity
-of what you're trying to do.  At other times, a simple comparison to
-0 or "" is what you want.
+it's an admission that it couldn't give you an honest answer.  So you
+should use defined() only when you're questioning the integrity of what
+you're trying to do.  At other times, a simple comparison to 0 or "" is
+what you want.
 
-Another surprise is that using defined() on an entire array or 
-hash reports whether memory for that aggregate has ever been
-allocated.  So an array you set to the empty list appears undefined
-initially, and one that once was full and that you then set to 
-the empty list still appears defined.  You should instead use a 
-simple test for size:
+Currently, using defined() on an entire array or hash reports whether
+memory for that aggregate has ever been allocated.  So an array you set
+to the empty list appears undefined initially, and one that once was full
+and that you then set to the empty list still appears defined.  You
+should instead use a simple test for size:
 
     if (@an_array) { print "has array elements\n" }
     if (%a_hash)   { print "has hash members\n"   }
@@ -724,6 +740,8 @@ again to have memory already ready to be filled.
 
 This counter-intuitive behaviour of defined() on aggregates may be
 changed, fixed, or broken in a future release of Perl.
+
+See also L<undef>, L<exists>, L<ref>.
 
 =item delete EXPR
 
@@ -859,15 +877,19 @@ Example:
 When called in a list context, returns a 2-element array consisting of the
 key and value for the next element of a hash, so that you can iterate over
 it.  When called in a scalar context, returns the key for only the next
-element in the hash.  Entries are returned in an apparently random order.
-When the hash is entirely read, a null array is returned in list context
-(which when assigned produces a FALSE (0) value), and C<undef> is returned
-in a scalar context.  The next call to each() after that will start
-iterating again.  There is a single iterator for each hash, shared by all
-each(), keys(), and values() function calls in the program; it can be
-reset by reading all the elements from the hash, or by evaluating C<keys
-HASH> or C<values HASH> in a scalar context.  You should not add elements
-to an hash while you're iterating over it.
+element in the hash.  (Note: Keys may be "0" or "", which are logically
+false; you may wish to avoid constructs like C<while ($k = each %foo) {}>
+for this reason.)
+
+Entries are returned in an apparently random order.  When the hash is
+entirely read, a null array is returned in list context (which when
+assigned produces a FALSE (0) value), and C<undef> is returned in a
+scalar context.  The next call to each() after that will start iterating
+again.  There is a single iterator for each hash, shared by all each(),
+keys(), and values() function calls in the program; it can be reset by
+reading all the elements from the hash, or by evaluating C<keys HASH> or
+C<values HASH>.  If you add or delete elements of a hash while you're
+iterating over it, you may get entries skipped or duplicated, so don't.
 
 The following prints out your environment like the printenv(1) program,
 only in a different order:
@@ -893,11 +915,11 @@ C<eof(FILEHANDLE)> on it) after end-of-file is reached.  Filetypes such
 as terminals may lose the end-of-file condition if you do.
 
 An C<eof> without an argument uses the last file read as argument.
-Empty parentheses () may be used to indicate
-the pseudo file formed of the files listed on the command line, i.e.,
-C<eof()> is reasonable to use inside a while (E<lt>E<gt>) loop to detect the end
-of only the last file.  Use C<eof(ARGV)> or eof without the parentheses to
-test I<EACH> file in a while (E<lt>E<gt>) loop.  Examples:
+Empty parentheses () may be used to indicate the pseudo file formed of
+the files listed on the command line, i.e., C<eof()> is reasonable to
+use inside a C<while (E<lt>E<gt>)> loop to detect the end of only the
+last file.  Use C<eof(ARGV)> or eof without the parentheses to test
+I<EACH> file in a while (E<lt>E<gt>) loop.  Examples:
 
     # reset line numbering on each input file
     while (<>) {
@@ -991,14 +1013,16 @@ being looked at when:
     eval "\$$x++"	# CASE 5
     $$x++;		# CASE 6
 
-Cases 1 and 2 above behave identically: they run the code contained in the
-variable $x.  (Although case 2 has misleading double quotes making the
-reader wonder what else might be happening (nothing is).) Cases 3 and 4
-likewise behave in the same way: they run the code E<lt>$xE<gt>, which does
-nothing at all.  (Case 4 is preferred for purely visual reasons.) Case 5
-is a place where normally you I<WOULD> like to use double quotes, except
-that in that particular situation, you can just use symbolic references
-instead, as in case 6.
+Cases 1 and 2 above behave identically: they run the code contained in
+the variable $x.  (Although case 2 has misleading double quotes making
+the reader wonder what else might be happening (nothing is).)  Cases 3
+and 4 likewise behave in the same way: they run the code '$x', which
+does nothing but return the value of C<$x>.  (Case 4 is preferred for
+purely visual reasons, but it also has the advantage of compiling at
+compile-time instead of at run-time.)  Case 5 is a place where
+normally you I<WOULD> like to use double quotes, except that in that
+particular situation, you can just use symbolic references instead, as
+in case 6.
 
 =item exec LIST
 
@@ -1413,9 +1437,8 @@ Returns the socket option requested, or undefined if there is an error.
 =item glob
 
 Returns the value of EXPR with filename expansions such as a shell
-would do.  This is the internal function implementing the E<lt>*.*E<gt>
-operator, except it's easier to use.
-If EXPR is omitted, $_ is used.
+would do.  This is the internal function implementing the <*.c>
+operator, except it's easier to use.  If EXPR is omitted, $_ is used.
 
 =item gmtime EXPR
 
@@ -1429,7 +1452,10 @@ Typically used as follows:
 
 All array elements are numeric, and come straight out of a struct tm.
 In particular this means that $mon has the range 0..11 and $wday has
-the range 0..6.  If EXPR is omitted, does C<gmtime(time())>.
+the range 0..6.  Also, $year is the number of years since 1900, I<not>
+simply the last two digits of the year.
+
+If EXPR is omitted, does C<gmtime(time())>.
 
 In a scalar context, prints out the ctime(3) value:
 
@@ -1472,6 +1498,10 @@ will be able to tell that this routine was called first.
 
 =item grep EXPR,LIST
 
+This is similar in spirit to, but not the same as, L<grep(1)>
+and its relatives.  In particular, it is not limited to using
+regular expressions.
+
 Evaluates the BLOCK or EXPR for each element of LIST (locally setting
 $_ to each element) and returns the list value consisting of those
 elements for which the expression evaluated to TRUE.  In a scalar
@@ -1486,15 +1516,21 @@ or equivalently,
 Note that, because $_ is a reference into the list value, it can be used
 to modify the elements of the array.  While this is useful and
 supported, it can cause bizarre results if the LIST is not a named
-array.
+array.  Similarly, grep returns aliases into the original list,
+much like the way that L<foreach>'s index variable aliases the list
+elements.  That is, modifying an element of a list returned by grep
+actually modifies the element in the original list.
 
 =item hex EXPR
 
 =item hex 
 
-Interprets EXPR as a hex string and returns the corresponding decimal
-value.  (To convert strings that might start with 0 or 0x see
-oct().)  If EXPR is omitted, uses $_.
+Interprets EXPR as a hex string and returns the corresponding 
+value.  (To convert strings that might start with either 0 or 0x
+see L<oct>.)  If EXPR is omitted, uses $_.
+
+    print hex '0xAf'; # prints '175'
+    print hex 'aF';   # same
 
 =item import
 
@@ -1826,13 +1862,16 @@ See the "use" function, which "no" is the opposite of.
 =item oct 
 
 Interprets EXPR as an octal string and returns the corresponding
-decimal value.  (If EXPR happens to start off with 0x, interprets it as
+value.  (If EXPR happens to start off with 0x, interprets it as
 a hex string instead.)  The following will handle decimal, octal, and
 hex in the standard Perl or C notation:
 
     $val = oct($val) if $val =~ /^0/;
 
-If EXPR is omitted, uses $_.
+If EXPR is omitted, uses $_.  This function is commonly used when
+a string such as "644" needs to be converted into a file mode, for
+example. (Although perl will automatically convert strings into
+numbers as needed, this automatic conversion assumes base 10.)
 
 =item open FILEHANDLE,EXPR
 
@@ -2033,7 +2072,7 @@ DIRHANDLEs have their own namespace separate from FILEHANDLEs.
 =item ord 
 
 Returns the numeric ascii value of the first character of EXPR.  If
-EXPR is omitted, uses $_.
+EXPR is omitted, uses $_.  For the reverse, see L<chr>.
 
 =item pack TEMPLATE,LIST
 
@@ -2071,7 +2110,7 @@ follows:
 
     u	A uuencoded string.
 
-    w A BER compressed integer. Bytes give an unsigned integer base
+    w A BER compressed integer.  Bytes give an unsigned integer base
       128, most significant digit first, with as few digits as
       possible, and with the bit 8 of each byte except the last set
       to "1."
@@ -2181,7 +2220,7 @@ like shift().
 =item pos 
 
 Returns the offset of where the last C<m//g> search left off for the variable
-is in question ($_ is used when the variable is not specified). May be
+is in question ($_ is used when the variable is not specified).  May be
 modified to change that offset.  Such modification will also influence
 the C<\G> zero-width assertion in regular expressions.  See L<perlre> and
 L<perlop>.
@@ -2278,12 +2317,9 @@ Returns a random fractional number between 0 and the value of EXPR.
 0 and 1.  Automatically calls srand() unless srand() has already been
 called.  See also srand().
 
-(Note: if your rand function consistently returns numbers that are too
+(Note: If your rand function consistently returns numbers that are too
 large or too small, then your version of Perl was probably compiled
-with the wrong number of RANDBITS.  As a workaround, you can usually
-multiply EXPR by the correct power of 2 to get the range you want.
-This will make your script unportable, however.  It's better to recompile
-if you can.)
+with the wrong number of RANDBITS.)
 
 =item read FILEHANDLE,SCALAR,LENGTH,OFFSET
 
@@ -2362,8 +2398,8 @@ themselves about what was just input:
 
 =item ref 
 
-Returns a TRUE value if EXPR is a reference, FALSE otherwise. If EXPR
-is not specified, $_ will be used. The value returned depends on the
+Returns a TRUE value if EXPR is a reference, FALSE otherwise.  If EXPR
+is not specified, $_ will be used.  The value returned depends on the
 type of thing the reference is a reference to.
 Builtin types include:
 
@@ -2470,14 +2506,22 @@ return the value of the last expression evaluated.)
 =item reverse LIST
 
 In a list context, returns a list value consisting of the elements
-of LIST in the opposite order.  In a scalar context, returns a string
-value consisting of the bytes of the first element of LIST in the
-opposite order.   
+of LIST in the opposite order.  In a scalar context, concatenates the
+elements of LIST, and returns a string value consisting of those bytes,
+but in the opposite order.
 
-    print reverse <>;			# line tac 
+    print reverse <>;		# line tac, last line first
 
-    undef $/;
-    print scalar reverse scalar <>;	# byte tac
+    undef $/;			# for efficiency of <>
+    print scalar reverse <>;	# byte tac, last line tsrif
+
+This operator is also handy for inverting a hash, although there are some
+caveats.  If a value is duplicated in the original hash, only one of those
+can be represented as a key in the inverted hash.  Also, this has to
+unwind one hash and build a whole new one, which may take some time
+on a large hash.
+
+    %by_name = reverse %by_address;	# Invert the hash
 
 =item rewinddir DIRHANDLE
 
@@ -2702,7 +2746,7 @@ array, returns the undefined value.  If ARRAY is omitted, shifts the
 @ARGV array in the main program, and the @_ array in subroutines.
 (This is determined lexically.)  See also unshift(), push(), and pop().
 Shift() and unshift() do the same thing to the left end of an array
-that push() and pop() do to the right end.
+that pop() and push() do to the right end.
 
 =item shmctl ID,CMD,ARG
 
@@ -2783,16 +2827,15 @@ error.  Returns TRUE if successful.
 
 =item sort LIST
 
-Sorts the LIST and returns the sorted list value.  Nonexistent values
-of arrays are stripped out.  If SUBNAME or BLOCK is omitted, sorts
-in standard string comparison order.  If SUBNAME is specified, it
-gives the name of a subroutine that returns an integer less than, equal
-to, or greater than 0, depending on how the elements of the array are
-to be ordered.  (The E<lt>=E<gt> and cmp operators are extremely useful in such
-routines.)  SUBNAME may be a scalar variable name, in which case the
-value provides the name of the subroutine to use.  In place of a
-SUBNAME, you can provide a BLOCK as an anonymous, in-line sort
-subroutine.
+Sorts the LIST and returns the sorted list value.  If SUBNAME or BLOCK
+is omitted, sorts in standard string comparison order.  If SUBNAME is
+specified, it gives the name of a subroutine that returns an integer
+less than, equal to, or greater than 0, depending on how the elements
+of the array are to be ordered.  (The C<E<lt>=E<gt>> and C<cmp>
+operators are extremely useful in such routines.)  SUBNAME may be a
+scalar variable name, in which case the value provides the name of the
+subroutine to use.  In place of a SUBNAME, you can provide a BLOCK as
+an anonymous, in-line sort subroutine.
 
 In the interests of efficiency the normal calling code for subroutines is
 bypassed, with the following effects: the subroutine may not be a
@@ -2829,7 +2872,7 @@ Examples:
 
     # sort using explicit subroutine name
     sub byage {
-	$age{$a} <=> $age{$b};	# presuming integers
+	$age{$a} <=> $age{$b};	# presuming numeric
     }
     @sortedclass = sort byage @class;
 
@@ -3047,12 +3090,14 @@ C<time ^ ($$ + ($$ << 15))>), but that isn't necessary any more.
 
 In fact, it's usually not necessary to call srand() at all, because if
 it is not called explicitly, it is called implicitly at the first use of
-the C<rand> operator.
+the C<rand> operator.  However, this was not the case in version of Perl
+before 5.004, so if your script will run under older Perl versions, it
+should call srand().
 
-However, you need something much more random than the default seed for
-cryptographic purposes.  Checksumming the compressed output of one or
-more rapidly changing operating system status programs is the usual
-method. For example:
+Note that you need something much more random than the default seed for
+cryptographic purposes.  Checksumming the compressed output of one or more
+rapidly changing operating system status programs is the usual method.  For
+example:
 
     srand (time ^ $$ ^ unpack "%L*", `ps axww | gzip`);
 
@@ -3082,7 +3127,7 @@ one-third of the time.  So don't do that.
 =item stat 
 
 Returns a 13-element array giving the status info for a file, either the
-file opened via FILEHANDLE, or named by EXPR. If EXPR is omitted, it
+file opened via FILEHANDLE, or named by EXPR.  If EXPR is omitted, it
 stats $_.  Returns a null list if the stat fails.  Typically used as
 follows:
 
@@ -3188,7 +3233,7 @@ out the names of those files that contain a match:
 This is subroutine definition, not a real function I<per se>.  With just a
 NAME (and possibly prototypes), it's just a forward declaration.  Without
 a NAME, it's an anonymous function declaration, and does actually return a
-value: the CODE ref of the closure you just created. See L<perlsub> and
+value: the CODE ref of the closure you just created.  See L<perlsub> and
 L<perlref> for details.
 
 =item substr EXPR,OFFSET,LEN
@@ -3196,7 +3241,8 @@ L<perlref> for details.
 =item substr EXPR,OFFSET
 
 Extracts a substring out of EXPR and returns it.  First character is at
-offset 0, or whatever you've set $[ to.  If OFFSET is negative, starts
+offset 0, or whatever you've set C<$[> to (but don't do that).
+If OFFSET is negative, starts
 that far from the end of the string.  If LEN is omitted, returns
 everything to the end of the string.  If LEN is negative, leaves that
 many characters off the end of the string.
@@ -3463,27 +3509,32 @@ If EXPR is omitted, uses $_.
 
 =item umask
 
-Sets the umask for the process and returns the old one.  If EXPR is
-omitted, returns merely the current umask.
+Sets the umask for the process to EXPR and returns the previous value.
+If EXPR is omitted, merely returns the current umask.  Remember that a
+umask is a number, usually given in octal; it is I<not> a string of octal
+digits.  See also L<oct>, if all you have is a string.
 
 =item undef EXPR
 
 =item undef
 
 Undefines the value of EXPR, which must be an lvalue.  Use on only a
-scalar value, an entire array, or a subroutine name (using "&").  (Using undef()
-will probably not do what you expect on most predefined variables or
-DBM list values, so don't do that.)  Always returns the undefined value.  You can omit
-the EXPR, in which case nothing is undefined, but you still get an
-undefined value that you could, for instance, return from a
-subroutine.  Examples:
+scalar value, an entire array or hash, or a subroutine name (using
+"&").  (Using undef() will probably not do what you expect on most
+predefined variables or DBM list values, so don't do that.)  Always
+returns the undefined value.  You can omit the EXPR, in which case
+nothing is undefined, but you still get an undefined value that you
+could, for instance, return from a subroutine, assign to a variable or
+pass as a parameter.  Examples:
 
     undef $foo;
-    undef $bar{'blurfl'};
+    undef $bar{'blurfl'};             # Compare to: delete $bar{'blurfl'};
     undef @ary;
     undef %hash;
     undef &mysub;
     return (wantarray ? () : undef) if $they_blew_it;
+    select undef, undef, undef, 0.25;
+    ($a, $b, undef, $c) = &foo;       # Ignore third value returned
 
 =item unlink LIST
 
@@ -3581,8 +3632,8 @@ call into the "Module" package to tell the module to import the list of
 features back into the current package.  The module can implement its
 import method any way it likes, though most modules just choose to
 derive their import method via inheritance from the Exporter class that
-is defined in the Exporter module. See L<Exporter>.  If no import
-method can be found then the error is currently silently ignored. This
+is defined in the Exporter module.  See L<Exporter>.  If no import
+method can be found then the error is currently silently ignored.  This
 may change to a fatal error in a future version.
 
 If you don't want your namespace altered, explicitly supply an empty list:
@@ -3648,7 +3699,7 @@ effect, it resets HASH's iterator.  See also keys(), each(), and sort().
 Treats the string in EXPR as a vector of unsigned integers, and
 returns the value of the bit field specified by OFFSET.  BITS specifies
 the number of bits that are reserved for each entry in the bit
-vector. This must be a power of two from 1 to 32. vec() may also be
+vector.  This must be a power of two from 1 to 32. vec() may also be
 assigned to, in which case parentheses are needed to give the expression
 the correct precedence as in
 
