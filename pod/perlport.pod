@@ -2077,6 +2077,7 @@ available at http://www.cpan.org/src/index.html
         BeOS
         Cygwin
         DG/UX
+        DOS DJGPP       1)
         DYNIX/ptx
         EPOC R5
         FreeBSD
@@ -2104,12 +2105,13 @@ available at http://www.cpan.org/src/index.html
         UNICOS/mk
         UTS
         VOS
-        Win95/98/ME/2K/XP 1)
+        Win95/98/ME/2K/XP 2)
         WinCE
         z/OS            (OS/390)
         VM/ESA
 
-        1) compilers: Borland, MinGW (GCC), VC6
+        1) in DOS mode either the DOS or OS/2 ports can be used
+        2) compilers: Borland, MinGW (GCC), VC6
 
 The following platforms worked with the previous releases (5.6 and
 5.7), but we did not manage either to fix or to test these in time
@@ -2130,12 +2132,6 @@ will work fine with the 5.8.0.
 Known to be broken for 5.8.0 (but 5.6.1 and 5.7.2 can be used):
 
 	AmigaOS
-
-Known to be broken for 5.8.0 (but 5.6.1 and 5.7.3 can be used):
-
-        DOS DJGPP       1)
-
-        1) in DOS mode either the DOS or OS/2 ports can be used
 
 The following platforms have been known to build Perl from source in
 the past (5.005_03 and earlier), but we haven't been able to verify

@@ -3384,10 +3384,6 @@ failures are expected:
 
 NDBM_File fails and ODBM_File just coredumps.
 
-=head2 DJGPP does not build
-
-Unfortunately DJGPP build broke somewhere after 5.7.3.
-
 =head2 FreeBSD built with ithreads coredumps reading large directories
 
 This is a known bug in FreeBSD 4.5's readdir_r(), it has been fixed in
