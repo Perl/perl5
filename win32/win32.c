@@ -1666,20 +1666,19 @@ win32_waitpid(int pid, int *status, int flags)
 	long child = find_pid(pid);
 	if (child >= 0) {
 	    HANDLE hProcess = w32_child_handles[child];
-		 DWORD timeout=(flags&WNOHANG)?0:INFINITE;
-		 DWORD waitcode = WaitForSingleObject(hProcess, timeout);
-		 if (waitcode == WAIT_TIMEOUT) {
-		 {
-			return 0;
+	    DWORD timeout = (flags & WNOHANG) ? 0 : INFINITE;
+	    DWORD waitcode = WaitForSingleObject(hProcess, timeout);
+	    if (waitcode == WAIT_TIMEOUT) {
+		return 0;
+	    }
+	    else if (waitcode != WAIT_FAILED) {
+		 if (GetExitCodeProcess(hProcess, &waitcode)) {
+		     *status = (int)((waitcode & 0xff) << 8);
+		     retval = (int)w32_child_pids[child];
+		     remove_dead_process(child);
+		     return retval;
 		 }
-		 else if (waitcode != WAIT_FAILED) {
-		     if (GetExitCodeProcess(hProcess, &waitcode)) {
-			 *status = (int)((waitcode & 0xff) << 8);
-			 retval = (int)w32_child_pids[child];
-			 remove_dead_process(child);
-			 return retval;
-		     }
-		 }
+	    }
 	    else
 		errno = ECHILD;
 	}

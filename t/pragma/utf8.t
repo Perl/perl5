@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 
-print "1..67\n";
+print "1..66\n";
 
 my $test = 1;
 
