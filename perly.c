@@ -81,7 +81,7 @@ while (0)
 # define YYLEX yylex_r (&yylval, &yychar)
 
 /* Enable debugging if requested.  */
-#if DEBUGGING
+#ifdef DEBUGGING
 
 #  define yydebug (DEBUG_p_TEST)
 
@@ -99,11 +99,11 @@ do {						\
 	yysymprint Args;			\
 } while (0)
 
-#  define YYDSYMPRINTF(Title, Token, Value, Location)		\
+#  define YYDSYMPRINTF(Title, Token, Value)			\
 do {								\
     if (yydebug) {						\
 	YYFPRINTF (Perl_debug_log, "%s ", Title);		\
-	yysymprint (aTHX_ Perl_debug_log,  Token, Value);		\
+	yysymprint (aTHX_ Perl_debug_log,  Token, Value);	\
 	YYFPRINTF (Perl_debug_log, "\n");			\
     }								\
 } while (0)
@@ -122,6 +122,8 @@ yysymprint (pTHX_ PerlIO *yyoutput, int yytype, YYSTYPE *yyvaluep)
 	YYFPRINTF (yyoutput, "token %s (", yytname[yytype]);
 #   ifdef YYPRINT
 	YYPRINT (yyoutput, yytoknum[yytype], *yyvaluep);
+#   else
+	YYFPRINTF (yyoutput, "0x%x", yyvaluep->ival);
 #   endif
     }
     else
@@ -135,24 +137,41 @@ yysymprint (pTHX_ PerlIO *yyoutput, int yytype, YYSTYPE *yyvaluep)
 }
 
 
-/*------------------------------------------------------------------.
-| yy_stack_print -- Print the state stack from its BOTTOM up to its |
-| TOP (cinluded).                                                   |
-`------------------------------------------------------------------*/
+/*  yy_stack_print()
+ *  print the top 8 items on the parse stack.  The args have the same
+ *  meanings as the local vars in yyparse() of the same name */
 
 static void
-yy_stack_print (pTHX_ short *bottom, short *top)
+yy_stack_print (pTHX_ short *yyss, short *yyssp, YYSTYPE *yyvs, char**yyns)
 {
-    YYFPRINTF (Perl_debug_log, "Stack now");
-    for (/* Nothing. */; bottom <= top; ++bottom)
-	YYFPRINTF (Perl_debug_log, " %d", *bottom);
-    YYFPRINTF (Perl_debug_log, "\n");
+    int i;
+    int start = 1;
+    int count = (int)(yyssp - yyss);
+
+    if (count > 8) {
+	start = count - 8 + 1;
+	count = 8;
+    }
+
+    PerlIO_printf(Perl_debug_log, "\nindex:");
+    for (i=0; i < count; i++)
+	PerlIO_printf(Perl_debug_log, " %8d", start+i);
+    PerlIO_printf(Perl_debug_log, "\nstate:");
+    for (i=0, yyss += start; i < count; i++, yyss++)
+	PerlIO_printf(Perl_debug_log, " %8d", *yyss);
+    PerlIO_printf(Perl_debug_log, "\ntoken:");
+    for (i=0, yyns += start; i < count; i++, yyns++)
+	PerlIO_printf(Perl_debug_log, " %8.8s", *yyns);
+    PerlIO_printf(Perl_debug_log, "\nvalue:");
+    for (i=0, yyvs += start; i < count; i++, yyvs++)
+	PerlIO_printf(Perl_debug_log, " %8x", yyvs->ival);
+    PerlIO_printf(Perl_debug_log, "\n\n");
 }
 
-#  define YY_STACK_PRINT(Bottom, Top)				\
+#  define YY_STACK_PRINT(yyss, yyssp, yyvs, yyns)		\
 do {								\
-    if (yydebug)						\
-	yy_stack_print (aTHX_ (Bottom), (Top));			\
+    if (yydebug && DEBUG_v_TEST)				\
+	yy_stack_print (aTHX_ (yyss), (yyssp), (yyvs), (yyns));	\
 } while (0)
 
 
@@ -182,8 +201,8 @@ do {					\
 #else /* !DEBUGGING */
 #  define YYDPRINTF(Args)
 #  define YYDSYMPRINT(Args)
-#  define YYDSYMPRINTF(Title, Token, Value, Location)
-#  define YY_STACK_PRINT(Bottom, Top)
+#  define YYDSYMPRINTF(Title, Token, Value)
+#  define YY_STACK_PRINT(yyss, yyssp, yyvs, yyns)
 #  define YY_REDUCE_PRINT(Rule)
 #endif /* !DEBUGGING */
 
@@ -293,7 +312,15 @@ Perl_yyparse (pTHX)
       * SvPVX points to the stacks */
     SV *yyss_sv, *yyvs_sv;
 
-#define YYPOPSTACK   (yyvsp--, yyssp--)
+#ifdef DEBUGGING
+    /* maintain also a stack of token/rule names for debugging with -Dpv */
+    char **yyns, **yynsp;
+    SV *yyns_sv;
+#  define YYPOPSTACK   (yyvsp--, yyssp--, yynsp--)
+#else
+#  define YYPOPSTACK   (yyvsp--, yyssp--)
+#endif
+
 
     YYSIZE_T yystacksize = YYINITDEPTH;
 
@@ -308,30 +335,35 @@ Perl_yyparse (pTHX)
 
     YYDPRINTF ((Perl_debug_log, "Starting parse\n"));
 
-    yyss_sv = NEWSV(73, YYINITDEPTH * sizeof(short));
-    yyvs_sv = NEWSV(73, YYINITDEPTH * sizeof(YYSTYPE));
 #ifdef USE_ITHREADS
     /* XXX is this needed anymore? DAPM 13-Feb-04;
      * if not, delete the correspinding LEAVE too */
     ENTER;			/* force stack free before we return */
 #endif
+    yyss_sv = NEWSV(73, YYINITDEPTH * sizeof(short));
+    yyvs_sv = NEWSV(73, YYINITDEPTH * sizeof(YYSTYPE));
     SAVEFREESV(yyss_sv);
     SAVEFREESV(yyvs_sv);
     yyss = (short *) SvPVX(yyss_sv);
     yyvs = (YYSTYPE *) SvPVX(yyvs_sv);
+    /* note that elements zero of yyvs and yyns are not used */
+    yyssp = yyss;
+    yyvsp = yyvs;
+#ifdef DEBUGGING
+    yyns_sv = NEWSV(73, YYINITDEPTH * sizeof(char *));
+    SAVEFREESV(yyns_sv);
+    yyns = (char **) SvPVX(yyns_sv);
+    yynsp = yyns;
+#endif
 
     yystate = 0;
     yyerrstatus = 0;
     yynerrs = 0;
     yychar = YYEMPTY;		/* Cause a token to be read.  */
 
-    /* Initialize stack pointers.
-	  Waste one element of value and location stack
-	  so that they stay on the same level as the state stack.
-	  The wasted elements are never initialized.  */
 
-    yyssp = yyss;
-    yyvsp = yyvs;
+
+    YYDPRINTF ((Perl_debug_log, "Entering state %d\n", yystate));
 
     goto yysetstate;
 
@@ -362,6 +394,13 @@ Perl_yyparse (pTHX)
 	 SvGROW(yyvs_sv, yystacksize * sizeof(YYSTYPE));
 	 yyss = (short *) SvPVX(yyss_sv);
 	 yyvs = (YYSTYPE *) SvPVX(yyvs_sv);
+#ifdef DEBUGGING
+	 SvGROW(yyns_sv, yystacksize * sizeof(char *));
+	 yyns = (char **) SvPVX(yyns_sv);
+	 if (! yyns)
+	       goto yyoverflowlab;
+	 yynsp = yyns + yysize - 1;
+#endif
 	 if (!yyss || ! yyvs)
 	       goto yyoverflowlab;
 
@@ -375,8 +414,6 @@ Perl_yyparse (pTHX)
 	 if (yyss + yystacksize - 1 <= yyssp)
 	       YYABORT;
     }
-
-    YYDPRINTF ((Perl_debug_log, "Entering state %d\n", yystate));
 
     goto yybackup;
 
@@ -409,7 +446,7 @@ Perl_yyparse (pTHX)
     }
     else {
 	yytoken = YYTRANSLATE (yychar);
-	YYDSYMPRINTF ("Next token is", yytoken, &yylval, &yylloc);
+	YYDSYMPRINTF ("Next token is", yytoken, &yylval);
     }
 
     /* If the proper action on seeing token YYTOKEN is to reduce or to
@@ -436,6 +473,9 @@ Perl_yyparse (pTHX)
 	yychar = YYEMPTY;
 
     *++yyvsp = yylval;
+#ifdef DEBUGGING
+    *++yynsp = (char *)(yytname[yytoken]);
+#endif
 
 
     /* Count tokens shifted since error; after three, turn off error
@@ -444,6 +484,8 @@ Perl_yyparse (pTHX)
 	yyerrstatus--;
 
     yystate = yyn;
+    YYDPRINTF ((Perl_debug_log, "Entering state %d\n", yystate));
+
     goto yynewstate;
 
 
@@ -487,11 +529,15 @@ Perl_yyparse (pTHX)
 
     yyvsp -= yylen;
     yyssp -= yylen;
+#ifdef DEBUGGING
+    yynsp -= yylen;
+#endif
 
-    YY_STACK_PRINT (yyss, yyssp);
 
     *++yyvsp = yyval;
-
+#ifdef DEBUGGING
+    *++yynsp = (char *)(yytname [yyr1[yyn]]);
+#endif
 
     /* Now `shift' the result of the reduction.  Determine what state
 	  that goes to, based on the state we popped back to and the rule
@@ -504,6 +550,17 @@ Perl_yyparse (pTHX)
 	yystate = yytable[yystate];
     else
 	yystate = yydefgoto[yyn - YYNTOKENS];
+
+    YYDPRINTF ((Perl_debug_log, "Entering state %d\n", yystate));
+
+#ifdef DEBUGGING
+    /* tmp push yystate for stack print; this is normally pushed later in
+     * yynewstate */
+    yyssp++;
+    *yyssp = yystate;
+    YY_STACK_PRINT (yyss, yyssp, yyvs, yyns);
+    yyssp--;
+#endif
 
     goto yynewstate;
 
@@ -575,14 +632,14 @@ Perl_yyparse (pTHX)
 	    YYPOPSTACK;
 	    /* Pop the rest of the stack.  */
 	    while (yyss < yyssp) {
-		YYDSYMPRINTF ("Error: popping", yystos[*yyssp], yyvsp, yylsp);
+		YYDSYMPRINTF ("Error: popping", yystos[*yyssp], yyvsp);
 		yydestruct (yystos[*yyssp], yyvsp);
 		YYPOPSTACK;
 	    }
 	    YYABORT;
 	}
 
-	YYDSYMPRINTF ("Error: discarding", yytoken, &yylval, &yylloc);
+	YYDSYMPRINTF ("Error: discarding", yytoken, &yylval);
 	yydestruct (yytoken, &yylval);
 	yychar = YYEMPTY;
 
@@ -614,12 +671,15 @@ Perl_yyparse (pTHX)
 	if (yyssp == yyss)
 	    YYABORT;
 
-	YYDSYMPRINTF ("Error: popping", yystos[*yyssp], yyvsp, yylsp);
+	YYDSYMPRINTF ("Error: popping", yystos[*yyssp], yyvsp);
 	yydestruct (yystos[yystate], yyvsp);
 	yyvsp--;
+#ifdef DEBUGGING
+	yynsp--;
+#endif
 	yystate = *--yyssp;
 
-	YY_STACK_PRINT (yyss, yyssp);
+	YY_STACK_PRINT (yyss, yyssp, yyvs, yyns);
     }
 
     if (yyn == YYFINAL)
@@ -628,8 +688,13 @@ Perl_yyparse (pTHX)
     YYDPRINTF ((Perl_debug_log, "Shifting error token, "));
 
     *++yyvsp = yylval;
+#ifdef DEBUGGING
+    *++yynsp ="<err>";
+#endif
 
     yystate = yyn;
+    YYDPRINTF ((Perl_debug_log, "Entering state %d\n", yystate));
+
     goto yynewstate;
 
 

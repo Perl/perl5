@@ -367,7 +367,7 @@ the format of the output is explained in L<perldebguts>.
 As an alternative, specify a number instead of list of letters (e.g.,
 B<-D14> is equivalent to B<-Dtls>):
 
-        1  p  Tokenizing and parsing
+        1  p  Tokenizing and parsing (with v, displays parse stack)
         2  s  Stack snapshots
                 with v, displays all stacks
         4  l  Context (loop) stack processing
