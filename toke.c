@@ -6894,6 +6894,14 @@ S_scan_formline(pTHX_ register char *s)
 		    needargs = TRUE;
 	    }
 	    sv_catpvn(stuff, s, eol-s);
+#ifndef PERL_STRICT_CR
+	    if (eol-s > 1 && eol[-2] == '\r' && eol[-1] == '\n') {
+		char *end = SvPVX(stuff) + SvCUR(stuff);
+		end[-2] = '\n';
+		end[-1] = '\0';
+		SvCUR(stuff)--;
+	    }
+#endif
 	}
 	s = eol;
 	if (PL_rsfp) {
