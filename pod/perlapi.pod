@@ -871,7 +871,7 @@ is to be expected. (For information only--not to be used).
 =for hackers
 Found in file hv.h
 
-=item Nullch 
+=item Nullch
 
 Null character pointer.
 =for hackers
@@ -1881,6 +1881,23 @@ Used by C<xsubpp> to hook up XSUBs as Perl subs.
 
 =for hackers
 Found in file op.c
+
+
+=back
+
+=head1 Pad Data Structures
+
+=over 8
+
+=item pad_sv
+
+Get the value at offset po in the current pad.
+Use macro PAD_SV instead of calling this function directly.
+
+	SV*	pad_sv(PADOFFSET po)
+
+=for hackers
+Found in file pad.c
 
 
 =back

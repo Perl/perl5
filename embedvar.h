@@ -342,7 +342,6 @@
 #define PL_nomemok		(PERL_GET_INTERP->Inomemok)
 #define PL_nthreads		(PERL_GET_INTERP->Inthreads)
 #define PL_nthreads_cond	(PERL_GET_INTERP->Inthreads_cond)
-#define PL_nullstash		(PERL_GET_INTERP->Inullstash)
 #define PL_numeric_compat1	(PERL_GET_INTERP->Inumeric_compat1)
 #define PL_numeric_local	(PERL_GET_INTERP->Inumeric_local)
 #define PL_numeric_name		(PERL_GET_INTERP->Inumeric_name)
@@ -646,7 +645,6 @@
 #define PL_nomemok		(vTHX->Inomemok)
 #define PL_nthreads		(vTHX->Inthreads)
 #define PL_nthreads_cond	(vTHX->Inthreads_cond)
-#define PL_nullstash		(vTHX->Inullstash)
 #define PL_numeric_compat1	(vTHX->Inumeric_compat1)
 #define PL_numeric_local	(vTHX->Inumeric_local)
 #define PL_numeric_name		(vTHX->Inumeric_name)
@@ -953,7 +951,6 @@
 #define PL_Inomemok		PL_nomemok
 #define PL_Inthreads		PL_nthreads
 #define PL_Inthreads_cond	PL_nthreads_cond
-#define PL_Inullstash		PL_nullstash
 #define PL_Inumeric_compat1	PL_numeric_compat1
 #define PL_Inumeric_local	PL_numeric_local
 #define PL_Inumeric_name	PL_numeric_name

@@ -48,7 +48,7 @@ PP(pp_padav)
 {
     dSP; dTARGET;
     if (PL_op->op_private & OPpLVAL_INTRO)
-	SAVECLEARSV(PL_curpad[PL_op->op_targ]);
+	SAVECLEARSV(PAD_SVl(PL_op->op_targ));
     EXTEND(SP, 1);
     if (PL_op->op_flags & OPf_REF) {
 	PUSHs(TARG);
@@ -90,7 +90,7 @@ PP(pp_padhv)
 
     XPUSHs(TARG);
     if (PL_op->op_private & OPpLVAL_INTRO)
-	SAVECLEARSV(PL_curpad[PL_op->op_targ]);
+	SAVECLEARSV(PAD_SVl(PL_op->op_targ));
     if (PL_op->op_flags & OPf_REF)
 	RETURN;
     else if (LVRET) {
@@ -159,7 +159,7 @@ PP(pp_rv2gv)
 		    GV *gv;
 		    if (cUNOP->op_targ) {
 			STRLEN len;
-			SV *namesv = PL_curpad[cUNOP->op_targ];
+			SV *namesv = PAD_SV(cUNOP->op_targ);
 			name = SvPV(namesv, len);
 			gv = (GV*)NEWSV(0,0);
 			gv_init(gv, CopSTASH(PL_curcop), name, len, 0);
@@ -420,7 +420,7 @@ PP(pp_prototype)
 PP(pp_anoncode)
 {
     dSP;
-    CV* cv = (CV*)PL_curpad[PL_op->op_targ];
+    CV* cv = (CV*)PAD_SV(PL_op->op_targ);
     if (CvCLONE(cv))
 	cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
     EXTEND(SP,1);
@@ -4372,14 +4372,14 @@ PP(pp_split)
 
     if (pm->op_pmreplroot) {
 #ifdef USE_ITHREADS
-	ary = GvAVn((GV*)PL_curpad[INT2PTR(PADOFFSET, pm->op_pmreplroot)]);
+	ary = GvAVn((GV*)PAD_SVl(INT2PTR(PADOFFSET, pm->op_pmreplroot)));
 #else
 	ary = GvAVn((GV*)pm->op_pmreplroot);
 #endif
     }
     else if (gimme != G_ARRAY)
 #ifdef USE_5005THREADS
-	ary = (AV*)PL_curpad[0];
+	ary = (AV*)PAD_SVl(0);
 #else
 	ary = GvAVn(PL_defgv);
 #endif /* USE_5005THREADS */

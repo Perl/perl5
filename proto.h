@@ -587,15 +587,15 @@ PERL_CALLCONV OP*	Perl_oopsCV(pTHX_ OP* o);
 PERL_CALLCONV void	Perl_op_free(pTHX_ OP* arg);
 PERL_CALLCONV void	Perl_package(pTHX_ OP* o);
 PERL_CALLCONV PADOFFSET	Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype);
-PERL_CALLCONV PADOFFSET	Perl_pad_allocmy(pTHX_ char* name);
+PERL_CALLCONV PADOFFSET	Perl_allocmy(pTHX_ char* name);
 PERL_CALLCONV PADOFFSET	Perl_pad_findmy(pTHX_ char* name);
 PERL_CALLCONV OP*	Perl_oopsAV(pTHX_ OP* o);
 PERL_CALLCONV OP*	Perl_oopsHV(pTHX_ OP* o);
-PERL_CALLCONV void	Perl_pad_leavemy(pTHX_ I32 fill);
+PERL_CALLCONV void	Perl_pad_leavemy(pTHX);
 PERL_CALLCONV SV*	Perl_pad_sv(pTHX_ PADOFFSET po);
 PERL_CALLCONV void	Perl_pad_free(pTHX_ PADOFFSET po);
 PERL_CALLCONV void	Perl_pad_reset(pTHX);
-PERL_CALLCONV void	Perl_pad_swipe(pTHX_ PADOFFSET po);
+PERL_CALLCONV void	Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust);
 PERL_CALLCONV void	Perl_peep(pTHX_ OP* o);
 PERL_CALLCONV PerlIO*	Perl_start_glob(pTHX_ SV* pattern, IO *io);
 #if defined(USE_5005THREADS)
@@ -1050,17 +1050,11 @@ STATIC OP*	S_no_fh_allowed(pTHX_ OP *o);
 STATIC OP*	S_scalarboolean(pTHX_ OP *o);
 STATIC OP*	S_too_few_arguments(pTHX_ OP *o, char* name);
 STATIC OP*	S_too_many_arguments(pTHX_ OP *o, char* name);
-STATIC PADOFFSET	S_pad_addlex(pTHX_ SV* name);
-STATIC PADOFFSET	S_pad_findlex(pTHX_ char* name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix, I32 saweval, U32 flags);
 STATIC OP*	S_newDEFSVOP(pTHX);
 STATIC OP*	S_new_logop(pTHX_ I32 type, I32 flags, OP **firstp, OP **otherp);
 STATIC void	S_simplify_sort(pTHX_ OP *o);
 STATIC bool	S_is_handle_constructor(pTHX_ OP *o, I32 argnum);
 STATIC char*	S_gv_ename(pTHX_ GV *gv);
-#  if defined(DEBUG_CLOSURES)
-STATIC void	S_cv_dump(pTHX_ CV *cv);
-#  endif
-STATIC CV*	S_cv_clone2(pTHX_ CV *proto, CV *outside);
 STATIC bool	S_scalar_mod_type(pTHX_ OP *o, I32 type);
 STATIC OP *	S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp);
 STATIC OP *	S_dup_attrlist(pTHX_ OP *o);
@@ -1382,6 +1376,30 @@ PERL_CALLCONV void	Perl_deb_stack_all(pTHX);
 #ifdef PERL_IN_DEB_C
 STATIC void	S_deb_stack_n(pTHX_ SV** stack_base, I32 stack_min, I32 stack_max, I32 mark_min, I32 mark_max);
 #endif
+
+PERL_CALLCONV PADLIST*	Perl_pad_new(pTHX_ padnew_flags flags);
+PERL_CALLCONV void	Perl_pad_undef(pTHX_ CV* cv, CV* outercv);
+PERL_CALLCONV PADOFFSET	Perl_pad_add_name(pTHX_ char *name, HV* typestash, HV* ourstash, bool clone);
+PERL_CALLCONV PADOFFSET	Perl_pad_add_anon(pTHX_ SV* sv, OPCODE op_type);
+PERL_CALLCONV void	Perl_pad_check_dup(pTHX_ char* name, bool is_our, HV* ourstash);
+#ifdef DEBUGGING
+PERL_CALLCONV void	Perl_pad_setsv(pTHX_ PADOFFSET po, SV* sv);
+#endif
+PERL_CALLCONV void	Perl_pad_block_start(pTHX_ int full);
+PERL_CALLCONV void	Perl_pad_tidy(pTHX_ padtidy_type type);
+PERL_CALLCONV void	Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full);
+PERL_CALLCONV void	Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv);
+
+PERL_CALLCONV void	Perl_pad_push(pTHX_ PADLIST *padlist, int depth, int has_args);
+
+#if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
+STATIC PADOFFSET	S_pad_findlex(pTHX_ char* name, PADOFFSET newoff, U32 seq, CV* startcv, I32 cx_ix, I32 saweval, U32 flags);
+#  if defined(DEBUGGING)
+STATIC void	S_cv_dump(pTHX_ CV *cv, char *title);
+#  endif
+STATIC CV*	S_cv_clone2(pTHX_ CV *proto, CV *outside);
+#endif
+
 
 
 END_EXTERN_C

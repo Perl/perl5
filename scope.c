@@ -868,6 +868,15 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_CLEARSV:
 	    ptr = (void*)&PL_curpad[SSPOPLONG];
 	    sv = *(SV**)ptr;
+
+	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
+		"Pad [0x%"UVxf"] clearsv: %ld sv=0x%"UVxf"<%"IVdf"> %s\n",
+		PTR2UV(PL_curpad), (long)((SV **)ptr-PL_curpad),
+		PTR2UV(sv),
+		(IV)SvREFCNT(sv),
+		(SvREFCNT(sv) <= 1 && !SvOBJECT(sv)) ? "clear" : "abandon"
+	    ));
+
 	    /* Can clear pad variable in place? */
 	    if (SvREFCNT(sv) <= 1 && !SvOBJECT(sv)) {
 		/*
@@ -1000,7 +1009,7 @@ Perl_leave_scope(pTHX_ I32 base)
 		PADOFFSET off = (PADOFFSET)SSPOPLONG;
 		ptr = SSPOPPTR;
 		if (ptr)
-		    ((SV**)ptr)[off] = (SV*)SSPOPPTR;
+		    ((PAD)ptr)[off] = (SV*)SSPOPPTR;
 	    }
 	    break;
 	default:

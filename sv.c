@@ -9573,15 +9573,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	} else {
 	  CvDEPTH(dstr) = 0;
 	}
-	if (CvPADLIST(sstr) && !AvREAL(CvPADLIST(sstr))) {
-	    /* XXX padlists are real, but pretend to be not */
-	    AvREAL_on(CvPADLIST(sstr));
-	    CvPADLIST(dstr)	= av_dup_inc(CvPADLIST(sstr), param);
-	    AvREAL_off(CvPADLIST(sstr));
-	    AvREAL_off(CvPADLIST(dstr));
-	}
-	else
-	    CvPADLIST(dstr)	= av_dup_inc(CvPADLIST(sstr), param);
+	PAD_DUP(CvPADLIST(dstr), CvPADLIST(sstr), param);
 	if (!CvANON(sstr) || CvCLONED(sstr))
 	    CvOUTSIDE(dstr)	= cv_dup_inc(CvOUTSIDE(sstr), param);
 	else
@@ -10390,12 +10382,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_rsfp_filters	= av_dup_inc(proto_perl->Irsfp_filters, param);
 
     PL_compcv			= cv_dup(proto_perl->Icompcv, param);
-    PL_comppad			= av_dup(proto_perl->Icomppad, param);
-    PL_comppad_name		= av_dup(proto_perl->Icomppad_name, param);
-    PL_comppad_name_fill	= proto_perl->Icomppad_name_fill;
-    PL_comppad_name_floor	= proto_perl->Icomppad_name_floor;
-    PL_curpad			= (SV**)ptr_table_fetch(PL_ptr_table,
-							proto_perl->Tcurpad);
+
+    PAD_CLONE_VARS(proto_perl, param);
 
 #ifdef HAVE_INTERP_INTERN
     sys_intern_dup(&proto_perl->Isys_intern, &PL_sys_intern);
@@ -10414,7 +10402,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_egid		= proto_perl->Iegid;
     PL_nomemok		= proto_perl->Inomemok;
     PL_an		= proto_perl->Ian;
-    PL_cop_seqmax	= proto_perl->Icop_seqmax;
     PL_op_seqmax	= proto_perl->Iop_seqmax;
     PL_evalseq		= proto_perl->Ievalseq;
     PL_origenviron	= proto_perl->Iorigenviron;	/* XXX not quite right */
@@ -10492,12 +10479,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_error_count	= proto_perl->Ierror_count;
     PL_subline		= proto_perl->Isubline;
     PL_subname		= sv_dup_inc(proto_perl->Isubname, param);
-
-    PL_min_intro_pending	= proto_perl->Imin_intro_pending;
-    PL_max_intro_pending	= proto_perl->Imax_intro_pending;
-    PL_padix			= proto_perl->Ipadix;
-    PL_padix_floor		= proto_perl->Ipadix_floor;
-    PL_pad_reset_pending	= proto_perl->Ipad_reset_pending;
 
     /* XXX See comment on SvANY(proto_perl->Ilinestr) above */
     if (SvANY(proto_perl->Ilinestr)) {
