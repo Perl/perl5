@@ -572,12 +572,17 @@ Perl_ithread_join(pTHX_ SV *obj)
 	{
 	  ithread*        current_thread;
 	  AV* params = (AV*) SvRV(thread->params);	
+	  PerlInterpreter *other_perl = thread->interp;
 	  CLONE_PARAMS clone_params;
 	  clone_params.stashes = newAV();
 	  clone_params.flags |= CLONEf_JOIN_IN;
 	  PL_ptr_table = ptr_table_new();
 	  current_thread = Perl_ithread_get(aTHX);
 	  Perl_ithread_set(aTHX_ thread);
+	  /* ensure 'meaningful' addresses retain their meaning */
+	  ptr_table_store(PL_ptr_table, &other_perl->Isv_undef, &PL_sv_undef);
+	  ptr_table_store(PL_ptr_table, &other_perl->Isv_no, &PL_sv_no);
+	  ptr_table_store(PL_ptr_table, &other_perl->Isv_yes, &PL_sv_yes);
 
 #if 0
 	  {
