@@ -61,7 +61,7 @@ static I32 read_e_script(pTHXo_ int idx, SV *buf_sv, int maxlen);
 
 /* this is called in parent before the fork() */
 void
-Perl_atfork_lock(pTHX)
+Perl_atfork_lock(void)
 {
     /* locks must be held in locking order (if any) */
 #ifdef MYMALLOC
@@ -72,7 +72,7 @@ Perl_atfork_lock(pTHX)
 
 /* this is called in both parent and child after the fork() */
 void
-Perl_atfork_unlock(pTHX)
+Perl_atfork_unlock(void)
 {
     /* locks must be released in same order as in S_atfork_lock() */
 #ifdef MYMALLOC

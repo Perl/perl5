@@ -73,8 +73,6 @@
 #define append_list		Perl_append_list
 #define apply			Perl_apply
 #define apply_attrs_string	Perl_apply_attrs_string
-#define atfork_lock		Perl_atfork_lock
-#define atfork_unlock		Perl_atfork_unlock
 #define avhv_delete_ent		Perl_avhv_delete_ent
 #define avhv_exists_ent		Perl_avhv_exists_ent
 #define avhv_fetch_ent		Perl_avhv_fetch_ent
@@ -1606,8 +1604,6 @@
 #define append_list(a,b,c)	Perl_append_list(aTHX_ a,b,c)
 #define apply(a,b,c)		Perl_apply(aTHX_ a,b,c)
 #define apply_attrs_string(a,b,c,d)	Perl_apply_attrs_string(aTHX_ a,b,c,d)
-#define atfork_lock(a)		Perl_atfork_lock(aTHX_ a)
-#define atfork_unlock(a)	Perl_atfork_unlock(aTHX_ a)
 #define avhv_delete_ent(a,b,c,d)	Perl_avhv_delete_ent(aTHX_ a,b,c,d)
 #define avhv_exists_ent(a,b,c)	Perl_avhv_exists_ent(aTHX_ a,b,c)
 #define avhv_fetch_ent(a,b,c,d)	Perl_avhv_fetch_ent(aTHX_ a,b,c,d)
@@ -3120,10 +3116,6 @@
 #define apply			Perl_apply
 #define Perl_apply_attrs_string	CPerlObj::Perl_apply_attrs_string
 #define apply_attrs_string	Perl_apply_attrs_string
-#define Perl_atfork_lock	CPerlObj::Perl_atfork_lock
-#define atfork_lock		Perl_atfork_lock
-#define Perl_atfork_unlock	CPerlObj::Perl_atfork_unlock
-#define atfork_unlock		Perl_atfork_unlock
 #define Perl_avhv_delete_ent	CPerlObj::Perl_avhv_delete_ent
 #define avhv_delete_ent		Perl_avhv_delete_ent
 #define Perl_avhv_exists_ent	CPerlObj::Perl_avhv_exists_ent

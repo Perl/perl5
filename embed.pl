@@ -1399,8 +1399,6 @@ p	|OP*	|append_elem	|I32 optype|OP* head|OP* tail
 p	|OP*	|append_list	|I32 optype|LISTOP* first|LISTOP* last
 p	|I32	|apply		|I32 type|SV** mark|SV** sp
 Ap	|void	|apply_attrs_string|char *stashpv|CV *cv|char *attrstr|STRLEN len
-p	|void	|atfork_lock
-p	|void	|atfork_unlock
 Ap	|SV*	|avhv_delete_ent|AV *ar|SV* keysv|I32 flags|U32 hash
 Ap	|bool	|avhv_exists_ent|AV *ar|SV* keysv|U32 hash
 Ap	|SV**	|avhv_fetch_ent	|AV *ar|SV* keysv|I32 lval|U32 hash
