@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon May 20 18:21:27 EET DST 2002 [metaconfig 3.0 PL70]
+# Generated on Sat May 25 22:51:20 EET DST 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -3833,7 +3833,9 @@ esac
 
 case "$fn" in
 *\(*)
-	expr $fn : '.*(\(.*\)).*' | $tr ',' $trnl >getfile.ok
+	: getfile will accept an answer from the comma-separated list
+	: enclosed in parentheses even if it does not meet other criteria.
+	expr "$fn" : '.*(\(.*\)).*' | $tr ',' $trnl >getfile.ok
 	fn=`echo $fn | sed 's/(.*)//'`
 	;;
 esac
@@ -17845,6 +17847,7 @@ EOM
 	esac
 fi
 : locate the preferred pager for this system
+fn=f/
 case "$pager" in
 '')
 	dflt=''
@@ -17864,10 +17867,14 @@ case "$pager" in
 	'') dflt=/usr/ucb/more;;
 	esac
 	;;
-*) dflt="$pager";;
+*)	dflt="$pager"
+	: Instruct ./getfile to trust the hinted or previous pager value,
+	: even if it does not begin with a slash.  For example, on os2,
+	: pager might be cmd /c more.  See comments in UU/getfile.
+	fn="f/($pager)"
+	;;
 esac
 echo " "
-fn=f/
 rp='What pager is used on your system?'
 . ./getfile
 pager="$ans"
