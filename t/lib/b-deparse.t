@@ -15,7 +15,7 @@ use warnings;
 use strict;
 use Config;
 
-print "1..12\n";
+print "1..14\n";
 
 use B::Deparse;
 my $deparse = B::Deparse->new() or print "not ";
@@ -166,3 +166,11 @@ $test /= 2 if ++$test;
 continue {
     123;
 }
+####
+# 9
+my $x;
+print $main::x;
+####
+# 10
+my @x;
+print $main::x[1];

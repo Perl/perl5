@@ -11,11 +11,11 @@ use Carp 'cluck', 'croak';
 use B qw(class main_root main_start main_cv svref_2object opnumber cstring
 	 OPf_WANT OPf_WANT_VOID OPf_WANT_SCALAR OPf_WANT_LIST
 	 OPf_KIDS OPf_REF OPf_STACKED OPf_SPECIAL
-	 OPpLVAL_INTRO OPpENTERSUB_AMPER OPpSLICE OPpCONST_BARE
+	 OPpLVAL_INTRO OPpOUR_INTRO OPpENTERSUB_AMPER OPpSLICE OPpCONST_BARE
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
 	 OPpCONST_ARYBASE OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER
 	 OPpSORT_REVERSE
-	 SVf_IOK SVf_NOK SVf_ROK SVf_POK
+	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR
          CVf_METHOD CVf_LOCKED CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
@@ -210,7 +210,7 @@ use warnings ();
 # if present, the fourth parameter is passed on by deparse.
 #
 # If present and true, it means that the op exists directly as
-# part of a lineseq. Currently it's only used by pp_scope to
+# part of a lineseq. Currently it's only used by scopeop to
 # decide whether its results need to be enclosed in a do {} block.
 
 # Nonprinting characters with special meaning:
@@ -654,8 +654,8 @@ sub deparse {
     Carp::confess("Null op in deparse") if !defined($op)
 					|| class($op) eq "NULL";
     my $meth = "pp_" . $op->name;
-    if ($meth eq "pp_scope") {
-	return $self->pp_scope($op, $cx, $flags);
+    if (is_scope($op)) {
+	return $self->$meth($op, $cx, $flags);
     }
     return $self->$meth($op, $cx);
 }
@@ -692,6 +692,7 @@ sub deparse_sub {
     my $self = shift;
     my $cv = shift;
     my $proto = "";
+Carp::confess("NULL in deparse_sub") if !defined($cv) || $cv->isa("B::NULL");
 Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
     local $self->{'curcop'} = $self->{'curcop'};
     if ($cv->FLAGS & SVf_POK) {
@@ -708,18 +709,35 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
     local($self->{'curcvlex'});
     local(@$self{qw'curstash warnings hints'})
 		= @$self{qw'curstash warnings hints'};
+    my $body;
     if (not null $cv->ROOT) {
-	# skip leavesub
-	return $proto . "{\n\t" . 
-	    $self->deparse($cv->ROOT->first, 0) . "\n\b}\n"; 
+	my $lineseq = $cv->ROOT->first;
+	if ($lineseq->name eq "lineseq") {
+	    my @ops;
+	    for(my$o=$lineseq->first; $$o; $o=$o->sibling) {
+		push @ops, $o;
+	    }
+	    $body = $self->lineseq(undef, @ops).";";
+	    my $scope_en = $self->find_scope_en($lineseq);
+	    if (defined $scope_en) {
+		my $subs = join"", $self->seq_subs($scope_en);
+		$body .= ";\n$subs" if length($subs);
+	    }
+	}
+	else {
+	    $body = $self->deparse($cv->ROOT->first, 0);
+	}
     }
-    my $sv = $cv->const_sv;
-    if ($$sv) {
-	# uh-oh. inlinable sub... format it differently
-	return $proto . "{ " . const($sv) . " }\n";
-    } else { # XSUB? (or just a declaration)
-	return "$proto;\n";
+    else {
+	my $sv = $cv->const_sv;
+	if ($$sv) {
+	    # uh-oh. inlinable sub... format it differently
+	    return $proto . "{ " . const($sv) . " }\n";
+	} else { # XSUB? (or just a declaration)
+	    return "$proto;\n";
+	}
     }
+    return $proto ."{\n\t$body\n\b}" ."\n";
 }
 
 sub deparse_format {
@@ -839,11 +857,14 @@ sub maybe_parens_func {
 sub maybe_local {
     my $self = shift;
     my($op, $cx, $text) = @_;
-    if ($op->private & OPpLVAL_INTRO and not $self->{'avoid_local'}{$$op}) {
+    my $our_intro = ($op->name =~ /^(gv|rv2)[ash]v$/) ? OPpOUR_INTRO : 0;
+    if ($op->private & (OPpLVAL_INTRO|$our_intro)
+	and not $self->{'avoid_local'}{$$op}) {
+	my $our_local = ($op->private & OPpLVAL_INTRO) ? "local" : "our";
         if (want_scalar($op)) {
-	    return "local $text";
+	    return "$our_local $text";
 	} else {
-	    return $self->maybe_parens_func("local", $text, $cx, 16);
+	    return $self->maybe_parens_func("$our_local", $text, $cx, 16);
 	}
     } else {
 	return $text;
@@ -967,10 +988,27 @@ sub pp_entertry { # see also leavetry
     return "XXX";
 }
 
+# $root should be the op which represents the root of whatever
+# we're sequencing here. If it's undefined, then we don't append
+# any subroutine declarations to the deparsed ops, otherwise we
+# append appropriate declarations.
 sub lineseq {
-    my $self = shift;
-    my(@ops) = @_;
+    my($self, $root, @ops) = @_;
     my($expr, @exprs);
+
+    my $out_cop = $self->{'curcop'};
+    my $out_seq = defined($out_cop) ? $out_cop->cop_seq : undef;
+    my $limit_seq;
+    if (defined $root) {
+	$limit_seq = $out_seq;
+	my $nseq = $self->find_scope_st($root->sibling) if ${$root->sibling};
+	$limit_seq = $nseq if !defined($limit_seq)
+			   or defined($nseq) && $nseq < $limit_seq;
+    }
+    $limit_seq = $self->{'limit_seq'}
+	if defined($self->{'limit_seq'})
+	&& (!defined($limit_seq) || $self->{'limit_seq'} < $limit_seq);
+    local $self->{'limit_seq'} = $limit_seq;
     for (my $i = 0; $i < @ops; $i++) {
 	$expr = "";
 	if (is_state $ops[$i]) {
@@ -997,11 +1035,16 @@ sub lineseq {
 	$expr =~ s/;\n?\z//;
 	push @exprs, $expr;
     }
-    return join(";\n", grep {length} @exprs);
+    my $body = join(";\n", grep {length} @exprs);
+    my $subs = "";
+    if (defined $root && defined $limit_seq) {
+	$subs = join "\n", $self->seq_subs($limit_seq);
+    }
+    return join(";\n", grep {length} $body, $subs);
 }
 
 sub scopeop {
-    my($real_block, $self, $op, $cx) = @_;
+    my($real_block, $self, $op, $cx, $flags) = @_;
     my $kid;
     my @kids;
 
@@ -1031,20 +1074,15 @@ sub scopeop {
     for (; !null($kid); $kid = $kid->sibling) {
 	push @kids, $kid;
     }
-    if ($cx > 0) { # inside an expression, (a do {} while for lineseq)
-	return "do { " . $self->lineseq(@kids) . " }";
+    if ($flags || $cx > 0) { # inside an expression, (a do {} while for lineseq)
+	return "do {\n\t" . $self->lineseq($op, @kids) . "\n\b}";
     } else {
-	my $lineseq = $self->lineseq(@kids);
+	my $lineseq = $self->lineseq($op, @kids);
 	return (length ($lineseq) ? "$lineseq;" : "");
     }
 }
 
-sub pp_scope {
-    my ($self, $op, $cx, $flags) = @_;
-    my $body = scopeop(0, @_);
-    return $body if $cx > 0 || !defined $flags || !$flags;
-    return "do {\n\t$body\n\b};";
-}
+sub pp_scope { scopeop(0, @_); }
 sub pp_lineseq { scopeop(0, @_); }
 sub pp_leave { scopeop(1, @_); }
 
@@ -1107,12 +1145,13 @@ sub lex_in_scope {
 
 sub populate_curcvlex {
     my $self = shift;
-    for (my $cv = $self->{'curcv'}; $$cv; $cv = $cv->OUTSIDE) {
+    for (my $cv = $self->{'curcv'}; class($cv) eq "CV"; $cv = $cv->OUTSIDE) {
 	my @padlist = $cv->PADLIST->ARRAY;
 	my @ns = $padlist[0]->ARRAY;
 
 	for (my $i=0; $i<@ns; ++$i) {
 	    next if class($ns[$i]) eq "SPECIAL";
+	    next if $ns[$i]->FLAGS & SVpad_OUR;  # Skip "our" vars
 	    if (class($ns[$i]) eq "PV") {
 		# Probably that pesky lexical @_
 		next;
@@ -1126,17 +1165,34 @@ sub populate_curcvlex {
     }
 }
 
-# Recurses down the tree, looking for a COP
-sub find_cop {
-    my ($self, $op) = @_;
-    if ($op->flags & OPf_KIDS) {
-	for (my $o=$op->first; $$o; $o=$o->sibling) {
-	    return $o if is_state($o);
-	    my $r = $self->find_cop($o);
-	    return $r if defined $r;
+sub find_scope_st { ((find_scope(@_))[0]); }
+sub find_scope_en { ((find_scope(@_))[1]); }
+
+# Recurses down the tree, looking for pad variable introductions and COPs
+sub find_scope {
+    my ($self, $op, $scope_st, $scope_en) = @_;
+Carp::cluck() if !defined $op;
+    return ($scope_st, $scope_en) unless $op->flags & OPf_KIDS;
+
+    for (my $o=$op->first; $$o; $o=$o->sibling) {
+	if ($o->name =~ /^pad.v$/ && $o->private & OPpLVAL_INTRO) {
+	    my $s = int($self->padname_sv($o->targ)->NVX);
+	    my $e = $self->padname_sv($o->targ)->IVX;
+	    $scope_st = $s if !defined($scope_st) || $s < $scope_st;
+	    $scope_en = $e if !defined($scope_en) || $e > $scope_en;
+	}
+	elsif (is_state($o)) {
+	    my $c = $o->cop_seq;
+	    $scope_st = $c if !defined($scope_st) || $c < $scope_st;
+	    $scope_en = $c if !defined($scope_en) || $c > $scope_en;
+	}
+	elsif ($o->flags & OPf_KIDS) {
+	    ($scope_st, $scope_en) =
+		$self->find_scope($o, $scope_st, $scope_en)
 	}
     }
-    return undef;
+
+    return ($scope_st, $scope_en);
 }
 
 # Returns a list of subs which should be inserted before the COP
@@ -1146,8 +1202,8 @@ sub cop_subs {
     # If we have nephews, then our sequence number indicates
     # the cop_seq of the end of some sort of scope.
     if (class($op->sibling) ne "NULL" && $op->sibling->flags & OPf_KIDS
-	and my $ncop = $self->find_cop($op->sibling)) {
-	$seq = $ncop->cop_seq;
+	and my $nseq = $self->find_scope_st($op->sibling) ) {
+	$seq = $nseq;
     }
     $seq = $out_seq if defined($out_seq) && $out_seq < $seq;
     return $self->seq_subs($seq);
@@ -1158,6 +1214,7 @@ sub seq_subs {
     my @text;
 #push @text, "# ($seq)\n";
 
+    return "" if !defined $seq;
     while (scalar(@{$self->{'subs_todo'}})
 	   and $seq > $self->{'subs_todo'}[0][0]) {
 	push @text, $self->next_todo;
@@ -1172,7 +1229,6 @@ sub pp_nextstate {
     my($op, $cx) = @_;
     $self->{'curcop'} = $op;
     my @text;
-#push @text, "# ", $op->cop_seq, "\n";
     push @text, $self->cop_subs($op);
     push @text, $op->label . ": " if $op->label;
     my $stash = $op->stashpv;
@@ -2144,21 +2200,26 @@ sub pp_list {
     my($expr, @exprs);
     my $kid = $op->first->sibling; # skip pushmark
     my $lop;
-    my $local = "either"; # could be local(...) or my(...)
+    my $local = "either"; # could be local(...), my(...) or our(...)
     for ($lop = $kid; !null($lop); $lop = $lop->sibling) {
 	# This assumes that no other private flags equal 128, and that
 	# OPs that store things other than flags in their op_private,
 	# like OP_AELEMFAST, won't be immediate children of a list.
-	unless ($lop->private & OPpLVAL_INTRO or $lop->name eq "undef")
+	unless ($lop->private & OPpLVAL_INTRO
+		or $lop->name eq "undef")
 	{
 	    $local = ""; # or not
 	    last;
 	}
 	if ($lop->name =~ /^pad[ash]v$/) { # my()
-	    ($local = "", last) if $local eq "local";
+	    ($local = "", last) if $local eq "local" || $local eq "our";
 	    $local = "my";
+	} elsif ($op->name =~ /^(gv|rv2)[ash]v$/
+			&& $op->private & OPpOUR_INTRO) { # our()
+	    ($local = "", last) if $local eq "my" || $local eq "local";
+	    $local = "our";
 	} elsif ($lop->name ne "undef") { # local()
-	    ($local = "", last) if $local eq "my";
+	    ($local = "", last) if $local eq "my" || $local eq "our";
 	    $local = "local";
 	}
     }
@@ -2242,7 +2303,6 @@ sub loop_common {
     my $bare = 0;
     my $body;
     my $cond = undef;
-    my $out_seq = $self->{'curcop'}->cop_seq;;
     if ($kid->name eq "lineseq") { # bare or infinite loop 
 	if (is_state $kid->last) { # infinite
 	    $head = "while (1) "; # Can't use for(;;) if there's a continue
@@ -2314,7 +2374,7 @@ sub loop_common {
 	for (; $$state != $$cont; $state = $state->sibling) {
 	    push @states, $state;
 	}
-	$body = $self->lineseq(@states);
+	$body = $self->lineseq(undef, @states);
 	if (defined $cond and not is_scope $cont and $self->{'expand'} < 3) {
 	    $head = "for ($init; $cond; " . $self->deparse($cont, 1) .") ";
 	    $cont = "\cK";
@@ -2330,11 +2390,7 @@ sub loop_common {
 	$cont = "\cK";
 	$body = $self->deparse($body, 0);
     }
-    $body =~ s/;?$/;/;
-    $body .= "\n";
-    # If we have say C<{my $x=2; sub x{$x}}>, the sub must go inside
-    # the loop. So we insert any subs which are due here.
-    $body .= join"", $self->seq_subs($out_seq);
+    $body =~ s/;?$/;\n/;
 
     return $head . "{\n\t" . $body . "\b}" . $cont;
 }
@@ -2452,7 +2508,11 @@ sub pp_aelemfast {
     my $self = shift;
     my($op, $cx) = @_;
     my $gv = $self->gv_or_padgv($op);
-    return "\$" . $self->gv_name($gv) . "[" .
+    my $name = $self->gv_name($gv);
+    $name = $self->{'curstash'}."::$name"
+	if $name !~ /::/ && $self->lex_in_scope('@'.$name);
+
+    return "\$" . $name . "[" .
 		  ($op->private + $self->{'arybase'}) . "]";
 }
 
@@ -2526,6 +2586,13 @@ sub elem {
 	$array = $self->padany($array);
     } elsif (is_scope($array)) { # ${expr}[0]
 	$array = "{" . $self->deparse($array, 0) . "}";
+    } elsif ($array->name eq "gv") {
+	$array = $self->gv_name($self->gv_or_padgv($array));
+	if ($array !~ /::/) {
+	    my $prefix = ($left eq '[' ? '@' : '%');
+	    $array = $self->{curstash}.'::'.$array
+		if $self->lex_in_scope($prefix . $array);
+	}
     } elsif (is_scalar $array) { # $x[0], $$x[0], ...
 	$array = $self->deparse($array, 24);
     } else {
@@ -2839,7 +2906,7 @@ sub pp_entersub {
 	    return "$kid(" . $args . ")";
 	} elsif (defined $proto and $proto eq "") {
 	    return $kid;
-	} elsif (defined $proto and $proto eq "\$") {
+	} elsif (defined $proto and $proto eq "\$" and is_scalar($exprs[0])) {
 	    return $self->maybe_parens_func($kid, $args, $cx, 16);
 	} elsif (defined($proto) && $proto or $simple) {
 	    return $self->maybe_parens_func($kid, $args, $cx, 5);
@@ -3386,7 +3453,7 @@ sub pp_split {
     my($kid, @exprs, $ary, $expr);
     $kid = $op->first;
     if ($ {$kid->pmreplroot}) {
-	$ary = '@' . $self->gv_name($kid->pmreplroot);
+	$ary = $self->stash_variable('@', $self->gv_name($kid->pmreplroot));
     }
     for (; !null($kid); $kid = $kid->sibling) {
 	push @exprs, $self->deparse($kid, 6);
