@@ -2060,6 +2060,7 @@ t/pod/testp2pt.pl		Module to test Pod::PlainText for a given file
 t/pod/testpchk.pl		Module to test Pod::Checker for a given file
 t/pod/testpods/lib/Pod/Stuff.pm			Sample data for find.t
 t/README			Instructions for regression tests
+t/run/exit.t                    Test perl's exit status.
 t/run/runenv.t			Test if perl honors its environment variables.
 t/TEST				The regression tester
 t/TestInit.pm			Preamble library for core tests
