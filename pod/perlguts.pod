@@ -765,52 +765,71 @@ the various routines for the various magical types begin with C<magic_>.
 
 The current kinds of Magic Virtual Tables are:
 
-    mg_type  MGVTBL              Type of magical
+    mg_type  MGVTBL              Type of magic
     -------  ------              ----------------------------
-    \0       vtbl_sv             Regexp???
-    A        vtbl_amagic         Operator Overloading
-    a        vtbl_amagicelem     Operator Overloading
-    c        0                   Used in Operator Overloading
-    B        vtbl_bm             Boyer-Moore???
+    \0       vtbl_sv             Special scalar variable
+    A        vtbl_amagic         %OVERLOAD hash
+    a        vtbl_amagicelem     %OVERLOAD hash element
+    c        (none)              Holds overload table (AMT) on stash
+    B        vtbl_bm             Boyer-Moore (fast string search)
     E        vtbl_env            %ENV hash
     e        vtbl_envelem        %ENV hash element
-    g        vtbl_mglob          Regexp /g flag???
+    f        vtbl_fm             Formline ('compiled' format)
+    g        vtbl_mglob          m//g target / study()ed string
     I        vtbl_isa            @ISA array
     i        vtbl_isaelem        @ISA array element
-    L        0 (but sets RMAGICAL)     Perl Module/Debugger???
-    l        vtbl_dbline         Debugger?
+    k        vtbl_nkeys          scalar(keys()) lvalue
+    L        (none)              Debugger %_<filename 
+    l        vtbl_dbline         Debugger %_<filename element
     o        vtbl_collxfrm       Locale transformation
-    P        vtbl_pack           Tied Array or Hash
-    p        vtbl_packelem       Tied Array or Hash element
-    q        vtbl_packelem       Tied Scalar or Handle
-    S        vtbl_sig            Signal Hash
-    s        vtbl_sigelem        Signal Hash element
+    P        vtbl_pack           Tied array or hash
+    p        vtbl_packelem       Tied array or hash element
+    q        vtbl_packelem       Tied scalar or handle
+    S        vtbl_sig            %SIG hash
+    s        vtbl_sigelem        %SIG hash element
     t        vtbl_taint          Taintedness
-    U        vtbl_uvar	         ???
-    v        vtbl_vec	         Vector
-    x        vtbl_substr         Substring???
-    y        vtbl_itervar        Shadow "foreach" iterator variable
-    *        vtbl_glob           GV???
-    #        vtbl_arylen         Array Length
-    .        vtbl_pos	         $. scalar variable
-    ~        None                Used by certain extensions
+    U        vtbl_uvar           Available for use by extensions
+    v        vtbl_vec            vec() lvalue
+    x        vtbl_substr         substr() lvalue
+    y        vtbl_defelem        Shadow "foreach" iterator variable /
+                                  smart parameter vivification
+    *        vtbl_glob           GV (typeglob)
+    #        vtbl_arylen         Array length ($#ary)
+    .        vtbl_pos            pos() lvalue
+    ~        (none)              Available for use by extensions
 
 When an uppercase and lowercase letter both exist in the table, then the
 uppercase letter is used to represent some kind of composite type (a list
 or a hash), and the lowercase letter is used to represent an element of
 that composite type.
 
-The '~' magic type is defined specifically for use by extensions and
-will not be used by perl itself. Extensions can use ~ magic to 'attach'
-private information to variables (typically objects).  This is especially
-useful because there is no way for normal perl code to corrupt this
-private information (unlike using extra elements of a hash object).
+The '~' and 'U' magic types are defined specifically for use by
+extensions and will not be used by perl itself.  Extensions can use
+'~' magic to 'attach' private information to variables (typically
+objects).  This is especially useful because there is no way for
+normal perl code to corrupt this private information (unlike using
+extra elements of a hash object).
 
-Note that because multiple extensions may be using ~ magic it is
-important for extensions to take extra care with it.  Typically only
-using it on objects blessed into the same class as the extension
-is sufficient.  It may also be appropriate to add an I32 'signature'
-at the top of the private data area and check that.
+Similarly, 'U' magic can be used much like tie() to call a C function
+any time a scalar's value is used or changed.  The C<MAGIC>'s
+C<mg_ptr> field points to a C<ufuncs> structure:
+
+    struct ufuncs {
+        I32 (*uf_val)(IV, SV*);
+        I32 (*uf_set)(IV, SV*);
+        IV uf_index;
+    };
+
+When the SV is read from or written to, the C<uf_val> or C<uf_set>
+function will be called with C<uf_index> as the first arg and a
+pointer to the SV as the second.
+
+Note that because multiple extensions may be using '~' or 'U' magic,
+it is important for extensions to take extra care to avoid conflict.
+Typically only using the magic on objects blessed into the same class
+as the extension is sufficient.  For '~' magic, it may also be
+appropriate to add an I32 'signature' at the top of the private data
+area and check that.
 
 =head2 Finding Magic
 
@@ -3007,7 +3026,8 @@ Jeff Okamoto <F<okamoto@corp.hp.com>>
 
 With lots of help and suggestions from Dean Roehrich, Malcolm Beattie,
 Andreas Koenig, Paul Hudson, Ilya Zakharevich, Paul Marquess, Neil
-Bowers, Matthew Green, Tim Bunce, Spider Boardman, and Ulrich Pfeifer.
+Bowers, Matthew Green, Tim Bunce, Spider Boardman, Ulrich Pfeifer, and
+Stephen McCamant.
 
 API Listing by Dean Roehrich <F<roehrich@cray.com>>.
 
