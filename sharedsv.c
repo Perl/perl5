@@ -95,7 +95,7 @@ Perl_sharedsv_find(pTHX_ SV* sv)
             if(mg) {
 	        if(strcmp(mg->mg_ptr,"threads::shared"))
                     break;
-                ssv = (shared_sv*) SvIV(mg->mg_obj);
+                ssv = INT2PTR(shared_sv *, SvIV(mg->mg_obj));
 	        break;
              }
 	    
@@ -103,7 +103,7 @@ Perl_sharedsv_find(pTHX_ SV* sv)
              if(mg) {
                  SV* obj = SvTIED_obj(sv,mg);
 	         if(sv_derived_from(obj, "threads::shared"))
-		     ssv = (shared_sv*) SvIV(SvRV(obj));
+                     ssv = INT2PTR(shared_sv *, SvIV(SvRV(obj)));
                  break;
              }
 	}
