@@ -765,8 +765,8 @@ LIMIT specified
 
 =back
 
-=head2 perlfaq - frequently asked questions about Perl ($Date: 2004/10/05
-22:15:44 $)
+=head2 perlfaq - frequently asked questions about Perl ($Date: 2005/03/27
+07:21:21 $)
 
 =over 4
 
@@ -829,8 +829,8 @@ Interaction, perlfaq9 - Networking
 
 =back
 
-=head2 perlfaq1 - General Questions About Perl ($Revision: 1.15 $, $Date:
-2004/10/11 05:06:29 $)
+=head2 perlfaq1 - General Questions About Perl ($Revision: 1.17 $, $Date:
+2005/01/31 15:52:15 $)
 
 =over 4
 
@@ -844,7 +844,7 @@ Interaction, perlfaq9 - Networking
 
 =item Which version of Perl should I use?
 
-=item What are perl4 and perl5?
+=item What are perl4, perl5, or perl6?
 
 =item What is Ponie?
 
@@ -878,8 +878,8 @@ Scheme, or Tcl?
 
 =back
 
-=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.29 $,
-$Date: 2004/10/25 18:37:23 $)
+=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.31 $,
+$Date: 2005/01/31 15:54:44 $)
 
 =over 4
 
@@ -934,8 +934,8 @@ References, Tutorials, Task-Oriented, Special Topics
 
 =back
 
-=head2 perlfaq3 - Programming Tools ($Revision: 1.41 $, $Date: 2004/11/03
-22:45:32 $)
+=head2 perlfaq3 - Programming Tools ($Revision: 1.47 $, $Date: 2005/03/27
+07:21:22 $)
 
 =over 4
 
@@ -976,8 +976,6 @@ BBEdit Lite
 
 =item How can I use X or Tk with Perl?
 
-=item How can I generate simple menus without using CGI or Tk?
-
 =item How can I make my Perl program run faster?
 
 =item How can I make my Perl program take less memory?
@@ -1009,8 +1007,8 @@ stringification, Pass by reference, Tie large variables to disk
 
 =item Where can I learn about linking C with Perl? [h2xs, xsubpp]
 
-=item I've read perlembed, perlguts, etc., but I can't embed perl in
-my C program; what am I doing wrong?
+=item I've read perlembed, perlguts, etc., but I can't embed perl in my C
+program; what am I doing wrong?
 
 =item When I tried to run my script, I got this message. What does it mean?
 
@@ -1022,8 +1020,8 @@ my C program; what am I doing wrong?
 
 =back
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 1.56 $, $Date: 2004/11/03
-22:47:56 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 1.61 $, $Date: 2005/03/11
+16:27:53 $)
 
 =over 4
 
@@ -1241,8 +1239,8 @@ array of hashes or arrays?
 
 =back
 
-=head2 perlfaq5 - Files and Formats ($Revision: 1.31 $, $Date: 2004/02/07
-04:29:50 $)
+=head2 perlfaq5 - Files and Formats ($Revision: 1.35 $, $Date: 2005/01/21
+12:26:11 $)
 
 =over 4
 
@@ -1258,6 +1256,8 @@ line in the middle of a file/append to the beginning of a file?
 =item How do I count the number of lines in a file?
 
 =item How can I use Perl's C<-i> option from within a program?
+
+=item How can I copy a file?
 
 =item How do I make a temporary file name?
 
@@ -1337,8 +1337,8 @@ protected files?  Isn't this a bug in Perl?
 
 =back
 
-=head2 perlfaq6 - Regular Expressions ($Revision: 1.27 $, $Date: 2004/11/03
-22:52:16 $)
+=head2 perlfaq6 - Regular Expressions ($Revision: 1.31 $, $Date: 2005/03/27
+07:17:28 $)
 
 =over 4
 
@@ -1388,8 +1388,6 @@ file?
 
 =item Why does using $&, $`, or $' slow my program down?
 
-=item What good is C<\G> in a regular expression?
-
 =item Are Perl regexes DFAs or NFAs?  Are they POSIX compliant?
 
 =item What's wrong with using grep in a void context?
@@ -1404,8 +1402,8 @@ file?
 
 =back
 
-=head2 perlfaq7 - General Perl Language Issues ($Revision: 1.18 $, $Date:
-2004/11/03 22:54:08 $)
+=head2 perlfaq7 - General Perl Language Issues ($Revision: 1.22 $, $Date:
+2005/03/27 07:19:01 $)
 
 =over 4
 
@@ -1486,8 +1484,8 @@ methods?
 
 =back
 
-=head2 perlfaq8 - System Interaction ($Revision: 1.22 $, $Date: 2004/10/05
-22:13:49 $)
+=head2 perlfaq8 - System Interaction ($Revision: 1.23 $, $Date: 2005/01/03
+18:43:37 $)
 
 =over 4
 
@@ -1616,7 +1614,7 @@ search path?
 
 =back
 
-=head2 perlfaq9 - Networking ($Revision: 1.16 $, $Date: 2004/10/30 12:20:59
+=head2 perlfaq9 - Networking ($Revision: 1.19 $, $Date: 2005/01/21 12:14:12
 $)
 
 =over 4
@@ -1948,28 +1946,29 @@ import, index STR,SUBSTR,POSITION, index STR,SUBSTR, int EXPR, int, ioctl
 FILEHANDLE,FUNCTION,SCALAR, join EXPR,LIST, keys HASH, kill SIGNAL, LIST,
 last LABEL, last, lc EXPR, lc, lcfirst EXPR, lcfirst, length EXPR, length,
 link OLDFILE,NEWFILE, listen SOCKET,QUEUESIZE, local EXPR, localtime EXPR,
-lock THING, log EXPR, log, lstat EXPR, lstat, m//, map BLOCK LIST, map
-EXPR,LIST, mkdir FILENAME,MASK, mkdir FILENAME, msgctl ID,CMD,ARG, msgget
-KEY,FLAGS, msgrcv ID,VAR,SIZE,TYPE,FLAGS, msgsnd ID,MSG,FLAGS, my EXPR, my
-TYPE EXPR, my EXPR : ATTRS, my TYPE EXPR : ATTRS, next LABEL, next, no
-Module VERSION LIST, no Module VERSION, no Module LIST, no Module, oct
-EXPR, oct, open FILEHANDLE,EXPR, open FILEHANDLE,MODE,EXPR, open
-FILEHANDLE,MODE,EXPR,LIST, open FILEHANDLE,MODE,REFERENCE, open FILEHANDLE,
-opendir DIRHANDLE,EXPR, ord EXPR, ord, our EXPR, our EXPR TYPE, our EXPR :
-ATTRS, our TYPE EXPR : ATTRS, pack TEMPLATE,LIST, package NAMESPACE,
-package, pipe READHANDLE,WRITEHANDLE, pop ARRAY, pop, pos SCALAR, pos,
-print FILEHANDLE LIST, print LIST, print, printf FILEHANDLE FORMAT, LIST,
-printf FORMAT, LIST, prototype FUNCTION, push ARRAY,LIST, q/STRING/,
-qq/STRING/, qr/STRING/, qx/STRING/, qw/STRING/, quotemeta EXPR, quotemeta,
-rand EXPR, rand, read FILEHANDLE,SCALAR,LENGTH,OFFSET, read
-FILEHANDLE,SCALAR,LENGTH, readdir DIRHANDLE, readline EXPR, readlink EXPR,
-readlink, readpipe EXPR, recv SOCKET,SCALAR,LENGTH,FLAGS, redo LABEL, redo,
-ref EXPR, ref, rename OLDNAME,NEWNAME, require VERSION, require EXPR,
-require, reset EXPR, reset, return EXPR, return, reverse LIST, rewinddir
-DIRHANDLE, rindex STR,SUBSTR,POSITION, rindex STR,SUBSTR, rmdir FILENAME,
-rmdir, s///, scalar EXPR, seek FILEHANDLE,POSITION,WHENCE, seekdir
-DIRHANDLE,POS, select FILEHANDLE, select, select RBITS,WBITS,EBITS,TIMEOUT,
-semctl ID,SEMNUM,CMD,ARG, semget KEY,NSEMS,FLAGS, semop KEY,OPSTRING, send
+localtime, lock THING, log EXPR, log, lstat EXPR, lstat, m//, map BLOCK
+LIST, map EXPR,LIST, mkdir FILENAME,MASK, mkdir FILENAME, msgctl
+ID,CMD,ARG, msgget KEY,FLAGS, msgrcv ID,VAR,SIZE,TYPE,FLAGS, msgsnd
+ID,MSG,FLAGS, my EXPR, my TYPE EXPR, my EXPR : ATTRS, my TYPE EXPR : ATTRS,
+next LABEL, next, no Module VERSION LIST, no Module VERSION, no Module
+LIST, no Module, oct EXPR, oct, open FILEHANDLE,EXPR, open
+FILEHANDLE,MODE,EXPR, open FILEHANDLE,MODE,EXPR,LIST, open
+FILEHANDLE,MODE,REFERENCE, open FILEHANDLE, opendir DIRHANDLE,EXPR, ord
+EXPR, ord, our EXPR, our EXPR TYPE, our EXPR : ATTRS, our TYPE EXPR :
+ATTRS, pack TEMPLATE,LIST, package NAMESPACE, package, pipe
+READHANDLE,WRITEHANDLE, pop ARRAY, pop, pos SCALAR, pos, print FILEHANDLE
+LIST, print LIST, print, printf FILEHANDLE FORMAT, LIST, printf FORMAT,
+LIST, prototype FUNCTION, push ARRAY,LIST, q/STRING/, qq/STRING/,
+qr/STRING/, qx/STRING/, qw/STRING/, quotemeta EXPR, quotemeta, rand EXPR,
+rand, read FILEHANDLE,SCALAR,LENGTH,OFFSET, read FILEHANDLE,SCALAR,LENGTH,
+readdir DIRHANDLE, readline EXPR, readlink EXPR, readlink, readpipe EXPR,
+recv SOCKET,SCALAR,LENGTH,FLAGS, redo LABEL, redo, ref EXPR, ref, rename
+OLDNAME,NEWNAME, require VERSION, require EXPR, require, reset EXPR, reset,
+return EXPR, return, reverse LIST, rewinddir DIRHANDLE, rindex
+STR,SUBSTR,POSITION, rindex STR,SUBSTR, rmdir FILENAME, rmdir, s///, scalar
+EXPR, seek FILEHANDLE,POSITION,WHENCE, seekdir DIRHANDLE,POS, select
+FILEHANDLE, select, select RBITS,WBITS,EBITS,TIMEOUT, semctl
+ID,SEMNUM,CMD,ARG, semget KEY,NSEMS,FLAGS, semop KEY,OPSTRING, send
 SOCKET,MSG,FLAGS,TO, send SOCKET,MSG,FLAGS, setpgrp PID,PGRP, setpriority
 WHICH,WHO,PRIORITY, setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL, shift ARRAY,
 shift, shmctl ID,CMD,ARG, shmget KEY,SIZE,FLAGS, shmread ID,VAR,POS,SIZE,
@@ -2260,7 +2259,7 @@ OS/2, MS-DOS, Win95/NT, Macintosh, VMS
 B<-0>[I<octal/hexadecimal>], B<-A [I<assertions>]>, B<-a>, B<-C
 [I<number/list>]>, B<-c>, B<-d>, B<-dt>, B<-d:>I<foo[=bar,baz]>,
 B<-dt:>I<foo[=bar,baz]>, B<-D>I<letters>, B<-D>I<number>, B<-e>
-I<commandline>, B<-F>I<pattern>, B<-h>, B<-i>[I<extension>],
+I<commandline>, B<-f>, B<-F>I<pattern>, B<-h>, B<-i>[I<extension>],
 B<-I>I<directory>, B<-l>[I<octnum>], B<-m>[B<->]I<module>,
 B<-M>[B<->]I<module>, B<-M>[B<->]I<'module ...'>,
 B<-[mM]>[B<->]I<module=arg[,arg]...>, B<-n>, B<-p>, B<-P>, B<-s>, B<-S>,
@@ -2418,13 +2417,13 @@ $OS_ERROR, $ERRNO, $!, %!, $EXTENDED_OS_ERROR, $^E, $EVAL_ERROR, $@,
 $PROCESS_ID, $PID, $$, $REAL_USER_ID, $UID, $<, $EFFECTIVE_USER_ID, $EUID,
 $>, $REAL_GROUP_ID, $GID, $(, $EFFECTIVE_GROUP_ID, $EGID, $),
 $PROGRAM_NAME, $0, $[, $], $COMPILING, $^C, $DEBUGGING, $^D,
-$SYSTEM_FD_MAX, $^F, $^H, %^H, $INPLACE_EDIT, $^I, $^M, $OSNAME, $^O,
-${^OPEN}, $PERLDB, $^P, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
-0x100, 0x200, 0x400, $LAST_REGEXP_CODE_RESULT, $^R,
-$EXCEPTIONS_BEING_CAUGHT, $^S, $BASETIME, $^T, ${^TAINT}, ${^UNICODE},
-$PERL_VERSION, $^V, $WARNING, $^W, ${^WARNING_BITS}, $EXECUTABLE_NAME, $^X,
-ARGV, $ARGV, @ARGV, ARGVOUT, @F, @INC, @_, %INC, %ENV, $ENV{expr}, %SIG,
-$SIG{expr}
+${^RE_DEBUG_FLAGS}, ${^RE_TRIE_MAXBUF}, $SYSTEM_FD_MAX, $^F, $^H, %^H,
+$INPLACE_EDIT, $^I, $^M, $OSNAME, $^O, ${^OPEN}, $PERLDB, $^P, 0x01, 0x02,
+0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x100, 0x200, 0x400,
+$LAST_REGEXP_CODE_RESULT, $^R, $EXCEPTIONS_BEING_CAUGHT, $^S, $BASETIME,
+$^T, ${^TAINT}, ${^UNICODE}, $PERL_VERSION, $^V, $WARNING, $^W,
+${^WARNING_BITS}, $EXECUTABLE_NAME, $^X, ARGV, $ARGV, @ARGV, ARGVOUT, @F,
+@INC, @_, %INC, %ENV, $ENV{expr}, %SIG, $SIG{expr}
 
 =item Error Indicators
 
@@ -4515,6 +4514,8 @@ A, p, d, s, n, r, f, M, o, x, m, X, E, b
 
 =item Pointer-To-Integer and Integer-To-Pointer
 
+=item Exception Handling
+
 =item Source Documentation
 
 =item Backwards compatibility
@@ -4728,6 +4729,10 @@ cv_const_sv, newCONSTSUB, newXS
 
 pad_sv
 
+=item Simple Exception Handling Macros
+
+dXCPT, XCPT_CATCH, XCPT_RETHROW, XCPT_TRY_END, XCPT_TRY_START
+
 =item Stack Manipulation Macros
 
 dMARK, dORIGMARK, dSP, EXTEND, MARK, mPUSHi, mPUSHn, mPUSHp, mPUSHu,
@@ -4744,20 +4749,20 @@ svtype, SVt_IV, SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG
 
 =item SV Manipulation Functions
 
-get_sv, looks_like_number, newRV_inc, newRV_noinc, newSV, NEWSV, newSViv,
+get_sv, looks_like_number, newRV_inc, newRV_noinc, NEWSV, newSV, newSViv,
 newSVnv, newSVpv, newSVpvf, newSVpvn, newSVpvn_share, newSVrv, newSVsv,
 newSVuv, SvCUR, SvCUR_set, SvEND, SvGROW, SvIOK, SvIOKp, SvIOK_notUV,
 SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only_UV, SvIOK_UV, SvIsCOW,
 SvIsCOW_shared_hash, SvIV, SvIVX, SvIVx, SvIV_nomg, SvLEN, SvNIOK, SvNIOKp,
-SvNIOK_off, SvNOK, SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVx,
-SvNVX, SvOK, SvOOK, SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only,
+SvNIOK_off, SvNOK, SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVX,
+SvNVx, SvOK, SvOOK, SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only,
 SvPOK_only_UTF8, SvPV, SvPVbyte, SvPVbytex, SvPVbytex_force,
 SvPVbyte_force, SvPVbyte_nolen, SvPVutf8, SvPVutf8x, SvPVutf8x_force,
 SvPVutf8_force, SvPVutf8_nolen, SvPVX, SvPVx, SvPV_force, SvPV_force_nomg,
 SvPV_nolen, SvPV_nomg, SvREFCNT, SvREFCNT_dec, SvREFCNT_inc, SvROK,
 SvROK_off, SvROK_on, SvRV, SvSTASH, SvTAINT, SvTAINTED, SvTAINTED_off,
 SvTAINTED_on, SvTRUE, SvTYPE, SvUOK, SvUPGRADE, SvUTF8, SvUTF8_off,
-SvUTF8_on, SvUV, SvUVx, SvUVX, SvUV_nomg, SvVOK, sv_2bool, sv_2cv, sv_2io,
+SvUTF8_on, SvUV, SvUVX, SvUVx, SvUV_nomg, SvVOK, sv_2bool, sv_2cv, sv_2io,
 sv_2iv_flags, sv_2mortal, sv_2nv, sv_2pvbyte, sv_2pvbyte_nolen, sv_2pvutf8,
 sv_2pvutf8_nolen, sv_2pv_flags, sv_2pv_nolen, sv_2uv_flags, sv_backoff,
 sv_bless, sv_catpv, sv_catpvf, sv_catpvf_mg, sv_catpvn, sv_catpvn_flags,
@@ -4834,7 +4839,7 @@ PL_rs
 
 =item GV Functions
 
-is_gv_magical
+is_gv_magical, is_gv_magical_sv
 
 =item IO Functions
 
@@ -5051,11 +5056,12 @@ t/cmd t/run t/io t/op, t/lib ext lib
 coretest, test.deparse, test.taintwarn, minitest, test.valgrind
 check.valgrind utest.valgrind ucheck.valgrind, test.third check.third
 utest.third ucheck.third, test.torture torturetest, utest ucheck test.utf8
-check.utf8, minitest.utf16 test.utf16, test_harness
+check.utf8, minitest.utf16 test.utf16, test_harness, test-notty test_notty
 
 =item Running tests by hand
 
-PERL_CORE=1, PERL_DESTRUCT_LEVEL=2, PERL, PERL_SKIP_TTY_TEST
+-v, -torture, -re=PATTERN, -re LIST OF PATTERNS, PERL_CORE=1,
+PERL_DESTRUCT_LEVEL=2, PERL, PERL_SKIP_TTY_TEST
 
 =back
 
@@ -5167,8 +5173,6 @@ I<The Road goes ever on and on, down from the door where it began.>
 =over 4
 
 =item regexp optimiser optional
-
-=item common suffices/prefices in regexps (trie optimization)
 
 =back
 
@@ -5337,13 +5341,51 @@ B<-V>
 
 =item Incompatible Changes
 
+=over 4
+
+=item Packing and UTF-8 strings
+
+=item Miscellaneous
+
+=back
+
 =item Core Enhancements
+
+=over 4
+
+=item Malloc wrapping
+
+=item Unicode Character Database 4.0.1
+
+=item suidperl less insecure
+
+=item PERLIO_DEBUG
+
+=item Formats
+
+=item Unicode Character Classes
+
+=item Byte-order modifiers for pack() and unpack()
+
+=item Byte count feature in pack()
+
+=item New variables
+
+=back
 
 =item Modules and Pragmata
 
-=item Utility Changes
+=over 4
 
-=item Documentation
+=item New modules
+
+=item Updated And Improved Modules and Pragmata
+
+B::Concise, Socket, Sys::Syslog, threads
+
+=back
+
+=item Utility Changes
 
 =item Performance Enhancements
 
@@ -5357,11 +5399,7 @@ B<-V>
 
 =item Known Problems
 
-=over 4
-
-=item Platform Specific Problems
-
-=back
+=item Plans for the next release
 
 =item Reporting Bugs
 
@@ -5377,13 +5415,51 @@ B<-V>
 
 =item Incompatible Changes
 
+=over 4
+
+=item Packing and UTF-8 strings
+
+=item Miscellaneous
+
+=back
+
 =item Core Enhancements
+
+=over 4
+
+=item Malloc wrapping
+
+=item Unicode Character Database 4.0.1
+
+=item suidperl less insecure
+
+=item PERLIO_DEBUG
+
+=item Formats
+
+=item Unicode Character Classes
+
+=item Byte-order modifiers for pack() and unpack()
+
+=item Byte count feature in pack()
+
+=item New variables
+
+=back
 
 =item Modules and Pragmata
 
-=item Utility Changes
+=over 4
 
-=item Documentation
+=item New modules
+
+=item Updated And Improved Modules and Pragmata
+
+B::Concise, Socket, Sys::Syslog, threads
+
+=back
+
+=item Utility Changes
 
 =item Performance Enhancements
 
@@ -5397,11 +5473,7 @@ B<-V>
 
 =item Known Problems
 
-=over 4
-
-=item Platform Specific Problems
-
-=back
+=item Plans for the next release
 
 =item Reporting Bugs
 
@@ -8092,9 +8164,20 @@ I<dlsym()>, Win9x and C<d_eofnblk>, Compiler/Preprocessor defines
 
 =item C<fork()> failures in io_* tests
 
+=back
+
+=item Specific features of the Cygwin port
+
+=over 4
+
 =item Script Portability on Cygwin
 
-Pathnames, Text/Binary, PerlIO, F<.exe>, C<chown()>, Miscellaneous
+Pathnames, Text/Binary, PerlIO, F<.exe>, cygwin vs. windows process ids,
+C<chown()>, Miscellaneous
+
+=item Prebuilt methods:
+
+C<Cwd::cwd>, C<Cygwin::pid_to_winpid>, C<Cygwin::winpid_to_pid>
 
 =back
 
@@ -9240,7 +9323,8 @@ Extensions, Notes on 64-bit Windows
 
 Gary Ng E<lt>71564.1743@CompuServe.COME<gt>, Gurusamy Sarathy
 E<lt>gsar@activestate.comE<gt>, Nick Ing-Simmons
-E<lt>nick@ing-simmons.netE<gt>
+E<lt>nick@ing-simmons.netE<gt>, Jan Dubois E<lt>jand@activestate.comE<gt>,
+Steve Hay E<lt>steve.hay@uk.radan.comE<gt>
 
 =item SEE ALSO
 
@@ -9745,6 +9829,45 @@ literals in regex that are longer than 127 bytes, EBCDIC, format
 =item HISTORY
 
 =item SEE ALSO
+
+=back
+
+=head2 encoding::warnings - Warn on implicit encoding conversions
+
+=over 4
+
+=item VERSION
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Overview of the problem
+
+=item Detecting the problem
+
+=item Solving the problem
+
+Upgrade both sides to unicode-strings, Downgrade both sides to
+byte-strings, Specify the encoding for implicit byte-string upgrading,
+PerlIO layers for B<STDIN> and B<STDOUT>, Literal conversions, Implicit
+upgrading for byte-strings
+
+=back
+
+=item CAVEATS
+
+=back
+
+=over 4
+
+=item SEE ALSO
+
+=item AUTHORS
+
+=item COPYRIGHT
 
 =back
 
@@ -11073,6 +11196,12 @@ charset([$charset]);, $flag = autoEscape([$flag]);
 
 B<application/x-www-form-urlencoded>, B<multipart/form-data>
 
+=item FORM ELEMENTS
+
+B<-name>, B<-value>, B<-values>, B<-tabindex>, B<-id>, B<-override>,
+B<-onChange>, B<-onFocus>, B<-onBlur>, B<-onMouseOver>, B<-onMouseOut>,
+B<-onSelect>
+
 =item CREATING A TEXT FIELD
 
 B<Parameters>
@@ -11136,6 +11265,11 @@ B<-name>, B<-value>, B<-path>, B<-domain>, B<-expires>, B<-secure>
 1. Create a <Frameset> document, 2. Specify the destination for the
 document in the HTTP header, 3. Specify the destination for the document in
 the <form> tag
+
+=item SUPPORT FOR JAVASCRIPT
+
+B<onLoad>, B<onUnload>, B<onSubmit>, B<onClick>, B<onChange>, B<onFocus>,
+B<onBlur>, B<onSelect>, B<onMouseOver>, B<onMouseOut>
 
 =item LIMITED SUPPORT FOR CASCADING STYLE SHEETS
 
@@ -12004,6 +12138,8 @@ abs_path, realpath, fast_abs_path
 
 =item AUTHOR
 
+=item COPYRIGHT
+
 =item SEE ALSO
 
 =back
@@ -12489,9 +12625,25 @@ $md5->add_bits($bitstring), $md5->digest, $md5->hexdigest, $md5->b64digest
 
 =over 4
 
-=item SYNPOSIS
+=item SYNOPSIS
 
 =item DESCRIPTION
+
+=item SEE ALSO
+
+=back
+
+=head2 Digest::file - Calculate digests of files
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+digest_file( $file, $algorithm, [$arg,...] ), digest_file_hex( $file,
+$algorithm, [$arg,...] ), digest_file_base64( $file, $algorithm, [$arg,...]
+)
 
 =item SEE ALSO
 
@@ -13559,28 +13711,7 @@ IV, UV, NV, PV, PVN, SV, YES, NO, UNDEF
 
 =back
 
-C_stringify NAME
-
-perl_stringify NAME
-
 constant_types
-
-memEQ_clause NAME, CHECKED_AT, INDENT
-
-assign INDENT, TYPE, PRE, POST, VALUE..
-
-return_clause
-
-switch_clause INDENT, NAMELEN, ITEMHASH, ITEM..
-
-params WHAT
-
-dump_names
-
-dogfood
-
-C_constant, name, type, value, macro, default, pre, post, def_pre =item
-def_post, utf8
 
 XS_constant PACKAGE, TYPES, SUBNAME, C_SUBNAME
 
@@ -13592,6 +13723,82 @@ WriteConstants ATTRIBUTE =E<gt> VALUE [, ...], NAME, DEFAULT_TYPE,
 BREAKOUT_AT, NAMES, C_FILE, XS_FILE, SUBNAME, C_SUBNAME
 
 =over 4
+
+=item AUTHOR
+
+=back
+
+=head2 ExtUtils::Constant::Base - base class for ExtUtils::Constant objects
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item USAGE
+
+=back
+
+header
+
+memEQ_clause args_hashref
+
+dump_names arg_hashref, ITEM..
+
+assign arg_hashref, VALUE..
+
+return_clause arg_hashref, ITEM
+
+switch_clause arg_hashref, NAMELEN, ITEMHASH, ITEM..
+
+params WHAT
+
+dogfood arg_hashref, ITEM..
+
+C_constant arg_hashref, ITEM.., name, type, value, macro, default, pre,
+post, def_pre, def_post, utf8, weight
+
+=over 4
+
+=item BUGS
+
+=item AUTHOR
+
+=back
+
+=head2 ExtUtils::Constant::Utils - helper functions for ExtUtils::Constant
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item USAGE
+
+C_stringify NAME
+
+=back
+
+perl_stringify NAME
+
+=over 4
+
+=item AUTHOR
+
+=back
+
+=head2 ExtUtils::Constant::XS, ExtUtils::Constant::Base - base class for
+ExtUtils::Constant objects
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item BUGS
 
 =item AUTHOR
 
@@ -14878,15 +15085,25 @@ $dont_use_nlink, symlinks
 
 =item DESCRIPTION
 
+=over 4
+
+=item META CHARACTERS
+
+=item POSIX FLAGS
+
 C<GLOB_ERR>, C<GLOB_LIMIT>, C<GLOB_MARK>, C<GLOB_NOCASE>, C<GLOB_NOCHECK>,
 C<GLOB_NOSORT>, C<GLOB_BRACE>, C<GLOB_NOMAGIC>, C<GLOB_QUOTE>,
 C<GLOB_TILDE>, C<GLOB_CSH>, C<GLOB_ALPHASORT>
+
+=back
 
 =item DIAGNOSTICS
 
 C<GLOB_NOSPACE>, C<GLOB_ABEND>
 
 =item NOTES
+
+=item SEE ALSO
 
 =item AUTHOR
 
@@ -14924,6 +15141,8 @@ splitdir, catpath(), abs2rel, rel2abs()
 
 =item AUTHOR
 
+=item COPYRIGHT
+
 =back
 
 =head2 File::Spec::Cygwin - methods for Cygwin file specs
@@ -14942,6 +15161,12 @@ file_name_is_absolute
 
 tmpdir (override)
 
+=over 4
+
+=item COPYRIGHT
+
+=back
+
 =head2 File::Spec::Epoc - methods for Epoc file specs
 
 =over 4
@@ -14950,13 +15175,15 @@ tmpdir (override)
 
 =item DESCRIPTION
 
-=item AUTHORS
-
 =back
 
 canonpath()
 
 =over 4
+
+=item AUTHOR
+
+=item COPYRIGHT
 
 =item SEE ALSO
 
@@ -14975,6 +15202,8 @@ canonpath()
 =item Exports
 
 =back
+
+=item COPYRIGHT
 
 =item SEE ALSO
 
@@ -15026,6 +15255,8 @@ rel2abs
 
 =item AUTHORS
 
+=item COPYRIGHT
+
 =item SEE ALSO
 
 =back
@@ -15039,6 +15270,8 @@ rel2abs
 =item DESCRIPTION
 
 tmpdir, splitpath
+
+=item COPYRIGHT
 
 =back
 
@@ -15092,6 +15325,8 @@ abs2rel
 rel2abs()
 
 =over 4
+
+=item COPYRIGHT
 
 =item SEE ALSO
 
@@ -15151,6 +15386,8 @@ rel2abs (override)
 
 =over 4
 
+=item COPYRIGHT
+
 =item SEE ALSO
 
 =back
@@ -15187,6 +15424,8 @@ catpath
 
 =over 4
 
+=item COPYRIGHT
+
 =item SEE ALSO
 
 =back
@@ -15205,13 +15444,15 @@ catpath
 
 =over 4
 
-=item OO INTERFACE
+=item OBJECT-ORIENTED INTERFACE
 
 B<new>
 
 =back
 
 B<filename>
+
+B<unlink_on_destroy>
 
 B<DESTROY>
 
@@ -15269,6 +15510,8 @@ B<cmpstat>
 
 B<unlink1>
 
+B<cleanup>
+
 =over 4
 
 =item PACKAGE VARIABLES
@@ -15279,6 +15522,8 @@ B<safe_level>, STANDARD, MEDIUM, HIGH
 
 TopSystemUID
 
+B<$KEEP_ALL>, B<$DEBUG>
+
 =over 4
 
 =item WARNING
@@ -15286,6 +15531,10 @@ TopSystemUID
 =over 4
 
 =item Temporary files and NFS
+
+=item Forking
+
+=item BINMODE
 
 =back
 
@@ -15917,6 +16166,8 @@ new ( FILENAME [,MODE [,PERMS]] ), new_tmpfile
 open( FILENAME [,MODE [,PERMS]] ), open( FILENAME, IOLAYERS ), binmode(
 [LAYER] )
 
+=item NOTE
+
 =item SEE ALSO
 
 =item HISTORY
@@ -16155,6 +16406,8 @@ new ( FILENAME [,MODE [,PERMS]] ), new_tmpfile
 
 open( FILENAME [,MODE [,PERMS]] ), open( FILENAME, IOLAYERS ), binmode(
 [LAYER] )
+
+=item NOTE
 
 =item SEE ALSO
 
@@ -17490,6 +17743,26 @@ Storable use
 =over 4
 
 =item DESCRIPTION
+
+=back
+
+=head2 Module::CoreList - what modules shipped with versions of perl
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CAVEATS
+
+=item HISTORY
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=item SEE ALSO
 
 =back
 
@@ -19668,8 +19941,8 @@ documentation
 
 =item ARGUMENTS
 
-C<-message>, C<-msg>, C<-exitval>, C<-verbose>, C<-output>, C<-input>,
-C<-pathlist>
+C<-message>, C<-msg>, C<-exitval>, C<-verbose>, C<-section>, C<-output>,
+C<-input>, C<-pathlist>
 
 =item DESCRIPTION
 
@@ -20324,17 +20597,11 @@ B<_my_exit>
 
 =over 4
 
-=item The test script output
-
-B<'1..M'>, B<'ok', 'not ok'.  Ok?>, B<test numbers>, B<test names>,
-B<Skipping tests>, B<Todo tests>, B<Bail out!>, B<Comments>, B<Anything
-else>
-
 =item Taint mode
 
 =item Configuration variables.
 
-B<$Test::Harness::Verbose>, B<$Test::Harness::switches>
+C<$Test::Harness::Verbose>, C<$Test::Harness::switches>
 
 =item Failure
 
@@ -20374,16 +20641,12 @@ C<All tests successful.\nFiles=%d,  Tests=%d, %s>, C<FAILED tests
 
 C<HARNESS_ACTIVE>, C<HARNESS_COLUMNS>, C<HARNESS_COMPILE_TEST>,
 C<HARNESS_DEBUG>, C<HARNESS_FILELEAK_IN_DIR>, C<HARNESS_IGNORE_EXITCODE>,
-C<HARNESS_NOTTY>, C<HARNESS_OK_SLOW>, C<HARNESS_PERL>,
-C<HARNESS_PERL_SWITCHES>, C<HARNESS_VERBOSE>
+C<HARNESS_NOTTY>, C<HARNESS_PERL>, C<HARNESS_PERL_SWITCHES>,
+C<HARNESS_VERBOSE>
 
 =item EXAMPLE
 
 =item SEE ALSO
-
-=item AUTHORS
-
-=item LICENSE
 
 =item TODO
 
@@ -20469,7 +20732,7 @@ C<HARNESS_PERL_SWITCHES>, C<HARNESS_VERBOSE>
 
 =over 4
 
-=item C<analyze>
+=item $strap->analyze( $name, \@output_lines )
 
 =back
 
@@ -20569,21 +20832,43 @@ C<HARNESS_PERL_SWITCHES>, C<HARNESS_VERBOSE>
 
 =item Results
 
-=over 4
-
-=item C<_detailize>
-
-=back
-
-=back
-
-=over 4
-
 =item EXAMPLES
 
 =item AUTHOR
 
 =item SEE ALSO
+
+=back
+
+=head2 Test::Harness::TAP - Documentation for the TAP format
+
+=over 4
+
+=item SYNOPSIS
+
+=item TERMINOLOGY
+
+=item THE TAP FORMAT
+
+=over 4
+
+=item The test script output
+
+B<"1..M">, B<'ok', 'not ok'.  Ok?>, B<test numbers>, B<test labels>,
+B<Skipping tests>, B<Todo tests>, B<Bail out!>, B<Comments>, B<Anything
+else>
+
+=back
+
+=item DESCRIPTION
+
+=item RATIONALE
+
+=item ACKNOWLEDGEMENTS
+
+=item AUTHORS
+
+=item COPYRIGHT
 
 =back
 
@@ -21201,11 +21486,11 @@ timers
 
 =item DESCRIPTION
 
-gettimeofday (), usleep ( $useconds ), ualarm ( $useconds [,
-$interval_useconds ] ), tv_interval, time (), sleep ( $floating_seconds ),
-alarm ( $floating_seconds [, $interval_floating_seconds ] ), setitimer (
-$which, $floating_seconds [, $interval_floating_seconds ] ), getitimer (
-$which )
+gettimeofday (), usleep ( $useconds ), nanosleep ( $nanoseconds ), ualarm (
+$useconds [, $interval_useconds ] ), tv_interval, time (), sleep (
+$floating_seconds ), alarm ( $floating_seconds [,
+$interval_floating_seconds ] ), setitimer ( $which, $floating_seconds [,
+$interval_floating_seconds ] ), getitimer ( $which )
 
 =item EXAMPLES
 

@@ -107,6 +107,10 @@ Produce verbose warning diagnostics
 
 Allows you to write your script in non-ascii or non-utf8
 
+=item encoding::warnings
+
+Warn on implicit encoding conversions
+
 =item fields
 
 Compile-time class fields
@@ -421,6 +425,10 @@ Perl interface to the MD5 Algorithm
 
 Digest base class
 
+=item Digest::file
+
+Calculate digests of files
+
 =item DirHandle
 
 Supply object methods for directory handles
@@ -557,6 +565,18 @@ Commands for the MM's to use in Makefiles
 
 Generate XS code to import C header constants
 
+=item ExtUtils::Constant::Base
+
+Base class for ExtUtils::Constant objects
+
+=item ExtUtils::Constant::Utils
+
+Helper functions for ExtUtils::Constant
+
+=item ExtUtils::Constant::XS
+
+Base class for ExtUtils::Constant objects
+
 =item ExtUtils::Embed
 
 Utilities for embedding Perl in C/C++ applications
@@ -595,7 +615,7 @@ DOS specific subclass of ExtUtils::MM_Unix
 
 =item ExtUtils::MM_MacOS
 
-Methods to override UN*X behaviour in ExtUtils::MakeMaker
+Once produced Makefiles for MacOS Classic
 
 =item ExtUtils::MM_NW5
 
@@ -797,6 +817,10 @@ Compare 8-bit scalar data according to the current locale
 
 Functions for dealing with RFC3066-style language tags
 
+=item I18N::LangTags::Detect
+
+Detect the user's language preferences
+
 =item I18N::LangTags::List
 
 Tags and names for human languages
@@ -927,7 +951,7 @@ Emulate low-level math with BigInt code
 
 =item Math::BigRat
 
-Arbitrarily big rational numbers
+Arbitrary big rational numbers
 
 =item Math::Complex
 
@@ -968,6 +992,10 @@ Glue to provide EXISTS for SDBM_File for Storable use
 =item Memoize::Storable
 
 Store Memoized data in Storable database
+
+=item Module::CoreList
+
+What modules shipped with versions of perl
 
 =item NDBM_File
 
@@ -1269,6 +1297,10 @@ Internal Test::Harness Iterator
 
 Detailed analysis of test results
 
+=item Test::Harness::TAP
+
+Documentation for the TAP format
+
 =item Test::More
 
 Yet another framework for writing test scripts
@@ -1400,10 +1432,6 @@ By-name interface to Perl's built-in getgr*() functions
 =item User::pwent
 
 By-name interface to Perl's built-in getpw*() functions
-
-=item Win32
-
-Interfaces to some Win32 API Functions
 
 =item XS::APItest
 
