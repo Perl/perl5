@@ -271,15 +271,15 @@ to rewrite this function as
 
     int
     foo(sv)
-	SV *addr
-    PREINIT:
-	STRLEN len;
-	char *s;
-    CODE:
-	s = SvPV(sv,len);
-	RETVAL = foo(s, len);
-    OUTPUT:
-	RETVAL
+	    SV *addr
+	PREINIT:
+	    STRLEN len;
+	    char *s;
+	CODE:
+	    s = SvPV(sv,len);
+	    RETVAL = foo(s, len);
+	OUTPUT:
+	    RETVAL
 
 or alternately
 
@@ -393,7 +393,8 @@ To install C::Scan, execute
    perl -MCPAN -e "install C::Scan"
 EOD
   }
-} elsif ($opt_o or $opt_F) {
+}
+elsif ($opt_o or $opt_F) {
   warn <<EOD;
 Options -o and -F do not make sense without -x.
 EOD
@@ -410,10 +411,11 @@ if( @path_h ){
       # XXXX This is not equivalent to what the older version did:
       #		it was looking at $hadsys header-file per header-file...
       my($hadsys) = grep s!^sys/!!i , @path_h;
-      @paths = qw( Sys\$Library VAXC$Include );
+      @paths = qw( Sys$Library VAXC$Include );
       push @paths, ($hadsys ? 'GNU_CC_Include[vms]' : 'GNU_CC_Include[000000]');
       push @paths, qw( DECC$Library_Include DECC$System_Include );
-    } else {
+    }
+    else {
       @paths = (File::Spec->curdir(), $Config{usrinc},
 		(split ' ', $Config{locincpth}), '/usr/include');
     }
@@ -507,7 +509,8 @@ else {
 
 if ($opt_O) {
 	warn "Overwriting existing $ext$modpname!!!\n" if -e $modpname;
-} else {
+}
+else {
 	die "Won't overwrite existing $ext$modpname\n" if -e $modpname;
 }
 if( $nested ){
@@ -712,17 +715,18 @@ sub AUTOLOAD {
 	    goto &AutoLoader::AUTOLOAD;
 	}
 	else {
-		croak "Your vendor has not defined $module macro \$constname";
+	    croak "Your vendor has not defined $module macro \$constname";
 	}
     }
-    {  no strict 'refs';
-       # Next line doesn't help with older Perls; in newers: no such warnings
-       # local \$^W = 0;		# Prototype mismatch: sub XXX vs ()
-       if (\$] >= 5.00561) {	# Fixed between 5.005_53 and 5.005_61
-	 *\$AUTOLOAD = sub () { \$val };
-       } else {
-	 *\$AUTOLOAD = sub { \$val };
-       }
+    {
+	no strict 'refs';
+	# Fixed between 5.005_53 and 5.005_61
+	if (\$] >= 5.00561) {
+	    *\$AUTOLOAD = sub () { \$val };
+	}
+	else {
+	    *\$AUTOLOAD = sub { \$val };
+	}
     }
     goto &\$AUTOLOAD;
 }
@@ -810,7 +814,7 @@ EOD
 }
 
 my $pod = <<"END" unless $opt_P;
-## Below is the stub of documentation for your module. You better edit it!
+## Below is stub documentation for your module. You better edit it!
 #
 #=head1 NAME
 #
@@ -823,7 +827,7 @@ my $pod = <<"END" unless $opt_P;
 #
 #=head1 DESCRIPTION
 #
-#Stub documentation for $module was created by h2xs. It looks like the
+#Stub documentation for $module, created by h2xs. It looks like the
 #author of the extension was negligent enough to leave the stub
 #unedited.
 #
@@ -1022,7 +1026,8 @@ EOP
       print $fh <<EOP;
 	return constant_$pref$leader$letter(name, len, arg);
 EOP
-    } else {
+    }
+    else {
       # Do it ourselves
       my $protect
 	= protect_convert_to_double("$pref$leader$letter$leading{$letter}[0]");
@@ -1083,13 +1088,13 @@ $_()
 
     CODE:
 #ifdef $_
-    RETVAL = $_;
+	RETVAL = $_;
 #else
-    croak("Your vendor has not defined the $module macro $_");
+	croak("Your vendor has not defined the $module macro $_");
 #endif
 
     OUTPUT:
-    RETVAL
+	RETVAL
 
 END
 }
@@ -1100,15 +1105,15 @@ print XS <<"END" unless $opt_c;
 
 double
 constant(sv,arg)
-PREINIT:
+    PREINIT:
 	STRLEN		len;
-INPUT:
+    INPUT:
 	SV *		sv
 	char *		s = SvPV(sv, len);
 	int		arg
-CODE:
+    CODE:
 	RETVAL = constant(s,len,arg);
-OUTPUT:
+    OUTPUT:
 	RETVAL
 
 END
@@ -1198,7 +1203,8 @@ sub normalize_type {		# Second arg: do not strip const's before \*
     = "(?:\\b(?:(?:__const__|const)$keep_deep_const|static|inline|__inline__)\\b\\s*)*";
   if ($do_keep_deep_const) {	# Keep different compiled /RExen/o separately!
     $type =~ s/$ignore_mods//go;
-  } else {
+  }
+  else {
     $type =~ s/$ignore_mods//go;
   }
   $type =~ s/([^\s\w])/ \1 /g;
