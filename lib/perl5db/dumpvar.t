@@ -42,7 +42,6 @@ for (@prgs) {
 }
 
 __END__
-########
 dumpValue(1);
 EXPECT
 1
