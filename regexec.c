@@ -946,7 +946,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    /* FALL THROUGH */
 	case BOUND:
 	    if (do_utf8) {
-		if (s == startpos)
+		if (s == PL_bostr)
 		    tmp = '\n';
 		else {
 		    U8 *r = reghop3((U8*)s, -1, (U8*)startpos);
@@ -969,7 +969,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		}
 	    }
 	    else {
-		tmp = (s != startpos) ? UCHARAT(s - 1) : '\n';
+		tmp = (s != PL_bostr) ? UCHARAT(s - 1) : '\n';
 		tmp = ((OP(c) == BOUND ? isALNUM(tmp) : isALNUM_LC(tmp)) != 0);
 		while (s < strend) {
 		    if (tmp ==
@@ -989,7 +989,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    /* FALL THROUGH */
 	case NBOUND:
 	    if (do_utf8) {
-		if (s == startpos)
+		if (s == PL_bostr)
 		    tmp = '\n';
 		else {
 		    U8 *r = reghop3((U8*)s, -1, (U8*)startpos);
@@ -1010,7 +1010,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 		}
 	    }
 	    else {
-		tmp = (s != startpos) ? UCHARAT(s - 1) : '\n';
+		tmp = (s != PL_bostr) ? UCHARAT(s - 1) : '\n';
 		tmp = ((OP(c) == NBOUND ?
 			isALNUM(tmp) : isALNUM_LC(tmp)) != 0);
 		while (s < strend) {
@@ -1427,19 +1427,6 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     }
     else {
       if (strend - startpos < minlen) goto phooey;
-    }
-
-    if (startpos == strbeg)	/* is ^ valid at stringarg? */
-	PL_regprev = '\n';
-    else {
-        if (prog->reganch & ROPT_UTF8 && do_utf8) {
-	    U8 *s = reghop3((U8*)stringarg, -1, (U8*)strbeg);
-	    PL_regprev = utf8n_to_uvchr(s, (U8*)stringarg - s, NULL, 0);
-	}
-	else
-	    PL_regprev = (U32)stringarg[-1];
-	if (!PL_multiline && PL_regprev == '\n')
-	    PL_regprev = '\0';		/* force ^ to NOT match */
     }
 
     /* Check validity of program. */
@@ -2044,19 +2031,16 @@ S_regmatch(pTHX_ regnode *prog)
 
 	switch (OP(scan)) {
 	case BOL:
-	    if (locinput == PL_bostr
-		? PL_regprev == '\n'
-		: (PL_multiline &&
-		   (nextchr || locinput < PL_regeol) && locinput[-1] == '\n') )
+	    if (locinput == PL_bostr || (PL_multiline &&
+		(nextchr || locinput < PL_regeol) && locinput[-1] == '\n') )
 	    {
 		/* regtill = regbol; */
 		break;
 	    }
 	    sayNO;
 	case MBOL:
-	    if (locinput == PL_bostr
-		? PL_regprev == '\n'
-		: ((nextchr || locinput < PL_regeol) && locinput[-1] == '\n') )
+	    if (locinput == PL_bostr ||
+		((nextchr || locinput < PL_regeol) && locinput[-1] == '\n'))
 	    {
 		break;
 	    }
@@ -2259,8 +2243,8 @@ S_regmatch(pTHX_ regnode *prog)
 	case NBOUND:
 	    /* was last char in word? */
 	    if (do_utf8) {
-		if (locinput == PL_regbol)
-		    ln = PL_regprev;
+		if (locinput == PL_bostr)
+		    ln = '\n';
 		else {
 		    U8 *r = reghop((U8*)locinput, -1);
 		
@@ -2277,8 +2261,8 @@ S_regmatch(pTHX_ regnode *prog)
 		}
 	    }
 	    else {
-		ln = (locinput != PL_regbol) ?
-		    UCHARAT(locinput - 1) : PL_regprev;
+		ln = (locinput != PL_bostr) ?
+		    UCHARAT(locinput - 1) : '\n';
 		if (OP(scan) == BOUND || OP(scan) == NBOUND) {
 		    ln = isALNUM(ln);
 		    n = isALNUM(nextchr);

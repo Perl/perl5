@@ -787,3 +787,4 @@ tt+$	xxxtt	y	-	-
 (a)?(a)+	a	y	$1:$2	:a	-
 (ab)?(ab)+	ab	y	$1:$2	:ab	-
 (abc)?(abc)+	abc	y	$1:$2	:abc	-
+'b\s^'m	a\nb\n	n	-	-
