@@ -349,7 +349,7 @@ else {
 }
 
 if ($Is_miniperl) {
-    skip ("miniperl can't rely on loading %Errno");
+    skip ("miniperl can't rely on loading %Errno") for 1..2;
 } else {
    no warnings 'void';
 
