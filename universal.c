@@ -192,7 +192,6 @@ Perl_boot_core_UNIVERSAL(pTHX)
 	sv_inc(sv);
 	SvSETMAGIC(sv);
 	/* Make it findable via fetchmethod */
-	newXS("version::()", NULL, file);
 	newXS("version::new", XS_version_new, file);
 	newXS("version::(\"\"", XS_version_stringify, file);
 	newXS("version::stringify", XS_version_stringify, file);
