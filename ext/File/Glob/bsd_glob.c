@@ -91,23 +91,23 @@ static char sccsid[] = "@(#)glob.c	8.3 (Berkeley) 10/13/93";
 #  endif
 #endif
 
-#define	DOLLAR		'$'
-#define	DOT		'.'
-#define	EOS		'\0'
-#define	LBRACKET	'['
-#define	NOT		'!'
-#define	QUESTION	'?'
-#define	QUOTE		'\\'
-#define	RANGE		'-'
-#define	RBRACKET	']'
-#define	SEP		'/'
-#define	STAR		'*'
-#define	TILDE		'~'
-#define	UNDERSCORE	'_'
-#define	LBRACE		'{'
-#define	RBRACE		'}'
-#define	SLASH		'/'
-#define	COMMA		','
+#define	BG_DOLLAR	'$'
+#define	BG_DOT		'.'
+#define	BG_EOS		'\0'
+#define	BG_LBRACKET	'['
+#define	BG_NOT		'!'
+#define	BG_QUESTION	'?'
+#define	BG_QUOTE	'\\'
+#define	BG_RANGE	'-'
+#define	BG_RBRACKET	']'
+#define	BG_SEP		'/'
+#define	BG_STAR		'*'
+#define	BG_TILDE	'~'
+#define	BG_UNDERSCORE	'_'
+#define	BG_LBRACE	'{'
+#define	BG_RBRACE	'}'
+#define	BG_SLASH	'/'
+#define	BG_COMMA	','
 
 #ifndef GLOB_DEBUG
 
@@ -198,10 +198,10 @@ bsd_glob(const char *pattern, int flags,
 	bufend = bufnext + MAXPATHLEN;
 	if (flags & GLOB_QUOTE) {
 		/* Protect the quoted characters. */
-		while (bufnext < bufend && (c = *patnext++) != EOS)
-			if (c == QUOTE) {
-				if ((c = *patnext++) == EOS) {
-					c = QUOTE;
+		while (bufnext < bufend && (c = *patnext++) != BG_EOS)
+			if (c == BG_QUOTE) {
+				if ((c = *patnext++) == BG_EOS) {
+					c = BG_QUOTE;
 					--patnext;
 				}
 				*bufnext++ = c | M_PROTECT;
@@ -210,9 +210,9 @@ bsd_glob(const char *pattern, int flags,
 				*bufnext++ = c;
 	}
 	else
-	    while (bufnext < bufend && (c = *patnext++) != EOS)
+	    while (bufnext < bufend && (c = *patnext++) != BG_EOS)
 		    *bufnext++ = c;
-	*bufnext = EOS;
+	*bufnext = BG_EOS;
 
 	if (flags & GLOB_BRACE)
 	    return globexp1(patbuf, pglob);
@@ -231,10 +231,10 @@ static int globexp1(const Char *pattern, glob_t *pglob)
 	int rv;
 
 	/* Protect a single {}, for find(1), like csh */
-	if (pattern[0] == LBRACE && pattern[1] == RBRACE && pattern[2] == EOS)
+	if (pattern[0] == BG_LBRACE && pattern[1] == BG_RBRACE && pattern[2] == BG_EOS)
 		return glob0(pattern, pglob);
 
-	while ((ptr = (const Char *) g_strchr((Char *) ptr, LBRACE)) != NULL)
+	while ((ptr = (const Char *) g_strchr((Char *) ptr, BG_LBRACE)) != NULL)
 		if (!globexp2(ptr, pattern, pglob, &rv))
 			return rv;
 
@@ -262,59 +262,59 @@ static int globexp2(const Char *ptr, const Char *pattern,
 
 	/* Find the balanced brace */
 	for (i = 0, pe = ++ptr; *pe; pe++)
-		if (*pe == LBRACKET) {
+		if (*pe == BG_LBRACKET) {
 			/* Ignore everything between [] */
-			for (pm = pe++; *pe != RBRACKET && *pe != EOS; pe++)
+			for (pm = pe++; *pe != BG_RBRACKET && *pe != BG_EOS; pe++)
 				continue;
-			if (*pe == EOS) {
+			if (*pe == BG_EOS) {
 				/*
-				 * We could not find a matching RBRACKET.
-				 * Ignore and just look for RBRACE
+				 * We could not find a matching BG_RBRACKET.
+				 * Ignore and just look for BG_RBRACE
 				 */
 				pe = pm;
 			}
 		}
-		else if (*pe == LBRACE)
+		else if (*pe == BG_LBRACE)
 			i++;
-		else if (*pe == RBRACE) {
+		else if (*pe == BG_RBRACE) {
 			if (i == 0)
 				break;
 			i--;
 		}
 
 	/* Non matching braces; just glob the pattern */
-	if (i != 0 || *pe == EOS) {
+	if (i != 0 || *pe == BG_EOS) {
 		*rv = glob0(patbuf, pglob);
 		return 0;
 	}
 
 	for (i = 0, pl = pm = ptr; pm <= pe; pm++)
 		switch (*pm) {
-		case LBRACKET:
+		case BG_LBRACKET:
 			/* Ignore everything between [] */
-			for (pl = pm++; *pm != RBRACKET && *pm != EOS; pm++)
+			for (pl = pm++; *pm != BG_RBRACKET && *pm != BG_EOS; pm++)
 				continue;
-			if (*pm == EOS) {
+			if (*pm == BG_EOS) {
 				/*
-				 * We could not find a matching RBRACKET.
-				 * Ignore and just look for RBRACE
+				 * We could not find a matching BG_RBRACKET.
+				 * Ignore and just look for BG_RBRACE
 				 */
 				pm = pl;
 			}
 			break;
 
-		case LBRACE:
+		case BG_LBRACE:
 			i++;
 			break;
 
-		case RBRACE:
+		case BG_RBRACE:
 			if (i) {
 			    i--;
 			    break;
 			}
 			/* FALLTHROUGH */
-		case COMMA:
-			if (i && *pm == COMMA)
+		case BG_COMMA:
+			if (i && *pm == BG_COMMA)
 				break;
 			else {
 				/* Append the current string */
@@ -324,7 +324,7 @@ static int globexp2(const Char *ptr, const Char *pattern,
 				 * Append the rest of the pattern after the
 				 * closing brace
 				 */
-				for (pl = pe + 1; (*lm++ = *pl++) != EOS;)
+				for (pl = pe + 1; (*lm++ = *pl++) != BG_EOS;)
 					continue;
 
 				/* Expand the current pattern */
@@ -358,17 +358,17 @@ globtilde(const Char *pattern, Char *patbuf, glob_t *pglob)
 	const Char *p;
 	Char *b;
 
-	if (*pattern != TILDE || !(pglob->gl_flags & GLOB_TILDE))
+	if (*pattern != BG_TILDE || !(pglob->gl_flags & GLOB_TILDE))
 		return pattern;
 
 	/* Copy up to the end of the string or / */
-	for (p = pattern + 1, h = (char *) patbuf; *p && *p != SLASH;
+	for (p = pattern + 1, h = (char *) patbuf; *p && *p != BG_SLASH;
 	     *h++ = *p++)
 		continue;
 
-	*h = EOS;
+	*h = BG_EOS;
 
-	if (((char *) patbuf)[0] == EOS) {
+	if (((char *) patbuf)[0] == BG_EOS) {
 		/*
 		 * handle a plain ~ or ~/ by expanding $HOME
 		 * first and then trying the password file
@@ -403,7 +403,7 @@ globtilde(const Char *pattern, Char *patbuf, glob_t *pglob)
 		continue;
 
 	/* Append the rest of the pattern */
-	while ((*b++ = *p++) != EOS)
+	while ((*b++ = *p++) != BG_EOS)
 		continue;
 
 	return patbuf;
@@ -431,40 +431,40 @@ glob0(const Char *pattern, glob_t *pglob)
 	bufnext = patbuf;
 
 	/* We don't need to check for buffer overflow any more. */
-	while ((c = *qpatnext++) != EOS) {
+	while ((c = *qpatnext++) != BG_EOS) {
 		switch (c) {
-		case LBRACKET:
+		case BG_LBRACKET:
 			c = *qpatnext;
-			if (c == NOT)
+			if (c == BG_NOT)
 				++qpatnext;
-			if (*qpatnext == EOS ||
-			    g_strchr((Char *) qpatnext+1, RBRACKET) == NULL) {
-				*bufnext++ = LBRACKET;
-				if (c == NOT)
+			if (*qpatnext == BG_EOS ||
+			    g_strchr((Char *) qpatnext+1, BG_RBRACKET) == NULL) {
+				*bufnext++ = BG_LBRACKET;
+				if (c == BG_NOT)
 					--qpatnext;
 				break;
 			}
 			*bufnext++ = M_SET;
-			if (c == NOT)
+			if (c == BG_NOT)
 				*bufnext++ = M_NOT;
 			c = *qpatnext++;
 			do {
 				*bufnext++ = CHAR(c);
-				if (*qpatnext == RANGE &&
-				    (c = qpatnext[1]) != RBRACKET) {
+				if (*qpatnext == BG_RANGE &&
+				    (c = qpatnext[1]) != BG_RBRACKET) {
 					*bufnext++ = M_RNG;
 					*bufnext++ = CHAR(c);
 					qpatnext += 2;
 				}
-			} while ((c = *qpatnext++) != RBRACKET);
+			} while ((c = *qpatnext++) != BG_RBRACKET);
 			pglob->gl_flags |= GLOB_MAGCHAR;
 			*bufnext++ = M_END;
 			break;
-		case QUESTION:
+		case BG_QUESTION:
 			pglob->gl_flags |= GLOB_MAGCHAR;
 			*bufnext++ = M_ONE;
 			break;
-		case STAR:
+		case BG_STAR:
 			pglob->gl_flags |= GLOB_MAGCHAR;
 			/* collapse adjacent stars to one,
 			 * to avoid exponential behavior
@@ -477,7 +477,7 @@ glob0(const Char *pattern, glob_t *pglob)
 			break;
 		}
 	}
-	*bufnext = EOS;
+	*bufnext = BG_EOS;
 #ifdef GLOB_DEBUG
 	qprintf("glob0:", patbuf);
 #endif /* GLOB_DEBUG */
@@ -523,7 +523,7 @@ glob1(Char *pattern, glob_t *pglob)
 	Char pathbuf[MAXPATHLEN+1];
 
 	/* A null pathname is invalid -- POSIX 1003.1 sect. 2.4. */
-	if (*pattern == EOS)
+	if (*pattern == BG_EOS)
 		return(0);
 	return(glob2(pathbuf, pathbuf, pattern, pglob));
 }
@@ -545,19 +545,19 @@ glob2(Char *pathbuf, Char *pathend, Char *pattern, glob_t *pglob)
 	 * segment with meta character found.
 	 */
 	for (anymeta = 0;;) {
-		if (*pattern == EOS) {		/* End of pattern? */
-			*pathend = EOS;
+		if (*pattern == BG_EOS) {		/* End of pattern? */
+			*pathend = BG_EOS;
 
 			if (g_lstat(pathbuf, &sb, pglob))
 				return(0);
 
 			if (((pglob->gl_flags & GLOB_MARK) &&
-			    pathend[-1] != SEP) && (S_ISDIR(sb.st_mode)
+			    pathend[-1] != BG_SEP) && (S_ISDIR(sb.st_mode)
 			    || (S_ISLNK(sb.st_mode) &&
 			    (g_stat(pathbuf, &sb, pglob) == 0) &&
 			    S_ISDIR(sb.st_mode)))) {
-				*pathend++ = SEP;
-				*pathend = EOS;
+				*pathend++ = BG_SEP;
+				*pathend = BG_EOS;
 			}
 			++pglob->gl_matchc;
 #ifdef GLOB_DEBUG
@@ -569,7 +569,7 @@ glob2(Char *pathbuf, Char *pathend, Char *pattern, glob_t *pglob)
 		/* Find end of next segment, copy tentatively to pathend. */
 		q = pathend;
 		p = pattern;
-		while (*p != EOS && *p != SEP) {
+		while (*p != BG_EOS && *p != BG_SEP) {
 			if (ismeta(*p))
 				anymeta = 1;
 			*q++ = *p++;
@@ -578,7 +578,7 @@ glob2(Char *pathbuf, Char *pathend, Char *pattern, glob_t *pglob)
 		if (!anymeta) {		/* No expansion, do next segment. */
 			pathend = q;
 			pattern = p;
-			while (*pattern == SEP)
+			while (*pattern == BG_SEP)
 				*pathend++ = *pattern++;
 		} else			/* Need expansion, recurse. */
 			return(glob3(pathbuf, pathend, pattern, p, pglob));
@@ -603,7 +603,7 @@ glob3(Char *pathbuf, Char *pathend, Char *pattern,
 	 */
 	Direntry_t *(*readdirfunc)();
 
-	*pathend = EOS;
+	*pathend = BG_EOS;
 	errno = 0;
 
 	if ((dirp = g_opendir(pathbuf, pglob)) == NULL) {
@@ -628,14 +628,14 @@ glob3(Char *pathbuf, Char *pathend, Char *pattern,
 		register U8 *sc;
 		register Char *dc;
 
-		/* Initial DOT must be matched literally. */
-		if (dp->d_name[0] == DOT && *pattern != DOT)
+		/* Initial BG_DOT must be matched literally. */
+		if (dp->d_name[0] == BG_DOT && *pattern != BG_DOT)
 			continue;
 		for (sc = (U8 *) dp->d_name, dc = pathend;
-		     (*dc++ = *sc++) != EOS;)
+		     (*dc++ = *sc++) != BG_EOS;)
 			continue;
 		if (!match(pathend, pattern, restpattern)) {
-			*pathend = EOS;
+			*pathend = BG_EOS;
 			continue;
 		}
 		err = glob2(pathbuf, --dc, restpattern, pglob);
@@ -678,7 +678,7 @@ globextend(const Char *path, glob_t *pglob)
         for (p = path; *p; p++)
                 (void)printf("%c", CHAR(*p));
         printf("\n");
-#endif GLOB_DEBUG
+#endif /* GLOB_DEBUG */
 
 	if (pglob->gl_pathv)
 		pathv = Renew(pglob->gl_pathv,
@@ -727,17 +727,17 @@ match(register Char *name, register Char *pat, register Char *patend)
 			do
 			    if (match(name, pat, patend))
 				    return(1);
-			while (*name++ != EOS);
+			while (*name++ != BG_EOS);
 			return(0);
 		case M_ONE:
-			if (*name++ == EOS)
+			if (*name++ == BG_EOS)
 				return(0);
 			break;
 		case M_SET:
 			ok = 0;
-			if ((k = *name++) == EOS)
+			if ((k = *name++) == BG_EOS)
 				return(0);
-			if ((negate_range = ((*pat & M_MASK) == M_NOT)) != EOS)
+			if ((negate_range = ((*pat & M_MASK) == M_NOT)) != BG_EOS)
 				++pat;
 			while (((c = *pat++) & M_MASK) != M_END)
 				if ((*pat & M_MASK) == M_RNG) {
@@ -755,7 +755,7 @@ match(register Char *name, register Char *pat, register Char *patend)
 			break;
 		}
 	}
-	return(*name == EOS);
+	return(*name == BG_EOS);
 }
 
 /* Free allocated data belonging to a glob_t structure. */
@@ -835,7 +835,7 @@ g_strcat(Char *dst, const Char *src)
 	while (*dst++)
 		continue;
 	--dst;
-	while((*dst++ = *src++) != EOS)
+	while((*dst++ = *src++) != BG_EOS)
 	    continue;
 
 	return (sdst);
@@ -847,7 +847,7 @@ g_Ctoc(register const Char *str, char *buf)
 {
 	register char *dc;
 
-	for (dc = buf; (*dc++ = *str++) != EOS;)
+	for (dc = buf; (*dc++ = *str++) != BG_EOS;)
 		continue;
 }
 
