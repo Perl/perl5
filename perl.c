@@ -281,8 +281,8 @@ perl_destruct(pTHXx)
 	    goto retry_cleanup;
 	default:
 	    DEBUG_S(PerlIO_printf(Perl_debug_log,
-				  "perl_destruct: ignoring %p (state %u)\n",
-				  t, ThrSTATE(t)));
+				  "perl_destruct: ignoring %p (state %"UVuf")\n",
+				  t, (UV)ThrSTATE(t)));
 	    MUTEX_UNLOCK(&t->mutex);
 	    /* fall through and out */
 	}

@@ -443,8 +443,8 @@ Perl_save_threadsv(pTHX_ PADOFFSET i)
 #ifdef USE_THREADS
     dTHR;
     SV **svp = &THREADSV(i);	/* XXX Change to save by offset */
-    DEBUG_S(PerlIO_printf(Perl_debug_log, "save_threadsv %u: %p %p:%s\n",
-			  i, svp, *svp, SvPEEK(*svp)));
+    DEBUG_S(PerlIO_printf(Perl_debug_log, "save_threadsv %"UVuf": %p %p:%s\n",
+			  (UV)i, svp, *svp, SvPEEK(*svp)));
     save_svref(svp);
     return svp;
 #else

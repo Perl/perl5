@@ -3473,7 +3473,8 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
 	    av_store(thr->threadsv, i, sv);
 	    sv_magic(sv, 0, 0, &PL_threadsv_names[i], 1);
 	    DEBUG_S(PerlIO_printf(Perl_debug_log,
-		"new_struct_thread: copied threadsv %d %p->%p\n",i, t, thr));
+		"new_struct_thread: copied threadsv %"IVdf" %p->%p\n",
+				  (IV)i, t, thr));
 	}
     } 
     thr->threadsvp = AvARRAY(thr->threadsv);

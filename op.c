@@ -475,8 +475,8 @@ Perl_pad_sv(pTHX_ PADOFFSET po)
     dTHR;
 #ifdef USE_THREADS
     DEBUG_X(PerlIO_printf(Perl_debug_log,
-			  "0x%"UVxf" Pad 0x%"UVxf" sv %d\n",
-			  PTR2UV(thr), PTR2UV(PL_curpad), po));
+			  "0x%"UVxf" Pad 0x%"UVxf" sv %"IVdf"\n",
+			  PTR2UV(thr), PTR2UV(PL_curpad), (IV)po));
 #else
     if (!po)
 	Perl_croak(aTHX_ "panic: pad_sv po");
@@ -498,8 +498,8 @@ Perl_pad_free(pTHX_ PADOFFSET po)
 	Perl_croak(aTHX_ "panic: pad_free po");
 #ifdef USE_THREADS
     DEBUG_X(PerlIO_printf(Perl_debug_log,
-			  "0x%"UVxf" Pad 0x%"UVxf" free %d\n",
-			  PTR2UV(thr), PTR2UV(PL_curpad), po));
+			  "0x%"UVxf" Pad 0x%"UVxf" free %"IVd"\n",
+			  PTR2UV(thr), PTR2UV(PL_curpad), (IV)po));
 #else
     DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" free %"IVdf"\n",
 			  PTR2UV(PL_curpad), (IV)po));
@@ -520,8 +520,8 @@ Perl_pad_swipe(pTHX_ PADOFFSET po)
 	Perl_croak(aTHX_ "panic: pad_swipe po");
 #ifdef USE_THREADS
     DEBUG_X(PerlIO_printf(Perl_debug_log,
-			  "0x%"UVxf" Pad 0x%"UVxf" swipe %d\n",
-			  PTR2UV(thr), PTR2UV(PL_curpad), po));
+			  "0x%"UVxf" Pad 0x%"UVxf" swipe %"IVdf"\n",
+			  PTR2UV(thr), PTR2UV(PL_curpad), (IV)po));
 #else
     DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%"UVxf" swipe %"IVdf"\n",
 			  PTR2UV(PL_curpad), (IV)po));
