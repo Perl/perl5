@@ -434,8 +434,9 @@ ext/PerlIO/PerlIO.t		See if PerlIO works
 ext/PerlIO/Scalar/Makefile.PL	PerlIO layer for scalars
 ext/PerlIO/Scalar/Scalar.pm	PerlIO layer for scalars
 ext/PerlIO/Scalar/Scalar.xs	PerlIO layer for scalars
-ext/PerlIO/t/encoding.t		See if PerlIo encoding conversion works
-ext/PerlIO/t/scalar.t		Test of PerlIO::Scalar
+ext/PerlIO/t/encoding.t		See if PerlIO encoding conversion works
+ext/PerlIO/t/scalar.t		See if PerlIO::Scalar works
+ext/PerlIO/t/via.t		See if PerlIO::Via works
 ext/PerlIO/Via/Makefile.PL	PerlIO layer for layers in perl
 ext/PerlIO/Via/Via.pm		PerlIO layer for layers in perl
 ext/PerlIO/Via/Via.xs		PerlIO layer for layers in perl
