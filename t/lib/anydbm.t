@@ -23,7 +23,7 @@ if (! -e $Dfile) {
 	($Dfile) = <Op.dbmx*>;
 }
 if ($^O eq 'amigaos' || $^O eq 'os2' || $^O eq 'MSWin32') {
-    print "ok 2\n";
+    print "ok 2 # Skipped: different file permission semantics\n";
 }
 else {
     ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,

@@ -1889,10 +1889,6 @@ sv_setsv(SV *dstr, register SV *sstr)
 	    sv_upgrade(dstr, SVt_PVNV);
 	break;
 
-    case SVt_PVLV:
-	sv_upgrade(dstr, SVt_PVLV);
-	break;
-
     case SVt_PVAV:
     case SVt_PVHV:
     case SVt_PVCV:
@@ -3887,7 +3883,16 @@ newSVrv(SV *rv, char *classname)
     SvANY(sv) = 0;
     SvREFCNT(sv) = 0;
     SvFLAGS(sv) = 0;
-    sv_upgrade(rv, SVt_RV);
+
+    sv_check_thinkfirst(rv);
+#ifdef OVERLOAD
+    SvAMAGIC_off(rv);
+#endif /* OVERLOAD */
+
+    if (SvTYPE(rv) < SVt_RV)
+      sv_upgrade(rv, SVt_RV);
+
+    (void)SvOK_off(rv);
     SvRV(rv) = SvREFCNT_inc(sv);
     SvROK_on(rv);
 
@@ -4094,14 +4099,14 @@ sv_catpvf(sv, pat, va_alist)
 }
 
 void
-sv_vsetpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, char *used_locale)
+sv_vsetpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, bool *used_locale)
 {
     sv_setpvn(sv, "", 0);
     sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale);
 }
 
 void
-sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, char *used_locale)
+sv_vcatpvfn(SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, bool *used_locale)
 {
     dTHR;
     char *p;
