@@ -60,6 +60,7 @@ $CarpLevel = 0;		# How many extra package levels to skip on carp.
 $MaxEvalLen = 0;	# How much eval '...text...' to show. 0 = all.
 $MaxArgLen = 64;        # How much of each argument to print. 0 = all.
 $MaxArgNums = 8;        # How many arguments to print. 0 = all.
+$Verbose = 0;
 
 require Exporter;
 @ISA = ('Exporter');
@@ -76,8 +77,7 @@ require Exporter;
 sub export_fail {
     shift;
     if ($_[0] eq 'verbose') {
-	local $^W = 0; # avoid "sub-routine redefined..." warning
-	*shortmess = \&longmess; # set shortmess() as an alias to longmess()
+	++$Verbose;
 	shift; # remove 'verbose' from the args to keep Exporter happy
     }
     return @_;
@@ -192,6 +192,10 @@ sub longmess {
 # you always get a stack trace
 
 sub shortmess {	# Short-circuit &longmess if called via multiple packages
+    if ($Verbose) {
+	local $CarpLevel = $CarpLevel + 1;
+	return &longmess;
+    }
     my $error = join '', @_;
     my ($prevpack) = caller(1);
     my $extra = $CarpLevel;
