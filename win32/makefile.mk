@@ -1102,11 +1102,16 @@ $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 Extensions : buildext.pl $(PERLDEP) $(CONFIGPM)
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR)
 
+# Note: The next two targets explicitly remove a "blibdirs.exists" file that
+# currerntly gets left behind, until CPAN RT Ticket #5616 is resolved.
+
 Extensions_clean :
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) clean
+	-if exist $(EXTDIR)\SDBM_File\sdbm\blibdirs.exists del /f $(EXTDIR)\SDBM_File\sdbm\blibdirs.exists
 
 Extensions_realclean :
 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) realclean
+	-if exist $(EXTDIR)\SDBM_File\sdbm\blibdirs.exists del /f $(EXTDIR)\SDBM_File\sdbm\blibdirs.exists
 
 #----------------------------------------------------------------------------------
 
@@ -1257,16 +1262,17 @@ inst_lib : $(CONFIGPM)
 	$(RCOPY) ..\lib $(INST_LIB)\*.*
 
 minitest : $(MINIPERL) $(GLOBEXE) $(CONFIGPM) utils
-	$(XCOPY) $(MINIPERL) ..\t\perl.exe
+	$(XCOPY) $(MINIPERL) ..\t\$(NULL)
+	if exist ..\t\perl.exe del /f ..\t\perl.exe
+	rename ..\t\miniperl.exe perl.exe
 .IF "$(CCTYPE)" == "BORLAND"
 	$(XCOPY) $(GLOBBAT) ..\t\$(NULL)
 .ELSE
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
 .ENDIF
 	attrib -r ..\t\*.*
-	copy test ..\t
 	cd ..\t && \
-	$(MINIPERL) -I..\lib test base/*.t comp/*.t cmd/*.t io/*.t op/*.t pragma/*.t
+	$(MINIPERL) -I..\lib harness base/*.t comp/*.t cmd/*.t io/*.t op/*.t pragma/*.t
 
 test-prep : all utils
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
