@@ -37,7 +37,7 @@ if ($] >= 5) {
 
 require 'syslog.ph';
 
- eval 'use Socket' 			||
+ eval 'use Socket; 1' 			||
      eval { require "socket.ph" } 	||
      require "sys/socket.ph";
 
