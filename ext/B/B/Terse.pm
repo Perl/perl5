@@ -51,14 +51,14 @@ sub B::SV::terse {
 }
 
 sub B::NULL::terse {
-    my ($sv, $level) = @_;
+    my ($sv, $level) = (@_, 0);
     my $s = indent($level) . sprintf "%s (0x%lx)", class($sv), $$sv;
     print "$s\n" unless defined wantarray;
     $s;
 }
 
 sub B::SPECIAL::terse {
-    my ($sv, $level) = @_;
+    my ($sv, $level) = (@_, 0);
     my $s = indent($level)
 	. sprintf( "%s #%d %s", class($sv), $$sv, $specialsv_name[$$sv]);
     print "$s\n" unless defined wantarray;

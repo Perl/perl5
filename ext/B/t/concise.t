@@ -1,14 +1,19 @@
 #!./perl
 
 BEGIN {
-    chdir 't';
-    @INC = '../lib';
+    if ($ENV{PERL_CORE}){
+	chdir('t') if -d 't';
+	@INC = ('.', '../lib');
+    } else {
+	unshift @INC, 't';
+	push @INC, "../../t";
+    }
     require Config;
     if (($Config::Config{'extensions'} !~ /\bB\b/) ){
         print "1..0 # Skip -- Perl configured without B module\n";
         exit 0;
     }
-    require './test.pl';
+    require 'test.pl';
 }
 
 plan tests => 142;
@@ -119,6 +124,7 @@ like ($@, qr/expecting 3 style-format args/,
 
 #### for content with doc'd options
 
+our($a, $b);
 my $func = sub{ $a = $b+42 };	# canonical example asub
 
 SKIP: {
@@ -246,7 +252,7 @@ SKIP: {
     }
 
     my %save = %combos;
-    my %combos;	# outputs for $mode=any($order) and any($style)
+    %combos = ();	# outputs for $mode=any($order) and any($style)
 
     # add more samples with switching modes & sticky styles
     for $style (@styles) {
@@ -292,7 +298,7 @@ SKIP: {
 
 
     #now do double crosschecks: commutativity across stick / nostick
-    my %combos = (%combos, %save);
+    %combos = (%combos, %save);
 
     # test commutativity of flags, ie that AB == BA
     for $mode (@modes) {
