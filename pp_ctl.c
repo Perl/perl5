@@ -2916,8 +2916,8 @@ PP(pp_require)
 
     sv = POPs;
     if (SvNIOKp(sv)) {
-	UV rev, ver, sver;
-	if (SvPOKp(sv)) {		/* require v5.6.1 */
+	if (SvPOK(sv) && SvNOK(sv)) {		/* require v5.6.1 */
+	    UV rev = 0, ver = 0, sver = 0;
 	    I32 len;
 	    U8 *s = (U8*)SvPVX(sv);
 	    U8 *end = (U8*)SvPVX(sv) + SvCUR(sv);
@@ -2929,14 +2929,8 @@ PP(pp_require)
 		    s += len;
 		    if (s < end)
 			sver = utf8_to_uv(s, &len);
-		    else
-			sver = 0;
 		}
-		else
-		    ver = 0;
 	    }
-	    else
-		rev = 0;
 	    if (PERL_REVISION < rev
 		|| (PERL_REVISION == rev
 		    && (PERL_VERSION < ver
@@ -2947,6 +2941,7 @@ PP(pp_require)
 		    "v%d.%d.%d, stopped", rev, ver, sver, PERL_REVISION,
 		    PERL_VERSION, PERL_SUBVERSION);
 	    }
+	    RETPUSHYES;
 	}
 	else if (!SvPOKp(sv)) {			/* require 5.005_03 */
 	    if ((NV)PERL_REVISION + ((NV)PERL_VERSION/(NV)1000)
@@ -2975,8 +2970,8 @@ PP(pp_require)
 			PERL_SUBVERSION);
 		}
 	    }
+	    RETPUSHYES;
 	}
-	RETPUSHYES;
     }
     name = SvPV(sv, len);
     if (!(name && len > 0 && *name))
