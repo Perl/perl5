@@ -573,6 +573,7 @@ I32 base;
 	    hv = (HV*)ptr;
 	    ptr = SSPOPPTR;
 	    hv_delete(hv, (char*)ptr, (U32)SSPOPINT);
+	    Safefree(ptr);
 	    break;
 	case SAVEt_DESTRUCTOR:
 	    ptr = SSPOPPTR;

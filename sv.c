@@ -1581,7 +1581,7 @@ register SV *sstr;
 	 */
 
 	if (SvTEMP(sstr)) {		/* slated for free anyway? */
-	    if (SvPOK(dstr)) {
+	    if (SvPVX(dstr)) {		/* we know that dtype >= SVt_PV */
 		(void)SvOOK_off(dstr);
 		Safefree(SvPVX(dstr));
 	    }

@@ -1045,8 +1045,9 @@ init_main_stash()
     GV *gv;
     curstash = defstash = newHV();
     curstname = newSVpv("main",4);
-    GvHV(gv = gv_fetchpv("main::",TRUE, SVt_PVHV)) =
-	(HV*)SvREFCNT_inc(defstash);
+    gv = gv_fetchpv("main::",TRUE, SVt_PVHV);
+    SvREFCNT_dec(GvHV(gv));
+    GvHV(gv) = (HV*)SvREFCNT_inc(defstash);
     SvREADONLY_on(gv);
     HvNAME(defstash) = savepv("main");
     incgv = gv_HVadd(gv_AVadd(gv_fetchpv("INC",TRUE, SVt_PVAV)));
@@ -1054,8 +1055,7 @@ init_main_stash()
     defgv = gv_fetchpv("_",TRUE, SVt_PVAV);
     curstash = defstash;
     compiling.cop_stash = defstash;
-    debstash = newHV();
-    GvHV(gv_fetchpv("DB::", GV_ADDMULTI, SVt_PVHV)) = debstash;
+    debstash = GvHV(gv_fetchpv("DB::", GV_ADDMULTI, SVt_PVHV));
 }
 
 #ifdef CAN_PROTOTYPE
@@ -1541,7 +1541,7 @@ init_predump_symbols()
     stdingv = gv_fetchpv("STDIN",TRUE, SVt_PVIO);
     SvMULTI_on(stdingv);
     IoIFP(GvIOp(stdingv)) = stdin;
-    tmpgv = gv_fetchpv("stdin",TRUE, SVt_PVIO);
+    tmpgv = gv_fetchpv("stdin",TRUE, SVt_PV);
     GvIOp(tmpgv) = (IO*)SvREFCNT_inc(GvIOp(stdingv));
     SvMULTI_on(tmpgv);
 
@@ -1549,14 +1549,14 @@ init_predump_symbols()
     SvMULTI_on(tmpgv);
     IoOFP(GvIOp(tmpgv)) = IoIFP(GvIOp(tmpgv)) = stdout;
     defoutgv = tmpgv;
-    tmpgv = gv_fetchpv("stdout",TRUE, SVt_PVIO);
+    tmpgv = gv_fetchpv("stdout",TRUE, SVt_PV);
     GvIOp(tmpgv) = (IO*)SvREFCNT_inc(GvIOp(defoutgv));
     SvMULTI_on(tmpgv);
 
     othergv = gv_fetchpv("STDERR",TRUE, SVt_PVIO);
     SvMULTI_on(othergv);
     IoOFP(GvIOp(othergv)) = IoIFP(GvIOp(othergv)) = stderr;
-    tmpgv = gv_fetchpv("stderr",TRUE, SVt_PVIO);
+    tmpgv = gv_fetchpv("stderr",TRUE, SVt_PV);
     GvIOp(tmpgv) = (IO*)SvREFCNT_inc(GvIOp(othergv));
     SvMULTI_on(tmpgv);
 

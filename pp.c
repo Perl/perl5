@@ -416,7 +416,7 @@ PP(pp_trans)
 	sv = GvSV(defgv);
 	EXTEND(SP,1);
     }
-    TARG = NEWSV(27,0);
+    TARG = sv_newmortal();
     PUSHi(do_trans(sv, op));
     RETURN;
 }

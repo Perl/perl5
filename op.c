@@ -3133,6 +3133,7 @@ register OP *op;
 				? SVt_PVHV
 				: SVt_PVGV);
 	}
+	SvREFCNT_dec(kid->op_sv);
 	kid->op_sv = SvREFCNT_inc(gv);
     }
     return op;
