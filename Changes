@@ -28,6 +28,364 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 18448] By: jhi                                   on 2003/01/05  15:29:54
+        Log: Subject: Partial Data::Dumper patch
+             From: Richard Clamp <richardc@unixbeard.net>
+             Date: Sat, 4 Jan 2003 00:52:47 +0000
+             Message-ID: <20030104005247.GA27685@mirth.demon.co.uk>
+             
+             Subject: Re: Partial Data::Dumper patch
+             From: Slaven Rezic <slaven@rezic.de>
+             Date: 04 Jan 2003 02:48:08 +0100
+             Message-ID: <87u1gp4rdz.fsf@vran.herceg.de>
+     Branch: maint-5.8/perl
+	   ! ext/Data/Dumper/Dumper.xs ext/Data/Dumper/t/dumper.t
+____________________________________________________________________________
+[ 18447] By: jhi                                   on 2003/01/05  14:58:52
+        Log: test.pl-ise t/op/fh.t.
+     Branch: maint-5.8/perl
+	   ! t/op/fh.t
+____________________________________________________________________________
+[ 18446] By: jhi                                   on 2003/01/05  14:58:06
+        Log: Add a test for change #18444 (and a new test file, since
+             I couldn't find anything fitting)
+     Branch: maint-5.8/perl
+	   + t/op/readline.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 18445] By: jhi                                   on 2003/01/05  14:46:32
+        Log: Backport change #18444 to maint.
+     Branch: maint-5.8/perl
+	   ! pp_hot.c sv.c sv.h
+____________________________________________________________________________
+[ 18444] By: jhi                                   on 2003/01/05  14:33:04
+        Log: Subject: [PATCH] Re: [perl #19566] Perl 5.8.0 segfault
+             From: Stephen McCamant <smcc@mit.edu>
+             Date: Thu, 2 Jan 2003 18:08:23 -0500
+             Message-ID: <15892.50791.692636.982873@syllepsis.MIT.EDU>
+     Branch: maint-5.8/perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[ 18443] By: jhi                                   on 2003/01/05  14:22:33
+        Log: Subject: [PATCH perl@18746] VMS test adjustments
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sat, 04 Jan 2003 11:26:00 -0600
+             Message-ID: <3E171928.1040100@mac.com>
+     Branch: maint-5.8/perl
+	   ! ext/Devel/Peek/Peek.t ext/Filter/t/call.t lib/charnames.t
+	   ! t/run/switchI.t
+____________________________________________________________________________
+[ 18442] By: jhi                                   on 2003/01/04  21:18:39
+        Log: Spotted by rgs.
+     Branch: maint-5.8/perl
+	   ! lib/File/Copy.pm
+____________________________________________________________________________
+[ 18437] By: jhi                                   on 2003/01/04  14:39:35
+        Log: Integrate:
+             [ 18434]
+             Forgot to add problems.t with change #18419
+     Branch: maint-5.8/perl
+	  +> ext/threads/t/problems.t
+____________________________________________________________________________
+[ 18436] By: jhi                                   on 2003/01/04  14:37:33
+        Log: Integrate:
+             [ 18435]
+             The problems.t is back.
+     Branch: maint-5.8/perl
+	  !> MANIFEST
+____________________________________________________________________________
+[ 18433] By: jhi                                   on 2003/01/04  04:49:38
+        Log: Integrate:
+             [ 18432]
+             One more (or, rather, less) //.
+     Branch: maint-5.8/perl
+	  !> ext/threads/threads.xs
+____________________________________________________________________________
+[ 18430] By: jhi                                   on 2003/01/04  04:35:40
+        Log: // is still not portable C commentary.
+     Branch: maint-5.8/perl
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 18429] By: jhi                                   on 2003/01/04  04:19:57
+        Log: AIX gcc (2.9) threaded build tweak (without the _THREAD_SAFE
+             things like drand48_data are undefined).
+     Branch: maint-5.8/perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[ 18428] By: jhi                                   on 2003/01/04  03:58:22
+        Log: Somehow I managed to get makefile.olds that didn't get cleaned away.
+     Branch: maint-5.8/perl
+	   ! Makefile.SH x2p/Makefile.SH
+____________________________________________________________________________
+[ 18427] By: jhi                                   on 2003/01/04  03:49:34
+        Log: To go with change #18404.
+     Branch: maint-5.8/perl
+	   ! lib/Attribute/Handlers/t/multi.t
+____________________________________________________________________________
+[ 18426] By: jhi                                   on 2003/01/04  03:38:27
+        Log: Integrate: [ 18425]  Until Arthur really adds the problems.t.
+     Branch: maint-5.8/perl
+	  !> MANIFEST
+____________________________________________________________________________
+[ 18424] By: jhi                                   on 2003/01/04  03:20:08
+        Log: Integrate:
+             [ 18417]
+             Fake what context we are running in for CLONE and DESTROY so 
+             threads->tid() returns the correct value.
+             This is reported as bug #10046
+             
+             [ 18419]
+             Fixes bug #15273, the return of the object caused
+             the stash of the object to be cloned, cloning the entire syntax
+             tree and all lexicals in there creating danglning copies to the
+             object. (Pararell but unlinked STASH tree).
+             This adds a new flag, when set it will use STASHES from the
+             thread we are joining into avoiding the problem.
+             
+             [ 18421]
+             Fix long standing memory leak with pop and shift!
+     Branch: maint-5.8/perl
+	  !> MANIFEST ext/threads/shared/shared.xs ext/threads/t/basic.t
+	  !> ext/threads/threads.xs sv.c sv.h
+____________________________________________________________________________
+[ 18423] By: jhi                                   on 2003/01/04  03:12:42
+        Log: spent_size was still off.  (As far as I can tell
+             _SC_GETPW_R_SIZE_MAX is supposed to be used also
+             for spents, not just pwents.)
+     Branch: maint-5.8/perl
+	   ! reentr.c reentr.pl
+____________________________________________________________________________
+[ 18422] By: jhi                                   on 2003/01/04  03:04:29
+        Log: Third Degree found a read of uninit memory (after setting
+             grent_size with sysconf(), pwent_size was read).  Also make
+             the ERANGE/INVARG more consistent.
+     Branch: maint-5.8/perl
+	   ! reentr.c reentr.h reentr.pl
+____________________________________________________________________________
+[ 18420] By: jhi                                   on 2003/01/04  00:04:33
+        Log: Mea culpa: the join() was the string join, not the
+             ithreads join().
+     Branch: maint-5.8/perl
+	   ! ext/threads/t/join.t
+____________________________________________________________________________
+[ 18418] By: jhi                                   on 2003/01/03  19:41:57
+        Log: Upgrade to Time::HiRes 1.41 (building with core perl had
+             become broken at some point, even before 1.40).
+     Branch: maint-5.8/perl
+	   ! ext/Time/HiRes/Changes ext/Time/HiRes/HiRes.pm
+	   ! ext/Time/HiRes/Makefile.PL
+____________________________________________________________________________
+[ 18416] By: jhi                                   on 2003/01/03  17:50:45
+        Log: Upgrade to Time::HiRes 1.40.
+     Branch: maint-5.8/perl
+	   ! ext/Time/HiRes/Changes ext/Time/HiRes/HiRes.pm
+	   ! ext/Time/HiRes/Makefile.PL
+____________________________________________________________________________
+[ 18415] By: jhi                                   on 2003/01/03  16:45:03
+        Log: regen headers.
+     Branch: maint-5.8/perl
+	   ! pod/perlapi.pod
+____________________________________________________________________________
+[ 18414] By: jhi                                   on 2003/01/03  16:39:33
+        Log: Integrate:
+             [ 18390]
+             Use a more likely location for the perl binary
+             
+             [ 18406]
+             Under darwin 6.0+ (MacOSX 10.2) we have threadsafe
+             libc_r functions.
+             
+             [ 18407]
+             Subject: Re: [perl #18257] Attempt to free unreferenced scalar (in 5 lines)
+             From: hv@crypt.org
+             Date: Thu, 02 Jan 2003 17:16:04 +0000
+             Message-Id: <200301021716.h02HG5809404@crypt.compulink.co.uk>
+             
+             [ 18408]
+             Subject: win32_msgwait() problem
+             From: Gurusamy Sarathy <gsar@ActiveState.com>
+             Date: Fri, 13 Dec 2002 17:31:59 -0800
+             Message-Id: <200212140132.gBE1Vxp02090@smtp3.ActiveState.com>
+             
+             [ 18411]
+             Subject: Re: [perl #19061] 'goto' confuses 'redo'
+             From: Stephen McCamant <smcc@mit.edu>
+             Date: Sun, 22 Dec 2002 22:09:51 -0500
+             Message-ID: <15878.32383.94274.950128@syllepsis.MIT.EDU>
+             
+             [ 18413]
+             Change pp_lock to take a reference instead of a
+             scalar since it wouldn't fork for the HELEM/AELEM
+             case. This was reported in bug #10045
+     Branch: maint-5.8/perl
+	  !> Porting/genlog ext/threads/shared/t/hv_refs.t hints/darwin.sh
+	  !> opcode.h opcode.pl opnames.h pp_ctl.c sv.c win32/win32.c
+____________________________________________________________________________
+[ 18405] By: jhi                                   on 2003/01/03  03:06:40
+        Log: Subject: [PATCH] Re: 5.8.0 dup strangety
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Tue, 31 Dec 2002 10:56:42 +0100
+             Message-Id: <20021231105642.6bc7a0f4.rgarciasuarez@free.fr>
+     Branch: maint-5.8/perl
+	   ! doio.c
+____________________________________________________________________________
+[ 18404] By: jhi                                   on 2003/01/03  02:54:46
+        Log: Subject: [PATCH] Re: Attribute::Handlers phase variance
+             From: Richard Clamp <richardc@unixbeard.net>
+             Date: Mon, 9 Dec 2002 11:10:24 +0000
+             Message-ID: <20021209111024.GA14365@mirth.demon.co.uk>
+     Branch: maint-5.8/perl
+	   ! lib/Attribute/Handlers.pm lib/Attribute/Handlers/t/multi.t
+____________________________________________________________________________
+[ 18403] By: jhi                                   on 2003/01/03  02:49:17
+        Log: Subject: [PATCH] [perl #15184] ExtUtils/t/Embed.t fails with -Duseshrplib -Dlibperl=...
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Fri, 13 Dec 2002 00:54:43 +0100
+             Message-Id: <20021213005443.3077a229.rgarciasuarez@free.fr>
+     Branch: maint-5.8/perl
+	   ! lib/ExtUtils/t/Embed.t
+____________________________________________________________________________
+[ 18402] By: jhi                                   on 2003/01/03  02:47:18
+        Log: Subject: [PATCH Pod::Checker] Decouple podchecker program and function
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 10 Dec 2002 15:25:02 -0800
+             Message-ID: <20021210232502.GD25945@blackrider.schwern.org>
+             
+             Subject: Re: [PATCH Pod::Checker] Decouple podchecker program and function
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 10 Dec 2002 15:40:05 -0800
+             Message-ID: <20021210234005.GF25945@blackrider.schwern.org>
+     Branch: maint-5.8/perl
+	   ! lib/Pod/Checker.pm pod/podchecker.PL t/pod/poderrs.xr
+____________________________________________________________________________
+[ 18401] By: jhi                                   on 2003/01/03  02:40:44
+        Log: Subject: [PATCH] integrate more with report_evil_fh
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Thu, 26 Dec 2002 20:56:21 +0000
+             Message-ID: <20021226205620.GA16584@Bagpuss.unfortu.net>
+     Branch: maint-5.8/perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 18400] By: jhi                                   on 2003/01/03  02:37:11
+        Log: Subject: [PATCH] label code in pp_ctl.c
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Thu, 26 Dec 2002 21:19:36 +0000
+             Message-ID: <20021226211935.GE284@Bagpuss.unfortu.net>
+     Branch: maint-5.8/perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[ 18399] By: jhi                                   on 2003/01/03  02:28:15
+        Log: Subject: [DOCPATCH] hv_store and hv_store_ent
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Wed, 1 Jan 2003 18:17:59 +0000
+             Message-ID: <20030101181757.GB296@Bagpuss.unfortu.net>
+     Branch: maint-5.8/perl
+	   ! hv.c
+____________________________________________________________________________
+[ 18398] By: jhi                                   on 2003/01/03  02:26:44
+        Log: Subject: [DOCPATCH] File::Copy's synopsis
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Wed, 1 Jan 2003 21:09:30 +0000
+             Message-ID: <20030101210930.GE296@Bagpuss.unfortu.net>
+     Branch: maint-5.8/perl
+	   ! lib/File/Copy.pm
+____________________________________________________________________________
+[ 18397] By: jhi                                   on 2003/01/03  02:25:38
+        Log: Subject: [PATCH] Re: [perl #19393] Bug in Time::localtime?
+             From: Dave Mitchell <davem@fdgroup.com>
+             To: Ton Hospel <perl5-porters@ton.iguana.be>
+             Date: Wed, 1 Jan 2003 21:43:24 +0000
+             Message-ID: <20030101214324.F12907@fdgroup.com>
+     Branch: maint-5.8/perl
+	   ! lib/Time/Local.pm lib/Time/Local.t
+____________________________________________________________________________
+[ 18396] By: jhi                                   on 2003/01/03  02:23:28
+        Log: Subject: Re: [PATCH] Tiny nits in perlre.pod
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: Fri, 03 Jan 2003 00:57:15 +0100
+             Message-ID: <m33cob14x0.fsf@k242.linux.bogus>
+     Branch: maint-5.8/perl
+	   ! pod/perlre.pod
+____________________________________________________________________________
+[ 18395] By: jhi                                   on 2003/01/03  02:21:50
+        Log: Subject: PATCH: perldoc in MAINT branch (probably unstable too)
+             From: Chip Turner <cturner@redhat.com>
+             Date: 02 Jan 2003 11:35:57 -0500
+             Message-ID: <vzksmwb8q6q.fsf@minbar.devel.redhat.com>
+     Branch: maint-5.8/perl
+	   ! lib/Pod/Perldoc.pm
+____________________________________________________________________________
+[ 18394] By: jhi                                   on 2003/01/02  21:37:16
+        Log: Document in more detail which tests will fail on FAT.
+     Branch: maint-5.8/perl
+	   ! README.win32
+____________________________________________________________________________
+[ 18392] By: jhi                                   on 2003/01/02  17:57:09
+        Log: Subject: [PATCH perl-5.8/win32/makefile.mk] Re: Smoke [5.8.0] 18389 FAIL(Fm) MSWin32 5.0 Service Pack 3 (x86/1 cpu)
+             From: Abe Timmerman <abe@ztreet.demon.nl>
+             Date: Thu, 2 Jan 2003 19:02:21 +0100
+             Message-Id: <200301021902.22444.abe@ztreet.demon.nl>
+     Branch: maint-5.8/perl
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[ 18391] By: jhi                                   on 2003/01/02  13:44:51
+        Log: Document the installprefix trick for compiling PASE Perl in AIX.
+     Branch: maint-5.8/perl
+	   ! README.os400
+____________________________________________________________________________
+[ 18389] By: jhi                                   on 2003/01/02  03:15:44
+        Log: Subject: [PATCH maintperl@18383] more pad removal for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Wed, 01 Jan 2003 21:53:22 -0600
+             Message-ID: <3E13B7B2.2070005@mac.com>
+     Branch: maint-5.8/perl
+	   ! vms/descrip_mms.template
+____________________________________________________________________________
+[ 18388] By: jhi                                   on 2003/01/02  01:41:55
+        Log: List the PERL_MAGIC_utf8 ('w') flag.
+     Branch: maint-5.8/perl
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[ 18387] By: jhi                                   on 2003/01/02  01:39:31
+        Log: The magic v-string patch from John Peacock for 5.8;
+             permits the programmer to know when a given scalar was
+             originally encoded as a v-string; Scalar::Util has already
+             been enhanced to expose this at the Perl level.
+     Branch: maint-5.8/perl
+	   ! dump.c perl.h pod/perlguts.pod sv.c sv.h t/op/ver.t util.c
+____________________________________________________________________________
+[ 18386] By: jhi                                   on 2003/01/01  23:06:53
+        Log: The change #18275 didn't translate the test case quite right.
+     Branch: maint-5.8/perl
+	   ! t/op/split.t
+____________________________________________________________________________
+[ 18385] By: gsar                                  on 2003/01/01  20:26:42
+        Log: remove the CRs that snuck in via change#18382
+     Branch: maint-5.8/perl
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 18383] By: jhi                                   on 2003/01/01  17:02:29
+        Log: Backport #18319 to 5.8, from Dave Mitchell.
+     Branch: maint-5.8/perl
+	   ! op.c t/op/eval.t
+____________________________________________________________________________
+[ 18382] By: jhi                                   on 2003/01/01  15:06:49
+        Log: More tweaks from Autrijus: no pad.c, perl59->perl58 in
+             installperl; and no pad.c in VMS, either.
+     Branch: maint-5.8/perl
+	   ! installperl vms/descrip_mms.template win32/Makefile
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[ 18381] By: jhi                                   on 2003/01/01  15:02:04
+        Log: Tweaks from Autrijus: threaded/win32 build, signedness.
+     Branch: maint-5.8/perl
+	   ! sv.c
+____________________________________________________________________________
+[ 18380] By: jhi                                   on 2002/12/31  16:34:22
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 18379] By: jhi                                   on 2002/12/31  15:33:11
         Log: Integrate:
              [ 18371]
@@ -625,12 +983,6 @@ ____________________________________________________________________________
 	  !> embedvar.h ext/threads/t/join.t perl.c perlapi.h perlvars.h
 	  !> pod/perlintern.pod
 ____________________________________________________________________________
-[ 18239] By: jhi                                   on 2002/12/03  12:49:01
-        Log: Fix up #18229.
-     Branch: perl
-	   ! embedvar.h ext/threads/t/join.t perl.c perlapi.h perlvars.h
-	   ! pod/perlintern.pod
-____________________________________________________________________________
 [ 18236] By: jhi                                   on 2002/12/03  01:25:45
         Log: According to Rainer Orth <ro@TechFak.Uni-Bielefeld.DE>
              gcc on IRIX (6.2) does not need and does indeed much better
@@ -818,11 +1170,6 @@ ____________________________________________________________________________
              Slight beauty tweak. 
      Branch: maint-5.8/perl
 	  !> intrpvar.h
-____________________________________________________________________________
-[ 18203] By: jhi                                   on 2002/11/28  14:54:34
-        Log: Slight beauty tweak. 
-     Branch: perl
-	   ! intrpvar.h
 ____________________________________________________________________________
 [ 18202] By: jhi                                   on 2002/11/28  14:49:11
         Log: Add test for bug #18153.
