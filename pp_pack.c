@@ -922,6 +922,8 @@ PP(pp_unpack)
 	    }
 	    break;
 	case 'P':
+	    if (star)
+	        DIE(aTHX_ "P must have an explicit size");
 	    EXTEND(SP, 1);
 	    if (sizeof(char*) > strend - s)
 		break;

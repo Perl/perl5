@@ -1,6 +1,6 @@
 #!./perl -w
 
-print "1..614\n";
+print "1..615\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -694,4 +694,13 @@ foreach (
        length $buf == 34 &&
        $s eq "ABCABCABCABCABCABCABCABCABCABC" &
        $y == 42);
+}
+
+{
+    # 615
+
+    # from Wolfgang Laun:Lfix in change #13288
+
+    eval { unpack("P*", "abc") };
+    ok($@ =~ /P must have an explicit size/);
 }
