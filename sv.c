@@ -6334,15 +6334,23 @@ thats_really_all_folks:
     }
    else
     {
-#ifndef EPOC
-       /*The big, slow, and stupid way */
-	STDCHAR buf[8192];
+       /*The big, slow, and stupid way. */
+
+      /* Any stack-challenged places. */
+#if defined(EPOC) || 1
+      /* EPOC: need to work around SDK features.         *
+       * On WINS: MS VC5 generates calls to _chkstk,     *
+       * if a "large" stack frame is allocated.          *
+       * gcc on MARM does not generate calls like these. */
+#   define USEHEAPINSTEADOFSTACK
+#endif
+
+#ifdef USEHEAPINSTEADOFSTACK
+	STDCHAR *buf = 0;
+	New(0, buf, 8192, STDCHAR);
+	assert(buf);
 #else
-	/* Need to work around EPOC SDK features          */
-	/* On WINS: MS VC5 generates calls to _chkstk,    */
-	/* if a `large' stack frame is allocated          */
-	/* gcc on MARM does not generate calls like these */
-	STDCHAR buf[1024];
+	STDCHAR buf[8192];
 #endif
 
 screamer2:
@@ -6391,6 +6399,10 @@ screamer2:
 	    if (!(cnt < sizeof(buf) && PerlIO_eof(fp)))
 		goto screamer2;
 	}
+
+#ifdef USEHEAPINSTEADOFSTACK
+	Safefree(buf);
+#endif
     }
 
     if (rspara) {		/* have to do this both before and after */

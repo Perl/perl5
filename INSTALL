@@ -650,6 +650,17 @@ Here's one way to do that:
     cd /opt/perl # Or wherever you specified as $prefix
     tar xvf perl5-archive.tar
 
+Alternatively, perl honors the DESTDIR variable in the make install
+call. DESTDIR is automatically prepended to all the installation paths.
+With DESTDIR, the above example can we written as:
+
+    sh Configure -Dprefix=/opt/perl -des
+    make
+    make test
+    make install DESTDIR=/tmp/perl5
+    cd /tmp/perl5/opt/perl
+    tar cvf /tmp/perl5-archive.tar .
+
 =head2 Site-wide Policy settings
 
 After Configure runs, it stores a number of common site-wide "policy"

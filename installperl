@@ -62,6 +62,7 @@ my $perl_verbase = defined($ENV{PERLNAME_VERBASE})
 		    : $perl;
 
 $otherperls = 1;
+my $destdir = '';
 while (@ARGV) {
     $nonono = 1 if $ARGV[0] eq '-n';
     $dostrip = 1 if $ARGV[0] eq '-s';
@@ -74,6 +75,7 @@ while (@ARGV) {
     $archname = 1 if $ARGV[0] eq '-A';
     $nwinstall = 1 if $ARGV[0] eq '-netware';
     $nopods = 1 if $ARGV[0] eq '-p';
+    $destdir = $1 if $ARGV[0] =~ /^-?-destdir=(.*)$/;
     if ($ARGV[0] eq '-?' or $ARGV[0] =~ /^-?-h/) {
 	print <<"EOT";
 Usage $0: [switches]
@@ -170,13 +172,13 @@ die "Patchlevel of perl ($patchlevel)",
 	if $patchlevel != $Config{'PERL_VERSION'};
 
 # Fetch some frequently-used items from %Config
-my $installbin = $Config{installbin};
-my $installscript = $Config{installscript};
-my $installprivlib = $Config{installprivlib};
-my $installarchlib = $Config{installarchlib};
-my $installsitelib = $Config{installsitelib};
-my $installsitearch = $Config{installsitearch};
-my $installman1dir = $Config{installman1dir};
+my $installbin = "$destdir$Config{installbin}";
+my $installscript = "$destdir$Config{installscript}";
+my $installprivlib = "$destdir$Config{installprivlib}";
+my $installarchlib = "$destdir$Config{installarchlib}";
+my $installsitelib = "$destdir$Config{installsitelib}";
+my $installsitearch = "$destdir$Config{installsitearch}";
+my $installman1dir = "$destdir$Config{installman1dir}";
 my $man1ext = $Config{man1ext};
 my $libperl = $Config{libperl};
 # Shared library and dynamic loading suffixes.
@@ -691,7 +693,11 @@ sub link {
     my($from,$to) = @_;
     my($success) = 0;
 
-    print $verbose ? "  ln $from $to\n" : "  $to\n" unless $silent;
+    my $xfrom = $from;
+    $xfrom =~ s/^\Q$destdir\E// if $destdir;
+    my $xto = $to;
+    $xto =~ s/^\Q$destdir\E// if $destdir;
+    print $verbose ? "  ln $xfrom $xto\n" : "  $xto\n" unless $silent;
     eval {
 	CORE::link($from, $to)
 	    ? $success++
@@ -699,18 +705,18 @@ sub link {
 	      ? die "AFS"  # okay inside eval {}
 	      : die "Couldn't link $from to $to: $!\n"
 	  unless $nonono;
-	$packlist->{$to} = { from => $from, type => 'link' };
+	$packlist->{$xto} = { from => $xfrom, type => 'link' };
     };
     if ($@) {
 	warn $@;
-	print $verbose ? "  cp $from $to\n" : "  $to\n" unless $silent;
-	print "  creating new version of $to\n"
+	print $verbose ? "  cp $from $xto\n" : "  $xto\n" unless $silent;
+	print "  creating new version of $xto\n"
 		 if $Is_VMS and -e $to and !$silent;
 	File::Copy::copy($from, $to)
 	    ? $success++
 	    : warn "Couldn't copy $from to $to: $!\n"
 	  unless $nonono;
-	$packlist->{$to} = { type => 'file' };
+	$packlist->{$xto} = { type => 'file' };
     }
     $success;
 }
@@ -728,12 +734,14 @@ sub chmod {
 sub copy {
     my($from,$to) = @_;
 
-    print $verbose ? "  cp $from $to\n" : "  $to\n" unless $silent;
-    print "  creating new version of $to\n" if $Is_VMS and -e $to and !$silent;
+    my $xto = $to;
+    $xto =~ s/^\Q$destdir\E// if $destdir;
+    print $verbose ? "  cp $from $xto\n" : "  $xto\n" unless $silent;
+    print "  creating new version of $xto\n" if $Is_VMS and -e $to and !$silent;
     File::Copy::copy($from, $to)
 	|| warn "Couldn't copy $from to $to: $!\n"
       unless $nonono;
-    $packlist->{$to} = { type => 'file' };
+    $packlist->{$xto} = { type => 'file' };
 }
 
 sub samepath {
@@ -796,7 +804,9 @@ sub installlib {
 	    #This might not work because $archname might have changed.
 	    unlink("$installarchlib/$name");
 	}
-	$packlist->{"$installlib/$name"} = { type => 'file' };
+	my $xname = "$installlib/$name";
+	$xname =~ s/^\Q$destdir\E// if $destdir;
+	$packlist->{$xname} = { type => 'file' };
 	if ($force || compare($_, "$installlib/$name") || $nonono) {
 	    unlink("$installlib/$name");
 	    mkpath("$installlib/$dir", $verbose, 0777);
@@ -841,6 +851,8 @@ sub installlib {
 sub copy_if_diff {
     my($from,$to)=@_;
     return 1 if (($^O eq 'VMS') && (-d $from));
+    my $xto = $to;
+    $xto =~ s/^\Q$destdir\E// if $destdir;
     my $perlpodbadsymlink;
     if ($from =~ m!^pod/perl[\w-]+\.pod$! &&
 	-l $from &&
@@ -853,7 +865,7 @@ sub copy_if_diff {
 	$perlpodbadsymlink = 1;
     }
     -f $from || $perlpodbadsymlink || warn "$0: $from not found";
-    $packlist->{$to} = { type => 'file' };
+    $packlist->{$xto} = { type => 'file' };
     if ($force || compare($from, $to) || $nonono) {
 	safe_unlink($to);   # In case we don't have write permissions.
 	if ($nonono) {

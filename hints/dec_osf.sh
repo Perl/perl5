@@ -225,6 +225,9 @@ libswanted="`echo $libswanted | sed -e 's/ ndbm / /'`"
 # the basic lddlflags used always
 lddlflags='-shared -expect_unresolved "*"'
 
+# Intentional leading tab.
+	myosvers="`/usr/sbin/sizer -v 2>/dev/null || head -1 /etc/motd`"
+
 # Fancy compiler suites use optimising linker as well as compiler.
 # <spider@Orb.Nashua.NH.US>
 case "`uname -r`" in
@@ -234,7 +237,7 @@ case "`uname -r`" in
 *)            if $test "X$optimize" = "X$undef"; then
                       lddlflags="$lddlflags -msym"
               else
-		  case "`/usr/sbin/sizer -v`" in
+		  case "$myosvers" in
 		  *4.0D*)
 		      # QAR 56761: -O4 + .so may produce broken code,
 		      # fixed in 4.0E or better.
@@ -286,7 +289,7 @@ esac
 # emulate_eaccess().
 
 # Fixed in V5.0A.
-case "`/usr/sbin/sizer -v`" in
+case "$myosvers" in
 *5.0[A-Z]*|*5.[1-9]*|*[6-9].[0-9]*)
 	: ok
 	;;
@@ -360,7 +363,7 @@ cat > UU/uselongdouble.cbu <<'EOCBU'
 # after it has prompted the user for whether to use long doubles.
 case "$uselongdouble" in
 $define|true|[yY]*)
-	case "`/usr/sbin/sizer -v`" in
+	case "$myosvers" in
 	*[1-4].0*)	cat >&4 <<EOF
 
 ***
@@ -412,7 +415,7 @@ UGLY
 esac
 EOCBU
 
-case "`/usr/sbin/sizer -v`" in
+case "$myosvers" in
 *[1-4].0*) d_modfl=undef ;; # must wait till 5.0
 esac
 
