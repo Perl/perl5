@@ -34,7 +34,7 @@ void byterun(FILE *fp)
 {
     dTHR;
     int insn;
-    while ((insn = FGETC()) != EOF) {
+    while ((insn = BGET_FGETC()) != EOF) {
 	switch (insn) {
 	  case INSN_COMMENT:		/* 35 */
 	    {

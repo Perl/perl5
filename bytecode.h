@@ -19,17 +19,21 @@ EXT void **obj_list;
 EXT I32 obj_list_fill INIT(-1);
 
 #ifdef INDIRECT_BGET_MACROS
-#define FREAD(argp, len, nelem) bs.fread((char*)(argp),(len),(nelem),bs.data)
-#define FGETC() bs.fgetc(bs.data)
+#define BGET_FREAD(argp, len, nelem)	\
+	 bs.fread((char*)(argp),(len),(nelem),bs.data)
+#define BGET_FGETC() bs.fgetc(bs.data)
 #else
-#define FREAD(argp, len, nelem) fread((argp), (len), (nelem), fp)
-#define FGETC() getc(fp)
+#define BGET_FREAD(argp, len, nelem) fread((argp), (len), (nelem), fp)
+#define BGET_FGETC() getc(fp)
 #endif /* INDIRECT_BGET_MACROS */
 
-#define BGET_U32(arg)	FREAD(&arg, sizeof(U32), 1); arg = ntohl((U32)arg)
-#define BGET_I32(arg)	FREAD(&arg, sizeof(I32), 1); arg = (I32)ntohl((U32)arg)
-#define BGET_U16(arg)	FREAD(&arg, sizeof(U16), 1); arg = ntohs((U16)arg)
-#define BGET_U8(arg)	arg = FGETC()
+#define BGET_U32(arg)	\
+	BGET_FREAD(&arg, sizeof(U32), 1); arg = ntohl((U32)arg)
+#define BGET_I32(arg)	\
+	BGET_FREAD(&arg, sizeof(I32), 1); arg = (I32)ntohl((U32)arg)
+#define BGET_U16(arg)	\
+	BGET_FREAD(&arg, sizeof(U16), 1); arg = ntohs((U16)arg)
+#define BGET_U8(arg)	arg = BGET_FGETC()
 
 #if INDIRECT_BGET_MACROS
 #define BGET_PV(arg)	do {		\
@@ -59,7 +63,7 @@ EXT I32 obj_list_fill INIT(-1);
 #endif /* INDIRECT_BGET_MACROS */
 
 #define BGET_comment(arg) \
-	do { arg = FGETC(); } while (arg != '\n' && arg != EOF)
+	do { arg = BGET_FGETC(); } while (arg != '\n' && arg != EOF)
 
 /*
  * In the following, sizeof(IV)*4 is just a way of encoding 32 on 64-bit-IV
@@ -94,7 +98,7 @@ EXT I32 obj_list_fill INIT(-1);
 
 #define BGET_pvcontents(arg)	arg = pv.xpv_pv
 #define BGET_strconst(arg)	do {	\
-	for (arg = tokenbuf; (*arg = FGETC()); arg++) /* nothing */;	\
+	for (arg = tokenbuf; (*arg = BGET_FGETC()); arg++) /* nothing */; \
 	arg = tokenbuf;			\
     } while (0)
 

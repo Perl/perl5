@@ -88,7 +88,7 @@ void byterun(FILE *fp)
 {
     dTHR;
     int insn;
-    while ((insn = FGETC()) != EOF) {
+    while ((insn = BGET_FGETC()) != EOF) {
 	switch (insn) {
 EOT
 
