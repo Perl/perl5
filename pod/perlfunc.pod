@@ -6258,12 +6258,8 @@ to the current time.  For example, this code has the same effect as the
 Unix touch(1) command when the files I<already exist>.
 
     #!/usr/bin/perl
-    $now = time;
-    utime $now, $now, @ARGV;
-
-B<Note:>  Under NFS, touch(1) uses the time of the NFS server, not
-the time of the local machine.  If there is a time synchronization
-problem, the NFS server and local machine will have different times.
+    $atime = $mtime = time;
+    utime $atime, $mtime, @ARGV;
 
 Since perl 5.7.2, if the first two elements of the list are C<undef>, then
 the utime(2) function in the C library will be called with a null second
@@ -6272,6 +6268,17 @@ modification times to the current time (i.e. equivalent to the example
 above.)
 
     utime undef, undef, @ARGV;
+
+Under NFS this will use the time of the NFS server, not the time of
+the local machine.  If there is a time synchronization problem, the
+NFS server and local machine will have different times.  The Unix
+touch(1) command will in fact normally use this form instead of the
+one shown in the first example.
+
+Note that only passing one of the first two elements as C<undef> will
+be equivalent of passing it as 0 and will not have the same effect as
+described when they are both C<undef>.  This case will also trigger an
+uninitialized warning.
 
 =item values HASH
 
