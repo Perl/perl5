@@ -2054,7 +2054,7 @@ Perl_moreswitches(pTHX_ char *s)
 	else if (!rschar && numlen >= 2)
 	    PL_nrs = newSVpvn("", 0);
 	else {
-	    char ch = rschar;
+	    char ch = (char)rschar;
 	    PL_nrs = newSVpvn(&ch, 1);
 	}
 	return s + numlen;

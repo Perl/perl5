@@ -135,7 +135,7 @@ prog	:	/* NULL */
 
 block	:	'{' remember lineseq '}'
 			{ if (PL_copline > (line_t)$1)
-			      PL_copline = $1;
+			      PL_copline = (line_t)$1;
 			  $$ = block_end($2, $3); }
 	;
 
@@ -145,7 +145,7 @@ remember:	/* NULL */	/* start a full lexical scope */
 
 mblock	:	'{' mremember lineseq '}'
 			{ if (PL_copline > (line_t)$1)
-			      PL_copline = $1;
+			      PL_copline = (line_t)$1;
 			  $$ = block_end($2, $3); }
 	;
 
@@ -194,7 +194,7 @@ sideff	:	error
 	|	expr UNTIL iexpr
 			{ $$ = newLOOPOP(OPf_PARENS, 1, $3, $1);}
 	|	expr FOR expr
-			{ $$ = newFOROP(0, Nullch, $2,
+			{ $$ = newFOROP(0, Nullch, (line_t)$2,
 					Nullop, $3, $1, Nullop); }
 	;
 
@@ -203,17 +203,17 @@ else	:	/* NULL */
 	|	ELSE mblock
 			{ ($2)->op_flags |= OPf_PARENS; $$ = scope($2); }
 	|	ELSIF '(' mexpr ')' mblock else
-			{ PL_copline = $1;
+			{ PL_copline = (line_t)$1;
 			    $$ = newCONDOP(0, $3, scope($5), $6);
 			    PL_hints |= HINT_BLOCK_SCOPE; }
 	;
 
 cond	:	IF '(' remember mexpr ')' mblock else
-			{ PL_copline = $1;
+			{ PL_copline = (line_t)$1;
 			    $$ = block_end($3,
 				   newCONDOP(0, $4, scope($6), $7)); }
 	|	UNLESS '(' remember miexpr ')' mblock else
-			{ PL_copline = $1;
+			{ PL_copline = (line_t)$1;
 			    $$ = block_end($3,
 				   newCONDOP(0, $4, scope($6), $7)); }
 	;
@@ -225,27 +225,27 @@ cont	:	/* NULL */
 	;
 
 loop	:	label WHILE '(' remember mtexpr ')' mblock cont
-			{ PL_copline = $2;
+			{ PL_copline = (line_t)$2;
 			    $$ = block_end($4,
 				   newSTATEOP(0, $1,
 				     newWHILEOP(0, 1, (LOOP*)Nullop,
 						$2, $5, $7, $8))); }
 	|	label UNTIL '(' remember miexpr ')' mblock cont
-			{ PL_copline = $2;
+			{ PL_copline = (line_t)$2;
 			    $$ = block_end($4,
 				   newSTATEOP(0, $1,
 				     newWHILEOP(0, 1, (LOOP*)Nullop,
 						$2, $5, $7, $8))); }
 	|	label FOR MY remember my_scalar '(' mexpr ')' mblock cont
 			{ $$ = block_end($4,
-				 newFOROP(0, $1, $2, $5, $7, $9, $10)); }
+				 newFOROP(0, $1, (line_t)$2, $5, $7, $9, $10)); }
 	|	label FOR scalar '(' remember mexpr ')' mblock cont
 			{ $$ = block_end($5,
-				 newFOROP(0, $1, $2, mod($3, OP_ENTERLOOP),
+				 newFOROP(0, $1, (line_t)$2, mod($3, OP_ENTERLOOP),
 					  $6, $8, $9)); }
 	|	label FOR '(' remember mexpr ')' mblock cont
 			{ $$ = block_end($4,
-				 newFOROP(0, $1, $2, Nullop, $5, $7, $8)); }
+				 newFOROP(0, $1, (line_t)$2, Nullop, $5, $7, $8)); }
 	|	label FOR '(' remember mnexpr ';' mtexpr ';' mnexpr ')' mblock
 			/* basically fake up an initialize-while lineseq */
 			{ OP *forop = append_elem(OP_LINESEQ,
@@ -253,7 +253,7 @@ loop	:	label WHILE '(' remember mtexpr ')' mblock cont
 					newWHILEOP(0, 1, (LOOP*)Nullop,
 						   $2, scalar($7),
 						   $11, scalar($9)));
-			  PL_copline = $2;
+			  PL_copline = (line_t)$2;
 			  $$ = block_end($4, newSTATEOP(0, $1, forop)); }
 	|	label block cont  /* a block is a loop that happens once */
 			{ $$ = newSTATEOP(0, $1,

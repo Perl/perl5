@@ -259,7 +259,7 @@ S_missingterm(pTHX_ char *s)
 	s = tmpbuf;
     }
     else {
-	*tmpbuf = PL_multi_close;
+	*tmpbuf = (char)PL_multi_close;
 	tmpbuf[1] = '\0';
 	s = tmpbuf;
     }
@@ -684,7 +684,7 @@ S_lop(pTHX_ I32 f, int x, char *s)
     PL_expect = x;
     PL_bufptr = s;
     PL_last_lop = PL_oldbufptr;
-    PL_last_lop_op = f;
+    PL_last_lop_op = (OPCODE)f;
     if (PL_nexttoke)
 	return LSTOP;
     if (*s == '(')
@@ -1032,7 +1032,7 @@ S_sublex_push(pTHX)
     *PL_lex_casestack = '\0';
     PL_lex_starts = 0;
     PL_lex_state = LEX_INTERPCONCAT;
-    CopLINE_set(PL_curcop, PL_multi_start);
+    CopLINE_set(PL_curcop, (line_t)PL_multi_start);
 
     PL_lex_inwhat = PL_sublex_info.sub_inwhat;
     if (PL_lex_inwhat == OP_MATCH || PL_lex_inwhat == OP_QR || PL_lex_inwhat == OP_SUBST)
@@ -1231,7 +1231,7 @@ S_scan_const(pTHX_ char *start)
 		else
 #endif
 		    for (i = min; i <= max; i++)
-			*d++ = i;
+			*d++ = (char)i;
 
 		/* mark the range as done, and continue */
 		dorange = FALSE;
@@ -1487,11 +1487,11 @@ S_scan_const(pTHX_ char *start)
 			*d = '\0';
 			sv_utf8_upgrade(sv);
 			/* this just broke our allocation above... */
-			SvGROW(sv, send - start);
+			SvGROW(sv, (STRLEN)(send - start));
 			d = SvPVX(sv) + SvCUR(sv);
 			has_utf8 = TRUE;
 		    }
-		    if (len > e - s + 4) {
+		    if (len > (STRLEN)(e - s + 4)) {
 			char *odest = SvPVX(sv);
 
 			SvGROW(sv, (SvCUR(sv) + len - (e - s + 4)));
@@ -1963,7 +1963,7 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
 	    int old_len = SvCUR(buf_sv) ;
 
 	    /* ensure buf_sv is large enough */
-	    SvGROW(buf_sv, old_len + maxlen) ;
+	    SvGROW(buf_sv, (STRLEN)(old_len + maxlen)) ;
 	    if ((len = PerlIO_read(PL_rsfp, SvPVX(buf_sv) + old_len, maxlen)) <= 0){
 		if (PerlIO_error(PL_rsfp))
 	            return -1;		/* error */
@@ -2298,7 +2298,7 @@ Perl_yylex(pTHX)
               "### Saw case modifier at '%s'\n", PL_bufptr); })
 	    s = PL_bufptr + 1;
 	    if (strnEQ(s, "L\\u", 3) || strnEQ(s, "U\\l", 3))
-		tmp = *s, *s = s[2], s[2] = tmp;	/* misordered... */
+		tmp = *s, *s = s[2], s[2] = (char)tmp;	/* misordered... */
 	    if (strchr("LU", *s) &&
 		(strchr(PL_lex_casestack, 'L') || strchr(PL_lex_casestack, 'U')))
 	    {
@@ -2583,7 +2583,7 @@ Perl_yylex(pTHX)
 		if (!PL_preprocess)
 		    bof = PerlIO_tell(PL_rsfp) == SvCUR(PL_linestr);
 #else
-		bof = PerlIO_tell(PL_rsfp) == SvCUR(PL_linestr);
+		bof = PerlIO_tell(PL_rsfp) == (Off_t)SvCUR(PL_linestr);
 #endif
 		if (bof) {
 		    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
@@ -2868,7 +2868,7 @@ Perl_yylex(pTHX)
 		Perl_croak(aTHX_ "Unrecognized file test: -%c", (int)tmp);
 		break;
 	    }
-	    PL_last_lop_op = ftst;
+	    PL_last_lop_op = (OPCODE)ftst;
 	    DEBUG_T( { PerlIO_printf(Perl_debug_log,
 				     "### Saw file test %c\n", (int)ftst);
 	    } )
@@ -6244,7 +6244,6 @@ S_scan_trans(pTHX_ char *start)
     I32 squash;
     I32 del;
     I32 complement;
-    I32 utf8;
     I32 count = 0;
 
     yylval.ival = OP_NULL;
@@ -6390,7 +6389,7 @@ S_scan_heredoc(pTHX_ register char *s)
 		CopLINE_inc(PL_curcop);
 	}
 	if (s >= bufend) {
-	    CopLINE_set(PL_curcop, PL_multi_start);
+	    CopLINE_set(PL_curcop, (line_t)PL_multi_start);
 	    missingterm(PL_tokenbuf);
 	}
 	sv_setpvn(herewas,bufptr,d-bufptr+1);
@@ -6410,7 +6409,7 @@ S_scan_heredoc(pTHX_ register char *s)
 		CopLINE_inc(PL_curcop);
 	}
 	if (s >= PL_bufend) {
-	    CopLINE_set(PL_curcop, PL_multi_start);
+	    CopLINE_set(PL_curcop, (line_t)PL_multi_start);
 	    missingterm(PL_tokenbuf);
 	}
 	sv_setpvn(tmpstr,d+1,s-d);
@@ -6428,7 +6427,7 @@ S_scan_heredoc(pTHX_ register char *s)
     while (s >= PL_bufend) {	/* multiple line string? */
 	if (!outer ||
 	 !(PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = filter_gets(PL_linestr, PL_rsfp, 0))) {
-	    CopLINE_set(PL_curcop, PL_multi_start);
+	    CopLINE_set(PL_curcop, (line_t)PL_multi_start);
 	    missingterm(PL_tokenbuf);
 	}
 	CopLINE_inc(PL_curcop);
@@ -6775,7 +6774,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 	if (!PL_rsfp ||
 	 !(PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = filter_gets(PL_linestr, PL_rsfp, 0))) {
 	    sv_free(sv);
-	    CopLINE_set(PL_curcop, PL_multi_start);
+	    CopLINE_set(PL_curcop, (line_t)PL_multi_start);
 	    return Nullch;
 	}
 	/* we read a line, so increment our line counter */

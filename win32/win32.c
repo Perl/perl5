@@ -215,7 +215,6 @@ get_emd_part(SV **prev_pathp, char *trailing_path, ...)
     char *ptr;
     char *optr;
     char *strip;
-    int oldsize, newsize;
     STRLEN baselen;
 
     va_start(ap, trailing_path);
@@ -293,8 +292,6 @@ win32_get_xlib(const char *pl, const char *xlib, const char *libname)
     dTHXo;
     char regstr[40];
     char pathstr[MAX_PATH+1];
-    DWORD datalen;
-    int len, newsize;
     SV *sv1 = Nullsv;
     SV *sv2 = Nullsv;
 
@@ -981,7 +978,7 @@ find_pid(int pid)
     dTHXo;
     long child = w32_num_children;
     while (--child >= 0) {
-	if (w32_child_pids[child] == pid)
+	if ((int)w32_child_pids[child] == pid)
 	    return child;
     }
     return -1;
@@ -1008,7 +1005,7 @@ find_pseudo_pid(int pid)
     dTHXo;
     long child = w32_num_pseudo_children;
     while (--child >= 0) {
-	if (w32_pseudo_child_pids[child] == pid)
+	if ((int)w32_pseudo_child_pids[child] == pid)
 	    return child;
     }
     return -1;
@@ -1785,7 +1782,6 @@ win32_wait(int *status)
 	}
     }
 
-FAILED:
     errno = GetLastError();
     return -1;
 }
@@ -2978,6 +2974,10 @@ DllExport int
 win32_chdir(const char *dir)
 {
     dTHXo;
+    if (!dir) {
+	errno = ENOENT;
+	return -1;
+    }
     if (USING_WIDE()) {
 	WCHAR wBuffer[MAX_PATH+1];
 	A2WHELPER(dir, wBuffer, sizeof(wBuffer));
@@ -3097,7 +3097,7 @@ qualified_path(const char *cmd)
 	    if (*pathstr == '"') {	/* foo;"baz;etc";bar */
 		pathstr++;		/* skip initial '"' */
 		while (*pathstr && *pathstr != '"') {
-		    if (curfullcmd-fullcmd < MAX_PATH-cmdlen-5)
+		    if ((STRLEN)(curfullcmd-fullcmd) < MAX_PATH-cmdlen-5)
 			*curfullcmd++ = *pathstr;
 		    pathstr++;
 		}
@@ -3105,7 +3105,7 @@ qualified_path(const char *cmd)
 		    pathstr++;		/* skip trailing '"' */
 	    }
 	    else {
-		if (curfullcmd-fullcmd < MAX_PATH-cmdlen-5)
+		if ((STRLEN)(curfullcmd-fullcmd) < MAX_PATH-cmdlen-5)
 		    *curfullcmd++ = *pathstr;
 		pathstr++;
 	    }
@@ -3118,7 +3118,7 @@ qualified_path(const char *cmd)
 	    *curfullcmd++ = '\\';
 	}
     }
-GIVE_UP:
+
     Safefree(fullcmd);
     return Nullch;
 }

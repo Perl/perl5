@@ -31,7 +31,7 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, int len, int level)
     if (gvp && (gv = *gvp) != (GV*)&PL_sv_undef && (subgen = GvSV(gv))
 	&& (hv = GvHV(gv)))
     {
-	if (SvIV(subgen) == PL_sub_generation) {
+	if (SvIV(subgen) == (IV)PL_sub_generation) {
 	    SV* sv;
 	    SV** svp = (SV**)hv_fetch(hv, name, len, FALSE);
 	    if (svp && (sv = *svp) != (SV*)&PL_sv_undef) {

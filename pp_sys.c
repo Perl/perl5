@@ -647,9 +647,9 @@ PP(pp_fileno)
 PP(pp_umask)
 {
     dSP; dTARGET;
+#ifdef HAS_UMASK
     Mode_t anum;
 
-#ifdef HAS_UMASK
     if (MAXARG < 1) {
 	anum = PerlLIO_umask(0);
 	(void)PerlLIO_umask(anum);
@@ -744,7 +744,7 @@ PP(pp_tie)
 	ENTER;
 	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
-	EXTEND(SP,items);
+	EXTEND(SP,(I32)items);
 	while (items--)
 	    PUSHs(*MARK++);
 	PUTBACK;
@@ -762,7 +762,7 @@ PP(pp_tie)
 	ENTER;
 	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
-	EXTEND(SP,items);
+	EXTEND(SP,(I32)items);
 	while (items--)
 	    PUSHs(*MARK++);
 	PUTBACK;
@@ -1326,7 +1326,6 @@ PP(pp_prtf)
     PerlIO *fp;
     SV *sv;
     MAGIC *mg;
-    STRLEN n_a;
 
     if (PL_op->op_flags & OPf_STACKED)
 	gv = (GV*)*++MARK;
@@ -1493,7 +1492,7 @@ PP(pp_sysread)
 	if (bufsize >= 256)
 	    bufsize = 255;
 #endif
-	buffer = SvGROW(bufsv, length+1);
+	buffer = SvGROW(bufsv, (STRLEN)(length+1));
 	/* 'offset' means 'flags' here */
 	length = PerlSock_recvfrom(PerlIO_fileno(IoIFP(io)), buffer, length, offset,
 			  (struct sockaddr *)namebuf, &bufsize);
@@ -1520,12 +1519,12 @@ PP(pp_sysread)
 	DIE(aTHX_ PL_no_sock_func, "recv");
 #endif
     if (offset < 0) {
-	if (-offset > blen)
+	if (-offset > (int)blen)
 	    DIE(aTHX_ "Offset outside string");
 	offset += blen;
     }
     bufsize = SvCUR(bufsv);
-    buffer = SvGROW(bufsv, length+offset+1);
+    buffer = SvGROW(bufsv, (STRLEN)(length+offset+1));
     if (offset > bufsize) { /* Zero any newly allocated space */
     	Zero(buffer+bufsize, offset-bufsize, char);
     }
@@ -1662,10 +1661,10 @@ PP(pp_send)
 	if (MARK < SP) {
 	    offset = SvIVx(*++MARK);
 	    if (offset < 0) {
-		if (-offset > blen)
+		if (-offset > (IV)blen)
 		    DIE(aTHX_ "Offset outside string");
 		offset += blen;
-	    } else if (offset >= blen && blen > 0)
+	    } else if (offset >= (IV)blen && blen > 0)
 		DIE(aTHX_ "Offset outside string");
 	} else
 	    offset = 0;
@@ -3239,8 +3238,8 @@ PP(pp_chown)
 PP(pp_chroot)
 {
     dSP; dTARGET;
-    char *tmps;
 #ifdef HAS_CHROOT
+    char *tmps;
     STRLEN n_a;
     tmps = POPpx;
     TAINT_PROPER("chroot");
@@ -3773,13 +3772,9 @@ PP(pp_system)
 {
     dSP; dMARK; dORIGMARK; dTARGET;
     I32 value;
-    Pid_t childpid;
     int result;
-    int status;
-    Sigsave_t ihand,qhand;     /* place to save signals during system() */
     STRLEN n_a;
     I32 did_pipes = 0;
-    int pp[2];
 
     if (SP - MARK == 1) {
 	if (PL_tainting) {
@@ -3790,6 +3785,10 @@ PP(pp_system)
     }
     PERL_FLUSHALL_FOR_CHILD;
 #if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2) && !defined(__CYGWIN__)
+  {
+    Pid_t childpid;
+    int pp[2];
+
     if (PerlProc_pipe(pp) >= 0)
 	did_pipes = 1;
     while ((childpid = vfork()) == -1) {
@@ -3806,6 +3805,8 @@ PP(pp_system)
 	sleep(5);
     }
     if (childpid > 0) {
+	Sigsave_t ihand,qhand;     /* place to save signals during system() */
+	int status;
 	if (did_pipes)
 	    PerlLIO_close(pp[1]);
 	rsignal_save(SIGINT, SIG_IGN, &ihand);
@@ -3857,6 +3858,7 @@ PP(pp_system)
 	value = (I32)do_exec3(SvPVx(sv_mortalcopy(*SP), n_a), pp[1], did_pipes);
     }
     PerlProc__exit(-1);
+  }
 #else /* ! FORK or VMS or OS/2 */
     PL_statusvalue = 0;
     result = 0;
@@ -4016,9 +4018,9 @@ PP(pp_setpgrp)
 PP(pp_getpriority)
 {
     dSP; dTARGET;
+#ifdef HAS_GETPRIORITY
     int which;
     int who;
-#ifdef HAS_GETPRIORITY
     who = POPi;
     which = TOPi;
     SETi( getpriority(which, who) );
@@ -4031,10 +4033,10 @@ PP(pp_getpriority)
 PP(pp_setpriority)
 {
     dSP; dTARGET;
+#ifdef HAS_SETPRIORITY
     int which;
     int who;
     int niceval;
-#ifdef HAS_SETPRIORITY
     niceval = POPi;
     who = POPi;
     which = TOPi;
@@ -4163,8 +4165,8 @@ PP(pp_gmtime)
 PP(pp_alarm)
 {
     dSP; dTARGET;
-    int anum;
 #ifdef HAS_ALARM
+    int anum;
     anum = POPi;
     anum = alarm((unsigned int)anum);
     EXTEND(SP, 1);
@@ -4645,7 +4647,7 @@ PP(pp_gservent)
     else if (which == OP_GSBYPORT) {
 #ifdef HAS_GETSERVBYPORT
 	char *proto = POPpx;
-	unsigned short port = POPu;
+	unsigned short port = (unsigned short)POPu;
 
 #ifdef HAS_HTONS
 	port = PerlSock_htons(port);

@@ -1154,15 +1154,14 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
   MAGIC* mg=mg_find((SV*)stash,'c');
   AMT *amtp = (mg) ? (AMT*)mg->mg_ptr: (AMT *) NULL;
   AMT amt;
-  STRLEN n_a;
 #ifdef OVERLOAD_VIA_HASH
   GV** gvp;
   HV* hv;
 #endif
 
   if (mg && amtp->was_ok_am == PL_amagic_generation
-      && amtp->was_ok_sub == PL_sub_generation)
-      return AMT_AMAGIC(amtp);
+      && amtp->was_ok_sub == (long)PL_sub_generation)
+      return (bool)AMT_AMAGIC(amtp);
   if (amtp && AMT_AMAGIC(amtp)) {	/* Have table. */
     int i;
     for (i=1; i<NofAMmeth; i++) {
@@ -1205,6 +1204,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
           switch (SvTYPE(sv)) {
             default:
               if (!SvROK(sv)) {
+	        STRLEN n_a;
                 if (!SvOK(sv)) break;
 		gv = gv_fetchmethod(stash, SvPV(sv, n_a));
                 if (gv) cv = GvCV(gv);
@@ -1270,7 +1270,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 		GV *ngv;
 		
 		DEBUG_o( Perl_deb(aTHX_ "Resolving method `%.256s' for overloaded `%s' in package `%.256s'\n",
-			     SvPV(GvSV(gv), n_a), cp, HvNAME(stash)) );
+			     SvPV_nolen(GvSV(gv)), cp, HvNAME(stash)) );
 		if (!SvPOK(GvSV(gv))
 		    || !(ngv = gv_fetchmethod_autoload(stash, SvPVX(GvSV(gv)),
 						       FALSE)))

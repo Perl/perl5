@@ -188,7 +188,7 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, U32 klen, I32 lval)
     for (; entry; entry = HeNEXT(entry)) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
-	if (HeKLEN(entry) != klen)
+	if (HeKLEN(entry) != (I32)klen)
 	    continue;
 	if (memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
@@ -296,7 +296,7 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
     for (; entry; entry = HeNEXT(entry)) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
-	if (HeKLEN(entry) != klen)
+	if (HeKLEN(entry) != (I32)klen)
 	    continue;
 	if (memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
@@ -399,7 +399,7 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, U32 klen, SV *val, register U32 has
     for (entry = *oentry; entry; i=0, entry = HeNEXT(entry)) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
-	if (HeKLEN(entry) != klen)
+	if (HeKLEN(entry) != (I32)klen)
 	    continue;
 	if (memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
@@ -420,7 +420,7 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, U32 klen, SV *val, register U32 has
     xhv->xhv_keys++;
     if (i) {				/* initial entry? */
 	++xhv->xhv_fill;
-	if (xhv->xhv_keys > xhv->xhv_max)
+	if (xhv->xhv_keys > (IV)xhv->xhv_max)
 	    hsplit(hv);
     }
 
@@ -499,7 +499,7 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
     for (entry = *oentry; entry; i=0, entry = HeNEXT(entry)) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
-	if (HeKLEN(entry) != klen)
+	if (HeKLEN(entry) != (I32)klen)
 	    continue;
 	if (memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
@@ -520,7 +520,7 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
     xhv->xhv_keys++;
     if (i) {				/* initial entry? */
 	++xhv->xhv_fill;
-	if (xhv->xhv_keys > xhv->xhv_max)
+	if (xhv->xhv_keys > (IV)xhv->xhv_max)
 	    hsplit(hv);
     }
 
@@ -586,7 +586,7 @@ Perl_hv_delete(pTHX_ HV *hv, const char *key, U32 klen, I32 flags)
     for (; entry; i=0, oentry = &HeNEXT(entry), entry = *oentry) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
-	if (HeKLEN(entry) != klen)
+	if (HeKLEN(entry) != (I32)klen)
 	    continue;
 	if (memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
@@ -673,7 +673,7 @@ Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
     for (; entry; i=0, oentry = &HeNEXT(entry), entry = *oentry) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
-	if (HeKLEN(entry) != klen)
+	if (HeKLEN(entry) != (I32)klen)
 	    continue;
 	if (memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
@@ -747,7 +747,7 @@ Perl_hv_exists(pTHX_ HV *hv, const char *key, U32 klen)
     for (; entry; entry = HeNEXT(entry)) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
-	if (HeKLEN(entry) != klen)
+	if (HeKLEN(entry) != (I32)klen)
 	    continue;
 	if (memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
@@ -827,7 +827,7 @@ Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
     for (; entry; entry = HeNEXT(entry)) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
-	if (HeKLEN(entry) != klen)
+	if (HeKLEN(entry) != (I32)klen)
 	    continue;
 	if (memNE(HeKEY(entry),key,klen))	/* is this it? */
 	    continue;
@@ -894,7 +894,7 @@ S_hsplit(pTHX_ HV *hv)
 	    continue;
 	bep = aep+oldsize;
 	for (oentry = aep, entry = *aep; entry; entry = *oentry) {
-	    if ((HeHASH(entry) & newsize) != i) {
+	    if ((HeHASH(entry) & newsize) != (U32)i) {
 		*oentry = HeNEXT(entry);
 		HeNEXT(entry) = *bep;
 		if (!*bep)
@@ -1280,7 +1280,7 @@ Perl_hv_iternext(pTHX_ HV *hv)
 	entry = HeNEXT(entry);
     while (!entry) {
 	++xhv->xhv_riter;
-	if (xhv->xhv_riter > xhv->xhv_max) {
+	if (xhv->xhv_riter > (I32)xhv->xhv_max) {
 	    xhv->xhv_riter = -1;
 	    break;
 	}
@@ -1489,7 +1489,7 @@ Perl_share_hek(pTHX_ const char *str, I32 len, register U32 hash)
 	xhv->xhv_keys++;
 	if (i) {				/* initial entry? */
 	    ++xhv->xhv_fill;
-	    if (xhv->xhv_keys > xhv->xhv_max)
+	    if (xhv->xhv_keys > (IV)xhv->xhv_max)
 		hsplit(PL_strtab);
 	}
     }

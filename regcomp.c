@@ -987,7 +987,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		    if (OP(nxt) != CLOSE) 
 			goto nogo;
 		    /* Now we know that nxt2 is the only contents: */
-		    oscan->flags = ARG(nxt);
+		    oscan->flags = (U8)ARG(nxt);
 		    OP(oscan) = CURLYN;
 		    OP(nxt1) = NOTHING;	/* was OPEN. */
 #ifdef DEBUGGING
@@ -1023,7 +1023,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 
 			if (OP(nxt) != CLOSE) 
 			    FAIL("Panic opt close");
-			oscan->flags = ARG(nxt);
+			oscan->flags = (U8)ARG(nxt);
 			OP(nxt1) = OPTIMIZED;	/* was OPEN. */
 			OP(nxt) = OPTIMIZED;	/* was CLOSE. */
 #ifdef DEBUGGING
@@ -1066,8 +1066,8 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 
 		    if (OP(PREVOPER(nxt)) == NOTHING) /* LONGJMP */
 			nxt += ARG(nxt);
-		    PREVOPER(nxt)->flags = data->whilem_c
-			| (PL_reg_whilem_seen << 4); /* On WHILEM */
+		    PREVOPER(nxt)->flags = (U8)(data->whilem_c
+			| (PL_reg_whilem_seen << 4)); /* On WHILEM */
 		}
 		if (data && fl & (SF_HAS_PAR|SF_IN_PAR)) 
 		    pars++;
@@ -1404,7 +1404,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 		else if (minnext > U8_MAX) {
 		    vFAIL2("Lookbehind longer than %"UVuf" not implemented", (UV)U8_MAX);
 		}
-		scan->flags = minnext;
+		scan->flags = (U8)minnext;
 	    }
 	    if (data && data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
 		pars++;
@@ -1424,7 +1424,7 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 	    pars++;
 	}
 	else if (OP(scan) == CLOSE) {
-	    if (ARG(scan) == is_par) {
+	    if ((I32)ARG(scan) == is_par) {
 		next = regnext(scan);
 
 		if ( next && (OP(next) != WHILEM) && next < last)
@@ -1622,7 +1622,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     PL_regnpar = 1;
     PL_regcode = r->program;
     /* Store the count of eval-groups for security checks: */
-    PL_regcode->next_off = ((PL_seen_evals > U16_MAX) ? U16_MAX : PL_seen_evals);
+    PL_regcode->next_off = (U16)((PL_seen_evals > U16_MAX) ? U16_MAX : PL_seen_evals);
     REGC((U8)REG_MAGIC, (char*) PL_regcode++);
     r->data = 0;
     if (reg(0, &flags) == NULL)
@@ -1806,8 +1806,11 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    r->regstclass = NULL;
 	if ((!r->anchored_substr || r->anchored_offset) && stclass_flag
 	    && !(data.start_class->flags & ANYOF_EOS)
-	    && !cl_is_anything(data.start_class)) {
+	    && !cl_is_anything(data.start_class))
+	{
+#ifdef DEBUGGING
 	    SV *sv;
+#endif
 	    I32 n = add_data(1, "f");
 
 	    New(1006, PL_regcomp_rx->data->data[n], 1, 
@@ -1858,7 +1861,9 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	r->check_substr = r->anchored_substr = r->float_substr = Nullsv;
 	if (!(data.start_class->flags & ANYOF_EOS)
 	    && !cl_is_anything(data.start_class)) {
+#ifdef DEBUGGING
 	    SV *sv;
+#endif
 	    I32 n = add_data(1, "f");
 
 	    New(1006, PL_regcomp_rx->data->data[n], 1, 
@@ -2205,7 +2210,7 @@ S_reg(pTHX_ I32 paren, I32 *flagp)
 	static char parens[] = "=!<,>";
 
 	if (paren && (p = strchr(parens, paren))) {
-	    int node = ((p - parens) % 2) ? UNLESSM : IFMATCH;
+	    U8 node = ((p - parens) % 2) ? UNLESSM : IFMATCH;
 	    int flag = (p - parens) > 1;
 
 	    if (paren == '>')
@@ -2218,7 +2223,7 @@ S_reg(pTHX_ I32 paren, I32 *flagp)
 
     /* Check for proper termination. */
     if (paren) {
-	PL_regflags = oregflags;
+	PL_regflags = (U16)oregflags;
 	if (PL_regcomp_parse >= PL_regxend || *nextchar() != ')') {
 	    PL_regcomp_parse = oregcomp_parse;
 	    vFAIL("Unmatched (");
@@ -2389,8 +2394,8 @@ S_regpiece(pTHX_ I32 *flagp)
 	    if (max && max < min)
 		vFAIL("Can't do {n,m} with n > m");
 	    if (!SIZE_ONLY) {
-		ARG1_SET(ret, min);
-		ARG2_SET(ret, max);
+		ARG1_SET(ret, (U16)min);
+		ARG2_SET(ret, (U16)max);
 	    }
 
 	    goto nest_check;
@@ -2610,20 +2615,20 @@ tryagain:
 		is_utf8_mark((U8*)"~");		/* preload table */
 	    break;
 	case 'w':
-	    ret = reg_node(
+	    ret = reg_node((U8)(
 		UTF
 		    ? (LOC ? ALNUMLUTF8 : ALNUMUTF8)
-		    : (LOC ? ALNUML     : ALNUM));
+		    : (LOC ? ALNUML     : ALNUM)));
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar();
 	    if (UTF && !PL_utf8_alnum)
 		is_utf8_alnum((U8*)"a");	/* preload table */
 	    break;
 	case 'W':
-	    ret = reg_node(
+	    ret = reg_node((U8)(
 		UTF
 		    ? (LOC ? NALNUMLUTF8 : NALNUMUTF8)
-		    : (LOC ? NALNUML     : NALNUM));
+		    : (LOC ? NALNUML     : NALNUM)));
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar();
 	    if (UTF && !PL_utf8_alnum)
@@ -2632,10 +2637,10 @@ tryagain:
 	case 'b':
 	    PL_seen_zerolen++;
 	    PL_regseen |= REG_SEEN_LOOKBEHIND;
-	    ret = reg_node(
+	    ret = reg_node((U8)(
 		UTF
 		    ? (LOC ? BOUNDLUTF8 : BOUNDUTF8)
-		    : (LOC ? BOUNDL     : BOUND));
+		    : (LOC ? BOUNDL     : BOUND)));
 	    *flagp |= SIMPLE;
 	    nextchar();
 	    if (UTF && !PL_utf8_alnum)
@@ -2644,44 +2649,44 @@ tryagain:
 	case 'B':
 	    PL_seen_zerolen++;
 	    PL_regseen |= REG_SEEN_LOOKBEHIND;
-	    ret = reg_node(
+	    ret = reg_node((U8)(
 		UTF
 		    ? (LOC ? NBOUNDLUTF8 : NBOUNDUTF8)
-		    : (LOC ? NBOUNDL     : NBOUND));
+		    : (LOC ? NBOUNDL     : NBOUND)));
 	    *flagp |= SIMPLE;
 	    nextchar();
 	    if (UTF && !PL_utf8_alnum)
 		is_utf8_alnum((U8*)"a");	/* preload table */
 	    break;
 	case 's':
-	    ret = reg_node(
+	    ret = reg_node((U8)(
 		UTF
 		    ? (LOC ? SPACELUTF8 : SPACEUTF8)
-		    : (LOC ? SPACEL     : SPACE));
+		    : (LOC ? SPACEL     : SPACE)));
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar();
 	    if (UTF && !PL_utf8_space)
 		is_utf8_space((U8*)" ");	/* preload table */
 	    break;
 	case 'S':
-	    ret = reg_node(
+	    ret = reg_node((U8)(
 		UTF
 		    ? (LOC ? NSPACELUTF8 : NSPACEUTF8)
-		    : (LOC ? NSPACEL     : NSPACE));
+		    : (LOC ? NSPACEL     : NSPACE)));
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar();
 	    if (UTF && !PL_utf8_space)
 		is_utf8_space((U8*)" ");	/* preload table */
 	    break;
 	case 'd':
-	    ret = reg_node(UTF ? DIGITUTF8 : DIGIT);
+	    ret = reg_node((U8)(UTF ? DIGITUTF8 : DIGIT));
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar();
 	    if (UTF && !PL_utf8_digit)
 		is_utf8_digit((U8*)"1");	/* preload table */
 	    break;
 	case 'D':
-	    ret = reg_node(UTF ? NDIGITUTF8 : NDIGIT);
+	    ret = reg_node((U8)(UTF ? NDIGITUTF8 : NDIGIT));
 	    *flagp |= HASWIDTH|SIMPLE;
 	    nextchar();
 	    if (UTF && !PL_utf8_digit)
@@ -2734,12 +2739,12 @@ tryagain:
 		    while (isDIGIT(*PL_regcomp_parse))
 			PL_regcomp_parse++;
 
-		    if (!SIZE_ONLY && num > PL_regcomp_rx->nparens)
+		    if (!SIZE_ONLY && num > (I32)PL_regcomp_rx->nparens)
 			vFAIL("Reference to nonexistent group");
 		    PL_regsawback = 1;
-		    ret = reganode(FOLD
+		    ret = reganode((U8)(FOLD
 				   ? (LOC ? REFFL : REFF)
-				   : REF, num);
+				   : REF), num);
 		    *flagp |= HASWIDTH;
 		    PL_regcomp_parse--;
 		    nextchar();
@@ -2775,9 +2780,9 @@ tryagain:
 	    PL_regcomp_parse++;
 
 	defchar:
-	    ret = reg_node(FOLD
+	    ret = reg_node((U8)(FOLD
 			  ? (LOC ? EXACTFL : EXACTF)
-			  : EXACT);
+			  : EXACT));
 	    s = STRING(ret);
 	    for (len = 0, p = PL_regcomp_parse - 1;
 	      len < 127 && p < PL_regxend;
@@ -2930,7 +2935,7 @@ tryagain:
 		    }
 		    else {
 			len++;
-			REGC(ender, s++);
+			REGC((char)ender, s++);
 		    }
 		    break;
 		}
@@ -2942,7 +2947,7 @@ tryagain:
 		    len += numlen - 1;
 		}
 		else
-		    REGC(ender, s++);
+		    REGC((char)ender, s++);
 	    }
 	loopdone:
 	    PL_regcomp_parse = p - 1;
@@ -3545,7 +3550,7 @@ S_regclass(pTHX)
 	    }
 	}
 	if (range) {
-	    if (lastvalue > value) /* b-a */ {
+	    if (lastvalue > (I32)value) /* b-a */ {
 		Simple_vFAIL4("Invalid [] range \"%*.*s\"",
 			      PL_regcomp_parse - rangebegin,
 			      PL_regcomp_parse - rangebegin,
@@ -3591,7 +3596,7 @@ S_regclass(pTHX)
 	    }
 	    else
 #endif
-		for ( ; lastvalue <= value; lastvalue++)
+		for ( ; lastvalue <= (I32)value; lastvalue++)
 		    ANYOF_BITMAP_SET(ret, lastvalue);
         }
 	range = 0;
@@ -3886,7 +3891,7 @@ S_regclassutf8(pTHX)
 	n = add_data(1,"s");
 	PL_regcomp_rx->data->data[n] = (void*)rv;
 	ARG1_SET(ret, flags);
-	ARG2_SET(ret, n);
+	ARG2_SET(ret, (U16)n);
     }
 
     return ret;
@@ -4344,8 +4349,8 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 		} else if (rangestart != -1) {
 		    U8 *p;
 
-		    if (i <= rangestart + 3)
-			for (; rangestart < i; rangestart++) {
+		    if (i <= (UV)rangestart + 3)
+			for (; (UV)rangestart < i; rangestart++) {
 			    for(e = uv_to_utf8(s, rangestart), p = s; p < e; p++)
 				put_byte(sv, *p);
 			}

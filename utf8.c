@@ -47,72 +47,72 @@ U8 *
 Perl_uv_to_utf8(pTHX_ U8 *d, UV uv)
 {
     if (uv < 0x80) {
-	*d++ = uv;
+	*d++ = (U8)uv;
 	return d;
     }
     if (uv < 0x800) {
-	*d++ = (( uv >>  6)         | 0xc0);
-	*d++ = (( uv        & 0x3f) | 0x80);
+	*d++ = (U8)(( uv >>  6)         | 0xc0);
+	*d++ = (U8)(( uv        & 0x3f) | 0x80);
 	return d;
     }
     if (uv < 0x10000) {
-	*d++ = (( uv >> 12)         | 0xe0);
-	*d++ = (((uv >>  6) & 0x3f) | 0x80);
-	*d++ = (( uv        & 0x3f) | 0x80);
+	*d++ = (U8)(( uv >> 12)         | 0xe0);
+	*d++ = (U8)(((uv >>  6) & 0x3f) | 0x80);
+	*d++ = (U8)(( uv        & 0x3f) | 0x80);
 	return d;
     }
     if (uv < 0x200000) {
-	*d++ = (( uv >> 18)         | 0xf0);
-	*d++ = (((uv >> 12) & 0x3f) | 0x80);
-	*d++ = (((uv >>  6) & 0x3f) | 0x80);
-	*d++ = (( uv        & 0x3f) | 0x80);
+	*d++ = (U8)(( uv >> 18)         | 0xf0);
+	*d++ = (U8)(((uv >> 12) & 0x3f) | 0x80);
+	*d++ = (U8)(((uv >>  6) & 0x3f) | 0x80);
+	*d++ = (U8)(( uv        & 0x3f) | 0x80);
 	return d;
     }
     if (uv < 0x4000000) {
-	*d++ = (( uv >> 24)         | 0xf8);
-	*d++ = (((uv >> 18) & 0x3f) | 0x80);
-	*d++ = (((uv >> 12) & 0x3f) | 0x80);
-	*d++ = (((uv >>  6) & 0x3f) | 0x80);
-	*d++ = (( uv        & 0x3f) | 0x80);
+	*d++ = (U8)(( uv >> 24)         | 0xf8);
+	*d++ = (U8)(((uv >> 18) & 0x3f) | 0x80);
+	*d++ = (U8)(((uv >> 12) & 0x3f) | 0x80);
+	*d++ = (U8)(((uv >>  6) & 0x3f) | 0x80);
+	*d++ = (U8)(( uv        & 0x3f) | 0x80);
 	return d;
     }
     if (uv < 0x80000000) {
-	*d++ = (( uv >> 30)         | 0xfc);
-	*d++ = (((uv >> 24) & 0x3f) | 0x80);
-	*d++ = (((uv >> 18) & 0x3f) | 0x80);
-	*d++ = (((uv >> 12) & 0x3f) | 0x80);
-	*d++ = (((uv >>  6) & 0x3f) | 0x80);
-	*d++ = (( uv        & 0x3f) | 0x80);
+	*d++ = (U8)(( uv >> 30)         | 0xfc);
+	*d++ = (U8)(((uv >> 24) & 0x3f) | 0x80);
+	*d++ = (U8)(((uv >> 18) & 0x3f) | 0x80);
+	*d++ = (U8)(((uv >> 12) & 0x3f) | 0x80);
+	*d++ = (U8)(((uv >>  6) & 0x3f) | 0x80);
+	*d++ = (U8)(( uv        & 0x3f) | 0x80);
 	return d;
     }
 #ifdef HAS_QUAD
     if (uv < UTF8_QUAD_MAX)
 #endif
     {
-	*d++ =                        0xfe;	/* Can't match U+FEFF! */
-	*d++ = (((uv >> 30) & 0x3f) | 0x80);
-	*d++ = (((uv >> 24) & 0x3f) | 0x80);
-	*d++ = (((uv >> 18) & 0x3f) | 0x80);
-	*d++ = (((uv >> 12) & 0x3f) | 0x80);
-	*d++ = (((uv >>  6) & 0x3f) | 0x80);
-	*d++ = (( uv        & 0x3f) | 0x80);
+	*d++ = (U8)                       0xfe;	/* Can't match U+FEFF! */
+	*d++ = (U8)(((uv >> 30) & 0x3f) | 0x80);
+	*d++ = (U8)(((uv >> 24) & 0x3f) | 0x80);
+	*d++ = (U8)(((uv >> 18) & 0x3f) | 0x80);
+	*d++ = (U8)(((uv >> 12) & 0x3f) | 0x80);
+	*d++ = (U8)(((uv >>  6) & 0x3f) | 0x80);
+	*d++ = (U8)(( uv        & 0x3f) | 0x80);
 	return d;
     }
 #ifdef HAS_QUAD
     {
-	*d++ =                        0xff;	/* Can't match U+FFFE! */
-	*d++ =                        0x80;	/* 6 Reserved bits */
-	*d++ = (((uv >> 60) & 0x0f) | 0x80);	/* 2 Reserved bits */
-	*d++ = (((uv >> 54) & 0x3f) | 0x80);
-	*d++ = (((uv >> 48) & 0x3f) | 0x80);
-	*d++ = (((uv >> 42) & 0x3f) | 0x80);
-	*d++ = (((uv >> 36) & 0x3f) | 0x80);
-	*d++ = (((uv >> 30) & 0x3f) | 0x80);
-	*d++ = (((uv >> 24) & 0x3f) | 0x80);
-	*d++ = (((uv >> 18) & 0x3f) | 0x80);
-	*d++ = (((uv >> 12) & 0x3f) | 0x80);
-	*d++ = (((uv >>  6) & 0x3f) | 0x80);
-	*d++ = (( uv        & 0x3f) | 0x80);
+	*d++ = (U8)                       0xff;	/* Can't match U+FFFE! */
+	*d++ = (U8)                       0x80;	/* 6 Reserved bits */
+	*d++ = (U8)(((uv >> 60) & 0x0f) | 0x80);/* 2 Reserved bits */
+	*d++ = (U8)(((uv >> 54) & 0x3f) | 0x80);
+	*d++ = (U8)(((uv >> 48) & 0x3f) | 0x80);
+	*d++ = (U8)(((uv >> 42) & 0x3f) | 0x80);
+	*d++ = (U8)(((uv >> 36) & 0x3f) | 0x80);
+	*d++ = (U8)(((uv >> 30) & 0x3f) | 0x80);
+	*d++ = (U8)(((uv >> 24) & 0x3f) | 0x80);
+	*d++ = (U8)(((uv >> 18) & 0x3f) | 0x80);
+	*d++ = (U8)(((uv >> 12) & 0x3f) | 0x80);
+	*d++ = (U8)(((uv >>  6) & 0x3f) | 0x80);
+	*d++ = (U8)(( uv        & 0x3f) | 0x80);
 	return d;
     }
 #endif
@@ -159,7 +159,7 @@ Perl_is_utf8_char(pTHX_ U8 *s)
 	s++;
     }
 
-    if (UNISKIP(uv) < len)
+    if ((STRLEN)UNISKIP(uv) < len)
 	return 0;
 
     return len;
@@ -331,7 +331,7 @@ Perl_utf8_to_uv(pTHX_ U8* s, STRLEN curlen, STRLEN* retlen, U32 flags)
 	       !(flags & UTF8_ALLOW_BOM)) {
 	warning = UTF8_WARN_BOM;
 	goto malformed;
-    } else if ((expectlen > UNISKIP(uv)) &&
+    } else if ((expectlen > (STRLEN)UNISKIP(uv)) &&
 	       !(flags & UTF8_ALLOW_LONG)) {
 	warning = UTF8_WARN_LONG;
 	goto malformed;
@@ -698,12 +698,12 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
 	UV uv = (p[0] << 8) + p[1]; /* UTF-16BE */
 	p += 2;
 	if (uv < 0x80) {
-	    *d++ = uv;
+	    *d++ = (U8)uv;
 	    continue;
 	}
 	if (uv < 0x800) {
-	    *d++ = (( uv >>  6)         | 0xc0);
-	    *d++ = (( uv        & 0x3f) | 0x80);
+	    *d++ = (U8)(( uv >>  6)         | 0xc0);
+	    *d++ = (U8)(( uv        & 0x3f) | 0x80);
 	    continue;
 	}
 	if (uv >= 0xd800 && uv < 0xdbff) {	/* surrogates */
@@ -713,16 +713,16 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
 	    uv = ((uv - 0xd800) << 10) + (low - 0xdc00) + 0x10000;
 	}
 	if (uv < 0x10000) {
-	    *d++ = (( uv >> 12)         | 0xe0);
-	    *d++ = (((uv >>  6) & 0x3f) | 0x80);
-	    *d++ = (( uv        & 0x3f) | 0x80);
+	    *d++ = (U8)(( uv >> 12)         | 0xe0);
+	    *d++ = (U8)(((uv >>  6) & 0x3f) | 0x80);
+	    *d++ = (U8)(( uv        & 0x3f) | 0x80);
 	    continue;
 	}
 	else {
-	    *d++ = (( uv >> 18)         | 0xf0);
-	    *d++ = (((uv >> 12) & 0x3f) | 0x80);
-	    *d++ = (((uv >>  6) & 0x3f) | 0x80);
-	    *d++ = (( uv        & 0x3f) | 0x80);
+	    *d++ = (U8)(( uv >> 18)         | 0xf0);
+	    *d++ = (U8)(((uv >> 12) & 0x3f) | 0x80);
+	    *d++ = (U8)(((uv >>  6) & 0x3f) | 0x80);
+	    *d++ = (U8)(( uv        & 0x3f) | 0x80);
 	    continue;
 	}
     }
@@ -998,13 +998,13 @@ Perl_is_utf8_alnum(pTHX_ U8 *p)
 	 * descendant of isalnum(3), in other words, it doesn't
 	 * contain the '_'. --jhi */
 	PL_utf8_alnum = swash_init("utf8", "IsWord", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_alnum, p);
+    return (bool)swash_fetch(PL_utf8_alnum, p);
 /*    return *p == '_' || is_utf8_alpha(p) || is_utf8_digit(p); */
 #ifdef SURPRISINGLY_SLOWER  /* probably because alpha is usually true */
     if (!PL_utf8_alnum)
 	PL_utf8_alnum = swash_init("utf8", "",
 	    sv_2mortal(newSVpv("+utf8::IsAlpha\n+utf8::IsDigit\n005F\n",0)), 0, 0);
-    return swash_fetch(PL_utf8_alnum, p);
+    return (bool)swash_fetch(PL_utf8_alnum, p);
 #endif
 }
 
@@ -1015,13 +1015,13 @@ Perl_is_utf8_alnumc(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_alnum)
 	PL_utf8_alnum = swash_init("utf8", "IsAlnumC", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_alnum, p);
+    return (bool)swash_fetch(PL_utf8_alnum, p);
 /*    return is_utf8_alpha(p) || is_utf8_digit(p); */
 #ifdef SURPRISINGLY_SLOWER  /* probably because alpha is usually true */
     if (!PL_utf8_alnum)
 	PL_utf8_alnum = swash_init("utf8", "",
 	    sv_2mortal(newSVpv("+utf8::IsAlpha\n+utf8::IsDigit\n005F\n",0)), 0, 0);
-    return swash_fetch(PL_utf8_alnum, p);
+    return (bool)swash_fetch(PL_utf8_alnum, p);
 #endif
 }
 
@@ -1038,7 +1038,7 @@ Perl_is_utf8_alpha(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_alpha)
 	PL_utf8_alpha = swash_init("utf8", "IsAlpha", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_alpha, p);
+    return (bool)swash_fetch(PL_utf8_alpha, p);
 }
 
 bool
@@ -1048,7 +1048,7 @@ Perl_is_utf8_ascii(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_ascii)
 	PL_utf8_ascii = swash_init("utf8", "IsAscii", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_ascii, p);
+    return (bool)swash_fetch(PL_utf8_ascii, p);
 }
 
 bool
@@ -1058,7 +1058,7 @@ Perl_is_utf8_space(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_space)
 	PL_utf8_space = swash_init("utf8", "IsSpacePerl", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_space, p);
+    return (bool)swash_fetch(PL_utf8_space, p);
 }
 
 bool
@@ -1068,7 +1068,7 @@ Perl_is_utf8_digit(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_digit)
 	PL_utf8_digit = swash_init("utf8", "IsDigit", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_digit, p);
+    return (bool)swash_fetch(PL_utf8_digit, p);
 }
 
 bool
@@ -1078,7 +1078,7 @@ Perl_is_utf8_upper(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_upper)
 	PL_utf8_upper = swash_init("utf8", "IsUpper", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_upper, p);
+    return (bool)swash_fetch(PL_utf8_upper, p);
 }
 
 bool
@@ -1088,7 +1088,7 @@ Perl_is_utf8_lower(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_lower)
 	PL_utf8_lower = swash_init("utf8", "IsLower", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_lower, p);
+    return (bool)swash_fetch(PL_utf8_lower, p);
 }
 
 bool
@@ -1098,7 +1098,7 @@ Perl_is_utf8_cntrl(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_cntrl)
 	PL_utf8_cntrl = swash_init("utf8", "IsCntrl", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_cntrl, p);
+    return (bool)swash_fetch(PL_utf8_cntrl, p);
 }
 
 bool
@@ -1108,7 +1108,7 @@ Perl_is_utf8_graph(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_graph)
 	PL_utf8_graph = swash_init("utf8", "IsGraph", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_graph, p);
+    return (bool)swash_fetch(PL_utf8_graph, p);
 }
 
 bool
@@ -1118,7 +1118,7 @@ Perl_is_utf8_print(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_print)
 	PL_utf8_print = swash_init("utf8", "IsPrint", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_print, p);
+    return (bool)swash_fetch(PL_utf8_print, p);
 }
 
 bool
@@ -1128,7 +1128,7 @@ Perl_is_utf8_punct(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_punct)
 	PL_utf8_punct = swash_init("utf8", "IsPunct", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_punct, p);
+    return (bool)swash_fetch(PL_utf8_punct, p);
 }
 
 bool
@@ -1138,7 +1138,7 @@ Perl_is_utf8_xdigit(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_xdigit)
 	PL_utf8_xdigit = swash_init("utf8", "IsXDigit", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_xdigit, p);
+    return (bool)swash_fetch(PL_utf8_xdigit, p);
 }
 
 bool
@@ -1148,7 +1148,7 @@ Perl_is_utf8_mark(pTHX_ U8 *p)
 	return FALSE;
     if (!PL_utf8_mark)
 	PL_utf8_mark = swash_init("utf8", "IsM", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_mark, p);
+    return (bool)swash_fetch(PL_utf8_mark, p);
 }
 
 UV
@@ -1226,7 +1226,7 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
 	char* pv = SvPV(tokenbufsv, len);
 
 	Copy(pv, PL_tokenbuf, len+1, char);
-	PL_curcop->op_private = PL_hints;
+	PL_curcop->op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
     }
     if (!SvROK(retval) || SvTYPE(SvRV(retval)) != SVt_PVHV)
 	Perl_croak(aTHX_ "SWASHNEW didn't return an HV ref");
@@ -1286,7 +1286,7 @@ Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr)
 	    FREETMPS;
 	    LEAVE;
 	    if (PL_curcop == &PL_compiling)
-		PL_curcop->op_private = PL_hints;
+		PL_curcop->op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
 
 	    svp = hv_store(hv, (char*)ptr, klen, retval, 0);
 

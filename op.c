@@ -165,7 +165,7 @@ Perl_pad_allocmy(pTHX_ char *name)
 	SV **svp = AvARRAY(PL_comppad_name);
 	HV *ourstash = (PL_curstash ? PL_curstash : PL_defstash);
 	PADOFFSET top = AvFILLp(PL_comppad_name);
-	for (off = top; off > PL_comppad_name_floor; off--) {
+	for (off = top; (I32)off > PL_comppad_name_floor; off--) {
 	    if ((sv = svp[off])
 		&& sv != &PL_sv_undef
 		&& (SvIVX(sv) == PAD_MAX || SvIVX(sv) == 0)
@@ -280,8 +280,8 @@ S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, U32 seq, CV* startcv,
 	for (off = AvFILLp(curname); off > 0; off--) {
 	    if ((sv = svp[off]) &&
 		sv != &PL_sv_undef &&
-		seq <= SvIVX(sv) &&
-		seq > I_32(SvNVX(sv)) &&
+		seq <= (U32)SvIVX(sv) &&
+		seq > (U32)I_32(SvNVX(sv)) &&
 		strEQ(SvPVX(sv), name))
 	    {
 		I32 depth;
@@ -443,8 +443,8 @@ Perl_pad_findmy(pTHX_ char *name)
 	if ((sv = svp[off]) &&
 	    sv != &PL_sv_undef &&
 	    (!SvIVX(sv) ||
-	     (seq <= SvIVX(sv) &&
-	      seq > I_32(SvNVX(sv)))) &&
+	     (seq <= (U32)SvIVX(sv) &&
+	      seq > (U32)I_32(SvNVX(sv)))) &&
 	    strEQ(SvPVX(sv), name))
 	{
 	    if (SvIVX(sv) || SvFLAGS(sv) & SVpad_OUR)
@@ -749,7 +749,7 @@ Perl_op_free(pTHX_ OP *o)
     }
     type = o->op_type;
     if (type == OP_NULL)
-	type = o->op_targ;
+	type = (OPCODE)o->op_targ;
 
     /* COP* is not cleared by op_clear() so that we may track line
      * numbers etc even after null() */
@@ -2113,7 +2113,7 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
     OP* retval = scalarseq(seq);
     LEAVE_SCOPE(floor);
     PL_pad_reset_pending = FALSE;
-    PL_compiling.op_private = PL_hints;
+    PL_compiling.op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
     if (needblockscope)
 	PL_hints |= HINT_BLOCK_SCOPE; /* propagate out */
     pad_leavemy(PL_comppad_name_fill);
@@ -2362,7 +2362,6 @@ Perl_gen_constant_list(pTHX_ register OP *o)
 OP *
 Perl_convert(pTHX_ I32 type, I32 flags, OP *o)
 {
-    OP *kid;
     OP *last = 0;
 
     if (!o || o->op_type != OP_LIST)
@@ -2373,7 +2372,7 @@ Perl_convert(pTHX_ I32 type, I32 flags, OP *o)
     if (!(PL_opargs[type] & OA_MARK))
 	null(cLISTOPo->op_first);
 
-    o->op_type = type;
+    o->op_type = (OPCODE)type;
     o->op_ppaddr = PL_ppaddr[type];
     o->op_flags |= flags;
 
@@ -2490,11 +2489,11 @@ Perl_newLISTOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
 
     NewOp(1101, listop, 1, LISTOP);
 
-    listop->op_type = type;
+    listop->op_type = (OPCODE)type;
     listop->op_ppaddr = PL_ppaddr[type];
     if (first || last)
 	flags |= OPf_KIDS;
-    listop->op_flags = flags;
+    listop->op_flags = (U8)flags;
 
     if (!last && first)
 	last = first;
@@ -2522,12 +2521,12 @@ Perl_newOP(pTHX_ I32 type, I32 flags)
 {
     OP *o;
     NewOp(1101, o, 1, OP);
-    o->op_type = type;
+    o->op_type = (OPCODE)type;
     o->op_ppaddr = PL_ppaddr[type];
-    o->op_flags = flags;
+    o->op_flags = (U8)flags;
 
     o->op_next = o;
-    o->op_private = 0 + (flags >> 8);
+    o->op_private = (U8)(0 | (flags >> 8));
     if (PL_opargs[type] & OA_RETSCALAR)
 	scalar(o);
     if (PL_opargs[type] & OA_TARGET)
@@ -2546,11 +2545,11 @@ Perl_newUNOP(pTHX_ I32 type, I32 flags, OP *first)
 	first = force_list(first);
 
     NewOp(1101, unop, 1, UNOP);
-    unop->op_type = type;
+    unop->op_type = (OPCODE)type;
     unop->op_ppaddr = PL_ppaddr[type];
     unop->op_first = first;
     unop->op_flags = flags | OPf_KIDS;
-    unop->op_private = 1 | (flags >> 8);
+    unop->op_private = (U8)(1 | (flags >> 8));
     unop = (UNOP*) CHECKOP(type, unop);
     if (unop->op_next)
 	return (OP*)unop;
@@ -2567,21 +2566,21 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
     if (!first)
 	first = newOP(OP_NULL, 0);
 
-    binop->op_type = type;
+    binop->op_type = (OPCODE)type;
     binop->op_ppaddr = PL_ppaddr[type];
     binop->op_first = first;
     binop->op_flags = flags | OPf_KIDS;
     if (!last) {
 	last = first;
-	binop->op_private = 1 | (flags >> 8);
+	binop->op_private = (U8)(1 | (flags >> 8));
     }
     else {
-	binop->op_private = 2 | (flags >> 8);
+	binop->op_private = (U8)(2 | (flags >> 8));
 	first->op_sibling = last;
     }
 
     binop = (BINOP*)CHECKOP(type, binop);
-    if (binop->op_next || binop->op_type != type)
+    if (binop->op_next || binop->op_type != (OPCODE)type)
 	return (OP*)binop;
 
     binop->op_last = binop->op_first->op_sibling;
@@ -2656,7 +2655,6 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	if (complement) {
 	    U8 tmpbuf[UTF8_MAXLEN+1];
 	    U8** cp;
-	    I32* cl;
 	    UV nextmin = 0;
 	    New(1109, cp, tlen, U8*);
 	    i = 0;
@@ -2817,17 +2815,17 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     tbl = (short*)cPVOPo->op_pv;
     if (complement) {
 	Zero(tbl, 256, short);
-	for (i = 0; i < tlen; i++)
+	for (i = 0; i < (I32)tlen; i++)
 	    tbl[t[i]] = -1;
 	for (i = 0, j = 0; i < 256; i++) {
 	    if (!tbl[i]) {
-		if (j >= rlen) {
+		if (j >= (I32)rlen) {
 		    if (del)
 			tbl[i] = -2;
 		    else if (rlen)
 			tbl[i] = r[j-1];
 		    else
-			tbl[i] = i;
+			tbl[i] = (short)i;
 		}
 		else {
 		    if (i < 128 && r[j] >= 128)
@@ -2845,8 +2843,8 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	}
 	for (i = 0; i < 256; i++)
 	    tbl[i] = -1;
-	for (i = 0, j = 0; i < tlen; i++,j++) {
-	    if (j >= rlen) {
+	for (i = 0, j = 0; i < (I32)tlen; i++,j++) {
+	    if (j >= (I32)rlen) {
 		if (del) {
 		    if (tbl[t[i]] == -1)
 			tbl[t[i]] = -2;
@@ -2875,10 +2873,10 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
     PMOP *pmop;
 
     NewOp(1101, pmop, 1, PMOP);
-    pmop->op_type = type;
+    pmop->op_type = (OPCODE)type;
     pmop->op_ppaddr = PL_ppaddr[type];
-    pmop->op_flags = flags;
-    pmop->op_private = 0 | (flags >> 8);
+    pmop->op_flags = (U8)flags;
+    pmop->op_private = (U8)(0 | (flags >> 8));
 
     if (PL_hints & HINT_RE_TAINT)
 	pmop->op_pmpermflags |= PMf_RETAINT;
@@ -2961,7 +2959,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl)
 	if (pm->op_pmflags & PMf_EVAL) {
 	    curop = 0;
 	    if (CopLINE(PL_curcop) < PL_multi_end)
-		CopLINE_set(PL_curcop, PL_multi_end);
+		CopLINE_set(PL_curcop, (line_t)PL_multi_end);
 	}
 #ifdef USE_THREADS
 	else if (repl->op_type == OP_THREADSV
@@ -3053,11 +3051,11 @@ Perl_newSVOP(pTHX_ I32 type, I32 flags, SV *sv)
 {
     SVOP *svop;
     NewOp(1101, svop, 1, SVOP);
-    svop->op_type = type;
+    svop->op_type = (OPCODE)type;
     svop->op_ppaddr = PL_ppaddr[type];
     svop->op_sv = sv;
     svop->op_next = (OP*)svop;
-    svop->op_flags = flags;
+    svop->op_flags = (U8)flags;
     if (PL_opargs[type] & OA_RETSCALAR)
 	scalar((OP*)svop);
     if (PL_opargs[type] & OA_TARGET)
@@ -3070,14 +3068,14 @@ Perl_newPADOP(pTHX_ I32 type, I32 flags, SV *sv)
 {
     PADOP *padop;
     NewOp(1101, padop, 1, PADOP);
-    padop->op_type = type;
+    padop->op_type = (OPCODE)type;
     padop->op_ppaddr = PL_ppaddr[type];
     padop->op_padix = pad_alloc(type, SVs_PADTMP);
     SvREFCNT_dec(PL_curpad[padop->op_padix]);
     PL_curpad[padop->op_padix] = sv;
     SvPADTMP_on(sv);
     padop->op_next = (OP*)padop;
-    padop->op_flags = flags;
+    padop->op_flags = (U8)flags;
     if (PL_opargs[type] & OA_RETSCALAR)
 	scalar((OP*)padop);
     if (PL_opargs[type] & OA_TARGET)
@@ -3101,11 +3099,11 @@ Perl_newPVOP(pTHX_ I32 type, I32 flags, char *pv)
 {
     PVOP *pvop;
     NewOp(1101, pvop, 1, PVOP);
-    pvop->op_type = type;
+    pvop->op_type = (OPCODE)type;
     pvop->op_ppaddr = PL_ppaddr[type];
     pvop->op_pv = pv;
     pvop->op_next = (OP*)pvop;
-    pvop->op_flags = flags;
+    pvop->op_flags = (U8)flags;
     if (PL_opargs[type] & OA_RETSCALAR)
 	scalar((OP*)pvop);
     if (PL_opargs[type] & OA_TARGET)
@@ -3391,7 +3389,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	}
 	curop = list(force_list(left));
 	o = newBINOP(OP_AASSIGN, flags, list(force_list(right)), curop);
-	o->op_private = 0 | (flags >> 8);
+	o->op_private = (U8)(0 | (flags >> 8));
 	for (curop = ((LISTOP*)curop)->op_first;
 	     curop; curop = curop->op_sibling)
 	{
@@ -3408,7 +3406,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 		if (PL_opargs[curop->op_type] & OA_DANGEROUS) {
 		    if (curop->op_type == OP_GV) {
 			GV *gv = cGVOPx_gv(curop);
-			if (gv == PL_defgv || SvCUR(gv) == PL_generation)
+			if (gv == PL_defgv || (int)SvCUR(gv) == PL_generation)
 			    break;
 			SvCUR(gv) = PL_generation;
 		    }
@@ -3418,7 +3416,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 			     curop->op_type == OP_PADANY) {
 			SV **svp = AvARRAY(PL_comppad_name);
 			SV *sv = svp[curop->op_targ];
-			if (SvCUR(sv) == PL_generation)
+			if ((int)SvCUR(sv) == PL_generation)
 			    break;
 			SvCUR(sv) = PL_generation;	/* (SvCUR not used any more) */
 		    }
@@ -3438,7 +3436,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 #else
 			    GV *gv = (GV*)((PMOP*)curop)->op_pmreplroot;
 #endif
-			    if (gv == PL_defgv || SvCUR(gv) == PL_generation)
+			    if (gv == PL_defgv || (int)SvCUR(gv) == PL_generation)
 				break;
 			    SvCUR(gv) = PL_generation;
 			}	
@@ -3529,8 +3527,8 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 	cop->op_type = OP_NEXTSTATE;
 	cop->op_ppaddr = PL_ppaddr[ OP_NEXTSTATE ];
     }
-    cop->op_flags = flags;
-    cop->op_private = (PL_hints & (HINT_BYTE|HINT_LOCALE));
+    cop->op_flags = (U8)flags;
+    cop->op_private = (U8)(PL_hints & (HINT_BYTE|HINT_LOCALE));
 #ifdef NATIVE_HINTS
     cop->op_private |= NATIVE_HINTS;
 #endif
@@ -3671,7 +3669,7 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 		  || k1->op_type == OP_EACH)
 	    {
 		warnop = ((k1->op_type == OP_NULL)
-			  ? k1->op_targ : k1->op_type);
+			  ? (OPCODE)k1->op_targ : k1->op_type);
 	    }
 	    break;
 	}
@@ -3695,12 +3693,12 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 
     NewOp(1101, logop, 1, LOGOP);
 
-    logop->op_type = type;
+    logop->op_type = (OPCODE)type;
     logop->op_ppaddr = PL_ppaddr[type];
     logop->op_first = first;
     logop->op_flags = flags | OPf_KIDS;
     logop->op_other = LINKLIST(other);
-    logop->op_private = 1 | (flags >> 8);
+    logop->op_private = (U8)(1 | (flags >> 8));
 
     /* establish postfix order */
     logop->op_next = LINKLIST(first);
@@ -3747,7 +3745,7 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
     logop->op_ppaddr = PL_ppaddr[OP_COND_EXPR];
     logop->op_first = first;
     logop->op_flags = flags | OPf_KIDS;
-    logop->op_private = 1 | (flags >> 8);
+    logop->op_private = (U8)(1 | (flags >> 8));
     logop->op_other = LINKLIST(trueop);
     logop->op_next = LINKLIST(falseop);
 
@@ -3783,7 +3781,7 @@ Perl_newRANGE(pTHX_ I32 flags, OP *left, OP *right)
     range->op_flags = OPf_KIDS;
     leftstart = LINKLIST(left);
     range->op_other = LINKLIST(right);
-    range->op_private = 1 | (flags >> 8);
+    range->op_private = (U8)(1 | (flags >> 8));
 
     left->op_sibling = right;
 
@@ -3917,7 +3915,7 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *
 	    next = unstack;
 	cont = append_elem(OP_LINESEQ, cont, unstack);
 	if ((line_t)whileline != NOLINE) {
-	    PL_copline = whileline;
+	    PL_copline = (line_t)whileline;
 	    cont = append_elem(OP_LINESEQ, cont,
 			       newSTATEOP(0, Nullch, Nullop));
 	}
@@ -3927,7 +3925,7 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *
     redo = LINKLIST(listop);
 
     if (expr) {
-	PL_copline = whileline;
+	PL_copline = (line_t)whileline;
 	scalar(listop);
 	o = new_logop(OP_AND, 0, &expr, &listop);
 	if (o == expr && o->op_type == OP_CONST && !SvTRUE(cSVOPo->op_sv)) {
@@ -4504,7 +4502,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    if (!block)
 		goto withattrs;
 	    if ((const_sv = cv_const_sv(cv)))
-		const_changed = sv_cmp(const_sv, op_const_sv(block, Nullcv));
+		const_changed = (bool)sv_cmp(const_sv, op_const_sv(block, Nullcv));
 	    if ((const_sv || const_changed) && ckWARN(WARN_REDEFINE))
 	    {
 		line_t oldline = CopLINE(PL_curcop);
@@ -4748,7 +4746,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    call_list(oldscope, PL_beginav);
 
 	    PL_curcop = &PL_compiling;
-	    PL_compiling.op_private = PL_hints;
+	    PL_compiling.op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
 	    LEAVE;
 	}
 	else if (strEQ(s, "END") && !PL_error_count) {
@@ -5142,7 +5140,7 @@ Perl_ck_anoncode(pTHX_ OP *o)
 OP *
 Perl_ck_bitop(pTHX_ OP *o)
 {
-    o->op_private = PL_hints;
+    o->op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
     return o;
 }
 

@@ -333,7 +333,6 @@ PP(pp_print)
     IO *io;
     register PerlIO *fp;
     MAGIC *mg;
-    STRLEN n_a;
 
     if (PL_op->op_flags & OPf_STACKED)
 	gv = (GV*)*++MARK;
@@ -543,7 +542,7 @@ PP(pp_rv2av)
 	EXTEND(SP, maxarg);          
 	if (SvRMAGICAL(av)) {
 	    U32 i; 
-	    for (i=0; i < maxarg; i++) {
+	    for (i=0; i < (U32)maxarg; i++) {
 		SV **svp = av_fetch(av, i, FALSE);
 		SP[i+1] = (svp) ? *svp : &PL_sv_undef;
 	    }
@@ -1032,7 +1031,7 @@ PP(pp_match)
 	pm = PL_curpm;
 	rx = pm->op_pmregexp;
     }
-    if (rx->minlen > len) goto failure;
+    if (rx->minlen > (I32)len) goto failure;
 
     truebase = t = s;
 
@@ -1872,7 +1871,7 @@ PP(pp_subst)
     c = rstr ? SvPV(rstr, clen) : Nullch;
 
     /* can do inplace substitution? */
-    if (c && clen <= rx->minlen && (once || !(r_flags & REXEC_COPY_STR))
+    if (c && (I32)clen <= rx->minlen && (once || !(r_flags & REXEC_COPY_STR))
 	&& do_utf8 == DO_UTF8(rstr)
 	&& !(rx->reganch & ROPT_LOOKBEHIND_SEEN)) {
 	if (!CALLREGEXEC(aTHX_ rx, s, strend, orig, 0, TARG, NULL,

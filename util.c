@@ -557,7 +557,7 @@ Perl_new_collate(pTHX_ char *newcoll)
 	  SSize_t mult = fb - fa;
 	  if (mult < 1)
 	      Perl_croak(aTHX_ "strxfrm() gets absurd");
-	  PL_collxfrm_base = (fa > mult) ? (fa - mult) : 0;
+	  PL_collxfrm_base = (fa > (Size_t)mult) ? (fa - mult) : 0;
 	  PL_collxfrm_mult = mult;
 	}
     }
@@ -950,7 +950,7 @@ Perl_mem_collxfrm(pTHX_ const char *s, STRLEN len, STRLEN *xlen)
 	    xused = strxfrm(xbuf + xout, s + xin, xAlloc - xout);
 	    if (xused == -1)
 		goto bad;
-	    if (xused < xAlloc - xout)
+	    if ((STRLEN)xused < xAlloc - xout)
 		break;
 	    xAlloc = (2 * xAlloc) + 1;
 	    Renew(xbuf, xAlloc, char);
@@ -1042,7 +1042,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 	}
     }
     BmRARE(sv) = s[rarest];
-    BmPREVIOUS(sv) = rarest;
+    BmPREVIOUS(sv) = (U16)rarest;
     BmUSEFUL(sv) = 100;			/* Initial value */
     if (flags & FBMcf_TAIL)
 	SvTAIL_on(sv);
@@ -1074,9 +1074,9 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
     register STRLEN littlelen = l;
     register I32 multiline = flags & FBMrf_MULTILINE;
 
-    if (bigend - big < littlelen) {
+    if ((STRLEN)(bigend - big) < littlelen) {
 	if ( SvTAIL(littlestr) 
-	     && (bigend - big == littlelen - 1)
+	     && ((STRLEN)(bigend - big) == littlelen - 1)
 	     && (littlelen == 1 
 		 || (*big == *little && memEQ(big, little, littlelen - 1))))
 	    return (char*)big;
@@ -1202,7 +1202,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	register unsigned char *table = little + littlelen + FBM_TABLE_OFFSET;
 	register unsigned char *oldlittle;
 
-	if (littlelen > bigend - big)
+	if (littlelen > (STRLEN)(bigend - big))
 	    return Nullch;
 	--littlelen;			/* Last char found by table lookup */
 
@@ -2661,14 +2661,13 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 I32
 Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 {
-    SV *sv;
-    SV** svp;
-    char spid[TYPE_CHARS(int)];
-
     if (!pid)
 	return -1;
 #if !defined(HAS_WAITPID) && !defined(HAS_WAIT4) || defined(HAS_WAITPID_RUNTIME)
     if (pid > 0) {
+	SV** svp;
+	char spid[TYPE_CHARS(int)];
+
 	sprintf(spid, "%"IVdf, (IV)pid);
 	svp = hv_fetch(PL_pidstatus,spid,strlen(spid),FALSE);
 	if (svp && *svp != &PL_sv_undef) {
@@ -2682,6 +2681,9 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 
 	hv_iterinit(PL_pidstatus);
 	if ((entry = hv_iternext(PL_pidstatus))) {
+	    SV *sv;
+	    char spid[TYPE_CHARS(int)];
+
 	    pid = atoi(hv_iterkey(entry,(I32*)statusp));
 	    sv = hv_iterval(PL_pidstatus,entry);
 	    *statusp = SvIVX(sv);

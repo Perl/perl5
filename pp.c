@@ -125,7 +125,7 @@ PP(pp_padav)
 	EXTEND(SP, maxarg);
 	if (SvMAGICAL(TARG)) {
 	    U32 i;
-	    for (i=0; i < maxarg; i++) {
+	    for (i=0; i < (U32)maxarg; i++) {
 		SV **svp = av_fetch((AV*)TARG, i, FALSE);
 		SP[i+1] = (svp) ? *svp : &PL_sv_undef;
 	    }
@@ -2229,7 +2229,7 @@ PP(pp_index)
 	sv_pos_u2b(big, &offset, 0);
     if (offset < 0)
 	offset = 0;
-    else if (offset > biglen)
+    else if (offset > (I32)biglen)
 	offset = biglen;
     if (!(tmps2 = fbm_instr((unsigned char*)tmps + offset,
       (unsigned char*)tmps + biglen, little, 0)))
@@ -2270,7 +2270,7 @@ PP(pp_rindex)
     }
     if (offset < 0)
 	offset = 0;
-    else if (offset > blen)
+    else if (offset > (I32)blen)
 	offset = blen;
     if (!(tmps2 = rninstr(tmps,  tmps  + offset,
 			  tmps2, tmps2 + llen)))
@@ -2327,7 +2327,7 @@ PP(pp_chr)
     SvGROW(TARG,2);
     SvCUR_set(TARG, 1);
     tmps = SvPVX(TARG);
-    *tmps++ = value;
+    *tmps++ = (char)value;
     *tmps = '\0';
     (void)SvPOK_only(TARG);
     XPUSHs(TARG);
@@ -2337,8 +2337,8 @@ PP(pp_chr)
 PP(pp_crypt)
 {
     dSP; dTARGET; dPOPTOPssrl;
-    STRLEN n_a;
 #ifdef HAS_CRYPT
+    STRLEN n_a;
     char *tmps = SvPV(left, n_a);
 #ifdef FCRYPT
     sv_setpv(TARG, fcrypt(tmps, SvPV(right, n_a)));
@@ -2376,7 +2376,7 @@ PP(pp_ucfirst)
 	
 	tend = uv_to_utf8(tmpbuf, uv);
 
-	if (!SvPADTMP(sv) || tend - tmpbuf != ulen || SvREADONLY(sv)) {
+	if (!SvPADTMP(sv) || (STRLEN)(tend - tmpbuf) != ulen || SvREADONLY(sv)) {
 	    dTARGET;
 	    sv_setpvn(TARG, (char*)tmpbuf, tend - tmpbuf);
 	    sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
@@ -2435,7 +2435,7 @@ PP(pp_lcfirst)
 	
 	tend = uv_to_utf8(tmpbuf, uv);
 
-	if (!SvPADTMP(sv) || tend - tmpbuf != ulen || SvREADONLY(sv)) {
+	if (!SvPADTMP(sv) || (STRLEN)(tend - tmpbuf) != ulen || SvREADONLY(sv)) {
 	    dTARGET;
 	    sv_setpvn(TARG, (char*)tmpbuf, tend - tmpbuf);
 	    sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
@@ -3335,7 +3335,7 @@ PP(pp_reverse)
 			while (down > up) {
 			    tmp = *up;
 			    *up++ = *down;
-			    *down-- = tmp;
+			    *down-- = (char)tmp;
 			}
 		    }
 		}
@@ -3345,7 +3345,7 @@ PP(pp_reverse)
 	    while (down > up) {
 		tmp = *up;
 		*up++ = *down;
-		*down-- = tmp;
+		*down-- = (char)tmp;
 	    }
 	    (void)SvPOK_only_UTF8(TARG);
 	}
@@ -3376,8 +3376,8 @@ S_mul128(pTHX_ SV *sv, U8 m)
     t--;
   while (t > s) {
     i = ((*t - '0') << 7) + m;
-    *(t--) = '0' + (i % 10);
-    m = i / 10;
+    *(t--) = '0' + (char)(i % 10);
+    m = (char)(i / 10);
   }
   return (sv);
 }
@@ -4154,7 +4154,7 @@ PP(pp_unpack)
 
 			sv = Perl_newSVpvf(aTHX_ "%.*"UVf, (int)TYPE_DIGITS(UV), auv);
 			while (s < strend) {
-			    sv = mul128(sv, *s & 0x7f);
+			    sv = mul128(sv, (U8)(*s & 0x7f));
 			    if (!(*s++ & 0x80)) {
 				bytes = 0;
 				break;
@@ -4324,9 +4324,9 @@ PP(pp_unpack)
 			d = PL_uudmap[*(U8*)s++] & 077;
 		    else
 			d = 0;
-		    hunk[0] = (a << 2) | (b >> 4);
-		    hunk[1] = (b << 4) | (c >> 2);
-		    hunk[2] = (c << 6) | d;
+		    hunk[0] = (char)((a << 2) | (b >> 4));
+		    hunk[1] = (char)((b << 4) | (c >> 2));
+		    hunk[2] = (char)((c << 6) | d);
 		    sv_catpvn(sv, hunk, (len > 3) ? 3 : len);
 		    len -= 3;
 		}
@@ -4593,7 +4593,7 @@ PP(pp_pack)
 	    break;
 	case 'X':
 	  shrink:
-	    if (SvCUR(cat) < len)
+	    if ((I32)SvCUR(cat) < len)
 		DIE(aTHX_ "X outside of string");
 	    SvCUR(cat) -= len;
 	    *SvEND(cat) = '\0';
@@ -4616,7 +4616,7 @@ PP(pp_pack)
 		if (datumtype == 'Z')
 		    ++len;
 	    }
-	    if (fromlen >= len) {
+	    if ((I32)fromlen >= len) {
 		sv_catpvn(cat, aptr, len);
 		if (datumtype == 'Z')
 		    *(SvEND(cat)-1) = '\0';
@@ -4655,7 +4655,7 @@ PP(pp_pack)
 		SvCUR(cat) += (len+7)/8;
 		SvGROW(cat, SvCUR(cat) + 1);
 		aptr = SvPVX(cat) + aint;
-		if (len > fromlen)
+		if (len > (I32)fromlen)
 		    len = fromlen;
 		aint = len;
 		items = 0;
@@ -4711,7 +4711,7 @@ PP(pp_pack)
 		SvCUR(cat) += (len+1)/2;
 		SvGROW(cat, SvCUR(cat) + 1);
 		aptr = SvPVX(cat) + aint;
-		if (len > fromlen)
+		if (len > (I32)fromlen)
 		    len = fromlen;
 		aint = len;
 		items = 0;
@@ -4885,7 +4885,7 @@ PP(pp_pack)
 		    UV     auv = U_V(adouble);
 
 		    do {
-			*--in = (auv & 0x7f) | 0x80;
+			*--in = (char)((auv & 0x7f) | 0x80);
 			auv >>= 7;
 		    } while (auv);
 		    buf[sizeof(buf) - 1] &= 0x7f; /* clear continue bit */
@@ -5057,7 +5057,7 @@ PP(pp_pack)
 	    while (fromlen > 0) {
 		I32 todo;
 
-		if (fromlen > len)
+		if ((I32)fromlen > len)
 		    todo = len;
 		else
 		    todo = fromlen;
@@ -5293,7 +5293,7 @@ PP(pp_split)
 		(void)SvUTF8_on(dstr);
 	    XPUSHs(dstr);
 	    if (rx->nparens) {
-		for (i = 1; i <= rx->nparens; i++) {
+		for (i = 1; i <= (I32)rx->nparens; i++) {
 		    s = rx->startp[i] + orig;
 		    m = rx->endp[i] + orig;
 		    if (m && s) {

@@ -44,7 +44,7 @@ S_do_trans_simple(pTHX_ SV *sv)
 	while (s < send) {
 	    if ((ch = tbl[*s]) >= 0) {
 		matches++;
-		*s++ = ch;
+		*s++ = (U8)ch;
 	    }
 	    else
 		s++;
@@ -68,7 +68,7 @@ S_do_trans_simple(pTHX_ SV *sv)
         if (c < 0x100 && (ch = tbl[c]) >= 0) {
             matches++;
             if (UTF8_IS_ASCII(ch))
-                *d++ = ch;
+                *d++ = (U8)ch;
             else
                 d = uv_to_utf8(d,ch);
             s += ulen;
@@ -154,7 +154,7 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
 	    U8* p = send;
 	    while (s < send) {
 		if ((ch = tbl[*s]) >= 0) {
-		    *d = ch;
+		    *d = (U8)ch;
 		    matches++;
 		    if (p != d - 1 || *p != *d)
 			p = d++;
@@ -170,7 +170,7 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
 	    while (s < send) {
 	        if ((ch = tbl[*s]) >= 0) {
 		    matches++;
-		    *d++ = ch;
+		    *d++ = (U8)ch;
 		}
 		else if (ch == -1)	/* -1 is unmapped character */
 		    *d++ = *s;
@@ -206,9 +206,9 @@ S_do_trans_complex(pTHX_ SV *sv)/* SPC - NOT OK */
 		}
 		else if ((ch = tbl[comp]) >= 0) {
 		    matches++;
-		    if (ch != pch) {
-		        d = uv_to_utf8(d, ch);
-		        pch = ch;
+		    if ((UV)ch != pch) {
+		        d = uv_to_utf8(d, (UV)ch);
+		        pch = (UV)ch;
 		    }
 		    s += len;
 		    continue;
@@ -668,18 +668,18 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 	else {
 	    offset >>= 3;	/* turn into byte offset */
 	    if (size == 16) {
-		if (offset >= srclen)
+		if ((STRLEN)offset >= srclen)
 		    retnum = 0;
 		else
 		    retnum = (UV) s[offset] <<  8;
 	    }
 	    else if (size == 32) {
-		if (offset >= srclen)
+		if ((STRLEN)offset >= srclen)
 		    retnum = 0;
-		else if (offset + 1 >= srclen)
+		else if ((STRLEN)(offset + 1) >= srclen)
 		    retnum =
 			((UV) s[offset    ] << 24);
-		else if (offset + 2 >= srclen)
+		else if ((STRLEN)(offset + 2) >= srclen)
 		    retnum =
 			((UV) s[offset    ] << 24) +
 			((UV) s[offset + 1] << 16);
@@ -834,30 +834,30 @@ Perl_do_vecset(pTHX_ SV *sv)
     else {
 	offset >>= 3;			/* turn into byte offset */
 	if (size == 8)
-	    s[offset  ] = lval         & 0xff;
+	    s[offset  ] = (U8)( lval        & 0xff);
 	else if (size == 16) {
-	    s[offset  ] = (lval >>  8) & 0xff;
-	    s[offset+1] = lval         & 0xff;
+	    s[offset  ] = (U8)((lval >>  8) & 0xff);
+	    s[offset+1] = (U8)( lval        & 0xff);
 	}
 	else if (size == 32) {
-	    s[offset  ] = (lval >> 24) & 0xff;
-	    s[offset+1] = (lval >> 16) & 0xff;
-	    s[offset+2] = (lval >>  8) & 0xff;
-	    s[offset+3] =  lval        & 0xff;
+	    s[offset  ] = (U8)((lval >> 24) & 0xff);
+	    s[offset+1] = (U8)((lval >> 16) & 0xff);
+	    s[offset+2] = (U8)((lval >>  8) & 0xff);
+	    s[offset+3] = (U8)( lval        & 0xff);
 	}
 #ifdef UV_IS_QUAD
 	else if (size == 64) {
 	    if (ckWARN(WARN_PORTABLE))
 		Perl_warner(aTHX_ WARN_PORTABLE,
 			    "Bit vector size > 32 non-portable");
-	    s[offset  ] = (lval >> 56) & 0xff;
-	    s[offset+1] = (lval >> 48) & 0xff;
-	    s[offset+2] = (lval >> 40) & 0xff;
-	    s[offset+3] = (lval >> 32) & 0xff;
-	    s[offset+4] = (lval >> 24) & 0xff;
-	    s[offset+5] = (lval >> 16) & 0xff;
-	    s[offset+6] = (lval >>  8) & 0xff;
-	    s[offset+7] =  lval        & 0xff;
+	    s[offset  ] = (U8)((lval >> 56) & 0xff);
+	    s[offset+1] = (U8)((lval >> 48) & 0xff);
+	    s[offset+2] = (U8)((lval >> 40) & 0xff);
+	    s[offset+3] = (U8)((lval >> 32) & 0xff);
+	    s[offset+4] = (U8)((lval >> 24) & 0xff);
+	    s[offset+5] = (U8)((lval >> 16) & 0xff);
+	    s[offset+6] = (U8)((lval >>  8) & 0xff);
+	    s[offset+7] = (U8)( lval        & 0xff);
 	}
 #endif
     }
@@ -1043,8 +1043,8 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     else if (SvOK(sv) || SvTYPE(sv) > SVt_PVMG) {
 	STRLEN n_a;
 	dc = SvPV_force(sv, n_a);
-	if (SvCUR(sv) < len) {
-	    dc = SvGROW(sv, len + 1);
+	if (SvCUR(sv) < (STRLEN)len) {
+	    dc = SvGROW(sv, (STRLEN)(len + 1));
 	    (void)memzero(dc + SvCUR(sv), len - SvCUR(sv) + 1);
 	}
 	if (optype != OP_BIT_AND && (left_utf || right_utf))
@@ -1182,9 +1182,9 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 		*dc++ = *lc++ | *rc++;
 	  mop_up:
 	    len = lensave;
-	    if (rightlen > len)
+	    if (rightlen > (STRLEN)len)
 		sv_catpvn(sv, rsave + len, rightlen - len);
-	    else if (leftlen > len)
+	    else if (leftlen > (STRLEN)len)
 		sv_catpvn(sv, lsave + len, leftlen - len);
 	    else
 		*SvEND(sv) = '\0';
