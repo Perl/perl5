@@ -517,13 +517,16 @@ PerlIO_list_push(pTHX_ PerlIO_list_t *list, PerlIO_funcs *funcs, SV *arg)
 PerlIO_list_t *
 PerlIO_clone_list(pTHX_ PerlIO_list_t *proto, CLONE_PARAMS *param)
 {
-    int i;
-    PerlIO_list_t *list = PerlIO_list_alloc(aTHX);
-    for (i=0; i < proto->cur; i++) {
-	SV *arg = Nullsv;
-	if (proto->array[i].arg)
-	    arg = PerlIO_sv_dup(aTHX_ proto->array[i].arg,param);
-	PerlIO_list_push(aTHX_ list, proto->array[i].funcs, arg);
+    PerlIO_list_t *list = (PerlIO_list_t *) NULL;
+    if (proto) {
+	int i;
+	list = PerlIO_list_alloc(aTHX);
+	for (i=0; i < proto->cur; i++) {
+	    SV *arg = Nullsv;
+	    if (proto->array[i].arg)
+		arg = PerlIO_sv_dup(aTHX_ proto->array[i].arg,param);
+	    PerlIO_list_push(aTHX_ list, proto->array[i].funcs, arg);
+	}
     }
     return list;
 }
@@ -538,6 +541,7 @@ PerlIO_clone(pTHX_ PerlInterpreter *proto, CLONE_PARAMS *param)
     PL_known_layers = PerlIO_clone_list(aTHX_ proto->Iknown_layers, param);
     PL_def_layerlist = PerlIO_clone_list(aTHX_ proto->Idef_layerlist, param);
     PerlIO_allocate(aTHX); /* root slot is never used */
+    PerlIO_debug("Clone %p from %p\n",aTHX,proto);
     while ((f = *table)) {
 	    int i;
 	    table = (PerlIO **) (f++);
@@ -556,6 +560,9 @@ PerlIO_destruct(pTHX)
 {
     PerlIO **table = &PL_perlio;
     PerlIO *f;
+#ifdef USE_ITHREADS
+    PerlIO_debug("Destruct %p\n",aTHX);
+#endif
     while ((f = *table)) {
 	int i;
 	table = (PerlIO **) (f++);
@@ -2015,15 +2022,6 @@ PerlIOUnix_refcnt_inc(int fd)
     }
 }
 
-void
-PerlIO_cleanup(pTHX)
-{
-    PerlIOUnix_refcnt_inc(0);
-    PerlIOUnix_refcnt_inc(1);
-    PerlIOUnix_refcnt_inc(2);
-    PerlIO_cleantable(aTHX_ &PL_perlio);
-}
-
 int
 PerlIOUnix_refcnt_dec(int fd)
 {
@@ -2040,6 +2038,24 @@ PerlIOUnix_refcnt_dec(int fd)
     }
     return cnt;
 }
+
+void
+PerlIO_cleanup(pTHX)
+{
+    int i;
+#ifdef USE_ITHREADS
+    PerlIO_debug("Cleanup %p\n",aTHX);
+#endif
+    /* Raise STDIN..STDERR refcount so we don't close them */
+    for (i=0; i < 3; i++)
+	PerlIOUnix_refcnt_inc(i);
+    PerlIO_cleantable(aTHX_ &PL_perlio);
+    /* Restore STDIN..STDERR refcount */
+    for (i=0; i < 3; i++)
+	PerlIOUnix_refcnt_dec(i);
+}
+
+
 
 /*--------------------------------------------------------------------------------------*/
 /*
@@ -2495,6 +2511,8 @@ PerlIOStdio_close(PerlIO *f)
 #endif
     FILE *stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
     if (PerlIOUnix_refcnt_dec(fileno(stdio)) > 0) {
+	/* Do not close it but do flush any buffers */
+	PerlIO_flush(f);
 	return 0;
     }
     return (
