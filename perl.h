@@ -2228,5 +2228,8 @@ EXT bool	numeric_local INIT(TRUE);    /* Assume local numerics */
 #define printf PerlIO_stdoutf
 #endif
 
+/* provide some backwards compatibility for XS source from 5.005 */
+#define dTHR typedef int _thr_dummy
+
 #endif /* Include guard */
 
