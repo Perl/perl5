@@ -122,25 +122,25 @@ before it could possibly have been used.
 =item %s: Command not found
 
 (A) You've accidentally run your script through B<csh> instead
-of Perl.  Check the E<lt>#!E<gt> line, or manually feed your script
-into Perl yourself.
+of Perl.  Check the #! line, or manually feed your script into
+Perl yourself.
 
 =item %s: Expression syntax
 
 (A) You've accidentally run your script through B<csh> instead
-of Perl.  Check the E<lt>#!E<gt> line, or manually feed your script
-into Perl yourself.
+of Perl.  Check the #! line, or manually feed your script into
+Perl yourself.
 
 =item %s: Undefined variable
 
 (A) You've accidentally run your script through B<csh> instead
-of Perl.  Check the E<lt>#!E<gt> line, or manually feed your script
-into Perl yourself.
+of Perl.  Check the #! line, or manually feed your script into
+Perl yourself.
 
 =item %s: not found
 
 (A) You've accidentally run your script through the Bourne shell
-instead of Perl.  Check the E<lt>#!E<gt> line, or manually feed your script
+instead of Perl.  Check the #! line, or manually feed your script
 into Perl yourself.
 
 =item B<-P> not allowed for setuid/setgid script
@@ -193,7 +193,9 @@ a missing quote, operator, parenthesis pair or declaration.
 =item Args must match #! line
 
 (F) The setuid emulator requires that the arguments Perl was invoked
-with match the arguments specified on the #! line.
+with match the arguments specified on the #! line.  Since some systems
+impose a one-argument limit on the #! line, try combining switches;
+for example, turn C<-w -U> into C<-wU>.
 
 =item Argument "%s" isn't numeric%s
 
@@ -320,8 +322,8 @@ wasn't a symbol table entry.
 =item Badly placed ()'s
 
 (A) You've accidentally run your script through B<csh> instead
-of Perl.  Check the E<lt>#!E<gt> line, or manually feed your script
-into Perl yourself.
+of Perl.  Check the #! line, or manually feed your script into
+Perl yourself.
 
 =item BEGIN failed--compilation aborted
 
@@ -2125,7 +2127,7 @@ if the error went away.  Sort of the cybernetic version of S<20 questions>.
 =item syntax error at line %d: `%s' unexpected
 
 (A) You've accidentally run your script through the Bourne shell
-instead of Perl.  Check the E<lt>#!E<gt> line, or manually feed your script
+instead of Perl.  Check the #! line, or manually feed your script
 into Perl yourself.
 
 =item System V IPC is not implemented on this machine
@@ -2200,9 +2202,9 @@ handles tainting, by the time Perl discovers a B<-T> in a script, it's
 too late to properly taint everything from the environment.  So Perl
 gives up.
 
-This error can usually be fixed by editing the "#!" line so that the
+This error can usually be fixed by editing the #! line so that the
 B<-T> option is in the Perl program's first argument.  (Many operating
-systems that implement the "#!" feature only pick up one argument from
+systems that implement the #! feature only pick up one argument from
 it, so Perl has to get the rest on its own.)
 
 =item Too many ('s
@@ -2210,8 +2212,8 @@ it, so Perl has to get the rest on its own.)
 =item Too many )'s
 
 (A) You've accidentally run your script through B<csh> instead
-of Perl.  Check the E<lt>#!E<gt> line, or manually feed your script
-into Perl yourself.
+of Perl.  Check the #! line, or manually feed your script into
+Perl yourself.
 
 =item Too many args to syscall
 
@@ -2523,8 +2525,8 @@ variables.
 =item Variable syntax
 
 (A) You've accidentally run your script through B<csh> instead
-of Perl.  Check the E<lt>#!E<gt> line, or manually feed your script
-into Perl yourself.
+of Perl.  Check the #! line, or manually feed your script into
+Perl yourself.
 
 =item Warning: something's wrong
 

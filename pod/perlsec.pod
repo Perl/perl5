@@ -141,6 +141,17 @@ locale-aware program, and want to launder data with a regular expression
 containing C<\w>, put C<no locale> ahead of the expression in the same
 block.  See L<perllocale/SECURITY> for further discussion and examples.
 
+=head2 Switches On the "#!" Line
+
+When you make a script executable, in order to make it usable as a
+command, the system will pass switches to perl from the script's #!
+line.  Perl checks that any command-line switches given to a setuid
+(or setgid) script actually match the ones set on the #! line.  Some
+UNIX and UNIX-like environments impose a one-switch limit on the #!
+line, so you may need to use something like C<-wU> instead of C<-w -U>
+under such systems.  (This issue should arise only in UNIX or
+UNIX-like environments that support #! and setuid or setgid scripts.)
+
 =head2 Cleaning Up Your Path
 
 For "Insecure C<$ENV{PATH}>" messages, you need to set C<$ENV{'PATH'}> to a
