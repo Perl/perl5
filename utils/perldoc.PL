@@ -38,7 +38,7 @@ INIT { eval { umask(0077) } }   # doubtless someone has no mask
 
 my \@pagers = ();
 push \@pagers, "$Config{'pager'}" if -x "$Config{'pager'}";
-my \$bindir = "$Config{installscript}";
+my \$bindir = '$Config{scriptdir}';
 
 !GROK!THIS!
 

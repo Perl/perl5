@@ -1,7 +1,7 @@
 # Pod::Text -- Convert POD data to formatted ASCII text.
-# $Id: Text.pm,v 2.7 2000/11/19 04:47:50 eagle Exp $
+# $Id: Text.pm,v 2.8 2001/02/10 06:50:23 eagle Exp $
 #
-# Copyright 1999, 2000 by Russ Allbery <rra@stanford.edu>
+# Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -37,7 +37,7 @@ use vars qw(@ISA @EXPORT %ESCAPES $VERSION);
 # Perl core and too many things could munge CVS magic revision strings.
 # This number should ideally be the same as the CVS revision in podlators,
 # however.
-$VERSION = 2.07;
+$VERSION = 2.08;
 
 
 ############################################################################
@@ -491,6 +491,10 @@ sub seq_l {
     # Okay, leading and trailing whitespace isn't important; get rid of it.
     s/^\s+//;
     s/\s+$//;
+
+    # If the argument looks like a URL, return it verbatim.  This only
+    # handles URLs that use the server syntax.
+    if (m%^[a-z]+://\S+$%) { return $_ }
 
     # Default to using the whole content of the link entry as a section
     # name.  Note that L<manpage/> forces a manpage interpretation, as does
