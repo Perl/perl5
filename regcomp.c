@@ -2190,14 +2190,14 @@ S_reg(pTHX_ I32 paren, I32 *flagp)
     if (paren) {
 	PL_regflags = oregflags;
 	if (PL_regcomp_parse >= PL_regxend || *nextchar() != ')') {
- 	    PL_regcomp_parse++;
- 	    vFAIL("Unmatched (");
+	    PL_regcomp_parse = oregcomp_parse;
+	    vFAIL("Unmatched (");
 	}
     }
     else if (!paren && PL_regcomp_parse < PL_regxend) {
 	if (*PL_regcomp_parse == ')') {
- 	    PL_regcomp_parse = oregcomp_parse;
- 	    vFAIL("Unmatched (");
+	    PL_regcomp_parse++;
+	    vFAIL("Unmatched )");
 	}
 	else
 	    FAIL("Junk on end of regexp");	/* "Can't happen". */
@@ -2704,8 +2704,8 @@ tryagain:
 		if (num > 9 && num >= PL_regnpar)
 		    goto defchar;
 		else {
-                   while (isDIGIT(*PL_regcomp_parse))
-                       PL_regcomp_parse++;
+		    while (isDIGIT(*PL_regcomp_parse))
+			PL_regcomp_parse++;
 
 		    if (!SIZE_ONLY && num > PL_regcomp_rx->nparens)
 			vFAIL("Reference to nonexistent group");

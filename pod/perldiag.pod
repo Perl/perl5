@@ -3431,13 +3431,14 @@ iterating over it, and someone else stuck a message in the stream of
 data Perl expected.  Someone's very confused, or perhaps trying to
 subvert Perl's population of %ENV for nefarious purposes.
 
-=item unmatched [] in regexp
+=item unmatched [ at <HERE< mark in regex m/%s/
 
-(F) The brackets around a character class must match.  If you wish to
+(F) The brackets around a character class must match. If you wish to
 include a closing bracket in a character class, backslash it or put it
-first.  See L<perlre>.
+first. See L<perlre>. The <HERE< shows in the regular expression about
+where the escape was discovered.
 
-=item unmatched () in regexp
+=item unmatched ( in regexp at <HERE< mark in regex m/%s/
 
 (F) Unbackslashed parentheses must always be balanced in regular
 expressions.  If you're a vi user, the % key is valuable for finding the
