@@ -194,23 +194,23 @@ typedef unsigned short	mode_t;
 #define STRUCT_MGVTBL_DEFINITION					\
 struct mgvtbl {								\
     union {								\
-	int	    (CPERLscope(*svt_get))	(SV *sv, MAGIC* mg);	\
+	int	    (CPERLscope(*svt_get))(pTHX_ SV *sv, MAGIC* mg);	\
 	char	    handle_VC_problem1[16];				\
     };									\
     union {								\
-	int	    (CPERLscope(*svt_set))	(SV *sv, MAGIC* mg);	\
+	int	    (CPERLscope(*svt_set))(pTHX_ SV *sv, MAGIC* mg);	\
 	char	    handle_VC_problem2[16];				\
     };									\
     union {								\
-	U32	    (CPERLscope(*svt_len))	(SV *sv, MAGIC* mg);	\
+	U32	    (CPERLscope(*svt_len))(pTHX_ SV *sv, MAGIC* mg);	\
 	char	    handle_VC_problem3[16];				\
     };									\
     union {								\
-	int	    (CPERLscope(*svt_clear))	(SV *sv, MAGIC* mg);	\
+	int	    (CPERLscope(*svt_clear))(pTHX_ SV *sv, MAGIC* mg);	\
 	char	    handle_VC_problem4[16];				\
     };									\
     union {								\
-	int	    (CPERLscope(*svt_free))	(SV *sv, MAGIC* mg);	\
+	int	    (CPERLscope(*svt_free))(pTHX_ SV *sv, MAGIC* mg);	\
 	char	    handle_VC_problem5[16];				\
     };									\
 }
@@ -218,7 +218,7 @@ struct mgvtbl {								\
 #define BASEOP_DEFINITION		\
     OP*		op_next;		\
     OP*		op_sibling;		\
-    OP*		(CPERLscope(*op_ppaddr))(ARGSproto);		\
+    OP*		(CPERLscope(*op_ppaddr))(pTHX);		\
     char	handle_VC_problem[12];	\
     PADOFFSET	op_targ;		\
     OPCODE	op_type;		\
@@ -231,7 +231,7 @@ struct mgvtbl {								\
     I32		any_i32;				\
     IV		any_iv;					\
     long	any_long;				\
-    void	(CPERLscope(*any_dptr)) (void*);	\
+    void	(CPERLscope(*any_dptr)) (pTHX_ void*);	\
     char	handle_VC_problem[16];			\
 }
 
@@ -294,19 +294,18 @@ extern	int	chown(const char *p, uid_t o, gid_t g);
 #define  init_os_extras Perl_init_os_extras
 
 DllExport void		Perl_win32_init(int *argcp, char ***argvp);
-DllExport void		Perl_init_os_extras(void);
-DllExport void		win32_str_os_error(void *sv, DWORD err);
+DllExport void		Perl_init_os_extras(pTHX);
+DllExport void		win32_str_os_error(pTHX_ void *sv, DWORD err);
 
 #ifndef USE_SOCKETS_AS_HANDLES
 extern FILE *		my_fdopen(int, char *);
 #endif
 extern int		my_fclose(FILE *);
-extern int		do_aspawn(void *really, void **mark, void **sp);
-extern int		do_spawn(char *cmd);
-extern int		do_spawn_nowait(char *cmd);
-extern char		do_exec(char *cmd);
-extern char *		win32_get_privlib(char *pl);
-extern char *		win32_get_sitelib(char *pl);
+extern int		do_aspawn(pTHX_ void *really, void **mark, void **sp);
+extern int		do_spawn(pTHX_ char *cmd);
+extern int		do_spawn_nowait(pTHX_ char *cmd);
+extern char *		win32_get_privlib(pTHX_ char *pl);
+extern char *		win32_get_sitelib(pTHX_ char *pl);
 extern int		IsWin95(void);
 extern int		IsWinNT(void);
 
@@ -405,6 +404,12 @@ struct thread_intern {
 /* place holders for now */
 #define USING_WIDE() 0
 #define GETINTERPMODE() CP_ACP
+
+/*
+ * This provides a layer of functions and macros to ensure extensions will
+ * get to use the same RTL functions as the core.
+ */
+#include "win32iop.h"
 
 #endif /* _INC_WIN32_PERL5 */
 

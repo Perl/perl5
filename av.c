@@ -13,10 +13,11 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_AV_C
 #include "perl.h"
 
 void
-av_reify(AV *av)
+Perl_av_reify(pTHX_ AV *av)
 {
     I32 key;
     SV* sv;
@@ -25,7 +26,7 @@ av_reify(AV *av)
 	return;
 #ifdef DEBUGGING
     if (SvTIED_mg((SV*)av, 'P'))
-	warn("av_reify called on tied array");
+	Perl_warn(aTHX_ "av_reify called on tied array");
 #endif
     key = AvMAX(av) + 1;
     while (key > AvFILLp(av) + 1)
@@ -46,7 +47,7 @@ av_reify(AV *av)
 }
 
 void
-av_extend(AV *av, I32 key)
+Perl_av_extend(pTHX_ AV *av, I32 key)
 {
     dTHR;			/* only necessary if we have to extend stack */
     MAGIC *mg;
@@ -60,7 +61,7 @@ av_extend(AV *av, I32 key)
 	PUSHs(SvTIED_obj((SV*)av, mg));
 	PUSHs(sv_2mortal(newSViv(key+1)));
         PUTBACK;
-	perl_call_method("EXTEND", G_SCALAR|G_DISCARD);
+	call_method("EXTEND", G_SCALAR|G_DISCARD);
 	POPSTACK;
 	FREETMPS;
 	LEAVE;
@@ -149,7 +150,7 @@ av_extend(AV *av, I32 key)
 }
 
 SV**
-av_fetch(register AV *av, I32 key, I32 lval)
+Perl_av_fetch(pTHX_ register AV *av, I32 key, I32 lval)
 {
     SV *sv;
 
@@ -196,7 +197,7 @@ av_fetch(register AV *av, I32 key, I32 lval)
 }
 
 SV**
-av_store(register AV *av, I32 key, SV *val)
+Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
 {
     SV** ary;
     U32  fill;
@@ -214,7 +215,7 @@ av_store(register AV *av, I32 key, SV *val)
     }
 
     if (SvREADONLY(av) && key >= AvFILL(av))
-	croak(PL_no_modify);
+	Perl_croak(aTHX_ PL_no_modify);
 
     if (SvRMAGICAL(av)) {
 	if (mg_find((SV*)av,'P')) {
@@ -255,7 +256,7 @@ av_store(register AV *av, I32 key, SV *val)
 }
 
 AV *
-newAV(void)
+Perl_newAV(pTHX)
 {
     register AV *av;
 
@@ -269,7 +270,7 @@ newAV(void)
 }
 
 AV *
-av_make(register I32 size, register SV **strp)
+Perl_av_make(pTHX_ register I32 size, register SV **strp)
 {
     register AV *av;
     register I32 i;
@@ -295,7 +296,7 @@ av_make(register I32 size, register SV **strp)
 }
 
 AV *
-av_fake(register I32 size, register SV **strp)
+Perl_av_fake(pTHX_ register I32 size, register SV **strp)
 {
     register AV *av;
     register SV** ary;
@@ -318,14 +319,14 @@ av_fake(register I32 size, register SV **strp)
 }
 
 void
-av_clear(register AV *av)
+Perl_av_clear(pTHX_ register AV *av)
 {
     register I32 key;
     SV** ary;
 
 #ifdef DEBUGGING
     if (SvREFCNT(av) <= 0) {
-	warn("Attempt to clear deleted array");
+	Perl_warn(aTHX_ "Attempt to clear deleted array");
     }
 #endif
     if (!av)
@@ -333,7 +334,7 @@ av_clear(register AV *av)
     /*SUPPRESS 560*/
 
     if (SvREADONLY(av))
-	croak(PL_no_modify);
+	Perl_croak(aTHX_ PL_no_modify);
 
     /* Give any tie a chance to cleanup first */
     if (SvRMAGICAL(av))
@@ -359,7 +360,7 @@ av_clear(register AV *av)
 }
 
 void
-av_undef(register AV *av)
+Perl_av_undef(pTHX_ register AV *av)
 {
     register I32 key;
 
@@ -387,13 +388,13 @@ av_undef(register AV *av)
 }
 
 void
-av_push(register AV *av, SV *val)
+Perl_av_push(pTHX_ register AV *av, SV *val)
 {             
     MAGIC *mg;
     if (!av)
 	return;
     if (SvREADONLY(av))
-	croak(PL_no_modify);
+	Perl_croak(aTHX_ PL_no_modify);
 
     if (mg = SvTIED_mg((SV*)av, 'P')) {
 	dSP;
@@ -404,7 +405,7 @@ av_push(register AV *av, SV *val)
 	PUSHs(val);
 	PUTBACK;
 	ENTER;
-	perl_call_method("PUSH", G_SCALAR|G_DISCARD);
+	call_method("PUSH", G_SCALAR|G_DISCARD);
 	LEAVE;
 	POPSTACK;
 	return;
@@ -413,7 +414,7 @@ av_push(register AV *av, SV *val)
 }
 
 SV *
-av_pop(register AV *av)
+Perl_av_pop(pTHX_ register AV *av)
 {
     SV *retval;
     MAGIC* mg;
@@ -421,7 +422,7 @@ av_pop(register AV *av)
     if (!av || AvFILL(av) < 0)
 	return &PL_sv_undef;
     if (SvREADONLY(av))
-	croak(PL_no_modify);
+	Perl_croak(aTHX_ PL_no_modify);
     if (mg = SvTIED_mg((SV*)av, 'P')) {
 	dSP;    
 	PUSHSTACKi(PERLSI_MAGIC);
@@ -429,7 +430,7 @@ av_pop(register AV *av)
 	XPUSHs(SvTIED_obj((SV*)av, mg));
 	PUTBACK;
 	ENTER;
-	if (perl_call_method("POP", G_SCALAR)) {
+	if (call_method("POP", G_SCALAR)) {
 	    retval = newSVsv(*PL_stack_sp--);    
 	} else {    
 	    retval = &PL_sv_undef;
@@ -446,7 +447,7 @@ av_pop(register AV *av)
 }
 
 void
-av_unshift(register AV *av, register I32 num)
+Perl_av_unshift(pTHX_ register AV *av, register I32 num)
 {
     register I32 i;
     register SV **ary;
@@ -455,7 +456,7 @@ av_unshift(register AV *av, register I32 num)
     if (!av || num <= 0)
 	return;
     if (SvREADONLY(av))
-	croak(PL_no_modify);
+	Perl_croak(aTHX_ PL_no_modify);
 
     if (mg = SvTIED_mg((SV*)av, 'P')) {
 	dSP;
@@ -468,7 +469,7 @@ av_unshift(register AV *av, register I32 num)
 	}
 	PUTBACK;
 	ENTER;
-	perl_call_method("UNSHIFT", G_SCALAR|G_DISCARD);
+	call_method("UNSHIFT", G_SCALAR|G_DISCARD);
 	LEAVE;
 	POPSTACK;
 	return;
@@ -499,7 +500,7 @@ av_unshift(register AV *av, register I32 num)
 }
 
 SV *
-av_shift(register AV *av)
+Perl_av_shift(pTHX_ register AV *av)
 {
     SV *retval;
     MAGIC* mg;
@@ -507,7 +508,7 @@ av_shift(register AV *av)
     if (!av || AvFILL(av) < 0)
 	return &PL_sv_undef;
     if (SvREADONLY(av))
-	croak(PL_no_modify);
+	Perl_croak(aTHX_ PL_no_modify);
     if (mg = SvTIED_mg((SV*)av, 'P')) {
 	dSP;
 	PUSHSTACKi(PERLSI_MAGIC);
@@ -515,7 +516,7 @@ av_shift(register AV *av)
 	XPUSHs(SvTIED_obj((SV*)av, mg));
 	PUTBACK;
 	ENTER;
-	if (perl_call_method("SHIFT", G_SCALAR)) {
+	if (call_method("SHIFT", G_SCALAR)) {
 	    retval = newSVsv(*PL_stack_sp--);            
 	} else {    
 	    retval = &PL_sv_undef;
@@ -536,17 +537,17 @@ av_shift(register AV *av)
 }
 
 I32
-av_len(register AV *av)
+Perl_av_len(pTHX_ register AV *av)
 {
     return AvFILL(av);
 }
 
 void
-av_fill(register AV *av, I32 fill)
+Perl_av_fill(pTHX_ register AV *av, I32 fill)
 {
     MAGIC *mg;
     if (!av)
-	croak("panic: null array");
+	Perl_croak(aTHX_ "panic: null array");
     if (fill < 0)
 	fill = -1;
     if (mg = SvTIED_mg((SV*)av, 'P')) {
@@ -559,7 +560,7 @@ av_fill(register AV *av, I32 fill)
 	PUSHs(SvTIED_obj((SV*)av, mg));
 	PUSHs(sv_2mortal(newSViv(fill+1)));
 	PUTBACK;
-	perl_call_method("STORESIZE", G_SCALAR|G_DISCARD);
+	call_method("STORESIZE", G_SCALAR|G_DISCARD);
 	POPSTACK;
 	FREETMPS;
 	LEAVE;
@@ -595,16 +596,16 @@ av_fill(register AV *av, I32 fill)
  */
 
 STATIC I32
-avhv_index_sv(SV* sv)
+S_avhv_index_sv(pTHX_ SV* sv)
 {
     I32 index = SvIV(sv);
     if (index < 1)
-	croak("Bad index while coercing array into hash");
+	Perl_croak(aTHX_ "Bad index while coercing array into hash");
     return index;    
 }
 
 HV*
-avhv_keys(AV *av)
+Perl_avhv_keys(pTHX_ AV *av)
 {
     SV **keysp = av_fetch(av, 0, FALSE);
     if (keysp) {
@@ -617,12 +618,12 @@ avhv_keys(AV *av)
 		return (HV*)sv;
 	}
     }
-    croak("Can't coerce array into hash");
+    Perl_croak(aTHX_ "Can't coerce array into hash");
     return Nullhv;
 }
 
 SV**
-avhv_fetch_ent(AV *av, SV *keysv, I32 lval, U32 hash)
+Perl_avhv_fetch_ent(pTHX_ AV *av, SV *keysv, I32 lval, U32 hash)
 {
     SV **indsvp;
     HV *keys = avhv_keys(av);
@@ -630,26 +631,26 @@ avhv_fetch_ent(AV *av, SV *keysv, I32 lval, U32 hash)
     
     he = hv_fetch_ent(keys, keysv, FALSE, hash);
     if (!he)
-        croak("No such array field");
+        Perl_croak(aTHX_ "No such array field");
     return av_fetch(av, avhv_index_sv(HeVAL(he)), lval);
 }
 
 bool
-avhv_exists_ent(AV *av, SV *keysv, U32 hash)
+Perl_avhv_exists_ent(pTHX_ AV *av, SV *keysv, U32 hash)
 {
     HV *keys = avhv_keys(av);
     return hv_exists_ent(keys, keysv, hash);
 }
 
 HE *
-avhv_iternext(AV *av)
+Perl_avhv_iternext(pTHX_ AV *av)
 {
     HV *keys = avhv_keys(av);
     return hv_iternext(keys);
 }
 
 SV *
-avhv_iterval(AV *av, register HE *entry)
+Perl_avhv_iterval(pTHX_ AV *av, register HE *entry)
 {
     SV *sv = hv_iterval(avhv_keys(av), entry);
     return *av_fetch(av, avhv_index_sv(sv), TRUE);

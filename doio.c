@@ -15,6 +15,7 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_DOIO_C
 #include "perl.h"
 
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
@@ -81,7 +82,7 @@
 #endif
 
 bool
-do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp)
+Perl_do_open(pTHX_ GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp)
 {
     register IO *io = GvIOn(gv);
     PerlIO *saveifp = Nullfp;
@@ -190,7 +191,7 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 	    if (*name == '\0') { /* command is missing 19990114 */
 		dTHR;
 		if (ckWARN(WARN_PIPE))
-		    warner(WARN_PIPE, "Missing command in piped open");
+		    Perl_warner(aTHX_ WARN_PIPE, "Missing command in piped open");
 		errno = EPIPE;
 		goto say_false;
 	    }
@@ -201,7 +202,7 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 		dTHR;
 		name[strlen(name)-1] = '\0' ;
 		if (ckWARN(WARN_PIPE))
-		    warner(WARN_PIPE, "Can't do bidirectional pipe");
+		    Perl_warner(aTHX_ WARN_PIPE, "Can't do bidirectional pipe");
 	    }
 	    fp = PerlProc_popen(name,"w");
 	    writing = 1;
@@ -294,7 +295,7 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
 	    if (*name == '\0') { /* command is missing 19990114 */
 		dTHR;
 		if (ckWARN(WARN_PIPE))
-		    warner(WARN_PIPE, "Missing command in piped open");
+		    Perl_warner(aTHX_ WARN_PIPE, "Missing command in piped open");
 		errno = EPIPE;
 		goto say_false;
 	    }
@@ -319,7 +320,7 @@ do_open(GV *gv, register char *name, I32 len, int as_raw, int rawmode, int rawpe
     if (!fp) {
 	dTHR;
 	if (ckWARN(WARN_NEWLINE) && IoTYPE(io) == '<' && strchr(name, '\n'))
-	    warner(WARN_NEWLINE, PL_warn_nl, "open");
+	    Perl_warner(aTHX_ WARN_NEWLINE, PL_warn_nl, "open");
 	goto say_false;
     }
     if (IoTYPE(io) &&
@@ -410,7 +411,7 @@ say_false:
 }
 
 PerlIO *
-nextargv(register GV *gv)
+Perl_nextargv(pTHX_ register GV *gv)
 {
     register SV *sv;
 #ifndef FLEXFILENAMES
@@ -454,7 +455,7 @@ nextargv(register GV *gv)
 		fileuid = PL_statbuf.st_uid;
 		filegid = PL_statbuf.st_gid;
 		if (!S_ISREG(PL_filemode)) {
-		    warn("Can't do inplace edit: %s is not a regular file",
+		    Perl_warn(aTHX_ "Can't do inplace edit: %s is not a regular file",
 		      PL_oldname );
 		    do_close(gv,FALSE);
 		    continue;
@@ -483,7 +484,7 @@ nextargv(register GV *gv)
                       || (_djstat_fail_bits & _STFAIL_TRUENAME)!=0
 #endif
                       ) {
-			warn("Can't do inplace edit: %s would not be unique",
+			Perl_warn(aTHX_ "Can't do inplace edit: %s would not be unique",
 			  SvPVX(sv) );
 			do_close(gv,FALSE);
 			continue;
@@ -492,7 +493,7 @@ nextargv(register GV *gv)
 #ifdef HAS_RENAME
 #ifndef DOSISH
 		    if (PerlLIO_rename(PL_oldname,SvPVX(sv)) < 0) {
-			warn("Can't rename %s to %s: %s, skipping file",
+			Perl_warn(aTHX_ "Can't rename %s to %s: %s, skipping file",
 			  PL_oldname, SvPVX(sv), Strerror(errno) );
 			do_close(gv,FALSE);
 			continue;
@@ -506,7 +507,7 @@ nextargv(register GV *gv)
 #else
 		    (void)UNLINK(SvPVX(sv));
 		    if (link(PL_oldname,SvPVX(sv)) < 0) {
-			warn("Can't rename %s to %s: %s, skipping file",
+			Perl_warn(aTHX_ "Can't rename %s to %s: %s, skipping file",
 			  PL_oldname, SvPVX(sv), Strerror(errno) );
 			do_close(gv,FALSE);
 			continue;
@@ -518,14 +519,14 @@ nextargv(register GV *gv)
 #if !defined(DOSISH) && !defined(AMIGAOS)
 #  ifndef VMS  /* Don't delete; use automatic file versioning */
 		    if (UNLINK(PL_oldname) < 0) {
-			warn("Can't remove %s: %s, skipping file",
+			Perl_warn(aTHX_ "Can't remove %s: %s, skipping file",
 			  PL_oldname, Strerror(errno) );
 			do_close(gv,FALSE);
 			continue;
 		    }
 #  endif
 #else
-		    croak("Can't do inplace edit without backup");
+		    Perl_croak(aTHX_ "Can't do inplace edit without backup");
 #endif
 		}
 
@@ -539,7 +540,7 @@ nextargv(register GV *gv)
 		if (!do_open(PL_argvoutgv,SvPVX(sv),SvCUR(sv),PL_inplace!=0,
 			     O_WRONLY|O_CREAT|OPEN_EXCL,0666,Nullfp)) {
 #endif
-		    warn("Can't do inplace edit on %s: %s",
+		    Perl_warn(aTHX_ "Can't do inplace edit on %s: %s",
 		      PL_oldname, Strerror(errno) );
 		    do_close(gv,FALSE);
 		    continue;
@@ -580,7 +581,7 @@ nextargv(register GV *gv)
 
 #ifdef HAS_PIPE
 void
-do_pipe(SV *sv, GV *rgv, GV *wgv)
+Perl_do_pipe(pTHX_ SV *sv, GV *rgv, GV *wgv)
 {
     register IO *rstio;
     register IO *wstio;
@@ -625,7 +626,7 @@ badexit:
 
 /* explicit renamed to avoid C++ conflict    -- kja */
 bool
-do_close(GV *gv, bool not_implicit)
+Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 {
     bool retval;
     IO *io;
@@ -642,7 +643,7 @@ do_close(GV *gv, bool not_implicit)
 	if (not_implicit) {
 	    dTHR;
 	    if (ckWARN(WARN_UNOPENED))
-		warner(WARN_UNOPENED, 
+		Perl_warner(aTHX_ WARN_UNOPENED, 
 		       "Close on unopened file <%s>",GvENAME(gv));
 	    SETERRNO(EBADF,SS$_IVCHAN);
 	}
@@ -659,7 +660,7 @@ do_close(GV *gv, bool not_implicit)
 }
 
 bool
-io_close(IO *io)
+Perl_io_close(pTHX_ IO *io)
 {
     bool retval = FALSE;
     int status;
@@ -690,7 +691,7 @@ io_close(IO *io)
 }
 
 bool
-do_eof(GV *gv)
+Perl_do_eof(pTHX_ GV *gv)
 {
     dTHR;
     register IO *io;
@@ -728,7 +729,7 @@ do_eof(GV *gv)
 }
 
 Off_t
-do_tell(GV *gv)
+Perl_do_tell(pTHX_ GV *gv)
 {
     register IO *io;
     register PerlIO *fp;
@@ -743,14 +744,14 @@ do_tell(GV *gv)
     {
 	dTHR;
 	if (ckWARN(WARN_UNOPENED))
-	    warner(WARN_UNOPENED, "tell() on unopened file");
+	    Perl_warner(aTHX_ WARN_UNOPENED, "tell() on unopened file");
     }
     SETERRNO(EBADF,RMS$_IFI);
     return (Off_t)-1;
 }
 
 bool
-do_seek(GV *gv, Off_t pos, int whence)
+Perl_do_seek(pTHX_ GV *gv, Off_t pos, int whence)
 {
     register IO *io;
     register PerlIO *fp;
@@ -765,14 +766,14 @@ do_seek(GV *gv, Off_t pos, int whence)
     {
 	dTHR;
 	if (ckWARN(WARN_UNOPENED))
-	    warner(WARN_UNOPENED, "seek() on unopened file");
+	    Perl_warner(aTHX_ WARN_UNOPENED, "seek() on unopened file");
     }
     SETERRNO(EBADF,RMS$_IFI);
     return FALSE;
 }
 
 Off_t
-do_sysseek(GV *gv, Off_t pos, int whence)
+Perl_do_sysseek(pTHX_ GV *gv, Off_t pos, int whence)
 {
     register IO *io;
     register PerlIO *fp;
@@ -782,17 +783,17 @@ do_sysseek(GV *gv, Off_t pos, int whence)
     {
 	dTHR;
 	if (ckWARN(WARN_UNOPENED))
-	    warner(WARN_UNOPENED, "sysseek() on unopened file");
+	    Perl_warner(aTHX_ WARN_UNOPENED, "sysseek() on unopened file");
     }
     SETERRNO(EBADF,RMS$_IFI);
     return -1L;
 }
 
 int
-do_binmode(PerlIO *fp, int iotype, int flag)
+Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int flag)
 {
     if (flag != TRUE)
-	croak("panic: unsetting binmode"); /* Not implemented yet */
+	Perl_croak(aTHX_ "panic: unsetting binmode"); /* Not implemented yet */
 #ifdef DOSISH
 #if defined(atarist) || defined(__MINT__)
     if (!PerlIO_flush(fp) && (fp->_flag |= _IOBIN))
@@ -880,7 +881,7 @@ Off_t length;		/* length to set file to */
 #endif /* F_FREESP */
 
 bool
-do_print(register SV *sv, PerlIO *fp)
+Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 {
     register char *tmps;
     STRLEN len;
@@ -906,7 +907,7 @@ do_print(register SV *sv, PerlIO *fp)
 	{
 	    dTHR;
 	    if (ckWARN(WARN_UNINITIALIZED))
-		warner(WARN_UNINITIALIZED, PL_warn_uninit);
+		Perl_warner(aTHX_ WARN_UNINITIALIZED, PL_warn_uninit);
 	}
 	return TRUE;
     case SVt_IV:
@@ -930,7 +931,7 @@ do_print(register SV *sv, PerlIO *fp)
 }
 
 I32
-my_stat(ARGSproto)
+Perl_my_stat(pTHX)
 {
     djSP;
     IO *io;
@@ -951,7 +952,7 @@ my_stat(ARGSproto)
 	    if (tmpgv == PL_defgv)
 		return PL_laststatval;
 	    if (ckWARN(WARN_UNOPENED))
-		warner(WARN_UNOPENED, "Stat on unopened file <%s>",
+		Perl_warner(aTHX_ WARN_UNOPENED, "Stat on unopened file <%s>",
 		  GvENAME(tmpgv));
 	    PL_statgv = Nullgv;
 	    sv_setpv(PL_statname,"");
@@ -978,13 +979,13 @@ my_stat(ARGSproto)
 	PL_laststype = OP_STAT;
 	PL_laststatval = PerlLIO_stat(s, &PL_statcache);
 	if (PL_laststatval < 0 && ckWARN(WARN_NEWLINE) && strchr(s, '\n'))
-	    warner(WARN_NEWLINE, PL_warn_nl, "stat");
+	    Perl_warner(aTHX_ WARN_NEWLINE, PL_warn_nl, "stat");
 	return PL_laststatval;
     }
 }
 
 I32
-my_lstat(ARGSproto)
+Perl_my_lstat(pTHX)
 {
     djSP;
     SV *sv;
@@ -993,10 +994,10 @@ my_lstat(ARGSproto)
 	EXTEND(SP,1);
 	if (cGVOP->op_gv == PL_defgv) {
 	    if (PL_laststype != OP_LSTAT)
-		croak("The stat preceding -l _ wasn't an lstat");
+		Perl_croak(aTHX_ "The stat preceding -l _ wasn't an lstat");
 	    return PL_laststatval;
 	}
-	croak("You can't use -l on a filehandle");
+	Perl_croak(aTHX_ "You can't use -l on a filehandle");
     }
 
     PL_laststype = OP_LSTAT;
@@ -1006,12 +1007,12 @@ my_lstat(ARGSproto)
     sv_setpv(PL_statname,SvPV(sv, n_a));
     PL_laststatval = PerlLIO_lstat(SvPV(sv, n_a),&PL_statcache);
     if (PL_laststatval < 0 && ckWARN(WARN_NEWLINE) && strchr(SvPV(sv, n_a), '\n'))
-	warner(WARN_NEWLINE, PL_warn_nl, "lstat");
+	Perl_warner(aTHX_ WARN_NEWLINE, PL_warn_nl, "lstat");
     return PL_laststatval;
 }
 
 bool
-do_aexec(SV *really, register SV **mark, register SV **sp)
+Perl_do_aexec(pTHX_ SV *really, register SV **mark, register SV **sp)
 {
     register char **a;
     char *tmps;
@@ -1035,7 +1036,7 @@ do_aexec(SV *really, register SV **mark, register SV **sp)
 	else
 	    PerlProc_execvp(PL_Argv[0],PL_Argv);
 	if (ckWARN(WARN_EXEC))
-	    warner(WARN_EXEC, "Can't exec \"%s\": %s", 
+	    Perl_warner(aTHX_ WARN_EXEC, "Can't exec \"%s\": %s", 
 		PL_Argv[0], Strerror(errno));
     }
     do_execfree();
@@ -1043,7 +1044,7 @@ do_aexec(SV *really, register SV **mark, register SV **sp)
 }
 
 void
-do_execfree(void)
+Perl_do_execfree(pTHX)
 {
     if (PL_Argv) {
 	Safefree(PL_Argv);
@@ -1058,13 +1059,13 @@ do_execfree(void)
 #if !defined(OS2) && !defined(WIN32) && !defined(DJGPP)
 
 bool
-do_exec(char *cmd)
+Perl_do_exec(pTHX_ char *cmd)
 {
     return do_exec3(cmd,0,0);
 }
 
 bool
-do_exec3(char *cmd, int fd, int do_report)
+Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
 {
     register char **a;
     register char *s;
@@ -1149,7 +1150,7 @@ do_exec3(char *cmd, int fd, int do_report)
 	    int e = errno;
 
 	    if (ckWARN(WARN_EXEC))
-		warner(WARN_EXEC, "Can't exec \"%s\": %s", 
+		Perl_warner(aTHX_ WARN_EXEC, "Can't exec \"%s\": %s", 
 		    PL_Argv[0], Strerror(errno));
 	    if (do_report) {
 		PerlLIO_write(fd, (void*)&e, sizeof(int));
@@ -1164,7 +1165,7 @@ do_exec3(char *cmd, int fd, int do_report)
 #endif /* OS2 || WIN32 */
 
 I32
-apply(I32 type, register SV **mark, register SV **sp)
+Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 {
     dTHR;
     register I32 val;
@@ -1241,7 +1242,7 @@ nothing in the core.
 	    if (*s == 'S' && s[1] == 'I' && s[2] == 'G')
 		s += 3;
 	    if (!(val = whichsig(s)))
-		croak("Unrecognized signal name \"%s\"",s);
+		Perl_croak(aTHX_ "Unrecognized signal name \"%s\"",s);
 	}
 	else
 	    val = SvIVx(*mark);
@@ -1366,7 +1367,7 @@ nothing in the core.
 /* Do the permissions allow some operation?  Assumes statcache already set. */
 #ifndef VMS /* VMS' cando is in vms.c */
 I32
-cando(I32 bit, I32 effective, register struct stat *statbufp)
+Perl_cando(pTHX_ I32 bit, I32 effective, register struct stat *statbufp)
 {
 #ifdef DOSISH
     /* [Comments and code from Len Reed]
@@ -1418,7 +1419,7 @@ cando(I32 bit, I32 effective, register struct stat *statbufp)
 #endif /* ! VMS */
 
 I32
-ingroup(I32 testgid, I32 effective)
+Perl_ingroup(pTHX_ I32 testgid, I32 effective)
 {
     if (testgid == (effective ? PL_egid : PL_gid))
 	return TRUE;
@@ -1442,7 +1443,7 @@ ingroup(I32 testgid, I32 effective)
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 
 I32
-do_ipcget(I32 optype, SV **mark, SV **sp)
+Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
 {
     dTHR;
     key_t key;
@@ -1468,14 +1469,14 @@ do_ipcget(I32 optype, SV **mark, SV **sp)
 #endif
 #if !defined(HAS_MSG) || !defined(HAS_SEM) || !defined(HAS_SHM)
     default:
-	croak("%s not implemented", PL_op_desc[optype]);
+	Perl_croak(aTHX_ "%s not implemented", PL_op_desc[optype]);
 #endif
     }
     return -1;			/* should never happen */
 }
 
 I32
-do_ipcctl(I32 optype, SV **mark, SV **sp)
+Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
 {
     dTHR;
     SV *astr;
@@ -1523,13 +1524,13 @@ do_ipcctl(I32 optype, SV **mark, SV **sp)
 		   than guessing about u_?short(_t)? */
 	}
 #else
-	croak("%s not implemented", PL_op_desc[optype]);
+	Perl_croak(aTHX_ "%s not implemented", PL_op_desc[optype]);
 #endif
 	break;
 #endif
 #if !defined(HAS_MSG) || !defined(HAS_SEM) || !defined(HAS_SHM)
     default:
-	croak("%s not implemented", PL_op_desc[optype]);
+	Perl_croak(aTHX_ "%s not implemented", PL_op_desc[optype]);
 #endif
     }
 
@@ -1545,7 +1546,7 @@ do_ipcctl(I32 optype, SV **mark, SV **sp)
 	{
 	    a = SvPV(astr, len);
 	    if (len != infosize)
-		croak("Bad arg length for %s, is %lu, should be %ld",
+		Perl_croak(aTHX_ "Bad arg length for %s, is %lu, should be %ld",
 		      PL_op_desc[optype],
 		      (unsigned long)len,
 		      (long)infosize);
@@ -1572,7 +1573,7 @@ do_ipcctl(I32 optype, SV **mark, SV **sp)
             unsemds.buf = (struct semid_ds *)a;
 	    ret = Semctl(id, n, cmd, unsemds);
 #else
-	    croak("%s not implemented", PL_op_desc[optype]);
+	    Perl_croak(aTHX_ "%s not implemented", PL_op_desc[optype]);
 #endif
         }
 	break;
@@ -1592,7 +1593,7 @@ do_ipcctl(I32 optype, SV **mark, SV **sp)
 }
 
 I32
-do_msgsnd(SV **mark, SV **sp)
+Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
 {
 #ifdef HAS_MSG
     dTHR;
@@ -1606,16 +1607,16 @@ do_msgsnd(SV **mark, SV **sp)
     flags = SvIVx(*++mark);
     mbuf = SvPV(mstr, len);
     if ((msize = len - sizeof(long)) < 0)
-	croak("Arg too short for msgsnd");
+	Perl_croak(aTHX_ "Arg too short for msgsnd");
     SETERRNO(0,0);
     return msgsnd(id, (struct msgbuf *)mbuf, msize, flags);
 #else
-    croak("msgsnd not implemented");
+    Perl_croak(aTHX_ "msgsnd not implemented");
 #endif
 }
 
 I32
-do_msgrcv(SV **mark, SV **sp)
+Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
 {
 #ifdef HAS_MSG
     dTHR;
@@ -1641,12 +1642,12 @@ do_msgrcv(SV **mark, SV **sp)
     }
     return ret;
 #else
-    croak("msgrcv not implemented");
+    Perl_croak(aTHX_ "msgrcv not implemented");
 #endif
 }
 
 I32
-do_semop(SV **mark, SV **sp)
+Perl_do_semop(pTHX_ SV **mark, SV **sp)
 {
 #ifdef HAS_SEM
     dTHR;
@@ -1666,12 +1667,12 @@ do_semop(SV **mark, SV **sp)
     SETERRNO(0,0);
     return semop(id, (struct sembuf *)opbuf, opsize/sizeof(struct sembuf));
 #else
-    croak("semop not implemented");
+    Perl_croak(aTHX_ "semop not implemented");
 #endif
 }
 
 I32
-do_shmio(I32 optype, SV **mark, SV **sp)
+Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 {
 #ifdef HAS_SHM
     dTHR;
@@ -1716,7 +1717,7 @@ do_shmio(I32 optype, SV **mark, SV **sp)
     }
     return shmdt(shm);
 #else
-    croak("shm I/O not implemented");
+    Perl_croak(aTHX_ "shm I/O not implemented");
 #endif
 }
 

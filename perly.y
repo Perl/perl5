@@ -14,13 +14,10 @@
 
 %{
 #include "EXTERN.h"
+#define PERL_IN_PERLY_C
 #include "perl.h"
 
-static void
-dep(void)
-{
-    deprecate("\"do\" to call subroutines");
-}
+#define dep() deprecate("\"do\" to call subroutines")
 
 %}
 

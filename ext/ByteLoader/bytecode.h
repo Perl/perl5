@@ -8,8 +8,8 @@ typedef OP *opindex;
 typedef IV IV64;
 
 #define BGET_FREAD(argp, len, nelem)	\
-	 bs.fread((char*)(argp),(len),(nelem),bs.data)
-#define BGET_FGETC() bs.fgetc(bs.data)
+	 bs.pfread((char*)(argp),(len),(nelem),bs.data)
+#define BGET_FGETC() bs.pfgetc(bs.data)
 
 #define BGET_U32(arg)	\
 	BGET_FREAD(&arg, sizeof(U32), 1); arg = PerlSock_ntohl((U32)arg)
@@ -22,7 +22,7 @@ typedef IV IV64;
 #define BGET_PV(arg)	STMT_START {	\
 	BGET_U32(arg);			\
 	if (arg)			\
-	    bs.freadpv(arg, bs.data, &bytecode_pv);	\
+	    bs.pfreadpv(arg, bs.data, &bytecode_pv);	\
 	else {				\
 	    bytecode_pv.xpv_pv = 0;		\
 	    bytecode_pv.xpv_len = 0;		\
@@ -111,7 +111,7 @@ typedef IV IV64;
 #define BSET_pv_free(pv)	Safefree(pv.xpv_pv)
 #define BSET_pregcomp(o, arg) \
 	((PMOP*)o)->op_pmregexp = arg ? \
-		CALLREGCOMP(arg, arg + bytecode_pv.xpv_cur, ((PMOP*)o)) : 0
+		CALLREGCOMP(aTHX_ arg, arg + bytecode_pv.xpv_cur, ((PMOP*)o)) : 0
 #define BSET_newsv(sv, arg)	sv = NEWSV(666,0); SvUPGRADE(sv, arg)
 #define BSET_newop(o, arg)	o = (OP*)safemalloc(optype_size[arg])
 #define BSET_newopn(o, arg) STMT_START {	\
@@ -132,7 +132,7 @@ typedef IV IV64;
 	    arg = OP_GREPSTART;			\
 	o->op_ppaddr = PL_ppaddr[arg];		\
     } STMT_END
-#define BSET_op_ppaddr(o, arg) croak("op_ppaddr not yet implemented")
+#define BSET_op_ppaddr(o, arg) Perl_croak(aTHX_ "op_ppaddr not yet implemented")
 #define BSET_curpad(pad, arg) STMT_START {	\
 	PL_comppad = (AV *)arg;			\
 	pad = AvARRAY(arg);			\

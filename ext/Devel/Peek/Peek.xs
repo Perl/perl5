@@ -6,7 +6,7 @@
 #define DeadCode() NULL
 #else
 SV *
-DeadCode()
+DeadCode(pTHX)
 {
     SV* sva;
     SV* sv, *dbg;
@@ -201,3 +201,7 @@ PPCODE:
 
 SV *
 DeadCode()
+CODE:
+    RETVAL = DeadCode(aTHX);
+OUTPUT:
+    RETVAL

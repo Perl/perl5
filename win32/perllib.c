@@ -7,13 +7,14 @@
 #include "perl.h"
 #include "XSUB.h"
 
-static void xs_init (void);
+static void xs_init (pTHX);
 
 DllExport int
 RunPerl(int argc, char **argv, char **env, void *iosubsystem)
 {
     int exitstatus;
     PerlInterpreter *my_perl;
+    struct perl_thread *thr;
 
 #ifdef PERL_GLOBAL_STRUCT
 #define PERLVAR(var,type) /**/
@@ -27,14 +28,14 @@ RunPerl(int argc, char **argv, char **env, void *iosubsystem)
 
     PERL_SYS_INIT(&argc,&argv);
 
-    perl_init_i18nl10n(1);
+    init_i18nl10n(1);
 
     if (!(my_perl = perl_alloc()))
 	return (1);
     perl_construct( my_perl );
     PL_perl_destruct_level = 0;
 
-    exitstatus = perl_parse( my_perl, xs_init, argc, argv, env);
+    exitstatus = perl_parse(my_perl, xs_init, argc, argv, env);
     if (!exitstatus) {
 	exitstatus = perl_run( my_perl );
     }
@@ -96,10 +97,10 @@ char *staticlinkmodules[] = {
     NULL,
 };
 
-EXTERN_C void boot_DynaLoader (CV* cv);
+EXTERN_C void boot_DynaLoader (pTHX_ CV* cv);
 
 static void
-xs_init()
+xs_init(pTHX)
 {
     char *file = __FILE__;
     dXSUB_SYS;

@@ -1024,12 +1024,12 @@ EOF
     if ($ALIAS) 
       { print Q<<"EOF" if $cond }
 #    if ($cond)
-#       croak("Usage: %s($orig_args)", GvNAME(CvGV(cv)));
+#       Perl_croak(aTHX_ "Usage: %s($orig_args)", GvNAME(CvGV(cv)));
 EOF
     else 
       { print Q<<"EOF" if $cond }
 #    if ($cond)
-#	croak("Usage: $pname($orig_args)");
+#	Perl_croak(aTHX_ "Usage: $pname($orig_args)");
 EOF
 
     print Q<<"EOF" if $PPCODE;
@@ -1080,7 +1080,7 @@ EOF
 
 	# do code
 	if (/^\s*NOT_IMPLEMENTED_YET/) {
-		print "\n\tcroak(\"$pname: not implemented yet\");\n";
+		print "\n\tPerl_croak(aTHX_ \"$pname: not implemented yet\");\n";
 		$_ = '' ;
 	} else {
 		if ($ret_type ne "void") {
@@ -1176,7 +1176,7 @@ EOF
 
     print Q<<EOF if $except;
 #    if (errbuf[0])
-#	croak(errbuf);
+#	Perl_croak(aTHX_ errbuf);
 EOF
 
     if ($ret_type ne "void" or $EXPLICIT_RETURN) {

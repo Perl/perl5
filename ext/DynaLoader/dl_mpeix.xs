@@ -33,16 +33,16 @@ typedef struct {
 static AV *dl_resolve_using = Nullav;
 
 static void
-dl_private_init()
+dl_private_init(pTHX)
 {
-    (void)dl_generic_private_init();
-    dl_resolve_using = perl_get_av("DynaLoader::dl_resolve_using", 0x4);
+    (void)dl_generic_private_init(aTHX);
+    dl_resolve_using = get_av("DynaLoader::dl_resolve_using", 0x4);
 }
 
 MODULE = DynaLoader     PACKAGE = DynaLoader
 
 BOOT:
-    (void)dl_private_init();
+    (void)dl_private_init(aTHX);
 
 void *
 dl_load_file(filename, flags=0)
@@ -56,7 +56,7 @@ dl_load_file(filename, flags=0)
     DLDEBUG(1,PerlIO_printf(PerlIO_stderr(), "dl_load_file(%s,%x):\n", filename,
 flags));
     if (flags & 0x01)
-        warn("Can't make loaded symbols global on this platform while loading %s
+        Perl_warn(aTHX_ "Can't make loaded symbols global on this platform while loading %s
 ",filename);
     obj = (p_mpe_dld) safemalloc(sizeof(t_mpe_dld));
     memzero(obj, sizeof(t_mpe_dld));
@@ -72,7 +72,7 @@ flags));
 
     ST(0) = sv_newmortal() ;
     if (obj == NULL)
-        SaveError("%s",Strerror(errno));
+        SaveError(aTHX_"%s",Strerror(errno));
     else
         sv_setiv( ST(0), (IV)obj);
 
@@ -98,7 +98,7 @@ dl_find_symbol(libhandle, symbolname)
     DLDEBUG(2,PerlIO_printf(PerlIO_stderr(),"  symbolref(PROCEDURE) = %x, status=%x\n", symaddr, status));
 
     if (status != 0) {
-        SaveError("%s",(errno) ? Strerror(errno) : "Symbol not found") ;
+        SaveError(aTHX_"%s",(errno) ? Strerror(errno) : "Symbol not found") ;
     } else {
         sv_setiv( ST(0), (IV)symaddr);
     }
@@ -117,7 +117,9 @@ dl_install_xsub(perl_name, symref, filename="$Package")
     CODE:
     DLDEBUG(2,PerlIO_printf(PerlIO_stderr(),"dl_install_xsub(name=%s, symref=%x)\n",
             perl_name, symref));
-    ST(0)=sv_2mortal(newRV((SV*)newXS(perl_name, (void(*)())symref, filename)));
+    ST(0) = sv_2mortal(newRV((SV*)newXS(perl_name,
+					(void(*)(pTHX_ CV *))symref,
+					filename)));
 
 char *
 dl_error()

@@ -79,6 +79,9 @@ PL_pending_ident
 PL_sortcxix
 PL_sublex_info
 PL_timesbuf
+main
+Perl_ErrorNo
+Perl_GetVars
 Perl_do_exec3
 Perl_do_ipcctl
 Perl_do_ipcget
@@ -122,6 +125,10 @@ else
  {
   skip_symbols [qw(
     Perl_dump_mstats
+    Perl_malloc
+    Perl_mfree
+    Perl_realloc
+    Perl_calloc
     Perl_malloced_size)];
  }
 
@@ -154,6 +161,20 @@ Perl_find_threadsv
 Perl_unlock_condpair
 Perl_magic_mutexfree
 )];
+ }
+unless ($define{'USE_THREADS'} or $define{'PERL_IMPLICIT_CONTEXT'})
+ {
+  skip_symbols [qw(
+		   Perl_croak_nocontext
+		   Perl_die_nocontext
+		   Perl_form_nocontext
+		   Perl_warn_nocontext
+		   Perl_newSVpvf_nocontext
+		   Perl_sv_catpvf_nocontext
+		   Perl_sv_setpvf_nocontext
+		   Perl_sv_catpvf_mg_nocontext
+		   Perl_sv_setpvf_mg_nocontext
+		   )];
  }
 
 unless ($define{'FAKE_THREADS'})
@@ -228,7 +249,7 @@ for my $syms ('../global.sym','../pp.sym', '../globvar.sym')
     # Functions have a Perl_ prefix
     # Variables have a PL_ prefix
     chomp($_);
-    my $symbol = ($syms =~ /var\.sym$/i ? "PL_" : "Perl_");
+    my $symbol = ($syms =~ /var\.sym$/i ? "PL_" : "");
     $symbol .= $_;
     emit_symbol($symbol) unless exists $skip{$symbol};
    }
@@ -303,30 +324,12 @@ sub output_symbol {
 1;
 __DATA__
 # extra globals not included above.
-perl_init_i18nl10n
 perl_alloc
-perl_atexit
 perl_construct
 perl_destruct
 perl_free
 perl_parse
 perl_run
-perl_get_sv
-perl_get_av
-perl_get_hv
-perl_get_cv
-perl_call_argv
-perl_call_pv
-perl_call_method
-perl_call_sv
-perl_require_pv
-perl_eval_pv
-perl_eval_sv
-perl_new_ctype
-perl_new_collate
-perl_new_numeric
-perl_set_numeric_standard
-perl_set_numeric_local
 boot_DynaLoader
 Perl_thread_create
 win32_errno

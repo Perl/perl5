@@ -8,6 +8,7 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_RUN_C
 #include "perl.h"
 
 /*
@@ -23,30 +24,23 @@
 #endif
 
 int
-runops_standard(void)
+Perl_runops_standard(pTHX)
 {
     dTHR;
 
-    while ( PL_op = (CALLOP->op_ppaddr)(ARGS) ) ;
+    while ( PL_op = (CALLOP->op_ppaddr)(aTHX) ) ;
 
     TAINT_NOT;
     return 0;
 }
 
-#ifdef DEBUGGING
-#ifndef PERL_OBJECT
-static void debprof (OP*o);
-#endif
-
-#endif	/* DEBUGGING */
-
 int
-runops_debug(void)
+Perl_runops_debug(pTHX)
 {
 #ifdef DEBUGGING
     dTHR;
     if (!PL_op) {
-	warn("NULL OP IN RUN");
+	Perl_warn(aTHX_ "NULL OP IN RUN");
 	return 0;
     }
 
@@ -59,7 +53,7 @@ runops_debug(void)
 	    DEBUG_t(debop(PL_op));
 	    DEBUG_P(debprof(PL_op));
 	}
-    } while ( PL_op = (CALLOP->op_ppaddr)(ARGS) );
+    } while ( PL_op = (CALLOP->op_ppaddr)(aTHX) );
 
     TAINT_NOT;
     return 0;
@@ -69,12 +63,12 @@ runops_debug(void)
 }
 
 I32
-debop(OP *o)
+Perl_debop(pTHX_ OP *o)
 {
 #ifdef DEBUGGING
     SV *sv;
     STRLEN n_a;
-    deb("%s", PL_op_name[o->op_type]);
+    Perl_deb(aTHX_ "%s", PL_op_name[o->op_type]);
     switch (o->op_type) {
     case OP_CONST:
 	PerlIO_printf(Perl_debug_log, "(%s)", SvPEEK(cSVOPo->op_sv));
@@ -99,7 +93,7 @@ debop(OP *o)
 }
 
 void
-watch(char **addr)
+Perl_watch(pTHX_ char **addr)
 {
 #ifdef DEBUGGING
     dTHR;
@@ -111,7 +105,7 @@ watch(char **addr)
 }
 
 STATIC void
-debprof(OP *o)
+S_debprof(pTHX_ OP *o)
 {
 #ifdef DEBUGGING
     if (!PL_profiledata)
@@ -121,7 +115,7 @@ debprof(OP *o)
 }
 
 void
-debprofdump(void)
+Perl_debprofdump(pTHX)
 {
 #ifdef DEBUGGING
     unsigned i;

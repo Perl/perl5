@@ -146,10 +146,10 @@ my_find_image_symbol(struct dsc$descriptor_s *imgname,
 
 
 static void
-dl_private_init()
+dl_private_init(pTHX)
 {
-    dl_generic_private_init();
-    dl_require_symbols = perl_get_av("DynaLoader::dl_require_symbols", 0x4);
+    dl_generic_private_init(aTHX);
+    dl_require_symbols = get_av("DynaLoader::dl_require_symbols", 0x4);
     /* Set up the static control blocks for dl_expand_filespec() */
     dlfab = cc$rms_fab;
     dlnam = cc$rms_nam;
@@ -162,7 +162,7 @@ dl_private_init()
 MODULE = DynaLoader PACKAGE = DynaLoader
 
 BOOT:
-    (void)dl_private_init();
+    (void)dl_private_init(aTHX);
 
 void
 dl_expandspec(filespec)
@@ -343,7 +343,9 @@ dl_install_xsub(perl_name, symref, filename="$Package")
     CODE:
     DLDEBUG(2,PerlIO_printf(PerlIO_stderr(), "dl_install_xsub(name=%s, symref=%x)\n",
         perl_name, symref));
-    ST(0)=sv_2mortal(newRV((SV*)newXS(perl_name, (void(*)())symref, filename)));
+    ST(0) = sv_2mortal(newRV((SV*)newXS(perl_name,
+				      (void(*)(pTHX_ CV *))symref,
+				      filename)));
 
 
 char *

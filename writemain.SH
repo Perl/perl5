@@ -65,14 +65,14 @@ if test X"$args" != "X" ; then
 mname=`echo $ext   | sed 's!/!::!g'`
 cname=`echo $mname | sed 's!:!_!g'`
 
-echo "EXTERN_C void boot_${cname} (CV* cv);"
+echo "EXTERN_C void boot_${cname} (pTHX_ CV* cv);"
     done
 fi
 
 cat << 'EOP'
 
 static void
-xs_init()
+xs_init(pTHX)
 {
 EOP
 

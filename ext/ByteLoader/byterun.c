@@ -51,7 +51,8 @@ bset_obj_store(void *obj, I32 ix)
     return obj;
 }
 
-void byterun(struct bytestream bs)
+void
+byterun(pTHX_ struct bytestream bs)
 {
     dTHR;
     int insn;
@@ -894,7 +895,7 @@ void byterun(struct bytestream bs)
 		break;
 	    }
 	  default:
-	    croak("Illegal bytecode instruction %d\n", insn);
+	    Perl_croak(aTHX_ "Illegal bytecode instruction %d\n", insn);
 	    /* NOTREACHED */
 	}
     }

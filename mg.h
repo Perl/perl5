@@ -11,11 +11,11 @@
 STRUCT_MGVTBL_DEFINITION;
 #else
 struct mgvtbl {
-    int		(CPERLscope(*svt_get))	(SV *sv, MAGIC* mg);
-    int		(CPERLscope(*svt_set))	(SV *sv, MAGIC* mg);
-    U32		(CPERLscope(*svt_len))	(SV *sv, MAGIC* mg);
-    int		(CPERLscope(*svt_clear))	(SV *sv, MAGIC* mg);
-    int		(CPERLscope(*svt_free))	(SV *sv, MAGIC* mg);
+    int		(CPERLscope(*svt_get))	(pTHX_ SV *sv, MAGIC* mg);
+    int		(CPERLscope(*svt_set))	(pTHX_ SV *sv, MAGIC* mg);
+    U32		(CPERLscope(*svt_len))	(pTHX_ SV *sv, MAGIC* mg);
+    int		(CPERLscope(*svt_clear))(pTHX_ SV *sv, MAGIC* mg);
+    int		(CPERLscope(*svt_free))	(pTHX_ SV *sv, MAGIC* mg);
 };
 #endif
 

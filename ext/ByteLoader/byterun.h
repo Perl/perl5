@@ -10,9 +10,9 @@
  */
 struct bytestream {
     void *data;
-    int (*fgetc)(void *);
-    int (*fread)(char *, size_t, size_t, void *);
-    void (*freadpv)(U32, void *, XPV *);
+    int (*pfgetc)(void *);
+    int (*pfread)(char *, size_t, size_t, void *);
+    void (*pfreadpv)(U32, void *, XPV *);
 };
 
 enum {
@@ -154,3 +154,28 @@ enum {
     OPt_COP		/* 11 */
 };
 
+EXT int PL_optype_size[]
+#ifdef DOINIT
+= {
+    sizeof(OP),
+    sizeof(UNOP),
+    sizeof(BINOP),
+    sizeof(LOGOP),
+    sizeof(CONDOP),
+    sizeof(LISTOP),
+    sizeof(PMOP),
+    sizeof(SVOP),
+    sizeof(GVOP),
+    sizeof(PVOP),
+    sizeof(LOOP),
+    sizeof(COP)
+}
+#endif /* DOINIT */
+;
+
+#define INIT_SPECIALSV_LIST STMT_START { \
+	PL_specialsv_list[0] = Nullsv; \
+	PL_specialsv_list[1] = &PL_sv_undef; \
+	PL_specialsv_list[2] = &PL_sv_yes; \
+	PL_specialsv_list[3] = &PL_sv_no; \
+    } STMT_END

@@ -44,7 +44,7 @@ Perl_alloc_thread_key(void)
     static int key_allocated = 0;
     if (!key_allocated) {
 	if ((PL_thr_key = TlsAlloc()) == TLS_OUT_OF_INDEXES)
-	    croak("panic: TlsAlloc");
+	    Perl_croak_nocontext("panic: TlsAlloc");
 	key_allocated = 1;
     }
 #endif

@@ -20,7 +20,7 @@ static int sig_pipe[2];
 #endif
 
 static void
-remove_thread(struct perl_thread *t)
+remove_thread(pTHX_ struct perl_thread *t)
 {
 #ifdef USE_THREADS
     DEBUG_S(WITH_THR(PerlIO_printf(PerlIO_stderr(),
@@ -194,7 +194,7 @@ threadstart(void *arg)
     case THRf_R_JOINED:
 	ThrSETSTATE(thr, THRf_DEAD);
 	MUTEX_UNLOCK(&thr->mutex);
-	remove_thread(thr);
+	remove_thread(aTHX_ thr);
 	DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			      "%p: R_JOINED thread finished\n", thr));
 	break;
@@ -204,7 +204,7 @@ threadstart(void *arg)
 	SvREFCNT_dec(av);
 	DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			      "%p: DETACHED thread finished\n", thr));
-	remove_thread(thr);	/* This might trigger main thread to finish */
+	remove_thread(aTHX_ thr);	/* This might trigger main thread to finish */
 	break;
     default:
 	MUTEX_UNLOCK(&thr->mutex);
@@ -221,7 +221,7 @@ threadstart(void *arg)
 }
 
 static SV *
-newthread (SV *startsv, AV *initargs, char *classname)
+newthread (pTHX_ SV *startsv, AV *initargs, char *classname)
 {
 #ifdef USE_THREADS
     dSP;
@@ -289,7 +289,7 @@ newthread (SV *startsv, AV *initargs, char *classname)
 			      savethread, thr, err));
 	/* Thread creation failed--clean up */
 	SvREFCNT_dec(thr->cvcache);
-	remove_thread(thr);
+	remove_thread(aTHX_ thr);
 	MUTEX_DESTROY(&thr->mutex);
 	for (i = 0; i <= AvFILL(initargs); i++)
 	    SvREFCNT_dec(*av_fetch(initargs, i, FALSE));
@@ -344,7 +344,7 @@ new(classname, startsv, ...)
 	SV *		startsv
 	AV *		av = av_make(items - 2, &ST(2));
     PPCODE:
-	XPUSHs(sv_2mortal(newthread(startsv, av, classname)));
+	XPUSHs(sv_2mortal(newthread(aTHX_ startsv, av, classname)));
 
 void
 join(t)
@@ -365,7 +365,7 @@ join(t)
 	case THRf_ZOMBIE:
 	    ThrSETSTATE(t, THRf_DEAD);
 	    MUTEX_UNLOCK(&t->mutex);
-	    remove_thread(t);
+	    remove_thread(aTHX_ t);
 	    break;
 	default:
 	    MUTEX_UNLOCK(&t->mutex);
@@ -408,7 +408,7 @@ detach(t)
 	    ThrSETSTATE(t, THRf_DEAD);
 	    DETACH(t);
 	    MUTEX_UNLOCK(&t->mutex);
-	    remove_thread(t);
+	    remove_thread(aTHX_ t);
 	    break;
 	default:
 	    MUTEX_UNLOCK(&t->mutex);

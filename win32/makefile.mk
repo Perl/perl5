@@ -60,6 +60,8 @@ CCTYPE		*= BORLAND
 #CCTYPE		*= GCC
 
 #
+# XXX Do not enable.  This is currently undergoing a rewrite and will
+# NOT work.
 # uncomment next line if you want to use the perl object
 # Currently, this cannot be enabled if you ask for threads above, or
 # if you are using GCC or EGCS.
@@ -495,7 +497,6 @@ XSUBPP		= ..\$(MINIPERL) -I..\..\lib ..\$(EXTUTILSDIR)\xsubpp \
 
 MICROCORE_SRC	=		\
 		..\av.c		\
-		..\byterun.c	\
 		..\deb.c	\
 		..\doio.c	\
 		..\doop.c	\
@@ -567,8 +568,6 @@ X2P_SRC		=		\
 
 CORE_NOCFG_H	=		\
 		..\av.h		\
-		..\byterun.h	\
-		..\bytecode.h	\
 		..\cop.h	\
 		..\cv.h		\
 		..\dosish.h	\

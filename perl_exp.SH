@@ -54,7 +54,7 @@ echo "#!" > perl.exp
 
 syms="global.sym pp.sym"
 
-sed -n '/^[A-Za-z]/ s/^/Perl_/p' $syms                 >> perl.exp
+cat $syms                                              >> perl.exp
 sed -n '/^[A-Za-z]/ s/^/PL_/p'   globvar.sym           >> perl.exp
 
 sed -n 's/^PERLVAR.*(G\([^[,]*\).*/PL_\1/p' perlvars.h >> perl.exp
@@ -75,36 +75,8 @@ fi
 # not actually be defined, but there's no harm in that).
 #
 
-cat >>perl.exp <<END
-perl_init_i18nl10n
-perl_init_i18nl14n
-perl_new_collate
-perl_new_ctype
-perl_new_numeric
-perl_set_numeric_local
-perl_set_numeric_standard
-perl_alloc
-perl_construct
-perl_destruct
-perl_free
-perl_parse
-perl_run
-perl_get_sv
-perl_get_av
-perl_get_hv
-perl_get_cv
-perl_call_argv
-perl_call_pv
-perl_call_method
-perl_call_sv
-perl_eval_pv
-perl_eval_sv
-perl_require_pv
-Perl_malloc
-Perl_calloc
-Perl_realloc
-Perl_mfree
-END
+#cat >>perl.exp <<END
+#END
 
 # The shebang line nicely sorts as the first one.
 sort -o perl.exp -u perl.exp

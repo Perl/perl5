@@ -128,7 +128,7 @@ HV *GvHVn();
 #define DM_DELAY 0x100
 
 /*
- * symbol creation flags, for use in gv_fetchpv() and perl_get_*v()
+ * symbol creation flags, for use in gv_fetchpv() and get_*v()
  */
 #define GV_ADD		0x01	/* add, if symbol not already there */
 #define GV_ADDMULTI	0x02	/* add, pretending it has been added already */

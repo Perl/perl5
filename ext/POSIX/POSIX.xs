@@ -3051,7 +3051,7 @@ setlocale(category, locale = 0)
 		else
 #endif
 		    newctype = RETVAL;
-		perl_new_ctype(newctype);
+		new_ctype(newctype);
 	    }
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
@@ -3068,7 +3068,7 @@ setlocale(category, locale = 0)
 		else
 #endif
 		    newcoll = RETVAL;
-		perl_new_collate(newcoll);
+		new_collate(newcoll);
 	    }
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
@@ -3085,7 +3085,7 @@ setlocale(category, locale = 0)
 		else
 #endif
 		    newnum = RETVAL;
-		perl_new_numeric(newnum);
+		new_numeric(newnum);
 	    }
 #endif /* USE_LOCALE_NUMERIC */
 	}
@@ -3202,7 +3202,7 @@ sigaction(sig, action, oldaction = 0)
 		    croak("Can't supply an action without a HANDLER");
 		sv_setpv(*sigsvp, SvPV(*svp, n_a));
 		mg_set(*sigsvp);	/* handles DEFAULT and IGNORE */
-		act.sa_handler = sighandler;
+		act.sa_handler = PL_sighandlerp;
 
 		/* Set up any desired mask. */
 		svp = hv_fetch(action, "MASK", 4, FALSE);

@@ -5,10 +5,11 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_TAINT_C
 #include "perl.h"
 
 void
-taint_proper(const char *f, char *s)
+Perl_taint_proper(pTHX_ const char *f, char *s)
 {
     dTHR;	/* just for taint */
     char *ug;
@@ -26,14 +27,14 @@ taint_proper(const char *f, char *s)
 	else
 	    ug = " while running with -T switch";
 	if (!PL_unsafe)
-	    croak(f, s, ug);
+	    Perl_croak(aTHX_ f, s, ug);
 	else if (ckWARN(WARN_TAINT))
-	    warner(WARN_TAINT, f, s, ug);
+	    Perl_warner(aTHX_ WARN_TAINT, f, s, ug);
     }
 }
 
 void
-taint_env(void)
+Perl_taint_env(pTHX)
 {
     SV** svp;
     MAGIC* mg;

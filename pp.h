@@ -15,7 +15,7 @@
 #define dARGS
 #endif /* USE_THREADS */
 
-#define PP(s) OP * s(ARGSproto)
+#define PP(s) OP * Perl_##s(pTHX)
 
 #define SP sp
 #define MARK mark
@@ -50,7 +50,7 @@
 #define dTARG SV *targ
 
 #define NORMAL PL_op->op_next
-#define DIE return die
+#define DIE return Perl_die
 
 #define PUTBACK		PL_stack_sp = sp
 #define RETURN		return PUTBACK, NORMAL
@@ -218,7 +218,7 @@
 
 #define setAGAIN(ref) sv = arg = ref;					\
   if (!SvROK(ref))							\
-      croak("Overloaded dereference did not return a reference");	\
+      Perl_croak(aTHX_ "Overloaded dereference did not return a reference");	\
   goto am_again;
 
 #define tryAMAGICunDEREF(meth) tryAMAGICunW(meth,setAGAIN,0,(void)0)

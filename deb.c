@@ -13,10 +13,11 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_DEB_C
 #include "perl.h"
 
 void
-deb(const char *pat, ...)
+Perl_deb(pTHX_ const char *pat, ...)
 {
 #ifdef DEBUGGING
     dTHR;
@@ -44,7 +45,7 @@ deb(const char *pat, ...)
 }
 
 void
-deb_growlevel(void)
+Perl_deb_growlevel(pTHX)
 {
 #ifdef DEBUGGING
     PL_dlmax += 128;
@@ -54,7 +55,7 @@ deb_growlevel(void)
 }
 
 I32
-debstackptrs(void)
+Perl_debstackptrs(pTHX)
 {
 #ifdef DEBUGGING
     dTHR;
@@ -70,7 +71,7 @@ debstackptrs(void)
 }
 
 I32
-debstack(void)
+Perl_debstack(pTHX)
 {
 #ifdef DEBUGGING
     dTHR;
