@@ -1158,6 +1158,7 @@ static void init_perinterp(pTHX)
 
     cxt->netorder = 0;		/* true if network order used */
     cxt->forgive_me = -1;	/* whether to be forgiving... */
+    cxt->accept_future_minor = -1; /* would otherwise occur too late */
 }
 
 /*
