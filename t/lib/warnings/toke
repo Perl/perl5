@@ -787,4 +787,12 @@ Name "main::F" used only once: possible typo at - line 4.
 # 20020414 mjd-perl-patch+@plover.com
 EXPECT
 
+########
+# toke.c
+# 20020414 mjd-perl-patch+@plover.com
+# In 5.7.3, this emitted "Possible unintended interpolation" warnings
+use warnings 'ambiguous';
+$s = "(@-)(@+)";
+EXPECT
+
 

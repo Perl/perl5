@@ -878,7 +878,7 @@ $!  ...and only accept symbols if they're in the | delimited list below
 $!
 $   config_symbols0 ="|archlib|archlibexp|bin|binexp|builddir|cf_email|config_sh|installarchlib|installbin|installman1dir|installman3dir|"
 $   config_symbols1 ="|installprivlib|installscript|installsitearch|installsitelib|most|oldarchlib|oldarchlibexp|osname|pager|perl_symbol|perl_verb|"
-$   config_symbols2 ="|prefix|privlib|privlibexp|scriptdir|sitearch|sitearchexp|sitelib|sitelib_stem|sitelibexp|try_cxx|use64bitall|use64bitint|"
+$   config_symbols2 ="|prefix|privlib|privlibexp|scriptdir|sitearch|sitearchexp|sitebin|sitelib|sitelib_stem|sitelibexp|try_cxx|use64bitall|use64bitint|"
 $   config_symbols3 ="|usecasesensitive|usedefaulttypes|usedevel|useieee|useithreads|usemultiplicity|usemymalloc|usedebugging_perl|useperlio|usesecurelog|"
 $   config_symbols4 ="|usethreads|usevmsdebug|"
 $!  
@@ -1446,6 +1446,16 @@ $   rp = F$FAO("!AS!/!AS",rp,"[ ''dflt' ] ")
 $   GOSUB myread
 $   bin = ans
 $!
+$!: determine where add-on public executables go
+$   IF F$TYPE(sitebin) .NES. ""
+$   THEN dflt = sitebin
+$   ELSE dflt = "''vms_prefix':[bin.''archname']"
+$   ENDIF
+$   rp = "Pathname where the add-on public executables should be installed? "
+$   rp = F$FAO("!AS!/!AS",rp,"[ ''dflt' ] ")
+$   GOSUB myread
+$   sitebin = ans
+$!
 $!: determine where manual pages are on this system
 $!: What suffix to use on installed man pages
 $!: see if we can have long filenames
@@ -1464,6 +1474,8 @@ $   IF F$TYPE(sitearch) .EQS. "" THEN -
       sitearch="''vms_prefix':[lib.site_perl.''archname']"
 $   IF F$TYPE(sitelib) .EQS. "" THEN -
       sitelib ="''vms_prefix':[lib.site_perl]"
+$   IF F$TYPE(sitebin) .EQS. "" THEN -
+      sitebin="''vms_prefix':[bin.''archname']"
 $ ENDIF !%Config-I-VMS, skip "where install" questions
 $!
 $! These derived locations can be set whether we've opted to
@@ -5577,9 +5589,12 @@ $ WC "installarchlib='" + installarchlib + "'"
 $ WC "installbin='" + installbin + "'"
 $ WC "installman1dir='" + installman1dir + "'"
 $ WC "installman3dir='" + installman3dir + "'"
+$ WC "installprefix='" + vms_prefix + "'"
+$ WC "installprefixexp='" + vms_prefix + ":'"
 $ WC "installprivlib='" + installprivlib + "'"
 $ WC "installscript='" + installscript + "'"
 $ WC "installsitearch='" + installsitearch + "'"
+$ WC "installsitebin='" + sitebin + "'"
 $ WC "installsitelib='" + installsitelib + "'"
 $ WC "installusrbinperl='undef'"
 $ WC "intsize='" + intsize + "'"
@@ -5693,9 +5708,13 @@ $ WC "sig_size='" + sig_size + "'"
 $ WC "signal_t='" + signal_t + "'"
 $ WC "sitearch='" + sitearch + "'"
 $ WC "sitearchexp='" + sitearchexp + "'"
+$ WC "sitebin='" + sitebin + "'"
+$ WC "sitebinexp='" + sitebin + "'"
 $ WC "sitelib='" + sitelib + "'"
 $ WC "sitelib_stem='" + sitelib_stem + "'"
 $ WC "sitelibexp='" + sitelibexp + "'"
+$ WC "siteprefix='" + vms_prefix + "'"
+$ WC "siteprefixexp='" + vms_prefix + ":'"
 $ WC "sizesize='" + sizesize + "'"
 $ WC "sizetype='size_t'"
 $ WC "so='" + so + "'"
@@ -5747,6 +5766,7 @@ $ WC "usereentrant='undef'"
 $ WC "usesecurelog='" + usesecurelog + "'"  ! VMS-specific
 $ WC "usesocks='undef'"
 $ WC "usethreads='" + usethreads + "'"
+$ WC "usevendorprefix='" + "'" ! try to say no, though we'll be ignored as of MM 5.90_01
 $ WC "usevfork='true'"
 $ WC "usevmsdebug='" + usevmsdebug + "'"     ! VMS-specific
 $ WC "uvoformat='" + uvoformat + "'"
@@ -5755,9 +5775,15 @@ $ WC "uvtype='" + uvtype + "'"
 $ WC "uvuformat='" + uvuformat + "'"
 $ WC "uvxformat='" + uvxformat + "'"
 $ WC "uvXUformat='" + uvXUformat + "'"
+$ WC "vendorarch='" + "'"
 $ WC "vendorarchexp='" + "'"
+$ WC "vendorbin='" + "'"
+$ WC "vendorbinexp='" + "'"
 $ WC "vendorlib_stem='" + "'"
+$ WC "vendorlib='" + "'"
 $ WC "vendorlibexp='" + "'"
+$ WC "vendorprefix='" + "'"
+$ WC "vendorprefixexp='" + "'"
 $ WC "version='" + version + "'"
 $ WC "version_patchlevel_string='" + version_patchlevel_string + "'"
 $ WC "vms_cc_type='" + vms_cc_type + "'" ! VMS specific

@@ -1,9 +1,48 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.34 2002/04/12 20:23:05 dankogai Exp dankogai $
+# $Id: Changes,v 1.40 2002/04/14 22:27:14 dankogai Exp $
 #
 
-1.34 $Date: 2002/04/12 20:23:05 $ (Unreleased)
+1.40 $Date: 2002/04/14 22:27:14 $
++ Encode/ConfigLocal_PM.e2x
+! lib/Encode/Config.pm
+! bin/enc2xs
+  "enc2xs -C" now generates/updates Encode::ConfigLocal. 
+  ConfigLocal_PM.e2x is a skelton thereof.
+! lib/Encode/Config.pm
+! CN/CN.pm
+  "use  Encode::CN::HZ;" was missing.
+! t/Unicode.t
+! t/unibench.t
+  More rigorous tests added to test XS, especially on memory allocation.
+! Encode.xs
+! lib/Encode/Unicode.pm
+  NI-S implemented an XS version -- merged
+  Message-Id: <20020414154857.2066.4@bactrian.ni-s.u-net.com>
+! encoding.pm
+! t/jperl.t
+  Source filter option added.  With this option on, you can write
+  perl 5.8-savvy scripts (such as UTF-8 identifiers) in legacy
+  encodings.  t/jperl.t enhanced to test this feature.
+! t/Unicode.t
+  ok() gotcha addressed by Benjamin fixed.  Though I didn't exactly
+  apply his suggestion, this degree of nitting is enough to add him
+  to AUTHORS list. 
+  Message-Id: <3CB93223.291E5E2E@earthlink.net>
+! JP/JP.pm
++ lib/Encode/JP/JIS7.pm
+- lib/Encode/JP/JIS.pm
+- lib/Encode/JP/2022_JP.pm
+- lib/Encode/JP/2022_JP1.pm
+  7bit-jis, iso-2022-jp and iso-2022-jp1 are all aggregated to
+  JIS7.pm for better maintainability and performance
+! encoding.pm
+  Added caveat for non-ascii identifiers.
+! encoding.pm
+  fixes by jhi, the original author of this pragramtic module.
+  Message-Id: <20020413231527.V1826@alpha.hut.fi>
+
+1.34 2002/04/12 20:23:05 (Unreleased)
 ! Encode.pm
 ! t/Unicode.t
   EBCDIC fixes addressed by jhi.
@@ -18,7 +57,7 @@
 ! AUTHORS
 ! t/Encoder.t
 ! lib/Encode/Encoder.pm
-  s/= shift;/= @_/g # trivial but a common idiomatic typo :)
+  s/ = shift;/ = @_;/ # trivial but a common idiomatic typo :)
   This adds Miyagawa-kun to AUTHORS. 
   * encoding() no longer exported by default but on demand
   * t/Encoder.t updated to test all these
@@ -257,7 +296,7 @@
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/04/12 20:23:05 $
+1.11  $Date: 2002/04/14 22:27:14 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST

@@ -6,7 +6,8 @@ BEGIN {
         chdir 't';
     }
 }
-use Test::More tests => 55;
+use Test::More tests => 61;
+use strict;
 
 my @Exported_Funcs;
 BEGIN { 
@@ -202,4 +203,27 @@ like( $@, qr/^Attempt to access disallowed key 'I_DONT_EXIST' in a restricted ha
     is (scalar keys %hash, 0, "and therefore there are no keys");
     $hash{second} = 1;
     is (scalar keys %hash, 1, "we now have just one key");
+    delete $hash{second};
+    is (scalar keys %hash, 0, "back to zero");
+
+    unlock_keys(%hash); # We have deliberately left a placeholder.
+
+    $hash{void} = undef;
+    $hash{nowt} = undef;
+
+    is (scalar keys %hash, 2, "two keys, values both undef");
+
+    lock_keys(%hash);
+
+    is (scalar keys %hash, 2, "still two keys after locking");
+
+    eval {$hash{second} = -1};
+    like ($@,
+          qr/^Attempt to access disallowed key 'second' in a restricted hash/,
+          'previously locked place holders should fail');
+
+    is ($hash{void}, undef,
+        "undef values should not be misunderstood as placeholders");
+    is ($hash{nowt}, undef,
+        "undef values should not be misunderstood as placeholders (again)");
 }

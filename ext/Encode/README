@@ -38,6 +38,12 @@ DEPENDENCIES
 
 This module requires perl5.7.3 or later.
 
+MAINTAINER
+
+This project was originated by Nick Ing-Simmons and later maintained by
+Dan Kogai <dankogai@dan.co.jp>.  See AUTHORS for full list of people
+involved.
+
 QUESTIONS?
 
 If you have any questions "perldoc Encode" does not answer, please

@@ -8,7 +8,7 @@ BEGIN {
 use strict;
 use Getopt::Std;
 my @orig_ARGV = @ARGV;
-our $VERSION  = do { my @r = (q$Revision: 1.20 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 1.21 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 # These may get re-ordered.
 # RAW is a do_now as inserted by &enter
@@ -131,9 +131,10 @@ my %opt;
 # -o <output> to specify the output file name (else it's the first arg)
 # -f <inlist> to give a file with a list of input files (else use the args)
 # -n <name> to name the encoding (else use the basename of the input file.
-getopts('M:SQqOo:f:n:',\%opt);
+getopts('CM:SQqOo:f:n:',\%opt);
 
 $opt{M} and make_makefile_pl($opt{M}, @ARGV);
+$opt{C} and make_configlocal_pm($opt{C}, @ARGV);
 
 # This really should go first, else the die here causes empty (non-erroneous)
 # output files to be written.
@@ -853,17 +854,71 @@ sub make_makefile_pl
     $_Name = shift;
     $_TableFiles = join(",", map {qq('$_')} @_);
     $_Now = scalar localtime();
+    eval { require File::Spec; };
     warn "Generating Makefile.PL\n";
-    _print_expand("$_Inc/Makefile_PL.e2x", "Makefile.PL");
+    _print_expand(File::Spec->catfile($_Inc,"Makefile_PL.e2x"),"Makefile.PL");
     warn "Generating $_Name.pm\n";
-    _print_expand("$_Inc/_PM.e2x",         "$_Name.pm");
+    _print_expand(File::Spec->catfile($_Inc,"_PM.e2x"),        "$_Name.pm");
     warn "Generating t/$_Name.t\n";
-    _print_expand("$_Inc/_T.e2x",          "t/$_Name.t");
+    _print_expand(File::Spec->catfile($_Inc,"_T.e2x"),         "t/$_Name.t");
     warn "Generating README\n";
-    _print_expand("$_Inc/README.e2x",      "README");
+    _print_expand(File::Spec->catfile($_Inc,"README.e2x"),     "README");
     warn "Generating t/$_Name.t\n";
-    _print_expand("$_Inc/Changes.e2x",     "Changes");
+    _print_expand(File::Spec->catfile($_Inc,"Changes.e2x"),    "Changes");
     exit;
+}
+
+use vars qw(
+	    $_ModLines
+	    $_LocalVer
+	    );
+
+sub make_configlocal_pm
+{
+    eval { require Encode; };
+    $@ and die "Unable to require Encode: $@\n";
+    eval { require File::Spec; };
+    # our used for variable expanstion
+    my %in_core = map {$_=>1}('ascii','iso-8859-1','utf8');
+    my %LocalMod = ();
+    for my $d (@INC){
+	my $inc = File::Spec->catfile($d, "Encode");
+	-d $inc or next;
+	opendir my $dh, $inc or die "$inc:$!";
+	warn "Checking $inc...\n";
+	for my $f (grep /\.pm$/o, readdir($dh)){
+	    -f File::Spec->catfile($inc, "$f") or next;
+	    $INC{"Encode/$f"} and next;
+	    warn "require Encode/$f;\n";
+	    eval { require "Encode/$f"; };
+	    $@ and die "Can't require Encode/$f: $@\n";
+	    for my $enc (Encode->encodings()){
+		$in_core{$enc} and next;
+		$Encode::Config::ExtModule{$enc} and next;
+		my $mod = "Encode/$f"; 
+		$mod =~ s/\.pm$//o; $mod =~ s,/,::,og;
+		warn "$enc => $mod\n";
+		$LocalMod{$enc} = $mod;
+	    }
+	}
+    }
+    $_ModLines = "";
+    for my $enc (sort keys %LocalMod){
+	$_ModLines .= 
+	    qq(\$Encode::ExtModule{'$enc'} =\t"$LocalMod{$enc}";\n);
+    }
+    $_LocalVer = _mkversion();
+    $_Inc = $INC{"Encode.pm"}; $_Inc =~ s/\.pm$//o;    
+    warn "Writing Encode::ConfigLocal\n";
+    _print_expand(File::Spec->catfile($_Inc,"ConfigLocal_PM.e2x"),    
+		  File::Spec->catfile($_Inc,"ConfigLocal.pm"));
+    exit;
+}
+
+sub _mkversion{
+    my ($ss,$mm,$hh,$dd,$mo,$yyyy) = localtime();
+    $yyyy += 1900, $mo +=1;
+    return sprintf("v%04d.%04d.%04d", $yyyy, $mo*100+$dd, $hh*100+$mm);
 }
 
 sub _print_expand{
@@ -893,8 +948,9 @@ enc2xs -- Perl Encode Module Generator
 
 =head1 SYNOPSIS
 
-  enc2xs -M ModName mapfiles...
   enc2xs -[options]
+  enc2xs -M ModName mapfiles...
+  enc2xs -C
 
 =head1 DESCRIPTION
 
@@ -1001,6 +1057,16 @@ You can "make install" already but you should test first.
 =item 6.
 
 If you are content with the test result, just "make install"
+
+=item 7.
+
+If you want to add your encoding to Encode demand-loading list
+(so you don't have to "use Encode::YourEncoding"), run
+
+  enc2xs -C
+
+to update Encode::ConfigLocal, a module that controls local settings.
+After that, "use Encode;" is enough to load your encodings on demand.
 
 =back
 

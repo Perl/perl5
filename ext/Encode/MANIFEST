@@ -9,6 +9,7 @@ EBCDIC/Makefile.PL     Encode extension
 Encode.pm	       Mother of all Encode extensions
 Encode.xs		Encode extension
 Encode/Changes.e2x		Skeleton file for enc2xs
+Encode/ConfigLocal_PM.e2x	Skeleton file for enc2xs
 Encode/Makefile_PL.e2x	Skeleton file for enc2xs
 Encode/README.e2x		Skeleton file for enc2xs
 Encode/_PM.e2x		Skeleton file for enc2xs
@@ -38,10 +39,8 @@ lib/Encode/CN/HZ.pm		Encode extension
 lib/Encode/Config.pm	        Encode configuration module
 lib/Encode/Encoder.pm	       OO Encoder
 lib/Encode/Encoding.pm	Encode extension
-lib/Encode/JP/2022_JP.pm	Encode extension
-lib/Encode/JP/2022_JP1.pm	Encode extension
 lib/Encode/JP/H2Z.pm		Encode extension
-lib/Encode/JP/JIS.pm	Encode extension
+lib/Encode/JP/JIS7.pm	Encode extension
 lib/Encode/KR/2022_KR.pm	 Encode extension
 lib/Encode/Supported.pod	Documents supported encodings
 lib/Encode/Unicode.pm	Encode extension

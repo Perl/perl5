@@ -213,6 +213,7 @@ ext/Encode/encengine.c		Encode extension
 ext/Encode/Encode.pm	       Mother of all Encode extensions
 ext/Encode/Encode.xs		Encode extension
 ext/Encode/Encode/Changes.e2x		Skeleton file for enc2xs
+ext/Encode/Encode/ConfigLocal_PM.e2x	Skeleton file for enc2xs
 ext/Encode/Encode/encode.h		Encode extension header file
 ext/Encode/Encode/Makefile_PL.e2x	Skeleton file for enc2xs
 ext/Encode/Encode/README.e2x		Skeleton file for enc2xs
@@ -229,10 +230,8 @@ ext/Encode/lib/Encode/CN/HZ.pm		Encode extension
 ext/Encode/lib/Encode/Config.pm	        Encode configuration module
 ext/Encode/lib/Encode/Encoder.pm	       OO Encoder
 ext/Encode/lib/Encode/Encoding.pm	Encode extension
-ext/Encode/lib/Encode/JP/2022_JP.pm	Encode extension
-ext/Encode/lib/Encode/JP/2022_JP1.pm	Encode extension
 ext/Encode/lib/Encode/JP/H2Z.pm		Encode extension
-ext/Encode/lib/Encode/JP/JIS.pm	Encode extension
+ext/Encode/lib/Encode/JP/JIS7.pm	Encode extension
 ext/Encode/lib/Encode/KR/2022_KR.pm	 Encode extension
 ext/Encode/lib/Encode/Supported.pod	Documents supported encodings
 ext/Encode/lib/Encode/Unicode.pm	Encode extension

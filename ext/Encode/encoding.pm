@@ -1,5 +1,5 @@
 package encoding;
-our $VERSION = do { my @r = (q$Revision: 1.25 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.26 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode;
 use strict;
@@ -22,23 +22,42 @@ sub import {
 	require Carp;
 	Carp::croak "Unknown encoding '$name'";
     }
-    ${^ENCODING} = $enc; # this is all you need, actually.
-
-    # $_OPEN_ORIG = ${^OPEN};
-    for my $h (qw(STDIN STDOUT STDERR)){
-	if ($arg{$h}){
-	    unless (defined find_encoding($name)) {
-		require Carp;
-		Carp::croak "Unknown encoding for $h, '$arg{$h}'";
+    unless ($arg{Filter}){
+	${^ENCODING} = $enc; # this is all you need, actually.
+	for my $h (qw(STDIN STDOUT)){
+	    if ($arg{$h}){
+		unless (defined find_encoding($arg{h})) {
+		    require Carp;
+		    Carp::croak "Unknown encoding for $h, '$arg{$h}'";
+		}
+		eval qq{ binmode($h, ":encoding($arg{$h})") };
+	    }else{
+		unless (exists $arg{$h}){
+		    eval qq{ binmode($h, ":encoding($name)") };
+		}
 	    }
-	    eval qq{ binmode($h, ":encoding($arg{$h})") };
-	}else{
-	    eval qq{ binmode($h, ":encoding($name)") };
+	    if ($@){
+		require Carp;
+		Carp::croak($@);
+	    }
 	}
-	if ($@){
-	    require Carp;
-	    Carp::croak($@);
-	}
+    }else{
+	defined(${^ENCODING}) and undef ${^ENCODING};
+	eval {
+	    require Filter::Util::Call ;
+	    Filter::Util::Call->import ;
+	    binmode(STDIN,  ":raw");
+	    binmode(STDOUT, ":raw");
+	    filter_add(sub{
+			   my $status;
+                           if (($status = filter_read()) > 0){
+			       $_ = $enc->decode($_, 1);
+			       # warn $_;
+			   }
+			   $status ;
+		       });
+	};
+	# warn "Filter installed";
     }
     return 1; # I doubt if we need it, though
 }
@@ -48,8 +67,9 @@ sub unimport{
     undef ${^ENCODING};
     binmode(STDIN,  ":raw");
     binmode(STDOUT, ":raw");
-    # Leaves STDERR alone.
-    # binmode(STDERR, ":raw");
+    if ($INC{"Filter/Util/Call.pm"}){
+	eval { filter_del() };
+    }
 }
 
 1;
@@ -79,6 +99,11 @@ encoding -  allows you to write your script in non-asii or non-utf8
 
   # "no encoding;" supported (but not scoped!)
   no encoding;
+
+  # an alternate way, Filter
+  use encoding "euc-jp", Filter=>1;
+  use utf8;
+  # now you can use kanji identifiers -- in euc-jp!
 
 =head1 ABSTRACT
 
@@ -133,11 +158,12 @@ error will be thrown.
 Note that non-STD file handles remain unaffected.  Use C<use open> or
 C<binmode> to change disciplines of those.
 
-=item use encoding I<ENCNAME> [ STDIN => I<ENCNAME_IN> ...] ;
+=item use encoding I<ENCNAME> [ STDIN =E<gt> I<ENCNAME_IN> ...] ;
 
-You can also individually set encodings of STDIN, STDOUT, and STDERR
-via STDI<FH> => I<ENCNAME_FH> form.  In this case, you cannot omit the
-first I<ENCNAME>.
+You can also individually set encodings of STDIN and STDOUT via
+STDI<FH> =E<gt> I<ENCNAME_FH> form.  In this case, you cannot omit the
+first I<ENCNAME>.  C<STDI<FH> =E<gt> undef> turns IO transcoding
+completely off.
 
 =item no encoding;
 
@@ -187,6 +213,41 @@ After all, the best thing about this pragma is that you don't have to
 resort to \x... just to spell your name in native encoding.  So feel
 free to put your strings in your encoding in quotes and regexes.
 
+=head1 NON-ASCII Identifiers and Filter option
+
+The magic of C<use encoding> is not applied to the names of identifiers.
+In order to make C<${"4eba"}++> ($man++, where man is a single ideograph)
+work, you still need to write your script in UTF-8 or use a source filter.
+
+In other words, the same restriction as Jperl applies.
+
+If you dare experiment, however, you can try Fitlter option.
+
+=over 4
+
+=item use encoding I<ENCNAME> Filter=E<gt>1;
+
+This turns encoding pragma into source filter.  While the default
+approach just decodes interpolated literals (in qq() and qr()), this
+will apply source filter to entire source code.  In this case, STDIN
+and STDOUT remain untouched.
+
+=back
+
+What does this mean?  Your source code behaves as if it is written 
+in UTF-8.  So even if your editor only supports Shift_JIS, for 
+example.  You can still try examples in Chapter 15 of 
+C<Programming Perl, 3rd Ed.>  For instance, you can use UTF-8
+identifiers.
+
+This option is significantly slower and (as of this writing) non-ASCII
+identifiers are not very stable WITHOUT this option and with the
+source code written in UTF-8.
+
+To make your script in legacy encoding work with minimum effort, do
+not use Filter=E<gt>1
+
+
 =head1 EXAMPLE - Greekperl
 
     use encoding "iso 8859-7";
@@ -231,6 +292,10 @@ The encoding pragma is not supported on EBCDIC platforms.
 
 =head1 SEE ALSO
 
-L<perlunicode>, L<Encode>, L<open>
+L<perlunicode>, L<Encode>, L<open>, L<Filter::Util::Call>,
+
+Ch. 15 of C<Programming Perl (3rd Edition)>
+by Larry Wall, Tom Christiansen, Jon Orwant;
+O'Reilly & Associates; ISBN 0-596-00027-8
 
 =cut

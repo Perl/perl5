@@ -3472,10 +3472,6 @@ Perl_init_argv_symbols(pTHX_ register int argc, register char **argv)
 		(void)sv_utf8_decode(sv);
 	}
     }
-
-    if (PL_minus_a) {
-      (void) get_av("main::F", TRUE | GV_ADDMULTI);
-    }
 }
 
 #ifdef HAS_PROCSELFEXE
@@ -3578,6 +3574,14 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	sv_setiv(GvSV(tmpgv), (IV)PerlProc_getpid());
         SvREADONLY_on(GvSV(tmpgv));
     }
+
+    /* touch @F array to prevent spurious warnings 20020415 MJD */
+    if (PL_minus_a) {
+      (void) get_av("main::F", TRUE | GV_ADDMULTI);
+    }
+    /* touch @- and @+ arrays to prevent spurious warnings 20020415 MJD */
+    (void) get_av("main::-", TRUE | GV_ADDMULTI);
+    (void) get_av("main::+", TRUE | GV_ADDMULTI);
 }
 
 STATIC void

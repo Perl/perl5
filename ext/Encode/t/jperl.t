@@ -1,5 +1,5 @@
 #
-# $Id: jperl.t,v 1.20 2002/04/04 19:50:52 dankogai Exp $
+# $Id: jperl.t,v 1.21 2002/04/14 22:05:20 dankogai Exp $
 #
 # This script is written in euc-jp
 
@@ -21,7 +21,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 15;
+use Test::More tests => 18;
 my $Debug = shift;
 
 no encoding; # ensure
@@ -68,6 +68,26 @@ ok(! defined(${^ENCODING}), q{not scoped yet});
 ok(! defined(${^ENCODING}), q{out of black magic});
 use bytes;
 is (length($Namae), 10);
+
+#
+# now something completely different!
+#
+{
+    use encoding "euc-jp", Filter=>1;
+    ok(1, "Filter on");
+    use utf8;
+    no strict 'vars'; # fools
+    # doesn't work w/ "my" as of this writing.
+    # because of  buggy strict.pm and utf8.pm
+    our $¿Í = 2; 
+    #   ^^U+4eba, "human" in CJK ideograph
+    $¿Í++; # a child is born
+    *people = \$¿Í;
+    is ($people, 3, "Filter:utf8 identifier");
+    no encoding;
+    ok(1, "Filter off");
+}
+
 1;
 __END__
 
