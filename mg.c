@@ -1698,6 +1698,7 @@ static void
 unwind_handler_stack(p)
     void *p;
 {
+    dTHR;
     U32 flags = *(U32*)p;
 
     if (flags & 1)
