@@ -6,7 +6,7 @@
 #   _n   : numeraotr (value = _n/_d)
 #   _a   : accuracy
 #   _p   : precision
-#   _f   : flags, used by MBR to flag parts of a rationale as untouchable
+#   _f   : flags, used by MBR to flag parts of a rational as untouchable
 
 package Math::BigRat;
 
@@ -47,7 +47,7 @@ sub isa
 
 sub _new_from_float
   {
-  # turn a single float input into a rationale (like '0.1')
+  # turn a single float input into a rational (like '0.1')
   my ($self,$f) = @_;
 
   return $self->bnan() if $f->is_nan();
@@ -293,7 +293,7 @@ sub _bzero
 
 sub badd
   {
-  # add two rationales
+  # add two rationals
   my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
 
   $x = $class->new($x) unless $x->isa($class);
@@ -328,7 +328,7 @@ sub badd
 
 sub bsub
   {
-  # subtract two rationales
+  # subtract two rationals
   my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
 
   $x = $class->new($x) unless $x->isa($class);
@@ -364,7 +364,7 @@ sub bsub
 
 sub bmul
   {
-  # multiply two rationales
+  # multiply two rationals
   my ($self,$x,$y,$a,$p,$r) = objectify(2,@_);
 
   $x = $class->new($x) unless $x->isa($class);
@@ -723,7 +723,7 @@ __END__
 
 =head1 NAME
 
-Math::BigRat - arbitrarily big rationales
+Math::BigRat - arbitrarily big rationals
 
 =head1 SYNOPSIS
 
