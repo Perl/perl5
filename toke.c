@@ -382,13 +382,20 @@ skipspace(register char *s)
     }
     for (;;) {
 	STRLEN prevlen;
-	while (s < PL_bufend && isSPACE(*s))
-	    s++;
+	while (s < PL_bufend && isSPACE(*s)) {
+	    if (*s++ == '\n' && PL_in_eval && !PL_rsfp)
+		incline(s);
+	}
 	if (s < PL_bufend && *s == '#') {
 	    while (s < PL_bufend && *s != '\n')
 		s++;
-	    if (s < PL_bufend)
+	    if (s < PL_bufend) {
 		s++;
+		if (PL_in_eval && !PL_rsfp) {
+		    incline(s);
+		    continue;
+		}
+	    }
 	}
 	if (s < PL_bufend || !PL_rsfp || PL_lex_state != LEX_NORMAL)
 	    return s;
