@@ -5824,7 +5824,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		else if (svix < svmax)
 		    vecsv = svargs[svix++];
 		else {
-		    vecstr = "";
+		    vecstr = (U8*)"";
 		    veclen = 0;
 		    continue;
 		}
