@@ -2208,7 +2208,7 @@ Found in file sv.h
 
 Tells an SV that it is a string and disables all other OK bits,
 and leaves the UTF8 status as it was.
-  
+
 	void	SvPOK_only_UTF8(SV* sv)
 
 =for hackers

@@ -594,7 +594,7 @@ Unsets the UTF8 status of an SV.
 =for apidoc Am|void|SvPOK_only_UTF8|SV* sv
 Tells an SV that it is a string and disables all other OK bits,
 and leaves the UTF8 status as it was.
-  
+
 =cut
  */
 
