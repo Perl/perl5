@@ -34,7 +34,9 @@ eval {
 # and mingw32 uses said silly CRT
 $have_setlocale = 0 if $^O eq 'MSWin32' && $Config{cc} =~ /^(cl|gcc)/i;
 
-print "1..", ($have_setlocale ? 116 : 98), "\n";
+my $last = $have_setlocale ? 116 : 98;
+
+print "1..$last\n";
 
 use vars qw(&LC_ALL);
 
@@ -639,6 +641,9 @@ foreach $Locale (@Locale) {
     }
 
     debug "# testing 115 with locale '$Locale'\n";
+    # Does taking lc separately differ from taking
+    # the lc "in-line"?  (This was the bug 19990704.002, change #3568.)
+    # The bug was in the caching of the 'o'-magic.
     {
 	use locale;
 
@@ -662,6 +667,9 @@ foreach $Locale (@Locale) {
     }
 
     debug "# testing 116 with locale '$Locale'\n";
+    # Does lc of an UPPER (if different from the UPPER) match
+    # case-insensitively the UPPER, and does the UPPER match
+    # case-insensitively the lc of the UPPER.  And vice versa.
     {
 	use locale;
 
@@ -677,15 +685,16 @@ foreach $Locale (@Locale) {
 	    push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
 	}
 	tryneoalpha($Locale, 116, @f == 0);
-	print "# testing 116 failed for locale '$Locale' for characters @f\n"
-            if @f;
+        if (@f) {
+	    print "# failed 116 locale '$Locale' characters @f\n"
+        }
     }
 
 }
 
 # Recount the errors.
 
-foreach (99..116) {
+foreach (99..$last) {
     if ($Problem{$_} || !defined $Okay{$_} || !@{$Okay{$_}}) {
 	if ($_ == 102) {
 	    print "# The failure of test 102 is not necessarily fatal.\n";
@@ -701,7 +710,7 @@ foreach (99..116) {
 
 my $didwarn = 0;
 
-foreach (99..116) {
+foreach (99..$last) {
     if ($Problem{$_}) {
 	my @f = sort keys %{ $Problem{$_} };
 	my $f = join(" ", @f);
@@ -726,17 +735,18 @@ EOW
     }
 }
 
-# Tell which locales were okay.
+# Tell which locales were okay and which were not.
 
 if ($didwarn) {
-    my @s;
+    my (@s, @F);
     
     foreach my $l (@Locale) {
 	my $p = 0;
-	foreach my $t (102..116) {
+	foreach my $t (102..$last) {
 	    $p++ if $Problem{$t}{$l};
 	}
 	push @s, $l if $p == 0;
+      push @F, $l unless $p == 0;
     }
     
     if (@s) {
@@ -748,7 +758,19 @@ if ($didwarn) {
             "#\t", $s, "\n#\n",
 	    "# tested okay.\n#\n",
     } else {
-        warn "# None of your locales was fully okay.\n";
+        warn "# None of your locales were fully okay.\n";
+    }
+
+    if (@F) {
+        my $F = join(" ", @F);
+        $F =~ s/(.{50,60}) /$1\n#\t/g;
+
+        warn
+          "# The following locales\n#\n",
+            "#\t", $F, "\n#\n",
+          "# had problems.\n#\n",
+    } else {
+        warn "# None of your locales were broken.\n";
     }
 }
 
