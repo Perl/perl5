@@ -2,7 +2,7 @@ package POSIX;
 
 our(@ISA, %EXPORT_TAGS, @EXPORT_OK, $AUTOLOAD) = ();
 
-our $VERSION = "1.07";
+our $VERSION = "1.08";
 
 use AutoLoader;
 
@@ -921,6 +921,7 @@ for (values %EXPORT_TAGS) {
 		gmtime
 		isatty
 		kill
+		lchown
 		link
 		localtime
 		log
