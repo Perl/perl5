@@ -1704,12 +1704,14 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #ifdef VMS
 	set_vaxc_errno(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 #else
-#ifdef WIN32
+#  ifdef WIN32
 	SetLastError( SvIV(sv) );
-#else
+#  else
+#    ifndef OS2
 	/* will anyone ever use this? */
 	SETERRNO(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv), 4);
-#endif
+#    endif
+#  endif
 #endif
 	break;
     case '\006':	/* ^F */
