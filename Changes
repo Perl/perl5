@@ -31,6 +31,469 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 11827] By: jhi                                   on 2001/09/02  11:46:47
+        Log: Subject: [PATCH] lib/Time/Local.pm
+             From: "Daniel S. Lewart" <d-lewart@uiuc.edu>
+             Date: Sun, 2 Sep 2001 06:50:01 -0500
+             Message-ID: <20010902065001.A21529@staff1.cso.uiuc.edu>
+     Branch: perl
+	   ! lib/Time/Local.pm
+____________________________________________________________________________
+[ 11826] By: jhi                                   on 2001/09/02  11:40:49
+        Log: Tick off Unicode collation and the normalization from
+             the todo list.
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 11825] By: jhi                                   on 2001/09/02  11:16:24
+        Log: Update to Unicode 3.1.1.
+     Branch: perl
+	   ! lib/unicore/ArabLink.pl lib/unicore/ArabLnkGrp.pl
+	   ! lib/unicore/ArabShap.txt lib/unicore/CaseFold.txt
+	   ! lib/unicore/EAWidth.txt lib/unicore/PropList.html
+	   ! lib/unicore/PropList.txt lib/unicore/README.perl
+	   ! lib/unicore/ReadMe.txt lib/unicore/SpecCase.txt
+	   ! lib/unicore/rename lib/unicore/version
+____________________________________________________________________________
+[ 11824] By: jhi                                   on 2001/09/02  10:32:30
+        Log: Slight doc tweaks for the module.
+     Branch: perl
+	   ! lib/Unicode/UCD.pm
+____________________________________________________________________________
+[ 11823] By: jhi                                   on 2001/09/02  10:02:20
+        Log: Rename the variable: it *used* to be (wrongly) that the
+             code related to PL_reg_sv (so PL_reg_sv_utf8 was logical)
+             but that is no more the case: PL_reg_match_utf8 is better.
+     Branch: perl
+	   ! embedvar.h mg.c perlapi.c perlapi.h pp.c pp_hot.c regcomp.c
+	   ! regexec.c sv.c thrdvar.h
+____________________________________________________________________________
+[ 11822] By: ams                                   on 2001/09/02  02:54:50
+        Log: Subject: RE: [PATCH] Add a nextstate into empty blocks
+             From: Ilmari Karonen <iltzu@sci.fi>
+             Date: Sun, 19 Aug 2001 19:27:33 +0300 (EET DST)
+             Message-Id: <Pine.SOL.3.96.1010819163840.8384B-100000@simpukka>
+             (op/sub_lval.t updated to take new error message into account.)
+     Branch: perl
+	   ! op.c t/op/sub_lval.t
+____________________________________________________________________________
+[ 11821] By: gsar                                  on 2001/09/02  01:06:30
+        Log: remove stray CRs in files; keep all files with UNIX line-ends
+             (Porting/makerel adds CRs to the files that need it in the
+             distribution)
+     Branch: perl
+	   ! NetWare/t/NWScripts.pl README.dos
+	   ! ext/Encode/Encode/cns11643-1.enc
+	   ! ext/Encode/Encode/cns11643-2.enc ext/SDBM_File/Makefile.PL
+	   ! jpl/JNI/JNI.xs jpl/JNI/Makefile.PL
+____________________________________________________________________________
+[ 11820] By: gsar                                  on 2001/09/02  00:56:44
+        Log: some remnants of change#11803
+     Branch: perl
+	   ! ext/ByteLoader/byterun.h perl.h
+____________________________________________________________________________
+[ 11819] By: jhi                                   on 2001/09/01  23:40:36
+        Log: Update to Unicode::Collate 0.08.
+     Branch: perl
+	   ! lib/Unicode/Collate.pm lib/Unicode/Collate/Changes
+	   ! lib/Unicode/Collate/README lib/Unicode/Collate/t/test.t
+____________________________________________________________________________
+[ 11818] By: jhi                                   on 2001/09/01  23:02:09
+        Log: Test tweaks.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[ 11817] By: pudge                                 on 2001/09/01  22:36:29
+        Log: Fix test
+     Branch: maint-5.6/macperl
+	   ! t/lib/b.t
+____________________________________________________________________________
+[ 11816] By: pudge                                 on 2001/09/01  22:15:09
+        Log: Misc. patches: fix tests script; add Mac::LowMem; quiet
+             warnings in Config.pm with -W; increase default and
+             minimum RAM; bump version number.
+     Branch: maint-5.6/macperl
+	   + macos/lib/Mac/LowMem.pm
+	   ! macos/MPVersion.r macos/MacPerlTests.cmd macos/Makefile.mk
+	   ! macos/configpm macos/macperl/MacPerl.r
+____________________________________________________________________________
+[ 11815] By: pudge                                 on 2001/09/01  22:10:49
+        Log: Make syntax check report in MPW style, fix tests
+             to use Mac::err=unix to get normal-style error
+             messages.
+     Branch: maint-5.6/macperl
+	   ! perl.c t/lib/b.t t/op/misc.t t/op/runlevel.t t/pod/testp2pt.pl
+	   ! t/pragma/strict.t t/pragma/subs.t t/pragma/warnings.t
+____________________________________________________________________________
+[ 11814] By: pudge                                 on 2001/09/01  22:09:08
+        Log: Make MPW-style errors optional (but the default); add
+             MacPerl::ErrorFormat() function and Mac::err pragma
+     Branch: maint-5.6/macperl
+	   + macos/ext/Mac/err/Makefile.PL macos/ext/Mac/err/err.pm
+	   + macos/ext/Mac/err/err.xs
+	   ! macos/ext/Mac/Makefile.mk macos/ext/MacPerl/MacPerl.xs
+	   ! macos/macish.c macos/macish.h macos/macperl.sym
+____________________________________________________________________________
+[ 11813] By: pudge                                 on 2001/09/01  22:01:40
+        Log: More module and test ports from Thomas Wegner et al
+     Branch: maint-5.6/macperl
+	   ! ext/File/Glob/Glob.pm ext/File/Glob/bsd_glob.c
+	   ! lib/File/DosGlob.pm lib/File/Spec/Mac.pm lib/File/Temp.pm
+	   ! t/lib/dosglob.t t/lib/filespec.t t/lib/ftmp-security.t
+	   ! t/op/magic.t
+____________________________________________________________________________
+[ 11812] By: sky                                   on 2001/09/01  17:19:30
+        Log: Subject: [PATCH t/op/concat.t] cleanup
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Sat, 1 Sep 2001 14:06:28 -0400
+             Message-ID: <20010901140628.C606@blackrider>
+     Branch: perl
+	   ! t/op/concat.t
+____________________________________________________________________________
+[ 11811] By: sky                                   on 2001/09/01  12:25:29
+        Log: Change #11805 didn't update the MANIFEST
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 11810] By: sky                                   on 2001/09/01  11:52:44
+        Log: Subject: [PATCH], was t/op/incode.t breaks make minitest
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Sat, 1 Sep 2001 14:50:14 +0200
+             Message-ID: <20010901145014.A691@rafael>
+     Branch: perl
+	   ! t/op/inccode.t
+____________________________________________________________________________
+[ 11809] By: sky                                   on 2001/09/01  11:49:22
+        Log: Subject: PATCH: ExtUtils::MakeMaker
+             From: Tony Bowden <tony@kasei.com>
+             Date: Sat, 1 Sep 2001 10:33:53 +0100
+             Message-ID: <20010901103353.A13863@soto.kasei.com>
+             Manually applied
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[ 11808] By: sky                                   on 2001/09/01  11:39:13
+        Log: Subject: [ID 20010831.002] Bug in Term::Cap on Solaris ansi terminal using CPAN::Shell
+             From: mike808@users.sourceforge.net
+             Date: Sat, 1 Sep 101 11:27:50 GMT
+             Message-Id: <200108312123.QAA27476@smtp.networkusa.net>
+             With little tweak
+     Branch: perl
+	   ! lib/Term/Cap.pm
+____________________________________________________________________________
+[ 11807] By: ams                                   on 2001/09/01  11:31:16
+        Log: Subject: oct() and hex()
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Fri, 31 Aug 2001 23:14:13 +0100
+             Message-Id: <20010831231413.J4950@plum.flirble.org>
+     Branch: perl
+	   ! pod/perlclib.pod
+____________________________________________________________________________
+[ 11806] By: pudge                                 on 2001/09/01  00:04:52
+        Log: Integrate change 11801 from maintperl
+     Branch: maint-5.6/macperl
+	   ! perl.c
+____________________________________________________________________________
+[ 11805] By: sky                                   on 2001/08/31  21:35:10
+        Log: Subject: Re: [ID 20010831.001] SEGV from ($a, b) = (1, 2)
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 31 Aug 2001 15:36:28 -0400
+             Message-ID: <20010831153628.B598@blackrider>
+             Check for things which used to segfault
+     Branch: perl
+	   + t/run/segfault.t
+____________________________________________________________________________
+[ 11804] By: gsar                                  on 2001/08/31  21:02:54
+        Log: integrate change#11801 from maint-5.6
+             
+             remove age-old UNICOS "workaround" that introduces a static, and
+             hence an egregious race condition for threaded builds (*sigh*
+             beats me why this kludge wasn't guarded by a UNICOS-specific
+             #define *sigh*)
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[ 11803] By: gsar                                  on 2001/08/31  20:58:38
+        Log: remove deprecated PERL_OBJECT cruft, it has long since stopped
+             working in 5.7.x
+     Branch: perl
+	   - objXSUB.h
+	   ! EXTERN.h MANIFEST Makefile.SH Makefile.micro NetWare/Makefile
+	   ! NetWare/config_h.PL NetWare/dl_netware.xs NetWare/interface.c
+	   ! NetWare/nw5.c NetWare/nw5sck.c NetWare/nw5thread.c
+	   ! NetWare/nwperlsys.c NetWare/nwperlsys.h Porting/makerel
+	   ! README.win32 XSUB.h bytecode.pl cv.h cygwin/cygwin.c
+	   ! emacs/ptags embed.h embed.pl embedvar.h epoc/epoc.c ext/B/B.xs
+	   ! ext/B/B/C.pm ext/ByteLoader/ByteLoader.xs
+	   ! ext/ByteLoader/bytecode.h ext/ByteLoader/byterun.c
+	   ! ext/DynaLoader/dlutils.c ext/Opcode/Opcode.xs
+	   ! ext/POSIX/POSIX.xs globals.c iperlsys.h lib/ExtUtils/Embed.pm
+	   ! lib/ExtUtils/MM_NW5.pm lib/ExtUtils/MM_Unix.pm
+	   ! lib/ExtUtils/MM_Win32.pm lib/ExtUtils/MakeMaker.pm
+	   ! lib/ExtUtils/xsubpp makedef.pl mg.c op.c perl.c perl.h
+	   ! perlapi.c perlapi.h perlio.c perly.c perly.y perly_c.diff
+	   ! pod/perlguts.pod pp_ctl.c pp_hot.c proto.h regcomp.c regexec.c
+	   ! scope.c sv.c sv.h toke.c universal.c vms/descrip_mms.template
+	   ! vms/perly_c.vms win32/Makefile win32/config_h.PL
+	   ! win32/dl_win32.xs win32/makefile.mk win32/perlhost.h
+	   ! win32/perllib.c win32/win32.c win32/win32.h win32/win32sck.c
+	   ! win32/win32thread.c wince/Makefile.ce wince/config_h.PL
+	   ! wince/dl_win32.xs wince/perllib.c wince/win32.h
+	   ! wince/win32thread.c wince/wince.c wince/wincesck.c xsutils.c
+____________________________________________________________________________
+[ 11802] By: ams                                   on 2001/08/31  18:11:32
+        Log: Subject: [DOC PATCH] Add perl4 warning messages to perldiag.pod
+             From: "Philip Newton" <Philip.Newton@gmx.net>
+             Date: Fri, 31 Aug 2001 21:12:56 +0200
+             Message-Id: <20010831.211000@ID-11583.news.dfncis.de>
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[ 11801] By: gsar                                  on 2001/08/31  17:49:03
+        Log: remove age-old UNICOS "workaround" that introduces a static, and
+             hence an egregious race condition for threaded builds (*sigh*
+             beats me why this kludge wasn't guarded by a UNICOS-specific
+             #define *sigh*)
+     Branch: maint-5.6/perl
+	   ! perl.c
+____________________________________________________________________________
+[ 11800] By: sky                                   on 2001/08/31  17:30:26
+        Log: Fixes bug in change 11717 that bus errored on HP-UX 10.20
+             Might break on platforms where bool is larger than 8 bites ???
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 11799] By: ams                                   on 2001/08/31  12:15:44
+        Log: Integrate 11778 into mainline.
+     Branch: perl
+	   ! t/base/term.t
+____________________________________________________________________________
+[ 11798] By: sky                                   on 2001/08/31  11:31:44
+        Log: Change 11797 sneaked in a faulty regcomp.c change which wasn't
+             supposed to happen.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 11797] By: sky                                   on 2001/08/31  11:28:17
+        Log: Subject: Re: Problem in ext/Time/HiRest/HiRes.t 
+             From: "John P. Linderman" <jpl@research.att.com>
+             Date: Fri, 31 Aug 2001 08:20:35 -0400
+             Message-Id: <200108311220.IAA54125@raptor.research.att.com>
+             Fixes test 14 which could fail randomly in rare cases.
+     Branch: perl
+	   ! ext/Time/HiRes/HiRes.t regcomp.c
+____________________________________________________________________________
+[ 11796] By: ams                                   on 2001/08/31  01:13:07
+        Log: Subject: [PATCH] Embaressing typo in Syslog's Makefile.PL
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Thu, 30 Aug 2001 23:21:50 +0100
+             Message-Id: <20010830232150.D4950@plum.flirble.org>
+     Branch: perl
+	   ! ext/Sys/Syslog/Makefile.PL
+____________________________________________________________________________
+[ 11795] By: ams                                   on 2001/08/30  23:53:23
+        Log: Subject: [PATCH pod/perlhack.pod] Yet another improvement to the
+             patching example
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Thu, 30 Aug 2001 17:02:08 -0400
+             Message-Id: <20010830170208.M2318@blackrider>
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[ 11794] By: ams                                   on 2001/08/30  19:35:36
+        Log: Subject: [PATCH] pp_modulo
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Thu, 30 Aug 2001 18:20:54 +0100
+             Message-Id: <20010830182053.A4950@plum.flirble.org>
+     Branch: perl
+	   ! pp.c t/op/64bitint.t
+____________________________________________________________________________
+[ 11793] By: sky                                   on 2001/08/30  13:02:48
+        Log: 11792 wasn't complete
+     Branch: perl
+	   ! makedef.pl regcomp.c
+____________________________________________________________________________
+[ 11792] By: sky                                   on 2001/08/30  12:21:11
+        Log: Added checks for PL_custom* and Perl_custom* functions in makedef.pl
+     Branch: perl
+	   ! makedef.pl
+____________________________________________________________________________
+[ 11791] By: sky                                   on 2001/08/30  10:08:02
+        Log: Due to braindamaged makedef.pl change 11758 broke makedef.pl
+     Branch: perl
+	   ! config_h.SH
+____________________________________________________________________________
+[ 11790] By: sky                                   on 2001/08/30  08:22:31
+        Log: Introduces SvREPADTMP(sv) that marks a repad SvIV as a offset
+             on the pad. Fixes coredumps in cleanups introduced by
+             Change 11755  
+     Branch: perl
+	   ! op.c perl.c sv.h
+____________________________________________________________________________
+[ 11789] By: sky                                   on 2001/08/29  19:01:47
+        Log: GCC on HP-UX 11 with 64bit support breaks inet_ntoa
+             This is a replacement implmentation that works on HPUX.
+             This bug should probably be fixed in GCC.
+     Branch: perl
+	   ! ext/Socket/Socket.xs
+____________________________________________________________________________
+[ 11788] By: ams                                   on 2001/08/29  17:35:33
+        Log: Subject: [PATCH] pass all tests when compiling with -DNO_PERL_PRESERVE_IVUV
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 29 Aug 2001 18:21:56 +0100
+             Message-Id: <20010829182156.O4950@plum.flirble.org>
+     Branch: perl
+	   ! ext/Devel/Peek/Peek.t sv.c t/op/64bitint.t t/op/numconvert.t
+____________________________________________________________________________
+[ 11787] By: sky                                   on 2001/08/29  10:42:54
+        Log: Added test for pack_addr_in and unpack_addr_in
+             Nitpik in test 10
+     Branch: perl
+	   ! ext/Socket/Socket.t
+____________________________________________________________________________
+[ 11786] By: sky                                   on 2001/08/29  10:28:14
+        Log: Added three tests to test inet_ntoa/inet_aton and *packaddr*
+             Trying to catch errors on HP-UX
+     Branch: perl
+	   ! ext/Socket/Socket.t
+____________________________________________________________________________
+[ 11785] By: sky                                   on 2001/08/29  09:07:03
+        Log: make sure USE_THREADS is defined so external apps work
+     Branch: perl
+	   ! config_h.SH
+____________________________________________________________________________
+[ 11784] By: sky                                   on 2001/08/29  08:06:12
+        Log: Subject: Re: The hitlist of untested modules.
+             From: Jonathan Stowe <gellyfish@gellyfish.com>
+             Date: Wed, 29 Aug 2001 09:25:49 +0100 (BST)
+             Message-ID: <Pine.LNX.4.33.0108290923320.29273-100000@orpheus.gellyfish.com>
+             Start of tests for Shell.pm (make Schwern poorer!)
+     Branch: perl
+	   + lib/Shell.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 11783] By: sky                                   on 2001/08/29  07:37:50
+        Log: END{} can change the return value even if we die from BEGIN{}
+     Branch: perl
+	   ! miniperlmain.c
+____________________________________________________________________________
+[ 11782] By: ams                                   on 2001/08/29  06:32:17
+        Log: Subject: Re: [PATCH] newer tests for the coderef-in-@INC !
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Wed, 29 Aug 2001 09:18:17 +0200
+             Message-Id: <20010829091817.A4453@rafael>
+     Branch: perl
+	   ! t/op/inccode.t
+____________________________________________________________________________
+[ 11781] By: pudge                                 on 2001/08/29  02:28:33
+        Log: Delete xsubpp.patch, as full copy exists now
+     Branch: maint-5.6/macperl
+	   - macos/xsubpp.patch
+____________________________________________________________________________
+[ 11780] By: pudge                                 on 2001/08/29  02:26:03
+        Log: Add Changes file
+     Branch: maint-5.6/macperl
+	   + macos/Changes
+____________________________________________________________________________
+[ 11779] By: pudge                                 on 2001/08/29  02:23:11
+        Log: Add Mac version of xsubpp as separate file
+     Branch: maint-5.6/macperl
+	   + macos/xsubpp
+	   ! macos/Makefile.mk
+____________________________________________________________________________
+[ 11778] By: pudge                                 on 2001/08/29  02:14:57
+        Log: Fix open of /dev/null for Mac OS
+     Branch: maint-5.6/macperl
+	   ! t/base/term.t
+____________________________________________________________________________
+[ 11777] By: pudge                                 on 2001/08/29  02:12:52
+        Log: Various patches: enable more tests; skip CVS in PerlInstall;
+             fix typemap for Mac::Processes; remove comments in MM_MacOS.pm
+     Branch: maint-5.6/macperl
+	   ! macos/MacPerlTests.cmd macos/PerlInstall
+	   ! macos/ext/Mac/Processes/typemap macos/lib/ExtUtils/MM_MacOS.pm
+____________________________________________________________________________
+[ 11776] By: pudge                                 on 2001/08/29  02:11:42
+        Log: Allow for platforms to override formatting of errors
+             on output from Matthias Neeracher (Mac files)
+     Branch: maint-5.6/macperl
+	   ! macos/macish.c macos/macish.h
+____________________________________________________________________________
+[ 11775] By: pudge                                 on 2001/08/29  01:59:32
+        Log: Allow for platforms to override formatting of errors
+             on output from Matthias Neeracher (core files)
+     Branch: maint-5.6/macperl
+	   ! perl.h pp_ctl.c util.c
+____________________________________________________________________________
+[ 11774] By: pudge                                 on 2001/08/29  01:29:43
+        Log: Add some param checking, from reports by Kevin Reid.
+     Branch: maint-5.6/macperl
+	   ! macos/ext/Mac/Controls/Controls.pm
+	   ! macos/ext/Mac/Menus/Menus.pm macos/ext/Mac/Windows/Windows.pm
+____________________________________________________________________________
+[ 11773] By: ams                                   on 2001/08/28  23:54:57
+        Log: Subject: [PATCH] make coretest
+             From: Paul Johnson <paul@pjcj.net>
+             Date: Wed, 29 Aug 2001 00:11:38 +0200
+             Message-Id: <20010829001138.B12169@pjcj.net>
+             (Applied without the change to perlhack.pod. This should
+             probably stay undocumented.)
+     Branch: perl
+	   ! Makefile.SH t/TEST
+____________________________________________________________________________
+[ 11772] By: sky                                   on 2001/08/28  13:01:20
+        Log: Subject: [PATCH t/op/pack.t pod/perlhack.pod] Adding the failure diagnostic  
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 28 Aug 2001 09:57:39 -0400
+             Message-ID: <20010828095738.E17775@blackrider>
+     Branch: perl
+	   ! pod/perlhack.pod t/op/pack.t
+____________________________________________________________________________
+[ 11771] By: sky                                   on 2001/08/28  11:20:13
+        Log: Subject: [PATCH] put useful info in %INC for files loaded by a hook in @INC
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Tue, 28 Aug 2001 14:23:43 +0200
+             Message-ID: <20010828142343.A19299@rafael>
+     Branch: perl
+	   ! pod/perlvar.pod pp_ctl.c
+____________________________________________________________________________
+[ 11770] By: ams                                   on 2001/08/28  10:13:21
+        Log: Subject: [PATCH] odd typo in op.h
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Tue, 28 Aug 2001 12:10:26 +0100
+             Message-Id: <20010828121026.V4950@plum.flirble.org>
+     Branch: perl
+	   ! op.h
+____________________________________________________________________________
+[ 11769] By: sky                                   on 2001/08/28  08:09:16
+        Log: Subject: [ID 20010827.008] no-foo options broken in B::Lint
+             From: Ville "Skyttä" <scop@cs132170.pp.htv.fi>
+             Date: Tue, 28 Aug 2001 02:22:20 +0300
+             Message-Id: <200108272322.f7RNMKd02261@cs132170.pp.htv.fi>
+     Branch: perl
+	   ! ext/B/B/Lint.pm
+____________________________________________________________________________
+[ 11768] By: ams                                   on 2001/08/28  00:47:35
+        Log: Subject: Re: [PATCH pod/perlhack.pod t/op/pack.t] Fixing bad testing advice
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 27 Aug 2001 21:24:44 -0400
+             Message-Id: <20010827212444.F12582@blackrider>
+     Branch: perl
+	   ! pod/perlhack.pod t/op/pack.t
+____________________________________________________________________________
+[ 11767] By: ams                                   on 2001/08/27  23:59:48
+        Log: Subject: [PATCH pod/perlhack.pod t/op/pack.t] Fixing bad testing advice
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 27 Aug 2001 20:12:29 -0400
+             Message-Id: <20010827201229.D12582@blackrider>
+     Branch: perl
+	   ! pod/perlhack.pod t/op/pack.t
+____________________________________________________________________________
+[ 11766] By: ams                                   on 2001/08/27  23:39:40
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [ 11765] By: ams                                   on 2001/08/27  22:53:10
         Log: Subject: Re: [PATCH] new tests for the coderef-in-@INC
              From: Michael G Schwern <schwern@pobox.com>
@@ -476,17 +939,6 @@ ____________________________________________________________________________
 	   ! lib/Net/README.libnet lib/Net/SMTP.pm lib/Net/Time.pm
 	   ! lib/Net/libnetFAQ.pod lib/Net/t/ftp.t
 ____________________________________________________________________________
-[ 11709] By: jhi                                   on 2001/08/17  13:47:53
-        Log: Upgrade to libnet 1.0704.
-     Branch: perl
-	   - lib/Net/README.config lib/Net/demos/snpp lib/Net/libnet.ppd
-	   ! MANIFEST lib/Net/ChangeLog.libnet lib/Net/Cmd.pm
-	   ! lib/Net/Config.pm lib/Net/Domain.pm lib/Net/FTP.pm
-	   ! lib/Net/FTP/A.pm lib/Net/FTP/I.pm lib/Net/FTP/dataconn.pm
-	   ! lib/Net/NNTP.pm lib/Net/Netrc.pm lib/Net/POP3.pm
-	   ! lib/Net/README.libnet lib/Net/SMTP.pm lib/Net/Time.pm
-	   ! lib/Net/libnetFAQ.pod lib/Net/t/ftp.t
-____________________________________________________________________________
 [ 11708] By: sky                                   on 2001/08/17  13:34:04
         Log: Let perl_clone copy PL_exit_flags
      Branch: perl
@@ -549,7 +1001,7 @@ ____________________________________________________________________________
         Log: It seems that Tru64 has "naturally" threadsafe APIs only for
              of the usual suspects (like getpwent) but not for others
              (like localtime and rand).  The _r versions are available
-             for all of them, so lets' use them.
+             for all of them, so lets use them.
      Branch: perl
 	   ! perl.h
 ____________________________________________________________________________
