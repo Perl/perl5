@@ -119,12 +119,12 @@ PP(pp_regcomp)
 	    else {
 		pm->op_pmdynflags &= ~PMdf_DYN_UTF8;
 		if (pm->op_pmdynflags & PMdf_UTF8)
-		    t = bytes_to_utf8(t, &len);
+		    t = (char*)bytes_to_utf8((U8*)t, &len);
 	    }
 	    pm->op_pmregexp = CALLREGCOMP(aTHX_ t, t + len, pm);
 	    if (!DO_UTF8(tmpstr) && (pm->op_pmdynflags & PMdf_UTF8))
 		Safefree(t);
-	    PL_reginterp_cnt = 0;		/* XXXX Be extra paranoid - needed
+	    PL_reginterp_cnt = 0;	/* XXXX Be extra paranoid - needed
 					   inside tie/overload accessors.  */
 	}
     }
