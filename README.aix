@@ -19,12 +19,12 @@ an ANSI compliant C-compiler with AIX by default, but binary builds of
 gcc for AIX are widely available.
 
 At the moment of writing, AIX supports two different native C compilers,
-for which you have to pay: B<xlc> and B<VAC>. If you decide to use either
+for which you have to pay: B<xlC> and B<vac>. If you decide to use either
 of these two (which is quite a lot easier than using gcc), be sure to
 upgrade to the latest available patch level. Currently:
 
-    xlC.C     3.1.4.0
-    vac.C     4.4.0.3 or 5.0.2.0
+    xlC.C     3.1.4.8 or 3.6.6.0
+    vac.C     4.4.0.3 or 5.0.2.3
 
 Perl can be compiled with either IBM's ANSI C compiler or with gcc.
 The former is recommended, as not only can it compile Perl with no
@@ -58,7 +58,7 @@ show the base, but is not always complete:
 As a side note, perl cannot be built without bos.adt.syscalls installed
 
     # lslpp -l | grep syscalls
-    bos.adt.syscalls  4.3.3.50  COMMITTED  System Calls Application
+    bos.adt.syscalls  4.3.3.51  COMMITTED  System Calls Application
     #
 
 =head2 Building Dynamic Extensions on AIX
@@ -85,7 +85,8 @@ was not possible using the emulated interface.
 All defaults for Configure can be used.
 
 If you've chosen to use vac 4, be sure to run 4.4.0.3. Older versions
-will turn up nasty later on. For vac 5 be sure to run at least 5.0.1.0.
+will turn up nasty later on. For vac 5 be sure to run at least 5.0.1.0,
+but vac 5.0.2.1 or up is highly recommended.
 
 Here's a brief lead of how to upgrade the compiler to the latest
 level.  Of course this is subject to changes.  You can only upgrade
@@ -165,7 +166,7 @@ Follow the messages ... and you're done.
 
 =head2 Using GNU's gcc for building perl
 
-We're working on this using gcc-3.0 ... (any input highly appreciated)
+Using gcc-3.0 (tested with 3.0.4) now works out of the box.
 
 =head2 Using Large Files with Perl
 
@@ -196,10 +197,8 @@ therefore in AIX 4.2 Perl is not linked against the libC_r.
 
 H.Merijn Brand <h.m.brand@hccnet.nl>
 
-Structure copied from README.hpux
-
 =head1 DATE
 
-Version 0.0.3: 12 Jul 2001
+Version 0.0.4: 13 May 2002
 
 =cut
