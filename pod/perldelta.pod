@@ -52,7 +52,7 @@ contains a very complex nesting of anonymous subs, evals and lexicals.
 
 =head1 Core Enhancements
 
-=head2 UTF-8 no more default under UTF-8 locales
+=head2 UTF-8 no longer default under UTF-8 locales
 
 In Perl 5.8.0 many Unicode features were introduced.   One of them
 was found to be of more nuisance than benefit: the automagic
@@ -69,7 +69,7 @@ is that the vast majority of people weren't: for example in RedHat releases
 8 and 9 the B<default> locale setting is UTF-8, so all RedHat users got
 UTF-8 filehandles, whether they wanted it or not.  The pain was
 intensified by the Unicode implementation of Perl 5.8.0 (still) having nasty
-bugs, especially related to the use of s/// and tr///.
+bugs, especially related to the use of s/// and tr///. (Bugs fixed in 5.8.1)
 
 Therefore a decision was made to backtrack the feature and change it
 from implicit silent default to explicit conscious option.  The new
@@ -81,7 +81,7 @@ arguments.  See L<perlrun> for more information.
 =head2 Unsafe signals again available
 
 In Perl 5.8.0 the so-called "safe signals" were introduced.  This
-means that Perl no more handles signals immediately but instead
+means that Perl no longer handles signals immediately but instead
 "between opcodes", when it is safe to do so.  The earlier immediate
 handling easily could corrupt the internal state of Perl, resulting
 in mysterious crashes.
@@ -240,7 +240,7 @@ of Perl in OS/400 PASE.
 
 =head1 Installation and Configuration Improvements
 
-The UNIX standard Perl location, F</usr/bin/perl>, is no more
+The UNIX standard Perl location, F</usr/bin/perl>, is no longer
 overwritten by default if it exists.  This change was very prudent
 because so many UNIX vendors already provide a F</usr/bin/perl>,
 but simultaneously many system utilities may depend on that
@@ -419,9 +419,9 @@ They never should have been, and if you application depends on them,
 you should (be ashamed and) contact perl5-porters to discuss what
 are the proper APIs.
 
-Certain APIs like Perl_list are no more available without their Perl_
-prefix.  You can force this also by defining in compile time the
-cpp define PERL_NO_SHORT_NAMES, for cleaner embedding.
+Certain APIs like Perl_list are no longer available without their Perl_
+prefix.  For cleaner embedding you can also force this for all APIs by
+defining at compile time the cpp define PERL_NO_SHORT_NAMES.
 
 Perl_save_bool() has been added.
 
