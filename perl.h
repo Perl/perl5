@@ -4516,5 +4516,14 @@ extern void moncontrol(int);
 
    so that Configure picks them up. */
 
+/* Source code compatibility cruft:
+   PERL_XS_APIVERSION is not used, and has been superseded by inc_version_list
+   It and PERL_PM_APIVERSION are retained for source compatibility in the
+   5.8.x maintenance branch.
+ */
+
+#define PERL_XS_APIVERSION "5.8.3"
+#define PERL_PM_APIVERSION "5.005"
+
 #endif /* Include guard */
 

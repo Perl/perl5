@@ -20,8 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Feb 26 10:02:07 MET 2004 [metaconfig 3.0 PL70]
-# But forked for maint because maint must keep the APIVERSION macros
+# Generated on Wed Feb 18 12:49:17 MET 2004 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1175,8 +1174,6 @@ vendorscriptexp=''
 versiononly=''
 defvoidused=''
 voidflags=''
-pm_apiversion=''
-xs_apiversion=''
 yacc=''
 yaccflags=''
 CONFIG=''
@@ -18668,12 +18665,6 @@ rp="What is the type of process ids on this system?"
 set pid_t pidtype int stdio.h sys/types.h
 eval $typedef_ask
 
-: Find earliest binary compatible site_perl subdirectory perl can use.
-xs_apiversion=$version # The current site_perl version.
-: Find earliest pure perl site_perl subdirectory perl can use.
-: The versioned directories started at 5.005.
-pm_apiversion='5.005'
-
 : see if ar generates random libraries by itself
 echo " "
 echo "Checking how to generate random libraries on your machine..." >&4
@@ -21235,7 +21226,6 @@ pg='$pg'
 phostname='$phostname'
 pidtype='$pidtype'
 plibpth='$plibpth'
-pm_apiversion='$pm_apiversion'
 pmake='$pmake'
 pr='$pr'
 prefix='$prefix'
@@ -21437,7 +21427,6 @@ versiononly='$versiononly'
 vi='$vi'
 voidflags='$voidflags'
 xlibpth='$xlibpth'
-xs_apiversion='$xs_apiversion'
 yacc='$yacc'
 yaccflags='$yaccflags'
 zcat='$zcat'
