@@ -1856,8 +1856,8 @@ PP(pp_iter)
 	if (cx->blk_loop.iterlval) {
 	    /* string increment */
 	    register SV* cur = cx->blk_loop.iterlval;
-	    STRLEN maxlen;
-	    char *max = SvPV((SV*)av, maxlen);
+	    STRLEN maxlen = 0;
+	    char *max = SvOK((SV*)av) ? SvPV((SV*)av, maxlen) : "";
 	    if (!SvNIOK(cur) && SvCUR(cur) <= maxlen) {
 #ifndef USE_5005THREADS			  /* don't risk potential race */
 		if (SvREFCNT(*itersvp) == 1 && !SvMAGICAL(*itersvp)) {
