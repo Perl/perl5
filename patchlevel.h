@@ -78,9 +78,9 @@
  */
 #if !defined(PERL_PATCHLEVEL_H_IMPLICIT) && !defined(LOCAL_PATCH_COUNT)
 static	char	*local_patches[] = {
-        NULL
-        ,"DEVEL17702"
-        ,NULL
+	NULL
+	,"DEVEL17787"
+	,NULL
 };
 
 /* Initial space prevents this variable from being inserted in config.sh  */

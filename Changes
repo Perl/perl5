@@ -28,6 +28,706 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.9.X		Development release working toward v5.10
 --------------
 ____________________________________________________________________________
+[ 17787] By: hv                                    on 2002/08/26  19:22:27
+        Log: fix for:
+             Subject: [perl #16773] "abc" =~ /(ab)()(c)??/ broken
+             From: (Randal L. Schwartz) (via RT) <perlbug@perl.org>
+             Date: 26 Aug 2002 15:01:36 -0000
+             Message-Id: <rt-16773-35748.5.13188490159294@bugs6.perl.org>
+     Branch: perl
+	   ! regexec.c t/op/re_tests
+____________________________________________________________________________
+[ 17786] By: hv                                    on 2002/08/26  15:34:25
+        Log: Subject: CPAN Upload: S/SB/SBURKE/Test-1.21.tar.gz
+             From: "Sean M. Burke" <sburke@cpan.org>
+             Date: Mon, 26 Aug 2002 04:38:19 -0600
+             Message-Id: <5.1.0.14.1.20020826043702.022ca320@mail.spinn.net>
+     Branch: perl
+	   ! lib/Test.pm lib/Test/t/fail.t lib/Test/t/mix.t
+	   ! lib/Test/t/todo.t
+____________________________________________________________________________
+[ 17785] By: hv                                    on 2002/08/26  15:18:41
+        Log: fix non-ANSI C++-style comment
+             Subject: [ PATCH ]  Smoke 17780 /pro/3gl/CPAN/perl-current
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Mon, 26 Aug 2002 09:15:18 +0200
+             Message-Id: <20020826090145.6975.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! ext/Storable/Storable.xs
+____________________________________________________________________________
+[ 17784] By: hv                                    on 2002/08/26  15:15:19
+        Log: #17780 relies on unixy paths to locate own directory for bignum tests.
+     Branch: perl
+	   ! lib/bignum/t/biinfnan.t lib/bignum/t/bninfnan.t
+	   ! lib/bignum/t/brinfnan.t
+____________________________________________________________________________
+[ 17783] By: hv                                    on 2002/08/26  15:07:21
+        Log: Subject: [ANNOUNCE] Test::Simple 0.47
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 26 Aug 2002 04:13:03 -0700
+             Message-ID: <20020826111303.GJ758@ool-18b93024.dyn.optonline.net>
+     Branch: perl
+	   + lib/Test/Simple/t/details.t lib/Test/Simple/t/fork.t
+	   + lib/Test/Simple/t/has_plan.t lib/Test/Simple/t/has_plan2.t
+	   + lib/Test/Simple/t/ok_obj.t
+	   + t/lib/Test/Simple/sample_tests/pre_plan_death.plx
+	   ! lib/Test/Builder.pm lib/Test/More.pm lib/Test/Simple.pm
+	   ! lib/Test/Simple/Changes lib/Test/Simple/t/exit.t
+	   ! lib/Test/Simple/t/plan.t lib/Test/Simple/t/threads.t
+	   ! lib/Test/Tutorial.pod t/lib/TieOut.pm
+____________________________________________________________________________
+[ 17782] By: hv                                    on 2002/08/26  15:00:55
+        Log: new test for change #17773
+             Subject: lib/Pod/t/htmlview.t and lib/Pod/t/htmlview.pod patch (to account for the Pod::Html patch)
+             From: DH <crazyinsomniac@yahoo.com>
+             Date: Mon, 26 Aug 2002 01:36:27 -0700 (PDT)
+             Message-ID: <20020826083627.46199.qmail@web40207.mail.yahoo.com>
+     Branch: perl
+	   ! lib/Pod/t/htmlview.pod lib/Pod/t/htmlview.t
+____________________________________________________________________________
+[ 17781] By: hv                                    on 2002/08/26  14:48:35
+        Log: #17775 changed reentr.c instead of reentr.pl, which generates it
+     Branch: perl
+	   ! reentr.pl
+____________________________________________________________________________
+[ 17780] By: hv                                    on 2002/08/25  19:03:50
+        Log: fix bignum test failures
+     Branch: perl
+	   ! lib/bignum/t/biinfnan.t lib/bignum/t/bninfnan.t
+	   ! lib/bignum/t/brinfnan.t
+____________________________________________________________________________
+[ 17779] By: hv                                    on 2002/08/25  18:56:29
+        Log: upgrade bignum to v0.13: fix test failures and update docs
+     Branch: perl
+	   ! lib/bignum.pm lib/bignum/t/bignum.t lib/bignum/t/bninfnan.t
+____________________________________________________________________________
+[ 17778] By: hv                                    on 2002/08/25  18:43:06
+        Log: Subject: Encode 1.76 Released
+             From: Dan Kogai <dankogai@dan.co.jp>
+             Date: su elo 25, 2002  11:27:07 US/Eastern
+             Message-Id: <1DE68466-B83F-11D6-8805-0003939A104C@dan.co.jp>
+     Branch: perl
+	   ! ext/Encode/Changes ext/Encode/Encode.pm ext/Encode/bin/piconv
+	   ! ext/Encode/encoding.pm ext/Encode/lib/Encode/Alias.pm
+	   ! ext/Encode/lib/Encode/MIME/Header.pm
+	   ! ext/Encode/t/big5-eten.utf ext/Encode/ucm/big5-eten.ucm
+____________________________________________________________________________
+[ 17777] By: rgs                                   on 2002/08/25  18:42:46
+        Log: Fix parsing problems with the // operator.
+             Make // able to follow various unary operators used without
+             arguments or parens (shift, pop, getc, pos, readline,
+             readlink, undef, umask, and the filetest operators), as
+             well as the <FH> operator.
+     Branch: perl
+	   ! perl.h t/op/dor.t toke.c
+____________________________________________________________________________
+[ 17776] By: hv                                    on 2002/08/25  15:56:37
+        Log: Subject: [PATCH] ExtUtils::Constant 0.13
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Fri, 23 Aug 2002 19:21:12 +0100
+             Message-ID: <20020823182111.GA281@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! lib/ExtUtils/Constant.pm lib/ExtUtils/t/Constant.t
+____________________________________________________________________________
+[ 17775] By: hv                                    on 2002/08/25  15:46:28
+        Log: Subject: [perl #16729] crypt() doesn't work in multithreaded perl
+             From: "mls@suse.de (via RT)" <perlbug@perl.org>
+             Date: 23 Aug 2002 15:24:39 -0000
+             Message-Id: <rt-16729-35555.9.25145891475907@bugs6.perl.org>
+     Branch: perl
+	   ! reentr.c
+____________________________________________________________________________
+[ 17774] By: hv                                    on 2002/08/25  15:29:42
+        Log: Subject: [PATCH lib/Benchmark.(pm|t)]  Make cmpthese work as documented.
+             From: Abigail <abigail@foad.org>
+             Date: Thu, 22 Aug 2002 04:10:39 -0700
+             Message-ID: <20020822041039.A2089@ucan.foad.org>
+     Branch: perl
+	   ! lib/Benchmark.pm lib/Benchmark.t
+____________________________________________________________________________
+[ 17773] By: hv                                    on 2002/08/25  15:17:16
+        Log: Subject: Re: a bugfix for Pod::Html (in diff -u format)
+             From: DH <crazyinsomniac@yahoo.com>
+             Date: Thu, 22 Aug 2002 02:32:50 -0700 (PDT)
+             Message-ID: <20020822093250.30523.qmail@web40205.mail.yahoo.com>
+     Branch: perl
+	   ! lib/Pod/Html.pm
+____________________________________________________________________________
+[ 17772] By: hv                                    on 2002/08/25  14:49:37
+        Log: Subject: Re: p5p patches
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Fri, 23 Aug 2002 15:27:48 +0200
+             Message-Id: <20020823152535.D3EA.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! Porting/patching.pod
+____________________________________________________________________________
+[ 17771] By: hv                                    on 2002/08/25  14:45:46
+        Log: Subject: Newdated info for HP-UX
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 21 Aug 2002 20:20:17 +0200
+             Message-Id: <20020821201737.697B.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! README.hpux
+____________________________________________________________________________
+[ 17770] By: hv                                    on 2002/08/25  14:26:36
+        Log: Subject: [PATCH] let perlfaq1.pod mention 5.8 as the current stable release
+             From: "Jos I. Boumans" <kane@cpan.org>
+             Date: Wed, 21 Aug 2002 14:55:51 +0200
+             Message-ID: <20020821124817.34761.qmail@onion.perl.org>
+     Branch: perl
+	   ! pod/perlfaq1.pod
+____________________________________________________________________________
+[ 17769] By: hv                                    on 2002/08/25  14:16:50
+        Log: Subject: bit more for WinCE
+             From: "Vadim Konovalov" <vkonovalov@peterstar.ru>
+             Date: Wed, 21 Aug 2002 01:31:52 +0400
+             Message-ID: <000f01c24891$045c4990$2b5ec3d9@vad>
+     Branch: perl
+	   ! wince/Makefile.ce wince/compile.bat wince/win32io.c
+	   ! wince/wince.c
+____________________________________________________________________________
+[ 17768] By: hv                                    on 2002/08/25  14:02:47
+        Log: Subject: [PATCH] fix lib.pm's import() to accept readonly parameters
+             From: Anton Berezin <tobez@tobez.org>
+             Date: Tue, 20 Aug 2002 23:44:25 +0200
+             Message-ID: <20020820214425.GG16178@heechee.tobez.org>
+     Branch: perl
+	   ! lib/lib.t lib/lib_pm.PL
+____________________________________________________________________________
+[ 17767] By: hv                                    on 2002/08/25  13:52:08
+        Log: Subject: [perl #16281] patch to enable perldoc -n for MSWin32 (perl-5.8.0)
+             From: "Randy W. Sims" (via RT) <perlbug@perl.org>
+             Date: 18 Aug 2002 13:27:12 -0000
+             Message-Id: <rt-16281-34264.3.49471192322156@bugs6.perl.org>
+     Branch: perl
+	   ! utils/perldoc.PL
+____________________________________________________________________________
+[ 17766] By: rgs                                   on 2002/08/24  20:33:05
+        Log: Subject: [perl #16737] [PATCH] Perl5.8.0 two simple typos in perlxstut  
+             From: Peter BARABAS (via RT) <perlbug@perl.org>
+             Date: 24 Aug 2002 08:16:19 -0000
+             Message-ID: <rt-16737-35573.3.51579548306248@bugs6.perl.org> 
+     Branch: perl
+	   ! pod/perlxstut.pod
+____________________________________________________________________________
+[ 17765] By: rgs                                   on 2002/08/24  19:03:52
+        Log: Subject: [PATCH] remove 2 unit warnings from lib/Net/t/hostname.t
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sat, 24 Aug 2002 17:01:08 +0100
+             Message-ID: <20020824160107.GI280@Bagpuss.unfortu.net>
+             (plus a typo fix)
+     Branch: perl
+	   ! lib/Net/t/hostname.t
+____________________________________________________________________________
+[ 17764] By: rgs                                   on 2002/08/24  12:29:27
+        Log: a2p wasn't installed with -Dversiononly
+     Branch: perl
+	   ! installperl
+____________________________________________________________________________
+[ 17763] By: hv                                    on 2002/08/23  12:23:31
+        Log: #17747 caused bad free()s with PERL_DESTRUCT by calling newXS()
+             with a NULL subaddr. Fix that, and stop it happening again.
+     Branch: perl
+	   ! op.c universal.c
+____________________________________________________________________________
+[ 17762] By: hv                                    on 2002/08/23  11:02:35
+        Log: fixup threaded build for vstring changes
+     Branch: perl
+	   ! universal.c util.c
+____________________________________________________________________________
+[ 17761] By: ams                                   on 2002/08/23  02:54:09
+        Log: Incorporate fix from JHI at:
+             http://rt.perl.org/rt2/Ticket/Display.html?id=16708
+     Branch: perl
+	   ! ext/NDBM_File/NDBM_File.xs ext/ODBM_File/ODBM_File.xs
+____________________________________________________________________________
+[ 17760] By: ams                                   on 2002/08/23  01:30:46
+        Log: Subject: [PATCH] PPPort IVSIZE and SvPV_nolen
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Fri, 23 Aug 2002 05:29:09 +0300
+             Message-Id: <20020823022909.GC9135@lyta.hut.fi>
+     Branch: perl
+	   ! ext/Devel/PPPort/PPPort.pm
+____________________________________________________________________________
+[ 17759] By: ams                                   on 2002/08/23  01:27:23
+        Log: Subject: [PATCH] x2p/str.c signedness nits
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Fri, 23 Aug 2002 02:43:30 +0300
+             Message-Id: <20020822234330.GC31624@lyta.hut.fi>
+     Branch: perl
+	   ! x2p/str.c
+____________________________________________________________________________
+[ 17758] By: hv                                    on 2002/08/22  22:29:45
+        Log: bignum-0.12 updates from:
+             Subject: [ANNOUCNE] Big Math::Big* update
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Tue, 13 Aug 2002 22:02:09 +0200 (CEST)
+             Message-Id: <200208132121.g7DLLRV21408@crypt.org>
+     Branch: perl
+	   + lib/bignum/t/biinfnan.t lib/bignum/t/bn_lite.t
+	   + lib/bignum/t/bninfnan.t lib/bignum/t/br_lite.t
+	   + lib/bignum/t/brinfnan.t lib/bignum/t/infnan.inc
+	   ! MANIFEST lib/bigint.pm lib/bignum.pm lib/bignum/t/bignum.t
+	   ! lib/bigrat.pm
+____________________________________________________________________________
+[ 17757] By: hv                                    on 2002/08/22  22:19:42
+        Log: new file for #17756
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 17756] By: hv                                    on 2002/08/22  22:16:41
+        Log: Subject: ANNOUCNE: Math::BigRat v0.09
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Wed, 14 Aug 2002 20:12:03 +0200 (CEST)
+             Message-Id: <200208141812.g7EICrV23771@crypt.org>
+     Branch: perl
+	   + lib/Math/BigRat/t/big_ap.t
+	   ! lib/Math/BigRat.pm lib/Math/BigRat/t/bigrat.t
+	   ! lib/Math/BigRat/t/bigratpm.inc
+____________________________________________________________________________
+[ 17755] By: hv                                    on 2002/08/22  19:44:03
+        Log: new files from #17754
+     Branch: perl
+	   + lib/Math/BigInt/Scalar.pm lib/Math/BigInt/t/bigints.t
+____________________________________________________________________________
+[ 17754] By: hv                                    on 2002/08/22  19:42:58
+        Log: Subject: ANNOUNCE: Math-BigInt v1.62
+             From: Tels <perl_dummy@bloodgate.com>
+             Date: Wed, 21 Aug 2002 19:12:59 +0200 (CEST)
+             Message-Id: <200208211513.g7LFDUs02512@crypt.org>
+     Branch: perl
+	   ! MANIFEST lib/Math/BigFloat.pm lib/Math/BigInt.pm
+	   ! lib/Math/BigInt/Calc.pm lib/Math/BigInt/t/bare_mbf.t
+	   ! lib/Math/BigInt/t/bare_mbi.t lib/Math/BigInt/t/bare_mif.t
+	   ! lib/Math/BigInt/t/bigfltpm.inc lib/Math/BigInt/t/bigfltpm.t
+	   ! lib/Math/BigInt/t/bigintc.t lib/Math/BigInt/t/bigintpm.inc
+	   ! lib/Math/BigInt/t/bigintpm.t lib/Math/BigInt/t/calling.t
+	   ! lib/Math/BigInt/t/constant.t lib/Math/BigInt/t/mbimbf.inc
+	   ! lib/Math/BigInt/t/mbimbf.t lib/Math/BigInt/t/sub_mbf.t
+	   ! lib/Math/BigInt/t/sub_mbi.t lib/Math/BigInt/t/sub_mif.t
+	   ! lib/Math/BigInt/t/upgrade.inc lib/Math/BigInt/t/upgrade.t
+	   ! lib/Math/BigInt/t/with_sub.t t/lib/Math/BigFloat/Subclass.pm
+____________________________________________________________________________
+[ 17753] By: hv                                    on 2002/08/22  12:05:57
+        Log: Subject: podlators 1.24 released
+             From: Russ Allbery <rra@stanford.edu>
+             Date: Sat, 03 Aug 2002 20:56:42 -0700
+             Message-ID: <ylbs8jff9h.fsf@windlord.stanford.edu>
+     Branch: perl
+	   + lib/Pod/t/text-options.t
+	   ! MANIFEST lib/Pod/Text.pm lib/Pod/Text/Overstrike.pm
+	   ! lib/Pod/t/basic.t pod/pod2text.PL
+____________________________________________________________________________
+[ 17752] By: hv                                    on 2002/08/22  11:13:17
+        Log: Subject: [Announce] Unicode::Collate 0.20 -> UCA version 9
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Fri, 26 Jul 2002 02:59:12 +0900
+             Message-Id: <20020726025828.B5E9.BQW10602@nifty.com>
+     Branch: perl
+	   ! lib/Unicode/Collate.pm lib/Unicode/Collate/Changes
+	   ! lib/Unicode/Collate/README lib/Unicode/Collate/keys.txt
+	   ! lib/Unicode/Collate/t/test.t
+____________________________________________________________________________
+[ 17751] By: hv                                    on 2002/08/22  11:08:35
+        Log: fix test failure from #17747
+     Branch: perl
+	   ! ext/B/t/stash.t
+____________________________________________________________________________
+[ 17750] By: hv                                    on 2002/08/22  10:46:19
+        Log: Subject: [PATCH] Fix DBM filters
+             From: "Paul Marquess" <Paul.Marquess@btinternet.com>
+             Date: Wed, 21 Aug 2002 11:40:49 +0100
+             Message-ID: <AIEAJICLCBDNAAOLLOKLAEHCFEAA.Paul.Marquess@btinternet.com>
+     Branch: perl
+	   ! XSUB.h ext/DB_File/DB_File.xs ext/DB_File/typemap
+	   ! ext/GDBM_File/GDBM_File.xs ext/GDBM_File/gdbm.t
+	   ! ext/GDBM_File/typemap ext/NDBM_File/NDBM_File.xs
+	   ! ext/NDBM_File/ndbm.t ext/NDBM_File/typemap
+	   ! ext/ODBM_File/ODBM_File.xs ext/ODBM_File/odbm.t
+	   ! ext/ODBM_File/typemap ext/SDBM_File/SDBM_File.xs
+	   ! ext/SDBM_File/sdbm.t ext/SDBM_File/typemap
+____________________________________________________________________________
+[ 17749] By: hv                                    on 2002/08/22  01:04:32
+        Log: avoid use of %caller::EXPORT
+             Subject: [PATCH] Re: question about Exporter::import
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Wed, 14 Aug 2002 21:33:12 +0100
+             Message-id: <20020814203311.GD278@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! lib/Exporter.pm lib/Exporter/Heavy.pm
+____________________________________________________________________________
+[ 17748] By: hv                                    on 2002/08/22  00:54:03
+        Log: todo test for linux $0 modification
+             Subject: Re: [perl #16206] $0 in 5.8
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 17 Aug 2002 21:32:37 +0200
+             Message-id: <87elcx2sdm.fsf@vran.herceg.de>
+     Branch: perl
+	   ! t/op/magic.t
+____________________________________________________________________________
+[ 17747] By: hv                                    on 2002/08/22  00:11:34
+        Log: Subject: Re: [PATCH] Version object patch #1
+             From: John Peacock <jpeacock@rowman.com>
+             Date: Tue, 20 Aug 2002 22:51:46 -0400 (Wed 03:51 BST)
+             Message-id: <3D630042.6020407@rowman.com>
+             
+             Subject: Re: [REVISED PATCH] Magic v-strings
+             From: John Peacock <jpeacock@rowman.com>
+             Date: Wed, 21 Aug 2002 15:08:34 -0400 (20:08 BST)
+             Message-id: <3D63E532.7020305@rowman.com>
+     Branch: perl
+	   ! sv.c t/op/ver.t universal.c util.c
+____________________________________________________________________________
+[ 17746] By: hv                                    on 2002/08/20  16:48:05
+        Log: Subject: [PATCH] Version object patch #1
+             From: John Peacock <jpeacock@rowman.com>
+             Date: Thu, 15 Aug 2002 10:06:21 -0400 (15:06 BST)
+             Message-id: <3D5BB55D.6090603@rowman.com>
+             and Message-id: <3D627D1A.4050607@rowman.com>
+             and t/lib/warnings/universal tweak to skip
+     Branch: perl
+	   ! embed.fnc embed.h global.sym pod/perlapi.pod proto.h sv.h
+	   ! t/lib/warnings/universal toke.c util.c
+____________________________________________________________________________
+[ 17745] By: hv                                    on 2002/08/20  16:27:01
+        Log: perldelta for #17727
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 17744] By: hv                                    on 2002/08/20  15:34:36
+        Log: Subject: typo in perfunc.pod
+             From: "John P. Linderman" <jpl@research.att.com>
+             Date: Mon, 19 Aug 2002 08:45:31 -0400 (EDT) (13:45 BST)
+             Message-id: <200208191245.IAA20072@raptor.research.att.com>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 17743] By: hv                                    on 2002/08/20  15:31:40
+        Log: Subject: Re: [PATCH] fix typos in perlpacktut
+             From: "Mr. Nobody" <mrnobo1024@yahoo.com>
+             Date: Fri, 16 Aug 2002 20:40:58 -0700 (PDT) (Sat 04:40 BST)
+             Message-id: <20020817034058.45633.qmail@web20802.mail.yahoo.com>
+     Branch: perl
+	   ! pod/perlpacktut.pod
+____________________________________________________________________________
+[ 17742] By: hv                                    on 2002/08/20  14:51:16
+        Log: Subject: [REVISED PATCH] Magic v-strings
+             From: John Peacock <jpeacock@rowman.com>
+             Date: Sat, 10 Aug 2002 15:56:22 -0400 (20:56 BST)
+             Message-id: <3D556FE6.6000404@rowman.com>
+             plus a bit of cleanup
+     Branch: perl
+	   ! dump.c perl.h pod/perlguts.pod sv.c sv.h util.c
+____________________________________________________________________________
+[ 17741] By: hv                                    on 2002/08/20  14:20:16
+        Log: Subject: Re: [PATCH] Storable and CODE references
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: 17 Aug 2002 21:58:03 +0200
+             Message-id: <87bs812r78.fsf@vran.herceg.de>
+     Branch: perl
+	   + ext/Storable/t/code.t
+	   ! MANIFEST ext/Storable/Storable.xs ext/Storable/t/forgive.t
+	   ! ext/Storable/t/malice.t
+____________________________________________________________________________
+[ 17740] By: hv                                    on 2002/08/20  14:07:56
+        Log: Clean up copy-on-write macros and debug facilities (new flag 'C').
+             Handle CoW in hashes:
+             Subject: Re: why would tr/// be performing hash copies?
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sun, 18 Aug 2002 23:17:01 +0100
+             Message-id: <20020818221700.GD294@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! hv.c perl.c perl.h pod/perlrun.pod sv.c sv.h
+____________________________________________________________________________
+[ 17739] By: hv                                    on 2002/08/20  13:52:18
+        Log: Subject: Re: [perl #15326] Not OK: perl v5.8.0 on i686-linux-64int-ld 2.4.5
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Tue, 23 Jul 2002 09:21:10 +0200
+             Message-id: <20020723092051.184C.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 17738] By: nick                                  on 2002/08/20  07:13:52
+        Log: Integrate mainline
+     Branch: perlio
+	   - vos/Makefile vos/build.cm vos/compile_perl.cm
+	   - vos/config.alpha.def vos/config.alpha.h vos/config.ga.def
+	   - vos/config.ga.h vos/config.pl vos/configure_perl.cm
+	   - vos/install_perl.cm vos/perl.bind vos/test_vos_dummies.c
+	   - vos/vos_dummies.c
+	  !> (integrate 57 files)
+____________________________________________________________________________
+[ 17737] By: ams                                   on 2002/08/19  07:48:39
+        Log: Effect a speedy recovery from POD affected by (ahem, Australian)
+             negligence.
+     Branch: perl
+	   ! pod/perlrun.pod
+____________________________________________________________________________
+[ 17736] By: hv                                    on 2002/08/18  18:27:28
+        Log: Subject: [PATCH] Re: 5.8.0 sprintf (?) problem with floats?
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Fri, 16 Aug 2002 23:31:07 +0100
+             Message-id: <20020816233107.E9388@fdgroup.com>
+     Branch: perl
+	   ! numeric.c t/base/num.t
+____________________________________________________________________________
+[ 17735] By: hv                                    on 2002/08/18  02:22:21
+        Log: Subject: Re: [perl #16198] pod tpyo in hostent.pm
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Tue, 13 Aug 2002 21:19:08 -0400 (Wed 02:19 BST)
+             Message-id: <20020814011909.22744.qmail@plover.com>
+     Branch: perl
+	   ! lib/Net/hostent.pm
+____________________________________________________________________________
+[ 17734] By: hv                                    on 2002/08/18  02:20:05
+        Log: Subject: [PATCH] Re: Pod::Functions tpyo
+             From: Abe Timmerman <abe@ztreet.demon.nl>
+             Date: Tue, 13 Aug 2002 23:47:00 +0200
+             Message-id: <200208132347.00782.abe@ztreet.demon.nl>
+     Branch: perl
+	   ! lib/Pod/Functions.pm
+____________________________________________________________________________
+[ 17733] By: hv                                    on 2002/08/18  02:17:18
+        Log: Subject: Server rename revisited
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Tue, 13 Aug 2002 19:19:03 +0200
+             Message-id: <20020813191821.DC98.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! README.hpux
+____________________________________________________________________________
+[ 17732] By: hv                                    on 2002/08/18  02:11:49
+        Log: Subject: [PATCH] Remove old VOS build methods
+             From: Paul_GreenVOS@vos.stratus.com
+             Date: Tue, 13 Aug 02 10:25 edt (15:25 BST)
+             Message-id: <200208131426.KAA01012@mailhub1.stratus.com>
+     Branch: perl
+	   - vos/Makefile vos/build.cm vos/compile_perl.cm
+	   - vos/config.alpha.def vos/config.alpha.h vos/config.ga.def
+	   - vos/config.ga.h vos/config.pl vos/configure_perl.cm
+	   - vos/install_perl.cm vos/perl.bind vos/test_vos_dummies.c
+	   - vos/vos_dummies.c
+	   ! MANIFEST README.vos pod/perlport.pod vos/Changes
+____________________________________________________________________________
+[ 17731] By: hv                                    on 2002/08/18  01:57:12
+        Log: Subject: [PATCH] Configure missing d_modflproto=''
+             From: "Gerrit P. Haase" <gp@familiehaase.de>
+             Date: Tue, 13 Aug 2002 15:11:05 +0200
+             Message-id: <11417599086.20020813151105@familiehaase.de>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 17730] By: hv                                    on 2002/08/18  01:41:33
+        Log: missing chunk from #17725 causes lib/constant.t test failures
+     Branch: perl
+	   ! lib/constant.t
+____________________________________________________________________________
+[ 17729] By: hv                                    on 2002/08/17  02:33:15
+        Log: Subject: [PATCH] Safe.pm documentation
+             From: Slaven Rezic <slaven.rezic@berlin.de>
+             Date: Sat, 10 Aug 2002 19:30:38 +0200 (CEST)
+             Message-id: <200208101730.g7AHUc9p001668@vran.herceg.de>
+     Branch: perl
+	   ! ext/Opcode/Safe.pm pod/perlre.pod
+____________________________________________________________________________
+[ 17728] By: hv                                    on 2002/08/17  02:07:24
+        Log: Subject: Copy On Write
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Thu, 15 Aug 2002 00:10:35 +0100
+             Message-id: <20020815001035.A69079@plum.flirble.org>
+             specify "-Accflags='-DPERL_COPY_ON_WRITE'" to use
+     Branch: perl
+	   ! doop.c dump.c embed.fnc embed.h mg.c pod/perlapi.pod pp.c
+	   ! pp_hot.c proto.h sv.c sv.h
+____________________________________________________________________________
+[ 17727] By: hv                                    on 2002/08/17  01:20:05
+        Log: Subject: [PATCH 5.7.3] Negative subscripts optionally passed to tied array methods
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Sun, 14 Apr 2002 23:38:55 -0400 (Mon 04:38 BST)
+             Message-id: <20020415033855.6343.qmail@plover.com>
+     Branch: perl
+	   ! av.c av.h pod/perltie.pod t/op/tiearray.t
+____________________________________________________________________________
+[ 17726] By: hv                                    on 2002/08/17  01:17:09
+        Log: pp.c warns that sv may be used uninitialised in pp_delete()
+     Branch: perl
+	   ! pp.c
+____________________________________________________________________________
+[ 17725] By: hv                                    on 2002/08/17  00:51:19
+        Log: Subject: [PATCH] Remove pseudo-hashes (complete)
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 6 Aug 2002 13:05:10 -0700 (21:05 BST)
+             Message-id: <20020806200510.GC31473@ool-18b93024.dyn.optonline.net>
+     Branch: perl
+	   ! av.c doop.c dump.c embed.fnc embed.h ext/B/B/Concise.pm
+	   ! global.sym lib/fields.pm lib/fields.t lib/overload.pm mg.c
+	   ! op.c op.h pod/perldiag.pod pod/perlfunc.pod pod/perlref.pod
+	   ! pp.c pp_hot.c proto.h t/op/avhv.t t/op/hashwarn.t
+____________________________________________________________________________
+[ 17724] By: hv                                    on 2002/08/17  00:27:33
+        Log: ext/B/defsubs.h also depends on the program that builds it
+     Branch: perl
+	   ! ext/B/Makefile.PL
+____________________________________________________________________________
+[ 17723] By: hv                                    on 2002/08/17  00:10:24
+        Log: Subject: Re: deb.c compile time error (patchlevel 17721)
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Tue, 13 Aug 2002 14:42:15 +0100
+             Message-ID: <20020813144215.G11939@fdgroup.com>
+     Branch: perl
+	   ! embed.fnc embed.h global.sym proto.h
+____________________________________________________________________________
+[ 17722] By: ams                                   on 2002/08/16  05:20:22
+        Log: Subject: Minor perlrun.pod patch
+             From: Iain Truskett <spoon@cpan.org>
+             Date: Fri, 16 Aug 2002 16:20:27 +1000
+             Message-Id: <20020816162027.D17196@eh.org>
+     Branch: perl
+	   ! pod/perlrun.pod
+____________________________________________________________________________
+[ 17721] By: hv                                    on 2002/08/12  12:17:19
+        Log: #17717 needed tests fixing up
+     Branch: perl
+	   ! t/op/chop.t
+____________________________________________________________________________
+[ 17720] By: hv                                    on 2002/08/12  12:10:07
+        Log: Subject: Re: [PATCH] Re: taint news
+             From: Rick Delaney <rick.delaney@rogers.com>
+             Date: 04 Aug 2002 00:28:58 EDT
+             Message-ID: <m3heibs0vp.fsf@cs839290-a.mtth.phub.net.cable.rogers.com>
+             missed patch fragment from Change #17676
+     Branch: perl
+	   ! pod/perlsec.pod
+____________________________________________________________________________
+[ 17719] By: hv                                    on 2002/08/12  12:03:53
+        Log: Subject: [perl #15987] Tests fail when sources are under CVS control
+             From: Warren Jones (via RT) <perlbug@perl.org>
+             Date: 5 Aug 2002 19:08:50 -0000 (Mon 20:08 BST)
+             Message-id: <rt-15987-32864.15.6255441902154@bugs6.perl.org>
+     Branch: perl
+	   ! lib/strict.t lib/warnings.t
+____________________________________________________________________________
+[ 17718] By: hv                                    on 2002/08/12  11:57:17
+        Log: Subject: [PATCH] add verbose stack display option, -Dvs
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Mon, 5 Aug 2002 00:55:33 +0100
+             Message-id: <20020805005533.B26111@fdgroup.com>
+     Branch: perl
+	   ! deb.c dump.c embed.fnc embed.h perl.c perl.h pod/perlapi.pod
+	   ! pod/perlrun.pod proto.h
+____________________________________________________________________________
+[ 17717] By: hv                                    on 2002/08/12  11:44:06
+        Log: Subject: Re: [PATCH@8545] [ID 20000808.005] OP_REFGEN as an lvalue
+             From: Stephen McCamant <smcc@CSUA.Berkeley.EDU>
+             Date: Sat, 27 Jan 2001 19:31:29 -0800 (PST)
+             Message-ID: <14963.32943.102669.67625@soda.csua.berkeley.edu>
+     Branch: perl
+	   ! op.c t/op/chop.t t/op/ref.t
+____________________________________________________________________________
+[ 17716] By: hv                                    on 2002/08/12  11:29:53
+        Log: Subject: Re: [ID 20020713.001] chomp($data=<tied_fh>) strangeness.
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>
+             Date: Sat, 13 Jul 2002 17:44:02 +0100
+             Message-id: <200207131644.g6DGi2214456@crypt.compulink.co.uk>
+     Branch: perl
+	   ! pp_hot.c t/op/tiehandle.t
+____________________________________________________________________________
+[ 17715] By: hv                                    on 2002/08/12  11:28:26
+        Log: Subject: [PATCH] better modfl detection
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sun, 11 Aug 2002 20:05:49 +0100
+             Message-id: <20020811190548.GK300@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! Configure config_h.SH perl.h
+____________________________________________________________________________
+[ 17714] By: hv                                    on 2002/08/12  11:26:23
+        Log: Subject: [PATCH] perltodo.pod
+             From: Richard.Foley@t-online.de
+             Date: Sun, 11 Aug 2002 18:26:10 +0200
+             Message-id: <17dwY1-0spbdoC@fwd06.sul.t-online.com>
+             perlbug credits
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 17713] By: hv                                    on 2002/08/12  11:24:44
+        Log: Subject: [PATCH] gv_fullname3 as call to gv_fullname4
+             From: Nicholas Clark <nick@unfortu.net>
+             Date: Sun, 11 Aug 2002 16:59:16 +0100
+             Message-id: <20020811155914.GE300@Bagpuss.unfortu.net>
+     Branch: perl
+	   ! gv.c
+____________________________________________________________________________
+[ 17712] By: hv                                    on 2002/08/12  11:23:06
+        Log: Subject: Re: Smoke 17703 /pro/3gl/CPAN/perl-current
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Mon, 12 Aug 2002 10:25:20 +0200
+             Message-id: <20020812102347.AFB6.H.M.BRAND@hccnet.nl>
+             gcc bug test needs -lm
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[ 17711] By: hv                                    on 2002/08/12  11:20:49
+        Log: Subject: [PATCH s2p] Small typo correction
+             From: "Newton, Philip" <Philip.Newton@datenrevision.de>
+             Date: Wed, 7 Aug 2002 11:50:51 +0200
+             Message-id: <C9A98F2128EDD411B0920008C7B337A13DCE2B@hamsem01.de.gedas.vwg>
+     Branch: perl
+	   ! x2p/s2p.PL
+____________________________________________________________________________
+[ 17710] By: hv                                    on 2002/08/12  11:17:21
+        Log: Subject: [PATCH] pod/perlfaq4.pod
+             From: Abigail <abigail@foad.org>
+             Date: Tue, 30 Jul 2002 09:52:02 -0700 (17:52 BST)
+             Message-id: <20020730095202.A6462@ucan.foad.org>
+             Add references to Regexp::Common.
+     Branch: perl
+	   ! pod/perlfaq4.pod
+____________________________________________________________________________
+[ 17709] By: nick                                  on 2002/08/11  10:25:15
+        Log: Fix for [perl #15986] tell/seek misbehave for :crlf
+             Test from "Vadim Konovalov" <vkonovalov@peterstar.ru>
+             fix by Nick I-S based on study of problem based
+             on Vadim's analysis.
+     Branch: perlio
+	   ! perlio.c t/io/crlf.t
+____________________________________________________________________________
+[ 17708] By: nick                                  on 2002/08/11  10:22:36
+        Log: Integrate mainline.
+     Branch: perlio
+	  +> pod/perl58delta.pod t/op/dor.t t/op/stash.t
+	  !> (integrate 73 files)
+____________________________________________________________________________
+[ 17707] By: rgs                                   on 2002/08/09  21:23:20
+        Log: Subject: New HP-UX itanium servers
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Wed, 07 Aug 2002 13:25:57 +0200
+             Message-ID: <20020807132518.FCBF.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! README.hpux
+____________________________________________________________________________
+[ 17706] By: rgs                                   on 2002/08/09  21:00:41
+        Log: Subject: Re: missing lower range in {} regex 
+             From: "John P. Linderman" <jpl@research.att.com>
+             Date: Fri, 09 Aug 2002 12:48:55 -0400
+             Message-ID: <200208091648.MAA77577@raptor.research.att.com>
+     Branch: perl
+	   ! pod/perlre.pod
+____________________________________________________________________________
+[ 17705] By: rgs                                   on 2002/08/08  20:57:59
+        Log: More tests for the attribute syntax, from the
+             attributes manpage.
+     Branch: perl
+	   ! t/op/attrs.t
+____________________________________________________________________________
+[ 17704] By: rgs                                   on 2002/08/08  19:47:44
+        Log: Fix bug #16080 : an attribute list should end at '}'
+     Branch: perl
+	   ! t/op/attrs.t toke.c
+____________________________________________________________________________
+[ 17703] By: hv                                    on 2002/08/08  15:30:12
+        Log: Update Changes
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 17702] By: hv                                    on 2002/08/08  15:08:57
         Log: Subject: Re: README.aix
              From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
