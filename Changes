@@ -79,6 +79,291 @@ Version 5.005_62        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  4435] By: gsar                                  on 1999/10/24  11:39:42
+        Log: VMS tweak (suggested by Craig A. Berry <craig.berry@metamor.com>)
+     Branch: perl
+	   ! ext/B/defsubs_h.PL
+____________________________________________________________________________
+[  4434] By: gsar                                  on 1999/10/24  11:36:08
+        Log: relax range checking if they ask for it (from John L. Allen
+             <allen@grumman.com>)
+     Branch: perl
+	   ! lib/Time/Local.pm
+____________________________________________________________________________
+[  4433] By: gsar                                  on 1999/10/24  11:25:51
+        Log: README nits pointed out by Chris Nandor <pudge@pobox.com>
+     Branch: perl
+	   ! README lib/File/Path.pm
+____________________________________________________________________________
+[  4432] By: gsar                                  on 1999/10/24  11:11:02
+        Log: From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sun, 24 Oct 1999 03:24:28 -0400 (EDT)
+             Message-Id: <199910240724.DAA12230@monk.mps.ohio-state.edu>
+             Subject: Re: [PATCH 5.005_62] OS/2 improvements
+     Branch: perl
+	   + os2/OS2/REXX/DLL/Changes os2/OS2/REXX/DLL/DLL.pm
+	   + os2/OS2/REXX/DLL/DLL.xs os2/OS2/REXX/DLL/MANIFEST
+	   + os2/OS2/REXX/DLL/Makefile.PL os2/OS2/REXX/t/rx_emxrv.t
+	   ! MANIFEST hints/os2.sh mg.c miniperlmain.c os2/Changes
+	   ! os2/OS2/REXX/Changes os2/OS2/REXX/Makefile.PL
+	   ! os2/OS2/REXX/REXX.pm os2/OS2/REXX/REXX.xs
+	   ! os2/OS2/REXX/t/rx_dllld.t os2/OS2/REXX/t/rx_objcall.t
+	   ! os2/OS2/REXX/t/rx_tievar.t os2/OS2/REXX/t/rx_tieydb.t
+	   ! os2/OS2/REXX/t/rx_vrexx.t os2/dl_os2.c os2/os2.c os2/os2ish.h
+	   ! perl.c perl.h t/io/fs.t t/op/magic.t
+____________________________________________________________________________
+[  4431] By: gsar                                  on 1999/10/24  10:50:14
+        Log: install all README.foo with pod content as podfoo.pod
+     Branch: perl
+	   ! Makefile.SH installman
+____________________________________________________________________________
+[  4430] By: gsar                                  on 1999/10/24  09:28:24
+        Log: @INC needs ../lib
+     Branch: perl
+	   ! t/op/int.t
+____________________________________________________________________________
+[  4429] By: jhi                                   on 1999/10/23  21:47:49
+        Log: More printf-fixes (see also #4426).
+     Branch: cfgperl
+	   ! deb.c dump.c ext/Data/Dumper/Dumper.xs
+	   ! ext/Devel/DProf/DProf.xs malloc.c mg.c op.c perl.c pp.c
+	   ! pp_ctl.c regcomp.c regexec.c run.c scope.c sv.c util.c
+____________________________________________________________________________
+[  4428] By: gsar                                  on 1999/10/23  20:28:56
+        Log: fix accidental C modulo semantics on integer-valued operations
+             (e.g. caused C<length("abc") % -10> to return 3 rather than -7)
+     Branch: perl
+	   ! op.c t/op/int.t
+____________________________________________________________________________
+[  4427] By: jhi                                   on 1999/10/23  16:10:10
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> sv.c win32/win32.c
+____________________________________________________________________________
+[  4426] By: jhi                                   on 1999/10/23  16:04:02
+        Log: Fix the printfing nits pointed out by using gcc -Wall and
+             Configure -Duse64bits -Dccflags=-DDEBUGGING in Solaris,
+             plus few other warnings in Dumper.xs.
+     Branch: cfgperl
+	   ! ext/Data/Dumper/Dumper.xs ext/Devel/DProf/DProf.xs
+	   ! ext/Devel/Peek/Peek.xs regcomp.c regexec.c sv.c util.c
+____________________________________________________________________________
+[  4425] By: jhi                                   on 1999/10/23  15:16:41
+        Log: Configure regen to pick up the new installation directories
+             from Policy_sh.SH.  The explanations of "public add-ons" and
+             "vendor-supplied" could do with more work.
+     Branch: cfgperl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  4424] By: nick                                  on 1999/10/23  00:46:22
+        Log: Resolve mainline before possible hacking operertunity this weekend
+     Branch: utfperl
+	  +> pod/perlfilter.pod
+	  !> (integrate 32 files)
+____________________________________________________________________________
+[  4423] By: jhi                                   on 1999/10/22  22:53:17
+        Log: Update Policy_sh.SH to handle the newer installation directives.
+             From: Andy Dougherty <doughera@lafayette.edu>
+             To: Perl Porters <perl5-porters@perl.org>
+             Subject: [PATCH 5.005_62] Policy_sh.SH update
+             Date: Fri, 22 Oct 1999 16:47:34 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.10.9910221645470.15232-100000@maxwell.phys.lafayette.edu>
+     Branch: cfgperl
+	   ! Policy_sh.SH
+____________________________________________________________________________
+[  4422] By: jhi                                   on 1999/10/22  22:44:44
+        Log: so back to 'so', from Stephanie Beals <bealzy@us.ibm.com>
+     Branch: cfgperl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[  4421] By: gsar                                  on 1999/10/22  21:16:44
+        Log: sv_vcatpvfn() bug: fell through to assuming intsize of 'q' for
+             C<"%ld", long_val>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[  4420] By: gsar                                  on 1999/10/22  16:36:46
+        Log: win32_utime() on directories should use localtime() rather
+             than gmtime() (from Jan Dubois)
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[  4419] By: jhi                                   on 1999/10/21  10:31:41
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> Makefile.SH lib/CPAN/FirstTime.pm op.c opcode.h opcode.pl
+	  !> t/lib/glob-basic.t t/op/sort.t
+____________________________________________________________________________
+[  4418] By: gsar                                  on 1999/10/20  23:49:47
+        Log: add test for change#4417
+     Branch: perl
+	   ! t/op/sort.t
+____________________________________________________________________________
+[  4417] By: gsar                                  on 1999/10/20  23:45:03
+        Log: avoid coredump on C<sort { my $c; return $a cmp $b } ...>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  4416] By: gsar                                  on 1999/10/20  01:00:50
+        Log: fix prototype mismatch (from Hans Mulder <hansm@xs4all.nl>)
+     Branch: perl
+	   ! lib/CPAN/FirstTime.pm
+____________________________________________________________________________
+[  4415] By: gsar                                  on 1999/10/20  00:52:34
+        Log: disable optimizing troublesome ops in change#3612
+             (from Ilya Zakharevich)
+     Branch: perl
+	   ! Makefile.SH opcode.h opcode.pl
+____________________________________________________________________________
+[  4414] By: gsar                                  on 1999/10/20  00:37:46
+        Log: skip unreadable directory test when running as root
+     Branch: perl
+	   ! t/lib/glob-basic.t
+____________________________________________________________________________
+[  4413] By: jhi                                   on 1999/10/19  09:26:52
+        Log: Avoid GNU ar if HP cc is being used.
+     Branch: cfgperl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[  4412] By: jhi                                   on 1999/10/19  07:24:29
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> perlvars.h
+____________________________________________________________________________
+[  4411] By: jhi                                   on 1999/10/19  07:22:34
+        Log: Long double support: sqrtl et al are not available everywhere,
+             e.g. not in Solaris, even when long doubles are.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH perl.h
+____________________________________________________________________________
+[  4410] By: jhi                                   on 1999/10/19  07:21:42
+        Log: Add sqrtl probe, add echo dependencies.
+     Branch: metaconfig
+	   ! U/threads/d_pthreadj.U
+     Branch: metaconfig/U/perl
+	   + d_sqrtl.U
+	   ! i_inttypes.U io64.U
+____________________________________________________________________________
+[  4409] By: gsar                                  on 1999/10/19  02:18:54
+        Log: perl_mutex n/a if !USE_THREADS
+     Branch: perl
+	   ! perlvars.h
+____________________________________________________________________________
+[  4408] By: jhi                                   on 1999/10/18  20:13:02
+        Log: Forgotten s/warning/warnings/.
+     Branch: cfgperl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  4407] By: jhi                                   on 1999/10/18  20:02:12
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  +> pod/perlfilter.pod
+	  !> (integrate 30 files)
+____________________________________________________________________________
+[  4406] By: gsar                                  on 1999/10/18  16:32:10
+        Log: added intro to source filters from Paul Marquess
+     Branch: perl
+	   + pod/perlfilter.pod
+	   ! MANIFEST pod/perldelta.pod
+____________________________________________________________________________
+[  4405] By: gsar                                  on 1999/10/18  05:53:06
+        Log: missing manpages
+     Branch: perl
+	   ! installman
+____________________________________________________________________________
+[  4404] By: gsar                                  on 1999/10/18  05:09:22
+        Log: pod updates from Tom Christiansen
+     Branch: perl
+	   ! lib/Pod/Man.pm pod/perldelta.pod pod/perlmodlib.pod
+____________________________________________________________________________
+[  4403] By: gsar                                  on 1999/10/17  23:43:59
+        Log: PL_malloc_mutex needs to be global, not per-interpreter
+             (malloc.c has static data)
+     Branch: perl
+	   ! embedvar.h intrpvar.h objXSUB.h perl.c perlvars.h
+____________________________________________________________________________
+[  4402] By: gsar                                  on 1999/10/17  22:30:30
+        Log: support PERL_IMPLICIT_SYS with MULTIPLICITY/USE_THREADS on
+             windows
+     Branch: perl
+	   ! XSUB.h ext/POSIX/POSIX.xs intrpvar.h makedef.pl malloc.c
+	   ! perl.c perl.h perlio.c win32/perllib.c win32/win32.c
+	   ! win32/win32.h
+____________________________________________________________________________
+[  4401] By: gsar                                  on 1999/10/17  20:33:42
+        Log: serious bug introduced by G_VOID changes in 5.003_96: scalar
+             eval"" did not pop stack correctly; C<$a = eval "(1,2)x1">
+             is one symptom of the problem
+     Branch: perl
+	   ! pp_ctl.c t/op/eval.t
+____________________________________________________________________________
+[  4400] By: gsar                                  on 1999/10/17  18:36:46
+        Log: remove FileHandle from list of PodParser dependencies (the
+             difference is 20 files vs 6 files loaded!)
+     Branch: perl
+	   ! lib/Pod/Parser.pm lib/Pod/Select.pm pod/perldelta.pod
+	   ! t/pod/testcmp.pl
+____________________________________________________________________________
+[  4399] By: nick                                  on 1999/10/17  14:51:35
+        Log: Pre-trip resolve
+     Branch: utfperl
+	  !> installperl lib/Text/Tabs.pm perl.c pp_hot.c
+____________________________________________________________________________
+[  4398] By: gsar                                  on 1999/10/17  09:19:24
+        Log: make installperl ignore RCS files (from Michael G Schwern
+             <schwern@pobox.com>)
+     Branch: perl
+	   ! installperl lib/Text/Tabs.pm
+____________________________________________________________________________
+[  4397] By: gsar                                  on 1999/10/16  18:30:14
+        Log: another bug in change#3386 (CATCH_SET wasn't reverted correctly)
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[  4396] By: jhi                                   on 1999/10/16  17:44:39
+        Log: Missing comma.
+     Branch: cfgperl
+	   ! lib/diagnostics.pm
+____________________________________________________________________________
+[  4395] By: gsar                                  on 1999/10/16  17:18:36
+        Log: assumption about @_ always being non-REAL doesn't hold when
+             debugger is running; DB::sub() can call arbitrary stuff
+             that modifies @_ at will
+     Branch: perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[  4394] By: nick                                  on 1999/10/16  09:35:20
+        Log: Resolve utfperl branch against mainline as of _62
+     Branch: utfperl
+	  +> eg/cgi/dna_small_gif.uu eg/cgi/wilogo_gif.uu
+	  +> ext/DB_File/hints/sco.pl ext/DynaLoader/hints/aix.pl
+	  +> ext/File/Glob/Changes ext/File/Glob/Glob.pm
+	  +> ext/File/Glob/Glob.xs ext/File/Glob/Makefile.PL
+	  +> ext/File/Glob/TODO ext/File/Glob/bsd_glob.c
+	  +> ext/File/Glob/bsd_glob.h ext/NDBM_File/hints/sco.pl
+	  +> pod/perlhack.pod t/lib/glob-basic.t t/lib/glob-global.t
+	  +> t/lib/glob-taint.t win32/genmk95.pl
+	   - eg/cgi/dna.small.gif.uu eg/cgi/wilogo.gif.uu
+	  !> (integrate 144 files)
+____________________________________________________________________________
+[  4393] By: gsar                                  on 1999/10/16  04:07:02
+        Log: OS/2 support bits (from Ilya Zakharevich)
+     Branch: perl
+	   ! hints/os2.sh makedef.pl os2/Makefile.SHs t/lib/glob-basic.t
+____________________________________________________________________________
+[  4392] By: jhi                                   on 1999/10/15  10:28:09
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> Changes MANIFEST Makefile.SH Porting/makerel lib/Pod/Man.pm
+	  !> lib/Pod/Parser.pm op.c pod/perldelta.pod pod/perlopentut.pod
+	  !> win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  4391] By: gsar                                  on 1999/10/15  10:12:42
+        Log: here be 5.005_62
+     Branch: perl
+	   ! Changes MANIFEST Porting/makerel
+____________________________________________________________________________
 [  4390] By: gsar                                  on 1999/10/15  09:45:51
         Log: lvalue subs patch (change#4081) breaks C<\(Foo->Bar())>;
              avoid tickling it in Pod::Man for now; other nits in
