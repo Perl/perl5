@@ -39,7 +39,7 @@ if ($Is_VMS) {
     $a =~ s/-uVMS,-uVMS::Filespec,//;
     $a =~ s/-uSocket,//; # Socket is optional/compiler version dependent
 }
-$OS2::is_aout||=0; # to thwart warning (OS2 special extra magic variable)
+use vars '$OS2::is_aout';
 if (($Config{static_ext} eq ' ' ||
      ($Config{static_ext} eq 'Socket' && $Is_VMS))
     && !($^O eq 'os2' and $OS2::is_aout)
