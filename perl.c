@@ -3431,8 +3431,10 @@ Perl_init_argv_symbols(pTHX_ register int argc, register char **argv)
 	for (; argc > 0; argc--,argv++) {
 	    SV *sv = newSVpv(argv[0],0);
 	    av_push(GvAVn(PL_argvgv),sv);
-	    if (PL_unicode & PERL_UNICODE_ARGV_FLAG)
-		 SvUTF8_on(sv);
+	    if (!(PL_unicode & PERL_UNICODE_LOCALE_FLAG) || PL_utf8locale) {
+		 if (PL_unicode & PERL_UNICODE_ARGV_FLAG)
+		      SvUTF8_on(sv);
+	    }
 	    if (PL_unicode & PERL_UNICODE_WIDESYSCALLS_FLAG) /* Sarathy? */
 		 (void)sv_utf8_decode(sv);
 	}

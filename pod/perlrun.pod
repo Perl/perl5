@@ -281,28 +281,30 @@ listing the letters is equal to summing the numbers.
     o    16    the default output layer enforces UTF-8
     D    24    i + o
     A    32    the @ARGV elements are supposed to be in UTF-8
-    L    64    normally the IOEio (SD) are unconditional,
+    L    64    normally the "IOEioA" are unconditional,
                the L makes them conditional on the locale environment
-               variables (the LC_ALL, LC_TYPE, and LANG; in the order
-               of decreasing precedence)
+               variables (the LC_ALL, LC_TYPE, and LANG, in the order
+               of decreasing precedence) -- if the variables indicate
+               UTF-8, then the selected "IOEioA" are in effect
 
 For example, C<-COE> and C<-C6> will both turn on UTF-8-ness on both
 STDOUT and STDERR.  Repeating letters is just redundant, not cumulative
 nor toggling.
 
-The C<-C> on its own (not followed by any number or option list) has
-the same effect as <-CSDL>.  In other words, the standard I/O handles
-and the default C<open()> layer are UTF-8-fied B<but> only if the locale
-environment variables indicate a UTF-8 locale.  This behavior follows
-the I<implicit> behaviour of Perl 5.8.0.
+The C<-C> on its own (not followed by any number or option list),
+or an empty string as the C<$ENV{PERL_UNICODE}), has the same effect
+as <-CSDL>.  In other words, the standard I/O handles and the default
+C<open()> layer are UTF-8-fied B<but> only if the locale environment
+variables indicate a UTF-8 locale.  This behavior follows the I<implicit>
+UTF-8 behaviour of Perl 5.8.0.
 
 You can use C<-C0> to explicitly disable all the above Unicode features.
 
 See L<perluniintro>, L<perlfunc/open>, and L<open> for more information.
 
-The magic variable C<${^UNICODE}> reflects the state of this setting,
-see L<perlvar/"${^UNICODE}">.  (Another way of setting this variable
-is to set the environment variable PERL_UNICODE.)
+The read-only magic variable C<${^UNICODE}> reflects the state of this
+setting, see L<perlvar/"${^UNICODE}">.  (Another way of setting this
+variable is to set the environment variable PERL_UNICODE.)
 
 (In Perls earlier than 5.8.1 the C<-C> switch was a Win32-only switch
 that enabled the use of Unicode-aware "wide system call" Win32 APIs.
