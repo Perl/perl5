@@ -2767,7 +2767,7 @@ perl_cond *cp;
 }
 #endif /* FAKE_THREADS */
 
-#ifdef OLD_PTHREADS_API
+#ifdef PTHREAD_GETSPECIFIC_INT
 struct perl_thread *
 getTHR _((void))
 {
@@ -2777,7 +2777,7 @@ getTHR _((void))
 	croak("panic: pthread_getspecific");
     return (struct perl_thread *) t;
 }
-#endif /* OLD_PTHREADS_API */
+#endif
 
 MAGIC *
 condpair_magic(SV *sv)

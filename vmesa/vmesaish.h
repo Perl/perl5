@@ -6,11 +6,5 @@
  void * dlopen(const char *);
  void * dlsym(void *, const char *);
  void * dlerror(void);
-# ifdef YIELD
-#  undef YIELD
-# endif
-# define YIELD pthread_yield(NULL)
-# define pthread_mutexattr_default NULL
-# define pthread_condattr_default NULL
- typedef void * pthread_addr_t;
+# define OLD_PTHREADS_API
 #endif
