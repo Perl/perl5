@@ -543,6 +543,7 @@ Perl_pad_findmy(pTHX_ char *name)
 {
     I32 off;
     I32 fake_off = 0;
+    I32 our_off = 0;
     SV *sv;
     SV **svp = AvARRAY(PL_comppad_name);
     U32 seq = PL_cop_seqmax;
@@ -577,6 +578,14 @@ Perl_pad_findmy(pTHX_ char *name)
 	    if (   seq >  (U32)I_32(SvNVX(sv))	/* min */
 		&& seq <= (U32)SvIVX(sv))	/* max */
 		return off;
+	    else if ((SvFLAGS(sv) & SVpad_OUR)
+		    && (U32)I_32(SvNVX(sv)) == PAD_MAX) /* min */
+	    {
+		/* look for an our that's being introduced; this allows
+		 *    our $foo = 0 unless defined $foo;
+		 * to not give a warning. (Yes, this is a hack) */
+		our_off = off;
+	    }
 	}
     }
     if (fake_off)
@@ -584,10 +593,12 @@ Perl_pad_findmy(pTHX_ char *name)
 
     /* See if it's in a nested scope */
     off = pad_findlex(name, 0, PL_compcv);
-    if (!off)			/* pad_findlex returns 0 for failure...*/
-	return NOT_IN_PAD;	/* ...but we return NOT_IN_PAD for failure */
+    if (off)			/* pad_findlex returns 0 for failure...*/
+	return off;
+    if (our_off)
+	return our_off;
+    return NOT_IN_PAD;		/* ...but we return NOT_IN_PAD for failure */
 
-    return off;
 }
 
 
