@@ -2182,9 +2182,6 @@ PP(pp_ioctl)
 #else
 	retval = fcntl(PerlIO_fileno(IoIFP(io)), func, s);
 #endif
-#else
-	DIE(aTHX_ "fcntl is not implemented");
-#endif
 
     if (SvPOK(argsv)) {
 	if (s[SvCUR(argsv)] != 17)
@@ -2203,6 +2200,10 @@ PP(pp_ioctl)
 	PUSHp(zero_but_true, ZBTLEN);
     }
     RETURN;
+
+#else
+    DIE(aTHX_ "fcntl is not implemented");
+#endif
 }
 
 PP(pp_flock)
