@@ -1,3 +1,4 @@
+$! OpenVMS configuration procedure for Perl -- do not attempt to run under DOS
 $ sav_ver = 'F$VERIFY(0)'
 $! SET VERIFY
 $!
