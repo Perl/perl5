@@ -1885,9 +1885,9 @@ First public release with perl5.005.
 
 =head1 Supported Platforms
 
-As of early February 2001 (the Perl release 5.6.1), the following
-platforms are able to build Perl from the standard source code
-distribution available at http://www.perl.com/CPAN/src/index.html
+As of early 2001 (the Perl release 5.6.1), the following platforms are
+able to build Perl from the standard source code distribution
+available at http://www.perl.com/CPAN/src/index.html
 
 	AIX
 	AmigaOS
@@ -1901,6 +1901,7 @@ distribution available at http://www.perl.com/CPAN/src/index.html
 	IRIX
 	Linux
 	MachTen
+	MacOS Classic	2)
 	NonStop-UX
 	ReliantUNIX	(SINIX)
 	OpenBSD
@@ -1913,10 +1914,14 @@ distribution available at http://www.perl.com/CPAN/src/index.html
 	UNICOS
 	UNICOS/mk
 	VOS
-	Win32/NT/2K	2)
+	Win32/NT/2K	3)
 
         1) in DOS mode either the DOS or OS/2 ports can be used
-        2) compilers: Borland, Cygwin, Mingw32 EGCS/GCC, VC++
+        2) Mac OS Classic (pre-X) is almost 5.6.1-ready; building from
+	   the source does work with 5.6.1, but additional MacOS specific
+           source code is needed for a complete build.  Contact the mailing
+           list macperl-porters@macperl.org for more information.
+        3) compilers: Borland, Cygwin, Mingw32 EGCS/GCC, VC++
 
 The following platforms worked for the previous release (5.6.0),
 but we did not manage to test these in time for the 5.6.1 release.
@@ -1938,12 +1943,13 @@ There is a very good chance that these will work fine with 5.6.1.
 	Windows 98
 	Windows Me
 
-The following platform worked for the 5.005_03 major release but not 5.6.0.
-Standardization on UTF-8 as the internal string representation
-in 5.6.0 and 5.6.1 has introduced incompatibilities in this EBCDIC platform.
-While Perl 5.6.1 will build on this platform some regression tests may fail 
-and the C<use utf8;> pragma typically introduces text handling errors.
-UTF-8 support for this platform may be enabled in a future release:
+The following platform worked for the 5.005_03 major release but not
+5.6.0.  Standardization on UTF-8 as the internal string representation
+in 5.6.0 and 5.6.1 has introduced incompatibilities in this EBCDIC
+platform.  While Perl 5.6.1 will build on this platform some
+regression tests may fail and the C<use utf8;> pragma typically
+introduces text handling errors.  UTF-8 support for this platform may
+be enabled in a future release:
 
 	OS/390	1)
 
@@ -1958,11 +1964,6 @@ mainframe platforms are the following platforms:
 These are also expected to work, albeit with no UTF-8 support, under 5.6.1 
 for the same reasons as OS/390.  Contact the mailing list perl-mvs@perl.org 
 for more details.
-
-Mac OS (Classic, pre-X) is almost 5.6.1-ready; building from the source
-does work with 5.6.1, but additional MacOS specific source code is needed
-for a complete port.  Contact the mailing list macperl-porters@macperl.org
-for more information.
 
 The following platforms have been known to build Perl from source in
 the past (5.005_03 and earlier), but we haven't been able to verify
