@@ -437,10 +437,13 @@ lib/Pod/Checker.pm		bradapp
 lib/Pod/Functions.pm	
 lib/Pod/Html.pm			tchrist
 lib/Pod/InputObjects.pm		bradapp
+lib/Pod/LaTeX.pm		tjenness
+lib/Pod/Man.pm			rra
 lib/Pod/Parser.pm		bradapp
 lib/Pod/PlainText.pm		bradapp
 lib/Pod/Select.pm		bradapp
-lib/Pod/Text.pm			tchrist
+lib/Pod/Text.pm			rra
+lib/Pod/Text/*			rra
 lib/Pod/Usage.pm		bradapp
 lib/Search/Dict.pm	
 lib/SelectSaver.pm	

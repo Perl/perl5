@@ -254,15 +254,15 @@ backspace are control characters.  All characters with ord() less than
 
 =item graph
 
-Any alphanumeric or punctuation character.
+Any alphanumeric or punctuation (special) character.
 
 =item print
 
-Any alphanumeric or punctuation character or space.
+Any alphanumeric or punctuation (special) character or space.
 
 =item punct
 
-Any punctuation character.
+Any punctuation (special) character.
 
 =item xdigit
 
@@ -381,6 +381,7 @@ use for a pattern. Simply quote all non-"word" characters:
 
     $pattern =~ s/(\W)/\\$1/g;
 
+(If C<use locale> is set, then this depends on the current locale.)
 Today it is more common to use the quotemeta() function or the C<\Q>
 metaquoting escape sequence to disable all metacharacters' special
 meanings like this:

@@ -261,7 +261,7 @@ C<strncmp>).
 /*
 =for apidoc Am|bool|isALNUM|char ch
 Returns a boolean indicating whether the C C<char> is an ASCII alphanumeric
-character or digit.
+character (including underscore) or digit.
 
 =for apidoc Am|bool|isALPHA|char ch
 Returns a boolean indicating whether the C C<char> is an ASCII alphabetic
