@@ -257,16 +257,11 @@ sub objxsub_var ($$) {
     undefine("PL_$sym") . hide("PL_$sym", "(*Perl_${pfx}${sym}_ptr($arg))");
 }
 
-sub embedvar ($) {
-    my ($sym) = @_;
-#   hide($sym, "Perl_$sym");
-    return '';
-}
-
 sub multon ($$$) {
     my ($sym,$pre,$ptr) = @_;
     hide("PL_$sym", "($ptr$pre$sym)");
 }
+
 sub multoff ($$) {
     my ($sym,$pre) = @_;
     return hide("PL_$pre$sym", "PL_$sym");
@@ -533,42 +528,45 @@ print EM <<'END';
 
 /* (Doing namespace management portably in C is really gross.) */
 
-/* Put interpreter-specific symbols into a struct? */
+/*
+   The following combinations of MULTIPLICITY, USE_THREADS, PERL_OBJECT
+   and PERL_IMPLICIT_CONTEXT are supported:
+     1) none
+     2) MULTIPLICITY	# supported for compatibility
+     3) MULTIPLICITY && PERL_IMPLICIT_CONTEXT
+     4) USE_THREADS && PERL_IMPLICIT_CONTEXT
+     5) MULTIPLICITY && USE_THREADS && PERL_IMPLICIT_CONTEXT
+     6) PERL_OBJECT && PERL_IMPLICIT_CONTEXT
 
-#ifdef MULTIPLICITY
+   All other combinations of these flags are errors.
 
-#ifndef USE_THREADS
-/* If we do not have threads then per-thread vars are per-interpreter */
+   #3, #4, #5, and #6 are supported directly, while #2 is a special
+   case of #3 (supported by redefining vTHX appropriately).
+*/
 
-#ifdef PERL_IMPLICIT_CONTEXT
+#if defined(MULTIPLICITY)
+/* cases 2, 3 and 5 above */
 
-/* everything has an implicit context pointer */
+#  if defined(PERL_IMPLICIT_CONTEXT)
+#    define vTHX	aTHX
+#  else
+#    define vTHX	PERL_GET_INTERP
+#  endif
 
 END
 
 for $sym (sort keys %thread) {
-    print EM multon($sym,'T','my_perl->');
+    print EM multon($sym,'T','vTHX->');
 }
 
 print EM <<'END';
 
-#else /* !PERL_IMPLICIT_CONTEXT */
+#  if defined(PERL_OBJECT)
+#    include "error: PERL_OBJECT + MULTIPLICITY don't go together"
+#  endif
 
-/* traditional MULTIPLICITY (intepreter is in a global) */
-
-END
-
-
-for $sym (sort keys %thread) {
-    print EM multon($sym,'T','PERL_GET_INTERP->');
-}
-
-print EM <<'END';
-
-#endif /* !PERL_IMPLICIT_CONTEXT */
-#endif /* !USE_THREADS */
-
-/* These are always per-interpreter if there is more than one */
+#  if defined(USE_THREADS)
+/* case 5 above */
 
 END
 
@@ -578,7 +576,21 @@ for $sym (sort keys %intrp) {
 
 print EM <<'END';
 
+#  else		/* !USE_THREADS */
+/* cases 2 and 3 above */
+
+END
+
+for $sym (sort keys %intrp) {
+    print EM multon($sym,'I','vTHX->');
+}
+
+print EM <<'END';
+
+#  endif	/* USE_THREADS */
+
 #else	/* !MULTIPLICITY */
+/* cases 1, 4 and 6 above */
 
 END
 
@@ -588,7 +600,19 @@ for $sym (sort keys %intrp) {
 
 print EM <<'END';
 
-#ifndef USE_THREADS
+#  if defined(USE_THREADS)
+/* case 4 above */
+
+END
+
+for $sym (sort keys %thread) {
+    print EM multon($sym,'T','aTHX->');
+}
+
+print EM <<'END';
+
+#  else		/* !USE_THREADS */
+/* cases 1 and 6 above */
 
 END
 
@@ -598,46 +622,10 @@ for $sym (sort keys %thread) {
 
 print EM <<'END';
 
-#endif /* USE_THREADS */
+#  endif	/* USE_THREADS */
+#endif	/* MULTIPLICITY */
 
-/* Hide what would have been interpreter-specific symbols? */
-
-END
-
-for $sym (sort keys %intrp) {
-    print EM embedvar($sym);
-}
-
-print EM <<'END';
-
-#ifndef USE_THREADS
-
-END
-
-for $sym (sort keys %thread) {
-    print EM embedvar($sym);
-}
-
-print EM <<'END';
-
-#endif /* USE_THREADS */
-#endif /* MULTIPLICITY */
-
-/* Now same trickey for per-thread variables */
-
-#ifdef USE_THREADS
-
-END
-
-for $sym (sort keys %thread) {
-    print EM multon($sym,'T','thr->');
-}
-
-print EM <<'END';
-
-#endif /* USE_THREADS */
-
-#ifdef PERL_GLOBAL_STRUCT
+#if defined(PERL_GLOBAL_STRUCT)
 
 END
 
@@ -657,19 +645,7 @@ for $sym (sort keys %globvar) {
 
 print EM <<'END';
 
-END
-
-for $sym (sort keys %globvar) {
-    print EM embedvar($sym);
-}
-
-print EM <<'END';
-
 #endif /* PERL_GLOBAL_STRUCT */
-
-END
-
-print EM <<'END';
 
 #ifdef PERL_POLLUTE		/* disabled by default in 5.006 */
 
@@ -683,7 +659,6 @@ print EM <<'END';
 
 #endif /* PERL_POLLUTE */
 END
-
 
 close(EM);
 

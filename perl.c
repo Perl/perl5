@@ -61,7 +61,8 @@ perl_alloc(void)
 {
     PerlInterpreter *my_perl;
 
-    New(53, my_perl, 1, PerlInterpreter);
+    /* New() needs interpreter, so call malloc() instead */
+    my_perl = PerlMem_malloc(sizeof(PerlInterpreter));
     PERL_SET_INTERP(my_perl);
     return my_perl;
 }
@@ -79,6 +80,14 @@ perl_construct(pTHXx)
     
 #ifdef MULTIPLICITY
     Zero(my_perl, 1, PerlInterpreter);
+#endif
+
+#ifdef MULTIPLICITY
+    init_interp();
+    PL_perl_destruct_level = 1; 
+#else
+   if (PL_perl_destruct_level > 0)
+       init_interp();
 #endif
 
    /* Init the real globals (and main thread)? */
@@ -158,13 +167,6 @@ perl_construct(pTHXx)
     PL_rs = SvREFCNT_inc(PL_nrs);
 
     init_stacks();
-#ifdef MULTIPLICITY
-    init_interp();
-    PL_perl_destruct_level = 1; 
-#else
-   if (PL_perl_destruct_level > 0)
-       init_interp();
-#endif
 
     init_ids();
     PL_lex_state = LEX_NOTPARSING;
@@ -1885,8 +1887,13 @@ S_init_interp(pTHX)
 #    define PERLVAR(var,type)
 #    define PERLVARA(var,n,type)
 #    if defined(PERL_IMPLICIT_CONTEXT)
-#      define PERLVARI(var,type,init)	my_perl->var = init;
-#      define PERLVARIC(var,type,init)	my_perl->var = init;
+#      if defined(USE_THREADS)
+#        define PERLVARI(var,type,init)		PERL_GET_INTERP->var = init;
+#        define PERLVARIC(var,type,init)	PERL_GET_INTERP->var = init;
+#      else /* !USE_THREADS */
+#        define PERLVARI(var,type,init)		aTHX->var = init;
+#        define PERLVARIC(var,type,init)	aTHX->var = init;
+#      endif /* USE_THREADS */
 #    else
 #      define PERLVARI(var,type,init)	PERL_GET_INTERP->var = init;
 #      define PERLVARIC(var,type,init)	PERL_GET_INTERP->var = init;

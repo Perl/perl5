@@ -115,17 +115,16 @@
 #  include "objXSUB.h"
 #endif	/* PERL_OBJECT || PERL_CAPI */
 
-#if defined(PERL_CAPI)
+#if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_NO_GET_CONTEXT)
 #  undef aTHX
 #  undef aTHX_
 #  undef _aTHX
-#  if defined(PERL_NO_GET_CONTEXT)
-#    define aTHX	 my_perl
-#  else
-#    define aTHX	 PERL_GET_INTERP
-#  endif /* PERL_NO_GET_CONTEXT */
-#  define aTHX_	aTHX,
-#  define _aTHX	,aTHX
+#  define aTHX		PERL_GET_THX
+#  define aTHX_		aTHX,
+#  define _aTHX		,aTHX
+#endif
+
+#if defined(PERL_CAPI)
 #  ifndef NO_XSLOCKS
 #    undef closedir
 #    undef opendir

@@ -155,8 +155,8 @@ class CPerlObj;
 #define PERL_OBJECT_THIS	aTHXo
 #define PERL_OBJECT_THIS_	aTHXo_
 #define _PERL_OBJECT_THIS	_aTHXo
-#define dTHXoa(a)		pTHXo = (CPerlObj *)a
-#define dTHXo			dTHXoa(PERL_GET_INTERP)
+#define dTHXoa(a)		pTHXo = a
+#define dTHXo			dTHXoa(PERL_GET_THX)
 
 #define pTHXx		void
 #define pTHXx_
@@ -172,8 +172,6 @@ class CPerlObj;
 struct perl_thread;
 #    define pTHX	register struct perl_thread *thr
 #    define aTHX	thr
-#    define dTHXa(a)	pTHX = (struct perl_thread *)a
-#    define dTHX	dTHXa(THR)
 #    define dTHR	dNOOP
 #  else
 #    ifndef MULTIPLICITY
@@ -181,9 +179,9 @@ struct perl_thread;
 #    endif
 #    define pTHX	register PerlInterpreter *my_perl
 #    define aTHX	my_perl
-#    define dTHXa(a)	pTHX = (PerlInterpreter *)a
-#    define dTHX	dTHXa(PERL_GET_INTERP)
 #  endif
+#  define dTHXa(a)	pTHX = a
+#  define dTHX		dTHXa(PERL_GET_THX)
 #  define pTHX_		pTHX,
 #  define _pTHX		,pTHX
 #  define aTHX_		aTHX,
@@ -1645,6 +1643,22 @@ typedef pthread_key_t	perl_key;
 #  define PERL_GET_INTERP		(PL_curinterp)
 #endif
 
+#if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_GET_THX)
+#  ifdef USE_THREADS
+#    define PERL_GET_THX		THR
+#  else
+#  ifdef MULTIPLICITY
+#    define PERL_GET_THX		PERL_GET_INTERP
+#  else
+#  ifdef PERL_OBJECT
+#    define PERL_GET_THX		((CPerlObj*)PERL_GET_INTERP)
+#  else
+#    define PERL_GET_THX		((void*)0)
+#  endif
+#  endif
+#  endif
+#endif
+
 /* Some unistd.h's give a prototype for pause() even though
    HAS_PAUSE ends up undefined.  This causes the #define
    below to be rejected by the compmiler.  Sigh.
@@ -2507,7 +2521,9 @@ struct perl_vars *PL_VarsPtr;
 */
 
 struct interpreter {
-#include "thrdvar.h"
+#ifndef USE_THREADS
+#  include "thrdvar.h"
+#endif
 #include "intrpvar.h"
 };
 

@@ -81,12 +81,13 @@ long lastxycount[MAXXCOUNT][MAXYCOUNT];
 Malloc_t
 Perl_safesysmalloc(MEM_SIZE size)
 {
+    dTHX;
     Malloc_t ptr;
 #ifdef HAS_64K_LIMIT
 	if (size > 0xffff) {
 	    PerlIO_printf(PerlIO_stderr(),
 			  "Allocation too large: %lx\n", size) FLUSH;
-	    WITH_THX(my_exit(1));
+	    my_exit(1);
 	}
 #endif /* HAS_64K_LIMIT */
 #ifdef DEBUGGING
@@ -94,18 +95,14 @@ Perl_safesysmalloc(MEM_SIZE size)
 	Perl_croak_nocontext("panic: malloc");
 #endif
     ptr = PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
-#if !(defined(I286) || defined(atarist))
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%x: (%05d) malloc %ld bytes\n",ptr,PL_an++,(long)size));
-#else
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) malloc %ld bytes\n",ptr,PL_an++,(long)size));
-#endif
     if (ptr != Nullch)
 	return ptr;
     else if (PL_nomemok)
 	return Nullch;
     else {
 	PerlIO_puts(PerlIO_stderr(),PL_no_mem) FLUSH;
-	WITH_THX(my_exit(1));
+	my_exit(1);
         return Nullch;
     }
     /*NOTREACHED*/
@@ -116,6 +113,7 @@ Perl_safesysmalloc(MEM_SIZE size)
 Malloc_t
 Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 {
+    dTHX;
     Malloc_t ptr;
 #if !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE)
     Malloc_t PerlMem_realloc();
@@ -125,7 +123,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
     if (size > 0xffff) {
 	PerlIO_printf(PerlIO_stderr(),
 		      "Reallocation too large: %lx\n", size) FLUSH;
-	WITH_THX(my_exit(1));
+	my_exit(1);
     }
 #endif /* HAS_64K_LIMIT */
     if (!size) {
@@ -141,17 +139,10 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 #endif
     ptr = PerlMem_realloc(where,size);
 
-#if !(defined(I286) || defined(atarist))
-    DEBUG_m( {
-	PerlIO_printf(Perl_debug_log, "0x%x: (%05d) rfree\n",where,PL_an++);
-	PerlIO_printf(Perl_debug_log, "0x%x: (%05d) realloc %ld bytes\n",ptr,PL_an++,(long)size);
-    } )
-#else
     DEBUG_m( {
 	PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) rfree\n",where,PL_an++);
 	PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) realloc %ld bytes\n",ptr,PL_an++,(long)size);
     } )
-#endif
 
     if (ptr != Nullch)
 	return ptr;
@@ -159,7 +150,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 	return Nullch;
     else {
 	PerlIO_puts(PerlIO_stderr(),PL_no_mem) FLUSH;
-	WITH_THX(my_exit(1));
+	my_exit(1);
 	return Nullch;
     }
     /*NOTREACHED*/
@@ -170,11 +161,8 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 Free_t
 Perl_safesysfree(Malloc_t where)
 {
-#if !(defined(I286) || defined(atarist))
-    DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%x: (%05d) free\n",(char *) where,PL_an++));
-#else
+    dTHX;
     DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) free\n",(char *) where,PL_an++));
-#endif
     if (where) {
 	/*SUPPRESS 701*/
 	PerlMem_free(where);
@@ -186,13 +174,14 @@ Perl_safesysfree(Malloc_t where)
 Malloc_t
 Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 {
+    dTHX;
     Malloc_t ptr;
 
 #ifdef HAS_64K_LIMIT
     if (size * count > 0xffff) {
 	PerlIO_printf(PerlIO_stderr(),
 		      "Allocation too large: %lx\n", size * count) FLUSH;
-	WITH_THX(my_exit(1));
+	my_exit(1);
     }
 #endif /* HAS_64K_LIMIT */
 #ifdef DEBUGGING
@@ -201,11 +190,7 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 #endif
     size *= count;
     ptr = PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
-#if !(defined(I286) || defined(atarist))
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%x: (%05d) calloc %ld  x %ld bytes\n",ptr,PL_an++,(long)count,(long)size));
-#else
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%lx: (%05d) calloc %ld x %ld bytes\n",ptr,PL_an++,(long)count,(long)size));
-#endif
     if (ptr != Nullch) {
 	memset((void*)ptr, 0, size);
 	return ptr;
@@ -214,7 +199,7 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 	return Nullch;
     else {
 	PerlIO_puts(PerlIO_stderr(),PL_no_mem) FLUSH;
-	WITH_THX(my_exit(1));
+	my_exit(1);
 	return Nullch;
     }
     /*NOTREACHED*/
