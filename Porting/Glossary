@@ -175,6 +175,7 @@ cc (cc.U):
 	This variable holds the name of a command to execute a C compiler which
 	can resolve multiple global references that happen to have the same
 	name.  Usual values are 'cc', 'Mcc', 'cc -M', and 'gcc'.
+	Fervent ANSI compilers may be called 'c89'. AIX has xlc.
 
 cccdlflags (dlsrc.U):
 	This variable contains any special flags that might need to be
@@ -191,6 +192,10 @@ ccdlflags (dlsrc.U):
 ccflags (ccflags.U):
 	This variable contains any additional C compiler flags desired by
 	the user.  It is up to the Makefile to use this.
+
+ccflags_uselargefiles (uselfs.U):
+	This variable contains the compiler flags needed by large file builds
+	and added to ccflags by hints files.
 
 ccsymbols (Cppsym.U):
 	The variable contains the symbols defined by the C compiler alone.
@@ -1312,6 +1317,11 @@ d_setprior (d_setprior.U):
 	This variable conditionally defines HAS_SETPRIORITY if setpriority()
 	is available to set a process's priority.
 
+d_setproctitle (d_setproctitle.U):
+	This variable conditionally defines the HAS_SETPROCTITLE symbol,
+	which indicates to the C program that the setproctitle() routine
+	is available.
+
 d_setpwent (d_setpwent.U):
 	This variable conditionally defines the HAS_SETPWENT symbol, which
 	indicates to the C program that the setpwent() routine is available
@@ -1803,7 +1813,12 @@ full_sed (Loc_sed.U):
 	can share this executable will have the same full pathname to
 	'sed.'
 
-gccversion (cc.U):
+gccosandvers (gccvers.U):
+	If GNU cc (gcc) is used, this variable the operating system and
+	version used to compile the gcc.  It is set to '' if not gcc,
+	or if nothing useful can be parsed as the os version.
+
+gccversion (gccvers.U):
 	If GNU cc (gcc) is used, this variable holds '1' or '2' to 
 	indicate whether the compiler is version 1 or 2.  This is used in
 	setting some of the default cflags.  It is set to '' if not gcc.
@@ -1961,6 +1976,10 @@ i_ieeefp (i_ieeefp.U):
 i_inttypes (i_inttypes.U):
 	This variable conditionally defines the I_INTTYPES symbol,
 	and indicates whether a C program should include <inttypes.h>.
+
+i_libutil (i_libutil.U):
+	This variable conditionally defines the I_LIBUTIL symbol, and indicates
+	whether a C program should include <libutil.h>.
 
 i_limits (i_limits.U):
 	This variable conditionally defines the I_LIMITS symbol, and indicates
@@ -2406,6 +2425,10 @@ ldflags (ccflags.U):
 	This variable contains any additional C loader flags desired by
 	the user.  It is up to the Makefile to use this.
 
+ldflags_uselargefiles (uselfs.U):
+	This variable contains the loader flags needed by large file builds
+	and added to ldflags by hints files.
+
 ldlibpthname (libperl.U):
 	This variable holds the name of the shared library
 	search path, often LD_LIBRARY_PATH.  To get an empty
@@ -2457,6 +2480,12 @@ libswanted (Myinit.U):
 	This variable holds a list of all the libraries we want to
 	search.  The order is chosen to pick up the c library
 	ahead of ucb or bsd libraries for SVR4.
+
+libswanted_uselargefiles (uselfs.U):
+	This variable contains the libraries needed by large file builds
+	and added to ldflags by hints files.  It is a space separated list
+	of the library names without the "lib" prefix or any suffix, just
+	like libswanted..
 
 line (Loc.U):
 	This variable is defined but not used by Configure.
