@@ -50,7 +50,6 @@ our %winlatin2cp   = (
 		      'Latin1'     => 1252,
 		      'Latin2'     => 1250,
 		      'Cyrillic'   => 1251,
-		      'Baltic'     => 1257,
 		      'Greek'      => 1253,
 		      'Turkish'    => 1254,
 		      'Hebrew'     => 1255,
@@ -593,7 +592,7 @@ the encoding by picking the first in the following sequence:
 
 =over 4
 
-=item * The MIME name as defined in IETF RFC-XXXX.
+=item * The MIME name as defined in IETF RFC-2045.
 
 =item * The name in the IANA registry.
 
@@ -604,6 +603,89 @@ the encoding by picking the first in the following sequence:
 Because of all the alias issues, and because in the general case
 encodings have state C<Encode> uses the encoding object internally
 once an operation is in progress.
+
+As of Perl 5.8.0, at least the following encodings are recognized
+(the => marks aliases):
+
+  ASCII
+
+  US-ASCII => ASCII
+
+The Unicode:
+
+  UTF-8   
+  UTF-16
+  UCS-2
+
+  ISO 10646-1 => UCS-2
+
+The ISO 8859 and KOI:
+
+  ISO 8859-1  ISO 8859-6   ISO 8859-11         KOI8-F
+  ISO 8859-2  ISO 8859-7   (12 doesn't exist)  KOI8-R
+  ISO 8859-3  ISO 8859-8   ISO 8859-13	       KOI8-U
+  ISO 8859-4  ISO 8859-9   ISO 8859-14
+  ISO 8859-5  ISO 8859-10  ISO 8859-15
+                           ISO 8859-16
+
+  Latin1  => 8859-1  Latin6  => 8859-10
+  Latin2  => 8859-2  Latin7  => 8859-13
+  Latin3  => 8859-3  Latin8  => 8859-14 
+  Latin4  => 8859-4  Latin9  => 8859-15
+  Latin5  => 8859-9  Latin10 => 8859-16
+
+  Cyrillic => 8859-5
+  Arabic   => 8859-6
+  Greek    => 8859-7
+  Hebrew   => 8859-8
+  Thai     => 8859-11
+  TIS620   => 8859-11 
+
+The CJKV: Chinese, Japanese, Korean, Vietnamese:
+
+  ISO 2022     ISO 2022 JP-1  JIS 0201  GB 1988   Big5       EUC-CN       
+  ISO 2022 CN  ISO 2022 JP-2  JIS 0208  GB 2312   HZ	     EUC-JP     
+  ISO 2022 JP  ISO 2022 KR    JIS 0210  GB 12345  CNS 11643  EUC-JP-0212
+  Shift-JIS                            			     EUC-KR     
+  VISCII
+
+The PC codepages:
+
+  CP37   CP852  CP861  CP866  CP949   CP1251  CP1256
+  CP424  CP855  CP862  CP869  CP950   CP1252  CP1257
+  CP737  CP856  CP863  CP874  CP1006  CP1253  CP1258
+  CP775  CP857  CP864  CP932  CP1047  CP1254
+  CP850  CP860  CP865  CP936  CP1250  CP1255
+
+  WinLatin1     => CP1252
+  WinLatin2     => CP1250
+  WinCyrillic   => CP1251
+  WinGreek      => CP1253
+  WinTurkiskh   => CP1254
+  WinHebrew     => CP1255
+  WinArabic     => CP1256
+  WinBaltic     => CP1257
+  WinVietnamese => CP1258
+
+(All the CPI<NNN...> are available also also IBMI<NNN...>.)
+
+The Mac codepages:
+
+  MacCentralEuropean   MacJapanese        
+  MacCroatian	       MacRoman           
+  MacCyrillic 	       MacRumanian        
+  MacDingbats	       MacSami            
+  MacGreek	       MacThai            
+  MacIcelandic	       MacTurkish         
+		       MacUkraine         
+
+Miscellaneous:
+
+  7bit-greek  IR-197
+  7bit-kana   NeXTstep
+  7bit-latin1 POSIX-BC
+  DingBats    Roman8
+  GSM 0338    Symbol
 
 =head1 PERL ENCODING API
 
