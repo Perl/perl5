@@ -3657,7 +3657,7 @@ PP(pp_system)
 	    PerlLIO_close(pp[0]);
 	    if (n) {			/* Error */
 		if (n != sizeof(int))
-		    Perl_croak(aTHX_ "panic: kid popen errno read");
+		    DIE(aTHX_ "panic: kid popen errno read");
 		errno = errkid;		/* Propagate errno from kid */
 		STATUS_CURRENT = -1;
 	    }

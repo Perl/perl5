@@ -234,7 +234,7 @@ PP(pp_preinc)
 {
     djSP;
     if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
-	Perl_croak(aTHX_ PL_no_modify);
+	DIE(aTHX_ PL_no_modify);
     if (SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
     	SvIVX(TOPs) != IV_MAX)
     {
@@ -1645,7 +1645,7 @@ PP(pp_subst)
     if (SvREADONLY(TARG)
 	|| (SvTYPE(TARG) > SVt_PVLV
 	    && !(SvTYPE(TARG) == SVt_PVGV && SvFAKE(TARG))))
-	Perl_croak(aTHX_ PL_no_modify);
+	DIE(aTHX_ PL_no_modify);
     PUTBACK;
 
     s = SvPV(TARG, len);
@@ -2014,36 +2014,49 @@ PP(pp_leavesublv)
 	/* Here we go for robustness, not for speed, so we change all
 	 * the refcounts so the caller gets a live guy. Cannot set
 	 * TEMP, so sv_2mortal is out of question. */
-	if (!CvLVALUE(cxsub.cv))
-	    Perl_croak(aTHX_ "Can't modify non-lvalue subroutine call");
+	if (!CvLVALUE(cxsub.cv)) {
+	    POPSUB2();
+	    PL_curpm = newpm;
+	    DIE(aTHX_ "Can't modify non-lvalue subroutine call");
+	}
 	if (gimme == G_SCALAR) {
 	    MARK = newsp + 1;
 	    EXTEND_MORTAL(1);
 	    if (MARK == SP) {
-		if (SvFLAGS(TOPs) & (SVs_TEMP | SVs_PADTMP | SVf_READONLY))
-		    Perl_croak(aTHX_ "Can't return a %s from lvalue subroutine",
+		if (SvFLAGS(TOPs) & (SVs_TEMP | SVs_PADTMP | SVf_READONLY)) {
+		    POPSUB2();
+		    PL_curpm = newpm;
+		    DIE(aTHX_ "Can't return a %s from lvalue subroutine",
 			SvREADONLY(TOPs) ? "readonly value" : "temporary");
+		}
 		else {                  /* Can be a localized value
 					 * subject to deletion. */
 		    PL_tmps_stack[++PL_tmps_ix] = *mark;
 		    SvREFCNT_inc(*mark);
 		}
 	    }
-	    else                        /* Should not happen? */
-		Perl_croak(aTHX_ "%s returned from lvalue subroutine in scalar context",
+	    else {			/* Should not happen? */
+		POPSUB2();
+		PL_curpm = newpm;
+		DIE(aTHX_ "%s returned from lvalue subroutine in scalar context",
 		    (MARK > SP ? "Empty array" : "Array"));
+	    }
 	    SP = MARK;
 	}
 	else if (gimme == G_ARRAY) {
 	    EXTEND_MORTAL(SP - newsp);
 	    for (mark = newsp + 1; mark <= SP; mark++) {
-		if (SvFLAGS(*mark) & (SVs_TEMP | SVs_PADTMP | SVf_READONLY))
-		/* Might be flattened array after $#array =  */
-		Perl_croak(aTHX_ "Can't return %s from lvalue subroutine",
+		if (SvFLAGS(*mark) & (SVs_TEMP | SVs_PADTMP | SVf_READONLY)) {
+		    /* Might be flattened array after $#array =  */
+		    PUTBACK;
+		    POPSUB2();
+		    PL_curpm = newpm;
+		    DIE(aTHX_ "Can't return %s from lvalue subroutine",
 			(*mark != &PL_sv_undef)
 			? (SvREADONLY(TOPs)
 			    ? "a readonly value" : "a temporary")
 			: "an uninitialized value");
+		}
 		else {
 		    mortalize:
 		    /* Can be a localized value subject to deletion. */
@@ -2258,7 +2271,7 @@ try_autoload:
 		    || !(sv = AvARRAY(av)[0]))
 		{
 		    MUTEX_UNLOCK(CvMUTEXP(cv));
-		    Perl_croak(aTHX_ "no argument for locked method call");
+		    DIE(aTHX_ "no argument for locked method call");
 		}
 	    }
 	    if (SvROK(sv))
