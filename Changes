@@ -28,6 +28,108 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 20873] By: jhi                                   on 2003/08/25  09:07:58
+        Log: Integrate:
+             [ 20864]
+             s/rationale/rational/g on bigrats.
+             
+             [ 20865]
+             An imperfect last resort in case there is no strtoul() but
+             there is strtol() (like e.g. SunOS 4) because of the Atoul()
+             in Perl_get_hash_seed()).  The only true fix would be to
+             implement Perl_my_strtoul() (and Perl_my_strtol(), I guess)
+             in numeric.c.
+             
+             [ 20866]
+             IRIX 5.3 is 99.90% okay.
+             
+             [ 20867]
+             Various tweaks for getting Perl to compile on SunOS 4.x.
+             Doesn't work well yet, something broken in DynaLoader/XSLoader?
+             
+             [ 20868]
+             MPE/iX doc tweak from Mark Bixby.
+             
+             [ 20870]
+             Subject: [patch emacs/ptags] allow xemacs to be used
+             From: Stas Bekman <stas@stason.org>
+             Date: Sun, 24 Aug 2003 22:05:00 -0700
+             Message-ID: <3F4998FC.3090401@stason.org>
+             
+             [ 20871]
+             Subject: [PATCH] valgrind memcpy warnings (Re: [PATCH] Re: valgrind as a leak hound?)
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sun, 24 Aug 2003 16:48:53 +0100
+             Message-ID: <20030824164851.E558@plum.flirble.org>
+             
+             [ 20872]
+             Subject: [PATCH] valgrind update
+             From: Marcus Holland-Moritz <mhx-perl@gmx.net>
+             Date: Mon, 25 Aug 2003 09:51:57 +0200 (MEST)
+             Message-ID: <21671.1061797917@www38.gmx.net>
+     Branch: maint-5.8/perl
+	  !> README.irix README.mpeix README.solaris doop.c emacs/ptags
+	  !> ext/IO/poll.c hints/irix_5.sh hints/sunos_4_1.sh
+	  !> lib/Math/BigRat.pm lib/bigrat.pm perl.h t/TEST t/op/magic.t
+____________________________________________________________________________
+[ 20869] By: jhi                                   on 2003/08/25  05:09:45
+        Log: Cygwin 1.5.x looking better.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 20863] By: jhi                                   on 2003/08/24  06:43:00
+        Log: Integrate:
+             [ 20860]
+             Bad quote day, noticed by Philip Newton.
+             
+             [ 20861]
+             gcc -O3 and Storable in Linux do not like each other.
+             
+             [ 20862]
+             Update the CPAN mirrors list.
+     Branch: maint-5.8/perl
+	  !> ext/Storable/hints/linux.pl hints/dos_djgpp.sh
+	  !> pod/perlmodlib.PL pod/perlmodlib.pod
+____________________________________________________________________________
+[ 20858] By: jhi                                   on 2003/08/23  09:21:09
+        Log: Integrate:
+             [ 20850]
+             Subject: [PATCH] Re: valgrind as a leak hound?
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Fri, 22 Aug 2003 23:28:18 +0200
+             Message-ID: <002201c368f4$4e5a5e40$0c2f1fac@R2D2>
+             
+             Add the leak detection to valgrind testing.
+             
+             [ 20851]
+             Doc tweaks on perlhack.
+             
+             [ 20853]
+             Move the note about known eval leaks earlier.
+             
+             [ 20854]
+             More data points about the Storable optimization problem
+             in Linux.  (It might be that also non-Debians are affected,
+             waiting for more information.)
+             
+             [ 20855]
+             Add more comments so that one can see what is supposed to happen.
+             
+             [ 20856]
+             Subject: Re: bytecode.t & OS X "Invalid bytecode for this architecture"
+             From: Enache Adrian <enache@rdslink.ro>
+             Date: Mon, 4 Aug 2003 16:20:19 +0300
+             Message-ID: <20030804132019.GA6764@ratsnest.hole>
+     Branch: maint-5.8/perl
+	  +> t/perl.supp
+	  !> Configure MANIFEST config_h.SH ext/Storable/hints/linux.pl
+	  !> pod/perlhack.pod t/TEST t/op/lc.t
+____________________________________________________________________________
+[ 20845] By: jhi                                   on 2003/08/22  15:23:12
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 20844] By: jhi                                   on 2003/08/22  15:07:15
         Log: Integrate:
              [ 20842]
