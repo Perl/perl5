@@ -175,7 +175,7 @@ L<perlfaq5> for more details.
 
 One of the most common uses for C<open> is one you never
 even notice.  When you process the ARGV filehandle using
-C<E<lt>ARGVE<gt>>, Perl actually does an implicit open 
+C<< <ARGV> >>, Perl actually does an implicit open 
 on each file in @ARGV.  Thus a program called like this:
 
     $ myprogram file1 file2 file3
@@ -189,7 +189,7 @@ using a construct no more complex than:
 
 If @ARGV is empty when the loop first begins, Perl pretends you've opened
 up minus, that is, the standard input.  In fact, $ARGV, the currently
-open file during C<E<lt>ARGVE<gt>> processing, is even set to "-"
+open file during C<< <ARGV> >> processing, is even set to "-"
 in these circumstances.
 
 You are welcome to pre-process your @ARGV before starting the loop to
@@ -239,7 +239,7 @@ Here's an example:
                 or die "can't open $pwdinfo: $!";
 
 This sort of thing also comes into play in filter processing.  Because
-C<E<lt>ARGVE<gt>> processing employs the normal, shell-style Perl C<open>,
+C<< <ARGV> >> processing employs the normal, shell-style Perl C<open>,
 it respects all the special things we've already seen:
 
     $ myprogram f1 "cmd1|" - f2 "cmd2|" f3 < tmpfile
@@ -264,7 +264,7 @@ you can fetch URLs before processing them:
 
     @ARGV = map { m#^\w+://# ? "GET $_ |" : $_ } @ARGV;
 
-It's not for nothing that this is called magic C<E<lt>ARGVE<gt>>.
+It's not for nothing that this is called magic C<< <ARGV> >>.
 Pretty nifty, eh?
 
 =head1 Open E<agrave> la C
@@ -393,7 +393,7 @@ folders, cookie files, and internal temporary files.
 Sometimes you already have a filehandle open, and want to make another
 handle that's a duplicate of the first one.  In the shell, we place an
 ampersand in front of a file descriptor number when doing redirections.
-For example, C<2E<gt>&1> makes descriptor 2 (that's STDERR in Perl)
+For example, C<< 2>&1 >> makes descriptor 2 (that's STDERR in Perl)
 be redirected into descriptor 1 (which is usually Perl's STDOUT).
 The same is essentially true in Perl: a filename that begins with an
 ampersand is treated instead as a file descriptor if a number, or as a
@@ -444,8 +444,8 @@ these days.  Here's an example of that:
     $fd = $ENV{"MHCONTEXTFD"};
     open(MHCONTEXT, "<&=$fd")   or die "couldn't fdopen $fd: $!";
 
-If you're using magic C<E<lt>ARGVE<gt>>, you could even pass in as a
-command line argument in @ARGV something like C<"E<lt>&=$MHCONTEXTFD">,
+If you're using magic C<< <ARGV> >>, you could even pass in as a
+command line argument in @ARGV something like C<"<&=$MHCONTEXTFD">,
 but we've never seen anyone actually do this.
 
 =head2 Dispelling the Dweomer
@@ -474,7 +474,7 @@ The only vaguely popular system that doesn't work this way is the
 proprietary Macintosh system, which uses a colon where the rest of us
 use a slash.  Maybe C<sysopen> isn't such a bad idea after all.
 
-If you want to use C<E<lt>ARGVE<gt>> processing in a totally boring
+If you want to use C<< <ARGV> >> processing in a totally boring
 and non-magical way, you could do this first:
 
     #   "Sam sat on the ground and put his head in his hands.  

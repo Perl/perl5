@@ -830,7 +830,7 @@ to EMX headers:
   +++ /emx/include/sys/stat.h	Sun Jul 12 14:11:32 1998
   @@ -53,7 +53,7 @@ struct stat
    #endif
- 
+
    #if !defined (S_IFMT)
   -#define S_IFMT   0160000  /* Mask for file type */
   +#define S_IFMT   0170000  /* Mask for file type */

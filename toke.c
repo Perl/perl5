@@ -319,6 +319,7 @@ S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 }
 #endif
 
+#if 0
 STATIC I32
 S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 {
@@ -329,7 +330,6 @@ S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 	New(898, tmps, SvCUR(sv) * 3 / 2 + 1, U8);
 	tend = utf16_to_utf8((U16*)SvPVX(sv), tmps, SvCUR(sv));
 	sv_usepvn(sv, (char*)tmps, tend - tmps);
-    
     }
     return count;
 }
@@ -344,10 +344,10 @@ S_utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 	New(898, tmps, SvCUR(sv) * 3 / 2 + 1, U8);
 	tend = utf16_to_utf8_reversed((U16*)SvPVX(sv), tmps, SvCUR(sv));
 	sv_usepvn(sv, (char*)tmps, tend - tmps);
-    
     }
     return count;
 }
+#endif
 
 /*
  * Perl_lex_start
@@ -861,7 +861,7 @@ S_force_version(pTHX_ char *s)
             version = yylval.opval;
 	    ver = cSVOPx(version)->op_sv;
 	    if (SvPOK(ver) && !SvNIOK(ver)) {
-		SvUPGRADE(ver, SVt_PVNV);
+		(void)SvUPGRADE(ver, SVt_PVNV);
 		SvNVX(ver) = str_to_version(ver);
 		SvNOK_on(ver);		/* hint that it is a version */
 	    }
@@ -1269,8 +1269,10 @@ S_scan_const(pTHX_ char *start)
 	    if (s[2] == '#') {
 		while (s < send && *s != ')')
 		    *d++ = *s++;
-	    } else if (s[2] == '{' /* This should match regcomp.c */
-		       || (s[2] == 'p' || s[2] == '?') && s[3] == '{') {	
+	    }
+	    else if (s[2] == '{' /* This should match regcomp.c */
+		     || ((s[2] == 'p' || s[2] == '?') && s[3] == '{'))
+	    {
 		I32 count = 1;
 		char *regparse = s + (s[2] == '{' ? 3 : 4);
 		char c;
@@ -1464,12 +1466,9 @@ S_scan_const(pTHX_ char *start)
  		++s;
  		if (*s == '{') {
  		    char* e = strchr(s, '}');
- 		    HV *hv;
- 		    SV **svp;
- 		    SV *res, *cv;
+ 		    SV *res;
  		    STRLEN len;
  		    char *str;
- 		    char *why = Nullch;
  
  		    if (!e) {
 			yyerror("Missing right brace on \\N{}");
@@ -2613,8 +2612,8 @@ Perl_yylex(pTHX)
 			    }
 			    d = moreswitches(d);
 			} while (d);
-			if (PERLDB_LINE && !oldpdb ||
-			    ( PL_minus_n || PL_minus_p ) && !(oldn || oldp) )
+			if ((PERLDB_LINE && !oldpdb) ||
+			    ((PL_minus_n || PL_minus_p) && !(oldn || oldp)))
 			      /* if we have already added "LINE: while (<>) {",
 			         we must not do it again */
 			{
@@ -3336,7 +3335,7 @@ Perl_yylex(pTHX)
 	    else if (isIDFIRST_lazy_if(s,UTF)) {
 		char tmpbuf[sizeof PL_tokenbuf];
 		scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len);
-		if (tmp = keyword(tmpbuf, len)) {
+		if ((tmp = keyword(tmpbuf, len))) {
 		    /* binary operators exclude handle interpretations */
 		    switch (tmp) {
 		    case -KEY_x:
@@ -3578,7 +3577,6 @@ Perl_yylex(pTHX)
     case 'z': case 'Z':
 
       keylookup: {
-	STRLEN n_a;
 	gv = Nullgv;
 	gvp = 0;
 
@@ -3586,10 +3584,10 @@ Perl_yylex(pTHX)
 	s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
 
 	/* Some keywords can be followed by any delimiter, including ':' */
-	tmp = (len == 1 && strchr("msyq", PL_tokenbuf[0]) ||
-	       len == 2 && ((PL_tokenbuf[0] == 't' && PL_tokenbuf[1] == 'r') ||
-			    (PL_tokenbuf[0] == 'q' &&
-			     strchr("qwxr", PL_tokenbuf[1]))));
+	tmp = ((len == 1 && strchr("msyq", PL_tokenbuf[0])) ||
+	       (len == 2 && ((PL_tokenbuf[0] == 't' && PL_tokenbuf[1] == 'r') ||
+			     (PL_tokenbuf[0] == 'q' &&
+			      strchr("qwxr", PL_tokenbuf[1])))));
 
 	/* x::* is just a word, unless x is "CORE" */
 	if (!tmp && *s == ':' && s[1] == ':' && strNE(PL_tokenbuf, "CORE"))
@@ -3672,7 +3670,7 @@ Perl_yylex(pTHX)
 
 		/* Get the rest if it looks like a package qualifier */
 
-		if (*s == '\'' || *s == ':' && s[1] == ':') {
+		if (*s == '\'' || (*s == ':' && s[1] == ':')) {
 		    STRLEN morelen;
 		    s = scan_word(s, PL_tokenbuf + len, sizeof PL_tokenbuf - len,
 				  TRUE, &morelen);
@@ -3986,7 +3984,7 @@ Perl_yylex(pTHX)
 	    LOP(OP_BIND,XTERM);
 
 	case KEY_binmode:
-	    UNI(OP_BINMODE);
+	    LOP(OP_BINMODE,XTERM);
 
 	case KEY_bless:
 	    LOP(OP_BLESS,XTERM);
@@ -5640,7 +5638,7 @@ S_checkcomma(pTHX_ register char *s, char *name, char *what)
 
 STATIC SV *
 S_new_constant(pTHX_ char *s, STRLEN len, const char *key, SV *sv, SV *pv,
-	       const char *type) 
+	       const char *type)
 {
     dSP;
     HV *table = GvHV(PL_hintgv);		 /* ^H */
@@ -5700,8 +5698,7 @@ S_new_constant(pTHX_ char *s, STRLEN len, const char *key, SV *sv, SV *pv,
     SPAGAIN ;
     
     /* Check the eval first */
-    if (!PL_in_eval && SvTRUE(ERRSV))
-    {
+    if (!PL_in_eval && SvTRUE(ERRSV)) {
 	STRLEN n_a;
  	sv_catpv(ERRSV, "Propagated");
 	yyerror(SvPV(ERRSV, n_a)); /* Duplicates the message inside eval */
@@ -5724,9 +5721,9 @@ S_new_constant(pTHX_ char *s, STRLEN len, const char *key, SV *sv, SV *pv,
  	why2 = key;
  	sv = res;
  	goto report;
-     }
+    }
 
-     return res;
+    return res;
 }
   
 STATIC char *
@@ -5853,7 +5850,7 @@ S_scan_ident(pTHX_ register char *s, register char *send, char *dest, STRLEN des
 	    d++;
 	    if (UTF) {
 		e = s;
-		while (e < send && isALNUM_lazy_if(e,UTF) || *e == ':') {
+		while ((e < send && isALNUM_lazy_if(e,UTF)) || *e == ':') {
 		    e += UTF8SKIP(e);
 		    while (e < send && *e & 0x80 && is_utf8_mark((U8*)e))
 			e += UTF8SKIP(e);
@@ -6684,7 +6681,6 @@ Perl_scan_num(pTHX_ char *start)
     register char *s = start;		/* current position in buffer */
     register char *d;			/* destination in temp buffer */
     register char *e;			/* end of temp buffer */
-    IV tryiv;				/* used to see if it can be an IV */
     NV value;				/* number read, as a double */
     SV *sv = Nullsv;			/* place to put the converted number */
     bool floatit;			/* boolean: int or float? */
@@ -6942,6 +6938,16 @@ Perl_scan_num(pTHX_ char *start)
 	/* make an sv from the string */
 	sv = NEWSV(92,0);
 
+#if ( defined(USE_64_BIT_INT) && \
+	(!defined(HAS_STRTOLL)|| !defined(HAS_STRTOULL))) || \
+    (!defined(USE_64_BIT_INT) && \
+	(!defined(HAS_STRTOL) || !defined(HAS_STRTOUL)))
+
+	/*
+	   No working strto[u]l[l]. Since atoi() doesn't do range checks,
+	   we need to do this the hard way.
+	 */
+
 	value = Atof(PL_tokenbuf);
 
 	/* 
@@ -6954,18 +6960,69 @@ Perl_scan_num(pTHX_ char *start)
 	   Note: if floatit is true, then we don't need to do the
 	   conversion at all.
 	*/
-	tryiv = I_V(value);
-	if (!floatit && (NV)tryiv == value)
-	    sv_setiv(sv, tryiv);
-	else
-	    sv_setnv(sv, value);
+	{
+	    UV tryuv = U_V(value);
+	    if (!floatit && (NV)tryuv == value) {
+		if (tryuv <= IV_MAX)
+		    sv_setiv(sv, (IV)tryuv);
+		else
+		    sv_setuv(sv, tryuv);
+	    }
+	    else
+		sv_setnv(sv, value);
+	}
+#else
+	/*
+	   strtol/strtoll sets errno to ERANGE if the number is too big
+	   for an integer. We try to do an integer conversion first
+	   if no characters indicating "float" have been found.
+	 */
+
+	if (!floatit) {
+	    char *tp;
+    	    IV iv;
+    	    UV uv;
+	    errno = 0;
+#ifdef USE_64_BIT_INT
+	    if (*PL_tokenbuf == '-')
+		iv = strtoll(PL_tokenbuf,&tp,10);
+	    else
+		uv = strtoull(PL_tokenbuf,&tp,10);
+#else
+	    if (*PL_tokenbuf == '-')
+		iv = strtol(PL_tokenbuf,&tp,10);
+	    else
+		uv = strtoul(PL_tokenbuf,&tp,10);
+#endif
+	    if (*tp || errno)
+	    	floatit = TRUE; /* probably just too large */
+	    else if (*PL_tokenbuf == '-')
+	    	sv_setiv(sv, iv);
+	    else
+	    	sv_setuv(sv, uv);
+	}
+	if (floatit) {
+	    char *tp;
+	    errno = 0;
+#ifdef USE_LONG_DOUBLE
+	    value = strtold(PL_tokenbuf,&tp);
+#else
+	    value = strtod(PL_tokenbuf,&tp);
+#endif
+	    if (*tp || errno)
+		Perl_die(aTHX_ "unparseable float");
+	    else
+	    	sv_setnv(sv, value);
+	} 
+#endif
 	if ( floatit ? (PL_hints & HINT_NEW_FLOAT) :
 	               (PL_hints & HINT_NEW_INTEGER) )
 	    sv = new_constant(PL_tokenbuf, d - PL_tokenbuf, 
 			      (floatit ? "float" : "integer"),
 			      sv, Nullsv, NULL);
 	break;
-    /* if it starts with a v, it could be a version number */
+
+    /* if it starts with a v, it could be a v-string */
     case 'v':
 vstring:
 	{

@@ -3,9 +3,9 @@
 *** ERROR: Unknown interior-sequence 'A' at line 30 in file pod/poderrs.t
 *** ERROR: Unknown interior-sequence 'Y' at line 31 in file pod/poderrs.t
 *** ERROR: Unknown interior-sequence 'V' at line 31 in file pod/poderrs.t
-*** WARNING: unterminated B<...> at line 35 in file pod/poderrs.t
-*** WARNING: unterminated I<...> at line 34 in file pod/poderrs.t
-*** WARNING: unterminated C<...> at line 37 in file pod/poderrs.t
+*** ERROR: unterminated B<...> at line 35 in file pod/poderrs.t
+*** ERROR: unterminated I<...> at line 34 in file pod/poderrs.t
+*** ERROR: unterminated C<...> at line 37 in file pod/poderrs.t
 *** WARNING: line containing nothing but whitespace in paragraph at line 45 in file pod/poderrs.t
 *** ERROR: =item without previous =over at line 52 in file pod/poderrs.t
 *** ERROR: =back without previous =over at line 56 in file pod/poderrs.t
@@ -30,4 +30,4 @@
 *** ERROR: unresolved internal link 'abc def' at line 96 in file pod/poderrs.t
 *** ERROR: unresolved internal link 'passwd(5)' at line 103 in file pod/poderrs.t
 *** WARNING: multiple occurence of link target 'oops' at line - in file pod/poderrs.t
-pod/poderrs.t has 22 pod syntax errors.
+pod/poderrs.t has 25 pod syntax errors.

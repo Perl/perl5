@@ -132,11 +132,11 @@ Math::Trig - trigonometric functions
 =head1 SYNOPSIS
 
 	use Math::Trig;
-	
+
 	$x = tan(0.9);
 	$y = acos(3.7);
 	$z = asin(2.4);
-	
+
 	$halfpi = pi/2;
 
 	$rad = deg2rad(120);
@@ -258,7 +258,7 @@ complex numbers as results because the C<Math::Complex> takes care of
 details like for example how to display complex numbers. For example:
 
 	print asin(2), "\n";
-    
+
 should produce something like this (take or leave few last decimals):
 
 	1.5707963267949-1.31695789692482i
@@ -272,10 +272,10 @@ and the imaginary part of approximately C<-1.317>.
 
 	$radians  = deg2rad($degrees);
 	$radians  = grad2rad($gradians);
-	
+
 	$degrees  = rad2deg($radians);
 	$degrees  = grad2deg($gradians);
-	
+
 	$gradians = deg2grad($degrees);
 	$gradians = rad2grad($radians);
 

@@ -22,7 +22,7 @@ Perl_runops_standard(pTHX)
 {
     dTHR;
 
-    while ( PL_op = CALL_FPTR(PL_op->op_ppaddr)(aTHX) ) {
+    while ((PL_op = CALL_FPTR(PL_op->op_ppaddr)(aTHX))) {
 	PERL_ASYNC_CHECK();
     }
 
@@ -53,7 +53,7 @@ Perl_runops_debug(pTHX)
 	    DEBUG_t(debop(PL_op));
 	    DEBUG_P(debprof(PL_op));
 	}
-    } while ( PL_op = CALL_FPTR(PL_op->op_ppaddr)(aTHX) );
+    } while ((PL_op = CALL_FPTR(PL_op->op_ppaddr)(aTHX)));
 
     TAINT_NOT;
     return 0;

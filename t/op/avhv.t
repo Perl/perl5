@@ -1,5 +1,5 @@
 #!./perl
-      
+
 BEGIN {
     chdir 't' if -d 't';
     unshift @INC, '../lib';
@@ -17,7 +17,7 @@ sub STORESIZE { $#{$_[0]} = $_[1]+1 }
 
 package main;
 
-print "1..20\n";
+print "1..28\n";
 
 $sch = {
     'abc' => 1,
@@ -139,3 +139,40 @@ print "ok 19\n";
 
 print "not " unless "$avhv->{bar}" eq "yyy";
 print "ok 20\n";
+
+# hash assignment
+%$avhv = ();
+print "not " unless ref($avhv->[0]) eq 'HASH';
+print "ok 21\n";
+
+%hv = %$avhv;
+print "not " if grep defined, values %hv;
+print "ok 22\n";
+print "not " if grep ref, keys %hv;
+print "ok 23\n";
+
+%$avhv = (foo => 29, pants => 2, bar => 0);
+print "not " unless "@$avhv[1..3]" eq '29 0 2';
+print "ok 24\n";
+
+my $extra;
+my @extra;
+($extra, %$avhv) = ("moo", foo => 42, pants => 53, bar => "HIKE!");
+print "not " unless "@$avhv[1..3]" eq '42 HIKE! 53' and $extra eq 'moo';
+print "ok 25\n";
+
+%$avhv = ();
+(%$avhv, $extra) = (foo => 42, pants => 53, bar => "HIKE!");
+print "not " unless "@$avhv[1..3]" eq '42 HIKE! 53' and !defined $extra;
+print "ok 26\n";
+
+@extra = qw(whatever and stuff);
+%$avhv = ();
+(%$avhv, @extra) = (foo => 42, pants => 53, bar => "HIKE!");
+print "not " unless "@$avhv[1..3]" eq '42 HIKE! 53' and @extra == 0;
+print "ok 27\n";
+
+%$avhv = ();
+(@extra, %$avhv) = (foo => 42, pants => 53, bar => "HIKE!");
+print "not " unless ref $avhv->[0] eq 'HASH' and @extra == 6;
+print "ok 28\n";

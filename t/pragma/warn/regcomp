@@ -6,8 +6,10 @@
   %.*s matches null string many times   	[S_regpiece]
 	$a = "ABC123" ; $a =~ /(?=a)*/'
 
-  /%.127s/: Unrecognized escape \\%c passed through"	[S_regatom] 
+  /%.127s/: Unrecognized escape \\%c passed through	[S_regatom] 
   	$x = '\m' ; /$x/
+
+  Character class [:%.*s:] unknown	[S_regpposixcc]
 
   Character class syntax [. .] is reserved for future extensions [S_regpposixcc]
 
@@ -52,6 +54,7 @@ EXPECT
 /a\m/: Unrecognized escape \m passed through at - line 4.
 ########
 # regcomp.c [S_regpposixcc S_checkposixcc]
+BEGIN { $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3 }
 use warnings 'regexp' ;
 $_ = "" ;
 /[:alpha:]/;
@@ -61,6 +64,7 @@ $_ = "" ;
 /[[.foo.]]/;
 /[[=bar=]]/;
 /[:zog:]/;
+/[[:zog:]]/;
 no warnings 'regexp' ;
 /[:alpha:]/;
 /[.foo.]/;
@@ -68,19 +72,18 @@ no warnings 'regexp' ;
 /[[:alpha:]]/;
 /[[.foo.]]/;
 /[[=bar=]]/;
-/[:zog:]/;
-BEGIN { $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3 }
 /[[:zog:]]/;
+/[:zog:]/;
 EXPECT
-Character class syntax [: :] belongs inside character classes at - line 4.
-Character class syntax [. .] belongs inside character classes at - line 5.
-Character class syntax [. .] is reserved for future extensions at - line 5.
-Character class syntax [= =] belongs inside character classes at - line 6.
-Character class syntax [= =] is reserved for future extensions at - line 6.
-Character class syntax [. .] is reserved for future extensions at - line 8.
-Character class syntax [= =] is reserved for future extensions at - line 9.
-Character class syntax [: :] belongs inside character classes at - line 10.
-Character class [:zog:] unknown at - line 20.
+Character class syntax [: :] belongs inside character classes at - line 5.
+Character class syntax [. .] belongs inside character classes at - line 6.
+Character class syntax [. .] is reserved for future extensions at - line 6.
+Character class syntax [= =] belongs inside character classes at - line 7.
+Character class syntax [= =] is reserved for future extensions at - line 7.
+Character class syntax [. .] is reserved for future extensions at - line 9.
+Character class syntax [= =] is reserved for future extensions at - line 10.
+Character class syntax [: :] belongs inside character classes at - line 11.
+Character class [:zog:] unknown at - line 12.
 ########
 # regcomp.c [S_regclass]
 $_ = "";

@@ -199,12 +199,12 @@ struct block_loop {
 	    : &GvSV((GV*)(c)->blk_loop.iterdata))			\
 	 : (SV**)NULL)
 #  define CX_ITERDATA_SET(cx,idata)					\
-	if (cx->blk_loop.iterdata = (idata))				\
+	if ((cx->blk_loop.iterdata = (idata)))				\
 	    cx->blk_loop.itersave = SvREFCNT_inc(*CxITERVAR(cx));
 #else
 #  define CxITERVAR(c)		((c)->blk_loop.itervar)
 #  define CX_ITERDATA_SET(cx,ivar)					\
-	if (cx->blk_loop.itervar = (SV**)(ivar))			\
+	if ((cx->blk_loop.itervar = (SV**)(ivar)))			\
 	    cx->blk_loop.itersave = SvREFCNT_inc(*CxITERVAR(cx));
 #endif
 

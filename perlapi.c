@@ -103,6 +103,13 @@ Perl_avhv_fetch_ent(pTHXo_ AV *ar, SV* keysv, I32 lval, U32 hash)
     return ((CPerlObj*)pPerl)->Perl_avhv_fetch_ent(ar, keysv, lval, hash);
 }
 
+#undef  Perl_avhv_store_ent
+SV**
+Perl_avhv_store_ent(pTHXo_ AV *ar, SV* keysv, SV* val, U32 hash)
+{
+    return ((CPerlObj*)pPerl)->Perl_avhv_store_ent(ar, keysv, val, hash);
+}
+
 #undef  Perl_avhv_iternext
 HE*
 Perl_avhv_iternext(pTHXo_ AV *ar)
@@ -3902,6 +3909,8 @@ Perl_ptr_table_split(pTHXo_ PTR_TBL_t *tbl)
 #  endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
+#if 0
+#endif
 #  if defined(CRIPPLED_CC)
 #  endif
 #  if defined(PERL_CR_FILTER)

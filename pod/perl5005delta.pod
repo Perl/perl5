@@ -482,10 +482,10 @@ magic lvalue too. For instance, this code now acts differently:
 
 In previous versions, this would print "hello", but it now prints "g'bye".
 
-=head2 E<lt>E<gt> now reads in records
+=head2 <> now reads in records
 
 If C<$/> is a reference to an integer, or a scalar that holds an integer,
-E<lt>E<gt> will read in records instead of lines. For more info, see
+<> will read in records instead of lines. For more info, see
 L<perlvar/$/>.
 
 =head1 Supported Platforms
@@ -759,10 +759,10 @@ only with arrays that have a hash reference at index 0.
 
 =item Can't localize pseudo-hash element
 
-(F) You said something like C<local $ar-E<gt>{'key'}>, where $ar is
+(F) You said something like C<< local $ar->{'key'} >>, where $ar is
 a reference to a pseudo-hash.  That hasn't been implemented yet, but
 you can get a similar effect by localizing the corresponding array
-element directly -- C<local $ar-E<gt>[$ar-E<gt>[0]{'key'}]>.
+element directly -- C<< local $ar->[$ar->[0]{'key'}] >>.
 
 =item Can't use %%! because Errno.pm is not available
 

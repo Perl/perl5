@@ -13,7 +13,7 @@
 /*
  * Package name      : perl5
  * Source directory  : 
- * Configuration time: Tue Jan 18 21:02:27 2000
+ * Configuration time: Sun Mar  5 04:30:31 2000
  * Configured by     : gsar
  * Target system     : 
  */
@@ -293,12 +293,6 @@
  */
 /*#define HAS_LSTAT		/**/
 
-/* HAS_MADVISE:
- *	This symbol, if defined, indicates that the madvise routine is
- *	available to hint about the expected access behavior.
- */
-/*#define HAS_MADVISE		/**/
-
 /* HAS_MBLEN:
  *	This symbol, if defined, indicates that the mblen routine is available
  *	to find the number of bytes in a multibye character.
@@ -350,12 +344,6 @@
  */
 #define HAS_MKDIR		/**/
 
-/* HAS_MKDTEMP:
- *	This symbol, if defined, indicates that the mkdtemp routine is
- *	available to exclusively create a uniquely named temporary directory.
- */
-/*#define HAS_MKDTEMP		/**/
-
 /* HAS_MKFIFO:
  *	This symbol, if defined, indicates that the mkfifo routine is
  *	available to create FIFOs. Otherwise, mknod should be able to
@@ -364,25 +352,23 @@
  */
 /*#define HAS_MKFIFO		/**/
 
-/* HAS_MKSTEMP:
- *	This symbol, if defined, indicates that the mkstemp routine is
- *	available to exclusively create and open a uniquely named
- *	temporary file.
- */
-/*#define HAS_MKSTEMP		/**/
-
-/* HAS_MKSTEMPS:
- *	This symbol, if defined, indicates that the mkstemps routine is
- *	available to exclusively create and open a uniquely named
- *	(with a suffix) temporary file.
- */
-/*#define HAS_MKSTEMPS		/**/
-
 /* HAS_MKTIME:
  *	This symbol, if defined, indicates that the mktime routine is
  *	available.
  */
 #define HAS_MKTIME		/**/
+
+/* HAS_MSYNC:
+ *	This symbol, if defined, indicates that the msync system call is
+ *	available to synchronize a mapped file.
+ */
+/*#define HAS_MSYNC		/**/
+
+/* HAS_MUNMAP:
+ *	This symbol, if defined, indicates that the munmap system call is
+ *	available to unmap a region, usually mapped by mmap().
+ */
+/*#define HAS_MUNMAP		/**/
 
 /* HAS_NICE:
  *	This symbol, if defined, indicates that the nice routine is
@@ -1046,7 +1032,7 @@
 #ifdef HAS_QUAD
 #   define Quad_t __int64	/**/
 #   define Uquad_t unsigned __int64	/**/
-#   define QUADKIND undef	/**/
+#   define QUADKIND 5	/**/
 #   define QUAD_IS_INT	1
 #   define QUAD_IS_LONG	2
 #   define QUAD_IS_LONG_LONG	3
@@ -1086,8 +1072,8 @@
 
 /* MEM_ALIGNBYTES:
  *	This symbol contains the number of bytes required to align a
- *	double. Usual values are 2, 4 and 8. The default is eight,
- *	for safety.
+ *	double, or a long double when applicable. Usual values are 2,
+ *	4 and 8. The default is eight, for safety.
  */
 #if defined(CROSSCOMPILE) || defined(MULTIARCH)
 #  define MEM_ALIGNBYTES 8
@@ -1108,7 +1094,7 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "c:\\perl\\5.5.670\\lib\\MSWin32-x86"		/**/
+#define ARCHLIB "c:\\perl\\5.6.0\\lib\\MSWin32-x86"		/**/
 /*#define ARCHLIB_EXP ""	/**/
 
 /* ARCHNAME:
@@ -1139,8 +1125,8 @@
  *	This symbol is the filename expanded version of the BIN symbol, for
  *	programs that do not want to deal with that at run-time.
  */
-#define BIN "c:\\perl\\5.5.670\\bin\\MSWin32-x86"	/**/
-#define BIN_EXP "c:\\perl\\5.5.670\\bin\\MSWin32-x86"	/**/
+#define BIN "c:\\perl\\5.6.0\\bin\\MSWin32-x86"	/**/
+#define BIN_EXP "c:\\perl\\5.6.0\\bin\\MSWin32-x86"	/**/
 
 /* PERL_BINCOMPAT_5005:
  *	This symbol, if defined, indicates that Perl 5.006 should be
@@ -1200,14 +1186,18 @@
  *	This macro surrounds its token with double quotes.
  */
 #if 42 == 1
-#define CAT2(a,b)a/**/b
-#define STRINGIFY(a)"a"
+#  define CAT2(a,b)	a/**/b
+#  define STRINGIFY(a)	"a"
 		/* If you can get stringification with catify, tell me how! */
 #endif
 #if 42 == 42
-#define CAT2(a,b)a ## b
-#define StGiFy(a)# a
-#define STRINGIFY(a)StGiFy(a)
+#  define PeRl_CaTiFy(a, b)	a ## b	
+#  define PeRl_StGiFy(a)	#a
+/* the additional level of indirection enables these macros to be
+ * used as arguments to other macros.  See K&R 2nd ed., page 231. */
+#  define CAT2(a,b)	PeRl_CaTiFy(a,b)
+#  define StGiFy(a)	PeRl_StGiFy(a)
+#  define STRINGIFY(a)	PeRl_StGiFy(a)
 #endif
 #if 42 != 1 && 42 != 42
 #include "Bletch: How does this C preprocessor catenate tokens?"
@@ -1234,9 +1224,14 @@
  *	available directly to the user. Note that it may well be different from
  *	the preprocessor used to compile the C program.
  */
+/* CPPLAST:
+ *	This symbol is intended to be used along with CPPRUN in the same manner
+ *	symbol CPPMINUS is used with CPPSTDIN. It contains either "-" or "".
+ */
 #define CPPSTDIN "cl -nologo -E"
 #define CPPMINUS ""
 #define CPPRUN "cl -nologo -E"
+#define CPPLAST ""
 
 /* HAS_ACCESS:
  *	This manifest constant lets the C program know that the access()
@@ -1347,6 +1342,11 @@
  */
 #define HAS_FD_SET	/**/
 
+/* HAS_FPOS64_T:
+ *	This symbol will be defined if the C compiler supports fpos64_t.
+ */
+/*#define	HAS_FPOS64_T    	/**/
+
 /* HAS_STRUCT_FS_DATA:
  *	This symbol, if defined, indicates that the struct fs_data
  *	to do statfs() is supported.
@@ -1394,12 +1394,6 @@
  */
 /*#define HAS_GETCWD		/**/
 
-/* HAS_GETFSSTAT:
- *	This symbol, if defined, indicates that the fstatfs routine is
- *	available to stat filesystems in bulk.
- */
-/*#define HAS_GETFSSTAT		/**/
-
 /* HAS_GETGRENT:
  *	This symbol, if defined, indicates that the getgrent routine is
  *	available for sequential access of the group database.
@@ -1441,9 +1435,14 @@
  *	so that it is safe even if used by a process with super-user
  *	privileges.
  */
+/* HAS_PHOSTNAME:
+ *	This symbol, if defined, indicates that the C program may use the
+ *	contents of PHOSTNAME as a command to feed to the popen() routine
+ *	to derive the host name.
+ */
 #define HAS_GETHOSTNAME	/**/
 #define HAS_UNAME		/**/
-#undef HAS_PHOSTNAME
+/*#define HAS_PHOSTNAME	/**/
 #ifdef HAS_PHOSTNAME
 #define PHOSTNAME ""	/* How to get the host name */
 #endif
@@ -1568,6 +1567,9 @@
  *	the GNU C library is being used.
  */
 /*#define HAS_GNULIBC  	/**/
+#if defined(HAS_GNULIBC) && !defined(_GNU_SOURCE)
+#   define _GNU_SOURCE
+#endif
 /* HAS_HASMNTOPT:
  *	This symbol, if defined, indicates that the hasmntopt routine is
  *	available to query the mount options of file systems.
@@ -1598,6 +1600,19 @@
 #define HAS_HTONS		/**/
 #define HAS_NTOHL		/**/
 #define HAS_NTOHS		/**/
+
+/* HAS_ICONV:
+ *	This symbol, if defined, indicates that the iconv routine is
+ *	available to do character set conversions.
+ */
+/*#define HAS_ICONV		/**/
+
+/* HAS_INT64_T:
+ *     This symbol will defined if the C compiler supports int64_t.
+ *     Usually the <inttypes.h> needs to be included, but sometimes
+ *	<sys/types.h> is enough.
+ */
+/*#define     HAS_INT64_T               /**/
 
 /* HAS_ISASCII:
  *	This manifest constant lets the C program know that isascii 
@@ -1647,13 +1662,11 @@
 #define LONGLONGSIZE 8		/**/
 #endif
 
-/* HAS_LSEEK_PROTO:
- *	This symbol, if defined, indicates that the system provides
- *	a prototype for the lseek() function.  Otherwise, it is up
- *	to the program to supply one.  A good guess is
- *		extern off_t lseek _((int, off_t, int));
+/* HAS_MADVISE:
+ *	This symbol, if defined, indicates that the madvise system call is
+ *	available to map a file into memory.
  */
-#define	HAS_LSEEK_PROTO	/**/
+/*#define HAS_MADVISE		/**/
 
 /* HAS_MEMCHR:
  *	This symbol, if defined, indicates that the memchr routine is available
@@ -1661,11 +1674,54 @@
  */
 #define HAS_MEMCHR	/**/
 
+/* HAS_MKDTEMP:
+ *	This symbol, if defined, indicates that the mkdtemp routine is
+ *	available to exclusively create a uniquely named temporary directory.
+ */
+/*#define HAS_MKDTEMP		/**/
+
+/* HAS_MKSTEMP:
+ *	This symbol, if defined, indicates that the mkstemp routine is
+ *	available to exclusively create and open a uniquely named
+ *	temporary file.
+ */
+/*#define HAS_MKSTEMP		/**/
+
+/* HAS_MKSTEMPS:
+ *	This symbol, if defined, indicates that the mkstemps routine is
+ *	available to excluslvely create and open a uniquely named
+ *	(with a suffix) temporary file.
+ */
+/*#define HAS_MKSTEMPS		/**/
+
+/* HAS_MMAP:
+ *	This symbol, if defined, indicates that the mmap system call is
+ *	available to map a file into memory.
+ */
+/* Mmap_t:
+ *	This symbol holds the return type of the mmap() system call
+ *	(and simultaneously the type of the first argument).
+ *	Usually set to 'void *' or 'cadd_t'.
+ */
+/*#define HAS_MMAP		/**/
+#define Mmap_t void *	/**/
+
+/* HAS_MPROTECT:
+ *	This symbol, if defined, indicates that the mprotect system call is
+ *	available to modify the access protection of a memory mapped file.
+ */
+/*#define HAS_MPROTECT		/**/
+
 /* HAS_MSG:
  *	This symbol, if defined, indicates that the entire msg*(2) library is
  *	supported (IPC mechanism based on message queues).
  */
 /*#define HAS_MSG		/**/
+
+/* HAS_OFF64_T:
+ *	This symbol will be defined if the C compiler supports off64_t.
+ */
+/*#define	HAS_OFF64_T    		/**/
 
 /* HAS_OPEN3:
  *	This manifest constant lets the C program know that the three
@@ -1882,12 +1938,6 @@
 /*#define	HAS_MSG_PEEK	/**/
 /*#define	HAS_MSG_PROXY	/**/
 /*#define	HAS_SCM_RIGHTS	/**/
-
-/* Sock_size_t:
- *	This symbol holds the type used for the size argument of
- *	various socket calls (just the base type, not the pointer-to).
- */
-#define Sock_size_t		int /**/
 
 /* HAS_SQRTL:
  *	This symbol, if defined, indicates that the sqrtl routine is
@@ -2200,6 +2250,12 @@
 /*#define I_GRP		/**/
 /*#define GRPASSWD	/**/
 
+/* I_ICONV:
+ *	This symbol, if defined, indicates that <iconv.h> exists and
+ *	should be included.
+ */
+/*#define	I_ICONV		/**/
+
 /* I_INTTYPES:
  *     This symbol, if defined, indicates to the C program that it should
  *     include <inttypes.h>.
@@ -2300,6 +2356,24 @@
  */
 /*#define	I_SOCKS		/**/
 
+/* I_SUNMATH:
+ *	This symbol, if defined, indicates that <sunmath.h> exists and
+ *	should be included.
+ */
+/*#define	I_SUNMATH		/**/
+
+/* I_SYSLOG:
+ *	This symbol, if defined, indicates that <syslog.h> exists and
+ *	should be included.
+ */
+/*#define	I_SYSLOG		/**/
+
+/* I_SYSMODE:
+ *	This symbol, if defined, indicates that <sys/mode.h> exists and
+ *	should be included.
+ */
+/*#define	I_SYSMODE		/**/
+
 /* I_SYS_MOUNT:
  *	This symbol, if defined, indicates that <sys/mount.h> exists and
  *	should be included.
@@ -2322,6 +2396,12 @@
  *	should be included.
  */
 /*#define	I_SYSUIO		/**/
+
+/* I_SYSUTSNAME:
+ *	This symbol, if defined, indicates that <sys/utsname.h> exists and
+ *	should be included.
+ */
+/*#define	I_SYSUTSNAME		/**/
 
 /* I_SYS_VFS:
  *	This symbol, if defined, indicates that <sys/vfs.h> exists and
@@ -2358,16 +2438,13 @@
  *	for a C initialization string.  See the inc_version_list entry
  *	in Porting/Glossary for more details.
  */
-#define PERL_INC_VERSION_LIST 	0	/**/
+#define PERL_INC_VERSION_LIST 0		/**/
 
-/* HAS_OFF64_T:
- *	This symbol will be defined if the C compiler supports off64_t.
+/* INSTALL_USR_BIN_PERL:
+ *	This symbol, if defined, indicates that Perl is to be installed
+ * 	also as /usr/bin/perl.
  */
-/* HAS_FPOS64_T:
- *	This symbol will be defined if the C compiler supports fpos64_t.
- */
-/*#define	HAS_OFF64_T    		/**/
-/*#define	HAS_FPOS64_T    	/**/
+/*#define INSTALL_USR_BIN_PERL	/**/
 
 /* PERL_PRIfldbl:
  *	This symbol, if defined, contains the string used by stdio to
@@ -2529,6 +2606,10 @@
 /* U64SIZE:
  *	This symbol contains the sizeof(U64).
  */
+/* NV_PRESERVES_UV:
+ *	This symbol, if defined, indicates that a variable of type NVTYPE
+ *	can preserve all the bit of a variable of type UVSIZE.
+ */
 #define	IVTYPE		long		/**/
 #define	UVTYPE		unsigned long		/**/
 #define	I8TYPE		char		/**/
@@ -2554,6 +2635,7 @@
 #define	I64SIZE		8	/**/
 #define	U64SIZE		8	/**/
 #endif
+#define	NV_PRESERVES_UV
 
 /* IVdf:
  *	This symbol defines the format string used for printing a Perl IV
@@ -2593,8 +2675,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "c:\\perl\\5.5.670\\lib"		/**/
-#define PRIVLIB_EXP (win32_get_privlib("5.5.670"))	/**/
+#define PRIVLIB "c:\\perl\\5.6.0\\lib"		/**/
+#define PRIVLIB_EXP (win32_get_privlib("5.6.0"))	/**/
 
 /* PTRSIZE:
  *	This symbol contains the size of a pointer, so that the C preprocessor
@@ -2692,7 +2774,7 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "c:\\perl\\site\\5.5.670\\lib\\MSWin32-x86"		/**/
+#define SITEARCH "c:\\perl\\site\\5.6.0\\lib\\MSWin32-x86"		/**/
 /*#define SITEARCH_EXP ""	/**/
 
 /* SITELIB:
@@ -2710,8 +2792,8 @@
  *	This symbol contains the ~name expanded version of SITELIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITELIB "c:\\perl\\site\\5.5.670\\lib"		/**/
-#define SITELIB_EXP (win32_get_sitelib("5.5.670"))	/**/
+#define SITELIB "c:\\perl\\site\\5.6.0\\lib"		/**/
+#define SITELIB_EXP (win32_get_sitelib("5.6.0"))	/**/
 
 /* Size_t:
  *	This symbol holds the type used to declare length parameters
@@ -2766,20 +2848,6 @@
  */
 #define Uid_t uid_t		/* UID type */
 
-/* USE_64_BIT_ALL:
- *	This variable conditionally defines the USE_64_BIT_ALL symbol,
- *	and indicates that 64-bit integer types should be used
- *	when available.  The maximal possible
- *	64-bitness is employed: LP64 or ILP64, meaning that you will
- *	be able to use more than 2 gigabytes of memory.  This mode is
- *	even more binary incompatible than USE_64_BIT_INT. You may not
- *	be able to run the resulting executable in a 32-bit CPU at all or
- *	you may need at least to reboot your OS to 64-bit mode.
- */
-#ifndef USE_64_BIT_ALL
-/*#define	USE_64_BIT_ALL		/**/
-#endif
-
 /* USE_64_BIT_INT:
  *	This symbol, if defined, indicates that 64-bit integers should
  *	be used when available.  If not defined, the native integers
@@ -2788,8 +2856,22 @@
  *	This may mean using for example "long longs", while your memory
  *	may still be limited to 2 gigabytes.
  */
+/* USE_64_BIT_ALL:
+ *	This symbol, if defined, indicates that 64-bit integers should
+ *	be used when available.  If not defined, the native integers
+ *	will be used (be they 32 or 64 bits).  The maximal possible
+ *	64-bitness is employed: LP64 or ILP64, meaning that you will
+ *	be able to use more than 2 gigabytes of memory.  This mode is
+ *	even more binary incompatible than USE_64_BIT_INT. You may not
+ *	be able to run the resulting executable in a 32-bit CPU at all or
+ *	you may need at least to reboot your OS to 64-bit mode.
+ */
 #ifndef USE_64_BIT_INT
 /*#define	USE_64_BIT_INT		/**/
+#endif
+
+#ifndef USE_64_BIT_ALL
+/*#define	USE_64_BIT_ALL		/**/
 #endif
 
 /* USE_LARGE_FILES:
@@ -2808,6 +2890,10 @@
 /*#define	USE_LONG_DOUBLE		/**/
 #endif
 
+/* USE_MORE_BITS:
+ *	This symbol, if defined, indicates that 64-bit interfaces and
+ *	long doubles should be used when available.
+ */
 #ifndef USE_MORE_BITS
 /*#define	USE_MORE_BITS		/**/
 #endif
@@ -2816,7 +2902,7 @@
  *	This symbol, if defined, indicates that Perl should
  *	be built to use multiplicity.
  */
-#ifndef MULTIPLICTY
+#ifndef MULTIPLICITY
 /*#define	MULTIPLICITY		/**/
 #endif
 
@@ -2886,5 +2972,66 @@
 #define void int		/* is void to be avoided? */
 #define M_VOID			/* Xenix strikes again */
 #endif
+
+/* PERL_XS_APIVERSION:
+ *	This variable contains the version of the oldest perl binary
+ *	compatible with the present perl.  perl.c:incpush() and
+ *	lib/lib.pm will automatically search in c:\\perl\\site\\5.6.0\\lib\\MSWin32-x86 for older
+ *	directories across major versions back to xs_apiversion.
+ *	This is only useful if you have a perl library directory tree
+ *	structured like the default one.
+ *	See INSTALL for how this works.
+ *	The versioned site_perl directory was introduced in 5.005,
+ *	so that is the lowest possible value.
+ *	Since this can depend on compile time options (such as
+ *	bincompat) it is set by Configure.  Other non-default sources
+ *	of potential incompatibility, such as multiplicity, threads,
+ *	debugging, 64bits, sfio, etc., are not checked for currently,
+ *	though in principle we could go snooping around in old
+ *	Config.pm files.
+ */
+/* PERL_PM_APIVERSION:
+ *	This variable contains the version of the oldest perl
+ *	compatible with the present perl.  (That is, pure perl modules
+ *	written for pm_apiversion will still work for the current
+ *	version).  perl.c:incpush() and lib/lib.pm will automatically
+ *	search in c:\\perl\\site\\5.6.0\\lib for older directories across major versions
+ *	back to pm_apiversion.  This is only useful if you have a perl
+ *	library directory tree structured like the default one.  The
+ *	versioned site_perl library was introduced in 5.005, so that's
+ *	the default setting for this variable.  It's hard to imagine
+ *	it changing before Perl6.  It is included here for symmetry
+ *	with xs_apiveprsion -- the searching algorithms will
+ *	(presumably) be similar.
+ *	See the INSTALL file for how this works.
+ */
+#define PERL_XS_APIVERSION "5.6.0"
+#define PERL_PM_APIVERSION "5.005"
+
+/* HAS_GETFSSTAT:
+ *	This symbol, if defined, indicates that the getfsstat routine is
+ *	available to stat filesystems in bulk.
+ */
+/*#define HAS_GETFSSTAT		/**/
+
+/* I_IEEEFP:
+ *	This symbol, if defined, indicates that <ieeefp.h> exists and
+ *	should be included.
+ */
+/*#define	I_IEEEFP		/**/
+
+/* HAS_LSEEK_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the lseek() function.  Otherwise, it is up
+ *	to the program to supply one.  A good guess is
+ *		extern off_t lseek(int, off_t, int);
+ */
+#define	HAS_LSEEK_PROTO	/**/
+
+/* Sock_size_t:
+ *	This symbol holds the type used for the size argument of
+ *	various socket calls (just the base type, not the pointer-to).
+ */
+#define Sock_size_t		int /**/
 
 #endif

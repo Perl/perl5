@@ -113,15 +113,15 @@ IPC::Msg - SysV Msg IPC object class
 
     use IPC::SysV qw(IPC_PRIVATE S_IRWXU S_IRWXG S_IRWXO);
     use IPC::Msg;
-    
+
     $msg = new IPC::Msg(IPC_PRIVATE, S_IRWXU | S_IRWXG | S_IRWXO);
-    
+
     $msg->snd(pack("L a*",$msgtype,$msg));
-    
+
     $msg->rcv($buf,256);
-    
+
     $ds = $msg->stat;
-    
+
     $msg->remove;
 
 =head1 DESCRIPTION

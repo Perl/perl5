@@ -24,6 +24,7 @@ Perl_Gv_AMupdate
 Perl_avhv_delete_ent
 Perl_avhv_exists_ent
 Perl_avhv_fetch_ent
+Perl_avhv_store_ent
 Perl_avhv_iternext
 Perl_avhv_iterval
 Perl_avhv_keys

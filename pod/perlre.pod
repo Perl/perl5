@@ -250,7 +250,7 @@ The assumedly non-obviously named classes are:
 Any control character.  Usually characters that don't produce output as
 such but instead control the terminal somehow: for example newline and
 backspace are control characters.  All characters with ord() less than
-32 are most often control classified as characters.
+32 are most often classified as control characters.
 
 =item graph
 
@@ -312,11 +312,11 @@ several patterns that you want to match against consequent substrings
 of your string, see the previous reference.  The actual location
 where C<\G> will match can also be influenced by using C<pos()> as
 an lvalue.  See L<perlfunc/pos>.
-  
+
 The bracketing construct C<( ... )> creates capture buffers.  To
-refer to the digit'th buffer use \E<lt>digitE<gt> within the
+refer to the digit'th buffer use \<digit> within the
 match.  Outside the match use "$" instead of "\".  (The
-\E<lt>digitE<gt> notation works in certain circumstances outside 
+\<digit> notation works in certain circumstances outside 
 the match.  See the warning below about \1 vs $1 for details.)
 Referring back to another part of the match is called a
 I<backreference>.
@@ -337,13 +337,13 @@ Examples:
      if (/(.)\1/) {                 # find first doubled char
          print "'$1' is the first doubled character\n";
      }
- 
+
     if (/Time: (..):(..):(..)/) {   # parse out values
 	$hours = $1;
 	$minutes = $2;
 	$seconds = $3;
     }
-  
+
 Several special variables also refer back to portions of the previous
 match.  C<$+> returns whatever the last bracket match matched.
 C<$&> returns the entire matched string.  (At one point C<$0> did
@@ -373,7 +373,7 @@ other two.
 Backslashed metacharacters in Perl are alphanumeric, such as C<\b>,
 C<\w>, C<\n>.  Unlike some other regular expression languages, there
 are no backslashed symbols that aren't alphanumeric.  So anything
-that looks like \\, \(, \), \E<lt>, \E<gt>, \{, or \} is always
+that looks like \\, \(, \), \<, \>, \{, or \} is always
 interpreted as a literal character, not a metacharacter.  This was
 once used in a common idiom to disable or quote the special meanings
 of regular expression metacharacters in a string that you want to
@@ -496,9 +496,9 @@ Sometimes it's still easier just to say:
 
 For look-behind see below.
 
-=item C<(?E<lt>=pattern)>
+=item C<(?<=pattern)>
 
-A zero-width positive look-behind assertion.  For example, C</(?E<lt>=\t)\w+/>
+A zero-width positive look-behind assertion.  For example, C</(?<=\t)\w+/>
 matches a word that follows a tab, without including the tab in C<$&>.
 Works only for fixed-width look-behind.
 
@@ -597,7 +597,7 @@ The following pattern matches a parenthesized group:
 	     \)
 	  }x;
 
-=item C<(?E<gt>pattern)>
+=item C<< (?>pattern) >>
 
 B<WARNING>: This extended regular expression feature is considered
 highly experimental, and may be changed or deleted without notice.
@@ -610,7 +610,7 @@ construct is useful for optimizations of what would otherwise be
 It may also be useful in places where the "grab all you can, and do not
 give anything back" semantic is desirable.
 
-For example: C<^(?E<gt>a*)ab> will never match, since C<(?E<gt>a*)>
+For example: C<< ^(?>a*)ab >> will never match, since C<< (?>a*) >>
 (anchored at the beginning of string, as above) will match I<all>
 characters C<a> at the beginning of string, leaving no C<a> for
 C<ab> to match.  In contrast, C<a*ab> will match the same as C<a+b>,
@@ -619,10 +619,10 @@ group C<ab> (see L<"Backtracking">).  In particular, C<a*> inside
 C<a*ab> will match fewer characters than a standalone C<a*>, since
 this makes the tail match.
 
-An effect similar to C<(?E<gt>pattern)> may be achieved by writing
+An effect similar to C<< (?>pattern) >> may be achieved by writing
 C<(?=(pattern))\1>.  This matches the same substring as a standalone
 C<a+>, and the following C<\1> eats the matched string; it therefore
-makes a zero-length assertion into an analogue of C<(?E<gt>...)>.
+makes a zero-length assertion into an analogue of C<< (?>...) >>.
 (The difference between these two constructs is that the second one
 uses a capturing group, thus shifting ordinals of backreferences
 in the rest of a regular expression.)
@@ -658,13 +658,13 @@ hung.  However, a tiny change to this pattern
        \) 
      }x
 
-which uses C<(?E<gt>...)> matches exactly when the one above does (verifying
+which uses C<< (?>...) >> matches exactly when the one above does (verifying
 this yourself would be a productive exercise), but finishes in a fourth
 the time when used on a similar string with 1000000 C<a>s.  Be aware,
 however, that this pattern currently triggers a warning message under
 B<-w> saying it C<"matches the null string many times">):
 
-On simple groups, such as the pattern C<(?E<gt> [^()]+ )>, a comparable
+On simple groups, such as the pattern C<< (?> [^()]+ ) >>, a comparable
 effect may be achieved by negative look-ahead, as in C<[^()]+ (?! [^()] )>.
 This was only 4 times slower on a string with 1000000 C<a>s.
 
@@ -907,12 +907,12 @@ then it would take forever--or until you ran out of stack space.
 
 A powerful tool for optimizing such beasts is what is known as an
 "independent group",
-which does not backtrack (see L<C<(?E<gt>pattern)>>).  Note also that
+which does not backtrack (see L<C<< (?>pattern) >>>).  Note also that
 zero-length look-ahead/look-behind assertions will not backtrack to make
 the tail match, since they are in "logical" context: only 
 whether they match is considered relevant.  For an example
 where side-effects of look-ahead I<might> have influenced the
-following match, see L<C<(?E<gt>pattern)>>.
+following match, see L<C<< (?>pattern) >>>.
 
 =head2 Version 8 Regular Expressions
 
@@ -1160,7 +1160,7 @@ Same as C<S{0,1}>, C<S{0,BIG_NUMBER}>, C<S{1,BIG_NUMBER}> respectively.
 
 Same as C<S{0,1}?>, C<S{0,BIG_NUMBER}?>, C<S{1,BIG_NUMBER}?> respectively.
 
-=item C<(?E<gt>S)>
+=item C<< (?>S) >>
 
 Matches the best match for C<S> and only that.
 

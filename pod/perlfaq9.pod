@@ -82,7 +82,7 @@ way is to use HTML::FormatText which not only removes HTML but also
 attempts to do a little simple formatting of the resulting plain text.
 
 Many folks attempt a simple-minded regular expression approach, like
-C<s/E<lt>.*?E<gt>//g>, but that fails in many cases because the tags
+C<< s/<.*?>//g >>, but that fails in many cases because the tags
 may continue over line breaks, they may contain quoted angle-brackets,
 or HTML comment may be present.  Plus folks forget to convert
 entities, like C<&lt;> for example.
@@ -148,7 +148,7 @@ the same as the startform() method.
 
 =head2 How do I make a pop-up menu in HTML?
 
-Use the B<E<lt>SELECTE<gt>> and B<E<lt>OPTIONE<gt>> tags.  The CGI.pm
+Use the B<< <SELECT> >> and B<< <OPTION> >> tags.  The CGI.pm
 module (available from CPAN) supports this widget, as well as many
 others, including some that it cleverly synthesizes on its own.
 
@@ -396,7 +396,7 @@ format after minor transliterations:
 
 =head2 How do I return the user's mail address?
 
-On systems that support getpwuid, the $E<lt> variable and the
+On systems that support getpwuid, the $< variable and the
 Sys::Hostname module (which is part of the standard perl distribution),
 you can probably try using something like this:
 

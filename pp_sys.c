@@ -521,7 +521,7 @@ PP(pp_open)
     if (GvIOp(gv))
 	IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT;
 
-    if (mg = SvTIED_mg((SV*)gv, 'q')) {
+    if ((mg = SvTIED_mg((SV*)gv, 'q'))) {
 	PUSHMARK(SP);
 	XPUSHs(SvTIED_obj((SV*)gv, mg));
 	XPUSHs(sv);
@@ -556,7 +556,7 @@ PP(pp_close)
     else
 	gv = (GV*)POPs;
 
-    if (mg = SvTIED_mg((SV*)gv, 'q')) {
+    if ((mg = SvTIED_mg((SV*)gv, 'q'))) {
 	PUSHMARK(SP);
 	XPUSHs(SvTIED_obj((SV*)gv, mg));
 	PUTBACK;
@@ -797,7 +797,7 @@ PP(pp_untie)
 
     if (ckWARN(WARN_UNTIE)) {
         MAGIC * mg ;
-        if (mg = SvTIED_mg(sv, how)) {
+        if ((mg = SvTIED_mg(sv, how))) {
             if (mg && SvREFCNT(SvRV(mg->mg_obj)) > 1)  
 		Perl_warner(aTHX_ WARN_UNTIE,
 		    "untie attempted while %"UVuf" inner references still exist",
@@ -816,7 +816,7 @@ PP(pp_tied)
     char how = (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV) ? 'P' : 'q';
     MAGIC *mg;
 
-    if (mg = SvTIED_mg(sv, how)) {
+    if ((mg = SvTIED_mg(sv, how))) {
 	SV *osv = SvTIED_obj(sv, mg);
 	if (osv == mg->mg_obj)
 	    osv = sv_mortalcopy(osv);
@@ -1085,7 +1085,7 @@ PP(pp_getc)
     else
 	gv = (GV*)POPs;
 
-    if (mg = SvTIED_mg((SV*)gv, 'q')) {
+    if ((mg = SvTIED_mg((SV*)gv, 'q'))) {
 	I32 gimme = GIMME_V;
 	PUSHMARK(SP);
 	XPUSHs(SvTIED_obj((SV*)gv, mg));
@@ -1309,7 +1309,7 @@ PP(pp_prtf)
     else
 	gv = PL_defoutgv;
 
-    if (mg = SvTIED_mg((SV*)gv, 'q')) {
+    if ((mg = SvTIED_mg((SV*)gv, 'q'))) {
 	if (MARK == ORIGMARK) {
 	    MEXTEND(SP, 1);
 	    ++MARK;
@@ -3459,7 +3459,7 @@ PP(pp_readdir)
 
     if (GIMME == G_ARRAY) {
 	/*SUPPRESS 560*/
-	while (dp = (Direntry_t *)PerlDir_read(IoDIRP(io))) {
+	while ((dp = (Direntry_t *)PerlDir_read(IoDIRP(io)))) {
 #ifdef DIRNAMLEN
 	    sv = newSVpvn(dp->d_name, dp->d_namlen);
 #else
@@ -3618,7 +3618,7 @@ PP(pp_fork)
 	RETSETUNDEF;
     if (!childpid) {
 	/*SUPPRESS 560*/
-	if (tmpgv = gv_fetchpv("$", TRUE, SVt_PV))
+	if ((tmpgv = gv_fetchpv("$", TRUE, SVt_PV)))
 	    sv_setiv(GvSV(tmpgv), (IV)PerlProc_getpid());
 	hv_clear(PL_pidstatus);	/* no kids, so don't wait for 'em */
     }
@@ -4035,7 +4035,6 @@ PP(pp_gmtime)
     EXTEND(SP, 9);
     EXTEND_MORTAL(9);
     if (GIMME != G_ARRAY) {
-	dTARGET;
 	SV *tsv;
 	if (!tmbuf)
 	    RETPUSHUNDEF;
@@ -4993,7 +4992,6 @@ PP(pp_syscall)
     unsigned long a[20];
     register I32 i = 0;
     I32 retval = -1;
-    MAGIC *mg;
     STRLEN n_a;
 
     if (PL_tainting) {

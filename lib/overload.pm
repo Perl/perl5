@@ -1,5 +1,7 @@
 package overload;
 
+$overload::hint_bits = 0x20000;
+
 sub nil {}
 
 sub OVERLOAD {
@@ -129,7 +131,7 @@ sub constant {
   # Arguments: what, sub
   while (@_) {
     $^H{$_[0]} = $_[1];
-    $^H |= $constants{$_[0]} | 0x20000;
+    $^H |= $constants{$_[0]} | $overload::hint_bits;
     shift, shift;
   }
 }
@@ -1029,7 +1031,7 @@ circumscribed octagon using the above package:
   my $iter = 1;			# 2**($iter+2) = 8
   my $side = new symbolic 1;
   my $cnt = $iter;
-  
+
   while ($cnt--) {
     $side = (sqrt(1 + $side**2) - 1)/$side;
   }
@@ -1154,7 +1156,7 @@ Use this module like this:
   my $iter = new symbolic 2;	# 16-gon
   my $side = new symbolic 1;
   my $cnt = $iter;
-  
+
   while ($cnt) {
     $cnt = $cnt - 1;		# Mutator `--' not implemented
     $side = (sqrt(1 + $side**2) - 1)/$side;

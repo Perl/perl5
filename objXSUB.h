@@ -47,6 +47,10 @@
 #define Perl_avhv_fetch_ent	pPerl->Perl_avhv_fetch_ent
 #undef  avhv_fetch_ent
 #define avhv_fetch_ent		Perl_avhv_fetch_ent
+#undef  Perl_avhv_store_ent
+#define Perl_avhv_store_ent	pPerl->Perl_avhv_store_ent
+#undef  avhv_store_ent
+#define avhv_store_ent		Perl_avhv_store_ent
 #undef  Perl_avhv_iternext
 #define Perl_avhv_iternext	pPerl->Perl_avhv_iternext
 #undef  avhv_iternext
@@ -2186,6 +2190,8 @@
 #  endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
+#if 0
+#endif
 #  if defined(CRIPPLED_CC)
 #  endif
 #  if defined(PERL_CR_FILTER)

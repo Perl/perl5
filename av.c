@@ -60,7 +60,7 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 {
     dTHR;			/* only necessary if we have to extend stack */
     MAGIC *mg;
-    if (mg = SvTIED_mg((SV*)av, 'P')) {
+    if ((mg = SvTIED_mg((SV*)av, 'P'))) {
 	dSP;
 	ENTER;
 	SAVETMPS;
@@ -241,8 +241,6 @@ SV**
 Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
 {
     SV** ary;
-    U32  fill;
-
 
     if (!av)
 	return 0;
@@ -419,7 +417,7 @@ Perl_av_clear(pTHX_ register AV *av)
 	    ary[key] = &PL_sv_undef;
 	}
     }
-    if (key = AvARRAY(av) - AvALLOC(av)) {
+    if ((key = AvARRAY(av) - AvALLOC(av))) {
 	AvMAX(av) += key;
 	SvPVX(av) = (char*)AvALLOC(av);
     }
@@ -481,7 +479,7 @@ Perl_av_push(pTHX_ register AV *av, SV *val)
     if (SvREADONLY(av))
 	Perl_croak(aTHX_ PL_no_modify);
 
-    if (mg = SvTIED_mg((SV*)av, 'P')) {
+    if ((mg = SvTIED_mg((SV*)av, 'P'))) {
 	dSP;
 	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
@@ -517,7 +515,7 @@ Perl_av_pop(pTHX_ register AV *av)
 	return &PL_sv_undef;
     if (SvREADONLY(av))
 	Perl_croak(aTHX_ PL_no_modify);
-    if (mg = SvTIED_mg((SV*)av, 'P')) {
+    if ((mg = SvTIED_mg((SV*)av, 'P'))) {
 	dSP;    
 	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
@@ -562,7 +560,7 @@ Perl_av_unshift(pTHX_ register AV *av, register I32 num)
     if (SvREADONLY(av))
 	Perl_croak(aTHX_ PL_no_modify);
 
-    if (mg = SvTIED_mg((SV*)av, 'P')) {
+    if ((mg = SvTIED_mg((SV*)av, 'P'))) {
 	dSP;
 	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
@@ -621,7 +619,7 @@ Perl_av_shift(pTHX_ register AV *av)
 	return &PL_sv_undef;
     if (SvREADONLY(av))
 	Perl_croak(aTHX_ PL_no_modify);
-    if (mg = SvTIED_mg((SV*)av, 'P')) {
+    if ((mg = SvTIED_mg((SV*)av, 'P'))) {
 	dSP;
 	PUSHSTACKi(PERLSI_MAGIC);
 	PUSHMARK(SP);
@@ -671,7 +669,7 @@ Perl_av_fill(pTHX_ register AV *av, I32 fill)
 	Perl_croak(aTHX_ "panic: null array");
     if (fill < 0)
 	fill = -1;
-    if (mg = SvTIED_mg((SV*)av, 'P')) {
+    if ((mg = SvTIED_mg((SV*)av, 'P'))) {
 	dSP;            
 	ENTER;
 	SAVETMPS;
@@ -805,6 +803,20 @@ S_avhv_index_sv(pTHX_ SV* sv)
     return index;    
 }
 
+STATIC I32
+S_avhv_index(pTHX_ AV *av, SV *keysv, U32 hash)
+{
+    HV *keys;
+    HE *he;
+    STRLEN n_a;
+
+    keys = avhv_keys(av);
+    he = hv_fetch_ent(keys, keysv, FALSE, hash);
+    if (!he)
+        Perl_croak(aTHX_ "No such pseudo-hash field \"%s\"", SvPV(keysv,n_a));
+    return avhv_index_sv(HeVAL(he));
+}
+
 HV*
 Perl_avhv_keys(pTHX_ AV *av)
 {
@@ -824,17 +836,15 @@ Perl_avhv_keys(pTHX_ AV *av)
 }
 
 SV**
+Perl_avhv_store_ent(pTHX_ AV *av, SV *keysv, SV *val, U32 hash)
+{
+    return av_store(av, avhv_index(av, keysv, hash), val);
+}
+
+SV**
 Perl_avhv_fetch_ent(pTHX_ AV *av, SV *keysv, I32 lval, U32 hash)
 {
-    SV **indsvp;
-    HV *keys = avhv_keys(av);
-    HE *he;
-    STRLEN n_a;
-   
-    he = hv_fetch_ent(keys, keysv, FALSE, hash);
-    if (!he)
-        Perl_croak(aTHX_ "No such pseudo-hash field \"%s\"", SvPV(keysv,n_a));
-    return av_fetch(av, avhv_index_sv(HeVAL(he)), lval);
+    return av_fetch(av, avhv_index(av, keysv, hash), lval);
 }
 
 SV *

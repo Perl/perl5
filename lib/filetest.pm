@@ -5,7 +5,7 @@ package filetest;
 filetest - Perl pragma to control the filetest permission operators
 
 =head1 SYNOPSIS
-    
+
     $can_perhaps_read = -r "file";	# use the mode bits
     {
         use filetest 'access';		# intuit harder
@@ -47,9 +47,11 @@ operators is a filename, not when it is a filehandle.
 
 =cut
 
+$filetest::hint_bits = 0x00400000;
+
 sub import {
     if ( $_[1] eq 'access' ) {
-	$^H |= 0x00400000;
+	$^H |= $filetest::hint_bits;
     } else {
 	die "filetest: the only implemented subpragma is 'access'.\n";
     }
@@ -57,7 +59,7 @@ sub import {
 
 sub unimport {
     if ( $_[1] eq 'access' ) {
-	$^H &= ~0x00400000;
+	$^H &= ~$filetest::hint_bits;
     } else {
 	die "filetest: the only implemented subpragma is 'access'.\n";
     }

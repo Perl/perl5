@@ -37,8 +37,8 @@ my @patches;
 while (<PATCH_LEVEL>) {
     last if /^\s*}/;
     chomp;
-    s/^\s+,?"?//;
-    s/"?,?$//;
+    s/^\s+,?\s*"?//;
+    s/"?\s*,?$//;
     s/(['\\])/\\$1/g;
     push @patches, $_ unless $_ eq 'NULL';
 }

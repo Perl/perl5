@@ -2281,7 +2281,7 @@ sub cookie {
     push(@param,'-expires'=>$expires) if $expires;
     push(@param,'-secure'=>$secure) if $secure;
 
-    return new CGI::Cookie(@param);
+    return CGI::Cookie->new(@param);
 }
 END_OF_FUNC
 
@@ -3830,7 +3830,7 @@ a short example of creating multiple session records:
 The file format used for save/restore is identical to that used by the
 Whitehead Genome Center's data exchange format "Boulderio", and can be
 manipulated and even databased using Boulderio utilities.  See
-	
+
   http://stein.cshl.org/boulder/
 
 for further details.
@@ -4069,7 +4069,7 @@ input, this should work:
 
    use CGI qw(-no_debug :standard);
    restore_parameters(join('&',@ARGV));
-  
+
 See the section on debugging for more details.
 
 =item -private_tempfiles
@@ -4616,7 +4616,7 @@ and values of the associative array become the HTML tag's attributes:
       "Open a new frame");
 
 	    <A HREF="fred.html",TARGET="_new">Open a new frame</A>
-   
+
 You may dispense with the dashes in front of the attribute names if
 you prefer:
 
@@ -4634,7 +4634,7 @@ Prior to CGI.pm version 2.41, providing an empty ('') string as an
 attribute argument was the same as providing undef.  However, this has
 changed in order to accommodate those who want to create tags of the form 
 <IMG ALT="">.  The difference is shown in these two pieces of code:
-  
+
    CODE                   RESULT
    img({alt=>undef})      <IMG ALT>
    img({alt=>''})         <IMT ALT="">
@@ -4768,7 +4768,7 @@ autoEscape() method with a false value immediately after creating the CGI object
 
    $query = new CGI;
    $query->autoEscape(undef);
-			     
+
 
 =head2 CREATING AN ISINDEX TAG
 
@@ -4798,7 +4798,7 @@ default is to process the query with the current script.
 
 startform() will return a <FORM> tag with the optional method,
 action and form encoding that you specify.  The defaults are:
-	
+
     method: POST
     action: this script
     enctype: application/x-www-form-urlencoded
@@ -5242,7 +5242,7 @@ handlers are called.
    print $query->checkbox_group(-name=>'group_name',
 				-values=>['eenie','meenie','minie','moe'],
 				-rows=2,-columns=>2);
-    
+
 
 checkbox_group() creates a list of checkboxes that are related
 by the same name.
@@ -5780,7 +5780,7 @@ documentation in Netscape's home pages for details
 =item 2. Specify the destination for the document in the HTTP header
 
 You may provide a B<-target> parameter to the header() method:
-   
+
     print $q->header(-target=>'ResultsWindow');
 
 This will tell the browser to load the output of your script into the
@@ -5917,7 +5917,7 @@ name/value pairs formatted nicely as a nested list.  This is useful
 for debugging purposes:
 
     print $query->dump
-    
+
 
 Produces something that looks like:
 
@@ -6162,7 +6162,7 @@ a second, and begins again.
 =over 4
 
 =item multipart_init()
-     
+
   multipart_init(-boundary=>$boundary);
 
 Initialize the multipart system.  The -boundary argument specifies
@@ -6379,9 +6379,9 @@ for suggestions and bug fixes.
 
 
 	#!/usr/local/bin/perl
-     
+
 	use CGI;
- 
+
 	$query = new CGI;
 
 	print $query->header;
@@ -6391,35 +6391,35 @@ for suggestions and bug fixes.
 	&do_work($query);
 	&print_tail;
 	print $query->end_html;
- 
+
 	sub print_prompt {
 	   my($query) = @_;
- 
+
 	   print $query->startform;
 	   print "<EM>What's your name?</EM><BR>";
 	   print $query->textfield('name');
 	   print $query->checkbox('Not my real name');
- 
+
 	   print "<P><EM>Where can you find English Sparrows?</EM><BR>";
 	   print $query->checkbox_group(
 				 -name=>'Sparrow locations',
 				 -values=>[England,France,Spain,Asia,Hoboken],
 				 -linebreak=>'yes',
 				 -defaults=>[England,Asia]);
- 
+
 	   print "<P><EM>How far can they fly?</EM><BR>",
 		$query->radio_group(
 			-name=>'how far',
 			-values=>['10 ft','1 mile','10 miles','real far'],
 			-default=>'1 mile');
- 
+
 	   print "<P><EM>What's your favorite color?</EM>  ";
 	   print $query->popup_menu(-name=>'Color',
 				    -values=>['black','brown','red','yellow'],
 				    -default=>'red');
- 
+
 	   print $query->hidden('Reference','Monty Python and the Holy Grail');
- 
+
 	   print "<P><EM>What have you got there?</EM><BR>";
 	   print $query->scrolling_list(
 			 -name=>'possessions',
@@ -6427,19 +6427,19 @@ for suggestions and bug fixes.
 				   'A Sword','A Ticket'],
 			 -size=>5,
 			 -multiple=>'true');
- 
+
 	   print "<P><EM>Any parting comments?</EM><BR>";
 	   print $query->textarea(-name=>'Comments',
 				  -rows=>10,
 				  -columns=>50);
- 
+
 	   print "<P>",$query->reset;
 	   print $query->submit('Action','Shout');
 	   print $query->submit('Action','Scream');
 	   print $query->endform;
 	   print "<HR>\n";
 	}
- 
+
 	sub do_work {
 	   my($query) = @_;
 	   my(@values,$key);
@@ -6452,7 +6452,7 @@ for suggestions and bug fixes.
 	      print join(", ",@values),"<BR>\n";
 	  }
 	}
- 
+
 	sub print_tail {
 	   print <<END;
 	<HR>

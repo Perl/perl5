@@ -347,7 +347,7 @@ listening for more connections on a listen socket
 
     $lsn = new IO::Socket::INET(Listen => 1, LocalPort => 8080);
     $sel = new IO::Select( $lsn );
-    
+
     while(@ready = $sel->can_read) {
         foreach $fh (@ready) {
             if($fh == $lsn) {

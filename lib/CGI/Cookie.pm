@@ -343,7 +343,7 @@ can iterate through the cookies this way:
 
 In a scalar context, fetch() returns a hash reference, which may be more
 efficient if you are manipulating multiple cookies.
-    
+
 CGI.pm uses the URL escaping methods to save and restore reserved characters
 in its cookies.  If you are trying to retrieve a cookie set by a foreign server,
 this escaping method may trip you up.  Use raw_fetch() instead, which has the
@@ -414,5 +414,5 @@ This section intentionally left blank.
 =head1 SEE ALSO
 
 L<CGI::Carp>, L<CGI>
- 
+
 =cut

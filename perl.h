@@ -151,6 +151,14 @@ functions are now member functions of the PERL_OBJECT.
 
 */
 
+#ifndef NEXT30_NO_ATTRIBUTE
+#  ifndef HASATTRIBUTE       /* disable GNU-cc attribute checking? */
+#    ifdef  __attribute__      /* Avoid possible redefinition errors */
+#      undef  __attribute__
+#    endif
+#    define __attribute__(attr)
+#  endif
+#endif
 
 class CPerlObj;
 
@@ -221,7 +229,7 @@ struct perl_thread;
 #endif
 
 #define NOOP (void)0
-#define dNOOP extern int Perl___notused
+#define dNOOP extern int __attribute__ ((unused)) Perl___notused
 
 #ifndef pTHX
 #  define pTHX		void
@@ -1135,6 +1143,9 @@ typedef UVTYPE UV;
 
 typedef NVTYPE NV;
 
+#ifdef I_IEEEFP
+#   include <ieeefp.h>
+#endif
 
 #ifdef USE_LONG_DOUBLE
 #   ifdef I_SUNMATH
@@ -2661,15 +2672,6 @@ typedef void *Thread;
 #  define PERL_CALLCONV
 #endif 
 
-#ifndef NEXT30_NO_ATTRIBUTE
-#  ifndef HASATTRIBUTE       /* disable GNU-cc attribute checking? */
-#    ifdef  __attribute__      /* Avoid possible redefinition errors */
-#      undef  __attribute__
-#    endif
-#    define __attribute__(attr)
-#  endif
-#endif
-
 #ifdef PERL_OBJECT
 #  define PERL_DECL_PROT
 #endif
@@ -3073,6 +3075,9 @@ typedef struct am_table_short AMTS;
 #endif /* !USE_LOCALE_NUMERIC */
 
 #if !defined(Atol) && defined(IV_IS_QUAD) && QUADKIND == QUAD_IS_LONG_LONG
+#    ifdef __hpux
+#        define strtoll __strtoll	/* secret handshake */
+#    endif
 #   if !defined(Atol) && defined(HAS_STRTOLL)
 #       define Atol(s) strtoll(s, (char**)NULL, 10)
 #   endif
@@ -3086,6 +3091,9 @@ typedef struct am_table_short AMTS;
 #endif
 
 #if !defined(Strtoul) && defined(UV_IS_QUAD) && QUADKIND == QUAD_IS_LONG_LONG
+#    ifdef __hpux
+#        define strtoull __strtoull	/* secret handshake */
+#    endif
 #    if !defined(Strtoul) && defined(HAS_STRTOULL)
 #       define Strtoul strtoull
 #    endif

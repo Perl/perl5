@@ -1,7 +1,7 @@
 =head1 NAME
 
 perlfilter - Source Filters
- 
+
 
 =head1 DESCRIPTION
 
@@ -198,7 +198,7 @@ going to this trouble is when writing a source scrambler. The
 C<decrypt> filter (which unscrambles the source before Perl parses it)
 included with the source filter distribution is an example of a C
 source filter (see Decryption Filters, below).
- 
+
 
 =over 5
 

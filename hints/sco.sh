@@ -181,6 +181,13 @@ shift
 libswanted="$*"
 
 ###############################################################
+# Remove libbind because it conflicts with libsocket.
+libswanted=`echo " $libswanted " | sed -e 's/ bind / /'`
+set X $libswanted
+shift
+libswanted="$*"
+
+###############################################################
 # Try to use libintl.a since it has strcoll and strxfrm
 libswanted="intl $libswanted"
 

@@ -555,9 +555,9 @@ change)
     package CLIENT;
     use DB;
     @ISA = qw(DB);
-    
+
     # these (inherited) methods can be called by the client
-    
+
     CLIENT->register()      # register a client package name
     CLIENT->done()          # de-register from the debugging API
     CLIENT->skippkg('hide::hide')  # ask DB not to stop in this package
@@ -585,7 +585,7 @@ change)
     # These methods will be called at the appropriate times.
     # Stub versions provided do nothing.
     # None of these can block.
-    
+
     CLIENT->init()          # called when debug API inits itself
     CLIENT->stop(FILE,LINE) # when execution stops
     CLIENT->idle()          # while stopped (can be a client event loop)

@@ -1044,7 +1044,7 @@ Perl_newHVhv(pTHX_ HV *ohv)
 	
 	/* Slow way */
 	hv_iterinit(ohv);
-	while (entry = hv_iternext(ohv)) {
+	while ((entry = hv_iternext(ohv))) {
 	    hv_store(hv, HeKEY(entry), HeKLEN(entry), 
 		     SvREFCNT_inc(HeVAL(entry)), HeHASH(entry));
 	}
@@ -1238,7 +1238,7 @@ Perl_hv_iternext(pTHX_ HV *hv)
     xhv = (XPVHV*)SvANY(hv);
     oldentry = entry = xhv->xhv_eiter;
 
-    if (mg = SvTIED_mg((SV*)hv, 'P')) {
+    if ((mg = SvTIED_mg((SV*)hv, 'P'))) {
 	SV *key = sv_newmortal();
 	if (entry) {
 	    sv_setsv(key, HeSVKEY_force(entry));

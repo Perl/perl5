@@ -859,7 +859,7 @@ PP(pp_sort)
     up = myorigmark + 1;
     while (MARK < SP) {	/* This may or may not shift down one here. */
 	/*SUPPRESS 560*/
-	if (*up = *++MARK) {			/* Weed out nulls. */
+	if ((*up = *++MARK)) {			/* Weed out nulls. */
 	    SvTEMP_off(*up);
 	    if (!PL_sortcop && !SvPOK(*up)) {
 		STRLEN n_a;
@@ -1238,7 +1238,6 @@ Perl_dounwind(pTHX_ I32 cxix)
 {
     dTHR;
     register PERL_CONTEXT *cx;
-    SV **newsp;
     I32 optype;
 
     while (cxstack_ix > cxix) {
@@ -1322,7 +1321,6 @@ Perl_qerror(pTHX_ SV *err)
 OP *
 Perl_die_where(pTHX_ char *message, STRLEN msglen)
 {
-    dSP;
     STRLEN n_a;
     if (PL_in_eval) {
 	I32 cxix;
@@ -2053,7 +2051,7 @@ S_dofindlabel(pTHX_ OP *o, char *label, OP **opstack, OP **oplimit)
 		 (ops[-1]->op_type != OP_NEXTSTATE &&
 		  ops[-1]->op_type != OP_DBSTATE)))
 		*ops++ = kid;
-	    if (o = dofindlabel(kid, label, ops, oplimit))
+	    if ((o = dofindlabel(kid, label, ops, oplimit)))
 		return o;
 	}
     }
@@ -2147,7 +2145,6 @@ PP(pp_goto)
 	    }
 	    else if (CvXSUB(cv)) {	/* put GvAV(defgv) back onto stack */
 		AV* av;
-		int i;
 #ifdef USE_THREADS
 		av = (AV*)PL_curpad[0];
 #else
@@ -2600,7 +2597,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
     I32 gimme = 0;   /* SUSPECT - INITIALZE TO WHAT?  NI-S */
     I32 optype;
     OP dummy;
-    OP *oop = PL_op, *rop;
+    OP *rop;
     char tbuf[TYPE_DIGITS(long) + 12 + 10];
     char *tmpbuf = tbuf;
     char *safestr;
@@ -3997,7 +3994,7 @@ S_qsortsv(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t compare)
                on the correct side of the partition. If I find a greater
                value, then stop the scan.
             */
-            while (still_work_on_left = (u_right >= part_left)) {
+            while ((still_work_on_left = (u_right >= part_left))) {
                s = qsort_cmp(u_right, pc_left);
                if (s < 0) {
                   --u_right;
@@ -4018,7 +4015,7 @@ S_qsortsv(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t compare)
 
             /* Do a mirror image scan of uncompared values on the right
             */
-            while (still_work_on_right = (u_left <= part_right)) {
+            while ((still_work_on_right = (u_left <= part_right))) {
                s = qsort_cmp(pc_right, u_left);
                if (s < 0) {
                   ++u_left;

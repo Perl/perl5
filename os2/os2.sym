@@ -5,6 +5,7 @@ OS2_Perl_data
 dlopen
 dlsym
 dlerror
+dlclose
 my_tmpfile
 my_tmpnam
 my_flock

@@ -298,7 +298,7 @@ the string being unpacked.  See L<perlfunc/pack>.
 
 =item <> should be quotes
 
-(F) You wrote C<require E<lt>fileE<gt>> when you should have written
+(F) You wrote C<< require <file> >> when you should have written
 C<require 'file'>.
 
 =item accept() on closed socket %s
@@ -771,7 +771,7 @@ your sysadmin why he and/or she removed it.
 (F) This machine doesn't have either waitpid() or wait4(), so only waitpid()
 without flags is emulated.
 
-=item Can't do {n,m} with n E<gt> m
+=item Can't do {n,m} with n > m
 
 (F) Minima must be less than or equal to maxima.  If you really want
 your regexp to match something 0 times, just put {0}.  See L<perlre>.
@@ -897,10 +897,10 @@ package name.
 
 =item Can't localize pseudo-hash element
 
-(F) You said something like C<local $ar-E<gt>{'key'}>, where $ar is
+(F) You said something like C<< local $ar->{'key'} >>, where $ar is
 a reference to a pseudo-hash.  That hasn't been implemented yet, but
 you can get a similar effect by localizing the corresponding array
-element directly -- C<local $ar-E<gt>[$ar-E<gt>[0]{'key'}]>.
+element directly -- C<< local $ar->[$ar->[0]{'key'}] >>.
 
 =item Can't locate auto/%s.al in @INC
 
@@ -956,7 +956,7 @@ buffer.
 
 =item Can't open %s: %s
 
-(S inplace) The implicit opening of a file through use of the C<E<lt>E<gt>>
+(S inplace) The implicit opening of a file through use of the C<< <> >>
 filehandle, either implicitly under the C<-n> or C<-p> command-line
 switches, or explicitly, failed for the indicated reason.  Usually this
 is because you don't have read permission for a file which you named
@@ -966,24 +966,24 @@ on the command line.
 
 (W pipe) You tried to say C<open(CMD, "|cmd|")>, which is not supported.  You can
 try any of several modules in the Perl library to do this, such as
-IPC::Open2.  Alternately, direct the pipe's output to a file using "E<gt>",
+IPC::Open2.  Alternately, direct the pipe's output to a file using ">",
 and then read it in under a different file handle.
 
 =item Can't open error file %s as stderr
 
 (F) An error peculiar to VMS.  Perl does its own command line redirection, and
-couldn't open the file specified after '2E<gt>' or '2E<gt>E<gt>' on the
+couldn't open the file specified after '2>' or '2>>' on the
 command line for writing.
 
 =item Can't open input file %s as stdin
 
 (F) An error peculiar to VMS.  Perl does its own command line redirection, and
-couldn't open the file specified after 'E<lt>' on the command line for reading.
+couldn't open the file specified after '<' on the command line for reading.
 
 =item Can't open output file %s as stdout
 
 (F) An error peculiar to VMS.  Perl does its own command line redirection, and
-couldn't open the file specified after 'E<gt>' or 'E<gt>E<gt>' on the command
+couldn't open the file specified after '>' or '>>' on the command
 line for writing.
 
 =item Can't open output pipe (name: %s)
@@ -1090,7 +1090,7 @@ provide symbolic names for C<$!> errno values.
 =item Can't use "my %s" in sort comparison
 
 (F) The global variables $a and $b are reserved for sort comparisons.
-You mentioned $a or $b in the same line as the E<lt>=E<gt> or cmp operator,
+You mentioned $a or $b in the same line as the <=> or cmp operator,
 and the variable had earlier been declared as a lexical variable.
 Either qualify the sort variable with the package name, or rename the
 lexical variable.
@@ -1208,7 +1208,7 @@ backslash: "\[=" and "=\]".
 not realizing that 777 will be interpreted as a decimal number, equivalent
 to 01411.  Octal constants are introduced with a leading 0 in Perl, as in C.
 
-=item Close on unopened file E<lt>%sE<gt>
+=item Close on unopened file <%s>
 
 (W unopened) You tried to close a filehandle that was never opened.
 
@@ -1304,7 +1304,7 @@ just use C<if (%hash) { # not empty }> for example.
 
 =item Delimiter for here document is too long
 
-(F) In a here document construct like C<E<lt>E<lt>FOO>, the label
+(F) In a here document construct like C<<<FOO>, the label
 C<FOO> is too long for Perl to handle.  You have to be seriously
 twisted to write code that triggers this error.
 
@@ -1480,16 +1480,16 @@ the FileHandle package.
 
 (W io) You tried to write on a read-only filehandle.  If you
 intended it to be a read-write filehandle, you needed to open it with
-"+E<lt>" or "+E<gt>" or "+E<gt>E<gt>" instead of with "E<lt>" or nothing.  If
-you intended only to write the file, use "E<gt>" or "E<gt>E<gt>".  See
+"+<" or "+>" or "+>>" instead of with "<" or nothing.  If
+you intended only to write the file, use ">" or ">>".  See
 L<perlfunc/open>.
 
 =item Filehandle %s opened only for output
 
 (W io) You tried to read from a filehandle opened only for writing.  If you
 intended it to be a read/write filehandle, you needed to open it with
-"+E<lt>" or "+E<gt>" or "+E<gt>E<gt>" instead of with "E<lt>" or nothing.  If
-you intended only to read from the file, use "E<lt>".  See
+"+<" or "+>" or "+>>" instead of with "<" or nothing.  If
+you intended only to read from the file, use "<".  See
 L<perlfunc/open>.
 
 =item Final $ should be \$ or $name
@@ -1561,7 +1561,7 @@ C<getpwnam> operator returned an invalid UIC.
 =item glob failed (%s)
 
 (W glob) Something went wrong with the external program(s) used for C<glob>
-and C<E<lt>*.cE<gt>>.  Usually, this means that you supplied a C<glob>
+and C<< <*.c> >>.  Usually, this means that you supplied a C<glob>
 pattern that caused the external program to fail and exit with a nonzero
 status.  If the message indicates that the abnormal exit resulted in a
 coredump, this may also mean that your csh (C shell) is broken.  If so,
@@ -2003,28 +2003,28 @@ but for some reason the perl5db.pl file (or some facsimile thereof)
 didn't define a DB::sub routine to be called at the beginning of each
 ordinary subroutine call.
 
-=item No error file after 2E<gt> or 2E<gt>E<gt> on command line
+=item No error file after 2> or 2>> on command line
 
 (F) An error peculiar to VMS.  Perl handles its own command line redirection,
-and found a '2E<gt>' or a '2E<gt>E<gt>' on the command line, but can't find
+and found a '2>' or a '2>>' on the command line, but can't find
 the name of the file to which to write data destined for stderr.
 
-=item No input file after E<lt> on command line
+=item No input file after < on command line
 
 (F) An error peculiar to VMS.  Perl handles its own command line redirection,
-and found a 'E<lt>' on the command line, but can't find the name of the file
+and found a '<' on the command line, but can't find the name of the file
 from which to read data for stdin.
 
-=item No output file after E<gt> on command line
+=item No output file after > on command line
 
 (F) An error peculiar to VMS.  Perl handles its own command line redirection,
-and found a lone 'E<gt>' at the end of the command line, so it doesn't know
+and found a lone '>' at the end of the command line, so it doesn't know
 where you wanted to redirect stdout.
 
-=item No output file after E<gt> or E<gt>E<gt> on command line
+=item No output file after > or >> on command line
 
 (F) An error peculiar to VMS.  Perl handles its own command line redirection,
-and found a 'E<gt>' or a 'E<gt>E<gt>' on the command line, but can't find the
+and found a '>' or a '>>' on the command line, but can't find the
 name of the file to which to write data destined for stdout.
 
 =item No package name allowed for variable %s in "our"
@@ -2766,7 +2766,7 @@ think so.
 
 =item seteuid() not implemented
 
-(F) You tried to assign to C<$E<gt>>, and your operating system doesn't support
+(F) You tried to assign to C<< $> >>, and your operating system doesn't support
 the seteuid() system call (or equivalent), or at least Configure didn't
 think so.
 
@@ -2783,7 +2783,7 @@ think so.
 
 =item setruid() not implemented
 
-(F) You tried to assign to C<$E<lt>>, and your operating system doesn't support
+(F) You tried to assign to C<$<>, and your operating system doesn't support
 the setruid() system call (or equivalent), or at least Configure didn't
 think so.
 
@@ -2813,7 +2813,7 @@ But before sort was a keyword, people sometimes used it as a filehandle.
 =item Sort subroutine didn't return a numeric value
 
 (F) A sort comparison routine must return a number.  You probably blew
-it by not using C<E<lt>=E<gt>> or C<cmp>, or by not using them correctly.
+it by not using C<< <=> >> or C<cmp>, or by not using them correctly.
 See L<perlfunc/sort>.
 
 =item Sort subroutine didn't return single value
@@ -2827,7 +2827,7 @@ or less than one element.  See L<perlfunc/sort>.
 more times than there are characters of input, which is what happened.)
 See L<perlfunc/split>.
 
-=item Stat on unopened file E<lt>%sE<gt>
+=item Stat on unopened file <%s>
 
 (W unopened) You tried to use the stat() function (or an equivalent file test)
 on a filehandle that was either never opened or has since been closed.
@@ -2949,7 +2949,7 @@ nested for Perl to reach.  Perl is doing you a favor by refusing.
 (W unopened) You tried to use the tell() function on a filehandle that was either
 never opened or has since been closed.
 
-=item Test on unopened file E<lt>%sE<gt>
+=item Test on unopened file <%s>
 
 (W unopened) You tried to invoke a file test operator on a filehandle that isn't
 open.  Check your logic.  See also L<perlfunc/-X>.
@@ -3156,8 +3156,8 @@ representative, who probably put it there in the first place.
 =item Unknown open() mode '%s'
 
 (F) The second argument of 3-argument open() is not among the list
-of valid modes: C<E<lt>>, C<E<gt>>, C<E<gt>E<gt>>, C<+E<lt>>,
-C<+E<gt>>, C<+E<gt>E<gt>>, C<-|>, C<|E<45>>.
+of valid modes: C<< < >>, C<< > >>, C<<< >> >>>, C<< +< >>,
+C<< +> >>, C<<< +>> >>>, C<-|>, C<|->.
 
 =item Unknown process %x sent message to prime_env_iter: %s
 
@@ -3241,7 +3241,7 @@ At least, Configure doesn't think so.
 (F) Your machine doesn't support the Berkeley socket mechanism, or at
 least that's what Configure thought.
 
-=item Unterminated E<lt>E<gt> operator
+=item Unterminated <> operator
 
 (F) The lexer saw a left angle bracket in a place where it was expecting
 a term, so it's looking for the corresponding right angle bracket, and not
@@ -3279,7 +3279,7 @@ action-at-a-distance effects of C<$*>.
 (F) You attempted to use a feature of printf that is accessible from
 only C.  This usually means there's a better way to do it in Perl.
 
-=item Use of bare E<lt>E<lt> to mean E<lt>E<lt>"" is deprecated
+=item Use of bare << to mean <<"" is deprecated
 
 (D deprecated) You are now encouraged to use the explicitly quoted form if you
 wish to use an empty line as the terminator of the here-document.
@@ -3292,10 +3292,10 @@ a split() explicitly to an array (or list).
 
 =item Use of inherited AUTOLOAD for non-method %s() is deprecated
 
-(D deprecated) As an (ahem) accidental feature, C<AUTOLOAD> subroutines are looked
-up as methods (using the C<@ISA> hierarchy) even when the subroutines to
-be autoloaded were called as plain functions (e.g. C<Foo::bar()>), not
-as methods (e.g. C<Foo-E<gt>bar()> or C<$obj-E<gt>bar()>).
+(D deprecated) As an (ahem) accidental feature, C<AUTOLOAD> subroutines are
+looked up as methods (using the C<@ISA> hierarchy) even when the subroutines
+to be autoloaded were called as plain functions (e.g.  C<Foo::bar()>),
+not as methods (e.g. C<< Foo->bar() >> or C<< $obj->bar() >>).
 
 This bug will be rectified in Perl 5.005, which will use method lookup
 only for methods' C<AUTOLOAD>s.  However, there is a significant base
@@ -3559,13 +3559,13 @@ substitution, but stylistically it's better to use the variable form
 because other Perl programmers will expect it, and it works better
 if there are more than 9 backreferences.
 
-=item '|' and 'E<lt>' may not both be specified on command line
+=item '|' and '<' may not both be specified on command line
 
 (F) An error peculiar to VMS.  Perl does its own command line redirection, and
 found that STDIN was a pipe, and that you also tried to redirect STDIN using
-'E<lt>'.  Only one STDIN stream to a customer, please.
+'<'.  Only one STDIN stream to a customer, please.
 
-=item '|' and 'E<gt>' may not both be specified on command line
+=item '|' and '>' may not both be specified on command line
 
 (F) An error peculiar to VMS.  Perl does its own command line redirection, and
 thinks you tried to redirect stdout both to a file and into a pipe to another

@@ -239,6 +239,9 @@ int my_syspclose(PerlIO *f);
 FILE *my_tmpfile (void);
 char *my_tmpnam (char *);
 
+#undef L_tmpnam
+#define L_tmpnam MAXPATHLEN
+
 #define tmpfile	my_tmpfile
 #define tmpnam	my_tmpnam
 #define isatty	_isterm

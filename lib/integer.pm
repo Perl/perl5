@@ -43,12 +43,14 @@ See L<perlmod/Pragmatic Modules>.
 
 =cut
 
+$integer::hint_bits = 0x1;
+
 sub import {
-    $^H |= 1;
+    $^H |= $integer::hint_bits;
 }
 
 sub unimport {
-    $^H &= ~1;
+    $^H &= ~$integer::hint_bits;
 }
 
 1;

@@ -291,7 +291,7 @@ C<Errno> also makes C<%!> magic such that each element of C<%!> has a
 non-zero value only if C<$!> is set to that value. For example:
 
     use Errno;
-    
+
     unless (open(FH, "/fangorn/spouse")) {
         if ($!{ENOENT}) {
             warn "Get a wife!\n";

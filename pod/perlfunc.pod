@@ -439,6 +439,8 @@ does.  Returns true if it succeeded, false otherwise.  NAME should be a
 packed address of the appropriate type for the socket.  See the examples in
 L<perlipc/"Sockets: Client/Server Communication">.
 
+=item binmode FILEHANDLE, DISCIPLINE
+
 =item binmode FILEHANDLE
 
 Arranges for FILEHANDLE to be read or written in "binary" mode on
@@ -2462,10 +2464,10 @@ and C<IPC::Msg> documentation.
 =item msgsnd ID,MSG,FLAGS
 
 Calls the System V IPC function msgsnd to send the message MSG to the
-message queue ID.  MSG must begin with the long integer message type,
-which may be created with C<pack("l", $type)>.  Returns true if
-successful, or false if there is an error.  See also C<IPC::SysV>
-and C<IPC::SysV::Msg> documentation.
+message queue ID.  MSG must begin with the native long integer message
+type, which may be created with C<pack("l!", $type)>.  Returns true if
+successful, or false if there is an error.  See also C<IPC::SysV> and
+C<IPC::SysV::Msg> documentation.
 
 =item msgrcv ID,VAR,SIZE,TYPE,FLAGS
 
@@ -2538,7 +2540,7 @@ to be converted into a file mode, for example. (Although perl will
 automatically convert strings into numbers as needed, this automatic
 conversion assumes base 10.)
 
-=item open FILEHANDLE,MODE,EXPR
+=item open FILEHANDLE,MODE,LIST
 
 =item open FILEHANDLE,EXPR
 
@@ -3874,9 +3876,11 @@ Calls the System V IPC function C<semctl>.  You'll probably have to say
 
 first to get the correct constant definitions.  If CMD is IPC_STAT or
 GETALL, then ARG must be a variable which will hold the returned
-semid_ds structure or semaphore value array.  Returns like C<ioctl>: the
-undefined value for error, "C<0 but true>" for zero, or the actual return
-value otherwise.  See also C<IPC::SysV> and C<IPC::Semaphore> documentation.
+semid_ds structure or semaphore value array.  Returns like C<ioctl>:
+the undefined value for error, "C<0 but true>" for zero, or the actual
+return value otherwise.  The ARG must consist of a vector of native
+short integers, which may may be created with C<pack("s!",(0)x$nsem)>.
+See also C<IPC::SysV> and C<IPC::Semaphore> documentation.
 
 =item semget KEY,NSEMS,FLAGS
 

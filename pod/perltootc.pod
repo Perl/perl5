@@ -653,8 +653,8 @@ settings can then be used in constructors for initialization of a
 particular object.  The class's eponymous hash can also be used to
 implement I<translucent attributes>.  A translucent attribute is one
 that has a class-wide default.  Each object can set its own value for the
-attribute, in which case C<$object-E<gt>attribute()> returns that value.
-But if no value has been set, then C<$object-E<gt>attribute()> returns
+attribute, in which case C<< $object->attribute() >> returns that value.
+But if no value has been set, then C<< $object->attribute() >> returns
 the class-wide default.
 
 We'll apply something of a copy-on-write approach to these translucent
@@ -1294,8 +1294,8 @@ or the AutoLoader, because they alter the lexical scope in which the
 module's methods wind up getting compiled.
 
 The usual mealy-mouthed package-mungeing doubtless applies to setting
-up names of object attributes.  For example, C<$self-E<gt>{ObData1}>
-should probably be C<$self-E<gt>{ __PACKAGE__ . "_ObData1" }>, but that
+up names of object attributes.  For example, C<< $self->{ObData1} >>
+should probably be C<< $self->{ __PACKAGE__ . "_ObData1" } >>, but that
 would just confuse the examples.
 
 =head1 SEE ALSO

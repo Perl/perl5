@@ -18,10 +18,10 @@ By default, optional warnings are disabled, so any legacy code that
 doesn't attempt to control the warnings will work unchanged.
 
 All warnings are enabled in a block by either of these:
- 
+
     use warnings ;
     use warnings 'all' ;
- 
+
 Similarly all warnings are disabled in a block by either of these:
 
     no warnings ;
@@ -138,7 +138,7 @@ will enable warnings everywhere. See L<Backward Compatibility> for
 details of how this flag interacts with lexical warnings.
 
 =item B<-W>
- 
+
 If the B<-W> flag is used on the command line, it will enable all warnings
 throughout the program regardless of whether warnings were disabled
 locally using C<no warnings> or C<$^W =0>. This includes all files that get
@@ -177,19 +177,19 @@ means that any legacy code that currently relies on manipulating C<$^W>
 to control warning behavior will still work as is. 
 
 =item 3.
- 
+
 Apart from now being a boolean, the C<$^W> variable operates in exactly
 the same horrible uncontrolled global way, except that it cannot
 disable/enable default warnings.
 
 =item 4.
- 
+
 If a piece of code is under the control of the C<warnings> pragma,
 both the C<$^W> variable and the B<-w> flag will be ignored for the
 scope of the lexical warning.
 
 =item 5.
- 
+
 The only way to override a lexical warnings setting is with the B<-W>
 or B<-X> command line flags.
 
@@ -200,7 +200,7 @@ the C<warnings> pragma to control the warning behavior of $^W-type
 code (using a C<local $^W=0>) if it really wants to, but not vice-versa.
 
 =head2 Category Hierarchy
- 
+
 A hierarchy of "categories" have been defined to allow groups of warnings
 to be enabled/disabled in isolation.
 
@@ -318,7 +318,7 @@ To determine which category a specific warning has been assigned to see
 L<perldiag>.
 
 =head2 Fatal Warnings
- 
+
 The presence of the word "FATAL" in the category list will escalate any
 warnings detected from the categories specified in the lexical scope
 into fatal errors. In the code below, there are 3 places where a
@@ -327,14 +327,14 @@ fatal error.
 
 
     use warnings ;
- 
+
     $a = 1 if $a EQ $b ;
- 
+
     {
         use warnings FATAL => qw(deprecated) ;
         $a = 1 if $a EQ $b ;
     }
- 
+
     $a = 1 if $a EQ $b ;
 
 =head2 Reporting Warnings from a Module
@@ -383,7 +383,7 @@ then C<warnings::warn> will detect this and die after displaying the
 warning message.
 
 =head1 TODO
- 
+
   perl5db.pl
     The debugger saves and restores C<$^W> at runtime. I haven't checked
     whether the debugger will still work with the lexical warnings
@@ -398,7 +398,7 @@ warning message.
 =head1 SEE ALSO
 
 L<warnings>, L<perldiag>.
- 
+
 =head1 AUTHOR
- 
+
 Paul Marquess

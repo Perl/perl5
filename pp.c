@@ -426,7 +426,7 @@ PP(pp_prototype)
 			seen_question = 1;
 			str[n++] = ';';
 		    }
-		    else if (seen_question) 
+		    else if (n && str[0] == ';' && seen_question) 
 			goto set;	/* XXXX system, exec */
 		    if ((oa & (OA_OPTIONAL - 1)) >= OA_AVREF 
 			&& (oa & (OA_OPTIONAL - 1)) <= OA_HVREF) {
@@ -1391,9 +1391,23 @@ PP(pp_negate)
 	dTOPss;
 	if (SvGMAGICAL(sv))
 	    mg_get(sv);
-	if (SvIOKp(sv) && !SvNOKp(sv) && !SvPOKp(sv) && SvIVX(sv) != IV_MIN)
-	    SETi(-SvIVX(sv));
-	else if (SvNIOKp(sv))
+	if (SvIOKp(sv) && !SvNOKp(sv) && !SvPOKp(sv)) {
+	    if (SvIsUV(sv)) {
+		if (SvIVX(sv) == IV_MIN) {
+		    SETi(SvIVX(sv));	/* special case: -((UV)IV_MAX+1) == IV_MIN */
+		    RETURN;
+		}
+		else if (SvUVX(sv) <= IV_MAX) {
+		    SETi(-SvUVX(sv));
+		    RETURN;
+		}
+	    }
+	    else if (SvIVX(sv) != IV_MIN) {
+		SETi(-SvIVX(sv));
+		RETURN;
+	    }
+	}
+	if (SvNIOKp(sv))
 	    SETn(-SvNV(sv));
 	else if (SvPOKp(sv)) {
 	    STRLEN len;
@@ -2887,7 +2901,7 @@ PP(pp_splice)
     SV **tmparyval = 0;
     MAGIC *mg;
 
-    if (mg = SvTIED_mg((SV*)ary, 'P')) {
+    if ((mg = SvTIED_mg((SV*)ary, 'P'))) {
 	*MARK-- = SvTIED_obj((SV*)ary, mg);
 	PUSHMARK(MARK);
 	PUTBACK;
@@ -3081,7 +3095,7 @@ PP(pp_push)
     register SV *sv = &PL_sv_undef;
     MAGIC *mg;
 
-    if (mg = SvTIED_mg((SV*)ary, 'P')) {
+    if ((mg = SvTIED_mg((SV*)ary, 'P'))) {
 	*MARK-- = SvTIED_obj((SV*)ary, mg);
 	PUSHMARK(MARK);
 	PUTBACK;
@@ -3137,7 +3151,7 @@ PP(pp_unshift)
     register I32 i = 0;
     MAGIC *mg;
 
-    if (mg = SvTIED_mg((SV*)ary, 'P')) {
+    if ((mg = SvTIED_mg((SV*)ary, 'P'))) {
 	*MARK-- = SvTIED_obj((SV*)ary, mg);
 	PUSHMARK(MARK);
 	PUTBACK;
@@ -4156,7 +4170,7 @@ PP(pp_unpack)
                 int i;
  
                 for (i = 0; i < sizeof(PL_uuemap); i += 1)
-                    PL_uudmap[PL_uuemap[i]] = i;
+                    PL_uudmap[(U8)PL_uuemap[i]] = i;
                 /*
                  * Because ' ' and '`' map to the same value,
                  * we need to decode them both the same.
@@ -4173,22 +4187,22 @@ PP(pp_unpack)
 		char hunk[4];
 
 		hunk[3] = '\0';
-		len = PL_uudmap[*s++] & 077;
+		len = PL_uudmap[*(U8*)s++] & 077;
 		while (len > 0) {
 		    if (s < strend && ISUUCHAR(*s))
-			a = PL_uudmap[*s++] & 077;
+			a = PL_uudmap[*(U8*)s++] & 077;
  		    else
  			a = 0;
 		    if (s < strend && ISUUCHAR(*s))
-			b = PL_uudmap[*s++] & 077;
+			b = PL_uudmap[*(U8*)s++] & 077;
  		    else
  			b = 0;
 		    if (s < strend && ISUUCHAR(*s))
-			c = PL_uudmap[*s++] & 077;
+			c = PL_uudmap[*(U8*)s++] & 077;
  		    else
  			c = 0;
 		    if (s < strend && ISUUCHAR(*s))
-			d = PL_uudmap[*s++] & 077;
+			d = PL_uudmap[*(U8*)s++] & 077;
 		    else
 			d = 0;
 		    hunk[0] = (a << 2) | (b >> 4);
@@ -4428,7 +4442,7 @@ PP(pp_pack)
 	    len = 1;
 	if (*pat == '/') {
 	    ++pat;
-	    if (*pat != 'a' && *pat != 'A' && *pat != 'Z' || pat[1] != '*')
+	    if ((*pat != 'a' && *pat != 'A' && *pat != 'Z') || pat[1] != '*')
 		DIE(aTHX_ "/ must be followed by a*, A* or Z*");
 	    lengthcode = sv_2mortal(newSViv(sv_len(items > 0
 						   ? *MARK : &PL_sv_no)));
@@ -4990,7 +5004,7 @@ PP(pp_split)
 	av_extend(ary,0);
 	av_clear(ary);
 	SPAGAIN;
-	if (mg = SvTIED_mg((SV*)ary, 'P')) {
+	if ((mg = SvTIED_mg((SV*)ary, 'P'))) {
 	    PUSHMARK(SP);
 	    XPUSHs(SvTIED_obj((SV*)ary, mg));
 	}
@@ -5262,8 +5276,8 @@ PP(pp_lock)
 
 PP(pp_threadsv)
 {
-    djSP;
 #ifdef USE_THREADS
+    djSP;
     EXTEND(SP, 1);
     if (PL_op->op_private & OPpLVAL_INTRO)
 	PUSHs(*save_threadsv(PL_op->op_targ));

@@ -347,7 +347,7 @@ Then use any of those as you would a normal filehandle.  Anywhere that
 Perl is expecting a filehandle, an indirect filehandle may be used
 instead. An indirect filehandle is just a scalar variable that contains
 a filehandle.  Functions like C<print>, C<open>, C<seek>, or
-the C<E<lt>FHE<gt>> diamond operator will accept either a read filehandle
+the C<< <FH> >> diamond operator will accept either a read filehandle
 or a scalar variable containing one:
 
     ($ifh, $ofh, $efh) = (*STDIN, *STDOUT, *STDERR);
@@ -407,7 +407,7 @@ calls doesn't work for the diamond operator.  That's because it's a
 real operator, not just a function with a comma-less argument.  Assuming
 you've been storing typeglobs in your structure as we did above, you
 can use the built-in function named C<readline> to reads a record just
-as C<E<lt>E<gt>> does.  Given the initialization shown above for @fd, this
+as C<< <> >> does.  Given the initialization shown above for @fd, this
 would work, but only because readline() require a typeglob.  It doesn't
 work with objects or strings, which might be a bug we haven't fixed yet.
 
@@ -463,7 +463,7 @@ whatever:
 
 =head2 How can I translate tildes (~) in a filename?
 
-Use the E<lt>E<gt> (glob()) operator, documented in L<perlfunc>.  This
+Use the <> (glob()) operator, documented in L<perlfunc>.  This
 requires that you have a shell installed that groks tildes, meaning
 csh or tcsh or (some versions of) ksh, and thus may have portability
 problems.  The Glob::KGlob module (available from CPAN) gives more
@@ -495,7 +495,7 @@ doesn't exist.
 
     open(FH, "+< /path/name");  	# open for update
 
-Using "E<gt>" always clobbers or creates.  Using "E<lt>" never does
+Using ">" always clobbers or creates.  Using "<" never does
 either.  The "+" doesn't change this.
 
 Here are examples of many kinds of file opens.  Those using sysopen()
@@ -556,9 +556,9 @@ isn't so exclusive as you might wish.
 
 See also the new L<perlopentut> if you have it (new for 5.6).
 
-=head2 Why do I sometimes get an "Argument list too long" when I use E<lt>*E<gt>?
+=head2 Why do I sometimes get an "Argument list too long" when I use <*>?
 
-The C<E<lt>E<gt>> operator performs a globbing operation (see above).
+The C<< <> >> operator performs a globbing operation (see above).
 In Perl versions earlier than v5.6.0, the internal glob() operator forks
 csh(1) to do the actual glob expansion, but
 csh can't handle more than 127 items and so gives the error message
@@ -576,7 +576,7 @@ use the glob() function or its angle-bracket alias in a scalar
 context, you may cause a leak and/or unpredictable behavior.  It's
 best therefore to use glob() only in list context.
 
-=head2 How can I open a file with a leading "E<gt>" or trailing blanks?
+=head2 How can I open a file with a leading ">" or trailing blanks?
 
 Normally perl ignores trailing blanks in filenames, and interprets
 certain leading characters (or a trailing "|") to mean something
@@ -1100,7 +1100,7 @@ Or even with a literal numeric descriptor:
    $fd = $ENV{MHCONTEXTFD};
    open(MHCONTEXT, "<&=$fd");	# like fdopen(3S)
 
-Note that "E<lt>&STDIN" makes a copy, but "E<lt>&=STDIN" make
+Note that "<&STDIN" makes a copy, but "<&=STDIN" make
 an alias.  That means if you close an aliased handle, all
 aliases become inaccessible.  This is not true with 
 a copied one.

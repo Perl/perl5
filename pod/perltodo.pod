@@ -165,7 +165,7 @@ I think we can accomodate that by extending bless() to stash
 extra information for objects so we track their lifetime accurately
 for those that want their DESTROY() to be predictable (this will be
 a speed hit, naturally, and will therefore be optional, naturally. :)
-    
+
 [N.B. Don't even ask me about this now!  When I have the time to
 write a cogent summary, I'll post it.]
 
@@ -321,14 +321,14 @@ We need something in the vicinity of:
   No documentation for perl function `random stuff' found
   The following entry in perlfunc.pod matches /random/a:
     =item rand EXPR
-     
+
     =item rand
-     
+
     Returns a random fractional number greater than or equal to C<0> and less
     than the value of EXPR.  (EXPR should be positive.)  If EXPR is
     omitted, the value C<1> is used.  Automatically calls C<srand()> unless
     C<srand()> has already been called.  See also C<srand()>.
-     
+
     (Note: If your rand function consistently returns numbers that are too
     large or too small, then your version of Perl was probably compiled
     with the wrong number of RANDBITS.)

@@ -94,7 +94,7 @@ typedef struct regexp {
 #define REXEC_NOT_FIRST	0x10		/* This is another iteration of //g. */
 #define REXEC_ML	0x20		/* $* was set. */
 
-#define ReREFCNT_inc(re) ((re && re->refcnt++), re)
+#define ReREFCNT_inc(re) ((void)(re && re->refcnt++), re)
 #define ReREFCNT_dec(re) CALLREGFREE(aTHX_ re)
 
 #define FBMcf_TAIL_DOLLAR	1

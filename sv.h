@@ -511,19 +511,19 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 
 #define SvOKp(sv)		(SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK))
 #define SvIOKp(sv)		(SvFLAGS(sv) & SVp_IOK)
-#define SvIOKp_on(sv)		(SvOOK_off(sv), SvFLAGS(sv) |= SVp_IOK)
+#define SvIOKp_on(sv)		((void)SvOOK_off(sv), SvFLAGS(sv) |= SVp_IOK)
 #define SvNOKp(sv)		(SvFLAGS(sv) & SVp_NOK)
 #define SvNOKp_on(sv)		(SvFLAGS(sv) |= SVp_NOK)
 #define SvPOKp(sv)		(SvFLAGS(sv) & SVp_POK)
 #define SvPOKp_on(sv)		(SvFLAGS(sv) |= SVp_POK)
 
 #define SvIOK(sv)		(SvFLAGS(sv) & SVf_IOK)
-#define SvIOK_on(sv)		(SvOOK_off(sv), \
+#define SvIOK_on(sv)		((void)SvOOK_off(sv), \
 				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
 #define SvIOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_IOK|SVp_IOK|SVf_IVisUV))
-#define SvIOK_only(sv)		(SvOK_off(sv), \
+#define SvIOK_only(sv)		((void)SvOK_off(sv), \
 				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
-#define SvIOK_only_UV(sv)	(SvOK_off_exc_UV(sv), \
+#define SvIOK_only_UV(sv)	((void)SvOK_off_exc_UV(sv), \
 				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
 
 #define SvIOK_UV(sv)		((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV))	\
@@ -538,7 +538,7 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 #define SvNOK(sv)		(SvFLAGS(sv) & SVf_NOK)
 #define SvNOK_on(sv)		(SvFLAGS(sv) |= (SVf_NOK|SVp_NOK))
 #define SvNOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_NOK|SVp_NOK))
-#define SvNOK_only(sv)		(SvOK_off(sv), \
+#define SvNOK_only(sv)		((void)SvOK_off(sv), \
 				    SvFLAGS(sv) |= (SVf_NOK|SVp_NOK))
 
 #define SvUTF8(sv)		(SvFLAGS(sv) & SVf_UTF8)
@@ -556,7 +556,7 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 
 #define SvOOK(sv)		(SvFLAGS(sv) & SVf_OOK)
-#define SvOOK_on(sv)		(SvIOK_off(sv), SvFLAGS(sv) |= SVf_OOK)
+#define SvOOK_on(sv)		((void)SvIOK_off(sv), SvFLAGS(sv) |= SVf_OOK)
 #define SvOOK_off(sv)		(SvOOK(sv) && sv_backoff(sv))
 
 #define SvFAKE(sv)		(SvFLAGS(sv) & SVf_FAKE)

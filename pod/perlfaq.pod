@@ -250,7 +250,7 @@ miscellaneous data issues.
 
 =item * What's wrong with always quoting "$vars"?
 
-=item * Why don't my E<lt>E<lt>HERE documents work?
+=item * Why don't my <<HERE documents work?
 
 =item * What is the difference between a list and an array?
 
@@ -361,11 +361,11 @@ I/O and the "f" issues: filehandles, flushing, formats and footers.
 
 =item * How come when I open a file read-write it wipes it out?
 
-=item * Why do I sometimes get an "Argument list too long" when I use E<lt>*E<gt>?
+=item * Why do I sometimes get an "Argument list too long" when I use <*>?
 
 =item * Is there a leak/bug in glob()?
 
-=item * How can I open a file with a leading "E<gt>" or trailing blanks?
+=item * How can I open a file with a leading ">" or trailing blanks?
 
 =item * How can I reliably rename a file?
 
@@ -508,7 +508,7 @@ other sections.
 
 =item * What's the difference between deep and shallow binding?
 
-=item * Why doesn't "my($foo) = E<lt>FILEE<gt>;" work right?
+=item * Why doesn't "my($foo) = <FILE>;" work right?
 
 =item * How do I redefine a builtin function, operator, or method?
 

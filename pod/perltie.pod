@@ -184,7 +184,7 @@ methods: TIEARRAY, FETCH, STORE, FETCHSIZE, STORESIZE and perhaps DESTROY.
 
 FETCHSIZE and STORESIZE are used to provide C<$#array> and
 equivalent C<scalar(@array)> access.
-    
+
 The methods POP, PUSH, SHIFT, UNSHIFT, SPLICE, DELETE, and EXISTS are
 required if the perl operator with the corresponding (but lowercase) name
 is to operate on the tied array. The B<Tie::Array> class can be used as a

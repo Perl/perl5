@@ -471,7 +471,7 @@ sub podchecker( $ ; $ % ) {
 
     ## Now create a pod checker
     my $checker = new Pod::Checker(%options);
-    $checker->parseopts(-process_cut_cmd => 1);
+    $checker->parseopts(-process_cut_cmd => 1, -warnings => 1);
 
     ## Now check the pod document for errors
     $checker->parse_from_file($infile, $outfile);

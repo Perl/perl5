@@ -55,8 +55,12 @@ Locales
 Regexen
    make RE engine thread-safe
    POSIX [=bar=] and [.zap.] would nice too but there's no API for them
-   (=bar= could be done with Unicode, though)
+   (=bar= could be done with Unicode, though, see TR about normalization forms)
    approximate matching
+
+Security
+    use fchown, fchmod (and futimes?) internally when possible
+    use fchdir(how portable?)
 
 Reliable Signals
     custom opcodes
@@ -70,8 +74,11 @@ Win32 stuff
 
 Miscellaneous
     add new modules (Archive::Tar, Compress::Zlib, CPAN::FTP?)
+    sub-second sleep? (integrate Time::HiRes?)
+    floating point handling: nans, infinities, fp exception masks, etc
     replace pod2html with new PodtoHtml? (requires other modules from CPAN)
     automate testing with large parts of CPAN
+    Unicode collation?
 
 Ongoing
     keep filenames 8.3 friendly, where feasible
@@ -81,6 +88,7 @@ Ongoing
 Documentation
     describe new age patterns
     update perl{guts,call,embed,xs} with additions, changes to API
+    convert more examples to use autovivified filehandles
     document Win32 choices
     spot-check all new modules for completeness
     better docs for pack()/unpack()

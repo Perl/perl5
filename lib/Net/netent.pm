@@ -120,26 +120,26 @@ This seems a bug, but here's how to deal with it:
  use strict;
  use Socket;
  use Net::netent;
- 
+
  @ARGV = ('loopback') unless @ARGV;
- 
+
  my($n, $net);
- 
+
  for $net ( @ARGV ) {
- 
+
      unless ($n = getnetbyname($net)) {
  	warn "$0: no such net: $net\n";
  	next;
      }
- 
+
      printf "\n%s is %s%s\n", 
  	    $net, 
  	    lc($n->name) eq lc($net) ? "" : "*really* ",
  	    $n->name;
- 
+
      print "\taliases are ", join(", ", @{$n->aliases}), "\n"
  		if @{$n->aliases};     
- 
+
      # this is stupid; first, why is this not in binary?
      # second, why am i going through these convolutions
      # to make it looks right
@@ -148,7 +148,7 @@ This seems a bug, but here's how to deal with it:
  	shift @a while @a && $a[0] == 0;
  	printf "\taddr is %s [%d.%d.%d.%d]\n", $n->net, @a;
      }
- 
+
      if ($n = getnetbyaddr($n->net)) {
  	if (lc($n->name) ne lc($net)) {
  	    printf "\tThat addr reverses to net %s!\n", $n->name;
