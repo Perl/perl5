@@ -1821,6 +1821,12 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
 }
 
 DllExport int
+win32_execv(const char *cmdname, const char *const *argv)
+{
+    return execv(cmdname, (char *const *)argv);
+}
+
+DllExport int
 win32_execvp(const char *cmdname, const char *const *argv)
 {
     return execvp(cmdname, (char *const *)argv);

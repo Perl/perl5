@@ -90,6 +90,7 @@ DllExport  int		win32_mkdir(const char *dir, int mode);
 DllExport  int		win32_rmdir(const char *dir);
 DllExport  int		win32_chdir(const char *dir);
 DllExport  int		win32_flock(int fd, int oper);
+DllExport  int		win32_execv(const char *cmdname, const char *const *argv);
 DllExport  int		win32_execvp(const char *cmdname, const char *const *argv);
 DllExport  void		win32_perror(const char *str);
 DllExport  void		win32_setbuf(FILE *pf, char *buf);
@@ -217,6 +218,7 @@ END_EXTERN_C
 #define rmdir			win32_rmdir
 #define chdir			win32_chdir
 #define flock(fd,o)		win32_flock(fd,o)
+#define execv			win32_execv
 #define execvp			win32_execvp
 #define perror			win32_perror
 #define setbuf			win32_setbuf
