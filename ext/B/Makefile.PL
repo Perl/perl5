@@ -32,5 +32,7 @@ sub post_constants {
 sub postamble {
 '
 B$(OBJ_EXT) : defsubs.h 
+
+defsubs.h :: ../../op.h ../../cop.h
 '
 }
