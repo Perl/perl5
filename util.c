@@ -1889,7 +1889,7 @@ Perl_my_setenv_init(char ***penviron)
 }
 
 void
-my_setenv(char *nam, char *val)
+Perl_my_setenv(char *nam, char *val)
 {
     /* You can not directly manipulate the environ[] array because
      * the routines do some additional work that syncs the Cygwin
@@ -1901,13 +1901,13 @@ my_setenv(char *nam, char *val)
        if (!oldstr)
            return;
        unsetenv(nam);
-       Safefree(oldstr);
+       safesysfree(oldstr);
        return;
     }
     setenv(nam, val, 1);
     environ = *Perl_main_environ; /* environ realloc can occur in setenv */
     if(oldstr && environ[setenv_getix(nam)] != oldstr)
-       Safefree(oldstr);
+       safesysfree(oldstr);
 }
 #else /* if WIN32 */
 

@@ -162,13 +162,13 @@ if ($Is_Cygwin) {
 
    if ($dlsrc ne "dl_none.xs") {
       -f $perldll || die "No perl DLL built\n";
-
+   }
 # Install the DLL
 
-      safe_unlink("$installbin/$perldll");
-      copy("$perldll", "$installbin/$perldll");
-      chmod(0755, "$installbin/$perldll");
-   }
+   safe_unlink("$installbin/$perldll");
+   copy("$perldll", "$installbin/$perldll");
+   chmod(0755, "$installbin/$perldll");
+   
 } # if ($Is_W32 or $Is_Cygwin)
 
 # This will be used to store the packlist

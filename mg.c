@@ -848,7 +848,7 @@ Perl_magic_clear_all_env(pTHX_ SV *sv, MAGIC *mg)
 #	ifdef CYGWIN
     I32 i;
     for (i = 0; environ[i]; i++)
-       Safefree(environ[i]);
+       safesysfree(environ[i]);
 #	else
 #	    ifndef PERL_USE_SAFE_PUTENV
     I32 i;
