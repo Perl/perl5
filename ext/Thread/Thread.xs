@@ -115,44 +115,9 @@ threadstart(void *arg)
     DEBUG_L(PerlIO_printf(PerlIO_stderr(), "new thread %p starting at %s\n",
 			  thr, SvPEEK(TOPs)));
 
-#ifdef OLD_WAY
-    JMPENV_PUSH(ret);
-    switch (ret) {
-    case 3:
-        PerlIO_printf(PerlIO_stderr(), "panic: threadstart\n");
-	/* fall through */
-    case 1:
-	STATUS_ALL_FAILURE;
-	/* fall through */
-    case 2:
-	/* my_exit() was called */
-	while (scopestack_ix > oldscope)
-	    LEAVE;
-	JMPENV_POP;
-	MUTEX_LOCK(&thr->mutex);
-	thr->flags |= THRf_DID_DIE;
-	MUTEX_UNLOCK(&thr->mutex);
-	av = newSVpvf("Thread called exit with value %d", statusvalue);
-	goto finishoff;
-    }
-
-    CATCH_SET(TRUE);
-
-    /* Now duplicate most of perl_call_sv but with a few twists */
-    op = (OP*)&myop;
-    Zero(op, 1, LOGOP);
-    myop.op_flags = OPf_STACKED;
-    myop.op_next = Nullop;
-    myop.op_flags |= OPf_KNOW;
-    myop.op_flags |= OPf_WANT_LIST;
-    op = pp_entersub(ARGS);
-    if (op)
-	runops();
-#else
     sv = POPs;
     PUTBACK;
     perl_call_sv(sv, G_ARRAY|G_EVAL);
-#endif
     SPAGAIN;
     retval = sp - (stack_base + oldmark);
     sp = stack_base + oldmark + 1;
