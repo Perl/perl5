@@ -8,11 +8,11 @@ parallel.t - Test suite for running multiple processes in parallel.
 
 BEGIN { 
     if( $ENV{PERL_CORE} ) {
-        chdir '../lib/IPC/Run' if -d '../lib/IPC/Run';
-        unshift @INC, 'lib', '../..';
 	use Cwd;
         $^X = Cwd::abs_path($^X);
 	$^X = qq("$^X") if $^X =~ /\s/;
+        chdir '../lib/IPC/Run' if -d '../lib/IPC/Run';
+        unshift @INC, 'lib', '../..';
     }
 }
 
