@@ -348,7 +348,7 @@ else {
 
     test 67, eval { open FOO, $foo } eq '', 'open for read';
     test 68, $@ eq '', $@;		# NB: This should be allowed
-    test 69, $! == 2;			# File not found
+    test 69, $! == 2 || ($Is_Dos && $! == 22); # File not found
 
     test 70, eval { open FOO, "> $foo" } eq '', 'open for write';
     test 71, $@ =~ /^Insecure dependency/, $@;
