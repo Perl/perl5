@@ -127,9 +127,6 @@ static bool will_taint = FALSE;  /* tainting active, but no PL_curinterp yet */
 /* munching */ 
 static int no_translate_barewords;
 
-/* Temp for subprocess commands */
-static struct dsc$descriptor_s VMSCMD = {0,DSC$K_DTYPE_T,DSC$K_CLASS_S,Nullch};
-
 #ifndef RTL_USES_UTC
 static int tz_updated = 1;
 #endif
