@@ -504,6 +504,10 @@ ext/Opcode/Opcode.xs		Opcode extension external subroutines
 ext/Opcode/ops.pm		"Pragma" form of Opcode extension Perl module
 ext/Opcode/ops.t		See if Opcode works
 ext/Opcode/Safe.pm		Safe extension Perl module
+ext/PerlIO/encoding/MANIFEST	PerlIO::encoding list of files
+ext/PerlIO/encoding/Makefile.PL	PerlIO::encoding makefile writer
+ext/PerlIO/encoding/encoding.pm	PerlIO::encoding
+ext/PerlIO/encoding/encoding.xs	PerlIO::encoding
 ext/PerlIO/PerlIO.t		See if PerlIO works
 ext/PerlIO/Scalar/Makefile.PL	PerlIO layer for scalars
 ext/PerlIO/Scalar/Scalar.pm	PerlIO layer for scalars
