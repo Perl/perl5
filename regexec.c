@@ -856,6 +856,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    PL_regdata = prog->data;
 	    PL_bostr = startpos;
 	}
+	S_cache_re(prog);
 	s = find_byclass(prog, prog->regstclass, s, endpos, startpos, 1);
 	if (!s) {
 #ifdef DEBUGGING
