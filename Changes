@@ -31,6 +31,185 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10929] By: jhi                                   on 2001/06/25  14:17:57
+        Log: Regen toc and modlib.
+     Branch: perl
+	   ! pod/perlmodlib.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 10928] By: jhi                                   on 2001/06/25  14:13:09
+        Log: Enclose the new symbols in START_EXTERN_C and END_EXTERN_C
+             for the benefit of C++ compilers, as suggested by Guruprasad.
+     Branch: perl
+	   ! embed.pl proto.h
+____________________________________________________________________________
+[ 10927] By: jhi                                   on 2001/06/25  14:11:59
+        Log: Subject: [PATCH ] Re: [ID 20010625.003] perlfaq5 correction
+             From: Jonathan Stowe <gellyfish@gellyfish.com>
+             Date: Mon, 25 Jun 2001 14:39:43 +0100 (BST)
+             Message-ID: <Pine.LNX.4.33.0106251438080.14795-100000@orpheus.gellyfish.com>
+     Branch: perl
+	   ! pod/perlfaq5.pod
+____________________________________________________________________________
+[ 10926] By: jhi                                   on 2001/06/25  14:04:07
+        Log: Missed from #10925.
+     Branch: perl
+	   ! gv.c
+____________________________________________________________________________
+[ 10925] By: jhi                                   on 2001/06/25  14:00:06
+        Log: Subject: [PATCH] Re: CvFILE corruption under ithreads
+             From: Robin Houston <robin@kitsite.com>
+             Date: Sat, 19 May 2001 16:19:34 +0100
+             Message-ID: <20010519161934.A12751@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! cv.h gv.h op.c
+____________________________________________________________________________
+[ 10924] By: jhi                                   on 2001/06/25  13:58:18
+        Log: Netware README tweak.
+     Branch: perl
+	   ! README.netware
+____________________________________________________________________________
+[ 10923] By: jhi                                   on 2001/06/25  13:57:13
+        Log: Subject: [PATCH] Re: overload.t fails
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Mon, 25 Jun 2001 14:52:20 +0530
+             Message-ID: <20010625145220.A24114@lustre.linux.in>
+     Branch: perl
+	   ! lib/overload.t
+____________________________________________________________________________
+[ 10922] By: jhi                                   on 2001/06/25  13:56:20
+        Log: Subject: Re: [PATCH] Re: [ID 20010624.001] debugger T, and Carp::carp don't trace arg of
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Mon, 25 Jun 2001 11:43:23 +0100
+             Message-Id: <E15ETpz-0007AD-00@draco.cus.cam.ac.uk>
+     Branch: perl
+	   ! lib/Carp.pm
+____________________________________________________________________________
+[ 10921] By: jhi                                   on 2001/06/25  13:50:02
+        Log: Subject: Re: [PATCH 5.6.1] OS2 syslog
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sun, 24 Jun 2001 05:17:05 -0400
+             Message-ID: <20010624051704.A27604@math.ohio-state.edu>
+     Branch: perl
+	   ! os2/os2ish.h
+____________________________________________________________________________
+[ 10920] By: jhi                                   on 2001/06/25  13:49:13
+        Log: Subject: [PATCH 5.6.1] crypt() on OS/2
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 25 Jun 2001 05:52:27 -0400
+             Message-ID: <20010625055227.A24635@math.ohio-state.edu>
+     Branch: perl
+	   ! hints/os2.sh
+____________________________________________________________________________
+[ 10919] By: jhi                                   on 2001/06/25  13:48:30
+        Log: Subject: Re: [PATCH 5.6.1] OS2 system() broken
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 25 Jun 2001 05:23:35 -0400
+             Message-ID: <20010625052334.A24320@math.ohio-state.edu>
+     Branch: perl
+	   ! os2/os2.c
+____________________________________________________________________________
+[ 10918] By: jhi                                   on 2001/06/25  13:47:46
+        Log: Subject: Re: [PATCH 5.6.1] OS2::DLL
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 25 Jun 2001 05:04:32 -0400
+             Message-ID: <20010625050432.A24128@math.ohio-state.edu>
+     Branch: perl
+	   ! os2/OS2/REXX/DLL/DLL.pm
+____________________________________________________________________________
+[ 10917] By: jhi                                   on 2001/06/25  13:44:14
+        Log: Subject: Re: [PATCH 5.6.1] $^E on OS/2
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 25 Jun 2001 05:02:36 -0400
+             Message-ID: <20010625050235.A24046@math.ohio-state.edu>
+     Branch: perl
+	   ! mg.c os2/dl_os2.c os2/os2.c
+____________________________________________________________________________
+[ 10916] By: jhi                                   on 2001/06/25  13:41:20
+        Log: Subject: Re: [PATCH 5.6.1] misprints
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Mon, 25 Jun 2001 04:50:50 -0400
+             Message-ID: <20010625045049.A23965@math.ohio-state.edu>
+     Branch: perl
+	   ! os2/os2.c pp_sys.c
+____________________________________________________________________________
+[ 10915] By: jhi                                   on 2001/06/25  13:39:59
+        Log: Add Test::More and Test::Simple to the delta.
+     Branch: perl
+	   ! pod/perl572delta.pod
+____________________________________________________________________________
+[ 10914] By: jhi                                   on 2001/06/25  13:38:08
+        Log: Add Test::More, from Michael G Schwern.
+     Branch: perl
+	   + lib/Test/More.pm lib/Test/More/t/More.t
+	   + lib/Test/More/t/fail-like.t lib/Test/More/t/fail.t
+	   + lib/Test/More/t/plan_is_noplan.t lib/Test/More/t/skipall.t
+	   + t/lib/Test/More/Catch.pm
+	   ! MANIFEST
+____________________________________________________________________________
+[ 10913] By: jhi                                   on 2001/06/25  13:35:41
+        Log: Add Test::Simple from Michael G Schwern.
+     Branch: perl
+	   + lib/Test/Simple.pm lib/Test/Simple/t/exit.t
+	   + lib/Test/Simple/t/extra.t lib/Test/Simple/t/fail.t
+	   + lib/Test/Simple/t/missing.t lib/Test/Simple/t/no_plan.t
+	   + lib/Test/Simple/t/plan_is_noplan.t lib/Test/Simple/t/simple.t
+	   + t/lib/Test/Simple/Catch.pm
+	   + t/lib/Test/Simple/sample_tests/death.plx
+	   + t/lib/Test/Simple/sample_tests/death_in_eval.plx
+	   + t/lib/Test/Simple/sample_tests/extras.plx
+	   + t/lib/Test/Simple/sample_tests/five_fail.plx
+	   + t/lib/Test/Simple/sample_tests/last_minute_death.plx
+	   + t/lib/Test/Simple/sample_tests/one_fail.plx
+	   + t/lib/Test/Simple/sample_tests/require.plx
+	   + t/lib/Test/Simple/sample_tests/success.plx
+	   + t/lib/Test/Simple/sample_tests/too_few.plx
+	   + t/lib/Test/Simple/sample_tests/two_fail.plx
+	   ! MANIFEST
+____________________________________________________________________________
+[ 10912] By: jhi                                   on 2001/06/25  13:31:57
+        Log: Subject: [PATCH perl@10907] RETURN requires dSP in pp_sys.c
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Sun, 24 Jun 2001 23:41:36 -0500
+             Message-Id: <a0510100db75c6d44e34c@[172.16.52.1]>
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 10911] By: jhi                                   on 2001/06/25  13:05:00
+        Log: Upgrade to Attribute::Handlers 0.70.
+     Branch: perl
+	   + lib/Attribute/Handlers/Changes lib/Attribute/Handlers/README
+	   ! MANIFEST lib/Attribute/Handlers.pm
+____________________________________________________________________________
+[ 10910] By: jhi                                   on 2001/06/25  00:09:27
+        Log: Subject: Re: [ID 20010621.007] readline() not quite as equal as <>
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Sat, 23 Jun 2001 05:17:44 +0530
+             Message-ID: <20010623051744.A18583@lustre.linux.in>
+             
+             (Can't think of a good place to put tests.)
+     Branch: perl
+	   ! opcode.pl pod/perlfunc.pod t/op/flip.t toke.c
+____________________________________________________________________________
+[ 10909] By: jhi                                   on 2001/06/24  23:45:13
+        Log: Subject: [PATCH] t/op/pat.t typo fix
+             From: Richard Soderberg <rs@crystalflame.net>
+             Date: Sun, 24 Jun 2001 12:07:42 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.21.0106241207320.17075-100000@oregonnet.com>
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[ 10908] By: jhi                                   on 2001/06/24  22:24:49
+        Log: Move the pack warnings to their own file, as pointed
+             out by Spider.
+     Branch: perl
+	   + t/lib/warnings/pp_pack
+	   ! MANIFEST t/lib/warnings/pp
+____________________________________________________________________________
+[ 10907] By: jhi                                   on 2001/06/24  19:55:15
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10906] By: jhi                                   on 2001/06/24  19:50:40
         Log: Partially fix a problem noticed by IRIX compiler:
              the initialization of parse_start was bypassed by
