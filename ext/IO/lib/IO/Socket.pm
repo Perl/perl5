@@ -39,6 +39,11 @@ C<new> only looks for one key C<Domain> which tells new which domain
 the socket will be in. All other arguments will be passed to the
 configuration method of the package for that domain, See below.
 
+C<IO::Socket>s will be in autoflush mode after creation.  Note that
+versions of IO::Socket prior to 1.1603 (as shipped with Perl 5.004_04)
+did not do this.   So if you need backward compatibility, you should
+set autoflush explicitly.
+
 =back
 
 =head1 METHODS
@@ -118,7 +123,7 @@ use Exporter;
 
 @ISA = qw(IO::Handle);
 
-$VERSION = "1.1602";
+$VERSION = "1.1603";
 
 sub import {
     my $pkg = shift;
@@ -129,6 +134,7 @@ sub import {
 sub new {
     my($class,%arg) = @_;
     my $fh = $class->SUPER::new();
+    $fh->autoflush;
 
     ${*$fh}{'io_socket_timeout'} = delete $arg{Timeout};
 
@@ -392,7 +398,7 @@ and some related methods. The constructor can take the following options
     PeerPort	Remote port or service       <service>[(<no>)] | <no>
     LocalAddr	Local host bind	address      hostname[:port]
     LocalPort	Local host bind	port         <service>[(<no>)] | <no>
-    Proto	Protocol name                "tcp" | "udp" | ...
+    Proto	Protocol name (or number)    "tcp" | "udp" | ...
     Type	Socket type                  SOCK_STREAM | SOCK_DGRAM | ...
     Listen	Queue size for listen
     Reuse	Set SO_REUSEADDR before binding
@@ -410,10 +416,13 @@ parenthesis which is used if the service is not known by the system.
 The C<PeerPort> specification can also be embedded in the C<PeerAddr>
 by preceding it with a ":".
 
-Only one of C<Type> or C<Proto> needs to be specified, one will be
-assumed from the other.  If you specify a symbolic C<PeerPort> port,
-then the constructor will try to derive C<Type> and C<Proto> from
-the service name.
+If C<Proto> is not given and you specify a symbolic C<PeerPort> port,
+then the constructor will try to derive C<Proto> from the service
+name.  As a last resort C<Proto> "tcp" is assumed.  The C<Type>
+parameter will be deduced from C<Proto> if not specified.
+
+If the constructor is only passed a single argument, it is assumed to
+be a C<PeerAddr> specification.
 
 Examples:
 
@@ -427,6 +436,9 @@ Examples:
                                  LocalAddr => 'localhost',
                                  LocalPort => 9000,
                                  Proto     => 'tcp');
+
+   $sock = IO::Socket::INET->new('127.0.0.1:25');
+
 
 =head2 METHODS
 
@@ -462,6 +474,13 @@ peer host in a text form xx.xx.xx.xx
 =back
 
 =cut
+
+sub new
+{
+  my $class = shift;
+  unshift(@_, "PeerAddr") if @_ == 1;
+  return $class->SUPER::new(@_);
+}
 
 sub _sock_info {
   my($addr,$port,$proto) = @_;
@@ -535,6 +554,7 @@ sub configure {
 		unless(defined $raddr);
     }
 
+    $proto ||= (getprotobyname "tcp")[2];
     return _error($fh,'Cannot determine protocol')
 	unless($proto);
 
