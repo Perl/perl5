@@ -230,6 +230,10 @@ sub _win32_ext {
     # add "$Config{installarchlib}/CORE" to default search path
     push @libpath, "$Config{installarchlib}/CORE";
 
+    if ($VC and exists $ENV{LIB} and $ENV{LIB}) {
+        push @libpath, split /;/, $ENV{LIB};
+    }
+
     foreach (Text::ParseWords::quotewords('\s+', 0, $potential_libs)){
 
 	$thislib = $_;
