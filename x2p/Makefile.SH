@@ -61,6 +61,7 @@ FIRSTMAKEFILE = $firstmakefile
 
 cat >>Makefile <<'!NO!SUBS!'
 
+REALPERL = ../perl
 CCCMD = `sh $(shellflags) cflags $@`
 
 public = a2p s2p find2perl
@@ -76,6 +77,8 @@ shextract = Makefile cflags
 
 pl = find2perl.PL s2p.PL
 plextract = find2perl s2p
+plexe = find2perl.exe s2p.exe
+plc   = find2perl.c s2p.c
 
 addedbyconf = $(shextract) $(plextract)
 
@@ -93,6 +96,9 @@ lintflags = -phbvxac
 
 all: $(public) $(private) $(util)
 	touch all
+
+compile: all
+	$(REALPERL) -I../lib ../utils/perlcc -regex 's/$$/.exe/' $(plextract) -prog -verbose dcf -log ../compilelog;  
 
 a2p: $(obj) a2p$(OBJ_EXT)
 	$(CC) $(LDFLAGS) $(obj) a2p$(OBJ_EXT) $(libs) -o a2p
@@ -116,7 +122,7 @@ a2p$(OBJ_EXT): a2p.c a2py.c a2p.h EXTERN.h util.h INTERN.h \
 	$(CCCMD) $(LARGE) a2p.c
 
 clean:
-	rm -f a2p *$(OBJ_EXT)
+	rm -f a2p *$(OBJ_EXT) $(plexe) $(plc)
 
 realclean: clean
 	rm -f *.orig core $(addedbyconf) all malloc.c

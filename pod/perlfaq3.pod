@@ -85,7 +85,7 @@ perl-mode for emacs can provide a remarkable amount of help with most
 (but not all) code, and even less programmable editors can provide
 significant assistance.
 
-If you are using to using vgrind program for printing out nice code to
+If you are used to using vgrind program for printing out nice code to
 a laser printer, you can take a stab at this using
 http://www.perl.com/CPAN/doc/misc/tips/working.vgrind.entry, but the
 results are not particularly satisfying for sophisticated code.
@@ -260,7 +260,7 @@ module written in C can.  With the FCGI module (from CPAN), a Perl
 executable compiled with sfio (see the F<INSTALL> file in the
 distribution) and the mod_fastcgi module (available from
 http://www.fastcgi.com/) each of your perl scripts becomes a permanent
-CGI daemon processes.
+CGI daemon process.
 
 Both of these solutions can have far-reaching effects on your system
 and on the way you write your CGI scripts, so investigate them with

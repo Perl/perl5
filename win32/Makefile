@@ -1,4 +1,3 @@
-# 
 # Makefile to build perl on Windowns NT using Microsoft NMAKE.
 # Works with MS command line compilers from VC++ etc.
 #
@@ -31,12 +30,14 @@ OBJECT		= -DPERL_OBJECT
 
 #
 # if you have the source for des_fcrypt(), uncomment this and make sure the
-# file exists (see README.win32)
+# file exists (see README.win32).  File should be located at the perl
+# top level directory.
 #CRYPT_SRC	= des_fcrypt.c
 
 #
 # if you didn't set CRYPT_SRC and if you have des_fcrypt() available in a
 # library, uncomment this, and make sure the library exists (see README.win32)
+# Specify the full pathname of the library.
 #CRYPT_LIB	= des_fcrypt.lib
 
 #
@@ -48,6 +49,9 @@ OBJECT		= -DPERL_OBJECT
 
 #
 # set the install locations of the compiler include/libraries
+# (you'll need to quote the value if it contains spaces: i.e.
+#     CCHOME    = "f:\Program Files\vc"
+#
 #CCHOME		= f:\msvc20
 CCHOME		= $(MSVCDIR)
 CCINCDIR	= $(CCHOME)\include
@@ -476,7 +480,7 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	$(XCOPY) *.h $(COREDIR)\*.*
 	$(RCOPY) include $(COREDIR)\*.*
 	$(MINIPERL) -I..\lib config_h.PL || $(MAKE) $(MAKEFLAGS) $(CONFIGPM)
- 
+
 $(MINIPERL) : $(MINIDIR) $(MINI_OBJ)
 	$(LINK32) -subsystem:console -out:$@ @<<
 	$(LINK_FLAGS) $(LIBFILES) $(MINI_OBJ)
@@ -689,12 +693,18 @@ realclean: clean
 	-rmdir /s /q $(COREDIR) || rmdir /s $(COREDIR)
 	-rmdir /s /q $(MINIDIR) || rmdir /s $(MINIDIR)
 
-install : all doc utils
+install : all installbare installutils installhtml
+
+installbare :
 	$(PERLEXE) ..\installperl
 	$(XCOPY) $(PERL95EXE) $(INST_BIN)\*.*
+
+installutils : utils
 	$(XCOPY) $(GLOBEXE) $(INST_BIN)\*.*
 	$(XCOPY) bin\*.bat $(INST_BIN)\*.*
 	$(XCOPY) ..\pod\*.bat $(INST_BIN)\*.*
+
+installhtml : doc
 	$(RCOPY) html\*.* $(INST_HTML)\*.*
 
 inst_lib : $(CONFIGPM)

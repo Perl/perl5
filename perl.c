@@ -88,6 +88,7 @@ static void nuke_stacks _((void));
 static void open_script _((char *, bool, SV *, int *fd));
 static void usage _((char *));
 static void validate_suid _((char *, char*, int));
+static I32 read_e_script _((int idx, SV *buf_sv, int maxlen));
 #endif
 
 #ifdef PERL_OBJECT
@@ -231,9 +232,10 @@ perl_construct(register PerlInterpreter *sv_interp)
     localpatches = local_patches;	/* For possible -v */
 #endif
 
-    PerlIO_init();      /* Hook to IO system */
+    PerlIO_init();			/* Hook to IO system */
 
-    fdpid = newAV();	/* for remembering popen pids by fd */
+    fdpid = newAV();			/* for remembering popen pids by fd */
+    modglobal = newHV();		/* pointers to per-interpreter module globals */
 
     DEBUG( {
 	New(51,debname,128,char);
@@ -380,6 +382,12 @@ perl_destruct(register PerlInterpreter *sv_interp)
     SvREFCNT_dec(parsehook);
     parsehook = Nullsv;
 
+    /* call exit list functions */
+    while (exitlistlen-- > 0)
+	exitlist[exitlistlen].fn(exitlist[exitlistlen].ptr);
+
+    Safefree(exitlist);
+
     if (destruct_level == 0){
 
 	DEBUG_P(debprofdump());
@@ -417,12 +425,9 @@ perl_destruct(register PerlInterpreter *sv_interp)
     Safefree(inplace);
     inplace = Nullch;
 
-    Safefree(e_tmpname);
-    e_tmpname = Nullch;
-
-    if (e_fp) {
-	PerlIO_close(e_fp);
-	e_fp = Nullfp;
+    if (e_script) {
+	SvREFCNT_dec(e_script);
+	e_script = Nullsv;
     }
 
     /* magical thingies */
@@ -589,6 +594,15 @@ perl_free(PerlInterpreter *sv_interp)
 #endif
 }
 
+void
+perl_atexit(void (*fn) (void *), void *ptr)
+{
+    Renew(exitlist, exitlistlen+1, PerlExitListEntry);
+    exitlist[exitlistlen].fn = fn;
+    exitlist[exitlistlen].ptr = ptr;
+    ++exitlistlen;
+}
+
 int
 #ifdef PERL_OBJECT
 CPerlObj::perl_parse(void (*xsinit) (CPerlObj*), int argc, char **argv, char **env)
@@ -604,7 +618,6 @@ perl_parse(PerlInterpreter *sv_interp, void (*xsinit) (void), int argc, char **a
     char *validarg = "";
     I32 oldscope;
     AV* comppadlist;
-    int e_tmpfd = -1;
     dJMPENV;
     int ret;
     int fdscript = -1;
@@ -632,7 +645,6 @@ setuid perl scripts securely.\n");
 #ifndef VMS  /* VMS doesn't have environ array */
     origenviron = environ;
 #endif
-    e_tmpname = Nullch;
 
     if (do_undump) {
 
@@ -696,6 +708,7 @@ setuid perl scripts securely.\n");
 	s = argv[0]+1;
       reswitch:
 	switch (*s) {
+	case ' ':
 	case '0':
 	case 'F':
 	case 'a':
@@ -726,48 +739,21 @@ setuid perl scripts securely.\n");
 	case 'e':
 	    if (euid != uid || egid != gid)
 		croak("No -e allowed in setuid scripts");
-	    if (!e_fp) {
-#ifdef HAS_UMASK
-		int oldumask = PerlLIO_umask(0177);
-#endif
-	        e_tmpname = savepv(TMPPATH);
-#ifdef HAS_MKSTEMP
-		e_tmpfd = PerlLIO_mkstemp(e_tmpname);
-#else /* use mktemp() */
-		(void)PerlLIO_mktemp(e_tmpname);
-		if (!*e_tmpname)
-		    croak("Cannot generate temporary filename");
-# if defined(HAS_OPEN3) && defined(O_EXCL)
-		e_tmpfd = open(e_tmpname,
-			       O_WRONLY | O_CREAT | O_EXCL,
-			       0600);
-# else
-		(void)UNLINK(e_tmpname);
-		/* Yes, potential race.  But at least we can say we tried. */
-		e_fp = PerlIO_open(e_tmpname,"w");
-# endif
-#endif /* ifdef HAS_MKSTEMP */
-#if defined(HAS_MKSTEMP) || (defined(HAS_OPEN3) && defined(O_EXCL))
-		if (e_tmpfd < 0)
-		    croak("Cannot create temporary file \"%s\"", e_tmpname);
-		e_fp = PerlIO_fdopen(e_tmpfd,"w");
-#endif
-  		if (!e_fp)
- 		    croak("Cannot create temporary file \"%s\"", e_tmpname);
-#ifdef HAS_UMASK
-		(void)PerlLIO_umask(oldumask);
-#endif
+	    if (!e_script) {
+		e_script = newSVpv("",0);
+		filter_add(read_e_script, NULL);
 	    }
 	    if (*++s)
-		PerlIO_puts(e_fp,s);
+		sv_catpv(e_script, s);
 	    else if (argv[1]) {
-		PerlIO_puts(e_fp,argv[1]);
+		sv_catpv(e_script, argv[1]);
 		argc--,argv++;
 	    }
 	    else
 		croak("No code specified for -e");
-	    (void)PerlIO_putc(e_fp,'\n');
+	    sv_catpv(e_script, "\n");
 	    break;
+
 	case 'I':	/* -I handled both here and in moreswitches() */
 	    forbid_setid("-I");
 	    if (!*++s && (s=argv[1]) != Nullch) {
@@ -902,16 +888,9 @@ print \"  \\@INC:\\n    @INC\\n\";");
 
     if (!scriptname)
 	scriptname = argv[0];
-    if (e_fp) {
-	if (PerlIO_flush(e_fp) || PerlIO_error(e_fp) || PerlIO_close(e_fp)) {
-#ifndef MULTIPLICITY
-	    warn("Did you forget to compile with -DMULTIPLICITY?");
-#endif	    
-	    croak("Can't write to temp file for -e: %s", Strerror(errno));
-	}
-	e_fp = Nullfp;
+    if (e_script) {
 	argc++,argv--;
-	scriptname = e_tmpname;
+	scriptname = BIT_BUCKET;	/* don't look for script or read stdin */
     }
     else if (scriptname == Nullch) {
 #ifdef MSDOS
@@ -965,6 +944,9 @@ print \"  \\@INC:\\n    @INC\\n\";");
 #endif
 
     init_predump_symbols();
+    /* init_postdump_symbols not currently designed to be called */
+    /* more than once (ENV isn't cleared first, for example)	 */
+    /* But running with -u leaves %ENV & @ARGV undefined!    XXX */
     if (!do_undump)
 	init_postdump_symbols(argc,argv,env);
 
@@ -985,11 +967,9 @@ print \"  \\@INC:\\n    @INC\\n\";");
     curcop->cop_line = 0;
     curstash = defstash;
     preprocess = FALSE;
-    if (e_tmpname) {
-	(void)UNLINK(e_tmpname);
-	Safefree(e_tmpname);
-	e_tmpname = Nullch;
-	e_tmpfd = -1;
+    if (e_script) {
+	SvREFCNT_dec(e_script);
+	e_script = Nullsv;
     }
 
     /* now that script is parsed, we can modify record separator */
@@ -1200,6 +1180,8 @@ perl_call_method(char *methname, I32 flags)
     XPUSHs(sv_2mortal(newSVpv(methname,0)));
     PUTBACK;
     pp_method(ARGS);
+	if(op == &myop)
+		op = Nullop;
     return perl_call_sv(*stack_sp--, flags);
 }
 
@@ -1244,7 +1226,8 @@ perl_call_sv(SV *sv, I32 flags)
 	  && (DBcv || (DBcv = GvCV(DBsub)))
 	   /* Try harder, since this may have been a sighandler, thus
 	    * curstash may be meaningless. */
-	  && (SvTYPE(sv) != SVt_PVCV || CvSTASH((CV*)sv) != debstash))
+	  && (SvTYPE(sv) != SVt_PVCV || CvSTASH((CV*)sv) != debstash)
+	  && !(flags & G_NODEBUG))
 	op->op_private |= OPpENTERSUB_DB;
 
     if (flags & G_EVAL) {
@@ -1502,7 +1485,7 @@ usage(char *name)		/* XXX move this out into a module ? */
 "-T              turn on tainting checks",
 "-u              dump core after parsing script",
 "-U              allow unsafe operations",
-"-v              print version number and patchlevel of perl",
+"-v              print version number, patchlevel plus VERY IMPORTANT perl info",
 "-V[:variable]   print perl configuration information",
 "-w              TURN WARNINGS ON FOR COMPILATION OF YOUR SCRIPT. Recommended.",
 "-x[directory]   strip off text before #!perl line and perhaps cd to directory",
@@ -1595,8 +1578,11 @@ moreswitches(char *s)
 	inplace = savepv(s+1);
 	/*SUPPRESS 530*/
 	for (s = inplace; *s && !isSPACE(*s); s++) ;
-	if (*s)
+	if (*s) {
 	    *s++ = '\0';
+	    if (*s == '-')	/* Additional switches on #! line. */
+	        s++;
+	}
 	return s;
     case 'I':	/* -I handled both here and in parse_perl() */
 	forbid_setid("-I");
@@ -1729,7 +1715,10 @@ moreswitches(char *s)
 #endif
 	printf("\n\
 Perl may be copied only under the terms of either the Artistic License or the\n\
-GNU General Public License, which may be found in the Perl 5.0 source kit.\n\n");
+GNU General Public License, which may be found in the Perl 5.0 source kit.\n\n\
+Complete documentation for Perl, including FAQ lists, should be found on\n\
+this system using `man perl' or `perldoc perl'.  If you have access to the\n\
+Internet, point your browser at http://www.perl.com/, the Perl Home Page.\n\n");
 	PerlProc_exit(0);
     case 'w':
 	dowarn = TRUE;
@@ -1765,6 +1754,7 @@ GNU General Public License, which may be found in the Perl 5.0 source kit.\n\n")
 /* compliments of Tom Christiansen */
 
 /* unexec() can be found in the Gnu emacs distribution */
+/* Known to work with -DUNEXEC and using unexelf.c from GNU emacs-20.2 */
 
 void
 my_unexec(void)
@@ -1772,18 +1762,16 @@ my_unexec(void)
 #ifdef UNEXEC
     SV*    prog;
     SV*    file;
-    int    status;
+    int    status = 1;
     extern int etext;
 
-    prog = newSVpv(BIN_EXP);
+    prog = newSVpv(BIN_EXP, 0);
     sv_catpv(prog, "/perl");
-    file = newSVpv(origfilename);
+    file = newSVpv(origfilename, 0);
     sv_catpv(file, ".perldump");
 
-    status = unexec(SvPVX(file), SvPVX(prog), &etext, sbrk(0), 0);
-    if (status)
-	PerlIO_printf(PerlIO_stderr(), "unexec of %s into %s failed!\n",
-		      SvPVX(prog), SvPVX(file));
+    unexec(SvPVX(file), SvPVX(prog), &etext, sbrk(0), 0);
+    /* unexec prints msg to stderr in case of failure */
     PerlProc_exit(status);
 #else
 #  ifdef VMS
@@ -1836,201 +1824,9 @@ STATIC void
 open_script(char *scriptname, bool dosearch, SV *sv, int *fdscript)
 {
     dTHR;
-    char *xfound = Nullch;
-    char *xfailed = Nullch;
     register char *s;
-    I32 len;
-    int retval;
-#if defined(DOSISH) && !defined(OS2) && !defined(atarist)
-#  define SEARCH_EXTS ".bat", ".cmd", NULL
-#  define MAX_EXT_LEN 4
-#endif
-#ifdef OS2
-#  define SEARCH_EXTS ".cmd", ".btm", ".bat", ".pl", NULL
-#  define MAX_EXT_LEN 4
-#endif
-#ifdef VMS
-#  define SEARCH_EXTS ".pl", ".com", NULL
-#  define MAX_EXT_LEN 4
-#endif
-    /* additional extensions to try in each dir if scriptname not found */
-#ifdef SEARCH_EXTS
-    char *ext[] = { SEARCH_EXTS };
-    int extidx = 0, i = 0;
-    char *curext = Nullch;
-#else
-#  define MAX_EXT_LEN 0
-#endif
 
-    /*
-     * If dosearch is true and if scriptname does not contain path
-     * delimiters, search the PATH for scriptname.
-     *
-     * If SEARCH_EXTS is also defined, will look for each
-     * scriptname{SEARCH_EXTS} whenever scriptname is not found
-     * while searching the PATH.
-     *
-     * Assuming SEARCH_EXTS is C<".foo",".bar",NULL>, PATH search
-     * proceeds as follows:
-     *   If DOSISH or VMSISH:
-     *     + look for ./scriptname{,.foo,.bar}
-     *     + search the PATH for scriptname{,.foo,.bar}
-     *
-     *   If !DOSISH:
-     *     + look *only* in the PATH for scriptname{,.foo,.bar} (note
-     *       this will not look in '.' if it's not in the PATH)
-     */
-
-#ifdef VMS
-#  ifdef ALWAYS_DEFTYPES
-    len = strlen(scriptname);
-    if (!(len == 1 && *scriptname == '-') && scriptname[len-1] != ':') {
-	int hasdir, idx = 0, deftypes = 1;
-	bool seen_dot = 1;
-
-	hasdir = !dosearch || (strpbrk(scriptname,":[</") != Nullch) ;
-#  else
-    if (dosearch) {
-	int hasdir, idx = 0, deftypes = 1;
-	bool seen_dot = 1;
-
-	hasdir = (strpbrk(scriptname,":[</") != Nullch) ;
-#  endif
-	/* The first time through, just add SEARCH_EXTS to whatever we
-	 * already have, so we can check for default file types. */
-	while (deftypes ||
-	       (!hasdir && my_trnlnm("DCL$PATH",tokenbuf,idx++)) )
-	{
-	    if (deftypes) {
-		deftypes = 0;
-		*tokenbuf = '\0';
-	    }
-	    if ((strlen(tokenbuf) + strlen(scriptname)
-		 + MAX_EXT_LEN) >= sizeof tokenbuf)
-		continue;	/* don't search dir with too-long name */
-	    strcat(tokenbuf, scriptname);
-#else  /* !VMS */
-
-#ifdef DOSISH
-    if (strEQ(scriptname, "-"))
- 	dosearch = 0;
-    if (dosearch) {		/* Look in '.' first. */
-	char *cur = scriptname;
-#ifdef SEARCH_EXTS
-	if ((curext = strrchr(scriptname,'.')))	/* possible current ext */
-	    while (ext[i])
-		if (strEQ(ext[i++],curext)) {
-		    extidx = -1;		/* already has an ext */
-		    break;
-		}
-	do {
-#endif
-	    DEBUG_p(PerlIO_printf(Perl_debug_log,
-				  "Looking for %s\n",cur));
-	    if (PerlLIO_stat(cur,&statbuf) >= 0) {
-		dosearch = 0;
-		scriptname = cur;
-#ifdef SEARCH_EXTS
-		break;
-#endif
-	    }
-#ifdef SEARCH_EXTS
-	    if (cur == scriptname) {
-		len = strlen(scriptname);
-		if (len+MAX_EXT_LEN+1 >= sizeof(tokenbuf))
-		    break;
-		cur = strcpy(tokenbuf, scriptname);
-	    }
-	} while (extidx >= 0 && ext[extidx]	/* try an extension? */
-		 && strcpy(tokenbuf+len, ext[extidx++]));
-#endif
-    }
-#endif
-
-    if (dosearch && !strchr(scriptname, '/')
-#ifdef DOSISH
-		 && !strchr(scriptname, '\\')
-#endif
-		 && (s = PerlEnv_getenv("PATH"))) {
-	bool seen_dot = 0;
-	
-	bufend = s + strlen(s);
-	while (s < bufend) {
-#if defined(atarist) || defined(DOSISH)
-	    for (len = 0; *s
-#  ifdef atarist
-		    && *s != ','
-#  endif
-		    && *s != ';'; len++, s++) {
-		if (len < sizeof tokenbuf)
-		    tokenbuf[len] = *s;
-	    }
-	    if (len < sizeof tokenbuf)
-		tokenbuf[len] = '\0';
-#else  /* ! (atarist || DOSISH) */
-	    s = delimcpy(tokenbuf, tokenbuf + sizeof tokenbuf, s, bufend,
-			':',
-			&len);
-#endif /* ! (atarist || DOSISH) */
-	    if (s < bufend)
-		s++;
-	    if (len + 1 + strlen(scriptname) + MAX_EXT_LEN >= sizeof tokenbuf)
-		continue;	/* don't search dir with too-long name */
-	    if (len
-#if defined(atarist) || defined(DOSISH)
-		&& tokenbuf[len - 1] != '/'
-		&& tokenbuf[len - 1] != '\\'
-#endif
-	       )
-		tokenbuf[len++] = '/';
-	    if (len == 2 && tokenbuf[0] == '.')
-		seen_dot = 1;
-	    (void)strcpy(tokenbuf + len, scriptname);
-#endif  /* !VMS */
-
-#ifdef SEARCH_EXTS
-	    len = strlen(tokenbuf);
-	    if (extidx > 0)	/* reset after previous loop */
-		extidx = 0;
-	    do {
-#endif
-	    	DEBUG_p(PerlIO_printf(Perl_debug_log, "Looking for %s\n",tokenbuf));
-		retval = PerlLIO_stat(tokenbuf,&statbuf);
-#ifdef SEARCH_EXTS
-	    } while (  retval < 0		/* not there */
-		    && extidx>=0 && ext[extidx]	/* try an extension? */
-		    && strcpy(tokenbuf+len, ext[extidx++])
-		);
-#endif
-	    if (retval < 0)
-		continue;
-	    if (S_ISREG(statbuf.st_mode)
-		&& cando(S_IRUSR,TRUE,&statbuf)
-#ifndef DOSISH
-		&& cando(S_IXUSR,TRUE,&statbuf)
-#endif
-		)
-	    {
-		xfound = tokenbuf;              /* bingo! */
-		break;
-	    }
-	    if (!xfailed)
-		xfailed = savepv(tokenbuf);
-	}
-#ifndef DOSISH
-	if (!xfound && !seen_dot && !xfailed && (PerlLIO_stat(scriptname,&statbuf) < 0))
-#endif
-	    seen_dot = 1;			/* Disable message. */
-	if (!xfound)
-	    croak("Can't %s %s%s%s",
-		  (xfailed ? "execute" : "find"),
-		  (xfailed ? xfailed : scriptname),
-		  (xfailed ? "" : " on PATH"),
-		  (xfailed || seen_dot) ? "" : ", '.' not in PATH");
-	if (xfailed)
-	    Safefree(xfailed);
-	scriptname = xfound;
-    }
+    scriptname = find_script(scriptname, dosearch, NULL, 0);
 
     if (strnEQ(scriptname, "/dev/fd/", 8) && isDIGIT(scriptname[8]) ) {
 	char *s = scriptname + 8;
@@ -2042,7 +1838,7 @@ open_script(char *scriptname, bool dosearch, SV *sv, int *fdscript)
     }
     else
 	*fdscript = -1;
-    origfilename = savepv(e_tmpname ? "-e" : scriptname);
+    origfilename = savepv(e_script ? "-e" : scriptname);
     curcop->cop_filegv = gv_fetchfile(origfilename);
     if (strEQ(origfilename,"-"))
 	scriptname = "";
@@ -2136,9 +1932,6 @@ sed %s -e \"/^[^#]/b\" \
 	if (rsfp)
 	    fcntl(PerlIO_fileno(rsfp),F_SETFD,1);  /* ensure close-on-exec */
 #endif
-    }
-    if (e_tmpname) {
-	e_fp = rsfp;
     }
     if (!rsfp) {
 #ifdef DOSUID
@@ -2424,6 +2217,23 @@ find_beginning(void)
 	}
     }
 }
+
+
+STATIC I32
+read_e_script(int idx, SV *buf_sv, int maxlen)
+{
+    char *p, *nl;
+    FILTER_READ(idx+1, buf_sv, maxlen);
+    p  = SvPVX(e_script);
+    nl = strchr(p, '\n');
+    nl = (nl) ? nl+1 : SvEND(e_script);
+    if (nl-p == 0)
+	return 0;
+    sv_catpvn(buf_sv, p, nl-p);
+    sv_chop(e_script, nl);
+    return 1;
+}
+
 
 STATIC void
 init_ids(void)
@@ -2724,7 +2534,7 @@ init_perllib(void)
     ARCHLIB PRIVLIB SITEARCH and SITELIB 
 */
 #ifdef APPLLIB_EXP
-    incpush(APPLLIB_EXP, FALSE);
+    incpush(APPLLIB_EXP, TRUE);
 #endif
 
 #ifdef ARCHLIB_EXP
@@ -2882,7 +2692,6 @@ init_main_thread()
     SvLEN_set(thrsv, sizeof(thr));
     *SvEND(thrsv) = '\0';	/* in the trailing_nul field */
     thr->oursv = thrsv;
-    curcop = &compiling;
     chopset = " \n-";
 
     MUTEX_LOCK(&threads_mutex);
@@ -3030,10 +2839,16 @@ my_failure_exit(void)
 	    STATUS_NATIVE_SET(vaxc$errno);
     }
 #else
+    int exitstatus;
     if (errno & 255)
 	STATUS_POSIX_SET(errno);
-    else if (STATUS_POSIX == 0)
-	STATUS_POSIX_SET(255);
+    else {
+	exitstatus = STATUS_POSIX >> 8; 
+	if (exitstatus & 255)
+	    STATUS_POSIX_SET(exitstatus);
+	else
+	    STATUS_POSIX_SET(255);
+    }
 #endif
     my_exit_jump();
 }
@@ -3046,14 +2861,9 @@ my_exit_jump(void)
     I32 gimme;
     SV **newsp;
 
-    if (e_tmpname) {
-	if (e_fp) {
-	    PerlIO_close(e_fp);
-	    e_fp = Nullfp;
-	}
-	(void)UNLINK(e_tmpname);
-	Safefree(e_tmpname);
-	e_tmpname = Nullch;
+    if (e_script) {
+	SvREFCNT_dec(e_script);
+	e_script = Nullsv;
     }
 
     POPSTACK_TO(mainstack);
@@ -3066,6 +2876,3 @@ my_exit_jump(void)
 
     JMPENV_JUMP(2);
 }
-
-
-

@@ -31,8 +31,7 @@ PERLVAR(Isawstudy,	bool)		/* do fbm_instr on all strings */
 PERLVAR(Isawvec,	bool)		
 PERLVAR(Iunsafe,	bool)		
 PERLVAR(Iinplace,	char *)		
-PERLVAR(Ie_tmpname,	char *)		
-PERLVAR(Ie_fp,		PerlIO *)		
+PERLVAR(Ie_script,	SV *)		
 PERLVAR(Iperldb,	U32)		
 
 /* This value may be raised by extensions for testing purposes */
@@ -151,6 +150,15 @@ PERLVAR(Imess_sv,	SV *)
 PERLVAR(Iors,		char *)		/* $\ */
 PERLVAR(Iorslen,	STRLEN)		
 PERLVAR(Iofmt,		char *)		/* $# */
+
+/* interpreter atexit processing */
+PERLVARI(Iexitlist,	PerlExitListEntry *, NULL)	/* list of exit functions */
+PERLVARI(Iexitlistlen,	I32, 0)				/* length of same */
+PERLVAR(Imodglobal,	HV *)				/* per-interp module data */
+
+#ifdef HAVE_INTERP_INTERN
+PERLVAR(Isys_intern,	struct interp_intern)		/* platform internals */
+#endif
 
 /* more statics moved here */
 PERLVAR(Imh,		HE)		/* from hv.c */

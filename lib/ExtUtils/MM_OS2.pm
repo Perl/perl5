@@ -8,7 +8,6 @@ require Exporter;
 Exporter::import('ExtUtils::MakeMaker',
        qw( $Verbose &neatvalue));
 
-$ENV{EMXSHELL} = 'sh'; # to run `commands`
 unshift @MM::ISA, 'ExtUtils::MM_OS2';
 
 sub dlsyms {
@@ -29,7 +28,8 @@ $self->{BASEEXT}.def: Makefile.PL
      '", "DLBASE" => "',$self->{DLBASE},
      '", "DL_FUNCS" => ',neatvalue($funcs),
      ', "IMPORTS" => ',neatvalue($imports),
-     ', "DL_VARS" => ', neatvalue($vars), ');\'
+     ', "VERSION" => "',$self->{VERSION},
+     '", "DL_VARS" => ', neatvalue($vars), ');\'
 ');
     }
     join('',@m);

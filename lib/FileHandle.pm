@@ -249,6 +249,10 @@ It will also croak() if accidentally called in a scalar context.
 
 =back
 
+There are many other functions available since FileHandle is descended
+from IO::File, IO::Seekable, and IO::Handle.  Please see those
+respective pages for documentation on more functions.
+
 =head1 SEE ALSO
 
 The B<IO> extension,

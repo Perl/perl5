@@ -2,7 +2,7 @@
 
 # $RCSfile: s.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:22 $
 
-print "1..68\n";
+print "1..69\n";
 
 $x = 'foo';
 $_ = "x";
@@ -267,3 +267,6 @@ $_="baacbaa";
 tr/a/b/s;
 print $_ eq "bbcbb" ? "ok 68\n" : "not ok 68 # `$_' ne `bbcbb'\n";
 
+# XXX TODO: Most tests above don't test return values of the ops. They should.
+$_ = "ab";
+print (s/a/b/ == 1 ? "ok 69\n" : "not ok 69\n");

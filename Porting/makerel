@@ -21,15 +21,21 @@ $patchlevel_h = `grep '#define ' patchlevel.h`;
 print $patchlevel_h;
 $patchlevel = $1 if $patchlevel_h =~ /PATCHLEVEL\s+(\d+)/;
 $subversion = $1 if $patchlevel_h =~ /SUBVERSION\s+(\d+)/;
-die "Unable to parse patchlevel.h" unless $subversion > 0;
+die "Unable to parse patchlevel.h" unless $subversion >= 0;
 $vers = sprintf("5.%03d", $patchlevel);
-$vers.= sprintf( "_%02d", $subversion) if $subversion;
+$vms_vers = sprintf("5_%03d", $patchlevel);
+if ($subversion) {
+    $vers.= sprintf( "_%02d", $subversion);
+    $vms_vers.= sprintf( "%02d", $subversion);
+} else {
+    $vms_vers.= "  ";
+}
 
 $perl = "perl$vers";
-$reldir = "$relroot/$perl";
+$reldir = "$perl";
 $reldir .= "-$ARGV[0]" if $ARGV[0];
 
-print "\nMaking a release for $perl in $reldir\n\n";
+print "\nMaking a release for $perl in $relroot/$reldir\n\n";
 
 
 print "Cross-checking the MANIFEST...\n";
@@ -45,6 +51,10 @@ if ("@$missentry" =~ m/\.orig\b/) {
 }
 die "Aborted.\n" if @$missentry or @$missfile;
 print "\n";
+
+
+print "Updating VMS version specific files with $vms_vers...\n";
+system("perl -pi -e 's/^\QPERL_VERSION = \E\d\_\d+(\s*\#)/PERL_VERSION = $vms_vers$1/' vms/descrip.mms");
 
 
 print "Setting file permissions...\n";
@@ -77,23 +87,24 @@ system("chmod +x @exe");
 print "\n";
 
 
-print "Creating $reldir release directory...\n";
-die "$reldir release directory already exists\n"   if -e "../$perl";
-die "$reldir.tar.gz release file already exists\n" if -e "../$reldir.tar.gz";
-mkdir($reldir, 0755) or die "mkdir $reldir: $!\n";
+print "Creating $relroot/$reldir release directory...\n";
+die "$relroot/$reldir release directory already exists\n"   if -e "$relroot/$reldir";
+die "$relroot/$reldir.tar.gz release file already exists\n" if -e "$relroot/$reldir.tar.gz";
+mkdir("$relroot/$reldir", 0755) or die "mkdir $relroot/$reldir: $!\n";
 print "\n";
 
 
 print "Copying files to release directory...\n";
 # ExtUtils::Manifest maniread does not preserve the order
-$cmd = "awk '{print \$1}' MANIFEST | cpio -pdm $reldir";
+$cmd = "awk '{print \$1}' MANIFEST | cpio -pdm $relroot/$reldir";
 system($cmd) == 0 or die "$cmd failed";
 print "\n";
 
 chdir $relroot or die $!;
 
 print "Creating and compressing the tar file...\n";
-$cmd = "tar cf - $perl | gzip --best > $perl.tar.gz";
+my $src = (-e $perl) ? $perl : 'perl'; # 'perl' in maint branch
+$cmd = "tar cf - $reldir | gzip --best > $perl.tar.gz";
 system($cmd) == 0 or die "$cmd failed";
 print "\n";
 

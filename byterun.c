@@ -38,7 +38,7 @@ void byterun(PerlIO *fp)
 	switch (insn) {
 	  case INSN_COMMENT:		/* 35 */
 	    {
-		comment arg;
+		comment_t arg;
 		BGET_comment(arg);
 		arg = arg;
 		break;

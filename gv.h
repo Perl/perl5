@@ -130,3 +130,4 @@ HV *GvHVn();
 #define GV_ADD		0x01
 #define GV_ADDMULTI	0x02
 #define GV_ADDWARN	0x04
+#define GV_NOINIT	0x10	/* 8 is used without a symbolic constant */

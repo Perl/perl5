@@ -115,6 +115,7 @@ VIRTUAL OP*	die _((const char* pat,...));
 VIRTUAL OP*	die_where _((char* message));
 VIRTUAL void	dounwind _((I32 cxix));
 VIRTUAL bool	do_aexec _((SV* really, SV** mark, SV** sp));
+VIRTUAL int	do_binmode _((PerlIO *fp, int iotype, int flag));
 VIRTUAL void    do_chop _((SV* asv, SV* sv));
 VIRTUAL bool	do_close _((GV* gv, bool not_implicit));
 VIRTUAL bool	do_eof _((GV* gv));
@@ -166,6 +167,7 @@ void	dump_packsubs _((HV* stash));
 void	dump_sub _((GV* gv));
 VIRTUAL void	fbm_compile _((SV* sv, U32 flags));
 VIRTUAL char*	fbm_instr _((unsigned char* big, unsigned char* bigend, SV* littlesv));
+VIRTUAL char*	find_script _((char *scriptname, bool dosearch, char **search_ext, I32 flags));
 #ifdef USE_THREADS
 VIRTUAL PADOFFSET	find_threadsv _((char *name));
 #endif
@@ -243,11 +245,14 @@ VIRTUAL int	magic_get	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_getarylen	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_getdefelem _((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_getglob	_((SV* sv, MAGIC* mg));
+VIRTUAL int	magic_getnkeys	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_getpack	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_getpos	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_getsig	_((SV* sv, MAGIC* mg));
+VIRTUAL int	magic_getsubstr	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_gettaint	_((SV* sv, MAGIC* mg));
 VIRTUAL int	magic_getuvar	_((SV* sv, MAGIC* mg));
+VIRTUAL int	magic_getvec	_((SV* sv, MAGIC* mg));
 VIRTUAL U32	magic_len	_((SV* sv, MAGIC* mg));
 #ifdef USE_THREADS
 VIRTUAL int	magic_mutexfree	_((SV* sv, MAGIC* mg));
@@ -362,11 +367,7 @@ VIRTUAL SV*	newRV _((SV* pref));
 #if !defined(__GNUC__) && (defined(CRIPPLED_CC) || defined(USE_THREADS) || defined(PERL_OBJECT))
 VIRTUAL SV*	newRV_noinc _((SV *sv));
 #endif
-#ifdef LEAKTEST
-VIRTUAL SV*	newSV _((I32 x, STRLEN len));
-#else
 VIRTUAL SV*	newSV _((STRLEN len));
-#endif
 VIRTUAL OP*	newSVREF _((OP* o));
 VIRTUAL OP*	newSVOP _((I32 type, I32 flags, SV* sv));
 VIRTUAL SV*	newSViv _((IV i));
@@ -401,6 +402,7 @@ VIRTUAL void	peep _((OP* o));
 #ifndef PERL_OBJECT
 PerlInterpreter*	perl_alloc _((void));
 #endif
+VIRTUAL void    perl_atexit _((void(*fn)(void *), void*));
 VIRTUAL I32	perl_call_argv _((char* sub_name, I32 flags, char** argv));
 VIRTUAL I32	perl_call_method _((char* methname, I32 flags));
 VIRTUAL I32	perl_call_pv _((char* sub_name, I32 flags));

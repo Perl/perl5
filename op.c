@@ -540,6 +540,11 @@ find_threadsv(char *name)
 	    sawampersand = TRUE;
 	    SvREADONLY_on(sv);
 	    /* FALL THROUGH */
+
+	/* XXX %! tied to Errno.pm needs to be added here.
+	 * See gv_fetchpv(). */
+	/* case '!': */
+
 	default:
 	    sv_magic(sv, 0, 0, name, 1); 
 	}
@@ -1248,6 +1253,7 @@ mod(OP *o, I32 type)
     else if (!type) {
 	o->op_private |= OPpLVAL_INTRO;
 	o->op_flags &= ~OPf_SPECIAL;
+	hints |= HINT_BLOCK_SCOPE;
     }
     else if (type != OP_GREPSTART && type != OP_ENTERSUB)
 	o->op_flags |= OPf_REF;
@@ -1689,9 +1695,12 @@ fold_constants(register OP *o)
     if (type == OP_RV2GV)
 	return newGVOP(OP_GV, 0, (GV*)sv);
     else {
-	if ((SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK)) == SVf_NOK) {
+	/* try to smush double to int, but don't smush -2.0 to -2 */
+	if ((SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK)) == SVf_NOK &&
+	    type != OP_NEGATE)
+	{
 	    IV iv = SvIV(sv);
-	    if ((double)iv == SvNV(sv)) {	/* can we smush double to int */
+	    if ((double)iv == SvNV(sv)) {
 		SvREFCNT_dec(sv);
 		sv = newSViv(iv);
 	    }
@@ -2428,6 +2437,7 @@ newASSIGNOP(I32 flags, OP *left, I32 optype, OP *right)
     }
 
     if (list_assignment(left)) {
+	dTHR;
 	modcount = 0;
 	eval_start = right;	/* Grandfathering $[ assignment here.  Bletch.*/
 	left = mod(left, OP_AASSIGN);
@@ -2675,7 +2685,7 @@ new_logop(I32 type, I32 flags, OP** firstp, OP** otherp)
 	case OP_NULL:
 	    if (k2 && k2->op_type == OP_READLINE
 		  && (k2->op_flags & OPf_STACKED)
-		  && (k1->op_type == OP_RV2SV || k1->op_type == OP_PADSV))
+		  && ((k1->op_flags & OPf_WANT) == OPf_WANT_SCALAR)) 
 		warnop = k2->op_type;
 	    break;
 
@@ -2837,6 +2847,24 @@ newLOOPOP(I32 flags, I32 debuggable, OP *expr, OP *block)
 	    || (expr->op_type == OP_NULL && expr->op_targ == OP_GLOB)) {
 	    expr = newUNOP(OP_DEFINED, 0,
 		newASSIGNOP(0, newDEFSVOP(), 0, expr) );
+	} else if (expr->op_flags & OPf_KIDS) {
+	    OP *k1 = ((UNOP*)expr)->op_first;
+	    OP *k2 = (k1) ? k1->op_sibling : NULL;
+	    switch (expr->op_type) {
+	      case OP_NULL: 
+		if (k2 && k2->op_type == OP_READLINE
+		      && (k2->op_flags & OPf_STACKED)
+		      && ((k1->op_flags & OPf_WANT) == OPf_WANT_SCALAR)) 
+		    expr = newUNOP(OP_DEFINED, 0, expr);
+		break;                                
+
+	      case OP_SASSIGN:
+		if (k1->op_type == OP_READDIR
+		      || k1->op_type == OP_GLOB
+		      || k1->op_type == OP_EACH)
+		    expr = newUNOP(OP_DEFINED, 0, expr);
+		break;
+	    }
 	}
     }
 
@@ -2872,6 +2900,24 @@ newWHILEOP(I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *expr, OP *b
 		 || (expr->op_type == OP_NULL && expr->op_targ == OP_GLOB))) {
 	expr = newUNOP(OP_DEFINED, 0,
 	    newASSIGNOP(0, newDEFSVOP(), 0, expr) );
+    } else if (expr && (expr->op_flags & OPf_KIDS)) {
+	OP *k1 = ((UNOP*)expr)->op_first;
+	OP *k2 = (k1) ? k1->op_sibling : NULL;
+	switch (expr->op_type) {
+	  case OP_NULL: 
+	    if (k2 && k2->op_type == OP_READLINE
+		  && (k2->op_flags & OPf_STACKED)
+		  && ((k1->op_flags & OPf_WANT) == OPf_WANT_SCALAR)) 
+		expr = newUNOP(OP_DEFINED, 0, expr);
+	    break;                                
+
+	  case OP_SASSIGN:
+	    if (k1->op_type == OP_READDIR
+		  || k1->op_type == OP_GLOB
+		  || k1->op_type == OP_EACH)
+		expr = newUNOP(OP_DEFINED, 0, expr);
+	    break;
+	}
     }
 
     if (!block)
@@ -3313,7 +3359,8 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 {
     dTHR;
     char *name = o ? SvPVx(cSVOPo->op_sv, na) : Nullch;
-    GV *gv = gv_fetchpv(name ? name : "__ANON__", GV_ADDMULTI, SVt_PVCV);
+    GV *gv = gv_fetchpv(name ? name : "__ANON__",
+			GV_ADDMULTI | (block ? 0 : GV_NOINIT), SVt_PVCV);
     char *ps = proto ? SvPVx(((SVOP*)proto)->op_sv, na) : Nullch;
     register CV *cv;
     I32 ix;
@@ -3322,6 +3369,23 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 	SAVEFREEOP(o);
     if (proto)
 	SAVEFREEOP(proto);
+
+    if (SvTYPE(gv) != SVt_PVGV) {	/* Prototype now, and had
+					   maximum a prototype before. */
+	if (SvTYPE(gv) > SVt_NULL) {
+	    if (!SvPOK((SV*)gv) && !(SvIOK((SV*)gv) && SvIVX((SV*)gv) == -1))
+		warn("Runaway prototype");
+	    cv_ckproto((CV*)gv, NULL, ps);
+	}
+	if (ps)
+	    sv_setpv((SV*)gv, ps);
+	else
+	    sv_setiv((SV*)gv, -1);
+	SvREFCNT_dec(compcv);
+	compcv = NULL;
+	sub_generation++;
+	goto noblock;
+    }
 
     if (!name || GvCVGEN(gv))
 	cv = Nullcv;
@@ -3404,6 +3468,7 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 	}
     }
     if (!block) {
+      noblock:
 	copline = NOLINE;
 	LEAVE_SCOPE(floor);
 	return cv;
@@ -3488,7 +3553,6 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 	    ENTER;
 	    SAVESPTR(compiling.cop_filegv);
 	    SAVEI16(compiling.cop_line);
-	    SAVEI32(perldb);
 	    save_svref(&rs);
 	    sv_setsv(rs, nrs);
 
@@ -4883,6 +4947,8 @@ peep(register OP *o)
 	    o->op_seq = op_seqmax++;
 	    if (dowarn && o->op_next && o->op_next->op_type == OP_NEXTSTATE) {
 		if (o->op_next->op_sibling &&
+			o->op_next->op_sibling->op_type != OP_EXIT &&
+			o->op_next->op_sibling->op_type != OP_WARN &&
 			o->op_next->op_sibling->op_type != OP_DIE) {
 		    line_t oldline = curcop->cop_line;
 

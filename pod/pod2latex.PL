@@ -475,6 +475,9 @@ while (<POD>) {
 	elsif ($cmd eq 'pod') {
 	    ;	# recognise the pod directive, as no op (hs)
 	}
+ 	elsif ($cmd eq 'pod') {
+ 	    ;    # recognise the pod directive, as no op (hs)
+ 	}
 	else {
 	    warn "Unrecognized directive: $cmd\n";
 	}

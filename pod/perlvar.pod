@@ -413,6 +413,9 @@ C<$? & 255> gives which signal, if any, the process died from, and
 whether there was a core dump.  (Mnemonic: similar to B<sh> and
 B<ksh>.)
 
+Additionally, if the C<h_errno> variable is supported in C, its value
+is returned via $? if any of the C<gethost*()> functions fail.
+
 Note that if you have installed a signal handler for C<SIGCHLD>, the
 value of C<$?> will usually be wrong outside that handler.
 
@@ -689,7 +692,7 @@ run-time only. This is a new mechanism and the details may change.
 
 Current state of the interpreter.  Undefined if parsing of the current
 module/eval is not finished (may happen in $SIG{__DIE__} and
-$SIG{__WARN__} handlers).  True if inside an eval, othewise false.
+$SIG{__WARN__} handlers).  True if inside an eval, otherwise false.
 
 =item $BASETIME
 
@@ -821,7 +824,7 @@ The C<__DIE__> handler is explicitly disabled during the call, so that you
 can die from a C<__DIE__> handler.  Similarly for C<__WARN__>.
 
 Note that the C<$SIG{__DIE__}> hook is called even inside eval()ed
-blocks/strings.  See L<perlfunc/die>, L<perlvar/$^S> for how to
+blocks/strings.  See L<perlfunc/die> and L<perlvar/$^S> for how to
 circumvent this.
 
 Note that C<__DIE__>/C<__WARN__> handlers are very special in one

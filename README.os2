@@ -308,7 +308,31 @@ L<"Frequently asked questions">), and perl should be able to find it
 The only cases when the shell is not used is the multi-argument
 system() (see L<perlfunc/system>)/exec() (see L<perlfunc/exec>), and
 one-argument version thereof without redirection and shell
-meta-characters.
+meta-characters.  Perl may also start scripts which start with cookies
+C<extproc> or C<#!> directly, without an intervention of shell.
+
+If starting scripts directly, Perl will use exactly the same algorithm as for 
+the search of script given by B<-S> command-line option: it will look in
+the current directory, then on components of C<$ENV{PATH}> using the 
+following order of appended extensions: no extension, F<.cmd>, F<.btm>, 
+F<.bat>, F<.pl>.
+
+Note that Perl will start to look for scripts only if OS/2 cannot start the
+specified application, thus C<system 'blah'> will not look for a script if 
+there is an executable file F<blah.exe> I<anywhere> on C<PATH>.  
+
+Note also that executable files on OS/2 can have an arbitrary extension, 
+but F<.exe> will be automatically appended if no dot is present in the name.  
+The workaround as as simple as that:  since F<blah.> and F<blah> denote the 
+same file, to start an executable residing in file F<n:/bin/blah> (no 
+extension) give an argument C<n:/bin/blah.> to system().
+
+The last note is that currently it is not straightforward to start PM 
+programs from VIO (=text-mode) Perl process and visa versa.  Either ensure
+that shell will be used, as in C<system 'cmd /c epm'>, or start it using
+optional arguments to system() documented in C<OS2::Process> module.  This
+is considered a bug and should be fixed soon.
+
 
 =head1 Frequently asked questions
 
@@ -780,6 +804,10 @@ F<POSIX.c>.
 
 =head2 Testing
 
+If you haven't yet moved perl.dll onto LIBPATH, do it now(alternatively, if
+you have a previous perl installation you'd rather not disrupt until this one
+is installed, copy perl.dll to the t directory).
+
 Now run
 
   make test
@@ -910,6 +938,8 @@ platforms. You may disable it by setting PERL_BADFREE environment variable
 to 1.
 
 =head2 Installing the built perl
+
+If you haven't yet moved perl.dll onto LIBPATH, do it now.
 
 Run
 

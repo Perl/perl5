@@ -45,6 +45,7 @@
 #define markstack		(curinterp->Tmarkstack)
 #define markstack_max		(curinterp->Tmarkstack_max)
 #define markstack_ptr		(curinterp->Tmarkstack_ptr)
+#define modcount		(curinterp->Tmodcount)
 #define nrs			(curinterp->Tnrs)
 #define ofs			(curinterp->Tofs)
 #define ofslen			(curinterp->Tofslen)
@@ -113,14 +114,14 @@
 #define doswitches		(curinterp->Idoswitches)
 #define dowarn			(curinterp->Idowarn)
 #define dumplvl			(curinterp->Idumplvl)
-#define e_fp			(curinterp->Ie_fp)
-#define e_tmpname		(curinterp->Ie_tmpname)
+#define e_script		(curinterp->Ie_script)
 #define endav			(curinterp->Iendav)
 #define envgv			(curinterp->Ienvgv)
 #define errgv			(curinterp->Ierrgv)
 #define eval_root		(curinterp->Ieval_root)
 #define eval_start		(curinterp->Ieval_start)
-#define extralen		(curinterp->Iextralen)
+#define exitlist		(curinterp->Iexitlist)
+#define exitlistlen		(curinterp->Iexitlistlen)
 #define fdpid			(curinterp->Ifdpid)
 #define filemode		(curinterp->Ifilemode)
 #define firstgv			(curinterp->Ifirstgv)
@@ -158,7 +159,7 @@
 #define minus_l			(curinterp->Iminus_l)
 #define minus_n			(curinterp->Iminus_n)
 #define minus_p			(curinterp->Iminus_p)
-#define modcount		(curinterp->Imodcount)
+#define modglobal		(curinterp->Imodglobal)
 #define multiline		(curinterp->Imultiline)
 #define mystrk			(curinterp->Imystrk)
 #define ofmt			(curinterp->Iofmt)
@@ -233,6 +234,7 @@
 #define sv_count		(curinterp->Isv_count)
 #define sv_objcount		(curinterp->Isv_objcount)
 #define sv_root			(curinterp->Isv_root)
+#define sys_intern		(curinterp->Isys_intern)
 #define tainting		(curinterp->Itainting)
 #define threadnum		(curinterp->Ithreadnum)
 #define thrsv			(curinterp->Ithrsv)
@@ -275,14 +277,14 @@
 #define Idoswitches		doswitches
 #define Idowarn			dowarn
 #define Idumplvl		dumplvl
-#define Ie_fp			e_fp
-#define Ie_tmpname		e_tmpname
+#define Ie_script		e_script
 #define Iendav			endav
 #define Ienvgv			envgv
 #define Ierrgv			errgv
 #define Ieval_root		eval_root
 #define Ieval_start		eval_start
-#define Iextralen		extralen
+#define Iexitlist		exitlist
+#define Iexitlistlen		exitlistlen
 #define Ifdpid			fdpid
 #define Ifilemode		filemode
 #define Ifirstgv		firstgv
@@ -320,7 +322,7 @@
 #define Iminus_l		minus_l
 #define Iminus_n		minus_n
 #define Iminus_p		minus_p
-#define Imodcount		modcount
+#define Imodglobal		modglobal
 #define Imultiline		multiline
 #define Imystrk			mystrk
 #define Iofmt			ofmt
@@ -395,6 +397,7 @@
 #define Isv_count		sv_count
 #define Isv_objcount		sv_objcount
 #define Isv_root		sv_root
+#define Isys_intern		sys_intern
 #define Itainting		tainting
 #define Ithreadnum		threadnum
 #define Ithrsv			thrsv
@@ -428,6 +431,7 @@
 #define Tmarkstack		markstack
 #define Tmarkstack_max		markstack_max
 #define Tmarkstack_ptr		markstack_ptr
+#define Tmodcount		modcount
 #define Tnrs			nrs
 #define Tofs			ofs
 #define Tofslen			ofslen
@@ -498,14 +502,14 @@
 #define doswitches		Perl_doswitches
 #define dowarn			Perl_dowarn
 #define dumplvl			Perl_dumplvl
-#define e_fp			Perl_e_fp
-#define e_tmpname		Perl_e_tmpname
+#define e_script		Perl_e_script
 #define endav			Perl_endav
 #define envgv			Perl_envgv
 #define errgv			Perl_errgv
 #define eval_root		Perl_eval_root
 #define eval_start		Perl_eval_start
-#define extralen		Perl_extralen
+#define exitlist		Perl_exitlist
+#define exitlistlen		Perl_exitlistlen
 #define fdpid			Perl_fdpid
 #define filemode		Perl_filemode
 #define firstgv			Perl_firstgv
@@ -543,7 +547,7 @@
 #define minus_l			Perl_minus_l
 #define minus_n			Perl_minus_n
 #define minus_p			Perl_minus_p
-#define modcount		Perl_modcount
+#define modglobal		Perl_modglobal
 #define multiline		Perl_multiline
 #define mystrk			Perl_mystrk
 #define ofmt			Perl_ofmt
@@ -618,6 +622,7 @@
 #define sv_count		Perl_sv_count
 #define sv_objcount		Perl_sv_objcount
 #define sv_root			Perl_sv_root
+#define sys_intern		Perl_sys_intern
 #define tainting		Perl_tainting
 #define threadnum		Perl_threadnum
 #define thrsv			Perl_thrsv
@@ -651,6 +656,7 @@
 #define markstack		Perl_markstack
 #define markstack_max		Perl_markstack_max
 #define markstack_ptr		Perl_markstack_ptr
+#define modcount		Perl_modcount
 #define nrs			Perl_nrs
 #define ofs			Perl_ofs
 #define ofslen			Perl_ofslen
@@ -714,6 +720,7 @@
 #define markstack		(thr->Tmarkstack)
 #define markstack_max		(thr->Tmarkstack_max)
 #define markstack_ptr		(thr->Tmarkstack_ptr)
+#define modcount		(thr->Tmodcount)
 #define nrs			(thr->Tnrs)
 #define ofs			(thr->Tofs)
 #define ofslen			(thr->Tofslen)

@@ -1,8 +1,6 @@
 #!./perl
 
-# $RCSfile: substr.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:31 $
-
-print "1..97\n";
+print "1..100\n";
 
 #P = start of string  Q = start of substr  R = end of substr  S = end of string
 
@@ -178,3 +176,13 @@ for (0,1) {
 
 # check no spurious warnings
 print $w ? "not ok 97\n" : "ok 97\n";
+
+# check new replacement syntax
+$a = "abcxyz";
+print "not " unless substr($a, 0, 3, "") eq "abc" && $a eq "xyz";
+print "ok 98\n";
+print "not " unless substr($a, 0, 0, "abc") eq "" && $a eq "abcxyz";
+print "ok 99\n";
+print "not " unless substr($a, 3, undef, "") eq "xyz" && $a eq "abc";
+print "ok 100\n";
+

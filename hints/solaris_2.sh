@@ -123,8 +123,10 @@ cat > UU/cc.cbu <<'EOSH'
 # If the C compiler is gcc:
 #   - check the fixed-includes
 #   - check as(1) and ld(1), they should not be GNU
+#	(GNU ad and ld 2.8.1 and later are reportedly ok, however.)
 # If the C compiler is not gcc:
 #   - check as(1) and ld(1), they should not be GNU
+#	(GNU ad and ld 2.8.1 and later are reportedly ok, however.)
 #
 # Watch out in case they have not set $cc.
 
@@ -236,9 +238,25 @@ if [ "X$usethreads" = "X$define" ]; then
     # as -lgdbm and such like. We assume here that -lc is present in
     # libswanted. If that fails to be true in future, then this can be
     # changed to add pthread to the very end of libswanted.
-    set `echo X "$libswanted "| sed -e 's/ c / pthread c /'`
+    # sched_yield is in -lposix4
+    set `echo X "$libswanted "| sed -e 's/ c / posix4 pthread c /'`
     shift
     libswanted="$*"
+
+    # On Solaris 2.6 x86 there is a bug with sigsetjmp() and siglongjmp()
+    # when linked with the threads library, such that whatever positive value
+    # you pass to siglongjmp(), sigsetjmp() returns 1.
+    # Thanks to Simon Parsons <S.Parsons@ftel.co.uk> for this report.
+    if test "`arch`" = i86pc -a "$osvers" = 2.6; then
+	d_sigaction=$undef
+	cat << 'EOM' >&2
+
+You will see a *** WHOA THERE!!! ***  message from Configure for
+d_sigaction.  Keep the recommended value.  See hints/solaris_2.sh
+for more information.
+
+EOM
+    fi
 fi
 
 # This is just a trick to include some useful notes.

@@ -89,11 +89,10 @@ PP(pp_regcomp) {
     else {
 	t = SvPV(tmpstr, len);
 
-	/* JMR: Check against the last compiled regexp
-	   To know for sure, we'd need the length of precomp.
-	   But we don't have it, so we must ... take a guess. */
+	/* Check against the last compiled regexp. */
 	if (!pm->op_pmregexp || !pm->op_pmregexp->precomp ||
-	    memNE(pm->op_pmregexp->precomp, t, len + 1))
+	    pm->op_pmregexp->prelen != len ||
+	    memNE(pm->op_pmregexp->precomp, t, len))
 	{
 	    if (pm->op_pmregexp) {
 		ReREFCNT_dec(pm->op_pmregexp);
@@ -134,8 +133,8 @@ PP(pp_substcont)
 	if (cx->sb_iters > cx->sb_maxiters)
 	    DIE("Substitution loop");
 
-	if (!cx->sb_rxtainted)
-	    cx->sb_rxtainted = SvTAINTED(TOPs);
+	if (!(cx->sb_rxtainted & 2) && SvTAINTED(TOPs))
+	    cx->sb_rxtainted |= 2;
 	sv_catsv(dstr, POPs);
 
 	/* Are we done */
@@ -147,6 +146,7 @@ PP(pp_substcont)
 	    sv_catpvn(dstr, s, cx->sb_strend - s);
 
 	    TAINT_IF(cx->sb_rxtainted || RX_MATCH_TAINTED(rx));
+	    cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
 
 	    (void)SvOOK_off(targ);
 	    Safefree(SvPVX(targ));
@@ -155,11 +155,15 @@ PP(pp_substcont)
 	    SvLEN_set(targ, SvLEN(dstr));
 	    SvPVX(dstr) = 0;
 	    sv_free(dstr);
+
+	    TAINT_IF(cx->sb_rxtainted & 1);
+	    PUSHs(sv_2mortal(newSViv((I32)cx->sb_iters - 1)));
+
 	    (void)SvPOK_only(targ);
+	    TAINT_IF(cx->sb_rxtainted);
 	    SvSETMAGIC(targ);
 	    SvTAINT(targ);
 
-	    PUSHs(sv_2mortal(newSViv((I32)cx->sb_iters - 1)));
 	    LEAVE_SCOPE(cx->sb_oldsave);
 	    POPSUBST(cx);
 	    RETURNOP(pm->op_next);
@@ -654,8 +658,9 @@ PP(pp_sort)
 	RETPUSHUNDEF;
     }
 
+    ENTER;
+    SAVEPPTR(sortcop);
     if (op->op_flags & OPf_STACKED) {
-	ENTER;
 	if (op->op_flags & OPf_SPECIAL) {
 	    OP *kid = cLISTOP->op_first->op_sibling;	/* pass pushmark */
 	    kid = kUNOP->op_first;			/* pass rv2gv */
@@ -741,7 +746,6 @@ PP(pp_sort)
 	    POPSTACK();
 	    CATCH_SET(oldcatch);
 	}
-	LEAVE;
     }
     else {
 	if (max > 1) {
@@ -752,6 +756,7 @@ PP(pp_sort)
 		    : FUNC_NAME_TO_PTR(sv_cmp));
 	}
     }
+    LEAVE;
     stack_sp = ORIGMARK + max;
     return nextop;
 }
@@ -913,14 +918,16 @@ block_gimme(void)
 	return G_VOID;
 
     switch (cxstack[cxix].blk_gimme) {
+    case G_VOID:
+	return G_VOID;
     case G_SCALAR:
 	return G_SCALAR;
     case G_ARRAY:
 	return G_ARRAY;
     default:
 	croak("panic: bad gimme: %d\n", cxstack[cxix].blk_gimme);
-    case G_VOID:
-	return G_VOID;
+	/* NOTREACHED */
+	return 0;
     }
 }
 
@@ -1039,29 +1046,33 @@ die_where(char *message)
 	I32 gimme;
 	SV **newsp;
 
-	if (in_eval & 4) {
-	    SV **svp;
-	    STRLEN klen = strlen(message);
-	    
-	    svp = hv_fetch(ERRHV, message, klen, TRUE);
-	    if (svp) {
-		if (!SvIOK(*svp)) {
-		    static char prefix[] = "\t(in cleanup) ";
-		    SV *err = ERRSV;
-		    sv_upgrade(*svp, SVt_IV);
-		    (void)SvIOK_only(*svp);
-		    if (!SvPOK(err))
-			sv_setpv(err,"");
-		    SvGROW(err, SvCUR(err)+sizeof(prefix)+klen);
-		    sv_catpvn(err, prefix, sizeof(prefix)-1);
-		    sv_catpvn(err, message, klen);
+	if (message) {
+	    if (in_eval & 4) {
+		SV **svp;
+		STRLEN klen = strlen(message);
+		
+		svp = hv_fetch(ERRHV, message, klen, TRUE);
+		if (svp) {
+		    if (!SvIOK(*svp)) {
+			static char prefix[] = "\t(in cleanup) ";
+			SV *err = ERRSV;
+			sv_upgrade(*svp, SVt_IV);
+			(void)SvIOK_only(*svp);
+			if (!SvPOK(err))
+			    sv_setpv(err,"");
+			SvGROW(err, SvCUR(err)+sizeof(prefix)+klen);
+			sv_catpvn(err, prefix, sizeof(prefix)-1);
+			sv_catpvn(err, message, klen);
+		    }
+		    sv_inc(*svp);
 		}
-		sv_inc(*svp);
 	    }
+	    else
+		sv_setpv(ERRSV, message);
 	}
 	else
-	    sv_setpv(ERRSV, message);
-	
+	    message = SvPVx(ERRSV, na);
+
 	while ((cxix = dopoptoeval(cxstack_ix)) < 0 && curstackinfo->si_prev) {
 	    dounwind(-1);
 	    POPSTACK();
@@ -1877,14 +1888,26 @@ PP(pp_goto)
 			mark++;
 		    }
 		}
-		if (PERLDB_SUB && curstash != debstash) {
+		if (PERLDB_SUB) {	/* Checking curstash breaks DProf. */
 		    /*
 		     * We do not care about using sv to call CV;
 		     * it's for informational purposes only.
 		     */
 		    SV *sv = GvSV(DBsub);
-		    save_item(sv);
-		    gv_efullname3(sv, CvGV(cv), Nullch);
+		    CV *gotocv;
+		    
+		    if (PERLDB_SUB_NN) {
+			SvIVX(sv) = (IV)cv; /* Already upgraded, saved */
+		    } else {
+			save_item(sv);
+			gv_efullname3(sv, CvGV(cv), Nullch);
+		    }
+		    if (  PERLDB_GOTO
+			  && (gotocv = perl_get_cv("DB::goto", FALSE)) ) {
+			PUSHMARK( stack_sp );
+			perl_call_sv((SV*)gotocv, G_SCALAR | G_NODEBUG);
+			stack_sp--;
+		    }
 		}
 		RETURNOP(CvSTART(cv));
 	    }
@@ -2443,7 +2466,7 @@ PP(pp_require)
     SvREFCNT_dec(namesv);
     if (!tryrsfp) {
 	if (op->op_type == OP_REQUIRE) {
-	    SV *msg = sv_2mortal(newSVpvf("Can't locate %s in @INC", name));
+	    SV *msg = sv_2mortal(newSVpvf("Can't locate '%s' in @INC", name));
 	    SV *dirmsgsv = NEWSV(0, 0);
 	    AV *ar = GvAVn(incgv);
 	    I32 i;

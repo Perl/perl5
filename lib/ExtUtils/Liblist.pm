@@ -182,6 +182,9 @@ sub _unix_os2_ext {
 }
 
 sub _win32_ext {
+
+    require Text::ParseWords;
+
     my($self, $potential_libs, $verbose) = @_;
 
     # If user did not supply a list, we punt.
@@ -206,14 +209,14 @@ sub _win32_ext {
     # compute $extralibs from $potential_libs
 
     my(@searchpath); # from "-L/path" entries in $potential_libs
-    my(@libpath) = split " ", $libpth;
+    my(@libpath) = Text::ParseWords::quotewords('\s+', 0, $libpth);
     my(@extralibs);
     my($fullname, $thislib, $thispth);
     my($pwd) = cwd(); # from Cwd.pm
     my($lib) = '';
     my($found) = 0;
 
-    foreach $thislib (split ' ', $potential_libs){
+    foreach $thislib (Text::ParseWords::quotewords('\s+', 0, $potential_libs)){
 
 	# Handle possible linker path arguments.
 	if ($thislib =~ s/^-L// and not -d $thislib) {
@@ -223,7 +226,7 @@ sub _win32_ext {
 	}
 	elsif (-d $thislib) {
 	    unless ($self->file_name_is_absolute($thislib)) {
-	      warn "Warning: -L$thislib changed to -L$pwd/$thislib\n";
+	      warn "Warning: '-L$thislib' changed to '-L$pwd/$thislib'\n";
 	      $thislib = $self->catdir($pwd,$thislib);
 	    }
 	    push(@searchpath, $thislib);
@@ -253,6 +256,9 @@ sub _win32_ext {
 	    unless $found_lib>0;
     }
     return ('','','','') unless $found;
+
+    # make sure paths with spaces are properly quoted
+    @extralibs = map { (/\s/ && !/^".*"$/) ? qq["$_"] : $_ } @extralibs;
     $lib = join(' ',@extralibs);
     warn "Result: $lib\n" if $verbose;
     wantarray ? ($lib, '', $lib, '') : $lib;
@@ -594,6 +600,17 @@ distinguish between them.
 
 LDLOADLIBS and EXTRALIBS are always identical under Win32, and BSLOADLIBS
 and LD_RUN_PATH are always empty (this may change in future).
+
+=item *
+
+You must make sure that any paths and path components are properly
+surrounded with double-quotes if they contain spaces. For example,
+C<$potential_libs> could be (literally):
+
+	"-Lc:\Program Files\vc\lib" msvcrt.lib "la test\foo bar.lib"
+
+Note how the first and last entries are protected by quotes in order
+to protect the spaces.
 
 =back
 

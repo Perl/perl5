@@ -368,6 +368,11 @@ EXPECT
 1
 2
 ########
+-w
+sub testme { my $a = "test"; { local $a = "new test"; print $a }}
+EXPECT
+Can't localize lexical variable $a at - line 2.
+########
 package X;
 sub ascalar { my $r; bless \$r }
 sub DESTROY { print "destroyed\n" };

@@ -36,12 +36,14 @@ OBJECT		*= -DPERL_OBJECT
 
 #
 # if you have the source for des_fcrypt(), uncomment this and make sure the
-# file exists (see README.win32)
+# file exists (see README.win32).  File should be located at the perl
+# top level directory.
 #CRYPT_SRC	*= des_fcrypt.c
 
 #
 # if you didn't set CRYPT_SRC and if you have des_fcrypt() available in a
 # library, uncomment this, and make sure the library exists (see README.win32)
+# Specify the full pathname of the library.
 #CRYPT_LIB	*= des_fcrypt.lib
 
 #
@@ -53,6 +55,9 @@ OBJECT		*= -DPERL_OBJECT
 
 #
 # set the install locations of the compiler include/libraries
+# (you'll need to quote the value if it contains spaces: i.e.
+#     CCHOME    *= "f:\Program Files\vc"
+#
 #CCHOME		*= f:\msdev\vc
 CCHOME		*= C:\bc5
 #CCHOME		*= D:\packages\mingw32
@@ -135,7 +140,7 @@ LIBFILES	= $(CRYPT_LIB) import32.lib $(LIBC) odbc32.lib odbccp32.lib
 OPTIMIZE	= -v $(RUNTIME) -DDEBUGGING
 LINK_DBG	= -v
 .ELSE
-OPTIMIZE	= -5 -O2 $(RUNTIME)
+OPTIMIZE	= -O2 $(RUNTIME)
 LINK_DBG	= 
 .ENDIF
 
@@ -165,8 +170,8 @@ SUBSYS		= console
 CXX_FLAG	= -xc++
 
 LIBC		= -lcrtdll
-LIBFILES	= $(CRYPT_LIB) -ladvapi32 -luser32 -lwsock32 -lmingw32 -lgcc \
-		-lmoldname $(LIBC) -lkernel32
+LIBFILES	= $(CRYPT_LIB) -ladvapi32 -luser32 -lnetapi32 -lwsock32 -lmingw32 \
+		-lgcc -lmoldname $(LIBC) -lkernel32
 
 .IF  "$(CFG)" == "Debug"
 OPTIMIZE	= -g -O2 $(RUNTIME) -DDEBUGGING
@@ -199,7 +204,7 @@ RUNTIME		= -MT
 RUNTIME		= -MD
 .ENDIF
 
-INCLUDES	= -I.\include -I. -I.. 
+INCLUDES	= -I.\include -I. -I..
 #PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX 
 DEFINES		= -DWIN32 -D_CONSOLE $(BUILDOPT) $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
@@ -750,6 +755,11 @@ $(ATTRS_DLL): $(PERLEXE) $(ATTRS).xs
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
 	cd $(EXTDIR)\$(*B) && $(MAKE)
 
+$(POSIX_DLL): $(PERLEXE) $(POSIX).xs
+	cd $(EXTDIR)\$(*B) && \
+	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
+	cd $(EXTDIR)\$(*B) && $(MAKE)
+
 $(IO_DLL): $(PERLEXE) $(IO).xs
 	cd $(EXTDIR)\$(*B) && \
 	..\..\miniperl -I..\..\lib Makefile.PL INSTALLDIRS=perl
@@ -800,6 +810,8 @@ distclean: clean
 	-del /f $(EXTENSION_C)
 	-del /f $(PODDIR)\*.html
 	-del /f $(PODDIR)\*.bat
+	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph h2xs perldoc pstruct *.bat
+	-cd ..\x2p && del /f find2perl s2p *.bat
 	-del /f ..\config.sh ..\splittree.pl perlmain.c dlutils.c config.h.new
 	-del /f ..\lib\Config.pm
 .IF "$(PERL95EXE)" != ""
@@ -811,14 +823,18 @@ distclean: clean
 	-rmdir /s /q $(COREDIR) || rmdir /s $(COREDIR)
 	-rmdir /s /q $(MINIDIR) || rmdir /s $(MINIDIR)
 
-install : all doc utils
+installbare :
 	$(PERLEXE) ..\installperl
 .IF "$(PERL95EXE)" != ""
 	$(XCOPY) $(PERL95EXE) $(INST_BIN)\*.*
 .ENDIF
+
+installutils : utils
 	$(XCOPY) $(GLOBEXE) $(INST_BIN)\*.*
 	$(XCOPY) bin\*.bat $(INST_BIN)\*.*
 	$(XCOPY) ..\pod\*.bat $(INST_BIN)\*.*
+
+installhtml : doc
 	$(RCOPY) html\*.* $(INST_HTML)\*.*
 
 inst_lib : $(CONFIGPM)

@@ -67,7 +67,7 @@ Return the (key, value) pair for the first key in the hash.
 
 =item NEXTKEY this, lastkey
 
-Return the next (key, value) pair for the hash.
+Return the next key for the hash.
 
 =item EXISTS this, key
 

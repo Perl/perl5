@@ -1,7 +1,7 @@
 #!/usr/local/bin/perl
 
 use Config;
-use File::Basename qw(&basename &dirname);
+use File::Basename qw(basename dirname);
 
 # List explicitly here the variables you want Configure to
 # generate.  Metaconfig only looks for shell variables, so you
@@ -38,8 +38,9 @@ use Config;
 use File::Path qw(mkpath);
 use Getopt::Std;
 
-getopts('d:rlh');
-
+getopts('Dd:rlha');
+die "-r and -a options are mutually exclusive\n" if ($opt_r and $opt_a);
+@inc_dirs = inc_dirs() if $opt_a;
 
 my $Exit = 0;
 
@@ -76,14 +77,21 @@ while (defined ($file = next_file())) {
     if ($file eq '-') {
 	open(IN, "-");
 	open(OUT, ">-");
-    }
-    else {
+    } else {
 	($outfile = $file) =~ s/\.h$/.ph/ || next;
 	print "$file -> $outfile\n";
 	if ($file =~ m|^(.*)/|) {
 	    $dir = $1;
 	    mkpath "$Dest_dir/$dir";
 	}
+
+	if ($opt_a) { # automagic mode:  locate header file in @inc_dirs
+	    foreach (@inc_dirs) {
+		chdir $_;
+		last if -f $file;
+	    }
+	}
+
 	open(IN,"$file") || (($Exit = 1),(warn "Can't open $file: $!\n"),next);
 	open(OUT,">$Dest_dir/$outfile") || die "Can't create $outfile: $!\n";
     }
@@ -94,6 +102,7 @@ while (defined ($file = next_file())) {
 	    $_ .= <IN>;
 	    chop;
 	}
+	print OUT "# $_\n" if $opt_D;
 	if (s:/\*:\200:g) {
 	    s:\*/:\201:g;
 	    s/\200[^\201]*\201//g;	# delete single line comments
@@ -103,7 +112,7 @@ while (defined ($file = next_file())) {
 		redo;
 	    }
 	}
-	if (s/^#\s*//) {
+	if (s/^\s*#\s*//) {
 	    if (s/^define\s+(\w+)//) {
 		$name = $1;
 		$new = '';
@@ -122,98 +131,146 @@ while (defined ($file = next_file())) {
 		    }
 		    s/^\s+//;
 		    expr();
-		    $new =~ s/(["\\])/\\$1/g;
+		    $new =~ s/(["\\])/\\$1/g;       #"]);
+		    $new = reindent($new);
+		    $args = reindent($args);
 		    if ($t ne '') {
-			$new =~ s/(['\\])/\\$1/g;
+			$new =~ s/(['\\])/\\$1/g;   #']);
 			if ($opt_h) {
 			    print OUT $t,
-                            "eval \"\\n#line $eval_index $outfile\\n\" . 'sub $name $proto\{\n$t    ${args}eval \"$new\";\n$t}' unless defined(\&$name);\n";
+                            "eval \"\\n#line $eval_index $outfile\\n\" . 'sub $name $proto\{\n$t    ${args}eval q($new);\n$t}' unless defined(\&$name);\n";
                             $eval_index++;
 			} else {
 			    print OUT $t,
-                            "eval 'sub $name $proto\{\n$t    ${args}eval \"$new\";\n$t}' unless defined(\&$name);\n";
+                            "eval 'sub $name $proto\{\n$t    ${args}eval q($new);\n$t}' unless defined(\&$name);\n";
 			}
-		    }
-		    else {
-                      print OUT "unless defined(\&$name) {\nsub $name $proto\{\n    ${args}eval \"$new\";\n}\n}\n";
+		    } else {
+                      print OUT "unless(defined(\&$name)) {\n    sub $name $proto\{\n\t${args}eval q($new);\n    }\n}\n";
 		    }
 		    %curargs = ();
-		}
-		else {
+		} else {
 		    s/^\s+//;
 		    expr();
 		    $new = 1 if $new eq '';
+		    $new = reindent($new);
+		    $args = reindent($args);
 		    if ($t ne '') {
-			$new =~ s/(['\\])/\\$1/g;
+			$new =~ s/(['\\])/\\$1/g;        #']);
 			if ($opt_h) {
 			    print OUT $t,"eval \"\\n#line $eval_index $outfile\\n\" . 'sub $name () {",$new,";}' unless defined(\&$name);\n";
 			    $eval_index++;
 			} else {
 			    print OUT $t,"eval 'sub $name () {",$new,";}' unless defined(\&$name);\n";
 			}
-		    }
-		    else {
-                      print OUT $t,"unless(defined(\&$name)) {\nsub $name () {",$new,";}\n}\n";
+		    } else {
+                      print OUT $t,"unless(defined(\&$name)) {\n    sub $name () {\t",$new,";}\n}\n";
 		    }
 		}
-	    }
-	    elsif (/^include\s*<(.*)>/) {
-		($incl = $1) =~ s/\.h$/.ph/;
+	    } elsif (/^(include|import)\s*[<"](.*)[>"]/) {
+		($incl = $2) =~ s/\.h$/.ph/;
 		print OUT $t,"require '$incl';\n";
-	    }
-	    elsif (/^ifdef\s+(\w+)/) {
-		print OUT $t,"if (defined &$1) {\n";
+	    } elsif(/^include_next\s*[<"](.*)[>"]/) {
+		($incl = $1) =~ s/\.h$/.ph/;
+		# should've read up on #include_next properly before attempting
+		# to implement it...
+		# 
+		#print OUT $t, "{\n";
+		#$tab += 4;
+		#$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
+		#print OUT $t, "my(\$INC) = shift(\@INC);\n";
+		#print OUT $t, "require '$incl';\n";
+		#print OUT $t, "unshift(\@INC, \$INC);}\n";
+		#$tab -= 4;
+		#$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
+		#print OUT $t, "}\n";
+		# 
+		# try this instead:
+		print OUT ($t, "my(\$i) = 0;\n");
+		print OUT ($t, "if(exists(\$INC{$incl})) {\n");
 		$tab += 4;
 		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
-	    }
-	    elsif (/^ifndef\s+(\w+)/) {
-		print OUT $t,"if (!defined &$1) {\n";
+		print OUT ($t, "++\$i while (\$i <= \$#INC",
+			   " and \$INC[\$i].'/$incl' ne \$INC{'$incl'});\n");
+		print OUT ($t, "\$i = 0 if \$INC[\$i].'/$incl' ne",
+			   " \$INC{'$incl'};\n");
+		$tab -= 4;
+		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
+		print OUT ($t, "}\n");
+		print OUT ($t,
+			   "eval(\"require '\" . ",
+			   "(\$i ? \$INC[\$i].'/' : '') . \"\$incl';\");");
+		# any better? require is smart enough not to try and include a
+		# file twice, i believe, so require-ing the same actual file
+		# should end up just being a null operation...
+	    } elsif (/^ifdef\s+(\w+)/) {
+		print OUT $t,"if(defined(&$1)) {\n";
 		$tab += 4;
 		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
-	    }
-	    elsif (s/^if\s+//) {
+	    } elsif (/^ifndef\s+(\w+)/) {
+		print OUT $t,"unless(defined(&$1)) {\n";
+		$tab += 4;
+		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
+	    } elsif (s/^if\s+//) {
 		$new = '';
 		$inif = 1;
 		expr();
 		$inif = 0;
-		print OUT $t,"if ($new) {\n";
+		print OUT $t,"if($new) {\n";
 		$tab += 4;
 		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
-	    }
-	    elsif (s/^elif\s+//) {
+	    } elsif (s/^elif\s+//) {
 		$new = '';
 		$inif = 1;
 		expr();
 		$inif = 0;
 		$tab -= 4;
 		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
-		print OUT $t,"}\n${t}elsif ($new) {\n";
+		print OUT $t,"}\n elsif($new) {\n";
 		$tab += 4;
 		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
-	    }
-	    elsif (/^else/) {
+	    } elsif (/^else/) {
 		$tab -= 4;
 		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
-		print OUT $t,"}\n${t}else {\n";
+		print OUT $t,"} else {\n";
 		$tab += 4;
 		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
-	    }
-	    elsif (/^endif/) {
+	    } elsif (/^endif/) {
 		$tab -= 4;
 		$t = "\t" x ($tab / 8) . ' ' x ($tab % 8);
 		print OUT $t,"}\n";
+	    } elsif(/^undef\s+(\w+)/) {
+		print OUT $t, "undef(&$1) if defined(&$1);\n";
+	    } elsif(/^error\s+(.*)/) {
+		print OUT $t, "die(\"$1\");\n";
+	    } elsif(/^warning\s+(.*)/) {
+		print OUT $t, "warn(\"$1\");\n";
+	    } elsif(/^ident\s+(.*)/) {
+		print OUT $t, "# $1\n";
 	    }
 	}
     }
     print OUT "1;\n";
+
+    $is_converted{$file} = 1;
+    queue_includes_from($file) if ($opt_a);
 }
 
 exit $Exit;
 
+sub reindent($) {
+    my($text) = shift;
+    $text =~ s/\n/\n    /g;
+    $text =~ s/        /\t/g;
+    $text;
+}
+
 sub expr {
+    if(keys(%curargs)) {
+	my($joined_args) = join('|', keys(%curargs));
+    }
     while ($_ ne '') {
-	s/^\&\&// && do { $new .= "&&"; next;}; # handle && operator
-	s/^\&//;		# hack for things that take the address of
+	s/^\&\&// && do { $new .= " &&"; next;}; # handle && operator
+	s/^\&([\(a-z\)]+)/$1/i;	# hack for things that take the address of
 	s/^(\s+)//		&& do {$new .= ' '; next;};
 	s/^(0X[0-9A-F]+)[UL]*//i	&& do {$new .= lc($1); next;};
 	s/^(-?\d+\.\d+E[-+]\d+)F?//i	&& do {$new .= $1; next;};
@@ -222,8 +279,7 @@ sub expr {
 	s/^'((\\"|[^"])*)'//	&& do {
 	    if ($curargs{$1}) {
 		$new .= "ord('\$$1')";
-	    }
-	    else {
+	    } else {
 		$new .= "ord('$1')";
 	    }
 	    next;
@@ -260,11 +316,22 @@ sub expr {
 	    }
 	    s/\([\w\s]+[\*\s]*\)// && next;      # then eliminate them.
 	};
-	# struct/union member:
-	s/^([_A-Z]\w*((\.|->)[_A-Z]\w*)+)//i && do {
+	# struct/union member, including arrays:
+	s/^([_A-Z]\w*(\[[^\]]+\])?((\.|->)[_A-Z]\w*(\[[^\]]+\])?)+)//i && do {
 	    $id = $1;
-	    $id =~ s/(\.|(->))([^\.-]*)/->\{$3\}/g;
-	    $new .= ' ($' . $id . ')';
+	    $id =~ s/(\.|(->))([^\.\-]*)/->\{$3\}/g;
+	    $id =~ s/\b([^\$])($joined_args)/$1\$$2/g if length($joined_args);
+	    while($id =~ /\[\s*([^\$\&\d\]]+)\]/) {
+		my($index) = $1;
+		$index =~ s/\s//g;
+		if(exists($curargs{$index})) {
+		    $index = "\$$index";
+		} else {
+		    $index = "&$index";
+		}
+		$id =~ s/\[\s*([^\$\&\d\]]+)\]/[$index]/;
+	    }
+	    $new .= " (\$$id)";
 	};
 	s/^([_a-zA-Z]\w*)//	&& do {
 	    $id = $1;
@@ -272,41 +339,33 @@ sub expr {
 		s/^\s+(\w+)//;
 		$id .= ' ' . $1;
 		$isatype{$id} = 1;
-	    }
-	    elsif ($id =~ /^((un)?signed)|(long)|(short)$/) {
+	    } elsif ($id =~ /^((un)?signed)|(long)|(short)$/) {
 		while (s/^\s+(\w+)//) { $id .= ' ' . $1; }
 		$isatype{$id} = 1;
 	    }
 	    if ($curargs{$id}) {
-		$new .= '$' . $id;
-	    }
-	    elsif ($id eq 'defined') {
+		$new .= "\$$id";
+		$new .= '->' if /^[\[\{]/;
+	    } elsif ($id eq 'defined') {
 		$new .= 'defined';
-	    }
-	    elsif (/^\(/) {
+	    } elsif (/^\(/) {
 		s/^\((\w),/("$1",/ if $id =~ /^_IO[WR]*$/i;	# cheat
 		$new .= " &$id";
-	    }
-	    elsif ($isatype{$id}) {
+	    } elsif ($isatype{$id}) {
 		if ($new =~ /{\s*$/) {
 		    $new .= "'$id'";
-		}
-		elsif ($new =~ /\(\s*$/ && /^[\s*]*\)/) {
+		} elsif ($new =~ /\(\s*$/ && /^[\s*]*\)/) {
 		    $new =~ s/\(\s*$//;
 		    s/^[\s*]*\)//;
-		}
-		else {
+		} else {
 		    $new .= q(').$id.q(');
 		}
-	    }
-	    else {
+	    } else {
 		if ($inif && $new !~ /defined\s*\($/) {
 		    $new .= '(defined(&' . $id . ') ? &' . $id . ' : 0)';
-		}
-		elsif (/^\[/) {
-		    $new .= ' $' . $id;
-		}
-		else {
+		} elsif (/^\[/) {
+		    $new .= " \$$id";
+		} else {
 		    $new .= ' &' . $id;
 		}
 	    }
@@ -334,6 +393,8 @@ sub next_file
             } else {
                 print STDERR "Skipping directory `$file'\n";
             }
+        } elsif ($opt_a) {
+            return $file;
         } else {
             print STDERR "Skipping `$file':  not a file or directory\n";
         }
@@ -388,13 +449,48 @@ sub link_if_possible
 
             # Make sure that the link _links_ to something:
             if (! -e "$Dest_dir/$target") {
-                mkdir("$Dest_dir/$target", 0755) or
+                mkpath("$Dest_dir/$target", 0755) or
                     print STDERR "Could not create $Dest_dir/$target/\n";
             }
         } else {
             print STDERR "Could not symlink $target -> $Dest_dir/$dirlink:  $!\n";
         }
     }
+}
+
+
+# Push all #included files in $file onto our stack, except for STDIN
+# and files we've already processed.
+sub queue_includes_from
+{
+    my ($file)    = @_;
+    my $line;
+
+    return if ($file eq "-");
+
+    open HEADER, $file or return;
+        while (defined($line = <HEADER>)) {
+            while (/\\$/) { # Handle continuation lines
+                chop $line;
+                $line .= <HEADER>;
+            }
+
+            if ($line =~ /^#\s*include\s+<(.*?)>/) {
+                push(@ARGV, $1) unless $is_converted{$1};
+            }
+        }
+    close HEADER;
+}
+
+
+# Determine include directories; $Config{usrinc} should be enough for (all
+# non-GCC?) C compilers, but gcc uses an additional include directory.
+sub inc_dirs
+{
+    my $from_gcc    = `$Config{cc} -v 2>&1`;
+    $from_gcc       =~ s:^Reading specs from (.*?)/specs\b.*:$1/include:s;
+
+    length($from_gcc) ? ($from_gcc, $Config{usrinc}) : ($Config{usrinc});
 }
 
 
@@ -409,7 +505,7 @@ h2ph - convert .h C header files to .ph Perl header files
 
 =head1 SYNOPSIS
 
-B<h2ph [-d destination directory] [-r] [-l] [headerfiles]>
+B<h2ph [-d destination directory] [-r | -a] [-l] [headerfiles]>
 
 =head1 DESCRIPTION
 
@@ -442,7 +538,15 @@ beneath the default Perl library location (C<$Config{'installsitsearch'}>).
 =item -r
 
 Run recursively; if any of B<headerfiles> are directories, then run I<h2ph>
-on all files in those directories (and their subdirectories, etc.).
+on all files in those directories (and their subdirectories, etc.).  B<-r>
+and B<-a> are mutually exclusive.
+
+=item -a
+
+Run automagically; convert B<headerfiles>, as well as any B<.h> files
+which they include.  This option will search for B<.h> files in all
+directories which your C compiler ordinarily uses.  B<-a> and B<-r> are
+mutually exclusive.
 
 =item -l
 
@@ -462,6 +566,11 @@ you will see the slightly more helpful
 	[ some error condition ] at filename.ph line nnn
 
 However, the B<.ph> files almost double in size when built using B<-h>.
+
+=item -D
+
+Include the code from the B<.h> file as a comment in the B<.ph> file.
+This is primarily used for debugging I<h2ph>.
 
 =back
 

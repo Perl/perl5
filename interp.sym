@@ -42,14 +42,14 @@ doextract
 doswitches
 dowarn
 dumplvl
-e_fp
-e_tmpname
+e_script
 endav
 envgv
 errgv
 eval_root
 eval_start
-extralen
+exitlist
+exitlistlen
 fdpid
 filemode
 firstgv
@@ -65,6 +65,7 @@ in_eval
 incgv
 initav
 inplace
+sys_intern
 last_in_gv
 lastfd
 lastgotoprobe
@@ -92,7 +93,7 @@ minus_c
 minus_l
 minus_n
 minus_p
-modcount
+modglobal
 multiline
 mystrk
 nrs

@@ -290,10 +290,11 @@ PP(pp_warn)
 	tmps = SvPV(TOPs, na);
     }
     if (!tmps || !*tmps) {
-	(void)SvUPGRADE(ERRSV, SVt_PV);
-	if (SvPOK(ERRSV) && SvCUR(ERRSV))
-	    sv_catpv(ERRSV, "\t...caught");
-	tmps = SvPV(ERRSV, na);
+  	SV *error = ERRSV;
+	(void)SvUPGRADE(error, SVt_PV);
+	if (SvPOK(error) && SvCUR(error))
+	    sv_catpv(error, "\t...caught");
+	tmps = SvPV(error, na);
     }
     if (!tmps || !*tmps)
 	tmps = "Warning: something's wrong";
@@ -305,6 +306,8 @@ PP(pp_die)
 {
     djSP; dMARK;
     char *tmps;
+    SV *tmpsv = Nullsv;
+    char *pat = "%s";
     if (SP - MARK != 1) {
 	dTARGET;
 	do_join(TARG, &sv_no, MARK, SP);
@@ -312,17 +315,26 @@ PP(pp_die)
 	SP = MARK + 1;
     }
     else {
-	tmps = SvPV(TOPs, na);
+	tmpsv = TOPs;
+	tmps = SvROK(tmpsv) ? Nullch : SvPV(tmpsv, na);
     }
     if (!tmps || !*tmps) {
-	(void)SvUPGRADE(ERRSV, SVt_PV);
-	if (SvPOK(ERRSV) && SvCUR(ERRSV))
-	    sv_catpv(ERRSV, "\t...propagated");
-	tmps = SvPV(ERRSV, na);
+  	SV *error = ERRSV;
+	(void)SvUPGRADE(error, SVt_PV);
+	if(tmpsv ? SvROK(tmpsv) : SvROK(error)) {
+	    if(tmpsv)
+		SvSetSV(error,tmpsv);
+	    pat = Nullch;
+	}
+	else {
+	    if (SvPOK(error) && SvCUR(error))
+		sv_catpv(error, "\t...propagated");
+	    tmps = SvPV(error, na);
+	}
     }
     if (!tmps || !*tmps)
 	tmps = "Died";
-    DIE("%s", tmps);
+    DIE(pat, tmps);
 }
 
 /* I/O. */
@@ -464,7 +476,7 @@ PP(pp_umask)
     TAINT_PROPER("umask");
     XPUSHi(anum);
 #else
-    DIE(no_func, "Unsupported function umask");
+    XPUSHs(&sv_undef)
 #endif
     RETURN;
 }
@@ -485,40 +497,10 @@ PP(pp_binmode)
     if (!(io = GvIO(gv)) || !(fp = IoIFP(io)))
 	RETPUSHUNDEF;
 
-#ifdef DOSISH
-#ifdef atarist
-    if (!PerlIO_flush(fp) && (fp->_flag |= _IOBIN))
+    if (do_binmode(fp,IoTYPE(io),TRUE)) 
 	RETPUSHYES;
     else
 	RETPUSHUNDEF;
-#else
-    if (PerlLIO_setmode(PerlIO_fileno(fp), OP_BINARY) != -1) {
-#if defined(WIN32) && defined(__BORLANDC__)
-	/* The translation mode of the stream is maintained independent
-	 * of the translation mode of the fd in the Borland RTL (heavy
-	 * digging through their runtime sources reveal).  User has to
-	 * set the mode explicitly for the stream (though they don't
-	 * document this anywhere). GSAR 97-5-24
-	 */
-	PerlIO_seek(fp,0L,0);
-	((FILE*)fp)->flags |= _F_BIN;
-#endif
-	RETPUSHYES;
-    }
-    else
-	RETPUSHUNDEF;
-#endif
-#else
-#if defined(USEMYBINMODE)
-    if (my_binmode(fp,IoTYPE(io)) != NULL)
-	RETPUSHYES;
-	else
-	RETPUSHUNDEF;
-#else
-    RETPUSHYES;
-#endif
-#endif
-
 }
 
 
@@ -599,7 +581,8 @@ PP(pp_untie)
 {
     djSP;
     SV * sv ;
-    sv = POPs;          
+
+    sv = POPs;
 
     if (dowarn) {
         MAGIC * mg ;
@@ -2603,6 +2586,13 @@ PP(pp_chdir)
 	if (svp)
 	    tmps = SvPV(*svp, na);
     }
+#ifdef VMS
+    if (!tmps || !*tmps) {
+       svp = hv_fetch(GvHVn(envgv), "SYS$LOGIN", 9, FALSE);
+       if (svp)
+           tmps = SvPV(*svp, na);
+    }
+#endif
     TAINT_PROPER("chdir");
     PUSHi( PerlDir_chdir(tmps) >= 0 );
 #ifdef VMS
@@ -4124,41 +4114,55 @@ PP(pp_gpwent)
     if (pwent) {
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setpv(sv, pwent->pw_name);
+
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setpv(sv, pwent->pw_passwd);
+
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setiv(sv, (IV)pwent->pw_uid);
+
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setiv(sv, (IV)pwent->pw_gid);
+
+	/* pw_change, pw_quota, and pw_age are mutually exclusive. */
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 #ifdef PWCHANGE
 	sv_setiv(sv, (IV)pwent->pw_change);
 #else
-#ifdef PWQUOTA
+#   ifdef PWQUOTA
 	sv_setiv(sv, (IV)pwent->pw_quota);
-#else
-#ifdef PWAGE
+#   else
+#       ifdef PWAGE
 	sv_setpv(sv, pwent->pw_age);
+#       endif
+#   endif
 #endif
-#endif
-#endif
+
+	/* pw_class and pw_comment are mutually exclusive. */
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 #ifdef PWCLASS
 	sv_setpv(sv, pwent->pw_class);
 #else
-#ifdef PWCOMMENT
+#   ifdef PWCOMMENT
 	sv_setpv(sv, pwent->pw_comment);
+#   endif
 #endif
-#endif
+
 	PUSHs(sv = sv_mortalcopy(&sv_no));
+#ifdef PWGECOS
 	sv_setpv(sv, pwent->pw_gecos);
+#endif
 #ifndef INCOMPLETE_TAINTS
+	/* pw_gecos is tainted because user himself can diddle with it. */
 	SvTAINTED_on(sv);
 #endif
+
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setpv(sv, pwent->pw_dir);
+
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setpv(sv, pwent->pw_shell);
+
 #ifdef PWEXPIRE
 	PUSHs(sv = sv_mortalcopy(&sv_no));
 	sv_setiv(sv, (IV)pwent->pw_expire);
@@ -4300,7 +4304,7 @@ PP(pp_getlogin)
 
 PP(pp_syscall)
 {
-#ifdef HAS_SYSCALL   
+#ifdef HAS_SYSCALL
     djSP; dMARK; dORIGMARK; dTARGET;
     register I32 items = SP - MARK;
     unsigned long a[20];
@@ -4514,4 +4518,3 @@ int operation;
 }
 
 #endif /* LOCKF_EMULATE_FLOCK */
-

@@ -347,7 +347,7 @@ all : base extras x2p archcorefiles preplibrary perlpods
 .endif
 base : miniperl perl
 	@ $(NOOP)
-extras : Fcntl IO Opcode attrs B $(POSIX) $(THREAD) SDBM_File libmods utils podxform
+extras : Fcntl IO Opcode attrs Stdio DCLsym B $(POSIX) $(THREAD) SDBM_File libmods utils podxform
 	@ $(NOOP)
 libmods : $(LIBPREREQ)
 	@ $(NOOP)
@@ -462,6 +462,10 @@ $(ARCHDIR)config.pm : [.lib]config.pm
 	@ If F$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
 	@ $(MINIPERL) -e "use AutoSplit; autosplit_lib_modules(@ARGV)" [.lib]DynaLoader.pm
 
+[.ext.dynaloader]dynaloader.pm : [.ext.dynaloader]dynaloader.pm_pl
+	$(MINIPERL) $(MMS$SOURCE)
+	@ Rename/Log dynaloader.pm [.ext.dynaloader]
+
 Opcode : [.lib]Opcode.pm [.lib]ops.pm [.lib]Safe.pm [.lib.auto.Opcode]Opcode$(E)
 	@ $(NOOP)
 
@@ -511,6 +515,50 @@ Fcntl : [.lib]Fcntl.pm [.lib.auto.Fcntl]Fcntl$(E)
 # ${@} necessary to distract different versions of MM[SK]/make
 [.ext.Fcntl]Descrip.MMS : [.ext.Fcntl]Makefile.PL $(LIBPREREQ) $(DBG)perlshr$(E)
 	$(MINIPERL) "-I[--.lib]" -e "chdir('[.ext.Fcntl]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[--.lib]" "INST_ARCHLIB=[--.lib]"
+
+Stdio : [.lib.vms]Stdio.pm [.lib.auto.vms.Stdio]Stdio$(E) [.t.lib]vms_stdio.t
+	@ $(NOOP)
+
+[.lib.vms]Stdio.pm : [.vms.ext.stdio]Descrip.MMS
+	@ If F$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
+	@ Set Default [.vms.ext.Stdio]
+	$(MMS)
+	@ Set Default [---]
+
+[.lib.auto.vms.Stdio]Stdio$(E) : [.vms.ext.Stdio]Descrip.MMS
+	@ Set Default [.vms.ext.Stdio]
+	$(MMS)
+	@ Set Default [---]
+
+[.t.lib]vms_stdio.t : [.vms.ext.Stdio]test.pl
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+
+# Add "-I[--.lib]" t $(MINIPERL) so we use this copy of lib after C<chdir>
+# ${@} necessary to distract different versions of MM[SK]/make
+[.vms.ext.stdio]Descrip.MMS : [.vms.ext.Stdio]Makefile.PL $(LIBPREREQ) $(DBG)perlshr$(E)
+	$(MINIPERL) "-I[---.lib]" -e "chdir('[.vms.ext.Stdio]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[---.lib]" "INST_ARCHLIB=[---.lib]"
+
+DCLsym : [.lib.vms]DCLsym.pm [.lib.auto.vms.DCLsym]DCLsym$(E) [.t.lib]vms_dclsym.t
+	@ $(NOOP)
+
+[.lib.vms]DCLsym.pm : [.vms.ext.dclsym]Descrip.MMS
+	@ If F$Search("[.lib]auto.dir").eqs."" Then Create/Directory [.lib.auto]
+	@ Set Default [.vms.ext.DCLsym]
+	$(MMS)
+	@ Set Default [---]
+
+[.lib.auto.vms.DCLsym]DCLsym$(E) : [.vms.ext.DCLsym]Descrip.MMS
+	@ Set Default [.vms.ext.DCLsym]
+	$(MMS)
+	@ Set Default [---]
+
+[.t.lib]vms_dclsym.t : [.vms.ext.DCLsym]test.pl
+	Copy/Log $(MMS$SOURCE) $(MMS$TARGET)
+
+# Add "-I[--.lib]" t $(MINIPERL) so we use this copy of lib after C<chdir>
+# ${@} necessary to distract different versions of MM[SK]/make
+[.vms.ext.DCLsym]Descrip.MMS : [.vms.ext.DCLsym]Makefile.PL $(LIBPREREQ) $(DBG)perlshr$(E)
+	$(MINIPERL) "-I[---.lib]" -e "chdir('[.vms.ext.DCLsym]') or die $!; do 'Makefile.PL'; print ${@} if ${@};" "INST_LIB=[---.lib]" "INST_ARCHLIB=[---.lib]"
 
 attrs : [.lib]attrs.pm [.lib.auto.attrs]attrs$(E)
 	@ $(NOOP)
@@ -779,14 +827,14 @@ B : [.lib]B.pm [.lib]O.pm [.lib.B]Asmdata.pm [.lib.B]Assembler.pm [.lib.B]Bblock
 
 [.lib]perlbug.com : [.utils]perlbug.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) $(MMS$SOURCE)
-	Rename/Log [.utils]perlbug.com $(MMS$TARGET)
+	Copy/Log [.utils]perlbug.com $(MMS$TARGET)
 
 [.utils]pl2pm.com : [.utils]pl2pm.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) $(MMS$SOURCE)
 
 [.lib]splain.com : [.utils]splain.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) $(MMS$SOURCE)
-	Rename/Log [.utils]splain.com $(MMS$TARGET)
+	Copy/Log [.utils]splain.com $(MMS$TARGET)
 
 [.x2p]find2perl.com : [.x2p]find2perl.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) $(MMS$SOURCE)
@@ -826,22 +874,22 @@ B : [.lib]B.pm [.lib]O.pm [.lib.B]Asmdata.pm [.lib.B]Assembler.pm [.lib.B]Bblock
 [.lib.pod]pod2html.com : [.pod]pod2html.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	$(MINIPERL) $(MMS$SOURCE)
-	Rename/Log [.pod]pod2html.com $(MMS$TARGET)
+	Copy/Log [.pod]pod2html.com $(MMS$TARGET)
 
 [.lib.pod]pod2latex.com : [.pod]pod2latex.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	$(MINIPERL) $(MMS$SOURCE)
-	Rename/Log [.pod]pod2latex.com $(MMS$TARGET)
+	Copy/Log [.pod]pod2latex.com $(MMS$TARGET)
 
 [.lib.pod]pod2man.com : [.pod]pod2man.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	$(MINIPERL) $(MMS$SOURCE)
-	Rename/Log [.pod]pod2man.com $(MMS$TARGET)
+	Copy/Log [.pod]pod2man.com $(MMS$TARGET)
 
 [.lib.pod]pod2text.com : [.pod]pod2text.PL $(ARCHDIR)Config.pm
 	@ If F$Search("[.lib]pod.dir").eqs."" Then Create/Directory [.lib.pod]
 	$(MINIPERL) $(MMS$SOURCE)
-	Rename/Log [.pod]pod2text.com $(MMS$TARGET)
+	Copy/Log [.pod]pod2text.com $(MMS$TARGET)
 
 preplibrary : $(MINIPERL_EXE) $(LIBPREREQ) $(SOCKPM)
 	@ Write Sys$Output "Autosplitting Perl library . . ."
@@ -1065,6 +1113,9 @@ perly$(O) : perly.c, perly.h, $(h)
 
 test : all [.t.lib]vmsfspec.t [.t.lib]vmsish.t
 	- @[.VMS]Test.Com "$(E)"
+
+install : 
+	$(MINIPERL) installperl
 
 archify : all
 	@ Write Sys$Output "Moving files to architecture-specific locations for $(ARCH)"
@@ -1313,6 +1364,7 @@ tidy : cleanlis
 	- If F$Search("Perlshr_Gbl*.Mar;-1")   .nes."" Then Purge/NoConfirm/Log Perlshr_Gbl*.Mar
 	- If F$Search("[.Ext.DynaLoader]DL_VMS$(O);-1").nes."" Then Purge/NoConfirm/Log [.Ext.DynaLoader]DL_VMS$(O)
 	- If F$Search("[.Ext.DynaLoader]DL_VMS.C;-1").nes."" Then Purge/NoConfirm/Log [.Ext.DynaLoader]DL_VMS.C
+	- If F$Search("[.Ext.Socket]Socket.C;-1").nes."" Then Purge/NoConfirm/Log [.Ext.DynaLoader]DL_VMS.C
 	- If F$Search("[.Ext.Opcode...];-1").nes."" Then Purge/NoConfirm/Log [.Ext.Opcode]
 	- If F$Search("[.VMS.Ext...]*.C;-1").nes."" Then Purge/NoConfirm/Log [.VMS.Ext...]*.C
 	- If F$Search("[.VMS.Ext...]*$(O);-1").nes."" Then Purge/NoConfirm/Log [.VMS.Ext...]*$(O)
@@ -1328,6 +1380,7 @@ tidy : cleanlis
 	- If F$Search("[.Lib.Pod]*.Pod;-1").nes."" Then Purge/NoConfirm/Log [.Lib.Pod]*.Pod
 	- If F$Search("$(ARCHCORE)*.*").nes."" Then Purge/NoConfirm/Log $(ARCHCORE)*.*
 	- If F$Search("[.lib]*.com;-1").nes."" Then Purge/NoConfirm/Log [.lib]*.com
+	- If F$Search("[.pod]*.com;-1").nes."" Then Purge/NoConfirm/Log [.pod]*.com
 	- If F$Search("[.utils]*.com;-1").nes."" Then Purge/NoConfirm/Log [.utils]*.com
 	- If F$Search("[.x2p]*.com;-1").nes."" Then Purge/NoConfirm/Log [.x2p]*.com
 	- If F$Search("[.lib.pod]*.com;-1").nes."" Then Purge/NoConfirm/Log [.lib.pod]*.com
@@ -1358,9 +1411,15 @@ clean : tidy
 	- $(MMS) clean
 	Set Default [--]
 .endif
-    Set Default [.ext.SDBM_File]
-    - $(MMS) clean
-    Set Default [--]
+	Set Default [.ext.SDBM_File]
+	- $(MMS) clean
+	Set Default [--]
+	Set Default [.vms.ext.Stdio]
+	- $(MMS) clean
+	Set Default [---]
+	Set Default [.vms.ext.DCLsym]
+	- $(MMS) clean
+	Set Default [---]
 	- If F$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*/Exclude=PerlShr_*.Opt
 	- If F$Search("[...]*$(O);*") .nes."" Then Delete/NoConfirm/Log [...]*$(O);*
 	- If F$Search("Config.H").nes."" Then Delete/NoConfirm/Log Config.H;*
@@ -1381,6 +1440,7 @@ clean : tidy
 	- If F$Search("[.Ext.Socket]Socket.C").nes."" Then Delete/NoConfirm/Log [.Ext.Socket]Socket.C;*
 	- If F$Search("[.VMS.Ext...]*.C").nes."" Then Delete/NoConfirm/Log [.VMS.Ext...]*.C;*
 	- If F$Search("[.VMS.Ext...]*$(O)").nes."" Then Delete/NoConfirm/Log [.VMS.Ext...]*$(O);*
+	- If F$Search("[.pod]*.com").nes."" Then Delete/NoConfirm/Log [.pod]*.com;*
 
 realclean : clean
 	Set Default [.ext.Fcntl]
@@ -1408,9 +1468,15 @@ realclean : clean
 	- $(MMS) realclean
 	Set Default [--]
 .endif
-    Set Default [.ext.SDBM_File]
-    - $(MMS) realclean
-    Set Default [--]
+	Set Default [.ext.SDBM_File]
+	- $(MMS) realclean
+	Set Default [--]
+	Set Default [.vms.ext.Stdio]
+	- $(MMS) clean
+	Set Default [---]
+	Set Default [.vms.ext.DCLsym]
+	- $(MMS) clean
+	Set Default [---]
 	- If F$Search("*$(OLB)").nes."" Then Delete/NoConfirm/Log *$(OLB);*
 	- If F$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*
 	- $(MINIPERL) -e "use File::Path; rmtree(['lib/auto','lib/VMS','lib/$(ARCH)'],1,0);"

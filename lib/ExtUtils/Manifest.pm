@@ -242,7 +242,11 @@ sub ln {
     link($srcFile, $dstFile);
     local($_) = $dstFile; # chmod a+r,go-w+X (except "X" only applies to u=x)
     my $mode= 0444 | (stat)[2] & 0700;
-    chmod(  $mode | ( $mode & 0100 ? 0111 : 0 ),  $_  );
+    if (! chmod(  $mode | ( $mode & 0100 ? 0111 : 0 ),  $_  )) {
+       unlink $dstFile;
+       return;
+    }
+    1;
 }
 
 sub best {
