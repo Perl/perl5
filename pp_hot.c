@@ -2125,6 +2125,8 @@ PP(pp_entersub)
 	    AV* av;
 	    SV** ary;
 
+	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+	    			  "%p entersub preparing @_\n", thr));
 	    av = (AV*)curpad[0];
 	    if (AvREAL(av)) {
 		av_clear(av);
@@ -2159,6 +2161,8 @@ PP(pp_entersub)
 		MARK++;
 	    }
 	}
+	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
+			      "%p entersub returning %p\n", thr, CvSTART(cv)));
 	RETURNOP(CvSTART(cv));
     }
 }

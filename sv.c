@@ -57,6 +57,7 @@ static void del_xpv _((XPV* p));
 static void del_xrv _((XRV* p));
 static void sv_mortalgrow _((void));
 static void sv_unglob _((SV* sv));
+static void sv_check_thinkfirst _((SV *sv));
 
 typedef void (*SVFUNC) _((SV*));
 
@@ -1093,12 +1094,7 @@ sv_setiv(sv,i)
 register SV *sv;
 IV i;
 {
-    if (SvTHINKFIRST(sv)) {
-	if (SvREADONLY(sv) && curcop != &compiling)
-	    croak(no_modify);
-	if (SvROK(sv))
-	    sv_unref(sv);
-    }
+    sv_check_thinkfirst(sv);
     switch (SvTYPE(sv)) {
     case SVt_NULL:
 	sv_upgrade(sv, SVt_IV);
@@ -1149,12 +1145,7 @@ sv_setnv(sv,num)
 register SV *sv;
 double num;
 {
-    if (SvTHINKFIRST(sv)) {
-	if (SvREADONLY(sv) && curcop != &compiling)
-	    croak(no_modify);
-	if (SvROK(sv))
-	    sv_unref(sv);
-    }
+    sv_check_thinkfirst(sv);
     switch (SvTYPE(sv)) {
     case SVt_NULL:
     case SVt_IV:
@@ -1845,12 +1836,7 @@ register SV *sstr;
 
     if (sstr == dstr)
 	return;
-    if (SvTHINKFIRST(dstr)) {
-	if (SvREADONLY(dstr) && curcop != &compiling)
-	    croak(no_modify);
-	if (SvROK(dstr))
-	    sv_unref(dstr);
-    }
+    sv_check_thinkfirst(dstr);
     if (!sstr)
 	sstr = &sv_undef;
     stype = SvTYPE(sstr);
@@ -2183,12 +2169,7 @@ register STRLEN len;
 {
     assert(len >= 0);  /* STRLEN is probably unsigned, so this may
 			  elicit a warning, but it won't hurt. */
-    if (SvTHINKFIRST(sv)) {
-	if (SvREADONLY(sv) && curcop != &compiling)
-	    croak(no_modify);
-	if (SvROK(sv))
-	    sv_unref(sv);
-    }
+    sv_check_thinkfirst(sv);
     if (!ptr) {
 	(void)SvOK_off(sv);
 	return;
@@ -2214,12 +2195,7 @@ register const char *ptr;
 {
     register STRLEN len;
 
-    if (SvTHINKFIRST(sv)) {
-	if (SvREADONLY(sv) && curcop != &compiling)
-	    croak(no_modify);
-	if (SvROK(sv))
-	    sv_unref(sv);
-    }
+    sv_check_thinkfirst(sv);
     if (!ptr) {
 	(void)SvOK_off(sv);
 	return;
@@ -2244,12 +2220,7 @@ register SV *sv;
 register char *ptr;
 register STRLEN len;
 {
-    if (SvTHINKFIRST(sv)) {
-	if (SvREADONLY(sv) && curcop != &compiling)
-	    croak(no_modify);
-	if (SvROK(sv))
-	    sv_unref(sv);
-    }
+    sv_check_thinkfirst(sv);
     if (!SvUPGRADE(sv, SVt_PV))
 	return;
     if (!ptr) {
@@ -2267,6 +2238,21 @@ register STRLEN len;
     SvTAINT(sv);
 }
 
+static void
+sv_check_thinkfirst(sv)
+register SV *sv;
+{
+    if (SvTHINKFIRST(sv)) {
+	if (SvREADONLY(sv)) {
+	    dTHR;
+	    if (curcop != &compiling)
+		croak(no_modify);
+	}
+	if (SvROK(sv))
+	    sv_unref(sv);
+    }
+}
+    
 void
 sv_chop(sv,ptr)	/* like set but assuming ptr is in sv */
 register SV *sv;
@@ -2276,12 +2262,7 @@ register char *ptr;
 
     if (!ptr || !SvPOKp(sv))
 	return;
-    if (SvTHINKFIRST(sv)) {
-	if (SvREADONLY(sv) && curcop != &compiling)
-	    croak(no_modify);
-	if (SvROK(sv))
-	    sv_unref(sv);
-    }
+    sv_check_thinkfirst(sv);
     if (SvTYPE(sv) < SVt_PVIV)
 	sv_upgrade(sv,SVt_PVIV);
 
@@ -2386,8 +2367,11 @@ I32 namlen;
 {
     MAGIC* mg;
     
-    if (SvREADONLY(sv) && curcop != &compiling && !strchr("gBf", how))
-	croak(no_modify);
+    if (SvREADONLY(sv)) {
+	dTHR;
+	if (curcop != &compiling && !strchr("gBf", how))
+	    croak(no_modify);
+    }
     if (SvMAGICAL(sv) || (how == 't' && SvTYPE(sv) >= SVt_PVMG)) {
 	if (SvMAGIC(sv) && (mg = mg_find(sv, how))) {
 	    if (how == 't')
@@ -2653,12 +2637,7 @@ register SV *sv;
 register SV *nsv;
 {
     U32 refcnt = SvREFCNT(sv);
-    if (SvTHINKFIRST(sv)) {
-	if (SvREADONLY(sv) && curcop != &compiling)
-	    croak(no_modify);
-	if (SvROK(sv))
-	    sv_unref(sv);
-    }
+    sv_check_thinkfirst(sv);
     if (SvREFCNT(nsv) != 1)
 	warn("Reference miscount in sv_replace()");
     if (SvMAGICAL(sv)) {
@@ -2880,7 +2859,7 @@ SV *sv;
 	return;
 #ifdef DEBUGGING
     if (SvTEMP(sv)) {
-	warn("Attempt to free temp prematurely");
+	warn("Attempt to free temp prematurely: %s", SvPEEK(sv));
 	return;
     }
 #endif
@@ -3080,12 +3059,7 @@ I32 append;
     register I32 cnt;
     I32 i;
 
-    if (SvTHINKFIRST(sv)) {
-	if (SvREADONLY(sv) && curcop != &compiling)
-	    croak(no_modify);
-	if (SvROK(sv))
-	    sv_unref(sv);
-    }
+    sv_check_thinkfirst(sv);
     if (!SvUPGRADE(sv, SVt_PV))
 	return 0;
     SvSCREAM_off(sv);
@@ -3323,8 +3297,11 @@ register SV *sv;
     if (!sv)
 	return;
     if (SvTHINKFIRST(sv)) {
-	if (SvREADONLY(sv) && curcop != &compiling)
-	    croak(no_modify);
+	if (SvREADONLY(sv)) {
+	    dTHR;
+	    if (curcop != &compiling)
+		croak(no_modify);
+	}
 	if (SvROK(sv)) {
 #ifdef OVERLOAD
 	  if (SvAMAGIC(sv) && AMG_CALLun(sv,inc)) return;
@@ -3398,8 +3375,11 @@ register SV *sv;
     if (!sv)
 	return;
     if (SvTHINKFIRST(sv)) {
-	if (SvREADONLY(sv) && curcop != &compiling)
-	    croak(no_modify);
+	if (SvREADONLY(sv)) {
+	    dTHR;
+	    if (curcop != &compiling)
+		croak(no_modify);
+	}
 	if (SvROK(sv)) {
 #ifdef OVERLOAD
 	  if (SvAMAGIC(sv) && AMG_CALLun(sv,dec)) return;
@@ -3883,8 +3863,11 @@ STRLEN *lp;
 {
     char *s;
 
-    if (SvREADONLY(sv) && curcop != &compiling)
-	croak(no_modify);
+    if (SvREADONLY(sv)) {
+	dTHR;
+	if (curcop != &compiling)
+	    croak(no_modify);
+    }
     
     if (SvPOK(sv)) {
 	*lp = SvCUR(sv);

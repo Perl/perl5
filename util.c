@@ -1172,6 +1172,8 @@ die(pat, va_alist)
     GV *gv;
     CV *cv;
 
+    DEBUG_L(fprintf(stderr, "die: curstack = %p, mainstack= %p\n",
+    		    curstack, mainstack));/*debug*/
     /* We have to switch back to mainstack or die_where may try to pop
      * the eval block from the wrong stack if die is being called from a
      * signal handler.  - dkindred@cs.cmu.edu */
@@ -1188,6 +1190,8 @@ die(pat, va_alist)
     message = mess(pat, &args);
     va_end(args);
 
+    DEBUG_L(fprintf(stderr, "die: message = %s\ndiehook = %p\n",
+		   message, diehook));/*debug*/
     if (diehook) {
 	/* sv_2cv might call croak() */
 	SV *olddiehook = diehook;
@@ -1215,6 +1219,9 @@ die(pat, va_alist)
     }
 
     restartop = die_where(message);
+    DEBUG_L(fprintf(stderr,
+    		    "die: restartop = %p, was_in_eval = %d, oldrunlevel = %d\n",
+		    restartop, was_in_eval, oldrunlevel));/*debug*/
     if ((!restartop && was_in_eval) || oldrunlevel > 1)
 	JMPENV_JUMP(3);
     return restartop;
@@ -2360,7 +2367,7 @@ perl_cond *cp;
     if (thr->next_run == thr)
 	croak("panic: perl_cond_wait called by last runnable thread");
     
-    New(666, cond, 1, perl_wait_queue);
+    New(666, cond, 1, struct perl_wait_queue);
     cond->thread = thr;
     cond->next = *cp;
     *cp = cond;

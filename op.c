@@ -637,6 +637,7 @@ OP *o;
 {
     if (dowarn &&
 	o->op_type == OP_SASSIGN && cBINOPo->op_first->op_type == OP_CONST) {
+	dTHR;
 	line_t oldline = curcop->cop_line;
 
 	if (copline != NOLINE)
@@ -697,7 +698,7 @@ OP *o;
 	    else
 		scalar(kid);
 	}
-	curcop = &compiling;
+	WITH_THR(curcop = &compiling);
 	break;
     case OP_SCOPE:
     case OP_LINESEQ:
@@ -708,7 +709,7 @@ OP *o;
 	    else
 		scalar(kid);
 	}
-	curcop = &compiling;
+	WITH_THR(curcop = &compiling);
 	break;
     }
     return o;
@@ -821,7 +822,7 @@ OP *o;
 
     case OP_NEXTSTATE:
     case OP_DBSTATE:
-	curcop = ((COP*)o);		/* for warning below */
+	WITH_THR(curcop = ((COP*)o));		/* for warning below */
 	break;
 
     case OP_CONST:
@@ -860,7 +861,7 @@ OP *o;
 
     case OP_NULL:
 	if (o->op_targ == OP_NEXTSTATE || o->op_targ == OP_DBSTATE)
-	    curcop = ((COP*)o);		/* for warning below */
+	    WITH_THR(curcop = ((COP*)o));	/* for warning below */
 	if (o->op_flags & OPf_STACKED)
 	    break;
 	/* FALL THROUGH */
@@ -957,7 +958,7 @@ OP *o;
 	    else
 		list(kid);
 	}
-	curcop = &compiling;
+	WITH_THR(curcop = &compiling);
 	break;
     case OP_SCOPE:
     case OP_LINESEQ:
@@ -967,7 +968,7 @@ OP *o;
 	    else
 		list(kid);
 	}
-	curcop = &compiling;
+	WITH_THR(curcop = &compiling);
 	break;
     case OP_REQUIRE:
 	/* all requires must return a boolean value */
@@ -989,6 +990,7 @@ OP *o;
 	     o->op_type == OP_LEAVE ||
 	     o->op_type == OP_LEAVETRY)
 	{
+	    dTHR;
 	    for (kid = cLISTOPo->op_first; kid; kid = kid->op_sibling) {
 		if (kid->op_sibling) {
 		    scalarvoid(kid);

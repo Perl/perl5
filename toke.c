@@ -226,6 +226,7 @@ void
 lex_start(line)
 SV *line;
 {
+    dTHR;
     char *s;
     STRLEN len;
 
@@ -309,6 +310,7 @@ static void
 incline(s)
 char *s;
 {
+    dTHR;
     char *t;
     char *n;
     char ch;
@@ -459,6 +461,7 @@ expectation x;
 char *s;
 #endif /* CAN_PROTOTYPE */
 {
+    dTHR;
     yylval.ival = f;
     CLINE;
     expect = x;
@@ -651,6 +654,7 @@ sublex_start()
 static I32
 sublex_push()
 {
+    dTHR;
     push_scope();
 
     lex_state = sublex_info.super_state;

@@ -2123,6 +2123,7 @@ OP *o;
     return Nullop;
 }
 
+/* With USE_THREADS, eval_owner must be held on entry to doeval */
 static OP *
 doeval(gimme)
 int gimme;
@@ -2134,14 +2135,6 @@ int gimme;
     CV *caller;
     AV* comppadlist;
 
-#ifdef USE_THREADS
-    MUTEX_LOCK(&eval_mutex);
-    if (eval_owner && eval_owner != thr)
-	while (eval_owner)
-	    COND_WAIT(&eval_cond, &eval_mutex);
-    eval_owner = thr;
-    MUTEX_UNLOCK(&eval_mutex);
-#endif /* USE_THREADS */
     in_eval = 1;
 
     PUSHMARK(SP);
@@ -2406,6 +2399,14 @@ PP(pp_require)
     compiling.cop_line = 0;
 
     PUTBACK;
+#ifdef USE_THREADS
+    MUTEX_LOCK(&eval_mutex);
+    if (eval_owner && eval_owner != thr)
+	while (eval_owner)
+	    COND_WAIT(&eval_cond, &eval_mutex);
+    eval_owner = thr;
+    MUTEX_UNLOCK(&eval_mutex);
+#endif /* USE_THREADS */
     return DOCATCH(doeval(G_SCALAR));
 }
 
@@ -2458,6 +2459,14 @@ PP(pp_entereval)
     if (perldb && curstash != debstash)
 	save_lines(GvAV(compiling.cop_filegv), linestr);
     PUTBACK;
+#ifdef USE_THREADS
+    MUTEX_LOCK(&eval_mutex);
+    if (eval_owner && eval_owner != thr)
+	while (eval_owner)
+	    COND_WAIT(&eval_cond, &eval_mutex);
+    eval_owner = thr;
+    MUTEX_UNLOCK(&eval_mutex);
+#endif /* USE_THREADS */
     ret = doeval(gimme);
     if (perldb && was != sub_generation) { /* Some subs defined here. */
 	strcpy(safestr, "_<(eval )");	/* Anything fake and short. */

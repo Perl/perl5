@@ -62,6 +62,7 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 
 #define NOOP (void)0
 
+#define WITH_THR(s) do { dTHR; s; } while (0)
 #ifdef USE_THREADS
 #ifdef FAKE_THREADS
 #include "fakethr.h"
@@ -69,6 +70,7 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #include <pthread.h>
 typedef pthread_mutex_t perl_mutex;
 typedef pthread_cond_t perl_cond;
+typedef pthread_key_t perl_key;
 #endif /* FAKE_THREADS */
 #endif /* USE_THREADS */
 
@@ -1323,7 +1325,7 @@ typedef Sighandler_t Sigsave_t;
 /* global state */
 EXT PerlInterpreter *	curinterp;	/* currently running interpreter */
 #ifdef USE_THREADS
-EXT pthread_key_t	thr_key;	/* For per-thread struct thread ptr */
+EXT perl_key		thr_key;	/* For per-thread struct thread ptr */
 EXT perl_mutex		sv_mutex;	/* Mutex for allocating SVs in sv.c */
 EXT perl_mutex		malloc_mutex;	/* Mutex for malloc */
 EXT perl_mutex		eval_mutex;	/* Mutex for doeval */
@@ -1332,6 +1334,9 @@ EXT struct thread *	eval_owner;	/* Owner thread for doeval */
 EXT int			nthreads;	/* Number of threads currently */
 EXT perl_mutex		nthreads_mutex;	/* Mutex for nthreads */
 EXT perl_cond		nthreads_cond;	/* Condition variable for nthreads */
+#ifdef FAKE_THREADS
+EXT struct thread *	thr;		/* Currently executing (fake) thread */
+#endif
 #endif /* USE_THREADS */
 
 /* VMS doesn't use environ array and NeXT has problems with crt0.o globals */
@@ -1904,9 +1909,11 @@ IEXT I32	Irunlevel;
 /* stack stuff */
 IEXT AV *	Icurstack;		/* THE STACK */
 IEXT AV *	Imainstack;	/* the stack when nothing funny is happening */
+#if 0
 IEXT SV **	Imystack_base;	/* stack->array_ary */
 IEXT SV **	Imystack_sp;	/* stack pointer now */
 IEXT SV **	Imystack_max;	/* stack->array_ary + stack->array_max */
+#endif
 
 /* format accumulators */
 IEXT SV *	Iformtarget;

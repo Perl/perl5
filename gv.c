@@ -93,6 +93,7 @@ char *name;
 STRLEN len;
 int multi;
 {
+    dTHR;
     register GP *gp;
 
     sv_upgrade((SV*)gv, SVt_PVGV);
@@ -261,6 +262,7 @@ HV* stash;
 char* name;
 I32 autoload;
 {
+    dTHR;
     register char *nend;
     char *nsplit = 0;
     GV* gv;

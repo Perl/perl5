@@ -139,12 +139,13 @@ struct thread {
     int		Tdelaymagic;
     bool	Tdirty;
     U8		Tlocalizing;
+    COP *	Tcurcop;
 
     CONTEXT *	Tcxstack;
     I32		Tcxstack_ix;
     I32		Tcxstack_max;
 
-    AV *	Tstack;
+    AV *	Tcurstack;
     AV *	Tmainstack;
     JMPENV *	Ttop_env;
     I32		Trunlevel;
@@ -160,6 +161,7 @@ struct thread {
     perl_thread next_run, prev_run;	/* Linked list of runnable threads */
     perl_cond	wait_queue;		/* Wait queue that we are waiting on */
     IV		private;		/* Holds data across time slices */
+    I32		savemark;		/* Holds MARK for thread join values */
 #endif /* FAKE_THREADS */
 };
 
@@ -195,7 +197,7 @@ typedef struct condpair {
 #undef	stack_base
 #undef	stack_sp
 #undef	stack_max
-#undef	stack
+#undef	curstack
 #undef	mainstack
 #undef	markstack
 #undef	markstack_ptr
@@ -209,6 +211,7 @@ typedef struct condpair {
 #undef	retstack
 #undef	retstack_ix
 #undef	retstack_max
+#undef	curcop
 #undef	cxstack
 #undef	cxstack_ix
 #undef	cxstack_max
@@ -233,6 +236,7 @@ typedef struct condpair {
 #undef	op
 #define op		(thr->Top)
 #endif
+#define	curcop		(thr->Tcurcop)
 #define	stack		(thr->Tstack)
 #define	mainstack	(thr->Tmainstack)
 #define	markstack	(thr->Tmarkstack)

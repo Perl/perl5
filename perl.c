@@ -97,9 +97,9 @@ void
 perl_construct( sv_interp )
 register PerlInterpreter *sv_interp;
 {
-#ifdef USE_THREADS
+#if defined(USE_THREADS) && !defined(FAKE_THREADS)
     struct thread *thr;
-#endif /* USE_THREADS */
+#endif
     
     if (!(curinterp = sv_interp))
 	return;
@@ -113,14 +113,22 @@ register PerlInterpreter *sv_interp;
     pthread_init();
 #endif /* NEED_PTHREAD_INIT */
     New(53, thr, 1, struct thread);
+#ifdef FAKE_THREADS
+    self = thr;
+    thr->next = thr->prev = thr->next_run = thr->prev_run = thr;
+    thr->wait_queue = 0;
+    thr->private = 0;
+#else
     self = pthread_self();
     if (pthread_key_create(&thr_key, thread_destruct))
 	croak("panic: pthread_key_create");
     if (pthread_setspecific(thr_key, (void *) thr))
 	croak("panic: pthread_setspecific");
+#endif /* !FAKE_THREADS */
     nthreads = 1;
     cvcache = newHV();
     thrflags = 0;
+    curcop = &compiling;
 #endif /* USE_THREADS */
 
     /* Init the real globals? */
@@ -240,6 +248,7 @@ register PerlInterpreter *sv_interp;
 	return;
 
 #ifdef USE_THREADS
+#ifndef FAKE_THREADS
     /* Wait until all user-created threads go away */
     MUTEX_LOCK(&nthreads_mutex);
     while (nthreads > 1)
@@ -253,6 +262,7 @@ register PerlInterpreter *sv_interp;
     DEBUG_L(fprintf(stderr, "perl_destruct: armageddon has arrived\n"));
     MUTEX_DESTROY(&nthreads_mutex);
     COND_DESTROY(&nthreads_cond);
+#endif /* !defined(FAKE_THREADS) */
 #endif /* USE_THREADS */
 
     destruct_level = perl_destruct_level;
@@ -1715,6 +1725,7 @@ bool dosearch;
 SV *sv;
 #endif
 {
+    dTHR;
     char *xfound = Nullch;
     char *xfailed = Nullch;
     register char *s;

@@ -491,7 +491,7 @@ MAGIC *mg;
     case '/':
 	break;
     case '[':
-	sv_setiv(sv, (IV)curcop->cop_arybase);
+	WITH_THR(sv_setiv(sv, (IV)curcop->cop_arybase));
 	break;
     case '|':
 	sv_setiv(sv, (IV)(IoFLAGS(GvIOp(defoutgv)) & IOf_FLUSH) != 0 );
@@ -967,6 +967,7 @@ magic_getarylen(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
+    dTHR;
     sv_setiv(sv, AvFILL((AV*)mg->mg_obj) + curcop->cop_arybase);
     return 0;
 }
@@ -976,6 +977,7 @@ magic_setarylen(sv,mg)
 SV* sv;
 MAGIC* mg;
 {
+    dTHR;
     av_fill((AV*)mg->mg_obj, SvIV(sv) - curcop->cop_arybase);
     return 0;
 }
@@ -990,6 +992,7 @@ MAGIC* mg;
     if (SvTYPE(lsv) >= SVt_PVMG && SvMAGIC(lsv)) {
 	mg = mg_find(lsv, 'g');
 	if (mg && mg->mg_len >= 0) {
+	    dTHR;
 	    sv_setiv(sv, mg->mg_len + curcop->cop_arybase);
 	    return 0;
 	}
@@ -1023,7 +1026,7 @@ MAGIC* mg;
     }
     len = SvPOK(lsv) ? SvCUR(lsv) : sv_len(lsv);
 
-    pos = SvIV(sv) - curcop->cop_arybase;
+    WITH_THR(pos = SvIV(sv) - curcop->cop_arybase);
     if (pos < 0) {
 	pos += len;
 	if (pos < 0)
