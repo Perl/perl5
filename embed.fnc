@@ -1301,6 +1301,10 @@ s	|COP*	|closest_cop	|COP *cop|OP *o
 s	|SV*	|mess_alloc
 #endif
 
+#if defined(PERL_IN_NUMERIC_C) || defined(PERL_DECL_PROT)
+sn	|NV|mulexp10	|NV value|I32 exponent
+#endif
+
 START_EXTERN_C
 
 Apd	|void	|sv_setsv_flags	|SV* dsv|SV* ssv|I32 flags

@@ -1328,6 +1328,10 @@ STATIC COP*	S_closest_cop(pTHX_ COP *cop, OP *o);
 STATIC SV*	S_mess_alloc(pTHX);
 #endif
 
+#if defined(PERL_IN_NUMERIC_C) || defined(PERL_DECL_PROT)
+STATIC NV	S_mulexp10(NV value, I32 exponent);
+#endif
+
 START_EXTERN_C
 
 PERL_CALLCONV void	Perl_sv_setsv_flags(pTHX_ SV* dsv, SV* ssv, I32 flags);
