@@ -1453,6 +1453,7 @@ t/harness		Finer diagnostics from test suite
 t/io/argv.t		See if ARGV stuff works
 t/io/dup.t		See if >& works right
 t/io/fflush.t		See if auto-flush on fork/exec/system/qx works
+t/io/format.t		See if formats work
 t/io/fs.t		See if directory manipulations work
 t/io/inplace.t		See if inplace editing works
 t/io/iprefix.t		See if inplace editing works with prefixes
