@@ -1357,22 +1357,22 @@ function).
 Here is a handy table of equivalents between ordinary C and Perl's
 memory abstraction layer:
 
-    Instead Of:			Use:
+    Instead Of:                 Use:
 
-    t* p = malloc(n)		New(id, p, n, t)
-    t* p = calloc(n, s)		Newz(id, p, n, t)
-    p = realloc(p, n)		Renew(p, n, t)
-    memcpy(dst, src, n)		Copy(src, dst, n, t)
-    memmove(dst, src, n)	Move(src, dst, n, t)
-    free(p)			Safefree(p)
-    strdup(p)			savepv(p)
-    strndup(p, n)		savepvn(p, n) (Hey, strndup doesn't exist!)
-    memcpy/*(struct foo *)	StructCopy(src, dst, t)
+    t* p = malloc(n)            New(id, p, n, t)
+    t* p = calloc(n, s)         Newz(id, p, n, t)
+    p = realloc(p, n)           Renew(p, n, t)
+    memcpy(dst, src, n)         Copy(src, dst, n, t)
+    memmove(dst, src, n)        Move(src, dst, n, t)
+    free(p)                     Safefree(p)
+    strdup(p)                   savepv(p)
+    strndup(p, n)               savepvn(p, n) (Hey, strndup doesn't exist!)
+    memcpy/*(struct foo *)      StructCopy(src, dst, t)
 
-    t	type
-    p	pointer
-    ck	cookie for the memory region (now unused)
-    n	number of elements
+    t   type
+    p   pointer
+    ck  cookie for the memory region (now unused)
+    n   number of elements
     src source pointer
     dst destination pointer
 
@@ -1721,10 +1721,10 @@ is normally hidden via macros.  Consider C<sv_setsv>.  It expands
 something like this:
 
     ifdef PERL_IMPLICIT_CONTEXT
-      define sv_setsv(a,b)	Perl_sv_setsv(aTHX_ a, b)
+      define sv_setsv(a,b)      Perl_sv_setsv(aTHX_ a, b)
       /* can't do this for vararg functions, see below */
     else
-      define sv_setsv		Perl_sv_setsv
+      define sv_setsv           Perl_sv_setsv
     endif
 
 This works well, and means that XS authors can gleefully write:
@@ -1799,31 +1799,31 @@ work.
 The second, more efficient way is to use the following template for
 your Foo.xs:
 
-	#define PERL_NO_GET_CONTEXT	/* we want efficiency */
-	#include "EXTERN.h"
-	#include "perl.h"
-	#include "XSUB.h"
+        #define PERL_NO_GET_CONTEXT     /* we want efficiency */
+        #include "EXTERN.h"
+        #include "perl.h"
+        #include "XSUB.h"
 
         static my_private_function(int arg1, int arg2);
 
-	static SV *
-	my_private_function(int arg1, int arg2)
-	{
-	    dTHX;	/* fetch context */
-	    ... call many Perl API functions ...
-	}
+        static SV *
+        my_private_function(int arg1, int arg2)
+        {
+            dTHX;       /* fetch context */
+            ... call many Perl API functions ...
+        }
 
         [... etc ...]
 
-	MODULE = Foo		PACKAGE = Foo
+        MODULE = Foo            PACKAGE = Foo
 
-	/* typical XSUB */
+        /* typical XSUB */
 
-	void
-	my_xsub(arg)
-		int arg
-	    CODE:
-		my_private_function(arg, 10);
+        void
+        my_xsub(arg)
+                int arg
+            CODE:
+                my_private_function(arg, 10);
 
 Note that the only two changes from the normal way of writing an
 extension is the addition of a C<#define PERL_NO_GET_CONTEXT> before
@@ -1838,32 +1838,32 @@ The third, even more efficient way is to ape how it is done within
 the Perl guts:
 
 
-	#define PERL_NO_GET_CONTEXT	/* we want efficiency */
-	#include "EXTERN.h"
-	#include "perl.h"
-	#include "XSUB.h"
+        #define PERL_NO_GET_CONTEXT     /* we want efficiency */
+        #include "EXTERN.h"
+        #include "perl.h"
+        #include "XSUB.h"
 
         /* pTHX_ only needed for functions that call Perl API */
         static my_private_function(pTHX_ int arg1, int arg2);
 
-	static SV *
-	my_private_function(pTHX_ int arg1, int arg2)
-	{
-	    /* dTHX; not needed here, because THX is an argument */
-	    ... call Perl API functions ...
-	}
+        static SV *
+        my_private_function(pTHX_ int arg1, int arg2)
+        {
+            /* dTHX; not needed here, because THX is an argument */
+            ... call Perl API functions ...
+        }
 
         [... etc ...]
 
-	MODULE = Foo		PACKAGE = Foo
+        MODULE = Foo            PACKAGE = Foo
 
-	/* typical XSUB */
+        /* typical XSUB */
 
-	void
-	my_xsub(arg)
-		int arg
-	    CODE:
-		my_private_function(aTHX_ arg, 10);
+        void
+        my_xsub(arg)
+                int arg
+            CODE:
+                my_private_function(aTHX_ arg, 10);
 
 This implementation never has to fetch the context using a function
 call, since it is always passed as an extra argument.  Depending on
@@ -1990,18 +1990,18 @@ If you are printing IVs, UVs, or NVS instead of the stdio(3) style
 formatting codes like C<%d>, C<%ld>, C<%f>, you should use the
 following macros for portability
 
-	IVdf		IV in decimal
-	UVuf		UV in decimal
-	UVof		UV in octal
-	UVxf		UV in hexadecimal
-	NVef		NV %e-like
-	NVff		NV %f-like
-	NVgf		NV %g-like
+        IVdf            IV in decimal
+        UVuf            UV in decimal
+        UVof            UV in octal
+        UVxf            UV in hexadecimal
+        NVef            NV %e-like
+        NVff            NV %f-like
+        NVgf            NV %g-like
 
 These will take care of 64-bit integers and long doubles.
 For example:
 
-	printf("IV is %"IVdf"\n", iv);
+        printf("IV is %"IVdf"\n", iv);
 
 The IVdf will expand to whatever is the correct format for the IVs.
 
@@ -2013,20 +2013,20 @@ with PTR2UV(), do not use %lx or %p.
 Because pointer size does not necessarily equal integer size,
 use the follow macros to do it right.
 
-	PTR2UV(pointer)
-	PTR2IV(pointer)
-	PTR2NV(pointer)
-	INT2PTR(pointertotype, integer)
+        PTR2UV(pointer)
+        PTR2IV(pointer)
+        PTR2NV(pointer)
+        INT2PTR(pointertotype, integer)
 
 For example:
 
-	IV  iv = ...;
-	SV *sv = INT2PTR(SV*, iv);
+        IV  iv = ...;
+        SV *sv = INT2PTR(SV*, iv);
 
 and
 
-	AV *av = ...;
-	UV  uv = PTR2UV(av);
+        AV *av = ...;
+        UV  uv = PTR2UV(av);
 
 =head2 Source Documentation
 
