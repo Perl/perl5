@@ -1107,15 +1107,15 @@ my @space1 = sort grep { $space{$_} =~ /[[:space:]]/ } keys %space;
 my @space2 = sort grep { $space{$_} =~ /[[:blank:]]/ } keys %space;
 
 print "not " unless "@space0" eq "cr ff lf spc tab";
-print "ok $test\n";
+print "ok $test # @space0\n";
 $test++;
 
 print "not " unless "@space1" eq "cr ff lf spc tab vt";
-print "ok $test\n";
+print "ok $test # @space1\n";
 $test++;
 
 print "not " unless "@space2" eq "spc tab";
-print "ok $test\n";
+print "ok $test # @space2\n";
 $test++;
  
 # bugid 20001021.005 - this caused a SEGV

@@ -922,6 +922,7 @@ lib/unicode/Is/BidiRLE.pl			Unicode character database
 lib/unicode/Is/BidiRLO.pl			Unicode character database
 lib/unicode/Is/BidiS.pl				Unicode character database
 lib/unicode/Is/BidiWS.pl			Unicode character database
+lib/unicode/Is/Blank.pl				Unicode character database
 lib/unicode/Is/C.pl				Unicode character database
 lib/unicode/Is/Cc.pl				Unicode character database
 lib/unicode/Is/Cf.pl				Unicode character database
@@ -1010,6 +1011,7 @@ lib/unicode/Is/Sk.pl				Unicode character database
 lib/unicode/Is/Sm.pl				Unicode character database
 lib/unicode/Is/So.pl				Unicode character database
 lib/unicode/Is/Space.pl				Unicode character database
+lib/unicode/Is/SpacePerl.pl			Unicode character database
 lib/unicode/Is/SylA.pl				Unicode character database
 lib/unicode/Is/SylAA.pl				Unicode character database
 lib/unicode/Is/SylAAI.pl			Unicode character database

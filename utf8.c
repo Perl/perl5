@@ -899,7 +899,7 @@ Perl_is_utf8_space(pTHX_ U8 *p)
     if (!is_utf8_char(p))
 	return FALSE;
     if (!PL_utf8_space)
-	PL_utf8_space = swash_init("utf8", "IsSpace", &PL_sv_undef, 0, 0);
+	PL_utf8_space = swash_init("utf8", "IsSpacePerl", &PL_sv_undef, 0, 0);
     return swash_fetch(PL_utf8_space, p);
 }
 
