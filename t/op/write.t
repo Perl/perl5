@@ -30,6 +30,7 @@ now @<<the@>>>> for all@|||||men to come @<<<<
 .
 
 open(OUT, '>Op_write.tmp') || die "Can't create Op_write.tmp";
+END { 1 while unlink 'Op_write.tmp' }
 
 $fox = 'foxiness';
 $good = 'good';
