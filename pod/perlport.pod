@@ -332,20 +332,23 @@ first 8 characters.
 
 Whitespace in filenames is tolerated on most systems, but not all,
 and even on systems where it might be tolerated, some utilities
-might becoem confused by such whitespace.
+might become confused by such whitespace.
 
 Many systems (DOS, VMS) cannot have more than one C<.> in their filenames.
 
 Don't assume C<< > >> won't be the first character of a filename.
-Always use C<< < >> explicitly to open a file for reading,
-unless you want the user to be able to specify a pipe open.
+Always use C<< < >> explicitly to open a file for reading, or even
+better, use the three-arg version of open, unless you want the user to
+be able to specify a pipe open.
 
-    open(FILE, "< $existing_file") or die $!;
+    open(FILE, '<', $existing_file) or die $!;
 
 If filenames might use strange characters, it is safest to open it
 with C<sysopen> instead of C<open>.  C<open> is magic and can
 translate characters like C<< > >>, C<< < >>, and C<|>, which may
 be the wrong thing to do.  (Sometimes, though, it's the right thing.)
+Three-arg open can also help protect against this translation in cases
+where it is undesirable.
 
 Don't use C<:> as a part of a filename since many systems use that for
 their own semantics (MacOS Classic for separating pathname components,
