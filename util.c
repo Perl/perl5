@@ -2382,14 +2382,14 @@ perl_cond *cp;
 #endif /* FAKE_THREADS */
 
 #ifdef OLD_PTHREADS_API
-struct thread *
+struct perl_thread *
 getTHR _((void))
 {
     pthread_addr_t t;
 
     if (pthread_getspecific(thr_key, &t))
 	croak("panic: pthread_getspecific");
-    return (struct thread *) t;
+    return (struct perl_thread *) t;
 }
 #endif /* OLD_PTHREADS_API */
 
@@ -2438,20 +2438,20 @@ condpair_magic(SV *sv)
  * called. The use by ext/Thread/Thread.xs in core perl (where t is the
  * thread calling new_struct_thread) clearly satisfies this constraint.
  */
-struct thread *
-new_struct_thread(struct thread *t)
+struct perl_thread *
+new_struct_thread(struct perl_thread *t)
 {
-    struct thread *thr;
+    struct perl_thread *thr;
     SV *sv;
     SV **svp;
     I32 i;
 
     sv = newSVpv("", 0);
-    SvGROW(sv, sizeof(struct thread) + 1);
-    SvCUR_set(sv, sizeof(struct thread));
+    SvGROW(sv, sizeof(struct perl_thread) + 1);
+    SvCUR_set(sv, sizeof(struct perl_thread));
     thr = (Thread) SvPVX(sv);
     /* debug */
-    memset(thr, 0xab, sizeof(struct thread));
+    memset(thr, 0xab, sizeof(struct perl_thread));
     markstack = 0;
     scopestack = 0;
     savestack = 0;

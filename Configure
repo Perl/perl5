@@ -465,6 +465,8 @@ usedl=''
 fpostype=''
 gidtype=''
 groupstype=''
+d_sched_yield=''
+d_pthread_yield=''
 h_fcntl=''
 h_sysfile=''
 db_hashtype=''
@@ -601,6 +603,7 @@ installprivlib=''
 privlib=''
 privlibexp=''
 prototype=''
+pthreads_created_joinable=''
 randbits=''
 installscript=''
 scriptdir=''
@@ -8549,6 +8552,24 @@ EOM
 *)  groupstype="$gidtype";;
 esac
 
+case "$usethreads" in
+$define)
+
+    : see if sched_yield exists
+    set sched_yield d_sched_yield
+    eval $inlibc
+    
+    : see if pthread_yield exists
+    set pthread_yield d_pthread_yield
+    eval $inlibc
+
+    ;;
+*)
+    d_sched_yield=$undef
+    d_pthread_yield=$undef
+    ;;
+esac
+
 : see what type lseek is declared as in the kernel
 set off_t lseektype long stdio.h sys/types.h
 eval $typedef
@@ -9896,6 +9917,53 @@ val="$t_gdbm"
 set i_gdbm
 eval $setvar
 
+: test whether pthreads are created in joinable -- aka undetached -- state
+if test "X$usethreads" != X; then
+echo " "
+echo 'Checking whether pthreads are created joinable.' >&4
+	$cat >try.c <<EOCP
+/* Note: this program returns 1 if detached, 0 if not.
+ * Easier this way because the PTHREAD_CREATE_DETACHED is more
+ * portable than the obsolete PTHREAD_CREATE_UNDETACHED.
+ * Testing for joinable (aka undetached) as opposed to detached
+ * is then again logically more sensible because that's
+ * the more modern default state in the pthreads implementations. */
+#include <pthread.h>
+#include <stdio.h>
+int main() {
+    pthread_attr_t attr;
+    int detachstate;
+    pthread_attr_init(&attr);
+    pthread_attr_getdetachstate(&attr, &detachstate);
+    printf("%s\n",
+           detachstate == PTHREAD_CREATE_DETACHED ?
+           "detached" : "joinable");
+    exit(0);
+}
+EOCP
+    if $cc $ccflags $ldflags -o try try.c $libs >/dev/null 2>&1; then
+	yyy=`./try`
+    else
+	echo "(I can't seem to compile the test program--assuming they are.)"
+	yyy=joinable
+    fi
+    case "$yyy" in
+    joinable)
+      val="$define"
+      echo "Yup, they are."
+      ;;
+    *)
+      val="$undef"
+      echo "Nope, they aren't."
+      ;;
+    esac
+    set d_pthreads_created_joinable
+    eval $setvar
+    $rm -f try try.*
+else
+    d_pthreads_created_joinable=$undef
+fi
+
 echo " "
 echo "Looking for extensions..." >&4
 cd ../ext
@@ -10271,6 +10339,7 @@ d_phostname='$d_phostname'
 d_pipe='$d_pipe'
 d_poll='$d_poll'
 d_portable='$d_portable'
+d_pthread_yield='$d_pthread_yield'
 d_pwage='$d_pwage'
 d_pwchange='$d_pwchange'
 d_pwclass='$d_pwclass'
@@ -10285,6 +10354,7 @@ d_rmdir='$d_rmdir'
 d_safebcpy='$d_safebcpy'
 d_safemcpy='$d_safemcpy'
 d_sanemcmp='$d_sanemcmp'
+d_sched_yield='$d_sched_yield'
 d_seekdir='$d_seekdir'
 d_select='$d_select'
 d_sem='$d_sem'
@@ -10538,6 +10608,7 @@ prefixexp='$prefixexp'
 privlib='$privlib'
 privlibexp='$privlibexp'
 prototype='$prototype'
+pthreads_created_joinable='$pthreads_created_joinable'
 randbits='$randbits'
 ranlib='$ranlib'
 rd_nodata='$rd_nodata'

@@ -70,7 +70,7 @@ static void init_debugger _((void));
 static void init_lexer _((void));
 static void init_main_stash _((void));
 #ifdef USE_THREADS
-static struct thread * init_main_thread _((void));
+static struct perl_thread * init_main_thread _((void));
 #endif /* USE_THREADS */
 static void init_perllib _((void));
 static void init_postdump_symbols _((int, char **, char **));
@@ -112,7 +112,7 @@ perl_construct(register PerlInterpreter *sv_interp)
 #ifdef USE_THREADS
     int i;
 #ifndef FAKE_THREADS
-    struct thread *thr;
+    struct perl_thread *thr;
 #endif /* FAKE_THREADS */
 #endif /* USE_THREADS */
     
@@ -2777,13 +2777,13 @@ incpush(char *p, int addsubdirs)
 }
 
 #ifdef USE_THREADS
-static struct thread *
+static struct perl_thread *
 init_main_thread()
 {
-    struct thread *thr;
+    struct perl_thread *thr;
     XPV *xpv;
 
-    Newz(53, thr, 1, struct thread);
+    Newz(53, thr, 1, struct perl_thread);
     curcop = &compiling;
     thr->cvcache = newHV();
     thr->threadsv = newAV();

@@ -16,13 +16,13 @@ static U32 threadnum = 0;
 static int sig_pipe[2];
             
 #ifndef THREAD_RET_TYPE
-typedef struct thread *Thread;
+typedef struct perl_thread *Thread;
 #define THREAD_RET_TYPE void *
 #define THREAD_RET_CAST(x) ((THREAD_RET_TYPE) x)
 #endif
 
 static void
-remove_thread(struct thread *t)
+remove_thread(struct perl_thread *t)
 {
 #ifdef USE_THREADS
     DEBUG_L(WITH_THR(PerlIO_printf(PerlIO_stderr(),
@@ -106,8 +106,8 @@ threadstart(void *arg)
 
     /*
      * It's safe to wait until now to set the thread-specific pointer
-     * from our pthread_t structure to our struct thread, since we're
-     * the only thread who can get at it anyway.
+     * from our pthread_t structure to our struct perl_thread, since
+     * we're the only thread who can get at it anyway.
      */
     SET_THR(thr);
 
@@ -234,8 +234,27 @@ newthread (SV *startsv, AV *initargs, char *classname)
     sigfillset(&fullmask);
     if (sigprocmask(SIG_SETMASK, &fullmask, &oldmask) == -1)
 	croak("panic: sigprocmask");
+#ifdef PTHREADS_CREATED_JOINABLE
     err = pthread_create(&thr->self, pthread_attr_default,
 			 threadstart, (void*) thr);
+#else
+    {
+	pthread_attr_t attr;
+
+	err = pthread_attr_init(&attr);
+	if (err == 0) {
+#ifdef PTHREAD_CREATE_UNDETACHED
+	  err = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_UNDETACHED);
+#else
+	  croak("panic: pthread_attr_setdetachstate");
+#endif
+	  if (err == 0) 
+	    err = pthread_create(&thr->self, &attr,
+				 threadstart, (void*) thr);
+	}
+	pthread_attr_destroy(&attr);
+    }
+#endif
     /* Go */
     MUTEX_UNLOCK(&thr->mutex);
 #endif

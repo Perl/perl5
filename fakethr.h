@@ -1,12 +1,12 @@
 typedef int perl_mutex;
 typedef int perl_key;
 
-typedef struct thread *perl_os_thread;
+typedef struct perl_thread *perl_os_thread;
 /* With fake threads, thr is global(ish) so we don't need dTHR */
 #define dTHR extern int errno
 
 struct perl_wait_queue {
-    struct thread *		thread;
+    struct perl_thread *	thread;
     struct perl_wait_queue *	next;
 };
 typedef struct perl_wait_queue *perl_cond;

@@ -341,7 +341,7 @@ OP*	newUNOP _((I32 type, I32 flags, OP* first));
 OP*	newWHILEOP _((I32 flags, I32 debuggable, LOOP* loop,
 		      I32 whileline, OP* expr, OP* block, OP* cont));
 #ifdef USE_THREADS
-struct thread *	new_struct_thread _((struct thread *t));
+struct perl_thread *	new_struct_thread _((struct perl_thread *t));
 #endif
 PerlIO*	nextargv _((GV* gv));
 char*	ninstr _((char* big, char* bigend, char* little, char* lend));

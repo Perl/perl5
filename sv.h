@@ -246,7 +246,7 @@ struct xpvfm {
     CV *	xcv_outside;
 #ifdef USE_THREADS
     perl_mutex *xcv_mutexp;	/* protects xcv_owner */
-    struct thread *xcv_owner;	/* current owner thread */
+    struct perl_thread *xcv_owner;	/* current owner thread */
 #endif /* USE_THREADS */
     cv_flags_t	xcv_flags;
 
