@@ -286,7 +286,8 @@ unless (   defined &Time::HiRes::setitimer
     print "# setitimer: ", join(" ", setitimer(ITIMER_VIRTUAL, 0.5, 0.4)), "\n";
 
     # Assume interval timer granularity of $limit * 0.5 seconds.  Too bold?
-    print "not " unless abs(getitimer(ITIMER_VIRTUAL) / 0.5) - 1 < $limit;
+    my $virt = getitimer(ITIMER_VIRTUAL);
+    print "not " unless defined $virt && abs($virt / 0.5) - 1 < $limit;
     print "ok 18\n";
 
     print "# getitimer: ", join(" ", getitimer(ITIMER_VIRTUAL)), "\n";
@@ -298,7 +299,8 @@ unless (   defined &Time::HiRes::setitimer
 
     print "# getitimer: ", join(" ", getitimer(ITIMER_VIRTUAL)), "\n";
 
-    print "not " unless getitimer(ITIMER_VIRTUAL) == 0;
+    $virt = getitimer(ITIMER_VIRTUAL);
+    print "not " unless defined $virt && $virt == 0;
     print "ok 19\n";
 
     $SIG{VTALRM} = 'DEFAULT';
