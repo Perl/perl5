@@ -155,6 +155,7 @@ sub install {
 	    } else {
 		inc_uninstall($_,$File::Find::dir,$verbose,0); # nonono set to 0
 	    }
+	    # Record the full pathname.
 	    $packlist->{$targetfile}++;
 
 	}, ".");
