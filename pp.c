@@ -1391,9 +1391,23 @@ PP(pp_negate)
 	dTOPss;
 	if (SvGMAGICAL(sv))
 	    mg_get(sv);
-	if (SvIOKp(sv) && !SvNOKp(sv) && !SvPOKp(sv) && SvIVX(sv) != IV_MIN)
-	    SETi(-SvIVX(sv));
-	else if (SvNIOKp(sv))
+	if (SvIOKp(sv) && !SvNOKp(sv) && !SvPOKp(sv)) {
+	    if (SvIsUV(sv)) {
+		if (SvIVX(sv) == IV_MIN) {
+		    SETi(SvIVX(sv));	/* special case: -((UV)IV_MAX+1) == IV_MIN */
+		    RETURN;
+		}
+		else if (SvUVX(sv) <= IV_MAX) {
+		    SETi(-SvUVX(sv));
+		    RETURN;
+		}
+	    }
+	    else if (SvIVX(sv) != IV_MIN) {
+		SETi(-SvIVX(sv));
+		RETURN;
+	    }
+	}
+	if (SvNIOKp(sv))
 	    SETn(-SvNV(sv));
 	else if (SvPOKp(sv)) {
 	    STRLEN len;
