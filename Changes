@@ -31,6 +31,223 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14225] By: jhi                                   on 2002/01/12  20:28:05
+        Log: Subject: [PATCH 2] Re: [PATCH Configure ext/NDBM_File/hints/linux.pl] Support for linux systems with gdbm
+             From: Jonathan Stowe <gellyfish@gellyfish.com>
+             Date: Sat, 12 Jan 2002 11:13:02 +0000 (GMT) 
+             Message-ID: <Pine.LNX.4.44.0201121107400.26602-100000@orpheus.gellyfish.com>    
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[ 14224] By: jhi                                   on 2002/01/12  20:18:02
+        Log: Quick reformat using indent -kr -nce, as requested
+             by Dan Kogai and suggest by NI-S.
+     Branch: perl
+	   ! ext/Encode/encengine.c
+____________________________________________________________________________
+[ 14223] By: jhi                                   on 2002/01/12  20:08:54
+        Log: Couple more Unicode lookbehind tests.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[ 14222] By: jhi                                   on 2002/01/12  20:05:29
+        Log: Sharp S as a special treat for our German UTF-8 testers :-)
+     Branch: perl
+	   ! pod/perlunicode.pod regexec.c t/op/pat.t utf8.h
+____________________________________________________________________________
+[ 14221] By: jhi                                   on 2002/01/12  18:38:54
+        Log: Subject: {PATCH] Fix:  Re: [PATCH] B::C, perlcc.PL, B.xs, B.pm, t/TEST, C.xs   
+             From: "Mattia Barbon" <mbarbon@dsi.unive.it>
+             Date: Sat, 12 Jan 2002 20:37:32 +0100
+             Message-ID: <3C409E8C.16203.196C2D3@localhost>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 14220] By: jhi                                   on 2002/01/12  18:27:32
+        Log: Hrmph.  Is having a test for an exact version of MM_Unix.pm
+             really worth the bits it's printed on?
+     Branch: perl
+	   ! lib/ExtUtils/t/MM_Unix.t
+____________________________________________________________________________
+[ 14219] By: jhi                                   on 2002/01/12  18:06:49
+        Log: Special treatment for U+03B0 and U+0390 in //i,
+             this means that we can remove the minlen pessimisations
+             introduced by the #14096.
+     Branch: perl
+	   ! pp_hot.c regcomp.c regexec.c
+____________________________________________________________________________
+[ 14218] By: jhi                                   on 2002/01/12  16:14:52
+        Log: Integrate perlio;
+             
+             Abstract out the cloning of SvPVX and handle shared pv in a 
+             safe (if suboptimal) manner. Does not fix op/fork.t :-(
+             
+             Win32-ize socketpair test
+             - Win32 can fork even though $Config{d_fork} is undef
+             - SOCK_DGRAM does not work - skip those tests.
+     Branch: perl
+	  !> ext/Socket/socketpair.t sv.c
+____________________________________________________________________________
+[ 14217] By: jhi                                   on 2002/01/12  16:09:59
+        Log: One should first drop the real uid, not the effective uid.
+             [ID 20020110.003]
+     Branch: perl
+	   ! utils/perldoc.PL
+____________________________________________________________________________
+[ 14216] By: jhi                                   on 2002/01/12  15:50:38
+        Log: Subject: [PATCH] B::C, perlcc.PL, B.xs, B.pm, t/TEST, C.xs
+             From: "Mattia Barbon" <mbarbon@dsi.unive.it>
+             Date: Fri, 11 Jan 2002 23:29:48 +0100
+             Message-ID: <3C3F756C.4581.2E2A938@localhost>
+     Branch: perl
+	   + ext/B/C/C.xs ext/B/C/Makefile.PL
+	   ! MANIFEST ext/B/B.pm ext/B/B.xs ext/B/B/C.pm t/TEST
+	   ! utils/perlcc.PL
+____________________________________________________________________________
+[ 14215] By: jhi                                   on 2002/01/12  15:22:01
+        Log: Subject: [PATCH] Re: Magic numbers in B::Concise
+             From: Stephen McCamant <smcc@CSUA.Berkeley.EDU>               
+             Date: Fri, 11 Jan 2002 14:29:30 -0800
+             Message-ID: <15423.26442.891378.802062@soda.csua.berkeley.edu>
+     Branch: perl
+	   ! ext/B/t/concise.t
+____________________________________________________________________________
+[ 14212] By: ams                                   on 2002/01/12  06:10:52
+        Log: Subject: [PATCH] More fixes for Stratus VOS
+             From: "Green, Paul" <Paul.Green@stratus.com>
+             Date: Fri, 11 Jan 2002 17:30:37 -0500
+             Message-Id: <95AE3CDB3543D511883A0020485B38B9023534D3@exna3.stratus.com>
+     Branch: perl
+	   ! hints/vos.sh lib/ExtUtils/MM_Unix.pm
+____________________________________________________________________________
+[ 14211] By: jhi                                   on 2002/01/12  06:01:29
+        Log: Upgrade to CGI.pm 2.80.
+     Branch: perl
+	   ! lib/CGI.pm lib/CGI/Carp.pm lib/CGI/t/form.t
+____________________________________________________________________________
+[ 14210] By: jhi                                   on 2002/01/12  05:57:36
+        Log: FAQ sync.
+     Branch: perl
+	   ! pod/perlfaq.pod pod/perlfaq1.pod pod/perlfaq2.pod
+	   ! pod/perlfaq3.pod pod/perlfaq4.pod pod/perlfaq5.pod
+	   ! pod/perlfaq8.pod
+____________________________________________________________________________
+[ 14209] By: jhi                                   on 2002/01/12  05:54:24
+        Log: This is getting embarrassing.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[ 14208] By: jhi                                   on 2002/01/12  05:30:03
+        Log: Doc tweaks.
+     Branch: perl
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[ 14207] By: jhi                                   on 2002/01/12  05:16:55
+        Log: Updating the test count is good; also rephrasing
+             so that there is no ok output containing "not".
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[ 14206] By: jhi                                   on 2002/01/12  05:11:20
+        Log: Andreas is busy :-)
+     Branch: perl
+	   ! doop.c t/op/unisprintf.t
+____________________________________________________________________________
+[ 14205] By: jhi                                   on 2002/01/12  04:55:20
+        Log: Unicode lookbehind looked bad.
+     Branch: perl
+	   ! regexec.c t/op/pat.t
+____________________________________________________________________________
+[ 14204] By: jhi                                   on 2002/01/12  01:43:48
+        Log: Garbage collection.
+     Branch: perl
+	   ! t/run/kill_perl.t
+____________________________________________________________________________
+[ 14203] By: jhi                                   on 2002/01/12  00:10:51
+        Log: Subject: [PATCH] export win32_async_check or Perl_despatch_signals
+             From: "Mattia Barbon" <mbarbon@dsi.unive.it>
+             Date: Fri, 11 Jan 2002 23:29:48 +0100
+             Message-ID: <3C3F756C.21561.2E2A9CE@localhost>
+     Branch: perl
+	   ! embed.fnc global.sym makedef.pl
+____________________________________________________________________________
+[ 14202] By: jhi                                   on 2002/01/12  00:07:41
+        Log: Subject: [PATCH] perldelta nit?
+             From: Robert Spier <rspier@pobox.com>
+             Date: Fri, 11 Jan 2002 15:19:16 -0800
+             Message-ID: <15423.29428.164185.251700@rls.cx>
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 14201] By: jhi                                   on 2002/01/12  00:06:02
+        Log: Subject: Re: [PATCH lib/AnyDBM_File.t] Convert to Test::More
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Fri, 11 Jan 2002 17:08:17 -0500
+             Message-ID: <20020111220817.GG2838@blackrider>
+     Branch: perl
+	   ! t/run/kill_perl.t t/test.pl
+____________________________________________________________________________
+[ 14200] By: jhi                                   on 2002/01/12  00:02:05
+        Log: Subject: [PATCH] Correct misleading error message
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Fri, 11 Jan 2002 18:36:33 +0000
+             Message-Id: <E16P6XZ-0005kA-00@draco.cus.cam.ac.uk>
+             
+             hash assignment -> anonymous hash
+     Branch: perl
+	   ! pod/perldiag.pod pp.c t/lib/warnings/pp t/op/hashwarn.t
+____________________________________________________________________________
+[ 14199] By: jhi                                   on 2002/01/11  23:58:00
+        Log: Subject: [PATCH bleadperl] Shut down warnings in Normalize.c          
+             From: Nikola Knezevic <indy@tesla.rcub.bg.ac.yu>
+             Date: Fri, 11 Jan 2002 16:58:14 +0100
+             Message-ID: <543058204.20020111165814@tesla.rcub.bg.ac.yu>
+     Branch: perl
+	   ! ext/Unicode/Normalize/mkheader
+____________________________________________________________________________
+[ 14198] By: jhi                                   on 2002/01/11  23:53:05
+        Log: Add a new test for is-sprintf-preserving Unicodeness:
+             #14194 and an old one from kill_perl.t (I could have used
+             sprintf.t, but it's format was quite fixed, and I didn't
+             feel like breaking the format)
+     Branch: perl
+	   + t/op/unisprintf.t
+	   ! MANIFEST t/run/kill_perl.t
+____________________________________________________________________________
+[ 14197] By: jhi                                   on 2002/01/11  21:48:49
+        Log: Integrate perlio;
+             Install dummy signal() handlers for Win32's SIGINT and SIGBREAK
+     Branch: perl
+	  !> win32/win32.c
+____________________________________________________________________________
+[ 14195] By: jhi                                   on 2002/01/11  20:07:35
+        Log: Integrate perlio;
+             A mostly-stable version of "new" Win32 signal/kill support.
+     Branch: perl
+	  !> MANIFEST XSUB.h mg.c t/run/kill_perl.t toke.c win32/config.bc
+	  !> win32/config.gc win32/config.vc win32/config_H.bc
+	  !> win32/config_H.gc win32/config_H.vc win32/config_h.PL
+	  !> win32/makefile.mk win32/win32.c win32/win32.h
+____________________________________________________________________________
+[ 14194] By: jhi                                   on 2002/01/11  20:04:26
+        Log: Fix for
+             
+             Subject: UTF-8 sprintf bug in bleadperl
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 11 Jan 2002 15:47:15 +0100
+             Message-ID: <m3vge99c7g.fsf@anima.de>
+             
+             I have tests, have just to figure out where to put them
+             since op/sprintf looks a bit unfriendly for tests of
+             somewhat freer form.
+     Branch: perl
+	   ! doop.c sv.c
+____________________________________________________________________________
+[ 14191] By: jhi                                   on 2002/01/11  15:34:53
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14190] By: jhi                                   on 2002/01/11  14:52:51
         Log: Subject: [PATCH] Re: Magic numbers in B::Concise
              From: Stephen McCamant <smcc@CSUA.Berkeley.EDU>
