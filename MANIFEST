@@ -634,6 +634,7 @@ perl.c			main()
 perl.h			Global declarations
 perl_exp.SH		Creates list of exported symbols for AIX
 perlio.c		C code for PerlIO abstraction
+perlio.h		compatibility stub
 perlio.sym		Symbols for PerlIO abstraction
 perlsdio.h		Fake stdio using perlio
 perlsfio.h		Prototype sfio mapping for PerlIO

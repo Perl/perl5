@@ -2669,7 +2669,7 @@ $(PERL_INC)/config.h       $(PERL_INC)/mg.h           $(PERL_INC)/scope.h    \
 $(PERL_INC)/cop.h          $(PERL_INC)/op.h           $(PERL_INC)/sv.h	     \
 $(PERL_INC)/cv.h           $(PERL_INC)/opcode.h       $(PERL_INC)/unixish.h  \
 $(PERL_INC)/dosish.h       $(PERL_INC)/patchlevel.h   $(PERL_INC)/util.h     \
-$(PERL_INC)/embed.h        $(PERL_INC)/perl.h				     \
+$(PERL_INC)/embed.h        $(PERL_INC)/perl.h         $(PERL_INC)/iperlsys.h \
 $(PERL_INC)/form.h         $(PERL_INC)/perly.h
 
 $(OBJECT) : $(PERL_HDRS)

@@ -57,7 +57,7 @@ perlapio - perl's IO abstraction interface.
 =head1 DESCRIPTION
 
 Perl's source code should use the above functions instead of those
-defined in ANSI C's I<stdio.h>,  I<perlio.h> will the C<#define> them to
+defined in ANSI C's I<stdio.h>.  The perl headers will C<#define> them to
 the I/O mechanism selected at Configure time.
 
 The functions are modeled on those in I<stdio.h>, but parameter order
