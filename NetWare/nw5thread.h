@@ -27,6 +27,11 @@
 
 typedef long perl_key;
 
+// The line below is just a definition to avoid compilation error.
+// It is not being used anywhere.
+// Ananth, 3 Sept 2001
+typedef struct nw_cond { long waiters; unsigned int sem; } perl_cond;
+
 #if (defined (USE_ITHREADS) || defined (USE_5005THREADS)) && defined(MPK_ON)
 #ifdef __cplusplus
 extern "C"
