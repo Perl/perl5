@@ -275,10 +275,17 @@ The old perltodo notes "Although we have C<Switch.pm> in core, Larry points to
 the dormant C<nswitch> and C<cswitch> ops in F<pp.c>; using these opcodes would
 be much faster."
 
-** Attach/detach debugger from running program
+=head2 Attach/detach debugger from running program
 
 The old perltodo notes "With C<gdb>, you can attach the debugger to a running
 program if you pass the process ID. It would be good to do this with the Perl
 debugger on a running Perl program, although I'm not sure how it would be done."
 ssh and screen do this with named pipes in tmp. Maybe we can too.
 
+=head2 A decent benchmark
+
+perlbench seems impervious to any recent changes made to the perl core. It would
+be useful to have a reasonable general benchmarking suite that roughly
+represented what current perl programs do, and measurably reported whether
+tweaks to the core improve, degrade or don't really affect performance, to
+guide people attempting to optimise the guts of perl.
