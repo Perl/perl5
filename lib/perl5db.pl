@@ -2749,6 +2749,7 @@ sub CvGV_name {
 sub CvGV_name_or_bust {
   my $in = shift;
   return if $skipCvGV;		# Backdoor to avoid problems if XS broken...
+  return unless ref $in;
   $in = \&$in;			# Hard reference...
   eval {require Devel::Peek; 1} or return;
   my $gv = Devel::Peek::CvGV($in) or return;
