@@ -67,7 +67,7 @@ $opts{verbose} ||= $opts{V} || $opts{notify};
 -x "t/perl$Config{exe_ext}"		|| warn "WARNING: You've never run 'make test'!!!",
 	"  (Installing anyway.)\n";
 
-$packlist = ExtUtils::Packlist->new("$opts{destdir}/$Config{installarchlib}/.packlist");
+$packlist = ExtUtils::Packlist->new("$opts{destdir}$Config{installarchlib}/.packlist");
 
 
 # Install the main pod pages.

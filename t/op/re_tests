@@ -924,3 +924,19 @@ ab(?i)cd	abCd	y	-	-
 (??{})	x	y	-	-
 a(b)??	abc	y	<$1>	<>	# undef [perl #16773]
 (\d{1,3}\.){3,}	128.134.142.8	y	<$1>	<142.>	# [perl #18019]
+^.{3,4}(.+)\1\z	foobarbar	y	$1	bar	# 16 tests for [perl #23171]
+^(?:f|o|b){3,4}(.+)\1\z	foobarbar	y	$1	bar
+^.{3,4}((?:b|a|r)+)\1\z	foobarbar	y	$1	bar
+^(?:f|o|b){3,4}((?:b|a|r)+)\1\z	foobarbar	y	$1	bar
+^.{3,4}(.+?)\1\z	foobarbar	y	$1	bar
+^(?:f|o|b){3,4}(.+?)\1\z	foobarbar	y	$1	bar
+^.{3,4}((?:b|a|r)+?)\1\z	foobarbar	y	$1	bar
+^(?:f|o|b){3,4}((?:b|a|r)+?)\1\z	foobarbar	y	$1	bar
+^.{2,3}?(.+)\1\z	foobarbar	y	$1	bar
+^(?:f|o|b){2,3}?(.+)\1\z	foobarbar	y	$1	bar
+^.{2,3}?((?:b|a|r)+)\1\z	foobarbar	y	$1	bar
+^(?:f|o|b){2,3}?((?:b|a|r)+)\1\z	foobarbar	y	$1	bar
+^.{2,3}?(.+?)\1\z	foobarbar	y	$1	bar
+^(?:f|o|b){2,3}?(.+?)\1\z	foobarbar	y	$1	bar
+^.{2,3}?((?:b|a|r)+?)\1\z	foobarbar	y	$1	bar
+^(?:f|o|b){2,3}?((?:b|a|r)+?)\1\z	foobarbar	y	$1	bar

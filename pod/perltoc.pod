@@ -2677,23 +2677,23 @@ threads, threads::shared, utf8, vars, vmsish, warnings, warnings::register
 AnyDBM_File, Attribute::Handlers, AutoLoader, AutoSplit, B, B::Asmdata,
 B::Assembler, B::Bblock, B::Bytecode, B::C, B::CC, B::Concise, B::Debug,
 B::Deparse, B::Disassembler, B::Lint, B::Showlex, B::Stackobj, B::Stash,
-B::Terse, B::Xref, Benchmark, ByteLoader, CGI, CGI::Apache, CGI::Carp,
-CGI::Cookie, CGI::Fast, CGI::Pretty, CGI::Push, CGI::Switch, CGI::Util,
-CPAN, CPAN::FirstTime, CPAN::Nox, Carp, Carp::Heavy, Class::ISA,
-Class::Struct, Config, Cwd, DB, DB_File, Data::Dumper, Devel::DProf,
-Devel::PPPort, Devel::Peek, Devel::SelfStubber, Digest, Digest::MD5,
-DirHandle, Dumpvalue, DynaLoader, Encode, Encode::Alias, Encode::Byte,
-Encode::CJKConstants, Encode::CN, Encode::CN::HZ, Encode::Config,
-Encode::EBCDIC, Encode::Encoder, Encode::Encoding, Encode::Guess,
-Encode::JP, Encode::JP::H2Z, Encode::JP::JIS7, Encode::KR,
-Encode::KR::2022_KR, Encode::MIME::Header, Encode::PerlIO,
-Encode::Supported, Encode::Symbol, Encode::TW, Encode::Unicode,
-Encode::Unicode::UTF7, English, Env, Errno, Exporter, Exporter::Heavy,
-ExtUtils::Command, ExtUtils::Command::MM, ExtUtils::Constant,
-ExtUtils::Embed, ExtUtils::Install, ExtUtils::Installed, ExtUtils::Liblist,
-ExtUtils::MM, ExtUtils::MM_Any, ExtUtils::MM_BeOS, ExtUtils::MM_Cygwin,
-ExtUtils::MM_DOS, ExtUtils::MM_MacOS, ExtUtils::MM_NW5, ExtUtils::MM_OS2,
-ExtUtils::MM_UWIN, ExtUtils::MM_Unix, ExtUtils::MM_VMS, ExtUtils::MM_Win32,
+B::Terse, B::Xref, Benchmark, CGI, CGI::Apache, CGI::Carp, CGI::Cookie,
+CGI::Fast, CGI::Pretty, CGI::Push, CGI::Switch, CGI::Util, CPAN,
+CPAN::FirstTime, CPAN::Nox, Carp, Carp::Heavy, Class::ISA, Class::Struct,
+Config, Cwd, DB, DB_File, Data::Dumper, Devel::DProf, Devel::PPPort,
+Devel::Peek, Devel::SelfStubber, Digest, Digest::MD5, DirHandle, Dumpvalue,
+DynaLoader, Encode, Encode::Alias, Encode::Byte, Encode::CJKConstants,
+Encode::CN, Encode::CN::HZ, Encode::Config, Encode::EBCDIC,
+Encode::Encoder, Encode::Encoding, Encode::Guess, Encode::JP,
+Encode::JP::H2Z, Encode::JP::JIS7, Encode::KR, Encode::KR::2022_KR,
+Encode::MIME::Header, Encode::PerlIO, Encode::Supported, Encode::Symbol,
+Encode::TW, Encode::Unicode, Encode::Unicode::UTF7, English, Env, Errno,
+Exporter, Exporter::Heavy, ExtUtils::Command, ExtUtils::Command::MM,
+ExtUtils::Constant, ExtUtils::Embed, ExtUtils::Install,
+ExtUtils::Installed, ExtUtils::Liblist, ExtUtils::MM, ExtUtils::MM_Any,
+ExtUtils::MM_BeOS, ExtUtils::MM_Cygwin, ExtUtils::MM_DOS,
+ExtUtils::MM_MacOS, ExtUtils::MM_NW5, ExtUtils::MM_OS2, ExtUtils::MM_UWIN,
+ExtUtils::MM_Unix, ExtUtils::MM_VMS, ExtUtils::MM_Win32,
 ExtUtils::MM_Win95, ExtUtils::MY, ExtUtils::MakeMaker,
 ExtUtils::MakeMaker::FAQ, ExtUtils::MakeMaker::Tutorial,
 ExtUtils::MakeMaker::bytes, ExtUtils::MakeMaker::vmsish,
@@ -3137,8 +3137,8 @@ my C program; what am I doing wrong?
 
 =back
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 1.43 $, $Date: 2003/02/23
-20:25:09 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 1.44 $, $Date: 2003/07/28
+17:35:21 $)
 
 =over 4
 
@@ -3515,8 +3515,8 @@ file?
 
 =back
 
-=head2 perlfaq7 - General Perl Language Issues ($Revision: 1.14 $, $Date:
-2003/01/31 17:38:14 $)
+=head2 perlfaq7 - General Perl Language Issues ($Revision: 1.15 $, $Date:
+2003/07/24 02:17:21 $)
 
 =over 4
 
@@ -4207,6 +4207,8 @@ C<t>, C<p>, C<n>, C<s>
 =item Working with HVs
 
 =item Hash API Extensions
+
+=item AVs, HVs and undefined values
 
 =item References
 
@@ -7886,6 +7888,32 @@ op/lexassign.t, pragma/warnings.t
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=item AUTHOR
+
+=item DATE
+
+=back
+
+=head2 perlmacosx, README.macosx - Perl under Mac OS X
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item INSTALLATION PREFIX
+
+=item LIBPERL AND PREBINDING
+
+=item UPDATING PANTHER
+
+=item MACPERL
+
+=item CARBON
+
+=item COCOA
 
 =item AUTHOR
 
@@ -13429,8 +13457,6 @@ cflags (override)
 const_cccmd (override)
 
 tool_sxubpp (override)
-
-xsubpp_version (override)
 
 tools_other (override)
 

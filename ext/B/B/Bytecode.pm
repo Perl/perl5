@@ -174,6 +174,7 @@ sub B::HV::ix {
 		for @array;
 	    asm "xnv", $hv->NVX;
 	    asm "xmg_stash", $stashix;
+	    asm "xhv_riter", $hv->RITER;
 	}
 	asm "sv_refcnt", $hv->REFCNT;
 	$ix;

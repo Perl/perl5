@@ -76,6 +76,7 @@ if (-d "pod") {
     perlirix            
     perlmachten         
     perlmacos
+    perlmacosx
     perlmint
     perlmpeix
     perlnetware             
