@@ -794,8 +794,6 @@ PP(pp_match)
 	    }
 	}
     }
-    if (!rx->nparens && !global)
-	gimme = G_SCALAR;			/* accidental array context? */
     safebase = (((gimme == G_ARRAY) || global || !rx->nparens)
 		&& !sawampersand);
     if (pm->op_pmflags & (PMf_MULTILINE|PMf_SINGLELINE)) {
@@ -886,6 +884,8 @@ play_it_again:
 		++rx->endp[0];
 	    goto play_it_again;
 	}
+	else if (!iters)
+	    XPUSHs(&sv_yes);
 	LEAVE_SCOPE(oldsave);
 	RETURN;
     }

@@ -2,7 +2,7 @@
 
 # $RCSfile: pat.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:12 $
 
-print "1..62\n";
+print "1..66\n";
 
 $ENV{PERL_DESTRUCT_LEVEL} = 0; # XXX known to leaks scalars
 
@@ -219,3 +219,29 @@ print "ok 61\n";
 /\Gc/g;
 print "not " if defined pos $_;
 print "ok 62\n";
+
+$test = 63;
+
+# test if failure of patterns returns empty list
+$_ = 'aaa';
+@_ = /bbb/;
+print "not " if @_;
+print "ok $test\n";
+$test++;
+
+@_ = /bbb/g;
+print "not " if @_;
+print "ok $test\n";
+$test++;
+
+@_ = /(bbb)/;
+print "not " if @_;
+print "ok $test\n";
+$test++;
+
+@_ = /(bbb)/g;
+print "not " if @_;
+print "ok $test\n";
+$test++;
+
+
