@@ -1,6 +1,6 @@
 #!./perl -w
 
-print "1..18\n";
+print "1..21\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -47,9 +47,15 @@ my @names = ("FIVE", {name=>"OK6", type=>"PV",},
               value=>['"not ok 7\\n\\0ok 7\\n"', 15]},
              {name => "FARTHING", type=>"NV"},
              {name => "NOT_ZERO", type=>"UV", value=>"~(UV)0"},
+             {name => "OPEN", type=>"PV", value=>'"/*"',
+              macro=>["#if 1\n", "#endif\n"]},
              {name => "CLOSE", type=>"PV", value=>'"*/"',
               macro=>["#if 1\n", "#endif\n"]},
-             {name => "ANSWER", default=>["UV", 42]}, "NOTDEF");
+             {name => "ANSWER", default=>["UV", 42]}, "NOTDEF",
+             {name => "Yes", type=>"YES"},
+             {name => "No", type=>"NO"},
+             {name => "Undef", type=>"UNDEF"}
+);
 
 my @names_only = map {(ref $_) ? $_->{name} : $_} @names;
 
@@ -69,6 +75,9 @@ print FH <<'EOT';
 #define OK7 1
 #define FARTHING 0.25
 #define NOT_ZERO 1
+#define Yes 0
+#define No 1
+#define Undef 1
 #undef NOTDEF
 EOT
 close FH or die "close $header: $!\n";
@@ -199,6 +208,30 @@ if (defined $notthere) {
   print "ok 13\n";
 }
 
+# Truth
+my $yes = Yes;
+if ($yes) {
+  print "ok 14\n";
+} else {
+  print "not ok 14 # $yes='\$yes'\n";
+}
+
+# Falsehood
+my $no = No;
+if (defined $no and !$no) {
+  print "ok 15\n";
+} else {
+  print "not ok 15 # \$no=" . defined ($no) ? "'$no'\n" : "undef\n";
+}
+
+# Undef
+my $undef = Undef;
+unless (defined $undef) {
+  print "ok 16\n";
+} else {
+  print "not ok 16 # \$undef='$undef'\n";
+}
+
 EOT
 
 close FH or die "close $testpl: $!\n";
@@ -276,27 +309,29 @@ if ($Config{usedl}) {
   }
 }
 
-my $test = 14;
+my $test = 17;
 my $maketest = "$make test";
 print "# make = '$maketest'\n";
 $makeout = `$maketest`;
+
+# echo of running the test script
+$makeout =~ s/^\s*PERL_DL_NONLAZY=.+?\n//m;
+$makeout =~ s/^MCR.+test.pl\n//mig if $^O eq 'VMS';
+
+# GNU make babblings
+$makeout =~ s/^\w*?make.+?(?:entering|leaving) directory.+?\n//mig;
+
+# Hopefully gets most make's babblings
+# make -f Makefile.aperl perl
+$makeout =~ s/^\w*?make.+\sperl[^A-Za-z0-9]*\n//mig;
+# make[1]: `perl' is up to date.
+$makeout =~ s/^\w*?make.+perl.+?is up to date.*?\n//mig;
+
+print $makeout;
+
 if ($?) {
   print "not ok $test # $maketest failed: $?\n";
 } else {
-  # echo of running the test script
-  $makeout =~ s/^\s*PERL_DL_NONLAZY=.+?\n//m;
-  $makeout =~ s/^MCR.+test.pl\n//mig if $^O eq 'VMS';
-
-  # GNU make babblings
-  $makeout =~ s/^\w*?make.+?(?:entering|leaving) directory.+?\n//mig;
-
-  # Hopefully gets most make's babblings
-  # make -f Makefile.aperl perl
-  $makeout =~ s/^\w*?make.+\sperl[^A-Za-z0-9]*\n//mig;
-  # make[1]: `perl' is up to date.
-  $makeout =~ s/^\w*?make.+perl.+?is up to date.*?\n//mig;
-
-  print $makeout;
   print "ok $test\n";
 }
 $test++;

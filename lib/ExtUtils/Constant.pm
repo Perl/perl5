@@ -55,6 +55,18 @@ NUL terminated string, length will be determined with C<strlen>
 A fixed length thing, given as a [pointer, length] pair. If you know the
 length of a string at compile time you may use this instead of I<PV>
 
+=item YES
+
+Truth.  (C<PL_sv_yes>)  The value is not needed (and ignored).
+
+=item NO
+
+Defined Falsehood.  (C<PL_sv_no>)  The value is not needed (and ignored).
+
+=item UNDEF
+
+C<undef>.  The value of the macro is not needed.
+
 =back
 
 =head1 FUNCTIONS
@@ -75,7 +87,7 @@ $Text::Wrap::huge = 'overflow';
 $Text::Wrap::columns = 80;
 
 @ISA = 'Exporter';
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 %EXPORT_TAGS = ( 'all' => [ qw(
 	XS_constant constant_types return_clause memEQ_clause C_stringify
@@ -89,7 +101,10 @@ $VERSION = '0.03';
                 UV => 'PUSHu((UV)iv)',
                 NV => 'PUSHn(nv)',
                 PV => 'PUSHp(pv, strlen(pv))',
-                PVN => 'PUSHp(pv, iv)'
+                PVN => 'PUSHp(pv, iv)',
+		YES => 'PUSHs(&PL_sv_yes)',
+		NO => 'PUSHs(&PL_sv_no)',
+		UNDEF => ''	# implicit undef
 );
 
 %XS_TypeSet = (
@@ -97,7 +112,8 @@ $VERSION = '0.03';
                 UV => '*iv_return = (IV)',
                 NV => '*nv_return =',
                 PV => '*pv_return =',
-                PVN => ['*pv_return =', '*iv_return = (IV)']
+                PVN => ['*pv_return =', '*iv_return = (IV)'],
+		YES => undef, NO => undef, UNDEF => undef
 );
 
 
@@ -116,6 +132,9 @@ sub C_stringify {
   s/([\"\'])/\\$1/g;	# Grr. fix perl mode.
   s/\n/\\n/g;		# Ensure newlines don't end up in octal
   s/\r/\\r/g;
+  s/\t/\\t/g;
+  s/\f/\\f/g;
+  s/\a/\\a/g;
   s/([[:cntrl:]])/sprintf "\\%03o", ord $1/ge;
   s/\177/\\177/g;	# DEL doesn't seem to be a [:cntrl:]
   $_;
@@ -201,16 +220,16 @@ I<VALUE>s for the components.
 sub assign {
   my $indent = shift;
   my $type = shift;
-  my $typeset = $XS_TypeSet{$type};
   my $clause;
-  die "Can't generate code for type $type" unless defined $typeset;
+  die "Can't generate code for type $type" unless exists $XS_TypeSet{$type};
+  my $typeset = $XS_TypeSet{$type};
   if (ref $typeset) {
     die "Type $type is aggregate, but only single value given"
       if @_ == 1;
     foreach (0 .. $#$typeset) {
       $clause .= $indent . "$typeset->[$_] $_[$_];\n";
     }
-  } else {
+  } elsif (defined $typeset) {
     die "Aggregate value given for type $type"
       if @_ > 1;
     $clause .= $indent . "$typeset $_[0];\n";
@@ -372,6 +391,8 @@ EOT
       # Ensure that the enclosing C comment doesn't end
       # by turning */  into *" . "/
       $line =~ s!\*\/!\*" . "/!gs;
+      # gcc -Wall doesn't like finding /* inside a comment
+      $line =~ s!\/\*!/" . "\*!gs;
       $result .= $line;
     }
   }
