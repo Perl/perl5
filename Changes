@@ -28,6 +28,24 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 21366] By: jhi                                   on 2003/09/25  04:49:32
+        Log: Integrate:
+             
+             [ 21365]
+             AUTHORS tweak.
+     Branch: maint-5.8/perl
+	  !> AUTHORS
+____________________________________________________________________________
+[ 21364] By: jhi                                   on 2003/09/24  20:04:19
+        Log: perldelta, perlport.
+     Branch: maint-5.8/perl
+	   ! pod/perldelta.pod pod/perlport.pod
+____________________________________________________________________________
+[ 21363] By: jhi                                   on 2003/09/24  19:42:35
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 21362] By: jhi                                   on 2003/09/24  19:37:08
         Log: Integrate:
              [ 21360]
