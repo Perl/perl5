@@ -98,9 +98,22 @@ conflicts when used to split a module.
 =cut
 
 AUTOLOAD {
-    my $name = "auto/$AUTOLOAD.al";
-    # Braces used on the s/// below to preserve $1 et al.
-    {$name =~ s#::#/#g}
+    my $name;
+    # Braces used to preserve $1 et al.
+    {
+     my ($pkg,$func) = $AUTOLOAD =~ /(.*)::([^:]+)$/;
+     $pkg =~ s#::#/#g;
+     if (defined($name=$INC{"$pkg.pm"}))
+      {
+       $name =~ s#^(.*)$pkg\.pm$#$1auto/$pkg/$func.al#;
+       $name = undef unless (-r $name); 
+      }
+     unless (defined $name)
+      {
+       $name = "auto/$AUTOLOAD.al";
+       $name =~ s#::#/#g;
+      }
+    }
     my $save = $@;
     eval {require $name};
     if ($@) {
