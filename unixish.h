@@ -36,7 +36,7 @@
 #define HAS_KILL
 #define HAS_WAIT
 
-#endif
+#endif /* !PERL_MICRO */
   
 /* USEMYBINMODE
  *	This symbol, if defined, indicates that the program should

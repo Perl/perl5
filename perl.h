@@ -1612,11 +1612,6 @@ typedef struct ptr_tbl PTR_TBL_t;
 # endif
 #endif         
 
-#ifdef PERL_MICRO
-#   undef HAS_PASSWD
-#   undef HAS_GROUP
-#endif
-
 #ifndef PERL_SYS_INIT3
 #  define PERL_SYS_INIT3(argvp,argcp,envp) PERL_SYS_INIT(argvp,argcp)
 #endif

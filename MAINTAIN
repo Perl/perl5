@@ -848,6 +848,7 @@ taint.c
 thrdvar.h	
 thread.h	
 toke.c	
+uconfig.h			simon
 uconfig.sh			simon
 universal.c	
 unixish.h	

@@ -1563,7 +1563,8 @@ taint.c			Tainting code
 thrdvar.h		Per-thread variables
 thread.h		Threading header
 toke.c			The tokener
-uconfig.sh		COnfiguration for microperl
+uconfig.h		Configuration header for microperl
+uconfig.sh		Configuration script for microperl
 universal.c		The default UNIVERSAL package methods
 unixish.h		Defines that are assumed on Unix
 utf8.c			Unicode routines

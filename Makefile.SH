@@ -224,7 +224,7 @@ private = preplibrary lib/ExtUtils/Miniperl.pm lib/Config.pm
 sh = Makefile.SH cflags.SH config_h.SH makeaperl.SH makedepend.SH \
 	makedir.SH myconfig.SH writemain.SH
 
-shextract = Makefile cflags config.h uconfig.h makeaperl makedepend \
+shextract = Makefile cflags config.h makeaperl makedepend \
 	makedir myconfig writemain
 
 # Files to be built with variable substitution after miniperl is
