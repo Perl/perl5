@@ -106,9 +106,8 @@ seconds like Time::HiRes::time() (see below).
 =item usleep ( $useconds )
 
 Issues a usleep for the number of microseconds specified.  Returns the
-number of microseconds actually slept.  The number of microseconds
-B<must> be between 0 and 1_000_0000 (inclusive): you B<cannot> sleep
-a minute by usleep(60_000_000).  See also Time::HiRes::sleep() below.
+number of microseconds actually slept.  See also Time::HiRes::sleep()
+below.
 
 =item ualarm ( $useconds [, $interval_useconds ] )
 

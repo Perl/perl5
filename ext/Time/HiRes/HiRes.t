@@ -223,9 +223,9 @@ unless (defined &Time::HiRes::setitimer
     $SIG{VTALRM} = 'DEFAULT';
 }
 
-$a = abs(sleep(1)                  - 1);
+$a = abs(sleep(1.5)                    - 1.5);
 print $a < 0.1 ? "ok 20 # $a\n" : "not ok 20 # $a\n";
 
-$a = abs(usleep(1000000) / 1000000 - 1);
+$a = abs(usleep(1_500_000) / 1_500_000 - 1.0);
 print $a < 0.1 ? "ok 21 # $a\n" : "not ok 21 # $a\n";
 
