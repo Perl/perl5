@@ -636,7 +636,7 @@ with C<eval()>).  The syntax for this mechanism is the same as for most
 C preprocessors: it matches the regular expression
 
     # example: '# line 42 "new_filename.plx"'
-    /^#    \s*
+    /^\#   \s*
       line \s+ (\d+)   \s*
       (?:\s("?)([^"]+)\2)? \s*
      $/x

@@ -3825,7 +3825,9 @@ Note the I<characters>: depending on the status of the filehandle,
 either (8-bit) bytes or characters are read.  By default all
 filehandles operate on bytes, but for example if the filehandle has
 been opened with the C<:utf8> I/O layer (see L</open>, and the C<open>
-pragma, L<open>), the I/O will operate on characters, not bytes.
+pragma, L<open>), the I/O will operate on UTF-8 encoded Unicode
+characters, not bytes.  Similarly for the C<:encoding> pragma:
+in that case pretty much any characters can be read.
 
 =item readdir DIRHANDLE
 
@@ -3912,7 +3914,9 @@ Note the I<characters>: depending on the status of the socket, either
 (8-bit) bytes or characters are received.  By default all sockets
 operate on bytes, but for example if the socket has been changed using
 binmode() to operate with the C<:utf8> I/O layer (see the C<open>
-pragma, L<open>), the I/O will operate on characters, not bytes.
+pragma, L<open>), the I/O will operate on UTF-8 encoded Unicode
+characters, not bytes.  Similarly for the C<:encoding> pragma:
+in that case pretty much any characters can be read.
 
 =item redo LABEL
 
@@ -4440,9 +4444,10 @@ L<perlipc/"UDP: Message Passing"> for examples.
 Note the I<characters>: depending on the status of the socket, either
 (8-bit) bytes or characters are sent.  By default all sockets operate
 on bytes, but for example if the socket has been changed using
-binmode() to operate with the C<:utf8> I/O layer (see L</open>, or
-the C<open> pragma, L<open>), the I/O will operate on characters, not
-bytes.
+binmode() to operate with the C<:utf8> I/O layer (see L</open>, or the
+C<open> pragma, L<open>), the I/O will operate on UTF-8 encoded
+Unicode characters, not bytes.  Similarly for the C<:encoding> pragma:
+in that case pretty much any characters can be sent.
 
 =item setpgrp PID,PGRP
 
@@ -5739,9 +5744,9 @@ string other than the beginning.  A negative OFFSET specifies writing
 that many characters counting backwards from the end of the string.
 In the case the SCALAR is empty you can use OFFSET but only zero offset.
 
-Note that if the filehandle has been marked as C<:utf8>,
-Unicode characters are written instead of bytes (the LENGTH, OFFSET,
-and the return value of syswrite() are in Unicode characters).
+Note that if the filehandle has been marked as C<:utf8>, Unicode
+characters are written instead of bytes (the LENGTH, OFFSET, and the
+return value of syswrite() are in UTF-8 encoded Unicode characters).
 The C<:encoding(...)> layer implicitly introduces the C<:utf8> layer.
 See L</binmode>, L</open>, and the C<open> pragma, L<open>.
 

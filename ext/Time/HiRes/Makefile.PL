@@ -129,9 +129,7 @@ sub try_compile_and_link {
         $cccmd = "$Config{'cc'} -o $tmp $ccflags $tmp.c @$LIBS $errornull"
 	    unless defined $cccmd;
 
-       if ($^O eq 'mpeix') {
-           $cccmd = 'MPEAUTOCONF=1 '.$cccmd;
-       } elsif ($^O eq 'VMS') {
+       if ($^O eq 'VMS') {
 	    open( CMDFILE, ">$tmp.com" );
 	    print CMDFILE "\$ SET MESSAGE/NOFACILITY/NOSEVERITY/NOIDENT/NOTEXT\n";
 	    print CMDFILE "\$ $cccmd\n";
@@ -336,8 +334,10 @@ EOD
     print "Looking for nanosleep()... ";
     my $has_nanosleep;
     if (exists $Config{d_nanosleep}) {
-	$has_nanosleep++ if $Config{d_nanosleep};
-	$DEFINE .= ' -DTIME_HIRES_NANOSLEEP';
+	if ($Config{d_nanosleep}) {
+	    $has_nanosleep++;
+	    $DEFINE .= ' -DTIME_HIRES_NANOSLEEP';
+	}
     } elsif (has_x ("nanosleep (NULL, NULL)")) {
 	$has_nanosleep++;
 	$DEFINE .= ' -DTIME_HIRES_NANOSLEEP';
