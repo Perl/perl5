@@ -843,8 +843,8 @@ S_study_chunk(pTHX_ regnode **scanp, I32 *deltap, regnode *last, scan_data_t *da
 	    flags &= ~SCF_DO_STCLASS;
 	}
 	else if (strchr((char*)PL_varies,OP(scan))) {
-	    I32 mincount, maxcount, minnext, deltanext, pos_before, fl;
-	    I32 f = flags;
+	    I32 mincount, maxcount, minnext, deltanext, fl;
+	    I32 f = flags, pos_before = 0;
 	    regnode *oscan = scan;
 	    struct regnode_charclass_class this_class;
 	    struct regnode_charclass_class *oclass = NULL;
