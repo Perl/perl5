@@ -1130,8 +1130,10 @@ typedef UVTYPE UV;
 # define DBL_DIG OVR_DBL_DIG
 #else
 /* The following is all to get DBL_DIG, in order to pick a nice
-   default value for printing floating point numbers in Gconvert.
-   (see config.h)
+   default value for printing floating point numbers in Gconvert
+   (see config.h). (It also has other uses, such as figuring out if
+   a given precision of printing can be done with a double instead of
+   a long double - Allen).
 */
 #ifdef I_LIMITS
 #include <limits.h>
@@ -1193,19 +1195,21 @@ typedef UVTYPE UV;
  * necessary to do so. - Allen <allens@cpan.org>
  */
 
-#if defined(I_VALUES)
-# if !defined(USE_LONG_DOUBLE) || defined(HAS_LDBL_SPRINTF_BUG)
-#  if (!defined(DBL_MIN) || !defined(DBL_MAX))
-#   include <values.h>
-#   if defined(MAXDOUBLE) && !defined(DBL_MAX)
-#    define DBL_MAX MAXDOUBLE
-#   endif
-#   if defined(MINDOUBLE) && !defined(DBL_MIN)
-#    define DBL_MIN MINDOUBLE
-#   endif
-#  endif
-# endif
+#ifdef I_LIMITS
+#  include <limits.h>
 #endif
+
+#ifdef I_VALUES
+#  if !(defined(DBL_MIN) && defined(DBL_MAX) && defined(I_LIMITS))
+#    include <values.h>
+#    if defined(MAXDOUBLE) && !defined(DBL_MAX)
+#      define DBL_MAX MAXDOUBLE
+#    endif
+#    if defined(MINDOUBLE) && !defined(DBL_MIN)
+#      define DBL_MIN MINDOUBLE
+#    endif
+#  endif
+#endif /* defined(I_VALUES) */
 
 typedef NVTYPE NV;
 
@@ -1305,7 +1309,7 @@ long double modfl(long double, long double *);
 #   ifdef DBL_EPSILON
 #       define NV_EPSILON DBL_EPSILON
 #   endif
-#   ifdef DBL_MAX
+#   ifdef DBL_MAX               /* XXX Does DBL_MAX imply having DBL_MIN? */
 #       define NV_MAX DBL_MAX
 #       define NV_MIN DBL_MIN
 #   else
@@ -1327,6 +1331,13 @@ long double modfl(long double, long double *);
 #endif
 
 /* rumor has it that Win32 has _fpclass() */
+
+/* SGI has fpclassl... but not with the same result values,
+ * and it's via a typedef (not via #define), so will need to redo Configure
+ * to use. Not worth the trouble, IMO, at least until the below is used
+ * more places. Also has fp_class_l, BTW, via fp_class.h. Feel free to check
+ * with me for the SGI manpages, SGI testing, etcetera, if you want to
+ * try getting this to work with IRIX. - Allen <allens@cpan.org> */
 
 #if !defined(Perl_fp_class) && (defined(HAS_FPCLASS)||defined(HAS_FPCLASSL))
 #    ifdef I_IEEFP
@@ -1469,7 +1480,8 @@ int isnan(double d);
  * it is however best to use the native implementation of atof.
  * You can experiment with using your native one by -DUSE_PERL_ATOF=0.
  * Some good tests to try out with either setting are t/base/num.t,
- * t/op/numconvert.t, and t/op/pack.t. */
+ * t/op/numconvert.t, and t/op/pack.t. Note that if using long doubles
+ * you may need to be using a different function than atof! */
 
 #ifndef USE_PERL_ATOF
 #   ifndef _UNICOS
@@ -1502,11 +1514,9 @@ int isnan(double d);
 
 #ifdef I_LIMITS  /* Needed for cast_xxx() functions below. */
 #  include <limits.h>
-#else
-#ifdef I_VALUES
-#  include <values.h>
 #endif
-#endif
+/* Included values.h above if necessary; still including limits.h down here,
+ * despite doing above, because math.h might have overriden... XXX - Allen */
 
 /*
  * Try to figure out max and min values for the integral types.  THE CORRECT

@@ -7924,7 +7924,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     }
 
     if (!args && svix < svmax && DO_UTF8(*svargs))
-        has_utf8 = TRUE;
+	has_utf8 = TRUE;
 
     patend = (char*)pat + patlen;
     for (p = (char*)pat; p < patend; p = q) {
@@ -7943,10 +7943,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	bool is_utf8 = FALSE;  /* is this item utf8?   */
 #ifdef HAS_LDBL_SPRINTF_BUG
 	/* This is to try to fix a bug with irix/nonstop-ux/powerux and
-	   with sfio - Allen <easmith@beatrice.rutgers.edu> */
+	   with sfio - Allen <allens@cpan.org> */
 	bool fix_ldbl_sprintf_bug = FALSE;
 #endif
-	
+
 	char esignbuf[4];
 	U8 utf8buf[UTF8_MAXLEN+1];
 	STRLEN esignlen = 0;
@@ -7957,7 +7957,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	 * NV_DIG: mantissa takes than many decimal digits.
 	 * Plus 32: Playing safe. */
 	char ebuf[IV_DIG * 4 + NV_DIG + 32];
-        /* large enough for "%#.#f" --chip */
+	/* large enough for "%#.#f" --chip */
 	/* what about long double NVs? --jhi */
 
 	SV *vecsv = Nullsv;
@@ -8166,7 +8166,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 #endif
 	case 'l':
 #if defined(HAS_QUAD) || defined(HAS_LONG_DOUBLE)
-             if (*(q + 1) == 'l') {	/* lld, llf */
+	    if (*(q + 1) == 'l') {	/* lld, llf */
 		intsize = 'q';
 		q += 2;
 		break;
@@ -8514,10 +8514,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    nv = (args && !vectorize) ?
 #if LONG_DOUBLESIZE > DOUBLESIZE
 		intsize == 'q' ?
-	            va_arg(*args, long double) :
-	            va_arg(*args, double)
+		    va_arg(*args, long double) :
+		    va_arg(*args, double)
 #else
-	            va_arg(*args, double)
+		    va_arg(*args, double)
 #endif
 		: SvNVx(argsv);
 
@@ -8540,84 +8540,68 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 #ifdef HAS_LDBL_SPRINTF_BUG
 	    /* This is to try to fix a bug with irix/nonstop-ux/powerux and
-	       with sfio - Allen <easmith@beatrice.rutgers.edu> */
-	    if ((intsize == 'q') && (c == 'f') &&
-#ifdef HAS_LDBL_SPRINTF_BUG_LESS1
-/* Only happens between -1 and 1 ??? - Allen */
-		((nv < 1L) && (nv > -1L)) &&
-#endif
-		(need < DBL_DIG)) { /* it's going to be short enough that
-				     long double precision is not needed */
+	       with sfio - Allen <allens@cpan.org> */
 
-	      if ((nv <= 0L) && (nv >= -0L)) {
-		fix_ldbl_sprintf_bug = TRUE; /* Easiest */
-	      } else {
-		/* SGI has fpclassl... but not with the same result values,
-		   and it's via a typedef, so will need to redo Configure
-		   to use. Not worth the trouble IMO. Also has fp_class_l,
-		   BTW, via fp_class.h - Allen */
-
-		   /* #if defined(HAS_FPCLASSL) && defined(USE_LONG_DOUBLE) */
-		/* 		if (Perl_fp_class_zero((long double)nv)) { */
-	 /* 		  fix_ldbl_sprintf_bug = TRUE; */ /* Easiest */
-	/* 		} elsif (Perl_fp_class_norm((long double)nv)) { */
-		/* #endif */
-#if !defined(DBL_MIN) || !defined(HAS_LDBL_SPRINTF_BUG_LESS1)
-# ifdef DBL_MAX
-#  define MY_DBL_MAX DBL_MAX
-# else /* XXX guessing! HUGE_VAL may be defined as infinity, so not using */
-#  if DOUBLESIZE >= 8
-#   define MY_DBL_MAX 1.7976931348623157E+308L
-#  else
-#   define MY_DBL_MAX 3.40282347E+38L
+#  ifdef DBL_MAX
+#    define MY_DBL_MAX DBL_MAX
+#  else /* XXX guessing! HUGE_VAL may be defined as infinity, so not using */
+#    if DOUBLESIZE >= 8
+#      define MY_DBL_MAX 1.7976931348623157E+308L
+#    else
+#      define MY_DBL_MAX 3.40282347E+38L
+#    endif
 #  endif
-# endif
-#endif /* !defined(DBL_MIN) || !defined(HAS_LDBL_SPRINTF_BUG_LESS1 */
 
-#ifndef HAS_LDBL_SPRINTF_BUG_LESS1
-		  if ((nv < MY_DBL_MAX) && (nv > -MY_DBL_MAX)) {
-#endif
+#  ifdef HAS_LDBL_SPRINTF_BUG_LESS1 /* only between -1L & 1L - Allen */
+#    define MY_DBL_MAX_BUG 1L
+#  else
+#    define MY_DBL_MAX_BUG MY_DBL_MAX
+#  endif
 
-#ifdef DBL_MIN
-# define MY_DBL_MIN DBL_MIN
-#else  /* XXX guessing! -Allen */
-# if DOUBLESIZE >= 8
-#  define MY_DBL_MIN 2.2250738585072014E-308L
-# else
-#  define MY_DBL_MIN 1.17549435E-38L
-# endif
+#  ifdef DBL_MIN
+#    define MY_DBL_MIN DBL_MIN
+#  else  /* XXX guessing! -Allen */
+#    if DOUBLESIZE >= 8
+#      define MY_DBL_MIN 2.2250738585072014E-308L
+#    else
+#      define MY_DBL_MIN 1.17549435E-38L
+#    endif
+#  endif
+
+	    if ((intsize == 'q') && (c == 'f') &&
+		((nv < MY_DBL_MAX_BUG) && (nv > -MY_DBL_MAX_BUG)) &&
+		(need < DBL_DIG)) {
+		/* it's going to be short enough that
+		 * long double precision is not needed */
+
+		if ((nv <= 0L) && (nv >= -0L))
+		    fix_ldbl_sprintf_bug = TRUE; /* 0 is 0 - easiest */
+		else {
+		    /* would use Perl_fp_class as a double-check but not
+		     * functional on IRIX - see perl.h comments */
+
+		    if ((nv >= MY_DBL_MIN) || (nv <= -MY_DBL_MIN)) {
+			/* It's within the range that a double can represent */
+#if defined(DBL_MAX) && !defined(DBL_MIN)
+			if ((nv >= ((long double)1/DBL_MAX)) ||
+			    (nv <= (-(long double)1/DBL_MAX)))
 #endif
-		    if (((nv > 0L) && (nv >= MY_DBL_MIN)
-#ifndef DBL_MIN
-			 && ((long double)1/MY_DBL_MAX <= nv)
-#endif
-			 ) || ((nv < -0L) && (nv <= -MY_DBL_MIN)
-#ifndef DBL_MIN
-			 && (-(long double)1/MY_DBL_MAX >= nv)
-#endif
-			 )) {
-		      /* It's within the range that a double can represent */
-		      fix_ldbl_sprintf_bug = TRUE;
+			fix_ldbl_sprintf_bug = TRUE;
 		    }
-#undef MY_DBL_MIN
-#ifndef HAS_LDBL_SPRINTF_BUG_LESS1
-		  }
-#endif
-#if !defined(DBL_MIN) || !defined(HAS_LDBL_SPRINTF_BUG_LESS1)
-# undef MY_DBL_MAX
-#endif
-/* #if defined(HAS_FPCLASSL) && defined(USE_LONG_DOUBLE) */
-/* 		} */
-/* #endif */
-	      }
-	      if (fix_ldbl_sprintf_bug == TRUE) {
-		double temp;
-		
-		intsize = 0;
-		temp = (double)nv;
-		nv = (NV)temp;
-	      }
+		}
+		if (fix_ldbl_sprintf_bug == TRUE) {
+		    double temp;
+
+		    intsize = 0;
+		    temp = (double)nv;
+		    nv = (NV)temp;
+		}
 	    }
+
+#  undef MY_DBL_MAX
+#  undef MY_DBL_MAX_BUG
+#  undef MY_DBL_MIN
+
 #endif /* HAS_LDBL_SPRINTF_BUG */
 
 	    need += 20; /* fudge factor */
