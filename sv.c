@@ -5349,7 +5349,6 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
     char *pv2;
     STRLEN cur2;
     I32  eq     = 0;
-    char *tpv   = Nullch;
 
     if (!sv1) {
 	pv1 = "";
@@ -5365,35 +5364,13 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
     else
 	pv2 = SvPV(sv2, cur2);
 
-    /* do not utf8ize the comparands as a side-effect */
-    if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTES) {
-	bool is_utf8 = TRUE;
-        /* UTF-8ness differs */
-
-	if (SvUTF8(sv1)) {
-	    /* sv1 is the UTF-8 one , If is equal it must be downgrade-able */
-	    char *pv = (char*)bytes_from_utf8((U8*)pv1, &cur1, &is_utf8);
-	    if (pv != pv1)
-		pv1 = tpv = pv;
-	}
-	else {
-	    /* sv2 is the UTF-8 one , If is equal it must be downgrade-able */
-	    char *pv = (char *)bytes_from_utf8((U8*)pv2, &cur2, &is_utf8);
-	    if (pv != pv2)
-		pv2 = tpv = pv;
-	}
-	if (is_utf8) {
-	    /* Downgrade not possible - cannot be eq */
-	    return FALSE;
-	}
-    }
-
-    if (cur1 == cur2)
-	eq = memEQ(pv1, pv2, cur1);
+    if (SvUTF8(sv1) == SvUTF8(sv2) || IN_BYTES)
+	eq = (cur1 == cur2) && memEQ(pv1, pv2, cur1);
+    else if (SvUTF8(sv1)) /* do not utf8ize the comparands as a side-effect */
+	eq = !memcmp_byte_utf8(pv2, cur2, pv1, cur1);
+    else
+	eq = !memcmp_byte_utf8(pv1, cur1, pv2, cur2);
 	
-    if (tpv != Nullch)
-	Safefree(tpv);
-
     return eq;
 }
 
@@ -5413,9 +5390,7 @@ Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
 {
     STRLEN cur1, cur2;
     char *pv1, *pv2;
-    I32  cmp;
-    bool pv1tmp = FALSE;
-    bool pv2tmp = FALSE;
+    I32  retval;
 
     if (!sv1) {
 	pv1 = "";
@@ -5431,40 +5406,28 @@ Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
     else
 	pv2 = SvPV(sv2, cur2);
 
-    /* do not utf8ize the comparands as a side-effect */
-    if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTES) {
-	if (SvUTF8(sv1)) {
-	    pv2 = (char*)bytes_to_utf8((U8*)pv2, &cur2);
-	    pv2tmp = TRUE;
-	}
-	else {
-	    pv1 = (char*)bytes_to_utf8((U8*)pv1, &cur1);
-	    pv1tmp = TRUE;
-	}
-    }
-
     if (!cur1) {
-	cmp = cur2 ? -1 : 0;
+	return cur2 ? -1 : 0;
     } else if (!cur2) {
-	cmp = 1;
-    } else {
-	I32 retval = memcmp((void*)pv1, (void*)pv2, cur1 < cur2 ? cur1 : cur2);
+	return 1;
+    } else if (SvUTF8(sv1) == SvUTF8(sv2) || IN_BYTES) {
+	retval = memcmp((void*)pv1, (void*)pv2, cur1 < cur2 ? cur1 : cur2);
 
 	if (retval) {
-	    cmp = retval < 0 ? -1 : 1;
+	    return retval < 0 ? -1 : 1;
 	} else if (cur1 == cur2) {
-	    cmp = 0;
-        } else {
-	    cmp = cur1 < cur2 ? -1 : 1;
+	    return 0;
+	} else {
+	    return cur1 < cur2 ? -1 : 1;
 	}
-    }
+    } else if (SvUTF8(sv1)) /* do not utf8ize the comparands as a side-effect */
+	retval = -memcmp_byte_utf8(pv2, cur2, pv1, cur1);
+    else
+	retval = memcmp_byte_utf8(pv1, cur1, pv2, cur2);
 
-    if (pv1tmp)
-	Safefree(pv1);
-    if (pv2tmp)
-	Safefree(pv2);
-
-    return cmp;
+    if (retval)				/* CURs taken into account already */
+	return retval < 0 ? -1 : 1;
+    return 0;
 }
 
 /*
