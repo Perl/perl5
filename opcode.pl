@@ -189,7 +189,7 @@ for (@ops) {
     $argsum |= 64 if $flags =~ /d/;		# danger, unknown side effects
     $argsum |= 128 if $flags =~ /u/;		# defaults to $_
 
-    $flags =~ /([^a-zA-Z])/ or die qq[Opcode "$_" has no class indicator];
+    $flags =~ /([\W\d_])/ or die qq[Opcode "$_" has no class indicator];
     $argsum |= $opclass{$1} << 8;
     $mul = 4096;				# 2 ^ OASHIFT
     for $arg (split(' ',$args{$_})) {
