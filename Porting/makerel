@@ -99,8 +99,6 @@ my @exe = qw(
     Porting/findrfuncs
     Porting/genlog
     Porting/makerel
-    Porting/p4d2p
-    Porting/p4desc
     Porting/p4genpatch
     Porting/patchls
     Porting/*.pl
