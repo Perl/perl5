@@ -1832,7 +1832,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 }
 
 /*
-=for apidoc is_gv_magical
+=for apidoc is_gv_magical_sv
 
 Returns C<TRUE> if given the name of a magical GV. Calls is_gv_magical.
 
@@ -1865,7 +1865,7 @@ pointers returned by SvPV.
 =cut
 */
 bool
-Perl_is_gv_magical(pTHX_ char *name, STRLEN len, U32 flags)
+Perl_is_gv_magical(pTHX_ const char *name, STRLEN len, U32 flags)
 {
     if (len > 1) {
 	const char *name1 = name + 1;
@@ -1913,7 +1913,7 @@ Perl_is_gv_magical(pTHX_ char *name, STRLEN len, U32 flags)
 	case '8':
 	case '9':
 	{
-	    char *end = name + len;
+	    const char *end = name + len;
 	    while (--end > name) {
 		if (!isDIGIT(*end))
 		    return FALSE;

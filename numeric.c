@@ -129,7 +129,7 @@ invalid character will also trigger a warning.
 On return I<*len> is set to the length of the scanned string,
 and I<*flags> gives output flags.
 
-If the value is <= UV_MAX it is returned as a UV, the output flags are clear,
+If the value is <= C<UV_MAX> it is returned as a UV, the output flags are clear,
 and nothing is written to I<*result>. If the value is > UV_MAX C<grok_bin>
 returns UV_MAX, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
 and writes the value to I<*result> (or the value is discarded if I<result>
@@ -144,15 +144,16 @@ number may use '_' characters to separate digits.
  */
 
 UV
-Perl_grok_bin(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
+Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result) {
     const char *s = start;
     STRLEN len = *len_p;
     UV value = 0;
     NV value_nv = 0;
 
     const UV max_div_2 = UV_MAX / 2;
-    bool allow_underscores = *flags & PERL_SCAN_ALLOW_UNDERSCORES;
+    const bool allow_underscores = *flags & PERL_SCAN_ALLOW_UNDERSCORES;
     bool overflowed = FALSE;
+    char bit;
 
     if (!(*flags & PERL_SCAN_DISALLOW_PREFIX)) {
         /* strip off leading b or 0b.
@@ -170,8 +171,7 @@ Perl_grok_bin(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
         }
     }
 
-    for (; len-- && *s; s++) {
-        char bit = *s;
+    for (; len-- && (bit = *s); s++) {
         if (bit == '0' || bit == '1') {
             /* Write it in this wonky order with a goto to attempt to get the
                compiler to make the common case integer-only loop pretty tight.
@@ -260,14 +260,14 @@ number may use '_' characters to separate digits.
  */
 
 UV
-Perl_grok_hex(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
+Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result) {
     const char *s = start;
     STRLEN len = *len_p;
     UV value = 0;
     NV value_nv = 0;
 
     const UV max_div_16 = UV_MAX / 16;
-    bool allow_underscores = *flags & PERL_SCAN_ALLOW_UNDERSCORES;
+    const bool allow_underscores = *flags & PERL_SCAN_ALLOW_UNDERSCORES;
     bool overflowed = FALSE;
     const char *hexdigit;
 
@@ -375,14 +375,14 @@ number may use '_' characters to separate digits.
  */
 
 UV
-Perl_grok_oct(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result) {
+Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result) {
     const char *s = start;
     STRLEN len = *len_p;
     UV value = 0;
     NV value_nv = 0;
 
     const UV max_div_8 = UV_MAX / 8;
-    bool allow_underscores = *flags & PERL_SCAN_ALLOW_UNDERSCORES;
+    const bool allow_underscores = *flags & PERL_SCAN_ALLOW_UNDERSCORES;
     bool overflowed = FALSE;
 
     for (; len-- && *s; s++) {

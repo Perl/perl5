@@ -2266,9 +2266,9 @@ PP(pp_goto)
 
 	retry:
 	    if (!CvROOT(cv) && !CvXSUB(cv)) {
-		GV *gv = CvGV(cv);
-		GV *autogv;
+		const GV * const gv = CvGV(cv);
 		if (gv) {
+		    GV *autogv;
 		    SV *tmpstr;
 		    /* autoloaded stub? */
 		    if (cv != GvCV(gv) && (cv = GvCV(gv)))
@@ -2285,7 +2285,7 @@ PP(pp_goto)
 	    }
 
 	    /* First do some returnish stuff. */
-	    SvREFCNT_inc(cv); /* avoid premature free during unwind */
+	    (void)SvREFCNT_inc(cv); /* avoid premature free during unwind */
 	    FREETMPS;
 	    cxix = dopoptosub(cxstack_ix);
 	    if (cxix < 0)

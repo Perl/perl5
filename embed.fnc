@@ -300,7 +300,7 @@ pd	|U32	|intro_my
 Ap	|char*	|instr		|const char* big|const char* little
 p	|bool	|io_close	|IO* io|bool not_implicit
 p	|OP*	|invert		|OP* cmd
-dp	|bool	|is_gv_magical	|char *name|STRLEN len|U32 flags
+dp	|bool	|is_gv_magical	|const char *name|STRLEN len|U32 flags
 Ap	|I32	|is_lvalue_sub
 Ap	|U32	|to_uni_upper_lc|U32 c
 Ap	|U32	|to_uni_title_lc|U32 c
@@ -337,25 +337,25 @@ Ap	|bool	|is_uni_lower_lc|UV c
 Ap	|bool	|is_uni_print_lc|UV c
 Ap	|bool	|is_uni_punct_lc|UV c
 Ap	|bool	|is_uni_xdigit_lc|UV c
-Apd	|STRLEN	|is_utf8_char	|U8 *p
-Apd	|bool	|is_utf8_string	|U8 *s|STRLEN len
-Apd	|bool	|is_utf8_string_loc|U8 *s|STRLEN len|U8 **p
-Ap	|bool	|is_utf8_alnum	|U8 *p
-Ap	|bool	|is_utf8_alnumc	|U8 *p
-Ap	|bool	|is_utf8_idfirst|U8 *p
-Ap	|bool	|is_utf8_idcont	|U8 *p
-Ap	|bool	|is_utf8_alpha	|U8 *p
-Ap	|bool	|is_utf8_ascii	|U8 *p
-Ap	|bool	|is_utf8_space	|U8 *p
-Ap	|bool	|is_utf8_cntrl	|U8 *p
-Ap	|bool	|is_utf8_digit	|U8 *p
-Ap	|bool	|is_utf8_graph	|U8 *p
-Ap	|bool	|is_utf8_upper	|U8 *p
-Ap	|bool	|is_utf8_lower	|U8 *p
-Ap	|bool	|is_utf8_print	|U8 *p
-Ap	|bool	|is_utf8_punct	|U8 *p
-Ap	|bool	|is_utf8_xdigit	|U8 *p
-Ap	|bool	|is_utf8_mark	|U8 *p
+Apd	|STRLEN	|is_utf8_char	|const U8 *p
+Apd	|bool	|is_utf8_string	|const U8 *s|STRLEN len
+Apd	|bool	|is_utf8_string_loc|const U8 *s|STRLEN len|const U8 **p
+Ap	|bool	|is_utf8_alnum	|const U8 *p
+Ap	|bool	|is_utf8_alnumc	|const U8 *p
+Ap	|bool	|is_utf8_idfirst|const U8 *p
+Ap	|bool	|is_utf8_idcont	|const U8 *p
+Ap	|bool	|is_utf8_alpha	|const U8 *p
+Ap	|bool	|is_utf8_ascii	|const U8 *p
+Ap	|bool	|is_utf8_space	|const U8 *p
+Ap	|bool	|is_utf8_cntrl	|const U8 *p
+Ap	|bool	|is_utf8_digit	|const U8 *p
+Ap	|bool	|is_utf8_graph	|const U8 *p
+Ap	|bool	|is_utf8_upper	|const U8 *p
+Ap	|bool	|is_utf8_lower	|const U8 *p
+Ap	|bool	|is_utf8_print	|const U8 *p
+Ap	|bool	|is_utf8_punct	|const U8 *p
+Ap	|bool	|is_utf8_xdigit	|const U8 *p
+Ap	|bool	|is_utf8_mark	|const U8 *p
 p	|OP*	|jmaybe		|OP* arg
 p	|I32	|keyword	|char* d|I32 len
 Ap	|void	|leave_scope	|I32 base
@@ -372,11 +372,11 @@ Apd	|void	|load_module|U32 flags|SV* name|SV* ver|...
 Ap	|void	|vload_module|U32 flags|SV* name|SV* ver|va_list* args
 p	|OP*	|localize	|OP* arg|I32 lexical
 Apd	|I32	|looks_like_number|SV* sv
-Apd	|UV	|grok_bin	|char* start|STRLEN* len|I32* flags|NV *result
-Apd	|UV	|grok_hex	|char* start|STRLEN* len|I32* flags|NV *result
+Apd	|UV	|grok_bin	|const char* start|STRLEN* len|I32* flags|NV *result
+Apd	|UV	|grok_hex	|const char* start|STRLEN* len|I32* flags|NV *result
 Apd	|int	|grok_number	|const char *pv|STRLEN len|UV *valuep
 Apd	|bool	|grok_numeric_radix|const char **sp|const char *send
-Apd	|UV	|grok_oct	|char* start|STRLEN* len|I32* flags|NV *result
+Apd	|UV	|grok_oct	|const char* start|STRLEN* len|I32* flags|NV *result
 p	|int	|magic_clearenv	|SV* sv|MAGIC* mg
 p	|int	|magic_clear_all_env|SV* sv|MAGIC* mg
 p	|int	|magic_clearpack|SV* sv|MAGIC* mg
@@ -803,17 +803,15 @@ Apd	|void	|sv_vsetpvfn	|SV* sv|const char* pat|STRLEN patlen \
 				|va_list* args|SV** svargs|I32 svmax \
 				|bool *maybe_tainted
 Ap	|NV	|str_to_version	|SV *sv
-Ap	|SV*	|swash_init	|char* pkg|char* name|SV* listsv \
-				|I32 minbits|I32 none
-Ap	|UV	|swash_fetch	|SV *sv|U8 *ptr|bool do_utf8
+Ap	|SV*	|swash_init	|const char* pkg|const char* name|SV* listsv|I32 minbits|I32 none
+Ap	|UV	|swash_fetch	|SV *sv|const U8 *ptr|bool do_utf8
 Ap	|void	|taint_env
 Ap	|void	|taint_proper	|const char* f|const char* s
-Apd	|UV	|to_utf8_case	|U8 *p|U8* ustrp|STRLEN *lenp \
-				|SV **swash|char *normal|char *special
-Apd	|UV	|to_utf8_lower	|U8 *p|U8* ustrp|STRLEN *lenp
-Apd	|UV	|to_utf8_upper	|U8 *p|U8* ustrp|STRLEN *lenp
-Apd	|UV	|to_utf8_title	|U8 *p|U8* ustrp|STRLEN *lenp
-Apd	|UV	|to_utf8_fold	|U8 *p|U8* ustrp|STRLEN *lenp
+Apd	|UV	|to_utf8_case	|const U8 *p|U8* ustrp|STRLEN *lenp|SV **swash|char *normal|char *special
+Apd	|UV	|to_utf8_lower	|const U8 *p|U8* ustrp|STRLEN *lenp
+Apd	|UV	|to_utf8_upper	|const U8 *p|U8* ustrp|STRLEN *lenp
+Apd	|UV	|to_utf8_title	|const U8 *p|U8* ustrp|STRLEN *lenp
+Apd	|UV	|to_utf8_fold	|const U8 *p|U8* ustrp|STRLEN *lenp
 #if defined(UNLINK_ALL_VERSIONS)
 Ap	|I32	|unlnk		|char* f
 #endif
@@ -830,10 +828,10 @@ Apd	|U8*	|utf8_hop	|U8 *s|I32 off
 ApMd	|U8*	|utf8_to_bytes	|U8 *s|STRLEN *len
 ApMd	|U8*	|bytes_from_utf8|U8 *s|STRLEN *len|bool *is_utf8
 ApMd	|U8*	|bytes_to_utf8	|const U8 *s|STRLEN *len
-Apd	|UV	|utf8_to_uvchr	|U8 *s|STRLEN* retlen
-Apd	|UV	|utf8_to_uvuni	|U8 *s|STRLEN* retlen
-Adp	|UV	|utf8n_to_uvchr	|U8 *s|STRLEN curlen|STRLEN* retlen|U32 flags
-Adp	|UV	|utf8n_to_uvuni	|U8 *s|STRLEN curlen|STRLEN* retlen|U32 flags
+Apd	|UV	|utf8_to_uvchr	|const U8 *s|STRLEN* retlen
+Apd	|UV	|utf8_to_uvuni	|const U8 *s|STRLEN* retlen
+Adp	|UV	|utf8n_to_uvchr	|const U8 *s|STRLEN curlen|STRLEN* retlen|U32 flags
+Adp	|UV	|utf8n_to_uvuni	|const U8 *s|STRLEN curlen|STRLEN* retlen|U32 flags
 Apd	|U8*	|uvchr_to_utf8	|U8 *d|UV uv
 Ap	|U8*	|uvuni_to_utf8	|U8 *d|UV uv
 Ap	|U8*	|uvchr_to_utf8_flags	|U8 *d|UV uv|UV flags
@@ -1264,8 +1262,8 @@ s	|I32	|sublex_done
 s	|I32	|sublex_push
 s	|I32	|sublex_start
 s	|char *	|filter_gets	|SV *sv|PerlIO *fp|STRLEN append
-s	|HV *	|find_in_my_stash|char *pkgname|I32 len
-s	|SV*	|new_constant	|char *s|STRLEN len|const char *key|SV *sv \
+s	|HV *	|find_in_my_stash|const char *pkgname|I32 len
+s	|SV*	|new_constant	|const char *s|STRLEN len|const char *key|SV *sv \
 				|SV *pv|const char *type
 #  if defined(DEBUGGING)
 s	|int	|tokereport	|char *s|I32 rv

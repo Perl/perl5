@@ -592,7 +592,7 @@ Perl_save_aelem(pTHX_ const AV *av, I32 idx, SV **sptr)
     SSPUSHINT(SAVEt_AELEM);
     /* if it gets reified later, the restore will have the wrong refcnt */
     if (!AvREAL(av) && AvREIFY(av))
-	SvREFCNT_inc(*sptr);
+        (void)SvREFCNT_inc(*sptr);
     save_scalar_at(sptr);
     sv = *sptr;
     /* If we're localizing a tied array element, this new sv

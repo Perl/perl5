@@ -259,7 +259,7 @@ Perl_pad_undef(pTHX_ CV* cv)
 	    if (namesv && namesv != &PL_sv_undef
 		&& *SvPVX(namesv) == '&')
 	    {
-		CV *innercv = (CV*)curpad[ix];
+		CV * const innercv = (CV*)curpad[ix];
 		namepad[ix] = Nullsv;
 		SvREFCNT_dec(namesv);
 
@@ -276,7 +276,7 @@ Perl_pad_undef(pTHX_ CV* cv)
 			CvWEAKOUTSIDE_off(innercv);
 			CvOUTSIDE(innercv) = outercv;
 			CvOUTSIDE_SEQ(innercv) = seq;
-			SvREFCNT_inc(outercv);
+			(void)SvREFCNT_inc(outercv);
 		    }
 		    else {
 			CvOUTSIDE(innercv) = Nullcv;

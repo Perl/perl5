@@ -2031,7 +2031,7 @@ invalid character will also trigger a warning.
 On return I<*len> is set to the length of the scanned string,
 and I<*flags> gives output flags.
 
-If the value is <= UV_MAX it is returned as a UV, the output flags are clear,
+If the value is <= C<UV_MAX> it is returned as a UV, the output flags are clear,
 and nothing is written to I<*result>. If the value is > UV_MAX C<grok_bin>
 returns UV_MAX, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
 and writes the value to I<*result> (or the value is discarded if I<result>
@@ -2042,7 +2042,7 @@ C<PERL_SCAN_DISALLOW_PREFIX> is set in I<*flags> on entry. If
 C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> then the binary
 number may use '_' characters to separate digits.
 
-	UV	grok_bin(char* start, STRLEN* len, I32* flags, NV *result)
+	UV	grok_bin(const char* start, STRLEN* len, I32* flags, NV *result)
 
 =for hackers
 Found in file numeric.c
@@ -2070,7 +2070,7 @@ C<PERL_SCAN_DISALLOW_PREFIX> is set in I<*flags> on entry. If
 C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> then the hex
 number may use '_' characters to separate digits.
 
-	UV	grok_hex(char* start, STRLEN* len, I32* flags, NV *result)
+	UV	grok_hex(const char* start, STRLEN* len, I32* flags, NV *result)
 
 =for hackers
 Found in file numeric.c
@@ -2130,7 +2130,7 @@ is NULL).
 If C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> then the octal
 number may use '_' characters to separate digits.
 
-	UV	grok_oct(char* start, STRLEN* len, I32* flags, NV *result)
+	UV	grok_oct(const char* start, STRLEN* len, I32* flags, NV *result)
 
 =for hackers
 Found in file numeric.c
@@ -5226,7 +5226,7 @@ character.  Note that an INVARIANT (i.e. ASCII) character is a valid
 UTF-8 character.  The actual number of bytes in the UTF-8 character
 will be returned if it is valid, otherwise 0.
 
-	STRLEN	is_utf8_char(U8 *p)
+	STRLEN	is_utf8_char(const U8 *p)
 
 =for hackers
 Found in file utf8.c
@@ -5238,7 +5238,7 @@ UTF-8 string, false otherwise.  Note that 'a valid UTF-8 string' does
 not mean 'a string that contains code points above 0x7F encoded in UTF-8'
 because a valid ASCII string is a valid UTF-8 string.
 
-	bool	is_utf8_string(U8 *s, STRLEN len)
+	bool	is_utf8_string(const U8 *s, STRLEN len)
 
 =for hackers
 Found in file utf8.c
@@ -5248,7 +5248,7 @@ Found in file utf8.c
 Like is_ut8_string but store the location of the failure in
 the last argument.
 
-	bool	is_utf8_string_loc(U8 *s, STRLEN len, U8 **p)
+	bool	is_utf8_string_loc(const U8 *s, STRLEN len, const U8 **p)
 
 =for hackers
 Found in file utf8.c
@@ -5345,7 +5345,7 @@ Perl_to_utf8_case().
 The "normal" is a string like "ToLower" which means the swash
 %utf8::ToLower.
 
-	UV	to_utf8_case(U8 *p, U8* ustrp, STRLEN *lenp, SV **swash, char *normal, char *special)
+	UV	to_utf8_case(const U8 *p, U8* ustrp, STRLEN *lenp, SV **swash, char *normal, char *special)
 
 =for hackers
 Found in file utf8.c
@@ -5361,7 +5361,7 @@ three characters).
 The first character of the foldcased version is returned
 (but note, as explained above, that there may be more.)
 
-	UV	to_utf8_fold(U8 *p, U8* ustrp, STRLEN *lenp)
+	UV	to_utf8_fold(const U8 *p, U8* ustrp, STRLEN *lenp)
 
 =for hackers
 Found in file utf8.c
@@ -5376,7 +5376,7 @@ lowercase version may be longer than the original character.
 The first character of the lowercased version is returned
 (but note, as explained above, that there may be more.)
 
-	UV	to_utf8_lower(U8 *p, U8* ustrp, STRLEN *lenp)
+	UV	to_utf8_lower(const U8 *p, U8* ustrp, STRLEN *lenp)
 
 =for hackers
 Found in file utf8.c
@@ -5391,7 +5391,7 @@ titlecase version may be longer than the original character.
 The first character of the titlecased version is returned
 (but note, as explained above, that there may be more.)
 
-	UV	to_utf8_title(U8 *p, U8* ustrp, STRLEN *lenp)
+	UV	to_utf8_title(const U8 *p, U8* ustrp, STRLEN *lenp)
 
 =for hackers
 Found in file utf8.c
@@ -5406,7 +5406,7 @@ the uppercase version may be longer than the original character.
 The first character of the uppercased version is returned
 (but note, as explained above, that there may be more.)
 
-	UV	to_utf8_upper(U8 *p, U8* ustrp, STRLEN *lenp)
+	UV	to_utf8_upper(const U8 *p, U8* ustrp, STRLEN *lenp)
 
 =for hackers
 Found in file utf8.c
@@ -5419,7 +5419,7 @@ length, in bytes, of that character.
 
 Allows length and flags to be passed to low level routine.
 
-	UV	utf8n_to_uvchr(U8 *s, STRLEN curlen, STRLEN* retlen, U32 flags)
+	UV	utf8n_to_uvchr(const U8 *s, STRLEN curlen, STRLEN* retlen, U32 flags)
 
 =for hackers
 Found in file utf8.c
@@ -5444,7 +5444,7 @@ the strict UTF-8 encoding (see F<utf8.h>).
 
 Most code should use utf8_to_uvchr() rather than call this directly.
 
-	UV	utf8n_to_uvuni(U8 *s, STRLEN curlen, STRLEN* retlen, U32 flags)
+	UV	utf8n_to_uvuni(const U8 *s, STRLEN curlen, STRLEN* retlen, U32 flags)
 
 =for hackers
 Found in file utf8.c
@@ -5511,7 +5511,7 @@ length, in bytes, of that character.
 If C<s> does not point to a well-formed UTF-8 character, zero is
 returned and retlen is set, if possible, to -1.
 
-	UV	utf8_to_uvchr(U8 *s, STRLEN* retlen)
+	UV	utf8_to_uvchr(const U8 *s, STRLEN* retlen)
 
 =for hackers
 Found in file utf8.c
@@ -5528,7 +5528,7 @@ an index into the Unicode semantic tables (e.g. swashes).
 If C<s> does not point to a well-formed UTF-8 character, zero is
 returned and retlen is set, if possible, to -1.
 
-	UV	utf8_to_uvuni(U8 *s, STRLEN* retlen)
+	UV	utf8_to_uvuni(const U8 *s, STRLEN* retlen)
 
 =for hackers
 Found in file utf8.c

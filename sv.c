@@ -10388,10 +10388,10 @@ Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS* param)
 	    nmg->mg_obj	= (SV*)re_dup((REGEXP*)mg->mg_obj, param);
 	}
 	else if(mg->mg_type == PERL_MAGIC_backref) {
-	    AV *av = (AV*) mg->mg_obj;
+	    const AV * const av = (AV*) mg->mg_obj;
 	    SV **svp;
 	    I32 i;
-	    SvREFCNT_inc(nmg->mg_obj = (SV*)newAV());
+	    (void)SvREFCNT_inc(nmg->mg_obj = (SV*)newAV());
 	    svp = AvARRAY(av);
 	    for (i = AvFILLp(av); i >= 0; i--) {
 		if (!svp[i]) continue;

@@ -2247,7 +2247,7 @@ S_filter_gets(pTHX_ register SV *sv, register PerlIO *fp, STRLEN append)
 }
 
 STATIC HV *
-S_find_in_my_stash(pTHX_ char *pkgname, I32 len)
+S_find_in_my_stash(pTHX_ const char *pkgname, I32 len)
 {
     GV *gv;
 
@@ -8938,7 +8938,7 @@ S_checkcomma(pTHX_ register char *s, char *name, char *what)
    and type is used with error messages only. */
 
 STATIC SV *
-S_new_constant(pTHX_ char *s, STRLEN len, const char *key, SV *sv, SV *pv,
+S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, SV *sv, SV *pv,
 	       const char *type)
 {
     dSP;

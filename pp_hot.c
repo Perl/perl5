@@ -1622,9 +1622,9 @@ Perl_do_readline(pTHX)
 		continue;
 	    }
 	} else if (SvUTF8(sv)) { /* OP_READLINE, OP_RCATLINE */
-	     U8 *s = (U8*)SvPVX(sv) + offset;
-	     STRLEN len = SvCUR(sv) - offset;
-	     U8 *f;
+	     const U8 *s = (U8*)SvPVX(sv) + offset;
+	     const STRLEN len = SvCUR(sv) - offset;
+	     const U8 *f;
 	     
 	     if (ckWARN(WARN_UTF8) &&
 		 !Perl_is_utf8_string_loc(aTHX_ s, len, &f))
