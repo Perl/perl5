@@ -6778,6 +6778,8 @@ Perl_peep(pTHX_ register OP *o)
 	    if ((!SvFAKE(sv = *svp) || !SvREADONLY(sv)) && !IS_PADCONST(sv)) {
 		key = SvPV(sv, keylen);
 		lexname = newSVpvn_share(key, keylen, 0);
+		if (SvUTF8(sv))
+		    SvUTF8_on(lexname);
 		SvREFCNT_dec(sv);
 		*svp = lexname;
 	    }
