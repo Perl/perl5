@@ -28,6 +28,136 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  7523] By: jhi                                   on 2000/11/01  22:57:09
+        Log: More tweaking on the #7522 theme.
+     Branch: perl
+	   ! ext/DynaLoader/DynaLoader_pm.PL
+____________________________________________________________________________
+[  7522] By: jhi                                   on 2000/11/01  22:06:15
+        Log: Expand %Config variables and %ENV variables only if
+             so requested during build time using the
+             PERL_BUILD_EXPAND_CONFIG_VARS and PERL_BUILD_EXPAND_ENV_VARS.
+             Not expanding makes relocating distributions easier.
+     Branch: perl
+	   ! ext/DynaLoader/DynaLoader_pm.PL
+____________________________________________________________________________
+[  7521] By: jhi                                   on 2000/11/01  20:56:34
+        Log: Make the POSIX::setuid and POSIX::setgid to really call setuid()
+             and setgid() because they were just changing $< and $( which means
+             only changing the real uid/gid, as opposed to changing both
+             real and effective ids.  (The alternative way could have been
+             in POSIX.pm to change $> and $), too, but making a direct call
+             to the C API feels cleaner.)  Fixes the bug
+             
+             Subject: [ID 20000904.005] POSIX::setuid() Doesn't Call setuid()
+             From: "Garry T. Williams" <garry@zvolve.com>
+             Date: Mon, 4 Sep 2000 12:09:44 -0400 (EDT)
+             Message-Id: <200009041609.e84G9iN12155@ifr.inside.zvolve.net>
+     Branch: perl
+	   ! ext/POSIX/POSIX.pm ext/POSIX/POSIX.pod ext/POSIX/POSIX.xs
+	   ! ext/POSIX/typemap pod/perlvar.pod
+____________________________________________________________________________
+[  7520] By: jhi                                   on 2000/11/01  20:08:33
+        Log: Subject: [ID 20000904.004] perlsec Manual Page Incorrect Doing "Safe Backticks"
+             From: "Garry T. Williams" <garry@zvolve.com>
+             Date: Mon, 4 Sep 2000 11:32:38 -0400 (EDT)
+             Message-Id: <200009041532.e84FWcl12106@ifr.inside.zvolve.net>
+     Branch: perl
+	   ! pod/perlsec.pod
+____________________________________________________________________________
+[  7519] By: jhi                                   on 2000/11/01  20:01:22
+        Log: Locale warning explanation tweak.
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[  7518] By: jhi                                   on 2000/11/01  18:57:13
+        Log: C.pm part of
+             
+             Subject: [ID 20001010.001] [Daniel.Stutz@astaro.de: perlcc and C.pm in perl-5.7.0]
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Tue, 10 Oct 2000 08:22:28 -0500
+             Message-Id: <20001010082228.B17030@chaos.wustl.edu>
+     Branch: perl
+	   ! ext/B/B/C.pm
+____________________________________________________________________________
+[  7517] By: jhi                                   on 2000/11/01  18:41:59
+        Log: Subject: [ID 20001005.006] Documentation -- description of qr//
+             From: Martien Verbruggen <mgjv@comdyn.com.au>
+             Date: Fri, 6 Oct 2000 14:09:10 +1100
+             Message-Id: <200010060309.OAA03457@verbruggen.comdyn.com.au>
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[  7516] By: jhi                                   on 2000/11/01  18:34:55
+        Log: Generalize the Camel wording.
+             
+             Subject: Re: perlfaq style changes
+             From: John Borwick <jhborwic@unity.ncsu.edu>
+             Date: Wed, 1 Nov 2000 13:19:21 -0500 (EST)
+             Message-ID: <Pine.GSO.4.21.0011011318270.7428-100000@eos00du.eos.ncsu.edu>
+     Branch: perl
+	   ! pod/perlfaq3.pod pod/perlfaq8.pod pod/perlfaq9.pod
+____________________________________________________________________________
+[  7515] By: jhi                                   on 2000/11/01  16:52:31
+        Log: Subject: [ID 20001005.004] doc bug: perlsec misleading re file output
+             From: pimlott@idiomtech.com (Andrew Pimlott)
+             Date: Thu, 5 Oct 2000 13:20:58 -0400 (EDT)
+             Message-Id: <m13hEhW-000SEmC@nolfolan.idiomtech.com>
+     Branch: perl
+	   ! pod/perlsec.pod
+____________________________________________________________________________
+[  7514] By: jhi                                   on 2000/11/01  15:03:40
+        Log: More AIX lore.
+     Branch: perl
+	   ! ext/re/hints/aix.pl
+____________________________________________________________________________
+[  7513] By: jhi                                   on 2000/11/01  14:48:30
+        Log: Subject: [ID 20001101.001] Net::Ping icmp odd $bytes
+             From: root <root@chronos.fi.muni.cz>
+             Date: Wed, 1 Nov 2000 12:31:32 +0100
+             Message-Id: <200011011131.MAA03310@chronos.fi.muni.cz>
+     Branch: perl
+	   ! lib/Net/Ping.pm
+____________________________________________________________________________
+[  7512] By: jhi                                   on 2000/11/01  14:46:47
+        Log: Subject: [ID 20001031.004] Uninitialized auto variable in regcomp.c
+             From: Martin Husemann <martin@duskware.de>
+             Date: Tue, 31 Oct 2000 23:39:35 +0100 (MET)
+             Message-Id: <200010312239.e9VMdZR01580@night-porter.duskware.de>
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[  7511] By: jhi                                   on 2000/11/01  14:39:50
+        Log: AUTHORS updates.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[  7509] By: jhi                                   on 2000/11/01  14:19:53
+        Log: printf UVs the correct way, noticed by Robin Barker.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[  7508] By: jhi                                   on 2000/11/01  14:10:03
+        Log: Do not cleanup *% because the % has special meanings in some
+             shell environments.
+     Branch: perl
+	   ! ext/Storable/Makefile.PL
+____________________________________________________________________________
+[  7507] By: jhi                                   on 2000/11/01  14:06:00
+        Log: The NonStop-UX libraries have a novel way to say NaN.
+     Branch: perl
+	   ! t/lib/bigfltpm.t
+____________________________________________________________________________
+[  7505] By: jhi                                   on 2000/10/31  19:18:39
+        Log: The compiler is either gcc or cc, from Tom Bates.
+     Branch: perl
+	   ! hints/nonstopux.sh
+____________________________________________________________________________
+[  7504] By: jhi                                   on 2000/10/31  14:53:42
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  7502] By: jhi                                   on 2000/10/31  14:25:02
         Log: AUTHORS tweaks.
      Branch: perl
