@@ -79,6 +79,61 @@ Version v5.5.650        Development release working toward v5.6
 ----------------
 
 ____________________________________________________________________________
+[  5030] By: gsar                                  on 2000/02/07  18:17:49
+        Log: thinko in change#5029
+     Branch: perl
+	   ! gv.c
+____________________________________________________________________________
+[  5029] By: gsar                                  on 2000/02/07  17:49:58
+        Log: change $^U to $^WIDE_SYSTEM_CALLS; s/PL_bigchar/PL_widesyscalls/;
+             introduce -C switch (sets $^WIDE_SYSTEM_CALLS)
+     Branch: perl
+	   ! embedvar.h gv.c intrpvar.h mg.c perl.c perlapi.h
+	   ! pod/perlrun.pod pod/perlunicode.pod pod/perlvar.pod
+	   ! win32/win32.h
+____________________________________________________________________________
+[  5028] By: gsar                                  on 2000/02/07  17:10:03
+        Log: perlport updates (from Peter Prymmer)
+     Branch: perl
+	   ! pod/perlport.pod
+____________________________________________________________________________
+[  5027] By: gsar                                  on 2000/02/07  16:53:47
+        Log: fix up Todo-5.6
+     Branch: perl
+	   ! Todo-5.6
+____________________________________________________________________________
+[  5026] By: gsar                                  on 2000/02/07  16:32:31
+        Log: rename Todo-5.005 to Todo-5.6
+     Branch: perl
+	  +> Todo-5.6
+	   - Todo-5.005
+	   ! MANIFEST
+____________________________________________________________________________
+[  5025] By: gsar                                  on 2000/02/07  16:09:54
+        Log: ${^Warnings} renamed to ${^WARNING_BITS}
+     Branch: perl
+	   ! gv.c lib/warnings.pm mg.c pod/perltoc.pod pod/perlvar.pod
+	   ! toke.c warnings.pl
+____________________________________________________________________________
+[  5024] By: gsar                                  on 2000/02/07  11:47:06
+        Log: various Windows tweaks: make $^E a little less buggy by saving
+             and restoring system error across TLS fetch; avoid needless
+             copying of buffers
+     Branch: perl
+	   ! win32/Makefile win32/makefile.mk win32/perllib.c win32/win32.c
+	   ! win32/win32.h
+____________________________________________________________________________
+[  5023] By: gsar                                  on 2000/02/07  11:44:19
+        Log: avoid MakeMaker setting $^W=1
+     Branch: perl
+	   ! lib/ExtUtils/MakeMaker.pm
+____________________________________________________________________________
+[  5022] By: gsar                                  on 2000/02/07  10:38:56
+        Log: up to v5.5.650
+     Branch: perl
+	   ! Changes patchlevel.h win32/Makefile win32/config_H.bc
+	   ! win32/config_H.gc win32/config_H.vc win32/makefile.mk
+____________________________________________________________________________
 [  5021] By: gsar                                  on 2000/02/07  10:10:31
         Log: mention threads status in pod
      Branch: perl
