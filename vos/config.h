@@ -1186,14 +1186,18 @@
  *	This macro surrounds its token with double quotes.
  */
 #if 42 == 1
-#define CAT2(a,b)a/**/b
-#define STRINGIFY(a)"a"
+#  define CAT2(a,b)	a/**/b
+#  define STRINGIFY(a)	"a"
 		/* If you can get stringification with catify, tell me how! */
 #endif
 #if 42 == 42
-#define CAT2(a,b)a ## b
-#define StGiFy(a)# a
-#define STRINGIFY(a)StGiFy(a)
+#  define PeRl_CaTiFy(a, b)	a ## b	
+#  define PeRl_StGiFy(a)	#a
+/* the additional level of indirection enables these macros to be
+ * used as arguments to other macros.  See K&R 2nd ed., page 231. */
+#  define CAT2(a,b)	PeRl_CaTiFy(a,b)
+#  define StGiFy(a)	PeRl_StGiFy(a)
+#  define STRINGIFY(a)	PeRl_StGiFy(a)
 #endif
 #if 42 != 1 && 42 != 42
 #include "Bletch: How does this C preprocessor catenate tokens?"
@@ -2788,8 +2792,14 @@
  *	This symbol contains the ~name expanded version of SITELIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
+/* SITELIB_STEM:
+ *	This define is SITELIB_EXP with any trailing version-specific component
+ *	removed.  The elements in inc_version_list (inc_version_list.U) can
+ *	be tacked onto this variable to generate a list of directories to search.
+ */
 #define SITELIB "/system/ported/perl/lib/site/5.005"		/**/
 #define SITELIB_EXP "/system/ported/perl/lib/site/5.005"		/**/
+#define SITELIB_STEM "/system/ported/perl/lib/site"		/**/
 
 /* Size_t:
  *	This symbol holds the type used to declare length parameters
@@ -2938,11 +2948,23 @@
 #endif
 /*#define	OLD_PTHREADS_API		/**/
 
+/* PERL_VENDORARCH_EXP:
+ *	This symbol contains the ~name expanded version of PERL_VENDORARCH, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+# PERL_VENDORARCH_EXP ""		/**/
+
 /* PERL_VENDORLIB_EXP:
  *	This symbol contains the ~name expanded version of VENDORLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
+/* PERL_VENDORLIB_STEM:
+ *	This define is PERL_VENDORLIB_EXP with any trailing version-specific component
+ *	removed.  The elements in inc_version_list (inc_version_list.U) can
+ *	be tacked onto this variable to generate a list of directories to search.
+ */
 #define PERL_VENDORLIB_EXP ""		/**/
+#define PERL_VENDORLIB_STEM ""		/**/
 
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this

@@ -2810,8 +2810,14 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol contains the ~name expanded version of SITELIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
+/* SITELIB_STEM:
+ *	This define is SITELIB_EXP with any trailing version-specific component
+ *	removed.  The elements in inc_version_list (inc_version_list.U) can
+ *	be tacked onto this variable to generate a list of directories to search.
+ */
 #define SITELIB "$sitelib"		/**/
 #define SITELIB_EXP "$sitelibexp"		/**/
+#define SITELIB_STEM "$sitelib_stem"		/**/
 
 /* Size_t:
  *	This symbol holds the type used to declare length parameters
@@ -2960,11 +2966,23 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #endif
 #$d_oldpthreads	OLD_PTHREADS_API		/**/
 
+/* PERL_VENDORARCH_EXP:
+ *	This symbol contains the ~name expanded version of PERL_VENDORARCH, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+#$d_vendorarch PERL_VENDORARCH_EXP "$vendorarchexp"		/**/
+
 /* PERL_VENDORLIB_EXP:
  *	This symbol contains the ~name expanded version of VENDORLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
+/* PERL_VENDORLIB_STEM:
+ *	This define is PERL_VENDORLIB_EXP with any trailing version-specific component
+ *	removed.  The elements in inc_version_list (inc_version_list.U) can
+ *	be tacked onto this variable to generate a list of directories to search.
+ */
 #$d_vendorlib PERL_VENDORLIB_EXP "$vendorlibexp"		/**/
+#$d_vendorlib PERL_VENDORLIB_STEM "$vendorlib_stem"		/**/
 
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this
