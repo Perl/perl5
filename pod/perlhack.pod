@@ -1322,6 +1322,12 @@ You may find it helpful to have a "macro dictionary", which you can
 produce by saying C<cpp -dM perl.c | sort>. Even then, F<cpp> won't
 recursively apply the macros for you. 
 
+B<NOTE>: Recent versions of F<gdb> have fairly good macro support, but
+in order to use it you'll need to compile perl with macro definitions
+included in the debugging information.  Using F<gcc> version 3.1, this
+means configuring with C<-Doptimize=-g3>.  Other compilers might use a
+different switch (if they support debugging macros at all).
+
 =back
 
 =head2 Dumping Perl Data Structures
