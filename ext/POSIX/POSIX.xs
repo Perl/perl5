@@ -3256,7 +3256,20 @@ SysRet
 sigprocmask(how, sigset, oldsigset = 0)
 	int			how
 	POSIX::SigSet		sigset
-	POSIX::SigSet		oldsigset
+	POSIX::SigSet		oldsigset = NO_INIT
+INIT:
+	if ( items < 3 ) {
+	    oldsigset = 0;
+	}
+	else if (sv_derived_from(ST(2), "POSIX::SigSet")) {
+	    IV tmp = SvIV((SV*)SvRV(ST(2)));
+	    oldsigset = (POSIX__SigSet) tmp;
+	}
+	else {
+	    oldsigset = (sigset_t*)safemalloc(sizeof(sigset_t));
+	    sigemptyset(oldsigset);
+	    sv_setref_pv(ST(2), "POSIX::SigSet", (void*)oldsigset);
+	}
 
 SysRet
 sigsuspend(signal_mask)
