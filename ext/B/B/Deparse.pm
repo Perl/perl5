@@ -3586,6 +3586,7 @@ sub re_dq {
 
 sub pure_string {
     my ($self, $op) = @_;
+    return 0 if null $op;
     my $type = $op->name;
 
     if ($type eq 'const') {

@@ -4092,7 +4092,7 @@ int flock(int fd, int op);
 #if O_TEXT != O_BINARY
     /* If you have different O_TEXT and O_BINARY and you are a CLRF shop,
      * that is, you are somehow DOSish. */
-#   if defined(__BEOS__) || defined(__VOS__)
+#   if defined(__BEOS__) || defined(__VOS__) || defined(__CYGWIN__)
     /* BeOS has O_TEXT != O_BINARY but O_TEXT and O_BINARY have no effect;
      * BeOS is always UNIXoid (LF), not DOSish (CRLF). */
     /* VOS has O_TEXT != O_BINARY, and they have effect,

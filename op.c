@@ -2653,6 +2653,8 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl)
 			   : OPf_KIDS);
 	rcop->op_private = 1;
 	rcop->op_other = o;
+	/* /$x/ may cause an eval, since $x might be qr/(?{..})/  */
+	PL_cv_has_eval = 1;
 
 	/* establish postfix order */
 	if (pm->op_pmflags & PMf_KEEP || !(PL_hints & HINT_RE_EVAL)) {
@@ -3886,6 +3888,26 @@ Perl_cv_const_sv(pTHX_ CV *cv)
     return (SV*)CvXSUBANY(cv).any_ptr;
 }
 
+/* op_const_sv:  examine an optree to determine whether it's in-lineable.
+ * Can be called in 3 ways:
+ *
+ * !cv
+ * 	look for a single OP_CONST with attached value: return the value
+ *
+ * cv && CvCLONE(cv) && !CvCONST(cv)
+ *
+ * 	examine the clone prototype, and if contains only a single
+ * 	OP_CONST referencing a pad const, or a single PADSV referencing
+ * 	an outer lexical, return a non-zero value to indicate the CV is
+ * 	a candidate for "constizing" at clone time
+ *
+ * cv && CvCONST(cv)
+ *
+ *	We have just cloned an anon prototype that was marked as a const
+ *	candidiate. Try to grab the current value, and in the case of
+ *	PADSV, ignore it if it has multiple references. Return the value.
+ */
+
 SV *
 Perl_op_const_sv(pTHX_ OP *o, CV *cv)
 {
@@ -3914,26 +3936,31 @@ Perl_op_const_sv(pTHX_ OP *o, CV *cv)
 	    return Nullsv;
 	if (type == OP_CONST && cSVOPo->op_sv)
 	    sv = cSVOPo->op_sv;
-	else if ((type == OP_PADSV || type == OP_CONST) && cv) {
+	else if (cv && type == OP_CONST) {
 	    sv = PAD_BASE_SV(CvPADLIST(cv), o->op_targ);
 	    if (!sv)
 		return Nullsv;
-	    if (CvCONST(cv)) {
-		/* We get here only from cv_clone2() while creating a closure.
-		   Copy the const value here instead of in cv_clone2 so that
-		   SvREADONLY_on doesn't lead to problems when leaving
-		   scope.
-		*/
-		sv = newSVsv(sv);
-	    }
-	    if (!SvREADONLY(sv) && SvREFCNT(sv) > 1)
-		return Nullsv;
 	}
-	else
+	else if (cv && type == OP_PADSV) {
+	    if (CvCONST(cv)) { /* newly cloned anon */
+		sv = PAD_BASE_SV(CvPADLIST(cv), o->op_targ);
+		/* the candidate should have 1 ref from this pad and 1 ref
+		 * from the parent */
+		if (!sv || SvREFCNT(sv) != 2)
+		    return Nullsv;
+		sv = newSVsv(sv);
+		SvREADONLY_on(sv);
+		return sv;
+	    }
+	    else {
+		if (PAD_COMPNAME_FLAGS(o->op_targ) & SVf_FAKE)
+		    sv = &PL_sv_undef; /* an arbitrary non-null value */
+	    }
+	}
+	else {
 	    return Nullsv;
+	}
     }
-    if (sv)
-	SvREADONLY_on(sv);
     return sv;
 }
 
@@ -4135,6 +4162,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	pad_fixup_inner_anons(CvPADLIST(cv), PL_compcv, cv);
 	/* ... before we throw it away */
 	SvREFCNT_dec(PL_compcv);
+	PL_compcv = cv;
 	if (PERLDB_INTER)/* Advice debugger on the new sub. */
 	  ++PL_sub_generation;
     }
@@ -4784,8 +4812,10 @@ Perl_ck_eval(pTHX_ OP *o)
 	    enter->op_other = o;
 	    return o;
 	}
-	else
+	else {
 	    scalar((OP*)kid);
+	    PL_cv_has_eval = 1;
+	}
     }
     else {
 	op_free(o);

@@ -4,14 +4,6 @@
 	my $x;
 	my $x ;
 
-     Variable "%s" may be unavailable 
-	sub x {
-      	    my $x;
-      	    sub y {
-         	$x
-      	    }
-   	}
-
      Variable "%s" will not stay shared 
 	sub x {
       	    my $x;
@@ -19,6 +11,14 @@
          	sub { $x }
       	    }
    	}
+
+	sub x {
+      	    my $x;
+      	    sub y {
+         	$x
+      	    }
+   	}
+
     "our" variable %s redeclared	(Did you mean "local" instead of "our"?)
 	our $x;
 	{
@@ -65,6 +65,71 @@ EXPECT
 # pad.c
 use warnings 'closure' ;
 sub x {
+      my $x;
+      sub y {
+         sub { $x }
+      }
+   }
+EXPECT
+Variable "$x" will not stay shared at - line 6.
+########
+# pad.c
+use warnings 'closure' ;
+sub x {
+    my $x;
+    sub {
+	$x;
+	sub y {
+	    $x
+	}
+    }->();
+}
+EXPECT
+Variable "$x" will not stay shared at - line 9.
+########
+# pad.c
+use warnings 'closure' ;
+my $x;
+sub {
+    $x;
+    sub f {
+	sub { $x }->();
+    }
+}->();
+EXPECT
+
+########
+# pad.c
+use warnings 'closure' ;
+sub {
+    my $x;
+    sub f { $x }
+}->();
+EXPECT
+Variable "$x" is not available at - line 5.
+########
+# pad.c
+use warnings 'closure' ;
+sub {
+    my $x;
+    eval 'sub f { $x }';
+}->();
+EXPECT
+
+########
+# pad.c
+use warnings 'closure' ;
+sub {
+    my $x;
+    sub f { eval '$x' }
+}->();
+f();
+EXPECT
+Variable "$x" is not available at (eval 1) line 2.
+########
+# pad.c
+use warnings 'closure' ;
+sub x {
       our $x;
       sub y {
          $x
@@ -74,15 +139,15 @@ EXPECT
 
 ########
 # pad.c
+# see bugid 1754
 use warnings 'closure' ;
-sub x {
-      my $x;
-      sub y {
-         sub { $x }
-      }
-   }
+sub f {
+    my $x;
+    sub { eval '$x' };
+}
+f()->();
 EXPECT
-Variable "$x" may be unavailable at - line 6.
+Variable "$x" is not available at (eval 1) line 2.
 ########
 # pad.c
 no warnings 'closure' ;

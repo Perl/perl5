@@ -1375,11 +1375,12 @@ pd	|void	|pad_fixup_inner_anons|PADLIST *padlist|CV *old_cv|CV *new_cv
 pd	|void	|pad_push	|PADLIST *padlist|int depth|int has_args
 
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
-sd	|PADOFFSET|pad_findlex	|char* name|PADOFFSET newoff|CV* innercv
+sd	|PADOFFSET|pad_findlex	|char *name|CV* cv|U32 seq|int warn \
+				|SV** out_capture|SV** out_name_sv \
+				|int *out_flags
 #  if defined(DEBUGGING)
 sd	|void	|cv_dump	|CV *cv|char *title
 #  endif
-s	|CV*	|cv_clone2	|CV *proto|CV *outside
 #endif
 pd 	|CV*	|find_runcv	|U32 *db_seqp
 p	|void	|free_tied_hv_pool

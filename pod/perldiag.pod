@@ -4022,6 +4022,16 @@ earlier in the line, and you really meant a "less than".
 (W untie) A copy of the object returned from C<tie> (or C<tied>) was
 still valid when C<untie> was called.
 
+=item Usage: POSIX::%s(%s)
+
+(F) You called a POSIX function with incorrect arguments.
+See L<POSIX/FUNCTIONS> for more information.
+
+=item Usage: Win32::%s(%s)
+
+(F) You called a Win32 function with incorrect arguments.
+See L<Win32> for more information.
+
 =item Useless (?-%s) - don't use /%s modifier in regex; marked by <-- HERE in m/%s/
 
 (W regexp) You have used an internal modifier such as (?-o) that has no
@@ -4340,26 +4350,35 @@ instance.  This is almost always a typographical error.  Note that the
 earlier variable will still exist until the end of the scope or until
 all closure referents to it are destroyed.
 
-=item Variable "%s" may be unavailable
+=item Variable "%s" is not available
 
-(W closure) An inner (nested) I<anonymous> subroutine is inside a
-I<named> subroutine, and outside that is another subroutine; and the
-anonymous (innermost) subroutine is referencing a lexical variable
-defined in the outermost subroutine.  For example:
+(W closure) During compilation, an inner named subroutine or eval is
+attempting to capture an outer lexical that is not currently available.
+This can be happen for one of two reasons. First, the outer lexical may be
+declared in an outer anonymous subroutine that has not yet been created.
+(Remember that named subs are created at compile time, while anonymous
+subs are created at run-time. For example,
 
-   sub outermost { my $a; sub middle { sub { $a } } }
+    sub { my $a; sub f { $a } }
 
-If the anonymous subroutine is called or referenced (directly or
-indirectly) from the outermost subroutine, it will share the variable as
-you would expect.  But if the anonymous subroutine is called or
-referenced when the outermost subroutine is not active, it will see the
-value of the shared variable as it was before and during the *first*
-call to the outermost subroutine, which is probably not what you want.
+At the time that f is created, it can't capture the current value of $a,
+since the anonymous subroutine hasn't been created yet. Conversely,
+the following won't give a warning since the anonymous subroutine has by
+now been created and is live:
 
-In these circumstances, it is usually best to make the middle subroutine
-anonymous, using the C<sub {}> syntax.  Perl has specific support for
-shared variables in nested anonymous subroutines; a named subroutine in
-between interferes with this feature.
+    sub { my $a; eval 'sub f { $a }' }->();
+
+The second situation is caused by an eval accessing a variable that has
+gone out of scope, for example,
+
+    sub f {
+	my $a;
+	sub { eval '$a' }
+    }
+    f()->();
+
+Here, when the '$a' in the eval is being compiled, f() is not currently being
+executed, so its $a is not available for capture.
 
 =item Variable syntax
 
@@ -4370,22 +4389,18 @@ Perl yourself.
 =item Variable "%s" will not stay shared
 
 (W closure) An inner (nested) I<named> subroutine is referencing a
-lexical variable defined in an outer subroutine.
+lexical variable defined in an outer named subroutine.
 
-When the inner subroutine is called, it will probably see the value of
+When the inner subroutine is called, it will see the value of
 the outer subroutine's variable as it was before and during the *first*
 call to the outer subroutine; in this case, after the first call to the
 outer subroutine is complete, the inner and outer subroutines will no
 longer share a common value for the variable.  In other words, the
 variable will no longer be shared.
 
-Furthermore, if the outer subroutine is anonymous and references a
-lexical variable outside itself, then the outer and inner subroutines
-will I<never> share the given variable.
-
 This problem can usually be solved by making the inner subroutine
 anonymous, using the C<sub {}> syntax.  When inner anonymous subs that
-reference variables in outer subroutines are called or referenced, they
+reference variables in outer subroutines are created, they
 are automatically rebound to the current values of such variables.
 
 =item Version number must be a constant number

@@ -1,5 +1,5 @@
---- ../installperl	2002-07-16 18:57:32.000000000 +0000
-+++ installperl	2003-04-15 01:55:54.000000000 +0000
+--- ../installperl	2003-03-26 21:07:13.000000000 +0000
++++ installperl	2003-05-01 11:17:48.000000000 +0000
 @@ -3,8 +3,8 @@
  BEGIN {
      require 5.004;
@@ -11,12 +11,12 @@
  }
  
  use strict;
-@@ -876,7 +876,7 @@
-                print " " if (@opts);
-                print "$file\n";
-            }
--            system("strip", @opts, $file);
-+            system("XXSTRIPXX-strip", @opts, $file);
-         } else {
-             print "# file '$file' skipped\n" if $verbose;
-         }
+@@ -878,7 +878,7 @@
+ 		print " " if (@opts);
+ 		print "$file\n";
+ 	    }
+-	    system("strip", @opts, $file);
++	    system("XXSTRIPXX-strip", @opts, $file);
+ 	} else {
+ 	    print "# file '$file' skipped\n" if $verbose;
+ 	}

@@ -428,7 +428,8 @@ CV's can have CvPADLIST(cv) set to point to an AV.
 
 For these purposes "forms" are a kind-of CV, eval""s are too (except they're
 not callable at will and are always thrown away after the eval"" is done
-executing).
+executing). Require'd files are simply evals without any outer lexical
+scope.
 
 XSUBs don't have CvPADLIST set - dXSTARG fetches values from PL_curpad,
 but that is really the callers pad (a slot of which is allocated by
@@ -474,15 +475,22 @@ stash of the associated global (so that duplicate C<our> delarations in the
 same package can be detected).  SvCUR is sometimes hijacked to
 store the generation number during compilation.
 
-If SvFAKE is set on the name SV then slot in the frame AVs are
-a REFCNT'ed references to a lexical from "outside". In this case,
-the name SV does not have a cop_seq range, since it is in scope
-throughout.
+If SvFAKE is set on the name SV, then that slot in the frame AV is
+a REFCNT'ed reference to a lexical from "outside". In this case,
+the name SV does not use NVX and IVX to store a cop_seq range, since it is
+in scope throughout. Instead IVX stores some flags containing info about
+the real lexical (is it declared in an anon, and is it capable of being
+instantiated multiple times?), and for fake ANONs, NVX contains the index
+within the parent's pad where the lexical's value is stored, to make
+cloning quicker.
 
 If the 'name' is '&' the corresponding entry in frame AV
 is a CV representing a possible closure.
 (SvFAKE and name of '&' is not a meaningful combination currently but could
 become so if C<my sub foo {}> is implemented.)
+
+Note that formats are treated as anon subs, and are cloned each time
+write is called (if necessary).
 
 	AV *	CvPADLIST(CV *cv)
 
@@ -538,13 +546,12 @@ Found in file pad.c
 
 =item pad_add_name
 
-Create a new name in the current pad at the specified offset.
+Create a new name and associated PADMY SV in the current pad; return the
+offset.
 If C<typestash> is valid, the name is for a typed lexical; set the
 name's stash to that value.
 If C<ourstash> is valid, it's an our lexical, set the name's
 GvSTASH to that value
-
-Also, if the name is @.. or %.., create a new array or hash for that slot
 
 If fake, it means we're cloning an existing entry
 
@@ -589,12 +596,23 @@ Found in file pad.c
 =item pad_findlex
 
 Find a named lexical anywhere in a chain of nested pads. Add fake entries
-in the inner pads if it's found in an outer one. innercv is the CV *inside*
-the chain of outer CVs to be searched. If newoff is non-null, this is a
-run-time cloning: don't add fake entries, just find the lexical and add a
-ref to it at newoff in the current pad.
+in the inner pads if it's found in an outer one.
 
-	PADOFFSET	pad_findlex(char* name, PADOFFSET newoff, CV* innercv)
+Returns the offset in the bottom pad of the lex or the fake lex.
+cv is the CV in which to start the search, and seq is the current cop_seq
+to match against. If warn is true, print appropriate warnings.  The out_*
+vars return values, and so are pointers to where the returned values
+should be stored. out_capture, if non-null, requests that the innermost
+instance of the lexical is captured; out_name_sv is set to the innermost
+matched namesv or fake namesv; out_flags returns the flags normally
+associated with the IVX field of a fake namesv.
+
+Note that pad_findlex() is recursive; it recurses up the chain of CVs,
+then comes back down, adding fake entries as it goes. It has to be this way
+because fake namesvs in anon protoypes have to store in NVX the index into
+the parent pad.
+
+	PADOFFSET	pad_findlex(char *name, CV* cv, U32 seq, int warn, SV** out_capture, SV** out_name_sv, int *out_flags)
 
 =for hackers
 Found in file pad.c

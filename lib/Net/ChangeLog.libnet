@@ -1,3 +1,99 @@
+Change 805 on 2003/06/02 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::Cmd
+	- Avoid process death from SIGPIPE
+
+Change 804 on 2003/05/27 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP
+	- Support for ALLO command (patch from Matthew N. Andrews)
+
+Change 803 on 2003/05/27 by <gbarr@pobox.com> (Graham Barr)
+
+	libnetFAQ
+	- Fix URLs
+
+Change 802 on 2003/05/21 by <gbarr@pobox.com> (Graham Barr)
+
+	Use read/print instead of sysread/syswrite for local files
+	so CRLF translation happens if it needs to
+
+Change 801 on 2003/05/20 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP, Net::NNTP
+	- doc updates from Jarkko
+
+Change 800 on 2003/05/20 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::Domain
+	- Look in environment on VMS for domainname
+	  (patch from Michael Cartmell)
+
+Change 799 on 2003/05/20 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::SMTP
+	- Allow multiple hosts to be passed to new() as an array reference
+
+Change 798 on 2003/05/20 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP
+	- Add some error checking to the examples in the SYNOPSIS
+
+Change 797 on 2003/05/20 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::SMTP
+	- Support MTAs with broken HELO response
+	  (patch from Michael Driscoll)
+
+Change 796 on 2003/05/20 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::POP3
+	- Add small example to SYNOPSIS
+
+Change 795 on 2003/05/20 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::NNTP
+	- Add post clarifications to pod
+
+Change 794 on 2003/05/20 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::SMTP, Net::Cmd
+	- Support for BINARYMIME
+	  (patch from Richard Coles)
+
+Change 793 on 2003/05/20 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP
+	- Allow the firewall type to be specified in Net::Config
+	  (patch from Philip Newton)
+
+Change 792 on 2003/05/20 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::SMTP
+	- Fixes to the DSN parameter to mail()
+	  (patch from Rafael Garcia-Suarez)
+
+Change 791 on 2003/05/20 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::FTP::A
+	- Fix CRLF translation in write()
+
+Change 790 on 2003/05/20 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::Cmd
+	- Improve performance of CRLF translation when sending data
+
+Change 789 on 2003/05/20 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::SMTP
+	- Make the use of email address extraction configurable. By default
+	it is now back how it was
+
+Change 788 on 2003/05/20 by <gbarr@pobox.com> (Graham Barr)
+
+	Net::NNTP
+	- Prevent instance methods being called as class methods when debug is turned on
+
 Change 772 on 2003/03/03 by <gbarr@pobox.com> (Graham Barr)
 
 	Release 1.13

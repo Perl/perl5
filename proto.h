@@ -1317,11 +1317,10 @@ PERL_CALLCONV void	Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv
 PERL_CALLCONV void	Perl_pad_push(pTHX_ PADLIST *padlist, int depth, int has_args);
 
 #if defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
-STATIC PADOFFSET	S_pad_findlex(pTHX_ char* name, PADOFFSET newoff, CV* innercv);
+STATIC PADOFFSET	S_pad_findlex(pTHX_ char *name, CV* cv, U32 seq, int warn, SV** out_capture, SV** out_name_sv, int *out_flags);
 #  if defined(DEBUGGING)
 STATIC void	S_cv_dump(pTHX_ CV *cv, char *title);
 #  endif
-STATIC CV*	S_cv_clone2(pTHX_ CV *proto, CV *outside);
 #endif
 PERL_CALLCONV CV*	Perl_find_runcv(pTHX_ U32 *db_seqp);
 PERL_CALLCONV void	Perl_free_tied_hv_pool(pTHX);

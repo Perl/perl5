@@ -487,6 +487,20 @@ To convert $Config{perlpath} to a file pathname, say:
   if ($^O ne 'VMS')
      {$thisperl .= $Config{_exe} unless $thisperl =~ m/$Config{_exe}$/i;}
 
+=head2 Networking
+
+Don't assume that you can reach the public Internet.
+
+Don't assume that there is only one way to get through firewalls
+to the public Internet.
+
+Don't assume that you can reach yourself or any node by the name
+'localhost'.  The same goes for '127.0.0.1'.
+
+Don't assume that any particular port (service) will respond.
+
+Don't assume that you can ping hosts and get replies.
+
 =head2 Interprocess Communication (IPC)
 
 In general, don't directly access the system in code meant to be

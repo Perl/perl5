@@ -16,7 +16,7 @@ use Net::Config;
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(hostname hostdomain hostfqdn domainname);
 
-$VERSION = "2.17"; # $Id: //depot/libnet/Net/Domain.pm#19 $
+$VERSION = "2.18"; # $Id: //depot/libnet/Net/Domain.pm#20 $
 
 my($host,$domain,$fqdn) = (undef,undef,undef);
 
@@ -163,6 +163,11 @@ sub _hostdomain {
 		    ? $tmp
 		    : undef;
         };
+
+	if ( $^O eq 'VMS' ) {
+	    $dom ||= $ENV{'TCPIP$INET_DOMAIN'}
+		 || $ENV{'UCX$INET_DOMAIN'};
+	}
 
 	chop($dom = `domainname 2>/dev/null`)
 		unless(defined $dom || $^O =~ /^(?:cygwin|MSWin32)/);
@@ -331,6 +336,6 @@ it under the same terms as Perl itself.
 
 =for html <hr>
 
-I<$Id: //depot/libnet/Net/Domain.pm#19 $>
+I<$Id: //depot/libnet/Net/Domain.pm#20 $>
 
 =cut

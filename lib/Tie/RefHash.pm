@@ -57,6 +57,8 @@ store a reference to one of your own hashes in the tied hash.
 
 Gurusamy Sarathy        gsar@activestate.com
 
+'Nestable' by Ed Avis   ed@membled.com
+
 =head1 VERSION
 
 Version 1.30
