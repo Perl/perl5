@@ -189,15 +189,19 @@ $files = maniread;
 is( $files->{wibble}, '',    'maniadd() with undef comment' );
 is( $files->{yarrow}, 'hock','          with comment' );
 is( $files->{foobar}, '',    '          preserved old entries' );
+
 add_file('MANIFEST'   => 'Makefile.PL');
 maniadd({ foo  => 'bar' });
-
 $files = maniread;
 # VMS downcases the MANIFEST.  We normalize it here to match.
 %$files = map { (lc $_ => $files->{$_}) } keys %$files;
 my %expect = ( 'makefile.pl' => '',
-               'foo'         => 'bar' );
+               'foo'    => 'bar'
+             );
 is_deeply( $files, \%expect, 'maniadd() vs MANIFEST without trailing newline');
+
+add_file('MANIFEST'   => 'Makefile.PL');
+maniadd({ foo => 'bar' });
 
 SKIP: {
     chmod( 0400, 'MANIFEST' );
