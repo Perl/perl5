@@ -1066,6 +1066,10 @@ int sockatmark(int);
 #undef UV
 #endif
 
+#ifdef	SPRINTF_E_BUG
+#  define sprintf UTS_sprintf_wrap
+#endif
+
 /* Configure gets this right but the UTS compiler gets it wrong.
    -- Hal Morris <hom00@utsglobal.com> */
 #ifdef UTS
