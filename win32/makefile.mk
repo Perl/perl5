@@ -79,7 +79,7 @@ USE_PERLIO	*= define
 # Comment this out if you don't want to enable large file support for
 # some reason.  Should normally only be changed to maintain compatibility
 # with an older release of perl.
-USE_LARGE_FILES *= define
+USE_LARGE_FILES	*= define
 
 #
 # uncomment exactly one of the following
@@ -97,10 +97,10 @@ CCTYPE		*= GCC
 
 #
 # uncomment this if your Borland compiler is older than v5.4.
-#BCCOLD = define
+#BCCOLD		*= define
 #
 # uncomment this if you want to use Borland's VCL as your CRT
-#BCCVCL = define
+#BCCVCL		*= define
 
 #
 # uncomment this if you are compiling under Windows 95/98 and command.com
@@ -204,6 +204,7 @@ CCLIBDIR	*= $(CCHOME)\lib
 #
 # This should normally be disabled.  Enabling it causes perl to read scripts
 # in text mode (which is the 5.005 behavior) and will break ByteLoader.
+#
 #BUILDOPT	+= -DPERL_TEXTMODE_SCRIPTS
 
 #

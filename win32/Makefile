@@ -32,7 +32,7 @@ INST_TOP	= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-#INST_VER = \5.9.2
+#INST_VER	= \5.9.2
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -43,27 +43,27 @@ INST_TOP	= $(INST_DRV)\perl
 # the same location.  Commenting it out gives you a simpler
 # installation that is easier to understand for beginners.
 #
-#INST_ARCH = \$(ARCHNAME)
+#INST_ARCH	= \$(ARCHNAME)
 
 #
 # uncomment to enable multiple interpreters.  This is need for fork()
 # emulation and for thread support.
 #
-USE_MULTI = define
+USE_MULTI	= define
 
 #
 # Beginnings of interpreter cloning/threads; now reasonably complete.
 # This should be enabled to get the fork() emulation.  This needs
 # USE_MULTI as well.
 #
-USE_ITHREADS = define
+USE_ITHREADS	= define
 
 #
 # uncomment to enable the implicit "host" layer for all system calls
 # made by perl.  This needs USE_MULTI above.  This is also needed to
 # get fork().
 #
-USE_IMP_SYS = define
+USE_IMP_SYS	= define
 
 #
 # Comment out next assign to disable perl's I/O subsystem and use compiler's 
@@ -77,7 +77,7 @@ USE_PERLIO	= define
 # Comment this out if you don't want to enable large file support for
 # some reason.  Should normally only be changed to maintain compatibility
 # with an older release of perl.
-USE_LARGE_FILES = define
+USE_LARGE_FILES	= define
 
 #
 # uncomment one of the following lines if you are using either
@@ -141,7 +141,7 @@ CRYPT_SRC	= fcrypt.c
 # This must be enabled to use the Devel::Peek::mstat() function.  This cannot
 # be enabled without PERL_MALLOC as well.
 #
-#DEBUG_MSTATS  = define
+#DEBUG_MSTATS	= define
 
 #
 #
@@ -179,6 +179,7 @@ CCLIBDIR	= $(CCHOME)\lib
 #
 # This should normally be disabled.  Enabling it causes perl to read scripts
 # in text mode (which is the 5.005 behavior) and will break ByteLoader.
+#
 #BUILDOPT	= $(BUILDOPT) -DPERL_TEXTMODE_SCRIPTS
 
 #
