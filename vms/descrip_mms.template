@@ -1271,6 +1271,12 @@ check : test
 	@ Continue
 
 test : all [.t.lib]vmsfspec.t [.t.lib]vms_dclsym.t [.t.lib]vms_stdio.t
+	@ PERL_TEST_DRIVER == "TEST."
+	- @[.VMS]Test.Com "$(E)" "$(__DEBUG__)"
+	@ $(MINIPERL) -e "print ""Ran tests"";" > [.t]rantests.
+
+test_harness : all [.t.lib]vmsfspec.t [.t.lib]vms_dclsym.t [.t.lib]vms_stdio.t
+	@ PERL_TEST_DRIVER == "harness."
 	- @[.VMS]Test.Com "$(E)" "$(__DEBUG__)"
 	@ $(MINIPERL) -e "print ""Ran tests"";" > [.t]rantests.
 

@@ -48,7 +48,7 @@ chdir($tmp) or die "chdir $tmp: $!\n";
 
 if ($ENV{'PERL_CORE'}) {
   if (-d '../../lib') {
-    $inc = '-I../../lib';
+    $inc = $^O eq 'VMS' ? '-"I../../lib"' : '-I../../lib';
     unshift @INC, '../../lib';
   }
 }
