@@ -1871,6 +1871,7 @@ distribution available at http://www.perl.com/CPAN/src/index.html
 	IRIX
 	Linux
 	MachTen
+	NonStop-UX
 	ReliantUNIX	(SINIX)
 	OpenVMS		(VMS)
 	OS/2
@@ -1962,7 +1963,6 @@ of any trouble.
 	MPC
 	NEWS-OS
 	NextSTEP
-	NonStop-UX
 	OpenSTEP
 	Opus
 	Plan 9
