@@ -300,8 +300,11 @@ else {
             };
             my $ps = $mydollarzero->("x");
             ok(!$ps  # we allow that something goes wrong with the ps command
-	       # FreeBSD cannot get rid of the trailing " (perl)".
-               || $ps =~ /^x\b/,
+               || $ps eq 'x'
+	       # FreeBSD cannot get rid of both the leading "perl :"
+	       # and the trailing " (perl)": some FreeBSD versions
+	       # can get rid of the first one.
+	       || ($^O eq 'freebsd' && $ps =~ m/^(?:perl: )? x (?:\(perl\))?$/)
 		       'altering $0 is effective (testing with `ps`)');
 	} else {
 	    skip("\$0 check only on Linux and FreeBSD") for 0, 1;

@@ -851,8 +851,10 @@ length of C<$0>.  In the most extreme case it may be limited to the
 space occupied by the original C<$0>.
 
 Note for BSD users: setting C<$0> does not completely remove "perl"
-from the ps(1) output.  For example, setting C<$0> to C<"foobar"> will
-result in C<"perl: foobar (perl)">.  This is an operating system feature.
+from the ps(1) output.  For example, setting C<$0> to C<"foobar"> may
+result in C<"perl: foobar (perl)"> (whether both the C<"perl: "> prefix
+and the " (perl)" suffix are shown depends on your exact BSD variant
+and version).  This is an operating system feature, Perl cannot help it.
 
 In multithreaded scripts Perl coordinates the threads so that any
 thread may modify its copy of the C<$0> and the change becomes visible
