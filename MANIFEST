@@ -868,6 +868,7 @@ lib/ExtUtils/MM_VMS.pm		MakeMaker methods for VMS
 lib/ExtUtils/MM_Win32.pm	MakeMaker methods for Win32
 lib/ExtUtils/Packlist.pm	Manipulates .packlist files
 lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
+lib/ExtUtils/testlib.t		Fixes up @INC to use just-built extension
 lib/ExtUtils/typemap		Extension interface types
 lib/ExtUtils/xsubpp		External subroutine preprocessor
 lib/fastcwd.pl			a faster but more dangerous getcwd
