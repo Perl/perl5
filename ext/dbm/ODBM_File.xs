@@ -19,7 +19,9 @@ typedef void* ODBM_File;
 
 static int dbmrefcnt;
 
+#ifndef DBM_REPLACE
 #define DBM_REPLACE 0
+#endif
 
 MODULE = ODBM_File	PACKAGE = ODBM_File	PREFIX = odbm_
 

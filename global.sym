@@ -37,7 +37,7 @@ fold
 freq
 gid
 hexdigit
-in_format
+hints
 in_my
 know_next
 last_lop
@@ -54,7 +54,6 @@ multi_end
 multi_open
 multi_start
 na
-needblockscope
 nexttype
 nextval
 no_aelem
@@ -185,7 +184,6 @@ av_clear
 av_fake
 av_fetch
 av_fill
-av_free
 av_len
 av_make
 av_pop
@@ -232,7 +230,7 @@ convert
 cpy7bit
 cpytill
 croak
-cv_clear
+cv_undef
 cxinc
 deb
 deb_growlevel
@@ -302,11 +300,11 @@ gv_fullname
 gv_init
 he_delayfree
 he_free
+hint
 hoistmust
 hv_clear
 hv_delete
 hv_fetch
-hv_free
 hv_iterinit
 hv_iterkey
 hv_iternext
@@ -577,7 +575,6 @@ pp_hslice
 pp_index
 pp_indread
 pp_int
-pp_intadd
 pp_interp
 pp_ioctl
 pp_iter

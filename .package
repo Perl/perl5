@@ -1,6 +1,6 @@
 : basic variables
-package=perl
-baserev=4.1
+package=perl5
+baserev=5.0
 patchbranch=1
 mydiff='diff -c'
 maintname='Larry Wall'

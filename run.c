@@ -31,13 +31,6 @@ run() {
 #endif
 
 I32
-getgimme(op)
-OP *op;
-{
-    return cxstack[cxstack_ix].blk_gimme;
-}
-
-I32
 debop(op)
 OP *op;
 {

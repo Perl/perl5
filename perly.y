@@ -58,7 +58,7 @@
 
 %token <opval> WORD METHOD THING PMFUNC PRIVATEREF
 %token <pval> LABEL
-%token <ival> FORMAT SUB PACKAGE
+%token <ival> FORMAT SUB PACKAGE HINT
 %token <ival> WHILE UNTIL IF UNLESS ELSE ELSIF CONTINUE FOR
 %token <ival> LOOPEX DOTDOT
 %token <ival> FUNC0 FUNC1 FUNC
@@ -119,13 +119,13 @@ prog	:	/* NULL */
 	;
 
 block	:	'{' remember lineseq '}'
-			{   int nbs = needblockscope;
+			{   int needblockscope = hints & HINT_BLOCK_SCOPE;
 			    $$ = scalarseq($3);
 			    if (copline > (line_t)$1)
 				copline = $1;
 			    LEAVE_SCOPE($2);
-			    if (nbs)
-				needblockscope = TRUE;	/* propagate outward */
+			    if (needblockscope)
+				hints |= HINT_BLOCK_SCOPE; /* propagate out */
 			    pad_leavemy(comppad_name_fill); }
 	;
 
@@ -136,8 +136,8 @@ remember:	/* NULL */	/* in case they push a package name */
 			    SAVEINT(max_intro_pending);
 			    min_intro_pending = 0;
 			    SAVEINT(comppad_name_fill);
-			    SAVEINT(needblockscope);
-			    needblockscope = FALSE; }
+			    SAVEINT(hints);
+			    hints &= ~HINT_BLOCK_SCOPE; }
 	;
 
 lineseq	:	/* NULL */
@@ -147,7 +147,7 @@ lineseq	:	/* NULL */
 	|	lineseq line
 			{   $$ = append_list(OP_LINESEQ,
 				(LISTOP*)$1, (LISTOP*)$2); pad_reset();
-			    if ($1 && $2) needblockscope = TRUE; }
+			    if ($1 && $2) hints |= HINT_BLOCK_SCOPE; }
 	;
 
 line	:	label cond
@@ -187,7 +187,8 @@ else	:	/* NULL */
 			{ $$ = scope($2); }
 	|	ELSIF '(' expr ')' block else
 			{ copline = $1;
-			    $$ = newCONDOP(0, $3, scope($5), $6); }
+			    $$ = newSTATEOP(0, 0,
+				newCONDOP(0, $3, scope($5), $6)); }
 	;
 
 cond	:	IF '(' expr ')' block else
@@ -272,6 +273,8 @@ decl	:	format
 			{ $$ = 0; }
 	|	package
 			{ $$ = 0; }
+	|	hint
+			{ $$ = 0; }
 	;
 
 format	:	FORMAT WORD block
@@ -290,6 +293,12 @@ package :	PACKAGE WORD ';'
 			{ package($2); }
 	|	PACKAGE ';'
 			{ package(Nullop); }
+	;
+
+hint	:	HINT WORD ';'
+			{ hint($1, $2, Nullop); }
+	|	HINT WORD expr ';'
+			{ hint($1, $2, list(force_list($3))); }
 	;
 
 expr	:	expr ',' sexpr
@@ -524,7 +533,8 @@ term	:	'-' term %prec UMINUS
 				scalar(newCVREF(scalar($2))),
 				$4))); }
 	|	LOOPEX
-			{ $$ = newOP($1, OPf_SPECIAL); needblockscope = TRUE; }
+			{ $$ = newOP($1, OPf_SPECIAL);
+			    hints |= HINT_BLOCK_SCOPE; }
 	|	LOOPEX sexpr
 			{ $$ = newLOOPEX($1,$2); }
 	|	UNIOP

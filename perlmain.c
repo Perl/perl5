@@ -32,11 +32,7 @@ void
 perl_init_ext()
 {
     char *file = __FILE__;
+    /* Do not delete this line--writemain depends on it */
+	boot_DynamicLoader();
 
-#ifdef USE_DYNAMIC_LOADING
-    boot_DynamicLoader();
-#endif
-    newXSUB("POSIX::bootstrap", 0, boot_POSIX, file);
-    newXSUB("NDBM_File::bootstrap", 0, boot_NDBM_File, file);
-    newXSUB("ODBM_File::bootstrap", 0, boot_ODBM_File, file);
 }

@@ -262,14 +262,6 @@ register AV *av;
     AvMAX(av) = AvFILL(av) = -1;
 }
 
-void
-av_free(av)
-AV *av;
-{
-    av_undef(av);
-    Safefree(av);
-}
-
 bool
 av_push(av,val)
 register AV *av;

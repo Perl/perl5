@@ -40,7 +40,7 @@
 #define freq		perl_freq
 #define gid		perl_gid
 #define hexdigit	perl_hexdigit
-#define in_format	perl_in_format
+#define hints		perl_hints
 #define in_my		perl_in_my
 #define know_next	perl_know_next
 #define last_lop	perl_last_lop
@@ -57,7 +57,6 @@
 #define multi_open	perl_multi_open
 #define multi_start	perl_multi_start
 #define na		perl_na
-#define needblockscope	perl_needblockscope
 #define nexttype	perl_nexttype
 #define nextval		perl_nextval
 #define no_aelem	perl_no_aelem
@@ -185,7 +184,6 @@
 #define av_fake		perl_av_fake
 #define av_fetch	perl_av_fetch
 #define av_fill		perl_av_fill
-#define av_free		perl_av_free
 #define av_len		perl_av_len
 #define av_make		perl_av_make
 #define av_pop		perl_av_pop
@@ -232,7 +230,7 @@
 #define cpy7bit		perl_cpy7bit
 #define cpytill		perl_cpytill
 #define croak		perl_croak
-#define cv_clear	perl_cv_clear
+#define cv_undef	perl_cv_undef
 #define cxinc		perl_cxinc
 #define deb		perl_deb
 #define deb_growlevel	perl_deb_growlevel
@@ -302,11 +300,11 @@
 #define gv_init		perl_gv_init
 #define he_delayfree	perl_he_delayfree
 #define he_free		perl_he_free
+#define hint		perl_hint
 #define hoistmust	perl_hoistmust
 #define hv_clear	perl_hv_clear
 #define hv_delete	perl_hv_delete
 #define hv_fetch	perl_hv_fetch
-#define hv_free		perl_hv_free
 #define hv_iterinit	perl_hv_iterinit
 #define hv_iterkey	perl_hv_iterkey
 #define hv_iternext	perl_hv_iternext
@@ -577,7 +575,6 @@
 #define pp_index	perl_pp_index
 #define pp_indread	perl_pp_indread
 #define pp_int		perl_pp_int
-#define pp_intadd	perl_pp_intadd
 #define pp_interp	perl_pp_interp
 #define pp_ioctl	perl_pp_ioctl
 #define pp_iter		perl_pp_iter

@@ -2,7 +2,7 @@ package SDBM_File;
 
 require Exporter;
 @ISA = (Exporter, DynamicLoader);
-@EXPORT = split(' ', 'new fetch store delete firstkey nextkey error clearerr');
+@EXPORT = qw(new fetch store delete firstkey nextkey error clearerr);
 
 bootstrap SDBM_File;
 

@@ -71,7 +71,7 @@ char *name;
     GV *gv;
 
     sprintf(tmpbuf,"::_<%s", name);
-    gv = gv_fetchpv(tmpbuf, TRUE);
+    gv = gv_fetchpv(tmpbuf, TRUE, SVt_PVGV);
     sv_setpv(GvSV(gv), name);
     if (*name == '/')
 	SvMULTI_on(gv);
@@ -164,16 +164,17 @@ char* name;
     
     for (nend = name; *nend; nend++) {
 	if (*nend == ':' || *nend == '\'') {
-	    return gv_fetchpv(name, FALSE);
+	    return gv_fetchpv(name, FALSE, SVt_PVCV);
 	}
     }
     return gv_fetchmeth(stash, name, nend - name);
 }
 
 GV *
-gv_fetchpv(nambeg,add)
+gv_fetchpv(nambeg,add,svtype)
 char *nambeg;
 I32 add;
+I32 svtype;
 {
     register char *name = nambeg;
     register GV *gv = 0;
@@ -182,31 +183,35 @@ I32 add;
     register char *namend;
     HV *stash = 0;
     bool global = FALSE;
-    char tmpbuf[256];
+    char *tmpbuf;
 
     for (namend = name; *namend; namend++) {
 	if ((*namend == '\'' && namend[1]) ||
 	    (*namend == ':' && namend[1] == ':'))
 	{
-	    len = namend - name;
-	    *tmpbuf = '_';
-	    Copy(name, tmpbuf+1, len, char);
-	    len++;
-	    tmpbuf[len] = '\0';
 	    if (!stash)
 		stash = defstash;
 
-	    if (len > 1) {
+	    len = namend - name;
+	    if (len > 0) {
+		New(601, tmpbuf, len+2, char);
+		*tmpbuf = '_';
+		Copy(name, tmpbuf+1, len, char);
+		tmpbuf[++len] = '\0';
 		gvp = (GV**)hv_fetch(stash,tmpbuf,len,add);
+		Safefree(tmpbuf);
 		if (!gvp || *gvp == (GV*)&sv_undef)
 		    return Nullgv;
 		gv = *gvp;
+
 		if (SvTYPE(gv) == SVt_PVGV)
 		    SvMULTI_on(gv);
 		else
 		    gv_init(gv, stash, nambeg, namend - nambeg, (add & 2));
+
 		if (!(stash = GvHV(gv)))
 		    stash = GvHV(gv) = newHV();
+
 		if (!HvNAME(stash))
 		    HvNAME(stash) = nsavestr(nambeg, namend - nambeg);
 	    }
@@ -250,8 +255,10 @@ I32 add;
 		global = TRUE;
 	    if (global)
 		stash = defstash;
-	    else if ((COP*)curcop == &compiling)
-		stash = curstash;
+	    else if ((COP*)curcop == &compiling) {
+		if (!(hints & HINT_STRICT_VARS) || svtype == SVt_PVCV)
+		    stash = curstash;
+	    }
 	    else
 		stash = curcop->cop_stash;
 	}
@@ -291,6 +298,14 @@ I32 add;
 	    AV* av = GvAVn(gv);
 	    SvMULTI_on(gv);
 	    sv_magic((SV*)av, (SV*)gv, 'I', 0, 0);
+	    if (add & 2 && strEQ(nambeg,"Any_DBM_File::ISA") && AvFILL(av) == -1)
+	    {
+		av_push(av, newSVpv("NDBM_File",0));
+		av_push(av, newSVpv("DB_File",0));
+		av_push(av, newSVpv("GDBM_File",0));
+		av_push(av, newSVpv("SDBM_File",0));
+		av_push(av, newSVpv("ODBM_File",0));
+	    }
 	}
 	break;
     case 'S':
@@ -445,7 +460,7 @@ newIO()
     sv_upgrade(io,SVt_PVIO);
     SvREFCNT(io) = 1;
     SvOBJECT_on(io);
-    iogv = gv_fetchpv("FileHandle::", TRUE);
+    iogv = gv_fetchpv("FileHandle::", TRUE, SVt_PVIO);
     SvSTASH(io) = (HV*)SvREFCNT_inc(GvHV(iogv));
     return io;
 }
@@ -486,7 +501,7 @@ GV *
 newGVgen()
 {
     (void)sprintf(tokenbuf,"_GEN_%d",gensym++);
-    return gv_fetchpv(tokenbuf,TRUE);
+    return gv_fetchpv(tokenbuf,TRUE, SVt_PVGV);
 }
 
 /* hopefully this is only called on local symbol table entries */
@@ -553,36 +568,3 @@ register GV *gv;
 	return GvGP(gv_HVadd(gv))->gp_hv;
 }
 #endif			/* Microport 2.4 hack */
-
-GV *
-fetch_gv(op,num)
-OP *op;
-I32 num;
-{
-    if (op->op_private < num)
-	return 0;
-    if (op->op_flags & OPf_STACKED)
-        return gv_fetchpv(SvPVx(*(stack_sp--), na),TRUE);
-    else
-        return cGVOP->op_gv;
-}
-
-IO *
-fetch_io(op,num)
-OP *op;
-I32 num;
-{
-    GV *gv;
-
-    if (op->op_private < num)
-	return 0;
-    if (op->op_flags & OPf_STACKED)
-        gv = gv_fetchpv(SvPVx(*(stack_sp--), na),TRUE);
-    else
-        gv = cGVOP->op_gv;
-
-    if (!gv)
-	return 0;
-
-    return GvIOn(gv);
-}

@@ -22,14 +22,14 @@ sub hostname {
 	syscall(&SYS_gethostname, $host, 65) == 0;
     }
 
-    # method 3 - sysV uname command
-    || eval {
-	$host = `uname -n 2>/dev/null`; ## sysVish
-    }
-
-    # method 4 - trusty old hostname command
+    # method 3 - trusty old hostname command
     || eval {
 	$host = `hostname 2>/dev/null`; # bsdish
+    }
+
+    # method 4 - sysV uname command (may truncate)
+    || eval {
+	$host = `uname -n 2>/dev/null`; ## sysVish
     }
 
     # method 5 - Apollo pre-SR10

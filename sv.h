@@ -43,7 +43,7 @@ typedef enum {
 	SVt_PVCV,
 	SVt_PVGV,
 	SVt_PVFM,
-	SVt_PVIO,
+	SVt_PVIO
 } svtype;
 
 /* Using C's structural equivalence to help emulate C++ inheritance here... */
@@ -413,8 +413,6 @@ struct xpvio {
 	do { assert(SvTYPE(sv) >= SVt_PV); \
 		(((XPV*)  SvANY(sv))->xpv_cur = val - SvPVX(sv)); } while (0)
 
-#define SvCUROK(sv) (SvPOK(sv) ? SvCUR(sv) : 0)
-
 #define BmRARE(sv)	((XPVBM*)  SvANY(sv))->xbm_rare
 #define BmUSEFUL(sv)	((XPVBM*)  SvANY(sv))->xbm_useful
 #define BmPREVIOUS(sv)	((XPVBM*)  SvANY(sv))->xbm_previous
@@ -447,7 +445,7 @@ struct xpvio {
 
 #ifdef CRIPPLED_CC
 
-double SvIV();
+I32 SvIV();
 double SvNV();
 #define SvPV(sv, lp) sv_pvn(sv, &lp)
 char *sv_pvn();

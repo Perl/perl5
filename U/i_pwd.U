@@ -1,0 +1,134 @@
+?RCS: $Id: i_pwd.U,v 3.0 1993/08/18 12:08:25 ram Exp $
+?RCS:
+?RCS: Copyright (c) 1991-1993, Raphael Manfredi
+?RCS: 
+?RCS: You may redistribute only under the terms of the Artistic Licence,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic Licence; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?RCS: $Log: i_pwd.U,v $
+?RCS: Revision 3.0  1993/08/18  12:08:25  ram
+?RCS: Baseline for dist 3.0 netwide release.
+?RCS:
+?X:
+?X: This unit looks wether there is a pwd system or not
+?X:
+?MAKE:i_pwd d_pwquota d_pwage d_pwchange d_pwclass d_pwexpire d_pwcomment: \
+	test contains rm cppstdin cppflags cppminus Findhdr
+?MAKE:	-pick add $@ %<
+?S:i_pwd:
+?S:	This variable conditionally defines I_PWD, which indicates
+?S:	to the C program that it should include <pwd.h>.
+?S:.
+?S:d_pwquota:
+?S:	This varaible conditionally defines PWQUOTA, which indicates
+?S:	that struct passwd contains pw_quota.
+?S:.
+?S:d_pwage:
+?S:	This varaible conditionally defines PWAGE, which indicates
+?S:	that struct passwd contains pw_age.
+?S:.
+?S:d_pwchange:
+?S:	This varaible conditionally defines PWCHANGE, which indicates
+?S:	that struct passwd contains pw_change.
+?S:.
+?S:d_pwclass:
+?S:	This varaible conditionally defines PWCLASS, which indicates
+?S:	that struct passwd contains pw_class.
+?S:.
+?S:d_pwexpire:
+?S:	This varaible conditionally defines PWEXPIRE, which indicates
+?S:	that struct passwd contains pw_expire.
+?S:.
+?S:d_pwcomment:
+?S:	This varaible conditionally defines PWCOMMENT, which indicates
+?S:	that struct passwd contains pw_comment.
+?S:.
+?C:I_PWD:
+?C:	This symbol, if defined, indicates to the C program that it should
+?C:	include <pwd.h>.
+?C:.
+?C:PWQUOTA:
+?C:	This symbol, if defined, indicates to the C program that struct passwd
+?C:	contains pw_quota.
+?C:.
+?C:PWAGE:
+?C:	This symbol, if defined, indicates to the C program that struct passwd
+?C:	contains pw_age.
+?C:.
+?C:PWCHANGE:
+?C:	This symbol, if defined, indicates to the C program that struct passwd
+?C:	contains pw_change.
+?C:.
+?C:PWCLASS:
+?C:	This symbol, if defined, indicates to the C program that struct passwd
+?C:	contains pw_class.
+?C:.
+?C:PWEXPIRE:
+?C:	This symbol, if defined, indicates to the C program that struct passwd
+?C:	contains pw_expire.
+?C:.
+?C:PWCOMMENT:
+?C:	This symbol, if defined, indicates to the C program that struct passwd
+?C:	contains pw_comment.
+?C:.
+?H:#$i_pwd I_PWD		/**/
+?H:#$d_pwquota PWQUOTA	/**/
+?H:#$d_pwage PWAGE	/**/
+?H:#$d_pwchange PWCHANGE	/**/
+?H:#$d_pwclass PWCLASS	/**/
+?H:#$d_pwexpire PWEXPIRE	/**/
+?H:#$d_pwcomment PWCOMMENT	/**/
+?H:.
+?T:xxx
+: see if this is a pwd system
+echo " "
+xxx=`./findhdr pwd.h`
+if $test "$xxx"; then
+	i_pwd="$define"
+	echo "<pwd.h> found." >&4
+	$cppstdin $cppflags $cppminus < $xxx >$$.h
+	if $contains 'pw_quota' $$.h >/dev/null 2>&1; then
+		d_pwquota="$define"
+	else
+		d_pwquota="$undef"
+	fi
+	if $contains 'pw_age' $$.h >/dev/null 2>&1; then
+		d_pwage="$define"
+	else
+		d_pwage="$undef"
+	fi
+	if $contains 'pw_change' $$.h >/dev/null 2>&1; then
+		d_pwchange="$define"
+	else
+		d_pwchange="$undef"
+	fi
+	if $contains 'pw_class' $$.h >/dev/null 2>&1; then
+		d_pwclass="$define"
+	else
+		d_pwclass="$undef"
+	fi
+	if $contains 'pw_expire' $$.h >/dev/null 2>&1; then
+		d_pwexpire="$define"
+	else
+		d_pwexpire="$undef"
+	fi
+	if $contains 'pw_comment' $$.h >/dev/null 2>&1; then
+		d_pwcomment="$define"
+	else
+		d_pwcomment="$undef"
+	fi
+	$rm -f $$.h
+else
+	i_pwd="$undef"
+	d_pwquota="$undef"
+	d_pwage="$undef"
+	d_pwchange="$undef"
+	d_pwclass="$undef"
+	d_pwexpire="$undef"
+	d_pwcomment="$undef"
+	echo "<pwd.h> NOT found." >&4
+fi
+

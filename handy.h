@@ -26,6 +26,7 @@
  * 
  */
 
+#if !defined(__STDC__)
 #ifdef NULL
 #undef NULL
 #endif
@@ -34,6 +35,8 @@
 #else
 #  define NULL 0L
 #endif
+#endif
+
 #define Null(type) ((type)NULL)
 #define Nullch Null(char*)
 #define Nullfp Null(FILE*)
@@ -54,6 +57,16 @@
 #define TRUE (1)
 #define FALSE (0)
 
+#ifdef UNICOS
+#define I8	char
+#define U8	unsigned char
+#define I16	short
+#define U16	unsigned short
+#define I32	int
+#define U32	unsigned int
+
+#else
+
 typedef char		I8;
 typedef unsigned char	U8;
 
@@ -61,12 +74,14 @@ typedef short		I16;
 typedef unsigned short	U16;
 
 #if INTSIZE == 4
-typedef int		I32;
-typedef unsigned int	U32;
+  typedef int		I32;
+  typedef unsigned int	U32;
 #else
-typedef long		I32;
-typedef unsigned long	U32;
+  typedef long		I32;
+  typedef unsigned long	U32;
 #endif
+
+#endif /* UNICOS */
 
 #define Ctl(ch) (ch & 037)
 
@@ -86,13 +101,13 @@ typedef unsigned long	U32;
 #endif
 
 #if defined(CTYPE256) || (!defined(isascii) && !defined(HAS_ISASCII))
-#define isALNUM(c)   (isalpha(c) || isdigit(c) || c == '_')
-#define isIDFIRST(c) (isalpha(c) || (c) == '_')
-#define isALPHA(c)   isalpha(c)
-#define isSPACE(c)   isspace(c)
-#define isDIGIT(c)   isdigit(c)
-#define isUPPER(c)   isupper(c)
-#define isLOWER(c)   islower(c)
+#define isALNUM(c)   (isalpha((unsigned char)(c)) || isdigit((unsigned char)(c)) || c == '_')
+#define isIDFIRST(c) (isalpha((unsigned char)(c)) || (c) == '_')
+#define isALPHA(c)   isalpha((unsigned char)(c))
+#define isSPACE(c)   isspace((unsigned char)(c))
+#define isDIGIT(c)   isdigit((unsigned char)(c))
+#define isUPPER(c)   isupper((unsigned char)(c))
+#define isLOWER(c)   islower((unsigned char)(c))
 #else
 #define isALNUM(c)   (isascii(c) && (isalpha(c) || isdigit(c) || c == '_'))
 #define isIDFIRST(c) (isascii(c) && (isalpha(c) || (c) == '_'))

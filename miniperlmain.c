@@ -32,8 +32,5 @@ void
 perl_init_ext()
 {
     char *file = __FILE__;
-
-#ifdef USE_DYNAMIC_LOADING
-    boot_DynamicLoader();
-#endif
+    /* Do not delete this line--writemain depends on it */
 }

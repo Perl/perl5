@@ -85,23 +85,26 @@ SV* sv;
     MAGIC* mg;
     char *s;
     STRLEN len;
-    U32 savemagic = SvMAGICAL(sv);
-
-    SvMAGICAL_off(sv);
-    SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
 
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	MGVTBL* vtbl = mg->mg_virtual;
-	if (vtbl && vtbl->svt_len)
-	    return (*vtbl->svt_len)(sv, mg);
+	if (vtbl && vtbl->svt_len) {
+	    U32 savemagic = SvMAGICAL(sv);
+
+	    SvMAGICAL_off(sv);
+	    SvFLAGS(sv) |= (SvFLAGS(sv)&(SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
+
+	    len = (*vtbl->svt_len)(sv, mg);
+
+	    SvFLAGS(sv) |= savemagic;
+	    if (SvGMAGICAL(sv))
+		SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+
+	    return len;
+	}
     }
-    mg_get(sv);
+
     s = SvPV(sv, len);
-
-    SvFLAGS(sv) |= savemagic;
-    if (SvGMAGICAL(sv))
-	SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
-
     return len;
 }
 
@@ -176,7 +179,7 @@ SV* sv;
 	    (*vtbl->svt_free)(sv, mg);
 	if (mg->mg_ptr && mg->mg_type != 'g')
 	    Safefree(mg->mg_ptr);
-	if (mg->mg_obj != sv)
+	if (mg->mg_flags & MGf_REFCOUNTED)
 	    SvREFCNT_dec(mg->mg_obj);
 	Safefree(mg);
     }
@@ -456,7 +459,7 @@ SV* sv;
 MAGIC* mg;
 {
     register char *s;
-    I32 i;
+    U32 i;
     s = SvPV(sv,na);
     my_setenv(mg->mg_ptr,s);
 			    /* And you'll never guess what the dog had */
@@ -474,6 +477,15 @@ MAGIC* mg;
 	    }
 	}
     }
+    return 0;
+}
+
+int
+magic_clearenv(sv,mg)
+SV* sv;
+MAGIC* mg;
+{
+    my_setenv(mg->mg_ptr,Nullch);
     return 0;
 }
 
@@ -759,7 +771,7 @@ MAGIC* mg;
     s = SvPV(sv, na);
     if (*s == '*' && s[1])
 	s++;
-    gv = gv_fetchpv(s,TRUE);
+    gv = gv_fetchpv(s,TRUE, SVt_PVGV);
     if (sv == (SV*)gv)
 	return 0;
     if (GvGP(sv))
@@ -880,7 +892,7 @@ MAGIC* mg;
 	perldb = i;
 	break;
     case '\024':	/* ^T */
-	basetime = (time_t)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+	basetime = (Time_t)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	break;
     case '\027':	/* ^W */
 	dowarn = (bool)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
@@ -894,12 +906,12 @@ MAGIC* mg;
     case '^':
 	Safefree(IoTOP_NAME(GvIO(defoutgv)));
 	IoTOP_NAME(GvIO(defoutgv)) = s = savestr(SvPV(sv,na));
-	IoTOP_GV(GvIO(defoutgv)) = gv_fetchpv(s,TRUE);
+	IoTOP_GV(GvIO(defoutgv)) = gv_fetchpv(s,TRUE, SVt_PVIO);
 	break;
     case '~':
 	Safefree(IoFMT_NAME(GvIO(defoutgv)));
 	IoFMT_NAME(GvIO(defoutgv)) = s = savestr(SvPV(sv,na));
-	IoFMT_GV(GvIO(defoutgv)) = gv_fetchpv(s,TRUE);
+	IoFMT_GV(GvIO(defoutgv)) = gv_fetchpv(s,TRUE, SVt_PVIO);
 	break;
     case '=':
 	IoPAGE_LEN(GvIO(defoutgv)) = (long)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
@@ -970,15 +982,18 @@ MAGIC* mg;
 	    break;				/* don't do magic till later */
 	}
 #ifdef HAS_SETRUID
-	(void)setruid((UIDTYPE)uid);
+	(void)setruid((Uid_t)uid);
 #else
 #ifdef HAS_SETREUID
-	(void)setreuid((UIDTYPE)uid, (UIDTYPE)-1);
+	(void)setreuid((Uid_t)uid, (Uid_t)-1);
+#ifdef HAS_SETRESUID
+      (void)setresuid((Uid_t)uid, (Uid_t)-1, (Uid_t)-1);
 #else
 	if (uid == euid)		/* special case $< = $> */
 	    (void)setuid(uid);
 	else
 	    croak("setruid() not implemented");
+#endif
 #endif
 #endif
 	uid = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
@@ -991,15 +1006,19 @@ MAGIC* mg;
 	    break;				/* don't do magic till later */
 	}
 #ifdef HAS_SETEUID
-	(void)seteuid((UIDTYPE)euid);
+	(void)seteuid((Uid_t)euid);
 #else
 #ifdef HAS_SETREUID
-	(void)setreuid((UIDTYPE)-1, (UIDTYPE)euid);
+	(void)setreuid((Uid_t)-1, (Uid_t)euid);
+#else
+#ifdef HAS_SETRESUID
+	(void)setresuid((Uid_t)-1, (Uid_t)euid, (Uid_t)-1);
 #else
 	if (euid == uid)		/* special case $> = $< */
 	    setuid(euid);
 	else
 	    croak("seteuid() not implemented");
+#endif
 #endif
 #endif
 	euid = (I32)geteuid();
@@ -1012,15 +1031,19 @@ MAGIC* mg;
 	    break;				/* don't do magic till later */
 	}
 #ifdef HAS_SETRGID
-	(void)setrgid((GIDTYPE)gid);
+	(void)setrgid((Gid_t)gid);
 #else
 #ifdef HAS_SETREGID
-	(void)setregid((GIDTYPE)gid, (GIDTYPE)-1);
+	(void)setregid((Gid_t)gid, (Gid_t)-1);
+#else
+#ifdef HAS_SETRESGID
+      (void)setresgid((Gid_t)gid, (Gid_t)-1, (Gid_t) 1);
 #else
 	if (gid == egid)			/* special case $( = $) */
 	    (void)setgid(gid);
 	else
 	    croak("setrgid() not implemented");
+#endif
 #endif
 #endif
 	gid = (I32)getgid();
@@ -1033,15 +1056,19 @@ MAGIC* mg;
 	    break;				/* don't do magic till later */
 	}
 #ifdef HAS_SETEGID
-	(void)setegid((GIDTYPE)egid);
+	(void)setegid((Gid_t)egid);
 #else
 #ifdef HAS_SETREGID
-	(void)setregid((GIDTYPE)-1, (GIDTYPE)egid);
+	(void)setregid((Gid_t)-1, (Gid_t)egid);
+#else
+#ifdef HAS_SETRESGID
+	(void)setresgid((Gid_t)-1, (Gid_t)egid, (Gid_t)-1);
 #else
 	if (egid == gid)			/* special case $) = $( */
 	    (void)setgid(egid);
 	else
 	    croak("setegid() not implemented");
+#endif
 #endif
 #endif
 	egid = (I32)getegid();
@@ -1131,15 +1158,15 @@ I32 sig;
 
     gv = gv_fetchpv(
 	SvPVx(*hv_fetch(GvHVn(siggv),sig_name[sig],strlen(sig_name[sig]),
-	  TRUE), na), TRUE);
+	  TRUE), na), TRUE, SVt_PVCV);
     cv = GvCV(gv);
     if (!cv && *sig_name[sig] == 'C' && instr(sig_name[sig],"LD")) {
 	if (sig_name[sig][1] == 'H')
 	    gv = gv_fetchpv(SvPVx(*hv_fetch(GvHVn(siggv),"CLD",3,TRUE), na),
-	      TRUE);
+	      TRUE, SVt_PVCV);
 	else
 	    gv = gv_fetchpv(SvPVx(*hv_fetch(GvHVn(siggv),"CHLD",4,TRUE), na),
-	      TRUE);
+	      TRUE, SVt_PVCV);
 	cv = GvCV(gv);	/* gag */
     }
     if (!cv) {

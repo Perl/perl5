@@ -1,0 +1,34 @@
+?RCS: $Id: i_vfork.U,v 3.0 1993/08/18 12:08:50 ram Exp $
+?RCS:
+?RCS: Copyright (c) 1991-1993, Raphael Manfredi
+?RCS: 
+?RCS: You may redistribute only under the terms of the Artistic Licence,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic Licence; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?RCS: $Log: i_vfork.U,v $
+?RCS: Revision 3.0  1993/08/18  12:08:50  ram
+?RCS: Baseline for dist 3.0 netwide release.
+?RCS:
+?MAKE:i_vfork: Inhdr d_vfork
+?MAKE:	-pick add $@ %<
+?S:i_vfork:
+?S:	This variable conditionally defines the I_VFORK symbol, and indicates
+?S:	whether a C program should include vfork.h.
+?S:.
+?C:I_VFORK:
+?C:	This symbol, if defined, indicates to the C program that it should
+?C:	include vfork.h.
+?C:.
+?H:#$i_vfork I_VFORK	/**/
+?H:.
+?LINT:set i_vfork
+: see if this is a vfork system
+case "$d_vfork" in
+define) set vfork.h i_vfork
+	eval $inhdr
+	;;
+*)      i_vfork="$undef";;
+esac

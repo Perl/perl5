@@ -1,0 +1,6 @@
+{
+    local(%ENV);
+    $ENV{OOPS} = OOPS;
+    system 'echo NOT $OOPS';
+}
+system 'echo $OOPS';

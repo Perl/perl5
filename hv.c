@@ -339,21 +339,14 @@ HV *hv;
     xhv = (XPVHV*)SvANY(hv);
     hfreeentries(hv);
     Safefree(xhv->xhv_array);
+    if (HvNAME(hv)) {
+	Safefree(HvNAME(hv));
+	HvNAME(hv) = 0;
+    }
     xhv->xhv_array = 0;
     xhv->xhv_max = 7;		/* it's a normal associative array */
     xhv->xhv_fill = 0;
     (void)hv_iterinit(hv);	/* so each() will start off right */
-}
-
-void
-hv_free(hv)
-register HV *hv;
-{
-    if (!hv)
-	return;
-    hfreeentries(hv);
-    Safefree(HvARRAY(hv));
-    Safefree(hv);
 }
 
 I32

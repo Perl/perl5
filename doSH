@@ -1,48 +1,12 @@
-#!/bin/sh
-
-: if this fails, just run all the .SH files by hand
-. ./config.sh
-
-(
-    cd x2p
-    rm -f config.sh
-    case "$d_symlink" in
-    *define*) ln -s ../config.sh . || ln ../config.sh .;;
-    *) ln ../config.sh . || ln -s ../config.sh .
-    esac
-)
-
-cp cppstdin x2p
-
-echo " "
-echo "Doing variable substitutions on .SH files..."
-set x `awk '{print $1}' <MANIFEST | grep '\.SH'`
-shift
-case $# in
-0) set x *.SH; shift;;
-esac
-if test ! -f $1; then
-    shift
+:  doSH is obsolete.  Just use Configure -S
+:  
+if test -f Configure ; then TOP=.;
+elif test -f ../Configure ; then TOP=..;
+elif test -f ../../Configure ; then TOP=../..;
+elif test -f ../../../Configure ; then TOP=../../..;
+elif test -f ../../../../Configure ; then TOP=../../../..;
+else
+	echo "Can't find Configure" ; exit 1
 fi
-for file in $*; do
-    set X
-    shift
-    chmod +x $file
-    case "$file" in
-    */*)
-	dir=`expr X$file : 'X\(.*\)/'`
-	file=`expr X$file : 'X.*/\(.*\)'`
-	(cd $dir && . ./$file)
-	;;
-    *)
-	. ./$file
-	;;
-    esac
-done
-if test -f config.h.SH; then
-    if test ! -f config.h; then
-	: oops, they left it out of MANIFEST, probably, so do it anyway.
-	. ./config.h.SH
-    fi
-fi
-exit 0
+
+sh $TOP/Configure -S

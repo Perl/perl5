@@ -11,13 +11,10 @@
 static char rcsid[] = "$Id: pair.c,v 1.10 90/12/13 13:00:35 oz Exp $";
 #endif
 
+#include "config.h"
 #include "sdbm.h"
 #include "tune.h"
 #include "pair.h"
-
-#ifndef BSD42
-#include <memory.h>
-#endif
 
 #define exhash(item)	sdbm_hash((item).dptr, (item).dsize)
 
@@ -195,7 +192,7 @@ datum key;
 			}
 		}
 #else
-#ifdef MEMMOVE
+#ifdef HAS_MEMMOVE
 		memmove(dst, src, m);
 #else
 		while (m--)

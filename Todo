@@ -11,9 +11,8 @@ Tie Modules
 Bugs
 	Make yyparse recursion longjmp() proof.
 	Make "delete $array{$key} while ($key) = each %array" safe
-	Wrong line reported for runtime elsif condition error
-	TOOSTRICT is not too strict
-	recv and sysread should taint
+	<$handle> doesn't work intuitively if $handle is ARGV
+	Anything in the Bugs directory
 
 Regexp extensions
 	/m  for multiline
@@ -27,6 +26,7 @@ Regexp extensions
 Would be nice to have
 	Profiler
 	pack "(stuff)*"
+	Contiguous bitfields in pack/unpack
 	lexperl
 	Bundled perl preprocessor
 	Make $[ compile-time instead of run-time
@@ -42,11 +42,12 @@ Would be nice to have
 	Multiple levels of warning
 	.= shouldn't complain about undefined under -w
 	report HANDLE [formats].
+	tie(FILEHANDLE, ...)
+	__DATA__
 
-Pragmas ("assume" maybe?)
-	integer, float
-	nodebug, debug
-	autocroak?
+Possible averments
+	debugger
+	optimize
 
 Optimizations
 	Optimize switch statements
@@ -80,3 +81,4 @@ Vague possibilities
 	compile to real threaded code
 	structured types
 	paren counting in tokener to queue remote expectations
+	autocroak?

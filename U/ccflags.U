@@ -1,12 +1,3 @@
-?X:  These units are based on the ones supplied with dist-3.0
-?X:  patchlevel 22.  They have been changed or enhanced to work with
-?X:  perl5alpha.  I would appreciate hearing about any changes,
-?X:  corrections, or enhancements.
-?X:	Andy Dougherty			doughera@lafcol.lafayette.edu
-?X:	Dept. of Physics 		
-?X:	Lafayette College	
-?X:	Easton, PA  18042-1782
-?X:     Sat Apr  2 15:45:17 EST 1994
 ?RCS: $Id: ccflags.U,v 3.0.1.3 1993/09/13 15:58:29 ram Exp $
 ?RCS:
 ?RCS: Copyright (c) 1991-1993, Raphael Manfredi
@@ -83,12 +74,12 @@ case "$optimize" in
 'none') optimize=" ";;
 esac
 
+dflt=''
 case "$ccflags" in
 '')	case "$cc" in
 	*gcc*) if $test "$gccversion" = "1"; then
 			dflt='-fpcc-struct-return'
 		   fi ;;
-	*) dflt='';;
 	esac
 	case "$optimize" in
 	*-g*) dflt="$dflt -DDEBUGGING";;
@@ -103,7 +94,6 @@ case "$ccflags" in
 		;;
 	esac
 	;;
-*) dflt="$ccflags" ;;
 esac
 
 ?X: In USG mode, a MIPS system may need some BSD includes
@@ -153,6 +143,10 @@ set signal.h _NO_PROTO; eval $inctest
 case "$dflt" in
 '') dflt=none;;
 esac
+case "$ccflags" in
+'') ;;
+*) dflt="$ccflags";;
+esac
 $cat <<EOH
 
 Your C compiler may want other flags.  For this question you should include
@@ -161,8 +155,8 @@ but you should NOT include libraries or ld flags like -lwhatever.  If you
 want $package to honor its debug switch, you should include -DDEBUGGING here.
 To use no flags, specify the word "none".
 
-Your C compiler might also need additional flags, such as -DJMPCLOBBER
-or -DCRIPPLED_CC.
+Your C compiler might also need additional flags, such as -DJMPCLOBBER,
+-DHIDEMYMALLOC or -DCRIPPLED_CC.
 EOH
 ?X: strip leading space
 set X $dflt
@@ -178,9 +172,10 @@ esac
 : the following weeds options from ccflags that are of no interest to cpp
 cppflags="$ccflags"
 case "$cc" in
-*gcc*) if $test "$gccversion" = "1"; then
-		cppflags="$cppflags -D__GNUC__"
-	    fi ;;
+*gcc*)  case "$gccversion" in
+	1) cppflags="$cppflags -D__GNUC__" ;;
+	esac
+	;;
 esac
 case "$mips_type" in
 '');;
@@ -193,7 +188,7 @@ case "$cppflags" in
 	for flag
 	do
 		case $flag in
-		-D*|-I*|-traditional|-ansi|-nostdinc) cppflags="$cppflags $flag";;
+		-D*|-I*|-traditional|-ansi|-nostdinc|-posix|-Xp) cppflags="$cppflags $flag";;
 		esac
 	done
 	case "$cppflags" in

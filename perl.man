@@ -5011,7 +5011,6 @@ out.
 You'll just have to suffer along with these silly symbols.
 Most of them have reasonable mnemonics, or analogues in one of the shells.
 .Ip $_ 8
-''' UNDER
 The default input and pattern-searching space.
 The following pairs are equivalent:
 .nf
@@ -5035,7 +5034,6 @@ The following pairs are equivalent:
 .fi 
 (Mnemonic: underline is understood in certain operations.)
 .Ip $. 8
-''' INPUT_LINE
 The current input line number of the last filehandle that was read.
 Readonly.
 Remember that only an explicit close on the filehandle resets the line number.
@@ -5043,7 +5041,6 @@ Since <> never does an explicit close, line numbers increase across ARGV files
 (but see examples under eof).
 (Mnemonic: many programs use . to mean the current line number.)
 .Ip $/ 8
-''' RS or INPUT_RECORD_SEPARATOR
 The input record separator, newline by default.
 Works like
 .IR awk 's
@@ -5059,7 +5056,6 @@ Setting it to "\en\en" will blindly assume that the next input character
 belongs to the next paragraph, even if it's a newline.
 (Mnemonic: / is used to delimit line boundaries when quoting poetry.)
 .Ip $, 8
-''' OFS or OUTPUT_FIELD_SEPARATOR
 The output field separator for the print operator.
 Ordinarily the print operator simply prints out the comma separated fields
 you specify.
@@ -5070,13 +5066,11 @@ set this variable as you would set
 OFS variable to specify what is printed between fields.
 (Mnemonic: what is printed when there is a , in your print statement.)
 .Ip $"" 8
-''' LIST_SEPARATOR
 This is like $, except that it applies to array values interpolated into
 a double-quoted string (or similar interpreted string).
 Default is a space.
 (Mnemonic: obvious, I think.)
 .Ip $\e 8
-''' ORS or OUTPUT_RECORD_SEPARATOR
 The output record separator for the print operator.
 Ordinarily the print operator simply prints out the comma separated fields
 you specify, with no trailing newline or record separator assumed.
@@ -5089,7 +5083,6 @@ ORS variable to specify what is printed at the end of the print.
 Also, it's just like /, but it's what you get \*(L"back\*(R" from
 .IR perl .)
 .Ip $# 8
-''' OFMT or OUTPUT_FORMAT
 The output format for printed numbers.
 This variable is a half-hearted attempt to emulate
 .IR awk 's
@@ -5106,33 +5099,27 @@ explicitly to get
 value.
 (Mnemonic: # is the number sign.)
 .Ip $% 8
-''' PAGE
 The current page number of the currently selected output channel.
 (Mnemonic: % is page number in nroff.)
 .Ip $= 8
-''' PRINTABLE_LINES
 The current page length (printable lines) of the currently selected output
 channel.
 Default is 60.
 (Mnemonic: = has horizontal lines.)
 .Ip $\- 8
-''' LINES_REMAINING
 The number of lines left on the page of the currently selected output channel.
 (Mnemonic: lines_on_page \- lines_printed.)
 .Ip $~ 8
-''' FORMAT_NAME
 The name of the current report format for the currently selected output
 channel.
 Default is name of the filehandle.
 (Mnemonic: brother to $^.)
 .Ip $^ 8
-''' TOP_FORMAT_NAME
 The name of the current top-of-page format for the currently selected output
 channel.
 Default is name of the filehandle with \*(L"_TOP\*(R" appended.
 (Mnemonic: points to top of page.)
 .Ip $| 8
-''' AUTOFLUSH
 If set to nonzero, forces a flush after every write or print on the currently
 selected output channel.
 Default is 0.
@@ -5147,13 +5134,11 @@ script under rsh and want to see the
 output as it's happening.
 (Mnemonic: when you want your pipes to be piping hot.)
 .Ip $$ 8
-''' PID
 The process number of the
 .I perl
 running this script.
 (Mnemonic: same as shells.)
 .Ip $? 8
-''' STATUS
 The status returned by the last pipe close, backtick (\`\`) command or
 .I system
 operator.
@@ -5163,19 +5148,16 @@ $? & 255 gives which signal, if any, the process died from, and whether
 there was a core dump.
 (Mnemonic: similar to sh and ksh.)
 .Ip $& 8 4
-''' MATCH
 The string matched by the last successful pattern match
 (not counting any matches hidden
 within a BLOCK or eval enclosed by the current BLOCK).
 (Mnemonic: like & in some editors.)
 .Ip $\` 8 4
-''' LEFT
 The string preceding whatever was matched by the last successful pattern match
 (not counting any matches hidden within a BLOCK or eval enclosed by the current
 BLOCK).
 (Mnemonic: \` often precedes a quoted string.)
 .Ip $\' 8 4
-''' RIGHT
 The string following whatever was matched by the last successful pattern match
 (not counting any matches hidden within a BLOCK or eval enclosed by the current
 BLOCK).
@@ -5190,7 +5172,6 @@ Example:
 
 .fi
 .Ip $+ 8 4
-''' LAST_PAREN_MATCH
 The last bracket matched by the last search pattern.
 This is useful if you don't know which of a set of alternative patterns
 matched.
@@ -5202,7 +5183,6 @@ For example:
 .fi
 (Mnemonic: be positive and forward looking.)
 .Ip $* 8 2
-''' MULTILINE_MATCHING
 Set to 1 to do multiline matching within a string, 0 to tell
 .I perl
 that it can assume that strings contain a single line, for the purpose
@@ -5214,7 +5194,6 @@ Default is 0.
 Note that this variable only influences the interpretation of ^ and $.
 A literal newline can be searched for even when $* == 0.
 .Ip $0 8
-''' PROGRAM_NAME
 Contains the name of the file containing the
 .I perl
 script being executed.
@@ -5226,7 +5205,6 @@ pattern matched, not counting patterns matched in nested blocks that have
 been exited already.
 (Mnemonic: like \edigit.)
 .Ip $[ 8 2
-''' ARRAY_BASE
 The index of the first element in an array, and of the first character in
 a substring.
 Default is 0, but you could set it to 1 to make
@@ -5237,7 +5215,6 @@ behave more like
 when subscripting and when evaluating the index() and substr() functions.
 (Mnemonic: [ begins subscripts.)
 .Ip $] 8 2
-''' PERL_VERSION
 The string printed out when you say \*(L"perl -v\*(R".
 It can be used to determine at the beginning of a script whether the perl
 interpreter executing the script is in the right range of versions.
@@ -5259,7 +5236,6 @@ or, used numerically,
 .fi
 (Mnemonic: Is this version of perl in the right bracket?)
 .Ip $; 8 2
-''' SUBSEP or SUBSCRIPT_SEPARATOR
 The subscript separator for multi-dimensional array emulation.
 If you refer to an associative array element as
 .nf
@@ -5286,7 +5262,6 @@ value for $;.
 Yeah, I know, it's pretty lame, but $, is already taken for something more
 important.)
 .Ip $! 8 2
-''' ERRNO
 If used in a numeric context, yields the current value of errno, with all the
 usual caveats.
 (This means that you shouldn't depend on the value of $! to be anything
@@ -5298,17 +5273,14 @@ if, for instance, you want $! to return the string for error n, or you want
 to set the exit value for the die operator.
 (Mnemonic: What just went bang?)
 .Ip $@ 8 2
-''' EVAL_ERROR
 The perl syntax error message from the last eval command.
 If null, the last eval parsed and executed correctly (although the operations
 you invoked may have failed in the normal fashion).
 (Mnemonic: Where was the syntax error \*(L"at\*(R"?)
 .Ip $< 8 2
-''' UID or REAL_USER_ID
 The real uid of this process.
 (Mnemonic: it's the uid you came FROM, if you're running setuid.)
 .Ip $> 8 2
-''' EUID or EFFECTIVE_USER_ID
 The effective uid of this process.
 Example:
 .nf
@@ -5321,7 +5293,6 @@ Example:
 (Mnemonic: it's the uid you went TO, if you're running setuid.)
 Note: $< and $> can only be swapped on machines supporting setreuid().
 .Ip $( 8 2
-''' GID or REAL_GROUP_ID
 The real gid of this process.
 If you are on a machine that supports membership in multiple groups
 simultaneously, gives a space separated list of groups you are in.
@@ -5330,7 +5301,6 @@ by getgroups(), one of which may be the same as the first number.
 (Mnemonic: parentheses are used to GROUP things.
 The real gid is the group you LEFT, if you're running setgid.)
 .Ip $) 8 2
-''' EGID or EFFECTIVE_GROUP_ID
 The effective gid of this process.
 If you are on a machine that supports membership in multiple groups
 simultaneously, gives a space separated list of groups you are in.
@@ -5343,40 +5313,35 @@ Note: $<, $>, $( and $) can only be set on machines that support the
 corresponding set[re][ug]id() routine.
 $( and $) can only be swapped on machines supporting setregid().
 .Ip $: 8 2
-''' LINE_BREAK_CHARACTERS
 The current set of characters after which a string may be broken to
 fill continuation fields (starting with ^) in a format.
 Default is "\ \en-", to break on whitespace or hyphens.
 (Mnemonic: a \*(L"colon\*(R" in poetry is a part of a line.)
+.Ip $^A 8 2
+The current value of the write accumulator for format lines.
 .Ip $^D 8 2
-''' DEBUGGING
 The current value of the debugging flags.
 (Mnemonic: value of
 .B \-D
 switch.)
 .Ip $^F 8 2
-''' SYSTEM_FD_MAX
 The maximum system file descriptor, ordinarily 2.  System file descriptors
 are passed to subprocesses, while higher file descriptors are not.
 During an open, system file descriptors are preserved even if the open
 fails.  Ordinary file descriptors are closed before the open is attempted.
 .Ip $^I 8 2
-''' INPLACE_EDIT
 The current value of the inplace-edit extension.
 Use undef to disable inplace editing.
 (Mnemonic: value of
 .B \-i
 switch.)
 .Ip $^L 8 2
-''' FORMFEED
 What formats output to perform a formfeed.  Default is \ef.
 .Ip $^P 8 2
-''' PERLDB
 The internal flag that the debugger clears so that it doesn't
 debug itself.  You could conceivable disable debugging yourself
 by clearing it.
 .Ip $^T 8 2
-''' BASETIME
 The time at which the script began running, in seconds since the epoch.
 The values returned by the
 .B \-M ,
@@ -5385,13 +5350,11 @@ and
 .B \-C
 filetests are based on this value.
 .Ip $^W 8 2
-''' WARNING
 The current value of the warning switch.
 (Mnemonic: related to the
 .B \-w
 switch.)
 .Ip $^X 8 2
-''' EXECUTABLE_NAME
 The name that Perl itself was executed as, from argv[0].
 .Ip $ARGV 8 3
 contains the name of the current file when reading from <>.

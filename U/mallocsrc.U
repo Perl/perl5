@@ -1,12 +1,3 @@
-?X:  These units are based on the ones supplied with dist-3.0
-?X:  patchlevel 22.  They have been changed or enhanced to work with
-?X:  perl5alpha.  I would appreciate hearing about any changes,
-?X:  corrections, or enhancements.
-?X:	Andy Dougherty			doughera@lafcol.lafayette.edu
-?X:	Dept. of Physics 		
-?X:	Lafayette College	
-?X:	Easton, PA  18042-1782
-?X:     Sat Apr  2 15:45:17 EST 1994
 ?RCS: $Id: mallocsrc.U,v 3.0 1993/08/18 12:09:12 ram Exp $
 ?RCS:
 ?RCS: Copyright (c) 1991-1993, Raphael Manfredi
@@ -21,8 +12,8 @@
 ?RCS: Revision 3.0  1993/08/18  12:09:12  ram
 ?RCS: Baseline for dist 3.0 netwide release.
 ?RCS:
-?MAKE:mallocsrc mallocobj usemymalloc malloctype: Myread Oldconfig package \
-	Guess test rm cat +cc +ccflags Findhdr
+?MAKE:mallocsrc mallocobj usemymalloc malloctype d_mymalloc: Myread Oldconfig package \
+	Guess Setvar test rm cat +cc +ccflags Findhdr
 ?MAKE:	-pick add $@ %<
 ?S:usemymalloc:
 ?S:	This variable contains y if the malloc that comes with this package
@@ -35,6 +26,11 @@
 ?S:	the package, if that malloc.c is preferred over the system malloc.
 ?S:	Otherwise the value is null.  This variable is intended for generating
 ?S:	Makefiles.
+?S:.
+?S:d_mymalloc:
+?S:	This variable conditionally defines MYMALLOC in case other parts
+?S:	of the source want to take special action if MYMALLOC is used.
+?S:	This may include different sorts of profiling or error detection.
 ?S:.
 ?S:mallocobj:
 ?S:	This variable contains the name of the malloc.o that this package
@@ -49,6 +45,11 @@
 ?C:	This symbol is the type of pointer returned by malloc and realloc.
 ?C:.
 ?H:#define Malloc_t $malloctype			/**/
+?H:.
+?C:MYMALLOC:
+?C:	This symbol, if defined, indicates that we're using our own malloc.
+?C:.
+?H:#$d_mymalloc MYMALLOC			/**/
 ?H:.
 ?X: Cannot test for mallocsrc; it is the unit's name and there is a bug in
 ?X: the interpreter which defines all the names, even though they are not used.
@@ -71,11 +72,17 @@ rp="Do you wish to attempt to use the malloc that comes with $package?"
 . ./myread
 usemymalloc="$ans"
 case "$ans" in
-y*) mallocsrc='malloc.c'; mallocobj='malloc.o';;
-*) mallocsrc=''; mallocobj='';;
+y*) mallocsrc='malloc.c'
+    mallocobj='malloc.o'
+    d_mymalloc="$define"
+    ;;
+*) mallocsrc=''
+   mallocobj=''
+   d_mymalloc="$undef"
+   ;;
 esac
-
 @end
+
 @if MALLOCPTRTYPE || Malloc_t
 : compute the type returned by malloc
 echo " "

@@ -1,44 +1,24 @@
 #!/bin/sh
+: This script takes the plain miniperlmain.c and writes out perlmain.c
+: which includes all the extensions.
+: The command line arguments name extensions to be used.
+:  E.g.:  sh writemain SDBM_File POSIX > perlmain.c
+:
+args="$*"
+if test X"$args" = "X" ; then
+    cat miniperlmain.c
+else
+    sed '/Do not delete this line--writemain depends on it/q' miniperlmain.c
+    cat << 'EOP'
 
-cat <<'EOF'
-#include "INTERN.h"
-#include "perl.h"
-
-main(argc, argv, env)
-int argc;
-char **argv;
-char **env;
-{
-    int exitstatus;
-    PerlInterpreter *my_perl;
-
-    my_perl = perl_alloc();
-    if (!my_perl)
-	exit(1);
-    perl_construct( my_perl );
-
-    exitstatus = perl_parse( my_perl, argc, argv, env );
-    if (exitstatus)
-	exit( exitstatus );
-
-    exitstatus = perl_run( my_perl );
-
-    perl_destruct( my_perl );
-    perl_free( my_perl );
-
-    exit( exitstatus );
-}
-
-/* Register any extra external extensions */
-
-void
-perl_init_ext()
-{
-    char *file = __FILE__;
-
+#ifdef USE_DYNAMIC_LOADING
     boot_DynamicLoader();
-EOF
+#endif
 
-sed -e 's/\(.*\)/    newXSUB("\1::bootstrap", 0, boot_\1, file);/' <$1
+EOP
+    for ext in $args; do
+	echo "    newXSUB(\"${ext}::bootstrap\", 0, boot_${ext}, file);"
+    done
+    echo '}'
+fi
 
-echo '}'

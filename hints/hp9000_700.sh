@@ -1,5 +1,5 @@
 libswanted='ndbm m'
-ccflags="$ccflags -DJMPCLOBBER"
+ccflags="$ccflags -Aa -D_POSIX_SOURCE -D_HPUX_SOURCE -DJMPCLOBBER"
 optimize='+O1'
 d_mymalloc=define
-alignbytes=8
+memalignbytes=8

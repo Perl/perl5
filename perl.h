@@ -40,10 +40,12 @@
  * 4.0 baseline.
  * 
  */
+#ifndef H_PERL
+#define H_PERL 1
 
 #include "embed.h"
 
-#define VOIDWANT 1
+#define VOIDUSED 1
 #ifdef __cplusplus
 #include "config_c++.h"
 #else
@@ -121,14 +123,12 @@ char Error[1];
 #   ifndef HAS_GETPGRP
 #	define HAS_GETPGRP
 #   endif
-#   define getpgrp getpgrp2
 #endif
 
 #ifdef HAS_SETPGRP2
 #   ifndef HAS_SETPGRP
 #	define HAS_SETPGRP
 #   endif
-#   define setpgrp setpgrp2
 #endif
 
 #include <stdio.h>
@@ -146,7 +146,9 @@ char Error[1];
 /* Use all the "standard" definitions? */
 #ifdef STANDARD_C
 #   include <stdlib.h>
-#   include <string.h>
+#   ifdef I_STRING
+#     include <string.h>
+#   endif
 #   define MEM_SIZE size_t
 #else
     typedef unsigned int MEM_SIZE;
@@ -157,9 +159,9 @@ char Error[1];
 #endif
 
 #ifdef HAS_MEMCPY
-#  ifndef STANDARD_C
+#  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
 #    ifndef memcpy
-	extern char * memcpy P((char*, char*, int));
+        extern char * memcpy P((char*, char*, int));
 #    endif
 #  endif
 #else
@@ -173,7 +175,7 @@ char Error[1];
 #endif /* HAS_MEMCPY */
 
 #ifdef HAS_MEMSET
-#  ifndef STANDARD_C
+#  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
 #    ifndef memset
 	extern char *memset P((char*, int, int));
 #    endif
@@ -190,7 +192,7 @@ char Error[1];
 #endif /* HAS_MEMSET */
 
 #ifdef HAS_MEMCMP
-#  ifndef STANDARD_C
+#  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
 #    ifndef memcmp
 	extern int memcmp P((char*, char*, int));
 #    endif
@@ -208,7 +210,7 @@ char Error[1];
 #   endif
 #endif /* HAS_BCMP */
 
-#ifndef HAS_MEMMOVE
+#if !defined(HAS_MEMMOVE) && !defined(memmove)
 #   if defined(HAS_BCOPY) && defined(HAS_SAFE_BCOPY)
 #	define memmove(d,s,l) bcopy(s,d,l)
 #   else
@@ -254,17 +256,19 @@ char Error[1];
 #endif
 
 #ifdef I_SYS_TIME
-#   ifdef SYSTIMEKERNEL
+#   ifdef I_SYS_TIME_KERNEL
 #	define KERNEL
 #   endif
 #   include <sys/time.h>
-#   ifdef SYSTIMEKERNEL
+#   ifdef I_SYS_TIME_KERNEL
 #	undef KERNEL
 #   endif
 #endif
 
 #ifndef MSDOS
-#include <sys/times.h>
+#  ifdef HAS_TIMES
+#    include <sys/times.h>
+#  endif
 #endif
 
 #if defined(HAS_STRERROR) && (!defined(HAS_MKDIR) || !defined(HAS_RMDIR))
@@ -273,7 +277,7 @@ char Error[1];
 
 #include <errno.h>
 #ifdef HAS_SOCKET
-#   ifndef ENOTSOCK
+#   ifdef I_NET_ERRNO
 #     include <net/errno.h>
 #   endif
 #endif
@@ -551,6 +555,7 @@ typedef union any ANY;
 union any {
     void*	any_ptr;
     I32		any_i32;
+    long	any_long;
 };
 
 #include "regexp.h"
@@ -668,10 +673,10 @@ struct Outrec {
 #endif /* MSDOS */
 
 #ifndef __cplusplus
-UIDTYPE getuid P(());
-UIDTYPE geteuid P(());
-GIDTYPE getgid P(());
-GIDTYPE getegid P(());
+Uid_t getuid P(());
+Uid_t geteuid P(());
+Gid_t getgid P(());
+Gid_t getegid P(());
 #endif
 
 #ifdef DEBUGGING
@@ -735,7 +740,7 @@ double atof P((const char*));
 
 #ifndef STANDARD_C
 /* All of these are in stdlib.h or time.h for ANSI C */
-long time();
+Time_t time();
 struct tm *gmtime(), *localtime();
 char *strchr(), *strrchr();
 char *strcpy(), *strcat();
@@ -764,7 +769,7 @@ char *strcpy(), *strcat();
 
 char *crypt P((const char*, const char*));
 char *getenv P((const char*));
-long lseek P((int,off_t,int));
+Off_t lseek P((int,Off_t,int));
 char *getlogin P((void));
 
 #ifdef EUNICE
@@ -775,16 +780,16 @@ int unlnk P((char*));
 #endif
 
 #ifndef HAS_SETREUID
-#ifdef HAS_SETRESUID
-#define setreuid(r,e) setresuid(r,e,-1)
-#define HAS_SETREUID
-#endif
+#  ifdef HAS_SETRESUID
+#    define setreuid(r,e) setresuid(r,e,(Uid_t)-1)
+#    define HAS_SETREUID
+#  endif
 #endif
 #ifndef HAS_SETREGID
-#ifdef HAS_SETRESGID
-#define setregid(r,e) setresgid(r,e,-1)
-#define HAS_SETREGID
-#endif
+#  ifdef HAS_SETRESGID
+#    define setregid(r,e) setresgid(r,e,(Gid_t)-1)
+#    define HAS_SETREGID
+#  endif
 #endif
 
 #define SCAN_DEF 0
@@ -817,7 +822,7 @@ EXT U32		sub_generation;	/* inc to force methods to be looked up again */
 EXT char **	origenviron;
 EXT U32		origalen;
 
-EXT I32 *	xiv_root;	/* free xiv list--shared by interpreters */
+EXT I32 **	xiv_root;	/* free xiv list--shared by interpreters */
 EXT double *	xnv_root;	/* free xnv list--shared by interpreters */
 EXT XRV *	xrv_root;	/* free xrv list--shared by interpreters */
 EXT XPV *	xpv_root;	/* free xpv list--shared by interpreters */
@@ -880,6 +885,8 @@ EXT char	warn_reserved[]
   INIT("Unquoted string \"%s\" may clash with future reserved word");
 EXT char	warn_nl[]
   INIT("Unsuccessful %s on filename containing newline");
+EXT char	no_hardref[]
+  INIT("Can't use a string as %s ref while \"strict refs\" averred");
 EXT char	no_usym[]
   INIT("Can't use an undefined value as %s reference");
 EXT char	no_aelem[]
@@ -1018,7 +1025,7 @@ typedef enum {
     XTERM,
     XREF,
     XSTATE,
-    XBLOCK,
+    XBLOCK
 } expectation;
 
 EXT FILE * VOL	rsfp INIT(Nullfp);
@@ -1052,12 +1059,21 @@ EXT I32		thisexpr;	/* name id for nothing_in_common() */
 EXT char *	last_uni;	/* position of last named-unary operator */
 EXT char *	last_lop;	/* position of last list operator */
 EXT OPCODE	last_lop_op;	/* last list operator */
-EXT bool	in_format;	/* we're compiling a run_format */
 EXT bool	in_my;		/* we're compiling a "my" declaration */
-EXT I32		needblockscope INIT(TRUE);	/* block overhead needed? */
 #ifdef FCRYPT
 EXT I32		cryptseen;	/* has fast crypt() been initialized? */
 #endif
+
+EXT U32		hints;		/* various compilation flags */
+
+				/* Note: the lowest 8 bits are reserved for
+				   stuffing into op->op_private */
+#define HINT_INTEGER		0x00000001
+#define HINT_STRICT_REFS	0x00000002
+
+#define HINT_BLOCK_SCOPE	0x00000100
+#define HINT_STRICT_SUBS	0x00000200
+#define HINT_STRICT_VARS	0x00000400
 
 /**************************************************************************/
 /* This regexp stuff is global since it always happens within 1 expr eval */
@@ -1136,7 +1152,7 @@ IEXT VOL U32	Idebug;
 IEXT U32	Iperldb;
 
 /* magical thingies */
-IEXT time_t	Ibasetime;		/* $^T */
+IEXT Time_t	Ibasetime;		/* $^T */
 IEXT I32	Iarybase;		/* $[ */
 IEXT SV *	Iformfeed;		/* $^L */
 IEXT char *	Ichopset IINIT(" \n-");	/* $: */
@@ -1317,7 +1333,8 @@ MGVTBL vtbl_sv =	{magic_get,
 						0,	0};
 MGVTBL vtbl_env =	{0,	0,	0,	0,	0};
 MGVTBL vtbl_envelem =	{0,	magic_setenv,
-					0,	0,	0};
+					0,	magic_clearenv,
+							0};
 MGVTBL vtbl_sig =	{0,	0,		 0, 0, 0};
 MGVTBL vtbl_sigelem =	{0,	magic_setsig,
 					0,	0,	0};
@@ -1372,3 +1389,5 @@ EXT MGVTBL vtbl_vec;
 EXT MGVTBL vtbl_bm;
 EXT MGVTBL vtbl_uvar;
 #endif
+
+#endif /* Include guard */

@@ -1,5 +1,9 @@
 make: Warning: Both `makefile' and `Makefile' exists
-./configpm
-ld.so: Undefined symbol: _dbminit
-*** Error code 127
-make: Fatal error: Command failed for target `lib/Config.pm'
+test -f miniperl || make miniperl
+./miniperl ext/xsubpp ext/posix/POSIX.xs >tmp
+mv tmp POSIX.c
+`sh  cflags POSIX.o`  POSIX.c
+	  CCCMD =  cc -c -DDEBUGGING -g  
+test -d lib/auto/POSIX || mkdir lib/auto/POSIX
+ld  -o lib/auto/POSIX/POSIX.so POSIX.o -lm
+cc    -o perl perlmain.o perl.o av.o scope.o op.o doop.o doio.o dump.o hv.o malloc.o mg.o perly.o pp.o regcomp.o regexec.o gv.o sv.o taint.o toke.o util.o deb.o run.o dl_sunos.o  -ldbm -ldl -lm -lposix

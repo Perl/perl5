@@ -166,7 +166,7 @@ I32 len;
 	    if (isDIGIT(*name))
 		fd = atoi(name);
 	    else {
-		gv = gv_fetchpv(name,FALSE);
+		gv = gv_fetchpv(name,FALSE,SVt_PVIO);
 		if (!gv || !GvIO(gv)) {
 #ifdef EINVAL
 		    errno = EINVAL;
@@ -332,7 +332,7 @@ register GV *gv;
     int filegid;
 
     if (!argvoutgv)
-	argvoutgv = gv_fetchpv("ARGVOUT",TRUE);
+	argvoutgv = gv_fetchpv("ARGVOUT",TRUE,SVt_PVIO);
     if (filemode & (S_ISUID|S_ISGID)) {
 	fflush(IoIFP(GvIO(argvoutgv)));  /* chmod must follow last write */
 #ifdef HAS_FCHMOD
@@ -353,7 +353,7 @@ register GV *gv;
 	    if (inplace) {
 		TAINT_PROPER("inplace open");
 		if (strEQ(oldname,"-")) {
-		    defoutgv = gv_fetchpv("STDOUT",TRUE);
+		    defoutgv = gv_fetchpv("STDOUT",TRUE,SVt_PVIO);
 		    return IoIFP(GvIO(gv));
 		}
 #ifndef FLEXFILENAMES
@@ -457,7 +457,7 @@ register GV *gv;
     }
     if (inplace) {
 	(void)do_close(argvoutgv,FALSE);
-	defoutgv = gv_fetchpv("STDOUT",TRUE);
+	defoutgv = gv_fetchpv("STDOUT",TRUE,SVt_PVIO);
     }
     return Nullfp;
 }
@@ -580,7 +580,7 @@ GV *gv;
 
     while (IoIFP(io)) {
 
-#ifdef STDSTDIO			/* (the code works without this) */
+#ifdef USE_STD_STDIO			/* (the code works without this) */
 	if (IoIFP(io)->_cnt > 0)	/* cheat a little, since */
 	    return FALSE;		/* this is the most usual case */
 #endif
@@ -590,7 +590,7 @@ GV *gv;
 	    (void)ungetc(ch, IoIFP(io));
 	    return FALSE;
 	}
-#ifdef STDSTDIO
+#ifdef USE_STD_STDIO
 	if (IoIFP(io)->_cnt < -1)
 	    IoIFP(io)->_cnt = -1;
 #endif
@@ -738,7 +738,7 @@ SV *argstr;
 
 I32 chsize(fd, length)
 I32 fd;			/* file descriptor */
-off_t length;		/* length to set file to */
+Off_t length;		/* length to set file to */
 {
     extern long lseek();
     struct flock fl;
@@ -1524,7 +1524,7 @@ SV **sp;
     STRLEN len;
     struct shmid_ds shmds;
 #ifndef VOIDSHMAT
-    extern char *shmat();
+    extern char *shmat P((int, char *, int));
 #endif
 
     id = SvIVx(*++mark);

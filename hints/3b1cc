@@ -1,5 +1,7 @@
 # To incorporate the 7300/3b1 shared library, run this script in place
 # of 'CC'.
+# You can skip this is you have the shcc program installed as cc in
+# your path.
 # First: Run 'Configure' through to the end and run 'make depend'.
 # Second: Edit 'makefile' ( not Makefile ) and set CC = 3b1cc.
 # Third: Edit 'x2p/makefile' and set CC = 3b1cc.

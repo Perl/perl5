@@ -1,4 +1,4 @@
-# $RCSfile: Makefile.SH,v 28453Revision: 4.1 28453Date: 92/08/07 18:29:07 $
+# $RCSfile: Makefile.SH,v 3314Revision: 4.1 3314Date: 92/08/07 18:29:07 $
 #
 # $Log:	Makefile.SH,v $
 # Revision 4.1  92/08/07  18:29:07  lwall
@@ -32,7 +32,7 @@ mallocsrc = malloc.c
 mallocobj = malloc.o
 shellflags = 
 
-libs = -ldl -lm -lposix
+libs = -ldbm -ldl -lm -lposix
 
 CCCMD = `sh $(shellflags) cflags $@`
 

@@ -1,0 +1,50 @@
+?RCS: $Id: i_net_errno.U,v $
+?RCS:
+?RCS: You may redistribute only under the terms of the Artistic Licence,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic Licence; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?RCS: $Log: i_net_errno.U,v $
+?RCS:
+?MAKE:i_neterrno: Inhdr cc ccflags rm
+?MAKE:	-pick add $@ %<
+?S:i_neterrno:
+?S:	This variable conditionally defines the I_NET_ERRNO symbol, which
+?S:	indicates to the C program that <net/errno.h> exists and should
+?S:	be included.
+?S:.
+?C:I_NET_ERRNO:
+?C:	This symbol, if defined, indicates that <net/errno.h> exists and 
+?C:	should be included.
+?C:.
+?H:#$i_neterrno I_NET_ERRNO		/**/
+?H:.
+?LINT:set i_neterrno
+: see if net/errno.h is available
+set net/errno.h i_neterrno
+eval $inhdr
+: Unfortunately, it causes problems on some systems.  Arrgh.
+case '$i_neterrno' in
+'define') echo "<net/errno.h> found."
+    cat > try.c <<'EOM'
+#include <stdio.h>
+#include <errno.h>
+#include <net/errno.h>
+int func()
+{
+int x;
+x = ENOTSOCK;
+return x;
+}
+EOM
+    if $cc $ccflags -c try.c >/dev/null 2>&1; then
+	i_neterrno="$define"
+    else
+	echo "But it causes problems, so we won't include it"
+	i_neterrno="$undef"
+    fi
+    $rm -f try.* try
+    ;;
+esac

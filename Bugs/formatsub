@@ -1,7 +1,0 @@
-#!./perl
-
-format STDOUT {
-    formline "@<<<<<<<<<<<<< @>>>>>>>>>>>\n", "foo", "bar";
-}
-
-write;

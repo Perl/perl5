@@ -2,7 +2,7 @@
 # Created by: JT McDuffie (jt@kpc.com)  26 DEC 1991
 bin='/usr/local/bin'
 installbin='/usr/local/bin'
-alignbytes="8"
+memalignbytes="8"
 byteorder="4321"
 cppstdin='/lib/cpp'
 cppminus=''

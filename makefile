@@ -1,4 +1,8 @@
-# : Makefile.SH,v 15738Revision: 4.1 15738Date: 92/08/07 17:18:08 $
+# .SH,v $Revision: 4.1 $Date: 92/08/07 17:18:08 $
+# This file is derived from Makefile.SH.  Any changes made here will
+# be lost the next time you run Configure.
+#  Makefile is used to generate makefile.  The only difference
+#  is that makefile has the dependencies filled in at the end.
 #
 # $Log:	Makefile.SH,v $
 # Revision 4.1  92/08/07  17:18:08  lwall
@@ -36,14 +40,24 @@ mansrc = /usr/local/man/man1
 manext = 1
 LDFLAGS = 
 CLDFLAGS = 
+
 SMALL = 
 LARGE =  
 mallocsrc = malloc.c
 mallocobj = malloc.o
-dlsrc = dl.c
-dlobj = dl.o
-SLN = ln -s
+dlsrc = dl_sunos.c
+dlobj = dl_sunos.o
+dldir = ext/dl
+LNS = /bin/ln -s
 RMS = rm -f
+ranlib = /usr/bin/ranlib
+
+# The following are used to build and install shared libraries for
+# dynamic loading.
+LDDLFLAGS = 
+CCDLFLAGS = 
+CCCDLFLAGS = 
+SHLIBSUFFIX = .so
 
 libs = -ldbm -ldl -lm -lposix 
 
@@ -51,7 +65,7 @@ public = perl
 
 shellflags = 
 
-# To use an alternate make, set  in config.sh.
+## To use an alternate make, set  in config.sh.
 MAKE = make
 
 CCCMD = `sh $(shellflags) cflags $@`
@@ -64,7 +78,7 @@ manpages = perl.man h2ph.man
 
 util =
 
-sh = Makefile.SH makedepend.SH h2ph.SH
+sh = Makefile.SH cflags.SH embed_h.SH makedepend.SH makedir.SH writemain.SH
 
 h1 = EXTERN.h INTERN.h av.h cop.h config.h embed.h form.h handy.h
 h2 = hv.h op.h opcode.h perl.h regcomp.h regexp.h gv.h sv.h util.h
@@ -79,19 +93,19 @@ c1 = av.c scope.c op.c doop.c doio.c dump.c hv.c
 c2 = $(mallocsrc) mg.c perly.c pp.c regcomp.c regexec.c
 c3 = gv.c sv.c taint.c toke.c util.c deb.c run.c
 
-c = $(c1) $(c2) $(c3)
+c = $(c1) $(c2) $(c3) $(dlsrc) miniperlmain.c perlmain.c
 
 s1 = av.c scope.c op.c doop.c doio.c dump.c hv.c
-s2 = $(mallocobj) mg.c perly.c pp.c regcomp.c regexec.c
+s2 = $(mallocsrc) mg.c perly.c pp.c regcomp.c regexec.c
 s3 = gv.c sv.c taint.c toke.c util.c deb.c run.c perly.c
 
-saber = $(s1) $(s2) $(s3)
+saber = $(s1) $(s2) $(s3) $(dlsrc)
 
 obj1 = av.o scope.o op.o doop.o doio.o dump.o hv.o
 obj2 = $(mallocobj) mg.o perly.o pp.o regcomp.o regexec.o
 obj3 = gv.o sv.o taint.o toke.o util.o deb.o run.o
 
-obj = $(obj1) $(obj2) $(obj3) $(dlobj)
+obj = $(obj1) $(obj2) $(obj3)
 
 lintflags = -hbvxac
 
@@ -100,13 +114,8 @@ addedbyconf = Makefile.old bsd eunice filexp loc pdp11 usg v7
 # grrr
 SHELL = /bin/sh
 
-.SUFFIXES: .x
-
 .c.o:
 	$(CCCMD) $*.c
-
-.x.c:
-	sh writemain $*.x >$*.c
 
 all: miniperl perl lib/Config.pm
 
@@ -114,71 +123,96 @@ all: miniperl perl lib/Config.pm
 #	cd x2p; $(MAKE) all
 #	touch all
 
+# Phony target to force checking subdirectories.
+FORCE:
+
+
+$(dlsrc): $(dldir)/$(dlsrc)
+	cp $(dldir)/$(dlsrc) $(dlsrc)
+
+$(dlobj): $(dlsrc)
+	$(CCCMD) $(dlsrc)
+
+
 # NDBM_File extension
+NDBM_File.o: NDBM_File.c
+	$(CCCMD) $(CCCDLFLAGS) $*.c
+
 NDBM_File.c:	ext/dbm/NDBM_File.xs ext/xsubpp ext/typemap
 	test -f miniperl || make miniperl
-	ext/xsubpp ext/dbm/NDBM_File.xs >tmp
+	./miniperl ext/xsubpp ext/dbm/NDBM_File.xs >tmp
 	mv tmp NDBM_File.c
 
-NDBM_File.o: NDBM_File.c
+lib/auto/NDBM_File/NDBM_File$(SHLIBSUFFIX): NDBM_File.o 
+	test -d lib/auto/NDBM_File || mkdir lib/auto/NDBM_File
+	ld $(LDDLFLAGS) -o $@ NDBM_File.o 
 
 # ODBM_File extension
+ODBM_File.o: ODBM_File.c
+	$(CCCMD) $(CCCDLFLAGS) $*.c
+
 ODBM_File.c:	ext/dbm/ODBM_File.xs ext/xsubpp ext/typemap
 	test -f miniperl || make miniperl
-	ext/xsubpp ext/dbm/ODBM_File.xs >tmp
+	./miniperl ext/xsubpp ext/dbm/ODBM_File.xs >tmp
 	mv tmp ODBM_File.c
 
-ODBM_File.o: ODBM_File.c
-
-# GDBM_File extension
-GDBM_File.c:	ext/dbm/GDBM_File.xs ext/xsubpp ext/typemap
-	test -f miniperl || make miniperl
-	ext/xsubpp ext/dbm/GDBM_File.xs >tmp
-	mv tmp GDBM_File.c
-
-GDBM_File.o: GDBM_File.c
+lib/auto/ODBM_File/ODBM_File$(SHLIBSUFFIX): ODBM_File.o 
+	test -d lib/auto/ODBM_File || mkdir lib/auto/ODBM_File
+	ld $(LDDLFLAGS) -o $@ ODBM_File.o 
 
 # SDBM_File extension
+SDBM_File.o: SDBM_File.c
+	$(CCCMD) $(CCCDLFLAGS) $*.c
+
 SDBM_File.c:	ext/dbm/SDBM_File.xs ext/xsubpp ext/typemap
 	test -f miniperl || make miniperl
-	ext/xsubpp ext/dbm/SDBM_File.xs >tmp
+	./miniperl ext/xsubpp ext/dbm/SDBM_File.xs >tmp
 	mv tmp SDBM_File.c
 
-SDBM_File.o: SDBM_File.c
-
-lib/auto/SDBM_File/SDBM_File.so: SDBM_File.o ext/dbm/sdbm/libsdbm.a
-	@- mkdir lib/auto/SDBM_File 2>/dev/null
-	ld -o lib/auto/SDBM_File/SDBM_File.so SDBM_File.o ext/dbm/sdbm/libsdbm.a
-
-ext/dbm/sdbm/libsdbm.a: ext/dbm/sdbm/sdbm.c ext/dbm/sdbm/sdbm.h
-	cd ext/dbm/sdbm; $(MAKE) sdbm
+lib/auto/SDBM_File/SDBM_File$(SHLIBSUFFIX): SDBM_File.o ext/dbm/sdbm/libsdbm.a
+	test -d lib/auto/SDBM_File || mkdir lib/auto/SDBM_File
+	ld $(LDDLFLAGS) -o $@ SDBM_File.o ext/dbm/sdbm/libsdbm.a
 
 # POSIX extension
+POSIX.o: POSIX.c
+	$(CCCMD) $(CCCDLFLAGS) $*.c
+
 POSIX.c:	ext/posix/POSIX.xs ext/xsubpp ext/typemap
 	test -f miniperl || make miniperl
-	ext/xsubpp ext/posix/POSIX.xs >tmp
+	./miniperl ext/xsubpp ext/posix/POSIX.xs >tmp
 	mv tmp POSIX.c
 
-POSIX.o: POSIX.c
-lib/auto/POSIX/POSIX.so: POSIX.o ext/dbm/sdbm/libsdbm.a
-	@- mkdir lib/auto/POSIX 2>/dev/null
-	ld -o lib/auto/POSIX/POSIX.so POSIX.o ext/dbm/sdbm/libsdbm.a
-extobjs=  ext/dbm/NDBM_File.xs.o ext/dbm/ODBM_File.xs.o ext/dbm/GDBM_File.xs.o ext/dbm/SDBM_File.xs.o ext/posix/POSIX.xs.o
+lib/auto/POSIX/POSIX$(SHLIBSUFFIX): POSIX.o 
+	test -d lib/auto/POSIX || mkdir lib/auto/POSIX
+	ld $(LDDLFLAGS) -o $@ POSIX.o -lm
+
+# List of extensions (used by writemain) to generate perlmain.c
+ext=  NDBM_File ODBM_File SDBM_File POSIX
+extsrc=  NDBM_File.c ODBM_File.c SDBM_File.c POSIX.c
+# Extension dependencies.
+extdep=  lib/auto/NDBM_File/NDBM_File$(SHLIBSUFFIX) lib/auto/ODBM_File/ODBM_File$(SHLIBSUFFIX) lib/auto/SDBM_File/SDBM_File$(SHLIBSUFFIX) lib/auto/POSIX/POSIX$(SHLIBSUFFIX)
+# How to include extensions in linking command
+extobj= 
+
+ext/dbm/sdbm/libsdbm.a: ext/dbm/sdbm/sdbm.h ext/dbm/sdbm/sdbm.c
+	cd ext/dbm/sdbm; $(MAKE) -f Makefile libsdbm.a
+
 # The $& notation tells Sequent machines that it can do a parallel make,
 # and is harmless otherwise.
 
-miniperlmain.c: miniperlmain.x
-miniperlmain.o: miniperlmain.c
 miniperl: $& miniperlmain.o perl.o $(obj)
 	$(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain.o perl.o $(obj) $(libs)
 
-perlmain.c: perlmain.x
+perlmain.c: miniperlmain.c
+	sh writemain $(ext) > perlmain.c
+
 perlmain.o: perlmain.c
-perl: $& perlmain.o perl.o $(obj) NDBM_File.o ODBM_File.o POSIX.o
-	$(CC) $(LARGE) $(CLDFLAGS) -o perl perlmain.o perl.o $(obj) NDBM_File.o ODBM_File.o POSIX.o $(libs)
+
+perl: $& perlmain.o perl.o $(obj) $(dlobj) $(extdep)
+	$(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o perl perlmain.o perl.o $(obj) $(dlobj) $(extobj) $(libs)
 
 libperl.rlb: libperl.a
-	ranlib libperl.a
+	$(ranlib) libperl.a
 	touch libperl.rlb
 
 libperl.a: $& perl.o $(obj)
@@ -189,11 +223,11 @@ libperl.a: $& perl.o $(obj)
 # checks as well as the special code to validate that the script in question
 # has been invoked correctly.
 
-suidperl: $& sperl.o main.o libperl.rlb
-	$(CC) $(LARGE) $(CLDFLAGS) sperl.o main.o libperl.a $(libs) -o suidperl
+suidperl: $& sperl.o perlmain.o libperl.rlb
+	$(CC) $(LARGE) $(CLDFLAGS) sperl.o perlmain.o libperl.a $(libs) -o suidperl
 
-lib/Config.pm: config.sh
-	./configpm
+lib/Config.pm: config.sh miniperl
+	./miniperl configpm
 
 saber: $(saber)
 	# load $(saber)
@@ -201,21 +235,16 @@ saber: $(saber)
 
 sperl.o: perl.c perly.h patchlevel.h $(h)
 	$(RMS) sperl.c
-	$(SLN) perl.c sperl.c
+	$(LNS) perl.c sperl.c
 	$(CCCMD) -DIAMSUID sperl.c
 	$(RMS) sperl.c
 
-dl.o: ext/dl/dl.c
-	cp ext/dl/dl.c dl.c
-	$(CC) -c dl.c
-
-    
 perly.h: perly.c
 	@ echo Dummy dependency for dumb parallel make
 	touch perly.h
 
 opcode.h: opcode.pl
-	- opcode.pl
+	- perl opcode.pl
 
 embed.h: embed_h.SH global.sym interp.sym
 	sh embed_h.SH
@@ -234,14 +263,21 @@ install: all
 	./perl installperl
 
 clean:
-	rm -f *.o all perl taintperl suidperl miniperl
+	rm -f *.o all perl miniperl
+	rm -f POSIX.c ?DBM_File.c perlmain.c
+	rm -f ext/dbm/sdbm/libsdbm.a
+	cd ext/dbm/sdbm; $(MAKE) -f Makefile clean
 	cd x2p; $(MAKE) clean
 
 realclean: clean
 	cd x2p; $(MAKE) realclean
+	cd ext/dbm/sdbm; $(MAKE) -f Makefile realclean
 	rm -f *.orig */*.orig *~ */*~ core $(addedbyconf) h2ph h2ph.man
-	rm -f perly.h t/perl Makefile config.h makedepend makedir
-	rm -f makefile x2p/Makefile x2p/makefile cflags x2p/cflags
+	rm -f Makefile cflags embed_h makedepend makedir writemain
+	rm -f config.h t/perl makefile makefile.old cflags 
+	rm -rf lib/auto/?DBM_File lib/auto/POSIX
+	rm -f x2p/Makefile x2p/makefile x2p/makefile.old x2p/cflags
+	rm -f lib/Config.pm
 	rm -f c2ph pstruct
 
 # The following lint has practically everything turned on.  Unfortunately,
@@ -258,17 +294,17 @@ depend: makedepend
 	- test -s perly.h || /bin/rm -f perly.h
 	cd x2p; $(MAKE) depend
 
-test: perl
+test: perl lib/Config.pm
 	- cd t && chmod +x TEST */*.t
-	- cd t && (rm -f perl; $(SLN) ../perl perl) && ./perl TEST </dev/tty
+	- cd t && (rm -f perl; $(LNS) ../perl perl) && ./perl TEST </dev/tty
 
-clist:
+clist:	$(c)
 	echo $(c) | tr ' ' '\012' >.clist
 
-hlist:
+hlist:  $(h)
 	echo $(h) | tr ' ' '\012' >.hlist
 
-shlist:
+shlist: $(sh)
 	echo $(sh) | tr ' ' '\012' >.shlist
 
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
@@ -1196,8 +1232,8 @@ util.o: /usr/include/sys/ttycom.h
 util.o: /usr/include/sys/ttydev.h
 util.o: /usr/include/sys/types.h
 util.o: /usr/include/time.h
+util.o: /usr/include/unistd.h
 util.o: /usr/include/varargs.h
-util.o: /usr/include/vfork.h
 util.o: /usr/include/vm/faultcode.h
 util.o: EXTERN.h
 util.o: av.h
@@ -1323,7 +1359,165 @@ run.o: scope.h
 run.o: sv.h
 run.o: unixish.h
 run.o: util.h
+dl_sunos.o: /usr/include/ctype.h
+dl_sunos.o: /usr/include/dirent.h
+dl_sunos.o: /usr/include/dlfcn.h
+dl_sunos.o: /usr/include/errno.h
+dl_sunos.o: /usr/include/machine/param.h
+dl_sunos.o: /usr/include/machine/setjmp.h
+dl_sunos.o: /usr/include/netinet/in.h
+dl_sunos.o: /usr/include/setjmp.h
+dl_sunos.o: /usr/include/stdio.h
+dl_sunos.o: /usr/include/sys/dirent.h
+dl_sunos.o: /usr/include/sys/errno.h
+dl_sunos.o: /usr/include/sys/filio.h
+dl_sunos.o: /usr/include/sys/ioccom.h
+dl_sunos.o: /usr/include/sys/ioctl.h
+dl_sunos.o: /usr/include/sys/param.h
+dl_sunos.o: /usr/include/sys/signal.h
+dl_sunos.o: /usr/include/sys/sockio.h
+dl_sunos.o: /usr/include/sys/stat.h
+dl_sunos.o: /usr/include/sys/stdtypes.h
+dl_sunos.o: /usr/include/sys/sysmacros.h
+dl_sunos.o: /usr/include/sys/time.h
+dl_sunos.o: /usr/include/sys/times.h
+dl_sunos.o: /usr/include/sys/ttold.h
+dl_sunos.o: /usr/include/sys/ttychars.h
+dl_sunos.o: /usr/include/sys/ttycom.h
+dl_sunos.o: /usr/include/sys/ttydev.h
+dl_sunos.o: /usr/include/sys/types.h
+dl_sunos.o: /usr/include/time.h
+dl_sunos.o: /usr/include/varargs.h
+dl_sunos.o: /usr/include/vm/faultcode.h
+dl_sunos.o: EXTERN.h
+dl_sunos.o: XSUB.h
+dl_sunos.o: av.h
+dl_sunos.o: config.h
+dl_sunos.o: cop.h
+dl_sunos.o: cv.h
+dl_sunos.o: dl_sunos.c
+dl_sunos.o: embed.h
+dl_sunos.o: form.h
+dl_sunos.o: gv.h
+dl_sunos.o: handy.h
+dl_sunos.o: hv.h
+dl_sunos.o: mg.h
+dl_sunos.o: op.h
+dl_sunos.o: opcode.h
+dl_sunos.o: perl.h
+dl_sunos.o: pp.h
+dl_sunos.o: proto.h
+dl_sunos.o: regexp.h
+dl_sunos.o: scope.h
+dl_sunos.o: sv.h
+dl_sunos.o: unixish.h
+dl_sunos.o: util.h
+miniperlmain.o: /usr/include/ctype.h
+miniperlmain.o: /usr/include/dirent.h
+miniperlmain.o: /usr/include/errno.h
+miniperlmain.o: /usr/include/machine/param.h
+miniperlmain.o: /usr/include/machine/setjmp.h
+miniperlmain.o: /usr/include/netinet/in.h
+miniperlmain.o: /usr/include/setjmp.h
+miniperlmain.o: /usr/include/stdio.h
+miniperlmain.o: /usr/include/sys/dirent.h
+miniperlmain.o: /usr/include/sys/errno.h
+miniperlmain.o: /usr/include/sys/filio.h
+miniperlmain.o: /usr/include/sys/ioccom.h
+miniperlmain.o: /usr/include/sys/ioctl.h
+miniperlmain.o: /usr/include/sys/param.h
+miniperlmain.o: /usr/include/sys/signal.h
+miniperlmain.o: /usr/include/sys/sockio.h
+miniperlmain.o: /usr/include/sys/stat.h
+miniperlmain.o: /usr/include/sys/stdtypes.h
+miniperlmain.o: /usr/include/sys/sysmacros.h
+miniperlmain.o: /usr/include/sys/time.h
+miniperlmain.o: /usr/include/sys/times.h
+miniperlmain.o: /usr/include/sys/ttold.h
+miniperlmain.o: /usr/include/sys/ttychars.h
+miniperlmain.o: /usr/include/sys/ttycom.h
+miniperlmain.o: /usr/include/sys/ttydev.h
+miniperlmain.o: /usr/include/sys/types.h
+miniperlmain.o: /usr/include/time.h
+miniperlmain.o: /usr/include/varargs.h
+miniperlmain.o: /usr/include/vm/faultcode.h
+miniperlmain.o: INTERN.h
+miniperlmain.o: av.h
+miniperlmain.o: config.h
+miniperlmain.o: cop.h
+miniperlmain.o: cv.h
+miniperlmain.o: embed.h
+miniperlmain.o: form.h
+miniperlmain.o: gv.h
+miniperlmain.o: handy.h
+miniperlmain.o: hv.h
+miniperlmain.o: mg.h
+miniperlmain.o: miniperlmain.c
+miniperlmain.o: op.h
+miniperlmain.o: opcode.h
+miniperlmain.o: perl.h
+miniperlmain.o: pp.h
+miniperlmain.o: proto.h
+miniperlmain.o: regexp.h
+miniperlmain.o: scope.h
+miniperlmain.o: sv.h
+miniperlmain.o: unixish.h
+miniperlmain.o: util.h
+perlmain.o: /usr/include/ctype.h
+perlmain.o: /usr/include/dirent.h
+perlmain.o: /usr/include/errno.h
+perlmain.o: /usr/include/machine/param.h
+perlmain.o: /usr/include/machine/setjmp.h
+perlmain.o: /usr/include/netinet/in.h
+perlmain.o: /usr/include/setjmp.h
+perlmain.o: /usr/include/stdio.h
+perlmain.o: /usr/include/sys/dirent.h
+perlmain.o: /usr/include/sys/errno.h
+perlmain.o: /usr/include/sys/filio.h
+perlmain.o: /usr/include/sys/ioccom.h
+perlmain.o: /usr/include/sys/ioctl.h
+perlmain.o: /usr/include/sys/param.h
+perlmain.o: /usr/include/sys/signal.h
+perlmain.o: /usr/include/sys/sockio.h
+perlmain.o: /usr/include/sys/stat.h
+perlmain.o: /usr/include/sys/stdtypes.h
+perlmain.o: /usr/include/sys/sysmacros.h
+perlmain.o: /usr/include/sys/time.h
+perlmain.o: /usr/include/sys/times.h
+perlmain.o: /usr/include/sys/ttold.h
+perlmain.o: /usr/include/sys/ttychars.h
+perlmain.o: /usr/include/sys/ttycom.h
+perlmain.o: /usr/include/sys/ttydev.h
+perlmain.o: /usr/include/sys/types.h
+perlmain.o: /usr/include/time.h
+perlmain.o: /usr/include/varargs.h
+perlmain.o: /usr/include/vm/faultcode.h
+perlmain.o: INTERN.h
+perlmain.o: av.h
+perlmain.o: config.h
+perlmain.o: cop.h
+perlmain.o: cv.h
+perlmain.o: embed.h
+perlmain.o: form.h
+perlmain.o: gv.h
+perlmain.o: handy.h
+perlmain.o: hv.h
+perlmain.o: mg.h
+perlmain.o: op.h
+perlmain.o: opcode.h
+perlmain.o: perl.h
+perlmain.o: perlmain.c
+perlmain.o: pp.h
+perlmain.o: proto.h
+perlmain.o: regexp.h
+perlmain.o: scope.h
+perlmain.o: sv.h
+perlmain.o: unixish.h
+perlmain.o: util.h
 Makefile: Makefile.SH config.sh ; /bin/sh Makefile.SH
+cflags: cflags.SH config.sh ; /bin/sh cflags.SH
+embed_h: embed_h.SH config.sh ; /bin/sh embed_h.SH
 makedepend: makedepend.SH config.sh ; /bin/sh makedepend.SH
-h2ph: h2ph.SH config.sh ; /bin/sh h2ph.SH
+makedir: makedir.SH config.sh ; /bin/sh makedir.SH
+writemain: writemain.SH config.sh ; /bin/sh writemain.SH
 # WARNING: Put nothing here or make depend will gobble it up!

@@ -89,3 +89,153 @@ extern long sdbm_hash proto((char *, int));
 #define dbm_error sdbm_error;
 #define dbm_clearerr sdbm_clearerr;
 #endif
+
+/* Most of the following is stolen from perl.h. */
+#ifndef H_PERL  /* Include guard */
+
+/*
+ * The following contortions are brought to you on behalf of all the
+ * standards, semi-standards, de facto standards, not-so-de-facto standards
+ * of the world, as well as all the other botches anyone ever thought of.
+ * The basic theory is that if we work hard enough here, the rest of the
+ * code can be a lot prettier.  Well, so much for theory.  Sorry, Henry...
+ */
+
+#include <errno.h>
+#ifdef HAS_SOCKET
+#   ifdef I_NET_ERRNO
+#     include <net/errno.h>
+#   endif
+#endif
+
+#ifdef MYMALLOC
+#   ifdef HIDEMYMALLOC
+#	define malloc Mymalloc
+#	define realloc Myremalloc
+#	define free Myfree
+#   endif
+#   define safemalloc malloc
+#   define saferealloc realloc
+#   define safefree free
+#endif
+
+#if defined(__STDC__) || defined(_AIX) || defined(__stdc__) || defined(__cplusplus)
+# define STANDARD_C 1
+#endif
+
+#if defined(STANDARD_C)
+#   define P(args) args
+#else
+#   define P(args) ()
+#endif
+
+#include <stdio.h>
+#include <ctype.h>
+#include <setjmp.h>
+
+#ifdef I_UNISTD
+#include <unistd.h>
+#endif
+
+#ifndef MSDOS
+#   ifdef PARAM_NEEDS_TYPES
+#	include <sys/types.h>
+#   endif
+#   include <sys/param.h>
+#endif
+
+#ifndef _TYPES_		/* If types.h defines this it's easy. */
+#   ifndef major		/* Does everyone's types.h define this? */
+#	include <sys/types.h>
+#   endif
+#endif
+
+#ifdef I_UNISTD
+#include <unistd.h>
+#endif
+
+#include <sys/stat.h>
+
+#ifndef SEEK_SET
+# ifdef L_SET
+#  define SEEK_SET	L_SET
+# else
+#  define SEEK_SET	0  /* Wild guess. */
+# endif
+#endif
+
+/* Use all the "standard" definitions? */
+#ifdef STANDARD_C
+#   include <stdlib.h>
+#   ifdef I_STRING
+#     include <string.h>
+#   endif
+#   define MEM_SIZE size_t
+#else
+#   ifdef I_MEMORY
+#     include <memory.h>
+#   endif
+    typedef unsigned int MEM_SIZE;
+#endif /* STANDARD_C */
+
+#if defined(HAS_MEMCMP) && defined(mips) && defined(ultrix)
+#   undef HAS_MEMCMP
+#endif
+
+#ifdef HAS_MEMCPY
+#  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
+#    ifndef memcpy
+        extern char * memcpy P((char*, char*, int));
+#    endif
+#  endif
+#else
+#   ifndef memcpy
+#	ifdef HAS_BCOPY
+#	    define memcpy(d,s,l) bcopy(s,d,l)
+#	else
+#	    define memcpy(d,s,l) my_bcopy(s,d,l)
+#	endif
+#   endif
+#endif /* HAS_MEMCPY */
+
+#ifdef HAS_MEMSET
+#  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
+#    ifndef memset
+	extern char *memset P((char*, int, int));
+#    endif
+#  endif
+#  define memzero(d,l) memset(d,0,l)
+#else
+#   ifndef memzero
+#	ifdef HAS_BZERO
+#	    define memzero(d,l) bzero(d,l)
+#	else
+#	    define memzero(d,l) my_bzero(d,l)
+#	endif
+#   endif
+#endif /* HAS_MEMSET */
+
+#ifdef HAS_MEMCMP
+#  if !defined(STANDARD_C) && !defined(I_STRING) && !defined(I_MEMORY)
+#    ifndef memcmp
+	extern int memcmp P((char*, char*, int));
+#    endif
+#  endif
+#else
+#   ifndef memcmp
+#	define memcmp(s1,s2,l) my_memcmp(s1,s2,l)
+#   endif
+#endif /* HAS_MEMCMP */
+
+/* we prefer bcmp slightly for comparisons that don't care about ordering */
+#ifndef HAS_BCMP
+#   ifndef bcmp
+#	define bcmp(s1,s2,l) memcmp(s1,s2,l)
+#   endif
+#endif /* HAS_BCMP */
+
+#ifdef I_NETINET_IN
+#   include <netinet/in.h>
+#endif
+
+#endif /* Include guard */

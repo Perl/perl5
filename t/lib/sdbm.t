@@ -2,7 +2,14 @@
 
 # $RCSfile: dbm.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:43 $
 
-BEGIN { @INC = '../lib' }
+BEGIN {
+    @INC = '../lib';
+    require Config; import Config;
+    if ($Config{'extensions'} !~ /\bSDBM_File\b/) {
+	print STDERR "1..0\n";
+	exit 0;
+    }
+}
 require SDBM_File;
 
 print "1..12\n";

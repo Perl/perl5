@@ -36,31 +36,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
 #ifndef _config_h_
 #define _config_h_
 
-/* EUNICE:
- *	This symbol, if defined, indicates that the program is being compiled
- *	under the EUNICE package under VMS.  The program will need to handle
- *	things like files that don't go away the first time you unlink them,
- *	due to version numbering.  It will also need to compensate for lack
- *	of a respectable link() command.
- */
-/* VMS:
- *	This symbol, if defined, indicates that the program is running under
- *	VMS.  It is currently only set in conjunction with the EUNICE symbol.
- */
-/* BSD:
- *	This symbol, if defined, indicates that the program is running under
- *	a BSD system.
- */
-#$d_eunice EUNICE		/**/
-#$d_eunice VMS		/**/
-#$d_bsd BSD		/**/
-
-/* ALIGNBYTES:
- *	This symbol contains the number of bytes required to align a
- *	double. Usual values are 2, 4 and 8.
- */
-#define ALIGNBYTES $alignbytes	/**/
-
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
  *	be installed. Program must be prepared to deal with ~name substitution.
@@ -246,31 +221,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #$d_getprior HAS_GETPRIORITY		/**/
 
-/* HAS_HTONL:
- *	This symbol, if defined, indicates that the htonl() routine (and
- *	friends htons() ntohl() ntohs()) are available to do network
- *	order byte swapping.
- */
-/* HAS_HTONS:
- *	This symbol, if defined, indicates that the htons() routine (and
- *	friends htonl() ntohl() ntohs()) are available to do network
- *	order byte swapping.
- */
-/* HAS_NTOHL:
- *	This symbol, if defined, indicates that the ntohl() routine (and
- *	friends htonl() htons() ntohs()) are available to do network
- *	order byte swapping.
- */
-/* HAS_NTOHS:
- *	This symbol, if defined, indicates that the ntohs() routine (and
- *	friends htonl() htons() ntohl()) are available to do network
- *	order byte swapping.
- */
-#$d_htonl HAS_HTONL		/**/
-#$d_htonl HAS_HTONS		/**/
-#$d_htonl HAS_NTOHL		/**/
-#$d_htonl HAS_NTOHS		/**/
-
 /* HAS_KILLPG:
  *	This symbol, if defined, indicates that the killpg routine is available
  *	to kill process groups.  If unavailable, you probably should use kill
@@ -359,13 +309,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #$d_open3 HAS_OPEN3		/**/
 
-/* HAS_READDIR:
- *	This symbol, if defined, indicates that the readdir routine is
- *	available to read directory entries. You may have to include
- *	<dirent.h>. See I_DIRENT.
- */
-#$d_readdir HAS_READDIR		/**/
-
 /* HAS_RENAME:
  *	This symbol, if defined, indicates that the rename routine is available
  *	to rename files.  Otherwise you should do the unlink(), link(), unlink()
@@ -379,22 +322,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  *	new process to exec /bin/rmdir.
  */
 #$d_rmdir HAS_RMDIR		/**/
-
-/* HAS_SAFE_BCOPY:
- *	This symbol, if defined, indicates that the bcopy routine is available
- *	to copy potentially overlapping memory blocks. Otherwise you should
- *	probably use memmove() or memcpy(). If neither is defined, roll your
- *	own version.
- */
-#$d_safebcpy HAS_SAFE_BCOPY	/**/
-
-/* HAS_SAFE_MEMCPY:
- *	This symbol, if defined, indicates that the memcpy routine is available
- *	to copy potentially overlapping memory blocks. Otherwise you should
- *	probably use memmove() or memcpy(). If neither is defined, roll your
- *	own version.
- */
-#$d_safemcpy HAS_SAFE_MEMCPY	/**/
 
 /* HAS_SELECT:
  *	This symbol, if defined, indicates that the select routine is
@@ -513,12 +440,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #$d_shm HAS_SHM		/**/
 
-/* HAS_SHMAT:
- *	This symbol, if defined, indicates that the shmat() routine is
- *	available to attach a shared memory segment to the process space.
- */
-#$d_shmat HAS_SHMAT		/**/
-
 /* HAS_SHMCTL:
  *	This symbol, if defined, indicates that the shmctl() routine is
  *	available to perform shared memory control operations.
@@ -591,6 +512,13 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #$d_system HAS_SYSTEM	/**/
 
+/* Time_t:
+ *	This symbol holds the type returned by time(). It can be long,
+ *	or time_t on BSD sites (in which case <sys/types.h> should be
+ *	included).
+ */
+#define Time_t $timetype		/* Time type */
+
 /* HAS_TIMES:
  *	This symbol, if defined, indicates that the times() routine exists.
  *	Note that this became obsolete on some systems (SUNOS), which now
@@ -609,11 +537,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  *	system's version of ndir.h, rather than the one with this package.
  */
 #$i_ndir I_NDIR		/**/
-
-/* HAS_VFORK:
- *	This symbol, if defined, indicates that vfork() exists.
- */
-#$d_vfork HAS_VFORK	/**/
 
 /* VOIDSIG:
  *	This symbol is defined if this system declares "void (*signal(...))()" in
@@ -716,42 +639,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
 #$i_niin I_NETINET_IN	/**/
 #$i_sysin I_SYS_IN		/**/
 
-/* I_PWD:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <pwd.h>.
- */
-/* PWQUOTA:
- *	This symbol, if defined, indicates to the C program that struct passwd
- *	contains pw_quota.
- */
-/* PWAGE:
- *	This symbol, if defined, indicates to the C program that struct passwd
- *	contains pw_age.
- */
-/* PWCHANGE:
- *	This symbol, if defined, indicates to the C program that struct passwd
- *	contains pw_change.
- */
-/* PWCLASS:
- *	This symbol, if defined, indicates to the C program that struct passwd
- *	contains pw_class.
- */
-/* PWEXPIRE:
- *	This symbol, if defined, indicates to the C program that struct passwd
- *	contains pw_expire.
- */
-/* PWCOMMENT:
- *	This symbol, if defined, indicates to the C program that struct passwd
- *	contains pw_comment.
- */
-#$i_pwd I_PWD		/**/
-#$d_pwquota PWQUOTA	/**/
-#$d_pwage PWAGE	/**/
-#$d_pwchange PWCHANGE	/**/
-#$d_pwclass PWCLASS	/**/
-#$d_pwexpire PWEXPIRE	/**/
-#$d_pwcomment PWCOMMENT	/**/
-
 /* I_STDARG:
  *	This symbol, if defined, indicates that <stdarg.h> exists and should
  *	be included.
@@ -763,6 +650,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  *	be included.
  */
 #$i_stddef I_STDDEF	/**/
+
+/* I_STRING:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <string.h> (USG systems) instead of <strings.h> (BSD systems).
+ */
+#$i_string I_STRING		/**/
 
 /* I_SYS_DIR:
  *	This symbol, if defined, indicates to the C program that it should
@@ -802,8 +695,19 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  *	This symbol, if defined, indicates to the C program that it should
  *	include <sys/time.h>.
  */
+/* I_SYS_TIME_KERNEL:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/time.h> with KERNEL defined.
+ */
 #$i_time I_TIME		/**/
 #$i_systime I_SYS_TIME		/**/
+#$i_systimek I_SYS_TIME_KERNEL		/**/
+
+/* I_UNISTD:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <unistd.h>.
+ */
+#$i_unistd I_UNISTD		/**/
 
 /* I_UTIME:
  *	This symbol, if defined, indicates to the C program that it should
@@ -817,17 +721,18 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #$i_varargs I_VARARGS		/**/
 
-/* I_VFORK:
- *	This symbol, if defined, indicates to the C program that it should
- *	include vfork.h.
- */
-#$i_vfork I_VFORK	/**/
-
 /* INTSIZE:
  *	This symbol contains the size of an int, so that the C preprocessor
  *	can make decisions based on it.
  */
 #define INTSIZE $intsize		/**/
+
+/* Off_t:
+ *	This symbol holds the type used to declare offsets in the kernel.
+ *	It can be int, long, off_t, etc... It may be necessary to include
+ *	<sys/types.h> to get any typedef'ed information.
+ */
+#define Off_t $lseektype		/* <offset> type */
 
 /* PRIVLIB:
  *	This symbol contains the name of the private library for this package.
@@ -836,6 +741,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  *	should be prepared to do ~ expansion.
  */
 #define PRIVLIB "$privlib"		/**/
+
+/* PTRSIZE:
+ *	This symbol contains the size of a pointer, so that the C preprocessor
+ *	can make decisions based on it.
+ */
+#define PTRSIZE $ptrsize		/**/
 
 /* RANDBITS:
  *	This symbol contains the number of bits of random number the rand()
@@ -851,16 +762,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #define SCRIPTDIR "$scriptdir"	/**/
 
-/* SIG_NAME:
- *	This symbol contains a list of signal names in order. This is intended
- *	to be used as a static array initialization, like this:
- *		char *sig_name[] = { SIG_NAME };
- *	The signals in the list are separated with commas, and each signal
- *	is surrounded by double quotes. There is no leading SIG in the signal
- *	name, i.e. SIGQUIT is known as "QUIT".
- */
-#define SIG_NAME "`echo $sig_name | sed 's/ /","/g'`"	/**/
-
 /* STDCHAR:
  *	This symbol is defined to be the type of char used in stdio.h.
  *	It has the values "unsigned char" or "char".
@@ -874,11 +775,56 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #define Uid_t $uidtype		/* UID type */
 
+/* EUNICE:
+ *	This symbol, if defined, indicates that the program is being compiled
+ *	under the EUNICE package under VMS.  The program will need to handle
+ *	things like files that don't go away the first time you unlink them,
+ *	due to version numbering.  It will also need to compensate for lack
+ *	of a respectable link() command.
+ */
+/* VMS:
+ *	This symbol, if defined, indicates that the program is running under
+ *	VMS.  It is currently only set in conjunction with the EUNICE symbol.
+ */
+#$d_eunice EUNICE		/**/
+#$d_eunice VMS		/**/
+
+/* MEM_ALIGNBYTES:
+ *	This symbol contains the number of bytes required to align a
+ *	double. Usual values are 2, 4 and 8.
+ */
+#define MEM_ALIGNBYTES $memalignbytes	/**/
+
 /* CASTI32:
  *	This symbol is defined if the C compiler can cast negative
  *	or large floating point numbers to 32-bit ints.
  */
 #$d_casti32	CASTI32		/**/
+
+/* HAS_HTONL:
+ *	This symbol, if defined, indicates that the htonl() routine (and
+ *	friends htons() ntohl() ntohs()) are available to do network
+ *	order byte swapping.
+ */
+/* HAS_HTONS:
+ *	This symbol, if defined, indicates that the htons() routine (and
+ *	friends htonl() ntohl() ntohs()) are available to do network
+ *	order byte swapping.
+ */
+/* HAS_NTOHL:
+ *	This symbol, if defined, indicates that the ntohl() routine (and
+ *	friends htonl() htons() ntohs()) are available to do network
+ *	order byte swapping.
+ */
+/* HAS_NTOHS:
+ *	This symbol, if defined, indicates that the ntohs() routine (and
+ *	friends htonl() htons() ntohl()) are available to do network
+ *	order byte swapping.
+ */
+#$d_htonl HAS_HTONL		/**/
+#$d_htonl HAS_HTONS		/**/
+#$d_htonl HAS_NTOHL		/**/
+#$d_htonl HAS_NTOHS		/**/
 
 /* HAS_ISASCII:
  *	This manifest constant lets the C program know that the
@@ -886,11 +832,64 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  */
 #$d_isascii HAS_ISASCII		/**/
 
+/* HAS_READDIR:
+ *	This symbol, if defined, indicates that the readdir routine is
+ *	available to read directory entries. You may have to include
+ *	<dirent.h>. See I_DIRENT.
+ */
+#$d_readdir HAS_READDIR		/**/
+
+/* HAS_SEEKDIR:
+ *	This symbol, if defined, indicates that the seekdir routine is
+ *	available. You may have to include <dirent.h>. See I_DIRENT.
+ */
+#$d_seekdir HAS_SEEKDIR		/**/
+
+/* HAS_TELLDIR:
+ *	This symbol, if defined, indicates that the telldir routine is
+ *	available. You may have to include <dirent.h>. See I_DIRENT.
+ */
+#$d_telldir HAS_TELLDIR		/**/
+
+/* HAS_REWINDDIR:
+ *	This symbol, if defined, indicates that the rewinddir routine is
+ *	available. You may have to include <dirent.h>. See I_DIRENT.
+ */
+#$d_rewinddir HAS_REWINDDIR		/**/
+
+/* HAS_SAFE_BCOPY:
+ *	This symbol, if defined, indicates that the bcopy routine is available
+ *	to copy potentially overlapping memory blocks. Otherwise you should
+ *	probably use memmove() or memcpy(). If neither is defined, roll your
+ *	own version.
+ */
+#$d_safebcpy HAS_SAFE_BCOPY	/**/
+
+/* HAS_SAFE_MEMCPY:
+ *	This symbol, if defined, indicates that the memcpy routine is available
+ *	to copy potentially overlapping memory blocks. Otherwise you should
+ *	probably use memmove() or memcpy(). If neither is defined, roll your
+ *	own version.
+ */
+#$d_safemcpy HAS_SAFE_MEMCPY	/**/
+
 /* HAS_SETLOCALE:
  *	This symbol, if defined, indicates that the setlocale routine is
  *	available to handle locale-specific ctype implementations.
  */
 #$d_setlocale HAS_SETLOCALE	/**/
+
+/* HAS_SHMAT:
+ *	This symbol, if defined, indicates that the shmat() routine is
+ *	available to attach a shared memory segment to the process space.
+ */
+#$d_shmat HAS_SHMAT		/**/
+
+/* VOIDSHMAT:
+ *	This symbol, if defined, indicates that the shmat() routine
+ *	returns a pointer of type void*.  Otherwise, char* is assumed.
+ */
+#$d_voidshmat	VOIDSHMAT		/**/
 
 /* HAS_STRERROR:
  *	This symbol, if defined, indicates that the strerror routine is
@@ -914,6 +913,11 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
 #else
 #$d_strerrm Strerror(e) ((e)<0||(e)>=sys_nerr?"unknown":sys_errlist[e]) /**/
 #endif
+
+/* HAS_VFORK:
+ *	This symbol, if defined, indicates that vfork() exists.
+ */
+#$d_vfork HAS_VFORK	/**/
 
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
@@ -942,10 +946,100 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
 #define GROUPSTYPE $groupstype	/* Type for 2nd arg to getgroups() */
 #endif
 
+/* I_DLFCN:
+ *	This symbol, if defined, indicates that <dlfcn.h> exists and should
+ *	be included.
+ */
+#$i_dlfcn I_DLFCN		/**/
+
+/* I_MEMORY:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <memory.h>.
+ */
+#$i_memory I_MEMORY		/**/
+
+/* I_NET_ERRNO:
+ *	This symbol, if defined, indicates that <net/errno.h> exists and 
+ *	should be included.
+ */
+#$i_neterrno I_NET_ERRNO		/**/
+
+/* I_PWD:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <pwd.h>.
+ */
+/* PWQUOTA:
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_quota.
+ */
+/* PWAGE:
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_age.
+ */
+/* PWCHANGE:
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_change.
+ */
+/* PWCLASS:
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_class.
+ */
+/* PWEXPIRE:
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_expire.
+ */
+/* PWCOMMENT:
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_comment.
+ */
+#$i_pwd I_PWD		/**/
+#$d_pwquota PWQUOTA	/**/
+#$d_pwage PWAGE	/**/
+#$d_pwchange PWCHANGE	/**/
+#$d_pwclass PWCLASS	/**/
+#$d_pwexpire PWEXPIRE	/**/
+#$d_pwcomment PWCOMMENT	/**/
+
+/* I_TERMIO:
+ *	This symbol, if defined, indicates that the program should include
+ *	<termio.h> rather than <sgtty.h>.  There are also differences in
+ *	the ioctl() calls that depend on the value of this symbol.
+ */
+/* I_TERMIOS:
+ *	This symbol, if defined, indicates that the program should include
+ *	the POSIX termios.h rather than sgtty.h or termio.h.
+ *	There are also differences in the ioctl() calls that depend on the
+ *	value of this symbol.
+ */
+/* I_SGTTY:
+ *	This symbol, if defined, indicates that the program should include
+ *	<sgtty.h> rather than <termio.h>.  There are also differences in
+ *	the ioctl() calls that depend on the value of this symbol.
+ */
+#$i_termio I_TERMIO		/**/
+#$i_termios I_TERMIOS		/**/
+#$i_sgtty I_SGTTY		/**/
+
+/* I_VFORK:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include vfork.h.
+ */
+#$i_vfork I_VFORK	/**/
+
+/* LOC_SED:
+ *	This symbol holds the complete pathname to the sed program.
+ */
+#define LOC_SED 	"$sed"	/**/
+
 /* Malloc_t:
  *	This symbol is the type of pointer returned by malloc and realloc.
  */
 #define Malloc_t $malloctype			/**/
+
+/* MYMALLOC:
+ *	This symbol, if defined, indicates that we're using our own malloc.
+ */
+#$d_mymalloc MYMALLOC			/**/
 
 /* CAN_PROTOTYPE:
  *	If defined, this macro indicates that the C compiler can handle
@@ -955,6 +1049,16 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
 #ifdef CAN_PROTOTYPE
 #else
 #endif
+
+/* SIG_NAME:
+ *	This symbol contains a list of signal names in order. This is intended
+ *	to be used as a static array initialization, like this:
+ *		char *sig_name[] = { SIG_NAME };
+ *	The signals in the list are separated with commas, and each signal
+ *	is surrounded by double quotes. There is no leading SIG in the signal
+ *	name, i.e. SIGQUIT is known as "QUIT".
+ */
+#define SIG_NAME "`echo $sig_name | sed 's/ /","/g'`"	/**/
 
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this
@@ -973,11 +1077,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  *	level of void support necessary is not present, defines void to int.
  */
 #ifndef VOIDUSED
-#  ifdef VOIDWANT
-#    define VOIDUSED VOIDWANT
-#  else
-#    define VOIDUSED $defvoidused
-#  endif
+#  define VOIDUSED $defvoidused
 #endif
 #define VOIDFLAGS $voidflags
 #if (VOIDFLAGS & VOIDUSED) != VOIDUSED
@@ -995,6 +1095,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
  * obsolete symbols may end without notice.
  */
 
+#ifdef MEM_ALIGNBYTES
+#define ALIGNBYTES MEM_ALIGNBYTES
+#endif
+
 #ifdef USE_CHAR_VSPRINTF
 #define CHARVSPRINTF USE_CHAR_VSPRINTF
 #endif
@@ -1007,8 +1111,32 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
 #define HAS_GDBM I_GDBM
 #endif
 
+#ifdef I_NDBM
+#define HAS_NDBM I_NDBM
+#endif
+
+#ifdef I_DBM
+#define HAS_ODBM I_DBM
+#endif
+
+#ifdef I_SYS_IOCTL
+#define I_SYSIOCTL I_SYS_IOCTL
+#endif
+
+#ifdef Malloc_t
+#define MALLOCPTRTYPE Malloc_t
+#endif
+
+#ifdef USE_OLDSOCKET
+#define OLDSOCKET USE_OLDSOCKET
+#endif
+
 #ifdef HAS_SAFE_BCOPY
 #define SAFE_BCOPY HAS_SAFE_BCOPY
+#endif
+
+#ifdef HAS_SAFE_MEMCPY
+#define SAFE_MEMCPY HAS_SAFE_MEMCPY
 #endif
 
 #ifdef USE_STAT_BLOCKS
@@ -1017,6 +1145,14 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#define!' -e 's!^#un-def!#undef!'
 
 #ifdef USE_STD_STDIO
 #define STDSTDIO USE_STD_STDIO
+#endif
+
+#ifdef USE_STRUCT_COPY
+#define STRUCTCOPY USE_STRUCT_COPY
+#endif
+
+#ifdef HAS_SYSTEM
+#define SYSTEM HAS_SYSTEM
 #endif
 
 #ifdef Uid_t

@@ -120,6 +120,7 @@ require Exporter;
 # Internals.
 
 	*PERL_VERSION				= \$]	;
+	*ACCUMULATOR				= \$^A	;
 	*DEBUGGING				= \$^D	;
 	*SYSTEM_FD_MAX				= \$^F	;
 	*INPLACE_EDIT				= \$^I	;

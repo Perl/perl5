@@ -1,6 +1,0 @@
-@S = (0, 1, 2, 3);
-for ("A", "D", "b", "c") { $foo{$i++} = $_; }
-# for (sort { lc($foo{$a}) cmp  lc($foo{$b}) } @S) { print $foo{$_}, "\n"; }
-for (sort Alpha @S)      { print $foo{$_}, "\n"; }
-
-sub Alpha { lc($foo{$a}) cmp  lc($foo{$b}); }

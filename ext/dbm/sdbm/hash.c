@@ -7,6 +7,7 @@
  * hashing routine
  */
 
+#include "config.h"
 #include "sdbm.h"
 /*
  * polynomial conversion ignoring overflows

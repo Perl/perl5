@@ -19,7 +19,9 @@ typedef void* ODBM_File;
 
 static int dbmrefcnt;
 
+#ifndef DBM_REPLACE
 #define DBM_REPLACE 0
+#endif
 
 static int
 XS_ODBM_File_odbm_new(ix, ax, items)
@@ -72,8 +74,11 @@ register int items;
     {
 	ODBM_File	db;
 
-	if (SvROK(ST(1)))
-	    db = (ODBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
+	if (SvROK(ST(1))) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV(ST(1)));
+	    db = (ODBM_File) tmp;
+	}
 	else
 	    croak("db is not a reference");
 	dbmrefcnt--;
@@ -96,8 +101,11 @@ register int items;
 	datum	key;
 	datum	RETVAL;
 
-	if (sv_isa(ST(1), "ODBM_File"))
-	    db = (ODBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
+	if (sv_isa(ST(1), "ODBM_File")) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV(ST(1)));
+	    db = (ODBM_File) tmp;
+	}
 	else
 	    croak("db is not of type ODBM_File");
 
@@ -127,8 +135,11 @@ register int items;
 	int	flags;
 	int	RETVAL;
 
-	if (sv_isa(ST(1), "ODBM_File"))
-	    db = (ODBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
+	if (sv_isa(ST(1), "ODBM_File")) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV(ST(1)));
+	    db = (ODBM_File) tmp;
+	}
 	else
 	    croak("db is not of type ODBM_File");
 
@@ -165,8 +176,11 @@ register int items;
 	datum	key;
 	int	RETVAL;
 
-	if (sv_isa(ST(1), "ODBM_File"))
-	    db = (ODBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
+	if (sv_isa(ST(1), "ODBM_File")) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV(ST(1)));
+	    db = (ODBM_File) tmp;
+	}
 	else
 	    croak("db is not of type ODBM_File");
 
@@ -193,8 +207,11 @@ register int items;
 	ODBM_File	db;
 	datum	RETVAL;
 
-	if (sv_isa(ST(1), "ODBM_File"))
-	    db = (ODBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
+	if (sv_isa(ST(1), "ODBM_File")) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV(ST(1)));
+	    db = (ODBM_File) tmp;
+	}
 	else
 	    croak("db is not of type ODBM_File");
 
@@ -219,8 +236,11 @@ register int items;
 	datum	key;
 	datum	RETVAL;
 
-	if (sv_isa(ST(1), "ODBM_File"))
-	    db = (ODBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
+	if (sv_isa(ST(1), "ODBM_File")) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV(ST(1)));
+	    db = (ODBM_File) tmp;
+	}
 	else
 	    croak("db is not of type ODBM_File");
 

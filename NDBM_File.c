@@ -42,8 +42,11 @@ register int items;
     {
 	NDBM_File	db;
 
-	if (SvROK(ST(1)))
-	    db = (NDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
+	if (SvROK(ST(1))) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV(ST(1)));
+	    db = (NDBM_File) tmp;
+	}
 	else
 	    croak("db is not a reference");
 	dbm_close(db);
@@ -65,8 +68,11 @@ register int items;
 	datum	key;
 	datum	RETVAL;
 
-	if (sv_isa(ST(1), "NDBM_File"))
-	    db = (NDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
+	if (sv_isa(ST(1), "NDBM_File")) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV(ST(1)));
+	    db = (NDBM_File) tmp;
+	}
 	else
 	    croak("db is not of type NDBM_File");
 
@@ -96,8 +102,11 @@ register int items;
 	int	flags;
 	int	RETVAL;
 
-	if (sv_isa(ST(1), "NDBM_File"))
-	    db = (NDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
+	if (sv_isa(ST(1), "NDBM_File")) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV(ST(1)));
+	    db = (NDBM_File) tmp;
+	}
 	else
 	    croak("db is not of type NDBM_File");
 
@@ -134,8 +143,11 @@ register int items;
 	datum	key;
 	int	RETVAL;
 
-	if (sv_isa(ST(1), "NDBM_File"))
-	    db = (NDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
+	if (sv_isa(ST(1), "NDBM_File")) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV(ST(1)));
+	    db = (NDBM_File) tmp;
+	}
 	else
 	    croak("db is not of type NDBM_File");
 
@@ -162,8 +174,11 @@ register int items;
 	NDBM_File	db;
 	datum	RETVAL;
 
-	if (sv_isa(ST(1), "NDBM_File"))
-	    db = (NDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
+	if (sv_isa(ST(1), "NDBM_File")) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV(ST(1)));
+	    db = (NDBM_File) tmp;
+	}
 	else
 	    croak("db is not of type NDBM_File");
 
@@ -188,8 +203,11 @@ register int items;
 	datum	key;
 	datum	RETVAL;
 
-	if (sv_isa(ST(1), "NDBM_File"))
-	    db = (NDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
+	if (sv_isa(ST(1), "NDBM_File")) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV(ST(1)));
+	    db = (NDBM_File) tmp;
+	}
 	else
 	    croak("db is not of type NDBM_File");
 
@@ -216,8 +234,11 @@ register int items;
 	NDBM_File	db;
 	int	RETVAL;
 
-	if (sv_isa(ST(1), "NDBM_File"))
-	    db = (NDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
+	if (sv_isa(ST(1), "NDBM_File")) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV(ST(1)));
+	    db = (NDBM_File) tmp;
+	}
 	else
 	    croak("db is not of type NDBM_File");
 
@@ -241,8 +262,11 @@ register int items;
 	NDBM_File	db;
 	int	RETVAL;
 
-	if (sv_isa(ST(1), "NDBM_File"))
-	    db = (NDBM_File)(unsigned long)SvNV((SV*)SvRV(ST(1)));
+	if (sv_isa(ST(1), "NDBM_File")) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV(ST(1)));
+	    db = (NDBM_File) tmp;
+	}
 	else
 	    croak("db is not of type NDBM_File");
 

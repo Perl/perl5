@@ -11,27 +11,22 @@
 static char rcsid[] = "$Id: sdbm.c,v 1.16 90/12/13 13:01:31 oz Exp $";
 #endif
 
+#include "config.h"
 #include "sdbm.h"
 #include "tune.h"
 #include "pair.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#ifdef BSD42
-#include <sys/file.h>
+#ifdef I_FCNTL
+# include <fcntl.h>
+#endif
+#ifdef I_SYS_FILE
+# include <sys/file.h>
+#endif
+
+#ifdef I_STRING
+# include <string.h>
 #else
-#include <fcntl.h>
-#include <memory.h>
-#endif
-#include <errno.h>
-#include <string.h>
-
-#ifdef __STDC__
-#include <stddef.h>
-#endif
-
-#ifndef NULL
-#define NULL	0
+# include <strings.h>
 #endif
 
 /*
@@ -41,9 +36,9 @@ static char rcsid[] = "$Id: sdbm.c,v 1.16 90/12/13 13:01:31 oz Exp $";
 extern int errno;
 #endif
 
-extern char *malloc proto((unsigned int));
+extern Malloc_t malloc proto((MEM_SIZE));
 extern void free proto((void *));
-extern long lseek();
+extern Off_t lseek();
 
 /*
  * forward
@@ -522,3 +517,4 @@ register DBM *db;
 
 	return ioerr(db), nullitem;
 }
+

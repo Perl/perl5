@@ -17,14 +17,16 @@ case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
 
-case "$d_symlink" in
-*define*) sln='ln -s' ;;
-*) sln='ln';;
-esac
-
 case "$d_dosuid" in
 *define*) suidperl='suidperl' ;;
 *) suidperl='';;
+esac
+
+: Certain parts of Makefile need to be commented out if dynamic
+: loading is not used.
+case "$usedl" in
+define) comment='' ;;
+*)	comment='#' ;;
 esac
 
 echo "Extracting Makefile (with variable substitutions)"
@@ -33,9 +35,13 @@ echo "Extracting Makefile (with variable substitutions)"
 : Protect any dollar signs and backticks that you do not want interpreted
 : by putting a backslash in front.  You may delete these comments.
 $spitshell >Makefile <<!GROK!THIS!
-# : Makefile.SH,v 15738Revision: 4.1 15738Date: 92/08/07 17:18:08 $
+# $Makefile.SH,v $Revision: 4.1 $Date: 92/08/07 17:18:08 $
+# This file is derived from Makefile.SH.  Any changes made here will
+# be lost the next time you run Configure.
+#  Makefile is used to generate makefile.  The only difference
+#  is that makefile has the dependencies filled in at the end.
 #
-# $Log:	Makefile.SH,v $
+# \$Log:	Makefile.SH,v \$
 # Revision 4.1  92/08/07  17:18:08  lwall
 # Stage 6 Snapshot
 # 
@@ -71,14 +77,24 @@ mansrc = $mansrc
 manext = $manext
 LDFLAGS = $ldflags
 CLDFLAGS = $ldflags
+
 SMALL = $small
 LARGE = $large $split
 mallocsrc = $mallocsrc
 mallocobj = $mallocobj
 dlsrc = $dlsrc
 dlobj = $dlobj
-SLN = $sln
+dldir = $dldir
+LNS = $lns
 RMS = rm -f
+ranlib = $ranlib
+
+# The following are used to build and install shared libraries for
+# dynamic loading.
+LDDLFLAGS = $lddlflags
+CCDLFLAGS = $ccdlflags
+CCCDLFLAGS = $cccdlflags
+SHLIBSUFFIX = $shlibsuffix
 
 libs = $libs $cryptlib
 
@@ -86,11 +102,11 @@ public = perl $suidperl
 
 shellflags = $shellflags
 
-# To use an alternate make, set $altmake in config.sh.
+## To use an alternate make, set $altmake in config.sh.
 MAKE = ${altmake-make}
 !GROK!THIS!
 
-: In the following dollars and backticks do not need the extra backslash.
+## In the following dollars and backticks do not need the extra backslash.
 $spitshell >>Makefile <<'!NO!SUBS!'
 
 CCCMD = `sh $(shellflags) cflags $@`
@@ -103,7 +119,7 @@ manpages = perl.man h2ph.man
 
 util =
 
-sh = Makefile.SH makedepend.SH h2ph.SH
+sh = Makefile.SH cflags.SH embed_h.SH makedepend.SH makedir.SH writemain.SH
 
 h1 = EXTERN.h INTERN.h av.h cop.h config.h embed.h form.h handy.h
 h2 = hv.h op.h opcode.h perl.h regcomp.h regexp.h gv.h sv.h util.h
@@ -118,19 +134,19 @@ c1 = av.c scope.c op.c doop.c doio.c dump.c hv.c
 c2 = $(mallocsrc) mg.c perly.c pp.c regcomp.c regexec.c
 c3 = gv.c sv.c taint.c toke.c util.c deb.c run.c
 
-c = $(c1) $(c2) $(c3)
+c = $(c1) $(c2) $(c3) $(dlsrc) miniperlmain.c perlmain.c
 
 s1 = av.c scope.c op.c doop.c doio.c dump.c hv.c
-s2 = $(mallocobj) mg.c perly.c pp.c regcomp.c regexec.c
+s2 = $(mallocsrc) mg.c perly.c pp.c regcomp.c regexec.c
 s3 = gv.c sv.c taint.c toke.c util.c deb.c run.c perly.c
 
-saber = $(s1) $(s2) $(s3)
+saber = $(s1) $(s2) $(s3) $(dlsrc)
 
 obj1 = av.o scope.o op.o doop.o doio.o dump.o hv.o
 obj2 = $(mallocobj) mg.o perly.o pp.o regcomp.o regexec.o
 obj3 = gv.o sv.o taint.o toke.o util.o deb.o run.o
 
-obj = $(obj1) $(obj2) $(obj3) $(dlobj)
+obj = $(obj1) $(obj2) $(obj3)
 
 lintflags = -hbvxac
 
@@ -139,82 +155,126 @@ addedbyconf = Makefile.old bsd eunice filexp loc pdp11 usg v7
 # grrr
 SHELL = /bin/sh
 
-.SUFFIXES: .x
-
 .c.o:
 	$(CCCMD) $*.c
-
-.x.c:
-	sh writemain $*.x >$*.c
 
 all: miniperl perl lib/Config.pm
 
 #all: $(public) $(private) $(util) $(scripts)
 #	cd x2p; $(MAKE) all
 #	touch all
+
+# Phony target to force checking subdirectories.
+FORCE:
+
 !NO!SUBS!
+
+### Some makes have problems with the following dependency
+### if $(dlsrc) or $(dlobj) is empty.
+### Therefore, comment it out if dlsrc is null.
+### 
+$spitshell >>Makefile <<!GROK!THIS!
+${comment}
+${comment}\$(dlsrc): \$(dldir)/\$(dlsrc)
+${comment}	cp \$(dldir)/\$(dlsrc) \$(dlsrc)
+
+${comment}\$(dlobj): \$(dlsrc)
+${comment}	\$(CCCMD) \$(dlsrc)
+
+!GROK!THIS!
+
 ###
 ### Boilerplate for all the .xs files in the ext directory.  
 ### XXX FIXME:  At some point we also need to copy .pm files out of 
 ### XXX the ext directory into lib.
-#  Configure sets extensions to a string like
-# "ext/dbm/NDBM_File.xs ext/dbm/ODBM_File.xs ext/dbm/GDBM_File.xs \
-#  ext/dbm/SDBM_File.xs ext/posix/POSIX.xs"
-extobjs=" "
+### XXX FIXME:  At some point we need to run autosplit on the .pm
+### XXX files.
+### Configure sets extensions to a string like
+### "ext/dbm/NDBM_File.xs ext/dbm/ODBM_File.xs ext/dbm/GDBM_File.xs \
+###  ext/dbm/SDBM_File.xs ext/posix/POSIX.xs"
+ext=" "
+extdep=" "
+extobj=" "
+extsrc=" "
+# extradep gives any extra dependencies of this extension.
+# extraobj gives any extra thinks to link with this extension.
 for f in $extensions
 do
-    base=`basename $f .xs`
-    dir=`dirname $f`
-    extobjs="$extobjs $f.o"
+    base=`echo $f | $sed -e 's@.*/\(.*\).xs@\1@'`
+    ext="$ext $base"
+    extsrc="$extsrc $base.c"
+    case $base in
+        SDBM_File) extradep="ext/dbm/sdbm/libsdbm.a"
+                   extraobj="ext/dbm/sdbm/libsdbm.a" ;;
+        POSIX) extradep=""   
+	       extraobj="-lm" ;;
+        *) extradep=""
+	   extraobj="" ;;
+    esac
+    case "$usedl" in
+	define) extdep="$extdep lib/auto/$base/${base}\$(SHLIBSUFFIX)"
+                ;;
+	*)	extdep="$extdep $base.o $extradep"
+      		extobj="$extobj $base.o $extraobj" ;; 
+    esac
+    
     $spitshell >>Makefile <<!GROK!THIS!
 
 # $base extension
+$base.o: $base.c
+	\$(CCCMD) \$(CCCDLFLAGS) \$*.c
+
 $base.c:	$f ext/xsubpp ext/typemap
 	test -f miniperl || make miniperl
-	ext/xsubpp $f >tmp
+	./miniperl ext/xsubpp $f >tmp
 	mv tmp $base.c
 
-$base.o: $base.c
+${comment}lib/auto/$base/$base\$(SHLIBSUFFIX): $base.o $extradep
+${comment}	test -d lib/auto/$base || mkdir lib/auto/$base
+${comment}	ld \$(LDDLFLAGS) -o \$@ $base.o $extraobj
 !GROK!THIS!
 
-    case $base in
-    SDBM_File) $spitshell >>Makefile <<'!NO!SUBS!'
-
-lib/auto/SDBM_File/SDBM_File.so: SDBM_File.o ext/dbm/sdbm/libsdbm.a
-	@- mkdir lib/auto/SDBM_File 2>/dev/null
-	ld -o lib/auto/SDBM_File/SDBM_File.so SDBM_File.o ext/dbm/sdbm/libsdbm.a
-
-ext/dbm/sdbm/libsdbm.a: ext/dbm/sdbm/sdbm.c ext/dbm/sdbm/sdbm.h
-	cd ext/dbm/sdbm; $(MAKE) sdbm
-!NO!SUBS!
-    ;;
-    POSIX) $spitshell >>Makefile <<'!NO!SUBS!'
-lib/auto/POSIX/POSIX.so: POSIX.o ext/dbm/sdbm/libsdbm.a
-	@- mkdir lib/auto/POSIX 2>/dev/null
-	ld -o lib/auto/POSIX/POSIX.so POSIX.o ext/dbm/sdbm/libsdbm.a
-!NO!SUBS!
-    ;;
-    esac
 done
 
-echo "extobjs=$extobjs" >> Makefile
+$spitshell >>Makefile <<!GROK!THIS!
 
+# List of extensions (used by writemain) to generate perlmain.c
+ext=$ext
+extsrc=$extsrc
+# Extension dependencies.
+extdep=$extdep
+# How to include extensions in linking command
+extobj=$extobj
+
+ext/dbm/sdbm/libsdbm.a: ext/dbm/sdbm/sdbm.h ext/dbm/sdbm/sdbm.c
+	cd ext/dbm/sdbm; \$(MAKE) -f Makefile libsdbm.a
+
+!GROK!THIS!
+
+### Now on to the rest of the Makefile.
 $spitshell >>Makefile <<'!NO!SUBS!'
 # The $& notation tells Sequent machines that it can do a parallel make,
 # and is harmless otherwise.
 
-miniperlmain.c: miniperlmain.x
-miniperlmain.o: miniperlmain.c
 miniperl: $& miniperlmain.o perl.o $(obj)
 	$(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain.o perl.o $(obj) $(libs)
 
-perlmain.c: perlmain.x
+perlmain.c: miniperlmain.c
+	sh writemain $(ext) > perlmain.c
+
 perlmain.o: perlmain.c
-perl: $& perlmain.o perl.o $(obj) NDBM_File.o ODBM_File.o POSIX.o
-	$(CC) $(LARGE) $(CLDFLAGS) -o perl perlmain.o perl.o $(obj) NDBM_File.o ODBM_File.o POSIX.o $(libs)
+
+perl: $& perlmain.o perl.o $(obj) $(dlobj) $(extdep)
+	$(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o perl perlmain.o perl.o $(obj) $(dlobj) $(extobj) $(libs)
+
+pureperl: $& perlmain.o perl.o $(obj) $(dlobj) $(extdep)
+	purify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o pureperl perlmain.o perl.o $(obj) $(dlobj) $(extobj) $(libs)
+
+quantperl: $& perlmain.o perl.o $(obj) $(dlobj) $(extdep)
+	quantify $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o quantperl perlmain.o perl.o $(obj) $(dlobj) $(extobj) $(libs)
 
 libperl.rlb: libperl.a
-	ranlib libperl.a
+	$(ranlib) libperl.a
 	touch libperl.rlb
 
 libperl.a: $& perl.o $(obj)
@@ -225,11 +285,11 @@ libperl.a: $& perl.o $(obj)
 # checks as well as the special code to validate that the script in question
 # has been invoked correctly.
 
-suidperl: $& sperl.o main.o libperl.rlb
-	$(CC) $(LARGE) $(CLDFLAGS) sperl.o main.o libperl.a $(libs) -o suidperl
+suidperl: $& sperl.o perlmain.o libperl.rlb
+	$(CC) $(LARGE) $(CLDFLAGS) sperl.o perlmain.o libperl.a $(libs) -o suidperl
 
-lib/Config.pm: config.sh
-	./configpm
+lib/Config.pm: config.sh miniperl
+	./miniperl configpm
 
 saber: $(saber)
 	# load $(saber)
@@ -237,25 +297,16 @@ saber: $(saber)
 
 sperl.o: perl.c perly.h patchlevel.h $(h)
 	$(RMS) sperl.c
-	$(SLN) perl.c sperl.c
+	$(LNS) perl.c sperl.c
 	$(CCCMD) -DIAMSUID sperl.c
 	$(RMS) sperl.c
 
-dl.o: ext/dl/dl.c
-	cp ext/dl/dl.c dl.c
-	$(CC) -c dl.c
-
-!NO!SUBS!
-
-### Now on to the rest of the Makefile.
-$spitshell >>Makefile <<'!NO!SUBS!'
-    
 perly.h: perly.c
 	@ echo Dummy dependency for dumb parallel make
 	touch perly.h
 
 opcode.h: opcode.pl
-	- opcode.pl
+	- perl opcode.pl
 
 embed.h: embed_h.SH global.sym interp.sym
 	sh embed_h.SH
@@ -274,14 +325,21 @@ install: all
 	./perl installperl
 
 clean:
-	rm -f *.o all perl taintperl suidperl miniperl
+	rm -f *.o all perl miniperl
+	rm -f POSIX.c ?DBM_File.c perlmain.c
+	rm -f ext/dbm/sdbm/libsdbm.a
+	cd ext/dbm/sdbm; $(MAKE) -f Makefile clean
 	cd x2p; $(MAKE) clean
 
 realclean: clean
 	cd x2p; $(MAKE) realclean
+	cd ext/dbm/sdbm; $(MAKE) -f Makefile realclean
 	rm -f *.orig */*.orig *~ */*~ core $(addedbyconf) h2ph h2ph.man
-	rm -f perly.h t/perl Makefile config.h makedepend makedir
-	rm -f makefile x2p/Makefile x2p/makefile cflags x2p/cflags
+	rm -f Makefile cflags embed_h makedepend makedir writemain
+	rm -f config.h t/perl makefile makefile.old cflags 
+	rm -rf lib/auto/?DBM_File lib/auto/POSIX
+	rm -f x2p/Makefile x2p/makefile x2p/makefile.old x2p/cflags
+	rm -f lib/Config.pm
 	rm -f c2ph pstruct
 
 # The following lint has practically everything turned on.  Unfortunately,
@@ -298,28 +356,28 @@ depend: makedepend
 	- test -s perly.h || /bin/rm -f perly.h
 	cd x2p; $(MAKE) depend
 
-test: perl
+test: perl lib/Config.pm
 	- cd t && chmod +x TEST */*.t
-	- cd t && (rm -f perl; $(SLN) ../perl perl) && ./perl TEST </dev/tty
+	- cd t && (rm -f perl; $(LNS) ../perl perl) && ./perl TEST </dev/tty
 
-clist:
+clist:	$(c)
 	echo $(c) | tr ' ' '\012' >.clist
 
-hlist:
+hlist:  $(h)
 	echo $(h) | tr ' ' '\012' >.hlist
 
-shlist:
+shlist: $(sh)
 	echo $(sh) | tr ' ' '\012' >.shlist
 
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 # If this runs make out of memory, delete /usr/include lines.
 !NO!SUBS!
 
-$eunicefix Makefile4
+$eunicefix Makefile
 case `pwd` in
 *SH)
-    $rm -f ../Makefile4
-    ln Makefile4 ../Makefile4
+    $rm -f ../Makefile
+    ln Makefile ../Makefile
     ;;
 esac
 rm -f makefile

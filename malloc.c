@@ -64,7 +64,7 @@ static int morecore();
  */
 union	overhead {
 	union	overhead *ov_next;	/* when free */
-#if ALIGNBYTES > 4
+#if MEM_ALIGNBYTES > 4
 	double	strut;			/* alignment problems */
 #endif
 	struct {

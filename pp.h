@@ -153,21 +153,14 @@
 				sp = stack_base + AvFILL(t);		\
 				stack = t;
 
-/* XXX need to diffentiate on marked operators? */
-#define FETCH_GV(s)  PUTBACK, s = fetch_gv(op,1), SPAGAIN
-#define FETCH_GV1(s) PUTBACK, s = fetch_gv(op,1), SPAGAIN
-#define FETCH_GV2(s) PUTBACK, s = fetch_gv(op,2), SPAGAIN
-#define FETCH_IO(s)  PUTBACK, s = fetch_io(op,1), SPAGAIN
-#define FETCH_IO1(s) PUTBACK, s = fetch_io(op,1), SPAGAIN
-#define FETCH_IO2(s) PUTBACK, s = fetch_io(op,2), SPAGAIN
-
 #define ENTER push_scope()
 #define LEAVE pop_scope()
 
 #define SAVEINT(i) save_int((int*)(&i));
-#define SAVEI32(i) save_int((I32*)(&i));
-#define SAVELONG(l) save_int((long*)(&l));
+#define SAVEI32(i) save_I32((I32*)(&i));
+#define SAVELONG(l) save_long((long*)(&l));
 #define SAVESPTR(s) save_sptr((SV**)(&s))
+#define SAVEPPTR(s) save_pptr((char**)(&s))
 #define SAVETMPS save_int(&tmps_floor), tmps_floor = tmps_ix
 #define SAVEFREESV(s) save_freesv((SV*)(s))
 #define SAVEFREEOP(o) save_freeop((OP*)(o))

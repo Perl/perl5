@@ -82,6 +82,7 @@ more_sv()
     register SV* svend;
     sv_root = (SV*)safemalloc(1012);
     sv = sv_root;
+    Zero(sv, 1012, char);
     svend = &sv[1008 / sizeof(SV) - 1];
     while (sv < svend) {
 	SvANY(sv) = (SV*)(sv + 1);
@@ -127,6 +128,8 @@ sv_clean_refs()
 		SvFLAGS(SvRV(sv)) |= SVf_BREAK;
 		SvFLAGS(sv) |= SVf_BREAK;
 		SvREFCNT_dec(sv);
+		assert(sv_root == sv);
+		sv_root = (SV*)SvANY(sv);	/* MUST NOT REUSE */
 	    }
 	    ++sv;
 	}
@@ -157,10 +160,13 @@ static XPVIV* more_xiv();
 static XPVIV*
 new_xiv()
 {
-    I32* xiv;
+    I32** xiv;
     if (xiv_root) {
 	xiv = xiv_root;
-	xiv_root = *(I32**)xiv;
+	/*
+	 * See comment in more_xiv() -- RAM.
+	 */
+	xiv_root = (I32**)*xiv;
 	return (XPVIV*)((char*)xiv - sizeof(XPV));
     }
     return more_xiv();
@@ -170,26 +176,25 @@ static void
 del_xiv(p)
 XPVIV* p;
 {
-    I32* xiv = (I32*)((char*)(p) + sizeof(XPV));
-    *(I32**)xiv = xiv_root;
+    I32** xiv = (I32**)((char*)(p) + sizeof(XPV));
+    *xiv = (I32 *)xiv_root;
     xiv_root = xiv;
 }
 
 static XPVIV*
 more_xiv()
 {
-    register int i;
-    register I32* xiv;
-    register I32* xivend;
-    xiv = (I32*)safemalloc(1008);
-    xivend = &xiv[1008 / sizeof(I32) - 1];
-    xiv += (sizeof(XPV) - 1) / sizeof(I32) + 1;   /* fudge by size of XPV */
+    register I32** xiv;
+    register I32** xivend;
+    xiv = (I32**)safemalloc(1008);
+    xivend = &xiv[1008 / sizeof(I32 *) - 1];
+    xiv += (sizeof(XPV) - 1) / sizeof(I32 *) + 1;   /* fudge by size of XPV */
     xiv_root = xiv;
     while (xiv < xivend) {
-	*(I32**)xiv = (I32*)(xiv + 1); /* XXX busted on Alpha? */
+	*xiv = (I32 *)(xiv + 1);
 	xiv++;
     }
-    *(I32**)xiv = 0;
+    *xiv = 0;
     return new_xiv();
 }
 
@@ -338,7 +343,7 @@ more_xpv()
 #define new_XIV() (void*)safemalloc(sizeof(XPVIV))
 #define del_XIV(p) free((char*)p)
 #else
-#define new_XIV() new_xiv()
+#define new_XIV() (void*)new_xiv()
 #define del_XIV(p) del_xiv(p)
 #endif
 
@@ -346,7 +351,7 @@ more_xpv()
 #define new_XNV() (void*)safemalloc(sizeof(XPVNV))
 #define del_XNV(p) free((char*)p)
 #else
-#define new_XNV() new_xnv()
+#define new_XNV() (void*)new_xnv()
 #define del_XNV(p) del_xnv(p)
 #endif
 
@@ -354,7 +359,7 @@ more_xpv()
 #define new_XRV() (void*)safemalloc(sizeof(XRV))
 #define del_XRV(p) free((char*)p)
 #else
-#define new_XRV() new_xrv()
+#define new_XRV() (void*)new_xrv()
 #define del_XRV(p) del_xrv(p)
 #endif
 
@@ -362,7 +367,7 @@ more_xpv()
 #define new_XPV() (void*)safemalloc(sizeof(XPV))
 #define del_XPV(p) free((char*)p)
 #else
-#define new_XPV() new_xpv()
+#define new_XPV() (void*)new_xpv()
 #define del_XPV(p) del_xpv(p)
 #endif
 
@@ -673,9 +678,9 @@ U32 mt;
 	IoIFP(sv)	= 0;
 	IoOFP(sv)	= 0;
 	IoDIRP(sv)	= 0;
-	IoLINES(sv)	= 60;
+	IoLINES(sv)	= 0;
 	IoPAGE(sv)	= 0;
-	IoPAGE_LEN(sv)	= 0;
+	IoPAGE_LEN(sv)	= 60;
 	IoLINES_LEFT(sv)= 0;
 	IoTOP_NAME(sv)	= 0;
 	IoTOP_GV(sv)	= 0;
@@ -846,7 +851,7 @@ unsigned long newlen;
     else
 	s = SvPVX(sv);
     if (newlen > SvLEN(sv)) {		/* need more room? */
-        if (SvLEN(sv))
+        if (SvLEN(sv) && s)
 	    Renew(s,newlen,char);
         else
 	    New(703,s,newlen,char);
@@ -1615,7 +1620,7 @@ sv_magic(register SV *sv, SV *obj, char how, char *name, I32 namlen)
     MAGIC* mg;
     
     if (SvTHINKFIRST(sv)) {
-	if (SvREADONLY(sv) && curcop != &compiling)
+	if (SvREADONLY(sv) && curcop != &compiling && !strchr("gB", how))
 	    croak(no_modify);
     }
     if (SvMAGICAL(sv)) {
@@ -1632,8 +1637,10 @@ sv_magic(register SV *sv, SV *obj, char how, char *name, I32 namlen)
     SvMAGIC(sv) = mg;
     if (obj == sv)
 	mg->mg_obj = obj;
-    else
+    else {
 	mg->mg_obj = SvREFCNT_inc(obj);
+	mg->mg_flags |= MGf_REFCOUNTED;
+    }
     mg->mg_type = how;
     mg->mg_len = namlen;
     if (name && namlen >= 0)
@@ -1880,7 +1887,7 @@ register SV *sv;
 	SAVESPTR(op);
 	curcop = &compiling;
 	curstash = SvSTASH(sv);
-	destructor = gv_fetchpv("DESTROY", FALSE);
+	destructor = gv_fetchpv("DESTROY", FALSE, SVt_PVCV);
 
 	if (destructor && GvCV(destructor)) {
 	    SV ref;
@@ -1905,6 +1912,7 @@ register SV *sv;
 		run();
 	    stack_sp--;
 	    SvREFCNT(sv) = 0;
+	    FREE_TMPS();
 	}
 	SvREFCNT_dec(SvSTASH(sv));
 	LEAVE;
@@ -1921,16 +1929,17 @@ register SV *sv;
 	goto freemagic;
     case SVt_PVGV:
 	gp_free(sv);
+	Safefree(GvNAME(sv));
 	goto freemagic;
     case SVt_PVCV:
-	cv_clear((CV*)sv);
+	cv_undef((CV*)sv);
 	goto freemagic;
     case SVt_PVHV:
-	hv_clear((HV*)sv);
+	hv_undef((HV*)sv);
 	SvPVX(sv)= 0;
 	goto freemagic;
     case SVt_PVAV:
-	av_clear((AV*)sv);
+	av_undef((AV*)sv);
 	SvPVX(sv)= 0;
 	goto freemagic;
     case SVt_PVLV:
@@ -2126,13 +2135,13 @@ register SV *str2;
 
     if (cur1 < cur2) {
 	/*SUPPRESS 560*/
-	if (retval = memcmp(pv1, pv2, cur1))
+	if (retval = memcmp((void*)pv1, (void*)pv2, cur1))
 	    return retval < 0 ? -1 : 1;
 	else
 	    return -1;
     }
     /*SUPPRESS 560*/
-    else if (retval = memcmp(pv1, pv2, cur2))
+    else if (retval = memcmp((void*)pv1, (void*)pv2, cur2))
 	return retval < 0 ? -1 : 1;
     else if (cur1 == cur2)
 	return 0;
@@ -2171,7 +2180,7 @@ I32 append;
 	    }
 	} while (i != EOF);
     }
-#ifdef STDSTDIO		/* Here is some breathtakingly efficient cheating */
+#ifdef USE_STD_STDIO		/* Here is some breathtakingly efficient cheating */
     cnt = fp->_cnt;			/* get count into register */
     SvPOK_only(sv);			/* validate pointer */
     if (SvLEN(sv) - append <= cnt + 1) { /* make sure we have the room */
@@ -2238,7 +2247,7 @@ thats_really_all_folks:
     *bp = '\0';
     SvCUR_set(sv, bp - SvPVX(sv));	/* set length */
 
-#else /* !STDSTDIO */	/* The big, slow, and stupid way */
+#else /* !USE_STD_STDIO */	/* The big, slow, and stupid way */
 
     {
 	char buf[8192];
@@ -2271,7 +2280,7 @@ screamer:
 	}
     }
 
-#endif /* STDSTDIO */
+#endif /* USE_STD_STDIO */
 
     if (rspara) {
         while (i != EOF) {
@@ -2646,7 +2655,7 @@ I32 lref;
 	if (isGV(sv))
 	    gv = (GV*)sv;
 	else
-	    gv = gv_fetchpv(SvPV(sv, na), lref);
+	    gv = gv_fetchpv(SvPV(sv, na), lref, SVt_PVCV);
 	*gvp = gv;
 	if (!gv)
 	    return Nullcv;
@@ -2695,6 +2704,17 @@ register SV *sv;
 }
 #endif /* SvTRUE */
 
+#ifndef SvIV
+I32 SvIV(Sv)
+register SV *Sv;
+{
+    if (SvIOK(Sv))
+	return SvIVX(Sv);
+    return sv_2iv(Sv);
+}
+#endif /* SvIV */
+
+
 #ifndef SvNV
 double SvNV(Sv)
 register SV *Sv;
@@ -2713,11 +2733,25 @@ sv_pvn(sv, lp)
 SV *sv;
 STRLEN *lp;
 {
-    if (SvPOK(sv))
+    if (SvPOK(sv)) {
+	*lp = SvCUR(sv);
 	return SvPVX(sv)
+    }
     return sv_2pv(sv, lp);
 }
 #endif
+
+int
+sv_isobject(sv)
+SV *sv;
+{
+    if (!SvROK(sv))
+	return 0;
+    sv = (SV*)SvRV(sv);
+    if (!SvOBJECT(sv))
+	return 0;
+    return 1;
+}
 
 int
 sv_isa(sv, name)
@@ -2770,6 +2804,13 @@ SV* sv;
     SvREFCNT_dec(SvRV(sv));
     SvRV(sv) = 0;
     SvROK_off(sv);
+    if (!(SvFLAGS(sv) & (SVp_IOK|SVp_NOK))) {
+	SvFLAGS(sv) &= ~SVf_OK;
+	if (SvTYPE(sv) == SVt_RV) {
+	    del_XRV(SvANY(sv));
+	    SvFLAGS(sv) &= ~SVTYPEMASK;	/* Make into type NULL. */
+	}
+    }
     --sv_rvcount;
 }
 

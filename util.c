@@ -51,7 +51,7 @@
 #include <signal.h>
 #endif
 
-#ifdef STANDARD_C
+#ifdef I_UNISTD
 #  include <unistd.h>
 #endif
 
@@ -86,10 +86,6 @@ MEM_SIZE size;
 #endif /* MSDOS */
 {
     char  *ptr;
-#ifndef STANDARD_C
-    char *malloc();
-#endif /* ! STANDARD_C */
-
 #ifdef MSDOS
 	if (size > 0xffff) {
 		fprintf(stderr, "Allocation too large: %lx\n", size) FLUSH;
@@ -810,7 +806,7 @@ mess(pat, args)
     SV *tmpstr;
     I32 usermess;
 #ifndef HAS_VPRINTF
-#ifdef CHARVSPRINTF
+#ifdef USE_CHAR_VSPRINTF
     char *vsprintf();
 #else
     I32 vsprintf();
@@ -992,7 +988,7 @@ char *f;
 }
 #endif
 
-#if !defined(HAS_BCOPY) || !defined(SAFE_BCOPY)
+#if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
 char *
 my_bcopy(from,to,len)
 register char *from;
@@ -1049,7 +1045,7 @@ register I32 len;
 #ifdef I_VARARGS
 #ifndef HAS_VPRINTF
 
-#ifdef CHARVSPRINTF
+#ifdef USE_CHAR_VSPRINTF
 char *
 #else
 int
@@ -1067,7 +1063,7 @@ char *dest, *pat, *args;
     fakebuf._flag = _IOWRT|_IOSTRG;
     _doprnt(pat, args, &fakebuf);	/* what a kludge */
     (void)putc('\0', &fakebuf);
-#ifdef CHARVSPRINTF
+#ifdef USE_CHAR_VSPRINTF
     return(dest);
 #else
     return 0;		/* perl doesn't use return value */
@@ -1287,7 +1283,7 @@ char	*mode;
 	    _exit(1);
 	}
 	/*SUPPRESS 560*/
-	if (tmpgv = gv_fetchpv("$",TRUE))
+	if (tmpgv = gv_fetchpv("$",TRUE, SVt_PV))
 	    sv_setiv(GvSV(tmpgv),(I32)getpid());
 	forkprocess = 0;
 	hv_clear(pidstatus);	/* we have no children */

@@ -42,7 +42,7 @@ typedef U16 PADOFFSET;
     char	op_flags;		\
     char	op_private;
 
-#define GIMME (op->op_flags & OPf_KNOW ? op->op_flags & OPf_LIST : getgimme(op))
+#define GIMME (op->op_flags & OPf_KNOW ? op->op_flags & OPf_LIST : cxstack[cxstack_ix].blk_gimme)
 
 /* Public flags */
 #define OPf_LIST	1	/* Do operator in list context. */
@@ -75,8 +75,11 @@ typedef U16 PADOFFSET;
 /* Private for OP_REPEAT */
 #define OPpREPEAT_DOLIST	1	/* List replication. */
 
-/* Private for OP_SUBR */
-#define OPpSUBR_DB		1	/* Debug subroutine. */
+/* Private for OP_ENTERSUBR, OP_RV2?V, OP_?ELEM */
+  /* (lower bits carry hints) */
+#define OPpDEREF_DB		32	/* Debug subroutine. */
+#define OPpDEREF_AV		64	/* Want ref to AV. */
+#define OPpDEREF_HV		128	/* Want ref to HV. */
 
 /* Private for OP_CONST */
 #define OPpCONST_BARE		1	/* Was a bare word (filehandle?). */
@@ -146,6 +149,7 @@ struct pmop {
 #define PMf_GLOBAL 256			/* pattern had a g modifier */
 #define PMf_RUNTIME 512			/* pattern coming in on the stack */
 #define PMf_EVAL 1024			/* evaluating replacement as expr */
+#define PMf_WHITE 2048			/* pattern is \s+ */
 
 struct svop {
     BASEOP

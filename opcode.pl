@@ -25,6 +25,7 @@ print "typedef enum {\n";
 for (@ops) {
     print "\t", &tab(3,"OP_\U$_,"), "/* ", $i++, " */\n";
 }
+print "\t", &tab(3,"OP_max"), "\n";
 print "} opcode;\n";
 print "\n#define MAXO ", scalar @ops, "\n\n"; 
 
@@ -213,35 +214,50 @@ defined		defined operator	ck_rfun		is	S?
 undef		undef operator		ck_lfun		s	S?
 study		study			ck_fun		st	S?
 
-preinc		preincrement		ck_lfun		s	S
-predec		predecrement		ck_lfun		s	S
-postinc		postincrement		ck_lfun		st	S
-postdec		postdecrement		ck_lfun		st	S
+preinc		preincrement		ck_lfun		Is	S
+i_preinc	integer preincrement	ck_lfun		is	S
+predec		predecrement		ck_lfun		Is	S
+i_predec	integer predecrement	ck_lfun		is	S
+postinc		postincrement		ck_lfun		Ist	S
+i_postinc	integer postincrement	ck_lfun		ist	S
+postdec		postdecrement		ck_lfun		Ist	S
+i_postdec	integer postdecrement	ck_lfun		ist	S
 
 # Ordinary operators.
 
-pow		exponentiation		ck_null		fst	S S
+pow		exponentiation		ck_null		Ifst	S S
 
-multiply	multiplication		ck_null		fst	S S
-divide		division		ck_null		fst	S S
-modulo		modulus			ck_null		ifst	S S
+multiply	multiplication		ck_null		Ifst	S S
+i_multiply	integer multiplication	ck_null		ifst	S S
+divide		division		ck_null		Ifst	S S
+i_divide	integer division	ck_null		ifst	S S
+modulo		modulus			ck_null		Iifst	S S
+i_modulo	integer modulus		ck_null		ifst	S S
 repeat		repeat			ck_repeat	mt	L S
 
 add		addition		ck_null		Ifst	S S
-intadd		integer addition	ck_null		ifst	S S
-subtract	subtraction		ck_null		fst	S S
+i_add		integer addition	ck_null		ifst	S S
+subtract	subtraction		ck_null		Ifst	S S
+i_subtract	integer subtraction	ck_null		ifst	S S
 concat		concatenation		ck_concat	fst	S S
 
 left_shift	left bitshift		ck_null		ifst	S S
 right_shift	right bitshift		ck_null		ifst	S S
 
-lt		numeric lt		ck_null		ifs	S S
-gt		numeric gt		ck_null		ifs	S S
-le		numeric le		ck_null		ifs	S S
-ge		numeric ge		ck_null		ifs	S S
-eq		numeric eq		ck_null		ifs	S S
-ne		numeric ne		ck_null		ifs	S S
-ncmp		spaceship		ck_null		ifst	S S
+lt		numeric lt		ck_null		Iifs	S S
+i_lt		integer lt		ck_null		ifs	S S
+gt		numeric gt		ck_null		Iifs	S S
+i_gt		integer gt		ck_null		ifs	S S
+le		numeric le		ck_null		Iifs	S S
+i_le		integer le		ck_null		ifs	S S
+ge		numeric ge		ck_null		Iifs	S S
+i_ge		integer ge		ck_null		ifs	S S
+eq		numeric eq		ck_null		Iifs	S S
+i_eq		integer eq		ck_null		ifs	S S
+ne		numeric ne		ck_null		Iifs	S S
+i_ne		integer ne		ck_null		ifs	S S
+ncmp		spaceship		ck_null		Iifst	S S
+i_ncmp		integer spaceship	ck_null		ifst	S S
 
 slt		string lt		ck_null		ifs	S S
 sgt		string gt		ck_null		ifs	S S
@@ -255,7 +271,8 @@ bit_and		bit and			ck_null		fst	S S
 xor		xor			ck_null		fst	S S
 bit_or		bit or			ck_null		fst	S S
 
-negate		negate			ck_null		fst	S
+negate		negate			ck_null		Ifst	S
+i_negate	integer negate		ck_null		ifst	S
 not		not			ck_null		ifs	S
 complement	1's complement		ck_null		fst	S
 

@@ -28,5 +28,6 @@ struct magic {
 };
 
 #define MGf_TAINTEDDIR 1
+#define MGf_REFCOUNTED 2
 #define MgTAINTEDDIR(mg) (mg->mg_flags & MGf_TAINTEDDIR)
 #define MgTAINTEDDIR_on(mg) (mg->mg_flags |= MGf_TAINTEDDIR)

@@ -6,17 +6,6 @@
 
 #define BYTESIZ		8
 
-#ifdef SVID
-#include <unistd.h>
-#endif
-
-#ifdef BSD42
-#define SEEK_SET	L_SET
-#define	memset(s,c,n)	bzero(s, n)		/* only when c is zero */
-#define	memcpy(s1,s2,n)	bcopy(s2, s1, n)
-#define	memcmp(s1,s2,n)	bcmp(s1,s2,n)
-#endif
-
 /*
  * important tuning parms (hah)
  */

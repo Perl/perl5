@@ -26,7 +26,9 @@
 #define    NULL    ((char *) 0)
 #endif
 
-#include <ndbm.h>
+#ifdef I_NDBM
+# include <ndbm.h>
+#endif
 
 datum    fetch();
 datum    firstkey();

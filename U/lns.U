@@ -1,0 +1,21 @@
+?RCS: $Id: lns.U,v $
+?RCS:
+?RCS: $Log: lns.U,v $
+?RCS:
+?MAKE:lns: ln touch
+?MAKE:	-pick add $@ %<
+?S:lns:
+?S:	This variable holds the name of the command to make 
+?S:	symbolic links (if they are supported).  It can be used
+?S:	in the Makefile. It is either 'ln -s' or 'ln'
+?S:.
+?X:  We can't rely on d_symlink because that may be listed in the
+?X:  C library but unimplemented.
+: determine whether symbolic links are supported
+$touch blurfl
+if $ln -s blurfl sym > /dev/null 2>&1 ; then
+    lns="$ln -s"
+else
+    lns="$ln"
+fi
+rm -f blurfl sym

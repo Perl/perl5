@@ -1,9 +1,0 @@
-#!/usr/bin/perl
-
-while (<>) {
-    chop;
-    $stuff[$i++] .= $_;
-    $i = 0 if eof;
-}
-
-$" = "\n";  print "@stuff\n";

@@ -13,7 +13,9 @@
 #include <limits.h>
 #include <locale.h>
 #include <math.h>
+#ifdef I_PWD
 #include <pwd.h>
+#endif
 #include <setjmp.h>
 #include <signal.h>
 #ifdef I_STDARG
@@ -30,7 +32,7 @@
 #include <sys/types.h>
 #include <sys/utsname.h>
 #include <sys/wait.h>
-#ifndef CR3
+#if defined(I_TERMIOS) && !defined(CR3)
 #include <termios.h>
 #endif
 #include <time.h>
@@ -44,7 +46,7 @@ typedef HV* POSIX__SigAction;
 #define HAS_UNAME
 
 #ifndef HAS_GETPGRP
-#define getpgrp(a,b) not_here("getpgrp")
+#define getpgrp() not_here("getpgrp")
 #endif
 #ifndef HAS_NICE
 #define nice(a) not_here("nice")
@@ -54,9 +56,6 @@ typedef HV* POSIX__SigAction;
 #endif
 #ifndef HAS_SETPGID
 #define setpgid(a,b) not_here("setpgid")
-#endif
-#ifndef HAS_SETPGRP
-#define setpgrp(a,b) not_here("setpgrp")
 #endif
 #ifndef HAS_SETSID
 #define setsid() not_here("setsid")
@@ -2090,7 +2089,7 @@ isalnum(charstring)
     CODE:
 	char *s;
 	RETVAL = 1;
-	for (s = charstring; *s; s++)
+	for (s = charstring; *s && RETVAL; s++)
 	    if (!isalnum(*s))
 		RETVAL = 0;
     OUTPUT:
@@ -2102,7 +2101,7 @@ isalpha(charstring)
     CODE:
 	char *s;
 	RETVAL = 1;
-	for (s = charstring; *s; s++)
+	for (s = charstring; *s && RETVAL; s++)
 	    if (!isalpha(*s))
 		RETVAL = 0;
     OUTPUT:
@@ -2114,7 +2113,7 @@ iscntrl(charstring)
     CODE:
 	char *s;
 	RETVAL = 1;
-	for (s = charstring; *s; s++)
+	for (s = charstring; *s && RETVAL; s++)
 	    if (!iscntrl(*s))
 		RETVAL = 0;
     OUTPUT:
@@ -2126,7 +2125,7 @@ isdigit(charstring)
     CODE:
 	char *s;
 	RETVAL = 1;
-	for (s = charstring; *s; s++)
+	for (s = charstring; *s && RETVAL; s++)
 	    if (!isdigit(*s))
 		RETVAL = 0;
     OUTPUT:
@@ -2138,7 +2137,7 @@ isgraph(charstring)
     CODE:
 	char *s;
 	RETVAL = 1;
-	for (s = charstring; *s; s++)
+	for (s = charstring; *s && RETVAL; s++)
 	    if (!isgraph(*s))
 		RETVAL = 0;
     OUTPUT:
@@ -2150,7 +2149,7 @@ islower(charstring)
     CODE:
 	char *s;
 	RETVAL = 1;
-	for (s = charstring; *s; s++)
+	for (s = charstring; *s && RETVAL; s++)
 	    if (!islower(*s))
 		RETVAL = 0;
     OUTPUT:
@@ -2162,7 +2161,7 @@ isprint(charstring)
     CODE:
 	char *s;
 	RETVAL = 1;
-	for (s = charstring; *s; s++)
+	for (s = charstring; *s && RETVAL; s++)
 	    if (!isprint(*s))
 		RETVAL = 0;
     OUTPUT:
@@ -2174,7 +2173,7 @@ ispunct(charstring)
     CODE:
 	char *s;
 	RETVAL = 1;
-	for (s = charstring; *s; s++)
+	for (s = charstring; *s && RETVAL; s++)
 	    if (!ispunct(*s))
 		RETVAL = 0;
     OUTPUT:
@@ -2186,7 +2185,7 @@ isspace(charstring)
     CODE:
 	char *s;
 	RETVAL = 1;
-	for (s = charstring; *s; s++)
+	for (s = charstring; *s && RETVAL; s++)
 	    if (!isspace(*s))
 		RETVAL = 0;
     OUTPUT:
@@ -2198,7 +2197,7 @@ isupper(charstring)
     CODE:
 	char *s;
 	RETVAL = 1;
-	for (s = charstring; *s; s++)
+	for (s = charstring; *s && RETVAL; s++)
 	    if (!isupper(*s))
 		RETVAL = 0;
     OUTPUT:
@@ -2210,7 +2209,7 @@ isxdigit(charstring)
     CODE:
 	char *s;
 	RETVAL = 1;
-	for (s = charstring; *s; s++)
+	for (s = charstring; *s && RETVAL; s++)
 	    if (!isxdigit(*s))
 		RETVAL = 0;
     OUTPUT:
@@ -2370,7 +2369,7 @@ sigaction(sig, action, oldaction = 0)
 # interface look beautiful, which is hard.
 
 	if (!siggv)
-	    gv_fetchpv("SIG", TRUE);
+	    gv_fetchpv("SIG", TRUE, SVt_PVHV);
 
 	{
 	    struct sigaction act;
@@ -2406,7 +2405,7 @@ sigaction(sig, action, oldaction = 0)
 		    act.sa_mask = *sigset;
 		}
 		else
-		    sigemptyset(act.sa_mask);
+		    sigemptyset(& act.sa_mask);
 
 		/* Set up any desired flags. */
 		svp = hv_fetch(action, "FLAGS", 5, FALSE);
@@ -2415,11 +2414,11 @@ sigaction(sig, action, oldaction = 0)
 
 	    /* Now work around sigaction oddities */
 	    if (action && oldaction)
-		RETVAL = sigaction(sig, act, oact);
+		RETVAL = sigaction(sig, & act, & oact);
 	    else if (action)
-		RETVAL = sigaction(sig, act, (struct sigaction*)0);
+		RETVAL = sigaction(sig, & act, (struct sigaction*)0);
 	    else if (oldaction)
-		RETVAL = sigaction(sig, (struct sigaction*)0, oact);
+		RETVAL = sigaction(sig, (struct sigaction*)0, & oact);
 
 	    if (oldaction) {
 		/* Get back the mask. */
@@ -2473,135 +2472,99 @@ void
 _exit(status)
 	int		status
 
-int
+SysRet
 close(fd)
 	int		fd
 
-int
+SysRet
 dup(fd)
 	int		fd
 
-int
+SysRet
 dup2(fd1, fd2)
 	int		fd1
 	int		fd2
 
-int
-fstat(fd, buf)
-	int		fd
-	struct stat *	buf = (struct stat*)sv_grow(ST(2),sizeof(struct stat));
-    CLEANUP:
-	SvCUR(ST(2)) = sizeof(struct stat);
-
-int
-getpgrp(pid)
-	int		pid
-
-int
-link()
-
-int
+SysRet
 lseek()
+	int		fd
+	Off_t		offset
+	int		whence
 
-int
-lstat()
-
-int
-mkdir()
-
-int
+SysRet
 nice(incr)
 	int		incr
 
 int
 pipe()
+    PPCODE:
+	int fds[2];
+	sp--;
+	if (pipe(fds) != -1) {
+	    EXTEND(sp,2);
+	    PUSHs(sv_2mortal(newSViv(fds[0])));
+	    PUSHs(sv_2mortal(newSViv(fds[1])));
+	}
 
-int
+SysRet
 read()
+    CODE:
+	int fd;
+	char * buffer;
+	size_t nbytes;
 
-int
-rename()
+	RETVAL = read(fd, buffer, nbytes);
+	croak("POSIX::read() not implemented yet\n");
+    OUTPUT:
+	RETVAL
 
-int
-rmdir()
+SysRet
+setgid(gid)
+	Gid_t		gid
 
-int
-setgid()
-
-int
+SysRet
 setpgid(pid, pgid)
 	pid_t		pid
 	pid_t		pgid
 
-int
-setpgrp(pid, pgrp)
-	int		pid
-	int		pgrp
-
 pid_t
 setsid()
 
-int
-setuid()
-
-int
-stat()
-
-int
-symlink()
-
-int
-system()
+SysRet
+setuid(uid)
+	Uid_t		uid
 
 pid_t
 tcgetpgrp(fd)
 	int		fd
 
-int
+SysRet
 tcsetpgrp(fd, pgrp_id)
 	int		fd
 	pid_t		pgrp_id
 
 int
-times(tms)
-	struct tms *	tms = (struct tms*)sv_grow(ST(1), sizeof(struct tms));
-    CLEANUP:
-	SvCUR(ST(1)) = sizeof(struct tms);
-
-int
-umask()
-
-void
 uname()
     PPCODE:
-	struct utsname utsname;
+	struct utsname buf;
 	sp--;
-	if (uname(&utsname) >= 0) {
+	if (uname(&buf) >= 0) {
 	    EXTEND(sp, 5);
-	    PUSHs(sv_2mortal(newSVpv(utsname.sysname, 0)));
-	    PUSHs(sv_2mortal(newSVpv(utsname.nodename, 0)));
-	    PUSHs(sv_2mortal(newSVpv(utsname.release, 0)));
-	    PUSHs(sv_2mortal(newSVpv(utsname.version, 0)));
-	    PUSHs(sv_2mortal(newSVpv(utsname.machine, 0)));
+	    PUSHs(sv_2mortal(newSVpv(buf.sysname, 0)));
+	    PUSHs(sv_2mortal(newSVpv(buf.nodename, 0)));
+	    PUSHs(sv_2mortal(newSVpv(buf.release, 0)));
+	    PUSHs(sv_2mortal(newSVpv(buf.version, 0)));
+	    PUSHs(sv_2mortal(newSVpv(buf.machine, 0)));
 	}
 
-int
-unlink()
-
-int
-utime()
-
-int
-wait()
-
-int
-waitpid(pid, statusp, options)
-	int		pid
-	int		&statusp
-	int		options
-    OUTPUT:
-	statusp
-
-int
+SysRet
 write()
+    CODE:
+	int fd;
+	char * buffer;
+	size_t nbytes;
 
+	RETVAL = write(fd, buffer, nbytes);
+	croak("POSIX::write() not implemented yet\n");
+    OUTPUT:
+	RETVAL

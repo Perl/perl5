@@ -1,0 +1,76 @@
+?RCS: $Id: d_htonl.U,v 3.0 1993/08/18 12:06:22 ram Exp $
+?RCS:
+?RCS: Copyright (c) 1991-1993, Raphael Manfredi
+?RCS: 
+?RCS: You may redistribute only under the terms of the Artistic Licence,
+?RCS: as specified in the README file that comes with the distribution.
+?RCS: You may reuse parts of this distribution only within the terms of
+?RCS: that same Artistic Licence; a copy of which may be found at the root
+?RCS: of the source tree for dist 3.0.
+?RCS:
+?RCS: $Log: d_htonl.U,v $
+?RCS: Revision 3.0  1993/08/18  12:06:22  ram
+?RCS: Baseline for dist 3.0 netwide release.
+?RCS:
+?MAKE:d_htonl: cc ccflags Inlibc i_niin i_sysin rm
+?MAKE:	-pick add $@ %<
+?S:d_htonl:
+?S:	This variable conditionally defines HAS_HTONL if htonl() and its
+?S:	friends are available to do network order byte swapping.
+?S:.
+?C:HAS_HTONL (HTONL):
+?C:	This symbol, if defined, indicates that the htonl() routine (and
+?C:	friends htons() ntohl() ntohs()) are available to do network
+?C:	order byte swapping.
+?C:.
+?C:HAS_HTONS (HTONS):
+?C:	This symbol, if defined, indicates that the htons() routine (and
+?C:	friends htonl() ntohl() ntohs()) are available to do network
+?C:	order byte swapping.
+?C:.
+?C:HAS_NTOHL (NTOHL):
+?C:	This symbol, if defined, indicates that the ntohl() routine (and
+?C:	friends htonl() htons() ntohs()) are available to do network
+?C:	order byte swapping.
+?C:.
+?C:HAS_NTOHS (NTOHS):
+?C:	This symbol, if defined, indicates that the ntohs() routine (and
+?C:	friends htonl() htons() ntohl()) are available to do network
+?C:	order byte swapping.
+?C:.
+?H:#$d_htonl HAS_HTONL		/**/
+?H:#$d_htonl HAS_HTONS		/**/
+?H:#$d_htonl HAS_NTOHL		/**/
+?H:#$d_htonl HAS_NTOHS		/**/
+?H:.
+?LINT:set d_htonl
+: see if htonl --and friends-- exists
+set htonl d_htonl
+eval $inlibc
+: Maybe they are macros.
+case "$d_htonl" in
+'define') ;;
+*) cat > try.c <<EOM
+#include <stdio.h>
+#include <sys/types.h>
+#$i_niin I_NETINET_IN
+#$i_sysin I_SYS_IN
+#ifdef I_NETINET_IN
+# include <netinet/in.h>
+#endif
+#ifdef I_SYS_IN
+# include <sys/in.h>
+#endif
+int main()
+{
+  int x;
+  printf("x = ", htonl(7));
+}
+EOM
+    if $cc $ccflags -c try.c >/dev/null 2>&1; then
+        d_htonl="$define"
+	echo "But it seems to be defined as a macro."
+    fi
+    $rm -f try.* try
+    ;;
+esac

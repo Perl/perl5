@@ -96,6 +96,8 @@ GV *gv;
     sv = GvSV(gv) = NEWSV(0,0);
     if (SvTYPE(osv) >= SVt_PVMG && SvMAGIC(osv)) {
 	sv_upgrade(sv, SvTYPE(osv));
+	mg_get(osv);
+	SvFLAGS(osv) |= (SvFLAGS(osv) & (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
 	SvMAGIC(sv) = SvMAGIC(osv);
 	localizing = TRUE;
 	SvSETMAGIC(sv);
@@ -200,6 +202,16 @@ int *intp;
 }
 
 void
+save_long(longp)
+long *longp;
+{
+    SSCHECK(3);
+    SSPUSHLONG(*longp);
+    SSPUSHPTR(longp);
+    SSPUSHINT(SAVEt_LONG);
+}
+
+void
 save_I32(intp)
 I32 *intp;
 {
@@ -207,6 +219,19 @@ I32 *intp;
     SSPUSHINT(*intp);
     SSPUSHPTR(intp);
     SSPUSHINT(SAVEt_I32);
+}
+
+/* Cannot use save_sptr() to store a char* since the SV** cast will
+ * force word-alignment and we'll miss the pointer.
+ */
+void
+save_pptr(pptr)
+char **pptr;
+{
+    SSCHECK(3);
+    SSPUSHPTR(*pptr);
+    SSPUSHPTR(pptr);
+    SSPUSHINT(SAVEt_PPTR);
 }
 
 void
@@ -233,7 +258,7 @@ save_hptr(hptr)
 HV **hptr;
 {
     SSCHECK(3);
-    SSPUSHINT(*hptr);
+    SSPUSHPTR(*hptr);
     SSPUSHPTR(hptr);
     SSPUSHINT(SAVEt_HPTR);
 }
@@ -243,7 +268,7 @@ save_aptr(aptr)
 AV **aptr;
 {
     SSCHECK(3);
-    SSPUSHINT(*aptr);
+    SSPUSHPTR(*aptr);
     SSPUSHPTR(aptr);
     SSPUSHINT(SAVEt_APTR);
 }
@@ -340,8 +365,10 @@ I32 base;
 	    value = (SV*)SSPOPPTR;
 	    gv = (GV*)SSPOPPTR;
 	    sv = GvSV(gv);
-	    if (SvTYPE(sv) >= SVt_PVMG)
+	    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
+		SvMAGIC(value) = SvMAGIC(sv);
 		SvMAGIC(sv) = 0;
+	    }
             SvREFCNT_dec(sv);
             GvSV(gv) = sv = value;
 	    SvSETMAGIC(sv);
@@ -371,6 +398,10 @@ I32 base;
 	    ptr = SSPOPPTR;
 	    *(int*)ptr = (int)SSPOPINT;
 	    break;
+	case SAVEt_LONG:			/* long reference */
+	    ptr = SSPOPPTR;
+	    *(long*)ptr = (long)SSPOPLONG;
+	    break;
 	case SAVEt_I32:				/* I32 reference */
 	    ptr = SSPOPPTR;
 	    *(I32*)ptr = (I32)SSPOPINT;
@@ -378,6 +409,10 @@ I32 base;
 	case SAVEt_SPTR:			/* SV* reference */
 	    ptr = SSPOPPTR;
 	    *(SV**)ptr = (SV*)SSPOPPTR;
+	    break;
+	case SAVEt_PPTR:			/* char* reference */
+	    ptr = SSPOPPTR;
+	    *(char**)ptr = (char*)SSPOPPTR;
 	    break;
 	case SAVEt_HPTR:			/* HV* reference */
 	    ptr = SSPOPPTR;
@@ -432,7 +467,7 @@ I32 base;
 		    break;
 		case SVt_PVCV:
 		    sub_generation++;
-		    cv_clear((CV*)sv);
+		    cv_undef((CV*)sv);
 		    break;
 		default:
 		    if (SvPOK(sv) && SvLEN(sv))

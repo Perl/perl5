@@ -521,8 +521,8 @@ sub remove {
 }
 
 sub rename {
-    unimpl "rename(xxx)", caller if @_ != 123;
-    rename($_[0]);
+    usage "rename(oldfilename, newfilename)", caller if @_ != 2;
+    rename($_[0], $_[1]);
 }
 
 sub rewind {
@@ -707,7 +707,7 @@ sub stroul {
 }
 
 sub system {
-    unimpl "system(xxx)", caller if @_ != 123;
+    usage "system(command)", caller if @_ != 1;
     system($_[0]);
 }
 
@@ -832,18 +832,22 @@ sub strxfrm {
 }
 
 sub chmod {
-    unimpl "chmod(xxx)", caller if @_ != 123;
-    chmod($_[0]);
+    usage "chmod(filename, mode)", caller if @_ != 2;
+    chmod($_[0], $_[1]);
 }
 
 sub fstat {
-    unimpl "fstat(xxx)", caller if @_ != 123;
-    fstat($_[0]);
+    usage "fstat(fd)", caller if @_ != 1;
+    local(*TMP);
+    open(TMP, "<&$_[0]");		# Gross.
+    local(@l) = stat(TMP);
+    close(TMP);
+    @l;
 }
 
 sub mkdir {
-    unimpl "mkdir(xxx)", caller if @_ != 123;
-    mkdir($_[0]);
+    usage "mkdir(directoryname, mode)", caller if @_ != 2;
+    mkdir($_[0], $_[1]);
 }
 
 sub mkfifo {
@@ -852,28 +856,32 @@ sub mkfifo {
 }
 
 sub stat {
-    unimpl "stat(xxx)", caller if @_ != 123;
+    usage "stat(filename)", caller if @_ != 1;
     stat($_[0]);
 }
 
 sub umask {
-    unimpl "umask(xxx)", caller if @_ != 123;
+    usage "umask(mask)", caller if @_ != 1;
     umask($_[0]);
 }
 
 sub times {
-    unimpl "times(xxx)", caller if @_ != 123;
-    times($_[0]);
+    usage "times()", caller if @_ != 0;
+    times();
 }
 
 sub wait {
-    unimpl "wait(xxx)", caller if @_ != 123;
-    wait($_[0]);
+    usage "wait(statusvariable)", caller if @_ != 1;
+    local $result = wait();
+    $_[0] = $?;
+    $result;
 }
 
 sub waitpid {
-    unimpl "waitpid(xxx)", caller if @_ != 123;
-    waitpid($_[0]);
+    usage "waitpid(pid, statusvariable, options)", caller if @_ != 3;
+    local $result = waitpid($_[0], $_[2]);
+    $_[1] = $?;
+    $result;
 }
 
 sub cfgetispeed {
@@ -1002,8 +1010,8 @@ sub chdir {
 }
 
 sub chown {
-    unimpl "chown(xxx)", caller if @_ != 123;
-    chown($_[0]);
+    usage "chown(filename, uid, gid)", caller if @_ != 3;
+    chown($_[0], $_[1], $_[2]);
 }
 
 sub close {
@@ -1077,32 +1085,33 @@ sub getcwd {
 }
 
 sub getegid {
-    unimpl "getegid(xxx)", caller if @_ != 123;
-    getegid($_[0]);
+    usage "getegid()", caller if @_ != 0;
+    $) + 0;
 }
 
 sub geteuid {
-    unimpl "geteuid(xxx)", caller if @_ != 123;
-    geteuid($_[0]);
+    usage "geteuid()", caller if @_ != 0;
+    $> + 0;
 }
 
 sub getgid {
-    unimpl "getgid(xxx)", caller if @_ != 123;
-    getgid($_[0]);
+    usage "getgid()", caller if @_ != 0;
+    $( + 0;
 }
 
 sub getgroups {
-    unimpl "getgroups(xxx)", caller if @_ != 123;
-    getgroups($_[0]);
+    usage "getgroups()", caller if @_ != 0;
+    local(%seen) = ();
+    grep(!%seen{$_}++, split(' ', $) ));
 }
 
 sub getlogin {
-    unimpl "getlogin(xxx)", caller if @_ != 123;
-    getlogin($_[0]);
+    usage "getlogin(xxx)", caller if @_ != 0;
+    getlogin();
 }
 
 sub getpgrp {
-    unimpl "getpgrp(xxx)", caller if @_ != 123;
+    usage "getpgrp()", caller if @_ != 0;
     getpgrp($_[0]);
 }
 
@@ -1117,8 +1126,8 @@ sub getppid {
 }
 
 sub getuid {
-    unimpl "getuid(xxx)", caller if @_ != 123;
-    getuid($_[0]);
+    usage "getuid()", caller if @_ != 0;
+    $<;
 }
 
 sub isatty {
@@ -1127,8 +1136,8 @@ sub isatty {
 }
 
 sub link {
-    unimpl "link(xxx)", caller if @_ != 123;
-    link($_[0]);
+    usage "link(oldfilename, newfilename)", caller if @_ != 2;
+    link($_[0], $_[1]);
 }
 
 sub lseek {
@@ -1157,7 +1166,7 @@ sub read {
 }
 
 sub rmdir {
-    unimpl "rmdir(xxx)", caller if @_ != 123;
+    usage "rmdir(directoryname)", caller if @_ != 1;
     rmdir($_[0]);
 }
 
@@ -1207,7 +1216,7 @@ sub ttyname {
 }
 
 sub unlink {
-    unimpl "unlink(xxx)", caller if @_ != 123;
+    usage "unlink(filename)", caller if @_ != 1;
     unlink($_[0]);
 }
 
@@ -1217,7 +1226,7 @@ sub write {
 }
 
 sub utime {
-    unimpl "utime(xxx)", caller if @_ != 123;
-    utime($_[0]);
+    usage "utime(filename, atime, mtime)", caller if @_ != 3;
+    utime($_[1], $_[2], $_[0]);
 }
 

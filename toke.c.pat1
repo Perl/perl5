@@ -1,0 +1,21 @@
+*** /scalpel/lwall/perl5alpha6/toke.c	Tue Feb 15 16:27:34 1994
+--- toke.c	Thu Feb 17 11:13:27 1994
+***************
+*** 1398,1405 ****
+  	if (expect == XTERM)
+  	    OPERATOR(HASHBRACK);
+  	else if (expect == XBLOCK || expect == XOPERATOR) {
+! 	    lex_brackstack[lex_brackets-1] = XBLOCK;
+! 	    expect = XBLOCK;
+  	}
+  	else {
+  	    char *t;
+--- 1398,1405 ----
+  	if (expect == XTERM)
+  	    OPERATOR(HASHBRACK);
+  	else if (expect == XBLOCK || expect == XOPERATOR) {
+! 	    lex_brackstack[lex_brackets-1] = XSTATE;
+! 	    expect = XSTATE;
+  	}
+  	else {
+  	    char *t;

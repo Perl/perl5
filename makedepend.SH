@@ -86,6 +86,11 @@ case "$defrule" in
 '') defrule='$(CC) -c $(CFLAGS)' ;;
 esac
 
+: Create files in UU directory to avoid problems with long filenames
+: on systems with 14 character filename limits so file.c.c and file.c
+: might be identical
+$test -d UU || mkdir UU
+
 make clist || ($echo "Searching for .c files..."; \
 	$echo *.c | $tr ' ' '\012' | $egrep -v '\*' >.clist)
 for file in `$cat .clist`; do
@@ -107,8 +112,8 @@ for file in `$cat .clist`; do
 	-e 's|/\*.*$||' \
 	-e 's|\\$||' \
 	-e p \
-	-e '}' ) >$file.c
-    $cppstdin $finc -I/usr/local/include -I. $cppflags $cppminus <$file.c |
+	-e '}' ) >UU/$file.c
+    $cppstdin $finc -I/usr/local/include -I. $cppflags $cppminus <UU/$file.c |
     $sed \
 	-e 's#\.[0-9][0-9]*\.c#'"$file.c#" \
 	-e 's/^[	 ]*#[	 ]*line/#/' \
@@ -166,7 +171,7 @@ $cp $mf $mf.old
 $cp $mf.new $mf
 $rm $mf.new
 $echo "# WARNING: Put nothing here or make depend will gobble it up!" >> $mf
-$rm -f .deptmp `sed 's/\.c/.c.c/' .clist` .shlist .clist .hlist .hsed
+$rm -rf .deptmp UU .shlist .clist .hlist .hsed
 
 !NO!SUBS!
 $eunicefix makedepend

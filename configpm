@@ -2,13 +2,6 @@
 
 @ARGV = "./config.sh";
 
-undef $/;
-$_ = <>;
-s:^#!/bin/sh\n::;
-s/'undef'/undef/g;
-s/\n(\w+)=/;\n\$Config{'$1'} = /g;
-s/;\n\$Config/\n\$Config/;
-
 open STDOUT, ">lib/Config.pm"
     or die "Can't open lib/Config.pm: $!\n";
 $myver = sprintf("%.3f", $]);
@@ -23,5 +16,13 @@ require Exporter;
 
 ENDOFBEG
 
-print $_;
-
+while (<>) {
+    s:^#!/bin/sh::;
+    s/'undef'/undef/;	# So we can say "if $Config{'foo'}".
+    s/=true$/='true'/;	# Catch CONFIG=true line from Configure.
+    s/^(\w+)=/\$Config{'$1'} = /;
+    s/$/;/ unless (/^#/ || /^$/);
+    print $_;
+}
+print "1;\n";
+exit 0;

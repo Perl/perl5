@@ -48,7 +48,6 @@ if ($d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
 	unless $installbin =~ m#^/afs/#;
 
 -x 'perl'		|| die "perl isn't executable!\n";
--x 'taintperl'		|| die "taintperl isn't executable!\n";
 -x 'suidperl'		|| die "suidperl isn't executable!\n" if $d_dosuid;
 
 -x 't/TEST'		|| warn "WARNING: You've never run 'make test'!!!",
@@ -58,10 +57,6 @@ if ($d_dosuid && $>) { die "You must run as root to install suidperl\n"; }
 
 &unlink("$installbin/perl$ver");
 &cmd("cp perl $installbin/perl$ver");
-
-&unlink("$installbin/tperl$ver");
-&cmd("cp taintperl $installbin/tperl$ver");
-&chmod(0755, "$installbin/tperl$ver");		# force non-suid for security
 
 &unlink("$installbin/sperl$ver");
 if ($d_dosuid) {
@@ -77,9 +72,8 @@ exit 0 if $versiononly;
 ($ddev,$dino) = stat('.');
 
 if ($bdev != $ddev || $bino != $dino) {
-    &unlink("$installbin/perl", "$installbin/taintperl", "$installbin/suidperl");
+    &unlink("$installbin/perl", "$installbin/suidperl");
     &link("$installbin/perl$ver", "$installbin/perl");
-    &link("$installbin/tperl$ver", "$installbin/taintperl");
     &link("$installbin/sperl$ver", "$installbin/suidperl") if $d_dosuid;
 }
 
@@ -145,6 +139,18 @@ if (chdir "lib") {
     ($ldev,$lino) = stat('.');
 
     if ($pdev != $ldev || $pino != $lino) {
+	# Optimize for quick access.  First the auto directory.
+	system "tar cf - auto | (cd $installprivlib; tar xvf -)";
+	# Next the Perl modules.
+	foreach $file (<*.pm>) {
+	    system "cmp", "-s", $file, "$privlib/$file";
+	    if ($?) {
+		&unlink("$installprivlib/$file");
+		&cmd("cp $file $installprivlib");
+		&chmod(0644, "$installprivlib/$file");
+	    }
+	}
+	# Finally the old library files.
 	foreach $file (<*.pl>) {
 	    system "cmp", "-s", $file, "$privlib/$file";
 	    if ($?) {
@@ -159,8 +165,6 @@ if (chdir "lib") {
 else {
     warn "Can't cd to lib to install lib files: $!\n";
 }
-
-&chmod(0755, "usub/mus");
 
 print STDERR "  Installation complete\n";
 

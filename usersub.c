@@ -124,7 +124,7 @@ void
 cryptswitch()
 {
     int ch;
-#ifdef STDSTDIO
+#ifdef USE_STD_STDIO
     /* cheat on stdio if possible */
     if (rsfp->_cnt > 0 && (*rsfp->_ptr & 0xff) != CRYPT_MAGIC_1)
 	return;

@@ -8,7 +8,7 @@ sub unctrl {
 }
 sub main'dumpvar {
     ($package,@vars) = @_;
-    local(*stab) = eval("*_$package");
+    local(*stab) = *{"::_$package"};
     while (($key,$val) = each(%stab)) {
 	{
 	    next if @vars && !grep($key eq $_,@vars);

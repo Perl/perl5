@@ -61,6 +61,8 @@ HV* stash;
 	    HV *hv;
 	    if (GvCV(gv))
 		dump_sub(gv);
+	    if (GvFORM(gv))
+		dump_form(gv);
 	    if (*entry->hent_key == '_' && (hv = GvHV(gv)) && HvNAME(hv) &&
 	      hv != defstash)
 		dump_packsubs(hv);		/* nested package */
@@ -73,18 +75,31 @@ dump_sub(gv)
 GV* gv;
 {
     SV *sv = sv_newmortal();
-    if (GvCV(gv)) {
-	gv_fullname(sv,gv);
-	dump("\nSUB %s = ", SvPVX(sv));
-	if (CvUSERSUB(GvCV(gv)))
-	    dump("(xsub 0x%x %d)\n",
-		(long)CvUSERSUB(GvCV(gv)),
-		CvUSERINDEX(GvCV(gv)));
-	else if (CvROOT(GvCV(gv)))
-	    dump_op(CvROOT(GvCV(gv)));
-	else
-	    dump("<undef>\n");
-    }
+
+    gv_fullname(sv,gv);
+    dump("\nSUB %s = ", SvPVX(sv));
+    if (CvUSERSUB(GvCV(gv)))
+	dump("(xsub 0x%x %d)\n",
+	    (long)CvUSERSUB(GvCV(gv)),
+	    CvUSERINDEX(GvCV(gv)));
+    else if (CvROOT(GvCV(gv)))
+	dump_op(CvROOT(GvCV(gv)));
+    else
+	dump("<undef>\n");
+}
+
+void
+dump_form(gv)
+GV* gv;
+{
+    SV *sv = sv_newmortal();
+
+    gv_fullname(sv,gv);
+    dump("\nFORMAT %s = ", SvPVX(sv));
+    if (CvROOT(GvFORM(gv)))
+	dump_op(CvROOT(GvFORM(gv)));
+    else
+	dump("<undef>\n");
 }
 
 void
@@ -171,9 +186,22 @@ register OP *op;
 	    if (op->op_private & OPpREPEAT_DOLIST)
 		(void)strcat(buf,"DOLIST,");
 	}
-	else if (op->op_type == OP_ENTERSUBR) {
-	    if (op->op_private & OPpSUBR_DB)
+	else if (op->op_type == OP_ENTERSUBR ||
+		 op->op_type == OP_RV2SV ||
+		 op->op_type == OP_RV2AV ||
+		 op->op_type == OP_RV2HV ||
+		 op->op_type == OP_RV2GV ||
+		 op->op_type == OP_AELEM ||
+		 op->op_type == OP_HELEM )
+	{
+	    if (op->op_private & OPpDEREF_DB)
 		(void)strcat(buf,"DB,");
+	    if (op->op_private & OPpDEREF_AV)
+		(void)strcat(buf,"AV,");
+	    if (op->op_private & OPpDEREF_HV)
+		(void)strcat(buf,"HV,");
+	    if (op->op_private & HINT_STRICT_REFS)
+		(void)strcat(buf,"STRICT_REFS,");
 	}
 	else if (op->op_type == OP_CONST) {
 	    if (op->op_private & OPpCONST_BARE)

@@ -1,0 +1,8 @@
+hintfile='next_3_2'
+ccflags='-posix -Disascii=NXIsAscii -DDEBUGGING -DHIDEMYMALLOC'
+ldflags='-u libsys_s'
+i_dirent='undef'
+groupstype='int'
+libs='-ldbm'
+optimize='-O'
+lddlflags='-r'

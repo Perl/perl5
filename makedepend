@@ -1,5 +1,5 @@
 #!/bin/sh
-# $RCSfile: makedepend.SH,v 28453Revision: 4.1 28453Date: 92/08/07 18:24:20 $
+# $RCSfile: makedepend.SH,v 3314Revision: 4.1 3314Date: 92/08/07 18:24:20 $
 #
 # $Log:	makedepend.SH,v $
 # Revision 4.1  92/08/07  18:24:20  lwall
@@ -23,21 +23,21 @@
 
 export PATH || (echo "OOPS, this isn't sh.  Desperation time.  I will feed myself to sh."; sh $0; kill $$)
 
-cat='cat'
+cat='/bin/cat'
 cppflags=' -DDEBUGGING'
-cp='cp'
-cppstdin='/tmp_mnt/vol/src/local/lwall/perl5/cppstdin'
+cp='/bin/cp'
+cppstdin='/tmp_mnt/net/vaccine/export/src/local/lwall/perl5/cppstdin'
 cppminus=''
-echo='echo'
-egrep='egrep'
-expr='expr'
-mv='mv'
-rm='rm'
-sed='sed'
-sort='sort'
+echo='/bin/echo'
+egrep='/bin/egrep'
+expr='/bin/expr'
+mv='/bin/mv'
+rm='/bin/rm'
+sed='/bin/sed'
+sort='/bin/sort'
 test='test'
-tr='tr'
-uniq='uniq'
+tr='/bin/tr'
+uniq='/bin/uniq'
 
 PATH="$PATH:."
 export PATH
@@ -66,6 +66,11 @@ case "$defrule" in
 '') defrule='$(CC) -c $(CFLAGS)' ;;
 esac
 
+: Create files in UU directory to avoid problems with long filenames
+: on systems with 14 character filename limits so file.c.c and file.c
+: might be identical
+$test -d UU || mkdir UU
+
 make clist || ($echo "Searching for .c files..."; \
 	$echo *.c | $tr ' ' '\012' | $egrep -v '\*' >.clist)
 for file in `$cat .clist`; do
@@ -87,8 +92,8 @@ for file in `$cat .clist`; do
 	-e 's|/\*.*$||' \
 	-e 's|\\$||' \
 	-e p \
-	-e '}' ) >$file.c
-    $cppstdin $finc -I/usr/local/include -I. $cppflags $cppminus <$file.c |
+	-e '}' ) >UU/$file.c
+    $cppstdin $finc -I/usr/local/include -I. $cppflags $cppminus <UU/$file.c |
     $sed \
 	-e 's#\.[0-9][0-9]*\.c#'"$file.c#" \
 	-e 's/^[	 ]*#[	 ]*line/#/' \
@@ -146,5 +151,5 @@ $cp $mf $mf.old
 $cp $mf.new $mf
 $rm $mf.new
 $echo "# WARNING: Put nothing here or make depend will gobble it up!" >> $mf
-$rm -f .deptmp `sed 's/\.c/.c.c/' .clist` .shlist .clist .hlist .hsed
+$rm -rf .deptmp UU .shlist .clist .hlist .hsed
 

@@ -10,38 +10,13 @@
  * $Id: Config_h.U,v 3.0.1.2 1993/08/24 12:13:20 ram Exp $
  */
 
-/* Configuration time: Mon Apr  4 15:17:26 PDT 1994
+/* Configuration time: Wed May  4 15:10:39 PDT 1994
  * Configured by: lwall
  * Target system: sunos scalpel 4.1.3 3 sun4c 
  */
 
 #ifndef _config_h_
 #define _config_h_
-
-/* EUNICE:
- *	This symbol, if defined, indicates that the program is being compiled
- *	under the EUNICE package under VMS.  The program will need to handle
- *	things like files that don't go away the first time you unlink them,
- *	due to version numbering.  It will also need to compensate for lack
- *	of a respectable link() command.
- */
-/* VMS:
- *	This symbol, if defined, indicates that the program is running under
- *	VMS.  It is currently only set in conjunction with the EUNICE symbol.
- */
-/* BSD:
- *	This symbol, if defined, indicates that the program is running under
- *	a BSD system.
- */
-/*#define EUNICE		/**/
-/*#define VMS		/**/
-#define BSD		/**/
-
-/* ALIGNBYTES:
- *	This symbol contains the number of bytes required to align a
- *	double. Usual values are 2, 4 and 8.
- */
-#define ALIGNBYTES 8	/**/
 
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
@@ -67,7 +42,7 @@
  *	output.  This symbol will have the value "-" if CPPSTDIN needs a minus
  *	to specify standard input, otherwise the value is "".
  */
-#define CPPSTDIN "/tmp_mnt/vol/src/local/lwall/perl5/cppstdin"
+#define CPPSTDIN "/tmp_mnt/net/vaccine/export/src/local/lwall/perl5/cppstdin"
 #define CPPMINUS ""
 
 /* HAS_BCMP:
@@ -137,7 +112,7 @@
  *	This symbol, if defined, indicates that the C-shell exists.
  *	If defined, contains the full pathname of csh.
  */
-/*#define CSH "csh"		/**/
+#define CSH "/bin/csh"		/**/
 
 /* DOSUID:
  *	This symbol, if defined, indicates that the C program should
@@ -228,31 +203,6 @@
  */
 #define HAS_GETPRIORITY		/**/
 
-/* HAS_HTONL:
- *	This symbol, if defined, indicates that the htonl() routine (and
- *	friends htons() ntohl() ntohs()) are available to do network
- *	order byte swapping.
- */
-/* HAS_HTONS:
- *	This symbol, if defined, indicates that the htons() routine (and
- *	friends htonl() ntohl() ntohs()) are available to do network
- *	order byte swapping.
- */
-/* HAS_NTOHL:
- *	This symbol, if defined, indicates that the ntohl() routine (and
- *	friends htonl() htons() ntohs()) are available to do network
- *	order byte swapping.
- */
-/* HAS_NTOHS:
- *	This symbol, if defined, indicates that the ntohs() routine (and
- *	friends htonl() htons() ntohl()) are available to do network
- *	order byte swapping.
- */
-#define HAS_HTONL		/**/
-#define HAS_HTONS		/**/
-#define HAS_NTOHL		/**/
-#define HAS_NTOHS		/**/
-
 /* HAS_KILLPG:
  *	This symbol, if defined, indicates that the killpg routine is available
  *	to kill process groups.  If unavailable, you probably should use kill
@@ -341,13 +291,6 @@
  */
 #define HAS_OPEN3		/**/
 
-/* HAS_READDIR:
- *	This symbol, if defined, indicates that the readdir routine is
- *	available to read directory entries. You may have to include
- *	<dirent.h>. See I_DIRENT.
- */
-#define HAS_READDIR		/**/
-
 /* HAS_RENAME:
  *	This symbol, if defined, indicates that the rename routine is available
  *	to rename files.  Otherwise you should do the unlink(), link(), unlink()
@@ -361,22 +304,6 @@
  *	new process to exec /bin/rmdir.
  */
 #define HAS_RMDIR		/**/
-
-/* HAS_SAFE_BCOPY:
- *	This symbol, if defined, indicates that the bcopy routine is available
- *	to copy potentially overlapping memory blocks. Otherwise you should
- *	probably use memmove() or memcpy(). If neither is defined, roll your
- *	own version.
- */
-#define HAS_SAFE_BCOPY	/**/
-
-/* HAS_SAFE_MEMCPY:
- *	This symbol, if defined, indicates that the memcpy routine is available
- *	to copy potentially overlapping memory blocks. Otherwise you should
- *	probably use memmove() or memcpy(). If neither is defined, roll your
- *	own version.
- */
-/*#define HAS_SAFE_MEMCPY	/**/
 
 /* HAS_SELECT:
  *	This symbol, if defined, indicates that the select routine is
@@ -495,12 +422,6 @@
  */
 #define HAS_SHM		/**/
 
-/* HAS_SHMAT:
- *	This symbol, if defined, indicates that the shmat() routine is
- *	available to attach a shared memory segment to the process space.
- */
-#define HAS_SHMAT		/**/
-
 /* HAS_SHMCTL:
  *	This symbol, if defined, indicates that the shmctl() routine is
  *	available to perform shared memory control operations.
@@ -573,6 +494,13 @@
  */
 #define HAS_SYSTEM	/**/
 
+/* Time_t:
+ *	This symbol holds the type returned by time(). It can be long,
+ *	or time_t on BSD sites (in which case <sys/types.h> should be
+ *	included).
+ */
+#define Time_t long		/* Time type */
+
 /* HAS_TIMES:
  *	This symbol, if defined, indicates that the times() routine exists.
  *	Note that this became obsolete on some systems (SUNOS), which now
@@ -591,11 +519,6 @@
  *	system's version of ndir.h, rather than the one with this package.
  */
 /*#define I_NDIR		/**/
-
-/* HAS_VFORK:
- *	This symbol, if defined, indicates that vfork() exists.
- */
-#define HAS_VFORK	/**/
 
 /* VOIDSIG:
  *	This symbol is defined if this system declares "void (*signal(...))()" in
@@ -698,42 +621,6 @@
 #define I_NETINET_IN	/**/
 /*#define I_SYS_IN		/**/
 
-/* I_PWD:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <pwd.h>.
- */
-/* PWQUOTA:
- *	This symbol, if defined, indicates to the C program that struct passwd
- *	contains pw_quota.
- */
-/* PWAGE:
- *	This symbol, if defined, indicates to the C program that struct passwd
- *	contains pw_age.
- */
-/* PWCHANGE:
- *	This symbol, if defined, indicates to the C program that struct passwd
- *	contains pw_change.
- */
-/* PWCLASS:
- *	This symbol, if defined, indicates to the C program that struct passwd
- *	contains pw_class.
- */
-/* PWEXPIRE:
- *	This symbol, if defined, indicates to the C program that struct passwd
- *	contains pw_expire.
- */
-/* PWCOMMENT:
- *	This symbol, if defined, indicates to the C program that struct passwd
- *	contains pw_comment.
- */
-#define I_PWD		/**/
-/*#define PWQUOTA	/**/
-#define PWAGE	/**/
-/*#define PWCHANGE	/**/
-/*#define PWCLASS	/**/
-/*#define PWEXPIRE	/**/
-#define PWCOMMENT	/**/
-
 /* I_STDARG:
  *	This symbol, if defined, indicates that <stdarg.h> exists and should
  *	be included.
@@ -745,6 +632,12 @@
  *	be included.
  */
 #define I_STDDEF	/**/
+
+/* I_STRING:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <string.h> (USG systems) instead of <strings.h> (BSD systems).
+ */
+#define I_STRING		/**/
 
 /* I_SYS_DIR:
  *	This symbol, if defined, indicates to the C program that it should
@@ -784,8 +677,19 @@
  *	This symbol, if defined, indicates to the C program that it should
  *	include <sys/time.h>.
  */
+/* I_SYS_TIME_KERNEL:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/time.h> with KERNEL defined.
+ */
 /*#define I_TIME		/**/
 #define I_SYS_TIME		/**/
+/*#define I_SYS_TIME_KERNEL		/**/
+
+/* I_UNISTD:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <unistd.h>.
+ */
+#define I_UNISTD		/**/
 
 /* I_UTIME:
  *	This symbol, if defined, indicates to the C program that it should
@@ -799,17 +703,18 @@
  */
 #define I_VARARGS		/**/
 
-/* I_VFORK:
- *	This symbol, if defined, indicates to the C program that it should
- *	include vfork.h.
- */
-#define I_VFORK	/**/
-
 /* INTSIZE:
  *	This symbol contains the size of an int, so that the C preprocessor
  *	can make decisions based on it.
  */
 #define INTSIZE 4		/**/
+
+/* Off_t:
+ *	This symbol holds the type used to declare offsets in the kernel.
+ *	It can be int, long, off_t, etc... It may be necessary to include
+ *	<sys/types.h> to get any typedef'ed information.
+ */
+#define Off_t off_t		/* <offset> type */
 
 /* PRIVLIB:
  *	This symbol contains the name of the private library for this package.
@@ -818,6 +723,12 @@
  *	should be prepared to do ~ expansion.
  */
 #define PRIVLIB "/usr/local/lib/perl"		/**/
+
+/* PTRSIZE:
+ *	This symbol contains the size of a pointer, so that the C preprocessor
+ *	can make decisions based on it.
+ */
+#define PTRSIZE 4		/**/
 
 /* RANDBITS:
  *	This symbol contains the number of bits of random number the rand()
@@ -833,16 +744,6 @@
  */
 #define SCRIPTDIR "/usr/local/bin"	/**/
 
-/* SIG_NAME:
- *	This symbol contains a list of signal names in order. This is intended
- *	to be used as a static array initialization, like this:
- *		char *sig_name[] = { SIG_NAME };
- *	The signals in the list are separated with commas, and each signal
- *	is surrounded by double quotes. There is no leading SIG in the signal
- *	name, i.e. SIGQUIT is known as "QUIT".
- */
-#define SIG_NAME "ZERO","HUP","INT","QUIT","ILL","TRAP","ABRT","EMT","FPE","KILL","BUS","SEGV","SYS","PIPE","ALRM","TERM","URG","STOP","TSTP","CONT","CLD","TTIN","TTOU","IO","XCPU","XFSZ","VTALRM","PROF","WINCH","LOST","USR1","USR2"	/**/
-
 /* STDCHAR:
  *	This symbol is defined to be the type of char used in stdio.h.
  *	It has the values "unsigned char" or "char".
@@ -856,11 +757,56 @@
  */
 #define Uid_t uid_t		/* UID type */
 
+/* EUNICE:
+ *	This symbol, if defined, indicates that the program is being compiled
+ *	under the EUNICE package under VMS.  The program will need to handle
+ *	things like files that don't go away the first time you unlink them,
+ *	due to version numbering.  It will also need to compensate for lack
+ *	of a respectable link() command.
+ */
+/* VMS:
+ *	This symbol, if defined, indicates that the program is running under
+ *	VMS.  It is currently only set in conjunction with the EUNICE symbol.
+ */
+/*#define EUNICE		/**/
+/*#define VMS		/**/
+
+/* MEM_ALIGNBYTES:
+ *	This symbol contains the number of bytes required to align a
+ *	double. Usual values are 2, 4 and 8.
+ */
+#define MEM_ALIGNBYTES 8	/**/
+
 /* CASTI32:
  *	This symbol is defined if the C compiler can cast negative
  *	or large floating point numbers to 32-bit ints.
  */
 #define	CASTI32		/**/
+
+/* HAS_HTONL:
+ *	This symbol, if defined, indicates that the htonl() routine (and
+ *	friends htons() ntohl() ntohs()) are available to do network
+ *	order byte swapping.
+ */
+/* HAS_HTONS:
+ *	This symbol, if defined, indicates that the htons() routine (and
+ *	friends htonl() ntohl() ntohs()) are available to do network
+ *	order byte swapping.
+ */
+/* HAS_NTOHL:
+ *	This symbol, if defined, indicates that the ntohl() routine (and
+ *	friends htonl() htons() ntohs()) are available to do network
+ *	order byte swapping.
+ */
+/* HAS_NTOHS:
+ *	This symbol, if defined, indicates that the ntohs() routine (and
+ *	friends htonl() htons() ntohl()) are available to do network
+ *	order byte swapping.
+ */
+#define HAS_HTONL		/**/
+#define HAS_HTONS		/**/
+#define HAS_NTOHL		/**/
+#define HAS_NTOHS		/**/
 
 /* HAS_ISASCII:
  *	This manifest constant lets the C program know that the
@@ -868,11 +814,64 @@
  */
 #define HAS_ISASCII		/**/
 
+/* HAS_READDIR:
+ *	This symbol, if defined, indicates that the readdir routine is
+ *	available to read directory entries. You may have to include
+ *	<dirent.h>. See I_DIRENT.
+ */
+#define HAS_READDIR		/**/
+
+/* HAS_SEEKDIR:
+ *	This symbol, if defined, indicates that the seekdir routine is
+ *	available. You may have to include <dirent.h>. See I_DIRENT.
+ */
+#define HAS_SEEKDIR		/**/
+
+/* HAS_TELLDIR:
+ *	This symbol, if defined, indicates that the telldir routine is
+ *	available. You may have to include <dirent.h>. See I_DIRENT.
+ */
+#define HAS_TELLDIR		/**/
+
+/* HAS_REWINDDIR:
+ *	This symbol, if defined, indicates that the rewinddir routine is
+ *	available. You may have to include <dirent.h>. See I_DIRENT.
+ */
+#define HAS_REWINDDIR		/**/
+
+/* HAS_SAFE_BCOPY:
+ *	This symbol, if defined, indicates that the bcopy routine is available
+ *	to copy potentially overlapping memory blocks. Otherwise you should
+ *	probably use memmove() or memcpy(). If neither is defined, roll your
+ *	own version.
+ */
+#define HAS_SAFE_BCOPY	/**/
+
+/* HAS_SAFE_MEMCPY:
+ *	This symbol, if defined, indicates that the memcpy routine is available
+ *	to copy potentially overlapping memory blocks. Otherwise you should
+ *	probably use memmove() or memcpy(). If neither is defined, roll your
+ *	own version.
+ */
+/*#define HAS_SAFE_MEMCPY	/**/
+
 /* HAS_SETLOCALE:
  *	This symbol, if defined, indicates that the setlocale routine is
  *	available to handle locale-specific ctype implementations.
  */
 #define HAS_SETLOCALE	/**/
+
+/* HAS_SHMAT:
+ *	This symbol, if defined, indicates that the shmat() routine is
+ *	available to attach a shared memory segment to the process space.
+ */
+#define HAS_SHMAT		/**/
+
+/* VOIDSHMAT:
+ *	This symbol, if defined, indicates that the shmat() routine
+ *	returns a pointer of type void*.  Otherwise, char* is assumed.
+ */
+/*#define	VOIDSHMAT		/**/
 
 /* HAS_STRERROR:
  *	This symbol, if defined, indicates that the strerror routine is
@@ -896,6 +895,11 @@
 #else
 #define Strerror(e) ((e)<0||(e)>=sys_nerr?"unknown":sys_errlist[e]) /**/
 #endif
+
+/* HAS_VFORK:
+ *	This symbol, if defined, indicates that vfork() exists.
+ */
+/*#define HAS_VFORK	/**/
 
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
@@ -924,10 +928,100 @@
 #define GROUPSTYPE int	/* Type for 2nd arg to getgroups() */
 #endif
 
+/* I_DLFCN:
+ *	This symbol, if defined, indicates that <dlfcn.h> exists and should
+ *	be included.
+ */
+#define I_DLFCN		/**/
+
+/* I_MEMORY:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <memory.h>.
+ */
+#define I_MEMORY		/**/
+
+/* I_NET_ERRNO:
+ *	This symbol, if defined, indicates that <net/errno.h> exists and 
+ *	should be included.
+ */
+/*#define I_NET_ERRNO		/**/
+
+/* I_PWD:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <pwd.h>.
+ */
+/* PWQUOTA:
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_quota.
+ */
+/* PWAGE:
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_age.
+ */
+/* PWCHANGE:
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_change.
+ */
+/* PWCLASS:
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_class.
+ */
+/* PWEXPIRE:
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_expire.
+ */
+/* PWCOMMENT:
+ *	This symbol, if defined, indicates to the C program that struct passwd
+ *	contains pw_comment.
+ */
+#define I_PWD		/**/
+/*#define PWQUOTA	/**/
+#define PWAGE	/**/
+/*#define PWCHANGE	/**/
+/*#define PWCLASS	/**/
+/*#define PWEXPIRE	/**/
+#define PWCOMMENT	/**/
+
+/* I_TERMIO:
+ *	This symbol, if defined, indicates that the program should include
+ *	<termio.h> rather than <sgtty.h>.  There are also differences in
+ *	the ioctl() calls that depend on the value of this symbol.
+ */
+/* I_TERMIOS:
+ *	This symbol, if defined, indicates that the program should include
+ *	the POSIX termios.h rather than sgtty.h or termio.h.
+ *	There are also differences in the ioctl() calls that depend on the
+ *	value of this symbol.
+ */
+/* I_SGTTY:
+ *	This symbol, if defined, indicates that the program should include
+ *	<sgtty.h> rather than <termio.h>.  There are also differences in
+ *	the ioctl() calls that depend on the value of this symbol.
+ */
+/*#define I_TERMIO		/**/
+#define I_TERMIOS		/**/
+/*#define I_SGTTY		/**/
+
+/* I_VFORK:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include vfork.h.
+ */
+/*#define I_VFORK	/**/
+
+/* LOC_SED:
+ *	This symbol holds the complete pathname to the sed program.
+ */
+#define LOC_SED 	"/bin/sed"	/**/
+
 /* Malloc_t:
  *	This symbol is the type of pointer returned by malloc and realloc.
  */
 #define Malloc_t char *			/**/
+
+/* MYMALLOC:
+ *	This symbol, if defined, indicates that we're using our own malloc.
+ */
+#define MYMALLOC			/**/
 
 /* CAN_PROTOTYPE:
  *	If defined, this macro indicates that the C compiler can handle
@@ -937,6 +1031,16 @@
 #ifdef CAN_PROTOTYPE
 #else
 #endif
+
+/* SIG_NAME:
+ *	This symbol contains a list of signal names in order. This is intended
+ *	to be used as a static array initialization, like this:
+ *		char *sig_name[] = { SIG_NAME };
+ *	The signals in the list are separated with commas, and each signal
+ *	is surrounded by double quotes. There is no leading SIG in the signal
+ *	name, i.e. SIGQUIT is known as "QUIT".
+ */
+#define SIG_NAME "ZERO","HUP","INT","QUIT","ILL","TRAP","ABRT","EMT","FPE","KILL","BUS","SEGV","SYS","PIPE","ALRM","TERM","URG","STOP","TSTP","CONT","CLD","TTIN","TTOU","IO","XCPU","XFSZ","VTALRM","PROF","WINCH","LOST","USR1","USR2"	/**/
 
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this
@@ -955,11 +1059,7 @@
  *	level of void support necessary is not present, defines void to int.
  */
 #ifndef VOIDUSED
-#  ifdef VOIDWANT
-#    define VOIDUSED VOIDWANT
-#  else
-#    define VOIDUSED 15
-#  endif
+#  define VOIDUSED 15
 #endif
 #define VOIDFLAGS 15
 #if (VOIDFLAGS & VOIDUSED) != VOIDUSED
@@ -977,6 +1077,10 @@
  * obsolete symbols may end without notice.
  */
 
+#ifdef MEM_ALIGNBYTES
+#define ALIGNBYTES MEM_ALIGNBYTES
+#endif
+
 #ifdef USE_CHAR_VSPRINTF
 #define CHARVSPRINTF USE_CHAR_VSPRINTF
 #endif
@@ -989,8 +1093,32 @@
 #define HAS_GDBM I_GDBM
 #endif
 
+#ifdef I_NDBM
+#define HAS_NDBM I_NDBM
+#endif
+
+#ifdef I_DBM
+#define HAS_ODBM I_DBM
+#endif
+
+#ifdef I_SYS_IOCTL
+#define I_SYSIOCTL I_SYS_IOCTL
+#endif
+
+#ifdef Malloc_t
+#define MALLOCPTRTYPE Malloc_t
+#endif
+
+#ifdef USE_OLDSOCKET
+#define OLDSOCKET USE_OLDSOCKET
+#endif
+
 #ifdef HAS_SAFE_BCOPY
 #define SAFE_BCOPY HAS_SAFE_BCOPY
+#endif
+
+#ifdef HAS_SAFE_MEMCPY
+#define SAFE_MEMCPY HAS_SAFE_MEMCPY
 #endif
 
 #ifdef USE_STAT_BLOCKS
@@ -999,6 +1127,14 @@
 
 #ifdef USE_STD_STDIO
 #define STDSTDIO USE_STD_STDIO
+#endif
+
+#ifdef USE_STRUCT_COPY
+#define STRUCTCOPY USE_STRUCT_COPY
+#endif
+
+#ifdef HAS_SYSTEM
+#define SYSTEM HAS_SYSTEM
 #endif
 
 #ifdef Uid_t

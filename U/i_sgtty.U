@@ -1,0 +1,128 @@
+?MAKE:i_sgtty: Inhdr
+?MAKE:	-pick add $@ %<
+?S:i_sgtty:
+?S:	This variable conditionally defines the I_SGTTY symbol, and
+?S:	indicates whether a C program should include <sgtty.h>.
+?S:.
+?C:I_SGTTY:
+?C:	This symbol, if defined, indicates to the C program that it should
+?C:	include <sgtty.h>.
+?C:.
+?H:#$i_sgtty I_SGTTY          /**/
+?H:.
+?LINT:set i_sgtty
+: see if this is a sgtty.h system
+set sgtty.h i_sgtty
+eval $inhdr
+?MAKE:i_sgtty: Inhdr
+?MAKE:	-pick add $@ %<
+?S:i_sgtty:
+?S:	This variable conditionally defines the I_SGTTY symbol, and
+?S:	indicates whether a C program should include <sgtty.h>.
+?S:.
+?C:I_SGTTY:
+?C:	This symbol, if defined, indicates to the C program that it should
+?C:	include <sgtty.h>.
+?C:.
+?H:#$i_sgtty I_SGTTY          /**/
+?H:.
+?LINT:set i_sgtty
+: see if this is a sgtty.h system
+set sgtty.h i_sgtty
+eval $inhdr
+?MAKE:i_sgtty: Inhdr
+?MAKE:	-pick add $@ %<
+?S:i_sgtty:
+?S:	This variable conditionally defines the I_SGTTY symbol, and
+?S:	indicates whether a C program should include <sgtty.h>.
+?S:.
+?C:I_SGTTY:
+?C:	This symbol, if defined, indicates to the C program that it should
+?C:	include <sgtty.h>.
+?C:.
+?H:#$i_sgtty I_SGTTY          /**/
+?H:.
+?LINT:set i_sgtty
+: see if this is a sgtty.h system
+set sgtty.h i_sgtty
+eval $inhdr
+?MAKE:i_sgtty: Inhdr
+?MAKE:	-pick add $@ %<
+?S:i_sgtty:
+?S:	This variable conditionally defines the I_SGTTY symbol, and
+?S:	indicates whether a C program should include <sgtty.h>.
+?S:.
+?C:I_SGTTY:
+?C:	This symbol, if defined, indicates to the C program that it should
+?C:	include <sgtty.h>.
+?C:.
+?H:#$i_sgtty I_SGTTY          /**/
+?H:.
+?LINT:set i_sgtty
+: see if this is a sgtty.h system
+set sgtty.h i_sgtty
+eval $inhdr
+?MAKE:i_sgtty: Inhdr
+?MAKE:	-pick add $@ %<
+?S:i_sgtty:
+?S:	This variable conditionally defines the I_SGTTY symbol, and
+?S:	indicates whether a C program should include <sgtty.h>.
+?S:.
+?C:I_SGTTY:
+?C:	This symbol, if defined, indicates to the C program that it should
+?C:	include <sgtty.h>.
+?C:.
+?H:#$i_sgtty I_SGTTY          /**/
+?H:.
+?LINT:set i_sgtty
+: see if this is a sgtty.h system
+set sgtty.h i_sgtty
+eval $inhdr
+?MAKE:i_sgtty: Inhdr
+?MAKE:	-pick add $@ %<
+?S:i_sgtty:
+?S:	This variable conditionally defines the I_SGTTY symbol, and
+?S:	indicates whether a C program should include <sgtty.h>.
+?S:.
+?C:I_SGTTY:
+?C:	This symbol, if defined, indicates to the C program that it should
+?C:	include <sgtty.h>.
+?C:.
+?H:#$i_sgtty I_SGTTY          /**/
+?H:.
+?LINT:set i_sgtty
+: see if this is a sgtty.h system
+set sgtty.h i_sgtty
+eval $inhdr
+?MAKE:i_sgtty: Inhdr
+?MAKE:	-pick add $@ %<
+?S:i_sgtty:
+?S:	This variable conditionally defines the I_SGTTY symbol, and
+?S:	indicates whether a C program should include <sgtty.h>.
+?S:.
+?C:I_SGTTY:
+?C:	This symbol, if defined, indicates to the C program that it should
+?C:	include <sgtty.h>.
+?C:.
+?H:#$i_sgtty I_SGTTY          /**/
+?H:.
+?LINT:set i_sgtty
+: see if this is a sgtty.h system
+set sgtty.h i_sgtty
+eval $inhdr
+?MAKE:i_sgtty: Inhdr
+?MAKE:	-pick add $@ %<
+?S:i_sgtty:
+?S:	This variable conditionally defines the I_SGTTY symbol, and
+?S:	indicates whether a C program should include <sgtty.h>.
+?S:.
+?C:I_SGTTY:
+?C:	This symbol, if defined, indicates to the C program that it should
+?C:	include <sgtty.h>.
+?C:.
+?H:#$i_sgtty I_SGTTY          /**/
+?H:.
+?LINT:set i_sgtty
+: see if this is a sgtty.h system
+set sgtty.h i_sgtty
+eval $inhdr

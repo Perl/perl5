@@ -28,7 +28,7 @@ New things
     this means you can return from it.
 
     Format value lists may be spread over multiple lines by enclosing in
-    curlies.
+    a do {} block.
 
     You may now define BEGIN and END subroutines for each package.  The BEGIN
     subroutine executes the moment it's parsed.  The END subroutine executes
@@ -85,6 +85,10 @@ New things
     Subroutines can be defined lazily in any package by declaring an AUTOLOAD
     routine, which will be called if a non-existent subroutine is called in
     that package.
+
+    There is now a pragma mechanism, using the keywords "aver" and "deny".
+    Current pragmas are "integer" and "strict".  Unrecognized pragmas
+    are ignored.
 
 Incompatibilities
 -----------------

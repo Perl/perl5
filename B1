@@ -1,7 +1,0 @@
-$ActualRevision = "M";
-
-($junk, $ActualRevision) = '';
-
-chop($ActualRevision);
-
-($name, $ActualRevision, $junk) = split(/\s+/, $ActualRevision);

@@ -1,13 +1,14 @@
 # $Header$ 
 # basic C types
-int			T_INT
-unsigned		T_U_INT
-unsigned int		T_U_INT
-long			T_LONG
-unsigned long		T_U_LONG
-short			T_SHORT
-unsigned short		T_U_SHORT
+int			T_IV
+unsigned		T_IV
+unsigned int		T_IV
+long			T_NV
+unsigned long		T_NV
+short			T_IV
+unsigned short		T_IV
 char			T_CHAR
+unsigned char		T_U_CHAR
 char *			T_STRING
 unsigned char *		T_STRING
 caddr_t			T_STRING
@@ -20,10 +21,12 @@ AV *			T_AVOBJ
 HV *			T_HVOBJ
 CV *			T_CVOBJ
 
-I32			T_LONG
-I16			T_SHORT
+I32			T_IV
+I16			T_IV
+I8			T_IV
 U32			T_U_LONG
 U16			T_U_SHORT
+U8			T_IV
 Result			T_U_CHAR
 Boolean			T_U_CHAR
 double			T_DOUBLE
@@ -55,6 +58,8 @@ T_CVOBJ
 	    croak(\"$var is not of type ${ntype}\")
 T_SYSRET
 	$var NOT IMPLEMENTED
+T_IV
+	$var = ($type)SvIV($arg)
 T_INT
 	$var = (int)SvIV($arg)
 T_ENUM
@@ -75,37 +80,53 @@ T_U_CHAR
 	$var = (unsigned char)SvIV($arg)
 T_FLOAT
 	$var = (float)SvNV($arg)
+T_NV
+	$var = ($type)SvNV($arg)
 T_DOUBLE
-	$var = SvNV($arg)
+	$var = (double)SvNV($arg)
 T_STRING
 	$var = SvPV($arg,na)
 T_PTR
 	$var = ($type)(unsigned long)SvNV($arg)
 T_PTRREF
-	if (SvROK($arg))
-	    $var = ($type)(unsigned long)SvNV((SV*)SvRV($arg));
+	if (SvROK($arg)) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV($arg));
+	    $var = ($type) tmp;
+	}
 	else
 	    croak(\"$var is not a reference\")
 T_PTROBJ
-	if (sv_isa($arg, \"${ntype}\"))
-	    $var = ($type)(unsigned long)SvNV((SV*)SvRV($arg));
+	if (sv_isa($arg, \"${ntype}\")) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV($arg));
+	    $var = ($type) tmp;
+	}
 	else
 	    croak(\"$var is not of type ${ntype}\")
 T_PTRDESC
 	if (sv_isa($arg, \"${ntype}\")) {
-	    ${type}_desc = (\U${type}_DESC\E*)(unsigned long)SvNV((SV*)SvRV($arg));
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV($arg));
+	    ${type}_desc = (\U${type}_DESC\E*) tmp; 
 	    $var = ${type}_desc->ptr;
 	}
 	else
 	    croak(\"$var is not of type ${ntype}\")
 T_REFREF
-	if (SvROK($arg))
-	    $var = *($type)(unsigned long)SvNV((SV*)SvRV($arg));
+	if (SvROK($arg)) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV($arg));
+	    $var = *($type) tmp;
+	}
 	else
 	    croak(\"$var is not a reference\")
 T_REFOBJ
-	if (sv_isa($arg, \"${ntype}\"))
-	    $var = *($type)(unsigned long)SvNV((SV*)SvRV($arg));
+	if (sv_isa($arg, \"${ntype}\")) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV($arg));
+	    $var = *($type) tmp;
+	}
 	else
 	    croak(\"$var is not of type ${ntype}\")
 T_OPAQUE
@@ -136,6 +157,8 @@ T_HVOBJ
 	$arg = newRV((SV*)$var);
 T_CVOBJ
 	$arg = newRV((SV*)$var);
+T_IV
+	sv_setiv($arg, (I32)$var);
 T_INT
 	sv_setiv($arg, (I32)$var);
 T_SYSRET
@@ -163,8 +186,10 @@ T_U_CHAR
 	sv_setiv($arg, (I32)$var);
 T_FLOAT
 	sv_setnv($arg, (double)$var);
+T_NV
+	sv_setnv($arg, (double)$var);
 T_DOUBLE
-	sv_setnv($arg, $var);
+	sv_setnv($arg, (double)$var);
 T_STRING
 	sv_setpv($arg, $var);
 T_PTR

@@ -1,6 +1,9 @@
 #!./perl
 
-require POSIX; import POSIX;
+BEGIN {require POSIX; import POSIX; }
+
+
+print POSIX::pipe(), "\n";
 
 $sigset = new POSIX::SigSet 1,3;
 delset $sigset 1;

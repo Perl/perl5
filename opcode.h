@@ -39,286 +39,303 @@ typedef enum {
 	OP_UNDEF,	/* 37 */
 	OP_STUDY,	/* 38 */
 	OP_PREINC,	/* 39 */
-	OP_PREDEC,	/* 40 */
-	OP_POSTINC,	/* 41 */
-	OP_POSTDEC,	/* 42 */
-	OP_POW,		/* 43 */
-	OP_MULTIPLY,	/* 44 */
-	OP_DIVIDE,	/* 45 */
-	OP_MODULO,	/* 46 */
-	OP_REPEAT,	/* 47 */
-	OP_ADD,		/* 48 */
-	OP_INTADD,	/* 49 */
-	OP_SUBTRACT,	/* 50 */
-	OP_CONCAT,	/* 51 */
-	OP_LEFT_SHIFT,	/* 52 */
-	OP_RIGHT_SHIFT,	/* 53 */
-	OP_LT,		/* 54 */
-	OP_GT,		/* 55 */
-	OP_LE,		/* 56 */
-	OP_GE,		/* 57 */
-	OP_EQ,		/* 58 */
-	OP_NE,		/* 59 */
-	OP_NCMP,	/* 60 */
-	OP_SLT,		/* 61 */
-	OP_SGT,		/* 62 */
-	OP_SLE,		/* 63 */
-	OP_SGE,		/* 64 */
-	OP_SEQ,		/* 65 */
-	OP_SNE,		/* 66 */
-	OP_SCMP,	/* 67 */
-	OP_BIT_AND,	/* 68 */
-	OP_XOR,		/* 69 */
-	OP_BIT_OR,	/* 70 */
-	OP_NEGATE,	/* 71 */
-	OP_NOT,		/* 72 */
-	OP_COMPLEMENT,	/* 73 */
-	OP_ATAN2,	/* 74 */
-	OP_SIN,		/* 75 */
-	OP_COS,		/* 76 */
-	OP_RAND,	/* 77 */
-	OP_SRAND,	/* 78 */
-	OP_EXP,		/* 79 */
-	OP_LOG,		/* 80 */
-	OP_SQRT,	/* 81 */
-	OP_INT,		/* 82 */
-	OP_HEX,		/* 83 */
-	OP_OCT,		/* 84 */
-	OP_ABS,		/* 85 */
-	OP_LENGTH,	/* 86 */
-	OP_SUBSTR,	/* 87 */
-	OP_VEC,		/* 88 */
-	OP_INDEX,	/* 89 */
-	OP_RINDEX,	/* 90 */
-	OP_SPRINTF,	/* 91 */
-	OP_FORMLINE,	/* 92 */
-	OP_ORD,		/* 93 */
-	OP_CHR,		/* 94 */
-	OP_CRYPT,	/* 95 */
-	OP_UCFIRST,	/* 96 */
-	OP_LCFIRST,	/* 97 */
-	OP_UC,		/* 98 */
-	OP_LC,		/* 99 */
-	OP_RV2AV,	/* 100 */
-	OP_AELEMFAST,	/* 101 */
-	OP_AELEM,	/* 102 */
-	OP_ASLICE,	/* 103 */
-	OP_EACH,	/* 104 */
-	OP_VALUES,	/* 105 */
-	OP_KEYS,	/* 106 */
-	OP_DELETE,	/* 107 */
-	OP_RV2HV,	/* 108 */
-	OP_HELEM,	/* 109 */
-	OP_HSLICE,	/* 110 */
-	OP_UNPACK,	/* 111 */
-	OP_PACK,	/* 112 */
-	OP_SPLIT,	/* 113 */
-	OP_JOIN,	/* 114 */
-	OP_LIST,	/* 115 */
-	OP_LSLICE,	/* 116 */
-	OP_ANONLIST,	/* 117 */
-	OP_ANONHASH,	/* 118 */
-	OP_SPLICE,	/* 119 */
-	OP_PUSH,	/* 120 */
-	OP_POP,		/* 121 */
-	OP_SHIFT,	/* 122 */
-	OP_UNSHIFT,	/* 123 */
-	OP_SORT,	/* 124 */
-	OP_REVERSE,	/* 125 */
-	OP_GREPSTART,	/* 126 */
-	OP_GREPWHILE,	/* 127 */
-	OP_RANGE,	/* 128 */
-	OP_FLIP,	/* 129 */
-	OP_FLOP,	/* 130 */
-	OP_AND,		/* 131 */
-	OP_OR,		/* 132 */
-	OP_COND_EXPR,	/* 133 */
-	OP_ANDASSIGN,	/* 134 */
-	OP_ORASSIGN,	/* 135 */
-	OP_METHOD,	/* 136 */
-	OP_ENTERSUBR,	/* 137 */
-	OP_LEAVESUBR,	/* 138 */
-	OP_CALLER,	/* 139 */
-	OP_WARN,	/* 140 */
-	OP_DIE,		/* 141 */
-	OP_RESET,	/* 142 */
-	OP_LINESEQ,	/* 143 */
-	OP_NEXTSTATE,	/* 144 */
-	OP_DBSTATE,	/* 145 */
-	OP_UNSTACK,	/* 146 */
-	OP_ENTER,	/* 147 */
-	OP_LEAVE,	/* 148 */
-	OP_SCOPE,	/* 149 */
-	OP_ENTERITER,	/* 150 */
-	OP_ITER,	/* 151 */
-	OP_ENTERLOOP,	/* 152 */
-	OP_LEAVELOOP,	/* 153 */
-	OP_RETURN,	/* 154 */
-	OP_LAST,	/* 155 */
-	OP_NEXT,	/* 156 */
-	OP_REDO,	/* 157 */
-	OP_DUMP,	/* 158 */
-	OP_GOTO,	/* 159 */
-	OP_EXIT,	/* 160 */
-	OP_NSWITCH,	/* 161 */
-	OP_CSWITCH,	/* 162 */
-	OP_OPEN,	/* 163 */
-	OP_CLOSE,	/* 164 */
-	OP_PIPE_OP,	/* 165 */
-	OP_FILENO,	/* 166 */
-	OP_UMASK,	/* 167 */
-	OP_BINMODE,	/* 168 */
-	OP_TIE,		/* 169 */
-	OP_UNTIE,	/* 170 */
-	OP_DBMOPEN,	/* 171 */
-	OP_DBMCLOSE,	/* 172 */
-	OP_SSELECT,	/* 173 */
-	OP_SELECT,	/* 174 */
-	OP_GETC,	/* 175 */
-	OP_READ,	/* 176 */
-	OP_ENTERWRITE,	/* 177 */
-	OP_LEAVEWRITE,	/* 178 */
-	OP_PRTF,	/* 179 */
-	OP_PRINT,	/* 180 */
-	OP_SYSREAD,	/* 181 */
-	OP_SYSWRITE,	/* 182 */
-	OP_SEND,	/* 183 */
-	OP_RECV,	/* 184 */
-	OP_EOF,		/* 185 */
-	OP_TELL,	/* 186 */
-	OP_SEEK,	/* 187 */
-	OP_TRUNCATE,	/* 188 */
-	OP_FCNTL,	/* 189 */
-	OP_IOCTL,	/* 190 */
-	OP_FLOCK,	/* 191 */
-	OP_SOCKET,	/* 192 */
-	OP_SOCKPAIR,	/* 193 */
-	OP_BIND,	/* 194 */
-	OP_CONNECT,	/* 195 */
-	OP_LISTEN,	/* 196 */
-	OP_ACCEPT,	/* 197 */
-	OP_SHUTDOWN,	/* 198 */
-	OP_GSOCKOPT,	/* 199 */
-	OP_SSOCKOPT,	/* 200 */
-	OP_GETSOCKNAME,	/* 201 */
-	OP_GETPEERNAME,	/* 202 */
-	OP_LSTAT,	/* 203 */
-	OP_STAT,	/* 204 */
-	OP_FTRREAD,	/* 205 */
-	OP_FTRWRITE,	/* 206 */
-	OP_FTREXEC,	/* 207 */
-	OP_FTEREAD,	/* 208 */
-	OP_FTEWRITE,	/* 209 */
-	OP_FTEEXEC,	/* 210 */
-	OP_FTIS,	/* 211 */
-	OP_FTEOWNED,	/* 212 */
-	OP_FTROWNED,	/* 213 */
-	OP_FTZERO,	/* 214 */
-	OP_FTSIZE,	/* 215 */
-	OP_FTMTIME,	/* 216 */
-	OP_FTATIME,	/* 217 */
-	OP_FTCTIME,	/* 218 */
-	OP_FTSOCK,	/* 219 */
-	OP_FTCHR,	/* 220 */
-	OP_FTBLK,	/* 221 */
-	OP_FTFILE,	/* 222 */
-	OP_FTDIR,	/* 223 */
-	OP_FTPIPE,	/* 224 */
-	OP_FTLINK,	/* 225 */
-	OP_FTSUID,	/* 226 */
-	OP_FTSGID,	/* 227 */
-	OP_FTSVTX,	/* 228 */
-	OP_FTTTY,	/* 229 */
-	OP_FTTEXT,	/* 230 */
-	OP_FTBINARY,	/* 231 */
-	OP_CHDIR,	/* 232 */
-	OP_CHOWN,	/* 233 */
-	OP_CHROOT,	/* 234 */
-	OP_UNLINK,	/* 235 */
-	OP_CHMOD,	/* 236 */
-	OP_UTIME,	/* 237 */
-	OP_RENAME,	/* 238 */
-	OP_LINK,	/* 239 */
-	OP_SYMLINK,	/* 240 */
-	OP_READLINK,	/* 241 */
-	OP_MKDIR,	/* 242 */
-	OP_RMDIR,	/* 243 */
-	OP_OPEN_DIR,	/* 244 */
-	OP_READDIR,	/* 245 */
-	OP_TELLDIR,	/* 246 */
-	OP_SEEKDIR,	/* 247 */
-	OP_REWINDDIR,	/* 248 */
-	OP_CLOSEDIR,	/* 249 */
-	OP_FORK,	/* 250 */
-	OP_WAIT,	/* 251 */
-	OP_WAITPID,	/* 252 */
-	OP_SYSTEM,	/* 253 */
-	OP_EXEC,	/* 254 */
-	OP_KILL,	/* 255 */
-	OP_GETPPID,	/* 256 */
-	OP_GETPGRP,	/* 257 */
-	OP_SETPGRP,	/* 258 */
-	OP_GETPRIORITY,	/* 259 */
-	OP_SETPRIORITY,	/* 260 */
-	OP_TIME,	/* 261 */
-	OP_TMS,		/* 262 */
-	OP_LOCALTIME,	/* 263 */
-	OP_GMTIME,	/* 264 */
-	OP_ALARM,	/* 265 */
-	OP_SLEEP,	/* 266 */
-	OP_SHMGET,	/* 267 */
-	OP_SHMCTL,	/* 268 */
-	OP_SHMREAD,	/* 269 */
-	OP_SHMWRITE,	/* 270 */
-	OP_MSGGET,	/* 271 */
-	OP_MSGCTL,	/* 272 */
-	OP_MSGSND,	/* 273 */
-	OP_MSGRCV,	/* 274 */
-	OP_SEMGET,	/* 275 */
-	OP_SEMCTL,	/* 276 */
-	OP_SEMOP,	/* 277 */
-	OP_REQUIRE,	/* 278 */
-	OP_DOFILE,	/* 279 */
-	OP_ENTEREVAL,	/* 280 */
-	OP_LEAVEEVAL,	/* 281 */
-	OP_EVALONCE,	/* 282 */
-	OP_ENTERTRY,	/* 283 */
-	OP_LEAVETRY,	/* 284 */
-	OP_GHBYNAME,	/* 285 */
-	OP_GHBYADDR,	/* 286 */
-	OP_GHOSTENT,	/* 287 */
-	OP_GNBYNAME,	/* 288 */
-	OP_GNBYADDR,	/* 289 */
-	OP_GNETENT,	/* 290 */
-	OP_GPBYNAME,	/* 291 */
-	OP_GPBYNUMBER,	/* 292 */
-	OP_GPROTOENT,	/* 293 */
-	OP_GSBYNAME,	/* 294 */
-	OP_GSBYPORT,	/* 295 */
-	OP_GSERVENT,	/* 296 */
-	OP_SHOSTENT,	/* 297 */
-	OP_SNETENT,	/* 298 */
-	OP_SPROTOENT,	/* 299 */
-	OP_SSERVENT,	/* 300 */
-	OP_EHOSTENT,	/* 301 */
-	OP_ENETENT,	/* 302 */
-	OP_EPROTOENT,	/* 303 */
-	OP_ESERVENT,	/* 304 */
-	OP_GPWNAM,	/* 305 */
-	OP_GPWUID,	/* 306 */
-	OP_GPWENT,	/* 307 */
-	OP_SPWENT,	/* 308 */
-	OP_EPWENT,	/* 309 */
-	OP_GGRNAM,	/* 310 */
-	OP_GGRGID,	/* 311 */
-	OP_GGRENT,	/* 312 */
-	OP_SGRENT,	/* 313 */
-	OP_EGRENT,	/* 314 */
-	OP_GETLOGIN,	/* 315 */
-	OP_SYSCALL,	/* 316 */
+	OP_I_PREINC,	/* 40 */
+	OP_PREDEC,	/* 41 */
+	OP_I_PREDEC,	/* 42 */
+	OP_POSTINC,	/* 43 */
+	OP_I_POSTINC,	/* 44 */
+	OP_POSTDEC,	/* 45 */
+	OP_I_POSTDEC,	/* 46 */
+	OP_POW,		/* 47 */
+	OP_MULTIPLY,	/* 48 */
+	OP_I_MULTIPLY,	/* 49 */
+	OP_DIVIDE,	/* 50 */
+	OP_I_DIVIDE,	/* 51 */
+	OP_MODULO,	/* 52 */
+	OP_I_MODULO,	/* 53 */
+	OP_REPEAT,	/* 54 */
+	OP_ADD,		/* 55 */
+	OP_I_ADD,	/* 56 */
+	OP_SUBTRACT,	/* 57 */
+	OP_I_SUBTRACT,	/* 58 */
+	OP_CONCAT,	/* 59 */
+	OP_LEFT_SHIFT,	/* 60 */
+	OP_RIGHT_SHIFT,	/* 61 */
+	OP_LT,		/* 62 */
+	OP_I_LT,	/* 63 */
+	OP_GT,		/* 64 */
+	OP_I_GT,	/* 65 */
+	OP_LE,		/* 66 */
+	OP_I_LE,	/* 67 */
+	OP_GE,		/* 68 */
+	OP_I_GE,	/* 69 */
+	OP_EQ,		/* 70 */
+	OP_I_EQ,	/* 71 */
+	OP_NE,		/* 72 */
+	OP_I_NE,	/* 73 */
+	OP_NCMP,	/* 74 */
+	OP_I_NCMP,	/* 75 */
+	OP_SLT,		/* 76 */
+	OP_SGT,		/* 77 */
+	OP_SLE,		/* 78 */
+	OP_SGE,		/* 79 */
+	OP_SEQ,		/* 80 */
+	OP_SNE,		/* 81 */
+	OP_SCMP,	/* 82 */
+	OP_BIT_AND,	/* 83 */
+	OP_XOR,		/* 84 */
+	OP_BIT_OR,	/* 85 */
+	OP_NEGATE,	/* 86 */
+	OP_I_NEGATE,	/* 87 */
+	OP_NOT,		/* 88 */
+	OP_COMPLEMENT,	/* 89 */
+	OP_ATAN2,	/* 90 */
+	OP_SIN,		/* 91 */
+	OP_COS,		/* 92 */
+	OP_RAND,	/* 93 */
+	OP_SRAND,	/* 94 */
+	OP_EXP,		/* 95 */
+	OP_LOG,		/* 96 */
+	OP_SQRT,	/* 97 */
+	OP_INT,		/* 98 */
+	OP_HEX,		/* 99 */
+	OP_OCT,		/* 100 */
+	OP_ABS,		/* 101 */
+	OP_LENGTH,	/* 102 */
+	OP_SUBSTR,	/* 103 */
+	OP_VEC,		/* 104 */
+	OP_INDEX,	/* 105 */
+	OP_RINDEX,	/* 106 */
+	OP_SPRINTF,	/* 107 */
+	OP_FORMLINE,	/* 108 */
+	OP_ORD,		/* 109 */
+	OP_CHR,		/* 110 */
+	OP_CRYPT,	/* 111 */
+	OP_UCFIRST,	/* 112 */
+	OP_LCFIRST,	/* 113 */
+	OP_UC,		/* 114 */
+	OP_LC,		/* 115 */
+	OP_RV2AV,	/* 116 */
+	OP_AELEMFAST,	/* 117 */
+	OP_AELEM,	/* 118 */
+	OP_ASLICE,	/* 119 */
+	OP_EACH,	/* 120 */
+	OP_VALUES,	/* 121 */
+	OP_KEYS,	/* 122 */
+	OP_DELETE,	/* 123 */
+	OP_RV2HV,	/* 124 */
+	OP_HELEM,	/* 125 */
+	OP_HSLICE,	/* 126 */
+	OP_UNPACK,	/* 127 */
+	OP_PACK,	/* 128 */
+	OP_SPLIT,	/* 129 */
+	OP_JOIN,	/* 130 */
+	OP_LIST,	/* 131 */
+	OP_LSLICE,	/* 132 */
+	OP_ANONLIST,	/* 133 */
+	OP_ANONHASH,	/* 134 */
+	OP_SPLICE,	/* 135 */
+	OP_PUSH,	/* 136 */
+	OP_POP,		/* 137 */
+	OP_SHIFT,	/* 138 */
+	OP_UNSHIFT,	/* 139 */
+	OP_SORT,	/* 140 */
+	OP_REVERSE,	/* 141 */
+	OP_GREPSTART,	/* 142 */
+	OP_GREPWHILE,	/* 143 */
+	OP_RANGE,	/* 144 */
+	OP_FLIP,	/* 145 */
+	OP_FLOP,	/* 146 */
+	OP_AND,		/* 147 */
+	OP_OR,		/* 148 */
+	OP_COND_EXPR,	/* 149 */
+	OP_ANDASSIGN,	/* 150 */
+	OP_ORASSIGN,	/* 151 */
+	OP_METHOD,	/* 152 */
+	OP_ENTERSUBR,	/* 153 */
+	OP_LEAVESUBR,	/* 154 */
+	OP_CALLER,	/* 155 */
+	OP_WARN,	/* 156 */
+	OP_DIE,		/* 157 */
+	OP_RESET,	/* 158 */
+	OP_LINESEQ,	/* 159 */
+	OP_NEXTSTATE,	/* 160 */
+	OP_DBSTATE,	/* 161 */
+	OP_UNSTACK,	/* 162 */
+	OP_ENTER,	/* 163 */
+	OP_LEAVE,	/* 164 */
+	OP_SCOPE,	/* 165 */
+	OP_ENTERITER,	/* 166 */
+	OP_ITER,	/* 167 */
+	OP_ENTERLOOP,	/* 168 */
+	OP_LEAVELOOP,	/* 169 */
+	OP_RETURN,	/* 170 */
+	OP_LAST,	/* 171 */
+	OP_NEXT,	/* 172 */
+	OP_REDO,	/* 173 */
+	OP_DUMP,	/* 174 */
+	OP_GOTO,	/* 175 */
+	OP_EXIT,	/* 176 */
+	OP_NSWITCH,	/* 177 */
+	OP_CSWITCH,	/* 178 */
+	OP_OPEN,	/* 179 */
+	OP_CLOSE,	/* 180 */
+	OP_PIPE_OP,	/* 181 */
+	OP_FILENO,	/* 182 */
+	OP_UMASK,	/* 183 */
+	OP_BINMODE,	/* 184 */
+	OP_TIE,		/* 185 */
+	OP_UNTIE,	/* 186 */
+	OP_DBMOPEN,	/* 187 */
+	OP_DBMCLOSE,	/* 188 */
+	OP_SSELECT,	/* 189 */
+	OP_SELECT,	/* 190 */
+	OP_GETC,	/* 191 */
+	OP_READ,	/* 192 */
+	OP_ENTERWRITE,	/* 193 */
+	OP_LEAVEWRITE,	/* 194 */
+	OP_PRTF,	/* 195 */
+	OP_PRINT,	/* 196 */
+	OP_SYSREAD,	/* 197 */
+	OP_SYSWRITE,	/* 198 */
+	OP_SEND,	/* 199 */
+	OP_RECV,	/* 200 */
+	OP_EOF,		/* 201 */
+	OP_TELL,	/* 202 */
+	OP_SEEK,	/* 203 */
+	OP_TRUNCATE,	/* 204 */
+	OP_FCNTL,	/* 205 */
+	OP_IOCTL,	/* 206 */
+	OP_FLOCK,	/* 207 */
+	OP_SOCKET,	/* 208 */
+	OP_SOCKPAIR,	/* 209 */
+	OP_BIND,	/* 210 */
+	OP_CONNECT,	/* 211 */
+	OP_LISTEN,	/* 212 */
+	OP_ACCEPT,	/* 213 */
+	OP_SHUTDOWN,	/* 214 */
+	OP_GSOCKOPT,	/* 215 */
+	OP_SSOCKOPT,	/* 216 */
+	OP_GETSOCKNAME,	/* 217 */
+	OP_GETPEERNAME,	/* 218 */
+	OP_LSTAT,	/* 219 */
+	OP_STAT,	/* 220 */
+	OP_FTRREAD,	/* 221 */
+	OP_FTRWRITE,	/* 222 */
+	OP_FTREXEC,	/* 223 */
+	OP_FTEREAD,	/* 224 */
+	OP_FTEWRITE,	/* 225 */
+	OP_FTEEXEC,	/* 226 */
+	OP_FTIS,	/* 227 */
+	OP_FTEOWNED,	/* 228 */
+	OP_FTROWNED,	/* 229 */
+	OP_FTZERO,	/* 230 */
+	OP_FTSIZE,	/* 231 */
+	OP_FTMTIME,	/* 232 */
+	OP_FTATIME,	/* 233 */
+	OP_FTCTIME,	/* 234 */
+	OP_FTSOCK,	/* 235 */
+	OP_FTCHR,	/* 236 */
+	OP_FTBLK,	/* 237 */
+	OP_FTFILE,	/* 238 */
+	OP_FTDIR,	/* 239 */
+	OP_FTPIPE,	/* 240 */
+	OP_FTLINK,	/* 241 */
+	OP_FTSUID,	/* 242 */
+	OP_FTSGID,	/* 243 */
+	OP_FTSVTX,	/* 244 */
+	OP_FTTTY,	/* 245 */
+	OP_FTTEXT,	/* 246 */
+	OP_FTBINARY,	/* 247 */
+	OP_CHDIR,	/* 248 */
+	OP_CHOWN,	/* 249 */
+	OP_CHROOT,	/* 250 */
+	OP_UNLINK,	/* 251 */
+	OP_CHMOD,	/* 252 */
+	OP_UTIME,	/* 253 */
+	OP_RENAME,	/* 254 */
+	OP_LINK,	/* 255 */
+	OP_SYMLINK,	/* 256 */
+	OP_READLINK,	/* 257 */
+	OP_MKDIR,	/* 258 */
+	OP_RMDIR,	/* 259 */
+	OP_OPEN_DIR,	/* 260 */
+	OP_READDIR,	/* 261 */
+	OP_TELLDIR,	/* 262 */
+	OP_SEEKDIR,	/* 263 */
+	OP_REWINDDIR,	/* 264 */
+	OP_CLOSEDIR,	/* 265 */
+	OP_FORK,	/* 266 */
+	OP_WAIT,	/* 267 */
+	OP_WAITPID,	/* 268 */
+	OP_SYSTEM,	/* 269 */
+	OP_EXEC,	/* 270 */
+	OP_KILL,	/* 271 */
+	OP_GETPPID,	/* 272 */
+	OP_GETPGRP,	/* 273 */
+	OP_SETPGRP,	/* 274 */
+	OP_GETPRIORITY,	/* 275 */
+	OP_SETPRIORITY,	/* 276 */
+	OP_TIME,	/* 277 */
+	OP_TMS,		/* 278 */
+	OP_LOCALTIME,	/* 279 */
+	OP_GMTIME,	/* 280 */
+	OP_ALARM,	/* 281 */
+	OP_SLEEP,	/* 282 */
+	OP_SHMGET,	/* 283 */
+	OP_SHMCTL,	/* 284 */
+	OP_SHMREAD,	/* 285 */
+	OP_SHMWRITE,	/* 286 */
+	OP_MSGGET,	/* 287 */
+	OP_MSGCTL,	/* 288 */
+	OP_MSGSND,	/* 289 */
+	OP_MSGRCV,	/* 290 */
+	OP_SEMGET,	/* 291 */
+	OP_SEMCTL,	/* 292 */
+	OP_SEMOP,	/* 293 */
+	OP_REQUIRE,	/* 294 */
+	OP_DOFILE,	/* 295 */
+	OP_ENTEREVAL,	/* 296 */
+	OP_LEAVEEVAL,	/* 297 */
+	OP_EVALONCE,	/* 298 */
+	OP_ENTERTRY,	/* 299 */
+	OP_LEAVETRY,	/* 300 */
+	OP_GHBYNAME,	/* 301 */
+	OP_GHBYADDR,	/* 302 */
+	OP_GHOSTENT,	/* 303 */
+	OP_GNBYNAME,	/* 304 */
+	OP_GNBYADDR,	/* 305 */
+	OP_GNETENT,	/* 306 */
+	OP_GPBYNAME,	/* 307 */
+	OP_GPBYNUMBER,	/* 308 */
+	OP_GPROTOENT,	/* 309 */
+	OP_GSBYNAME,	/* 310 */
+	OP_GSBYPORT,	/* 311 */
+	OP_GSERVENT,	/* 312 */
+	OP_SHOSTENT,	/* 313 */
+	OP_SNETENT,	/* 314 */
+	OP_SPROTOENT,	/* 315 */
+	OP_SSERVENT,	/* 316 */
+	OP_EHOSTENT,	/* 317 */
+	OP_ENETENT,	/* 318 */
+	OP_EPROTOENT,	/* 319 */
+	OP_ESERVENT,	/* 320 */
+	OP_GPWNAM,	/* 321 */
+	OP_GPWUID,	/* 322 */
+	OP_GPWENT,	/* 323 */
+	OP_SPWENT,	/* 324 */
+	OP_EPWENT,	/* 325 */
+	OP_GGRNAM,	/* 326 */
+	OP_GGRGID,	/* 327 */
+	OP_GGRENT,	/* 328 */
+	OP_SGRENT,	/* 329 */
+	OP_EGRENT,	/* 330 */
+	OP_GETLOGIN,	/* 331 */
+	OP_SYSCALL,	/* 332 */
+	OP_max		
 } opcode;
 
-#define MAXO 317
+#define MAXO 333
 
 #ifndef DOINIT
 extern char *op_name[];
@@ -364,27 +381,42 @@ char *op_name[] = {
 	"undef operator",
 	"study",
 	"preincrement",
+	"integer preincrement",
 	"predecrement",
+	"integer predecrement",
 	"postincrement",
+	"integer postincrement",
 	"postdecrement",
+	"integer postdecrement",
 	"exponentiation",
 	"multiplication",
+	"integer multiplication",
 	"division",
+	"integer division",
 	"modulus",
+	"integer modulus",
 	"repeat",
 	"addition",
 	"integer addition",
 	"subtraction",
+	"integer subtraction",
 	"concatenation",
 	"left bitshift",
 	"right bitshift",
 	"numeric lt",
+	"integer lt",
 	"numeric gt",
+	"integer gt",
 	"numeric le",
+	"integer le",
 	"numeric ge",
+	"integer ge",
 	"numeric eq",
+	"integer eq",
 	"numeric ne",
+	"integer ne",
 	"spaceship",
+	"integer spaceship",
 	"string lt",
 	"string gt",
 	"string le",
@@ -396,6 +428,7 @@ char *op_name[] = {
 	"xor",
 	"bit or",
 	"negate",
+	"integer negate",
 	"not",
 	"1's complement",
 	"atan2",
@@ -712,27 +745,42 @@ OP *	pp_defined	P((void));
 OP *	pp_undef	P((void));
 OP *	pp_study	P((void));
 OP *	pp_preinc	P((void));
+OP *	pp_i_preinc	P((void));
 OP *	pp_predec	P((void));
+OP *	pp_i_predec	P((void));
 OP *	pp_postinc	P((void));
+OP *	pp_i_postinc	P((void));
 OP *	pp_postdec	P((void));
+OP *	pp_i_postdec	P((void));
 OP *	pp_pow		P((void));
 OP *	pp_multiply	P((void));
+OP *	pp_i_multiply	P((void));
 OP *	pp_divide	P((void));
+OP *	pp_i_divide	P((void));
 OP *	pp_modulo	P((void));
+OP *	pp_i_modulo	P((void));
 OP *	pp_repeat	P((void));
 OP *	pp_add		P((void));
-OP *	pp_intadd	P((void));
+OP *	pp_i_add	P((void));
 OP *	pp_subtract	P((void));
+OP *	pp_i_subtract	P((void));
 OP *	pp_concat	P((void));
 OP *	pp_left_shift	P((void));
 OP *	pp_right_shift	P((void));
 OP *	pp_lt		P((void));
+OP *	pp_i_lt		P((void));
 OP *	pp_gt		P((void));
+OP *	pp_i_gt		P((void));
 OP *	pp_le		P((void));
+OP *	pp_i_le		P((void));
 OP *	pp_ge		P((void));
+OP *	pp_i_ge		P((void));
 OP *	pp_eq		P((void));
+OP *	pp_i_eq		P((void));
 OP *	pp_ne		P((void));
+OP *	pp_i_ne		P((void));
 OP *	pp_ncmp		P((void));
+OP *	pp_i_ncmp	P((void));
 OP *	pp_slt		P((void));
 OP *	pp_sgt		P((void));
 OP *	pp_sle		P((void));
@@ -744,6 +792,7 @@ OP *	pp_bit_and	P((void));
 OP *	pp_xor		P((void));
 OP *	pp_bit_or	P((void));
 OP *	pp_negate	P((void));
+OP *	pp_i_negate	P((void));
 OP *	pp_not		P((void));
 OP *	pp_complement	P((void));
 OP *	pp_atan2	P((void));
@@ -1034,27 +1083,42 @@ OP * (*ppaddr[])() = {
 	pp_undef,
 	pp_study,
 	pp_preinc,
+	pp_i_preinc,
 	pp_predec,
+	pp_i_predec,
 	pp_postinc,
+	pp_i_postinc,
 	pp_postdec,
+	pp_i_postdec,
 	pp_pow,
 	pp_multiply,
+	pp_i_multiply,
 	pp_divide,
+	pp_i_divide,
 	pp_modulo,
+	pp_i_modulo,
 	pp_repeat,
 	pp_add,
-	pp_intadd,
+	pp_i_add,
 	pp_subtract,
+	pp_i_subtract,
 	pp_concat,
 	pp_left_shift,
 	pp_right_shift,
 	pp_lt,
+	pp_i_lt,
 	pp_gt,
+	pp_i_gt,
 	pp_le,
+	pp_i_le,
 	pp_ge,
+	pp_i_ge,
 	pp_eq,
+	pp_i_eq,
 	pp_ne,
+	pp_i_ne,
 	pp_ncmp,
+	pp_i_ncmp,
 	pp_slt,
 	pp_sgt,
 	pp_sle,
@@ -1066,6 +1130,7 @@ OP * (*ppaddr[])() = {
 	pp_xor,
 	pp_bit_or,
 	pp_negate,
+	pp_i_negate,
 	pp_not,
 	pp_complement,
 	pp_atan2,
@@ -1358,27 +1423,42 @@ OP * (*check[])() = {
 	ck_lfun,	/* undef */
 	ck_fun,		/* study */
 	ck_lfun,	/* preinc */
+	ck_lfun,	/* i_preinc */
 	ck_lfun,	/* predec */
+	ck_lfun,	/* i_predec */
 	ck_lfun,	/* postinc */
+	ck_lfun,	/* i_postinc */
 	ck_lfun,	/* postdec */
+	ck_lfun,	/* i_postdec */
 	ck_null,	/* pow */
 	ck_null,	/* multiply */
+	ck_null,	/* i_multiply */
 	ck_null,	/* divide */
+	ck_null,	/* i_divide */
 	ck_null,	/* modulo */
+	ck_null,	/* i_modulo */
 	ck_repeat,	/* repeat */
 	ck_null,	/* add */
-	ck_null,	/* intadd */
+	ck_null,	/* i_add */
 	ck_null,	/* subtract */
+	ck_null,	/* i_subtract */
 	ck_concat,	/* concat */
 	ck_null,	/* left_shift */
 	ck_null,	/* right_shift */
 	ck_null,	/* lt */
+	ck_null,	/* i_lt */
 	ck_null,	/* gt */
+	ck_null,	/* i_gt */
 	ck_null,	/* le */
+	ck_null,	/* i_le */
 	ck_null,	/* ge */
+	ck_null,	/* i_ge */
 	ck_null,	/* eq */
+	ck_null,	/* i_eq */
 	ck_null,	/* ne */
+	ck_null,	/* i_ne */
 	ck_null,	/* ncmp */
+	ck_null,	/* i_ncmp */
 	ck_null,	/* slt */
 	ck_null,	/* sgt */
 	ck_null,	/* sle */
@@ -1390,6 +1470,7 @@ OP * (*check[])() = {
 	ck_null,	/* xor */
 	ck_null,	/* bit_or */
 	ck_null,	/* negate */
+	ck_null,	/* i_negate */
 	ck_null,	/* not */
 	ck_null,	/* complement */
 	ck_fun,		/* atan2 */
@@ -1681,28 +1762,43 @@ U32 opargs[] = {
 	0x00000914,	/* defined */
 	0x00000904,	/* undef */
 	0x0000090c,	/* study */
-	0x00000104,	/* preinc */
-	0x00000104,	/* predec */
-	0x0000010c,	/* postinc */
-	0x0000010c,	/* postdec */
-	0x0000110e,	/* pow */
-	0x0000110e,	/* multiply */
-	0x0000110e,	/* divide */
-	0x0000111e,	/* modulo */
+	0x00000124,	/* preinc */
+	0x00000114,	/* i_preinc */
+	0x00000124,	/* predec */
+	0x00000114,	/* i_predec */
+	0x0000012c,	/* postinc */
+	0x0000011c,	/* i_postinc */
+	0x0000012c,	/* postdec */
+	0x0000011c,	/* i_postdec */
+	0x0000112e,	/* pow */
+	0x0000112e,	/* multiply */
+	0x0000111e,	/* i_multiply */
+	0x0000112e,	/* divide */
+	0x0000111e,	/* i_divide */
+	0x0000113e,	/* modulo */
+	0x0000111e,	/* i_modulo */
 	0x00001209,	/* repeat */
 	0x0000112e,	/* add */
-	0x0000111e,	/* intadd */
-	0x0000110e,	/* subtract */
+	0x0000111e,	/* i_add */
+	0x0000112e,	/* subtract */
+	0x0000111e,	/* i_subtract */
 	0x0000110e,	/* concat */
 	0x0000111e,	/* left_shift */
 	0x0000111e,	/* right_shift */
-	0x00001116,	/* lt */
-	0x00001116,	/* gt */
-	0x00001116,	/* le */
-	0x00001116,	/* ge */
-	0x00001116,	/* eq */
-	0x00001116,	/* ne */
-	0x0000111e,	/* ncmp */
+	0x00001136,	/* lt */
+	0x00001116,	/* i_lt */
+	0x00001136,	/* gt */
+	0x00001116,	/* i_gt */
+	0x00001136,	/* le */
+	0x00001116,	/* i_le */
+	0x00001136,	/* ge */
+	0x00001116,	/* i_ge */
+	0x00001136,	/* eq */
+	0x00001116,	/* i_eq */
+	0x00001136,	/* ne */
+	0x00001116,	/* i_ne */
+	0x0000113e,	/* ncmp */
+	0x0000111e,	/* i_ncmp */
 	0x00001116,	/* slt */
 	0x00001116,	/* sgt */
 	0x00001116,	/* sle */
@@ -1713,7 +1809,8 @@ U32 opargs[] = {
 	0x0000110e,	/* bit_and */
 	0x0000110e,	/* xor */
 	0x0000110e,	/* bit_or */
-	0x0000010e,	/* negate */
+	0x0000012e,	/* negate */
+	0x0000011e,	/* i_negate */
 	0x00000116,	/* not */
 	0x0000010e,	/* complement */
 	0x0000110e,	/* atan2 */

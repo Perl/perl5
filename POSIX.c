@@ -13,7 +13,9 @@
 #include <limits.h>
 #include <locale.h>
 #include <math.h>
+#ifdef I_PWD
 #include <pwd.h>
+#endif
 #include <setjmp.h>
 #include <signal.h>
 #ifdef I_STDARG
@@ -30,7 +32,7 @@
 #include <sys/types.h>
 #include <sys/utsname.h>
 #include <sys/wait.h>
-#ifndef CR3
+#if defined(I_TERMIOS) && !defined(CR3)
 #include <termios.h>
 #endif
 #include <time.h>
@@ -44,7 +46,7 @@ typedef HV* POSIX__SigAction;
 #define HAS_UNAME
 
 #ifndef HAS_GETPGRP
-#define getpgrp(a,b) not_here("getpgrp")
+#define getpgrp() not_here("getpgrp")
 #endif
 #ifndef HAS_NICE
 #define nice(a) not_here("nice")
@@ -54,9 +56,6 @@ typedef HV* POSIX__SigAction;
 #endif
 #ifndef HAS_SETPGID
 #define setpgid(a,b) not_here("setpgid")
-#endif
-#ifndef HAS_SETPGRP
-#define setpgrp(a,b) not_here("setpgrp")
 #endif
 #ifndef HAS_SETSID
 #define setsid() not_here("setsid")
@@ -2074,8 +2073,11 @@ register int items;
     {
 	POSIX__SigSet	sigset;
 
-	if (SvROK(ST(1)))
-	    sigset = (POSIX__SigSet)(unsigned long)SvNV((SV*)SvRV(ST(1)));
+	if (SvROK(ST(1))) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV(ST(1)));
+	    sigset = (POSIX__SigSet) tmp;
+	}
 	else
 	    croak("sigset is not a reference");
 	safefree(sigset);
@@ -2097,8 +2099,11 @@ register int items;
 	int	sig = (int)SvIV(ST(2));
 	SysRet	RETVAL;
 
-	if (sv_isa(ST(1), "POSIX::SigSet"))
-	    sigset = (POSIX__SigSet)(unsigned long)SvNV((SV*)SvRV(ST(1)));
+	if (sv_isa(ST(1), "POSIX::SigSet")) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV(ST(1)));
+	    sigset = (POSIX__SigSet) tmp;
+	}
 	else
 	    croak("sigset is not of type POSIX::SigSet");
 
@@ -2128,8 +2133,11 @@ register int items;
 	int	sig = (int)SvIV(ST(2));
 	SysRet	RETVAL;
 
-	if (sv_isa(ST(1), "POSIX::SigSet"))
-	    sigset = (POSIX__SigSet)(unsigned long)SvNV((SV*)SvRV(ST(1)));
+	if (sv_isa(ST(1), "POSIX::SigSet")) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV(ST(1)));
+	    sigset = (POSIX__SigSet) tmp;
+	}
 	else
 	    croak("sigset is not of type POSIX::SigSet");
 
@@ -2158,8 +2166,11 @@ register int items;
 	POSIX__SigSet	sigset;
 	SysRet	RETVAL;
 
-	if (sv_isa(ST(1), "POSIX::SigSet"))
-	    sigset = (POSIX__SigSet)(unsigned long)SvNV((SV*)SvRV(ST(1)));
+	if (sv_isa(ST(1), "POSIX::SigSet")) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV(ST(1)));
+	    sigset = (POSIX__SigSet) tmp;
+	}
 	else
 	    croak("sigset is not of type POSIX::SigSet");
 
@@ -2188,8 +2199,11 @@ register int items;
 	POSIX__SigSet	sigset;
 	SysRet	RETVAL;
 
-	if (sv_isa(ST(1), "POSIX::SigSet"))
-	    sigset = (POSIX__SigSet)(unsigned long)SvNV((SV*)SvRV(ST(1)));
+	if (sv_isa(ST(1), "POSIX::SigSet")) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV(ST(1)));
+	    sigset = (POSIX__SigSet) tmp;
+	}
 	else
 	    croak("sigset is not of type POSIX::SigSet");
 
@@ -2219,8 +2233,11 @@ register int items;
 	int	sig = (int)SvIV(ST(2));
 	int	RETVAL;
 
-	if (sv_isa(ST(1), "POSIX::SigSet"))
-	    sigset = (POSIX__SigSet)(unsigned long)SvNV((SV*)SvRV(ST(1)));
+	if (sv_isa(ST(1), "POSIX::SigSet")) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV(ST(1)));
+	    sigset = (POSIX__SigSet) tmp;
+	}
 	else
 	    croak("sigset is not of type POSIX::SigSet");
 
@@ -2266,7 +2283,7 @@ register int items;
 	int	RETVAL;
 	char *s;
 	RETVAL = 1;
-	for (s = charstring; *s; s++)
+	for (s = charstring; *s && RETVAL; s++)
 	    if (!isalnum(*s))
 		RETVAL = 0;
 	ST(0) = sv_newmortal();
@@ -2289,7 +2306,7 @@ register int items;
 	int	RETVAL;
 	char *s;
 	RETVAL = 1;
-	for (s = charstring; *s; s++)
+	for (s = charstring; *s && RETVAL; s++)
 	    if (!isalpha(*s))
 		RETVAL = 0;
 	ST(0) = sv_newmortal();
@@ -2312,7 +2329,7 @@ register int items;
 	int	RETVAL;
 	char *s;
 	RETVAL = 1;
-	for (s = charstring; *s; s++)
+	for (s = charstring; *s && RETVAL; s++)
 	    if (!iscntrl(*s))
 		RETVAL = 0;
 	ST(0) = sv_newmortal();
@@ -2335,7 +2352,7 @@ register int items;
 	int	RETVAL;
 	char *s;
 	RETVAL = 1;
-	for (s = charstring; *s; s++)
+	for (s = charstring; *s && RETVAL; s++)
 	    if (!isdigit(*s))
 		RETVAL = 0;
 	ST(0) = sv_newmortal();
@@ -2358,7 +2375,7 @@ register int items;
 	int	RETVAL;
 	char *s;
 	RETVAL = 1;
-	for (s = charstring; *s; s++)
+	for (s = charstring; *s && RETVAL; s++)
 	    if (!isgraph(*s))
 		RETVAL = 0;
 	ST(0) = sv_newmortal();
@@ -2381,7 +2398,7 @@ register int items;
 	int	RETVAL;
 	char *s;
 	RETVAL = 1;
-	for (s = charstring; *s; s++)
+	for (s = charstring; *s && RETVAL; s++)
 	    if (!islower(*s))
 		RETVAL = 0;
 	ST(0) = sv_newmortal();
@@ -2404,7 +2421,7 @@ register int items;
 	int	RETVAL;
 	char *s;
 	RETVAL = 1;
-	for (s = charstring; *s; s++)
+	for (s = charstring; *s && RETVAL; s++)
 	    if (!isprint(*s))
 		RETVAL = 0;
 	ST(0) = sv_newmortal();
@@ -2427,7 +2444,7 @@ register int items;
 	int	RETVAL;
 	char *s;
 	RETVAL = 1;
-	for (s = charstring; *s; s++)
+	for (s = charstring; *s && RETVAL; s++)
 	    if (!ispunct(*s))
 		RETVAL = 0;
 	ST(0) = sv_newmortal();
@@ -2450,7 +2467,7 @@ register int items;
 	int	RETVAL;
 	char *s;
 	RETVAL = 1;
-	for (s = charstring; *s; s++)
+	for (s = charstring; *s && RETVAL; s++)
 	    if (!isspace(*s))
 		RETVAL = 0;
 	ST(0) = sv_newmortal();
@@ -2473,7 +2490,7 @@ register int items;
 	int	RETVAL;
 	char *s;
 	RETVAL = 1;
-	for (s = charstring; *s; s++)
+	for (s = charstring; *s && RETVAL; s++)
 	    if (!isupper(*s))
 		RETVAL = 0;
 	ST(0) = sv_newmortal();
@@ -2496,7 +2513,7 @@ register int items;
 	int	RETVAL;
 	char *s;
 	RETVAL = 1;
-	for (s = charstring; *s; s++)
+	for (s = charstring; *s && RETVAL; s++)
 	    if (!isxdigit(*s))
 		RETVAL = 0;
 	ST(0) = sv_newmortal();
@@ -2652,12 +2669,12 @@ register int items;
 	croak("Usage: POSIX::acos(x)");
     }
     {
-	double	x = SvNV(ST(1));
+	double	x = (double)SvNV(ST(1));
 	double	RETVAL;
 
 	RETVAL = acos(x);
 	ST(0) = sv_newmortal();
-	sv_setnv(ST(0), RETVAL);
+	sv_setnv(ST(0), (double)RETVAL);
     }
     return ax;
 }
@@ -2672,12 +2689,12 @@ register int items;
 	croak("Usage: POSIX::asin(x)");
     }
     {
-	double	x = SvNV(ST(1));
+	double	x = (double)SvNV(ST(1));
 	double	RETVAL;
 
 	RETVAL = asin(x);
 	ST(0) = sv_newmortal();
-	sv_setnv(ST(0), RETVAL);
+	sv_setnv(ST(0), (double)RETVAL);
     }
     return ax;
 }
@@ -2692,12 +2709,12 @@ register int items;
 	croak("Usage: POSIX::atan(x)");
     }
     {
-	double	x = SvNV(ST(1));
+	double	x = (double)SvNV(ST(1));
 	double	RETVAL;
 
 	RETVAL = atan(x);
 	ST(0) = sv_newmortal();
-	sv_setnv(ST(0), RETVAL);
+	sv_setnv(ST(0), (double)RETVAL);
     }
     return ax;
 }
@@ -2712,12 +2729,12 @@ register int items;
 	croak("Usage: POSIX::ceil(x)");
     }
     {
-	double	x = SvNV(ST(1));
+	double	x = (double)SvNV(ST(1));
 	double	RETVAL;
 
 	RETVAL = ceil(x);
 	ST(0) = sv_newmortal();
-	sv_setnv(ST(0), RETVAL);
+	sv_setnv(ST(0), (double)RETVAL);
     }
     return ax;
 }
@@ -2732,12 +2749,12 @@ register int items;
 	croak("Usage: POSIX::cosh(x)");
     }
     {
-	double	x = SvNV(ST(1));
+	double	x = (double)SvNV(ST(1));
 	double	RETVAL;
 
 	RETVAL = cosh(x);
 	ST(0) = sv_newmortal();
-	sv_setnv(ST(0), RETVAL);
+	sv_setnv(ST(0), (double)RETVAL);
     }
     return ax;
 }
@@ -2752,12 +2769,12 @@ register int items;
 	croak("Usage: POSIX::floor(x)");
     }
     {
-	double	x = SvNV(ST(1));
+	double	x = (double)SvNV(ST(1));
 	double	RETVAL;
 
 	RETVAL = floor(x);
 	ST(0) = sv_newmortal();
-	sv_setnv(ST(0), RETVAL);
+	sv_setnv(ST(0), (double)RETVAL);
     }
     return ax;
 }
@@ -2772,13 +2789,13 @@ register int items;
 	croak("Usage: POSIX::fmod(x,y)");
     }
     {
-	double	x = SvNV(ST(1));
-	double	y = SvNV(ST(2));
+	double	x = (double)SvNV(ST(1));
+	double	y = (double)SvNV(ST(2));
 	double	RETVAL;
 
 	RETVAL = fmod(x, y);
 	ST(0) = sv_newmortal();
-	sv_setnv(ST(0), RETVAL);
+	sv_setnv(ST(0), (double)RETVAL);
     }
     return ax;
 }
@@ -2793,7 +2810,7 @@ register int items;
 	croak("Usage: POSIX::frexp(x)");
     }
     {
-	double	x = SvNV(ST(1));
+	double	x = (double)SvNV(ST(1));
 	dSP;
 	int expvar;
 	sp--;
@@ -2815,13 +2832,13 @@ register int items;
 	croak("Usage: POSIX::ldexp(x,exp)");
     }
     {
-	double	x = SvNV(ST(1));
+	double	x = (double)SvNV(ST(1));
 	int	exp = (int)SvIV(ST(2));
 	double	RETVAL;
 
 	RETVAL = ldexp(x, exp);
 	ST(0) = sv_newmortal();
-	sv_setnv(ST(0), RETVAL);
+	sv_setnv(ST(0), (double)RETVAL);
     }
     return ax;
 }
@@ -2836,12 +2853,12 @@ register int items;
 	croak("Usage: POSIX::log10(x)");
     }
     {
-	double	x = SvNV(ST(1));
+	double	x = (double)SvNV(ST(1));
 	double	RETVAL;
 
 	RETVAL = log10(x);
 	ST(0) = sv_newmortal();
-	sv_setnv(ST(0), RETVAL);
+	sv_setnv(ST(0), (double)RETVAL);
     }
     return ax;
 }
@@ -2856,7 +2873,7 @@ register int items;
 	croak("Usage: POSIX::modf(x)");
     }
     {
-	double	x = SvNV(ST(1));
+	double	x = (double)SvNV(ST(1));
 	dSP;
 	double intvar;
 	sp--;
@@ -2878,12 +2895,12 @@ register int items;
 	croak("Usage: POSIX::sinh(x)");
     }
     {
-	double	x = SvNV(ST(1));
+	double	x = (double)SvNV(ST(1));
 	double	RETVAL;
 
 	RETVAL = sinh(x);
 	ST(0) = sv_newmortal();
-	sv_setnv(ST(0), RETVAL);
+	sv_setnv(ST(0), (double)RETVAL);
     }
     return ax;
 }
@@ -2898,12 +2915,12 @@ register int items;
 	croak("Usage: POSIX::tanh(x)");
     }
     {
-	double	x = SvNV(ST(1));
+	double	x = (double)SvNV(ST(1));
 	double	RETVAL;
 
 	RETVAL = tanh(x);
 	ST(0) = sv_newmortal();
-	sv_setnv(ST(0), RETVAL);
+	sv_setnv(ST(0), (double)RETVAL);
     }
     return ax;
 }
@@ -2939,7 +2956,7 @@ register int items;
 
 
 	if (!siggv)
-	    gv_fetchpv("SIG", TRUE);
+	    gv_fetchpv("SIG", TRUE, SVt_PVHV);
 
 	{
 	    struct sigaction act;
@@ -2975,7 +2992,7 @@ register int items;
 		    act.sa_mask = *sigset;
 		}
 		else
-		    sigemptyset(act.sa_mask);
+		    sigemptyset(& act.sa_mask);
 
 		/* Set up any desired flags. */
 		svp = hv_fetch(action, "FLAGS", 5, FALSE);
@@ -2984,11 +3001,11 @@ register int items;
 
 	    /* Now work around sigaction oddities */
 	    if (action && oldaction)
-		RETVAL = sigaction(sig, act, oact);
+		RETVAL = sigaction(sig, & act, & oact);
 	    else if (action)
-		RETVAL = sigaction(sig, act, (struct sigaction*)0);
+		RETVAL = sigaction(sig, & act, (struct sigaction*)0);
 	    else if (oldaction)
-		RETVAL = sigaction(sig, (struct sigaction*)0, oact);
+		RETVAL = sigaction(sig, (struct sigaction*)0, & oact);
 
 	    if (oldaction) {
 		/* Get back the mask. */
@@ -3030,8 +3047,11 @@ register int items;
 	POSIX__SigSet	sigset;
 	SysRet	RETVAL;
 
-	if (sv_isa(ST(1), "POSIX::SigSet"))
-	    sigset = (POSIX__SigSet)(unsigned long)SvNV((SV*)SvRV(ST(1)));
+	if (sv_isa(ST(1), "POSIX::SigSet")) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV(ST(1)));
+	    sigset = (POSIX__SigSet) tmp;
+	}
 	else
 	    croak("sigset is not of type POSIX::SigSet");
 
@@ -3062,16 +3082,22 @@ register int items;
 	POSIX__SigSet	oldsigset;
 	SysRet	RETVAL;
 
-	if (sv_isa(ST(2), "POSIX::SigSet"))
-	    sigset = (POSIX__SigSet)(unsigned long)SvNV((SV*)SvRV(ST(2)));
+	if (sv_isa(ST(2), "POSIX::SigSet")) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV(ST(2)));
+	    sigset = (POSIX__SigSet) tmp;
+	}
 	else
 	    croak("sigset is not of type POSIX::SigSet");
 
 	if (items < 3)
 	    oldsigset = 0;
 	else {
-	    if (sv_isa(ST(3), "POSIX::SigSet"))
-		oldsigset = (POSIX__SigSet)(unsigned long)SvNV((SV*)SvRV(ST(3)));
+	    if (sv_isa(ST(3), "POSIX::SigSet")) {
+		unsigned long tmp;
+		tmp = (unsigned long)SvNV((SV*)SvRV(ST(3)));
+		oldsigset = (POSIX__SigSet) tmp;
+	    }
 	    else
 		croak("oldsigset is not of type POSIX::SigSet");
 	}
@@ -3101,8 +3127,11 @@ register int items;
 	POSIX__SigSet	signal_mask;
 	SysRet	RETVAL;
 
-	if (sv_isa(ST(1), "POSIX::SigSet"))
-	    signal_mask = (POSIX__SigSet)(unsigned long)SvNV((SV*)SvRV(ST(1)));
+	if (sv_isa(ST(1), "POSIX::SigSet")) {
+	    unsigned long tmp;
+	    tmp = (unsigned long)SvNV((SV*)SvRV(ST(1)));
+	    signal_mask = (POSIX__SigSet) tmp;
+	}
 	else
 	    croak("signal_mask is not of type POSIX::SigSet");
 
@@ -3146,11 +3175,16 @@ register int items;
     }
     {
 	int	fd = (int)SvIV(ST(1));
-	int	RETVAL;
+	SysRet	RETVAL;
 
 	RETVAL = close(fd);
 	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
+	if (RETVAL != -1) {
+	    if (RETVAL == 0)
+		sv_setpvn(ST(0), "0 but true", 10);
+	    else
+		sv_setiv(ST(0), (I32)RETVAL);
+	}
     }
     return ax;
 }
@@ -3166,11 +3200,16 @@ register int items;
     }
     {
 	int	fd = (int)SvIV(ST(1));
-	int	RETVAL;
+	SysRet	RETVAL;
 
 	RETVAL = dup(fd);
 	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
+	if (RETVAL != -1) {
+	    if (RETVAL == 0)
+		sv_setpvn(ST(0), "0 but true", 10);
+	    else
+		sv_setiv(ST(0), (I32)RETVAL);
+	}
     }
     return ax;
 }
@@ -3187,72 +3226,16 @@ register int items;
     {
 	int	fd1 = (int)SvIV(ST(1));
 	int	fd2 = (int)SvIV(ST(2));
-	int	RETVAL;
+	SysRet	RETVAL;
 
 	RETVAL = dup2(fd1, fd2);
 	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
-    }
-    return ax;
-}
-
-static int
-XS_POSIX_fstat(ix, ax, items)
-register int ix;
-register int ax;
-register int items;
-{
-    if (items != 2) {
-	croak("Usage: POSIX::fstat(fd, buf)");
-    }
-    {
-	int	fd = (int)SvIV(ST(1));
-	struct stat * buf = (struct stat*)sv_grow(ST(2),sizeof(struct stat));
-	int	RETVAL;
-
-	RETVAL = fstat(fd, buf);
-	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
-	SvCUR(ST(2)) = sizeof(struct stat);
-    }
-    return ax;
-}
-
-static int
-XS_POSIX_getpgrp(ix, ax, items)
-register int ix;
-register int ax;
-register int items;
-{
-    if (items != 1) {
-	croak("Usage: POSIX::getpgrp(pid)");
-    }
-    {
-	int	pid = (int)SvIV(ST(1));
-	int	RETVAL;
-
-	RETVAL = getpgrp(pid);
-	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
-    }
-    return ax;
-}
-
-static int
-XS_POSIX_link(ix, ax, items)
-register int ix;
-register int ax;
-register int items;
-{
-    if (items != 0) {
-	croak("Usage: POSIX::link()");
-    }
-    {
-	int	RETVAL;
-
-	RETVAL = link();
-	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
+	if (RETVAL != -1) {
+	    if (RETVAL == 0)
+		sv_setpvn(ST(0), "0 but true", 10);
+	    else
+		sv_setiv(ST(0), (I32)RETVAL);
+	}
     }
     return ax;
 }
@@ -3267,49 +3250,19 @@ register int items;
 	croak("Usage: POSIX::lseek()");
     }
     {
-	int	RETVAL;
+	int;
+	Off_t;
+	int;
+	SysRet	RETVAL;
 
 	RETVAL = lseek();
 	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
-    }
-    return ax;
-}
-
-static int
-XS_POSIX_lstat(ix, ax, items)
-register int ix;
-register int ax;
-register int items;
-{
-    if (items != 0) {
-	croak("Usage: POSIX::lstat()");
-    }
-    {
-	int	RETVAL;
-
-	RETVAL = lstat();
-	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
-    }
-    return ax;
-}
-
-static int
-XS_POSIX_mkdir(ix, ax, items)
-register int ix;
-register int ax;
-register int items;
-{
-    if (items != 0) {
-	croak("Usage: POSIX::mkdir()");
-    }
-    {
-	int	RETVAL;
-
-	RETVAL = mkdir();
-	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
+	if (RETVAL != -1) {
+	    if (RETVAL == 0)
+		sv_setpvn(ST(0), "0 but true", 10);
+	    else
+		sv_setiv(ST(0), (I32)RETVAL);
+	}
     }
     return ax;
 }
@@ -3325,11 +3278,16 @@ register int items;
     }
     {
 	int	incr = (int)SvIV(ST(1));
-	int	RETVAL;
+	SysRet	RETVAL;
 
 	RETVAL = nice(incr);
 	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
+	if (RETVAL != -1) {
+	    if (RETVAL == 0)
+		sv_setpvn(ST(0), "0 but true", 10);
+	    else
+		sv_setiv(ST(0), (I32)RETVAL);
+	}
     }
     return ax;
 }
@@ -3345,10 +3303,15 @@ register int items;
     }
     {
 	int	RETVAL;
-
-	RETVAL = pipe();
-	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
+	dSP;
+	int fds[2];
+	sp--;
+	if (pipe(fds) != -1) {
+	    EXTEND(sp,2);
+	    PUSHs(sv_2mortal(newSViv(fds[0])));
+	    PUSHs(sv_2mortal(newSViv(fds[1])));
+	}
+	ax = sp - stack_base;
     }
     return ax;
 }
@@ -3363,49 +3326,20 @@ register int items;
 	croak("Usage: POSIX::read()");
     }
     {
-	int	RETVAL;
+	SysRet	RETVAL;
+	int fd;
+	char * buffer;
+	size_t nbytes;
 
-	RETVAL = read();
+	RETVAL = read(fd, buffer, nbytes);
+	croak("POSIX::read() not implemented yet\n");
 	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
-    }
-    return ax;
-}
-
-static int
-XS_POSIX_rename(ix, ax, items)
-register int ix;
-register int ax;
-register int items;
-{
-    if (items != 0) {
-	croak("Usage: POSIX::rename()");
-    }
-    {
-	int	RETVAL;
-
-	RETVAL = rename();
-	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
-    }
-    return ax;
-}
-
-static int
-XS_POSIX_rmdir(ix, ax, items)
-register int ix;
-register int ax;
-register int items;
-{
-    if (items != 0) {
-	croak("Usage: POSIX::rmdir()");
-    }
-    {
-	int	RETVAL;
-
-	RETVAL = rmdir();
-	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
+	if (RETVAL != -1) {
+	    if (RETVAL == 0)
+		sv_setpvn(ST(0), "0 but true", 10);
+	    else
+		sv_setiv(ST(0), (I32)RETVAL);
+	}
     }
     return ax;
 }
@@ -3416,15 +3350,21 @@ register int ix;
 register int ax;
 register int items;
 {
-    if (items != 0) {
-	croak("Usage: POSIX::setgid()");
+    if (items != 1) {
+	croak("Usage: POSIX::setgid(gid)");
     }
     {
-	int	RETVAL;
+	Gid_t	gid = (Gid_t)SvNV(ST(1));
+	SysRet	RETVAL;
 
-	RETVAL = setgid();
+	RETVAL = setgid(gid);
 	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
+	if (RETVAL != -1) {
+	    if (RETVAL == 0)
+		sv_setpvn(ST(0), "0 but true", 10);
+	    else
+		sv_setiv(ST(0), (I32)RETVAL);
+	}
     }
     return ax;
 }
@@ -3439,34 +3379,18 @@ register int items;
 	croak("Usage: POSIX::setpgid(pid, pgid)");
     }
     {
-	pid_t	pid = (int)SvIV(ST(1));
-	pid_t	pgid = (int)SvIV(ST(2));
-	int	RETVAL;
+	pid_t	pid = (pid_t)SvNV(ST(1));
+	pid_t	pgid = (pid_t)SvNV(ST(2));
+	SysRet	RETVAL;
 
 	RETVAL = setpgid(pid, pgid);
 	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
-    }
-    return ax;
-}
-
-static int
-XS_POSIX_setpgrp(ix, ax, items)
-register int ix;
-register int ax;
-register int items;
-{
-    if (items != 2) {
-	croak("Usage: POSIX::setpgrp(pid, pgrp)");
-    }
-    {
-	int	pid = (int)SvIV(ST(1));
-	int	pgrp = (int)SvIV(ST(2));
-	int	RETVAL;
-
-	RETVAL = setpgrp(pid, pgrp);
-	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
+	if (RETVAL != -1) {
+	    if (RETVAL == 0)
+		sv_setpvn(ST(0), "0 but true", 10);
+	    else
+		sv_setiv(ST(0), (I32)RETVAL);
+	}
     }
     return ax;
 }
@@ -3485,7 +3409,7 @@ register int items;
 
 	RETVAL = setsid();
 	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
+	sv_setnv(ST(0), (double)RETVAL);
     }
     return ax;
 }
@@ -3496,72 +3420,21 @@ register int ix;
 register int ax;
 register int items;
 {
-    if (items != 0) {
-	croak("Usage: POSIX::setuid()");
+    if (items != 1) {
+	croak("Usage: POSIX::setuid(uid)");
     }
     {
-	int	RETVAL;
+	Uid_t	uid = (Uid_t)SvNV(ST(1));
+	SysRet	RETVAL;
 
-	RETVAL = setuid();
+	RETVAL = setuid(uid);
 	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
-    }
-    return ax;
-}
-
-static int
-XS_POSIX_stat(ix, ax, items)
-register int ix;
-register int ax;
-register int items;
-{
-    if (items != 0) {
-	croak("Usage: POSIX::stat()");
-    }
-    {
-	int	RETVAL;
-
-	RETVAL = stat();
-	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
-    }
-    return ax;
-}
-
-static int
-XS_POSIX_symlink(ix, ax, items)
-register int ix;
-register int ax;
-register int items;
-{
-    if (items != 0) {
-	croak("Usage: POSIX::symlink()");
-    }
-    {
-	int	RETVAL;
-
-	RETVAL = symlink();
-	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
-    }
-    return ax;
-}
-
-static int
-XS_POSIX_system(ix, ax, items)
-register int ix;
-register int ax;
-register int items;
-{
-    if (items != 0) {
-	croak("Usage: POSIX::system()");
-    }
-    {
-	int	RETVAL;
-
-	RETVAL = system();
-	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
+	if (RETVAL != -1) {
+	    if (RETVAL == 0)
+		sv_setpvn(ST(0), "0 but true", 10);
+	    else
+		sv_setiv(ST(0), (I32)RETVAL);
+	}
     }
     return ax;
 }
@@ -3581,7 +3454,7 @@ register int items;
 
 	RETVAL = tcgetpgrp(fd);
 	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
+	sv_setnv(ST(0), (double)RETVAL);
     }
     return ax;
 }
@@ -3597,52 +3470,17 @@ register int items;
     }
     {
 	int	fd = (int)SvIV(ST(1));
-	pid_t	pgrp_id = (int)SvIV(ST(2));
-	int	RETVAL;
+	pid_t	pgrp_id = (pid_t)SvNV(ST(2));
+	SysRet	RETVAL;
 
 	RETVAL = tcsetpgrp(fd, pgrp_id);
 	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
-    }
-    return ax;
-}
-
-static int
-XS_POSIX_times(ix, ax, items)
-register int ix;
-register int ax;
-register int items;
-{
-    if (items != 1) {
-	croak("Usage: POSIX::times(tms)");
-    }
-    {
-	struct tms * tms = (struct tms*)sv_grow(ST(1), sizeof(struct tms));
-	int	RETVAL;
-
-	RETVAL = times(tms);
-	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
-	SvCUR(ST(1)) = sizeof(struct tms);
-    }
-    return ax;
-}
-
-static int
-XS_POSIX_umask(ix, ax, items)
-register int ix;
-register int ax;
-register int items;
-{
-    if (items != 0) {
-	croak("Usage: POSIX::umask()");
-    }
-    {
-	int	RETVAL;
-
-	RETVAL = umask();
-	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
+	if (RETVAL != -1) {
+	    if (RETVAL == 0)
+		sv_setpvn(ST(0), "0 but true", 10);
+	    else
+		sv_setiv(ST(0), (I32)RETVAL);
+	}
     }
     return ax;
 }
@@ -3657,97 +3495,19 @@ register int items;
 	croak("Usage: POSIX::uname()");
     }
     {
+	int	RETVAL;
 	dSP;
-	struct utsname utsname;
+	struct utsname buf;
 	sp--;
-	if (uname(&utsname) >= 0) {
+	if (uname(&buf) >= 0) {
 	    EXTEND(sp, 5);
-	    PUSHs(sv_2mortal(newSVpv(utsname.sysname, 0)));
-	    PUSHs(sv_2mortal(newSVpv(utsname.nodename, 0)));
-	    PUSHs(sv_2mortal(newSVpv(utsname.release, 0)));
-	    PUSHs(sv_2mortal(newSVpv(utsname.version, 0)));
-	    PUSHs(sv_2mortal(newSVpv(utsname.machine, 0)));
+	    PUSHs(sv_2mortal(newSVpv(buf.sysname, 0)));
+	    PUSHs(sv_2mortal(newSVpv(buf.nodename, 0)));
+	    PUSHs(sv_2mortal(newSVpv(buf.release, 0)));
+	    PUSHs(sv_2mortal(newSVpv(buf.version, 0)));
+	    PUSHs(sv_2mortal(newSVpv(buf.machine, 0)));
 	}
 	ax = sp - stack_base;
-    }
-    return ax;
-}
-
-static int
-XS_POSIX_unlink(ix, ax, items)
-register int ix;
-register int ax;
-register int items;
-{
-    if (items != 0) {
-	croak("Usage: POSIX::unlink()");
-    }
-    {
-	int	RETVAL;
-
-	RETVAL = unlink();
-	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
-    }
-    return ax;
-}
-
-static int
-XS_POSIX_utime(ix, ax, items)
-register int ix;
-register int ax;
-register int items;
-{
-    if (items != 0) {
-	croak("Usage: POSIX::utime()");
-    }
-    {
-	int	RETVAL;
-
-	RETVAL = utime();
-	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
-    }
-    return ax;
-}
-
-static int
-XS_POSIX_wait(ix, ax, items)
-register int ix;
-register int ax;
-register int items;
-{
-    if (items != 0) {
-	croak("Usage: POSIX::wait()");
-    }
-    {
-	int	RETVAL;
-
-	RETVAL = wait();
-	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
-    }
-    return ax;
-}
-
-static int
-XS_POSIX_waitpid(ix, ax, items)
-register int ix;
-register int ax;
-register int items;
-{
-    if (items != 3) {
-	croak("Usage: POSIX::waitpid(pid, statusp, options)");
-    }
-    {
-	int	pid = (int)SvIV(ST(1));
-	int	statusp = (int)SvIV(ST(2));
-	int	options = (int)SvIV(ST(3));
-	int	RETVAL;
-
-	RETVAL = waitpid(pid, &statusp, options);
-	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
     }
     return ax;
 }
@@ -3762,11 +3522,20 @@ register int items;
 	croak("Usage: POSIX::write()");
     }
     {
-	int	RETVAL;
+	SysRet	RETVAL;
+	int fd;
+	char * buffer;
+	size_t nbytes;
 
-	RETVAL = write();
+	RETVAL = write(fd, buffer, nbytes);
+	croak("POSIX::write() not implemented yet\n");
 	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), (I32)RETVAL);
+	if (RETVAL != -1) {
+	    if (RETVAL == 0)
+		sv_setpvn(ST(0), "0 but true", 10);
+	    else
+		sv_setiv(ST(0), (I32)RETVAL);
+	}
     }
     return ax;
 }
@@ -3821,33 +3590,16 @@ int items;
     newXSUB("POSIX::close", 0, XS_POSIX_close, file);
     newXSUB("POSIX::dup", 0, XS_POSIX_dup, file);
     newXSUB("POSIX::dup2", 0, XS_POSIX_dup2, file);
-    newXSUB("POSIX::fstat", 0, XS_POSIX_fstat, file);
-    newXSUB("POSIX::getpgrp", 0, XS_POSIX_getpgrp, file);
-    newXSUB("POSIX::link", 0, XS_POSIX_link, file);
     newXSUB("POSIX::lseek", 0, XS_POSIX_lseek, file);
-    newXSUB("POSIX::lstat", 0, XS_POSIX_lstat, file);
-    newXSUB("POSIX::mkdir", 0, XS_POSIX_mkdir, file);
     newXSUB("POSIX::nice", 0, XS_POSIX_nice, file);
     newXSUB("POSIX::pipe", 0, XS_POSIX_pipe, file);
     newXSUB("POSIX::read", 0, XS_POSIX_read, file);
-    newXSUB("POSIX::rename", 0, XS_POSIX_rename, file);
-    newXSUB("POSIX::rmdir", 0, XS_POSIX_rmdir, file);
     newXSUB("POSIX::setgid", 0, XS_POSIX_setgid, file);
     newXSUB("POSIX::setpgid", 0, XS_POSIX_setpgid, file);
-    newXSUB("POSIX::setpgrp", 0, XS_POSIX_setpgrp, file);
     newXSUB("POSIX::setsid", 0, XS_POSIX_setsid, file);
     newXSUB("POSIX::setuid", 0, XS_POSIX_setuid, file);
-    newXSUB("POSIX::stat", 0, XS_POSIX_stat, file);
-    newXSUB("POSIX::symlink", 0, XS_POSIX_symlink, file);
-    newXSUB("POSIX::system", 0, XS_POSIX_system, file);
     newXSUB("POSIX::tcgetpgrp", 0, XS_POSIX_tcgetpgrp, file);
     newXSUB("POSIX::tcsetpgrp", 0, XS_POSIX_tcsetpgrp, file);
-    newXSUB("POSIX::times", 0, XS_POSIX_times, file);
-    newXSUB("POSIX::umask", 0, XS_POSIX_umask, file);
     newXSUB("POSIX::uname", 0, XS_POSIX_uname, file);
-    newXSUB("POSIX::unlink", 0, XS_POSIX_unlink, file);
-    newXSUB("POSIX::utime", 0, XS_POSIX_utime, file);
-    newXSUB("POSIX::wait", 0, XS_POSIX_wait, file);
-    newXSUB("POSIX::waitpid", 0, XS_POSIX_waitpid, file);
     newXSUB("POSIX::write", 0, XS_POSIX_write, file);
 }
