@@ -900,6 +900,12 @@ and the variable had earlier been declared as a lexical variable.
 Either qualify the sort variable with the package name, or rename the
 lexical variable.
 
+=item Bad evalled substitution pattern
+
+(F) You've used the /e switch to evaluate the replacement for a
+substitution, but perl found a syntax error in the code to evaluate,
+most likely an unexpected right brace '}'.
+
 =item Can't use %s for loop variable
 
 (F) Only a simple scalar variable may be used as a loop variable on a foreach.
