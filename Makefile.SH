@@ -824,8 +824,10 @@ CHMOD_W = chmod +w
 #	warnings.pl:	warnings.h lib/warnings.pm
 # The correct versions should be already supplied with the perl kit,
 # in case you don't have perl available.
-# To force them to be regenerated, type
-#	make regen_headers
+# To force them to be regenerated, run
+#       perl regen_headers.pl
+# with your existing copy of perl
+# (make regen_headers is kept for backwards compatibility)
 
 AUTOGEN_FILES = keywords.h opcode.h opnames.h pp_proto.h pp.sym proto.h \
 		embed.h embedvar.h global.sym \
@@ -837,14 +839,7 @@ AUTOGEN_FILES = keywords.h opcode.h opnames.h pp_proto.h pp.sym proto.h \
 .PHONY: regen_headers regen_pods regen_all
 
 regen_headers:	FORCE
-	-$(CHMOD_W) $(AUTOGEN_FILES)
-	-perl keywords.pl
-	-perl opcode.pl
-	-perl embed.pl
-	-perl bytecode.pl
-	-perl regcomp.pl
-	-perl warnings.pl
-	-perl autodoc.pl
+	-perl regen_headers.pl
 
 regen_pods:	FORCE
 	-cd pod; $(LDLIBPTH) $(MAKE) regen_pods

@@ -3,6 +3,11 @@
 require 5.003;	# keep this compatible, an old perl is all we may have before
                 # we build the new one
 
+BEGIN {
+    # Get function prototypes
+    require 'regen.pl';
+}
+
 #
 # See database of global and static function prototypes in embed.fnc
 # This is used to generate prototype headers under various configurations,
@@ -60,7 +65,7 @@ sub walk_table (&@) {
 	$F = $filename;
     }
     else {
-	unlink $filename;
+	safer_unlink $filename;
 	open F, ">$filename" or die "Can't open $filename: $!";
 	$F = \*F;
     }
@@ -84,7 +89,9 @@ sub walk_table (&@) {
         print $F @outs; # $function->(@args) is not 5.003
     }
     print $F $trailer if $trailer;
-    close $F unless ref $filename;
+    unless (ref $filename) {
+	close $F or die "Error closing $filename: $!";
+    }
 }
 
 sub munge_c_files () {
@@ -302,7 +309,7 @@ sub multoff ($$) {
     return hide("PL_$pre$sym", "PL_$sym");
 }
 
-unlink 'embed.h';
+safer_unlink 'embed.h';
 open(EM, '> embed.h') or die "Can't create embed.h: $!\n";
 
 print EM do_not_edit ("embed.h"), <<'END';
@@ -488,9 +495,9 @@ print EM <<'END';
 
 END
 
-close(EM);
+close(EM) or die "Error closing EM: $!";
 
-unlink 'embedvar.h';
+safer_unlink 'embedvar.h';
 open(EM, '> embedvar.h')
     or die "Can't create embedvar.h: $!\n";
 
@@ -626,10 +633,10 @@ print EM <<'END';
 #endif /* PERL_POLLUTE */
 END
 
-close(EM);
+close(EM) or die "Error closing EM: $!";
 
-unlink 'perlapi.h';
-unlink 'perlapi.c';
+safer_unlink 'perlapi.h';
+safer_unlink 'perlapi.c';
 open(CAPI, '> perlapi.c') or die "Can't create perlapi.c: $!\n";
 open(CAPIH, '> perlapi.h') or die "Can't create perlapi.h: $!\n";
 
@@ -727,7 +734,7 @@ print CAPIH <<'EOT';
 #endif /* __perlapi_h__ */
 
 EOT
-close CAPIH;
+close CAPIH or die "Error closing CAPIH: $!";
 
 print CAPI do_not_edit ("perlapi.c"), <<'EOT';
 
@@ -777,7 +784,7 @@ END_EXTERN_C
 #endif /* MULTIPLICITY */
 EOT
 
-close(CAPI);
+close(CAPI) or die "Error closing CAPI: $!";
 
 # functions that take va_list* for implementing vararg functions
 # NOTE: makedef.pl must be updated if you add symbols to %vfuncs

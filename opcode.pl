@@ -1,4 +1,8 @@
 #!/usr/bin/perl
+BEGIN {
+    # Get function prototypes
+    require 'regen.pl';
+}
 
 $opcode_new = 'opcode.h-new';
 $opname_new = 'opnames.h-new';
@@ -278,15 +282,11 @@ if (keys %OP_IS_FILETEST) {
 close OC or die "Error closing opcode.h: $!";
 close ON or die "Error closing opnames.h: $!";
 
-chmod 0600, 'opcode.h';  # required by dosish filesystems
-chmod 0600, 'opnames.h'; # required by dosish filesystems
-
-# Some dosish systems can't rename over an existing file:
-unlink		"$_-old"	for qw(opcode.h opnames.h);
-rename $_,	"$_-old"	for qw(opcode.h opnames.h);
-
-rename $opcode_new, 'opcode.h' or die "renaming opcode.h: $!\n";
-rename $opname_new, 'opnames.h' or die "renaming opnames.h: $!\n";
+foreach ('opcode.h', 'opnames.h') {
+    safer_rename_silent $_, "$_-old";
+}
+safer_rename $opcode_new, 'opcode.h';
+safer_rename $opname_new, 'opnames.h';
 
 $pp_proto_new = 'pp_proto.h-new';
 $pp_sym_new  = 'pp.sym-new';
@@ -330,15 +330,11 @@ for (@ops) {
 close PP or die "Error closing pp_proto.h: $!";
 close PPSYM or die "Error closing pp.sym: $!";
 
-chmod 0600, 'pp_proto.h'; # required by dosish filesystems
-chmod 0600, 'pp.sym';     # required by dosish filesystems
-
-# Some dosish systems can't rename over an existing file:
-unlink		"$_-old"	for qw(pp_proto.h pp.sym);
-rename $_,	"$_-old"	for qw(pp_proto.h pp.sym);
-
-rename $pp_proto_new, 'pp_proto.h' or die "rename pp_proto.h: $!\n";
-rename $pp_sym_new, 'pp.sym' or die "rename pp.sym: $!\n";
+foreach ('pp_proto.h', 'pp.sym') {
+    safer_rename_silent $_, "$_-old";
+}
+safer_rename $pp_proto_new, 'pp_proto.h';
+safer_rename $pp_sym_new, 'pp.sym';
 
 ###########################################################################
 sub tab {

@@ -155,7 +155,28 @@ Public API:
 
 /* new_SV(): return a new, empty SV head */
 
-#define new_SV(p) \
+#ifdef DEBUG_LEAKING_SCALARS
+/* provide a real function for a debugger to play with */
+STATIC SV*
+S_new_SV(pTHX)
+{
+    SV* sv;
+
+    LOCK_SV_MUTEX;
+    if (PL_sv_root)
+	uproot_SV(sv);
+    else
+	sv = more_sv();
+    UNLOCK_SV_MUTEX;
+    SvANY(sv) = 0;
+    SvREFCNT(sv) = 1;
+    SvFLAGS(sv) = 0;
+    return sv;
+}
+#  define new_SV(p) (p)=S_new_SV(aTHX)
+
+#else
+#  define new_SV(p) \
     STMT_START {					\
 	LOCK_SV_MUTEX;					\
 	if (PL_sv_root)					\
@@ -167,6 +188,7 @@ Public API:
 	SvREFCNT(p) = 1;				\
 	SvFLAGS(p) = 0;					\
     } STMT_END
+#endif
 
 
 /* del_SV(): return an empty SV head to the free list */

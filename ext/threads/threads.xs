@@ -386,7 +386,7 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 	thread->interp = perl_clone(aTHX, CLONEf_KEEP_PTR_TABLE);
 #endif
 	/* perl_clone leaves us in new interpreter's context.
-	   As it is tricky to spot implcit aTHX create a new scope
+	   As it is tricky to spot an implicit aTHX, create a new scope
 	   with aTHX matching the context for the duration of
 	   our work for new interpreter.
 	 */

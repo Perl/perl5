@@ -326,7 +326,8 @@ EOCCBU
 # We don't want these libraries.
 # Socket networking is in libc, these are not installed by default,
 # and just slow perl down. (scotth@sgi.com)
-set `echo X "$libswanted "|sed -e 's/ socket / /' -e 's/ nsl / /' -e 's/ dl / /'`
+# librt contains nothing we need (some places need it for Time::HiRes) --jhi
+set `echo X "$libswanted "|sed -e 's/ socket / /' -e 's/ nsl / /' -e 's/ dl / /' -e 's/ rt / /'`
 shift
 libswanted="$*"
 

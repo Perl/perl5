@@ -29,8 +29,8 @@ is($cop_base, 1, "Smallest COP sequence number");
 
 $out = runperl(
     switches => ["-MO=Concise,-exec"],
-    prog => q{$a//=$b && print q/foo/},
+    prog => q{$a||=$b && print q/foo/},
     stderr => 1,
 );
 
-like($out, qr/print/, "-exec option with //=");
+like($out, qr/print/, "-exec option with ||=");

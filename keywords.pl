@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
-unlink "keywords.h";
+require 'regen.pl';
+safer_unlink ("keywords.h");
 open(KW, ">keywords.h") || die "Can't create keywords.h: $!\n";
 select KW;
 
@@ -29,6 +30,8 @@ while (<DATA>) {
     ($keyword) = split;
     print &tab(5, "#define KEY_$keyword"), $keynum++, "\n";
 }
+
+close KW or die "Error closing keywords.h: $!";
 
 ###########################################################################
 sub tab {

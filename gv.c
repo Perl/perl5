@@ -401,6 +401,10 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
     register const char *nend;
     const char *nsplit = 0;
     GV* gv;
+    HV* ostash = stash;
+
+    if (stash && SvTYPE(stash) < SVt_PVHV)
+	stash = Nullhv;
 
     for (nend = name; *nend; nend++) {
 	if (*nend == '\'')
@@ -433,6 +437,7 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 		gv_stashpvn(origname, nsplit - origname - 7, FALSE))
 	      stash = gv_stashpvn(origname, nsplit - origname, TRUE);
 	}
+	ostash = stash;
     }
 
     gv = gv_fetchmeth(stash, name, nend - name, 0);
@@ -440,7 +445,7 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 	if (strEQ(name,"import") || strEQ(name,"unimport"))
 	    gv = (GV*)&PL_sv_yes;
 	else if (autoload)
-	    gv = gv_autoload4(stash, name, nend - name, TRUE);
+	    gv = gv_autoload4(ostash, name, nend - name, TRUE);
     }
     else if (autoload) {
 	CV* cv = GvCV(gv);
@@ -475,11 +480,19 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
     HV* varstash;
     GV* vargv;
     SV* varsv;
+    char *packname = "";
 
-    if (!stash)
-	return Nullgv;	/* UNIVERSAL::AUTOLOAD could cause trouble */
     if (len == autolen && strnEQ(name, autoload, autolen))
 	return Nullgv;
+    if (stash) {
+	if (SvTYPE(stash) < SVt_PVHV) {
+	    packname = SvPV_nolen((SV*)stash);
+	    stash = Nullhv;
+	}
+	else {
+	    packname = HvNAME(stash);
+	}
+    }
     if (!(gv = gv_fetchmeth(stash, autoload, autolen, FALSE)))
 	return Nullgv;
     cv = GvCV(gv);
@@ -494,7 +507,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 	(GvCVGEN(gv) || GvSTASH(gv) != stash))
 	Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
 	  "Use of inherited AUTOLOAD for non-method %s::%.*s() is deprecated",
-	     HvNAME(stash), (int)len, name);
+	     packname, (int)len, name);
 
 #ifndef USE_5005THREADS
     if (CvXSUB(cv)) {
@@ -530,7 +543,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 #ifdef USE_5005THREADS
     sv_lock(varsv);
 #endif
-    sv_setpv(varsv, HvNAME(stash));
+    sv_setpv(varsv, packname);
     sv_catpvn(varsv, "::", 2);
     sv_catpvn(varsv, name, len);
     SvTAINTED_off(varsv);

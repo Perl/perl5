@@ -2278,6 +2278,8 @@ int
 Perl_block_start(pTHX_ int full)
 {
     int retval = PL_savestack_ix;
+    /* If there were syntax errors, don't try to start a block */
+    if (PL_yynerrs) return retval;
 
     SAVEI32(PL_comppad_name_floor);
     PL_comppad_name_floor = AvFILLp(PL_comppad_name);
@@ -2313,6 +2315,8 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
     int needblockscope = PL_hints & HINT_BLOCK_SCOPE;
     line_t copline = PL_copline;
     OP* retval = scalarseq(seq);
+    /* If there were syntax errors, don't try to close a block */
+    if (PL_yynerrs) return retval;
     if (!seq) {
 	/* scalarseq() gave us an OP_STUB */
 	retval->op_flags |= OPf_PARENS;

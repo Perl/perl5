@@ -478,10 +478,15 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
       /* Set PL_wantutf8 to TRUE if using PerlIO _and_
 	 any of the following are true:
 	 - nl_langinfo(CODESET) contains /^utf-?8/i
-	 - $ENV{LANGUAGE} contains /^utf-?8/i (only if using glibc)
-	 - $ENV{LC_CALL} contains /^utf-?8/i
+	 - $ENV{LC_ALL}   contains /^utf-?8/i
 	 - $ENV{LC_CTYPE} contains /^utf-?8/i
-	 - $ENV{LANG} contains /^utf-?8/i
+	 - $ENV{LANG}     contains /^utf-?8/i
+	 The LC_ALL, LC_CTYPE, LANG obey the usual override
+	 hierarchy of locale environment variables.  (LANGUAGE
+	 affects only LC_MESSAGES only under glibc.) (If present,
+	 it overrides LC_MESSAGES for GNU gettext, and it also
+	 can have more than one locale, separated by spaces,
+	 in case you need to know.)
 	 If PL_wantutf8 is true, perl.c:S_parse_body()
 	 will turn on the PerlIO :utf8 discipline on STDIN, STDOUT,
 	 STDERR, _and_ the default open discipline.
@@ -491,32 +496,26 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #if defined(HAS_NL_LANGINFO) && defined(CODESET)
 	 codeset = nl_langinfo(CODESET);
 #endif
-	 if (codeset &&
-	     (ibcmp(codeset,  "UTF-8", 5) == 0 ||
-	      ibcmp(codeset,  "UTF8",  4) == 0))
-	      wantutf8 = TRUE;
+	 if (codeset)
+	      wantutf8 = (ibcmp(codeset,  "UTF-8", 5) == 0 ||
+			  ibcmp(codeset,  "UTF8",  4) == 0);
 #if defined(USE_LOCALE)
-#ifdef __GLIBC__
-	 if (!wantutf8 && language &&
-	     (ibcmp(language, "UTF-8", 5) == 0 ||
-	      ibcmp(language, "UTF8",  4) == 0))
-	      wantutf8 = TRUE;
-#endif
-	 if (!wantutf8 && lc_all &&
-	     (ibcmp(lc_all,   "UTF-8", 5) == 0 ||
-	      ibcmp(lc_all,   "UTF8",  4) == 0))
-	      wantutf8 = TRUE;
+	 else { /* nl_langinfo(CODESET) is supposed to correctly
+		 * interpret the locale environment variables,
+		 * but just in case it fails, let's do this manually. */ 
+	      if (lang)
+		   wantutf8 = (ibcmp(lang,     "UTF-8", 5) == 0 ||
+			       ibcmp(lang,     "UTF8",  4) == 0);
 #ifdef USE_LOCALE_CTYPE
-	 if (!wantutf8 && curctype &&
-	     (ibcmp(curctype,     "UTF-8", 5) == 0 ||
-	      ibcmp(curctype,     "UTF8",  4) == 0))
-	      wantutf8 = TRUE;
+	      if (curctype)
+		   wantutf8 = (ibcmp(curctype,     "UTF-8", 5) == 0 ||
+			       ibcmp(curctype,     "UTF8",  4) == 0);
 #endif
-	 if (!wantutf8 && lang &&
-	     (ibcmp(lang,     "UTF-8", 5) == 0 ||
-	      ibcmp(lang,     "UTF8",  4) == 0))
-	      wantutf8 = TRUE;
+	      if (lc_all)
+		   wantutf8 = (ibcmp(lc_all,   "UTF-8", 5) == 0 ||
+			       ibcmp(lc_all,   "UTF8",  4) == 0);
 #endif /* USE_LOCALE */
+	 }
 	 if (wantutf8)
 	      PL_wantutf8 = TRUE;
     }

@@ -415,12 +415,12 @@ for more information about UTF-8.
 
 =item *
 
-If your environment variables (LC_ALL, LC_CTYPE, LANG, LANGUAGE) look
-like you want to use UTF-8 (any of the the variables match C</utf-?8/i>),
-your STDIN, STDOUT, STDERR handles and the default open layer
-(see L<open>) are marked as UTF-8.  (This feature, like other new
-features that combine Unicode and I/O, work only if you are using
-PerlIO, but that's the default.)
+If your environment variables (LC_ALL, LC_CTYPE, LANG) look like you
+want to use UTF-8 (any of the the variables match C</utf-?8/i>), your
+STDIN, STDOUT, STDERR handles and the default open layer (see L<open>)
+are marked as UTF-8.  (This feature, like other new features that
+combine Unicode and I/O, work only if you are using PerlIO, but that's
+the default.)
 
 Note that after this Perl really does assume that everything is UTF-8:
 for example if some input handle is not, Perl will probably very soon
@@ -678,10 +678,10 @@ returns the number of slept seconds.
 
 =item *
 
-The printf() and sprintf() now support parameter reordering using the
+printf() and sprintf() now support parameter reordering using the
 C<%\d+\$> and C<*\d+\$> syntaxes.  For example
 
-    print "%2\$s %1\$s\n", "foo", "bar";
+    printf "%2\$s %1\$s\n", "foo", "bar";
 
 will print "bar foo\n".  This feature helps in writing
 internationalised software, and in general when the order

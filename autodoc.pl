@@ -3,7 +3,10 @@
 require 5.003;	# keep this compatible, an old perl is all we may have before
                 # we build the new one
 
-BEGIN {  push @INC, 'lib' }	# glob() below requires File::Glob
+BEGIN {
+  push @INC, 'lib';
+  require 'regen.pl';
+}	# glob() below requires File::Glob
 
 
 #
@@ -28,6 +31,7 @@ sub walk_table (&@) {
 	$F = $filename;
     }
     else {
+	safer_unlink $filename;
 	open F, ">$filename" or die "Can't open $filename: $!";
 	$F = \*F;
     }
@@ -50,7 +54,9 @@ sub walk_table (&@) {
 	print $F $function->(@args);
     }
     print $F $trailer if $trailer;
-    close $F unless ref $filename;
+    unless (ref $filename) {
+	close $F or die "Error closing $filename: $!";
+    }
 }
 
 my %apidocs;
@@ -145,7 +151,7 @@ for $file (glob('*.c'), glob('*.h')) {
     close F or die "Error closing $file: $!\n";
 }
 
-unlink "pod/perlapi.pod";
+safer_unlink "pod/perlapi.pod";
 open (DOC, ">pod/perlapi.pod") or
 	die "Can't create pod/perlapi.pod: $!\n";
 
@@ -235,8 +241,9 @@ perlguts(1), perlxs(1), perlxstut(1), perlintern(1)
 _EOE_
 
 
-close(DOC);
+close(DOC) or die "Error closing pod/perlapi.pod: $!";
 
+safer_unlink "pod/perlintern.pod";
 open(GUTS, ">pod/perlintern.pod") or
 		die "Unable to create pod/perlintern.pod: $!\n";
 print GUTS <<'END';
@@ -277,5 +284,4 @@ perlguts(1), perlapi(1)
 
 END
 
-close GUTS;
-
+close GUTS or die "Error closing pod/perlintern.pod: $!";
