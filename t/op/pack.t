@@ -359,7 +359,7 @@ foreach my $base (@templates) {
             skip "cannot pack '$t' on this perl", 4
               if is_valid_error($@);
 
-            is( $@, '' );
+            is( $@, '', "Template $t works");
             is(scalar @t, 2);
 
             is($t[0], 12);
