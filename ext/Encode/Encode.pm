@@ -228,7 +228,7 @@ sub define_encoding
 
 sub getEncoding
 {
-    my ($class,$name) = @_;
+    my ($class,$name,$skip_external) = @_;
     my $enc;
     if (ref($name) && $name->can('new_sequence'))
     {
@@ -250,7 +250,7 @@ sub getEncoding
     $oc = $class->findAlias($lc) if $lc ne $name;
     return $oc if defined $oc;
 
-    if (exists $external_tables{$lc})
+    if (!$skip_external and exists $external_tables{$lc})
     {
 	require $external_tables{$lc};
 	return $encoding{$name} if exists $encoding{$name};
@@ -261,8 +261,8 @@ sub getEncoding
 
 sub find_encoding
 {
-    my ($name) = @_;
-    return __PACKAGE__->getEncoding($name);
+    my ($name,$skip_external) = @_;
+    return __PACKAGE__->getEncoding($name,$skip_external);
 }
 
 sub encode

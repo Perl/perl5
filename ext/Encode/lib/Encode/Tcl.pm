@@ -21,7 +21,7 @@ sub INC_search
 		if ($name =~ /^(.*)\.enc$/)
 		{
 		    my $canon = $1;
-		    my $obj = find_encoding($canon);
+		    my $obj = find_encoding($canon, 1); # skip external tables
 		    if (!defined($obj))
 		    {
 			my $obj = bless { Name => $canon, File => "$dir/Encode/$name"},__PACKAGE__;
