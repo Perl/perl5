@@ -7303,7 +7303,7 @@ do_clean_objs(pTHXo_ SV *sv)
 static void
 do_clean_named_objs(pTHXo_ SV *sv)
 {
-    if (SvTYPE(sv) == SVt_PVGV) {
+    if (SvTYPE(sv) == SVt_PVGV && GvGP(sv)) {
 	if ( SvOBJECT(GvSV(sv)) ||
 	     GvAV(sv) && SvOBJECT(GvAV(sv)) ||
 	     GvHV(sv) && SvOBJECT(GvHV(sv)) ||

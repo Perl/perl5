@@ -2015,15 +2015,19 @@ Perl_yylex(pTHX)
 	    }
 #endif /* USE_THREADS */
 	    if ((tmp = pad_findmy(PL_tokenbuf)) != NOT_IN_PAD) {
+		SV *namesv = AvARRAY(PL_comppad_name)[tmp];
 		/* might be an "our" variable" */
-		if (SvFLAGS(AvARRAY(PL_comppad_name)[tmp]) & SVpad_OUR) {
+		if (SvFLAGS(namesv) & SVpad_OUR) {
 		    /* build ops for a bareword */
-		    yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(PL_tokenbuf+1, 0));
+		    SV *sym = newSVpv(HvNAME(GvSTASH(namesv)),0);
+		    sv_catpvn(sym, "::", 2);
+		    sv_catpv(sym, PL_tokenbuf+1);
+		    yylval.opval = (OP*)newSVOP(OP_CONST, 0, sym);
 		    yylval.opval->op_private = OPpCONST_ENTERED;
-		    gv_fetchpv(PL_tokenbuf+1,
+		    gv_fetchpv(SvPVX(sym),
 			(PL_in_eval
-			    ? (GV_ADDMULTI | GV_ADDINEVAL | GV_ADDOUR)
-			    : GV_ADDOUR
+			    ? (GV_ADDMULTI | GV_ADDINEVAL)
+			    : TRUE
 			),
 			((PL_tokenbuf[0] == '$') ? SVt_PV
 			 : (PL_tokenbuf[0] == '@') ? SVt_PVAV

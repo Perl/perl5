@@ -159,11 +159,15 @@ Perl_pad_allocmy(pTHX_ char *name)
 		&& (SvIVX(sv) == PAD_MAX || SvIVX(sv) == 0)
 		&& strEQ(name, SvPVX(sv)))
 	    {
-		Perl_warner(aTHX_ WARN_UNSAFE,
+		if (PL_in_my != KEY_our
+		    || GvSTASH(sv) == (PL_curstash ? PL_curstash : PL_defstash))
+		{
+		    Perl_warner(aTHX_ WARN_UNSAFE,
 			"\"%s\" variable %s masks earlier declaration in same %s", 
 			(PL_in_my == KEY_our ? "our" : "my"),
 			name,
 			(SvIVX(sv) == PAD_MAX ? "scope" : "statement"));
+		}
 		break;
 	    }
 	}
@@ -181,8 +185,11 @@ Perl_pad_allocmy(pTHX_ char *name)
 	SvSTASH(sv) = (HV*)SvREFCNT_inc(PL_in_my_stash);
 	PL_sv_objcount++;
     }
-    if (PL_in_my == KEY_our)
+    if (PL_in_my == KEY_our) {
+	(void)SvUPGRADE(sv, SVt_PVGV);
+	GvSTASH(sv) = (HV*)SvREFCNT_inc(PL_curstash ? PL_curstash : PL_defstash);
 	SvFLAGS(sv) |= SVpad_OUR;
+    }
     av_store(PL_comppad_name, off, sv);
     SvNVX(sv) = (NV)PAD_MAX;
     SvIVX(sv) = 0;			/* Not yet introduced--see newSTATEOP */
@@ -250,13 +257,16 @@ S_pad_findlex(pTHX_ char *name, PADOFFSET newoff, U32 seq, CV* startcv,
 		    SvNVX(namesv) = (NV)PL_curcop->cop_seq;
 		    SvIVX(namesv) = PAD_MAX;	/* A ref, intro immediately */
 		    SvFAKE_on(namesv);		/* A ref, not a real var */
-		    if (SvFLAGS(sv) & SVpad_OUR)/* An "our" variable */
-			SvFLAGS(namesv) |= SVpad_OUR;
 		    if (SvOBJECT(sv)) {		/* A typed var */
 			SvOBJECT_on(namesv);
 			(void)SvUPGRADE(namesv, SVt_PVMG);
 			SvSTASH(namesv) = (HV*)SvREFCNT_inc((SV*)SvSTASH(sv));
 			PL_sv_objcount++;
+		    }
+		    if (SvFLAGS(sv) & SVpad_OUR) { /* An "our" variable */
+			SvFLAGS(namesv) |= SVpad_OUR;
+			(void)SvUPGRADE(namesv, SVt_PVGV);
+			GvSTASH(namesv) = (HV*)SvREFCNT_inc((SV*)GvSTASH(sv));
 		    }
 		    if (CvANON(PL_compcv) || SvTYPE(PL_compcv) == SVt_PVFM) {
 			/* "It's closures all the way down." */
