@@ -18,7 +18,7 @@ print +(length(File::Basename::fileparse_set_fstype('unix')) ?
         '' : 'not '),"ok 2\n";
 
 # Unix syntax tests
-($base,$path,$type) = fileparse('/virgil/aeneid/draft.book7','\.book\d+');
+($base,$path,$type) = fileparse('/virgil/aeneid/draft.book7',qr'\.book\d+');
 if ($base eq 'draft' and $path eq '/virgil/aeneid/' and $type eq '.book7') {
   print "ok 3\n";
 }
@@ -37,7 +37,7 @@ print +(File::Basename::fileparse_set_fstype('VMS') eq 'unix' ?
         '' : 'not '),"ok 8\n";
 
 # VMS syntax tests
-($base,$path,$type) = fileparse('virgil:[aeneid]draft.book7','\.book\d+');
+($base,$path,$type) = fileparse('virgil:[aeneid]draft.book7',qr{\.book\d+});
 if ($base eq 'draft' and $path eq 'virgil:[aeneid]' and $type eq '.book7') {
   print "ok 9\n";
 }
