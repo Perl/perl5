@@ -115,7 +115,9 @@ sub STORE {
 
 sub DELETE {
   my($s, $k) = @_;
-  (ref $k) ? delete($s->[0]{overload::StrVal($k)})->[1] : delete($s->[1]{$k});
+  (ref $k)
+    ? (delete($s->[0]{overload::StrVal($k)}) || [])->[1]
+    : delete($s->[1]{$k});
 }
 
 sub EXISTS {
