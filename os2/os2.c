@@ -620,8 +620,6 @@ char	*mode;
     PerlIO *res;
     SV *sv;
     
-    if (pipe(p) < 0)
-	return Nullfp;
     /* `this' is what we use in the parent, `that' in the child. */
     this = (*mode == 'w');
     that = !this;
@@ -629,6 +627,8 @@ char	*mode;
 	taint_env();
 	taint_proper("Insecure %s%s", "EXEC");
     }
+    if (pipe(p) < 0)
+	return Nullfp;
     /* Now we need to spawn the child. */
     newfd = dup(*mode == 'r');		/* Preserve std* */
     if (p[that] != (*mode == 'r')) {
