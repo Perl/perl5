@@ -69,6 +69,14 @@ so you can use 'BO', 'Bo', 'bO' or 'bo' for Bolivia.
 When a code is returned by one of the functions in
 this module, it will always be lower-case.
 
+As of version 2.00, Locale::Country supports variant
+names for countries. So, for example, the country code for "United States"
+is "us", so country2code('United States') returns 'us'.
+Now the following will also return 'us':
+
+    country2code('United States of America') 
+    country2code('USA') 
+
 =cut
 
 #-----------------------------------------------------------------------
@@ -82,7 +90,7 @@ use Locale::Constants;
 #	Public Global Variables
 #-----------------------------------------------------------------------
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION   = sprintf("%d.%02d", q$Revision: 1.7 $ =~ /(\d+)\.(\d+)/);
+$VERSION   = sprintf("%d.%02d", q$Revision: 2.0 $ =~ /(\d+)\.(\d+)/);
 @ISA       = qw(Exporter);
 @EXPORT    = qw(code2country country2code
                 all_country_codes all_country_names
@@ -355,24 +363,21 @@ B<uk> would map to B<gb>. Any others?
 =item *
 
 When using C<country2code()>, the country name must currently appear
-exactly as it does in the source of the module. For example,
+exactly as it does in the source of the module. The module now supports
+a small number of variants.
 
-    country2code('United States')
-
-will return B<us>, as expected. But the following will all return C<undef>:
-
-    country2code('United States of America')
-    country2code('Great Britain')
-    country2code('U.S.A.')
-
-If there's need for it, a future version could have variants
-for country names.
+Possible extensions to this are: an interface for getting at the
+list of variant names, and regular expression matches.
 
 =item *
 
 In the current implementation, all data is read in when the
 module is loaded, and then held in memory.
 A lazy implementation would be more memory friendly.
+
+=item *
+
+Support for country names in different languages.
 
 =back
 
@@ -383,6 +388,10 @@ A lazy implementation would be more memory friendly.
 =item Locale::Language
 
 ISO two letter codes for identification of language (ISO 639).
+
+=item Locale::Script
+
+ISO codes for identification of scripts (ISO 15924).
 
 =item Locale::Currency
 
@@ -411,9 +420,11 @@ as defined by ISO 3166, FIPS 10-4, and internet domain names.
 
 =head1 AUTHOR
 
-Neil Bowers E<lt>neilb@cre.canon.co.ukE<gt>
+Neil Bowers E<lt>neil@bowers.comE<gt>
 
 =head1 COPYRIGHT
+
+Copyright (C) 2002, Neil Bowers.
 
 Copyright (c) 1997-2001 Canon Research Centre Europe (CRE).
 
@@ -429,28 +440,37 @@ modify it under the same terms as Perl itself.
 #=======================================================================
 {
     my ($alpha2, $alpha3, $numeric);
-    my $country;
+    my ($country, @countries);
 
 
     while (<DATA>)
     {
         next unless /\S/;
         chop;
-        ($alpha2, $alpha3, $numeric, $country) = split(/:/, $_, 4);
+        ($alpha2, $alpha3, $numeric, @countries) = split(/:/, $_);
 
-        $CODES->[LOCALE_CODE_ALPHA_2]->{$alpha2} = $country;
-        $COUNTRIES->[LOCALE_CODE_ALPHA_2]->{"\L$country"} = $alpha2;
+        $CODES->[LOCALE_CODE_ALPHA_2]->{$alpha2} = $countries[0];
+	foreach $country (@countries)
+	{
+	    $COUNTRIES->[LOCALE_CODE_ALPHA_2]->{"\L$country"} = $alpha2;
+	}
 
 	if ($alpha3)
 	{
-            $CODES->[LOCALE_CODE_ALPHA_3]->{$alpha3} = $country;
-            $COUNTRIES->[LOCALE_CODE_ALPHA_3]->{"\L$country"} = $alpha3;
+            $CODES->[LOCALE_CODE_ALPHA_3]->{$alpha3} = $countries[0];
+	    foreach $country (@countries)
+	    {
+		$COUNTRIES->[LOCALE_CODE_ALPHA_3]->{"\L$country"} = $alpha3;
+	    }
 	}
 
 	if ($numeric)
 	{
-            $CODES->[LOCALE_CODE_NUMERIC]->{$numeric} = $country;
-            $COUNTRIES->[LOCALE_CODE_NUMERIC]->{"\L$country"} = $numeric;
+            $CODES->[LOCALE_CODE_NUMERIC]->{$numeric} = $countries[0];
+	    foreach $country (@countries)
+	    {
+		$COUNTRIES->[LOCALE_CODE_NUMERIC]->{"\L$country"} = $numeric;
+	    }
 	}
 
     }
@@ -496,7 +516,7 @@ by:blr:112:Belarus
 bz:blz:084:Belize
 ca:can:124:Canada
 cc:::Cocos (Keeling) Islands
-cd:cod:180:Congo, The Democratic Republic of the
+cd:cod:180:Congo, The Democratic Republic of the:Congo, Democratic Republic of the
 cf:caf:140:Central African Republic
 cg:cog:178:Congo
 ch:che:756:Switzerland
@@ -527,13 +547,13 @@ es:esp:724:Spain
 et:eth:231:Ethiopia
 fi:fin:246:Finland
 fj:fji:242:Fiji
-fk:flk:238:Falkland Islands (Malvinas)
+fk:flk:238:Falkland Islands (Malvinas):Falkland Islands (Islas Malvinas)
 fm:fsm:583:Micronesia, Federated States of
 fo:fro:234:Faroe Islands
 fr:fra:250:France
 fx:::France, Metropolitan
 ga:gab:266:Gabon
-gb:gbr:826:United Kingdom
+gb:gbr:826:United Kingdom:Great Britain
 gd:grd:308:Grenada
 ge:geo:268:Georgia
 gf:guf:254:French Guiana
@@ -562,7 +582,7 @@ il:isr:376:Israel
 in:ind:356:India
 io:::British Indian Ocean Territory
 iq:irq:368:Iraq
-ir:irn:364:Iran, Islamic Republic of
+ir:irn:364:Iran, Islamic Republic of:Iran
 is:isl:352:Iceland
 it:ita:380:Italy
 jm:jam:388:Jamaica
@@ -574,8 +594,8 @@ kh:khm:116:Cambodia
 ki:kir:296:Kiribati
 km:com:174:Comoros
 kn:kna:659:Saint Kitts and Nevis
-kp:prk:408:Korea, Democratic People's Republic of
-kr:kor:410:Korea, Republic of
+kp:prk:408:Korea, Democratic People's Republic of:Korea, North:North Korea
+kr:kor:410:Korea, Republic of:Korea, South:South Korea
 kw:kwt:414:Kuwait
 ky:cym:136:Cayman Islands
 kz:kaz:398:Kazakstan
@@ -589,13 +609,13 @@ ls:lso:426:Lesotho
 lt:ltu:440:Lithuania
 lu:lux:442:Luxembourg
 lv:lva:428:Latvia
-ly:lby:434:Libyan Arab Jamahiriya
+ly:lby:434:Libyan Arab Jamahiriya:Libya
 ma:mar:504:Morocco
 mc:mco:492:Monaco
 md:mda:498:Moldova, Republic of
 mg:mdg:450:Madagascar
 mh:mhl:584:Marshall Islands
-mk:mkd:807:Macedonia, the Former Yugoslav Republic of
+mk:mkd:807:Macedonia, the Former Yugoslav Republic of:Macedonia, Former Yugoslav Republic of:Macedonia
 ml:mli:466:Mali
 mm:mmr:104:Myanmar
 mn:mng:496:Mongolia
@@ -632,7 +652,7 @@ ph:phl:608:Philippines
 pk:pak:586:Pakistan
 pl:pol:616:Poland
 pm:spm:666:Saint Pierre and Miquelon
-pn:pcn:612:Pitcairn
+pn:pcn:612:Pitcairn:Pitcairn Island
 pr:pri:630:Puerto Rico
 ps:pse:275:Palestinian Territory, Occupied
 pt:prt:620:Portugal
@@ -641,7 +661,7 @@ py:pry:600:Paraguay
 qa:qat:634:Qatar
 re:reu:638:Reunion
 ro:rom:642:Romania
-ru:rus:643:Russian Federation
+ru:rus:643:Russian Federation:Russia
 rw:rwa:646:Rwanda
 sa:sau:682:Saudi Arabia
 sb:slb:090:Solomon Islands
@@ -651,7 +671,7 @@ se:swe:752:Sweden
 sg:sgp:702:Singapore
 sh:shn:654:Saint Helena
 si:svn:705:Slovenia
-sj:sjm:744:Svalbard and Jan Mayen
+sj:sjm:744:Svalbard and Jan Mayen:Jan Mayen:Svalbard
 sk:svk:703:Slovakia
 sl:sle:694:Sierra Leone
 sm:smr:674:San Marino
@@ -660,7 +680,7 @@ so:som:706:Somalia
 sr:sur:740:Suriname
 st:stp:678:Sao Tome and Principe
 sv:slv:222:El Salvador
-sy:syr:760:Syrian Arab Republic
+sy:syr:760:Syrian Arab Republic:Syria
 sz:swz:748:Swaziland
 tc:tca:796:Turks and Caicos Islands
 td:tcd:148:Chad
@@ -676,18 +696,18 @@ tp:tmp:626:East Timor
 tr:tur:792:Turkey
 tt:tto:780:Trinidad and Tobago
 tv:tuv:798:Tuvalu
-tw:twn:158:Taiwan, Province of China
-tz:tza:834:Tanzania, United Republic of
+tw:twn:158:Taiwan, Province of China:Taiwan
+tz:tza:834:Tanzania, United Republic of:Tanzania
 ua:ukr:804:Ukraine
 ug:uga:800:Uganda
 um:::United States Minor Outlying Islands
-us:usa:840:United States
+us:usa:840:United States:USA:United States of America
 uy:ury:858:Uruguay
 uz:uzb:860:Uzbekistan
-va:vat:336:Holy See (Vatican City State)
+va:vat:336:Holy See (Vatican City State):Hole See (Vatican City)
 vc:vct:670:Saint Vincent and the Grenadines
 ve:ven:862:Venezuela
-vg:vgb:092:Virgin Islands, British
+vg:vgb:092:Virgin Islands, British:British Virgin Islands
 vi:vir:850:Virgin Islands, U.S.
 vn:vnm:704:Vietnam
 vu:vut:548:Vanuatu

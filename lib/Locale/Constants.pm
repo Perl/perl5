@@ -2,7 +2,7 @@ package Locale::Constants;
 #
 # Locale::Constants - defined constants for identifying codesets
 #
-# $Id: Constants.pm,v 1.1 2001/03/04 17:58:15 neilb Exp $
+# $Id: Constants.pm,v 2.0 2002/02/05 22:37:58 neilb Exp $
 #
 
 use strict;
@@ -10,6 +10,7 @@ use strict;
 require Exporter;
 
 use vars qw($VERSION @ISA @EXPORT);
+$VERSION   = sprintf("%d.%02d", q$Revision: 2.0 $ =~ /(\d+)\.(\d+)/);
 @ISA	= qw(Exporter);
 @EXPORT = qw(LOCALE_CODE_ALPHA_2 LOCALE_CODE_ALPHA_3 LOCALE_CODE_NUMERIC
 		LOCALE_CODE_DEFAULT);
@@ -17,8 +18,6 @@ use vars qw($VERSION @ISA @EXPORT);
 use constant LOCALE_CODE_ALPHA_2 => 1;
 use constant LOCALE_CODE_ALPHA_3 => 2;
 use constant LOCALE_CODE_NUMERIC => 3;
-
-$VERSION = '1.00';
 
 use constant LOCALE_CODE_DEFAULT => LOCALE_CODE_ALPHA_2;
 
@@ -39,14 +38,15 @@ Locale::Constants - constants for Locale codes
 =head1 DESCRIPTION
 
 B<Locale::Constants> defines symbols which are used in
-the three modules from the Locale-Codes distribution:
+the four modules from the Locale-Codes distribution:
 
 	Locale::Language
 	Locale::Country
 	Locale::Currency
+	Locale::Script
 
-B<Note:> at the moment only Locale::Country supports
-more than one code set.
+B<Note:> at the moment only Locale::Country and Locale::Script
+support more than one code set.
 
 The symbols defined are used to specify which codes you
 want to be used:
@@ -75,6 +75,10 @@ Codes for identification of languages.
 
 Codes for identification of countries.
 
+=item Locale::Script
+
+Codes for identification of scripts.
+
 =item Locale::Currency
 
 Codes for identification of currencies and funds.
@@ -83,9 +87,11 @@ Codes for identification of currencies and funds.
 
 =head1 AUTHOR
 
-Neil Bowers E<lt>neilb@cre.canon.co.ukE<gt>
+Neil Bowers E<lt>neil@bowers.comE<gt>
 
 =head1 COPYRIGHT
+
+Copyright (C) 2002, Neil Bowers.
 
 Copyright (C) 2001, Canon Research Centre Europe (CRE).
 

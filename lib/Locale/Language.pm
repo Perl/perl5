@@ -29,7 +29,7 @@ require 5.002;
 The C<Locale::Language> module provides access to the ISO two-letter
 codes for identifying languages, as defined in ISO 639. You can either
 access the codes via the L<conversion routines> (described below),
-or with the two functions which return lists of all language codes or
+or via the two functions which return lists of all language codes or
 all language names.
 
 =cut
@@ -42,7 +42,7 @@ require Exporter;
 #	Public Global Variables
 #-----------------------------------------------------------------------
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION      = sprintf("%d.%02d", q$Revision: 1.6 $ =~ /(\d+)\.(\d+)/);
+$VERSION      = sprintf("%d.%02d", q$Revision: 2.0 $ =~ /(\d+)\.(\d+)/);
 @ISA          = qw(Exporter);
 @EXPORT       = qw(&code2language &language2code
                    &all_language_codes &all_language_names );
@@ -213,6 +213,10 @@ Would these be of any use to anyone?
 ISO codes for identification of country (ISO 3166).
 Supports 2-letter, 3-letter, and numeric country codes.
 
+=item Locale::Script
+
+ISO codes for identification of written scripts (ISO 15924).
+
 =item Locale::Currency
 
 ISO three letter codes for identification of currencies and funds (ISO 4217).
@@ -223,16 +227,18 @@ Code for the representation of names of languages.
 
 =item http://lcweb.loc.gov/standards/iso639-2/langhome.html
 
-Home page for ISO 639-2
+Home page for ISO 639-2.
 
 =back
 
 
 =head1 AUTHOR
 
-Neil Bowers E<lt>neilb@cre.canon.co.ukE<gt>
+Neil Bowers E<lt>neil@bowers.comE<gt>
 
 =head1 COPYRIGHT
+
+Copyright (C) 2002, Neil Bowers.
 
 Copyright (c) 1997-2001 Canon Research Centre Europe (CRE).
 
@@ -247,15 +253,13 @@ modify it under the same terms as Perl itself.
 # initialisation code - stuff the DATA into the CODES hash
 #=======================================================================
 {
-    no utf8; # __DATA__ contains Latin-1
-
     my $code;
     my $language;
 
 
     while (<DATA>)
     {
-	next unless /\S/;
+        next unless /\S/;
         chop;
         ($code, $language) = split(/:/, $_, 2);
         $CODES{$code} = $language;

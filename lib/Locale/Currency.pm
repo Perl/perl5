@@ -58,7 +58,7 @@ require Exporter;
 #	Public Global Variables
 #-----------------------------------------------------------------------
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION      = sprintf("%d.%02d", q$Revision: 1.3 $ =~ /(\d+)\.(\d+)/);
+$VERSION      = sprintf("%d.%02d", q$Revision: 2.0 $ =~ /(\d+)\.(\d+)/);
 @ISA          = qw(Exporter);
 @EXPORT       = qw(&code2currency &currency2code
                    &all_currency_codes &all_currency_names );
@@ -224,7 +224,8 @@ do something about it.
 =item *
 
 ISO 4217 also defines a numeric code for each currency.
-Currency codes are not currently supported by this module.
+Currency codes are not currently supported by this module,
+in the same way Locale::Country supports multiple codesets.
 
 =item *
 
@@ -245,8 +246,10 @@ you might not get back the code you expected.
 =item Locale::Country
 
 ISO codes for identification of country (ISO 3166).
-Supports alpha-2, alpha-3, and numeric codes.
-The currency codes use the alpha-2 codeset.
+
+=item Locale::Script
+
+ISO codes for identification of written scripts (ISO 15924).
 
 =item ISO 4217:1995
 
@@ -263,7 +266,7 @@ This has the latest list of codes, in MS Word format. Boo.
 
 Michael Hennecke E<lt>hennecke@rz.uni-karlsruhe.deE<gt>
 and
-Neil Bowers E<lt>neilb@cre.canon.co.ukE<gt>
+Neil Bowers E<lt>neil@bowers.comE<gt>
 
 =head1 COPYRIGHT
 

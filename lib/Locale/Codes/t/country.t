@@ -60,13 +60,23 @@ use Locale::Country;
  ['!defined country2code("Banana")', 0],          # illegal country name
 
  #---- some successful examples -----------------------------------------
- ['country2code("japan")          eq "jp"', 0],
- ['country2code("japan")          ne "ja"', 0],
- ['country2code("Japan")          eq "jp"', 0],
- ['country2code("United States")  eq "us"', 0],
- ['country2code("United Kingdom") eq "gb"', 0],
- ['country2code("Andorra")        eq "ad"', 0],    # first in DATA segment
- ['country2code("Zimbabwe")       eq "zw"', 0],    # last in DATA segment
+ ['country2code("japan")                    eq "jp"', 0],
+ ['country2code("japan")                    ne "ja"', 0],
+ ['country2code("Japan")                    eq "jp"', 0],
+ ['country2code("United States")            eq "us"', 0],
+ ['country2code("United Kingdom")           eq "gb"', 0],
+ ['country2code("Andorra")                  eq "ad"', 0],    # first in DATA
+ ['country2code("Zimbabwe")                 eq "zw"', 0],    # last in DATA
+ ['country2code("Iran")                     eq "ir"', 0],    # alias
+ ['country2code("North Korea")              eq "kp"', 0],    # alias
+ ['country2code("South Korea")              eq "kr"', 0],    # alias
+ ['country2code("Libya")                    eq "ly"', 0],    # alias
+ ['country2code("Syria")                    eq "sy"', 0],    # alias
+ ['country2code("Svalbard")                 eq "sj"', 0],    # alias
+ ['country2code("Jan Mayen")                eq "sj"', 0],    # alias
+ ['country2code("USA")                      eq "us"', 0],    # alias
+ ['country2code("United States of America") eq "us"', 0],    # alias
+ ['country2code("Great Britain")            eq "gb"', 0],    # alias
 
 	#================================================
 	# TESTS FOR country_code2code
