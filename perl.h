@@ -3268,7 +3268,7 @@ typedef struct am_table_short AMTS;
    HAS_MMAP
    HAS_MPROTECT
    HAS_MSYNC
-   HAS_MADVSISE
+   HAS_MADVISE
    HAS_MUNMAP
    I_SYSMMAN
    Mmap_t

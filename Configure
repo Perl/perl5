@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Feb 28 08:28:06 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Mon Feb 28 19:17:18 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -418,6 +418,7 @@ d_longlong=''
 longlongsize=''
 d_lseekproto=''
 d_lstat=''
+d_madvise=''
 d_mblen=''
 d_mbstowcs=''
 d_mbtowc=''
@@ -9596,6 +9597,10 @@ eval $hasproto
 set lstat d_lstat
 eval $inlibc
 
+: see if madvise exists
+set madvise d_madvise
+eval $inlibc
+
 : see if mblen exists
 set mblen d_mblen
 eval $inlibc
@@ -14930,6 +14935,7 @@ d_longdbl='$d_longdbl'
 d_longlong='$d_longlong'
 d_lseekproto='$d_lseekproto'
 d_lstat='$d_lstat'
+d_madvise='$d_madvise'
 d_mblen='$d_mblen'
 d_mbstowcs='$d_mbstowcs'
 d_mbtowc='$d_mbtowc'
