@@ -102,6 +102,11 @@ EOM
     ;;
 esac
 
+case `$cc -v 2>&1`"" in
+*gcc*) ccisgcc="$define" ;;
+*) ccisgcc='' ;;
+esac
+
 # Determine the architecture type of this system.
 # Keep leading tab below -- Configure Black Magic -- RAM, 03/02/97
 	xxOsRevMajor=`uname -r | sed -e 's/^[^0-9]*//' | cut -d. -f1`;
@@ -167,40 +172,47 @@ EOM
 *LP64*|*PA-RISC2.0*) ;;
 *) xxx=/no/64-bit$xxx ;;
 esac'
-    ld=/usr/bin/ld
+    case "$ccisgcc" in
+    "$define") ld=$cc ;;
+    *) ld=/usr/bin/ld ;;
+    esac
     ar=/usr/bin/ar
     full_ar=$ar
 
-    # The strict ANSI mode (-Aa) doesn't like the LL suffixes.
-    case "$ccflags" in
-    *-Aa*)
+    case "$ccisgcc" in
+    "$define") ;;
+    *) # The strict ANSI mode (-Aa) doesn't like the LL suffixes.
+       case "$ccflags" in
+       *-Aa*)
 	    echo "(Changing from strict ANSI compilation to extended because of 64-bitness)"
 	    ccflags=`echo $ccflags|sed 's@ -Aa @ -Ae @'`
 	    ;;
-    *)	case `$cc -v 2>&1`"" in
-	*gcc*) ;;
-	*) ccflags="$ccflags -Ae" ;;
-	esac
-	;;
+       *) ccflags="$ccflags -Ae" ;;
+       esac
+       ;;
     esac    
 
     set `echo " $libswanted " | sed -e 's@ dl @ @'`
     libswanted="$*"
 
-    case "`$cc -v 2>&1`" in
-    # Even if you use gcc, prefer the HP math library over the GNU one.
-    *gcc*) test -d /lib/pa20_64 && ccflags="$ccflags -L/lib/pa20_64" ;;
-    esac
-    ;;
-*)  case "`$cc -v 2>&1`" in
-    # Even if you use gcc, prefer the HP math library over the GNU one.
-    *gcc*) test -d /lib/pa1.1 && ccflags="$ccflags -L/lib/pa1.1" ;;
+    case "$ccisgcc" in
+    "$define") ;;
     esac
     ;;
 esac
 
-case "`getconf KERNEL_BITS 2>/dev/null`" in
-*64*) ldflags="$ldflags -Wl,+vnocompatwarnings" ;;
+case "$ccisgcc" in
+# Even if you use gcc, prefer the HP math library over the GNU one.
+"$define") test -d /lib/pa1.1 && ccflags="$ccflags -L/lib/pa1.1" ;;
+esac
+    
+
+case "$ccisgcc" in
+"$define") ;;
+*)  case "`getconf KERNEL_BITS 2>/dev/null`" in
+    *64*) ldflags="$ldflags -Wl,+vnocompatwarnings" ;;
+    esac
+    ;;
 esac
 
 # Remove bad libraries that will cause problems
@@ -257,8 +269,8 @@ case "$ldlibpthname" in
 esac
 
 # HP-UX 10.20 and gcc 2.8.1 break UINT32_MAX.
-case "$cc" in
-*gcc*) ccflags="$ccflags -DUINT32_MAX_BROKEN" ;;
+case "$ccisgcc" in
+"$define") ccflags="$ccflags -DUINT32_MAX_BROKEN" ;;
 esac
 
 cat > UU/cc.cbu <<'EOSH'
@@ -368,8 +380,8 @@ case "$uselargefiles" in
 	    echo "(Changing from strict ANSI compilation to extended because of large files)"
 	    ccflags=`echo $ccflags|sed 's@ -Aa @ -Ae @'`
 	    ;;
-	*)  case `$cc -v 2>&1`"" in
-	    *gcc*) ;;
+	*)  case "$ccisgcc" in
+	    "ccisgcc") ;;
 	    *) ccflags="$ccflags -Ae" ;;
 	    esac
 	    ;; 
@@ -378,4 +390,6 @@ case "$uselargefiles" in
 esac
 EOCBU
 
+# keep that leading tab.
+	ccisgcc=''
 
