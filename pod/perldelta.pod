@@ -1343,6 +1343,10 @@ change#4232
 
 An introduction to using the Perl Compiler suite.
 
+=item perlfilter.pod
+
+An introduction to writing Perl source filters.
+
 =item perlhack.pod
 
 Some guidelines for hacking the Perl source code.

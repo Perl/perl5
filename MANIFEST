@@ -1036,6 +1036,7 @@ pod/perlfaq6.pod	Frequently Asked Questions, Part 6
 pod/perlfaq7.pod	Frequently Asked Questions, Part 7
 pod/perlfaq8.pod	Frequently Asked Questions, Part 8
 pod/perlfaq9.pod	Frequently Asked Questions, Part 9
+pod/perlfilter.pod	Source filters info
 pod/perlform.pod	Format info
 pod/perlfunc.pod	Function info
 pod/perlguts.pod	Internals info
