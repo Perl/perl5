@@ -2570,7 +2570,8 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
     I32 optype;
     OP dummy;
     OP *oop = PL_op, *rop;
-    char tmpbuf[TYPE_DIGITS(long) + 12 + 10];
+    char tbuf[TYPE_DIGITS(long) + 12 + 10];
+    char *tmpbuf = tbuf;
     char *safestr;
 
     ENTER;
@@ -2584,7 +2585,15 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, AV** avp)
     }
     SAVECOPFILE(&PL_compiling);
     SAVECOPLINE(&PL_compiling);
-    sprintf(tmpbuf, "_<(%.10s_eval %lu)", code, (unsigned long)++PL_evalseq);
+    if (PERLDB_NAMEEVAL && CopLINE(PL_curcop)) {
+	SV *sv = sv_newmortal();
+	Perl_sv_setpvf(aTHX_ sv, "_<(%.10seval %lu)[%s:%"IVdf"]",
+		       code, (unsigned long)++PL_evalseq,
+		       CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
+	tmpbuf = SvPVX(sv);
+    }
+    else
+	sprintf(tmpbuf, "_<(%.10s_eval %lu)", code, (unsigned long)++PL_evalseq);
     CopFILE_set(&PL_compiling, tmpbuf+2);
     CopLINE_set(&PL_compiling, 1);
     /* XXX For C<eval "...">s within BEGIN {} blocks, this ends up
@@ -3155,7 +3164,8 @@ PP(pp_entereval)
     register PERL_CONTEXT *cx;
     dPOPss;
     I32 gimme = GIMME_V, was = PL_sub_generation;
-    char tmpbuf[TYPE_DIGITS(long) + 12];
+    char tbuf[TYPE_DIGITS(long) + 12];
+    char *tmpbuf = tbuf;
     char *safestr;
     STRLEN len;
     OP *ret;
@@ -3171,7 +3181,15 @@ PP(pp_entereval)
     /* switch to eval mode */
 
     SAVECOPFILE(&PL_compiling);
-    sprintf(tmpbuf, "_<(eval %lu)", (unsigned long)++PL_evalseq);
+    if (PERLDB_NAMEEVAL && CopLINE(PL_curcop)) {
+	SV *sv = sv_newmortal();
+	Perl_sv_setpvf(aTHX_ sv, "_<(eval %lu)[%s:%"IVdf"]",
+		       (unsigned long)++PL_evalseq,
+		       CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
+	tmpbuf = SvPVX(sv);
+    }
+    else
+	sprintf(tmpbuf, "_<(eval %lu)", (unsigned long)++PL_evalseq);
     CopFILE_set(&PL_compiling, tmpbuf+2);
     CopLINE_set(&PL_compiling, 1);
     /* XXX For C<eval "...">s within BEGIN {} blocks, this ends up

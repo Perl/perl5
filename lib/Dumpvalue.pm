@@ -347,16 +347,30 @@ sub dumpglob {
   }
 }
 
+sub CvGV_name {
+  my $self = shift;
+  my $in = shift;
+  return if $self->{skipCvGV};	# Backdoor to avoid problems if XS broken...
+  $in = \&$in;			# Hard reference...
+  eval {require Devel::Peek; 1} or return;
+  my $gv = Devel::Peek::CvGV($in) or return;
+  *$gv{PACKAGE} . '::' . *$gv{NAME};
+}
+
 sub dumpsub {
   my $self = shift;
   my ($off,$sub) = @_;
+  my $ini = $sub;
+  my $s;
   $sub = $1 if $sub =~ /^\{\*(.*)\}$/;
-  my $subref = \&$sub;
-  my $place = $DB::sub{$sub} || (($sub = $subs{"$subref"}) && $DB::sub{$sub})
-    || ($self->{subdump} && ($sub = $self->findsubs("$subref"))
-	&& $DB::sub{$sub});
+  my $subref = defined $1 ? \&$sub : \&$ini;
+  my $place = $DB::sub{$sub} || (($s = $subs{"$subref"}) && $DB::sub{$s})
+    || (($s = $self->CvGV_name($subref)) && $DB::sub{$s})
+    || ($self->{subdump} && ($s = $self->findsubs("$subref"))
+	&& $DB::sub{$s});
+  $s = $sub unless defined $s;
   $place = '???' unless defined $place;
-  print( (' ' x $off) .  "&$sub in $place\n" );
+  print( (' ' x $off) .  "&$s in $place\n" );
 }
 
 sub findsubs {
