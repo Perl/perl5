@@ -914,9 +914,9 @@ lib/unicode/Is/DCcompat.pl			Unicode character database
 lib/unicode/Is/DCfinal.pl			Unicode character database
 lib/unicode/Is/DCfont.pl			Unicode character database
 lib/unicode/Is/DCfraction.pl			Unicode character database
-lib/unicode/Is/DCinital.pl			Unicode character database
 lib/unicode/Is/DCinitial.pl			Unicode character database
 lib/unicode/Is/DCisolated.pl			Unicode character database
+lib/unicode/Is/DCmedial.pl			Unicode character database
 lib/unicode/Is/DCnarrow.pl			Unicode character database
 lib/unicode/Is/DCnoBreak.pl			Unicode character database
 lib/unicode/Is/DCsmall.pl			Unicode character database
