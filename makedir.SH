@@ -6,7 +6,7 @@ case $CONFIG in
 	ln ../../../config.sh . || \
 	(echo "Can't find config.sh."; exit 1)
     fi
-    . config.sh
+    . ./config.sh
     ;;
 esac
 case "$0" in
@@ -15,17 +15,12 @@ esac
 echo "Extracting makedir (with variable substitutions)"
 $spitshell >makedir <<!GROK!THIS!
 $startsh
-# $Header: makedir.SH,v 1.0 87/12/18 13:05:32 root Exp $
+# $Header: makedir.SH,v 2.0 88/06/05 00:09:13 root Exp $
 # 
 # $Log:	makedir.SH,v $
-# Revision 1.0  87/12/18  13:05:32  root
-# Initial revision
+# Revision 2.0  88/06/05  00:09:13  root
+# Baseline version 2.0.
 # 
-# Revision 4.3.1.1  85/05/10  11:35:14  lwall
-# Branch for patches.
-# 
-# Revision 4.3  85/05/01  11:42:31  lwall
-# Baseline for release with 4.3bsd.
 # 
 
 export PATH || (echo "OOPS, this isn't sh.  Desperation time.  I will feed myself to sh."; sh \$0; kill \$\$)
@@ -74,4 +69,4 @@ for dir do
 done
 !GROK!THIS!
 $eunicefix makedir
-chmod 755 makedir
+chmod +x makedir

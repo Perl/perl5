@@ -1,11 +1,8 @@
-/* $Header: arg.h,v 1.0.1.1 88/01/28 10:22:40 root Exp $
+/* $Header: arg.h,v 2.0 88/06/05 00:08:14 root Exp $
  *
  * $Log:	arg.h,v $
- * Revision 1.0.1.1  88/01/28  10:22:40  root
- * patch8: added eval operator.
- * 
- * Revision 1.0  87/12/18  13:04:39  root
- * Initial revision
+ * Revision 2.0  88/06/05  00:08:14  root
+ * Baseline version 2.0.
  * 
  */
 
@@ -115,7 +112,38 @@
 #define O_LINK 103
 #define O_REPEAT 104
 #define O_EVAL 105
-#define MAXO 106
+#define O_FTEREAD 106
+#define O_FTEWRITE 107
+#define O_FTEEXEC 108
+#define O_FTEOWNED 109
+#define O_FTRREAD 110
+#define O_FTRWRITE 111
+#define O_FTREXEC 112
+#define O_FTROWNED 113
+#define O_FTIS 114
+#define O_FTZERO 115
+#define O_FTSIZE 116
+#define O_FTFILE 117
+#define O_FTDIR 118
+#define O_FTLINK 119
+#define O_SYMLINK 120
+#define O_FTPIPE 121
+#define O_FTSOCK 122
+#define O_FTBLK 123
+#define O_FTCHR 124
+#define O_FTSUID 125
+#define O_FTSGID 126
+#define O_FTSVTX 127
+#define O_FTTTY 128
+#define O_DOFILE 129
+#define O_FTTEXT 130
+#define O_FTBINARY 131
+#define O_UTIME 132
+#define O_WAIT 133
+#define O_SORT 134
+#define O_DELETE 135
+#define O_STUDY 136
+#define MAXO 137
 
 #ifndef DOINIT
 extern char *opname[];
@@ -227,7 +255,38 @@ char *opname[] = {
     "LINK",
     "REPEAT",
     "EVAL",
-    "106"
+    "FTEREAD",
+    "FTEWRITE",
+    "FTEEXEC",
+    "FTEOWNED",
+    "FTRREAD",
+    "FTRWRITE",
+    "FTREXEC",
+    "FTROWNED",
+    "FTIS",
+    "FTZERO",
+    "FTSIZE",
+    "FTFILE",
+    "FTDIR",
+    "FTLINK",
+    "SYMLINK",
+    "FTPIPE",
+    "FTSOCK",
+    "FTBLK",
+    "FTCHR",
+    "FTSUID",
+    "FTSGID",
+    "FTSVTX",
+    "FTTTY",
+    "DOFILE",
+    "FTTEXT",
+    "FTBINARY",
+    "UTIME",
+    "WAIT",
+    "SORT",
+    "DELETE",
+    "STUDY",
+    "135"
 };
 #endif
 
@@ -244,6 +303,10 @@ char *opname[] = {
 #define A_LEXPR 10
 #define A_ARYLEN 11
 #define A_NUMBER 12
+#define A_LARYLEN 13
+#define A_GLOB 14
+#define A_WORD 15
+#define A_INDREAD 16
 
 #ifndef DOINIT
 extern char *argname[];
@@ -262,29 +325,35 @@ char *argname[] = {
     "LEXPR",
     "ARYLEN",
     "NUMBER",
-    "13"
+    "LARYLEN",
+    "GLOB",
+    "WORD",
+    "INDREAD",
+    "17"
 };
 #endif
 
 #ifndef DOINIT
 extern bool hoistable[];
 #else
-bool hoistable[] = {0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0};
+bool hoistable[] = {0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0};
 #endif
 
+union argptr {
+    ARG		*arg_arg;
+    char	*arg_cval;
+    STAB	*arg_stab;
+    SPAT	*arg_spat;
+    CMD		*arg_cmd;
+    STR		*arg_str;
+    double	arg_nval;
+};
+
 struct arg {
-    union argptr {
-	ARG	*arg_arg;
-	char	*arg_cval;
-	STAB	*arg_stab;
-	SPAT	*arg_spat;
-	CMD	*arg_cmd;
-	STR	*arg_str;
-	double	arg_nval;
-    } arg_ptr;
+    union argptr arg_ptr;
     short	arg_len;
-    char	arg_type;
-    char	arg_flags;
+    unsigned char arg_type;
+    unsigned char arg_flags;
 };
 
 #define AF_SPECIAL 1		/* op wants to evaluate this arg itself */
@@ -294,6 +363,7 @@ struct arg {
 #define AF_COMMON 16		/* left and right have symbols in common */
 #define AF_NUMERIC 32		/* return as numeric rather than string */
 #define AF_LISTISH 64		/* turn into list if important */
+#define AF_LOCAL 128		/* list of local variables */
 
 /*
  * Most of the ARG pointers are used as pointers to arrays of ARG.  When
@@ -317,3 +387,6 @@ bool do_seek();
 int do_tms();
 int do_time();
 int do_stat();
+STR *do_push();
+FILE *nextargv();
+STR *do_fttext();

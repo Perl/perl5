@@ -1,14 +1,8 @@
-/* $Header: a2p.h,v 1.0.1.2 88/02/01 17:33:40 root Exp $
+/* $Header: a2p.h,v 2.0 88/06/05 00:15:33 root Exp $
  *
  * $Log:	a2p.h,v $
- * Revision 1.0.1.2  88/02/01  17:33:40  root
- * patch12: forgot to fix #define YYDEBUG; bug in a2p.
- * 
- * Revision 1.0.1.1  88/01/26  09:52:30  root
- * patch 5: a2p didn't use config.h.
- * 
- * Revision 1.0  87/12/18  13:06:58  root
- * Initial revision
+ * Revision 2.0  88/06/05  00:15:33  root
+ * Baseline version 2.0.
  * 
  */
 
@@ -182,11 +176,6 @@ EXT int mop INIT(1);
 
 #include <stdio.h>
 #include <ctype.h>
-#include <setjmp.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <time.h>
-#include <sys/times.h>
 
 typedef struct string STR;
 typedef struct htbl HASH;

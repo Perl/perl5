@@ -1,8 +1,8 @@
-/* $Header: INTERN.h,v 1.0 87/12/18 13:02:39 root Exp $
+/* $Header: INTERN.h,v 2.0 88/06/05 00:07:49 root Exp $
  *
  * $Log:	INTERN.h,v $
- * Revision 1.0  87/12/18  13:02:39  root
- * Initial revision
+ * Revision 2.0  88/06/05  00:07:49  root
+ * Baseline version 2.0.
  * 
  */
 

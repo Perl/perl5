@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: op.flip,v 1.0 87/12/18 13:13:34 root Exp $
+# $Header: op.flip,v 2.0 88/06/05 00:13:51 root Exp $
 
 print "1..8\n";
 
@@ -17,7 +17,7 @@ if ($y eq '12E0123E0') {print "ok 7\n";} else {print "not ok 7\n";}
 
 @a = ('a','b','c','d','e','f','g');
 
-open(of,'/etc/termcap');
+open(of,'../Makefile');
 while (<of>) {
     (3 .. 5) && $foo .= $_;
 }

@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: op.oct,v 1.0 87/12/18 13:13:57 root Exp $
+# $Header: op.oct,v 2.0 88/06/05 00:14:14 root Exp $
 
 print "1..3\n";
 

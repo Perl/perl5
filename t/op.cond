@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: op.cond,v 1.0 87/12/18 13:13:14 root Exp $
+# $Header: op.cond,v 2.0 88/06/05 00:13:26 root Exp $
 
 print "1..4\n";
 

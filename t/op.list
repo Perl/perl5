@@ -1,8 +1,8 @@
 #!./perl
 
-# $Header: op.list,v 1.0 87/12/18 13:13:50 root Exp $
+# $Header: op.list,v 2.0 88/06/05 00:14:09 root Exp $
 
-print "1..11\n";
+print "1..18\n";
 
 @foo = (1, 2, 3, 4);
 if ($foo[0] == 1 && $foo[3] == 4) {print "ok 1\n";} else {print "not ok 1\n";}
@@ -32,3 +32,28 @@ if ($d eq 4) {print "ok 10\n";} else {print "not ok 10\n";}
 ($a, $b, $c, $d) = @foo;
 print "#11	$a;$b;$c;$d eq 1;2;3;4\n";
 if ("$a;$b;$c;$d" eq '1;2;3;4') {print "ok 11\n";} else {print "not ok 11\n";}
+
+@foo = (1);
+if (join(':',@foo) eq '1') {print "ok 12\n";} else {print "not ok 12\n";}
+
+@foo = ();
+@foo = 1+2+3;
+if (join(':',@foo) eq '6') {print "ok 13\n";} else {print "not ok 13\n";}
+
+for ($x = 0; $x < 3; $x++) {
+    ($a, $b, $c) = 
+	    $x == 0?
+		    ('ok ', 14, "\n"):
+	    $x == 1?
+		    ('ok ', 15, "\n"):
+	    # default
+		    ('ok ', 16, "\n");
+
+    print $a,$b,$c;
+}
+
+@a = ($x == 12345 || (1,2,3));
+if (join('',@a) eq '123') {print "ok 17\n";} else {print "not ok 17\n";}
+
+@a = ($x == $x || (4,5,6));
+if (join('',@a) eq '1') {print "ok 18\n";} else {print "not ok 18\n";}

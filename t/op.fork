@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: op.fork,v 1.0 87/12/18 13:13:37 root Exp $
+# $Header: op.fork,v 2.0 88/06/05 00:13:53 root Exp $
 
 $| = 1;
 print "1..2\n";

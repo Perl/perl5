@@ -1,29 +1,21 @@
-char rcsid[] = "$Header: perly.c,v 1.0.1.3 88/01/28 10:28:31 root Exp $";
+char rcsid[] = "$Header: perly.c,v 2.0 88/06/05 00:09:56 root Exp $";
 /*
  * $Log:	perly.c,v $
- * Revision 1.0.1.3  88/01/28  10:28:31  root
- * patch8: added eval operator.  Also fixed expectterm following right curly.
- * 
- * Revision 1.0.1.2  88/01/24  00:06:03  root
- * patch 2: s/(abc)/\1/ grandfathering didn't work right.
- * 
- * Revision 1.0.1.1  88/01/21  21:25:57  root
- * Now uses CPP and CPPMINUS symbols from config.h.
- * 
- * Revision 1.0  87/12/18  15:53:31  root
- * Initial revision
+ * Revision 2.0  88/06/05  00:09:56  root
+ * Baseline version 2.0.
  * 
  */
 
-bool preprocess = FALSE;
-bool assume_n = FALSE;
-bool assume_p = FALSE;
-bool doswitches = FALSE;
-bool allstabs = FALSE;		/* init all customary symbols in symbol table?*/
-char *filename;
-char *e_tmpname = "/tmp/perl-eXXXXXX";
-FILE *e_fp = Nullfp;
-ARG *l();
+#include "EXTERN.h"
+#include "perl.h"
+#include "perly.h"
+
+extern char *tokename[];
+extern int yychar;
+
+static int cmd_tosave();
+static int arg_tosave();
+static int spat_tosave();
 
 main(argc,argv,env)
 register int argc;
@@ -32,15 +24,24 @@ register char **env;
 {
     register STR *str;
     register char *s;
-    char *index();
+    char *index(), *strcpy(), *getenv();
+    bool dosearch = FALSE;
 
+    uid = (int)getuid();
+    euid = (int)geteuid();
     linestr = str_new(80);
-    str = str_make("-I/usr/lib/perl ");	/* first used for -I flags */
+    str_nset(linestr,"",0);
+    str = str_make("");		/* first used for -I flags */
+    incstab = aadd(stabent("INC",TRUE));
     for (argc--,argv++; argc; argc--,argv++) {
 	if (argv[0][0] != '-' || !argv[0][1])
 	    break;
       reswitch:
 	switch (argv[0][1]) {
+	case 'a':
+	    minus_a = TRUE;
+	    strcpy(argv[0], argv[0]+1);
+	    goto reswitch;
 #ifdef DEBUGGING
 	case 'D':
 	    debug = atoi(argv[0]+2);
@@ -51,6 +52,7 @@ register char **env;
 #endif
 	case 'e':
 	    if (!e_fp) {
+	        e_tmpname = strcpy(safemalloc(sizeof(TMPPATH)),TMPPATH);
 		mktemp(e_tmpname);
 		e_fp = fopen(e_tmpname,"w");
 	    }
@@ -66,18 +68,22 @@ register char **env;
 	case 'I':
 	    str_cat(str,argv[0]);
 	    str_cat(str," ");
-	    if (!argv[0][2]) {
+	    if (argv[0][2]) {
+		apush(incstab->stab_array,str_make(argv[0]+2));
+	    }
+	    else {
+		apush(incstab->stab_array,str_make(argv[1]));
 		str_cat(str,argv[1]);
 		argc--,argv++;
 		str_cat(str," ");
 	    }
 	    break;
 	case 'n':
-	    assume_n = TRUE;
+	    minus_n = TRUE;
 	    strcpy(argv[0], argv[0]+1);
 	    goto reswitch;
 	case 'p':
-	    assume_p = TRUE;
+	    minus_p = TRUE;
 	    strcpy(argv[0], argv[0]+1);
 	    goto reswitch;
 	case 'P':
@@ -88,16 +94,28 @@ register char **env;
 	    doswitches = TRUE;
 	    strcpy(argv[0], argv[0]+1);
 	    goto reswitch;
+	case 'S':
+	    dosearch = TRUE;
+	    strcpy(argv[0], argv[0]+1);
+	    goto reswitch;
+	case 'U':
+	    unsafe = TRUE;
+	    strcpy(argv[0], argv[0]+1);
+	    goto reswitch;
 	case 'v':
 	    version();
 	    exit(0);
+	case 'w':
+	    dowarn = TRUE;
+	    strcpy(argv[0], argv[0]+1);
+	    goto reswitch;
 	case '-':
 	    argc--,argv++;
 	    goto switch_end;
 	case 0:
 	    break;
 	default:
-	    fatal("Unrecognized switch: %s\n",argv[0]);
+	    fatal("Unrecognized switch: %s",argv[0]);
 	}
     }
   switch_end:
@@ -106,6 +124,10 @@ register char **env;
 	argc++,argv--;
 	argv[0] = e_tmpname;
     }
+#ifndef PRIVLIB
+#define PRIVLIB "/usr/local/lib/perl"
+#endif
+    apush(incstab->stab_array,str_make(PRIVLIB));
 
     str_set(&str_no,No);
     str_set(&str_yes,Yes);
@@ -115,21 +137,55 @@ register char **env;
 
     if (argv[0] == Nullch)
 	argv[0] = "-";
+    if (dosearch && argv[0][0] != '/' && (s = getenv("PATH"))) {
+	char *xfound = Nullch, *xfailed = Nullch;
+
+	while (*s) {
+	    s = cpytill(tokenbuf,s,':');
+	    if (*s)
+		s++;
+	    if (tokenbuf[0])
+		strcat(tokenbuf,"/");
+	    strcat(tokenbuf,argv[0]);
+#ifdef DEBUGGING
+	    if (debug & 1)
+		fprintf(stderr,"Looking for %s\n",tokenbuf);
+#endif
+	    if (stat(tokenbuf,&statbuf) < 0)		/* not there? */
+		continue;
+	    if ((statbuf.st_mode & S_IFMT) == S_IFREG
+	     && cando(S_IREAD,TRUE) && cando(S_IEXEC,TRUE)) {
+		xfound = tokenbuf;              /* bingo! */
+		break;
+	    }
+	    if (!xfailed)
+		xfailed = savestr(tokenbuf);
+	}
+	if (!xfound)
+	    fatal("Can't execute %s", xfailed);
+	if (xfailed)
+	    safefree(xfailed);
+	argv[0] = savestr(xfound);
+    }
     filename = savestr(argv[0]);
+    origfilename = savestr(filename);
     if (strEQ(filename,"-"))
 	argv[0] = "";
     if (preprocess) {
+	str_cat(str,"-I");
+	str_cat(str,PRIVLIB);
 	sprintf(buf, "\
 /bin/sed -e '/^[^#]/b' \
  -e '/^#[ 	]*include[ 	]/b' \
  -e '/^#[ 	]*define[ 	]/b' \
  -e '/^#[ 	]*if[ 	]/b' \
  -e '/^#[ 	]*ifdef[ 	]/b' \
+ -e '/^#[ 	]*ifndef[ 	]/b' \
  -e '/^#[ 	]*else/b' \
  -e '/^#[ 	]*endif/b' \
  -e 's/^#.*//' \
- %s | %s -C %s%s",
-	  argv[0], CPP, str_get(str), CPPMINUS);
+ %s | %s -C %s %s",
+	  argv[0], CPPSTDIN, str_get(str), CPPMINUS);
 	rsfp = popen(buf,"r");
     }
     else if (!*argv[0])
@@ -137,7 +193,7 @@ register char **env;
     else
 	rsfp = fopen(argv[0],"r");
     if (rsfp == Nullfp)
-	fatal("Perl script \"%s\" doesn't seem to exist.\n",filename);
+	fatal("Perl script \"%s\" doesn't seem to exist",filename);
     str_free(str);		/* free -I directories */
 
     defstab = stabent("_",TRUE);
@@ -151,6 +207,12 @@ register char **env;
     if (yyparse())
 	fatal("Execution aborted due to compilation errors.\n");
 
+    if (dowarn) {
+	stab_check('A','Z');
+	stab_check('a','z');
+    }
+
+    preprocess = FALSE;
     if (e_fp) {
 	e_fp = Nullfp;
 	UNLINK(e_tmpname);
@@ -166,11 +228,13 @@ register char **env;
 	}
     }
     if (argvstab = stabent("ARGV",allstabs)) {
+	aadd(argvstab);
 	for (; argc > 0; argc--,argv++) {
 	    apush(argvstab->stab_array,str_make(argv[0]));
 	}
     }
     if (envstab = stabent("ENV",allstabs)) {
+	hadd(envstab);
 	for (; *env; env++) {
 	    if (!(s = index(*env,'=')))
 		continue;
@@ -181,12 +245,15 @@ register char **env;
 	    *--s = '=';
 	}
     }
-    sigstab = stabent("SIG",allstabs);
+    if (sigstab = stabent("SIG",allstabs))
+	hadd(sigstab);
 
-    magicalize("!#?^~=-%0123456789.+&*(),\\/[|");
+    magicalize("!#?^~=-%0123456789.+&*()<>,\\/[|");
 
-    (tmpstab = stabent("0",allstabs)) && str_set(STAB_STR(tmpstab),filename);
-    (tmpstab = stabent("$",allstabs)) &&
+    sawampersand = (stabent("&",FALSE) != Nullstab);
+    if (tmpstab = stabent("0",allstabs))
+	str_set(STAB_STR(tmpstab),origfilename);
+    if (tmpstab = stabent("$",allstabs))
 	str_numset(STAB_STR(tmpstab),(double)getpid());
 
     tmpstab = stabent("stdin",TRUE);
@@ -202,8 +269,8 @@ register char **env;
     tmpstab = stabent("stderr",TRUE);
     tmpstab->stab_io = stio_new();
     tmpstab->stab_io->fp = stderr;
-    safefree(filename);
-    filename = "(eval)";
+
+    savestack = anew(Nullstab);		/* for saving non-local values */
 
     setjmp(top_env);	/* sets goto_targ on longjump */
 
@@ -219,8 +286,9 @@ register char **env;
     (void) cmd_exec(main_root);
 
     if (goto_targ)
-	fatal("Can't find label \"%s\"--aborting.\n",goto_targ);
+	fatal("Can't find label \"%s\"--aborting",goto_targ);
     exit(0);
+    /* NOTREACHED */
 }
 
 magicalize(list)
@@ -238,855 +306,64 @@ register char *list;
     }
 }
 
-#define RETURN(retval) return (bufptr = s,retval)
-#define OPERATOR(retval) return (expectterm = TRUE,bufptr = s,retval)
-#define TERM(retval) return (expectterm = FALSE,bufptr = s,retval)
-#define LOOPX(f) return (yylval.ival = f,expectterm = FALSE,bufptr = s,LOOPEX)
-#define UNI(f) return (yylval.ival = f,expectterm = TRUE,bufptr = s,UNIOP)
-#define FUN0(f) return (yylval.ival = f,expectterm = FALSE,bufptr = s,FUNC0)
-#define FUN1(f) return (yylval.ival = f,expectterm = FALSE,bufptr = s,FUNC1)
-#define FUN2(f) return (yylval.ival = f,expectterm = FALSE,bufptr = s,FUNC2)
-#define FUN3(f) return (yylval.ival = f,expectterm = FALSE,bufptr = s,FUNC3)
-#define SFUN(f) return (yylval.ival = f,expectterm = FALSE,bufptr = s,STABFUN)
-
-yylex()
-{
-    register char *s = bufptr;
-    register char *d;
-    register int tmp;
-    static bool in_format = FALSE;
-    static bool firstline = TRUE;
-
-  retry:
-#ifdef YYDEBUG
-    if (yydebug)
-	if (index(s,'\n'))
-	    fprintf(stderr,"Tokener at %s",s);
-	else
-	    fprintf(stderr,"Tokener at %s\n",s);
-#endif
-    switch (*s) {
-    default:
-	fprintf(stderr,
-	    "Unrecognized character %c in file %s line %d--ignoring.\n",
-	     *s++,filename,line);
-	goto retry;
-    case 0:
-	s = str_get(linestr);
-	*s = '\0';
-	if (firstline && (assume_n || assume_p)) {
-	    firstline = FALSE;
-	    str_set(linestr,"while (<>) {");
-	    s = str_get(linestr);
-	    goto retry;
-	}
-	if (!rsfp)
-	    RETURN(0);
-	if (in_format) {
-	    yylval.formval = load_format();	/* leaves . in buffer */
-	    in_format = FALSE;
-	    s = str_get(linestr);
-	    TERM(FORMLIST);
-	}
-	line++;
-	if ((s = str_gets(linestr, rsfp)) == Nullch) {
-	    if (preprocess)
-		pclose(rsfp);
-	    else if (rsfp != stdin)
-		fclose(rsfp);
-	    rsfp = Nullfp;
-	    if (assume_n || assume_p) {
-		str_set(linestr,assume_p ? "}continue{print;" : "");
-		str_cat(linestr,"}");
-		s = str_get(linestr);
-		goto retry;
-	    }
-	    s = str_get(linestr);
-	    RETURN(0);
-	}
-#ifdef DEBUG
-	else if (firstline) {
-	    char *showinput();
-	    s = showinput();
-	}
-#endif
-	firstline = FALSE;
-	goto retry;
-    case ' ': case '\t':
-	s++;
-	goto retry;
-    case '\n':
-    case '#':
-	if (preprocess && s == str_get(linestr) &&
-	       s[1] == ' ' && isdigit(s[2])) {
-	    line = atoi(s+2)-1;
-	    for (s += 2; isdigit(*s); s++) ;
-	    while (*s && isspace(*s)) s++;
-	    if (filename)
-		safefree(filename);
-	    s[strlen(s)-1] = '\0';	/* wipe out newline */
-	    filename = savestr(s);
-	    s = str_get(linestr);
-	}
-	if (in_eval) {
-	    while (*s && *s != '\n')
-		s++;
-	    if (*s)
-		s++;
-	    line++;
-	}
-	else
-	    *s = '\0';
-	if (lex_newlines)
-	    RETURN('\n');
-	goto retry;
-    case '+':
-    case '-':
-	if (s[1] == *s) {
-	    s++;
-	    if (*s++ == '+')
-		RETURN(INC);
-	    else
-		RETURN(DEC);
-	}
-	/* FALL THROUGH */
-    case '*':
-    case '%':
-    case '^':
-    case '~':
-    case '(':
-    case ',':
-    case ':':
-    case ';':
-    case '{':
-    case '[':
-	tmp = *s++;
-	OPERATOR(tmp);
-    case ')':
-    case ']':
-	tmp = *s++;
-	TERM(tmp);
-    case '}':
-	tmp = *s++;
-	for (d = s; *d == ' ' || *d == '\t'; d++) ;
-	if (*d == '\n' || *d == '#')
-	    OPERATOR(tmp);		/* block end */
-	else
-	    TERM(tmp);			/* associative array end */
-    case '&':
-	s++;
-	tmp = *s++;
-	if (tmp == '&')
-	    OPERATOR(ANDAND);
-	s--;
-	OPERATOR('&');
-    case '|':
-	s++;
-	tmp = *s++;
-	if (tmp == '|')
-	    OPERATOR(OROR);
-	s--;
-	OPERATOR('|');
-    case '=':
-	s++;
-	tmp = *s++;
-	if (tmp == '=')
-	    OPERATOR(EQ);
-	if (tmp == '~')
-	    OPERATOR(MATCH);
-	s--;
-	OPERATOR('=');
-    case '!':
-	s++;
-	tmp = *s++;
-	if (tmp == '=')
-	    OPERATOR(NE);
-	if (tmp == '~')
-	    OPERATOR(NMATCH);
-	s--;
-	OPERATOR('!');
-    case '<':
-	if (expectterm) {
-	    s = scanstr(s);
-	    TERM(RSTRING);
-	}
-	s++;
-	tmp = *s++;
-	if (tmp == '<')
-	    OPERATOR(LS);
-	if (tmp == '=')
-	    OPERATOR(LE);
-	s--;
-	OPERATOR('<');
-    case '>':
-	s++;
-	tmp = *s++;
-	if (tmp == '>')
-	    OPERATOR(RS);
-	if (tmp == '=')
-	    OPERATOR(GE);
-	s--;
-	OPERATOR('>');
-
-#define SNARFWORD \
-	d = tokenbuf; \
-	while (isalpha(*s) || isdigit(*s) || *s == '_') \
-	    *d++ = *s++; \
-	*d = '\0'; \
-	d = tokenbuf;
-
-    case '$':
-	if (s[1] == '#' && (isalpha(s[2]) || s[2] == '_')) {
-	    s++;
-	    s = scanreg(s,tokenbuf);
-	    yylval.stabval = aadd(stabent(tokenbuf,TRUE));
-	    TERM(ARYLEN);
-	}
-	s = scanreg(s,tokenbuf);
-	yylval.stabval = stabent(tokenbuf,TRUE);
-	TERM(REG);
-
-    case '@':
-	s = scanreg(s,tokenbuf);
-	yylval.stabval = aadd(stabent(tokenbuf,TRUE));
-	TERM(ARY);
-
-    case '/':			/* may either be division or pattern */
-    case '?':			/* may either be conditional or pattern */
-	if (expectterm) {
-	    s = scanpat(s);
-	    TERM(PATTERN);
-	}
-	tmp = *s++;
-	OPERATOR(tmp);
-
-    case '.':
-	if (!expectterm || !isdigit(s[1])) {
-	    s++;
-	    tmp = *s++;
-	    if (tmp == '.')
-		OPERATOR(DOTDOT);
-	    s--;
-	    OPERATOR('.');
-	}
-	/* FALL THROUGH */
-    case '0': case '1': case '2': case '3': case '4':
-    case '5': case '6': case '7': case '8': case '9':
-    case '\'': case '"': case '`':
-	s = scanstr(s);
-	TERM(RSTRING);
-
-    case '_':
-	SNARFWORD;
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 'a': case 'A':
-	SNARFWORD;
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 'b': case 'B':
-	SNARFWORD;
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 'c': case 'C':
-	SNARFWORD;
-	if (strEQ(d,"continue"))
-	    OPERATOR(CONTINUE);
-	if (strEQ(d,"chdir"))
-	    UNI(O_CHDIR);
-	if (strEQ(d,"close"))
-	    OPERATOR(CLOSE);
-	if (strEQ(d,"crypt"))
-	    FUN2(O_CRYPT);
-	if (strEQ(d,"chop"))
-	    OPERATOR(CHOP);
-	if (strEQ(d,"chmod")) {
-	    yylval.ival = O_CHMOD;
-	    OPERATOR(PRINT);
-	}
-	if (strEQ(d,"chown")) {
-	    yylval.ival = O_CHOWN;
-	    OPERATOR(PRINT);
-	}
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 'd': case 'D':
-	SNARFWORD;
-	if (strEQ(d,"do"))
-	    OPERATOR(DO);
-	if (strEQ(d,"die"))
-	    UNI(O_DIE);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 'e': case 'E':
-	SNARFWORD;
-	if (strEQ(d,"else"))
-	    OPERATOR(ELSE);
-	if (strEQ(d,"elsif"))
-	    OPERATOR(ELSIF);
-	if (strEQ(d,"eq") || strEQ(d,"EQ"))
-	    OPERATOR(SEQ);
-	if (strEQ(d,"exit"))
-	    UNI(O_EXIT);
-	if (strEQ(d,"eval")) {
-	    allstabs = TRUE;		/* must initialize everything since */
-	    UNI(O_EVAL);		/* we don't know what will be used */
-	}
-	if (strEQ(d,"eof"))
-	    TERM(FEOF);
-	if (strEQ(d,"exp"))
-	    FUN1(O_EXP);
-	if (strEQ(d,"each"))
-	    SFUN(O_EACH);
-	if (strEQ(d,"exec")) {
-	    yylval.ival = O_EXEC;
-	    OPERATOR(PRINT);
-	}
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 'f': case 'F':
-	SNARFWORD;
-	if (strEQ(d,"for"))
-	    OPERATOR(FOR);
-	if (strEQ(d,"format")) {
-	    in_format = TRUE;
-	    OPERATOR(FORMAT);
-	}
-	if (strEQ(d,"fork"))
-	    FUN0(O_FORK);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 'g': case 'G':
-	SNARFWORD;
-	if (strEQ(d,"gt") || strEQ(d,"GT"))
-	    OPERATOR(SGT);
-	if (strEQ(d,"ge") || strEQ(d,"GE"))
-	    OPERATOR(SGE);
-	if (strEQ(d,"goto"))
-	    LOOPX(O_GOTO);
-	if (strEQ(d,"gmtime"))
-	    FUN1(O_GMTIME);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 'h': case 'H':
-	SNARFWORD;
-	if (strEQ(d,"hex"))
-	    FUN1(O_HEX);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 'i': case 'I':
-	SNARFWORD;
-	if (strEQ(d,"if"))
-	    OPERATOR(IF);
-	if (strEQ(d,"index"))
-	    FUN2(O_INDEX);
-	if (strEQ(d,"int"))
-	    FUN1(O_INT);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 'j': case 'J':
-	SNARFWORD;
-	if (strEQ(d,"join"))
-	    OPERATOR(JOIN);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 'k': case 'K':
-	SNARFWORD;
-	if (strEQ(d,"keys"))
-	    SFUN(O_KEYS);
-	if (strEQ(d,"kill")) {
-	    yylval.ival = O_KILL;
-	    OPERATOR(PRINT);
-	}
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 'l': case 'L':
-	SNARFWORD;
-	if (strEQ(d,"last"))
-	    LOOPX(O_LAST);
-	if (strEQ(d,"length"))
-	    FUN1(O_LENGTH);
-	if (strEQ(d,"lt") || strEQ(d,"LT"))
-	    OPERATOR(SLT);
-	if (strEQ(d,"le") || strEQ(d,"LE"))
-	    OPERATOR(SLE);
-	if (strEQ(d,"localtime"))
-	    FUN1(O_LOCALTIME);
-	if (strEQ(d,"log"))
-	    FUN1(O_LOG);
-	if (strEQ(d,"link"))
-	    FUN2(O_LINK);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 'm': case 'M':
-	SNARFWORD;
-	if (strEQ(d,"m")) {
-	    s = scanpat(s-1);
-	    TERM(PATTERN);
-	}
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 'n': case 'N':
-	SNARFWORD;
-	if (strEQ(d,"next"))
-	    LOOPX(O_NEXT);
-	if (strEQ(d,"ne") || strEQ(d,"NE"))
-	    OPERATOR(SNE);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 'o': case 'O':
-	SNARFWORD;
-	if (strEQ(d,"open"))
-	    OPERATOR(OPEN);
-	if (strEQ(d,"ord"))
-	    FUN1(O_ORD);
-	if (strEQ(d,"oct"))
-	    FUN1(O_OCT);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 'p': case 'P':
-	SNARFWORD;
-	if (strEQ(d,"print")) {
-	    yylval.ival = O_PRINT;
-	    OPERATOR(PRINT);
-	}
-	if (strEQ(d,"printf")) {
-	    yylval.ival = O_PRTF;
-	    OPERATOR(PRINT);
-	}
-	if (strEQ(d,"push")) {
-	    yylval.ival = O_PUSH;
-	    OPERATOR(PUSH);
-	}
-	if (strEQ(d,"pop"))
-	    OPERATOR(POP);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 'q': case 'Q':
-	SNARFWORD;
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 'r': case 'R':
-	SNARFWORD;
-	if (strEQ(d,"reset"))
-	    UNI(O_RESET);
-	if (strEQ(d,"redo"))
-	    LOOPX(O_REDO);
-	if (strEQ(d,"rename"))
-	    FUN2(O_RENAME);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 's': case 'S':
-	SNARFWORD;
-	if (strEQ(d,"s")) {
-	    s = scansubst(s);
-	    TERM(SUBST);
-	}
-	if (strEQ(d,"shift"))
-	    TERM(SHIFT);
-	if (strEQ(d,"split"))
-	    TERM(SPLIT);
-	if (strEQ(d,"substr"))
-	    FUN3(O_SUBSTR);
-	if (strEQ(d,"sprintf"))
-	    OPERATOR(SPRINTF);
-	if (strEQ(d,"sub"))
-	    OPERATOR(SUB);
-	if (strEQ(d,"select"))
-	    OPERATOR(SELECT);
-	if (strEQ(d,"seek"))
-	    OPERATOR(SEEK);
-	if (strEQ(d,"stat"))
-	    OPERATOR(STAT);
-	if (strEQ(d,"sqrt"))
-	    FUN1(O_SQRT);
-	if (strEQ(d,"sleep"))
-	    UNI(O_SLEEP);
-	if (strEQ(d,"system")) {
-	    yylval.ival = O_SYSTEM;
-	    OPERATOR(PRINT);
-	}
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 't': case 'T':
-	SNARFWORD;
-	if (strEQ(d,"tr")) {
-	    s = scantrans(s);
-	    TERM(TRANS);
-	}
-	if (strEQ(d,"tell"))
-	    TERM(TELL);
-	if (strEQ(d,"time"))
-	    FUN0(O_TIME);
-	if (strEQ(d,"times"))
-	    FUN0(O_TMS);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 'u': case 'U':
-	SNARFWORD;
-	if (strEQ(d,"using"))
-	    OPERATOR(USING);
-	if (strEQ(d,"until"))
-	    OPERATOR(UNTIL);
-	if (strEQ(d,"unless"))
-	    OPERATOR(UNLESS);
-	if (strEQ(d,"umask"))
-	    FUN1(O_UMASK);
-	if (strEQ(d,"unshift")) {
-	    yylval.ival = O_UNSHIFT;
-	    OPERATOR(PUSH);
-	}
-	if (strEQ(d,"unlink")) {
-	    yylval.ival = O_UNLINK;
-	    OPERATOR(PRINT);
-	}
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 'v': case 'V':
-	SNARFWORD;
-	if (strEQ(d,"values"))
-	    SFUN(O_VALUES);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 'w': case 'W':
-	SNARFWORD;
-	if (strEQ(d,"write"))
-	    TERM(WRITE);
-	if (strEQ(d,"while"))
-	    OPERATOR(WHILE);
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 'x': case 'X':
-	SNARFWORD;
-	if (!expectterm && strEQ(d,"x"))
-	    OPERATOR('x');
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 'y': case 'Y':
-	SNARFWORD;
-	if (strEQ(d,"y")) {
-	    s = scantrans(s);
-	    TERM(TRANS);
-	}
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    case 'z': case 'Z':
-	SNARFWORD;
-	yylval.cval = savestr(d);
-	OPERATOR(WORD);
-    }
-}
-
-STAB *
-stabent(name,add)
-register char *name;
-int add;
-{
-    register STAB *stab;
-
-    for (stab = stab_index[*name]; stab; stab = stab->stab_next) {
-	if (strEQ(name,stab->stab_name))
-	    return stab;
-    }
-    
-    /* no entry--should we add one? */
-
-    if (add) {
-	stab = (STAB *) safemalloc(sizeof(STAB));
-	bzero((char*)stab, sizeof(STAB));
-	stab->stab_name = savestr(name);
-	stab->stab_val = str_new(0);
-	stab->stab_next = stab_index[*name];
-	stab_index[*name] = stab;
-	return stab;
-    }
-    return Nullstab;
-}
-
-STIO *
-stio_new()
-{
-    STIO *stio = (STIO *) safemalloc(sizeof(STIO));
-
-    bzero((char*)stio, sizeof(STIO));
-    stio->page_len = 60;
-    return stio;
-}
-
-char *
-scanreg(s,dest)
-register char *s;
-char *dest;
-{
-    register char *d;
-
-    s++;
-    d = dest;
-    while (isalpha(*s) || isdigit(*s) || *s == '_')
-	*d++ = *s++;
-    *d = '\0';
-    d = dest;
-    if (!*d) {
-	*d = *s++;
-	if (*d == '{') {
-	    d = dest;
-	    while (*s && *s != '}')
-		*d++ = *s++;
-	    *d = '\0';
-	    d = dest;
-	    if (*s)
-		s++;
-	}
-	else
-	    d[1] = '\0';
-    }
-    if (*d == '^' && !isspace(*s))
-	*d = *s++ & 31;
-    return s;
-}
-
-STR *
-scanconst(string)
-char *string;
-{
-    register STR *retstr;
-    register char *t;
-    register char *d;
-
-    if (index(string,'|')) {
-	return Nullstr;
-    }
-    retstr = str_make(string);
-    t = str_get(retstr);
-    for (d=t; *d; ) {
-	switch (*d) {
-	case '.': case '[': case '$': case '(': case ')': case '|':
-	    *d = '\0';
-	    break;
-	case '\\':
-	    if (index("wWbB0123456789",d[1])) {
-		*d = '\0';
-		break;
-	    }
-	    strcpy(d,d+1);
-	    switch(*d) {
-	    case 'n':
-		*d = '\n';
-		break;
-	    case 't':
-		*d = '\t';
-		break;
-	    case 'f':
-		*d = '\f';
-		break;
-	    case 'r':
-		*d = '\r';
-		break;
-	    }
-	    /* FALL THROUGH */
-	default:
-	    if (d[1] == '*' || d[1] == '+' || d[1] == '?') {
-		*d = '\0';
-		break;
-	    }
-	    d++;
-	}
-    }
-    if (!*t) {
-	str_free(retstr);
-	return Nullstr;
-    }
-    retstr->str_cur = strlen(retstr->str_ptr);	/* XXX cheating here */
-    return retstr;
-}
-
-char *
-scanpat(s)
-register char *s;
-{
-    register SPAT *spat = (SPAT *) safemalloc(sizeof (SPAT));
-    register char *d;
-
-    bzero((char *)spat, sizeof(SPAT));
-    spat->spat_next = spat_root;	/* link into spat list */
-    spat_root = spat;
-    init_compex(&spat->spat_compex);
-
-    switch (*s++) {
-    case 'm':
-	s++;
-	break;
-    case '/':
-	break;
-    case '?':
-	spat->spat_flags |= SPAT_USE_ONCE;
-	break;
-    default:
-	fatal("Search pattern not found:\n%s",str_get(linestr));
-    }
-    s = cpytill(tokenbuf,s,s[-1]);
-    if (!*s)
-	fatal("Search pattern not terminated:\n%s",str_get(linestr));
-    s++;
-    if (*tokenbuf == '^') {
-	spat->spat_first = scanconst(tokenbuf+1);
-	if (spat->spat_first) {
-	    spat->spat_flen = strlen(spat->spat_first->str_ptr);
-	    if (spat->spat_flen == strlen(tokenbuf+1))
-		spat->spat_flags |= SPAT_SCANALL;
-	}
-    }
-    else {
-	spat->spat_flags |= SPAT_SCANFIRST;
-	spat->spat_first = scanconst(tokenbuf);
-	if (spat->spat_first) {
-	    spat->spat_flen = strlen(spat->spat_first->str_ptr);
-	    if (spat->spat_flen == strlen(tokenbuf))
-		spat->spat_flags |= SPAT_SCANALL;
-	}
-    }	
-    if (d = compile(&spat->spat_compex,tokenbuf,TRUE,FALSE))
-	fatal(d);
-    yylval.arg = make_match(O_MATCH,stab_to_arg(A_STAB,defstab),spat);
-    return s;
-}
-
-char *
-scansubst(s)
-register char *s;
-{
-    register SPAT *spat = (SPAT *) safemalloc(sizeof (SPAT));
-    register char *d;
-
-    bzero((char *)spat, sizeof(SPAT));
-    spat->spat_next = spat_root;	/* link into spat list */
-    spat_root = spat;
-    init_compex(&spat->spat_compex);
-
-    s = cpytill(tokenbuf,s+1,*s);
-    if (!*s)
-	fatal("Substitution pattern not terminated:\n%s",str_get(linestr));
-    for (d=tokenbuf; *d; d++) {
-	if (*d == '$' && d[1] && d[-1] != '\\' && d[1] != '|') {
-	    register ARG *arg;
-
-	    spat->spat_runtime = arg = op_new(1);
-	    arg->arg_type = O_ITEM;
-	    arg[1].arg_type = A_DOUBLE;
-	    arg[1].arg_ptr.arg_str = str_make(tokenbuf);
-	    goto get_repl;		/* skip compiling for now */
-	}
-    }
-    if (*tokenbuf == '^') {
-	spat->spat_first = scanconst(tokenbuf+1);
-	if (spat->spat_first)
-	    spat->spat_flen = strlen(spat->spat_first->str_ptr);
-    }
-    else {
-	spat->spat_flags |= SPAT_SCANFIRST;
-	spat->spat_first = scanconst(tokenbuf);
-	if (spat->spat_first)
-	    spat->spat_flen = strlen(spat->spat_first->str_ptr);
-    }	
-    if (d = compile(&spat->spat_compex,tokenbuf,TRUE,FALSE))
-	fatal(d);
-get_repl:
-    s = scanstr(s);
-    if (!*s)
-	fatal("Substitution replacement not terminated:\n%s",str_get(linestr));
-    spat->spat_repl = yylval.arg;
-    if (*s == 'g') {
-	s++;
-	spat->spat_flags &= ~SPAT_USE_ONCE;
-    }
-    else
-	spat->spat_flags |= SPAT_USE_ONCE;
-    yylval.arg = make_match(O_SUBST,stab_to_arg(A_STAB,defstab),spat);
-    return s;
-}
-
 ARG *
 make_split(stab,arg)
 register STAB *stab;
 register ARG *arg;
 {
-    if (arg->arg_type != O_MATCH) {
-	register SPAT *spat = (SPAT *) safemalloc(sizeof (SPAT));
-	register char *d;
+    register SPAT *spat = (SPAT *) safemalloc(sizeof (SPAT));
 
+    if (arg->arg_type != O_MATCH) {
+	spat = (SPAT *) safemalloc(sizeof (SPAT));
 	bzero((char *)spat, sizeof(SPAT));
 	spat->spat_next = spat_root;	/* link into spat list */
 	spat_root = spat;
-	init_compex(&spat->spat_compex);
 
 	spat->spat_runtime = arg;
-	arg = make_match(O_MATCH,stab_to_arg(A_STAB,defstab),spat);
+	arg = make_match(O_MATCH,stab2arg(A_STAB,defstab),spat);
     }
     arg->arg_type = O_SPLIT;
-    arg[2].arg_ptr.arg_spat->spat_repl = stab_to_arg(A_STAB,aadd(stab));
+    spat = arg[2].arg_ptr.arg_spat;
+    spat->spat_repl = stab2arg(A_STAB,aadd(stab));
+    if (spat->spat_short) {	/* exact match can bypass regexec() */
+	if (!((spat->spat_flags & SPAT_SCANFIRST) &&
+	    (spat->spat_flags & SPAT_ALL) )) {
+	    str_free(spat->spat_short);
+	    spat->spat_short = Nullstr;
+	}
+    }
     return arg;
 }
 
-char *
-expand_charset(s)
-register char *s;
+SUBR *
+make_sub(name,cmd)
+char *name;
+CMD *cmd;
 {
-    char t[512];
-    register char *d = t;
-    register int i;
+    register SUBR *sub = (SUBR *) safemalloc(sizeof (SUBR));
+    STAB *stab = stabent(name,TRUE);
 
-    while (*s) {
-	if (s[1] == '-' && s[2]) {
-	    for (i = s[0]; i <= s[2]; i++)
-		*d++ = i;
-	    s += 3;
+    if (stab->stab_sub) {
+	if (dowarn) {
+	    line_t oldline = line;
+
+	    if (cmd)
+		line = cmd->c_line;
+	    warn("Subroutine %s redefined",name);
+	    line = oldline;
 	}
-	else
-	    *d++ = *s++;
+	cmd_free(stab->stab_sub->cmd);
+	afree(stab->stab_sub->tosave);
+	safefree((char*)stab->stab_sub);
     }
-    *d = '\0';
-    return savestr(t);
-}
-
-char *
-scantrans(s)
-register char *s;
-{
-    ARG *arg =
-	l(make_op(O_TRANS,2,stab_to_arg(A_STAB,defstab),Nullarg,Nullarg,0));
-    register char *t;
-    register char *r;
-    register char *tbl = safemalloc(256);
-    register int i;
-
-    arg[2].arg_type = A_NULL;
-    arg[2].arg_ptr.arg_cval = tbl;
-    for (i=0; i<256; i++)
-	tbl[i] = 0;
-    s = scanstr(s);
-    if (!*s)
-	fatal("Translation pattern not terminated:\n%s",str_get(linestr));
-    t = expand_charset(str_get(yylval.arg[1].arg_ptr.arg_str));
-    free_arg(yylval.arg);
-    s = scanstr(s-1);
-    if (!*s)
-	fatal("Translation replacement not terminated:\n%s",str_get(linestr));
-    r = expand_charset(str_get(yylval.arg[1].arg_ptr.arg_str));
-    free_arg(yylval.arg);
-    yylval.arg = arg;
-    if (!*r) {
-	safefree(r);
-	r = t;
-    }
-    for (i = 0; t[i]; i++) {
-	if (!r[i])
-	    r[i] = r[i-1];
-	tbl[t[i] & 0377] = r[i];
-    }
-    if (r != t)
-	safefree(r);
-    safefree(t);
-    return s;
+    bzero((char *)sub, sizeof(SUBR));
+    sub->cmd = cmd;
+    sub->filename = filename;
+    tosave = anew(Nullstab);
+    tosave->ary_fill = 0;	/* make 1 based */
+    cmd_tosave(cmd);		/* this builds the tosave array */
+    sub->tosave = tosave;
+    stab->stab_sub = sub;
 }
 
 CMD *
@@ -1141,9 +418,14 @@ ARG *arg;
     cmd->ucmd.acmd.ac_expr = arg;
     cmd->c_expr = cond;
     if (cond) {
-	opt_arg(cmd,1);
+	opt_arg(cmd,1,1);
 	cmd->c_flags |= CF_COND;
     }
+    if (cmdline != NOLINE) {
+	cmd->c_line = cmdline;
+	cmdline = NOLINE;
+    }
+    cmd->c_file = filename;
     return cmd;
 }
 
@@ -1161,16 +443,21 @@ struct compcmd cblock;
     cmd->ucmd.ccmd.cc_true = cblock.comp_true;
     cmd->ucmd.ccmd.cc_alt = cblock.comp_alt;
     if (arg) {
-	opt_arg(cmd,1);
+	opt_arg(cmd,1,0);
 	cmd->c_flags |= CF_COND;
+    }
+    if (cmdline != NOLINE) {
+	cmd->c_line = cmdline;
+	cmdline = NOLINE;
     }
     return cmd;
 }
 
 void
-opt_arg(cmd,fliporflop)
+opt_arg(cmd,fliporflop,acmd)
 register CMD *cmd;
 int fliporflop;
+int acmd;
 {
     register ARG *arg;
     int opt = CFT_EVAL;
@@ -1184,9 +471,25 @@ int fliporflop;
 	return;
     arg = cmd->c_expr;
 
+    /* Can we turn && and || into if and unless? */
+
+    if (acmd && !cmd->ucmd.acmd.ac_expr && 
+      (arg->arg_type == O_AND || arg->arg_type == O_OR) ) {
+	dehoist(arg,1);
+	dehoist(arg,2);
+	cmd->ucmd.acmd.ac_expr = arg[2].arg_ptr.arg_arg;
+	cmd->c_expr = arg[1].arg_ptr.arg_arg;
+	if (arg->arg_type == O_OR)
+	    cmd->c_flags ^= CF_INVERT;		/* || is like unless */
+	arg->arg_len = 0;
+	arg_free(arg);
+	arg = cmd->c_expr;
+    }
+
     /* Turn "if (!expr)" into "unless (expr)" */
 
-    while (arg->arg_type == O_NOT && arg[1].arg_type == A_EXPR) {
+    while (arg->arg_type == O_NOT) {
+	dehoist(arg,1);
 	cmd->c_flags ^= CF_INVERT;		/* flip sense of cmd */
 	cmd->c_expr = arg[1].arg_ptr.arg_arg;	/* hoist the rest of expr */
 	free_arg(arg);
@@ -1223,7 +526,7 @@ int fliporflop;
       arg->arg_type == O_AND || arg->arg_type == O_OR) {
 	if (arg[flp].arg_type == A_SINGLE) {
 	    opt = (str_true(arg[flp].arg_ptr.arg_str) ? CFT_TRUE : CFT_FALSE);
-	    cmd->c_first = arg[flp].arg_ptr.arg_str;
+	    cmd->c_short = arg[flp].arg_ptr.arg_str;
 	    goto literal;
 	}
 	else if (arg[flp].arg_type == A_STAB || arg[flp].arg_type == A_LVAL) {
@@ -1241,19 +544,20 @@ int fliporflop;
 	}
     }
     else if (arg->arg_type == O_MATCH || arg->arg_type == O_SUBST ||
-             arg->arg_type == O_NMATCH || arg->arg_type == O_NSUBST) {
+	     arg->arg_type == O_NMATCH || arg->arg_type == O_NSUBST) {
 	if ((arg[1].arg_type == A_STAB || arg[1].arg_type == A_LVAL) &&
 		arg[2].arg_type == A_SPAT &&
-		arg[2].arg_ptr.arg_spat->spat_first ) {
+		arg[2].arg_ptr.arg_spat->spat_short ) {
 	    cmd->c_stab  = arg[1].arg_ptr.arg_stab;
-	    cmd->c_first = arg[2].arg_ptr.arg_spat->spat_first;
-	    cmd->c_flen  = arg[2].arg_ptr.arg_spat->spat_flen;
-	    if (arg[2].arg_ptr.arg_spat->spat_flags & SPAT_SCANALL &&
+	    cmd->c_short = arg[2].arg_ptr.arg_spat->spat_short;
+	    cmd->c_slen  = arg[2].arg_ptr.arg_spat->spat_slen;
+	    if (arg[2].arg_ptr.arg_spat->spat_flags & SPAT_ALL &&
+		!(arg[2].arg_ptr.arg_spat->spat_flags & SPAT_ONCE) &&
 		(arg->arg_type == O_MATCH || arg->arg_type == O_NMATCH) )
 		sure |= CF_EQSURE;		/* (SUBST must be forced even */
 						/* if we know it will work.) */
-	    arg[2].arg_ptr.arg_spat->spat_first = Nullstr;
-	    arg[2].arg_ptr.arg_spat->spat_flen = 0; /* only one chk */
+	    arg[2].arg_ptr.arg_spat->spat_short = Nullstr;
+	    arg[2].arg_ptr.arg_spat->spat_slen = 0; /* only one chk */
 	    sure |= CF_NESURE;		/* normally only sure if it fails */
 	    if (arg->arg_type == O_NMATCH || arg->arg_type == O_NSUBST)
 		cmd->c_flags |= CF_FIRSTNEG;
@@ -1278,8 +582,8 @@ int fliporflop;
 		    && arg->arg_type == O_MATCH
 		    && context & 4
 		    && fliporflop == 1) {
-		    arg[2].arg_type = A_SINGLE;		/* don't do twice */
-		    arg[2].arg_ptr.arg_str = &str_yes;
+		    spat_free(arg[2].arg_ptr.arg_spat);
+		    arg[2].arg_ptr.arg_spat = Nullspat;	/* don't do twice */
 		}
 		cmd->c_flags |= sure;
 	    }
@@ -1290,8 +594,8 @@ int fliporflop;
 	if (arg[1].arg_type == A_STAB || arg[1].arg_type == A_LVAL) {
 	    if (arg[2].arg_type == A_SINGLE) {
 		cmd->c_stab  = arg[1].arg_ptr.arg_stab;
-		cmd->c_first = arg[2].arg_ptr.arg_str;
-		cmd->c_flen  = 30000;
+		cmd->c_short = arg[2].arg_ptr.arg_str;
+		cmd->c_slen  = 30000;
 		switch (arg->arg_type) {
 		case O_SLT: case O_SGT:
 		    sure |= CF_EQSURE;
@@ -1318,6 +622,28 @@ int fliporflop;
 		}
 		if (sure & (CF_EQSURE|CF_NESURE)) {
 		    opt = CFT_STROP;
+		    cmd->c_flags |= sure;
+		}
+	    }
+	}
+    }
+    else if (arg->arg_type == O_EQ || arg->arg_type == O_NE ||
+	     arg->arg_type == O_LE || arg->arg_type == O_GE ||
+	     arg->arg_type == O_LT || arg->arg_type == O_GT) {
+	if (arg[1].arg_type == A_STAB || arg[1].arg_type == A_LVAL) {
+	    if (arg[2].arg_type == A_SINGLE) {
+		cmd->c_stab  = arg[1].arg_ptr.arg_stab;
+		cmd->c_short = str_nmake(str_gnum(arg[2].arg_ptr.arg_str));
+		cmd->c_slen = arg->arg_type;
+		sure |= CF_NESURE|CF_EQSURE;
+		if (context & 1) {	/* only sure if thing is false */
+		    sure &= ~CF_EQSURE;
+		}
+		else if (context & 2) { /* only sure if thing is true */
+		    sure &= ~CF_NESURE;
+		}
+		if (sure & (CF_EQSURE|CF_NESURE)) {
+		    opt = CFT_NUMOP;
 		    cmd->c_flags |= sure;
 		}
 	    }
@@ -1356,7 +682,7 @@ int fliporflop;
 	    bcopy((char *)cmd, (char *)arg[3].arg_ptr.arg_cmd, sizeof(CMD));
 	    arg[4].arg_ptr.arg_cmd = (CMD*)safemalloc(sizeof(CMD));
 	    bcopy((char *)cmd, (char *)arg[4].arg_ptr.arg_cmd, sizeof(CMD));
-	    opt_arg(arg[4].arg_ptr.arg_cmd,2);
+	    opt_arg(arg[4].arg_ptr.arg_cmd,2,acmd);
 	    arg->arg_len = 2;		/* this is a lie */
 	}
 	else {
@@ -1420,7 +746,6 @@ register ARG *pat;
 	bzero((char *)spat, sizeof(SPAT));
 	spat->spat_next = spat_root;	/* link into spat list */
 	spat_root = spat;
-	init_compex(&spat->spat_compex);
 
 	spat->spat_runtime = pat;
 	newarg = make_op(type,2,left,Nullarg,Nullarg,0);
@@ -1448,7 +773,7 @@ register CMD *cmd;
 register ARG *arg;
 {
     cmd->c_expr = arg;
-    opt_arg(cmd,1);
+    opt_arg(cmd,1,0);
     cmd->c_flags |= CF_COND;
     return cmd;
 }
@@ -1459,7 +784,7 @@ register CMD *cmd;
 register ARG *arg;
 {
     cmd->c_expr = arg;
-    opt_arg(cmd,1);
+    opt_arg(cmd,1,0);
     cmd->c_flags |= CF_COND|CF_LOOP;
     if (cmd->c_type == C_BLOCK)
 	cmd->c_flags &= ~CF_COND;
@@ -1512,223 +837,6 @@ char *s;
 	fputs(tokenbuf,stderr);
 }
 
-char *
-scanstr(s)
-register char *s;
-{
-    register char term;
-    register char *d;
-    register ARG *arg;
-    register bool makesingle = FALSE;
-    char *leave = "\\$nrtfb0123456789";	/* which backslash sequences to keep */
-
-    arg = op_new(1);
-    yylval.arg = arg;
-    arg->arg_type = O_ITEM;
-
-    switch (*s) {
-    default:			/* a substitution replacement */
-	arg[1].arg_type = A_DOUBLE;
-	makesingle = TRUE;	/* maybe disable runtime scanning */
-	term = *s;
-	if (term == '\'')
-	    leave = Nullch;
-	goto snarf_it;
-    case '0':
-	{
-	    long i;
-	    int shift;
-
-	    arg[1].arg_type = A_SINGLE;
-	    if (s[1] == 'x') {
-		shift = 4;
-		s += 2;
-	    }
-	    else if (s[1] == '.')
-		goto decimal;
-	    else
-		shift = 3;
-	    i = 0;
-	    for (;;) {
-		switch (*s) {
-		default:
-		    goto out;
-		case '8': case '9':
-		    if (shift != 4)
-			fatal("Illegal octal digit at line %d",line);
-		    /* FALL THROUGH */
-		case '0': case '1': case '2': case '3': case '4':
-		case '5': case '6': case '7':
-		    i <<= shift;
-		    i += *s++ & 15;
-		    break;
-		case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
-		case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
-		    if (shift != 4)
-			goto out;
-		    i <<= 4;
-		    i += (*s++ & 7) + 9;
-		    break;
-		}
-	    }
-	  out:
-	    sprintf(tokenbuf,"%d",i);
-	    arg[1].arg_ptr.arg_str = str_make(tokenbuf);
-	}
-	break;
-    case '1': case '2': case '3': case '4': case '5':
-    case '6': case '7': case '8': case '9': case '.':
-      decimal:
-	arg[1].arg_type = A_SINGLE;
-	d = tokenbuf;
-	while (isdigit(*s) || *s == '_')
-	    *d++ = *s++;
-	if (*s == '.' && index("0123456789eE",s[1]))
-	    *d++ = *s++;
-	while (isdigit(*s) || *s == '_')
-	    *d++ = *s++;
-	if (index("eE",*s) && index("+-0123456789",s[1]))
-	    *d++ = *s++;
-	if (*s == '+' || *s == '-')
-	    *d++ = *s++;
-	while (isdigit(*s))
-	    *d++ = *s++;
-	*d = '\0';
-	arg[1].arg_ptr.arg_str = str_make(tokenbuf);
-	break;
-    case '\'':
-	arg[1].arg_type = A_SINGLE;
-	term = *s;
-	leave = Nullch;
-	goto snarf_it;
-
-    case '<':
-	arg[1].arg_type = A_READ;
-	s = cpytill(tokenbuf,s+1,'>');
-	if (!*tokenbuf)
-	    strcpy(tokenbuf,"ARGV");
-	if (*s)
-	    s++;
-	if (rsfp == stdin && strEQ(tokenbuf,"stdin"))
-	    fatal("Can't get both program and data from <stdin>\n");
-	arg[1].arg_ptr.arg_stab = stabent(tokenbuf,TRUE);
-	arg[1].arg_ptr.arg_stab->stab_io = stio_new();
-	if (strEQ(tokenbuf,"ARGV")) {
-	    aadd(arg[1].arg_ptr.arg_stab);
-	    arg[1].arg_ptr.arg_stab->stab_io->flags |= IOF_ARGV|IOF_START;
-	}
-	break;
-    case '"': 
-	arg[1].arg_type = A_DOUBLE;
-	makesingle = TRUE;	/* maybe disable runtime scanning */
-	term = *s;
-	goto snarf_it;
-    case '`':
-	arg[1].arg_type = A_BACKTICK;
-	term = *s;
-      snarf_it:
-	{
-	    STR *tmpstr;
-	    int sqstart = line;
-	    char *tmps;
-
-	    tmpstr = str_new(strlen(s));
-	    s = str_append_till(tmpstr,s+1,term,leave);
-	    while (!*s) {	/* multiple line string? */
-		s = str_gets(linestr, rsfp);
-		if (!*s)
-		    fatal("EOF in string at line %d\n",sqstart);
-		line++;
-		s = str_append_till(tmpstr,s,term,leave);
-	    }
-	    s++;
-	    if (term == '\'') {
-		arg[1].arg_ptr.arg_str = tmpstr;
-		break;
-	    }
-	    tmps = s;
-	    s = d = tmpstr->str_ptr;	/* assuming shrinkage only */
-	    while (*s) {
-		if (*s == '$' && s[1]) {
-		    makesingle = FALSE;	/* force interpretation */
-		    if (!isalpha(s[1])) {	/* an internal register? */
-			int len;
-
-			len = scanreg(s,tokenbuf) - s;
-			stabent(tokenbuf,TRUE);	/* make sure it's created */
-			while (len--)
-			    *d++ = *s++;
-			continue;
-		    }
-		}
-		else if (*s == '\\' && s[1]) {
-		    s++;
-		    switch (*s) {
-		    default:
-		      defchar:
-			if (!leave || index(leave,*s))
-			    *d++ = '\\';
-			*d++ = *s++;
-			continue;
-		    case '0': case '1': case '2': case '3':
-		    case '4': case '5': case '6': case '7':
-			*d = *s++ - '0';
-			if (index("01234567",*s)) {
-			    *d <<= 3;
-			    *d += *s++ - '0';
-			}
-			else if (!index("`\"",term)) {	/* oops, a subpattern */
-			    s--;
-			    goto defchar;
-			}
-			if (index("01234567",*s)) {
-			    *d <<= 3;
-			    *d += *s++ - '0';
-			}
-			d++;
-			continue;
-		    case 'b':
-			*d++ = '\b';
-			break;
-		    case 'n':
-			*d++ = '\n';
-			break;
-		    case 'r':
-			*d++ = '\r';
-			break;
-		    case 'f':
-			*d++ = '\f';
-			break;
-		    case 't':
-			*d++ = '\t';
-			break;
-		    }
-		    s++;
-		    continue;
-		}
-		*d++ = *s++;
-	    }
-	    *d = '\0';
-	    if (arg[1].arg_type == A_DOUBLE) {
-		if (makesingle)
-		    arg[1].arg_type = A_SINGLE;	/* now we can optimize on it */
-		else
-		    leave = "\\";
-		for (d = s = tmpstr->str_ptr; *s; *d++ = *s++) {
-		    if (*s == '\\' && (!leave || index(leave,s[1])))
-			s++;
-		}
-		*d = '\0';
-	    }
-	    tmpstr->str_cur = d - tmpstr->str_ptr;	/* XXX cheat */
-	    arg[1].arg_ptr.arg_str = tmpstr;
-	    s = tmps;
-	    break;
-	}
-    }
-    return s;
-}
-
 ARG *
 make_op(type,newlen,arg1,arg2,arg3,dolist)
 int type;
@@ -1771,8 +879,28 @@ int dolist;
 			arg[1].arg_flags |= AF_SPECIAL;
 		    }
 		}
-		else if (chld->arg_type == O_ARRAY && chld->arg_len == 1)
-		    arg[1].arg_flags |= AF_SPECIAL;
+		else {
+		    switch (chld->arg_type) {
+		    case O_ARRAY:
+			if (chld->arg_len == 1)
+			    arg[1].arg_flags |= AF_SPECIAL;
+			break;
+		    case O_ITEM:
+			if (chld[1].arg_type == A_READ ||
+			    chld[1].arg_type == A_INDREAD ||
+			    chld[1].arg_type == A_GLOB)
+			    arg[1].arg_flags |= AF_SPECIAL;
+			break;
+		    case O_SPLIT:
+		    case O_TMS:
+		    case O_EACH:
+		    case O_VALUES:
+		    case O_KEYS:
+		    case O_SORT:
+			arg[1].arg_flags |= AF_SPECIAL;
+			break;
+		    }
+		}
 	    }
 	}
     }
@@ -1784,8 +912,12 @@ int dolist;
 	if (chld->arg_type == O_ITEM && 
 	    (hoistable[chld[1].arg_type] || 
 	     (type == O_ASSIGN && 
-	      (chld[1].arg_type == A_READ ||
-	       chld[1].arg_type == A_DOUBLE ||
+	      ((chld[1].arg_type == A_READ && !(arg[1].arg_flags & AF_SPECIAL))
+		||
+	       (chld[1].arg_type == A_INDREAD && !(arg[1].arg_flags & AF_SPECIAL))
+		||
+	       (chld[1].arg_type == A_GLOB && !(arg[1].arg_flags & AF_SPECIAL))
+		||
 	       chld[1].arg_type == A_BACKTICK ) ) ) ) {
 	    arg[2].arg_type = chld[1].arg_type;
 	    arg[2].arg_ptr = chld[1].arg_ptr;
@@ -1865,6 +997,7 @@ register ARG *arg;
     double value;		/* must not be register */
     register char *tmps;
     int i;
+    unsigned long tmplong;
     double exp(), log(), sqrt(), modf();
     char *crypt();
 
@@ -1890,7 +1023,7 @@ register ARG *arg;
 	    break;
 	case O_REPEAT:
 	    i = (int)str_gnum(s2);
-	    while (i--)
+	    while (i-- > 0)
 		str_scat(str,s1);
 	    break;
 	case O_MULTIPLY:
@@ -1898,12 +1031,16 @@ register ARG *arg;
 	    str_numset(str,value * str_gnum(s2));
 	    break;
 	case O_DIVIDE:
-	    value = str_gnum(s1);
-	    str_numset(str,value / str_gnum(s2));
+	    value = str_gnum(s2);
+	    if (value == 0.0)
+		fatal("Illegal division by constant zero");
+	    str_numset(str,str_gnum(s1) / value);
 	    break;
 	case O_MODULO:
-	    value = str_gnum(s1);
-	    str_numset(str,(double)(((long)value) % ((long)str_gnum(s2))));
+	    tmplong = (unsigned long)str_gnum(s2);
+	    if (tmplong == 0L)
+		fatal("Illegal modulus of constant zero");
+	    str_numset(str,(double)(((unsigned long)str_gnum(s1)) % tmplong));
 	    break;
 	case O_ADD:
 	    value = str_gnum(s1);
@@ -1915,11 +1052,13 @@ register ARG *arg;
 	    break;
 	case O_LEFT_SHIFT:
 	    value = str_gnum(s1);
-	    str_numset(str,(double)(((long)value) << ((long)str_gnum(s2))));
+	    i = (int)str_gnum(s2);
+	    str_numset(str,(double)(((unsigned long)value) << i));
 	    break;
 	case O_RIGHT_SHIFT:
 	    value = str_gnum(s1);
-	    str_numset(str,(double)(((long)value) >> ((long)str_gnum(s2))));
+	    i = (int)str_gnum(s2);
+	    str_numset(str,(double)(((unsigned long)value) >> i));
 	    break;
 	case O_LT:
 	    value = str_gnum(s1);
@@ -1947,15 +1086,18 @@ register ARG *arg;
 	    break;
 	case O_BIT_AND:
 	    value = str_gnum(s1);
-	    str_numset(str,(double)(((long)value) & ((long)str_gnum(s2))));
+	    str_numset(str,(double)(((unsigned long)value) &
+		((unsigned long)str_gnum(s2))));
 	    break;
 	case O_XOR:
 	    value = str_gnum(s1);
-	    str_numset(str,(double)(((long)value) ^ ((long)str_gnum(s2))));
+	    str_numset(str,(double)(((unsigned long)value) ^
+		((unsigned long)str_gnum(s2))));
 	    break;
 	case O_BIT_OR:
 	    value = str_gnum(s1);
-	    str_numset(str,(double)(((long)value) | ((long)str_gnum(s2))));
+	    str_numset(str,(double)(((unsigned long)value) |
+		((unsigned long)str_gnum(s2))));
 	    break;
 	case O_AND:
 	    if (str_true(s1))
@@ -2034,8 +1176,13 @@ register ARG *arg;
 	    str_numset(str,(double)(strNE(tmps,str_get(s2))));
 	    break;
 	case O_CRYPT:
+#ifdef CRYPT
 	    tmps = str_get(s1);
 	    str_set(str,crypt(tmps,str_get(s2)));
+#else
+	    fatal(
+	    "The crypt() function is unimplemented due to excessive paranoia.");
+#endif
 	    break;
 	case O_EXP:
 	    str_numset(str,exp(str_gnum(s1)));
@@ -2047,7 +1194,13 @@ register ARG *arg;
 	    str_numset(str,sqrt(str_gnum(s1)));
 	    break;
 	case O_INT:
-	    modf(str_gnum(s1),&value);
+	    value = str_gnum(s1);
+	    if (value >= 0.0)
+		modf(value,&value);
+	    else {
+		modf(-value,&value);
+		value = -value;
+	    }
 	    str_numset(str,value);
 	    break;
 	case O_ORD:
@@ -2069,8 +1222,15 @@ register ARG *arg;
 {
     register int i;
     register ARG *arg1;
+    ARG *tmparg;
 
     arg->arg_flags |= AF_COMMON;	/* XXX should cross-match */
+					/* this does unnecessary copying */
+
+    if (arg[1].arg_type == A_ARYLEN) {
+	arg[1].arg_type = A_LARYLEN;
+	return arg;
+    }
 
     /* see if it's an array reference */
 
@@ -2080,6 +1240,7 @@ register ARG *arg;
 	if (arg1->arg_type == O_LIST && arg->arg_type != O_ITEM) {
 						/* assign to list */
 	    arg[1].arg_flags |= AF_SPECIAL;
+	    dehoist(arg,2);
 	    arg[2].arg_flags |= AF_SPECIAL;
 	    for (i = arg1->arg_len; i >= 1; i--) {
 		switch (arg1[i].arg_type) {
@@ -2108,6 +1269,7 @@ register ARG *arg;
 	    if (arg1->arg_len == 1 && arg->arg_type != O_ITEM) {
 						/* assign to array */
 		arg[1].arg_flags |= AF_SPECIAL;
+		dehoist(arg,2);
 		arg[2].arg_flags |= AF_SPECIAL;
 	    }
 	    else
@@ -2115,7 +1277,7 @@ register ARG *arg;
 	}
 	else if (arg1->arg_type == O_HASH)
 	    arg1->arg_type = O_LHASH;
-	else {
+	else if (arg1->arg_type != O_ASSIGN) {
 	    sprintf(tokenbuf,
 	      "Illegal expression (%s) as lvalue",opname[arg1->arg_type]);
 	    yyerror(tokenbuf);
@@ -2141,6 +1303,19 @@ register ARG *arg;
 	fprintf(stderr,"lval LVAL\n");
 #endif
     return arg;
+}
+
+dehoist(arg,i)
+ARG *arg;
+{
+    ARG *tmparg;
+
+    if (arg[i].arg_type != A_EXPR) {	/* dehoist */
+	tmparg = make_op(O_ITEM,1,Nullarg,Nullarg,Nullarg,0);
+	tmparg[1] = arg[i];
+	arg[i].arg_ptr.arg_arg = tmparg;
+	arg[i].arg_type = A_EXPR;
+    }
 }
 
 ARG *
@@ -2194,7 +1369,8 @@ register ARG *arg;
 	*arg = *node;		/* copy everything except the STR */
 	arg->arg_ptr.arg_str = tmpstr;
 	for (j = 1; ; ) {
-	    arg[j++] = node[1];
+	    arg[j] = node[1];
+	    ++j;		/* Bug in Xenix compiler */
 	    if (j >= i) {
 		arg[j] = node[2];
 		free_arg(node);
@@ -2216,13 +1392,25 @@ ARG *
 listish(arg)
 ARG *arg;
 {
-    if (arg->arg_flags & AF_LISTISH)
+    if (arg->arg_flags & AF_LISTISH) {
 	arg = make_op(O_LIST,1,arg,Nullarg,Nullarg,0);
+	arg[1].arg_flags &= ~AF_SPECIAL;
+    }
+    return arg;
+}
+
+/* mark list of local variables */
+
+ARG *
+localize(arg)
+ARG *arg;
+{
+    arg->arg_flags |= AF_LOCAL;
     return arg;
 }
 
 ARG *
-stab_to_arg(atype,stab)
+stab2arg(atype,stab)
 int atype;
 register STAB *stab;
 {
@@ -2284,7 +1472,7 @@ SPAT *spat;
     arg[2].arg_ptr.arg_spat = spat;
 #ifdef DEBUGGING
     if (debug & 16)
-	fprintf(stderr,"make_match SPAT=%lx\n",spat);
+	fprintf(stderr,"make_match SPAT=%lx\n",(long)spat);
 #endif
 
     if (type == O_SUBST || type == O_NSUBST) {
@@ -2314,7 +1502,7 @@ register CMD *cmd;
 {
     register CMD *tail;
     register ARG *arg = cmd->c_expr;
-    char *tmps;	/* used by True macro */
+    STAB *asgnstab;
 
     /* hoist "while (<channel>)" up into command block */
 
@@ -2324,12 +1512,28 @@ register CMD *cmd;
 	cmd->c_stab = arg[1].arg_ptr.arg_stab;
 	if (arg[1].arg_ptr.arg_stab->stab_io->flags & IOF_ARGV) {
 	    cmd->c_expr = l(make_op(O_ASSIGN, 2,	/* fake up "$_ =" */
-	       stab_to_arg(A_LVAL,defstab), arg, Nullarg,1 ));
+	       stab2arg(A_LVAL,defstab), arg, Nullarg,1 ));
 	}
 	else {
 	    free_arg(arg);
 	    cmd->c_expr = Nullarg;
 	}
+    }
+    else if (arg && arg->arg_type == O_ITEM && arg[1].arg_type == A_INDREAD) {
+	cmd->c_flags &= ~CF_OPTIMIZE;	/* clear optimization type */
+	cmd->c_flags |= CFT_INDGETS;	/* and set it to do the input */
+	cmd->c_stab = arg[1].arg_ptr.arg_stab;
+	free_arg(arg);
+	cmd->c_expr = Nullarg;
+    }
+    else if (arg && arg->arg_type == O_ITEM && arg[1].arg_type == A_GLOB) {
+	if ((cmd->c_flags & CF_OPTIMIZE) == CFT_ARRAY)
+	    asgnstab = cmd->c_stab;
+	else
+	    asgnstab = defstab;
+	cmd->c_expr = l(make_op(O_ASSIGN, 2,	/* fake up "$foo =" */
+	   stab2arg(A_LVAL,asgnstab), arg, Nullarg,1 ));
+	cmd->c_flags &= ~CF_OPTIMIZE;	/* clear optimization type */
     }
 
     /* First find the end of the true list */
@@ -2365,145 +1569,76 @@ register CMD *cmd;
     return cmd;
 }
 
-FCMD *
-load_format()
+CMD *
+over(eachstab,cmd)
+STAB *eachstab;
+register CMD *cmd;
 {
-    FCMD froot;
-    FCMD *flinebeg;
-    register FCMD *fprev = &froot;
-    register FCMD *fcmd;
-    register char *s;
-    register char *t;
-    register char tmpchar;
-    bool noblank;
+    /* hoist "for $foo (@bar)" up into command block */
 
-    while ((s = str_gets(linestr,rsfp)) != Nullch) {
-	line++;
-	if (strEQ(s,".\n")) {
-	    bufptr = s;
-	    return froot.f_next;
-	}
-	if (*s == '#')
-	    continue;
-	flinebeg = Nullfcmd;
-	noblank = FALSE;
-	while (*s) {
-	    fcmd = (FCMD *)safemalloc(sizeof (FCMD));
-	    bzero((char*)fcmd, sizeof (FCMD));
-	    fprev->f_next = fcmd;
-	    fprev = fcmd;
-	    for (t=s; *t && *t != '@' && *t != '^'; t++) {
-		if (*t == '~') {
-		    noblank = TRUE;
-		    *t = ' ';
-		}
-	    }
-	    tmpchar = *t;
-	    *t = '\0';
-	    fcmd->f_pre = savestr(s);
-	    fcmd->f_presize = strlen(s);
-	    *t = tmpchar;
-	    s = t;
-	    if (!*s) {
-		if (noblank)
-		    fcmd->f_flags |= FC_NOBLANK;
-		break;
-	    }
-	    if (!flinebeg)
-		flinebeg = fcmd;		/* start values here */
-	    if (*s++ == '^')
-		fcmd->f_flags |= FC_CHOP;	/* for doing text filling */
-	    switch (*s) {
-	    case '*':
-		fcmd->f_type = F_LINES;
-		*s = '\0';
-		break;
-	    case '<':
-		fcmd->f_type = F_LEFT;
-		while (*s == '<')
-		    s++;
-		break;
-	    case '>':
-		fcmd->f_type = F_RIGHT;
-		while (*s == '>')
-		    s++;
-		break;
-	    case '|':
-		fcmd->f_type = F_CENTER;
-		while (*s == '|')
-		    s++;
-		break;
-	    default:
-		fcmd->f_type = F_LEFT;
-		break;
-	    }
-	    if (fcmd->f_flags & FC_CHOP && *s == '.') {
-		fcmd->f_flags |= FC_MORE;
-		while (*s == '.')
-		    s++;
-	    }
-	    fcmd->f_size = s-t;
-	}
-	if (flinebeg) {
-	  again:
-	    if ((bufptr = str_gets(linestr ,rsfp)) == Nullch)
-		goto badform;
-	    line++;
-	    if (strEQ(bufptr,".\n")) {
-		yyerror("Missing values line");
-		return froot.f_next;
-	    }
-	    if (*bufptr == '#')
-		goto again;
-	    lex_newlines = TRUE;
-	    while (flinebeg || *bufptr) {
-		switch(yylex()) {
-		default:
-		    yyerror("Bad value in format");
-		    *bufptr = '\0';
-		    break;
-		case '\n':
-		    if (flinebeg)
-			yyerror("Missing value in format");
-		    *bufptr = '\0';
-		    break;
-		case REG:
-		    yylval.arg = stab_to_arg(A_LVAL,yylval.stabval);
-		    /* FALL THROUGH */
-		case RSTRING:
-		    if (!flinebeg)
-			yyerror("Extra value in format");
-		    else {
-			flinebeg->f_expr = yylval.arg;
-			do {
-			    flinebeg = flinebeg->f_next;
-			} while (flinebeg && flinebeg->f_size == 0);
-		    }
-		    break;
-		case ',': case ';':
-		    continue;
-		}
-	    }
-	    lex_newlines = FALSE;
-	}
-    }
-  badform:
-    bufptr = str_get(linestr);
-    yyerror("Format not terminated");
-    return froot.f_next;
+    cmd->c_flags &= ~CF_OPTIMIZE;	/* clear optimization type */
+    cmd->c_flags |= CFT_ARRAY;		/* and set it to do the iteration */
+    cmd->c_stab = eachstab;
+
+    return cmd;
 }
 
+static int gensym = 0;
+
+STAB *
+genstab()
+{
+    sprintf(tokenbuf,"_GEN_%d",gensym++);
+    return stabent(tokenbuf,TRUE);
+}
+
+/* this routine is in perly.c by virtue of being sort of an alternate main() */
+
 STR *
-do_eval(str)
+do_eval(str,optype)
 STR *str;
+int optype;
 {
     int retval;
     CMD *myroot;
+    ARRAY *ar;
+    int i;
+    char *oldfile = filename;
+    line_t oldline = line;
+    int oldtmps_base = tmps_base;
+    int oldsave = savestack->ary_fill;
 
-    in_eval++;
+    tmps_base = tmps_max;
     str_set(stabent("@",TRUE)->stab_val,"");
-    line = 1;
-    str_sset(linestr,str);
+    if (optype != O_DOFILE) {	/* normal eval */
+	filename = "(eval)";
+	line = 1;
+	str_sset(linestr,str);
+    }
+    else {
+	filename = savestr(str_get(str));	/* can't free this easily */
+	str_set(linestr,"");
+	rsfp = fopen(filename,"r");
+	ar = incstab->stab_array;
+	if (!rsfp && *filename != '/') {
+	    for (i = 0; i <= ar->ary_fill; i++) {
+		sprintf(tokenbuf,"%s/%s",str_get(afetch(ar,i)),filename);
+		rsfp = fopen(tokenbuf,"r");
+		if (rsfp) {
+		    free(filename);
+		    filename = savestr(tokenbuf);
+		    break;
+		}
+	    }
+	}
+	if (!rsfp) {
+	    filename = oldfile;
+	    tmps_base = oldtmps_base;
+	    return &str_no;
+	}
+	line = 0;
+    }
+    in_eval++;
     bufptr = str_get(linestr);
     if (setjmp(eval_env))
 	retval = 1;
@@ -2513,10 +1648,16 @@ STR *str;
     if (retval)
 	str = &str_no;
     else {
-	str = cmd_exec(eval_root);
+	str = str_static(cmd_exec(eval_root));
+				/* if we don't save str, free zaps it */
 	cmd_free(myroot);	/* can't free on error, for some reason */
     }
     in_eval--;
+    filename = oldfile;
+    line = oldline;
+    tmps_base = oldtmps_base;
+    if (savestack->ary_fill > oldsave)	/* let them use local() */
+	restorelist(oldsave);
     return str;
 }
 
@@ -2527,14 +1668,16 @@ register CMD *cmd;
     register CMD *head = cmd;
 
     while (cmd) {
-	if (cmd->c_label)
-	    safefree(cmd->c_label);
-	if (cmd->c_first)
-	    str_free(cmd->c_first);
-	if (cmd->c_spat)
-	    spat_free(cmd->c_spat);
-	if (cmd->c_expr)
-	    arg_free(cmd->c_expr);
+	if (cmd->c_type != C_WHILE) {	/* WHILE block is duplicated */
+	    if (cmd->c_label)
+		safefree(cmd->c_label);
+	    if (cmd->c_short)
+		str_free(cmd->c_short);
+	    if (cmd->c_spat)
+		spat_free(cmd->c_spat);
+	    if (cmd->c_expr)
+		arg_free(cmd->c_expr);
+	}
 	switch (cmd->c_type) {
 	case C_WHILE:
 	case C_BLOCK:
@@ -2542,11 +1685,9 @@ register CMD *cmd;
 	    if (cmd->ucmd.ccmd.cc_true)
 		cmd_free(cmd->ucmd.ccmd.cc_true);
 	    if (cmd->c_type == C_IF && cmd->ucmd.ccmd.cc_alt)
-		cmd_free(cmd->ucmd.ccmd.cc_alt,Nullcmd);
+		cmd_free(cmd->ucmd.ccmd.cc_alt);
 	    break;
 	case C_EXPR:
-	    if (cmd->ucmd.acmd.ac_stab)
-		arg_free(cmd->ucmd.acmd.ac_stab);
 	    if (cmd->ucmd.acmd.ac_expr)
 		arg_free(cmd->ucmd.acmd.ac_expr);
 	    break;
@@ -2575,9 +1716,11 @@ register ARG *arg;
 	case A_CMD:
 	    cmd_free(arg[i].arg_ptr.arg_cmd);
 	    break;
+	case A_WORD:
 	case A_STAB:
 	case A_LVAL:
 	case A_READ:
+	case A_GLOB:
 	case A_ARYLEN:
 	    break;
 	case A_SINGLE:
@@ -2605,7 +1748,12 @@ register SPAT *spat;
     if (spat->spat_repl) {
 	arg_free(spat->spat_repl);
     }
-    free_compex(&spat->spat_compex);
+    if (spat->spat_short) {
+	str_free(spat->spat_short);
+    }
+    if (spat->spat_regexp) {
+	regfree(spat->spat_regexp);
+    }
 
     /* now unlink from spat list */
     if (spat_root == spat)
@@ -2616,4 +1764,100 @@ register SPAT *spat;
     }
 
     safefree((char*)spat);
+}
+
+/* Recursively descend a command sequence and push the address of any string
+ * that needs saving on recursion onto the tosave array.
+ */
+
+static int
+cmd_tosave(cmd)
+register CMD *cmd;
+{
+    register CMD *head = cmd;
+
+    while (cmd) {
+	if (cmd->c_spat)
+	    spat_tosave(cmd->c_spat);
+	if (cmd->c_expr)
+	    arg_tosave(cmd->c_expr);
+	switch (cmd->c_type) {
+	case C_WHILE:
+	case C_BLOCK:
+	case C_IF:
+	    if (cmd->ucmd.ccmd.cc_true)
+		cmd_tosave(cmd->ucmd.ccmd.cc_true);
+	    if (cmd->c_type == C_IF && cmd->ucmd.ccmd.cc_alt)
+		cmd_tosave(cmd->ucmd.ccmd.cc_alt);
+	    break;
+	case C_EXPR:
+	    if (cmd->ucmd.acmd.ac_expr)
+		arg_tosave(cmd->ucmd.acmd.ac_expr);
+	    break;
+	}
+	cmd = cmd->c_next;
+	if (cmd && cmd == head)		/* reached end of while loop */
+	    break;
+    }
+}
+
+static int
+arg_tosave(arg)
+register ARG *arg;
+{
+    register int i;
+    int saving = FALSE;
+
+    for (i = 1; i <= arg->arg_len; i++) {
+	switch (arg[i].arg_type) {
+	case A_NULL:
+	    break;
+	case A_LEXPR:
+	case A_EXPR:
+	    saving |= arg_tosave(arg[i].arg_ptr.arg_arg);
+	    break;
+	case A_CMD:
+	    cmd_tosave(arg[i].arg_ptr.arg_cmd);
+	    saving = TRUE;	/* assume hanky panky */
+	    break;
+	case A_WORD:
+	case A_STAB:
+	case A_LVAL:
+	case A_READ:
+	case A_GLOB:
+	case A_ARYLEN:
+	case A_SINGLE:
+	case A_DOUBLE:
+	case A_BACKTICK:
+	    break;
+	case A_SPAT:
+	    saving |= spat_tosave(arg[i].arg_ptr.arg_spat);
+	    break;
+	case A_NUMBER:
+	    break;
+	}
+    }
+    switch (arg->arg_type) {
+    case O_EVAL:
+    case O_SUBR:
+	saving = TRUE;
+    }
+    if (saving)
+	apush(tosave,arg->arg_ptr.arg_str);
+    return saving;
+}
+
+static int
+spat_tosave(spat)
+register SPAT *spat;
+{
+    int saving = FALSE;
+
+    if (spat->spat_runtime)
+	saving |= arg_tosave(spat->spat_runtime);
+    if (spat->spat_repl) {
+	saving |= arg_tosave(spat->spat_repl);
+    }
+
+    return saving;
 }

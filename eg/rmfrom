@@ -1,0 +1,7 @@
+#!/usr/bin/perl -n
+
+# $Header: rmfrom,v 2.0 88/06/05 00:16:57 root Exp $
+
+# A handy (but dangerous) script to put after a find ... -print.
+
+chop; unlink;

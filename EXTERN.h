@@ -1,8 +1,8 @@
-/* $Header: EXTERN.h,v 1.0 87/12/18 13:02:26 root Exp $
+/* $Header: EXTERN.h,v 2.0 88/06/05 00:07:46 root Exp $
  *
  * $Log:	EXTERN.h,v $
- * Revision 1.0  87/12/18  13:02:26  root
- * Initial revision
+ * Revision 2.0  88/06/05  00:07:46  root
+ * Baseline version 2.0.
  * 
  */
 

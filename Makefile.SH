@@ -6,7 +6,7 @@ case $CONFIG in
 	ln ../../../config.sh . || \
 	(echo "Can't find config.sh."; exit 1)
     fi
-    . config.sh
+    . ./config.sh
     ;;
 esac
 case "$0" in
@@ -20,31 +20,17 @@ esac
 
 echo "Extracting Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 1.0.1.5 88/02/02 11:20:49 root Exp $
+# $Header: Makefile.SH,v 2.0 88/06/05 00:07:54 root Exp $
 #
 # $Log:	Makefile.SH,v $
-# Revision 1.0.1.5  88/02/02  11:20:49  root
-# patch13: added d_symlink dependency, changed TEST to ./perl TEST.
+# Revision 2.0  88/06/05  00:07:54  root
+# Baseline version 2.0.
 # 
-# Revision 1.0.1.4  88/01/28  10:17:59  root
-# patch8: added perldb.man
-# 
-# Revision 1.0.1.3  88/01/26  14:14:52  root
-# Added mallocsrc stuff.
-# 
-# Revision 1.0.1.2  88/01/26  08:46:04  root
-# patch 4: make depend didn't work right if . wasn't in PATH.
-# 
-# Revision 1.0.1.1  88/01/24  03:55:18  root
-# patch 2: remove extra Log lines.
-# 
-# Revision 1.0  87/12/18  16:11:50  root
-# Initial revision
 # 
 
 CC = $cc
 bin = $bin
-lib = $lib
+lib = $privlib
 mansrc = $mansrc
 manext = $manext
 CFLAGS = $ccflags -O
@@ -71,17 +57,17 @@ util =
 sh = Makefile.SH makedepend.SH
 
 h1 = EXTERN.h INTERN.h arg.h array.h cmd.h config.h form.h handy.h
-h2 = hash.h perl.h search.h spat.h stab.h str.h util.h
+h2 = hash.h perl.h regexp.h spat.h stab.h str.h util.h
 
 h = $(h1) $(h2)
 
-c1 = arg.c array.c cmd.c dump.c form.c hash.c $(mallocsrc)
-c2 = search.c stab.c str.c util.c version.c
+c1 = arg.c array.c cmd.c dump.c eval.c form.c hash.c $(mallocsrc)
+c2 = perly.c regexp.c stab.c str.c toke.c util.c version.c
 
 c = $(c1) $(c2)
 
-obj1 = arg.o array.o cmd.o dump.o form.o hash.o $(mallocobj)
-obj2 = search.o stab.o str.o util.o version.o
+obj1 = arg.o array.o cmd.o dump.o eval.o form.o hash.o $(mallocobj)
+obj2 = perly.o regexp.o stab.o str.o toke.o util.o version.o
 
 obj = $(obj1) $(obj2)
 
@@ -101,12 +87,13 @@ all: $(public) $(private) $(util)
 perl: $(obj) perl.o
 	$(CC) $(LDFLAGS) $(LARGE) $(obj) perl.o $(libs) -o perl
 
-perl.c: perl.y
-	@ echo Expect 2 shift/reduce errors...
-	yacc perl.y
+perl.c perly.h: perl.y
+	@ echo Expect 37 shift/reduce errors...
+	yacc -d perl.y
 	mv y.tab.c perl.c
+	mv y.tab.h perly.h
 
-perl.o: perl.c perly.c perl.h EXTERN.h search.h util.h INTERN.h handy.h
+perl.o: perl.c perly.h perl.h EXTERN.h regexp.h util.h INTERN.h handy.h config.h
 	$(CC) -c $(CFLAGS) $(LARGE) perl.c
 
 # if a .h file depends on another .h file...
@@ -119,23 +106,23 @@ perl.man: perl.man.1 perl.man.2
 install: perl perl.man
 # won't work with csh
 	export PATH || exit 1
-	- mv $(bin)/perl $(bin)/perl.old
+	- mv $(bin)/perl $(bin)/perl.old 2>/dev/null
 	- if test `pwd` != $(bin); then cp $(public) $(bin); fi
 	cd $(bin); \
 for pub in $(public); do \
-chmod 755 `basename $$pub`; \
+chmod +x `basename $$pub`; \
 done
-	- test $(bin) = /bin || rm -f /bin/perl
-	- test $(bin) = /bin || ln -s $(bin)/perl /bin || cp $(bin)/perl /bin
-#	chmod 755 makedir
-#	- makedir `filexp $(lib)`
-#	- \
-#if test `pwd` != `filexp $(lib)`; then \
-#cp $(private) `filexp $(lib)`; \
-#fi
-#	cd `filexp $(lib)`; \
+	- test $(bin) = /usr/bin || rm -f /usr/bin/perl
+	- test $(bin) = /usr/bin || $(SLN) $(bin)/perl /usr/bin || cp $(bin)/perl /usr/bin
+	chmod +x makedir
+	- ./makedir $(lib)
+	- \
+if test `pwd` != $(lib); then \
+cp $(private) lib/*.pl $(lib); \
+fi
+#	cd $(lib); \
 #for priv in $(private); do \
-#chmod 755 `basename $$priv`; \
+#chmod +x `basename $$priv`; \
 #done
 	- if test `pwd` != $(mansrc); then \
 for page in $(manpages); do \
@@ -154,14 +141,16 @@ realclean:
 # If the source file has a /*NOSTRICT*/ somewhere, ignore the lint message
 # for that spot.
 
-lint:
-	lint $(lintflags) $(defs) $(c) > perl.fuzz
+lint: perl.c $(c)
+	lint $(lintflags) $(defs) perl.c $(c) > perl.fuzz
 
 depend: makedepend
+	- test -f perly.h || cp /dev/null perly.h
 	./makedepend
+	- test -s perly.h || /bin/rm -f perly.h
 
 test: perl
-	chmod 755 t/TEST t/base.* t/comp.* t/cmd.* t/io.* t/op.*
+	chmod +x t/TEST t/base.* t/comp.* t/cmd.* t/io.* t/op.*
 	cd t && (rm -f perl; $(SLN) ../perl .) && ./perl TEST
 
 clist:

@@ -1,0 +1,21 @@
+#!./perl
+
+# $Header: io.pipe,v 2.0 88/06/05 00:13:05 root Exp $
+
+$| = 1;
+print "1..4\n";
+
+open(PIPE, "|-") || (exec 'tr', '[A-Z]', '[a-z]');
+print PIPE "OK 1\n";
+print PIPE "ok 2\n";
+close PIPE;
+
+if (open(PIPE, "-|")) {
+    while(<PIPE>) {
+	print;
+    }
+}
+else {
+    print stdout "ok 3\n";
+    exec 'echo', 'ok 4';
+}

@@ -1,8 +1,8 @@
 #!./perl
 
-# $Header: op.each,v 1.0 87/12/18 13:13:23 root Exp $
+# $Header: op.each,v 2.0 88/06/05 00:13:38 root Exp $
 
-print "1..2\n";
+print "1..3\n";
 
 $h{'abc'} = 'ABC';
 $h{'def'} = 'DEF';
@@ -48,3 +48,6 @@ while (($key,$value) = each(h)) {
 }
 
 if ($i == 30) {print "ok 2\n";} else {print "not ok 2\n";}
+
+@keys = ('blurfl', keys(h), 'dyick');
+if ($#keys == 31) {print "ok 3\n";} else {print "not ok 3\n";}

@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: TEST,v 1.0.1.1 88/01/24 03:55:39 root Exp $
+# $Header: TEST,v 2.0 88/06/05 00:11:47 root Exp $
 
 # This is written in a peculiar style, since we're trying to avoid
 # most of the constructs we'll be testing for.
@@ -9,6 +9,8 @@ if ($ARGV[0] eq '-v') {
     $verbose = 1;
     shift;
 }
+
+chdir 't' if -f 't/TEST';
 
 if ($ARGV[0] eq '') {
     @ARGV = split(/[ \n]/,`echo base.* comp.* cmd.* io.* op.*`);
@@ -23,11 +25,14 @@ while (<config>) {
 }
 $bad = 0;
 while ($test = shift) {
+    if ($test =~ /\.orig$/) {
+	next;
+    }
     print "$test...";
     if ($sharpbang) {
-	open(results,"$test|") || (print "can't run.\n");
+	open(results,"./$test|") || (print "can't run.\n");
     } else {
-	open(script,"$test") || die "Can't run $test";
+	open(script,"$test") || die "Can't run $test.\n";
 	$_ = <script>;
 	close(script);
 	if (/#!..perl(.*)/) {
@@ -38,6 +43,7 @@ while ($test = shift) {
 	open(results,"./perl$switch $test|") || (print "can't run.\n");
     }
     $ok = 0;
+    $next = 0;
     while (<results>) {
 	if ($verbose) {
 	    print $_;
@@ -65,7 +71,7 @@ while ($test = shift) {
 	$bad = $bad + 1;
 	$_ = $test;
 	if (/^base/) {
-	    die "Failed a basic test--cannot continue.";
+	    die "Failed a basic test--cannot continue.\n";
 	}
     }
 }
@@ -74,13 +80,13 @@ if ($bad == 0) {
     if ($ok) {
 	print "All tests successful.\n";
     } else {
-	die "FAILED--no tests were run for some reason.";
+	die "FAILED--no tests were run for some reason.\n";
     }
 } else {
     if ($bad == 1) {
-	die "Failed 1 test.";
+	die "Failed 1 test.\n";
     } else {
-	die "Failed $bad tests.";
+	die "Failed $bad tests.\n";
     }
 }
 ($user,$sys,$cuser,$csys) = times;

@@ -1,8 +1,8 @@
-/* $Header: hash.h,v 1.0 87/12/18 13:07:23 root Exp $
+/* $Header: hash.h,v 2.0 88/06/05 00:15:52 root Exp $
  *
  * $Log:	hash.h,v $
- * Revision 1.0  87/12/18  13:07:23  root
- * Initial revision
+ * Revision 2.0  88/06/05  00:15:52  root
+ * Baseline version 2.0.
  * 
  */
 

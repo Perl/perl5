@@ -1,15 +1,12 @@
-/* $Header: dump.c,v 1.0 87/12/18 13:05:03 root Exp $
+/* $Header: dump.c,v 2.0 88/06/05 00:08:44 root Exp $
  *
  * $Log:	dump.c,v $
- * Revision 1.0  87/12/18  13:05:03  root
- * Initial revision
+ * Revision 2.0  88/06/05  00:08:44  root
+ * Baseline version 2.0.
  * 
  */
 
-#include "handy.h"
 #include "EXTERN.h"
-#include "search.h"
-#include "util.h"
 #include "perl.h"
 
 #ifdef DEBUGGING
@@ -23,6 +20,8 @@ register CMD *alt;
     while (cmd) {
 	dumplvl++;
 	dump("C_TYPE = %s\n",cmdname[cmd->c_type]);
+	if (cmd->c_line)
+	    dump("C_LINE = %d\n",cmd->c_line);
 	if (cmd->c_label)
 	    dump("C_LABEL = \"%s\"\n",cmd->c_label);
 	dump("C_OPT = CFT_%s\n",cmdopt[cmd->c_flags & CF_OPTIMIZE]);
@@ -46,9 +45,9 @@ register CMD *alt;
 	if (*buf)
 	    buf[strlen(buf)-1] = '\0';
 	dump("C_FLAGS = (%s)\n",buf);
-	if (cmd->c_first) {
-	    dump("C_FIRST = \"%s\"\n",str_peek(cmd->c_first));
-	    dump("C_FLEN = \"%d\"\n",cmd->c_flen);
+	if (cmd->c_short) {
+	    dump("C_SHORT = \"%s\"\n",str_peek(cmd->c_short));
+	    dump("C_SLEN = \"%d\"\n",cmd->c_slen);
 	}
 	if (cmd->c_stab) {
 	    dump("C_STAB = ");
@@ -81,7 +80,7 @@ register CMD *alt;
 	case C_EXPR:
 	    if (cmd->ucmd.acmd.ac_stab) {
 		dump("AC_STAB = ");
-		dump_arg(cmd->ucmd.acmd.ac_stab);
+		dump_stab(cmd->ucmd.acmd.ac_stab);
 	    } else
 		dump("AC_STAB = NULL\n");
 	    if (cmd->ucmd.acmd.ac_expr) {
@@ -117,26 +116,18 @@ register ARG *arg;
     dumplvl++;
     dump("OP_TYPE = %s\n",opname[arg->arg_type]);
     dump("OP_LEN = %d\n",arg->arg_len);
+    if (arg->arg_flags) {
+	dump_flags(buf,arg->arg_flags);
+	dump("OP_FLAGS = (%s)\n",buf);
+    }
     for (i = 1; i <= arg->arg_len; i++) {
 	dump("[%d]ARG_TYPE = %s\n",i,argname[arg[i].arg_type]);
 	if (arg[i].arg_len)
 	    dump("[%d]ARG_LEN = %d\n",i,arg[i].arg_len);
-	*buf = '\0';
-	if (arg[i].arg_flags & AF_SPECIAL)
-	    strcat(buf,"SPECIAL,");
-	if (arg[i].arg_flags & AF_POST)
-	    strcat(buf,"POST,");
-	if (arg[i].arg_flags & AF_PRE)
-	    strcat(buf,"PRE,");
-	if (arg[i].arg_flags & AF_UP)
-	    strcat(buf,"UP,");
-	if (arg[i].arg_flags & AF_COMMON)
-	    strcat(buf,"COMMON,");
-	if (arg[i].arg_flags & AF_NUMERIC)
-	    strcat(buf,"NUMERIC,");
-	if (*buf)
-	    buf[strlen(buf)-1] = '\0';
-	dump("[%d]ARG_FLAGS = (%s)\n",i,buf);
+	if (arg[i].arg_flags) {
+	    dump_flags(buf,arg[i].arg_flags);
+	    dump("[%d]ARG_FLAGS = (%s)\n",i,buf);
+	}
 	switch (arg[i].arg_type) {
 	case A_NULL:
 	    break;
@@ -149,9 +140,11 @@ register ARG *arg;
 	    dump("[%d]ARG_CMD = ",i);
 	    dump_cmd(arg[i].arg_ptr.arg_cmd,Nullcmd);
 	    break;
+	case A_WORD:
 	case A_STAB:
 	case A_LVAL:
 	case A_READ:
+	case A_GLOB:
 	case A_ARYLEN:
 	    dump("[%d]ARG_STAB = ",i);
 	    dump_stab(arg[i].arg_ptr.arg_stab);
@@ -174,9 +167,38 @@ register ARG *arg;
     dump("}\n");
 }
 
+dump_flags(b,flags)
+char *b;
+unsigned flags;
+{
+    *b = '\0';
+    if (flags & AF_SPECIAL)
+	strcat(b,"SPECIAL,");
+    if (flags & AF_POST)
+	strcat(b,"POST,");
+    if (flags & AF_PRE)
+	strcat(b,"PRE,");
+    if (flags & AF_UP)
+	strcat(b,"UP,");
+    if (flags & AF_COMMON)
+	strcat(b,"COMMON,");
+    if (flags & AF_NUMERIC)
+	strcat(b,"NUMERIC,");
+    if (flags & AF_LISTISH)
+	strcat(b,"LISTISH,");
+    if (flags & AF_LOCAL)
+	strcat(b,"LOCAL,");
+    if (*b)
+	b[strlen(b)-1] = '\0';
+}
+
 dump_stab(stab)
 register STAB *stab;
 {
+    if (!stab) {
+	fprintf(stderr,"{}\n");
+	return;
+    }
     dumplvl++;
     fprintf(stderr,"{\n");
     dump("STAB_NAME = %s\n",stab->stab_name);
@@ -189,28 +211,37 @@ register SPAT *spat;
 {
     char ch;
 
+    if (!spat) {
+	fprintf(stderr,"{}\n");
+	return;
+    }
     fprintf(stderr,"{\n");
     dumplvl++;
     if (spat->spat_runtime) {
 	dump("SPAT_RUNTIME = ");
 	dump_arg(spat->spat_runtime);
     } else {
-	if (spat->spat_flags & SPAT_USE_ONCE)
+	if (spat->spat_flags & SPAT_ONCE)
 	    ch = '?';
 	else
 	    ch = '/';
-	dump("SPAT_PRE %c%s%c\n",ch,spat->spat_compex.precomp,ch);
+	dump("SPAT_PRE %c%s%c\n",ch,spat->spat_regexp->precomp,ch);
     }
     if (spat->spat_repl) {
 	dump("SPAT_REPL = ");
 	dump_arg(spat->spat_repl);
     }
+    if (spat->spat_short) {
+	dump("SPAT_SHORT = \"%s\"\n",str_peek(spat->spat_short));
+    }
     dumplvl--;
     dump("}\n");
 }
 
+/* VARARGS1 */
 dump(arg1,arg2,arg3,arg4,arg5)
-char *arg1, *arg2, *arg3, *arg4, *arg5;
+char *arg1;
+long arg2, arg3, arg4, arg5;
 {
     int i;
 

@@ -1,10 +1,14 @@
 #!./perl
 
-# $Header: io.fs,v 1.0 87/12/18 13:12:48 root Exp $
+# $Header: io.fs,v 2.0 88/06/05 00:12:59 root Exp $
 
-print "1..18\n";
+print "1..22\n";
 
-chdir '/tmp';
+$wd = `pwd`;
+chop($wd);
+
+`rm -f tmp 2>/dev/null; mkdir tmp 2>/dev/null`;
+chdir './tmp';
 `/bin/rm -rf a b c x`;
 
 umask(022);
@@ -52,12 +56,27 @@ if (rename('a','b')) {print "ok 14\n";} else {print "not ok 14\n";}
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('a');
 if ($ino == 0) {print "ok 15\n";} else {print "not ok 15\n";}
+$foo = (utime 0,1,'b');
+if ($foo == 1) {print "ok 16\n";} else {print "not ok 16 $foo\n";}
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('b');
-if ($ino) {print "ok 16\n";} else {print "not ok 16\n";}
+if ($ino) {print "ok 17\n";} else {print "not ok 17\n";}
+if ($atime == 0 && $mtime == 1) {print "ok 18\n";} else {print "not ok 18 $atime $mtime\n";}
 
-if ((unlink 'b') == 1) {print "ok 17\n";} else {print "not ok 17\n";}
+if ((unlink 'b') == 1) {print "ok 19\n";} else {print "not ok 19\n";}
 ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks) = stat('b');
-if ($ino == 0) {print "ok 18\n";} else {print "not ok 18\n";}
+if ($ino == 0) {print "ok 20\n";} else {print "not ok 20\n";}
 unlink 'c';
+
+chdir $wd || die "Can't cd back to $wd";
+
+unlink 'c';
+if (`ls -l perl 2>/dev/null` =~ /^l.*->/) {  # we have symbolic links
+    if (symlink("TEST","c")) {print "ok 21\n";} else {print "not ok 21\n";}
+    $foo = `grep perl c`;
+    if ($foo) {print "ok 22\n";} else {print "not ok 22\n";}
+}
+else {
+    print "ok 21\nok 22\n";
+}

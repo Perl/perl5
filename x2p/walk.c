@@ -1,17 +1,8 @@
-/* $Header: walk.c,v 1.0.1.3 88/02/02 11:54:58 root Exp $
+/* $Header: walk.c,v 2.0 88/06/05 00:16:12 root Exp $
  *
  * $Log:	walk.c,v $
- * Revision 1.0.1.3  88/02/02  11:54:58  root
- * patch14: got return value of each() backwards in translating 'for (a in b)'.
- * 
- * Revision 1.0.1.2  88/02/01  17:34:05  root
- * patch12: made a2p take advantage of new awk-compatible split in perl.
- * 
- * Revision 1.0.1.1  88/01/28  11:07:56  root
- * patch8: changed some misleading comments.
- * 
- * Revision 1.0  87/12/18  13:07:40  root
- * Initial revision
+ * Revision 2.0  88/06/05  00:16:12  root
+ * Baseline version 2.0.
  * 
  */
 
@@ -22,7 +13,10 @@
 
 bool exitval = FALSE;
 bool realexit = FALSE;
+bool saw_getline = FALSE;
 int maxtmp = 0;
+char *lparen;
+char *rparen;
 
 STR *
 walk(useval,level,node,numericptr)
@@ -132,6 +126,18 @@ int *numericptr;
 	}
 	if (exitval)
 	    str_cat(str,"exit ExitValue;\n");
+	if (saw_getline) {
+	    str_cat(str,"\nsub Getline {\n    $_ = <>;\n");
+	    tab(str,++level);
+	    if (do_chop) {
+		str_cat(str,"chop;\t# strip record separator\n");
+		tab(str,level);
+	    }
+	    if (do_split)
+		emit_split(str,level);
+	    fixtab(str,--level);
+	    str_cat(str,"}\n");
+	}
 	if (do_fancy_opens) {
 	    str_cat(str,"\n\
 sub Pick {\n\
@@ -192,6 +198,8 @@ sub Pick {\n\
 		*d = *s;
 	}
 	*d = '\0';
+	for (d=tokenbuf; *d; d++)
+	    *d += 128;
 	str_cat(str,tokenbuf);
 	str_free(tmpstr);
 	str_cat(str,"/");
@@ -447,14 +455,8 @@ sub Pick {\n\
 	break;
     case OGETLINE:
 	str = str_new(0);
-	str_set(str,"$_ = <>;\n");
-	tab(str,level);
-	if (do_chop) {
-	    str_cat(str,"chop;\t# strip record separator\n");
-	    tab(str,level);
-	}
-	if (do_split)
-	    emit_split(str,level);
+	str_set(str,"do Getline()");
+	saw_getline = TRUE;
 	break;
     case OSPRINTF:
 	str = str_new(0);
@@ -543,14 +545,25 @@ sub Pick {\n\
     case OSTR:
 	tmpstr = walk(1,level,ops[node+1].ival,&numarg);
 	s = "'";
-	for (t = tmpstr->str_ptr; *t; t++) {
-	    if (*t == '\\' || *t == '\'')
+	for (t = tmpstr->str_ptr, d=tokenbuf; *t; d++,t++) {
+	    if (*t == '\'')
 		s = "\"";
-	    *t += 128;
+	    else if (*t == '\\') {
+		s = "\"";
+		*d++ = *t++ + 128;
+		switch (*t) {
+		case '\\': case '"': case 'n': case 't':
+		    break;
+		default:	/* hide this from perl */
+		    *d++ = '\\' + 128;
+		}
+	    }
+	    *d = *t + 128;
 	}
+	*d = '\0';
 	str = str_new(0);
 	str_set(str,s);
-	str_scat(str,tmpstr);
+	str_cat(str,tokenbuf);
 	str_free(tmpstr);
 	str_cat(str,s);
 	break;
@@ -683,6 +696,8 @@ sub Pick {\n\
 	break;
     case OPRINTF:
     case OPRINT:
+	lparen = "";	/* set to parens if necessary */
+	rparen = "";
 	str = str_new(0);
 	if (len == 3) {		/* output redirection */
 	    tmpstr = walk(1,level,ops[node+3].ival,&numarg);
@@ -732,10 +747,13 @@ sub Pick {\n\
 		*tokenbuf = '\0';
 		str_free(tmpstr);
 		str_free(tmp2str);
+		lparen = "(";
+		rparen = ")";
 	    }
 	}
 	else
 	    strcpy(tokenbuf,"stdout");
+	str_cat(str,lparen);	/* may be null */
 	if (type == OPRINTF)
 	    str_cat(str,"printf");
 	else
@@ -774,6 +792,7 @@ sub Pick {\n\
 	else {
 	    str_cat(str," $_");
 	}
+	str_cat(str,rparen);	/* may be null */
 	str_free(tmpstr);
 	break;
     case OLENGTH:
@@ -947,18 +966,11 @@ sub Pick {\n\
 	str_cat(str,"[]");
 	tmp2str = hfetch(symtab,str->str_ptr);
 	if (tmp2str && atoi(tmp2str->str_ptr)) {
-	    maxtmp++;
 	    fstr=walk(1,level,ops[node+1].ival,&numarg);
 	    sprintf(tokenbuf,
-	      "for ($T_%d = 1; ($%s = $%s[$T_%d]) || $T_%d <= $#%s; $T_%d++)%c",
-	      maxtmp,
+	      "foreach $%s (@%s) ",
 	      fstr->str_ptr,
-	      tmpstr->str_ptr,
-	      maxtmp,
-	      maxtmp,
-	      tmpstr->str_ptr,
-	      maxtmp,
-	      0377);
+	      tmpstr->str_ptr);
 	    str_set(str,tokenbuf);
 	    str_free(fstr);
 	    str_scat(str,fstr=walk(0,level,ops[node+3].ival,&numarg));
@@ -979,7 +991,7 @@ sub Pick {\n\
     case OBLOCK:
 	str = str_new(0);
 	str_set(str,"{");
-	if (len == 2) {
+	if (len >= 2 && ops[node+2].ival) {
 	    str_scat(str,fstr=walk(0,level,ops[node+2].ival,&numarg));
 	    str_free(fstr);
 	}
@@ -990,6 +1002,10 @@ sub Pick {\n\
 	fixtab(str,--level);
 	str_cat(str,"}\n");
 	tab(str,level);
+	if (len >= 3) {
+	    str_scat(str,fstr=walk(0,level,ops[node+3].ival,&numarg));
+	    str_free(fstr);
+	}
 	break;
     default:
       def:

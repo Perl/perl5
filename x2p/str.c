@@ -1,8 +1,8 @@
-/* $Header: str.c,v 1.0 87/12/18 13:07:26 root Exp $
+/* $Header: str.c,v 2.0 88/06/05 00:16:02 root Exp $
  *
  * $Log:	str.c,v $
- * Revision 1.0  87/12/18  13:07:26  root
- * Initial revision
+ * Revision 2.0  88/06/05  00:16:02  root
+ * Baseline version 2.0.
  * 
  */
 
@@ -281,7 +281,7 @@ register FILE *fp;
 
     register char *bp;		/* we're going to steal some values */
     register int cnt;		/*  from the stdio struct and put EVERYTHING */
-    register char *ptr;		/*   in the innermost loop into registers */
+    register STDCHAR *ptr;	/*   in the innermost loop into registers */
     register char newline = '\n';	/* (assuming at least 6 registers) */
     int i;
     int bpx;
@@ -294,9 +294,14 @@ register FILE *fp;
     bp = str->str_ptr;			/* move these two too to registers */
     ptr = fp->_ptr;
     for (;;) {
-	while (--cnt >= 0) {			/* this */	/* eat */
-	    if ((*bp++ = *ptr++) == newline)	/* really */	/* dust */
-		goto thats_all_folks;		/* screams */	/* sed :-) */ 
+	while (--cnt >= 0) {
+	    if ((*bp++ = *ptr++) == newline)
+		if (bp <= str->str_ptr || bp[-2] != '\\')
+		    goto thats_all_folks;
+		else {
+		    line++;
+		    bp -= 2;
+		}
 	}
 	
 	fp->_cnt = cnt;			/* deregisterize cnt and ptr */

@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: cmd.elsif,v 1.0 87/12/18 13:12:02 root Exp $
+# $Header: cmd.elsif,v 2.0 88/06/05 00:12:16 root Exp $
 
 sub foo {
     if ($_[0] == 1) {

@@ -1,112 +1,168 @@
-/* $Header: arg.c,v 1.0.1.7 88/02/02 11:22:19 root Exp $
+/* $Header: arg.c,v 2.0 88/06/05 00:08:04 root Exp $
  *
  * $Log:	arg.c,v $
- * Revision 1.0.1.7  88/02/02  11:22:19  root
- * patch13: fixed split(' ') to work right second time.  Added CRYPT dependency.
- * 
- * Revision 1.0.1.6  88/02/01  17:32:26  root
- * patch12: made split(' ') behave like awk in ignoring leading white space.
- * 
- * Revision 1.0.1.5  88/01/30  08:53:16  root
- * patch9: fixed some missing right parens introduced (?) by patch 2
- * 
- * Revision 1.0.1.4  88/01/28  10:22:06  root
- * patch8: added eval operator.
- * 
- * Revision 1.0.1.2  88/01/24  03:52:34  root
- * patch 2: added STATBLKS dependencies.
- * 
- * Revision 1.0.1.1  88/01/21  21:27:10  root
- * Now defines signal return values correctly using VOIDSIG.
- * 
- * Revision 1.0  87/12/18  13:04:33  root
- * Initial revision
+ * Revision 2.0  88/06/05  00:08:04  root
+ * Baseline version 2.0.
  * 
  */
 
-#include <signal.h>
-#include "handy.h"
 #include "EXTERN.h"
-#include "search.h"
-#include "util.h"
 #include "perl.h"
 
-ARG *debarg;
+#include <signal.h>
+#include <errno.h>
 
-bool
-do_match(s,arg)
-register char *s;
+extern int errno;
+
+STR *
+do_match(arg,retary,sarg,ptrmaxsarg,sargoff,cushion)
 register ARG *arg;
+STR ***retary;
+register STR **sarg;
+int *ptrmaxsarg;
+int sargoff;
+int cushion;
 {
     register SPAT *spat = arg[2].arg_ptr.arg_spat;
-    register char *d;
     register char *t;
+    register char *s = str_get(sarg[1]);
+    char *strend = s + sarg[1]->str_cur;
 
-    if (!spat || !s)
-	fatal("panic: do_match\n");
+    if (!spat)
+	return &str_yes;
+    if (!s)
+	fatal("panic: do_match");
+    if (retary) {
+	*retary = sarg;		/* assume no match */
+	*ptrmaxsarg = sargoff;
+    }
     if (spat->spat_flags & SPAT_USED) {
 #ifdef DEBUGGING
 	if (debug & 8)
 	    deb("2.SPAT USED\n");
 #endif
-	return FALSE;
+	return &str_no;
     }
     if (spat->spat_runtime) {
-	t = str_get(eval(spat->spat_runtime,Null(STR***)));
+	t = str_get(eval(spat->spat_runtime,Null(STR***),-1));
 #ifdef DEBUGGING
 	if (debug & 8)
 	    deb("2.SPAT /%s/\n",t);
 #endif
-	if (d = compile(&spat->spat_compex,t,TRUE,FALSE)) {
-#ifdef DEBUGGING
-	    deb("/%s/: %s\n", t, d);
-#endif
-	    return FALSE;
-	}
-	if (spat->spat_compex.complen <= 1 && curspat)
-	    spat = curspat;
-	if (execute(&spat->spat_compex, s, TRUE, 0)) {
-	    if (spat->spat_compex.numsubs)
+	spat->spat_regexp = regcomp(t,spat->spat_flags & SPAT_FOLD,1);
+	if (!*spat->spat_regexp->precomp && lastspat)
+	    spat = lastspat;
+	if (regexec(spat->spat_regexp, s, strend, TRUE, 0,
+	  sarg[1]->str_pok & 4 ? sarg[1] : Nullstr)) {
+	    if (spat->spat_regexp->subbase)
 		curspat = spat;
-	    return TRUE;
+	    lastspat = spat;
+	    goto gotcha;
 	}
 	else
-	    return FALSE;
+	    return &str_no;
     }
     else {
 #ifdef DEBUGGING
 	if (debug & 8) {
 	    char ch;
 
-	    if (spat->spat_flags & SPAT_USE_ONCE)
+	    if (spat->spat_flags & SPAT_ONCE)
 		ch = '?';
 	    else
 		ch = '/';
-	    deb("2.SPAT %c%s%c\n",ch,spat->spat_compex.precomp,ch);
+	    deb("2.SPAT %c%s%c\n",ch,spat->spat_regexp->precomp,ch);
 	}
 #endif
-	if (spat->spat_compex.complen <= 1 && curspat)
-	    spat = curspat;
-	if (spat->spat_first) {
-	    if (spat->spat_flags & SPAT_SCANFIRST) {
-		str_free(spat->spat_first);
-		spat->spat_first = Nullstr;	/* disable optimization */
+	if (!*spat->spat_regexp->precomp && lastspat)
+	    spat = lastspat;
+	t = s;
+	if (hint) {
+	    if (hint < s || hint > strend)
+		fatal("panic: hint in do_match");
+	    s = hint;
+	    hint = Nullch;
+	    if (spat->spat_regexp->regback >= 0) {
+		s -= spat->spat_regexp->regback;
+		if (s < t)
+		    s = t;
 	    }
-	    else if (*spat->spat_first->str_ptr != *s ||
-	      strnNE(spat->spat_first->str_ptr, s, spat->spat_flen) )
-		return FALSE;
+	    else
+		s = t;
 	}
-	if (execute(&spat->spat_compex, s, TRUE, 0)) {
-	    if (spat->spat_compex.numsubs)
+	else if (spat->spat_short) {
+	    if (spat->spat_flags & SPAT_SCANFIRST) {
+		if (sarg[1]->str_pok == 5) {
+		    if (screamfirst[spat->spat_short->str_rare] < 0)
+			goto nope;
+		    else if (!(s = screaminstr(sarg[1],spat->spat_short)))
+			goto nope;
+		    else if (spat->spat_flags & SPAT_ALL)
+			goto yup;
+		}
+		else if (!(s = fbminstr(s, strend, spat->spat_short)))
+		    goto nope;
+		else if (spat->spat_flags & SPAT_ALL)
+		    goto yup;
+		else if (spat->spat_regexp->regback >= 0) {
+		    ++*(long*)&spat->spat_short->str_nval;
+		    s -= spat->spat_regexp->regback;
+		    if (s < t)
+			s = t;
+		}
+		else
+		    s = t;
+	    }
+	    else if (!multiline && (*spat->spat_short->str_ptr != *s ||
+	      strnNE(spat->spat_short->str_ptr, s, spat->spat_slen) ))
+		goto nope;
+	    if (--*(long*)&spat->spat_short->str_nval < 0) {
+		str_free(spat->spat_short);
+		spat->spat_short = Nullstr;	/* opt is being useless */
+	    }
+	}
+	if (regexec(spat->spat_regexp, s, strend, s == t, 0,
+	  sarg[1]->str_pok & 4 ? sarg[1] : Nullstr)) {
+	    if (spat->spat_regexp->subbase)
 		curspat = spat;
-	    if (spat->spat_flags & SPAT_USE_ONCE)
+	    lastspat = spat;
+	    if (spat->spat_flags & SPAT_ONCE)
 		spat->spat_flags |= SPAT_USED;
-	    return TRUE;
+	    goto gotcha;
 	}
 	else
-	    return FALSE;
+	    return &str_no;
     }
     /*NOTREACHED*/
+
+  gotcha:
+    if (retary && curspat == spat) {
+	int iters, i, len;
+
+	iters = spat->spat_regexp->nparens;
+	*ptrmaxsarg = iters + sargoff;
+	sarg = (STR**)saferealloc((char*)(sarg - sargoff),
+	  (iters+2+cushion+sargoff)*sizeof(STR*)) + sargoff;
+
+	for (i = 1; i <= iters; i++) {
+	    sarg[i] = str_static(&str_no);
+	    if (s = spat->spat_regexp->startp[i]) {
+		len = spat->spat_regexp->endp[i] - s;
+		if (len > 0)
+		    str_nset(sarg[i],s,len);
+	    }
+	}
+	*retary = sarg;
+    }
+    return &str_yes;
+
+yup:
+    ++*(long*)&spat->spat_short->str_nval;
+    return &str_yes;
+
+nope:
+    ++*(long*)&spat->spat_short->str_nval;
+    return &str_no;
 }
 
 int
@@ -116,62 +172,95 @@ register ARG *arg;
 {
     register SPAT *spat;
     register STR *dstr;
-    register char *s;
+    register char *s = str_get(str);
+    char *strend = s + str->str_cur;
     register char *m;
 
     spat = arg[2].arg_ptr.arg_spat;
-    s = str_get(str);
     if (!spat || !s)
-	fatal("panic: do_subst\n");
+	fatal("panic: do_subst");
     else if (spat->spat_runtime) {
-	char *d;
-
-	m = str_get(eval(spat->spat_runtime,Null(STR***)));
-	if (d = compile(&spat->spat_compex,m,TRUE,FALSE)) {
-#ifdef DEBUGGING
-	    deb("/%s/: %s\n", m, d);
-#endif
-	    return 0;
-	}
+	m = str_get(eval(spat->spat_runtime,Null(STR***),-1));
+	spat->spat_regexp = regcomp(m,spat->spat_flags & SPAT_FOLD,1);
     }
 #ifdef DEBUGGING
     if (debug & 8) {
-	deb("2.SPAT /%s/\n",spat->spat_compex.precomp);
+	deb("2.SPAT /%s/\n",spat->spat_regexp->precomp);
     }
 #endif
-    if (spat->spat_compex.complen <= 1 && curspat)
-	spat = curspat;
-    if (spat->spat_first) {
-	if (spat->spat_flags & SPAT_SCANFIRST) {
-	    str_free(spat->spat_first);
-	    spat->spat_first = Nullstr;	/* disable optimization */
+    if (!*spat->spat_regexp->precomp && lastspat)
+	spat = lastspat;
+    m = s;
+    if (hint) {
+	if (hint < s || hint > strend)
+	    fatal("panic: hint in do_match");
+	s = hint;
+	hint = Nullch;
+	if (spat->spat_regexp->regback >= 0) {
+	    s -= spat->spat_regexp->regback;
+	    if (s < m)
+		s = m;
 	}
-	else if (*spat->spat_first->str_ptr != *s ||
-	  strnNE(spat->spat_first->str_ptr, s, spat->spat_flen) )
-	    return 0;
+	else
+	    s = m;
     }
-    if (m = execute(&spat->spat_compex, s, TRUE, 1)) {
+    else if (spat->spat_short) {
+	if (spat->spat_flags & SPAT_SCANFIRST) {
+	    if (str->str_pok == 5) {
+		if (screamfirst[spat->spat_short->str_rare] < 0)
+		    goto nope;
+		else if (!(s = screaminstr(str,spat->spat_short)))
+		    goto nope;
+	    }
+	    else if (!(s = fbminstr(s, strend, spat->spat_short)))
+		goto nope;
+	    else if (spat->spat_regexp->regback >= 0) {
+		++*(long*)&spat->spat_short->str_nval;
+		s -= spat->spat_regexp->regback;
+		if (s < m)
+		    s = m;
+	    }
+	    else
+		s = m;
+	}
+	else if (!multiline && (*spat->spat_short->str_ptr != *s ||
+	  strnNE(spat->spat_short->str_ptr, s, spat->spat_slen) ))
+	    goto nope;
+	if (--*(long*)&spat->spat_short->str_nval < 0) {
+	    str_free(spat->spat_short);
+	    spat->spat_short = Nullstr;	/* opt is being useless */
+	}
+    }
+    if (regexec(spat->spat_regexp, s, strend, s == m, 1,
+      str->str_pok & 4 ? str : Nullstr)) {
 	int iters = 0;
 
 	dstr = str_new(str_len(str));
-	if (spat->spat_compex.numsubs)
+	str_nset(dstr,m,s-m);
+	if (spat->spat_regexp->subbase)
 	    curspat = spat;
+	lastspat = spat;
 	do {
+	    m = spat->spat_regexp->startp[0];
 	    if (iters++ > 10000)
-		fatal("Substitution loop?\n");
-	    if (spat->spat_compex.numsubs)
-		s = spat->spat_compex.subbase;
+		fatal("Substitution loop");
+	    if (spat->spat_regexp->subbase)
+		s = spat->spat_regexp->subbase;
 	    str_ncat(dstr,s,m-s);
-	    s = spat->spat_compex.subend[0];
-	    str_scat(dstr,eval(spat->spat_repl,Null(STR***)));
-	    if (spat->spat_flags & SPAT_USE_ONCE)
+	    s = spat->spat_regexp->endp[0];
+	    str_scat(dstr,eval(spat->spat_repl,Null(STR***),-1));
+	    if (spat->spat_flags & SPAT_ONCE)
 		break;
-	} while (m = execute(&spat->spat_compex, s, FALSE, 1));
+	} while (regexec(spat->spat_regexp, s, strend, FALSE, 1, Nullstr));
 	str_cat(dstr,s);
 	str_replace(str,dstr);
 	STABSET(str);
 	return iters;
     }
+    return 0;
+
+nope:
+    ++*(long*)&spat->spat_short->str_nval;
     return 0;
 }
 
@@ -188,7 +277,7 @@ register ARG *arg;
     tbl = arg[2].arg_ptr.arg_cval;
     s = str_get(str);
     if (!tbl || !s)
-	fatal("panic: do_trans\n");
+	fatal("panic: do_trans");
 #ifdef DEBUGGING
     if (debug & 8) {
 	deb("2.TBL\n");
@@ -206,28 +295,29 @@ register ARG *arg;
 }
 
 int
-do_split(s,spat,retary)
-register char *s;
+do_split(spat,retary,sarg,ptrmaxsarg,sargoff,cushion)
 register SPAT *spat;
 STR ***retary;
+register STR **sarg;
+int *ptrmaxsarg;
+int sargoff;
+int cushion;
 {
+    register char *s = str_get(sarg[1]);
+    char *strend = s + sarg[1]->str_cur;
     register STR *dstr;
     register char *m;
     register ARRAY *ary;
     static ARRAY *myarray = Null(ARRAY*);
     int iters = 0;
-    STR **sarg;
-    register char *e;
     int i;
 
     if (!spat || !s)
-	fatal("panic: do_split\n");
+	fatal("panic: do_split");
     else if (spat->spat_runtime) {
-	char *d;
-
-	m = str_get(eval(spat->spat_runtime,Null(STR***)));
+	m = str_get(eval(spat->spat_runtime,Null(STR***),-1));
 	if (!*m || (*m == ' ' && !m[1])) {
-	    m = "[ \\t\\n]+";
+	    m = "\\s+";
 	    spat->spat_flags |= SPAT_SKIPWHITE;
 	}
 	if (spat->spat_runtime->arg_type == O_ITEM &&
@@ -235,16 +325,11 @@ STR ***retary;
 	    arg_free(spat->spat_runtime);	/* it won't change, so */
 	    spat->spat_runtime = Nullarg;	/* no point compiling again */
 	}
-	if (d = compile(&spat->spat_compex,m,TRUE,FALSE)) {
-#ifdef DEBUGGING
-	    deb("/%s/: %s\n", m, d);
-#endif
-	    return FALSE;
-	}
+	spat->spat_regexp = regcomp(m,spat->spat_flags & SPAT_FOLD,1);
     }
 #ifdef DEBUGGING
     if (debug & 8) {
-	deb("2.SPAT /%s/\n",spat->spat_compex.precomp);
+	deb("2.SPAT /%s/\n",spat->spat_regexp->precomp);
     }
 #endif
     if (retary)
@@ -252,21 +337,36 @@ STR ***retary;
     else
 	ary = spat->spat_repl[1].arg_ptr.arg_stab->stab_array;
     if (!ary)
-	myarray = ary = anew();
+	myarray = ary = anew(Nullstab);
     ary->ary_fill = -1;
     if (spat->spat_flags & SPAT_SKIPWHITE) {
 	while (isspace(*s))
 	    s++;
     }
-    while (*s && (m = execute(&spat->spat_compex, s, (iters == 0), 1))) {
-	if (spat->spat_compex.numsubs)
-	    s = spat->spat_compex.subbase;
-	dstr = str_new(m-s);
-	str_nset(dstr,s,m-s);
-	astore(ary, iters++, dstr);
-	if (iters > 10000)
-	    fatal("Substitution loop?\n");
-	s = spat->spat_compex.subend[0];
+    if (spat->spat_short) {
+	i = spat->spat_short->str_cur;
+	while (*s && (m = fbminstr(s, strend, spat->spat_short))) {
+	    dstr = str_new(m-s);
+	    str_nset(dstr,s,m-s);
+	    astore(ary, iters++, dstr);
+	    if (iters > 10000)
+		fatal("Substitution loop");
+	    s = m + i;
+	}
+    }
+    else {
+	while (*s && regexec(spat->spat_regexp, s, strend, (iters == 0), 1,
+	  Nullstr)) {
+	    m = spat->spat_regexp->startp[0];
+	    if (spat->spat_regexp->subbase)
+		s = spat->spat_regexp->subbase;
+	    dstr = str_new(m-s);
+	    str_nset(dstr,s,m-s);
+	    astore(ary, iters++, dstr);
+	    if (iters > 10000)
+		fatal("Substitution loop");
+	    s = spat->spat_regexp->endp[0];
+	}
     }
     if (*s) {			/* ignore field after final "whitespace" */
 	dstr = str_new(0);	/*   if they interpolate, it's null anyway */
@@ -278,10 +378,10 @@ STR ***retary;
 	    iters--;
     }
     if (retary) {
-	sarg = (STR**)safemalloc((iters+2)*sizeof(STR*));
+	*ptrmaxsarg = iters + sargoff;
+	sarg = (STR**)saferealloc((char*)(sarg - sargoff),
+	  (iters+2+cushion+sargoff)*sizeof(STR*)) + sargoff;
 
-	sarg[0] = Nullstr;
-	sarg[iters+1] = Nullstr;
 	for (i = 1; i <= iters; i++)
 	    sarg[i] = afetch(ary,i-1);
 	*retary = sarg;
@@ -297,17 +397,62 @@ register STR *str;
 {
     STR **tmpary;	/* must not be register */
     register STR **elem;
+    register int items;
 
-    (void)eval(arg[2].arg_ptr.arg_arg,&tmpary);
+    (void)eval(arg[2].arg_ptr.arg_arg,&tmpary,-1);
+    items = (int)str_gnum(*tmpary);
     elem = tmpary+1;
-    if (*elem)
-    str_sset(str,*elem++);
-    for (; *elem; elem++) {
+    if (items-- > 0)
+	str_sset(str,*elem++);
+    for (; items > 0; items--,elem++) {
 	str_cat(str,delim);
 	str_scat(str,*elem);
     }
     STABSET(str);
     safefree((char*)tmpary);
+}
+
+FILE *
+forkopen(name,mode)
+char *name;
+char *mode;
+{
+    int pfd[2];
+
+    if (pipe(pfd) < 0)
+	return Nullfp;
+    while ((forkprocess = fork()) == -1) {
+	if (errno != EAGAIN)
+	    return Nullfp;
+	sleep(5);
+    }
+    if (*mode == 'w') {
+	if (forkprocess) {
+	    close(pfd[0]);
+	    return fdopen(pfd[1],"w");
+	}
+	else {
+	    close(pfd[1]);
+	    close(0);
+	    dup(pfd[0]);	/* substitute our pipe for stdin */
+	    close(pfd[0]);
+	    return Nullfp;
+	}
+    }
+    else {
+	if (forkprocess) {
+	    close(pfd[1]);
+	    return fdopen(pfd[0],"r");
+	}
+	else {
+	    close(pfd[0]);
+	    close(1);
+	    if (dup(pfd[1]) == 0)
+		dup(pfd[1]);	/* substitute our pipe for stdout */
+	    close(pfd[1]);
+	    return Nullfp;
+	}
+    }
 }
 
 bool
@@ -318,26 +463,60 @@ register char *name;
     FILE *fp;
     int len = strlen(name);
     register STIO *stio = stab->stab_io;
+    char *myname = savestr(name);
+    int result;
+    int fd;
 
+    name = myname;
+    forkprocess = 1;		/* assume true if no fork */
     while (len && isspace(name[len-1]))
 	name[--len] = '\0';
     if (!stio)
 	stio = stab->stab_io = stio_new();
     if (stio->fp) {
+	fd = fileno(stio->fp);
 	if (stio->type == '|')
-	    pclose(stio->fp);
+	    result = pclose(stio->fp);
 	else if (stio->type != '-')
-	    fclose(stio->fp);
+	    result = fclose(stio->fp);
+	else
+	    result = 0;
+	if (result == EOF && fd > 2)
+	    fprintf(stderr,"Warning: unable to close filehandle %s properly.\n",
+	      stab->stab_name);
 	stio->fp = Nullfp;
     }
     stio->type = *name;
     if (*name == '|') {
 	for (name++; isspace(*name); name++) ;
-	fp = popen(name,"w");
+	if (strNE(name,"-"))
+	    fp = popen(name,"w");
+	else {
+	    fp = forkopen(name,"w");
+	    stio->subprocess = forkprocess;
+	    stio->type = '%';
+	}
     }
     else if (*name == '>' && name[1] == '>') {
+	stio->type = 'a';
 	for (name += 2; isspace(*name); name++) ;
 	fp = fopen(name,"a");
+    }
+    else if (*name == '>' && name[1] == '&') {
+	for (name += 2; isspace(*name); name++) ;
+	if (isdigit(*name))
+	    fd = atoi(name);
+	else {
+	    stab = stabent(name,FALSE);
+	    if (stab->stab_io && stab->stab_io->fp) {
+		fd = fileno(stab->stab_io->fp);
+		stio->type = stab->stab_io->type;
+	    }
+	    else
+		fd = -1;
+	}
+	fp = fdopen(dup(fd),stio->type == 'a' ? "a" :
+	  (stio->type == '<' ? "r" : "w") );
     }
     else if (*name == '>') {
 	for (name++; isspace(*name); name++) ;
@@ -363,8 +542,15 @@ register char *name;
 	    while (len && isspace(name[len-1]))
 		name[--len] = '\0';
 	    for (; isspace(*name); name++) ;
-	    fp = popen(name,"r");
-	    stio->type = '|';
+	    if (strNE(name,"-")) {
+		fp = popen(name,"r");
+		stio->type = '|';
+	    }
+	    else {
+		fp = forkopen(name,"r");
+		stio->subprocess = forkprocess;
+		stio->type = '%';
+	    }
 	}
 	else {
 	    stio->type = '<';
@@ -377,9 +563,11 @@ register char *name;
 		fp = fopen(name,"r");
 	}
     }
+    safefree(myname);
     if (!fp)
 	return FALSE;
-    if (stio->type != '|' && stio->type != '-') {
+    if (stio->type &&
+      stio->type != '|' && stio->type != '-' && stio->type != '%') {
 	if (fstat(fileno(fp),&statbuf) < 0) {
 	    fclose(fp);
 	    return FALSE;
@@ -400,14 +588,18 @@ register STAB *stab;
 {
     register STR *str;
     char *oldname;
+    int filemode,fileuid,filegid;
 
-    while (alen(stab->stab_array) >= 0L) {
+    while (alen(stab->stab_array) >= 0) {
 	str = ashift(stab->stab_array);
 	str_sset(stab->stab_val,str);
 	STABSET(stab->stab_val);
 	oldname = str_get(stab->stab_val);
 	if (do_open(stab,oldname)) {
 	    if (inplace) {
+		filemode = statbuf.st_mode;
+		fileuid = statbuf.st_uid;
+		filegid = statbuf.st_gid;
 		if (*inplace) {
 		    str_cat(str,inplace);
 #ifdef RENAME
@@ -418,9 +610,23 @@ register STAB *stab;
 		    UNLINK(oldname);
 #endif
 		}
+		else {
+		    UNLINK(oldname);
+		}
 		sprintf(tokenbuf,">%s",oldname);
+		errno = 0;		/* in case sprintf set errno */
 		do_open(argvoutstab,tokenbuf);
 		defoutstab = argvoutstab;
+#ifdef FCHMOD
+		fchmod(fileno(argvoutstab->stab_io->fp),filemode);
+#else
+		chmod(oldname,filemode);
+#endif
+#ifdef FCHOWN
+		fchown(fileno(argvoutstab->stab_io->fp),fileuid,filegid);
+#else
+		chown(oldname,fileuid,filegid);
+#endif
 	    }
 	    str_free(str);
 	    return stab->stab_io->fp;
@@ -443,16 +649,30 @@ bool explicit;
 {
     bool retval = FALSE;
     register STIO *stio = stab->stab_io;
+    int status;
+    int tmp;
 
-    if (!stio)		/* never opened */
+    if (!stio) {		/* never opened */
+	if (dowarn && explicit)
+	    warn("Close on unopened file <%s>",stab->stab_name);
 	return FALSE;
+    }
     if (stio->fp) {
 	if (stio->type == '|')
 	    retval = (pclose(stio->fp) >= 0);
 	else if (stio->type == '-')
 	    retval = TRUE;
-	else
+	else {
 	    retval = (fclose(stio->fp) != EOF);
+	    if (stio->type == '%' && stio->subprocess) {
+		while ((tmp = wait(&status)) != stio->subprocess && tmp != -1)
+		    ;
+		if (tmp == -1)
+		    statusvalue = -1;
+		else
+		    statusvalue = (unsigned)status & 0xffff;
+	    }
+	}
 	stio->fp = Nullfp;
     }
     if (explicit)
@@ -468,10 +688,11 @@ STAB *stab;
     register STIO *stio;
     int ch;
 
-    if (!stab)
-	return TRUE;
+    if (!stab)			/* eof() */
+	stio = argvstab->stab_io;
+    else
+	stio = stab->stab_io;
 
-    stio = stab->stab_io;
     if (!stio)
 	return TRUE;
 
@@ -487,8 +708,8 @@ STAB *stab;
 	    ungetc(ch, stio->fp);
 	    return FALSE;
 	}
-	if (stio->flags & IOF_ARGV) {	/* not necessarily a real EOF yet? */
-	    if (!nextargv(stab))	/* get another fp handy */
+	if (!stab) {			/* not necessarily a real EOF yet? */
+	    if (!nextargv(argvstab))	/* get another fp handy */
 		return TRUE;
 	}
 	else
@@ -502,16 +723,20 @@ do_tell(stab)
 STAB *stab;
 {
     register STIO *stio;
-    int ch;
 
     if (!stab)
-	return -1L;
+	goto phooey;
 
     stio = stab->stab_io;
     if (!stio || !stio->fp)
-	return -1L;
+	goto phooey;
 
     return ftell(stio->fp);
+
+phooey:
+    if (dowarn)
+	warn("tell() on unopened file");
+    return -1L;
 }
 
 bool
@@ -523,19 +748,113 @@ int whence;
     register STIO *stio;
 
     if (!stab)
-	return FALSE;
+	goto nuts;
 
     stio = stab->stab_io;
     if (!stio || !stio->fp)
-	return FALSE;
+	goto nuts;
 
     return fseek(stio->fp, pos, whence) >= 0;
+
+nuts:
+    if (dowarn)
+	warn("seek() on unopened file");
+    return FALSE;
 }
 
-do_stat(arg,sarg,retary)
+static CMD *sortcmd;
+static STAB *firststab = Nullstab;
+static STAB *secondstab = Nullstab;
+
+do_sort(arg,stab,retary,sarg,ptrmaxsarg,sargoff,cushion)
 register ARG *arg;
-register STR **sarg;
+STAB *stab;
 STR ***retary;
+register STR **sarg;
+int *ptrmaxsarg;
+int sargoff;
+int cushion;
+{
+    STR **tmpary;	/* must not be register */
+    register STR **elem;
+    register bool retval;
+    register int max;
+    register int i;
+    int sortcmp();
+    int sortsub();
+    STR *oldfirst;
+    STR *oldsecond;
+
+    (void)eval(arg[1].arg_ptr.arg_arg,&tmpary,-1);
+    max = (int)str_gnum(*tmpary);
+
+    if (retary) {
+	sarg = (STR**)saferealloc((char*)(sarg - sargoff),
+	  (max+2+cushion+sargoff)*sizeof(STR*)) + sargoff;
+	for (i = 1; i <= max; i++)
+	    sarg[i] = tmpary[i];
+	*retary = sarg;
+	if (max > 1) {
+	    if (stab->stab_sub && (sortcmd = stab->stab_sub->cmd)) {
+		if (!firststab) {
+		    firststab = stabent("a",TRUE);
+		    secondstab = stabent("b",TRUE);
+		}
+		oldfirst = firststab->stab_val;
+		oldsecond = secondstab->stab_val;
+		qsort((char*)(sarg+1),max,sizeof(STR*),sortsub);
+		firststab->stab_val = oldfirst;
+		secondstab->stab_val = oldsecond;
+	    }
+	    else
+		qsort((char*)(sarg+1),max,sizeof(STR*),sortcmp);
+	}
+	while (max > 0 && !sarg[max])
+	    max--;
+	*ptrmaxsarg = max + sargoff;
+    }
+    safefree((char*)tmpary);
+    return max;
+}
+
+int
+sortcmp(str1,str2)
+STR **str1;
+STR **str2;
+{
+    char *tmps;
+
+    if (!*str1)
+	return -1;
+    if (!*str2)
+	return 1;
+    tmps = str_get(*str1);
+    return strcmp(tmps,str_get(*str2));
+}
+
+int
+sortsub(str1,str2)
+STR **str1;
+STR **str2;
+{
+    STR *str;
+
+    if (!*str1)
+	return -1;
+    if (!*str2)
+	return 1;
+    firststab->stab_val = *str1;
+    secondstab->stab_val = *str2;
+    return (int)str_gnum(cmd_exec(sortcmd));
+}
+
+do_stat(arg,retary,sarg,ptrmaxsarg,sargoff,cushion)
+register ARG *arg;
+STR ***retary;
+register STR **sarg;
+int *ptrmaxsarg;
+int sargoff;
+int cushion;
 {
     register ARRAY *ary;
     static ARRAY *myarray = Null(ARRAY*);
@@ -544,7 +863,7 @@ STR ***retary;
 
     ary = myarray;
     if (!ary)
-	myarray = ary = anew();
+	myarray = ary = anew(Nullstab);
     ary->ary_fill = -1;
     if (arg[1].arg_type == A_LVAL) {
 	tmpstab = arg[1].arg_ptr.arg_stab;
@@ -578,9 +897,9 @@ STR ***retary;
 	    apush(ary,str_make(""));
 #endif
 	}
-	sarg = (STR**)safemalloc((max+2)*sizeof(STR*));
-	sarg[0] = Nullstr;
-	sarg[max+1] = Nullstr;
+	*ptrmaxsarg = max + sargoff;
+	sarg = (STR**)saferealloc((char*)(sarg - sargoff),
+	  (max+2+cushion+sargoff)*sizeof(STR*)) + sargoff;
 	for (i = 1; i <= max; i++)
 	    sarg[i] = afetch(ary,i-1);
 	*retary = sarg;
@@ -588,32 +907,38 @@ STR ***retary;
     return max;
 }
 
-do_tms(retary)
+do_tms(retary,sarg,ptrmaxsarg,sargoff,cushion)
 STR ***retary;
+STR **sarg;
+int *ptrmaxsarg;
+int sargoff;
+int cushion;
 {
     register ARRAY *ary;
     static ARRAY *myarray = Null(ARRAY*);
-    register STR **sarg;
     int max = 4;
     register int i;
 
     ary = myarray;
     if (!ary)
-	myarray = ary = anew();
+	myarray = ary = anew(Nullstab);
     ary->ary_fill = -1;
-    if (times(&timesbuf) < 0)
-	max = 0;
+    times(&timesbuf);
+
+#ifndef HZ
+#define HZ 60
+#endif
 
     if (retary) {
 	if (max) {
-	    apush(ary,str_nmake(((double)timesbuf.tms_utime)/60.0));
-	    apush(ary,str_nmake(((double)timesbuf.tms_stime)/60.0));
-	    apush(ary,str_nmake(((double)timesbuf.tms_cutime)/60.0));
-	    apush(ary,str_nmake(((double)timesbuf.tms_cstime)/60.0));
+	    apush(ary,str_nmake(((double)timesbuf.tms_utime)/HZ));
+	    apush(ary,str_nmake(((double)timesbuf.tms_stime)/HZ));
+	    apush(ary,str_nmake(((double)timesbuf.tms_cutime)/HZ));
+	    apush(ary,str_nmake(((double)timesbuf.tms_cstime)/HZ));
 	}
-	sarg = (STR**)safemalloc((max+2)*sizeof(STR*));
-	sarg[0] = Nullstr;
-	sarg[max+1] = Nullstr;
+	*ptrmaxsarg = max + sargoff;
+	sarg = (STR**)saferealloc((char*)(sarg - sargoff),
+	  (max+2+cushion+sargoff)*sizeof(STR*)) + sargoff;
 	for (i = 1; i <= max; i++)
 	    sarg[i] = afetch(ary,i-1);
 	*retary = sarg;
@@ -621,20 +946,22 @@ STR ***retary;
     return max;
 }
 
-do_time(tmbuf,retary)
+do_time(tmbuf,retary,sarg,ptrmaxsarg,sargoff,cushion)
 struct tm *tmbuf;
 STR ***retary;
+STR **sarg;
+int *ptrmaxsarg;
+int sargoff;
+int cushion;
 {
     register ARRAY *ary;
     static ARRAY *myarray = Null(ARRAY*);
-    register STR **sarg;
     int max = 9;
     register int i;
-    STR *str;
 
     ary = myarray;
     if (!ary)
-	myarray = ary = anew();
+	myarray = ary = anew(Nullstab);
     ary->ary_fill = -1;
     if (!tmbuf)
 	max = 0;
@@ -651,9 +978,9 @@ STR ***retary;
 	    apush(ary,str_nmake((double)tmbuf->tm_yday));
 	    apush(ary,str_nmake((double)tmbuf->tm_isdst));
 	}
-	sarg = (STR**)safemalloc((max+2)*sizeof(STR*));
-	sarg[0] = Nullstr;
-	sarg[max+1] = Nullstr;
+	*ptrmaxsarg = max + sargoff;
+	sarg = (STR**)saferealloc((char*)(sarg - sargoff),
+	  (max+2+cushion+sargoff)*sizeof(STR*)) + sargoff;
 	for (i = 1; i <= max; i++)
 	    sarg[i] = afetch(ary,i-1);
 	*retary = sarg;
@@ -688,6 +1015,7 @@ register STR **sarg;
 	for (t++; *sarg && *t && t != s; t++) {
 	    switch (*t) {
 	    case '\0':
+		t--;
 		break;
 	    case '%':
 		ch = *(++t);
@@ -702,7 +1030,7 @@ register STR **sarg;
 	    case 'D': case 'X': case 'O':
 		dolong = TRUE;
 		/* FALL THROUGH */
-	    case 'd': case 'x': case 'o': case 'c':
+	    case 'd': case 'x': case 'o': case 'c': case 'u':
 		ch = *(++t);
 		*t = '\0';
 		if (dolong)
@@ -722,7 +1050,12 @@ register STR **sarg;
 	    case 's':
 		ch = *(++t);
 		*t = '\0';
-		sprintf(buf,s,str_get(*(sarg++)));
+		if (strEQ(s,"%s")) {	/* some printfs fail on >128 chars */
+		    *buf = '\0';
+		    str_scat(str,*(sarg++));  /* so handle simple case */
+		}
+		else
+		    sprintf(buf,s,str_get(*(sarg++)));
 		s = t;
 		*(t--) = ch;
 		break;
@@ -736,13 +1069,22 @@ register STR **sarg;
 }
 
 bool
-do_print(s,fp)
-char *s;
+do_print(str,fp)
+register STR *str;
 FILE *fp;
 {
-    if (!fp || !s)
+    if (!fp) {
+	if (dowarn)
+	    warn("print to unopened file");
 	return FALSE;
-    fputs(s,fp);
+    }
+    if (!str)
+	return FALSE;
+    if (ofmt &&
+      ((str->str_nok && str->str_nval != 0.0) || str_gnum(str) != 0.0) )
+	fprintf(fp, ofmt, str->str_nval);
+    else
+	fputs(str_get(str),fp);
     return TRUE;
 }
 
@@ -754,30 +1096,30 @@ register FILE *fp;
     STR **tmpary;	/* must not be register */
     register STR **elem;
     register bool retval;
-    double value;
+    register int items;
 
-    (void)eval(arg[1].arg_ptr.arg_arg,&tmpary);
+    if (!fp) {
+	if (dowarn)
+	    warn("print to unopened file");
+	return FALSE;
+    }
+    (void)eval(arg[1].arg_ptr.arg_arg,&tmpary,-1);
+    items = (int)str_gnum(*tmpary);
     if (arg->arg_type == O_PRTF) {
-	do_sprintf(arg->arg_ptr.arg_str,32767,tmpary);
-	retval = do_print(str_get(arg->arg_ptr.arg_str),fp);
+	do_sprintf(arg->arg_ptr.arg_str,items,tmpary);
+	retval = do_print(arg->arg_ptr.arg_str,fp);
     }
     else {
 	retval = FALSE;
-	for (elem = tmpary+1; *elem; elem++) {
+	for (elem = tmpary+1; items > 0; items--,elem++) {
 	    if (retval && ofs)
-		do_print(ofs, fp);
-	    if (ofmt && fp) {
-		if ((*elem)->str_nok || str_gnum(*elem) != 0.0)
-		    fprintf(fp, ofmt, str_gnum(*elem));
-		retval = TRUE;
-	    }
-	    else
-		retval = do_print(str_get(*elem), fp);
+		fputs(ofs, fp);
+	    retval = do_print(*elem, fp);
 	    if (!retval)
 		break;
 	}
 	if (ors)
-	    retval = do_print(ors, fp);
+	    fputs(ors, fp);
     }
     safefree((char*)tmpary);
     return retval;
@@ -790,18 +1132,19 @@ register ARG *arg;
     STR **tmpary;	/* must not be register */
     register STR **elem;
     register char **a;
-    register int i;
+    register int items;
     char **argv;
 
-    (void)eval(arg[1].arg_ptr.arg_arg,&tmpary);
-    i = 0;
-    for (elem = tmpary+1; *elem; elem++)
-	i++;
-    if (i) {
-	argv = (char**)safemalloc((i+1)*sizeof(char*));
+    (void)eval(arg[1].arg_ptr.arg_arg,&tmpary,-1);
+    items = (int)str_gnum(*tmpary);
+    if (items) {
+	argv = (char**)safemalloc((items+1)*sizeof(char*));
 	a = argv;
-	for (elem = tmpary+1; *elem; elem++) {
-	    *a++ = str_get(*elem);
+	for (elem = tmpary+1; items > 0; items--,elem++) {
+	    if (*elem)
+		*a++ = str_get(*elem);
+	    else
+		*a++ = "";
 	}
 	*a = Nullch;
 	execvp(argv[0],argv);
@@ -812,19 +1155,19 @@ register ARG *arg;
 }
 
 bool
-do_exec(cmd)
-char *cmd;
+do_exec(str)
+STR *str;
 {
-    STR **tmpary;	/* must not be register */
     register char **a;
     register char *s;
     char **argv;
+    char *cmd = str_get(str);
 
     /* see if there are shell metacharacters in it */
 
     for (s = cmd; *s; s++) {
 	if (*s != ' ' && !isalpha(*s) && index("$&*(){}[]'\";\\|?<>~`",*s)) {
-	    execl("/bin/sh","sh","-c",cmd,0);
+	    execl("/bin/sh","sh","-c",cmd,(char*)0);
 	    return FALSE;
 	}
     }
@@ -854,11 +1197,14 @@ register ARRAY *ary;
     STR **tmpary;	/* must not be register */
     register STR **elem;
     register STR *str = &str_no;
+    register int items;
 
-    (void)eval(arg[1].arg_ptr.arg_arg,&tmpary);
-    for (elem = tmpary+1; *elem; elem++) {
+    (void)eval(arg[1].arg_ptr.arg_arg,&tmpary,-1);
+    items = (int)str_gnum(*tmpary);
+    for (elem = tmpary+1; items > 0; items--,elem++) {
 	str = str_new(0);
-	str_sset(str,*elem);
+	if (*elem)
+	    str_sset(str,*elem);
 	apush(ary,str);
     }
     safefree((char*)tmpary);
@@ -873,17 +1219,16 @@ register ARRAY *ary;
     register STR **elem;
     register STR *str = &str_no;
     register int i;
+    register int items;
 
-    (void)eval(arg[1].arg_ptr.arg_arg,&tmpary);
+    (void)eval(arg[1].arg_ptr.arg_arg,&tmpary,-1);
+    items = (int)str_gnum(*tmpary);
+    aunshift(ary,items);
     i = 0;
-    for (elem = tmpary+1; *elem; elem++)
-	i++;
-    aunshift(ary,i);
-    i = 0;
-    for (elem = tmpary+1; *elem; elem++) {
+    for (elem = tmpary+1; i < items; i++,elem++) {
 	str = str_new(0);
 	str_sset(str,*elem);
-	astore(ary,i++,str);
+	astore(ary,i,str);
     }
     safefree((char*)tmpary);
 }
@@ -895,69 +1240,133 @@ STR **sarg;
 {
     STR **tmpary;	/* must not be register */
     register STR **elem;
-    register int i;
+    register int items;
     register int val;
     register int val2;
+    char *s;
 
-    if (sarg)
+    if (sarg) {
 	tmpary = sarg;
-    else
-	(void)eval(arg[1].arg_ptr.arg_arg,&tmpary);
-    i = 0;
-    for (elem = tmpary+1; *elem; elem++)
-	i++;
+	items = 0;
+	for (elem = tmpary+1; *elem; elem++)
+	    items++;
+    }
+    else {
+	(void)eval(arg[1].arg_ptr.arg_arg,&tmpary,-1);
+	items = (int)str_gnum(*tmpary);
+    }
     switch (type) {
     case O_CHMOD:
-	if (--i > 0) {
+	if (--items > 0) {
 	    val = (int)str_gnum(tmpary[1]);
 	    for (elem = tmpary+2; *elem; elem++)
 		if (chmod(str_get(*elem),val))
-		    i--;
+		    items--;
 	}
 	break;
     case O_CHOWN:
-	if (i > 2) {
-	    i -= 2;
+	if (items > 2) {
+	    items -= 2;
 	    val = (int)str_gnum(tmpary[1]);
 	    val2 = (int)str_gnum(tmpary[2]);
 	    for (elem = tmpary+3; *elem; elem++)
 		if (chown(str_get(*elem),val,val2))
-		    i--;
+		    items--;
 	}
 	else
-	    i = 0;
+	    items = 0;
 	break;
     case O_KILL:
-	if (--i > 0) {
+	if (--items > 0) {
 	    val = (int)str_gnum(tmpary[1]);
-	    if (val < 0)
+	    if (val < 0) {
 		val = -val;
-	    for (elem = tmpary+2; *elem; elem++)
-		if (kill(atoi(str_get(*elem)),val))
-		    i--;
+		for (elem = tmpary+2; *elem; elem++)
+#ifdef KILLPG
+		    if (killpg((int)(str_gnum(*elem)),val))	/* BSD */
+#else
+		    if (kill(-(int)(str_gnum(*elem)),val))	/* SYSV */
+#endif
+			items--;
+	    }
+	    else {
+		for (elem = tmpary+2; *elem; elem++)
+		    if (kill((int)(str_gnum(*elem)),val))
+			items--;
+	    }
 	}
 	break;
     case O_UNLINK:
-	for (elem = tmpary+1; *elem; elem++)
-	    if (UNLINK(str_get(*elem)))
-		i--;
+	for (elem = tmpary+1; *elem; elem++) {
+	    s = str_get(*elem);
+	    if (euid || unsafe) {
+		if (UNLINK(s))
+		    items--;
+	    }
+	    else {	/* don't let root wipe out directories without -U */
+		if (stat(s,&statbuf) < 0 ||
+		  (statbuf.st_mode & S_IFMT) == S_IFDIR )
+		    items--;
+		else {
+		    if (UNLINK(s))
+			items--;
+		}
+	    }
+	}
+	break;
+    case O_UTIME:
+	if (items > 2) {
+	    struct {
+		long    atime,
+			mtime;
+	    } utbuf;
+
+	    utbuf.atime = (long)str_gnum(tmpary[1]);    /* time accessed */
+	    utbuf.mtime = (long)str_gnum(tmpary[2]);    /* time modified */
+	    items -= 2;
+	    for (elem = tmpary+3; *elem; elem++)
+		if (utime(str_get(*elem),&utbuf))
+		    items--;
+	}
+	else
+	    items = 0;
 	break;
     }
     if (!sarg)
 	safefree((char*)tmpary);
-    return i;
+    return items;
 }
 
 STR *
 do_subr(arg,sarg)
 register ARG *arg;
-register char **sarg;
+register STR **sarg;
 {
+    register SUBR *sub;
     ARRAY *savearray;
     STR *str;
+    STAB *stab;
+    char *oldfile = filename;
+    int oldsave = savestack->ary_fill;
+    int oldtmps_base = tmps_base;
 
+    if (arg[2].arg_type == A_WORD)
+	stab = arg[2].arg_ptr.arg_stab;
+    else
+	stab = stabent(str_get(arg[2].arg_ptr.arg_stab->stab_val),TRUE);
+    if (!stab) {
+	if (dowarn)
+	    warn("Undefined subroutine called");
+	return &str_no;
+    }
+    sub = stab->stab_sub;
+    if (!sub) {
+	if (dowarn)
+	    warn("Undefined subroutine \"%s\" called", stab->stab_name);
+	return &str_no;
+    }
     savearray = defstab->stab_array;
-    defstab->stab_array = anew();
+    defstab->stab_array = anew(defstab);
     if (arg[1].arg_flags & AF_SPECIAL)
 	(void)do_push(arg,defstab->stab_array);
     else if (arg[1].arg_type != A_NULL) {
@@ -965,16 +1374,34 @@ register char **sarg;
 	str_sset(str,sarg[1]);
 	apush(defstab->stab_array,str);
     }
-    str = cmd_exec(arg[2].arg_ptr.arg_stab->stab_sub);
+    sub->depth++;
+    if (sub->depth >= 2) {	/* save temporaries on recursion? */
+	if (sub->depth == 100 && dowarn)
+	    warn("Deep recursion on subroutine \"%s\"",stab->stab_name);
+	savelist(sub->tosave->ary_array,sub->tosave->ary_fill);
+    }
+    filename = sub->filename;
+    tmps_base = tmps_max;
+
+    str = cmd_exec(sub->cmd);		/* so do it already */
+
+    sub->depth--;	/* assuming no longjumps out of here */
     afree(defstab->stab_array);  /* put back old $_[] */
     defstab->stab_array = savearray;
+    filename = oldfile;
+    tmps_base = oldtmps_base;
+    if (savestack->ary_fill > oldsave) {
+	str = str_static(str);	/* in case restore wipes old str */
+	restorelist(oldsave);
+    }
     return str;
 }
 
 void
-do_assign(retstr,arg)
+do_assign(retstr,arg,sarg)
 STR *retstr;
 register ARG *arg;
+register STR **sarg;
 {
     STR **tmpary;	/* must not be register */
     register ARG *larg = arg[1].arg_ptr.arg_arg;
@@ -982,60 +1409,76 @@ register ARG *arg;
     register STR *str;
     register ARRAY *ary;
     register int i;
-    register int lasti;
-    char *s;
+    register int items;
+    STR *tmpstr;
 
-    (void)eval(arg[2].arg_ptr.arg_arg,&tmpary);
+    if (arg[2].arg_flags & AF_SPECIAL) {
+	(void)eval(arg[2].arg_ptr.arg_arg,&tmpary,-1);
+	items = (int)str_gnum(*tmpary);
+    }
+    else {
+	tmpary = sarg;
+	sarg[1] = sarg[2];
+	sarg[2] = Nullstr;
+	items = 1;
+    }
 
-    if (arg->arg_flags & AF_COMMON) {
+    if (arg->arg_flags & AF_COMMON) {	/* always true currently, alas */
 	if (*(tmpary+1)) {
-	    for (elem=tmpary+2; *elem; elem++) {
+	    for (i=2,elem=tmpary+2; i <= items; i++,elem++) {
 		*elem = str_static(*elem);
 	    }
 	}
     }
     if (larg->arg_type == O_LIST) {
-	lasti = larg->arg_len;
-	for (i=1,elem=tmpary+1; i <= lasti; i++) {
-	    if (*elem)
-		s = str_get(*(elem++));
-	    else
-		s = "";
+	for (i=1,elem=tmpary+1; i <= larg->arg_len; i++) {
 	    switch (larg[i].arg_type) {
 	    case A_STAB:
 	    case A_LVAL:
 		str = STAB_STR(larg[i].arg_ptr.arg_stab);
 		break;
 	    case A_LEXPR:
-		str = eval(larg[i].arg_ptr.arg_arg,Null(STR***));
+		str = eval(larg[i].arg_ptr.arg_arg,Null(STR***),-1);
 		break;
 	    }
-	    str_set(str,s);
+	    if (larg->arg_flags & AF_LOCAL) {
+		apush(savestack,str);	/* save pointer */
+		tmpstr = str_new(0);
+		str_sset(tmpstr,str);
+		apush(savestack,tmpstr); /* save value */
+	    }
+	    if (*elem)
+		str_sset(str,*(elem++));
+	    else
+		str_set(str,"");
 	    STABSET(str);
 	}
-	i = elem - tmpary - 1;
     }
     else {			/* should be an array name */
 	ary = larg[1].arg_ptr.arg_stab->stab_array;
-	for (i=0,elem=tmpary+1; *elem; i++) {
+	for (i=0,elem=tmpary+1; i < items; i++) {
 	    str = str_new(0);
 	    if (*elem)
 		str_sset(str,*(elem++));
 	    astore(ary,i,str);
 	}
-	ary->ary_fill = i - 1;	/* they can get the extra ones back by */
-    }				/*   setting an element larger than old fill */
-    str_numset(retstr,(double)i);
+	ary->ary_fill = items - 1;/* they can get the extra ones back by */
+    }				/*   setting $#ary larger than old fill */
+    str_numset(retstr,(double)items);
     STABSET(retstr);
-    safefree((char*)tmpary);
+    if (tmpary != sarg);
+	safefree((char*)tmpary);
 }
 
 int
-do_kv(hash,kv,sarg,retary)
+do_kv(hash,kv,retary,sarg,ptrmaxsarg,sargoff,cushion)
 HASH *hash;
 int kv;
-register STR **sarg;
 STR ***retary;
+register STR **sarg;
+int *ptrmaxsarg;
+int sargoff;
+int cushion;
 {
     register ARRAY *ary;
     int max = 0;
@@ -1045,7 +1488,7 @@ STR ***retary;
 
     ary = myarray;
     if (!ary)
-	myarray = ary = anew();
+	myarray = ary = anew(Nullstab);
     ary->ary_fill = -1;
 
     hiterinit(hash);
@@ -1057,9 +1500,9 @@ STR ***retary;
 	    apush(ary,str_make(str_get(hiterval(entry))));
     }
     if (retary) { /* array wanted */
-	sarg = (STR**)saferealloc((char*)sarg,(max+2)*sizeof(STR*));
-	sarg[0] = Nullstr;
-	sarg[max+1] = Nullstr;
+	*ptrmaxsarg = max + sargoff;
+	sarg = (STR**)saferealloc((char*)(sarg - sargoff),
+	  (max+2+cushion+sargoff)*sizeof(STR*)) + sargoff;
 	for (i = 1; i <= max; i++)
 	    sarg[i] = afetch(ary,i-1);
 	*retary = sarg;
@@ -1068,10 +1511,13 @@ STR ***retary;
 }
 
 STR *
-do_each(hash,sarg,retary)
+do_each(hash,retary,sarg,ptrmaxsarg,sargoff,cushion)
 HASH *hash;
-register STR **sarg;
 STR ***retary;
+STR **sarg;
+int *ptrmaxsarg;
+int sargoff;
+int cushion;
 {
     static STR *mystr = Nullstr;
     STR *retstr;
@@ -1084,17 +1530,18 @@ STR ***retary;
 
     if (retary) { /* array wanted */
 	if (entry) {
-	    sarg = (STR**)saferealloc((char*)sarg,4*sizeof(STR*));
-	    sarg[0] = Nullstr;
-	    sarg[3] = Nullstr;
+	    *ptrmaxsarg = 2 + sargoff;
+	    sarg = (STR**)saferealloc((char*)(sarg - sargoff),
+	      (2+2+cushion+sargoff)*sizeof(STR*)) + sargoff;
 	    sarg[1] = mystr = str_make(hiterkey(entry));
 	    retstr = sarg[2] = hiterval(entry);
 	    *retary = sarg;
 	}
 	else {
-	    sarg = (STR**)saferealloc((char*)sarg,2*sizeof(STR*));
-	    sarg[0] = Nullstr;
-	    sarg[1] = retstr = Nullstr;
+	    *ptrmaxsarg = sargoff;
+	    sarg = (STR**)saferealloc((char*)(sarg - sargoff),
+	      (2+cushion+sargoff)*sizeof(STR*)) + sargoff;
+	    retstr = Nullstr;
 	    *retary = sarg;
 	}
     }
@@ -1104,10 +1551,150 @@ STR ***retary;
     return retstr;
 }
 
+int
+mystat(arg,str)
+ARG *arg;
+STR *str;
+{
+    STIO *stio;
+
+    if (arg[1].arg_flags & AF_SPECIAL) {
+	stio = arg[1].arg_ptr.arg_stab->stab_io;
+	if (stio && stio->fp)
+	    return fstat(fileno(stio->fp), &statbuf);
+	else {
+	    if (dowarn)
+		warn("Stat on unopened file <%s>",
+		  arg[1].arg_ptr.arg_stab->stab_name);
+	    return -1;
+	}
+    }
+    else
+	return stat(str_get(str),&statbuf);
+}
+
+STR *
+do_fttext(arg,str)
+register ARG *arg;
+STR *str;
+{
+    int i;
+    int len;
+    int odd = 0;
+    STDCHAR tbuf[512];
+    register STDCHAR *s;
+    register STIO *stio;
+
+    if (arg[1].arg_flags & AF_SPECIAL) {
+	stio = arg[1].arg_ptr.arg_stab->stab_io;
+	if (stio && stio->fp) {
+#ifdef STDSTDIO
+	    if (stio->fp->_cnt <= 0) {
+		i = getc(stio->fp);
+		ungetc(i,stio->fp);
+	    }
+	    if (stio->fp->_cnt <= 0)	/* null file is anything */
+		return &str_yes;
+	    len = stio->fp->_cnt + (stio->fp->_ptr - stio->fp->_base);
+	    s = stio->fp->_base;
+#else
+	    fatal("-T and -B not implemented on filehandles\n");
+#endif
+	}
+	else {
+	    if (dowarn)
+		warn("Test on unopened file <%s>",
+		  arg[1].arg_ptr.arg_stab->stab_name);
+	    return &str_no;
+	}
+    }
+    else {
+	i = open(str_get(str),0);
+	if (i < 0)
+	    return &str_no;
+	len = read(i,tbuf,512);
+	if (len <= 0)		/* null file is anything */
+	    return &str_yes;
+	close(i);
+	s = tbuf;
+    }
+
+    /* now scan s to look for textiness */
+
+    for (i = 0; i < len; i++,s++) {
+	if (!*s) {			/* null never allowed in text */
+	    odd += len;
+	    break;
+	}
+	else if (*s & 128)
+	    odd++;
+	else if (*s < 32 &&
+	  *s != '\n' && *s != '\r' && *s != '\b' &&
+	  *s != '\t' && *s != '\f' && *s != 27)
+	    odd++;
+    }
+
+    if ((odd * 10 > len) == (arg->arg_type == O_FTTEXT)) /* allow 10% odd */
+	return &str_no;
+    else
+	return &str_yes;
+}
+
+int
+do_study(str)
+STR *str;
+{
+    register char *s = str_get(str);
+    register int pos = str->str_cur;
+    register int ch;
+    register int *sfirst;
+    register int *snext;
+    static int maxscream = -1;
+    static STR *lastscream = Nullstr;
+
+    if (lastscream && lastscream->str_pok == 5)
+	lastscream->str_pok &= ~4;
+    lastscream = str;
+    if (pos <= 0)
+	return 0;
+    if (pos > maxscream) {
+	if (maxscream < 0) {
+	    maxscream = pos + 80;
+	    screamfirst = (int*)safemalloc((MEM_SIZE)(256 * sizeof(int)));
+	    screamnext = (int*)safemalloc((MEM_SIZE)(maxscream * sizeof(int)));
+	}
+	else {
+	    maxscream = pos + pos / 4;
+	    screamnext = (int*)saferealloc((char*)screamnext,
+		(MEM_SIZE)(maxscream * sizeof(int)));
+	}
+    }
+
+    sfirst = screamfirst;
+    snext = screamnext;
+
+    if (!sfirst || !snext)
+	fatal("do_study: out of memory");
+
+    for (ch = 256; ch; --ch)
+	*sfirst++ = -1;
+    sfirst -= 256;
+
+    while (--pos >= 0) {
+	ch = s[pos];
+	if (sfirst[ch] >= 0)
+	    snext[pos] = sfirst[ch] - pos;
+	else
+	    snext[pos] = -pos;
+	sfirst[ch] = pos;
+    }
+
+    str->str_pok |= 4;
+    return 1;
+}
+
 init_eval()
 {
-    register int i;
-
 #define A(e1,e2,e3) (e1+(e2<<1)+(e3<<2))
     opargs[O_ITEM] =		A(1,0,0);
     opargs[O_ITEM2] =		A(0,0,0);
@@ -1165,15 +1752,15 @@ init_eval()
     opargs[O_SEQ] =		A(1,1,0);
     opargs[O_SNE] =		A(1,1,0);
     opargs[O_SUBR] =		A(1,0,0);
-    opargs[O_PRINT] =		A(1,0,0);
+    opargs[O_PRINT] =		A(1,1,0);
     opargs[O_CHDIR] =		A(1,0,0);
     opargs[O_DIE] =		A(1,0,0);
     opargs[O_EXIT] =		A(1,0,0);
     opargs[O_RESET] =		A(1,0,0);
     opargs[O_LIST] =		A(0,0,0);
-    opargs[O_EOF] =		A(0,0,0);
-    opargs[O_TELL] =		A(0,0,0);
-    opargs[O_SEEK] =		A(0,1,1);
+    opargs[O_EOF] =		A(1,0,0);
+    opargs[O_TELL] =		A(1,0,0);
+    opargs[O_SEEK] =		A(1,1,1);
     opargs[O_LAST] =		A(1,0,0);
     opargs[O_NEXT] =		A(1,0,0);
     opargs[O_REDO] =		A(1,0,0);
@@ -1189,7 +1776,7 @@ init_eval()
     opargs[O_LOG] =		A(1,0,0);
     opargs[O_SQRT] =		A(1,0,0);
     opargs[O_INT] =		A(1,0,0);
-    opargs[O_PRTF] =		A(1,0,0);
+    opargs[O_PRTF] =		A(1,1,0);
     opargs[O_ORD] = 		A(1,0,0);
     opargs[O_SLEEP] =		A(1,0,0);
     opargs[O_FLIP] =		A(1,0,0);
@@ -1213,956 +1800,35 @@ init_eval()
     opargs[O_LINK] =		A(1,1,0);
     opargs[O_REPEAT] =		A(1,1,0);
     opargs[O_EVAL] =		A(1,0,0);
-}
-
-#ifdef VOIDSIG
-static void (*ihand)();
-static void (*qhand)();
-#else
-static int (*ihand)();
-static int (*qhand)();
-#endif
-
-STR *
-eval(arg,retary)
-register ARG *arg;
-STR ***retary;		/* where to return an array to, null if nowhere */
-{
-    register STR *str;
-    register int anum;
-    register int optype;
-    register int maxarg;
-    double value;
-    STR *quicksarg[5];
-    register STR **sarg = quicksarg;
-    register char *tmps;
-    char *tmps2;
-    int argflags;
-    long tmplong;
-    FILE *fp;
-    STR *tmpstr;
-    FCMD *form;
-    STAB *stab;
-    ARRAY *ary;
-    bool assigning = FALSE;
-    double exp(), log(), sqrt(), modf();
-    char *crypt(), *getenv();
-
-    if (!arg)
-	return &str_no;
-    str = arg->arg_ptr.arg_str;
-    optype = arg->arg_type;
-    maxarg = arg->arg_len;
-    if (maxarg > 3 || retary) {
-	sarg = (STR **)safemalloc((maxarg+2) * sizeof(STR*));
-    }
-#ifdef DEBUGGING
-    if (debug & 8) {
-	deb("%s (%lx) %d args:\n",opname[optype],arg,maxarg);
-    }
-    debname[dlevel] = opname[optype][0];
-    debdelim[dlevel++] = ':';
-#endif
-    for (anum = 1; anum <= maxarg; anum++) {
-	argflags = arg[anum].arg_flags;
-	if (argflags & AF_SPECIAL)
-	    continue;
-      re_eval:
-	switch (arg[anum].arg_type) {
-	default:
-	    sarg[anum] = &str_no;
-#ifdef DEBUGGING
-	    tmps = "NULL";
-#endif
-	    break;
-	case A_EXPR:
-#ifdef DEBUGGING
-	    if (debug & 8) {
-		tmps = "EXPR";
-		deb("%d.EXPR =>\n",anum);
-	    }
-#endif
-	    sarg[anum] = eval(arg[anum].arg_ptr.arg_arg, Null(STR***));
-	    break;
-	case A_CMD:
-#ifdef DEBUGGING
-	    if (debug & 8) {
-		tmps = "CMD";
-		deb("%d.CMD (%lx) =>\n",anum,arg[anum].arg_ptr.arg_cmd);
-	    }
-#endif
-	    sarg[anum] = cmd_exec(arg[anum].arg_ptr.arg_cmd);
-	    break;
-	case A_STAB:
-	    sarg[anum] = STAB_STR(arg[anum].arg_ptr.arg_stab);
-#ifdef DEBUGGING
-	    if (debug & 8) {
-		sprintf(buf,"STAB $%s ==",arg[anum].arg_ptr.arg_stab->stab_name);
-		tmps = buf;
-	    }
-#endif
-	    break;
-	case A_LEXPR:
-#ifdef DEBUGGING
-	    if (debug & 8) {
-		tmps = "LEXPR";
-		deb("%d.LEXPR =>\n",anum);
-	    }
-#endif
-	    str = eval(arg[anum].arg_ptr.arg_arg,Null(STR***));
-	    if (!str)
-		fatal("panic: A_LEXPR\n");
-	    goto do_crement;
-	case A_LVAL:
-#ifdef DEBUGGING
-	    if (debug & 8) {
-		sprintf(buf,"LVAL $%s ==",arg[anum].arg_ptr.arg_stab->stab_name);
-		tmps = buf;
-	    }
-#endif
-	    str = STAB_STR(arg[anum].arg_ptr.arg_stab);
-	    if (!str)
-		fatal("panic: A_LVAL\n");
-	  do_crement:
-	    assigning = TRUE;
-	    if (argflags & AF_PRE) {
-		if (argflags & AF_UP)
-		    str_inc(str);
-		else
-		    str_dec(str);
-		STABSET(str);
-		sarg[anum] = str;
-		str = arg->arg_ptr.arg_str;
-	    }
-	    else if (argflags & AF_POST) {
-		sarg[anum] = str_static(str);
-		if (argflags & AF_UP)
-		    str_inc(str);
-		else
-		    str_dec(str);
-		STABSET(str);
-		str = arg->arg_ptr.arg_str;
-	    }
-	    else {
-		sarg[anum] = str;
-	    }
-	    break;
-	case A_ARYLEN:
-	    sarg[anum] = str_static(&str_no);
-	    str_numset(sarg[anum],
-		(double)alen(arg[anum].arg_ptr.arg_stab->stab_array));
-#ifdef DEBUGGING
-	    tmps = "ARYLEN";
-#endif
-	    break;
-	case A_SINGLE:
-	    sarg[anum] = arg[anum].arg_ptr.arg_str;
-#ifdef DEBUGGING
-	    tmps = "SINGLE";
-#endif
-	    break;
-	case A_DOUBLE:
-	    (void) interp(str,str_get(arg[anum].arg_ptr.arg_str));
-	    sarg[anum] = str;
-#ifdef DEBUGGING
-	    tmps = "DOUBLE";
-#endif
-	    break;
-	case A_BACKTICK:
-	    tmps = str_get(arg[anum].arg_ptr.arg_str);
-	    fp = popen(str_get(interp(str,tmps)),"r");
-	    tmpstr = str_new(80);
-	    str_set(str,"");
-	    if (fp) {
-		while (str_gets(tmpstr,fp) != Nullch) {
-		    str_scat(str,tmpstr);
-		}
-		statusvalue = pclose(fp);
-	    }
-	    else
-		statusvalue = -1;
-	    str_free(tmpstr);
-
-	    sarg[anum] = str;
-#ifdef DEBUGGING
-	    tmps = "BACK";
-#endif
-	    break;
-	case A_READ:
-	    fp = Nullfp;
-	    last_in_stab = arg[anum].arg_ptr.arg_stab;
-	    if (last_in_stab->stab_io) {
-		fp = last_in_stab->stab_io->fp;
-		if (!fp && (last_in_stab->stab_io->flags & IOF_ARGV)) {
-		    if (last_in_stab->stab_io->flags & IOF_START) {
-			last_in_stab->stab_io->flags &= ~IOF_START;
-			last_in_stab->stab_io->lines = 0;
-			if (alen(last_in_stab->stab_array) < 0L) {
-			    tmpstr = str_make("-");	/* assume stdin */
-			    apush(last_in_stab->stab_array, tmpstr);
-			}
-		    }
-		    fp = nextargv(last_in_stab);
-		    if (!fp)	/* Note: fp != last_in_stab->stab_io->fp */
-			do_close(last_in_stab,FALSE);	/* now it does */
-		}
-	    }
-	  keepgoing:
-	    if (!fp)
-		sarg[anum] = &str_no;
-	    else if (!str_gets(str,fp)) {
-		if (last_in_stab->stab_io->flags & IOF_ARGV) {
-		    fp = nextargv(last_in_stab);
-		    if (fp)
-			goto keepgoing;
-		    do_close(last_in_stab,FALSE);
-		    last_in_stab->stab_io->flags |= IOF_START;
-		}
-		if (fp == stdin) {
-		    clearerr(fp);
-		}
-		sarg[anum] = &str_no;
-		break;
-	    }
-	    else {
-		last_in_stab->stab_io->lines++;
-		sarg[anum] = str;
-	    }
-#ifdef DEBUGGING
-	    tmps = "READ";
-#endif
-	    break;
-	}
-#ifdef DEBUGGING
-	if (debug & 8)
-	    deb("%d.%s = '%s'\n",anum,tmps,str_peek(sarg[anum]));
-#endif
-    }
-    switch (optype) {
-    case O_ITEM:
-	if (str != sarg[1])
-	    str_sset(str,sarg[1]);
-	STABSET(str);
-	break;
-    case O_ITEM2:
-	if (str != sarg[2])
-	    str_sset(str,sarg[2]);
-	STABSET(str);
-	break;
-    case O_ITEM3:
-	if (str != sarg[3])
-	    str_sset(str,sarg[3]);
-	STABSET(str);
-	break;
-    case O_CONCAT:
-	if (str != sarg[1])
-	    str_sset(str,sarg[1]);
-	str_scat(str,sarg[2]);
-	STABSET(str);
-	break;
-    case O_REPEAT:
-	if (str != sarg[1])
-	    str_sset(str,sarg[1]);
-	anum = (long)str_gnum(sarg[2]);
-	if (anum >= 1) {
-	    tmpstr = str_new(0);
-	    str_sset(tmpstr,str);
-	    for (anum--; anum; anum--)
-		str_scat(str,tmpstr);
-	}
-	else
-	    str_sset(str,&str_no);
-	STABSET(str);
-	break;
-    case O_MATCH:
-	str_set(str, do_match(str_get(sarg[1]),arg) ? Yes : No);
-	STABSET(str);
-	break;
-    case O_NMATCH:
-	str_set(str, do_match(str_get(sarg[1]),arg) ? No : Yes);
-	STABSET(str);
-	break;
-    case O_SUBST:
-	value = (double) do_subst(str, arg);
-	str = arg->arg_ptr.arg_str;
-	goto donumset;
-    case O_NSUBST:
-	str_set(arg->arg_ptr.arg_str, do_subst(str, arg) ? No : Yes);
-	str = arg->arg_ptr.arg_str;
-	break;
-    case O_ASSIGN:
-	if (arg[2].arg_flags & AF_SPECIAL)
-	    do_assign(str,arg);
-	else {
-	    if (str != sarg[2])
-		str_sset(str, sarg[2]);
-	    STABSET(str);
-	}
-	break;
-    case O_CHOP:
-	tmps = str_get(str);
-	tmps += str->str_cur - (str->str_cur != 0);
-	str_set(arg->arg_ptr.arg_str,tmps);	/* remember last char */
-	*tmps = '\0';				/* wipe it out */
-	str->str_cur = tmps - str->str_ptr;
-	str->str_nok = 0;
-	str = arg->arg_ptr.arg_str;
-	break;
-    case O_MULTIPLY:
-	value = str_gnum(sarg[1]);
-	value *= str_gnum(sarg[2]);
-	goto donumset;
-    case O_DIVIDE:
-	value = str_gnum(sarg[1]);
-	value /= str_gnum(sarg[2]);
-	goto donumset;
-    case O_MODULO:
-	value = str_gnum(sarg[1]);
-	value = (double)(((long)value) % (long)str_gnum(sarg[2]));
-	goto donumset;
-    case O_ADD:
-	value = str_gnum(sarg[1]);
-	value += str_gnum(sarg[2]);
-	goto donumset;
-    case O_SUBTRACT:
-	value = str_gnum(sarg[1]);
-	value -= str_gnum(sarg[2]);
-	goto donumset;
-    case O_LEFT_SHIFT:
-	value = str_gnum(sarg[1]);
-	value = (double)(((long)value) << (long)str_gnum(sarg[2]));
-	goto donumset;
-    case O_RIGHT_SHIFT:
-	value = str_gnum(sarg[1]);
-	value = (double)(((long)value) >> (long)str_gnum(sarg[2]));
-	goto donumset;
-    case O_LT:
-	value = str_gnum(sarg[1]);
-	value = (double)(value < str_gnum(sarg[2]));
-	goto donumset;
-    case O_GT:
-	value = str_gnum(sarg[1]);
-	value = (double)(value > str_gnum(sarg[2]));
-	goto donumset;
-    case O_LE:
-	value = str_gnum(sarg[1]);
-	value = (double)(value <= str_gnum(sarg[2]));
-	goto donumset;
-    case O_GE:
-	value = str_gnum(sarg[1]);
-	value = (double)(value >= str_gnum(sarg[2]));
-	goto donumset;
-    case O_EQ:
-	value = str_gnum(sarg[1]);
-	value = (double)(value == str_gnum(sarg[2]));
-	goto donumset;
-    case O_NE:
-	value = str_gnum(sarg[1]);
-	value = (double)(value != str_gnum(sarg[2]));
-	goto donumset;
-    case O_BIT_AND:
-	value = str_gnum(sarg[1]);
-	value = (double)(((long)value) & (long)str_gnum(sarg[2]));
-	goto donumset;
-    case O_XOR:
-	value = str_gnum(sarg[1]);
-	value = (double)(((long)value) ^ (long)str_gnum(sarg[2]));
-	goto donumset;
-    case O_BIT_OR:
-	value = str_gnum(sarg[1]);
-	value = (double)(((long)value) | (long)str_gnum(sarg[2]));
-	goto donumset;
-    case O_AND:
-	if (str_true(sarg[1])) {
-	    anum = 2;
-	    optype = O_ITEM2;
-	    maxarg = 0;
-	    argflags = arg[anum].arg_flags;
-	    goto re_eval;
-	}
-	else {
-	    if (assigning) {
-		str_sset(str, sarg[1]);
-		STABSET(str);
-	    }
-	    else
-		str = sarg[1];
-	    break;
-	}
-    case O_OR:
-	if (str_true(sarg[1])) {
-	    if (assigning) {
-		str_set(str, sarg[1]);
-		STABSET(str);
-	    }
-	    else
-		str = sarg[1];
-	    break;
-	}
-	else {
-	    anum = 2;
-	    optype = O_ITEM2;
-	    maxarg = 0;
-	    argflags = arg[anum].arg_flags;
-	    goto re_eval;
-	}
-    case O_COND_EXPR:
-	anum = (str_true(sarg[1]) ? 2 : 3);
-	optype = (anum == 2 ? O_ITEM2 : O_ITEM3);
-	maxarg = 0;
-	argflags = arg[anum].arg_flags;
-	goto re_eval;
-    case O_COMMA:
-	str = sarg[2];
-	break;
-    case O_NEGATE:
-	value = -str_gnum(sarg[1]);
-	goto donumset;
-    case O_NOT:
-	value = (double) !str_true(sarg[1]);
-	goto donumset;
-    case O_COMPLEMENT:
-	value = (double) ~(long)str_gnum(sarg[1]);
-	goto donumset;
-    case O_SELECT:
-	if (arg[1].arg_type == A_LVAL)
-	    defoutstab = arg[1].arg_ptr.arg_stab;
-	else
-	    defoutstab = stabent(str_get(sarg[1]),TRUE);
-	if (!defoutstab->stab_io)
-	    defoutstab->stab_io = stio_new();
-	curoutstab = defoutstab;
-	str_set(str,curoutstab->stab_io->fp ? Yes : No);
-	STABSET(str);
-	break;
-    case O_WRITE:
-	if (maxarg == 0)
-	    stab = defoutstab;
-	else if (arg[1].arg_type == A_LVAL)
-	    stab = arg[1].arg_ptr.arg_stab;
-	else
-	    stab = stabent(str_get(sarg[1]),TRUE);
-	if (!stab->stab_io) {
-	    str_set(str, No);
-	    STABSET(str);
-	    break;
-	}
-	curoutstab = stab;
-	fp = stab->stab_io->fp;
-	debarg = arg;
-	if (stab->stab_io->fmt_stab)
-	    form = stab->stab_io->fmt_stab->stab_form;
-	else
-	    form = stab->stab_form;
-	if (!form || !fp) {
-	    str_set(str, No);
-	    STABSET(str);
-	    break;
-	}
-	format(&outrec,form);
-	do_write(&outrec,stab->stab_io);
-	if (stab->stab_io->flags & IOF_FLUSH)
-	    fflush(fp);
-	str_set(str, Yes);
-	STABSET(str);
-	break;
-    case O_OPEN:
-	if (do_open(arg[1].arg_ptr.arg_stab,str_get(sarg[2]))) {
-	    str_set(str, Yes);
-	    arg[1].arg_ptr.arg_stab->stab_io->lines = 0;
-	}
-	else
-	    str_set(str, No);
-	STABSET(str);
-	break;
-    case O_TRANS:
-	value = (double) do_trans(str,arg);
-	str = arg->arg_ptr.arg_str;
-	goto donumset;
-    case O_NTRANS:
-	str_set(arg->arg_ptr.arg_str, do_trans(str,arg) == 0 ? Yes : No);
-	str = arg->arg_ptr.arg_str;
-	break;
-    case O_CLOSE:
-	str_set(str,
-	    do_close(arg[1].arg_ptr.arg_stab,TRUE) ? Yes : No );
-	STABSET(str);
-	break;
-    case O_EACH:
-	str_sset(str,do_each(arg[1].arg_ptr.arg_stab->stab_hash,sarg,retary));
-	retary = Null(STR***);		/* do_each already did retary */
-	STABSET(str);
-	break;
-    case O_VALUES:
-    case O_KEYS:
-	value = (double) do_kv(arg[1].arg_ptr.arg_stab->stab_hash,
-	  optype,sarg,retary);
-	retary = Null(STR***);		/* do_keys already did retary */
-	goto donumset;
-    case O_ARRAY:
-	if (maxarg == 1) {
-	    ary = arg[1].arg_ptr.arg_stab->stab_array;
-	    maxarg = ary->ary_fill;
-	    if (retary) { /* array wanted */
-		sarg =
-		  (STR **)saferealloc((char*)sarg,(maxarg+3)*sizeof(STR*));
-		for (anum = 0; anum <= maxarg; anum++) {
-		    sarg[anum+1] = str = afetch(ary,anum);
-		}
-		maxarg++;
-	    }
-	    else
-		str = afetch(ary,maxarg);
-	}
-	else
-	    str = afetch(arg[2].arg_ptr.arg_stab->stab_array,
-		((int)str_gnum(sarg[1])) - arybase);
-	if (!str)
-	    return &str_no;
-	break;
-    case O_HASH:
-	tmpstab = arg[2].arg_ptr.arg_stab;		/* XXX */
-	str = hfetch(tmpstab->stab_hash,str_get(sarg[1]));
-	if (!str)
-	    return &str_no;
-	break;
-    case O_LARRAY:
-	anum = ((int)str_gnum(sarg[1])) - arybase;
-	str = afetch(arg[2].arg_ptr.arg_stab->stab_array,anum);
-	if (!str || str == &str_no) {
-	    str = str_new(0);
-	    astore(arg[2].arg_ptr.arg_stab->stab_array,anum,str);
-	}
-	break;
-    case O_LHASH:
-	tmpstab = arg[2].arg_ptr.arg_stab;
-	str = hfetch(tmpstab->stab_hash,str_get(sarg[1]));
-	if (!str) {
-	    str = str_new(0);
-	    hstore(tmpstab->stab_hash,str_get(sarg[1]),str);
-	}
-	if (tmpstab == envstab) {	/* heavy wizardry going on here */
-	    str->str_link.str_magic = tmpstab;/* str is now magic */
-	    envname = savestr(str_get(sarg[1]));
-					/* he threw the brick up into the air */
-	}
-	else if (tmpstab == sigstab) {	/* same thing, only different */
-	    str->str_link.str_magic = tmpstab;
-	    signame = savestr(str_get(sarg[1]));
-	}
-	break;
-    case O_PUSH:
-	if (arg[1].arg_flags & AF_SPECIAL)
-	    str = do_push(arg,arg[2].arg_ptr.arg_stab->stab_array);
-	else {
-	    str = str_new(0);		/* must copy the STR */
-	    str_sset(str,sarg[1]);
-	    apush(arg[2].arg_ptr.arg_stab->stab_array,str);
-	}
-	break;
-    case O_POP:
-	str = apop(arg[1].arg_ptr.arg_stab->stab_array);
-	if (!str)
-	    return &str_no;
-#ifdef STRUCTCOPY
-	*(arg->arg_ptr.arg_str) = *str;
-#else
-	bcopy((char*)str, (char*)arg->arg_ptr.arg_str, sizeof *str);
-#endif
-	safefree((char*)str);
-	str = arg->arg_ptr.arg_str;
-	break;
-    case O_SHIFT:
-	str = ashift(arg[1].arg_ptr.arg_stab->stab_array);
-	if (!str)
-	    return &str_no;
-#ifdef STRUCTCOPY
-	*(arg->arg_ptr.arg_str) = *str;
-#else
-	bcopy((char*)str, (char*)arg->arg_ptr.arg_str, sizeof *str);
-#endif
-	safefree((char*)str);
-	str = arg->arg_ptr.arg_str;
-	break;
-    case O_SPLIT:
-	value = (double) do_split(str_get(sarg[1]),arg[2].arg_ptr.arg_spat,retary);
-	retary = Null(STR***);		/* do_split already did retary */
-	goto donumset;
-    case O_LENGTH:
-	value = (double) str_len(sarg[1]);
-	goto donumset;
-    case O_SPRINTF:
-	sarg[maxarg+1] = Nullstr;
-	do_sprintf(str,arg->arg_len,sarg);
-	break;
-    case O_SUBSTR:
-	anum = ((int)str_gnum(sarg[2])) - arybase;
-	for (tmps = str_get(sarg[1]); *tmps && anum > 0; tmps++,anum--) ;
-	anum = (int)str_gnum(sarg[3]);
-	if (anum >= 0 && strlen(tmps) > anum)
-	    str_nset(str, tmps, anum);
-	else
-	    str_set(str, tmps);
-	break;
-    case O_JOIN:
-	if (arg[2].arg_flags & AF_SPECIAL && arg[2].arg_type == A_EXPR)
-	    do_join(arg,str_get(sarg[1]),str);
-	else
-	    ajoin(arg[2].arg_ptr.arg_stab->stab_array,str_get(sarg[1]),str);
-	break;
-    case O_SLT:
-	tmps = str_get(sarg[1]);
-	value = (double) strLT(tmps,str_get(sarg[2]));
-	goto donumset;
-    case O_SGT:
-	tmps = str_get(sarg[1]);
-	value = (double) strGT(tmps,str_get(sarg[2]));
-	goto donumset;
-    case O_SLE:
-	tmps = str_get(sarg[1]);
-	value = (double) strLE(tmps,str_get(sarg[2]));
-	goto donumset;
-    case O_SGE:
-	tmps = str_get(sarg[1]);
-	value = (double) strGE(tmps,str_get(sarg[2]));
-	goto donumset;
-    case O_SEQ:
-	tmps = str_get(sarg[1]);
-	value = (double) strEQ(tmps,str_get(sarg[2]));
-	goto donumset;
-    case O_SNE:
-	tmps = str_get(sarg[1]);
-	value = (double) strNE(tmps,str_get(sarg[2]));
-	goto donumset;
-    case O_SUBR:
-	str_sset(str,do_subr(arg,sarg));
-	STABSET(str);
-	break;
-    case O_PRTF:
-    case O_PRINT:
-	if (maxarg <= 1)
-	    stab = defoutstab;
-	else {
-	    stab = arg[2].arg_ptr.arg_stab;
-	    if (!stab)
-		stab = defoutstab;
-	}
-	if (!stab->stab_io)
-	    value = 0.0;
-	else if (arg[1].arg_flags & AF_SPECIAL)
-	    value = (double)do_aprint(arg,stab->stab_io->fp);
-	else {
-	    value = (double)do_print(str_get(sarg[1]),stab->stab_io->fp);
-	    if (ors && optype == O_PRINT)
-		do_print(ors, stab->stab_io->fp);
-	}
-	if (stab->stab_io->flags & IOF_FLUSH)
-	    fflush(stab->stab_io->fp);
-	goto donumset;
-    case O_CHDIR:
-	tmps = str_get(sarg[1]);
-	if (!tmps || !*tmps)
-	    tmps = getenv("HOME");
-	if (!tmps || !*tmps)
-	    tmps = getenv("LOGDIR");
-	value = (double)(chdir(tmps) >= 0);
-	goto donumset;
-    case O_DIE:
-	tmps = str_get(sarg[1]);
-	if (!tmps || !*tmps)
-	    exit(1);
-	fatal("%s\n",str_get(sarg[1]));
-	value = 0.0;
-	goto donumset;
-    case O_EXIT:
-	exit((int)str_gnum(sarg[1]));
-	value = 0.0;
-	goto donumset;
-    case O_RESET:
-	str_reset(str_get(sarg[1]));
-	value = 1.0;
-	goto donumset;
-    case O_LIST:
-	if (maxarg > 0)
-	    str = sarg[maxarg];	/* unwanted list, return last item */
-	else
-	    str = &str_no;
-	break;
-    case O_EOF:
-	str_set(str, do_eof(maxarg > 0 ? arg[1].arg_ptr.arg_stab : last_in_stab) ? Yes : No);
-	STABSET(str);
-	break;
-    case O_TELL:
-	value =	(double)do_tell(maxarg > 0 ? arg[1].arg_ptr.arg_stab : last_in_stab);
-	goto donumset;
-	break;
-    case O_SEEK:
-	value = str_gnum(sarg[2]);
-	str_set(str, do_seek(arg[1].arg_ptr.arg_stab,
-	  (long)value, (int)str_gnum(sarg[3]) ) ? Yes : No);
-	STABSET(str);
-	break;
-    case O_REDO:
-    case O_NEXT:
-    case O_LAST:
-	if (maxarg > 0) {
-	    tmps = str_get(sarg[1]);
-	    while (loop_ptr >= 0 && (!loop_stack[loop_ptr].loop_label ||
-	      strNE(tmps,loop_stack[loop_ptr].loop_label) )) {
-#ifdef DEBUGGING
-		if (debug & 4) {
-		    deb("(Skipping label #%d %s)\n",loop_ptr,
-			loop_stack[loop_ptr].loop_label);
-		}
-#endif
-		loop_ptr--;
-	    }
-#ifdef DEBUGGING
-	    if (debug & 4) {
-		deb("(Found label #%d %s)\n",loop_ptr,
-		    loop_stack[loop_ptr].loop_label);
-	    }
-#endif
-	}
-	if (loop_ptr < 0)
-	    fatal("Bad label: %s\n", maxarg > 0 ? tmps : "<null>");
-	longjmp(loop_stack[loop_ptr].loop_env, optype);
-    case O_GOTO:/* shudder */
-	goto_targ = str_get(sarg[1]);
-	longjmp(top_env, 1);
-    case O_INDEX:
-	tmps = str_get(sarg[1]);
-	if (!(tmps2 = instr(tmps,str_get(sarg[2]))))
-	    value = (double)(-1 + arybase);
-	else
-	    value = (double)(tmps2 - tmps + arybase);
-	goto donumset;
-    case O_TIME:
-	value = (double) time(0);
-	goto donumset;
-    case O_TMS:
-	value = (double) do_tms(retary);
-	retary = Null(STR***);		/* do_tms already did retary */
-	goto donumset;
-    case O_LOCALTIME:
-	tmplong = (long) str_gnum(sarg[1]);
-	value = (double) do_time(localtime(&tmplong),retary);
-	retary = Null(STR***);		/* do_localtime already did retary */
-	goto donumset;
-    case O_GMTIME:
-	tmplong = (long) str_gnum(sarg[1]);
-	value = (double) do_time(gmtime(&tmplong),retary);
-	retary = Null(STR***);		/* do_gmtime already did retary */
-	goto donumset;
-    case O_STAT:
-	value = (double) do_stat(arg,sarg,retary);
-	retary = Null(STR***);		/* do_stat already did retary */
-	goto donumset;
-    case O_CRYPT:
-#ifdef CRYPT
-	tmps = str_get(sarg[1]);
-	str_set(str,crypt(tmps,str_get(sarg[2])));
-#else
-	fatal(
-	  "The crypt() function is unimplemented due to excessive paranoia.");
-#endif
-	break;
-    case O_EXP:
-	value = exp(str_gnum(sarg[1]));
-	goto donumset;
-    case O_LOG:
-	value = log(str_gnum(sarg[1]));
-	goto donumset;
-    case O_SQRT:
-	value = sqrt(str_gnum(sarg[1]));
-	goto donumset;
-    case O_INT:
-	modf(str_gnum(sarg[1]),&value);
-	goto donumset;
-    case O_ORD:
-	value = (double) *str_get(sarg[1]);
-	goto donumset;
-    case O_SLEEP:
-	tmps = str_get(sarg[1]);
-	time(&tmplong);
-	if (!tmps || !*tmps)
-	    sleep((32767<<16)+32767);
-	else
-	    sleep(atoi(tmps));
-	value = (double)tmplong;
-	time(&tmplong);
-	value = ((double)tmplong) - value;
-	goto donumset;
-    case O_FLIP:
-	if (str_true(sarg[1])) {
-	    str_numset(str,0.0);
-	    anum = 2;
-	    arg->arg_type = optype = O_FLOP;
-	    maxarg = 0;
-	    arg[2].arg_flags &= ~AF_SPECIAL;
-	    arg[1].arg_flags |= AF_SPECIAL;
-	    argflags = arg[anum].arg_flags;
-	    goto re_eval;
-	}
-	str_set(str,"");
-	break;
-    case O_FLOP:
-	str_inc(str);
-	if (str_true(sarg[2])) {
-	    arg->arg_type = O_FLIP;
-	    arg[1].arg_flags &= ~AF_SPECIAL;
-	    arg[2].arg_flags |= AF_SPECIAL;
-	    str_cat(str,"E0");
-	}
-	break;
-    case O_FORK:
-	value = (double)fork();
-	goto donumset;
-    case O_SYSTEM:
-	if (anum = vfork()) {
-	    ihand = signal(SIGINT, SIG_IGN);
-	    qhand = signal(SIGQUIT, SIG_IGN);
-	    while ((maxarg = wait(&argflags)) != anum && maxarg != -1)
-		;
-	    if (maxarg == -1)
-		argflags = -1;
-	    signal(SIGINT, ihand);
-	    signal(SIGQUIT, qhand);
-	    value = (double)argflags;
-	    goto donumset;
-	}
-	/* FALL THROUGH */
-    case O_EXEC:
-	if (arg[1].arg_flags & AF_SPECIAL)
-	    value = (double)do_aexec(arg);
-	else {
-	    value = (double)do_exec(str_get(sarg[1]));
-	}
-	goto donumset;
-    case O_HEX:
-	maxarg = 4;
-	goto snarfnum;
-
-    case O_OCT:
-	maxarg = 3;
-
-      snarfnum:
-	anum = 0;
-	tmps = str_get(sarg[1]);
-	for (;;) {
-	    switch (*tmps) {
-	    default:
-		goto out;
-	    case '8': case '9':
-		if (maxarg != 4)
-		    goto out;
-		/* FALL THROUGH */
-	    case '0': case '1': case '2': case '3': case '4':
-	    case '5': case '6': case '7':
-		anum <<= maxarg;
-		anum += *tmps++ & 15;
-		break;
-	    case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
-	    case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
-		if (maxarg != 4)
-		    goto out;
-		anum <<= 4;
-		anum += (*tmps++ & 7) + 9;
-		break;
-	    case 'x':
-		maxarg = 4;
-		tmps++;
-		break;
-	    }
-	}
-      out:
-	value = (double)anum;
-	goto donumset;
-    case O_CHMOD:
-    case O_CHOWN:
-    case O_KILL:
-    case O_UNLINK:
-	if (arg[1].arg_flags & AF_SPECIAL)
-	    value = (double)apply(optype,arg,Null(STR**));
-	else {
-	    sarg[2] = Nullstr;
-	    value = (double)apply(optype,arg,sarg);
-	}
-	goto donumset;
-    case O_UMASK:
-	value = (double)umask((int)str_gnum(sarg[1]));
-	goto donumset;
-    case O_RENAME:
-	tmps = str_get(sarg[1]);
-#ifdef RENAME
-	value = (double)(rename(tmps,str_get(sarg[2])) >= 0);
-#else
-	tmps2 = str_get(sarg[2]);
-	UNLINK(tmps2);
-	if (!(anum = link(tmps,tmps2)))
-	    anum = UNLINK(tmps);
-	value = (double)(anum >= 0);
-#endif
-	goto donumset;
-    case O_LINK:
-	tmps = str_get(sarg[1]);
-	value = (double)(link(tmps,str_get(sarg[2])) >= 0);
-	goto donumset;
-    case O_UNSHIFT:
-	ary = arg[2].arg_ptr.arg_stab->stab_array;
-	if (arg[1].arg_flags & AF_SPECIAL)
-	    do_unshift(arg,ary);
-	else {
-	    str = str_new(0);		/* must copy the STR */
-	    str_sset(str,sarg[1]);
-	    aunshift(ary,1);
-	    astore(ary,0,str);
-	}
-	value = (double)(ary->ary_fill + 1);
-	break;
-    case O_EVAL:
-	str_sset(str,
-	    do_eval(arg[1].arg_type != A_NULL ? sarg[1] : defstab->stab_val) );
-	STABSET(str);
-	break;
-    }
-#ifdef DEBUGGING
-    dlevel--;
-    if (debug & 8)
-	deb("%s RETURNS \"%s\"\n",opname[optype],str_get(str));
-#endif
-    goto freeargs;
-
-donumset:
-    str_numset(str,value);
-    STABSET(str);
-#ifdef DEBUGGING
-    dlevel--;
-    if (debug & 8)
-	deb("%s RETURNS \"%f\"\n",opname[optype],value);
-#endif
-
-freeargs:
-    if (sarg != quicksarg) {
-	if (retary) {
-	    if (optype == O_LIST)
-		sarg[0] = &str_no;
-	    else
-		sarg[0] = Nullstr;
-	    sarg[maxarg+1] = Nullstr;
-	    *retary = sarg;	/* up to them to free it */
-	}
-	else
-	    safefree(sarg);
-    }
-    return str;
-
-nullarray:
-    maxarg = 0;
-#ifdef DEBUGGING
-    dlevel--;
-    if (debug & 8)
-	deb("%s RETURNS ()\n",opname[optype],value);
-#endif
-    goto freeargs;
+    opargs[O_FTEREAD] =		A(1,0,0);
+    opargs[O_FTEWRITE] =	A(1,0,0);
+    opargs[O_FTEEXEC] =		A(1,0,0);
+    opargs[O_FTEOWNED] =	A(1,0,0);
+    opargs[O_FTRREAD] =		A(1,0,0);
+    opargs[O_FTRWRITE] =	A(1,0,0);
+    opargs[O_FTREXEC] =		A(1,0,0);
+    opargs[O_FTROWNED] =	A(1,0,0);
+    opargs[O_FTIS] =		A(1,0,0);
+    opargs[O_FTZERO] =		A(1,0,0);
+    opargs[O_FTSIZE] =		A(1,0,0);
+    opargs[O_FTFILE] =		A(1,0,0);
+    opargs[O_FTDIR] =		A(1,0,0);
+    opargs[O_FTLINK] =		A(1,0,0);
+    opargs[O_SYMLINK] =		A(1,1,0);
+    opargs[O_FTPIPE] =		A(1,0,0);
+    opargs[O_FTSUID] =		A(1,0,0);
+    opargs[O_FTSGID] =		A(1,0,0);
+    opargs[O_FTSVTX] =		A(1,0,0);
+    opargs[O_FTCHR] =		A(1,0,0);
+    opargs[O_FTBLK] =		A(1,0,0);
+    opargs[O_FTSOCK] =		A(1,0,0);
+    opargs[O_FTTTY] =		A(1,0,0);
+    opargs[O_DOFILE] =		A(1,0,0);
+    opargs[O_FTTEXT] =		A(1,0,0);
+    opargs[O_FTBINARY] =	A(1,0,0);
+    opargs[O_UTIME] =		A(1,0,0);
+    opargs[O_WAIT] =		A(0,0,0);
+    opargs[O_SORT] =		A(1,0,0);
+    opargs[O_STUDY] =		A(1,0,0);
+    opargs[O_DELETE] =		A(1,0,0);
 }

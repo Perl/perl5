@@ -1,8 +1,8 @@
-/* $Header: str.h,v 1.0 87/12/18 13:06:26 root Exp $
+/* $Header: str.h,v 2.0 88/06/05 00:11:11 root Exp $
  *
  * $Log:	str.h,v $
- * Revision 1.0  87/12/18  13:06:26  root
- * Initial revision
+ * Revision 2.0  88/06/05  00:11:11  root
+ * Baseline version 2.0.
  * 
  */
 
@@ -17,6 +17,8 @@ struct string {
     } str_link;
     char	str_pok;	/* state of str_ptr */
     char	str_nok;	/* state of str_nval */
+    char	str_rare;	/* used by search strings */
+    char	str_prev;	/* also used by search strings */
 };
 
 #define Nullstr Null(STR*)
@@ -26,7 +28,8 @@ struct string {
 #define STABSET(x) (x->str_link.str_magic && stabset(x->str_link.str_magic,x))
 
 EXT STR **tmps_list;
-EXT long tmps_max INIT(-1);
+EXT int tmps_max INIT(-1);
+EXT int tmps_base INIT(-1);
 
 char *str_2ptr();
 double str_2num();

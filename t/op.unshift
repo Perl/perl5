@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: op.unshift,v 1.0 87/12/18 13:14:37 root Exp $
+# $Header: op.unshift,v 2.0 88/06/05 00:15:00 root Exp $
 
 print "1..2\n";
 

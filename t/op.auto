@@ -1,8 +1,8 @@
 #!./perl
 
-# $Header: op.auto,v 1.0 87/12/18 13:13:08 root Exp $
+# $Header: op.auto,v 2.0 88/06/05 00:13:19 root Exp $
 
-print "1..30\n";
+print "1..34\n";
 
 $x = 10000;
 if (0 + ++$x - 1 == 10000) { print "ok 1\n";} else {print "not ok 1\n";}
@@ -39,3 +39,10 @@ if (0 + $x{0} == 10000) { print "ok 27\n";} else {print "not ok 27\n";}
 if (0 + --$x{0} + 1 == 10000) { print "ok 28\n";} else {print "not ok 28\n";}
 if (0 + ++$x{0} + 0 == 10000) { print "ok 29\n";} else {print "not ok 29\n";}
 if ($x{0} == 10000) { print "ok 30\n";} else {print "not ok 30\n";}
+
+# test magical autoincrement
+
+if (++($foo = '99') eq '100') {print "ok 31\n";} else {print "not ok 31\n";}
+if (++($foo = 'a0') eq 'a1') {print "ok 32\n";} else {print "not ok 32\n";}
+if (++($foo = 'Az') eq 'Ba') {print "ok 33\n";} else {print "not ok 33\n";}
+if (++($foo = 'zz') eq 'aaa') {print "ok 34\n";} else {print "not ok 34\n";}

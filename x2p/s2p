@@ -1,4 +1,12 @@
-#!/bin/perl
+#!/usr/bin/perl
+
+# $Header: s2p,v 2.0 88/06/05 00:15:55 root Exp $
+#
+# $Log:	s2p,v $
+# Revision 2.0  88/06/05  00:15:55  root
+# Baseline version 2.0.
+# 
+#
 
 $indent = 4;
 $shiftwidth = 4;
@@ -21,11 +29,11 @@ while ($ARGV[0] =~ '^-') {
 	$assumep++;
 	next;
     }
-    die "I don't recognize this switch: $_";
+    die "I don't recognize this switch: $_\n";
 }
 
 unless ($debug) {
-    open(body,">/tmp/sperl$$") || do Die("Can't open temp file.");
+    open(body,">/tmp/sperl$$") || do Die("Can't open temp file");
 }
 
 if (!$assumen && !$assumep) {
@@ -37,7 +45,7 @@ if (!$assumen && !$assumep) {
 	$nflag++;
 	next;
     }
-    die "I don\'t recognize this switch: $_";
+    die "I don\'t recognize this switch: $_\\n";
 }
 
 ';
@@ -127,11 +135,12 @@ line: while (<>) {
 		}
 	    }
 	} else {
-	    do Die("Invalid second address at line $.: $_");
+	    do Die("Invalid second address at line $.\n");
 	}
 	$addr1 .= " .. $addr2";
     }
 					# a { to keep vi happy
+    s/^[ \t]+//;
     if ($_ eq '}') {
 	$indent -= 4;
 	next;
@@ -220,7 +229,7 @@ continue {
 close body;
 
 unless ($debug) {
-    open(head,">/tmp/sperl2$$") || do Die("Can't open temp file 2.\n");
+    open(head,">/tmp/sperl2$$.c") || do Die("Can't open temp file 2");
     print head "#define PRINTIT\n" if ($printit);
     print head "#define APPENDSEEN\n" if ($appendseen);
     print head "#define TSEEN\n" if ($tseen);
@@ -228,15 +237,15 @@ unless ($debug) {
     print head "#define ASSUMEN\n" if ($assumen);
     print head "#define ASSUMEP\n" if ($assumep);
     if ($opens) {print head "$opens\n";}
-    open(body,"/tmp/sperl$$") || do Die("Can't reopen temp file.");
+    open(body,"/tmp/sperl$$") || do Die("Can't reopen temp file");
     while (<body>) {
 	print head $_;
     }
     close head;
 
     print "#!/bin/perl\n\n";
-    open(body,"cc -E /tmp/sperl2$$ |") ||
-	do Die("Can't reopen temp file.");
+    open(body,"cc -E /tmp/sperl2$$.c |") ||
+	do Die("Can't reopen temp file");
     while (<body>) {
 	/^# [0-9]/ && next;
 	/^[ \t]*$/ && next;
@@ -245,10 +254,10 @@ unless ($debug) {
     }
 }
 
-`/bin/rm -f /tmp/sperl$$ /tmp/sperl2$$`;
+unlink "/tmp/sperl$$", "/tmp/sperl2$$";
 
 sub Die {
-    `/bin/rm -f /tmp/sperl$$ /tmp/sperl2$$`;
+    unlink "/tmp/sperl$$", "/tmp/sperl2$$";
     die $_[0];
 }
 sub make_filehandle {
@@ -262,7 +271,7 @@ sub make_filehandle {
 	$_ = $first . $rest;
     }
     if (!$seen{$_}) {
-	$opens .= "open($_,'>$fname') || die \"Can't create $fname.\";\n";
+	$opens .= "open($_,'>$fname') || die \"Can't create $fname\";\n";
     }
     $seen{$_} = $_;
 }
@@ -398,12 +407,12 @@ ${space}next line;";
 		    $len++;
 		}
 	    }
-	    print "repl $repl end $end $_\n";
-	    do Die("Malformed substitution at line $.") unless $end;
+	    do Die("Malformed substitution at line $.\n") unless $end;
 	    $pat = substr($_, 0, $repl + 1);
 	    $repl = substr($_, $repl + 1, $end - $repl - 1);
 	    $end = substr($_, $end + 1, 1000);
 	    $dol = '$';
+	    $repl =~ s/\$/\\$/;
 	    $repl =~ s'&'$&'g;
 	    $repl =~ s/[\\]([0-9])/$dol$1/g;
 	    $subst = "$pat$repl$delim";
@@ -417,7 +426,7 @@ ${space}next line;";
 		    $end = '';
 		    next;
 		}
-		do Die("Unrecognized substitution command ($end) at line $.");
+		do Die("Unrecognized substitution command ($end) at line $.\n");
 	    }
 	    $_ = $subst . $cmd . ';';
 	    next;

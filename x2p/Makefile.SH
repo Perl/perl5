@@ -6,7 +6,7 @@ case $CONFIG in
 	ln ../../../config.sh . || \
 	(echo "Can't find config.sh."; exit 1)
     fi
-    . config.sh
+    . ./config.sh
     ;;
 esac
 case "$0" in
@@ -18,14 +18,11 @@ case "$mallocsrc" in
 esac
 echo "Extracting x2p/Makefile (with variable substitutions)"
 cat >Makefile <<!GROK!THIS!
-# $Header: Makefile.SH,v 1.0.1.1 88/01/26 14:15:24 root Exp $
+# $Header: Makefile.SH,v 2.0 88/06/05 00:15:31 root Exp $
 #
 # $Log:	Makefile.SH,v $
-# Revision 1.0.1.1  88/01/26  14:15:24  root
-# Added mallocsrc stuff.
-# 
-# Revision 1.0  87/12/18  17:50:17  root
-# Initial revision
+# Revision 2.0  88/06/05  00:15:31  root
+# Baseline version 2.0.
 # 
 # 
 
@@ -79,11 +76,11 @@ a2p: $(obj) a2p.o
 	$(CC) $(LDFLAGS) $(LARGE) $(obj) a2p.o $(libs) -o a2p
 
 a2p.c: a2p.y
-	@ echo Expect 107 shift/reduce errors...
+	@ echo Expect 103 shift/reduce errors...
 	yacc a2p.y
 	mv y.tab.c a2p.c
 
-a2p.o: a2p.c a2py.c a2p.h EXTERN.h util.h INTERN.h handy.h
+a2p.o: a2p.c a2py.c a2p.h EXTERN.h util.h INTERN.h handy.h ../config.h
 	$(CC) -c $(CFLAGS) $(LARGE) a2p.c
 
 # if a .h file depends on another .h file...
@@ -92,23 +89,22 @@ $(h):
 install: a2p s2p
 # won't work with csh
 	export PATH || exit 1
-	- mv $(bin)/a2p $(bin)/a2p.old
+	- mv $(bin)/a2p $(bin)/a2p.old 2>/dev/null
 	- mv $(bin)/s2p $(bin)/s2p.old
 	- if test `pwd` != $(bin); then cp $(public) $(bin); fi
 	cd $(bin); \
 for pub in $(public); do \
-chmod 755 `basename $$pub`; \
+chmod +x `basename $$pub`; \
 done
-	- test $(bin) = /bin || rm -f /bin/a2p
-#	chmod 755 makedir
-#	- makedir `filexp $(lib)`
+#	chmod +x makedir
+#	- ./makedir `filexp $(lib)`
 #	- \
 #if test `pwd` != `filexp $(lib)`; then \
 #cp $(private) `filexp $(lib)`; \
 #fi
 #	cd `filexp $(lib)`; \
 #for priv in $(private); do \
-#chmod 755 `basename $$priv`; \
+#chmod +x `basename $$priv`; \
 #done
 	- if test `pwd` != $(mansrc); then \
 for page in $(manpages); do \

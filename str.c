@@ -1,18 +1,12 @@
-/* $Header: str.c,v 1.0.1.1 88/01/21 21:28:39 root Exp $
+/* $Header: str.c,v 2.0 88/06/05 00:11:07 root Exp $
  *
  * $Log:	str.c,v $
- * Revision 1.0.1.1  88/01/21  21:28:39  root
- * Suppressed warning messages on signed vs unsigned chars in str_gets().
- * 
- * Revision 1.0  87/12/18  13:06:22  root
- * Initial revision
+ * Revision 2.0  88/06/05  00:11:07  root
+ * Baseline version 2.0.
  * 
  */
 
-#include "handy.h"
 #include "EXTERN.h"
-#include "search.h"
-#include "util.h"
 #include "perl.h"
 
 str_reset(s)
@@ -43,8 +37,15 @@ register char *s;
 	    for (stab = stab_index[i]; stab; stab = stab->stab_next) {
 		str = stab->stab_val;
 		str->str_cur = 0;
+		str->str_nok = 0;
 		if (str->str_ptr != Nullch)
 		    str->str_ptr[0] = '\0';
+		if (stab->stab_array) {
+		    aclear(stab->stab_array);
+		}
+		if (stab->stab_hash) {
+		    hclear(stab->stab_hash);
+		}
 	    }
 	}
     }
@@ -59,20 +60,36 @@ double num;
     str->str_nok = 1;		/* validate number */
 }
 
+extern int errno;
+
 char *
 str_2ptr(str)
 register STR *str;
 {
     register char *s;
+    int olderrno;
 
     if (!str)
 	return "";
     GROWSTR(&(str->str_ptr), &(str->str_len), 24);
     s = str->str_ptr;
     if (str->str_nok) {
+	olderrno = errno;	/* some Xenix systems wipe out errno here */
+#if defined(scs) && defined(ns32000)
+	gcvt(str->str_nval,20,s);
+#else
+#ifdef apollo
+	if (str->str_nval == 0.0)
+	    strcpy(s,"0");
+	else
+#endif /*apollo*/
 	sprintf(s,"%.20g",str->str_nval);
+#endif /*scs*/
+	errno = olderrno;
 	while (*s) s++;
     }
+    else if (dowarn)
+	warn("Use of uninitialized variable");
     *s = '\0';
     str->str_cur = s - str->str_ptr;
     str->str_pok = 1;
@@ -91,8 +108,12 @@ register STR *str;
 	return 0.0;
     if (str->str_len && str->str_pok)
 	str->str_nval = atof(str->str_ptr);
-    else
+    else {
+	if (dowarn)
+	    fprintf(stderr,"Use of uninitialized variable in %s line %ld.\n",
+		filename,(long)line);
 	str->str_nval = 0.0;
+    }
     str->str_nok = 1;
 #ifdef DEBUGGING
     if (debug & 32)
@@ -175,6 +196,8 @@ str_scat(dstr,sstr)
 STR *dstr;
 register STR *sstr;
 {
+    if (!sstr)
+	return;
     if (!(sstr->str_pok))
 	str_2ptr(sstr);
     if (sstr)
@@ -356,7 +379,7 @@ register FILE *fp;
 	bpx = bp - str->str_ptr;	/* prepare for possible relocation */
 	if (get_paragraph && oldbp)
 	    obpx = oldbp - str->str_ptr;
-	GROWSTR(&(str->str_ptr), &(str->str_len), str->str_cur + cnt + 1);
+	GROWSTR(&(str->str_ptr), &(str->str_len), bpx + cnt + 2);
 	bp = str->str_ptr + bpx;	/* reconstitute our pointer */
 	if (get_paragraph && oldbp)
 	    oldbp = str->str_ptr + obpx;
@@ -407,7 +430,11 @@ register char *s;
 
     str_set(str,"");
     while (*s) {
-	if (*s == '\\' && s[1] == '$') {
+	if (*s == '\\' && s[1] == '\\') {
+	    str_ncat(str, t, s++ - t);
+	    t = s++;
+	}
+	else if (*s == '\\' && s[1] == '$') {
 	    str_ncat(str, t, s++ - t);
 	    t = s++;
 	}
@@ -438,36 +465,47 @@ register STR *str;
 	str->str_pok = 0;
 	return;
     }
-    if (!str->str_pok) {
+    if (!str->str_pok || !*str->str_ptr) {
 	str->str_nval = 1.0;
 	str->str_nok = 1;
 	return;
     }
-    for (d = str->str_ptr; *d && *d != '.'; d++) ;
-    d--;
-    if (!isdigit(*str->str_ptr) || !isdigit(*d) ) {
+    d = str->str_ptr;
+    while (isalpha(*d)) d++;
+    while (isdigit(*d)) d++;
+    if (*d) {
         str_numset(str,atof(str->str_ptr) + 1.0);  /* punt */
 	return;
     }
+    d--;
     while (d >= str->str_ptr) {
-	if (++*d <= '9')
-	    return;
-	*(d--) = '0';
+	if (isdigit(*d)) {
+	    if (++*d <= '9')
+		return;
+	    *(d--) = '0';
+	}
+	else {
+	    ++*d;
+	    if (isalpha(*d))
+		return;
+	    *(d--) -= 'z' - 'a' + 1;
+	}
     }
     /* oh,oh, the number grew */
     GROWSTR(&(str->str_ptr), &(str->str_len), str->str_cur + 2);
     str->str_cur++;
     for (d = str->str_ptr + str->str_cur; d > str->str_ptr; d--)
 	*d = d[-1];
-    *d = '1';
+    if (isdigit(d[1]))
+	*d = '1';
+    else
+	*d = d[1];
 }
 
 void
 str_dec(str)
 register STR *str;
 {
-    register char *d;
-
     if (!str)
 	return;
     if (str->str_nok) {
@@ -480,17 +518,7 @@ register STR *str;
 	str->str_nok = 1;
 	return;
     }
-    for (d = str->str_ptr; *d && *d != '.'; d++) ;
-    d--;
-    if (!isdigit(*str->str_ptr) || !isdigit(*d) || (*d == '0' && d == str->str_ptr)) {
-        str_numset(str,atof(str->str_ptr) - 1.0);  /* punt */
-	return;
-    }
-    while (d >= str->str_ptr) {
-	if (--*d >= '0')
-	    return;
-	*(d--) = '9';
-    }
+    str_numset(str,atof(str->str_ptr) - 1.0);
 }
 
 /* make a string that will exist for the duration of the expression eval */
@@ -508,7 +536,7 @@ STR *oldstr;
 	if (!(tmps_size & 127)) {
 	    if (tmps_size)
 		tmps_list = (STR**)saferealloc((char*)tmps_list,
-		    (tmps_size + 128) * sizeof(STR*) );
+		    (MEM_SIZE)((tmps_size + 128) * sizeof(STR*)) );
 	    else
 		tmps_list = (STR**)safemalloc(128 * sizeof(char*));
 	}

@@ -1,9 +1,9 @@
 .rn '' }`
-''' $Header: a2p.man,v 1.0 87/12/18 17:23:56 root Exp $
+''' $Header: a2p.man,v 2.0 88/06/05 00:15:36 root Exp $
 ''' 
 ''' $Log:	a2p.man,v $
-''' Revision 1.0  87/12/18  17:23:56  root
-''' Initial revision
+''' Revision 2.0  88/06/05  00:15:36  root
+''' Baseline version 2.0.
 ''' 
 ''' 
 .de Sh
@@ -28,11 +28,11 @@
 '''     string Tr holds user defined translation string.
 '''     Bell System Logo is used as a dummy character.
 '''
-.tr \(bs-|\(bv\*(Tr
+.tr \(*W-|\(bv\*(Tr
 .ie n \{\
-.ds -- \(bs-
-.if (\n(.H=4u)&(1m=24u) .ds -- \(bs\h'-12u'\(bs\h'-12u'-\" diablo 10 pitch
-.if (\n(.H=4u)&(1m=20u) .ds -- \(bs\h'-12u'\(bs\h'-8u'-\" diablo 12 pitch
+.ds -- \(*W-
+.if (\n(.H=4u)&(1m=24u) .ds -- \(*W\h'-12u'\(*W\h'-12u'-\" diablo 10 pitch
+.if (\n(.H=4u)&(1m=20u) .ds -- \(*W\h'-12u'\(*W\h'-8u'-\" diablo 12 pitch
 .ds L" ""
 .ds R" ""
 .ds L' '

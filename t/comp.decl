@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: comp.decl,v 1.0 87/12/18 13:12:27 root Exp $
+# $Header: comp.decl,v 2.0 88/06/05 00:12:40 root Exp $
 
 # check to see if subroutine declarations work everwhere
 

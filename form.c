@@ -1,15 +1,12 @@
-/* $Header: form.c,v 1.0 87/12/18 13:05:07 root Exp $
+/* $Header: form.c,v 2.0 88/06/05 00:08:57 root Exp $
  *
  * $Log:	form.c,v $
- * Revision 1.0  87/12/18  13:05:07  root
- * Initial revision
+ * Revision 2.0  88/06/05  00:08:57  root
+ * Baseline version 2.0.
  * 
  */
 
-#include "handy.h"
 #include "EXTERN.h"
-#include "search.h"
-#include "util.h"
 #include "perl.h"
 
 /* Forms stuff */
@@ -57,7 +54,7 @@ register FCMD *fcmd;
 	    orec->o_lines++;
 	    break;
 	case F_LEFT:
-	    str = eval(fcmd->f_expr,Null(char***),(double*)0);
+	    str = eval(fcmd->f_expr,Null(STR***),-1);
 	    s = str_get(str);
 	    size = fcmd->f_size;
 	    CHKLEN(size);
@@ -101,7 +98,7 @@ register FCMD *fcmd;
 	    }
 	    break;
 	case F_RIGHT:
-	    t = s = str_get(eval(fcmd->f_expr,Null(char***),(double*)0));
+	    t = s = str_get(eval(fcmd->f_expr,Null(STR***),-1));
 	    size = fcmd->f_size;
 	    CHKLEN(size);
 	    chophere = Nullch;
@@ -150,7 +147,7 @@ register FCMD *fcmd;
 	case F_CENTER: {
 	    int halfsize;
 
-	    t = s = str_get(eval(fcmd->f_expr,Null(char***),(double*)0));
+	    t = s = str_get(eval(fcmd->f_expr,Null(STR***),-1));
 	    size = fcmd->f_size;
 	    CHKLEN(size);
 	    chophere = Nullch;
@@ -207,7 +204,7 @@ register FCMD *fcmd;
 	    break;
 	}
 	case F_LINES:
-	    str = eval(fcmd->f_expr,Null(char***),(double*)0);
+	    str = eval(fcmd->f_expr,Null(STR***),-1);
 	    s = str_get(str);
 	    size = str_len(str);
 	    CHKLEN(size);
@@ -240,7 +237,8 @@ register STIO *stio;
 
 #ifdef DEBUGGING
     if (debug & 256)
-	fprintf(stderr,"left=%d, todo=%d\n",stio->lines_left, orec->o_lines);
+	fprintf(stderr,"left=%ld, todo=%ld\n",
+	  (long)stio->lines_left, (long)orec->o_lines);
 #endif
     if (stio->lines_left < orec->o_lines) {
 	if (!stio->top_stab) {

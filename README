@@ -1,7 +1,7 @@
 
-			Perl Kit, Version 1.0
+			Perl Kit, Version 2.0
 
-		    Copyright (c) 1987, Larry Wall
+		    Copyright (c) 1988, Larry Wall
 
 You may copy the perl kit in whole or in part as long as you don't try to
 make money off it, or pretend that you wrote it.
@@ -52,7 +52,9 @@ Installation
 
     This will run the regression tests on the perl you just made.
     If it doesn't say "All tests successful" then something went wrong.
-    See the README in the t subdirectory.
+    See the README in the t subdirectory.  Note that you can't run it
+    in background if this disables opening of /dev/tty.  If in doubt, just
+    cd to the t directory and run TEST by hand.
 
 6)  make install
 

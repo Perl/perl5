@@ -1,8 +1,8 @@
-/* $Header: str.h,v 1.0 87/12/18 13:07:30 root Exp $
+/* $Header: str.h,v 2.0 88/06/05 00:16:05 root Exp $
  *
  * $Log:	str.h,v $
- * Revision 1.0  87/12/18  13:07:30  root
- * Initial revision
+ * Revision 2.0  88/06/05  00:16:05  root
+ * Baseline version 2.0.
  * 
  */
 
