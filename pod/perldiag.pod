@@ -334,13 +334,9 @@ system malloc().
 
 =item Bad index while coercing array into hash
 
-(F) A field name of a typed variable was looked up in the %FIELDS
-hash, but the index found was not legal, i.e. less than 1.
-
-=item Bad index while coercing array into hash
-
-(F) The index looked up in the hash found as 0'th element of the array
-is not legal.  Index values must be at 1 or greater.
+(F) The index looked up in the hash found as the 0'th element of a
+pseudo-hash is not legal.  Index values must be at 1 or greater.
+See L<perlref>.
 
 =item Bad name after %s::
 
