@@ -6,11 +6,21 @@ our $VERSION = '0.01';
 # use warnings;
 
 my $hint=0x01000000;
+my $seen_hint=0x02000000;
 
 sub syntax_error ($$) {
     my ($expr, $why)=@_;
     require Carp;
     Carp::croak("syntax error on assertion filter '$expr' ($why)");
+}
+
+sub my_warn ($) {
+    my $error=shift;
+    require warnings;
+    if (warnings::enabled('assertions')) {
+	require Carp;
+	Carp::carp($error);
+    }
 }
 
 sub calc_expr {
@@ -30,6 +40,8 @@ sub calc_expr {
     my @op='start';
 
     for my $t (@tokens) {
+	next if (!defined $t or $t eq '');
+
 	if ($t eq '(') {
 	    unshift @now, 1;
 	    unshift @op, 'start';
@@ -45,9 +57,6 @@ sub calc_expr {
 		    and syntax_error $expr, 'consecutive operators';
 		$op[0]='&&';
 	    }
-	    elsif (!defined $t or $t eq '') {
-		# warn "empty token";
-	    }
 	    else {
 		if ($t eq ')') {
 		    @now==1 and
@@ -59,6 +68,9 @@ sub calc_expr {
 		    shift @op;
 		}
 		elsif ($t eq '_') {
+		    unless ($^H & $seen_hint) {
+			my_warn "assertion status '_' referenced but not previously defined";
+		    }
 		    $t=($^H & $hint) ? 1 : 0;
 		}
 		elsif ($t ne '0' and $t ne '1') {
@@ -98,11 +110,12 @@ sub import {
 	unless (calc_expr $expr) {
 	    # print STDERR "assertions deactived";
 	    $^H &= ~$hint;
+	    $^H |= $seen_hint;
 	    return;
 	}
     }
     # print STDERR "assertions actived";
-    $^H |= $hint;
+    $^H |= $hint|$seen_hint;
 }
 
 

@@ -3241,7 +3241,9 @@ enum {		/* pass one of these to get_vtbl */
 #define HINT_FILETEST_ACCESS	0x00400000 /* filetest pragma */
 #define HINT_UTF8		0x00800000 /* utf8 pragma */
 
+/* assertions pragma */
 #define HINT_ASSERTING          0x01000000
+#define HINT_ASSERTIONSSEEN     0x02000000
 
 /* The following are stored in $sort::hints, not in PL_hints */
 #define HINT_SORT_SORT_BITS	0x000000FF /* allow 256 different ones */

@@ -5814,7 +5814,13 @@ Perl_ck_subr(pTHX_ OP *o)
 			if (PERLDB_ASSERTION && PL_curstash != PL_debstash)
 			    o->op_private |= OPpENTERSUB_DB;
 		    }
-		    else delete=1;
+		    else {
+			delete=1;
+			if (ckWARN(WARN_ASSERTIONS) && !(PL_hints & HINT_ASSERTIONSSEEN)) {
+			    Perl_warner(aTHX_ packWARN(WARN_ASSERTIONS),
+					"Impossible to activate assertion call");
+			}
+		    }
 		}
 	    }
 	}

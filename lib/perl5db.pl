@@ -332,17 +332,10 @@ BEGIN { $ini_warn = $^W; $^W = 0 } # Switch compilation warnings off until anoth
 # test if assertions are supported and actived:
 BEGIN {
     $ini_assertion=
-      eval "sub asserting_test : assertion {1}; asserting_test()";
+	eval "sub asserting_test : assertion {1}; 1";
     # $ini_assertion = undef => assertions unsupported,
-    #        "       = 0 => assertions supported but inactive
-    #        "       = 1 => assertions suported and active
+    #        "       = 1     => assertions suported
     # print "\$ini_assertion=$ini_assertion\n";
-}
-INIT { # We use also INIT {} because test doesn't work in BEGIN {} if
-       # '-A' flag is in the perl script source file after the shebang
-       # as in '#!/usr/bin/perl -A'
-    $ini_assertion=
-      eval "sub asserting_test1 : assertion {1}; asserting_test1()";
 }
 
 local($^W) = 0;			# Switch run-time warnings off during init.
@@ -1001,7 +994,10 @@ EOP
 		        print $OUT "Warning: some settings and command-line options may be lost!\n";
 			my (@script, @flags, $cl);
 			push @flags, '-w' if $ini_warn;
-			push @flags, '-A' if $ini_assertion;
+			if ($ini_assertion and @{^ASSERTING}) {
+			    push @flags, (map { /\:\^\(\?\:(.*)\)\$\)/ ?
+						"-A$1" : "-A$_" } @{^ASSERTING});
+			}
 			# Put all the old includes at the start to get
 			# the same debugger.
 			for (@ini_INC) {
@@ -2630,23 +2626,23 @@ sub OnlyAssertions {
         &warn("Too late to set up OnlyAssertions mode, enabled on next 'R'!\n") if @_;
     }
     if (@_) {
-      unless (defined $ini_assertion) {
-	if ($term) {
-	  &warn("Current Perl interpreter doesn't support assertions");
+	unless (defined $ini_assertion) {
+	    if ($term) {
+		&warn("Current Perl interpreter doesn't support assertions");
+	    }
+	    return 0;
 	}
-	return 0;
-      }
-      if (shift) {
-	unless ($ini_assertion) {
-	  print "Assertions will also be actived on next 'R'!\n";
-	  $ini_assertion=1;
+	if (shift) {
+	    unless ($ini_assertion) {
+		print "Assertions will be active on next 'R'!\n";
+		$ini_assertion=1;
+	    }
+	    $^P&= ~$DollarCaretP_flags{PERLDBf_SUB};
+	    $^P|=$DollarCaretP_flags{PERLDBf_ASSERTION};
 	}
-	$^P&= ~$DollarCaretP_flags{PERLDBf_SUB};
-	$^P|=$DollarCaretP_flags{PERLDBf_ASSERTION};
-      }
-      else {
-	$^P|=$DollarCaretP_flags{PERLDBf_SUB};
-      }
+	else {
+	    $^P|=$DollarCaretP_flags{PERLDBf_SUB};
+	}
     }
     !($^P & $DollarCaretP_flags{PERLDBf_SUB}) || 0;
 }
