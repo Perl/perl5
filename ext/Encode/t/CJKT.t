@@ -26,7 +26,7 @@ use Encode;
 use File::Basename;
 use File::Spec;
 use File::Compare qw(compare_text);
-our $DEBUG;
+our $DEBUG = shift || 0;
 
 my %Charset =
     (
@@ -42,6 +42,7 @@ my %Charset =
     );
 
 my $dir = dirname(__FILE__);
+my $seq = 1;
 
 for my $charset (sort keys %Charset){
     my ($src, $uni, $dst, $txt);
@@ -62,8 +63,8 @@ for my $charset (sort keys %Charset){
     
     eval{ $uni = $transcoder->decode($txt, 1) }; 
     $@ and print $@;
-    ok(defined($uni),  "decode $charset");
-    is(length($txt),0, "decode $charset completely");
+    ok(defined($uni),  "decode $charset"); $seq++;
+    is(length($txt),0, "decode $charset completely"); $seq++;
     
     open $dst, ">$dst_utf" or die "$dst_utf : $!";
     if (PerlIO::Layer->find('perlio')){
@@ -76,7 +77,9 @@ for my $charset (sort keys %Charset){
     }
 
     close($dst); 
-    is(compare_text($dst_utf, $src_utf), 0, "$dst_utf eq $src_utf");
+    is(compare_text($dst_utf, $src_utf), 0, "$dst_utf eq $src_utf")
+	or ($DEBUG and rename $dst_utf, "$dst_utf.$seq");
+    $seq++;
     
     open $src, "<$src_utf" or die "$src_utf : $!";
     if (PerlIO::Layer->find('perlio')){
@@ -91,18 +94,21 @@ for my $charset (sort keys %Charset){
 
     eval{ $txt = $transcoder->encode($uni,1) };    
     $@ and print $@;
-    ok(defined($txt),   "encode $charset");
-    is(length($uni), 0, "encode $charset completely");
+    ok(defined($txt),   "encode $charset"); $seq++;
+    is(length($uni), 0, "encode $charset completely");  $seq++;
 
     open $dst,">$dst_enc" or die "$dst_utf : $!";
     binmode($dst);
     print $dst $txt;
     close($dst); 
-    is(compare_text($src_enc, $dst_enc), 0 => "$dst_enc eq $src_enc");
-
+    is(compare_text($src_enc, $dst_enc), 0 => "$dst_enc eq $src_enc")
+	or ($DEBUG and rename $dst_enc, "$dst_enc.$seq");
+    $seq++;
+    
     for my $canon (@{$Charset{$charset}}){
 	is($uni, decode($canon, encode($canon, $uni)), 
 	   "RT/$charset/$canon");
+	$seq++;
      }
-    $DEBUG or unlink($dst_utf, $dst_enc);
+    unlink($dst_utf, $dst_enc);
 }

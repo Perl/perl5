@@ -1,9 +1,22 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.63 2002/04/27 18:59:50 dankogai Exp $
+# $Id: Changes,v 1.64 2002/04/29 06:54:06 dankogai Exp $
 #
 
-$Revision: 1.63 $ $Date: 2002/04/27 18:59:50 $
+$Revision: 1.64 $ $Date: 2002/04/29 06:54:06 $
+! ucm/euc-jp.ucm
+  Now decodes euc-jisx0213 also.  CAVEAT: encode("euc-jp"...) and
+  encocde("euc-jisx0213") are still DIFFERENT.
+  Message-Id: <A5DFA5CA-5B3C-11D6-A54F-00039301D480@dan.co.jp>
+! Encode.xs
+  A few white spaces corrected by NI-XS via PerlIO integration to 
+  Mainline
+  Subject: Change 16247: Integrate perlio;
+! Encode.pm
+  Document fixes by Andreas
+  Message-Id: <m3k7qsf1we.fsf@anima.de>
+
+1.63 2002/04/27 18:59:50
 ! lib/Encode/Encoding.pm
 ! Encoding.pm Unicode/Unicode.pm lib/Encode/Guess.pm lib/Encode/CN/HZ.pm 
 ! lib/Encode/JP/JIS7.pm lib/Encode/MIME/Header.pm lib/Encode/KR/2022_KR.pm 
@@ -528,7 +541,7 @@ $Revision: 1.63 $ $Date: 2002/04/27 18:59:50 $
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/04/27 18:59:50 $
+1.11  $Date: 2002/04/29 06:54:06 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST
