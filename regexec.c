@@ -1790,7 +1790,8 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 
     /* XXXX What this code is doing here?!!!  There should be no need
        to do this again and again, PL_reglastparen should take care of
-       this!  */
+       this!  --ilya*/
+    /* Tests pat.t#187 and split.t#{13,14} seem to depend on this. --jhi */
     sp = prog->startp;
     ep = prog->endp;
     if (prog->nparens) {
