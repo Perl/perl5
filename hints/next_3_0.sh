@@ -35,10 +35,15 @@ d_strcoll='undef'
 # with Larry's malloc on NS 3.2 due to broken sbrk()
 usemymalloc='n'
 d_uname='define'
-d_setpgid='define'
-d_setsid='define'
-d_tcgetpgrp='define'
-d_tcsetpgrp='define'
+
+# Thanks to Etienne Grossman <etienne@isr.isr.ist.utl.pt> for sending
+# the correct values for perl5.003_11 for the following 4
+# variables. For older version all four were defined.
+d_setsid='undef'
+d_tcgetpgrp='undef'
+d_tcsetpgrp='undef'
+d_setpgid='undef'
+
 #
 # On some NeXT machines, the timestamp put by ranlib is not correct, and
 # this may cause useless recompiles.  Fix that by adding a sleep before

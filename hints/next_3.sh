@@ -6,7 +6,54 @@
 # special hint file.
 #
 
-ccflags='-DUSE_NEXT_CTYPE -DUSE_PERL_SBRK -DHIDEMYMALLOC'
+######################################################################
+# THE MALLOC STORY
+######################################################################
+# 1994:
+# the simple program `for ($i=1;$i<38771;$i++){$t{$i}=123}' fails
+# with Larry's malloc on NS 3.2 due to broken sbrk()
+#
+# setting usemymalloc='n' was the solution back then. Later came
+# reports that perl would run unstable on 3.2:
+#
+# 1996:
+# From about perl5.002beta1h perl became unstable on the
+# NeXT. Intermittent coredumps were frequent on 3.2 OS. There were
+# reports, that the developer version of 3.3 didn't have problems, so it
+# seemed pretty obvious that we had to work around an malloc bug in 3.2.
+# This hints file reflects a patch to perl5.002_01 that introduces a
+# home made sbrk routine (remember, NeXT's sbrk _never_ worked). This
+# sbrk makes it possible to run perl with its own malloc. Thanks to
+# Ilya who showed me the way to his sbrk for OS/2!!
+#
+# The whole malloc desaster lead to a failing gdbm test. It is far
+# beyond my understanding, why GDBM_File breaks with the "fix", but in
+# general I consider it better to have a working perl with broken GDBM
+# than no perl at all.
+#
+# So, this hintsfile is using perl's malloc. If you want to turn
+# perl's malloc off, you need to remove '-DUSE_PERL_SBRK' and
+# '-DHIDEMYMALLOC' from the ccflags and set usemymalloc to 'n'.
+#
+# 1997:
+# From perl5.003_22 the malloc bug has no impact any more. We can run
+# a perl without a special sbrk. Apparently Chip Salzenberg, the hero
+# of 5.004 anyway, earned another trophy during Australien Open.
+#
+# use the following two lines to enable USE_PERL_SBRK. Try this if you
+# encounter intermittent core dumps:
+#ccflags='-DUSE_NEXT_CTYPE -DUSE_PERL_SBRK -DHIDEMYMALLOC'
+#usemymalloc='y'
+# use the following two lines if you have perl5.003_22 or better and
+# do not encounter intermittent core dumps.
+
+ccflags='-DUSE_NEXT_CTYPE'
+usemymalloc='n'
+
+######################################################################
+# End of the MALLOC story
+######################################################################
+
 ldflags='-u libsys_s'
 libswanted='dbm gdbm db'
 
@@ -25,7 +72,6 @@ do
        mab="$mab -arch $d"
 done
 
-
 archname='next-fat'
 ld='cc'
 
@@ -33,34 +79,6 @@ i_utime='undef'
 groupstype='int'
 direntrytype='struct direct'
 d_strcoll='undef'
-
-######################################################################
-# THE MALLOC STORY
-######################################################################
-# 1994:
-# the simple program `for ($i=1;$i<38771;$i++){$t{$i}=123}' fails
-# with Larry's malloc on NS 3.2 due to broken sbrk()
-#
-# setting usemymalloc='n' was the solution back then. Later came
-# reports that perl would run unstable on 3.2:
-#
-# From about perl5.002beta1h perl became unstable on the
-# NeXT. Intermittent coredumps were frequent on 3.2 OS. There were
-# reports, that the developer version of 3.3 didn't have problems, so it
-# seemed pretty obvious that we had to work around an malloc bug in 3.2.
-# This hints file reflects a patch to perl5.002_01 that introduces a
-# home made sbrk routine (remember, NeXT's sbrk _never_ worked). This
-# sbrk makes it possible to run perl with its own malloc. Thanks to
-# Ilya who showed me the way to his sbrk for OS/2!!
-# andreas koenig, 1996-06-16
-#
-# So, this hintsfile is using perl's malloc. If you want to turn perl's
-# malloc off, you need to change remove '-DUSE_PERL_SBRK' and 
-# '-DHIDEMYMALLOC' from the ccflags above and set usemymalloc below
-# to 'n'.
-#
-######################################################################
-usemymalloc='y'
 
 d_uname='define'
 # setpgid() is in the posix library, but we don't use -posix, so
