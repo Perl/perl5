@@ -1,4 +1,4 @@
-/* $RCSfile: doarg.c,v $$Revision: 4.0.1.5 $$Date: 91/11/11 16:31:58 $
+/* $RCSfile: doarg.c,v $$Revision: 4.0.1.6 $$Date: 92/06/08 12:34:30 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,16 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	doarg.c,v $
+ * Revision 4.0.1.6  92/06/08  12:34:30  lwall
+ * patch20: removed implicit int declarations on funcions
+ * patch20: pattern modifiers i and o didn't interact right
+ * patch20: join() now pre-extends target string to avoid excessive copying
+ * patch20: fixed confusion between a *var's real name and its effective name
+ * patch20: subroutines didn't localize $`, $&, $', $1 et al correctly
+ * patch20: usersub routines didn't reclaim temp values soon enough
+ * patch20: ($<,$>) = ... didn't work on some architectures
+ * patch20: added Atari ST portability
+ * 
  * Revision 4.0.1.5  91/11/11  16:31:58  lwall
  * patch19: added little-endian pack/unpack options
  * 
@@ -53,6 +63,8 @@ extern unsigned char fold[];
  #pragma function(memcmp)
 #endif /* BUGGY_MSC */
 
+static void doencodes();
+
 int
 do_subst(str,arg,sp)
 STR *str;
@@ -90,7 +102,8 @@ int sp;
 	spat->spat_regexp = regcomp(m,m+dstr->str_cur,
 	    spat->spat_flags & SPAT_FOLD);
 	if (spat->spat_flags & SPAT_KEEP) {
-	    scanconst(spat, m, dstr->str_cur);
+	    if (!(spat->spat_flags & SPAT_FOLD))
+		scanconst(spat, m, dstr->str_cur);
 	    arg_free(spat->spat_runtime);	/* it won't change, so */
 	    spat->spat_runtime = Nullarg;	/* no point compiling again */
 	    hoistmust(spat);
@@ -178,12 +191,12 @@ int sp;
 		    s = orig;
 		    if (m - s > strend - d) {	/* faster to shorten from end */
 			if (clen) {
-			    (void)bcopy(c, m, clen);
+			    Copy(c, m, clen, char);
 			    m += clen;
 			}
 			i = strend - d;
 			if (i > 0) {
-			    (void)bcopy(d, m, i);
+			    Move(d, m, i, char);
 			    m += i;
 			}
 			*m = '\0';
@@ -202,7 +215,7 @@ int sp;
 			while (i--)
 			    *--d = *--s;
 			if (clen)
-			    (void)bcopy(c, m, clen);
+			    Copy(c, m, clen, char);
 			STABSET(str);
 			str_numset(arg->arg_ptr.arg_str, 1.0);
 			stack->ary_array[++sp] = arg->arg_ptr.arg_str;
@@ -211,7 +224,7 @@ int sp;
 		    else if (clen) {
 			d -= clen;
 			str_chop(str,d);
-			(void)bcopy(c,d,clen);
+			Copy(c,d,clen,char);
 			STABSET(str);
 			str_numset(arg->arg_ptr.arg_str, 1.0);
 			stack->ary_array[++sp] = arg->arg_ptr.arg_str;
@@ -233,11 +246,11 @@ int sp;
 		    /*SUPPRESS 560*/
 		    if (i = m - s) {
 			if (s != d)
-			    (void)bcopy(s,d,i);
+			    Move(s,d,i,char);
 			d += i;
 		    }
 		    if (clen) {
-			(void)bcopy(c,d,clen);
+			Copy(c,d,clen,char);
 			d += clen;
 		    }
 		    s = spat->spat_regexp->endp[0];
@@ -246,7 +259,7 @@ int sp;
 		if (s != d) {
 		    i = strend - s;
 		    str->str_cur = d - str->str_ptr + i;
-		    (void)bcopy(s,d,i+1);		/* include the Null */
+		    Move(s,d,i+1,char);		/* include the Null */
 		}
 		STABSET(str);
 		str_numset(arg->arg_ptr.arg_str, (double)iters);
@@ -385,19 +398,35 @@ register STR *str;
 int *arglast;
 {
     register STR **st = stack->ary_array;
-    register int sp = arglast[1];
+    int sp = arglast[1];
     register int items = arglast[2] - sp;
     register char *delim = str_get(st[sp]);
+    register STRLEN len;
     int delimlen = st[sp]->str_cur;
 
-    st += ++sp;
+    st += sp + 1;
+
+    len = delimlen * (items - 1);
+    if (str->str_len < len + items) {	/* current length is way too short */
+	while (items-- > 0) {
+	    if (*st)
+		len += (*st)->str_cur;
+	    st++;
+	}
+	STR_GROW(str, len + 1);		/* so try to pre-extend */
+
+	items = arglast[2] - sp;
+	st -= items;
+    }
+
     if (items-- > 0)
 	str_sset(str, *st++);
     else
 	str_set(str,"");
-    if (delimlen) {
+    len = delimlen;
+    if (len) {
 	for (; items > 0; items--,st++) {
-	    str_ncat(str,delim,delimlen);
+	    str_ncat(str,delim,len);
 	    str_scat(str,*st);
 	}
     }
@@ -780,6 +809,7 @@ int *arglast;
 }
 #undef NEXTFROM
 
+static void
 doencodes(str, s, len)
 register STR *str;
 register char *s;
@@ -938,7 +968,7 @@ register STR **sarg;
 		  && xlen == sizeof(STBP)) {
 		    STR *tmpstr = Str_new(24,0);
 
-		    stab_fullname(tmpstr, ((STAB*)arg)); /* a stab value! */
+		    stab_efullname(tmpstr, ((STAB*)arg)); /* a stab value! */
 		    sprintf(tokenbuf,"*%s",tmpstr->str_ptr);
 					/* reformat to non-binary */
 		    xs = tokenbuf;
@@ -1053,6 +1083,7 @@ int *arglast;
     register int sp = arglast[1];
     register int items = arglast[2] - sp;
     register SUBR *sub;
+    SPAT * VOLATILE oldspat = curspat;
     STR *str;
     STAB *stab;
     int oldsave = savestack->ary_fill;
@@ -1075,13 +1106,13 @@ int *arglast;
     if (!(sub = stab_sub(stab))) {
 	STR *tmpstr = arg[0].arg_ptr.arg_str;
 
-	stab_fullname(tmpstr, stab);
+	stab_efullname(tmpstr, stab);
 	fatal("Undefined subroutine \"%s\" called",tmpstr->str_ptr);
     }
     if (arg->arg_type == O_DBSUBR && !sub->usersub) {
 	str = stab_val(DBsub);
 	saveitem(str);
-	stab_fullname(str,stab);
+	stab_efullname(str,stab);
 	sub = stab_sub(DBsub);
 	if (!sub)
 	    fatal("No DBsub routine");
@@ -1098,6 +1129,7 @@ int *arglast;
     csv->wantarray = gimme;
     csv->hasargs = hasargs;
     curcsv = csv;
+    tmps_base = tmps_max;
     if (sub->usersub) {
 	csv->hasargs = 0;
 	csv->savearray = Null(ARRAY*);;
@@ -1105,28 +1137,30 @@ int *arglast;
 	st[sp] = arg->arg_ptr.arg_str;
 	if (!hasargs)
 	    items = 0;
-	return (*sub->usersub)(sub->userindex,sp,items);
+	sp = (*sub->usersub)(sub->userindex,sp,items);
     }
-    if (hasargs) {
-	csv->savearray = stab_xarray(defstab);
-	csv->argarray = afake(defstab, items, &st[sp+1]);
-	stab_xarray(defstab) = csv->argarray;
+    else {
+	if (hasargs) {
+	    csv->savearray = stab_xarray(defstab);
+	    csv->argarray = afake(defstab, items, &st[sp+1]);
+	    stab_xarray(defstab) = csv->argarray;
+	}
+	sub->depth++;
+	if (sub->depth >= 2) {	/* save temporaries on recursion? */
+	    if (sub->depth == 100 && dowarn)
+		warn("Deep recursion on subroutine \"%s\"",stab_ename(stab));
+	    savelist(sub->tosave->ary_array,sub->tosave->ary_fill);
+	}
+	sp = cmd_exec(sub->cmd,gimme, --sp);	/* so do it already */
     }
-    sub->depth++;
-    if (sub->depth >= 2) {	/* save temporaries on recursion? */
-	if (sub->depth == 100 && dowarn)
-	    warn("Deep recursion on subroutine \"%s\"",stab_name(stab));
-	savelist(sub->tosave->ary_array,sub->tosave->ary_fill);
-    }
-    tmps_base = tmps_max;
-    sp = cmd_exec(sub->cmd,gimme, --sp);	/* so do it already */
-    st = stack->ary_array;
 
+    st = stack->ary_array;
     tmps_base = oldtmps_base;
     for (items = arglast[0] + 1; items <= sp; items++)
 	st[items] = str_mortal(st[items]);
 	    /* in case restore wipes old str */
     restorelist(oldsave);
+    curspat = oldspat;
     return sp;
 }
 
@@ -1264,22 +1298,56 @@ int *arglast;
 	    STABSET(str);
 	}
     }
-    if (delaymagic > 1) {
-	if (delaymagic & DM_REUID) {
+    if (delaymagic & ~DM_DELAY) {
+	if (delaymagic & DM_UID) {
 #ifdef HAS_SETREUID
-	    setreuid(uid,euid);
-#else
-	    if (uid != euid || setuid(uid) < 0)
-		fatal("No setreuid available");
-#endif
+	    (void)setreuid(uid,euid);
+#else /* not HAS_SETREUID */
+#ifdef HAS_SETRUID
+	    if ((delaymagic & DM_UID) == DM_RUID) {
+		(void)setruid(uid);
+		delaymagic =~ DM_RUID;
+	    }
+#endif /* HAS_SETRUID */
+#ifdef HAS_SETEUID
+	    if ((delaymagic & DM_UID) == DM_EUID) {
+		(void)seteuid(uid);
+		delaymagic =~ DM_EUID;
+	    }
+#endif /* HAS_SETEUID */
+	    if (delaymagic & DM_UID) {
+		if (uid != euid)
+		    fatal("No setreuid available");
+		(void)setuid(uid);
+	    }
+#endif /* not HAS_SETREUID */
+	    uid = (int)getuid();
+	    euid = (int)geteuid();
 	}
-	if (delaymagic & DM_REGID) {
+	if (delaymagic & DM_GID) {
 #ifdef HAS_SETREGID
-	    setregid(gid,egid);
-#else
-	    if (gid != egid || setgid(gid) < 0)
-		fatal("No setregid available");
-#endif
+	    (void)setregid(gid,egid);
+#else /* not HAS_SETREGID */
+#ifdef HAS_SETRGID
+	    if ((delaymagic & DM_GID) == DM_RGID) {
+		(void)setrgid(gid);
+		delaymagic =~ DM_RGID;
+	    }
+#endif /* HAS_SETRGID */
+#ifdef HAS_SETEGID
+	    if ((delaymagic & DM_GID) == DM_EGID) {
+		(void)setegid(gid);
+		delaymagic =~ DM_EGID;
+	    }
+#endif /* HAS_SETEGID */
+	    if (delaymagic & DM_GID) {
+		if (gid != egid)
+		    fatal("No setregid available");
+		(void)setgid(gid);
+	    }
+#endif /* not HAS_SETREGID */
+	    gid = (int)getgid();
+	    egid = (int)getegid();
 	}
     }
     delaymagic = 0;
@@ -1498,7 +1566,7 @@ int *arglast;
     else {
 	if (len > str->str_cur) {
 	    STR_GROW(str,len);
-	    (void)bzero(str->str_ptr + str->str_cur, len - str->str_cur);
+	    (void)memzero(str->str_ptr + str->str_cur, len - str->str_cur);
 	    str->str_cur = len;
 	}
 	s = (unsigned char*)str_get(str);
@@ -1571,6 +1639,7 @@ STR *str;
     }
 }
 
+void
 do_chop(astr,str)
 register STR *astr;
 register STR *str;
@@ -1610,6 +1679,7 @@ register STR *str;
 	str_nset(astr,"",0);
 }
 
+void
 do_vop(optype,str,left,right)
 STR *str;
 STR *left;
@@ -1627,7 +1697,7 @@ STR *right;
 	str->str_cur = len;
     else if (str->str_cur < len) {
 	STR_GROW(str,len);
-	(void)bzero(str->str_ptr + str->str_cur, len - str->str_cur);
+	(void)memzero(str->str_ptr + str->str_cur, len - str->str_cur);
 	str->str_cur = len;
     }
     str->str_pok = 1;
@@ -1666,7 +1736,11 @@ int *arglast;
     register STR **st = stack->ary_array;
     register int sp = arglast[1];
     register int items = arglast[2] - sp;
+#ifdef atarist
+    unsigned long arg[14]; /* yes, we really need that many ! */
+#else
     unsigned long arg[8];
+#endif
     register int i = 0;
     int retval = -1;
 
@@ -1723,6 +1797,32 @@ int *arglast;
 	retval = syscall(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
 	  arg[7]);
 	break;
+#ifdef atarist
+    case 9:
+	retval = syscall(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+	  arg[7], arg[8]);
+	break;
+    case 10:
+	retval = syscall(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+	  arg[7], arg[8], arg[9]);
+	break;
+    case 11:
+	retval = syscall(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+	  arg[7], arg[8], arg[9], arg[10]);
+	break;
+    case 12:
+	retval = syscall(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+	  arg[7], arg[8], arg[9], arg[10], arg[11]);
+	break;
+    case 13:
+	retval = syscall(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+	  arg[7], arg[8], arg[9], arg[10], arg[11], arg[12]);
+	break;
+    case 14:
+	retval = syscall(arg[0],arg[1],arg[2],arg[3],arg[4],arg[5],arg[6],
+	  arg[7], arg[8], arg[9], arg[10], arg[11], arg[12], arg[13]);
+	break;
+#endif /* atarist */
     }
     return retval;
 #else

@@ -1,4 +1,4 @@
-/* $RCSfile: dump.c,v $$Revision: 4.0.1.1 $$Date: 91/06/07 10:58:44 $
+/* $RCSfile: dump.c,v $$Revision: 4.0.1.2 $$Date: 92/06/08 13:14:22 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,10 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	dump.c,v $
+ * Revision 4.0.1.2  92/06/08  13:14:22  lwall
+ * patch20: removed implicit int declarations on funcions
+ * patch20: fixed confusion between a *var's real name and its effective name
+ * 
  * Revision 4.0.1.1  91/06/07  10:58:44  lwall
  * patch4: new copyright notice
  * 
@@ -20,6 +24,9 @@
 #ifdef DEBUGGING
 static int dumplvl = 0;
 
+static void dump();
+
+void
 dump_all()
 {
     register int i;
@@ -40,6 +47,7 @@ dump_all()
     }
 }
 
+void
 dump_cmd(cmd,alt)
 register CMD *cmd;
 register CMD *alt;
@@ -160,6 +168,7 @@ register CMD *alt;
     }
 }
 
+void
 dump_arg(arg)
 register ARG *arg;
 {
@@ -231,6 +240,7 @@ register ARG *arg;
     dump("}\n");
 }
 
+void
 dump_flags(b,flags)
 char *b;
 unsigned int flags;
@@ -256,6 +266,7 @@ unsigned int flags;
 	b[strlen(b)-1] = '\0';
 }
 
+void
 dump_stab(stab)
 register STAB *stab;
 {
@@ -269,11 +280,17 @@ register STAB *stab;
     dumplvl++;
     fprintf(stderr,"{\n");
     stab_fullname(str,stab);
-    dump("STAB_NAME = %s\n", str->str_ptr);
+    dump("STAB_NAME = %s", str->str_ptr);
+    if (stab != stab_estab(stab)) {
+	stab_efullname(str,stab_estab(stab));
+	dump("-> %s", str->str_ptr);
+    }
+    dump("\n");
     dumplvl--;
     dump("}\n");
 }
 
+void
 dump_spat(spat)
 register SPAT *spat;
 {
@@ -307,7 +324,7 @@ register SPAT *spat;
 }
 
 /* VARARGS1 */
-dump(arg1,arg2,arg3,arg4,arg5)
+static void dump(arg1,arg2,arg3,arg4,arg5)
 char *arg1;
 long arg2, arg3, arg4, arg5;
 {

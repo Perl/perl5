@@ -1,4 +1,4 @@
-/* $RCSfile: cons.c,v $$Revision: 4.0.1.2 $$Date: 91/11/05 16:15:13 $
+/* $RCSfile: cons.c,v $$Revision: 4.0.1.3 $$Date: 92/06/08 12:18:35 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,16 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	cons.c,v $
+ * Revision 4.0.1.3  92/06/08  12:18:35  lwall
+ * patch20: removed implicit int declarations on funcions
+ * patch20: deleted some minor memory leaks
+ * patch20: fixed double debug break in foreach with implicit array assignment
+ * patch20: fixed confusion between a *var's real name and its effective name
+ * patch20: Perl now distinguishes overlapped copies from non-overlapped
+ * patch20: debugger sometimes displayed wrong source line
+ * patch20: various error messages have been clarified
+ * patch20: an eval block containing a null block or statement could dump core
+ * 
  * Revision 4.0.1.2  91/11/05  16:15:13  lwall
  * patch11: debugger got confused over nested subroutine definitions
  * patch11: prepared for ctype implementations that don't define isascii()
@@ -29,6 +39,8 @@ extern int yychar;
 static int cmd_tosave();
 static int arg_tosave();
 static int spat_tosave();
+static void make_cswitch();
+static void make_nswitch();
 
 static bool saw_return;
 
@@ -40,8 +52,7 @@ CMD *cmd;
     register SUBR *sub;
     STAB *stab = stabent(name,TRUE);
 
-    Newz(101,sub,1,SUBR);
-    if (stab_sub(stab)) {
+    if (sub = stab_sub(stab)) {
 	if (dowarn) {
 	    CMD *oldcurcmd = curcmd;
 
@@ -50,13 +61,14 @@ CMD *cmd;
 	    warn("Subroutine %s redefined",name);
 	    curcmd = oldcurcmd;
 	}
-	if (stab_sub(stab)->cmd) {
-	    cmd_free(stab_sub(stab)->cmd);
-	    stab_sub(stab)->cmd = Nullcmd;
-	    afree(stab_sub(stab)->tosave);
+	if (!sub->usersub && sub->cmd) {
+	    cmd_free(sub->cmd);
+	    sub->cmd = Nullcmd;
+	    afree(sub->tosave);
 	}
-	Safefree(stab_sub(stab));
+	Safefree(sub);
     }
+    Newz(101,sub,1,SUBR);
     stab_sub(stab) = sub;
     sub->filestab = curcmd->c_filestab;
     saw_return = FALSE;
@@ -69,7 +81,8 @@ CMD *cmd;
 
 	mycompblock.comp_true = cmd;
 	mycompblock.comp_alt = Nullcmd;
-	cmd = add_label(savestr("_SUB_"),make_ccmd(C_BLOCK,Nullarg,mycompblock));
+	cmd = add_label(savestr("_SUB_"),make_ccmd(C_BLOCK,0,
+	    Nullarg,mycompblock));
 	saw_return = FALSE;
 	cmd->c_flags |= CF_TERM;
     }
@@ -83,10 +96,10 @@ CMD *cmd;
 	str_cat(str,"-");
 	sprintf(buf,"%ld",(long)curcmd->c_line);
 	str_cat(str,buf);
-	name = str_get(subname);
-	stab_fullname(tmpstr,stab);
+	stab_efullname(tmpstr,stab);
 	hstore(stab_xhash(DBsub), tmpstr->str_ptr, tmpstr->str_cur, str, 0);
     }
+    Safefree(name);
     return sub;
 }
 
@@ -102,17 +115,17 @@ char *filename;
 
     if (!stab)				/* unused function */
 	return Null(SUBR*);
-    Newz(101,sub,1,SUBR);
-    if (stab_sub(stab)) {
+    if (sub = stab_sub(stab)) {
 	if (dowarn)
 	    warn("Subroutine %s redefined",name);
-	if (stab_sub(stab)->cmd) {
-	    cmd_free(stab_sub(stab)->cmd);
-	    stab_sub(stab)->cmd = Nullcmd;
-	    afree(stab_sub(stab)->tosave);
+	if (!sub->usersub && sub->cmd) {
+	    cmd_free(sub->cmd);
+	    sub->cmd = Nullcmd;
+	    afree(sub->tosave);
 	}
-	Safefree(stab_sub(stab));
+	Safefree(sub);
     }
+    Newz(101,sub,1,SUBR);
     stab_sub(stab) = sub;
     sub->filestab = fstab(filename);
     sub->usersub = subaddr;
@@ -120,6 +133,7 @@ char *filename;
     return sub;
 }
 
+void
 make_form(stab,fcmd)
 STAB *stab;
 FCMD *fcmd;
@@ -188,11 +202,6 @@ register CMD *tail;
 	/* now do a little optimization on case-ish structures */
 	switch(tail->c_flags & (CF_OPTIMIZE|CF_FIRSTNEG|CF_INVERT)) {
 	case CFT_ANCHOR:
-	    if (stabent("*",FALSE)) {	/* bad assumption here!!! */
-		opt = 0;
-		break;
-	    }
-	    /* FALL THROUGH */
 	case CFT_STROP:
 	    opt = (tail->c_flags & CF_NESURE) ? CFT_STROP : 0;
 	    break;
@@ -239,6 +248,7 @@ register CMD *tail;
  * spat.  Thus we can insert a SWITCH in front and jump directly
  * to the correct one.
  */
+static void
 make_cswitch(head,count)
 register CMD *head;
 int count;
@@ -251,12 +261,9 @@ int count;
 
     /* make a new head in the exact same spot */
     New(102,cur, 1, CMD);
-#ifdef STRUCTCOPY
-    *cur = *head;
-#else
-    Copy(head,cur,1,CMD);
-#endif
+    StructCopy(head,cur,CMD);
     Zero(head,1,CMD);
+    head->c_head = cur->c_head;
     head->c_type = C_CSWITCH;
     head->c_next = cur;		/* insert new cmd at front of list */
     head->c_stab = cur->c_stab;
@@ -289,7 +296,7 @@ int count;
     }
     max++;
     if (min > 0)
-	Copy(&loc[min],&loc[0], max - min, CMD*);
+	Move(&loc[min],&loc[0], max - min, CMD*);
     loc--;
     min--;
     max -= min;
@@ -302,6 +309,7 @@ int count;
     head->ucmd.scmd.sc_next = loc;
 }
 
+static void
 make_nswitch(head,count)
 register CMD *head;
 int count;
@@ -339,12 +347,9 @@ int count;
 
     /* now make a new head in the exact same spot */
     New(104,cur, 1, CMD);
-#ifdef STRUCTCOPY
-    *cur = *head;
-#else
-    Copy(head,cur,1,CMD);
-#endif
+    StructCopy(head,cur,CMD);
     Zero(head,1,CMD);
+    head->c_head = cur->c_head;
     head->c_type = C_NSWITCH;
     head->c_next = cur;		/* insert new cmd at front of list */
     head->c_stab = cur->c_stab;
@@ -443,6 +448,7 @@ CMD *cur;
 	stab2arg(A_WORD,DBstab),
 	Nullarg,
 	Nullarg);
+    /*SUPPRESS 53*/
     cmd->c_flags |= CF_COND|CF_DBSUB|CFT_D0;
     cmd->c_line = head->c_line;
     cmd->c_label = head->c_label;
@@ -481,8 +487,9 @@ ARG *arg;
 }
 
 CMD *
-make_ccmd(type,arg,cblock)
+make_ccmd(type,debuggable,arg,cblock)
 int type;
+int debuggable;
 ARG *arg;
 struct compcmd cblock;
 {
@@ -503,7 +510,7 @@ struct compcmd cblock;
     }
     cmd->c_filestab = curcmd->c_filestab;
     cmd->c_stash = curstash;
-    if (perldb)
+    if (perldb && debuggable)
 	cmd = dodb(cmd);
     return cmd;
 }
@@ -545,7 +552,7 @@ struct compcmd cblock;
     if (alt) {			/* a real life ELSE at the end? */
 	ncblock.comp_true = alt;
 	ncblock.comp_alt = Nullcmd;
-	alt = append_line(cur,make_ccmd(C_ELSE,Nullarg,ncblock));
+	alt = append_line(cur,make_ccmd(C_ELSE,1,Nullarg,ncblock));
 	cur->ucmd.ccmd.cc_alt = alt;
     }
     else
@@ -693,6 +700,7 @@ int acmd;
 		sure |= CF_EQSURE;		/* (SUBST must be forced even */
 						/* if we know it will work.) */
 	    if (arg->arg_type != O_SUBST) {
+		str_free(arg[2].arg_ptr.arg_spat->spat_short);
 		arg[2].arg_ptr.arg_spat->spat_short = Nullstr;
 		arg[2].arg_ptr.arg_spat->spat_slen = 0; /* only one chk */
 	    }
@@ -901,6 +909,18 @@ CMD *cmd;
     return cmd;
 }
 
+void
+cpy7bit(d,s,l)
+register char *d;
+register char *s;
+register int l;
+{
+    while (l--)
+	*d++ = *s++ & 127;
+    *d = '\0';
+}
+
+int
 yyerror(s)
 char *s;
 {
@@ -912,16 +932,14 @@ char *s;
       oldoldbufptr != oldbufptr && oldbufptr != bufptr) {
 	while (isSPACE(*oldoldbufptr))
 	    oldoldbufptr++;
-	strncpy(tmp2buf, oldoldbufptr, bufptr - oldoldbufptr);
-	tmp2buf[bufptr - oldoldbufptr] = '\0';
+	cpy7bit(tmp2buf, oldoldbufptr, bufptr - oldoldbufptr);
 	sprintf(tname,"next 2 tokens \"%s\"",tmp2buf);
     }
     else if (bufptr > oldbufptr && bufptr - oldbufptr < 200 &&
       oldbufptr != bufptr) {
 	while (isSPACE(*oldbufptr))
 	    oldbufptr++;
-	strncpy(tmp2buf, oldbufptr, bufptr - oldbufptr);
-	tmp2buf[bufptr - oldbufptr] = '\0';
+	cpy7bit(tmp2buf, oldbufptr, bufptr - oldbufptr);
 	sprintf(tname,"next token \"%s\"",tmp2buf);
     }
     else if (yychar > 256)
@@ -1101,7 +1119,7 @@ register CMD *cmd;
 	cmd->ucmd.ccmd.cc_alt = tail;	/* every loop has a continue now */
 
 #ifndef lint
-    (void)bcopy((char *)cmd, (char *)tail, sizeof(CMD));
+    Copy((char *)cmd, (char *)tail, 1, CMD);
 #endif
     tail->c_type = C_EXPR;
     tail->c_flags ^= CF_INVERT;		/* turn into "last unless" */
@@ -1127,12 +1145,17 @@ register CMD *cmd;
     return cmd;
 }
 
+void
 cmd_free(cmd)
 register CMD *cmd;
 {
     register CMD *tofree;
     register CMD *head = cmd;
 
+    if (!cmd)
+	return;
+    if (cmd->c_head != cmd)
+	warn("Malformed cmd links\n");
     while (cmd) {
 	if (cmd->c_type != C_WHILE) {	/* WHILE block is duplicated */
 	    if (cmd->c_label) {
@@ -1175,11 +1198,14 @@ register CMD *cmd;
     Safefree(head);
 }
 
+void
 arg_free(arg)
 register ARG *arg;
 {
     register int i;
 
+    if (!arg)
+	return;
     for (i = 1; i <= arg->arg_len; i++) {
 	switch (arg[i].arg_type & A_MASK) {
 	case A_NULL:
@@ -1231,12 +1257,15 @@ register ARG *arg;
     free_arg(arg);
 }
 
+void
 spat_free(spat)
 register SPAT *spat;
 {
     register SPAT *sp;
     HENT *entry;
 
+    if (!spat)
+	return;
     if (spat->spat_runtime) {
 	arg_free(spat->spat_runtime);
 	spat->spat_runtime = Nullarg;

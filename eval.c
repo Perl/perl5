@@ -1,4 +1,4 @@
-/* $RCSfile: eval.c,v $$Revision: 4.0.1.3 $$Date: 91/11/05 17:15:21 $
+/* $RCSfile: eval.c,v $$Revision: 4.0.1.4 $$Date: 92/06/08 13:20:20 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,16 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	eval.c,v $
+ * Revision 4.0.1.4  92/06/08  13:20:20  lwall
+ * patch20: added explicit time_t support
+ * patch20: fixed confusion between a *var's real name and its effective name
+ * patch20: added Atari ST portability
+ * patch20: new warning for use of x with non-numeric right operand
+ * patch20: modulus with highest bit in left operand set didn't always work
+ * patch20: dbmclose(%array) didn't work
+ * patch20: added ... as variant on ..
+ * patch20: O_PIPE conflicted with Atari
+ * 
  * Revision 4.0.1.3  91/11/05  17:15:21  lwall
  * patch11: prepared for ctype implementations that don't define isascii()
  * patch11: various portability fixes
@@ -42,6 +52,11 @@
 #endif
 
 #ifdef I_FCNTL
+#include <fcntl.h>
+#endif
+#ifdef MSDOS
+/* I_FCNTL *MUST* not be defined for MS-DOS and OS/2
+   but fcntl.h is required for O_BINARY */
 #include <fcntl.h>
 #endif
 #ifdef I_SYS_FILE
@@ -89,8 +104,10 @@ register int sp;
     int argtype;
     union argptr argptr;
     int arglast[8];	/* highest sp for arg--valid only for non-O_LIST args */
-    unsigned long tmplong;
-    long when;
+    unsigned long tmpulong;
+    long tmplong;
+    time_t when;
+    STRLEN tmplen;
     FILE *fp;
     STR *tmpstr;
     FCMD *form;
@@ -204,7 +221,8 @@ register int sp;
 		stab_io(stab) = stio_new();
 #ifdef DEBUGGING
 	    if (debug & 8) {
-		(void)sprintf(buf,"STAR *%s",stab_name(argptr.arg_stab));
+		(void)sprintf(buf,"STAR *%s -> *%s",
+		    stab_name(argptr.arg_stab), stab_ename(argptr.arg_stab));
 		tmps = buf;
 	    }
 #endif
@@ -213,7 +231,8 @@ register int sp;
 	    str = st[++sp] = (STR*)argptr.arg_stab;
 #ifdef DEBUGGING
 	    if (debug & 8) {
-		(void)sprintf(buf,"LSTAR *%s",stab_name(argptr.arg_stab));
+		(void)sprintf(buf,"LSTAR *%s -> *%s",
+		stab_name(argptr.arg_stab), stab_ename(argptr.arg_stab));
 		tmps = buf;
 	    }
 #endif
@@ -390,7 +409,7 @@ register int sp;
 	    old_rschar = rschar;
 	    old_rslen = rslen;
 	    rslen = 1;
-#ifdef MSDOS
+#ifdef DOSISH
 	    rschar = 0;
 #else
 #ifdef CSH
@@ -433,7 +452,7 @@ register int sp;
 			(void) interp(str,stab_val(last_in_stab),sp);
 			st = stack->ary_array;
 			tmpstr = Str_new(55,0);
-#ifdef MSDOS
+#ifdef DOSISH
 			str_set(tmpstr, "perlglob ");
 			str_scat(tmpstr,str);
 			str_cat(tmpstr," |");
@@ -458,9 +477,9 @@ register int sp;
 		}
 	    }
 	    if (!fp && dowarn)
-		warn("Read on closed filehandle <%s>",stab_name(last_in_stab));
-	    when = str->str_len;	/* remember if already alloced */
-	    if (!when)
+		warn("Read on closed filehandle <%s>",stab_ename(last_in_stab));
+	    tmplen = str->str_len;	/* remember if already alloced */
+	    if (!tmplen)
 		Str_Grow(str,80);	/* try short-buffering it */
 	  keepgoing:
 	    if (!fp)
@@ -520,7 +539,7 @@ register int sp;
 		    str = Str_new(58,80);
 		    goto keepgoing;
 		}
-		else if (!when && str->str_len - str->str_cur > 80) {
+		else if (!tmplen && str->str_len - str->str_cur > 80) {
 		    /* try to reclaim a bit of scalar space on 1st alloc */
 		    if (str->str_cur < 60)
 			str->str_len = 80;
@@ -584,8 +603,8 @@ register int sp;
 	    sp = do_repeatary(arglast);
 	    goto array_return;
 	}
-	STR_SSET(str,st[arglast[1] - arglast[0]]);
-	anum = (int)str_gnum(st[arglast[2] - arglast[0]]);
+	STR_SSET(str,st[1]);
+	anum = (int)str_gnum(st[2]);
 	if (anum >= 1) {
 	    tmpstr = Str_new(50, 0);
 	    tmps = str_get(str);
@@ -598,8 +617,11 @@ register int sp;
 	    str->str_nok = 0;
 	    str_free(tmpstr);
 	}
-	else
+	else {
+	    if (dowarn && st[2]->str_pok && !looks_like_number(st[2]))
+		warn("Right operand of x is not numeric");
 	    str_sset(str,&str_no);
+	}
 	STABSET(str);
 	break;
     case O_MATCH:
@@ -724,15 +746,17 @@ register int sp;
 #endif
 	goto donumset;
     case O_MODULO:
-	tmplong = (long) str_gnum(st[2]);
-    	if (tmplong == 0L)
+	tmpulong = (unsigned long) str_gnum(st[2]);
+    	if (tmpulong == 0L)
     	    fatal("Illegal modulus zero");
-	when = (long)str_gnum(st[1]);
 #ifndef lint
-	if (when >= 0)
-	    value = (double)(when % tmplong);
-	else
-	    value = (double)(tmplong - ((-when - 1) % tmplong)) - 1;
+	value = str_gnum(st[1]);
+	if (value >= 0.0)
+	    value = (double)(((unsigned long)value) % tmpulong);
+	else {
+	    tmplong = (long)value;
+	    value = (double)(tmpulong - ((-tmplong - 1) % tmpulong)) - 1;
+	}
 #endif
 	goto donumset;
     case O_ADD:
@@ -916,7 +940,7 @@ register int sp;
 	}
 	break;
     case O_SELECT:
-	stab_fullname(str,defoutstab);
+	stab_efullname(str,defoutstab);
 	if (maxarg > 0) {
 	    if ((arg[1].arg_type & A_MASK) == A_WORD)
 		defoutstab = arg[1].arg_ptr.arg_stab;
@@ -989,7 +1013,8 @@ register int sp;
 #endif
     case O_DBMCLOSE:
 #ifdef SOME_DBM
-	if ((arg[1].arg_type & A_MASK) == A_WORD)
+	anum = arg[1].arg_type & A_MASK;
+	if (anum == A_WORD || anum == A_STAB)
 	    stab = arg[1].arg_ptr.arg_stab;
 	else
 	    stab = stabent(str_get(st[1]),TRUE);
@@ -1074,7 +1099,7 @@ register int sp;
 	tmps = str_get(st[2]);
 	str = hdelete(stab_hash(tmpstab),tmps,st[2]->str_cur);
 	if (tmpstab == envstab)
-	    setenv(tmps,Nullch);
+	    my_setenv(tmps,Nullch);
 	if (!str)
 	    goto say_undef;
 	break;
@@ -1656,7 +1681,7 @@ register int sp;
 	if (maxarg < 1)
 	    (void)time(&when);
 	else
-	    when = (long)str_gnum(st[1]);
+	    when = (time_t)str_gnum(st[1]);
 	sp = do_time(str,localtime(&when),
 	  gimme,arglast);
 	goto array_return;
@@ -1664,7 +1689,7 @@ register int sp;
 	if (maxarg < 1)
 	    (void)time(&when);
 	else
-	    when = (long)str_gnum(st[1]);
+	    when = (time_t)str_gnum(st[1]);
 	sp = do_time(str,gmtime(&when),
 	  gimme,arglast);
 	goto array_return;
@@ -1869,17 +1894,23 @@ register int sp;
 	  last_in_stab && (int)str_gnum(st[1]) == stab_io(last_in_stab)->lines
 	  :
 	  str_true(st[1]) ) {
-	    str_numset(str,0.0);
-	    anum = 2;
-	    arg->arg_type = optype = O_FLOP;
 	    arg[2].arg_type &= ~A_DONT;
 	    arg[1].arg_type |= A_DONT;
-	    argflags = arg[2].arg_flags;
-	    argtype = arg[2].arg_type & A_MASK;
-	    argptr = arg[2].arg_ptr;
-	    sp = arglast[0];
-	    st -= sp++;
-	    goto re_eval;
+	    arg->arg_type = optype = O_FLOP;
+	    if (arg->arg_flags & AF_COMMON) {
+		str_numset(str,0.0);
+		anum = 2;
+		argflags = arg[2].arg_flags;
+		argtype = arg[2].arg_type & A_MASK;
+		argptr = arg[2].arg_ptr;
+		sp = arglast[0];
+		st -= sp++;
+		goto re_eval;
+	    }
+	    else {
+		str_numset(str,1.0);
+		break;
+	    }
 	}
 	str_set(str,"");
 	break;
@@ -2862,8 +2893,18 @@ donumset:
 	    stab = stabent(str_get(st[1]),TRUE);
 	if (!stab || !(stio = stab_io(stab)) || !(fp = stio->ifp))
 	    goto say_undef;
-#ifdef MSDOS
+#ifdef DOSISH
+#ifdef atarist
+	if(fflush(fp))
+	   str_set(str, No);
+	else
+	{
+	    fp->_flag |= _IOBIN;
+	    str_set(str, Yes);
+	}
+#else
 	str_set(str, (setmode(fileno(fp), O_BINARY) != -1) ? Yes : No);
+#endif
 #else
 	str_set(str, Yes);
 #endif
@@ -2938,7 +2979,7 @@ donumset:
     case O_SYSCALL:
 	value = (double)do_syscall(arglast);
 	goto donumset;
-    case O_PIPE:
+    case O_PIPE_OP:
 #ifdef HAS_PIPE
 	if ((arg[1].arg_type & A_MASK) == A_WORD)
 	    stab = arg[1].arg_ptr.arg_stab;

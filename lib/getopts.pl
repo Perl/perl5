@@ -18,6 +18,7 @@ sub Getopts {
 	    if($args[$pos+1] eq ':') {
 		shift(@ARGV);
 		if($rest eq '') {
+		    ++$errs unless @ARGV;
 		    $rest = shift(@ARGV);
 		}
 		eval "\$opt_$first = \$rest;";

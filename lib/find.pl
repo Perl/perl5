@@ -48,6 +48,7 @@ sub find {
 	    unless (($dir,$_) = $topdir =~ m#^(.*/)(.*)$#) {
 		($dir,$_) = ('.', $topdir);
 	    }
+	    $name = $topdir;
 	    chdir $dir && &wanted;
 	}
 	chdir $cwd;
@@ -61,7 +62,7 @@ sub finddir {
 
     # Get the list of files in the current directory.
 
-    opendir(DIR,'.') || warn "Can't open $dir: $!\n";
+    opendir(DIR,'.') || (warn "Can't open $dir: $!\n", return);
     local(@filenames) = readdir(DIR);
     closedir(DIR);
 

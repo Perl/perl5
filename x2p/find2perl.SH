@@ -6,7 +6,7 @@ case $CONFIG in
 	ln ../../../config.sh . || \
 	(echo "Can't find config.sh."; exit 1)
     fi
-    . config.sh
+    . ./config.sh
     ;;
 esac
 : This forces SH files to create target in same directory as SH file.
@@ -19,8 +19,12 @@ echo "Extracting find2perl (with variable substitutions)"
 : Move anything that needs config subs from !NO!SUBS! section to !GROK!THIS!.
 : Protect any dollar signs and backticks that you do not want interpreted
 : by putting a backslash in front.  You may delete these comments.
+rm -f find2perl
 $spitshell >find2perl <<!GROK!THIS!
 #!$bin/perl
+
+eval 'exec $bin/perl -S \$0 \${1+"\$@"}'
+	if \$running_under_some_shell;
 
 \$bin = "$bin";
 
@@ -231,6 +235,9 @@ while (@ARGV) {
 
 print <<"END";
 #!$bin/perl
+
+eval 'exec $bin/perl -S \$0 \${1+"\$@"}'
+	if \$running_under_some_shell;
 
 END
 
@@ -544,7 +551,7 @@ sub tab {
 
     $tabstring = "\t" x ($indent / 2) . ' ' x ($indent % 2 * 4);
     if (!$statdone) {
-	if ($_ =~ /^(name|print)/) {
+	if ($_ =~ /^(name|print|prune|exec|ok|\(|\))/) {
 	    $delayedstat++;
 	}
 	else {
