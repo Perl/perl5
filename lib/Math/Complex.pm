@@ -19,9 +19,9 @@ BEGIN {
 	my $e = $!;
 	$Inf = CORE::exp(CORE::exp(30));
 	$! = $e; # Clear ERANGE.
-	undef $Inf unless $Inf =~ /^inf$/; # Inf INF inf
     }
-    $Inf = "Inf" if !defined $Inf || !($Inf > 0);
+    undef $Inf unless $Inf =~ /^inf(?:inity)?$/i; # Inf INF inf Infinity
+    $Inf = "Inf" if !defined $Inf || !($Inf > 0); # Desperation.
 }
 
 use strict;
@@ -998,8 +998,6 @@ sub cosh {
 	    return $ex ? ($ex + 1/$ex)/2 : $Inf;
 	}
 	my ($x, $y) = @{$z->cartesian};
-	my $cy = CORE::cos($y);
-	my $sy = CORE::cos($y);
 	$ex = CORE::exp($x);
 	my $ex_1 = $ex ? 1 / $ex : $Inf;
 	return (ref $z)->make(CORE::cos($y) * ($ex + $ex_1)/2,
@@ -1024,8 +1022,8 @@ sub sinh {
 	my $sy = CORE::sin($y);
 	$ex = CORE::exp($x);
 	my $ex_1 = $ex ? 1 / $ex : $Inf;
-	return (ref $z)->make($cy * ($ex - $ex_1)/2,
-			      $sy * ($ex + $ex_1)/2);
+	return (ref $z)->make(CORE::cos($y) * ($ex - $ex_1)/2,
+			      CORE::sin($y) * ($ex + $ex_1)/2);
 }
 
 #
