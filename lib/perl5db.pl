@@ -2,7 +2,7 @@ package DB;
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 
-$VERSION = 1.0402;
+$VERSION = 1.0403;
 $header = "perl5db.pl version $VERSION";
 
 # Enhanced by ilya@math.ohio-state.edu (Ilya Zakharevich)
@@ -478,7 +478,7 @@ EOP
 	  if $single & 4;
 	$start = $line;
 	$incr = -1;		# for backward motion.
-	@typeahead = @$pretype, @typeahead;
+	@typeahead = (@$pretype, @typeahead);
       CMD:
 	while (($term || &setterm),
 	       ($term_pid == $$ or &resetterm),
