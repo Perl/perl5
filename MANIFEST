@@ -824,6 +824,7 @@ t/op/undef.t		See if undef works
 t/op/universal.t	See if UNIVERSAL class works
 t/op/unshift.t		See if unshift works
 t/op/vec.t		See if vectors work
+t/op/wantarray.t	See if wantarray works
 t/op/write.t		See if write works
 t/pragma/constant.t	See if compile-time constants work
 t/pragma/locale.t	See if locale support (i18n and l10n) works
