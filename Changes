@@ -32,6 +32,135 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8341] By: jhi                                   on 2001/01/05  23:52:33
+        Log: Add a note about EBCDIC versus UTF-8 to a potential problem spot.
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  8340] By: jhi                                   on 2001/01/05  22:44:08
+        Log: Subject: [PATCH] Re: [ID 20010105.002] close() on process filehandle leaves defunct process
+             From: Radu Greab <radu@netsoft.ro>
+             Date: Fri, 5 Jan 2001 21:04:33 +0200 (EET)
+             Message-ID: <14934.6849.742435.23178@ix.netsoft.ro>
+     Branch: perl
+	   ! t/io/pipe.t util.c
+____________________________________________________________________________
+[  8339] By: jhi                                   on 2001/01/05  22:35:17
+        Log: Subject: [PATCH] format and rewording in perlfaq.pod
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Fri, 5 Jan 2001 18:51:20 GMT
+             Message-Id: <200101051851.SAA03310@tempest.npl.co.uk>
+     Branch: perl
+	   ! pod/perlfaq.pod
+____________________________________________________________________________
+[  8338] By: jhi                                   on 2001/01/05  22:31:17
+        Log: Subject: [patch: perl@8327] have perlbug's Save to File respect -F flag
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 5 Jan 2001 14:02:13 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10101051357400.28294-100000@aspara.forte.com>
+     Branch: perl
+	   ! utils/perlbug.PL
+____________________________________________________________________________
+[  8337] By: jhi                                   on 2001/01/05  18:15:11
+        Log: Subject: [PATCH 5.7.1/Configure] failure to set src='.'
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Tue, 2 Jan 2001 15:24:07 GMT
+             Message-Id: <200101021524.PAA15145@tempest.npl.co.uk>
+             
+             If you call configure as C<./Configure> or C<sh ./Configure>,
+             $src is set to the absolute path name, not '.'.
+             
+             This, in turn, means -Dmksymlink tries to do its stuff because
+             it does not think it is in the src directory.
+             
+             (plus a metaconfig nitfix)
+     Branch: metaconfig
+	   ! U/compline/ccflags.U U/modified/src.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  8336] By: jhi                                   on 2001/01/05  17:48:32
+        Log: Subject: Re: [Fwd: Scoping of %^H still broken in both perl@8269 and perl-5.6.1-TRIAL1]
+             From: Alan Burlison <Alan.Burlison@uk.sun.com>
+             Message-ID: <3A5606C4.473D2226@uk.sun.com>
+             Date: Fri, 05 Jan 2001 17:39:16 +0000
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[  8335] By: jhi                                   on 2001/01/05  16:05:44
+        Log: Upgrade to Getopt::Long 2.24_01, from Johan Vromans.
+     Branch: perl
+	   ! lib/Getopt/Long.pm
+____________________________________________________________________________
+[  8334] By: jhi                                   on 2001/01/05  16:00:51
+        Log: Subject: PATCH 5.6.1 & blead 8327 -- workaround for t/io/fs.t
+             From: Raphael Manfredi <Raphael_Manfredi@pobox.com>
+             Date: Fri, 05 Jan 2001 13:46:51 +0100
+             Message-ID: <13693.978698811@nice.ram.loc>
+             
+             Apparently, the glibc2.2 + linux 2.4.0 + NFS combination prevent
+             accurate reading of the "atime".  
+     Branch: perl
+	   ! t/io/fs.t
+____________________________________________________________________________
+[  8333] By: jhi                                   on 2001/01/05  15:57:37
+        Log: Subject: [PATCH] Re: ebcdic <-> ascii tables interjected in uv <-> utf8 considered harmful 
+             From: Simon Cozens <simon@cozens.net>
+             Date: Fri, 8 Dec 2000 13:33:31 +0000
+             Message-ID: <20001208133331.A11535@deep-dark-truthful-mirror.perlhacker.org> 
+             
+             A lost patch fragment.
+     Branch: perl
+	   ! doop.c
+____________________________________________________________________________
+[  8332] By: jhi                                   on 2001/01/05  15:40:42
+        Log: Do away with strncpy() and a fixed length buffer.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[  8331] By: jhi                                   on 2001/01/05  15:03:07
+        Log: Tests for #8329 and #8330.
+     Branch: perl
+	   ! t/op/bop.t
+____________________________________________________________________________
+[  8330] By: jhi                                   on 2001/01/05  15:02:38
+        Log: "\x{FF}\xFF" was broken, the \xFF was appended in its
+             raw 8-bit form to the UTF-8 string.
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  8329] By: jhi                                   on 2001/01/05  14:55:13
+        Log: Subject: [PATCH perl@8327] strings with \x{..} in the middle are corrupted 
+             From: "Roca, Ignasi" <ignasi.roca@fujitsu.siemens.es>
+             Date: Fri, 5 Jan 2001 12:28:52 +0100
+             Message-ID: <5930DC161690D211966700902715754703738F96@madt009a.siemens.es>
+             
+             UTF-8 parsing fix that seems to be needed for EBCDIC, in ASCII
+             no effect.  (changed the strncpy() to Copy())
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  8328] By: jhi                                   on 2001/01/05  06:44:27
+        Log: UTF-8 cleanup.
+     Branch: perl
+	   ! doop.c op.c pp.c pp_ctl.c pp_hot.c pp_sys.c regcomp.c
+	   ! regexec.c sv.c toke.c
+____________________________________________________________________________
+[  8327] By: jhi                                   on 2001/01/05  01:11:29
+        Log: Subject: [PATCH perl@8268] Test::Harness doesn't use IO (was Re: [PATCH 5.7.0] Re: Tests depending on extensions,    and `make minitest')
+             From: Radu Greab <radu@netsoft.ro>
+             Message-ID: <14933.5458.672637.641215@ix.netsoft.ro>
+             Date: Fri, 5 Jan 2001 02:29:06 +0200 (EET)
+             
+             Cleans up Harness to not use FileHandle, which uses IO.
+     Branch: perl
+	   ! lib/Test/Harness.pm t/lib/ftmp-mktemp.t t/lib/ftmp-posix.t
+____________________________________________________________________________
+[  8326] By: jhi                                   on 2001/01/05  00:56:37
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  8325] By: jhi                                   on 2001/01/05  00:53:18
         Log: Subject: Re: [patch bug 20010103.019] Re: perl@8269: failure to build on NT 4.0.1381 with MSVC (fwd)
              From: Peter Prymmer <pvhp@forte.com>
