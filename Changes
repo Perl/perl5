@@ -28,6 +28,86 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 20557] By: jhi                                   on 2003/08/07  18:15:57
+        Log: Integrate:
+             [ 20556]
+             The #20546 was too ambitious, broke the test.
+     Branch: maint-5.8/perl
+	  !> lib/Benchmark.pm lib/Benchmark.t
+____________________________________________________________________________
+[ 20555] By: jhi                                   on 2003/08/07  17:36:20
+        Log: Integrate:
+             [ 20550]
+             Allow hinting d_semctl_semun and d_semctl_semid_ds.
+             
+             [ 20552]
+             Hint away the semid_ds test in NetBSD/sparc.
+             
+             [ 20553]
+             Some AUTHORS updates.
+             
+             [ 20554]
+             Subject: Fw: [PATCH: perl@20512] DBG build tweaks for VMS.
+             From: PPrymmer@factset.com
+             Date: Thu, 7 Aug 2003 14:02:02 -0400
+             Message-ID: <OFA59024FD.170B3227-ON85256D7B.00630753-85256D7B.00631048@factset.com>
+     Branch: maint-5.8/perl
+	  !> AUTHORS Configure hints/netbsd.sh vms/descrip_mms.template
+____________________________________________________________________________
+[ 20549] By: jhi                                   on 2003/08/07  15:07:48
+        Log: Integrate:
+             [ 20538]
+             Subject: Re: [perl #23030] Error in negative lookahead with alternations
+             From: hv@crypt.org
+             Date: Thu, 07 Aug 2003 02:44:23 +0100
+             Message-Id: <200308070144.h771iN906446@zen.crypt.org>
+             
+             [ 20540]
+             Subject: Re: maint @ 20537
+             From: Philip Newton <Philip.Newton@gmx.net>
+             Date: Thu, 07 Aug 2003 09:05:17 +0200
+             Message-ID: <s0l3jvo4mju2uu4f6pkq18istk02hme6j9@4ax.com>
+             
+             [ 20541]
+             Subject: Re: maint @ 20537
+             From: Philip Newton <Philip.Newton@gmx.net>
+             Date: Thu, 07 Aug 2003 09:05:17 +0200
+             Message-ID: <s0l3jvo4mju2uu4f6pkq18istk02hme6j9@4ax.com>
+             
+             [ 20542]
+             If no alarm(), skip the subtests.
+             
+             [ 20546]
+             Subject: [PATCH 5.8.1] Benchmark problem
+             From: Radu Greab <rgreab@fx.ro>
+             Date: Thu, 07 Aug 2003 16:18:25 +0300 (EEST)
+             Message-Id: <20030807.161825.106541372.radu@yx.primIT.ro>
+             
+             Subject: Re: [PATCH 5.8.1] Benchmark problem
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Thu, 7 Aug 2003 15:48:38 +0200
+             Message-Id: <20030807154838.5d240dbb.rgarciasuarez@free.fr>
+             
+             [ 20548]
+             Subject: [PATCH] Test::More
+             From: Fergal Daly <fergal@esatclear.ie>
+             Date: Thu, 7 Aug 2003 15:52:11 +0100
+             Message-Id: <200308071552.11873.fergal@esatclear.ie>
+     Branch: maint-5.8/perl
+	  !> ext/Socket/Socket.xs ext/Time/HiRes/t/HiRes.t
+	  !> hints/dos_djgpp.sh lib/Benchmark.pm lib/Benchmark.t
+	  !> lib/Test/More.pm regexec.c t/op/re_tests
+____________________________________________________________________________
+[ 20543] By: nick                                  on 2003/08/07  08:44:20
+        Log: Workround for SuSE8.2's -lndbm hack
+     Branch: maint-5.8/perl
+	   ! hints/linux.sh
+____________________________________________________________________________
+[ 20537] By: jhi                                   on 2003/08/06  19:16:43
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 20536] By: jhi                                   on 2003/08/06  19:07:34
         Log: Integrate:
              [ 20535]
