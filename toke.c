@@ -7435,7 +7435,7 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
     case 'v':
 vstring:
 		sv = NEWSV(92,5); /* preallocate storage space */
-		s = new_vstring(s,sv);
+		s = scan_vstring(s,sv);
 	break;
     }
 

@@ -4052,24 +4052,24 @@ Perl_getcwd_sv(pTHX_ register SV *sv)
 /*
 =head1 SV Manipulation Functions
 
-=for apidoc new_vstring
+=for apidoc scan_vstring
 
 Returns a pointer to the next character after the parsed
 vstring, as well as updating the passed in sv.
 
 Function must be called like
 
-        sv = NEWSV(92,5);
-	s = new_vstring(s,sv);
+	sv = NEWSV(92,5);
+	s = scan_vstring(s,sv);
 
-The sv must already be large enough to store the vstring
-passed in.
+The sv should already be large enough to store the vstring
+passed in, for performance reasons.
 
 =cut
 */
 
 char *
-Perl_new_vstring(pTHX_ char *s, SV *sv)
+Perl_scan_vstring(pTHX_ char *s, SV *sv)
 {
     char *pos = s;
     if (*pos == 'v') pos++;  /* get past 'v' */
@@ -4124,6 +4124,181 @@ Perl_new_vstring(pTHX_ char *s, SV *sv)
 	SvREADONLY_on(sv);
     }
     return s;
+}
+
+
+/*
+=for apidoc scan_version
+
+Returns a pointer to the next character after the parsed
+version string, as well as upgrading the passed in SV to
+an RV.
+
+Function must be called with an already existing SV like
+
+    sv = NEWSV(92,0);
+    s = scan_version(s,sv);
+
+Performs some preprocessing to the string to ensure that
+it has the correct characteristics of a version.  Flags the
+object if it contains an underscore (which denotes this
+is a beta version).
+
+=cut
+*/
+
+char *
+Perl_scan_version(pTHX_ char *version, SV *rv)
+{
+    char *d;
+    int beta = 0;
+    SV * sv = newSVrv(rv, "version"); /* create an SV and upgrade the RV */
+    d = version;
+    if (*d == 'v')
+	d++;
+    if (isDIGIT(*d)) {
+	while (isDIGIT(*d) || *d == '.')
+	    d++;
+	if ( *d == '_' ) {
+	    *d = '.';
+	    if ( *(d+1) == '0' && *(d+2) != '0' ) { /* perl-style version */
+		*(d+1) = *(d+2);
+		*(d+2) = '0';
+	    }
+	    else {
+		beta = -1;
+	    }
+	}
+    }
+    version = scan_vstring(version,sv); 	/* store the v-string in the object */
+    SvIVX(sv) = beta;
+    return version;
+}
+
+/*
+=for apidoc new_version
+
+Returns a new version object based on the passed in SV:
+
+    SV *sv = new_version(SV *ver);
+
+Does not alter the passed in ver SV.  See "upg_version" if you
+want to upgrade the SV.
+
+=cut
+*/
+
+SV *
+Perl_new_version(pTHX_ SV *ver)
+{
+    SV *rv = NEWSV(92,5);
+    char *version;
+
+    if ( SvMAGICAL(ver) ) { /* already a v-string */
+	MAGIC* mg = mg_find(ver,PERL_MAGIC_vstring);
+	version = savepvn( (const char*)mg->mg_ptr,mg->mg_len );
+    }
+    else {
+	version = (char *)SvPV_nolen(ver);
+    }
+    version = scan_version(version,rv);
+    return rv;
+}
+
+/*
+=for apidoc upg_version
+
+In-place upgrade of the supplied SV to a version object.
+
+    SV *sv = upg_version(SV *sv);
+
+Returns a pointer to the upgraded SV.
+
+=cut
+*/
+
+SV *
+Perl_upg_version(pTHX_ SV *sv)
+{
+    char *version = (char *)SvPV_nolen(sv_mortalcopy(sv));
+    bool utf8 = SvUTF8(sv);
+    if ( SvVOK(sv) ) { /* already a v-string */
+	SV * ver = newSVrv(sv, "version");
+	sv_setpv(ver,version);
+	if ( utf8 )
+	    SvUTF8_on(ver);
+    }
+    else {
+	version = scan_version(version,sv);
+    }
+    return sv;
+}
+
+
+/*
+=for apidoc vnumify
+
+Accepts a version (or vstring) object and returns the
+normalized floating point representation.  Call like:
+
+    sv = vnumify(sv,SvRV(rv));
+
+NOTE: no checking is done to see if the object is of the
+correct type (for speed).
+
+=cut
+*/
+
+SV *
+Perl_vnumify(SV *sv, SV *vs)
+{
+    U8* pv = (U8*)SvPVX(vs);
+    STRLEN len = SvCUR(vs);
+    STRLEN retlen;
+    UV digit = utf8_to_uvchr(pv,&retlen);
+    sv_setpvf(sv,"%"UVf".",digit);
+    for (pv += retlen, len -= retlen;
+	len > 0;
+	pv += retlen, len -= retlen)
+    {
+	digit = utf8_to_uvchr(pv,&retlen);
+	sv_catpvf(sv,"%03"UVf,digit);
+    }
+    return sv;
+}
+
+/*
+=for apidoc vstringify
+
+Accepts a version (or vstring) object and returns the
+normalized representation.  Call like:
+
+    sv = vstringify(sv,SvRV(rv));
+
+NOTE: no checking is done to see if the object is of the
+correct type (for speed).
+
+=cut
+*/
+
+SV *
+Perl_vstringify(SV *sv, SV *vs)
+{
+    U8* pv = (U8*)SvPVX(vs);
+    STRLEN len = SvCUR(vs);
+    STRLEN retlen;
+    UV digit = utf8_to_uvchr(pv,&retlen);
+    sv_setpvf(sv,"%"UVf,digit);
+    for (pv += retlen, len -= retlen;
+	len > 0;
+	pv += retlen, len -= retlen)
+    {
+	digit = utf8_to_uvchr(pv,&retlen);
+	sv_catpvf(sv,".%03"UVf,digit);
+    }
+    if ( SvIVX(vs) < 0 )
+	sv_catpv(sv,"beta");
+    return sv;
 }
 
 #if !defined(HAS_SOCKETPAIR) && defined(HAS_SOCKET) && defined(AF_INET) && defined(PF_INET) && defined(SOCK_DGRAM) && defined(HAS_SELECT)

@@ -487,6 +487,9 @@ Unsets the PV status of an SV.
 Tells an SV that it is a string and disables all other OK bits.
 Will also turn off the UTF8 status.
 
+=for apidoc Am|bool|SvVOK|SV* sv
+Returns a boolean indicating whether the SV contains a v-string.
+
 =for apidoc Am|bool|SvOOK|SV* sv
 Returns a boolean indicating whether the SvIVX is a valid offset value for
 the SvPVX.  This hack is used internally to speed up removal of characters
@@ -578,7 +581,6 @@ Set the length of the string which is in the SV.  See C<SvCUR>.
 #define SvIOK_notUV(sv)		((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV))	\
 				 == SVf_IOK)
 
-#define SvVOK(sv)		(SvMAGICAL(sv) && mg_find(sv,'V'))
 #define SvIsUV(sv)		(SvFLAGS(sv) & SVf_IVisUV)
 #define SvIsUV_on(sv)		(SvFLAGS(sv) |= SVf_IVisUV)
 #define SvIsUV_off(sv)		(SvFLAGS(sv) &= ~SVf_IVisUV)
@@ -621,6 +623,7 @@ and leaves the UTF8 status as it was.
 						  SVf_IVisUV),		\
 				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 
+#define SvVOK(sv)		(SvMAGICAL(sv) && mg_find(sv,'V'))
 #define SvOOK(sv)		(SvFLAGS(sv) & SVf_OOK)
 #define SvOOK_on(sv)		((void)SvIOK_off(sv), SvFLAGS(sv) |= SVf_OOK)
 #define SvOOK_off(sv)		(SvOOK(sv) && sv_backoff(sv))
