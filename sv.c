@@ -3006,6 +3006,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
                                            need a newline */
                                         mg->mg_len++; /* save space for it */
                                         need_newline = 1; /* note to add it */
+					break;
                                     }
                                 }
                             }

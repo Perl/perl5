@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..940\n";
+print "1..941\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2929,6 +2929,10 @@ print(("a$x" =~ /^a$a\z/ ? '' : 'not '),
 
 print(("a$x" =~ /^a(??{$a})\z/ ? '' : 'not '),
       "ok $test - postponed interpolation of qr// preserves utf8\n");
+++$test;
+
+print((length(qr/##/x) == 12 ? '' : 'not '),
+      "ok $test - ## in qr// doesn't corrupt memory [perl #17776]\n");
 ++$test;
 
 { use re 'eval';
