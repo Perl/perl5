@@ -1244,7 +1244,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	CATCH_SET(TRUE);
 	call_xbody((OP*)&myop, FALSE);
 	retval = PL_stack_sp - (PL_stack_base + oldmark);
-	CATCH_SET(FALSE);
+	CATCH_SET(oldcatch);
     }
     else {
 	cLOGOP->op_other = PL_op;
