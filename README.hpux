@@ -202,7 +202,7 @@ threads library package. Two examples are the HP DCE package, available
 on "HP-UX Hardware Extensions 3.0, Install and Core OS, Release 10.20,
 April 1999 (B3920-13941)" or the Freely available PTH package, available
 though worldwide HP-UX mirrors of precompiled packages
-(e.g. http://hpux.tn.tudelft.nl/hppd/hpux/alpha.html)
+(i.e. http://hpux.tn.tudelft.nl/hppd/hpux/alpha.html)
 
 =head2 64-bit Perl
 

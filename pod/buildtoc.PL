@@ -151,7 +151,6 @@ if (-d "pod") {
 
     perlaix
     perlamiga          
-    perlbs2000
     perlcygwin          
     perldos             
     perlepoc             
@@ -160,8 +159,8 @@ if (-d "pod") {
     perlmpeix         
     perlos2             
     perlos390           
+    perlposix-bc
     perlsolaris
-    perlvmesa             
     perlvms             
     perlvos             
     perlwin32           
@@ -170,7 +169,6 @@ if (-d "pod") {
 @ARCHPODS = qw(
     perlaix	
     perlamiga          
-    perlbs2000
     perlcygwin          
     perldos             
     perlepoc             
@@ -179,8 +177,8 @@ if (-d "pod") {
     perlmpeix
     perlos2             
     perlos390           
+    perlposix-bc
     perlsolaris
-    perlvmesa             
     perlvms             
     perlvos             
     perlwin32           
