@@ -1,9 +1,22 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.65 2002/04/30 16:13:37 dankogai Exp dankogai $
+# $Id: Changes,v 1.66 2002/05/01 05:41:06 dankogai Exp dankogai $
 #
 
-$Revision: 1.65 $ $Date: 2002/04/30 16:13:37 $
+$Revision: 1.66 $ $Date: 2002/05/01 05:41:06 $
+! Encode.xs t/fallback.t
+  WARN_ON_ERR no longer assumes RETURN_ON_ERR so you can issue a warning
+  while fallback is in effect.  This even came with a welcome side-effect
+  of cleaner code with less nests!  Thank you, NI-XS.  t/fallback.t is
+  also modified to test this.
+  And of course, the corresponding varialbles to UV[Xx]f are appropriately
+  cast.  This should've concluded NI-XS homework.
+! Encode.pm
+  encode(undef) does warn again!  Repented upon suggestion by NI-XS.
+  Document for unless vs. '' added
+  Message-Id: <20020430171547.3322.13@bactrian.elixent.com>
+
+1.65 2002/04/30 16:13:37
 ! Encode.pm
   encode(undef) no longer warns for C<Use of uninitialized value in 
   subroutine entry>.  Suggested by Paul.
@@ -553,7 +566,7 @@ $Revision: 1.65 $ $Date: 2002/04/30 16:13:37 $
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/04/30 16:13:37 $
+1.11  $Date: 2002/05/01 05:41:06 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST
