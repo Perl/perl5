@@ -122,16 +122,18 @@ CCTYPE		*= BORLAND
 # set the install locations of the compiler include/libraries
 # Running VCVARS32.BAT is *required* when using Visual C.
 # Some versions of Visual C don't define MSVCDIR in the environment,
-# so you may have to set CCHOME explicitly.
+# so you may have to set CCHOME explicitly (spaces in the path name should
+# not be quoted)
 #
 #CCHOME		*= f:\msdev\vc
 CCHOME		*= C:\bc5
 #CCHOME		*= D:\packages\mingw32
-CCINCDIR	*= '$(CCHOME)\include'
-CCLIBDIR	*= '$(CCHOME)\lib'
+CCINCDIR	*= $(CCHOME)\include
+CCLIBDIR	*= $(CCHOME)\lib
 
 #
-# specify space-separated list of extra directories to look for libraries
+# specify semicolon-separated list of extra directories that modules will
+# look for libraries (spaces in path names need not be quoted)
 #
 EXTRALIBDIRS	*=
 
@@ -207,7 +209,7 @@ IMPLIB		= implib -c
 # Options
 #
 RUNTIME		= -D_RTLDLL
-INCLUDES	= -I.\include -I. -I.. -I$(CCINCDIR)
+INCLUDES	= -I.\include -I. -I.. -I"$(CCINCDIR)"
 #PCHFLAGS	= -H -Hc -H=c:\temp\bcmoduls.pch 
 DEFINES		= -DWIN32 $(BUILDOPT) $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
@@ -227,7 +229,7 @@ LINK_DBG	=
 
 CFLAGS		= -w -g0 -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 		$(PCHFLAGS) $(OPTIMIZE)
-LINK_FLAGS	= $(LINK_DBG) -L$(CCLIBDIR) $(EXTRALIBDIRS:^"-L")
+LINK_FLAGS	= $(LINK_DBG) -L"$(CCLIBDIR)"
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -e
 LIBOUT_FLAG	= 
@@ -265,7 +267,7 @@ LINK_DBG	=
 .ENDIF
 
 CFLAGS		= $(INCLUDES) $(DEFINES) $(LOCDEFS) $(OPTIMIZE)
-LINK_FLAGS	= $(LINK_DBG) -L$(CCLIBDIR) $(EXTRALIBDIRS:^"-L")
+LINK_FLAGS	= $(LINK_DBG) -L"$(CCLIBDIR)"
 OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -o
 LIBOUT_FLAG	= 
@@ -686,14 +688,14 @@ CFG_VARS	=					\
 		"INST_VER=$(INST_VER)"			\
 		"archname=$(ARCHNAME)"			\
 		"cc=$(CC)"				\
-		"ccflags=$(OPTIMIZE) $(DEFINES) $(OBJECT)"	\
+		"ccflags=$(OPTIMIZE:s/"/\"/) $(DEFINES) $(OBJECT)"	\
 		"cf_email=$(EMAIL)"			\
 		"d_crypt=$(D_CRYPT)"			\
 		"d_mymalloc=$(PERL_MALLOC)"		\
 		"libs=$(LIBFILES:f)"			\
-		"incpath=$(CCINCDIR)"			\
+		"incpath=$(CCINCDIR:s/"/\"/)"		\
 		"libperl=$(PERLIMPLIB:f)"		\
-		"libpth=$(strip $(CCLIBDIR) $(EXTRALIBDIRS) $(LIBFILES:d))" \
+		"libpth=$(CCLIBDIR:s/"/\"/);$(EXTRALIBDIRS:s/"/\"/)"	\
 		"libc=$(LIBC)"				\
 		"make=dmake"				\
 		"_o=$(o)" "obj_ext=$(o)"		\
@@ -703,8 +705,8 @@ CFG_VARS	=					\
 		"nonxs_ext=$(NONXS_EXT)"		\
 		"usethreads=$(USE_THREADS)"		\
 		"usemultiplicity=$(USE_MULTI)"		\
-		"LINK_FLAGS=$(LINK_FLAGS)"		\
-		"optimize=$(OPTIMIZE)"
+		"LINK_FLAGS=$(LINK_FLAGS:s/"/\"/)"		\
+		"optimize=$(OPTIMIZE:s/"/\"/)"
 
 #
 # Top targets
@@ -719,9 +721,9 @@ $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
 
 $(GLOBEXE) : perlglob$(o)
 .IF "$(CCTYPE)" == "BORLAND"
-	$(CC) -c -w -v -tWM -I$(CCINCDIR) perlglob.c
+	$(CC) -c -w -v -tWM -I"$(CCINCDIR)" perlglob.c
 	$(LINK32) -Tpe -ap $(LINK_FLAGS) c0x32$(o) perlglob$(o) \
-	    $(CCLIBDIR)\32BIT\wildargs$(o),$@,,import32.lib cw32mt.lib,
+	    "$(CCLIBDIR)\32BIT\wildargs$(o)",$@,,import32.lib cw32mt.lib,
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) $(LINK_FLAGS) -o $@ perlglob$(o) $(LIBFILES)
 .ELSE

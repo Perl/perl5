@@ -47,7 +47,7 @@ following compilers:
 
       Borland C++		version 5.02 or later
       Microsoft Visual C++	version 4.2 or later
-      Mingw32 with EGCS		version 1.0.2
+      Mingw32 with EGCS		versions 1.0.2, 1.1
       Mingw32 with GCC		version 2.8.1
 
 The last two of these are high quality freeware compilers.  Support
@@ -74,6 +74,9 @@ build attempts using 4DOS/NT version 6.01 under Windows95, using dmake, but
 your mileage may vary.
 
 The surest way to build it is on WindowsNT, using the cmd shell.
+
+Make sure the path to the build directory does not contain spaces.  The
+build usually works in this circumstance, but some tests will fail.
 
 =item Borland C++
 
@@ -104,7 +107,7 @@ make for building extensions using MakeMaker.
 
 =item Mingw32 with EGCS or GCC
 
-ECGS-1.0.2 binaries can be downloaded from:
+ECGS binaries can be downloaded from:
 
     ftp://ftp.xraylith.wisc.edu/pub/khan/gnu-win32/mingw32/
 
@@ -189,6 +192,10 @@ fail at run time.
 You will also have to make sure CCHOME points to wherever you installed
 your compiler.
 
+The default value for CCHOME in the makefiles for Visual C++
+may not be correct if you have a version later than 5.2.  Make
+sure the default exists and is valid.
+
 Other options are explained in the makefiles.  Be sure to read the
 instructions carefully.
 
@@ -216,9 +223,9 @@ perl95.exe will have esoteric problems with extensions like perl/Tk that
 themselves use the C Runtime heavily, or want to free() pointers
 malloc()-ed by perl.
 
-You can avoid the perl95.exe problems completely if you use Borland
-C++ for building perl (perl95.exe is not needed and will not be built
-in that case).
+You can avoid the perl95.exe problems completely if you either enable
+USE_PERLCRT with Visual C++, or use Borland C++ for building perl.  In
+those cases, perl95.exe is not needed and will not be built.
 
 =back
 
@@ -228,17 +235,18 @@ Type "dmake test" (or "nmake test").  This will run most of the tests from
 the testsuite (many tests will be skipped, and but no test should fail).
 
 If some tests do fail, it may be because you are using a different command
-shell than the native "cmd.exe".
+shell than the native "cmd.exe", or because you are building from a path
+that contains spaces.  So don't do that.
 
-If you used the Borland compiler, you may see a failure in op/taint.t
+If you're using the Borland compiler, you may see a failure in op/taint.t
 arising from the inability to find the Borland Runtime DLLs on the system
 default path.  You will need to copy the DLLs reported by the messages
 from where Borland chose to install it, into the Windows system directory
 (usually somewhere like C:\WINNT\SYSTEM32), and rerun the test.
 
 The Visual C runtime apparently has a bug that causes posix.t to fail
-one it test#2.  This usually happens only if you extracted the files in
-text mode.
+test#2.  This usually happens only if you extracted the files in text
+mode.  Enable the USE_PERLCRT option in the Makefile to fix this bug.
 
 Please report any other failures as described under L<BUGS AND CAVEATS>.
 
@@ -274,9 +282,21 @@ variables you can set in L<perlrun>.
 You can also control the shell that perl uses to run system() and
 backtick commands via PERL5SHELL.  See L<perlrun>.
 
-Currently, Perl does not depend on the registry, but can look up
-values if you choose to put them there.  [XXX add registry locations
-that perl looks at here.]
+Perl does not depend on the registry, but it can look up certain default
+values if you choose to put them there.  Perl attempts to read entries from
+C<HKEY_CURRENT_USER\Software\Perl> and C<HKEY_LOCAL_MACHINE\Software\Perl>.
+Entries in the former override entries in the latter.  One or more of the
+following entries (of type REG_SZ or REG_EXPAND_SZ) may be set:
+
+    lib-$]		version-specific path to add to @INC
+    lib			path to add to @INC
+    sitelib-$]		version-specific path to add to @INC
+    sitelib		path to add to @INC
+    PERL*		fallback for all %ENV lookups that begin with "PERL"
+
+Note the C<$]> in the above is not literal.  Substitute whatever version
+of perl you want to honor that entry, e.g. C<5.00502>.  Paths must be
+separated with semicolons, as usual on win32.
 
 =item File Globbing
 
@@ -698,7 +718,11 @@ sundry hacks since then.
 
 Borland support was added in 5.004_01 (Gurusamy Sarathy).
 
-Last updated: 12 July 1998
+GCC/mingw32 support was added in 5.005 (Nick Ing-Simmons).
+
+Support for PERL_OBJECT was added in 5.005 (ActiveState Tool Corp).
+
+Last updated: 18 January 1999
 
 =cut
 

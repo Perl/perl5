@@ -34,15 +34,21 @@ CPerlObj *pPerl;
 int
 main(int argc, char **argv, char **env)
 {
-    char szModuleName[MAX_PATH];
     CPerlHost host;
     int exitstatus = 1;
-
-    if(!host.PerlCreate())
-	exit(exitstatus);
+#ifndef __BORLANDC__
+    /* XXX this _may_ be a problem on some compilers (e.g. Borland) that
+     * want to free() argv after main() returns.  As luck would have it,
+     * Borland's CRT does the right thing to argv[0] already. */
+    char szModuleName[MAX_PATH];
 
     GetModuleFileName(NULL, szModuleName, sizeof(szModuleName));
     argv[0] = szModuleName;
+#endif
+
+    if (!host.PerlCreate())
+	exit(exitstatus);
+
     exitstatus = host.PerlParse(xs_init, argc, argv, NULL);
 
     if (!exitstatus)
@@ -76,9 +82,14 @@ __declspec(dllimport) int RunPerl(int argc, char **argv, char **env, void *ios);
 int
 main(int argc, char **argv, char **env)
 {
+#ifndef __BORLANDC__
+    /* XXX this _may_ be a problem on some compilers (e.g. Borland) that
+     * want to free() argv after main() returns.  As luck would have it,
+     * Borland's CRT does the right thing to argv[0] already. */
     char szModuleName[MAX_PATH];
     GetModuleFileName(NULL, szModuleName, sizeof(szModuleName));
     argv[0] = szModuleName;
+#endif
     return RunPerl(argc, argv, env, (void*)0);
 }
 
