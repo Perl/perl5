@@ -9,7 +9,7 @@
 
 package Data::Dumper;
 
-$VERSION = '2.103';
+$VERSION = '2.12';
 
 #$| = 1;
 
@@ -42,6 +42,7 @@ $Bless = "bless" unless defined $Bless;
 $Maxdepth = 0 unless defined $Maxdepth;
 $Useperl = 0 unless defined $Useperl;
 $Sortkeys = 0 unless defined $Sortkeys;
+$Deparse = 0 unless defined $Deparse;
 
 #
 # expects an arrayref of values to be dumped.
@@ -79,6 +80,7 @@ sub new {
 	     maxdepth	=> $Maxdepth,   # depth beyond which we give up
 	     useperl    => $Useperl,    # use the pure Perl implementation
 	     sortkeys   => $Sortkeys,   # flag or filter for sorting hash keys
+	     deparse	=> $Deparse,	# use B::Deparse for coderefs
 	   };
 
   if ($Indent > 0) {
@@ -153,7 +155,8 @@ sub DESTROY {}
 sub Dump {
     return &Dumpxs
 	unless $Data::Dumper::Useperl || (ref($_[0]) && $_[0]->{useperl}) ||
-	       $Data::Dumper::Useqq || (ref($_[0]) && $_[0]->{useqq});
+	       $Data::Dumper::Useqq   || (ref($_[0]) && $_[0]->{useqq}) ||
+	       $Data::Dumper::Deparse || (ref($_[0]) && $_[0]->{deparse});
     return &Dumpperl;
 }
 
@@ -372,8 +375,16 @@ sub _dump {
       $out .= ($name =~ /^\%/) ? ')' : '}';
     }
     elsif ($realtype eq 'CODE') {
-      $out .= 'sub { "DUMMY" }';
-      carp "Encountered CODE ref, using dummy placeholder" if $s->{purity};
+      if ($s->{deparse}) {
+	require B::Deparse;
+	my $sub =  'sub ' . (B::Deparse->new)->coderef2text($val);
+	$pad    =  $s->{sep} . $s->{pad} . $s->{xpad} . $s->{apad} . '    ';
+	$sub    =~ s/\n/$pad/gse;
+	$out   .=  $sub;
+      } else {
+        $out .= 'sub { "DUMMY" }';
+        carp "Encountered CODE ref, using dummy placeholder" if $s->{purity};
+      }
     }
     else {
       croak "Can\'t handle $realtype type.";
@@ -570,6 +581,10 @@ sub Sortkeys {
   defined($v) ? (($s->{'sortkeys'} = $v), return $s) : $s->{'sortkeys'};
 }
 
+sub Deparse {
+  my($s, $v) = @_;
+  defined($v) ? (($s->{'deparse'} = $v), return $s) : $s->{'deparse'};
+}
 
 # used by qquote below
 my %esc = (  
@@ -847,7 +862,7 @@ string.
 
 Can be set to a method name, or to an empty string to disable the feature.
 Data::Dumper will emit a method call for any objects that are to be dumped
-using the syntax C<bless(DATA, CLASS)->METHOD()>.  Note that this means that
+using the syntax C<bless(DATA, CLASS)-E<gt>METHOD()>.  Note that this means that
 the method specified will have to perform any modifications required on the
 object (like creating new state within it, and/or reblessing it in a
 different package) and then return it.  The client is responsible for making
@@ -905,6 +920,17 @@ control both the order of the keys, and which keys are actually used. In
 other words, this subroutine acts as a filter by which you can exclude
 certain keys from being dumped. Default is 0, which means that hash keys
 are not sorted.
+
+=item $Data::Dumper::Deparse  I<or>  $I<OBJ>->Deparse(I<[NEWVAL]>)
+
+Can be set to a boolean value to control whether code references are
+turned into perl source code. If set to a true value, C<B::Deparse>
+will be used to get the source of the code reference. Using this option
+will force using the Perl implementation of the dumper, since the fast
+XSUB implementation doesn't support it.
+
+Caution : use this option only if you know that your coderefs will be
+properly reconstructed by C<B::Deparse>.
 
 =back
 
@@ -1089,12 +1115,13 @@ distribution for more examples.)
 
 Due to limitations of Perl subroutine call semantics, you cannot pass an
 array or hash.  Prepend it with a C<\> to pass its reference instead.  This
-will be remedied in time, with the arrival of prototypes in later versions
-of Perl.  For now, you need to use the extended usage form, and prepend the
+will be remedied in time, now that Perl has subroutine prototypes.
+For now, you need to use the extended usage form, and prepend the
 name with a C<*> to output it as a hash or array.
 
 C<Data::Dumper> cheats with CODE references.  If a code reference is
-encountered in the structure being processed, an anonymous subroutine that
+encountered in the structure being processed (and if you haven't set
+the C<Deparse> flag), an anonymous subroutine that
 contains the string '"DUMMY"' will be inserted in its place, and a warning
 will be printed if C<Purity> is set.  You can C<eval> the result, but bear
 in mind that the anonymous sub that gets created is just a placeholder.
@@ -1105,8 +1132,8 @@ to have, you can use the C<Seen> method to pre-seed the internal reference
 table and make the dumped output point to them, instead.  See L<EXAMPLES>
 above.
 
-The C<Useqq> flag makes Dump() run slower, since the XSUB implementation
-does not support it.
+The C<Useqq> and C<Deparse> flags makes Dump() run slower, since the
+XSUB implementation does not support them.
 
 SCALAR objects have the weirdest looking C<bless> workaround.
 
@@ -1122,7 +1149,7 @@ modify it under the same terms as Perl itself.
 
 =head1 VERSION
 
-Version 2.11   (unreleased)
+Version 2.12   (unreleased)
 
 =head1 SEE ALSO
 

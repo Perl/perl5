@@ -61,11 +61,11 @@ sub TEST {
 
 if (defined &Data::Dumper::Dumpxs) {
   print "### XS extension loaded, will run XS tests\n";
-  $TMAX = 210; $XS = 1;
+  $TMAX = 213; $XS = 1;
 }
 else {
   print "### XS extensions not loaded, will NOT run XS tests\n";
-  $TMAX = 105; $XS = 0;
+  $TMAX = 108; $XS = 0;
 }
 
 print "1..$TMAX\n";
@@ -923,4 +923,21 @@ EOT
 TEST q(Data::Dumper->new([[$c, $d]])->Dump;);
 TEST q(Data::Dumper->new([[$c, $d]])->Dumpxs;)
 	if $XS;
+}
+
+{
+  local $Data::Dumper::Deparse = 1;
+  local $Data::Dumper::Indent = 2;
+
+############# 211
+##
+  $WANT = <<'EOT';
+#$VAR1 = {
+#          foo => sub {
+#                         print 'foo';
+#                     }
+#        };
+EOT
+
+  TEST q(Data::Dumper->new([{ foo => sub { print "foo"; } }])->Dump);
 }
