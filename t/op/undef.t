@@ -1,5 +1,10 @@
 #!./perl
 
+BEGIN {
+    chdir 't' if -d 't';
+    unshift @INC, '../lib';
+}
+
 print "1..27\n";
 
 print defined($a) ? "not ok 1\n" : "ok 1\n";
