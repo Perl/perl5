@@ -1,14 +1,18 @@
 package PerlIO::via::QuotedPrint;
 
-# Make sure we do things by the book
 # Set the version info
+# Make sure we do things by the book from now on
 
+$VERSION = '0.04';
 use strict;
-$PerlIO::via::QuotedPrint::VERSION = 0.01;
 
 # Make sure the encoding/decoding stuff is available
 
 use MIME::QuotedPrint (); # no need to pollute this namespace
+
+# Satisfy -require-
+
+1;
 
 #-----------------------------------------------------------------------
 #  IN: 1 class to bless with
@@ -16,7 +20,7 @@ use MIME::QuotedPrint (); # no need to pollute this namespace
 #      3 file handle of PerlIO layer below (ignored)
 # OUT: 1 blessed object
 
-sub PUSHED { bless [],$_[0] } #PUSHED
+sub PUSHED { bless \*PUSHED,$_[0] } #PUSHED
 
 #-----------------------------------------------------------------------
 #  IN: 1 instantiated object (ignored)
@@ -45,10 +49,6 @@ sub WRITE {
     (print {$_[2]} MIME::QuotedPrint::encode_qp($_[1])) ? length($_[1]) : -1;
 } #WRITE
 
-# Satisfy -require-
-
-1;
-
 __END__
 
 =head1 NAME
@@ -59,10 +59,10 @@ PerlIO::via::QuotedPrint - PerlIO layer for quoted-printable strings
 
  use PerlIO::via::QuotedPrint;
 
- open( my $in,'<Via(PerlIO::via::QuotedPrint)','file.qp' )
+ open( my $in,'<:via(QuotedPrint)','file.qp' )
   or die "Can't open file.qp for reading: $!\n";
  
- open( my $out,'>Via(PerlIO::via::QuotedPrint)','file.qp' )
+ open( my $out,'>:via(QuotedPrint)','file.qp' )
   or die "Can't open file.qp for writing: $!\n";
 
 =head1 DESCRIPTION
@@ -73,8 +73,8 @@ from a handle, and it will encode as quoted-printable while writing to a handle.
 
 =head1 SEE ALSO
 
-L<PerlIO::via>, L<MIME::QuotedPrint>, L<PerlIO::via::Base64>, L<PerlIO::via::MD5>,
-L<PerlIO::via::StripHTML>.
+L<PerlIO::via>, L<MIME::QuotedPrint>, L<PerlIO::via::Base64>,
+L<PerlIO::via::MD5>, L<PerlIO::via::StripHTML>, L<PerlIO::via::Rotate>.
 
 =head1 COPYRIGHT
 

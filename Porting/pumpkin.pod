@@ -1285,11 +1285,12 @@ probably be restored with (GNU) indent somewhat like this:
 
     indent -kr -nce -psl -sc
 
-More full solution would also specify a list of Perl specific types
-with -TSV -TAV -THV .. -TMAGIC -TPerlIO ... but that list would be
-quite ungainly.  Also note that GNU indent also doesn't do aligning
-of assignments, which would truly wreck the indentation in places
-like sv.c:Perl_sv_upgrade().
+A more ambitious solution would also specify a list of Perl specific
+types with -TSV -TAV -THV .. -TMAGIC -TPerlIO ... but that list would
+be quite ungainly.  Also note that GNU indent also doesn't do aligning
+of consecutive assignments, which would truly wreck the layout in
+places like sv.c:Perl_sv_upgrade() or sv.c:Perl_clone_using().
+Similarly nicely aligned &&s, ||s and ==s would not be respected.
 
 =back
 

@@ -372,7 +372,7 @@ like you want to use UTF-8 (any of the the variables match C</utf-?8/i>),
 your STDIN, STDOUT, STDERR handles and the default open layer
 (see L<open>) are marked as UTF-8.  (This feature, like other new
 features that combine Unicode and I/O, work only if you are using
-PerlIO, but that's is the default.)
+PerlIO, but that's the default.)
 
 Note that after this Perl really does assume that everything is UTF-8:
 for example if some input handle is not, Perl will probably very soon
@@ -832,6 +832,8 @@ RFC 1321, from Gisle Aas, has been added.  See L<Digest::MD5>.
 NOTE: the C<MD5> backward compatibility module is deliberately not
 included since its further use is discouraged.
 
+See also L<PerlIO::via::QuotedPrint>.
+
 =item *
 
 C<Encode>, originally by Nick Ing-Simmons and now maintained by Dan
@@ -1021,7 +1023,7 @@ C<PerlIO::via::QuotedPrint>, by Elizabeth Mattijsen, is an example
 of a C<PerlIO::via> class:
 
     use PerlIO::via::QuotedPrint;
-    open($fh,">Via(PerlIO::via::QuotedPrint)",$path);
+    open($fh,">:via(QuotedPrint)",$path);
 
 This will automatically convert everything output to C<$fh> to
 Quoted-Printable.  See L<PerlIO::via> and L<PerlIO::via::QuotedPrint>.
@@ -2957,7 +2959,7 @@ There are now several profiling make targets.
 
 (This change was already made in 5.7.0 but bears repeating here.)
 (5.7.0 came out before 5.6.1: the development branch 5.7 released
-sooner than the maintenance branch 5.6)
+earlier than the maintenance branch 5.6)
 
 A potential security vulnerability in the optional suidperl component
 of Perl was identified in August 2000.  suidperl is neither built nor
@@ -2987,12 +2989,13 @@ such as sudo ( see http://www.courtesan.com/sudo/ ).
 
 =head1 New Tests
 
-Several new tests have been added, especially for the F<lib> and F<ext>
-subsections.  There are now about 65 000 individual tests (spread over
-about 700 test scripts), in the regression suite (5.6.1 has about
-11700 tests, in 258 test scripts)  Many of the new tests are of course
-introduced by the new modules, but still in general Perl is now more
-thoroughly tested.
+Several new tests have been added, especially for the F<lib> and
+F<ext> subsections.  There are now about 69 000 individual tests
+(spread over about 700 test scripts), in the regression suite (5.6.1
+has about 11 700 tests, in 258 test scripts)  The exact numbers depend
+on the platform and Perl configuration used.  Many of the new tests
+are of course introduced by the new modules, but still in general Perl
+is now more thoroughly tested.
 
 Because of the large number of tests, running the regression suite
 will take considerably longer time than it used to: expect the suite
@@ -3178,19 +3181,19 @@ threadunsafe.)
 The following tests are known to fail on OS/2 (for clarity
 only the failures are shown, not the full error messages):
 
-t/io/utf8............................FAILED at test 19
-t/op/grent...........................FAILED at test 2
-t/op/pwent...........................FAILED at test 1
-t/lib/os2_base.......................FAILED at test 13
-t/lib/os2_process....................FAILED at test 10
-t/lib/os2_process_kid................FAILED at test 10
-t/lib/rx_cmprt.......................FAILED at test 16
-ext/DB_File/t/db-btree...............FAILED at test 0
-ext/DB_File/t/db-hash................FAILED at test 0
-ext/DB_File/t/db-recno...............FAILED at test 0
-lib/ExtUtils/t/basic.................FAILED at test 14
-lib/ExtUtils/t/Constant..............FAILED at test 4
-lib/Memoize/t/errors.................FAILED at test 4
+ t/io/utf8............................FAILED at test 19
+ t/op/grent...........................FAILED at test 2
+ t/op/pwent...........................FAILED at test 1
+ t/lib/os2_base.......................FAILED at test 13
+ t/lib/os2_process....................FAILED at test 10
+ t/lib/os2_process_kid................FAILED at test 10
+ t/lib/rx_cmprt.......................FAILED at test 16
+ ext/DB_File/t/db-btree...............FAILED at test 0
+ ext/DB_File/t/db-hash................FAILED at test 0
+ ext/DB_File/t/db-recno...............FAILED at test 0
+ lib/ExtUtils/t/basic.................FAILED at test 14
+ lib/ExtUtils/t/Constant..............FAILED at test 4
+ lib/Memoize/t/errors.................FAILED at test 4
 
 =head2 op/sprintf tests 91, 129, and 130
 
@@ -3485,7 +3488,8 @@ development release).
 The C<PerlIO::Scalar> and C<PerlIO::Via> (capitalised) were renamed as
 C<PerlIO::scalar> and C<PerlIO::via> (all lowercase) just before 5.8.0.
 The main rationale was to have all core IO layers to have all
-lowercase names.
+lowercase names.  The "plugins" are named as usual, for example
+C<PerlIO::via::QuotedPrint>.
 
 =head1 Reporting Bugs
 
