@@ -1,5 +1,3 @@
-#
-
 package IO::File;
 
 =head1 NAME
@@ -103,7 +101,6 @@ require 5.000;
 use vars qw($VERSION @EXPORT @EXPORT_OK $AUTOLOAD);
 use Carp;
 use Symbol;
-use English;
 use SelectSaver;
 use IO::Handle qw(_open_mode_string);
 use IO::Seekable;
@@ -117,20 +114,20 @@ $VERSION = sprintf("%d.%02d", q$Revision: 1.5 $ =~ /(\d+)\.(\d+)/);
 
 @EXPORT = @IO::Seekable::EXPORT;
 
-################################################
-## If the Fcntl extension is available,
-##  export its constants.
-##
-
 sub import {
     my $pkg = shift;
     my $callpkg = caller;
-    Exporter::export $pkg, $callpkg;
+    Exporter::export $pkg, $callpkg, @_;
+
+    #
+    # If the Fcntl extension is available,
+    #  export its constants for sysopen().
+    #
     eval {
 	require Fcntl;
-	Exporter::export 'Fcntl', $callpkg;
+	Exporter::export 'Fcntl', $callpkg, '/^O_/';
     };
-};
+}
 
 
 ################################################
