@@ -28,6 +28,111 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 20897] By: jhi                                   on 2003/08/25  19:56:08
+        Log: Integrate:
+             [ 20886]
+             SunOS 4.1.4 is working, too.
+             
+             [ 20887]
+             pat.t -> charnames -> UCD -> Storable,
+             not good for static builds and minitest.
+             
+             [ 20888]
+             The #20887 didn't go over that well;
+             and add a few more tests from UTS#18.
+             
+             [ 20889]
+             More SunOS 4.x info.
+             
+             [ 20890]
+             Subject: [5.8.1] maint @ 20845 OK on aix 4.2
+             From: Jose.auguste-etienne@cgss-guyane.fr
+             Date: Mon, 25 Aug 2003 14:35:45 -0300
+             Message-ID: <OF1EF867E8.4A2A43A1-ON03256D8D.005DFE9A@Cgss-Guyane.fr>
+             
+             AIX Configure advice.
+             
+             [ 20891]
+             The new tests of #20888 didn't really test what they claimed to.
+             
+             [ 20892]
+             More ptags tweakage from Stas; now add 'fullpath'
+             option to get absolute paths.
+             
+             [ 20893]
+             Subject: more valgrinding: select problem?
+             From: "Marcus Holland-Moritz" <mhx-perl@gmx.net>
+             Date: Mon, 25 Aug 2003 22:02:17 +0200
+             Message-ID: <008301c36b43$cfe26f10$0c2f1fac@R2D2>
+             
+             In glibc, just use the __FD_SETSIZE since that's
+             the size of the buffer (usually 1024 bits, much
+             more than the selectminbits of 32).
+             
+             [ 20894]
+             Subject: [PATCH@20512] make backspace key work for WinCE users
+             From: Vadim Konovalov <vkonovalov@peterstar.ru>
+             Date: Tue, 26 Aug 2003 00:10:29 +0400
+             Message-ID: <135606488000.20030826001029@peterstar.ru>
+             
+             [ 20895]
+             Even more SunOS 4 info.
+             
+             [ 20896]
+             Tiny doc tweak.
+     Branch: maint-5.8/perl
+	  !> README.aix README.solaris emacs/ptags hints/sunos_4_1.sh
+	  !> pp_sys.c t/op/pat.t wince/perlmain.c
+____________________________________________________________________________
+[ 20885] By: jhi                                   on 2003/08/25  16:13:44
+        Log: Regen perlmodlib, perltoc.
+     Branch: maint-5.8/perl
+	   ! pod/perlmodlib.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 20883] By: jhi                                   on 2003/08/25  15:49:41
+        Log: Integrate:
+             [ 20875]
+             Upgrade to CGI.pm 3.00.
+             
+             [ 20876]
+             Keep the CGI::Util VERSION at 1.31 since there have been changes
+             since Perl 5.8.0.
+             
+             [ 20877]
+             Change the VERSION since there are now changes since Perl 5.8.0.
+             
+             [ 20878]
+             Document even more ways of affecting your "utf8ness".
+             
+             [ 20879]
+             Subject: Please update my address
+             From: Ed Avis <ed@membled.com>
+             Date: Mon, 25 Aug 2003 13:16:45 +0100 (BST)
+             Message-ID: <Pine.LNX.4.20L2.0308251314530.29902-100000@budvar.future-i.net>
+             
+             (Just the AUTHORS part, though, I don't think retroactively
+             updating the Changes* is useful.)
+             
+             [ 20880]
+             Subject: [PATCH] valgrind and /#/x
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Mon, 25 Aug 2003 13:27:49 +0100
+             Message-ID: <20030825122748.GA15560@fdgroup.com>
+             
+             [ 20881]
+             UVSIZE is not yet defined when it would be needed
+             by MULTIARCH.  So go back to LONGSIZE, and (belt-
+             and-suspenders-and-rope style) later in UVSIZE
+             possibly redefine BYTEORDER.
+     Branch: maint-5.8/perl
+	  !> AUTHORS Configure config_h.SH ext/I18N/Langinfo/Langinfo.pm
+	  !> lib/CGI.pm lib/CGI/Util.pm lib/utf8.pm regcomp.c
+____________________________________________________________________________
+[ 20874] By: jhi                                   on 2003/08/25  09:40:24
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 20873] By: jhi                                   on 2003/08/25  09:07:58
         Log: Integrate:
              [ 20864]
