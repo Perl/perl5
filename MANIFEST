@@ -650,6 +650,7 @@ lib/ExtUtils/Embed.pm	Utilities for embedding Perl in C programs
 lib/ExtUtils/Install.pm	Handles 'make install' on extensions
 lib/ExtUtils/Installed.pm	Information on installed extensions
 lib/ExtUtils/Liblist.pm	Locates libraries
+lib/ExtUtils/MANIFEST.SKIP	The default MANIFEST.SKIP
 lib/ExtUtils/MM_Cygwin.pm	MakeMaker methods for Cygwin
 lib/ExtUtils/MM_OS2.pm		MakeMaker methods for OS/2
 lib/ExtUtils/MM_Unix.pm		MakeMaker base class for Unix
