@@ -485,6 +485,15 @@ This is not a substitute for -T.>
 
 =item *
 
+In other taint news, the C<exec LIST> and C<system LIST> have now been
+considered too risky (think C<exec @ARGV>: it can start any program
+with any arguments), and now the said forms cause a warning.
+You should carefully launder the arguments to guarantee their
+validity.  In future releases of Perl the forms will become fatal
+errors so consider starting laundering now.
+
+=item *
+
 If tr/// is just counting characters, it doesn't attempt to
 modify its target.
 
