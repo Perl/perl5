@@ -19,14 +19,13 @@ and other associated NLMs.
 
 =head2 Tools & SDK
 
-The build requires Watcom 11.x compiler and linker.  NetWare SDK,
-available at L<http://developer.novell.com/ndk/>, is required.  Apart
-from NetWare SDK, "NLM & NetWare Libraries for C" and "NetWare Server
-Protocol Libraries for C" are also required.  This is also available
-at the above mentioned site.  Microsoft Visual C++ version 4.2 or
-later is also required.
+The build requires Watcom 11.x compiler and linker.  In addition,
+the "NetWare SDK", "NLM & NetWare Libraries for C" and
+"NetWare Server Protocol Libraries for C", all available at
+L<http://developer.novell.com/ndk/>, are also required.
+Microsoft Visual C++ version 4.2 or later is also required.
 
-Currently the interpreter builds only with Watcom, we do have plans of
+Currently the interpreter builds only with Watcom and we do have plans of
 making this work with CodeWarrior as well.
 
 =head2 Setup
@@ -58,12 +57,13 @@ or I</?> gives the usage help.
 
 =head2 Make
 
-The makefile is located under the NetWare folder.  Type nmake at the
-WinNT command prompt.  The make process runs only under WinNT shell.
-The makefile makes use of miniperl.exe to run some of the Perl
-scripts.  Please run nmake from win32 folder which builds miniperl.exe
-before running nmake from NetWare folder.  The build process can be
-stopped after miniperl.exe is created.
+The make process runs only under WinNT shell.
+The NetWare makefile is located under the NetWare folder.
+The makefile for NetWare makes use of miniperl.exe to run some of
+the Perl scripts.  To create miniperl.exe, run nmake from
+win32 folder through WinNT commond prompt.  The build process
+can be stopped after miniperl.exe is created.  Then run nmake
+from NetWare folder through WinNT command prompt.
 
 Currently the follwing two build types are tested on NetWare
 
@@ -81,11 +81,10 @@ USE_MULTI & USE_IMP_SYS defined and USE_ITHREADS not defined
 
 =head2 Interpreter
 
-Once miniperl.exe creation is over, run nmake from the NetWare
-folder. This will build the Perl interpreter for NetWare as
-I<perl.nlm>.  This is copied under the I<Release> folder if you are
-doing a release build else will be copied under I<Debug> folder for
-debug builds.
+Once miniperl.exe creation is over, run nmake from the NetWare folder.
+This will build the Perl interpreter for NetWare as I<perl.nlm>.
+This is copied under the I<Release> folder if you are doing
+a release build, else will be copied under I<Debug> folder for debug builds.
 
 =head2 Extensions
 
@@ -94,24 +93,22 @@ NLPs (NetWare Loadable Perl).
 
 =head1 Install
 
-Installing NetWare Perl on Windows doesn't make any sense.  To
-install, type I<nmake nwinstall>. This will copy the binaries and
-module files to a NetWare server.  The makefile, by default sets the
-drive letter to I<i:> which should be mapped to the I<sys> volume of a
-NetWare server.  The Perl interpreter, I<perl.nlm>, is copied under
-I<sys:\perl\system> folder. Copy I<perl.nlm> to I<sys:\system>
-folder. Before running I<nmake nwinstall>, make sure the NetWare
-server on which the files have to go is mapped to the drive letter
-I<i:>.
+To install NetWare Perl onto a NetWare server, first map the Sys volume
+of a NetWare server to I<i:>. This is because the makefile by default
+sets the drive letter to I<i:>.  Type I<nmake nwinstall> from NetWare folder
+on a WinNT command prompt.  This will copy the binaries and module files
+onto the NetWare server.  The Perl interpreter, I<perl.nlm>, is copied under
+I<sys:\perl\system> folder.  Copy I<perl.nlm> to I<sys:\system> folder.
 
 =head1 Build new extensions
 
 To build extensions other than standard extensions, NetWare Perl has
 to be installed on Windows as well.  This can be done by invoking
-I<nmake install> on the Windows NT command prompt.  This will copy all
-the *.pm files and other required files.  Documentation files are not
-copied. This has be done after installing Perl for Windows. Once this
-is done, to build any extension, do the following
+I<nmake install> from the NetWare folder on a WinNT command prompt.
+This will copy all the *.pm files and other required files.
+Documentation files are not copied. This has to be done after
+installing Perl for Windows. Once this is done, do the following
+to build any extension:
 
 =over 4
 
@@ -162,12 +159,13 @@ Also fork() is not currently implemented.
 =head1 Acknowledgements
 
 The makefile for Win32 is used as a reference to create the makefile
-for NetWare build.  Also, the make process for NetWare port uses miniperl.exe
-to run scripts during the make and installation process.
+for NetWare build.  Also, the make process for NetWare port uses
+miniperl.exe to run scripts during the make and installation process.
 
-=head1 Author
+=head1 Authors
 
 Guruprasad S (sguruprasad@novell.com)
+Anantha Kesari H Y (hyanantha@novell.com)
 
 =head1 Date
 
@@ -180,6 +178,10 @@ Created - 18th Jan 2001
 =item *
 
 Modified -  25th June 2001
+
+=item *
+
+Modified -  13 July 2001
 
 =back
 

@@ -28,8 +28,178 @@ not those that affect the (now decommissioned) cfgperl, or vmsperl,
 or any other branch.
 
 --------------
-Version v5.7.1		Development release working toward v5.8
+Version v5.7.2		Development release working toward v5.8
 --------------
+____________________________________________________________________________
+[ 11352] By: jhi                                   on 2001/07/13  12:54:49
+        Log: Reword.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 11351] By: jhi                                   on 2001/07/13  12:52:47
+        Log: AUTHORS update.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 11350] By: jhi                                   on 2001/07/13  12:24:36
+        Log: Ignore PL_regex_pad and PL_regex_padav from symbols
+             unless ithreads.
+     Branch: perl
+	   ! makedef.pl
+____________________________________________________________________________
+[ 11349] By: jhi                                   on 2001/07/13  11:54:10
+        Log: Integrate perlio.
+     Branch: perl
+	  !> win32/distclean.bat
+____________________________________________________________________________
+[ 11348] By: jhi                                   on 2001/07/13  11:49:50
+        Log: Test the encoding transform only iff we have PerlIO,
+             noticed by H. Merijn Brand.
+     Branch: perl
+	   ! ext/PerlIO/t/encoding.t
+____________________________________________________________________________
+[ 11347] By: jhi                                   on 2001/07/13  11:40:13
+        Log: README.netware tweaks from Ananth Kesari.
+     Branch: perl
+	   ! README.netware
+____________________________________________________________________________
+[ 11346] By: nick                                  on 2001/07/13  09:18:51
+        Log: Win32/distclean.bat - Down-case all MANIFEST and File::Find results so 
+             to avoid /unicode vs /Unicode issues.
+     Branch: perlio
+	   ! win32/distclean.bat
+____________________________________________________________________________
+[ 11345] By: nick                                  on 2001/07/13  06:24:18
+        Log: Integrate mainline
+     Branch: perlio
+	  +> README.uts lib/UnicodeCD.pm lib/UnicodeCD.t
+	   - lib/Unicode/UCD.pm lib/Unicode/UCD.t lib/unicode/distinct.pm
+	  !> (integrate 63 files)
+____________________________________________________________________________
+[ 11344] By: jhi                                   on 2001/07/13  04:50:22
+        Log: Add d_bincompat5005 information to perl -V.
+     Branch: perl
+	   ! myconfig.SH
+____________________________________________________________________________
+[ 11343] By: jhi                                   on 2001/07/13  03:42:05
+        Log: Subject: Re: [PATCH] Re: Memory corruption? Read-only $_?
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Fri, 13 Jul 2001 07:12:36 +0530
+             Message-ID: <20010713071236.C5669@lustre.dyn.wiw.org>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 11342] By: jhi                                   on 2001/07/13  03:36:22
+        Log: Remove unicode::distinct, as per Inaba Hiroto.
+     Branch: perl
+	   - lib/unicode/distinct.pm
+	   ! MANIFEST hv.c perl.h pod/perlmodlib.pod pod/perltoc.pod sv.c
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[ 11341] By: jhi                                   on 2001/07/13  00:05:53
+        Log: Paging for Dr Octothorpe.
+     Branch: perl
+	   ! pod/perlfaq4.pod
+____________________________________________________________________________
+[ 11340] By: jhi                                   on 2001/07/12  23:53:44
+        Log: cut-n-paste error noticed by mjd.
+     Branch: perl
+	   ! pod/perlfaq4.pod
+____________________________________________________________________________
+[ 11339] By: jhi                                   on 2001/07/12  23:39:42
+        Log: Subject: [PATCH: perl@11328] update the octal situation in perlfaq4.pod
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Thu, 12 Jul 2001 17:04:22 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10107121703040.219875-100000@aspara.forte.com>
+     Branch: perl
+	   ! pod/perlfaq4.pod
+____________________________________________________________________________
+[ 11338] By: jhi                                   on 2001/07/12  23:38:49
+        Log: Subject: Re: [randy@qualcomm.com: Corrections for ' repository - Using the Perl repository ']
+             From: Randall Gellens <randy@qualcomm.com>
+             Date: Thu, 12 Jul 2001 16:56:23 -0700
+             Message-Id: <p05100301b773e9751c04@[129.46.176.61]>
+     Branch: perl
+	   ! Porting/repository.pod
+____________________________________________________________________________
+[ 11337] By: jhi                                   on 2001/07/12  23:35:06
+        Log: Make PTHREAD_ATFORK() to croak if HAS_FORK, noop otherwise.
+     Branch: perl
+	   ! thread.h
+____________________________________________________________________________
+[ 11336] By: jhi                                   on 2001/07/12  23:23:39
+        Log: Subject: [PATCH] pthread_atfork on FreeBSD - Part 1: #ifdef HAS_PTHREAD_ATFORK  
+             From: coral <coral@moonlight.crystalflame.net>
+             Date: Thu, 12 Jul 2001 16:16:50 -0700 (PDT)
+             Message-Id: <200107122316.f6CNGoq09171@moonlight.crystalflame.net>
+     Branch: perl
+	   ! thread.h
+____________________________________________________________________________
+[ 11335] By: jhi                                   on 2001/07/12  23:23:14
+        Log: Metaconfig unit change for #11134.
+     Branch: metaconfig
+	   + U/threads/d_pthread_atfork.U
+____________________________________________________________________________
+[ 11334] By: jhi                                   on 2001/07/12  23:22:42
+        Log: Add HAS_PTHREAD_ATFORK.
+     Branch: perl
+	   ! Configure NetWare/config.wc NetWare/config_H.wc
+	   ! Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH configure.com epoc/config.sh pod/perltoc.pod
+	   ! uconfig.h uconfig.sh vos/config.alpha.def vos/config.alpha.h
+	   ! vos/config.ga.def vos/config.ga.h win32/config.bc
+	   ! win32/config.gc win32/config.vc win32/config_H.bc
+	   ! win32/config_H.gc win32/config_H.vc
+____________________________________________________________________________
+[ 11333] By: jhi                                   on 2001/07/12  22:58:35
+        Log: Subject: [PATCH] File::Copy fails on tied handles
+             From: "Wilson, Doug" <Doug_Wilson@intuit.com>
+             Date: Thu, 12 Jul 2001 15:18:51 -0700
+             Message-ID: <35A280DF784CD411A06B0008C7B130ADB5505B@sdex04.sd.intuit.com>
+     Branch: perl
+	   ! lib/File/Copy.pm
+____________________________________________________________________________
+[ 11332] By: jhi                                   on 2001/07/12  22:57:04
+        Log: Subject: [PATCH] Langinfo.t
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Thu, 12 Jul 2001 23:55:38 +0100
+             Message-ID: <20010712235538.M5827@plum.flirble.org>
+     Branch: perl
+	   ! ext/I18N/Langinfo/Langinfo.t
+____________________________________________________________________________
+[ 11331] By: jhi                                   on 2001/07/12  22:56:09
+        Log: Subject: [PATCH: perl@11328] informational tweaks to perl572delta.pod
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Thu, 12 Jul 2001 16:38:00 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10107121633340.219875-100000@aspara.forte.com>
+     Branch: perl
+	   ! pod/perl572delta.pod
+____________________________________________________________________________
+[ 11330] By: jhi                                   on 2001/07/12  22:55:23
+        Log: Subject: [PATCH] Re: Memory corruption? Read-only $_?
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Fri, 13 Jul 2001 05:21:16 +0530
+             Message-ID: <20010713052116.B5669@lustre.dyn.wiw.org>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 11329] By: jhi                                   on 2001/07/12  22:54:39
+        Log: Subject: [PATCH 20010712.005] Re: Perl bug with "delete" on arrays
+             From: Abhijit Menon-Sen <ams@wiw.org>
+             Date: Fri, 13 Jul 2001 03:04:25 +0530
+             Message-ID: <20010713030425.A5669@lustre.dyn.wiw.org>
+     Branch: perl
+	   ! av.c
+____________________________________________________________________________
+[ 11328] By: gsar                                  on 2001/07/12  19:02:01
+        Log: s/^M$//g
+     Branch: perl
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 11327] By: jhi                                   on 2001/07/12  18:54:09
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
 ____________________________________________________________________________
 [ 11326] By: jhi                                   on 2001/07/12  18:17:18
         Log: Typo spotted by Philip Newton.
@@ -656,7 +826,9 @@ ____________________________________________________________________________
 	   ! Changes patchlevel.h
 ____________________________________________________________________________
 [ 11237] By: jhi                                   on 2001/07/09  14:27:27
-        Log: Subject: [PATCH] OPpCONST_OCTAL fixes
+        Log: (Retracted by #11285).
+             
+             Subject: [PATCH] OPpCONST_OCTAL fixes
              From: Abhijit Menon-Sen <ams@wiw.org>
              Date: Mon, 9 Jul 2001 07:38:45 +0530
              Message-ID: <20010709073845.A25406@lustre.dyn.wiw.org>
@@ -1050,10 +1222,7 @@ ____________________________________________________________________________
 	   ! lib/Cwd.pm
 ____________________________________________________________________________
 [ 11176] By: jhi                                   on 2001/07/06  12:42:45
-        Log: Subject: [PATCH lib/Cwd.pm] QNX patch extended for NTO
-             From: Norton Allen <allen@huarp.harvard.edu>
-             Date: Fri, 6 Jul 2001 09:39:57 -0400 (edt)
-             Message-Id: <200107061339.JAA12582@bottesini.harvard.edu>
+        Log: (Accidentally empty check-in.)
      Branch: perl
 	   ! utf8.h
 ____________________________________________________________________________
@@ -1128,7 +1297,9 @@ ____________________________________________________________________________
 	   ! ext/B/B/Deparse.pm
 ____________________________________________________________________________
 [ 11166] By: jhi                                   on 2001/07/06  01:11:50
-        Log: Subject: Re: [PATCH] mkdir() mode argument is missing initial 0
+        Log: (Retracted by #11285.)
+             
+             Subject: Re: [PATCH] mkdir() mode argument is missing initial 0
              From: Abhijit Menon-Sen <ams@wiw.org>
              Date: Fri, 6 Jul 2001 01:26:32 +0530
              Message-ID: <20010706012632.A28327@lustre.dyn.wiw.org>
@@ -1288,7 +1459,7 @@ ____________________________________________________________________________
 	   ! Configure
 ____________________________________________________________________________
 [ 11145] By: jhi                                   on 2001/07/04  16:08:00
-        Log: PERLRUNINST needed in some spots.
+        Log: (Retracted by #11155) PERLRUNINST needed in some spots.
      Branch: perl
 	   ! lib/ExtUtils/MM_Unix.pm
 ____________________________________________________________________________
@@ -1436,7 +1607,8 @@ ____________________________________________________________________________
 	   ! lib/Unicode/UCD.pm
 ____________________________________________________________________________
 [ 11125] By: jhi                                   on 2001/07/03  16:12:20
-        Log: Subject: MakeMaker should pass through DEFINE and INC to subdirs
+        Log: (Retracted by #11174)
+             Subject: MakeMaker should pass through DEFINE and INC to subdirs
              From: Alan Burlison <Alan.Burlison@sun.com>
              Date: Tue, 03 Jul 2001 15:20:13 +0100
              Message-ID: <3B41D49D.A923D4F9@sun.com>
@@ -3028,7 +3200,9 @@ ____________________________________________________________________________
 	   ! ext/Cwd/Cwd.xs ext/Devel/Peek/Peek.xs pp_sys.c
 ____________________________________________________________________________
 [ 10899] By: jhi                                   on 2001/06/24  17:00:34
-        Log: Subject: Re: [PATCH] Re: [ID 20010624.001] debugger T, and Carp::carp don't trace arg of
+        Log: (Replaced by #10922)
+             
+             Subject: Re: [PATCH] Re: [ID 20010624.001] debugger T, and Carp::carp don't trace arg of
              From: Tony Bowden <tony@kasei.com>
              Date: Sun, 24 Jun 2001 17:32:40 +0100
              Message-ID: <20010624173240.A16293@blackstar.co.uk>
@@ -6767,8 +6941,8 @@ ____________________________________________________________________________
              aren't "normally" visible inside eval""s contained in subs unless
              a cloned reference to them already exists)
              
-             strangely enough, t/harness did show this up as a failure (harness
-             needs fixing?)
+             strangely enough, t/harness didn't show this up as a failure
+             (harness needs fixing?)
      Branch: maint-5.6/perl
 	   ! t/op/eval.t
 ____________________________________________________________________________
@@ -7592,7 +7766,6 @@ ____________________________________________________________________________
 	   ! lib/Test/Harness.pm t/lib/test-harness.t
 ____________________________________________________________________________
 [ 10293] By: jhi                                   on 2001/05/29  15:46:10
-
         Log: Subject: [PATCH t/TEST lib/Test.pm t/lib/Test/*.t] Syncing with Test-1.17
              From: Michael G Schwern <schwern@pobox.com>
              Date: Tue, 29 May 2001 09:19:52 +0100
