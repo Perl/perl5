@@ -1,4 +1,4 @@
-#!./perl
+#!./perl -w
 
 BEGIN {
     unless(grep /blib/, @INC) {
@@ -31,7 +31,7 @@ BEGIN {
 my $has_perlio = find PerlIO::Layer 'perlio';
 
 $| = 1;
-print "1..23\n";
+print "1..24\n";
 
 eval {
     $SIG{ALRM} = sub { die; };
@@ -267,7 +267,7 @@ if( $server_pid) {
     }
     print "ok 18\n";
 
-    ### TEST 19
+    ### TEST 21
     ### Get data from the server using a stream, which is
     ### interrupted by eof calls.
     ### On perl-5.7.0@7673 this failed in a SOCKS environment, because eof
@@ -276,7 +276,7 @@ if( $server_pid) {
     ### a recv(2) call on the socket, while ungetc(3) put back a character
     ### to an IO buffer, which never again was read.
     #
-    ### TEST 20
+    ### TESTS 19,20
     ### Try to ping-pong a Unicode character.
     #
     if ($^O eq 'mpeix') {
@@ -285,7 +285,11 @@ if( $server_pid) {
     $sock = IO::Socket::INET->new("localhost:$serverport")
          || IO::Socket::INET->new("127.0.0.1:$serverport");
 
-    binmode($sock, ":utf8") if $has_perlio;
+    if ($has_perlio) {
+	print binmode($sock, ":utf8") ? "ok 19\n" : "not ok 19\n";
+    } else {
+	print "ok 19 - Skip: no perlio\n";
+    }
 
     if ($sock) {
 
@@ -293,9 +297,9 @@ if( $server_pid) {
 	    $sock->print("ping \x{100}\n");
 	    chomp(my $pong = scalar <$sock>);
 	    print $pong =~ /^pong (.+)$/ && $1 eq "\x{100}" ?
-		"ok 19\n" : "not ok 19\n";
+		"ok 20\n" : "not ok 20\n";
 	} else {
-	    print "ok 19 - Skip: no perlio\n";
+	    print "ok 20 - Skip: no perlio\n";
 	}
 
 	$sock->print("send\n");
@@ -315,10 +319,10 @@ if( $server_pid) {
     } else {
 	print "not ";
     }
-    print "ok 20\n";
+    print "ok 21\n";
     }
 
-    ### TEST 21
+    ### TEST 22
     ### Stop the server
     #
     $sock = IO::Socket::INET->new("localhost:$serverport")
@@ -332,7 +336,7 @@ if( $server_pid) {
     } else {
 	print "not ";
     }
-    print "ok 21\n";
+    print "ok 22\n";
 
 } elsif (defined($server_pid)) {
    
@@ -370,14 +374,14 @@ if( $server_pid) {
 
 $sock = IO::Socket::INET->new(Blocking => 0)
     or print "not ";
-print "ok 22\n";
+print "ok 23\n";
 
 if ( $^O eq 'qnx' ) {
-  print "ok 23 # skipped on QNX4\n";
+  print "ok 24 # skipped on QNX4\n";
   # QNX4 library bug: Can set non-blocking on socket, but
   # cannot return that status.
 } else {
   my $status = $sock->blocking;
   print "not " unless defined $status && !$status;
-  print "ok 23\n";
+  print "ok 24\n";
 }
