@@ -21,7 +21,7 @@ static HV *dl_loaded_files = Nullhv;	/* only needed on a few systems */
 
 
 #ifdef DEBUGGING
-static int dl_debug = 0;	/* value copied from $DynaLoader::dl_error */
+static int dl_debug = 0;	/* value copied from $DynaLoader::dl_debug */
 #define DLDEBUG(level,code)	if (dl_debug>=level) { code; }
 #else
 #define DLDEBUG(level,code)
