@@ -4553,7 +4553,7 @@ PP(pp_split)
 		s++;
 	}
     }
-    if (pm->op_pmflags & (PMf_MULTILINE|PMf_SINGLELINE)) {
+    if ((pm->op_pmflags & PMf_MULTILINE) != PL_multiline) {
 	SAVEINT(PL_multiline);
 	PL_multiline = pm->op_pmflags & PMf_MULTILINE;
     }

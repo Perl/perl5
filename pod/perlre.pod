@@ -41,11 +41,7 @@ line anywhere within the string.
 Treat string as single line.  That is, change "." to match any character
 whatsoever, even a newline, which normally it would not match.
 
-The C</s> and C</m> modifiers both override the C<$*> setting.  That
-is, no matter what C<$*> contains, C</s> without C</m> will force
-"^" to match only at the beginning of the string and "$" to match
-only at the end (or just before a newline at the end) of the string.
-Together, as /ms, they let the "." match any character whatsoever,
+Used together, as /ms, they let the "." match any character whatsoever,
 while still allowing "^" and "$" to match, respectively, just after
 and just before newlines within the string.
 
@@ -103,13 +99,11 @@ string as a multi-line buffer, such that the "^" will match after any
 newline within the string, and "$" will match before any newline.  At the
 cost of a little more overhead, you can do this by using the /m modifier
 on the pattern match operator.  (Older programs did this by setting C<$*>,
-but this practice is now deprecated.)
+but this practice has been removed in perl 5.9.)
 
 To simplify multi-line substitutions, the "." character never matches a
 newline unless you use the C</s> modifier, which in effect tells Perl to pretend
-the string is a single line--even if it isn't.  The C</s> modifier also
-overrides the setting of C<$*>, in case you have some (badly behaved) older
-code that sets it in another module.
+the string is a single line--even if it isn't.
 
 The following standard quantifiers are recognized:
 
