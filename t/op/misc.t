@@ -476,3 +476,10 @@ for (2..3) {
 print $x->foo;
 EXPECT
 new1new22DESTROY2new33DESTROY31DESTROY1
+########
+re();
+sub re {
+    my $re = join '', eval 'qr/(?p{ $obj->method })/';
+    $re;
+}
+EXPECT

@@ -1664,7 +1664,7 @@ regmatch(regnode *prog)
 	    n = ARG(scan);
 	    PL_op = (OP_4tree*)PL_regdata->data[n];
 	    DEBUG_r( PerlIO_printf(Perl_debug_log, "  re_eval 0x%x\n", PL_op) );
-	    PL_curpad = AvARRAY((AV*)PL_regdata->data[n + 1]);
+	    PL_curpad = AvARRAY((AV*)PL_regdata->data[n + 2]);
 	    PL_reg_magic->mg_len = locinput - PL_bostr;
 	    PL_regendp[0] = locinput;
 

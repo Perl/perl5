@@ -1171,10 +1171,10 @@ reg(I32 paren, I32 *flagp)
 
 		    rop = sv_compile_2op(sv, &sop, "re", &av);
 
-		    n = add_data(3, "nso");
+		    n = add_data(3, "nop");
 		    PL_regcomp_rx->data->data[n] = (void*)rop;
-		    PL_regcomp_rx->data->data[n+1] = (void*)av;
-		    PL_regcomp_rx->data->data[n+2] = (void*)sop;
+		    PL_regcomp_rx->data->data[n+1] = (void*)sop;
+		    PL_regcomp_rx->data->data[n+2] = (void*)av;
 		    SvREFCNT_dec(sv);
 		}
 		else {						/* First pass */
@@ -3123,13 +3123,30 @@ pregfree(struct regexp *r)
     }
     if (r->data) {
 	int n = r->data->count;
+	AV* new_comppad = NULL;
+	AV* old_comppad;
+	SV** old_curpad;
+
 	while (--n >= 0) {
 	    switch (r->data->what[n]) {
 	    case 's':
 		SvREFCNT_dec((SV*)r->data->data[n]);
 		break;
+	    case 'p':
+		new_comppad = (AV*)r->data->data[n];
+		break;
 	    case 'o':
+		if (new_comppad == NULL)
+		    croak("panic: pregfree comppad");
+		old_comppad = PL_comppad;
+		old_curpad = PL_curpad;
+		PL_comppad = new_comppad;
+		PL_curpad = AvARRAY(new_comppad);
 		op_free((OP_4tree*)r->data->data[n]);
+		PL_comppad = old_comppad;
+		PL_curpad = old_curpad;
+		SvREFCNT_dec((SV*)new_comppad);
+		new_comppad = NULL;
 		break;
 	    case 'n':
 		break;
