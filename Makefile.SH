@@ -563,7 +563,7 @@ CHMOD_W = chmod +w
 # To force them to run, type
 #	make regen_headers
 regen_headers:	FORCE
-	$(CHMOD_W) proto.h warning.h lib/warning.pm 
+	$(CHMOD_W) proto.h warnings.h lib/warnings.pm 
 	perl keywords.pl
 	perl opcode.pl
 	perl embed.pl
