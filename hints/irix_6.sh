@@ -207,9 +207,8 @@ esac
 # Don't groan about unused libraries.
 ldflags="$ldflags -Wl,-woff,84"
 
-case "`uname -s`-`$cc -version 2>&1`" in
-IRIX64-*7.2.*)
-op_cflags='optimize=-O1' ;; # workaround for an optimizer bug
+case "`$cc -version 2>&1`" in
+*7.2.*) op_cflags='optimize=-O1' ;; # workaround for an optimizer bug
 esac
 
 # We don't want these libraries.
