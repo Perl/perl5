@@ -43,7 +43,7 @@
 #ifdef XS_VERSION
 # define XS_VERSION_BOOTCHECK \
     STMT_START {							\
-	char *vn = "", *module = SvPV(ST(0),na);			\
+	char *vn = Nullch, *module = SvPV(ST(0),na);			\
 	if (items >= 2)	 /* version supplied as bootstrap arg */	\
 	    Sv = ST(1);							\
 	else {								\
@@ -55,8 +55,10 @@
 				      vn = "VERSION"), FALSE);		\
 	}								\
 	if (Sv && (!SvOK(Sv) || strNE(XS_VERSION, SvPV(Sv, na))))	\
-	    croak("%s object version %s does not match $%s::%s %_",	\
-		  module, XS_VERSION, module, vn, Sv);			\
+	    croak("%s object version %s does not match %s%s%s%s %_",	\
+		  module, XS_VERSION,					\
+		  vn ? "$" : "", vn ? module : "", vn ? "::" : "",	\
+		  vn ? vn : "bootstrap parameter", Sv);			\
     } STMT_END
 #else
 # define XS_VERSION_BOOTCHECK
