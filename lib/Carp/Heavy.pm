@@ -1,6 +1,12 @@
 # Carp::Heavy uses some variables in common with Carp.
 package Carp;
 
+=head1 NAME
+
+Carp heavy machinery - no user serviceable parts inside
+
+=cut
+
 # use strict; # not yet
 
 # On one line so MakeMaker will see it.

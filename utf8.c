@@ -1,6 +1,6 @@
 /*    utf8.c
  *
- *    Copyright (c) 1998-2000, Larry Wall
+ *    Copyright (c) 1998-2001, Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -167,7 +167,7 @@ Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
     STRLEN c;
 
     if (!len)
-	len = strlen(s);
+	len = strlen((char *)s);
     send = s + len;
 
     while (x < send) {

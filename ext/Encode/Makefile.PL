@@ -74,15 +74,35 @@ sub postamble
  $str .= "\n\n";
  foreach my $table (keys %tables)
   {
+   my $numlines = 1;
+   my $lengthsofar = length($str);
+   my $continuator = '';
    $str .= "$table.c : compile Makefile.PL";
    foreach my $file (@{$tables{$table}})
     {
-     $str .= ' '.$self->catfile($dir,$file);
+     $str .= $continuator.' '.$self->catfile($dir,$file);
+     if ( length($str)-$lengthsofar > 128*$numlines )
+      {
+       $continuator .= " \\\n\t";
+       $numlines++;
+      } else {
+       $continuator = '';
+      }
     }
+   $numlines = 1;
+   $lengthsofar = length($str);
+   $continuator = '';
    $str .= "\n\t\$(PERL) compile \$\@";
    foreach my $file (@{$tables{$table}})
     {
-     $str .= ' '.$self->catfile($dir,$file);
+     $str .= $continuator.' '.$self->catfile($dir,$file);
+     if ( length($str)-$lengthsofar > 128*$numlines )
+      {
+       $continuator .= "\n\t\$(PERL) compile \$\@";
+       $numlines++;
+      } else {
+       $continuator = '';
+      }
     }
    $str .= "\n\n";
   }

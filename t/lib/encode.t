@@ -95,8 +95,8 @@ for $i (256,128,129,256)
  {
   my $c = chr($i);
   my $s = "$c\n".sprintf("%02X",$i);
-  ok(Encode::valid_utf8($s),1,"concat to utf8 botched");
+  ok(Encode::valid_utf8($s),1,"concat of $i botched");
   Encode::utf8_upgrade($s);
-  ok(Encode::valid_utf8($s),1,"concat to utf8 botched");
+  ok(Encode::valid_utf8($s),1,"concat of $i botched");
  }
 
