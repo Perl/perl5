@@ -23,28 +23,75 @@
 
 #define CALL_PEEP(o) CALL_FPTR(PL_peepp)(aTHX_ o)
 
-/* #define PL_OP_SLAB_ALLOC */
+#if defined(PL_OP_SLAB_ALLOC)
 
-#if defined(PL_OP_SLAB_ALLOC) && !defined(PERL_IMPLICIT_CONTEXT)
-#define SLAB_SIZE 8192
-static char    *PL_OpPtr  = NULL;	/* XXX threadead */
-static int     PL_OpSpace = 0;		/* XXX threadead */
-#define NewOp(m,var,c,type) do { if ((PL_OpSpace -= c*sizeof(type)) >= 0)     \
-                              var =  (type *)(PL_OpPtr -= c*sizeof(type));    \
-                             else                                             \
-                              var = (type *) Slab_Alloc(m,c*sizeof(type));    \
-                           } while (0)
+#ifndef PERL_SLAB_SIZE
+#define PERL_SLAB_SIZE 2048
+#endif
+
+#define NewOp(m,var,c,type) \
+	STMT_START { var = (type *) Slab_Alloc(m,c*sizeof(type)); } STMT_END
+
+#define FreeOp(p) Slab_Free(p)
 
 STATIC void *
 S_Slab_Alloc(pTHX_ int m, size_t sz)
 {
- Newz(m,PL_OpPtr,SLAB_SIZE,char);
- PL_OpSpace = SLAB_SIZE - sz;
- return PL_OpPtr += PL_OpSpace;
+    /*
+     * To make incrementing use count easy PL_OpSlab is an I32 *
+     * To make inserting the link to slab PL_OpPtr is I32 **
+     * So compute size in units of sizeof(I32 *) as that is how Pl_OpPtr increments
+     * Add an overhead for pointer to slab and round up as a number of pointers
+     */
+    sz = (sz + 2*sizeof(I32 *) -1)/sizeof(I32 *);
+    if ((PL_OpSpace -= sz) < 0) {
+	PL_OpPtr = (I32 **) PerlMemShared_malloc(PERL_SLAB_SIZE*sizeof(I32*));
+	if (!PL_OpPtr) {
+	    return NULL;
+	}
+	Zero(PL_OpPtr,PERL_SLAB_SIZE,I32 **);
+	/* We reserve the 0'th I32 sized chunk as a use count */
+	PL_OpSlab = (I32 *) PL_OpPtr;
+	/* Reduce size by the use count word, and by the size we need.
+	 * Latter is to mimic the '-=' in the if() above
+	 */
+	PL_OpSpace = PERL_SLAB_SIZE - (sizeof(I32)+sizeof(I32 **)-1)/sizeof(I32 **) - sz;
+	/* Allocation pointer starts at the top.
+	   Theory: because we build leaves before trunk allocating at end
+	   means that at run time access is cache friendly upward
+	 */
+	PL_OpPtr += PERL_SLAB_SIZE;
+    }
+    assert( PL_OpSpace >= 0 );
+    /* Move the allocation pointer down */
+    PL_OpPtr   -= sz;
+    assert( PL_OpPtr > (I32 **) PL_OpSlab );
+    *PL_OpPtr   = PL_OpSlab;	/* Note which slab it belongs to */
+    (*PL_OpSlab)++;		/* Increment use count of slab */
+    assert( PL_OpPtr+sz <= ((I32 **) PL_OpSlab + PERL_SLAB_SIZE) );
+    assert( *PL_OpSlab > 0 );
+    return (void *)(PL_OpPtr + 1);
+}
+
+STATIC void
+S_Slab_Free(pTHX_ void *op)
+{
+    I32 **ptr = (I32 **) op;
+    I32 *slab = ptr[-1];
+    assert( ptr-1 > (I32 **) slab );
+    assert( ptr < ( (I32 **) slab + PERL_SLAB_SIZE) );
+    assert( *slab > 0 );
+    if (--(*slab) == 0) {
+	PerlMemShared_free(slab);
+	if (slab == PL_OpSlab) {
+	    PL_OpSpace = 0;
+	}
+    }
 }
 
 #else
 #define NewOp(m, var, c, type) Newz(m, var, c, type)
+#define FreeOp(p) Safefree(p)
 #endif
 /*
  * In the following definition, the ", Nullop" is just to make the compiler
@@ -735,14 +782,7 @@ Perl_op_free(pTHX_ OP *o)
 	cop_free((COP*)o);
 
     op_clear(o);
-
-#ifdef PL_OP_SLAB_ALLOC
-    if ((char *) o == PL_OpPtr)
-     {
-     }
-#else
-    Safefree(o);
-#endif
+    FreeOp(o);
 }
 
 void
@@ -847,11 +887,7 @@ clear_pmop:
 		    pmop = pmop->op_pmnext;
 		}
 	    }
-#ifdef USE_ITHREADS
-	    Safefree(PmopSTASHPV(cPMOPo));
-#else
-	    /* NOTE: PMOP.op_pmstash is not refcounted */
-#endif
+	    PmopSTASH_free(cPMOPo);
 	}
 	cPMOPo->op_pmreplroot = Nullop;
         /* we use the "SAFE" version of the PM_ macros here
@@ -882,18 +918,20 @@ clear_pmop:
 STATIC void
 S_cop_free(pTHX_ COP* cop)
 {
-    Safefree(cop->cop_label);
-#ifdef USE_ITHREADS
-    Safefree(CopFILE(cop));		/* XXX share in a pvtable? */
-    Safefree(CopSTASHPV(cop));		/* XXX share in a pvtable? */
-#else
-    /* NOTE: COP.cop_stash is not refcounted */
-    SvREFCNT_dec(CopFILEGV(cop));
-#endif
+    Safefree(cop->cop_label);   /* FIXME: treaddead ??? */
+    CopFILE_free(cop);
+    CopSTASH_free(cop);
     if (! specialWARN(cop->cop_warnings))
 	SvREFCNT_dec(cop->cop_warnings);
-    if (! specialCopIO(cop->cop_io))
+    if (! specialCopIO(cop->cop_io)) {
+#ifdef USE_ITHREADS
+	STRLEN len;
+        char *s = SvPV(cop->cop_io,len);
+	Perl_warn(aTHX_ "io='%.*s'",(int) len,s);
+#else
 	SvREFCNT_dec(cop->cop_io);
+#endif
+    }
 }
 
 void
@@ -2583,10 +2621,8 @@ Perl_append_list(pTHX_ I32 type, LISTOP *first, LISTOP *last)
     first->op_last = last->op_last;
     first->op_flags |= (last->op_flags & OPf_KIDS);
 
-#ifdef PL_OP_SLAB_ALLOC
-#else
-    Safefree(last);
-#endif
+    FreeOp(last);
+
     return (OP*)first;
 }
 
@@ -4288,6 +4324,7 @@ Perl_newFOROP(pTHX_ I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *blo
 	LOOP *tmp;
 	NewOp(1234,tmp,1,LOOP);
 	Copy(loop,tmp,1,LOOP);
+	FreeOp(loop);
 	loop = tmp;
     }
 #else
@@ -5141,11 +5178,7 @@ Perl_newCONSTSUB(pTHX_ HV *stash, char *name, SV *sv)
 	SAVESPTR(PL_curstash);
 	SAVECOPSTASH(PL_curcop);
 	PL_curstash = stash;
-#ifdef USE_ITHREADS
-	CopSTASHPV(PL_curcop) = stash ? HvNAME(stash) : Nullch;
-#else
-	CopSTASH(PL_curcop) = stash;
-#endif
+	CopSTASH_set(PL_curcop,stash);
     }
 
     cv = newXS(name, const_sv_xsub, __FILE__);
@@ -6056,8 +6089,6 @@ Perl_ck_glob(pTHX_ OP *o)
 		newSVpvn("File::Glob", 10), Nullsv, Nullsv, Nullsv);
 	gv = gv_fetchpv("CORE::GLOBAL::glob", FALSE, SVt_PVCV);
 	glob_gv = gv_fetchpv("File::Glob::csh_glob", FALSE, SVt_PVCV);
-	if (!glob_gv)
-	    Perl_croak(aTHX_ "Can't locate File::Glob");
 	GvCV(gv) = GvCV(glob_gv);
 	SvREFCNT_inc((SV*)GvCV(gv));
 	GvIMPORTED_CV_on(gv);

@@ -696,15 +696,8 @@ perl_destruct(pTHXx)
     if (!specialCopIO(PL_compiling.cop_io))
 	SvREFCNT_dec(PL_compiling.cop_io);
     PL_compiling.cop_io = Nullsv;
-#ifdef USE_ITHREADS
-    Safefree(CopFILE(&PL_compiling));
-    CopFILE(&PL_compiling) = Nullch;
-    Safefree(CopSTASHPV(&PL_compiling));
-#else
-    SvREFCNT_dec(CopFILEGV(&PL_compiling));
-    CopFILEGV(&PL_compiling) = Nullgv;
-    /* cop_stash is not refcounted */
-#endif
+    CopFILE_free(&PL_compiling);
+    CopSTASH_free(&PL_compiling);
 
     /* Prepare to destruct main symbol table.  */
 
@@ -2717,11 +2710,7 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv, int *fdscript)
 	}
     }
 
-#   ifdef USE_ITHREADS
-        Safefree(CopFILE(PL_curcop));
-#   else
-        SvREFCNT_dec(CopFILEGV(PL_curcop));
-#   endif
+    CopFILE_free(PL_curcop);
     CopFILE_set(PL_curcop, PL_origfilename);
     if (strEQ(PL_origfilename,"-"))
 	scriptname = "";

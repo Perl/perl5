@@ -512,6 +512,12 @@ PERLVAR(Idebug_pad,	struct perl_debug_pad)	/* always needed because of the re ex
 
 PERLVAR(Itaint_warn, bool)      /* taint warns instead of dying */
 
+#ifdef PL_OP_SLAB_ALLOC
+PERLVAR(IOpPtr,I32 **)
+PERLVARI(IOpSpace,I32,0)
+PERLVAR(IOpSlab,I32 *)
+#endif
+
 /* New variables must be added to the very end for binary compatibility.
  * XSUB.h provides wrapper functions via perlapi.h that make this
  * irrelevant, but not all code may be expected to #include XSUB.h. */

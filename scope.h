@@ -35,6 +35,7 @@
 #define SAVEt_GENERIC_PVREF	34
 #define SAVEt_PADSV		35
 #define SAVEt_MORTALIZESV	36
+#define SAVEt_SHARED_PVREF	37
 
 #ifndef SCOPE_SAVES_SIGNAL_MASK
 #define SCOPE_SAVES_SIGNAL_MASK 0
@@ -117,6 +118,7 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 #define SAVECLEARSV(sv)	save_clearsv(SOFT_CAST(SV**)&(sv))
 #define SAVEGENERICSV(s)	save_generic_svref((SV**)&(s))
 #define SAVEGENERICPV(s)	save_generic_pvref((char**)&(s))
+#define SAVESHAREDPV(s)		save_shared_pvref((char**)&(s))
 #define SAVEDELETE(h,k,l) \
 	  save_delete(SOFT_CAST(HV*)(h), SOFT_CAST(char*)(k), (I32)(l))
 #define SAVEDESTRUCTOR(f,p) \
@@ -160,9 +162,9 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 
 #ifdef USE_ITHREADS
 #  define SAVECOPSTASH(c)	SAVEPPTR(CopSTASHPV(c))
-#  define SAVECOPSTASH_FREE(c)	SAVEGENERICPV(CopSTASHPV(c))
+#  define SAVECOPSTASH_FREE(c)	SAVESHAREDPV(CopSTASHPV(c))
 #  define SAVECOPFILE(c)	SAVEPPTR(CopFILE(c))
-#  define SAVECOPFILE_FREE(c)	SAVEGENERICPV(CopFILE(c))
+#  define SAVECOPFILE_FREE(c)	SAVESHAREDPV(CopFILE(c))
 #else
 #  define SAVECOPSTASH(c)	SAVESPTR(CopSTASH(c))
 #  define SAVECOPSTASH_FREE(c)	SAVECOPSTASH(c)	/* XXX not refcounted */

@@ -1759,6 +1759,7 @@ win32_async_check(pTHX)
 	    break;
 	}
     }
+    w32_poll_count = 0;
 
     /* Above or other stuff may have set a signal flag */
     if (PL_sig_pending) {
@@ -4561,6 +4562,7 @@ Perl_sys_intern_init(pTHX)
 #  endif
     w32_init_socktype		= 0;
     w32_timerid                 = 0;
+    w32_poll_count              = 0;
     if (my_perl == PL_curinterp) {
         /* Force C runtime signal stuff to set its console handler */
 	signal(SIGINT,&win32_csighandler);
@@ -4603,6 +4605,7 @@ Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
     Newz(1313, dst->pseudo_children, 1, child_tab);
     dst->thr_intern.Winit_socktype = 0;
     dst->timerid                 = 0;
+    dst->poll_count              = 0;
 }
 #  endif /* USE_ITHREADS */
 #endif /* HAVE_INTERP_INTERN */

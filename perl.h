@@ -41,6 +41,15 @@
 /* See L<perlguts/"The Perl API"> for detailed notes on
  * PERL_IMPLICIT_CONTEXT and PERL_IMPLICIT_SYS */
 
+#ifdef PERL_IMPLICIT_SYS
+/* PERL_IMPLICIT_SYS implies PerlMemShared != PerlMem
+   so use slab allocator to avoid lots of MUTEX overhead
+ */
+#  ifndef PL_OP_SLAB_ALLOC
+#    define PL_OP_SLAB_ALLOC
+#  endif
+#endif
+
 #ifdef USE_ITHREADS
 #  if !defined(MULTIPLICITY)
 #    define MULTIPLICITY

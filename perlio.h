@@ -149,7 +149,7 @@ extern void PerlIO_clone(pTHX_ PerlInterpreter *proto, CLONE_PARAMS *param);
 #endif				/* ifndef PERLIO_NOT_STDIO */
 #endif				/* PERLIO_IS_STDIO */
 
-#define specialCopIO(sv) ((sv) != Nullsv)
+#define specialCopIO(sv) ((sv) == Nullsv)
 
 /* ----------- fill in things that have not got #define'd  ---------- */
 

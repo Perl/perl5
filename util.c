@@ -891,10 +891,11 @@ Copy a string to a safe spot.  This does not use an SV.
 char *
 Perl_savepv(pTHX_ const char *sv)
 {
-    register char *newaddr;
-
-    New(902,newaddr,strlen(sv)+1,char);
-    (void)strcpy(newaddr,sv);
+    register char *newaddr = Nullch;
+    if (sv) {
+	New(902,newaddr,strlen(sv)+1,char);
+	(void)strcpy(newaddr,sv);
+    }
     return newaddr;
 }
 
@@ -919,6 +920,27 @@ Perl_savepvn(pTHX_ const char *sv, register I32 len)
     newaddr[len] = '\0';		/* is now */
     return newaddr;
 }
+
+/*
+=for apidoc savesharedpv
+
+Copy a string to a safe spot in memory shared between threads.
+This does not use an SV.
+
+=cut
+*/
+char *
+Perl_savesharedpv(pTHX_ const char *sv)
+{
+    register char *newaddr = Nullch;
+    if (sv) {
+	newaddr = PerlMemShared_malloc(strlen(sv)+1);
+    	(void)strcpy(newaddr,sv);
+    }
+    return newaddr;
+}
+
+
 
 /* the SV for Perl_form() and mess() is not kept in an arena */
 

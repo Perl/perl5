@@ -13,7 +13,7 @@
 /*
  * Package name      : perl5
  * Source directory  : 
- * Configuration time: Fri Jan 11 12:16:33 2002
+ * Configuration time: Mon Jan 14 15:39:13 2002
  * Configured by     : nick
  * Target system     : 
  */
@@ -732,12 +732,6 @@
  *	include <memory.h>.
  */
 /*#define I_MEMORY		/**/
-
-/* I_NDBM:
- *	This symbol, if defined, indicates that <ndbm.h> exists and should
- *	be included.
- */
-/*#define I_NDBM	/**/
 
 /* I_NET_ERRNO:
  *	This symbol, if defined, indicates that <net/errno.h> exists and 
@@ -3419,6 +3413,12 @@
  */
 /*#define SETUID_SCRIPTS_ARE_SECURE_NOW	/**/
 /*#define DOSUID		/**/
+
+/* I_NDBM:
+ *	This symbol, if defined, indicates that <ndbm.h> exists and should
+ *	be included.
+ */
+/*#define I_NDBM	/**/
 
 /* I_STDARG:
  *	This symbol, if defined, indicates that <stdarg.h> exists and should

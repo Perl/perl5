@@ -351,6 +351,7 @@ Perl_rninstr
 Perl_rsignal
 Perl_rsignal_state
 Perl_savepv
+Perl_savesharedpv
 Perl_savepvn
 Perl_savestack_grow
 Perl_save_aelem
@@ -365,6 +366,7 @@ Perl_save_freesv
 Perl_save_freepv
 Perl_save_generic_svref
 Perl_save_generic_pvref
+Perl_save_shared_pvref
 Perl_save_gp
 Perl_save_hash
 Perl_save_helem

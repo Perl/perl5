@@ -254,6 +254,18 @@ Perl_save_generic_pvref(pTHX_ char **str)
     SSPUSHINT(SAVEt_GENERIC_PVREF);
 }
 
+/* Like save_generic_pvref(), but uses PerlMemShared_free() rather than Safefree().
+ * Can be used to restore a shared global char* to its prior
+ * contents, freeing new value. */
+void
+Perl_save_shared_pvref(pTHX_ char **str)
+{
+    SSCHECK(3);
+    SSPUSHPTR(str);
+    SSPUSHPTR(*str);
+    SSPUSHINT(SAVEt_SHARED_PVREF);
+}
+
 void
 Perl_save_gp(pTHX_ GV *gv, I32 empty)
 {
@@ -654,6 +666,14 @@ Perl_leave_scope(pTHX_ I32 base)
 	    ptr = SSPOPPTR;
 	    if (*(char**)ptr != str) {
 		Safefree(*(char**)ptr);
+		*(char**)ptr = str;
+	    }
+	    break;
+	case SAVEt_SHARED_PVREF:		/* shared pv */
+	    str = (char*)SSPOPPTR;
+	    ptr = SSPOPPTR;
+	    if (*(char**)ptr != str) {
+		PerlMemShared_free(*(char**)ptr);
 		*(char**)ptr = str;
 	    }
 	    break;
