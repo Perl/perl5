@@ -528,20 +528,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_setsid HAS_SETSID	/**/
 
-/* Shmat_t:
- *	This symbol holds the return type of the shmat() system call.
- *	Usually set to 'void *' or 'char *'.
- */
-/* HAS_SHMAT_PROTOTYPE:
- *	This symbol, if defined, indicates that the sys/shm.h includes
- *	a prototype for shmat().  Otherwise, it is up to the program to
- *	guess one.  Shmat_t shmat _((int, Shmat_t, int)) is a good guess,
- *	but not always right so it should be emitted by the program only
- *	when HAS_SHMAT_PROTOTYPE is not defined to avoid conflicting defs.
- */
-#define Shmat_t $shmattype	/**/
-#$d_shmatprototype HAS_SHMAT_PROTOTYPE	/**/
-
 /* HAS_STRCHR:
  *	This symbol is defined to indicate that the strchr()/strrchr()
  *	functions are available for string searching. If not, try the
@@ -916,24 +902,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_vfork I_VFORK	/**/
 
-/* CAN_PROTOTYPE:
- *	If defined, this macro indicates that the C compiler can handle
- *	function prototypes.
- */
-/* _:
- *	This macro is used to declare function parameters for folks who want
- *	to make declarations with prototypes using a different style than
- *	the above macros.  Use double parentheses.  For example:
- *
- *		int main _((int argc, char *argv[]));
- */
-#$prototype	CAN_PROTOTYPE	/**/
-#ifdef CAN_PROTOTYPE
-#define	_(args) args
-#else
-#define	_(args) ()
-#endif
-
 /* INTSIZE:
  *	This symbol contains the value of sizeof(int) so that the C
  *	preprocessor can make decisions based on it.
@@ -1262,7 +1230,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates that the system provides
  *	a prototype for the drand48() function.  Otherwise, it is up
  *	to the program to supply one.  A good guess is
- *		extern double drand48 _((void));
+ *		extern double drand48(void);
  */
 #$d_drand48proto	HAS_DRAND48_PROTO	/**/
 
@@ -1943,8 +1911,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates that the system provides
  *	a prototype for the sbrk() function.  Otherwise, it is up
  *	to the program to supply one.  Good guesses are
- *		extern void* sbrk _((int));
- *		extern void* sbrk _((size_t));
+ *		extern void* sbrk(int);
+ *		extern void* sbrk(size_t);
  */
 #$d_sbrkproto	HAS_SBRK_PROTO	/**/
 
@@ -2302,7 +2270,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates that the system provides
  *	a prototype for the telldir() function.  Otherwise, it is up
  *	to the program to supply one.  A good guess is
- *		extern long telldir _((DIR*));
+ *		extern long telldir(DIR*);
  */
 #$d_telldirproto	HAS_TELLDIR_PROTO	/**/
 
@@ -3438,6 +3406,20 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_suidsafe SETUID_SCRIPTS_ARE_SECURE_NOW	/**/
 #$d_dosuid DOSUID		/**/
 
+/* Shmat_t:
+ *	This symbol holds the return type of the shmat() system call.
+ *	Usually set to 'void *' or 'char *'.
+ */
+/* HAS_SHMAT_PROTOTYPE:
+ *	This symbol, if defined, indicates that the sys/shm.h includes
+ *	a prototype for shmat().  Otherwise, it is up to the program to
+ *	guess one.  Shmat_t shmat(int, Shmat_t, int) is a good guess,
+ *	but not always right so it should be emitted by the program only
+ *	when HAS_SHMAT_PROTOTYPE is not defined to avoid conflicting defs.
+ */
+#define Shmat_t $shmattype	/**/
+#$d_shmatprototype HAS_SHMAT_PROTOTYPE	/**/
+
 /* I_NDBM:
  *	This symbol, if defined, indicates that <ndbm.h> exists and should
  *	be included.
@@ -3454,6 +3436,24 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_stdarg I_STDARG		/**/
 #$i_varargs I_VARARGS	/**/
+
+/* CAN_PROTOTYPE:
+ *	If defined, this macro indicates that the C compiler can handle
+ *	function prototypes.
+ */
+/* PROTO_:
+ *	This macro is used to declare function parameters for folks who want
+ *	to make declarations with prototypes using a different style than
+ *	the above macros.  Use double parentheses.  For example:
+ *
+ *		int main PROTO_((int argc, char *argv[]));
+ */
+#$prototype	CAN_PROTOTYPE	/**/
+#ifdef CAN_PROTOTYPE
+#define	PROTO_(args) args
+#else
+#define	PROTO_(args) ()
+#endif
 
 /* SH_PATH:
  *	This symbol contains the full pathname to the shell used on this
@@ -3554,7 +3554,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates that the system provides
  *	a prototype for the sockatmark() function.  Otherwise, it is up
  *	to the program to supply one.  A good guess is
- *		extern int sockatmark _((int));
+ *		extern int sockatmark(int);
  */
 #$d_sockatmarkproto	HAS_SOCKATMARK_PROTO	/**/
 

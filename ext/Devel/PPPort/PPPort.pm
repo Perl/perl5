@@ -462,7 +462,7 @@ static SV * newRV_noinc (SV * sv)
 #if defined(NEED_newCONSTSUB)
 static
 #else
-extern void newCONSTSUB _((HV * stash, char * name, SV *sv));
+extern void newCONSTSUB(HV * stash, char * name, SV *sv);
 #endif
 
 #if defined(NEED_newCONSTSUB) || defined(NEED_newCONSTSUB_GLOBAL)

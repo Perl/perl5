@@ -255,7 +255,6 @@
 #    include <stdlib.h>
 #    include <stdio.h>
 #    include <memory.h>
-#    define _(arg) arg
 #    ifndef Malloc_t
 #      define Malloc_t void *
 #    endif

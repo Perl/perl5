@@ -2094,6 +2094,11 @@ glibpth (libpth.U):
 	find libraries.  It may contain directories that do not exist on
 	this platform, libpth is the cleaned-up version.
 
+gmake (Loc.U):
+	This variable is used internally by Configure to determine the
+	full pathname (if any) of the gmake program.  After Configure runs,
+	the value is reset to a plain "gmake" and is not useful.
+
 grep (Loc.U):
 	This variable is used internally by Configure to determine the
 	full pathname (if any) of the grep program.  After Configure runs,
@@ -3362,7 +3367,7 @@ shrpenv (libperl.U):
 	shrpenv=''
 	See the main perl Makefile.SH for actual working usage.
 	Alternatively, we might be able to use a command line option such
-	as -R $archlibexp/CORE (Solaris, NetBSD) or -Wl,-rpath
+	as -R $archlibexp/CORE (Solaris) or -Wl,-rpath
 	$archlibexp/CORE (Linux).
 
 shsharp (spitshell.U):
