@@ -335,6 +335,11 @@ which access REXX queues or REXX variables in signal handlers.
 
 See C<t/rx*.t> for examples.
 
+=head1 ENVIRONMENT
+
+If C<PERL_REXX_DEBUG> is set, prints trace info on calls to REXX runtime
+environment.
+
 =head1 AUTHOR
 
 Andreas Kaiser ak@ananke.s.bawue.de, with additions by Ilya Zakharevich
