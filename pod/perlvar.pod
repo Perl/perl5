@@ -654,6 +654,11 @@ status; see L<perlvms/$?> for details.
 
 Also see L<Error Indicators>.
 
+=item ${^ENCODING}
+
+The encoding used to interpret native eight-bit encodings to Unicode,
+see L<encode>.  An opaque C<Encode::XS> object.
+
 =item $OS_ERROR
 
 =item $ERRNO

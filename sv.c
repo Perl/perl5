@@ -3302,27 +3302,54 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
 	sv_force_normal(sv);
     }
 
-    /* This function could be much more efficient if we had a FLAG in SVs
-     * to signal if there are any hibit chars in the PV.
-     * Given that there isn't make loop fast as possible
-     */
-    s = (U8 *) SvPVX(sv);
-    e = (U8 *) SvEND(sv);
-    t = s;
-    while (t < e) {
-	U8 ch = *t++;
-	if ((hibit = !NATIVE_IS_INVARIANT(ch)))
-	    break;
-    }
-    if (hibit) {
-	STRLEN len;
-
-	len = SvCUR(sv) + 1; /* Plus the \0 */
-	SvPVX(sv) = (char*)bytes_to_utf8((U8*)s, &len);
-	SvCUR(sv) = len - 1;
-	if (SvLEN(sv) != 0)
-	    Safefree(s); /* No longer using what was there before. */
-	SvLEN(sv) = len; /* No longer know the real size. */
+    if (PL_encoding) {
+         SV *uni;
+	 STRLEN len;
+	 char *s;
+	 dSP;
+	 ENTER;
+	 SAVETMPS;
+	 PUSHMARK(sp);
+	 EXTEND(SP, 3);
+	 XPUSHs(PL_encoding);
+	 XPUSHs(sv);
+	 XPUSHs(&PL_sv_yes);
+	 PUTBACK;
+	 call_method("decode", G_SCALAR);
+	 SPAGAIN;
+	 uni = POPs;
+	 PUTBACK;
+	 s = SvPVutf8(uni, len);
+	 if (s != SvPVX(sv)) {
+	      SvGROW(sv, len);
+	      Move(s, SvPVX(sv), len, char);
+	      SvCUR_set(sv, len);
+	 }
+	 FREETMPS;
+	 LEAVE;
+    } else { /* Assume Latin-1/EBCDIC */
+	 /* This function could be much more efficient if we
+	  * had a FLAG in SVs to signal if there are any hibit
+	  * chars in the PV.  Given that there isn't such a flag
+	  * make the loop as fast as possible. */
+	 s = (U8 *) SvPVX(sv);
+	 e = (U8 *) SvEND(sv);
+	 t = s;
+	 while (t < e) {
+	      U8 ch = *t++;
+	      if ((hibit = !NATIVE_IS_INVARIANT(ch)))
+		   break;
+	 }
+	 if (hibit) {
+	      STRLEN len;
+	      
+	      len = SvCUR(sv) + 1; /* Plus the \0 */
+	      SvPVX(sv) = (char*)bytes_to_utf8((U8*)s, &len);
+	      SvCUR(sv) = len - 1;
+	      if (SvLEN(sv) != 0)
+		   Safefree(s); /* No longer using what was there before. */
+	      SvLEN(sv) = len; /* No longer know the real size. */
+	 }
     }
     /* Mark as UTF-8 even if no hibit - saves scanning loop */
     SvUTF8_on(sv);
@@ -9827,6 +9854,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #ifdef VMS
     PL_statusvalue_vms	= proto_perl->Istatusvalue_vms;
 #endif
+    PL_encoding		= sv_dup(proto_perl->Iencoding, param);
 
     /* Clone the regex array */
     PL_regex_padav = newAV();

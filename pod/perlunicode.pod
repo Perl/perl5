@@ -102,10 +102,11 @@ literal UTF-8 string constant in the program), character semantics
 apply; otherwise, byte semantics are in effect.  To force byte semantics
 on Unicode data, the C<bytes> pragma should be used.
 
-Notice that if you have a string with byte semantics and you then
-add character data into it, the bytes will be upgraded I<as if they
-were ISO 8859-1 (Latin-1)> (or if in EBCDIC, after a translation
-to ISO 8859-1).
+Notice that if you concatenate strings with byte semantics and strings
+with Unicode character data, the bytes will by default be upgraded
+I<as if they were ISO 8859-1 (Latin-1)> (or if in EBCDIC, after a
+translation to ISO 8859-1).  To change this, use the C<encoding>
+pragma, see L<encoding>.
 
 Under character semantics, many operations that formerly operated on
 bytes change to operating on characters.  For ASCII data this makes no

@@ -231,6 +231,7 @@
 #define PL_dowarn		(PERL_GET_INTERP->Idowarn)
 #define PL_e_script		(PERL_GET_INTERP->Ie_script)
 #define PL_egid			(PERL_GET_INTERP->Iegid)
+#define PL_encoding		(PERL_GET_INTERP->Iencoding)
 #define PL_endav		(PERL_GET_INTERP->Iendav)
 #define PL_envgv		(PERL_GET_INTERP->Ienvgv)
 #define PL_errgv		(PERL_GET_INTERP->Ierrgv)
@@ -522,6 +523,7 @@
 #define PL_dowarn		(vTHX->Idowarn)
 #define PL_e_script		(vTHX->Ie_script)
 #define PL_egid			(vTHX->Iegid)
+#define PL_encoding		(vTHX->Iencoding)
 #define PL_endav		(vTHX->Iendav)
 #define PL_envgv		(vTHX->Ienvgv)
 #define PL_errgv		(vTHX->Ierrgv)
@@ -816,6 +818,7 @@
 #define PL_Idowarn		PL_dowarn
 #define PL_Ie_script		PL_e_script
 #define PL_Iegid		PL_egid
+#define PL_Iencoding		PL_encoding
 #define PL_Iendav		PL_endav
 #define PL_Ienvgv		PL_envgv
 #define PL_Ierrgv		PL_errgv

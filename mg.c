@@ -519,62 +519,66 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 #endif
 	break;
     case '\005':  /* ^E */
+	 if (*(mg->mg_ptr+1) == '\0') {
 #ifdef MACOS_TRADITIONAL
-	{
-	    char msg[256];
+	     {
+		  char msg[256];
 	
-	    sv_setnv(sv,(double)gMacPerl_OSErr);
-	    sv_setpv(sv, gMacPerl_OSErr ? GetSysErrText(gMacPerl_OSErr, msg) : "");	
-	}
+		  sv_setnv(sv,(double)gMacPerl_OSErr);
+		  sv_setpv(sv, gMacPerl_OSErr ? GetSysErrText(gMacPerl_OSErr, msg) : "");	
+	     }
 #else	
 #ifdef VMS
-	{
-#	    include <descrip.h>
-#	    include <starlet.h>
-	    char msg[255];
-	    $DESCRIPTOR(msgdsc,msg);
-	    sv_setnv(sv,(NV) vaxc$errno);
-	    if (sys$getmsg(vaxc$errno,&msgdsc.dsc$w_length,&msgdsc,0,0) & 1)
-		sv_setpvn(sv,msgdsc.dsc$a_pointer,msgdsc.dsc$w_length);
-	    else
-		sv_setpv(sv,"");
-	}
+	     {
+#	          include <descrip.h>
+#	          include <starlet.h>
+		  char msg[255];
+		  $DESCRIPTOR(msgdsc,msg);
+		  sv_setnv(sv,(NV) vaxc$errno);
+		  if (sys$getmsg(vaxc$errno,&msgdsc.dsc$w_length,&msgdsc,0,0) & 1)
+		       sv_setpvn(sv,msgdsc.dsc$a_pointer,msgdsc.dsc$w_length);
+		  else
+		       sv_setpv(sv,"");
+	     }
 #else
 #ifdef OS2
-	if (!(_emx_env & 0x200)) {	/* Under DOS */
-	    sv_setnv(sv, (NV)errno);
-	    sv_setpv(sv, errno ? Strerror(errno) : "");
-	} else {
-	    if (errno != errno_isOS2) {
-		int tmp = _syserrno();
-		if (tmp)	/* 2nd call to _syserrno() makes it 0 */
-		    Perl_rc = tmp;
-	    }
-	    sv_setnv(sv, (NV)Perl_rc);
-	    sv_setpv(sv, os2error(Perl_rc));
-	}
+	     if (!(_emx_env & 0x200)) {	/* Under DOS */
+		  sv_setnv(sv, (NV)errno);
+		  sv_setpv(sv, errno ? Strerror(errno) : "");
+	     } else {
+		  if (errno != errno_isOS2) {
+		       int tmp = _syserrno();
+		       if (tmp)	/* 2nd call to _syserrno() makes it 0 */
+			    Perl_rc = tmp;
+		  }
+		  sv_setnv(sv, (NV)Perl_rc);
+		  sv_setpv(sv, os2error(Perl_rc));
+	     }
 #else
 #ifdef WIN32
-	{
-	    DWORD dwErr = GetLastError();
-	    sv_setnv(sv, (NV)dwErr);
-	    if (dwErr)
-	    {
-		PerlProc_GetOSError(sv, dwErr);
-	    }
-	    else
-		sv_setpv(sv, "");
-	    SetLastError(dwErr);
-	}
+	     {
+		  DWORD dwErr = GetLastError();
+		  sv_setnv(sv, (NV)dwErr);
+		  if (dwErr)
+		  {
+		       PerlProc_GetOSError(sv, dwErr);
+		  }
+		  else
+		       sv_setpv(sv, "");
+		  SetLastError(dwErr);
+	     }
 #else
-	sv_setnv(sv, (NV)errno);
-	sv_setpv(sv, errno ? Strerror(errno) : "");
+	     sv_setnv(sv, (NV)errno);
+	     sv_setpv(sv, errno ? Strerror(errno) : "");
 #endif
 #endif
 #endif
 #endif
-	SvNOK_on(sv);	/* what a wonderful hack! */
-	break;
+	     SvNOK_on(sv);	/* what a wonderful hack! */
+	 }
+	 else if (strEQ(mg->mg_ptr+1, "NCODING"))
+	      sv_setsv(sv, PL_encoding);
+	 break;
     case '\006':		/* ^F */
 	sv_setiv(sv, (IV)PL_maxsysfd);
 	break;
@@ -625,7 +629,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '\027':		/* ^W  & $^WARNING_BITS & ^WIDE_SYSTEM_CALLS */
 	if (*(mg->mg_ptr+1) == '\0')
 	    sv_setiv(sv, (IV)((PL_dowarn & G_WARN_ON) ? TRUE : FALSE));
-	else if (strEQ(mg->mg_ptr, "\027ARNING_BITS")) {
+	else if (strEQ(mg->mg_ptr+1, "ARNING_BITS")) {
 	    if (PL_compiling.cop_warnings == pWARN_NONE ||
 	        PL_compiling.cop_warnings == pWARN_STD)
 	    {
@@ -639,7 +643,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    }
 	    SvPOK_only(sv);
 	}
-	else if (strEQ(mg->mg_ptr, "\027IDE_SYSTEM_CALLS"))
+	else if (strEQ(mg->mg_ptr+1, "IDE_SYSTEM_CALLS"))
 	    sv_setiv(sv, (IV)PL_widesyscalls);
 	break;
     case '1': case '2': case '3': case '4':
@@ -1742,25 +1746,32 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	DEBUG_x(dump_all());
 	break;
     case '\005':  /* ^E */
+	 if (*(mg->mg_ptr+1) == '\0') {
 #ifdef MACOS_TRADITIONAL
-	gMacPerl_OSErr = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
+	      gMacPerl_OSErr = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 #else
 #  ifdef VMS
-	set_vaxc_errno(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+	      set_vaxc_errno(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 #  else
 #    ifdef WIN32
-	SetLastError( SvIV(sv) );
+	      SetLastError( SvIV(sv) );
 #    else
 #      ifdef OS2
-	os2_setsyserrno(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+	      os2_setsyserrno(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 #      else
-	/* will anyone ever use this? */
-	SETERRNO(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv), 4);
+	      /* will anyone ever use this? */
+	      SETERRNO(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv), 4);
 #      endif
 #    endif
 #  endif
 #endif
-	break;
+	 }
+	 else if (strEQ(mg->mg_ptr+1, "NCODING")) {
+	     if (PL_encoding)
+	         sv_setsv(PL_encoding, sv);
+	     else
+	         PL_encoding = newSVsv(sv);
+	 }
     case '\006':	/* ^F */
 	PL_maxsysfd = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
 	break;
@@ -1811,7 +1822,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 		    		| (i ? G_WARN_ON : G_WARN_OFF) ;
 	    }
 	}
-	else if (strEQ(mg->mg_ptr, "\027ARNING_BITS")) {
+	else if (strEQ(mg->mg_ptr+1, "ARNING_BITS")) {
 	    if ( ! (PL_dowarn & G_WARN_ALL_MASK)) {
 		if (!SvPOK(sv) && PL_localizing) {
 	            sv_setpvn(sv, WARN_NONEstring, WARNsize);
@@ -1845,7 +1856,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 		}
 	    }
 	}
-	else if (strEQ(mg->mg_ptr, "\027IDE_SYSTEM_CALLS"))
+	else if (strEQ(mg->mg_ptr+1, "IDE_SYSTEM_CALLS"))
 	    PL_widesyscalls = SvTRUE(sv);
 	break;
     case '.':
