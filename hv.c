@@ -190,7 +190,7 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen, I32 lval)
 #endif
 	                                                          )
 	    Newz(503, HvARRAY(hv),
-		 PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1), char);
+		 PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1), HE*);
 	else
 	    return 0;
     }
@@ -317,7 +317,7 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 #endif
 	                                                          )
 	    Newz(503, HvARRAY(hv),
-		 PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1), char);
+		 PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1), HE*);
 	else
 	    return 0;
     }
@@ -448,7 +448,7 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen, SV *val, register U32 has
 
     if (!HvARRAY(hv))
 	Newz(505, HvARRAY(hv),
-	     PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1), char);
+	     PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1), HE*);
 
     oentry = &(HvARRAY(hv))[hash & (I32) HvMAX(hv)];
     i = 1;
@@ -558,7 +558,7 @@ Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, register U32 hash)
 
     if (!HvARRAY(hv))
 	Newz(505, HvARRAY(hv),
-	     PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1), char);
+	     PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1), HE*);
 
     oentry = &(HvARRAY(hv))[hash & (I32) HvMAX(hv)];
     i = 1;
@@ -1014,7 +1014,7 @@ S_hsplit(pTHX_ HV *hv)
     PL_nomemok = FALSE;
     Zero(&a[oldsize * sizeof(HE*)], (newsize-oldsize) * sizeof(HE*), char);	/* zero 2nd half*/
     HvMAX(hv) = --newsize;
-    HvARRAY(hv) = a;
+    HvARRAY(hv) = (HE**)a;
     aep = (HE**)a;
 
     for (i=0; i<oldsize; i++,aep++) {
@@ -1090,7 +1090,7 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 	Newz(0, a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
     }
     HvMAX(hv) = --newsize;
-    HvARRAY(hv) = a;
+    HvARRAY(hv) = (HE**)a;
     if (!HvFILL(hv))				/* skip rest if no entries */
 	return;
 
@@ -1392,7 +1392,7 @@ Perl_hv_iternext(pTHX_ HV *hv)
 
     if (!HvARRAY(hv))
 	Newz(506, HvARRAY(hv),
-	     PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1), char);
+	     PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1), HE*);
     if (entry)
 	entry = HeNEXT(entry);
     while (!entry) {
