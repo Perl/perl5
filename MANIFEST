@@ -857,7 +857,7 @@ mpeix/mpeixish.h	MPE/iX port
 mpeix/nm		MPE/iX port
 mpeix/relink		MPE/iX port
 mv-if-diff		Script to mv a file if it changed
-myconfig		Prints summary of the current configuration
+myconfig.SH		Prints summary of the current configuration
 nostdio.h		Cause compile error on stdio calls
 op.c			Opcode syntax tree code
 op.h			Opcode syntax tree header
