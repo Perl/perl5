@@ -777,6 +777,28 @@ win32_stat(const char *path, struct stat *buffer)
     return stat(p, buffer);
 }
 
+#ifndef USE_WIN32_RTL_ENV
+
+DllExport char *
+win32_getenv(const char *name)
+{
+    static char *curitem = Nullch;
+    static DWORD curlen = 512;
+    DWORD needlen;
+    if (!curitem)
+	New(1305,curitem,curlen,char);
+    if (!(needlen = GetEnvironmentVariable(name,curitem,curlen)))
+	return Nullch;
+    while (needlen > curlen) {
+	Renew(curitem,needlen,char);
+	curlen = needlen;
+	needlen = GetEnvironmentVariable(name,curitem,curlen);
+    }
+    return curitem;
+}
+
+#endif
+
 #undef times
 int
 mytimes(struct tms *timebuf)

@@ -64,6 +64,12 @@ extern  char	*staticlinkmodules[];
  * facilities for accessing the same.  See note in util.c/my_setenv().
  */
 /*#define USE_WIN32_RTL_ENV */
+
+#ifndef USE_WIN32_RTL_ENV
+#undef getenv
+#define getenv win32_getenv
+#endif
+
 #define USE_SOCKETS_AS_HANDLES
 #ifndef USE_SOCKETS_AS_HANDLES
 extern FILE *myfdopen(int, char *);
