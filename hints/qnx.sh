@@ -50,12 +50,11 @@
 #   PATH. The PATH test is triggered because cwd calls
 #   `fullpath -t`.
 #
-#   lib/ExtUtils.t: If you follow these hints and include
-#   -w4 in your ccflags, this test will complain about
-#   extra .err files appearing in its test directory.
-#
-#   ext/IO/lib/IO/t/io_sock.t Still investigating
-#   ext/POSIX/sigaction.t Still investigating
+#   ext/IO/lib/IO/t/io_sock.t: Subtest 14 is skipped due to
+#   the fact that the functionality to read back the non-blocking
+#   status of a socket is not implemented in QNX's TCP/IP. This
+#   has been reported to QNX and it may work with later versions
+#   of TCP/IP.
 #
 # Older issues:
 #   lib/posix.t test failed on test 17 because acos(1) != 0.
