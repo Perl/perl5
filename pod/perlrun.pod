@@ -909,21 +909,21 @@ C<:perlio> will insert a C<:unix> layer below itself to do low level IO.
 
 =item :raw
 
-B<Note that the explicit use of the C<:raw> layer is deprecated.>
+Applying the <:raw> layer is equivalent to calling C<binmode($fh)>.
+It makes the stream pass each byte as-is without any translation.
+In particular CRLF translation, and/or :utf8 inuited from locale
+are disabled.
 
-Arranges for all accesses go straight to the lowest level layer provided
+Arranges for all accesses go straight to the lowest buffered layer provided
 by the configration. That is it strips off any layers above that layer.
-(The intent - unless layers are then pushed on top again -
-is to make perl's C<read> behave like C<sysread>.)
-
-Not really useful in PERLIO environment variable, instead just use
-C<:unix> layer explicitly.
 
 In Perl 5.6 and some books the C<:raw> layer (also called a discipline)
-is documented as the inverse of the C<:crlf> layer. That is not really
-the case.  If you want UNIX line endings on a platform that normally
-does CRLF translation the appropriate thing to do is to add C<:perlio>
-to PERLIO environment variable.
+is documented as the inverse of the C<:crlf> layer. That is no longer
+the case - other layers which would alter binary nature of the
+stream are also disabled.  If you want UNIX line endings on a platform
+that normally does CRLF translation, but still want UTF-8 or encoding
+defaults the appropriate thing to do is to add C<:perlio> to PERLIO
+environment variable.
 
 =item :stdio
 

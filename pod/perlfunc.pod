@@ -455,9 +455,14 @@ binary and text files.  If FILEHANDLE is an expression, the value is
 taken as the name of the filehandle.  Returns true on success,
 C<undef> on failure.
 
-If DISCIPLINE is omitted the filehandle is made suitable for passing
-binary data. This includes turning off possible CRLF translation and
-marking it as bytes (as opposed to Unicode characters).
+If DISCIPLINE is omitted or specified as C<:raw> the filehandle is made
+suitable for passing binary data. This includes turning off possible CRLF
+translation and marking it as bytes (as opposed to Unicode characters).
+Note that as desipite what may be implied in I<"Programming Perl">
+(the Camel) or elsewhere C<:raw> is I<not> the simply inverse of C<:crlf>
+- other disciplines which would affect binary nature of the stream are
+I<also> disabled. See L<PerlIO>, L<perlrun> and the discussion about the
+PERLIO environment variable.
 
 On some systems (in general, DOS and Windows-based systems) binmode()
 is necessary when you're not working with a text file.  For the sake
@@ -480,10 +485,6 @@ of disciplines in Perl 5.8 and later is in terms of I<layers>. See
 L<PerlIO>. (There is typically a one-to-one correspondence between
 layers and disiplines.) The C<open> pragma can be used to establish
 default I/O disciplines.  See L<open>.
-
-The C<:raw> discipline is deprecated.  (As opposed to what Camel III
-said, it is not the inverse of C<:crlf>.)  See L<PerlIO>, L<perlrun>
-and the discussion about the PERLIO environment variable.
 
 In general, binmode() should be called after open() but before any I/O
 is done on the filehandle.  Calling binmode() will normally flush any
