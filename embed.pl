@@ -2205,6 +2205,7 @@ Ap	|DIR*	|dirp_dup	|DIR* dp
 Ap	|GP*	|gp_dup		|GP* gp
 Ap	|MAGIC*	|mg_dup		|MAGIC* mg
 Ap	|SV*	|sv_dup		|SV* sstr
+s	|SV*	|gv_share	|SV *sv
 #if defined(HAVE_INTERP_INTERN)
 Ap	|void	|sys_intern_dup	|struct interp_intern* src \
 				|struct interp_intern* dst

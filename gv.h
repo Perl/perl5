@@ -131,6 +131,19 @@ HV *GvHVn();
 #define GvIN_PAD_on(gv)		(GvFLAGS(gv) |= GVf_IN_PAD)
 #define GvIN_PAD_off(gv)	(GvFLAGS(gv) &= ~GVf_IN_PAD)
 
+/* XXX: all GvFLAGS options are used, borrowing GvGPFLAGS for the moment */
+
+#define GVf_SHARED           0x0001
+#define GvSHARED(gv)         (GvGP(gv) && (GvGPFLAGS(gv) & GVf_SHARED))
+#define GvSHARED_on(gv)      (GvGPFLAGS(gv) |= GVf_SHARED)
+#define GvSHARED_off(gv)     (GvGPFLAGS(gv) &= ~GVf_SHARED)
+
+#ifdef USE_ITHREADS
+#define GV_SHARED_CHECK
+#else
+#undef  GV_SHARED_CHECK
+#endif
+
 #define Nullgv Null(GV*)
 
 #define DM_UID   0x003

@@ -45,8 +45,14 @@ Perl_gv_IOadd(pTHX_ register GV *gv)
 {
     if (!gv || SvTYPE((SV*)gv) != SVt_PVGV)
 	Perl_croak(aTHX_ "Bad symbol for filehandle");
-    if (!GvIOp(gv))
+    if (!GvIOp(gv)) {
+#ifdef GV_SHARED_CHECK
+        if (GvSHARED(gv)) {
+            Perl_croak(aTHX_ "Bad symbol for filehandle (GV is shared)");
+        }
+#endif
 	GvIOp(gv) = newIO();
+    }
     return gv;
 }
 

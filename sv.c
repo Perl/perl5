@@ -3218,6 +3218,13 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 		     && GvCV(dstr) && PL_sortcop == CvSTART(GvCV(dstr)))
 		Perl_croak(aTHX_ "Can't redefine active sort subroutine %s",
 		      GvNAME(dstr));
+
+#ifdef GV_SHARED_CHECK
+                if (GvSHARED((GV*)dstr)) {
+                    Perl_croak(aTHX_ PL_no_modify);
+                }
+#endif
+
 	    (void)SvOK_off(dstr);
 	    GvINTRO_off(dstr);		/* one-shot flag */
 	    gp_free((GV*)dstr);
@@ -3257,6 +3264,12 @@ Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr)
 		SV *sref = SvREFCNT_inc(SvRV(sstr));
 		SV *dref = 0;
 		int intro = GvINTRO(dstr);
+
+#ifdef GV_SHARED_CHECK
+                if (GvSHARED((GV*)dstr)) {
+                    Perl_croak(aTHX_ PL_no_modify);
+                }
+#endif
 
 		if (intro) {
 		    GP *gp;
@@ -7749,6 +7762,61 @@ Perl_ptr_table_free(pTHX_ PTR_TBL_t *tbl)
 char *PL_watch_pvx;
 #endif
 
+STATIC SV *
+S_gv_share(pTHX_ SV *sstr)
+{
+    GV *gv = (GV*)sstr;
+    SV *sv = &PL_sv_no; /* just need SvREADONLY-ness */
+
+    if (GvIO(gv) || GvFORM(gv)) {
+        GvSHARED_off(gv); /* GvIOs cannot be shared. nor can GvFORMs */
+    }
+    else if (!GvCV(gv)) {
+        GvCV(gv) = (CV*)sv;
+    }
+    else {
+        /* CvPADLISTs cannot be shared */
+        if (!CvXSUB(GvCV(gv))) {
+            GvSHARED_off(gv);
+        }
+    }
+
+    if (!GvSHARED(gv)) {
+#if 0
+        PerlIO_printf(Perl_debug_log, "gv_share: unable to share %s::%s\n",
+                      HvNAME(GvSTASH(gv)), GvNAME(gv));
+#endif
+        return Nullsv;
+    }
+
+    /* 
+     * write attempts will die with
+     * "Modification of a read-only value attempted"
+     */
+    if (!GvSV(gv)) {
+        GvSV(gv) = sv;
+    }
+    else {
+        SvREADONLY_on(GvSV(gv));
+    }
+
+    if (!GvAV(gv)) {
+        GvAV(gv) = (AV*)sv;
+    }
+    else {
+        SvREADONLY_on(GvAV(gv));
+    }
+
+    if (!GvHV(gv)) {
+        GvHV(gv) = (HV*)sv;
+    }
+    else {
+        SvREADONLY_on(GvAV(gv));
+    }
+
+    return sstr; /* he_dup() will SvREFCNT_inc() */
+}
+
 SV *
 Perl_sv_dup(pTHX_ SV *sstr)
 {
@@ -7881,6 +7949,18 @@ Perl_sv_dup(pTHX_ SV *sstr)
 	LvTYPE(dstr)	= LvTYPE(sstr);
 	break;
     case SVt_PVGV:
+	if (GvSHARED((GV*)sstr)) {
+            SV *share;
+            if ((share = gv_share(sstr))) {
+                del_SV(dstr);
+                dstr = share;
+#if 0
+                PerlIO_printf(Perl_debug_log, "sv_dup: sharing %s::%s\n",
+                              HvNAME(GvSTASH(share)), GvNAME(share));
+#endif
+                break;
+            }
+	}
 	SvANY(dstr)	= new_XPVGV();
 	SvCUR(dstr)	= SvCUR(sstr);
 	SvLEN(dstr)	= SvLEN(sstr);

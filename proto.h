@@ -947,6 +947,7 @@ PERL_CALLCONV DIR*	Perl_dirp_dup(pTHX_ DIR* dp);
 PERL_CALLCONV GP*	Perl_gp_dup(pTHX_ GP* gp);
 PERL_CALLCONV MAGIC*	Perl_mg_dup(pTHX_ MAGIC* mg);
 PERL_CALLCONV SV*	Perl_sv_dup(pTHX_ SV* sstr);
+STATIC SV*	S_gv_share(pTHX_ SV *sv);
 #if defined(HAVE_INTERP_INTERN)
 PERL_CALLCONV void	Perl_sys_intern_dup(pTHX_ struct interp_intern* src, struct interp_intern* dst);
 #endif

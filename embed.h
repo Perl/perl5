@@ -846,6 +846,7 @@
 #define gp_dup			Perl_gp_dup
 #define mg_dup			Perl_mg_dup
 #define sv_dup			Perl_sv_dup
+#define gv_share		S_gv_share
 #if defined(HAVE_INTERP_INTERN)
 #define sys_intern_dup		Perl_sys_intern_dup
 #endif
@@ -2320,6 +2321,7 @@
 #define gp_dup(a)		Perl_gp_dup(aTHX_ a)
 #define mg_dup(a)		Perl_mg_dup(aTHX_ a)
 #define sv_dup(a)		Perl_sv_dup(aTHX_ a)
+#define gv_share(a)		S_gv_share(aTHX_ a)
 #if defined(HAVE_INTERP_INTERN)
 #define sys_intern_dup(a,b)	Perl_sys_intern_dup(aTHX_ a,b)
 #endif
@@ -4553,6 +4555,8 @@
 #define mg_dup			Perl_mg_dup
 #define Perl_sv_dup		CPerlObj::Perl_sv_dup
 #define sv_dup			Perl_sv_dup
+#define S_gv_share		CPerlObj::S_gv_share
+#define gv_share		S_gv_share
 #if defined(HAVE_INTERP_INTERN)
 #define Perl_sys_intern_dup	CPerlObj::Perl_sys_intern_dup
 #define sys_intern_dup		Perl_sys_intern_dup

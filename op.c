@@ -4548,6 +4548,12 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 
     cv = (!name || GvCVGEN(gv)) ? Nullcv : GvCV(gv);
 
+#ifdef GV_SHARED_CHECK
+    if (cv && GvSHARED(gv) && SvREADONLY(cv)) {
+        Perl_croak(aTHX_ "Can't define subroutine %s (GV is shared)", name);
+    }
+#endif
+
     if (!block || !ps || *ps || attrs)
 	const_sv = Nullsv;
     else
@@ -4555,6 +4561,13 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 
     if (cv) {
         bool exists = CvROOT(cv) || CvXSUB(cv);
+
+#ifdef GV_SHARED_CHECK
+        if (exists && GvSHARED(gv)) {
+            Perl_croak(aTHX_ "Can't redefine shared subroutine %s", name);
+        }
+#endif
+
         /* if the subroutine doesn't exist and wasn't pre-declared
          * with a prototype, assume it will be AUTOLOADed,
          * skipping the prototype check
@@ -5006,6 +5019,11 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     else
 	name = "STDOUT";
     gv = gv_fetchpv(name,TRUE, SVt_PVFM);
+#ifdef GV_SHARED_CHECK
+    if (GvSHARED(gv)) {
+        Perl_croak(aTHX_ "Bad symbol for form (GV is shared)");
+    }
+#endif
     GvMULTI_on(gv);
     if ((cv = GvFORM(gv))) {
 	if (ckWARN(WARN_REDEFINE)) {
