@@ -432,7 +432,7 @@ $(o).dll:
 	    -out:$@ $(LINK_FLAGS) $(LIBFILES) $< $(LIBPERL)  
 
 .rc.res:
-	$(RSC) $<
+	$(RSC) -i.. $<
 
 #
 # various targets

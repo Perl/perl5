@@ -259,13 +259,19 @@ static DWORD g_TlsAllocIndex;
 EXTERN_C DllExport bool
 SetPerlInterpreter(void *interp)
 {
-    return TlsSetValue(g_TlsAllocIndex, interp);
+    DWORD dwErr = GetLastError();
+    bool bResult = TlsSetValue(g_TlsAllocIndex, interp);
+    SetLastError(dwErr);
+    return bResult;
 }
 
 EXTERN_C DllExport void*
 GetPerlInterpreter(void)
 {
-    return TlsGetValue(g_TlsAllocIndex);
+    DWORD dwErr = GetLastError();
+    LPVOID pResult = TlsGetValue(g_TlsAllocIndex);
+    SetLastError(dwErr);
+    return pResult;
 }
 
 EXTERN_C DllExport int

@@ -540,7 +540,7 @@ $(o).dll:
 .ENDIF
 
 .rc.res:
-	$(RSC) $<
+	$(RSC) -i.. $<
 
 #
 # various targets

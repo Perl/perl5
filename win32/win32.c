@@ -1037,6 +1037,7 @@ win32_stat(const char *path, struct stat *sbuf)
     int		l = strlen(path);
     int		res;
     WCHAR	wbuffer[MAX_PATH+1];
+    WCHAR*	pwbuffer;
     HANDLE      handle;
     int         nlink = 1;
 
@@ -1069,12 +1070,13 @@ win32_stat(const char *path, struct stat *sbuf)
     /* This also gives us an opportunity to determine the number of links.    */
     if (USING_WIDE()) {
 	A2WHELPER(path, wbuffer, sizeof(wbuffer));
-	wcscpy(wbuffer, PerlDir_mapW(wbuffer));
-	handle = CreateFileW(wbuffer, 0, 0, NULL, OPEN_EXISTING, 0, NULL);
+	pwbuffer = PerlDir_mapW(wbuffer);
+	handle = CreateFileW(pwbuffer, 0, 0, NULL, OPEN_EXISTING, 0, NULL);
     }
     else {
-	strcpy(buffer, PerlDir_mapA(path));
-	handle = CreateFileA(buffer, 0, 0, NULL, OPEN_EXISTING, 0, NULL);
+	path = PerlDir_mapA(path);
+	l = strlen(path);
+	handle = CreateFileA(path, 0, 0, NULL, OPEN_EXISTING, 0, NULL);
     }
     if (handle != INVALID_HANDLE_VALUE) {
 	BY_HANDLE_FILE_INFORMATION bhi;
@@ -1083,12 +1085,12 @@ win32_stat(const char *path, struct stat *sbuf)
 	CloseHandle(handle);
     }
 
-    /* wbuffer or path will be mapped correctly above */
+    /* pwbuffer or path will be mapped correctly above */
     if (USING_WIDE()) {
-	res = _wstat(wbuffer, (struct _stat *)sbuf);
+	res = _wstat(pwbuffer, (struct _stat *)sbuf);
     }
     else {
-	res = stat(buffer, sbuf);
+	res = stat(path, sbuf);
     }
     sbuf->st_nlink = nlink;
 
@@ -1099,10 +1101,10 @@ win32_stat(const char *path, struct stat *sbuf)
 	 * Windows of 1995) */
 	DWORD r;
 	if (USING_WIDE()) {
-	    r = GetFileAttributesW(wbuffer);
+	    r = GetFileAttributesW(pwbuffer);
 	}
 	else {
-	    r = GetFileAttributesA(buffer);
+	    r = GetFileAttributesA(path);
 	}
 	if (r != 0xffffffff && (r & FILE_ATTRIBUTE_DIRECTORY)) {
 	    /* sbuf may still contain old garbage since stat() failed */
@@ -1120,8 +1122,8 @@ win32_stat(const char *path, struct stat *sbuf)
 	{
 	    /* The drive can be inaccessible, some _stat()s are buggy */
 	    if (USING_WIDE()
-		? !GetVolumeInformationW(wbuffer,NULL,0,NULL,NULL,NULL,NULL,0)
-		: !GetVolumeInformationA(buffer,NULL,0,NULL,NULL,NULL,NULL,0)) {
+		? !GetVolumeInformationW(pwbuffer,NULL,0,NULL,NULL,NULL,NULL,0)
+		: !GetVolumeInformationA(path,NULL,0,NULL,NULL,NULL,NULL,0)) {
 		errno = ENOENT;
 		return -1;
 	    }
@@ -1396,35 +1398,35 @@ win32_unlink(const char *filename)
 
     if (USING_WIDE()) {
 	WCHAR wBuffer[MAX_PATH+1];
+	WCHAR* pwBuffer;
 
 	A2WHELPER(filename, wBuffer, sizeof(wBuffer));
-	wcscpy(wBuffer, PerlDir_mapW(wBuffer));
-	attrs = GetFileAttributesW(wBuffer);
+	pwBuffer = PerlDir_mapW(wBuffer);
+	attrs = GetFileAttributesW(pwBuffer);
 	if (attrs == 0xFFFFFFFF)
 	    goto fail;
 	if (attrs & FILE_ATTRIBUTE_READONLY) {
-	    (void)SetFileAttributesW(wBuffer, attrs & ~FILE_ATTRIBUTE_READONLY);
-	    ret = _wunlink(wBuffer);
+	    (void)SetFileAttributesW(pwBuffer, attrs & ~FILE_ATTRIBUTE_READONLY);
+	    ret = _wunlink(pwBuffer);
 	    if (ret == -1)
-		(void)SetFileAttributesW(wBuffer, attrs);
+		(void)SetFileAttributesW(pwBuffer, attrs);
 	}
 	else
-	    ret = _wunlink(wBuffer);
+	    ret = _wunlink(pwBuffer);
     }
     else {
-	char buffer[MAX_PATH+1];
-	strcpy(buffer, PerlDir_mapA(filename));
-	attrs = GetFileAttributesA(buffer);
+	filename = PerlDir_mapA(filename);
+	attrs = GetFileAttributesA(filename);
 	if (attrs == 0xFFFFFFFF)
 	    goto fail;
 	if (attrs & FILE_ATTRIBUTE_READONLY) {
-	    (void)SetFileAttributesA(buffer, attrs & ~FILE_ATTRIBUTE_READONLY);
-	    ret = unlink(buffer);
+	    (void)SetFileAttributesA(filename, attrs & ~FILE_ATTRIBUTE_READONLY);
+	    ret = unlink(filename);
 	    if (ret == -1)
-		(void)SetFileAttributesA(buffer, attrs);
+		(void)SetFileAttributesA(filename, attrs);
 	}
 	else
-	    ret = unlink(buffer);
+	    ret = unlink(filename);
     }
     return ret;
 fail:
@@ -1442,17 +1444,17 @@ win32_utime(const char *filename, struct utimbuf *times)
     FILETIME ftWrite;
     struct utimbuf TimeBuffer;
     WCHAR wbuffer[MAX_PATH+1];
-    char buffer[MAX_PATH+1];
+    WCHAR* pwbuffer;
 
     int rc;
     if (USING_WIDE()) {
 	A2WHELPER(filename, wbuffer, sizeof(wbuffer));
-	wcscpy(wbuffer, PerlDir_mapW(wbuffer));
-	rc = _wutime(wbuffer, (struct _utimbuf*)times);
+	pwbuffer = PerlDir_mapW(wbuffer);
+	rc = _wutime(pwbuffer, (struct _utimbuf*)times);
     }
     else {
-	strcpy(buffer, PerlDir_mapA(filename));
-	rc = utime(buffer, times);
+	filename = PerlDir_mapA(filename);
+	rc = utime(filename, times);
     }
     /* EACCES: path specifies directory or readonly file */
     if (rc == 0 || errno != EACCES /* || !IsWinNT() */)
@@ -1466,12 +1468,12 @@ win32_utime(const char *filename, struct utimbuf *times)
 
     /* This will (and should) still fail on readonly files */
     if (USING_WIDE()) {
-	handle = CreateFileW(wbuffer, GENERIC_READ | GENERIC_WRITE,
+	handle = CreateFileW(pwbuffer, GENERIC_READ | GENERIC_WRITE,
 			    FILE_SHARE_READ | FILE_SHARE_DELETE, NULL,
 			    OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
     }
     else {
-	handle = CreateFileA(buffer, GENERIC_READ | GENERIC_WRITE,
+	handle = CreateFileA(filename, GENERIC_READ | GENERIC_WRITE,
 			    FILE_SHARE_READ | FILE_SHARE_DELETE, NULL,
 			    OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
     }
