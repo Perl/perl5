@@ -2115,6 +2115,7 @@ PP(pp_redo)
     TOPBLOCK(cx);
     oldsave = PL_scopestack[PL_scopestack_ix - 1];
     LEAVE_SCOPE(oldsave);
+    FREETMPS;
     return cx->blk_loop.redo_op;
 }
 
