@@ -31,6 +31,302 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[  9621] By: jhi                                   on 2001/04/07  22:34:16
+        Log: Update AUTHORS.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[  9620] By: jhi                                   on 2001/04/07  22:12:47
+        Log: Forgot to bump the number of tests in #9164.
+     Branch: perl
+	   ! t/op/array.t
+____________________________________________________________________________
+[  9619] By: jhi                                   on 2001/04/07  22:09:50
+        Log: Bump patchlevel to 5.7.1.
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH patchlevel.h
+____________________________________________________________________________
+[  9618] By: jhi                                   on 2001/04/07  22:02:41
+        Log: Populate perl571delta.
+     Branch: perl
+	   ! pod/perl571delta.pod
+____________________________________________________________________________
+[  9617] By: jhi                                   on 2001/04/07  22:01:23
+        Log: Change 5.7.0 to 5.7.1 in some of the places I would be guaranteed
+             to forget it later; do not change patchlevel.h yet or regenerate
+             Configure yet.
+     Branch: perl
+	   ! epoc/config.sh win32/Makefile win32/config_H.bc
+	   ! win32/config_H.gc win32/config_H.vc win32/makefile.mk
+____________________________________________________________________________
+[  9616] By: jhi                                   on 2001/04/07  17:46:33
+        Log: Add PerlIO and Encode information to perl571delta, fron NI-S.
+     Branch: perl
+	   ! pod/perl571delta.pod
+____________________________________________________________________________
+[  9615] By: jhi                                   on 2001/04/07  17:33:21
+        Log: Change the toc configuration.
+     Branch: perl
+	   ! pod/buildtoc.PL pod/perl.pod
+____________________________________________________________________________
+[  9614] By: jhi                                   on 2001/04/07  17:29:47
+        Log: Subject: PATCH: $[
+             From: Robin Houston <robin@kitsite.com>
+             Date: Fri, 6 Apr 2001 18:10:14 +0100
+             Message-ID: <20010406181014.A18803@puffinry.freeserve.co.uk>
+     Branch: perl
+	   ! op.c t/op/array.t
+____________________________________________________________________________
+[  9613] By: jhi                                   on 2001/04/07  17:28:26
+        Log: Subject: [PATCH perl@9424] isn't numeric warning
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Fri, 6 Apr 2001 18:08:52 +0100 (BST)
+             Message-Id: <200104061708.SAA06783@tempest.npl.co.uk>
+     Branch: perl
+	   ! sv.c t/pragma/warn/sv
+____________________________________________________________________________
+[  9612] By: jhi                                   on 2001/04/07  17:26:45
+        Log: Subject: [PATCH bleadperl] Re: [PATCH dump.c] hash quality
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Fri, 06 Apr 2001 12:47:06 +0100
+             Message-Id: <E14lUhm-0000rx-00@libra.cus.cam.ac.uk>
+     Branch: perl
+	   ! dump.c t/lib/peek.t
+____________________________________________________________________________
+[  9611] By: jhi                                   on 2001/04/07  17:21:35
+        Log: Create perl571delta and seed it off with the perldelta changes
+             since 5.7.0; remove those changes from perldelta and rename it
+             as perl570delta; recreate perldelta but leave it almost empty.
+     Branch: perl
+	   + pod/perl570delta.pod pod/perl571delta.pod
+	   ! MANIFEST pod/perldelta.pod
+____________________________________________________________________________
+[  9610] By: jhi                                   on 2001/04/07  16:56:32
+        Log: Denit.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[  9609] By: jhi                                   on 2001/04/07  16:38:32
+        Log: Retract #9523: needs more thought.
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[  9608] By: jhi                                   on 2001/04/07  14:59:20
+        Log: atmark() code cleanaup.
+     Branch: perl
+	   ! ext/IO/IO.xs
+____________________________________________________________________________
+[  9607] By: jhi                                   on 2001/04/07  14:48:14
+        Log: Integrate change #9605 from maintperl into mainline.
+             
+             can't optimize away scope entry if tr/// is present
+     Branch: perl
+	  !> op.c t/op/tr.t
+____________________________________________________________________________
+[  9606] By: jhi                                   on 2001/04/07  14:43:59
+        Log: Integrate perlio.
+     Branch: perl
+	  +> win32/FindExt.pm
+	  !> MANIFEST ext/PerlIO/Via/Via.xs perlio.c t/lib/md5-file.t
+	  !> win32/buildext.pl win32/config_sh.PL win32/makefile.mk
+____________________________________________________________________________
+[  9605] By: gsar                                  on 2001/04/07  11:52:40
+        Log: can't optimize away scope entry if tr/// is present
+     Branch: maint-5.6/perl
+	   ! op.c t/op/tr.t
+____________________________________________________________________________
+[  9604] By: nick                                  on 2001/04/07  11:39:45
+        Log: Split out extension finding code from buildext.pl into FindExt.pm
+             Use it to get Config.pm's idea of available extensions in line
+             with what is built.
+     Branch: perlio
+	   + win32/FindExt.pm
+	   ! MANIFEST win32/buildext.pl win32/config_sh.PL
+	   ! win32/makefile.mk
+____________________________________________________________________________
+[  9603] By: nick                                  on 2001/04/07  09:11:38
+        Log: Cleanup correction for failed :Via() layer, also set an error code.
+     Branch: perlio
+	   ! ext/PerlIO/Via/Via.xs
+____________________________________________________________________________
+[  9602] By: nick                                  on 2001/04/07  08:38:04
+        Log: Digests in lib/md5-file.t are for text files _without_ CRLF i.e. UNIX
+             style. So don't use binmode() on the handles so that Win32 etc. see
+             same sequence and produce same digests.
+     Branch: perlio
+	   ! t/lib/md5-file.t
+____________________________________________________________________________
+[  9601] By: nick                                  on 2001/04/07  08:36:26
+        Log: Allow PerlIOBase_pushed to ignore prefix on mode (e.g. sysopen's "#r")
+             Else it complains and so crlf layer (say) does not get pushed.
+     Branch: perlio
+	   ! perlio.c
+____________________________________________________________________________
+[  9600] By: jhi                                   on 2001/04/06  23:00:09
+        Log: Integrate change #9599 from perlio into mainline.
+     Branch: perl
+	  !> ext/Encode/Encode.pm win32/config_H.bc win32/config_H.gc
+	  !> win32/config_H.vc
+____________________________________________________________________________
+[  9599] By: nick                                  on 2001/04/06  21:42:43
+        Log: Quote $VERSION in Encode.pm.
+             regen_config_h as requested.
+     Branch: perlio
+	   ! ext/Encode/Encode.pm win32/config_H.bc win32/config_H.gc
+	   ! win32/config_H.vc
+____________________________________________________________________________
+[  9598] By: nick                                  on 2001/04/06  20:34:59
+        Log: Integrate mainline
+     Branch: perlio
+	  +> README.macos
+	  !> (integrate 39 files)
+____________________________________________________________________________
+[  9597] By: gsar                                  on 2001/04/06  18:06:35
+        Log: integrate change#9464 from mainline (addendum to change#8313)
+             
+             Subject: [PATCH @9452] Better peep()ing for foreach() loops
+     Branch: maint-5.6/perl
+	  !> op.c
+____________________________________________________________________________
+[  9596] By: jhi                                   on 2001/04/06  17:26:03
+        Log: The d_casti32=undef is good for you even when not use64bitall.
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[  9595] By: gsar                                  on 2001/04/06  14:57:17
+        Log: add a low-impact fix to accomodate darwin-ism
+     Branch: maint-5.6/perl
+	   ! ext/Errno/Errno_pm.PL
+____________________________________________________________________________
+[  9594] By: jhi                                   on 2001/04/06  14:55:14
+        Log: Integrate changes #9528,9593 from mainline into maintperl;
+             tweaking the editor/IDE/shell list.
+     Branch: maint-5.6/perl
+	  !> pod/perlfaq3.pod
+____________________________________________________________________________
+[  9593] By: jhi                                   on 2001/04/06  14:51:39
+        Log: Make the editor/IDE/shell list a little bit airier.
+     Branch: perl
+	   ! pod/perlfaq3.pod
+____________________________________________________________________________
+[  9592] By: gsar                                  on 2001/04/06  14:45:18
+        Log: integrate change#9477 from mainline (base.pm doc tweak)
+             
+             missing doc entry for fmod()
+     Branch: maint-5.6/perl
+	   ! lib/Math/BigFloat.pm
+	  !> lib/base.pm
+____________________________________________________________________________
+[  9591] By: jhi                                   on 2001/04/06  13:55:48
+        Log: Regen toc.
+     Branch: perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[  9590] By: jhi                                   on 2001/04/06  13:54:52
+        Log: Math::BigFloat patches from John Peacock.  The equivalent
+             of #9586 from maintperl but reworked by John to work with
+             the bleadperl.
+     Branch: perl
+	   ! lib/Math/BigFloat.pm t/lib/bigfltpm.t
+____________________________________________________________________________
+[  9589] By: jhi                                   on 2001/04/06  13:42:23
+        Log: Define the U32_ALIGNMENT_REQUIRED only if it's not already defined.
+     Branch: perl
+	   ! ext/Digest/MD5/Makefile.PL
+____________________________________________________________________________
+[  9588] By: jhi                                   on 2001/04/06  13:31:45
+        Log: Integrate changes #9584,9587 from maintperl into mainline.
+             
+             keep eval"" CVs alive until the end of the statement in which
+             they're called
+             
+             add README.macos (from Chris Nandor)
+             
+             tyop in change#9555
+     Branch: perl
+	  +> README.macos
+	  !> MANIFEST embed.h embed.pl global.sym objXSUB.h perlapi.c
+	  !> pod/buildtoc.PL pod/perl.pod pod/perlfaq9.pod pod/perlguts.pod
+	  !> pp_ctl.c proto.h scope.c scope.h sv.c win32/Makefile
+	  !> win32/makefile.mk
+____________________________________________________________________________
+[  9587] By: gsar                                  on 2001/04/06  07:31:30
+        Log: add README.macos (from Chris Nandor)
+             
+             tyop in change#9555
+     Branch: maint-5.6/perl
+	   + README.macos
+	   ! MANIFEST pod/buildtoc.PL pod/perl.pod pod/perlfaq9.pod
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[  9586] By: gsar                                  on 2001/04/06  07:08:54
+        Log: fixes for Math::BigFloat bugs; add fmod() (from John Peacock)
+     Branch: maint-5.6/perl
+	   ! lib/Math/BigFloat.pm t/lib/bigfltpm.t
+____________________________________________________________________________
+[  9585] By: gsar                                  on 2001/04/06  06:58:44
+        Log: integrate changes#9555,9556,9563..9567,9570..9575,9577..9578
+             from mainline
+             
+             Subject: [PATCH] Base64 update to perlfaq9.pod
+             
+             Subject: [PATCH AUTHORS] Housekeeping
+             
+             Subject: Re: Not OK: perl v5.6.1 +fools-gold on darwin 1.3 (UNINSTALLED)
+             Mac OS X (Darwin) has extra pwent fields.
+             
+             Subject: [PATCH B::*] print control-character vars readably
+             Needs EBCDICification.
+             
+             Subject: [PATCH B::Deparse] lexical variables with ridiculously long names that are used in list assignments
+             
+             Subject: [PATCH B::*] cope with SVf_IVisUV, and cope with $^^ and friends
+             
+             Subject: [PATCH B::Deparse] "${foo}bar", "${foo}[1]" etc.
+             
+             Subject: [PATCH B::Deparse] binmode is no longer an UNOP
+             
+             Subject: [PATCH B::Deparse] regex quoting, and a minor milestone
+             
+             Subject: [PATCH B::Deparse] suppress "unintialized value" warnings
+             
+             Subject: bleadperl / hex ignores variable length and/or tr doesn't null terminate   ( with patch)
+             
+             Subject: patch for t/op/oct.t that shows need for patch supplied with bug 20010404.009, (bugs in hex and oct)
+             
+             FreeBSD hints tweak from Anton Berezin.
+             
+             Subject: [PATCH foolperl & bleadperl] README.vms update
+             
+             Subject: Re: [PATCH foolperl & bleadperl] README.vms update
+     Branch: maint-5.6/perl
+	  !> AUTHORS README.vms ext/B/B.pm ext/B/B/Concise.pm
+	  !> ext/B/B/Debug.pm ext/B/B/Deparse.pm ext/B/B/Terse.pm
+	  !> hints/freebsd.sh pod/perlfaq9.pod pp.c t/op/oct.t t/op/pwent.t
+____________________________________________________________________________
+[  9584] By: gsar                                  on 2001/04/06  04:09:00
+        Log: keep eval"" CVs alive until the end of the statement in which
+             they're called; this avoids a coredump ensuing from search for
+             lexicals in code such as:
+             
+             sub bug {
+             my $s = @_;
+             eval q[sub { eval 'sub { &$s }' }];
+             }
+             bug("x")->()->();
+             
+             this code still doesn't work as intended (as it has remained
+             since time immemorial), but it doesn't provoke a coredump anymore
+     Branch: maint-5.6/perl
+	   ! embed.h embed.pl global.sym objXSUB.h perlapi.c
+	   ! pod/perlguts.pod pp_ctl.c proto.h scope.c scope.h sv.c
+____________________________________________________________________________
+[  9583] By: jhi                                   on 2001/04/05  23:52:51
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  9582] By: jhi                                   on 2001/04/05  23:11:23
         Log: Slight doc tweak.
      Branch: perl
@@ -477,7 +773,9 @@ ____________________________________________________________________________
 	   ! pp_sys.c
 ____________________________________________________________________________
 [  9523] By: jhi                                   on 2001/04/03  00:02:31
-        Log: Make it harder for parallel makes to enter 'test' before
+        Log: (Retracted by #9609)
+             
+             Make it harder for parallel makes to enter 'test' before
              Dynaloader and File::Glob are happy.  (In principle 'make_ext'
              should be unhappy enough, but sometimes parallel makes seem
              to sneak past both in Tru64 and AIX.)
