@@ -283,13 +283,13 @@ locatelocale(\$Spanish, \@Spanish,
 # Select the largest of the alpha(num)bets.
 
 ($Locale, @Locale) = ($English, @English)
-    if (length(@English) > length(@Locale));
+    if (@English > @Locale);
 ($Locale, @Locale) = ($German, @German)
-    if (length(@German)  > length(@Locale));
+    if (@German  > @Locale);
 ($Locale, @Locale) = ($French, @French)
-    if (length(@French)  > length(@Locale));
+    if (@French  > @Locale);
 ($Locale, @Locale) = ($Spanish, @Spanish)
-    if (length(@Spanish) > length(@Locale));
+    if (@Spanish > @Locale);
 
 {
     local $^W = 0;
