@@ -3134,12 +3134,16 @@ sv_pos_u2b(register SV *sv, I32* offsetp, I32* lenp)
     send = s + len;
     while (s < send && uoffset--)
 	s += UTF8SKIP(s);
+    if (s >= send)
+	s = send;
     *offsetp = s - start;
     if (lenp) {
 	I32 ulen = *lenp;
 	start = s;
 	while (s < send && ulen--)
 	    s += UTF8SKIP(s);
+	if (s >= send)
+	    s = send;
 	*lenp = s - start;
     }
     return;
