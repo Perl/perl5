@@ -508,3 +508,10 @@ else {
 }
 EXPECT
 Use of uninitialized value in numeric eq (==) at - line 4.
+########
+$x = sub {};
+foo();
+sub foo { eval { return }; }
+print "ok\n";
+EXPECT
+ok
