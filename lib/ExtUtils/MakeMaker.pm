@@ -180,7 +180,6 @@ sub eval_in_x {
 
 sub full_setup {
     $Verbose ||= 0;
-    $^W=1;
 
     # package name for the classes into which the first object will be blessed
     $PACKNAME = "PACK000";
