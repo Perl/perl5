@@ -2,7 +2,7 @@
 
 # $RCSfile: pack.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:11 $
 
-print "1..8\n";
+print "1..9\n";
 
 $format = "c2x5CCxsdila6";
 # Need the expression in here to force ary[5] to be numeric.  This avoids
@@ -41,3 +41,6 @@ close BIN;
 $sum = unpack("%32b*", $foo);
 $longway = unpack("b*", $foo);
 print $sum == $longway =~ tr/1/1/ ? "ok 8\n" : "not ok 8\n";
+
+print +($x = unpack("I",pack("I", 0xFFFFFFFF))) == 0xFFFFFFFF
+	? "ok 9\n" : "not ok 9 $x\n";
