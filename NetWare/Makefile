@@ -847,10 +847,10 @@ all : .cleanoldfiles .\nwconfig.h $(CONFIGPM) $(NLM_NAME) $(EXTENSION_NLP) $(EXT
 regen_config_h:
 	perl config_sh.PL $(NW_CFG_VARS) $(NW_CFGSH_TMPL) > ..\config.sh
 	cd ..
-	-del /f perl.exe
+	-del /f /q perl.exe
 	perl configpm
 	cd netware
-	-del /f $(NW_CFGH_TMPL)
+	-del /f /q $(NW_CFGH_TMPL)
 	-mkdir $(COREDIR)
 	-perl -I..\lib config_h.PL "INST_VER=$(INST_VER)"
 	rename config.h $(NW_CFGH_TMPL)
@@ -1046,6 +1046,7 @@ $(NLM_NAME): MESSAGE HEADERS $(BLDDIR)\nul $(NLM_OBJ) $(NEWTARE_OBJ_DEP) $(PERL_
 LibPath $(LIBPATH)
  $(BASE_LIBRARIES)
  Module clib
+ Module netdb
  $(BASE_IMPORT_FNS)
  $(BASE_IMPORT_FILES)
  $(ADD_IMPORT_FNS)
@@ -1154,14 +1155,17 @@ $(EXT_MAIN_OBJ) : $(CLIB_H_FILES)
 # config.sh will definitely be created
 # COREDIR might have got created
 .cleanoldfiles :
-	-del ..\config.sh
-	-del .\Main.obj
-	-del .\Main.lib
+	-del /f /q $(PERLIMPLIB)
+	-del /f /q ..\lib\config.pm
+	-del /f /q ..\config.sh
+	-del /f /q .\Main.obj
+	-del /f /q .\Main.lib
 	-rmdir /s /q $(AUTODIR)
 	-rmdir /s /q $(COREDIR)
+	-del /f /q ..\lib\core
 
 .\nwconfig.h : $(NW_CFGH_TMPL)
-	-del /f config.h
+	-del /f /q config.h
 	copy $(NW_CFGH_TMPL) config.h
 
 # REQUIRED WHEN WE INCLUDE CONFIGPM OR REGEN_CONFIG - sgp
@@ -1405,16 +1409,18 @@ $(PERL2UCS_NLP):
 !endif
 
 nwclean:
-	-rmdir /s /q $(REL_DIR) || rmdir /s $(REL_DIR)
-	-rmdir /s /q $(DEB_DIR) || rmdir /s $(DEB_DIR)
-	@if exist .\stdio.h del .\stdio.h
-	@if exist .\string.h del .\string.h
-	@if exist .\Main.obj del .\Main.obj
-	@if exist .\Main.lib del .\Main.lib
+	-rmdir /s /q $(REL_DIR)
+	-rmdir /s /q $(DEB_DIR)
+	@if exist .\stdio.h del /f /q .\stdio.h
+	@if exist .\string.h del /f /q .\string.h
+	@if exist .\Main.obj del /f /q  .\Main.obj
+	@if exist .\Main.lib del /f /q .\Main.lib
+	@if exist .\config.nw5 del /f /q .\config.nw5
+	@if exist .\perl.imp del /f /q .\perl.imp
 	cd testnlm\echo
-	-del *.obj *.map *.link *.options *.nlm *.sym *.xdc *.err
+	-del /f /q *.obj *.map *.link *.options *.nlm *.sym *.xdc *.err
 	cd ..\type
-	-del *.obj *.map *.link *.options *.nlm *.sym *.xdc *.err
+	-del /f /q *.obj *.map *.link *.options *.nlm *.sym *.xdc *.err
 	cd ..\..\
 
 utils: $(BLDDIR)\$(NLM_NAME8).$(NLM_EXT) $(X2P)
@@ -1435,53 +1441,53 @@ utils: $(BLDDIR)\$(NLM_NAME8).$(NLM_EXT) $(X2P)
 	$(MINIPERL) $(PL2BAT) $(UTILS)
 
 distclean: clean nwclean
-	-del /f $(PERLIMPLIB) ..\miniperl.lib $(MINIMOD)
-	-del /f *.def *.map
-	-del /f $(EXTENSION_NPM)
-	-del /f $(EXTENSION_C) $(DYNALOADER).c $(ERRNO).pm
-	-del /f $(EXTDIR)\DynaLoader\dl_netware.xs
-	-del /f $(LIBDIR)\.exists $(LIBDIR)\attrs.pm $(LIBDIR)\DynaLoader.pm
-	-del /f $(LIBDIR)\XSLoader.pm
-	-del /f $(LIBDIR)\Fcntl.pm $(LIBDIR)\IO.pm $(LIBDIR)\Opcode.pm
-	-del /f $(LIBDIR)\ops.pm $(LIBDIR)\Safe.pm
-	-del /f $(LIBDIR)\SDBM_File.pm $(LIBDIR)\Socket.pm $(LIBDIR)\POSIX.pm
-	-del /f $(LIBDIR)\B.pm $(LIBDIR)\O.pm $(LIBDIR)\re.pm
-	-del /f $(LIBDIR)\Data\Dumper.pm $(LIBDIR)\ByteLoader.pm
-	-del /f $(LIBDIR)\Devel\Peek.pm $(LIBDIR)\Devel\DProf.pm
-	-del /f $(LIBDIR)\File\Glob.pm
-	-del /f $(LIBDIR)\Unicode\Normalize.pm
-	-rmdir /s /q $(LIBDIR)\IO || rmdir /s $(LIBDIR)\IO
-	-rmdir /s /q $(LIBDIR)\Thread || rmdir /s $(LIBDIR)\Thread
-	-rmdir /s /q $(LIBDIR)\B || rmdir /s $(LIBDIR)\B
-	-rmdir /s /q $(LIBDIR)\Data || rmdir /s $(LIBDIR)\Data
-	-del /f $(PODDIR)\*.html
-	-del /f $(PODDIR)\*.bat
+	-del /f /q $(PERLIMPLIB) ..\miniperl.lib $(MINIMOD)
+	-del /f /q *.def *.map
+	-del /f /q $(EXTENSION_NPM)
+	-del /f /q $(EXTENSION_C) $(DYNALOADER).c $(ERRNO).pm
+	-del /f /q $(EXTDIR)\DynaLoader\dl_netware.xs
+	-del /f /q $(LIBDIR)\.exists $(LIBDIR)\attrs.pm $(LIBDIR)\DynaLoader.pm
+	-del /f /q $(LIBDIR)\XSLoader.pm
+	-del /f /q $(LIBDIR)\Fcntl.pm $(LIBDIR)\IO.pm $(LIBDIR)\Opcode.pm
+	-del /f /q $(LIBDIR)\ops.pm $(LIBDIR)\Safe.pm
+	-del /f /q $(LIBDIR)\SDBM_File.pm $(LIBDIR)\Socket.pm $(LIBDIR)\POSIX.pm
+	-del /f /q $(LIBDIR)\B.pm $(LIBDIR)\O.pm $(LIBDIR)\re.pm
+	-del /f /q $(LIBDIR)\Data\Dumper.pm $(LIBDIR)\ByteLoader.pm
+	-del /f /q $(LIBDIR)\Devel\Peek.pm $(LIBDIR)\Devel\DProf.pm
+	-del /f /q $(LIBDIR)\File\Glob.pm
+	-del /f /q $(LIBDIR)\Unicode\Normalize.pm
+	-rmdir /s /q $(LIBDIR)\IO
+	-rmdir /s /q $(LIBDIR)\Thread
+	-rmdir /s /q $(LIBDIR)\B
+	-rmdir /s /q $(LIBDIR)\Data
+	-del /f /q $(PODDIR)\*.html
+	-del /f /q $(PODDIR)\*.bat
 	cd ..\utils
-	-del /f h2ph splain perlbug pl2pm c2ph h2xs perldoc dprofpp
-	-del /f *.bat
+	-del /f /q h2ph splain perlbug pl2pm c2ph h2xs perldoc dprofpp
+	-del /f /q *.bat
 	cd ..\netware
 	cd ..\x2p
-	-del /f find2perl s2p
-	-del /f *.bat
-	-del *.obj *.map *.link *.xdc *.err
+	-del /f /q find2perl s2p
+	-del /f /q *.bat
+	-del /f /q *.obj *.map *.link *.xdc *.err
 	cd ..\netware
-	-del /f ..\config.sh ..\splittree.pl dlutils.c config.h.new
-	-del /f $(CONFIGPM)
-	-del /f bin\*.bat
+	-del /f /q ..\config.sh ..\splittree.pl dlutils.c config.h.new
+	-del /f /q $(CONFIGPM)
+	-del /f /q bin\*.bat
 	cd $(EXTDIR)
-	-del /s *.lib *.def *.map *.pdb *.bs Makefile *$(o) pm_to_blib *.xdc *.err
+	-del /s /q *.lib *.def *.map *.pdb *.bs Makefile *$(o) pm_to_blib *.xdc *.err
 	cd ..\netware
 !if "$(NW_EXTNS)"=="yes"
 	cd cgi2perl
-	-del *.obj *.bs Makefile *$(o) *.c pm_to_blib *.xdc *.err *.sym *.map
+	-del /f /q *.obj *.bs Makefile *$(o) *.c pm_to_blib *.xdc *.err *.sym *.map
 	cd ..
 	cd $(EXTDIR)\Perl2UCS
-	-del *.obj *.bs Makefile *$(o) *.c pm_to_blib *.xdc *.err *.sym *.map *.c
+	-del /f /q *.obj *.bs Makefile *$(o) *.c pm_to_blib *.xdc *.err *.sym *.map *.c
 	cd ..\..\netware
 !endif
-	-rmdir /s /q $(AUTODIR) || rmdir /s $(AUTODIR)
-	-rmdir /s /q $(COREDIR) || rmdir /s $(COREDIR)
-	-del ..\config.sh
+	-rmdir /s /q $(AUTODIR)
+	-rmdir /s /q $(COREDIR)
+	-del /f /q ..\config.sh
 
 installwin:
 	$(MINIPERL) -I..\lib ..\installperl
