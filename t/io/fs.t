@@ -7,7 +7,9 @@ BEGIN {
 }
 
 use Config;
+use File::Spec::Functions;
 
+my $Is_MacOS  = ($^O eq 'MacOS');
 my $Is_VMSish = ($^O eq 'VMS');
 
 if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
@@ -24,7 +26,8 @@ my $accurate_timestamps =
     !($^O eq 'MSWin32' || $^O eq 'NetWare' ||
       $^O eq 'dos'     || $^O eq 'os2'     ||
       $^O eq 'mint'    || $^O eq 'cygwin'  ||
-      $^O eq 'amigaos' || $wd =~ m#$Config{afsroot}/#
+      $^O eq 'amigaos' || $wd =~ m#$Config{afsroot}/# ||
+      $Is_MacOS
      );
 
 if (defined &Win32::IsWinNT && Win32::IsWinNT()) {
@@ -50,23 +53,27 @@ plan tests => 32;
 if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
     `rmdir /s /q tmp 2>nul`;
     `mkdir tmp`;
-} elsif ($^O eq 'VMS') {
+}
+elsif ($^O eq 'VMS') {
     `if f\$search("[.tmp]*.*") .nes. "" then delete/nolog/noconfirm [.tmp]*.*.*`;
     `if f\$search("tmp.dir") .nes. "" then delete/nolog/noconfirm tmp.dir;`;
     `create/directory [.tmp]`;
+}
+elsif ($Is_MacOS) {
+    rmdir "tmp"; mkdir "tmp";
 }
 else {
     `rm -f tmp 2>/dev/null; mkdir tmp 2>/dev/null`;
 }
 
-chdir './tmp';
+chdir catdir(curdir(), 'tmp');
 
 `/bin/rm -rf a b c x` if -x '/bin/rm';
 
 umask(022);
 
 SKIP: {
-    skip "bogus umask", 1 if ($^O eq 'MSWin32') || ($^O eq 'NetWare') ||  ($^O eq 'epoc'); 
+    skip "bogus umask", 1 if ($^O eq 'MSWin32') || ($^O eq 'NetWare') || ($^O eq 'epoc') || $Is_MacOS;
 
     is((umask(0)&0777), 022, 'umask'),
 }

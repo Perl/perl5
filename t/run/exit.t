@@ -19,12 +19,14 @@ sub run {
 }
 
 BEGIN {
-    $numtests = ($^O eq 'VMS') ? 7 : 3; 
+    # MacOS system() doesn't have good return value
+    $numtests = ($^O eq 'VMS') ? 7 : ($^O eq 'MacOS') ? 0 : 3; 
 }
 
 require "test.pl";
 plan(tests => $numtests);
 
+if ($^O ne 'MacOS') {
 my $exit, $exit_arg;
 
 $exit = run('exit');
@@ -66,3 +68,4 @@ $exit = run("END { \$? = $exit_arg }");
 $exit_arg = (44 & 7) if $^O eq 'VMS';  
 
 is( $exit >> 8, $exit_arg,             'Changing $? in END block' );
+}

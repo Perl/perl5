@@ -34,6 +34,8 @@ BEGIN {
     undef &skip;
 }
 
+skip_all "Unhappy on MacOS" if $^O eq 'MacOS';
+
 #
 # ./test.pl does real evilness by jumping to a label.
 # This function copies the skip from ./test, omitting the goto.
@@ -140,7 +142,7 @@ plan tests => 130;
 {
     my $datafile = "datatmp000";
     1 while -f ++ $datafile;
-    END {unlink_all $datafile}
+    END {unlink_all $datafile if $datafile}
 
     open  MY_DATA, "> $datafile" or die "Failed to open $datafile: $!";
     print MY_DATA  << "    --";
@@ -220,7 +222,7 @@ plan tests => 130;
 {
     my $progfile = "progtmp000";
     1 while -f ++ $progfile;
-    END {unlink_all $progfile}
+    END {unlink_all $progfile if $progfile}
 
     my @programs = (<< '    --', << '    --');
 #!./perl

@@ -14,6 +14,7 @@ BEGIN {
 
 use strict;
 use Config;
+use File::Spec::Functions;
 
 my $test = 177;
 sub ok ($;$) {
@@ -48,6 +49,7 @@ BEGIN {
   }
 }
 
+my $Is_MacOS = $^O eq 'MacOS';
 my $Is_VMS = $^O eq 'VMS';
 my $Is_MSWin32 = $^O eq 'MSWin32';
 my $Is_NetWare = $^O eq 'NetWare';
@@ -55,6 +57,7 @@ my $Is_Dos = $^O eq 'dos';
 my $Is_Cygwin = $^O eq 'cygwin';
 my $Invoke_Perl = $Is_VMS ? 'MCR Sys$Disk:[]Perl.' :
                   ($Is_MSWin32 ? '.\perl' :
+                  $Is_MacOS ? ':perl' :
                   ($Is_NetWare ? 'perl' : './perl'));
 my @MoreEnv = qw/IFS CDPATH ENV BASH_ENV/;
 
@@ -112,12 +115,14 @@ sub test ($$;$) {
 }
 
 # We need an external program to call.
-my $ECHO = ($Is_MSWin32 ? ".\\echo$$" : ($Is_NetWare ? "echo$$" : "./echo$$"));
+my $ECHO = ($Is_MSWin32 ? ".\\echo$$" : $Is_MacOS ? ":echo$$" : ($Is_NetWare ? "echo$$" : "./echo$$"));
 END { unlink $ECHO }
 open PROG, "> $ECHO" or die "Can't create $ECHO: $!";
 print PROG 'print "@ARGV\n"', "\n";
 close PROG;
 my $echo = "$Invoke_Perl $ECHO";
+
+my $TEST = catfile(curdir(), 'TEST');
 
 print "1..203\n";
 
@@ -139,7 +144,7 @@ print "1..203\n";
 
     test 1, eval { `$echo 1` } eq "1\n";
 
-    if ($Is_MSWin32 || $Is_NetWare || $Is_VMS || $Is_Dos) {
+    if ($Is_MSWin32 || $Is_NetWare || $Is_VMS || $Is_Dos || $Is_MacOS) {
 	print "# Environment tainting tests skipped\n";
 	for (2..5) { print "ok $_\n" }
     }
@@ -255,8 +260,8 @@ print "1..203\n";
 
 # How about command-line arguments? The problem is that we don't
 # always get some, so we'll run another process with some.
-{
-    my $arg = "./arg$$";
+SKIP: {
+    my $arg = catfile(curdir(), "arg$$");
     open PROG, "> $arg" or die "Can't create $arg: $!";
     print PROG q{
 	eval { join('', @ARGV), kill 0 };
@@ -272,8 +277,7 @@ print "1..203\n";
 
 # Reading from a file should be tainted
 {
-    my $file = './TEST';
-    test 32, open(FILE, $file), "Couldn't open '$file': $!";
+    test 32, open(FILE, $TEST), "Couldn't open '$TEST': $!";
 
     my $block;
     sysread(FILE, $block, 100);
@@ -606,7 +610,10 @@ else {
     if ($Config{d_readlink} && $Config{d_symlink}) {
 	my $symlink = "sl$$";
 	unlink($symlink);
-	symlink("/something/naughty", $symlink) or die "symlink: $!\n";
+	my $sl = "/something/naughty";
+	# it has to be a real path on Mac OS
+	$sl = MacPerl::MakePath((MacPerl::Volumes())[0]) if $Is_MacOS;
+	symlink($sl, $symlink) or die "symlink: $!\n";
 	my $readlink = readlink($symlink);
 	test 144, tainted $readlink;
 	unlink($symlink);
@@ -720,7 +727,7 @@ else {
 {
     # bug id 20001004.006
 
-    open IN, "./TEST" or warn "$0: cannot read ./TEST: $!" ;
+    open IN, $TEST or warn "$0: cannot read $TEST: $!" ;
     local $/;
     my $a = <IN>;
     my $b = <IN>;
@@ -732,7 +739,7 @@ else {
 {
     # bug id 20001004.007
 
-    open IN, "./TEST" or warn "$0: cannot read ./TEST: $!" ;
+    open IN, $TEST or warn "$0: cannot read $TEST: $!" ;
     my $a = <IN>;
 
     my $c = { a => 42,

@@ -10,6 +10,7 @@ $|  = 1;
 use warnings;
 use Config;
 $Is_VMS = $^O eq 'VMS';
+$Is_MacOS = $^O eq 'MacOS';
 
 plan tests => 94;
 
@@ -79,7 +80,7 @@ SKIP: {
     skip "open -| busted and noisy on VMS", 3 if $Is_VMS;
 
     ok( open(my $f, '-|', <<EOC),     'open -|' );
-    $Perl -e "print qq(a row\n); print qq(another row\n)"
+    $Perl -e "print qq(a row\\n); print qq(another row\\n)"
 EOC
 
     my @rows = <$f>;
@@ -87,7 +88,9 @@ EOC
     ok( close($f),                      '       close' );
 }
 
-{
+SKIP: {
+    skip "Output for |- doesn't go to shell on MacOS", 5 if $Is_MacOS;
+
     ok( open(my $f, '|-', <<EOC),     'open |-' );
     $Perl -pe "s/^not //"
 EOC
@@ -172,7 +175,7 @@ SKIP: {
     skip "open -| busted and noisy on VMS", 3 if $Is_VMS;
 
     ok( open(local $f, '-|', <<EOC),  'open local $f, "-|", ...' );
-    $Perl -e "print qq(a row\n); print qq(another row\n)"
+    $Perl -e "print qq(a row\\n); print qq(another row\\n)"
 EOC
     my @rows = <$f>;
 
@@ -180,7 +183,9 @@ EOC
     ok( close($f),                      '       close' );
 }
 
-{
+SKIP: {
+    skip "Output for |- doesn't go to shell on MacOS", 5 if $Is_MacOS;
+
     ok( open(local $f, '|-', <<EOC),  'open local $f, "|-", ...' );
     $Perl -pe "s/^not //"
 EOC

@@ -1,8 +1,8 @@
 #!./perl
 
 BEGIN {
-    chdir '..' if -d '../pod' && -d '../t';
-    @INC = 'lib';
+    chdir 't';
+    @INC = '../lib';
 }
 
 my $module = shift;
