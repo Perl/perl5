@@ -25,7 +25,7 @@ void
 print_long_double()
         CODE:
 #ifdef HAS_LONG_DOUBLE
-#   if LONG_DOUBLESIZE > DOUBLESIZE
+#   if defined(PERL_PRIfldbl) && (LONG_DOUBLESIZE > DOUBLESIZE)
         long double val = 7.0;
         printf("%5.3" PERL_PRIfldbl "\n",val);
 #   else
