@@ -3551,15 +3551,16 @@ rename(2) manpage or equivalent system documentation for details.
 Demands some semantics specified by EXPR, or by C<$_> if EXPR is not
 supplied.
 
-If a VERSION is specified as a literal of the form v5.6.0,
+If a VERSION is specified as a literal of the form v5.6.1,
 demands that the current version of Perl (C<$^V> or $PERL_VERSION) be
 at least as recent as that version, at run time.  (For compatibility
 with older versions of Perl, a numeric argument will also be interpreted
 as VERSION.)  Compare with L</use>, which can do a similar check at
 compile time.
 
-    require v5.6.0;	# run time version check
-    require 5.005_03;	# same, number still supported for compatibility
+    require v5.6.1;	# run time version check
+    require 5.6.1;	# ditto
+    require 5.005_03;	# float version allowed for compatibility
 
 Otherwise, demands that a library file be included if it hasn't already
 been included.  The file is included via the do-FILE mechanism, which is
@@ -4389,7 +4390,7 @@ in arbitrary strings:
 
     printf "version is v%vd\n", $^V;		# Perl's version
     printf "address is %*vX\n", ":", $addr;	# IPv6 address
-    printf "bits are %*vb\n", "", $bits;	# random bitstring
+    printf "bits are %*vb\n", " ", $bits;	# random bitstring
 
 If C<use locale> is in effect, the character used for the decimal
 point in formatted real numbers is affected by the LC_NUMERIC locale.
@@ -5255,7 +5256,7 @@ package.  It is exactly equivalent to
 
 except that Module I<must> be a bareword.
 
-VERSION, which can be specified as a literal of the form v5.6.0, demands
+VERSION, which can be specified as a literal of the form v5.6.1, demands
 that the current version of Perl (C<$^V> or $PERL_VERSION) be at least
 as recent as that version.  (For compatibility with older versions of Perl,
 a numeric literal will also be interpreted as VERSION.)  If the version
@@ -5264,8 +5265,9 @@ message is printed and Perl exits immediately without attempting to
 parse the rest of the file.  Compare with L</require>, which can do a
 similar check at run time.
 
-    use v5.6.0;		# compile time version check
-    use 5.005_03;	# same, number still supported for compatibility
+    use v5.6.1;		# compile time version check
+    use 5.6.1;		# ditto
+    use 5.005_03;	# float version allowed for compatibility
 
 This is often useful if you need to check the current Perl version before
 C<use>ing library modules that have changed in incompatible ways from

@@ -84,6 +84,18 @@ notation, 5.005_03 is the same as v5.5.30, and the first maintenance
 version following v5.6.0 will be v5.6.1, which amounts to a floating point
 value of 5.006_001).
 
+=item Literals of the form C<1.2.3> parse differently
+
+Previously, numeric literals with more than one dot in them were
+interpreted as a floating point number concatenated with one or more
+numbers.  Such "numbers" are now parsed as strings composed of the
+specified ordinals.
+
+For example, C<print 97.98.99> used to output C<97.9899> in earlier
+versions, but now prints C<abc>.
+
+See L<Support for strings represented as a vector of ordinals> below.
+
 =item Possibly changed pseudo-random number generator
 
 In 5.005_0x and earlier, perl's rand() function used the C library
@@ -461,10 +473,12 @@ variables.  See L<perlfunc/our>.
 
 =head2 Support for strings represented as a vector of ordinals
 
-Literals of the form v1.2.3.4 are now parsed as a string composed of
+Literals of the form C<v1.2.3.4> are now parsed as a string composed of
 of characters with the specified ordinals.  This is an alternative, more
 readable way to construct (possibly unicode) strings instead of
-interpolating characters, as in C<"\x{1}\x{2}\x{3}\x{4}">.
+interpolating characters, as in C<"\x{1}\x{2}\x{3}\x{4}">.  The leading
+C<v> may be omitted if there are more than two ordinals, so C<1.2.3> is
+parsed the same as C<v1.2.3>.
 
 Strings written in this form are also useful to represent version "numbers".
 It is easy to compare such version "numbers" (which are really just plain
@@ -487,12 +501,17 @@ They will be interpreted as a version rather than as a module name:
     require v5.6.0;		# croak if $^V lt v5.6.0
     use v5.6.0;			# same, but croaks at compile-time
 
+Alternatively, the C<v> may be omitted if there is more than one dot:
+
+    require 5.6.0;
+    use 5.6.0;
+
 Also, C<sprintf> and C<printf> support the Perl-specific format flag C<%v>
 to print ordinals of characters in arbitrary strings:
 
     printf "v%vd", $^V;		# prints current version, such as "v5.5.650"
     printf "%*vX", ":", $addr;	# formats IPv6 address
-    printf "%*vb", "", $bits;	# displays bitstring as contiguous 0's and 1's
+    printf "%*vb", " ", $bits;	# displays bitstring
 
 See L<perlop/"Strings of Character"> for additional information.
 
