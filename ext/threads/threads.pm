@@ -50,7 +50,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 async	
 );
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 
 # || 0 to ensure compatibility with previous versions
@@ -266,14 +266,14 @@ signal handling is not threadsafe.
 
 =item Detached threads on Windows
 
-There aren't supported yet (as of perl 5.8.3), as they may lead to
+These aren't yet supported (as of perl 5.8.3), as they may lead to
 memory access violation problems.
 
 =back
 
 =head1 AUTHOR and COPYRIGHT
 
-Arthur Bergman E<lt>arthur at contiller.seE<gt>
+Arthur Bergman E<lt>sky at nanisky.comE<gt>
 
 threads is released under the same license as Perl.
 
