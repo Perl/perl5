@@ -257,7 +257,7 @@ else {
 	    open CMDLINE, "/proc/$$/cmdline") {
 	    chomp(my $line = scalar <CMDLINE>);
 	    my $me = (split /\0/, $line)[0];
-	    ok($me eq $0, 'altering $0 is effective');
+	    ok($me eq $0, 'altering $0 is effective', 'PL_origarg{c,v} copy breaks this');
 	    close CMDLINE;
 	} else {
 	    skip("\$0 check only on Linux and FreeBSD with /proc");

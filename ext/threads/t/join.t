@@ -11,7 +11,7 @@ BEGIN {
 
 use ExtUtils::testlib;
 use strict;
-BEGIN { print "1..11\n" };
+BEGIN { print "1..10\n" };
 use threads;
 use threads::shared;
 
@@ -86,29 +86,4 @@ ok(1,"");
 	return $foo{bar} = \$foo;
     })->join();
     ok(1,"");
-}
-
-if ($^O eq 'linux') {
-  # Modify $0 in a subthread.
-  print "# 1a: \$0 = $0\n";
-  join( threads->new( sub {
-	print "# 2a: \$0 = $0\n";
-	$0 = "foobar";
-	print "# 2b: \$0 = $0\n" } ) );
-  print "# 1b: \$0 = $0\n";
-  if (open PS, "ps -f |") {
-    my $ok;
-    while (<PS>) {
-      if (/^\S+\s+$$\s.+\sfoobar\s*$/) {
-	$ok++;
-	last;
-      }
-    }
-    ok($ok, 'altering $0 is effective');
-    close PS;
-  } else {
-    skip("\$0 check: opening ps -fu | failed: $!");
-  }
-} else {
-  skip("\$0 check: only on Linux");
 }

@@ -1140,8 +1140,13 @@ S_more_xpvbm(pTHX)
     xpvbm->xpv_pv = 0;
 }
 
-#define my_safemalloc(s)	(void*)safemalloc(s)
-#define my_safefree(p)	safefree((char*)p)
+#ifdef LEAKTEST
+#  define my_safemalloc(s)	(void*)safexmalloc(717,s)
+#  define my_safefree(p)	safexfree((char*)p)
+#else
+#  define my_safemalloc(s)	(void*)safemalloc(s)
+#  define my_safefree(p)	safefree((char*)p)
+#endif
 
 #ifdef PURIFY
 
@@ -1587,7 +1592,7 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 
     if (newlen > SvLEN(sv)) {		/* need more room? */
 	if (SvLEN(sv) && s) {
-#ifdef MYMALLOC
+#if defined(MYMALLOC) && !defined(LEAKTEST)
 	    STRLEN l = malloced_size((void*)SvPVX(sv));
 	    if (newlen <= l) {
 		SvLEN_set(sv, l);
@@ -10016,7 +10021,12 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* pseudo environmental stuff */
     PL_origargc		= proto_perl->Iorigargc;
-    PL_origargv		= proto_perl->Iorigargv;
+    i = PL_origargc;
+    New(0, PL_origargv, i+1, char*);
+    PL_origargv[i] = '\0';
+    while (i-- > 0) {
+	PL_origargv[i]	= SAVEPV(proto_perl->Iorigargv[i]);
+    }
 
     param->stashes      = newAV();  /* Setup array of objects to call clone on */
 
