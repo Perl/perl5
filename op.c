@@ -1446,11 +1446,6 @@ Perl_mod(pTHX_ OP *o, I32 type)
 			|| kid->op_type == OP_METHOD)
 		    {
 			UNOP *newop;
-
-			if (kid->op_sibling || kid->op_next != kid) {
-			    yyerror("panic: unexpected optree near method call");
-			    break;
-			}
 			
 			NewOp(1101, newop, 1, UNOP);
 			newop->op_type = OP_RV2CV;

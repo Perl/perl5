@@ -9,7 +9,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..72\n";
+print "1..73\n";
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -239,5 +239,14 @@ test( Foo->boogie(), "yes, sir!");
 #   print foo "bar"  where foo does not exist is an indirect object.
 eval { sub AUTOLOAD { "ok ", shift, "\n"; } };
 print nonsuch(++$cnt);
+
+# Bug ID 20010902.002
+test (
+    eval q[
+	$x = 'x';
+	sub Foo::x : lvalue { $x }
+	Foo->$x = 'ok';
+    ] || $@, 'ok'
+);
 
 print "# $cnt tests completed\n";
