@@ -28,7 +28,7 @@ a tied hash is used in scalar context, such as
 
 The old behaviour was that %tied_hash would return whatever would have been
 returned for that hash before the hash was tied (so usually 0). The new
-behaviour in the absense of a SCALAR method is to return TRUE if in the
+behaviour in the absence of a SCALAR method is to return TRUE if in the
 middle of an C<each> iteration, and otherwise call FIRSTKEY to check if the
 hash is empty (making sure that a subsequent C<each> will also begin by
 calling FIRSTKEY). Please see L<perltie/SCALAR> for the full details and
@@ -139,6 +139,13 @@ local variables now name these variables more defensively, which should
 avoid bugs where names clash.
 
 <signal.h> is now always included.
+
+=head1 Configuration and Building
+
+C<Configure> now invokes callbacks regardless of the value of the variable
+they are called for. Previously callbacks were only invoked in the
+C<case $variable $define)> branch. This change should only affect platform
+maintainers writing configuration hints files.
 
 =head1 New Tests
 
