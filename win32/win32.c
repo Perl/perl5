@@ -1548,7 +1548,6 @@ win32_alarm(unsigned int sec)
     return 0;
 }
 
-#if defined(HAVE_DES_FCRYPT) || defined(PERL_OBJECT)
 #ifdef HAVE_DES_FCRYPT
 extern char *	des_fcrypt(const char *txt, const char *salt, char *cbuf);
 #endif
@@ -1561,11 +1560,10 @@ win32_crypt(const char *txt, const char *salt)
     dTHR;
     return des_fcrypt(txt, salt, w32_crypt_buffer);
 #else
-    die("The crypt() function is unimplemented due to excessive paranoia.");
+    Perl_croak(aTHX_ "The crypt() function is unimplemented due to excessive paranoia.");
     return Nullch;
 #endif
 }
-#endif
 
 #ifdef USE_FIXED_OSFHANDLE
 

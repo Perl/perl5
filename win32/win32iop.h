@@ -139,9 +139,7 @@ DllExport  int		win32_kill(int pid, int sig);
 DllExport  unsigned long	win32_os_id(void);
 DllExport  void*	win32_dynaload(const char*filename);
 
-#if defined(HAVE_DES_FCRYPT) || defined(PERL_OBJECT)
 DllExport char *	win32_crypt(const char *txt, const char *salt);
-#endif
 
 END_EXTERN_C
 
@@ -287,10 +285,8 @@ END_EXTERN_C
 #define closedir		win32_closedir
 #define os_id			win32_os_id
 
-#ifdef HAVE_DES_FCRYPT
 #undef crypt
-#define crypt			win32_crypt
-#endif
+#define crypt(t,s)		win32_crypt(t,s)
 
 #ifndef USE_WIN32_RTL_ENV
 #undef getenv

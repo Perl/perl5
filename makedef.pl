@@ -455,11 +455,6 @@ unless ($define{'DEBUGGING'})
     PL_watchok)];
  }
 
-if ($PLATFORM eq 'win32' && $define{'HAVE_DES_FCRYPT'})
- {
-  emit_symbols [qw(win32_crypt)];
- }
-
 # functions from *.sym files
 
 my @syms = ($global_sym, $pp_sym, $globvar_sym);
@@ -671,6 +666,7 @@ win32_rewinddir
 win32_closedir
 win32_longpath
 win32_os_id
+win32_crypt
 			   )) {
 	try_symbol($symbol);
     }
