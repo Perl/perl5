@@ -7,7 +7,7 @@ Install - Build and Installation guide for perl5.
 The basic steps to build and install perl5 on a Unix system are:
 
 	rm -f config.sh Policy.sh
-	sh Configure
+	sh Configure -de
 	make
 	make test
 	make install
@@ -18,6 +18,17 @@ The basic steps to build and install perl5 on a Unix system are:
 	(cd pod && make tex  && <process the latex files>)
 
 Each of these is explained in further detail below.
+
+The above commands will install Perl to /usr/local or /opt, depending
+on the platform.  If that's not okay with you, use
+
+	rm -f config.sh Policy.sh
+	sh Configure
+	make
+	make test
+	make install
+
+Full configuration instructions can be found in the INSTALL file.
 
 For information on non-Unix systems, see the section on
 L<"Porting information"> below.
@@ -1119,11 +1130,16 @@ libgdbm under HP-UX 11.
 Specific information for the OS/2, Plan9, VMS and Win32 ports is in the
 corresponding README files and subdirectories.  Additional information,
 including a glossary of all those config.sh variables, is in the Porting
-subdirectory.
+subdirectory.  Especially Porting/Glossary should come in handy. 
 
 Ports for other systems may also be available.  You should check out
 http://www.perl.com/CPAN/ports for current information on ports to
 various other operating systems.
+
+If you plan to port Perl to a new architecture study carefully the
+section titled "Philosophical Issues in Patching and Porting Perl"
+in the file Porting/pumpkin.pod and the file Porting/patching.pod.
+Study also how other non-UNIX ports have solved problems.
 
 =back
 

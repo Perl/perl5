@@ -64,14 +64,27 @@ Installation
 
 1) Detailed instructions are in the file INSTALL which you should read.
 In brief, the following should work on most systems:
-	rm -f config.sh
+
+	rm -f config.sh Policy.sh
+	sh Configure -de
+	make
+	make test
+	make install
+
+For most systems, it should be safe to accept all the Configure defaults.
+It is recommended that you accept the defaults the first time you build
+or if you have any problems building.
+
+The above commands will install Perl to /usr/local or /opt, depending
+on the platform.  If that's not okay with you, use
+
+	rm -f config.sh Policy.sh
 	sh Configure
 	make
 	make test
 	make install
-For most systems, it should be safe to accept all the Configure defaults.
-(It is recommended that you accept the defaults the first time you build
-or if you have any problems building.)
+
+Full configuration instructions can be found in the INSTALL file.
 
 2) Read the manual entries before running perl.
 
