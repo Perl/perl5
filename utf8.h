@@ -28,5 +28,21 @@ END_EXTERN_C
 
 #define IN_UTF8 (PL_curcop->op_private & HINT_UTF8)
 #define IN_BYTE (PL_curcop->op_private & HINT_BYTE)
+#define DO_UTF8(sv) (SvUTF8(sv) && !IN_BYTE)
 
 #define UTF8SKIP(s) PL_utf8skip[*(U8*)s]
+
+/*
+ * Note: we try to be careful never to call the isXXX_utf8() functions
+ * unless we're pretty sure we've seen the beginning of a UTF-8 character
+ * (that is, the two high bits are set).  Otherwise we risk loading in the
+ * heavy-duty SWASHINIT and SWASHGET routines unnecessarily.
+ */
+#define isIDFIRST_lazy_if(p,c) ((!c || (*((U8*)p) < 0xc0)) \
+				? isIDFIRST(*(p)) \
+				: isIDFIRST_utf8((U8*)p))
+#define isALNUM_lazy_if(p,c)   ((!c || (*((U8*)p) < 0xc0)) \
+				? isALNUM(*(p)) \
+				: isALNUM_utf8((U8*)p))
+#define isIDFIRST_lazy(p)	isIDFIRST_lazy_if(p,1)
+#define isALNUM_lazy(p)		isALNUM_lazy_if(p,1)

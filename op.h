@@ -234,6 +234,7 @@ struct pmop {
 
 #define PMdf_USED	0x01		/* pm has been used once already */
 #define PMdf_TAINTED	0x02		/* pm compiled from tainted pattern */
+#define PMdf_UTF8	0x04		/* pm compiled from utf8 data */
 
 #define PMf_RETAINT	0x0001		/* taint $1 etc. if target tainted */
 #define PMf_ONCE	0x0002		/* use pattern only once per reset */

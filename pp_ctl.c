@@ -114,6 +114,10 @@ PP(pp_regcomp)
 		PL_reginterp_cnt = I32_MAX; /* Mark as safe.  */
 
 	    pm->op_pmflags = pm->op_pmpermflags;	/* reset case sensitivity */
+	    if (DO_UTF8(tmpstr))
+		pm->op_pmdynflags |= PMdf_UTF8;
+	    else
+		pm->op_pmdynflags &= ~PMdf_UTF8;
 	    pm->op_pmregexp = CALLREGCOMP(aTHX_ t, t + len, pm);
 	    PL_reginterp_cnt = 0;		/* XXXX Be extra paranoid - needed
 					   inside tie/overload accessors.  */
@@ -296,7 +300,8 @@ PP(pp_formline)
     NV value;
     bool gotsome;
     STRLEN len;
-    STRLEN fudge = SvCUR(tmpForm) * (IN_UTF8 ? 3 : 1) + 1;
+    STRLEN fudge = SvCUR(tmpForm) * (IN_BYTE ? 1 : 3) + 1;
+    bool item_is_utf = FALSE;
 
     if (!SvMAGICAL(tmpForm) || !SvCOMPILED(tmpForm)) {
 	SvREADONLY_off(tmpForm);
@@ -374,7 +379,7 @@ PP(pp_formline)
 	case FF_CHECKNL:
 	    item = s = SvPV(sv, len);
 	    itemsize = len;
-	    if (IN_UTF8) {
+	    if (DO_UTF8(sv)) {
 		itemsize = sv_len_utf8(sv);
 		if (itemsize != len) {
 		    I32 itembytes;
@@ -393,11 +398,13 @@ PP(pp_formline)
 			    break;
 			s++;
 		    }
+		    item_is_utf = TRUE;
 		    itemsize = s - item;
 		    sv_pos_b2u(sv, &itemsize);
 		    break;
 		}
 	    }
+	    item_is_utf = FALSE;
 	    if (itemsize > fieldsize)
 		itemsize = fieldsize;
 	    send = chophere = s + itemsize;
@@ -414,7 +421,7 @@ PP(pp_formline)
 	case FF_CHECKCHOP:
 	    item = s = SvPV(sv, len);
 	    itemsize = len;
-	    if (IN_UTF8) {
+	    if (DO_UTF8(sv)) {
 		itemsize = sv_len_utf8(sv);
 		if (itemsize != len) {
 		    I32 itembytes;
@@ -452,9 +459,11 @@ PP(pp_formline)
 			itemsize = chophere - item;
 			sv_pos_b2u(sv, &itemsize);
 		    }
+		    item_is_utf = TRUE;
 		    break;
 		}
 	    }
+	    item_is_utf = FALSE;
 	    if (itemsize <= fieldsize) {
 		send = chophere = s + itemsize;
 		while (s < send) {
@@ -510,7 +519,7 @@ PP(pp_formline)
 	case FF_ITEM:
 	    arg = itemsize;
 	    s = item;
-	    if (IN_UTF8) {
+	    if (item_is_utf) {
 		while (arg--) {
 		    if (*s & 0x80) {
 			switch (UTF8SKIP(s)) {
@@ -553,6 +562,7 @@ PP(pp_formline)
 	case FF_LINEGLOB:
 	    item = s = SvPV(sv, len);
 	    itemsize = len;
+	    item_is_utf = FALSE;		/* XXX is this correct? */
 	    if (itemsize) {
 		gotsome = TRUE;
 		send = s + itemsize;

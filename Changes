@@ -79,6 +79,185 @@ Version v5.5.640        Development release working toward 5.6
 ----------------
 
 ____________________________________________________________________________
+[  4921] By: gsar                                  on 2000/01/28  15:49:04
+        Log: alias realpath() to abs_path() (from Tom Christiansen)
+     Branch: perl
+	   ! lib/Cwd.pm
+____________________________________________________________________________
+[  4920] By: jhi                                   on 2000/01/28  09:52:47
+        Log: Cppsym fixup from Andy.
+     Branch: cfgperl
+	   ! Configure config_h.SH
+     Branch: metaconfig
+	   ! U/modified/Cppsym.U
+____________________________________________________________________________
+[  4919] By: jhi                                   on 2000/01/28  09:52:22
+        Log: In HP-UX no largefiles if no 64 bits.
+     Branch: cfgperl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[  4918] By: jhi                                   on 2000/01/28  09:03:37
+        Log: The #4880 was too eager, the $n test is useful too.
+     Branch: cfgperl
+	   ! lib/Benchmark.pm
+____________________________________________________________________________
+[  4917] By: jhi                                   on 2000/01/28  06:27:50
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  +> pod/perlapi.pod pod/perlintern.pod
+	  !> (integrate 39 files)
+____________________________________________________________________________
+[  4916] By: gsar                                  on 2000/01/28  05:29:37
+        Log: more exported symbols needed for build on windows
+     Branch: perl
+	   ! embed.pl global.sym objXSUB.h perlapi.c pod/perlapi.pod
+	   ! pod/perlintern.pod t/lib/thread.t win32/win32.c
+____________________________________________________________________________
+[  4915] By: gsar                                  on 2000/01/28  03:43:52
+        Log: autogenerate API listing from comments in the source (from Benjamin
+             Stuhl <sho_pi@hotmail.com>); fix the markup format to be more
+             flexible for better readability; add missing docs in sv.c; regenerate
+             perltoc
+     Branch: perl
+	   + pod/perlapi.pod pod/perlintern.pod
+	   ! MANIFEST XSUB.h av.c av.h cop.h cv.h embed.pl global.sym gv.c
+	   ! gv.h handy.h hv.c hv.h intrpvar.h makedef.pl mg.c objXSUB.h
+	   ! op.c op.h perl.c perlapi.c pod/Makefile pod/buildtoc
+	   ! pod/perl.pod pod/perldelta.pod pod/perlguts.pod
+	   ! pod/perltoc.pod pod/roffitall pp.h scope.h sv.c sv.h thrdvar.h
+	   ! universal.c util.c
+____________________________________________________________________________
+[  4914] By: gsar                                  on 2000/01/27  19:43:35
+        Log: document unimplemented status of forking pipe open() on windows
+     Branch: perl
+	   ! pod/perlfork.pod t/op/fork.t
+____________________________________________________________________________
+[  4913] By: jhi                                   on 2000/01/27  11:18:51
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> (integrate 51 files)
+____________________________________________________________________________
+[  4912] By: jhi                                   on 2000/01/27  10:35:48
+        Log: Cppsym update continues.
+     Branch: cfgperl
+	   ! Configure config_h.SH
+     Branch: metaconfig
+	   ! U/modified/Cppsym.U
+____________________________________________________________________________
+[  4911] By: gsar                                  on 2000/01/27  08:04:17
+        Log: add missing flag in change#4892
+     Branch: perl
+	   ! win32/win32.c
+____________________________________________________________________________
+[  4910] By: gsar                                  on 2000/01/27  03:56:48
+        Log: various pod nits identified by installhtml (all fixed except
+             unresolved links)
+     Branch: perl
+	   ! ext/B/B/C.pm ext/Devel/Peek/Peek.pm ext/File/Glob/Glob.pm
+	   ! ext/IO/lib/IO/Socket/INET.pm ext/IPC/SysV/SysV.pm
+	   ! ext/Thread/Thread.pm lib/Class/Struct.pm lib/File/Find.pm
+	   ! lib/File/Spec/VMS.pm lib/Pod/Html.pm lib/UNIVERSAL.pm
+	   ! pod/buildtoc pod/perlcompile.pod pod/perlfork.pod
+	   ! pod/perlre.pod pod/perltoc.pod pod/perltodo.pod
+____________________________________________________________________________
+[  4909] By: gsar                                  on 2000/01/26  22:45:28
+        Log: typo
+     Branch: perl
+	   ! Porting/p4desc
+____________________________________________________________________________
+[  4908] By: gsar                                  on 2000/01/26  22:41:18
+        Log: update p4 tool
+     Branch: perl
+	   ! Porting/p4desc
+____________________________________________________________________________
+[  4907] By: gsar                                  on 2000/01/26  21:45:41
+        Log: revised attribute syntax: C<my $foo :a :b :c>, C<my $foo : a b c>
+             and C<my $foo : a : b : c> are all valid (from Spider Boardman)
+     Branch: perl
+	   ! lib/AutoSplit.pm lib/SelfLoader.pm lib/attributes.pm
+	   ! pod/perldelta.pod pod/perldiag.pod pod/perlsub.pod
+	   ! t/op/attrs.t toke.c
+____________________________________________________________________________
+[  4906] By: gsar                                  on 2000/01/26  20:16:39
+        Log: pod typos and warnings (from Abigail <abigail@delanet.com>)
+     Branch: perl
+	   ! README.win32 ext/B/B/Deparse.pm lib/Class/Struct.pm
+____________________________________________________________________________
+[  4905] By: gsar                                  on 2000/01/26  19:10:26
+        Log: s/STOP/CHECK/ blocks
+     Branch: perl
+	   ! embedvar.h ext/B/B/Stash.pm ext/B/NOTES ext/B/O.pm intrpvar.h
+	   ! keywords.h keywords.pl lib/constant.pm op.c perl.c perlapi.h
+	   ! perly.c perly.y pod/perldelta.pod pod/perldiag.pod
+	   ! pod/perlfunc.pod pod/perlmod.pod pod/perlrun.pod
+	   ! pod/perlsub.pod pod/perltodo.pod sv.c t/op/misc.t toke.c
+	   ! vms/perly_c.vms
+____________________________________________________________________________
+[  4904] By: jhi                                   on 2000/01/26  13:58:18
+        Log: In UNICOS and UNICOS/mk after a successful fcntl F_SETFL
+             of O_NONBLOCK a subsequent fcntl F_GETFL will return O_NDELAY.
+     Branch: cfgperl
+	   ! ext/IO/IO.xs
+____________________________________________________________________________
+[  4903] By: jhi                                   on 2000/01/26  11:16:34
+        Log: Continue cpp symbol update.
+     Branch: cfgperl
+	   ! Configure config_h.SH
+     Branch: metaconfig
+	   ! U/modified/Cppsym.U
+____________________________________________________________________________
+[  4902] By: gsar                                  on 2000/01/26  09:28:37
+        Log: tweak exports list on Windows
+     Branch: perl
+	   ! makedef.pl t/op/fork.t win32/win32.h
+____________________________________________________________________________
+[  4901] By: jhi                                   on 2000/01/26  08:05:57
+        Log: Integrate with Sarathy.
+     Branch: cfgperl
+	  !> Changes README.win32 lib/File/Path.pm lib/Getopt/Std.pm op.c
+	  !> pod/perldelta.pod pod/perldiag.pod t/op/grep.t
+	  !> t/pragma/strict-vars toke.c win32/Makefile win32/makefile.mk
+	  !> win32/win32.c win32/win32.h
+____________________________________________________________________________
+[  4900] By: jhi                                   on 2000/01/26  07:59:05
+        Log: s/d_nvpresuv/d_nv_preserves_uv/;
+             plus cosmetic change for #4899.
+     Branch: cfgperl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH
+     Branch: metaconfig
+	   ! U/modified/Cppsym.U
+     Branch: metaconfig/U/perl
+	   ! perlxv.U
+____________________________________________________________________________
+[  4899] By: jhi                                   on 2000/01/26  07:46:56
+        Log: Update the scan of the cpp symbols.
+     Branch: cfgperl
+	   ! Configure config_h.SH
+     Branch: metaconfig
+	   ! U/modified/Cppsym.U
+____________________________________________________________________________
+[  4898] By: gsar                                  on 2000/01/26  04:49:45
+        Log: allow '--' to terminate argument processing (suggested by
+             Marc Espie <espie@schutzenberger.liafa.jussieu.fr>)
+     Branch: perl
+	   ! lib/Getopt/Std.pm
+____________________________________________________________________________
+[  4897] By: gsar                                  on 2000/01/26  02:42:38
+        Log: change#3744 should have made grep more like map instead of the
+             other way around
+     Branch: perl
+	   ! t/op/grep.t toke.c
+____________________________________________________________________________
+[  4896] By: gsar                                  on 2000/01/26  00:56:14
+        Log: integrate cfgperl contents into mainline
+     Branch: perl
+	  +> vos/config.def vos/config.pl
+	   ! Changes
+	  !> Configure MANIFEST config_h.SH hints/unicosmk.sh
+	  !> lib/Benchmark.pm pod/perldelta.pod pod/perlhist.pod pp.c
+	  !> vos/config.h vos/config_h.SH_orig
+____________________________________________________________________________
 [  4895] By: gsar                                  on 2000/01/26  00:45:45
         Log: fix parse failure of (my $foo : bar) and similar (from Spider
              Boardman)

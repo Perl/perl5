@@ -2737,7 +2737,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	    !(ob=(SV*)GvIO(iogv)))
 	{
 	    if (!packname || 
-		((*(U8*)packname >= 0xc0 && IN_UTF8)
+		((*(U8*)packname >= 0xc0 && DO_UTF8(sv))
 		    ? !isIDFIRST_utf8((U8*)packname)
 		    : !isIDFIRST(*packname)
 		))

@@ -50,6 +50,8 @@ my $startperl = "#! $perlpath -w";
 #
 # Modified 1999-06-10, 1999-07-07 to migrate to cleaner perl5 usage
 #   Ken Pizzini <ken@halcyon.com>
+#
+# Modified 2000-01-28 to use the 'follow' option of File::Find
 
 my @roots = ();
 while ($ARGV[0] =~ /^[^-!(]/) {
@@ -68,6 +70,7 @@ my $initfile = '';
 my $initnewer = '';
 my $out = '';
 my %init = ();
+my ($follow_in_effect,$Skip_And) = (0,0);
 
 while (@ARGV) {
     $_ = shift;
@@ -80,10 +83,9 @@ while (@ARGV) {
         --$indent_depth;
         $out .= &tab . ")";
     } elsif ($_ eq 'follow') {
+        $follow_in_effect= 1;
         $stat = 'stat';
-        $decl = "\nmy %already_seen = ();\n";
-        $out .= &tab . '(not $already_seen{"$dev,$ino"}) &&' . "\n";
-        $out .= &tab . '(($already_seen{"$dev,$ino"} = !(-d _)) || 1)';
+        $Skip_And= 1;
     } elsif ($_ eq '!') {
         $out .= &tab . "!";
         next;
@@ -235,7 +237,7 @@ while (@ARGV) {
             $init{saw_or} = 1;
             shift;
         } else {
-            $out .= " &&" unless $ARGV[0] eq ')';
+            $out .= " &&" unless $Skip_And || $ARGV[0] eq ')';
             $out .= "\n";
             shift if $ARGV[0] eq '-a';
         }
@@ -301,10 +303,12 @@ if (exists $init{declarestat}) {
 END
 }
 
+if ( $follow_in_effect ) {
+$out =~ s/lstat\(\$_\)/lstat(_)/;
 print <<"END";
 $decl
 # Traverse desired filesystems
-File::Find::$find(\\&wanted, $roots);
+File::Find::$find( {wanted => \\&wanted, follow => 1}, $roots);
 $flushall
 
 sub wanted {
@@ -312,7 +316,19 @@ $out;
 }
 
 END
+} else {
+print <<"END";
+$decl
+# Traverse desired filesystems
+File::Find::$find({wanted => \\&wanted}, $roots);
+$flushall
 
+sub wanted {
+$out;
+}
+
+END
+}
 
 if (exists $init{doexec}) {
     print <<'END';
@@ -709,7 +725,12 @@ not evaluated if PREDICATE1 is true.
 
 =item C<-follow>
 
-Follow (dereference) symlinks.  [XXX doesn't work fully, see L<BUGS>]
+Follow (dereference) symlinks.  The checking of file attributes depends
+on the position of the C<-follow> option. If it precedes the file
+check option, an C<stat> is done which means the file check applies to the
+file the symbolic link is pointing to. If C<-follow> option follows the
+file check option, this now applies to the symbolic link itself, i.e.
+an C<lstat> is done.
 
 =item C<-depth>
 
@@ -851,11 +872,6 @@ Predicates which take a numeric argument N can come in three forms:
    * N is prefixed with a +: match values greater than N
    * N is prefixed with a -: match values less than N
    * N is not prefixed with either + or -: match only values equal to N
-
-=head1 BUGS
-
-The -follow option doesn't really work yet, because File::Find doesn't
-support following symlinks.
 
 =head1 SEE ALSO
 

@@ -2867,6 +2867,8 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl)
 	    p = SvPV(pat, plen);
 	    pm->op_pmflags |= PMf_SKIPWHITE;
 	}
+	else if (DO_UTF8(pat))
+	    pm->op_pmdynflags |= PMdf_UTF8;
 	pm->op_pmregexp = CALLREGCOMP(aTHX_ p, p + plen, pm);
 	if (strEQ("\\s+", pm->op_pmregexp->precomp))
 	    pm->op_pmflags |= PMf_WHITE;
