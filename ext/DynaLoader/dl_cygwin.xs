@@ -95,7 +95,7 @@ dl_load_file(filename,flags=0)
     if (RETVAL == NULL){
 	SaveError(aTHX_ "%d",GetLastError()) ;
     } else {
-	sv_setiv( ST(0), PTR2IV(RETVAL));
+	sv_setiv( ST(0), PTR2IV(RETVAL) );
     }
    }
 	

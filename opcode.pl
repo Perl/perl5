@@ -88,7 +88,12 @@ EXT char *PL_op_desc[] = {
 END
 
 for (@ops) {
-    print qq(\t"$desc{$_}",\n);
+    my($safe_desc) = $desc{$_};
+
+    # Have to escape double quotes and escape characters.    
+    $safe_desc =~ s/(^|[^\\])([\\"])/$1\\$2/g;
+
+    print qq(\t"$safe_desc",\n);
 }
 
 print <<END;
@@ -352,7 +357,7 @@ bless		bless			ck_fun		s@	S S?
 
 # Pushy I/O.
 
-backtick	backticks		ck_null		t%	
+backtick	quoted execution (``, qx)	ck_null		t%	
 # glob defaults its first arg to $_
 glob		glob			ck_glob		t@	S? S?
 readline	<HANDLE>		ck_null		t%	
@@ -360,14 +365,14 @@ rcatline	append I/O operator	ck_null		t%
 
 # Bindable operators.
 
-regcmaybe	regexp comp once	ck_fun		s1	S
+regcmaybe	regexp comp once		ck_fun		s1	S
 regcreset	regexp reset interpolation flag	ck_fun		s1	S
-regcomp		regexp compilation	ck_null		s|	S
-match		pattern match		ck_match	d/
-qr		pattern quote		ck_match	s/
-subst		substitution		ck_null		dis/	S
-substcont	substitution cont	ck_null		dis|	
-trans		character translation	ck_null		is"	S
+regcomp		regexp compilation		ck_null		s|	S
+match		pattern match (m//)		ck_match	d/
+qr			pattern quote (qr//)	ck_match	s/
+subst		substitution (s///)		ck_null		dis/	S
+substcont	substitution cont		ck_null		dis|	
+trans		character translation (tr///)	ck_null		is"	S
 
 # Lvalue operators.
 # sassign is special-cased for op class
@@ -384,51 +389,51 @@ undef		undef operator		ck_lfun		s%	S?
 study		study			ck_fun		su%	S?
 pos		match position		ck_lfun		stu%	S?
 
-preinc		preincrement		ck_lfun		dIs1	S
-i_preinc	integer preincrement	ck_lfun		dis1	S
-predec		predecrement		ck_lfun		dIs1	S
-i_predec	integer predecrement	ck_lfun		dis1	S
-postinc		postincrement		ck_lfun		dIsT1	S
-i_postinc	integer postincrement	ck_lfun		disT1	S
-postdec		postdecrement		ck_lfun		dIsT1	S
-i_postdec	integer postdecrement	ck_lfun		disT1	S
+preinc		preincrement (++)		ck_lfun		dIs1	S
+i_preinc	integer preincrement (++)	ck_lfun		dis1	S
+predec		predecrement (--)		ck_lfun		dIs1	S
+i_predec	integer predecrement (--)	ck_lfun		dis1	S
+postinc		postincrement (++)		ck_lfun		dIsT1	S
+i_postinc	integer postincrement (++)	ck_lfun		disT1	S
+postdec		postdecrement (--)		ck_lfun		dIsT1	S
+i_postdec	integer postdecrement (--)	ck_lfun		disT1	S
 
 # Ordinary operators.
 
-pow		exponentiation		ck_null		fsT2	S S
+pow		exponentiation (**)	ck_null		fsT2	S S
 
-multiply	multiplication		ck_null		IfsT2	S S
-i_multiply	integer multiplication	ck_null		ifsT2	S S
-divide		division		ck_null		IfsT2	S S
-i_divide	integer division	ck_null		ifsT2	S S
-modulo		modulus			ck_null		IifsT2	S S
-i_modulo	integer modulus		ck_null		ifsT2	S S
-repeat		repeat			ck_repeat	mt2	L S
+multiply	multiplication (*)		ck_null		IfsT2	S S
+i_multiply	integer multiplication (*)	ck_null		ifsT2	S S
+divide		division (/)		ck_null		IfsT2	S S
+i_divide	integer division (/)	ck_null		ifsT2	S S
+modulo		modulus (%)		ck_null		IifsT2	S S
+i_modulo	integer modulus (%)	ck_null		ifsT2	S S
+repeat		repeat (x)		ck_repeat	mt2	L S
 
-add		addition		ck_null		IfsT2	S S
-i_add		integer addition	ck_null		ifsT2	S S
-subtract	subtraction		ck_null		IfsT2	S S
-i_subtract	integer subtraction	ck_null		ifsT2	S S
-concat		concatenation		ck_concat	fsT2	S S
+add		addition (+)		ck_null		IfsT2	S S
+i_add		integer addition (+)	ck_null		ifsT2	S S
+subtract	subtraction (-)		ck_null		IfsT2	S S
+i_subtract	integer subtraction (-)	ck_null		ifsT2	S S
+concat		concatenation (.)	ck_concat	fsT2	S S
 stringify	string			ck_fun		fsT@	S
 
-left_shift	left bitshift		ck_bitop	fsT2	S S
-right_shift	right bitshift		ck_bitop	fsT2	S S
+left_shift	left bitshift (<<)	ck_bitop	fsT2	S S
+right_shift	right bitshift (>>)	ck_bitop	fsT2	S S
 
-lt		numeric lt		ck_null		Iifs2	S S
-i_lt		integer lt		ck_null		ifs2	S S
-gt		numeric gt		ck_null		Iifs2	S S
-i_gt		integer gt		ck_null		ifs2	S S
-le		numeric le		ck_null		Iifs2	S S
-i_le		integer le		ck_null		ifs2	S S
-ge		numeric ge		ck_null		Iifs2	S S
-i_ge		integer ge		ck_null		ifs2	S S
-eq		numeric eq		ck_null		Iifs2	S S
-i_eq		integer eq		ck_null		ifs2	S S
-ne		numeric ne		ck_null		Iifs2	S S
-i_ne		integer ne		ck_null		ifs2	S S
-ncmp		spaceship operator	ck_null		Iifst2	S S
-i_ncmp		integer spaceship	ck_null		ifst2	S S
+lt		numeric lt (<)		ck_null		Iifs2	S S
+i_lt		integer lt (<)		ck_null		ifs2	S S
+gt		numeric gt (>)		ck_null		Iifs2	S S
+i_gt		integer gt (>)		ck_null		ifs2	S S
+le		numeric le (<=)		ck_null		Iifs2	S S
+i_le		integer le (<=)		ck_null		ifs2	S S
+ge		numeric ge (>=)		ck_null		Iifs2	S S
+i_ge		integer ge (>=)		ck_null		ifs2	S S
+eq		numeric eq (==)		ck_null		Iifs2	S S
+i_eq		integer eq (==)		ck_null		ifs2	S S
+ne		numeric ne (!=)		ck_null		Iifs2	S S
+i_ne		integer ne (!=)		ck_null		ifs2	S S
+ncmp		numeric comparison (<=>)	ck_null		Iifst2	S S
+i_ncmp		integer comparison (<=>)	ck_null		ifst2	S S
 
 slt		string lt		ck_scmp		ifs2	S S
 sgt		string gt		ck_scmp		ifs2	S S
@@ -436,27 +441,27 @@ sle		string le		ck_scmp		ifs2	S S
 sge		string ge		ck_scmp		ifs2	S S
 seq		string eq		ck_null		ifs2	S S
 sne		string ne		ck_null		ifs2	S S
-scmp		string comparison	ck_scmp		ifst2	S S
+scmp	string comparison (cmp)		ck_scmp		ifst2	S S
 
-bit_and		bitwise and		ck_bitop	fsT2	S S
-bit_xor		bitwise xor		ck_bitop	fsT2	S S
-bit_or		bitwise or		ck_bitop	fsT2	S S
+bit_and		bitwise and (&)		ck_bitop	fsT2	S S
+bit_xor		bitwise xor (^)		ck_bitop	fsT2	S S
+bit_or		bitwise or (|)		ck_bitop	fsT2	S S
 
-negate		negate			ck_null		IfsT1	S
-i_negate	integer negate		ck_null		ifsT1	S
+negate		negate (-)		ck_null		IfsT1	S
+i_negate	integer negate (-)	ck_null		ifsT1	S
 not		not			ck_null		ifs1	S
-complement	1's complement		ck_bitop	fsT1	S
+complement	1's complement (~)	ck_bitop	fsT1	S
 
 # High falutin' math.
 
-atan2		atan2			ck_fun		fsT@	S S
-sin		sin			ck_fun		fsTu%	S?
-cos		cos			ck_fun		fsTu%	S?
-rand		rand			ck_fun		sT%	S?
-srand		srand			ck_fun		s%	S?
-exp		exp			ck_fun		fsTu%	S?
-log		log			ck_fun		fsTu%	S?
-sqrt		sqrt			ck_fun		fsTu%	S?
+atan2		atan2		ck_fun		fsT@	S S
+sin		sin		ck_fun		fsTu%	S?
+cos		cos		ck_fun		fsTu%	S?
+rand		rand		ck_fun		sT%	S?
+srand		srand		ck_fun		s%	S?
+exp		exp		ck_fun		fsTu%	S?
+log		log		ck_fun		fsTu%	S?
+sqrt		sqrt		ck_fun		fsTu%	S?
 
 # Lowbrow math.
 
@@ -479,11 +484,11 @@ formline	formline		ck_fun		ms@	S L
 ord		ord			ck_fun		ifsTu%	S?
 chr		chr			ck_fun		fsTu%	S?
 crypt		crypt			ck_fun		fsT@	S S
-ucfirst		upper case first	ck_fun_locale	fstu%	S?
-lcfirst		lower case first	ck_fun_locale	fstu%	S?
-uc		upper case		ck_fun_locale	fstu%	S?
-lc		lower case		ck_fun_locale	fstu%	S?
-quotemeta	quote metachars		ck_fun		fsTu%	S?
+ucfirst		ucfirst			ck_fun_locale	fstu%	S?
+lcfirst		lcfirst			ck_fun_locale	fstu%	S?
+uc		uc			ck_fun_locale	fstu%	S?
+lc		lc			ck_fun_locale	fstu%	S?
+quotemeta	quotemeta		ck_fun		fsTu%	S?
 
 # Arrays.
 
@@ -498,7 +503,7 @@ each		each			ck_fun		%	H
 values		values			ck_fun		t%	H
 keys		keys			ck_fun		t%	H
 delete		delete			ck_delete	%	S
-exists		exists operator		ck_exists	is%	S
+exists		exists			ck_exists	is%	S
 rv2hv		hash deref		ck_rvconst	dt1	
 helem		hash elem		ck_null		s2@	H S
 hslice		hash slice		ck_null		m@	H L
@@ -514,8 +519,8 @@ join		join			ck_join		msT@	S L
 
 list		list			ck_null		m@	L
 lslice		list slice		ck_null		2	H L L
-anonlist	anonymous list		ck_fun		ms@	L
-anonhash	anonymous hash		ck_fun		ms@	L
+anonlist	anonymous list ([])	ck_fun		ms@	L
+anonhash	anonymous hash ({})	ck_fun		ms@	L
 
 splice		splice			ck_fun		m@	A S? S? L
 push		push			ck_fun		imsT@	A L
@@ -525,11 +530,11 @@ unshift		unshift			ck_fun		imsT@	A L
 sort		sort			ck_sort		m@	C? L
 reverse		reverse			ck_fun		mt@	L
 
-grepstart	grep			ck_grep		dm@	C L
-grepwhile	grep iterator		ck_null		dt|	
+grepstart	grep		ck_grep		dm@	C L
+grepwhile	grep iterator	ck_null		dt|	
 
-mapstart	map			ck_grep		dm@	C L
-mapwhile	map iterator		ck_null		dt|
+mapstart	map		ck_grep		dm@	C L
+mapwhile	map iterator	ck_null		dt|
 
 # Range stuff.
 
@@ -539,12 +544,12 @@ flop		range (or flop)		ck_null		1
 
 # Control.
 
-and		logical and		ck_null		|	
-or		logical or		ck_null		|	
+and		logical and (&&)		ck_null		|	
+or		logical or (||)		ck_null		|	
 xor		logical xor		ck_null		fs2	S S	
-cond_expr	conditional expression	ck_null		d|	
-andassign	logical and assignment	ck_null		s|	
-orassign	logical or assignment	ck_null		s|	
+cond_expr	conditional operator (?:)	ck_null		d|	
+andassign	logical and assignment (&&=)	ck_null		s|	
+orassign	logical or assignment (||=)	ck_null		s|	
 
 method		method lookup		ck_method	d1
 entersub	subroutine entry	ck_subr		dmt1	L
@@ -743,10 +748,10 @@ semop		semop			ck_fun		imst@	S S
 
 require		require			ck_require	du%	S?
 dofile		do 'file'		ck_fun		d1	S
-entereval	eval string		ck_eval		d%	S
+entereval	eval "string"		ck_eval		d%	S
 leaveeval	eval exit		ck_null		1	S
 #evalonce	eval constant string	ck_null		d1	S
-entertry	eval block		ck_null		|	
+entertry	eval {block}		ck_null		|	
 leavetry	eval block exit		ck_null		@	
 
 # Get system info.

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Sep 13 19:24:34 EET DST 1999 [metaconfig 3.0 PL70]
+# Generated on Fri Sep 17 12:06:13 EET DST 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -10185,6 +10185,8 @@ if set sigaction val -f d_sigaction; eval $csym; $val; then
 int main()
 {
     struct sigaction act, oact;
+    act.sa_flags = 0;
+    oact.sa_handler = 0;
 }
 EOP
 	set try

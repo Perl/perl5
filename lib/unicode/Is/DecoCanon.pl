@@ -80,8 +80,6 @@ return <<'END';
 0d4a	0d4c
 0dda	
 0ddc	0dde
-0e33	
-0eb3	
 0f43	
 0f4d	
 0f52	

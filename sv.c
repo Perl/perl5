@@ -1034,10 +1034,12 @@ S_not_a_number(pTHX_ SV *sv)
     *d = '\0';
 
     if (PL_op)
-	Perl_warner(aTHX_ WARN_NUMERIC, "Argument \"%s\" isn't numeric in %s", tmpbuf,
-		PL_op_name[PL_op->op_type]);
+	Perl_warner(aTHX_ WARN_NUMERIC,
+		    "Argument \"%s\" isn't numeric in %s", tmpbuf,
+		PL_op_desc[PL_op->op_type]);
     else
-	Perl_warner(aTHX_ WARN_NUMERIC, "Argument \"%s\" isn't numeric", tmpbuf);
+	Perl_warner(aTHX_ WARN_NUMERIC,
+		    "Argument \"%s\" isn't numeric", tmpbuf);
 }
 
 /* the number can be converted to integer with atol() or atoll() */

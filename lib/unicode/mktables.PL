@@ -193,7 +193,7 @@ END
 
 exit if @ARGV and not grep { $_ eq Block } @ARGV;
 print "Block\n";
-open(UD, 'blocks.txt') or die "Can't open blocks.txt: $!\n";
+open(UD, 'Blocks.txt') or die "Can't open blocks.txt: $!\n";
 open(OUT, ">Block.pl") or die "Can't create $table.pl: $!\n";
 print OUT <<"END";
 return <<'END';
@@ -229,12 +229,12 @@ sub proplist {
     my $split;
 
     if ($table =~ /^Arab/) {
-	open(UD, "arabshp.txt") or warn "Can't open $table: $!";
+	open(UD, "ArabShap.txt") or warn "Can't open $table: $!";
 
 	$split = '($code, $name, $link, $linkgroup) = split(/; */);';
     }
     elsif ($table =~ /^Jamo/) {
-	open(UD, "jamo2.txt") or warn "Can't open $table: $!";
+	open(UD, "Jamo-2.txt") or warn "Can't open $table: $!";
 
 	$split = '($code, $short, $name) = split(/; */); $code =~ s/^U\+//;';
     }

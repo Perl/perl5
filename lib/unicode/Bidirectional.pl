@@ -447,7 +447,7 @@ return <<'END';
 202c		PDF
 202d		LRO
 202e		RLO
-202f		CS
+202f		WS
 2030	2034	ET
 2035	2046	ON
 2048	204d	ON
@@ -494,7 +494,9 @@ return <<'END';
 2300	2335	ON
 2336	237a	L
 237b		ON
-237d	239a	ON
+237d	2394	ON
+2395		L
+2396	239a	ON
 2400	2426	ON
 2440	244a	ON
 2460	249b	EN
@@ -554,11 +556,11 @@ return <<'END';
 3400	4db5	L
 4e00	9fa5	L
 a000	a48c	L
-a490	a4a1	L
-a4a4	a4b3	L
-a4b5	a4c0	L
-a4c2	a4c4	L
-a4c6		L
+a490	a4a1	ON
+a4a4	a4b3	ON
+a4b5	a4c0	ON
+a4c2	a4c4	ON
+a4c6		ON
 ac00	d7a3	L
 d800	db7f	L
 db80	dbff	L

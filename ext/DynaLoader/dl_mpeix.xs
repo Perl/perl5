@@ -74,7 +74,7 @@ flags));
     if (obj == NULL)
         SaveError(aTHX_"%s",Strerror(errno));
     else
-        sv_setiv( ST(0), PTR2IV(obj));
+        sv_setiv( ST(0), PTR2IV(obj) );
 
 void *
 dl_find_symbol(libhandle, symbolname)
@@ -100,7 +100,7 @@ dl_find_symbol(libhandle, symbolname)
     if (status != 0) {
         SaveError(aTHX_"%s",(errno) ? Strerror(errno) : "Symbol not found") ;
     } else {
-        sv_setiv( ST(0), PTR2IV(symaddr));
+        sv_setiv( ST(0), PTR2IV(symaddr) );
     }
 
 void

@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Mon Aug 16 22:37:31 EET DST 1999
+ * Configuration time: Fri Sep 17 12:08:19 EET DST 1999
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1423,8 +1423,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/opt/perl/lib/5.00560/alpha-dec_osf-thread"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/5.00560/alpha-dec_osf-thread"		/**/
+#define ARCHLIB "/opt/perl/lib/5.00561/alpha-dec_osf-thread"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/5.00561/alpha-dec_osf-thread"		/**/
 
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
@@ -1453,8 +1453,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/opt/perl/lib/5.00560"		/**/
-#define PRIVLIB_EXP "/opt/perl/lib/5.00560"		/**/
+#define PRIVLIB "/opt/perl/lib/5.00561"		/**/
+#define PRIVLIB_EXP "/opt/perl/lib/5.00561"		/**/
 
 /* SITEARCH:
  *	This symbol contains the name of the private library for this package.
@@ -1469,8 +1469,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "/opt/perl/lib/site_perl/5.00560/alpha-dec_osf-thread"		/**/
-#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.00560/alpha-dec_osf-thread"		/**/
+#define SITEARCH "/opt/perl/lib/site_perl/5.00561/alpha-dec_osf-thread"		/**/
+#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.00561/alpha-dec_osf-thread"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -1542,9 +1542,14 @@
  *	available directly to the user. Note that it may well be different from
  *	the preprocessor used to compile the C program.
  */
+/* CPPLAST:
+ *	This symbol is intended to be used along with CPPRUN in the same manner
+ *	symbol CPPMINUS is used with CPPSTDIN. It contains either "-" or "".
+ */
 #define CPPSTDIN "cppstdin"
 #define CPPMINUS ""
 #define CPPRUN "/usr/bin/cpp"
+#define CPPLAST ""
 
 /* HAS_ACCESS:
  *	This manifest constant lets the C program know that the access()
@@ -1640,6 +1645,11 @@
  *	and HAS_UNAME.	Note that the command uses a fully qualified path,
  *	so that it is safe even if used by a process with super-user
  *	privileges.
+ */
+/* HAS_PHOSTNAME:
+ *	This symbol, if defined, indicates that the C program may use the
+ *	contents of PHOSTNAME as a command to feed to the popen() routine
+ *	to derive the host name.
  */
 #define HAS_GETHOSTNAME	/**/
 #define HAS_UNAME		/**/
@@ -2056,7 +2066,12 @@
  *	This symbol, if defined, indicates that <sys/uio.h> exists and
  *	should be included.
  */
+/* HAS_STRUCT_IOVEC:
+ *	This symbol, if defined, indicates that the struct iovec
+ *	to do scatter writes/gather reads is supported.
+ */
 #define	I_SYSUIO		/**/
+#define	HAS_STRUCT_IOVEC		/**/
 
 /* Free_t:
  *	This variable contains the return type of free().  It is usually
@@ -2582,6 +2597,12 @@
  *     include <mach/cthreads.h>.
  */
 /*#define   I_MACH_CTHREADS	/ **/
+
+/* I_PTHREAD:
+ *     This symbol, if defined, indicates to the C program that it should
+ *     include <pthread.h>.
+ */
+#define   I_PTHREAD	/**/
 
 /* USE_THREADS:
  *	This symbol, if defined, indicates that Perl should

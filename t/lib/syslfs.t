@@ -30,13 +30,15 @@ sub explain {
     print <<EOM;
 #
 # If the lfs (large file support: large meaning larger than two gigabytes)
-# tests are skipped or fail, it may mean either that your process is not
-# allowed to write large files or that the file system you are running
-# the tests on doesn't support large files, or both.  You may also need
-# to reconfigure your kernel. (This is all very system-dependent.)
+# tests are skipped or fail, it may mean either that your process
+# (or process group) is not allowed to write large files (resource
+# limits) or that the file system you are running the tests on doesn't
+# let your user/group have large files (quota) or the filesystem simply
+# doesn't support large files.  You may even need to reconfigure your kernel.
+# (This is all very operating system and site-dependent.)
 #
 # Perl may still be able to support large files, once you have
-# such a process and such a (file) system.
+# such a process, enough quota, and such a (file) system.
 #
 EOM
 }
@@ -44,6 +46,13 @@ EOM
 # Known have-nots.
 if ($^O eq 'win32' || $^O eq 'vms') {
     print "1..0\n# no sparse files\n";
+    bye();
+}
+
+# Known haves that have problems running this test
+# (for example because they do not support sparse files, like UNICOS)
+if ($^O eq 'unicos') {
+    print "1..0\n# large files known to work but unable to test them here\n";
     bye();
 }
 
@@ -66,7 +75,7 @@ my @s;
 
 print "# @s\n";
 
-my $BLOCKSIZE = 512; # is this really correct everywhere?
+my $BLOCKSIZE = $s[11] || 512;
 
 unless (@s == 13 &&
 	$s[7] == 1_000_003 &&
@@ -79,19 +88,29 @@ unless (@s == 13 &&
 # By now we better be sure that we do have sparse files:
 # if we are not, the following will hog 5 gigabytes of disk.  Ooops.
 
+$ENV{LC_ALL} = "C";
+
 sysopen(BIG, "big", O_WRONLY|O_CREAT|O_TRUNC) or
 	do { warn "sysopen failed: $!\n"; bye };
 sysseek(BIG, 5_000_000_000, SEEK_SET);
+
 # The syswrite will fail if there are are filesize limitations (process or fs).
-unless(syswrite(BIG, "big") == 3) {
-    $ENV{LC_ALL} = "C";
-    if ($! =~/File too large/) {
-	print "1..0\n# writing past 2GB failed\n";
-	explain();
-	bye();
+my $syswrite = syswrite(BIG, "big") == 3;
+my $close   = close BIG if $syswrite;
+unless($syswrite && $close) {
+    unless ($syswrite) {
+        print "# syswrite failed: $!\n"
+    } else {
+        print "# close failed: $!\n"
     }
+    if ($! =~/too large/i) {
+	print "1..0\n# writing past 2GB failed: process limits?\n";
+    } elsif ($! =~ /quota/i) {
+	print "1..0\n# filesystem quota limits?\n";
+    }
+    explain();
+    bye();
 }
-close BIG;
 
 @s = stat("big");
 

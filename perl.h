@@ -1044,7 +1044,7 @@ Free_t   Perl_mfree (Malloc_t where);
 #  define IVSIZE LONGSIZE
 #endif
 #define IV_DIG (BIT_DIGITS(IVSIZE * 8))
-#define UV_DIG (BIT_DIGITS(IVSIZE * 8))
+#define UV_DIG (BIT_DIGITS(UVSIZE * 8))
 
 /*   
  *  The macros INT2PTR and NUM2PTR are (despite their names)

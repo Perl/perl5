@@ -54,7 +54,7 @@ dl_load_file(filename, flags=0)
 	PerlIO_printf(PerlIO_stderr(), "load_add_on(%s) : %d (%s)\n", path, bogo, strerror(bogo));
     } else {
 	RETVAL = (void *) bogo;
-	sv_setiv( ST(0), PTR2IV(RETVAL));
+	sv_setiv( ST(0), PTR2IV(RETVAL) );
     }
     free(path);
 }

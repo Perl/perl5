@@ -4,7 +4,6 @@ return <<'END';
 003a	
 00a0	
 060c	
-202f	
 fe50	
 fe52	
 fe55	
