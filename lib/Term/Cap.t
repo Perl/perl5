@@ -12,16 +12,19 @@ END {
 	1 while unlink('tcout');
 }
 
-use Test::More tests => 43;
+use Test::More;
 
 # these names are hardcoded in Term::Cap
-my $files = join '', grep { -f $_ } ( $ENV{HOME} . '/.termcap', '/etc/termcap', 
-	'/usr/share/misc/termcap' );
-unless ($files) {
-	SKIP: {
-		skip('no termcap available to test', 43);
-	}
-	exit;
+my $files = join '',
+    grep { -f $_ }
+	( $ENV{HOME} . '/.termcap', # we assume pretty UNIXy system anyway
+	  '/etc/termcap', 
+	  '/usr/share/misc/termcap' );
+unless( $files ) {
+    plan skip_all => 'no termcap available to test';
+}
+else {
+    plan tests => 43;
 }
 
 use_ok( 'Term::Cap' );
