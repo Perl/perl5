@@ -318,8 +318,8 @@ $cutting = 1;
 # running an installed version of Perl to produce documentation from an
 # uninstalled newer version's pod files.
 if ($^O ne 'plan9' and $^O ne 'dos' and $^O ne 'os2' and $^O ne 'MSWin32') {
-  ($version,$patch) =
-    `\PATH=.:..:\$PATH; perl -v` =~ /version (\d\.\d{3})(?:_(\d{2}))?/;
+  my $perl = (-x './perl') ? './perl' : ((-x '../perl') ? '../perl' : '');
+  ($version,$patch) = `$perl -e 'print $]'` =~ /^(\d\.\d{3})(\d{2})?/ if $perl;
 }
 # No luck; we'll just go with the running Perl's version
 ($version,$patch) = $] =~ /^(.{5})(\d{2})?/ unless $version;
