@@ -2048,12 +2048,23 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol is defined if the FILE_cnt macro can be used as an
  *	lvalue.
  */
+/* STDIO_PTR_LVAL_SETS_CNT:
+ *	This symbol is defined if using the FILE_ptr macro as an lvalue
+ *	to increase the pointer by n has the side effect of decreasing the
+ *	value of File_cnt(fp) by n.
+ */
+/* STDIO_PTR_LVAL_NOCHANGE_CNT:
+ *	This symbol is defined if using the FILE_ptr macro as an lvalue
+ *	to increase the pointer by n leaves File_cnt(fp) unchanged.
+ */
 #$d_stdstdio USE_STDIO_PTR 	/**/
 #ifdef USE_STDIO_PTR
 #define FILE_ptr(fp)	$stdio_ptr
 #$d_stdio_ptr_lval STDIO_PTR_LVALUE 		/**/
 #define FILE_cnt(fp)	$stdio_cnt
 #$d_stdio_cnt_lval STDIO_CNT_LVALUE 		/**/
+#$d_stdio_ptr_lval_sets_cnt STDIO_PTR_LVAL_SETS_CNT	/**/
+#$d_stdio_ptr_lval_nochange_cnt STDIO_PTR_LVAL_NOCHANGE_CNT	/**/
 #endif
 
 /* USE_STDIO_BASE:

@@ -1473,20 +1473,20 @@ PP(pp_complement)
 	  STRLEN targlen = 0;
 	  U8 *result;
 	  U8 *send;
-	  I32 l;
+	  STRLEN l;
 
 	  send = tmps + len;
 	  while (tmps < send) {
-	    UV c = utf8_to_uv(tmps, &l);
+	    UV c = utf8_to_uv(tmps, 0, &l, UTF8_ALLOW_ANY);
 	    tmps += UTF8SKIP(tmps);
-	    targlen += UTF8LEN(~c);
+	    targlen += UNISKIP(~c);
 	  }
 
 	  /* Now rewind strings and write them. */
 	  tmps -= len;
 	  Newz(0, result, targlen + 1, U8);
 	  while (tmps < send) {
-	    UV c = utf8_to_uv(tmps, &l);
+	    UV c = utf8_to_uv(tmps, 0, &l, UTF8_ALLOW_ANY);
 	    tmps += UTF8SKIP(tmps);
 	    result = uv_to_utf8(result,(UV)~c);
 	  }
@@ -1937,7 +1937,7 @@ PP(pp_hex)
 {
     djSP; dTARGET;
     char *tmps;
-    I32 argtype;
+    STRLEN argtype;
     STRLEN n_a;
 
     tmps = POPpx;
@@ -1950,7 +1950,7 @@ PP(pp_oct)
 {
     djSP; dTARGET;
     NV value;
-    I32 argtype;
+    STRLEN argtype;
     char *tmps;
     STRLEN n_a;
 
@@ -2227,13 +2227,13 @@ PP(pp_ord)
 {
     djSP; dTARGET;
     UV value;
-    STRLEN n_a;
     SV *tmpsv = POPs;
-    U8 *tmps = (U8*)SvPVx(tmpsv,n_a);
-    I32 retlen;
+    STRLEN len;
+    U8 *tmps = (U8*)SvPVx(tmpsv, len);
+    STRLEN retlen;
 
     if ((*tmps & 0x80) && DO_UTF8(tmpsv))
-	value = utf8_to_uv_chk(tmps, &retlen, 0);
+	value = utf8_to_uv(tmps, len, &retlen, 0);
     else
 	value = (UV)(*tmps & 255);
     XPUSHu(value);
@@ -2297,10 +2297,10 @@ PP(pp_ucfirst)
     STRLEN slen;
 
     if (DO_UTF8(sv) && (s = (U8*)SvPV(sv, slen)) && slen && (*s & 0xc0) == 0xc0) {
-	I32 ulen;
+	STRLEN ulen;
 	U8 tmpbuf[UTF8_MAXLEN];
 	U8 *tend;
-	UV uv = utf8_to_uv_chk(s, &ulen, 0);
+	UV uv = utf8_to_uv(s, slen, &ulen, 0);
 
 	if (PL_op->op_private & OPpLOCALE) {
 	    TAINT;
@@ -2356,10 +2356,10 @@ PP(pp_lcfirst)
     STRLEN slen;
 
     if (DO_UTF8(sv) && (s = (U8*)SvPV(sv, slen)) && slen && (*s & 0xc0) == 0xc0) {
-	I32 ulen;
+	STRLEN ulen;
 	U8 tmpbuf[UTF8_MAXLEN];
 	U8 *tend;
-	UV uv = utf8_to_uv_chk(s, &ulen, 0);
+	UV uv = utf8_to_uv(s, slen, &ulen, 0);
 
 	if (PL_op->op_private & OPpLOCALE) {
 	    TAINT;
@@ -2416,7 +2416,7 @@ PP(pp_uc)
 
     if (DO_UTF8(sv)) {
 	dTARGET;
-	I32 ulen;
+	STRLEN ulen;
 	register U8 *d;
 	U8 *send;
 
@@ -2436,7 +2436,7 @@ PP(pp_uc)
 		TAINT;
 		SvTAINTED_on(TARG);
 		while (s < send) {
-		    d = uv_to_utf8(d, toUPPER_LC_uni( utf8_to_uv_chk(s, &ulen, 0)));
+		    d = uv_to_utf8(d, toUPPER_LC_uni( utf8_to_uv(s, len, &ulen, 0)));
 		    s += ulen;
 		}
 	    }
@@ -2490,7 +2490,7 @@ PP(pp_lc)
 
     if (DO_UTF8(sv)) {
 	dTARGET;
-	I32 ulen;
+	STRLEN ulen;
 	register U8 *d;
 	U8 *send;
 
@@ -2510,7 +2510,7 @@ PP(pp_lc)
 		TAINT;
 		SvTAINTED_on(TARG);
 		while (s < send) {
-		    d = uv_to_utf8(d, toLOWER_LC_uni( utf8_to_uv_chk(s, &ulen, 0)));
+		    d = uv_to_utf8(d, toLOWER_LC_uni( utf8_to_uv(s, len, &ulen, 0)));
 		    s += ulen;
 		}
 	    }
@@ -3354,9 +3354,9 @@ PP(pp_unpack)
     register char *str;
 
     /* These must not be in registers: */
-    I16 ashort;
+    short ashort;
     int aint;
-    I32 along;
+    long along;
 #ifdef HAS_QUAD
     Quad_t aquad;
 #endif
@@ -3652,7 +3652,9 @@ PP(pp_unpack)
 		len = strend - s;
 	    if (checksum) {
 		while (len-- > 0 && s < strend) {
-		    auint = utf8_to_uv_chk((U8*)s, &along, 0);
+		    STRLEN alen;
+		    auint = utf8_to_uv((U8*)s, strend - s, &alen, 0);
+		    along = alen;
 		    s += along;
 		    if (checksum > 32)
 			cdouble += (NV)auint;
@@ -3664,7 +3666,9 @@ PP(pp_unpack)
 		EXTEND(SP, len);
 		EXTEND_MORTAL(len);
 		while (len-- > 0 && s < strend) {
-		    auint = utf8_to_uv_chk((U8*)s, &along, 0);
+		    STRLEN alen;
+		    auint = utf8_to_uv((U8*)s, strend - s, &alen, 0);
+		    along = alen;
 		    s += along;
 		    sv = NEWSV(37, 0);
 		    sv_setuv(sv, (UV)auint);

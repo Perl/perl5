@@ -1478,6 +1478,15 @@ d_stdio_ptr_lval (d_stdstdio.U):
 	This variable conditionally defines STDIO_PTR_LVALUE if the
 	FILE_ptr macro can be used as an lvalue.
 
+d_stdio_ptr_lval_nochange_cnt (d_stdstdio.U):
+	This symbol is defined if using the FILE_ptr macro as an lvalue
+	to increase the pointer by n leaves File_cnt(fp) unchanged.
+
+d_stdio_ptr_lval_sets_cnt (d_stdstdio.U):
+	This symbol is defined if using the FILE_ptr macro as an lvalue
+	to increase the pointer by n has the side effect of decreasing the
+	value of File_cnt(fp) by n.
+
 d_stdio_stream_array (stdio_streams.U):
 	This variable tells whether there is an array holding
 	the stdio streams.

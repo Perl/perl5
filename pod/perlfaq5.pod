@@ -705,7 +705,7 @@ It's more realistic.
 
 Anyway, this is what you can do if you can't help yourself.
 
-    use Fcntl ':flock';
+    use Fcntl qw(:DEFAULT :flock);
     sysopen(FH, "numfile", O_RDWR|O_CREAT) 	 or die "can't open numfile: $!";
     flock(FH, LOCK_EX) 				 or die "can't flock numfile: $!";
     $num = <FH> || 0;

@@ -4123,9 +4123,9 @@ B<filter_fetch_value>
 AvFILL, av_clear, av_delete, av_exists, av_extend, av_fetch, av_fill,
 av_len, av_make, av_pop, av_push, av_shift, av_store, av_undef, av_unshift,
 bytes_to_utf8, call_argv, call_method, call_pv, call_sv, CLASS, Copy,
-croak, CvSTASH, dMARK, dORIGMARK, dSP, dXSARGS, dXSI32, ENTER, eval_pv,
-eval_sv, EXTEND, fbm_compile, fbm_instr, FREETMPS, get_av, get_cv, get_hv,
-get_sv, GIMME, GIMME_V, GvSV, gv_fetchmeth, gv_fetchmethod,
+croak, CvSTASH, cv_const_sv, dMARK, dORIGMARK, dSP, dXSARGS, dXSI32, ENTER,
+eval_pv, eval_sv, EXTEND, fbm_compile, fbm_instr, FREETMPS, get_av, get_cv,
+get_hv, get_sv, GIMME, GIMME_V, GvSV, gv_fetchmeth, gv_fetchmethod,
 gv_fetchmethod_autoload, gv_stashpv, gv_stashsv, G_ARRAY, G_DISCARD,
 G_EVAL, G_NOARGS, G_SCALAR, G_VOID, HEf_SVKEY, HeHASH, HeKEY, HeKLEN, HePV,
 HeSVKEY, HeSVKEY_force, HeSVKEY_set, HeVAL, HvNAME, hv_clear, hv_delete,
@@ -5678,6 +5678,42 @@ DJGPP, Pthreads
 
 =back
 
+=head2 perlepoc, README.epoc - Perl for EPOC
+
+=over
+
+=item SYNOPSIS
+
+=item INTRODUCTION
+
+=item INSTALLING PERL ON EPOC
+
+=item USING PERL ON EPOC
+
+=over
+
+=item IO Redirection
+
+=item PATH Names
+
+=item Editors
+
+=item Features
+
+=item Restrictions
+
+=item Compiling Perl 5 on the EPOC cross compiling environment
+
+=back
+
+=item SUPPORT STATUS
+
+=item AUTHOR
+
+=item LAST UPDATE
+
+=back
+
 =head2 perlhpux, README.hpux - Perl version 5 on Hewlett-Packard Unix
 (HP-UX) systems
 
@@ -6125,6 +6161,46 @@ LIST, waitpid PID,FLAGS
 =item Revision date
 
 =item AUTHOR
+
+=back
+
+=head2 perlvos, README.vos - Perl for Stratus VOS
+
+=over
+
+=item SYNOPSIS
+
+=over
+
+=item Stratus POSIX Support
+
+=back
+
+=item INSTALLING PERL IN VOS
+
+=over
+
+=item Compiling Perl 5 on VOS
+
+=item Installing Perl 5 on VOS
+
+=back
+
+=item USING PERL IN VOS
+
+=over
+
+=item Unimplemented Features
+
+=item Restrictions
+
+=back
+
+=item SUPPORT STATUS
+
+=item AUTHOR
+
+=item LAST UPDATE
 
 =back
 
@@ -6817,7 +6893,7 @@ FILL, MAX, OFF, ARRAY, AvFLAGS
 =item B::CV METHODS
 
 STASH, START, ROOT, GV, FILE, DEPTH, PADLIST, OUTSIDE, XSUB, XSUBANY,
-CvFLAGS
+CvFLAGS, const_sv
 
 =item B::HV METHODS
 
@@ -7944,12 +8020,13 @@ C<d_setvbuf>, C<d_sfio>, C<d_shm>, C<d_shmat>, C<d_shmatprototype>,
 C<d_shmctl>, C<d_shmdt>, C<d_shmget>, C<d_sigaction>, C<d_sigsetjmp>,
 C<d_socket>, C<d_socklen_t>, C<d_sockpair>, C<d_socks5_init>, C<d_sqrtl>,
 C<d_statblks>, C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>,
-C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>, C<d_stdio_stream_array>,
-C<d_stdiobase>, C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>,
-C<d_strerrm>, C<d_strerror>, C<d_strtod>, C<d_strtol>, C<d_strtold>,
-C<d_strtoll>, C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>,
-C<d_suidsafe>, C<d_symlink>, C<d_syscall>, C<d_sysconf>, C<d_sysernlst>,
-C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>,
+C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>, C<d_stdio_ptr_lval_nochange_cnt>,
+C<d_stdio_ptr_lval_sets_cnt>, C<d_stdio_stream_array>, C<d_stdiobase>,
+C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>,
+C<d_strerror>, C<d_strtod>, C<d_strtol>, C<d_strtold>, C<d_strtoll>,
+C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>,
+C<d_symlink>, C<d_syscall>, C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>,
+C<d_system>, C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>,
 C<d_telldirproto>, C<d_time>, C<d_times>, C<d_truncate>, C<d_tzname>,
 C<d_umask>, C<d_uname>, C<d_union_semun>, C<d_ustat>, C<d_vendorarch>,
 C<d_vendorbin>, C<d_vendorlib>, C<d_vfork>, C<d_void_closedir>,
@@ -9148,21 +9225,21 @@ pasthru (o)
 
 =item Using Attributes and Parameters
 
-AUTHOR, ABSTRACT, ABSTRACT_FROM, BINARY_LOCATION, C, CAPI, CCFLAGS, CONFIG,
+ABSTRACT, ABSTRACT_FROM, AUTHOR, BINARY_LOCATION, C, CAPI, CCFLAGS, CONFIG,
 CONFIGURE, DEFINE, DIR, DISTNAME, DL_FUNCS, DL_VARS, EXCLUDE_EXT,
 EXE_FILES, FIRST_MAKEFILE, FULLPERL, FUNCLIST, H, HTMLLIBPODS,
 HTMLSCRIPTPODS, IMPORTS, INC, INCLUDE_EXT, INSTALLARCHLIB, INSTALLBIN,
 INSTALLDIRS, INSTALLHTMLPRIVLIBDIR, INSTALLHTMLSCRIPTDIR,
 INSTALLHTMLSITELIBDIR, INSTALLMAN1DIR, INSTALLMAN3DIR, INSTALLPRIVLIB,
 INSTALLSCRIPT, INSTALLSITEARCH, INSTALLSITELIB, INST_ARCHLIB, INST_BIN,
-INST_EXE, INST_LIB, INST_HTMLLIBDIR, INST_HTMLSCRIPTDIR, INST_MAN1DIR,
-INST_MAN3DIR, INST_SCRIPT, PERL_MALLOC_OK, LDFROM, LIB, LIBPERL_A, LIBS,
-LINKTYPE, MAKEAPERL, MAKEFILE, MAN1PODS, MAN3PODS, MAP_TARGET, MYEXTLIB,
-NAME, NEEDS_LINKING, NOECHO, NORECURS, NO_VC, OBJECT, OPTIMIZE, PERL,
-PERLMAINCC, PERL_ARCHLIB, PERL_LIB, PERL_SRC, PERM_RW, PERM_RWX, PL_FILES,
-PM, PMLIBDIRS, POLLUTE, PPM_INSTALL_EXEC, PPM_INSTALL_SCRIPT, PREFIX,
-PREREQ_PM, SKIP, TYPEMAPS, VERSION, VERSION_FROM, XS, XSOPT, XSPROTOARG,
-XS_VERSION
+INST_EXE, INST_HTMLLIBDIR, INST_HTMLSCRIPTDIR, INST_LIB, INST_MAN1DIR,
+INST_MAN3DIR, INST_SCRIPT, LDFROM, LIB, LIBPERL_A, LIBS, LINKTYPE,
+MAKEAPERL, MAKEFILE, MAN1PODS, MAN3PODS, MAP_TARGET, MYEXTLIB, NAME,
+NEEDS_LINKING, NOECHO, NORECURS, NO_VC, OBJECT, OPTIMIZE, PERL, PERLMAINCC,
+PERL_ARCHLIB, PERL_LIB, PERL_MALLOC_OK, PERL_SRC, PERM_RW, PERM_RWX,
+PL_FILES, PM, PMLIBDIRS, POLLUTE, PPM_INSTALL_EXEC, PPM_INSTALL_SCRIPT,
+PREFIX, PREREQ_PM, SKIP, TYPEMAPS, VERSION, VERSION_FROM, XS, XSOPT,
+XSPROTOARG, XS_VERSION
 
 =item Additional lowercase attributes
 

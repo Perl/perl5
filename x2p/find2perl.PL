@@ -37,6 +37,7 @@ my \$perlpath = "$Config{perlpath}";
 print OUT <<'!NO!SUBS!';
 use strict;
 use vars qw/$statdone/;
+use File::Spec::Functions 'curdir';
 my $startperl = "#! $perlpath -w";
 
 #
@@ -57,7 +58,7 @@ my @roots = ();
 while ($ARGV[0] =~ /^[^-!(]/) {
     push(@roots, shift);
 }
-@roots = ('.') unless @roots;
+@roots = (curdir()) unless @roots;
 for (@roots) { $_ = &quote($_) }
 my $roots = join(', ', @roots);
 
@@ -674,6 +675,7 @@ sub n {
 
 sub quote {
     my $string = shift;
+    $string =~ s/\\/\\\\/g;
     $string =~ s/'/\\'/g;
     "'$string'";
 }

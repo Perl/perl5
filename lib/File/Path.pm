@@ -119,16 +119,19 @@ sub mkpath {
     my(@created,$path);
     foreach $path (@$paths) {
 	$path .= '/' if $^O eq 'os2' and $path =~ /^\w:\z/s; # feature of CRT 
-	next if -d $path;
 	# Logic wants Unix paths, so go with the flow.
-	$path = VMS::Filespec::unixify($path) if $Is_VMS;
-	my $parent = File::Basename::dirname($path);
-	# Allow for creation of new logical filesystems under VMS
-	if (not $Is_VMS or $parent !~ m:/[^/]+/000000/?:) {
-	    unless (-d $parent or $path eq $parent) {
-		push(@created,mkpath($parent, $verbose, $mode));
+	if ($Is_VMS) {
+	    next if $path eq '/';
+	    $path = VMS::Filespec::unixify($path);
+	    if ($path =~ m:^(/[^/]+)/?\z:) {
+	        $path = $1.'/000000';
 	    }
 	}
+	next if -d $path;
+	my $parent = File::Basename::dirname($path);
+	unless (-d $parent or $path eq $parent) {
+	    push(@created,mkpath($parent, $verbose, $mode));
+ 	}
 	print "mkdir $path\n" if $verbose;
 	unless (mkdir($path,$mode)) {
 	    my $e = $!;

@@ -154,12 +154,14 @@ if (-d "pod") {
     perlamiga          
     perlcygwin          
     perldos             
+    perlepoc             
     perlhpux            
     perlmachten         
     perlos2             
     perlos390           
     perlposix-bc
     perlvms             
+    perlvos             
     perlwin32           
 	  );
 
@@ -168,12 +170,14 @@ if (-d "pod") {
     perlamiga          
     perlcygwin          
     perldos             
+    perlepoc             
     perlhpux            
     perlmachten         
     perlos2             
     perlos390           
     perlposix-bc
     perlvms             
+    perlvos             
     perlwin32           
           );
 for (@ARCHPODS) { s/$/.pod/ }

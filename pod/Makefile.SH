@@ -60,6 +60,7 @@ POD2HTML = pod2html \
 	    --libpods=perlfunc:perlguts:perlvar:perlrun:perlop
 
 PERL = ../miniperl
+PERLILIB = $(PERL) -I../lib
 REALPERL = ../perl
 
 all: $(CONVERTERS) man
@@ -69,7 +70,9 @@ converters: $(CONVERTERS)
 regen_pods: perlmodlib.pod toc
 
 buildtoc:	buildtoc.PL perl.pod ../MANIFEST
-	$(PERL) -I ../lib buildtoc.PL
+	$(PERLILIB) buildtoc.PL
+
+perltoc.pod:	buildtoc
 
 man:	pod2man $(MAN)
 
@@ -78,7 +81,7 @@ html:	pod2html $(HTML)
 tex:	pod2latex $(TEX)
 
 toc:	buildtoc
-	$(PERL) -I../lib buildtoc
+	$(PERLILIB) buildtoc
 
 .SUFFIXES: .pm .pod
 
