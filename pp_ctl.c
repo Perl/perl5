@@ -998,10 +998,14 @@ char *message;
     }
     fputs(message, stderr);
     (void)Fflush(stderr);
-    if (e_fp) {
-	fclose(e_fp);
-	e_fp = Nullfp;
+    if (e_tmpname) {
+	if (e_fp) {
+	    fclose(e_fp);
+	    e_fp = Nullfp;
+	}
 	(void)UNLINK(e_tmpname);
+	Safefree(e_tmpname);
+	e_tmpname = Nullch;
     }
     statusvalue = SHIFTSTATUS(statusvalue);
 #ifdef VMS
@@ -1160,7 +1164,7 @@ const void *b;
     GvSV(secondgv) = *str2;
     stack_sp = stack_base;
     op = sortcop;
-    run();
+    runops();
     if (stack_sp != stack_base + 1)
 	croak("Sort subroutine didn't return single value");
     if (!SvNIOKp(*stack_sp))
