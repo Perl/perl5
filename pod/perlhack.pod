@@ -480,63 +480,23 @@ for reference.
 =back
 
 
-=head2 Perlbug remote interface
+=head2 Perlbug administration
 
-There are three (3) remote administrative interfaces for modifying bug
-status, category, etc.  In all cases an admin must be first registered
-with the Perlbug database by sending an email request to
-richard@perl.org or bugmongers@perl.org.
+There is a single remote administrative interface for modifying bug status, 
+category, open issues etc. using the B<RT> I<bugtracker> system, maintained
+by I<Robert Spier>.  Become an administrator, and close any bugs you can get 
+your sticky mitts on:
 
-The main requirement is the willingness to classify, (with the
-emphasis on closing where possible :), outstanding bugs.  Further
-explanation can be garnered from the web at http://bugs.perl.org/ , or
-by asking on the admin mailing list at: bugmongers@perl.org
+	http://rt.perl.org
 
-For more info on the web see
+The bugtracker mechanism for B<perl5> bugs in particular is at:
 
-	http://bugs.perl.org/perlbug.cgi?req=spec
+	http://bugs6.perl.org/perlbug
 
-=over 4
+To email the bug system administrators:
 
-=item 1 http://bugs.perl.org
+	"perlbug-admin" <perlbug-admin@perl.org>
 
-Login via the web, (remove B<admin/> if only browsing), where interested
-Cc's, tests, patches and change-ids, etc. may be assigned.
-
-	http://bugs.perl.org/admin/index.html
-
-
-=item 2 bugdb@perl.org
-
-Where the subject line is used for commands:
-
-	To: bugdb@perl.org
-	Subject: -a close bugid1 bugid2 aix install
-
-	To: bugdb@perl.org
-	Subject: -h
-
-
-=item 3 commands_and_bugdids@bugs.perl.org
-
-Where the address itself is the source for the commands:
-
-	To: close_bugid1_bugid2_aix@bugs.perl.org
-
-	To: help@bugs.perl.org
-
-
-=item notes, patches, tests
-
-For patches and tests, the message body is assigned to the appropriate
-bugs and forwarded to p5p for their attention.
-
-	To: test_<bugid1>_aix_close@bugs.perl.org
-	Subject: this is a test for the (now closed) aix bug
-
-	Test is the body of the mail
-
-=back
 
 =head2 Submitting patches
 
