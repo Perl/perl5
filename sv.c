@@ -59,6 +59,10 @@ static void sv_mortalgrow _((void));
 static void sv_unglob _((SV* sv));
 static void sv_check_thinkfirst _((SV *sv));
 
+#ifndef PURIFY
+static void *my_safemalloc(MEM_SIZE size);
+#endif
+
 typedef void (*SVFUNC) _((SV*));
 
 #ifdef PURIFY
@@ -576,8 +580,7 @@ more_xpv(void)
 #  define my_safefree(s) free(s)
 #else
 static void* 
-my_safemalloc(size)
-    MEM_SIZE size;
+my_safemalloc(MEM_SIZE size)
 {
     char *p;
     New(717, p, size, char);
