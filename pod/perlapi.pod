@@ -2219,6 +2219,53 @@ Found in file pad.c
 
 =back
 
+=head1 Simple Exception Handling Macros
+
+=over 8
+
+=item dXCPT
+
+Set up neccessary local variables for exception handling.
+See L<perlguts/"Exception Handling">.
+
+		dXCPT;
+
+=for hackers
+Found in file XSUB.h
+
+=item XCPT_CATCH
+
+Introduces a catch block.  See L<perlguts/"Exception Handling">.
+
+=for hackers
+Found in file XSUB.h
+
+=item XCPT_RETHROW
+
+Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
+
+		XCPT_RETHROW;
+
+=for hackers
+Found in file XSUB.h
+
+=item XCPT_TRY_END
+
+Ends a try block.  See L<perlguts/"Exception Handling">.
+
+=for hackers
+Found in file XSUB.h
+
+=item XCPT_TRY_START
+
+Starts a try block.  See L<perlguts/"Exception Handling">.
+
+=for hackers
+Found in file XSUB.h
+
+
+=back
+
 =head1 Stack Manipulation Macros
 
 =over 8
@@ -5307,7 +5354,7 @@ Found in file utf8.c
 
 Convert the UTF-8 encoded character at p to its foldcase version and
 store that in UTF-8 in ustrp and its length in bytes in lenp.  Note
-that the ustrp needs to be at least UTF8_MAXLEN_FOLD+1 bytes since the
+that the ustrp needs to be at least UTF8_MAXBYTES_CASE+1 bytes since the
 foldcase version may be longer than the original character (up to
 three characters).
 
@@ -5323,9 +5370,8 @@ Found in file utf8.c
 
 Convert the UTF-8 encoded character at p to its lowercase version and
 store that in UTF-8 in ustrp and its length in bytes in lenp.  Note
-that the ustrp needs to be at least UTF8_MAXLEN_UCLC+1 bytes since the
-lowercase version may be longer than the original character (up to two
-characters).
+that the ustrp needs to be at least UTF8_MAXBYTES_CASE+1 bytes since the
+lowercase version may be longer than the original character.
 
 The first character of the lowercased version is returned
 (but note, as explained above, that there may be more.)
@@ -5339,9 +5385,8 @@ Found in file utf8.c
 
 Convert the UTF-8 encoded character at p to its titlecase version and
 store that in UTF-8 in ustrp and its length in bytes in lenp.  Note
-that the ustrp needs to be at least UTF8_MAXLEN_UCLC+1 bytes since the
-titlecase version may be longer than the original character (up to two
-characters).
+that the ustrp needs to be at least UTF8_MAXBYTES_CASE+1 bytes since the
+titlecase version may be longer than the original character.
 
 The first character of the titlecased version is returned
 (but note, as explained above, that there may be more.)
@@ -5355,9 +5400,8 @@ Found in file utf8.c
 
 Convert the UTF-8 encoded character at p to its uppercase version and
 store that in UTF-8 in ustrp and its length in bytes in lenp.  Note
-that the ustrp needs to be at least UTF8_MAXLEN_UCLC+1 bytes since the
-uppercase version may be longer than the original character (up to two
-characters).
+that the ustrp needs to be at least UTF8_MAXBYTES_CASE+1 bytes since
+the uppercase version may be longer than the original character.
 
 The first character of the uppercased version is returned
 (but note, as explained above, that there may be more.)
@@ -5492,7 +5536,7 @@ Found in file utf8.c
 =item uvchr_to_utf8
 
 Adds the UTF-8 representation of the Native codepoint C<uv> to the end
-of the string C<d>; C<d> should be have at least C<UTF8_MAXLEN+1> free
+of the string C<d>; C<d> should be have at least C<UTF8_MAXBYTES+1> free
 bytes available. The return value is the pointer to the byte after the
 end of the new character. In other words,
 
@@ -5510,7 +5554,7 @@ Found in file utf8.c
 =item uvuni_to_utf8_flags
 
 Adds the UTF-8 representation of the Unicode codepoint C<uv> to the end
-of the string C<d>; C<d> should be have at least C<UTF8_MAXLEN+1> free
+of the string C<d>; C<d> should be have at least C<UTF8_MAXBYTES+1> free
 bytes available. The return value is the pointer to the byte after the
 end of the new character. In other words,
 
