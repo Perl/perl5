@@ -699,7 +699,6 @@ PP(pp_binmode)
     PerlIO *fp;
     MAGIC *mg;
     SV *discp = Nullsv;
-    STRLEN len  = 0;
 
     if (MAXARG < 1)
 	RETPUSHUNDEF;
