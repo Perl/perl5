@@ -1080,13 +1080,26 @@ win32_kill(int pid, int sig)
 	/* it is a pseudo-forked child */
 	child = find_pseudo_pid(-pid);
 	if (child >= 0) {
-	    if (!sig)
-		return 0;
 	    hProcess = w32_pseudo_child_handles[child];
-	    if (TerminateThread(hProcess, sig)) {
-		remove_dead_pseudo_process(child);
+	    switch (sig) {
+	    case 0:
 		return 0;
-	    }
+	    case 9:
+                /* kill -9 style un-graceful exit */
+	    	if (TerminateThread(hProcess, sig)) {
+		    remove_dead_pseudo_process(child);
+		    return 0;
+	    	}
+		break;
+	    default:
+		/* We fake signals to pseudo-processes using message queue */
+		if (PostThreadMessage(-pid,WM_USER,sig,0)) {
+		    /* It might be us ... */ 
+		    PERL_ASYNC_CHECK();
+		    return 0;
+		}
+		break;
+            }
 	}
 	else if (IsWin95()) {
 	    pid = -pid;
@@ -1098,24 +1111,39 @@ win32_kill(int pid, int sig)
     {
 	child = find_pid(pid);
 	if (child >= 0) {
-	    if (!sig)
+            hProcess = w32_child_handles[child];
+	    switch(sig) {
+	    case 0:
 		return 0;
-	    hProcess = w32_child_handles[child];
-	    if (TerminateProcess(hProcess, sig)) {
-		remove_dead_process(child);
-		return 0;
-	    }
+	    case 2:
+		if (GenerateConsoleCtrlEvent(CTRL_C_EVENT,pid))
+		    return 0;
+		break;
+	    case 9:
+	        if (TerminateProcess(hProcess, sig)) {
+		    remove_dead_process(child);
+		    return 0;
+	    	}
+		break;
+            }
 	}
 	else {
 alien_process:
 	    hProcess = OpenProcess(PROCESS_ALL_ACCESS, TRUE,
 				   (IsWin95() ? -pid : pid));
 	    if (hProcess) {
-		if (!sig)
+		switch(sig) {
+		case 0:
 		    return 0;
-		if (TerminateProcess(hProcess, sig)) {
-		    CloseHandle(hProcess);
-		    return 0;
+		case 2:
+		    if (GenerateConsoleCtrlEvent(CTRL_C_EVENT,pid))
+			return 0;
+		    break;
+                case 9:
+		    if (TerminateProcess(hProcess, sig)) {
+			CloseHandle(hProcess);
+			return 0;
+		    }
 		}
 	    }
 	}
@@ -1685,8 +1713,20 @@ win32_async_check(pTHX)
 {
     MSG msg;
     int ours = 1;
-    while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+    /* Passing PeekMessage -1 as HWND (2nd arg) only get PostThreadMessage() messages
+     * and ignores window messages - should co-exist better with windows apps e.g. Tk
+     */ 
+    while (PeekMessage(&msg, (HWND)-1, 0, 0, PM_REMOVE)) {
 	switch(msg.message) {
+
+#if 0
+    /* Perhaps some other messages could map to signals ? ... */
+        case WM_CLOSE:
+        case WM_QUIT: 
+	    /* Treat WM_QUIT like SIGHUP?  */
+	    CALL_FPTR(PL_sighandlerp)(1);
+	    break;
+#endif
 
 	/* plan to use WM_USER to fake kill() with other signals */
 	case WM_USER: {
@@ -1711,6 +1751,7 @@ win32_async_check(pTHX)
 	}
     }
 
+    /* Above or other stuff may have set a signal flag */
     if (PL_sig_pending) {
 	despatch_signals();
     }
@@ -3527,7 +3568,12 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
 	    ret = -1;
 	    goto RETVAL;
 	}
+	/* Create a new process group so we can use GenerateConsoleCtrlEvent() 
+	 * in win32_kill()
+	 */
+        create |= CREATE_NEW_PROCESS_GROUP;  
 	/* FALL THROUGH */
+
     case P_WAIT:	/* synchronous execution */
 	break;
     default:		/* invalid mode */
@@ -3611,6 +3657,9 @@ RETRY:
     else  {
 	DWORD status;
 	win32_msgwait(aTHX_ 1, &ProcessInformation.hProcess, INFINITE, NULL);
+	/* FIXME: if msgwait returned due to message perhaps forward the
+	   "signal" to the process
+         */
 	GetExitCodeProcess(ProcessInformation.hProcess, &status);
 	ret = (int)status;
 	CloseHandle(ProcessInformation.hProcess);
