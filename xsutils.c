@@ -6,8 +6,43 @@
  * Contributed by Spider Boardman (spider.boardman@orb.nashua.nh.us).
  */
 
-STATIC int
-S_modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
+/* package attributes; */
+void XS_attributes__warn_reserved(pTHXo_ CV *cv);
+void XS_attributes_reftype(pTHXo_ CV *cv);
+void XS_attributes__modify_attrs(pTHXo_ CV *cv);
+void XS_attributes__guess_stash(pTHXo_ CV *cv);
+void XS_attributes__fetch_attrs(pTHXo_ CV *cv);
+void XS_attributes_bootstrap(pTHXo_ CV *cv);
+
+
+/*
+ * Note that only ${pkg}::bootstrap definitions should go here.
+ * This helps keep down the start-up time, which is especially
+ * relevant for users who don't invoke any features which are
+ * (partially) implemented here.
+ *
+ * The various bootstrap definitions can take care of doing
+ * package-specific newXS() calls.  Since the layout of the
+ * bundled lib/*.pm files is in a version-specific directory,
+ * version checks in these bootstrap calls are optional.
+ */
+
+void
+Perl_boot_core_xsutils(pTHX)
+{
+    char *file = __FILE__;
+
+    newXS("attributes::bootstrap",	XS_attributes_bootstrap,	file);
+}
+
+#ifdef PERL_OBJECT
+#define NO_XSLOCKS
+#endif  /* PERL_OBJECT */
+
+#include "XSUB.h"
+
+static int
+modify_SV_attributes(pTHXo_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 {
     SV *attr;
     char *name;
@@ -70,40 +105,6 @@ S_modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 }
 
 
-/* package attributes; */
-void XS_attributes__warn_reserved(pTHXo_ CV *cv);
-void XS_attributes_reftype(pTHXo_ CV *cv);
-void XS_attributes__modify_attrs(pTHXo_ CV *cv);
-void XS_attributes__guess_stash(pTHXo_ CV *cv);
-void XS_attributes__fetch_attrs(pTHXo_ CV *cv);
-void XS_attributes_bootstrap(pTHXo_ CV *cv);
-
-
-/*
- * Note that only ${pkg}::bootstrap definitions should go here.
- * This helps keep down the start-up time, which is especially
- * relevant for users who don't invoke any features which are
- * (partially) implemented here.
- *
- * The various bootstrap definitions can take care of doing
- * package-specific newXS() calls.  Since the layout of the
- * bundled lib/*.pm files is in a version-specific directory,
- * version checks in these bootstrap calls are optional.
- */
-
-void
-Perl_boot_core_xsutils(pTHX)
-{
-    char *file = __FILE__;
-
-    newXS("attributes::bootstrap",	XS_attributes_bootstrap,	file);
-}
-
-#ifdef PERL_OBJECT
-#define NO_XSLOCKS
-#endif  /* PERL_OBJECT */
-
-#include "XSUB.h"
 
 /* package attributes; */
 
@@ -137,7 +138,7 @@ usage:
 	goto usage;
     sv = SvRV(rv);
     if (items > 1)
-	XSRETURN(modify_SV_attributes(sv, &ST(0), &ST(1), items-1));
+	XSRETURN(modify_SV_attributes(aTHXo_ sv, &ST(0), &ST(1), items-1));
 
     XSRETURN(0);
 }

@@ -4869,8 +4869,6 @@ Perl_boot_core_xsutils(pTHXo)
 #endif
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
 #endif
-#if defined(PERL_IN_XSUTILS_C) || defined(PERL_DECL_PROT)
-#endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 #  if defined(LEAKTEST)
 #  endif

@@ -980,9 +980,6 @@ STATIC I32	S_win32_textfilter(pTHX_ int idx, SV *sv, int maxlen);
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
 STATIC SV*	S_isa_lookup(pTHX_ HV *stash, const char *name, int len, int level);
 #endif
-#if defined(PERL_IN_XSUTILS_C) || defined(PERL_DECL_PROT)
-STATIC int	S_modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs);
-#endif
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
 STATIC SV*	S_mess_alloc(pTHX);
 #  if defined(LEAKTEST)
