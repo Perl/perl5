@@ -263,6 +263,9 @@ typedef U16 line_t;
 */
 
 #ifndef lint
+
+#define NEWSV(x,len)	newSV(len)
+
 #ifndef LEAKTEST
 
 #define New(x,v,n,t)	(v = (t*)safemalloc((MEM_SIZE)((n)*sizeof(t))))
@@ -274,7 +277,6 @@ typedef U16 line_t;
 #define Renewc(v,n,t,c) \
 	  (v = (c*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))
 #define Safefree(d)	safefree((Malloc_t)(d))
-#define NEWSV(x,len)	newSV(len)
 
 #else /* LEAKTEST */
 
@@ -287,7 +289,6 @@ typedef U16 line_t;
 #define Renewc(v,n,t,c) \
 	  (v = (c*)safexrealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))
 #define Safefree(d)	safexfree((Malloc_t)(d))
-#define NEWSV(x,len)	newSV(x,len)
 
 #define MAXXCOUNT 1400
 #define MAXY_SIZE 80

@@ -1438,7 +1438,7 @@ sub compile {
 	    last OPTION;
 	} elsif ($opt eq "o") {
 	    $arg ||= shift @options;
-	    open(STDOUT, ">$arg") or return "$arg: $!\n";
+	    open(STDOUT, ">$arg") or return "open '>$arg': $!\n";
 	} elsif ($opt eq "n") {
 	    $arg ||= shift @options;
 	    $module_name = $arg;

@@ -2417,11 +2417,7 @@ sv_catpv_mg(register SV *sv, register char *ptr)
 }
 
 SV *
-#ifdef LEAKTEST
-newSV(I32 x, STRLEN len)
-#else
 newSV(STRLEN len)
-#endif
 {
     register SV *sv;
     
