@@ -3910,7 +3910,7 @@ hv_store_ent, hv_undef, isALNUM, isALPHA, isDIGIT, isLOWER, isSPACE,
 isUPPER, is_utf8_char, is_utf8_string, items, ix, LEAVE, load_module,
 looks_like_number, MARK, mg_clear, mg_copy, mg_find, mg_free, mg_get,
 mg_length, mg_magical, mg_set, Move, New, newAV, Newc, newCONSTSUB, newHV,
-newRV_inc, newRV_noinc, newSV, NEWSV, newSViv, newSVnv, newSVpv, newSVpvf,
+newRV_inc, newRV_noinc, NEWSV, newSV, newSViv, newSVnv, newSVpv, newSVpvf,
 newSVpvn, newSVpvn_share, newSVrv, newSVsv, newSVuv, newXS, newXSproto,
 Newz, Nullav, Nullch, Nullcv, Nullhv, Nullsv, ORIGMARK, perl_alloc,
 perl_clone, perl_construct, perl_destruct, perl_free, perl_parse, perl_run,
@@ -3920,15 +3920,15 @@ PUTBACK, Renew, Renewc, require_pv, RETVAL, Safefree, savepv, savepvn,
 SAVETMPS, SP, SPAGAIN, ST, strEQ, strGE, strGT, strLE, strLT, strNE,
 strnEQ, strnNE, StructCopy, SvCUR, SvCUR_set, SvEND, SvGETMAGIC, SvGROW,
 SvIOK, SvIOKp, SvIOK_notUV, SvIOK_off, SvIOK_on, SvIOK_only, SvIOK_only_UV,
-SvIOK_UV, SvIV, SvIVX, SvIVx, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK,
+SvIOK_UV, SvIV, SvIVx, SvIVX, SvLEN, SvNIOK, SvNIOKp, SvNIOK_off, SvNOK,
 SvNOKp, SvNOK_off, SvNOK_on, SvNOK_only, SvNV, SvNVx, SvNVX, SvOK, SvOOK,
 SvPOK, SvPOKp, SvPOK_off, SvPOK_on, SvPOK_only, SvPOK_only_UTF8, SvPV,
 SvPVbyte, SvPVbytex, SvPVbytex_force, SvPVbyte_force, SvPVbyte_nolen,
 SvPVutf8, SvPVutf8x, SvPVutf8x_force, SvPVutf8_force, SvPVutf8_nolen,
-SvPVX, SvPVx, SvPV_force, SvPV_force_nomg, SvPV_nolen, SvREFCNT,
+SvPVx, SvPVX, SvPV_force, SvPV_force_nomg, SvPV_nolen, SvREFCNT,
 SvREFCNT_dec, SvREFCNT_inc, SvROK, SvROK_off, SvROK_on, SvRV, SvSETMAGIC,
 SvSetMagicSV, SvSetMagicSV_nosteal, SvSetSV, SvSetSV_nosteal, SvSTASH,
-SvTAINT, SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, svtype, SvTYPE,
+SvTAINT, SvTAINTED, SvTAINTED_off, SvTAINTED_on, SvTRUE, SvTYPE, svtype,
 SVt_IV, SVt_NV, SVt_PV, SVt_PVAV, SVt_PVCV, SVt_PVHV, SVt_PVMG, SvUOK,
 SvUPGRADE, SvUTF8, SvUTF8_off, SvUTF8_on, SvUV, SvUVX, SvUVx, sv_2bool,
 sv_2cv, sv_2io, sv_2iv, sv_2mortal, sv_2nv, sv_2pvbyte, sv_2pvbyte_nolen,
@@ -4457,9 +4457,16 @@ work?, Patches speak louder than words
 =item Keeping in sync
 
 rsync'ing the source tree, Using rsync over the LAN, Using pushing over the
-NFS, rsync'ing the patches, It's easier, It's more recent, It's more
-reliable, It's easier, It's a good reference, Finding a start point,
-Finding how to fix a bug, Finding the source of misbehaviour
+NFS, rsync'ing the patches
+
+=item Why rsync the source tree
+
+It's easier to rsync the source tree, It's more recent, It's more reliable
+
+=item Why rsync the patches
+
+It's easier to rsync the patches, It's a good reference, Finding a start
+point, Finding how to fix a bug, Finding the source of misbehaviour
 
 =item Submitting patches
 
@@ -4468,7 +4475,7 @@ F<Porting/pumpkin.pod>, The perl5-porters FAQ
 
 =item Finding Your Way Around
 
-Core modules, Documentation, Configure, Interpreter
+Core modules, Tests, Documentation, Configure, Interpreter
 
 =item Elements of the interpreter
 
@@ -4494,6 +4501,13 @@ finish, 'enter', print
 =item Dumping Perl Data Structures
 
 =item Patching
+
+=item Patching a core module
+
+=item Writing a test
+
+F<t/base/>, F<t/cmd/>, F<t/comp/>, F<t/io/>, F<t/lib/>, F<t/op/>,
+F<t/pod/>, F<t/run/>
 
 =back
 
@@ -11996,32 +12010,6 @@ set ( NAME => VALUE [, NAME => VALUE ...] ), setall ( VALUES ), setval ( N
 
 =back
 
-=head2 Langinfo - Perl extension for blah blah blah
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item EXPORT
-
-=item Exportable constants
-
-=back
-
-=item HISTORY
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item COPYRIGHT AND LICENSE
-
-=back
-
 =head2 List::Util - A selection of general-utility list subroutines
 
 =over 4
@@ -14115,8 +14103,8 @@ release, section
 =item DIAGNOSTICS
 
 roff font should be 1 or 2 chars, not "%s", Invalid link %s, Invalid quote
-specification "%s", %s:%d: Unknown command paragraph "%s", Unknown escape
-EE<lt>%sE<gt>, Unknown sequence %s, Unmatched =back
+specification "%s", %s:%d: Unknown command paragraph "%s", %s:%d: Unknown
+escape EE<lt>%sE<gt>, %s:%d: Unknown sequence %s, %s:%d: Unmatched =back
 
 =item BUGS
 
@@ -14936,6 +14924,8 @@ C<Storable::is_retrieving>
 =item Allowing fall-through
 
 =item Automating fall-through
+
+=item Alternative syntax
 
 =item Higher-order Operations
 
