@@ -8,17 +8,22 @@ BEGIN {
 }
 
 use File::Spec;
-use File::Temp qw/tempfile/;
 use Test::More tests => 30;
 
+my @tempfiles = ();
+
 sub get_temp_fh {
-    my ($fh,$f) = tempfile("DummyModuleXXXX", DIR => File::Spec->curdir,
-	UNLINK => 1);
+    my $f = "DummyModule0000";
+    1 while -e ++$f;
+    push @tempfiles, $f;
+    open my $fh, ">$f" or die "Can't create $f: $!";
     print $fh "package ".substr($_[0],0,-3)."; 1;";
     close $fh;
     open $fh, $f or die "Can't open $f: $!";
     return $fh;
 }
+
+END { 1 while unlink @tempfiles }
 
 sub get_addr {
     my $str = shift;
