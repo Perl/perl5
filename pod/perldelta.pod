@@ -55,7 +55,8 @@ In 5.005_0x and earlier, perl's rand() function used the C library
 rand(3) function.  As of 5.005_52, Configure tests for drand48(),
 random(), and rand() (in that order) and picks the first one it finds.
 Perl programs that depend on reproducing a specific set of pseudo-random
-numbers will now likely produce different output.
+numbers will now likely produce different output.  You can use
+C<sh Configure -Drandfunc=rand> to obtain the old behavior.
 
 =item Hashing function for hash keys has changed
 
@@ -272,7 +273,8 @@ because many scripts assume to find Perl in /usr/bin/perl.
 =head2 SOCKS support
 
 You can use "Configure -Dusesocks" which causes Perl to probe
-for the SOCKS proxy protocol library, http://www.socks.nec.com/
+for the SOCKS (v5, not v4) proxy protocol library,
+http://www.socks.nec.com/
 
 =head2 C<-A> flag
 
@@ -281,10 +283,14 @@ flag.  The editing happens immediately after the platform specific
 hints files have been processed but before the actual configuration
 process starts.  Run C<Configure -h> to find out the full C<-A> syntax.
 
-=head2 New Installation Scheme
+=head2 Enhanced Installation Directories
 
-vendorprefix et al
-[TODO - Andy Dougherty <doughera@lafcol.lafayette.edu>]
+The installation structure has been enriched to improve the support for 
+maintaining multiple versions of perl, to provide locations for
+vendor-supplied modules and scripts, and to ease maintenance of
+locally-added modules and scripts.  See the section on Installation 
+Directories in the INSTALL file for complete details.  For most users
+building and installing from source, the defaults should be fine.
 
 =head1 Core Changes
 
