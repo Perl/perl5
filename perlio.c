@@ -1696,6 +1696,7 @@ PerlIOStdio_fdopen(PerlIO_funcs *self, int fd,const char *mode)
 IV
 PerlIOStdio_pushed(PerlIO *f, const char *mode, const char *arg, STRLEN len)
 {
+ dTHX;
  if (*PerlIONext(f))
   {
    PerlIOStdio *s = PerlIOSelf(f,PerlIOStdio);
