@@ -2965,7 +2965,6 @@ tests have been added.
                                                               834 845
  op/sprintf.t                               224    3   1.34%  98 100 136
  op/tr.t                                     97    5   5.15%  63 71-74
- run/fresh_perl.t                            95    3   3.16%  92-94
  uni/fold.t                                 780    6   0.77%  61 169 196 661
                                                               710-711
 

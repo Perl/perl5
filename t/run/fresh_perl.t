@@ -52,6 +52,13 @@ foreach my $prog (@prgs) {
 
     my($prog,$expected) = split(/\nEXPECT\n/, $raw_prog);
 
+    if ($prog =~ /^\# SKIP: (.+)/m) {
+	if (eval $1) {
+	    ok(1, "Skip: $1");
+	    next;
+	}
+    }
+
     $expected =~ s/\n+$//;
 
     fresh_perl_is($prog, $expected, { switches => [$switch] }, $name);
@@ -789,6 +796,7 @@ $test = Foo->new(); # must be package var
 EXPECT
 ok
 ######## example from Camel 5, ch. 15, pp.406 (with my)
+# SKIP: ord "A" == 193 # EBCDIC
 use strict;
 use utf8;
 my $人 = 2; # 0xe4 0xba 0xba: U+4eba, "human" in CJK ideograph
@@ -797,6 +805,7 @@ print $人, "\n";
 EXPECT
 3
 ######## example from Camel 5, ch. 15, pp.406 (with our)
+# SKIP: ord "A" == 193 # EBCDIC
 use strict;
 use utf8;
 our $人 = 2; # 0xe4 0xba 0xba: U+4eba, "human" in CJK ideograph
@@ -805,6 +814,7 @@ print $人, "\n";
 EXPECT
 3
 ######## example from Camel 5, ch. 15, pp.406 (with package vars)
+# SKIP: ord "A" == 193 # EBCDIC
 use utf8;
 $人 = 2; # 0xe4 0xba 0xba: U+4eba, "human" in CJK ideograph
 $人++; # a child is born
@@ -817,4 +827,3 @@ tie FH, 'main';
 EXPECT
 Can't modify constant item in tie at - line 2, near "'main';"
 Execution of - aborted due to compilation errors.
-
