@@ -118,19 +118,17 @@ Perl_pv_display(pTHX_ SV *dsv, char *pv, STRLEN cur, STRLEN len, STRLEN pvlim)
             truncated++;
 	    break;
         }
-        if (isPRINT(*pv)) {
-            switch (*pv) {
-	    case '\t': sv_catpvn(dsv, "\\t", 2);  break;
-	    case '\n': sv_catpvn(dsv, "\\n", 2);  break;
-	    case '\r': sv_catpvn(dsv, "\\r", 2);  break;
-	    case '\f': sv_catpvn(dsv, "\\f", 2);  break;
-	    case '"':  sv_catpvn(dsv, "\\\"", 2); break;
-	    case '\\': sv_catpvn(dsv, "\\\\", 2); break;
-	    default:   sv_catpvn(dsv, pv, 1);     break;
-            }
-        }
-	else {
-	    if (cur && isDIGIT(*(pv+1)))
+	switch (*pv) {
+	case '\t': sv_catpvn(dsv, "\\t", 2);  break;
+	case '\n': sv_catpvn(dsv, "\\n", 2);  break;
+	case '\r': sv_catpvn(dsv, "\\r", 2);  break;
+	case '\f': sv_catpvn(dsv, "\\f", 2);  break;
+	case '"':  sv_catpvn(dsv, "\\\"", 2); break;
+	case '\\': sv_catpvn(dsv, "\\\\", 2); break;
+	default:
+	    if (isPRINT(*pv))
+		sv_catpvn(dsv, pv, 1);
+	    else if (cur && isDIGIT(*(pv+1)))
 		Perl_sv_catpvf(aTHX_ dsv, "\\%03o", (U8)*pv);
 	    else
 		Perl_sv_catpvf(aTHX_ dsv, "\\%o", (U8)*pv);
