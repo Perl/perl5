@@ -78,9 +78,14 @@ static int findbucket _((union overhead *freep, int srchlen));
 #define	MAGIC		0xff		/* magic # on accounting info */
 #define RMAGIC		0x55555555	/* magic # on range info */
 #ifdef RCHECK
-#define	RSLOP		sizeof (u_int)
+#  define	RSLOP		sizeof (u_int)
+#  ifdef TWO_POT_OPTIMIZE
+#    define MAX_SHORT_BUCKET 12
+#  else
+#    define MAX_SHORT_BUCKET 13
+#  endif 
 #else
-#define	RSLOP		0
+#  define	RSLOP		0
 #endif
 
 #ifdef PACK_MALLOC
@@ -265,7 +270,7 @@ malloc(nbytes)
   	register MEM_SIZE shiftr;
 
 #ifdef PERL_CORE
-#ifdef DEBUGGING
+#if defined(DEBUGGING) || defined(RCHECK)
 	MEM_SIZE size = nbytes;
 #endif
 
@@ -344,6 +349,7 @@ malloc(nbytes)
 	 * Record allocated size of block and
 	 * bound space with magic numbers.
 	 */
+	nbytes = (size + M_OVERHEAD + 3) &~ 3; 
   	if (nbytes <= 0x10000)
 		p->ov_size = nbytes - 1;
 	p->ov_rmagic = RMAGIC;
@@ -515,7 +521,7 @@ free(mp)
 #endif
 #ifdef RCHECK
   	ASSERT(op->ov_rmagic == RMAGIC);
-	if (OV_INDEX(op) <= 13)
+	if (OV_INDEX(op) <= MAX_SHORT_BUCKET)
 		ASSERT(*(u_int *)((caddr_t)op + op->ov_size + 1 - RSLOP) == RMAGIC);
 	op->ov_rmagic = RMAGIC - 1;
 #endif
@@ -619,7 +625,7 @@ realloc(mp, nbytes)
 		 * Record new allocated size of block and
 		 * bound space with magic numbers.
 		 */
-		if (OV_INDEX(op) <= 13) {
+		if (OV_INDEX(op) <= MAX_SHORT_BUCKET) {
 			/*
 			 * Convert amount of memory requested into
 			 * closest block size stored in hash buckets
