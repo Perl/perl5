@@ -78,6 +78,9 @@ typedef unsigned UBW;
 #define SIZE16 2
 #define SIZE32 4
 
+/* CROSSCOMPILE and MULTIARCH are going to affect pp_pack() and pp_unpack().
+   --jhi Feb 1999 */
+
 #if SHORTSIZE != SIZE16 || LONGSIZE != SIZE32
 #   define PERL_NATINT_PACK
 #endif

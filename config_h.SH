@@ -2062,6 +2062,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_archlib ARCHLIB "$archlib"		/**/
 #$d_archlib ARCHLIB_EXP "$archlibexp"		/**/
 
+/* CROSSCOMPILE:
+ *	This symbol, if defined, signifies that we our
+ *	build process is a cross-compilation.
+ */
+#$crosscompile CROSSCOMPILE		/**/
+
 /* DLSYM_NEEDS_UNDERSCORE:
  *	This symbol, if defined, indicates that we need to prepend an
  *	underscore to the symbol name before calling dlsym().  This only
@@ -2319,6 +2325,15 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #$d_truncate64  HAS_TRUNCATE64	/**/
 #$d_off64t      HAS_OFF64_T    	/**/
 #$d_dirent64_s   HAS_STRUCT_DIRENT64 	/**/
+
+/* MULTIARCH:
+ *	This symbol, if defined, signifies that the build
+ *	process will produce some binary files that are going to be
+ *	used in a cross-platform environment.  This is the case for
+ *	example with the NeXT "fat" binaries that contain executables
+ *	for several CPUs.
+ */
+#$multiarch MULTIARCH		/**/
 
 /* PRIVLIB:
  *	This symbol contains the name of the private library for this package.

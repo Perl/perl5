@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Feb 22 11:10:33 EET 1999 [metaconfig 3.0 PL70]
+# Generated on Mon Feb 22 11:28:58 EET 1999 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -4541,6 +4541,10 @@ else
 	installbin="$binexp"
 fi
 
+case "$crosscompile" in
+''|[nN]*) crosscompile="$undef" ;;
+esac
+
 : determine whether to install perl also as /usr/bin/perl
 
 echo " "
@@ -5719,6 +5723,13 @@ case "$man3dir" in
 	. ./myread
 	man3ext="$ans"
 	;;
+esac
+
+case "$osname" in
+next) multiarch="$define" ;;
+esac
+case "$multiarch" in
+''|[nN]*) multiarch="$undef" ;;
 esac
 
 : see if we have to deal with yellow pages, now NIS.
@@ -10282,17 +10293,6 @@ Id='$Id'
 Log='$Log'
 RCSfile='$RCSfile'
 Revision='$Revision'
-
-case "$crosscompile" in
-''|[nN]*) crosscompile="$undef" ;;
-esac
-
-case "$osname" in
-next) multiarch="$define" ;;
-esac
-case "$multiarch" in
-''|[nN]*) multiarch="$undef" ;;
-esac
 
 : check for alignment requirements
 echo " "
