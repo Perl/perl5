@@ -264,7 +264,7 @@ do_test(15,
   RV = $ADDR
   SV = PVMG\\($ADDR\\) at $ADDR
     REFCNT = 1
-    FLAGS = \\(OBJECT,RMG\\)
+    FLAGS = \\(OBJECT,SMG\\)
     IV = 0
     NV = 0
     PV = 0

@@ -1818,6 +1818,13 @@ Perl_magic_setuvar(pTHX_ SV *sv, MAGIC *mg)
 }
 
 int
+Perl_magic_setregexp(pTHX_ SV *sv, MAGIC *mg)
+{
+    sv_unmagic(sv, PERL_MAGIC_qr);
+    return 0;
+}
+
+int
 Perl_magic_freeregexp(pTHX_ SV *sv, MAGIC *mg)
 {
     regexp *re = (regexp *)mg->mg_obj;
