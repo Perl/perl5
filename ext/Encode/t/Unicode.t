@@ -16,11 +16,10 @@ BEGIN {
 # 	print "1..0 # Skip: PerlIO was not built\n";
 # 	exit 0;
 #     }
-# should work on EBCDIC
-#    if (ord("A") == 193) {
-# 	print "1..0 # Skip: EBCDIC\n";
-# 	exit 0;
-#    }
+    if (ord("A") == 193) {
+ 	print "1..0 # Skip: EBCDIC\n";
+ 	exit 0;
+    }
     $| = 1;
 }
 
