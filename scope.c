@@ -193,11 +193,14 @@ AV *
 save_ary(gv)
 GV *gv;
 {
-    AV *oav, *av;
+    AV *oav = GvAVn(gv);
+    AV *av;
 
+    if (!AvREAL(oav) && AvREIFY(oav))
+	av_reify(oav);
     SSCHECK(3);
     SSPUSHPTR(gv);
-    SSPUSHPTR(oav = GvAVn(gv));
+    SSPUSHPTR(oav);
     SSPUSHINT(SAVEt_AV);
 
     GvAV(gv) = Null(AV*);
