@@ -667,7 +667,7 @@ The PC codepages:
   WinBaltic     => CP1257
   WinVietnamese => CP1258
 
-(All the CPI<NNN...> are available also also IBMI<NNN...>.)
+(All the CPI<NNN...> are available also as IBMI<NNN...>.)
 
 The Mac codepages:
 
