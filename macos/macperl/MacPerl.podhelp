@@ -139,6 +139,7 @@ pod:pod/perl5004delta.pod		New for Perl 5.004 (perl5004delta)
 http://www.macperl.org/			MacPerl Homepage
 http://dev.macperl.org/			MacPerl Development
 http://www.ptf.com/macperl/		The MacPerl Pages (PTF)
+http://sourceforge.net/projects/shuck/	Shuck Project on SourceForge.net
 @end
 
 @index :pod:perlop.pod
