@@ -36,6 +36,30 @@ delete(hash, key_sv)
         RETVAL
 
 SV *
+store_ent(hash, key, value)
+	PREINIT:
+	SV *copy;
+	HE *result;
+	INPUT:
+	HV *hash
+	SV *key
+	SV *value
+	CODE:
+	copy = newSV(0);
+	result = hv_store_ent(hash, key, copy, 0);
+	SvSetMagicSV(copy, value);
+	if (!result) {
+	    SvREFCNT_dec(copy);
+	    XSRETURN_EMPTY;
+	}
+	/* It's about to become mortal, so need to increase reference count.
+	 */
+	RETVAL = SvREFCNT_inc(HeVAL(result));
+        OUTPUT:
+        RETVAL
+
+
+SV *
 store(hash, key_sv, value)
 	PREINIT:
 	STRLEN len;
@@ -50,7 +74,7 @@ store(hash, key_sv, value)
 	key = SvPV(key_sv, len);
 	copy = newSV(0);
 	result = hv_store(hash, key, SvUTF8(key_sv) ? -len : len, copy, 0);
-	SvSetMagicSV(*result, value);
+	SvSetMagicSV(copy, value);
 	if (!result) {
 	    SvREFCNT_dec(copy);
 	    XSRETURN_EMPTY;
@@ -81,7 +105,6 @@ fetch(hash, key_sv)
 	RETVAL = newSVsv(*result);
         OUTPUT:
         RETVAL
-
 =pod
 
 sub TIEHASH  { bless {}, $_[0] }

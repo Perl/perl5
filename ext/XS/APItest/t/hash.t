@@ -106,26 +106,27 @@ sub brute_force_exists {
 
 sub test_store {
   my $key = shift;
-  my $printable = join ',', map {ord} split //, $key;
+  my $defaults = shift;
+  my $HV_STORE_IS_CRAZY = @$defaults ? 1 : undef;
+  my $name = join ',', map {ord} split //, $key;
+  $name .= ' (hash starts empty)' unless @$defaults;
 
-  # We are cheating - hv_store returns NULL for a store into an empty
-  # tied hash. This isn't helpful here.
-
-  my %h1 = (a=>'cheat');
-  is ($h1{$key} = 1, 1); 
-  ok (brute_force_exists (\%h1, $key), "hv_store_ent $printable");
-  my %h2 = (a=>'cheat');
-  is (XS::APItest::Hash::store(\%h2, $key,  1), 1);
-  ok (brute_force_exists (\%h2, $key), "hv_store $printable");
-  my %h3 = (a=>'cheat');
+  my %h1 = @$defaults;
+  is (XS::APItest::Hash::store_ent (\%h1, $key, 1), 1, "hv_store_ent $name"); 
+  ok (brute_force_exists (\%h1, $key), "hv_store_ent $name");
+  my %h2 = @$defaults;
+  is (XS::APItest::Hash::store(\%h2, $key,  1), 1, "hv_store $name");
+  ok (brute_force_exists (\%h2, $key), "hv_store $name");
+  my %h3 = @$defaults;
   tie %h3, 'Tie::StdHash';
-  is ($h3{$key} = 1, 1); 
-  ok (brute_force_exists (\%h3, $key), "hv_store_ent tie $printable");
-
-  my %h4 = (a=>'cheat');
+  is (XS::APItest::Hash::store_ent (\%h3, $key, 1), 1,
+      "hv_store_ent tie $name");
+  ok (brute_force_exists (\%h3, $key), "hv_store_ent tie $name");
+  my %h4 = @$defaults;
   tie %h4, 'Tie::StdHash';
-  is (XS::APItest::Hash::store(\%h4, $key, 1), 1);
-  ok (brute_force_exists (\%h4, $key), "hv_store tie $printable");
+  is (XS::APItest::Hash::store(\%h4, $key, 1), $HV_STORE_IS_CRAZY,
+      "hv_store tie $name");
+  ok (brute_force_exists (\%h4, $key), "hv_store tie $name");
 }
 
 sub test_fetch_present {
@@ -159,7 +160,8 @@ foreach my $key (@testkeys) {
   test_fetch_present ($key);
   test_delete_present ($key);
 
-  test_store ($key);
+  test_store ($key, [a=>'cheat']);
+  test_store ($key, []);
 
   my $lckey = lc $key;
   test_absent ($lckey);
