@@ -25,21 +25,28 @@ sub bye {
     exit(0);
 }
 
+my $explained;
+
 sub explain {
-    print <<EOM;
+    unless ($explained++) {
+	print <<EOM;
 #
-# If the lfs (large file support: large meaning larger than two gigabytes)
-# tests are skipped or fail, it may mean either that your process
-# (or process group) is not allowed to write large files (resource
-# limits) or that the file system you are running the tests on doesn't
-# let your user/group have large files (quota) or the filesystem simply
-# doesn't support large files.  You may even need to reconfigure your kernel.
-# (This is all very operating system and site-dependent.)
+# If the lfs (large file support: large meaning larger than two
+# gigabytes) tests are skipped or fail, it may mean either that your
+# process (or process group) is not allowed to write large files
+# (resource limits) or that the file system (the network filesystem?)
+# you are running the tests on doesn't let your user/group have large
+# files (quota) or the filesystem simply doesn't support large files.
+# You may even need to reconfigure your kernel.  (This is all very
+# operating system and site-dependent.)
 #
 # Perl may still be able to support large files, once you have
 # such a process, enough quota, and such a (file) system.
+# It is just that the test failed now.
 #
 EOM
+    }
+    print "1..0 # Skip: @_\n" if @_;
 }
 
 print "# checking whether we have sparse files...\n";
@@ -125,8 +132,7 @@ open(BIG, ">big") or do { warn "open failed: $!\n"; bye };
 binmode BIG;
 if ($r or not seek(BIG, 5_000_000_000, $SEEK_SET)) {
     my $err = $r ? 'signal '.($r & 0x7f) : $!;
-    print "1..0 # Skip: seeking past 2GB failed: $err\n";
-    explain();
+    explain("seeking past 2GB failed: $err");
     bye();
 }
 
@@ -138,11 +144,12 @@ my $close = close BIG;
 print "# close failed: $!\n" unless $close;
 unless ($print && $close) {
     if ($! =~/too large/i) {
-	print "1..0 # Skip: writing past 2GB failed: process limits?\n";
+	explain("writing past 2GB failed: process limits?");
     } elsif ($! =~ /quota/i) {
-	print "1..0 # Skip: filesystem quota limits?\n";
+	explain("filesystem quota limits?");
+    } else {
+	explain("error: $!");
     }
-    explain();
     bye();
 }
 
@@ -151,8 +158,7 @@ unless ($print && $close) {
 print "# @s\n";
 
 unless ($s[7] == 5_000_000_003) {
-    print "1..0 # Skip: not configured to use large files?\n";
-    explain();
+    explain("kernel/fs not configured to use large files?");
     bye();
 }
 
@@ -224,7 +230,7 @@ print "ok 16\n";
 fail unless $zero eq "\0\0\0";
 print "ok 17\n";
 
-explain if $fail;
+explain() if $fail;
 
 bye(); # does the necessary cleanup
 
