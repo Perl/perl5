@@ -1,6 +1,6 @@
 package ExtUtils::Constant;
 use vars qw (@ISA $VERSION %XS_Constant %XS_TypeSet @EXPORT_OK %EXPORT_TAGS);
-$VERSION = '0.06';
+$VERSION = '0.07';
 
 =head1 NAME
 
@@ -8,14 +8,15 @@ ExtUtils::Constant - generate XS code to import C header constants
 
 =head1 SYNOPSIS
 
-    use ExtUtils::Constant qw (constant_types C_constant XS_constant);
-    print constant_types(); # macro defs
-    foreach (C_constant ("Foo", undef, "IV", undef, undef, undef,
-                         @names) ) {
-	print $_, "\n"; # C constant subs
-    }
-    print "MODULE = Foo		PACKAGE = Foo\n";
-    print XS_constant ("Foo", {NV => 1, IV => 1}); # XS for Foo::constant
+    use ExtUtils::Constant qw (WriteConstants);
+    WriteConstants(
+        NAME => 'Foo',
+        NAMES => [qw(FOO BAR BAZ)],
+        C_FILE => 'constants.c',
+        XS_FILE => 'constants.xs',
+    );
+    # Generates wrapper code to make the values of the constants FOO BAR BAZ
+    #  available to perl
 
 =head1 DESCRIPTION
 
@@ -27,8 +28,18 @@ constants.
 
 =head1 USAGE
 
-Generally one only needs to call the 3 functions shown in the synopsis,
-C<constant_types()>, C<C_constant> and C<XS_constant>.
+Generally one only needs to call the C<WriteConstants> function, and then
+
+    #include "constants.c"
+
+in the C section of C<Foo.xs>
+
+    INCLUDE constants.xs
+
+in the XS section of C<Foo.xs>.
+
+For greater flexibility use C<constant_types()>, C<C_constant> and
+C<XS_constant>, with which C<WriteConstants> is implemented.
 
 Currently this module understands the following types. h2xs may only know
 a subset. The sizes of the numeric types are chosen by the C<Configure>
@@ -95,7 +106,7 @@ $Text::Wrap::columns = 80;
 
 %EXPORT_TAGS = ( 'all' => [ qw(
 	XS_constant constant_types return_clause memEQ_clause C_stringify
-	C_constant autoload
+	C_constant autoload WriteConstants
 ) ] );
 
 @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
@@ -417,8 +428,8 @@ sub switch_clause {
 
 An internal function. I<WHAT> should be a hashref of types the constant
 function will return. I<params> returns the list of flags C<$use_iv, $use_nv,
-$use_pv> to show which combination of pointers will be needed in the C
-argument list.
+$use_pv, $use_sv> to show which combination of pointers will be needed in the
+C argument list.
 
 =cut
 
@@ -956,6 +967,98 @@ END
 
   return $func;
 }
+
+
+=item WriteConstants ATTRIBUTE =E<gt> VALUE [, ...]
+
+Writes a file of C code and a file of XS code which you should C<#include>
+and C<INCLUDE> in the C and XS sections respectively of your module's XS
+code.  You probaby want to do this in your C<Makefile.PL>, so that you can
+easily edit the list of constants without touching the rest of your module.
+The attributes supported are
+
+=over 4
+
+=item NAME
+
+Name of the module.  This must be specified
+
+=item DEFAULT_TYPE
+
+The default type for the constants.  If not specified C<IV> is assumed.
+
+=item BREAKOUT_AT
+
+The names of the constants are grouped by length.  Generate child subroutines
+for each group with this number or more names in.
+
+=item NAMES
+
+An array of constants' names, either scalars containing names, or hashrefs
+as detailed in L<"C_constant">.
+
+=item C_FILE
+
+The name of the file to write containing the C code.  The default is
+C<constants.c>.
+
+=item XS_FILE
+
+The name of the file to write containing the XS code.  The default is
+C<constants.xs>.
+
+=item SUBNAME
+
+The perl visible name of the XS subroutine generated which will return the
+constants. The default is C<constant>.  
+
+=item C_SUBNAME
+
+The name of the C subroutine generated which will return the constants.
+The default is I<SUBNAME>.  Child subroutines have C<_> and the name
+length appended, so constants with 10 character names would be in
+C<constant_10> with the default I<XS_SUBNAME>.
+
+=back
+
+=cut
+
+sub WriteConstants {
+  my %ARGS =
+    ( # defaults
+     C_FILE =>       'constants.c',
+     XS_FILE =>      'constants.xs',
+     SUBNAME =>      'constant',
+     DEFAULT_TYPE => 'IV',
+     @_);
+
+  $ARGS{C_SUBNAME} ||= $ARGS{SUBNAME}; # No-one sane will have C_SUBNAME eq '0'
+
+  croak "Module name not specified" unless length $ARGS{NAME};
+
+  open my $c_fh, ">$ARGS{C_FILE}" or die "Can't open $ARGS{C_FILE}: $!";
+  open my $xs_fh, ">$ARGS{XS_FILE}" or die "Can't open $ARGS{XS_FILE}: $!";
+
+  # As this subroutine is intended to make code that isn't edited, there's no
+  # need for the user to specify any types that aren't found in the list of
+  # names.
+  my $types = {};
+
+  print $c_fh constant_types(); # macro defs
+  print $c_fh "\n";
+
+  # indent is still undef. Until anyone implents indent style rules with it.
+  foreach (C_constant ($ARGS{NAME}, $ARGS{C_SUBNAME}, $ARGS{DEFAULT_TYPE},
+                       $types, undef, $ARGS{BREAKOUT_AT}, @{$ARGS{NAMES}})) {
+    print $c_fh $_, "\n"; # C constant subs
+  }
+  print $xs_fh XS_constant ($ARGS{NAME}, $types, $ARGS{XS_SUBNAME},
+                            $ARGS{C_SUBNAME});
+
+  close $c_fh or warn "Error closing $ARGS{C_FILE}: $!";
+  close $xs_fh or warn "Error closing $ARGS{XS_FILE}: $!";
+}
+
 1;
 __END__
 
