@@ -8,6 +8,7 @@
 #ifdef PERL_OBJECT	/* XXX _very_ temporary hacks */
 #  undef signal
 #  undef open
+#  undef setmode
 #  define open PerlLIO_open3
 #  undef TAINT_PROPER
 #  define TAINT_PROPER(a)
