@@ -2,7 +2,7 @@ package File::Find;
 use 5.006;
 use strict;
 use warnings;
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 require Exporter;
 require Cwd;
 
@@ -180,9 +180,6 @@ Notice the C<_> in the above C<int(-M _)>: the C<_> is a magical
 filehandle that caches the information from the preceding
 stat(), lstat(), or filetest.
 
-Set the variable C<$File::Find::dont_use_nlink> if you're using AFS,
-since AFS cheats.
-
 Here's another interesting wanted function.  It will find all symbolic
 links that don't resolve:
 
@@ -195,6 +192,23 @@ module.
 
 =head1 CAVEAT
 
+=over 2
+
+=item $dont_use_nlink
+
+You can set the variable C<$File::Find::dont_use_nlink> to 1, if you want to
+force File::Find to always stat directories. This was used for systems
+that do not have the correct C<nlink> count for directories. Examples are
+ISO-9660 (CD-R), AFS, and operating systems like OS/2, DOS and a couple of
+others.
+
+Since now File::Find should now detect such things on-the-fly and switch it
+self to using stat, this will probably not a problem to you.
+
+If you do set $dont_use_nlink to 1, you will notice slow-downs.
+
+=item symlinks
+
 Be aware that the option to follow symbolic links can be dangerous.
 Depending on the structure of the directory tree (including symbolic
 links to directories) you might traverse a given (physical) directory
@@ -202,6 +216,8 @@ more than once (only if C<follow_fast> is in effect).
 Furthermore, deleting or changing files in a symbolically linked directory
 might cause very unpleasant surprises, since you delete or change files
 in an unknown directory.
+
+=back
 
 =head1 NOTES
 
@@ -643,6 +659,7 @@ sub _find_dir($$$) {
     my $dir_pref;
     my $dir_rel = $File::Find::current_dir;
     my $tainted = 0;
+    my $no_nlink;
 
     if ($Is_MacOS) {
 	$dir_pref= ($p_dir =~ /:$/) ? $p_dir : "$p_dir:"; # preface
@@ -736,7 +753,13 @@ sub _find_dir($$$) {
 	@filenames = &$pre_process(@filenames) if $pre_process;
 	push @Stack,[$CdLvl,$dir_name,"",-2]   if $post_process;
 
-	if ($nlink == 2 && !$avoid_nlink) {
+	# default: use whatever was specifid
+        # (if $nlink >= 2, and $avoid_nlink == 0, this will switch back)
+        $no_nlink = $avoid_nlink;
+        # if dir has wrong nlink count, force switch to slower stat method
+        $no_nlink = 1 if ($nlink < 2);
+
+	if ($nlink == 2 && !$no_nlink) {
 	    # This dir has no subdirectories.
 	    for my $FN (@filenames) {
 		next if $FN =~ $File::Find::skip_pattern;
@@ -753,7 +776,7 @@ sub _find_dir($$$) {
 
 	    for my $FN (@filenames) {
 		next if $FN =~ $File::Find::skip_pattern;
-		if ($subcount > 0 || $avoid_nlink) {
+		if ($subcount > 0 || $no_nlink) {
 		    # Seen all the subdirs?
 		    # check for directoriness.
 		    # stat is faster for a file in the current directory
