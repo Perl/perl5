@@ -1091,6 +1091,9 @@ scalar.
 #  endif /* USE_5005THREADS */
 #endif /* __GNU__ */
 
+#define SvIsCOW(sv)		((SvFLAGS(sv) & (SVf_FAKE | SVf_READONLY)) == \
+				    (SVf_FAKE | SVf_READONLY))
+#define SvIsCOW_shared_hash(sv)	(SvIsCOW(sv) && SvLEN(sv) == 0)
 
 /* flag values for sv_*_flags functions */
 #define SV_IMMEDIATE_UNREF	1
