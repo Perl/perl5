@@ -37,6 +37,7 @@ README.apollo		Notes about Apollo DomainOS port
 README.beos		Notes about BeOS port
 README.cygwin32		Notes about Cygwin32 port
 README.dos		Notes about dos/djgpp port
+README.epoc		Notes about EPOC port
 README.hpux		Notes about HP-UX port
 README.hurd		Notes about GNU/Hurd port
 README.lexwarn		Notes about lexical warnings
@@ -159,6 +160,11 @@ emacs/ptags		Creates smart TAGS file
 embed.h			Maps symbols to safer names
 embed.pl		Produces {embed,embedvar,objXSUB,proto}.h, global.sym
 embedvar.h		C namespace management
+epoc/config.h		EPOC port
+epoc/epoc.c		EPOC port
+epoc/epocish.h		EPOC port
+epoc/perl.mmp		EPOC port
+epoc/perl.pkg		EPOC port
 ext/B/B.pm		Compiler backend support functions and methods
 ext/B/B.xs		Compiler backend external subroutines
 ext/B/B/Asmdata.pm	Compiler backend data for assembler
