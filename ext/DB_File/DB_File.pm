@@ -1,8 +1,8 @@
 # DB_File.pm -- Perl 5 interface to Berkeley DB 
 #
 # written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
-# last modified 6th Feb 1997
-# version 1.11
+# last modified 12th Mar 1997
+# version 1.12
 #
 #     Copyright (c) 1995, 1996, 1997 Paul Marquess. All rights reserved.
 #     This program is free software; you can redistribute it and/or
@@ -146,7 +146,7 @@ use vars qw($VERSION @ISA @EXPORT $AUTOLOAD $DB_BTREE $DB_HASH $DB_RECNO) ;
 use Carp;
 
 
-$VERSION = "1.11" ;
+$VERSION = "1.12" ;
 
 #typedef enum { DB_BTREE, DB_HASH, DB_RECNO } DBTYPE;
 $DB_BTREE = new DB_File::BTREEINFO ;
@@ -325,6 +325,10 @@ facilities provided by Berkeley DB.  If you intend to use this
 module you should really have a copy of the Berkeley DB manual pages at
 hand. The interface defined here mirrors the Berkeley DB interface
 closely.
+
+Please note that this module will only work with version 1.x of
+Berkeley DB. Once Berkeley DB version 2 is released, B<DB_File> will be
+upgraded to work with it.
 
 Berkeley DB is a C library which provides a consistent interface to a
 number of database formats.  B<DB_File> provides an interface to all
@@ -1144,7 +1148,7 @@ destroyed.
     undef $db ;
     untie %hash ;
 
-See L<The untie Gotcha> for more details.
+See L<The untie gotcha> for more details.
 
 All the functions defined in L<dbopen> are available except for
 close() and dbopen() itself. The B<DB_File> method interface to the
@@ -1394,7 +1398,7 @@ F<authors/id/TOMC/scripts/nshist.gz>).
 =head2 The untie gotcha
 
 If you make use of the Berkeley DB API, it is is I<very> strongly
-recommended that you read L<perltie/The untie gotcha>. 
+recommended that you read L<perltie/The untie Gotcha>. 
 
 Even if you don't currently make use of the API interface, it is still
 worth reading it.
@@ -1642,6 +1646,10 @@ Fixed fd method so that it still returns -1 for in-memory files when db
 
 Documented the untie gotcha.
 
+=item 1.12
+
+Documented the incompatibility with version 2 of Berkeley DB.
+
 =back
 
 =head1 BUGS
@@ -1658,7 +1666,10 @@ suggest any enhancements, I would welcome your comments.
 B<DB_File> comes with the standard Perl source distribution. Look in
 the directory F<ext/DB_File>.
 
-Berkeley DB is available at your nearest CPAN archive (see
+This version of B<DB_File> will only work with version 1.x of Berkeley
+DB. It is I<not> yet compatible with version 2.
+
+Version 1 of Berkeley DB is available at your nearest CPAN archive (see
 L<perlmod/"CPAN"> for a list) in F<src/misc/db.1.85.tar.gz>, or via the
 host F<ftp.cs.berkeley.edu> in F</ucb/4bsd/db.tar.gz>.  Alternatively,
 check out the Berkeley DB home page at F<http://www.bostic.com/db>. It

@@ -3,8 +3,8 @@
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
  written by Paul Marquess (pmarquess@bfsec.bt.co.uk)
- last modified 6th Feb 1997
- version 1.11
+ last modified 12th Mar 1997
+ version 1.12
 
  All comments/suggestions/problems are welcome
 
@@ -38,6 +38,7 @@
 	1.10 -  Fixed fd method so that it still returns -1 for
 		in-memory files when db 1.86 is used.
 	1.11 -  No change to DB_File.xs
+	1.12 -  No change to DB_File.xs
 
 */
 
