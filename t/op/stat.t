@@ -206,12 +206,18 @@ SKIP: {
 
     skip "opendir failed: $!", 3 if @DEV == 0;
 
+    # /dev/stdout might be either character special or a named pipe,
+    # depending on which OS and how are you running the test, so let's
+    # censor that one away.
+    $DEV =~ s{^[cp].+?\bstdout$}{}m;
+    @DEV = grep { ! m{\bstdout$} } @DEV;
+
     my $try = sub {
 	my @c1 = eval qq[\$DEV =~ /^$_[0]/mg];
 	my @c2 = eval qq[grep { $_[1] "/dev/\$_" } \@DEV];
 	my $c1 = scalar @c1;
 	my $c2 = scalar @c2;
-	is($c1, $c2, "ls and $_[1] agree on /dev ($c1 $c2)");
+	is($c1, $c2, "ls and $_[1] agreeing on /dev ($c1 $c2)");
     };
 
     $try->('b', '-b');
