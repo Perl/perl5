@@ -367,10 +367,8 @@ morecore(bucket)
 		op->ov_next = (union overhead *)((caddr_t)op + siz);
 		op = (union overhead *)((caddr_t)op + siz);
   	}
-#if defined(USE_PERL_SBRK) || defined(OS2)
-	/* all real sbrks return zeroe-d memory, perl's sbrk doesn't guarantee this */
+	/* Not all sbrks return zeroed memory.*/
 	op->ov_next = (union overhead *)NULL;
-#endif
 #ifdef PACK_MALLOC
 	if (bucket == 7 - 3) {	/* Special case, explanation is above. */
 	    union overhead *n_op = nextf[7 - 3]->ov_next;
