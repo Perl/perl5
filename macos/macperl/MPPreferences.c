@@ -9,6 +9,9 @@ Apple Developer Support UK
 Language	:	MPW C
 
 $Log: MPPreferences.c,v $
+Revision 1.10  2002/01/23 05:47:48  pudge
+Fix prefs file name
+
 Revision 1.9  2002/01/04 03:34:45  pudge
 Modifications for universal headers 3.4
 
@@ -198,8 +201,7 @@ pascal void OpenPreferences()
 	
 	prefPath.vRefNum 	= gAppVol;
 	prefPath.parID		= gAppDir;
-	/* Temporarily make path with "¶", for development */
-	PLstrcpy(prefPath.name, (StringPtr) "\pMacPerl 5 Preferences ¶");
+	PLstrcpy(prefPath.name, (StringPtr) "\pMacPerl 5 Preferences");
 	
 	if (GUSIFSpGetCatInfo(&prefPath, &info))
 		if (FindFolder(
