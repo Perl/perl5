@@ -1,5 +1,5 @@
 # hints/solaris_2.sh
-# Last modified:  Thu Feb  8 11:38:12 EST 1996
+# Last modified:  Wed May 27 13:04:45 EDT 1998
 # Andy Dougherty  <doughera@lafcol.lafayette.edu>
 # Based on input from lots of folks, especially
 # Dean Roehrich <roehrich@ironwood-fddi.cray.com>
@@ -53,11 +53,12 @@ esac
 
 # Here's another draft of the perl5/solaris/gcc sanity-checker. 
 
-case $PATH in
-*/usr/ucb*:/usr/bin:*|*/usr/ucb*:/usr/bin) cat <<END >&4
+case `type ${cc:-cc}` in
+*/usr/ucb/cc*) cat <<END >&4
 
 NOTE:  Some people have reported problems with /usr/ucb/cc.  
-Remove /usr/ucb from your PATH if you have difficulties.
+If you have difficulties, please make sure the directory
+containing your C compiler is before /usr/ucb in your PATH.
 
 END
 ;;
@@ -95,13 +96,22 @@ END
 ;;
 esac
 
+# Use shell built-in 'type' command instead of /usr/bin/which to
+# avoid possible csh start-up problems and also to use the same shell
+# we'll be using to Configure and make perl.
+# The path name is the last field in the output, but the type command
+# has an annoying array of possible outputs, e.g.:
+#	make is hashed (/opt/gnu/bin/make)
+# 	cc is /usr/ucb/cc
+#	foo not found
+# use a command like type make | awk '{print $NF}' | sed 's/[()]//g'
 
 # See if make(1) is GNU make(1).
 # If it is, make sure the setgid bit is not set.
 make -v > make.vers 2>&1
 if grep GNU make.vers > /dev/null 2>&1; then
-    tmp=`/usr/bin/which make`
-    case "`/usr/bin/ls -l $tmp`" in
+    tmp=`type make | awk '{print $NF}' | sed 's/[()]//g'`
+    case "`/usr/bin/ls -lL $tmp`" in
     ??????s*)
 	    cat <<END >&2
 	
@@ -123,17 +133,17 @@ cat > UU/cc.cbu <<'EOSH'
 # If the C compiler is gcc:
 #   - check the fixed-includes
 #   - check as(1) and ld(1), they should not be GNU
-#	(GNU ad and ld 2.8.1 and later are reportedly ok, however.)
+#	(GNU as and ld 2.8.1 and later are reportedly ok, however.)
 # If the C compiler is not gcc:
 #   - check as(1) and ld(1), they should not be GNU
-#	(GNU ad and ld 2.8.1 and later are reportedly ok, however.)
+#	(GNU as and ld 2.8.1 and later are reportedly ok, however.)
 #
 # Watch out in case they have not set $cc.
 
 # Get gcc to share its secrets.
 echo 'main() { return 0; }' > try.c
-verbose=`${cc:-cc} -v -o try try.c 2>&1`
-rm -f try try.c
+	# Indent to avoid propagation to config.sh
+	verbose=`${cc:-cc} -v -o try try.c 2>&1`
 
 if echo "$verbose" | grep '^Reading specs from' >/dev/null 2>&1; then
 	#
@@ -154,24 +164,24 @@ if echo "$verbose" | grep '^Reading specs from' >/dev/null 2>&1; then
 	    cat <<END >&2
 
 NOTE: You are using GNU as(1).  GNU as(1) will not build Perl.
-I'm arranging to use /usr/ccs/bin/as by setting including
--B/usr/ccs/bin/ in your ${cc:-cc} command.
-(Note that the trailing "/" is required.)
+I'm arranging to use /usr/ccs/bin/as by including -B/usr/ccs/bin/
+in your ${cc:-cc} command.  (Note that the trailing "/" is required.)
 
 END
 	    cc="${cc:-cc} -B/usr/ccs/bin/"
 	fi
 
 	# See if ld(1) is GNU ld(1).  GNU ld(1) won't work for this job.
-	if echo "$verbose" | grep ' /usr/ccs/bin/as ' >/dev/null 2>&1; then
+	# Recompute $verbose since we may have just changed $cc.
+	verbose=`${cc:-cc} -v -o try try.c 2>&1`
+	if echo "$verbose" | grep ' /usr/ccs/bin/ld ' >/dev/null 2>&1; then
 	    :
 	else
 	    cat <<END >&2
 
-NOTE: You are using GNU as(1).  GNU as(1) will not build Perl.
-I'm arranging to use /usr/ccs/bin/as by setting including
--B/usr/ccs/bin/ in your ${cc:-cc} command.
-(Note that the trailing "/" is required.)
+NOTE: You are using GNU ld(1).  GNU ld(1) will not build Perl.
+I'm arranging to use /usr/ccs/bin/ld by including -B/usr/ccs/bin/
+in your ${cc:-cc} command.  (Note that the trailing "/" is required.)
 
 END
 	    cc="${cc:-cc} -B/usr/ccs/bin/"
@@ -189,8 +199,8 @@ else
 		cat <<END >&2
 
 NOTE: You are using GNU as(1).  GNU as(1) will not build Perl.
-You must arrange to use /usr/ccs/bin, perhaps by adding it to the
-beginning of your PATH.
+You must arrange to use /usr/ccs/bin/as, perhaps by adding /usr/ccs/bin
+to the beginning of your PATH.
 
 END
 		;;
@@ -207,19 +217,18 @@ END
 	esac
 	if $gnu_ld ; then :
 	else
-		case `which ld` in
-		no\ ld\ in*|[Cc]ommand\ not\ found*)
-			;;
-		/*gnu*/ld|/*GNU*/ld)
+		# Try to guess from path
+		case `type ld | awk '{print $NF}'` in
+		*gnu*|*GNU*|*FSF*)
 			gnu_ld=true ;;
 		esac
 	fi
 	if $gnu_ld ; then
 		cat <<END >&2
 
-NOTE: You are using GNU ld(1).  GNU ld(1) will not build Perl.
-You must arrange to use /usr/ccs/bin, perhaps by adding it to the
-beginning of your PATH.
+NOTE: You are apparently using GNU ld(1).  GNU ld(1) will not build Perl.
+You must arrange to use /usr/ccs/bin/ld, perhaps by adding /usr/ccs/bin
+to the beginning of your PATH.
 
 END
 	fi
@@ -227,6 +236,7 @@ END
 fi
 
 # as --version or ld --version might dump core.
+rm -f try try.c
 rm -f core
 
 # XXX

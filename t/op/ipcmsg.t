@@ -110,8 +110,9 @@ use strict;
 
 print "1..6\n";
 
-my $msg = msgget($IPC_PRIVATE, $S_IRWXU | $S_IRWXG | $S_IRWXO)
-	|| die "msgget failed: $!\n";
+my $msg = msgget($IPC_PRIVATE, $S_IRWXU | $S_IRWXG | $S_IRWXO);
+# Very first time called after machine is booted value may be 0 
+die "msgget failed: $!\n" unless defined($msg) && $msg >= 0;
 
 print "ok 1\n";
 

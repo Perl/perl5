@@ -899,5 +899,5 @@ cx_dump(PERL_CONTEXT *cx)
 		(long)cx->sb_rxres);
 	break;
     }
-#endif
+#endif	/* DEBUGGING */
 }

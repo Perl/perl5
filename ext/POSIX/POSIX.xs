@@ -30,9 +30,8 @@
 #endif
 #include <setjmp.h>
 #include <signal.h>
-#ifdef I_STDARG
 #include <stdarg.h>
-#endif
+
 #ifdef I_STDDEF
 #include <stddef.h>
 #endif
@@ -51,7 +50,7 @@
 #include <sys/types.h>
 #include <time.h>
 #ifdef I_UNISTD
-#include <unistd.h>	/* see hints/sunos_4_1.sh */
+#include <unistd.h>
 #endif
 #include <fcntl.h>
 
@@ -114,6 +113,15 @@
 #  endif
 #  ifdef _MSC_VER
 #    define mode_t short
+#  endif
+#  ifdef __MINGW32__
+#    define mode_t short
+#    ifndef tzset
+#      define tzset()		not_here("tzset")
+#    endif
+#    ifndef _POSIX_OPEN_MAX
+#      define _POSIX_OPEN_MAX	FOPEN_MAX	/* XXX bogus ? */
+#    endif
 #  endif
 #  define sigaction(a,b,c)	not_here("sigaction")
 #  define sigpending(a)		not_here("sigpending")
@@ -262,12 +270,12 @@ unsigned long strtoul _((const char *, char **, int));
 #define localeconv() not_here("localeconv")
 #endif
 
-#ifndef WIN32
 #ifdef HAS_TZNAME
+#  ifndef WIN32
 extern char *tzname[];
+#  endif
 #else
 char *tzname[] = { "" , "" };
-#endif
 #endif
 
 /* XXX struct tm on some systems (SunOS4/BSD) contains extra (non POSIX)

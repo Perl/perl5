@@ -1711,7 +1711,7 @@ sv_2pv(register SV *sv, STRLEN *lp)
 		case SVt_PVHV:	s = "HASH";			break;
 		case SVt_PVCV:	s = "CODE";			break;
 		case SVt_PVGV:	s = "GLOB";			break;
-		case SVt_PVFM:	s = "FORMLINE";			break;
+		case SVt_PVFM:	s = "FORMAT";			break;
 		case SVt_PVIO:	s = "IO";			break;
 		default:	s = "UNKNOWN";			break;
 		}
@@ -2079,6 +2079,12 @@ sv_setsv(SV *dstr, register SV *sstr)
 			    if (!GvCVGEN((GV*)dstr) &&
 				(CvROOT(cv) || CvXSUB(cv)))
 			    {
+				SV *const_sv = cv_const_sv(cv);
+				bool const_changed = TRUE; 
+				if(const_sv)
+				    const_changed = sv_cmp(const_sv, 
+					   op_const_sv(CvSTART((CV*)sref), 
+						       Nullcv));
 				/* ahem, death to those who redefine
 				 * active sort subs */
 				if (curstackinfo->si_type == SI_SORT &&
@@ -2086,15 +2092,14 @@ sv_setsv(SV *dstr, register SV *sstr)
 				    croak(
 				    "Can't redefine active sort subroutine %s",
 					  GvENAME((GV*)dstr));
-				if (cv_const_sv(cv))
-				    warn("Constant subroutine %s redefined",
-					 GvENAME((GV*)dstr));
-				else if (dowarn) {
+				if (dowarn || (const_changed && const_sv)) {
 				    if (!(CvGV(cv) && GvSTASH(CvGV(cv))
 					  && HvNAME(GvSTASH(CvGV(cv)))
 					  && strEQ(HvNAME(GvSTASH(CvGV(cv))),
 						   "autouse")))
-					warn("Subroutine %s redefined",
+					warn(const_sv ? 
+					     "Constant subroutine %s redefined"
+					     : "Subroutine %s redefined", 
 					     GvENAME((GV*)dstr));
 				}
 			    }
@@ -3589,16 +3594,8 @@ newSVpvn(char *s, STRLEN len)
     return sv;
 }
 
-#ifdef I_STDARG
 SV *
 newSVpvf(const char* pat, ...)
-#else
-/*VARARGS0*/
-SV *
-newSVpvf(pat, va_alist)
-const char *pat;
-va_dcl
-#endif
 {
     register SV *sv;
     va_list args;
@@ -3607,11 +3604,7 @@ va_dcl
     SvANY(sv) = 0;
     SvREFCNT(sv) = 1;
     SvFLAGS(sv) = 0;
-#ifdef I_STDARG
     va_start(args, pat);
-#else
-    va_start(args);
-#endif
     sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
     va_end(args);
     return sv;
@@ -3996,7 +3989,7 @@ sv_reftype(SV *sv, int ob)
 	case SVt_PVHV:		return "HASH";
 	case SVt_PVCV:		return "CODE";
 	case SVt_PVGV:		return "GLOB";
-	case SVt_PVFM:		return "FORMLINE";
+	case SVt_PVFM:		return "FORMAT";
 	default:		return "UNKNOWN";
 	}
     }
@@ -4228,92 +4221,40 @@ sv_setpviv_mg(SV *sv, IV iv)
     SvSETMAGIC(sv);
 }
 
-#ifdef I_STDARG
 void
 sv_setpvf(SV *sv, const char* pat, ...)
-#else
-/*VARARGS0*/
-void
-sv_setpvf(sv, pat, va_alist)
-    SV *sv;
-    const char *pat;
-    va_dcl
-#endif
 {
     va_list args;
-#ifdef I_STDARG
     va_start(args, pat);
-#else
-    va_start(args);
-#endif
     sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
     va_end(args);
 }
 
 
-#ifdef I_STDARG
 void
 sv_setpvf_mg(SV *sv, const char* pat, ...)
-#else
-/*VARARGS0*/
-void
-sv_setpvf_mg(sv, pat, va_alist)
-    SV *sv;
-    const char *pat;
-    va_dcl
-#endif
 {
     va_list args;
-#ifdef I_STDARG
     va_start(args, pat);
-#else
-    va_start(args);
-#endif
     sv_vsetpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
     va_end(args);
     SvSETMAGIC(sv);
 }
 
-#ifdef I_STDARG
 void
 sv_catpvf(SV *sv, const char* pat, ...)
-#else
-/*VARARGS0*/
-void
-sv_catpvf(sv, pat, va_alist)
-    SV *sv;
-    const char *pat;
-    va_dcl
-#endif
 {
     va_list args;
-#ifdef I_STDARG
     va_start(args, pat);
-#else
-    va_start(args);
-#endif
     sv_vcatpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
     va_end(args);
 }
 
-#ifdef I_STDARG
 void
 sv_catpvf_mg(SV *sv, const char* pat, ...)
-#else
-/*VARARGS0*/
-void
-sv_catpvf_mg(sv, pat, va_alist)
-    SV *sv;
-    const char *pat;
-    va_dcl
-#endif
 {
     va_list args;
-#ifdef I_STDARG
     va_start(args, pat);
-#else
-    va_start(args);
-#endif
     sv_vcatpvfn(sv, pat, strlen(pat), &args, Null(SV**), 0, Null(bool*));
     va_end(args);
     SvSETMAGIC(sv);

@@ -712,7 +712,7 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ)
 	$(LINK32) -Tpe -ap $(LINK_FLAGS) \
 	    @$(mktmp c0x32$(o) $(PERLEXE_OBJ:s,\,\\)\n \
 	    $(@:s,\,\\),\n \
-	    $(LIBFILES) $(PERLIMPLIB)\n)
+	    $(PERLIMPLIB) $(LIBFILES)\n)
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -o $@ $(LINK_FLAGS)  \
 	    $(PERLEXE_OBJ) $(PERLIMPLIB) $(LIBFILES)

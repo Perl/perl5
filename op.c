@@ -3322,16 +3322,27 @@ cv_ckproto(CV *cv, GV *gv, char *p)
 SV *
 cv_const_sv(CV *cv)
 {
-    OP *o;
-    SV *sv;
-
     if (!cv || !SvPOK(cv) || SvCUR(cv))
 	return Nullsv;
+    return op_const_sv(CvSTART(cv), cv);
+}
 
-    sv = Nullsv;
-    for (o = CvSTART(cv); o; o = o->op_next) {
+SV *
+op_const_sv(OP *o, CV *cv)
+{
+    SV *sv = Nullsv;
+
+    if(!o)
+	return Nullsv;
+ 
+    if(o->op_type == OP_LINESEQ && cLISTOPo->op_first) 
+	o = cLISTOPo->op_first->op_sibling;
+
+    for (; o; o = o->op_next) {
 	OPCODE type = o->op_type;
-	
+
+	if(sv && o->op_next == o) 
+	    return sv;
 	if (type == OP_NEXTSTATE || type == OP_NULL || type == OP_PUSHMARK)
 	    continue;
 	if (type == OP_LEAVESUB || type == OP_RETURN)
@@ -3340,7 +3351,7 @@ cv_const_sv(CV *cv)
 	    return Nullsv;
 	if (type == OP_CONST)
 	    sv = cSVOPo->op_sv;
-	else if (type == OP_PADSV) {
+	else if (type == OP_PADSV && cv) {
 	    AV* padav = (AV*)(AvARRAY(CvPADLIST(cv))[1]);
 	    sv = padav ? AvARRAY(padav)[o->op_targ] : Nullsv;
 	    if (!sv || (!SvREADONLY(sv) && SvREFCNT(sv) > 1))
@@ -3382,7 +3393,7 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 	else
 	    sv_setiv((SV*)gv, -1);
 	SvREFCNT_dec(compcv);
-	compcv = NULL;
+	cv = compcv = NULL;
 	sub_generation++;
 	goto noblock;
     }
@@ -3394,6 +3405,7 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 	/* already defined (or promised)? */
 	if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
 	    SV* const_sv;
+	    bool const_changed = TRUE;
 	    if (!block) {
 		/* just a "sub foo;" when &foo is already defined */
 		SAVEFREESV(compcv);
@@ -3402,8 +3414,9 @@ newSUB(I32 floor, OP *o, OP *proto, OP *block)
 	    /* ahem, death to those who redefine active sort subs */
 	    if (curstackinfo->si_type == SI_SORT && sortcop == CvSTART(cv))
 		croak("Can't redefine active sort subroutine %s", name);
-	    const_sv = cv_const_sv(cv);
-	    if (const_sv || dowarn && !(CvGV(cv) && GvSTASH(CvGV(cv))
+	    if(const_sv = cv_const_sv(cv))
+		const_changed = sv_cmp(const_sv, op_const_sv(block, Nullcv));
+	    if ((const_sv && const_changed) || dowarn && !(CvGV(cv) && GvSTASH(CvGV(cv))
 					&& HvNAME(GvSTASH(CvGV(cv)))
 					&& strEQ(HvNAME(GvSTASH(CvGV(cv))),
 						 "autouse"))) {

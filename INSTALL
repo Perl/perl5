@@ -163,18 +163,11 @@ your perl source directory.  If you do, installperl will attempt
 infinite recursion.
 
 It may seem obvious to say, but Perl is useful only when users can
-easily find it. When possible, it's good for both /usr/bin/perl and
-/usr/local/bin/perl to be symlinks to the actual binary. If that can't
-be done, system administrators are strongly encouraged to put
-(symlinks to) perl and its accompanying utilities, such as perldoc,
-into a directory typically found along a user's PATH, or in another
-obvious and convenient place.
-
-It may seem obvious to say, but Perl is useful only when users can
-easily find it. When possible, it's good for both /usr/bin/perl and
-/usr/local/bin/perl to be symlinks to the actual binary. If that can't
-be done, system administrators are strongly encouraged to put
-(symlinks to) perl and its accompanying utilities, such as perldoc,
+easily find it.  It's often a good idea to have both /usr/bin/perl and
+/usr/local/bin/perl be symlinks to the actual binary.  Be especially
+careful, however, of overwriting a version of perl supplied by your
+vendor.  In any case, system administrators are strongly encouraged to
+put (symlinks to) perl and its accompanying utilities, such as perldoc,
 into a directory typically found along a user's PATH, or in another
 obvious and convenient place.
 
@@ -514,14 +507,6 @@ There are several different ways to Configure and build perl for your
 system.  For most users, the defaults are sensible and will work.
 Some users, however, may wish to further customize perl.  Here are
 some of the main things you can change.
-
-=head2 Installing perl under different names
-
-If you want to install perl under a name other than "perl" (for example,
-when installing perl with special features enabled, such as debugging),
-indicate the alternate name on the "make install" line, such as:
-
-    make install PERLNAME=myperl
 
 =head2 Threads
 
@@ -1319,6 +1304,16 @@ pages, however.  You may need to be root to run B<make install>.  If you
 are not root, you must own the directories in question and you should
 ignore any messages about chown not working.
 
+=head2 Installing perl under different names
+
+If you want to install perl under a name other than "perl" (for example,
+when installing perl with special features enabled, such as debugging),
+indicate the alternate name on the "make install" line, such as:
+
+    make install PERLNAME=myperl
+
+=head2 Installed files
+
 If you want to see exactly what will happen without installing
 anything, you can run
 
@@ -1588,4 +1583,4 @@ above.
 
 =head1 LAST MODIFIED
 
-$Id: INSTALL,v 1.34 1998/04/23 18:19:41 doughera Released $
+$Id: INSTALL,v 1.35 1998/05/18 19:06:26 doughera Released $

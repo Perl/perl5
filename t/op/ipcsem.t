@@ -115,8 +115,9 @@ exit;
 
 print "1..10\n";
 
-my $sem = semget($IPC_PRIVATE, 10, $S_IRWXU | $S_IRWXG | $S_IRWXO | $IPC_CREAT)
-	|| die "semget: $!\n";
+my $sem = semget($IPC_PRIVATE, 10, $S_IRWXU | $S_IRWXG | $S_IRWXO | $IPC_CREAT);
+# Very first time called after machine is booted value may be 0 
+die "semget: $!\n" unless defined($sem) && $sem >= 0;
 
 print "ok 1\n";
 

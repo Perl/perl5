@@ -16,11 +16,7 @@
 #include "perl.h"
 
 #ifndef PERL_OBJECT
-#ifdef I_STDARG
 static void dump(char *pat, ...);
-#else
-static void dump();
-#endif
 #endif /* PERL_OBJECT */
 
 void
@@ -32,7 +28,7 @@ dump_all(void)
     if (main_root)
 	dump_op(main_root);
     dump_packsubs(defstash);
-#endif /* DEBUGGING */
+#endif	/* DEBUGGING */
 }
 
 void
@@ -58,7 +54,7 @@ dump_packsubs(HV *stash)
 		dump_packsubs(hv);		/* nested package */
 	}
     }
-#endif /* DEBUGGING */
+#endif	/* DEBUGGING */
 }
 
 void
@@ -77,7 +73,7 @@ dump_sub(GV *gv)
 	dump_op(CvROOT(GvCV(gv)));
     else
 	dump("<undef>\n");
-#endif /* DEBUGGING */
+#endif	/* DEBUGGING */
 }
 
 void
@@ -92,7 +88,7 @@ dump_form(GV *gv)
 	dump_op(CvROOT(GvFORM(gv)));
     else
 	dump("<undef>\n");
-#endif /* DEBUGGING */
+#endif	/* DEBUGGING */
 }
 
 void
@@ -100,7 +96,7 @@ dump_eval(void)
 {
 #ifdef DEBUGGING
     dump_op(eval_root);
-#endif /* DEBUGGING */
+#endif	/* DEBUGGING */
 }
 
 void
@@ -315,7 +311,7 @@ dump_op(OP *o)
     }
     dumplvl--;
     dump("}\n");
-#endif /* DEBUGGING */
+#endif	/* DEBUGGING */
 }
 
 void
@@ -340,7 +336,7 @@ dump_gv(GV *gv)
     dump("\n");
     dumplvl--;
     dump("}\n");
-#endif /* DEBUGGING */
+#endif	/* DEBUGGING */
 }
 
 void
@@ -401,51 +397,21 @@ dump_pm(PMOP *pm)
 
     dumplvl--;
     dump("}\n");
-#endif /* DEBUGGING */
+#endif	/* DEBUGGING */
 }
 
 
-#if !defined(I_STDARG) && !defined(I_VARARGS)
-/* VARARGS1 */
-static void dump(arg1,arg2,arg3,arg4,arg5)
-char *arg1;
-long arg2, arg3, arg4, arg5;
-{
-#ifdef DEBUGGING
-    I32 i;
-
-    for (i = dumplvl*4; i; i--)
-	(void)PerlIO_putc(Perl_debug_log,' ');
-    PerlIO_printf(Perl_debug_log, arg1, arg2, arg3, arg4, arg5);
-#endif /* DEBUGGING */
-}
-
-#else
-
-#ifdef I_STDARG
 STATIC void
 dump(char *pat,...)
-#else
-/*VARARGS0*/
-static void
-dump(pat,va_alist)
-    char *pat;
-    va_dcl
-#endif
 {
 #ifdef DEBUGGING
     I32 i;
     va_list args;
 
-#ifdef I_STDARG
     va_start(args, pat);
-#else
-    va_start(args);
-#endif
     for (i = dumplvl*4; i; i--)
 	(void)PerlIO_putc(Perl_debug_log,' ');
     PerlIO_vprintf(Perl_debug_log,pat,args);
     va_end(args);
-#endif /* DEBUGGING */
+#endif	/* DEBUGGING */
 }
-#endif

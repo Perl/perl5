@@ -115,7 +115,9 @@ call
 
 	timethis(COUNT, VALUE, KEY, STYLE)
 
-The Count can be zero or negative, see timethis().
+The routines are called in string comparison order of KEY.
+
+The COUNT can be zero or negative, see timethis().
 
 =item timediff ( T1, T2 )
 
@@ -295,12 +297,12 @@ sub timestr {
     $style ||= $defaultstyle;
     $style = ($ct>0) ? 'all' : 'noc' if $style eq 'auto';
     my $s = "@t $style"; # default for unknown style
-    $s=sprintf("%2d wallclock secs (%$f usr %$f sys + %$f cusr %$f csys = %$f CPU secs)",
+    $s=sprintf("%2d wallclock secs (%$f usr %$f sys + %$f cusr %$f csys = %$f CPU)",
 			    @t,$t) if $style eq 'all';
-    $s=sprintf("%$f CPU secs (%$f usr + %$f sys)",
-			    $pt,$pu,$ps) if $style eq 'noc';
-    $s=sprintf("%$f CPU secs (%$f cusr %$f csys)",
-			    $ct,$cu,$cs) if $style eq 'nop';
+    $s=sprintf("%2d wallclock secs (%$f usr + %$f sys = %$f CPU)",
+			    $r,$pu,$ps,$pt) if $style eq 'noc';
+    $s=sprintf("%2d wallclock secs (%$f cusr + %$f csys = %$f CPU)",
+			    $r,$cu,$cs,$ct) if $style eq 'nop';
     $s .= sprintf(" @ %$f/s (n=$n)", $n / ( $pu + $ps )) if $n;
     $s;
 }

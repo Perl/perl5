@@ -112,7 +112,7 @@ FileHandle - supply object methods for filehandles
     use FileHandle;
 
     $fh = new FileHandle;
-    if ($fh->open "< file") {
+    if ($fh->open("< file")) {
         print <$fh>;
         $fh->close;
     }

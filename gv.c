@@ -111,6 +111,7 @@ gv_init(GV *gv, HV *stash, char *name, STRLEN len, int multi)
     if (multi)
 	GvMULTI_on(gv);
     if (doproto) {			/* Replicate part of newSUB here. */
+	SvIOK_off(gv);
 	ENTER;
 	start_subparse(0,0);		/* Create CV in compcv. */
 	GvCV(gv) = compcv;
@@ -721,7 +722,7 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 		SPAGAIN;
 		stash = gv_stashpvn("Errno",5,FALSE);
 		if (!stash || !(gv_fetchmethod(stash, "TIEHASH")))
-		    croak("Can't use %%! because Errno.pm is not avaliable");
+		    croak("Can't use %%! because Errno.pm is not available");
 	    }
 	}
 	goto magicalize;

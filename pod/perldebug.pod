@@ -1083,7 +1083,7 @@ file.
 Some functions are provided to simplify customization.  See L<"Debugger
 Customization"> for description of C<DB::parse_options(string)>.  The
 function C<DB::dump_trace(skip[, count])> skips the specified number
-of frames, and returns an array containing info about the caller
+of frames, and returns a list containing info about the caller
 frames (all if C<count> is missing).  Each entry is a hash with keys
 C<context> (C<$> or C<@>), C<sub> (subroutine name, or info about
 eval), C<args> (C<undef> or a reference to an array), C<file>, and

@@ -2474,7 +2474,7 @@ init_postdump_symbols(register int argc, register char **argv, register char **e
 	    if (!(s = strchr(*env,'=')))
 		continue;
 	    *s++ = '\0';
-#if defined(WIN32) || defined(MSDOS)
+#if defined(MSDOS)
 	    (void)strupr(*env);
 #endif
 	    sv = newSVpv(s--,0);
@@ -2878,7 +2878,6 @@ read_e_script(int idx, SV *buf_sv, int maxlen)
 #endif
 {
     char *p, *nl;
-    FILTER_READ(idx+1, buf_sv, maxlen);
     p  = SvPVX(e_script);
     nl = strchr(p, '\n');
     nl = (nl) ? nl+1 : SvEND(e_script);
