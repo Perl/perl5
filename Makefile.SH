@@ -378,9 +378,19 @@ perlmain.c: miniperlmain.c config.sh $(FIRSTMAKEFILE)
 	sh writemain $(DYNALOADER) $(static_ext) > writemain.tmp
 	sh mv-if-diff writemain.tmp perlmain.c
 
+!NO!SUBS!
+case "$osname" in
+cygwin)
+	;; # Let cygwin/Makefile.SHs do its work.
+*)
+	$spitshell >>Makefile <<'!NO!SUBS!'
 perlmain$(OBJ_EXT): perlmain.c
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
+!NO!SUBS!
+	;;
+esac
+$spitshell >>Makefile <<'!NO!SUBS!'
 # The file ext.libs is a list of libraries that must be linked in
 # for static extensions, e.g. -lm -lgdbm, etc.  The individual
 # static extension Makefile's add to it.
