@@ -4,10 +4,12 @@ use Config qw(%Config);
 use ExtUtils::MakeMaker;
 
 my @extra;
-@extra = (DEFINE => "-DU32_ALIGNMENT_REQUIRED")
-    if !($Config{'byteorder'} eq '1234' || $Config{'byteorder'} eq '4321') ||
-       $^O eq 'VMS' ||
-       $Config{d_u32align};
+
+unless ($Config{d_u32align}) {
+    @extra = (DEFINE => "-DU32_ALIGNMENT_REQUIRED")
+	if !($Config{'byteorder'} eq '1234' ||
+	     $Config{'byteorder'} eq '4321');
+}
 
 WriteMakefile(
     'NAME'	   => 'Digest::MD5',
