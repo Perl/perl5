@@ -1,17 +1,26 @@
 #!./perl -w
 
+use warnings;
+use strict;
+
 BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-    require Config; import Config;
-    if ($Config{'extensions'} !~ /\bDB_File\b/) {
-	print "1..0 # Skip: DB_File was not built\n";
-	exit 0;
+    unless(grep /blib/, @INC) {
+        chdir 't' if -d 't';
+        @INC = '../lib' if -d '../lib';
+    }
+}
+ 
+use Config;
+ 
+BEGIN {
+    if(-d "lib" && -f "TEST") {
+        if ($Config{'extensions'} !~ /\bDB_File\b/ ) {
+            print "1..163\n";
+            exit 0;
+        }
     }
 }
 
-use warnings;
-use strict;
 use DB_File; 
 use Fcntl;
 
@@ -66,23 +75,31 @@ sub lexical
 sub docat
 { 
     my $file = shift;
-    #local $/ = undef unless wantarray ;
+    local $/ = undef ;
     open(CAT,$file) || die "Cannot open $file: $!";
-    my @result = <CAT>;
+    my $result = <CAT>;
     close(CAT);
-    wantarray ? @result : join("", @result) ;
+    $result = normalise($result) ;
+    return $result ;
 }   
 
 sub docat_del
 { 
     my $file = shift;
-    #local $/ = undef unless wantarray ;
-    open(CAT,$file) || die "Cannot open $file: $!";
-    my @result = <CAT>;
-    close(CAT);
+    my $result = docat($file);
     unlink $file ;
-    wantarray ? @result : join("", @result) ;
+    return $result ;
 }   
+
+sub normalise
+{
+    my $data = shift ;
+    $data =~ s#\r\n#\n#g 
+        if $^O eq 'cygwin' ;
+
+    return $data ;
+}
+
 
 
 my $db185mode =  ($DB_File::db_version == 1 && ! $DB_File::db_185_compat) ;
@@ -143,8 +160,11 @@ ok(19, $X = tie(%h, 'DB_File',$Dfile, O_RDWR|O_CREAT, 0640, $DB_BTREE )) ;
 
 my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
    $blksize,$blocks) = stat($Dfile);
+
+my %noMode = map { $_, 1} qw( amigaos MSWin32 NetWare cygwin ) ;
+
 ok(20, ($mode & 0777) == (($^O eq 'os2' || $^O eq 'MacOS') ? 0666 : 0640)
-   || $^O eq 'amigaos' || $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'NetWare');
+   || $noMode{$^O} );
 
 my ($key, $value, $i);
 while (($key,$value) = each(%h)) {
