@@ -75,11 +75,10 @@ PP(pp_regcomp) {
     tmpstr = POPs;
     t = SvPV(tmpstr, len);
 
-    /* JMR: Check against the last compiled regexp.
-       To know for sure, we'd need the length of precomp.
-       But we don't have it, so we must ... take a guess. */
+    /* Check against the last compiled regexp. */
     if (!pm->op_pmregexp || !pm->op_pmregexp->precomp ||
-	memNE(pm->op_pmregexp->precomp, t, len + 1))
+	pm->op_pmregexp->prelen != len ||
+	memNE(pm->op_pmregexp->precomp, t, len))
     {
 	if (pm->op_pmregexp) {
 	    pregfree(pm->op_pmregexp);
