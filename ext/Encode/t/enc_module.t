@@ -1,4 +1,4 @@
-# $Id: enc_module.t,v 1.5 2003/04/24 17:43:16 dankogai Exp $
+# $Id: enc_module.t,v 1.6 2003/05/10 18:13:59 dankogai Exp $
 # This file is in euc-jp
 BEGIN {
     require Config; import Config;
@@ -41,9 +41,9 @@ print $obj->str, "\n";
 $obj->set("テスト文字列");
 print $obj->str, "\n";
 
-# I have tested and found "unless $^O eq 'freebsd'" is not
-# necessary but I will leave it for the sake of Enache -- dankogai
 # Please do not move this to a point after the comparison -- Craig Berry
+# and "unless $^O eq 'freebsd'" is needed for FreeBSD (toy-)?thread
+# -- dankogai
 close STDOUT unless $^O eq 'freebsd';
 
 my $cmp = compare_text($file0, $file1);

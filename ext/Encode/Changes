@@ -1,8 +1,42 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.93 2003/04/24 17:43:16 dankogai Exp $
+# $Id: Changes,v 1.94 2003/05/10 18:13:59 dankogai Exp $
 #
-$Revision: 1.93 $ $Date: 2003/04/24 17:43:16 $
+$Revision: 1.94 $ $Date: 2003/05/10 18:13:59 $
+! lib/Encode/MIME/Header.pm
+  A more sophisticated solution for double-encoding by dankogai
+! lib/Encode/MIME/Header.pm AUTHORS
+  Two bugs fixed by Bjoern Jacke
+  * "Double Encoding" was not possible
+    i.e. encode("MIME-B" => "=?UTF-8?B?w4RwZmVs?=")
+  * encode("MIME-Q") had UTF-8 flag on
+  Message-Id: <rt-22166-57077.2.12980078979811@bugs6.perl.org>
+! lib/Encode/MIME/Header.pm AUTHORS
+  Two occurances of "croak ()" fixed as "croak qq()".
+  Simon Cozens is added to AUTHORS as a result.
+  Message-Id: <20030509103708.GA30664@deep-dark-truthful-mirror.pad>
+! bin/piconv
+  POD fixes that reflect enhancements by jhi
+! bin/piconv
+  Two enhancements by jhi.
+  + Now uses Getopt::Long so it accepts long name options 
+   (--from for -f, for example)
+  + New option: -r,--resolve
+  Message-Id: <20030505114149.GA227075@kosh.hut.fi>
+! MANIFEST META.yml
+  META.yml added upon request of Schwern
+  Message-Id: <F3B0BD2C-7BCB-11D7-A488-000393AE4244@dan.co.jp>
+! AUTHORS
+  Enache Adrian removed upon request -- to live longer than Encode
+  and/or FreeBSD (toy-)?thread :)
+  Message-Id: <20030425015701.GA2069@ratsnest.hole>
+! t/enc_module.t
+  "close STDOUT unless $^O eq 'freebsd';" once again relocated
+  to keep VMS happy in which case "$^O eq 'freebsd'" is required
+  to keep FreeBSD+thread happy.  Sigh.
+  Message-Id: <3EA88ADC.3000300@mac.com>
+
+1.93 2003/04/24 17:43:16
 ! t/enc_eucjp.t
   added "no warnings 'pack'" in for loop to keep bleedperl from
   complaining "Character in 'C' format wrapped in pack".
