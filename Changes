@@ -69,6 +69,19 @@ Version 5.004_71        Developer release working toward 5.005
 ----------------
 
 ____________________________________________________________________________
+[  1453] By: gsar                                  on 1998/07/12  10:04:33
+        Log: merge changes 1424, 1428 from maintbranch
+     Branch: perl
+           ! Porting/makerel ext/re/re.pm lib/Sys/Syslog.pm
+____________________________________________________________________________
+[  1452] By: gsar                                  on 1998/07/12  09:46:40
+        Log: patchlevel up to 72, update Changes, minor tweaks to win32/config*
+             and README.win32
+     Branch: perl
+	   ! Changes README.win32 patchlevel.h win32/Makefile
+	   ! win32/config_H.bc win32/config_H.gc win32/config_H.vc
+           ! win32/makefile.mk
+____________________________________________________________________________
 [  1451] By: gsar                                  on 1998/07/12  07:01:26
         Log: generic Configure mods and HAS_GROUP additions to help MiNT/MPEix/MVS
              From: Jarkko Hietaniemi <jhi@iki.fi>
