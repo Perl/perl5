@@ -2443,11 +2443,7 @@ win32_popen(const char *command, const char *mode)
     }
 
     /* we have an fd, return a file stream */
-#ifdef USE_PERLIO
     return (PerlIO_fdopen(p[parent], (char *)mode));
-#else
-    return (fdopen(p[parent], (char *)mode));
-#endif
 
 cleanup:
     /* we don't need to check for errors here */

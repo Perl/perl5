@@ -20,7 +20,7 @@
 #endif
 /*
  * This file provides those parts of PerlIO abstraction
- * which are not #defined in iperlsys.h.
+ * which are not #defined in perlio.h.
  * Which these are depends on various Configure #ifdef's
  */
 
@@ -35,10 +35,10 @@ PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
  if (!names || !*names || strEQ(names,":crlf") || strEQ(names,":raw"))
   {
    return 0;
-  } 
+  }
  Perl_croak(aTHX_ "Cannot apply \"%s\" in non-PerlIO perl",names);
  /* NOTREACHED */
- return -1; 
+ return -1;
 }
 #endif
 
@@ -114,12 +114,14 @@ PerlIO_init(void)
 
 #include "XSUB.h"
 
-void PerlIO_debug(char *fmt,...) __attribute__((format(__printf__,1,2)));
+void PerlIO_debug(const char *fmt,...) __attribute__((format(__printf__,1,2)));
 
 void
-PerlIO_debug(char *fmt,...)
+PerlIO_debug(const char *fmt,...)
 {
  static int dbg = 0;
+ va_list ap;
+ va_start(ap,fmt);
  if (!dbg)
   {
    char *s = PerlEnv_getenv("PERLIO_DEBUG");
@@ -131,11 +133,9 @@ PerlIO_debug(char *fmt,...)
  if (dbg > 0)
   {
    dTHX;
-   va_list ap;
    SV *sv = newSVpvn("",0);
    char *s;
    STRLEN len;
-   va_start(ap,fmt);
    s = CopFILE(PL_curcop);
    if (!s)
     s = "(none)";
@@ -144,9 +144,9 @@ PerlIO_debug(char *fmt,...)
 
    s = SvPV(sv,len);
    PerlLIO_write(dbg,s,len);
-   va_end(ap);
    SvREFCNT_dec(sv);
   }
+ va_end(ap);
 }
 
 /*--------------------------------------------------------------------------------------*/
@@ -943,6 +943,11 @@ PerlIOUnix_oflags(const char *mode)
      oflags |= O_WRONLY;
     break;
   }
+ if (*mode == 'b')
+  {
+   oflags |= O_BINARY;
+   mode++; 
+  }   
  if (*mode || oflags == -1)
   {
    errno = EINVAL;
@@ -1278,7 +1283,25 @@ IV
 PerlIOStdio_flush(PerlIO *f)
 {
  FILE *stdio = PerlIOSelf(f,PerlIOStdio)->stdio;
- return fflush(stdio);
+ if (PerlIOBase(f)->flags & PERLIO_F_CANWRITE)
+  {
+   return fflush(stdio);
+  }
+ else
+  {
+#if 0
+   /* FIXME: This discards ungetc() and pre-read stuff which is
+      not right if this is just a "sync" from a layer above
+      Suspect right design is to do _this_ but not have layer above
+      flush this layer read-to-read
+    */
+   /* Not writeable - sync by attempting a seek */
+   int err = errno;
+   if (fseek(stdio,(Off_t) 0, SEEK_CUR) != 0)
+    errno = err;
+#endif
+  }
+ return 0;
 }
 
 IV
@@ -1555,6 +1578,7 @@ PerlIOBuf_flush(PerlIO *f)
   }
  b->ptr = b->end = b->buf;
  PerlIOBase(f)->flags &= ~(PERLIO_F_RDBUF|PERLIO_F_WRBUF);
+ /* FIXME: Is this right for read case ? */
  if (PerlIO_flush(PerlIONext(f)) != 0)
   code = -1;
  return code;
@@ -1564,11 +1588,53 @@ IV
 PerlIOBuf_fill(PerlIO *f)
 {
  PerlIOBuf *b = PerlIOSelf(f,PerlIOBuf);
+ PerlIO *n = PerlIONext(f);
  SSize_t avail;
+ /* FIXME: doing the down-stream flush is a bad idea if it causes
+    pre-read data in stdio buffer to be discarded
+    but this is too simplistic - as it skips _our_ hosekeeping
+    and breaks tell tests.
+ if (!(PerlIOBase(f)->flags & PERLIO_F_RDBUF))
+  {
+  }
+  */
  if (PerlIO_flush(f) != 0)
   return -1;
+
  b->ptr = b->end = b->buf;
- avail = PerlIO_read(PerlIONext(f),b->ptr,b->bufsiz);
+ if (PerlIO_fast_gets(n))
+  {
+   /* Layer below is also buffered
+    * We do _NOT_ want to call its ->Read() because that will loop
+    * till it gets what we asked for which may hang on a pipe etc.
+    * Instead take anything it has to hand, or ask it to fill _once_.
+    */
+   avail  = PerlIO_get_cnt(n);
+   if (avail <= 0)
+    {
+     avail = PerlIO_fill(n);
+     if (avail == 0)
+      avail = PerlIO_get_cnt(n);
+     else
+      {
+       if (!PerlIO_error(n) && PerlIO_eof(n))
+        avail = 0;
+      }
+    }
+   if (avail > 0)
+    {
+     STDCHAR *ptr = PerlIO_get_ptr(n);
+     SSize_t cnt  = avail;
+     if (avail > b->bufsiz)
+      avail = b->bufsiz;
+     Copy(ptr,b->buf,avail,STDCHAR);
+     PerlIO_set_ptrcnt(n,ptr+avail,cnt-avail);
+    }
+  }
+ else
+  {
+   avail = PerlIO_read(n,b->ptr,b->bufsiz);
+  }
  if (avail <= 0)
   {
    if (avail == 0)
@@ -1601,7 +1667,7 @@ PerlIOBuf_read(PerlIO *f, void *vbuf, Size_t count)
       avail = count;
      if (avail > 0)
       {
-       Copy(b->ptr,buf,avail,char);
+       Copy(b->ptr,buf,avail,STDCHAR);
        got     += avail;
        b->ptr  += avail;
        count   -= avail;
@@ -1650,7 +1716,7 @@ PerlIOBuf_unread(PerlIO *f, const void *vbuf, Size_t count)
      buf    -= avail;
      if (buf != b->ptr)
       {
-       Copy(buf,b->ptr,avail,char);
+       Copy(buf,b->ptr,avail,STDCHAR);
       }
      count  -= avail;
      unread += avail;
@@ -1696,7 +1762,7 @@ PerlIOBuf_write(PerlIO *f, const void *vbuf, Size_t count)
     {
      if (avail)
       {
-       Copy(buf,b->ptr,avail,char);
+       Copy(buf,b->ptr,avail,STDCHAR);
        count   -= avail;
        buf     += avail;
        written += avail;
@@ -2344,8 +2410,18 @@ PerlIO_stdoutf(const char *fmt,...)
 PerlIO *
 PerlIO_tmpfile(void)
 {
- dTHX;
  /* I have no idea how portable mkstemp() is ... */
+#if defined(WIN32) || !defined(HAVE_MKSTEMP)
+ PerlIO *f = NULL;
+ FILE *stdio = tmpfile();
+ if (stdio)
+  {
+   PerlIOStdio *s = PerlIOSelf(PerlIO_push(f = PerlIO_allocate(),&PerlIO_stdio,"w+"),PerlIOStdio);
+   s->stdio  = stdio;
+  }
+ return f;
+#else
+ dTHX;
  SV *sv = newSVpv("/tmp/PerlIO_XXXXXX",0);
  int fd = mkstemp(SvPVX(sv));
  PerlIO *f = NULL;
@@ -2360,6 +2436,7 @@ PerlIO_tmpfile(void)
    SvREFCNT_dec(sv);
   }
  return f;
+#endif
 }
 
 #undef HAS_FSETPOS

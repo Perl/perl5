@@ -433,16 +433,16 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    IoTYPE(io) = IoTYPE_RDONLY;
 	    /*SUPPRESS 530*/
 	    for (; isSPACE(*name); name++) ;
+	    mode[0] = 'r';
+	    if (in_raw)
+		strcat(mode, "b");
+	    else if (in_crlf)
+		strcat(mode, "t");
 	    if (strEQ(name,"-")) {
 		fp = PerlIO_stdin();
 		IoTYPE(io) = IoTYPE_STD;
 	    }
 	    else {
-	        mode[0] = 'r';
-		if (in_raw)
-		    strcat(mode, "b");
-		else if (in_crlf)
-		    strcat(mode, "t");
 		fp = PerlIO_open(name,mode);
 	    }
 	}
@@ -453,8 +453,7 @@ Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    Perl_warner(aTHX_ WARN_NEWLINE, PL_warn_nl, "open");
 	goto say_false;
     }
-    if (IoTYPE(io) &&
-      IoTYPE(io) != IoTYPE_PIPE && IoTYPE(io) != IoTYPE_STD) {
+    if (IoTYPE(io) && IoTYPE(io) != IoTYPE_PIPE && IoTYPE(io) != IoTYPE_STD) {
 	dTHR;
 	if (PerlLIO_fstat(PerlIO_fileno(fp),&PL_statbuf) < 0) {
 	    (void)PerlIO_close(fp);
