@@ -99,6 +99,55 @@ perlsio_binmode(FILE *fp, int iotype, int mode)
 #endif
 }
 
+#ifndef O_ACCMODE
+#define O_ACCMODE 3		/* Assume traditional implementation */
+#endif
+
+int
+PerlIO_intmode2str(int rawmode, char *mode, int *writing)
+{
+    int result = rawmode & O_ACCMODE;
+    int ix = 0;
+    int ptype;
+    switch (result) {
+    case O_RDONLY:
+	ptype = IoTYPE_RDONLY;
+	break;
+    case O_WRONLY:
+	ptype = IoTYPE_WRONLY;
+	break;
+    case O_RDWR:
+    default:
+	ptype = IoTYPE_RDWR;
+	break;
+    }
+    if (writing)
+	*writing = (result != O_RDONLY);
+
+    if (result == O_RDONLY) {
+	mode[ix++] = 'r';
+    }
+#ifdef O_APPEND
+    else if (rawmode & O_APPEND) {
+	mode[ix++] = 'a';
+	if (result != O_WRONLY)
+	    mode[ix++] = '+';
+    }
+#endif
+    else {
+	if (result == O_WRONLY)
+	    mode[ix++] = 'w';
+	else {
+	    mode[ix++] = 'r';
+	    mode[ix++] = '+';
+	}
+    }
+    if (rawmode & O_BINARY)
+	mode[ix++] = 'b';
+    mode[ix] = '\0';
+    return ptype;
+}
+
 #ifndef PERLIO_LAYERS
 int
 PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
@@ -134,8 +183,11 @@ PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param)
     if (f) {
 	int fd = PerlLIO_dup(PerlIO_fileno(f));
 	if (fd >= 0) {
+	    char mode[8];
+	    int omode = fcntl(fd, F_GETFL);
+	    PerlIO_intmode2str(omode,mode,NULL);
 	    /* the r+ is a hack */
-	    return PerlIO_fdopen(fd, "r+");
+	    return PerlIO_fdopen(fd, mode);
 	}
 	return NULL;
     }

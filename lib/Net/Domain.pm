@@ -36,8 +36,8 @@ sub _hostname {
           my $a = shift(@addr);
           $host = gethostbyaddr($a,Socket::AF_INET());
           last if defined $host;
-         } 
-        if (index($host,'.') > 0) {
+         }
+        if (defined($host) && index($host,'.') > 0) {
            $fqdn = $host;
            ($host,$domain) = $fqdn =~ /^([^\.]+)\.(.*)$/;
          }
@@ -102,7 +102,7 @@ sub _hostname {
 	};
     }
 
-    # remove garbage 
+    # remove garbage
     $host =~ s/[\0\r\n]+//go;
     $host =~ s/(\A\.+|\.+\Z)//go;
     $host =~ s/\.\.+/\./go;
@@ -147,7 +147,7 @@ sub _hostdomain {
 
     @hosts = ($host,"localhost");
 
-    unless($host =~ /\./) {
+    unless (defined($host) && $host =~ /\./) {
 	my $dom = undef;
         eval {
     	    my $tmp = "\0" x 256; ## preload scalar
@@ -179,19 +179,19 @@ sub _hostdomain {
 
     # Attempt to locate FQDN
 
-    foreach (@hosts) {
+    foreach (grep {defined $_} @hosts) {
     	my @info = gethostbyname($_);
 
     	next unless @info;
 
     	# look at real name & aliases
     	my $site;
-    	foreach $site ($info[0], split(/ /,$info[1])) { 
+    	foreach $site ($info[0], split(/ /,$info[1])) {
     	    if(rindex($site,".") > 0) {
 
     	    	# Extract domain from FQDN
 
-     	    	($domain = $site) =~ s/\A[^\.]+\.//; 
+     	    	($domain = $site) =~ s/\A[^\.]+\.//;
      	        return $domain;
     	    }
     	}

@@ -158,45 +158,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	rawmode |= O_LARGEFILE;	/* Transparently largefiley. */
 #endif
 
-#ifndef O_ACCMODE
-#define O_ACCMODE 3		/* Assume traditional implementation */
-#endif
-
-	switch (result = rawmode & O_ACCMODE) {
-	case O_RDONLY:
-	     IoTYPE(io) = IoTYPE_RDONLY;
-	     break;
-	case O_WRONLY:
-	     IoTYPE(io) = IoTYPE_WRONLY;
-	     break;
-	case O_RDWR:
-	default:
-	     IoTYPE(io) = IoTYPE_RDWR;
-	     break;
-	}
-	writing = (result != O_RDONLY);
-
-	if (result == O_RDONLY) {
-	    mode[ix++] = 'r';
-	}
-#ifdef O_APPEND
-	else if (rawmode & O_APPEND) {
-	    mode[ix++] = 'a';
-	    if (result != O_WRONLY)
-		mode[ix++] = '+';
-	}
-#endif
-	else {
-	    if (result == O_WRONLY)
-		mode[ix++] = 'w';
-	    else {
-		mode[ix++] = 'r';
-		mode[ix++] = '+';
-	    }
-	}
-	if (rawmode & O_BINARY)
-	    mode[ix++] = 'b';
-	mode[ix] = '\0';
+        IoTYPE(io) = PerlIO_intmode2str(rawmode, &mode[ix], &writing);
 
 	namesv = sv_2mortal(newSVpvn(name,strlen(name)));
 	num_svs = 1;
@@ -1693,7 +1655,7 @@ nothing in the core.
 
            if ( accessed == &PL_sv_undef && modified == &PL_sv_undef )
              utbufp = NULL;
-           
+
 	    Zero(&utbuf, sizeof utbuf, char);
 #ifdef BIG_TIME
            utbuf.actime = (Time_t)SvNVx(accessed);     /* time accessed */
