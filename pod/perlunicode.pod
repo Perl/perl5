@@ -616,10 +616,10 @@ And finally, C<scalar reverse()> reverses by character rather than by byte.
 =head2 User-Defined Character Properties
 
 You can define your own character properties by defining subroutines
-whose names begin with "In" or "Is".  The subroutines must be
-visible in the package that uses the properties.  The user-defined
-properties can be used in the regular expression C<\p> and C<\P>
-constructs.
+whose names begin with "In" or "Is".  The subroutines must be defined
+in the C<main> package.  The user-defined properties can be used in the
+regular expression C<\p> and C<\P> constructs.  Note that the effect
+is compile-time and immutable once defined.
 
 The subroutines must return a specially-formatted string, with one
 or more newline-separated lines.  Each line must be one of the following:
@@ -697,6 +697,56 @@ The negation is useful for defining (surprise!) negated classes.
     +utf8::IsCn
     END
     }
+
+You can also define your own mappings to be used in the lc(),
+lcfirst(), uc(), and ucfirst() (or their string-inlined versions).
+The principle is the same: define subroutines in the C<main> package
+with names like C<ToLower> (for lc() and lcfirst()), C<ToTitle> (for
+the first character in ucfirst()), and C<ToUpper> (for uc(), and the
+rest of the characters in ucfirst()).
+
+The string returned by the subroutines needs now to be three
+hexadecimal numbers separated by tabulators: start of the source
+range, end of the source range, and start of the destination range.
+For example:
+
+    sub ToUpper {
+	return <<END;
+    0061\t0063\t0041
+    END
+    }
+
+defines an uc() mapping that causes only the characters "a", "b", and
+"c" to be mapped to "A", "B", "C", all other characters will remain
+unchanged.
+
+If there is no source range to speak of, that is, the mapping is from
+a single character to another single character, leave the end of the
+source range empty, but the two tabulator characters are still needed.
+For example:
+
+    sub ToLower {
+	return <<END;
+    0041\t\t0061
+    END
+    }
+
+defines a lc() mapping that causes only "A" to be mapped to "a", all
+other characters will remain unchanged.
+
+(For serious hackers only)  If you want to introspect the default
+mappings, you can find the data in the directory
+C<$Config{privlib}>/F<unicore/To/>.  The mapping data is returned as
+the here-document, and the C<utf8::ToSpecFoo> are special exception
+mappings derived from <$Config{privlib}>/F<unicore/SpecialCasing.txt>.
+The C<Digit> and C<Fold> mappings that one can see in the directory
+are not directly user-accessible, one can use either the
+C<Unicode::UCD> module, or just match case-insensitively (that's when
+the C<Fold> mapping is used).
+
+A final note on the user-defined property tests and mappings: they
+will be used only if the scalar has been marked as having Unicode
+characters.  Old byte-style strings will not be affected.
 
 =head2 Character Encodings for Input and Output
 
