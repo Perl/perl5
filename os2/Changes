@@ -181,3 +181,20 @@ after 5.004_53:
 after 5.004_64:
 	Make DLL names different if thread-enabled.
 	Emit more informative internal DLL descriptions.
+
+5.004_72:
+	Updated OS2::Process (v0.2) included.
+	
+after 5.004_73:
+	Fixed a bug with argv not NULL-terminated when starting scripts.
+	Support all the forms of starting scripts.
+	Support killing a child when receiving a signal during system()
+	(in two stage, on first send the same signal, on the next
+	send SIGKILL).
+	Add the same logic for scripts as in pdksh, including 
+		stripping the path from #! line if needed, 
+		calling EXECSHELL or COMSPEC for magic-less scripts;
+	Now pdksh is called only if one-arg system()/friends contains
+	metachars, or if magic-line asks for sh, or there is no magic
+	line and EXECSHELL is set to sh.
+	Shell is supplied the original command line if possible.

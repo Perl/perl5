@@ -136,10 +136,6 @@ __END__
 EOT
     }
     $s1 = $s2 = "\$^X is $perl, \$0 is $script\n";
-    if ($^O eq 'os2') {
-	# Started by ksh, which adds suffixes '.exe' and '.' to perl and script
-	$s2 = "\$^X is $wd/perl.exe, \$0 is $script.\n";
-    }
     ok 19, open(SCRIPT, ">$script"), $!;
     ok 20, print(SCRIPT $headmaybe . <<EOB . <<'EOF' . $tailmaybe), $!;
 #!$wd/perl

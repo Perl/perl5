@@ -310,7 +310,28 @@ getpriority(int which /* ignored */, int pid)
 
 /*****************************************************************************/
 /* spawn */
-typedef void (*Sigfunc) _((int));
+
+/* There is no big sense to make it thread-specific, since signals 
+   are delivered to thread 1 only.  XXXX Maybe make it into an array? */
+static int spawn_pid;
+static int spawn_killed;
+
+static Signal_t
+spawn_sighandler(int sig)
+{
+    /* Some programs do not arrange for the keyboard signals to be
+       delivered to them.  We need to deliver the signal manually. */
+    /* We may get a signal only if 
+       a) kid does not receive keyboard signal: deliver it;
+       b) kid already died, and we get a signal.  We may only hope
+          that the pid number was not reused.
+     */
+    
+    if (spawn_killed) 
+	sig = SIGKILL;			/* Try harder. */
+    kill(spawn_pid, sig);
+    spawn_killed = 1;
+}
 
 static int
 result(int flag, int pid)
@@ -327,8 +348,10 @@ result(int flag, int pid)
 		return pid;
 
 #ifdef __EMX__
-	ihand = rsignal(SIGINT, SIG_IGN);
-	qhand = rsignal(SIGQUIT, SIG_IGN);
+	spawn_pid = pid;
+	spawn_killed = 0;
+	ihand = rsignal(SIGINT, &spawn_sighandler);
+	qhand = rsignal(SIGQUIT, &spawn_sighandler);
 	do {
 	    r = wait4pid(pid, &status, 0);
 	} while (r == -1 && errno == EINTR);
@@ -359,14 +382,15 @@ result(int flag, int pid)
 /* global Argv[] contains arguments. */
 
 int
-do_spawn_ve(really, flag, execf)
+do_spawn_ve(really, flag, execf, inicmd)
 SV *really;
 U32 flag;
 U32 execf;
+char *inicmd;
 {
     dTHR;
 	int trueflag = flag;
-	int rc, secondtry = 0, err;
+	int rc, pass = 1, err;
 	char *tmps;
 	char buf[256], *s = 0;
 	char *args[4];
@@ -385,7 +409,7 @@ U32 execf;
 	if (Argv[0][0] != '/' && Argv[0][0] != '\\'
 	    && !(Argv[0][0] && Argv[0][1] == ':' 
 		 && (Argv[0][2] == '/' || Argv[0][2] != '\\'))
-	    ) /* will swawnvp use PATH? */
+	    ) /* will spawnvp use PATH? */
 	    TAINT_ENV();	/* testing IFS here is overkill, probably */
 	/* We should check PERL_SH* and PERLLIB_* as well? */
 	if (!really || !*(tmps = SvPV(really, na)))
@@ -403,105 +427,169 @@ U32 execf;
 	    rc = result(trueflag, 
 			spawnvp(trueflag | P_NOWAIT,tmps,Argv));
 #endif 
-	if (rc < 0 && secondtry == 0 
+	if (rc < 0 && pass == 1
 	    && (tmps == Argv[0])) { /* Cannot transfer `really' via shell. */
 	    err = errno;
-	    if (err == ENOENT) {	/* No such file. */
-		/* One reason may be that EMX added .exe. We suppose
-		   that .exe-less files are automatically shellable.
-		   It might have also been .cmd file without
-		   extension. */
-		char *no_dir;
-		(no_dir = strrchr(Argv[0], '/')) 
-		    || (no_dir = strrchr(Argv[0], '\\'))
-		    || (no_dir = Argv[0]);
-		if (!strchr(no_dir, '.')) {
-		    struct stat buffer;
-		    if (stat(Argv[0], &buffer) != -1) { /* File exists. */
-			/* Maybe we need to specify the full name here? */
-			goto doshell;
-		    } else {
-			/* Try adding script extensions to the file name */
-			char *scr;
-			if ((scr = find_script(Argv[0], TRUE, NULL, 0))) {
-			    FILE *file = fopen(scr, "r");
-			    char *s = 0, *s1;
+	    if (err == ENOENT || err == ENOEXEC) {
+		/* No such file, or is a script. */
+		/* Try adding script extensions to the file name, and
+		   search on PATH. */
+		char *scr = find_script(Argv[0], TRUE, NULL, 0);
 
-			    Argv[0] = scr;
-			    if (!file)
-				goto panic_file;
-			    if (!fgets(buf, sizeof buf, file)) {
-				fclose(file);
-				goto panic_file;
-			    }
-			    if (fclose(file) != 0) { /* Failure */
-			      panic_file:
-				warn("Error reading \"%s\": %s", 
-				     scr, Strerror(errno));
-				goto doshell;
-			    }
-			    if (buf[0] == '#') {
-				if (buf[1] == '!')
-				    s = buf + 2;
-			    } else if (buf[0] == 'e') {
-				if (strnEQ(buf, "extproc", 7) 
-				    && isSPACE(buf[7]))
-				    s = buf + 8;
-			    } else if (buf[0] == 'E') {
-				if (strnEQ(buf, "EXTPROC", 7)
-				    && isSPACE(buf[7]))
-				    s = buf + 8;
-			    }
-			    if (!s)
-				goto doshell;
-			    s1 = s;
-			    nargs = 0;
-			    argsp = args;
-			    while (1) {
-				while (isSPACE(*s))
-				    s++;
-				if (*s == 0) 
-				    break;
-				if (nargs == 4) {
-				    nargs = -1;
-				    break;
-				}
-				args[nargs++] = s;
-				while (*s && !isSPACE(*s))
-				    s++;
-				if (*s == 0) 
-				    break;
-				*s++ = 0;
-			    }
-			    if (nargs == -1) {
-				warn("Too many args on %.*s line of \"%s\"",
-				     s1 - buf, buf, scr);
-				nargs = 4;
-				argsp = fargs;
-			    }
-			    goto doshell;
+		if (scr) {
+		    FILE *file = fopen(scr, "r");
+		    char *s = 0, *s1;
+
+		    Argv[0] = scr;
+		    if (!file)
+			goto panic_file;
+		    if (!fgets(buf, sizeof buf, file)) {
+			fclose(file);
+			goto panic_file;
+		    }
+		    if (fclose(file) != 0) { /* Failure */
+		      panic_file:
+			warn("Error reading \"%s\": %s", 
+			     scr, Strerror(errno));
+			buf[0] = 0;	/* Not #! */
+			goto doshell_args;
+		    }
+		    if (buf[0] == '#') {
+			if (buf[1] == '!')
+			    s = buf + 2;
+		    } else if (buf[0] == 'e') {
+			if (strnEQ(buf, "extproc", 7) 
+			    && isSPACE(buf[7]))
+			    s = buf + 8;
+		    } else if (buf[0] == 'E') {
+			if (strnEQ(buf, "EXTPROC", 7)
+			    && isSPACE(buf[7]))
+			    s = buf + 8;
+		    }
+		    if (!s) {
+			buf[0] = 0;	/* Not #! */
+			goto doshell_args;
+		    }
+		    
+		    s1 = s;
+		    nargs = 0;
+		    argsp = args;
+		    while (1) {
+			/* Do better than pdksh: allow a few args,
+			   strip trailing whitespace.  */
+			while (isSPACE(*s))
+			    s++;
+			if (*s == 0) 
+			    break;
+			if (nargs == 4) {
+			    nargs = -1;
+			    break;
 			}
+			args[nargs++] = s;
+			while (*s && !isSPACE(*s))
+			    s++;
+			if (*s == 0) 
+			    break;
+			*s++ = 0;
+		    }
+		    if (nargs == -1) {
+			warn("Too many args on %.*s line of \"%s\"",
+			     s1 - buf, buf, scr);
+			nargs = 4;
+			argsp = fargs;
+		    }
+		  doshell_args:
+		    {
+			char **a = Argv;
+			char *exec_args[2];
+
+			if (!buf[0] && file) { /* File without magic */
+			    /* In fact we tried all what pdksh would
+			       try.  There is no point in calling
+			       pdksh, we may just emulate its logic. */
+			    char *shell = getenv("EXECSHELL");
+			    char *shell_opt = NULL;
+
+			    if (!shell) {
+				char *s;
+
+				shell_opt = "/c";
+				shell = getenv("OS2_SHELL");
+				if (inicmd) { /* No spaces at start! */
+				    s = inicmd;
+				    while (*s && !isSPACE(*s)) {
+					if (*s++ = '/') {
+					    inicmd = NULL; /* Cannot use */
+					    break;
+					}
+				    }
+				}
+				if (!inicmd) {
+				    s = Argv[0];
+				    while (*s) { 
+					/* Dosish shells will choke on slashes
+					   in paths, fortunately, this is
+					   important for zeroth arg only. */
+					if (*s == '/') 
+					    *s = '\\';
+					s++;
+				    }
+				}
+			    }
+			    /* If EXECSHELL is set, we do not set */
+			    
+			    if (!shell)
+				shell = ((_emx_env & 0x200)
+					 ? "c:/os2/cmd.exe"
+					 : "c:/command.com");
+			    nargs = shell_opt ? 2 : 1;	/* shell file args */
+			    exec_args[0] = shell;
+			    exec_args[1] = shell_opt;
+			    argsp = exec_args;
+			    if (nargs == 2 && inicmd) {
+				/* Use the original cmd line */
+				/* XXXX This is good only until we refuse
+				        quoted arguments... */
+				Argv[0] = inicmd;
+				Argv[1] = Nullch;
+			    }
+			} else if (!buf[0] && inicmd) { /* No file */
+			    /* Start with the original cmdline. */
+			    /* XXXX This is good only until we refuse
+			            quoted arguments... */
+
+			    Argv[0] = inicmd;
+			    Argv[1] = Nullch;
+			    nargs = 2;	/* shell -c */
+			} 
+
+			while (a[1])		/* Get to the end */
+			    a++;
+			a++;			/* Copy finil NULL too */
+			while (a >= Argv) {
+			    *(a + nargs) = *a;	/* Argv was preallocated to be
+						   long enough. */
+			    a--;
+			}
+			while (nargs-- >= 0)
+			    Argv[nargs] = argsp[nargs];
+			/* Enable pathless exec if #! (as pdksh). */
+			pass = (buf[0] == '#' ? 2 : 3);
+			goto retry;
 		    }
 		}
-		/* Restore errno */
+		/* Not found: restore errno */
 		errno = err;
-	    } else if (err == ENOEXEC) { /* Need to send to shell. */
-	      doshell:
-		{
-		char **a = Argv;
+	    }
+	} else if (rc < 0 && pass == 2 && err == ENOENT) { /* File not found */
+	    char *no_dir = strrchr(Argv[0], '/');
 
-		while (a[1])		/* Get to the end */
-		    a++;
-		while (a >= Argv) {
-		    *(a + nargs) = *a;	/* Argv was preallocated to be
-					   long enough. */
-		    a--;
-		}
-		while (nargs-- >= 0)
-		    Argv[nargs] = argsp[nargs];
-		secondtry = 1;
+	    /* Do as pdksh port does: if not found with /, try without
+	       path. */
+	    if (no_dir) {
+		Argv[0] = no_dir + 1;
+		pass++;
 		goto retry;
-		}
 	    }
 	}
 	if (rc < 0 && dowarn)
@@ -516,6 +604,7 @@ U32 execf;
     return rc;
 }
 
+/* Array spawn.  */
 int
 do_aspawn(really,mark,sp)
 SV *really;
@@ -545,7 +634,7 @@ register SV **sp;
 	}
 	*a = Nullch;
 
-	rc = do_spawn_ve(really, flag, EXECF_SPAWN);
+	rc = do_spawn_ve(really, flag, EXECF_SPAWN, NULL);
     } else
     	rc = -1;
     do_execfree();
@@ -562,7 +651,7 @@ int execf;
     register char *s;
     char flags[10];
     char *shell, *copt, *news = NULL;
-    int rc, added_shell = 0, err, seenspace = 0;
+    int rc, err, seenspace = 0;
     char fullcmd[MAXNAMLEN + 1];
 
 #ifdef TRYSHELL
@@ -593,7 +682,6 @@ int execf;
 	strcpy(news, sh_path);
 	strcpy(news + l, cmd + 7);
 	cmd = news;
-	added_shell = 1;
     }
 
     /* save an extra exec if possible */
@@ -621,20 +709,23 @@ int execf;
 	       should be smart enough to start itself gloriously. */
 	  doshell:
 	    if (execf == EXECF_TRUEEXEC)
-                return execl(shell,shell,copt,cmd,(char*)0);
+                rc = execl(shell,shell,copt,cmd,(char*)0);		
 	    else if (execf == EXECF_EXEC)
-                return spawnl(P_OVERLAY,shell,shell,copt,cmd,(char*)0);
+                rc = spawnl(P_OVERLAY,shell,shell,copt,cmd,(char*)0);
 	    else if (execf == EXECF_SPAWN_NOWAIT)
-                return spawnl(P_NOWAIT,shell,shell,copt,cmd,(char*)0);
-	    /* In the ak code internal P_NOWAIT is P_WAIT ??? */
-	    rc = result(P_WAIT,
-			spawnl(P_NOWAIT,shell,shell,copt,cmd,(char*)0));
-	    if (rc < 0 && dowarn)
-		warn("Can't %s \"%s\": %s", 
-		     (execf == EXECF_SPAWN ? "spawn" : "exec"),
-		     shell, Strerror(errno));
-	    if (rc < 0) rc = 255 << 8; /* Emulate the fork(). */
-	    if (news) Safefree(news);
+                rc = spawnl(P_NOWAIT,shell,shell,copt,cmd,(char*)0);
+	    else {
+		/* In the ak code internal P_NOWAIT is P_WAIT ??? */
+		rc = result(P_WAIT,
+			    spawnl(P_NOWAIT,shell,shell,copt,cmd,(char*)0));
+		if (rc < 0 && dowarn)
+		    warn("Can't %s \"%s\": %s", 
+			 (execf == EXECF_SPAWN ? "spawn" : "exec"),
+			 shell, Strerror(errno));
+		if (rc < 0) rc = 255 << 8; /* Emulate the fork(). */
+	    }
+	    if (news)
+		Safefree(news);
 	    return rc;
 	} else if (*s == ' ' || *s == '\t') {
 	    seenspace = 1;
@@ -655,10 +746,11 @@ int execf;
     }
     *a = Nullch;
     if (Argv[0])
-	rc = do_spawn_ve(NULL, 0, execf);
+	rc = do_spawn_ve(NULL, 0, execf, cmd);
     else
     	rc = -1;
-    if (news) Safefree(news);
+    if (news)
+	Safefree(news);
     do_execfree();
     return rc;
 }
