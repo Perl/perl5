@@ -35,7 +35,7 @@ unless (defined $Config{d_link}) {
 
 sub mkmanifest {
     my $manimiss = 0;
-    my $read = maniread() or $manimiss++;
+    my $read = (-r 'MANIFEST' && maniread()) or $manimiss++;
     $read = {} if $manimiss;
     local *M;
     rename $MANIFEST, "$MANIFEST.bak" unless $manimiss;
