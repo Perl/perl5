@@ -275,8 +275,10 @@ Perl_sharedsv_associate(pTHX_ SV **psv, SV *ssv, shared_sv *data)
     /* If neither of those then create a new one */
     if (!data) {
 	    SHARED_CONTEXT;
-	    if (!ssv)
+	    if (!ssv) {
 		ssv = newSV(0);
+		SvREFCNT(ssv) = 0;
+	    }
 	    data = PerlMemShared_malloc(sizeof(shared_sv));
 	    Zero(data,1,shared_sv);
 	    SHAREDSvPTR(data) = ssv;
@@ -503,7 +505,6 @@ sharedsv_elem_mg_FETCH(pTHX_ SV *sv, MAGIC *mg)
     assert ( SHAREDSvPTR(shared) );
 
     ENTER_LOCK;
-
     if (SvTYPE(SHAREDSvPTR(shared)) == SVt_PVAV) {
 	assert ( mg->mg_ptr == 0 );
 	SHARED_CONTEXT;
@@ -782,6 +783,7 @@ CODE:
 	    sharedsv_scalar_store(aTHX_ tmp, target);
 	    SHARED_CONTEXT;
 	    av_push((AV*) SHAREDSvPTR(shared), SHAREDSvPTR(target));
+	    SvREFCNT_inc(SHAREDSvPTR(target));
 	    SHARED_RELEASE;
 	    SvREFCNT_dec(tmp);
 	}
@@ -801,6 +803,7 @@ CODE:
 	    sharedsv_scalar_store(aTHX_ tmp, target);
 	    SHARED_CONTEXT;
 	    av_store((AV*) SHAREDSvPTR(shared), i - 1, SHAREDSvPTR(target));
+	    SvREFCNT_inc(SHAREDSvPTR(target));
 	    CALLER_CONTEXT;
 	    SvREFCNT_dec(tmp);
 	}
