@@ -2737,8 +2737,8 @@ t/op/grent.t			See if getgr*() functions work
 t/op/grep.t			See if grep() and map() work
 t/op/groups.t			See if $( works
 t/op/gv.t			See if typeglobs work
-t/op/hash.t			See if the complexity attackers are repelled
 t/op/hashassign.t		See if hash assignments work
+t/op/hash.t			See if the complexity attackers are repelled
 t/op/hashwarn.t			See if warnings for bad hash assignments work
 t/op/inccode.t			See if coderefs work in @INC
 t/op/inc.t			See if inc/dec of integers near 32 bit limit work
@@ -2797,12 +2797,12 @@ t/op/srand.t			See if srand works
 t/op/stash.t			See if %:: stashes work
 t/op/stat.t			See if stat works
 t/op/study.t			See if study works
-t/op/sub.t			See if subroutines work
 t/op/sub_lval.t			See if lvalue subroutines work
 t/op/subst_amp.t		See if $&-related substitution works
 t/op/substr.t			See if substr works
 t/op/subst.t			See if substitution works
 t/op/subst_wamp.t		See if substitution works with $& present
+t/op/sub.t			See if subroutines work
 t/op/sysio.t			See if sysread and syswrite work
 t/op/taint.t			See if tainting works
 t/op/tiearray.t			See if tie for arrays works
