@@ -14114,9 +14114,13 @@ eval $inlibc
 set modfl d_modfl
 eval $inlibc
 
+: see if this is a math.h system
+set math.h i_math
+eval $inhdr
+
 : see if prototype for modfl is available
 echo " "
-set d_modflproto modfl math.h
+set d_modflproto modfl $i_math math.h
 eval $hasproto
 
 d_modfl_pow32_bug="$undef"
@@ -19555,10 +19559,6 @@ else
 fi
 
 
-
-: see if this is a math.h system
-set math.h i_math
-eval $inhdr
 
 : see if this is a mntent.h system
 set mntent.h i_mntent
