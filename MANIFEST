@@ -1591,13 +1591,16 @@ lib/Test/Harness/Changes	Test::Harness
 lib/Test/Harness/Iterator.pm	Test::Harness::Iterator (internal use only)
 lib/Test/Harness.pm		A test harness
 lib/Test/Harness/Straps.pm	Test::Harness::Straps
+lib/Test/Harness/bin/prove	The prove harness utility
 lib/Test/Harness/t/00compile.t	Test::Harness test
 lib/Test/Harness/t/assert.t	Test::Harness::Assert test
 lib/Test/Harness/t/base.t	Test::Harness test
 lib/Test/Harness/t/callback.t	Test::Harness test
+lib/Test/Harness/t/inc_taint.t	Test::Harness test
 lib/Test/Harness/t/nonumbers.t	Test::Harness test
 lib/Test/Harness/t/ok.t		Test::Harness test
 lib/Test/Harness/t/pod.t	Test::Harness test
+lib/Test/Harness/t/prove-switches.t	Test::Harness::Straps test
 lib/Test/Harness/t/strap-analyze.t	Test::Harness::Straps test
 lib/Test/Harness/t/strap.t		Test::Harness::Straps test
 lib/Test/Harness/t/test-harness.t	Test::Harness test
@@ -2583,6 +2586,7 @@ t/japh/abigail.t		Obscure tests
 t/lib/1_compile.t		See if the various libraries and extensions compile
 t/lib/commonsense.t		See if configuration meets basic needs
 t/lib/compmod.pl		Helper for 1_compile.t
+t/lib/Dev/Null.pm		Module for testing Test::Harness
 t/lib/Devel/switchd.pm		Module for t/run/switchd.t
 t/lib/dprof/test1_t		Perl code profiler tests
 t/lib/dprof/test1_v		Perl code profiler tests
@@ -2622,28 +2626,30 @@ t/lib/sample-tests/bailout		Test data for Test::Harness
 t/lib/sample-tests/bignum		Test data for Test::Harness
 t/lib/sample-tests/combined		Test data for Test::Harness
 t/lib/sample-tests/descriptive		Test data for Test::Harness
-t/lib/sample-tests/die			Test data for Test::Harness
 t/lib/sample-tests/die_head_end		Test data for Test::Harness
 t/lib/sample-tests/die_last_minute	Test data for Test::Harness
+t/lib/sample-tests/die			Test data for Test::Harness
 t/lib/sample-tests/duplicates		Test data for Test::Harness
 t/lib/sample-tests/head_end		Test data for Test::Harness
 t/lib/sample-tests/head_fail		Test data for Test::Harness
+t/lib/sample-tests/inc_taint		Test data for Test::Harness
 t/lib/sample-tests/lone_not_bug		Test data for Test::Harness
 t/lib/sample-tests/no_nums		Test data for Test::Harness
 t/lib/sample-tests/no_output		Test data for Test::Harness
 t/lib/sample-tests/out_of_order		Test data for Test::Harness
 t/lib/sample-tests/segfault		Test data for Test::Harness
 t/lib/sample-tests/shbang_misparse	Test data for Test::Harness
-t/lib/sample-tests/simple		Test data for Test::Harness
 t/lib/sample-tests/simple_fail		Test data for Test::Harness
-t/lib/sample-tests/skip			Test data for Test::Harness
-t/lib/sample-tests/skipall		Test data for Test::Harness
+t/lib/sample-tests/simple		Test data for Test::Harness
 t/lib/sample-tests/skipall_nomsg	Test data for Test::Harness
+t/lib/sample-tests/skipall		Test data for Test::Harness
 t/lib/sample-tests/skip_nomsg		Test data for Test::Harness
+t/lib/sample-tests/skip			Test data for Test::Harness
 t/lib/sample-tests/switches		Test data for Test::Harness
 t/lib/sample-tests/taint		Test data for Test::Harness
-t/lib/sample-tests/todo			Test data for Test::Harness
+t/lib/sample-tests/taint_warn		Test data for Test::Harness
 t/lib/sample-tests/todo_inline		Test data for Test::Harness
+t/lib/sample-tests/todo			Test data for Test::Harness
 t/lib/sample-tests/too_many		Test data for Test::Harness
 t/lib/sample-tests/vms_nit		Test data for Test::Harness
 t/lib/sample-tests/with_comments	Test data for Test::Harness
@@ -2928,6 +2934,7 @@ utils/perldoc.PL		A simple tool to find & display perl's documentation
 utils/perlivp.PL		installation verification procedure
 utils/piconv.PL			iconv(1), reinvented in perl
 utils/pl2pm.PL			A pl to pm translator
+utils/prove.PL			The prove harness utility
 utils/splain.PL			Stand-alone version of diagnostics.pm
 utils/xsubpp.PL			External subroutine preprocessor
 uts/sprintf_wrap.c		sprintf wrapper for UTS

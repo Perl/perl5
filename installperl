@@ -801,9 +801,10 @@ sub installlib {
     # .exists files, .PL files, and test files.
     return if $name =~ m{\.orig$|\.rej$|~$|^#.+#$|,v$|^\.exists|\.PL$|\.plc$|\.t$|^test\.pl$} ||
 	      $dir  =~ m{/t(?:/|$)};
-    # ignore the cpan script in lib/CPAN/bin and the instmodsh and xsubpp
-    # scripts in lib/ExtUtils (they're installed later with other utils)
-    return if $name =~ /^(?:cpan|instmodsh|xsubpp)\z/;
+    # ignore the cpan script in lib/CPAN/bin, the instmodsh and xsubpp
+    # scripts in lib/ExtUtils, and the prove script in lib/Test/Harness
+    # (they're installed later with other utils)
+    return if $name =~ /^(?:cpan|instmodsh|xsubpp|prove)\z/;
     # ignore the Makefiles
     return if $name =~ /^makefile$/i;
     # ignore the test extensions

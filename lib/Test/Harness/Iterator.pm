@@ -12,12 +12,10 @@ Test::Harness::Iterator - Internal Test::Harness Iterator
 =head1 SYNOPSIS
 
   use Test::Harness::Iterator;
-  use Test::Harness::Iterator;
   my $it = Test::Harness::Iterator->new(\*TEST);
   my $it = Test::Harness::Iterator->new(\@array);
 
   my $line = $it->next;
-
 
 =head1 DESCRIPTION
 
