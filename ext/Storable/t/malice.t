@@ -32,11 +32,11 @@ sub BEGIN {
 use strict;
 use vars qw($file_magic_str $other_magic $network_magic);
 $file_magic_str = 'pst0';
-$other_magic = 7 + $Config{longsize};
+$other_magic = 7 + $Config{ivsize};
 $network_magic = 2;
 
 use Test;
-BEGIN { plan tests => 334 + $Config{longsize} * 4}
+BEGIN { plan tests => 334 + $Config{ivsize} * 4}
 
 use Storable qw (store retrieve freeze thaw nstore nfreeze);
 
@@ -70,7 +70,7 @@ sub test_header {
     ok ($header->{byteorder}, $Config{byteorder}, "byte order");
     ok ($header->{intsize}, $Config{intsize}, "int size");
     ok ($header->{longsize}, $Config{longsize}, "long size");
-    ok ($header->{ptrsize}, $Config{ptrsize}, "long size");
+    ok ($header->{ptrsize}, $Config{ptrsize}, "ptr size");
     ok ($header->{nvsize}, $Config{nvsize} || $Config{doublesize} || 8,
         "nv size"); # 5.00405 doesn't even have doublesize in config.
   }
@@ -176,7 +176,7 @@ sub test_things {
                   "byte order");
     $where = $file_magic + 3 + length $header->{byteorder};
     foreach (['intsize', "Integer"],
-             ['longsize', "Long integer"],
+             ['ivsize', "Long integer"],
              ['ptrsize', "Pointer integer"],
              ['nvsize', "Double"]) {
       my ($key, $name) = @$_;
@@ -217,7 +217,7 @@ my $length = -s $file;
 die "Don't seem to have written file '$file' as I can't get its length: $!"
   unless defined $file;
 
-die "Expected file to be $expected bytes (sizeof long is $Config{longsize}) but it is $length"
+die "Expected file to be $expected bytes (sizeof IV is $Config{ivsize}) but it is $length"
   unless $length == $expected;
 
 # Read the contents into memory:
@@ -245,7 +245,7 @@ $length = -s $file;
 die "Don't seem to have written file '$file' as I can't get its length: $!"
   unless defined $file;
 
-die "Expected file to be $expected bytes (sizeof long is $Config{longsize}) but it is $length"
+die "Expected file to be $expected bytes (sizeof IV is $Config{ivsize}) but it is $length"
   unless $length == $expected;
 
 # Read the contents into memory:
