@@ -4779,7 +4779,7 @@ register char *s;
     register char *d;
     register char *e;
     char *peek;
-    int outer = (rsfp && !lex_inwhat);
+    int outer = (rsfp && !(lex_inwhat == OP_SCALAR));
 
     s += 2;
     d = tokenbuf;
