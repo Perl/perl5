@@ -217,7 +217,7 @@ av_store(register AV *av, I32 key, SV *val)
     }
 
     if (SvREADONLY(av) && key >= AvFILL(av))
-	croak(no_modify);
+	croak(PL_no_modify);
 
     if (SvRMAGICAL(av)) {
 	if (mg_find((SV*)av,'P')) {
@@ -336,7 +336,7 @@ av_clear(register AV *av)
     /*SUPPRESS 560*/
 
     if (SvREADONLY(av))
-	croak(no_modify);
+	croak(PL_no_modify);
 
     /* Give any tie a chance to cleanup first */
     if (SvRMAGICAL(av))
@@ -396,7 +396,7 @@ av_push(register AV *av, SV *val)
     if (!av)
 	return;
     if (SvREADONLY(av))
-	croak(no_modify);
+	croak(PL_no_modify);
 
     if (mg = SvTIED_mg((SV*)av, 'P')) {
 	dSP;
@@ -424,7 +424,7 @@ av_pop(register AV *av)
     if (!av || AvFILL(av) < 0)
 	return &PL_sv_undef;
     if (SvREADONLY(av))
-	croak(no_modify);
+	croak(PL_no_modify);
     if (mg = SvTIED_mg((SV*)av, 'P')) {
 	dSP;    
 	PUSHSTACKi(PERLSI_MAGIC);
@@ -458,7 +458,7 @@ av_unshift(register AV *av, register I32 num)
     if (!av || num <= 0)
 	return;
     if (SvREADONLY(av))
-	croak(no_modify);
+	croak(PL_no_modify);
 
     if (mg = SvTIED_mg((SV*)av, 'P')) {
 	dSP;
@@ -510,7 +510,7 @@ av_shift(register AV *av)
     if (!av || AvFILL(av) < 0)
 	return &PL_sv_undef;
     if (SvREADONLY(av))
-	croak(no_modify);
+	croak(PL_no_modify);
     if (mg = SvTIED_mg((SV*)av, 'P')) {
 	dSP;
 	PUSHSTACKi(PERLSI_MAGIC);

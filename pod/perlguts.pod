@@ -2778,7 +2778,7 @@ indicated number of bytes (remember to reserve space for an extra
 trailing NUL character).  Calls C<sv_grow> to perform the expansion if
 necessary.  Returns a pointer to the character buffer.
 
-	char*	SvGROW( SV* sv, int len )
+	char*	SvGROW( SV* sv, STRLEN len )
 
 =item sv_grow
 

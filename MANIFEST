@@ -346,6 +346,7 @@ fakethr.h		Fake threads header
 form.h			Public declarations for the above
 global.sym		Symbols that need hiding when embedded
 globals.c		File to declare global symbols (for shared library)
+globvar.sym		Global variables that need hiding when embedded
 gv.c			Glob value code
 gv.h			Glob value header
 h2pl/README		How to turn .ph files into .pl files
@@ -777,7 +778,6 @@ mpeix/relink		MPE/iX port
 mv-if-diff		Script to mv a file if it changed
 myconfig		Prints summary of the current configuration
 nostdio.h		Cause compile error on stdio calls
-objpp.h			Scoping macros for Perl Object
 op.c			Opcode syntax tree code
 op.h			Opcode syntax tree header
 opcode.h		Automatically generated opcode header
@@ -920,6 +920,7 @@ pod/splitman		Splits perlfunc into multiple man pages
 pod/splitpod		Splits perlfunc into multiple pod pages
 pp.c			Push/Pop code
 pp.h			Push/Pop code defs
+pp.sym			Push/Pop code symbols
 pp_ctl.c		Push/Pop code for control flow
 pp_hot.c		Push/Pop code for heavily used opcodes
 pp_proto.h		C++ definitions for Push/Pop code
@@ -1165,7 +1166,6 @@ t/pragma/warning.t	See if warning controls work
 taint.c			Tainting code
 thrdvar.h		Per-thread variables
 thread.h		Threading header
-thread.sym		Symbols for threads
 toke.c			The tokener
 universal.c		The default UNIVERSAL package methods
 unixish.h		Defines that are assumed on Unix

@@ -1254,7 +1254,7 @@ free(void *mp)
  * is extern so the caller can modify it).  If that fails we just copy
  * however many bytes was given to realloc() and hope it's not huge.
  */
-int reall_srchlen = 4;	/* 4 should be plenty, -1 =>'s whole list */
+#define reall_srchlen  4	/* 4 should be plenty, -1 =>'s whole list */
 
 Malloc_t
 realloc(void *mp, size_t nbytes)

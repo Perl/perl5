@@ -19,9 +19,9 @@
 #include "perl.h"
 
 #ifdef PERL_OBJECT
-#define CHECKCALL this->*check
+#define CHECKCALL this->*PL_check
 #else
-#define CHECKCALL *check
+#define CHECKCALL *PL_check
 #endif
 
 /*
@@ -31,7 +31,7 @@
 #define CHECKOP(type,o) \
     ((PL_op_mask && PL_op_mask[type])					\
      ? ( op_free((OP*)o),					\
-	 croak("%s trapped by operation mask", op_desc[type]),	\
+	 croak("%s trapped by operation mask", PL_op_desc[type]),	\
 	 Nullop )						\
      : (CHECKCALL[type])((OP*)o))
 
@@ -65,7 +65,7 @@ STATIC OP *
 no_fh_allowed(OP *o)
 {
     yyerror(form("Missing comma after first argument to %s function",
-		 op_desc[o->op_type]));
+		 PL_op_desc[o->op_type]));
     return o;
 }
 
@@ -87,7 +87,7 @@ STATIC void
 bad_type(I32 n, char *t, char *name, OP *kid)
 {
     yyerror(form("Type of arg %d to %s must be %s (not %s)",
-		 (int)n, name, t, op_desc[kid->op_type]));
+		 (int)n, name, t, PL_op_desc[kid->op_type]));
 }
 
 void
@@ -95,7 +95,7 @@ assertref(OP *o)
 {
     int type = o->op_type;
     if (type != OP_AELEM && type != OP_HELEM && type != OP_GELEM) {
-	yyerror(form("Can't use subscript on %s", op_desc[type]));
+	yyerror(form("Can't use subscript on %s", PL_op_desc[type]));
 	if (type == OP_ENTERSUB || type == OP_RV2HV || type == OP_PADHV) {
 	    dTHR;
 	    SV *msg = sv_2mortal(
@@ -432,11 +432,11 @@ pad_alloc(I32 optype, U32 tmptype)
 #ifdef USE_THREADS
     DEBUG_X(PerlIO_printf(Perl_debug_log, "0x%lx Pad 0x%lx alloc %ld for %s\n",
 			  (unsigned long) thr, (unsigned long) PL_curpad,
-			  (long) retval, op_name[optype]));
+			  (long) retval, PL_op_name[optype]));
 #else
     DEBUG_X(PerlIO_printf(Perl_debug_log, "Pad 0x%lx alloc %ld for %s\n",
 			  (unsigned long) PL_curpad,
-			  (long) retval, op_name[optype]));
+			  (long) retval, PL_op_name[optype]));
 #endif /* USE_THREADS */
     return (PADOFFSET)retval;
 }
@@ -624,7 +624,7 @@ op_free(OP *o)
 #endif /* USE_THREADS */
     default:
 	if (!(o->op_flags & OPf_REF)
-	    || (check[o->op_type] != FUNC_NAME_TO_PTR(ck_ftst)))
+	    || (PL_check[o->op_type] != FUNC_NAME_TO_PTR(ck_ftst)))
 	    break;
 	/* FALL THROUGH */
     case OP_GVSV:
@@ -678,7 +678,7 @@ null(OP *o)
 	pad_free(o->op_targ);
     o->op_targ = o->op_type;
     o->op_type = OP_NULL;
-    o->op_ppaddr = ppaddr[OP_NULL];
+    o->op_ppaddr = PL_ppaddr[OP_NULL];
 }
 
 /* Contextualizers */
@@ -820,7 +820,7 @@ scalarvoid(OP *o)
 
     switch (o->op_type) {
     default:
-	if (!(opargs[o->op_type] & OA_FOLDCONST))
+	if (!(PL_opargs[o->op_type] & OA_FOLDCONST))
 	    break;
 	/* FALL THROUGH */
     case OP_REPEAT:
@@ -900,7 +900,7 @@ scalarvoid(OP *o)
     case OP_GETLOGIN:
       func_ops:
 	if (!(o->op_private & OPpLVAL_INTRO))
-	    useless = op_desc[o->op_type];
+	    useless = PL_op_desc[o->op_type];
 	break;
 
     case OP_RV2GV:
@@ -939,12 +939,12 @@ scalarvoid(OP *o)
 
     case OP_POSTINC:
 	o->op_type = OP_PREINC;		/* pre-increment is faster */
-	o->op_ppaddr = ppaddr[OP_PREINC];
+	o->op_ppaddr = PL_ppaddr[OP_PREINC];
 	break;
 
     case OP_POSTDEC:
 	o->op_type = OP_PREDEC;		/* pre-decrement is faster */
-	o->op_ppaddr = ppaddr[OP_PREDEC];
+	o->op_ppaddr = PL_ppaddr[OP_PREDEC];
 	break;
 
     case OP_OR:
@@ -1152,7 +1152,7 @@ mod(OP *o, I32 type)
 	if ((type == OP_UNDEF || type == OP_REFGEN) &&
 	    !(o->op_flags & OPf_STACKED)) {
 	    o->op_type = OP_RV2CV;		/* entersub => rv2cv */
-	    o->op_ppaddr = ppaddr[OP_RV2CV];
+	    o->op_ppaddr = PL_ppaddr[OP_RV2CV];
 	    assert(cUNOPo->op_first->op_type == OP_NULL);
 	    null(((LISTOP*)cUNOPo->op_first)->op_first);/* disable pushmark */
 	    break;
@@ -1165,8 +1165,8 @@ mod(OP *o, I32 type)
 	    break;
 	yyerror(form("Can't modify %s in %s",
 		     (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)
-		      ? "do block" : op_desc[o->op_type]),
-		     type ? op_desc[type] : "local"));
+		      ? "do block" : PL_op_desc[o->op_type]),
+		     type ? PL_op_desc[type] : "local"));
 	return o;
 
     case OP_PREINC:
@@ -1393,7 +1393,7 @@ ref(OP *o, I32 type)
 	if ((type == OP_DEFINED || type == OP_LOCK) &&
 	    !(o->op_flags & OPf_STACKED)) {
 	    o->op_type = OP_RV2CV;             /* entersub => rv2cv */
-	    o->op_ppaddr = ppaddr[OP_RV2CV];
+	    o->op_ppaddr = PL_ppaddr[OP_RV2CV];
 	    assert(cUNOPo->op_first->op_type == OP_NULL);
 	    null(((LISTOP*)cUNOPo->op_first)->op_first);	/* disable pushmark */
 	    o->op_flags |= OPf_SPECIAL;
@@ -1485,7 +1485,7 @@ my(OP *o)
 	     type != OP_PADHV &&
 	     type != OP_PUSHMARK)
     {
-	yyerror(form("Can't declare %s in my", op_desc[o->op_type]));
+	yyerror(form("Can't declare %s in my", PL_op_desc[o->op_type]));
 	return o;
     }
     o->op_flags |= OPf_MOD;
@@ -1512,7 +1512,7 @@ bind_match(I32 type, OP *left, OP *right)
        left->op_type == OP_RV2HV ||
        left->op_type == OP_PADAV ||
        left->op_type == OP_PADHV)) {
-      char *desc = op_desc[(right->op_type == OP_SUBST ||
+      char *desc = PL_op_desc[(right->op_type == OP_SUBST ||
                             right->op_type == OP_TRANS)
                            ? right->op_type : OP_MATCH];
       char *sample = ((left->op_type == OP_RV2AV ||
@@ -1558,13 +1558,13 @@ scope(OP *o)
 	if (o->op_flags & OPf_PARENS || PERLDB_NOOPT || PL_tainting) {
 	    o = prepend_elem(OP_LINESEQ, newOP(OP_ENTER, 0), o);
 	    o->op_type = OP_LEAVE;
-	    o->op_ppaddr = ppaddr[OP_LEAVE];
+	    o->op_ppaddr = PL_ppaddr[OP_LEAVE];
 	}
 	else {
 	    if (o->op_type == OP_LINESEQ) {
 		OP *kid;
 		o->op_type = OP_SCOPE;
-		o->op_ppaddr = ppaddr[OP_SCOPE];
+		o->op_ppaddr = PL_ppaddr[OP_SCOPE];
 		kid = ((LISTOP*)o)->op_first;
 		if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE){
 		    SvREFCNT_dec(((COP*)kid)->cop_filegv);
@@ -1729,15 +1729,15 @@ fold_constants(register OP *o)
     I32 type = o->op_type;
     SV *sv;
 
-    if (opargs[type] & OA_RETSCALAR)
+    if (PL_opargs[type] & OA_RETSCALAR)
 	scalar(o);
-    if (opargs[type] & OA_TARGET)
+    if (PL_opargs[type] & OA_TARGET)
 	o->op_targ = pad_alloc(type, SVs_PADTMP);
 
-    if ((opargs[type] & OA_OTHERINT) && (PL_hints & HINT_INTEGER))
-	o->op_ppaddr = ppaddr[type = ++(o->op_type)];
+    if ((PL_opargs[type] & OA_OTHERINT) && (PL_hints & HINT_INTEGER))
+	o->op_ppaddr = PL_ppaddr[type = ++(o->op_type)];
 
-    if (!(opargs[type] & OA_FOLDCONST))
+    if (!(PL_opargs[type] & OA_FOLDCONST))
 	goto nope;
 
     switch (type) {
@@ -1800,7 +1800,7 @@ fold_constants(register OP *o)
     }
 
   nope:
-    if (!(opargs[type] & OA_OTHERINT))
+    if (!(PL_opargs[type] & OA_OTHERINT))
 	return o;
 
     if (!(PL_hints & HINT_INTEGER)) {
@@ -1813,11 +1813,11 @@ fold_constants(register OP *o)
 		    continue;
 		return o;
 	    }
-	    if (opargs[curop->op_type] & OA_RETINTEGER)
+	    if (PL_opargs[curop->op_type] & OA_RETINTEGER)
 		continue;
 	    return o;
 	}
-	o->op_ppaddr = ppaddr[++(o->op_type)];
+	o->op_ppaddr = PL_ppaddr[++(o->op_type)];
     }
 
     return o;
@@ -1843,7 +1843,7 @@ gen_constant_list(register OP *o)
     PL_tmps_floor = oldtmps_floor;
 
     o->op_type = OP_RV2AV;
-    o->op_ppaddr = ppaddr[OP_RV2AV];
+    o->op_ppaddr = PL_ppaddr[OP_RV2AV];
     curop = ((UNOP*)o)->op_first;
     ((UNOP*)o)->op_first = newSVOP(OP_CONST, 0, SvREFCNT_inc(*PL_stack_sp--));
     op_free(curop);
@@ -1862,11 +1862,11 @@ convert(I32 type, I32 flags, OP *o)
     else
 	o->op_flags &= ~OPf_WANT;
 
-    if (!(opargs[type] & OA_MARK))
+    if (!(PL_opargs[type] & OA_MARK))
 	null(cLISTOPo->op_first);
 
     o->op_type = type;
-    o->op_ppaddr = ppaddr[type];
+    o->op_ppaddr = PL_ppaddr[type];
     o->op_flags |= flags;
 
     o = CHECKOP(type, o);
@@ -1987,7 +1987,7 @@ newLISTOP(I32 type, I32 flags, OP *first, OP *last)
     Newz(1101, listop, 1, LISTOP);
 
     listop->op_type = type;
-    listop->op_ppaddr = ppaddr[type];
+    listop->op_ppaddr = PL_ppaddr[type];
     listop->op_children = (first != 0) + (last != 0);
     listop->op_flags = flags;
 
@@ -2020,14 +2020,14 @@ newOP(I32 type, I32 flags)
     OP *o;
     Newz(1101, o, 1, OP);
     o->op_type = type;
-    o->op_ppaddr = ppaddr[type];
+    o->op_ppaddr = PL_ppaddr[type];
     o->op_flags = flags;
 
     o->op_next = o;
     o->op_private = 0 + (flags >> 8);
-    if (opargs[type] & OA_RETSCALAR)
+    if (PL_opargs[type] & OA_RETSCALAR)
 	scalar(o);
-    if (opargs[type] & OA_TARGET)
+    if (PL_opargs[type] & OA_TARGET)
 	o->op_targ = pad_alloc(type, SVs_PADTMP);
     return CHECKOP(type, o);
 }
@@ -2039,12 +2039,12 @@ newUNOP(I32 type, I32 flags, OP *first)
 
     if (!first)
 	first = newOP(OP_STUB, 0);
-    if (opargs[type] & OA_MARK)
+    if (PL_opargs[type] & OA_MARK)
 	first = force_list(first);
 
     Newz(1101, unop, 1, UNOP);
     unop->op_type = type;
-    unop->op_ppaddr = ppaddr[type];
+    unop->op_ppaddr = PL_ppaddr[type];
     unop->op_first = first;
     unop->op_flags = flags | OPf_KIDS;
     unop->op_private = 1 | (flags >> 8);
@@ -2065,7 +2065,7 @@ newBINOP(I32 type, I32 flags, OP *first, OP *last)
 	first = newOP(OP_NULL, 0);
 
     binop->op_type = type;
-    binop->op_ppaddr = ppaddr[type];
+    binop->op_ppaddr = PL_ppaddr[type];
     binop->op_first = first;
     binop->op_flags = flags | OPf_KIDS;
     if (!last) {
@@ -2358,7 +2358,7 @@ newPMOP(I32 type, I32 flags)
 
     Newz(1101, pmop, 1, PMOP);
     pmop->op_type = type;
-    pmop->op_ppaddr = ppaddr[type];
+    pmop->op_ppaddr = PL_ppaddr[type];
     pmop->op_flags = flags;
     pmop->op_private = 0 | (flags >> 8);
 
@@ -2413,7 +2413,7 @@ pmruntime(OP *o, OP *expr, OP *repl)
 
 	Newz(1101, rcop, 1, LOGOP);
 	rcop->op_type = OP_REGCOMP;
-	rcop->op_ppaddr = ppaddr[OP_REGCOMP];
+	rcop->op_ppaddr = PL_ppaddr[OP_REGCOMP];
 	rcop->op_first = scalar(expr);
 	rcop->op_flags |= ((PL_hints & HINT_RE_EVAL) 
 			   ? (OPf_SPECIAL | OPf_KIDS)
@@ -2452,7 +2452,7 @@ pmruntime(OP *o, OP *expr, OP *repl)
 	else {
 	    OP *lastop = 0;
 	    for (curop = LINKLIST(repl); curop!=repl; curop = LINKLIST(curop)) {
-		if (opargs[curop->op_type] & OA_DANGEROUS) {
+		if (PL_opargs[curop->op_type] & OA_DANGEROUS) {
 #ifdef USE_THREADS
 		    if (curop->op_type == OP_THREADSV) {
 			repl_has_vars = 1;
@@ -2505,7 +2505,7 @@ pmruntime(OP *o, OP *expr, OP *repl)
 	    }
 	    Newz(1101, rcop, 1, LOGOP);
 	    rcop->op_type = OP_SUBSTCONT;
-	    rcop->op_ppaddr = ppaddr[OP_SUBSTCONT];
+	    rcop->op_ppaddr = PL_ppaddr[OP_SUBSTCONT];
 	    rcop->op_first = scalar(repl);
 	    rcop->op_flags |= OPf_KIDS;
 	    rcop->op_private = 1;
@@ -2530,13 +2530,13 @@ newSVOP(I32 type, I32 flags, SV *sv)
     SVOP *svop;
     Newz(1101, svop, 1, SVOP);
     svop->op_type = type;
-    svop->op_ppaddr = ppaddr[type];
+    svop->op_ppaddr = PL_ppaddr[type];
     svop->op_sv = sv;
     svop->op_next = (OP*)svop;
     svop->op_flags = flags;
-    if (opargs[type] & OA_RETSCALAR)
+    if (PL_opargs[type] & OA_RETSCALAR)
 	scalar((OP*)svop);
-    if (opargs[type] & OA_TARGET)
+    if (PL_opargs[type] & OA_TARGET)
 	svop->op_targ = pad_alloc(type, SVs_PADTMP);
     return CHECKOP(type, svop);
 }
@@ -2548,13 +2548,13 @@ newGVOP(I32 type, I32 flags, GV *gv)
     GVOP *gvop;
     Newz(1101, gvop, 1, GVOP);
     gvop->op_type = type;
-    gvop->op_ppaddr = ppaddr[type];
+    gvop->op_ppaddr = PL_ppaddr[type];
     gvop->op_gv = (GV*)SvREFCNT_inc(gv);
     gvop->op_next = (OP*)gvop;
     gvop->op_flags = flags;
-    if (opargs[type] & OA_RETSCALAR)
+    if (PL_opargs[type] & OA_RETSCALAR)
 	scalar((OP*)gvop);
-    if (opargs[type] & OA_TARGET)
+    if (PL_opargs[type] & OA_TARGET)
 	gvop->op_targ = pad_alloc(type, SVs_PADTMP);
     return CHECKOP(type, gvop);
 }
@@ -2565,13 +2565,13 @@ newPVOP(I32 type, I32 flags, char *pv)
     PVOP *pvop;
     Newz(1101, pvop, 1, PVOP);
     pvop->op_type = type;
-    pvop->op_ppaddr = ppaddr[type];
+    pvop->op_ppaddr = PL_ppaddr[type];
     pvop->op_pv = pv;
     pvop->op_next = (OP*)pvop;
     pvop->op_flags = flags;
-    if (opargs[type] & OA_RETSCALAR)
+    if (PL_opargs[type] & OA_RETSCALAR)
 	scalar((OP*)pvop);
-    if (opargs[type] & OA_TARGET)
+    if (PL_opargs[type] & OA_TARGET)
 	pvop->op_targ = pad_alloc(type, SVs_PADTMP);
     return CHECKOP(type, pvop);
 }
@@ -2794,7 +2794,7 @@ newASSIGNOP(I32 flags, OP *left, I32 optype, OP *right)
 	    OP *lastop = o;
 	    PL_generation++;
 	    for (curop = LINKLIST(o); curop != o; curop = LINKLIST(curop)) {
-		if (opargs[curop->op_type] & OA_DANGEROUS) {
+		if (PL_opargs[curop->op_type] & OA_DANGEROUS) {
 		    if (curop->op_type == OP_GV) {
 			GV *gv = ((GVOP*)curop)->op_gv;
 			if (gv == PL_defgv || SvCUR(gv) == PL_generation)
@@ -2903,11 +2903,11 @@ newSTATEOP(I32 flags, char *label, OP *o)
     Newz(1101, cop, 1, COP);
     if (PERLDB_LINE && PL_curcop->cop_line && PL_curstash != PL_debstash) {
 	cop->op_type = OP_DBSTATE;
-	cop->op_ppaddr = ppaddr[ OP_DBSTATE ];
+	cop->op_ppaddr = PL_ppaddr[ OP_DBSTATE ];
     }
     else {
 	cop->op_type = OP_NEXTSTATE;
-	cop->op_ppaddr = ppaddr[ OP_NEXTSTATE ];
+	cop->op_ppaddr = PL_ppaddr[ OP_NEXTSTATE ];
     }
     cop->op_flags = flags;
     cop->op_private = (PL_hints & HINT_UTF8);
@@ -3011,7 +3011,7 @@ new_logop(I32 type, I32 flags, OP** firstp, OP** otherp)
     if (first->op_type == OP_CONST) {
 	if (ckWARN(WARN_PRECEDENCE) && (first->op_private & OPpCONST_BARE))
 	    warner(WARN_PRECEDENCE, "Probable precedence problem on %s", 
-			op_desc[type]);
+			PL_op_desc[type]);
 	if ((type == OP_AND) == (SvTRUE(((SVOP*)first)->op_sv))) {
 	    op_free(first);
 	    *firstp = Nullop;
@@ -3054,7 +3054,7 @@ new_logop(I32 type, I32 flags, OP** firstp, OP** otherp)
 	    PL_curcop->cop_line = PL_copline;
 	    warner(WARN_UNSAFE,
 		 "Value of %s%s can be \"0\"; test with defined()",
-		 op_desc[warnop],
+		 PL_op_desc[warnop],
 		 ((warnop == OP_READLINE || warnop == OP_GLOB)
 		  ? " construct" : "() operator"));
 	    PL_curcop->cop_line = oldline;
@@ -3070,7 +3070,7 @@ new_logop(I32 type, I32 flags, OP** firstp, OP** otherp)
     Newz(1101, logop, 1, LOGOP);
 
     logop->op_type = type;
-    logop->op_ppaddr = ppaddr[type];
+    logop->op_ppaddr = PL_ppaddr[type];
     logop->op_first = first;
     logop->op_flags = flags | OPf_KIDS;
     logop->op_other = LINKLIST(other);
@@ -3119,7 +3119,7 @@ newCONDOP(I32 flags, OP *first, OP *trueop, OP *falseop)
     Newz(1101, condop, 1, CONDOP);
 
     condop->op_type = OP_COND_EXPR;
-    condop->op_ppaddr = ppaddr[OP_COND_EXPR];
+    condop->op_ppaddr = PL_ppaddr[OP_COND_EXPR];
     condop->op_first = first;
     condop->op_flags = flags | OPf_KIDS;
     condop->op_true = LINKLIST(trueop);
@@ -3152,7 +3152,7 @@ newRANGE(I32 flags, OP *left, OP *right)
     Newz(1101, condop, 1, CONDOP);
 
     condop->op_type = OP_RANGE;
-    condop->op_ppaddr = ppaddr[OP_RANGE];
+    condop->op_ppaddr = PL_ppaddr[OP_RANGE];
     condop->op_first = left;
     condop->op_flags = OPf_KIDS;
     condop->op_true = LINKLIST(left);
@@ -3312,7 +3312,7 @@ newWHILEOP(I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *expr, OP *b
     if (!loop) {
 	Newz(1101,loop,1,LOOP);
 	loop->op_type = OP_ENTERLOOP;
-	loop->op_ppaddr = ppaddr[OP_ENTERLOOP];
+	loop->op_ppaddr = PL_ppaddr[OP_ENTERLOOP];
 	loop->op_private = 0;
 	loop->op_next = (OP*)loop;
     }
@@ -3343,7 +3343,7 @@ newFOROP(I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *block,OP *cont
     if (sv) {
 	if (sv->op_type == OP_RV2SV) {	/* symbol table variable */
 	    sv->op_type = OP_RV2GV;
-	    sv->op_ppaddr = ppaddr[OP_RV2GV];
+	    sv->op_ppaddr = PL_ppaddr[OP_RV2GV];
 	}
 	else if (sv->op_type == OP_PADSV) { /* private variable */
 	    padoff = sv->op_targ;
@@ -3357,7 +3357,7 @@ newFOROP(I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *block,OP *cont
 	    sv = Nullop;
 	}
 	else
-	    croak("Can't use %s for loop variable", op_desc[sv->op_type]);
+	    croak("Can't use %s for loop variable", PL_op_desc[sv->op_type]);
     }
     else {
 #ifdef USE_THREADS
@@ -4170,12 +4170,12 @@ oopsAV(OP *o)
     switch (o->op_type) {
     case OP_PADSV:
 	o->op_type = OP_PADAV;
-	o->op_ppaddr = ppaddr[OP_PADAV];
+	o->op_ppaddr = PL_ppaddr[OP_PADAV];
 	return ref(o, OP_RV2AV);
 	
     case OP_RV2SV:
 	o->op_type = OP_RV2AV;
-	o->op_ppaddr = ppaddr[OP_RV2AV];
+	o->op_ppaddr = PL_ppaddr[OP_RV2AV];
 	ref(o, OP_RV2AV);
 	break;
 
@@ -4193,13 +4193,13 @@ oopsHV(OP *o)
     case OP_PADSV:
     case OP_PADAV:
 	o->op_type = OP_PADHV;
-	o->op_ppaddr = ppaddr[OP_PADHV];
+	o->op_ppaddr = PL_ppaddr[OP_PADHV];
 	return ref(o, OP_RV2HV);
 
     case OP_RV2SV:
     case OP_RV2AV:
 	o->op_type = OP_RV2HV;
-	o->op_ppaddr = ppaddr[OP_RV2HV];
+	o->op_ppaddr = PL_ppaddr[OP_RV2HV];
 	ref(o, OP_RV2HV);
 	break;
 
@@ -4215,7 +4215,7 @@ newAVREF(OP *o)
 {
     if (o->op_type == OP_PADANY) {
 	o->op_type = OP_PADAV;
-	o->op_ppaddr = ppaddr[OP_PADAV];
+	o->op_ppaddr = PL_ppaddr[OP_PADAV];
 	return o;
     }
     return newUNOP(OP_RV2AV, 0, scalar(o));
@@ -4234,7 +4234,7 @@ newHVREF(OP *o)
 {
     if (o->op_type == OP_PADANY) {
 	o->op_type = OP_PADHV;
-	o->op_ppaddr = ppaddr[OP_PADHV];
+	o->op_ppaddr = PL_ppaddr[OP_PADHV];
 	return o;
     }
     return newUNOP(OP_RV2HV, 0, scalar(o));
@@ -4259,7 +4259,7 @@ newSVREF(OP *o)
 {
     if (o->op_type == OP_PADANY) {
 	o->op_type = OP_PADSV;
-	o->op_ppaddr = ppaddr[OP_PADSV];
+	o->op_ppaddr = PL_ppaddr[OP_PADSV];
 	return o;
     }
     else if (o->op_type == OP_THREADSV && !(o->op_flags & OPpDONE_SVREF)) {
@@ -4318,7 +4318,7 @@ ck_spair(OP *o)
 	newop = kUNOP->op_first->op_sibling;
 	if (newop &&
 	    (newop->op_sibling ||
-	     !(opargs[newop->op_type] & OA_RETSCALAR) ||
+	     !(PL_opargs[newop->op_type] & OA_RETSCALAR) ||
 	     newop->op_type == OP_PADAV || newop->op_type == OP_PADHV ||
 	     newop->op_type == OP_RV2AV || newop->op_type == OP_RV2HV)) {
 	
@@ -4327,7 +4327,7 @@ ck_spair(OP *o)
 	op_free(kUNOP->op_first);
 	kUNOP->op_first = newop;
     }
-    o->op_ppaddr = ppaddr[++o->op_type];
+    o->op_ppaddr = PL_ppaddr[++o->op_type];
     return ck_fun(o);
 }
 
@@ -4342,7 +4342,7 @@ ck_delete(OP *o)
 	    o->op_private |= OPpSLICE;
 	else if (kid->op_type != OP_HELEM)
 	    croak("%s argument is not a HASH element or slice",
-		  op_desc[o->op_type]);
+		  PL_op_desc[o->op_type]);
 	null(kid);
     }
     return o;
@@ -4384,7 +4384,7 @@ ck_eval(OP *o)
 
 	    Newz(1101, enter, 1, LOGOP);
 	    enter->op_type = OP_ENTERTRY;
-	    enter->op_ppaddr = ppaddr[OP_ENTERTRY];
+	    enter->op_ppaddr = PL_ppaddr[OP_ENTERTRY];
 	    enter->op_private = 0;
 
 	    /* establish postfix order */
@@ -4392,7 +4392,7 @@ ck_eval(OP *o)
 
 	    o = prepend_elem(OP_LINESEQ, (OP*)enter, (OP*)kid);
 	    o->op_type = OP_LEAVETRY;
-	    o->op_ppaddr = ppaddr[OP_LEAVETRY];
+	    o->op_ppaddr = PL_ppaddr[OP_LEAVETRY];
 	    enter->op_other = o;
 	    return o;
 	}
@@ -4429,12 +4429,13 @@ ck_exists(OP *o)
     if (o->op_flags & OPf_KIDS) {
 	OP *kid = cUNOPo->op_first;
 	if (kid->op_type != OP_HELEM)
-	    croak("%s argument is not a HASH element", op_desc[o->op_type]);
+	    croak("%s argument is not a HASH element", PL_op_desc[o->op_type]);
 	null(kid);
     }
     return o;
 }
 
+#if 0
 OP *
 ck_gvconst(register OP *o)
 {
@@ -4443,6 +4444,7 @@ ck_gvconst(register OP *o)
 	o->op_type = OP_GV;
     return o;
 }
+#endif
 
 OP *
 ck_rvconst(register OP *o)
@@ -4583,7 +4585,7 @@ ck_fun(OP *o)
     OP *sibl;
     I32 numargs = 0;
     int type = o->op_type;
-    register I32 oa = opargs[type] >> OASHIFT;
+    register I32 oa = PL_opargs[type] >> OASHIFT;
 
     if (o->op_flags & OPf_STACKED) {
 	if ((oa & OA_OPTIONAL) && (oa >> 4) && !((oa >> 4) & OA_OPTIONAL))
@@ -4601,7 +4603,7 @@ ck_fun(OP *o)
 	    tokid = &kid->op_sibling;
 	    kid = kid->op_sibling;
 	}
-	if (!kid && opargs[type] & OA_DEFGV)
+	if (!kid && PL_opargs[type] & OA_DEFGV)
 	    *tokid = kid = newDEFSVOP();
 
 	while (oa && kid) {
@@ -4628,14 +4630,14 @@ ck_fun(OP *o)
 		    if (ckWARN(WARN_SYNTAX))
 			warner(WARN_SYNTAX,
 			    "Array @%s missing the @ in argument %ld of %s()",
-			    name, (long)numargs, op_desc[type]);
+			    name, (long)numargs, PL_op_desc[type]);
 		    op_free(kid);
 		    kid = newop;
 		    kid->op_sibling = sibl;
 		    *tokid = kid;
 		}
 		else if (kid->op_type != OP_RV2AV && kid->op_type != OP_PADAV)
-		    bad_type(numargs, "array", op_desc[o->op_type], kid);
+		    bad_type(numargs, "array", PL_op_desc[o->op_type], kid);
 		mod(kid, type);
 		break;
 	    case OA_HVREF:
@@ -4647,14 +4649,14 @@ ck_fun(OP *o)
 		    if (ckWARN(WARN_SYNTAX))
 			warner(WARN_SYNTAX,
 			    "Hash %%%s missing the %% in argument %ld of %s()",
-			    name, (long)numargs, op_desc[type]);
+			    name, (long)numargs, PL_op_desc[type]);
 		    op_free(kid);
 		    kid = newop;
 		    kid->op_sibling = sibl;
 		    *tokid = kid;
 		}
 		else if (kid->op_type != OP_RV2HV && kid->op_type != OP_PADHV)
-		    bad_type(numargs, "hash", op_desc[o->op_type], kid);
+		    bad_type(numargs, "hash", PL_op_desc[o->op_type], kid);
 		mod(kid, type);
 		break;
 	    case OA_CVREF:
@@ -4697,10 +4699,10 @@ ck_fun(OP *o)
 	}
 	o->op_private |= numargs;
 	if (kid)
-	    return too_many_arguments(o,op_desc[o->op_type]);
+	    return too_many_arguments(o,PL_op_desc[o->op_type]);
 	listkids(o);
     }
-    else if (opargs[type] & OA_DEFGV) {
+    else if (PL_opargs[type] & OA_DEFGV) {
 	op_free(o);
 	return newUNOP(type, 0, newDEFSVOP());
     }
@@ -4709,7 +4711,7 @@ ck_fun(OP *o)
 	while (oa & OA_OPTIONAL)
 	    oa >>= 4;
 	if (oa && oa != OA_LIST)
-	    return too_few_arguments(o,op_desc[o->op_type]);
+	    return too_few_arguments(o,PL_op_desc[o->op_type]);
     }
     return o;
 }
@@ -4731,9 +4733,9 @@ ck_glob(OP *o)
 	append_elem(OP_GLOB, o,
 		    newSVOP(OP_CONST, 0, newSViv(glob_index++)));
 	o->op_type = OP_LIST;
-	o->op_ppaddr = ppaddr[OP_LIST];
+	o->op_ppaddr = PL_ppaddr[OP_LIST];
 	cLISTOPo->op_first->op_type = OP_PUSHMARK;
-	cLISTOPo->op_first->op_ppaddr = ppaddr[OP_PUSHMARK];
+	cLISTOPo->op_first->op_ppaddr = PL_ppaddr[OP_PUSHMARK];
 	o = newUNOP(OP_ENTERSUB, OPf_STACKED,
 		    append_elem(OP_LIST, o,
 				scalar(newUNOP(OP_RV2CV, 0,
@@ -4756,7 +4758,7 @@ ck_grep(OP *o)
     OP *kid;
     OPCODE type = o->op_type == OP_GREPSTART ? OP_GREPWHILE : OP_MAPWHILE;
 
-    o->op_ppaddr = ppaddr[OP_GREPSTART];
+    o->op_ppaddr = PL_ppaddr[OP_GREPSTART];
     Newz(1101, gwop, 1, LOGOP);
 
     if (o->op_flags & OPf_STACKED) {
@@ -4783,7 +4785,7 @@ ck_grep(OP *o)
     kid = kUNOP->op_first;
 
     gwop->op_type = type;
-    gwop->op_ppaddr = ppaddr[type];
+    gwop->op_ppaddr = PL_ppaddr[type];
     gwop->op_first = listkids(o);
     gwop->op_flags |= OPf_KIDS;
     gwop->op_private = 1;
@@ -4793,7 +4795,7 @@ ck_grep(OP *o)
 
     kid = cLISTOPo->op_first->op_sibling;
     if (!kid || !kid->op_sibling)
-	return too_few_arguments(o,op_desc[o->op_type]);
+	return too_few_arguments(o,PL_op_desc[o->op_type]);
     for (kid = kid->op_sibling; kid; kid = kid->op_sibling)
 	mod(kid, OP_GREPSTART);
 
@@ -4944,6 +4946,7 @@ ck_require(OP *o)
     return ck_fun(o);
 }
 
+#if 0
 OP *
 ck_retarget(OP *o)
 {
@@ -4951,6 +4954,7 @@ ck_retarget(OP *o)
     /* STUB */
     return o;
 }
+#endif
 
 OP *
 ck_select(OP *o)
@@ -4960,7 +4964,7 @@ ck_select(OP *o)
 	kid = cLISTOPo->op_first->op_sibling;	/* get past pushmark */
 	if (kid && kid->op_sibling) {
 	    o->op_type = OP_SSELECT;
-	    o->op_ppaddr = ppaddr[OP_SSELECT];
+	    o->op_ppaddr = PL_ppaddr[OP_SSELECT];
 	    o = ck_fun(o);
 	    return fold_constants(o);
 	}
@@ -5080,7 +5084,7 @@ ck_split(OP *o)
     }
 
     kid->op_type = OP_PUSHRE;
-    kid->op_ppaddr = ppaddr[OP_PUSHRE];
+    kid->op_ppaddr = PL_ppaddr[OP_PUSHRE];
     scalar(kid);
 
     if (!kid->op_sibling)
@@ -5096,7 +5100,7 @@ ck_split(OP *o)
     scalar(kid);
 
     if (kid->op_sibling)
-	return too_many_arguments(o,op_desc[o->op_type]);
+	return too_many_arguments(o,PL_op_desc[o->op_type]);
 
     return o;
 }
@@ -5319,7 +5323,7 @@ peep(register OP *o)
 		    o->op_private |= o->op_next->op_private & OPpLVAL_INTRO;
 		    o->op_next = o->op_next->op_next;
 		    o->op_type = OP_GVSV;
-		    o->op_ppaddr = ppaddr[OP_GVSV];
+		    o->op_ppaddr = PL_ppaddr[OP_GVSV];
 		}
 	    }
 	    else if (o->op_next->op_type == OP_RV2AV) {
@@ -5341,7 +5345,7 @@ peep(register OP *o)
 		    o->op_flags |= pop->op_next->op_flags & OPf_MOD;
 		    o->op_next = pop->op_next->op_next;
 		    o->op_type = OP_AELEMFAST;
-		    o->op_ppaddr = ppaddr[OP_AELEMFAST];
+		    o->op_ppaddr = PL_ppaddr[OP_AELEMFAST];
 		    o->op_private = (U8)i;
 		    GvAVn(((GVOP*)o)->op_gv);
 		}
@@ -5429,9 +5433,9 @@ peep(register OP *o)
 	    if (ind < 1)
 		croak("Bad index while coercing array into hash");
 	    rop->op_type = OP_RV2AV;
-	    rop->op_ppaddr = ppaddr[OP_RV2AV];
+	    rop->op_ppaddr = PL_ppaddr[OP_RV2AV];
 	    o->op_type = OP_AELEM;
-	    o->op_ppaddr = ppaddr[OP_AELEM];
+	    o->op_ppaddr = PL_ppaddr[OP_AELEM];
 	    SvREFCNT_dec(*svp);
 	    *svp = newSViv(ind);
 	    break;

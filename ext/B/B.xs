@@ -13,12 +13,12 @@
 #include "INTERN.h"
 
 #ifdef PERL_OBJECT
-#undef op_name
-#undef opargs 
-#undef op_desc
-#define op_name (pPerl->Perl_get_op_names())
-#define opargs (pPerl->Perl_get_opargs())
-#define op_desc (pPerl->Perl_get_op_descs())
+#undef PL_op_name
+#undef PL_opargs 
+#undef PL_op_desc
+#define PL_op_name (pPerl->Perl_get_op_names())
+#define PL_opargs (pPerl->Perl_get_opargs())
+#define PL_op_desc (pPerl->Perl_get_op_descs())
 #endif
 
 #ifdef PerlIO
@@ -95,7 +95,7 @@ cc_opclass(OP *o)
     if (o->op_type == OP_SASSIGN)
 	return ((o->op_private & OPpASSIGN_BACKWARDS) ? OPc_UNOP : OPc_BINOP);
 
-    switch (opargs[o->op_type] & OA_CLASS_MASK) {
+    switch (PL_opargs[o->op_type] & OA_CLASS_MASK) {
     case OA_BASEOP:
 	return OPc_BASEOP;
 
@@ -173,7 +173,7 @@ cc_opclass(OP *o)
 	    return OPc_PVOP;
     }
     warn("can't determine class of operator %s, assuming BASEOP\n",
-	 op_name[o->op_type]);
+	 PL_op_name[o->op_type]);
     return OPc_BASEOP;
 }
 
@@ -518,7 +518,7 @@ ppname(opnum)
 	ST(0) = sv_newmortal();
 	if (opnum >= 0 && opnum < PL_maxo) {
 	    sv_setpvn(ST(0), "pp_", 3);
-	    sv_catpv(ST(0), op_name[opnum]);
+	    sv_catpv(ST(0), PL_op_name[opnum]);
 	}
 
 void
@@ -568,7 +568,7 @@ threadsv_names()
 
 #define OP_next(o)	o->op_next
 #define OP_sibling(o)	o->op_sibling
-#define OP_desc(o)	op_desc[o->op_type]
+#define OP_desc(o)	PL_op_desc[o->op_type]
 #define OP_targ(o)	o->op_targ
 #define OP_type(o)	o->op_type
 #define OP_seq(o)	o->op_seq
@@ -591,7 +591,7 @@ OP_ppaddr(o)
     CODE:
 	ST(0) = sv_newmortal();
 	sv_setpvn(ST(0), "pp_", 3);
-	sv_catpv(ST(0), op_name[o->op_type]);
+	sv_catpv(ST(0), PL_op_name[o->op_type]);
 
 char *
 OP_desc(o)

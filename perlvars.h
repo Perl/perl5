@@ -10,7 +10,7 @@
  * and how they're initialized.
  *
  * The 'G' prefix is only needed for vars that need appropriate #defines
- * generated when built with or without EMBED.  It is also used to generate
+ * generated in embed*.h.  Such symbols are also used to generate
  * the appropriate export list for win32.
  *
  * Avoid build-specific #ifdefs here, like DEBUGGING.  That way,
@@ -70,11 +70,7 @@ PERLVAR(Ghe_root,	HE *)		/* free he list--shared by interpreters */
 PERLVAR(Gnice_chunk,	char *)		/* a nice chunk of memory to reuse */
 PERLVAR(Gnice_chunk_size,	U32)	/* how nice the chunk of memory is */
 
-#ifdef PERL_OBJECT
 PERLVARI(Grunops,	runops_proc_t,	FUNC_NAME_TO_PTR(RUNOPS_DEFAULT))
-#else
-PERLVARI(Grunops,	runops_proc_t *,	RUNOPS_DEFAULT)
-#endif
 
 PERLVAR(Gtokenbuf[256],	char)
 PERLVAR(Gna,		STRLEN)		/* for use in SvPV when length is

@@ -852,7 +852,7 @@ PP(pp_sort)
 	    }
 	    PL_sortcop = CvSTART(cv);
 	    SAVESPTR(CvROOT(cv)->op_ppaddr);
-	    CvROOT(cv)->op_ppaddr = ppaddr[OP_NULL];
+	    CvROOT(cv)->op_ppaddr = PL_ppaddr[OP_NULL];
 
 	    SAVESPTR(PL_curpad);
 	    PL_curpad = AvARRAY((AV*)AvARRAY(CvPADLIST(cv))[1]);
@@ -1047,22 +1047,22 @@ dopoptolabel(char *label)
 	case CXt_SUBST:
 	    if (ckWARN(WARN_UNSAFE))
 		warner(WARN_UNSAFE, "Exiting substitution via %s", 
-			op_name[PL_op->op_type]);
+			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_SUB:
 	    if (ckWARN(WARN_UNSAFE))
 		warner(WARN_UNSAFE, "Exiting subroutine via %s", 
-			op_name[PL_op->op_type]);
+			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_EVAL:
 	    if (ckWARN(WARN_UNSAFE))
 		warner(WARN_UNSAFE, "Exiting eval via %s", 
-			op_name[PL_op->op_type]);
+			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_NULL:
 	    if (ckWARN(WARN_UNSAFE))
 		warner(WARN_UNSAFE, "Exiting pseudo-block via %s", 
-			op_name[PL_op->op_type]);
+			PL_op_name[PL_op->op_type]);
 	    return -1;
 	case CXt_LOOP:
 	    if (!cx->blk_loop.label ||
@@ -1167,22 +1167,22 @@ dopoptoloop(I32 startingblock)
 	case CXt_SUBST:
 	    if (ckWARN(WARN_UNSAFE))
 		warner(WARN_UNSAFE, "Exiting substitution via %s", 
-			op_name[PL_op->op_type]);
+			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_SUB:
 	    if (ckWARN(WARN_UNSAFE))
 		warner(WARN_UNSAFE, "Exiting subroutine via %s", 
-			op_name[PL_op->op_type]);
+			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_EVAL:
 	    if (ckWARN(WARN_UNSAFE))
 		warner(WARN_UNSAFE, "Exiting eval via %s", 
-			op_name[PL_op->op_type]);
+			PL_op_name[PL_op->op_type]);
 	    break;
 	case CXt_NULL:
 	    if (ckWARN(WARN_UNSAFE))
 		warner(WARN_UNSAFE, "Exiting pseudo-block via %s", 
-			op_name[PL_op->op_type]);
+			PL_op_name[PL_op->op_type]);
 	    return -1;
 	case CXt_LOOP:
 	    DEBUG_l( deb("(Found loop #%ld)\n", (long)i));
@@ -1203,7 +1203,7 @@ dounwind(I32 cxix)
     while (cxstack_ix > cxix) {
 	cx = &cxstack[cxstack_ix];
 	DEBUG_l(PerlIO_printf(Perl_debug_log, "Unwinding block %ld, type %s\n",
-			      (long) cxstack_ix, block_type[CxTYPE(cx)]));
+			      (long) cxstack_ix, PL_block_type[CxTYPE(cx)]));
 	/* Note: we don't need to restore the base context info till the end. */
 	switch (CxTYPE(cx)) {
 	case CXt_SUBST:
@@ -2459,7 +2459,7 @@ sv_compile_2op(SV *sv, OP** startop, char *code, AV** avp)
     POPEVAL(cx);
 
     (*startop)->op_type = OP_NULL;
-    (*startop)->op_ppaddr = ppaddr[OP_NULL];
+    (*startop)->op_ppaddr = PL_ppaddr[OP_NULL];
     lex_end();
     *avp = (AV*)SvREFCNT_inc(PL_comppad);
     LEAVE;

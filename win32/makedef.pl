@@ -1,18 +1,8 @@
 #!../miniperl
 
-# Written: 10 April 1996 Gary Ng (71564.1743@compuserve.com)
+# Create the export list for perl. Needed by WIN32 for creating perl.dll.
 
-# Create the export list for perl.
-# Needed by WIN32 for creating perl.dll
-# based on perl_exp.SH in the main perl distribution directory
-
-# This simple program relys on 'global.sym' being up to date
-# with all of the global symbols that a dynamicly link library
-# might want to access.
-
-# There is some symbol defined in global.sym and interp.sym
-# that does not present in the WIN32 port but there is no easy
-# way to find them so I just put a exception list here
+# reads global.sym, pp.sym, perlvars.h, intrpvar.h, thrdvar.h, config.h
 
 my $CCTYPE = "MSVC";	# default
 
@@ -143,7 +133,6 @@ Perl_pp_evalonce
 Perl_pp_interp
 Perl_pp_map
 Perl_pp_nswitch
-Perl_q
 Perl_reall_srchlen
 Perl_same_dirent
 Perl_saw_return
@@ -228,7 +217,7 @@ PL_nthreads_cond
 PL_threadnum
 PL_threadsv_names
 PL_thrsv
-Perl_vtbl_mutex
+PL_vtbl_mutex
 Perl_getTHR
 Perl_setTHR
 Perl_condpair_magic
@@ -292,8 +281,8 @@ unless ($define{'DEBUGGING'})
     Perl_debstackptrs
     Perl_runops_debug
     Perl_sv_peek
-    Perl_watchaddr
-    Perl_watchok)];
+    PL_watchaddr
+    PL_watchok)];
  }
 
 if ($define{'HAVE_DES_FCRYPT'})
@@ -301,23 +290,25 @@ if ($define{'HAVE_DES_FCRYPT'})
   emit_symbols [qw(win32_crypt)];
  }
 
-open (GLOBAL, "<../global.sym") || die "failed to open global.sym" . $!;
-while (<GLOBAL>) 
- {
-  next if (!/^[A-Za-z]/);
-  next if (/_amg[ \t]*$/);
-  # All symbols have a Perl_ prefix because that's what embed.h
-  # sticks in front of them.
-  chomp($_);
-  my $symbol = "Perl_$_";
-  emit_symbol($symbol) unless exists $skip{$symbol};
- }
-close(GLOBAL);
+# functions from *.sym files
 
-# also add symbols from interp.sym
-# They are only needed if -DMULTIPLICITY is not set but it
-# doesn't hurt to include them anyway.
-# these don't have Perl prefix
+for my $syms ('../global.sym','../pp.sym', '../globvar.sym')
+ {
+  open (GLOBAL, "<$syms") || die "failed to open $syms" . $!;
+  while (<GLOBAL>) 
+   {
+    next if (!/^[A-Za-z]/);
+    # Functions have a Perl_ prefix
+    # Variables have a PL_ prefix
+    chomp($_);
+    my $symbol = ($syms =~ /var\.sym$/i ? "PL_" : "Perl_");
+    $symbol .= $_;
+    emit_symbol($symbol) unless exists $skip{$symbol};
+   }
+  close(GLOBAL);
+ }
+
+# variables
 
 unless ($define{'PERL_GLOBAL_STRUCT'})
  {

@@ -16,9 +16,6 @@
  * Above symbol is defined via -D in 'x2p/Makefile.SH'
  * Decouple x2p stuff from some of perls more extreme eccentricities. 
  */
-#undef EMBED
-#undef NO_EMBED
-#define NO_EMBED
 #undef MULTIPLICITY
 #undef USE_STDIO
 #define USE_STDIO
@@ -61,9 +58,9 @@ PERL CORE
 variables or functions needed are made member functions
 3. all writable static variables are made member variables
 4. all global variables and functions are defined as:
-	#define var CPerlObj::Perl_var
+	#define var CPerlObj::PL_var
 	#define func CPerlObj::Perl_func
-	* these are in objpp.h
+	* these are in embed.h
 This necessitated renaming some local variables and functions that
 had the same name as a global variable or function. This was
 probably a _good_ thing anyway.
@@ -73,7 +70,7 @@ EXTENSIONS
 1. Access to global variables and perl functions is through a
 pointer to the PERL_OBJECT. This pointer type is CPerlObj*. This is
 made transparent to extension developers by the following macros:
-	#define var pPerl->Perl_var
+	#define var pPerl->PL_var
 	#define func pPerl->Perl_func
 	* these are done in objXSUB.h
 This requires that the extension be compiled as C++, which means
@@ -127,7 +124,7 @@ class CPerlObj;
 #define PERL_OBJECT_THIS
 #define _PERL_OBJECT_THIS
 #define PERL_OBJECT_THIS_
-#define CALLRUNOPS PL_runops
+#define CALLRUNOPS (*PL_runops)
 #define CALLREGCOMP (*PL_regcompp)
 #define CALLREGEXEC (*PL_regexecp)
 
@@ -136,7 +133,9 @@ class CPerlObj;
 #define VOIDUSED 1
 #include "config.h"
 
-#include "embed.h"
+#if !defined(PERL_FOR_X2P)
+#  include "embed.h"
+#endif
 
 #undef START_EXTERN_C
 #undef END_EXTERN_C
@@ -155,11 +154,7 @@ class CPerlObj;
 #  ifdef __GNUC__
 #    define stringify_immed(s) #s
 #    define stringify(s) stringify_immed(s)
-#ifdef EMBED
 register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
-#else
-register struct op *op asm(stringify(OP_IN_REGISTER));
-#endif
 #  endif
 #endif
 
@@ -250,7 +245,7 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #define TAINT_NOT	(PL_tainted = FALSE)
 #define TAINT_IF(c)	if (c) { PL_tainted = TRUE; }
 #define TAINT_ENV()	if (PL_tainting) { taint_env(); }
-#define TAINT_PROPER(s)	if (PL_tainting) { taint_proper(no_security, s); }
+#define TAINT_PROPER(s)	if (PL_tainting) { taint_proper(Nullch, s); }
 
 /* XXX All process group stuff is handled in pp_sys.c.  Should these 
    defines move there?  If so, I could simplify this a lot. --AD  9/96.
@@ -1490,7 +1485,9 @@ union any {
 #include "form.h"
 #include "gv.h"
 #include "cv.h"
+#ifndef PERL_OBJECT
 #include "opcode.h"
+#endif
 #include "op.h"
 #include "cop.h"
 #include "av.h"
@@ -1546,11 +1543,6 @@ typedef struct {
 
 typedef I32 CHECKPOINT;
 #endif /* PERL_OBJECT */
-
-/* work around some libPW problems */
-#ifdef DOINIT
-EXT char Error[1];
-#endif
 
 #if defined(iAPX286) || defined(M_I286) || defined(I80286)
 #   define I286
@@ -1837,12 +1829,13 @@ typedef Sighandler_t Sigsave_t;
  */
 
 #ifndef PERL_OBJECT
-typedef int runops_proc_t _((void));
+typedef int (*runops_proc_t) _((void));
 int runops_standard _((void));
 #ifdef DEBUGGING
 int runops_debug _((void));
 #endif
-#endif  /* PERL_OBJECT */
+#endif
+
 
 /* _ (for $_) must be first in the following list (DEFSV requires it) */
 #define THREADSV_NAMES "_123456789&`'+/.,\\\";^-%=|~:\001\005!@"
@@ -1864,62 +1857,57 @@ EXT char *** environ_pointer;
 #endif /* environ processing */
 
 
-/* for tmp use in stupid debuggers */
-EXT int *	di;
-EXT short *	ds;
-EXT char *	dc;
-
 /* handy constants */
-EXTCONST char warn_uninit[]
+EXTCONST char PL_warn_uninit[]
   INIT("Use of uninitialized value");
-EXTCONST char warn_nosemi[]
+EXTCONST char PL_warn_nosemi[]
   INIT("Semicolon seems to be missing");
-EXTCONST char warn_reserved[]
+EXTCONST char PL_warn_reserved[]
   INIT("Unquoted string \"%s\" may clash with future reserved word");
-EXTCONST char warn_nl[]
+EXTCONST char PL_warn_nl[]
   INIT("Unsuccessful %s on filename containing newline");
-EXTCONST char no_wrongref[]
+EXTCONST char PL_no_wrongref[]
   INIT("Can't use %s ref as %s ref");
-EXTCONST char no_symref[]
+EXTCONST char PL_no_symref[]
   INIT("Can't use string (\"%.32s\") as %s ref while \"strict refs\" in use");
-EXTCONST char no_usym[]
+EXTCONST char PL_no_usym[]
   INIT("Can't use an undefined value as %s reference");
-EXTCONST char no_aelem[]
+EXTCONST char PL_no_aelem[]
   INIT("Modification of non-creatable array value attempted, subscript %d");
-EXTCONST char no_helem[]
+EXTCONST char PL_no_helem[]
   INIT("Modification of non-creatable hash value attempted, subscript \"%s\"");
-EXTCONST char no_modify[]
+EXTCONST char PL_no_modify[]
   INIT("Modification of a read-only value attempted");
-EXTCONST char no_mem[]
+EXTCONST char PL_no_mem[]
   INIT("Out of memory!\n");
-EXTCONST char no_security[]
+EXTCONST char PL_no_security[]
   INIT("Insecure dependency in %s%s");
-EXTCONST char no_sock_func[]
+EXTCONST char PL_no_sock_func[]
   INIT("Unsupported socket function \"%s\" called");
-EXTCONST char no_dir_func[]
+EXTCONST char PL_no_dir_func[]
   INIT("Unsupported directory function \"%s\" called");
-EXTCONST char no_func[]
+EXTCONST char PL_no_func[]
   INIT("The %s function is unimplemented");
-EXTCONST char no_myglob[]
+EXTCONST char PL_no_myglob[]
   INIT("\"my\" variable %s can't be in a package");
 
 #ifdef DOINIT
-EXT char *sig_name[] = { SIG_NAME };
-EXT int   sig_num[]  = { SIG_NUM };
-EXT SV	* psig_ptr[sizeof(sig_num)/sizeof(*sig_num)];
-EXT SV  * psig_name[sizeof(sig_num)/sizeof(*sig_num)];
+EXT char *PL_sig_name[] = { SIG_NAME };
+EXT int   PL_sig_num[]  = { SIG_NUM };
+EXT SV	* PL_psig_ptr[sizeof(PL_sig_num)/sizeof(*PL_sig_num)];
+EXT SV  * PL_psig_name[sizeof(PL_sig_num)/sizeof(*PL_sig_num)];
 #else
-EXT char *sig_name[];
-EXT int   sig_num[];
-EXT SV  * psig_ptr[];
-EXT SV  * psig_name[];
+EXT char *PL_sig_name[];
+EXT int   PL_sig_num[];
+EXT SV  * PL_psig_ptr[];
+EXT SV  * PL_psig_name[];
 #endif
 
 /* fast case folding tables */
 
 #ifdef DOINIT
 #ifdef EBCDIC
-EXT unsigned char fold[] = { /* fast EBCDIC case folding table */
+EXT unsigned char PL_fold[] = { /* fast EBCDIC case folding table */
     0,      1,      2,      3,      4,      5,      6,      7,
     8,      9,      10,     11,     12,     13,     14,     15,
     16,     17,     18,     19,     20,     21,     22,     23,
@@ -1954,7 +1942,7 @@ EXT unsigned char fold[] = { /* fast EBCDIC case folding table */
     248,    249,    250,    251,    252,    253,    254,    255
 };
 #else   /* ascii rather than ebcdic */
-EXTCONST  unsigned char fold[] = {
+EXTCONST  unsigned char PL_fold[] = {
 	0,	1,	2,	3,	4,	5,	6,	7,
 	8,	9,	10,	11,	12,	13,	14,	15,
 	16,	17,	18,	19,	20,	21,	22,	23,
@@ -1990,11 +1978,11 @@ EXTCONST  unsigned char fold[] = {
 };
 #endif  /* !EBCDIC */
 #else
-EXTCONST unsigned char fold[];
+EXTCONST unsigned char PL_fold[];
 #endif
 
 #ifdef DOINIT
-EXT unsigned char fold_locale[] = {
+EXT unsigned char PL_fold_locale[] = {
 	0,	1,	2,	3,	4,	5,	6,	7,
 	8,	9,	10,	11,	12,	13,	14,	15,
 	16,	17,	18,	19,	20,	21,	22,	23,
@@ -2029,12 +2017,12 @@ EXT unsigned char fold_locale[] = {
 	248,	249,	250,	251,	252,	253,	254,	255
 };
 #else
-EXT unsigned char fold_locale[];
+EXT unsigned char PL_fold_locale[];
 #endif
 
 #ifdef DOINIT
 #ifdef EBCDIC
-EXT unsigned char freq[] = {/* EBCDIC frequencies for mixed English/C */
+EXT unsigned char PL_freq[] = {/* EBCDIC frequencies for mixed English/C */
     1,      2,      84,     151,    154,    155,    156,    157,
     165,    246,    250,    3,      158,    7,      18,     29,
     40,     51,     62,     73,     85,     96,     107,    118,
@@ -2069,7 +2057,7 @@ EXT unsigned char freq[] = {/* EBCDIC frequencies for mixed English/C */
     191,    183,    141,    142,    143,    144,    145,    146
 };
 #else  /* ascii rather than ebcdic */
-EXTCONST unsigned char freq[] = {	/* letter frequencies for mixed English/C */
+EXTCONST unsigned char PL_freq[] = {	/* letter frequencies for mixed English/C */
 	1,	2,	84,	151,	154,	155,	156,	157,
 	165,	246,	250,	3,	158,	7,	18,	29,
 	40,	51,	62,	73,	85,	96,	107,	118,
@@ -2105,12 +2093,12 @@ EXTCONST unsigned char freq[] = {	/* letter frequencies for mixed English/C */
 };
 #endif
 #else
-EXTCONST unsigned char freq[];
+EXTCONST unsigned char PL_freq[];
 #endif
 
 #ifdef DEBUGGING
 #ifdef DOINIT
-EXTCONST char* block_type[] = {
+EXTCONST char* PL_block_type[] = {
 	"NULL",
 	"SUB",
 	"EVAL",
@@ -2119,7 +2107,7 @@ EXTCONST char* block_type[] = {
 	"BLOCK",
 };
 #else
-EXTCONST char* block_type[];
+EXTCONST char* PL_block_type[];
 #endif
 #endif
 
@@ -2207,7 +2195,10 @@ typedef struct exitlistentry {
 #ifdef PERL_OBJECT
 extern "C" CPerlObj* perl_alloc _((IPerlMem*, IPerlEnv*, IPerlStdIO*, IPerlLIO*, IPerlDir*, IPerlSock*, IPerlProc*));
 
+#ifdef PERL_OBJECT
 typedef int (CPerlObj::*runops_proc_t) _((void));
+#endif  /* PERL_OBJECT */
+
 #undef EXT
 #define EXT
 #undef EXTCONST
@@ -2247,9 +2238,7 @@ struct perl_vars *PL_VarsPtr;
 */
 
 struct interpreter {
-#ifndef USE_THREADS
 #include "thrdvar.h"
-#endif
 #include "intrpvar.h"
 };
 
@@ -2284,17 +2273,14 @@ typedef void *Thread;
 #include "pp.h"
 #include "proto.h"
 
-#ifdef EMBED
 #define Perl_sv_setptrobj(rv,ptr,name) Perl_sv_setref_iv(rv,name,(IV)ptr)
 #define Perl_sv_setptrref(rv,ptr) Perl_sv_setref_iv(rv,Nullch,(IV)ptr)
-#else
-#define sv_setptrobj(rv,ptr,name) sv_setref_iv(rv,name,(IV)ptr)
-#define sv_setptrref(rv,ptr) sv_setref_iv(rv,Nullch,(IV)ptr)
-#endif
 
 /* The following must follow proto.h as #defines mess up syntax */
 
-#include "embedvar.h"
+#if !defined(PERL_FOR_X2P)
+#  include "embedvar.h"
+#endif
 
 /* Now include all the 'global' variables 
  * If we don't have threads or multiple interpreters
@@ -2327,14 +2313,21 @@ typedef void *Thread;
 PERLVAR(object_compatibility[30],	char)
 };
 
-#include "objpp.h"
-#ifdef DOINIT
-#include "INTERN.h"
-#else
-#include "EXTERN.h"
-#endif
-#endif  /* PERL_OBJECT */
+#  include "embed.h"
+#  if defined(WIN32) && !defined(WIN32IO_IS_STDIO)
+#    define errno	CPerlObj::ErrorNo()
+#  endif
 
+#  ifdef DOINIT
+#    include "INTERN.h"
+#  else
+#    include "EXTERN.h"
+#  endif
+
+/* this has structure inits, so it cannot be included before here */
+#  include "opcode.h"
+
+#endif  /* PERL_OBJECT */
 
 #undef PERLVAR
 #undef PERLVARI
@@ -2354,125 +2347,125 @@ PERLVAR(object_compatibility[30],	char)
 
 #ifdef DOINIT
 
-EXT MGVTBL vtbl_sv =	{magic_get,
+EXT MGVTBL PL_vtbl_sv =	{magic_get,
 				magic_set,
 					magic_len,
 						0,	0};
-EXT MGVTBL vtbl_env =	{0,	magic_set_all_env,
+EXT MGVTBL PL_vtbl_env =	{0,	magic_set_all_env,
 				0,	magic_clear_all_env,
 							0};
-EXT MGVTBL vtbl_envelem =	{0,	magic_setenv,
+EXT MGVTBL PL_vtbl_envelem =	{0,	magic_setenv,
 					0,	magic_clearenv,
 							0};
-EXT MGVTBL vtbl_sig =	{0,	0,		 0, 0, 0};
-EXT MGVTBL vtbl_sigelem =	{magic_getsig,
+EXT MGVTBL PL_vtbl_sig =	{0,	0,		 0, 0, 0};
+EXT MGVTBL PL_vtbl_sigelem =	{magic_getsig,
 					magic_setsig,
 					0,	magic_clearsig,
 							0};
-EXT MGVTBL vtbl_pack =	{0,	0,	magic_sizepack,	magic_wipepack,
+EXT MGVTBL PL_vtbl_pack =	{0,	0,	magic_sizepack,	magic_wipepack,
 							0};
-EXT MGVTBL vtbl_packelem =	{magic_getpack,
+EXT MGVTBL PL_vtbl_packelem =	{magic_getpack,
 				magic_setpack,
 					0,	magic_clearpack,
 							0};
-EXT MGVTBL vtbl_dbline =	{0,	magic_setdbline,
+EXT MGVTBL PL_vtbl_dbline =	{0,	magic_setdbline,
 					0,	0,	0};
-EXT MGVTBL vtbl_isa =	{0,	magic_setisa,
+EXT MGVTBL PL_vtbl_isa =	{0,	magic_setisa,
 					0,	magic_setisa,
 							0};
-EXT MGVTBL vtbl_isaelem =	{0,	magic_setisa,
+EXT MGVTBL PL_vtbl_isaelem =	{0,	magic_setisa,
 					0,	0,	0};
-EXT MGVTBL vtbl_arylen =	{magic_getarylen,
+EXT MGVTBL PL_vtbl_arylen =	{magic_getarylen,
 				magic_setarylen,
 					0,	0,	0};
-EXT MGVTBL vtbl_glob =	{magic_getglob,
+EXT MGVTBL PL_vtbl_glob =	{magic_getglob,
 				magic_setglob,
 					0,	0,	0};
-EXT MGVTBL vtbl_mglob =	{0,	magic_setmglob,
+EXT MGVTBL PL_vtbl_mglob =	{0,	magic_setmglob,
 					0,	0,	0};
-EXT MGVTBL vtbl_nkeys =	{magic_getnkeys,
+EXT MGVTBL PL_vtbl_nkeys =	{magic_getnkeys,
 				magic_setnkeys,
 					0,	0,	0};
-EXT MGVTBL vtbl_taint =	{magic_gettaint,magic_settaint,
+EXT MGVTBL PL_vtbl_taint =	{magic_gettaint,magic_settaint,
 					0,	0,	0};
-EXT MGVTBL vtbl_substr =	{magic_getsubstr, magic_setsubstr,
+EXT MGVTBL PL_vtbl_substr =	{magic_getsubstr, magic_setsubstr,
 					0,	0,	0};
-EXT MGVTBL vtbl_vec =	{magic_getvec,
+EXT MGVTBL PL_vtbl_vec =	{magic_getvec,
 				magic_setvec,
 					0,	0,	0};
-EXT MGVTBL vtbl_pos =	{magic_getpos,
+EXT MGVTBL PL_vtbl_pos =	{magic_getpos,
 				magic_setpos,
 					0,	0,	0};
-EXT MGVTBL vtbl_bm =	{0,	magic_setbm,
+EXT MGVTBL PL_vtbl_bm =	{0,	magic_setbm,
 					0,	0,	0};
-EXT MGVTBL vtbl_fm =	{0,	magic_setfm,
+EXT MGVTBL PL_vtbl_fm =	{0,	magic_setfm,
 					0,	0,	0};
-EXT MGVTBL vtbl_uvar =	{magic_getuvar,
+EXT MGVTBL PL_vtbl_uvar =	{magic_getuvar,
 				magic_setuvar,
 					0,	0,	0};
 #ifdef USE_THREADS
-EXT MGVTBL vtbl_mutex =	{0,	0,	0,	0,	magic_mutexfree};
+EXT MGVTBL PL_vtbl_mutex =	{0,	0,	0,	0,	magic_mutexfree};
 #endif /* USE_THREADS */
-EXT MGVTBL vtbl_defelem = {magic_getdefelem,magic_setdefelem,
+EXT MGVTBL PL_vtbl_defelem = {magic_getdefelem,magic_setdefelem,
 					0,	0,	0};
 
-EXT MGVTBL vtbl_regexp = {0,0,0,0, magic_freeregexp};
-EXT MGVTBL vtbl_regdata = {0, 0, magic_regdata_cnt, 0, 0};
-EXT MGVTBL vtbl_regdatum = {magic_regdatum_get, 0, 0, 0, 0};
+EXT MGVTBL PL_vtbl_regexp = {0,0,0,0, magic_freeregexp};
+EXT MGVTBL PL_vtbl_regdata = {0, 0, magic_regdata_cnt, 0, 0};
+EXT MGVTBL PL_vtbl_regdatum = {magic_regdatum_get, 0, 0, 0, 0};
 
 #ifdef USE_LOCALE_COLLATE
-EXT MGVTBL vtbl_collxfrm = {0,
+EXT MGVTBL PL_vtbl_collxfrm = {0,
 				magic_setcollxfrm,
 					0,	0,	0};
 #endif
 
 #ifdef OVERLOAD
-EXT MGVTBL vtbl_amagic =       {0,     magic_setamagic,
+EXT MGVTBL PL_vtbl_amagic =       {0,     magic_setamagic,
                                         0,      0,      magic_setamagic};
-EXT MGVTBL vtbl_amagicelem =   {0,     magic_setamagic,
+EXT MGVTBL PL_vtbl_amagicelem =   {0,     magic_setamagic,
                                         0,      0,      magic_setamagic};
 #endif /* OVERLOAD */
 
 #else /* !DOINIT */
 
-EXT MGVTBL vtbl_sv;
-EXT MGVTBL vtbl_env;
-EXT MGVTBL vtbl_envelem;
-EXT MGVTBL vtbl_sig;
-EXT MGVTBL vtbl_sigelem;
-EXT MGVTBL vtbl_pack;
-EXT MGVTBL vtbl_packelem;
-EXT MGVTBL vtbl_dbline;
-EXT MGVTBL vtbl_isa;
-EXT MGVTBL vtbl_isaelem;
-EXT MGVTBL vtbl_arylen;
-EXT MGVTBL vtbl_glob;
-EXT MGVTBL vtbl_mglob;
-EXT MGVTBL vtbl_nkeys;
-EXT MGVTBL vtbl_taint;
-EXT MGVTBL vtbl_substr;
-EXT MGVTBL vtbl_vec;
-EXT MGVTBL vtbl_pos;
-EXT MGVTBL vtbl_bm;
-EXT MGVTBL vtbl_fm;
-EXT MGVTBL vtbl_uvar;
+EXT MGVTBL PL_vtbl_sv;
+EXT MGVTBL PL_vtbl_env;
+EXT MGVTBL PL_vtbl_envelem;
+EXT MGVTBL PL_vtbl_sig;
+EXT MGVTBL PL_vtbl_sigelem;
+EXT MGVTBL PL_vtbl_pack;
+EXT MGVTBL PL_vtbl_packelem;
+EXT MGVTBL PL_vtbl_dbline;
+EXT MGVTBL PL_vtbl_isa;
+EXT MGVTBL PL_vtbl_isaelem;
+EXT MGVTBL PL_vtbl_arylen;
+EXT MGVTBL PL_vtbl_glob;
+EXT MGVTBL PL_vtbl_mglob;
+EXT MGVTBL PL_vtbl_nkeys;
+EXT MGVTBL PL_vtbl_taint;
+EXT MGVTBL PL_vtbl_substr;
+EXT MGVTBL PL_vtbl_vec;
+EXT MGVTBL PL_vtbl_pos;
+EXT MGVTBL PL_vtbl_bm;
+EXT MGVTBL PL_vtbl_fm;
+EXT MGVTBL PL_vtbl_uvar;
 
 #ifdef USE_THREADS
-EXT MGVTBL vtbl_mutex;
+EXT MGVTBL PL_vtbl_mutex;
 #endif /* USE_THREADS */
 
-EXT MGVTBL vtbl_defelem;
-EXT MGVTBL vtbl_regexp;
-EXT MGVTBL vtbl_regdata;
-EXT MGVTBL vtbl_regdatum;
+EXT MGVTBL PL_vtbl_defelem;
+EXT MGVTBL PL_vtbl_regexp;
+EXT MGVTBL PL_vtbl_regdata;
+EXT MGVTBL PL_vtbl_regdatum;
 
 #ifdef USE_LOCALE_COLLATE
-EXT MGVTBL vtbl_collxfrm;
+EXT MGVTBL PL_vtbl_collxfrm;
 #endif
 
 #ifdef OVERLOAD
-EXT MGVTBL vtbl_amagic;
-EXT MGVTBL vtbl_amagicelem;
+EXT MGVTBL PL_vtbl_amagic;
+EXT MGVTBL PL_vtbl_amagicelem;
 #endif /* OVERLOAD */
 
 #endif /* !DOINIT */
@@ -2481,7 +2474,7 @@ EXT MGVTBL vtbl_amagicelem;
 
 #define NofAMmeth 58
 #ifdef DOINIT
-EXTCONST char * AMG_names[NofAMmeth] = {
+EXTCONST char * PL_AMG_names[NofAMmeth] = {
   "fallback",	"abs",			/* "fallback" should be the first. */
   "bool",	"nomethod",
   "\"\"",	"0+",
@@ -2513,7 +2506,7 @@ EXTCONST char * AMG_names[NofAMmeth] = {
   "=",		"neg"
 };
 #else
-EXTCONST char * AMG_names[NofAMmeth];
+EXTCONST char * PL_AMG_names[NofAMmeth];
 #endif /* def INITAMAGIC */
 
 struct am_table {

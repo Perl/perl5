@@ -3,7 +3,7 @@
    Any changes made here will be lost!
 */
 
-#define	END	0	/*  0x0 End of program. */
+#define	END	0	/*    0 End of program. */
 #define	SUCCEED	1	/*  0x1 Return from a subroutine, basically. */
 #define	BOL	2	/*  0x2 Match "" at beginning of line. */
 #define	MBOL	3	/*  0x3 Same, assuming multiline. */
@@ -21,7 +21,7 @@
 #define	NBOUNDL	15	/*  0xf Match "" at any word non-boundary */
 #define	NBOUNDLUTF8	16	/* 0x10 Match "" at any word non-boundary */
 #define	GPOS	17	/* 0x11 Matches where last m//g left off. */
-#define	ANY	18	/* 0x12 Match any one character (except newline). */
+#define	REG_ANY	18	/* 0x12 Match any one character (except newline). */
 #define	ANYUTF8	19	/* 0x13 Match any one Unicode character (except newline). */
 #define	SANY	20	/* 0x14 Match any one character. */
 #define	SANYUTF8	21	/* 0x15 Match any one Unicode character. */
@@ -81,9 +81,9 @@
 #define	OPTIMIZED	75	/* 0x4b Placeholder for dump. */
 
 #ifndef DOINIT
-EXTCONST U8 regkind[];
+EXTCONST U8 PL_regkind[];
 #else
-EXTCONST U8 regkind[] = {
+EXTCONST U8 PL_regkind[] = {
 	END,		/* END */
 	END,		/* SUCCEED */
 	BOL,		/* BOL */
@@ -102,10 +102,10 @@ EXTCONST U8 regkind[] = {
 	NBOUND,		/* NBOUNDL */
 	NBOUND,		/* NBOUNDLUTF8 */
 	GPOS,		/* GPOS */
-	ANY,		/* ANY */
-	ANY,		/* ANYUTF8 */
-	ANY,		/* SANY */
-	ANY,		/* SANYUTF8 */
+	REG_ANY,		/* REG_ANY */
+	REG_ANY,		/* ANYUTF8 */
+	REG_ANY,		/* SANY */
+	REG_ANY,		/* SANYUTF8 */
 	ANYOF,		/* ANYOF */
 	ANYOF,		/* ANYOFUTF8 */
 	ALNUM,		/* ALNUM */
@@ -184,7 +184,7 @@ const static U8 regarglen[] = {
 	0,		/* NBOUNDL */
 	0,		/* NBOUNDLUTF8 */
 	0,		/* GPOS */
-	0,		/* ANY */
+	0,		/* REG_ANY */
 	0,		/* ANYUTF8 */
 	0,		/* SANY */
 	0,		/* SANYUTF8 */
@@ -263,7 +263,7 @@ const static char reg_off_by_arg[] = {
 	0,		/* NBOUNDL */
 	0,		/* NBOUNDLUTF8 */
 	0,		/* GPOS */
-	0,		/* ANY */
+	0,		/* REG_ANY */
 	0,		/* ANYUTF8 */
 	0,		/* SANY */
 	0,		/* SANYUTF8 */

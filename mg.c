@@ -905,8 +905,8 @@ magic_getsig(SV *sv, MAGIC *mg)
     /* Are we fetching a signal entry? */
     i = whichsig(MgPV(mg,PL_na));
     if (i) {
-    	if(psig_ptr[i])
-    	    sv_setsv(sv,psig_ptr[i]);
+    	if(PL_psig_ptr[i])
+    	    sv_setsv(sv,PL_psig_ptr[i]);
     	else {
     	    Sighandler_t sigstate = rsignal_state(i);
 
@@ -915,7 +915,7 @@ magic_getsig(SV *sv, MAGIC *mg)
     	    	sv_setpv(sv,"IGNORE");
     	    else
     	    	sv_setsv(sv,&PL_sv_undef);
-    	    psig_ptr[i] = SvREFCNT_inc(sv);
+    	    PL_psig_ptr[i] = SvREFCNT_inc(sv);
     	    SvTEMP_off(sv);
     	}
     }
@@ -928,13 +928,13 @@ magic_clearsig(SV *sv, MAGIC *mg)
     /* Are we clearing a signal entry? */
     i = whichsig(MgPV(mg,PL_na));
     if (i) {
-    	if(psig_ptr[i]) {
-    	    SvREFCNT_dec(psig_ptr[i]);
-    	    psig_ptr[i]=0;
+    	if(PL_psig_ptr[i]) {
+    	    SvREFCNT_dec(PL_psig_ptr[i]);
+    	    PL_psig_ptr[i]=0;
     	}
-    	if(psig_name[i]) {
-    	    SvREFCNT_dec(psig_name[i]);
-    	    psig_name[i]=0;
+    	if(PL_psig_name[i]) {
+    	    SvREFCNT_dec(PL_psig_name[i]);
+    	    PL_psig_name[i]=0;
     	}
     }
     return 0;
@@ -971,12 +971,12 @@ magic_setsig(SV *sv, MAGIC *mg)
 		warner(WARN_SIGNAL, "No such signal: SIG%s", s);
 	    return 0;
 	}
-	SvREFCNT_dec(psig_name[i]);
-	SvREFCNT_dec(psig_ptr[i]);
-	psig_ptr[i] = SvREFCNT_inc(sv);
+	SvREFCNT_dec(PL_psig_name[i]);
+	SvREFCNT_dec(PL_psig_ptr[i]);
+	PL_psig_ptr[i] = SvREFCNT_inc(sv);
 	SvTEMP_off(sv); /* Make sure it doesn't go away on us */
-	psig_name[i] = newSVpv(s, strlen(s));
-	SvREADONLY_on(psig_name[i]);
+	PL_psig_name[i] = newSVpv(s, strlen(s));
+	SvREADONLY_on(PL_psig_name[i]);
     }
     if (SvTYPE(sv) == SVt_PVGV || SvROK(sv)) {
 	if (i)
@@ -1548,7 +1548,7 @@ vivify_defelem(SV *sv)
 		value = *svp;
 	}
 	if (!value || value == &PL_sv_undef)
-	    croak(no_helem, SvPV(mg->mg_obj, PL_na));
+	    croak(PL_no_helem, SvPV(mg->mg_obj, PL_na));
     }
     else {
 	AV* av = (AV*)LvTARG(sv);
@@ -1557,7 +1557,7 @@ vivify_defelem(SV *sv)
 	else {
 	    SV** svp = av_fetch(av, LvTARGOFF(sv), TRUE);
 	    if (!svp || (value = *svp) == &PL_sv_undef)
-		croak(no_aelem, (I32)LvTARGOFF(sv));
+		croak(PL_no_aelem, (I32)LvTARGOFF(sv));
 	}
     }
     (void)SvREFCNT_inc(value);
@@ -2019,9 +2019,9 @@ whichsig(char *sig)
 {
     register char **sigv;
 
-    for (sigv = sig_name+1; *sigv; sigv++)
+    for (sigv = PL_sig_name+1; *sigv; sigv++)
 	if (strEQ(sig,*sigv))
-	    return sig_num[sigv - sig_name];
+	    return PL_sig_num[sigv - PL_sig_name];
 #ifdef SIGCLD
     if (strEQ(sig,"CHLD"))
 	return SIGCLD;
@@ -2070,9 +2070,9 @@ sighandler(int sig)
     if (PL_scopestack_ix < PL_scopestack_max - 3)
 	flags |= 16;
 
-    if (!psig_ptr[sig])
+    if (!PL_psig_ptr[sig])
 	die("Signal SIG%s received, but no signal handler set.\n",
-	    sig_name[sig]);
+	    PL_sig_name[sig]);
 
     /* Max number of items pushed there is 3*n or 4. We cannot fix
        infinity, so we fix 4 (in fact 5): */
@@ -2090,27 +2090,27 @@ sighandler(int sig)
     if (flags & 16)
 	PL_scopestack_ix += 1;
     /* sv_2cv is too complicated, try a simpler variant first: */
-    if (!SvROK(psig_ptr[sig]) || !(cv = (CV*)SvRV(psig_ptr[sig])) 
+    if (!SvROK(PL_psig_ptr[sig]) || !(cv = (CV*)SvRV(PL_psig_ptr[sig])) 
 	|| SvTYPE(cv) != SVt_PVCV)
-	cv = sv_2cv(psig_ptr[sig],&st,&gv,TRUE);
+	cv = sv_2cv(PL_psig_ptr[sig],&st,&gv,TRUE);
 
     if (!cv || !CvROOT(cv)) {
 	if (ckWARN(WARN_SIGNAL))
 	    warner(WARN_SIGNAL, "SIG%s handler \"%s\" not defined.\n",
-		sig_name[sig], (gv ? GvENAME(gv)
+		PL_sig_name[sig], (gv ? GvENAME(gv)
 				: ((cv && CvGV(cv))
 				   ? GvENAME(CvGV(cv))
 				   : "__ANON__")));
 	goto cleanup;
     }
 
-    if(psig_name[sig]) {
-    	sv = SvREFCNT_inc(psig_name[sig]);
+    if(PL_psig_name[sig]) {
+    	sv = SvREFCNT_inc(PL_psig_name[sig]);
 	flags |= 64;
 	sig_sv = sv;
     } else {
 	sv = sv_newmortal();
-	sv_setpv(sv,sig_name[sig]);
+	sv_setpv(sv,PL_sig_name[sig]);
     }
 
     PUSHSTACKi(PERLSI_SIGNAL);

@@ -259,7 +259,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
     while (scan && OP(scan) != END && scan < last) {
 	/* Peephole optimizer: */
 
-	if (regkind[(U8)OP(scan)] == EXACT) {
+	if (PL_regkind[(U8)OP(scan)] == EXACT) {
 	    regnode *n = regnext(scan);
 	    U32 stringok = 1;
 #ifdef DEBUGGING
@@ -269,13 +269,13 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 	    next = scan + (*OPERAND(scan) + 2 - 1)/sizeof(regnode) + 2;
 	    /* Skip NOTHING, merge EXACT*. */
 	    while (n &&
-		   ( regkind[(U8)OP(n)] == NOTHING || 
+		   ( PL_regkind[(U8)OP(n)] == NOTHING || 
 		     (stringok && (OP(n) == OP(scan))))
 		   && NEXT_OFF(n)
 		   && NEXT_OFF(scan) + NEXT_OFF(n) < I16_MAX) {
 		if (OP(n) == TAIL || n > next)
 		    stringok = 0;
-		if (regkind[(U8)OP(n)] == NOTHING) {
+		if (PL_regkind[(U8)OP(n)] == NOTHING) {
 		    NEXT_OFF(scan) += NEXT_OFF(n);
 		    next = n + NODE_STEP_REGNODE;
 #ifdef DEBUGGING
@@ -311,7 +311,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 		 * don't initialize the OP() slot of a node when that node
 		 * is occupied by just the trailing null of the string in
 		 * an EXACT node */
-		if (regkind[(U8)OP(n)] != NOTHING || OP(n) == NOTHING) {
+		if (PL_regkind[(U8)OP(n)] != NOTHING || OP(n) == NOTHING) {
 		    OP(n) = OPTIMIZED;
 		    NEXT_OFF(n) = 0;
 		}
@@ -331,7 +331,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 	    
 	    /* Skip NOTHING and LONGJMP. */
 	    while ((n = regnext(n))
-		   && ((regkind[(U8)OP(n)] == NOTHING && (noff = NEXT_OFF(n)))
+		   && ((PL_regkind[(U8)OP(n)] == NOTHING && (noff = NEXT_OFF(n)))
 		       || ((OP(n) == LONGJMP) && (noff = ARG(n))))
 		   && off + noff < max)
 		off += noff;
@@ -420,7 +420,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 		data->flags &= ~SF_BEFORE_EOL;
 	    }
 	}
-	else if (regkind[(U8)OP(scan)] == EXACT) {
+	else if (PL_regkind[(U8)OP(scan)] == EXACT) {
 	    I32 l = *OPERAND(scan);
 	    if (flags & SCF_DO_SUBSTR) 
 		scan_commit(data);
@@ -438,11 +438,11 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 	    if (data && (flags & SCF_DO_SUBSTR))
 		data->pos_min += l;
 	}
-	else if (strchr(varies,OP(scan))) {
+	else if (strchr(PL_varies,OP(scan))) {
 	    I32 mincount, maxcount, minnext, deltanext, pos_before, fl;
 	    regnode *oscan = scan;
 	    
-	    switch (regkind[(U8)OP(scan)]) {
+	    switch (PL_regkind[(U8)OP(scan)]) {
 	    case WHILEM:
 		scan = NEXTOPER(scan);
 		goto finish;
@@ -513,8 +513,8 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 
 		    /* Skip open. */
 		    nxt = regnext(nxt);
-		    if (!strchr(simple,OP(nxt))
-			&& !(regkind[(U8)OP(nxt)] == EXACT
+		    if (!strchr(PL_simple,OP(nxt))
+			&& !(PL_regkind[(U8)OP(nxt)] == EXACT
 			     && *OPERAND(nxt) == 1)) 
 			goto nogo;
 		    nxt2 = nxt;
@@ -646,7 +646,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 		    data->flags |= SF_HAS_EVAL;
 	      optimize_curly_tail:
 		if (OP(oscan) != CURLYX) {
-		    while (regkind[(U8)OP(next = regnext(oscan))] == NOTHING
+		    while (PL_regkind[(U8)OP(next = regnext(oscan))] == NOTHING
 			   && NEXT_OFF(next))
 			NEXT_OFF(oscan) += NEXT_OFF(next);
 		}
@@ -660,19 +660,19 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 		break;
 	    }
 	}
-	else if (strchr(simple,OP(scan)) || regkind[(U8)OP(scan)] == ANYUTF8) {
+	else if (strchr(PL_simple,OP(scan)) || PL_regkind[(U8)OP(scan)] == ANYUTF8) {
 	    if (flags & SCF_DO_SUBSTR) {
 		scan_commit(data);
 		data->pos_min++;
 	    }
 	    min++;
 	}
-	else if (regkind[(U8)OP(scan)] == EOL && flags & SCF_DO_SUBSTR) {
+	else if (PL_regkind[(U8)OP(scan)] == EOL && flags & SCF_DO_SUBSTR) {
 	    data->flags |= (OP(scan) == MEOL
 			    ? SF_BEFORE_MEOL
 			    : SF_BEFORE_SEOL);
 	}
-	else if (regkind[(U8)OP(scan)] == BRANCHJ
+	else if (PL_regkind[(U8)OP(scan)] == BRANCHJ
 		   && (scan->flags || data)
 		   && (OP(scan) == IFMATCH || OP(scan) == UNLESSM)) {
 	    I32 deltanext, minnext;
@@ -839,7 +839,7 @@ pregcomp(char *exp, char *xend, PMOP *pm)
     PL_regnpar = 1;
     PL_regsize = 0L;
     PL_regcode = &PL_regdummy;
-    regc((U8)MAGIC, (char*)PL_regcode);
+    regc((U8)REG_MAGIC, (char*)PL_regcode);
     if (reg(0, &flags) == NULL) {
 	Safefree(PL_regprecomp);
 	PL_regprecomp = Nullch;
@@ -874,7 +874,7 @@ pregcomp(char *exp, char *xend, PMOP *pm)
     PL_regcode = r->program;
     /* Store the count of eval-groups for security checks: */
     PL_regcode->next_off = ((PL_seen_evals > U16_MAX) ? U16_MAX : PL_seen_evals);
-    regc((U8)MAGIC, (char*) PL_regcode++);
+    regc((U8)REG_MAGIC, (char*) PL_regcode++);
     r->data = 0;
     if (reg(0, &flags) == NULL)
 	return(NULL);
@@ -905,7 +905,7 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 	    (OP(first) == BRANCH && OP(regnext(first)) != BRANCH) ||
 	    (OP(first) == PLUS) ||
 	    (OP(first) == MINMOD) ||
-	    (regkind[(U8)OP(first)] == CURLY && ARG1(first) > 0) ) {
+	    (PL_regkind[(U8)OP(first)] == CURLY && ARG1(first) > 0) ) {
 		if (OP(first) == PLUS)
 		    sawplus = 1;
 		else
@@ -916,12 +916,12 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 	/* Starting-point info. */
       again:
 	if (OP(first) == EXACT);	/* Empty, get anchored substr later. */
-	else if (strchr(simple+4,OP(first)))
+	else if (strchr(PL_simple+4,OP(first)))
 	    r->regstclass = first;
-	else if (regkind[(U8)OP(first)] == BOUND ||
-		 regkind[(U8)OP(first)] == NBOUND)
+	else if (PL_regkind[(U8)OP(first)] == BOUND ||
+		 PL_regkind[(U8)OP(first)] == NBOUND)
 	    r->regstclass = first;
-	else if (regkind[(U8)OP(first)] == BOL) {
+	else if (PL_regkind[(U8)OP(first)] == BOL) {
 	    r->reganch |= (OP(first) == MBOL ? ROPT_ANCH_MBOL: ROPT_ANCH_BOL);
 	    first = NEXTOPER(first);
 	    goto again;
@@ -932,7 +932,7 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 	    goto again;
 	}
 	else if ((OP(first) == STAR &&
-	    regkind[(U8)OP(NEXTOPER(first))] == ANY) &&
+	    PL_regkind[(U8)OP(NEXTOPER(first))] == REG_ANY) &&
 	    !(r->reganch & ROPT_ANCH) )
 	{
 	    /* turn .* into ^.* with an implied $*=1 */
@@ -1658,7 +1658,7 @@ tryagain:
 	    if (PL_regflags & PMf_SINGLELINE)
 		ret = reg_node(SANY);
 	    else
-		ret = reg_node(ANY);
+		ret = reg_node(REG_ANY);
 	    *flagp |= HASWIDTH|SIMPLE;
 	}
 	PL_regnaughty++;
@@ -2295,7 +2295,7 @@ regclass(void)
     if (!SIZE_ONLY && (*opnd & (0xFF ^ ANYOF_INVERT)) == ANYOF_FOLD) {
 	for (value = 0; value < 256; ++value) {
 	    if (ANYOF_TEST(opnd, value)) {
-		I32 cf = fold[value];
+		I32 cf = PL_fold[value];
 		ANYOF_SET(opnd, cf);
 	    }
 	}
@@ -2654,7 +2654,7 @@ reginsert(U8 op, regnode *opnd)
     register regnode *place;
     register int offset = regarglen[(U8)op];
     
-/* (regkind[(U8)op] == CURLY ? EXTRA_STEP_2ARGS : 0); */
+/* (PL_regkind[(U8)op] == CURLY ? EXTRA_STEP_2ARGS : 0); */
 
     if (SIZE_ONLY) {
 	PL_regsize += NODE_STEP_REGNODE + offset;
@@ -2714,10 +2714,10 @@ regoptail(regnode *p, regnode *val)
     /* "Operandless" and "op != BRANCH" are synonymous in practice. */
     if (p == NULL || SIZE_ONLY)
 	return;
-    if (regkind[(U8)OP(p)] == BRANCH) {
+    if (PL_regkind[(U8)OP(p)] == BRANCH) {
 	regtail(NEXTOPER(p), val);
     }
-    else if ( regkind[(U8)OP(p)] == BRANCHJ) {
+    else if ( PL_regkind[(U8)OP(p)] == BRANCHJ) {
 	regtail(NEXTOPER(NEXTOPER(p)), val);
     }
     else
@@ -2773,7 +2773,7 @@ dumpuntil(regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 	    PerlIO_printf(Perl_debug_log, "(%d)", next - start);
 	(void)PerlIO_putc(Perl_debug_log, '\n');
       after_print:
-	if (regkind[(U8)op] == BRANCHJ) {
+	if (PL_regkind[(U8)op] == BRANCHJ) {
 	    register regnode *nnode = (OP(next) == LONGJMP 
 				       ? regnext(next) 
 				       : next);
@@ -2781,14 +2781,14 @@ dumpuntil(regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 		nnode = last;
 	    node = dumpuntil(start, NEXTOPER(NEXTOPER(node)), nnode, sv, l + 1);
 	}
-	else if (regkind[(U8)op] == BRANCH) {
+	else if (PL_regkind[(U8)op] == BRANCH) {
 	    node = dumpuntil(start, NEXTOPER(node), next, sv, l + 1);
 	}
 	else if ( op == CURLY) {   /* `next' might be very big: optimizer */
 	    node = dumpuntil(start, NEXTOPER(node) + EXTRA_STEP_2ARGS,
 			     NEXTOPER(node) + EXTRA_STEP_2ARGS + 1, sv, l + 1);
 	}
-	else if (regkind[(U8)op] == CURLY && op != CURLYX) {
+	else if (PL_regkind[(U8)op] == CURLY && op != CURLYX) {
 	    node = dumpuntil(start, NEXTOPER(node) + EXTRA_STEP_2ARGS,
 			     next, sv, l + 1);
 	}
@@ -2799,7 +2799,7 @@ dumpuntil(regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 	    node = NEXTOPER(node);
 	    node += ANY_SKIP;
 	}
-	else if (regkind[(U8)op] == EXACT) {
+	else if (PL_regkind[(U8)op] == EXACT) {
             /* Literal string, where present. */
 	    node += ((*OPERAND(node)) + 2 + sizeof(regnode) - 1) / sizeof(regnode);
 	    node = NEXTOPER(node);
@@ -2915,7 +2915,7 @@ regprop(SV *sv, regnode *o)
     case SEOL:
 	p = "SEOL";
 	break;
-    case ANY:
+    case REG_ANY:
 	p = "ANY";
 	break;
     case SANY:

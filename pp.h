@@ -14,11 +14,8 @@
 #define ARGS
 #define dARGS
 #endif /* USE_THREADS */
-#ifdef PERL_OBJECT
-#define PP(s) OP * CPerlObj::s(ARGSproto)
-#else
+
 #define PP(s) OP * s(ARGSproto)
-#endif
 
 #define SP sp
 #define MARK mark

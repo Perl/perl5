@@ -358,9 +358,9 @@ typedef enum {
 #define MAXO 348
 
 #ifndef DOINIT
-EXT char *op_name[];
+EXT char *PL_op_name[];
 #else
-EXT char *op_name[] = {
+EXT char *PL_op_name[] = {
 	"null",
 	"stub",
 	"scalar",
@@ -713,9 +713,9 @@ EXT char *op_name[] = {
 #endif
 
 #ifndef DOINIT
-EXT char *op_desc[];
+EXT char *PL_op_desc[];
 #else
-EXT char *op_desc[] = {
+EXT char *PL_op_desc[] = {
 	"null operation",
 	"stub",
 	"scalar",
@@ -1070,396 +1070,21 @@ EXT char *op_desc[] = {
 #ifndef PERL_OBJECT
 START_EXTERN_C
 
-OP *	ck_anoncode	_((OP* o));
-OP *	ck_bitop	_((OP* o));
-OP *	ck_concat	_((OP* o));
-OP *	ck_delete	_((OP* o));
-OP *	ck_eof		_((OP* o));
-OP *	ck_eval		_((OP* o));
-OP *	ck_exec		_((OP* o));
-OP *	ck_exists	_((OP* o));
-OP *	ck_ftst		_((OP* o));
-OP *	ck_fun		_((OP* o));
-OP *	ck_fun_locale	_((OP* o));
-OP *	ck_glob		_((OP* o));
-OP *	ck_grep		_((OP* o));
-OP *	ck_index	_((OP* o));
-OP *	ck_lengthconst	_((OP* o));
-OP *	ck_lfun		_((OP* o));
-OP *	ck_listiob	_((OP* o));
-OP *	ck_match	_((OP* o));
-OP *	ck_null		_((OP* o));
-OP *	ck_repeat	_((OP* o));
-OP *	ck_require	_((OP* o));
-OP *	ck_rfun		_((OP* o));
-OP *	ck_rvconst	_((OP* o));
-OP *	ck_scmp		_((OP* o));
-OP *	ck_select	_((OP* o));
-OP *	ck_shift	_((OP* o));
-OP *	ck_sort		_((OP* o));
-OP *	ck_spair	_((OP* o));
-OP *	ck_split	_((OP* o));
-OP *	ck_subr		_((OP* o));
-OP *	ck_svconst	_((OP* o));
-OP *	ck_trunc	_((OP* o));
+#undef PERL_CKDEF
+#undef PERL_PPDEF
+#define PERL_CKDEF(s) OP *s _((OP *o));
+#define PERL_PPDEF(s) OP *s _((ARGSproto));
 
-OP *	pp_null		_((ARGSproto));
-OP *	pp_stub		_((ARGSproto));
-OP *	pp_scalar	_((ARGSproto));
-OP *	pp_pushmark	_((ARGSproto));
-OP *	pp_wantarray	_((ARGSproto));
-OP *	pp_const	_((ARGSproto));
-OP *	pp_gvsv		_((ARGSproto));
-OP *	pp_gv		_((ARGSproto));
-OP *	pp_gelem	_((ARGSproto));
-OP *	pp_padsv	_((ARGSproto));
-OP *	pp_padav	_((ARGSproto));
-OP *	pp_padhv	_((ARGSproto));
-OP *	pp_padany	_((ARGSproto));
-OP *	pp_pushre	_((ARGSproto));
-OP *	pp_rv2gv	_((ARGSproto));
-OP *	pp_rv2sv	_((ARGSproto));
-OP *	pp_av2arylen	_((ARGSproto));
-OP *	pp_rv2cv	_((ARGSproto));
-OP *	pp_anoncode	_((ARGSproto));
-OP *	pp_prototype	_((ARGSproto));
-OP *	pp_refgen	_((ARGSproto));
-OP *	pp_srefgen	_((ARGSproto));
-OP *	pp_ref		_((ARGSproto));
-OP *	pp_bless	_((ARGSproto));
-OP *	pp_backtick	_((ARGSproto));
-OP *	pp_glob		_((ARGSproto));
-OP *	pp_readline	_((ARGSproto));
-OP *	pp_rcatline	_((ARGSproto));
-OP *	pp_regcmaybe	_((ARGSproto));
-OP *	pp_regcreset	_((ARGSproto));
-OP *	pp_regcomp	_((ARGSproto));
-OP *	pp_match	_((ARGSproto));
-OP *	pp_qr		_((ARGSproto));
-OP *	pp_subst	_((ARGSproto));
-OP *	pp_substcont	_((ARGSproto));
-OP *	pp_trans	_((ARGSproto));
-OP *	pp_sassign	_((ARGSproto));
-OP *	pp_aassign	_((ARGSproto));
-OP *	pp_chop		_((ARGSproto));
-OP *	pp_schop	_((ARGSproto));
-OP *	pp_chomp	_((ARGSproto));
-OP *	pp_schomp	_((ARGSproto));
-OP *	pp_defined	_((ARGSproto));
-OP *	pp_undef	_((ARGSproto));
-OP *	pp_study	_((ARGSproto));
-OP *	pp_pos		_((ARGSproto));
-OP *	pp_preinc	_((ARGSproto));
-OP *	pp_i_preinc	_((ARGSproto));
-OP *	pp_predec	_((ARGSproto));
-OP *	pp_i_predec	_((ARGSproto));
-OP *	pp_postinc	_((ARGSproto));
-OP *	pp_i_postinc	_((ARGSproto));
-OP *	pp_postdec	_((ARGSproto));
-OP *	pp_i_postdec	_((ARGSproto));
-OP *	pp_pow		_((ARGSproto));
-OP *	pp_multiply	_((ARGSproto));
-OP *	pp_i_multiply	_((ARGSproto));
-OP *	pp_divide	_((ARGSproto));
-OP *	pp_i_divide	_((ARGSproto));
-OP *	pp_modulo	_((ARGSproto));
-OP *	pp_i_modulo	_((ARGSproto));
-OP *	pp_repeat	_((ARGSproto));
-OP *	pp_add		_((ARGSproto));
-OP *	pp_i_add	_((ARGSproto));
-OP *	pp_subtract	_((ARGSproto));
-OP *	pp_i_subtract	_((ARGSproto));
-OP *	pp_concat	_((ARGSproto));
-OP *	pp_stringify	_((ARGSproto));
-OP *	pp_left_shift	_((ARGSproto));
-OP *	pp_right_shift	_((ARGSproto));
-OP *	pp_lt		_((ARGSproto));
-OP *	pp_i_lt		_((ARGSproto));
-OP *	pp_gt		_((ARGSproto));
-OP *	pp_i_gt		_((ARGSproto));
-OP *	pp_le		_((ARGSproto));
-OP *	pp_i_le		_((ARGSproto));
-OP *	pp_ge		_((ARGSproto));
-OP *	pp_i_ge		_((ARGSproto));
-OP *	pp_eq		_((ARGSproto));
-OP *	pp_i_eq		_((ARGSproto));
-OP *	pp_ne		_((ARGSproto));
-OP *	pp_i_ne		_((ARGSproto));
-OP *	pp_ncmp		_((ARGSproto));
-OP *	pp_i_ncmp	_((ARGSproto));
-OP *	pp_slt		_((ARGSproto));
-OP *	pp_sgt		_((ARGSproto));
-OP *	pp_sle		_((ARGSproto));
-OP *	pp_sge		_((ARGSproto));
-OP *	pp_seq		_((ARGSproto));
-OP *	pp_sne		_((ARGSproto));
-OP *	pp_scmp		_((ARGSproto));
-OP *	pp_bit_and	_((ARGSproto));
-OP *	pp_bit_xor	_((ARGSproto));
-OP *	pp_bit_or	_((ARGSproto));
-OP *	pp_negate	_((ARGSproto));
-OP *	pp_i_negate	_((ARGSproto));
-OP *	pp_not		_((ARGSproto));
-OP *	pp_complement	_((ARGSproto));
-OP *	pp_atan2	_((ARGSproto));
-OP *	pp_sin		_((ARGSproto));
-OP *	pp_cos		_((ARGSproto));
-OP *	pp_rand		_((ARGSproto));
-OP *	pp_srand	_((ARGSproto));
-OP *	pp_exp		_((ARGSproto));
-OP *	pp_log		_((ARGSproto));
-OP *	pp_sqrt		_((ARGSproto));
-OP *	pp_int		_((ARGSproto));
-OP *	pp_hex		_((ARGSproto));
-OP *	pp_oct		_((ARGSproto));
-OP *	pp_abs		_((ARGSproto));
-OP *	pp_length	_((ARGSproto));
-OP *	pp_substr	_((ARGSproto));
-OP *	pp_vec		_((ARGSproto));
-OP *	pp_index	_((ARGSproto));
-OP *	pp_rindex	_((ARGSproto));
-OP *	pp_sprintf	_((ARGSproto));
-OP *	pp_formline	_((ARGSproto));
-OP *	pp_ord		_((ARGSproto));
-OP *	pp_chr		_((ARGSproto));
-OP *	pp_crypt	_((ARGSproto));
-OP *	pp_ucfirst	_((ARGSproto));
-OP *	pp_lcfirst	_((ARGSproto));
-OP *	pp_uc		_((ARGSproto));
-OP *	pp_lc		_((ARGSproto));
-OP *	pp_quotemeta	_((ARGSproto));
-OP *	pp_rv2av	_((ARGSproto));
-OP *	pp_aelemfast	_((ARGSproto));
-OP *	pp_aelem	_((ARGSproto));
-OP *	pp_aslice	_((ARGSproto));
-OP *	pp_each		_((ARGSproto));
-OP *	pp_values	_((ARGSproto));
-OP *	pp_keys		_((ARGSproto));
-OP *	pp_delete	_((ARGSproto));
-OP *	pp_exists	_((ARGSproto));
-OP *	pp_rv2hv	_((ARGSproto));
-OP *	pp_helem	_((ARGSproto));
-OP *	pp_hslice	_((ARGSproto));
-OP *	pp_unpack	_((ARGSproto));
-OP *	pp_pack		_((ARGSproto));
-OP *	pp_split	_((ARGSproto));
-OP *	pp_join		_((ARGSproto));
-OP *	pp_list		_((ARGSproto));
-OP *	pp_lslice	_((ARGSproto));
-OP *	pp_anonlist	_((ARGSproto));
-OP *	pp_anonhash	_((ARGSproto));
-OP *	pp_splice	_((ARGSproto));
-OP *	pp_push		_((ARGSproto));
-OP *	pp_pop		_((ARGSproto));
-OP *	pp_shift	_((ARGSproto));
-OP *	pp_unshift	_((ARGSproto));
-OP *	pp_sort		_((ARGSproto));
-OP *	pp_reverse	_((ARGSproto));
-OP *	pp_grepstart	_((ARGSproto));
-OP *	pp_grepwhile	_((ARGSproto));
-OP *	pp_mapstart	_((ARGSproto));
-OP *	pp_mapwhile	_((ARGSproto));
-OP *	pp_range	_((ARGSproto));
-OP *	pp_flip		_((ARGSproto));
-OP *	pp_flop		_((ARGSproto));
-OP *	pp_and		_((ARGSproto));
-OP *	pp_or		_((ARGSproto));
-OP *	pp_xor		_((ARGSproto));
-OP *	pp_cond_expr	_((ARGSproto));
-OP *	pp_andassign	_((ARGSproto));
-OP *	pp_orassign	_((ARGSproto));
-OP *	pp_method	_((ARGSproto));
-OP *	pp_entersub	_((ARGSproto));
-OP *	pp_leavesub	_((ARGSproto));
-OP *	pp_caller	_((ARGSproto));
-OP *	pp_warn		_((ARGSproto));
-OP *	pp_die		_((ARGSproto));
-OP *	pp_reset	_((ARGSproto));
-OP *	pp_lineseq	_((ARGSproto));
-OP *	pp_nextstate	_((ARGSproto));
-OP *	pp_dbstate	_((ARGSproto));
-OP *	pp_unstack	_((ARGSproto));
-OP *	pp_enter	_((ARGSproto));
-OP *	pp_leave	_((ARGSproto));
-OP *	pp_scope	_((ARGSproto));
-OP *	pp_enteriter	_((ARGSproto));
-OP *	pp_iter		_((ARGSproto));
-OP *	pp_enterloop	_((ARGSproto));
-OP *	pp_leaveloop	_((ARGSproto));
-OP *	pp_return	_((ARGSproto));
-OP *	pp_last		_((ARGSproto));
-OP *	pp_next		_((ARGSproto));
-OP *	pp_redo		_((ARGSproto));
-OP *	pp_dump		_((ARGSproto));
-OP *	pp_goto		_((ARGSproto));
-OP *	pp_exit		_((ARGSproto));
-OP *	pp_open		_((ARGSproto));
-OP *	pp_close	_((ARGSproto));
-OP *	pp_pipe_op	_((ARGSproto));
-OP *	pp_fileno	_((ARGSproto));
-OP *	pp_umask	_((ARGSproto));
-OP *	pp_binmode	_((ARGSproto));
-OP *	pp_tie		_((ARGSproto));
-OP *	pp_untie	_((ARGSproto));
-OP *	pp_tied		_((ARGSproto));
-OP *	pp_dbmopen	_((ARGSproto));
-OP *	pp_dbmclose	_((ARGSproto));
-OP *	pp_sselect	_((ARGSproto));
-OP *	pp_select	_((ARGSproto));
-OP *	pp_getc		_((ARGSproto));
-OP *	pp_read		_((ARGSproto));
-OP *	pp_enterwrite	_((ARGSproto));
-OP *	pp_leavewrite	_((ARGSproto));
-OP *	pp_prtf		_((ARGSproto));
-OP *	pp_print	_((ARGSproto));
-OP *	pp_sysopen	_((ARGSproto));
-OP *	pp_sysseek	_((ARGSproto));
-OP *	pp_sysread	_((ARGSproto));
-OP *	pp_syswrite	_((ARGSproto));
-OP *	pp_send		_((ARGSproto));
-OP *	pp_recv		_((ARGSproto));
-OP *	pp_eof		_((ARGSproto));
-OP *	pp_tell		_((ARGSproto));
-OP *	pp_seek		_((ARGSproto));
-OP *	pp_truncate	_((ARGSproto));
-OP *	pp_fcntl	_((ARGSproto));
-OP *	pp_ioctl	_((ARGSproto));
-OP *	pp_flock	_((ARGSproto));
-OP *	pp_socket	_((ARGSproto));
-OP *	pp_sockpair	_((ARGSproto));
-OP *	pp_bind		_((ARGSproto));
-OP *	pp_connect	_((ARGSproto));
-OP *	pp_listen	_((ARGSproto));
-OP *	pp_accept	_((ARGSproto));
-OP *	pp_shutdown	_((ARGSproto));
-OP *	pp_gsockopt	_((ARGSproto));
-OP *	pp_ssockopt	_((ARGSproto));
-OP *	pp_getsockname	_((ARGSproto));
-OP *	pp_getpeername	_((ARGSproto));
-OP *	pp_lstat	_((ARGSproto));
-OP *	pp_stat		_((ARGSproto));
-OP *	pp_ftrread	_((ARGSproto));
-OP *	pp_ftrwrite	_((ARGSproto));
-OP *	pp_ftrexec	_((ARGSproto));
-OP *	pp_fteread	_((ARGSproto));
-OP *	pp_ftewrite	_((ARGSproto));
-OP *	pp_fteexec	_((ARGSproto));
-OP *	pp_ftis		_((ARGSproto));
-OP *	pp_fteowned	_((ARGSproto));
-OP *	pp_ftrowned	_((ARGSproto));
-OP *	pp_ftzero	_((ARGSproto));
-OP *	pp_ftsize	_((ARGSproto));
-OP *	pp_ftmtime	_((ARGSproto));
-OP *	pp_ftatime	_((ARGSproto));
-OP *	pp_ftctime	_((ARGSproto));
-OP *	pp_ftsock	_((ARGSproto));
-OP *	pp_ftchr	_((ARGSproto));
-OP *	pp_ftblk	_((ARGSproto));
-OP *	pp_ftfile	_((ARGSproto));
-OP *	pp_ftdir	_((ARGSproto));
-OP *	pp_ftpipe	_((ARGSproto));
-OP *	pp_ftlink	_((ARGSproto));
-OP *	pp_ftsuid	_((ARGSproto));
-OP *	pp_ftsgid	_((ARGSproto));
-OP *	pp_ftsvtx	_((ARGSproto));
-OP *	pp_fttty	_((ARGSproto));
-OP *	pp_fttext	_((ARGSproto));
-OP *	pp_ftbinary	_((ARGSproto));
-OP *	pp_chdir	_((ARGSproto));
-OP *	pp_chown	_((ARGSproto));
-OP *	pp_chroot	_((ARGSproto));
-OP *	pp_unlink	_((ARGSproto));
-OP *	pp_chmod	_((ARGSproto));
-OP *	pp_utime	_((ARGSproto));
-OP *	pp_rename	_((ARGSproto));
-OP *	pp_link		_((ARGSproto));
-OP *	pp_symlink	_((ARGSproto));
-OP *	pp_readlink	_((ARGSproto));
-OP *	pp_mkdir	_((ARGSproto));
-OP *	pp_rmdir	_((ARGSproto));
-OP *	pp_open_dir	_((ARGSproto));
-OP *	pp_readdir	_((ARGSproto));
-OP *	pp_telldir	_((ARGSproto));
-OP *	pp_seekdir	_((ARGSproto));
-OP *	pp_rewinddir	_((ARGSproto));
-OP *	pp_closedir	_((ARGSproto));
-OP *	pp_fork		_((ARGSproto));
-OP *	pp_wait		_((ARGSproto));
-OP *	pp_waitpid	_((ARGSproto));
-OP *	pp_system	_((ARGSproto));
-OP *	pp_exec		_((ARGSproto));
-OP *	pp_kill		_((ARGSproto));
-OP *	pp_getppid	_((ARGSproto));
-OP *	pp_getpgrp	_((ARGSproto));
-OP *	pp_setpgrp	_((ARGSproto));
-OP *	pp_getpriority	_((ARGSproto));
-OP *	pp_setpriority	_((ARGSproto));
-OP *	pp_time		_((ARGSproto));
-OP *	pp_tms		_((ARGSproto));
-OP *	pp_localtime	_((ARGSproto));
-OP *	pp_gmtime	_((ARGSproto));
-OP *	pp_alarm	_((ARGSproto));
-OP *	pp_sleep	_((ARGSproto));
-OP *	pp_shmget	_((ARGSproto));
-OP *	pp_shmctl	_((ARGSproto));
-OP *	pp_shmread	_((ARGSproto));
-OP *	pp_shmwrite	_((ARGSproto));
-OP *	pp_msgget	_((ARGSproto));
-OP *	pp_msgctl	_((ARGSproto));
-OP *	pp_msgsnd	_((ARGSproto));
-OP *	pp_msgrcv	_((ARGSproto));
-OP *	pp_semget	_((ARGSproto));
-OP *	pp_semctl	_((ARGSproto));
-OP *	pp_semop	_((ARGSproto));
-OP *	pp_require	_((ARGSproto));
-OP *	pp_dofile	_((ARGSproto));
-OP *	pp_entereval	_((ARGSproto));
-OP *	pp_leaveeval	_((ARGSproto));
-OP *	pp_entertry	_((ARGSproto));
-OP *	pp_leavetry	_((ARGSproto));
-OP *	pp_ghbyname	_((ARGSproto));
-OP *	pp_ghbyaddr	_((ARGSproto));
-OP *	pp_ghostent	_((ARGSproto));
-OP *	pp_gnbyname	_((ARGSproto));
-OP *	pp_gnbyaddr	_((ARGSproto));
-OP *	pp_gnetent	_((ARGSproto));
-OP *	pp_gpbyname	_((ARGSproto));
-OP *	pp_gpbynumber	_((ARGSproto));
-OP *	pp_gprotoent	_((ARGSproto));
-OP *	pp_gsbyname	_((ARGSproto));
-OP *	pp_gsbyport	_((ARGSproto));
-OP *	pp_gservent	_((ARGSproto));
-OP *	pp_shostent	_((ARGSproto));
-OP *	pp_snetent	_((ARGSproto));
-OP *	pp_sprotoent	_((ARGSproto));
-OP *	pp_sservent	_((ARGSproto));
-OP *	pp_ehostent	_((ARGSproto));
-OP *	pp_enetent	_((ARGSproto));
-OP *	pp_eprotoent	_((ARGSproto));
-OP *	pp_eservent	_((ARGSproto));
-OP *	pp_gpwnam	_((ARGSproto));
-OP *	pp_gpwuid	_((ARGSproto));
-OP *	pp_gpwent	_((ARGSproto));
-OP *	pp_spwent	_((ARGSproto));
-OP *	pp_epwent	_((ARGSproto));
-OP *	pp_ggrnam	_((ARGSproto));
-OP *	pp_ggrgid	_((ARGSproto));
-OP *	pp_ggrent	_((ARGSproto));
-OP *	pp_sgrent	_((ARGSproto));
-OP *	pp_egrent	_((ARGSproto));
-OP *	pp_getlogin	_((ARGSproto));
-OP *	pp_syscall	_((ARGSproto));
-OP *	pp_lock		_((ARGSproto));
-OP *	pp_threadsv	_((ARGSproto));
+#include "pp_proto.h"
+
 
 END_EXTERN_C
 #endif	/* PERL_OBJECT */
 
 #ifndef DOINIT
-EXT OP * (CPERLscope(*ppaddr)[])(ARGSproto);
+EXT OP * (CPERLscope(*PL_ppaddr)[])(ARGSproto);
 #else
-#ifndef PERL_OBJECT
-EXT OP * (CPERLscope(*ppaddr)[])(ARGSproto) = {
+EXT OP * (CPERLscope(*PL_ppaddr)[])(ARGSproto) = {
 	pp_null,
 	pp_stub,
 	pp_scalar,
@@ -1809,14 +1434,12 @@ EXT OP * (CPERLscope(*ppaddr)[])(ARGSproto) = {
 	pp_lock,
 	pp_threadsv,
 };
-#endif	/* PERL_OBJECT */
 #endif
 
 #ifndef DOINIT
-EXT OP * (CPERLscope(*check)[]) _((OP *op));
+EXT OP * (CPERLscope(*PL_check)[]) _((OP *op));
 #else
-#ifndef PERL_OBJECT
-EXT OP * (CPERLscope(*check)[]) _((OP *op)) = {
+EXT OP * (CPERLscope(*PL_check)[]) _((OP *op)) = {
 	ck_null,	/* null */
 	ck_null,	/* stub */
 	ck_fun,		/* scalar */
@@ -2166,13 +1789,12 @@ EXT OP * (CPERLscope(*check)[]) _((OP *op)) = {
 	ck_rfun,	/* lock */
 	ck_null,	/* threadsv */
 };
-#endif	/* PERL_OBJECT */
 #endif
 
 #ifndef DOINIT
-EXT U32 opargs[];
+EXT U32 PL_opargs[];
 #else
-EXT U32 opargs[] = {
+EXT U32 PL_opargs[] = {
 	0x00000000,	/* null */
 	0x00000000,	/* stub */
 	0x00001c04,	/* scalar */

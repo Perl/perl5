@@ -110,7 +110,7 @@ dump_op(OP *o)
 	PerlIO_printf(Perl_debug_log, "%-4d", o->op_seq);
     else
 	PerlIO_printf(Perl_debug_log, "    ");
-    dump("TYPE = %s  ===> ", op_name[o->op_type]);
+    dump("TYPE = %s  ===> ", PL_op_name[o->op_type]);
     if (o->op_next) {
 	if (o->op_seq)
 	    PerlIO_printf(Perl_debug_log, "%d\n", o->op_next->op_seq);
@@ -122,7 +122,7 @@ dump_op(OP *o)
     PL_dumplvl++;
     if (o->op_targ) {
 	if (o->op_type == OP_NULL)
-	    dump("  (was %s)\n", op_name[o->op_targ]);
+	    dump("  (was %s)\n", PL_op_name[o->op_targ]);
 	else
 	    dump("TARG = %d\n", o->op_targ);
     }

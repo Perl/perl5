@@ -39,9 +39,9 @@ EOP
 print OUT <<EOP;
 
 #ifndef DOINIT
-EXTCONST U8 regkind[];
+EXTCONST U8 PL_regkind[];
 #else
-EXTCONST U8 regkind[] = {
+EXTCONST U8 PL_regkind[] = {
 EOP
 
 $ind = 0;

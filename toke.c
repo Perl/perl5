@@ -112,10 +112,8 @@ static char ident_too_long[] = "Identifier too long";
 #ifdef USE_PURE_BISON
 YYSTYPE* yylval_pointer = NULL;
 int* yychar_pointer = NULL;
-#  ifdef EMBED
-#    undef yylval
-#    undef yychar
-#  endif
+#  undef yylval
+#  undef yychar
 #  define yylval (*yylval_pointer)
 #  define yychar (*yychar_pointer)
 #  define PERL_YYLEX_PARAM yylval_pointer,yychar_pointer
@@ -1614,7 +1612,7 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 	*/
 	if (PL_in_my) {
 	    if (strchr(PL_tokenbuf,':'))
-		croak(no_myglob,PL_tokenbuf);
+		croak(PL_no_myglob,PL_tokenbuf);
 
 	    yylval.opval = newOP(OP_PADANY, 0);
 	    yylval.opval->op_targ = pad_allocmy(PL_tokenbuf);
@@ -2532,7 +2530,7 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 	if (PL_expect == XOPERATOR) {
 	    if (ckWARN(WARN_SEMICOLON) && isIDFIRST_lazy(s) && PL_bufptr == PL_linestart) {
 		PL_curcop->cop_line--;
-		warner(WARN_SEMICOLON, warn_nosemi);
+		warner(WARN_SEMICOLON, PL_warn_nosemi);
 		PL_curcop->cop_line++;
 	    }
 	    BAop(OP_BIT_AND);
@@ -3065,7 +3063,7 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 		if (PL_expect == XOPERATOR) {
 		    if (PL_bufptr == PL_linestart) {
 			PL_curcop->cop_line--;
-			warner(WARN_SEMICOLON, warn_nosemi);
+			warner(WARN_SEMICOLON, PL_warn_nosemi);
 			PL_curcop->cop_line++;
 		    }
 		    else
@@ -3121,7 +3119,7 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 		    (PL_oldoldbufptr == PL_last_lop || PL_oldoldbufptr == PL_last_uni) &&
 		    /* NO SKIPSPACE BEFORE HERE! */
 		    (PL_expect == XREF 
-		     || ((opargs[PL_last_lop_op] >> OASHIFT)& 7) == OA_FILEREF
+		     || ((PL_opargs[PL_last_lop_op] >> OASHIFT)& 7) == OA_FILEREF
 		     || (PL_last_lop_op == OP_ENTERSUB 
 			 && PL_last_proto 
 			 && PL_last_proto[PL_last_proto[0] == ';' ? 1 : 0] == '*')) )
@@ -3251,7 +3249,7 @@ int yylex(PERL_YYLEX_PARAM_DECL)
 		    if (lastchar != '-') {
 			for (d = PL_tokenbuf; *d && isLOWER(*d); d++) ;
 			if (!*d)
-			    warner(WARN_RESERVED, warn_reserved, PL_tokenbuf);
+			    warner(WARN_RESERVED, PL_warn_reserved, PL_tokenbuf);
 		    }
 		}
 

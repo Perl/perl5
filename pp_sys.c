@@ -359,7 +359,7 @@ PP(pp_glob)
 	 * so for security reasons we must assume the worst.
 	 */
 	TAINT;
-	taint_proper(no_security, "glob");
+	taint_proper(PL_no_security, "glob");
     }
 #endif /* !VMS */
 
@@ -484,12 +484,12 @@ PP(pp_open)
     if (MAXARG > 1)
 	sv = POPs;
     if (!isGV(TOPs))
-	DIE(no_usym, "filehandle");
+	DIE(PL_no_usym, "filehandle");
     if (MAXARG <= 1)
 	sv = GvSV(TOPs);
     gv = (GV*)POPs;
     if (!isGV(gv))
-	DIE(no_usym, "filehandle");
+	DIE(PL_no_usym, "filehandle");
     if (GvIOp(gv))
 	IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT;
     tmps = SvPV(sv, len);
@@ -545,7 +545,7 @@ PP(pp_pipe_op)
 	goto badexit;
 
     if (SvTYPE(rgv) != SVt_PVGV || SvTYPE(wgv) != SVt_PVGV)
-	DIE(no_usym, "filehandle");
+	DIE(PL_no_usym, "filehandle");
     rstio = GvIOn(rgv);
     wstio = GvIOn(wgv);
 
@@ -576,7 +576,7 @@ PP(pp_pipe_op)
 badexit:
     RETPUSHUNDEF;
 #else
-    DIE(no_func, "pipe");
+    DIE(PL_no_func, "pipe");
 #endif
 }
 
@@ -1404,7 +1404,7 @@ PP(pp_sysread)
     }
 #else
     if (PL_op->op_type == OP_RECV)
-	DIE(no_sock_func, "recv");
+	DIE(PL_no_sock_func, "recv");
 #endif
     if (offset < 0) {
 	if (-offset > blen)
@@ -1542,7 +1542,7 @@ PP(pp_send)
 
 #else
     else
-	DIE(no_sock_func, "send");
+	DIE(PL_no_sock_func, "send");
 #endif
     if (length < 0)
 	goto say_undef;
@@ -1733,7 +1733,7 @@ PP(pp_ioctl)
     if (SvPOK(argsv)) {
 	if (s[SvCUR(argsv)] != 17)
 	    DIE("Possible memory corruption: %s overflowed 3rd argument",
-		op_name[optype]);
+		PL_op_name[optype]);
 	s[SvCUR(argsv)] = 0;		/* put our null back */
 	SvSETMAGIC(argsv);		/* Assume it has changed */
     }
@@ -1776,7 +1776,7 @@ PP(pp_flock)
     PUSHi(value);
     RETURN;
 #else
-    DIE(no_func, "flock()");
+    DIE(PL_no_func, "flock()");
 #endif
 }
 
@@ -1820,7 +1820,7 @@ PP(pp_socket)
 
     RETPUSHYES;
 #else
-    DIE(no_sock_func, "socket");
+    DIE(PL_no_sock_func, "socket");
 #endif
 }
 
@@ -1870,7 +1870,7 @@ PP(pp_sockpair)
 
     RETPUSHYES;
 #else
-    DIE(no_sock_func, "socketpair");
+    DIE(PL_no_sock_func, "socketpair");
 #endif
 }
 
@@ -1929,7 +1929,7 @@ nuts:
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
-    DIE(no_sock_func, "bind");
+    DIE(PL_no_sock_func, "bind");
 #endif
 }
 
@@ -1959,7 +1959,7 @@ nuts:
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
-    DIE(no_sock_func, "connect");
+    DIE(PL_no_sock_func, "connect");
 #endif
 }
 
@@ -1985,7 +1985,7 @@ nuts:
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
-    DIE(no_sock_func, "listen");
+    DIE(PL_no_sock_func, "listen");
 #endif
 }
 
@@ -2042,7 +2042,7 @@ badexit:
     RETPUSHUNDEF;
 
 #else
-    DIE(no_sock_func, "accept");
+    DIE(PL_no_sock_func, "accept");
 #endif
 }
 
@@ -2066,7 +2066,7 @@ nuts:
     SETERRNO(EBADF,SS$_IVCHAN);
     RETPUSHUNDEF;
 #else
-    DIE(no_sock_func, "shutdown");
+    DIE(PL_no_sock_func, "shutdown");
 #endif
 }
 
@@ -2075,7 +2075,7 @@ PP(pp_gsockopt)
 #ifdef HAS_SOCKET
     return pp_ssockopt(ARGS);
 #else
-    DIE(no_sock_func, "getsockopt");
+    DIE(PL_no_sock_func, "getsockopt");
 #endif
 }
 
@@ -2146,7 +2146,7 @@ nuts2:
     RETPUSHUNDEF;
 
 #else
-    DIE(no_sock_func, "setsockopt");
+    DIE(PL_no_sock_func, "setsockopt");
 #endif
 }
 
@@ -2155,7 +2155,7 @@ PP(pp_getsockname)
 #ifdef HAS_SOCKET
     return pp_getpeername(ARGS);
 #else
-    DIE(no_sock_func, "getsockname");
+    DIE(PL_no_sock_func, "getsockname");
 #endif
 }
 
@@ -2219,7 +2219,7 @@ nuts2:
     RETPUSHUNDEF;
 
 #else
-    DIE(no_sock_func, "getpeername");
+    DIE(PL_no_sock_func, "getpeername");
 #endif
 }
 
@@ -2271,7 +2271,7 @@ PP(pp_stat)
 	    PL_laststatval = PerlLIO_stat(SvPV(PL_statname, PL_na), &PL_statcache);
 	if (PL_laststatval < 0) {
 	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV(PL_statname, PL_na), '\n'))
-		warner(WARN_NEWLINE, warn_nl, "stat");
+		warner(WARN_NEWLINE, PL_warn_nl, "stat");
 	    max = 0;
 	}
     }
@@ -2785,7 +2785,7 @@ PP(pp_fttext)
 #endif
 	if (i < 0) {
 	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV(sv, PL_na), '\n'))
-		warner(WARN_NEWLINE, warn_nl, "open");
+		warner(WARN_NEWLINE, PL_warn_nl, "open");
 	    RETPUSHUNDEF;
 	}
 	PL_laststatval = PerlLIO_fstat(i, &PL_statcache);
@@ -2882,7 +2882,7 @@ PP(pp_chown)
     PUSHi(value);
     RETURN;
 #else
-    DIE(no_func, "Unsupported function chown");
+    DIE(PL_no_func, "Unsupported function chown");
 #endif
 }
 
@@ -2896,7 +2896,7 @@ PP(pp_chroot)
     PUSHi( chroot(tmps) >= 0 );
     RETURN;
 #else
-    DIE(no_func, "chroot");
+    DIE(PL_no_func, "chroot");
 #endif
 }
 
@@ -2965,7 +2965,7 @@ PP(pp_link)
     TAINT_PROPER("link");
     SETi( link(tmps, tmps2) >= 0 );
 #else
-    DIE(no_func, "Unsupported function link");
+    DIE(PL_no_func, "Unsupported function link");
 #endif
     RETURN;
 }
@@ -2980,7 +2980,7 @@ PP(pp_symlink)
     SETi( symlink(tmps, tmps2) >= 0 );
     RETURN;
 #else
-    DIE(no_func, "symlink");
+    DIE(PL_no_func, "symlink");
 #endif
 }
 
@@ -3157,7 +3157,7 @@ nope:
 	SETERRNO(EBADF,RMS$_DIR);
     RETPUSHUNDEF;
 #else
-    DIE(no_dir_func, "opendir");
+    DIE(PL_no_dir_func, "opendir");
 #endif
 }
 
@@ -3213,7 +3213,7 @@ nope:
     else
 	RETPUSHUNDEF;
 #else
-    DIE(no_dir_func, "readdir");
+    DIE(PL_no_dir_func, "readdir");
 #endif
 }
 
@@ -3237,7 +3237,7 @@ nope:
 	SETERRNO(EBADF,RMS$_ISI);
     RETPUSHUNDEF;
 #else
-    DIE(no_dir_func, "telldir");
+    DIE(PL_no_dir_func, "telldir");
 #endif
 }
 
@@ -3260,7 +3260,7 @@ nope:
 	SETERRNO(EBADF,RMS$_ISI);
     RETPUSHUNDEF;
 #else
-    DIE(no_dir_func, "seekdir");
+    DIE(PL_no_dir_func, "seekdir");
 #endif
 }
 
@@ -3281,7 +3281,7 @@ nope:
 	SETERRNO(EBADF,RMS$_ISI);
     RETPUSHUNDEF;
 #else
-    DIE(no_dir_func, "rewinddir");
+    DIE(PL_no_dir_func, "rewinddir");
 #endif
 }
 
@@ -3311,7 +3311,7 @@ nope:
 	SETERRNO(EBADF,RMS$_IFI);
     RETPUSHUNDEF;
 #else
-    DIE(no_dir_func, "closedir");
+    DIE(PL_no_dir_func, "closedir");
 #endif
 }
 
@@ -3337,7 +3337,7 @@ PP(pp_fork)
     PUSHi(childpid);
     RETURN;
 #else
-    DIE(no_func, "Unsupported function fork");
+    DIE(PL_no_func, "Unsupported function fork");
 #endif
 }
 
@@ -3353,7 +3353,7 @@ PP(pp_wait)
     XPUSHi(childpid);
     RETURN;
 #else
-    DIE(no_func, "Unsupported function wait");
+    DIE(PL_no_func, "Unsupported function wait");
 #endif
 }
 
@@ -3372,7 +3372,7 @@ PP(pp_waitpid)
     SETi(childpid);
     RETURN;
 #else
-    DIE(no_func, "Unsupported function waitpid");
+    DIE(PL_no_func, "Unsupported function waitpid");
 #endif
 }
 
@@ -3498,7 +3498,7 @@ PP(pp_kill)
     PUSHi(value);
     RETURN;
 #else
-    DIE(no_func, "Unsupported function kill");
+    DIE(PL_no_func, "Unsupported function kill");
 #endif
 }
 
@@ -3509,7 +3509,7 @@ PP(pp_getppid)
     XPUSHi( getppid() );
     RETURN;
 #else
-    DIE(no_func, "getppid");
+    DIE(PL_no_func, "getppid");
 #endif
 }
 
@@ -3534,7 +3534,7 @@ PP(pp_getpgrp)
     XPUSHi(value);
     RETURN;
 #else
-    DIE(no_func, "getpgrp()");
+    DIE(PL_no_func, "getpgrp()");
 #endif
 }
 
@@ -3563,7 +3563,7 @@ PP(pp_setpgrp)
 #endif /* USE_BSDPGRP */
     RETURN;
 #else
-    DIE(no_func, "setpgrp()");
+    DIE(PL_no_func, "setpgrp()");
 #endif
 }
 
@@ -3578,7 +3578,7 @@ PP(pp_getpriority)
     SETi( getpriority(which, who) );
     RETURN;
 #else
-    DIE(no_func, "getpriority()");
+    DIE(PL_no_func, "getpriority()");
 #endif
 }
 
@@ -3596,7 +3596,7 @@ PP(pp_setpriority)
     SETi( setpriority(which, who, niceval) >= 0 );
     RETURN;
 #else
-    DIE(no_func, "setpriority()");
+    DIE(PL_no_func, "setpriority()");
 #endif
 }
 
@@ -3728,7 +3728,7 @@ PP(pp_alarm)
     PUSHi((I32)anum);
     RETURN;
 #else
-    DIE(no_func, "Unsupported function alarm");
+    DIE(PL_no_func, "Unsupported function alarm");
 #endif
 }
 
@@ -3876,7 +3876,7 @@ PP(pp_ghbyname)
 #ifdef HAS_GETHOSTBYNAME
     return pp_ghostent(ARGS);
 #else
-    DIE(no_sock_func, "gethostbyname");
+    DIE(PL_no_sock_func, "gethostbyname");
 #endif
 }
 
@@ -3885,7 +3885,7 @@ PP(pp_ghbyaddr)
 #ifdef HAS_GETHOSTBYADDR
     return pp_ghostent(ARGS);
 #else
-    DIE(no_sock_func, "gethostbyaddr");
+    DIE(PL_no_sock_func, "gethostbyaddr");
 #endif
 }
 
@@ -3909,7 +3909,7 @@ PP(pp_ghostent)
 #ifdef HAS_GETHOSTBYNAME
 	hent = PerlSock_gethostbyname(POPp);
 #else
-	DIE(no_sock_func, "gethostbyname");
+	DIE(PL_no_sock_func, "gethostbyname");
 #endif
     else if (which == OP_GHBYADDR) {
 #ifdef HAS_GETHOSTBYADDR
@@ -3920,14 +3920,14 @@ PP(pp_ghostent)
 
 	hent = PerlSock_gethostbyaddr(addr, (Netdb_hlen_t) addrlen, addrtype);
 #else
-	DIE(no_sock_func, "gethostbyaddr");
+	DIE(PL_no_sock_func, "gethostbyaddr");
 #endif
     }
     else
 #ifdef HAS_GETHOSTENT
 	hent = PerlSock_gethostent();
 #else
-	DIE(no_sock_func, "gethostent");
+	DIE(PL_no_sock_func, "gethostent");
 #endif
 
 #ifdef HOST_NOT_FOUND
@@ -3975,7 +3975,7 @@ PP(pp_ghostent)
     }
     RETURN;
 #else
-    DIE(no_sock_func, "gethostent");
+    DIE(PL_no_sock_func, "gethostent");
 #endif
 }
 
@@ -3984,7 +3984,7 @@ PP(pp_gnbyname)
 #ifdef HAS_GETNETBYNAME
     return pp_gnetent(ARGS);
 #else
-    DIE(no_sock_func, "getnetbyname");
+    DIE(PL_no_sock_func, "getnetbyname");
 #endif
 }
 
@@ -3993,7 +3993,7 @@ PP(pp_gnbyaddr)
 #ifdef HAS_GETNETBYADDR
     return pp_gnetent(ARGS);
 #else
-    DIE(no_sock_func, "getnetbyaddr");
+    DIE(PL_no_sock_func, "getnetbyaddr");
 #endif
 }
 
@@ -4015,7 +4015,7 @@ PP(pp_gnetent)
 #ifdef HAS_GETNETBYNAME
 	nent = PerlSock_getnetbyname(POPp);
 #else
-        DIE(no_sock_func, "getnetbyname");
+        DIE(PL_no_sock_func, "getnetbyname");
 #endif
     else if (which == OP_GNBYADDR) {
 #ifdef HAS_GETNETBYADDR
@@ -4023,14 +4023,14 @@ PP(pp_gnetent)
 	Netdb_net_t addr = (Netdb_net_t) U_L(POPn);
 	nent = PerlSock_getnetbyaddr(addr, addrtype);
 #else
-	DIE(no_sock_func, "getnetbyaddr");
+	DIE(PL_no_sock_func, "getnetbyaddr");
 #endif
     }
     else
 #ifdef HAS_GETNETENT
 	nent = PerlSock_getnetent();
 #else
-        DIE(no_sock_func, "getnetent");
+        DIE(PL_no_sock_func, "getnetent");
 #endif
 
     EXTEND(SP, 4);
@@ -4062,7 +4062,7 @@ PP(pp_gnetent)
 
     RETURN;
 #else
-    DIE(no_sock_func, "getnetent");
+    DIE(PL_no_sock_func, "getnetent");
 #endif
 }
 
@@ -4071,7 +4071,7 @@ PP(pp_gpbyname)
 #ifdef HAS_GETPROTOBYNAME
     return pp_gprotoent(ARGS);
 #else
-    DIE(no_sock_func, "getprotobyname");
+    DIE(PL_no_sock_func, "getprotobyname");
 #endif
 }
 
@@ -4080,7 +4080,7 @@ PP(pp_gpbynumber)
 #ifdef HAS_GETPROTOBYNUMBER
     return pp_gprotoent(ARGS);
 #else
-    DIE(no_sock_func, "getprotobynumber");
+    DIE(PL_no_sock_func, "getprotobynumber");
 #endif
 }
 
@@ -4102,19 +4102,19 @@ PP(pp_gprotoent)
 #ifdef HAS_GETPROTOBYNAME
 	pent = PerlSock_getprotobyname(POPp);
 #else
-	DIE(no_sock_func, "getprotobyname");
+	DIE(PL_no_sock_func, "getprotobyname");
 #endif
     else if (which == OP_GPBYNUMBER)
 #ifdef HAS_GETPROTOBYNUMBER
 	pent = PerlSock_getprotobynumber(POPi);
 #else
-    DIE(no_sock_func, "getprotobynumber");
+    DIE(PL_no_sock_func, "getprotobynumber");
 #endif
     else
 #ifdef HAS_GETPROTOENT
 	pent = PerlSock_getprotoent();
 #else
-	DIE(no_sock_func, "getprotoent");
+	DIE(PL_no_sock_func, "getprotoent");
 #endif
 
     EXTEND(SP, 3);
@@ -4144,7 +4144,7 @@ PP(pp_gprotoent)
 
     RETURN;
 #else
-    DIE(no_sock_func, "getprotoent");
+    DIE(PL_no_sock_func, "getprotoent");
 #endif
 }
 
@@ -4153,7 +4153,7 @@ PP(pp_gsbyname)
 #ifdef HAS_GETSERVBYNAME
     return pp_gservent(ARGS);
 #else
-    DIE(no_sock_func, "getservbyname");
+    DIE(PL_no_sock_func, "getservbyname");
 #endif
 }
 
@@ -4162,7 +4162,7 @@ PP(pp_gsbyport)
 #ifdef HAS_GETSERVBYPORT
     return pp_gservent(ARGS);
 #else
-    DIE(no_sock_func, "getservbyport");
+    DIE(PL_no_sock_func, "getservbyport");
 #endif
 }
 
@@ -4190,7 +4190,7 @@ PP(pp_gservent)
 
 	sent = PerlSock_getservbyname(name, proto);
 #else
-	DIE(no_sock_func, "getservbyname");
+	DIE(PL_no_sock_func, "getservbyname");
 #endif
     }
     else if (which == OP_GSBYPORT) {
@@ -4203,14 +4203,14 @@ PP(pp_gservent)
 #endif
 	sent = PerlSock_getservbyport(port, proto);
 #else
-	DIE(no_sock_func, "getservbyport");
+	DIE(PL_no_sock_func, "getservbyport");
 #endif
     }
     else
 #ifdef HAS_GETSERVENT
 	sent = PerlSock_getservent();
 #else
-	DIE(no_sock_func, "getservent");
+	DIE(PL_no_sock_func, "getservent");
 #endif
 
     EXTEND(SP, 4);
@@ -4251,7 +4251,7 @@ PP(pp_gservent)
 
     RETURN;
 #else
-    DIE(no_sock_func, "getservent");
+    DIE(PL_no_sock_func, "getservent");
 #endif
 }
 
@@ -4262,7 +4262,7 @@ PP(pp_shostent)
     PerlSock_sethostent(TOPi);
     RETSETYES;
 #else
-    DIE(no_sock_func, "sethostent");
+    DIE(PL_no_sock_func, "sethostent");
 #endif
 }
 
@@ -4273,7 +4273,7 @@ PP(pp_snetent)
     PerlSock_setnetent(TOPi);
     RETSETYES;
 #else
-    DIE(no_sock_func, "setnetent");
+    DIE(PL_no_sock_func, "setnetent");
 #endif
 }
 
@@ -4284,7 +4284,7 @@ PP(pp_sprotoent)
     PerlSock_setprotoent(TOPi);
     RETSETYES;
 #else
-    DIE(no_sock_func, "setprotoent");
+    DIE(PL_no_sock_func, "setprotoent");
 #endif
 }
 
@@ -4295,7 +4295,7 @@ PP(pp_sservent)
     PerlSock_setservent(TOPi);
     RETSETYES;
 #else
-    DIE(no_sock_func, "setservent");
+    DIE(PL_no_sock_func, "setservent");
 #endif
 }
 
@@ -4307,7 +4307,7 @@ PP(pp_ehostent)
     EXTEND(SP,1);
     RETPUSHYES;
 #else
-    DIE(no_sock_func, "endhostent");
+    DIE(PL_no_sock_func, "endhostent");
 #endif
 }
 
@@ -4319,7 +4319,7 @@ PP(pp_enetent)
     EXTEND(SP,1);
     RETPUSHYES;
 #else
-    DIE(no_sock_func, "endnetent");
+    DIE(PL_no_sock_func, "endnetent");
 #endif
 }
 
@@ -4331,7 +4331,7 @@ PP(pp_eprotoent)
     EXTEND(SP,1);
     RETPUSHYES;
 #else
-    DIE(no_sock_func, "endprotoent");
+    DIE(PL_no_sock_func, "endprotoent");
 #endif
 }
 
@@ -4343,7 +4343,7 @@ PP(pp_eservent)
     EXTEND(SP,1);
     RETPUSHYES;
 #else
-    DIE(no_sock_func, "endservent");
+    DIE(PL_no_sock_func, "endservent");
 #endif
 }
 
@@ -4352,7 +4352,7 @@ PP(pp_gpwnam)
 #ifdef HAS_PASSWD
     return pp_gpwent(ARGS);
 #else
-    DIE(no_func, "getpwnam");
+    DIE(PL_no_func, "getpwnam");
 #endif
 }
 
@@ -4361,7 +4361,7 @@ PP(pp_gpwuid)
 #ifdef HAS_PASSWD
     return pp_gpwent(ARGS);
 #else
-    DIE(no_func, "getpwuid");
+    DIE(PL_no_func, "getpwuid");
 #endif
 }
 
@@ -4453,7 +4453,7 @@ PP(pp_gpwent)
     }
     RETURN;
 #else
-    DIE(no_func, "getpwent");
+    DIE(PL_no_func, "getpwent");
 #endif
 }
 
@@ -4464,7 +4464,7 @@ PP(pp_spwent)
     setpwent();
     RETPUSHYES;
 #else
-    DIE(no_func, "setpwent");
+    DIE(PL_no_func, "setpwent");
 #endif
 }
 
@@ -4475,7 +4475,7 @@ PP(pp_epwent)
     endpwent();
     RETPUSHYES;
 #else
-    DIE(no_func, "endpwent");
+    DIE(PL_no_func, "endpwent");
 #endif
 }
 
@@ -4484,7 +4484,7 @@ PP(pp_ggrnam)
 #ifdef HAS_GROUP
     return pp_ggrent(ARGS);
 #else
-    DIE(no_func, "getgrnam");
+    DIE(PL_no_func, "getgrnam");
 #endif
 }
 
@@ -4493,7 +4493,7 @@ PP(pp_ggrgid)
 #ifdef HAS_GROUP
     return pp_ggrent(ARGS);
 #else
-    DIE(no_func, "getgrgid");
+    DIE(PL_no_func, "getgrgid");
 #endif
 }
 
@@ -4547,7 +4547,7 @@ PP(pp_ggrent)
 
     RETURN;
 #else
-    DIE(no_func, "getgrent");
+    DIE(PL_no_func, "getgrent");
 #endif
 }
 
@@ -4558,7 +4558,7 @@ PP(pp_sgrent)
     setgrent();
     RETPUSHYES;
 #else
-    DIE(no_func, "setgrent");
+    DIE(PL_no_func, "setgrent");
 #endif
 }
 
@@ -4569,7 +4569,7 @@ PP(pp_egrent)
     endgrent();
     RETPUSHYES;
 #else
-    DIE(no_func, "endgrent");
+    DIE(PL_no_func, "endgrent");
 #endif
 }
 
@@ -4584,7 +4584,7 @@ PP(pp_getlogin)
     PUSHp(tmps, strlen(tmps));
     RETURN;
 #else
-    DIE(no_func, "getlogin");
+    DIE(PL_no_func, "getlogin");
 #endif
 }
 
@@ -4683,7 +4683,7 @@ PP(pp_syscall)
     PUSHi(retval);
     RETURN;
 #else
-    DIE(no_func, "syscall");
+    DIE(PL_no_func, "syscall");
 #endif
 }
 

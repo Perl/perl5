@@ -670,13 +670,13 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 	    GvMULTI_on(PL_siggv);
 	    hv = GvHVn(PL_siggv);
 	    hv_magic(hv, PL_siggv, 'S');
-	    for(i=1;sig_name[i];i++) {
+	    for(i=1;PL_sig_name[i];i++) {
 	    	SV ** init;
-	    	init=hv_fetch(hv,sig_name[i],strlen(sig_name[i]),1);
+	    	init=hv_fetch(hv,PL_sig_name[i],strlen(PL_sig_name[i]),1);
 	    	if(init)
 	    		sv_setsv(*init,&PL_sv_undef);
-	    	psig_ptr[i] = 0;
-	    	psig_name[i] = 0;
+	    	PL_psig_ptr[i] = 0;
+	    	PL_psig_name[i] = 0;
 	    }
 	}
 	break;
@@ -1046,16 +1046,16 @@ Gv_AMupdate(HV *stash)
     SV* sv;
     SV** svp;
 
-    /* Work with "fallback" key, which we assume to be first in AMG_names */
+    /* Work with "fallback" key, which we assume to be first in PL_AMG_names */
 
-    if (( cp = (char *)AMG_names[0] ) &&
+    if (( cp = (char *)PL_AMG_names[0] ) &&
 	(svp = (SV**)hv_fetch(hv,cp,strlen(cp),FALSE)) && (sv = *svp)) {
       if (SvTRUE(sv)) amt.fallback=AMGfallYES;
       else if (SvOK(sv)) amt.fallback=AMGfallNEVER;
     }
     for (i = 1; i < NofAMmeth; i++) {
       cv = 0;
-      cp = (char *)AMG_names[i];
+      cp = (char *)PL_AMG_names[i];
       
         svp = (SV**)hv_fetch(hv, cp, strlen(cp), FALSE);
         if (svp && ((sv = *svp) != &PL_sv_undef)) {
@@ -1098,9 +1098,9 @@ Gv_AMupdate(HV *stash)
     SV* sv = NULL;
     SV** svp;
 
-    /* Work with "fallback" key, which we assume to be first in AMG_names */
+    /* Work with "fallback" key, which we assume to be first in PL_AMG_names */
 
-    if ( cp = AMG_names[0] ) {
+    if ( cp = PL_AMG_names[0] ) {
 	/* Try to find via inheritance. */
 	gv = gv_fetchmeth(stash, "()", 2, -1); /* A cookie: "()". */
 	if (gv) sv = GvSV(gv);
@@ -1111,7 +1111,7 @@ Gv_AMupdate(HV *stash)
     }
 
     for (i = 1; i < NofAMmeth; i++) {
-	SV *cookie = sv_2mortal(newSVpvf("(%s", cp = AMG_names[i]));
+	SV *cookie = sv_2mortal(newSVpvf("(%s", cp = PL_AMG_names[i]));
 	DEBUG_o( deb("Checking overloading of `%s' in package `%.256s'\n",
 		     cp, HvNAME(stash)) );
 	/* don't fill the cache while looking up! */
@@ -1324,7 +1324,7 @@ amagic_call(SV *left, SV *right, int method, int flags)
 	if (off==-1) off=method;
 	msg = sv_2mortal(newSVpvf(
 		      "Operation `%s': no method found,%sargument %s%s%s%s",
-		      AMG_names[method + assignshift],
+		      PL_AMG_names[method + assignshift],
 		      (flags & AMGf_unary ? " " : "\n\tleft "),
 		      SvAMAGIC(left)? 
 		        "in overloaded package ":
@@ -1353,11 +1353,11 @@ amagic_call(SV *left, SV *right, int method, int flags)
   if (!notfound) {
     DEBUG_o( deb(
   "Overloaded operator `%s'%s%s%s:\n\tmethod%s found%s in package %s%s\n",
-		 AMG_names[off],
+		 PL_AMG_names[off],
 		 method+assignshift==off? "" :
 		             " (initially `",
 		 method+assignshift==off? "" :
-		             AMG_names[method+assignshift],
+		             PL_AMG_names[method+assignshift],
 		 method+assignshift==off? "" : "')",
 		 flags & AMGf_unary? "" :
 		   lr==1 ? " for right argument": " for left argument",
@@ -1417,7 +1417,7 @@ amagic_call(SV *left, SV *right, int method, int flags)
     PUSHs(lr>0? left: right);
     PUSHs( lr > 0 ? &PL_sv_yes : ( assign ? &PL_sv_undef : &PL_sv_no ));
     if (notfound) {
-      PUSHs( sv_2mortal(newSVpv((char *)AMG_names[method + assignshift],0)) );
+      PUSHs( sv_2mortal(newSVpv((char *)PL_AMG_names[method + assignshift],0)));
     }
     PUSHs((SV*)cv);
     PUTBACK;

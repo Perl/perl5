@@ -10,8 +10,6 @@
 #  undef open
 #  undef setmode
 #  define open PerlLIO_open3
-#  undef TAINT_PROPER
-#  define TAINT_PROPER(a)
 #endif
 #include <ctype.h>
 #ifdef I_DIRENT    /* XXX maybe better to just rely on perl.h? */
