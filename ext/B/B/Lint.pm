@@ -1,6 +1,6 @@
 package B::Lint;
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 =head1 NAME
 
@@ -164,7 +164,7 @@ sub gimme {
     my $op = shift;
     my $flags = $op->flags;
     if ($flags & OPf_WANT) {
-	return(($flags & OPf_WANT_LIST) ? 1 : 0);
+	return(($flags & OPf_WANT == OPf_WANT_LIST) ? 1 : 0);
     }
     return undef;
 }
