@@ -352,6 +352,25 @@ file already tied or opened; C<untie> or C<close> it first.
 Don't open the same file more than once at a time for writing, as some
 operating systems put mandatory locks on such files.
 
+Don't assume that write/modify permission on a directory gives the
+right to add or delete files/directories in that directory.  That is
+filesystem specific: in some filesystems you need write/modify
+permission also (or even just) in the file/directory itself.  In some
+filesystems (AFS, DFS) the permission to add/delete directory entries
+is a completely separate permission.
+
+Don't assume that a single C<unlink> completely gets rid of the file:
+some filesystems (most notably the ones in VMS) have versioned
+filesystems, and unlink() removes only the most recent one (it doesn't
+remove all the versions because by default the native tools on those
+platforms remove just the most recent version, too).  The portable
+idiom to remove all the versions of a file is
+
+    1 while unlink "file";
+
+This will terminate if the file is undeleteable for some reason
+(protected, not there, and so on).
+
 Don't count on a specific environment variable existing in C<%ENV>.
 Don't count on C<%ENV> entries being case-sensitive, or even
 case-preserving.  Don't try to clear %ENV by saying C<%ENV = ();>, or,
@@ -403,6 +422,14 @@ simple, platform-independent mailing.
 
 The Unix System V IPC (C<msg*(), sem*(), shm*()>) is not available
 even on all Unix platforms.
+
+Do not use either the bare result of C<pack("N", 10, 20, 30, 40)>
+or bare v-strings (such as C<v10.20.30.40>) or to represent
+IPv4 addresses: both forms just pack the four bytes into network order.
+That this would be equal to the C language C<in_addr> struct (which is
+what the socket code internally uses) is not guaranteed.  To be
+portable use the routines of the Socket extension, such as
+C<inet_aton()>, C<inet_ntoa()>, and C<sockaddr_in()>.
 
 The rule of thumb for portable code is: Do it all in portable Perl, or
 use a module (that may internally implement it with platform-specific
@@ -663,17 +690,22 @@ often assume nothing about their data.
 The C<$^O> variable and the C<$Config{archname}> values for various
 DOSish perls are as follows:
 
-    OS            $^O        $Config{'archname'}
-    --------------------------------------------
-    MS-DOS        dos
-    PC-DOS        dos
-    OS/2          os2
-    Windows 95    MSWin32    MSWin32-x86
-    Windows 98    MSWin32    MSWin32-x86
-    Windows NT    MSWin32    MSWin32-x86
-    Windows NT    MSWin32    MSWin32-ALPHA
-    Windows NT    MSWin32    MSWin32-ppc
-    Cygwin        cygwin
+     OS            $^O      $Config{archname}   ID    Version
+     --------------------------------------------------------
+     MS-DOS        dos        ?                 
+     PC-DOS        dos        ?                 
+     OS/2          os2        ?
+     Windows 3.1   ?          ?                 0      3 01
+     Windows 95    MSWin32    MSWin32-x86       1      4 00
+     Windows 98    MSWin32    MSWin32-x86       1      4 10
+     Windows ME    MSWin32    MSWin32-x86       1      ?
+     Windows NT    MSWin32    MSWin32-x86       2      4 xx
+     Windows NT    MSWin32    MSWin32-ALPHA     2      4 xx
+     Windows NT    MSWin32    MSWin32-ppc       2      4 xx
+     Windows 2000  MSWin32    MSWin32-x86       2      5 xx
+     Windows XP    MSWin32    MSWin32-x86       2      ?
+     Windows CE    MSWin32    ?                 3           
+     Cygwin        cygwin     ?                 
 
 The various MSWin32 Perl's can distinguish the OS they are running on
 via the value of the fifth element of the list returned from 
@@ -1527,6 +1559,17 @@ Not implemented. (S<Mac OS>, Win32, Plan9)
 
 Not implemented. (Plan9, Win32)
 
+=item exit EXPR
+
+=item exit
+
+Emulates UNIX exit() (which considers C<exit 1> to indicate an error) by
+mapping the C<1> to SS$_ABORT (C<44>).  This behavior may be overridden
+with the pragma C<use vmsish 'exit'>.  As with the CRTL's exit()
+function, C<exit 0> is also mapped to an exit status of SS$_NORMAL
+(C<1>); this mapping cannot be overridden.  Any other argument to exit()
+is used directly as Perl's exit status. (VMS)
+
 =item getsockopt SOCKET,LEVEL,OPTNAME
 
 Not implemented. (S<Mac OS>, Plan9)
@@ -1659,6 +1702,11 @@ Not implemented. (S<Mac OS>, Plan9)
 
 Not implemented. (S<Mac OS>, Win32, VMS, S<RISC OS>, VOS)
 
+=item sockatmark SOCKET
+
+A relatively recent addition to socket functions, may not
+be implemented even in UNIX platforms.
+
 =item socketpair SOCKET1,SOCKET2,DOMAIN,TYPE,PROTOCOL
 
 Not implemented. (Win32, VMS, S<RISC OS>, VOS, VM/ESA)
@@ -1685,6 +1733,9 @@ inode are not necessarily reliable.  (S<RISC OS>)
 
 dev, rdev, blksize, and blocks are not available.  inode is not
 meaningful and will differ between stat calls on the same file.  (os2)
+
+some versions of cygwin when doing a stat("foo") and if not finding it
+may then attempt to stat("foo.exe") (Cygwin)
 
 =item symlink OLDFILE,NEWFILE
 
@@ -1732,6 +1783,11 @@ first token in its argument string.  Handles basic redirection
 Does not automatically flush output handles on some platforms.
 (SunOS, Solaris, HP-UX)
 
+The return value is POSIX-like (shifted up by 8 bits), which only allows
+room for a made-up value derived from the severity bits of the native
+32-bit condition code (unless overridden by C<use vmsish 'status'>). 
+For more details see L<perlvms/$?>. (VMS)
+
 =item times
 
 Only the first entry returned is nonzero. (S<Mac OS>)
@@ -1747,12 +1803,12 @@ Not useful. (S<RISC OS>)
 
 =item truncate EXPR,LENGTH
 
-Not implemented. (VMS)
+Not implemented. (Older versions of VMS)
 
 Truncation to zero-length only. (VOS)
 
 If a FILEHANDLE is supplied, it must be writable and opened in append
-mode (i.e., use C<open(FH, '>>filename')>
+mode (i.e., use C<<< open(FH, '>>filename') >>>
 or C<sysopen(FH,...,O_APPEND|O_RDWR)>.  If a filename is supplied, it
 should not be held open elsewhere. (Win32)
 
@@ -2032,7 +2088,7 @@ http://www.perl.com/CPAN/ports/index.html for binary distributions.
 =head1 SEE ALSO
 
 L<perlaix>, L<perlapollo>, L<perlamiga>, L<perlbeos>, L<perlbs200>,
-L<perlcygwin>, L<perldgux>, L<perldos>, L<perlepoc>, L<perlebcdic>,
+L<perlce>, L<perlcygwin>, L<perldgux>, L<perldos>, L<perlepoc>, L<perlebcdic>,
 L<perlhurd>, L<perlhpux>, L<perlmachten>, L<perlmacos>, L<perlmint>,
 L<perlmpeix>, L<perlnetware>, L<perlos2>, L<perlos390>, L<perlplan9>,
 L<perlqnx>, L<perlsolaris>, L<perltru64>, L<perlunicode>,
@@ -2062,6 +2118,7 @@ Larry Moore <ljmoore@freespace.net>,
 Paul Moore <Paul.Moore@uk.origin-it.com>,
 Chris Nandor <pudge@pobox.com>,
 Matthias Neeracher <neeri@iis.ee.ethz.ch>,
+Philip Newton <pne@cpan.org>,
 Gary Ng <71564.1743@CompuServe.COM>,
 Tom Phoenix <rootbeer@teleport.com>,
 AndrE<eacute> Pirard <A.Pirard@ulg.ac.be>,
