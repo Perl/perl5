@@ -367,7 +367,6 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 	MUTEX_INIT(&thread->mutex);
 	thread->tid = tid_counter++;
 	thread->gimme = GIMME_V;
-	thread->state = (thread->gimme == G_VOID) ? 1 : 0;
 
 	/* "Clone" our interpreter into the thread's interpreter
 	 * This gives thread access to "static data" and code.
@@ -551,6 +550,23 @@ CODE:
     ST(0) = sv_2mortal(Perl_ithread_create(aTHX_ Nullsv, classname, function_to_call, newRV_noinc((SV*) params)));
     XSRETURN(1);
 }
+
+void
+ithread_list(char *classname)
+PPCODE:
+{
+  ithread *curr_thread;
+  MUTEX_LOCK(&create_destruct_mutex);
+  curr_thread = threads;
+  while(curr_thread) {
+    PUSHs( ithread_to_SV(aTHX_ NULL, curr_thread, classname, TRUE));
+    curr_thread = curr_thread->next;
+    if(curr_thread == threads)
+      break;
+  }	
+  MUTEX_UNLOCK(&create_destruct_mutex);
+}
+
 
 void
 ithread_self(char *classname)

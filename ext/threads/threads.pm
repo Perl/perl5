@@ -52,7 +52,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 our @EXPORT = qw(
 	
 );
-our $VERSION = '0.05';
+our $VERSION = '0.99';
 
 
 sub equal {
@@ -101,6 +101,8 @@ $thread->tid();
 
 threads->yield();
 
+threads->list();
+
 =head1 DESCRIPTION
 
 Perl 5.6 introduced something called interpreter threads.  Interpreter
@@ -135,7 +137,7 @@ object.
 
 This will wait for the corresponding thread to join. When it finishes
 join will return the return values of the entry point function.  If a
-thread has been detached, join will return without wait.
+thread has been detached, an error will be thrown..
 
 =item $thread->detach
 
@@ -148,13 +150,17 @@ This will return the object for the current thread.
 
 =item $thread->tid
 
-This will return the id of the thread.  threads->self->tid() is a
-quick way to get current thread id.
+This will return the id of the thread.  threads->tid() is a quick way 
+to get current thread id if you don't have your thread handy.
 
 =item threads->yield();
 
 This will tell the OS to let this thread yield CPU time to other threads.
 However this is highly depending on the underlying thread implmentation.
+
+=item threads->list();
+
+This will return a list of all non joined, non detached threads.
 
 =back
 
@@ -170,15 +176,38 @@ or somehow be certain that all the non-main threads have finished.
 
 =back
 
-=head1 TODO
+=head1 BUGS / TODO
+
+The current implmentation of threads has been an attempt to get
+a correct threading system working that could be built on, 
+and optimized, in newer versions of perl.
+
+Current the overhead of creating a thread is rather large,
+also the cost of returning values can be large. These are areas
+were there most likely will be work done to optimize what data
+that needs to be cloned.
 
 =over
 
-=item Fix so the return value is returned when you join.
+=item Parent-Child threads.
 
-=item Add join_all.
+On some platforms it might not be possible to destroy "parent"
+threads while there are still existing child "threads".
 
-=item Fix memory leaks!
+This will be possibly be fixed in later versions of perl.
+
+=item tid is I32
+
+The tid is a 32 bit integer, it can potentially overflow. 
+This might be fixed in a later version of perl.
+
+=item Returning objects
+
+When you return an object the entire stash that the object is blessed
+as well. This will lead to a large memory usage.
+The ideal situation would be to detect the original stash if it existed.
+
+=item PERL_OLD_SIGNALS are not threadsafe, will not be.
 
 =back
 
@@ -203,16 +232,8 @@ Helping with debugging.
 
 please join perl-ithreads@perl.org for more information
 
-=head1 BUGS
-
-=over
-
-=item creating a thread from within a thread is unsafe under win32
-
-=item PERL_OLD_SIGNALS are not threadsafe, will not be.
 
 
-=back
 
 =head1 SEE ALSO
 
