@@ -78,6 +78,7 @@ print "not " unless $x eq chr(300);
 print "ok 14\n";
 
 open F, "a" or die $!; # Not UTF
+binmode(F, ":bytes");
 $x = <F>;
 chomp($x);
 $chr = chr(196).chr(172);
@@ -119,6 +120,7 @@ print "ok 18\n";
 close F;
 
 open F, "a" or die $!; # Not UTF
+binmode(F, ":bytes");
 $x = <F>;
 chomp($x);
 $chr = v196.172.194.130;
@@ -133,16 +135,20 @@ close F;
 printf "not (%vd) ", $x unless $x eq chr(300).chr(130);
 print "ok 21\n";
 
-# Now let's make it suffer.
-open F, ">", "a" or die $!;
-my $w;
-{
-    use warnings 'utf8';
-    local $SIG{__WARN__} = sub { $w = $_[0] };
-    print F $a;
+if (${^OPEN} =~ /:utf8/) {
+    
+} else {
+    # Now let's make it suffer.
+    open F, ">", "a" or die $!;
+    my $w;
+    {
+	use warnings 'utf8';
+	local $SIG{__WARN__} = sub { $w = $_[0] };
+	print F $a;
+    }
+    print "not " if ($@ || $w !~ /Wide character in print/i);
+    print "ok 22\n";
 }
-print "not " if ($@ || $w !~ /Wide character in print/i);
-print "ok 22\n";
 }
 
 # Hm. Time to get more evil.
@@ -151,8 +157,9 @@ print F $a;
 binmode(F, ":bytes");
 print F chr(130)."\n";
 close F;
-
+ 
 open F, "<", "a" or die $!;
+binmode(F, ":bytes");
 $x = <F>; chomp $x;
 $chr = v196.172.130;
 if (ord('A') == 193) { $chr = v141.83.130; } # EBCDIC
@@ -223,6 +230,7 @@ print "ok 26\n";
 
     undef $@;
     open F, ">a";
+    binmode(F, ":bytes");
     print F chr(0x100);
     close(F);
 
@@ -256,6 +264,7 @@ print "ok 26\n";
 
     undef $@;
     open F, ">a";
+    binmode(F, ":bytes");
     print F chr(0x100);
     close(F);
 
