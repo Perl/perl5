@@ -4555,7 +4555,7 @@ $undef)
 	;;
 *)	case "$useshrplib" in
 	'')	case "$osname" in
-		svr4|dgux|dynixptx|esix|powerux)
+		svr4*|dgux|dynixptx|esix|powerux)
 			dflt='yes'
 			also='Building a shared libperl is required for dynamic loading to work on your system.'
 			;;
