@@ -3041,10 +3041,6 @@ Perl_yylex(pTHX)
 		if (*d == '(') {
 		    d = scan_str(d,TRUE,TRUE);
 		    if (!d) {
-			if (PL_lex_stuff) {
-			    SvREFCNT_dec(PL_lex_stuff);
-			    PL_lex_stuff = Nullsv;
-			}
 			/* MUST advance bufptr here to avoid bogus
 			   "at end of line" context messages from yyerror().
 			 */
@@ -4743,9 +4739,10 @@ Perl_yylex(pTHX)
 		    force_next(THING);
 		}
 	    }
-	    if (PL_lex_stuff)
+	    if (PL_lex_stuff) {
 		SvREFCNT_dec(PL_lex_stuff);
-	    PL_lex_stuff = Nullsv;
+		PL_lex_stuff = Nullsv;
+	    }
 	    PL_expect = XTERM;
 	    TOKEN('(');
 
@@ -5017,12 +5014,8 @@ Perl_yylex(pTHX)
 		    char *p;
 
 		    s = scan_str(s,FALSE,FALSE);
-		    if (!s) {
-			if (PL_lex_stuff)
-			    SvREFCNT_dec(PL_lex_stuff);
-			PL_lex_stuff = Nullsv;
+		    if (!s)
 			Perl_croak(aTHX_ "Prototype not terminated");
-		    }
 		    /* strip spaces */
 		    d = SvPVX(PL_lex_stuff);
 		    tmp = 0;
@@ -6190,12 +6183,8 @@ S_scan_pat(pTHX_ char *start, I32 type)
     char *s;
 
     s = scan_str(start,FALSE,FALSE);
-    if (!s) {
-	if (PL_lex_stuff)
-	    SvREFCNT_dec(PL_lex_stuff);
-	PL_lex_stuff = Nullsv;
+    if (!s)
 	Perl_croak(aTHX_ "Search pattern not terminated");
-    }
 
     pm = (PMOP*)newPMOP(type, 0);
     if (PL_multi_open == '?')
@@ -6227,12 +6216,8 @@ S_scan_subst(pTHX_ char *start)
 
     s = scan_str(start,FALSE,FALSE);
 
-    if (!s) {
-	if (PL_lex_stuff)
-	    SvREFCNT_dec(PL_lex_stuff);
-	PL_lex_stuff = Nullsv;
+    if (!s)
 	Perl_croak(aTHX_ "Substitution pattern not terminated");
-    }
 
     if (s[-1] == PL_multi_open)
 	s--;
@@ -6240,12 +6225,10 @@ S_scan_subst(pTHX_ char *start)
     first_start = PL_multi_start;
     s = scan_str(s,FALSE,FALSE);
     if (!s) {
-	if (PL_lex_stuff)
+	if (PL_lex_stuff) {
 	    SvREFCNT_dec(PL_lex_stuff);
-	PL_lex_stuff = Nullsv;
-	if (PL_lex_repl)
-	    SvREFCNT_dec(PL_lex_repl);
-	PL_lex_repl = Nullsv;
+	    PL_lex_stuff = Nullsv;
+	}
 	Perl_croak(aTHX_ "Substitution replacement not terminated");
     }
     PL_multi_start = first_start;	/* so whole substitution is taken together */
@@ -6300,23 +6283,17 @@ S_scan_trans(pTHX_ char *start)
     yylval.ival = OP_NULL;
 
     s = scan_str(start,FALSE,FALSE);
-    if (!s) {
-	if (PL_lex_stuff)
-	    SvREFCNT_dec(PL_lex_stuff);
-	PL_lex_stuff = Nullsv;
+    if (!s)
 	Perl_croak(aTHX_ "Transliteration pattern not terminated");
-    }
     if (s[-1] == PL_multi_open)
 	s--;
 
     s = scan_str(s,FALSE,FALSE);
     if (!s) {
-	if (PL_lex_stuff)
+	if (PL_lex_stuff) {
 	    SvREFCNT_dec(PL_lex_stuff);
-	PL_lex_stuff = Nullsv;
-	if (PL_lex_repl)
-	    SvREFCNT_dec(PL_lex_repl);
-	PL_lex_repl = Nullsv;
+	    PL_lex_stuff = Nullsv;
+	}
 	Perl_croak(aTHX_ "Transliteration replacement not terminated");
     }
 
@@ -6688,11 +6665,11 @@ S_scan_inputsymbol(pTHX_ char *start)
    delimiter.  It allows quoting of delimiters, and if the string has
    balanced delimiters ([{<>}]) it allows nesting.
 
-   The lexer always reads these strings into lex_stuff, except in the
-   case of the operators which take *two* arguments (s/// and tr///)
-   when it checks to see if lex_stuff is full (presumably with the 1st
-   arg to s or tr) and if so puts the string into lex_repl.
-
+   On success, the SV with the resulting string is put into lex_stuff or,
+   if that is already non-NULL, into lex_repl. The second case occurs only
+   when parsing the RHS of the special constructs s/// and tr/// (y///).
+   For convenience, the terminating delimiter character is stuffed into
+   SvIVX of the SV.
 */
 
 STATIC char *
