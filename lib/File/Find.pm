@@ -176,9 +176,12 @@ produces something like:
         ($File::Find::prune = 1);
     }
 
+Notice the C<_> in the above C<int(-M _)>: the C<_> is a magical
+filehandle that caches the information from the preceding
+stat(), lstat(), or filetest.
+
 Set the variable C<$File::Find::dont_use_nlink> if you're using AFS,
 since AFS cheats.
-
 
 Here's another interesting wanted function.  It will find all symbolic
 links that don't resolve:
