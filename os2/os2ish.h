@@ -47,6 +47,12 @@
 
 #define BIT_BUCKET "/dev/nul"  /* Will this work? */
 
+/* SH_PATH_INI:
+ *	Duplicate for SH_PATH. This symbol allows redefinition of SH_PATH,
+ *	which may be needed to make a binary distribution.
+ */
+#define SH_PATH_INI SH_PATH  /**/
+
 void Perl_OS2_init();
 
 #define PERL_SYS_INIT(argcp, argvp) STMT_START {	\
@@ -172,6 +178,7 @@ extern OS2_Perl_data_t OS2_Perl_data;
 
 #define STATIC_FILE_LENGTH 127
 extern char sh_path[STATIC_FILE_LENGTH+1];
+#undef SH_PATH
 #define SH_PATH sh_path
 #define PERLLIB_MANGLE(s, n) perllib_mangle((s), (n))
 char *perllib_mangle(char *, unsigned int);
@@ -348,3 +355,4 @@ typedef struct {
 PQTOPLEVEL get_sysinfo(ULONG pid, ULONG flags);
 
 #endif /* _OS2EMX_H */
+
