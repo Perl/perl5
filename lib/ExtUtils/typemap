@@ -99,7 +99,7 @@ T_LONG
 T_U_LONG
 	$var = (unsigned long)SvUV($arg)
 T_CHAR
-	$var = (char)*SvPV($arg,PL_na)
+	$var = (char)*SvPV_nolen($arg)
 T_U_CHAR
 	$var = (unsigned char)SvUV($arg)
 T_FLOAT
@@ -109,7 +109,7 @@ T_NV
 T_DOUBLE
 	$var = (double)SvNV($arg)
 T_PV
-	$var = ($type)SvPV($arg,PL_na)
+	$var = ($type)SvPV_nolen($arg)
 T_PTR
 	$var = INT2PTR($type,SvIV($arg))
 T_PTRREF
@@ -163,9 +163,9 @@ T_REFOBJ
 	else
 	    Perl_croak(aTHX_ \"$var is not of type ${ntype}\")
 T_OPAQUE
-	$var = *($type *)SvPV($arg,PL_na)
+	$var = *($type *)SvPV_nolen($arg)
 T_OPAQUEPTR
-	$var = ($type)SvPV($arg,PL_na)
+	$var = ($type)SvPV_nolen($arg)
 T_PACKED
 	$var = XS_unpack_$ntype($arg)
 T_PACKEDARRAY
