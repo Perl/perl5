@@ -534,8 +534,6 @@ PERLVAR(Iunicode, U32)	/* Unicode features: $ENV{PERL_UNICODE} or -C */
 
 PERLVAR(Isignals, U32)	/* Using which pre-5.8 signals */
 
-PERLVAR(IDBassertion,   SV *)
-
 /* Don't forget to add your variable also to perl_clone()! */
 
 /* New variables must be added to the very end, before this comment,
