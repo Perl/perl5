@@ -4618,9 +4618,9 @@ PP(pp_ghostent)
     register char **elem;
     register SV *sv;
 #ifndef HAS_GETHOST_PROTOS /* XXX Do we need individual probes? */
-    struct hostent *PerlSock_gethostbyaddr(Netdb_host_t, Netdb_hlen_t, int);
-    struct hostent *PerlSock_gethostbyname(Netdb_name_t);
-    struct hostent *PerlSock_gethostent(void);
+    struct hostent *gethostbyaddr(Netdb_host_t, Netdb_hlen_t, int);
+    struct hostent *gethostbyname(Netdb_name_t);
+    struct hostent *gethostent(void);
 #endif
     struct hostent *hent;
     unsigned long len;
@@ -4727,9 +4727,9 @@ PP(pp_gnetent)
     register char **elem;
     register SV *sv;
 #ifndef HAS_GETNET_PROTOS /* XXX Do we need individual probes? */
-    struct netent *PerlSock_getnetbyaddr(Netdb_net_t, int);
-    struct netent *PerlSock_getnetbyname(Netdb_name_t);
-    struct netent *PerlSock_getnetent(void);
+    struct netent *getnetbyaddr(Netdb_net_t, int);
+    struct netent *getnetbyname(Netdb_name_t);
+    struct netent *getnetent(void);
 #endif
     struct netent *nent;
     STRLEN n_a;
@@ -4815,9 +4815,9 @@ PP(pp_gprotoent)
     register char **elem;
     register SV *sv;
 #ifndef HAS_GETPROTO_PROTOS /* XXX Do we need individual probes? */
-    struct protoent *PerlSock_getprotobyname(Netdb_name_t);
-    struct protoent *PerlSock_getprotobynumber(int);
-    struct protoent *PerlSock_getprotoent(void);
+    struct protoent *getprotobyname(Netdb_name_t);
+    struct protoent *getprotobynumber(int);
+    struct protoent *getprotoent(void);
 #endif
     struct protoent *pent;
     STRLEN n_a;
@@ -4898,9 +4898,9 @@ PP(pp_gservent)
     register char **elem;
     register SV *sv;
 #ifndef HAS_GETSERV_PROTOS /* XXX Do we need individual probes? */
-    struct servent *PerlSock_getservbyname(Netdb_name_t, Netdb_name_t);
-    struct servent *PerlSock_getservbyport(int, Netdb_name_t);
-    struct servent *PerlSock_getservent(void);
+    struct servent *getservbyname(Netdb_name_t, Netdb_name_t);
+    struct servent *getservbyport(int, Netdb_name_t);
+    struct servent *getservent(void);
 #endif
     struct servent *sent;
     STRLEN n_a;
