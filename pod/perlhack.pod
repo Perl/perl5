@@ -495,10 +495,6 @@ For more info on the web see
 
 	http://bugs.perl.org/perlbug.cgi?req=spec
 
-
-B<The interfaces:>
-
-
 =item 1 http://bugs.perl.org
 
 Login via the web, (remove B<admin/> if only browsing), where interested Cc's, tests, patches and change-ids, etc. may be assigned.

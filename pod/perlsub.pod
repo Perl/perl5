@@ -686,7 +686,7 @@ subroutine never gets that chance.  Consider;
 
     # set_arr_lv cannot stop this !
     set_arr_lv() = { a => 1 };
-	
+
 =back
 
 =head2 Passing Symbol Table Entries (typeglobs)

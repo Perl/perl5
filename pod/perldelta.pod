@@ -2010,7 +2010,7 @@ exist, if that's what they were.
     # Nothing has set the FOO element so far
 
     { local $tied_hash{FOO} = 'Bar' }
-    
+
     # This used to print, but not now.
     print "exists!\n" if exists $tied_hash{FOO};
 

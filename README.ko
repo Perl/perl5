@@ -165,7 +165,7 @@ Perl 전반 뿐 아니라 유니코드 지원, Encode의 사용법 등에 많은 것을
   Home for Korean Perlmanias
 
 =item L<http://www.oreilly.co.kr/perl/>
-  
+
   O'Reilly에서 나온 한국어 Perl 서적 목록
 
 =item L<http://www.perlschool.net/>
@@ -195,7 +195,7 @@ Character Set)을 만드는  ISO/IEC JTC1/SC2/WG2의 웹 페이지.
 
   한국어 문자 집합 및 인코딩에 대한 안내.
 
-=item L<htp://www.cl.cam.ac.uk/~mgk25/unicode.html>
+=item L<http://www.cl.cam.ac.uk/~mgk25/unicode.html>
 
   유닉스/리눅스에서 유니코드와 UTF-8 사용에 대한 문답집(FAQ)
 

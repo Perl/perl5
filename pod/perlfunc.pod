@@ -2889,7 +2889,7 @@ C<STDERR> using various methods:
     #!/usr/bin/perl
     open my $oldout, ">&STDOUT"     or die "Can't dup STDOUT: $!";
     open OLDERR,     ">&", \*STDERR or die "Can't dup STDERR: $!";
- 
+
     open STDOUT, '>', "foo.out" or die "Can't redirect STDOUT: $!";
     open STDERR, ">&STDOUT"     or die "Can't dup STDOUT: $!";
 
