@@ -5,7 +5,7 @@
 #	MS Platform SDK 64-bit compiler and tools **experimental**
 #
 # This is set up to build a perl.exe that runs off a shared library
-# (perl58.dll).  Also makes individual DLLs for the XS extensions.
+# (perl59.dll).  Also makes individual DLLs for the XS extensions.
 #
 
 ##
@@ -431,8 +431,8 @@ $(o).dll:
 
 # makedef.pl must be updated if this changes, and this should normally
 # only change when there is an incompatible revision of the public API.
-PERLIMPLIB	= ..\perl58.lib
-PERLDLL		= ..\perl58.dll
+PERLIMPLIB	= ..\perl59.lib
+PERLDLL		= ..\perl59.dll
 
 MINIPERL	= ..\miniperl.exe
 MINIDIR		= .\mini

@@ -3,8 +3,8 @@
 # Time-stamp: <26/10/01 15:10:06 keuchel@keuchelnt>
 
 SRCDIR     = ..
-PV         = 58
-INST_VER   = 5.8.0
+PV         = 59
+INST_VER   = 5.9.0
 
 # INSTALL_ROOT specifies a path where this perl will be installed on CE device
 INSTALL_ROOT=/netzwerk/sprache/perl

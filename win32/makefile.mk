@@ -7,7 +7,7 @@
 #	MS Platform SDK 64-bit compiler and tools **experimental**
 #
 # This is set up to build a perl.exe that runs off a shared library
-# (perl58.dll).  Also makes individual DLLs for the XS extensions.
+# (perl59.dll).  Also makes individual DLLs for the XS extensions.
 #
 
 ##
@@ -624,7 +624,7 @@ CFGH_TMPL	= config_H.bc
 
 CFGSH_TMPL	= config.gc
 CFGH_TMPL	= config_H.gc
-PERLIMPLIB	= ..\libperl58$(a)
+PERLIMPLIB	= ..\libperl59$(a)
 
 .ELSE
 
@@ -640,8 +640,8 @@ CFGH_TMPL	= config_H.vc
 
 # makedef.pl must be updated if this changes, and this should normally
 # only change when there is an incompatible revision of the public API.
-PERLIMPLIB	*= ..\perl58$(a)
-PERLDLL		= ..\perl58.dll
+PERLIMPLIB	*= ..\perl59$(a)
+PERLDLL		= ..\perl59.dll
 
 XCOPY		= xcopy /f /r /i /d
 RCOPY		= xcopy /f /r /i /e /d

@@ -13,7 +13,7 @@
  * exactly on the third column */
 
 #define PERL_REVISION	5		/* age */
-#define PERL_VERSION	8		/* epoch */
+#define PERL_VERSION	9		/* epoch */
 #define PERL_SUBVERSION	0		/* generation */
 
 /* The following numbers describe the earliest compatible version of
@@ -80,7 +80,7 @@
 static	char	*local_patches[] = {
         NULL
         ,"DEVEL17641"
-	,NULL
+        ,NULL
 };
 
 /* Initial space prevents this variable from being inserted in config.sh  */

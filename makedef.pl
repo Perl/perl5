@@ -118,7 +118,7 @@ my $sym_ord = 0;
 
 if ($PLATFORM =~ /^win(?:32|ce)$/) {
     warn join(' ',keys %define)."\n";
-    ($dll = ($define{PERL_DLL} || "perl58")) =~ s/\.dll$//i;
+    ($dll = ($define{PERL_DLL} || "perl59")) =~ s/\.dll$//i;
     print "LIBRARY $dll\n";
     print "DESCRIPTION 'Perl interpreter'\n";
     print "EXPORTS\n";
@@ -170,7 +170,7 @@ elsif ($PLATFORM eq 'aix') {
 }
 elsif ($PLATFORM eq 'netware') {
 	if ($FILETYPE eq 'def') {
-	print "LIBRARY perl58\n";
+	print "LIBRARY perl59\n";
 	print "DESCRIPTION 'Perl interpreter for NetWare'\n";
 	print "EXPORTS\n";
 	}
