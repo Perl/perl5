@@ -1,5 +1,9 @@
 Revision history for Perl extension Time::HiRes.
 
+1.55
+	- Windows: ming32 patch from Mike Pomraning (use Perl's Const64()
+	  instead of VC-specific i64 suffix)
+
 1.54
 	- Solaris: like Tru64 (dec_osf) also Solaris need -lrt for nanosleep
 

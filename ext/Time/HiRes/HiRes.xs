@@ -193,8 +193,8 @@ _gettimeofday(pTHX_ struct timeval *tp, void *not_used)
         QueryPerformanceCounter((LARGE_INTEGER*)&ticks);
         ticks -= MY_CXT.base_ticks;
         ft.ft_i64 = MY_CXT.base_systime_as_filetime.ft_i64
-                    + 10000000i64 * (ticks / MY_CXT.tick_frequency)
-                    +(10000000i64 * (ticks % MY_CXT.tick_frequency)) / MY_CXT.tick_frequency;
+                    + Const64(10000000) * (ticks / MY_CXT.tick_frequency)
+                    +(Const64(10000000) * (ticks % MY_CXT.tick_frequency)) / MY_CXT.tick_frequency;
     }
     else {
         QueryPerformanceFrequency((LARGE_INTEGER*)&MY_CXT.tick_frequency);
