@@ -1027,7 +1027,8 @@ to Perl's debugging API.
 
 =item Devel::DProf
 
-Devel::DProf, a Perl source code profiler has been added.  See L<DProf>.
+Devel::DProf, a Perl source code profiler has been added.  See
+L<Devel::DProf> and L<dprofpp>.
 
 =item Dumpvalue
 
