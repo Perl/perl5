@@ -198,7 +198,9 @@ ithread_mg_free(pTHX_ SV *sv, MAGIC *mg)
             MUTEX_UNLOCK(&thread->mutex);
             Perl_ithread_destruct(aTHX_ thread, "no reference");
        }
-       MUTEX_UNLOCK(&thread->mutex);
+       else {
+	    MUTEX_UNLOCK(&thread->mutex);
+       }    
     }
     else {
 	MUTEX_UNLOCK(&thread->mutex);
