@@ -842,7 +842,7 @@ ones.
     # invoked as class method or object method
     sub has_attribute {
 	my($self, $attr)  = @_;
-	my $class = ref $self if $self;
+	my $class = ref($self) || $self;
 	return exists $class->{$attr};  
     } 
 

@@ -2209,8 +2209,9 @@ typedef pthread_key_t	perl_key;
  *   of bytes occurs on read or write operations.
  */
 #  define USEMYBINMODE / **/
+#  include <io.h> /* for setmode() prototype */
 #  define my_binmode(fp, iotype, mode) \
-            (PerlLIO_setmode(PerlIO_fileno(fp), mode) != -1 ? TRUE : FALSE)
+            (PerlLIO_setmode(fileno(fp), mode) != -1 ? TRUE : FALSE)
 #endif
 
 #ifdef __CYGWIN__
