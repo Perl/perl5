@@ -15,7 +15,7 @@
 #       include <sys/sem.h>
 #   endif
 #   ifdef HAS_SHM
-#       if defined(PERL_SCO5) || defined(PERL_ISC)
+#       if defined(PERL_SCO) || defined(PERL_ISC)
 #           include <sys/sysmacros.h>	/* SHMLBA */
 #       endif
 #      include <sys/shm.h>
