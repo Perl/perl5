@@ -1,4 +1,5 @@
 #define PERL_NO_GET_CONTEXT
+
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -8,8 +9,8 @@
 #include "EBCDIC.h"
 #include "Symbols.h"
 
-#define UNIMPLEMENTED(x,y) y x (SV *sv, char *encoding) {   \
-                         dTHX; \
+
+#define UNIMPLEMENTED(x,y) y x (SV *sv, char *encoding) {dTHX;   \
                          Perl_croak(aTHX_ "panic_unimplemented"); \
 			 return (y)0; /* fool picky compilers */ \
                          }
@@ -64,7 +65,7 @@ PerlIOEncode_getarg(PerlIO *f)
    PUSHMARK(sp);
    XPUSHs(e->enc);
    PUTBACK;
-   if (call_method("name",G_SCALAR) == 1)
+   if (perl_call_method("name",G_SCALAR) == 1)
     {
      SPAGAIN;
      sv = newSVsv(POPs);
@@ -87,7 +88,7 @@ PerlIOEncode_pushed(PerlIO *f, const char *mode, SV *arg)
  PUSHMARK(sp);
  XPUSHs(arg);
  PUTBACK;
- if (call_pv("Encode::find_encoding",G_SCALAR) != 1)
+ if (perl_call_pv("Encode::find_encoding",G_SCALAR) != 1)
   {
    /* should never happen */
    Perl_die(aTHX_ "Encode::find_encoding did not return a value");
@@ -191,7 +192,7 @@ PerlIOEncode_fill(PerlIO *f)
    XPUSHs(e->bufsv);
    XPUSHs(&PL_sv_yes);
    PUTBACK;
-   if (call_method("decode",G_SCALAR) != 1)
+   if (perl_call_method("decode",G_SCALAR) != 1)
     code = -1;
    SPAGAIN;
    uni = POPs;
@@ -249,7 +250,7 @@ PerlIOEncode_flush(PerlIO *f)
    XPUSHs(e->bufsv);
    XPUSHs(&PL_sv_yes);
    PUTBACK;
-   if (call_method("encode",G_SCALAR) != 1)
+   if (perl_call_method("encode",G_SCALAR) != 1)
     code = -1;
    SPAGAIN;
    str = POPs;

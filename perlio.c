@@ -344,14 +344,67 @@ PerlIO_cleantable(pTHX_ PerlIO **tablep)
   }
 }
 
-HV *PerlIO_layer_hv;
-AV *PerlIO_layer_av;
+PerlIO_list_t *PerlIO_known_layers;
+PerlIO_list_t *PerlIO_def_layerlist;
+
+PerlIO_list_t *
+PerlIO_list_alloc(void)
+{
+ PerlIO_list_t *list;
+ Newz('L',list,1,PerlIO_list_t);
+ list->refcnt = 1;
+ return list;
+}
+
+void
+PerlIO_list_free(PerlIO_list_t *list)
+{
+ if (list)
+  {
+   if (--list->refcnt == 0)
+    {
+     if (list->array)
+      {
+       dTHX;
+       IV i;
+       for (i=0; i < list->cur; i++)
+        {
+         if (list->array[i].arg)
+          SvREFCNT_dec(list->array[i].arg);
+        }
+       Safefree(list->array);
+      }
+     Safefree(list);
+    }
+  }
+}
+
+void
+PerlIO_list_push(PerlIO_list_t *list,PerlIO_funcs *funcs,SV *arg)
+{
+ PerlIO_pair_t *p;
+ if (list->cur >= list->len)
+  {
+   list->len += 8;
+   if (list->array)
+    Renew(list->array,list->len,PerlIO_pair_t);
+   else
+    New('l',list->array,list->len,PerlIO_pair_t);
+  }
+ p = &(list->array[list->cur++]);
+ p->funcs = funcs;
+ if ((p->arg = arg))
+  SvREFCNT_inc(arg);
+}
+
 
 void
 PerlIO_cleanup_layers(pTHXo_ void *data)
 {
- PerlIO_layer_hv = Nullhv;
- PerlIO_layer_av = Nullav;
+#if 0
+ PerlIO_known_layers = Nullhv;
+ PerlIO_def_layerlist = Nullav;
+#endif
 }
 
 void
@@ -409,15 +462,22 @@ PerlIO_pop(pTHX_ PerlIO *f)
 /*--------------------------------------------------------------------------------------*/
 /* XS Interface for perl code */
 
-SV *
+PerlIO_funcs *
 PerlIO_find_layer(pTHX_ const char *name, STRLEN len, int load)
 {
- SV **svp;
- SV *sv;
+ IV i;
  if ((SSize_t) len <= 0)
   len = strlen(name);
- svp  = hv_fetch(PerlIO_layer_hv,name,len,0);
- if (!svp && load && PL_subname && PerlIO_layer_av && av_len(PerlIO_layer_av)+1 >= 2)
+ for (i=0; i < PerlIO_known_layers->cur; i++)
+  {
+   PerlIO_funcs *f = PerlIO_known_layers->array[i].funcs;
+   if (strEQ(f->name,name))
+    {
+     PerlIO_debug("%.*s => %p\n",(int)len,name,f);
+     return f;
+    }
+  }
+ if (load && PL_subname && PerlIO_def_layerlist && PerlIO_def_layerlist->cur >= 2)
   {
    SV *pkgsv  = newSVpvn("PerlIO",6);
    SV *layer  = newSVpvn(name,len);
@@ -425,15 +485,10 @@ PerlIO_find_layer(pTHX_ const char *name, STRLEN len, int load)
    /* The two SVs are magically freed by load_module */
    Perl_load_module(aTHX_ 0, pkgsv, Nullsv, layer, Nullsv);
    LEAVE;
-   /* Say this is lvalue so we get an 'undef' if still not there */
-   svp  = hv_fetch(PerlIO_layer_hv,name,len,1);
+   return PerlIO_find_layer(aTHX_ name,len,0);
   }
- if (svp && (sv = *svp))
-  {
-   if (SvROK(sv))
-    return *svp;
-  }
- return Nullsv;
+ PerlIO_debug("Cannot find %.*s\n",(int)len,name);
+ return NULL;
 }
 
 #ifdef USE_ATTRIBUTES_FOR_PERLIO
@@ -532,16 +587,14 @@ PerlIO_tab_sv(pTHX_ PerlIO_funcs *tab)
 void
 PerlIO_define_layer(pTHX_ PerlIO_funcs *tab)
 {
- if (!PerlIO_layer_hv)
-  {
-   PerlIO_layer_hv = get_hv("open::layers",GV_ADD|GV_ADDMULTI);
-  }
- hv_store(PerlIO_layer_hv,tab->name,strlen(tab->name),PerlIO_tab_sv(aTHX_ tab),0);
+ if (!PerlIO_known_layers)
+  PerlIO_known_layers = PerlIO_list_alloc();
+ PerlIO_list_push(PerlIO_known_layers,tab,Nullsv);
  PerlIO_debug("define %s %p\n",tab->name,tab);
 }
 
 int
-PerlIO_parse_layers(pTHX_ AV *av, const char *names)
+PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 {
  if (names)
   {
@@ -605,11 +658,10 @@ PerlIO_parse_layers(pTHX_ AV *av, const char *names)
         }
        if (e > s)
         {
-         SV *layer = PerlIO_find_layer(aTHX_ s,llen,1);
+         PerlIO_funcs *layer = PerlIO_find_layer(aTHX_ s,llen,1);
          if (layer)
           {
-           av_push(av,SvREFCNT_inc(layer));
-           av_push(av,(as) ? newSVpvn(as,alen) : &PL_sv_undef);
+           PerlIO_list_push(av, layer, (as) ? newSVpvn(as,alen) : &PL_sv_undef);
           }
          else {
           Perl_warn(aTHX_ "perlio: unknown layer \"%.*s\"",(int)llen,s);
@@ -624,7 +676,7 @@ PerlIO_parse_layers(pTHX_ AV *av, const char *names)
 }
 
 void
-PerlIO_default_buffer(pTHX_ AV *av)
+PerlIO_default_buffer(pTHX_ PerlIO_list_t *av)
 {
  PerlIO_funcs *tab = &PerlIO_perlio;
  if (O_BINARY != O_TEXT)
@@ -639,40 +691,35 @@ PerlIO_default_buffer(pTHX_ AV *av)
     }
   }
  PerlIO_debug("Pushing %s\n",tab->name);
- av_push(av,SvREFCNT_inc(PerlIO_find_layer(aTHX_ tab->name,0,0)));
- av_push(av,&PL_sv_undef);
+ PerlIO_list_push(av,PerlIO_find_layer(aTHX_ tab->name,0,0),&PL_sv_undef);
 }
 
 SV *
-PerlIO_arg_fetch(pTHX_ AV *av,IV n)
+PerlIO_arg_fetch(PerlIO_list_t *av,IV n)
 {
- SV **svp = av_fetch(av,n,FALSE);
- return (svp) ? *svp : Nullsv;
+ return av->array[n].arg;
 }
 
 PerlIO_funcs *
-PerlIO_layer_fetch(pTHX_ AV *av,IV n,PerlIO_funcs *def)
+PerlIO_layer_fetch(pTHX_ PerlIO_list_t *av,IV n,PerlIO_funcs *def)
 {
- SV **svp = av_fetch(av,n,FALSE);
- SV *layer;
- if (svp && (layer = *svp) && SvROK(layer) && SvIOK((layer = SvRV(layer))))
+ if (n >= 0 && n < av->cur)
   {
-   /* PerlIO_debug("Layer %d is %s\n",n/2,tab->name); */
-   return INT2PTR(PerlIO_funcs *, SvIV(layer));
+   PerlIO_debug("Layer %ld is %s\n",n,av->array[n].funcs->name);
+   return av->array[n].funcs;
   }
  if (!def)
   Perl_croak(aTHX_ "panic: PerlIO layer array corrupt");
  return def;
 }
 
-AV *
+PerlIO_list_t *
 PerlIO_default_layers(pTHX)
 {
- IV len;
- if (!PerlIO_layer_av)
+ if (!PerlIO_def_layerlist)
   {
    const char *s  = (PL_tainting) ? Nullch : PerlEnv_getenv("PERLIO");
-   PerlIO_layer_av = get_av("open::layers",GV_ADD|GV_ADDMULTI);
+   PerlIO_def_layerlist = PerlIO_list_alloc();
 
 #ifdef USE_ATTRIBUTES_FOR_PERLIO
    newXS("io::MODIFY_SCALAR_ATTRIBUTES",XS_io_MODIFY_SCALAR_ATTRIBUTES,__FILE__);
@@ -688,34 +735,30 @@ PerlIO_default_layers(pTHX)
 #endif
    PerlIO_define_layer(aTHX_ &PerlIO_utf8);
    PerlIO_define_layer(aTHX_ &PerlIO_byte);
-   av_push(PerlIO_layer_av,SvREFCNT_inc(PerlIO_find_layer(aTHX_ PerlIO_unix.name,0,0)));
-   av_push(PerlIO_layer_av,&PL_sv_undef);
+   PerlIO_list_push(PerlIO_def_layerlist,PerlIO_find_layer(aTHX_ PerlIO_unix.name,0,0),&PL_sv_undef);
    if (s)
     {
-     PerlIO_parse_layers(aTHX_ PerlIO_layer_av,s);
+     PerlIO_parse_layers(aTHX_ PerlIO_def_layerlist,s);
     }
    else
     {
-     PerlIO_default_buffer(aTHX_ PerlIO_layer_av);
+     PerlIO_default_buffer(aTHX_ PerlIO_def_layerlist);
     }
   }
- len  = av_len(PerlIO_layer_av)+1;
- if (len < 2)
+ if (PerlIO_def_layerlist->cur < 2)
   {
-   PerlIO_default_buffer(aTHX_ PerlIO_layer_av);
-   len  = av_len(PerlIO_layer_av);
+   PerlIO_default_buffer(aTHX_ PerlIO_def_layerlist);
   }
- return PerlIO_layer_av;
+ return PerlIO_def_layerlist;
 }
 
 
 PerlIO_funcs *
 PerlIO_default_layer(pTHX_ I32 n)
 {
- AV *av = PerlIO_default_layers(aTHX);
- n *= 2;
+ PerlIO_list_t *av = PerlIO_default_layers(aTHX);
  if (n < 0)
-  n += av_len(PerlIO_layer_av)+1;
+  n += av->cur;
  return PerlIO_layer_fetch(aTHX_ av,n, &PerlIO_stdio);
 }
 
@@ -803,9 +846,9 @@ PerlIORaw_pushed(PerlIO *f, const char *mode, SV *arg)
 }
 
 int
-PerlIO_apply_layera(pTHX_ PerlIO *f, const char *mode, AV *layers, IV n)
+PerlIO_apply_layera(pTHX_ PerlIO *f, const char *mode, PerlIO_list_t *layers, IV n)
 {
- IV max = av_len(layers)+1;
+ IV max = layers->cur;
  int code = 0;
  while (n < max)
   {
@@ -818,7 +861,7 @@ PerlIO_apply_layera(pTHX_ PerlIO *f, const char *mode, AV *layers, IV n)
        break;
       }
     }
-   n += 2;
+   n++;
   }
  return code;
 }
@@ -829,13 +872,13 @@ PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
  int code = 0;
  if (names)
   {
-   AV *layers = newAV();
+   PerlIO_list_t *layers = PerlIO_list_alloc();
    code = PerlIO_parse_layers(aTHX_ layers,names);
    if (code == 0)
     {
      code = PerlIO_apply_layera(aTHX_ f, mode, layers, 0);
     }
-   SvREFCNT_dec((SV *) layers);
+   PerlIO_list_free(layers);
   }
  return code;
 }
@@ -959,7 +1002,7 @@ PerlIO_context_layers(pTHX_ const char *mode)
  return type;
 }
 
-static SV *
+static PerlIO_funcs *
 PerlIO_layer_from_ref(pTHX_ SV *sv)
 {
  /* For any scalar type load the handler which is bundled with perl */
@@ -978,13 +1021,13 @@ PerlIO_layer_from_ref(pTHX_ SV *sv)
    case SVt_PVGV:
     return PerlIO_find_layer(aTHX_ "Glob",4, 0);
   }
- return Nullsv;
+ return NULL;
 }
 
-AV *
+PerlIO_list_t *
 PerlIO_resolve_layers(pTHX_ const char *layers,const char *mode,int narg, SV **args)
 {
- AV *def = PerlIO_default_layers(aTHX);
+ PerlIO_list_t *def = PerlIO_default_layers(aTHX);
  int incdef = 1;
  if (!_perlio)
   PerlIO_stdstreams(aTHX);
@@ -994,12 +1037,11 @@ PerlIO_resolve_layers(pTHX_ const char *layers,const char *mode,int narg, SV **a
    /* If it is a reference but not an object see if we have a handler for it */
    if (SvROK(arg) && !sv_isobject(arg))
     {
-     SV *handler = PerlIO_layer_from_ref(aTHX_ SvRV(arg));
+     PerlIO_funcs *handler = PerlIO_layer_from_ref(aTHX_ SvRV(arg));
      if (handler)
       {
-       def = newAV();
-       av_push(def,SvREFCNT_inc(handler));
-       av_push(def,&PL_sv_undef);
+       def = PerlIO_list_alloc();
+       PerlIO_list_push(def,handler,&PL_sv_undef);
        incdef = 0;
       }
      /* Don't fail if handler cannot be found
@@ -1012,15 +1054,14 @@ PerlIO_resolve_layers(pTHX_ const char *layers,const char *mode,int narg, SV **a
   layers = PerlIO_context_layers(aTHX_ mode);
  if (layers && *layers)
   {
-   AV *av;
+   PerlIO_list_t *av;
    if (incdef)
     {
-     IV n = av_len(def)+1;
-     av = newAV();
-     while (n-- > 0)
+     IV i = def->cur;
+     av = PerlIO_list_alloc();
+     for (i=0; i < def->cur; i++)
       {
-       SV **svp = av_fetch(def,n,0);
-       av_store(av,n,(svp) ? SvREFCNT_inc(*svp) : &PL_sv_undef);
+       PerlIO_list_push(av,def->array[i].funcs,def->array[i].arg);
       }
     }
    else
@@ -1033,7 +1074,7 @@ PerlIO_resolve_layers(pTHX_ const char *layers,const char *mode,int narg, SV **a
  else
   {
    if (incdef)
-    SvREFCNT_inc(def);
+    def->refcnt++;
    return def;
   }
 }
@@ -1053,20 +1094,18 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd, int imode, int 
   }
  else
   {
-   AV *layera;
+   PerlIO_list_t *layera = NULL;
    IV n;
    PerlIO_funcs *tab = NULL;
    if (f && *f)
     {
      /* This is "reopen" - it is not tested as perl does not use it yet */
      PerlIOl *l = *f;
-     layera = newAV();
+     layera = PerlIO_list_alloc();
      while (l)
       {
        SV *arg = (l->tab->Getarg) ? (*l->tab->Getarg)(&l) : &PL_sv_undef;
-       av_unshift(layera,2);
-       av_store(layera,0,PerlIO_tab_sv(aTHX_ l->tab));
-       av_store(layera,1,arg);
+       PerlIO_list_push(layera,l->tab,arg);
        l = *PerlIONext(&l);
       }
     }
@@ -1074,7 +1113,8 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd, int imode, int 
     {
      layera = PerlIO_resolve_layers(aTHX_ layers, mode, narg, args);
     }
-   n = av_len(layera)-1;
+   /* Start at "top" of layer stack */
+   n = layera->cur-1;
    while (n >= 0)
     {
      PerlIO_funcs *t = PerlIO_layer_fetch(aTHX_ layera,n,NULL);
@@ -1083,25 +1123,27 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd, int imode, int 
        tab = t;
        break;
       }
-     n -= 2;
+     n--;
     }
    if (tab)
     {
+     /* Found that layer 'n' can do opens - call it */
      PerlIO_debug("openn(%s,'%s','%s',%d,%x,%o,%p,%d,%p)\n",
                   tab->name,layers,mode,fd,imode,perm,f,narg,args);
      f = (*tab->Open)(aTHX_ tab, layera, n, mode,fd,imode,perm,f,narg,args);
      if (f)
       {
-       if (n+2 < av_len(layera)+1)
+       if (n+1 < layera->cur)
         {
-         if (PerlIO_apply_layera(aTHX_ f, mode, layera, n+2) != 0)
+         /* More layers above the one that we used to open - apply them now */
+         if (PerlIO_apply_layera(aTHX_ f, mode, layera, n+1) != 0)
           {
            f = NULL;
           }
         }
       }
     }
-   SvREFCNT_dec(layera);
+   PerlIO_list_free(layera);
   }
  return f;
 }
@@ -1520,10 +1562,10 @@ PerlIO_funcs PerlIO_byte = {
 };
 
 PerlIO *
-PerlIORaw_open(pTHX_ PerlIO_funcs *self,  AV *layers, IV n,const char *mode, int fd, int imode, int perm, PerlIO *old, int narg, SV **args)
+PerlIORaw_open(pTHX_ PerlIO_funcs *self,  PerlIO_list_t *layers, IV n,const char *mode, int fd, int imode, int perm, PerlIO *old, int narg, SV **args)
 {
  PerlIO_funcs *tab = PerlIO_default_btm();
- return (*tab->Open)(aTHX_ tab,layers,n-2,mode,fd,imode,perm,old,narg,args);
+ return (*tab->Open)(aTHX_ tab,layers,n-1,mode,fd,imode,perm,old,narg,args);
 }
 
 PerlIO_funcs PerlIO_raw = {
@@ -1872,7 +1914,7 @@ PerlIOUnix_pushed(PerlIO *f, const char *mode, SV *arg)
 }
 
 PerlIO *
-PerlIOUnix_open(pTHX_ PerlIO_funcs *self, AV *layers, IV n, const char *mode, int fd, int imode, int perm, PerlIO *f, int narg, SV **args)
+PerlIOUnix_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers, IV n, const char *mode, int fd, int imode, int perm, PerlIO *f, int narg, SV **args)
 {
  if (f)
   {
@@ -2092,7 +2134,7 @@ PerlIO_importFILE(FILE *stdio, int fl)
 }
 
 PerlIO *
-PerlIOStdio_open(pTHX_ PerlIO_funcs *self, AV *layers, IV n, const char *mode, int fd, int imode, int perm, PerlIO *f, int narg, SV **args)
+PerlIOStdio_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers, IV n, const char *mode, int fd, int imode, int perm, PerlIO *f, int narg, SV **args)
 {
  char tmode[8];
  if (f)
@@ -2507,13 +2549,13 @@ PerlIOBuf_pushed(PerlIO *f, const char *mode, SV *arg)
 }
 
 PerlIO *
-PerlIOBuf_open(pTHX_ PerlIO_funcs *self, AV *layers, IV n, const char *mode, int fd, int imode, int perm, PerlIO *f, int narg, SV **args)
+PerlIOBuf_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers, IV n, const char *mode, int fd, int imode, int perm, PerlIO *f, int narg, SV **args)
 {
  if (f)
   {
    PerlIO *next = PerlIONext(f);
-   PerlIO_funcs *tab = PerlIO_layer_fetch(aTHX_ layers, n-2, PerlIOBase(next)->tab);
-   next = (*tab->Open)(aTHX_ tab, layers, n-2, mode,fd,imode,perm,next,narg,args);
+   PerlIO_funcs *tab = PerlIO_layer_fetch(aTHX_ layers, n-1, PerlIOBase(next)->tab);
+   next = (*tab->Open)(aTHX_ tab, layers, n-1, mode,fd,imode,perm,next,narg,args);
    if (!next || (*PerlIOBase(f)->tab->Pushed)(f,mode,PerlIOArg) != 0)
     {
      return NULL;
@@ -2521,14 +2563,14 @@ PerlIOBuf_open(pTHX_ PerlIO_funcs *self, AV *layers, IV n, const char *mode, int
   }
  else
   {
-   PerlIO_funcs *tab = PerlIO_layer_fetch(aTHX_ layers, n-2, PerlIO_default_btm());
+   PerlIO_funcs *tab = PerlIO_layer_fetch(aTHX_ layers, n-1, PerlIO_default_btm());
    int init = 0;
    if (*mode == 'I')
     {
      init = 1;
      mode++;
     }
-   f = (*tab->Open)(aTHX_ tab, layers, n-2, mode,fd,imode,perm,NULL,narg,args);
+   f = (*tab->Open)(aTHX_ tab, layers, n-1, mode,fd,imode,perm,NULL,narg,args);
    if (f)
     {
      PerlIO_push(aTHX_ f,self,mode,PerlIOArg);

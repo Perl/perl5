@@ -65,7 +65,6 @@ PerlIOScalar_popped(PerlIO *f)
 IV
 PerlIOScalar_close(PerlIO *f)
 {
- dTHXs;
  IV code = PerlIOBase_close(f);
  PerlIOBase(f)->flags &= ~(PERLIO_F_RDBUF|PERLIO_F_WRBUF);
  return code;
@@ -224,7 +223,7 @@ PerlIOScalar_set_ptrcnt(PerlIO *f, STDCHAR *ptr, SSize_t cnt)
 }
 
 PerlIO *
-PerlIOScalar_open(pTHX_ PerlIO_funcs *self, AV *layers, IV n, const char *mode, int fd, int imode, int perm, PerlIO *f, int narg, SV **args)
+PerlIOScalar_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers, IV n, const char *mode, int fd, int imode, int perm, PerlIO *f, int narg, SV **args)
 {
  PerlIOScalar *s;
  SV *arg = (narg > 0) ? *args : PerlIOArg;
