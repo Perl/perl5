@@ -4,12 +4,14 @@ use Pod::Functions;
 use Getopt::Long;	# package for handling command-line parameters
 require Exporter;
 use vars qw($VERSION);
-$VERSION = 1.01;
+$VERSION = '1.0101';
 @ISA = Exporter;
 @EXPORT = qw(pod2html htmlify);
 use Cwd;
 
 use Carp;
+
+use locale;	# make \w work right in non-ASCII lands
 
 use strict;
 
