@@ -202,8 +202,12 @@ if ($^O eq 'MacOS') {
 [ "Win32->canonpath('////')",           '\\\\\\'              ],
 [ "Win32->canonpath('//')",             '\\'                  ],
 [ "Win32->canonpath('/.')",             '\\.'                 ],
-[ "Win32->canonpath('//a/b/../../c')",  '\\\\a\\b\\..\\..\\c' ],
-[ "Win32->canonpath('//a/../../c')",    '\\\\a\\..\\..\\c'    ],
+[ "Win32->canonpath('//a/b/../../c')",  '\\\\a\\b\\c'         ],
+[ "Win32->canonpath('//a/b/c/../d')",   '\\\\a\\b\\d'         ],
+[ "Win32->canonpath('//a/b/c/../../d')",'\\\\a\\b\\d'         ],
+[ "Win32->canonpath('//a/b/c/.../d')",  '\\\\a\\b\\d'         ],
+[ "Win32->canonpath('/a/b/c/../../d')", '\\a\\d'              ],
+[ "Win32->canonpath('/a/b/c/.../d')",   '\\a\\d'              ],
 
 ## Hmmm, we should test missing and relative base paths some day...
 ## would need to cd to a known place, get the cwd() and use it I
@@ -226,13 +230,12 @@ if ($^O eq 'MacOS') {
 [ "Win32->rel2abs('temp','C:/')",                       'C:\\temp'                        ],
 [ "Win32->rel2abs('temp','C:/a')",                      'C:\\a\\temp'                     ],
 [ "Win32->rel2abs('temp','C:/a/')",                     'C:\\a\\temp'                     ],
-[ "Win32->rel2abs('../','C:/')",                        'C:\\..'                          ],
-[ "Win32->rel2abs('../','C:/a')",                       'C:\\a\\..'                       ],
+[ "Win32->rel2abs('../','C:/')",                        'C:\\'                            ],
+[ "Win32->rel2abs('../','C:/a')",                       'C:\\'                            ],
 [ "Win32->rel2abs('temp','//prague_main/work/')",       '\\\\prague_main\\work\\temp'     ],
-[ "Win32->rel2abs('../temp','//prague_main/work/')",    '\\\\prague_main\\work\\..\\temp' ],
+[ "Win32->rel2abs('../temp','//prague_main/work/')",    '\\\\prague_main\\work\\temp'     ],
 [ "Win32->rel2abs('temp','//prague_main/work')",        '\\\\prague_main\\work\\temp'     ],
-[ "Win32->rel2abs('../','//prague_main/work')",         '\\\\prague_main\\work\\..'       ],
-
+[ "Win32->rel2abs('../','//prague_main/work')",         '\\\\prague_main\\work'           ],
 
 [ "VMS->catfile('a','b','c')",         '[.a.b]c'  ],
 [ "VMS->catfile('a','b','[]c')",       '[.a.b]c'  ],

@@ -113,11 +113,16 @@ sub path {
 
 No physical check on the filesystem, but a logical cleanup of a
 path. On UNIX eliminated successive slashes and successive "/.".
+On Win32 makes 
+
+	dir1\dir2\dir3\..\..\dir4 -> \dir\dir4 and even
+	dir1\dir2\dir3\...\dir4   -> \dir\dir4
 
 =cut
 
 sub canonpath {
     my ($self,$path) = @_;
+    my $orig_path = $path;
     $path =~ s/^([a-z]:)/\u$1/s;
     $path =~ s|/|\\|g;
     $path =~ s|([^\\])\\+|$1\\|g;                  # xx\\\\xx  -> xx\xx
@@ -125,6 +130,38 @@ sub canonpath {
     $path =~ s|^(\.\\)+||s unless $path eq ".\\";  # .\xx      -> xx
     $path =~ s|\\\Z(?!\n)||
              unless $path =~ m#^([A-Z]:)?\\\Z(?!\n)#s;   # xx\       -> xx
+	# xx1/xx2/xx3/../../xx -> xx1/xx
+	$path =~ s|\\\.\.\.\\|\\\.\.\\\.\.\\|g; # \...\ is 2 levels up
+	$path =~ s|^\.\.\.\\|\.\.\\\.\.\\|g;    # ...\ is 2 levels up
+	return $path if $path =~ m|^\.\.|;      # skip relative paths
+	return $path unless $path =~ /\.\./;    # too few .'s to cleanup
+	return $path if $path =~ /\.\.\.\./;    # too many .'s to cleanup
+	return $path if $orig_path =~ m|^\Q/../\E|
+			        and $orig_path =~ m|\/$|;  # don't do /../dirs/ 
+			        						   # when called from rel2abs()
+			        						   # for ../dirs/
+	my ($vol,$dirs,$file) = $self->splitpath($path);
+	my @dirs = $self->splitdir($dirs);
+	my (@base_dirs, @path_dirs);
+	my $dest = \@base_dirs;
+	for my $dir (@dirs){
+		$dest = \@path_dirs if $dir eq $self->updir;
+		push @$dest, $dir;
+	}
+	# for each .. in @path_dirs pop one item from 
+	# @base_dirs
+	while (my $dir = shift @path_dirs){ 
+		unless ($dir eq $self->updir){
+			unshift @path_dirs, $dir;
+			last;
+		}
+		pop @base_dirs;
+	}
+	$path = $self->catpath( 
+		$vol, 
+		$self->catdir(@base_dirs, @path_dirs), 
+		$file
+    );
     return $path;
 }
 
