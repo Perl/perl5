@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.49 $, $Date: 2003/09/20 06:37:43 $)
+perlfaq4 - Data Manipulation ($Revision: 1.52 $, $Date: 2003/10/02 04:44:33 $)
 
 =head1 DESCRIPTION
 
@@ -1586,7 +1586,7 @@ If you need to sort on several fields, the following paradigm is useful.
 This can be conveniently combined with precalculation of keys as given
 above.
 
-See the F<sort> artitcle article in the "Far More Than You Ever Wanted
+See the F<sort> article in the "Far More Than You Ever Wanted
 To Know" collection in http://www.cpan.org/misc/olddoc/FMTEYEWTK.tgz for
 more about this approach.
 
