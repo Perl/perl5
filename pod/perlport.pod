@@ -404,10 +404,12 @@ interaction.  A program requiring a command line interface might
 not work everywhere.  This is probably for the user of the program
 to deal with, so don't stay up late worrying about it.
 
-Some platforms can't delete or rename files held open by the system.
-Remember to C<close> files when you are done with them.  Don't
-C<unlink> or C<rename> an open file.  Don't C<tie> or C<open> a
-file already tied or opened; C<untie> or C<close> it first.
+Some platforms can't delete or rename files held open by the system,
+this limitation may also apply to changing filesystem metainformation
+like file permissions or owners.  Remember to C<close> files when you
+are done with them.  Don't C<unlink> or C<rename> an open file.  Don't
+C<tie> or C<open> a file already tied or opened; C<untie> or C<close>
+it first.
 
 Don't open the same file more than once at a time for writing, as some
 operating systems put mandatory locks on such files.
@@ -446,7 +448,12 @@ C<closedir> instead.
 Don't count on per-program environment variables, or per-program current
 directories.
 
-Don't count on specific values of C<$!>.
+Don't count on specific values of C<$!>, neither numeric nor
+especially the strings values-- users may switch their locales causing
+error messages to be translated into their languages.  If you can
+trust a POSIXish environment, you can portably use the symbols defined
+by the Errno module, like ENOENT.  And don't trust on the values of C<$!>
+at all except immediately after a failed system call.
 
 =head2 Command names versus file pathnames
 
@@ -564,16 +571,24 @@ work with any DBM module.  See L<AnyDBM_File> for more details.
 The system's notion of time of day and calendar date is controlled in
 widely different ways.  Don't assume the timezone is stored in C<$ENV{TZ}>,
 and even if it is, don't assume that you can control the timezone through
-that variable.
+that variable.  Don't assume anything about the three-letter timezone
+abbreviations (for example that MST would be the Mountain Standard Time,
+it's been known to stand for Moscow Standard Time).  If you need to
+use timezones, express them in some unambiguous format like the
+exact number of minutes offset from UTC, or the POSIX timezone
+format.
 
 Don't assume that the epoch starts at 00:00:00, January 1, 1970,
-because that is OS- and implementation-specific.  It is better to store a date
-in an unambiguous representation.  The ISO-8601 standard defines
-"YYYY-MM-DD" as the date format.  A text representation (like "1987-12-18")
-can be easily converted into an OS-specific value using a module like
-Date::Parse.  An array of values, such as those returned by
-C<localtime>, can be converted to an OS-specific representation using
-Time::Local.
+because that is OS- and implementation-specific.  It is better to
+store a date in an unambiguous representation.  The ISO 8601 standard
+defines YYYY-MM-DD as the date format, or YYYY-MM-DDTHH-MM-SS
+(that's a literal "T" separating the date from the time).
+Please do use the ISO 8601 instead of making us to guess what
+date 02/03/04 might be.  ISO 8601 even sorts nicely as-is.
+A text representation (like "1987-12-18") can be easily converted
+into an OS-specific value using a module like Date::Parse.
+An array of values, such as those returned by C<localtime>, can be
+converted to an OS-specific representation using Time::Local.
 
 When calculating specific times, such as for tests in time or date modules,
 it may be appropriate to calculate an offset for the epoch.
@@ -610,6 +625,9 @@ system at least attempts to make things a little bit more portable,
 or at least more convenient and native-friendly for non-English
 users.  The system affects character sets and encoding, and date
 and time formatting--amongst other things.
+
+If you really want to be international, you should consider Unicode.
+See L<perluniintro> and L<perlunicode> for more information.
 
 =head2 System Resources
 
@@ -672,12 +690,14 @@ Be careful in the tests you supply with your module or programs.
 Module code may be fully portable, but its tests might not be.  This
 often happens when tests spawn off other processes or call external
 programs to aid in the testing, or when (as noted above) the tests
-assume certain things about the filesystem and paths.  Be careful
-not to depend on a specific output style for errors, such as when
-checking C<$!> after a system call.  Some platforms expect a certain
-output format, and perl on those platforms may have been adjusted
-accordingly.  Most specifically, don't anchor a regex when testing
-an error value.
+assume certain things about the filesystem and paths.  Be careful not
+to depend on a specific output style for errors, such as when checking
+C<$!> after a failed system call.  Using C<$!> for anything else than
+displaying it as output is doubtful (though see the Errno module for
+testing reasonably portably for error value). Some platforms expect
+a certain output format, and Perl on those platforms may have been
+adjusted accordingly.  Most specifically, don't anchor a regex when
+testing an error value.
 
 =head1 CPAN Testers
 
