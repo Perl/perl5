@@ -77,7 +77,6 @@ ExtUtils::MM_NW5
 ExtUtils::Install
 ExtUtils::Liblist
 ExtUtils::Mksymlists
-Net::Domain
 O
 Pod::Plainer
 Test::Harness::Iterator
