@@ -8,19 +8,24 @@
 ##
 
 # BSD paths
-prefix='/usr/local'; # Built-in perl uses /usr
-siteprefix='/usr/local';
-vendorprefix='/usr/local'; usevendorprefix='define';
+case "$prefix" in
+'')	
+	prefix='/usr/local'; # Built-in perl uses /usr
+	siteprefix='/usr/local';
+	vendorprefix='/usr/local'; usevendorprefix='define';
 
-# 4BSD uses ${prefix}/share/man, not ${prefix}/man.
-# Don't put man pages in ${prefix}/lib; that's goofy.
-man1dir="${prefix}/share/man/man1";
-man3dir="${prefix}/share/man/man3";
+	# 4BSD uses ${prefix}/share/man, not ${prefix}/man.
+	# Don't put man pages in ${prefix}/lib; that's goofy.
+	man1dir="${prefix}/share/man/man1";
+	man3dir="${prefix}/share/man/man3";
 
-# Where to put modules.
-privlib='/Local/Library/Perl'; # Built-in perl uses /System/Library/Perl
-sitelib='/Local/Library/Perl';
-vendorlib='/Network/Library/Perl';
+	# Where to put modules.
+	# Built-in perl uses /System/Library/Perl
+	privlib='/Local/Library/Perl';
+	sitelib='/Local/Library/Perl';
+	vendorlib='/Network/Library/Perl';
+	;;
+esac
 
 ##
 # Tool chain settings
