@@ -1,6 +1,10 @@
 #!./perl
 
 BEGIN {
+    if ($^O eq 'VMS') {
+       print "1..0 # skip - Bytecode/ByteLoader doesn't work on VMS\n";
+       exit 0;
+    }
     chdir 't' if -d 't';
     @INC = qw(../lib);
     require './test.pl'; # for run_perl()
@@ -8,7 +12,7 @@ BEGIN {
 use strict;
 
 my $test = 'bytecode.pl';
-END { 1 while unlink $test }
+END { 1 while unlink $test, "${test}c" }
 
 undef $/;
 my @tests = split /\n###+\n/, <DATA>;
@@ -22,11 +26,13 @@ for (@tests) {
     my ($script, $expect) = split />>>+\n/;
     $expect =~ s/\n$//;
     open T, ">$test"; print T $script; close T;
-    $got = run_perl(switches => [ "-MO=Bytecode,-H,-o$test" ],
-		    stderr   => 1,
+    $got = run_perl(switches => [ "-MO=Bytecode,-H,-o${test}c" ],
+		    verbose  => 0, # for debugging
+		    stderr   => 1, # to capture the "bytecode.pl syntax ok"
 		    progfile => $test);
     unless ($?) {
-	$got = run_perl(progfile => $test);
+	1 while unlink($test); # nuke the .pl
+	$got = run_perl(progfile => "${test}c"); # run the .plc
 	unless ($?) {
 	    if ($got =~ /^$expect$/) {
 		print "ok $cnt\n";
