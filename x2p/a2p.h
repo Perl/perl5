@@ -1,4 +1,4 @@
-/* $RCSfile: a2p.h,v $$Revision: 4.1 $$Date: 92/08/07 18:29:09 $
+/* $RCSfile: a2p.h,v $$Revision: 4.1 $$Date: 1996/07/05 23:49:58 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	a2p.h,v $
+ * Revision 1.2  1996/07/05 23:49:58  gerti
+ * OPENSTEP 4.0 patches
+ *
  */
 
 #include "../embed.h"
@@ -32,11 +35,17 @@
 #endif
 
 
-#ifdef USE_NEXT_CTYPE 
+#ifdef USE_NEXT_CTYPE
+
+#if NX_CURRENT_COMPILER_RELEASE >= 400
+#include <objc/NXCType.h>
+#else /*  NX_CURRENT_COMPILER_RELEASE < 400 */
 #include <appkit/NXCType.h>
-#else
+#endif /*  NX_CURRENT_COMPILER_RELEASE >= 400 */
+
+#else /* !USE_NEXT_CTYPE */
 #include <ctype.h>
-#endif
+#endif /* USE_NEXT_CTYPE */
 
 #define MEM_SIZE Size_t
 
