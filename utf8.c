@@ -1323,7 +1323,11 @@ Perl_to_utf8_case(pTHX_ U8 *p, U8* ustrp, STRLEN *lenp, SV **swashp, char *norma
 
 		   for (t = ustrp, tend = t + *lenp; t < tend; t += tlen) {
 			UV c = utf8_to_uvchr(t, &tlen);
-			d = uvchr_to_utf8(d, UNI_TO_NATIVE(c));
+
+			if (tlen > 0)
+			     d = uvchr_to_utf8(d, UNI_TO_NATIVE(c));
+			else
+			     break;
 		   }
 		   *lenp = d - tmpbuf; 
 		   Copy(tmpbuf, ustrp, *lenp, U8);
