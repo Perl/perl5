@@ -606,8 +606,10 @@ I32 sv_type;
     case '|':
     case '\001':
     case '\004':
+    case '\005':
     case '\006':
     case '\010':
+    case '\017':
     case '\t':
     case '\020':
     case '\024':
@@ -1144,7 +1146,7 @@ int flags;
     PUTBACK;
 
     if (op = pp_entersub())
-      run();
+      runops();
     LEAVE;
     SPAGAIN;
 
