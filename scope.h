@@ -394,7 +394,11 @@ typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ volatile JMPENV *pcur_env,
     } STMT_END
 
 #define JMPENV_POP \
-    STMT_START { PL_top_env = cur_env.je_prev; } STMT_END
+    STMT_START {							\
+	DEBUG_l(Perl_deb(aTHX_ "popping jumplevel was %p, now %p\n",	\
+			 PL_top_env, cur_env.je_prev));			\
+	PL_top_env = cur_env.je_prev;					\
+    } STMT_END
 
 #define JMPENV_JUMP(v) \
     STMT_START {						\

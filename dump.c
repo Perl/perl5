@@ -1540,6 +1540,7 @@ Perl_runops_debug(pTHX)
 	return 0;
     }
 
+    DEBUG_l(Perl_deb(aTHX_ "Entering new RUNOPS level\n"));
     do {
 	PERL_ASYNC_CHECK();
 	if (PL_debug) {
@@ -1562,6 +1563,7 @@ Perl_runops_debug(pTHX)
 	    if (DEBUG_P_TEST_) debprof(PL_op);
 	}
     } while ((PL_op = CALL_FPTR(PL_op->op_ppaddr)(aTHX)));
+    DEBUG_l(Perl_deb(aTHX_ "leaving RUNOPS level\n"));
 
     TAINT_NOT;
     return 0;
