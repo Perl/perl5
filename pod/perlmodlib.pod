@@ -21,7 +21,7 @@ bulletproof.
 
 They work somewhat like pragmas in that they tend to affect the compilation of
 your program, and thus will usually work well only when used within a
-C<use>, or C<no>.  Most of these are locally scoped, so an inner BLOCK
+C<use>, or C<no>.  Most of these are lexically scoped, so an inner BLOCK
 may countermand any of these by saying:
 
     no integer;
