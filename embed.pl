@@ -10,6 +10,8 @@ my @extvars = qw(sv_undef sv_yes sv_no na dowarn
                  stdingv
 		 defgv
 		 errgv
+		 rsfp_filters
+		 perldb
                 );
 
 sub readsyms (\%$) {
