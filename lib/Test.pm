@@ -206,7 +206,7 @@ The test failures can trigger extra diagnostics at the end of the test
 run.  C<onfail> is passed an array ref of hash refs that describe each
 test failure.  Each hash will contain at least the following fields:
 package, repetition, and result.  (The file, line, and test number are
-not included because their correspondance to a particular test is
+not included because their correspondence to a particular test is
 fairly weak.)  If the test had an expected value or a diagnostic
 string, these will also be included.
 
