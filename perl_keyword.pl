@@ -31,7 +31,7 @@ sub return_statement_for_notfound {
 }
 
 # Ditch the default "const"
-sub C_constant_name_param_definition {
+sub name_param_definition {
   "char *" . $_[0]->name_param;
 }
 
@@ -48,8 +48,8 @@ sub C_constant_prefix_param_defintion {
   "pTHX_ ";
 }
 
-sub C_constant_namelen_param_definition {
-  'I32 ' . $_[0] -> C_constant_namelen_param;
+sub namelen_param_definition {
+  'I32 ' . $_[0] -> namelen_param;
 }
 
 package main;

@@ -171,11 +171,11 @@ sub C_constant_prefix_param_defintion {
   "pTHX_ ";
 }
 
-sub C_constant_namelen_param_definition {
-  'STRLEN ' . $_[0] -> C_constant_namelen_param;
+sub namelen_param_definition {
+  'STRLEN ' . $_[0] -> namelen_param;
 }
 
-sub C_constant_param_defintion {
+sub C_constant_other_params_defintion {
   my ($self, $params) = @_;
   my $body = '';
   $body .= ", int utf8" if $params->{''};
@@ -186,7 +186,7 @@ sub C_constant_param_defintion {
   $body;
 }
 
-sub C_constant_param {
+sub C_constant_other_params {
   my ($self, $params) = @_;
   my $body = '';
   $body .= ", utf8" if $params->{''};
