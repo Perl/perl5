@@ -191,30 +191,34 @@ is( $files->{yarrow}, 'hock','          with comment' );
 is( $files->{foobar}, '',    '          preserved old entries' );
 
 add_file('MANIFEST'   => 'Makefile.PL');
-maniadd({ 'META.yml'  => 'Module meta-data (added by MakeMaker)' });
+maniadd({ foo  => 'bar' });
 $files = maniread;
 # VMS downcases the MANIFEST.  We normalize it here to match.
 %$files = map { (lc $_ => $files->{$_}) } keys %$files;
 my %expect = ( 'makefile.pl' => '',
-               'meta.yml'    => 'Module meta-data (added by MakeMaker)' 
+               'foo'    => 'bar'
              );
 is_deeply( $files, \%expect, 'maniadd() vs MANIFEST without trailing newline');
+
+add_file('MANIFEST'   => 'Makefile.PL');
+maniadd({ foo => 'bar' });
 
 SKIP: {
     chmod( 0400, 'MANIFEST' );
     skip "Can't make MANIFEST read-only", 2 if -w 'MANIFEST';
 
     eval {
-        maniadd({ 'META.yml' => 'hock' });
+        maniadd({ 'foo' => 'bar' });
     };
     is( $@, '',  "maniadd() won't open MANIFEST if it doesn't need to" );
 
     eval {
         maniadd({ 'grrrwoof' => 'yippie' });
     };
-    like( $@, qr/^Could not open MANIFEST/,  
+    like( $@, qr/^\Qmaniadd() could not open MANIFEST:\E/,  
                  "maniadd() dies if it can't open the MANIFEST" );
 
+    chmod( 0600, 'MANIFEST' );
 }
     
 
@@ -224,7 +228,6 @@ END {
 
 	# now get rid of the parent directory
 	ok( chdir( $cwd ), 'return to parent directory' );
-	unlink('mantest/MANIFEST');
 	remove_dir( 'mantest' );
 }
 

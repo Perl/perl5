@@ -1,3 +1,15 @@
+6.17 Sun Sep 14 20:52:45 PDT 2003
+    - Fixing LD so it can be set properly on Win32. (Orton Yves)
+    * Fixing the init_PERL() "tack $Config{exe_ext} onto $^X" logic so 
+      it works on VMS allowing $^X to be found.
+    * Fixing make install UNINST=1 on Windows so it can search PERL5LIB
+      (Orton Yves)
+    - Fixing "could not open MANIFEST" test for OS/2 (and probably others) 
+      where a read-only file cannot be deleted.
+    - Hacking around the fact that when built for debugging, VMS creates
+      ndbgperl.exe.
+    - Eliminating the never implemented "help" argument.
+
 6.16 Mon Aug 18 01:39:51 PDT 2003
     * Fixing the max exec length for Windows to account for old
       versions of nmake (the one you can download for free from MS).

@@ -21,7 +21,7 @@ BEGIN {
 use File::Basename;
 use vars qw($Revision @ISA $VERSION);
 ($VERSION) = '5.70';
-($Revision) = q$Revision: 1.109 $ =~ /Revision:\s+(\S+)/;
+($Revision) = q$Revision: 1.110 $ =~ /Revision:\s+(\S+)/;
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
@@ -164,25 +164,33 @@ sub find_perl {
     my($rslt);
     my($inabs) = 0;
     local *TCF;
-    # Check in relative directories first, so we pick up the current
-    # version of Perl if we're running MakeMaker as part of the main build.
-    @sdirs = sort { my($absa) = $self->file_name_is_absolute($a);
-                    my($absb) = $self->file_name_is_absolute($b);
-                    if ($absa && $absb) { return $a cmp $b }
-                    else { return $absa ? 1 : ($absb ? -1 : ($a cmp $b)); }
-                  } @$dirs;
-    # Check miniperl before perl, and check names likely to contain
-    # version numbers before "generic" names, so we pick up an
-    # executable that's less likely to be from an old installation.
-    @snames = sort { my($ba) = $a =~ m!([^:>\]/]+)$!;  # basename
-                     my($bb) = $b =~ m!([^:>\]/]+)$!;
-                     my($ahasdir) = (length($a) - length($ba) > 0);
-                     my($bhasdir) = (length($b) - length($bb) > 0);
-                     if    ($ahasdir and not $bhasdir) { return 1; }
-                     elsif ($bhasdir and not $ahasdir) { return -1; }
-                     else { $bb =~ /\d/ <=> $ba =~ /\d/
-                            or substr($ba,0,1) cmp substr($bb,0,1)
-                            or length($bb) <=> length($ba) } } @$names;
+
+    if( $self->{PERL_CORE} ) {
+        # Check in relative directories first, so we pick up the current
+        # version of Perl if we're running MakeMaker as part of the main build.
+        @sdirs = sort { my($absa) = $self->file_name_is_absolute($a);
+                        my($absb) = $self->file_name_is_absolute($b);
+                        if ($absa && $absb) { return $a cmp $b }
+                        else { return $absa ? 1 : ($absb ? -1 : ($a cmp $b)); }
+                      } @$dirs;
+        # Check miniperl before perl, and check names likely to contain
+        # version numbers before "generic" names, so we pick up an
+        # executable that's less likely to be from an old installation.
+        @snames = sort { my($ba) = $a =~ m!([^:>\]/]+)$!;  # basename
+                         my($bb) = $b =~ m!([^:>\]/]+)$!;
+                         my($ahasdir) = (length($a) - length($ba) > 0);
+                         my($bhasdir) = (length($b) - length($bb) > 0);
+                         if    ($ahasdir and not $bhasdir) { return 1; }
+                         elsif ($bhasdir and not $ahasdir) { return -1; }
+                         else { $bb =~ /\d/ <=> $ba =~ /\d/
+                                  or substr($ba,0,1) cmp substr($bb,0,1)
+                                  or length($bb) <=> length($ba) } } @$names;
+    }
+    else {
+        @sdirs  = @$dirs;
+        @snames = @$names;
+    }
+
     # Image names containing Perl version use '_' instead of '.' under VMS
     foreach $name (@snames) { $name =~ s/\.(\d+)$/_$1/; }
     if ($trace >= 2){
