@@ -3140,22 +3140,21 @@ http://testers.cpan.org/
 
 =item Alphabetical Listing of Perl Functions
 
--I<X> FILEHANDLE, -I<X> EXPR, -I<X>, alarm SECONDS, alarm, binmode
-FILEHANDLE, chmod LIST, chown LIST, chroot FILENAME, chroot, crypt
-PLAINTEXT,SALT, dbmclose HASH, dbmopen HASH,DBNAME,MODE, dump LABEL, exec
-LIST, exit EXPR, exit, fcntl FILEHANDLE,FUNCTION,SCALAR, flock
-FILEHANDLE,OPERATION, fork, getlogin, getpgrp PID, getppid, getpriority
-WHICH,WHO, getpwnam NAME, getgrnam NAME, getnetbyname NAME, getpwuid UID,
-getgrgid GID, getnetbyaddr ADDR,ADDRTYPE, getprotobynumber NUMBER,
-getservbyport PORT,PROTO, getpwent, getgrent, gethostbyname, gethostent,
-getnetent, getprotoent, getservent, sethostent STAYOPEN, setnetent
-STAYOPEN, setprotoent STAYOPEN, setservent STAYOPEN, endpwent, endgrent,
-endhostent, endnetent, endprotoent, endservent, getsockopt
-SOCKET,LEVEL,OPTNAME, glob EXPR, glob, ioctl FILEHANDLE,FUNCTION,SCALAR,
-kill SIGNAL, LIST, link OLDFILE,NEWFILE, lstat FILEHANDLE, lstat EXPR,
-lstat, msgctl ID,CMD,ARG, msgget KEY,FLAGS, msgsnd ID,MSG,FLAGS, msgrcv
-ID,VAR,SIZE,TYPE,FLAGS, open FILEHANDLE,EXPR, open FILEHANDLE, pipe
-READHANDLE,WRITEHANDLE, readlink EXPR, readlink, select
+-I<X> FILEHANDLE, -I<X> EXPR, -I<X>, binmode FILEHANDLE, chmod LIST, chown
+LIST, chroot FILENAME, chroot, crypt PLAINTEXT,SALT, dbmclose HASH, dbmopen
+HASH,DBNAME,MODE, dump LABEL, exec LIST, exit EXPR, exit, fcntl
+FILEHANDLE,FUNCTION,SCALAR, flock FILEHANDLE,OPERATION, fork, getlogin,
+getpgrp PID, getppid, getpriority WHICH,WHO, getpwnam NAME, getgrnam NAME,
+getnetbyname NAME, getpwuid UID, getgrgid GID, getnetbyaddr ADDR,ADDRTYPE,
+getprotobynumber NUMBER, getservbyport PORT,PROTO, getpwent, getgrent,
+gethostbyname, gethostent, getnetent, getprotoent, getservent, sethostent
+STAYOPEN, setnetent STAYOPEN, setprotoent STAYOPEN, setservent STAYOPEN,
+endpwent, endgrent, endhostent, endnetent, endprotoent, endservent,
+getsockopt SOCKET,LEVEL,OPTNAME, glob EXPR, glob, ioctl
+FILEHANDLE,FUNCTION,SCALAR, kill SIGNAL, LIST, link OLDFILE,NEWFILE, lstat
+FILEHANDLE, lstat EXPR, lstat, msgctl ID,CMD,ARG, msgget KEY,FLAGS, msgsnd
+ID,MSG,FLAGS, msgrcv ID,VAR,SIZE,TYPE,FLAGS, open FILEHANDLE,EXPR, open
+FILEHANDLE, pipe READHANDLE,WRITEHANDLE, readlink EXPR, readlink, select
 RBITS,WBITS,EBITS,TIMEOUT, semctl ID,SEMNUM,CMD,ARG, semget
 KEY,NSEMS,FLAGS, semop KEY,OPSTRING, setgrent, setpgrp PID,PGRP,
 setpriority WHICH,WHO,PRIORITY, setpwent, setsockopt
@@ -5649,7 +5648,254 @@ Win32::GetOSVersion
 
 =back
 
-=head2 perl58delta, perldelta - what is new for perl v5.8.0
+=head2 perl583delta, perldelta - what is new for perl v5.8.3
+
+=over 4
+
+=item DESCRIPTION
+
+=item Incompatible Changes
+
+=item Core Enhancements
+
+=item Modules and Pragmata
+
+CGI, Cwd, Digest, Digest::MD5, Encode, File::Spec, FindBin, List::Util,
+Math::BigInt, PodParser, Pod::Perldoc, POSIX, Unicode::Collate,
+Unicode::Normalize, Test::Harness, threads::shared
+
+=item Utility Changes
+
+=item New Documentation
+
+=item Installation and Configuration Improvements
+
+=item Selected Bug Fixes
+
+=item New or Changed Diagnostics
+
+=item Changed Internals
+
+=item Configuration and Building
+
+=item Platform Specific Problems
+
+=item Known Problems
+
+=item Future Directions
+
+=item Obituary
+
+=item Reporting Bugs
+
+=item SEE ALSO
+
+=back
+
+=head2 perl582delta - what is new for perl v5.8.2
+
+=over 4
+
+=item DESCRIPTION
+
+=item Incompatible Changes
+
+=item Core Enhancements
+
+=over 4
+
+=item Hash Randomisation
+
+=item Threading
+
+=back
+
+=item Modules and Pragmata
+
+=over 4
+
+=item Updated Modules And Pragmata
+
+Devel::PPPort, Digest::MD5, I18N::LangTags, libnet, MIME::Base64,
+Pod::Perldoc, strict, Tie::Hash, Time::HiRes, Unicode::Collate,
+Unicode::Normalize, UNIVERSAL
+
+=back
+
+=item Selected Bug Fixes
+
+=item Changed Internals
+
+=item Platform Specific Problems
+
+=item Future Directions
+
+=item Reporting Bugs
+
+=item SEE ALSO
+
+=back
+
+=head2 perl581delta - what is new for perl v5.8.1
+
+=over 4
+
+=item DESCRIPTION
+
+=item Incompatible Changes
+
+=over 4
+
+=item Hash Randomisation
+
+=item UTF-8 On Filehandles No Longer Activated By Locale
+
+=item Single-number v-strings are no longer v-strings before "=>"
+
+=item (Win32) The -C Switch Has Been Repurposed
+
+=item (Win32) The /d Switch Of cmd.exe
+
+=back
+
+=item Core Enhancements
+
+=over 4
+
+=item UTF-8 no longer default under UTF-8 locales
+
+=item Unsafe signals again available
+
+=item Tied Arrays with Negative Array Indices
+
+=item local ${$x}
+
+=item Unicode Character Database 4.0.0
+
+=item Deprecation Warnings
+
+=item Miscellaneous Enhancements
+
+=back
+
+=item Modules and Pragmata
+
+=over 4
+
+=item Updated Modules And Pragmata
+
+base, B::Bytecode, B::Concise, B::Deparse, Benchmark, ByteLoader, bytes,
+CGI, charnames, CPAN, Data::Dumper, DB_File, Devel::PPPort, Digest::MD5,
+Encode, fields, libnet, Math::BigInt, MIME::Base64, NEXT, Net::Ping,
+PerlIO::scalar, podlators, Pod::LaTeX, PodParsers, Pod::Perldoc,
+Scalar::Util, Storable, strict, Term::ANSIcolor, Test::Harness, Test::More,
+Test::Simple, Text::Balanced, Time::HiRes, threads, threads::shared,
+Unicode::Collate, Unicode::Normalize, Win32::GetFolderPath,
+Win32::GetOSVersion
+
+=back
+
+=item Utility Changes
+
+=item New Documentation
+
+=item Installation and Configuration Improvements
+
+=over 4
+
+=item Platform-specific enhancements
+
+=back
+
+=item Selected Bug Fixes
+
+=over 4
+
+=item Closures, eval and lexicals
+
+=item Generic fixes
+
+=item Platform-specific fixes
+
+=back
+
+=item New or Changed Diagnostics
+
+=over 4
+
+=item Changed "A thread exited while %d threads were running"
+
+=item Removed "Attempt to clear a restricted hash"
+
+=item New "Illegal declaration of anonymous subroutine"
+
+=item Changed "Invalid range "%s" in transliteration operator"
+
+=item New "Missing control char name in \c"
+
+=item New "Newline in left-justified string for %s"
+
+=item New "Possible precedence problem on bitwise %c operator"
+
+=item New "Pseudo-hashes are deprecated"
+
+=item New "read() on %s filehandle %s"
+
+=item New "5.005 threads are deprecated"
+
+=item New "Tied variable freed while still in use"
+
+=item New "To%s: illegal mapping '%s'"
+
+=item New "Use of freed value in iteration"
+
+=back
+
+=item Changed Internals
+
+=item New Tests
+
+=item Known Problems
+
+=over 4
+
+=item Tied hashes in scalar context
+
+=item Net::Ping 450_service and 510_ping_udp failures
+
+=item B::C
+
+=back
+
+=item Platform Specific Problems
+
+=over 4
+
+=item EBCDIC Platforms
+
+=item Cygwin 1.5 problems
+
+=item HP-UX: HP cc warnings about sendfile and sendpath
+
+=item IRIX: t/uni/tr_7jis.t falsely failing
+
+=item Mac OS X: no usemymalloc
+
+=item Tru64: No threaded builds with GNU cc (gcc)
+
+=item Win32: sysopen, sysread, syswrite
+
+=back
+
+=item Future Directions
+
+=item Reporting Bugs
+
+=item SEE ALSO
+
+=back
+
+=head2 perl58delta - what is new for perl v5.8.0
 
 =over 4
 
@@ -5860,165 +6106,6 @@ Win32::GetOSVersion
 =item SEE ALSO
 
 =item HISTORY
-
-=back
-
-=head2 perl581delta, perldelta - what is new for perl v5.8.1
-
-=over 4
-
-=item DESCRIPTION
-
-=item Incompatible Changes
-
-=over 4
-
-=item Hash Randomisation
-
-=item UTF-8 On Filehandles No Longer Activated By Locale
-
-=item Single-number v-strings are no longer v-strings before "=>"
-
-=item (Win32) The -C Switch Has Been Repurposed
-
-=item (Win32) The /d Switch Of cmd.exe
-
-=back
-
-=item Core Enhancements
-
-=over 4
-
-=item UTF-8 no longer default under UTF-8 locales
-
-=item Unsafe signals again available
-
-=item Tied Arrays with Negative Array Indices
-
-=item local ${$x}
-
-=item Unicode Character Database 4.0.0
-
-=item Deprecation Warnings
-
-=item Miscellaneous Enhancements
-
-=back
-
-=item Modules and Pragmata
-
-=over 4
-
-=item Updated Modules And Pragmata
-
-base, B::Bytecode, B::Concise, B::Deparse, Benchmark, ByteLoader, bytes,
-CGI, charnames, CPAN, Data::Dumper, DB_File, Devel::PPPort, Digest::MD5,
-Encode, fields, libnet, Math::BigInt, MIME::Base64, NEXT, Net::Ping,
-PerlIO::scalar, podlators, Pod::LaTeX, PodParsers, Pod::Perldoc,
-Scalar::Util, Storable, strict, Term::ANSIcolor, Test::Harness, Test::More,
-Test::Simple, Text::Balanced, Time::HiRes, threads, threads::shared,
-Unicode::Collate, Unicode::Normalize, Win32::GetFolderPath,
-Win32::GetOSVersion
-
-=back
-
-=item Utility Changes
-
-=item New Documentation
-
-=item Installation and Configuration Improvements
-
-=over 4
-
-=item Platform-specific enhancements
-
-=back
-
-=item Selected Bug Fixes
-
-=over 4
-
-=item Closures, eval and lexicals
-
-=item Generic fixes
-
-=item Platform-specific fixes
-
-=back
-
-=item New or Changed Diagnostics
-
-=over 4
-
-=item Changed "A thread exited while %d threads were running"
-
-=item Removed "Attempt to clear a restricted hash"
-
-=item New "Illegal declaration of anonymous subroutine"
-
-=item Changed "Invalid range "%s" in transliteration operator"
-
-=item New "Missing control char name in \c"
-
-=item New "Newline in left-justified string for %s"
-
-=item New "Possible precedence problem on bitwise %c operator"
-
-=item New "Pseudo-hashes are deprecated"
-
-=item New "read() on %s filehandle %s"
-
-=item New "5.005 threads are deprecated"
-
-=item New "Tied variable freed while still in use"
-
-=item New "To%s: illegal mapping '%s'"
-
-=item New "Use of freed value in iteration"
-
-=back
-
-=item Changed Internals
-
-=item New Tests
-
-=item Known Problems
-
-=over 4
-
-=item Tied hashes in scalar context
-
-=item Net::Ping 450_service and 510_ping_udp failures
-
-=item B::C
-
-=back
-
-=item Platform Specific Problems
-
-=over 4
-
-=item EBCDIC Platforms
-
-=item Cygwin 1.5 problems
-
-=item HP-UX: HP cc warnings about sendfile and sendpath
-
-=item IRIX: t/uni/tr_7jis.t falsely failing
-
-=item Mac OS X: no usemymalloc
-
-=item Tru64: No threaded builds with GNU cc (gcc)
-
-=item Win32: sysopen, sysread, syswrite
-
-=back
-
-=item Future Directions
-
-=item Reporting Bugs
-
-=item SEE ALSO
 
 =back
 
@@ -8396,6 +8483,19 @@ F<op/stat.t>
 
 =back
 
+=item Building a binary distribution
+
+=item Building custom F<.EXE> files
+
+=over 4
+
+=item Making executables with a custom collection of statically loaded
+extensions
+
+=item Making executables with a custom search-paths
+
+=back
+
 =item Build FAQ
 
 =over 4
@@ -9040,8 +9140,9 @@ data structures between threads
 
 =item FUNCTIONS
 
-share VARIABLE, lock VARIABLE, cond_wait VARIABLE, cond_signal VARIABLE,
-cond_broadcast VARIABLE
+share VARIABLE, lock VARIABLE, cond_wait VARIABLE, cond_wait CONDVAR,
+LOCKVAR, cond_timedwait VARIABLE, ABS_TIMEOUT, cond_timedwait CONDVAR,
+ABS_TIMEOUT, LOCKVAR, cond_signal VARIABLE, cond_broadcast VARIABLE
 
 =item NOTES
 
@@ -9075,7 +9176,8 @@ A thread exited while %d other threads were still running
 =item BUGS
 
 Parent-Child threads, Returning objects, Creating threads inside BEGIN
-blocks, PERL_OLD_SIGNALS are not threadsafe, will not be
+blocks, PERL_OLD_SIGNALS are not threadsafe, will not be, Detached threads
+on Windows
 
 =item AUTHOR and COPYRIGHT
 
@@ -9175,7 +9277,7 @@ FETCH_I<type>_ATTRIBUTES, MODIFY_I<type>_ATTRIBUTES
 
 =back
 
-=head2 base - Establish IS-A relationship with base class at compile time
+=head2 base - Establish IS-A relationship with base classes at compile time
 
 =over 4
 
@@ -9798,8 +9900,9 @@ structures between threads
 
 =item FUNCTIONS
 
-share VARIABLE, lock VARIABLE, cond_wait VARIABLE, cond_signal VARIABLE,
-cond_broadcast VARIABLE
+share VARIABLE, lock VARIABLE, cond_wait VARIABLE, cond_wait CONDVAR,
+LOCKVAR, cond_timedwait VARIABLE, ABS_TIMEOUT, cond_timedwait CONDVAR,
+ABS_TIMEOUT, LOCKVAR, cond_signal VARIABLE, cond_broadcast VARIABLE
 
 =item NOTES
 
@@ -10825,8 +10928,8 @@ B<Accept()>, B<raw_cookie()>, B<user_agent()>, B<path_info()>,
 B<path_translated()>, B<remote_host()>, B<script_name()> Return the script
 name as a partial URL, for self-refering scripts, B<referer()>, B<auth_type
 ()>, B<server_name ()>, B<virtual_host ()>, B<server_port ()>,
-B<server_software ()>, B<remote_user ()>, B<user_name ()>,
-B<request_method()>, B<content_type()>, B<http()>, B<https()>
+B<virtual_port ()>, B<server_software ()>, B<remote_user ()>, B<user_name
+()>, B<request_method()>, B<content_type()>, B<http()>, B<https()>
 
 =item USING NPH SCRIPTS
 
@@ -11964,7 +12067,7 @@ Dumper
 
 =back
 
-=head2 Digest:: - Modules that calculate message digests
+=head2 Digest - Modules that calculate message digests
 
 =over 4
 
@@ -11978,9 +12081,11 @@ I<binary>, I<hex>, I<base64>
 
 $ctx = Digest->XXX($arg,...), $ctx = Digest->new(XXX => $arg,...), $ctx =
 Digest::XXX->new($arg,...), $other_ctx = $ctx->clone, $ctx->reset,
-$ctx->add($data,...), $ctx->addfile($io_handle), $ctx->add_bits($data,
-$nbits), $ctx->add_bits($bitstring), $ctx->digest, $ctx->hexdigest,
-$ctx->b64digest
+$ctx->add( $data, ... ), $ctx->addfile( $io_handle ), $ctx->add_bits(
+$data, $nbits ), $ctx->add_bits( $bitstring ), $ctx->digest,
+$ctx->hexdigest, $ctx->b64digest
+
+=item Digest speed
 
 =item SEE ALSO
 
@@ -13948,6 +14053,8 @@ clean_subdirs_target
 
 realclean_subdirs_target
 
+max_exec_len
+
 os_flavor
 
 =over 4
@@ -14067,9 +14174,14 @@ MakeMaker
 
 =over 4
 
+=item Module Installation
+
+How do I keep from installing man pages?, How do I use a module without
+installing it?
+
 =item Philosophy and History
 
-Why not just use <insert other build config tool here>?, What's
+Why not just use <insert other build config tool here>?, What is
 Module::Build and how does it relate to MakeMaker?, pure perl.	no make, no
 shell commands, easier to customize, cleaner internals, less cruft
 
@@ -16496,10 +16608,10 @@ Input, Output
 
 =item is_one()/is_zero()/is_nan()/is_inf()
 
-=item is_positive()/is_negative()
+=item is_pos()/is_neg()
 
-	$x->is_positive();		# true if >= 0
-	$x->is_negative();		# true if <  0
+	$x->is_pos();			# true if >= 0
+	$x->is_neg();			# true if <  0
 
 =item is_odd()/is_even()/is_int()
 
@@ -16577,7 +16689,7 @@ Input, Output
 
 =item copy
 
-=item as_number
+=item as_int
 
 =item bsstr
 
@@ -16691,7 +16803,29 @@ the same terms as Perl itself.
 
 =back
 
-=head2 Math::BigRat - arbitrarily big rationals
+=head2 Math::BigInt::CalcEmu - Emulate low-level math with BigInt code
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+=item LICENSE
+
+This program is free software; you may redistribute it and/or modify it
+under
+the same terms as Perl itself. 
+
+=item AUTHORS
+
+=item SEE ALSO
+
+=back
+
+=head2 Math::BigRat - arbitrarily big rational numbers
 
 =over 4
 
@@ -16749,6 +16883,10 @@ the same terms as Perl itself.
 
 	$x->bfloor();
 
+=item bsqrt()
+
+	$x->bsqrt();
+
 =item config
 
 =back
@@ -16756,7 +16894,8 @@ the same terms as Perl itself.
 =item BUGS
 
 inf handling (partial), NaN handling (partial), rounding (not implemented
-except for bceil/bfloor), $x ** $y where $y is not an integer
+except for bceil/bfloor), $x ** $y where $y is not an integer, bmod(),
+blog(), bmodinv() and bmodpow() (partial)
 
 =item LICENSE
 
@@ -17864,6 +18003,8 @@ $obj->CLEARERR($fh), $obj->ERROR($fh), $obj->EOF($fh)
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=item REQUIRED MODULES
 
 =item SEE ALSO
 
@@ -19423,7 +19564,7 @@ C<Storable::is_retrieving>
 
 =item BUGS
 
-=item LIMITATION
+=item LIMITATIONS
 
 =item COPYRIGHT
 
@@ -19894,6 +20035,14 @@ C<HARNESS_PERL_SWITCHES>, C<HARNESS_VERBOSE>
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=over 4
+
+=item new()
+
+=item next()
+
+=back
 
 =back
 
@@ -20693,6 +20842,14 @@ $which )
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=over 4
+
+=item Ambiguous Local Times (DST)
+
+=item Negative Epoch Values
+
+=back
 
 =item IMPLEMENTATION
 

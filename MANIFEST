@@ -575,10 +575,10 @@ ext/PerlIO/t/open.t		See if PerlIO certain special opens work
 ext/PerlIO/t/PerlIO.t		See if PerlIO works
 ext/PerlIO/t/scalar.t		See if PerlIO::scalar works
 ext/PerlIO/t/via.t		See if PerlIO::via works
+ext/PerlIO/via/hints/aix.pl	Hint for PerlIO::via for named architecture
 ext/PerlIO/via/Makefile.PL	PerlIO layer for layers in perl
 ext/PerlIO/via/via.pm		PerlIO layer for layers in perl
 ext/PerlIO/via/via.xs		PerlIO layer for layers in perl
-ext/PerlIO/via/hints/aix.pl	Hint for PerlIO::via for named architecture
 ext/POSIX/hints/bsdos.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/dynixptx.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/freebsd.pl	Hint for POSIX for named architecture
@@ -1087,8 +1087,8 @@ lib/Devel/SelfStubber.pm	Generate stubs for SelfLoader.pm
 lib/Devel/SelfStubber.t		See if Devel::SelfStubber works
 lib/diagnostics.pm		Print verbose diagnostics
 lib/diagnostics.t		See if diagnostics.pm works
-lib/Digest.pm			Digest extensions
 lib/Digest/base.pm		Digest extensions
+lib/Digest.pm			Digest extensions
 lib/Digest/t/base.t		See if Digest extensions work
 lib/Digest/t/digest.t		See if Digest extensions work
 lib/DirHandle.pm		like FileHandle only for directories
@@ -1328,13 +1328,13 @@ lib/locale.t			See if locale support works
 lib/look.pl			A "look" equivalent
 lib/Math/BigFloat.pm		An arbitrary precision floating-point arithmetic package
 lib/Math/BigFloat/Trace.pm	bignum tracing
-lib/Math/BigInt/Calc.pm		Pure Perl module to support Math::BigInt
 lib/Math/BigInt/CalcEmu.pm	Pure Perl module to support Math::BigInt
+lib/Math/BigInt/Calc.pm		Pure Perl module to support Math::BigInt
 lib/Math/BigInt.pm		An arbitrary precision integer arithmetic package
+lib/Math/BigInt/t/alias.inc	Support for BigInt tests
 lib/Math/BigInt/t/bare_mbf.t	Test MBF under Math::BigInt::BareCalc
 lib/Math/BigInt/t/bare_mbi.t	Test MBI under Math::BigInt::BareCalc
 lib/Math/BigInt/t/bare_mif.t	Rounding tests under BareCalc
-lib/Math/BigInt/t/alias.inc	Support for BigInt tests
 lib/Math/BigInt/t/bigfltpm.inc	Shared tests for bigfltpm.t and sub_mbf.t
 lib/Math/BigInt/t/bigfltpm.t	See if BigFloat.pm works
 lib/Math/BigInt/t/bigintc.t	See if BigInt/Calc.pm works
@@ -1352,9 +1352,9 @@ lib/Math/BigInt/t/fallback.t	Test Math::BigInt
 lib/Math/BigInt/t/inf_nan.t	Special tests for inf and NaN handling
 lib/Math/BigInt/t/isa.t		Test for Math::BigInt inheritance
 lib/Math/BigInt/t/mbf_ali.t	Tests for BigFloat
+lib/Math/BigInt/t/mbi_ali.t	Tests for BigInt
 lib/Math/BigInt/t/mbimbf.inc	Actual BigInt/BigFloat accuracy, precision and fallback, round_mode tests
 lib/Math/BigInt/t/mbimbf.t	BigInt/BigFloat accuracy, precision and fallback, round_mode
-lib/Math/BigInt/t/mbi_ali.t	Tests for BigInt
 lib/Math/BigInt/t/mbi_rand.t	Test Math::BigInt randomly
 lib/Math/BigInt/Trace.pm	bignum tracing
 lib/Math/BigInt/t/req_mbf0.t	test: require Math::BigFloat; ->bzero();
@@ -1599,11 +1599,11 @@ lib/Term/ReadLine.pm		Stub readline library
 lib/Term/ReadLine.t		See if Term::ReadLine works
 lib/Test/Builder.pm		For writing new test libraries
 lib/Test/Harness/Assert.pm	Test::Harness::Assert (internal use only)
+lib/Test/Harness/bin/prove	The prove harness utility
 lib/Test/Harness/Changes	Test::Harness
 lib/Test/Harness/Iterator.pm	Test::Harness::Iterator (internal use only)
 lib/Test/Harness.pm		A test harness
 lib/Test/Harness/Straps.pm	Test::Harness::Straps
-lib/Test/Harness/bin/prove	The prove harness utility
 lib/Test/Harness/t/00compile.t	Test::Harness test
 lib/Test/Harness/t/assert.t	Test::Harness::Assert test
 lib/Test/Harness/t/base.t	Test::Harness test
@@ -1766,8 +1766,8 @@ lib/Unicode/Collate/t/altern.t	Unicode::Collate
 lib/Unicode/Collate/t/contract.t	Unicode::Collate
 lib/Unicode/Collate/t/hangtype.t	Unicode::Collate
 lib/Unicode/Collate/t/hangul.t	Unicode::Collate
-lib/Unicode/Collate/t/illegal.t	Unicode::Collate
 lib/Unicode/Collate/t/illegalp.t	Unicode::Collate
+lib/Unicode/Collate/t/illegal.t	Unicode::Collate
 lib/Unicode/Collate/t/index.t	Unicode::Collate
 lib/Unicode/Collate/t/normal.t	Unicode::Collate
 lib/Unicode/Collate/t/rearrang.t	Unicode::Collate
@@ -2603,8 +2603,8 @@ t/japh/abigail.t		Obscure tests
 t/lib/1_compile.t		See if the various libraries and extensions compile
 t/lib/commonsense.t		See if configuration meets basic needs
 t/lib/compmod.pl		Helper for 1_compile.t
-t/lib/Dev/Null.pm		Module for testing Test::Harness
 t/lib/Devel/switchd.pm		Module for t/run/switchd.t
+t/lib/Dev/Null.pm		Module for testing Test::Harness
 t/lib/dprof/test1_t		Perl code profiler tests
 t/lib/dprof/test1_v		Perl code profiler tests
 t/lib/dprof/test2_t		Perl code profiler tests
@@ -2644,9 +2644,9 @@ t/lib/sample-tests/bailout		Test data for Test::Harness
 t/lib/sample-tests/bignum		Test data for Test::Harness
 t/lib/sample-tests/combined		Test data for Test::Harness
 t/lib/sample-tests/descriptive		Test data for Test::Harness
+t/lib/sample-tests/die			Test data for Test::Harness
 t/lib/sample-tests/die_head_end		Test data for Test::Harness
 t/lib/sample-tests/die_last_minute	Test data for Test::Harness
-t/lib/sample-tests/die			Test data for Test::Harness
 t/lib/sample-tests/duplicates		Test data for Test::Harness
 t/lib/sample-tests/head_end		Test data for Test::Harness
 t/lib/sample-tests/head_fail		Test data for Test::Harness
@@ -2657,17 +2657,17 @@ t/lib/sample-tests/no_output		Test data for Test::Harness
 t/lib/sample-tests/out_of_order		Test data for Test::Harness
 t/lib/sample-tests/segfault		Test data for Test::Harness
 t/lib/sample-tests/shbang_misparse	Test data for Test::Harness
-t/lib/sample-tests/simple_fail		Test data for Test::Harness
 t/lib/sample-tests/simple		Test data for Test::Harness
-t/lib/sample-tests/skipall_nomsg	Test data for Test::Harness
-t/lib/sample-tests/skipall		Test data for Test::Harness
-t/lib/sample-tests/skip_nomsg		Test data for Test::Harness
+t/lib/sample-tests/simple_fail		Test data for Test::Harness
 t/lib/sample-tests/skip			Test data for Test::Harness
+t/lib/sample-tests/skipall		Test data for Test::Harness
+t/lib/sample-tests/skipall_nomsg	Test data for Test::Harness
+t/lib/sample-tests/skip_nomsg		Test data for Test::Harness
 t/lib/sample-tests/switches		Test data for Test::Harness
 t/lib/sample-tests/taint		Test data for Test::Harness
 t/lib/sample-tests/taint_warn		Test data for Test::Harness
-t/lib/sample-tests/todo_inline		Test data for Test::Harness
 t/lib/sample-tests/todo			Test data for Test::Harness
+t/lib/sample-tests/todo_inline		Test data for Test::Harness
 t/lib/sample-tests/too_many		Test data for Test::Harness
 t/lib/sample-tests/vms_nit		Test data for Test::Harness
 t/lib/sample-tests/with_comments	Test data for Test::Harness
@@ -2773,8 +2773,8 @@ t/op/grent.t			See if getgr*() functions work
 t/op/grep.t			See if grep() and map() work
 t/op/groups.t			See if $( works
 t/op/gv.t			See if typeglobs work
-t/op/hash.t			See if the complexity attackers are repelled
 t/op/hashassign.t		See if hash assignments work
+t/op/hash.t			See if the complexity attackers are repelled
 t/op/hashwarn.t			See if warnings for bad hash assignments work
 t/op/inccode.t			See if coderefs work in @INC
 t/op/inc.t			See if inc/dec of integers near 32 bit limit work
@@ -2827,18 +2827,18 @@ t/op/sleep.t			See if sleep works
 t/op/sort.t			See if sort works
 t/op/splice.t			See if splice works
 t/op/split.t			See if split works
-t/op/sprintf.t			See if sprintf works
 t/op/sprintf2.t			See if sprintf works
+t/op/sprintf.t			See if sprintf works
 t/op/srand.t			See if srand works
 t/op/stash.t			See if %:: stashes work
 t/op/stat.t			See if stat works
 t/op/study.t			See if study works
-t/op/sub.t			See if subroutines work
 t/op/sub_lval.t			See if lvalue subroutines work
 t/op/subst_amp.t		See if $&-related substitution works
 t/op/substr.t			See if substr works
 t/op/subst.t			See if substitution works
 t/op/subst_wamp.t		See if substitution works with $& present
+t/op/sub.t			See if subroutines work
 t/op/sysio.t			See if sysread and syswrite work
 t/op/taint.t			See if tainting works
 t/op/tiearray.t			See if tie for arrays works
