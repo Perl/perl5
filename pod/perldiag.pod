@@ -361,6 +361,12 @@ Perl yourself.
 subroutine identifier, in curly braces or to the left of the "=>" symbol.
 Perhaps you need to predeclare a subroutine?
 
+=item Bareword "%s" refers to nonexistent package
+
+(W) You used a qualified bareword of the form C<Foo::>, but
+the compiler saw no other uses of that namespace before that point.
+Perhaps you need to predeclare a package?
+
 =item BEGIN failed--compilation aborted
 
 (F) An untrapped exception was raised while executing a BEGIN subroutine.

@@ -1228,6 +1228,12 @@ that can no longer be found in the table.
 as an lvalue, which is pretty strange.  Perhaps you forgot to
 dereference it first.  See L<perlfunc/substr>.
 
+=item Bareword "%s" refers to nonexistent package
+
+(W) You used a qualified bareword of the form C<Foo::>, but
+the compiler saw no other uses of that namespace before that point.
+Perhaps you need to predeclare a package?
+
 =item Can't redefine active sort subroutine %s
 
 (F) Perl optimizes the internal handling of sort subroutines and keeps
