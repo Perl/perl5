@@ -47,7 +47,7 @@ Anod	|int	|perl_parse	|PerlInterpreter* interp|XSINIT_t xsinit \
 				|int argc|char** argv|char** env
 Anp	|bool	|doing_taint	|int argc|char** argv|char** env
 #if defined(USE_ITHREADS)
-Anod	|PerlInterpreter*|perl_clone|PerlInterpreter* interp, UV flags
+Anod	|PerlInterpreter*|perl_clone|PerlInterpreter* interp|UV flags
 #  if defined(PERL_IMPLICIT_SYS)
 Ano	|PerlInterpreter*|perl_clone_using|PerlInterpreter *interp|UV flags \
 				|struct IPerlMem* m|struct IPerlMem* ms \

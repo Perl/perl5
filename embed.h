@@ -355,7 +355,6 @@
 #define hv_iterval		Perl_hv_iterval
 #define hv_ksplit		Perl_hv_ksplit
 #define hv_magic		Perl_hv_magic
-#define hv_scalar		Perl_hv_scalar
 #define hv_store		Perl_hv_store
 #define hv_store_ent		Perl_hv_store_ent
 #define hv_store_flags		Perl_hv_store_flags
@@ -555,9 +554,6 @@
 #endif
 #ifdef PERL_CORE
 #define magic_regdatum_set	Perl_magic_regdatum_set
-#endif
-#ifdef PERL_CORE
-#define magic_scalarpack	Perl_magic_scalarpack
 #endif
 #ifdef PERL_CORE
 #define magic_set		Perl_magic_set
@@ -2182,6 +2178,10 @@
 #define hv_fetch_common		S_hv_fetch_common
 #endif
 #endif
+#define hv_scalar		Perl_hv_scalar
+#ifdef PERL_CORE
+#define magic_scalarpack	Perl_magic_scalarpack
+#endif
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
 #define ck_concat		Perl_ck_concat
@@ -2880,7 +2880,6 @@
 #define hv_iterval(a,b)		Perl_hv_iterval(aTHX_ a,b)
 #define hv_ksplit(a,b)		Perl_hv_ksplit(aTHX_ a,b)
 #define hv_magic(a,b,c)		Perl_hv_magic(aTHX_ a,b,c)
-#define hv_scalar(a)		Perl_hv_scalar(aTHX_ a)
 #define hv_store(a,b,c,d,e)	Perl_hv_store(aTHX_ a,b,c,d,e)
 #define hv_store_ent(a,b,c,d)	Perl_hv_store_ent(aTHX_ a,b,c,d)
 #define hv_store_flags(a,b,c,d,e,f)	Perl_hv_store_flags(aTHX_ a,b,c,d,e,f)
@@ -3079,9 +3078,6 @@
 #endif
 #ifdef PERL_CORE
 #define magic_regdatum_set(a,b)	Perl_magic_regdatum_set(aTHX_ a,b)
-#endif
-#ifdef PERL_CORE
-#define magic_scalarpack(a,b)	Perl_magic_scalarpack(aTHX_ a,b)
 #endif
 #ifdef PERL_CORE
 #define magic_set(a,b)		Perl_magic_set(aTHX_ a,b)
@@ -4695,6 +4691,10 @@
 #ifdef PERL_CORE
 #define hv_fetch_common(a,b,c,d,e,f,g,h)	S_hv_fetch_common(aTHX_ a,b,c,d,e,f,g,h)
 #endif
+#endif
+#define hv_scalar(a)		Perl_hv_scalar(aTHX_ a)
+#ifdef PERL_CORE
+#define magic_scalarpack(a,b)	Perl_magic_scalarpack(aTHX_ a,b)
 #endif
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
