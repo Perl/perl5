@@ -201,20 +201,20 @@ unlink($tmpfile_link);
 ok(! -e $tmpfile_link,  '   -e on unlinked file');
 
 SKIP: {
-    skip "No character, socket or block special files", 3
+    skip "No character, socket or block special files", 6
       if $Is_MSWin32 || $Is_NetWare || $Is_Dos;
-    skip "/dev isn't available to test against", 3
+    skip "/dev isn't available to test against", 6
       unless -d '/dev' && -r '/dev' && -x '/dev';
 
     my $LS  = $Config{d_readlink} ? "ls -lL" : "ls -l";
     my $CMD = "$LS /dev 2>/dev/null";
     my $DEV = qx($CMD);
 
-    skip "$CMD failed", 3 if $DEV eq '';
+    skip "$CMD failed", 6 if $DEV eq '';
 
     my @DEV = do { my $dev; opendir($dev, "/dev") ? readdir($dev) : () };
 
-    skip "opendir failed: $!", 3 if @DEV == 0;
+    skip "opendir failed: $!", 6 if @DEV == 0;
 
     # /dev/stdout might be either character special or a named pipe,
     # or a symlink, or a socket, depending on which OS and how are
