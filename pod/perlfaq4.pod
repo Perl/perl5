@@ -359,7 +359,7 @@ The localtime function returns the day of the week.  Without an
 argument localtime uses the current time.
 
     $day_of_year = (localtime)[7];
-    
+
 The POSIX module can also format a date as the day of the year or
 week of the year.
 
@@ -369,7 +369,7 @@ week of the year.
 
 To get the day of year for any date, use the Time::Local module to get
 a time in epoch seconds for the argument to localtime.
-	
+
 	use POSIX qw/strftime/;
 	use Time::Local;
 	my $week_of_year = strftime "%W", 
@@ -380,7 +380,7 @@ The Date::Calc module provides two functions for to calculate these.
 	use Date::Calc;
 	my $day_of_year  = Day_of_Year(  1987, 12, 18 );
 	my $week_of_year = Week_of_Year( 1987, 12, 18 );
-	
+
 =head2 How do I find the current century or millennium?
 
 Use the following simple functions:

@@ -664,7 +664,7 @@ simply
 
 (Note that the template C<A*> would only have packed C<$str[0]> in full
 length.)
- 
+
 To pack dates stored as triplets ( day, month, year ) in an array C<@dates>
 into a sequence of byte, byte, short integer we can write
 
