@@ -4,7 +4,7 @@
 
 This document includes the GNU General Public License, one of the two
 alternatives licenses under which Perl can be redistributed and/or
-modified.  See also the Perl Artistic License L<perlartistic>.
+modified.  See also the Perl Artistic License in L<perlartistic>.
 
 =head2 The License Text
 
