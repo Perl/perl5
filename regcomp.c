@@ -737,7 +737,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		}
 	    }
 
-	    if (UTF && OP(scan) == EXACTF) {
+	    if (UTF && OP(scan) == EXACTF && STR_LEN(scan) >= 6) {
 /*
   Two problematic code points in Unicode casefolding of EXACT nodes:
 
