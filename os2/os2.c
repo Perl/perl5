@@ -1,4 +1,4 @@
-/* $RCSfile: os2.c,v $$Revision: 4.0.1.1 $$Date: 91/06/07 11:23:06 $
+/* $RCSfile: os2.c,v $$Revision: 4.0.1.2 $$Date: 92/06/08 14:32:30 $
  *
  *    (C) Copyright 1989, 1990 Diomidis Spinellis.
  *
@@ -6,6 +6,9 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	os2.c,v $
+ * Revision 4.0.1.2  92/06/08  14:32:30  lwall
+ * patch20: new OS/2 support
+ * 
  * Revision 4.0.1.1  91/06/07  11:23:06  lwall
  * patch4: new copyright notice
  * 
@@ -54,14 +57,15 @@ int syscall()
 { return -1; }
 
 
-/* extendd chdir() */
+/* extended chdir() */
 
 int chdir(char *path)
 {
   if ( path[0] != 0 && path[1] == ':' )
-    DosSelectDisk(toupper(path[0]) - '@');
+    if ( DosSelectDisk(toupper(path[0]) - '@') )
+      return -1;
 
-  DosChDir(path, 0L);
+  return DosChDir(path, 0L);
 }
 
 
@@ -102,6 +106,17 @@ int getppid(void)
 }
 
 
+/* wait for specific pid */
+int wait4pid(int pid, int *status, int flags)
+{
+  RESULTCODES res;
+  int endpid, rc;
+  if ( DosCwait(DCWA_PROCESS, flags ? DCWW_NOWAIT : DCWW_WAIT,
+                &res, &endpid, pid) )
+    return -1;
+  *status = res.codeResult;
+  return endpid;
+}
 /* kill */
 
 int kill(int pid, int sig)
@@ -251,7 +266,7 @@ char *cmd;
 usage(char *myname)
 {
 #ifdef MSDOS
-  printf("\nUsage: %s [-acdnpsSvw] [-0[octal]] [-Dnumber] [-i[extension]] [-Idirectory]"
+  printf("\nUsage: %s [-acdnpPsSvw] [-0[octal]] [-Dnumber] [-i[extension]] [-Idirectory]"
 #else
   printf("\nUsage: %s [-acdnpPsSuUvw] [-Dnumber] [-i[extension]] [-Idirectory]"
 #endif
@@ -262,9 +277,7 @@ usage(char *myname)
          "\n  -d  run scripts under debugger"
          "\n  -n  assume 'while (<>) { ...script... }' loop arround your script"
          "\n  -p  assume loop like -n but print line also like sed"
-#ifndef MSDOS
          "\n  -P  run script through C preprocessor befor compilation"
-#endif
          "\n  -s  enable some switch parsing for switches after script name"
          "\n  -S  look for the script using PATH environment variable");
 #ifndef MSDOS

@@ -1,6 +1,11 @@
-/* $RCSfile: malloc.c,v $$Revision: 4.0.1.3 $$Date: 91/11/05 17:57:40 $
+/* $RCSfile: malloc.c,v $$Revision: 4.0.1.4 $$Date: 92/06/08 14:28:38 $
  *
  * $Log:	malloc.c,v $
+ * Revision 4.0.1.4  92/06/08  14:28:38  lwall
+ * patch20: removed implicit int declarations on functions
+ * patch20: hash tables now split only if the memory is available to do so
+ * patch20: realloc(0, size) now does malloc in case library routines call it
+ * 
  * Revision 4.0.1.3  91/11/05  17:57:40  lwall
  * patch11: safe malloc code now integrated into Perl's malloc when possible
  * 
@@ -102,7 +107,7 @@ static	u_int nmalloc[NBUCKETS];
 
 #ifdef debug
 #define	ASSERT(p)   if (!(p)) botch("p"); else
-static
+static void
 botch(s)
 	char *s;
 {
@@ -120,20 +125,20 @@ static int an = 0;
 
 MALLOCPTRTYPE *
 malloc(nbytes)
-	register unsigned nbytes;
+	register MEM_SIZE nbytes;
 {
   	register union overhead *p;
   	register int bucket = 0;
-  	register unsigned shiftr;
+  	register MEM_SIZE shiftr;
 
 #ifdef safemalloc
 #ifdef DEBUGGING
-	int size = nbytes;
+	MEM_SIZE size = nbytes;
 #endif
 
 #ifdef MSDOS
 	if (nbytes > 0xffff) {
-		fprintf(stderr, "Allocation too large: %lx\n", nbytes);
+		fprintf(stderr, "Allocation too large: %lx\n", (long)nbytes);
 		exit(1);
 	}
 #endif /* MSDOS */
@@ -163,8 +168,10 @@ malloc(nbytes)
   		morecore(bucket);
   	if ((p = (union overhead *)nextf[bucket]) == NULL) {
 #ifdef safemalloc
-		fputs("Out of memory!\n", stderr);
-		exit(1);
+		if (!nomemok) {
+		    fputs("Out of memory!\n", stderr);
+		    exit(1);
+		}
 #else
   		return (NULL);
 #endif
@@ -172,12 +179,12 @@ malloc(nbytes)
 
 #ifdef safemalloc
 #ifdef DEBUGGING
-#  ifndef I286
+#  if !(defined(I286) || defined(atarist))
     if (debug & 128)
-        fprintf(stderr,"0x%x: (%05d) malloc %d bytes\n",p+1,an++,size);
+        fprintf(stderr,"0x%x: (%05d) malloc %ld bytes\n",p+1,an++,(long)size);
 #  else
     if (debug & 128)
-        fprintf(stderr,"0x%lx: (%05d) malloc %d bytes\n",p+1,an++,size);
+        fprintf(stderr,"0x%lx: (%05d) malloc %ld bytes\n",p+1,an++,(long)size);
 #  endif
 #endif
 #endif /* safemalloc */
@@ -185,7 +192,7 @@ malloc(nbytes)
 	/* remove from linked list */
 #ifdef RCHECK
 	if (*((int*)p) & (sizeof(union overhead) - 1))
-#ifndef I286
+#if !(defined(I286) || defined(atarist))
 	    fprintf(stderr,"Corrupt malloc ptr 0x%x at 0x%x\n",*((int*)p),p);
 #else
 	    fprintf(stderr,"Corrupt malloc ptr 0x%lx at 0x%lx\n",*((int*)p),p);
@@ -220,7 +227,7 @@ morecore(bucket)
   	register union overhead *op;
   	register int rnu;       /* 2^rnu bytes will be requested */
   	register int nblks;     /* become nblks blocks of the desired size */
-	register int siz;
+	register MEM_SIZE siz;
 
   	if (nextf[bucket])
   		return;
@@ -229,6 +236,7 @@ morecore(bucket)
 	 * on a page boundary.  Should
 	 * make getpageize call?
 	 */
+#ifndef atarist /* on the atari we dont have to worry about this */
   	op = (union overhead *)sbrk(0);
 #ifndef I286
   	if ((int)op & 0x3ff)
@@ -236,19 +244,20 @@ morecore(bucket)
 #else
 	/* The sbrk(0) call on the I286 always returns the next segment */
 #endif
+#endif /* atarist */
 
-#ifndef I286
+#if !(defined(I286) || defined(atarist))
 	/* take 2k unless the block is bigger than that */
   	rnu = (bucket <= 8) ? 11 : bucket + 3;
 #else
 	/* take 16k unless the block is bigger than that 
-	   (80286s like large segments!)		*/
+	   (80286s like large segments!), probably good on the atari too */
   	rnu = (bucket <= 11) ? 14 : bucket + 3;
 #endif
   	nblks = 1 << (rnu - (bucket + 3));  /* how many blocks to get */
   	if (rnu < bucket)
 		rnu = bucket;
-	op = (union overhead *)sbrk(1 << rnu);
+	op = (union overhead *)sbrk(1L << rnu);
 	/* no more room! */
   	if ((int)op == -1)
   		return;
@@ -258,7 +267,7 @@ morecore(bucket)
 	 */
 #ifndef I286
   	if ((int)op & 7) {
-  		op = (union overhead *)(((int)op + 8) &~ 7);
+  		op = (union overhead *)(((MEM_SIZE)op + 8) &~ 7);
   		nblks--;
   	}
 #else
@@ -280,13 +289,13 @@ void
 free(mp)
 	MALLOCPTRTYPE *mp;
 {   
-  	register int size;
+  	register MEM_SIZE size;
 	register union overhead *op;
 	char *cp = (char*)mp;
 
 #ifdef safemalloc
 #ifdef DEBUGGING
-#  ifndef I286
+#  if !(defined(I286) || defined(atarist))
 	if (debug & 128)
 		fprintf(stderr,"0x%x: (%05d) free\n",cp,an++);
 #  else
@@ -339,9 +348,9 @@ int reall_srchlen = 4;	/* 4 should be plenty, -1 =>'s whole list */
 MALLOCPTRTYPE *
 realloc(mp, nbytes)
 	MALLOCPTRTYPE *mp; 
-	unsigned nbytes;
+	MEM_SIZE nbytes;
 {   
-  	register u_int onb;
+  	register MEM_SIZE onb;
 	union overhead *op;
   	char *res;
 	register int i;
@@ -350,7 +359,7 @@ realloc(mp, nbytes)
 
 #ifdef safemalloc
 #ifdef DEBUGGING
-	int size = nbytes;
+	MEM_SIZE size = nbytes;
 #endif
 
 #ifdef MSDOS
@@ -360,15 +369,13 @@ realloc(mp, nbytes)
 	}
 #endif /* MSDOS */
 	if (!cp)
-		fatal("Null realloc");
+		return malloc(nbytes);
 #ifdef DEBUGGING
 	if ((long)nbytes < 0)
 		fatal("panic: realloc");
 #endif
 #endif /* safemalloc */
 
-  	if (cp == NULL)
-  		return (malloc(nbytes));
 	op = (union overhead *)((caddr_t)cp - sizeof (union overhead));
 	if (op->ov_magic == MAGIC) {
 		was_alloced++;
@@ -389,7 +396,7 @@ realloc(mp, nbytes)
 		    (i = findbucket(op, reall_srchlen)) < 0)
 			i = 0;
 	}
-	onb = (1 << (i + 3)) - sizeof (*op) - RSLOP;
+	onb = (1L << (i + 3)) - sizeof (*op) - RSLOP;
 	/* avoid the copy if same size block */
 	if (was_alloced &&
 	    nbytes <= onb && nbytes > (onb >> 1) - sizeof(*op) - RSLOP) {
@@ -417,22 +424,22 @@ realloc(mp, nbytes)
 		if ((res = (char*)malloc(nbytes)) == NULL)
 			return (NULL);
 		if (cp != res)			/* common optimization */
-			bcopy(cp, res, (int)(nbytes < onb ? nbytes : onb));
+			Copy(cp, res, (MEM_SIZE)(nbytes<onb?nbytes:onb), char);
 		if (was_alloced)
 			free(cp);
 	}
 
 #ifdef safemalloc
 #ifdef DEBUGGING
-#  ifndef I286
+#  if !(defined(I286) || defined(atarist))
 	if (debug & 128) {
 	    fprintf(stderr,"0x%x: (%05d) rfree\n",res,an++);
-	    fprintf(stderr,"0x%x: (%05d) realloc %d bytes\n",res,an++,size);
+	    fprintf(stderr,"0x%x: (%05d) realloc %ld bytes\n",res,an++,(long)size);
 	}
 #  else
 	if (debug & 128) {
 	    fprintf(stderr,"0x%lx: (%05d) rfree\n",res,an++);
-	    fprintf(stderr,"0x%lx: (%05d) realloc %d bytes\n",res,an++,size);
+	    fprintf(stderr,"0x%lx: (%05d) realloc %ld bytes\n",res,an++,(long)size);
 	}
 #  endif
 #endif
@@ -445,7 +452,7 @@ realloc(mp, nbytes)
  * header starts at ``freep''.  If srchlen is -1 search the whole list.
  * Return bucket number, or -1 if not found.
  */
-static
+static int
 findbucket(freep, srchlen)
 	union overhead *freep;
 	int srchlen;
@@ -472,6 +479,7 @@ findbucket(freep, srchlen)
  * for each size category, the second showing the number of mallocs -
  * frees for each size category.
  */
+void
 mstats(s)
 	char *s;
 {

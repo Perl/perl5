@@ -1,4 +1,4 @@
-/* $RCSfile: perl.h,v $$Revision: 4.0.1.5 $$Date: 91/11/11 16:41:07 $
+/* $RCSfile: perl.h,v $$Revision: 4.0.1.6 $$Date: 92/06/08 14:55:10 $
  *
  *    Copyright (c) 1991, Larry Wall
  *
@@ -6,6 +6,12 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	perl.h,v $
+ * Revision 4.0.1.6  92/06/08  14:55:10  lwall
+ * patch20: added Atari ST portability
+ * patch20: bcopy() and memcpy() now tested for overlap safety
+ * patch20: Perl now distinguishes overlapped copies from non-overlapped
+ * patch20: removed implicit int declarations on functions
+ * 
  * Revision 4.0.1.5  91/11/11  16:41:07  lwall
  * patch19: uts wrongly defines S_ISDIR() et al
  * patch19: too many preprocessors can't expand a macro right in #if
@@ -53,7 +59,12 @@
 char Error[1];
 #endif
 
-#ifdef MSDOS
+/* define this once if either system, instead of cluttering up the src */
+#if defined(MSDOS) || defined(atarist)
+#define DOSISH 1
+#endif
+
+#ifdef DOSISH
 /* This stuff now in the MS-DOS config.h file. */
 #else /* !MSDOS */
 
@@ -130,33 +141,77 @@ char Error[1];
 /* Use all the "standard" definitions */
 #include <stdlib.h>
 #include <string.h>
+#define MEM_SIZE size_t
+#else
+typedef unsigned int MEM_SIZE;
 #endif /* STANDARD_C */
 
-#if defined(HAS_MEMCMP) && defined(mips) && BYTEORDER == 0x1234
+#if defined(HAS_MEMCMP) && defined(mips) && defined(ultrix)
 #undef HAS_MEMCMP
 #endif
 
 #ifdef HAS_MEMCPY
-
 #  ifndef STANDARD_C
 #    ifndef memcpy
-extern char * memcpy(), *memset();
-extern int memcmp();
-#    endif /* ndef memcpy */
-#  endif /* ndef STANDARD_C */
-
-#   ifndef bcopy
-#	define bcopy(s1,s2,l) memcpy(s2,s1,l)
-#   endif
-#   ifndef bzero
-#	define bzero(s,l) memset(s,0,l)
+	extern char * memcpy();
+#    endif
+#  endif
+#else
+#   ifndef memcpy
+#	ifdef HAS_BCOPY
+#	    define memcpy(d,s,l) bcopy(s,d,l)
+#	else
+#	    define memcpy(d,s,l) my_bcopy(s,d,l)
+#	endif
 #   endif
 #endif /* HAS_MEMCPY */
 
-#ifndef HAS_BCMP		/* prefer bcmp slightly 'cuz it doesn't order */
+#ifdef HAS_MEMSET
+#  ifndef STANDARD_C
+#    ifndef memset
+	extern char *memset();
+#    endif
+#  endif
+#  define memzero(d,l) memset(d,0,l)
+#else
+#   ifndef memzero
+#	ifdef HAS_BZERO
+#	    define memzero(d,l) bzero(d,l)
+#	else
+#	    define memzero(d,l) my_bzero(d,l)
+#	endif
+#   endif
+#endif /* HAS_MEMSET */
+
+#ifdef HAS_MEMCMP
+#  ifndef STANDARD_C
+#    ifndef memcmp
+	extern int memcmp();
+#    endif
+#  endif
+#else
+#   ifndef memcmp
+#	define memcmp(s1,s2,l) my_memcmp(s1,s2,l)
+#   endif
+#endif /* HAS_MEMCMP */
+
+/* we prefer bcmp slightly for comparisons that don't care about ordering */
+#ifndef HAS_BCMP
 #   ifndef bcmp
 #	define bcmp(s1,s2,l) memcmp(s1,s2,l)
 #   endif
+#endif /* HAS_BCMP */
+
+#ifndef HAS_MEMMOVE
+#if defined(HAS_BCOPY) && defined(SAFE_BCOPY)
+#define memmove(d,s,l) bcopy(s,d,l)
+#else
+#if defined(HAS_MEMCPY) && defined(SAFE_MEMCPY)
+#define memmove(d,s,l) memcpy(d,s,l)
+#else
+#define memmove(d,s,l) my_bcopy(s,d,l)
+#endif
+#endif
 #endif
 
 #ifndef _TYPES_		/* If types.h defines this it's easy. */
@@ -170,7 +225,7 @@ extern int memcmp();
 #endif
 
 #include <sys/stat.h>
-#ifdef uts
+#if defined(uts) || defined(UTekV)
 #undef S_ISDIR
 #undef S_ISCHR
 #undef S_ISBLK
@@ -182,7 +237,9 @@ extern int memcmp();
 #define S_ISBLK(P) (((P)&S_IFMT)==S_IFBLK)
 #define S_ISREG(P) (((P)&S_IFMT)==S_IFREG)
 #define S_ISFIFO(P) (((P)&S_IFMT)==S_IFIFO)
+#ifdef S_IFLNK
 #define S_ISLNK(P) (((P)&S_IFMT)==S_IFLNK)
+#endif
 #endif
 
 #ifdef I_TIME
@@ -230,7 +287,7 @@ extern char *sys_errlist[];
 #endif
 #endif
 
-#if defined(mc300) || defined(mc500) || defined(mc700)	/* MASSCOMP */
+#if defined(mc300) || defined(mc500) || defined(mc700) || defined(mc6000)
 #ifdef HAS_SOCKETPAIR
 #undef HAS_SOCKETPAIR
 #endif
@@ -437,7 +494,7 @@ EXT int dbmlen;
 #undef f_next
 #endif
 
-#if defined(cray) || defined(gould)
+#if defined(cray) || defined(gould) || defined(i860)
 #   define SLOPPYDIVIDE
 #endif
 
@@ -457,7 +514,7 @@ EXT int dbmlen;
 #   endif
 #endif
 
-typedef unsigned int STRLEN;
+typedef MEM_SIZE STRLEN;
 
 typedef struct arg ARG;
 typedef struct cmd CMD;
@@ -553,7 +610,7 @@ EXT STR *Str;
 
 #define GROWSTR(pp,lp,len) if (*(lp) < (len)) growstr(pp,lp,len)
 
-#ifndef MSDOS
+#ifndef DOSISH
 #define STR_GROW(str,len) if ((str)->str_len < (len)) str_grow(str,len)
 #define Str_Grow str_grow
 #else
@@ -561,7 +618,7 @@ EXT STR *Str;
 #define STR_GROW(str,len) if ((str)->str_len < (unsigned long)len) \
 		str_grow(str,(unsigned long)len)
 #define Str_Grow(str,len) str_grow(str,(unsigned long)(len))
-#endif /* MSDOS */
+#endif /* DOSISH */
 
 #ifndef BYTEORDER
 #define BYTEORDER 0x1234
@@ -670,6 +727,7 @@ ARG *cval_to_arg();
 STR *str_new();
 STR *stab_str();
 
+int apply();
 int do_each();
 int do_subr();
 int do_match();
@@ -701,12 +759,24 @@ bool do_aexec();
 int do_subst();
 int cando();
 int ingroup();
+int whichsig();
+int userinit();
+#ifdef CRYPTSCRIPT
+void cryptswitch();
+#endif
 
 void str_replace();
 void str_inc();
 void str_dec();
 void str_free();
+void cmd_free();
+void arg_free();
+void spat_free();
+void regfree();
 void stab_clear();
+void do_chop();
+void do_vop();
+void do_write();
 void do_join();
 void do_sprintf();
 void do_accept();
@@ -724,6 +794,24 @@ void savesptr();
 void savehptr();
 void restorelist();
 void repeatcpy();
+void make_form();
+void dehoist();
+void format();
+void my_unexec();
+void fatal();
+void warn();
+#ifdef DEBUGGING
+void dump_all();
+void dump_cmd();
+void dump_arg();
+void dump_flags();
+void dump_stab();
+void dump_spat();
+#endif
+#ifdef MSTATS
+void mstats();
+#endif
+
 HASH *savehash();
 ARRAY *saveary();
 
@@ -773,6 +861,7 @@ EXT STR *lastretstr INIT(Nullstr);
 EXT STR *DBsingle INIT(Nullstr);
 EXT STR *DBtrace INIT(Nullstr);
 EXT STR *DBsignal INIT(Nullstr);
+EXT STR *formfeed INIT(Nullstr);
 
 EXT int lastspbase;
 EXT int lastsize;
@@ -791,6 +880,7 @@ EXT STR *linestr INIT(Nullstr);
 EXT char *rs INIT("\n");
 EXT int rschar INIT('\n');	/* final char of rs, or 0777 if none */
 EXT int rslen INIT(1);
+EXT bool rspara INIT(FALSE);
 EXT char *ofs INIT(Nullch);
 EXT int ofslen INIT(0);
 EXT char *ors INIT(Nullch);
@@ -820,15 +910,18 @@ EXT bool localizing INIT(FALSE);	/* are we processing a local() list? */
 EXT int maxsysfd INIT(MAXSYSFD);	/* top fd to pass to subprocesses */
 
 #ifdef CSH
-char *cshname INIT(CSH);
-int cshlen INIT(0);
+EXT char *cshname INIT(CSH);
+EXT int cshlen INIT(0);
 #endif /* CSH */
 
 #ifdef TAINT
 EXT bool tainted INIT(FALSE);		/* using variables controlled by $< */
+EXT bool taintanyway INIT(FALSE);	/* force taint checks when !set?id */
 #endif
 
-#ifndef MSDOS
+EXT bool nomemok INIT(FALSE);		/* let malloc context handle nomem */
+
+#ifndef DOSISH
 #define TMPPATH "/tmp/perl-eXXXXXX"
 #else
 #define TMPPATH "plXXXXXX"
@@ -858,8 +951,8 @@ void scanconst();
 
 EXT struct stat statbuf;
 EXT struct stat statcache;
-STAB *statstab INIT(Nullstab);
-STR *statname;
+EXT STAB *statstab INIT(Nullstab);
+EXT STR *statname;
 #ifndef MSDOS
 EXT struct tms timesbuf;
 #endif
@@ -928,7 +1021,7 @@ EXT char *dc;
 EXT short *ds;
 
 /* Fix these up for __STDC__ */
-EXT long basetime INIT(0);
+EXT time_t basetime INIT(0);
 char *mktemp();
 #ifndef STANDARD_C
 /* All of these are in stdlib.h or time.h for ANSI C */
@@ -958,3 +1051,7 @@ int unlnk();
 #define HAS_SETREGID
 #endif
 #endif
+
+#define SCAN_DEF 0
+#define SCAN_TR 1
+#define SCAN_REPL 2

@@ -1,11 +1,11 @@
 # newgetopt.pl -- new options parsing
 
-# SCCS Status     : @(#)@ newgetopt.pl	1.8
+# SCCS Status     : @(#)@ newgetopt.pl	1.13
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Thu Sep 26 20:10:41 1991
-# Update Count    : 35
+# Last Modified On: Tue Jun  2 11:24:03 1992
+# Update Count    : 75
 # Status          : Okay
 
 # This package implements a new getopt function. This function adheres
@@ -18,6 +18,8 @@
 #    for mandatory arguments or ":" for optional arguments) and an
 #    argument type specifier: "n" or "i" for integer numbers, "f" for
 #    real (fix) numbers or "s" for strings.
+#    If an "@" sign is appended, the option is treated as an array.
+#    Value(s) are not set, but pushed.
 #
 #  - if the first option of the list consists of non-alphanumeric
 #    characters only, it is interpreted as a generic option starter.
@@ -25,7 +27,7 @@
 #    will be considered an option.
 #    Likewise, a double occurrence (e.g. "--") signals end of
 #    the options list.
-#    The default value for the starter is "-".
+#    The default value for the starter is "-", "--" or "+".
 #
 # Upon return, the option variables, prefixed with "opt_", are defined
 # and set to the respective option arguments, if any.
@@ -49,90 +51,135 @@
 #    -foo -bar		-> $opt_foo = '-bar'
 #    -foo --		-> $opt_foo = '--'
 #
-
 # HISTORY 
+# 2-Jun-1992		Johan Vromans	
+#    Do not use //o to allow multiple NGetOpt calls with different delimeters.
+#    Prevent typeless option from using previous $array state.
+#    Prevent empty option from being eaten as a (negative) number.
+
+# 25-May-1992		Johan Vromans	
+#    Add array options. "foo=s@" will return an array @opt_foo that
+#    contains all values that were supplied. E.g. "-foo one -foo -two" will
+#    return @opt_foo = ("one", "-two");
+#    Correct bug in handling options that allow for a argument when followed
+#    by another option.
+
+# 4-May-1992		Johan Vromans	
+#    Add $ignorecase to match options in either case.
+#    Allow '' option.
+
+# 19-Mar-1992		Johan Vromans	
+#    Allow require from packages.
+#    NGetOpt is now defined in the package that requires it.
+#    @ARGV and $opt_... are taken from the package that calls it.
+#    Use standard (?) option prefixes: -, -- and +.
+
 # 20-Sep-1990		Johan Vromans	
 #    Set options w/o argument to 1.
 #    Correct the dreadful semicolon/require bug.
 
 
-package newgetopt;
+{   package newgetopt;
+    $debug = 0;			# for debugging
+    $ignorecase = 1;		# ignore case when matching options
+}
 
-$debug = 0;			# for debugging
+sub NGetOpt {
 
-sub main'NGetOpt {
-    local (@optionlist) = @_;
+    @newgetopt'optionlist = @_;
+    *newgetopt'ARGV = *ARGV;
+
+    package newgetopt;
+
     local ($[) = 0;
-    local ($genprefix) = "-";
+    local ($genprefix) = "(--|-|\\+)";
+    local ($argend) = "--";
     local ($error) = 0;
-    local ($opt, $optx, $arg, $type, $mand, @hits);
+    local ($opt, $optx, $arg, $type, $mand, %opctl);
+    local ($pkg) = (caller)[0];
+
+    print STDERR "NGetOpt 1.13 -- called from $pkg\n" if $debug;
 
     # See if the first element of the optionlist contains option
     # starter characters.
-    $genprefix = shift (@optionlist) if $optionlist[0] =~ /^\W+$/;
-
-    # Turn into regexp.
-    $genprefix =~ s/(\W)/\\\1/g;
-    $genprefix = "[" . $genprefix . "]";
+    if ( $optionlist[0] =~ /^\W+$/ ) {
+	$genprefix = shift (@optionlist);
+	# Turn into regexp.
+	$genprefix =~ s/(\W)/\\\1/g;
+	$genprefix = "[" . $genprefix . "]";
+	undef $argend;
+    }
 
     # Verify correctness of optionlist.
-    @hits = grep ($_ !~ /^\w+([=:][infse])?$/, @optionlist);
-    if ( $#hits >= 0 ) {
-	foreach $opt ( @hits ) {
+    %opctl = ();
+    foreach $opt ( @optionlist ) {
+	$opt =~ tr/A-Z/a-z/ if $ignorecase;
+	if ( $opt !~ /^(\w*)([=:][infse]@?)?$/ ) {
 	    print STDERR ("Error in option spec: \"", $opt, "\"\n");
 	    $error++;
+	    next;
 	}
-	return 0;
+	$opctl{$1} = defined $2 ? $2 : "";
+    }
+
+    return 0 if $error;
+
+    if ( $debug ) {
+	local ($arrow, $k, $v);
+	$arrow = "=> ";
+	while ( ($k,$v) = each(%opctl) ) {
+	    print STDERR ($arrow, "\$opctl{\"$k\"} = \"$v\"\n");
+	    $arrow = "   ";
+	}
     }
 
     # Process argument list
 
-    while ( $#main'ARGV >= 0 ) {		#'){
+    while ( $#ARGV >= 0 ) {
 
 	# >>> See also the continue block <<<
 
 	# Get next argument
-	$opt = shift (@main'ARGV);		#');
+	$opt = shift (@ARGV);
 	print STDERR ("=> option \"", $opt, "\"\n") if $debug;
 	$arg = undef;
 
 	# Check for exhausted list.
-	if ( $opt =~ /^$genprefix/o ) {
+	if ( $opt =~ /^$genprefix/ ) {
 	    # Double occurrence is terminator
-	    return ($error == 0) if $opt eq "$+$+";
+	    return ($error == 0) 
+		if ($opt eq "$+$+") || ((defined $argend) && $opt eq $argend);
 	    $opt = $';		# option name (w/o prefix)
 	}
 	else {
 	    # Apparently not an option - push back and exit.
-	    unshift (@main'ARGV, $opt);		#');
+	    unshift (@ARGV, $opt);
 	    return ($error == 0);
 	}
 
-	# Grep in option list. Hide regexp chars from option.
-	($optx = $opt) =~ s/(\W)/\\\1/g;
-	@hits = grep (/^$optx([=:].+)?$/, @optionlist);
-	if ( $#hits != 0 ) {
+	# Look it up.
+	$opt =~ tr/A-Z/a-z/ if $ignorecase;
+	unless  ( defined ( $type = $opctl{$opt} ) ) {
 	    print STDERR ("Unknown option: ", $opt, "\n");
 	    $error++;
 	    next;
 	}
 
 	# Determine argument status.
-	undef $type;
-	$type = $+ if $hits[0] =~ /[=:].+$/;
-	print STDERR ("=> found \"$hits[0]\" for ", $opt, "\n") if $debug;
+	print STDERR ("=> found \"$type\" for ", $opt, "\n") if $debug;
 
 	# If it is an option w/o argument, we're almost finished with it.
-	if ( ! defined $type ) {
+	if ( $type eq "" ) {
 	    $arg = 1;		# supply explicit value
+	    $array = 0;
 	    next;
 	}
 
 	# Get mandatory status and type info.
-	($mand, $type) = $type =~ /^(.)(.)$/;
+	($mand, $type, $array) = $type =~ /^(.)(.)(@?)$/;
 
 	# Check if the argument list is exhausted.
-	if ( $#main'ARGV < 0 ) {		#'){
+	if ( $#ARGV < 0 ) {
 
 	    # Complain if this option needs an argument.
 	    if ( $mand eq "=" ) {
@@ -146,30 +193,35 @@ sub main'NGetOpt {
 	}
 
 	# Get (possibly optional) argument.
-	$arg = shift (@main'ARGV);		#');
+	$arg = shift (@ARGV);
 
 	# Check if it is a valid argument. A mandatory string takes
- 	# anything. 
-	if ( "$mand$type" ne "=s" && $arg =~ /^$genprefix/o ) {
+	# anything. 
+	if ( "$mand$type" ne "=s" && $arg =~ /^$genprefix/ ) {
 
 	    # Check for option list terminator.
-	    if ( $arg eq "$+$+" ) {
+	    if ( $arg eq "$+$+" || 
+		 ((defined $argend) && $arg eq $argend)) {
+		# Push back so the outer loop will terminate.
+		unshift (@ARGV, $arg);
 		# Complain if an argument is required.
 		if ($mand eq "=") {
 		    print STDERR ("Option ", $opt, " requires an argument\n");
 		    $error++;
+		    undef $arg;	# don't assign it
 		}
-		# Push back so the outer loop will terminate.
-		unshift (@main'ARGV, $arg);	#');
-		$arg = "";	# don't assign it
+		else {
+		    # Supply empty value.
+		    $arg = $type eq "s" ? "" : 0;
+		}
 		next;
 	    }
 
 	    # Maybe the optional argument is the next option?
-	    if ( $mand eq ":" && $' =~ /[a-zA-Z_]/ ) {
+	    if ( $mand eq ":" && ($' eq "" || $' =~ /[a-zA-Z_]/) ) {
 		# Yep. Push back.
-		unshift (@main'ARGV, $arg);	#');
-		$arg = "";	# don't assign it
+		unshift (@ARGV, $arg);
+		$arg = $type eq "s" ? "" : 0;
 		next;
 	    }
 	}
@@ -177,8 +229,9 @@ sub main'NGetOpt {
 	if ( $type eq "n" || $type eq "i" ) { # numeric/integer
 	    if ( $arg !~ /^-?[0-9]+$/ ) {
 		print STDERR ("Value \"", $arg, "\" invalid for option ",
-			       $opt, " (numeric required)\n");
+			      $opt, " (number expected)\n");
 		$error++;
+		undef $arg;	# don't assign it
 	    }
 	    next;
 	}
@@ -186,8 +239,9 @@ sub main'NGetOpt {
 	if ( $type eq "f" ) { # fixed real number, int is also ok
 	    if ( $arg !~ /^-?[0-9.]+$/ ) {
 		print STDERR ("Value \"", $arg, "\" invalid for option ",
-			       $opt, " (real number required)\n");
+			      $opt, " (real number expected)\n");
 		$error++;
+		undef $arg;	# don't assign it
 	    }
 	    next;
 	}
@@ -198,8 +252,18 @@ sub main'NGetOpt {
 
     }
     continue {
-	print STDERR ("=> \$main'opt_$opt = $arg\n") if $debug;
-	eval ("\$main'opt_$opt = \$arg");
+	if ( defined $arg ) {
+	    if ( $array ) {
+		print STDERR ('=> push (@', $pkg, '\'opt_', $opt, ", \"$arg\")\n")
+		    if $debug;
+	        eval ('push(@' . $pkg . '\'opt_' . $opt . ", \$arg);");
+	    }
+	    else {
+		print STDERR ('=> $', $pkg, '\'opt_', $opt, " = \"$arg\"\n")
+		    if $debug;
+	        eval ('$' . $pkg . '\'opt_' . $opt . " = \$arg;");
+	    }
+	}
     }
 
     return ($error == 0);
