@@ -659,6 +659,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 			 (!done && (lang || PerlEnv_getenv("LC_CTYPE")))
 				    ? "" : Nullch)))
 	    setlocale_failure = TRUE;
+	else
+	    curctype = savepv(curctype);
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
 	if (! (curcoll =
@@ -666,6 +668,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 			 (!done && (lang || PerlEnv_getenv("LC_COLLATE")))
 				   ? "" : Nullch)))
 	    setlocale_failure = TRUE;
+	else
+	    curcoll = savepv(curcoll);
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
 	if (! (curnum =
@@ -673,6 +677,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 			 (!done && (lang || PerlEnv_getenv("LC_NUMERIC")))
 				  ? "" : Nullch)))
 	    setlocale_failure = TRUE;
+	else
+	    curnum = savepv(curnum);
 #endif /* USE_LOCALE_NUMERIC */
     }
 
@@ -689,14 +695,20 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #ifdef USE_LOCALE_CTYPE
 	if (! (curctype = setlocale(LC_CTYPE, "")))
 	    setlocale_failure = TRUE;
+	else
+	    curctype = savepv(curctype);
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
 	if (! (curcoll = setlocale(LC_COLLATE, "")))
 	    setlocale_failure = TRUE;
+	else
+	    curcoll = savepv(curcoll);
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
 	if (! (curnum = setlocale(LC_NUMERIC, "")))
 	    setlocale_failure = TRUE;
+	else
+	    curnum = savepv(curnum);
 #endif /* USE_LOCALE_NUMERIC */
     }
 
@@ -808,15 +820,16 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #endif /* ! LC_ALL */
 
 #ifdef USE_LOCALE_CTYPE
-	curctype = setlocale(LC_CTYPE, Nullch);
+	curctype = savepv(setlocale(LC_CTYPE, Nullch));
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
-	curcoll = setlocale(LC_COLLATE, Nullch);
+	curcoll = savepv(setlocale(LC_COLLATE, Nullch));
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
-	curnum = setlocale(LC_NUMERIC, Nullch);
+	curnum = savepv(setlocale(LC_NUMERIC, Nullch));
 #endif /* USE_LOCALE_NUMERIC */
     }
+    else {
 
 #ifdef USE_LOCALE_CTYPE
     new_ctype(curctype);
@@ -829,9 +842,22 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #ifdef USE_LOCALE_NUMERIC
     new_numeric(curnum);
 #endif /* USE_LOCALE_NUMERIC */
+    }
 
 #endif /* USE_LOCALE */
 
+#ifdef USE_LOCALE_CTYPE
+    if (curctype != NULL)
+	Safefree(curctype);
+#endif /* USE_LOCALE_CTYPE */
+#ifdef USE_LOCALE_COLLATE
+    if (curcoll != NULL)
+	Safefree(curcoll);
+#endif /* USE_LOCALE_COLLATE */
+#ifdef USE_LOCALE_NUMERIC
+    if (curnum != NULL)
+	Safefree(curnum);
+#endif /* USE_LOCALE_NUMERIC */
     return ok;
 }
 
