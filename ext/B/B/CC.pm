@@ -350,8 +350,9 @@ sub dopoptoloop {
 sub dopoptolabel {
     my $label = shift;
     my $cxix = $#cxstack;
-    while ($cxix >= 0 && $cxstack[$cxix]->{type} != CXt_LOOP
-	   && $cxstack[$cxix]->{label} ne $label) {
+    while ($cxix >= 0 &&
+	   ($cxstack[$cxix]->{type} != CXt_LOOP ||
+	    $cxstack[$cxix]->{label} ne $label)) {
 	$cxix--;
     }
     debug "dopoptolabel: returning $cxix" if $debug_cxstack;
