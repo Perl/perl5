@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Nov 21 20:33:35 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Sat Nov 25 20:16:14 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -3673,7 +3673,8 @@ esac
 cat <<EOM
 
 Perl can be built to use the SOCKS proxy protocol library.  To do so,
-Configure must be run with -Dusesocks.
+Configure must be run with -Dusesocks.  If you use SOCKS you also need
+to use the PerlIO abstraction layer, this will be implicitly selected.
 
 If this doesn't make any sense to you, just accept the default '$dflt'.
 EOM
@@ -3685,6 +3686,10 @@ y|Y)	val="$define" ;;
 esac
 set usesocks
 eval $setvar
+
+case "$usesocks" in
+$define|true|[yY]*) useperlio="$define";;
+esac
 
 : Looking for optional libraries
 echo " "
@@ -7428,13 +7433,12 @@ $define|true|[yY]*)	dflt='y';;
 esac
 cat <<EOM
 
-Previous version of $package used the standard IO mechanisms as defined
-in <stdio.h>.  Versions 5.003_02 and later of perl allow alternate IO
-mechanisms via a "PerlIO" abstraction, but the stdio mechanism is still
-the default.  This abstraction layer can use AT&T's sfio (if you already
-have sfio installed) or regular stdio.  Using PerlIO with sfio may cause
-problems with some extension modules.  Using PerlIO with stdio is safe,
-but it is slower than plain stdio and therefore is not the default.
+Previous version of $package used the standard IO mechanisms as
+defined in <stdio.h>.  Versions 5.003_02 and later of perl allow
+alternate IO mechanisms via the PerlIO abstraction layer, but the
+stdio mechanism is still the default.  This abstraction layer can
+use AT&T's sfio (if you already have sfio installed) or regular stdio.
+Using PerlIO with sfio may cause problems with some extension modules.
 
 If this doesn't make any sense to you, just accept the default '$dflt'.
 EOM
@@ -7445,13 +7449,29 @@ y|Y)
 	val="$define"
 	;;     
 *)      
-	echo "Ok, doing things the stdio way"
+	echo "Ok, doing things the stdio way."
 	val="$undef"
 	;;
 esac
 set useperlio
 eval $setvar 
 
+case "$usesocks" in
+$define|true|[yY]*)
+	case "$useperlio" in
+	$define|true|[yY]*) ;;
+	*)	cat >&4 <<EOM
+
+You are using the SOCKS proxy protocol library which means that you
+should also use the PerlIO layer.  You may be headed for trouble.
+
+EOM
+		;;
+	esac
+	;;
+esac
+
+	
 case "$vendorprefix" in
 '')	d_vendorbin="$undef"
 	vendorbin=''

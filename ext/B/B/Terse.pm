@@ -1,6 +1,6 @@
 package B::Terse;
 use strict;
-use B qw(peekop class walkoptree_slow walkoptree_exec
+use B qw(peekop class walkoptree walkoptree_exec
 	 main_start main_root cstring svref_2object);
 use B::Asmdata qw(@specialsv_name);
 
@@ -10,7 +10,7 @@ sub terse {
     if ($order eq "exec") {
 	walkoptree_exec($cv->START, "terse");
     } else {
-	walkoptree_slow($cv->ROOT, "terse");
+	walkoptree($cv->ROOT, "terse");
     }
 }
 
@@ -31,7 +31,7 @@ sub compile {
 	if ($order eq "exec") {
 	    return sub { walkoptree_exec(main_start, "terse") }
 	} else {
-	    return sub { walkoptree_slow(main_root, "terse") }
+	    return sub { walkoptree(main_root, "terse") }
 	}
     }
 }

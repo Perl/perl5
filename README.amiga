@@ -4,14 +4,9 @@ specially designed to be readable as is.
 
 =head1 NAME
 
-perlamiga - Perl under Amiga OS (possibly very outdated information)
+perlamiga - Perl under Amiga OS
 
 =head1 SYNOPSIS
-
-NOTE: The following information is highly unlikely to be correct.
-A recent version of perl for the Amiga can be found at the Aminet site:
-
-    http://us.aminet.net/aminet/dirs/dev_gg.html
 
 One can read this document in the following formats:
 
@@ -20,6 +15,11 @@ One can read this document in the following formats:
 
 to list some (not all may be available simultaneously), or it may
 be read I<as is>: either as F<README.amiga>, or F<pod/perlamiga.pod>.
+
+A recent version of perl for the Amiga can be found at the Geek Gadgets
+section of the Aminet:
+  
+      http://www.aminet.net/~aminet/dirs/dev_gg.html
 
 =cut
 
@@ -58,15 +58,12 @@ Contents
 =item B<Unix emulation for AmigaOS: ixemul.library>
 
 You need the Unix emulation for AmigaOS, whose most important part is
-B<ixemul.library>. For a minimum setup, get the following archives from
-the Aminet archives (http://www.aminet.net/~aminet/):
+B<ixemul.library>. For a minimum setup, get the latest versions
+of the following packages from the Aminet archives (http://www.aminet.net/~aminet/):
 
-ixemul-bin.lha
-ixemul-env-bin.lha
-pdksh-bin.lha
-
-Note that there might be newer versions available by the time you read
-this.
+	ixemul-bin
+	ixemul-env-bin
+	pdksh-bin
 
 Note also that this is a minimum setup; you might want to add other
 packages of B<ADE> (the I<Amiga Developers Environment>).
@@ -201,19 +198,55 @@ or get the official source from CPAN:
 
 Extract it like this
 
-  tar xvzpf perl$VERSION.tar.gz
+  tar xvzpf perl-$VERSION.tar.gz
 
 You will see a message about errors while extracting F<Configure>. This
 is normal and expected. (There is a conflict with a similarly-named file
 F<configure>, but it causes no harm.)
 
 =head2 Making
+	
+=over 4
 
-  sh configure.gnu --prefix=/ade
+=item *
 
-Now
+remember to use a healthy sized stack (I used 2000000)
+
+=item *
+
+your PATH environment variable must include /bin (e.g. ".:/bin" is good)
+(or, more precisely, it must include the directory where you have your
+basic UNIX utilities like test, cat, sed, and so on)
+
+=item *
+	
+  sh Configure -Dprefix=/ade -Dloclibpth=/ade/lib
+
+=item *
+
+now type make depend
+
+	when the make depend has ended load the gnumakefile into a editor and
+	go to the end of the file
+	move upwards in the file until you reach av.o: EXTERN.h
+	and delete all lines down to # WARNING: Put....
+
+=item *
+
+now go to the x2p directory
+
+	load the gnumakefile
+	go to the end moveup until you reach hash.o: EXTERN.h
+	and delete all lines dowonwards until you reach
+	# WARNING: Put nothing....
+
+=item *
+
+Now!
 
   make
+
+=back
 
 =head2 Testing
 
@@ -232,9 +265,10 @@ Run
 
   make install
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Norbert Pueschel, pueschel@imsdd.meb.uni-bonn.de
+Jan-Erik Karlsson, trg@privat.utfors.se
 
 =head1 SEE ALSO
 

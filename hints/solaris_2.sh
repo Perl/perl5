@@ -474,10 +474,12 @@ EOM
 		lddlflags="$lddlflags -G `getconf XBS5_LP64_OFF64_LDFLAGS 2>/dev/null`"
 		;;
 	    esac	
+
 	    libscheck='case "`/usr/bin/file $xxx`" in
 *64-bit*|*SPARCV9*) ;;
 *) xxx=/no/64-bit$xxx ;;
 esac'
+
 	    use64bitall_done=yes
 	    ;;
 esac

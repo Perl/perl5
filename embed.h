@@ -193,11 +193,6 @@
 #define do_vecget		Perl_do_vecget
 #define do_vecset		Perl_do_vecset
 #define do_vop			Perl_do_vop
-#if defined(SOCKS_64BIT_BUG)
-#define s64_get_buffer		S_s64_get_buffer
-#define s64_create_buffer	S_s64_create_buffer
-#define s64_malloc		S_s64_malloc
-#endif
 #define dofile			Perl_dofile
 #define dowantarray		Perl_dowantarray
 #define dump_all		Perl_dump_all
@@ -1666,11 +1661,6 @@
 #define do_vecget(a,b,c)	Perl_do_vecget(aTHX_ a,b,c)
 #define do_vecset(a)		Perl_do_vecset(aTHX_ a)
 #define do_vop(a,b,c,d)		Perl_do_vop(aTHX_ a,b,c,d)
-#if defined(SOCKS_64BIT_BUG)
-#define s64_get_buffer(a)	S_s64_get_buffer(aTHX_ a)
-#define s64_create_buffer(a)	S_s64_create_buffer(aTHX_ a)
-#define s64_malloc(a)		S_s64_malloc(aTHX_ a)
-#endif
 #define dofile(a)		Perl_dofile(aTHX_ a)
 #define dowantarray()		Perl_dowantarray(aTHX)
 #define dump_all()		Perl_dump_all(aTHX)
@@ -3265,21 +3255,6 @@
 #define do_vecset		Perl_do_vecset
 #define Perl_do_vop		CPerlObj::Perl_do_vop
 #define do_vop			Perl_do_vop
-#if defined(SOCKS_64BIT_BUG)
-#define do_s64_tell		Perl_do_s64_tell
-#define do_s64_fread		Perl_do_s64_fread
-#define do_s64_getc		Perl_do_s64_getc
-#define do_s64_seek		Perl_do_s64_seek
-#define do_s64_ungetc		Perl_do_s64_ungetc
-#define do_s64_delete_buffer	Perl_do_s64_delete_buffer
-#define do_s64_init_buffer	Perl_do_s64_init_buffer
-#define S_s64_get_buffer	CPerlObj::S_s64_get_buffer
-#define s64_get_buffer		S_s64_get_buffer
-#define S_s64_create_buffer	CPerlObj::S_s64_create_buffer
-#define s64_create_buffer	S_s64_create_buffer
-#define S_s64_malloc		CPerlObj::S_s64_malloc
-#define s64_malloc		S_s64_malloc
-#endif
 #define Perl_dofile		CPerlObj::Perl_dofile
 #define dofile			Perl_dofile
 #define Perl_dowantarray	CPerlObj::Perl_dowantarray

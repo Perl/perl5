@@ -303,7 +303,8 @@ extern int	PerlIO_getpos		(PerlIO *,Fpos_t *);
 extern int	PerlIO_setpos		(PerlIO *,const Fpos_t *);
 #endif
 #ifndef PerlIO_fdupopen
-extern PerlIO *	PerlIO_fdupopen		(PerlIO *);
+#define PerlIO_fdupopen(f)		(f)
+/* extern PerlIO *	PerlIO_fdupopen		(PerlIO *); */
 #endif
 #ifndef PerlIO_isutf8
 extern int	PerlIO_isutf8		(PerlIO *);

@@ -476,19 +476,6 @@ unless ($define{'FAKE_THREADS'}) {
     skip_symbols [qw(PL_curthr)];
 }
 
-# All quad int platforms are assumed to have broken SOCKS
-unless ($define{USE_SOCKS} && $define{USE_64_BIT_ALL}) {
-    skip_symbols [qw(
-		     Perl_do_s64_delete_buffer
-		     Perl_do_s64_fread
-		     Perl_do_s64_getc
-		     Perl_do_s64_init_buffer
-		     Perl_do_s64_seek
-		     Perl_do_s64_tell
-		     Perl_do_s64_ungetc
-		    )];
-}
-
 sub readvar {
     my $file = shift;
     my $proc = shift || sub { "PL_$_[2]" };

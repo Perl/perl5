@@ -737,9 +737,6 @@ typedef struct perl_mstats perl_mstats_t;
 #       undef INCLUDE_PROTOTYPES
 #       undef PERL_SOCKS_NEED_PROTOTYPES
 #   endif
-#   ifdef USE_64_BIT_ALL
-#       define SOCKS_64BIT_BUG /* until proven otherwise */
-#   endif
 # endif 
 # ifdef I_NETDB
 #  include <netdb.h>
@@ -3441,16 +3438,6 @@ typedef struct am_table_short AMTS;
 
 #ifdef I_LIBUTIL
 #   include <libutil.h>		/* setproctitle() in some FreeBSDs */
-#endif
-
-#ifdef SOCKS_64BIT_BUG
-typedef struct __s64_iobuffer {
-    struct __s64_iobuffer *next, *last;		/* Queue pointer */
-    PerlIO *fp;					/* Assigned file pointer */
-    int cnt;					/* Buffer counter */
-    int size;					/* Buffer size */
-    int *buffer;				/* The buffer */
-} S64_IOB;
 #endif
 
 /* and finally... */

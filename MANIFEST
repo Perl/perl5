@@ -287,9 +287,9 @@ ext/File/Glob/Makefile.PL	File::Glob extension makefile writer
 ext/File/Glob/TODO		File::Glob extension todo list
 ext/File/Glob/bsd_glob.c	File::Glob extension run time code
 ext/File/Glob/bsd_glob.h	File::Glob extension header file
-ext/Filter/Util/Call.pm		Filter::Util::Call extension module
-ext/Filter/Util/Call.xs		Filter::Util::Call extension external subroutines
-ext/Filter/Util/Makefile.PL	Filter::Util::Call extension makefile writer
+ext/Filter/Util/Call/Call.pm	Filter::Util::Call extension module
+ext/Filter/Util/Call/Call.xs	Filter::Util::Call extension external subroutines
+ext/Filter/Util/Call/Makefile.PL	Filter::Util::Call extension makefile writer
 ext/GDBM_File/GDBM_File.pm	GDBM extension Perl module
 ext/GDBM_File/GDBM_File.xs	GDBM extension external subroutines
 ext/GDBM_File/Makefile.PL	GDBM extension makefile writer
@@ -1388,8 +1388,8 @@ t/lib/filefunc.t	See if File::Spec::Functions works
 t/lib/filehand.t	See if FileHandle works
 t/lib/filepath.t	See if File::Path works
 t/lib/filespec.t	See if File::Spec works
-t/lib/filt-util.t	See if Filter::Util::Call works
-t/lib/filt-util.pl	See if Filter::Util::Call works
+t/lib/filter-util.t	See if Filter::Util::Call works
+t/lib/filter-util.pl	See if Filter::Util::Call works
 t/lib/findbin.t		See if FindBin works
 t/lib/ftmp-mktemp.t	See if File::Temp works
 t/lib/ftmp-posix.t	See if File::Temp works
