@@ -1634,8 +1634,7 @@ PP(pp_sysread)
 	    count = -1;
     }
     if (count < 0) {
-	if ((IoTYPE(io) == IoTYPE_WRONLY || IoIFP(io) == PerlIO_stdout()
-	    || IoIFP(io) == PerlIO_stderr()) && ckWARN(WARN_IO))
+	if ((IoTYPE(io) == IoTYPE_WRONLY) && ckWARN(WARN_IO))
 	{
 	    /* integrate with report_evil_fh()? */
 	    char *name = NULL;

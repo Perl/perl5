@@ -132,6 +132,9 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 
     if (as_raw) {
         /* sysopen style args, i.e. integer mode and permissions */
+	if (num_svs != 0) {
+	     Perl_croak(aTHX_ "panic:sysopen with multiple args");
+	}
 
 #if defined(USE_64_BIT_RAWIO) && defined(O_LARGEFILE)
 	rawmode |= O_LARGEFILE;
@@ -234,7 +237,8 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		name = type;
 		len = tend-type;
 	    }
-	    if (*name == '\0') { /* command is missing 19990114 */
+	    if (*name == '\0') {
+		/* command is missing 19990114 */
 		if (ckWARN(WARN_PIPE))
 		    Perl_warner(aTHX_ WARN_PIPE, "Missing command in piped open");
 		errno = EPIPE;
@@ -254,7 +258,12 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		strcat(mode, "b");
 	    else if (out_crlf)
 		strcat(mode, "t");
-	    fp = PerlProc_popen(name,mode);
+	    if (num_svs > 1) {
+		fp = PerlProc_popen_list(mode, num_svs, svp);
+	    }
+	    else {
+		fp = PerlProc_popen(name,mode);
+	    }
 	}
 	else if (*type == IoTYPE_WRONLY) {
 	    TAINT_PROPER("open");
@@ -274,27 +283,39 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		strcat(mode, "t");
 
 	    if (*type == '&') {
-		name = type;
 	      duplicity:
-		if (num_svs)
-		    goto unknown_desr;
 		dodup = 1;
-		name++;
-		if (*name == '=') {
+		type++;
+		if (*type == '=') {
 		    dodup = 0;
-		    name++;
+		    type++;
 		}
-		if (!*name && supplied_fp)
+		if (!num_svs && !*type && supplied_fp)
+		    /* "<+&" etc. is used by typemaps */
 		    fp = supplied_fp;
 		else {
-		    /*SUPPRESS 530*/
-		    for (; isSPACE(*name); name++) ;
-		    if (isDIGIT(*name))
-			fd = atoi(name);
+		    if (num_svs > 1) {
+			Perl_croak(aTHX_ "More than one argument to '%c&' open",IoTYPE(io));
+		    }
+		    if (num_svs && SvIOK(*svp))
+			fd = SvUV(*svp);
+		    else if (isDIGIT(*type)) {
+			/*SUPPRESS 530*/
+			for (; isSPACE(*type); type++) ;
+			fd = atoi(type);
+		    }
 		    else {
 			IO* thatio;
-			gv = gv_fetchpv(name,FALSE,SVt_PVIO);
-			thatio = GvIO(gv);
+			if (num_svs) {
+			    thatio = sv_2io(*svp);
+			}
+			else {
+			    GV *thatgv;
+			    /*SUPPRESS 530*/
+			    for (; isSPACE(*type); type++) ;
+			    thatgv = gv_fetchpv(type,FALSE,SVt_PVIO);
+			    thatio = GvIO(thatgv);
+			}
 			if (!thatio) {
 #ifdef EINVAL
 			    SETERRNO(EINVAL,SS$_IVCHAN);
@@ -347,6 +368,9 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		}
 	    }
 	    else {
+		if (num_svs > 1) {
+		    Perl_croak(aTHX_ "More than one argument to '>' open");
+		}
 		/*SUPPRESS 530*/
 		for (; isSPACE(*type); type++) ;
 		if (*type == IoTYPE_STD && (!type[1] || isSPACE(type[1]) || type[1] == ':')) {
@@ -361,6 +385,9 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    }
 	}
 	else if (*type == IoTYPE_RDONLY) {
+	    if (num_svs > 1) {
+		Perl_croak(aTHX_ "More than one argument to '<' open");
+	    }
 	    /*SUPPRESS 530*/
 	    for (type++; isSPACE(*type); type++) ;
 	    mode[0] = 'r';
@@ -370,7 +397,6 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		strcat(mode, "t");
 
 	    if (*type == '&') {
-		name = type;
 		goto duplicity;
 	    }
 	    if (*type == IoTYPE_STD && (!type[1] || isSPACE(type[1]) || type[1] == ':')) {
@@ -396,7 +422,8 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		name = type;
 	        len  = tend-type;
 	    }
-	    if (*name == '\0') { /* command is missing 19990114 */
+	    if (*name == '\0') {
+		/* command is missing 19990114 */
 		if (ckWARN(WARN_PIPE))
 		    Perl_warner(aTHX_ WARN_PIPE, "Missing command in piped open");
 		errno = EPIPE;
@@ -410,7 +437,12 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		strcat(mode, "b");
 	    else if (in_crlf)
 		strcat(mode, "t");
-	    fp = PerlProc_popen(name,mode);
+	    if (num_svs > 1) {
+		fp = PerlProc_popen_list(mode,num_svs,svp);
+	    }
+	    else {
+		fp = PerlProc_popen(name,mode);
+	    }
 	    IoTYPE(io) = IoTYPE_PIPE;
 	}
 	else {
@@ -439,6 +471,18 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    Perl_warner(aTHX_ WARN_NEWLINE, PL_warn_nl, "open");
 	goto say_false;
     }
+
+    if (ckWARN(WARN_IO)) {
+	if ((IoTYPE(io) == IoTYPE_RDONLY) &&
+	    (fp == PerlIO_stdout() || fp == PerlIO_stderr())) {
+		Perl_warner(aTHX_ WARN_IO, "'std%s' opened only for input",
+				(fp == PerlIO_stdout()) ? "out" : "err");
+	}
+	else if ((IoTYPE(io) == IoTYPE_WRONLY) && fp == PerlIO_stdout()) {
+		Perl_warner(aTHX_ WARN_IO, "'stdin' opened only for output");
+	}
+    }
+
     if (IoTYPE(io) && IoTYPE(io) != IoTYPE_PIPE && IoTYPE(io) != IoTYPE_STD) {
 	if (PerlLIO_fstat(PerlIO_fileno(fp),&PL_statbuf) < 0) {
 	    (void)PerlIO_close(fp);
@@ -914,9 +958,7 @@ Perl_do_eof(pTHX_ GV *gv)
 
     if (!io)
 	return TRUE;
-    else if (ckWARN(WARN_IO)
-	     && (IoTYPE(io) == IoTYPE_WRONLY || IoIFP(io) == PerlIO_stdout()
-		 || IoIFP(io) == PerlIO_stderr()))
+    else if (ckWARN(WARN_IO) && (IoTYPE(io) == IoTYPE_WRONLY))
     {
 	/* integrate to report_evil_fh()? */
         char *name = NULL;

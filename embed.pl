@@ -1772,6 +1772,7 @@ Anp	|void*	|my_memset	|char* loc|I32 ch|I32 len
 #if !defined(PERL_OBJECT)
 Ap	|I32	|my_pclose	|PerlIO* ptr
 Ap	|PerlIO*|my_popen	|char* cmd|char* mode
+Ap	|PerlIO*|my_popen_list	|char* mode|int n|SV ** args
 #endif
 Ap	|void	|my_setenv	|char* nam|char* val
 Ap	|I32	|my_stat

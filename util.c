@@ -2309,6 +2309,131 @@ VTOH(vtohs,short)
 VTOH(vtohl,long)
 #endif
 
+PerlIO *
+Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
+{
+#if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(OS2) && !defined(VMS) && !defined(__OPEN_VM) && !defined(EPOC) && !defined(MACOS_TRADITIONAL)
+    int p[2];
+    register I32 This, that;
+    register Pid_t pid;
+    SV *sv;
+    I32 did_pipes = 0;
+    int pp[2];
+
+    PERL_FLUSHALL_FOR_CHILD;
+    This = (*mode == 'w');
+    that = !This;
+    if (PL_tainting) {
+	taint_env();
+	taint_proper("Insecure %s%s", "EXEC");
+    }
+    if (PerlProc_pipe(p) < 0)
+	return Nullfp;
+    /* Try for another pipe pair for error return */
+    if (PerlProc_pipe(pp) >= 0)
+	did_pipes = 1;
+    while ((pid = vfork()) < 0) {
+	if (errno != EAGAIN) {
+	    PerlLIO_close(p[This]);
+	    if (did_pipes) {
+		PerlLIO_close(pp[0]);
+		PerlLIO_close(pp[1]);
+	    }
+	    return Nullfp;
+	}
+	sleep(5);
+    }
+    if (pid == 0) {
+	/* Child */
+	GV* tmpgv;
+	int fd;
+#undef THIS
+#undef THAT
+#define THIS that
+#define THAT This
+	/* Close parent's end of _the_ pipe */
+	PerlLIO_close(p[THAT]);
+	/* Close parent's end of error status pipe (if any) */
+	if (did_pipes) {
+	    PerlLIO_close(pp[0]);
+#if defined(HAS_FCNTL) && defined(F_SETFD)
+	    /* Close error pipe automatically if exec works */
+	    fcntl(pp[1], F_SETFD, FD_CLOEXEC);
+#endif
+	}
+	/* Now dup our end of _the_ pipe to right position */
+	if (p[THIS] != (*mode == 'r')) {
+	    PerlLIO_dup2(p[THIS], *mode == 'r');
+	    PerlLIO_close(p[THIS]);
+	}
+#if !defined(HAS_FCNTL) || !defined(F_SETFD)
+	/* No automatic close - do it by hand */
+#ifndef NOFILE
+#define NOFILE 20
+#endif
+	for (fd = PL_maxsysfd + 1; fd < NOFILE; fd++) {
+	    if (fd != pp[1])
+		PerlLIO_close(fd);
+	}
+#endif
+	do_aexec5(Nullsv, args-1, args-1+n, pp[1], did_pipes);
+	PerlProc__exit(1);
+#undef THIS
+#undef THAT
+    }
+    /* Parent */
+    do_execfree();	/* free any memory malloced by child on vfork */
+    /* Close child's end of pipe */
+    PerlLIO_close(p[that]);
+    if (did_pipes)
+	PerlLIO_close(pp[1]);
+    /* Keep the lower of the two fd numbers */
+    if (p[that] < p[This]) {
+	PerlLIO_dup2(p[This], p[that]);
+	PerlLIO_close(p[This]);
+	p[This] = p[that];
+    }
+    LOCK_FDPID_MUTEX;
+    sv = *av_fetch(PL_fdpid,p[This],TRUE);
+    UNLOCK_FDPID_MUTEX;
+    (void)SvUPGRADE(sv,SVt_IV);
+    SvIVX(sv) = pid;
+    PL_forkprocess = pid;
+    /* If we managed to get status pipe check for exec fail */
+    if (did_pipes && pid > 0) {
+	int errkid;
+	int n = 0, n1;
+
+	while (n < sizeof(int)) {
+	    n1 = PerlLIO_read(pp[0],
+			      (void*)(((char*)&errkid)+n),
+			      (sizeof(int)) - n);
+	    if (n1 <= 0)
+		break;
+	    n += n1;
+	}
+	PerlLIO_close(pp[0]);
+	did_pipes = 0;
+	if (n) {			/* Error */
+	    int pid2, status;
+	    if (n != sizeof(int))
+		Perl_croak(aTHX_ "panic: kid popen errno read");
+	    do {
+		pid2 = wait4pid(pid, &status, 0);
+	    } while (pid2 == -1 && errno == EINTR);
+	    errno = errkid;		/* Propagate errno from kid */
+	    return Nullfp;
+	}
+    }
+    if (did_pipes)
+	 PerlLIO_close(pp[0]);
+    return PerlIO_fdopen(p[This], mode);
+#else
+    Perl_croak(aTHX_ "List form of piped open not implemented");
+    return (PerlIO *) NULL;
+#endif
+}
+
     /* VMS' my_popen() is in VMS.c, same with OS/2. */
 #if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(__OPEN_VM) && !defined(EPOC) && !defined(MACOS_TRADITIONAL)
 PerlIO *
@@ -3969,14 +4094,14 @@ Perl_ebcdic_control(pTHX_ int ch)
 {
     	if (ch > 'a') {
 	        char *ctlp;
- 
+
  	       if (islower(ch))
   	              ch = toupper(ch);
- 
+
  	       if ((ctlp = strchr(controllablechars, ch)) == 0) {
   	              Perl_die(aTHX_ "unrecognised control character '%c'\n", ch);
      	       }
- 
+
         	if (ctlp == controllablechars)
          	       return('\177'); /* DEL */
         	else

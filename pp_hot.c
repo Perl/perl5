@@ -346,7 +346,7 @@ PP(pp_add)
        A side effect is that this also aggressively prefers integer maths over
        fp maths for integer values.
 
-       How to detect overflow? 
+       How to detect overflow?
 
        C 99 section 6.2.6.1 says
 
@@ -417,7 +417,7 @@ PP(pp_add)
 	    UV result;
 	    register UV buv;
 	    bool buvok = SvUOK(TOPs);
-	    
+	
 	    if (buvok)
 		buv = SvUVX(TOPs);
 	    else {
@@ -1459,10 +1459,9 @@ Perl_do_readline(pTHX)
 	}
 	else if (type == OP_GLOB)
 	    SP--;
-	else if (ckWARN(WARN_IO)	/* stdout/stderr or other write fh */
-		 && (IoTYPE(io) == IoTYPE_WRONLY || fp == PerlIO_stdout()
-		     || fp == PerlIO_stderr()))
+	else if (ckWARN(WARN_IO) && IoTYPE(io) == IoTYPE_WRONLY) {
 	    report_evil_fh(PL_last_in_gv, io, OP_phoney_OUTPUT_ONLY);
+	}
     }
     if (!fp) {
 	if (ckWARN2(WARN_GLOB, WARN_CLOSED)

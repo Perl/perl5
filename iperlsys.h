@@ -253,7 +253,7 @@ struct IPerlStdIOInfo
 #define PerlSIO_printf		Perl_fprintf_nocontext
 #define PerlSIO_stdoutf		Perl_printf_nocontext
 #define PerlSIO_vprintf(f,fmt,a)						\
-	(*PL_StdIO->pVprintf)(PL_StdIO, (f),(fmt),a)          
+	(*PL_StdIO->pVprintf)(PL_StdIO, (f),(fmt),a)
 #define PerlSIO_ftell(f)							\
 	(*PL_StdIO->pTell)(PL_StdIO, (f))
 #define PerlSIO_fseek(f,o,w)						\
@@ -982,6 +982,8 @@ struct IPerlProcInfo
 	(*PL_Proc->pPauseProc)(PL_Proc)
 #define PerlProc_popen(c, m)						\
 	(*PL_Proc->pPopen)(PL_Proc, (c), (m))
+#define PerlProc_popen_list(m, n, a)					\
+	(*PL_Proc->pPopenList)(PL_Proc, (m), (n), (a))
 #define PerlProc_pclose(f)						\
 	(*PL_Proc->pPclose)(PL_Proc, (f))
 #define PerlProc_pipe(fd)						\
@@ -1043,6 +1045,7 @@ struct IPerlProcInfo
 #define PerlProc_killpg(i, a)	killpg((i), (a))
 #define PerlProc_pause()	Pause()
 #define PerlProc_popen(c, m)	my_popen((c), (m))
+#define PerlProc_popen_list(m,n,a)	my_popen_list((m),(n),(a))
 #define PerlProc_pclose(f)	my_pclose((f))
 #define PerlProc_pipe(fd)	pipe((fd))
 #define PerlProc_setuid(u)	setuid((u))

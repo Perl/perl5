@@ -3,9 +3,9 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-}    
+}
 
-# $RCSfile$    
+# $RCSfile$
 $|  = 1;
 use warnings;
 $Is_VMS = $^O eq 'VMS';
@@ -21,11 +21,11 @@ sub ok { print "ok $test\n"; $test++ }
 
 # 1..9
 {
-    unlink("afile") if -f "afile";     
+    unlink("afile") if -f "afile";
     print "$!\nnot " unless open(my $f,"+>afile");
     ok;
     binmode $f;
-    print "not " unless -f "afile";     
+    print "not " unless -f "afile";
     ok;
     print "not " unless print $f "SomeData\n";
     ok;
@@ -36,15 +36,15 @@ sub ok { print "ok $test\n"; $test++ }
     $b = <$f>;
     print "not " unless $b eq "SomeData\n";
     ok;
-    print "not " unless -f $f;     
+    print "not " unless -f $f;
     ok;
-    eval  { die "Message" };   
+    eval  { die "Message" };
     # warn $@;
     print "not " unless $@ =~ /<\$f> line 1/;
     ok;
     print "not " unless close($f);
     ok;
-    unlink("afile");     
+    unlink("afile");
 }
 
 # 10..12
@@ -96,7 +96,7 @@ sub ok { print "ok $test\n"; $test++ }
     print "not " unless -s 'afile' > 20;
     ok;
 
-    unlink("afile");     
+    unlink("afile");
 }
 
 # 24..26
@@ -138,18 +138,18 @@ open my $f, '<&', 'afile';
 1;
 EOE
 ok;
-$@ =~ /Unknown open\(\) mode \'<&\'/ or print "not ";
+$@ =~ /Bad filehandle:\s+afile/ or print "not ";
 ok;
 
 # local $file tests
 
 # 33..41
 {
-    unlink("afile") if -f "afile";     
+    unlink("afile") if -f "afile";
     print "$!\nnot " unless open(local $f,"+>afile");
     ok;
     binmode $f;
-    print "not " unless -f "afile";     
+    print "not " unless -f "afile";
     ok;
     print "not " unless print $f "SomeData\n";
     ok;
@@ -160,15 +160,15 @@ ok;
     $b = <$f>;
     print "not " unless $b eq "SomeData\n";
     ok;
-    print "not " unless -f $f;     
+    print "not " unless -f $f;
     ok;
-    eval  { die "Message" };   
+    eval  { die "Message" };
     # warn $@;
     print "not " unless $@ =~ /<\$f> line 1/;
     ok;
     print "not " unless close($f);
     ok;
-    unlink("afile");     
+    unlink("afile");
 }
 
 # 42..44
@@ -220,7 +220,7 @@ ok;
     print "not " unless -s 'afile' > 20;
     ok;
 
-    unlink("afile");     
+    unlink("afile");
 }
 
 # 56..58
@@ -262,7 +262,7 @@ open local $f, '<&', 'afile';
 1;
 EOE
 ok;
-$@ =~ /Unknown open\(\) mode \'<&\'/ or print "not ";
+$@ =~ /Bad filehandle:\s+afile/ or print "not ";
 ok;
 
 # 65..66
