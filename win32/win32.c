@@ -1652,7 +1652,8 @@ win32_uname(struct utsname *name)
 	char *arch;
 	GetSystemInfo(&info);
 
-#if (defined(__BORLANDC__)&&(__BORLANDC__<=0x520)) || defined(__MINGW32__)
+#if (defined(__BORLANDC__)&&(__BORLANDC__<=0x520)) \
+ || (defined(__MINGW32__) && !defined(_ANONYMOUS_UNION))
 	switch (info.u.s.wProcessorArchitecture) {
 #else
 	switch (info.wProcessorArchitecture) {
@@ -2072,7 +2073,7 @@ win32_feof(FILE *fp)
 DllExport char *
 win32_strerror(int e) 
 {
-#ifndef __BORLANDC__		/* Borland intolerance */
+#if !defined __BORLANDC__ && !defined __MINGW32__      /* compiler intolerance */
     extern int sys_nerr;
 #endif
     DWORD source = 0;
@@ -2539,7 +2540,8 @@ Nt4CreateHardLinkW(
     StreamId.dwStreamId = BACKUP_LINK;
     StreamId.dwStreamAttributes = 0;
     StreamId.dwStreamNameSize = 0;
-#if defined(__BORLANDC__) || defined(__MINGW32__)
+#if defined(__BORLANDC__) \
+ ||(defined(__MINGW32__) && !defined(_ANONYMOUS_UNION))
     StreamId.Size.u.HighPart = 0;
     StreamId.Size.u.LowPart = dwLen;
 #else
