@@ -1865,6 +1865,7 @@ t/lib/warnings/perly		Tests for perly.y for warnings.t
 t/lib/warnings/pp		Tests for pp.c for warnings.t
 t/lib/warnings/pp_ctl		Tests for pp_ctl.c for warnings.t
 t/lib/warnings/pp_hot		Tests for pp_hot.c for warnings.t
+t/lib/warnings/pp_pack		Tests for pp_pack.c for warnings.t
 t/lib/warnings/pp_sys		Tests for pp_sys.c for warnings.t
 t/lib/warnings/regcomp		Tests for regcomp.c for warnings.t
 t/lib/warnings/regexec		Tests for regexec.c for warnings.t
