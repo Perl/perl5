@@ -707,9 +707,11 @@ lib/timelocal.pl	Perl library supporting inverse of localtime, gmtime
 lib/unicode/ArabLink.pl				Unicode character database
 lib/unicode/ArabLnkGrp.pl			Unicode character database
 lib/unicode/ArabShap.txt			Unicode character database
+lib/unicode/BidiMirr.txt			Unicode character database
 lib/unicode/Bidirectional.pl			Unicode character database
 lib/unicode/Block.pl				Unicode character database
 lib/unicode/Blocks.txt				Unicode character database
+lib/unicode/CaseFold.txt			Unicode character database
 lib/unicode/Category.pl				Unicode character database
 lib/unicode/CombiningClass.pl			Unicode character database
 lib/unicode/CompExcl.txt			Unicode character database
@@ -954,17 +956,18 @@ lib/unicode/Name.pl				Unicode character database
 lib/unicode/Names.txt				Unicode character database
 lib/unicode/NamesList.html			Unicode character database
 lib/unicode/Number.pl				Unicode character database
-lib/unicode/Props.txt				Unicode character database
+lib/unicode/PropList.txt			Unicode character database
 lib/unicode/README.Ethiopic			Unicode character database
+lib/unicode/README.perl				Unicode character database
 lib/unicode/ReadMe.txt				Unicode character database info
 lib/unicode/SpecCase.txt			Unicode character database
 lib/unicode/To/Digit.pl				Unicode character database
 lib/unicode/To/Lower.pl				Unicode character database
 lib/unicode/To/Title.pl				Unicode character database
 lib/unicode/To/Upper.pl				Unicode character database
-lib/unicode/UCD300.html				Unicode character database
-lib/unicode/Unicode.300				Unicode character database
-lib/unicode/Unicode3.html			Unicode character database
+lib/unicode/UCD301.html				Unicode character database
+lib/unicode/UCDFF301.html			Unicode character database
+lib/unicode/Unicode.301				Unicode character database
 lib/unicode/mktables.PL				Unicode character database generator
 lib/unicode/syllables.txt			Unicode character database
 lib/utf8.pm					Pragma to control Unicode support
