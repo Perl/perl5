@@ -965,6 +965,27 @@ This is useful for propagating exceptions:
 
 If C<$@> is empty then the string C<"Died"> is used.
 
+die() can also be called with a reference argument.  If this happens to be
+trapped within an eval(), $@ contains the reference.  This behavior permits
+a more elaborate exception handling implementation using objects that
+maintain arbitary state about the nature of the exception.  Such a scheme
+is sometimes preferable to matching particular string values of $@ using
+regular expressions.  Here's an example:
+
+    eval { ... ; die Some::Module::Exception->new( FOO => "bar" ) };
+    if ($@) {
+        if (ref($@) && UNIVERSAL::isa($@,"Some::Module::Exception")) {
+            # handle Some::Module::Exception
+        }
+        else {
+            # handle all other possible exceptions
+        }
+    }
+
+Since perl will stringify uncaught exception messages before displaying
+them, you may want to overload stringification operations on such custom
+exception objects.  See L<overload> for details about that.
+
 You can arrange for a callback to be run just before the C<die()> does
 its deed, by setting the C<$SIG{__DIE__}> hook.  The associated handler
 will be called with the error text and can change the error message, if
