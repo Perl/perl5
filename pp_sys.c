@@ -3868,6 +3868,8 @@ PP(pp_system)
     }
     PerlProc__exit(-1);
 #else /* ! FORK or VMS or OS/2 */
+    PL_statusvalue = 0;
+    result = 0;
     if (PL_op->op_flags & OPf_STACKED) {
 	SV *really = *++MARK;
 	value = (I32)do_aspawn(really, (void **)MARK, (void **)SP);
@@ -3877,10 +3879,12 @@ PP(pp_system)
     else {
 	value = (I32)do_spawn(SvPVx(sv_mortalcopy(*SP), n_a));
     }
+    if (PL_statusvalue == -1)	/* hint that value must be returned as is */
+	result = 1;
     STATUS_NATIVE_SET(value);
     do_execfree();
     SP = ORIGMARK;
-    PUSHi(STATUS_CURRENT);
+    PUSHi(result ? value : STATUS_CURRENT);
 #endif /* !FORK or VMS */
     RETURN;
 }
