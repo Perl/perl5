@@ -1,6 +1,6 @@
-#!./perl -Tw
+#!./perl -w
 
-print "1..610\n";
+print "1..611\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -645,4 +645,13 @@ foreach (
       , "", $@)
     or printf "# scalar unpack ('$template', \"%s\") gave %s expected %s\n",
     encode ($in), encode_list ($got), encode_list ($out[0]);
+}
+
+{
+    # 611
+    my $t = 'Z*Z*';
+    my ($u, $v) = qw(foo xyzzy);
+    my $p = pack($t, $u, $v);
+    my @u = unpack($t, $p);
+    print @u == 2 && $u[0] eq $u && $u[1] eq $v ? "ok 611\n" : "not ok 611\n";
 }
