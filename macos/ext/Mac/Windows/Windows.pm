@@ -560,6 +560,7 @@ Returns whether PANE currently is focused.
 sub has_focus {
 	my($my, $pane) = @_;
 
+	defined ${$my->{focusable}}[$my->{focus}] or return;
 	return ${$my->{focusable}}[$my->{focus}] == $pane
 		if $my->{focus} && $my->{focusable} &&
 		defined ${$my->{focusable}}[$my->{focus}];
@@ -855,6 +856,7 @@ Perform regular activities.
 =cut
 sub idle {
 	my($self) = @_;
+	return unless $self->{port};
 	my($front) = FrontWindow();
 	if ($front && ${$self->{port}} == $$front) {
 		for my $pane (@{$self->{idlefront}}) { 

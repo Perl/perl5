@@ -84,7 +84,7 @@ BEGIN {
 #
 sub _HandleMenu {
 	my($menuid, $item) = @_;
-	return unless $item;
+	return unless defined $item && defined $menuid;	# ??
 	my($handler);
 	if ($handler = $Menu{sprintf("%04X", $menuid)}) {
 		$handler->handle($menuid, $item);

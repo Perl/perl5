@@ -516,7 +516,7 @@ Destroys the C<MacControl>.
 =cut
 sub DESTROY {
 	my($my) = @_;
-	DisposeControl($my->{control});
+	DisposeControl($my->{control}) if $my->{control};
 }
 
 =item track WINDOW, PT
