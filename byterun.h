@@ -156,7 +156,7 @@ enum {
     OPt_COP		/* 11 */
 };
 
-EXT int optype_size[]
+EXT int PL_optype_size[]
 #ifdef DOINIT
 = {
     sizeof(OP),

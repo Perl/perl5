@@ -442,6 +442,8 @@
 #define PL_op_seqmax		pPerl->PL_op_seqmax
 #undef  PL_opsave
 #define PL_opsave		pPerl->PL_opsave
+#undef  PL_optype_size
+#define PL_optype_size		pPerl->PL_optype_size
 #undef  PL_origalen
 #define PL_origalen		pPerl->PL_origalen
 #undef  PL_origargc

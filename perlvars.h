@@ -204,3 +204,6 @@ PERLVAR(Guudmap[256],	char)
 PERLVAR(Gbitcount,	char *)
 PERLVAR(Gfilter_debug,	int)
 
+/* byterun globals */
+PERLVAR(Goptype_size[], int)
+

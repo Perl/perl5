@@ -198,7 +198,7 @@ for ($i = 0; $i < @optype - 1; $i++) {
 }
 printf BYTERUN_H "    OPt_%s\t\t/* %d */\n};\n\n", $optype[$i], $i;
 print BYTERUN_H <<'EOT';
-EXT int optype_size[]
+EXT int PL_optype_size[]
 #ifdef DOINIT
 = {
 EOT

@@ -757,6 +757,7 @@
 #define PL_oldbufptr		(PL_Vars.Goldbufptr)
 #define PL_oldoldbufptr		(PL_Vars.Goldoldbufptr)
 #define PL_op_seqmax		(PL_Vars.Gop_seqmax)
+#define PL_optype_size		(PL_Vars.Goptype_size)
 #define PL_origalen		(PL_Vars.Gorigalen)
 #define PL_origenviron		(PL_Vars.Gorigenviron)
 #define PL_osname		(PL_Vars.Gosname)
@@ -896,6 +897,7 @@
 #define PL_Goldbufptr		PL_oldbufptr
 #define PL_Goldoldbufptr	PL_oldoldbufptr
 #define PL_Gop_seqmax		PL_op_seqmax
+#define PL_Goptype_size		PL_optype_size
 #define PL_Gorigalen		PL_origalen
 #define PL_Gorigenviron		PL_origenviron
 #define PL_Gosname		PL_osname

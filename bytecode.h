@@ -134,7 +134,7 @@ typedef IV IV64;
 	((PMOP*)o)->op_pmregexp = arg ? \
 		CALLREGCOMP(arg, arg + PL_bytecode_pv.xpv_cur, ((PMOP*)o)) : 0
 #define BSET_newsv(sv, arg)	sv = NEWSV(666,0); SvUPGRADE(sv, arg)
-#define BSET_newop(o, arg)	o = (OP*)safemalloc(optype_size[arg])
+#define BSET_newop(o, arg)	o = (OP*)safemalloc(PL_optype_size[arg])
 #define BSET_newopn(o, arg) STMT_START {	\
 	OP *oldop = o;				\
 	BSET_newop(o, arg);			\
