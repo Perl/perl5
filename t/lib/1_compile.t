@@ -8,6 +8,8 @@ BEGIN {
 use strict;
 use warnings;
 
+# This list really needs to be dynamic.
+
 my @Core_Modules = (
                     'AnyDBM_File',
                     'AutoLoader',
@@ -140,13 +142,13 @@ my @Core_Modules = (
                     'Pod::Html',
                     'Pod::InputObjects',
                     'Pod::Man',
-                    'Pod::Overstrike',
                     'Pod::ParseUtils',
                     'Pod::Parser',
                     'Pod::Plainer',
                     'Pod::Select',
                     'Pod::Text',
                     'Pod::Text::Color',
+                    'Pod::Text::Overstrike',
                     'Pod::Text::Termcap',
                     'Pod::Usage',
                     'SDBM_File',
