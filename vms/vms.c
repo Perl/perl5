@@ -2,8 +2,8 @@
  *
  * VMS-specific routines for perl5
  *
- * Last revised: 24-Jun-1996 by Charles Bailey  bailey@genetics.upenn.edu
- * Version: 5.3.0
+ * Last revised: 21-Jun-1996 by Charles Bailey  bailey@genetics.upenn.edu
+ * Version: 5.2.2
  */
 
 #include <acedef.h>
