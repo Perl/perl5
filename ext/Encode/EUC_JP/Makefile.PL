@@ -2,18 +2,17 @@ use 5.7.2;
 use strict;
 use ExtUtils::MakeMaker;
 
-my %tables = (EUC_JP  => [
-               'euc-jp.ucm',
-               'jis0208.enc',
-               'jis0212.enc',
-               'shiftjis.enc',
-              ]);
+my %tables = (EUC_JP   => ['euc-jp.ucm'],
+              JIS0208  => ['jis0208.enc'],
+              JIS0212  => ['jis0212.enc'],
+              SHIFTJIS => ['shiftjis.enc'],
+             );
 
 
 WriteMakefile(
               INC		=> "-I..",
-	      NAME		=> "Encode::EUC_JP",
-	      VERSION_FROM	=> 'EUC_JP.pm',
+	      NAME		=> "Encode::Japanese",
+	      VERSION_FROM	=> 'Japanese.pm',
 	      OBJECT		=> '$(O_FILES)',
 	      'dist'		=> {
 		  COMPRESS	=> 'gzip -9f',
