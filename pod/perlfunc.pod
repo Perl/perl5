@@ -454,6 +454,12 @@ Always use the two-argument version if the function doing the blessing
 might be inherited by a derived class.  See L<perltoot> and L<perlobj>
 for more about the blessing (and blessings) of objects.
 
+Creating objects in lowercased CLASSNAMEs should be avoided.  Such 
+namespaces should be considered reserved for Perl pragmata and objects
+that may be created to implement internal operations.
+
+See L<perlmod/"Perl Modules">.
+
 =item caller EXPR
 
 =item caller

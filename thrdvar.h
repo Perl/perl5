@@ -161,7 +161,7 @@ PERLVARI(Tregcompp,	regcomp_t, FUNC_NAME_TO_PTR(pregcomp))
 					/* Pointer to RE compiler */
 PERLVARI(Tregexecp,	regexec_t, FUNC_NAME_TO_PTR(regexec_flags))
 					/* Pointer to RE executer */
-PERLVARI(Treginterp_cnt,int,	    0)	/* Whether `Regexp'
+PERLVARI(Treginterp_cnt,int,	    0)	/* Whether `re'
 						   was interpolated. */
 #ifdef DEBUGGING
 PERLVARI(Twatchaddr,	char **,    0)
