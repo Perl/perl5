@@ -2135,6 +2135,7 @@ pure_site_install ::
 		}.$self->catdir('$(PERL_ARCHLIB)','auto','$(FULLEXT)').q{
 
 doc_perl_install ::
+	-}.$self->{NOECHO}.q{$(MKPATH) $(INSTALLARCHLIB)
 	-}.$self->{NOECHO}.q{$(DOC_INSTALL) \
 		"Module" "$(NAME)" \
 		"installed into" "$(INSTALLPRIVLIB)" \
@@ -2144,6 +2145,7 @@ doc_perl_install ::
 		>> }.$self->catfile('$(INSTALLARCHLIB)','perllocal.pod').q{
 
 doc_site_install ::
+	-}.$self->{NOECHO}.q{$(MKPATH) $(INSTALLARCHLIB)
 	-}.$self->{NOECHO}.q{$(DOC_INSTALL) \
 		"Module" "$(NAME)" \
 		"installed into" "$(INSTALLSITELIB)" \
@@ -2510,6 +2512,7 @@ $tmp/perlmain.c: $makefilename}, q{
     push @m, q{
 doc_inst_perl:
 	}.$self->{NOECHO}.q{echo Appending installation info to $(INSTALLARCHLIB)/perllocal.pod
+	-}.$self->{NOECHO}.q{$(MKPATH) $(INSTALLARCHLIB)
 	-}.$self->{NOECHO}.q{$(DOC_INSTALL) \
 		"Perl binary" "$(MAP_TARGET)" \
 		MAP_STATIC "$(MAP_STATIC)" \

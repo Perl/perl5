@@ -1998,7 +1998,7 @@ PP(pp_leavesublv)
 		else {
 		    /* Can be a localized value subject to deletion. */
 		    PL_tmps_stack[++PL_tmps_ix] = *mark;
-		    SvREFCNT_inc(*mark);
+		    (void)SvREFCNT_inc(*mark);
 		}
 	    }
 	}
@@ -2029,7 +2029,7 @@ PP(pp_leavesublv)
 		else {                  /* Can be a localized value
 					 * subject to deletion. */
 		    PL_tmps_stack[++PL_tmps_ix] = *mark;
-		    SvREFCNT_inc(*mark);
+		    (void)SvREFCNT_inc(*mark);
 		}
 	    }
 	    else {			/* Should not happen? */
@@ -2062,7 +2062,7 @@ PP(pp_leavesublv)
 		    mortalize:
 		    /* Can be a localized value subject to deletion. */
 		    PL_tmps_stack[++PL_tmps_ix] = *mark;
-		    SvREFCNT_inc(*mark);
+		    (void)SvREFCNT_inc(*mark);
 		}
 	    }
 	}

@@ -75,7 +75,7 @@ perl_construct(pTHXx)
 #ifdef USE_THREADS
     int i;
 #ifndef FAKE_THREADS
-    struct perl_thread *thr;
+    struct perl_thread *thr = NULL;
 #endif /* FAKE_THREADS */
 #endif /* USE_THREADS */
     

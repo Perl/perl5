@@ -28,9 +28,11 @@ sub import {
 	    unshift(@INC, "$_/$archname")    if -d "$_/$archname/auto";
 	    unshift(@INC, "$_/$archname/$]") if -d "$_/$archname/$]/auto";
 	}
-	# remove trailing duplicates
-	@INC = grep { ++$names{$_} == 1 } @INC;
     }
+
+    # remove trailing duplicates
+    @INC = grep { ++$names{$_} == 1 } @INC;
+    return;
 }
 
 
@@ -45,6 +47,7 @@ sub unimport {
 
     # Remove ALL instances of each named directory.
     @INC = grep { !exists $names{$_} } @INC;
+    return;
 }
 
 1;

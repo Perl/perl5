@@ -900,6 +900,8 @@ emergency_sbrk(MEM_SIZE size)
   do_croak:
     MALLOC_UNLOCK;
     croak("Out of memory during request for %i bytes", size);
+    /* NOTREACHED */
+    return Nullch;
 }
 
 #else /* !(defined(PERL_EMERGENCY_SBRK) && defined(PERL_CORE)) */
@@ -1574,7 +1576,7 @@ Perl_realloc(void *mp, size_t nbytes)
 		    bad_free_warn = (pbf) ? atoi(pbf) : 1;
 		}
 		if (!bad_free_warn)
-		    return;
+		    return Nullch;
 #ifdef RCHECK
 		warn("%srealloc() %signored",
 		    (ovp->ov_rmagic == RMAGIC - 1 ? "" : "Bad "),
@@ -1582,7 +1584,7 @@ Perl_realloc(void *mp, size_t nbytes)
 #else
 		warn("%s", "Bad realloc() ignored");
 #endif
-		return;				/* sanity */
+		return Nullch;			/* sanity */
 	    }
 
 	onb = BUCKET_SIZE_REAL(bucket);

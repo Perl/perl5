@@ -6158,8 +6158,10 @@ Perl_peep(pTHX_ register OP *o)
 	case OP_RV2AV:
 	case OP_RV2HV:
 	    if (!(o->op_flags & OPf_WANT)
-		|| o->op_flags & OPf_WANT == OPf_WANT_LIST)
+		|| (o->op_flags & OPf_WANT) == OPf_WANT_LIST)
+	    {
 		last_composite = o;
+	    }
 	    o->op_seq = PL_op_seqmax++;
 	    break;
 

@@ -2724,8 +2724,13 @@ it differs from "use vars", which is package scoped.)
 
 =item pack TEMPLATE,LIST
 
-Takes a list of values and packs it into a binary structure,
-returning the string containing the structure.  The TEMPLATE is a
+Takes a LIST of values and converts it into a string using the rules
+given by the TEMPLATE.  The resulting string is the concatenation of
+the converted values.  Typically, each converted value looks
+like its machine-level representation.  For example, on 32-bit machines
+a converted integer may be represented by a sequence of 4 bytes.
+
+The TEMPLATE is a
 sequence of characters that give the order and type of values, as
 follows:
 
@@ -2733,8 +2738,8 @@ follows:
     A	An ascii string, will be space padded.
     Z	A null terminated (asciz) string, will be null padded.
 
-    b	A bit string (ascending bit order, like vec()).
-    B	A bit string (descending bit order).
+    b	A bit string (ascending bit order inside each byte, like vec()).
+    B	A bit string (descending bit order inside each byte).
     h	A hex string (low nybble first).
     H	A hex string (high nybble first).
 
@@ -2802,18 +2807,46 @@ Each letter may optionally be followed by a number giving a repeat
 count.  With all types except C<"a">, C<"A">, C<"Z">, C<"b">, C<"B">, C<"h">,
 C<"H">, and C<"P"> the pack function will gobble up that many values from
 the LIST.  A C<*> for the repeat count means to use however many items are
-left.
+left, except for C<"@">, C<"x">, C<"X">, where it is equivalent
+to C<"0">, and C<"u">, where it is equivalent to 1 (or 45, what is the
+same).
+
+When used with C<"Z">, C<*> results in the addition of a trailing null
+byte (so the packed result will be one longer than the byte C<length>
+of the item).
+
+The repeat count for C<"u"> is interpreted as the maximal number of bytes
+to encode per line of output, with 0 and 1 replaced by 45.
 
 =item *
 
 The C<"a">, C<"A">, and C<"Z"> types gobble just one value, but pack it as a
 string of length count, padding with nulls or spaces as necessary.  When
 unpacking, C<"A"> strips trailing spaces and nulls, C<"Z"> strips everything
-after the first null, and C<"a"> returns data verbatim.
+after the first null, and C<"a"> returns data verbatim.  When packing,
+C<"a">, and C<"Z"> are equivalent.
+
+If the value-to-pack is too long, it is truncated.  If too long and an
+explicit count is provided, C<"Z"> packs only C<$count-1> bytes, followed
+by a null byte.  Thus C<"Z"> always packs a trailing null byte under
+all circumstances.
 
 =item *
 
 Likewise, the C<"b"> and C<"B"> fields pack a string that many bits long.
+Each byte of the input field generates 1 bit of the result basing on
+the least-signifant bit of each input byte, i.e., on C<ord($byte)%2>.
+In particular, bytes C<"0"> and C<"1"> generate bits 0 and 1.
+
+Starting from the beginning of the input string, each 8-tuple of bytes
+is converted to 1 byte of output.  If the length of the input string
+is not divisible by 8, the remainder is packed as if padded by 0s.
+Similarly, during unpack()ing the "extra" bits are ignored.
+
+If the input string is longer than needed, extra bytes are ignored.
+A C<*> for the repeat count of pack() means to use all the bytes of
+the input field.  On unpack()ing the bits are converted to a string
+of C<"0">s and C<"1">s.
 
 =item *
 
@@ -2827,7 +2860,7 @@ responsible for ensuring the string is not a temporary value (which can
 potentially get deallocated before you get around to using the packed result).
 The C<"P"> type packs a pointer to a structure of the size indicated by the
 length.  A NULL pointer is created if the corresponding value for C<"p"> or
-C<"P"> is C<undef>.
+C<"P"> is C<undef>, similarly for unpack().
 
 =item *
 
@@ -2956,6 +2989,12 @@ sequences of bytes.
 =item *
 
 A comment in a TEMPLATE starts with C<#> and goes to the end of line.
+
+=item *
+
+If TEMPLATE requires more arguments to pack() than actually given, pack()
+assumes additional C<""> arguments.  If TEMPLATE requires less arguments
+to pack() than actually given, extra arguments are ignored.
 
 =back
 
@@ -4869,8 +4908,14 @@ If LIST is omitted, uses C<$_>.
 =item unpack TEMPLATE,EXPR
 
 C<unpack> does the reverse of C<pack>: it takes a string
-representing a structure and expands it out into a list of values.
+and expands it out into a list of values.
 (In scalar context, it returns merely the first value produced.)
+
+The string is broken into chunks described by the TEMPLATE.  Each chunk
+is converted separately to a value.  Typically, either the string is a result
+of C<pack>, or the bytes of the string represent a C structure of some
+kind.
+
 The TEMPLATE has the same format as in the C<pack> function.
 Here's a subroutine that does substring:
 
@@ -4883,9 +4928,14 @@ and then there's
 
     sub ordinal { unpack("c",$_[0]); } # same as ord()
 
-In addition, you may prefix a field with a %E<lt>numberE<gt> to indicate that
+In addition to fields allowed in pack(), you may prefix a field with
+a %E<lt>numberE<gt> to indicate that
 you want a E<lt>numberE<gt>-bit checksum of the items instead of the items
-themselves.  Default is a 16-bit checksum.  For example, the following
+themselves.  Default is a 16-bit checksum.  Checksum is calculated by
+summing numeric values of expanded values (for string fields the sum of
+C<ord($char)> is taken, for bit fields the sum of zeroes and ones).
+
+For example, the following
 computes the same number as the System V sum program:
 
     $checksum = do {
@@ -4901,6 +4951,10 @@ The C<"p"> and C<"P"> formats should be used with care.  Since Perl
 has no way of checking whether the value passed to C<unpack()>
 corresponds to a valid memory location, passing a pointer value that's
 not known to be valid is likely to have disastrous consequences.
+
+If the repeat count of a field is larger than what the remainder of
+the input string allows, repeat count is decreased.  If the input string
+is longer than one described by the TEMPLATE, the rest is ignored. 
 
 See L</pack> for more examples and notes.
 
@@ -5030,11 +5084,12 @@ See also C<keys>, C<each>, and C<sort>.
 
 =item vec EXPR,OFFSET,BITS
 
-Treats the string in EXPR as a vector of unsigned integers, and
-returns the value of the bit field specified by OFFSET.  BITS
-specifies the number of bits that are reserved for each entry in the
-bit vector.  This must be a power of two from 1 to 32 (or 64, if your
-platform supports that).
+Treats the string in EXPR as a bit vector made up of elements of
+width BITS, and returns the value of the element specified by OFFSET
+as an unsigned integer.  BITS therefore specifies the number of bits
+that are reserved for each element in the bit vector.  This must
+be a power of two from 1 to 32 (or 64, if your platform supports
+that).
 
 C<vec> may also be assigned to, in which case parentheses are needed
 to give the expression the correct precedence as in
@@ -5052,6 +5107,10 @@ in the same way on big-endian or little-endian machines.
 
     my $foo = '';
     vec($foo,  0, 32) = 0x5065726C;	# 'Perl'
+
+    # $foo eq "Perl" eq "\x50\x65\x72\x6C", 32 bits
+    print vec($foo, 0, 8);		# prints 80 == 0x50 == ord('P')
+
     vec($foo,  2, 16) = 0x5065;		# 'PerlPe'
     vec($foo,  3, 16) = 0x726C;		# 'PerlPerl'
     vec($foo,  8,  8) = 0x50;		# 'PerlPerlP'
@@ -5070,6 +5129,171 @@ To transform a bit vector into a string or list of 0's and 1's, use these:
     @bits = split(//, unpack("b*", $vector));
 
 If you know the exact length in bits, it can be used in place of the C<*>.
+
+Here is an example to illustrate how the bits actually fall in place:
+
+    #!/usr/bin/perl -wl
+
+    print <<'EOT';
+                                      0         1         2         3  
+                       unpack("V",$_) 01234567890123456789012345678901
+    ------------------------------------------------------------------
+    EOT
+
+    for $w (0..3) {
+        $width = 2**$w;
+        for ($shift=0; $shift < $width; ++$shift) {
+            for ($off=0; $off < 32/$width; ++$off) {
+                $str = pack("B*", "0"x32);
+                $bits = (1<<$shift);
+                vec($str, $off, $width) = $bits;
+                $res = unpack("b*",$str);
+                $val = unpack("V", $str);
+                write;
+            }
+        }
+    }
+
+    format STDOUT =
+    vec($_,@#,@#) = @<< == @######### @>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    $off, $width, $bits, $val, $res
+    .
+    __END__
+
+Regardless of the machine architecture on which it is run, the above
+example should print the following table:
+
+                                      0         1         2         3  
+                       unpack("V",$_) 01234567890123456789012345678901
+    ------------------------------------------------------------------
+    vec($_, 0, 1) = 1   ==          1 10000000000000000000000000000000
+    vec($_, 1, 1) = 1   ==          2 01000000000000000000000000000000
+    vec($_, 2, 1) = 1   ==          4 00100000000000000000000000000000
+    vec($_, 3, 1) = 1   ==          8 00010000000000000000000000000000
+    vec($_, 4, 1) = 1   ==         16 00001000000000000000000000000000
+    vec($_, 5, 1) = 1   ==         32 00000100000000000000000000000000
+    vec($_, 6, 1) = 1   ==         64 00000010000000000000000000000000
+    vec($_, 7, 1) = 1   ==        128 00000001000000000000000000000000
+    vec($_, 8, 1) = 1   ==        256 00000000100000000000000000000000
+    vec($_, 9, 1) = 1   ==        512 00000000010000000000000000000000
+    vec($_,10, 1) = 1   ==       1024 00000000001000000000000000000000
+    vec($_,11, 1) = 1   ==       2048 00000000000100000000000000000000
+    vec($_,12, 1) = 1   ==       4096 00000000000010000000000000000000
+    vec($_,13, 1) = 1   ==       8192 00000000000001000000000000000000
+    vec($_,14, 1) = 1   ==      16384 00000000000000100000000000000000
+    vec($_,15, 1) = 1   ==      32768 00000000000000010000000000000000
+    vec($_,16, 1) = 1   ==      65536 00000000000000001000000000000000
+    vec($_,17, 1) = 1   ==     131072 00000000000000000100000000000000
+    vec($_,18, 1) = 1   ==     262144 00000000000000000010000000000000
+    vec($_,19, 1) = 1   ==     524288 00000000000000000001000000000000
+    vec($_,20, 1) = 1   ==    1048576 00000000000000000000100000000000
+    vec($_,21, 1) = 1   ==    2097152 00000000000000000000010000000000
+    vec($_,22, 1) = 1   ==    4194304 00000000000000000000001000000000
+    vec($_,23, 1) = 1   ==    8388608 00000000000000000000000100000000
+    vec($_,24, 1) = 1   ==   16777216 00000000000000000000000010000000
+    vec($_,25, 1) = 1   ==   33554432 00000000000000000000000001000000
+    vec($_,26, 1) = 1   ==   67108864 00000000000000000000000000100000
+    vec($_,27, 1) = 1   ==  134217728 00000000000000000000000000010000
+    vec($_,28, 1) = 1   ==  268435456 00000000000000000000000000001000
+    vec($_,29, 1) = 1   ==  536870912 00000000000000000000000000000100
+    vec($_,30, 1) = 1   == 1073741824 00000000000000000000000000000010
+    vec($_,31, 1) = 1   == 2147483648 00000000000000000000000000000001
+    vec($_, 0, 2) = 1   ==          1 10000000000000000000000000000000
+    vec($_, 1, 2) = 1   ==          4 00100000000000000000000000000000
+    vec($_, 2, 2) = 1   ==         16 00001000000000000000000000000000
+    vec($_, 3, 2) = 1   ==         64 00000010000000000000000000000000
+    vec($_, 4, 2) = 1   ==        256 00000000100000000000000000000000
+    vec($_, 5, 2) = 1   ==       1024 00000000001000000000000000000000
+    vec($_, 6, 2) = 1   ==       4096 00000000000010000000000000000000
+    vec($_, 7, 2) = 1   ==      16384 00000000000000100000000000000000
+    vec($_, 8, 2) = 1   ==      65536 00000000000000001000000000000000
+    vec($_, 9, 2) = 1   ==     262144 00000000000000000010000000000000
+    vec($_,10, 2) = 1   ==    1048576 00000000000000000000100000000000
+    vec($_,11, 2) = 1   ==    4194304 00000000000000000000001000000000
+    vec($_,12, 2) = 1   ==   16777216 00000000000000000000000010000000
+    vec($_,13, 2) = 1   ==   67108864 00000000000000000000000000100000
+    vec($_,14, 2) = 1   ==  268435456 00000000000000000000000000001000
+    vec($_,15, 2) = 1   == 1073741824 00000000000000000000000000000010
+    vec($_, 0, 2) = 2   ==          2 01000000000000000000000000000000
+    vec($_, 1, 2) = 2   ==          8 00010000000000000000000000000000
+    vec($_, 2, 2) = 2   ==         32 00000100000000000000000000000000
+    vec($_, 3, 2) = 2   ==        128 00000001000000000000000000000000
+    vec($_, 4, 2) = 2   ==        512 00000000010000000000000000000000
+    vec($_, 5, 2) = 2   ==       2048 00000000000100000000000000000000
+    vec($_, 6, 2) = 2   ==       8192 00000000000001000000000000000000
+    vec($_, 7, 2) = 2   ==      32768 00000000000000010000000000000000
+    vec($_, 8, 2) = 2   ==     131072 00000000000000000100000000000000
+    vec($_, 9, 2) = 2   ==     524288 00000000000000000001000000000000
+    vec($_,10, 2) = 2   ==    2097152 00000000000000000000010000000000
+    vec($_,11, 2) = 2   ==    8388608 00000000000000000000000100000000
+    vec($_,12, 2) = 2   ==   33554432 00000000000000000000000001000000
+    vec($_,13, 2) = 2   ==  134217728 00000000000000000000000000010000
+    vec($_,14, 2) = 2   ==  536870912 00000000000000000000000000000100
+    vec($_,15, 2) = 2   == 2147483648 00000000000000000000000000000001
+    vec($_, 0, 4) = 1   ==          1 10000000000000000000000000000000
+    vec($_, 1, 4) = 1   ==         16 00001000000000000000000000000000
+    vec($_, 2, 4) = 1   ==        256 00000000100000000000000000000000
+    vec($_, 3, 4) = 1   ==       4096 00000000000010000000000000000000
+    vec($_, 4, 4) = 1   ==      65536 00000000000000001000000000000000
+    vec($_, 5, 4) = 1   ==    1048576 00000000000000000000100000000000
+    vec($_, 6, 4) = 1   ==   16777216 00000000000000000000000010000000
+    vec($_, 7, 4) = 1   ==  268435456 00000000000000000000000000001000
+    vec($_, 0, 4) = 2   ==          2 01000000000000000000000000000000
+    vec($_, 1, 4) = 2   ==         32 00000100000000000000000000000000
+    vec($_, 2, 4) = 2   ==        512 00000000010000000000000000000000
+    vec($_, 3, 4) = 2   ==       8192 00000000000001000000000000000000
+    vec($_, 4, 4) = 2   ==     131072 00000000000000000100000000000000
+    vec($_, 5, 4) = 2   ==    2097152 00000000000000000000010000000000
+    vec($_, 6, 4) = 2   ==   33554432 00000000000000000000000001000000
+    vec($_, 7, 4) = 2   ==  536870912 00000000000000000000000000000100
+    vec($_, 0, 4) = 4   ==          4 00100000000000000000000000000000
+    vec($_, 1, 4) = 4   ==         64 00000010000000000000000000000000
+    vec($_, 2, 4) = 4   ==       1024 00000000001000000000000000000000
+    vec($_, 3, 4) = 4   ==      16384 00000000000000100000000000000000
+    vec($_, 4, 4) = 4   ==     262144 00000000000000000010000000000000
+    vec($_, 5, 4) = 4   ==    4194304 00000000000000000000001000000000
+    vec($_, 6, 4) = 4   ==   67108864 00000000000000000000000000100000
+    vec($_, 7, 4) = 4   == 1073741824 00000000000000000000000000000010
+    vec($_, 0, 4) = 8   ==          8 00010000000000000000000000000000
+    vec($_, 1, 4) = 8   ==        128 00000001000000000000000000000000
+    vec($_, 2, 4) = 8   ==       2048 00000000000100000000000000000000
+    vec($_, 3, 4) = 8   ==      32768 00000000000000010000000000000000
+    vec($_, 4, 4) = 8   ==     524288 00000000000000000001000000000000
+    vec($_, 5, 4) = 8   ==    8388608 00000000000000000000000100000000
+    vec($_, 6, 4) = 8   ==  134217728 00000000000000000000000000010000
+    vec($_, 7, 4) = 8   == 2147483648 00000000000000000000000000000001
+    vec($_, 0, 8) = 1   ==          1 10000000000000000000000000000000
+    vec($_, 1, 8) = 1   ==        256 00000000100000000000000000000000
+    vec($_, 2, 8) = 1   ==      65536 00000000000000001000000000000000
+    vec($_, 3, 8) = 1   ==   16777216 00000000000000000000000010000000
+    vec($_, 0, 8) = 2   ==          2 01000000000000000000000000000000
+    vec($_, 1, 8) = 2   ==        512 00000000010000000000000000000000
+    vec($_, 2, 8) = 2   ==     131072 00000000000000000100000000000000
+    vec($_, 3, 8) = 2   ==   33554432 00000000000000000000000001000000
+    vec($_, 0, 8) = 4   ==          4 00100000000000000000000000000000
+    vec($_, 1, 8) = 4   ==       1024 00000000001000000000000000000000
+    vec($_, 2, 8) = 4   ==     262144 00000000000000000010000000000000
+    vec($_, 3, 8) = 4   ==   67108864 00000000000000000000000000100000
+    vec($_, 0, 8) = 8   ==          8 00010000000000000000000000000000
+    vec($_, 1, 8) = 8   ==       2048 00000000000100000000000000000000
+    vec($_, 2, 8) = 8   ==     524288 00000000000000000001000000000000
+    vec($_, 3, 8) = 8   ==  134217728 00000000000000000000000000010000
+    vec($_, 0, 8) = 16  ==         16 00001000000000000000000000000000
+    vec($_, 1, 8) = 16  ==       4096 00000000000010000000000000000000
+    vec($_, 2, 8) = 16  ==    1048576 00000000000000000000100000000000
+    vec($_, 3, 8) = 16  ==  268435456 00000000000000000000000000001000
+    vec($_, 0, 8) = 32  ==         32 00000100000000000000000000000000
+    vec($_, 1, 8) = 32  ==       8192 00000000000001000000000000000000
+    vec($_, 2, 8) = 32  ==    2097152 00000000000000000000010000000000
+    vec($_, 3, 8) = 32  ==  536870912 00000000000000000000000000000100
+    vec($_, 0, 8) = 64  ==         64 00000010000000000000000000000000
+    vec($_, 1, 8) = 64  ==      16384 00000000000000100000000000000000
+    vec($_, 2, 8) = 64  ==    4194304 00000000000000000000001000000000
+    vec($_, 3, 8) = 64  == 1073741824 00000000000000000000000000000010
+    vec($_, 0, 8) = 128 ==        128 00000001000000000000000000000000
+    vec($_, 1, 8) = 128 ==      32768 00000000000000010000000000000000
+    vec($_, 2, 8) = 128 ==    8388608 00000000000000000000000100000000
+    vec($_, 3, 8) = 128 == 2147483648 00000000000000000000000000000001
 
 =item wait
 

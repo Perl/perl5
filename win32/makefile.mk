@@ -25,11 +25,6 @@ INST_DRV	*= c:
 INST_TOP	*= $(INST_DRV)\perl
 
 #
-# Uncomment this if you are compiling under Windows 95/98 and command.com
-# (not needed if you're running under 4DOS/NT 6.01 or later)
-#IS_WIN95	*= define
-
-#
 # Comment this out if you DON'T want your perl installation to be versioned.
 # This means that the new installation will overwrite any files from the
 # old installation at the same INST_TOP location.  Leaving it enabled is
@@ -38,7 +33,7 @@ INST_TOP	*= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER	*= \5.00561
+INST_VER	*= \5.00562
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -87,6 +82,11 @@ INST_ARCH	*= \$(ARCHNAME)
 CCTYPE		*= BORLAND
 # mingw32/egcs or mingw32/gcc
 #CCTYPE		*= GCC
+
+#
+# uncomment this if you are compiling under Windows 95/98 and command.com
+# (not needed if you're running under 4DOS/NT 6.01 or later)
+#IS_WIN95	*= define
 
 #
 # uncomment next line if you want debug version of perl (big,slow)
