@@ -20,7 +20,7 @@ use vars qw($VERSION @ISA
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
-$VERSION = '1.40';
+$VERSION = '1.41';
 
 require ExtUtils::MM_Any;
 @ISA = qw(ExtUtils::MM_Any);
@@ -1031,8 +1031,6 @@ sub dynamic {
 
     my($self) = shift;
     '
-## $(INST_PM) has been moved to the all: target.
-## It remains here for awhile to allow for old usage: "make dynamic"
 dynamic :: $(FIRST_MAKEFILE) $(INST_DYNAMIC) $(INST_BOOT)
 	$(NOECHO) $(NOOP)
 ';
@@ -2598,13 +2596,21 @@ sub installbin {
 	$fromto{$from}=$to;
     }
     @to   = values %fromto;
+
+    my $fixin;
+    if( $Is_Win32 ) {
+        $fixin = $self->{PERL_CORE} ? '$(PERLRUN) ../../win32/bin/pl2bat.pl'
+                                    : 'pl2bat.bat';
+    }
+    else {
+        $fixin = q{$(PERLRUN) "-MExtUtils::MY" -e "MY->fixin(shift)"};
+    }
+
     push(@m, qq{
 EXE_FILES = @{$self->{EXE_FILES}}
 
-} . ($Is_Win32
-  ? q{FIXIN = pl2bat.bat
-} : q{FIXIN = $(PERLRUN) "-MExtUtils::MY" -e "MY->fixin(shift)"
-}).qq{
+FIXIN = $fixin
+
 pure_all :: @to
 	\$(NOECHO) \$(NOOP)
 
