@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Jul 31 18:10:25 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Wed Aug  1 02:58:53 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -6772,13 +6772,14 @@ be asked later to configure the CPAN.pm module which will in turn do
 the installation of the rest of the extra modules or bundles.)
 
 Notice also that if the modules require any external software such as
-libraries (the libz library for the Compress::Zlib module, for example)
-you *NEED* to have any such external software already installed, this
-configuration process will not install such things for you.
+libraries and headers (the libz library and the zlib.h header for the
+Compress::Zlib module, for example) you MUST have any such software
+already installed, this configuration process will NOT install such
+things for you.
 
 If this doesn't make any sense to you, just accept the default '$dflt'.
 EOM
-rp='Install any extra modules (y or n) ?'
+rp='Install any extra modules (y or n)?'
 . ./myread
 case "$ans" in
 y|Y)
@@ -6786,8 +6787,8 @@ y|Y)
 
 Please list any extra modules or bundles to be installed from CPAN,
 with spaces between the names.  The names can be in any format the
-'install' command of CPAN.pm will understand.  (Answer 'none' the
-quotes, to install no extra modules or bundles.)
+'install' command of CPAN.pm will understand.  (Answer 'none',
+without the quotes, to install no extra modules or bundles.)
 EOM
 	rp='Extras?'
 	dflt="$extras"
@@ -6800,8 +6801,8 @@ case "$extras" in
 	$rm -f ../extras.lst
 	;;
 *)	echo "(Saving the list of extras for later...)"
-	echo $extras > ../extras.lst
-	val="$extras"
+	echo "$extras" > ../extras.lst
+	val="'$extras'"
 	;;
 esac
 set extras
