@@ -3270,8 +3270,17 @@ OP *block;
 	if (name) {
 	    char *s = strrchr(name, ':');
 	    s = s ? s+1 : name;
-	    if (strEQ(s, "BEGIN"))
-		croak("BEGIN not safe after errors--compilation aborted");
+	    if (strEQ(s, "BEGIN")) {
+		char *not_safe =
+		    "BEGIN not safe after errors--compilation aborted";
+		if (in_eval & 4)
+		    croak(not_safe);
+		else {
+		    /* force display of errors found but not reported */
+		    sv_catpv(GvSV(errgv), not_safe);
+		    croak("%s", SvPVx(GvSV(errgv), na));
+		}
+	    }
 	}
     }
     if (!block) {
