@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Jan 12 14:18:05 MET 2004 [metaconfig 3.0 PL70]
+# Generated on Mon Jan 19 17:27:25 MET 2004 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -6876,7 +6876,7 @@ EOM
 rp='List of earlier versions to include in @INC?'
 . ./myread
 case "$ans" in
-[Nn]one|''|' ') inc_version_list=' ' ;;
+[Nn]one|''|' '|$undef) inc_version_list=' ' ;;
 *) inc_version_list="$ans" ;;
 esac
 case "$inc_version_list" in
