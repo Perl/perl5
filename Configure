@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sat Jul 29 02:22:13 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Sat Jul 29 02:48:03 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -3183,7 +3183,7 @@ case "$gccversion" in
 esac
 case "$gccversion" in
 '') gccosandvers='' ;;
-*) gccosandvers=`gcc -v 2>&1|grep '/specs$'|sed 's!.*/[^-]*-[^-]*-\([^/]*\)/'$gccversion'/specs$!\1!'`
+*) gccosandvers=`$cc -v 2>&1|grep '/specs$'|sed 's!.*/[^-]*-[^-]*-\([^/]*\)/'$gccversion'/specs$!\1!'`
    case "$gccosandvers" in
    $osname$osvers) ;;
    $osname*) cat <<EOM >&4
@@ -3204,7 +3204,7 @@ case "$gccversion" in
 
 EOM
       ;;
-   *) ;; # failed to parse, better be silent
+   *) gccosandvers='' ;; # failed to parse, better be silent
    esac
    ;;
 esac
