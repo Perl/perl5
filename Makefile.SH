@@ -659,7 +659,7 @@ $define)
     xxx=''
     echo "This is an EBCDIC system, checking if any parser files need regenerating." >&4
 case "$osname" in
-os390)
+os390|posix-bc)
     rm -f y.tab.c y.tab.h
     yacc -d perly.y >/dev/null 2>&1
     if cmp -s y.tab.c perly.c; then
