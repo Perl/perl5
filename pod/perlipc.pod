@@ -837,7 +837,7 @@ domain sockets can show up in the file system with an ls(1) listing.
 You can test for these with Perl's B<-S> file test:
 
     unless ( -S '/dev/log' ) {
-	die "something's wicked with the print system";
+	die "something's wicked with the log system";
     }
 
 Here's a sample Unix-domain client:
