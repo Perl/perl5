@@ -1844,6 +1844,7 @@ distribution available at http://www.perl.com/CPAN/src/index.html
 
 	AIX
 	DOS DJGPP 	1)
+	EPOC
 	FreeBSD
 	HP-UX
 	IRIX
