@@ -30,7 +30,6 @@ Version v5.9.X		Development release working toward v5.10
 
 ____________________________________________________________________________
 ____________________________________________________________________________
-____________________________________________________________________________
 [ 21538] By: ams                                   on 2003/10/26  08:08:02
         Log: Fix off-by-one in $0 set magic. (From Autrijus.)
              The whole PL_origalen thing in perl.c looks very hokey.
@@ -1428,6 +1427,7 @@ ____________________________________________________________________________
         Log: Update changes
      Branch: perl
 	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 21398] By: hv                                    on 2003/10/02  09:15:42
         Log: build perlapi.pod in deterministic order even when functions differ
              only in case; regen perlapi.pod
