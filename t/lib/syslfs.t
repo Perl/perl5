@@ -1,5 +1,5 @@
 # NOTE: this file tests how large files (>2GB) work with raw system IO.
-# open(), tell(), seek(), print(), read() are tested in t/op/lfs.t.
+# stdio: open(), tell(), seek(), print(), read() is tested in t/op/lfs.t.
 # If you modify/add tests here, remember to update also t/op/lfs.t.
 
 BEGIN {
@@ -14,9 +14,15 @@ BEGIN {
 	require Fcntl; import Fcntl qw(/^O_/ /^SEEK_/);
 }
 
-sub bye {
+sub zap {
     close(BIG);
-    unlink "big";
+    unlink("big");
+    unlink("big1");
+    unlink("big2");
+}
+
+sub bye {
+    zap(); 
     exit(0);
 }
 
@@ -59,26 +65,38 @@ if ($^O eq 'unicos') {
 # consume less blocks than one megabyte (assuming nobody has
 # one megabyte blocks...)
 
-sysopen(BIG, "big", O_WRONLY|O_CREAT|O_TRUNC) or
-	do { warn "sysopen failed: $!\n"; bye };
-sysseek(BIG, 1_000_000, SEEK_SET);
-syswrite(BIG, "big");
-close(BIG);
+sysopen(BIG, "big1", O_WRONLY|O_CREAT|O_TRUNC) or
+    do { warn "sysopen big1 failed: $!\n"; bye };
+sysseek(BIG, 1_000_000, SEEK_SET) or
+    do { warn "sysseek big1 failed: $!\n"; bye };
+syswrite(BIG, "big") or
+    do { warn "syswrite big1 failed; $!\n"; bye };
+close(BIG) or
+    do { warn "close big1 failed: $!\n"; bye };
 
-my @s;
+my @s1 = stat("big1");
 
-@s = stat("big");
+print "# s1 = @s1\n";
 
-print "# @s\n";
+sysopen(BIG, "big2", O_WRONLY|O_CREAT|O_TRUNC) or
+    do { warn "sysopen big2 failed: $!\n"; bye };
+sysseek(BIG, 2_000_000, SEEK_SET) or
+    do { warn "sysseek big2 failed: $!\n"; bye };
+syswrite(BIG, "big") or
+    do { warn "syswrite big2 failed; $!\n"; bye };
+close(BIG) or
+    do { warn "close big2 failed: $!\n"; bye };
 
-my $BLOCKSIZE = $s[11] || 512;
+my @s2 = stat("big2");
 
-unless (@s == 13 &&
-	$s[7] == 1_000_003 &&
-	defined $s[12] &&
-	$BLOCKSIZE * $s[12] < 1_000_003) {
-    print "1..0\n# no sparse files?\n";
-    bye();
+print "# s2 = @s2\n";
+
+zap();
+
+unless ($s1[7] == 1_000_003 && $s2[7] == 2_000_003 &&
+	$s1[11] == $s2[11] && $s1[12] == $s2[12]) {
+	print "1..0\n#no sparse files?\n";
+	bye;
 }
 
 print "# we seem to have sparse files...\n";
@@ -181,7 +199,7 @@ fail unless $big eq "big";
 print "ok 14\n";
 
 # 705_032_704 = (I32)5_000_000_000
-fail unless seek(BIG, 705_032_704, $SEEK_SET);
+fail unless seek(BIG, 705_032_704, SEEK_SET);
 print "ok 15\n";
 
 my $zero;
