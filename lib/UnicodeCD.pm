@@ -393,8 +393,8 @@ by L</charblocks> and </charscripts> by using charinrange():
     my $compexcl = compexcl("09dc");
 
 The compexcl() returns the composition exclusion (that is, if the
-character cannot be decomposed) of the character specified by a B<code
-point argument>.
+character should not be produced during a precomposition) of the 
+character specified by a B<code point argument>.
 
 If there is a composition exclusion for the character, true is
 returned.  Otherwise, false is returned.
