@@ -72,12 +72,10 @@ main(int argc, char **argv, char **env)
     }
     PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
     exitstatus = perl_parse(my_perl, xs_init, argc, argv, (char **)NULL);
-    if (!exitstatus) {
+    if (!exitstatus)
         perl_run(my_perl);
-        exitstatus = perl_destruct(my_perl);
-    } else {
-        perl_destruct(my_perl);
-    }
+      
+    exitstatus = perl_destruct(my_perl);
 
     perl_free(my_perl);
 
