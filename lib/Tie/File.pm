@@ -97,6 +97,7 @@ sub TIEARRAY {
     $fh = \do { local *FH };   # only works in 5.005 and later
     sysopen $fh, $file, $opts{mode}, 0666 or return;
     binmode $fh;
+    ++$opts{ourfh};
   }
   { my $ofh = select $fh; $| = 1; select $ofh } # autoflush on write
   if (defined $opts{discipline} && $] >= 5.006) {
@@ -407,6 +408,10 @@ sub DESTROY {
   my $self = shift;
   $self->flush if $self->_is_deferring;
   $self->{cache}->delink if defined $self->{cache}; # break circular link
+  if ($self->{fh} and $self->{ourfh}) {
+      delete $self->{ourfh};
+      close delete $self->{fh};
+  }
 }
 
 sub _splice {
@@ -2288,6 +2293,11 @@ array.  Handles must be attached to seekable sources of data---that
 means no pipes or sockets.  If C<Tie::File> can detect that you
 supplied a non-seekable handle, the C<tie> call will throw an
 exception.  (On Unix systems, it can detect this.)
+
+Note that Tie::File will only close any filehandles that it opened
+internally.  If you passed it a filehandle as above, you "own" the
+filehandle, and are responsible for closing it after you have untied
+the @array.
 
 =head1 Deferred Writing
 

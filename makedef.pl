@@ -1006,6 +1006,7 @@ if ($PLATFORM =~ /^win(?:32|ce)$/) {
 			    Perl_init_os_extras
 			    Perl_thread_create
 			    Perl_win32_init
+			    Perl_win32_term
 			    RunPerl
 			    win32_async_check
 			    win32_errno

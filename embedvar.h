@@ -296,6 +296,7 @@
 #define PL_linestart		(vTHX->Ilinestart)
 #define PL_linestr		(vTHX->Ilinestr)
 #define PL_localpatches		(vTHX->Ilocalpatches)
+#define PL_lockhook		(vTHX->Ilockhook)
 #define PL_main_cv		(vTHX->Imain_cv)
 #define PL_main_root		(vTHX->Imain_root)
 #define PL_main_start		(vTHX->Imain_start)
@@ -349,6 +350,7 @@
 #define PL_perldb		(vTHX->Iperldb)
 #define PL_perlio		(vTHX->Iperlio)
 #define PL_pidstatus		(vTHX->Ipidstatus)
+#define PL_ppid			(vTHX->Ippid)
 #define PL_preambleav		(vTHX->Ipreambleav)
 #define PL_preambled		(vTHX->Ipreambled)
 #define PL_preprocess		(vTHX->Ipreprocess)
@@ -365,9 +367,12 @@
 #define PL_rsfp			(vTHX->Irsfp)
 #define PL_rsfp_filters		(vTHX->Irsfp_filters)
 #define PL_runops		(vTHX->Irunops)
+#define PL_runops_dbg		(vTHX->Irunops_dbg)
+#define PL_runops_std		(vTHX->Irunops_std)
 #define PL_savebegin		(vTHX->Isavebegin)
 #define PL_sawampersand		(vTHX->Isawampersand)
 #define PL_sh_path_compat	(vTHX->Ish_path_compat)
+#define PL_sharehook		(vTHX->Isharehook)
 #define PL_sig_pending		(vTHX->Isig_pending)
 #define PL_sighandlerp		(vTHX->Isighandlerp)
 #define PL_signals		(vTHX->Isignals)
@@ -394,9 +399,11 @@
 #define PL_sys_intern		(vTHX->Isys_intern)
 #define PL_taint_warn		(vTHX->Itaint_warn)
 #define PL_tainting		(vTHX->Itainting)
+#define PL_threadhook		(vTHX->Ithreadhook)
 #define PL_tokenbuf		(vTHX->Itokenbuf)
 #define PL_uid			(vTHX->Iuid)
 #define PL_unicode		(vTHX->Iunicode)
+#define PL_unlockhook		(vTHX->Iunlockhook)
 #define PL_unsafe		(vTHX->Iunsafe)
 #define PL_utf8_alnum		(vTHX->Iutf8_alnum)
 #define PL_utf8_alnumc		(vTHX->Iutf8_alnumc)
@@ -590,6 +597,7 @@
 #define PL_Ilinestart		PL_linestart
 #define PL_Ilinestr		PL_linestr
 #define PL_Ilocalpatches	PL_localpatches
+#define PL_Ilockhook		PL_lockhook
 #define PL_Imain_cv		PL_main_cv
 #define PL_Imain_root		PL_main_root
 #define PL_Imain_start		PL_main_start
@@ -643,6 +651,7 @@
 #define PL_Iperldb		PL_perldb
 #define PL_Iperlio		PL_perlio
 #define PL_Ipidstatus		PL_pidstatus
+#define PL_Ippid		PL_ppid
 #define PL_Ipreambleav		PL_preambleav
 #define PL_Ipreambled		PL_preambled
 #define PL_Ipreprocess		PL_preprocess
@@ -659,9 +668,12 @@
 #define PL_Irsfp		PL_rsfp
 #define PL_Irsfp_filters	PL_rsfp_filters
 #define PL_Irunops		PL_runops
+#define PL_Irunops_dbg		PL_runops_dbg
+#define PL_Irunops_std		PL_runops_std
 #define PL_Isavebegin		PL_savebegin
 #define PL_Isawampersand	PL_sawampersand
 #define PL_Ish_path_compat	PL_sh_path_compat
+#define PL_Isharehook		PL_sharehook
 #define PL_Isig_pending		PL_sig_pending
 #define PL_Isighandlerp		PL_sighandlerp
 #define PL_Isignals		PL_signals
@@ -688,9 +700,11 @@
 #define PL_Isys_intern		PL_sys_intern
 #define PL_Itaint_warn		PL_taint_warn
 #define PL_Itainting		PL_tainting
+#define PL_Ithreadhook		PL_threadhook
 #define PL_Itokenbuf		PL_tokenbuf
 #define PL_Iuid			PL_uid
 #define PL_Iunicode		PL_unicode
+#define PL_Iunlockhook		PL_unlockhook
 #define PL_Iunsafe		PL_unsafe
 #define PL_Iutf8_alnum		PL_utf8_alnum
 #define PL_Iutf8_alnumc		PL_utf8_alnumc
@@ -880,18 +894,11 @@
 #define PL_do_undump		(PL_Vars.Gdo_undump)
 #define PL_dollarzero_mutex	(PL_Vars.Gdollarzero_mutex)
 #define PL_hexdigit		(PL_Vars.Ghexdigit)
-#define PL_lockhook		(PL_Vars.Glockhook)
 #define PL_malloc_mutex		(PL_Vars.Gmalloc_mutex)
 #define PL_op_mutex		(PL_Vars.Gop_mutex)
 #define PL_patleave		(PL_Vars.Gpatleave)
-#define PL_ppid			(PL_Vars.Gppid)
-#define PL_runops_dbg		(PL_Vars.Grunops_dbg)
-#define PL_runops_std		(PL_Vars.Grunops_std)
 #define PL_sh_path		(PL_Vars.Gsh_path)
-#define PL_sharehook		(PL_Vars.Gsharehook)
 #define PL_thr_key		(PL_Vars.Gthr_key)
-#define PL_threadhook		(PL_Vars.Gthreadhook)
-#define PL_unlockhook		(PL_Vars.Gunlockhook)
 
 #else /* !PERL_GLOBAL_STRUCT */
 
@@ -901,18 +908,11 @@
 #define PL_Gdo_undump		PL_do_undump
 #define PL_Gdollarzero_mutex	PL_dollarzero_mutex
 #define PL_Ghexdigit		PL_hexdigit
-#define PL_Glockhook		PL_lockhook
 #define PL_Gmalloc_mutex	PL_malloc_mutex
 #define PL_Gop_mutex		PL_op_mutex
 #define PL_Gpatleave		PL_patleave
-#define PL_Gppid		PL_ppid
-#define PL_Grunops_dbg		PL_runops_dbg
-#define PL_Grunops_std		PL_runops_std
 #define PL_Gsh_path		PL_sh_path
-#define PL_Gsharehook		PL_sharehook
 #define PL_Gthr_key		PL_thr_key
-#define PL_Gthreadhook		PL_threadhook
-#define PL_Gunlockhook		PL_unlockhook
 
 #endif /* PERL_GLOBAL_STRUCT */
 

@@ -4884,6 +4884,13 @@ Perl_win32_init(int *argcp, char ***argvp)
 }
 
 void
+Perl_win32_term(void)
+{
+    OP_REFCNT_TERM;
+    MALLOC_TERM;
+}
+
+void
 win32_get_child_IO(child_IO_table* ptbl)
 {
     ptbl->childStdIn	= GetStdHandle(STD_INPUT_HANDLE);

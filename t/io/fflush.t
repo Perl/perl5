@@ -3,6 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    require './test.pl';
 }
 
 # Script to test auto flush on fork/exec/system/qx.  The idea is to
@@ -132,7 +133,11 @@ for (qw(system qx popen)) {
     ++$t;
 }
 
-my $cmd = qq[$runperl -e "print qq[ok \$_\\n] for ($t..$t+2)"];
+my $cmd = _create_runperl(
+			  switches => ['-l'],
+			  prog =>
+			  sprintf('print qq[ok $_] for (%d..%d)', $t, $t+2));
+print "# cmd = '$cmd'\n";
 open my $CMD, "$cmd |" or die "Can't open pipe to '$cmd': $!";
 while (<$CMD>) {
     system("$runperl -e 0");

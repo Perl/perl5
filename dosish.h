@@ -30,6 +30,7 @@
 #else	/* DJGPP */
 #  ifdef WIN32
 #    define PERL_SYS_INIT(c,v)	Perl_win32_init(c,v)
+#    define PERL_SYS_TERM()	Perl_win32_term()
 #    define BIT_BUCKET "nul"
 #  else
 #	 ifdef NETWARE
@@ -42,7 +43,9 @@
 #  endif
 #endif	/* DJGPP */
 
-#define PERL_SYS_TERM() OP_REFCNT_TERM; MALLOC_TERM
+#ifndef PERL_SYS_TERM
+#  define PERL_SYS_TERM() OP_REFCNT_TERM; MALLOC_TERM
+#endif
 #define dXSUB_SYS
 
 /*
