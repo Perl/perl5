@@ -4,6 +4,6 @@ WriteMakefile(
 	NAME			=> q(Mac::QDOffscreen),
 	'VERSION_FROM'		=> 'QDOffscreen.pm',
 	'LINKTYPE'		=> 'static dynamic',
-	TYPEMAPS		=> '::QuickDraw:typemap',
+	TYPEMAPS		=> ['::QuickDraw:typemap'],
 	XSPROTOARG		=> '-noprototypes', 		# XXX remove later?
 );

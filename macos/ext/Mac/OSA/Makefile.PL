@@ -5,6 +5,6 @@ WriteMakefile(
 	'VERSION_FROM'		=> 'OSA.pm',
 	'LINKTYPE'		=> 'static dynamic',
 	XSPROTOARG 		=> '-noprototypes', 		# XXX remove later?
-	TYPEMAPS   		=> '::Components:typemap',
+	TYPEMAPS   		=> ['::Components:typemap'],
 	MACLIBS_SHARED		=> '"{{SharedLibraries}}"AppleScriptLib',   # e.g., '-lm' 
 );
