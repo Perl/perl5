@@ -32,6 +32,206 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8866] By: jhi                                   on 2001/02/21  00:34:20
+        Log: Upgrade to CGI.pm 2.752, from Lincoln Stein.
+             (Note: there were some conflicts due to EBCDIC and EPOC
+             patches, in general I preferred the repository code.)
+             (When 2.753 comes out, we need to synchronize.)
+     Branch: perl
+	   ! lib/CGI.pm lib/CGI/Carp.pm lib/CGI/Cookie.pm lib/CGI/Pretty.pm
+	   ! lib/CGI/Push.pm lib/CGI/Util.pm t/lib/cgi-form.t
+	   ! t/lib/cgi-html.t
+____________________________________________________________________________
+[  8865] By: jhi                                   on 2001/02/21  00:24:22
+        Log: Make pack("C", 0x100) to create Unicode, unless under the
+             evil influence of 'use bytes'.  Similarly, unpack("C", ...)
+             will understand Unicode, unless you under know what.
+     Branch: perl
+	   ! pp.c t/op/pack.t t/op/qu.t
+____________________________________________________________________________
+[  8864] By: alanbur                               on 2001/02/20  22:35:34
+        Log: Resynchronised with parent
+     Branch: maint-5.6/pureperl
+	  !> README.win32 ext/GDBM_File/GDBM_File.pm
+	  !> ext/NDBM_File/NDBM_File.pm ext/ODBM_File/ODBM_File.pm
+	  !> ext/SDBM_File/SDBM_File.pm handy.h lib/Test.pm makedef.pl mg.c
+	  !> pod/perlop.pod t/lib/gdbm.t t/lib/ndbm.t t/lib/odbm.t
+	  !> t/lib/sdbm.t util.c
+____________________________________________________________________________
+[  8863] By: jhi                                   on 2001/02/20  20:55:11
+        Log: Integrate change #8860,8861 from mainline into maintperl.
+             
+             "pseudo-literal j"
+             
+             Subject: [PATCH: 5.6.1 trial2 && perl@8807] workaround VMS I/O problem in Test.pm for bug ID 20010213.009
+     Branch: maint-5.6/perl
+	  !> lib/Test.pm pod/perlop.pod
+____________________________________________________________________________
+[  8862] By: jhi                                   on 2001/02/20  20:30:07
+        Log: Don't do casting between pointers pointing to differently sized
+             integers.
+     Branch: perl
+	   ! hv.c sv.c
+____________________________________________________________________________
+[  8861] By: jhi                                   on 2001/02/20  19:53:44
+        Log: Subject: [PATCH: 5.6.1 trial2 && perl@8807] workaround VMS I/O problem in Test.pm for bug ID 20010213.009
+             From: Peter Prymmer <pvhp@forte.com>
+             Message-ID: <Pine.OSF.4.10.10102141617350.197219-100000@aspara.forte.com>
+             Date: Wed, 14 Feb 2001 16:28:16 -0800 (PST)
+     Branch: perl
+	   ! lib/Test.pm
+____________________________________________________________________________
+[  8860] By: jhi                                   on 2001/02/20  19:48:02
+        Log: "pseudo-literal j", a documentation glitch reported to Debian.
+             The text recovered from Perl 5.005_03, and pseudo-literal replaced
+             by "backtick string".
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[  8859] By: jhi                                   on 2001/02/20  19:15:46
+        Log: Skip the Perl_sys_intern_clear and Perl_sys_intern_init,
+             from Chris Nandor.
+     Branch: perl
+	   ! makedef.pl
+____________________________________________________________________________
+[  8858] By: jhi                                   on 2001/02/20  17:36:53
+        Log: Integrate pureperl changes #8844,8845,8850 to mainline
+             (via maintperl #8855).
+             
+             Fixed %^H scoping bug
+             
+             Removed GV <-> CV refcount loop
+             
+             Removed %ENV refcount loop
+     Branch: perl
+	  !> gv.c op.c perl.c pp.c scope.c
+____________________________________________________________________________
+[  8857] By: jhi                                   on 2001/02/20  17:34:32
+        Log: Integrate changes #8853,8854 from maintperl to mainline.
+             
+             EBDIC fixes, README.win32 Borland update.
+     Branch: perl
+	  !> README.win32 handy.h util.c
+____________________________________________________________________________
+[  8856] By: jhi                                   on 2001/02/20  17:33:16
+        Log: Integrate change #8848 from mainline to maintperl: ?DBM_File cleanup.
+     Branch: maint-5.6/perl
+	  !> ext/GDBM_File/GDBM_File.pm ext/NDBM_File/NDBM_File.pm
+	  !> ext/ODBM_File/ODBM_File.pm ext/SDBM_File/SDBM_File.pm
+	  !> t/lib/gdbm.t t/lib/ndbm.t t/lib/odbm.t t/lib/sdbm.t
+____________________________________________________________________________
+[  8855] By: jhi                                   on 2001/02/20  17:32:13
+        Log: Integrate pureperl changes #8844,8845,8850 to maintperl.
+             
+             Fixed %^H scoping bug
+             
+             Removed GV <-> CV refcount loop
+             
+             Removed %ENV refcount loop
+     Branch: maint-5.6/perl
+	  !> gv.c op.c perl.c pp.c scope.c
+____________________________________________________________________________
+[  8854] By: jhi                                   on 2001/02/20  17:25:06
+        Log: Subject: Addition to readme.win32 for Borland C++ compilers
+             Date: Tue, 20 Feb 2001 02:15:25 +0300
+             From: "Vadim Konovalov" <watman@inbox.ru>
+             Message-ID: <011c01c09aca$93bbbec0$367b55c2@vad>
+             
+             Document Borland compiler misbehaviour.
+     Branch: maint-5.6/perl
+	   ! README.win32
+____________________________________________________________________________
+[  8853] By: jhi                                   on 2001/02/20  17:22:25
+        Log: The assimilation of ebcdic.c didn't quite work at the first try,
+             patches from Thomas Dorner.
+     Branch: maint-5.6/perl
+	   ! handy.h util.c
+____________________________________________________________________________
+[  8852] By: jhi                                   on 2001/02/20  17:20:15
+        Log: Subject: [PATCH] More Mac OS patches for maint-5.6
+             From: Chris Nandor <pudge@pobox.com>
+             Date: Tue, 20 Feb 2001 08:32:45 -0500
+             Message-Id: <p05010403b6b81ee8dca0@[10.0.1.177]>
+     Branch: maint-5.6/perl
+	   ! makedef.pl mg.c
+____________________________________________________________________________
+[  8851] By: jhi                                   on 2001/02/20  17:15:52
+        Log: Filter::Util::Call update to 1.05, from Paul Marquess.
+     Branch: perl
+	   ! ext/Filter/Util/Call/Call.pm t/lib/filter-util.pl
+	   ! t/lib/filter-util.t
+____________________________________________________________________________
+[  8850] By: alanbur                               on 2001/02/20  17:12:40
+        Log: Removed %ENV refcount loop.  Elements of %ENV are magical,
+             and the magic pointer points back to the GV that contains the
+             %ENV hash.  This creates a refcount loop that prevents members
+             of %ENV from being freed correctly.  This change removes the
+             refcount loop - the magic pointer was never used anyway, the
+             only use of the magic was to check the type ('E') so that the
+             appropriate environment manipulation code is called when %ENV
+             is modified.
+     Branch: maint-5.6/pureperl
+	   ! perl.c
+____________________________________________________________________________
+[  8849] By: jhi                                   on 2001/02/20  17:12:20
+        Log: Subject: [PATCH perl@8841] glob-basic.t, runenv.t fix-ups
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Mon, 19 Feb 2001 23:36:12 -0600
+             Message-Id: <5.0.2.1.0.20010219230450.02762648@exchi01>
+             
+             Case-forgiving systems match TestInit.pm with TES*.
+     Branch: perl
+	   ! t/lib/glob-basic.t
+____________________________________________________________________________
+[  8848] By: jhi                                   on 2001/02/20  17:10:02
+        Log: strict-w-proof the ?DBM_File, from Paul Marquess.
+     Branch: perl
+	   ! ext/GDBM_File/GDBM_File.pm ext/NDBM_File/NDBM_File.pm
+	   ! ext/ODBM_File/ODBM_File.pm ext/SDBM_File/SDBM_File.pm
+	   ! t/lib/gdbm.t t/lib/ndbm.t t/lib/odbm.t t/lib/sdbm.t
+____________________________________________________________________________
+[  8847] By: jhi                                   on 2001/02/20  15:34:41
+        Log: The #8843 wasn't quite right: %Config needs to imported.
+     Branch: perl
+	   ! t/run/runenv.t
+____________________________________________________________________________
+[  8846] By: jhi                                   on 2001/02/20  15:31:50
+        Log: Retract the #8838 and #8840 for now because of
+             the DB_File tie problem.
+     Branch: perl
+	   ! embed.h embed.pl global.sym lib/ExtUtils/xsubpp objXSUB.h
+	   ! perlapi.c pod/perlapi.pod pod/perlfunc.pod pod/perlguts.pod
+	   ! proto.h sv.c
+____________________________________________________________________________
+[  8845] By: alanbur                               on 2001/02/20  14:25:41
+        Log: Removed GV <-> CV refcount loop
+             CvGV(mycv) points to the parent GV of the CV, and was previously
+             refcounted.  The pointer remains, but the refcounting has been removed
+             as it causes a refcount loop between the CV and GV that means the CV
+             can't ever be deleted.
+     Branch: maint-5.6/pureperl
+	   ! gv.c op.c pp.c
+____________________________________________________________________________
+[  8844] By: alanbur                               on 2001/02/20  14:23:13
+        Log: Fixed %^H scoping bug
+     Branch: maint-5.6/pureperl
+	   ! scope.c
+____________________________________________________________________________
+[  8843] By: jhi                                   on 2001/02/19  13:38:08
+        Log: fork() not everywhere, cleanup temp files.
+     Branch: perl
+	   ! t/run/runenv.t
+____________________________________________________________________________
+[  8842] By: alanbur                               on 2001/02/19  12:42:07
+        Log: Resynchronised with parent
+     Branch: maint-5.6/pureperl
+	  !> pod/perlfaq4.pod sv.c utf8.c
+____________________________________________________________________________
+[  8841] By: jhi                                   on 2001/02/19  03:35:51
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  8840] By: jhi                                   on 2001/02/19  00:23:41
         Log: Subject: [patch] add sv_setref_uv
              From: Doug MacEachern <dougm@covalent.net>
@@ -275,10 +475,8 @@ ____________________________________________________________________________
              Date: 14 Feb 2001 10:15:41 -0800
              Message-ID: <ylzofpf7w2.fsf@windlord.stanford.edu>
              
-             Subject: [PATCH: 5.6.1 trial2 && perl@8807] workaround VMS I/O problem in Test.pm for bug ID 20010213.009
-             From: Peter Prymmer <pvhp@forte.com>
-             Date: Wed, 14 Feb 2001 16:28:16 -0800 (PST)
-             Message-ID: <Pine.OSF.4.10.10102141617350.197219-100000@aspara.forte.com>
+             (8809 empty)
+
              Upgrade to podlators 1.08, from Russ Allbery.
      Branch: perl
 	  !> lib/Pod/Man.pm lib/Pod/Text.pm lib/Test/Harness.pm
@@ -290,10 +488,7 @@ ____________________________________________________________________________
 	   ! lib/Pod/Man.pm lib/Pod/Text.pm
 ____________________________________________________________________________
 [  8809] By: jhi                                   on 2001/02/15  13:26:38
-        Log: Subject: [PATCH: 5.6.1 trial2 && perl@8807] workaround VMS I/O problem in Test.pm for bug ID 20010213.009
-             From: Peter Prymmer <pvhp@forte.com>
-             Date: Wed, 14 Feb 2001 16:28:16 -0800 (PST)
-             Message-ID: <Pine.OSF.4.10.10102141617350.197219-100000@aspara.forte.com>
+        Log: (accidentally empty check-in)
      Branch: maint-5.6/perl
 	   ! lib/Test/Harness.pm
 ____________________________________________________________________________
