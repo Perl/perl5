@@ -25,6 +25,14 @@ features were added to Perl 5.
 
 =item *
 
+In versions of 5.002 prior to the gamma version, the test script in Example
+1 will not function properly.  You need to change the "use lib" line to
+read:
+
+	use lib './blib';
+
+=item *
+
 In versions of 5.002 prior to version beta 3, then the line in the .xs file
 about "PROTOTYPES: DISABLE" will cause a compiler error.  Simply remove that
 line from the file.
@@ -150,7 +158,7 @@ Let's edit the .xs file by adding this to the end of the file:
 		printf("Hello, world!\n");
 
 Now we'll run "perl Makefile.PL".  This will create a real Makefile,
-which make needs.  It's output looks something like:
+which make needs.  Its output looks something like:
 
 	% perl Makefile.PL
 	Checking if your kit is complete...
@@ -178,7 +186,7 @@ that looks like this:
 
 	#! /opt/perl5/bin/perl
 	
-	use lib './blib';
+	use ExtUtils::testlib;
 	
 	use Mytest;
 	
@@ -223,11 +231,9 @@ In order to test that our extension works, we now need to look at the
 file test.pl.  This file is set up to imitate the same kind of testing
 structure that Perl itself has.  Within the test script, you perform a
 number of tests to confirm the behavior of the extension, printing "ok"
-when the test is correct, "not ok" when it is not.
-
-Remove the line that starts with "use lib", change the print statement in
-the BEGIN block to print "1..4", and add the following code to the end of
-the file:
+when the test is correct, "not ok" when it is not.  Change the print
+statement in the BEGIN block to print "1..4", and add the following code
+to the end of the file:
 
 	print &Mytest::is_even(0) == 1 ? "ok 2" : "not ok 2", "\n";
 	print &Mytest::is_even(1) == 0 ? "ok 3" : "not ok 3", "\n";
@@ -367,9 +373,9 @@ you change the value of constants!
 =head2 WHAT'S NEW HERE?
 
 Two things are new here.  First, we've made some changes to Makefile.PL.
-In this case, we've specified an extra library to link in, in this case the
-math library, libm.  We'll talk later about how to write XSUBs that can call
-every routine in a library.
+In this case, we've specified an extra library to link in, the math library
+libm.  We'll talk later about how to write XSUBs that can call every routine
+in a library.
 
 Second, the value of the function is being passed back not as the function's
 return value, but through the same variable that was passed into the function.
@@ -441,7 +447,7 @@ section on the argument stack.
 In general, it's not a good idea to write extensions that modify their input
 parameters, as in Example 3.  However, in order to better accomodate calling
 pre-existing C routines, which often do modify their input parameters,
-this behavior is tolerated.
+this behavior is tolerated.  The next example will show how to do this.
 
 =head2 EXAMPLE 4
 
@@ -504,7 +510,7 @@ And finally create a file Makefile.PL that looks like this:
 We will now create the main top-level Mytest2 files.  Change to the directory
 above Mytest2 and run the following command:
 
-	% h2xs -O -n Mytest2 < ./Mytest2/mylib/mylib.h
+	% h2xs -O -n Mytest2 ./Mytest2/mylib/mylib.h
 
 This will print out a warning about overwriting Mytest2, but that's okay.
 Our files are stored in Mytest2/mylib, and will be untouched.
@@ -537,8 +543,9 @@ the following three lines:
 	mylib/mylib.h
 
 To keep our namespace nice and unpolluted, edit the .pm file and change
-the line setting @EXPORT to @EXPORT_OK.  And finally, in the .xs file,
-edit the #include line to read:
+the lines setting @EXPORT to @EXPORT_OK (there are two: one in the line
+beginning "use vars" and one setting the array itself).  Finally, in the
+.xs file, edit the #include line to read:
 
 	#include "mylib/mylib.h"
 
@@ -601,6 +608,11 @@ is only going to be used by the C routines themselves, and not by the user,
 they should be removed from the @EXPORT array.  Alternately, if you don't
 mind using the "fully qualified name" of a variable, you could remove most
 or all of the items in the @EXPORT array.
+
+=item *
+
+If our include file contained #include directives, these would not be
+processed at all by h2xs.  There is no good solution to this right now.
 
 =back
 
@@ -719,4 +731,4 @@ and Tim Bunce.
 
 =head2 Last Changed
 
-1996/2/9
+1996/7/10
