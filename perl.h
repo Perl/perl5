@@ -3139,16 +3139,10 @@ typedef struct am_table_short AMTS;
 #ifdef USE_LOCALE_NUMERIC
 
 #define SET_NUMERIC_STANDARD() \
-    STMT_START {				\
-	if (! PL_numeric_standard)		\
-	    set_numeric_standard();		\
-    } STMT_END
+	set_numeric_standard();
 
 #define SET_NUMERIC_LOCAL() \
-    STMT_START {				\
-	if (! PL_numeric_local)			\
-	    set_numeric_local();		\
-    } STMT_END
+	set_numeric_local();
 
 #define IS_NUMERIC_RADIX(c)	\
 	((PL_hints & HINT_LOCALE) && \
@@ -3156,11 +3150,11 @@ typedef struct am_table_short AMTS;
 
 #define STORE_NUMERIC_LOCAL_SET_STANDARD() \
 	bool was_local = (PL_hints & HINT_LOCALE) && PL_numeric_local; \
-	if (!was_local) SET_NUMERIC_STANDARD();
+	if (was_local) SET_NUMERIC_STANDARD();
 
 #define STORE_NUMERIC_STANDARD_SET_LOCAL() \
-	bool was_standard = !(PL_hints & HINT_LOCALE) || PL_numeric_standard; \
-	if (!was_standard) SET_NUMERIC_LOCAL();
+	bool was_standard = (PL_hints & HINT_LOCALE) && PL_numeric_standard; \
+	if (was_standard) SET_NUMERIC_LOCAL();
 
 #define RESTORE_NUMERIC_LOCAL() \
 	if (was_local) SET_NUMERIC_LOCAL();

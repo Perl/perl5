@@ -466,7 +466,7 @@ Perl_rninstr(pTHX_ register const char *big, const char *bigend, const char *lit
  * Set up for a new ctype locale.
  */
 void
-Perl_new_ctype(pTHX_ const char *newctype)
+Perl_new_ctype(pTHX_ char *newctype)
 {
 #ifdef USE_LOCALE_CTYPE
 
@@ -485,10 +485,54 @@ Perl_new_ctype(pTHX_ const char *newctype)
 }
 
 /*
+ * Standardize the locale name from a string returned by 'setlocale'.
+ *
+ * The standard return value of setlocale() is either
+ * (1) "xx_YY" if the first argument of setlocale() is not LC_ALL
+ * (2) "xa_YY xb_YY ..." if the first argument of setlocale() is LC_ALL
+ *     (the space-separated values represent the various sublocales,
+ *      in some unspecificed order)
+ *
+ * In some platforms it has a form like "LC_SOMETHING=Lang_Country.866\n",
+ * which is harmful for further use of the string in setlocale().
+ *
+ */
+STATIC char *
+S_stdize_locale(pTHX_ char *locs)
+{
+    char *s;
+    bool okay = TRUE;
+
+    if ((s = strchr(locs, '='))) {
+	char *t;
+
+	okay = FALSE;
+	if ((t = strchr(s, '.'))) {
+	    char *u;
+
+	    if ((u = strchr(t, '\n'))) {
+
+		if (u[1] == 0) {
+		    STRLEN len = u - s;
+		    Move(t + 1, locs, len, char);
+		    locs[len] = 0;
+		    okay = TRUE;
+		}
+	    }
+	}
+    }
+
+    if (!okay)
+	Perl_croak(aTHX_ "Can't fix broken locale name \"%s\"", locs);
+
+    return locs;
+}
+
+/*
  * Set up for a new collation locale.
  */
 void
-Perl_new_collate(pTHX_ const char *newcoll)
+Perl_new_collate(pTHX_ char *newcoll)
 {
 #ifdef USE_LOCALE_COLLATE
 
@@ -497,17 +541,17 @@ Perl_new_collate(pTHX_ const char *newcoll)
 	    ++PL_collation_ix;
 	    Safefree(PL_collation_name);
 	    PL_collation_name = NULL;
-	    PL_collation_standard = TRUE;
-	    PL_collxfrm_base = 0;
-	    PL_collxfrm_mult = 2;
 	}
+	PL_collation_standard = TRUE;
+	PL_collxfrm_base = 0;
+	PL_collxfrm_mult = 2;
 	return;
     }
 
     if (! PL_collation_name || strNE(PL_collation_name, newcoll)) {
 	++PL_collation_ix;
 	Safefree(PL_collation_name);
-	PL_collation_name = savepv(newcoll);
+	PL_collation_name = stdize_locale(savepv(newcoll));
 	PL_collation_standard = (strEQ(newcoll, "C") || strEQ(newcoll, "POSIX"));
 
 	{
@@ -551,7 +595,7 @@ Perl_set_numeric_radix(pTHX)
  * Set up for a new numeric locale.
  */
 void
-Perl_new_numeric(pTHX_ const char *newnum)
+Perl_new_numeric(pTHX_ char *newnum)
 {
 #ifdef USE_LOCALE_NUMERIC
 
@@ -559,15 +603,15 @@ Perl_new_numeric(pTHX_ const char *newnum)
 	if (PL_numeric_name) {
 	    Safefree(PL_numeric_name);
 	    PL_numeric_name = NULL;
-	    PL_numeric_standard = TRUE;
-	    PL_numeric_local = TRUE;
 	}
+	PL_numeric_standard = TRUE;
+	PL_numeric_local = TRUE;
 	return;
     }
 
     if (! PL_numeric_name || strNE(PL_numeric_name, newnum)) {
 	Safefree(PL_numeric_name);
-	PL_numeric_name = savepv(newnum);
+	PL_numeric_name = stdize_locale(savepv(newnum));
 	PL_numeric_standard = (strEQ(newnum, "C") || strEQ(newnum, "POSIX"));
 	PL_numeric_local = TRUE;
 	set_numeric_radix();
@@ -585,6 +629,7 @@ Perl_set_numeric_standard(pTHX)
 	setlocale(LC_NUMERIC, "C");
 	PL_numeric_standard = TRUE;
 	PL_numeric_local = FALSE;
+	set_numeric_radix();
     }
 
 #endif /* USE_LOCALE_NUMERIC */
