@@ -533,7 +533,7 @@ Perl_new_collate(pTHX_ char *newcoll)
 
     if (! newcoll) {
 	if (PL_collation_name) {
-	    PL_collation_ix++;
+	    ++PL_collation_ix;
 	    Safefree(PL_collation_name);
 	    PL_collation_name = NULL;
 	}
@@ -544,10 +544,9 @@ Perl_new_collate(pTHX_ char *newcoll)
     }
 
     if (! PL_collation_name || strNE(PL_collation_name, newcoll)) {
-	PL_collation_ix++;
-	if (PL_collation_name)
-	    Safefree(PL_collation_name);
-	PL_collation_name = stdize_locale(newcoll);
+	++PL_collation_ix;
+	Safefree(PL_collation_name);
+	PL_collation_name = stdize_locale(savepv(newcoll));
 	PL_collation_standard = (strEQ(newcoll, "C") || strEQ(newcoll, "POSIX"));
 
 	{
@@ -606,9 +605,8 @@ Perl_new_numeric(pTHX_ char *newnum)
     }
 
     if (! PL_numeric_name || strNE(PL_numeric_name, newnum)) {
-	if (PL_numeric_name)
-	    Safefree(PL_numeric_name);
-	PL_numeric_name = stdize_locale(newnum);
+	Safefree(PL_numeric_name);
+	PL_numeric_name = stdize_locale(savepv(newnum));
 	PL_numeric_standard = (strEQ(newnum, "C") || strEQ(newnum, "POSIX"));
 	PL_numeric_local = TRUE;
 	set_numeric_radix();

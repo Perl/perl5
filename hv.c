@@ -1225,8 +1225,7 @@ Perl_hv_undef(pTHX_ HV *hv)
 	return;
     xhv = (XPVHV*)SvANY(hv);
     hfreeentries(hv);
-    if (xhv->xhv_array)
-	Safefree(xhv->xhv_array);
+    Safefree(xhv->xhv_array);
     if (HvNAME(hv)) {
 	Safefree(HvNAME(hv));
 	HvNAME(hv) = 0;
