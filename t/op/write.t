@@ -365,7 +365,8 @@ $v
     # must fail since we have a trailing ; in the eval'ed string (WL)
     my @v = ('k');
     eval "format OUT14 = \n@\n\@v";
-    print $@ ? "ok 14\n" : "not ok 14\n";
+    print +($@ && $@ =~ /Format not terminated/)
+      ? "ok 14\n" : "not ok 14 $@\n";
 
 }
 
@@ -431,7 +432,8 @@ EOD
 .
     open(OUT18, '>Op_write.tmp') || die "Can't create Op_write.tmp";
     eval { write(OUT18); };
-    print $@ ? "ok 18\n" : "not ok 18\n";
+    print +($@ && $@ =~ /Repeated format line will never terminate/)
+      ? "ok 18\n" : "not ok 18: $@\n";
     close OUT18 or die "Could not close: $!";
 }
 
