@@ -15,11 +15,10 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-/* Omit -- it causes too much grief on mixed systems.
+/* XXX If this causes problems, set i_unistd=undef in the hint file.  */
 #ifdef I_UNISTD
 # include <unistd.h>
 #endif
-*/
 
 /*
  * Use the "DESTRUCTOR" scope cleanup to reinstate magic.
@@ -70,7 +69,7 @@ void* p;
 	    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
     }
 
-    safefree((void *)mgs);
+    Safefree(mgs);
 }
 
 
