@@ -176,9 +176,9 @@ CCLIBDIR	*= $(CCHOME)\lib
 #BUILDOPT	+= -DPERL_POLLUTE
 
 #
-# enable this to test the File::Glob implementation of CORE::glob
+# enable this to disable the File::Glob implementation of CORE::glob
 #
-#BUILDOPT	+= -DPERL_INTERNAL_GLOB
+#BUILDOPT	+= -DPERL_EXTERNAL_GLOB
 
 # Enabling this runs a cloned toplevel interpreter (fails tests)
 #BUILDOPT	+= -DTOP_CLONE

@@ -5370,7 +5370,7 @@ Perl_ck_glob(pTHX_ OP *o)
     if (!((gv = gv_fetchpv("glob", FALSE, SVt_PVCV)) && GvIMPORTED_CV(gv)))
 	gv = gv_fetchpv("CORE::GLOBAL::glob", FALSE, SVt_PVCV);
 
-#if defined(PERL_INTERNAL_GLOB) && !defined(MINIPERL_BUILD)
+#if !defined(PERL_EXTERNAL_GLOB)
     /* XXX this can be tightened up and made more failsafe. */
     if (!gv) {
 	OP *modname = newSVOP(OP_CONST, 0, newSVpvn("File::Glob", 10));
@@ -5381,7 +5381,7 @@ Perl_ck_glob(pTHX_ OP *o)
 	gv = gv_fetchpv("CORE::GLOBAL::glob", FALSE, SVt_PVCV);
 	LEAVE;
     }
-#endif /* PERL_INTERNAL_GLOB && !MINIPERL_BUILD */
+#endif /* PERL_EXTERNAL_GLOB */
 
     if (gv && GvIMPORTED_CV(gv)) {
 	append_elem(OP_GLOB, o,

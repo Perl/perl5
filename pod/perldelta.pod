@@ -333,9 +333,9 @@ change#3385, also need perlguts documentation
 WARNING: This is currently an experimental feature.  Interfaces and
 implementation are likely to change.
 
-Perl can be compiled with -DPERL_INTERNAL_GLOB to use the File::Glob
-implementation of the glob() operator.  This avoids using an external
-csh process and the problems associated with it.
+Perl now uses the File::Glob implementation of the glob() operator
+automatically.  This avoids using an external csh process and the
+problems associated with it.
 
 =head2 Binary numbers supported
 
@@ -1149,9 +1149,9 @@ when pruning top-level directories has been fixed.
 
 =item File::Glob
 
-This extension implements BSD-style file globbing.  It will also be
-used for the internal implementation of the glob() operator if
-Perl was compiled with -DPERL_INTERNAL_GLOB.  See L<File::Glob>.
+This extension implements BSD-style file globbing.  By default,
+it will also be used for the internal implementation of the glob()
+operator.  See L<File::Glob>.
 
 =item File::Spec
 

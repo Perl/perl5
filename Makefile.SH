@@ -337,7 +337,7 @@ $(LIBPERL_NONSHR): perl$(OBJ_EXT) $(obj)
 	$(AR) rcu $(LIBPERL_NONSHR) perl$(OBJ_EXT) $(obj)
 
 $(MINIPERL_NONSHR): $(LIBPERL_NONSHR) miniperlmain$(OBJ_EXT)
-	$(CCCMD) $(PLDLFLAGS) -DMINIPERL_BUILD -o opmini$(OBJ_EXT) op.c
+	$(CCCMD) $(PLDLFLAGS) -DPERL_EXTERNAL_GLOB -o opmini$(OBJ_EXT) op.c
 	$(CC) $(LDFLAGS) -o $(MINIPERL_NONSHR) miniperlmain$(OBJ_EXT) \
 	    opmini$(OBJ_EXT) $(LIBPERL_NONSHR) $(LIBS)
 
