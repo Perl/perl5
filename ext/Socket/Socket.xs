@@ -3,6 +3,8 @@
 #include "perl.h"
 #include "XSUB.h"
 
+#include <stddef.h>
+
 #ifndef VMS
 # ifdef I_SYS_TYPES
 #  include <sys/types.h>
