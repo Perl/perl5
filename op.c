@@ -46,6 +46,7 @@ static OP *too_many_arguments _((OP *op, char* name));
 static void null _((OP* op));
 static PADOFFSET pad_findlex _((char* name, PADOFFSET newoff, U32 seq,
 	CV* startcv, I32 cx_ix));
+static OP *new_logop _((I32 type, I32 flags, OP **firstp, OP **otherp));
 
 static char*
 gv_ename(gv)
@@ -2556,8 +2557,20 @@ I32 flags;
 OP* first;
 OP* other;
 {
+    return new_logop(type, flags, &first, &other);
+}
+
+static OP *
+new_logop(type, flags, firstp, otherp)
+I32 type;
+I32 flags;
+OP** firstp;
+OP** otherp;
+{
     LOGOP *logop;
     OP *op;
+    OP *first = *firstp;
+    OP *other = *otherp;
 
     if (type == OP_XOR)		/* Not short circuit, but here by precedence. */
 	return newBINOP(type, flags, scalar(first), scalar(other));
@@ -2571,7 +2584,7 @@ OP* other;
 	    else
 		type = OP_AND;
 	    op = first;
-	    first = cUNOP->op_first;
+	    first = *firstp = cUNOP->op_first;
 	    if (op->op_next)
 		first->op_next = op->op_next;
 	    cUNOP->op_first = Nullop;
@@ -2583,10 +2596,12 @@ OP* other;
 	    warn("Probable precedence problem on %s", op_desc[type]);
 	if ((type == OP_AND) == (SvTRUE(((SVOP*)first)->op_sv))) {
 	    op_free(first);
+	    *firstp = Nullop;
 	    return other;
 	}
 	else {
 	    op_free(other);
+	    *otherp = Nullop;
 	    return first;
 	}
     }
@@ -2779,9 +2794,10 @@ OP *block;
     }
 
     listop = append_elem(OP_LINESEQ, block, newOP(OP_UNSTACK, 0));
-    op = newLOGOP(OP_AND, 0, expr, listop);
+    op = new_logop(OP_AND, 0, &expr, &listop);
 
-    ((LISTOP*)listop)->op_last->op_next = LINKLIST(op);
+    if (listop)
+	((LISTOP*)listop)->op_last->op_next = LINKLIST(op);
 
     if (once && op != listop)
 	op->op_next = ((LOGOP*)cUNOP->op_first)->op_other;
@@ -2835,14 +2851,16 @@ OP *cont;
     redo = LINKLIST(listop);
 
     if (expr) {
-	op = newLOGOP(OP_AND, 0, expr, scalar(listop));
+	scalar(listop);
+	op = new_logop(OP_AND, 0, &expr, &listop);
 	if (op == expr && op->op_type == OP_CONST && !SvTRUE(cSVOP->op_sv)) {
 	    op_free(expr);		/* oops, it's a while (0) */
 	    op_free((OP*)loop);
-	    return Nullop;		/* (listop already freed by newLOGOP) */
+	    return Nullop;		/* listop already freed by new_logop */
 	}
-	((LISTOP*)listop)->op_last->op_next = condop = 
-	    (op == listop ? redo : LINKLIST(op));
+	if (listop)
+	    ((LISTOP*)listop)->op_last->op_next = condop = 
+		(op == listop ? redo : LINKLIST(op));
 	if (!next)
 	    next = condop;
     }
