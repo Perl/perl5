@@ -137,6 +137,9 @@ malloc_cflags='ccflags="-DSTRICT_ALIGNMENT $ccflags"'
 	;;
 esac
 
+# Don't groan about unused libraries.
+ccflags="$ccflags -Wl,-woff,84"
+
 # We don't want these libraries.
 # Socket networking is in libc, these are not installed by default,
 # and just slow perl down. (scotth@sgi.com)
