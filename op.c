@@ -5412,6 +5412,31 @@ ck_subr(OP *o)
 		    goto wrapref;	/* autoconvert GLOB -> GLOBref */
 		else if (o2->op_type == OP_CONST)
 		    o2->op_private &= ~OPpCONST_STRICT;
+		else if (o2->op_type == OP_ENTERSUB) {
+		    /* accidental subroutine, revert to bareword */
+		    OP *gvop = ((UNOP*)o2)->op_first;
+		    if (gvop && gvop->op_type == OP_NULL) {
+			gvop = ((UNOP*)gvop)->op_first;
+			if (gvop) {
+			    for (; gvop->op_sibling; gvop = gvop->op_sibling)
+				;
+			    if (gvop &&
+				(gvop->op_private & OPpENTERSUB_NOPAREN) &&
+				(gvop = ((UNOP*)gvop)->op_first) &&
+				gvop->op_type == OP_GV)
+			    {
+				GV *gv = (GV*)((SVOP*)gvop)->op_sv;
+				OP *sibling = o2->op_sibling;
+				op_free(o2);
+				o2 = newSVOP(OP_CONST, 0,
+					     newSVpvn(GvNAME(gv),
+						      GvNAMELEN(gv)));
+				prev->op_sibling = o2;
+				o2->op_sibling = sibling;
+			    }
+			}
+		    }
+		}
 		scalar(o2);
 		break;
 	    case '\\':

@@ -125,6 +125,7 @@ typedef U32 PADOFFSET;
 #define OPpENTERSUB_DB		16	/* Debug subroutine. */
   /* OP_RV2CV only */
 #define OPpENTERSUB_AMPER	8	/* Used & form to call. */
+#define OPpENTERSUB_NOPAREN	128	/* bare sub call (without parens) */
   /* OP_?ELEM only */
 #define OPpLVAL_DEFER		16	/* Defer creation of array/hash elem */
   /* for OP_RV2?V, lower bits carry hints */
