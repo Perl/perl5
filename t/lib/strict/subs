@@ -26,6 +26,15 @@ EXPECT
 
 # strict subs - error
 use strict 'subs' ;
+my @a = (1..2);
+my $b = xyz;
+EXPECT
+Bareword "xyz" not allowed while "strict subs" in use at - line 5.
+Execution of - aborted due to compilation errors.
+########
+
+# strict subs - error
+use strict 'subs' ;
 Fred ;
 EXPECT
 Bareword "Fred" not allowed while "strict subs" in use at - line 4.
