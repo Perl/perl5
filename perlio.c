@@ -1968,7 +1968,10 @@ PerlIOUnix_pushed(PerlIO *f, const char *mode, SV *arg)
   {
    PerlIOUnix *s = PerlIOSelf(f,PerlIOUnix);
    s->fd     = PerlIO_fileno(PerlIONext(f));
-   s->oflags = PerlIOUnix_oflags(mode);
+   /* XXX could (or should) we retrieve the oflags from the open file handle
+      rather than believing the "mode" we are passed in?
+      XXX Should the value on NULL mode be 0 or -1?  */
+   s->oflags = mode ? PerlIOUnix_oflags(mode) : -1;
   }
  PerlIOBase(f)->flags |= PERLIO_F_OPEN;
  return code;

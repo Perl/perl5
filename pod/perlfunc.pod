@@ -450,13 +450,12 @@ on systems where the run-time libraries distinguish between binary and
 text files.  If FILEHANDLE is an expression, the value is taken as the
 name of the filehandle.  DISCIPLINE can be either of C<":raw"> for
 binary mode or C<":crlf"> for "text" mode.  If the DISCIPLINE is
-omitted, it defaults to C<":raw">.
+omitted, it defaults to C<":raw">.  Returns true on success, C<undef> on
+failure.
 
 binmode() should be called after open() but before any I/O is done on
 the filehandle.
 
-On many systems binmode() currently has no effect, but in future, it
-will be extended to support user-defined input and output disciplines.
 On some systems binmode() is necessary when you're not working with a
 text file.  For the sake of portability it is a good idea to always use
 it when appropriate, and to never use it when it isn't appropriate.
