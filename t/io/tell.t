@@ -12,7 +12,8 @@ print "1..27\n";
 $TST = 'tst';
 
 $Is_Dosish = ($^O eq 'MSWin32' or $^O eq 'NetWare' or $^O eq 'dos' or
-	      $^O eq 'os2' or $^O eq 'mint' or $^O eq 'cygwin');
+              $^O eq 'os2' or $^O eq 'mint' or $^O eq 'cygwin' or
+              $^O =~ /^uwin/);
 
 open($TST, 'harness') || (die "Can't open harness");
 binmode $TST if $Is_Dosish;

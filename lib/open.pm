@@ -80,7 +80,7 @@ sub import {
 	foreach my $layer (split(/\s+/,$dscp)) {
             $layer =~ s/^://;
 	    if ($layer eq 'locale') {
-		use Encode;
+		require Encode;
 		_get_locale_encoding()
 		    unless defined $locale_encoding;
 		(warnings::warnif("layer", "Cannot figure out an encoding to use"), last)

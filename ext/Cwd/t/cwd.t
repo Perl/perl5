@@ -46,10 +46,10 @@ if ($^O eq 'MSWin32') {
 }
 $pwd_cmd =~ s=\\=/=g if ($^O eq 'dos');
 
-print "# native pwd = '$pwd_cmd'\n";
-
 SKIP: {
     skip "No native pwd command found to test against", 4 unless $pwd_cmd;
+
+    print "# native pwd = '$pwd_cmd'\n";
 
     local @ENV{qw(PATH IFS CDPATH ENV BASH_ENV)};
     my ($pwd_cmd_untainted) = $pwd_cmd =~ /^(.+)$/; # Untaint.

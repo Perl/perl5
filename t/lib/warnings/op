@@ -952,3 +952,87 @@ Possible precedence problem on bitwise & operator at - line 7.
 Possible precedence problem on bitwise ^ operator at - line 8.
 Possible precedence problem on bitwise | operator at - line 9.
 Possible precedence problem on bitwise & operator at - line 10.
+########
+# op.c
+
+# ok	=> local() has desired effect;
+# ignore=> local() silently ignored
+
+use warnings 'syntax';
+
+local(undef);		# OP_UNDEF		ignore
+sub lval : lvalue {};
+local(lval());		# OP_ENTERSUB
+local($x **= 1);	# OP_POW
+local($x *=  1);	# OP_MULTIPLY
+local($x /=  1);	# OP_DIVIDE
+local($x %=  1);	# OP_MODULO
+local($x x=  1);	# OP_REPEAT
+local($x +=  1);	# OP_ADD
+local($x -=  1);	# OP_SUBTRACT
+local($x .=  1);	# OP_CONCAT
+local($x <<= 1);	# OP_LEFT_SHIFT
+local($x >>= 1);	# OP_RIGHT_SHIFT
+local($x &=  1);	# OP_BIT_AND
+local($x ^=  1);	# OP_BIT_XOR
+local($x |=  1);	# OP_BIT_OR
+{
+    use integer;
+    local($x *= 1);	# OP_I_MULTIPLY
+    local($x /= 1);	# OP_I_DIVIDE
+    local($x %= 1);	# OP_I_MODULO
+    local($x += 1);	# OP_I_ADD
+    local($x -= 1);	# OP_I_SUBTRACT
+}
+local($x?$y:$z) = 1;	# OP_COND_EXPR		ok
+# these two are fatal run-time errors instead
+#local(@$a);		# OP_RV2AV		ok
+#local(%$a);		# OP_RV2HV		ok
+local(*a);		# OP_RV2GV		ok
+local(@a[1,2]);		# OP_ASLICE		ok
+local(@a{1,2});		# OP_HSLICE		ok
+local(@a = (1,2));	# OP_AASSIGN
+local($$x);		# OP_RV2SV		ok
+local($#a);		# OP_AV2ARYLEN
+local($x =   1);	# OP_SASSIGN
+local($x &&= 1);	# OP_ANDASSIGN
+local($x ||= 1);	# OP_ORASSIGN
+local($x //= 1);	# OP_DORASSIGN
+local($a[0]);		# OP_AELEMFAST		ok
+
+local(substr($x,0,1));	# OP_SUBSTR
+local(pos($x));		# OP_POS
+local(vec($x,0,1));	# OP_VEC
+local($a[$b]);		# OP_AELEM		ok
+local($a{$b});		# OP_HELEM		ok
+
+no warnings 'syntax';
+EXPECT
+Useless localization of subroutine entry at - line 10.
+Useless localization of exponentiation (**) at - line 11.
+Useless localization of multiplication (*) at - line 12.
+Useless localization of division (/) at - line 13.
+Useless localization of modulus (%) at - line 14.
+Useless localization of repeat (x) at - line 15.
+Useless localization of addition (+) at - line 16.
+Useless localization of subtraction (-) at - line 17.
+Useless localization of concatenation (.) or string at - line 18.
+Useless localization of left bitshift (<<) at - line 19.
+Useless localization of right bitshift (>>) at - line 20.
+Useless localization of bitwise and (&) at - line 21.
+Useless localization of bitwise xor (^) at - line 22.
+Useless localization of bitwise or (|) at - line 23.
+Useless localization of integer multiplication (*) at - line 26.
+Useless localization of integer division (/) at - line 27.
+Useless localization of integer modulus (%) at - line 28.
+Useless localization of integer addition (+) at - line 29.
+Useless localization of integer subtraction (-) at - line 30.
+Useless localization of list assignment at - line 39.
+Useless localization of array length at - line 41.
+Useless localization of scalar assignment at - line 42.
+Useless localization of logical and assignment (&&=) at - line 43.
+Useless localization of logical or assignment (||=) at - line 44.
+Useless localization of defined or assignment (//=) at - line 45.
+Useless localization of substr at - line 48.
+Useless localization of match position at - line 49.
+Useless localization of vec at - line 50.

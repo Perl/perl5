@@ -12,7 +12,7 @@ use DirHandle;
 
 use vars qw($VERSION @ISA
             $Is_Mac $Is_OS2 $Is_VMS $Is_Win32 $Is_Win95  $Is_Dos $Is_VOS
-            $Is_QNX $Is_AIX $Is_OSF $Is_IRIX  $Is_NetBSD 
+            $Is_QNX $Is_AIX $Is_OSF $Is_IRIX  $Is_NetBSD $Is_BSD
             $Is_SunOS4 $Is_Solaris $Is_SunOS
             $Verbose %pm %static $Xsubpp_Version
             %Config_Override
@@ -40,6 +40,7 @@ $Is_NetBSD  = $^O eq 'netbsd';
 $Is_SunOS4  = $^O eq 'sunos';
 $Is_Solaris = $^O eq 'solaris';
 $Is_SunOS   = $Is_SunOS4 || $Is_Solaris;
+$Is_BSD     = $^O =~ /^(?:free|net|open)bsd|bsdos$/;
 
 
 =head1 NAME
@@ -304,6 +305,9 @@ clean :: clean_subdirs
     }
     else {
         push(@otherfiles, qw[core core.*perl.*.? *perl.core]);
+
+        # core.\d+
+        push(@otherfiles, map { "core." . "[0-9]"x$_ } (1..5));
     }
 
     push @m, "\t-\$(RM_RF) @otherfiles\n";
@@ -792,7 +796,7 @@ print 'Warning: Makefile possibly out of date with $(VERSION_FROM)'
 CODE
 
     return sprintf <<'MAKE_FRAG', $date_check;
-dist : $(DIST_DEFAULT)
+dist : $(DIST_DEFAULT) $(FIRST_MAKEFILE)
 	$(NOECHO) %s
 MAKE_FRAG
 }
@@ -1170,12 +1174,12 @@ in these dirs:
 
     my $stderr_duped = 0;
     local *STDERR_COPY;
-    unless ($^O =~ /^(?:free|net|open)bsd|bsdos$/) { # Search for '51535'.
-	if( open(STDERR_COPY, '>&STDERR') ) {
-	    $stderr_duped = 1;
-	}
-	else {
-	    warn <<WARNING;
+    unless ($Is_BSD) {
+        if( open(STDERR_COPY, '>&STDERR') ) {
+            $stderr_duped = 1;
+        }
+        else {
+            warn <<WARNING;
 find_perl() can't dup STDERR: $!
 You might see some garbage while we search for Perl
 WARNING
@@ -1199,21 +1203,19 @@ WARNING
             print "Executing $abs\n" if ($trace >= 2);
 
             my $version_check = qq{$abs -e "require $ver; print qq{VER_OK\n}"};
-            # To avoid using the unportable 2>&1 to suppress STDERR,
+            # To avoid using the unportable 2>&1 to supress STDERR,
             # we close it before running the command.
             # However, thanks to a thread library bug in many BSDs
             # ( http://www.freebsd.org/cgi/query-pr.cgi?pr=51535 )
             # we cannot use the fancier more portable way in here
             # but instead need to use the traditional 2>&1 construct.
-            if ($^O =~ /^(?:free|net|open)bsd|bsdos$/) {
-                 $val = `$version_check 2>&1`;
+            if ($Is_BSD) {
+                $val = `$version_check 2>&1`;
             } else {
                 close STDERR if $stderr_duped;
                 $val = `$version_check`;
                 open STDERR, '>&STDERR_COPY' if $stderr_duped;
             }
-            print STDERR "Perl version check failed: '$version_check'\n"
-                unless defined $val;
 
             if ($val =~ /^VER_OK/) {
                 print "Using PERL=$abs\n" if $trace;
@@ -1999,15 +2001,14 @@ sub init_INST {
     }
 
     my @parentdir = split(/::/, $self->{PARENT_NAME});
-    $self->{INST_LIBDIR} = $self->catdir($self->{INST_LIB},@parentdir);
-    $self->{INST_ARCHLIBDIR} = $self->catdir($self->{INST_ARCHLIB},
-                                                  @parentdir);
-    $self->{INST_AUTODIR} = $self->catdir($self->{INST_LIB},'auto',
-                                               $self->{FULLEXT});
-    $self->{INST_ARCHAUTODIR} = $self->catdir($self->{INST_ARCHLIB},
-                                                   'auto',$self->{FULLEXT});
+    $self->{INST_LIBDIR}      = $self->catdir('$(INST_LIB)',     @parentdir);
+    $self->{INST_ARCHLIBDIR}  = $self->catdir('$(INST_ARCHLIB)', @parentdir);
+    $self->{INST_AUTODIR}     = $self->catdir('$(INST_LIB)', 'auto', 
+                                              '$(FULLEXT)');
+    $self->{INST_ARCHAUTODIR} = $self->catdir('$(INST_ARCHLIB)', 'auto',
+                                              '$(FULLEXT)');
 
-    $self->{INST_SCRIPT} ||= $self->catdir($Curdir,'blib','script');
+    $self->{INST_SCRIPT}  ||= $self->catdir($Curdir,'blib','script');
 
     $self->{INST_MAN1DIR} ||= $self->catdir($Curdir,'blib','man1');
     $self->{INST_MAN3DIR} ||= $self->catdir($Curdir,'blib','man3');
@@ -2703,7 +2704,7 @@ $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE)
 	$(NOECHO) $(ECHO) Writing \"$(MAKE_APERL_FILE)\" for this $(MAP_TARGET)
 	$(NOECHO) $(PERLRUNINST) \
 		Makefile.PL DIR=}, $dir, q{ \
-		FIRST_MAKEFILE=$(MAKE_APERL_FILE) LINKTYPE=static \
+		MAKEFILE=$(MAKE_APERL_FILE) LINKTYPE=static \
 		MAKEAPERL=1 NORECURS=1 CCCDLFLAGS=};
 
 	foreach (@ARGV){
@@ -3054,8 +3055,7 @@ sub parse_version {
 	$inpod = /^=(?!cut)/ ? 1 : /^=cut/ ? 0 : $inpod;
 	next if $inpod || /^\s*#/;
 	chop;
-	# next unless /\$(([\w\:\']*)\bVERSION)\b.*\=/;
-	next unless /([\$*])(([\w\:\']*)\bVERSION)\b.*\=/;
+	next unless /(?<!\\)([\$*])(([\w\:\']*)\bVERSION)\b.*\=/;
 	my $eval = qq{
 	    package ExtUtils::MakeMaker::_version;
 	    no strict;
@@ -3167,10 +3167,8 @@ PERL_HDRS = \
 	$(PERL_INC)/nostdio.h		\
 	$(PERL_INC)/op.h		\
 	$(PERL_INC)/opcode.h		\
-	$(PERL_INC)/opnames.h		\
 	$(PERL_INC)/patchlevel.h	\
 	$(PERL_INC)/perl.h		\
-	$(PERL_INC)/perlapi.h		\
 	$(PERL_INC)/perlio.h		\
 	$(PERL_INC)/perlsdio.h		\
 	$(PERL_INC)/perlsfio.h		\
@@ -3187,9 +3185,7 @@ PERL_HDRS = \
 	$(PERL_INC)/thrdvar.h		\
 	$(PERL_INC)/thread.h		\
 	$(PERL_INC)/unixish.h		\
-	$(PERL_INC)/utf8.h		\
-	$(PERL_INC)/util.h		\
-	$(PERL_INC)/warnings.h
+	$(PERL_INC)/util.h
 
 $(OBJECT) : $(PERL_HDRS)
 } if $self->{OBJECT};

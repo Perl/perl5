@@ -2670,6 +2670,13 @@
 #define PROCSELFEXE_PATH		/**/
 #endif
 
+/* HAS_PTHREAD_ATTR_SETSCOPE:
+ *	This symbol, if defined, indicates that the pthread_attr_setscope
+ *	system call is available to set the contention scope attribute of
+ *	a thread attribute object.
+ */
+/*#define HAS_PTHREAD_ATTR_SETSCOPE		/ **/
+
 /* HAS_READV:
  *	This symbol, if defined, indicates that the readv routine is
  *	available to do gather reads.  You will also need <sys/uio.h>
@@ -3923,7 +3930,7 @@
 
 /* HAS_PTHREAD_ATFORK:
  *	This symbol, if defined, indicates that the pthread_atfork routine
- *	is available setup fork handlers.
+ *	is available to setup fork handlers.
  */
 /*#define HAS_PTHREAD_ATFORK		/ **/
 

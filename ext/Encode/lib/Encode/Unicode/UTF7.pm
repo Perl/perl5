@@ -1,12 +1,12 @@
 #
-# $Id: UTF7.pm,v 0.1 2003/05/16 18:06:24 dankogai Exp dankogai $
+# $Id: UTF7.pm,v 0.2 2003/05/19 04:56:03 dankogai Exp $
 #
 package Encode::Unicode::UTF7;
 use strict;
 no warnings 'redefine';
 use base qw(Encode::Encoding);
 __PACKAGE__->Define('UTF-7');
-our $VERSION = do { my @r = (q$Revision: 0.1 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 0.2 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 use MIME::Base64;
 use Encode;
 
@@ -19,7 +19,7 @@ my $specials =   quotemeta "\'(),-./:?";
 $OPTIONAL_DIRECT_CHARS and
     $specials .= quotemeta "!\"#$%&*;<=>@[]^_`{|}";
 # \s will not work because it matches U+3000 DEOGRAPHIC SPACE
-# We use qr/[\n\r\t\ ] instead
+# We use qr/[\n\r\t\ ] instead 
 my $re_asis =     qr/(?:[\n\r\t\ A-Za-z0-9$specials])/;
 my $re_encoded = qr/(?:[^\n\r\t\ A-Za-z0-9$specials])/;
 my $e_utf16 = find_encoding("UTF-16BE");

@@ -144,6 +144,24 @@ C<AUTOLOAD> from the .pm file.
 
 Turn on debugging messages.
 
+=item B<-e>, B<--omit-enums>=[I<regular expression>]
+
+If I<regular expression> is not given, skip all constants that are defined in
+a C enumeration. Otherwise skip only those constants that are defined in an
+enum whose name matches I<regular expression>.
+
+Since I<regular expression> is optional, make sure that this switch is followed
+by at least one other switch if you omit I<regular expression> and have some
+pending arguments such as header-file names. This is ok:
+
+    h2xs -e -n Module::Foo foo.h
+
+This is not ok:
+
+    h2xs -n Module::Foo -e foo.h
+
+In the latter, foo.h is taken as I<regular expression>.
+
 =item B<-f>, B<--force>
 
 Allows an extension to be created for a header even if that header is
@@ -267,57 +285,68 @@ also the section on L<LIMITATIONS of B<-x>>.
 =head1 EXAMPLES
 
 
-	# Default behavior, extension is Rusers
-	h2xs rpcsvc/rusers
+    # Default behavior, extension is Rusers
+    h2xs rpcsvc/rusers
 
-	# Same, but extension is RUSERS
-	h2xs -n RUSERS rpcsvc/rusers
+    # Same, but extension is RUSERS
+    h2xs -n RUSERS rpcsvc/rusers
 
-	# Extension is rpcsvc::rusers. Still finds <rpcsvc/rusers.h>
-	h2xs rpcsvc::rusers
+    # Extension is rpcsvc::rusers. Still finds <rpcsvc/rusers.h>
+    h2xs rpcsvc::rusers
 
-	# Extension is ONC::RPC.  Still finds <rpcsvc/rusers.h>
-	h2xs -n ONC::RPC rpcsvc/rusers
+    # Extension is ONC::RPC.  Still finds <rpcsvc/rusers.h>
+    h2xs -n ONC::RPC rpcsvc/rusers
 
-	# Without constant() or AUTOLOAD
-	h2xs -c rpcsvc/rusers
+    # Without constant() or AUTOLOAD
+    h2xs -c rpcsvc/rusers
 
-	# Creates templates for an extension named RPC
-	h2xs -cfn RPC
+    # Creates templates for an extension named RPC
+    h2xs -cfn RPC
 
-	# Extension is ONC::RPC.
-	h2xs -cfn ONC::RPC
+    # Extension is ONC::RPC.
+    h2xs -cfn ONC::RPC
+    
+    # Extension is Lib::Foo which works at least with Perl5.005_03.
+    # Constants are created for all #defines and enums h2xs can find
+    # in foo.h.
+    h2xs -b 5.5.3 -n Lib::Foo foo.h
 
-	# Makefile.PL will look for library -lrpc in 
-	# additional directory /opt/net/lib
-	h2xs rpcsvc/rusers -L/opt/net/lib -lrpc
+    # Extension is Lib::Foo which works at least with Perl5.005_03.
+    # Constants are created for all #defines but only for enums
+    # whose names do not start with 'bar_'.
+    h2xs -b 5.5.3 -e '^bar_' -n Lib::Foo foo.h
 
-        # Extension is DCE::rgynbase
-        # prefix "sec_rgy_" is dropped from perl function names
-        h2xs -n DCE::rgynbase -p sec_rgy_ dce/rgynbase
+    # Makefile.PL will look for library -lrpc in 
+    # additional directory /opt/net/lib
+    h2xs rpcsvc/rusers -L/opt/net/lib -lrpc
 
-        # Extension is DCE::rgynbase
-        # prefix "sec_rgy_" is dropped from perl function names
-        # subroutines are created for sec_rgy_wildcard_name and sec_rgy_wildcard_sid
-        h2xs -n DCE::rgynbase -p sec_rgy_ \
-        -s sec_rgy_wildcard_name,sec_rgy_wildcard_sid dce/rgynbase
+    # Extension is DCE::rgynbase
+    # prefix "sec_rgy_" is dropped from perl function names
+    h2xs -n DCE::rgynbase -p sec_rgy_ dce/rgynbase
 
-	# Make XS without defines in perl.h, but with function declarations
-	# visible from perl.h. Name of the extension is perl1.
-	# When scanning perl.h, define -DEXT=extern -DdEXT= -DINIT(x)=
-	# Extra backslashes below because the string is passed to shell.
-	# Note that a directory with perl header files would 
-	#  be added automatically to include path.
-	h2xs -xAn perl1 -F "-DEXT=extern -DdEXT= -DINIT\(x\)=" perl.h
+    # Extension is DCE::rgynbase
+    # prefix "sec_rgy_" is dropped from perl function names
+    # subroutines are created for sec_rgy_wildcard_name and 
+    # sec_rgy_wildcard_sid
+    h2xs -n DCE::rgynbase -p sec_rgy_ \
+    -s sec_rgy_wildcard_name,sec_rgy_wildcard_sid dce/rgynbase
 
-	# Same with function declaration in proto.h as visible from perl.h.
-	h2xs -xAn perl2 perl.h,proto.h
+    # Make XS without defines in perl.h, but with function declarations
+    # visible from perl.h. Name of the extension is perl1.
+    # When scanning perl.h, define -DEXT=extern -DdEXT= -DINIT(x)=
+    # Extra backslashes below because the string is passed to shell.
+    # Note that a directory with perl header files would 
+    #  be added automatically to include path.
+    h2xs -xAn perl1 -F "-DEXT=extern -DdEXT= -DINIT\(x\)=" perl.h
 
-	# Same but select only functions which match /^av_/
-	h2xs -M '^av_' -xAn perl2 perl.h,proto.h
+    # Same with function declaration in proto.h as visible from perl.h.
+    h2xs -xAn perl2 perl.h,proto.h
 
-	# Same but treat SV* etc as "opaque" types
-	h2xs -o '^[S]V \*$' -M '^av_' -xAn perl2 perl.h,proto.h
+    # Same but select only functions which match /^av_/
+    h2xs -M '^av_' -xAn perl2 perl.h,proto.h
+
+    # Same but treat SV* etc as "opaque" types
+    h2xs -o '^[S]V \*$' -M '^av_' -xAn perl2 perl.h,proto.h
 
 =head2 Extension based on F<.h> and F<.c> files
 
@@ -497,6 +526,9 @@ OPTIONS:
     -c, --omit-constant   Omit the constant() function and specialised AUTOLOAD
                           from the XS file.
     -d, --debugging       Turn on debugging messages.
+    -e, --omit-enums      Omit constants from enums in the constant() function.
+                          If a pattern is given, only the matching enums are 
+                          ignored.
     -f, --force           Force creation of the extension even if the C header
                           does not exist.
     -g, --global          Include code for safely storing static data in the .xs file. 
@@ -538,6 +570,7 @@ my ($opt_A,
     $opt_a,
     $opt_c,
     $opt_d,
+    $opt_e,
     $opt_f,
     $opt_g,
     $opt_h,
@@ -575,6 +608,7 @@ my %options = (
                 'compat-version|b=s' => \$opt_b,
                 'omit-constant|c'    => \$opt_c,
                 'debugging|d'        => \$opt_d,
+                'omit-enums|e:s'     => \$opt_e,
                 'force|f'            => \$opt_f,
                 'global|g'           => \$opt_g,
                 'help|h|?'           => \$opt_h,
@@ -841,7 +875,33 @@ if( @path_h ){
 	    }
 	  }
       }
-      close(CH);
+      if (defined $opt_e and !$opt_e) {
+        close(CH);
+      }
+      else {
+        use Fcntl qw/SEEK_SET/;
+        seek CH, 0, SEEK_SET;
+        my $src = do { local $/; <CH> };
+        close CH;
+        no warnings 'uninitialized';
+        
+        # Remove C and C++ comments 
+        $src =~ s#/\*[^*]*\*+([^/*][^*]*\*+)*/|("(\\.|[^"\\])*"|'(\\.|[^'\\])*'|.[^/"'\\]*)#$2#gs;
+        
+        while ($src =~ /(\benum\s*([\w_]*)\s*\{\s([\s\w=,]+)\})/gsc) {
+            my ($enum_name, $enum_body) = 
+                $1 =~ /enum\s*([\w_]*)\s*\{\s([\s\w=,]+)\}/gs;
+            # skip enums matching $opt_e
+            next if $opt_e && $enum_name =~ /$opt_e/;
+            my $val = 0;
+            for my $item (split /,/, $enum_body) {
+                my ($key, $declared_val) = $item =~ /(\w*)\s*=\s*(.*)/;
+                $val = length($declared_val) ? $declared_val : 1 + $val;
+                $seen_define{$key} = $declared_val;
+                $const_names{$key}++;
+            }
+        } # while (...)
+      } # if (!defined $opt_e or $opt_e)
     }
     }
 }

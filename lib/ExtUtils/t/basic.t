@@ -159,7 +159,7 @@ my $manifest = maniread();
 # VMS is non-case preserving, so we can't know what the MANIFEST will
 # look like. :(
 _normalize($manifest);
-is( $manifest->{'meta.yml'}, 'Module meta-data in YAML' );
+is( $manifest->{'meta.yml'}, 'Module meta-data (added by MakeMaker)' );
 
 # Test NO_META META.yml suppression
 unlink 'META.yml';

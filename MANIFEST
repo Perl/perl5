@@ -1044,7 +1044,6 @@ lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
 lib/CPAN/bin/cpan		easily interact with CPAN from the command line
 lib/CPAN/FirstTime.pm		Utility for creating CPAN config files
 lib/CPAN/Nox.pm			Runs CPAN while avoiding compiled extensions
-lib/CPAN/README			README of CPAN
 lib/CPAN/t/loadme.t		See if CPAN the module works
 lib/CPAN/t/mirroredby.t		See if CPAN::Mirrored::By works
 lib/CPAN/t/Nox.t		See if CPAN::Nox works
@@ -1085,11 +1084,13 @@ lib/ExtUtils/instmodsh		Give information about installed extensions
 lib/ExtUtils/Liblist.pm		Locates libraries
 lib/ExtUtils/Liblist/Kid.pm	Does the real work of the above
 lib/ExtUtils/MakeMaker.pm	Write Makefiles for extensions
+lib/ExtUtils/MakeMaker/bytes.pm	Version agnostic bytes.pm
 lib/ExtUtils/MakeMaker/FAQ.pod	MakeMaker FAQ
 lib/ExtUtils/MakeMaker/Tutorial.pod	Writing a module with MakeMaker
 lib/ExtUtils/MakeMaker/vmsish.pm	Platform agnostic vmsish.pm
 lib/ExtUtils/Manifest.pm	Utilities to write MANIFEST files
 lib/ExtUtils/MANIFEST.SKIP	The default MANIFEST.SKIP
+lib/ExtUtils/META.yml	ExtUtils::MakeMaker metadata
 lib/ExtUtils/Mkbootstrap.pm	Writes a bootstrap file (see MakeMaker)
 lib/ExtUtils/Mksymlists.pm	Writes a linker options file for extensions
 lib/ExtUtils/MM.pm		MakeMaker adaptor class
@@ -1114,6 +1115,7 @@ lib/ExtUtils/t/00compile.t	See if MakeMaker modules compile
 lib/ExtUtils/t/00setup_dummy.t	Setup MakeMaker test module
 lib/ExtUtils/t/backwards.t	Check MakeMaker's backwards compatibility
 lib/ExtUtils/t/basic.t		See if MakeMaker can build a module
+lib/ExtUtils/t/bytes.t	Test ExtUtils::MakeMaker::bytes
 lib/ExtUtils/t/Command.t	See if ExtUtils::Command works (Win32 only)
 lib/ExtUtils/t/Constant.t	See if ExtUtils::Constant works
 lib/ExtUtils/t/Embed.t		See if ExtUtils::Embed and embedding works
@@ -1141,6 +1143,7 @@ lib/ExtUtils/t/prompt.t		See if E::MM::prompt() works
 lib/ExtUtils/t/split_command.t	See if MM's xargs-like function works
 lib/ExtUtils/t/testlib.t	See if ExtUtils::testlib works
 lib/ExtUtils/t/VERSION_FROM.t	See if MakeMaker's VERSION_FROM works
+lib/ExtUtils/t/vmsish.t	Test ExtUtils::MakeMaker::vmsish
 lib/ExtUtils/t/writemakefile_args.t	See if WriteMakefile works
 lib/ExtUtils/t/zz_cleanup_dummy.t	Cleanup MakeMaker test module
 lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
@@ -1205,7 +1208,6 @@ lib/FindBin.pm			Find name of currently executing program
 lib/FindBin.t			See if FindBin works
 lib/finddepth.pl		A depth-first find emulator--used by find2perl
 lib/flush.pl			Routines to do single flush
-lib/ftp.pl			FTP code (obsolete, use Net::FTP instead)
 lib/getcwd.pl			A getcwd() emulator
 lib/getopt.pl			Perl library supporting option parsing
 lib/Getopt/Long.pm		Fetch command options (GetOptions)

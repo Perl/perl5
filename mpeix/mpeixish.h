@@ -9,25 +9,25 @@
  *	This symbol, if defined, indicates that the ioctl() routine is
  *	available to set I/O characteristics
  */
-#define	HAS_IOCTL		/ **/
+#define	HAS_IOCTL		/**/
  
 /* HAS_UTIME:
  *	This symbol, if defined, indicates that the routine utime() is
  *	available to update the access and modification times of files.
  */
-#define HAS_UTIME		/ **/
+#define HAS_UTIME		/**/
 
 /* HAS_GROUP
  *	This symbol, if defined, indicates that the getgrnam() and
  *	getgrgid() routines are available to get group entries.
  */
-#define HAS_GROUP		/ **/
+#define HAS_GROUP		/**/
 
 /* HAS_PASSWD
  *	This symbol, if defined, indicates that the getpwnam() and
  *	getpwuid() routines are available to get password entries.
  */
-#define HAS_PASSWD		/ **/
+#define HAS_PASSWD		/**/
 
 #define HAS_KILL
 #define HAS_WAIT
@@ -52,7 +52,7 @@
  *	This symbol is defined if this system has a stat structure declaring
  *	st_rdev
  */
-#define USE_STAT_RDEV 	/ **/
+#define USE_STAT_RDEV 	/**/
 
 /* ACME_MESS:
  *	This symbol, if defined, indicates that error messages should be 

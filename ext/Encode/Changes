@@ -1,8 +1,27 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.94 2003/05/10 18:13:59 dankogai Exp $
+# $Id: Changes,v 1.95 2003/05/21 08:41:11 dankogai Exp $
 #
-$Revision: 1.94 $ $Date: 2003/05/10 18:13:59 $
+$Revision: 1.95 $ $Date: 2003/05/21 08:41:11 $
+! encoding.pm
+  Addressed [cpan #2629] Wrong assumption in numeric comparison
+  Message-Id: <rt-2629-7326.19.5700583232515@cpan.org>
+! Encode.pm Encode.xs Unicode/Unicode.pm Unicode/Unicode.xs
+ lib/Encode/Encoding.pm t/perlio.t
+ ! API Change: ->new_sequence() => ->renew()
+ + Encode::Unicode makes use of it so it can handle BOM on PerlIO
+ + Encode::XS and Encode::utf8 now supports ->renew()
+ + Encode::Encoding now documents this with examples
+ - Non-XS (en|de)code stripped out of Encode::Unicode
+ Message-Id: <146957DB-8C39-11D7-9C91-000393AE4244@dan.co.jp>
+
+1.95 2003/05/21 08:41:11
+! ucm/8859-*.ucm
+  Since bogus entries were found in iso-8859-6, all entries are
+  re-generated once again out of
+  http://www.unicode.org/Public/MAPPINGS/ISO8859/8859-*.TXT
+  Thank David Graff <graff@unagi.cis.upenn.edu> for the discovery
+  Message-Id: <200305201819.h4KIJRRU013746@unagi.cis.upenn.edu>
 + lib/Encode/Unicode/UTF7.pm
 ! lib/Encode/Config.pm lib/Encode/Alias.pm Unicode/Unicode.pm t/Unicode.t
   lib/Encode/Supported.pod

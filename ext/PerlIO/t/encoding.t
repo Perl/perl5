@@ -10,6 +10,10 @@ BEGIN {
 	print "1..0 # Skip: not perlio\n";
 	exit 0;
     }
+    unless (eval { require Encode } ) {
+	print "1..0 # Skip: not Encode\n";
+	exit 0;
+    }
 }
 
 print "1..14\n";
@@ -29,7 +33,6 @@ if (open(GRK, ">$grk")) {
 }
 
 {
-    use Encode;
     open(my $i,'<:encoding(iso-8859-7)',$grk);
     print "ok 1\n";
     open(my $o,'>:utf8',$utf);

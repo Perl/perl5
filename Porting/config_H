@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Wed Apr 23 22:22:47 EET DST 2003
+ * Configuration time: Sat May 24 10:17:06 EET DST 2003
  * Configured by     : jhi
  * Target system     : osf1 kosh.hut.fi v5.1 2650 alpha 
  */
@@ -1480,7 +1480,7 @@
 #define OSVERS "5.1b"		/**/
 
 /* CAT2:
- *	This macro catenates 2 tokens together.
+ *	This macro concatenates 2 tokens together.
  */
 /* STRINGIFY:
  *	This macro surrounds its token with double quotes.
@@ -2673,6 +2673,13 @@
 #if defined(HAS_PROCSELFEXE) && !defined(PROCSELFEXE_PATH)
 #define PROCSELFEXE_PATH		/**/
 #endif
+
+/* HAS_PTHREAD_ATTR_SETSCOPE:
+ *	This symbol, if defined, indicates that the pthread_attr_setscope
+ *	system call is available to set the contention scope attribute of
+ *	a thread attribute object.
+ */
+/*#define HAS_PTHREAD_ATTR_SETSCOPE		/ **/
 
 /* HAS_READV:
  *	This symbol, if defined, indicates that the readv routine is
@@ -3927,7 +3934,7 @@
 
 /* HAS_PTHREAD_ATFORK:
  *	This symbol, if defined, indicates that the pthread_atfork routine
- *	is available setup fork handlers.
+ *	is available to setup fork handlers.
  */
 /*#define HAS_PTHREAD_ATFORK		/ **/
 

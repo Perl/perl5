@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Wed Apr 23 22:22:47 EET DST 2003
+# Configuration time: Sat May 24 10:17:06 EET DST 2003
 # Configured by     : jhi
 # Target system     : osf1 kosh.hut.fi v5.1 2650 alpha 
 
@@ -59,11 +59,11 @@ ccdlflags='  -Wl,-rpath,/opt/perl/lib/5.9.0/alpha-dec_osf/CORE'
 ccflags='-std -D_INTRINSICS -fprm d -ieee -DLANGUAGE_C'
 ccflags_uselargefiles=''
 ccname='cc'
-ccsymbols='__alpha=1 __ALPHA=1 __Alpha_AXP=1 __arch64__=1 __DATE__="Apr __DECC=1 __DECC_MODE_RELAXED=1 __DECC_VER=60590011 __digital__=1 __IEEE_FLOAT=1 __INITIAL_POINTER_SIZE=0 __LANGUAGE_C__=1 __osf__=1 __PRAGMA_ENVIRONMENT=1 __STDC__=0 __STDC_HOSTED__=1 __STDC_VERSION__=199901L __TIME__="22:23:42" __unix__=1 __X_FLOAT=1 _LONGLONG=1 _SYSTYPE_BSD=1'
+ccsymbols='__alpha=1 __ALPHA=1 __Alpha_AXP=1 __arch64__=1 __DATE__="May __DECC=1 __DECC_MODE_RELAXED=1 __DECC_VER=60590011 __digital__=1 __IEEE_FLOAT=1 __INITIAL_POINTER_SIZE=0 __LANGUAGE_C__=1 __osf__=1 __PRAGMA_ENVIRONMENT=1 __STDC__=0 __STDC_HOSTED__=1 __STDC_VERSION__=199901L __TIME__="10:18:27" __unix__=1 __X_FLOAT=1 _LONGLONG=1 _SYSTYPE_BSD=1'
 ccversion='V6.5-011'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Wed Apr 23 22:22:47 EET DST 2003'
+cf_time='Sat May 24 10:17:06 EET DST 2003'
 charsize='1'
 chgrp=''
 chmod='chmod'
@@ -326,6 +326,7 @@ d_poll='define'
 d_portable='define'
 d_procselfexe='undef'
 d_pthread_atfork='undef'
+d_pthread_attr_setscope='undef'
 d_pthread_yield='undef'
 d_pwage='undef'
 d_pwchange='undef'

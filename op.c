@@ -888,10 +888,23 @@ S_modkids(pTHX_ OP *o, I32 type)
     return o;
 }
 
+/* Propagate lvalue ("modifiable") context to an op and it's children.
+ * 'type' represents the context type, roughly based on the type of op that
+ * would do the modifying, although local() is represented by OP_NULL.
+ * It's responsible for detecting things that can't be modified,  flag
+ * things that need to behave specially in an lvalue context (e.g., "$$x = 5"
+ * might have to vivify a reference in $x), and so on.
+ *
+ * For example, "$a+1 = 2" would cause mod() to be called with o being
+ * OP_ADD and type being OP_SASSIGN, and would output an error.
+ */
+
 OP *
 Perl_mod(pTHX_ OP *o, I32 type)
 {
     OP *kid;
+    /* -1 = error on localize, 0 = ignore localize, 1 = ok to localize */
+    int localize = -1;
 
     if (!o || PL_error_count)
 	return o;
@@ -904,6 +917,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 
     switch (o->op_type) {
     case OP_UNDEF:
+	localize = 0;
 	PL_modcount++;
 	return o;
     case OP_CONST:
@@ -1060,6 +1074,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	break;
 
     case OP_COND_EXPR:
+	localize = 1;
 	for (kid = cUNOPo->op_first->op_sibling; kid; kid = kid->op_sibling)
 	    mod(kid, type);
 	break;
@@ -1080,6 +1095,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
     case OP_HSLICE:
 	if (type == OP_LEAVESUBLV)
 	    o->op_private |= OPpMAYBE_LVSUB;
+	localize = 1;
 	/* FALL THROUGH */
     case OP_AASSIGN:
     case OP_NEXTSTATE:
@@ -1088,6 +1104,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	break;
     case OP_RV2SV:
 	ref(cUNOPo->op_first, o->op_type);
+	localize = 1;
 	/* FALL THROUGH */
     case OP_GV:
     case OP_AV2ARYLEN:
@@ -1096,7 +1113,11 @@ Perl_mod(pTHX_ OP *o, I32 type)
     case OP_ANDASSIGN:
     case OP_ORASSIGN:
     case OP_DORASSIGN:
+	PL_modcount++;
+	break;
+
     case OP_AELEMFAST:
+	localize = 1;
 	PL_modcount++;
 	break;
 
@@ -1112,17 +1133,13 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	/* FALL THROUGH */
     case OP_PADSV:
 	PL_modcount++;
-	if (!type)
-	{   /* XXX DAPM 2002.08.25 tmp assert test */
-	    /* XXX */ assert(av_fetch(PL_comppad_name, (o->op_targ), FALSE));
-	    /* XXX */ assert(*av_fetch(PL_comppad_name, (o->op_targ), FALSE));
-
+	if (!type) /* local() */
 	    Perl_croak(aTHX_ "Can't localize lexical variable %s",
 		 PAD_COMPNAME_PV(o->op_targ));
-	}
 	break;
 
     case OP_PUSHMARK:
+	localize = 0;
 	break;
 
     case OP_KEYS:
@@ -1153,6 +1170,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	    o->op_private |= OPpLVAL_DEFER;
 	if (type == OP_LEAVESUBLV)
 	    o->op_private |= OPpMAYBE_LVSUB;
+	localize = 1;
 	PL_modcount++;
 	break;
 
@@ -1160,11 +1178,13 @@ Perl_mod(pTHX_ OP *o, I32 type)
     case OP_LEAVE:
     case OP_ENTER:
     case OP_LINESEQ:
+	localize = 0;
 	if (o->op_flags & OPf_KIDS)
 	    mod(cLISTOPo->op_last, type);
 	break;
 
     case OP_NULL:
+	localize = 0;
 	if (o->op_flags & OPf_SPECIAL)		/* do BLOCK */
 	    goto nomod;
 	else if (!(o->op_flags & OPf_KIDS))
@@ -1175,6 +1195,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	}
 	/* FALL THROUGH */
     case OP_LIST:
+	localize = 0;
 	for (kid = cLISTOPo->op_first; kid; kid = kid->op_sibling)
 	    mod(kid, type);
 	break;
@@ -1197,10 +1218,21 @@ Perl_mod(pTHX_ OP *o, I32 type)
 
     if (type == OP_AASSIGN || type == OP_SASSIGN)
 	o->op_flags |= OPf_SPECIAL|OPf_REF;
-    else if (!type) {
-	o->op_private |= OPpLVAL_INTRO;
-	o->op_flags &= ~OPf_SPECIAL;
-	PL_hints |= HINT_BLOCK_SCOPE;
+    else if (!type) { /* local() */
+	switch (localize) {
+	case 1:
+	    o->op_private |= OPpLVAL_INTRO;
+	    o->op_flags &= ~OPf_SPECIAL;
+	    PL_hints |= HINT_BLOCK_SCOPE;
+	    break;
+	case 0:
+	    break;
+	case -1:
+	    if (ckWARN(WARN_SYNTAX)) {
+		Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+		    "Useless localization of %s", OP_DESC(o));
+	    }
+	}
     }
     else if (type != OP_GREPSTART && type != OP_ENTERSUB
              && type != OP_LEAVESUBLV)
@@ -3586,11 +3618,6 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop, I32 whileline, OP *
 	if (!next)
 	    next = unstack;
 	cont = append_elem(OP_LINESEQ, cont, unstack);
-	if ((line_t)whileline != NOLINE) {
-	    PL_copline = (line_t)whileline;
-	    cont = append_elem(OP_LINESEQ, cont,
-			       newSTATEOP(0, Nullch, Nullop));
-	}
     }
 
     listop = append_list(OP_LINESEQ, (LISTOP*)block, (LISTOP*)cont);
@@ -3643,13 +3670,16 @@ Perl_newFOROP(pTHX_ I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *blo
     OP *wop;
     PADOFFSET padoff = 0;
     I32 iterflags = 0;
+    I32 iterpflags = 0;
 
     if (sv) {
 	if (sv->op_type == OP_RV2SV) {	/* symbol table variable */
+	    iterpflags = sv->op_private & OPpOUR_INTRO; /* for our $x () */
 	    sv->op_type = OP_RV2GV;
 	    sv->op_ppaddr = PL_ppaddr[OP_RV2GV];
 	}
 	else if (sv->op_type == OP_PADSV) { /* private variable */
+	    iterpflags = sv->op_private & OPpLVAL_INTRO; /* for my $x () */
 	    padoff = sv->op_targ;
 	    sv->op_targ = 0;
 	    op_free(sv);
@@ -3708,6 +3738,9 @@ Perl_newFOROP(pTHX_ I32 flags,char *label,line_t forline,OP *sv,OP *expr,OP *blo
     loop = (LOOP*)list(convert(OP_ENTERITER, iterflags,
 			       append_elem(OP_LIST, expr, scalar(sv))));
     assert(!loop->op_next);
+    /* for my  $x () sets OPpLVAL_INTRO;
+     * for our $x () sets OPpOUR_INTRO; both only used by Deparse.pm */
+    loop->op_private = iterpflags;
 #ifdef PL_OP_SLAB_ALLOC
     {
 	LOOP *tmp;
@@ -5104,10 +5137,6 @@ Perl_ck_fun(pTHX_ OP *o)
 			     */
 			    priv = OPpDEREF;
 			    if (kid->op_type == OP_PADSV) {
-				/*XXX DAPM 2002.08.25 tmp assert test */
-				/*XXX*/ assert(av_fetch(PL_comppad_name, (kid->op_targ), FALSE));
-				/*XXX*/ assert(*av_fetch(PL_comppad_name, (kid->op_targ), FALSE));
-
 				name = PAD_COMPNAME_PV(kid->op_targ);
 				/* SvCUR of a pad namesv can't be trusted
 				 * (see PL_generation), so calc its length

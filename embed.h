@@ -1543,7 +1543,7 @@
 #define doeval			S_doeval
 #endif
 #ifdef PERL_CORE
-#define doopen_pmc		S_doopen_pmc
+#define doopen_pm		S_doopen_pm
 #endif
 #ifdef PERL_CORE
 #define path_is_absolute	S_path_is_absolute
@@ -4018,7 +4018,7 @@
 #define doeval(a,b,c,d)		S_doeval(aTHX_ a,b,c,d)
 #endif
 #ifdef PERL_CORE
-#define doopen_pmc(a,b)		S_doopen_pmc(aTHX_ a,b)
+#define doopen_pm(a,b)		S_doopen_pm(aTHX_ a,b)
 #endif
 #ifdef PERL_CORE
 #define path_is_absolute(a)	S_path_is_absolute(aTHX_ a)

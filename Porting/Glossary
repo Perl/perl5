@@ -296,7 +296,7 @@ cpp (Loc.U):
 	the value is reset to a plain "cpp" and is not useful.
 
 cpp_stuff (cpp_stuff.U):
-	This variable contains an identification of the catenation mechanism
+	This variable contains an identification of the concatenation mechanism
 	used by the C preprocessor.
 
 cppccsymbols (Cppsym.U):
@@ -1478,6 +1478,11 @@ d_pthread_atfork (d_pthread_atfork.U):
 	This variable conditionally defines the HAS_PTHREAD_ATFORK symbol,
 	which indicates to the C program that the pthread_atfork()
 	routine is available.
+
+d_pthread_attr_setscope (d_pthread_attr_ss.U):
+	This variable conditionally defines HAS_PTHREAD_ATTR_SETSCOPE if
+	pthread_attr_setscope() is available to set the contention scope
+	attribute of a thread attribute object.
 
 d_pthread_yield (d_pthread_y.U):
 	This variable conditionally defines the HAS_PTHREAD_YIELD

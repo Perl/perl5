@@ -3,6 +3,10 @@ Changes in version 2.33
 
 **************** WARNING -- EXPERIMENTAL CODE AHEAD ****************
 
+The following new features are marked experimental. This means that if
+you are going to use them you _must_ watch out for the next release of
+Getopt::Long to see if the API has changed.
+
 * Getopt::Long can automatically handle --version and --help options
   if the calling program did not specify a handler explicitly.
 
@@ -38,7 +42,7 @@ Changes in version 2.33
 
   Example:
 
-    use Getopt::Long 2.3203 qw(GetOptions HelpMessage);
+    use Getopt::Long 2.33 qw(GetOptions HelpMessage);
     GetOptions(...) or HelpMessage(2);
 
 **************** END EXPERIMENTAL CODE ****************
@@ -46,10 +50,10 @@ Changes in version 2.33
 * Subroutine Configure can now be exported on demand.
 
 * Negatable options (with "!") now also support the "no-" prefix.
-  On request of Ed Avis <eavis@amadeus.net>.
+  On request of Ed Avis.
 
 * Some fixes with hashes and bundling.
-  Thanks to Anders Johnson <anders@wis-tech.com> and Andrei Gnepp <>.
+  Thanks to Anders Johnson and Andrei Gnepp.
   Mandatory/optional status for hash values is now effective.
   String valued options with no value now default to the empty string
   instead of 1 (one).
@@ -57,7 +61,7 @@ Changes in version 2.33
 
 * Fix a pass_through bug where the options terminator (normally "--")
   was not passed through in @ARGV.
-  Thanks to Philippe Verdret <philippe.verdret@xps-pro.com>.
+  Thanks to Philippe Verdret.
 
 * Add FAQ: I "use GetOpt::Long;" (Windows) and now it doesn't work.
 
@@ -83,14 +87,13 @@ Changes in version 2.30
 
 * Fix a problem where a 'die' from a 'warn' via a localized
   $SIG{__WARN__} was not properly propagated from a callback.
-  Thanks to Diab Jerius <dj@head-cfa.harvard.edu>.
+  Thanks to Diab Jerius.
 
 Changes in version 2.29
 -----------------------
 
 * Fix a problem where options were not recognized when both
-  auto_abbrev and ignore_case were disabled. Thanks to Seth Robertson
-  <seth@systemdetection.com>.
+  auto_abbrev and ignore_case were disabled. Thanks to Seth Robertson.
 
 * Remove Carp.
 
@@ -132,11 +135,11 @@ Changes in version 2.27
 
 * Avoid errors on references when an option is found in error, e.g.
   GetOptions('fo$@#' => \$var).
-  Thanks to Wolfgang Laun <Wolfgang.Laun@alcatel.at>.
+  Thanks to Wolfgang Laun.
 
 * When an option is specified more than once, an error is now
   generated. E.g., GetOptions('foo', 'foo').
-  Thanks to Wolfgang Laun <Wolfgang.Laun@alcatel.at>.
+  Thanks to Wolfgang Laun.
 
 * Lots of internal restructoring to make room for extensions.
 
