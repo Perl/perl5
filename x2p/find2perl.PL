@@ -266,7 +266,9 @@ while (@ARGV) {
 }
 
 if ($print_needed) {
-    $out .= "\n" . tab . '&& print("$name\n")';
+    my $t = tab;
+    if ($t !~ /&&\s*$/) { $t .= '&& ' }
+    $out .= "\n" . $t . 'print("$name\n")';
 }
 
 
