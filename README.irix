@@ -22,7 +22,7 @@ or later compilers (use cc -version to check).
 
 (Building 'cc -n32' is the default.)
 
-=head2 Building 64-bot
+=head2 Building 64-bit
 
 Use
 	
