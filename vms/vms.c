@@ -2269,7 +2269,7 @@ vmspipe_tempfile(pTHX)
     }
     if (!fp) return 0;  /* we're hosed */
 
-    fprintf(fp,"$! 'f$verify(0)\n");
+    fprintf(fp,"$! 'f$verify(0)'\n");
     fprintf(fp,"$!  ---  protect against nonstandard definitions ---\n");
     fprintf(fp,"$ perl_cfile  = f$environment(\"procedure\")\n");
     fprintf(fp,"$ perl_define = \"define/nolog\"\n");
@@ -2287,16 +2287,8 @@ vmspipe_tempfile(pTHX)
     fprintf(fp,"$c=c+perl_popen_cmd2\n"); 
     fprintf(fp,"$x=perl_popen_cmd3\n"); 
     fprintf(fp,"$c=c+x\n"); 
-    fprintf(fp,"$!  --- get rid of global symbols\n");
-    fprintf(fp,"$ perl_del/symbol/global perl_popen_in\n");
-    fprintf(fp,"$ perl_del/symbol/global perl_popen_err\n");
-    fprintf(fp,"$ perl_del/symbol/global perl_popen_out\n");
-    fprintf(fp,"$ perl_del/symbol/global perl_popen_cmd0\n");
-    fprintf(fp,"$ perl_del/symbol/global perl_popen_cmd1\n");
-    fprintf(fp,"$ perl_del/symbol/global perl_popen_cmd2\n");
-    fprintf(fp,"$ perl_del/symbol/global perl_popen_cmd3\n");
     fprintf(fp,"$ perl_on\n");
-    fprintf(fp,"$ 'c\n");
+    fprintf(fp,"$ 'c'\n");
     fprintf(fp,"$ perl_status = $STATUS\n");
     fprintf(fp,"$ perl_del  'perl_cfile'\n");
     fprintf(fp,"$ perl_exit 'perl_status'\n");
@@ -2328,7 +2320,11 @@ safe_popen(pTHX_ char *cmd, char *in_mode, int *psts)
 {
     static int handler_set_up = FALSE;
     unsigned long int sts, flags = CLI$M_NOWAIT;
-    unsigned int table = LIB$K_CLI_GLOBAL_SYM;
+    /* The use of a GLOBAL table (as was done previously) rendered
+     * Perl's qx() or `` unusable from a C<$ SET SYMBOL/SCOPE=NOGLOBAL> DCL
+     * environment.  Hence we've switched to LOCAL symbol table.
+     */
+    unsigned int table = LIB$K_CLI_LOCAL_SYM;
     int j, wait = 0;
     char *p, mode[10], symbol[MAX_DCL_SYMBOL+1], *vmspipe;
     char in[512], out[512], err[512], mbx[512];
