@@ -53,6 +53,7 @@ sub _init_optags {
     my(%all, %seen);
     @all{opset_to_ops(full_opset)} = (); # keys only
 
+    local($_);
     local($/) = "\n=cut"; # skip to optags definition section
     <DATA>;
     $/ = "\n=";		# now read in 'pod section' chunks
@@ -558,7 +559,7 @@ Originally designed and implemented by Malcolm Beattie,
 mbeattie@sable.ox.ac.uk as part of Safe version 1.
 
 Split out from Safe module version 1, named opcode tags and other
-changes added by Tim Bunce <Tim.Bunce@ig.co.uk>.
+changes added by Tim Bunce E<lt>F<Tim.Bunce@ig.co.uk>E<gt>.
 
 =cut
 
