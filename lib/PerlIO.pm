@@ -1,6 +1,6 @@
 package PerlIO;
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 
 # Map layer name to package that defines it
 our %alias;
@@ -240,6 +240,12 @@ returned, to get the output side use the optional C<output> argument:
 
 (Usually the layers are identical on either side of a filehandle but
 for example with sockets there may be differences.)
+
+There is no set_layers(), nor does get_layers() return a tied array
+mirroring the stack, or anything fancy like that.  This is not
+accidental or unintentional.  The PerlIO layer stack is a bit more
+complicated than just a stack (see for example the behaviour of C<:raw>).
+You are supposed to use open() and binmode() to manipulate the stack.
 
 B<Implementation details follow, please close your eyes.>
 
