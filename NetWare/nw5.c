@@ -582,7 +582,7 @@ nw_open(const char *path, int flag, ...)
     va_end(ap);
 
 	if (stricmp(path, "/dev/null")==0)
-	path = "NUL";
+	path = "NWNUL";
 
 	return open(path, flag, pmode);
 }
