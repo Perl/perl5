@@ -28,6 +28,120 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.4		Maintenance release working toward v5.8.4
 --------------
 ____________________________________________________________________________
+[ 22729] By: nicholas                              on 2004/04/21  18:54:21
+        Log: New sample config files.
+             Also add usemallocwrap to the ARM Cross config.sh - I'm guessing that
+             as this is the only new symbol, it should be sufficient to make it
+             work.
+     Branch: maint-5.8/perl
+	   ! Cross/config.sh-arm-linux Porting/config.sh Porting/config_H
+____________________________________________________________________________
+[ 22728] By: nicholas                              on 2004/04/21  15:25:46
+        Log: Integrate:
+             [ 22727]
+             Subject: [perl #28456] Typo in perlipc man page, and suggestions for same
+             From: Axel Boldt (via RT) <perlbug-followup@perl.org>
+             Message-ID: <rt-3.0.8-28456-84424.10.5222745276547@perl.org>
+             Date: 11 Apr 2004 13:08:17 -0000
+     Branch: maint-5.8/perl
+	  !> pod/perlipc.pod
+____________________________________________________________________________
+[ 22726] By: nicholas                              on 2004/04/21  15:04:07
+        Log: Integrate:
+             [ 21661]
+             Subject: [PATCH] Modernise INSTALL
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 05 Nov 2003 05:16:25 -0800
+             Message-Id: <lrd6c7ez12.fsf@caliper.activestate.com>
+             
+             [ 22722]
+             We should be telling people about ..exp, else they use the unexpanded
+             forms and shaft anyone who installs a private perl within ~
+             
+             [ 22723]
+             INSTALL didn't mention the 5.8.2 hash changes. Fixed
+             
+             [ 22724]
+             This should be L<>
+             
+             [ 22725]
+             Punt the "reporting bugs" section to the top.
+             Reorder the description of what to do, to start with the most common
+             case.
+             Clarify "how to report bugs effectively" (and why it benefits you)
+             
+             plus some edits to undo Gisle's "modernisation" of 5.8.0 to 5.9.0
+     Branch: maint-5.8/perl
+	   ! INSTALL
+____________________________________________________________________________
+[ 22720] By: nicholas                              on 2004/04/20  16:12:49
+        Log: Simpler suggstion to resolve the #!/usr/bin/suidperl vs. the set uid
+             binary must have fd script conundrum, as suggested by Brendan O'Dea
+             Plus restore the more helpful error message from 22694 and the gist
+             of the perl584delta changes from 22700
+     Branch: maint-5.8/perl
+	   ! installperl perl.c pod/perl584delta.pod
+____________________________________________________________________________
+[ 22719] By: nicholas                              on 2004/04/20  15:11:16
+        Log: Revert 22694
+     Branch: maint-5.8/perl
+	   ! installperl perl.c
+____________________________________________________________________________
+[ 22718] By: nicholas                              on 2004/04/20  14:43:18
+        Log: Revert 22700 (as part of changes suggested by Brendan O'Dea)
+     Branch: maint-5.8/perl
+	   ! INSTALL installperl perl.c pod/perl584delta.pod
+	   ! pod/perldiag.pod pod/perlsec.pod
+____________________________________________________________________________
+[ 22711] By: nicholas                              on 2004/04/17  14:28:57
+        Log: Integrate:
+             [ 22706]
+             On Linux-PPC, using gcc, downgrade to the -O1 optimisation
+             level (with -O2 miniperl behaves really badly.)
+     Branch: maint-5.8/perl
+	  !> hints/linux.sh
+____________________________________________________________________________
+[ 22710] By: nicholas                              on 2004/04/17  14:02:04
+        Log: Subject:  spelling
+             From:  Jarkko Hietaniemi <jhi@cc.hut.fi>
+             Date:  Fri, 16 Apr 2004 21:18:18 +0300 (EEST)
+             Message-Id:  <200404161818.i3GIIILh391648@kosh.hut.fi>
+     Branch: maint-5.8/perl
+	   ! pod/perl584delta.pod
+____________________________________________________________________________
+[ 22709] By: nicholas                              on 2004/04/17  14:01:17
+        Log: Subject: [PATCH] for debugger options (against RC2)
+             From: Richard.Foley@t-online.de (Richard Foley)
+             Message-Id: <200404171150.47561.richard.foley@rfi.net>
+             Date: Sat, 17 Apr 2004 11:50:47 +0200
+     Branch: maint-5.8/perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[ 22707] By: nicholas                              on 2004/04/17  12:33:57
+        Log: Undo RC2
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 22705] By: nicholas                              on 2004/04/15  22:39:40
+        Log: This is RC2
+     Branch: maint-5.8/perl
+	   ! patchlevel.h pod/perlhist.pod
+____________________________________________________________________________
+[ 22704] By: nicholas                              on 2004/04/15  20:51:58
+        Log: Rebuild toc
+     Branch: maint-5.8/perl
+	   ! pod/perltoc.pod
+____________________________________________________________________________
+[ 22703] By: nicholas                              on 2004/04/15  20:27:00
+        Log: More perldelta updates
+     Branch: maint-5.8/perl
+	   ! pod/perl584delta.pod
+____________________________________________________________________________
+[ 22702] By: nicholas                              on 2004/04/15  20:02:23
+        Log: Update changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 22701] By: nicholas                              on 2004/04/15  18:19:57
         Log: Integrate:
              [ 22691]
