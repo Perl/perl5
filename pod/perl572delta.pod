@@ -638,6 +638,16 @@ DEC C V6.0-001 on OpenVMS Alpha V7.2-1
   [.lib]vmsish............................FAILED on test 13
   Failed 4/399 tests, 92.48% okay.
 
+Compac C V6.4-005 on OpenVMS Alpha 7.2.1
+
+  [-.ext.b]showlex........................FAILED on test 1
+  [-.ext.list.util.t]tainted..............FAILED on test 3
+  [-.lib.file.find]taint..................FAILED on test 17 
+  [-.lib.test.simple.t]exit...............FAILED on test 1
+  [.lib]vmsish............................FAILED on test 13
+  [.op]misc...............................FAILED on test 49
+  Failed 6/401 tests, 92.77% okay.
+
 =head2 Localising a Tied Variable Leaks Memory
 
     use Tie::Hash;
