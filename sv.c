@@ -4630,7 +4630,7 @@ sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, used_locale)
 	need = (have > width ? have : width);
 	gap = need - have;
 
-	SvGROW(sv, SvLEN(sv) + need);
+	SvGROW(sv, SvCUR(sv) + need + 1);
 	p = SvEND(sv);
 	if (esignlen && fill == '0') {
 	    for (i = 0; i < esignlen; i++)
