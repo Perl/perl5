@@ -170,6 +170,7 @@ END_EXTERN_C
 #define fread(buf,size,count,f)	win32_fread(buf,size,count,f)
 #define fwrite(buf,size,count,f)	win32_fwrite(buf,size,count,f)
 #define fopen			win32_fopen
+#undef fdopen
 #define fdopen			win32_fdopen
 #define freopen			win32_freopen
 #define	fclose(f)		win32_fclose(f)

@@ -11,6 +11,9 @@
 #define WIN32IO_IS_STDIO
 #define WIN32SCK_IS_STDSCK
 #define WIN32_LEAN_AND_MEAN
+#ifdef __GNUC__
+#define Win32_Winsock
+#endif
 #include <windows.h>
 #include "EXTERN.h"
 #include "perl.h"

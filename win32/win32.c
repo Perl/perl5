@@ -11,6 +11,9 @@
 #define WIN32_LEAN_AND_MEAN
 #define WIN32IO_IS_STDIO
 #include <tchar.h>
+#ifdef __GNUC__
+#define Win32_Winsock
+#endif
 #include <windows.h>
 
 /* #include "config.h" */
@@ -1123,13 +1126,21 @@ win32_pipe(int *pfd, unsigned int size, int mode)
 DllExport FILE*
 win32_popen(const char *command, const char *mode)
 {
+#ifdef __GNUC__
+    return NULL;
+#else
     return _popen(command, mode);
+#endif
 }
 
 DllExport int
 win32_pclose(FILE *pf)
 {
+#ifdef __GNUC__
+    return fclose(pf);
+#else
     return _pclose(pf);
+#endif
 }
 
 DllExport int
@@ -1252,13 +1263,17 @@ win32_setvbuf(FILE *pf, char *buf, int type, size_t size)
 DllExport int
 win32_flushall(void)
 {
+#ifndef __GNUC__
     return flushall();
+#endif
 }
 
 DllExport int
 win32_fcloseall(void)
 {
+#ifndef __GNUC__
     return fcloseall();
+#endif
 }
 
 DllExport char*
@@ -1720,7 +1735,7 @@ Perl_win32_init(int *argcp, char ***argvp)
      * want to be at the vendor's whim on the default, we set
      * it explicitly here.
      */
-#if !defined(_ALPHA_)
+#if !defined(_ALPHA_) && !defined(__GNUC__)
     _control87(MCW_EM, MCW_EM);
 #endif
 }
@@ -1749,6 +1764,7 @@ win32_strip_return(SV *sv)
 }
 
 #endif
+
 
 
 
