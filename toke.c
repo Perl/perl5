@@ -3789,6 +3789,7 @@ Perl_yylex(pTHX)
 	case KEY_DESTROY:
 	case KEY_BEGIN:
 	case KEY_END:
+	case KEY_STOP:
 	case KEY_INIT:
 	    if (PL_expect == XSTATE) {
 		s = PL_bufptr;
@@ -5226,6 +5227,9 @@ Perl_keyword(pTHX_ register char *d, I32 len)
 	    if (strEQ(d,"rewinddir"))		return -KEY_rewinddir;
 	    break;
 	}
+	break;
+    case 'S':
+	if (strEQ(d,"STOP"))			return KEY_STOP;
 	break;
     case 's':
 	switch (d[1]) {

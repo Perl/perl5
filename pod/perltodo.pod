@@ -824,7 +824,8 @@ Workarounds to help Win32 dynamic loading.
 
 =head2 END blocks
 
-END blocks need saving in compiled output.
+END blocks need saving in compiled output, now that STOP blocks
+are available.
 
 =head2 _AUTOLOAD
 

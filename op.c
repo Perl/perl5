@@ -4411,6 +4411,13 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    av_store(PL_endav, 0, (SV *)cv);
 	    GvCV(gv) = 0;
 	}
+	else if (strEQ(s, "STOP") && !PL_error_count) {
+	    if (!PL_stopav)
+		PL_stopav = newAV();
+	    av_unshift(PL_stopav, 1);
+	    av_store(PL_stopav, 0, (SV *)cv);
+	    GvCV(gv) = 0;
+	}
 	else if (strEQ(s, "INIT") && !PL_error_count) {
 	    if (!PL_initav)
 		PL_initav = newAV();
@@ -4520,6 +4527,13 @@ Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
 		PL_endav = newAV();
 	    av_unshift(PL_endav, 1);
 	    av_store(PL_endav, 0, (SV *)cv);
+	    GvCV(gv) = 0;
+	}
+	else if (strEQ(s, "STOP")) {
+	    if (!PL_stopav)
+		PL_stopav = newAV();
+	    av_unshift(PL_stopav, 1);
+	    av_store(PL_stopav, 0, (SV *)cv);
 	    GvCV(gv) = 0;
 	}
 	else if (strEQ(s, "INIT")) {

@@ -1316,10 +1316,11 @@ ugly.  Your code will be interpreted as an attempt to call a method
 named "elseif" for the class returned by the following block.  This is
 unlikely to be what you want.
 
-=item END failed--cleanup aborted
+=item %s failed--call queue aborted
 
-(F) An untrapped exception was raised while executing an END subroutine.
-The interpreter is immediately exited.
+(F) An untrapped exception was raised while executing a STOP, INIT, or
+END subroutine.  Processing of the remainder of the queue of such
+routines has been prematurely ended.
 
 =item entering effective %s failed
 

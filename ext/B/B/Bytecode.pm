@@ -470,11 +470,12 @@ sub B::GV::bytecode {
     my $egv = $gv->EGV;
     my $egvix = $egv->objix;
     ldsv($ix);
-    printf <<"EOT", $gv->FLAGS, $gv->GvFLAGS, $gv->LINE, cstring($gv->FILE);
+    printf <<"EOT", $gv->FLAGS, $gv->GvFLAGS, $gv->LINE, pvstring($gv->FILE);
 sv_flags 0x%x
 xgv_flags 0x%x
 gp_line %d
-gp_file %s
+newpv %s
+gp_file
 EOT
     my $refcnt = $gv->REFCNT;
     printf("sv_refcnt_add %d\n", $refcnt - 1) if $refcnt > 1;

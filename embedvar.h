@@ -363,6 +363,7 @@
 #define PL_statusvalue_vms	(PERL_GET_INTERP->Istatusvalue_vms)
 #define PL_stderrgv		(PERL_GET_INTERP->Istderrgv)
 #define PL_stdingv		(PERL_GET_INTERP->Istdingv)
+#define PL_stopav		(PERL_GET_INTERP->Istopav)
 #define PL_strtab		(PERL_GET_INTERP->Istrtab)
 #define PL_strtab_mutex		(PERL_GET_INTERP->Istrtab_mutex)
 #define PL_sub_generation	(PERL_GET_INTERP->Isub_generation)
@@ -622,6 +623,7 @@
 #define PL_statusvalue_vms	(vTHX->Istatusvalue_vms)
 #define PL_stderrgv		(vTHX->Istderrgv)
 #define PL_stdingv		(vTHX->Istdingv)
+#define PL_stopav		(vTHX->Istopav)
 #define PL_strtab		(vTHX->Istrtab)
 #define PL_strtab_mutex		(vTHX->Istrtab_mutex)
 #define PL_sub_generation	(vTHX->Isub_generation)
@@ -883,6 +885,7 @@
 #define PL_Istatusvalue_vms	PL_statusvalue_vms
 #define PL_Istderrgv		PL_stderrgv
 #define PL_Istdingv		PL_stdingv
+#define PL_Istopav		PL_stopav
 #define PL_Istrtab		PL_strtab
 #define PL_Istrtab_mutex	PL_strtab_mutex
 #define PL_Isub_generation	PL_sub_generation
