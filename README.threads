@@ -70,6 +70,12 @@ For IRIX:
     For IRIX 6.3 and 6.4 the pthreads should work out of the box.
     Thanks to Hannu Napari <Hannu.Napari@hut.fi> for the IRIX
     pthreads patches information.
+For AIX:
+    Change cc to xlc_r or cc_r.
+    Add -DUSE_THREADS -DNEED_PTHREAD_INIT -DDEBUGGING to ccflags and cppflags
+    Change optimize to -g
+    Add -lc_r to libswanted
+    Change -lc in lddflags to be -lpthread -lc_r -lc
 
 Now you can do a
     make

@@ -493,6 +493,7 @@ i_netdb=''
 i_neterrno=''
 i_niin=''
 i_sysin=''
+d_pthreads_created_joinable=''
 d_pwage=''
 d_pwchange=''
 d_pwclass=''
@@ -603,7 +604,6 @@ installprivlib=''
 privlib=''
 privlibexp=''
 prototype=''
-pthreads_created_joinable=''
 randbits=''
 installscript=''
 scriptdir=''
@@ -2099,8 +2099,15 @@ esac
 rp='What is your architecture name'
 . ./myread
 case "$usethreads" in
-$define)  archname="$ans-thread"
-          echo "usethreads selected... architecture name is now $archname." >&4
+$define)  echo "Threads selected." >&4
+          case "$ans" in
+          *-thread) echo "...and architecture name already ends in -thread." >&4
+                    archname="$ans"
+                    ;;
+          *)        archname="$ans-thread"
+                    echo "...setting architecture name to $archname." >&4
+                    ;;
+          esac
           ;;
 *)        archname="$ans" ;;
 esac
@@ -6613,16 +6620,16 @@ eval $inlibc
 set gethostbyaddr d_gethbadd
 eval $inlibc
 
-: see if getnetbyaddr exists
-set getnetbyaddr d_getnbadd
-eval $inlibc
-
 : see if gethostent exists
 set gethostent d_gethent
 eval $inlibc
 
 : see if getlogin exists
 set getlogin d_getlogin
+eval $inlibc
+
+: see if getnetbyaddr exists
+set getnetbyaddr d_getnbadd
 eval $inlibc
 
 : see if getpgid exists
@@ -8552,24 +8559,6 @@ EOM
 *)  groupstype="$gidtype";;
 esac
 
-case "$usethreads" in
-$define)
-
-    : see if sched_yield exists
-    set sched_yield d_sched_yield
-    eval $inlibc
-    
-    : see if pthread_yield exists
-    set pthread_yield d_pthread_yield
-    eval $inlibc
-
-    ;;
-*)
-    d_sched_yield=$undef
-    d_pthread_yield=$undef
-    ;;
-esac
-
 : see what type lseek is declared as in the kernel
 set off_t lseektype long stdio.h sys/types.h
 eval $typedef
@@ -9289,8 +9278,10 @@ EOCP
 			    if $cc $ccflags -c -DGethbadd_addr_t="$xxx" -DGethbadd_alen_t="$yyy" try.c >/dev/null 2>&1 ; then
 				gethbadd_addr_type="$xxx"
 				gethbadd_alen_type="$yyy"
-				echo "Your system uses $xxx for the 1st argument to gethostbyaddr." >&4
-				echo "and the the 2nd argument to gethostbyaddr is $yyy." >&4
+				$cat >&4 <<EOM
+Your system uses $xxx for the 1st argument to gethostbyaddr.
+and the 2nd argument to gethostbyaddr is $yyy.
+EOM
 				break
 			    fi
 		    done
@@ -9311,6 +9302,11 @@ EOCP
 		    gethbadd_alen_type="$ans"
 	    fi
 	    $rm -f try.[co]
+	 else
+	    $cat >&4 <<EOM
+Your system uses $gethbadd_addr_type for the 1st argument to gethostbyaddr.
+and the 2nd argument to gethostbyaddr is $gethbadd_alen_type.
+EOM
 	fi
 	;;
 *)	gethbadd_addr_type='void *'
@@ -9323,7 +9319,7 @@ esac
 : getnetbyaddr.
 case "$d_getnbadd" in
 $define)
-        if test "X$getnbadd_addr_type" = X -o "X$getnbadd_alen_type" = X; then
+        if test "X$getnbadd_net_type" = X; then
 	    $cat <<EOM
 
 Checking to see what type of arguments are expected by getnetbyaddr().
@@ -9370,6 +9366,8 @@ EOCP
 		    getnbadd_net_type="$ans"
 	    fi
 	    $rm -f try.[co]
+	else
+	    echo "Your system uses $getnbadd_net_type for the 1st argument to getnetbyaddr." >&4
 	fi
 	;;
 *)	getnbadd_net_type='long'
@@ -9919,50 +9917,83 @@ eval $setvar
 
 : test whether pthreads are created in joinable -- aka undetached -- state
 if test "X$usethreads" != X; then
-echo " "
-echo 'Checking whether pthreads are created joinable.' >&4
+    if test "X$d_pthreads_created_joinable" = X; then
+	echo >&4 "Checking whether pthreads are created joinable."
 	$cat >try.c <<EOCP
-/* Note: this program returns 1 if detached, 0 if not.
- * Easier this way because the PTHREAD_CREATE_DETACHED is more
- * portable than the obsolete PTHREAD_CREATE_UNDETACHED.
- * Testing for joinable (aka undetached) as opposed to detached
- * is then again logically more sensible because that's
- * the more modern default state in the pthreads implementations. */
 #include <pthread.h>
 #include <stdio.h>
 int main() {
     pthread_attr_t attr;
     int detachstate;
-    pthread_attr_init(&attr);
-    pthread_attr_getdetachstate(&attr, &detachstate);
     printf("%s\n",
-           detachstate == PTHREAD_CREATE_DETACHED ?
-           "detached" : "joinable");
+	pthread_attr_init(&attr) == 0 &&
+        pthread_attr_getdetachstate(&attr, &detachstate) == 0 &&
+        detachstate == PTHREAD_CREATE_DETACHED ?
+        "detached" : "joinable");
     exit(0);
 }
 EOCP
-    if $cc $ccflags $ldflags -o try try.c $libs >/dev/null 2>&1; then
-	yyy=`./try`
-    else
-	echo "(I can't seem to compile the test program--assuming they are.)"
-	yyy=joinable
+	: Compile and link separately because the used cc might not be
+	: able to link the right CRT and libs for pthreading.
+	if $cc $ccflags -c try.c >/dev/null 2>&1 &&
+	   $ld $ldflags -o try try$obj_ext $libs >/dev/null 2>&1; then
+	    yyy=`./try`
+	else
+	    echo "(I can't execute the test program--assuming they are.)"
+	    yyy=joinable
+	fi
+	case "$yyy" in
+	detached)
+	    val="$undef"
+	    echo "Nope, they aren't."
+	    ;;
+	*)
+	    val="$define"
+	    echo "Yup, they are."
+	    ;;
+	esac
+	set d_pthreads_created_joinable
+	eval $setvar
+	$rm -f try try.*
     fi
-    case "$yyy" in
-    joinable)
-      val="$define"
-      echo "Yup, they are."
-      ;;
-    *)
-      val="$undef"
-      echo "Nope, they aren't."
-      ;;
-    esac
-    set d_pthreads_created_joinable
-    eval $setvar
-    $rm -f try try.*
 else
     d_pthreads_created_joinable=$undef
 fi
+
+: see whether the various POSIXish _yields exist within given cccmd
+$cat >try.c <<EOP
+#include <pthread.h>
+main() {
+	YIELD();
+	exit(0);
+}
+EOP
+: see if pthread_yield exists within given cccmd,
+: if we do not usethreads this may well end up undef.
+if $cc $ccflags -DYIELD=pthread_yield $ldflags -o try try.c $libs > /dev/null 2>&1; then
+    val="$define"
+    echo 'pthread_yield() found.' >&4
+else
+    val="$undef"
+    echo 'pthread_yield() NOT found.' >&4
+fi
+set d_pthread_yield
+eval $setvar
+
+: see if sched_yield exists within given cccmd,
+: if we do not usethreads this may well end up undef.
+if $cc $ccflags -DYIELD=sched_yield $ldflags -o try try.c $libs > /dev/null 2>&1; then
+    val="$define"
+    echo 'sched_yield() found.' >&4
+else
+    val="$undef"
+    echo 'sched_yield() NOT found.' >&4
+fi
+set d_sched_yield
+eval $setvar
+
+: common to both the pthread_yield and sched_yield tests
+rm -f try try.*
 
 echo " "
 echo "Looking for extensions..." >&4
@@ -10340,6 +10371,7 @@ d_pipe='$d_pipe'
 d_poll='$d_poll'
 d_portable='$d_portable'
 d_pthread_yield='$d_pthread_yield'
+d_pthreads_created_joinable='$d_pthreads_created_joinable'
 d_pwage='$d_pwage'
 d_pwchange='$d_pwchange'
 d_pwclass='$d_pwclass'
@@ -10608,7 +10640,6 @@ prefixexp='$prefixexp'
 privlib='$privlib'
 privlibexp='$privlibexp'
 prototype='$prototype'
-pthreads_created_joinable='$pthreads_created_joinable'
 randbits='$randbits'
 ranlib='$ranlib'
 rd_nodata='$rd_nodata'

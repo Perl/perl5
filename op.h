@@ -95,6 +95,7 @@ typedef U32 PADOFFSET;
 #define OPpRUNTIME		64	/* Pattern coming in on the stack */
 
 /* Private for OP_TRANS */
+#define OPpTRANS_COUNTONLY	8
 #define OPpTRANS_SQUASH		16
 #define OPpTRANS_DELETE		32
 #define OPpTRANS_COMPLEMENT	64
@@ -274,6 +275,8 @@ struct loop {
 #define OA_DEFGV 128
 
 /* The next 4 bits encode op class information */
+#define OA_CLASS_MASK (15 << 8)
+
 #define OA_BASEOP (0 << 8)
 #define OA_UNOP (1 << 8)
 #define OA_BINOP (2 << 8)
