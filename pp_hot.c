@@ -141,7 +141,7 @@ PP(pp_concat)
     bool lbyte;
     STRLEN rlen;
     char* rpv = SvPV(right, rlen);	/* mg_get(right) happens here */
-    bool rbyte = !SvUTF8(right), rcopied = FALSE;
+    bool rbyte = !DO_UTF8(right), rcopied = FALSE;
 
     if (TARG == right && right != left) {
 	right = sv_2mortal(newSVpvn(rpv, rlen));
@@ -151,7 +151,7 @@ PP(pp_concat)
 
     if (TARG != left) {
 	lpv = SvPV(left, llen);		/* mg_get(left) may happen here */
-	lbyte = !SvUTF8(left);
+	lbyte = !DO_UTF8(left);
 	sv_setpvn(TARG, lpv, llen);
 	if (!lbyte)
 	    SvUTF8_on(TARG);
@@ -164,7 +164,9 @@ PP(pp_concat)
 	if (!SvOK(TARG))
 	    sv_setpv(left, "");
 	lpv = SvPV_nomg(left, llen);
-	lbyte = !SvUTF8(left);
+	lbyte = !DO_UTF8(left);
+	if (IN_BYTES)
+	    SvUTF8_off(TARG);
     }
 
 #if defined(PERL_Y2KWARN)

@@ -368,3 +368,10 @@ print "" if BAREWORD;
 EXPECT
 Bareword "BAREWORD" not allowed while "strict subs" in use at - line 3.
 Execution of - aborted due to compilation errors.
+########
+# [perl #26910] hints not propagated into (?{...})
+use strict 'subs';
+qr/(?{my $x=foo})/;
+EXPECT
+Bareword "foo" not allowed while "strict subs" in use at (re_eval 1) line 1.
+Compilation failed in regexp at - line 3.
