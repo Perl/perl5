@@ -4749,7 +4749,6 @@ Perl_pregfree(pTHX_ struct regexp *r)
     if (!r || (--r->refcnt > 0))
 	return;
     DEBUG_r({
-         bool utf8 = r->reganch & ROPT_UTF8;
          char *s = pv_uni_display(dsv, (U8*)r->precomp, r->prelen, 60,
 				  UNI_DISPLAY_ISPRINT);
 	 int len = SvCUR(dsv);
