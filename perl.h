@@ -1986,9 +1986,9 @@ END_EXTERN_C
 #  if defined(NeXT) || defined(__NeXT__) /* or whatever catches all NeXTs */
 char *crypt ();       /* Maybe more hosts will need the unprototyped version */
 #  else
-#    if !defined(WIN32) || !defined(HAVE_DES_FCRYPT)
+#    if !defined(WIN32)
 char *crypt (const char*, const char*);
-#    endif /* !WIN32 && !HAVE_CRYPT_SOURCE */
+#    endif /* !WIN32 */
 #  endif /* !NeXT && !__NeXT__ */
 #  ifndef DONT_DECLARE_STD
 #    ifndef getenv
