@@ -39,6 +39,7 @@
 #  define Perl_pregfree my_regfree
 #  define Perl_regnext my_regnext
 #  define Perl_save_re_context my_save_re_context
+#  define Perl_reginitcolors my_reginitcolors 
 #endif 
 
 /*SUPPRESS 112*/
@@ -759,6 +760,31 @@ add_data(I32 n, char *s)
     return PL_regcomp_rx->data->count - n;
 }
 
+void
+reginitcolors(void)
+{
+    dTHR;
+    int i = 0;
+    char *s = PerlEnv_getenv("PERL_RE_COLORS");
+	    
+    if (s) {
+	PL_colors[0] = s = savepv(s);
+	while (++i < 6) {
+	    s = strchr(s, '\t');
+	    if (s) {
+		*s = '\0';
+		PL_colors[i] = ++s;
+	    }
+	    else
+		PL_colors[i] = "";
+	}
+    } else {
+	while (i < 6) 
+	    PL_colors[i++] = "";
+    }
+    PL_colorset = 1;
+}
+
 /*
  - pregcomp - compile a regular expression into internal code
  *
@@ -799,31 +825,11 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 
     PL_regprecomp = savepvn(exp, xend - exp);
     DEBUG_r(
-	if (!PL_colorset) {
-	    int i = 0;
-	    char *s = PerlEnv_getenv("PERL_RE_COLORS");
-	    
-	    if (s) {
-		PL_colors[0] = s = savepv(s);
-		while (++i < 6) {
-		    s = strchr(s, '\t');
-		    if (s) {
-			*s = '\0';
-			PL_colors[i] = ++s;
-		    }
-		    else
-			PL_colors[i] = "";
-		}
-	    } else {
-		while (i < 6) 
-		    PL_colors[i++] = "";
-	    }
-	    PL_colorset = 1;
-	}
-	);
-    DEBUG_r(PerlIO_printf(Perl_debug_log, "%sCompiling%s RE `%s%*s%s'\n",
-			  PL_colors[4],PL_colors[5],PL_colors[0],
-			  xend - exp, PL_regprecomp, PL_colors[1]));
+	if (!PL_colorset)
+	    reginitcolors();
+	PerlIO_printf(Perl_debug_log, "%sCompiling%s RE `%s%*s%s'\n",
+		      PL_colors[4],PL_colors[5],PL_colors[0],
+		      xend - exp, PL_regprecomp, PL_colors[1]));
     PL_regflags = pm->op_pmflags;
     PL_regsawback = 0;
 

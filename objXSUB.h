@@ -2613,6 +2613,8 @@
 #define reginclass		pPerl->Perl_reginclass
 #undef  reginclassutf8
 #define reginclassutf8		pPerl->Perl_reginclassutf8
+#undef  reginitcolors
+#define reginitcolors		pPerl->Perl_reginitcolors
 #undef  reginsert
 #define reginsert		pPerl->Perl_reginsert
 #undef  regmatch

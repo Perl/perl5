@@ -961,3 +961,4 @@ VIRTUAL void do_op_dump _((I32 level, PerlIO *file, OP *o));
 VIRTUAL void do_pmop_dump _((I32 level, PerlIO *file, PMOP *pm));
 VIRTUAL void do_sv_dump _((I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim));
 VIRTUAL void magic_dump _((MAGIC *mg));
+VIRTUAL void reginitcolors _((void));

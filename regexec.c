@@ -37,6 +37,7 @@
 #  define Perl_regprop my_regprop
 /* *These* symbols are masked to allow static link. */
 #  define Perl_pregexec my_pregexec
+#  define Perl_reginitcolors my_reginitcolors 
 #endif 
 
 /*SUPPRESS 112*/
@@ -401,6 +402,8 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
     }
 
     DEBUG_r(
+	if (!PL_colorset)
+	    reginitcolors();	
 	PerlIO_printf(Perl_debug_log, 
 		      "%sMatching%s `%s%.60s%s%s' against `%s%.*s%s%s'\n",
 		      PL_colors[4],PL_colors[5],PL_colors[0],
