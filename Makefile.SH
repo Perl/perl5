@@ -705,7 +705,7 @@ _cleaner:
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
 	$(LDLIBPTH) sh ext/util/make_ext realclean $$x MAKE=$(MAKE) ; \
 	done
-	rm -f *.orig */*.orig *~ */*~ core core.*perl.*.? *perl.core t/core t/core.perl.*.? t/*perl.core t/misctmp* t/forktmp* t/tmp* t/c t/perl .?*.c so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
+	rm -f core core.*perl.*.? *perl.core t/core t/core.perl.*.? t/*perl.core t/misctmp* t/forktmp* t/tmp* t/c t/perl .?*.c so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
 	rm -rf $(addedbyconf)
 	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old
 	rm -f $(private)
