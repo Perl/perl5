@@ -2267,6 +2267,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_sfio	USE_SFIO		/**/
 
+/* HAS_SQRTL:
+ *	This symbol, if defined, indicates that the sqrtl routine is
+ *	available to do long double square roots.
+ */
+#$d_sqrtl HAS_SQRTL		/**/
+
 /* HAS_FSTATFS:
  *	This symbol, if defined, indicates that the fstatfs routine is
  *	available to stat filesystems of file descriptors.

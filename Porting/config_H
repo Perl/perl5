@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Sun Oct  3 02:17:38 EET DST 1999
+ * Configuration time: Tue Oct 19 10:28:21 EET DST 1999
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1423,8 +1423,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/opt/perl/lib/5.00561/alpha-dec_osf-thread"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/5.00561/alpha-dec_osf-thread"		/**/
+#define ARCHLIB "/opt/perl/lib/5.00562/alpha-dec_osf-thread"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/5.00562/alpha-dec_osf-thread"		/**/
 
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
@@ -1453,8 +1453,8 @@
  *	This symbol contains the ~name expanded version of PRIVLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define PRIVLIB "/opt/perl/lib/5.00561"		/**/
-#define PRIVLIB_EXP "/opt/perl/lib/5.00561"		/**/
+#define PRIVLIB "/opt/perl/lib/5.00562"		/**/
+#define PRIVLIB_EXP "/opt/perl/lib/5.00562"		/**/
 
 /* SITEARCH:
  *	This symbol contains the name of the private library for this package.
@@ -1469,8 +1469,8 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "/opt/perl/lib/site_perl/5.00561/alpha-dec_osf-thread"		/**/
-#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.00561/alpha-dec_osf-thread"		/**/
+#define SITEARCH "/opt/perl/lib/site_perl/5.00562/alpha-dec_osf-thread"		/**/
+#define SITEARCH_EXP "/opt/perl/lib/site_perl/5.00562/alpha-dec_osf-thread"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.
@@ -2253,6 +2253,12 @@
  */
 /*#define	USE_SFIO		/ **/
 
+/* HAS_SQRTL:
+ *	This symbol, if defined, indicates that the sqrtl routine is
+ *	available to do long double square roots.
+ */
+#define HAS_SQRTL		/**/
+
 /* HAS_FSTATFS:
  *	This symbol, if defined, indicates that the fstatfs routine is
  *	available to stat filesystems of file descriptors.
@@ -2496,7 +2502,7 @@
 /* PERL_XS_APIVERSION:
  *	This variable contains the version of the oldest perl binary
  *	compatible with the present perl.  perl.c:incpush() and
- *	lib/lib.pm will automatically search in /opt/perl/lib/site_perl/5.00561/alpha-dec_osf-thread for older
+ *	lib/lib.pm will automatically search in /opt/perl/lib/site_perl/5.00562/alpha-dec_osf-thread for older
  *	directories across major versions back to xs_apiversion.
  *	This is only useful if you have a perl library directory tree
  *	structured like the default one.
@@ -2525,7 +2531,7 @@
  *	(presumably) be similar.
  *	See the INSTALL file for how this works.
  */
-#define PERL_XS_APIVERSION 5.00561 /* Change to string for tuples?*/
+#define PERL_XS_APIVERSION 5.00562 /* Change to string for tuples?*/
 #define PERL_PM_APIVERSION 5.005 /* Change to string for tuples?*/
 
 /* HAS_DRAND48_PROTO:

@@ -1314,6 +1314,10 @@ d_sockpair (d_socket.U):
 	This variable conditionally defines the HAS_SOCKETPAIR symbol, which
 	indicates that the BSD socketpair() is supported.
 
+d_sqrtl (d_sqrtl.U):
+	This variable conditionally defines the HAS_SQRTL symbol, which
+	indicates to the C program that the sqrtl() routine is available.
+
 d_statblks (d_statblks.U):
 	This variable conditionally defines USE_STAT_BLOCKS
 	if this system has a stat structure declaring

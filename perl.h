@@ -1077,9 +1077,7 @@ Free_t   Perl_mfree (Malloc_t where);
 #define PTR2NV(p)	NUM2PTR(NV,p)
   
 #ifdef USE_LONG_DOUBLE
-#  if defined(HAS_LONG_DOUBLE) && (LONG_DOUBLESIZE > DOUBLESIZE)
-#    define LDoub_t long double
-#  else
+#  if !(defined(HAS_LONG_DOUBLE) && (LONG_DOUBLESIZE > DOUBLESIZE))
 #     undef USE_LONG_DOUBLE /* Ouch! */
 #  endif
 #endif
@@ -1123,43 +1121,48 @@ Free_t   Perl_mfree (Malloc_t where);
    default value for printing floating point numbers in Gconvert.
    (see config.h)
 */
-#ifdef I_LIMITS
-#include <limits.h>
-#endif
-#ifdef I_FLOAT
-#include <float.h>
-#endif
-#ifndef HAS_LDBL_DIG
-#if LONG_DOUBLESIZE == 10
-#define LDBL_DIG 18 /* assume IEEE */
-#else
-#if LONG_DOUBLESIZE == 16
-#define LDBL_DIG 33 /* assume IEEE */
-#else
-#if LONG_DOUBLESIZE == DOUBLESIZE
-#define LDBL_DIG DBL_DIG /* bummer */
-#endif
-#endif
-#endif
-#endif
+# ifdef I_LIMITS
+#   include <limits.h>
+# endif
+# ifdef I_FLOAT
+#  include <float.h>
+# endif
+# ifndef HAS_LDBL_DIG
+#  if LONG_DOUBLESIZE == 10
+#   define LDBL_DIG 18 /* assume IEEE */
+#  else
+#   if LONG_DOUBLESIZE == 12
+#    define LDBL_DIG 18 /* gcc? */
+#   else
+#    if LONG_DOUBLESIZE == 16
+#     define LDBL_DIG 33 /* assume IEEE */
+#    else
+#     if LONG_DOUBLESIZE == DOUBLESIZE
+#      define LDBL_DIG DBL_DIG /* bummer */
+#     endif
+#    endif
+#   endif
+#  endif
+# endif
 #endif
 
 #ifdef USE_LONG_DOUBLE
-#   define HAS_LDOUB
-    typedef LDoub_t NV;
+    typedef long double NV;
 #   define NVSIZE LONG_DOUBLESIZE
 #   define NV_DIG LDBL_DIG
-#   define Perl_modf modfl
-#   define Perl_frexp frexpl
-#   define Perl_cos cosl
-#   define Perl_sin sinl
-#   define Perl_sqrt sqrtl
-#   define Perl_exp expl
-#   define Perl_log logl
-#   define Perl_atan2 atan2l
-#   define Perl_pow powl
-#   define Perl_floor floorl
-#   define Perl_fmod fmodl
+#   ifdef HAS_SQRTL
+#       define Perl_modf modfl
+#       define Perl_frexp frexpl
+#       define Perl_cos cosl
+#       define Perl_sin sinl
+#       define Perl_sqrt sqrtl
+#       define Perl_exp expl
+#       define Perl_log logl
+#       define Perl_atan2 atan2l
+#       define Perl_pow powl
+#       define Perl_floor floorl
+#       define Perl_fmod fmodl
+#   endif
 #else
     typedef double NV;
 #   define NVSIZE DOUBLESIZE
