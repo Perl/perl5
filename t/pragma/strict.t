@@ -18,6 +18,8 @@ my @prgs = () ;
 
 foreach (sort glob("pragma/strict-*")) {
 
+    next if /(~|\.orig)$/;
+
     open F, "<$_" or die "Cannot open $_: $!\n" ;
     while (<F>) {
 	last if /^__END__/ ;
