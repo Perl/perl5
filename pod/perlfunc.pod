@@ -5421,11 +5421,6 @@ the B<-U> flag is supplied to Perl.  Even if these conditions are
 met, be warned that unlinking a directory can inflict damage on your
 filesystem.  Use C<rmdir> instead.
 
-Note: on filesystems that support multiple versions of a file,
-such as VMS, each version counts as a separate file: on such a
-platform, C<unlink "filename"> will generally delete only the last
-version of the file.  See L<perlvms/unlink LIST> for more information.
-
 If LIST is omitted, uses C<$_>.
 
 =item unpack TEMPLATE,EXPR
