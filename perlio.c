@@ -916,7 +916,7 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 		    char q = ((*s == '\'') ? '"' : '\'');
 		    if (ckWARN(WARN_LAYER))
 			Perl_warner(aTHX_ packWARN(WARN_LAYER),
-			      "perlio: invalid separator character %c%c%c in layer specification list %s",
+			      "Invalid separator character %c%c%c in PerlIO layer specification %s",
 			      q, *s, q, s);
 		    SETERRNO(EINVAL, LIB_INVARG);
 		    return -1;
@@ -953,7 +953,7 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 			    e--;
 			    if (ckWARN(WARN_LAYER))
 				Perl_warner(aTHX_ packWARN(WARN_LAYER),
-				      "perlio: argument list not closed for layer \"%.*s\"",
+				      "Argument list not closed for PerlIO layer \"%.*s\"",
 				      (int) (e - s), s);
 			    return -1;
 			default:
@@ -976,7 +976,7 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 		    }
 		    else {
 			if (warn_layer)
-			    Perl_warner(aTHX_ packWARN(WARN_LAYER), "perlio: unknown layer \"%.*s\"",
+			    Perl_warner(aTHX_ packWARN(WARN_LAYER), "Unknown PerlIO layer \"%.*s\"",
 				  (int) llen, s);
 			return -1;
 		    }

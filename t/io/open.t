@@ -286,19 +286,19 @@ SKIP: {
     local $SIG{__WARN__} = sub { $w = shift };
 
     eval { open(F, ">>>", "afile") };
-    like($w, qr/perlio: invalid separator character '>' in layer spec/,
+    like($w, qr/Invalid separator character '>' in PerlIO layer spec/,
 	 "bad open (>>>) warning");
     like($@, qr/Unknown open\(\) mode '>>>'/,
 	 "bad open (>>>) failure");
 
     eval { open(F, ">:u", "afile" ) };
-    like($w, qr/perlio: unknown layer "u"/,
+    like($w, qr/Unknown PerlIO layer "u"/,
 	 'bad layer ">:u" warning');
     eval { open(F, "<:u", "afile" ) };
-    like($w, qr/perlio: unknown layer "u"/,
+    like($w, qr/Unknown PerlIO layer "u"/,
 	 'bad layer "<:u" warning');
-    eval { open(F, ":u", "afile" ) };
-    like($@, qr/Unknown open\(\) mode ':u'/,
-	 'bad layer ":u" failure');
+    eval { open(F, ":c", "afile" ) };
+    like($@, qr/Unknown open\(\) mode ':c'/,
+	 'bad layer ":c" failure');
 }
 
