@@ -8,8 +8,8 @@ BEGIN {
     @INC = '../lib';
     require Config; import Config;
     $can_fork = $Config{'d_fork'}
-		or ($^O eq 'MSWin32' and $Config{useithreads}
-		    and $Config{ccflags} =~ /-DPERL_IMPLICIT_SYS/);
+		|| ($^O eq 'MSWin32' && $Config{useithreads}
+		    && $Config{ccflags} =~ /-DPERL_IMPLICIT_SYS\b/);
 
 
     if ($^O eq "hpux" or $Config{'extensions'} !~ /\bSocket\b/ &&
