@@ -127,45 +127,32 @@ constant - Perl pragma to declare constants
 
 =head1 SYNOPSIS
 
-    use constant BUFFER_SIZE	=> 4096;
-    use constant ONE_YEAR	=> 365.2425 * 24 * 60 * 60;
-    use constant PI		=> 4 * atan2 1, 1;
-    use constant DEBUGGING	=> 0;
-    use constant ORACLE		=> 'oracle@cs.indiana.edu';
-    use constant USERNAME	=> scalar getpwuid($<);
-    use constant USERINFO	=> getpwuid($<);
+    use constant PI    => 4 * atan2(1, 1);
+    use constant DEBUG => 0;
 
-    sub deg2rad { PI * $_[0] / 180 }
+    print "Pi equals ", PI, "...\n" if DEBUG;
 
-    print "This line does nothing"		unless DEBUGGING;
-
-    # references can be constants
-    use constant CHASH		=> { foo => 42 };
-    use constant CARRAY		=> [ 1,2,3,4 ];
-    use constant CPSEUDOHASH	=> [ { foo => 1}, 42 ];
-    use constant CCODE		=> sub { "bite $_[0]\n" };
-
-    print CHASH->{foo};
-    print CARRAY->[$i];
-    print CPSEUDOHASH->{foo};
-    print CCODE->("me");
-    print CHASH->[10];			# compile-time error
-
-    # declaring multiple constants at once
     use constant {
-	BUFFER_SIZE	=> 4096,
-	ONE_YEAR	=> 365.2425 * 24 * 60 * 60,
-	PI		=> 4 * atan2( 1, 1 ),
-	DEBUGGING	=> 0,
-	ORACLE		=> 'oracle@cs.indiana.edu',
-	USERNAME	=> scalar getpwuid($<),      # this works
-	USERINFO	=> getpwuid($<),             # THIS IS A BUG!
+        SEC   => 0,
+        MIN   => 1,
+        HOUR  => 2,
+        MDAY  => 3,
+        MON   => 4,
+        YEAR  => 5,
+        WDAY  => 6,
+        YDAY  => 7,
+        ISDST => 8,
     };
+
+    use constant WEEKDAYS => qw(
+        Sunday Monday Tuesday Wednesday Thursday Friday Saturday
+    );
+
+    print "Today is ", (WEEKDAYS)[ (localtime)[WDAY] ], ".\n";
 
 =head1 DESCRIPTION
 
-This will declare a symbol to be a constant with the given scalar
-or list value.
+This will declare a symbol to be a constant with the given value.
 
 When you declare a constant such as C<PI> using the method shown
 above, each machine your script runs upon can have as many digits
@@ -174,21 +161,43 @@ read, more likely to be maintained (and maintained correctly), and
 far less likely to send a space probe to the wrong planet because
 nobody noticed the one equation in which you wrote C<3.14195>.
 
+When a constant is used in an expression, perl replaces it with its
+value at compile time, and may then optimize the expression further.
+In particular, any code in an C<if (CONSTANT)> block will be optimized
+away if the constant is false.
+
 =head1 NOTES
 
-The value or values are evaluated in a list context. You may override
-this with C<scalar> as shown above.
+As with all C<use> directives, defining a constant happens at
+compile time. Thus, it's probably not correct to put a constant
+declaration inside of a conditional statement (like C<if ($foo)
+{ use constant ... }>).
 
-These constants do not directly interpolate into double-quotish
-strings, although you may do so indirectly. (See L<perlref> for
-details about how this works.)
+Constants defined using this module cannot be interpolated into
+strings like variables.  However, concatenation works just fine:
 
-    print "The value of PI is @{[ PI ]}.\n";
+    print "Pi equals PI...\n";        # WRONG: does not expand "PI"
+    print "Pi equals ".PI."...\n";    # right
 
-List constants are returned as lists, not as arrays.
+Even though a reference may be declared as a constant, the reference may
+point to data which may be changed, as this code shows.
 
-    $homedir = USERINFO[7];		# WRONG
-    $homedir = (USERINFO)[7];		# Right
+    use constant ARRAY => [ 1,2,3,4 ];
+    print ARRAY->[1];
+    ARRAY->[1] = " be changed";
+    print ARRAY->[1];
+
+Dereferencing constant references incorrectly (such as using an array
+subscript on a constant hash reference, or vice versa) will be trapped at
+compile time.
+
+Constants belong to the package they are defined in.  To refer to a
+constant defined in another package, specify the full package name, as
+in C<Some::Package::CONSTANT>.  Constants may be exported by modules,
+and may also be called as either class or instance methods, that is,
+as C<< Some::Package->CONSTANT >> or as C<< $obj->CONSTANT >> where
+C<$obj> is an instance of C<Some::Package>.  Subclasses may define
+their own constants to override those in their base class.
 
 The use of all caps for constant names is merely a convention,
 although it is recommended in order to make constants stand out
@@ -198,79 +207,43 @@ underscore. Names beginning with a double underscore are reserved. Some
 poor choices for names will generate warnings, if warnings are enabled at
 compile time.
 
-Constant symbols are package scoped (rather than block scoped, as
-C<use strict> is). That is, you can refer to a constant from package
-Other as C<Other::CONST>.  You may also use constants as either class
-or object methods, ie. C<< Other->CONST() >> or C<< $obj->CONST() >>.
-Such constant methods will be inherited as usual.
+=head2 List constants
 
-As with all C<use> directives, defining a constant happens at
-compile time. Thus, it's probably not correct to put a constant
-declaration inside of a conditional statement (like C<if ($foo)
-{ use constant ... }>).  When defining multiple constants, you
-cannot use the values of other constants within the same declaration
-scope.  This is because the calling package doesn't know about any
-constant within that group until I<after> the C<use> statement is
-finished.
+Constants may be lists of more (or less) than one value.  A constant
+with no values evaluates to C<undef> in scalar context.  Note that
+constants with more than one value do I<not> return their last value in
+scalar context as one might expect.  They currently return the number
+of values, but B<this may change in the future>.  Do not use constants
+with multiple values in scalar context.
 
-    use constant {
-	AGE    => 20,
-	PERSON => { age => AGE }, # Error!
-    };
-    [...]
-    use constant PERSON => { age => AGE }; # Right
+B<NOTE:> This implies that the expression defining the value of a
+constant is evaluated in list context.  This may produce surprises:
 
-Giving an empty list, C<()>, as the value for a symbol makes it return
-C<undef> in scalar context and the empty list in list context.
+    use constant TIMESTAMP => localtime;                # WRONG!
+    use constant TIMESTAMP => scalar localtime;         # right
 
-    use constant UNICORNS => ();
+The first line above defines C<TIMESTAMP> as a 9-element list, as
+returned by localtime() in list context.  To set it to the string
+returned by localtime() in scalar context, an explicit C<scalar>
+keyword is required.
 
-    print "Impossible!\n"  if defined UNICORNS;    
-    my @unicorns = UNICORNS;  # there are no unicorns
+List constants are lists, not arrays.  To index or slice them, they
+must be placed in parentheses.
 
-The same effect can be achieved by omitting the value and the big
-arrow entirely, but then the symbol name must be put in quotes.
+    my @workdays = WEEKDAYS[1 .. 5];            # WRONG!
+    my @workdays = (WEEKDAYS)[1 .. 5];          # right
 
-    use constant "UNICORNS";
+=head2 Defining multiple constants at once
 
-The result from evaluating a list constant with more than one element
-in a scalar context is not documented, and is B<not> guaranteed to be
-any particular value in the future. In particular, you should not rely
-upon it being the number of elements in the list, especially since it
-is not B<necessarily> that value in the current implementation.
-
-Magical values and references can be made into constants at compile
-time, allowing for way cool stuff like this.  (These error numbers
-aren't totally portable, alas.)
-
-    use constant E2BIG => ($! = 7);
-    print   E2BIG, "\n";	# something like "Arg list too long"
-    print 0+E2BIG, "\n";	# "7"
-
-You can't produce a tied constant by giving a tied scalar as the
-value.  References to tied variables, however, can be used as
-constants without any problems.
-
-Dereferencing constant references incorrectly (such as using an array
-subscript on a constant hash reference, or vice versa) will be trapped at
-compile time.
-
-When declaring multiple constants, all constant values B<must be
-scalars>.  If you accidentally try to use a list with more (or less)
-than one value, every second value will be treated as a symbol name.
+Instead of writing multiple C<use constant> statements, you may define
+multiple constants in a single statement by giving, instead of the
+constant name, a reference to a hash where the keys are the names of
+the constants to be defined.  Obviously, all constants defined using
+this method must have a single value.
 
     use constant {
-        EMPTY => (),                    # WRONG!
-        MANY => ("foo", "bar", "baz"),  # WRONG!
-    };
-
-This will get interpreted as below, which is probably not what you
-wanted.
-
-    use constant {
-        EMPTY => "MANY",  # oops.
-        foo => "bar",     # oops!
-        baz => undef,     # OOPS!
+        FOO => "A single value",
+        BAR => "This", "won't", "work!",        # Error!
     };
 
 This is a fundamental limitation of the way hashes are constructed in
@@ -278,22 +251,31 @@ Perl.  The error messages produced when this happens will often be
 quite cryptic -- in the worst case there may be none at all, and
 you'll only later find that something is broken.
 
-In the rare case in which you need to discover at run time whether a
-particular constant has been declared via this module, you may use
-this function to examine the hash C<%constant::declared>. If the given
-constant name does not include a package name, the current package is
-used.
+When defining multiple constants, you cannot use the values of other
+constants defined in the same declaration.  This is because the
+calling package doesn't know about any constant within that group
+until I<after> the C<use> statement is finished.
 
-    sub declared ($) {
-	use constant 1.01;		# don't omit this!
-	my $name = shift;
-	$name =~ s/^::/main::/;
-	my $pkg = caller;
-	my $full_name = $name =~ /::/ ? $name : "${pkg}::$name";
-	$constant::declared{$full_name};
-    }
+    use constant {
+        BITMASK => 0xAFBAEBA8,
+        NEGMASK => ~BITMASK,                    # Error!
+    };
 
-=head1 TECHNICAL NOTE
+=head2 Magic constants
+
+Magical values and references can be made into constants at compile
+time, allowing for way cool stuff like this.  (These error numbers
+aren't totally portable, alas.)
+
+    use constant E2BIG => ($! = 7);
+    print   E2BIG, "\n";        # something like "Arg list too long"
+    print 0+E2BIG, "\n";        # "7"
+
+You can't produce a tied constant by giving a tied scalar as the
+value.  References to tied variables, however, can be used as
+constants without any problems.
+
+=head1 TECHNICAL NOTES
 
 In the current implementation, scalar constants are actually
 inlinable subroutines. As of version 5.004 of Perl, the appropriate
@@ -302,25 +284,32 @@ calls, thereby saving the overhead of a subroutine call. See
 L<perlsub/"Constant Functions"> for details about how and when this
 happens.
 
+In the rare case in which you need to discover at run time whether a
+particular constant has been declared via this module, you may use
+this function to examine the hash C<%constant::declared>. If the given
+constant name does not include a package name, the current package is
+used.
+
+    sub declared ($) {
+        use constant 1.01;              # don't omit this!
+        my $name = shift;
+        $name =~ s/^::/main::/;
+        my $pkg = caller;
+        my $full_name = $name =~ /::/ ? $name : "${pkg}::$name";
+        $constant::declared{$full_name};
+    }
+
 =head1 BUGS
 
 In the current version of Perl, list constants are not inlined
 and some symbols may be redefined without generating a warning.
 
-It is not possible to have a subroutine or keyword with the same
+It is not possible to have a subroutine or a keyword with the same
 name as a constant in the same package. This is probably a Good Thing.
 
 A constant with a name in the list C<STDIN STDOUT STDERR ARGV ARGVOUT
 ENV INC SIG> is not allowed anywhere but in package C<main::>, for
 technical reasons. 
-
-Even though a reference may be declared as a constant, the reference may
-point to data which may be changed, as this code shows.
-
-    use constant CARRAY		=> [ 1,2,3,4 ];
-    print CARRAY->[1];
-    CARRAY->[1] = " be changed";
-    print CARRAY->[1];
 
 Unlike constants in some languages, these cannot be overridden
 on the command line or via environment variables.
@@ -330,10 +319,10 @@ automatically quotes barewords (as is true for any subroutine call).
 For example, you can't say C<$hash{CONSTANT}> because C<CONSTANT> will
 be interpreted as a string.  Use C<$hash{CONSTANT()}> or
 C<$hash{+CONSTANT}> to prevent the bareword quoting mechanism from
-kicking in.  Similarly, since the C<=E<gt>> operator quotes a bareword
-immediately to its left, you have to say C<CONSTANT() =E<gt> 'value'>
+kicking in.  Similarly, since the C<< => >> operator quotes a bareword
+immediately to its left, you have to say C<< CONSTANT() => 'value' >>
 (or simply use a comma in place of the big arrow) instead of
-C<CONSTANT =E<gt> 'value'>.
+C<< CONSTANT => 'value' >>.
 
 =head1 AUTHOR
 
@@ -343,7 +332,7 @@ many other folks.
 Multiple constant declarations at once added by Casey West,
 E<lt>F<casey@geeknest.com>E<gt>.
 
-Assorted documentation fixes by Ilmari Karonen,
+Documentation mostly rewritten by Ilmari Karonen,
 E<lt>F<perl@itz.pp.sci.fi>E<gt>.
 
 =head1 COPYRIGHT
