@@ -388,7 +388,7 @@ C<a> at the beginning of string, leaving no C<a> for C<ab> to match.
 In contrast, C<a*ab> will match the same as C<a+b>, since the match of
 the subgroup C<a*> is influenced by the following group C<ab> (see
 L<"Backtracking">).  In particular, C<a*> inside C<a*ab> will match
-less characters that a standalone C<a*>, since this makes the tail match.
+fewer characters than a standalone C<a*>, since this makes the tail match.
 
 An effect similar to C<(?E<gt>pattern)> may be achieved by
 
