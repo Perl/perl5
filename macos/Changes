@@ -21,9 +21,125 @@ http://dev.macperl.org/.
 This file contains only changes that affect the maint-5.6/macperl branch.
 
 ----------------
-Version v5.6.1b2
+Version v5.6.1b3
 ----------------
 
+____________________________________________________________________________
+[ 14079] By: pudge                                 on 2002/01/04  21:09:40
+        Log: Add more droplets
+     Branch: maint-5.6/macperl
+	   + macos/macperl/Droplets/gluedialect.plx
+	   + macos/macperl/Droplets/glueedit.plx
+	   + macos/macperl/Droplets/gluemac.plx
+	   + macos/macperl/Droplets/gluescriptadds.plx
+	   + macos/macperl/Droplets/installme.plx
+	   + macos/macperl/Droplets/show_glue_pods.plx
+	   + macos/macperl/Droplets/tarzipme.plx
+	   + macos/macperl/Droplets/untarzipme.plx
+____________________________________________________________________________
+[ 14076] By: pudge                                 on 2002/01/04  20:44:23
+        Log: First go at fixing Mac::Memory::_open (MacPerl Bug #494481)
+     Branch: maint-5.6/macperl
+	   + macos/HandleSocket.cp
+	   ! macos/ext/Mac/Memory/Memory.xs macos/ext/Mac/Memory/t/Memory.t
+	   ! macos/macperl.sym
+____________________________________________________________________________
+[ 14075] By: pudge                                 on 2002/01/04  20:42:06
+        Log: Doc updates
+     Branch: maint-5.6/macperl
+	   ! macos/ext/MacPerl/MacPerl.pm macos/ext/MacPerl/OSA.xs
+____________________________________________________________________________
+[ 14074] By: pudge                                 on 2002/01/04  20:41:26
+        Log: Update libraries
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/Makefile.mk
+____________________________________________________________________________
+[ 14073] By: pudge                                 on 2002/01/04  20:40:11
+        Log: Update tests to Mac::StandardFile from StandardFile.pl,
+             plus other fixes
+     Branch: maint-5.6/macperl
+	   ! macos/ext/Mac/Menus/t/MenuBar.t
+	   ! macos/ext/Mac/Movies/t/PlayMacMovie.t
+	   ! macos/ext/Mac/Movies/t/PlayMovie.t
+	   ! macos/ext/Mac/QuickTimeVR/t/QTVRControl.t
+	   ! macos/ext/Mac/QuickTimeVR/t/QTVRInterceptor.t
+	   ! macos/ext/Mac/QuickTimeVR/t/QTVRotator.t
+	   ! macos/ext/Mac/Resources/t/Resources.t
+____________________________________________________________________________
+[ 14072] By: pudge                                 on 2002/01/04  20:37:44
+        Log: Mistakenly used dXSARGS instead of dSP (MacPerl Bug #494482)
+     Branch: maint-5.6/macperl
+	   ! macos/ext/Mac/Lists/Lists.xs macos/ext/Mac/Menus/Menus.xs
+	   ! macos/ext/Mac/Movies/Movies.xs
+	   ! macos/ext/Mac/QuickTimeVR/QuickTimeVR.xs
+	   ! macos/ext/Mac/StandardFile/StandardFile.xs
+	   ! macos/ext/Mac/Windows/Windows.xs
+____________________________________________________________________________
+[ 14071] By: pudge                                 on 2002/01/04  20:35:52
+        Log: Updates for Universal Headers 3.4 (forgot one)
+     Branch: maint-5.6/macperl
+	   ! macos/macperl/MPConsole.cp
+____________________________________________________________________________
+[ 14070] By: pudge                                 on 2002/01/04  20:32:57
+        Log: Updates for Universal Headers 3.4
+     Branch: maint-5.6/macperl
+	   ! macos/SubLaunch.c macos/ext/Mac/Navigation/Navigation.xs
+	   ! macos/ext/Mac/Navigation/typemap macos/macperl/MPAEUtils.c
+	   ! macos/macperl/MPAEVTStream.cp macos/macperl/MPAppleEvents.c
+	   ! macos/macperl/MPEditions.c macos/macperl/MPEditor.c
+	   ! macos/macperl/MPFile.c macos/macperl/MPGlobals.c
+	   ! macos/macperl/MPHelp.c macos/macperl/MPMain.c
+	   ! macos/macperl/MPPreferences.c macos/macperl/MPPseudoFile.cp
+	   ! macos/macperl/MPSave.c macos/macperl/MPScript.c
+	   ! macos/macperl/MPUtils.c macos/macperl/MPWindow.c
+____________________________________________________________________________
+[ 14069] By: pudge                                 on 2002/01/04  20:28:20
+        Log: Change AddEmulationProc to MacPerl_AddEmulationProc
+             from <200112112327.JAA25434@gpo.metropolis.net.au>;
+             don't crash on quit for 68K (MacPerl Bug #490013)
+     Branch: maint-5.6/macperl
+	   ! macos/macish.c macos/macperl/MPConsole.cp
+____________________________________________________________________________
+[ 14067] By: pudge                                 on 2002/01/04  20:19:18
+        Log: Disable sigaction (MacPerl Bug #470321)
+     Branch: maint-5.6/macperl
+	   ! macos/config.h macos/config.sh
+____________________________________________________________________________
+[ 14066] By: pudge                                 on 2002/01/04  20:16:47
+        Log: Make GUSI resource work (MacPerl Bug #464638)
+     Branch: maint-5.6/macperl
+	   ! macos/PerlGUSIConfig.cp macos/macperl/MacPerl.r
+	   ! macos/macperl/MacPerl.rsrc
+____________________________________________________________________________
+[ 14065] By: pudge                                 on 2002/01/04  20:14:26
+        Log: Make AutoSplit go a little deeper
+     Branch: maint-5.6/macperl
+	   ! macos/Makefile.mk
+____________________________________________________________________________
+[ 14064] By: pudge                                 on 2002/01/04  20:13:36
+        Log: A few doc updates from bleadperl
+     Branch: maint-5.6/macperl
+	   ! pod/perlmodinstall.pod pod/perlport.pod
+____________________________________________________________________________
+[ 14063] By: pudge                                 on 2002/01/04  20:12:11
+        Log: Sync up to latest changes from bleadperl
+     Branch: maint-5.6/macperl
+	   ! lib/File/Find.pm
+____________________________________________________________________________
+[ 14062] By: pudge                                 on 2002/01/04  20:09:20
+        Log: Define setbuf, setvbuf for Mac OS
+     Branch: maint-5.6/macperl
+	   ! ext/IO/IO.xs
+____________________________________________________________________________
+[ 14061] By: pudge                                 on 2002/01/04  20:07:38
+        Log: Delete by request of Mark-Jason Dominus (change #13676)
+     Branch: maint-5.6/macperl
+	   - macos/bundled_lib/blib/lib/Memoize/Saves.pm
+____________________________________________________________________________
+[ 13616] By: pudge                                 on 2001/12/11  05:11:44
+        Log: Update changes
+     Branch: maint-5.6/macperl
+	   ! macos/Changes
 ____________________________________________________________________________
 [ 13615] By: pudge                                 on 2001/12/11  05:09:34
         Log: Add extra pod to help
@@ -45,6 +161,11 @@ ____________________________________________________________________________
      Branch: maint-5.6/macperl
 	  !> op.c pp.c pp_hot.c t/io/pipe.t t/op/cmp.t t/op/misc.t
 	  !> t/op/system_tests util.c win32/perlhost.h win32/win32.c
+
+----------------
+Version v5.6.1b2
+----------------
+
 ____________________________________________________________________________
 [ 13156] By: pudge                                 on 2001/11/21  03:19:09
         Log: Slight doc changes.
