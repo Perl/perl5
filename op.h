@@ -55,7 +55,7 @@ typedef U32 PADOFFSET;
 /*
 =for apidoc Amn|U32|GIMME_V
 The XSUB-writer's equivalent to Perl's C<wantarray>.  Returns C<G_VOID>,
-C<G_SCALAR> or C<G_ARRAY> for void, scalar or array context,
+C<G_SCALAR> or C<G_ARRAY> for void, scalar or list context,
 respectively.
 
 =for apidoc Amn|U32|GIMME

@@ -1314,7 +1314,7 @@ exits. No access to the filename is provided.
 
 sub tmpfile {
 
-  # Simply call tmpnam() in an array context
+  # Simply call tmpnam() in a list context
   my ($fh, $file) = tmpnam();
 
   # Make sure file is removed when filehandle is closed

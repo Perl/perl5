@@ -1941,7 +1941,8 @@ Found in file sv.h
 
 =item SvLEN
 
-Returns the size of the string buffer in the SV.  See C<SvCUR>.
+Returns the size of the string buffer in the SV, not including any part
+attributable to C<SvOOK>.  See C<SvCUR>.
 
 	STRLEN	SvLEN(SV* sv)
 

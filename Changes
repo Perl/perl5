@@ -2394,7 +2394,7 @@ ____________________________________________________________________________
 	   ! t/op/grent.t t/op/pwent.t
 ____________________________________________________________________________
 [  6049] By: jhi                                   on 2000/05/02  19:06:02
-        Log: Test both the scalar and array contexts.
+        Log: Test both the scalar and list contexts.
      Branch: cfgperl
 	   ! t/op/grent.t t/op/pwent.t
 ____________________________________________________________________________

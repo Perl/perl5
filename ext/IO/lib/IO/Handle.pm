@@ -115,13 +115,13 @@ Returns true if the object is currently a valid file descriptor.
 =item $io->getline
 
 This works like <$io> described in L<perlop/"I/O Operators">
-except that it's more readable and can be safely called in an
-array context but still returns just one line.
+except that it's more readable and can be safely called in a
+list context but still returns just one line.
 
 =item $io->getlines
 
-This works like <$io> when called in an array context to
-read all the remaining lines in a file, except that it's more readable.
+This works like <$io> when called in a list context to read all
+the remaining lines in a file, except that it's more readable.
 It will also croak() if accidentally called in a scalar context.
 
 =item $io->ungetc ( ORD )

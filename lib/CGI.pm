@@ -3678,13 +3678,13 @@ the keys are the names of the CGI parameters, and the values are the
 parameters' values.  The Vars() method does this.  Called in a scalar
 context, it returns the parameter list as a tied hash reference.
 Changing a key changes the value of the parameter in the underlying
-CGI parameter list.  Called in an array context, it returns the
+CGI parameter list.  Called in a list context, it returns the
 parameter list as an ordinary hash.  This allows you to read the
 contents of the parameter list, but not to change it.
 
 When using this, the thing you must watch out for are multivalued CGI
 parameters.  Because a hash cannot distinguish between scalar and
-array context, multivalued parameters will be returned as a packed
+list context, multivalued parameters will be returned as a packed
 string, separated by the "\0" (null) character.  You must split this
 packed string in order to get at the individual values.  This is the
 convention introduced long ago by Steve Brenner in his cgi-lib.pl
