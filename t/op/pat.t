@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..224\n";
+print "1..225\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1089,3 +1089,12 @@ $test++;
 print "not " unless undef =~ /^([^\/]*)(.*)$/;
 print "ok $test\n";
 $test++;
+
+{
+  # japhy -- added 03/03/2001
+  () = (my $str = "abc") =~ /(...)/;
+  $str = "def";
+  print "not " if $1 ne "abc";
+  print "ok $test\n";
+  $test++;
+}
