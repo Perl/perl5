@@ -28,6 +28,162 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.5		Maintenance release working toward v5.8.5
 --------------
 ____________________________________________________________________________
+[ 23136] By: nicholas                              on 2004/07/19  12:27:41
+        Log: Integrate:
+             [ 23042]
+             Bump $B::Deparse::VERSION
+     Branch: maint-5.8/perl
+	  !> ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 23134] By: nicholas                              on 2004/07/17  09:40:46
+        Log: New sample config files.
+     Branch: maint-5.8/perl
+	   ! Porting/config.sh Porting/config_H
+____________________________________________________________________________
+[ 23133] By: nicholas                              on 2004/07/17  09:36:41
+        Log: Integrate:
+             [ 23120]
+             threads.xs doesn't check the return value of the thread creation
+             call. D'oh! This gives SEGVs if the OS fails to create another thread.
+             Cause of problem located by Nigel Sandever
+     Branch: maint-5.8/perl
+	  !> ext/threads/threads.pm ext/threads/threads.xs
+____________________________________________________________________________
+[ 23132] By: nicholas                              on 2004/07/16  14:31:01
+        Log: Integrate:
+             [ 23072]
+             dor and // fulfil a TODO
+             Correct a deviation from the Nicholas Clark style guide.
+             
+             [ 23073]
+             A more honest TODO
+             
+             [ 23077]
+             Resurrect the TODO items about Unicode filenames and Unicode %ENV
+             Rant a bit more about POD -> HTML
+             
+             [ 23078]
+             Dual lifing and dists is a TODO
+             
+             [ 23081]
+             Finding a way to put "I'm MAINT" in perl -v is a TODO
+             
+             [ 23082]
+             A decent benchmark would be useful. But it is vague.
+             
+             [ 23094]
+             Generalised "how many in list context" would be useful
+             
+             [ 23103]
+             s/sort/split/; - my mistake spotted by Dave.
+             
+             [ 23104]
+             Some thoughts on foreach reverse
+             
+             [ 23107]
+             Subject:  [PATCH] split doc clarification
+             From:  Yitzchak Scott-Thoennes <sthoenna@efn.org>
+             Date:  Wed, 14 Jul 2004 10:19:36 -0700
+             Message-Id:  <20040714171936.GA1092@efn.org>
+             
+             [ 23115]
+             for (reverse @foo) now iterates in reverse in place.
+             (Just the TODO change)
+             
+             [ 23116]
+             Abigail notes that a re-entrant regexp engine is a todo
+             
+             [ 23129]
+             Typo fix from Julian Gilbey, forwarded upstream from Debian by
+             Brendan O'Dea
+             
+             [ 23130]
+             Clarify that it's only Mac OS *Classic* that uses 1904 - OS X uses
+             1970
+     Branch: maint-5.8/perl
+	  !> pod/perlfunc.pod pod/perltodo.pod pod/perluniintro.pod
+____________________________________________________________________________
+[ 23131] By: nicholas                              on 2004/07/16  14:11:52
+        Log: Integrate:
+             [ 23051]
+             Add some missing authors and remove 1 duplicate
+             
+             [ 23127]
+             glob('*.c') to find documentation is dangerous when run in unclean
+             trees, so isntead use MANIFEST to only scan the legitimate source
+             files.
+     Branch: maint-5.8/perl
+	  !> AUTHORS autodoc.pl
+____________________________________________________________________________
+[ 23119] By: nicholas                              on 2004/07/15  16:38:38
+        Log: Integrate:
+             [ 23118]
+             Assimilate Cwd 2.19
+     Branch: maint-5.8/perl
+	  !> ext/Cwd/Changes ext/Cwd/t/cwd.t lib/Cwd.pm
+____________________________________________________________________________
+[ 23110] By: nicholas                              on 2004/07/14  23:36:17
+        Log: Integrate:
+             [ 23071]
+             Subject: [PATCH] prime_env_iter and zero-length values on VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Thu, 08 Jul 2004 23:19:05 -0500
+             Message-ID: <40EE1CB9.8030407@mac.com>
+     Branch: maint-5.8/perl
+	  !> vms/vms.c
+____________________________________________________________________________
+[ 23087] By: nicholas                              on 2004/07/12  21:36:51
+        Log: Integrate:
+             [ 23076]
+             Perl_mode_from_discipline must update len. (else SEGV)
+             Diagnosis and patch from clkao
+             
+             [ 23083]
+             Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
+             Can now handle the case
+             is_utf8_string(NULL,0)
+             again.
+             Why do we have code dup for Perl_is_utf8_string_loc() ?
+             
+             [ 23084]
+             NI-S: IMHO utf8_upgrade is just changing representation not the value
+             so it has no business calling SvSETMAGIC.
+             
+             [ 23085]
+             Bodge to make Tk work - like the UTF8 flag, the READONLY flag has too
+             many meanings. const const vs mutable in this case.
+     Branch: maint-5.8/perl
+	   ! sv.c
+	  !> doio.c utf8.c
+____________________________________________________________________________
+[ 23086] By: nicholas                              on 2004/07/12  21:19:15
+        Log: Disarm the release candidate
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 23080] By: nicholas                              on 2004/07/11  16:07:49
+        Log: Remove the Safe $VERSION FIXME.
+             Comment on the rearrangement of lib/unicore
+     Branch: maint-5.8/perl
+	   ! pod/perl585delta.pod
+____________________________________________________________________________
+[ 23070] By: nicholas                              on 2004/07/08  16:21:29
+        Log: Need to copy the correct perldelta.
+             Also need to fix Makefile.SH to work out what to copy using pod.lst
+             (Spotted by Randal)
+     Branch: maint-5.8/perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 23069] By: nicholas                              on 2004/07/08  13:53:43
+        Log: This is RC2. Maybe this one will last longer.
+     Branch: maint-5.8/perl
+	   ! patchlevel.h pod/perlhist.pod
+____________________________________________________________________________
+[ 23068] By: nicholas                              on 2004/07/08  13:38:14
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 23067] By: nicholas                              on 2004/07/08  13:25:33
         Log: Rebuild toc. Resort MANIFEST
      Branch: maint-5.8/perl
