@@ -1,6 +1,6 @@
 # hints/sunos_4_1.sh
 # Last modified:  Wed May 27 11:00:02 EDT 1998
-# Andy Dougherty  <doughera@lafcol.lafayette.edu>
+# Andy Dougherty  <doughera@lafayette.edu>
 
 case "$cc" in
 *gcc*)	usevfork=false 
