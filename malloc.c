@@ -1282,7 +1282,7 @@ botch(char *diag, char *s, char *file, int line)
     else {
 	dTHX;
 	if (PerlIO_printf(PerlIO_stderr(),
-			  "assertion botched (%s?): %s%s %s:%d\n",
+			  "assertion botched (%s?): %s %s:%d\n",
 			  diag, s, file, line) != 0) {
 	 do_write:		/* Can be initializing interpreter */
 	    write2("assertion botched (");
