@@ -31,7 +31,7 @@ Unicode::UCD - Unicode character database
     my $charblock  = charblock($codepoint);
 
     use Unicode::UCD 'charscript';
-    my $charscript = charblock($codepoint);
+    my $charscript = charscript($codepoint);
 
     use Unicode::UCD 'charblocks';
     my $charblocks = charblocks();
