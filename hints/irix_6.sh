@@ -234,7 +234,7 @@ if [ "X$use64bits" = "X$define" ]; then
 	cat << 'EOM' >&2
 
 You will see a *** WHOA THERE!!! ***  message from Configure for
-d_open64.  Keep the recommended value.  See hints/irix6_2.sh
+d_open64.  Keep the recommended value.  See hints/irix6.sh
 for more information.
 
 EOM

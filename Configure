@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Sep 30 02:04:24 EET DST 1998 [metaconfig 3.0 PL70]
+# Generated on Wed Oct 14 17:00:29 EET DST 1998 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by jhi@iki.fi)
 
 cat >/tmp/c1$$ <<EOF
@@ -411,6 +411,7 @@ d_poll=''
 d_portable=''
 d_pthread_yield=''
 d_sched_yield=''
+sched_yield=''
 d_pthreads_created_joinable=''
 d_readdir=''
 d_rewinddir=''
@@ -639,6 +640,7 @@ libpth=''
 loclibpth=''
 plibpth=''
 xlibpth=''
+ignore_versioned_solibs=''
 libs=''
 lns=''
 lseeksize=''
@@ -699,6 +701,7 @@ installprivlib=''
 privlib=''
 privlibexp=''
 prototype=''
+pthread_setdetachstate_pointer=''
 ptrsize=''
 drand01=''
 randbits=''
@@ -793,8 +796,6 @@ glibpth="$glibpth /usr/ccs/lib /usr/ucblib /usr/local/lib"
 : machines, like the mips.  Usually, it should be empty.
 plibpth=''
 
-: default library list
-libswanted=''
 : Possible local include directories to search.
 : Set locincpth to "" in a hint file to defeat local include searches.
 locincpth="/usr/local/include /opt/local/include /usr/gnu/include"
@@ -873,6 +874,9 @@ _exe=''
 : Extra object files, if any, needed on this platform.
 archobjs=''
 groupstype=''
+: default library list
+libswanted=''
+ignore_versioned_solibs=''
 : full support for void wanted by default
 defvoidused=15
 
@@ -3571,7 +3575,11 @@ cat <<'EOT' >testcpp.c
 ABC.XYZ
 EOT
 cd ..
-echo 'cat >.$$.c; '"$cc"' -E ${1+"$@"} .$$.c; rm .$$.c' >cppstdin
+if test ! -f cppstdin; then
+	echo 'cat >.$$.c; '"$cc"' -E ${1+"$@"} .$$.c; rm .$$.c' >cppstdin
+else
+	echo "Keeping your $hint cppstdin wrapper."
+fi
 chmod 755 cppstdin
 wrapper=`pwd`/cppstdin
 ok='false'
@@ -3822,7 +3830,8 @@ case "$libswanted" in
 esac
 for thislib in $libswanted; do
 	
-	if xxx=`./loc lib$thislib.$so.[0-9]'*' X $libpth`; $test -f "$xxx"; then
+	if xxx=`./loc lib$thislib.$so.[0-9]'*' X $libpth`;
+		$test -f "$xxx" -a "X$ignore_versioned_solibs" = "X"; then
 		echo "Found -l$thislib (shared)."
 		case " $dflt " in
 		*"-l$thislib "*);;
@@ -8151,42 +8160,6 @@ eval $inlibc
 set poll d_poll
 eval $inlibc
 
-
-: see whether the various POSIXish _yields exist within given cccmd
-$cat >try.c <<EOP
-#include <pthread.h>
-main() {
-	YIELD();
-	exit(0);
-}
-EOP
-: see if pthread_yield exists within given cccmd,
-: if we do not usethreads this may well end up undef.
-set try -DYIELD=pthread_yield
-if eval $compile; then
-    val="$define"
-    echo 'pthread_yield() found.' >&4
-else
-    val="$undef"
-    echo 'pthread_yield() NOT found.' >&4
-fi
-set d_pthread_yield
-eval $setvar
-
-: see if sched_yield exists within given cccmd,
-: if we do not usethreads this may well end up undef.
-set try -DYIELD=sched_yield
-if eval $compile; then
-    val="$define"
-    echo 'sched_yield() found.' >&4
-else
-    val="$undef"
-    echo 'sched_yield() NOT found.' >&4
-fi
-set d_sched_yield
-eval $setvar
-$rm -f try try.*
-
 : test whether pthreads are created in joinable -- aka undetached -- state
 if test "X$usethreads" = "X$define"; then
 	echo $n "Checking whether pthreads are created joinable. $c" >&4 
@@ -10552,6 +10525,37 @@ rp="What is the type of process ids on this system?"
 set pid_t pidtype int stdio.h sys/types.h
 eval $typedef_ask
 
+
+: see whether the state of pthread_attr_setdetachstate is an int pointer
+$cat >try.c <<EOP
+#include <pthread.h>
+main() {
+    pthread_attr_t attr;
+    int state = 0;	
+    pthread_attr_init(&attr);
+#ifdef POINTER
+    pthread_attr_setdetachstate(&attr, &state);
+#else
+    pthread_attr_setdetachstate(&attr, state);
+#endif
+}
+EOP
+set try
+if eval $compile; then
+    val="$undef"
+else
+    set try -DPOINTER
+    if eval $compile; then
+        val="$define"
+    else
+        val="$undef"
+    fi
+fi
+set pthread_setdetachstate_pointer
+eval $setvar
+
+$rm -f try try.*
+
 : check for length of pointer
 echo " "
 case "$ptrsize" in
@@ -10627,6 +10631,69 @@ else
 	fi
 fi
 $rm -f foo* bar* 
+
+
+: see whether the various POSIXish _yields exist within given cccmd
+$cat >try.c <<EOP
+#include <pthread.h>
+#include <stdio.h>
+main() {
+#ifdef SCHED_YIELD
+	sched_yield();
+#else
+#ifdef PTHREAD_YIELD
+	pthread_yield();
+#else
+#ifdef PTHREAD_YIELD_NULL
+	pthread_yield(NULL);
+#endif
+#endif
+#endif
+}
+EOP
+: see if sched_yield exists
+set try -DSCHED_YIELD
+if eval $compile; then
+    val="$define"
+    echo 'sched_yield() found.' >&4
+    sched_yield='sched_yield()'
+else
+    val="$undef"
+    echo 'sched_yield() NOT found.' >&4
+fi
+set d_sched_yield
+eval $setvar
+
+: see if pthread_yield exists
+set try -DPTHREAD_YIELD
+if eval $compile; then
+    val="$define"
+    case "$sched_yield" in
+    '') sched_yield='pthread_yield()' ;;
+    esac
+else
+    set try -DPTHREAD_YIELD_NULL
+    if eval $compile; then
+	val="$define"
+	case "$sched_yield" in
+	'') sched_yield='pthread_yield(NULL)' ;;
+	esac
+    else
+	val="$undef"
+    fi
+fi
+case "$val" in
+$define) echo 'pthread_yield() found.' >&4	;;
+*)	 echo 'pthread_yield() NOT found.' >&4	;;
+esac
+set d_pthread_yield
+eval $setvar
+
+case "$sched_yield" in
+'') sched_yield=undef ;;
+esac
+
+$rm -f try try.*
 
 : see if sys/select.h has to be included
 set sys/select.h i_sysselct
@@ -10804,8 +10871,8 @@ EOM
 		: The first arg can be int, unsigned, or size_t
 		: The last arg may or may not be 'const'
 		val=''
-		for xxx in 'fd_set *' 'int *'; do
-			for nfd in 'int' 'size_t' 'unsigned' ; do
+		for xxx in 'fd_set *' 'int *' 'void *'; do
+			for nfd in 'int' 'size_t' 'unsigned long' 'unsigned' ; do
 				for tmo in 'struct timeval *' 'const struct timeval *'; do
 					case "$val" in
 					'')	try="extern select _(($nfd, $xxx, $xxx, $xxx, $tmo));"
@@ -12469,6 +12536,7 @@ i_values='$i_values'
 i_varargs='$i_varargs'
 i_varhdr='$i_varhdr'
 i_vfork='$i_vfork'
+ignore_versioned_solibs='$ignore_versioned_solibs'
 incpath='$incpath'
 inews='$inews'
 installarchlib='$installarchlib'
@@ -12568,6 +12636,7 @@ prefixexp='$prefixexp'
 privlib='$privlib'
 privlibexp='$privlibexp'
 prototype='$prototype'
+pthread_setdetachstate_pointer='$pthread_setdetachstate_pointer'
 ptrsize='$ptrsize'
 randbits='$randbits'
 randfunc='$randfunc'
@@ -12577,6 +12646,7 @@ rd_nodata='$rd_nodata'
 rm='$rm'
 rmail='$rmail'
 runnm='$runnm'
+sched_yield='$sched_yield'
 scriptdir='$scriptdir'
 scriptdirexp='$scriptdirexp'
 sed='$sed'

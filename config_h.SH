@@ -55,21 +55,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #define BIN "$bin"	/**/
 #define BIN_EXP "$binexp"	/**/
 
-/* CPPSTDIN:
- *	This symbol contains the first part of the string which will invoke
- *	the C preprocessor on the standard input and produce to standard
- *	output.	 Typical value of "cc -E" or "/lib/cpp", but it can also
- *	call a wrapper. See CPPRUN.
- */
-/* CPPMINUS:
- *	This symbol contains the second part of the string which will invoke
- *	the C preprocessor on the standard input and produce to standard
- *	output.  This symbol will have the value "-" if CPPSTDIN needs a minus
- *	to specify standard input, otherwise the value is "".
- */
-#define CPPSTDIN "$cppstdin"
-#define CPPMINUS "$cppminus"
-
 /* HAS_ALARM:
  *	This symbol, if defined, indicates that the alarm routine is
  *	available.
@@ -1429,6 +1414,21 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #include "Bletch: How does this C preprocessor catenate tokens?"
 #endif
 
+/* CPPSTDIN:
+ *	This symbol contains the first part of the string which will invoke
+ *	the C preprocessor on the standard input and produce to standard
+ *	output.	 Typical value of "cc -E" or "/lib/cpp", but it can also
+ *	call a wrapper. See CPPRUN.
+ */
+/* CPPMINUS:
+ *	This symbol contains the second part of the string which will invoke
+ *	the C preprocessor on the standard input and produce to standard
+ *	output.  This symbol will have the value "-" if CPPSTDIN needs a minus
+ *	to specify standard input, otherwise the value is "".
+ */
+#define CPPSTDIN "$cppstdin"
+#define CPPMINUS "$cppminus"
+
 /* HAS_ACCESS:
  *	This manifest constant lets the C program know that the access()
  *	system call is available to check for accessibility using real UID/GID.
@@ -2267,24 +2267,25 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define ARCHNAME "$archname"		/**/
 
-/* HAS_PTHREAD_YIELD:
- *	This symbol, if defined, indicates that the pthread_yield 
- *	routine is available to yield the execution of the current
- *	thread.
+/* SCHED_YIELD:
+ *	This symbol defines the way to yield the execution of
+ *	the current thread.  Known ways are sched_yield,
+ *	pthread_yield, and pthread_yield with NULL.
  */
-/* HAS_SCHED_YIELD:
- *	This symbol, if defined, indicates that the sched_yield
- *	routine is available to yield the execution of the current
- *	thread.
- */
-#$d_pthread_yield HAS_PTHREAD_YIELD	/**/
-#$d_sched_yield HAS_SCHED_YIELD	/**/
+#define SCHED_YIELD	$sched_yield	/**/
 
 /* PTHREADS_CREATED_JOINABLE:
  *	This symbol, if defined, indicates that pthreads are created
  *	in the joinable (aka undetached) state.
  */
 #$d_pthreads_created_joinable PTHREADS_CREATED_JOINABLE /**/
+
+/* PTHREAD_SETDETACHSTATE_POINTER:
+ *	This symbol, if defined, indicates that the second argument of
+ *	pthread_attr_setdetachstate is a pointer to an int, as opposed
+ *	to an int.
+ */
+#$pthread_setdetachstate_pointer	PTHREAD_SETDETACHSTATE_POINTER	/**/
 
 /* MULTIPLICITY:
  *	This symbol, if defined, indicates that Perl should
