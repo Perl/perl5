@@ -5311,7 +5311,7 @@ Perl_ck_glob(pTHX_ OP *o)
 
 #if !defined(PERL_EXTERNAL_GLOB)
     /* XXX this can be tightened up and made more failsafe. */
-    if (!gv) {
+    if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv))) {
 	GV *glob_gv;
 	ENTER;
 	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,

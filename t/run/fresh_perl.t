@@ -822,5 +822,20 @@ It's good! >A< >B<
 $_="foo";utf8::upgrade($_);/bar/i,warn$_;
 EXPECT
 foo at - line 1.
-
-
+######## glob() bug Mon, 01 Sep 2003 02:25:41 -0700 <200309010925.h819Pf0X011457@smtp3.ActiveState.com>
+-lw
+print glob(q(./"TEST"));
+use File::Glob;
+print glob(q(./"TEST"));
+EXPECT
+./"TEST"
+./"TEST"
+######## glob() bug Mon, 01 Sep 2003 02:25:41 -0700 <200309010925.h819Pf0X011457@smtp3.ActiveState.com>
+-lw
+use File::Glob;
+print glob(q(./"TEST"));
+use File::Glob;
+print glob(q(./"TEST"));
+EXPECT
+./"TEST"
+./"TEST"
