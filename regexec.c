@@ -471,10 +471,10 @@ I32 safebase;	/* no need to remember string in subbase */
     goto phooey;
 
 got_it:
+    strend += dontbother;	/* uncheat */
     prog->subbeg = strbeg;
     prog->subend = strend;
     if ((!safebase && (prog->nparens || sawampersand)) || prog->do_folding) {
-	strend += dontbother;	/* uncheat */
 	i = strend - startpos + (stringarg - strbeg);
 	if (safebase) {			/* no need for $digit later */
 	    s = strbeg;
