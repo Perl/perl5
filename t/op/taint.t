@@ -39,6 +39,7 @@ BEGIN {
 my $Is_VMS = $^O eq 'VMS';
 my $Is_MSWin32 = $^O eq 'MSWin32';
 my $Is_Dos = $^O eq 'dos';
+my $Is_Cygwin = $^O eq 'cygwin';
 my $Invoke_Perl = $Is_VMS ? 'MCR Sys$Disk:[]Perl.' :
                   $Is_MSWin32 ? '.\perl' : './perl';
 my @MoreEnv = qw/IFS CDPATH ENV BASH_ENV/;
@@ -115,6 +116,12 @@ print "1..155\n";
     $ENV{PATH} = '';
     delete @ENV{@MoreEnv};
     $ENV{TERM} = 'dumb';
+
+    if ($Is_Cygwin && ! -f 'cygwin1.dll') {
+	system("/usr/bin/cp /usr/bin/cygwin1.dll .") &&
+	    die "$0: failed to cp cygwin1.dll: $!\n";
+	END { unlink "cygwin1.dll" } # yes, done for all platforms...
+    }
 
     test 1, eval { `$echo 1` } eq "1\n";
 

@@ -98,6 +98,11 @@ true)
 	    ldlibpth=`echo $ldlibpth | sed 's/:*$//'`
 	    ;;
         esac
+
+	case "$ldlibpth" in
+	# Protect any spaces
+	*" "*) ldlibpth=`echo $ldlibpth|sed 's/ /\\\\ /g'` ;;
+	esac
 	;;
 *)	pldlflags=''
 	;;
