@@ -6187,7 +6187,7 @@ Perl_peep(pTHX_ register OP *o)
 	    break;
 
 	case OP_RETURN:
-	    if (o->op_next->op_type != OP_LEAVESUBLV) {
+	    if (o->op_next && o->op_next->op_type != OP_LEAVESUBLV) {
 		o->op_seq = PL_op_seqmax++;
 		break;
 	    }
