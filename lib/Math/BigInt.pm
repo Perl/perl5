@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 require 5.005;
 
-$VERSION = '1.65';
+$VERSION = '1.66';
 use Exporter;
 @ISA =       qw( Exporter );
 @EXPORT_OK = qw( objectify _swap bgcd blcm); 
@@ -1751,7 +1751,7 @@ sub bpow
   # (BINT or num_str, BINT or num_str) return BINT
   # compute power of two numbers -- stolen from Knuth Vol 2 pg 233
   # modifies first argument
-  
+
   # set up parameters
   my ($self,$x,$y,@r) = (ref($_[0]),@_);
   # objectify is costly, so avoid it
@@ -2742,7 +2742,7 @@ sub _split
 
   # some possible inputs: 
   # 2.1234 # 0.12        # 1 	      # 1E1 # 2.134E1 # 434E-10 # 1.02009E-2 
-  # .2 	   # 1_2_3.4_5_6 # 1.4E1_2_3  # 1e3 # +.2
+  # .2 	   # 1_2_3.4_5_6 # 1.4E1_2_3  # 1e3 # +.2     # 0e999	
 
   #return if $$x =~ /[Ee].*[Ee]/;	# more than one E => error
 
@@ -2768,6 +2768,8 @@ sub _split
       $mis = $1||'+'; $miv = $2;
       return unless ($mf =~ /^(\d*?)0*$/);	# strip trailing zeros
       $mfv = $1;
+      # handle the 0e999 case here
+      $ev = 0 if $miv eq '0' && $mfv eq '';
       return (\$mis,\$miv,\$mfv,\$es,\$ev);
       }
     }
@@ -3041,32 +3043,29 @@ exactly what you expect.
 
 =over 2
 
-=item Canonical notation
-
-Big integer values are strings of the form C</^[+-]\d+$/> with leading
-zeros suppressed.
-
-   '-0'                            canonical value '-0', normalized '0'
-   '   -123_123_123'               canonical value '-123123123'
-   '1_23_456_7890'                 canonical value '1234567890'
-
 =item Input
 
-Input values to these routines may be either Math::BigInt objects or
-strings of the form C</^\s*[+-]?[\d]+\.?[\d]*E?[+-]?[\d]*$/>, or
-hexadecimal C</^\s*[+-]?[0-9a-f]+$/i>, or binary C</^\s*[+-]?[01]+$/>.
+Input values to these routines may be any string, that looks like a number
+and results in an integer, including hexadecimal and binary numbers.
+
+Scalars holding numbers may also be passed, but note that non-integer numbers
+may already have lost precision due to the conversation to float. Quote
+your input if you want BigInt to see all the digits.
+
+	$x = Math::BigInt->new(12345678890123456789);	# bad
+	$x = Math::BigInt->new('12345678901234567890');	# good
 
 You can include one underscore between any two digits.
 
 This means integer values like 1.01E2 or even 1000E-2 are also accepted.
-Non integer values result in NaN.
+Non-integer values result in NaN.
 
-Math::BigInt::new() defaults to 0, while Math::BigInt::new('') results
-in 'NaN'.
+Currently, Math::BigInt::new() defaults to 0, while Math::BigInt::new('')
+results in 'NaN'.
 
-bnorm() on a BigInt object is now effectively a no-op, since the numbers 
+C<bnorm()> on a BigInt object is now effectively a no-op, since the numbers 
 are always stored in normalized form. On a string, it creates a BigInt 
-object.
+object from the input.
 
 =item Output
 
@@ -3228,9 +3227,11 @@ result).
 
   	$x = Math::BigInt->new($str,$A,$P,$R);
 
-Creates a new BigInt object from a string or another BigInt object. The
+Creates a new BigInt object from a scalar or another BigInt object. The
 input is accepted as decimal, hex (with leading '0x') or binary (with leading
 '0b').
+
+See L<Input> for more info on accepted input formats.
 
 =head2 bnan
 
