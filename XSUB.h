@@ -1,13 +1,9 @@
 #define ST(off) PL_stack_base[ax + (off)]
 
-#ifdef PERL_OBJECT
-#  define XS(name) void name(CV* cv, CPerlObj* pPerl)
+#if defined(CYGWIN32) && defined(USE_DYNAMIC_LOADING)
+#  define XS(name) __declspec(dllexport) void name(pTHXo_ CV* cv)
 #else
-#  if defined(CYGWIN32) && defined(USE_DYNAMIC_LOADING)
-#    define XS(name) __declspec(dllexport) void name(pTHX_ CV* cv)
-#  else
-#    define XS(name) void name(pTHX_ CV* cv)
-#  endif
+#  define XS(name) void name(pTHXo_ CV* cv)
 #endif
 
 #define dXSARGS				\
@@ -148,10 +144,12 @@
 #ifdef PERL_OBJECT
 #  include "objXSUB.h"
 
-#  undef  PERL_OBJECT_THIS
-#  define PERL_OBJECT_THIS pPerl
-#  undef  PERL_OBJECT_THIS_
-#  define PERL_OBJECT_THIS_ pPerl,
+#  undef  aTHXo
+#  define aTHXo			pPerl
+#  undef  aTHXo_
+#  define aTHXo_		aTHXo,
+#  undef  _aTHXo
+#  define _aTHXo		,aTHXo
 
 #  undef  SAVEDESTRUCTOR
 #  define SAVEDESTRUCTOR(f,p) \
@@ -162,8 +160,6 @@
 #      undef	errno
 #      define	errno			ErrorNo()
 #    endif
-#    undef  ErrorNo
-#    define ErrorNo			pPerl->ErrorNo
 #    undef  NtCrypt
 #    define NtCrypt			pPerl->NtCrypt
 #    undef  NtGetLib
@@ -176,6 +172,8 @@
 #    define NtGetBin			pPerl->NtGetBin
 #    undef  NtGetDebugScriptStr
 #    define NtGetDebugScriptStr		pPerl->NtGetDebugScriptStr
+#    undef fprintf
+#    define fprintf			pPerl->fprintf
 #  endif /* WIN32 */
 
 #  ifndef NO_XSLOCKS

@@ -1320,7 +1320,7 @@ EOF
 if ($WantCAPI) { 
 print Q<<"EOF";
 ##ifdef PERL_CAPI
-##define XSCAPI(name) void name(CV* cv, void* pPerl)
+##define XSCAPI(name) void name(void *pPerl, CV* cv)
 #
 ##ifdef __cplusplus
 #extern "C"

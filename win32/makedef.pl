@@ -29,6 +29,15 @@ if ($define{PERL_OBJECT}) {
     print "DESCRIPTION 'Perl interpreter'\n";
     print "EXPORTS\n";
     output_symbol("perl_alloc");
+    output_symbol("perl_get_host_info");
+    output_symbol("perl_alloc_using");
+    output_symbol("perl_construct");
+    output_symbol("perl_destruct");
+    output_symbol("perl_free");
+    output_symbol("perl_parse");
+    output_symbol("perl_run");
+    output_symbol("RunPerl");
+    output_symbol("GetPerlInterpreter");
     exit(0);
 }
 
@@ -467,6 +476,7 @@ win32_seekdir
 win32_rewinddir
 win32_closedir
 win32_longpath
+win32_os_id
 Perl_win32_init
 Perl_init_os_extras
 Perl_getTHR

@@ -67,8 +67,19 @@ print BYTERUN_C $c_header, <<'EOT';
 
 #include "EXTERN.h"
 #include "perl.h"
+#define NO_XSLOCKS
+#include "XSUB.h"
+
+#ifdef PERL_OBJECT
+#undef CALL_FPTR
+#define CALL_FPTR(fptr) (pPerl->*fptr)
+#undef PL_ppaddr
+#define PL_ppaddr (*get_ppaddr())
+#endif
+
 #include "byterun.h"
 #include "bytecode.h"
+
 
 static int optype_size[] = {
 EOT
@@ -89,7 +100,7 @@ static void **bytecode_obj_list;
 static I32 bytecode_obj_list_fill = -1;
 
 void *
-bset_obj_store(void *obj, I32 ix)
+bset_obj_store(pTHXo_ void *obj, I32 ix)
 {
     if (ix > bytecode_obj_list_fill) {
 	if (bytecode_obj_list_fill == -1)
@@ -103,7 +114,7 @@ bset_obj_store(void *obj, I32 ix)
 }
 
 void
-byterun(pTHX_ struct bytestream bs)
+byterun(pTHXo_ struct bytestream bs)
 {
     dTHR;
     int insn;
@@ -237,6 +248,8 @@ print BYTERUN_H <<'EOT';
 EOT
 
 print BYTERUN_H <<'EOT';
+EXT void byterun(pTHXo_ struct bytestream bs);
+
 #define INIT_SPECIALSV_LIST STMT_START { \
 EOT
 for ($i = 0; $i < @specialsv; $i++) {

@@ -32,6 +32,17 @@ INST_TOP	= $(INST_DRV)\perl
 INST_VER	= \5.00557
 
 #
+# Comment this out if you DON'T want your perl installation to have
+# architecture specific components.  This means that architecture-
+# specific files will be installed along with the architecture-neutral
+# files.  Leaving it enabled is safer and more flexible, in case you
+# want to build multiple flavors of perl and install them together in
+# the same location.  Commenting it out gives you a simpler
+# installation that is easier to understand for beginners.
+#
+#INST_ARCH	= \$(ARCHNAME)
+
+#
 # uncomment to enable threads-capabilities
 #
 #USE_THREADS	= define
@@ -124,6 +135,7 @@ CCLIBDIR	= $(CCHOME)\lib
 # instead of clinging to shortcuts like this one.
 #
 #BUILDOPT	= -DPERL_POLLUTE
+#BUILDOPT	= -DPERL_IMPLICIT_CONTEXT
 
 #
 # specify semicolon-separated list of extra directories that modules will
@@ -196,7 +208,6 @@ CFG		= Optimize
 !ENDIF
 !ENDIF
 
-ARCHDIR		= ..\lib\$(ARCHNAME)
 COREDIR		= ..\lib\CORE
 AUTODIR		= ..\lib\auto
 
@@ -299,7 +310,7 @@ $(o).dll:
 	    -out:$@ $(LINK_FLAGS) $(LIBFILES) $< $(LIBPERL)  
 
 #
-INST_BIN	= $(INST_TOP)$(INST_VER)\bin\$(ARCHNAME)
+INST_BIN	= $(INST_TOP)$(INST_VER)\bin$(INST_ARCH)
 INST_SCRIPT	= $(INST_TOP)$(INST_VER)\bin
 INST_LIB	= $(INST_TOP)$(INST_VER)\lib
 INST_POD	= $(INST_LIB)\pod
@@ -314,7 +325,7 @@ EXTUTILSDIR	= $(LIBDIR)\extutils
 !IF "$(OBJECT)" == "-DPERL_OBJECT"
 PERLIMPLIB	= ..\perlcore.lib
 PERLDLL		= ..\perlcore.dll
-CAPILIB		= $(COREDIR)\perlCAPI.lib
+#CAPILIB		= $(COREDIR)\perlCAPI.lib
 !ELSE
 PERLIMPLIB	= ..\perl.lib
 PERLDLL		= ..\perl.dll
@@ -405,6 +416,8 @@ MICROCORE_SRC	=		\
 		..\utf8.c	\
 		..\util.c
 
+EXTRACORE_SRC	= $(EXTRACORE_SRC) perllib.c
+
 !IF "$(PERL_MALLOC)" == "define"
 EXTRACORE_SRC	= $(EXTRACORE_SRC) ..\malloc.c
 !ENDIF
@@ -437,9 +450,9 @@ PERL95_SRC	= $(PERL95_SRC) .\$(CRYPT_SRC)
 DLL_SRC		= $(DYNALOADER).c
 
 
-!IF "$(OBJECT)" == ""
-DLL_SRC		= $(DLL_SRC) perllib.c
-!ENDIF
+#!IF "$(OBJECT)" == ""
+#DLL_SRC		= $(DLL_SRC) perllib.c
+#!ENDIF
 
 X2P_SRC		=		\
 		..\x2p\a2p.c	\
@@ -504,12 +517,9 @@ X2P_OBJ		= $(X2P_SRC:.c=.obj)
 PERLDLL_OBJ	= $(CORE_OBJ)
 PERLEXE_OBJ	= perlmain$(o)
 
-!IF "$(OBJECT)" == ""
 PERLDLL_OBJ	= $(PERLDLL_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
-!ELSE
-PERLEXE_OBJ	= $(PERLEXE_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
-PERL95_OBJ	= $(PERL95_OBJ) DynaLoadmt$(o)
-!ENDIF
+#PERLEXE_OBJ	= $(PERLEXE_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
+#PERL95_OBJ	= $(PERL95_OBJ) DynaLoadmt$(o)
 
 !IF "$(USE_SETARGV)" != ""
 SETARGV_OBJ	= setargv$(o)
@@ -599,6 +609,7 @@ CFG_VARS	=					\
 		"INST_DRV=$(INST_DRV)"			\
 		"INST_TOP=$(INST_TOP)"			\
 		"INST_VER=$(INST_VER)"			\
+		"INST_ARCH=$(INST_ARCH)"		\
 		"archname=$(ARCHNAME)"			\
 		"cc=$(CC)"				\
 		"ccflags=$(OPTIMIZE:"=\") $(DEFINES) $(OBJECT)"	\
@@ -781,17 +792,17 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 	$(XSUBPP) dl_win32.xs > $(*B).c
 	cd ..\..\win32
 
-!IF "$(OBJECT)" == "-DPERL_OBJECT"
-perlCAPI.cpp : $(MINIPERL)
-	$(MINIPERL) GenCAPI.pl $(COREDIR)
-
-perlCAPI$(o) : perlCAPI.cpp
-	$(CC) $(CFLAGS_O) $(RUNTIME) -UPERLDLL -c \
-	    $(OBJOUT_FLAG)perlCAPI$(o) perlCAPI.cpp
-
-$(CAPILIB) : perlCAPI.cpp perlCAPI$(o)
-	lib /OUT:$(CAPILIB) perlCAPI$(o)
-!ENDIF
+#!IF "$(OBJECT)" == "-DPERL_OBJECT"
+#perlCAPI.cpp : $(MINIPERL)
+#	$(MINIPERL) GenCAPI.pl $(COREDIR)
+#
+#perlCAPI$(o) : perlCAPI.cpp
+#	$(CC) $(CFLAGS_O) $(RUNTIME) -UPERLDLL -c \
+#	    $(OBJOUT_FLAG)perlCAPI$(o) perlCAPI.cpp
+#
+#$(CAPILIB) : perlCAPI.cpp perlCAPI$(o)
+#	lib /OUT:$(CAPILIB) perlCAPI$(o)
+#!ENDIF
 
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs

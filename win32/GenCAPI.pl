@@ -23,7 +23,7 @@ sub readsyms(\%@) {
 	    s/[ \t]*#.*$//;	# delete comments
 	    if (/^\s*(\S+)\s*$/) {
 		my $sym = $1;
-		$$syms{$sym} = "Perl_$sym";
+		$$syms{$sym} = $sym;
 	    }
 	}
 	close(FILE);
@@ -40,41 +40,66 @@ sub skip_these {
 }
 
 skip_these [qw(
-yylex
-cando
-cast_ulong
-my_chsize
-condpair_magic
-deb
-deb_growlevel
-debprofdump
-debop
-debstack
-debstackptrs
-dump_fds
-dump_mstats
+Perl_yylex
+Perl_cando
+Perl_cast_ulong
+Perl_my_chsize
+Perl_condpair_magic
+Perl_deb
+Perl_deb_growlevel
+Perl_debprofdump
+Perl_debop
+Perl_debstack
+Perl_debstackptrs
+Perl_dump_fds
+Perl_dump_mstats
 fprintf
-find_threadsv
-magic_mutexfree
-my_memcmp
-my_memset
-my_pclose
-my_popen
-my_swap
-my_htonl
-my_ntohl
-new_struct_thread
-same_dirent
-unlnk
-unlock_condpair
-safexmalloc
-safexcalloc
-safexrealloc
-safexfree
+Perl_find_threadsv
+Perl_magic_mutexfree
+Perl_my_memcmp
+Perl_my_memset
+Perl_my_pclose
+Perl_my_popen
+Perl_my_swap
+Perl_my_htonl
+Perl_my_ntohl
+Perl_new_struct_thread
+Perl_same_dirent
+Perl_unlnk
+Perl_unlock_condpair
+Perl_safexmalloc
+Perl_safexcalloc
+Perl_safexrealloc
+Perl_safexfree
 Perl_GetVars
-malloced_size
-do_exec3
-getenv_len
+Perl_malloced_size
+Perl_do_exec3
+Perl_getenv_len
+Perl_dump_indent
+Perl_default_protect
+Perl_croak_nocontext
+Perl_die_nocontext
+Perl_form_nocontext
+Perl_warn_nocontext
+Perl_newSVpvf_nocontext
+Perl_sv_catpvf_nocontext
+Perl_sv_catpvf_mg_nocontext
+Perl_sv_setpvf_nocontext
+Perl_sv_setpvf_mg_nocontext
+Perl_do_ipcctl
+Perl_do_ipcget
+Perl_do_msgrcv
+Perl_do_msgsnd
+Perl_do_semop
+Perl_do_shmio
+Perl_my_bzero
+perl_parse
+perl_alloc
+Perl_call_atexit
+Perl_malloc
+Perl_calloc
+Perl_realloc
+Perl_mfree
 )];
 
 
@@ -94,8 +119,15 @@ print OUTFILE <<ENDCODE;
 #include "perl.h"
 #include "XSUB.h"
   
-#define DESTRUCTORFUNC (void (*)(void*))
-  
+/*#define DESTRUCTORFUNC (void (*)(void*))*/
+
+#undef Perl_sv_2mortal
+#undef Perl_newSVsv
+#undef Perl_mess
+#undef Perl_sv_2pv
+#undef Perl_sv_vcatpvfn
+#undef Perl_sv_vsetpvfn
+#undef Perl_newSV
 ENDCODE
 
 print OUTFILE "#ifdef SetCPerlObj_defined\n" unless ($separateObj == 0);
@@ -110,17 +142,18 @@ ENDCODE
 
 print OUTFILE "#endif\n" unless ($separateObj == 0); 
 
+my %done;
+
 while () {
     last unless defined ($_ = <INFILE>);
-    if (/^VIRTUAL\s/) {
+    if (/^VIRTUAL\s+/) {
         while (!/;$/) {
             chomp;
             $_ .= <INFILE>;
         }
         $_ =~ s/^VIRTUAL\s*//;
         $_ =~ s/\s*__attribute__.*$/;/;
-        if ( /(.*)\s([A-z_]*[0-9A-z_]+\s)\((.*)\);/ ||
-             /(.*)\*([A-z_]*[0-9A-z_]+\s)\((.*)\);/ ) {
+        if ( /^(.+)\t(\w+)\((.*)\);/ ) {
             $type = $1;
             $name = $2;
             $args = $3;
@@ -128,10 +161,14 @@ while () {
             $name =~ s/\s*$//;
             $type =~ s/\s*$//;
 	    next if (defined $skip_list{$name});
+	    next if $name =~ /^S_/;
+	    next if exists $done{$name};
 
-	    if($args eq "ARGSproto") {
+	    $done{$name}++;
+	    if($args eq "ARGSproto" or $args eq "pTHX") {
 		$args = "void";
 	    }
+	    $args =~ s/^pTHX_ //;
 
             $return = ($type eq "void" or $type eq "Free_t") ? "\t" : "\treturn";
 
@@ -143,9 +180,7 @@ while () {
 
             @args = split(',', $args);
             if ($args[$#args] =~ /\s*\.\.\.\s*/) {
-                if(($name eq "croak") or ($name eq "deb") or ($name eq "die")
-		        or ($name eq "form") or ($name eq "warn")
-		        or ($name eq "warner")) {
+                if ($name =~ /^Perl_(croak|deb|die|warn|form|warner)$/) {
                     print OUTFILE "\n#ifdef $name" . "_defined" unless ($separateObj == 0);
                     for (@args) { $_ = $1 if /(\w+)\W*$/; }
                     $arg = $args[$#args-1];
@@ -161,13 +196,13 @@ extern "C" $type $funcName ($args)
     va_list args;
     va_start(args, $arg);
     pmsg = pPerl->Perl_sv_2mortal(pPerl->Perl_newSVsv(pPerl->Perl_mess($arg, &args)));
-$return pPerl->Perl_$name($start SvPV_nolen(pmsg));
+$return pPerl->$name($start SvPV_nolen(pmsg));
     va_end(args);
 }
 ENDCODE
                     print OUTFILE "#endif\n" unless ($separateObj == 0);
                 }
-                elsif($name eq "newSVpvf") {
+                elsif($name =~ /^Perl_newSVpvf/) {
                     print OUTFILE "\n#ifdef $name" . "_defined" unless ($separateObj == 0);
                     $args[0] =~ /(\w+)\W*$/; 
                     $arg = $1;
@@ -187,7 +222,7 @@ extern "C" $type $funcName ($args)
 ENDCODE
                     print OUTFILE "#endif\n" unless ($separateObj == 0);
                 }
-                elsif($name eq "sv_catpvf") {
+                elsif($name =~ /^Perl_sv_catpvf/) {
                     print OUTFILE "\n#ifdef $name" . "_defined" unless ($separateObj == 0);
                     $args[0] =~ /(\w+)\W*$/; 
                     $arg0 = $1;
@@ -206,7 +241,7 @@ extern "C" $type $funcName ($args)
 ENDCODE
                     print OUTFILE "#endif\n" unless ($separateObj == 0);
                 }
-                elsif($name eq "sv_catpvf_mg") {
+                elsif($name =~ /^Perl_sv_catpvf_mg/) {
                     print OUTFILE "\n#ifdef $name" . "_defined" unless ($separateObj == 0);
                     $args[0] =~ /(\w+)\W*$/; 
                     $arg0 = $1;
@@ -229,7 +264,7 @@ extern "C" $type $funcName ($args)
 ENDCODE
                     print OUTFILE "#endif\n" unless ($separateObj == 0);
                 }
-                elsif($name eq "sv_setpvf") {
+                elsif($name =~ /^Perl_sv_setpvf/) {
                     print OUTFILE "\n#ifdef $name" . "_defined" unless ($separateObj == 0);
                     $args[0] =~ /(\w+)\W*$/; 
                     $arg0 = $1;
@@ -248,7 +283,7 @@ extern "C" $type $funcName ($args)
 ENDCODE
                     print OUTFILE "#endif\n" unless ($separateObj == 0);
                 }
-                elsif($name eq "sv_setpvf_mg") {
+                elsif($name =~ /^Perl_sv_setpvf_mg/) {
                     print OUTFILE "\n#ifdef $name" . "_defined" unless ($separateObj == 0);
                     $args[0] =~ /(\w+)\W*$/; 
                     $arg0 = $1;
@@ -298,26 +333,26 @@ ENDCODE
             }
 
 	    # newXS special case
-	    if ($name eq "newXS") {
+	    if ($name eq "Perl_newXS") {
 		next;
 	    }
             
             print OUTFILE "\n#ifdef $name" . "defined" unless ($separateObj == 0);
 
 	    # handle specical case for save_destructor
-	    if ($name eq "save_destructor") {
+	    if ($name eq "Perl_save_destructor") {
 		next;
 	    }
 	    # handle specical case for sighandler
-	    if ($name eq "sighandler") {
+	    if ($name eq "Perl_sighandler") {
 		next;
 	    }
 	    # handle special case for sv_grow
-	    if ($name eq "sv_grow" and $args eq "SV* sv, unsigned long newlen") {
+	    if ($name eq "Perl_sv_grow" and $args eq "SV* sv, unsigned long newlen") {
 		next;
 	    }
 	    # handle special case for newSV
-	    if ($name eq "newSV" and $args eq "I32 x, STRLEN len") {
+	    if ($name eq "Perl_newSV" and $args eq "I32 x, STRLEN len") {
 		next;
 	    }
 	    # handle special case for perl_parse
@@ -334,13 +369,13 @@ ENDCODE
 		next;
 	    }
 	    # handle special case for perl_atexit
-	    if ($name eq "perl_atexit") {
+	    if ($name eq "Perl_call_atexit") {
 		print OUTFILE <<ENDCODE;
 
 #undef $name
 extern "C" $type $name ($args)
 {
-    pPerl->perl_atexit(fn, ptr);
+    pPerl->perl_call_atexit(fn, ptr);
 }
 ENDCODE
                 print OUTFILE "#endif\n" unless ($separateObj == 0);
@@ -348,7 +383,7 @@ ENDCODE
 	    }
 
 
-	    if($name eq "byterun" and $args eq "struct bytestream bs") {
+	    if($name eq "Perl_byterun" and $args eq "struct bytestream bs") {
 		next;
 	    }
 
@@ -607,7 +642,7 @@ void boot_CAPI_handler(CV *cv, void (*subaddr)(CV *c), void *pP)
     subaddr(cv);
 }
 
-void xs_handler(CV* cv, CPerlObj* p)
+void xs_handler(CPerlObj* p, CV* cv)
 {
     void(*func)(CV*);
     SV* sv;
@@ -627,6 +662,7 @@ void xs_handler(CV* cv, CPerlObj* p)
     }
 }
 
+#undef Perl_newXS
 CV* Perl_newXS(char* name, void (*subaddr)(CV* cv), char* filename)
 {
     CV* cv = pPerl->Perl_newXS(name, xs_handler, filename);
@@ -634,7 +670,7 @@ CV* Perl_newXS(char* name, void (*subaddr)(CV* cv), char* filename)
     return cv;
 }
 
-
+#undef Perl_deb
 void Perl_deb(const char pat, ...)
 {
 }
@@ -1003,6 +1039,11 @@ int          _win32_uname(struct utsname *name)
     return pPerl->PL_piENV->Uname(name, ErrorNo());
 }
 
+unsigned long _win32_os_id(void)
+{
+    return pPerl->PL_piENV->OsID();
+}
+
 char*   _win32_getenv(const char *name)
 {
     return pPerl->PL_piENV->Getenv(name, ErrorNo());
@@ -1330,6 +1371,8 @@ U32 * _Perl_opargs ();
 #undef win32_stat
 #undef win32_ioctl
 #undef win32_utime
+#undef win32_uname
+#undef win32_os_id
 #undef win32_getenv
 
 #undef win32_htonl
@@ -1447,6 +1490,8 @@ U32 * _Perl_opargs ();
 #define win32_stat     _win32_stat
 #define win32_ioctl    _win32_ioctl
 #define win32_utime    _win32_utime
+#define win32_uname    _win32_uname
+#define win32_os_id    _win32_os_id
 #define win32_getenv   _win32_getenv
 #define win32_open_osfhandle _win32_open_osfhandle
 #define win32_get_osfhandle  _win32_get_osfhandle
@@ -1566,6 +1611,8 @@ int	_win32_times(struct tms *timebuf);
 int	_win32_stat(const char *path, struct stat *buf);
 int	_win32_ioctl(int i, unsigned int u, char *data);
 int	_win32_utime(const char *f, struct utimbuf *t);
+int	_win32_uname(struct utsname *n);
+unsigned long	_win32_os_id(void);
 char*   _win32_getenv(const char *name);
 int     _win32_open_osfhandle(long handle, int flags);
 long    _win32_get_osfhandle(int fd);

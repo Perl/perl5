@@ -140,4 +140,4 @@ typedef IV IV64;
 
 #define BSET_OBJ_STORE(obj, ix)		\
 	(I32)ix > bytecode_obj_list_fill ?	\
-	bset_obj_store(obj, (I32)ix) : (bytecode_obj_list[ix] = obj)
+	bset_obj_store(aTHXo_ obj, (I32)ix) : (bytecode_obj_list[ix] = obj)
