@@ -1712,6 +1712,7 @@ from the perl source tree.
 	$self->{PERL_INC}     = $self->catdir("$self->{PERL_ARCHLIB}","CORE"); # wild guess for now
 	my $perl_h;
 
+	no warnings 'uninitialized' ;
 	if (not -f ($perl_h = $self->catfile($self->{PERL_INC},"perl.h"))
 	    and not $old){
 	    # Maybe somebody tries to build an extension with an
