@@ -3440,11 +3440,14 @@ S_init_main_stash(pTHX)
     SvREADONLY_on(gv);
     hv_name_set(PL_defstash, "main", 4, 0);
     PL_incgv = gv_HVadd(gv_AVadd(gv_fetchpv("INC",TRUE, SVt_PVAV)));
+    SvREFCNT_inc(PL_incgv); /* Don't allow it to be freed */
     GvMULTI_on(PL_incgv);
     PL_hintgv = gv_fetchpv("\010",TRUE, SVt_PV); /* ^H */
     GvMULTI_on(PL_hintgv);
     PL_defgv = gv_fetchpv("_",TRUE, SVt_PVAV);
+    SvREFCNT_inc(PL_defgv);
     PL_errgv = gv_HVadd(gv_fetchpv("@", TRUE, SVt_PV));
+    SvREFCNT_inc(PL_errgv);
     GvMULTI_on(PL_errgv);
     PL_replgv = gv_fetchpv("\022", TRUE, SVt_PV); /* ^R */
     GvMULTI_on(PL_replgv);
