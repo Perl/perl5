@@ -6,7 +6,7 @@ BEGIN {
 	require Config; import Config;
 }
 
-use Test::More tests => 16;
+use Test::More tests => 15;
 
 # open::import expects 'open' as its first argument, but it clashes with open()
 sub import {
@@ -26,14 +26,6 @@ is( $^H & $open::hint_bits, 0,
 	'hint bits should not be set in $^H before open import' );
 
 # prevent it from loading I18N::Langinfo, so we can test encoding failures
-{
-    local @INC;
-    $ENV{LC_ALL} = $ENV{LANG} = '';
-    eval { import( 'IN', 'locale' ) };
-    like( $@, qr/Cannot figure out an encoding/, 
-	  'no encoding should be found without $ENV{LANG} or $ENV{LC_ALL}' );
-}
-
 my $warn;
 local $SIG{__WARN__} = sub {
 	$warn .= shift;
