@@ -50,7 +50,7 @@ if ($^O ne 'MSWin32' && $^O ne 'NetWare' && $^O ne 'VMS' && $^O ne 'os2') {
     1;
   } and do {
     @a = bsd_glob("~$name", GLOB_TILDE);
-    if (scalar(@a) != 1 || $a[0] ne $home || GLOB_ERROR) {
+    if (defined $home && (scalar(@a) != 1 || $a[0] ne $home || GLOB_ERROR)) {
 	print "not ";
     }
   };
