@@ -10815,16 +10815,17 @@ char *
 Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 {
     if (SvPOK(sv) && !DO_UTF8(sv) && SvROK(encoding)) {
-	  SV *uni;
-	  STRLEN len;
-	  char *s;
-	  dSP;
-	  ENTER;
-	  SAVETMPS;
-	  PUSHMARK(sp);
-	  EXTEND(SP, 3);
-	  XPUSHs(encoding);
-	  XPUSHs(sv);
+	int vary = FALSE;
+	SV *uni;
+	STRLEN len;
+	char *s;
+	dSP;
+	ENTER;
+	SAVETMPS;
+	PUSHMARK(sp);
+	EXTEND(SP, 3);
+	XPUSHs(encoding);
+	XPUSHs(sv);
 /* 
   NI-S 2002/07/09
   Passing sv_yes is wrong - it needs to be or'ed set of constants
@@ -10833,23 +10834,32 @@ Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 
   Both will default the value - let them.
   
-	  XPUSHs(&PL_sv_yes);
+	XPUSHs(&PL_sv_yes);
 */
-	  PUTBACK;
-	  call_method("decode", G_SCALAR);
-	  SPAGAIN;
-	  uni = POPs;
-	  PUTBACK;
-	  s = SvPV(uni, len);
-	  if (s != SvPVX(sv)) {
-	       SvGROW(sv, len + 1);
-	       Move(s, SvPVX(sv), len, char);
-	       SvCUR_set(sv, len);
-	       SvPVX(sv)[len] = 0;	
-	  }
-	  FREETMPS;
-	  LEAVE;
-	  SvUTF8_on(sv);
+	PUTBACK;
+	call_method("decode", G_SCALAR);
+	SPAGAIN;
+	uni = POPs;
+	PUTBACK;
+	s = SvPV(uni, len);
+	{
+	    U8 *t = (U8 *)s, *e = (U8 *)s + len;
+	    while (t < e) {
+		if ((vary = !UTF8_IS_INVARIANT(*t++)))
+		    break;
+	    }
+	}
+	if (s != SvPVX(sv)) {
+	    SvGROW(sv, len + 1);
+	    Move(s, SvPVX(sv), len, char);
+	    SvCUR_set(sv, len);
+	    SvPVX(sv)[len] = 0;	
+	}
+	FREETMPS;
+	LEAVE;
+	if (vary)
+	    SvUTF8_on(sv);
+	SvUTF8_on(sv);
     }
     return SvPVX(sv);
 }
