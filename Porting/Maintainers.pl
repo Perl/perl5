@@ -308,15 +308,6 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
-	'perlio-doc' =>
-		{
-		'MAINTAINER'	=> 'ni-s',
-		'FILES'		=> q[pod/perlapio.pod
-				     pod/perliol.pod
-				     lib/PerlIO.pm],
-		'CPAN'		=> 0,
-		},
-
 	'perlebcdic' =>
 		{
 		'MAINTAINER'	=> 'pvhp',
@@ -328,6 +319,23 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'p5p',
 		'FILES'		=> q[ext/PerlIO lib/PerlIO],
+		'CPAN'		=> 1,
+		},
+
+	'perlio-doc' =>
+		{
+		'MAINTAINER'	=> 'ni-s',
+		'FILES'		=> q[pod/perlapio.pod
+				     pod/perliol.pod
+				     lib/PerlIO.pm],
+		'CPAN'		=> 0,
+		},
+
+	'Perlio::via::QuotedPrint' =>
+		{
+		'MAINTAINER'	=> 'elizabeth',
+		'FILES'		=> q[lib/PerlIO/via/QuotedPrint.pm
+				     lib/PerlIO/via/t/QuotedPrint.t],
 		'CPAN'		=> 1,
 		},
 
