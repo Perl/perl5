@@ -1,9 +1,12 @@
 /* vms.c
  *
  * VMS-specific routines for perl5
+ * Version: 5.7.0
  *
- * Last revised: 20-Aug-1999 by Charles Bailey  bailey@newman.upenn.edu
- * Version: 5.5.60
+ * August 2000 tweaks to vms_image_init, my_flush, my_fwrite, cando_by_name, 
+ *             and Perl_cando by Craig Berry
+ * 29-Aug-2000 Charles Lane's piping improvements rolled in
+ * 20-Aug-1999 revisions by Charles Bailey  bailey@newman.upenn.edu
  */
 
 #include <acedef.h>
@@ -4726,6 +4729,13 @@ my_flush(FILE *fp)
 #endif
 	    res = fsync(fileno(fp));
     }
+/*
+ * If the flush succeeded but set end-of-file, we need to clear
+ * the error because our caller may check ferror().  BTW, this 
+ * probably means we just flushed an empty file.
+ */
+    if (res == 0 && vaxc$errno == RMS$_EOF) clearerr(fp);
+
     return res;
 }
 /*}}}*/
@@ -5587,7 +5597,16 @@ Perl_cando(pTHX_ Mode_t bit, Uid_t effective, Stat_t *statbufp)
                              &namdsc,&namdsc.dsc$w_length,0,0);
     if (retsts & 1) {
       fname[namdsc.dsc$w_length] = '\0';
-      return cando_by_name(bit,effective,fname);
+/* 
+ * lib$fid_to_name returns DVI$_LOGVOLNAM as the device part of the name,
+ * but if someone has redefined that logical, Perl gets very lost.  Since
+ * we have the physical device name from the stat buffer, just paste it on.
+ */
+      char fname_phdev[NAM$C_MAXRSS+1];
+      strcpy( fname_phdev, statbufp->st_devnam );
+      strcat( fname_phdev, strrchr(fname, ':') );
+
+      return cando_by_name(bit,effective,fname_phdev);
     }
     else if (retsts == SS$_NOSUCHDEV || retsts == SS$_NOSUCHFILE) {
       Perl_warn(aTHX_ "Can't get filespec - stale stat buffer?\n");

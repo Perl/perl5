@@ -754,11 +754,6 @@ one can (or, if one can, whether it's a good idea) link together at
 all binaries with different ideas about file offsets, all this is
 platform-dependent.
 
-=head2 ftmp-posix subtest 6 fails in VMS
-
-The test exposes a flushing bug in the VMS port of Perl, this failure
-as such can be ignored.
-
 =head2 ftmp-security tests warn 'system possibly insecure'
 
 Don't panic.  Read INSTALL 'make test' section instead. 
@@ -766,9 +761,12 @@ Don't panic.  Read INSTALL 'make test' section instead.
 =head2 Long Doubles Still Don't Work In Solaris
 
 The experimental long double support is still very much so in Solaris.
-(Other platforms like Linux and Tru64 are beginning to solidify in this area.)
+(Other platforms like Linux and Tru64 are beginning to solidify in
+this area.)
 
 =head2 Storable tests fail in some platforms
+
+If any Storable tests fail the use of Storable is not advisable.
 
 =over 4
 
@@ -790,6 +788,10 @@ st-06compat fails in UNICOS and UNICOS/mk.
 
 This means that you cannot read old (pre-Storable-0.7) Storable images
 made in other platforms.
+
+=item *
+
+st-store.t and st-retrieve may fail with Compaq C 6.2 on OpenVMS Alpha 7.2.
 
 =back
 
