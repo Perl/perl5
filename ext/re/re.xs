@@ -3,10 +3,6 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#ifdef WAS_NOT_DEBUGGING
-void Perl_deb(pTHX_ const char* pat, ...) { }
-#endif
-
 extern regexp*	my_regcomp (pTHX_ char* exp, char* xend, PMOP* pm);
 extern I32	my_regexec (pTHX_ regexp* prog, char* stringarg, char* strend,
 			    char* strbeg, I32 minend, SV* screamer,
