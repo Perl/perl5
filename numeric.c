@@ -814,24 +814,38 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
     NV result = 0.0;
     char* s = (char*)orig;
 #ifdef USE_PERL_ATOF
+    UV accumulator = 0;
     bool negative = 0;
     char* send = s + strlen(orig) - 1;
-    bool seendigit = 0;
-    I32 expextra = 0;
+    bool seen_digit = 0;
+    I32 exp_adjust = 0;
+    I32 exp_acc = 0; 	/* the current exponent adjust for the accumulator */
     I32 exponent = 0;
-    I32 i;
-/* this is arbitrary */
-#define PARTLIM 6
-/* we want the largest integers we can usefully use */
-#if defined(HAS_QUAD) && defined(USE_64_BIT_INT)
-#   define PARTSIZE ((int)TYPE_DIGITS(U64)-1)
-    U64 part[PARTLIM];
-#else
-#   define PARTSIZE ((int)TYPE_DIGITS(U32)-1)
-    U32 part[PARTLIM];
-#endif
-    I32 ipart = 0;	/* index into part[] */
-    I32 offcount;	/* number of digits in least significant part */
+    I32	seen_dp  = 0;
+    I32 digit;
+    I32 sig_digits = 0; /* noof significant digits seen so far */
+
+/* There is no point in processing more significant digits
+ * than the NV can hold. Note that NV_DIG is a lower-bound value,
+ * while we need an upper-bound value. We add 2 to account for this;
+ * since it will have been conservative on both the first and last digit.
+ * For example a 32-bit mantissa with an exponent of 4 would have
+ * exact values in the set
+ *               4
+ *               8
+ *              ..
+ *     17179869172
+ *     17179869176
+ *     17179869180
+ *
+ * where for the purposes of calculating NV_DIG we would have to discount
+ * both the first and last digit, since neither can hold all values from
+ * 0..9; but for calculating the value we must examine those two digits.
+ */
+#define MAX_SIG_DIGITS (NV_DIG+2)
+
+/* the max number we can accumulate in a UV, and still safely do 10*N+9 */
+#define MAX_ACCUMULATE ( (UV) ((UV_MAX - 9)/10))
 
     /* leading whitespace */
     while (isSPACE(*s))
@@ -846,74 +860,54 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 	    ++s;
     }
 
-    part[0] = offcount = 0;
-    if (isDIGIT(*s)) {
-	seendigit = 1;	/* get this over with */
+    /* we accumulate digits into an integer; when this becomes too
+     * large, we add the total to NV and start again */
 
-	/* skip leading zeros */
-	while (*s == '0')
-	    ++s;
-    }
+    while (1) {
+	if (isDIGIT(*s)) {
+	    seen_digit = 1;
+	    digit = *s++ - '0';
+	    exp_adjust -= seen_dp;
 
-    /* integer digits */
-    while (isDIGIT(*s)) {
-	if (++offcount > PARTSIZE) {
-	    if (++ipart < PARTLIM) {
-		part[ipart] = 0;
-		offcount = 1;	/* ++0 */
-	    }
-	    else {
+	    /* don't start counting until we see the first significant
+	     * digit, eg the 5 in 0.00005... */
+	    if (!sig_digits && digit == 0)
+		continue;
+
+	    if (++sig_digits > MAX_SIG_DIGITS) {
 		/* limits of precision reached */
-		--ipart;
-		--offcount;
-		if (*s >= '5')
-		    ++part[ipart];
+		if (digit >= 5)
+		    ++accumulator;
+		++exp_adjust;
+		/* skip remaining digits */
 		while (isDIGIT(*s)) {
-		    ++expextra;
 		    ++s;
+		    exp_adjust += 1 - seen_dp;
 		}
 		/* warn of loss of precision? */
-		break;
+	    }
+	    else {
+		if (accumulator > MAX_ACCUMULATE) {
+		    /* add accumulator to result and start again */
+		    result = S_mulexp10(result, exp_acc) + (NV)accumulator;
+		    accumulator = 0;
+		    exp_acc = 0;
+		}
+		accumulator = accumulator * 10 + digit;
+		++exp_acc;
 	    }
 	}
-	part[ipart] = part[ipart] * 10 + (*s++ - '0');
-    }
-
-    /* decimal point */
-    if (GROK_NUMERIC_RADIX((const char **)&s, send)) {
-	if (isDIGIT(*s))
-	    seendigit = 1;	/* get this over with */
-
-	/* decimal digits */
-	while (isDIGIT(*s)) {
-	    if (++offcount > PARTSIZE) {
-		if (++ipart < PARTLIM) {
-		    part[ipart] = 0;
-		    offcount = 1;	/* ++0 */
-		}
-		else {
-		    /* limits of precision reached */
-		    --ipart;
-		    --offcount;
-		    if (*s >= '5')
-			++part[ipart];
-		    while (isDIGIT(*s))
-			++s;
-		    /* warn of loss of precision? */
-		    break;
-		}
-	    }
-	    --expextra;
-	    part[ipart] = part[ipart] * 10 + (*s++ - '0');
+	else if (!seen_dp && GROK_NUMERIC_RADIX((const char **)&s, send)) {
+	    seen_dp = 1;
+	}
+	else {
+	    break;
 	}
     }
 
-    /* combine components of mantissa */
-    for (i = 0; i <= ipart; ++i)
-	result += S_mulexp10((NV)part[ipart - i],
-		i ? offcount + (i - 1) * PARTSIZE : 0);
+    result = S_mulexp10(result, exp_acc) + (NV)accumulator;
 
-    if (seendigit && (*s == 'e' || *s == 'E')) {
+    if (seen_digit && (*s == 'e' || *s == 'E')) {
 	bool expnegative = 0;
 
 	++s;
@@ -931,7 +925,7 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
     }
 
     /* now apply the exponent */
-    exponent += expextra;
+    exponent += exp_adjust;
     result = S_mulexp10(result, exponent);
 
     /* now apply the sign */
