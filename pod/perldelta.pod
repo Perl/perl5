@@ -15,6 +15,9 @@ the 5.8.3 release.
 
 =head1 Utility Changes
 
+C<find2perl> now assumes C<-print> as a default action. It needed to be
+specified explicitly.
+
 =head1 New Documentation
 
 =head1 Performance Enhancements
