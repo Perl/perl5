@@ -1335,15 +1335,15 @@ yydestruct(ptr)
 void* ptr;
 {
     struct ysv* ysave = (struct ysv*)ptr;
-    if (ysave->yyss) safefree((char *)ysave->yyss);
-    if (ysave->yyvs) safefree((char *)ysave->yyvs);
+    if (ysave->yyss) Safefree(ysave->yyss);
+    if (ysave->yyvs) Safefree(ysave->yyvs);
     yydebug	= ysave->oldyydebug;
     yynerrs	= ysave->oldyynerrs;
     yyerrflag	= ysave->oldyyerrflag;
     yychar	= ysave->oldyychar;
     yyval	= ysave->oldyyval;
     yylval	= ysave->oldyylval;
-    safefree((char *)ysave);
+    Safefree(ysave);
 }
 
 int
