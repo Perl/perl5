@@ -81,17 +81,17 @@ case "$usethreads" in
 $define|true|[yY]*)
         ccflags="$ccflags -DNEED_PTHREAD_INIT"
         case "$cc" in
-        xlc_r | cc_r) ;;
+        xlc_r) ;;
         cc) 
 	    echo >&4 "Switching cc to xlc_r because of POSIX threads."
 	    cc=xlc_r
             ;;
-        '') 
+        '' | cc_r) 
 	    cc=xlc_r
             ;;
         *)
  	    cat >&4 <<EOM
-For pthreads you should use the AIX C compilers xlc_r or cc_r.
+For pthreads you should use the AIX C compiler xlc_r.
 (now your compiler was '$cc')
 Cannot continue, aborting.
 EOM
