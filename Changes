@@ -103,6 +103,76 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6984] By: jhi                                   on 2000/09/01  18:26:53
+        Log: Feature ordering tweak.
+     Branch: perl
+	   ! myconfig.SH
+____________________________________________________________________________
+[  6983] By: jhi                                   on 2000/09/01  18:19:50
+        Log: Subject: Re: [PATCH lib/overload.pm] Sanaty checking of arguments to overload::constant
+             From: <abigail@foad.org>
+             Date: Fri, 1 Sep 2000 13:07:32 -0400
+             Message-ID: <20000901170732.18249.qmail@foad.org>
+     Branch: perl
+	   ! t/pragma/overload.t
+____________________________________________________________________________
+[  6982] By: jhi                                   on 2000/09/01  18:17:54
+        Log: Rename the PRIElfbl, PRIX64, etc, to be PRIEUfldbl, PRIXU64,
+             so that case-ignoring systems like DCL can tell them from
+             PRIefldbl and PRIx64.  Apply Merijn's ccversion patches.
+     Branch: metaconfig/U/perl
+	   ! Checkcc.U gccvers.U longdblfio.U perlxvf.U quadfio.U
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! config_h.SH configure.com epoc/config.sh hints/aix.sh
+	   ! hints/dec_osf.sh hints/hpux.sh hints/irix_6.sh
+	   ! hints/solaris_2.sh myconfig.SH uconfig.h uconfig.sh
+	   ! vos/config.def vos/config.h vos/config_h.SH_orig
+	   ! win32/config.bc win32/config.gc win32/config.vc
+____________________________________________________________________________
+[  6981] By: nick                                  on 2000/09/01  17:21:57
+        Log: Document UNTIE. Also tweak implementation to suppress the 'inner references'
+             warning when UNTIE exists and instead pass the cound of extra references to
+             the UNTIE method.
+     Branch: perl
+	   ! pod/perltie.pod pp_sys.c
+____________________________________________________________________________
+[  6980] By: jhi                                   on 2000/09/01  16:54:44
+        Log: Subject: [PATCH: 6948] add SCNfldbl to configure.com
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Thu, 31 Aug 2000 18:47:18 -0700 (PDT)
+             Message-ID: <Pine.OSF.4.10.10008311811060.91659-100000@aspara.forte.com>
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[  6979] By: jhi                                   on 2000/09/01  16:06:20
+        Log: Subject: [ID 20000901.017] [PATCH] Basic test failure in an untidy world       
+             From: Mike Guy <mjtg@cam.ac.uk> 
+             Date: Fri, 01 Sep 2000 16:49:27 +0100
+             Message-Id: <E13Ut4J-0002sd-00@draco.cus.cam.ac.uk>  
+     Branch: perl
+	   ! t/base/rs.t
+____________________________________________________________________________
+[  6978] By: jhi                                   on 2000/09/01  16:00:42
+        Log: Update to PodParser 1.18, from Brad Appleton.
+     Branch: perl
+	   ! lib/Pod/Checker.pm t/pod/find.t
+____________________________________________________________________________
+[  6977] By: jhi                                   on 2000/09/01  14:48:58
+        Log: Subject: Nit in Configure (bleadperl@6961)
+             From: Lupe Christoph <lupe@lupe-christoph.de>
+             Date: Fri, 1 Sep 2000 16:34:29 +0200
+             Message-ID: <20000901163429.K13547@alanya.lupe-christoph.de>
+     Branch: metaconfig
+	   ! U/compline/ccflags.U
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[  6976] By: jhi                                   on 2000/09/01  14:39:52
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6975] By: jhi                                   on 2000/09/01  14:37:36
         Log: microperl config update.
      Branch: perl
