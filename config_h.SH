@@ -981,12 +981,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #define SH_PATH "$sh"  /**/
 
-/* STDCHAR:
- *	This symbol is defined to be the type of char used in stdio.h.
- *	It has the values "unsigned char" or "char".
- */
-#define STDCHAR $stdchar	/**/
-
 /* CROSSCOMPILE:
  *	This symbol, if defined, signifies that we our
  *	build process is a cross-compilation.
@@ -3210,6 +3204,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_setpgrp HAS_SETPGRP		/**/
 #$d_bsdsetpgrp USE_BSD_SETPGRP	/**/
+
+/* STDCHAR:
+ *	This symbol is defined to be the type of char used in stdio.h.
+ *	It has the values "unsigned char" or "char".
+ */
+#define STDCHAR $stdchar	/**/
 
 /* HAS__FWALK:
  *	This symbol, if defined, indicates that the _fwalk system call is

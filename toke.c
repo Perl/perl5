@@ -2864,7 +2864,7 @@ Perl_yylex(pTHX)
 		if (*s == '(' && ckWARN(WARN_AMBIGUOUS))
 		    Perl_warner(aTHX_ WARN_AMBIGUOUS,
 				"Ambiguous -%c() resolved as a file test",
-				tmp, tmp);
+				tmp);
 		FTST(ftst);
 	    }
 	    else {
