@@ -1249,7 +1249,7 @@ PP(pp_match)
 	    }
 	}
     }
-    if ((gimme != G_ARRAY && !global && rx->nparens)
+    if ((!global && rx->nparens)
 	    || SvTEMP(TARG) || PL_sawampersand)
 	r_flags |= REXEC_COPY_STR;
     if (SvSCREAM(TARG))

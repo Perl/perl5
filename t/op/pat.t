@@ -4,7 +4,7 @@
 # the format supported by op/regexp.t.  If you want to add a test
 # that does fit that format, add it to op/re_tests, not here.
 
-print "1..242\n";
+print "1..243\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -1203,3 +1203,10 @@ print "ok 241\n";
 print "not " unless tr/\x89-\x91//d == 1;
 print "ok 242\n";
 
+{
+  # japhy -- added 03/03/2001
+  () = (my $str = "abc") =~ /(...)/;
+  $str = "def";
+  print "not " if $1 ne "abc";
+  print "ok 243\n";
+}
