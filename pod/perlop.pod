@@ -694,9 +694,8 @@ from the next line.  This allows you to write:
     s {foo}  # Replace foo
       {bar}  # with bar.
 
-For constructs that do interpolate, variables beginning with "C<$>"
-or "C<@>" are interpolated, as are the following escape sequences.  Within
-a transliteration, the first eleven of these sequences may be used.
+The following escape sequences are available in constructs that interpolate
+and in transliterations.
 
     \t		tab             (HT, TAB)
     \n		newline         (NL)
@@ -710,6 +709,9 @@ a transliteration, the first eleven of these sequences may be used.
     \x{263a}	wide hex char	(SMILEY)
     \c[		control char    (ESC)
     \N{name}	named char
+
+The following escape sequences are available in constructs that interpolate
+but not in transliterations.
 
     \l		lowercase next char
     \u		uppercase next char
@@ -736,14 +738,15 @@ and although they often accept just C<"\012">, they seldom tolerate just
 C<"\015">.  If you get in the habit of using C<"\n"> for networking,
 you may be burned some day.
 
-Subscripted variables such as C<$a[3]> or C<$href->{key}[0]> are also
-interpolated, as are array and hash slices.    But method calls
-such as C<$obj->meth> are not interpolated.
+For constructs that do interpolate, variables beginning with "C<$>"
+or "C<@>" are interpolated.  Subscripted variables such as C<$a[3]> or
+C<$href->{key}[0]> are also interpolated, as are array and hash slices.
+But method calls such as C<$obj->meth> are not.
 
 Interpolating an array or slice interpolates the elements in order,
 separated by the value of C<$">, so is equivalent to interpolating
-C<join $", @array>.    "Punctuation" arrays such C<@+> are not
-interpolated.
+C<join $", @array>.    "Punctuation" arrays such as C<@+> are only
+interpolated if the name is enclosed in braces C<@{+}>.
 
 You cannot include a literal C<$> or C<@> within a C<\Q> sequence. 
 An unescaped C<$> or C<@> interpolates the corresponding variable, 
