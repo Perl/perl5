@@ -31,6 +31,149 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10021] By: jhi                                   on 2001/05/07  20:11:31
+        Log: Subject: [PATCH regcomp.c] Insecure regexes
+             From: Robin Houston <robin@kitsite.com>
+             Date: Mon, 7 May 2001 21:56:12 +0100
+             Message-ID: <20010507215612.A31114@penderel>
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 10020] By: jhi                                   on 2001/05/07  20:02:30
+        Log: Drop the foobar.perl.com references for now until Simon
+             gets them sorted out.
+     Branch: perl
+	   ! pod/perlfaq2.pod
+____________________________________________________________________________
+[ 10019] By: jhi                                   on 2001/05/07  19:54:33
+        Log: Subject: Re: RFC: changing Devel::SelfStubber to relinquish its grasp
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Mon, 7 May 2001 07:47:21 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0105070733080.13301-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! lib/Devel/SelfStubber.pm
+____________________________________________________________________________
+[ 10018] By: jhi                                   on 2001/05/07  19:53:10
+        Log: Subject: Re: [ID 20010506.022] Win32/Makefile problems in 5.7.1 
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Sun, 6 May 2001 21:34:56 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0105062131520.17625-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! win32/Makefile
+____________________________________________________________________________
+[ 10017] By: jhi                                   on 2001/05/07  19:35:10
+        Log: s/WebTechnique's/WebTechniques/
+     Branch: perl
+	   ! pod/perlfaq2.pod
+____________________________________________________________________________
+[ 10016] By: jhi                                   on 2001/05/07  12:26:29
+        Log: Llama 3 updates from Randal.
+     Branch: perl
+	   ! pod/perlfaq2.pod
+____________________________________________________________________________
+[ 10015] By: jhi                                   on 2001/05/07  01:34:38
+        Log: Subject: [PATCH] Help -Dt show correct pad variables
+             From: Benjamin Sugars <ben.sugars@home.com>
+             Date: Sun, 6 May 2001 12:54:13 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0105061142040.12858-100000@localhost.localdomain>
+     Branch: perl
+	   ! embed.h embed.pl proto.h run.c
+____________________________________________________________________________
+[ 10014] By: jhi                                   on 2001/05/07  01:23:56
+        Log: Subject: [PATCH] Document C<our $foo : shared>
+             From: Benjamin Sugars <ben.sugars@home.com>
+             Date: Sun, 6 May 2001 19:00:55 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.21.0105061847090.9500-100000@localhost.localdomain>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 10013] By: jhi                                   on 2001/05/07  01:22:22
+        Log: Subject: [PATCH B::Deparse] undefined folded constants
+             From: Robin Houston <robin@kitsite.com>
+             Date: Sun, 6 May 2001 17:19:09 +0100
+             Message-ID: <20010506171909.A7046@penderel>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 10012] By: jhi                                   on 2001/05/07  00:57:38
+        Log: Subject: [PATCH B::Deparse] use Foo (sub {...});
+             From: Robin Houston <robin@kitsite.com>
+             Message-ID: <20010506164654.A6848@penderel>
+             Date: Sun, 6 May 2001 16:46:54 +0100
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[ 10011] By: jhi                                   on 2001/05/07  00:52:18
+        Log: Subject: [PATCH t/op/my_stash.t] Naughty?
+             From: Robin Houston <robin@kitsite.com>
+             Date: Sun, 6 May 2001 14:47:02 +0100
+             Message-ID: <20010506144702.A6308@penderel>
+     Branch: perl
+	   ! t/op/my_stash.t
+____________________________________________________________________________
+[ 10010] By: jhi                                   on 2001/05/06  15:07:51
+        Log: Subject: Perl book, magazine and website updates.
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Sun, 6 May 2001 16:55:36 +0100
+             Message-ID: <20010506165536.A1795@netthink.co.uk>
+     Branch: perl
+	   ! pod/perlbook.pod pod/perlfaq2.pod
+____________________________________________________________________________
+[ 10009] By: jhi                                   on 2001/05/06  14:11:40
+        Log: Tweaks on the Tru64 prof options.
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[ 10008] By: jhi                                   on 2001/05/06  13:51:49
+        Log: Subject: [PATCH t/pod/testp2pt.pl] Give deparse tester a chance
+             From: Robin Houston <robin@kitsite.com>
+             Date: Sun, 6 May 2001 14:40:51 +0100
+             Message-ID: <20010506144051.A6279@penderel>
+     Branch: perl
+	   ! t/pod/testp2pt.pl
+____________________________________________________________________________
+[ 10007] By: jhi                                   on 2001/05/06  13:49:31
+        Log: Subject: [PATCH B::Deparse] scoping
+             From: Robin Houston <robin@kitsite.com>
+             Date: Sun, 6 May 2001 14:36:56 +0100
+             Message-ID: <20010506143656.A4006@penderel>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm ext/B/defsubs_h.PL t/lib/b-deparse.t
+____________________________________________________________________________
+[ 10006] By: jhi                                   on 2001/05/06  13:24:12
+        Log: Document the undefinedness of bitshifting out of range.
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[ 10005] By: jhi                                   on 2001/05/06  13:03:17
+        Log: Retract #10003 and update the IDE descriptions a bit.
+     Branch: perl
+	   ! pod/perlfaq3.pod
+____________________________________________________________________________
+[ 10004] By: jhi                                   on 2001/05/06  03:02:41
+        Log: Subject: [PATCH: perl@10001] win32 update (VC,Borland,gcc), nmake update
+             From: Prymmer/Kahn <pvhp@best.com>
+             Date: Sat, 5 May 2001 20:30:49 -0700 (PDT)
+             Message-ID: <Pine.BSF.4.21.0105052017370.3961-100000@shell8.ba.best.com>
+     Branch: perl
+	   ! win32/Makefile win32/buildext.pl win32/config.bc
+	   ! win32/config.gc win32/config.vc
+____________________________________________________________________________
+[ 10003] By: jhi                                   on 2001/05/05  20:24:44
+        Log: (Retracted by #10005.)
+     Branch: perl
+	   ! pod/perlfaq3.pod
+____________________________________________________________________________
+[ 10002] By: jhi                                   on 2001/05/05  19:23:36
+        Log: It's "psed", not "sed".
+     Branch: perl
+	   ! x2p/s2p.PL
+____________________________________________________________________________
+[ 10001] By: jhi                                   on 2001/05/05  18:35:38
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10000] By: jhi                                   on 2001/05/05  18:32:15
         Log: Subject: Re: bleadperl make install fails due to "psed"
              From: andreas.koenig@anima.de (Andreas J. Koenig)
