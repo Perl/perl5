@@ -2997,9 +2997,8 @@ a block by itself.
 
 =item stat() on unopened filehandle %s
 
-(W unopened) You tried to use the stat() function (or an equivalent file
-test) on a filehandle that was either never opened or has since been
-closed.
+(W unopened) You tried to use the stat() function on a filehandle that
+was either never opened or has since been closed.
 
 =item Strange *+?{} on zero-length expression
 
