@@ -154,7 +154,11 @@ Perl_eval_mutex
 Perl_eval_cond
 Perl_eval_owner
 Perl_threads_mutex
+Perl_new_struct_thread
+Perl_nthreads
 Perl_nthreads_cond
+Perl_per_thread_magicals
+Perl_thrsv
 Perl_unlock_condpair
 Perl_vtbl_mutex
 Perl_magic_mutexfree
@@ -347,6 +351,7 @@ win32_sendto
 win32_recv
 win32_recvfrom
 win32_shutdown
+win32_closesocket
 win32_ioctlsocket
 win32_setsockopt
 win32_getsockopt
@@ -390,8 +395,11 @@ win32_malloc
 win32_calloc
 win32_realloc
 win32_free
-win32stdio
+win32_sleep
+win32_times
+win32_alarm
+win32_open_osfhandle
+win32_get_osfhandle
 Perl_win32_init
+Perl_init_os_extras
 RunPerl
-SetIOSubSystem
-GetIOSubSystem

@@ -986,6 +986,7 @@ pp_system
 pp_syswrite
 pp_tell
 pp_telldir
+pp_threadsv
 pp_tie
 pp_tied
 pp_time

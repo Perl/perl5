@@ -1277,6 +1277,7 @@
 #define formfeed		(curinterp->Iformfeed)
 #define formtarget		(curinterp->Iformtarget)
 #define gensym			(curinterp->Igensym)
+#define globalstash		(curinterp->Iglobalstash)
 #define in_eval			(curinterp->Iin_eval)
 #define incgv			(curinterp->Iincgv)
 #define initav			(curinterp->Iinitav)
@@ -1330,7 +1331,6 @@
 #define restartop		(curinterp->Irestartop)
 #define rightgv			(curinterp->Irightgv)
 #define rs			(curinterp->Irs)
-#define runlevel		(curinterp->Irunlevel)
 #define sawampersand		(curinterp->Isawampersand)
 #define sawstudy		(curinterp->Isawstudy)
 #define sawvec			(curinterp->Isawvec)
@@ -1429,6 +1429,7 @@
 #define Iformfeed		formfeed
 #define Iformtarget		formtarget
 #define Igensym			gensym
+#define Iglobalstash		globalstash
 #define Iin_eval		in_eval
 #define Iincgv			incgv
 #define Iinitav			initav
@@ -1482,7 +1483,6 @@
 #define Irestartop		restartop
 #define Irightgv		rightgv
 #define Irs			rs
-#define Irunlevel		runlevel
 #define Isawampersand		sawampersand
 #define Isawstudy		sawstudy
 #define Isawvec			sawvec
@@ -1590,6 +1590,7 @@
 #define formfeed		Perl_formfeed
 #define formtarget		Perl_formtarget
 #define gensym			Perl_gensym
+#define globalstash		Perl_globalstash
 #define in_eval			Perl_in_eval
 #define incgv			Perl_incgv
 #define initav			Perl_initav
@@ -1643,7 +1644,6 @@
 #define restartop		Perl_restartop
 #define rightgv			Perl_rightgv
 #define rs			Perl_rs
-#define runlevel		Perl_runlevel
 #define sawampersand		Perl_sawampersand
 #define sawstudy		Perl_sawstudy
 #define sawvec			Perl_sawvec

@@ -10,13 +10,6 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-#undef EXTERN_C
-#ifdef __cplusplus
-#  define EXTERN_C extern "C"
-#else
-#  define EXTERN_C extern
-#endif
-
 static void xs_init _((void));
 static PerlInterpreter *my_perl;
 

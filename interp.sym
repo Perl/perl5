@@ -57,6 +57,7 @@ forkprocess
 formfeed
 formtarget
 gensym
+globalstash
 in_eval
 incgv
 initav
@@ -110,7 +111,6 @@ preprocess
 restartop
 rightgv
 rs
-runlevel
 sawampersand
 sawstudy
 sawvec

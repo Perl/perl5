@@ -2055,20 +2055,18 @@ docatch(OP *o)
 {
     dTHR;
     int ret;
-    I32 oldrunlevel = runlevel;
     OP *oldop = op;
     dJMPENV;
 
     op = o;
 #ifdef DEBUGGING
     assert(CATCH_GET == TRUE);
-    DEBUG_l(deb("(Setting up local jumplevel, runlevel = %ld)\n", (long)runlevel+1));
+    DEBUG_l(deb("Setting up local jumplevel %p, was %p\n", &cur_env, top_env));
 #endif
     JMPENV_PUSH(ret);
     switch (ret) {
     default:				/* topmost level handles it */
 	JMPENV_POP;
-	runlevel = oldrunlevel;
 	op = oldop;
 	JMPENV_JUMP(ret);
 	/* NOTREACHED */
@@ -2085,7 +2083,6 @@ docatch(OP *o)
 	break;
     }
     JMPENV_POP;
-    runlevel = oldrunlevel;
     op = oldop;
     return Nullop;
 }

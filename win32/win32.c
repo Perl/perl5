@@ -30,17 +30,11 @@
 #include <stdarg.h>
 #include <float.h>
 
-#define CROAK croak
-#define WARN warn
-
 #define EXECF_EXEC 1
 #define EXECF_SPAWN 2
 #define EXECF_SPAWN_NOWAIT 3
 
 static DWORD IdOS(void);
-
-extern WIN32_IOSUBSYSTEM	win32stdio;
-static PWIN32_IOSUBSYSTEM pIOSubSystem = &win32stdio;
 
 BOOL  ProbeEnv = FALSE;
 DWORD Win32System = (DWORD)-1;
@@ -58,29 +52,6 @@ IsWin95(void) {
 int
 IsWinNT(void) {
     return (IdOS() == VER_PLATFORM_WIN32_NT);
-}
-
-DllExport PWIN32_IOSUBSYSTEM
-SetIOSubSystem(void *p)
-{
-    PWIN32_IOSUBSYSTEM old = pIOSubSystem;
-    if (p) {
-	PWIN32_IOSUBSYSTEM pio = (PWIN32_IOSUBSYSTEM)p;
-	if (pio->signature_begin == 12345678L
-	    && pio->signature_end == 87654321L) {
-	    pIOSubSystem = pio;
-	}
-    }
-    else {
-	pIOSubSystem = &win32stdio;
-    }
-    return old;
-}
-
-DllExport PWIN32_IOSUBSYSTEM
-GetIOSubSystem(void)
-{
-    return pIOSubSystem;
 }
 
 char *
@@ -168,156 +139,12 @@ my_popen(char *cmd, char *mode)
 #else
 #define fixcmd(x)
 #endif
-
-#if 1
-/* was #ifndef PERLDLL, but the #else stuff doesn't work on NT
- * GSAR 97/03/13
- */
     fixcmd(cmd);
 #ifdef __BORLANDC__ /* workaround a Borland stdio bug */
     win32_fflush(stdout);
     win32_fflush(stderr);
 #endif
     return win32_popen(cmd, mode);
-#else
-/*
- * There seems to be some problems for the _popen call in a DLL
- * this trick at the moment seems to work but it is never test
- * on NT yet
- *
- */ 
-#	ifdef __cplusplus
-#define EXT_C_FUNC	extern "C"
-#	else
-#define EXT_C_FUNC	extern
-#	endif
-
-    EXT_C_FUNC int __cdecl _set_osfhnd(int fh, long value);
-    EXT_C_FUNC void __cdecl _lock_fhandle(int);
-    EXT_C_FUNC void __cdecl _unlock_fhandle(int);
-
-    BOOL	fSuccess;
-    PerlIO	*pf;		/* to store the _popen return value */
-    int		tm = 0;		/* flag indicating tDllExport or binary mode */
-    int		fhNeeded, fhInherited, fhDup;
-    int		ineeded, iinherited;
-    DWORD	dwDup;
-    int		phdls[2];	/* I/O handles for pipe */
-    HANDLE	hPIn, hPOut, hPErr,
-		hSaveStdin, hSaveStdout, hSaveStderr,
-		hPNeeded, hPInherited, hPDuped;
-     
-    /* first check for errors in the arguments */
-    if ( (cmd == NULL) || (mode == NULL)
-	 || ((*mode != 'w') && (*mode != _T('r'))) )
-	goto error1;
-
-    if ( *(mode + 1) == _T('t') )
-	tm = O_TEXT;
-    else if ( *(mode + 1) == _T('b') )
-	tm = O_BINARY;
-    else
-	tm = (*mode == 'w' ? O_BINARY : O_TEXT);
-
-
-    fixcmd(cmd);
-    if (&win32stdio != pIOSubSystem)
-	return win32_popen(cmd, mode);
-
-#ifdef EFG
-    if ( _pipe( phdls, 1024, tm ) == -1 )
-#else
-    if ( win32_pipe( phdls, 1024, tm ) == -1 )
-#endif
-	goto error1;
-
-    /* save the current situation */
-    hSaveStdin = GetStdHandle(STD_INPUT_HANDLE); 
-    hSaveStdout = GetStdHandle(STD_OUTPUT_HANDLE); 
-    hSaveStderr = GetStdHandle(STD_ERROR_HANDLE); 
-
-    if (*mode == _T('w')) {
-	ineeded = 1;
-	dwDup	= STD_INPUT_HANDLE;
-	iinherited = 0;
-    }
-    else {
-	ineeded = 0;
-	dwDup	= STD_OUTPUT_HANDLE;
-	iinherited = 1;
-    }
-
-    fhNeeded = phdls[ineeded];
-    fhInherited = phdls[iinherited];
-
-    fSuccess = DuplicateHandle(GetCurrentProcess(), 
-			       (HANDLE) stolen_get_osfhandle(fhNeeded), 
-			       GetCurrentProcess(), 
-			       &hPNeeded, 
-			       0, 
-			       FALSE,       /* not inherited */ 
-			       DUPLICATE_SAME_ACCESS); 
-
-    if (!fSuccess)
-	goto error2;
-
-    fhDup = stolen_open_osfhandle((long) hPNeeded, tm);
-    win32_dup2(fhDup, fhNeeded);
-    win32_close(fhDup);
-
-#ifdef AAA
-    /* Close the Out pipe, child won't need it */
-    hPDuped = (HANDLE) stolen_get_osfhandle(fhNeeded);
-
-    _lock_fhandle(fhNeeded);
-    _set_osfhnd(fhNeeded, (long)hPNeeded); /* put in ours duplicated one */
-    _unlock_fhandle(fhNeeded);
-
-    CloseHandle(hPDuped);	/* close the handle first */
-#endif
-
-    if (!SetStdHandle(dwDup, (HANDLE) stolen_get_osfhandle(fhInherited)))
-	goto error2;
-
-    /*
-     * make sure the child see the same stderr as the calling program
-     */
-    if (!SetStdHandle(STD_ERROR_HANDLE,
-		      (HANDLE)stolen_get_osfhandle(win32_fileno(win32_stderr()))))
-	goto error2;
-
-    pf = win32_popen(cmd, mode);	/* ask _popen to do the job */
-
-    /* restore to where we were */
-    SetStdHandle(STD_INPUT_HANDLE, hSaveStdin);
-    SetStdHandle(STD_OUTPUT_HANDLE, hSaveStdout);
-    SetStdHandle(STD_ERROR_HANDLE, hSaveStderr);
-
-    /* we don't need it any more, that's for the child */
-    win32_close(fhInherited);
-
-    if (NULL == pf) {
-	/* something wrong */
-	win32_close(fhNeeded);
-	goto error1;
-    }
-    else {
-	/*
-	 * here we steal the file handle in pf and stuff ours in
-	 */
-	win32_dup2(fhNeeded, win32_fileno(pf));
-	win32_close(fhNeeded);
-    }
-    return (pf);
-
-error2:
-    win32_close(fhNeeded);
-    win32_close(fhInherited);
-
-error1:
-    return (NULL);
-
-#endif
 }
 
 long
@@ -566,7 +393,7 @@ opendir(char *filename)
     idx = strlen(FindData.cFileName)+1;
     New(1304, p->start, idx, char);
     if(p->start == NULL) {
-	CROAK("opendir: malloc failed!\n");
+	croak("opendir: malloc failed!\n");
     }
     strcpy(p->start, FindData.cFileName);
 /*  if(downcase)
@@ -586,7 +413,7 @@ opendir(char *filename)
 	 */
 	Renew(p->start, idx+len+1, char);
 	if(p->start == NULL) {
-	    CROAK("opendir: malloc failed!\n");
+	    croak("opendir: malloc failed!\n");
 	}
 	strcpy(&p->start[idx], FindData.cFileName);
 /*	if (downcase) 
@@ -725,11 +552,11 @@ kill(int pid, int sig)
     HANDLE hProcess= OpenProcess(PROCESS_ALL_ACCESS, TRUE, pid);
 
     if (hProcess == NULL) {
-	CROAK("kill process failed!\n");
+	croak("kill process failed!\n");
     }
     else {
 	if (!TerminateProcess(hProcess, sig))
-	    CROAK("kill process failed!\n");
+	    croak("kill process failed!\n");
 	CloseHandle(hProcess);
     }
     return 0;
@@ -743,30 +570,17 @@ kill(int pid, int sig)
 int
 ioctl(int i, unsigned int u, char *data)
 {
-    CROAK("ioctl not implemented!\n");
+    croak("ioctl not implemented!\n");
     return -1;
 }
 #endif
 
-unsigned int
-sleep(unsigned int t)
+DllExport unsigned int
+win32_sleep(unsigned int t)
 {
     Sleep(t*1000);
     return 0;
 }
-
-
-#undef rename
-
-int
-myrename(char *OldFileName, char *newname)
-{
-    if(_access(newname, 0) != -1) {	/* file exists */
-	_unlink(newname);
-    }
-    return rename(OldFileName, newname);
-}
-
 
 DllExport int
 win32_stat(const char *path, struct stat *buffer)
@@ -787,7 +601,7 @@ win32_stat(const char *path, struct stat *buffer)
 	    };
 	}
     }
-    res = pIOSubSystem->pfnstat(p,buffer);
+    res = stat(p,buffer);
 #ifdef __BORLANDC__
     if (res == 0) {
 	if (S_ISDIR(buffer->st_mode))
@@ -843,9 +657,8 @@ FileTimeToClock(PFILETIME ft)
  return (long) qw;
 }
 
-#undef times
-int
-mytimes(struct tms *timebuf)
+DllExport int
+win32_times(struct tms *timebuf)
 {
     FILETIME user;
     FILETIME kernel;
@@ -878,9 +691,8 @@ static VOID CALLBACK TimerProc(HWND win, UINT msg, UINT id, DWORD time)
  sighandler(14);
 }
 
-#undef alarm
-unsigned int
-myalarm(unsigned int sec)
+DllExport unsigned int
+win32_alarm(unsigned int sec)
 {
     /* 
      * the 'obvious' implentation is SetTimer() with a callback
@@ -908,6 +720,154 @@ myalarm(unsigned int sec)
     return 0;
 }
 
+#ifdef USE_FIXED_OSFHANDLE
+
+EXTERN_C int __cdecl _alloc_osfhnd(void);
+EXTERN_C int __cdecl _set_osfhnd(int fh, long value);
+EXTERN_C void __cdecl _lock_fhandle(int);
+EXTERN_C void __cdecl _unlock_fhandle(int);
+EXTERN_C void __cdecl _unlock(int);
+
+#if	(_MSC_VER >= 1000)
+typedef struct	{
+    long osfhnd;    /* underlying OS file HANDLE */
+    char osfile;    /* attributes of file (e.g., open in text mode?) */
+    char pipech;    /* one char buffer for handles opened on pipes */
+#if defined (_MT) && !defined (DLL_FOR_WIN32S)
+    int lockinitflag;
+    CRITICAL_SECTION lock;
+#endif  /* defined (_MT) && !defined (DLL_FOR_WIN32S) */
+}	ioinfo;
+
+EXTERN_C ioinfo * __pioinfo[];
+
+#define IOINFO_L2E			5
+#define IOINFO_ARRAY_ELTS	(1 << IOINFO_L2E)
+#define _pioinfo(i)	(__pioinfo[i >> IOINFO_L2E] + (i & (IOINFO_ARRAY_ELTS - 1)))
+#define _osfile(i)	(_pioinfo(i)->osfile)
+
+#else	/* (_MSC_VER >= 1000) */
+extern char _osfile[];
+#endif	/* (_MSC_VER >= 1000) */
+
+#define FOPEN			0x01	/* file handle open */
+#define FAPPEND			0x20	/* file handle opened O_APPEND */
+#define FDEV			0x40	/* file handle refers to device */
+#define FTEXT			0x80	/* file handle is in text mode */
+
+#define _STREAM_LOCKS   26		/* Table of stream locks */
+#define _LAST_STREAM_LOCK  (_STREAM_LOCKS+_NSTREAM_-1)	/* Last stream lock */
+#define _FH_LOCKS          (_LAST_STREAM_LOCK+1)	/* Table of fh locks */
+
+/***
+*int my_open_osfhandle(long osfhandle, int flags) - open C Runtime file handle
+*
+*Purpose:
+*       This function allocates a free C Runtime file handle and associates
+*       it with the Win32 HANDLE specified by the first parameter. This is a
+*		temperary fix for WIN95's brain damage GetFileType() error on socket
+*		we just bypass that call for socket
+*
+*Entry:
+*       long osfhandle - Win32 HANDLE to associate with C Runtime file handle.
+*       int flags      - flags to associate with C Runtime file handle.
+*
+*Exit:
+*       returns index of entry in fh, if successful
+*       return -1, if no free entry is found
+*
+*Exceptions:
+*
+*******************************************************************************/
+
+static int
+my_open_osfhandle(long osfhandle, int flags)
+{
+    int fh;
+    char fileflags;		/* _osfile flags */
+
+    /* copy relevant flags from second parameter */
+    fileflags = FDEV;
+
+    if(flags & O_APPEND)
+	fileflags |= FAPPEND;
+
+    if(flags & O_TEXT)
+	fileflags |= FTEXT;
+
+    /* attempt to allocate a C Runtime file handle */
+    if((fh = _alloc_osfhnd()) == -1) {
+	errno = EMFILE;		/* too many open files */
+	_doserrno = 0L;		/* not an OS error */
+	return -1;		/* return error to caller */
+    }
+
+    /* the file is open. now, set the info in _osfhnd array */
+    _set_osfhnd(fh, osfhandle);
+
+    fileflags |= FOPEN;		/* mark as open */
+
+#if (_MSC_VER >= 1000)
+    _osfile(fh) = fileflags;	/* set osfile entry */
+    _unlock_fhandle(fh);
+#else
+    _osfile[fh] = fileflags;	/* set osfile entry */
+    _unlock(fh+_FH_LOCKS);		/* unlock handle */
+#endif
+
+    return fh;			/* return handle */
+}
+
+#define _open_osfhandle my_open_osfhandle
+#endif	/* USE_FIXED_OSFHANDLE */
+
+/* simulate flock by locking a range on the file */
+
+#define LK_ERR(f,i)	((f) ? (i = 0) : (errno = GetLastError()))
+#define LK_LEN		0xffff0000
+
+DllExport int
+win32_flock(int fd, int oper)
+{
+    OVERLAPPED o;
+    int i = -1;
+    HANDLE fh;
+
+    if (!IsWinNT()) {
+	croak("flock() unimplemented on this platform");
+	return -1;
+    }
+    fh = (HANDLE)_get_osfhandle(fd);
+    memset(&o, 0, sizeof(o));
+
+    switch(oper) {
+    case LOCK_SH:		/* shared lock */
+	LK_ERR(LockFileEx(fh, 0, 0, LK_LEN, 0, &o),i);
+	break;
+    case LOCK_EX:		/* exclusive lock */
+	LK_ERR(LockFileEx(fh, LOCKFILE_EXCLUSIVE_LOCK, 0, LK_LEN, 0, &o),i);
+	break;
+    case LOCK_SH|LOCK_NB:	/* non-blocking shared lock */
+	LK_ERR(LockFileEx(fh, LOCKFILE_FAIL_IMMEDIATELY, 0, LK_LEN, 0, &o),i);
+	break;
+    case LOCK_EX|LOCK_NB:	/* non-blocking exclusive lock */
+	LK_ERR(LockFileEx(fh,
+		       LOCKFILE_EXCLUSIVE_LOCK|LOCKFILE_FAIL_IMMEDIATELY,
+		       0, LK_LEN, 0, &o),i);
+	break;
+    case LOCK_UN:		/* unlock lock */
+	LK_ERR(UnlockFileEx(fh, 0, LK_LEN, 0, &o),i);
+	break;
+    default:			/* unknown */
+	errno = EINVAL;
+	break;
+    }
+    return i;
+}
+
+#undef LK_ERR
+#undef LK_LEN
+
 /*
  *  redirected io subsystem for all XS modules
  *
@@ -916,45 +876,45 @@ myalarm(unsigned int sec)
 DllExport int *
 win32_errno(void)
 {
-    return (pIOSubSystem->pfnerrno());
+    return (&errno);
 }
 
 DllExport char ***
 win32_environ(void)
 {
-    return (pIOSubSystem->pfnenviron());
+    return (&(_environ));
 }
 
 /* the rest are the remapped stdio routines */
 DllExport FILE *
 win32_stderr(void)
 {
-    return (pIOSubSystem->pfnstderr());
+    return (stderr);
 }
 
 DllExport FILE *
 win32_stdin(void)
 {
-    return (pIOSubSystem->pfnstdin());
+    return (stdin);
 }
 
 DllExport FILE *
 win32_stdout()
 {
-    return (pIOSubSystem->pfnstdout());
+    return (stdout);
 }
 
 DllExport int
 win32_ferror(FILE *fp)
 {
-    return (pIOSubSystem->pfnferror(fp));
+    return (ferror(fp));
 }
 
 
 DllExport int
 win32_feof(FILE *fp)
 {
-    return (pIOSubSystem->pfnfeof(fp));
+    return (feof(fp));
 }
 
 /*
@@ -983,7 +943,7 @@ win32_strerror(int e)
 
 	return strerror_buffer;
     }
-    return pIOSubSystem->pfnstrerror(e);
+    return strerror(e);
 }
 
 DllExport int
@@ -992,7 +952,7 @@ win32_fprintf(FILE *fp, const char *format, ...)
     va_list marker;
     va_start(marker, format);     /* Initialize variable arguments. */
 
-    return (pIOSubSystem->pfnvfprintf(fp, format, marker));
+    return (vfprintf(fp, format, marker));
 }
 
 DllExport int
@@ -1001,188 +961,193 @@ win32_printf(const char *format, ...)
     va_list marker;
     va_start(marker, format);     /* Initialize variable arguments. */
 
-    return (pIOSubSystem->pfnvprintf(format, marker));
+    return (vprintf(format, marker));
 }
 
 DllExport int
 win32_vfprintf(FILE *fp, const char *format, va_list args)
 {
-    return (pIOSubSystem->pfnvfprintf(fp, format, args));
+    return (vfprintf(fp, format, args));
 }
 
 DllExport int
 win32_vprintf(const char *format, va_list args)
 {
-    return (pIOSubSystem->pfnvprintf(format, args));
+    return (vprintf(format, args));
 }
 
 DllExport size_t
 win32_fread(void *buf, size_t size, size_t count, FILE *fp)
 {
-    return pIOSubSystem->pfnfread(buf, size, count, fp);
+    return fread(buf, size, count, fp);
 }
 
 DllExport size_t
 win32_fwrite(const void *buf, size_t size, size_t count, FILE *fp)
 {
-    return pIOSubSystem->pfnfwrite(buf, size, count, fp);
+    return fwrite(buf, size, count, fp);
 }
 
 DllExport FILE *
 win32_fopen(const char *filename, const char *mode)
 {
     if (stricmp(filename, "/dev/null")==0)
-	return pIOSubSystem->pfnfopen("NUL", mode);
-    return pIOSubSystem->pfnfopen(filename, mode);
+	return fopen("NUL", mode);
+    return fopen(filename, mode);
 }
+
+#ifndef USE_SOCKETS_AS_HANDLES
+#undef fdopen
+#define fdopen my_fdopen
+#endif
 
 DllExport FILE *
 win32_fdopen( int handle, const char *mode)
 {
-    return pIOSubSystem->pfnfdopen(handle, (char *) mode);
+    return fdopen(handle, (char *) mode);
 }
 
 DllExport FILE *
 win32_freopen( const char *path, const char *mode, FILE *stream)
 {
     if (stricmp(path, "/dev/null")==0)
-	return pIOSubSystem->pfnfreopen("NUL", mode, stream);
-    return pIOSubSystem->pfnfreopen(path, mode, stream);
+	return freopen("NUL", mode, stream);
+    return freopen(path, mode, stream);
 }
 
 DllExport int
 win32_fclose(FILE *pf)
 {
-    return pIOSubSystem->pfnfclose(pf);
+    return my_fclose(pf);	/* defined in win32sck.c */
 }
 
 DllExport int
 win32_fputs(const char *s,FILE *pf)
 {
-    return pIOSubSystem->pfnfputs(s, pf);
+    return fputs(s, pf);
 }
 
 DllExport int
 win32_fputc(int c,FILE *pf)
 {
-    return pIOSubSystem->pfnfputc(c,pf);
+    return fputc(c,pf);
 }
 
 DllExport int
 win32_ungetc(int c,FILE *pf)
 {
-    return pIOSubSystem->pfnungetc(c,pf);
+    return ungetc(c,pf);
 }
 
 DllExport int
 win32_getc(FILE *pf)
 {
-    return pIOSubSystem->pfngetc(pf);
+    return getc(pf);
 }
 
 DllExport int
 win32_fileno(FILE *pf)
 {
-    return pIOSubSystem->pfnfileno(pf);
+    return fileno(pf);
 }
 
 DllExport void
 win32_clearerr(FILE *pf)
 {
-    pIOSubSystem->pfnclearerr(pf);
+    clearerr(pf);
     return;
 }
 
 DllExport int
 win32_fflush(FILE *pf)
 {
-    return pIOSubSystem->pfnfflush(pf);
+    return fflush(pf);
 }
 
 DllExport long
 win32_ftell(FILE *pf)
 {
-    return pIOSubSystem->pfnftell(pf);
+    return ftell(pf);
 }
 
 DllExport int
 win32_fseek(FILE *pf,long offset,int origin)
 {
-    return pIOSubSystem->pfnfseek(pf, offset, origin);
+    return fseek(pf, offset, origin);
 }
 
 DllExport int
 win32_fgetpos(FILE *pf,fpos_t *p)
 {
-    return pIOSubSystem->pfnfgetpos(pf, p);
+    return fgetpos(pf, p);
 }
 
 DllExport int
 win32_fsetpos(FILE *pf,const fpos_t *p)
 {
-    return pIOSubSystem->pfnfsetpos(pf, p);
+    return fsetpos(pf, p);
 }
 
 DllExport void
 win32_rewind(FILE *pf)
 {
-    pIOSubSystem->pfnrewind(pf);
+    rewind(pf);
     return;
 }
 
 DllExport FILE*
 win32_tmpfile(void)
 {
-    return pIOSubSystem->pfntmpfile();
+    return tmpfile();
 }
 
 DllExport void
 win32_abort(void)
 {
-    pIOSubSystem->pfnabort();
+    abort();
     return;
 }
 
 DllExport int
 win32_fstat(int fd,struct stat *bufptr)
 {
-    return pIOSubSystem->pfnfstat(fd,bufptr);
+    return fstat(fd,bufptr);
 }
 
 DllExport int
 win32_pipe(int *pfd, unsigned int size, int mode)
 {
-    return pIOSubSystem->pfnpipe(pfd, size, mode);
+    return _pipe(pfd, size, mode);
 }
 
 DllExport FILE*
 win32_popen(const char *command, const char *mode)
 {
-    return pIOSubSystem->pfnpopen(command, mode);
+    return _popen(command, mode);
 }
 
 DllExport int
 win32_pclose(FILE *pf)
 {
-    return pIOSubSystem->pfnpclose(pf);
+    return _pclose(pf);
 }
 
 DllExport int
 win32_setmode(int fd, int mode)
 {
-    return pIOSubSystem->pfnsetmode(fd, mode);
+    return setmode(fd, mode);
 }
 
 DllExport long
 win32_lseek(int fd, long offset, int origin)
 {
-    return pIOSubSystem->pfnlseek(fd, offset, origin);
+    return lseek(fd, offset, origin);
 }
 
 DllExport long
 win32_tell(int fd)
 {
-    return pIOSubSystem->pfntell(fd);
+    return tell(fd);
 }
 
 DllExport int
@@ -1196,197 +1161,187 @@ win32_open(const char *path, int flag, ...)
     va_end(ap);
 
     if (stricmp(path, "/dev/null")==0)
-	return pIOSubSystem->pfnopen("NUL", flag, pmode);
-    return pIOSubSystem->pfnopen(path,flag,pmode);
+	return open("NUL", flag, pmode);
+    return open(path,flag,pmode);
 }
 
 DllExport int
 win32_close(int fd)
 {
-    return pIOSubSystem->pfnclose(fd);
+    return close(fd);
 }
 
 DllExport int
 win32_eof(int fd)
 {
-    return pIOSubSystem->pfneof(fd);
+    return eof(fd);
 }
 
 DllExport int
 win32_dup(int fd)
 {
-    return pIOSubSystem->pfndup(fd);
+    return dup(fd);
 }
 
 DllExport int
 win32_dup2(int fd1,int fd2)
 {
-    return pIOSubSystem->pfndup2(fd1,fd2);
+    return dup2(fd1,fd2);
 }
 
 DllExport int
 win32_read(int fd, void *buf, unsigned int cnt)
 {
-    return pIOSubSystem->pfnread(fd, buf, cnt);
+    return read(fd, buf, cnt);
 }
 
 DllExport int
 win32_write(int fd, const void *buf, unsigned int cnt)
 {
-    return pIOSubSystem->pfnwrite(fd, buf, cnt);
+    return write(fd, buf, cnt);
 }
 
 DllExport int
 win32_mkdir(const char *dir, int mode)
 {
-    return pIOSubSystem->pfnmkdir(dir); /* just ignore mode */
+    return mkdir(dir); /* just ignore mode */
 }
 
 DllExport int
 win32_rmdir(const char *dir)
 {
-    return pIOSubSystem->pfnrmdir(dir);
+    return rmdir(dir);
 }
 
 DllExport int
 win32_chdir(const char *dir)
 {
-    return pIOSubSystem->pfnchdir(dir);
+    return chdir(dir);
 }
 
 DllExport int
 win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
 {
-    return pIOSubSystem->pfnspawnvp(mode, cmdname, (char * const *) argv);
+    return spawnvp(mode, cmdname, (char * const *) argv);
 }
 
 DllExport int
 win32_execvp(const char *cmdname, const char *const *argv)
 {
-    return pIOSubSystem->pfnexecvp(cmdname, (char *const *)argv);
+    return execvp(cmdname, (char *const *)argv);
 }
 
 DllExport void
 win32_perror(const char *str)
 {
-    pIOSubSystem->pfnperror(str);
+    perror(str);
 }
 
 DllExport void
 win32_setbuf(FILE *pf, char *buf)
 {
-    pIOSubSystem->pfnsetbuf(pf, buf);
+    setbuf(pf, buf);
 }
 
 DllExport int
 win32_setvbuf(FILE *pf, char *buf, int type, size_t size)
 {
-    return pIOSubSystem->pfnsetvbuf(pf, buf, type, size);
+    return setvbuf(pf, buf, type, size);
 }
 
 DllExport int
 win32_flushall(void)
 {
-    return pIOSubSystem->pfnflushall();
+    return flushall();
 }
 
 DllExport int
 win32_fcloseall(void)
 {
-    return pIOSubSystem->pfnfcloseall();
+    return fcloseall();
 }
 
 DllExport char*
 win32_fgets(char *s, int n, FILE *pf)
 {
-    return pIOSubSystem->pfnfgets(s, n, pf);
+    return fgets(s, n, pf);
 }
 
 DllExport char*
 win32_gets(char *s)
 {
-    return pIOSubSystem->pfngets(s);
+    return gets(s);
 }
 
 DllExport int
 win32_fgetc(FILE *pf)
 {
-    return pIOSubSystem->pfnfgetc(pf);
+    return fgetc(pf);
 }
 
 DllExport int
 win32_putc(int c, FILE *pf)
 {
-    return pIOSubSystem->pfnputc(c,pf);
+    return putc(c,pf);
 }
 
 DllExport int
 win32_puts(const char *s)
 {
-    return pIOSubSystem->pfnputs(s);
+    return puts(s);
 }
 
 DllExport int
 win32_getchar(void)
 {
-    return pIOSubSystem->pfngetchar();
+    return getchar();
 }
 
 DllExport int
 win32_putchar(int c)
 {
-    return pIOSubSystem->pfnputchar(c);
+    return putchar(c);
 }
 
 DllExport void*
 win32_malloc(size_t size)
 {
-    return pIOSubSystem->pfnmalloc(size);
+    return malloc(size);
 }
 
 DllExport void*
 win32_calloc(size_t numitems, size_t size)
 {
-    return pIOSubSystem->pfncalloc(numitems,size);
+    return calloc(numitems,size);
 }
 
 DllExport void*
 win32_realloc(void *block, size_t size)
 {
-    return pIOSubSystem->pfnrealloc(block,size);
+    return realloc(block,size);
 }
 
 DllExport void
 win32_free(void *block)
 {
-    pIOSubSystem->pfnfree(block);
+    free(block);
 }
 
 int
-stolen_open_osfhandle(long handle, int flags)
+win32_open_osfhandle(long handle, int flags)
 {
-    return pIOSubSystem->pfn_open_osfhandle(handle, flags);
+    return _open_osfhandle(handle, flags);
 }
 
 long
-stolen_get_osfhandle(int fd)
+win32_get_osfhandle(int fd)
 {
-    return pIOSubSystem->pfn_get_osfhandle(fd);
+    return _get_osfhandle(fd);
 }
 
 /*
  * Extras.
  */
-
-DllExport int
-win32_flock(int fd, int oper)
-{
-    if (!IsWinNT()) {
-	croak("flock() unimplemented on this platform");
-	return -1;
-    }
-    return pIOSubSystem->pfnflock(fd, oper);
-}
 
 static
 XS(w32_GetCwd)
@@ -1639,7 +1594,7 @@ XS(w32_GetShortPathName)
 }
 
 void
-init_os_extras()
+Perl_init_os_extras()
 {
     char *file = __FILE__;
     dXSUB_SYS;

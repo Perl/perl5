@@ -18,8 +18,8 @@ void
 Perl_set_thread_self(struct thread *thr)
 {
 #ifdef USE_THREADS
-    /* GetCurrentThread() retrurns a pseudo handle, need
-       this to convert it into a handle another thread can use
+    /* Set thr->self.  GetCurrentThread() retrurns a pseudo handle, need
+       this to convert it into a handle another thread can use.
      */
     DuplicateHandle(GetCurrentProcess(),
 		    GetCurrentThread(),

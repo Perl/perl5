@@ -2520,7 +2520,10 @@ yylex(void)
     case 'y': case 'Y':
     case 'z': case 'Z':
 
-      keylookup:
+      keylookup: {
+	GV *gv = Nullgv;
+	GV **gvp = 0;
+
 	bufptr = s;
 	s = scan_word(s, tokenbuf, sizeof tokenbuf, FALSE, &len);
 
@@ -2562,16 +2565,24 @@ yylex(void)
 	}
 
 	if (tmp < 0) {			/* second-class keyword? */
-	    GV* gv;
-	    if (expect != XOPERATOR &&
-		(*s != ':' || s[1] != ':') &&
-		(gv = gv_fetchpv(tokenbuf, FALSE, SVt_PVCV)) &&
-		GvIMPORTED_CV(gv))
+	    if (expect != XOPERATOR && (*s != ':' || s[1] != ':') &&
+		(((gv = gv_fetchpv(tokenbuf, FALSE, SVt_PVCV)) &&
+		  GvCVu(gv) && GvIMPORTED_CV(gv)) ||
+		 ((gvp = (GV**)hv_fetch(globalstash,tokenbuf,len,FALSE)) &&
+		  (gv = *gvp) != (GV*)&sv_undef &&
+		  GvCVu(gv) && GvIMPORTED_CV(gv))))
 	    {
-		tmp = 0;
+		tmp = 0;		/* overridden by importation */
 	    }
-	    else
-		tmp = -tmp;
+	    else if (gv && !gvp
+		     && -tmp==KEY_lock	/* XXX generalizable kludge */
+		     && !hv_fetch(GvHVn(incgv), "Thread.pm", 9, FALSE))
+	    {
+		tmp = 0;		/* any sub overrides "weak" keyword */
+	    }
+	    else {
+		tmp = -tmp; gv = Nullgv; gvp = 0;
+	    }
 	}
 
       reserved_word:
@@ -2579,7 +2590,6 @@ yylex(void)
 
 	default:			/* not a keyword */
 	  just_a_word: {
-		GV *gv;
 		SV *sv;
 		char lastchar = (bufptr == oldoldbufptr ? 0 : bufptr[-1]);
 
@@ -2604,12 +2614,19 @@ yylex(void)
 
 		/* Look for a subroutine with this name in current package. */
 
-		gv = gv_fetchpv(tokenbuf,FALSE, SVt_PVCV);
+		if (gvp) {
+		    sv = newSVpv("CORE::GLOBAL::",14);
+		    sv_catpv(sv,tokenbuf);
+		}
+		else
+		    sv = newSVpv(tokenbuf,0);
+		if (!gv)
+		    gv = gv_fetchpv(tokenbuf,FALSE, SVt_PVCV);
 
 		/* Presume this is going to be a bareword of some sort. */
 
 		CLINE;
-		yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(tokenbuf,0));
+		yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
 		yylval.opval->op_private = OPpCONST_BARE;
 
 		/* See if it's the indirect object for a list operator. */
@@ -3745,7 +3762,7 @@ yylex(void)
 	    s = scan_trans(s);
 	    TERM(sublex_start());
 	}
-    }
+    }}
 }
 
 I32

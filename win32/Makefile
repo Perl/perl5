@@ -11,7 +11,7 @@
 # newly built perl.
 INST_DRV=c:
 INST_TOP=$(INST_DRV)\perl
-BUILDOPT=-DUSE_THREADS -TP
+BUILDOPT=-DUSE_THREADS
 CORECCOPT=
 
 #
@@ -60,7 +60,7 @@ LIBC = msvcrt.lib
 WINIOMAYBE =
 !ELSE
 LIBC = libcmt.lib
-WINIOMAYBE = win32io.obj
+WINIOMAYBE =
 !ENDIF
 
 !IF  "$(CFG)" == "Debug"
@@ -197,18 +197,15 @@ CORE_OBJ= ..\av.obj	\
 
 WIN32_C = perllib.c \
 	win32.c \
-	win32io.c \
 	win32sck.c \
 	win32thread.c 
 
 WIN32_OBJ = win32.obj \
-	win32io.obj \
 	win32sck.obj \
 	win32thread.obj 
 
 PERL95_OBJ = perl95.obj \
 	win32mt.obj \
-	win32iomt.obj \
 	win32sckmt.obj
 
 DLL_OBJ = perllib.obj $(DYNALOADER).obj
@@ -236,6 +233,7 @@ CORE_H = ..\av.h	\
 	..\regexp.h	\
 	..\scope.h	\
 	..\sv.h		\
+	..\thread.h	\
 	..\unixish.h	\
 	..\util.h	\
 	..\XSUB.h	\
@@ -313,6 +311,7 @@ config.w32 : $(CFGSH_TMPL)
 	    "INST_TOP=$(INST_TOP)" "cc=$(CC)" "ccflags=$(OPTIMIZE) $(DEFINES)" \
 	    "cf_email=$(EMAIL)" "libs=$(LIBFILES)" "incpath=$(CCINCDIR)" \
 	    "libpth=$(CCLIBDIR)" "libc=$(LIBC)" \
+	    "LINK_FLAGS=$(LINK_FLAGS)" \
 	    config.w32 > ..\config.sh
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
@@ -361,17 +360,12 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) perlmain.obj
 	del perl.exe
 	copy splittree.pl .. 
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" "../LIB/auto"
-#	attrib -r ..\t\*.*
-#	copy test ..\t
 
 perl95.c : runperl.c 
 	copy runperl.c perl95.c
 
 perl95.obj : perl95.c
 	$(CC) $(CFLAGS) -MT -UPERLDLL -c perl95.c
-
-win32iomt.obj : win32io.c
-	$(CC) $(CFLAGS) -MT -c $(OBJOUT_FLAG)win32iomt.obj win32io.c
 
 win32sckmt.obj : win32sck.c
 	$(CC) $(CFLAGS) -MT -c $(OBJOUT_FLAG)win32sckmt.obj win32sck.c
@@ -386,7 +380,7 @@ $(PERL95EXE): $(PERLDLL) $(CONFIGPM) $(PERL95_OBJ)
 	del perl95.exe
 
 $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
-	if not exist ..\lib\auto md ..\lib\auto
+	if not exist ..\lib\auto mkdir ..\lib\auto
 	$(XCOPY) $(EXTDIR)\$(*B)\$(*B).pm $(LIBDIR)\$(NULL)
 	cd $(EXTDIR)\$(*B)
 	$(XSUBPP) dl_win32.xs > $(*B).c

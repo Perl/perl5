@@ -10,8 +10,8 @@
 # Set these to wherever you want "nmake install" to put your
 # newly built perl.
 INST_DRV=c:
-INST_TOP=$(INST_DRV)\perl\perl5004.5X
-BUILDOPT=-DUSE_THREADS 
+INST_TOP=$(INST_DRV)\perl
+BUILDOPT=-DUSE_THREADS
 
 # -DUSE_PERLIO -D__STDC__=1 -DUSE_SFIO -DI_SFIO -I\sfio97\include
 
@@ -96,7 +96,7 @@ RUNTIME  = -MD
 .ENDIF
 INCLUDES = -I.\include -I. -I..
 #PCHFLAGS = -Fp$(INTDIR)\vcmoduls.pch -YX 
-DEFINES  = -DWIN32 $(BUILDOPT) -D_CONSOLE -D_WIN32_WINNT=0x400
+DEFINES  = -DWIN32 -D_CONSOLE $(BUILDOPT)
 LOCDEFS  = -DPERLDLL
 SUBSYS   = console
 
@@ -105,7 +105,7 @@ LIBC = msvcrt.lib
 WINIOMAYBE =
 .ELSE
 LIBC = libcmt.lib
-WINIOMAYBE = win32io.obj
+WINIOMAYBE =
 .ENDIF
 
 .IF  "$(CFG)" == "Debug"
@@ -131,7 +131,7 @@ LIBFILES = oldnames.lib kernel32.lib user32.lib gdi32.lib \
 	version.lib odbc32.lib odbccp32.lib
 
 CFLAGS   = -nologo -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) $(PCHFLAGS) $(OPTIMIZE)
-LINK_FLAGS  = -nologo $(LIBFILES) $(LINK_DBG) -machine:I386
+LINK_FLAGS  = -nologo $(LIBFILES) $(LINK_DBG) -machine:$(PROCESSOR_ARCHITECTURE)
 OBJOUT_FLAG = -Fo
 
 .ENDIF
@@ -265,18 +265,15 @@ CORE_OBJ= ..\av.obj	\
 
 WIN32_C = perllib.c \
 	win32.c \
-	win32io.c \
 	win32sck.c \
 	win32thread.c 
 
 WIN32_OBJ = win32.obj \
-	win32io.obj \
 	win32sck.obj \
 	win32thread.obj
 
 PERL95_OBJ = perl95.obj \
 	win32mt.obj \
-	win32iomt.obj \
 	win32sckmt.obj
 
 DLL_OBJ = perllib.obj $(DYNALOADER).obj
@@ -314,7 +311,6 @@ CORE_H = ..\av.h	\
 	.\include\netdb.h	\
 	.\include\sys\socket.h	\
 	.\win32.h
-
 
 EXTENSIONS=DynaLoader Socket IO Fcntl Opcode SDBM_File attrs Thread
 
@@ -461,8 +457,6 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) perlmain.obj
 .ENDIF
 	copy splittree.pl .. 
 	$(MINIPERL) -I..\lib ..\splittree.pl "../LIB" "../LIB/auto"
-#	attrib -r ..\t\*.*
-#	copy test ..\t
 
 .IF "$(CCTYPE)" != "BORLAND"
 
@@ -471,9 +465,6 @@ perl95.c : runperl.c
 
 perl95.obj : perl95.c
 	$(CC) $(CFLAGS) -MT -UPERLDLL -c perl95.c
-
-win32iomt.obj : win32io.c
-	$(CC) $(CFLAGS) -MT -c $(OBJOUT_FLAG)win32iomt.obj win32io.c
 
 win32sckmt.obj : win32sck.c
 	$(CC) $(CFLAGS) -MT -c $(OBJOUT_FLAG)win32sckmt.obj win32sck.c
@@ -601,7 +592,7 @@ minitest : $(MINIPERL) $(GLOBEXE) $(CONFIGPM)
 	cd ..\t && \
 	$(MINIPERL) -I..\lib test base/*.t comp/*.t cmd/*.t io/*.t op/*.t pragma/*.t
 
-test : all
+test-prep : all
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
 	$(XCOPY) $(PERLDLL) ..\t\$(NULL)
 .IF "$(CCTYPE)" == "BORLAND"
@@ -609,7 +600,13 @@ test : all
 .ELSE
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
 .ENDIF
+
+test : test-prep
 	cd ..\t && $(PERLEXE) -I..\lib harness
+
+test-notty : test-prep
+	set PERL_SKIP_TTY_TEST=1 && \
+	cd ..\t && $(PERLEXE) -I.\lib harness
 
 clean : 
 	-@erase miniperlmain.obj

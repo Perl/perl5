@@ -115,6 +115,7 @@ void win32_endservent(void);
 #define recv		win32_recv
 #define recvfrom	win32_recvfrom
 #define shutdown	win32_shutdown
+#define closesocket	win32_closesocket
 #define ioctlsocket	win32_ioctlsocket
 #define setsockopt	win32_setsockopt
 #define getsockopt	win32_getsockopt
