@@ -3185,6 +3185,24 @@ Return to any given position in the B<true>-history list
                 $cmd =~ /^(R|rerun\s*(.*))$/ && do {
                     my @args = ($1 eq 'R' ? restart() : rerun($2));
 
+                    # Close all non-system fds for a clean restart.  A more
+                    # correct method would be to close all fds that were not
+                    # open when the process started, but this seems to be
+                    # hard.  See "debugger 'R'estart and open database
+                    # connections" on p5p.
+
+                    my $max_fd;
+                    if (eval { require POSIX }) {
+                        $max_fd = POSIX::sysconf(POSIX::_SC_OPEN_MAX());
+                    }
+
+                    if (defined $max_fd) {
+                        foreach ($^F+1 .. $max_fd-1) {
+                            next unless open FD_TO_CLOSE, "<&=$_";
+                            close(FD_TO_CLOSE);
+                        }
+                    }
+
                     # And run Perl again.  We use exec() to keep the
                     # PID stable (and that way $ini_pids is still valid).
                     exec(@args) || print $OUT "exec failed: $!\n";
