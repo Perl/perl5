@@ -493,8 +493,10 @@ PERLVARI(Icheckav_save, AV*, Nullav)	/* save CHECK{}s when compiling */
 
 PERLVARI(Iclocktick, long, 0)	/* this many times() ticks in a second */
 
-/* New variables must be added to the very end for binary compatibility.
+PERLVARI(Iin_load_module, int, 0)	/* to prevent recursions in PerlIO_find_layer */
+
+/* New variables must be added to the very end, before this comment,
+ * for binary compatibility (the offsets of the old members must not change).
  * XSUB.h provides wrapper functions via perlapi.h that make this
  * irrelevant, but not all code may be expected to #include XSUB.h. */
 
-PERLVARI(Iin_load_module, int, 0)	/* to prevent recursions in PerlIO_find_layer */
