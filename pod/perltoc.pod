@@ -1796,7 +1796,7 @@ Proto, LocalPort, Listen, Reuse
 
 =back
 
-=head2 perlfork - Perl's fork() emulation (EXPERIMENTAL, subject to change)
+=head2 perlfork - Perl's fork() emulation
 
 =over 4
 
@@ -2645,13 +2645,14 @@ B::Deparse, B::Disassembler, B::Lint, B::Showlex, B::Stackobj, B::Stash,
 B::Terse, B::Xref, Benchmark, ByteLoader, CGI, CGI::Apache, CGI::Carp,
 CGI::Cookie, CGI::Fast, CGI::Pretty, CGI::Push, CGI::Switch, CGI::Util,
 CPAN, CPAN::FirstTime, CPAN::Nox, Carp, Carp::Heavy, Class::ISA,
-Class::Struct, Cwd, DB, DB_File, Devel::SelfStubber, Digest, DirHandle,
-Dumpvalue, Encode, English, Env, Exporter, Exporter::Heavy,
-ExtUtils::Command, ExtUtils::Command::MM, ExtUtils::Constant,
-ExtUtils::Embed, ExtUtils::Install, ExtUtils::Installed, ExtUtils::Liblist,
-ExtUtils::MM, ExtUtils::MM_Any, ExtUtils::MM_BeOS, ExtUtils::MM_Cygwin,
-ExtUtils::MM_DOS, ExtUtils::MM_MacOS, ExtUtils::MM_NW5, ExtUtils::MM_OS2,
-ExtUtils::MM_UWIN, ExtUtils::MM_Unix, ExtUtils::MM_VMS, ExtUtils::MM_Win32,
+Class::Struct, Config, Cwd, DB, DB_File, Devel::SelfStubber, Digest,
+DirHandle, Dumpvalue, Encode, English, Env, Errno, Exporter,
+Exporter::Heavy, ExtUtils::Command, ExtUtils::Command::MM,
+ExtUtils::Constant, ExtUtils::Embed, ExtUtils::Install,
+ExtUtils::Installed, ExtUtils::Liblist, ExtUtils::MM, ExtUtils::MM_Any,
+ExtUtils::MM_BeOS, ExtUtils::MM_Cygwin, ExtUtils::MM_DOS,
+ExtUtils::MM_MacOS, ExtUtils::MM_NW5, ExtUtils::MM_OS2, ExtUtils::MM_UWIN,
+ExtUtils::MM_Unix, ExtUtils::MM_VMS, ExtUtils::MM_Win32,
 ExtUtils::MM_Win95, ExtUtils::MY, ExtUtils::MakeMaker, ExtUtils::Manifest,
 ExtUtils::Mkbootstrap, ExtUtils::Mksymlists, ExtUtils::Packlist,
 ExtUtils::testlib, Fatal, Fcntl, File::Basename, File::CheckTree,
@@ -2673,10 +2674,10 @@ Net::netent, Net::protoent, Net::servent, O, ODBM_File, Opcode, POSIX,
 PerlIO, Pod::Checker, Pod::Find, Pod::Functions, Pod::Html,
 Pod::InputObjects, Pod::LaTeX, Pod::Man, Pod::ParseLink, Pod::ParseUtils,
 Pod::Parser, Pod::Plainer, Pod::Select, Pod::Text, Pod::Text::Color,
-Pod::Text::Overstrike, Pod::Text::Termcap, Pod::Usage, Pod::t::basic,
-SDBM_File, Safe, Search::Dict, SelectSaver, SelfLoader, Shell, Socket,
-Storable, Switch, Symbol, Term::ANSIColor, Term::Cap, Term::Complete,
-Term::ReadLine, Test, Test::Builder, Test::Harness, Test::Harness::Assert,
+Pod::Text::Overstrike, Pod::Text::Termcap, Pod::Usage, SDBM_File, Safe,
+Search::Dict, SelectSaver, SelfLoader, Shell, Socket, Storable, Switch,
+Symbol, Term::ANSIColor, Term::Cap, Term::Complete, Term::ReadLine, Test,
+Test::Builder, Test::Harness, Test::Harness::Assert,
 Test::Harness::Iterator, Test::Harness::Straps, Test::More, Test::Simple,
 Test::Tutorial, Text::Abbrev, Text::Balanced, Text::ParseWords,
 Text::Soundex, Text::Tabs, Text::Wrap, Thread, Thread::Queue,
@@ -5097,7 +5098,7 @@ NFS, rsync'ing the patches
 
 =item Why rsync the source tree
 
-It's easier to rsync the source tree, It's more recent, It's more reliable
+It's easier to rsync the source tree, It's more reliable
 
 =item Why rsync the patches
 
@@ -7547,6 +7548,8 @@ SetNWBld.bat, Buildtype.bat
 =back
 
 =item Install
+
+=item Build new extensions
 
 =item Acknowledgements
 
@@ -10728,7 +10731,7 @@ C<orderlib>, C<osname>, C<osvers>, C<otherlibdirs>
 =item p
 
 C<package>, C<pager>, C<passcat>, C<patchlevel>, C<path_sep>, C<perl5>,
-C<perl5>, C<perl>, C<perl_patchlevel>
+C<perl>, C<perl_patchlevel>
 
 =item P
 
@@ -10798,7 +10801,7 @@ C<xlibpth>, C<xs_apiversion>
 
 =item y
 
-C<yaccflags>
+C<yacc>, C<yaccflags>
 
 =item z
 
@@ -16007,9 +16010,10 @@ MSGNUM ] ), delete ( MSGNUM ), reset (), quit ()
 
 =item Functions
 
-Net::Ping->new([$proto [, $def_timeout [, $bytes]]]);, $p->hires( { 0 | 1 }
-);, $p->bind($local_addr);, $p->ping($host [, $timeout]);,
-$p->open($host);, $p->close();, pingecho($host [, $timeout]);
+Net::Ping->new([$proto [, $def_timeout [, $bytes]]]);, $p->source_verify( {
+0 | 1 } );, $p->hires( { 0 | 1 } );, $p->bind($local_addr);, $p->ping($host
+[, $timeout]);, $p->open($host);, $p->close();, pingecho($host [,
+$timeout]);
 
 =back
 
@@ -19539,6 +19543,33 @@ Win32::Sleep(TIME), Win32::Spawn(COMMAND, ARGS, PID),
 Win32::UnregisterServer(LIBRARYNAME)
 
 =back
+
+=back
+
+=head2 XS::APItest - Test the perl C API
+
+=over 4
+
+=item SYNOPSIS
+
+=item ABSTRACT
+
+=item DESCRIPTION
+
+=over 4
+
+=item EXPORT
+
+B<print_double>, B<print_long_double>, B<have_long_double>, B<print_nv>,
+B<print_iv>, B<print_uv>, B<print_int>, B<print_long>, B<print_float>
+
+=back
+
+=item SEE ALSO
+
+=item AUTHORS
+
+=item COPYRIGHT AND LICENSE
 
 =back
 
