@@ -765,8 +765,8 @@ LIMIT specified
 
 =back
 
-=head2 perlfaq - frequently asked questions about Perl ($Date: 2003/01/31
-17:37:17 $)
+=head2 perlfaq - frequently asked questions about Perl ($Date: 2004/10/05
+22:15:44 $)
 
 =over 4
 
@@ -829,8 +829,8 @@ Interaction, perlfaq9 - Networking
 
 =back
 
-=head2 perlfaq1 - General Questions About Perl ($Revision: 1.14 $, $Date:
-2003/11/23 08:02:29 $)
+=head2 perlfaq1 - General Questions About Perl ($Revision: 1.15 $, $Date:
+2004/10/11 05:06:29 $)
 
 =over 4
 
@@ -878,8 +878,8 @@ Scheme, or Tcl?
 
 =back
 
-=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.25 $,
-$Date: 2003/10/16 04:57:38 $)
+=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.29 $,
+$Date: 2004/10/25 18:37:23 $)
 
 =over 4
 
@@ -934,8 +934,8 @@ References, Tutorials, Task-Oriented, Special Topics
 
 =back
 
-=head2 perlfaq3 - Programming Tools ($Revision: 1.37 $, $Date: 2003/11/24
-19:55:50 $)
+=head2 perlfaq3 - Programming Tools ($Revision: 1.41 $, $Date: 2004/11/03
+22:45:32 $)
 
 =over 4
 
@@ -963,9 +963,10 @@ References, Tutorials, Task-Oriented, Special Topics
 
 =item Is there an IDE or Windows Perl Editor?
 
-Komodo, The Object System, Open Perl IDE, PerlBuilder, visiPerl+, OptiPerl,
-GNU Emacs, MicroEMACS, XEmacs, Jed, Elvis, Vile, Vim, Codewright,
-MultiEdit, SlickEdit, Bash, Ksh, Tcsh, Zsh, BBEdit and BBEdit Lite, Alpha
+Eclipse, Komodo, Open Perl IDE, OptiPerl, PerlBuilder, visiPerl+, Visual
+Perl, GNU Emacs, MicroEMACS, XEmacs, Jed, Elvis, Vile, Vim, Codewright,
+MultiEdit, SlickEdit, Bash, Ksh, Tcsh, Zsh, Affrus, Alpha, BBEdit and
+BBEdit Lite
 
 =item Where can I get Perl macros for vi?
 
@@ -1021,8 +1022,8 @@ my C program; what am I doing wrong?
 
 =back
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 1.54 $, $Date: 2003/11/30
-00:50:08 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 1.56 $, $Date: 2004/11/03
+22:47:56 $)
 
 =over 4
 
@@ -1240,8 +1241,8 @@ array of hashes or arrays?
 
 =back
 
-=head2 perlfaq5 - Files and Formats ($Revision: 1.30 $, $Date: 2003/11/23
-08:07:46 $)
+=head2 perlfaq5 - Files and Formats ($Revision: 1.31 $, $Date: 2004/02/07
+04:29:50 $)
 
 =over 4
 
@@ -1336,8 +1337,8 @@ protected files?  Isn't this a bug in Perl?
 
 =back
 
-=head2 perlfaq6 - Regular Expressions ($Revision: 1.20 $, $Date: 2003/01/03
-20:05:28 $)
+=head2 perlfaq6 - Regular Expressions ($Revision: 1.27 $, $Date: 2004/11/03
+22:52:16 $)
 
 =over 4
 
@@ -1403,8 +1404,8 @@ file?
 
 =back
 
-=head2 perlfaq7 - General Perl Language Issues ($Revision: 1.15 $, $Date:
-2003/07/24 02:17:21 $)
+=head2 perlfaq7 - General Perl Language Issues ($Revision: 1.18 $, $Date:
+2004/11/03 22:54:08 $)
 
 =over 4
 
@@ -1485,8 +1486,8 @@ methods?
 
 =back
 
-=head2 perlfaq8 - System Interaction ($Revision: 1.17 $, $Date: 2003/01/26
-17:44:04 $)
+=head2 perlfaq8 - System Interaction ($Revision: 1.22 $, $Date: 2004/10/05
+22:13:49 $)
 
 =over 4
 
@@ -1594,6 +1595,8 @@ complete?
 
 =item How do I open a file without blocking?
 
+=item How do I tell the difference between errors from the shell and perl?
+
 =item How do I install a module from CPAN?
 
 =item What's the difference between require and use?
@@ -1613,7 +1616,7 @@ search path?
 
 =back
 
-=head2 perlfaq9 - Networking ($Revision: 1.15 $, $Date: 2003/01/31 17:36:57
+=head2 perlfaq9 - Networking ($Revision: 1.16 $, $Date: 2004/10/30 12:20:59
 $)
 
 =over 4
@@ -2249,10 +2252,10 @@ OS/2, MS-DOS, Win95/NT, Macintosh, VMS
 =item Command Switches
 
 B<-0>[I<octal/hexadecimal>], B<-a>, B<-C [I<number/list>]>, B<-c>, B<-d>,
-B<-d:>I<foo[=bar,baz]>, B<-D>I<letters>, B<-D>I<number>, B<-e>
-I<commandline>, B<-F>I<pattern>, B<-h>, B<-i>[I<extension>],
-B<-I>I<directory>, B<-l>[I<octnum>], B<-m>[B<->]I<module>,
-B<-M>[B<->]I<module>, B<-M>[B<->]I<'module ...'>,
+B<-dt>, B<-d:>I<foo[=bar,baz]>, B<-dt:>I<foo[=bar,baz]>, B<-D>I<letters>,
+B<-D>I<number>, B<-e> I<commandline>, B<-F>I<pattern>, B<-h>,
+B<-i>[I<extension>], B<-I>I<directory>, B<-l>[I<octnum>],
+B<-m>[B<->]I<module>, B<-M>[B<->]I<module>, B<-M>[B<->]I<'module ...'>,
 B<-[mM]>[B<->]I<module=arg[,arg]...>, B<-n>, B<-p>, B<-P>, B<-s>, B<-S>,
 B<-t>, B<-T>, B<-u>, B<-U>, B<-v>, B<-V>, B<-V:>I<configvar>, B<-w>, B<-W>,
 B<-X>, B<-x>, B<-x> I<directory>
@@ -2263,11 +2266,11 @@ B<-X>, B<-x>, B<-x> I<directory>
 
 HOME, LOGDIR, PATH, PERL5LIB, PERL5OPT, PERLIO, :bytes, :crlf, :mmap,
 :perlio, :pop, :raw, :stdio, :unix, :utf8, :win32, PERLIO_DEBUG, PERLLIB,
-PERL5DB, PERL5SHELL (specific to the Win32 port), PERL_ALLOW_NON_IFS_LSP
-(specific to the Win32 port), PERL_DEBUG_MSTATS, PERL_DESTRUCT_LEVEL,
-PERL_DL_NONLAZY, PERL_ENCODING, PERL_HASH_SEED, PERL_HASH_SEED_DEBUG,
-PERL_ROOT (specific to the VMS port), PERL_SIGNALS, PERL_UNICODE, SYS$LOGIN
-(specific to the VMS port)
+PERL5DB, PERL5DB_THREADED, PERL5SHELL (specific to the Win32 port),
+PERL_ALLOW_NON_IFS_LSP (specific to the Win32 port), PERL_DEBUG_MSTATS,
+PERL_DESTRUCT_LEVEL, PERL_DL_NONLAZY, PERL_ENCODING, PERL_HASH_SEED,
+PERL_HASH_SEED_DEBUG, PERL_ROOT (specific to the VMS port), PERL_SIGNALS,
+PERL_UNICODE, SYS$LOGIN (specific to the VMS port)
 
 =back
 
@@ -5309,7 +5312,37 @@ B<-V>
 
 =back
 
-=head2 perldelta - what is new for perl v5.8.5
+=head2 perldelta, perl586delta - what is new for perl v5.8.6
+
+=over 4
+
+=item DESCRIPTION
+
+=item Incompatible Changes
+
+=item Core Enhancements
+
+=item Modules and Pragmata
+
+=item Utility Changes
+
+=item Performance Enhancements
+
+=item Selected Bug Fixes
+
+=item New or Changed Diagnostics
+
+=item Changed Internals
+
+=item New Tests
+
+=item Reporting Bugs
+
+=item SEE ALSO
+
+=back
+
+=head2 perl587delta, perldelta - what is new for perl v5.8.7
 
 =over 4
 
@@ -5347,7 +5380,7 @@ B<-V>
 
 =back
 
-=head2 perl586delta, perldelta - what is new for perl v5.8.5
+=head2 perl586delta - what is new for perl v5.8.6
 
 =over 4
 
@@ -5361,11 +5394,7 @@ B<-V>
 
 =item Utility Changes
 
-=item New Documentation
-
 =item Performance Enhancements
-
-=item Installation and Configuration Improvements
 
 =item Selected Bug Fixes
 
@@ -5374,10 +5403,6 @@ B<-V>
 =item Changed Internals
 
 =item New Tests
-
-=item Known Problems
-
-=item Platform Specific Problems
 
 =item Reporting Bugs
 
@@ -12243,11 +12268,11 @@ CHECK]);
 
 =item Handling Malformed Data
 
-I<CHECK> = Encode::FB_DEFAULT ( == 0), I<CHECK> = Encode::FB_CROAK ( == 1),
-I<CHECK> = Encode::FB_QUIET, I<CHECK> = Encode::FB_WARN, perlqq mode
-(I<CHECK> = Encode::FB_PERLQQ), HTML charref mode (I<CHECK> =
-Encode::FB_HTMLCREF), XML charref mode (I<CHECK> = Encode::FB_XMLCREF), The
-bitmask
+B<NOTE:> Not all encoding suppport this feature, I<CHECK> =
+Encode::FB_DEFAULT ( == 0), I<CHECK> = Encode::FB_CROAK ( == 1), I<CHECK> =
+Encode::FB_QUIET, I<CHECK> = Encode::FB_WARN, perlqq mode (I<CHECK> =
+Encode::FB_PERLQQ), HTML charref mode (I<CHECK> = Encode::FB_HTMLCREF), XML
+charref mode (I<CHECK> = Encode::FB_XMLCREF), The bitmask
 
 =over 4
 
@@ -12363,7 +12388,8 @@ reference, e.g.:
 
 =item Other methods defined in Encode::Encodings
 
--E<gt>name, -E<gt>renew, -E<gt>perlio_ok(), -E<gt>needs_lines()
+-E<gt>name, -E<gt>renew, -E<gt>renewed, -E<gt>perlio_ok(),
+-E<gt>needs_lines()
 
 =item Example: Encode::ROT13
 
@@ -12617,6 +12643,8 @@ BOM as integer when fetched in network byte order
 
 =item Surrogate Pairs
 
+=item Error Checking
+
 =item SEE ALSO
 
 =back
@@ -12684,7 +12712,8 @@ Implementation Base Class
 
 =item Other methods defined in Encode::Encodings
 
--E<gt>name, -E<gt>renew, -E<gt>perlio_ok(), -E<gt>needs_lines()
+-E<gt>name, -E<gt>renew, -E<gt>renewed, -E<gt>perlio_ok(),
+-E<gt>needs_lines()
 
 =item Example: Encode::ROT13
 
