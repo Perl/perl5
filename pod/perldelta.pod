@@ -1678,6 +1678,22 @@ and C<~> are now supported on bigints.
 The accessor methods Re, Im, arg, abs, rho, and theta can now also
 act as mutators (accessor $z->Re(), mutator $z->Re(3)).
 
+The class method C<display_format> and the corresponding object method
+C<display_format>, in addition to accepting just one argument, now can
+also accept a parameter hash.  Recognized keys of a parameter hash are
+C<"style">, which corresponds to the old one parameter case, and two
+new parameters: C<"format">, which is a printf()-style format string
+(defaults usually to C<"%.15g">, you can revert to the default by
+setting the format string to C<undef>) used for both parts of a
+complex number, and C<"polar_pretty_print"> (defaults to true),
+which controls whether an attempt is made to try to recognize small
+multiples and rationals of pi (2pi, pi/2) at the argument (angle) of a
+polar complex number.
+
+The potentially disruptive change is that in list context both methods
+now I<return the parameter hash>, instead of only the value of the
+C<"style"> parameter.
+
 =item Math::Trig
 
 A little bit of radial trigonometry (cylindrical and spherical),
