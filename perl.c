@@ -1492,6 +1492,9 @@ perl_run(pTHXx)
 #endif
 
     oldscope = PL_scopestack_ix;
+#ifdef VMS
+    VMSISH_HUSHED = 0;
+#endif
 
 #ifdef PERL_FLEXIBLE_EXCEPTIONS
  redo_body:

@@ -1273,7 +1273,7 @@ EXT OP * (CPERLscope(*PL_check)[]) (pTHX_ OP *op) = {
 	MEMBER_TO_FPTR(Perl_ck_null),	/* leavesublv */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* caller */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* warn */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* die */
+	MEMBER_TO_FPTR(Perl_ck_die),	/* die */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* reset */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* lineseq */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* nextstate */

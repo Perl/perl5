@@ -425,7 +425,7 @@ int usleep(unsigned int);
 #  define MYSWAP
 #endif
 
-#if !defined(PERL_FOR_X2P) && !defined(WIN32)
+#if !defined(PERL_FOR_X2P) && !(defined(WIN32)||defined(VMS))
 #  include "embed.h"
 #endif
 
@@ -1754,6 +1754,7 @@ typedef struct clone_params CLONE_PARAMS;
 #else
 # if defined(VMS)
 #   include "vmsish.h"
+#   include "embed.h"
 # else
 #   if defined(PLAN9)
 #     include "./plan9/plan9ish.h"

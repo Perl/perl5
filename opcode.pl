@@ -652,7 +652,7 @@ leavesub	subroutine exit		ck_null		1
 leavesublv	lvalue subroutine return	ck_null		1	
 caller		caller			ck_fun		t%	S?
 warn		warn			ck_fun		imst@	L
-die		die			ck_fun		dimst@	L
+die		die			ck_die		dimst@	L
 reset		symbol reset		ck_fun		is%	S?
 
 lineseq		line sequence		ck_null		@	
