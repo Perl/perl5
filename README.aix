@@ -1,0 +1,16 @@
+Currently, perl1 doesn't build using anything other than gcc on AIX. This
+is a TODO list item, but until that point please consult this note
+extracted from perl-5.8.2's README.aix
+
+=head2 Using GNU's gcc for building perl
+
+Using gcc-3.x (tested with 3.0.4, 3.1, and 3.2) now works out of the box,
+as do recent gcc-2.9 builds available directly from IBM as part of their
+Linux compatibility packages, available here:
+
+  http://www.ibm.com/servers/aix/products/aixos/linux/
+
+=head1 AUTHOR
+
+H.Merijn Brand <h.m.brand@hccnet.nl>
+
