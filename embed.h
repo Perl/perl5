@@ -695,7 +695,6 @@
 #define sv_pos_b2u		Perl_sv_pos_b2u
 #define sv_pvutf8n_force	Perl_sv_pvutf8n_force
 #define sv_pvbyten_force	Perl_sv_pvbyten_force
-#define sv_realpath		Perl_sv_realpath
 #define sv_reftype		Perl_sv_reftype
 #define sv_replace		Perl_sv_replace
 #define sv_report_used		Perl_sv_report_used
@@ -2203,7 +2202,6 @@
 #define sv_pos_b2u(a,b)		Perl_sv_pos_b2u(aTHX_ a,b)
 #define sv_pvutf8n_force(a,b)	Perl_sv_pvutf8n_force(aTHX_ a,b)
 #define sv_pvbyten_force(a,b)	Perl_sv_pvbyten_force(aTHX_ a,b)
-#define sv_realpath(a,b,c)	Perl_sv_realpath(aTHX_ a,b,c)
 #define sv_reftype(a,b)		Perl_sv_reftype(aTHX_ a,b)
 #define sv_replace(a,b)		Perl_sv_replace(aTHX_ a,b)
 #define sv_report_used()	Perl_sv_report_used(aTHX)
@@ -4331,8 +4329,6 @@
 #define sv_pvutf8n_force	Perl_sv_pvutf8n_force
 #define Perl_sv_pvbyten_force	CPerlObj::Perl_sv_pvbyten_force
 #define sv_pvbyten_force	Perl_sv_pvbyten_force
-#define Perl_sv_realpath	CPerlObj::Perl_sv_realpath
-#define sv_realpath		Perl_sv_realpath
 #define Perl_sv_reftype		CPerlObj::Perl_sv_reftype
 #define sv_reftype		Perl_sv_reftype
 #define Perl_sv_replace		CPerlObj::Perl_sv_replace
