@@ -3022,13 +3022,15 @@ sub const {
 	return $sv->NV;
     } elsif ($sv->FLAGS & SVf_ROK && $sv->can("RV")) {
 	return "\\(" . const($sv->RV) . ")"; # constant folded
-    } else {
+    } elsif ($sv->FLAGS & SVf_POK) {
 	my $str = $sv->PV;
 	if ($str =~ /[^ -~]/) { # ASCII for non-printing
 	    return single_delim("qq", '"', uninterp escape_str unback $str);
 	} else {
 	    return single_delim("q", "'", unback $str);
 	}
+    } else {
+	return "undef";
     }
 }
 
