@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Oct 27 18:18:06 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Fri Oct 27 18:57:46 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -16139,7 +16139,7 @@ echo "CONFIGDOTSH=true" >>config.sh
 if $test -f UU/config.sh; then
 	<UU/config.sh $sort | $uniq >UU/oldconfig.sh
 	sed -n 's/^\([a-zA-Z_0-9]*\)=.*/\1/p' config.sh config.sh UU/oldconfig.sh |\
-	$sort | $uniq >UU/oldsyms
+	$sort | $uniq -u >UU/oldsyms
 	set X `cat UU/oldsyms`
 	shift
 	case $# in
