@@ -1,6 +1,6 @@
 #      C.pm
 #
-#      Copyright (c) 1996, 1997 Malcolm Beattie
+#      Copyright (c) 1996, 1997, 1998 Malcolm Beattie
 #
 #      You may distribute under the terms of either the GNU General Public
 #      License or the Artistic License, as specified in the README file.
@@ -1212,7 +1212,105 @@ B::C - Perl compiler's C backend
 
 =head1 DESCRIPTION
 
-See F<ext/B/README>.
+This compiler backend takes Perl source and generates C source code
+corresponding to the internal structures that perl uses to run
+your program. When the generated C source is compiled and run, it
+cuts out the time which perl would have taken to load and parse
+your program into its internal semi-compiled form. That means that
+compiling with this backend will not help improve the runtime
+execution speed of your program but may improve the start-up time.
+Depending on the environment in which your program runs this may be
+either a help or a hindrance.
+
+=head1 OPTIONS
+
+If there are any non-option arguments, they are taken to be
+names of objects to be saved (probably doesn't work properly yet).
+Without extra arguments, it saves the main program.
+
+=over 4
+
+=item B<-ofilename>
+
+Output to filename instead of STDOUT
+
+=item B<-v>
+
+Verbose compilation (currently gives a few compilation statistics).
+
+=item B<-->
+
+Force end of options
+
+=item B<-uPackname>
+
+Force apparently unused subs from package Packname to be compiled.
+This allows programs to use eval "foo()" even when sub foo is never
+seen to be used at compile time. The down side is that any subs which
+really are never used also have code generated. This option is
+necessary, for example, if you have a signal handler foo which you
+initialise with C<$SIG{BAR} = "foo">.  A better fix, though, is just
+to change it to C<$SIG{BAR} = \&foo>. You can have multiple B<-u>
+options. The compiler tries to figure out which packages may possibly
+have subs in which need compiling but the current version doesn't do
+it very well. In particular, it is confused by nested packages (i.e.
+of the form C<A::B>) where package C<A> does not contain any subs.
+
+=item B<-D>
+
+Debug options (concatenated or separate flags like C<perl -D>).
+
+=item B<-Do>
+
+OPs, prints each OP as it's processed
+
+=item B<-Dc>
+
+COPs, prints COPs as processed (incl. file & line num)
+
+=item B<-DA>
+
+prints AV information on saving
+
+=item B<-DC>
+
+prints CV information on saving
+
+=item B<-DM>
+
+prints MAGIC information on saving
+
+=item B<-f>
+
+Force optimisations on or off one at a time.
+
+=item B<-fcog>
+
+Copy-on-grow: PVs declared and initialised statically.
+
+=item B<-fno-cog>
+
+No copy-on-grow.
+
+=item B<-On>
+
+Optimisation level (n = 0, 1, 2, ...). B<-O> means B<-O1>.  Currently,
+B<-O1> and higher set B<-fcog>.
+
+=head1 EXAMPLES
+
+    perl -MO=C,-ofoo.c foo.pl
+    perl cc_harness -o foo foo.c
+
+Note that C<cc_harness> lives in the C<B> subdirectory of your perl
+library directory. The utility called C<perlcc> may also be used to
+help make use of this compiler.
+
+    perl -MO=C,-v,-DcA bar.pl > /dev/null
+
+=head1 BUGS
+
+Plenty. Current status: experimental.
 
 =head1 AUTHOR
 
