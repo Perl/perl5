@@ -3,6 +3,9 @@ package Encode::CN::HZ;
 use strict;
 no warnings 'redefine'; # to quell the "use Encode" below
 
+use vars qw($VERSION);
+$VERSION = 0.01;
+
 use Encode::CN;
 use Encode qw|encode decode|;
 use base 'Encode::Encoding';

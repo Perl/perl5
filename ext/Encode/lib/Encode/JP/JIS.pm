@@ -4,6 +4,9 @@ use base 'Encode::Encoding';
 
 use strict;
 
+use vars qw($VERSION);
+$VERSION = 0.01;
+
 # Just for the time being, we implement jis-7bit
 # encoding via EUC
 
