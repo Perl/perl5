@@ -119,8 +119,7 @@ Perl_pad_new(pTHX_ padnew_flags flags)
     /* save existing state, ... */
 
     if (flags & padnew_SAVE) {
-	SAVEVPTR(PL_curpad);
-	SAVESPTR(PL_comppad);
+	SAVECOMPPAD();
 	SAVESPTR(PL_comppad_name);
 	if (! (flags & padnew_CLONE)) {
 	    SAVEI32(PL_padix);
