@@ -1502,34 +1502,33 @@ typedef pthread_key_t	perl_key;
 #ifdef PERL_IMPLICIT_CONTEXT
 #  ifdef USE_THREADS
 struct perl_thread;
-#    define pTHX struct perl_thread *thr
-#    define pTHX_ pTHX,
-#    define _pTHX ,pTHX
-#    define aTHX thr
-#    define aTHX_ aTHX,
-#    define _aTHX ,aTHX
-#    define dTHX pTHX = (struct perl_thread *)SvPVX(PL_thrsv)
-#    define dTHR dNOOP
+#    define pTHX	struct perl_thread *thr
+#    define aTHX	thr
+#    define dTHXa(a)	pTHX = (struct perl_thread *)a
+#    define dTHX	dTHXa(SvPVX(PL_thrsv))
+#    define dTHR	dNOOP
 #  else
 #    define MULTIPLICITY
-#    define pTHX PerlInterpreter *my_perl
-#    define pTHX_ pTHX,
-#    define _pTHX ,pTHX
-#    define aTHX my_perl
-#    define aTHX_ aTHX,
-#    define _aTHX ,aTHX
-#    define dTHX pTHX = PL_curinterp
+#    define pTHX	PerlInterpreter *my_perl
+#    define aTHX	my_perl
+#    define dTHXa(a)	pTHX = (PerlInterpreter *)a
+#    define dTHX	dTHXa(PL_curinterp)
 #  endif
+#  define pTHX_		pTHX,
+#  define _pTHX		,pTHX
+#  define aTHX_		aTHX,
+#  define _aTHX		,aTHX
 #endif
 
 #ifndef pTHX
-#  define pTHX void
+#  define pTHX		void
 #  define pTHX_
 #  define _pTHX
 #  define aTHX
 #  define aTHX_
 #  define _aTHX
-#  define dTHX dNOOP
+#  define dTHXa(a)	dNOOP
+#  define dTHX		dNOOP
 #endif
 
 #define WITH_THX(s) STMT_START { dTHX; s; } STMT_END

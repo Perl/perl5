@@ -16,7 +16,7 @@
 #  endif
 #endif
 
-static void xs_init (void);
+static void xs_init (pTHX);
 static PerlInterpreter *my_perl;
 
 int jpldebug = 0;
@@ -46,8 +46,6 @@ Java_PerlInterpreter_init(JNIEnv *env, jobject obj, jstring js)
     if (PL_curinterp)
 	return;
 
-    perl_init_i18nl10n(1);
-
     if (!PL_do_undump) {
 	my_perl = perl_alloc();
 	if (!my_perl)
@@ -64,20 +62,21 @@ Java_PerlInterpreter_init(JNIEnv *env, jobject obj, jstring js)
 }
 
 JNIEXPORT void JNICALL
-Java_PerlInterpreter_eval(JNIEnv *env, jobject obj, jstring js)
+Java_PerlInterpreter_eval(void *perl, JNIEnv *env, jobject obj, jstring js)
 {
     SV* envsv;
     SV* objsv;
     dSP;
     jbyte* jb;
+    dTHXa(perl);
 
     ENTER;
     SAVETMPS;
 
     jplcurenv = env;
-    envsv = perl_get_sv("JPL::_env_", 1);
+    envsv = get_sv("JPL::_env_", 1);
     sv_setiv(envsv, (IV)(void*)env);
-    objsv = perl_get_sv("JPL::_obj_", 1);
+    objsv = get_sv("JPL::_obj_", 1);
     sv_setiv(objsv, (IV)(void*)obj);
 
     jb = (jbyte*)(*env)->GetStringUTFChars(env,js,0);
@@ -85,7 +84,7 @@ Java_PerlInterpreter_eval(JNIEnv *env, jobject obj, jstring js)
     if (jpldebug)
 	fprintf(stderr, "eval %s\n", (char*)jb);
 
-    perl_eval_pv( (char*)jb, 0 );
+    eval_pv( (char*)jb, 0 );
 
     if (SvTRUE(ERRSV)) {
 	jthrowable newExcCls;
@@ -106,10 +105,11 @@ Java_PerlInterpreter_eval(JNIEnv *env, jobject obj, jstring js)
 
 /*
 JNIEXPORT jint JNICALL
-Java_PerlInterpreter_eval(JNIEnv *env, jobject obj, jint ji)
+Java_PerlInterpreter_eval(void *perl, JNIEnv *env, jobject obj, jint ji)
 {
+    dTHXa(perl);
     op = (OP*)(void*)ji;
-    op = (*op->op_ppaddr)();
+    op = (*op->op_ppaddr)(pTHX);
     return (jint)(void*)op;
 }
 */
@@ -117,11 +117,11 @@ Java_PerlInterpreter_eval(JNIEnv *env, jobject obj, jint ji)
 /* Register any extra external extensions */
 
 /* Do not delete this line--writemain depends on it */
-EXTERN_C void boot_DynaLoader (CV* cv);
-EXTERN_C void boot_JNI (CV* cv);
+EXTERN_C void boot_DynaLoader (pTHX_ CV* cv);
+EXTERN_C void boot_JNI (pTHX_ CV* cv);
 
 static void
-xs_init()
+xs_init(pTHX)
 {
     char *file = __FILE__;
     dXSUB_SYS;
