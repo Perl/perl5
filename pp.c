@@ -376,8 +376,13 @@ PP(pp_refgen)
 {
     dSP; dMARK;
     if (GIMME != G_ARRAY) {
-	MARK[1] = *SP;
-	SP = MARK + 1;
+	if (++MARK <= SP)
+	    *MARK = *SP;
+	else
+	    *MARK = &sv_undef;
+	*MARK = refto(*MARK);
+	SP = MARK;
+	RETURN;
     }
     EXTEND_MORTAL(SP - MARK);
     while (++MARK <= SP)
