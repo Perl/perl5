@@ -26,19 +26,19 @@
 #define XST_mYES(i)   (ST(i) = &sv_yes  )
 #define XST_mUNDEF(i) (ST(i) = &sv_undef)
  
-#define XSRETURN_IV(v) do { XST_mIV(0,v);  XSRETURN(1); } while (0)
-#define XSRETURN_NV(v) do { XST_mNV(0,v);  XSRETURN(1); } while (0)
-#define XSRETURN_PV(v) do { XST_mPV(0,v);  XSRETURN(1); } while (0)
-#define XSRETURN_NO    do { XST_mNO(0);    XSRETURN(1); } while (0)
-#define XSRETURN_YES   do { XST_mYES(0);   XSRETURN(1); } while (0)
-#define XSRETURN_UNDEF do { XST_mUNDEF(0); XSRETURN(1); } while (0)
-#define XSRETURN_EMPTY do {                XSRETURN(0); } while (0)
+#define XSRETURN_IV(v) STMT_START { XST_mIV(0,v);  XSRETURN(1); } STMT_END
+#define XSRETURN_NV(v) STMT_START { XST_mNV(0,v);  XSRETURN(1); } STMT_END
+#define XSRETURN_PV(v) STMT_START { XST_mPV(0,v);  XSRETURN(1); } STMT_END
+#define XSRETURN_NO    STMT_START { XST_mNO(0);    XSRETURN(1); } STMT_END
+#define XSRETURN_YES   STMT_START { XST_mYES(0);   XSRETURN(1); } STMT_END
+#define XSRETURN_UNDEF STMT_START { XST_mUNDEF(0); XSRETURN(1); } STMT_END
+#define XSRETURN_EMPTY STMT_START {                XSRETURN(0); } STMT_END
 
 #define newXSproto(a,b,c,d)	sv_setpv((SV*)newXS(a,b,c), d)
 
 #ifdef XS_VERSION
 # define XS_VERSION_BOOTCHECK \
-    do {                                                                      \
+    STMT_START {                                                                      \
         char vn[255], *module = SvPV(ST(0),na);                               \
         if (items >= 2)         /* version supplied as bootstrap arg */       \
             Sv=ST(1);                                                         \
@@ -49,7 +49,7 @@
         if (Sv && (!SvOK(Sv) || strNE(XS_VERSION, SvPV(Sv,na))) )             \
             croak("%s object version %s does not match %s.pm $VERSION %s",    \
               module,XS_VERSION, module,(Sv && SvOK(Sv))?SvPV(Sv,na):"(undef)");\
-    } while (0)
+    } STMT_END
 #else
 # define XS_VERSION_BOOTCHECK
 #endif
