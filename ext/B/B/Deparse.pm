@@ -350,6 +350,10 @@ sub new {
     $self->{'cuddle'} = "\n";
     $self->{'indent_size'} = 4;
     $self->{'use_tabs'} = 0;
+    $self->{'expand'} = 0;
+    $self->{'unquote'} = 0;
+    $self->{'linenums'} = 0;
+    $self->{'parens'} = 0;
     $self->{'ex_const'} = "'???'";
     while (my $arg = shift @_) {
 	if (substr($arg, 0, 2) eq "-u") {
