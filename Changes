@@ -31,6 +31,360 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 13225] By: jhi                                   on 2001/11/23  19:53:53
+        Log: Never mind.
+     Branch: perl
+	   - lib/Filter/Simple/lib/ExportTest.pm
+	   - lib/Filter/Simple/lib/ImportTest.pm
+____________________________________________________________________________
+[ 13224] By: jhi                                   on 2001/11/23  19:52:03
+        Log: Mis-add.
+     Branch: perl
+	   + lib/Filter/Simple/lib/ExportTest.pm
+	   + lib/Filter/Simple/lib/ImportTest.pm
+____________________________________________________________________________
+[ 13223] By: jhi                                   on 2001/11/23  19:39:57
+        Log: Upgrade to Filter::Simple 0.77.
+     Branch: perl
+	   + lib/Filter/Simple/t/export.t lib/Filter/Simple/t/import.t
+	   - t/lib/FilterOnlyTest.pm t/lib/FilterTest.pm
+	   ! MANIFEST lib/Filter/Simple.pm lib/Filter/Simple/Changes
+	   ! lib/Filter/Simple/README lib/Filter/Simple/t/data.t
+	   ! lib/Filter/Simple/t/filter.t lib/Filter/Simple/t/filter_only.t
+____________________________________________________________________________
+[ 13222] By: jhi                                   on 2001/11/23  19:12:20
+        Log: Missing p4 add.
+     Branch: perl
+	   + lib/ExtUtils/MM_VMS.t
+____________________________________________________________________________
+[ 13221] By: jhi                                   on 2001/11/23  19:10:18
+        Log: Pass 5 at perldelta - module and utility updates cleanup.
+     Branch: perl
+	   ! pod/perldelta.pod
+____________________________________________________________________________
+[ 13219] By: jhi                                   on 2001/11/23  18:55:06
+        Log: Regen Porting stuff; regen toc; cleanup nit in Configure.
+     Branch: perl
+	   ! Configure Porting/Glossary Porting/config.sh Porting/config_H
+	   ! pod/buildtoc.PL pod/perltoc.pod
+____________________________________________________________________________
+[ 13218] By: jhi                                   on 2001/11/23  18:48:18
+        Log: Add procselfexe and d_dirfd to strange lands.
+     Branch: perl
+	   ! NetWare/config.wc configure.com epoc/config.sh uconfig.h
+	   ! uconfig.sh vos/config.alpha.def vos/config.alpha.h
+	   ! vos/config.ga.def vos/config.ga.h win32/config.bc
+	   ! win32/config.gc win32/config.vc win32/config.win64
+	   ! wince/config.ce
+____________________________________________________________________________
+[ 13216] By: jhi                                   on 2001/11/23  18:47:17
+        Log: Better to "quote" the pathname.
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[ 13215] By: jhi                                   on 2001/11/23  18:34:24
+        Log: Use PROCSELFEXE_PATH.
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[ 13213] By: jhi                                   on 2001/11/23  18:31:13
+        Log: Add probing for BSD-like /proc/curpoc/file.
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[ 13211] By: jhi                                   on 2001/11/23  18:09:37
+        Log: Add probing for dirfd() so that it can be added it IO::Dir.
+     Branch: perl
+	   ! Configure config_h.SH perl.h
+____________________________________________________________________________
+[ 13210] By: jhi                                   on 2001/11/23  17:37:27
+        Log: ...and update the test count.
+     Branch: perl
+	   ! lib/Pod/t/basic.t
+____________________________________________________________________________
+[ 13209] By: jhi                                   on 2001/11/23  17:19:12
+        Log: Must remove the cap test also from the test script.
+     Branch: perl
+	   ! lib/Pod/t/basic.t
+____________________________________________________________________________
+[ 13208] By: jhi                                   on 2001/11/23  17:11:58
+        Log: Subject: [PATCH] Tests are good
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Fri, 23 Nov 2001 18:12:21 +0000
+             Message-ID: <20011123181220.F37621@plum.flirble.org>
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[ 13207] By: jhi                                   on 2001/11/23  17:08:31
+        Log: The basic.cap from podlators 1.14 is not very portable.
+     Branch: perl
+	   - lib/Pod/t/basic.cap
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13206] By: jhi                                   on 2001/11/23  16:41:13
+        Log: Subject: Re: [DOC PATCHES] pod cleanups
+             From: rgarciasuarez@free.fr (Rafael Garcia-Suarez)
+             Date: 22 Nov 2001 12:54:16 -0000
+             Message-Id: <slrn9vptci.klv.rgarciasuarez@rafael.kazibao.net>
+     Branch: perl
+	   ! pod/perlfunc.pod pod/perlmodinstall.pod pod/perlre.pod
+	   ! pod/perlretut.pod pod/perluniintro.pod vms/perlvms.pod
+____________________________________________________________________________
+[ 13205] By: jhi                                   on 2001/11/23  16:38:10
+        Log: FAQ sync.
+     Branch: perl
+	   ! pod/perlfaq.pod pod/perlfaq3.pod pod/perlfaq4.pod
+____________________________________________________________________________
+[ 13204] By: jhi                                   on 2001/11/23  16:37:21
+        Log: Subject: [PATCH: perl@13169] inital testing for MM_VMS 
+             From: PPrymmer@factset.com
+             Date: Fri, 23 Nov 2001 11:43:45 -0500
+             Message-ID: <OFC84EA224.295430FF-ON85256B0D.005BB70C@55.25.11>
+     Branch: perl
+	   ! MANIFEST lib/ExtUtils/MM_VMS.pm
+____________________________________________________________________________
+[ 13203] By: jhi                                   on 2001/11/23  15:47:13
+        Log: Corify podlators 1.14 test.
+     Branch: perl
+	   ! lib/Pod/t/basic.t
+____________________________________________________________________________
+[ 13202] By: jhi                                   on 2001/11/23  15:38:36
+        Log: Output tweak needed because of podlators 1.14.
+     Branch: perl
+	   ! t/pod/multiline_items.xr
+____________________________________________________________________________
+[ 13201] By: jhi                                   on 2001/11/23  15:38:04
+        Log: Upgrade to podlators 1.14.
+     Branch: perl
+	   + lib/Pod/t/basic.cap lib/Pod/t/basic.clr lib/Pod/t/basic.man
+	   + lib/Pod/t/basic.ovr lib/Pod/t/basic.pod lib/Pod/t/basic.t
+	   + lib/Pod/t/basic.txt lib/Pod/t/parselink.t
+	   ! MANIFEST lib/Pod/Man.pm lib/Pod/ParseLink.pm lib/Pod/Text.pm
+	   ! lib/Pod/Text/Overstrike.pm
+____________________________________________________________________________
+[ 13200] By: jhi                                   on 2001/11/23  15:32:06
+        Log: perlmodinstall tweaks from Philip Newton.
+     Branch: perl
+	   ! pod/perlmodinstall.pod
+____________________________________________________________________________
+[ 13199] By: jhi                                   on 2001/11/23  15:05:02
+        Log: Subject: Re: [PATCH] Porting/genlog -bi and range
+             From: Autrijus Tang <autrijus@autrijus.org>           
+             Date: Fri, 23 Nov 2001 23:55:53 +0800
+             Message-ID: <20011123235553.A2310@not.autrijus.org>
+     Branch: perl
+	   ! Porting/genlog
+____________________________________________________________________________
+[ 13198] By: jhi                                   on 2001/11/23  14:58:40
+        Log: Subject: Re: regex oddness with \Z and $&
+             From: Hugo van der Sanden <hv@crypt.compulink.co.uk>  
+             Date: Fri, 23 Nov 2001 15:15:24 +0000
+             Message-Id: <200111231515.fANFFOR10341@crypt.compulink.co.uk>
+     Branch: perl
+	   ! regcomp.c t/op/re_tests
+____________________________________________________________________________
+[ 13197] By: jhi                                   on 2001/11/23  14:44:19
+        Log: regen_headers.
+     Branch: perl
+	   ! embed.h global.sym pod/perlapi.pod proto.h
+____________________________________________________________________________
+[ 13196] By: jhi                                   on 2001/11/23  14:24:08
+        Log: Forgotten check-in.
+     Branch: perl
+	   ! pod/perlapi.pod
+____________________________________________________________________________
+[ 13195] By: jhi                                   on 2001/11/23  14:23:49
+        Log: Remembered everything in 13152 but Test/Simple.pm itself, duh.
+     Branch: perl
+	   ! lib/Test/Simple.pm
+____________________________________________________________________________
+[ 13194] By: jhi                                   on 2001/11/22  11:31:59
+        Log: Retract #13173 (effectively retract Net::Ping 2.06,
+             go back to 2.04, the 2.06 hasn't seen the patches
+             that have gone to the blead version.)
+     Branch: perl
+	   - lib/Net/Ping/CHANGES lib/Net/Ping/README
+	   - lib/Net/Ping/t/100_load.t lib/Net/Ping/t/110_icmp_inst.t
+	   - lib/Net/Ping/t/120_udp_inst.t lib/Net/Ping/t/130_tcp_inst.t
+	   - lib/Net/Ping/t/200_ping_tcp.t
+	   ! MANIFEST lib/Net/Ping.pm
+____________________________________________________________________________
+[ 13193] By: jhi                                   on 2001/11/22  11:27:49
+        Log: Subject: Re: [PATCH perldoc] problems with pod2man         
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Thu, 22 Nov 2001 11:00:38 GMT
+             Message-Id: <200111221100.LAA08582@tempest.npl.co.uk>
+     Branch: perl
+	   ! utils/perldoc.PL
+____________________________________________________________________________
+[ 13191] By: jhi                                   on 2001/11/22  05:06:09
+        Log: procselfexe tweak: for some reason I had a ls in
+             /proc/self/exe, not the ls Configure thought it
+             would found.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 13190] By: jhi                                   on 2001/11/22  04:45:36
+        Log: Corify the Net::Ping tests; skip the tests
+             unless $ENV{PERL_TEST_Net_Ping} is true.
+     Branch: perl
+	   ! lib/Net/Ping/t/100_load.t lib/Net/Ping/t/110_icmp_inst.t
+	   ! lib/Net/Ping/t/120_udp_inst.t lib/Net/Ping/t/130_tcp_inst.t
+	   ! lib/Net/Ping/t/200_ping_tcp.t
+____________________________________________________________________________
+[ 13188] By: jhi                                   on 2001/11/22  04:43:29
+        Log: The #13182 didn't really help.  The real problem
+             seems to be that 'sh' can in AIX mean at least three
+             different things, and we can't know which one it is
+             unless we export $newsh from an earlier run (and it's
+             the 'bsh' aka 'sh' that has the the broken test -h).
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 13187] By: gsar                                  on 2001/11/22  03:42:58
+        Log: local(*CORE::GLOBAL::require) doesn't behave like other overrides 
+     Branch: perl
+	   ! op.c t/op/override.t
+____________________________________________________________________________
+[ 13186] By: jhi                                   on 2001/11/22  03:18:49
+        Log: Subject: [PATCH: perl@13169] add Shell.t tests for VMS
+             From: PPrymmer@factset.com 
+             Date: Wed, 21 Nov 2001 20:17:25 -0500
+             Message-ID: <OF6DA93FFA.A954A0D4-ON85256B0C.0006DDF9@55.25.11>
+     Branch: perl
+	   ! lib/Shell.t
+____________________________________________________________________________
+[ 13185] By: jhi                                   on 2001/11/22  03:09:27
+        Log: Reapply perlmodinstall parts of #12897.
+     Branch: perl
+	   ! pod/perlmodinstall.pod
+____________________________________________________________________________
+[ 13184] By: jhi                                   on 2001/11/22  03:08:00
+        Log: perlmodinstall 2.01 from Jon Orwant.
+     Branch: perl
+	   ! pod/perlmodinstall.pod
+____________________________________________________________________________
+[ 13183] By: jhi                                   on 2001/11/21  22:33:20
+        Log: Subject: [PATCH @10907] REXX on OS/2
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Wed, 21 Nov 2001 15:26:11 -0500
+             Message-ID: <20011121152611.A13664@math.ohio-state.edu>
+     Branch: perl
+	   ! os2/Makefile.SHs os2/OS2/REXX/REXX.pm os2/OS2/REXX/REXX.xs
+	   ! os2/OS2/REXX/t/rx_cmprt.t os2/os2.c os2/perlrexx.c
+____________________________________________________________________________
+[ 13181] By: jhi                                   on 2001/11/21  22:30:37
+        Log: AIX has broken builtin 'test'.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 13180] By: jhi                                   on 2001/11/21  22:27:16
+        Log: Subject: [PATCH 5.7.x] INSTALL size update
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Wed, 21 Nov 2001 14:49:21 -0500 (EST) 
+             Message-ID: <Pine.SOL.4.10.10111211448190.16009-100000@maxwell.phys.lafayette.edu>         
+     Branch: perl
+	   ! INSTALL
+____________________________________________________________________________
+[ 13179] By: jhi                                   on 2001/11/21  22:25:14
+        Log: Implement the sort pragma.  Split sort code from pp_ctl.c
+             to pp_sort.c.  Includes the quicksort stabilizing layer
+             from John P. Linderman.  -Msort=qsort or -Msort=fast is
+             faster than without (or with -Msort=mergesort or -Msort=safe)
+             for short random inputs, but for some reason not quite as fast
+             as 5.6.1 qsort.  More benchmarking, profiling, tuning, and
+             optimizing definitely needed.
+     Branch: perl
+	   + lib/sort.pm lib/sort.t pp_sort.c
+	   ! MANIFEST Makefile.SH Makefile.micro NetWare/Makefile embed.h
+	   ! embed.pl global.sym perl.h pp_ctl.c proto.h
+	   ! vms/descrip_mms.template vos/build.cm win32/Makefile
+	   ! win32/makefile.mk wince/Makefile.ce
+____________________________________________________________________________
+[ 13178] By: gbarr                                 on 2001/11/21  18:30:10
+        Log: Sync file with libnet-1.0901-tobe
+     Branch: perl
+	   + lib/Net/t/config.t lib/Net/t/libnet_t.pl lib/Net/t/time.t
+	   ! MANIFEST lib/Net/ChangeLog.libnet lib/Net/Config.pm
+	   ! lib/Net/Domain.pm lib/Net/FTP.pm lib/Net/FTP/E.pm
+	   ! lib/Net/FTP/L.pm lib/Net/NNTP.pm lib/Net/POP3.pm
+	   ! lib/Net/SMTP.pm lib/Net/libnetFAQ.pod
+____________________________________________________________________________
+[ 13177] By: jhi                                   on 2001/11/21  17:31:28
+        Log: Subject: [PATCH perldoc] problems with pod2man
+             From: Robin Barker <rmb1@cise.npl.co.uk>
+             Date: Wed, 21 Nov 2001 17:48:51 GMT
+             Message-Id: <200111211748.RAA07123@tempest.npl.co.uk>
+     Branch: perl
+	   ! utils/perldoc.PL
+____________________________________________________________________________
+[ 13176] By: jhi                                   on 2001/11/21  17:27:30
+        Log: debug_pad only visible when debugging.
+     Branch: perl
+	   ! makedef.pl
+____________________________________________________________________________
+[ 13174] By: jhi                                   on 2001/11/21  16:01:39
+        Log: procselfexe tweaks.
+     Branch: perl
+	   ! Configure config_h.SH
+____________________________________________________________________________
+[ 13173] By: jhi                                   on 2001/11/21  15:55:08
+        Log: Upgrade to Net::Ping 2.06.
+     Branch: perl
+	   + lib/Net/Ping/CHANGES lib/Net/Ping/README
+	   + lib/Net/Ping/t/100_load.t lib/Net/Ping/t/110_icmp_inst.t
+	   + lib/Net/Ping/t/120_udp_inst.t lib/Net/Ping/t/130_tcp_inst.t
+	   + lib/Net/Ping/t/200_ping_tcp.t
+	   ! MANIFEST lib/Net/Ping.pm
+____________________________________________________________________________
+[ 13172] By: jhi                                   on 2001/11/21  15:17:13
+        Log: Upgrade to Math::BigInt 1.47.
+     Branch: perl
+	   ! lib/Math/BigFloat.pm lib/Math/BigInt.pm
+	   ! lib/Math/BigInt/Calc.pm lib/Math/BigInt/t/bigfltpm.inc
+	   ! lib/Math/BigInt/t/bigfltpm.t lib/Math/BigInt/t/bigintc.t
+	   ! lib/Math/BigInt/t/bigintpm.inc lib/Math/BigInt/t/bigintpm.t
+	   ! lib/Math/BigInt/t/mbimbf.t lib/Math/BigInt/t/sub_mbf.t
+	   ! lib/Math/BigInt/t/sub_mbi.t
+____________________________________________________________________________
+[ 13171] By: jhi                                   on 2001/11/21  15:03:53
+        Log: Dynaloading for POSIX-BC from Thomas Dorner.
+     Branch: perl
+	   ! hints/posix-bc.sh
+____________________________________________________________________________
+[ 13170] By: jhi                                   on 2001/11/21  15:02:39
+        Log: Strange: the same mysterious regex study bug
+             seems to be present both in OS/390 and POSIX-BC.
+             Deep EBCDIC magic that regex engine gets wrong,
+             or a bug in some compiler/library shared by the
+             two platforms?  From Thomas Dorner.
+     Branch: perl
+	   ! t/op/study.t
+____________________________________________________________________________
+[ 13169] By: jhi                                   on 2001/11/21  14:47:03
+        Log: More lost and found.
+     Branch: perl
+	   + lib/Test/Simple/README
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13168] By: jhi                                   on 2001/11/21  14:45:05
+        Log: MANIFESTly missing.
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 13167] By: jhi                                   on 2001/11/21  14:42:35
+        Log: Subject: Re: PERFORCE change 13162 for review               
+             From: Philip Newton <Philip.Newton@gmx.net> 
+             Date: Wed, 21 Nov 2001 16:44:30 +0100
+             Message-ID: <j2invt4a84bccvj8khob0s9m3hd5urmcud@4ax.com>
+     Branch: perl
+	   ! ext/Devel/PPPort/PPPort.pm
+____________________________________________________________________________
+[ 13166] By: jhi                                   on 2001/11/21  14:39:27
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 13165] By: jhi                                   on 2001/11/21  14:34:43
         Log: Small doc tweaks.
      Branch: perl
