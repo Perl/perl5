@@ -1,4 +1,5 @@
 package Cwd;
+$VERSION = $VERSION = '2.15';
 
 =head1 NAME
 
@@ -129,6 +130,12 @@ C<fast_abs_path()>.
 
 =back
 
+=head1 AUTHOR
+
+Originally by the perl5-porters.
+
+Now maintained by Ken Williams <KWILLIAMS@cpan.org>
+
 =head1 SEE ALSO
 
 L<File::chdir>
@@ -137,9 +144,7 @@ L<File::chdir>
 
 use strict;
 use Exporter;
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-
-$VERSION = '2.12';
+use vars qw(@ISA @EXPORT @EXPORT_OK);
 
 @ISA = qw/ Exporter /;
 @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
@@ -178,21 +183,21 @@ eval {
 # are safe.  This prevents _backtick_pwd() consulting $ENV{PATH}
 # so everything works under taint mode.
 my $pwd_cmd;
-foreach my $try (qw(/bin/pwd /usr/bin/pwd)) {
+foreach my $try ('/bin/pwd',
+		 '/usr/bin/pwd',
+		 '/QOpenSys/bin/pwd', # OS/400 PASE.
+		) {
+
     if( -x $try ) {
         $pwd_cmd = $try;
         last;
     }
 }
 unless ($pwd_cmd) {
-    if (-x '/QOpenSys/bin/pwd') { # OS/400 PASE.
-        $pwd_cmd = '/QOpenSys/bin/pwd' ;
-    } else {
-        # Isn't this wrong?  _backtick_pwd() will fail if somenone has
-        # pwd in their path but it is not /bin/pwd or /usr/bin/pwd?
-        # See [perl #16774]. --jhi
-        $pwd_cmd = 'pwd';
-    }
+    # Isn't this wrong?  _backtick_pwd() will fail if somenone has
+    # pwd in their path but it is not /bin/pwd or /usr/bin/pwd?
+    # See [perl #16774]. --jhi
+    $pwd_cmd = 'pwd';
 }
 
 # Lazy-load Carp

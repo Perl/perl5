@@ -1,5 +1,26 @@
 Revision history for Perl extension Cwd.
 
+2.15  Fri Jan 16 08:09:44 CST 2004
+
+ - Fixed a problem on static perl builds - while creating
+   Makefile.aperl, it was loading a mismatched version of Cwd from
+   blib/ . [Reported by Blair Zajac]
+
+2.14  Thu Jan  8 18:51:08 CST 2004
+
+ - We now use File::Spec->canonpath() and properly-escaped regular
+   expressions when comparing paths in the regression tests.  This
+   fixes some testing failures in 2.13 on non-Unix platforms.  No
+   changes were made in the actual Cwd module code. [Steve Hay]
+
+2.13  Fri Jan  2 22:29:42 CST 2004
+
+ - Changed a '//' comment to a '/* */' comment in the XS code, so that
+   it'll compile properly under ANSI C rules. [Jarkko Hietaniemi]
+
+ - Fixed a 1-character buffer overrun problem in the C code. [The BSD
+   people]
+
 2.12  Fri Dec 19 17:04:52 CST 2003
 
  - Fixed a bug on Cygwin - the output of realpath() should have been
