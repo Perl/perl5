@@ -309,6 +309,31 @@ April 1999 (B3920-13941)" or the Freely available PTH package, available
 though worldwide HP-UX mirrors of precompiled packages
 (e.g. http://hpux.tn.tudelft.nl/hppd/hpux/)
 
+If you are going to use the HP DCE package, the library used for threading
+is /usr/lib/libcma.sl, but there have been multiple updates of that
+library over time. Perl will build with the first version, but it
+will not pass the test suite. Older Oracle versions might be a compelling
+reason, not to update that library, otherwise please find a newer version
+in one of the following patches: PHSS_19739, PHSS_20608, or PHSS_23672
+
+reformatted output:
+
+  d3:/usr/lib 106 > what libcma-*.1
+  libcma-00000.1:
+     HP DCE/9000 1.5               Module: libcma.sl (Export)
+                                   Date: Apr 29 1996 22:11:24
+  libcma-19739.1:
+     HP DCE/9000 1.5 PHSS_19739-40 Module: libcma.sl (Export)
+                                   Date: Sep  4 1999 01:59:07
+  libcma-20608.1:
+     HP DCE/9000 1.5 PHSS_20608    Module: libcma.1 (Export)
+                                   Date: Dec  8 1999 18:41:23
+  libcma-23672.1:
+     HP DCE/9000 1.5 PHSS_23672    Module: libcma.1 (Export)
+                                   Date: Apr  9 2001 10:01:06
+  d3:/usr/lib 107 >
+
+
 =head2 64-bit Perl on HP-UX
 
 Beginning with HP-UX 11.00, programs compiled under HP-UX can take
@@ -419,11 +444,12 @@ the same bug affects also Solaris.
 =head1 AUTHOR
 
 Jeff Okamoto <okamoto@corp.hp.com>
+H.Merijn Brand <h.m.brand@hccnet.nl>
 
 With much assistance regarding shared libraries from Marc Sabatella.
 
 =head1 DATE
 
-Version 0.6.4: 2001-10-09
+Version 0.6.5: 2002-02-27
 
 =cut

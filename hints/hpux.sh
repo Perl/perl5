@@ -409,6 +409,27 @@ EOM
 		if [ -f /usr/lib/libcma.sl ]; then
 		    # DCE (from Core OS CD) is installed
 
+                   # Check if it is pristine, or patched
+                   cmavsn=`what /usr/lib/libcma.sl 2>&1 | grep 1996`
+                   if [ ! -z "$cmavsn" ]; then
+                       cat <<EOM >&4
+
+***************************************************************************
+
+Perl will support threading through /usr/lib/libcma.sl from
+the HP DCE package, but the version found is too old to be
+reliable.
+
+If you are not depending on this specific version of the library,
+consider to upgrade using patch PHSS_23672 (read README.hpux)
+
+***************************************************************************
+
+(sleeping for 10 seconds...)
+EOM
+			  sleep 10
+                       fi
+
 		    # It needs # libcma and OLD_PTHREADS_API. Also
 		    # <pthread.h> needs to be #included before any
 		    # other includes (in perl.h)
