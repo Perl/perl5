@@ -358,7 +358,7 @@ sub B::AV::bsave {
 
     nice "-AV-",
     asm "ldsv", $varix = $ix unless $ix == $varix;
-    asm "av_extend", $av->MAX;
+    asm "av_extend", $av->MAX if $av->MAX >= 0;
     asm "av_pushx", $_ for @array;
     asm "sv_refcnt", $av->REFCNT;
     asm "xav_flags", $av->AvFLAGS;
