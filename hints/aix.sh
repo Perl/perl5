@@ -185,6 +185,10 @@ EOM
 	    esac
 	    ccflags="$ccflags `getconf XBS5_LPBIG_OFFBIG_CFLAGS 2>/dev/null`"
     	    ccflags="$ccflags -DUSE_LONG_LONG"
+	    case "$cc" in
+	    *c89) ccflags="$ccflags -qlonglong" ;;
+	    # Plus AIX also requires LL prefixes for all long long constants.
+	    esac
 
 	    ldflags="$ldflags `getconf XBS5_LPBIG_OFFBIG_LDFLAGS 2>/dev/null`"
 	    # _Somehow_ in AIX 4.3.1.0 the above getconf call manages to
