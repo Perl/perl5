@@ -267,8 +267,8 @@ package :	PACKAGE WORD ';'
 			{ package(Nullop); }
 	;
 
-use	:	USE startsub WORD listexpr ';'
-			{ utilize($1, $2, $3, $4); }
+use	:	USE startsub WORD WORD listexpr ';'
+			{ utilize($1, $2, $3, $4, $5); }
 	;
 
 expr	:	expr ANDOP expr
