@@ -16,7 +16,7 @@ BEGIN {
 
 use Test;
 
-plan tests => 11;
+plan tests => 15;
 
 my $STDOUT = './results-0';
 my $STDERR = './results-1';
@@ -144,6 +144,28 @@ try({PERL5OPT => '-t'},
     ['-e', 'print ${^TAINT}'],
     '1',
     '');
+
+try({PERLLIB => "foobar:42"},
+    ['-e', 'print grep { $_ eq "foobar" } @INC'],
+    'foobar',
+    '');
+
+try({PERLLIB => "foobar:42"},
+    ['-e', 'print grep { $_ eq "42" } @INC'],
+    '42',
+    '');
+
+try({PERL5LIB => "foobar:42"},
+    ['-e', 'print grep { $_ eq "foobar" } @INC'],
+    'foobar',
+    '');
+
+try({PERL5LIB => "foobar:42"},
+    ['-e', 'print grep { $_ eq "42" } @INC'],
+    '42',
+    '');
+
+# PERL5LIB tests with included arch directories still missing
 
 END {
     1 while unlink $STDOUT;

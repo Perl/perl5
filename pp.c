@@ -3324,14 +3324,13 @@ PP(pp_ucfirst)
     register U8 *s;
     STRLEN slen;
 
-    if (DO_UTF8(sv)) {
+    SvGETMAGIC(sv);
+    if (DO_UTF8(sv) && (s = (U8*)SvPV_nomg(sv, slen)) && slen && UTF8_IS_START(*s)) {
 	U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
 	STRLEN ulen;
 	STRLEN tculen;
 
-	s = (U8*)SvPV(sv, slen);
 	utf8_to_uvchr(s, &ulen);
-
 	toTITLE_utf8(s, tmpbuf, &tculen);
 	utf8_to_uvchr(tmpbuf, 0);
 
@@ -3343,7 +3342,7 @@ PP(pp_ucfirst)
 	    SETs(TARG);
 	}
 	else {
-	    s = (U8*)SvPV_force(sv, slen);
+	    s = (U8*)SvPV_force_nomg(sv, slen);
 	    Copy(tmpbuf, s, tculen, U8);
 	}
     }
@@ -3351,11 +3350,11 @@ PP(pp_ucfirst)
 	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
 	    dTARGET;
 	    SvUTF8_off(TARG);				/* decontaminate */
-	    sv_setsv(TARG, sv);
+	    sv_setsv_nomg(TARG, sv);
 	    sv = TARG;
 	    SETs(sv);
 	}
-	s = (U8*)SvPV_force(sv, slen);
+	s = (U8*)SvPV_force_nomg(sv, slen);
 	if (*s) {
 	    if (IN_LOCALE_RUNTIME) {
 		TAINT;
@@ -3366,8 +3365,7 @@ PP(pp_ucfirst)
 		*s = toUPPER(*s);
 	}
     }
-    if (SvSMAGICAL(sv))
-	mg_set(sv);
+    SvSETMAGIC(sv);
     RETURN;
 }
 
@@ -3378,7 +3376,8 @@ PP(pp_lcfirst)
     register U8 *s;
     STRLEN slen;
 
-    if (DO_UTF8(sv) && (s = (U8*)SvPV(sv, slen)) && slen && UTF8_IS_START(*s)) {
+    SvGETMAGIC(sv);
+    if (DO_UTF8(sv) && (s = (U8*)SvPV_nomg(sv, slen)) && slen && UTF8_IS_START(*s)) {
 	STRLEN ulen;
 	U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
 	U8 *tend;
@@ -3386,7 +3385,6 @@ PP(pp_lcfirst)
 
 	toLOWER_utf8(s, tmpbuf, &ulen);
 	uv = utf8_to_uvchr(tmpbuf, 0);
-	
 	tend = uvchr_to_utf8(tmpbuf, uv);
 
 	if (!SvPADTMP(sv) || (STRLEN)(tend - tmpbuf) != ulen || SvREADONLY(sv)) {
@@ -3397,7 +3395,7 @@ PP(pp_lcfirst)
 	    SETs(TARG);
 	}
 	else {
-	    s = (U8*)SvPV_force(sv, slen);
+	    s = (U8*)SvPV_force_nomg(sv, slen);
 	    Copy(tmpbuf, s, ulen, U8);
 	}
     }
@@ -3405,11 +3403,11 @@ PP(pp_lcfirst)
 	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
 	    dTARGET;
 	    SvUTF8_off(TARG);				/* decontaminate */
-	    sv_setsv(TARG, sv);
+	    sv_setsv_nomg(TARG, sv);
 	    sv = TARG;
 	    SETs(sv);
 	}
-	s = (U8*)SvPV_force(sv, slen);
+	s = (U8*)SvPV_force_nomg(sv, slen);
 	if (*s) {
 	    if (IN_LOCALE_RUNTIME) {
 		TAINT;
@@ -3420,8 +3418,7 @@ PP(pp_lcfirst)
 		*s = toLOWER(*s);
 	}
     }
-    if (SvSMAGICAL(sv))
-	mg_set(sv);
+    SvSETMAGIC(sv);
     RETURN;
 }
 
@@ -3432,6 +3429,7 @@ PP(pp_uc)
     register U8 *s;
     STRLEN len;
 
+    SvGETMAGIC(sv);
     if (DO_UTF8(sv)) {
 	dTARGET;
 	STRLEN ulen;
@@ -3439,7 +3437,7 @@ PP(pp_uc)
 	U8 *send;
 	U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
 
-	s = (U8*)SvPV(sv,len);
+	s = (U8*)SvPV_nomg(sv,len);
 	if (!len) {
 	    SvUTF8_off(TARG);				/* decontaminate */
 	    sv_setpvn(TARG, "", 0);
@@ -3469,11 +3467,11 @@ PP(pp_uc)
 	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
 	    dTARGET;
 	    SvUTF8_off(TARG);				/* decontaminate */
-	    sv_setsv(TARG, sv);
+	    sv_setsv_nomg(TARG, sv);
 	    sv = TARG;
 	    SETs(sv);
 	}
-	s = (U8*)SvPV_force(sv, len);
+	s = (U8*)SvPV_force_nomg(sv, len);
 	if (len) {
 	    register U8 *send = s + len;
 
@@ -3489,8 +3487,7 @@ PP(pp_uc)
 	    }
 	}
     }
-    if (SvSMAGICAL(sv))
-	mg_set(sv);
+    SvSETMAGIC(sv);
     RETURN;
 }
 
@@ -3501,6 +3498,7 @@ PP(pp_lc)
     register U8 *s;
     STRLEN len;
 
+    SvGETMAGIC(sv);
     if (DO_UTF8(sv)) {
 	dTARGET;
 	STRLEN ulen;
@@ -3508,7 +3506,7 @@ PP(pp_lc)
 	U8 *send;
 	U8 tmpbuf[UTF8_MAXLEN_UCLC+1];
 
-	s = (U8*)SvPV(sv,len);
+	s = (U8*)SvPV_nomg(sv,len);
 	if (!len) {
 	    SvUTF8_off(TARG);				/* decontaminate */
 	    sv_setpvn(TARG, "", 0);
@@ -3555,12 +3553,12 @@ PP(pp_lc)
 	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
 	    dTARGET;
 	    SvUTF8_off(TARG);				/* decontaminate */
-	    sv_setsv(TARG, sv);
+	    sv_setsv_nomg(TARG, sv);
 	    sv = TARG;
 	    SETs(sv);
 	}
 
-	s = (U8*)SvPV_force(sv, len);
+	s = (U8*)SvPV_force_nomg(sv, len);
 	if (len) {
 	    register U8 *send = s + len;
 
@@ -3576,8 +3574,7 @@ PP(pp_lc)
 	    }
 	}
     }
-    if (SvSMAGICAL(sv))
-	mg_set(sv);
+    SvSETMAGIC(sv);
     RETURN;
 }
 

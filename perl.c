@@ -1208,7 +1208,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		char *p;
 		STRLEN len = strlen(s);
 		p = savepvn(s, len);
-		incpush(p, TRUE, TRUE);
+		incpush(p, TRUE, TRUE, FALSE);
 		sv_catpvn(sv, "-I", 2);
 		sv_catpvn(sv, p, len);
 		sv_catpvn(sv, " ", 1);
@@ -2417,7 +2417,7 @@ Perl_moreswitches(pTHX_ char *s)
 		    p++;
 	    } while (*p && *p != '-');
 	    e = savepvn(s, e-s);
-	    incpush(e, TRUE, TRUE);
+	    incpush(e, TRUE, TRUE, FALSE);
 	    Safefree(e);
 	    s = p;
 	    if (*s == '-')
@@ -3689,9 +3689,9 @@ S_init_perllib(pTHX)
 #ifndef VMS
 	s = PerlEnv_getenv("PERL5LIB");
 	if (s)
-	    incpush(s, TRUE, TRUE);
+	    incpush(s, TRUE, TRUE, TRUE);
 	else
-	    incpush(PerlEnv_getenv("PERLLIB"), FALSE, FALSE);
+	    incpush(PerlEnv_getenv("PERLLIB"), FALSE, FALSE, TRUE);
 #else /* VMS */
 	/* Treat PERL5?LIB as a possible search list logical name -- the
 	 * "natural" VMS idiom for a Unix path string.  We allow each
@@ -3700,9 +3700,9 @@ S_init_perllib(pTHX)
 	char buf[256];
 	int idx = 0;
 	if (my_trnlnm("PERL5LIB",buf,0))
-	    do { incpush(buf,TRUE,TRUE); } while (my_trnlnm("PERL5LIB",buf,++idx));
+	    do { incpush(buf,TRUE,TRUE,TRUE); } while (my_trnlnm("PERL5LIB",buf,++idx));
 	else
-	    while (my_trnlnm("PERLLIB",buf,idx++)) incpush(buf,FALSE,FALSE);
+	    while (my_trnlnm("PERLLIB",buf,idx++)) incpush(buf,FALSE,FALSE,TRUE);
 #endif /* VMS */
     }
 
@@ -3710,11 +3710,11 @@ S_init_perllib(pTHX)
     ARCHLIB PRIVLIB SITEARCH SITELIB VENDORARCH and VENDORLIB
 */
 #ifdef APPLLIB_EXP
-    incpush(APPLLIB_EXP, TRUE, TRUE);
+    incpush(APPLLIB_EXP, TRUE, TRUE, TRUE);
 #endif
 
 #ifdef ARCHLIB_EXP
-    incpush(ARCHLIB_EXP, FALSE, FALSE);
+    incpush(ARCHLIB_EXP, FALSE, FALSE, TRUE);
 #endif
 #ifdef MACOS_TRADITIONAL
     {
@@ -3727,71 +3727,72 @@ S_init_perllib(pTHX)
 	
 	Perl_sv_setpvf(aTHX_ privdir, "%slib:", macperl);
 	if (PerlLIO_stat(SvPVX(privdir), &tmpstatbuf) >= 0 && S_ISDIR(tmpstatbuf.st_mode))
-	    incpush(SvPVX(privdir), TRUE, FALSE);
+	    incpush(SvPVX(privdir), TRUE, FALSE, TRUE);
 	Perl_sv_setpvf(aTHX_ privdir, "%ssite_perl:", macperl);
 	if (PerlLIO_stat(SvPVX(privdir), &tmpstatbuf) >= 0 && S_ISDIR(tmpstatbuf.st_mode))
-	    incpush(SvPVX(privdir), TRUE, FALSE);
+	    incpush(SvPVX(privdir), TRUE, FALSE, TRUE);
 	
    	SvREFCNT_dec(privdir);
     }
     if (!PL_tainting)
-	incpush(":", FALSE, FALSE);
+	incpush(":", FALSE, FALSE, TRUE);
 #else
 #ifndef PRIVLIB_EXP
 #  define PRIVLIB_EXP "/usr/local/lib/perl5:/usr/local/lib/perl"
 #endif
 #if defined(WIN32)
-    incpush(PRIVLIB_EXP, TRUE, FALSE);
+    incpush(PRIVLIB_EXP, TRUE, FALSE, TRUE);
 #else
-    incpush(PRIVLIB_EXP, FALSE, FALSE);
+    incpush(PRIVLIB_EXP, FALSE, FALSE, TRUE);
 #endif
 
 #ifdef SITEARCH_EXP
     /* sitearch is always relative to sitelib on Windows for
      * DLL-based path intuition to work correctly */
 #  if !defined(WIN32)
-    incpush(SITEARCH_EXP, FALSE, FALSE);
+    incpush(SITEARCH_EXP, FALSE, FALSE, TRUE);
 #  endif
 #endif
 
 #ifdef SITELIB_EXP
 #  if defined(WIN32)
-    incpush(SITELIB_EXP, TRUE, FALSE);	/* this picks up sitearch as well */
+    /* this picks up sitearch as well */
+    incpush(SITELIB_EXP, TRUE, FALSE, TRUE);
 #  else
-    incpush(SITELIB_EXP, FALSE, FALSE);
+    incpush(SITELIB_EXP, FALSE, FALSE, TRUE);
 #  endif
 #endif
 
 #ifdef SITELIB_STEM /* Search for version-specific dirs below here */
-    incpush(SITELIB_STEM, FALSE, TRUE);
+    incpush(SITELIB_STEM, FALSE, TRUE, TRUE);
 #endif
 
 #ifdef PERL_VENDORARCH_EXP
     /* vendorarch is always relative to vendorlib on Windows for
      * DLL-based path intuition to work correctly */
 #  if !defined(WIN32)
-    incpush(PERL_VENDORARCH_EXP, FALSE, FALSE);
+    incpush(PERL_VENDORARCH_EXP, FALSE, FALSE, TRUE);
 #  endif
 #endif
 
 #ifdef PERL_VENDORLIB_EXP
 #  if defined(WIN32)
-    incpush(PERL_VENDORLIB_EXP, TRUE, FALSE);	/* this picks up vendorarch as well */
+    incpush(PERL_VENDORLIB_EXP, TRUE, FALSE, TRUE);	/* this picks up vendorarch as well */
 #  else
-    incpush(PERL_VENDORLIB_EXP, FALSE, FALSE);
+    incpush(PERL_VENDORLIB_EXP, FALSE, FALSE, TRUE);
 #  endif
 #endif
 
 #ifdef PERL_VENDORLIB_STEM /* Search for version-specific dirs below here */
-    incpush(PERL_VENDORLIB_STEM, FALSE, TRUE);
+    incpush(PERL_VENDORLIB_STEM, FALSE, TRUE, TRUE);
 #endif
 
 #ifdef PERL_OTHERLIBDIRS
-    incpush(PERL_OTHERLIBDIRS, TRUE, TRUE);
+    incpush(PERL_OTHERLIBDIRS, TRUE, TRUE, TRUE);
 #endif
 
     if (!PL_tainting)
-	incpush(".", FALSE, FALSE);
+	incpush(".", FALSE, FALSE, TRUE);
 #endif /* MACOS_TRADITIONAL */
 }
 
@@ -3813,7 +3814,7 @@ S_init_perllib(pTHX)
 #endif
 
 STATIC void
-S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers)
+S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers, int usesep)
 {
     SV *subdir = Nullsv;
 
@@ -3830,13 +3831,15 @@ S_incpush(pTHX_ char *p, int addsubdirs, int addoldvers)
 	char *s;
 
 	/* skip any consecutive separators */
-	while ( *p == PERLLIB_SEP ) {
-	    /* Uncomment the next line for PATH semantics */
-	    /* av_push(GvAVn(PL_incgv), newSVpvn(".", 1)); */
-	    p++;
+	if (usesep) {
+	    while ( *p == PERLLIB_SEP ) {
+		/* Uncomment the next line for PATH semantics */
+		/* av_push(GvAVn(PL_incgv), newSVpvn(".", 1)); */
+		p++;
+	    }
 	}
 
-	if ( (s = strchr(p, PERLLIB_SEP)) != Nullch ) {
+	if ( usesep && (s = strchr(p, PERLLIB_SEP)) != Nullch ) {
 	    sv_setpvn(libdir, PERLLIB_MANGLE(p, (STRLEN)(s - p)),
 		      (STRLEN)(s - p));
 	    p = s + 1;

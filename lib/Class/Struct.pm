@@ -61,7 +61,7 @@ sub import {
 	# do we ever export anything else than 'struct'...?
       $self->export_to_level( 1, $self, @_ );
     } else {
-      &struct;
+      goto &struct;
     }
 }
 
@@ -265,6 +265,10 @@ Class::Struct - declare struct-like datatypes as Perl classes
     # Declare struct at compile time
     use Class::Struct CLASS_NAME => [ ELEMENT_NAME => ELEMENT_TYPE, ... ];
     use Class::Struct CLASS_NAME => { ELEMENT_NAME => ELEMENT_TYPE, ... };
+
+    # declare struct at compile time, based on array, implicit class name:
+    package CLASS_NAME;
+    use Class::Struct ELEMENT_NAME => ELEMENT_TYPE, ... ;
 
     package Myobj;
     use Class::Struct;
