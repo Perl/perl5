@@ -273,7 +273,7 @@ else
 
 # 12..44: scary format testing from Merijn H. Brand
 
-if ($^O eq 'VMS' || $^O eq 'MSWin32') {
+if ($^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'dos') {
   foreach (12..44) { print "ok $_ # skipped: '|-' and '-|' not supported\n"; }
   exit(0);
 }
