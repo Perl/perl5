@@ -56,6 +56,8 @@ $| = 1;
 
 print "1..", @tests/2, "\n";
 
+use Text::Wrap;
+
 $rerun = $ENV{'PERL_DL_NONLAZY'} ? 0 : 1;
 
 $tn = 1;
