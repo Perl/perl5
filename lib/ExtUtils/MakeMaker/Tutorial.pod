@@ -144,7 +144,7 @@ Suggested information to include here:
 
 A file full of regular expressions to exclude when using 'make
 manifest' to generate the MANIFEST.  These regular expressions
-are checked against each filepath found in the distrubtion (so
+are checked against each filepath found in the distribution (so
 you're matching against "t/foo.t" not "foo.t").
 
 Here's a sample:

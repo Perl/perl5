@@ -480,8 +480,9 @@ directories.
 
 =head2 make run_byacc
 
-If you have byacc-1.8.2 (available from CPAN), and if there have been
-changes to F<perly.y>, you can regenerate the F<perly.c> file.  The
+If you have byacc-1.8.2 (available from CPAN as
+http://www.cpan.org/src/misc/perl-byacc1.8.2.tar.gz), and if there have
+been changes to F<perly.y>, you can regenerate the F<perly.c> file.  The
 run_byacc makefile target does this by running byacc and then applying
 some patches so that byacc dynamically allocates space, rather than
 having fixed limits.  This patch is handled by the F<perly.fixer>
