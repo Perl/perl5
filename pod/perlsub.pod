@@ -754,6 +754,21 @@ starts scribbling on your @_ parameter list.
 This is all very powerful, of course, and should be used only in moderation
 to make the world a better place.  
 
+If you redefine a subroutine which was eligible for inlining you'll get
+a mandatory warning.  (You can use this warning to tell whether or not a
+particular subroutine is considered constant.)  The warning is
+considered severe enough not to be optional because previously compiled
+invocations of the function will still be using the old value of the
+function.  If you need to be able to redefine the subroutine you need to
+ensure that it isn't inlined, either by dropping the C<()> prototype
+(which changes the calling semantics, so beware) or by thwarting the
+inlining mechanism in some other way, such as
+
+    my $dummy;
+    sub not_inlined () {
+    	$dummy || 23
+    }
+
 =head2 Overriding Builtin Functions
 
 Many builtin functions may be overridden, though this should be tried

@@ -812,6 +812,12 @@ to 01411.  Octal constants are introduced with a leading 0 in Perl, as in C.
 (W) You tried to do a connect on a closed socket.  Did you forget to check
 the return value of your socket() call?  See L<perlfunc/connect>.
 
+=item Constant subroutine %s redefined
+
+(S) You redefined a subroutine which had previously been eligible for
+inlining.  See L<perlsub/"Constant Functions"> for commentary and
+workarounds.
+
 =item Corrupt malloc ptr 0x%lx at 0x%lx
 
 (P) The malloc package that comes with Perl had an internal failure.
