@@ -254,10 +254,6 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		name = type;
 		len = tend-type;
 	    }
-	    else {
-	      if (*type)
-		  goto unknown_desr;
-	    }
 	    if (*name == '\0') {
 		/* command is missing 19990114 */
 		if (ckWARN(WARN_PIPE))
@@ -284,6 +280,13 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	    }
 	    else {
 		fp = PerlProc_popen(name,mode);
+	    }
+	    if (num_svs) {
+		if (*type) {
+		    if (PerlIO_apply_layers(aTHX_ fp, mode, type) != 0) {
+			goto say_false;
+		    }
+		}
 	    }
 	}
 	else if (*type == IoTYPE_WRONLY) {
@@ -320,7 +323,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		    if (num_svs > 1) {
 			Perl_croak(aTHX_ "More than one argument to '%c&' open",IoTYPE(io));
 		    }
-		    if (num_svs && SvIOK(*svp)) {
+		    if (num_svs && (SvIOK(*svp) || (SvPOK(*svp) && looks_like_number(*svp)))) {
 			fd = SvUV(*svp);
 		    }
 		    else if (isDIGIT(*type)) {
@@ -487,6 +490,14 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 		fp = PerlProc_popen(name,mode);
 	    }
 	    IoTYPE(io) = IoTYPE_PIPE;
+	    if (num_svs) {
+		for (; isSPACE(*type); type++) ;
+		if (*type) {
+		    if (PerlIO_apply_layers(aTHX_ fp, mode, type) != 0) {
+			goto say_false;
+		    }
+		}
+	    }
 	}
 	else {
 	    if (num_svs)
