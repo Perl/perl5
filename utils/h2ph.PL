@@ -230,10 +230,12 @@ while (defined ($file = next_file())) {
 		print OUT $t,"}\n";
 	    } elsif(/^undef\s+(\w+)/) {
 		print OUT $t, "undef(&$1) if defined(&$1);\n";
+	    } elsif(/^error\s+(".*")/) {
+		print OUT $t, "die($1);\n";
 	    } elsif(/^error\s+(.*)/) {
-		print OUT $t, "die(\"$1\");\n";
+		print OUT $t, "die(\"", quotemeta($1), "\");\n";
 	    } elsif(/^warning\s+(.*)/) {
-		print OUT $t, "warn(\"$1\");\n";
+		print OUT $t, "warn(\"", quotemeta($1), "\");\n";
 	    } elsif(/^ident\s+(.*)/) {
 		print OUT $t, "# $1\n";
 	    }
