@@ -204,19 +204,15 @@ PP(pp_readline)
 {
     tryAMAGICunTARGET(iter, 0);
     PL_last_in_gv = (GV*)(*PL_stack_sp--);
-    if (PL_op->op_flags & OPf_SPECIAL) {	/* Are called as <$var> */
-	if (SvROK(PL_last_in_gv)) {
-	    if (SvTYPE(SvRV(PL_last_in_gv)) != SVt_PVGV) 
-		goto hard_way;
+    if (SvTYPE(PL_last_in_gv) != SVt_PVGV) {
+	if (SvROK(PL_last_in_gv) && SvTYPE(SvRV(PL_last_in_gv)) == SVt_PVGV) 
 	    PL_last_in_gv = (GV*)SvRV(PL_last_in_gv);
-	} else if (SvTYPE(PL_last_in_gv) != SVt_PVGV) {
-	  hard_way: {
+	else {
 	    dSP;
 	    XPUSHs((SV*)PL_last_in_gv);
 	    PUTBACK;
 	    pp_rv2gv(ARGS);
 	    PL_last_in_gv = (GV*)(*PL_stack_sp--);
-	  }
 	}
     }
     return do_readline();
