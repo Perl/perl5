@@ -3367,7 +3367,7 @@ sub subdir_x {
 subdirs ::
 @[
 	cd $subdir
-	\$(MAKE) all \$(PASTHRU)
+	\$(MAKE) -f \$(FIRST_MAKEFILE) all \$(PASTHRU)
 	cd ..
 ]
 EOT
@@ -3376,7 +3376,7 @@ EOT
 	    return <<EOT;
 subdirs ::
 	cd $subdir
-	\$(MAKE) all \$(PASTHRU)
+	\$(MAKE) -f \$(FIRST_MAKEFILE) all \$(PASTHRU)
 	cd ..
 EOT
 	}
@@ -3384,8 +3384,7 @@ EOT
 	return <<EOT;
 
 subdirs ::
-	$self->{NOECHO}cd $subdir && \$(MAKE) all \$(PASTHRU)
-
+	$self->{NOECHO}cd $subdir && \$(MAKE) -f \$(FIRST_MAKEFILE) all \$(PASTHRU)
 EOT
     }
 }

@@ -423,6 +423,8 @@ sub ExtUtils::MakeMaker::new {
 		    }
 	    }
 	}
+	my @fm = grep /^FIRST_MAKEFILE=/, @ARGV;
+	parse_args($self,@fm) if @fm;
     } else {
 	parse_args($self,split(' ', $ENV{PERL_MM_OPT} || ''),@ARGV);
     }
