@@ -29,7 +29,62 @@ More details are in L<perldelta/Performance Enhancements>.
 
 =item *
 
+Anonymous temporary files are available without need to
+'use FileHandle' or other module via
+
+   open($fh,"+>", undef) || ...
+
+=item *
+
+IO is now by default done via PerlIO rather than system's "stdio".
+PerlIO allows "layers" to be "pushed" onto a file handle to alter the
+handle's behaviour.  Layers can be specified at open time via 3-arg
+form of open:
+
+   open($fh,'>:crlf :utf8', $path) || ...
+
+or on already opened handles via extended C<binmode>:
+
+   binmode($fh,':encoding(iso-8859-7)');
+
+The built-in layers are: unix (low level read/write), stdio (as in
+previous Perls), perlio (re-implementation of stdio buffering in a
+portable manner), crlf (does CRLF <=> "\n" translation as on Win32,
+but available on any platform).  A mmap layer may be available if
+platform supports it (mostly UNIXes).
+
+Layers to be applied by default may be specified via the 'open' pragma.
+
+=item *
+
+File handles can be marked as accepting Perl's internal encoding of Unicode
+(UTF-8 or UTF-EBCDIC depending on platfrom) by a pseudo layer ":utf8" :
+
+   open($fh,">:utf8","Uni.txt");
+
+=item *
+
+File handles can translate character encodings from/to Perl's internal
+Unicode form on read/write via the ":encoding()" layer.
+
+=item *
+
+File handles can be opened to "in memory" files held in Perl scalars via:
+
+   open($fh,'>', \$variable) || ...
+
+=item *
+
 Formats now support zero-padded decimal fields.
+
+=item *
+
+The list form of C<open> is now implemented for pipes (at least on UNIX):
+
+   open($fh,"-|", 'cat', '/etc/motd')
+
+creates a pipe, and runs the equivalent of exec('cat', '/etc/motd') in
+the child process.
 
 =item *
  
@@ -75,6 +130,63 @@ which needs them.
 vec() now tries to work with characters <= 255 when possible, but it leaves
 higher character values in place.  In that case, if vec() was used to modify
 the string, it is no longer considered to be utf8-encoded.
+
+=back
+
+=head1 Core Enhancements
+
+=head2 New Modules
+
+=over 4
+
+=item *
+
+Encode provides a mechanism to translate between different character
+encodings.  Support for Unicode, ISO-8859-*, ASCII, CP*, KOI8-R, and
+three variants of EBCDIC are compiled in to the module.  Several other
+encodings (like Japanese, Chinese, and MacIntosh encodings) are
+included and will be loaded at runtime.
+
+=item *
+
+Any encoding supported by Encode module is also available to the
+":encoding()" layer if PerlIO is used.
+
+=item *
+
+PerlIO::Scalar provides the IO to "in memory" perl scalars discussed
+above.  It also serves as an example of a loadable layer.
+
+=item *
+
+PerlIO::Via acts as a PerlIO layer and wraps PerlIO layer
+functionality provided by a class (typically implemented in
+perl code).
+
+=item *
+
+MIME::QuotedPrint has been enhanced to provide the basic methods
+necessary to use it with PerlIO::Via as in :
+
+ use MIME::QuotedPrint;
+ open($fh,">Via(MIME::QuotedPrint)",$path)
+
+=back
+
+=head2 Updated And Improved Modules and Pragmata
+
+=over 4
+
+=item *
+
+The C<open> pragma allows layers other than ":raw" and ":crlf" when
+using PerlIO.
+
+=item *
+
+The utf8:: name space (as in the pragma) provides various
+Perl-callable functions to provide low level access to Perl's
+internal Unicode representation.
 
 =back
 
