@@ -76,9 +76,6 @@ Documentation improved
 
 =head1 Selected Bug Fixes
 
-C<require> now caches results as expected when repeated attempts are
-made to load a file which fails.
-
 Some syntax errors involving unrecognized filetest operators are now handled
 correctly by the parser.
 
