@@ -3996,7 +3996,7 @@ Perl_yylex(pTHX)
 		    if (ckWARN(WARN_RESERVED)) {
 			if (lastchar != '-') {
 			    for (d = PL_tokenbuf; *d && isLOWER(*d); d++) ;
-			    if (!*d)
+			    if (!*d && strNE(PL_tokenbuf,"main"))
 				Perl_warner(aTHX_ WARN_RESERVED, PL_warn_reserved,
 				       PL_tokenbuf);
 			}
