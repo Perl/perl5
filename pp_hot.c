@@ -415,21 +415,8 @@ PP(pp_print)
     }
     else if (!(fp = IoOFP(io))) {
 	if (ckWARN2(WARN_CLOSED, WARN_IO))  {
-	    if (IoIFP(io)) {
-		/* integrate with report_evil_fh()? */
-	        char *name = NULL;
-		if (isGV(gv)) {
-		    SV* sv = sv_newmortal();
-		    gv_efullname4(sv, gv, Nullch, FALSE);
-		    name = SvPV_nolen(sv);
-		}
-		if (name && *name)
-		  Perl_warner(aTHX_ WARN_IO,
-			      "Filehandle %s opened only for input", name);
-		else
-		    Perl_warner(aTHX_ WARN_IO,
-				"Filehandle opened only for input");
-	    }
+	    if (IoIFP(io))
+		report_evil_fh(gv, io, OP_phoney_INPUT_ONLY);
 	    else if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 		report_evil_fh(gv, io, PL_op->op_type);
 	}
@@ -1394,21 +1381,7 @@ Perl_do_readline(pTHX)
 	else if (ckWARN(WARN_IO)	/* stdout/stderr or other write fh */
 		 && (IoTYPE(io) == IoTYPE_WRONLY || fp == PerlIO_stdout()
 		     || fp == PerlIO_stderr()))
-	{
-	    /* integrate with report_evil_fh()? */
-	    char *name = NULL;
-	    if (isGV(PL_last_in_gv)) { /* can this ever fail? */
-		SV* sv = sv_newmortal();
-		gv_efullname4(sv, PL_last_in_gv, Nullch, FALSE);
-		name = SvPV_nolen(sv);
-	    }
-	    if (name && *name)
-		Perl_warner(aTHX_ WARN_IO,
-			    "Filehandle %s opened only for output", name);
-	    else
-		Perl_warner(aTHX_ WARN_IO,
-			    "Filehandle opened only for output");
-	}
+	    report_evil_fh(PL_last_in_gv, io, OP_phoney_OUTPUT_ONLY);
     }
     if (!fp) {
 	if (ckWARN2(WARN_GLOB, WARN_CLOSED)

@@ -3958,7 +3958,15 @@ Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op)
 	name = SvPVX(sv);
     }
 
-    if (name && *name) {
+    if (op == OP_phoney_OUTPUT_ONLY || op == OP_phoney_INPUT_ONLY) {
+	if (name && *name)
+	    Perl_warner(aTHX_ WARN_IO, "Filehandle %s opened only for %sput",
+			name, 
+			(op == OP_phoney_INPUT_ONLY ? "in" : "out"));
+	else
+	    Perl_warner(aTHX_ WARN_IO, "Filehandle opened only for %sput",
+			(op == OP_phoney_INPUT_ONLY ? "in" : "out"));
+    } else if (name && *name) {
 	Perl_warner(aTHX_ warn_type,
 		    "%s%s on %s %s %s", func, pars, vile, type, name);
 	if (io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))

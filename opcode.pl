@@ -56,7 +56,9 @@ for (@ops) {
 }
 print ON "\t", &tab(3,"OP_max"), "\n";
 print ON "} opcode;\n";
-print ON "\n#define MAXO ", scalar @ops, "\n\n"; 
+print ON "\n#define MAXO ", scalar @ops, "\n";
+print ON "#define OP_phoney_INPUT_ONLY -1\n";
+print ON "#define OP_phoney_OUTPUT_ONLY -2\n\n";
 
 # Emit op names and descriptions.
 
