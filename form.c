@@ -1,4 +1,4 @@
-/* $Header: form.c,v 3.0.1.2 90/08/09 03:38:40 lwall Locked $
+/* $Header: form.c,v 3.0.1.3 90/10/15 17:26:24 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	form.c,v $
+ * Revision 3.0.1.3  90/10/15  17:26:24  lwall
+ * patch29: added @###.## fields to format
+ * 
  * Revision 3.0.1.2  90/08/09  03:38:40  lwall
  * patch19: did preliminary work toward debugging packages and evals
  * 
@@ -281,6 +284,31 @@ int sp;
 	    d += size;
 	    linebeg = fcmd->f_next;
 	    break;
+	case F_DECIMAL: {
+	    double value;
+
+	    (void)eval(fcmd->f_expr,G_SCALAR,sp);
+	    str = stack->ary_array[sp+1];
+	    /* If the field is marked with ^ and the value is undefined,
+	       blank it out. */
+	    if ((fcmd->f_flags & FC_CHOP) && !str->str_pok && !str->str_nok) {
+		while (size) {
+		    size--;
+		    *d++ = ' ';
+		}
+		break;
+	    }
+	    value = str_gnum(str);
+	    size = fcmd->f_size;
+	    CHKLEN(size);
+	    if (fcmd->f_flags & FC_DP) {
+		sprintf(d, "%#*.*f", size, fcmd->f_decimals, value);
+	    } else {
+		sprintf(d, "%*.0f", size, value);
+	    }
+	    d += size;
+	    break;
+	}
 	}
     }
     CHKLEN(1);

@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: op.stat,v 3.0.1.4 90/08/13 22:31:36 lwall Locked $
+# $Header: op.stat,v 3.0.1.5 90/10/16 10:55:42 lwall Locked $
 
 print "1..56\n";
 
@@ -97,7 +97,7 @@ $cnt = $uid = 0;
 
 die "Can't run op.stat test 35 without pwd working" unless $cwd;
 chdir '/usr/bin' || die "Can't cd to /usr/bin";
-while (<*>) {
+while (defined($_ = <*>)) {
     $cnt++;
     $uid++ if -u;
     last if $uid && $uid < $cnt;

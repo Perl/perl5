@@ -102,7 +102,8 @@ foreach $file (@ARGV) {
 		}
 	    }
 	    elsif (/^include <(.*)>/) {
-		print OUT $t,"do '$1' || die \"Can't include $1: \$!\";\n";
+		($incl = $1) =~ s/\.h$/.ph/;
+		print OUT $t,"require '$incl';\n";
 	    }
 	    elsif (/^ifdef\s+(\w+)/) {
 		print OUT $t,"if (defined &$1) {\n";

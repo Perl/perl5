@@ -1,6 +1,9 @@
-/* $Header: malloc.c,v 3.0.1.2 89/11/11 04:36:37 lwall Locked $
+/* $Header: malloc.c,v 3.0.1.3 90/10/16 15:27:47 lwall Locked $
  *
  * $Log:	malloc.c,v $
+ * Revision 3.0.1.3  90/10/16  15:27:47  lwall
+ * patch29: various portability fixes
+ * 
  * Revision 3.0.1.2  89/11/11  04:36:37  lwall
  * patch2: malloc pointer corruption check made more portable
  * 
@@ -53,7 +56,7 @@ static findbucket(), morecore();
  */
 union	overhead {
 	union	overhead *ov_next;	/* when free */
-#if defined (mips) || defined (sparc)
+#if defined(mips) || defined(sparc) || defined(luna88k)
 	double  strut;			/* alignment problems */
 #endif
 	struct {

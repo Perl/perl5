@@ -1,4 +1,4 @@
-/* $Header: perl.h,v 3.0.1.8 90/08/09 04:10:53 lwall Locked $
+/* $Header: perl.h,v 3.0.1.9 90/10/15 17:59:41 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perl.h,v $
+ * Revision 3.0.1.9  90/10/15  17:59:41  lwall
+ * patch29: some machines didn't like unsigned C preprocessor values
+ * 
  * Revision 3.0.1.8  90/08/09  04:10:53  lwall
  * patch19: various MSDOS and OS/2 patches folded in
  * patch19: did preliminary work toward debugging packages and evals
@@ -75,6 +78,8 @@
  *	doesn't distinguish.
  */
 #define BINARY				/**/
+
+#define I_FCNTL
 
 #else /* !MSDOS */
 
@@ -156,7 +161,9 @@ extern int memcmp();
 #include <stdio.h>
 #include <ctype.h>
 #include <setjmp.h>
+#ifndef MSDOS
 #include <sys/param.h>	/* if this needs types.h we're still wrong */
+#endif
 
 #ifndef _TYPES_		/* If types.h defines this it's easy. */
 #ifndef major		/* Does everyone's types.h define this? */
@@ -184,15 +191,19 @@ extern int memcmp();
 #   endif
 #endif
 
+#ifndef MSDOS
 #include <sys/times.h>
+#endif
 
 #if defined(STRERROR) && (!defined(MKDIR) || !defined(RMDIR))
 #undef STRERROR
 #endif
 
 #include <errno.h>
+#ifndef MSDOS
 #ifndef errno
 extern int errno;     /* ANSI allows errno to be an lvalue expr */
+#endif
 #endif
 
 #ifdef STRERROR
@@ -288,6 +299,7 @@ typedef struct htbl HASH;
 typedef struct regexp REGEXP;
 typedef struct stabptrs STBP;
 typedef struct stab STAB;
+typedef struct callsave CSV;
 
 #include "handy.h"
 #include "regexp.h"
@@ -396,7 +408,7 @@ EXT STR *Str;
 #define NTOHS
 #endif
 #ifndef HTONL
-#if (BYTEORDER != 0x4321) && (BYTEORDER != 0x87654321)
+#if (BYTEORDER & 0xffff) != 0x4321
 #define HTONS
 #define HTONL
 #define NTOHS
@@ -408,7 +420,7 @@ EXT STR *Str;
 #define ntohl my_ntohl
 #endif
 #else
-#if (BYTEORDER == 0x4321) || (BYTEORDER == 0x87654321)
+#if (BYTEORDER & 0xffff) == 0x4321
 #undef HTONS
 #undef HTONL
 #undef NTOHS
@@ -525,9 +537,9 @@ EXT STR *subname INIT(Nullstr);
 EXT int arybase INIT(0);
 
 struct outrec {
-    line_t  o_lines;
-    char    *o_str;
-    int     o_len;
+    long	o_lines;
+    char	*o_str;
+    int		o_len;
 };
 
 EXT struct outrec outrec;
@@ -547,6 +559,7 @@ EXT STAB *leftstab INIT(Nullstab);
 EXT STAB *amperstab INIT(Nullstab);
 EXT STAB *rightstab INIT(Nullstab);
 EXT STAB *DBstab INIT(Nullstab);
+EXT STAB *DBline INIT(Nullstab);
 EXT STAB *DBsub INIT(Nullstab);
 
 EXT HASH *defstash;		/* main symbol table */
@@ -558,12 +571,12 @@ EXT STR *curstname;		/* name of current package */
 EXT STR *freestrroot INIT(Nullstr);
 EXT STR *lastretstr INIT(Nullstr);
 EXT STR *DBsingle INIT(Nullstr);
+EXT STR *DBtrace INIT(Nullstr);
+EXT STR *DBsignal INIT(Nullstr);
 
 EXT int lastspbase;
 EXT int lastsize;
 
-EXT char *curpack;
-EXT char *filename;
 EXT char *origfilename;
 EXT FILE * VOLATILE rsfp;
 EXT char buf[1024];
@@ -637,7 +650,9 @@ EXT struct stat statbuf;
 EXT struct stat statcache;
 STAB *statstab INIT(Nullstab);
 STR *statname;
+#ifndef MSDOS
 EXT struct tms timesbuf;
+#endif
 EXT int uid;
 EXT int euid;
 EXT int gid;
@@ -692,8 +707,10 @@ EXT ARRAY * VOLATILE savestack;		/* to save non-local values on */
 EXT ARRAY *tosave;		/* strings to save on recursive subroutine */
 
 EXT ARRAY *lineary;		/* lines of script for debugger */
+EXT ARRAY *dbargs;		/* args to call listed by caller function */
 
-EXT ARRAY *pidstatary;		/* keep pids and statuses by fd for mypopen */
+EXT ARRAY *fdpid;		/* keep fd-to-pid mappings for mypopen */
+EXT HASH *pidstatus;		/* keep pid-to-status mappings for waitpid */
 
 EXT int *di;			/* for tmp use in debuggers */
 EXT char *dc;
@@ -701,6 +718,7 @@ EXT short *ds;
 
 double atof();
 long time();
+EXT long basetime INIT(0);
 struct tm *gmtime(), *localtime();
 char *mktemp();
 char *index(), *rindex();

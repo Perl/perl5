@@ -1,4 +1,4 @@
-/* $Header: hash.h,v 3.0.1.1 90/08/09 03:51:34 lwall Locked $
+/* $Header: hash.h,v 3.0.1.2 90/10/15 17:33:58 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,9 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	hash.h,v $
+ * Revision 3.0.1.2  90/10/15  17:33:58  lwall
+ * patch29: the debugger now understands packages and evals
+ * 
  * Revision 3.0.1.1  90/08/09  03:51:34  lwall
  * patch19: various MSDOS and OS/2 patches folded in
  * 
@@ -38,6 +41,7 @@ struct htbl {
     int		tbl_riter;	/* current root of iterator */
     HENT	*tbl_eiter;	/* current entry of iterator */
     SPAT 	*tbl_spatroot;	/* list of spats for this package */
+    char	*tbl_name;	/* name, if a symbol table */
 #ifdef SOME_DBM
 #ifdef NDBM
     DBM		*tbl_dbm;

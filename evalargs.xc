@@ -2,9 +2,13 @@
  * kit sizes from getting too big.
  */
 
-/* $Header: evalargs.xc,v 3.0.1.6 90/08/09 03:37:15 lwall Locked $
+/* $Header: evalargs.xc,v 3.0.1.7 90/10/15 16:48:11 lwall Locked $
  *
  * $Log:	evalargs.xc,v $
+ * Revision 3.0.1.7  90/10/15  16:48:11  lwall
+ * patch29: non-existent array values no longer cause core dumps
+ * patch29: added caller
+ * 
  * Revision 3.0.1.6  90/08/09  03:37:15  lwall
  * patch19: passing *name to subroutine now forces filehandle and array creation
  * patch19: `command` in array context now returns array of lines
@@ -92,8 +96,6 @@
 	    }
 	    st[++sp] = afetch(stab_array(argptr.arg_stab),
 		arg[argtype].arg_len - arybase, FALSE);
-	    if (!st[sp])
-		st[sp] = &str_undef;
 #ifdef DEBUGGING
 	    if (debug & 8) {
 		(void)sprintf(buf,"ARYSTAB $%s[%d]",stab_name(argptr.arg_stab),
@@ -263,7 +265,7 @@
 	    break;
 	case A_WANTARRAY:
 	    {
-		if (wantarray == G_ARRAY)
+		if (curcsv->wantarray == G_ARRAY)
 		    st[++sp] = &str_yes;
 		else
 		    st[++sp] = &str_no;
@@ -323,7 +325,7 @@
 			st = stack->ary_array;
 			tmpstr = Str_new(55,0);
 #ifdef MSDOS
-			str_set(tmpstr, "glob ");
+			str_set(tmpstr, "perlglob ");
 			str_scat(tmpstr,str);
 			str_cat(tmpstr," |");
 #else

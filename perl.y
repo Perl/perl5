@@ -1,4 +1,4 @@
-/* $Header: perl.y,v 3.0.1.8 90/08/13 22:19:55 lwall Locked $
+/* $Header: perl.y,v 3.0.1.9 90/10/15 18:01:45 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,11 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	perl.y,v $
+ * Revision 3.0.1.9  90/10/15  18:01:45  lwall
+ * patch29: added SysV IPC
+ * patch29: package behavior is now more consistent
+ * patch29: index and substr now have optional 3rd args
+ * 
  * Revision 3.0.1.8  90/08/13  22:19:55  lwall
  * patch28: lowercase unquoted strings caused infinite loop
  * 
@@ -71,9 +76,9 @@ ARG *arg5;
 %token <ival> USING FORMAT DO SHIFT PUSH POP LVALFUN
 %token <ival> WHILE UNTIL IF UNLESS ELSE ELSIF CONTINUE SPLIT FLIST
 %token <ival> FOR FILOP FILOP2 FILOP3 FILOP4 FILOP22 FILOP25
-%token <ival> FUNC0 FUNC1 FUNC2 FUNC3 HSHFUN HSHFUN3
+%token <ival> FUNC0 FUNC1 FUNC2 FUNC2x FUNC3 FUNC4 FUNC5 HSHFUN HSHFUN3
 %token <ival> FLIST2 SUB FILETEST LOCAL DELETE
-%token <ival> RELOP EQOP MULOP ADDOP PACKAGE AMPER LFUNC4
+%token <ival> RELOP EQOP MULOP ADDOP PACKAGE AMPER
 %token <formval> FORMLIST
 %token <stabval> REG ARYLEN ARY HSH STAR
 %token <arg> SUBST PATTERN
@@ -346,9 +351,11 @@ package :	PACKAGE WORD ';'
 			  sprintf(tmpbuf,"'_%s",$2);
 			  tmpstab = hadd(stabent(tmpbuf,TRUE));
 			  curstash = stab_xhash(tmpstab);
-			  curpack = stab_name(tmpstab);
+			  if (!curstash->tbl_name)
+			      curstash->tbl_name = savestr($2);
 			  curstash->tbl_coeffsize = 0;
 			  Safefree($2);
+			  cmdline = NOLINE;
 			}
 	;
 
@@ -473,8 +480,7 @@ term	:	'-' term %prec UMINUS
 	|	'(' ')'
 			{ $$ = make_list(Nullarg); }
 	|	DO sexpr	%prec FILETEST
-			{ $$ = fixeval(
-			    make_op(O_DOFILE,2,$2,Nullarg,Nullarg) );
+			{ $$ = make_op(O_DOFILE,2,$2,Nullarg,Nullarg);
 			  allstabs = TRUE;}
 	|	DO block	%prec '('
 			{ $$ = cmd_to_arg($2); }
@@ -584,13 +590,9 @@ term	:	'-' term %prec UMINUS
 			{ $$ = make_op($1,1,cval_to_arg($2),
 			    Nullarg,Nullarg); }
 	|	UNIOP
-			{ $$ = make_op($1,0,Nullarg,Nullarg,Nullarg);
-			  if ($1 == O_EVAL || $1 == O_RESET || $1 == O_REQUIRE)
-			    $$ = fixeval($$); }
+			{ $$ = make_op($1,0,Nullarg,Nullarg,Nullarg); }
 	|	UNIOP sexpr
-			{ $$ = make_op($1,1,$2,Nullarg,Nullarg);
-			  if ($1 == O_EVAL || $1 == O_RESET || $1 == O_REQUIRE)
-			    $$ = fixeval($$); }
+			{ $$ = make_op($1,1,$2,Nullarg,Nullarg); }
 	|	SSELECT
 			{ $$ = make_op(O_SELECT, 0, Nullarg, Nullarg, Nullarg);}
 	|	SSELECT '(' handle ')'
@@ -696,21 +698,29 @@ term	:	'-' term %prec UMINUS
 	|	FUNC0 '(' ')'
 			{ $$ = make_op($1, 0, Nullarg, Nullarg, Nullarg); }
 	|	FUNC1 '(' ')'
-			{ $$ = make_op($1, 0, Nullarg, Nullarg, Nullarg);
-			  if ($1 == O_EVAL || $1 == O_RESET || $1 == O_REQUIRE)
-			    $$ = fixeval($$); }
+			{ $$ = make_op($1, 0, Nullarg, Nullarg, Nullarg); }
 	|	FUNC1 '(' expr ')'
-			{ $$ = make_op($1, 1, $3, Nullarg, Nullarg);
-			  if ($1 == O_EVAL || $1 == O_RESET || $1 == O_REQUIRE)
-			    $$ = fixeval($$); }
+			{ $$ = make_op($1, 1, $3, Nullarg, Nullarg); }
 	|	FUNC2 '(' sexpr cexpr ')'
 			{ $$ = make_op($1, 2, $3, $4, Nullarg);
 			    if ($1 == O_INDEX && $$[2].arg_type == A_SINGLE)
 				fbmcompile($$[2].arg_ptr.arg_str,0); }
+	|	FUNC2x '(' sexpr csexpr ')'
+			{ $$ = make_op($1, 2, $3, $4, Nullarg);
+			    if ($1 == O_INDEX && $$[2].arg_type == A_SINGLE)
+				fbmcompile($$[2].arg_ptr.arg_str,0); }
+	|	FUNC2x '(' sexpr csexpr cexpr ')'
+			{ $$ = make_op($1, 3, $3, $4, $5);
+			    if ($1 == O_INDEX && $$[2].arg_type == A_SINGLE)
+				fbmcompile($$[2].arg_ptr.arg_str,0); }
 	|	FUNC3 '(' sexpr csexpr cexpr ')'
 			{ $$ = make_op($1, 3, $3, $4, $5); }
-	|	LFUNC4 '(' sexpr csexpr csexpr cexpr ')'
-			{ arg4 = $6; $$ = make_op($1, 4, l($3), $4, $5); }
+	|	FUNC4 '(' sexpr csexpr csexpr cexpr ')'
+			{ arg4 = $6;
+			  $$ = make_op($1, 4, $3, $4, $5); }
+	|	FUNC5 '(' sexpr csexpr csexpr csexpr cexpr ')'
+			{ arg4 = $6; arg5 = $7;
+			  $$ = make_op($1, 5, $3, $4, $5); }
 	|	HSHFUN '(' hshword ')'
 			{ $$ = make_op($1, 1,
 				$3,

@@ -103,7 +103,7 @@ EOF
 	}
 	elsif ($rettype =~ /^[A-Z]+\s*\*$/) {
 	    print <<EOF;
-	    str_set(st[0], (char*) &retval, sizeof retval);
+	    str_nset(st[0], (char*) &retval, sizeof retval);
 EOF
 	}
 	else {

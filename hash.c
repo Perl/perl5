@@ -1,4 +1,4 @@
-/* $Header: hash.c,v 3.0.1.5 90/08/13 22:18:27 lwall Locked $
+/* $Header: hash.c,v 3.0.1.6 90/10/15 17:32:52 lwall Locked $
  *
  *    Copyright (c) 1989, Larry Wall
  *
@@ -6,6 +6,12 @@
  *    as specified in the README file that comes with the perl 3.0 kit.
  *
  * $Log:	hash.c,v $
+ * Revision 3.0.1.6  90/10/15  17:32:52  lwall
+ * patch29: non-existent array values no longer cause core dumps
+ * patch29: %foo = () will now clear dbm files
+ * patch29: dbm files couldn't be opened read only
+ * patch29: the cache array for dbm files wasn't correctly created on fetches
+ * 
  * Revision 3.0.1.5  90/08/13  22:18:27  lwall
  * patch28: defined(@array) and defined(%array) didn't work right
  * 
@@ -39,11 +45,13 @@ static char coeff[] = {
 		61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1,
 		61,59,53,47,43,41,37,31,29,23,17,13,11,7,3,1};
 
+static void hfreeentries();
+
 STR *
 hfetch(tb,key,klen,lval)
 register HASH *tb;
 char *key;
-int klen;
+unsigned int klen;
 int lval;
 {
     register char *s;
@@ -57,12 +65,12 @@ int lval;
 #endif
 
     if (!tb)
-	return Nullstr;
+	return &str_undef;
     if (!tb->tbl_array) {
 	if (lval)
 	    Newz(503,tb->tbl_array, tb->tbl_max + 1, HENT*);
 	else
-	    return Nullstr;
+	    return &str_undef;
     }
 
     /* The hash function we use on symbols has to be equal to the first
@@ -114,14 +122,14 @@ int lval;
 	hstore(tb,key,klen,str,hash);
 	return str;
     }
-    return Nullstr;
+    return &str_undef;
 }
 
 bool
 hstore(tb,key,klen,val,hash)
 register HASH *tb;
 char *key;
-int klen;
+unsigned int klen;
 STR *val;
 register int hash;
 {
@@ -209,7 +217,7 @@ STR *
 hdelete(tb,key,klen)
 register HASH *tb;
 char *key;
-int klen;
+unsigned int klen;
 {
     register char *s;
     register int i;
@@ -357,41 +365,70 @@ register HENT *hent;
 }
 
 void
-hclear(tb)
+hclear(tb,dodbm)
 register HASH *tb;
+int dodbm;
+{
+    if (!tb)
+	return;
+    hfreeentries(tb,dodbm);
+    tb->tbl_fill = 0;
+#ifndef lint
+    if (tb->tbl_array)
+	(void)bzero((char*)tb->tbl_array, (tb->tbl_max + 1) * sizeof(HENT*));
+#endif
+}
+
+static void
+hfreeentries(tb,dodbm)
+register HASH *tb;
+int dodbm;
 {
     register HENT *hent;
     register HENT *ohent = Null(HENT*);
+#ifdef SOME_DBM
+    datum dkey;
+    datum nextdkey;
+#ifdef NDBM
+    DBM *old_dbm;
+#else
+    int old_dbm;
+#endif
+#endif
 
     if (!tb || !tb->tbl_array)
 	return;
+#ifdef SOME_DBM
+    if ((old_dbm = tb->tbl_dbm) && dodbm) {
+	while (dkey = dbm_firstkey(tb->tbl_dbm), dkey.dptr) {
+	    do {
+		nextdkey = dbm_nextkey(tb->tbl_dbm, dkey);
+		dbm_delete(tb->tbl_dbm,dkey);
+		dkey = nextdkey;
+	    } while (dkey.dptr);	/* one way or another, this works */
+	}
+    }
+    tb->tbl_dbm = 0;			/* now clear just cache */
+#endif
     (void)hiterinit(tb);
     while (hent = hiternext(tb)) {	/* concise but not very efficient */
 	hentfree(ohent);
 	ohent = hent;
     }
     hentfree(ohent);
-    tb->tbl_fill = 0;
-#ifndef lint
-    (void)bzero((char*)tb->tbl_array, (tb->tbl_max + 1) * sizeof(HENT*));
+#ifdef SOME_DBM
+    tb->tbl_dbm = old_dbm;
 #endif
 }
 
 void
-hfree(tb)
+hfree(tb,dodbm)
 register HASH *tb;
+int dodbm;
 {
-    register HENT *hent;
-    register HENT *ohent = Null(HENT*);
-
     if (!tb)
 	return;
-    (void)hiterinit(tb);
-    while (hent = hiternext(tb)) {
-	hentfree(ohent);
-	ohent = hent;
-    }
-    hentfree(ohent);
+    hfreeentries(tb,dodbm);
     Safefree(tb->tbl_array);
     Safefree(tb);
 }
@@ -532,12 +569,14 @@ int mode;
 	hdbmclose(tb);
 	tb->tbl_dbm = 0;
     }
-    hclear(tb);
+    hclear(tb, FALSE);	/* clear cache */
 #ifdef NDBM
     if (mode >= 0)
 	tb->tbl_dbm = dbm_open(fname, O_RDWR|O_CREAT, mode);
     if (!tb->tbl_dbm)
 	tb->tbl_dbm = dbm_open(fname, O_RDWR, mode);
+    if (!tb->tbl_dbm)
+	tb->tbl_dbm = dbm_open(fname, O_RDONLY, mode);
 #else
     if (dbmrefcnt++)
 	fatal("Old dbm can only open one database");
@@ -551,6 +590,8 @@ int mode;
     }
     tb->tbl_dbm = dbminit(fname) >= 0;
 #endif
+    if (!tb->tbl_array && tb->tbl_dbm != 0)
+	Newz(507,tb->tbl_array, tb->tbl_max + 1, HENT*);
     return tb->tbl_dbm != 0;
 }
 
@@ -574,7 +615,7 @@ bool
 hdbmstore(tb,key,klen,str)
 register HASH *tb;
 char *key;
-int klen;
+unsigned int klen;
 register STR *str;
 {
     datum dkey, dcontent;
