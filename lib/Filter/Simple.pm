@@ -242,6 +242,5 @@ Damian Conway (damian@conway.org)
 =head1 COPYRIGHT
 
  Copyright (c) 2000, Damian Conway. All Rights Reserved.
- This module is free software. It may be used, redistributed
-and/or modified under the terms of the Perl Artistic License
-     (see http://www.perl.com/perl/misc/Artistic.html)
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
