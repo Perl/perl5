@@ -152,7 +152,10 @@ sub findConsole {
 	$console = "sys\$command";
     }
 
-    if (defined $ENV{'OS2_SHELL'}) { # In OS/2
+    if ($^O eq 'amigaos') {
+	$console = undef;
+    }
+    elsif ($^O eq 'os2') {
       if ($DB::emacs) {
 	$console = undef;
       } else {
