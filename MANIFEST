@@ -909,6 +909,7 @@ pod/perlpod.pod		Pod info
 pod/perlport.pod	Portability guide
 pod/perlre.pod		Regular expression info
 pod/perlref.pod		References info
+pod/perlreftut.pod	Mark's references tutorial
 pod/perlrun.pod		Execution info
 pod/perlsec.pod		Security info
 pod/perlstyle.pod	Style info

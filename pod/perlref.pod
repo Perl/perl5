@@ -2,6 +2,12 @@
 
 perlref - Perl references and nested data structures
 
+=head1 NOTE
+
+This is complete documentation about all aspects of references.
+For a shorter, tutorial introduction to just the essential features,
+see L<perlreftut>.
+
 =head1 DESCRIPTION
 
 Before release 5 of Perl it was difficult to represent complex data
