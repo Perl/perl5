@@ -308,6 +308,8 @@ S_hv_fetch_flags(pTHX_ HV *hv, const char *key, I32 klen, I32 lval, int flags)
             }
             else
                 HeKFLAGS(entry) = flags;
+            if (flags)
+                HvHASKFLAGS_on(hv);
         }
         if (flags & HVhek_FREEKEY)
             Safefree(key);
@@ -478,6 +480,8 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
             }
             else
                 HeKFLAGS(entry) = flags;
+            if (flags)
+                HvHASKFLAGS_on(hv);
         }
 	if (key != keysave)
 	    Safefree(key);
