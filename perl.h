@@ -3795,7 +3795,7 @@ typedef struct am_table_short AMTS;
  *    access MY_CXT.
  */
 
-#if defined(USE_ITHREADS)
+#if defined(PERL_IMPLICIT_CONTEXT)
 
 /* This must appear in all extensions that define a my_cxt_t structure,
  * right after the definition (i.e. at file scope).  The non-threads
