@@ -2652,7 +2652,13 @@ that executes once.  Thus C<next> will exit such a block early.
 See also L</continue> for an illustration of how C<last>, C<next>, and
 C<redo> work.
 
+=item no Module VERSION LIST
+
+=item no Module VERSION
+
 =item no Module LIST
+
+=item no Module
 
 See the L</use> function, which C<no> is the opposite of.
 
