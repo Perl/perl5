@@ -246,11 +246,11 @@ L<perlport> and other available platform-specific documentation.
 
 =over 8
 
-=item I<-X> FILEHANDLE
+=item -X FILEHANDLE
 
-=item I<-X> EXPR
+=item -X EXPR
 
-=item I<-X>
+=item -X
 
 A file test, where X is one of the letters listed below.  This unary
 operator takes one argument, either a filename or a filehandle, and
