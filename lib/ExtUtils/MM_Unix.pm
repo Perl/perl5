@@ -8,7 +8,7 @@ use strict;
 use vars qw($VERSION $Is_Mac $Is_OS2 $Is_VMS
 	    $Verbose %pm %static $Xsubpp_Version);
 
-$VERSION = substr q$Revision: 1.109 $, 10;
+$VERSION = substr q$Revision: 1.109_01 $, 10;
 # $Id: MM_Unix.pm,v 1.109 1996/12/17 00:42:32 k Exp k $
 
 Exporter::import('ExtUtils::MakeMaker',
@@ -2956,8 +2956,9 @@ DOC_INSTALL = $(PERL) -e '$$\="\n\n";' \
 -e 'print "=back";'
 
 UNINSTALL =   $(PERL) -MExtUtils::Install \
--e 'uninstall($$ARGV[0],1);'
-
+-e 'uninstall($$ARGV[0],1,1); print "\nUninstall is deprecated. Please check the";' \
+-e 'print " packlist above carefully.\n  There may be errors. Remove the";' \
+-e 'print " appropriate files manually.\n  Sorry for the inconveniences.\n"'
 };
 
     return join "", @m;
