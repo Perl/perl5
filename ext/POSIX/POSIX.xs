@@ -55,6 +55,9 @@
 #ifdef I_UNISTD
 #include <unistd.h>
 #endif
+#ifdef MACOS_TRADITIONAL
+#undef fdopen
+#endif
 #include <fcntl.h>
 
 #if defined(__VMS) && !defined(__POSIX_SOURCE)
@@ -142,7 +145,7 @@
 #else
 
 #  ifndef HAS_MKFIFO
-#    ifdef OS2
+#    if defined(OS2) || defined(MACOS_TRADITIONAL)
 #      define mkfifo(a,b) not_here("mkfifo")
 #    else	/* !( defined OS2 ) */ 
 #      ifndef mkfifo
@@ -151,12 +154,19 @@
 #    endif
 #  endif /* !HAS_MKFIFO */
 
-#  include <grp.h>
-#  include <sys/times.h>
-#  ifdef HAS_UNAME
-#    include <sys/utsname.h>
+#  ifdef MACOS_TRADITIONAL
+	 struct tms { time_t tms_utime, tms_stime, tms_cutime, tms_cstime; }; 
+#    define times(a) not_here("times")
+#    define ttyname(a) (char*)not_here("ttyname")
+#    define tzset() not_here("tzset")
+#  else
+#    include <grp.h>
+#    include <sys/times.h>
+#    ifdef HAS_UNAME
+#      include <sys/utsname.h>
+#    endif
+#    include <sys/wait.h>
 #  endif
-#  include <sys/wait.h>
 #  ifdef I_UTIME
 #    include <utime.h>
 #  endif
@@ -3352,7 +3362,7 @@ modf(x)
     PPCODE:
 	double intvar;
 	/* (We already know stack is long enough.) */
-	PUSHs(sv_2mortal(newSVnv(modf(x,&intvar))));
+	PUSHs(sv_2mortal(newSVnv(Perl_modf(x,&intvar))));
 	PUSHs(sv_2mortal(newSVnv(intvar)));
 
 double
