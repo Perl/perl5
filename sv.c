@@ -5884,32 +5884,18 @@ screamer2:
 	    /* Accomodate broken VAXC compiler, which applies U8 cast to
 	     * both args of ?: operator, causing EOF to change into 255
 	     */
-	    /* For some reason #17270 broke things for DJGPP and NetWare.
-	     * Another hunk just below. */
-#if defined(DJGPP) || defined(NETWARE)
-	    if (cnt)
-#else
 	    if (cnt > 0)
-#endif
-	    {
-		i = (U8)buf[cnt - 1];
-	    }
-	    else {
+		 i = (U8)buf[cnt - 1];
+	    else
 		 i = EOF;
-	    }
 	}
 
-	/* This is basically undoing #17270 for DJGPP and NetWare.
-	 * Another hunk just above. */
-#if !(defined(DJGPP) || defined(NETWARE))
-	if (cnt > 0)
-#endif
-	{
-	    if (append)
-		sv_catpvn(sv, (char *) buf, cnt);
-	    else
-		sv_setpvn(sv, (char *) buf, cnt);
-	}
+	if (cnt < 0)
+	    cnt = 0;  /* we do need to re-set the sv even when cnt <= 0 */
+	if (append)
+	     sv_catpvn(sv, (char *) buf, cnt);
+	else
+	     sv_setpvn(sv, (char *) buf, cnt);
 
 	if (i != EOF &&			/* joy */
 	    (!rslen ||
