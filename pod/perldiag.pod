@@ -3239,7 +3239,7 @@ or setgid bit set.  This doesn't make much sense.
 construct.  Remember that bracketing delimiters count nesting level.
 Missing the leading C<$> from a variable C<$m> may cause this error.
 
-Note that since Perlf 5.9.0 a // can also be the I<defined-or>
+Note that since Perl 5.9.0 a // can also be the I<defined-or>
 construct, not just the empty search pattern.  Therefore code written
 in Perl 5.9.0 or later that uses the // as the I<defined-or> can be
 misparsed by pre-5.9.0 Perls as a non-terminated search pattern.
