@@ -563,9 +563,7 @@ PP(pp_bless)
 	STRLEN len;
 	char *ptr;
 
-	if (ssv && SvGMAGICAL(ssv))
-	    mg_get(ssv);
-	if (SvROK(ssv))
+	if (ssv && !SvGMAGICAL(ssv) && !SvAMAGIC(ssv) && SvROK(ssv))
 	    Perl_croak(aTHX_ "Attempt to bless into a reference");
 	ptr = SvPV(ssv,len);
 	if (ckWARN(WARN_MISC) && len == 0)
