@@ -2386,7 +2386,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #endif
 	/* PL_origalen is set in perl_parse(). */
 	s = SvPV_force(sv,len);
-	if (len >= (I32)PL_origalen) {
+	if (len >= (STRLEN)PL_origalen) {
 	    /* Longer than original, will be truncated. */
 	    Copy(s, PL_origargv[0], PL_origalen, char);
 	    PL_origargv[0][PL_origalen - 1] = 0;

@@ -984,7 +984,7 @@ I32
 COP_arybase(o)
 	B::COP	o
 
-U16
+U32
 COP_line(o)
 	B::COP	o
 
@@ -1339,7 +1339,7 @@ U32
 GvCVGEN(gv)
 	B::GV	gv
 
-U16
+U32
 GvLINE(gv)
 	B::GV	gv
 

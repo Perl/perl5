@@ -44,8 +44,10 @@ sub initialize {
     my ($ospeed, $term, $termios);
 
     # The default Term::Cap path won't work on Solaris.
-    $ENV{TERMPATH} = "$ENV{HOME}/.termcap:/etc/termcap"
-        . ":/usr/share/misc/termcap:/usr/share/lib/termcap";
+    # $ENV{HOME} is usually not set on MSWin32.
+    my $home = exists $ENV{HOME} ? "$ENV{HOME}/.termcap:" : '';
+    $ENV{TERMPATH} = $home . '/etc/termcap:/usr/share/misc/termcap'
+                           . ':/usr/share/lib/termcap';
 
     # Fall back on a hard-coded terminal speed if POSIX::Termios isn't
     # available (such as on VMS).
