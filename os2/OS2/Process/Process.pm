@@ -65,6 +65,22 @@ our @EXPORT = qw(
 	sidOf
 	scrsize
 	scrsize_set
+	kbdChar
+	kbdhChar
+	kbdStatus
+	_kbdStatus_set
+	kbdhStatus
+	kbdhStatus_set
+	vioConfig
+	viohConfig
+	vioMode
+	viohMode
+	viohMode_set
+	_vioMode_set
+	_vioState
+	_vioState_set
+	vioFont
+	vioFont_set
 	process_entry
 	process_entries
 	process_hentry
@@ -489,6 +505,74 @@ sub MessageBox2 ($;$$$$$) {
 # backward compatibility
 *set_title = \&Title_set;
 *get_title = \&Title;
+
+# adapter; display; cbMemory; Configuration; VDHVersion; Flags; HWBufferSize;
+# FullSaveSize; PartSaveSize; EMAdaptersOFF; EMDisplaysOFF;
+sub vioConfig (;$$) {
+  my $data = &_vioConfig;
+  my @out = unpack 'x[S]SSLSSSLLLSS', $data;
+  # If present, offset points to S/S (with only the first work making sense)
+  my (@adaptersEMU, @displayEMU);
+  @displaysEMU = unpack("x[$out[10]]S/S", $data), pop @out if @out > 10;
+  @adaptersEMU = unpack("x[$out[ 9]]S/S", $data), pop @out if @out > 9;
+  $out[9] = $adaptersEMU[0] if @adaptersEMU;
+  $out[10] = $displaysEMU[0] if @displaysEMU;
+  @out;
+}
+
+my @vioConfig = qw(adapter display cbMemory Configuration VDHVersion Flags
+		   HWBufferSize FullSaveSize PartSaveSize EMAdapters EMDisplays);
+
+sub viohConfig (;$$) {
+  my %h;
+  @h{@vioConfig} = &vioConfig;
+  %h;
+}
+
+# fbType; color; col; row; hres; vres; fmt_ID; attrib; buf_addr; buf_length;
+# full_length; partial_length; ext_data_addr;
+sub vioMode() {unpack 'x[S]CCSSSSCCLLLLL', _vioMode}
+
+my @vioMode = qw( fbType color col row hres vres fmt_ID attrib buf_addr
+		  buf_length full_length partial_length ext_data_addr);
+
+sub viohMode() {
+  my %h;
+  @h{@vioMode} = vioMode;
+  %h;
+}
+
+sub viohMode_set {
+  my %h = (viohMode, @_);
+  my $o = pack 'x[S]CCSSSSCCLLLLL', @h{@vioMode};
+  $o = pack 'SCCSSSSCCLLLLL', length $o, @h{@vioMode};
+  _vioMode_set($o);
+}
+
+sub kbdChar (;$$) {unpack 'CCCCSL', &_kbdChar}
+
+my @kbdChar = qw(ascii scancode status nlsstate shifts time);
+sub kbdhChar (;$$) {
+  my %h;
+  @h{@kbdChar} = &kbdChar;
+  %h
+}
+
+sub kbdStatus (;$) {unpack 'x[S]SSSS', &_kbdStatus}
+my @kbdStatus = qw(state turnChar intCharFlags shifts);
+sub kbdhStatus (;$) {
+  my %h;
+  @h{@kbdStatus} = &kbdStatus;
+  %h
+}
+sub kbdhStatus_set {
+  my $h = (@_ % 2 ? shift @_ : 0);
+  my %h = (kbdhStatus($h), @_);
+  my $o = pack 'x[S]SSSS', @h{@kbdStatus};
+  $o = pack 'SSSSS', length $o, @h{@kbdStatus};
+  _kbdStatus_set($o,$h);
+}
+
 
 # Autoload methods go after __END__, and are processed by the autosplit program.
 

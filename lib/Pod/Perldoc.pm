@@ -12,7 +12,7 @@ use File::Spec::Functions qw(catfile catdir splitdir);
 use vars qw($VERSION @Pagers $Bindir $Pod2man
   $Temp_Files_Created $Temp_File_Lifetime
 );
-$VERSION = '3.09';
+$VERSION = '3.10';
 #..........................................................................
 
 BEGIN {  # Make a DEBUG constant very first thing...
@@ -360,7 +360,7 @@ sub init_formatter_class_list {
 
   $self->opt_M_with('Pod::Perldoc::ToPod');   # the always-there fallthru
   $self->opt_o_with('text');
-  $self->opt_o_with('man') unless IS_MSWin32 || IS_Dos || IS_Cygwin
+  $self->opt_o_with('man') unless IS_MSWin32 || IS_Dos
        || !($ENV{TERM} && (
               ($ENV{TERM} || '') !~ /dumb|emacs|none|unknown/i
            ));
@@ -485,7 +485,7 @@ sub find_good_formatter_class {
       } else {
         $^W = 0;
         # The average user just has no reason to be seeing
-        #  $^W-suppressable warnings from the require!
+        #  $^W-suppressable warnings from the the require!
       }
 
       eval "require $c";
@@ -1341,6 +1341,27 @@ sub check_file {
 sub containspod {
     my($self, $file, $readit) = @_;
     return 1 if !$readit && $file =~ /\.pod\z/i;
+
+
+    #  Under cygwin the /usr/bin/perl is legal executable, but
+    #  you cannot open a file with that name. It must be spelled
+    #  out as "/usr/bin/perl.exe".
+    #
+    #  The following if-case under cygwin prevents error
+    #
+    #     $ perldoc perl
+    #     Cannot open /usr/bin/perl: no such file or directory
+    #
+    #  This would work though
+    #
+    #     $ perldoc perl.pod
+
+    if ( IS_Cygwin  and  -x $file  and  -f "$file.exe" )
+    {
+        warn "Cygwin $file.exe search skipped\n"  if DEBUG or $self->opt_v;
+        return 0;
+    }
+
     local($_);
     open(TEST,"<", $file) 	or die "Can't open $file: $!";   # XXX 5.6ism
     while (<TEST>) {
@@ -1701,7 +1722,7 @@ __END__
 #	 it'll run faster.
 #
 # Version 1.01:	Tue May 30 14:47:34 EDT 1995
-#		Andy Dougherty  <doughera@lafayette.edu>
+#		Andy Dougherty  <doughera@lafcol.lafayette.edu>
 #   -added pod documentation.
 #   -added PATH searching.
 #   -added searching pod/ subdirectory (mainly to pick up perlfunc.pod

@@ -3269,8 +3269,10 @@ S_validate_suid(pTHX_ char *validarg, char *scriptname, int fdscript)
 	 * But I don't think it's too important.  The manual lies when
 	 * it says access() is useful in setuid programs.
 	 */
-	if (PerlLIO_access(CopFILE(PL_curcop),1)) /*double check*/
-	    Perl_croak(aTHX_ "Permission denied");
+	if (PerlLIO_access(CopFILE(PL_curcop),1)) { /*double check*/
+            errno = EPERM;
+	    Perl_croak(aTHX_ "Permission denied\n");
+	}
 #else
 	/* If we can swap euid and uid, then we can determine access rights
 	 * with a simple stat of the file, and then compare device and
@@ -3290,15 +3292,20 @@ S_validate_suid(pTHX_ char *validarg, char *scriptname, int fdscript)
 #endif
 		|| PerlProc_getuid() != PL_euid || PerlProc_geteuid() != PL_uid)
 		Perl_croak(aTHX_ "Can't swap uid and euid");	/* really paranoid */
-	    if (PerlLIO_stat(CopFILE(PL_curcop),&tmpstatbuf) < 0)
-		Perl_croak(aTHX_ "Permission denied");	/* testing full pathname here */
+	    if (PerlLIO_stat(CopFILE(PL_curcop),&tmpstatbuf) < 0) {
+		errno = EPERM;
+		Perl_croak(aTHX_ "Permission denied\n");	/* testing full pathname here */
+	    }
 #if defined(IAMSUID) && !defined(NO_NOSUID_CHECK)
-	    if (fd_on_nosuid_fs(PerlIO_fileno(PL_rsfp)))
-		Perl_croak(aTHX_ "Permission denied");
+	    if (fd_on_nosuid_fs(PerlIO_fileno(PL_rsfp))) {
+		errno = EPERM;
+		Perl_croak(aTHX_ "Permission denied\n");
+	    }
 #endif
 	    if (tmpstatbuf.st_dev != PL_statbuf.st_dev ||
 		tmpstatbuf.st_ino != PL_statbuf.st_ino) {
 		(void)PerlIO_close(PL_rsfp);
+		errno = EPERM;
 		Perl_croak(aTHX_ "Permission denied\n");
 	    }
 	    if (
@@ -3317,8 +3324,10 @@ S_validate_suid(pTHX_ char *validarg, char *scriptname, int fdscript)
 #endif /* HAS_SETREUID */
 #endif /* IAMSUID */
 
-	if (!S_ISREG(PL_statbuf.st_mode))
-	    Perl_croak(aTHX_ "Permission denied");
+	if (!S_ISREG(PL_statbuf.st_mode)) {
+            errno = EPERM;
+	    Perl_croak(aTHX_ "Permission denied\n");
+	}
 	if (PL_statbuf.st_mode & S_IWOTH)
 	    Perl_croak(aTHX_ "Setuid/gid script is writable by world");
 	PL_doswitches = FALSE;		/* -s is insecure in suid */
@@ -3426,8 +3435,10 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 	Perl_croak(aTHX_ "-P not allowed for setuid/setgid script\n");
     else if (fdscript >= 0)
 	Perl_croak(aTHX_ "fd script not allowed in suidperl\n");
-    else
+    else {
+	errno = EPERM;
 	Perl_croak(aTHX_ "Permission denied\n");
+    }
 
     /* We absolutely must clear out any saved ids here, so we */
     /* exec the real perl, substituting fd script for scriptname. */
@@ -3435,8 +3446,10 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
     PerlIO_rewind(PL_rsfp);
     PerlLIO_lseek(PerlIO_fileno(PL_rsfp),(Off_t)0,0);  /* just in case rewind didn't */
     for (which = 1; PL_origargv[which] && PL_origargv[which] != scriptname; which++) ;
-    if (!PL_origargv[which])
-	Perl_croak(aTHX_ "Permission denied");
+    if (!PL_origargv[which]) {
+	errno = EPERM;
+	Perl_croak(aTHX_ "Permission denied\n");
+    }
     PL_origargv[which] = savepv(Perl_form(aTHX_ "/dev/fd/%d/%s",
 				  PerlIO_fileno(PL_rsfp), PL_origargv[which]));
 #if defined(HAS_FCNTL) && defined(F_SETFD)
