@@ -1,23 +1,22 @@
-Thread		T_IVOBJ
+Thread		T_XSOBJ
 
 INPUT
-T_IVOBJ
-	if (sv_isobject($arg)) {
-	    $var = ($type) SvIV((SV*)SvRV($arg));
+T_XSOBJ
+	STMT_START {
+	    MAGIC *mg;
+	    SV *sv = ($arg);
+
+	    if (!sv_isobject(sv))
+		croak(\"$var is not an object\");
+	    if (!SvRMAGICAL(sv) || !(mg = mg_find(sv, '~')))
+		croak(\"$arg is a counterfeit ${ntype} object\");
+	    $var = ($type) SvPVX(mg->mg_obj);
 	    DEBUG_L(PerlIO_printf(PerlIO_stderr(),
-				  \"XSUB ${func_name}: 0x%lx\\n\",
-				  (unsigned long)$var););
-	}
-	else
-	    croak(\"$var is not an object\")
+				  \"XSUB ${func_name}: %p\\n\", $var);)
+	} STMT_END
 T_IVREF
 	if (SvROK($arg))
 	    $var = ($type) SvIV((SV*)SvRV($arg));
 	else
 	    croak(\"$var is not a reference\")
 
-OUTPUT
-T_IVOBJ	
-	sv_setref_iv($arg, \"${ntype}\", (IV)($var));
-    	DEBUG_L(PerlIO_printf(PerlIO_stderr(), \"XSUB $func_name: 0x%lx\\n\",
-			      (unsigned long)$var););

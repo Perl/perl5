@@ -2,6 +2,8 @@
 #include "perl.h"
 #include "XSUB.h"
 
+static I32 threadnum = 0;
+
 static void *
 threadstart(arg)
 void *arg;
@@ -15,8 +17,8 @@ void *arg;
     AV *returnav = newAV();
     int i;
 
-    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "new thread 0x%lx starting at %s\n",
-			  (unsigned long) thr, SvPEEK(TOPs)));
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "new thread %p starting at %s\n",
+			  thr, SvPEEK(TOPs)));
     thr = (Thread) arg;
     savemark = TOPMARK;
     thr->prev = thr->prev_run = savethread;
@@ -78,8 +80,8 @@ void *arg;
 	croak("panic: pthread_setspecific");
 
     /* Only now can we use SvPEEK (which calls sv_newmortal which does dTHR) */
-    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "new thread 0x%lx starting at %s\n",
-			  (unsigned long) thr, SvPEEK(TOPs)));
+    DEBUG_L(PerlIO_printf(PerlIO_stderr(), "new thread %p starting at %s\n",
+			  thr, SvPEEK(TOPs)));
 
     JMPENV_PUSH(ret);
     switch (ret) {
@@ -132,11 +134,11 @@ void *arg;
     Safefree(cxstack);
     Safefree(tmps_stack);
 
-    if (ThrSTATE(thr) == THR_DETACHED) {
+    if (ThrSTATE(thr) == THRf_DETACHED) {
 	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
 			      "%p detached...zapping returnav\n", thr));
 	SvREFCNT_dec(returnav);
-	ThrSETSTATE(thr, THR_DEAD);
+	ThrSETSTATE(thr, THRf_DEAD);
     }
     DEBUG_L(PerlIO_printf(PerlIO_stderr(), "%p returning\n", thr));	
     return (void *) returnav;	/* Available for anyone to join with us */
@@ -145,18 +147,24 @@ void *arg;
 #endif    
 }
 
-Thread
-newthread(startsv, initargs)
+static SV *
+newthread(startsv, initargs, class)
 SV *startsv;
 AV *initargs;
+char *class;
 {
     dTHR;
     dSP;
     Thread savethread;
     int i;
+    SV *sv;
     
     savethread = thr;
-    New(53, thr, 1, struct thread);
+    sv = newSVpv("", 0);
+    SvGROW(sv, sizeof(struct thread) + 1);
+    SvCUR_set(sv, sizeof(struct thread));
+    thr = (Thread) SvPVX(sv);
+    oursv = sv; 
     /* If we don't zero these foostack pointers, init_stacks won't init them */
     markstack = 0;
     scopestack = 0;
@@ -170,7 +178,8 @@ AV *initargs;
     /* top_env? */
     /* runlevel */
     cvcache = newHV();
-    ThrSETSTATE(thr, THR_NORMAL);
+    thrflags = 0;
+    ThrSETSTATE(thr, THRf_NORMAL);
 
     /* The following pushes the arg list and startsv onto the *new* stack */
     PUSHMARK(sp);
@@ -199,20 +208,20 @@ AV *initargs;
     /* Go */
     MUTEX_UNLOCK(threadstart_mutexp);
 #endif
-    return thr;
+    sv = newSViv(++threadnum);
+    sv_magic(sv, oursv, '~', 0, 0);
+    return sv_bless(newRV(sv), gv_stashpv(class, TRUE));
 }
 
 MODULE = Thread		PACKAGE = Thread
 
-Thread
+void
 new(class, startsv, ...)
-	SV *		class
+	char *		class
 	SV *		startsv
 	AV *		av = av_make(items - 2, &ST(2));
-    CODE:
-	RETVAL = newthread(startsv, av);
-    OUTPUT:
-	RETVAL
+    PPCODE:
+	XPUSHs(sv_2mortal(newthread(startsv, av, class)));
 
 void
 join(t)
@@ -221,19 +230,18 @@ join(t)
 	int	i = NO_INIT
     PPCODE:
 	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
-			      "0x%lx: joining 0x%lx (state 0x%lx)\n",
-			      (unsigned long)thr, (unsigned long)t,
-			      (unsigned long)ThrSTATE(t)););
-	if (ThrSTATE(t) == THR_DETACHED)
+			      "%p: joining %p (state 0x%lx)\n",
+			      thr, t, (unsigned long)ThrSTATE(t)););
+	if (ThrSTATE(t) == THRf_DETACHED)
 	    croak("tried to join a detached thread");
-	else if (ThrSTATE(t) == THR_JOINED)
+	else if (ThrSTATE(t) == THRf_JOINED)
 	    croak("tried to rejoin an already joined thread");
-	else if (ThrSTATE(t) == THR_DEAD)
+	else if (ThrSTATE(t) == THRf_DEAD)
 	    croak("tried to join a dead thread");
 
 	if (pthread_join(t->Tself, (void **) &av))
 	    croak("pthread_join failed");
-	ThrSETSTATE(t, THR_JOINED);
+	ThrSETSTATE(t, THRf_JOINED);
 	/* Could easily speed up the following if necessary */
 	for (i = 0; i <= AvFILL(av); i++)
 	    XPUSHs(sv_2mortal(*av_fetch(av, i, FALSE)));
@@ -243,27 +251,27 @@ detach(t)
 	Thread	t
     CODE:
 	DEBUG_L(PerlIO_printf(PerlIO_stderr(),
-			      "0x%lx: detaching 0x%lx (state 0x%lx)\n",
-			      (unsigned long)thr, (unsigned long)t,
-			      (unsigned long)ThrSTATE(t)););
-	if (ThrSTATE(t) == THR_DETACHED)
+			      "%p: detaching %p (state 0x%lx)\n",
+			      thr, t, (unsigned long)ThrSTATE(t)););
+	if (ThrSTATE(t) == THRf_DETACHED)
 	    croak("tried to detach an already detached thread");
-	else if (ThrSTATE(t) == THR_JOINED)
+	else if (ThrSTATE(t) == THRf_JOINED)
 	    croak("tried to detach an already joined thread");
-	else if (ThrSTATE(t) == THR_DEAD)
+	else if (ThrSTATE(t) == THRf_DEAD)
 	    croak("tried to detach a dead thread");
 	if (pthread_detach(t->Tself))
-	    croak("pthread_detach failed");
-	ThrSETSTATE(t, THR_DETACHED);
+	    croak("panic: pthread_detach failed");
+	ThrSETSTATE(t, THRf_DETACHED);
 
 void
 DESTROY(t)
 	Thread	t
     CODE:
-	if (ThrSTATE(t) == THR_NORMAL) {
+	if (ThrSTATE(t) == THRf_NORMAL) {
 	    if (pthread_detach(t->Tself))
-		croak("pthread_detach failed");
-	    ThrSETSTATE(t, THR_DETACHED);
+		croak("panic: pthread_detach failed");
+	    ThrSETSTATE(t, THRf_DETACHED);
+	    thrflags |= THRf_DIE_FATAL;
 	}
 
 void
@@ -286,8 +294,7 @@ CODE:
 	    sv = SvRV(sv);
 
 	mg = condpair_magic(sv);
-	DEBUG_L(PerlIO_printf(PerlIO_stderr(), "0x%lx: cond_wait 0x%lx\n",
-			      (unsigned long)thr, (unsigned long)sv));
+	DEBUG_L(PerlIO_printf(PerlIO_stderr(), "%p: cond_wait %p\n", thr, sv));
 	MUTEX_LOCK(MgMUTEXP(mg));
 	if (MgOWNER(mg) != thr) {
 	    MUTEX_UNLOCK(MgMUTEXP(mg));
@@ -311,8 +318,7 @@ CODE:
 	    sv = SvRV(sv);
 	}
 	mg = condpair_magic(sv);
-	DEBUG_L(PerlIO_printf(PerlIO_stderr(), "0x%lx: cond_signal 0x%lx\n",
-			      (unsigned long)thr, (unsigned long)sv));
+	DEBUG_L(PerlIO_printf(PerlIO_stderr(), "%p: cond_signal %p\n",thr,sv));
 	MUTEX_LOCK(MgMUTEXP(mg));
 	if (MgOWNER(mg) != thr) {
 	    MUTEX_UNLOCK(MgMUTEXP(mg));
@@ -330,8 +336,8 @@ CODE:
 	    sv = SvRV(sv);
 
 	mg = condpair_magic(sv);
-	DEBUG_L(PerlIO_printf(PerlIO_stderr(), "0x%lx: cond_broadcast 0x%lx\n",
-			      (unsigned long)thr, (unsigned long)sv));
+	DEBUG_L(PerlIO_printf(PerlIO_stderr(), "%p: cond_broadcast %p\n",
+			      thr, sv));
 	MUTEX_LOCK(MgMUTEXP(mg));
 	if (MgOWNER(mg) != thr) {
 	    MUTEX_UNLOCK(MgMUTEXP(mg));
