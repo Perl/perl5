@@ -18,7 +18,7 @@ case "$osvers" in
 	usedl="$undef"
 	;;
 *)
-	if [ -f /usr/libexec/ld.elf_so ]; then
+	if test -f /usr/libexec/ld.elf_so; then
 		d_dlopen=$define
 		d_dlerror=$define
 		# Include the whole libgcc.a, required for Xerces-P, which
@@ -28,14 +28,14 @@ case "$osvers" in
 			-Wl,-E $ccdlflags"
 		cccdlflags="-DPIC -fPIC $cccdlflags"
 		lddlflags="--whole-archive -shared $lddlflags"
-	elif [ "`uname -m`" = "pmax" ]; then
+	elif test "`uname -m`" = "pmax"; then
 # NetBSD 1.3 and 1.3.1 on pmax shipped an `old' ld.so, which will not work.
 		case "$osvers" in
 		1.3|1.3.1)
 			d_dlopen=$undef
 			;;
 		esac
-	elif [ -f /usr/libexec/ld.so ]; then
+	elif test -f /usr/libexec/ld.so; then
 		d_dlopen=$define
 		d_dlerror=$define
 # we use -fPIC here because -fpic is *NOT* enough for some of the
@@ -76,25 +76,52 @@ ieeefp_h="define"
 cat > UU/usethreads.cbu <<'EOCBU' 
 case "$usethreads" in 
 $define|true|[yY]*) 
-        # The GNU pth is the recommended user-level pthreads implementation. 
-        # As of NetBSD 1.5.2 there are no kernel pthreads. 
-        if pkg_info -qe pth; then 
-            # Add -lpthread. 
-            libswanted="$libswanted pthread" 
-            # There is no libc_r as of NetBSD 1.5.2, so no c -> c_r. 
+	lpthread=
+	for thislib in pthread; do
+		for thisdir in $loclibpth $plibpth $glibpth dummy; do
+			xxx=$thisdir/lib$thislib.a
+			if test -f "$xxx"; then
+				lpthread=$thislib
+				break;
+			fi
+			xxx=$thisdir/lib$thislib.so
+			if test -f "$xxx"; then
+				lpthread=$thislib
+				break;
+			fi
+			xxx=`ls $thisdir/lib$thislib.so.* 2>/dev/null`
+			if test "X$xxx" != X; then
+				lpthread=$thislib
+				break;
+			fi
+		done
+		if test "X$lpthread" != X; then
+			break;
+		fi
+	done
+	if test "X$lpthread" != X; then
+		# Add -lpthread. 
+		libswanted="$libswanted $lpthread" 
+		# There is no libc_r as of NetBSD 1.5.2, so no c -> c_r.
+		# This will be revisited when NetBSD gains a native pthreads
+		# implementation.
         else 
-            echo "$0: You need to install the GNU pth.  Aborting." >&4 
-            exit 1 
-        fi 
+		echo "$0: No POSIX threads library (-lpthread) found.  " \
+		     "You may want to install GNU pth.  Aborting." >&4 
+		exit 1 
+        fi
+	unset thisdir
+	unset thislib
+	unset lpthread
         ;; 
 esac 
 EOCBU
 
 # Recognize the NetBSD packages collection.
-# GDBM might be here, pth might be there.
+# GDBM might be here, GNU pth might be there.
 if test -d /usr/pkg/lib; then
 	loclibpth="$loclibpth /usr/pkg/lib"
-	if [ -f /usr/libexec/ld.elf_so ]; then
+	if test -f /usr/libexec/ld.elf_so; then
 		ldflags="$ldflags -Wl,-R/usr/pkg/lib"
 	else
 		ldflags="$ldflags -R/usr/pkg/lib"
