@@ -761,7 +761,7 @@ CFG_VARS = \
 # Top targets
 #
 
-all: hostminiperl $(MINIMOD) $(CONFIGPM) $(PERLEXE)
+all: hostminiperl $(MINIMOD) $(CONFIGPM) $(PERLEXE) Extensions
 
 $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
 
@@ -1140,3 +1140,6 @@ host-install:
 	perl -MConfig -MExtUtils::Install -we "install({'../xlib/$(CROSS_NAME)', qq#$$Config{installprefixexp}/xlib/$(CROSS_NAME)#},1)"
 	perl -MConfig -MFile::Copy -we "copy qq#./$(MACHINE)/perl$(PV).lib#, qq#$$Config{installprefixexp}/xlib/$(CROSS_NAME)/CORE#"
 	perl -MConfig -MFile::Copy -we "copy qq#../lib/Cross.pm#, qq#$$Config{installprefixexp}/lib#"
+	perl -MConfig -we "system qq#perl -pi.bak -we \"s{((arch^|priv)libexp)='.*'}{\$$1='# . \
+	 quotemeta($$Config{installprefixexp}) . \
+	 qq#/xlib/$(CROSS_NAME)'}\" $$Config{installprefixexp}/xlib/$(CROSS_NAME)/Config.pm#"
