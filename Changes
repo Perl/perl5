@@ -32,6 +32,312 @@ Version v5.7.1		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  8935] By: jhi                                   on 2001/02/25  18:46:36
+        Log: Retract #8929,8930,8932,8933 for now.
+     Branch: perl
+	   ! perl.h regcomp.c t/op/pat.t t/op/tr.t toke.c
+____________________________________________________________________________
+[  8934] By: jhi                                   on 2001/02/25  17:34:35
+        Log: Integrate perlio.
+     Branch: perl
+	  !> embed.pl ext/Encode/Encode.pm ext/Encode/Encode.xs
+	  !> lib/ExtUtils/typemap perl.h perlapi.c proto.h sv.c
+	  !> t/lib/encode.t
+____________________________________________________________________________
+[  8933] By: jhi                                   on 2001/02/25  17:33:12
+        Log: (Retracted by #8395.)
+             
+             Slight tweaks in scan_const(), not fixes yet, it seems like
+             lots of work remains to be done...
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[  8932] By: jhi                                   on 2001/02/25  17:27:11
+        Log: (Retracted by #8395.)
+             
+             Missing from #8930.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  8931] By: jhi                                   on 2001/02/25  17:26:19
+        Log: A comment tweak.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[  8930] By: jhi                                   on 2001/02/25  17:25:47
+        Log: (Retracted by #8395.)
+             
+             Attempt to fix the EBCDIC character range problwm with //.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[  8929] By: jhi                                   on 2001/02/25  17:23:45
+        Log: (Retracted by #8395.)
+             
+             Expand the EBCDIC character range tests, and add few nasty
+             tr tests from Karsten Sperling.
+     Branch: perl
+	   ! t/op/pat.t t/op/tr.t
+____________________________________________________________________________
+[  8928] By: jhi                                   on 2001/02/25  17:18:49
+        Log: Missing check-in.
+     Branch: perl
+	   ! lib/Pod/Find.pm
+____________________________________________________________________________
+[  8927] By: nick                                  on 2001/02/25  11:30:22
+        Log: Change method names in Encode implementation classes to something
+             less confusing (preparing to "go public").
+     Branch: perlio
+	   ! ext/Encode/Encode.pm ext/Encode/Encode.xs t/lib/encode.t
+____________________________________________________________________________
+[  8926] By: nick                                  on 2001/02/25  10:53:24
+        Log: GCC __atribute__ / printf fix
+     Branch: perlio
+	   ! perl.h
+____________________________________________________________________________
+[  8925] By: nick                                  on 2001/02/25  10:52:25
+        Log: Checked in the wrong one ...
+     Branch: perlio
+	   ! ext/Encode/Encode.pm
+____________________________________________________________________________
+[  8924] By: nick                                  on 2001/02/24  18:46:51
+        Log: Integrate mainline - to see what Jarkko has in ...
+     Branch: perlio
+	  +> t/pod/testpods/lib/Pod/Stuff.pm
+	  !> MANIFEST t/TEST t/lib/glob-basic.t t/op/pat.t t/pod/find.t
+____________________________________________________________________________
+[  8923] By: nick                                  on 2001/02/24  17:05:23
+        Log: Encode API documentation nd tidy up.
+             Minor additions to test.
+             Tweaks sv_utf8_upgrade() to force SvPV, and always SvUTF8_on and return length.
+             Adds STRLEN to standard typemap.
+     Branch: perlio
+	   ! embed.pl ext/Encode/Encode.pm ext/Encode/Encode.xs
+	   ! lib/ExtUtils/typemap perlapi.c proto.h sv.c t/lib/encode.t
+____________________________________________________________________________
+[  8922] By: jhi                                   on 2001/02/24  16:38:12
+        Log: Add a test for the "character range should match in EBCDIC
+             if specified using explicit numerics" bug found by Karsten
+             Sperling.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[  8921] By: jhi                                   on 2001/02/24  16:30:16
+        Log: Subject: [PATCH t/pod/find.t t/TEST] fixing t/pod/find.t, running t/pod
+             From: schwern@pobox.com
+             Date: Fri, 23 Feb 2001 03:21:37 -0500
+             Message-ID: <20010223032137.A26022@magnonel.guild.net>
+             
+             plus Charles Lane's fixes, plus tweaks.
+     Branch: perl
+	   + t/pod/testpods/lib/Pod/Stuff.pm
+	   ! MANIFEST t/TEST t/lib/glob-basic.t t/pod/find.t
+____________________________________________________________________________
+[  8920] By: nick                                  on 2001/02/24  10:30:11
+        Log: Integrate mainline
+     Branch: perlio
+	  !> (integrate 33 files)
+____________________________________________________________________________
+[  8919] By: jhi                                   on 2001/02/24  00:23:35
+        Log: Subject: Re: I'm losing the war...
+             From: "Vadim Konovalov" <watman@inbox.ru>
+             Date: Sat, 24 Feb 2001 00:10:14 +0300
+             Message-ID: <007501c09dde$a9b84420$2f7b55c2@vad>
+             
+             hv_store() not working correctly in ENV_IS_CASELESS case.
+     Branch: perl
+	   ! hv.c
+____________________________________________________________________________
+[  8918] By: jhi                                   on 2001/02/24  00:20:09
+        Log: Subject: Re: [PATCH] fix for charnames above FFFF
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 23 Feb 2001 02:39:03 +0100
+             Message-ID: <m3u25mxjns.fsf@ak-71.mind.de>
+             
+             A further efficiency tweak.
+     Branch: perl
+	   ! lib/charnames.pm
+____________________________________________________________________________
+[  8917] By: jhi                                   on 2001/02/23  20:27:51
+        Log: Integrate change #8916 from mainline,
+             do away with USE_WIN32_RTL_ENV.
+     Branch: maint-5.6/perl
+	  !> perl.c util.c win32/win32.c win32/win32.h win32/win32iop.h
+____________________________________________________________________________
+[  8916] By: jhi                                   on 2001/02/23  20:02:25
+        Log: Abolish USE_WIN32_RTL_ENV.
+     Branch: perl
+	   ! perl.c util.c win32/win32.c win32/win32.h win32/win32iop.h
+____________________________________________________________________________
+[  8915] By: jhi                                   on 2001/02/23  19:36:00
+        Log: Retract #8893, zero-initializing may be costly, maybe reintroduce
+             later protected by some #define.
+     Branch: perl
+	   ! gv.c
+____________________________________________________________________________
+[  8914] By: jhi                                   on 2001/02/23  19:31:38
+        Log: Retract #8902 for now, requested by Charles Lane, the correct
+             fix will be something else.
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  8913] By: jhi                                   on 2001/02/23  19:11:36
+        Log: Subject: [PATCH: perl@8892] was Re: hashing order difference?
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Fri, 23 Feb 2001 10:54:09 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10102231036100.79050-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/op/lex_assign.t
+____________________________________________________________________________
+[  8912] By: jhi                                   on 2001/02/23  18:38:20
+        Log: Subject: [patch] perlio + useithreads
+             From: Doug MacEachern <dougm@covalent.net>
+             Date: Fri, 23 Feb 2001 00:05:37 -0800 (PST)
+             Message-ID: <Pine.LNX.4.21.0102222356460.14249-100000@mako.covalent.net>
+             
+             Gets things running but not complete.
+     Branch: perl
+	   ! intrpvar.h objXSUB.h perlapi.c perlio.h proto.h sv.c
+____________________________________________________________________________
+[  8911] By: jhi                                   on 2001/02/23  04:20:02
+        Log: Integrate changes #8896,8897,8898,8906,8907,8908 from mainline.
+             
+             Duplicated environment freeing, File::Temp 0.12,
+             op/append portability (EBCDIC) tweak.
+     Branch: maint-5.6/perl
+	  !> lib/File/Temp.pm perl.c t/lib/ftmp-mktemp.t t/lib/ftmp-posix.t
+	  !> t/op/append.t
+____________________________________________________________________________
+[  8910] By: jhi                                   on 2001/02/23  02:07:33
+        Log: Integrate change #8909 from mainline, a better Borland
+             putenv() workaround.
+     Branch: maint-5.6/perl
+	  !> perl.c
+____________________________________________________________________________
+[  8909] By: jhi                                   on 2001/02/23  02:05:46
+        Log: A better workaround for Borland putenv() brokenness from Sarathy.
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[  8908] By: jhi                                   on 2001/02/23  02:04:14
+        Log: Subject: fix for parameter -Dm (for perl@8867)
+             From: "Vadim Konovalov" <watman@inbox.ru>
+             Date: Thu, 22 Feb 2001 17:30:12 +0300
+             Message-ID: <001801c09cdc$2faba490$2a7b55c2@vad>
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[  8907] By: jhi                                   on 2001/02/23  01:58:20
+        Log: Subject: [PATCH: perl@8892] treat unicoding and null bytes in op/append.t
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Thu, 22 Feb 2001 13:23:59 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10102221319460.47500-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/op/append.t
+____________________________________________________________________________
+[  8906] By: jhi                                   on 2001/02/23  01:48:34
+        Log: Upgrade to File::Temp 0.12, from Tim Jenness.
+     Branch: perl
+	   ! lib/File/Temp.pm t/lib/ftmp-mktemp.t t/lib/ftmp-posix.t
+____________________________________________________________________________
+[  8905] By: jhi                                   on 2001/02/23  01:43:30
+        Log: Subject: [PATCH: perl@8892] fix a patcho in t/lib/st-06compat.t
+             From: Peter Prymmer <pvhp@forte.com>
+             Date: Thu, 22 Feb 2001 12:54:31 -0800 (PST)
+             Message-ID: <Pine.OSF.4.10.10102221249170.47500-100000@aspara.forte.com>
+     Branch: perl
+	   ! t/lib/st-06compat.t
+____________________________________________________________________________
+[  8904] By: jhi                                   on 2001/02/23  01:42:39
+        Log: Metaconfig unit change for #8903.
+     Branch: metaconfig/U/perl
+	   ! Devel.U
+____________________________________________________________________________
+[  8903] By: jhi                                   on 2001/02/23  01:42:12
+        Log: Be more helpful for devel builders, suggested by John L. Allen.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[  8902] By: jhi                                   on 2001/02/23  01:37:41
+        Log: (Retracted by #8914)
+             
+             Subject:  [PATCH 5.7.0] don't zero CvFLAGS before checking for CvCONST!
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date:     Thu, 22 Feb 2001 09:43:57 EST
+             Message-Id: <010222094237.9d22e@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  8901] By: jhi                                   on 2001/02/23  01:20:32
+        Log: Subject:  [PATCH perl 5.7.0] malloc message address offset
+             From: lane@DUPHY4.Physics.Drexel.Edu (Charles Lane)
+             Date:     Thu, 22 Feb 2001 08:01:35 EST
+             Message-Id: <010222075625.9d22e@DUPHY4.Physics.Drexel.Edu>
+     Branch: perl
+	   ! malloc.c
+____________________________________________________________________________
+[  8900] By: jhi                                   on 2001/02/23  01:18:02
+        Log: Integrate changes #8898,8899 from mainline, environ handling.
+     Branch: maint-5.6/perl
+	  !> perl.c
+____________________________________________________________________________
+[  8899] By: jhi                                   on 2001/02/23  01:16:25
+        Log: Rewrite putenv() using my_setenv().  (In general the vendors'
+             putenv() is not to be relied on, they are either broken or leaky
+             or both.)
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[  8898] By: jhi                                   on 2001/02/22  23:36:59
+        Log: Fix #8803 as #8897 fixed #8896: with environ safesysmalloc()
+             and safesysfree() must be used.
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[  8897] By: jhi                                   on 2001/02/22  23:25:45
+        Log: With environ one must use safesysmalloc()/safesysfree().
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[  8896] By: jhi                                   on 2001/02/22  22:13:18
+        Log: If we have a duplicated environment free it
+             if PERL_DESTRUCT_LEVEL.
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[  8895] By: alanbur                               on 2001/02/22  19:31:57
+        Log: Synchronised with parent
+     Branch: maint-5.6/pureperl
+	  !> embed.h embed.pl ext/POSIX/POSIX.xs lib/File/Temp.pm op.c
+____________________________________________________________________________
+[  8894] By: gsar                                  on 2001/02/22  19:06:18
+        Log: integrate changes#6162,6163 from mainline (missing leak fixes!)
+             
+             fix memory leak in method call optimization (change#3768);
+             made C<eval "$x->foo()"> leak
+             
+             fix memory leak in C<eval "BEGIN {}"> (bug in change#4579)
+     Branch: maint-5.6/perl
+	  !> op.c
+____________________________________________________________________________
+[  8893] By: jhi                                   on 2001/02/22  18:35:27
+        Log: (Retracted by #8915.)
+             
+             Third Degree finding:
+             reading uninitialized local variable smallbuf + 8 bytes of Perl_gv_fetchfile
+     Branch: perl
+	   ! gv.c
+____________________________________________________________________________
+[  8892] By: jhi                                   on 2001/02/22  14:28:32
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
+[  8891] By: jhi                                   on 2001/02/22  13:22:45
+        Log: Metaconfig unit changes for #8890.
+     Branch: metaconfig
+	   ! U/modified/Cppsym.U U/threads/archname.U
+____________________________________________________________________________
 [  8890] By: jhi                                   on 2001/02/22  13:22:12
         Log: Add -stdio to the archname if no perlio selected,
              no -perlio added since that is now the default.
