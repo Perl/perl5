@@ -3248,7 +3248,7 @@ S_validate_suid(pTHX_ char *validarg, char *scriptname, int fdscript)
 	    PL_euid == PL_statbuf.st_uid)
 	    if (!PL_do_undump)
 		Perl_croak(aTHX_ "YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET!\n\
-FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
+FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 #endif /* IAMSUID */
 
 	if (PL_euid) {	/* oops, we're not the setuid root perl */
