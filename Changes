@@ -95,6 +95,97 @@ Version v5.7.0		Development release working toward v5.8
 --------------
 
 ____________________________________________________________________________
+[  6707] By: jhi                                   on 2000/08/18  21:55:14
+        Log: Add warnif(), check warnings further up the stack,
+             all the warnings functions now can take an optional object reference.
+             
+             Subject: [PATCH bleedperl@6691] warnings pragma update
+             From: "Paul Marquess" <Paul.Marquess@btinternet.com>
+             Date: Fri, 18 Aug 2000 22:42:06 +0100
+             Message-ID: <000c01c0095d$278e0040$ca01073e@bfs.phone.com>
+     Branch: perl
+	   ! lib/Class/Struct.pm lib/Tie/Handle.pm lib/Tie/Hash.pm
+	   ! lib/Tie/Scalar.pm lib/fields.pm lib/syslog.pl lib/warnings.pm
+	   ! pod/perllexwarn.pod t/pragma/warn/9enabled warnings.pl
+____________________________________________________________________________
+[  6706] By: jhi                                   on 2000/08/18  21:41:45
+        Log: Typo in pp_complement().
+             
+             Subject: [PATCH perl-current] Deparse
+             From: Peter Scott <Peter@PSDT.com>
+             Date: Fri, 18 Aug 2000 12:44:37 -0700
+             Message-Id: <4.3.2.7.2.20000818124024.00ba2be0@psdt.com>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm
+____________________________________________________________________________
+[  6705] By: jhi                                   on 2000/08/18  21:25:59
+        Log: Subject: [PATCH 5.6.0+] fix for Win32::DomainName
+             From: Jan Dubois <jand@ActiveState.com>
+             Date: Fri, 18 Aug 2000 14:22:51 -0700
+             Message-ID: <0o9rps458r29eb97h5csuq81b1eip4no33@4ax.com>
+     Branch: perl
+	   ! lib/Win32.pod win32/win32.c
+____________________________________________________________________________
+[  6704] By: jhi                                   on 2000/08/18  21:16:14
+        Log: Don't eat leading os from index entries.
+             
+             Subject: Re: [ID 20000810.006] Pod::Man Ate My 'O'!
+             From: Russ Allbery <rra@stanford.edu>
+             Date: 10 Aug 2000 20:49:25 -0700
+             Message-ID: <ylu2cs78ze.fsf@windlord.stanford.edu>
+     Branch: perl
+	   ! lib/Pod/Man.pm
+____________________________________________________________________________
+[  6703] By: jhi                                   on 2000/08/18  21:07:06
+        Log: Add [[:blank:]] as suggested in
+             
+             Subject: [ID 20000716.024] [=cc=] / [:blank:]
+             From: Jeffrey Friedl <jfriedl@fummy.dsl.yahoo.com>
+             Date: Sun, 16 Jul 2000 17:55:29 -0700
+             Message-Id: <200007170055.RAA23528@fummy.dsl.yahoo.com>
+             
+             (the [=cc=] has already been taken care of by #6439
+             so the whole bug report can be closed)
+             
+             and make [[:space:]] to be equivalent to isspace(3)
+             (as opposed to \s, which is isSPACE()).  The difference
+             is that now [[:space:]] matches the mythical vertical tab,
+             while \s doesn't.
+     Branch: perl
+	   ! handy.h pod/perlre.pod pod/perlretut.pod regcomp.c regcomp.h
+	   ! regexec.c t/op/pat.t
+____________________________________________________________________________
+[  6702] By: jhi                                   on 2000/08/18  18:47:47
+        Log: The new tests were missing from #6415.
+     Branch: perl
+	   ! t/op/bop.t
+____________________________________________________________________________
+[  6701] By: jhi                                   on 2000/08/18  18:20:40
+        Log: Document the NDBM_File and ODBM_File as SDBM_File
+             was documented in #6417.
+     Branch: perl
+	   ! ext/NDBM_File/NDBM_File.pm ext/ODBM_File/ODBM_File.pm
+	   ! ext/SDBM_File/SDBM_File.pm
+____________________________________________________________________________
+[  6700] By: jhi                                   on 2000/08/18  18:10:39
+        Log: Subject: [PATCH perl@6698] cygwin port
+             From: "Fifer, Eric" <EFifer@sanwaint.com>
+             Date: Fri, 18 Aug 2000 17:30:05 +0100
+             Message-ID: <779F20BCCE5AD31186A50008C75D9979171784@silldn_mail1.sanwaint.com>
+     Branch: perl
+	   ! lib/File/Temp.pm
+____________________________________________________________________________
+[  6699] By: jhi                                   on 2000/08/18  16:21:49
+        Log: Document code point which makes if (defined %stash::) to work
+             (noted by Spider Boardman).
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[  6698] By: jhi                                   on 2000/08/18  13:43:27
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [  6697] By: jhi                                   on 2000/08/18  13:35:57
         Log: Tiny Getopt::Long patch from Johan Vromans.
      Branch: perl
