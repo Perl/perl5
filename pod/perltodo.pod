@@ -69,9 +69,10 @@ B<\b> assertion wants to be overloaded by a function.
 
     Case Mappings? http://www.unicode.org/unicode/reports/tr21/
 
-lc(), uc(), lcfirst(), and ucfirst() work only for simple cases, where
-the mapping goes from a single Unicode character to another single
-Unicode character.  See lib/unicore/SpecCase.txt (and CaseFold.txt).
+lc(), uc(), lcfirst(), and ucfirst() work only for some of the
+simplest cases, where the mapping goes from a single Unicode character
+to another single Unicode character.  See lib/unicore/SpecCase.txt
+(and CaseFold.txt).
 
 =item *
 
