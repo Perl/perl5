@@ -5161,7 +5161,7 @@ PP(pp_gpwent)
      * AIX getpwnam() is clever enough to return the encrypted password
      * only if the caller (euid?) is root.
      *
-     * There are at least two other shadow password APIs.  Many platforms
+     * There are at least three other shadow password APIs.  Many platforms
      * seem to contain more than one interface for accessing the shadow
      * password databases, possibly for compatibility reasons.
      * The getsp*() is by far he simplest one, the other two interfaces
@@ -5182,6 +5182,12 @@ PP(pp_gpwent)
      * The password is in
      * char *(getespw*(...).ufld.fd_encrypt)
      * Mention HAS_GETESPWNAM here so that Configure probes for it.
+     *
+     * <userpw.h> (AIX)
+     * struct userpw *getuserpw();
+     * The password is in
+     * char *(getuserpw(...)).spw_upw_passwd
+     * (but the de facto standard getpwnam() should work okay)
      *
      * Mention I_PROT here so that Configure probes for it.
      *
@@ -5268,7 +5274,9 @@ PP(pp_gpwent)
 	 * Divert the urge to writing an extension instead.
 	 *
 	 * --jhi */
-#   ifdef HAS_GETSPNAM
+	/* Some AIX setups falsely(?) detect some getspnam(), which
+	 * has a different API than the Solaris/IRIX one. */
+#   if defined(HAS_GETSPNAM) && !defined(_AIX)
 	{
 	    struct spwd *spwent;
 	    int saverrno; /* Save and restore errno so that
