@@ -1,18 +1,53 @@
+#!./perl
+
 BEGIN {
-	chdir 't' if -d 't';
-	@INC = '../lib';
+    chdir 't' if -d 't';
+    @INC = '../lib';
 }
 
-print "1..3\n";
+use Test;
+BEGIN { plan tests => 9; }
 
-use autouse 'Math::Complex' => qw(cplx);
-use autouse 'Math::Trig' => qw(Math::Trig::deg2grad($;$));
+BEGIN {
+    require autouse;
+    eval {
+        "autouse"->import('List::Util' => 'List::Util::first');
+    };
+    ok( $@, qr/^autouse into different package attempted/ );
 
-print "ok 1\n";
+    "autouse"->import('List::Util' => qw(max first(&@)));
+}
 
-print "not " unless sqrt(cplx(-1)) == cplx(0, 1);
-print "ok 2\n";
+my @a = (1,2,3,4,5.5);
+ok( max(@a), 5.5);
 
-print "not " unless Math::Trig::deg2grad(360, 1) == 400;
-print "ok 3\n";
+
+# first() has a prototype of &@.  Make sure that's preserved.
+ok( (first { $_ > 3 } @a), 4);
+
+
+# Example from the docs.
+use autouse 'Carp' => qw(carp croak);
+
+{
+    my @warning;
+    local $SIG{__WARN__} = sub { push @warning, @_ };
+    carp "this carp was predeclared and autoused\n";
+    ok( scalar @warning, 1 );
+    ok( $warning[0], "this carp was predeclared and autoused\n" );
+
+    eval { croak "It is but a scratch!" };
+    ok( $@, qr/^It is but a scratch!/);
+}
+
+
+# Test that autouse's lazy module loading works.  We assume that nothing
+# involved in this test uses Test::Soundex, which is pretty safe.
+use File::Spec;
+use autouse 'Text::Soundex' => qw(soundex);
+
+my $mod_file = File::Spec->catfile(qw(Text Soundex.pm));
+ok( !exists $INC{$mod_file} );
+ok( soundex('Basset'), 'B230' );
+ok( exists $INC{$mod_file} );
 
