@@ -511,12 +511,12 @@ CORE_NOCFG_H	=		\
 		..\gv.h		\
 		..\handy.h	\
 		..\hv.h		\
+		..\iperlsys.h	\
 		..\mg.h		\
 		..\nostdio.h	\
 		..\op.h		\
 		..\opcode.h	\
 		..\perl.h	\
-		..\perlio.h	\
 		..\perlsdio.h	\
 		..\perlsfio.h	\
 		..\perly.h	\

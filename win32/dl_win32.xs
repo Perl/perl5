@@ -37,7 +37,7 @@ calls.
 static SV *error_sv;
 
 static char *
-OS_Error_String(void)
+OS_Error_String(CPERLarg)
 {
  DWORD err = GetLastError();
  STRLEN len;
@@ -110,7 +110,8 @@ dl_load_file(filename,flags=0)
     DLDEBUG(2,PerlIO_printf(PerlIO_stderr()," libref=%x\n", RETVAL));
     ST(0) = sv_newmortal() ;
     if (RETVAL == NULL)
-	SaveError(PERL_OBJECT_THIS_ "load_file:%s",OS_Error_String()) ;
+	SaveError(PERL_OBJECT_THIS_ "load_file:%s",
+		  OS_Error_String(PERL_OBJECT_THIS)) ;
     else
 	sv_setiv( ST(0), (IV)RETVAL);
 
@@ -126,7 +127,8 @@ dl_find_symbol(libhandle, symbolname)
     DLDEBUG(2,PerlIO_printf(PerlIO_stderr(),"  symbolref = %x\n", RETVAL));
     ST(0) = sv_newmortal() ;
     if (RETVAL == NULL)
-	SaveError(PERL_OBJECT_THIS_ "find_symbol:%s",OS_Error_String()) ;
+	SaveError(PERL_OBJECT_THIS_ "find_symbol:%s",
+		  OS_Error_String(PERL_OBJECT_THIS)) ;
     else
 	sv_setiv( ST(0), (IV)RETVAL);
 

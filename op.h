@@ -32,6 +32,9 @@ typedef U32 PADOFFSET;
 #define OPCODE U16
 #endif
 
+#ifdef BASEOP_DEFINITION
+#define BASEOP BASEOP_DEFINITION
+#else
 #define BASEOP				\
     OP*		op_next;		\
     OP*		op_sibling;		\
@@ -41,6 +44,7 @@ typedef U32 PADOFFSET;
     U16		op_seq;			\
     U8		op_flags;		\
     U8		op_private;
+#endif
 
 #define OP_GIMME(op,dfl) \
 	(((op)->op_flags & OPf_WANT) == OPf_WANT_VOID   ? G_VOID   : \

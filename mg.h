@@ -7,6 +7,9 @@
  *
  */
 
+#ifdef STRUCT_MGVTBL_DEFINITION
+STRUCT_MGVTBL_DEFINITION;
+#else
 struct mgvtbl {
     int		(CPERLscope(*svt_get))	_((SV *sv, MAGIC* mg));
     int		(CPERLscope(*svt_set))	_((SV *sv, MAGIC* mg));
@@ -14,6 +17,7 @@ struct mgvtbl {
     int		(CPERLscope(*svt_clear))	_((SV *sv, MAGIC* mg));
     int		(CPERLscope(*svt_free))	_((SV *sv, MAGIC* mg));
 };
+#endif
 
 struct magic {
     MAGIC*	mg_moremagic;

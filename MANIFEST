@@ -404,13 +404,7 @@ installman		Perl script to install man pages for pods
 installperl		Perl script to do "make install" dirty work
 interp.sym		Interpreter specific symbols to hide in a struct
 intrpvar.h		Variables held in each interpreter instance
-ipdir.h			Directory interface for Perl Object
-ipenv.h			Environment interface for Perl Object
-iplio.h			Low level IO interface for Perl Object
-ipmem.h			Memory interface for Perl Object
-ipproc.h		Process interface for Perl Object
-ipsock.h		Socket interface for Perl Object
-ipstdio.h		Stdio interface for Perl Object
+iperlsys.h		Perl's interface to the system
 keywords.h		The keyword numbers
 keywords.pl		Program to write keywords.h
 lib/AnyDBM_File.pm	Perl module to emulate dbmopen
@@ -632,18 +626,11 @@ patchlevel.h		The current patch level of perl
 perl.c			main()
 perl.h			Global declarations
 perl_exp.SH		Creates list of exported symbols for AIX
-perldir.h		Macros for directory abstraction
-perlenv.h		Macros for environment abstraction
 perlio.c		C code for PerlIO abstraction
-perlio.h		Interface to PerlIO abstraction
 perlio.sym		Symbols for PerlIO abstraction
-perllio.h		Macros for Low level IO abstraction
-perlmem.h		Macros for memory allocation abstraction
-perlproc.h		Macros for process abstraction
 perlsdio.h		Fake stdio using perlio
 perlsfio.h		Prototype sfio mapping for PerlIO
 perlsh			A poor man's perl shell
-perlsock.h		Macros for socket abstraction
 perlvars.h		Global variables
 perly.c			A byacc'ed perly.y
 perly.c.diff		Fixup perly.c to allow recursion
@@ -1009,6 +996,7 @@ win32/makefile.mk	Win32 makefile for DMAKE (BC++, VC++ builds)
 win32/makemain.pl	Win32 port
 win32/makeperldef.pl	Win32 port
 win32/perlglob.c	Win32 port
+win32/perlhost.h	Perl host implementation
 win32/perllib.c		Win32 port
 win32/pod.mak		Win32 port
 win32/runperl.c		Win32 port

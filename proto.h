@@ -1,11 +1,4 @@
 #ifdef PERL_OBJECT
-#include "ipstdio.h"
-#include "ipdir.h"
-#include "ipenv.h"
-#include "iplio.h"
-#include "ipmem.h"
-#include "ipproc.h"
-#include "ipsock.h"
 #define VIRTUAL virtual
 #else
 #define VIRTUAL

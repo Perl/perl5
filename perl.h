@@ -90,8 +90,8 @@ are local to a function.
 PERL HOST
 1. The perl host is linked with perlX.lib to get perl_alloc. This
 function will return a pointer to CPerlObj (the PERL_OBJECT). It
-takes pointers to the various PerlXXX_YYY interfaces (see ipdir.h for
-information on this).
+takes pointers to the various PerlXXX_YYY interfaces (see iperlsys.h
+for more information on this).
 2. The perl host calls the same functions as normally would be
 called in setting up and running a perl script, except that the
 functions are now member functions of the PERL_OBJECT.
@@ -312,13 +312,7 @@ register struct op *op asm(stringify(OP_IN_REGISTER));
 #  endif
 #endif
 
-#include "perlio.h"
-#include "perlmem.h"
-#include "perllio.h"
-#include "perlsock.h"
-#include "perlproc.h"
-#include "perlenv.h"
-#include "perldir.h"
+#include "iperlsys.h"
 
 #ifdef USE_NEXT_CTYPE
 
@@ -1207,17 +1201,17 @@ typedef pthread_key_t perl_key;
 #   endif
 #endif
 
+#ifdef UNION_ANY_DEFINITION
+UNION_ANY_DEFINITION;
+#else
 union any {
     void*	any_ptr;
     I32		any_i32;
     IV		any_iv;
     long	any_long;
     void	(CPERLscope(*any_dptr)) _((void*));
-#if defined(WIN32) && !defined(PERL_OBJECT)
-	/* Visual C thinks that a pointer to a member variable is 16 bytes in size. */
-	char	handle_VC_problem[16];
-#endif
 };
+#endif
 
 #ifdef USE_THREADS
 #define ARGSproto struct perl_thread *thr
