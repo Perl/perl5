@@ -242,14 +242,15 @@ operators, like C<-f>, C<-M>, etc.  See L<perlfunc>.
 If any list operator (print(), etc.) or any unary operator (chdir(), etc.)
 is followed by a left parenthesis as the next token, the operator and
 arguments within parentheses are taken to be of highest precedence,
-just like a normal function call.  Examples:
+just like a normal function call.  For example,
+because named unary operators are higher precedence than ||:
 
     chdir $foo    || die;	# (chdir $foo) || die
     chdir($foo)   || die;	# (chdir $foo) || die
     chdir ($foo)  || die;	# (chdir $foo) || die
     chdir +($foo) || die;	# (chdir $foo) || die
 
-but, because * is higher precedence than ||:
+but, because * is higher precedence than named operators:
 
     chdir $foo * 20;	# chdir ($foo * 20)
     chdir($foo) * 20;	# (chdir $foo) * 20
