@@ -8,7 +8,7 @@ BEGIN {
         print "1..0 # Skip -- Perl configured without B module\n";
         exit 0;
     }
-    if ($Config{'extensions'} !~ /\bData\/Dumper\b/) {
+    if ($Config::Config{'extensions'} !~ /\bData\/Dumper\b/) {
 	print
 	    "1..0 # Skip: Data::Dumper was not built, needed by OptreeCheck\n";
 	exit 0;
