@@ -68,7 +68,7 @@ test ! $a->can("sleep");
 test my $ref = $a->can("drink");        # returns a coderef
 test $a->$ref("tea") eq "drinking tea"; # ... which works
 test $ref = $a->can("sing");
-eval { $a->sing };
+eval { $a->$ref() };
 test $@;                                # ... but not if no actual subroutine
 
 test (!Cedric->isa('Programmer'));
