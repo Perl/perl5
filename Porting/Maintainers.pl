@@ -399,7 +399,7 @@ package Maintainers;
 	'podlators' =>
 		{
 		'MAINTAINER'	=> 'rra',
-		'FILES'		=> q[lib/Pod/{Html,Man,ParseLink,Text,Text/{Color,Overstrike,Termcap}}.pm pod/pod2man.PL pod/pod2text.PL lib/Pod/t/{basic.*,{man,parselink,text*}.t}],
+		'FILES'		=> q[lib/Pod/{Man,ParseLink,Text,Text/{Color,Overstrike,Termcap}}.pm pod/pod2man.PL pod/pod2text.PL lib/Pod/t/{basic.*,{man,parselink,text*}.t}],
 		'CPAN'		=> 1,
 		},
 
