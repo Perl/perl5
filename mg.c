@@ -2100,7 +2100,11 @@ static SV* sig_sv;
 Signal_t
 Perl_sighandler(int sig)
 {
+#if defined(WIN32) && defined(PERL_IMPLICIT_CONTEXT)
+    dTHXoa(PL_curinterp);	/* fake TLS, because signals don't do TLS */
+#else
     dTHX;
+#endif
     dSP;
     GV *gv = Nullgv;
     HV *st;
@@ -2110,6 +2114,10 @@ Perl_sighandler(int sig)
     U32 flags = 0;
     I32 o_save_i = PL_savestack_ix;
     XPV *tXpv = PL_Xpv;
+
+#if defined(WIN32) && defined(PERL_IMPLICIT_CONTEXT)
+    PERL_SET_THX(aTHXo);	/* fake TLS, see above */
+#endif
     
     if (PL_savestack_ix + 15 <= PL_savestack_max)
 	flags |= 1;

@@ -10,6 +10,7 @@
 #ifndef ___PerlHost_H___
 #define ___PerlHost_H___
 
+#include <signal.h>
 #include "iperlsys.h"
 #include "vmem.h"
 #include "vdir.h"
@@ -1639,7 +1640,7 @@ PerlProcWaitpid(struct IPerlProc* piPerl, int pid, int *status, int flags)
 Sighandler_t
 PerlProcSignal(struct IPerlProc* piPerl, int sig, Sighandler_t subcode)
 {
-    return 0;
+    return signal(sig, subcode);
 }
 
 #ifdef USE_ITHREADS
