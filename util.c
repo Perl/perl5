@@ -2090,6 +2090,7 @@ my_popen(char *cmd, char *mode)
 	    PerlLIO_dup2(p[THIS], *mode == 'r');
 	    PerlLIO_close(p[THIS]);
 	}
+#ifndef OS2
 	if (doexec) {
 #if !defined(HAS_FCNTL) || !defined(F_SETFD)
 	    int fd;
@@ -2104,6 +2105,7 @@ my_popen(char *cmd, char *mode)
 	    do_exec3(cmd,pp[1],did_pipes);	/* may or may not use the shell */
 	    PerlProc__exit(1);
 	}
+#endif	/* defined OS2 */
 	/*SUPPRESS 560*/
 	if (tmpgv = gv_fetchpv("$",TRUE, SVt_PV))
 	    sv_setiv(GvSV(tmpgv), (IV)getpid());

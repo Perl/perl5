@@ -21,6 +21,13 @@ BEGIN {
 	elsif ($Config{'extensions'} !~ /\bIO\b/) {
 	    $reason = 'IO extension unavailable';
 	}
+	elsif ($^O eq 'os2') {
+	    use IO::Socket;
+
+	    eval {IO::Socket::pack_sockaddr_un('/tmp/foo') || 1}
+	      or $@ !~ /not implemented/ or
+		$reason = 'compiled without TCP/IP stack v4';
+	}
 	undef $reason if $^O eq 'VMS' and $Config{d_socket};
 	if ($reason) {
 	    print "1..0 # Skip: $reason\n";
