@@ -1,14 +1,14 @@
 # hints/hpux.sh
-# Perl Configure hints file for Hewlett Packard HP/UX 9.x and 10.x
+# Perl Configure hints file for Hewlett Packard HP-UX 9.x and 10.x
 # This file is based on 
-# hints/hpux_9.sh, Perl Configure hints file for Hewlett Packard HP/UX 9.x
+# hints/hpux_9.sh, Perl Configure hints file for Hewlett Packard HP-UX 9.x
 # Use Configure -Dcc=gcc to use gcc.
 # From: Jeff Okamoto <okamoto@hpcc123.corp.hp.com>
-# Date: Thu, 28 Sep 95 11:06:07 PDT
 # and
-# hints/hpux_10.sh, Perl Configure hints file for Hewlett Packard HP/UX 10.x
+# hints/hpux_10.sh, Perl Configure hints file for Hewlett Packard HP-UX 10.x
 # From: Giles Lean <giles@nemeton.com.au>
-# Date: Tue, 27 Jun 1995 08:17:45 +1000
+
+# This version: October 29, 1996
 
 # Use Configure -Dcc=gcc to use gcc.
 # Use Configure -Dprefix=/usr/local to install in /usr/local.
@@ -18,7 +18,10 @@
 
 # Turn on the _HPUX_SOURCE flag to get many of the HP add-ons
 ccflags="$ccflags -D_HPUX_SOURCE"
-ldflags="$ldflags"
+
+# If you plan to use gcc, then you should uncomment the following line
+# so you get the HP math library and not the GCC math library.
+# ccflags="$ccflags -L/lib/pa1.1"
 
 # Check if you're using the bundled C compiler.  This compiler doesn't support
 # ANSI C (the -Aa flag) nor can it produce shared libraries.  Thus we have
