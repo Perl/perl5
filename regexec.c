@@ -3879,7 +3879,7 @@ S_regrepeat(pTHX_ regnode *p, I32 max)
     case SANY:
         if (do_utf8) {
 	    loceol = PL_regeol;
-	    while (scan < loceol) {
+	    while (scan < loceol && hardcount < max) {
 	        scan += UTF8SKIP(scan);
 		hardcount++;
 	    }

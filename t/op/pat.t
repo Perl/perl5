@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..845\n";
+print "1..846\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -2637,4 +2637,18 @@ print "# some Unicode properties\n";
     }
 
     print join("", @c) eq $s ? "ok 845\n" : "not ok 845\n";
+
+    my $t1 = "Q003\n\n\x{e4}\x{f6}\n\nQ004\n\n\x{e7}"; # test only chars < 256
+    my $r1 = "";
+    while ($t1 =~ / \G ( .+? ) \n\s+ ( .+? ) ( $ | \n\s+ ) /xgcs) {
+	$r1 .= $1 . $2;
+    }
+
+    my $t2 = $t1 . "\x{100}"; # repeat with a larger char
+    my $r2 = "";
+    while ($t2 =~ / \G ( .+? ) \n\s+ ( .+? ) ( $ | \n\s+ ) /xgcs) {
+	$r2 .= $1 . $2;
+    }
+    $r2 =~ s/\x{100}//;
+    print $r1 eq $r2 ? "ok 846\n" : "not ok 846\n";
 }
