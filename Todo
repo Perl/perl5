@@ -46,6 +46,15 @@ Would be nice to have
 	    an extension (Devel::MProf?) that would return the malloc
 	    stats in a nice Perl datastructure (also a simple interface
 	    to return just the grand total would be good)
+	cross-compilation support
+	    host vs target: compile in the host, get the executable to
+	    the target, get the possible input files to the target,
+	    execute in the target (and do not assume a UNIXish shell
+	    in the target! e.g. no command redirection can be assumed),
+	    get possible output files back to to host.  this needs to work
+	    both during Configure and during the build.  You cannot assume
+	    shared filesystems between the host and the target (you may need
+	    e.g. ftp), executing the target executable may involve e.g. rsh
 	a way to make << and >> to shift bitvectors instead of numbers
 
 Possible pragmas

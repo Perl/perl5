@@ -26,8 +26,7 @@ BEGIN {
   }
   if ($Config{d_shm} || $Config{d_msg}) {
      require IPC::SysV;
-     IPC::SysV->import(qw(IPC_PRIVATE IPC_RMID IPC_CREAT S_IRWXU
-			 S_IRWXG S_IRWXO));
+     IPC::SysV->import(qw(IPC_PRIVATE IPC_RMID IPC_CREAT S_IRWXU);
   }
 }
 
@@ -618,7 +617,7 @@ else {
 	my $sent = "foobar";
 	my $rcvd;
 	my $size = 2000;
-	my $id = shmget(IPC_PRIVATE, $size, S_IRWXU|S_IRWXG|S_IRWXO) ||
+	my $id = shmget(IPC_PRIVATE, $size, S_IRWXU) ||
 	    warn "# shmget failed: $!\n";
 	if (defined $id) {
 	    if (shmwrite($id, $sent, 0, 60)) {
