@@ -13,7 +13,7 @@
 /*
  * Package name      : perl5
  * Source directory  : 
- * Configuration time: Tue Mar 14 16:57:28 2000
+ * Configuration time: Tue Mar 21 01:26:44 2000
  * Configured by     : gsar
  * Target system     : 
  */
@@ -170,12 +170,6 @@
  *	available to get the file position indicator, similar to ftell().
  */
 #define HAS_FGETPOS	/**/
-
-/* FLEXFILENAMES:
- *	This symbol, if defined, indicates that the system supports filenames
- *	longer than 14 characters.
- */
-#define	FLEXFILENAMES		/**/
 
 /* HAS_FLOCK:
  *	This symbol, if defined, indicates that the flock routine is
@@ -2233,7 +2227,7 @@
  *	It can be int, ushort, gid_t, etc... 
  *	It may be necessary to include <sys/types.h> to get any 
  *	typedef'ed information.  This is only required if you have
- *	getgroups() or setgroups()..
+ *	getgroups() or setgropus()..
  */
 #if defined(HAS_GETGROUPS) || defined(HAS_SETGROUPS)
 #define Groups_t gid_t	/* Type for 2nd arg to [sg]etgroups() */
@@ -2823,7 +2817,7 @@
 /* Size_t_size:
  *	This symbol holds the size of a Size_t in bytes.
  */
-#define Size_t_size 4		/* */
+#define Size_t_size 4		/**/
 
 /* Size_t:
  *	This symbol holds the type used to declare length parameters
@@ -2876,8 +2870,8 @@
  *	This symbol holds the signedess of a Uid_t.
  *	1 for unsigned, -1 for signed.
  */
-#define Uid_t_sign	-1	/* UID sign */
-  
+#define Uid_t_sign	-1		/* UID sign */
+
 /* Uid_t_size:
  *	This symbol holds the size of a Uid_t in bytes.
  */
@@ -3080,5 +3074,11 @@
  *	link).
  */
 /*#define HAS_LCHOWN		/**/
+
+/* FLEXFILENAMES:
+ *	This symbol, if defined, indicates that the system supports filenames
+ *	longer than 14 characters.
+ */
+#define	FLEXFILENAMES		/**/
 
 #endif
