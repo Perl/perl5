@@ -4901,7 +4901,7 @@ Example, assuming array lengths are passed before arrays:
 
 Splits the string EXPR into a list of strings and returns that list.  By
 default, empty leading fields are preserved, and empty trailing ones are
-deleted.
+deleted.  (If all fields are empty, they are considered to be trailing.)
 
 In scalar context, returns the number of fields found and splits into
 the C<@_> array.  Use of split in scalar context is deprecated, however,
@@ -5987,9 +5987,10 @@ package.
 =item time
 
 Returns the number of non-leap seconds since whatever time the system
-considers to be the epoch (that's 00:00:00, January 1, 1904 for Mac OS,
-and 00:00:00 UTC, January 1, 1970 for most other systems).
-Suitable for feeding to C<gmtime> and C<localtime>.
+considers to be the epoch, suitable for feeding to C<gmtime> and
+C<localtime>. On most systems the epoch is 00:00:00 UTC, January 1, 1970;
+a prominent exception being Mac OS Classic which uses 00:00:00, January 1,
+1904 in the current local time zone for its epoch.
 
 For measuring time in better granularity than one second,
 you may use either the Time::HiRes module (from CPAN, and starting from
