@@ -1742,56 +1742,59 @@ mpeix/nm			MPE/iX port
 mpeix/relink			MPE/iX port
 mv-if-diff			Script to mv a file if it changed
 myconfig.SH			Prints summary of the current configuration
-NetWare/bat/BldNWExt.bat	Netware port
-NetWare/bat/Buildtype.bat	Netware port
-NetWare/bat/MPKBuild.bat	Netware port
-NetWare/bat/Setmpksdk.bat	Netware port
-NetWare/bat/Setnlmsdk.bat	Netware port
-NetWare/bat/SetNWBld.bat	Netware port
-NetWare/bat/Setwatcom.bat	Netware port
-NetWare/bat/ToggleD2.bat	Netware port
-NetWare/bat/ToggleXDC.bat	Netware port
-NetWare/CLIBsdio.h		Netware port
-NetWare/CLIBstr.h		Netware port
-NetWare/CLIBstuf.c		Netware port
-NetWare/CLIBstuf.h		Netware port
-NetWare/config.wc		Netware port
-NetWare/config_h.PL		Netware port
-NetWare/config_H.wc		Netware port
-NetWare/config_sh.PL		Netware port
-NetWare/deb.h			Netware port
-NetWare/dl_netware.xs		Netware port
-NetWare/intdef.h		Netware port
-NetWare/interface.c		Netware port
-NetWare/interface.h		Netware port
-NetWare/iperlhost.h		Netware port
-NetWare/Main.c			Netware port
-NetWare/Makefile		Netware port
-NetWare/netware.h		Netware port
-NetWare/nw5.c			Netware port
-NetWare/nw5iop.h		Netware port
-NetWare/nw5sck.c		Netware port
-NetWare/nw5sck.h		Netware port
-NetWare/nw5thread.c		Netware port
-NetWare/nw5thread.h		Netware port
-NetWare/Nwmain.c		Netware port
-NetWare/nwperlsys.c		Netware port
-NetWare/nwperlsys.h		Netware port
-NetWare/Nwpipe.c		Netware port
-NetWare/nwpipe.h		Netware port
-NetWare/nwplglob.c		Netware port
-NetWare/nwplglob.h		Netware port
-NetWare/nwstdio.h		Netware port
-NetWare/NWTInfo.c		Netware port
-NetWare/nwtinfo.h		Netware port
-NetWare/NWUtil.c		Netware port
-NetWare/nwutil.h		Netware port
-NetWare/t/NWModify.pl		Netware port
-NetWare/t/NWScripts.pl		Netware port
-NetWare/t/Readme.txt		Netware port
-NetWare/testnlm/echo/echo.c	Netware port
-NetWare/testnlm/type/type.c	Netware port
-NetWare/win32ish.h		Netware port
+NetWare/bat/BldNWExt-Exist.bat	NetWare port
+NetWare/bat/BldNWExt.bat	NetWare port
+NetWare/bat/Buildtype.bat	NetWare port
+NetWare/bat/MPKBuild.bat	NetWare port
+NetWare/bat/Setmpksdk.bat	NetWare port
+NetWare/bat/Setnlmsdk.bat	NetWare port
+NetWare/bat/SetNWBld.bat	NetWare port
+NetWare/bat/Setwatcom.bat	NetWare port
+NetWare/bat/ToggleD2.bat	NetWare port
+NetWare/bat/ToggleXDC.bat	NetWare port
+NetWare/CLIBsdio.h		NetWare port
+NetWare/CLIBstr.h		NetWare port
+NetWare/CLIBstuf.c		NetWare port
+NetWare/CLIBstuf.h		NetWare port
+NetWare/config.wc		NetWare port
+NetWare/config_h.PL		NetWare port
+NetWare/config_H.wc		NetWare port
+NetWare/config_sh.PL		NetWare port
+NetWare/deb.h			NetWare port
+NetWare/dl_netware.xs		NetWare port
+NetWare/intdef.h		NetWare port
+NetWare/interface.c		NetWare port
+NetWare/interface.h		NetWare port
+NetWare/iperlhost.h		NetWare port
+NetWare/Main.c			NetWare port
+NetWare/Makefile		NetWare port
+NetWare/netware.h		NetWare port
+NetWare/nw5.c			NetWare port
+NetWare/nw5iop.h		NetWare port
+NetWare/nw5sck.c		NetWare port
+NetWare/nw5sck.h		NetWare port
+NetWare/nw5thread.c		NetWare port
+NetWare/nw5thread.h		NetWare port
+NetWare/Nwmain.c		NetWare port
+NetWare/nwperlsys.c		NetWare port
+NetWare/nwperlsys.h		NetWare port
+NetWare/Nwpipe.c		NetWare port
+NetWare/nwpipe.h		NetWare port
+NetWare/nwplglob.c		NetWare port
+NetWare/nwplglob.h		NetWare port
+NetWare/nwstdio.h		NetWare port
+NetWare/NWTInfo.c		NetWare port
+NetWare/nwtinfo.h		NetWare port
+NetWare/NWUtil.c		NetWare port
+NetWare/nwutil.h		NetWare port
+NetWare/t/NWModify-Exist.pl	NetWare port
+NetWare/t/NWModify.pl		NetWare port
+NetWare/t/NWScripts-Exist.pl	NetWare port
+NetWare/t/NWScripts.pl		NetWare port
+NetWare/t/Readme.txt		NetWare port
+NetWare/testnlm/echo/echo.c	NetWare port
+NetWare/testnlm/type/type.c	NetWare port
+NetWare/win32ish.h		NetWare port
 nostdio.h			Cause compile error on stdio calls
 numeric.c			Miscellaneous numeric conversion routines
 op.c				Opcode syntax tree code
@@ -2036,7 +2039,7 @@ README.macos		Notes about Mac OS (Classic)
 README.micro		Notes about microperl
 README.mint		Notes about Atari MiNT port
 README.mpeix		Notes about MPE/iX port
-README.netware		Notes about Netware port
+README.netware		Notes about NetWare port
 README.os2		Notes about OS/2 port
 README.os390		Notes about OS/390 (nee MVS) port
 README.plan9		Notes about Plan9 port
@@ -2065,6 +2068,7 @@ sv.h				Scalar value header
 t/base/cond.t			See if conditionals work
 t/base/if.t			See if if works
 t/base/lex.t			See if lexical items work
+t/base/num.t			See if numbers work
 t/base/pat.t			See if pattern matching works
 t/base/rs.t			See if record-read works
 t/base/term.t			See if various terms work

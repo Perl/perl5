@@ -280,7 +280,8 @@ sub check_graph_consistency {
     if ($slowrate < $fastrate) {
         pass ("slow rate is less than fast rate");
         ok ($slowfast < 0 && $slowfast > -100,
-            "slowfast should be less than zero, and > -100");
+            "slowfast should be less than zero, and > -100") ||
+          print STDERR "# slowfast $slowfast\n";
         ok ($fastslow > 0, "fastslow should be > 0") ||
           print STDERR "# fastslow $fastslow\n";
     } else {

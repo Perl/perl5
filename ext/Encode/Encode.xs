@@ -255,7 +255,7 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	       (The copy is a pain - need a put-it-here option for decode.)
 	     */
 	    sv_setpvn(e->bufsv,s,len);
-	    e->base.ptr = e->base.buf = (U8*)SvPVX(e->bufsv);
+           e->base.ptr = e->base.buf = (STDCHAR*)SvPVX(e->bufsv);
 	    e->base.end = e->base.ptr + SvCUR(e->bufsv);
 	    PerlIOBase(f)->flags |= PERLIO_F_RDBUF;
 	    SvUTF8_on(e->bufsv);
