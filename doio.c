@@ -349,8 +349,12 @@ PerlIO *supplied_fp;
 	PerlIO_clearerr(fp);
     }
 #if defined(HAS_FCNTL) && defined(F_SETFD)
-    fd = PerlIO_fileno(fp);
-    fcntl(fd,F_SETFD,fd > maxsysfd);
+    {
+	int save_errno = errno;
+	fd = PerlIO_fileno(fp);
+	fcntl(fd,F_SETFD,fd > maxsysfd); /* can change errno */
+	errno = save_errno;
+    }
 #endif
     IoIFP(io) = fp;
     if (writing) {
