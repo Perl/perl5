@@ -4312,3 +4312,56 @@ Perl_sv_nounlocking(pTHX_ SV *sv)
 {
 }
 
+U32
+Perl_parse_unicode_opts(pTHX_ char **popt)
+{
+  char *p = *popt;
+  U32 opt = 0;
+
+  if (*p) {
+       if (isDIGIT(*p)) {
+	    opt = (U32) atoi(p);
+	    while (isDIGIT(*p)) p++;
+	    if (*p)
+		 Perl_croak(aTHX_ "Unknown Unicode option letter '%c'", *p);
+       }
+       else {
+	    for (; *p; p++) {
+		 switch (*p) {
+		 case PERL_UNICODE_STDIN:
+		      opt |= PERL_UNICODE_STDIN_FLAG;	break;
+		 case PERL_UNICODE_STDOUT:
+		      opt |= PERL_UNICODE_STDOUT_FLAG;	break;
+		 case PERL_UNICODE_STDERR:
+		      opt |= PERL_UNICODE_STDERR_FLAG;	break;
+		 case PERL_UNICODE_STD:
+		      opt |= PERL_UNICODE_STD_FLAG;    	break;
+		 case PERL_UNICODE_IN:
+		      opt |= PERL_UNICODE_IN_FLAG;	break;
+		 case PERL_UNICODE_OUT:
+		      opt |= PERL_UNICODE_OUT_FLAG;	break;
+		 case PERL_UNICODE_INOUT:
+		      opt |= PERL_UNICODE_INOUT_FLAG;	break;
+		 case PERL_UNICODE_LOCALE:
+		      opt |= PERL_UNICODE_LOCALE_FLAG;	break;
+		 case PERL_UNICODE_ARGV:
+		      opt |= PERL_UNICODE_ARGV_FLAG;	break;
+		 default:
+		      Perl_croak(aTHX_
+				 "Unknown Unicode option letter '%c'", *p);
+		 }
+	    }
+       }
+  }
+  else
+       opt = PERL_UNICODE_DEFAULT_FLAGS;
+
+  if (opt & ~PERL_UNICODE_ALL_FLAGS)
+       Perl_croak(aTHX_ "Unknown Unicode option value 0x%"UVXf,
+		  (UV) (opt & ~PERL_UNICODE_ALL_FLAGS));
+
+  *popt = p;
+
+  return opt;
+}
+

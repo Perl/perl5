@@ -487,8 +487,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 	 it overrides LC_MESSAGES for GNU gettext, and it also
 	 can have more than one locale, separated by spaces,
 	 in case you need to know.)
-	 If PL_utf8locale and PL_wantutf8 (set by -C) are true,
-	 perl.c:S_parse_body() will turn on the PerlIO :utf8 layer
+	 If PL_utf8locale and PL_unicode (set by -C or by $ENV{PERL_UNICODE)
+         are true, perl.c:S_parse_body() will turn on the PerlIO :utf8 layer
 	 on STDIN, STDOUT, STDERR, _and_ the default open discipline.
       */
 	 bool utf8locale = FALSE;
@@ -519,12 +519,12 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 	 if (utf8locale)
 	      PL_utf8locale = TRUE;
     }
-    /* Set PL_wantutf8 to $ENV{PERL_UTF8_LOCALE} if using PerlIO.
+    /* Set PL_unicode to $ENV{PERL_UNICODE} if using PerlIO.
        This is an alternative to using the -C command line switch
        (the -C if present will override this). */
     {
-	 char *p = PerlEnv_getenv("PERL_UTF8_LOCALE");
-	 PL_wantutf8 = p ? (bool) atoi(p) : FALSE;
+	 char *p = PerlEnv_getenv("PERL_UNICODE");
+	 PL_unicode = p ? parse_unicode_opts(&p) : 0;
     }
 #endif
 

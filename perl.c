@@ -1352,25 +1352,44 @@ print \"  \\@INC:\\n    @INC\\n\";");
     if (!PL_do_undump)
 	init_postdump_symbols(argc,argv,env);
 
-    /* PL_utf8locale is conditionally turned on by
+    /* PL_unicode is turned on by -C or by $ENV{PERL_UNICODE}.
+     * PL_utf8locale is conditionally turned on by
      * locale.c:Perl_init_i18nl10n() if the environment
-     * look like the user wants to use UTF-8.
-     * PL_wantutf8 is turned on by -C or by $ENV{PERL_UTF8_LOCALE}. */
-    if (PL_utf8locale && PL_wantutf8) { /* Requires init_predump_symbols(). */
+     * look like the user wants to use UTF-8. */
+    if (PL_unicode) { /* Requires init_predump_symbols(). */
 	 IO* io;
 	 PerlIO* fp;
 	 SV* sv;
-	 /* Turn on UTF-8-ness on STDIN, STDOUT, STDERR
-	  *  _and_ the default open discipline. */
-	 if (PL_stdingv  && (io = GvIO(PL_stdingv))  && (fp = IoIFP(io)))
-	      PerlIO_binmode(aTHX_ fp, IoTYPE(io), 0, ":utf8");
-	 if (PL_defoutgv && (io = GvIO(PL_defoutgv)) && (fp = IoOFP(io)))
-	      PerlIO_binmode(aTHX_ fp, IoTYPE(io), 0, ":utf8");
-	 if (PL_stderrgv && (io = GvIO(PL_stderrgv)) && (fp = IoOFP(io)))
-	      PerlIO_binmode(aTHX_ fp, IoTYPE(io), 0, ":utf8");
-	 if ((sv = GvSV(gv_fetchpv("\017PEN", TRUE, SVt_PV)))) {
-	     sv_setpvn(sv, ":utf8\0:utf8", 11);
-	     SvSETMAGIC(sv);
+
+	 if (!(PL_unicode & PERL_UNICODE_LOCALE_FLAG) || PL_utf8locale) {
+	      /* Turn on UTF-8-ness on STDIN, STDOUT, STDERR
+	       * and the default open discipline. */
+	      if ((PL_unicode & PERL_UNICODE_STDIN_FLAG) &&
+		  PL_stdingv  && (io = GvIO(PL_stdingv)) &&
+		  (fp = IoIFP(io)))
+		   PerlIO_binmode(aTHX_ fp, IoTYPE(io), 0, ":utf8");
+	      if ((PL_unicode & PERL_UNICODE_STDOUT_FLAG) &&
+		  PL_defoutgv && (io = GvIO(PL_defoutgv)) &&
+		  (fp = IoOFP(io)))
+		   PerlIO_binmode(aTHX_ fp, IoTYPE(io), 0, ":utf8");
+	      if ((PL_unicode & PERL_UNICODE_STDERR_FLAG) &&
+		  PL_stderrgv && (io = GvIO(PL_stderrgv)) &&
+		  (fp = IoOFP(io)))
+		   PerlIO_binmode(aTHX_ fp, IoTYPE(io), 0, ":utf8");
+	      if ((PL_unicode & PERL_UNICODE_INOUT_FLAG) &&
+		  (sv = GvSV(gv_fetchpv("\017PEN", TRUE, SVt_PV)))) {
+		   U32 in  = PL_unicode & PERL_UNICODE_IN_FLAG;
+		   U32 out = PL_unicode & PERL_UNICODE_OUT_FLAG;
+		   if (in) {
+			if (out)
+			     sv_setpvn(sv, ":utf8\0:utf8", 11);
+			else
+			     sv_setpvn(sv, ":utf8\0", 6);
+		   }
+		   else if (out)
+			sv_setpvn(sv, "\0:utf8", 6);
+		   SvSETMAGIC(sv);
+	      }
 	 }
     }
 
@@ -2154,12 +2173,8 @@ Perl_moreswitches(pTHX_ char *s)
 	return s + numlen;
     }
     case 'C':
-        PL_wantutf8 = TRUE; /* Can be set earlier by $ENV{PERL_UTF8_LOCALE}. */
-	s++;
-	if (*s == ':') {
-	     PL_wantutf8 = (bool) atoi(s + 1);
-	     for (s++; isDIGIT(*s); s++) ;
-	}
+        s++;
+        PL_unicode = parse_unicode_opts(&s);
 	return s;
     case 'F':
 	PL_minus_F = TRUE;
@@ -3399,8 +3414,10 @@ Perl_init_argv_symbols(pTHX_ register int argc, register char **argv)
 	for (; argc > 0; argc--,argv++) {
 	    SV *sv = newSVpv(argv[0],0);
 	    av_push(GvAVn(PL_argvgv),sv);
-	    if (PL_wantutf8)
-		(void)sv_utf8_decode(sv);
+	    if (PL_unicode & PERL_UNICODE_ARGV_FLAG)
+		 SvUTF8_on(sv);
+	    if (PL_unicode & PERL_UNICODE_WIDESYSCALLS_FLAG) /* Sarathy? */
+		 (void)sv_utf8_decode(sv);
 	}
     }
 }
