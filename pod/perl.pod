@@ -40,6 +40,7 @@ For ease of access, the Perl manual has been split up into several sections.
 
     perlstyle		Perl style guide
 
+    perlcheat		Perl cheat sheet
     perltrap		Perl traps for the unwary
     perldebtut		Perl debugging tutorial
 

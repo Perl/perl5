@@ -830,6 +830,26 @@ LIMIT specified
 
 =back
 
+=head2 perlcheat - Perl 5 Cheat Sheet
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item The sheet
+
+=back
+
+=item ACKNOWLEDGEMENTS
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
 =head2 perlrun - how to execute the Perl interpreter
 
 =over 4
@@ -1351,11 +1371,11 @@ C<(?(condition)yes-pattern|no-pattern)>
 
 =item DESCRIPTION
 
+=over 4
+
 =item OPERATORS
 
 =item SYNTAX
-
-=over 4
 
 =item ESCAPE SEQUENCES
 
@@ -1367,11 +1387,13 @@ C<(?(condition)yes-pattern|no-pattern)>
 
 =item EXTENDED CONSTRUCTS
 
-=back
-
 =item VARIABLES
 
 =item FUNCTIONS
+
+=item TERMINOLOGY
+
+=back
 
 =item AUTHOR
 
@@ -11839,6 +11861,24 @@ Perl code
 
 =item DESCRIPTION
 
+=over 4
+
+=item Migration from C<DynaLoader>
+
+=item Backward compatible boilerplate
+
+=back
+
+=item Order of initialization: early load()
+
+=over 4
+
+=item The most hairy case
+
+=back
+
+=item LIMITATIONS
+
 =item AUTHOR
 
 =back
@@ -13915,18 +13955,6 @@ B<PERL_MM_MANIFEST_DEBUG>
 =item SEE ALSO
 
 =item AUTHOR
-
-=back
-
-=head2 ExtUtils::Miniperl, writemain - write the C code for perlmain.c
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item SEE ALSO
 
 =back
 
@@ -17558,13 +17586,13 @@ unix, stdio, perlio, crlf, utf8, bytes, raw, pop
 =item EXPECTED METHODS
 
 $class->PUSHED([$mode[,$fh]]), $obj->POPPED([$fh]),
-$obj->OPEN($path,$mode[,$fh]), $obj->BINMODE([,$fh]),
-$obj->FDOPEN($fd[,$fh]), $obj->SYSOPEN($path,$imode,$perm,[,$fh]),
-$obj->FILENO($fh), $obj->READ($buffer,$len,$fh), $obj->WRITE($buffer,$fh),
-$obj->FILL($fh), $obj->CLOSE($fh), $obj->SEEK($posn,$whence,$fh),
-$obj->TELL($fh), $obj->UNREAD($buffer,$fh), $obj->FLUSH($fh),
-$obj->SETLINEBUF($fh), $obj->CLEARERR($fh), $obj->ERROR($fh),
-$obj->EOF($fh)
+$obj->UTF8($bellowFlag,[$fh]), $obj->OPEN($path,$mode[,$fh]),
+$obj->BINMODE([,$fh]), $obj->FDOPEN($fd[,$fh]),
+$obj->SYSOPEN($path,$imode,$perm,[,$fh]), $obj->FILENO($fh),
+$obj->READ($buffer,$len,$fh), $obj->WRITE($buffer,$fh), $obj->FILL($fh),
+$obj->CLOSE($fh), $obj->SEEK($posn,$whence,$fh), $obj->TELL($fh),
+$obj->UNREAD($buffer,$fh), $obj->FLUSH($fh), $obj->SETLINEBUF($fh),
+$obj->CLEARERR($fh), $obj->ERROR($fh), $obj->EOF($fh)
 
 =item EXAMPLES
 
@@ -20673,6 +20701,24 @@ Win32::UnregisterServer(LIBRARYNAME)
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=over 4
+
+=item Migration from C<DynaLoader>
+
+=item Backward compatible boilerplate
+
+=back
+
+=item Order of initialization: early load()
+
+=over 4
+
+=item The most hairy case
+
+=back
+
+=item LIMITATIONS
 
 =item AUTHOR
 
