@@ -3576,18 +3576,10 @@ PerlIOCrlf_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
 	/*
 	 * Test code - delete when it works ...
 	 */
-	STDCHAR *chk;
-	if (c->nl)
-	    chk = c->nl + 1;
-	else {
-	    chk = b->end;
-	    if ((flags & PERLIO_F_CRLF) && chk > b->buf && chk[-1] == 0xd)
-		chk--;
-	}
+	STDCHAR *chk = (c->nl) ? (c->nl+1) : b->end;
 	chk -= cnt;
 
 	if (ptr != chk) {
-	    dTHX;
 	    Perl_croak(aTHX_ "ptr wrong %p != %p fl=%08" UVxf
 		       " nl=%p e=%p for %d", ptr, chk, flags, c->nl,
 		       b->end, cnt);

@@ -5666,7 +5666,7 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
     DEBUG_P(PerlIO_printf(Perl_debug_log,
 	"Screamer: entering, ptr=%"UVuf", cnt=%ld\n",PTR2UV(ptr),(long)cnt));
     DEBUG_P(PerlIO_printf(Perl_debug_log,
-	"Screamer: entering: FILE * thinks ptr=%"UVuf", cnt=%ld, base=%"UVuf"\n",
+	"Screamer: entering: PerlIO * thinks ptr=%"UVuf", cnt=%ld, base=%"UVuf"\n",
 	       PTR2UV(PerlIO_get_ptr(fp)), (long)PerlIO_get_cnt(fp),
 	       PTR2UV(PerlIO_has_base(fp) ? PerlIO_get_base(fp) : 0)));
     for (;;) {
@@ -5701,18 +5701,22 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 			      "Screamer: going to getc, ptr=%"UVuf", cnt=%ld\n",
 			      PTR2UV(ptr),(long)cnt));
 	PerlIO_set_ptrcnt(fp, (STDCHAR*)ptr, cnt); /* deregisterize cnt and ptr */
+#if 0
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
 	    "Screamer: pre: FILE * thinks ptr=%"UVuf", cnt=%ld, base=%"UVuf"\n",
 	    PTR2UV(PerlIO_get_ptr(fp)), (long)PerlIO_get_cnt(fp),
 	    PTR2UV(PerlIO_has_base (fp) ? PerlIO_get_base(fp) : 0)));
+#endif
 	/* This used to call 'filbuf' in stdio form, but as that behaves like
 	   getc when cnt <= 0 we use PerlIO_getc here to avoid introducing
 	   another abstraction.  */
 	i   = PerlIO_getc(fp);		/* get more characters */
+#if 0
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
 	    "Screamer: post: FILE * thinks ptr=%"UVuf", cnt=%ld, base=%"UVuf"\n",
 	    PTR2UV(PerlIO_get_ptr(fp)), (long)PerlIO_get_cnt(fp),
 	    PTR2UV(PerlIO_has_base (fp) ? PerlIO_get_base(fp) : 0)));
+#endif
 	cnt = PerlIO_get_cnt(fp);
 	ptr = (STDCHAR*)PerlIO_get_ptr(fp);	/* reregisterize cnt and ptr */
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
