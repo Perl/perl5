@@ -352,17 +352,19 @@ XS(XS_UNIVERSAL_VERSION)
 XS(XS_version_new)
 {
     dXSARGS;
-    if (items != 2)
+    if (items > 3)
 	Perl_croak(aTHX_ "Usage: version::new(class, version)");
     SP -= items;
     {
 /*	char *	class = (char *)SvPV_nolen(ST(0)); */
-	SV *	version = ST(1);
+        SV *version = ST(1);
+	if (items == 3 )
+	{
+	    char *vs = savepvn(SvPVX(ST(2)),SvCUR(ST(2)));
+	    version = newSVpvf("v%s",vs);
+	}
 
-{
-    PUSHs(new_version(version));
-}
-
+	PUSHs(new_version(version));
 	PUTBACK;
 	return;
     }
