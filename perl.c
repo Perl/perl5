@@ -121,10 +121,12 @@ register PerlInterpreter *sv_interp;
     init_ids();
 
 #if defined(SUBVERSION) && SUBVERSION > 0
-    sprintf(patchlevel, "%7.5f", 5.0 + (PATCHLEVEL / 1000.0)
-				     + (SUBVERSION / 100000.0));
+    sprintf(patchlevel, "%7.5f",   (double) 5 
+				+ ((double) PATCHLEVEL / (double) 1000)
+				+ ((double) SUBVERSION / (double) 100000));
 #else
-    sprintf(patchlevel, "%5.3f", 5.0 + (PATCHLEVEL / 1000.0));
+    sprintf(patchlevel, "%5.3f", (double) 5 +
+				((double) PATCHLEVEL / (double) 1000));
 #endif
 
 #if defined(LOCAL_PATCH_COUNT)
