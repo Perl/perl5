@@ -381,6 +381,10 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 
 	SV**            tmps_tmp = PL_tmps_stack;
 	I32             tmps_ix  = PL_tmps_ix;
+#ifndef WIN32
+	int		failure;
+	const char*	panic = NULL;
+#endif
 
 
 	MUTEX_LOCK(&create_destruct_mutex);
@@ -480,10 +484,8 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 	/* Start the thread */
 
 #ifdef WIN32
-
 	thread->handle = CreateThread(NULL, 0, Perl_ithread_run,
 			(LPVOID)thread, 0, &thread->thr);
-
 #else
 	{
 	  static pthread_attr_t attr;
@@ -498,20 +500,40 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 #  endif
 #  ifdef THREAD_CREATE_NEEDS_STACK
 	    if(pthread_attr_setstacksize(&attr, THREAD_CREATE_NEEDS_STACK))
-	      Perl_croak(aTHX_ "panic: pthread_attr_setstacksize failed");
+	      panic = "panic: pthread_attr_setstacksize failed";
 #  endif
 
 #ifdef OLD_PTHREADS_API
-	  pthread_create( &thread->thr, attr, Perl_ithread_run, (void *)thread);
+	    failure
+	      = panic ? 1 : pthread_create( &thread->thr, attr,
+					    Perl_ithread_run, (void *)thread);
 #else
 #  if defined(HAS_PTHREAD_ATTR_SETSCOPE) && defined(PTHREAD_SCOPE_SYSTEM)
 	  pthread_attr_setscope( &attr, PTHREAD_SCOPE_SYSTEM );
 #  endif
-	  pthread_create( &thread->thr, &attr, Perl_ithread_run, (void *)thread);
+	  failure
+	    = panic ? 1 : pthread_create( &thread->thr, &attr,
+					  Perl_ithread_run, (void *)thread);
 #endif
 	}
 #endif
 	known_threads++;
+	if (
+#ifdef WIN32
+	    thread->handle == NULL
+#else
+	    failure
+#endif
+	    ) {
+	  MUTEX_UNLOCK(&create_destruct_mutex);
+	  sv_2mortal(params);
+	  Perl_ithread_destruct(aTHX_ thread, "create failed");
+#ifndef WIN32
+	  if (panic)
+	    Perl_croak(aTHX_ panic);
+#endif
+	  return &PL_sv_undef;
+	}
 	active_threads++;
 	MUTEX_UNLOCK(&create_destruct_mutex);
 	sv_2mortal(params);
