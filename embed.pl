@@ -201,8 +201,8 @@ sub write_global_sym {
     $ret;
 }
 
-walk_table(\&write_protos,     "proto.h", "");
-walk_table(\&write_global_sym, "global.sym", "");
+walk_table(\&write_protos,     "proto.h", undef);
+walk_table(\&write_global_sym, "global.sym", undef);
 
 # XXX others that may need adding
 #       warnhook
