@@ -2564,6 +2564,13 @@ The following tests are known to fail:
  ../ext/DB_File/t/db-recno.t              149    3   2.01%  61 63 65
  ../ext/POSIX/t/posix.t                    31    1   3.23%  10
 
+If you are building on a UFS partition, you will also probably see
+this failure:
+
+ ext/POSIX/t/posix...................FAILED at test 10
+
+This is caused by Darwin's UFS not supporting inode change time.
+
 =head2 OS/390
 
 OS/390 has rather many test failures but the situation is actually
