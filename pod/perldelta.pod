@@ -2663,6 +2663,14 @@ known as Open Edition MVS) and VM-ESA were supported.  Due to changes
 required by the UTF-8 (Unicode) support, the EBCDIC platforms are not
 supported in Perl 5.6.0.
 
+=head2 In 64-bit HP-UX the lib/io_multihomed test may hang
+
+The lib/io_multihomed test may hang in HP-UX if Perl has been
+configured to be 64-bit.  Because other 64-bit platforms do not
+hang in this test, HP-UX is suspect.  All other tests pass
+in 64-bit HP-UX.  The test attempts to create and connect to
+"multihomed" sockets (sockets which have multiple IP addresses).
+
 =head2 NEXTSTEP 3.3 POSIX test failure
 
 In NEXTSTEP 3.3p2 the implementation of the strftime(3) in the
