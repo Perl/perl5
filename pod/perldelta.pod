@@ -188,12 +188,12 @@ now do localise variables, given that the $x is a valid variable name.
 
 Unicode Character Database has been updated to 4.0.0 from 3.2.0.
 
-=head2 Warnings
+=head2 Deprecation Warnings
 
 Perl 5.8.0 forgot to add some deprecation warnings.  These warnings
 have now been added.
 
-=head2 Pseudo-hashes really are deprecated
+=head3 Pseudo-hashes really are deprecated
 
 Pseudo-hashes were deprecated in Perl 5.8.0 and will be removed in Perl
 5.10.0, see L<perl58delta> for details.  Each attempt to access pseudo-hashes
@@ -205,7 +205,7 @@ to continue using pseudo-hashes but not to see the deprecation warnings, add:
 Or you can continue to use the L<fields> pragma, but please don't
 expect the data structures to be pseudohashes any more.
 
-=head2 5.005-style threads really are deprecated
+=head3 5.005-style threads really are deprecated
 
 5.005-style threads (activated by C<use Thread;>) were deprecated in Perl
 5.8.0 and will be removed in Perl 5.10.0, see L<perl58delta> for details.
@@ -215,19 +215,27 @@ C<5.005 threads are deprecated>.  If you really want to continue using
 
     no warnings 'deprecated';
 
-=head2 Version Strings (v-strings) Are Deprecated
+=head3 (New) Version Strings (v-strings) Are Deprecated
 
 Version Strings (v-strings) have been deprecated.  They will not be
 available after Perl 5.8.  The marginal benefits of v-strings were
 greatly outweighed by the potential for Surprise and Confusion.
 
-=head2 The $* variable Is Deprecated
+=head3 The $* Variable Really Is Deprecated
 
 The C<$*> variable controlling multi-line matching has been
 deprecated.  It will not be available after Perl 5.8.  The variable
 has been deprecated for a long time, now it will just finally be
 removed.  The functionality has been supplanted by the C</s> and
 C</m> modifiers on pattern matching.
+
+=head2 Miscellaneous Enhancements
+
+PerlIO::get_layers(FH) returns the names of the PerlIO layers
+active on a filehandle.
+
+utf8::is_utf8() has been added as a quick way to test whether
+a scalar is encoded internally in UTF-8 (Unicode).
 
 =head1 Modules and Pragmata
 
@@ -355,31 +363,35 @@ One can now build subsets of Perl core modules by using the
 Configure flags C<-Dnoextensions=> and C<-Donlyextensions=>,
 see F<INSTALL>
 
+=head2 Platform-specific enhancements
+
+In Cygwin Perl can now be built with threads (Configure -Duseithreads).
+
+In newer FreeBSD releases Perl 5.8.0 compilation failed because of
+trying to use <malloc.h>, which in FreeBSD is just a dummy file, and
+a fatal error to even try to use.  Now <malloc.h> is not used.
+
+Perl is now known to build also in Hitachi HI-UXMPP.
+
 Mac OS X now installs with Perl version number embedded in
 installation directory names for easier upgrading of user-compiled
 Perl, and the installation directories in general are more standard.
 (In other words, the default installation no longer breaks the
 Apple-provided Perl.)
 
-In newer FreeBSD releases Perl 5.8.0 compilation failed because of
-trying to use <malloc.h>, which in FreeBSD is just a dummy file, and
-a fatal error to even try to use.  Now <malloc.h> is not used.
+Perl has been ported to IBM's OS/400 PASE environment.  The best way
+to build a Perl for PASE is to use an AIX host as a cross-compilation
+environment.  See README.os400.
+
+Yet another cross-compilation option has been added, now Perl builds
+on OpenZaurus, see the Cross subdirectory.
 
 Tru64 gcc 3.2.1 -O3 toke.c dropped to -O2 because of gigantic
 memory use otherwise.
 
 Tru64 can now build Perl with the newer Berkeley DBs.
 
-Perl has been ported to IBM's OS/400 PASE environment.  The best way
-to build a Perl for PASE is to use an AIX host as a cross-compilation
-environment.  See README.os400.
-
-Perl is now known to build also in Hitachi HI-UXMPP.
-
 Building Perl on WinCE has been much enhanced, see the wince subdirectory.
-
-Yet another cross-compilation option has been added, now Perl builds
-on OpenZaurus, see the Cross subdirectory.
 
 =head1 Selected Bug Fixes
 
@@ -615,9 +627,6 @@ PERL_NO_SHORT_NAMES.
 
 Perl_save_bool() has been added.
 
-utf8::is_utf8() has been added as a quick way to test whether
-a scalar is encoded internally in UTF-8 (Unicode).
-
 C<-DL> removed (the leaktest had been broken and unsupported for years,
 use alternative debugging mallocs or tools like valgrind and Purify).
 
@@ -685,6 +694,46 @@ for "text" mode operations.
 
 IBM z/OS and other EBCDIC platforms continue to be problematic
 regarding Unicode support.
+
+=head1 Future Directions
+
+The following things B<might> happen in future.  The first publicly
+available releases having these characteristics will be the developer
+releases Perl 5.9.x, culminating in the Perl 5.10.0 release.  These
+are our best guesses at the moment: we reserve the right to rethink.
+
+=over 4
+
+=item *
+
+PerlIO will become The Default.  Currently (in Perl 5.8.x) the stdio
+library is still used if Perl thinks it can use certain tricks to
+make stdio go B<really> fast.  For future releases our goal is to
+make PerlIO go even faster.
+
+=item *
+
+A new feature called I<assertions> will be available.  This means that
+one can have code called assertions sprinkled in the code: usually
+they are optimised away, but they can be enabled with the C<-A> option.
+
+=item *
+
+5.005 Threads Will Be Removed
+
+=item *
+
+V-strings (Version Strings) Will Be Removed
+
+=item *
+
+The C<$*> Variable Will Be Removed
+
+=item *
+
+Pseudohashes Will Be Removed
+
+=back
 
 =head1 Reporting Bugs
 
