@@ -56,6 +56,9 @@ use B::Asmdata qw(@specialsv_name);
 use FileHandle;
 use Carp;
 use strict;
+use Config;
+my $handle_VC_problem = "";
+$handle_VC_problem="{0}," if $^O eq 'MSWin32' and $Config{cc} =~ /^cl/i;
 
 my $hv_index = 0;
 my $gv_index = 0;
@@ -162,7 +165,7 @@ sub B::OP::save {
 	$init->add(sprintf("(void)find_threadsv(%s);",
 			   cstring($threadsv_names[$op->targ])));
     }
-    $opsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x",
+    $opsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x",
 			 ${$op->next}, ${$op->sibling}, $op->ppaddr, $op->targ,
 			 $type, $op_seq, $op->flags, $op->private));
     savesym($op, sprintf("&op_list[%d]", $opsect->index));
@@ -175,7 +178,7 @@ sub B::FAKEOP::new {
 
 sub B::FAKEOP::save {
     my ($op, $level) = @_;
-    $opsect->add(sprintf("%s, %s, %s, %u, %u, %u, 0x%x, 0x%x",
+    $opsect->add(sprintf("%s, %s, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x",
 			 $op->next, $op->sibling, $op->ppaddr, $op->targ,
 			 $op->type, $op_seq, $op->flags, $op->private));
     return sprintf("&op_list[%d]", $opsect->index);
@@ -193,7 +196,7 @@ sub B::UNOP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);
     return $sym if defined $sym;
-    $unopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x",
+    $unopsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, s\\_%x",
 			   ${$op->next}, ${$op->sibling}, $op->ppaddr,
 			   $op->targ, $op->type, $op_seq, $op->flags,
 			   $op->private, ${$op->first}));
@@ -204,7 +207,7 @@ sub B::BINOP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);
     return $sym if defined $sym;
-    $binopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x",
+    $binopsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x",
 			    ${$op->next}, ${$op->sibling}, $op->ppaddr,
 			    $op->targ, $op->type, $op_seq, $op->flags,
 			    $op->private, ${$op->first}, ${$op->last}));
@@ -215,7 +218,7 @@ sub B::LISTOP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);
     return $sym if defined $sym;
-    $listopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, %u",
+    $listopsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, %u",
 			     ${$op->next}, ${$op->sibling}, $op->ppaddr,
 			     $op->targ, $op->type, $op_seq, $op->flags,
 			     $op->private, ${$op->first}, ${$op->last},
@@ -227,7 +230,7 @@ sub B::LOGOP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);
     return $sym if defined $sym;
-    $logopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x",
+    $logopsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x",
 			    ${$op->next}, ${$op->sibling}, $op->ppaddr,
 			    $op->targ, $op->type, $op_seq, $op->flags,
 			    $op->private, ${$op->first}, ${$op->other}));
@@ -241,7 +244,7 @@ sub B::LOOP::save {
     #warn sprintf("LOOP: redoop %s, nextop %s, lastop %s\n",
     #		 peekop($op->redoop), peekop($op->nextop),
     #		 peekop($op->lastop)); # debug
-    $loopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, %u, s\\_%x, s\\_%x, s\\_%x",
+    $loopsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, %u, s\\_%x, s\\_%x, s\\_%x",
 			   ${$op->next}, ${$op->sibling}, $op->ppaddr,
 			   $op->targ, $op->type, $op_seq, $op->flags,
 			   $op->private, ${$op->first}, ${$op->last},
@@ -254,7 +257,7 @@ sub B::PVOP::save {
     my ($op, $level) = @_;
     my $sym = objsym($op);
     return $sym if defined $sym;
-    $pvopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, %s",
+    $pvopsect->add(sprintf("s\\_%x, s\\_%x, %s, $handle_VC_problem %u, %u, %u, 0x%x, 0x%x, %s",
 			   ${$op->next}, ${$op->sibling}, $op->ppaddr,
 			   $op->targ, $op->type, $op_seq, $op->flags,
 			   $op->private, cstring($op->pv)));
@@ -266,7 +269,7 @@ sub B::SVOP::save {
     my $sym = objsym($op);
     return $sym if defined $sym;
     my $svsym = $op->sv->save;
-    $svopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, %s",
+    $svopsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, %s",
 			   ${$op->next}, ${$op->sibling}, $op->ppaddr,
 			   $op->targ, $op->type, $op_seq, $op->flags,
 			   $op->private, "(SV*)$svsym"));
@@ -278,7 +281,7 @@ sub B::GVOP::save {
     my $sym = objsym($op);
     return $sym if defined $sym;
     my $gvsym = $op->gv->save;
-    $gvopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, Nullgv",
+    $gvopsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, Nullgv",
 			   ${$op->next}, ${$op->sibling}, $op->ppaddr,
 			   $op->targ, $op->type, $op_seq, $op->flags,
 			   $op->private));
@@ -294,7 +297,7 @@ sub B::COP::save {
     my $stashsym = $op->stash->save;
     warn sprintf("COP: line %d file %s\n", $op->line, $op->filegv->SV->PV)
 	if $debug_cops;
-    $copsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, %s, Nullhv, Nullgv, %u, %d, %u",
+    $copsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, %s, Nullhv, Nullgv, %u, %d, %u",
 			  ${$op->next}, ${$op->sibling}, $op->ppaddr,
 			  $op->targ, $op->type, $op_seq, $op->flags,
 			  $op->private, cstring($op->label), $op->cop_seq,
@@ -330,7 +333,7 @@ sub B::PMOP::save {
     # pmnext handling is broken in perl itself, I think. Bad op_pmnext
     # fields aren't noticed in perl's runtime (unless you try reset) but we
     # segfault when trying to dereference it to find op->op_pmnext->op_type
-    $pmopsect->add(sprintf("s\\_%x, s\\_%x, %s, %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, %u, %s, %s, 0, 0, 0x%x, 0x%x",
+    $pmopsect->add(sprintf("s\\_%x, s\\_%x, %s,$handle_VC_problem %u, %u, %u, 0x%x, 0x%x, s\\_%x, s\\_%x, %u, %s, %s, 0, 0, 0x%x, 0x%x",
 			   ${$op->next}, ${$op->sibling}, $ppaddr, $op->targ,
 			   $op->type, $op_seq, $op->flags, $op->private,
 			   ${$op->first}, ${$op->last}, $op->children,
