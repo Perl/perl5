@@ -39,7 +39,7 @@ sub hostname {
   if ($^O eq 'VMS') {
 
     # method 2 - no sockets ==> return DECnet node name
-    eval {gethostbyname('me')};
+    eval {my($test) = gethostbyname('me')}; # returns 'me' on most systems
     if ($@) { return $host = $ENV{'SYS$NODE'}; }
 
     # method 3 - has someone else done the job already?  It's common for the
