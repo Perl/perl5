@@ -59,12 +59,12 @@ will be used, with the first character capitalized.
 
 If the extension might need extra libraries, they should be included
 here.  The extension Makefile.PL will take care of checking whether
-the libraries actually exist and how they should be loaded.
-The extra libraries should be specified in the form -lm -lposix, etc,
-just as on the cc command line.  By default, the Makefile.PL will
-search through the library path determined by Configure.  That path
-can be augmented by including arguments of the form B<-L/another/library/path>
-in the extra-libraries argument.
+the libraries actually exist and how they should be loaded.  The extra
+libraries should be specified in the form -lm -lposix, etc, just as on
+the cc command line.  By default, the Makefile.PL will search through
+the library path determined by Configure.  That path can be augmented
+by including arguments of the form B<-L/another/library/path> in the
+extra-libraries argument.
 
 =head1 OPTIONS
 
@@ -72,8 +72,8 @@ in the extra-libraries argument.
 
 =item B<-A>
 
-Omit all autoload facilities.  This is the same as B<-c> but also removes the
-S<C<use AutoLoader>> statement from the .pm file.
+Omit all autoload facilities.  This is the same as B<-c> but also
+removes the S<C<use AutoLoader>> statement from the .pm file.
 
 =item B<-C>
 
@@ -157,7 +157,8 @@ from typemaps.  Should not be used without B<-x>.
 This may be useful since, say, types which are C<typedef>-equivalent
 to integers may represent OS-related handles, and one may want to work
 with these handles in OO-way, as in C<$handle-E<gt>do_something()>.
-Use C<-o .> if you want to handle all the C<typedef>ed types as opaque types.
+Use C<-o .> if you want to handle all the C<typedef>ed types as opaque
+types.
 
 The type-to-match is whitewashed (except for commas, which have no
 whitespace before them, and multiple C<*> which have no whitespace
@@ -165,14 +166,17 @@ between them).
 
 =item B<-p> I<prefix>
 
-Specify a prefix which should be removed from the Perl function names, e.g., S<-p sec_rgy_> 
-This sets up the XS B<PREFIX> keyword and removes the prefix from functions that are
-autoloaded via the C<constant()> mechanism.
+Specify a prefix which should be removed from the Perl function names,
+e.g., S<-p sec_rgy_> This sets up the XS B<PREFIX> keyword and removes
+the prefix from functions that are autoloaded via the C<constant()>
+mechanism.
 
 =item B<-s> I<sub1,sub2>
 
-Create a perl subroutine for the specified macros rather than autoload with the constant() subroutine.
-These macros are assumed to have a return type of B<char *>, e.g., S<-s sec_rgy_wildcard_name,sec_rgy_wildcard_sid>.
+Create a perl subroutine for the specified macros rather than autoload
+with the constant() subroutine.  These macros are assumed to have a
+return type of B<char *>, e.g.,
+S<-s sec_rgy_wildcard_name,sec_rgy_wildcard_sid>.
 
 =item B<-v> I<version>
 
@@ -184,8 +188,9 @@ to the templates.  The default is 0.01.
 Automatically generate XSUBs basing on function declarations in the
 header file.  The package C<C::Scan> should be installed. If this
 option is specified, the name of the header file may look like
-C<NAME1,NAME2>. In this case NAME1 is used instead of the specified string,
-but XSUBs are emitted only for the declarations included from file NAME2.
+C<NAME1,NAME2>. In this case NAME1 is used instead of the specified
+string, but XSUBs are emitted only for the declarations included from
+file NAME2.
 
 Note that some types of arguments/return-values for functions may
 result in XSUB-declarations/typemap-entries which need
@@ -1180,7 +1185,7 @@ sub write_const {
 
   if (@$list == 0) {		# Can happen on the initial iteration only
     print $fh <<"END";
-static double
+static NV
 constant(char *name, int len, int arg)
 {
     errno = EINVAL;
@@ -1194,11 +1199,11 @@ END
     my $protect = protect_convert_to_double("$pref$list->[0]");
 
     print $fh <<"END";
-static double
+static NV
 constant(char *name, int len, int arg)
 {
     errno = 0;
-    if (strEQ(name + $offarg, "$list->[0]")) {	/* $pref removed */
+    if (strEQ(name + $offarg, "$list->[0]")) {	/* \"$pref\" removed */
 #ifdef $pref$list->[0]
 	return $protect$pref$list->[0];
 #else
@@ -1233,7 +1238,7 @@ END
   $npref = '' if $pref eq '';
 
   print $fh <<"END";
-static double
+static NV
 constant$npref(char *name, int len, int arg)
 {
 END
@@ -1291,7 +1296,7 @@ EOP
 	= protect_convert_to_double("$pref$leader$letter$leading{$letter}[0]");
 
       print $fh <<EOP;
-	if (strEQ(name + $offarg, "$leader$letter$leading{$letter}[0]")) {	/* $pref removed */
+	if (strEQ(name + $offarg, "$leader$letter$leading{$letter}[0]")) {	/* \"$pref\" removed */
 #ifdef $pref$leader$letter$leading{$letter}[0]
 	    return $protect$pref$leader$letter$leading{$letter}[0];
 #else
@@ -1362,7 +1367,7 @@ END
 # XS declaration:
 print XS <<"END" unless $opt_c;
 
-double
+NV
 constant(sv,arg)
     PREINIT:
 	STRLEN		len;
@@ -1619,7 +1624,7 @@ sub get_typemap {
   my $proto_re = "[" . quotemeta('\$%&*@;') . "]" ;
 
   # Start with useful default values
-  $typemap{float} = 'T_DOUBLE';
+  $typemap{float} = 'T_NV';
 
   foreach my $typemap (@tm) {
     next unless -e $typemap ;
