@@ -207,6 +207,9 @@ S_save_scalar_at(pTHX_ SV **sptr)
 	}
 	SvMAGIC(sv) = SvMAGIC(osv);
 	SvFLAGS(sv) |= SvMAGICAL(osv);
+	/* XXX SvMAGIC() is *shared* between osv and sv.  This can
+	 * lead to coredumps when both SVs are destroyed without one
+	 * of their SvMAGIC() slots being NULLed. */
 	PL_localizing = 1;
 	SvSETMAGIC(sv);
 	PL_localizing = 0;
@@ -678,19 +681,20 @@ Perl_leave_scope(pTHX_ I32 base)
 		SvMAGICAL_off(sv);
 		SvMAGIC(sv) = 0;
 	    }
-	    /* XXX this branch is pretty bogus--note that we seem to
-	     * only get here if the mg_get() in save_scalar_at() ends
-	     * up croaking.  This code irretrievably clears(!) the magic
-	     * on the SV to avoid further croaking that might ensue
-	     * when the SvSETMAGIC() below is called.  This needs a
-	     * total rethink.  --GSAR */
+	    /* XXX This branch is pretty bogus.  This code irretrievably
+	     * clears(!) the magic on the SV (either to avoid further
+	     * croaking that might ensue when the SvSETMAGIC() below is
+	     * called, or to avoid two different SVs pointing at the same
+	     * SvMAGIC()).  This needs a total rethink.  --GSAR */
 	    else if (SvTYPE(value) >= SVt_PVMG && SvMAGIC(value) &&
 		     SvTYPE(value) != SVt_PVGV)
 	    {
 		SvFLAGS(value) |= (SvFLAGS(value) &
 				   (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
 		SvMAGICAL_off(value);
-		mg_free(value);
+		/* XXX this is a leak when we get here because the
+		 * mg_get() in save_scalar_at() croaked */
+		SvMAGIC(value) = 0;
 	    }
             SvREFCNT_dec(sv);
 	    *(SV**)ptr = value;
