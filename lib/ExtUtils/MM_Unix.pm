@@ -2429,7 +2429,8 @@ put them into the INST_* directories.
 
 sub manifypods {
     my($self, %attribs) = @_;
-    return "\nmanifypods :\n\t$self->{NOECHO}\$(NOOP)\n" unless %{$self->{MAN3PODS}} or %{$self->{MAN1PODS}};
+    return "\nmanifypods : pure_all\n\t$self->{NOECHO}\$(NOOP)\n" unless
+	%{$self->{MAN3PODS}} or %{$self->{MAN1PODS}};
     my($dist);
     my($pod2man_exe);
     if (defined $self->{PERL_SRC}) {
@@ -2457,7 +2458,7 @@ q[-e 'next if -e $$m{$$_} && -M $$m{$$_} < -M $$_ && -M $$m{$$_} < -M "],
 -e 'system(qq[$$^X ].q["-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" $(POD2MAN_EXE) ].qq[$$_>$$m{$$_}])==0 or warn "Couldn\\047t install $$m{$$_}\n";' \\
 -e 'chmod(oct($(PERM_RW))), $$m{$$_} or warn "chmod $(PERM_RW) $$m{$$_}: $$!\n";}'
 ];
-    push @m, "\nmanifypods : ";
+    push @m, "\nmanifypods : pure_all ";
     push @m, join " \\\n\t", keys %{$self->{MAN1PODS}}, keys %{$self->{MAN3PODS}};
 
     push(@m,"\n");
