@@ -103,7 +103,7 @@ register SV **sp;
 	sv_upgrade(sv, SVt_PV);
     if (SvLEN(sv) < len + items) {	/* current length is way too short */
 	while (items-- > 0) {
-	    if (*mark) {
+	    if (*mark && !SvGMAGIC(*mark) && SvOK(*mark)) {
 		SvPV(*mark, tmplen);
 		len += tmplen;
 	    }

@@ -47,9 +47,7 @@
 #endif
 
 #if defined(HOST_NOT_FOUND) && !defined(h_errno)
-#ifndef h_errno
 extern int h_errno;
-#endif
 #endif
 
 #ifdef HAS_PASSWD

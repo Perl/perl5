@@ -67,7 +67,7 @@ appears in curly braces or on the left hand side of the "=E<gt>" symbol.
 
 =back
 
-See L<perlmod/Pragmatic Modules>.
+See L<perlmodlib/Pragmatic Modules>.
 
 
 =cut

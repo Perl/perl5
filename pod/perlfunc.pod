@@ -2626,13 +2626,11 @@ or
         require "Foo::Bar" ; # not a bareword because of the ""
 
 The require function will look for the "Foo::Bar" file in the @INC array and 
-will complain about not finding "Foo::Bar" there. In this case you must do :
+will complain about not finding "Foo::Bar" there. In this case you can do :
 
-        $class = 'Foo/Bar.pm';
-        require $class ;
+        eval "require $class";
 
-For a yet-more-powerful import facility, see L</use> and
-L<perlmod>.
+For a yet-more-powerful import facility, see L</use> and L<perlmod>.
 
 =item reset EXPR
 
