@@ -4865,8 +4865,8 @@ The LIMIT parameter can be used to split a line partially
 
     ($login, $passwd, $remainder) = split(/:/, $_, 3);
 
-When assigning to a list, if LIMIT is omitted, Perl supplies a LIMIT
-one larger than the number of variables in the list, to avoid
+When assigning to a list, if LIMIT is omitted, or zero, Perl supplies
+a LIMIT one larger than the number of variables in the list, to avoid
 unnecessary work.  For the list above LIMIT would have been 4 by
 default.  In time critical applications it behooves you not to split
 into more fields than you really need.
