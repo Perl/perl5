@@ -3457,17 +3457,14 @@ destination, C<n> is the number of items, and C<t> is the type.
 
 =back
 
-=head1 EDITOR
+=head1 AUTHORS
 
-Jeff Okamoto <F<okamoto@corp.hp.com>>
+Until May 1997, this document was maintained by Jeff Okamoto
+<okamoto@corp.hp.com>.  It is now maintained as part of Perl itself.
 
 With lots of help and suggestions from Dean Roehrich, Malcolm Beattie,
 Andreas Koenig, Paul Hudson, Ilya Zakharevich, Paul Marquess, Neil
 Bowers, Matthew Green, Tim Bunce, Spider Boardman, Ulrich Pfeifer,
 Stephen McCamant, and Gurusamy Sarathy.
 
-API Listing by Dean Roehrich <F<roehrich@cray.com>>.
-
-=head1 DATE
-
-Version 31.8: 1997/5/17
+API Listing originally by Dean Roehrich <roehrich@cray.com>.
