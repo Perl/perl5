@@ -77,7 +77,7 @@ Encode::Unicode, which will be autoloaded on demand.
   UTF-16BE                                                    [UC]
   UTF-16LE                                                    [UC]
   UTF-32                                                      [UC]
-  UTF-32BE                                                    [UC]
+  UTF-32BE	UCS-4                                         [UC]
   UTF-32LE                                                    [UC]
   ----------------------------------------------------------------
 

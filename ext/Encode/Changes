@@ -1,9 +1,18 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.67 2002/05/02 07:33:09 dankogai Exp $
+# $Id: Changes,v 1.68 2002/05/03 12:20:13 dankogai Exp $
 #
 
-$Revision: 1.67 $ $Date: 2002/05/02 07:33:09 $
+$Revision: 1.68 $ $Date: 2002/05/03 12:20:13 $
+! lib/Encode/Alias.pm lib/Encode/Supported.pod t/Alias.t AUTHORS
+  UCS-4 added to aliases of UTF-32 by Elizabeth Mattijsen.  Alias.t
+  and Supported.pod modified to reflect the change.  Elizabeth added
+  to Authors.  And H.M. is also added for forwarding her patch among
+  other contributions (I was rather surprised to find his name was not
+  there yet!) 
+   Message-Id: <20020503114901.D639.H.M.BRAND@hccnet.nl>
+
+1.67 2002/05/02 07:33:09
 ! Encode.xs
   Error message now consistent w/ perlqq (\N{U+} -> \x{})
   done in perl@16308 but Philip linted me further.  Now the error
@@ -574,7 +583,7 @@ $Revision: 1.67 $ $Date: 2002/05/02 07:33:09 $
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/05/02 07:33:09 $
+1.11  $Date: 2002/05/03 12:20:13 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST
