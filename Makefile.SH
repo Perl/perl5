@@ -509,7 +509,7 @@ fi
 
 $spitshell >>Makefile <<'!NO!SUBS!'
 
-sperl$(OBJ_EXT): perl.c perly.h patchlevel.h $(h)
+sperl$(OBJ_EXT): perl.c $(h)
 	$(RMS) sperl.c
 	$(LNS) perl.c sperl.c
 	$(CCCMD) -DIAMSUID sperl.c
@@ -792,7 +792,7 @@ _verycleaner:
 # If the source file has a /*NOSTRICT*/ somewhere, ignore the lint message
 # for that spot.
 
-lint: perly.c $(c)
+lint: $(c)
 	lint $(lintflags) $(defs) perly.c $(c) > perl.fuzz
 
 # Need to unset during recursion to go out of loop.
