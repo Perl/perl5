@@ -96,26 +96,32 @@ true)
 	    ldlibpth=`echo $ldlibpth | sed 's/:*$//'`
 	    ;;
         esac
+
+	case "$ldlibpth" in
+	# Protect any spaces
+	*" "*) ldlibpth=`echo $ldlibpth|sed 's/ /\\\\ /g'` ;;
+	esac
+
+	case "$osname" in
+	linux)
+		cat <<-'EOT' >| preload
+		#! /bin/sh
+		lib=$1
+		shift
+		test -r $lib && export LD_PRELOAD="$lib $LD_PRELOAD"
+		exec "$@"
+		EOT
+		chmod 755 preload
+		ldlibpth="$ldlibpth `pwd`/preload `pwd`/$libperl"
+		;;
+	os390)	test -f /bin/env && ldlibpth="/bin/env $ldlibpth"
+		;;
+	esac
+
 	;;
+
 *)	pldlflags=''
 	static_target='static'
-	;;
-esac
-
-case "$ldlibpth" in
-# Protect any spaces
-*" "*) ldlibpth=`echo $ldlibpth|sed 's/ /\\\\ /g'` ;;
-esac
-
-case "$osname" in
-linux)
-	case "$useshrplib" in
-	true)
-	    ldlibpth="LD_PRELOAD=\"\$\$LD_PRELOAD `pwd`/$libperl\" $ldlibpth"
-	    ;;
-	esac
-	;;
-os390)	test -f /bin/env && ldlibpth="/bin/env $ldlibpth"
 	;;
 esac
 
@@ -944,6 +950,7 @@ _cleaner2:
 	rm -f lib/.exists lib/*/.exists lib/*/*/.exists
 	rm -f h2ph.man pstruct
 	rm -rf .config
+	rm -f preload
 	rm -f testcompile compilelog
 	-rmdir lib/B lib/Data lib/Digest
 	rm -rf lib/Encode
