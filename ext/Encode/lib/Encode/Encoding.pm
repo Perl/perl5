@@ -1,7 +1,7 @@
 package Encode::Encoding;
 # Base class for classes which implement encodings
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.25 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.26 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 sub Define
 {
@@ -19,6 +19,8 @@ sub toUnicode    { shift->decode(@_) }
 sub fromUnicode  { shift->encode(@_) }
 
 sub new_sequence { return $_[0] }
+
+sub needs_lines  { 0 }
 
 sub DESTROY {}
 

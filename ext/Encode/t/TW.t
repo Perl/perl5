@@ -1,12 +1,14 @@
 BEGIN {
-    if ($ENV{'PERL_CORE'}){
-	chdir 't';
-    	unshift @INC, '../lib';
-    }
+    if (! -d 'blib' and -d 't'){ chdir 't' };
+    unshift @INC,  '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bEncode\b/) {
       print "1..0 # Skip: Encode was not built\n";
       exit 0;
+    }
+    unless (find PerlIO::Layer 'perlio') {
+	print "1..0 # Skip: PerlIO was not built\n";
+	exit 0;
     }
     if (ord("A") == 193) {
 	print "1..0 # Skip: EBCDIC\n";
@@ -38,7 +40,7 @@ run_tests('Basic Big5 range', {
 24799.24218.23493.21566.20197.38477.65108
     ),
 
-    'big5-eten'	=> (join('',
+    'big5'	=> (join('',
 '«Ò°ª¶§¤§­]¸Ç¤¼¡A®Ó¬Ó¦Ò¤ê§B±e¡Q',
 'Äá´£­s¤_©s³µ¤¼¡A±©©°±G§^¥H­°¡Q',
     )),
@@ -63,14 +65,11 @@ run_tests('Hong Kong Extensions', {
 65292.35531.21578.35380.25105.21707.12290
     ),
 
-    'big5-hkscs'=> join('',
-'·PÁÂ©Ò¦³¨Ï¥Î Perl ûHªB¤Í¡Aµ¹§Ú’]ûH¤ä«ù¡B·N¨£©M¹ªÀy',
+    'big5-hkscs'	=> join('',
+'·PÁÂ©Ò¦³¨Ï¥Î Perl ïªB¤Í¡Aµ¹§Ú’]ï¤ä«ù¡B·N¨£©M¹ªÀy',
 '¦pªG½s½X¦³¥ô¦ó¿ùº|¡A½Ğ§i¶D§Ú’]¡C'
     ),
 });
-
-# oops -- Autrijus in Message-Id: <20020420085424.GA25198@not.autrijus.org>
-# use Encode::Big5z;
 
 sub run_tests {
     my ($title, $tests) = @_;

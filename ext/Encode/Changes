@@ -1,9 +1,26 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.51 2002/04/20 09:58:23 dankogai Exp dankogai $
+# $Id: Changes,v 1.52 2002/04/20 23:43:47 dankogai Exp dankogai $
 #
 
-1.51 $Date: 2002/04/20 09:58:23 $
+1.52 $Date: 2002/04/20 23:43:47 $
+! t/perlio.t
+  TODO: is now SKIP:, as NI-XS requested.  Also adds more
+  eraborate failure analysis added.
+! bin/enc2xs
+  A note on how to make sure of round-trip safety added to POD
+  section (so Autrijus is happier)
+! ucm/big5-hkscs.ucm ucm/big5-eten.ucm t/TW.pm
+  big5-(eten|hkscs) is round-trip safe again!
+  Message-Id: <A2C949CC-54AC-11D6-A5FB-00039301D480@dan.co.jp>
+! encoding.pm
+  Typo fixes by Andreas
+! Encode.pm Encode.xs Unicode/Unicode.xs Encode/Encoding.pm
+! lib/Encode/JP/JIS7.pm lib/Encode/KR/2022_KR.pm t/perlio.t
+  PerIO coodination patches from NI-XS.
+  Message-Id: <2769E572-54A1-11D6-B7E2-00039301D480@dan.co.jp>
+
+1.51 2002/04/20 09:58:23
 ! t/TW.t
   Updated test suite by Autrijis so "make test" is happy again
   Message-Id: <20020420082104.GA25037@not.autrijus.org>
@@ -393,7 +410,7 @@
   Typo fixes and improvements by jhi
   Message-Id: <200204010201.FAA03564@alpha.hut.fi>, et al.
 
-1.11  $Date: 2002/04/20 09:58:23 $
+1.11  $Date: 2002/04/20 23:43:47 $
 + t/encoding.t
 + t/jperl.t
 ! MANIFEST

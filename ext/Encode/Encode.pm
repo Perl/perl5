@@ -1,12 +1,12 @@
 package Encode;
 use strict;
-our $VERSION = do { my @r = (q$Revision: 1.51 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.52 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 our $DEBUG = 0;
+use XSLoader ();
+XSLoader::load 'Encode';
 
-require DynaLoader;
 require Exporter;
-
-our @ISA = qw(Exporter DynaLoader);
+our @ISA = qw(Exporter);
 
 # Public, encouraged API is exported by default
 
@@ -19,7 +19,7 @@ our @FB_FLAGS  = qw(DIE_ON_ERR WARN_ON_ERR RETURN_ON_ERR LEAVE_SRC PERLQQ);
 our @FB_CONSTS = qw(FB_DEFAULT FB_QUIET FB_WARN FB_PERLQQ FB_CROAK);
 
 our @EXPORT_OK =
-    ( 
+    (
      qw(
        _utf8_off _utf8_on define_encoding from_to is_16bit is_8bit
        is_utf8 perlio_ok resolve_alias utf8_downgrade utf8_upgrade
@@ -27,15 +27,12 @@ our @EXPORT_OK =
      @FB_FLAGS, @FB_CONSTS,
     );
 
-our %EXPORT_TAGS = 
+our %EXPORT_TAGS =
     (
      all          =>  [ @EXPORT, @EXPORT_OK ],
      fallbacks    =>  [ @FB_CONSTS ],
      fallback_all =>  [ @FB_CONSTS, @FB_FLAGS ],
     );
-
-
-bootstrap Encode ();
 
 # Documentation moved after __END__ for speed - NI-S
 
@@ -57,7 +54,7 @@ sub encodings
     my @modules = (@_ and $_[0] eq ":all") ? values %ExtModule : @_;
     for my $mod (@modules){
 	$mod =~ s,::,/,g or $mod = "Encode/$mod";
-	$mod .= '.pm'; 
+	$mod .= '.pm';
 	$DEBUG and warn "about to require $mod;";
 	eval { require $mod; };
     }
@@ -193,7 +190,7 @@ predefine_encodings();
 # This is to restore %Encoding if really needed;
 #
 sub predefine_encodings{
-    if ($ON_EBCDIC) { 
+    if ($ON_EBCDIC) {
 	# was in Encode::UTF_EBCDIC
 	package Encode::UTF_EBCDIC;
 	*name         = sub{ shift->{'Name'} };
@@ -202,7 +199,7 @@ sub predefine_encodings{
 	    my ($obj,$str,$chk) = @_;
 	    my $res = '';
 	    for (my $i = 0; $i < length($str); $i++) {
-		$res .= 
+		$res .=
 		    chr(utf8::unicode_to_native(ord(substr($str,$i,1))));
 	    }
 	    $_[1] = '' if $chk;
@@ -212,15 +209,15 @@ sub predefine_encodings{
 	    my ($obj,$str,$chk) = @_;
 	    my $res = '';
 	    for (my $i = 0; $i < length($str); $i++) {
-		$res .= 
+		$res .=
 		    chr(utf8::native_to_unicode(ord(substr($str,$i,1))));
 	    }
 	    $_[1] = '' if $chk;
 	    return $res;
 	};
-	$Encode::Encoding{Unicode} = 
+	$Encode::Encoding{Unicode} =
 	    bless {Name => "UTF_EBCDIC"} => "Encode::UTF_EBCDIC";
-    } else {  
+    } else {
 	# was in Encode::UTF_EBCDIC
 	package Encode::Internal;
 	*name         = sub{ shift->{'Name'} };
@@ -232,7 +229,7 @@ sub predefine_encodings{
 	    return $str;
 	};
 	*encode = \&decode;
-	$Encode::Encoding{Unicode} = 
+	$Encode::Encoding{Unicode} =
 	    bless {Name => "Internal"} => "Encode::Internal";
     }
 
@@ -270,6 +267,7 @@ eval {
     }
 };
 # warn $@ if $@;
+@Encode::XS::ISA = qw(Encode::Encoding);
 
 1;
 
@@ -286,14 +284,14 @@ Encode - character encodings
 
 =head2 Table of Contents
 
-Encode consists of a collection of modules which details are too big 
+Encode consists of a collection of modules which details are too big
 to fit in one document.  This POD itself explains the top-level APIs
-and general topics at a glance.  For other topics and more details, 
+and general topics at a glance.  For other topics and more details,
 see the PODs below;
 
   Name			        Description
   --------------------------------------------------------
-  Encode::Alias         Alias defintions to encodings
+  Encode::Alias         Alias definitions to encodings
   Encode::Encoding      Encode Implementation Base Class
   Encode::Supported     List of Supported Encodings
   Encode::CN            Simplified Chinese Encodings
@@ -364,7 +362,7 @@ alias.  For encoding names and aliases, see L</"Defining Aliases">.
 For CHECK see L</"Handling Malformed Data">.
 
 For example to convert (internally UTF-8 encoded) Unicode string to
-iso-8859-1 (also known as Latin1), 
+iso-8859-1 (also known as Latin1),
 
   $octets = encode("iso-8859-1", $unicode);
 
@@ -444,7 +442,7 @@ When "::" is not in the name, "Encode::" is assumed.
 
   @ebcdic = Encode->encodings("EBCDIC");
 
-To find which encodings are supported by this package in details, 
+To find which encodings are supported by this package in details,
 see L<Encode::Supported>.
 
 =head2 Defining Aliases
@@ -467,7 +465,7 @@ i.e.
   Encode::resolve_alias("iso-8859-12")   # false; nonexistent
   Encode::resolve_alias($name) eq $name  # true if $name is canonical
 
-This resolve_alias() does not need C<use Encode::Alias> and is 
+This resolve_alias() does not need C<use Encode::Alias> and is
 exported via C<use encode qw(resolve_alias)>.
 
 See L<Encode::Alias> on details.
@@ -486,7 +484,7 @@ totally identical by functionality.
   # via from_to
   open my $in,  $infile  or die;
   open my $out, $outfile or die;
-  while(<>){ 
+  while(<>){
     from_to($_, "shiftjis", "euc", 1);
   }
 
@@ -513,7 +511,7 @@ If I<CHECK> is 0, (en|de)code will put I<substitution character> in
 place of the malformed character.  for UCM-based encodings,
 E<lt>subcharE<gt> will be used.  For Unicode, \xFFFD is used.  If the
 data is supposed to be UTF-8, an optional lexical warning (category
-utf8) is given. 
+utf8) is given.
 
 =item I<CHECK> = Encode::DIE_ON_ERROR (== 1)
 
@@ -524,10 +522,10 @@ with eval{} unless you really want to let it die on error.
 =item I<CHECK> = Encode::FB_QUIET
 
 If I<CHECK> is set to Encode::FB_QUIET, (en|de)code will immediately
-return proccessed part on error, with data passed via argument
-overwritten with unproccessed part.  This is handy when have to
+return processed part on error, with data passed via argument
+overwritten with unprocessed part.  This is handy when have to
 repeatedly call because the source data is chopped in the middle for
-some reasons, such as fixed-width buffer.  Here is a sample code that 
+some reasons, such as fixed-width buffer.  Here is a sample code that
 just does this.
 
   my $data = '';
@@ -552,7 +550,7 @@ When you decode, '\xI<XX>' will be placed where I<XX> is the hex
 representation of the octet  that could not be decoded to utf8.  And
 when you encode, '\x{I<xxxx>}' will be placed where I<xxxx> is the
 Unicode ID of the character that cannot be found in the character
-repartoire of the encoding.
+repertoire of the encoding.
 
 =item The bitmask
 
@@ -621,12 +619,12 @@ not a string.
 
 L<Encode::Encoding>,
 L<Encode::Supported>,
-L<Encode::PerlIO>, 
+L<Encode::PerlIO>,
 L<encoding>,
-L<perlebcdic>, 
-L<perlfunc/open>, 
-L<perlunicode>, 
-L<utf8>, 
+L<perlebcdic>,
+L<perlfunc/open>,
+L<perlunicode>,
+L<utf8>,
 the Perl Unicode Mailing List E<lt>perl-unicode@perl.orgE<gt>
 
 =head1 MAINTAINER

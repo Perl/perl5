@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 1.30 2002/04/20 09:58:23 dankogai Exp dankogai $
+ $Id: Encode.xs,v 1.31 2002/04/20 23:43:47 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -194,8 +194,8 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 	}
     }
  ENCODE_SET_SRC:
-    if (check & ~ENCODE_LEAVE_SRC){ 
-    	sdone = SvCUR(src) - (slen+sdone);
+    if (check && !(check & ENCODE_LEAVE_SRC)){
+	sdone = SvCUR(src) - (slen+sdone);
 	if (sdone) {
 	    sv_setpvn(src, (char*)s+slen, sdone);
 	}
