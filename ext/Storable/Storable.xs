@@ -149,7 +149,8 @@ typedef double NV;			/* Older perls lack the NV type */
 #define SX_UTF8STR	C(23)	/* UTF-8 string forthcoming (small) */
 #define SX_LUTF8STR	C(24)	/* UTF-8 string forthcoming (large) */
 #define SX_FLAG_HASH	C(25)	/* Hash with flags forthcoming (size, flags, key/flags/value triplet list) */
-#define SX_ERROR	C(26)	/* Error */
+#define SX_CODE         C(26)   /* Code references as perl source code */
+#define SX_ERROR	C(27)	/* Error */
 
 /*
  * Those are only used to retrieve "old" pre-0.6 binary images.
@@ -289,6 +290,8 @@ typedef struct stcxt {
 	int netorder;		/* true if network order used */
 	int s_tainted;		/* true if input source is tainted, at retrieve time */
 	int forgive_me;		/* whether to be forgiving... */
+	int deparse;        /* whether to deparse code refs */
+	SV *eval;           /* whether to eval source code */
 	int canonical;		/* whether to store hashes sorted by key */
 #ifndef HAS_RESTRICTED_HASHES
         int derestrict;         /* whether to downgrade restrcted hashes */
@@ -628,7 +631,8 @@ static stcxt_t *Context_ptr = NULL;
 #define svis_HASH		3
 #define svis_TIED		4
 #define svis_TIED_ITEM	5
-#define svis_OTHER		6
+#define svis_CODE		6
+#define svis_OTHER		7
 
 /*
  * Flags for SX_HOOK.
@@ -756,7 +760,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 #endif
 
 #define STORABLE_BIN_MAJOR	2		/* Binary major "version" */
-#define STORABLE_BIN_MINOR	5		/* Binary minor "version" */
+#define STORABLE_BIN_MINOR	6		/* Binary minor "version" */
 
 /* If we aren't 5.7.3 or later, we won't be writing out files that use the
  * new flagged hash introdued in 2.5, so put 2.4 in the binary header to
@@ -770,7 +774,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
  * As of perl 5.7.3, utf8 hash key is introduced.
  * So this must change -- dankogai
 */
-#define STORABLE_BIN_WRITE_MINOR	5
+#define STORABLE_BIN_WRITE_MINOR	6
 #endif /* (PATCHLEVEL <= 6) */
 
 /*
@@ -964,6 +968,7 @@ static int store_array(stcxt_t *cxt, AV *av);
 static int store_hash(stcxt_t *cxt, HV *hv);
 static int store_tied(stcxt_t *cxt, SV *sv);
 static int store_tied_item(stcxt_t *cxt, SV *sv);
+static int store_code(stcxt_t *cxt, CV *cv);
 static int store_other(stcxt_t *cxt, SV *sv);
 static int store_blessed(stcxt_t *cxt, SV *sv, int type, HV *pkg);
 
@@ -974,6 +979,7 @@ static int (*sv_store[])(stcxt_t *cxt, SV *sv) = {
 	(int (*)(stcxt_t *cxt, SV *sv)) store_hash,		/* svis_HASH */
 	store_tied,										/* svis_TIED */
 	store_tied_item,								/* svis_TIED_ITEM */
+	(int (*)(stcxt_t *cxt, SV *sv)) store_code,		/* svis_CODE */
 	store_other,									/* svis_OTHER */
 };
 
@@ -1027,6 +1033,7 @@ static SV *(*sv_old_retrieve[])(stcxt_t *cxt, char *cname) = {
 	retrieve_other,			/* SX_UTF8STR not supported */
 	retrieve_other,			/* SX_LUTF8STR not supported */
 	retrieve_other,			/* SX_FLAG_HASH not supported */
+	retrieve_other,			/* SX_CODE not supported */
 	retrieve_other,			/* SX_ERROR */
 };
 
@@ -1042,6 +1049,7 @@ static SV *retrieve_overloaded(stcxt_t *cxt, char *cname);
 static SV *retrieve_tied_key(stcxt_t *cxt, char *cname);
 static SV *retrieve_tied_idx(stcxt_t *cxt, char *cname);
 static SV *retrieve_flag_hash(stcxt_t *cxt, char *cname);
+static SV *retrieve_code(stcxt_t *cxt, char *cname);
 
 static SV *(*sv_retrieve[])(stcxt_t *cxt, char *cname) = {
 	0,			/* SX_OBJECT -- entry unused dynamically */
@@ -1070,6 +1078,7 @@ static SV *(*sv_retrieve[])(stcxt_t *cxt, char *cname) = {
 	retrieve_utf8str,		/* SX_UTF8STR  */
 	retrieve_lutf8str,		/* SX_LUTF8STR */
 	retrieve_flag_hash,		/* SX_HASH */
+	retrieve_code,			/* SX_CODE */
 	retrieve_other,			/* SX_ERROR */
 };
 
@@ -1122,6 +1131,8 @@ static void init_store_context(
 
 	cxt->netorder = network_order;
 	cxt->forgive_me = -1;			/* Fetched from perl if needed */
+	cxt->deparse = -1;				/* Idem */
+	cxt->eval = NULL;				/* Idem */
 	cxt->canonical = -1;			/* Idem */
 	cxt->tagnum = -1;				/* Reset tag numbers */
 	cxt->classnum = -1;				/* Reset class numbers */
@@ -1268,6 +1279,11 @@ static void clean_store_context(stcxt_t *cxt)
 	}
 
 	cxt->forgive_me = -1;			/* Fetched from perl if needed */
+	cxt->deparse = -1;				/* Idem */
+	if (cxt->eval) {
+	    SvREFCNT_dec(cxt->eval);
+	}
+	cxt->eval = NULL;				/* Idem */
 	cxt->canonical = -1;			/* Idem */
 
 	reset_context(cxt);
@@ -2340,6 +2356,109 @@ out:
 }
 
 /*
+ * store_code
+ *
+ * Store a code reference.
+ *
+ * Layout is SX_CODE <length> followed by a scalar containing the perl
+ * source code of the code reference.
+ */
+static int store_code(stcxt_t *cxt, CV *cv)
+{
+#if PERL_VERSION < 6
+    /*
+	 * retrieve_code does not work with perl 5.005 or less
+	 */
+	return store_other(cxt, (SV*)cv);
+#else
+	dSP;
+	I32 len;
+	int ret, count, reallen;
+	SV *text, *bdeparse;
+
+	TRACEME(("store_code (0x%"UVxf")", PTR2UV(cv)));
+
+	if (
+		cxt->deparse == 0 ||
+		(cxt->deparse < 0 && !(cxt->deparse =
+			SvTRUE(perl_get_sv("Storable::Deparse", TRUE)) ? 1 : 0))
+	) {
+		return store_other(cxt, (SV*)cv);
+	}
+
+	/*
+	 * Require B::Deparse. At least B::Deparse 0.61 is needed for
+	 * blessed code references.
+	 */
+	/* XXX sv_2mortal seems to be evil here. why? */
+	load_module(PERL_LOADMOD_NOIMPORT, newSVpvn("B::Deparse",10), newSVnv(0.61));
+
+	ENTER;
+	SAVETMPS;
+
+	/*
+	 * create the B::Deparse object
+	 */
+
+	PUSHMARK(sp);
+	XPUSHs(sv_2mortal(newSVpvn("B::Deparse",10)));
+	PUTBACK;
+	count = call_method("new", G_SCALAR);
+	SPAGAIN;
+	if (count != 1)
+		CROAK(("Unexpected return value from B::Deparse::new\n"));
+	bdeparse = POPs;
+
+	/*
+	 * call the coderef2text method
+	 */
+
+	PUSHMARK(sp);
+	XPUSHs(bdeparse); /* XXX is this already mortal? */
+	XPUSHs(sv_2mortal(newRV_inc((SV*)cv)));
+	PUTBACK;
+	count = call_method("coderef2text", G_SCALAR);
+	SPAGAIN;
+	if (count != 1)
+		CROAK(("Unexpected return value from B::Deparse::coderef2text\n"));
+
+	text = POPs;
+	len = SvLEN(text);
+	reallen = strlen(SvPV(text,PL_na));
+
+	/*
+	 * Empty code references or XS functions are deparsed as
+	 * "(prototype) ;" or ";".
+	 */
+
+	if (len == 0 || *(SvPV(text,PL_na)+reallen-1) == ';') {
+	    CROAK(("The result of B::Deparse::coderef2text was empty - maybe you're trying to serialize an XS function?\n"));
+	}
+
+	/* 
+	 * Signal code by emitting SX_CODE.
+	 */
+
+	PUTMARK(SX_CODE);
+	TRACEME(("size = %d", len));
+	TRACEME(("code = %s", SvPV(text,PL_na)));
+
+	/*
+	 * Now store the source code.
+	 */
+
+	STORE_SCALAR(SvPV(text,PL_na), len);
+
+	FREETMPS;
+	LEAVE;
+
+	TRACEME(("ok (code)"));
+
+	return 0;
+#endif
+}
+
+/*
  * store_tied
  *
  * When storing a tied object (be it a tied scalar, array or hash), we lay out
@@ -3073,6 +3192,8 @@ static int sv_type(SV *sv)
 		if (SvRMAGICAL(sv) && (mg_find(sv, 'P')))
 			return svis_TIED;
 		return svis_HASH;
+	case SVt_PVCV:
+		return svis_CODE;
 	default:
 		break;
 	}
@@ -3105,7 +3226,7 @@ static int store(stcxt_t *cxt, SV *sv)
 	 *
 	 * NOTA BENE, for 64-bit machines: the "*svh" below does not yield a
 	 * real pointer, rather a tag number (watch the insertion code below).
-	 * That means it pobably safe to assume it is well under the 32-bit limit,
+	 * That means it probably safe to assume it is well under the 32-bit limit,
 	 * and makes the truncation safe.
 	 *		-- RAM, 14/09/1999
 	 */
@@ -4800,6 +4921,107 @@ static SV *retrieve_flag_hash(stcxt_t *cxt, char *cname)
     TRACEME(("ok (retrieve_hash at 0x%"UVxf")", PTR2UV(hv)));
 
     return (SV *) hv;
+}
+
+/*
+ * retrieve_code
+ *
+ * Return a code reference.
+ */
+static SV *retrieve_code(stcxt_t *cxt, char *cname)
+{
+#if PERL_VERSION < 6
+    CROAK(("retrieve_code does not work with perl 5.005 or less\n"));
+#else
+	dSP;
+	int type, count;
+	SV *cv;
+	SV *sv, *text, *sub, *errsv;
+
+	TRACEME(("retrieve_code (#%d)", cxt->tagnum));
+
+	/*
+	 * Retrieve the source of the code reference
+	 * as a small or large scalar
+	 */
+
+	GETMARK(type);
+	switch (type) {
+	case SX_SCALAR:
+		text = retrieve_scalar(cxt, cname);
+		break;
+	case SX_LSCALAR:
+		text = retrieve_lscalar(cxt, cname);
+		break;
+	default:
+		CROAK(("Unexpected type %d in retrieve_code\n", type));
+	}
+
+	/*
+	 * prepend "sub " to the source
+	 */
+
+	sub = newSVpvn("sub ", 4);
+	sv_catpv(sub, SvPV(text, PL_na)); //XXX no sv_catsv!
+	SvREFCNT_dec(text);
+
+	/*
+	 * evaluate the source to a code reference and use the CV value
+	 */
+
+	if (cxt->eval == NULL) {
+		cxt->eval = perl_get_sv("Storable::Eval", TRUE);
+		SvREFCNT_inc(cxt->eval);
+	}
+	if (!SvTRUE(cxt->eval)) {
+		if (
+			cxt->forgive_me == 0 ||
+			(cxt->forgive_me < 0 && !(cxt->forgive_me =
+				SvTRUE(perl_get_sv("Storable::forgive_me", TRUE)) ? 1 : 0))
+		) {
+			CROAK(("Can't eval, please set $Storable::Eval to a true value"));
+		} else {
+			sv = newSVsv(sub);
+			return sv;
+		}
+	}
+
+	ENTER;
+	SAVETMPS;
+
+	if (SvROK(cxt->eval) && SvTYPE(SvRV(cxt->eval)) == SVt_PVCV) {
+		SV* errsv = get_sv("@", TRUE);
+		sv_setpv(errsv, "");					/* clear $@ */
+		PUSHMARK(sp);
+		XPUSHs(sv_2mortal(newSVsv(sub)));
+		PUTBACK;
+		count = call_sv(cxt->eval, G_SCALAR);
+		SPAGAIN;
+		if (count != 1)
+			CROAK(("Unexpected return value from $Storable::Eval callback\n"));
+		cv = POPs;
+		if (SvTRUE(errsv)) {
+			CROAK(("code %s caused an error: %s", SvPV(sub, PL_na), SvPV(errsv, PL_na)));
+		}
+		PUTBACK;
+	} else {
+		cv = eval_pv(SvPV(sub, PL_na), TRUE);
+	}
+	if (cv && SvROK(cv) && SvTYPE(SvRV(cv)) == SVt_PVCV) {
+	    sv = SvRV(cv);
+	} else {
+	    CROAK(("code %s did not evaluate to a subroutine reference\n", SvPV(sub, PL_na)));
+	}
+
+	SvREFCNT_inc(sv); /* XXX seems to be necessary */
+	SvREFCNT_dec(sub);
+
+	FREETMPS;
+	LEAVE;
+
+	SEEN(sv, cname);
+	return sv;
+#endif
 }
 
 /*
