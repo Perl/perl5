@@ -192,7 +192,7 @@ take an exception.  (Well, if you access an individual element; an
 aggregate assignment would be missed.) For example:
 
     require Bounded_Array;
-    tie @ary, Bounded_Array, 2;
+    tie @ary, 'Bounded_Array', 2;
     $| = 1;
     for $i (0 .. 10) {
         print "setting index $i: ";
@@ -317,7 +317,7 @@ with the name of the file (minus the dot) and you get back that dotfile's
 contents.  For example:
 
     use DotFiles;
-    tie %dot, DotFiles;
+    tie %dot, 'DotFiles';
     if ( $dot{profile} =~ /MANPATH/ ||
          $dot{login}   =~ /MANPATH/ ||
          $dot{cshrc}   =~ /MANPATH/    )
@@ -327,7 +327,7 @@ contents.  For example:
 
 Or here's another sample of using our tied class:
 
-    tie %him, DotFiles, 'daemon';
+    tie %him, 'DotFiles', 'daemon';
     foreach $f ( keys %him ) {
 	printf "daemon dot file %s is size %d\n",
 	    $f, length $him{$f};
@@ -509,8 +509,16 @@ be careful to check whether they really want to clobber files.
 	croak "@{[&whowasi]}: won't remove file $file"
 	    unless $self->{CLOBBER};
 	delete $self->{LIST}->{$dot};
-	unlink($file) || carp "@{[&whowasi]}: can't unlink $file: $!";
+	my $success = unlink($file);
+	carp "@{[&whowasi]}: can't unlink $file: $!" unless $success;
+	$success;
     }
+
+The value returned by DELETE becomes the return value of the call
+to delete().  If you want to emulate the normal behavior of delete(),
+you should return whatever FETCH would have returned for this key.
+In this example, we have chosen instead to return a value which tells
+the caller whether the file was successfully deleted.
 
 =item CLEAR this
 
@@ -592,7 +600,7 @@ use the each() function to iterate over such.  Example:
 
     # print out history file offsets
     use NDBM_File;
-    tie(%HIST, NDBM_File, '/usr/lib/news/history', 1, 0);
+    tie(%HIST, 'NDBM_File', '/usr/lib/news/history', 1, 0);
     while (($key,$val) = each %HIST) {
         print $key, ' = ', unpack('L',$val), "\n";
     }
