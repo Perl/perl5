@@ -15,10 +15,14 @@ hashes, hashes of arrays, arrays of hashes of functions, and so on.
 
 Hard references are smart--they keep track of reference counts for you,
 automatically freeing the thing referred to when its reference count
-goes to zero.  If that thing happens to be an object, the object is
+goes to zero.  (Note: The reference counts for values in self-referential
+or cyclic data structures may not go to zero without a little help; see
+L<perlobj/"Two-Phased Garbage Collection"> for a detailed explanation.
+If that thing happens to be an object, the object is
 destructed.  See L<perlobj> for more about objects.  (In a sense,
 everything in Perl is an object, but we usually reserve the word for
 references to objects that have been officially "blessed" into a class package.)
+
 
 A symbolic reference contains the name of a variable, just as a
 symbolic link in the filesystem merely contains the name of a file.  
@@ -207,9 +211,9 @@ are several basic methods.
 
 =item 1.
 
-Anywhere you'd put an identifier as part of a variable or subroutine
-name, you can replace the identifier with a simple scalar variable
-containing a reference of the correct type:
+Anywhere you'd put an identifier (or chain of identifiers) as part
+of a variable or subroutine name, you can replace the identifier with
+a simple scalar variable containing a reference of the correct type:
 
     $bar = $$scalarref;
     push(@$arrayref, $filename);
@@ -230,10 +234,10 @@ However, a "simple scalar" includes an identifier that itself uses method
 
 =item 2.
 
-Anywhere you'd put an identifier as part of a variable or subroutine
-name, you can replace the identifier with a BLOCK returning a reference
-of the correct type.  In other words, the previous examples could be
-written like this:
+Anywhere you'd put an identifier (or chain of identifiers) as part of a
+variable or subroutine name, you can replace the identifier with a
+BLOCK returning a reference of the correct type.  In other words, the
+previous examples could be written like this:
 
     $bar = ${$scalarref};
     push(@{$arrayref}, $filename);
