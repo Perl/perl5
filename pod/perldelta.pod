@@ -7,13 +7,88 @@ perldelta - what is new for perl v5.8.1
 This document describes differences between the 5.8.0 release and
 the 5.8.1 release.
 
+If you are upgrading from an earlier release like 5.6.1, read first
+the L<perl58delta>, which describes differences between 5.6.0 and
+5.8.0.
+
 =head1 Incompatible Changes
+
+=head2 Hash Randomisation
+
+Due to security reasons, the "random ordering" of hashes has been made
+even more random.  Previously while the order of hash elements from
+keys(), values(), and each() was essentially random, it was still
+repeatable.  Now, however, the order varies between different runs
+of Perl.
+
+B<Perl has never guaranteed any ordering of the hash keys>, and the
+ordering has already changed several times during the lifetime of
+Perl 5.  Also, the ordering of hash keys has always been, and
+continues to be, affected by the insertion order.
+
+The added randomness may affect applications, especially when the
+output of an application has included hash data.  For example, if you
+have used the Data::Dumper module to dump data into different files,
+and then compared the files to see whether the data has changed, now
+you will have false positives since the order in which hashes are
+dumped will vary.  In general the cure is to sort the keys (or the
+values); in particular for Data::Dumper to use the C<Sortkeys> option;
+or if some particular order is really important, use tied hashes.
+
+The hash randomisation is certain to reveal hidden assumptions about
+some particular ordering of hash elements, and outright bugs: it did
+reveal few bugs from the Perl core and core modules.
+
+See L<perlsec/"Algorithmic Complexity Attacks"> for the rationale
+behind this change.
 
 =head1 Core Enhancements
 
 =head2 UTF-8 no more default under UTF-8 locales
 
+In Perl 5.8.0 many Unicode features were introduced.   One of them
+was found the be more of nuisance than benefit: the automagic
+(and silent) "UTF-8-ification" of filehandles, including the
+standard filehandles, if the user's locale settings indicated
+use of UTF-8.
+
+For example, if you had C<en_US.UTF-8> as your locale, your STDIN and
+STDOUT were automatically "UTF-8", in other words an implicit
+binmode(..., ":utf8") was made.  This meant that trying to print, say,
+chr(0xff), ended up printing the bytes 0xc3 0xbf.  Hardly what you had
+in mind unless you were aware of this feature of Perl 5.8.0.  The problem
+is that the vast majority of people weren't: for example in RedHat releases
+8 and 9 the B<default> locale setting is UTF-8, so all RedHat users got
+UTF-8 filehandles, whether they wanted it or not.  The pain was
+intensified by the Unicode implementation of Perl 5.8.0 (still) having nasty
+bugs, especially related to the use of s/// and tr///.
+
+Therefore a decision was made to backtrack the feature and change it
+from implicit silent default to explicit conscious option.  The new
+Perl command line option C<-C> and its counterpart environment
+variable PERL_UNICODE can now be used to control how Perl and Unicode
+interact at interfaces like I/O and for example the command line
+arguments.  See L<perlrun> for more information.
+
 =head2 Unsafe signals again available
+
+In Perl 5.8.0 the so-called "safe signals" were introduced.  This
+means that Perl no more handles signals immediately but instead
+"between opcodes", when it is safe to do so.  The earlier immediate
+handling easily could corrupt the internal state of Perl, resulting
+in mysterious crashes.
+
+However, the new safer model has its problems too.  Because now an
+opcode, a basic unit of Perl execution, is never interrupted but
+instead let to run to completion, certain operations that can take a
+long time now really do take a long time.  For example, certain
+network operations have their own blocking and timeout mechanisms, and
+being able to interrupt them immediately would be nice.
+
+Therefore perl 5.8.1 introduces a "backdoor" to restore the pre-5.8.0
+(5.7.3, really) signal behaviour.  Just set the environment variable
+PERL_SIGNALS to C<unsafe>, and the old immediate (and unsafe)
+signal handling behaviour returns.
 
 =head2 Tied Arrays with Negative Array Indices
 
@@ -21,12 +96,24 @@ Formerly, the indices passed to C<FETCH>, C<STORE>, C<EXISTS>, and
 C<DELETE> methods in tied array class were always non-negative.  If
 the actual argument was negative, Perl would call FETCHSIZE implicitly
 and add the result to the index before passing the result to the tied
-array method.  This behavior is now optional.  If the tied array class
+array method.  This behaviour is now optional.  If the tied array class
 contains a package variable named C<$NEGATIVE_INDICES> which is set to
 a true value, negative values will be passed to C<FETCH>, C<STORE>,
 C<EXISTS>, and C<DELETE> unchanged.
 
-utime undef, undef for current time
+=head2 local ${$x}
+
+The syntaxes
+
+	local ${$x}
+	local @{$x}
+	local %{$x}
+
+now do localise variables, given that the $x is a valid variable name.
+
+=head2 Unicode Character Database
+
+Unicode Character Database has been updated to 4.0.0 from 3.2.0.
 
 =head2 Warnings
 
@@ -57,19 +144,20 @@ C<5.005 threads are deprecated>.  If you really want to continue using
 
 =head1 Modules and Pragmata
 
-Data::Dumper Pair option
-
 =head2 Updated Modules
 
-Benchmark :hireswallclock
+Benchmark - An optional feature, C<:hireswallclock>, now allows
+for high resolution wall clock times (uses Time::HiRes).
 
 CGI
 
-charnames - custom aliases
+charnames - One can now have custom character name aliases.
 
-Class::Struct - compile time structs
+CPAN - There is now a simple command line frontend to the CPAN.pm
+module called F<cpan>.
 
-CPAN - now with cpan
+Data::Dumper - A new option, Pair, allows choosing the separator
+between hash keys and values.
 
 DB_File
 
@@ -90,9 +178,11 @@ podlators
 
 Pod::Perldoc
 
-Scalar::Util - refaddr isvstring looks_like_number set_prototype
+Scalar::Util - New utilities: refaddr, isvstring, looks_like_number,
+set_prototype.
 
-Storable - code references (via B::Deparse)
+Storable - can now store code references (via B::Deparse, so not
+foolproof).
 
 Term::ANSIcolor
 
@@ -100,101 +190,263 @@ Test::More
 
 Test::Simple
 
-Time::HiRes - use of nanosleep allows mixing subsecond sleeps with alarms
+Time::HiRes - Use of nanosleep(), if available, allows mixing
+subsecond sleeps with alarms.
+
+threads - Several fixes, for example for join() problems and memory
+leaks.  In some platforms (like Linux) that use glibc the memory
+footprint of one ithread has been reduced by several hundred kilobytes.
+
+threads::shared - Many memory leaks have been fixed.
 
 Unicode::Collate
 
 Unicode::Normalize
 
-Unicode data fixes
-
 Win32::GetFolderPath
 
 =head1 Utility Changes
 
+The Perl debugger (F<lib/perl5db.pl>) has now been extensively
+documented and bugs found while documented have been fixed.
+
+perldoc has been rewritten from scratch to be more robust and
+featureful.
+
 =head1 New Documentation
 
-perl573delta
+perl573delta has been added to list the differences between the
+(now quite obsolete) development releases 5.7.2 and 5.7.3.
 
-perlos400
+perl58delta has been added: it is the perldelta of 5.8.0, detailing
+the differences between 5.6.0 and 5.8.0.
 
-=head1 Performance Enhancements
+perlartistic has been added: it is the Artistic License in pod format,
+making it easier for modules to refer to it.
+
+perlgpl has been added: it is the GNU General Public License in pod
+format, making it easier for modules to refer to it.
+
+perlos400 has been added to tell about the installation and use
+of Perl in OS/400 PASE.
 
 =head1 Installation and Configuration Improvements
 
-Mac OS X now installs with Perl version embedded in installation
-directory names for easier upgrading of user-compiled Perl
+The UNIX standard Perl location, F</usr/bin/perl>, is no more
+overwritten by default if it exists.  This change was very prudent
+because so many UNIX vendors already provide a F</usr/bin/perl>,
+but simultaneously many system utilities may depend on that
+exact version of Perl, so better not to overwrite it.
 
-Tru64 gcc 3.2.1 -O3 toke.c dropped to -O2
+One can now specify installation directories for site and vendor man
+and HTML pages, and site and vendor scripts.  See F<INSTALL.>
 
-Tru64 building with newer with Berkeley DB
+gcc versions 3.x introduced a new warning that caused a lot of noise
+during Perl compilation: C<gcc -Ialreadyknowndirectory (warning:
+changing search order)>.  This warning has now been avoided by
+Configure weeding out such directories before the compilation.
 
-/usr/bin/perl not overwritten by default
+The Perl malloc has been enhanced: for example in FreeBSD Perl
+now builds with that by default, operation on 64-bit platforms
+should now also be better, and there are more debugging options
+and features.
 
-Installation directories for site and vendor man and HTML pages,
-and site and vendor scripts
+Mac OS X now installs with Perl version number embedded in
+installation directory names for easier upgrading of user-compiled
+Perl.  (In other words, the default installation no more breaks the
+Apple-provided Perl.)
 
-gcc -Ialreadyknowndirectory (warning: changing search order)
+In newer FreeBSD releases Perl 5.8.0 compilation failed because of
+trying to use <malloc.h>, which in FreeBSD is just a dummy file, and
+a fatal error to even try to use.  Now <malloc.h> is not used.
 
-OS/400 PASE
+Tru64 gcc 3.2.1 -O3 toke.c dropped to -O2 because of gigantic
+memory use otherwise.
 
-<malloc.h> FreeBSD
+Tru64 can now build Perl with the newer Berkeley DBs.
 
-openbsd -Wl,-R
-
-getgrent_r, gethostbyaddr_r, getnetbyaddr_r, random_r
-
-VMS poll, readdir_r
+Perl has been ported to IBM's OS/400 PASE environment.  The best way
+to build a Perl for PASE is to use an AIX host as a cross-compilation
+environment.  See README.os400.
 
 =head1 Selected Bug Fixes
 
-Setting $0 works again in Linux
+Setting $0 works again in Linux.
 
-Setting $0 now works in HP-UX
+Setting $0 now works in HP-UX.
 
-Binary mode for pipes and sockets in Win32
+Pipes and sockets are now automatically in binary mode in Win32.
 
-Lexicals, Closures by Dave Mitchell
+Several bugs related to lexical scope have been fixed by Dave Mitchell.
 
-Encode: unmappable characters are detected already during input
+Encode: if a filehandle has been marked as to have an encoding,
+unmappable characters are detected already during input, not later
+(when the corrupted data is being used).
 
-PerlIO::scalar reading from non-string scalars
+PerlIO::scalar; reading from non-string scalars (like the special
+variables, see L<perlvar>) now works.
 
-getgrent_r dynamic buffer
+binmode(SOCKET, ":utf8") only worked on the input side, not
+on the output side of the socket.  Now it works both ways.
 
-User-defined uppercase<->lowercase Unicode mappings
+For threaded Perls certain system database functions like getpwent()
+and getgrent() now grow their result buffer dynamically, instead of
+failing.  This means that at sites with lots of users and groups the
+functions no more fail by returning only partial results.
 
-local ${$x}
+Perl 5.8.0 had accidentally broken the capability for users
+to define their own uppercase<->lowercase Unicode mappings
+(as advertised by the Camel).  This feature has been fixed and
+is also documented better.
 
-.= <> UTF-8
+In 5.8.0 this
+
+	$some_unicode .= <FH>;
+
+didn't work correctly but instead corrupted the data.  This has now
+been fixed.
+
+In VMS IO::Poll now works.
 
 =head1 New or Changed Diagnostics
 
+All the warnings related to pack() and unpack() were made more
+informative and consistent.
+
+=head2 Changed "A thread exited while %d threads were running"
+
+The old version
+
+    A thread exited while %d other threads were still running
+
+was misleading because the "other" included also the thread giving
+the warning.
+
+=head2 Removed "Attempt to clear a restricted hash"
+
+It is not illegal to clear a restricted hash, so the warning
+was removed.
+
+=head2 New "Illegal declaration of anonymous subroutine"
+
+You must specify the block of code for C<sub>.
+
+=head2 Changed "Invalid range "%s" in transliteration operator"
+
+The old version
+
+    Invalid [] range "%s" in transliteration operator
+
+was simply wrong because there are no "[] ranges" in tr///.
+
+=head2 New "Missing control char name in \c"
+
+Self-explanatory.
+
+=head2 "Newline in left-justified string for %s"
+
+The padding spaces would appear after the newline, which is
+probably not what you had in mind.
+
+=head2 "Possible precedence problem on bitwise %c operator"
+
+If you think this
+
+    $x & $y == 0
+
+tests whether the bitwise AND of $x and $y is zero,
+you will like this warning.
+
+=head2 New "Pseudo-hashes are deprecated"
+
+This warning should have been already in 5.8.0, since they are.
+
+=head2 New "read() on %s filehandle %s"
+
+You cannot read() (or sysread()) from a closed or unopened filehandle.
+
+=head2 New "5.005 threads are deprecated"
+
+This warning should have been already in 5.8.0, since they are.
+
+=head2 New "Tied variable freed while still in use"
+
+Something pulled the plug on a live free variable, Perl plays
+safe by bailing out.
+
+=head2 New "To%s: illegal mapping '%s'"
+
+An illegal user-defined Unicode casemapping was specified.
+
+=head2 New "Use of freed value in iteration (perhaps you modified the iterated array within the loop?)"
+
+Something modified the values being iterated over.  This is not good.
+
 =head1 Changed Internals
 
-Pad work
+These news matter to you only if you either write XS code or like to
+hack Perl internals, or like to run Perl with the C<-D> option.
 
-V-string work
+The embedding examples of L<perlembed> have been reviewed to be
+uptodate and consistent: for example, the correct use of
+PERL_SYS_INIT3() and PERL_SYS_TERM().
 
-UTF-8 length and position cache
+Extensive reworking of the pad code has been conducted by Dave Mitchell.
 
-Obsoleted APIs like sv_2pv, sv_catpvn, sv_catsv, sv_setsv again available
+Extensive work on the v-strings by John Peacock.
 
-Certain APIs like regatom are no more available
+UTF-8 length and position cache: to speed up the handling of Unicode
+(UTF-8) scalars, a cache was introduced.  Potential problems if an
+extension bypasses the official APIs and directly modifies the PV
+of an SV: the UTF-8 cache does not get cleared as it should.
+
+APIs obsoleted in Perl 5.8.0s like sv_2pv, sv_catpvn, sv_catsv,
+sv_setsv, are again available.
+
+Certain Perl core C APIs like cxinc and regatom are no more available.
+They never should have been, and if you application depends on them,
+you should (be ashamed and) contact perl5-porters to discuss what
+are the proper APIs.
 
 Certain APIs like Perl_list are no more available without their Perl_
+prefix.  You can force this also by defining in compile time the
+cpp define PERL_NO_SHORT_NAMES, for cleaner embedding.
 
-PERL_NO_SHORT_NAMES for cleaner embedding
+Perl_save_bool() has been added.
 
-Perl_save_bool added
-
--DL removed, -Dv and -Dxv added
+-DL removed, -Dv and -Dxv added, see L<perlrun>.
 
 =head1 New Tests
 
+In Perl 5.8.0 there were about 69000 separate tests in about 700 test files,
+in Perl 5.8.1 there are about 75000 separate tests in about 750 test files.
+The exact numbers depend on the Perl configuration and on the
+operating system platform.
+
 =head1 Known Problems
 
+The hash randomisation mentioned in L</Incompatible Changes> is definitely
+problematic: it will wake dormant bugs.
+
 =head1 Platform Specific Problems
+
+=head2 Win32 sysread, syswrite
+
+In Win32 the problem of sysread/syswritebecoming "broken" in 5.8.0 is
+still open.  Background: before 5.8.0 in Win32 a filehandle that had
+been opened with sysopen() and then read/written with sysread/syswrite
+still did the CRLF <-> LF translation emblematic of Win32.
+For example, sysread() did translate any read CRLFs into LFs.
+
+The new PerlIO model introduced in 5.8.0 changed this: sysopen()
+really does mean binary mode: if there are CRLFs, they are returned
+as CRLFs.
+
+This is still the case with 5.8.1 since the proper fix would require a
+considerable effort to implement cleanly, and secondly because one can
+argue that the old behaviour of sysread/syswrite on Win32 was simply
+anomalous (that is, wrong), since it makes Win32 to behave differently
+than any other platform.
 
 =head1 Reporting Bugs
 
