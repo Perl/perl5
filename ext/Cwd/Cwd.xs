@@ -128,7 +128,6 @@ _cwdxs_abs_path(char *start)
   DIR *parent;
   Direntry_t *dp;
   char dotdots[MAXPATHLEN] = { 0 };
-  char dir[MAXPATHLEN]     = { 0 };
   char name[MAXPATHLEN]    = { 0 };
   char *cwd;
   int namelen;
