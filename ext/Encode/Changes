@@ -1,9 +1,38 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.5 2004/10/19 04:55:01 dankogai Exp dankogai $
+# $Id: Changes,v 2.7 2004/10/22 19:35:52 dankogai Exp $
 #
+$Revision: 2.7 $ $Date: 2004/10/22 19:35:52 $
+! lib/Encode/Encoding.pm
+  "Remove Carp from warnings.pm" that influences Encode, by Tels.
+  Message-Id: <200410161618.29779@bloodgate.com>
+! Encode.xs AUTHORS t/fallback.t
+  Now Encode::utf8's fallbacks are compliant to Encode standard.
+  Thank Bjoern Hoehrmann for persistently convincing me.
+  Message-Id: <41a61aea.638409494@smtp.bjoern.hoehrmann.de>
+! Encode.pm
+  POD further revised.
 
-$Revision: 2.5 $ $Date: 2004/10/19 04:55:01 $
+2.06 2004/10/22 06:23:11
+! ucm/mac*
+  RT #8083 reports that MacThai mapping was obsolete
+  Updated all mac* encodings accordingly to the URI below.
+  One remaining mystery is that MacRomanian vs. MacRumanian.
+  MacRumanian is not found in unicode.org...
+  http://www.unicode.org/Public/MAPPINGS/VENDORS/APPLE/
+! Encode.pm t/Encode.t
+  Fixed RT #8081: "decode(..., bless{},'x') segfault"
+  Two more tests added to test that.
+  http://rt.cpan.org/NoAuth/Bug.html?id=8081
+! Encode.pm
+  POD revised accordingly to RT #7966
+  http://rt.cpan.org/NoAuth/Bug.html?id=7966
+! Unicode/Unicode.pm
+  POD updated explaining why Encode::Unicode always croaks on error
+  rather than giving users choices.
+  http://rt.cpan.org/NoAuth/Bug.html?id=7892
+
+2.05 2004/10/19 04:55:01
 ! encoding.pm
   "unnuke" jhi's patch in bleedperl, with minor correction by dankogai.
   Message-ID: <41210A84.6060506@iki.fi>

@@ -8,11 +8,12 @@
 # source code kit or CPAN is, of course, allowed.)
 #
 # This list is in alphabetical order.
--- 
+--
 Andreas J. Koenig		<andreas.koenig@anima.de>
 Anton Tagunov			<tagunov@motor.ru>
 Autrijus Tang			<autrijus@autrijus.org>
 Benjamin Goldberg               <goldbb2@earthlink.net>
+Bjoern Hoehrmann		<derhoermi@gmx.net>
 Bjoern Jacke			<debianbugs@j3e.de>
 Chris Nandor                    <pudge@pobox.com>
 Craig A. Berry			<craigberry@mac.com>
@@ -47,5 +48,6 @@ Simon Cozens			<simon@netthink.co.uk>
 Spider Boardman			<spider@web.zk3.dec.com>
 Steve Hay			<steve.hay@uk.radan.com>
 Tatsuhiko Miyagawa		<miyagawa@edge.co.jp>
+Tels                            <perl_dummy@bloodgate.com>
 Vadim Konovalov			<vkonovalov@peterstar.ru>
 Yitzchak Scott-Thoennes		<sthoenna@efn.org>

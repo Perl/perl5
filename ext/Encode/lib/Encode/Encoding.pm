@@ -1,7 +1,7 @@
 package Encode::Encoding;
 # Base class for classes which implement encodings
 use strict;
-our $VERSION = do { my @r = (q$Revision: 2.0 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 2.1 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 require Encode;
 
@@ -39,14 +39,14 @@ sub encode {
     require Carp;
     my $obj = shift;
     my $class = ref($obj) ? ref($obj) : $obj;
-    Carp::croak $class, "->encode() not defined!";
+    Carp::croak($class . "->encode() not defined!");
 }
 
 sub decode{
     require Carp;
     my $obj = shift;
     my $class = ref($obj) ? ref($obj) : $obj;
-    Carp::croak $class, "->encode() not defined!";
+    Carp::croak($class . "->encode() not defined!");
 }
 
 sub DESTROY {}

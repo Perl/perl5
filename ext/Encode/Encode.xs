@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.0 2004/05/16 20:55:15 dankogai Exp $
+ $Id: Encode.xs,v 2.1 2004/10/22 19:35:52 dankogai Exp $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -157,24 +157,15 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 		if (check & ENCODE_RETURN_ON_ERR){
 		    goto ENCODE_SET_SRC;
 		}
-		if (check & ENCODE_PERLQQ){
-		    SV* perlqq = 
-			sv_2mortal(newSVpvf("\\x{%04"UVxf"}", (UV)ch));
+		if (check & (ENCODE_PERLQQ|ENCODE_HTMLCREF|ENCODE_XMLCREF)){
+		    SV* subchar = 
+			newSVpvf(check & ENCODE_PERLQQ ? "\\x{%04"UVxf"}" :
+				 check & ENCODE_HTMLCREF ? "&#%" UVuf ";" :
+				 "&#x%" UVxf ";", (UV)ch);
 		    sdone += slen + clen;
-		    ddone += dlen + SvCUR(perlqq);
-		    sv_catsv(dst, perlqq);
-		}else if (check & ENCODE_HTMLCREF){
-		    SV* htmlcref = 
-			sv_2mortal(newSVpvf("&#%" UVuf ";", (UV)ch));
-		    sdone += slen + clen;
-		    ddone += dlen + SvCUR(htmlcref);
-		    sv_catsv(dst, htmlcref);
-		}else if (check & ENCODE_XMLCREF){
-		    SV* xmlcref = 
-			sv_2mortal(newSVpvf("&#x%" UVxf ";", (UV)ch));
-		    sdone += slen + clen;
-		    ddone += dlen + SvCUR(xmlcref);
-		    sv_catsv(dst, xmlcref);
+		    ddone += dlen + SvCUR(subchar);
+		    sv_catsv(dst, subchar);
+		    SvREFCNT_dec(subchar);
 		} else {
 		    /* fallback char */
 		    sdone += slen + clen;
@@ -200,11 +191,11 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
 		}
 		if (check &
 		    (ENCODE_PERLQQ|ENCODE_HTMLCREF|ENCODE_XMLCREF)){
-		    SV* perlqq = 
-			sv_2mortal(newSVpvf("\\x%02" UVXf, (UV)s[slen]));
+		    SV* subchar = newSVpvf("\\x%02" UVXf, (UV)s[slen]);
 		    sdone += slen + 1;
-		    ddone += dlen + SvCUR(perlqq);
-		    sv_catsv(dst, perlqq);
+		    ddone += dlen + SvCUR(subchar);
+		    sv_catsv(dst, subchar);
+		    SvREFCNT_dec(subchar);
 		} else {
 		    sdone += slen + 1;
 		    ddone += dlen + strlen(FBCHAR_UTF8);
@@ -297,7 +288,7 @@ CODE:
 	    U8 skip = UTF8SKIP(s);
 	    if ((s + skip) > e) {
 	    	/* Partial character - done */
-	    	break;
+	    	goto decode_utf8_fallback;
 	    }
 	    else if (is_utf8_char(s)) {
 	    	/* Whole char is good */
@@ -313,6 +304,7 @@ CODE:
 	    /* Invalid start byte */
 	}
 	/* If we get here there is something wrong with alleged UTF-8 */
+    decode_utf8_fallback:
 	if (check & ENCODE_DIE_ON_ERR){
 	    Perl_croak(aTHX_ ERR_DECODE_NOMAP, "utf8", (UV)*s);
 	    XSRETURN(0);
@@ -325,9 +317,9 @@ CODE:
 		break;
     	}
         if (check & (ENCODE_PERLQQ|ENCODE_HTMLCREF|ENCODE_XMLCREF)){
-	    SV* perlqq = newSVpvf("\\x%02" UVXf, (UV)*s);
-    	    sv_catsv(dst, perlqq);
-	    SvREFCNT_dec(perlqq);
+	    SV* subchar = newSVpvf("\\x%02" UVXf, (UV)*s);
+    	    sv_catsv(dst, subchar);
+	    SvREFCNT_dec(subchar);
 	} else {
 	    sv_catpv(dst, FBCHAR_UTF8);
 	}
