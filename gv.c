@@ -531,7 +531,15 @@ gv_fetchpv(char *nambeg, I32 add, I32 sv_type)
 
     if (!stash) {
 	if (add) {
-	    warn("Global symbol \"%s\" requires explicit package name", name);
+	    char sv_type_char = ((sv_type == SVt_PV) ? '$'
+				 : (sv_type == SVt_PVAV) ? '@'
+				 : (sv_type == SVt_PVHV) ? '%'
+				 : 0);
+	    if (sv_type_char) 
+		warn("Global symbol \"%c%s\" requires explicit package name",
+		     sv_type_char, name);
+	    else
+		warn("Global symbol \"%s\" requires explicit package name", name);
 	    ++error_count;
 	    stash = curstash ? curstash : defstash;	/* avoid core dumps */
 	    add_gvflags = ((sv_type == SVt_PV) ? GVf_IMPORTED_SV
