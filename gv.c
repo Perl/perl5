@@ -812,8 +812,11 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
     case ']':
 	if (len == 1) {
 	    SV *sv = GvSV(gv);
-	    GvSV(gv) = SvREFCNT_inc(PL_patchlevel);
-	    SvREFCNT_dec(sv);
+	    (void)SvUPGRADE(sv, SVt_PVNV);
+	    SvNVX(sv) = SvNVX(PL_patchlevel);
+	    SvNOK_on(sv);
+	    (void)SvPV_nolen(sv);
+	    SvREADONLY_on(sv);
 	}
 	break;
     }
