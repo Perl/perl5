@@ -1172,6 +1172,12 @@ regmatch(regnode *prog)
 	    int docolor = *PL_colors[0];
 	    int taill = (docolor ? 10 : 7); /* 3 chars for "> <" */
 	    int l = (PL_regeol - locinput > taill ? taill : PL_regeol - locinput);
+	    /* The part of the string before starttry has one color
+	       (pref0_len chars), between starttry and current
+	       position another one (pref_len - pref0_len chars),
+	       after the current position the third one.
+	       We assume that pref0_len <= pref_len, otherwise we
+	       decrease pref0_len.  */
 	    int pref_len = (locinput - PL_bostr > (5 + taill) - l 
 			    ? (5 + taill) - l : locinput - PL_bostr);
 	    int pref0_len = pref_len  - (locinput - PL_reg_starttry);
@@ -1181,6 +1187,8 @@ regmatch(regnode *prog)
 		      ? (5 + taill) - pref_len : PL_regeol - locinput);
 	    if (pref0_len < 0)
 		pref0_len = 0;
+	    if (pref0_len > pref_len)
+		pref0_len = pref_len;
 	    regprop(prop, scan);
 	    PerlIO_printf(Perl_debug_log, 
 			  "%4i <%s%.*s%s%s%.*s%s%s%s%.*s%s>%*s|%3d:%*s%s\n",
