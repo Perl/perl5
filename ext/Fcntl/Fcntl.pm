@@ -26,7 +26,6 @@ pack up your own arguments to pass as args for locking functions, etc.
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 
 require Exporter;
-use AutoLoader;
 require DynaLoader;
 @ISA = qw(Exporter DynaLoader);
 $VERSION = "1.00";
@@ -66,8 +65,4 @@ sub AUTOLOAD {
 
 bootstrap Fcntl $VERSION;
 
-# Preloaded methods go here.  Autoload methods go after __END__, and are
-# processed by the autosplit program.
-package Fcntl; # return to package Fcntl so AutoSplit is happy
 1;
-__END__
