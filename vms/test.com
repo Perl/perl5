@@ -41,7 +41,7 @@ $   if p2.nes."" then dbg  = "dbg"
 $   if p2.nes."" then ndbg = "ndbg"
 $!
 $!  Pick up a copy of perl to use for the tests
-$   Delete/Log/NoConfirm Perl.;*
+$   If F$Search("Perl.").nes."" Then Delete/Log/NoConfirm Perl.;*
 $   Copy/Log/NoConfirm [-]'ndbg'Perl'exe' []Perl.
 $
 $!  Make the environment look a little friendlier to tests which assume Unix

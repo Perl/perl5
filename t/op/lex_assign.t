@@ -173,7 +173,7 @@ EOE
 __END__
 ref $xref			# ref
 ref $cstr			# ref nonref
-`$runme -e "print qq[1\n]"`				# backtick skip(MSWin32)
+`$runme -e "print qq[1\\n]"`				# backtick skip(MSWin32)
 `$undefed`			# backtick undef skip(MSWin32)
 <*>				# glob
 <OP>				# readline

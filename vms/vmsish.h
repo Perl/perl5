@@ -254,6 +254,8 @@
 
 #ifdef VMS_DO_SOCKETS
 #include "sockadapt.h"
+#define PERL_SOCK_SYSREAD_IS_RECV
+#define PERL_SOCK_SYSWRITE_IS_SEND
 #endif
 
 #define BIT_BUCKET "_NLA0:"
