@@ -185,8 +185,8 @@ else {
 if (!$have_time) {
     skip 14
 } else {
- my ($s, $n);
- for my $i (1 .. 100) {
+ my ($s, $n, $i) = (0);
+ for $i (1 .. 100) {
      $s += Time::HiRes::time() - time();
      $n++;
  }

@@ -5,6 +5,7 @@ extern "C" {
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#include "ppport.h"
 #if defined(__CYGWIN__) && defined(HAS_W32API_WINDOWS_H)
 # include <w32api/windows.h>
 # define CYGWIN_WITH_W32API
@@ -23,19 +24,6 @@ extern "C" {
 }
 #endif
 
-#ifndef NOOP
-#    define NOOP (void)0
-#endif
-#ifndef dNOOP
-#    define dNOOP extern int Perl___notused
-#endif
-
-#ifndef aTHX_
-#    define aTHX_
-#    define pTHX_
-#    define dTHX dNOOP
-#endif
-
 #ifdef START_MY_CXT
 #  ifndef MY_CXT_CLONE
 #    define MY_CXT_CLONE                                                \
@@ -45,79 +33,17 @@ extern "C" {
 	sv_setuv(my_cxt_sv, PTR2UV(my_cxtp))
 #  endif
 #else
-#    define START_MY_CXT static my_cxt_t my_cxt;
-#    define dMY_CXT	 dNOOP
-#    define MY_CXT_INIT	 NOOP
 #    define MY_CXT_CLONE NOOP
-#    define MY_CXT	 my_cxt
-#endif
-
-#ifndef NVTYPE
-#   if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE)
-#       define NVTYPE long double
-#   else
-#       define NVTYPE double
-#   endif
-typedef NVTYPE NV;
-#endif
-
-#ifndef IVdf
-#  ifdef IVSIZE
-#      if IVSIZE == LONGSIZE
-#           define	IVdf		"ld"
-#           define	UVuf		"lu"
-#       else
-#           if IVSIZE == INTSIZE
-#               define	IVdf	"d"
-#               define	UVuf	"u"
-#           endif
-#       endif
-#   else
-#       define	IVdf	"ld"
-#       define	UVuf	"lu"
-#   endif
-#endif
-
-#ifndef NVef
-#   if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE) && \
-	defined(PERL_PRIgldbl) /* Not very likely, but let's try anyway. */ 
-#       define NVgf		PERL_PRIgldbl
-#   else
-#       define NVgf		"g"
-#   endif
-#endif
-
-#ifndef INT2PTR
-
-#if (IVSIZE == PTRSIZE) && (UVSIZE == PTRSIZE)
-#  define PTRV                  UV
-#  define INT2PTR(any,d)        (any)(d)
-#else
-#  if PTRSIZE == LONGSIZE
-#    define PTRV                unsigned long
-#  else
-#    define PTRV                unsigned
-#  endif
-#  define INT2PTR(any,d)        (any)(PTRV)(d)
-#endif
-#define PTR2IV(p)       INT2PTR(IV,p)
-
-#endif /* !INT2PTR */
-
-#ifndef SvPV_nolen
-static char *
-sv_2pv_nolen(pTHX_ register SV *sv)
-{
-    STRLEN n_a;
-    return sv_2pv(sv, &n_a);
-}
-#   define SvPV_nolen(sv) \
-        ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
-         ? SvPVX(sv) : sv_2pv_nolen(sv))
 #endif
 
 #ifndef PerlProc_pause
 #   define PerlProc_pause() Pause()
+#endif
+
+#ifdef HAS_PAUSE
+#   define Pause   pause
+#else
+#   define Pause() sleep(~0)
 #endif
 
 /* Though the cpp define ITIMER_VIRTUAL is available the functionality
