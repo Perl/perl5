@@ -395,7 +395,7 @@ sub cp_if_diff {
         }
 	cmd("cp $from $to");
 	# Restore timestamps if it's a .a library.
-	if ($to =~ /\.a$/) {
+	if ($to =~ /\.a$/ or $^O eq 'os2') {	# For binary install
 	    ($atime, $mtime) = (stat $from)[8,9];
 	    utime $atime, $mtime, $to;
 	}
