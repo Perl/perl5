@@ -14,7 +14,7 @@
  * $Id: Config_h.U,v 3.0.1.4 1995/09/25 09:10:49 ram Exp $
  */
 
-/* Configuration time: Fri Aug 23 15:12:57 EDT 1996
+/* Configuration time: Fri Aug 30 15:56:35 EDT 1996
  * Configured by: doughera
  * Target system: sunos fractal 5.5 generic i86pc i386 i86pc 
  */
@@ -36,6 +36,9 @@
 
 /* CAT2:
  *	This macro catenates 2 tokens together.
+ */
+/* STRINGIFY:
+ *	This macro surrounds its token with double quotes.
  */
 #if 42 == 1
 #define CAT2(a,b)a/**/b
@@ -86,7 +89,7 @@
  *	This symbol indicates the C compiler can check for function attributes,
  *	such as printf formats. This is normally only supported by GNU cc.
  */
-/*#define HASATTRIBUTE 	/**/
+/*#define HASATTRIBUTE 	/ **/
 #ifndef HASATTRIBUTE
 #define __attribute__(_arg_)
 #endif
@@ -146,13 +149,13 @@
  *	This symbol, if defined, indicates that the chsize routine is available
  *	to truncate files.  You might need a -lx to get this routine.
  */
-/*#define	HAS_CHSIZE		/**/
+/*#define	HAS_CHSIZE		/ **/
 
 /* VOID_CLOSEDIR:
  *	This symbol, if defined, indicates that the closedir() routine
  *	does not return a value.
  */
-/*#define VOID_CLOSEDIR		/**/
+/*#define VOID_CLOSEDIR		/ **/
 
 /* HASCONST:
  *	This symbol, if defined, indicates that this C compiler knows about
@@ -238,7 +241,7 @@
  *	This symbol, if defined, indicates that the flock routine is
  *	available to do file locking.
  */
-/*#define HAS_FLOCK		/**/
+/*#define HAS_FLOCK		/ **/
 
 /* HAS_FORK:
  *	This symbol, if defined, indicates that the fork routine is
@@ -288,7 +291,7 @@
  *	This symbol, if defined, indicates that the getpgrp2() (as in DG/UX)
  *	routine is available to get the current process group.
  */
-/*#define HAS_GETPGRP2		/**/
+/*#define HAS_GETPGRP2		/ **/
 
 /* HAS_GETPPID:
  *	This symbol, if defined, indicates that the getppid routine is
@@ -537,7 +540,7 @@
  *	probably use memmove() or memcpy(). If neither is defined, roll your
  *	own version.
  */
-/*#define HAS_SAFE_MEMCPY	/**/
+/*#define HAS_SAFE_MEMCPY	/ **/
 
 /* HAS_SELECT:
  *	This symbol, if defined, indicates that the select routine is
@@ -593,13 +596,13 @@
  *	instead of the USG setpgrp().
  */
 #define HAS_SETPGRP		/**/
-/*#define USE_BSDPGRP		/**/
+/*#define USE_BSDPGRP		/ **/
 
 /* HAS_SETPGRP2:
  *	This symbol, if defined, indicates that the setpgrp2() (as in DG/UX)
  *	routine is available to set the current process group.
  */
-/*#define HAS_SETPGRP2		/**/
+/*#define HAS_SETPGRP2		/ **/
 
 /* HAS_SETPRIORITY:
  *	This symbol, if defined, indicates that the setpriority routine is
@@ -618,7 +621,7 @@
  *	process.
  */
 #define HAS_SETREGID		/**/
-/*#define HAS_SETRESGID		/**/
+/*#define HAS_SETRESGID		/ **/
 
 /* HAS_SETREUID:
  *	This symbol, if defined, indicates that the setreuid routine is
@@ -631,19 +634,19 @@
  *	process.
  */
 #define HAS_SETREUID		/**/
-/*#define HAS_SETRESUID		/**/
+/*#define HAS_SETRESUID		/ **/
 
 /* HAS_SETRGID:
  *	This symbol, if defined, indicates that the setrgid routine is available
  *	to change the real gid of the current program.
  */
-/*#define HAS_SETRGID		/**/
+/*#define HAS_SETRGID		/ **/
 
 /* HAS_SETRUID:
  *	This symbol, if defined, indicates that the setruid routine is available
  *	to change the real uid of the current program.
  */
-/*#define HAS_SETRUID		/**/
+/*#define HAS_SETRUID		/ **/
 
 /* HAS_SETSID:
  *	This symbol, if defined, indicates that the setsid routine is
@@ -773,7 +776,7 @@
  *	functions are available for string searching.
  */
 #define HAS_STRCHR	/**/
-/*#define HAS_INDEX	/**/
+/*#define HAS_INDEX	/ **/
 
 /* HAS_STRCOLL:
  *	This symbol, if defined, indicates that the strcoll routine is
@@ -884,7 +887,7 @@
 /* HAS_VFORK:
  *	This symbol, if defined, indicates that vfork() exists.
  */
-/*#define HAS_VFORK	/**/
+/*#define HAS_VFORK	/ **/
 
 /* Signal_t:
  *	This symbol's value is either "void" or "int", corresponding to the
@@ -915,7 +918,7 @@
  *	symbol.
  */
 #define HAS_VPRINTF	/**/
-/*#define USE_CHAR_VSPRINTF 	/**/
+/*#define USE_CHAR_VSPRINTF 	/ **/
 
 /* HAS_WAIT4:
  *	This symbol, if defined, indicates that wait4() exists.
@@ -998,7 +1001,7 @@
  *	portably declare your directory entries.
  */
 #define I_DIRENT		/**/
-/*#define DIRNAMLEN	/**/
+/*#define DIRNAMLEN	/ **/
 #define Direntry_t struct dirent
 
 /* I_DLFCN:
@@ -1042,7 +1045,7 @@
  *	This symbol, if defined, indicates to the C program that it should
  *	include <memory.h>.
  */
-/*#define I_MEMORY		/**/
+/*#define I_MEMORY		/ **/
 
 /* I_NDBM:
  *	This symbol, if defined, indicates that <ndbm.h> exists and should
@@ -1054,7 +1057,7 @@
  *	This symbol, if defined, indicates that <net/errno.h> exists and 
  *	should be included.
  */
-/*#define I_NET_ERRNO		/**/
+/*#define I_NET_ERRNO		/ **/
 
 /* I_NETINET_IN:
  *	This symbol, if defined, indicates to the C program that it should
@@ -1091,11 +1094,11 @@
  *	contains pw_comment.
  */
 #define I_PWD		/**/
-/*#define PWQUOTA	/**/
+/*#define PWQUOTA	/ **/
 #define PWAGE	/**/
-/*#define PWCHANGE	/**/
-/*#define PWCLASS	/**/
-/*#define PWEXPIRE	/**/
+/*#define PWCHANGE	/ **/
+/*#define PWCLASS	/ **/
+/*#define PWEXPIRE	/ **/
 #define PWCOMMENT	/**/
 
 /* I_STDDEF:
@@ -1120,13 +1123,13 @@
  *	This symbol, if defined, indicates to the C program that it should
  *	include <sys/dir.h>.
  */
-/*#define I_SYS_DIR		/**/
+/*#define I_SYS_DIR		/ **/
 
 /* I_SYS_FILE:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <sys/file.h> to get definition of R_OK and friends.
  */
-/*#define I_SYS_FILE		/**/
+/*#define I_SYS_FILE		/ **/
 
 /* I_SYS_IOCTL:
  *	This symbol, if defined, indicates that <sys/ioctl.h> exists and should
@@ -1138,7 +1141,7 @@
  *	This symbol, if defined, indicates to the C program that it should
  *	include <sys/ndir.h>.
  */
-/*#define I_SYS_NDIR	/**/
+/*#define I_SYS_NDIR	/ **/
 
 /* I_SYS_PARAM:
  *	This symbol, if defined, indicates to the C program that it should
@@ -1198,9 +1201,9 @@
  *	<sgtty.h> rather than <termio.h>.  There are also differences in
  *	the ioctl() calls that depend on the value of this symbol.
  */
-/*#define I_TERMIO		/**/
+/*#define I_TERMIO		/ **/
 #define I_TERMIOS		/**/
-/*#define I_SGTTY		/**/
+/*#define I_SGTTY		/ **/
 
 /* I_TIME:
  *	This symbol, if defined, indicates to the C program that it should
@@ -1214,9 +1217,9 @@
  *	This symbol, if defined, indicates to the C program that it should
  *	include <sys/time.h> with KERNEL defined.
  */
-/*#define I_TIME		/**/
+/*#define I_TIME		/ **/
 #define I_SYS_TIME		/**/
-/*#define I_SYS_TIME_KERNEL		/**/
+/*#define I_SYS_TIME_KERNEL		/ **/
 
 /* I_UNISTD:
  *	This symbol, if defined, indicates to the C program that it should
@@ -1239,13 +1242,13 @@
  *	include <varargs.h>.
  */
 #define I_STDARG		/**/
-/*#define I_VARARGS	/**/
+/*#define I_VARARGS	/ **/
 
 /* I_VFORK:
  *	This symbol, if defined, indicates to the C program that it should
  *	include vfork.h.
  */
-/*#define I_VFORK	/**/
+/*#define I_VFORK	/ **/
 
 /* INTSIZE:
  *	This symbol contains the size of an int, so that the C preprocessor
@@ -1354,8 +1357,8 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "/opt/perl/lib/i86pc-solaris/5.00303"		/**/
-#define ARCHLIB_EXP "/opt/perl/lib/i86pc-solaris/5.00303"		/**/
+#define ARCHLIB "/opt/perl/lib/i86pc-solaris/5.00304"		/**/
+#define ARCHLIB_EXP "/opt/perl/lib/i86pc-solaris/5.00304"		/**/
 
 /* BYTEORDER:
  *	This symbol holds the hexadecimal constant defined in byteorder,
@@ -1392,7 +1395,7 @@
  *	makes sense if you *have* dlsym, which we will presume is the
  *	case if you're using dl_dlopen.xs.
  */
-/*#define 	DLSYM_NEEDS_UNDERSCORE 	/* */
+/*#define 	DLSYM_NEEDS_UNDERSCORE 	/ * */
 
 /* SETUID_SCRIPTS_ARE_SECURE_NOW:
  *	This symbol, if defined, indicates that the bug that prevents
@@ -1412,7 +1415,7 @@
  *	file descriptor of the script to be executed.
  */
 #define SETUID_SCRIPTS_ARE_SECURE_NOW	/**/
-/*#define DOSUID		/**/
+/*#define DOSUID		/ **/
 
 /* Gconvert:
  *	This preprocessor macro is defined to convert a floating point
@@ -1435,7 +1438,7 @@
  *	This symbol, if defined, indicates that sfio should
  *	be used.
  */
-/*#define	USE_SFIO		/**/
+/*#define	USE_SFIO		/ **/
 
 /* Sigjmp_buf:
  *	This is the buffer type to be used with Sigsetjmp and Siglongjmp.
@@ -1475,7 +1478,7 @@
  *	This symbol, if defined, indicates that <rpcsvc/dbm.h> exists and
  *	should be included.
  */
-/*#define I_DBM	/**/
+/*#define I_DBM	/ **/
 #define I_RPCSVC_DBM	/**/
 
 /* I_LOCALE:
@@ -1488,7 +1491,7 @@
  *	This symbol, if defined, indicates to the C program that it should
  *	include <sfio.h>.
  */
-/*#define	I_SFIO		/**/
+/*#define	I_SFIO		/ **/
 
 /* I_SYS_STAT:
  *	This symbol, if defined, indicates to the C program that it should
@@ -1558,8 +1561,8 @@
  *	used in programs that are not prepared to deal with ~ expansion at 
  *	run-time.
  */
-/*#define OLDARCHLIB ""		/**/
-/*#define OLDARCHLIB_EXP ""		/**/
+/*#define OLDARCHLIB ""		/ **/
+/*#define OLDARCHLIB_EXP ""		/ **/
 
 /* PRIVLIB:
  *	This symbol contains the name of the private library for this package.
@@ -1667,7 +1670,7 @@
  *	be used throughout.  If not defined, stdio should be
  *	used in a fully backward compatible manner.
  */
-/*#define	USE_PERLIO		/**/
+/*#define	USE_PERLIO		/ **/
 
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this
