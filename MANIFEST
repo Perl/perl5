@@ -1421,6 +1421,7 @@ lib/I18N/LangTags/t/01_about_verbose.t	See whether I18N::LangTags works
 lib/I18N/LangTags/t/05_main.t	See whether I18N::LangTags works
 lib/I18N/LangTags/t/07_listy.t	See whether I18N::LangTags works
 lib/I18N/LangTags/t/10_http.t	See whether I18N::LangTags works
+lib/I18N/LangTags/t/20_locales.t	See whether I18N::LangTags works
 lib/I18N/LangTags/t/50_super.t	See whether I18N::LangTags works
 lib/I18N/LangTags/t/55_supers_strict.t	See whether I18N::LangTags works
 lib/I18N/LangTags/t/80_all_env.t	See whether I18N::LangTags works
