@@ -2976,6 +2976,17 @@ PP(pp_require)
 	tryname = name;
 	tryrsfp = doopen_pmc(name,PERL_SCRIPT_MODE);
     }
+#ifdef MACOS_TRADITIONAL
+    if (!tryrsfp) {
+	char newname[256];
+
+	MacPerl_CanonDir(name, newname, 1);
+	if (path_is_absolute(newname)) {
+	    tryname = newname;
+	    tryrsfp = doopen_pmc(newname,PERL_SCRIPT_MODE);
+	}
+    }
+#endif
     if (!tryrsfp) {
 	AV *ar = GvAVn(PL_incgv);
 	I32 i;
@@ -3109,8 +3120,11 @@ PP(pp_require)
 		  ) {
 		    char *dir = SvPVx(dirsv, n_a);
 #ifdef MACOS_TRADITIONAL
-		    char buf[256];
-		    Perl_sv_setpvf(aTHX_ namesv, "%s%s", MacPerl_CanonDir(dir, buf), name+(name[0] == ':'));
+		    char buf1[256];
+		    char buf2[256];
+
+		    MacPerl_CanonDir(name, buf2, 1);
+		    Perl_sv_setpvf(aTHX_ namesv, "%s%s", MacPerl_CanonDir(dir, buf1, 0), buf2+(buf2[0] == ':'));
 #else
 #ifdef VMS
 		    char *unixdir;
@@ -3124,14 +3138,6 @@ PP(pp_require)
 #endif
 		    TAINT_PROPER("require");
 		    tryname = SvPVX(namesv);
-#ifdef MACOS_TRADITIONAL
-		    {
-		    	/* Convert slashes in the name part, but not the directory part, to colons */
-		    	char * colon;
-		    	for (colon = tryname+strlen(dir); colon = strchr(colon, '/'); )
-			    *colon++ = ':';
-		    }
-#endif
 		    tryrsfp = doopen_pmc(tryname, PERL_SCRIPT_MODE);
 		    if (tryrsfp) {
 			if (tryname[0] == '.' && tryname[1] == '/')
@@ -3743,7 +3749,7 @@ S_path_is_absolute(pTHX_ char *name)
 {
     if (PERL_FILE_IS_ABSOLUTE(name)
 #ifdef MACOS_TRADITIONAL
-	|| (*name == ':' && name[1] != ':' && strchr(name+2, ':')))
+	|| (*name == ':'))
 #else
 	|| (*name == '.' && (name[1] == '/' ||
 			     (name[1] == '.' && name[2] == '/'))))
