@@ -1,3 +1,15 @@
+Sat Sep  6 01:08:20 IST 2003   Abhijit Menon-Sen <ams@wiw.org>
+
+    Version 2.08
+
+        This release works around a 5.8.0 bug which caused hashes to not
+        be marked as having key flags even though an HEK had HEK_WASUTF8
+        set. (Note that the only reasonable solution is to silently drop
+        the flag from the affected key.)
+
+        Users of RT 3 who were seeing assertion failures should upgrade.
+        (Perl 5.8.1 will have the bug fixed.)
+
 Mon May  5 10:24:16 IST 2003   Abhijit Menon-Sen <ams@wiw.org>
 
     Version 2.07
