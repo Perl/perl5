@@ -3054,9 +3054,10 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	packname = Nullch;
 
         if(SvOK(sv) && (packname = SvPV(sv, packlen))) {
-          HE* he = hv_fetch_ent(PL_stashcache, sv, 0, 0);
+          HE* he;
+	  he = hv_fetch_ent(PL_stashcache, sv, 0, 0);
           if (he) { 
-            stash = (HV*)HeVAL(he);
+            stash = (HV*)SvIV(HeVAL(he));
             goto fetch;
           }
         }
@@ -3082,10 +3083,9 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	    if (!stash)
 		packsv = sv;
             else {
-              SvREFCNT_inc((SV*)stash);
-              if(!hv_store(PL_stashcache, packname, packlen, (SV*)stash, 0))
-                SvREFCNT_dec((SV*)stash);
-            }
+	        SV* ref = newSViv((IV)stash);
+	        hv_store(PL_stashcache, packname, packlen, ref, 0);
+	    }
 	    goto fetch;
 	}
 	/* it _is_ a filehandle name -- replace with a reference */

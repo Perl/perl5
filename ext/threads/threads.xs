@@ -494,6 +494,7 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 #ifdef OLD_PTHREADS_API
 	  pthread_create( &thread->thr, attr, Perl_ithread_run, (void *)thread);
 #else
+	  pthread_attr_setscope( &attr, PTHREAD_SCOPE_SYSTEM );
 	  pthread_create( &thread->thr, &attr, Perl_ithread_run, (void *)thread);
 #endif
 	}
@@ -600,7 +601,7 @@ Perl_ithread_join(pTHX_ SV *obj)
 	/* We have finished with it */
 	thread->state |= PERL_ITHR_JOINED;
 	MUTEX_UNLOCK(&thread->mutex);
-    	sv_unmagic(SvRV(obj),PERL_MAGIC_shared_scalar);
+    	
 	return retparam;
     }
     return (AV*)NULL;

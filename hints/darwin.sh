@@ -1,6 +1,6 @@
 ##
 # Darwin (Mac OS) hints
-# Wilfredo Sanchez <wsanchez@mit.edu>
+# Wilfredo Sanchez <wsanchez@wsanchez.net>
 ##
 
 ##
@@ -19,22 +19,21 @@ case "$prefix" in
     # Default install; use non-system directories
     prefix='/usr/local'; # Built-in perl uses /usr
     siteprefix='/usr/local';
-    vendorprefix='/usr/local'; usevendorprefix='define';
+    vendorprefix='/usr'; usevendorprefix='define';
 
     # Where to put modules.
-    privlib="/Library/Perl/${version}"; # Built-in perl uses /System/Library/Perl
-    sitelib="/Library/Perl/${version}";
-    vendorlib="/Network/Library/Perl/${version}";
+    sitelib="/Library/Perl/${version}"; # FIXME: Want "/Network/Perl/${version}" also
+    vendorlib="/System/Library/Perl/${version}"; # Apple-supplied modules
     ;;
+
   '/usr')
     # We are building/replacing the built-in perl
     siteprefix='/usr/local';
     vendorprefix='/usr/local'; usevendorprefix='define';
 
     # Where to put modules.
-    privlib="/System/Library/Perl/${version}";
-    sitelib="/Library/Perl/${version}";
-    vendorlib="/Network/Library/Perl/${version}";
+    sitelib="/Library/Perl/${version}"; # FIXME: Want "/Network/Perl/${version}" also
+    vendorlib="/System/Library/Perl/${version}"; # Apple-supplied modules
     ;;
 esac
 
@@ -66,7 +65,6 @@ else
   optimize='-O3'
 fi
 
-
 # -pipe: makes compilation go faster.
 # -fno-common because common symbols are not allowed in MH_DYLIB
 ccflags="${ccflags} -pipe -fno-common"
@@ -96,12 +94,12 @@ case "$(grep '^#define INT32_MIN' /usr/include/stdint.h)" in
   *-2147483648) ccflags="${ccflags} -DINT32_MIN_BROKEN -DINT64_MIN_BROKEN" ;;
 esac
 
-# cppflags='-traditional-cpp';
 # Avoid Apple's cpp precompiler, better for extensions
 cppflags="${cppflags} -no-cpp-precomp"
-# and ccflags needs them as well since we don't use cpp directly
-# -- If this is necessary, it's a bug. -wsv
-ccflags="${ccflags} -no-cpp-precomp"
+
+# This is necessary because perl's build system doesn't
+# apply cppflags to cc compile lines as it should.
+ccflags="${ccflags} ${cppflags}"
 
 # Known optimizer problems.
 case "`cc -v 2>&1`" in
@@ -134,18 +132,9 @@ usevfork='true';
 # malloc works
 usemymalloc='n';
 
-##
-# Build process
-##
-
 # Locales aren't feeling well.
 LC_ALL=C; export LC_ALL;
 LANG=C; export LANG;
-
-# Case-insensitive filesystems don't get along with Makefile and
-# makefile in the same place.  Since Darwin uses GNU make, this dodges
-# the problem.
-firstmakefile=GNUmakefile;
 
 #
 # The libraries are not threadsafe as of OS X 10.1.
@@ -169,3 +158,12 @@ EOM
   esac
 
 esac
+
+##
+# Build process
+##
+
+# Case-insensitive filesystems don't get along with Makefile and
+# makefile in the same place.  Since Darwin uses GNU make, this dodges
+# the problem.
+firstmakefile=GNUmakefile;

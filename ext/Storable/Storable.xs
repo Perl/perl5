@@ -2475,6 +2475,7 @@ static int store_code(stcxt_t *cxt, CV *cv)
 static int store_tied(stcxt_t *cxt, SV *sv)
 {
 	MAGIC *mg;
+	SV *obj = NULL;
 	int ret = 0;
 	int svt = SvTYPE(sv);
 	char mtype = 'P';
@@ -2520,7 +2521,9 @@ static int store_tied(stcxt_t *cxt, SV *sv)
 	 * accesses on the retrieved object will indeed call the magic methods...
 	 */
 
-	if ((ret = store(cxt, mg->mg_obj)))		/* Extra () for -Wall, grr... */
+	/* [#17040] mg_obj is NULL for scalar self-ties. AMS 20030416 */
+	obj = mg->mg_obj ? mg->mg_obj : newSV(0);
+	if ((ret = store(cxt, obj)))
 		return ret;
 
 	TRACEME(("ok (tied)"));
@@ -4263,19 +4266,27 @@ static SV *retrieve_tied_hash(stcxt_t *cxt, char *cname)
 static SV *retrieve_tied_scalar(stcxt_t *cxt, char *cname)
 {
 	SV *tv;
-	SV *sv;
+	SV *sv, *obj = NULL;
 
 	TRACEME(("retrieve_tied_scalar (#%d)", cxt->tagnum));
 
 	tv = NEWSV(10002, 0);
 	SEEN(tv, cname);			/* Will return if rv is null */
 	sv = retrieve(cxt, 0);		/* Retrieve <object> */
-	if (!sv)
+	if (!sv) {
 		return (SV *) 0;		/* Failed */
+	}
+	else if (SvTYPE(sv) != SVt_NULL) {
+		obj = sv;
+	}
 
 	sv_upgrade(tv, SVt_PVMG);
-	sv_magic(tv, sv, 'q', Nullch, 0);
-	SvREFCNT_dec(sv);			/* Undo refcnt inc from sv_magic() */
+	sv_magic(tv, obj, 'q', Nullch, 0);
+
+	if (obj) {
+		/* Undo refcnt inc from sv_magic() */
+		SvREFCNT_dec(obj);
+	}
 
 	TRACEME(("ok (retrieve_tied_scalar at 0x%"UVxf")", PTR2UV(tv)));
 

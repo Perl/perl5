@@ -1729,8 +1729,8 @@ Perl_hv_undef(pTHX_ HV *hv)
     hfreeentries(hv);
     Safefree(xhv->xhv_array /* HvARRAY(hv) */);
     if (HvNAME(hv)) {
-        if(PL_stashcache) 
-            hv_delete_ent(PL_stashcache, sv_2mortal(newSVpv(HvNAME(hv),0)), G_DISCARD, 0);
+        if(PL_stashcache)
+	    hv_delete(PL_stashcache, HvNAME(hv), strlen(HvNAME(hv)), G_DISCARD);
 	Safefree(HvNAME(hv));
 	HvNAME(hv) = 0;
     }

@@ -1004,7 +1004,7 @@ makedepend: makedepend.SH config.sh
 	test_tty test-tty _test_tty test_notty test-notty _test_notty \
 	utest ucheck test.utf8 check.utf8 test.torture torturetest \
 	test.third check.third utest.third ucheck.third test_notty.third \
-	test.deparse test_notty.deparse \
+	test.deparse test_notty.deparse test_harness \
 	minitest coretest
 
 # Cannot delegate rebuilding of t/perl to make

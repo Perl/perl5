@@ -397,6 +397,7 @@
 #define PL_sort_RealCmp		(PERL_GET_INTERP->Isort_RealCmp)
 #define PL_splitstr		(PERL_GET_INTERP->Isplitstr)
 #define PL_srand_called		(PERL_GET_INTERP->Isrand_called)
+#define PL_stashcache		(PERL_GET_INTERP->Istashcache)
 #define PL_statusvalue		(PERL_GET_INTERP->Istatusvalue)
 #define PL_statusvalue_vms	(PERL_GET_INTERP->Istatusvalue_vms)
 #define PL_stderrgv		(PERL_GET_INTERP->Istderrgv)

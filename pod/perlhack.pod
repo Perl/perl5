@@ -1719,6 +1719,18 @@ modules hanging around in here that need to be moved out into F<lib/>.
 Testing features of how perl actually runs, including exit codes and
 handling of PERL* environment variables.
 
+=item F<t/uni/>
+
+Tests for the core support of Unicode.
+
+=item F<t/win32/>
+
+Windows-specific tests.
+
+=item F<t/x2p>
+
+A test suite for the s2p converter.
+
 =back
 
 The core uses the same testing style as the rest of Perl, a simple
@@ -1795,7 +1807,7 @@ F<perl3.log.testname>.
 =item test.torture torturetest
 
 Run all the usual tests and some extra tests.  As of Perl 5.8.0 the
-only extra tests are Abigail's JAPHs, t/japh/abigail.t.
+only extra tests are Abigail's JAPHs, F<t/japh/abigail.t>.
 
 You can also run the torture test with F<t/harness> by giving
 C<-torture> argument to F<t/harness>.
@@ -1803,6 +1815,59 @@ C<-torture> argument to F<t/harness>.
 =item utest ucheck test.utf8 check.utf8
 
 Run all the tests with -Mutf8.  Not all tests will succeed.
+
+=item test_harness
+
+Run the test suite with the F<t/harness> controlling program, instead of
+F<t/TEST>. F<t/harness> is more sophisticated, and uses the
+L<Test::Harness> module, thus using this test target supposes that perl
+mostly works. The main advantage for our purposes is that it prints a
+detailed summary of failed tests at the end. Also, unlike F<t/TEST>, it
+doesn't redirect stderr to stdout.
+
+=back
+
+=head2 Running tests by hand
+
+You can run part of the test suite by hand by using one the following
+commands from the F<t/> directory :
+
+    ./perl -I../lib TEST list-of-.t-files
+
+or
+
+    ./perl -I../lib harness list-of-.t-files
+
+(if you don't specify test scripts, the whole test suite will be run.)
+
+You can run an individual test by a command similar to
+
+    ./perl -I../lib patho/to/foo.t
+
+except that the harnesses set up some environment variables that may
+affect the execution of the test :
+
+=over 4 
+
+=item PERL_CORE=1
+
+indicates that we're running this test part of the perl core test suite.
+This is useful for modules that have a dual life on CPAN.
+
+=item PERL_DESTRUCT_LEVEL=2
+
+is set to 2 if it isn't set already (see L</PERL_DESTRUCT_LEVEL>)
+
+=item PERL
+
+(used only by F<t/TEST>) if set, overrides the path to the perl executable
+that should be used to run the tests (the default being F<./perl>).
+
+=item PERL_SKIP_TTY_TEST
+
+if set, tells to skip the tests that need a terminal. It's actually set
+automatically by the Makefile, but can also be forced artificially by
+running 'make test_notty'.
 
 =back
 

@@ -702,8 +702,6 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 	}
     }
     len = namend - name;
-    if (!len)
-	len = 1;
 
     /* No stash in name, so see how we can default */
 
@@ -1255,6 +1253,8 @@ Perl_gp_free(pTHX_ GV *gv)
 
     SvREFCNT_dec(gp->gp_sv);
     SvREFCNT_dec(gp->gp_av);
+    if(gp->gp_hv && HvNAME(gp->gp_hv) && PL_stashcache)
+        hv_delete(PL_stashcache, HvNAME(gp->gp_hv), strlen(HvNAME(gp->gp_hv)), G_DISCARD);
     SvREFCNT_dec(gp->gp_hv);
     SvREFCNT_dec(gp->gp_io);
     SvREFCNT_dec(gp->gp_cv);

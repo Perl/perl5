@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..996\n";
+print "1..997\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3159,4 +3159,11 @@ ok("bbbbac" =~ /$pattern/ && $1 eq 'a', "[perl #3547]");
     ok(join(":", /\b(.)\x{100}/g) eq "a:/", "re_intuit_start and PL_bostr");
 }
 
-# last test 996
+{
+    $_ = "code:   'x' { '...' }\n"; study;
+    my @x; push @x, $& while m/'[^\']*'/gx;
+    ok(join(":", @x) eq "'x':'...'",
+       "[perl #17757] Parse::RecDescent triggers infinite loop");
+}
+
+# last test 997
