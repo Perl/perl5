@@ -308,9 +308,15 @@ void Perl_atfork_unlock(void);
 #ifndef PTHREAD_ATFORK
 #  ifdef HAS_PTHREAD_ATFORK
 #    define PTHREAD_ATFORK(prepare,parent,child)		\
-      pthread_atfork(prepare,parent,child)
+	pthread_atfork(prepare,parent,child)
 #  else
-#    define PTHREAD_ATFORK(prepare,parent,child)
+#    ifdef HAS_FORK
+#      define PTHREAD_ATFORK(prepare,parent,child)		\
+	 Perl_croak(aTHX_ "No pthread_atfork() -- fork() too unsafe");
+#    else
+#      define PTHREAD_ATFORK(prepare,parent,child)		\
+	 NOOP
+#    endif
 #  endif
 #endif
 
