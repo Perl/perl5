@@ -25,7 +25,9 @@ sub wrap
 	my ($ip, $xp, @t) = @_;
 
 	my $r = "";
-	my $t = expand(join(" ",@t));
+
+	my $t = _linearize(@t);
+
 	my $lead = $ip;
 	my $ll = $columns - length(expand($ip)) - 1;
 	my $nll = $columns - length(expand($xp)) - 1;
@@ -60,6 +62,18 @@ sub wrap
 	print "-----------$r---------\n" if $debug;;
 	return $r;
 }
+
+sub _linearize {
+    my @lines = expand(@_);
+
+    # Join the lines together, adding in extra whitespace only where needed
+    # to keep words seperated.
+    my $text = join "", map { /\s+\Z/ ? $_ : $_.' ' } @lines[0..$#lines-1];
+    $text .= $lines[-1];
+
+    return $text;
+}
+
 
 sub fill 
 {
