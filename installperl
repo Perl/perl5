@@ -30,6 +30,14 @@ umask 022;
 
 @pods = (<pod/*.pod>);
 
+%archpms = (Config => 1, FileHandle => 1, overload => 1);
+find(sub {
+	if ("$File::Find::dir/$_" =~ m{^ext/[^/]+/(.*)\.pm$}) {
+	    (my $pm = $1) =~ s{^lib/}{};
+	    $archpms{$pm} = 1;
+	}
+    }, 'ext');
+
 $ver = $];
 $release = substr($ver,0,3);   # Not used presently.
 $patchlevel = substr($ver,3,2);
@@ -349,7 +357,8 @@ sub installlib {
     $name = "$dir/$name" if $dir ne '';
 
     my $installlib = $installprivlib;
-    if ($dir =~ /^auto/ || $name =~ /^(Config|FileHandle|Safe)\.pm$/) {
+    if ($dir =~ /^auto/ ||
+	  ($name =~ /^(.*)\.(?:pm|pod)$/ && $archpms{$1})) {
         $installlib = $installarchlib;
 	return unless $do_installarchlib;
     } else {
