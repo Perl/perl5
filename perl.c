@@ -3327,8 +3327,9 @@ S_init_ids(pTHX)
     PL_tainting |= (PL_uid && (PL_euid != PL_uid || PL_egid != PL_gid));
 }
 
-#ifdef MYMALLOC
-/* This is used very early in the lifetime of the program. */
+/* This is used very early in the lifetime of the program,
+ * before even the options are parsed, so PL_tainting has
+ * not been initialized properly.*/
 int
 Perl_doing_taint(int argc, char *argv[], char *envp[])
 {
@@ -3351,7 +3352,6 @@ Perl_doing_taint(int argc, char *argv[], char *envp[])
 	return 1;
     return 0;
 }
-#endif
 
 STATIC void
 S_forbid_setid(pTHX_ char *s)

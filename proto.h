@@ -26,6 +26,7 @@ PERL_CALLCONV int	perl_destruct(PerlInterpreter* interp);
 PERL_CALLCONV void	perl_free(PerlInterpreter* interp);
 PERL_CALLCONV int	perl_run(PerlInterpreter* interp);
 PERL_CALLCONV int	perl_parse(PerlInterpreter* interp, XSINIT_t xsinit, int argc, char** argv, char** env);
+PERL_CALLCONV int	Perl_doing_taint(int argc, char** argv, char** env);
 #if defined(USE_ITHREADS)
 PERL_CALLCONV PerlInterpreter*	perl_clone(PerlInterpreter* interp, UV flags);
 #  if defined(PERL_IMPLICIT_SYS)
