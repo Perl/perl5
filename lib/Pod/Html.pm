@@ -1336,23 +1336,25 @@ sub process_pre {
     my $any  = "${ltrs}${gunk}${punc}";
 
     $rest =~ s{
-        \b                          # start at word boundary
-        (                           # begin $1  {
-          $urls     :               # need resource and a colon
-	  (?!:)                     # Ignore File::, among others.
-          [$any] +?                 # followed by one or more of any valid
-                                    #   character, but be conservative and
-                                    #   take only what you need to....
-        )                           # end   $1  }
-        (?=                         # look-ahead non-consumptive assertion
-                [$punc]*            # either 0 or more punctuation
-                (?:                 #   followed
-                    [^$any]         #   by a non-url char
-                    |               #   or
-                    $               #   end of the string
-                )                   #
-            |                       # or else
-                $                   #   then end of the string
+	\b			# start at word boundary
+	(			# begin $1  {
+	    $urls :		# need resource and a colon
+	    (?!:)		# Ignore File::, among others.
+	    [$any] +?		# followed by one or more of any valid
+				#   character, but be conservative and
+				#   take only what you need to....
+	)			# end   $1  }
+	(?=
+	    &quot; &gt;		# maybe pre-quoted '<a href="...">'
+	|			# or:
+	    [$punc]*		# 0 or more punctuation
+	    (?:			#   followed
+		[^$any]		#   by a non-url char
+	    |			#   or
+		$		#   end of the string
+	    )			#
+	|			# or else
+	    $			#   then end of the string
         )
       }{<a href="$1">$1</a>}igox;
 
