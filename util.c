@@ -3958,52 +3958,39 @@ Perl_get_vtbl(pTHX_ int vtbl_id)
     return result;
 }
 
-#ifdef PERLIO_IS_STDIO
-# if !defined(FFLUSH_NULL) && defined(HAS__FWALK)
-static int S_fflush(FILE *fp);
-
-static int
-S_fflush(FILE *fp)
-{
-    return fflush(fp); /* fflush() maybe a macro but we need a function */
-}
-# endif
-#endif
-
 I32
 Perl_my_fflush_all(pTHX)
 {
-#ifdef FFLUSH_NULL
+#if defined(FFLUSH_NULL)
     return PerlIO_flush(NULL);
 #else
-# ifdef PERLIO_IS_STDIO
-#  if defined(HAS__FWALK)
+# if defined(HAS__FWALK)
     /* undocumented, unprototyped, but very useful BSDism */
     extern void _fwalk(int (*)(FILE *));
-    _fwalk(&S_fflush);
+    _fwalk(&fflush);
     return 0;
-#    else
+#   else
     long open_max = -1;
-#   if defined(FFLUSH_ALL) && defined(HAS_STDIO_STREAM_ARRAY)
-#    ifdef PERL_FFLUSH_ALL_FOPEN_MAX
+#  if defined(FFLUSH_ALL) && defined(HAS_STDIO_STREAM_ARRAY)
+#   ifdef PERL_FFLUSH_ALL_FOPEN_MAX
     open_max = PERL_FFLUSH_ALL_FOPEN_MAX;
-#    else
-#     if defined(HAS_SYSCONF) && defined(_SC_OPEN_MAX)
+#   else
+#   if defined(HAS_SYSCONF) && defined(_SC_OPEN_MAX)
     open_max = sysconf(_SC_OPEN_MAX);
-#     else
-#      ifdef FOPEN_MAX
+#   else
+#    ifdef FOPEN_MAX
     open_max = FOPEN_MAX;
-#      else
-#       ifdef OPEN_MAX
+#    else
+#     ifdef OPEN_MAX
     open_max = OPEN_MAX;
-#       else
-#        ifdef _NFILE
+#     else
+#      ifdef _NFILE
     open_max = _NFILE;
-#        endif
-#       endif
 #      endif
 #     endif
 #    endif
+#   endif
+#   endif
     if (open_max > 0) {
       long i;
       for (i = 0; i < open_max; i++)
@@ -4013,10 +4000,9 @@ Perl_my_fflush_all(pTHX)
 		PerlIO_flush(&STDIO_STREAM_ARRAY[i]);
       return 0;
     }
-#   endif
+#  endif
     SETERRNO(EBADF,RMS$_IFI);
     return EOF;
-#  endif
 # endif
 #endif
 }
