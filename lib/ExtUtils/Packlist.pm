@@ -89,7 +89,12 @@ my ($line);
 while (defined($line = <$fh>))
    {
    chomp $line;
-   my ($key, @kvs) = split(' ', $line);
+   my ($key, @kvs) = $line;
+   if ($key =~ /^(.*?)( \w+=.*)$/)
+      {
+      $key = $1;
+      @kvs = split(' ', $2);
+      }
    $key =~ s!/\./!/!g;   # Some .packlists have spurious '/./' bits in the paths
    if (! @kvs)
       {
