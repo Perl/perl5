@@ -31,6 +31,293 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 14549] By: jhi                                   on 2002/02/04  13:57:42
+        Log: Comment microtweaks.
+     Branch: perl
+	   ! lib/locale.t
+____________________________________________________________________________
+[ 14548] By: jhi                                   on 2002/02/04  13:32:00
+        Log: Subject: trivial docu patch
+             From: andreas.koenig@anima.de (Andreas J. Koenig)
+             Date: 04 Feb 2002 08:15:19 +0100
+             Message-ID: <m3pu3l7m60.fsf@anima.de>
+     Branch: perl
+	   ! pod/perluniintro.pod
+____________________________________________________________________________
+[ 14547] By: jhi                                   on 2002/02/04  13:30:55
+        Log: Subject: [PATCH] (??{ }) anomaly
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)
+             Date: Sun, 03 Feb 2002 20:21:45 -0800
+             Message-ID: <ZxgX8gzkgCXO092yn@efn.org> 
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 14546] By: jhi                                   on 2002/02/04  04:41:02
+        Log: Integrate perlio.
+             
+             Carry on where we left off if we have to grow destination
+             SV during XS encode/decode
+             
+             Remove debugging warning, be consistent about API fails.
+     Branch: perl
+	  !> ext/Encode/Encode.xs
+____________________________________________________________________________
+[ 14543] By: jhi                                   on 2002/02/03  19:06:06
+        Log: Subject: PATCH CPAN.pm
+             From: Mark-Jason Dominus <mjd@plover.com>
+             Date: Sun, 03 Feb 2002 12:36:36 -0500
+             Message-ID: <20020203173636.27451.qmail@plover.com>
+     Branch: perl
+	   ! lib/CPAN.pm
+____________________________________________________________________________
+[ 14542] By: jhi                                   on 2002/02/03  19:05:13
+        Log: Must search further back.
+     Branch: perl
+	   ! lib/h2xs.t
+____________________________________________________________________________
+[ 14540] By: jhi                                   on 2002/02/03  18:33:53
+        Log: EBCDIC: more natification.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 14539] By: jhi                                   on 2002/02/03  18:32:31
+        Log: Debug noise.
+     Branch: perl
+	   ! ext/Encode/Encode.xs
+____________________________________________________________________________
+[ 14538] By: jhi                                   on 2002/02/03  18:13:07
+        Log: Integrate perlio;
+             
+             Stable intermediate point in Encode cleanup.
+             :encode(euc-jp) works on Dan's table.euc
+             Much buffer copying and other silliness remains.
+     Branch: perl
+	  !> ext/Encode/Encode.pm ext/Encode/Encode.xs
+	  !> ext/Encode/lib/Encode/Encoding.pm
+____________________________________________________________________________
+[ 14537] By: jhi                                   on 2002/02/03  17:57:31
+        Log: Prettify.
+     Branch: perl
+	   ! lib/unicore/mktables
+____________________________________________________________________________
+[ 14535] By: jhi                                   on 2002/02/03  17:29:57
+        Log: EBCDIC: it's much nicer to compare Unicode code points
+             to Unicode code points.
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 14534] By: jhi                                   on 2002/02/03  17:04:34
+        Log: EBCDIC: character classes must remap the low 256.
+     Branch: perl
+	   ! regcomp.c
+____________________________________________________________________________
+[ 14533] By: jhi                                   on 2002/02/03  16:05:12
+        Log: Upgrade to I18N::LangTags::List 0.27, from Sean Burke.
+     Branch: perl
+	   ! lib/I18N/LangTags/List.pm
+____________________________________________________________________________
+[ 14532] By: jhi                                   on 2002/02/03  15:36:36
+        Log: FAQ sync.
+     Branch: perl
+	   ! pod/perlfaq.pod pod/perlfaq1.pod pod/perlfaq4.pod
+	   ! pod/perlfaq6.pod pod/perlfaq7.pod
+____________________________________________________________________________
+[ 14531] By: jhi                                   on 2002/02/03  15:35:28
+        Log: Integrate perlio;
+             
+             Re-indent Encode.xs
+             
+             Fix SvGROW on an SV with SvLEN == 0 - copy in any existing data.
+             (Mis-feature discovered by Encode.)
+     Branch: perl
+	  !> ext/Encode/Encode.pm ext/Encode/Encode.xs sv.c
+____________________________________________________________________________
+[ 14530] By: jhi                                   on 2002/02/03  15:30:24
+        Log: Subject: [PATCH] lstat FH and -l FH warnings
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Sat, 2 Feb 2002 22:24:54 +0100           
+             Message-ID: <20020202222454.A11608@rafael>       
+     Branch: perl
+	   ! doio.c lib/File/Copy.pm pod/perldiag.pod pp_sys.c
+	   ! t/lib/warnings/doio t/lib/warnings/pp_sys t/op/stat.t
+____________________________________________________________________________
+[ 14529] By: jhi                                   on 2002/02/03  15:27:26
+        Log: Subject: [PATCH t/op/taint.t] remove possible false positive
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Sat, 2 Feb 2002 13:11:01 +0100           
+             Message-ID: <20020202131101.A722@rafael>               
+             
+             Subject: [PATCH t/op/ver.t] another false positive
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Sat, 2 Feb 2002 13:38:22 +0100           
+             Message-ID: <20020202133822.E722@rafael>         
+             
+             Subject: [PATCH] t/test.pl:ok() doesn't work
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)  
+             Date: Sun, 03 Feb 2002 00:02:38 -0800          
+             Message-ID: <e6OX8gzkgSMO092yn@efn.org>          
+     Branch: perl
+	   ! lib/Net/t/netrc.t t/op/stat.t t/op/taint.t t/op/ver.t
+	   ! t/test.pl
+____________________________________________________________________________
+[ 14528] By: jhi                                   on 2002/02/03  15:26:33
+        Log: Subject: [PATCH @13746] OS2::Process's constants
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sat, 2 Feb 2002 01:00:55 -0500           
+             Message-ID: <20020202010055.A12924@math.ohio-state.edu>
+     Branch: perl
+	   ! os2/OS2/Process/Makefile.PL
+____________________________________________________________________________
+[ 14527] By: jhi                                   on 2002/02/03  15:16:46
+        Log: Subject: [PATCH @13746] h2xs   
+             From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+             Date: Sat, 2 Feb 2002 00:58:44 -0500           
+             Message-ID: <20020202005844.A12756@math.ohio-state.edu>
+     Branch: perl
+	   ! utils/h2xs.PL
+____________________________________________________________________________
+[ 14525] By: jhi                                   on 2002/02/02  16:44:58
+        Log: EBCDIC: since #14519 made \N{...} to remap,
+             the test cannot expect an ASCII code point.
+     Branch: perl
+	   ! lib/charnames.t
+____________________________________________________________________________
+[ 14524] By: jhi                                   on 2002/02/02  05:03:24
+        Log: Sub-MANIFEST-tweak.
+     Branch: perl
+	   ! ext/Encode/MANIFEST
+____________________________________________________________________________
+[ 14523] By: jhi                                   on 2002/02/02  02:54:44
+        Log: Subject: [Patch] Encode::Tcl::Escape, more ISO2022 like
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Fri, 01 Feb 2002 23:51:03 +0900
+             Message-Id: <20020201234727.15ED.BQW10602@nifty.com>
+     Branch: perl
+	   ! ext/Encode/lib/Encode/Tcl/Escape.pm
+____________________________________________________________________________
+[ 14522] By: jhi                                   on 2002/02/02  02:53:29
+        Log: Subject: [PATCH] (Was Re: [ID 20020129.003] Trouble building perl 5.6.1)
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Fri, 1 Feb 2002 13:06:05 -0500 (EST)
+             Message-ID: <Pine.SOL.4.10.10202011243130.24740-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! README.solaris hints/solaris_2.sh
+____________________________________________________________________________
+[ 14521] By: jhi                                   on 2002/02/02  02:08:42
+        Log: EBCDIC: no hope to get the low 256 right in unifolding.
+     Branch: perl
+	   ! t/uni/fold.t
+____________________________________________________________________________
+[ 14520] By: jhi                                   on 2002/02/02  02:02:13
+        Log: todo entry for missing pack formats.
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 14519] By: jhi                                   on 2002/02/02  01:31:50
+        Log: EBCDIC: the low 256 \N{...} need to be remapped.
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[ 14516] By: jhi                                   on 2002/02/01  16:46:16
+        Log: Integrate perlio; 
+             
+             Minor Encode tweaks:
+             - move Encode.pm back to top of Encode like normal XS extension
+             - avoid .def as a file extension (Win32 builds)
+     Branch: perl
+	   ! MANIFEST
+	  !> ext/Encode/EUC_JP/Makefile.PL ext/Encode/Encode.xs
+	  !> ext/Encode/Makefile.PL ext/Encode/compile
+____________________________________________________________________________
+[ 14514] By: jhi                                   on 2002/02/01  14:45:26
+        Log: Subject: [PATCH utf8.t] temp file not cleaned up
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Fri, 1 Feb 2002 15:47:46 +0100
+             Message-ID: <20020201154746.A24079@rafael>
+     Branch: perl
+	   ! t/io/utf8.t
+____________________________________________________________________________
+[ 14513] By: jhi                                   on 2002/02/01  14:44:39
+        Log: Subject: [PATCH] make "lstat FH" croak
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Fri, 1 Feb 2002 15:12:50 +0100
+             Message-ID: <20020201151250.A738@rafael>
+     Branch: perl
+	   ! pod/perldiag.pod pp_sys.c t/op/stat.t
+____________________________________________________________________________
+[ 14512] By: jhi                                   on 2002/02/01  14:42:58
+        Log: Subject: [PATCH t/op/stat.t] Mentioning Darwins UFS ctime failure
+             From: Kay Röpke <kroepke@dolphin-services.de>
+             Date: Fri, 1 Feb 2002 01:10:43 +0100
+             Message-Id: <2255B944-16A8-11D6-814B-000393414688@dolphin-services.de>
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[ 14511] By: jhi                                   on 2002/02/01  05:17:59
+        Log: The Malformed UTF-8 Heisenbug seen by Merijn and NickC
+             I got it in Tru64 + ithreads but only without -g, took
+             some debugging by printf (which was no fun either since
+             adding some debug printfs hid the error)
+     Branch: perl
+	   ! regexec.c utf8.c
+____________________________________________________________________________
+[ 14510] By: jhi                                   on 2002/01/31  22:48:13
+        Log: Subject: Re: [PATCH] perl -V:
+             From: sthoenna@efn.org (Yitzchak Scott-Thoennes)            
+             Date: Thu, 31 Jan 2002 12:10:20 -0800
+             Message-ID: <sSaW8gzkgaNQ092yn@efn.org>
+             
+             Subject: Re: [PATCH] perl -V:
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Thu, 31 Jan 2002 16:43:13 -0500
+             Message-ID: <20020131214313.GH6498@blackrider>
+     Branch: perl
+	   ! t/run/switches.t
+____________________________________________________________________________
+[ 14509] By: jhi                                   on 2002/01/31  21:30:46
+        Log: #14505 effect.
+     Branch: perl
+	   ! pod/perluniintro.pod
+____________________________________________________________________________
+[ 14508] By: jhi                                   on 2002/01/31  16:57:18
+        Log: Daniel S. Lewart adopts the Math::Complex.
+     Branch: perl
+	   ! lib/Math/Complex.pm
+____________________________________________________________________________
+[ 14507] By: jhi                                   on 2002/01/31  16:54:44
+        Log: More Complex DWIMmery.
+     Branch: perl
+	   ! lib/Math/Complex.pm lib/Math/Complex.t
+____________________________________________________________________________
+[ 14506] By: jhi                                   on 2002/01/31  15:27:49
+        Log: Subject: [PATCH 20020124.004] forbid -l _ after -T _
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Thu, 31 Jan 2002 14:37:52 +0100
+             Message-ID: <20020131143752.A1452@rafael>
+     Branch: perl
+	   ! pod/perlfunc.pod pp_sys.c t/lib/warnings/pp_sys t/op/stat.t
+____________________________________________________________________________
+[ 14505] By: jhi                                   on 2002/01/31  15:26:41
+        Log: Turn the I/O Unicode error by default on, but the
+             character-generating Unicode error by default off,
+             as Larry suggested.
+     Branch: perl
+	   ! doio.c pod/perldiag.pod pp.c t/io/utf8.t t/lib/warnings/utf8
+	   ! utf8.c
+____________________________________________________________________________
+[ 14504] By: jhi                                   on 2002/01/31  14:08:44
+        Log: Subject: [PATCH] open.pm minor cleanup
+             From: Rafael Garcia-Suarez <rgarciasuarez@free.fr>
+             Date: Thu, 31 Jan 2002 15:03:02 +0100
+             Message-ID: <20020131150302.C1452@rafael>
+     Branch: perl
+	   ! lib/open.pm
+____________________________________________________________________________
+[ 14503] By: jhi                                   on 2002/01/30  15:28:29
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 14502] By: jhi                                   on 2002/01/30  14:32:25
         Log: Subject: [PATCH re bug 200713.003] Re: Perlbug - reminder of bug(20010713.003) status
              From: Robin Barker <rmb1@cise.npl.co.uk>
