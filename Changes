@@ -34,6 +34,12 @@ Version v5.6.1
 --------------
 
 ____________________________________________________________________________
+[  9651] By: gsar                                  on 2001/04/09  03:11:19
+        Log: update Changes, patchlevel.h &c.
+     Branch: maint-5.6/perl
+	   ! Changes patchlevel.h pod/perldelta.pod pod/perlhist.pod
+	   ! pod/perltoc.pod
+____________________________________________________________________________
 [  9649] By: gsar                                  on 2001/04/09  02:35:43
         Log: tweak perldelta as suggested by Jarkko
      Branch: maint-5.6/perl
