@@ -4,7 +4,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan tests => 20;
+plan tests => 23;
 
 use_ok('Config');
 
@@ -16,8 +16,6 @@ ok(each %Config);
 
 is($Config{PERL_REVISION}, 5, "PERL_REVISION is 5");
 
-like($Config{ivsize},     qr/^(4|8)$/, "ivsize is 4 or 8");
-
 ok( exists $Config{cc},      "has cc");
 
 ok( exists $Config{ccflags}, "has ccflags");
@@ -28,11 +26,13 @@ ok( exists $Config{d_fork},  "has d_fork");
 
 ok(!exists $Config{d_bork},  "has no d_bork");
 
+like($Config{ivsize},     qr/^(4|8)$/, "ivsize is 4 or 8 (it is $Config{ivsize})");
+
 # byteorder is virtual, but it has rules. 
 
-like($Config{byteorder}, qr/^(1234|4321|12345678|87654321)$/, "byteorder is 1234 or 4321 or 12345678 or 87654321");
+like($Config{byteorder}, qr/^(1234|4321|12345678|87654321)$/, "byteorder is 1234 or 4321 or 12345678 or 87654321 (it is $Config{byteorder})");
 
-is(length $Config{byteorder}, $Config{ivsize}, "byteorder is as long as ivsize");
+is(length $Config{byteorder}, $Config{ivsize}, "byteorder is as long as ivsize (which is $Config{ivsize})");
 
 # ccflags_nolargefiles is virtual, too.
 
@@ -61,14 +61,23 @@ like($out2, qr/^d_bork='UNKNOWN';/, "config_vars d_bork is UNKNOWN");
 
 # Read-only.
 
+undef $@;
 eval { $Config{d_bork} = 'borkbork' };
 like($@, qr/Config is read-only/, "no STORE");
 
+ok(!exists $Config{d_bork}, "still no d_bork");
+
+undef $@;
 eval { delete $Config{d_fork} };
 like($@, qr/Config is read-only/, "no DELETE");
 
+ok( exists $Config{d_fork}, "still d_fork");
+
+undef $@;
 eval { %Config = () };
 like($@, qr/Config is read-only/, "no CLEAR");
+
+ok( exists $Config{d_fork}, "still d_fork");
 
 package FakeOut;
 
@@ -80,14 +89,8 @@ sub clear {
         ${ $_[0] } = '';
 }
 
-# remove the bell character
-sub scrub {
-        ${ $_[0] } =~ tr/\a//d;
-}
-
-# must shift off self
 sub PRINT {
         my $self = shift;
-        ($$self .= join('', @_)) =~ s/\s+/./gm;
+        $$self .= join('', @_);
 }
 
