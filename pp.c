@@ -168,6 +168,12 @@ PP(pp_rv2gv)
 		    }
 		    if (SvTYPE(sv) < SVt_RV)
 			sv_upgrade(sv, SVt_RV);
+		    if (SvPVX(sv)) {
+			(void)SvOOK_off(sv);		/* backoff */
+			if (SvLEN(sv))
+			    Safefree(SvPVX(sv));
+			SvLEN(sv)=SvCUR(sv)=0;
+		    }
 		    SvRV(sv) = (SV*)gv;
 		    SvROK_on(sv);
 		    SvSETMAGIC(sv);
