@@ -1,3 +1,8 @@
+#
+# NOTE! This module is deprecated (obsolete) after the Perl release
+# 5.003_06 as the functionality has been integrated into the Perl core.
+#
+
 package I18N::Collate;
 
 =head1 NAME
@@ -87,7 +92,7 @@ ISO Latin (8859) 1 (-1) which is the Western European character set.
 #		   variant of French (fr), ISO Latin (8859) 1 (-1)
 #		   which is the Western European character set.
 #
-# Updated:	19960104 1946 GMT
+# Updated:	19961005
 #
 # ---
 
@@ -104,7 +109,37 @@ fallback	1
 cmp		collate_cmp
 );
 
-sub new { my $new = $_[1]; bless \$new }
+sub new {
+  my $new = $_[1];
+
+  if ($^W && $] >= 5.003_06) {
+    unless ($please_use_I18N_Collate_even_if_deprecated) {
+      warn <<___EOD___;
+***
+
+  WARNING: starting from the Perl version 5.003_06 the I18N::Collate
+  interface for comparing 8-bit scalar data according to the current locale
+
+	HAS BEEN DEPRECATED
+
+  (that is, please do not use it anymore for any new applications and please
+  migrate the old applications away from it) because its functionality
+  was integrated into the Perl core language in the release 5.003_06.
+
+  All scalar data is now collated according to the current locale setting.
+  Also, Perl does automatically the setlocale(LC_COLLATE, "") for you.
+
+  To convert: forget I18N::Collate completely and use scalar data in
+  a completely normal way.
+
+***
+___EOD___
+      $please_use_I18N_Collate_even_if_deprecated++;
+    }
+  }
+
+  bless \$new;
+}
 
 sub setlocale {
  my ($category, $locale) = @_[0,1];
