@@ -218,7 +218,8 @@ Perl_sharedsv_thrcnt_dec(pTHX_ shared_sv* ssv)
 
             while (items-- > 0) {
             if(SvTYPE(*src_ary))
-                Perl_sharedsv_thrcnt_dec(aTHX_ INT2PTR(shared_sv *, SvIV(*src_ary++)));
+                Perl_sharedsv_thrcnt_dec(aTHX_ INT2PTR(shared_sv *, SvIV(*src_ary)));
+                src_ary++;
             }
             break;
         }
