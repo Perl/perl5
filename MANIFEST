@@ -1554,7 +1554,6 @@ t/op/subst_wamp.t	See if substitution works with $& present
 t/op/substr.t		See if substr works
 t/op/sysio.t		See if sysread and syswrite work
 t/op/taint.t		See if tainting works
-t/op/tell.t		See if tell works
 t/op/tie.t		See if tie/untie functions work
 t/op/tiearray.t		See if tie for arrays works
 t/op/tiehandle.t	See if tie for handles works
