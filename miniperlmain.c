@@ -51,6 +51,8 @@ char **env;
     perl_destruct( my_perl );
     perl_free( my_perl );
 
+    PERL_SYS_TERM();
+
     exit( exitstatus );
 }
 
@@ -61,4 +63,5 @@ char **env;
 static void
 xs_init()
 {
+  dXSUB_SYS;
 }
