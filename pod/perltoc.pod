@@ -4851,6 +4851,8 @@ Getarg, Fileno, Dup, Read, Write, Seek, Tell, Close, Flush, Fill, Eof,
 Error,	Clearerr, Setlinebuf, Get_base, Get_bufsiz, Get_ptr, Get_cnt,
 Set_ptrcnt
 
+=item Utilities
+
 =item Implementing PerlIO Layers
 
 C implementations, Perl implementations
@@ -5522,6 +5524,15 @@ B<-V>
 
 =item Updated Modules And Pragmata
 
+base, B::Bytecode, B::Concise, B::Deparse, Benchmark, ByteLoader, bytes,
+CGI, charnames, CPAN, Data::Dumper, DB_File, Devel::PPPort, Digest::MD5,
+Encode, fields, libnet, Math::BigInt, MIME::Base64, NEXT, Net::Ping,
+PerlIO::scalar, podlators, Pod::LaTeX, PodParsers, Pod::Perldoc,
+Scalar::Util, Storable, strict, Term::ANSIcolor, Test::Harness, Test::More,
+Test::Simple, Text::Balanced, Time::HiRes, threads, threads::shared,
+Unicode::Collate, Unicode::Normalize, Win32::GetFolderPath,
+Win32::GetOSVersion
+
 =back
 
 =item Utility Changes
@@ -5543,10 +5554,6 @@ B<-V>
 =item Closures, eval and lexicals
 
 =item Generic fixes
-
-=item Module and pragma specific fixes
-
-Encode, PerlIO::scalar, strict
 
 =item Platform-specific fixes
 
@@ -5580,8 +5587,7 @@ Encode, PerlIO::scalar, strict
 
 =item New "To%s: illegal mapping '%s'"
 
-=item New "Use of freed value in iteration (perhaps you modified the
-iterated array within the loop?)"
+=item New "Use of freed value in iteration"
 
 =back
 
@@ -5593,9 +5599,9 @@ iterated array within the loop?)"
 
 =over 4
 
-=item tied hashes in scalar context
+=item Tied hashes in scalar context
 
-=item lib/Net/Ping/t/510_ping_udp.t subtest 2
+=item Net::Ping 450_service and 510_ping_udp failures
 
 =item B::C
 
@@ -5607,11 +5613,9 @@ iterated array within the loop?)"
 
 =item EBCDIC Platforms
 
-=item Cygwin 1.5 sysio.t
+=item Cygwin 1.5 problems
 
-=item FreeBSD: malloc dilemma
-
-=item HP-UX: HP cc warnings about sendfile
+=item HP-UX: HP cc warnings about sendfile and sendpath
 
 =item IRIX: t/uni/tr_7jis.t falsely failing
 
@@ -7599,6 +7603,34 @@ R4 x86, R4 PPC
 
 =back
 
+=over 4
+
+=item Name
+
+=item Description
+
+=item Build
+
+=over 4
+
+=item Tools & SDK
+
+Microsoft Embedded Visual Tools, Microsoft Visual C++, Rainer Keuchel's
+celib-sources, Rainer Keuchel's console-sources
+
+=item Make
+
+go to ./wince subdirectory, edit file compile.bat, run	  compile.bat, run 
+  compile.bat dist
+
+=back
+
+=item Acknowledgements
+
+=item AUTHORS
+
+=back
+
 =head2 perlcygwin, README.cygwin - Perl for Cygwin
 
 =over 4
@@ -7704,6 +7736,50 @@ Source, Compiled Module Source, Perl Modules/Scripts
 =item Testing Perl on DG/UX
 
 =item Installing the built perl on DG/UX
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 perldos - Perl under DOS, W31, W95.
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Prerequisites for Compiling Perl on DOS
+
+DJGPP, Pthreads
+
+=item Shortcomings of Perl under DOS
+
+=item Building Perl on DOS
+
+=item Testing Perl on DOS
+
+=item Installation of Perl on DOS
+
+=back
+
+=item BUILDING AND INSTALLING MODULES ON DOS
+
+=over 4
+
+=item Building Prerequisites for Perl on DOS
+
+=item Unpacking CPAN Modules on DOS
+
+=item Building Non-XS Modules on DOS
+
+=item Building XS Modules on DOS
 
 =back
 
@@ -8719,6 +8795,53 @@ LIST, waitpid PID,FLAGS
 
 =back
 
+=head2 perlwin32 - Perl under Windows
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Setting Up Perl on Win32
+
+Make, Command Shell, Borland C++, Microsoft Visual C++, Microsoft Platform
+SDK 64-bit Compiler, MinGW32 with gcc, MinGW release 1
+
+=item Building
+
+=item Testing Perl on Win32
+
+=item Installation of Perl on Win32
+
+=item Usage Hints for Perl on Win32
+
+Environment Variables, File Globbing, Using perl from the command line,
+Building Extensions, Command-line Wildcard Expansion, Win32 Specific
+Extensions, Notes on 64-bit Windows
+
+=item Running Perl Scripts
+
+Miscellaneous Things
+
+=back
+
+=item BUGS AND CAVEATS
+
+=item AUTHORS
+
+Gary Ng E<lt>71564.1743@CompuServe.COME<gt>, Gurusamy Sarathy
+E<lt>gsar@activestate.comE<gt>, Nick Ing-Simmons
+E<lt>nick@ing-simmons.netE<gt>
+
+=item SEE ALSO
+
+=item HISTORY
+
+=back
+
 =head1 PRAGMA DOCUMENTATION
 
 =head2 attrs - set/get attributes of a subroutine (deprecated)
@@ -9180,12 +9303,6 @@ literals in regex that are longer than 127 bytes, EBCDIC, format
 =item DESCRIPTION
 
 new, phash
-
-=over 4
-
-=item NOTES
-
-=back
 
 =item SEE ALSO
 
@@ -13823,18 +13940,6 @@ B<PERL_MM_MANIFEST_DEBUG>
 
 =back
 
-=head2 ExtUtils::Miniperl, writemain - write the C code for perlmain.c
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item SEE ALSO
-
-=back
-
 =head2 ExtUtils::Mkbootstrap - make a bootstrap file for use by DynaLoader
 
 =over 4
@@ -14733,8 +14838,6 @@ VersionMessage, C<-message>, C<-msg>, C<-exitval>, C<-output>, HelpMessage
 =item Trouble Shooting
 
 =over 4
-
-=item Warning: Ignoring '!' modifier for short option
 
 =item GetOptions does not return a false result when an option is not
 supplied

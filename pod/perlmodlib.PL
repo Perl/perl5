@@ -415,6 +415,8 @@ You should try to choose one close to you.
 
 =item Austria
 
+                      http://cpan.inode.at/
+                      ftp://cpan.inode.at
                       ftp://ftp.tuwien.ac.at/pub/CPAN/
 
 =item Belgium
@@ -571,7 +573,7 @@ You should try to choose one close to you.
 
 =item Poland
 
-                      ftp.mega.net.pl/CPAN
+                      ftp://ftp.mega.net.pl/CPAN
                       ftp://ftp.man.torun.pl/pub/doc/CPAN/
                       ftp://sunsite.icm.edu.pl/pub/CPAN/
 
@@ -625,7 +627,7 @@ You should try to choose one close to you.
 
                       http://cpan.imasd.elmundo.es/
                       ftp://ftp.rediris.es/mirror/CPAN/
-                      ftp://ftp.ri.telefonica-data.net/
+                      ftp://ftp.ri.telefonica-data.net/CPAN
                       ftp://ftp.etse.urv.es/pub/perl/
 
 =item Sweden
@@ -791,6 +793,8 @@ You should try to choose one close to you.
 =item Michigan
 
                       ftp://cpan.cse.msu.edu/
+                      http://cpan.calvin.edu/pub/CPAN
+                      ftp://cpan.calvin.edu/pub/CPAN
 
 =item Nevada
 

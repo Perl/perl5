@@ -125,6 +125,8 @@ The && problem.
 sub xs_o {
     my($self) = shift;
     return '' unless $self->needs_linking();
+    # Having to choose between .xs -> .c -> .o and .xs -> .o confuses dmake.
+    return '' if $DMAKE;
     '
 .xs$(OBJ_EXT):
 	$(PERLRUN) $(XSUBPP) $(XSPROTOARG) $(XSUBPPARGS) $*.xs > $*.c
