@@ -295,7 +295,7 @@ sub Tpad { ## public
     my($string, $cnt, $FH) = @_;
     my($decr, $ms);
 
-    if ($string =~ /(^[\d.]+)(\*?)(.*)$/) {
+    if (defined $string && $string =~ /(^[\d.]+)(\*?)(.*)$/) {
 	$ms = $1;
 	$ms *= $cnt if $2;
 	$string = $3;
