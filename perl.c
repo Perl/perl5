@@ -3637,6 +3637,7 @@ S_init_main_thread(pTHX)
     thr->tid = 0;
     thr->next = thr;
     thr->prev = thr;
+    thr->thr_done = 0;
     MUTEX_UNLOCK(&PL_threads_mutex);
 
 #ifdef HAVE_THREAD_INTERN

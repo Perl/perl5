@@ -189,6 +189,7 @@ threadstart(void *arg)
     SvREFCNT_dec(PL_lastscream);
     SvREFCNT_dec(PL_defoutgv);
     Safefree(PL_reg_poscache);
+    thr->thr_done = 1;
 
     MUTEX_LOCK(&thr->mutex);
     DEBUG_S(PerlIO_printf(Perl_debug_log,
@@ -445,6 +446,14 @@ flags(t)
     PPCODE:
 #ifdef USE_THREADS
 	PUSHs(sv_2mortal(newSViv(t->flags)));
+#endif
+
+void
+done(t)
+	Thread	t
+    PPCODE:
+#ifdef USE_THREADS
+     PUSHs(t->thr_done ? &PL_sv_yes : &PL_sv_no);
 #endif
 
 void

@@ -236,5 +236,5 @@ PERLVAR(i,		struct thread_intern)
 #endif
 
 PERLVAR(trailing_nul,	char)		/* For the sake of thrsv and oursv */
-
+PERLVAR(thr_done,	bool)		/* True when the thread has finished */
 #endif /* USE_THREADS */

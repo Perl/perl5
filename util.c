@@ -3605,6 +3605,7 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     thr->specific = newAV();
     thr->errsv = newSVpvn("", 0);
     thr->flags = THRf_R_JOINABLE;
+    thr->thr_done = 0;
     MUTEX_INIT(&thr->mutex);
 
     JMPENV_BOOTSTRAP;

@@ -21,6 +21,11 @@ Thread - manipulate threads in Perl (EXPERIMENTAL, subject to change)
     $result = $t->join;
     $result = $t->eval;
     $t->detach;
+    $flags = $t->flags;
+    
+    if ($t->done) {
+        $t->join;
+    }
 
     if($t->equal($another_thread)) {
     	# ...
@@ -28,6 +33,7 @@ Thread - manipulate threads in Perl (EXPERIMENTAL, subject to change)
 
     my $tid = Thread->self->tid; 
     my $tlist = Thread->list;
+
 
     lock($scalar);
     yield();
@@ -180,6 +186,17 @@ The C<tid> method returns the tid of a thread. The tid is a monotonically
 increasing integer assigned when a thread is created. The main thread of a
 program will have a tid of zero, while subsequent threads will have tids
 assigned starting with one.
+
+=item flags
+
+The C<flags> method returns the flags for the thread. This is the
+integer value corresponding to the internal flags for the thread, and
+the value man not be all that meaningful to you.
+
+=item done
+
+The C<done> method returns true if the thread you're checking has
+finished, and false otherwise.
 
 =back
 
