@@ -5,6 +5,7 @@
 /* maxo shouldn't differ from MAXO but leave room anyway (see BOOT:)	*/
 #define OP_MASK_BUF_SIZE (MAXO + 100)
 
+/* XXX op_named_bits and opset_all are never freed */
 static HV *op_named_bits;	/* cache shared for whole process	*/
 static SV *opset_all;		/* mask with all bits set		*/
 static IV  opset_len;		/* length of opmasks in bytes		*/
@@ -21,6 +22,8 @@ static SV  *get_op_bitspec _((char *opname, STRLEN len, int fatal));
  * It is first loaded with the name and number of each perl operator.
  * Then the builtin tags :none and :all are added.
  * Opcode.pm loads the standard optags from __DATA__
+ * XXX leak-alert: data allocated here is never freed, call this
+ *     at most once
  */
 
 static void
@@ -244,7 +247,7 @@ _safe_call_sv(package, mask, codesv)
     char *	package
     SV *	mask
     SV *	codesv
-    PPCODE:
+PPCODE:
     char op_mask_buf[OP_MASK_BUF_SIZE];
     GV *gv;
 
@@ -281,11 +284,11 @@ verify_opset(opset, fatal = 0)
 void
 invert_opset(opset)
     SV *opset
-    CODE:
+CODE:
     {
     char *bitmap;
     STRLEN len = opset_len;
-    opset = new_opset(opset);	/* verify and clone opset */
+    opset = sv_2mortal(new_opset(opset));	/* verify and clone opset */
     bitmap = SvPVX(opset);
     while(len-- > 0)
 	bitmap[len] = ~bitmap[len];
@@ -300,7 +303,7 @@ void
 opset_to_ops(opset, desc = 0)
     SV *opset
     int	desc
-    PPCODE:
+PPCODE:
     {
     STRLEN len;
     int i, j, myopcode;
@@ -319,12 +322,12 @@ opset_to_ops(opset, desc = 0)
 
 void
 opset(...)
-    CODE:
+CODE:
     int i, j;
     SV *bitspec, *opset;
     char *bitmap;
     STRLEN len, on;
-    opset = new_opset(Nullsv);
+    opset = sv_2mortal(new_opset(Nullsv));
     bitmap = SvPVX(opset);
     for (i = 0; i < items; i++) {
 	char *opname;
@@ -349,11 +352,11 @@ opset(...)
 void
 permit_only(safe, ...)
     SV *safe
-    ALIAS:
+ALIAS:
 	permit    = 1
 	deny_only = 2
 	deny      = 3
-    CODE:
+CODE:
     int i, on;
     SV *bitspec, *mask;
     char *bitmap, *opname;
@@ -363,8 +366,9 @@ permit_only(safe, ...)
 	croak("Not a Safe object");
     mask = *hv_fetch((HV*)SvRV(safe), "Mask",4, 1);
     if (ONLY_THESE)	/* *_only = new mask, else edit current	*/
-	 sv_setsv(mask, new_opset(PERMITING ? opset_all : Nullsv));
-    else verify_opset(mask,1); /* croaks */
+	sv_setsv(mask, sv_2mortal(new_opset(PERMITING ? opset_all : Nullsv)));
+    else
+	verify_opset(mask,1); /* croaks */
     bitmap = SvPVX(mask);
     for (i = 1; i < items; i++) {
 	on = PERMITING ? 0 : 1;		/* deny = mask bit on	*/
@@ -386,7 +390,7 @@ permit_only(safe, ...)
 
 void
 opdesc(...)
-    PPCODE:
+PPCODE:
     int i, myopcode;
     STRLEN len;
     SV **args;
@@ -423,7 +427,7 @@ void
 define_optag(optagsv, mask)
     SV *optagsv
     SV *mask
-    CODE:
+CODE:
     STRLEN len;
     char *optag = SvPV(optagsv, len);
     put_op_bitspec(optag, len, mask); /* croaks */
@@ -432,24 +436,24 @@ define_optag(optagsv, mask)
 
 void
 empty_opset()
-    CODE:
+CODE:
     ST(0) = sv_2mortal(new_opset(Nullsv));
 
 void
 full_opset()
-    CODE:
+CODE:
     ST(0) = sv_2mortal(new_opset(opset_all));
 
 void
 opmask_add(opset)
     SV *opset
-    PREINIT:
+PREINIT:
     if (!op_mask)
 	Newz(0, op_mask, maxo, char);
 
 void
 opcodes()
-    PPCODE:
+PPCODE:
     if (GIMME == G_ARRAY) {
 	croak("opcodes in list context not yet implemented"); /* XXX */
     }
@@ -459,7 +463,7 @@ opcodes()
 
 void
 opmask()
-    CODE:
+CODE:
     ST(0) = sv_2mortal(new_opset(Nullsv));
     if (op_mask) {
 	char *bitmap = SvPVX(ST(0));
