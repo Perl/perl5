@@ -4507,6 +4507,7 @@ $   sig_name_init = psnwc1 + psnwc2 + psnwc3
 $   sig_num="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 6 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 64"",0"
 $   sig_num_init="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,6,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,64,0"
 $!   perl_sig_num_with_commas=sig_num_init
+$   sig_size="37"
 $   uidtype="uid_t"
 $   d_pathconf="define"
 $   d_fpathconf="define"
@@ -4529,6 +4530,7 @@ $   sig_name_init = psnwc1 + psnwc2
 $   sig_num="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 6 16 17"",0"
 $   sig_num_init="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,6,16,17,0"
 $!   perl_sig_num_with_commas=sig_num_init
+$   sig_size="20"
 $   uidtype="unsigned int"
 $   d_pathconf="undef"
 $   d_fpathconf="undef"
@@ -5384,6 +5386,7 @@ $ WC/symbol tmp
 $ DELETE/SYMBOL tmp
 $ WC "sig_num='" + sig_num + "'"
 $ WC "sig_num_init='" + sig_num_init + "'"
+$ WC "sig_size='" + sig_size + "'"
 $ WC "signal_t='" + signal_t + "'"
 $ WC "sitearch='" + sitearch + "'"
 $ WC "sitearchexp='" + sitearchexp + "'"

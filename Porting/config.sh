@@ -8,7 +8,7 @@
 
 # Package name      : perl5
 # Source directory  : .
-# Configuration time: Fri Jan 12 22:32:53 EET 2001
+# Configuration time: Wed Jan 17 05:19:01 EET 2001
 # Configured by     : jhi
 # Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
 
@@ -62,7 +62,7 @@ ccsymbols='__alpha=1 __LANGUAGE_C__=1 __osf__=1 __unix__=1 _LONGLONG=1 _SYSTYPE_
 ccversion='V5.6-082'
 cf_by='jhi'
 cf_email='yourname@yourhost.yourplace.com'
-cf_time='Fri Jan 12 22:32:53 EET 2001'
+cf_time='Wed Jan 17 05:19:01 EET 2001'
 charsize='1'
 chgrp=''
 chmod=''
@@ -704,6 +704,7 @@ sig_name='ZERO HUP INT QUIT ILL TRAP ABRT EMT FPE KILL BUS SEGV SYS PIPE ALRM TE
 sig_name_init='"ZERO", "HUP", "INT", "QUIT", "ILL", "TRAP", "ABRT", "EMT", "FPE", "KILL", "BUS", "SEGV", "SYS", "PIPE", "ALRM", "TERM", "IOINT", "STOP", "TSTP", "CONT", "CHLD", "TTIN", "TTOU", "AIO", "XCPU", "XFSZ", "VTALRM", "PROF", "WINCH", "INFO", "USR1", "USR2", "RESV", "RTMIN", "NUM34", "NUM35", "NUM36", "NUM37", "NUM38", "NUM39", "NUM40", "NUM41", "NUM42", "NUM43", "NUM44", "NUM45", "NUM46", "NUM47", "MAX", "IOT", "LOST", "URG", "CLD", "IO", "POLL", "PTY", "PWR", "RTMAX", 0'
 sig_num='0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 6 6 16 20 23 23 23 29 48 '
 sig_num_init='0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 6, 6, 16, 20, 23, 23, 23, 29, 48, 0'
+sig_size='58'
 signal_t='void'
 sitearch='/opt/perl/lib/site_perl/5.7.0/alpha-dec_osf-thread'
 sitearchexp='/opt/perl/lib/site_perl/5.7.0/alpha-dec_osf-thread'

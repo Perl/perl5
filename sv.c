@@ -8866,12 +8866,11 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_bitcount		= Nullch;	/* reinits on demand */
 
     if (proto_perl->Ipsig_ptr) {
-	int sig_num[] = { SIG_NUM };
-	Newz(0, PL_psig_ptr, sizeof(sig_num)/sizeof(*sig_num), SV*);
-	Newz(0, PL_psig_name, sizeof(sig_num)/sizeof(*sig_num), SV*);
-	Newz(0, PL_psig_pend, sizeof(sig_num)/sizeof(*sig_num), int*);
-	for (i = 1; PL_sig_name[i]; i++) {
-	    PL_psig_ptr[i] = sv_dup_inc(proto_perl->Ipsig_ptr[i]);
+	Newz(0, PL_psig_ptr,  SIG_SIZE, SV*);
+	Newz(0, PL_psig_name, SIG_SIZE, SV*);
+	Newz(0, PL_psig_pend, SIG_SIZE, int);
+	for (i = 1; i < SIG_SIZE; i++) {
+	    PL_psig_ptr[i]  = sv_dup_inc(proto_perl->Ipsig_ptr[i]);
 	    PL_psig_name[i] = sv_dup_inc(proto_perl->Ipsig_name[i]);
 	}
     }

@@ -2957,8 +2957,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	The last element is 0, corresponding to the 0 at the end of
  *	the sig_name list.
  */
+/* SIG_SIZE:
+ *	This variable contains the number of elements of the sig_name
+ *	and sig_num arrays, including the final NULL entry.
+ */
 #define SIG_NAME $sig_name_init		/**/
 #define SIG_NUM  $sig_num_init		/**/
+#define SIG_SIZE $sig_size			/**/
 
 /* SITEARCH:
  *	This symbol contains the name of the private library for this package.

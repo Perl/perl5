@@ -2933,8 +2933,13 @@
  *	The last element is 0, corresponding to the 0 at the end of
  *	the sig_name list.
  */
+/* SIG_SIZE:
+ *	This variable contains the number of elements of the sig_name
+ *	and sig_num arrays, including the final NULL entry.
+ */
 #define SIG_NAME 0		/**/
 #define SIG_NUM  0		/**/
+#define SIG_SIZE 1			/**/
 
 /* SITEARCH:
  *	This symbol contains the name of the private library for this package.

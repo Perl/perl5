@@ -2918,8 +2918,13 @@
  *	The last element is 0, corresponding to the 0 at the end of
  *	the sig_name list.
  */
+/* SIG_SIZE:
+ *	This variable contains the number of elements of the sig_name
+ *	and sig_num arrays, including the final NULL entry.
+ */
 #define SIG_NAME "ZERO","ABRT","FPE","ILL","INT","SEGV","TERM","USR1","USR2","IO","HUP","URG","ALRM","CHLD","CONT","KILL","STOP","PIPE","QUIT","BUS","TRAP","TSTP","TTIN","TTOU","RT1","RT2","RT3","RT4","RT5","RT6","RT7","RT8",0		/**/
 #define SIG_NUM  0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,0		/**/
+#define SIG_SIZE 32			/**/
 
 /* SITEARCH:
  *	This symbol contains the name of the private library for this package.
