@@ -130,6 +130,13 @@ case "$cc" in
 *gcc*) ccdlflags='-Xlinker' ;;
 *) ccversion=`lslpp -L | grep 'C for AIX Compiler$' | awk '{print $2}'`
    case "$ccversion" in
+     '') ccversion=`lslpp -L | grep 'IBM C and C++ Compilers LUM$' | awk '{print $2}'`
+	;;
+     esac
+   case "$ccversion" in
+     3.6.6.0)
+	optimize='none'
+	;;
      4.4.0.0|4.4.0.1|4.4.0.2)
 	echo >&4 "*** This C compiler ($ccversion) is outdated."
 	echo >&4 "*** Please upgrade to at least 4.4.0.3."
