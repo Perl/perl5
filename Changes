@@ -31,6 +31,259 @@ or any other branch.
 Version v5.7.1		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 10209] By: jhi                                   on 2001/05/25  12:24:45
+        Log: Based on
+             
+             Subject: [PATCH pp.c] Wrapping pack("C",256)
+             From: Simon Cozens <simon@netthink.co.uk>
+             Date: Sat, 12 May 2001 17:58:41 +0100
+             Message-ID: <20010512175841.A6132@netthink.co.uk>
+     Branch: perl
+	   ! pod/perldiag.pod pp.c t/pragma/warn/pp
+____________________________________________________________________________
+[ 10208] By: jhi                                   on 2001/05/25  01:37:03
+        Log: Subject: [PATCH] 5.6.1 Term::Cap -- add terminfo fallback
+             From: "Brendan O'Dea" <bod@compusol.com.au>
+             Date: Fri, 25 May 2001 11:18:29 +1000
+             Message-ID: <20010525111829.A28411@compusol.com.au>
+             
+             (Slightly modified.)
+     Branch: perl
+	   ! lib/Term/Cap.pm
+____________________________________________________________________________
+[ 10207] By: jhi                                   on 2001/05/25  01:12:14
+        Log: Subject: Re: [ID 20010506.041] segfault when matching utf8 string 
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Fri, 25 May 2001 02:13:25 +0100
+             Message-Id: <200105250113.CAA23158@crypt.compulink.co.uk>
+     Branch: perl
+	   ! t/op/misc.t
+____________________________________________________________________________
+[ 10206] By: jhi                                   on 2001/05/25  01:07:59
+        Log: Subject: Re: [ID 20010506.041] segfault when matching utf8 string
+             From: Inaba Hiroto <hiroto.inaba@toshiba.co.jp>
+             Date: Fri, 25 May 2001 10:25:36 +0900
+             Message-Id: <200105250124.KAA19571@toshiba.co.jp> 
+     Branch: perl
+	   ! regcomp.c regexec.c
+____________________________________________________________________________
+[ 10205] By: jhi                                   on 2001/05/25  01:07:00
+        Log: Subject: [PATCH #2] stash autovivification and method call error messages
+             From: Ilmari Karonen <iltzu@sci.fi>
+             Date: Thu, 24 May 2001 01:51:48 +0300 (EET DST)
+             Message-ID: <Pine.SOL.3.96.1010524013737.18819D-100000@simpukka>
+     Branch: perl
+	   ! gv.c pp_hot.c t/op/method.t
+____________________________________________________________________________
+[ 10204] By: jhi                                   on 2001/05/25  01:03:50
+        Log: Add make target and documentation for gprof profiling.
+     Branch: perl
+	   ! Makefile.SH pod/perlhack.pod
+____________________________________________________________________________
+[ 10203] By: jhi                                   on 2001/05/24  21:09:36
+        Log: Subject: Don't think about UTF8 
+             From: Mike Guy <mjtg@cam.ac.uk> 
+             Date: Tue, 22 May 2001 14:35:39 +0100
+             Message-Id: <E152CK3-00028O-00@virgo.cus.cam.ac.uk>
+     Branch: perl
+	   ! sv.h
+____________________________________________________________________________
+[ 10202] By: jhi                                   on 2001/05/24  21:07:25
+        Log: Subject: [ID 20010524.002] find2perl bug in fileglob_to_re
+             From: Geraint A Edwards <gedge@serf.org> 
+             Date: Thu, 24 May 2001 22:51:24 +0100
+             Message-Id: <20010524225124.A34981@cymru.serf.org>
+     Branch: perl
+	   ! x2p/find2perl.PL
+____________________________________________________________________________
+[ 10201] By: jhi                                   on 2001/05/24  21:02:30
+        Log: DB_File has its own attribute story.
+     Branch: perl
+	   ! ext/DB_File/DB_File.xs
+____________________________________________________________________________
+[ 10200] By: jhi                                   on 2001/05/24  19:54:21
+        Log: Subject: Re: Making perl with -Wall
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Thu, 24 May 2001 14:33:37 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.10.10105241415460.2443-100000@maxwell.phys.lafayette.edu>
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 10199] By: jhi                                   on 2001/05/24  15:15:03
+        Log: Subject: RE: [ID 20010521.003] - [PATCH #2] sv.c: sv_dup_inc(SvRV(sstr)) wasn't checking SvWEAKREF
+             From: "Richard Soderberg" <rs@crystalflame.net>
+             Date: Thu, 24 May 2001 08:58:16 -0700
+             Message-ID: <NAEKLNAAHLMBPMPNBMLEOEPODEAA.rs@crystalflame.net>
+     Branch: perl
+	   ! sv.c
+____________________________________________________________________________
+[ 10198] By: jhi                                   on 2001/05/24  15:10:04
+        Log: IV/UV casting fixes from Nicholas Clark.
+     Branch: perl
+	   ! perl.h pp_sys.c util.c
+____________________________________________________________________________
+[ 10197] By: jhi                                   on 2001/05/24  14:19:44
+        Log: Subject: Re: Making perl with -Wall
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Thu, 24 May 2001 15:40:28 +0100
+             Message-ID: <20010524154028.B1988@blackrider.blackstar.co.uk>
+     Branch: perl
+	   ! malloc.c perl.h
+____________________________________________________________________________
+[ 10196] By: jhi                                   on 2001/05/24  14:04:41
+        Log: Subject: [PATCH] Re: [ID 20010521.004] Two test suite failures on this platform with latest rsync 
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Tue, 22 May 2001 11:49:37 +0200
+             Message-Id: <20010522114044.BC4E.H.M.BRAND@hccnet.nl>
+     Branch: metaconfig
+	   ! U/modified/Oldsym.U
+     Branch: metaconfig/U/perl
+	   ! patchlevel.U
+     Branch: perl
+	   ! Configure config_h.SH myconfig.SH
+____________________________________________________________________________
+[ 10195] By: jhi                                   on 2001/05/24  13:25:04
+        Log: Under versiononly install also the scripts with the version suffix.
+             (e.g. .../bin/h2xs5.7.1)
+     Branch: perl
+	   ! installperl
+____________________________________________________________________________
+[ 10194] By: jhi                                   on 2001/05/24  13:02:49
+        Log: Subject: [PATCH] Stop segfault in mg.c:636
+             From: "Richard Soderberg" <rs@crystalflame.net>
+             Date: Thu, 24 May 2001 05:51:52 -0700
+             Message-ID: <NAEKLNAAHLMBPMPNBMLEGEPGDEAA.rs@crystalflame.net>
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[ 10193] By: jhi                                   on 2001/05/24  12:37:13
+        Log: Iteration continues; hopefully convergently.
+     Branch: perl
+	   ! t/lib/b-stash.t
+____________________________________________________________________________
+[ 10192] By: jhi                                   on 2001/05/24  12:36:35
+        Log: Subject: [PATCH] CORE::GLOBAL::require override happens too early
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 23 May 2001 16:13:10 -0700
+             Message-ID: <lrofsjfym1.fsf@caliper.ActiveState.com>
+     Branch: perl
+	   ! op.c toke.c
+____________________________________________________________________________
+[ 10191] By: jhi                                   on 2001/05/24  12:25:12
+        Log: Subject: [PATCH] lib/dumpvar.pl, lib/perl5db.pl - fix warnings
+             From: "Daniel S. Lewart" <d-lewart@uiuc.edu>
+             Date: Thu, 24 May 2001 05:05:22 -0500
+             Message-ID: <20010524050522.A18997@staff1.cso.uiuc.edu>
+     Branch: perl
+	   ! lib/dumpvar.pl lib/perl5db.pl
+____________________________________________________________________________
+[ 10190] By: jhi                                   on 2001/05/24  12:24:07
+        Log: Subject: Re: [ID 20010524.001] perl5db.pl   x @INC  doesn't work like it used to
+             From: David Dyck <dcd@tc.fluke.com>
+             Date: Thu, 24 May 2001 01:42:09 -0700 (PDT)
+             Message-ID: <Pine.LNX.4.33.0105240134580.5179-100000@dd.tc.fluke.com>
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[ 10189] By: jhi                                   on 2001/05/23  22:43:31
+        Log: Tiny pod nits on READMEs, mostly whitespace issues.
+     Branch: perl
+	   ! README.amiga README.dos README.macos README.mpeix README.vmesa
+	   ! README.win32
+____________________________________________________________________________
+[ 10188] By: jhi                                   on 2001/05/23  22:26:03
+        Log: The DG/UX part of the 20010521.005.
+     Branch: perl
+	   ! README.dgux
+____________________________________________________________________________
+[ 10187] By: jhi                                   on 2001/05/23  22:04:05
+        Log: Subject: Re: [ID 20000716.007] \G in a m//g expression causes problems 
+             From: Hugo <hv@crypt.compulink.co.uk>
+             Date: Mon, 21 May 2001 16:32:02 +0100
+             Message-Id: <200105211532.QAA03999@crypt.compulink.co.uk>
+     Branch: perl
+	   ! regcomp.c t/op/misc.t
+____________________________________________________________________________
+[ 10186] By: jhi                                   on 2001/05/23  21:42:15
+        Log: Subject: [PATCH] Extra UNIVERSAL tests
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Wed, 23 May 2001 12:29:20 +0100
+             Message-Id: <E152WpM-0001yP-00@virgo.cus.cam.ac.uk>
+     Branch: perl
+	   ! t/op/universal.t
+____________________________________________________________________________
+[ 10185] By: jhi                                   on 2001/05/23  21:38:48
+        Log: Subject: [PATCH] Remove EQ keyword
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Message-Id: <E152Vhp-00072x-00@virgo.cus.cam.ac.uk>
+             Date: Wed, 23 May 2001 11:17:29 +0100
+     Branch: perl
+	   ! keywords.h keywords.pl
+____________________________________________________________________________
+[ 10184] By: jhi                                   on 2001/05/23  21:29:41
+        Log: Subject: [PATCH] lib/perl5db.pl
+             From: "Daniel S. Lewart" <d-lewart@uiuc.edu>
+             Date: Wed, 23 May 2001 02:18:03 -0500
+             Message-ID: <20010523021803.A21965@staff1.cso.uiuc.edu>
+     Branch: perl
+	   ! lib/perl5db.pl
+____________________________________________________________________________
+[ 10183] By: jhi                                   on 2001/05/23  21:27:54
+        Log: Subject: [PATCH lib/Term/Cap.pm] Avoid -W warnings in Tgetent and Tputs
+             From: "Daniel S. Lewart" <d-lewart@uiuc.edu>
+             Date: Tue, 22 May 2001 23:34:41 -0500
+             Message-ID: <20010522233441.A12431@staff1.cso.uiuc.edu>
+     Branch: perl
+	   ! lib/Term/Cap.pm
+____________________________________________________________________________
+[ 10182] By: jhi                                   on 2001/05/23  21:24:30
+        Log: Subject: [PATCH emacs/e2ctags.pl] big speedup
+             From: davem@fdgroup.co.uk
+             Date: Tue, 22 May 2001 22:08:09 +0100 (BST)
+             Message-Id: <200105222108.WAA09442@gizmo.fdgroup.co.uk>
+     Branch: perl
+	   ! emacs/e2ctags.pl
+____________________________________________________________________________
+[ 10181] By: jhi                                   on 2001/05/23  21:23:29
+        Log: Subject: [PATCH lib/vars.pm] Sensible minimum version
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 22 May 2001 14:15:09 +0100
+             Message-ID: <20010522141509.J701@blackrider.blackstar.co.uk>
+     Branch: perl
+	   ! lib/vars.pm
+____________________________________________________________________________
+[ 10180] By: jhi                                   on 2001/05/23  21:22:14
+        Log: Subject: [PATCH lib/vars.pm] Odd code nit
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 22 May 2001 14:14:28 +0100
+             Message-ID: <20010522141427.I701@blackrider.blackstar.co.uk>
+     Branch: perl
+	   ! lib/vars.pm
+____________________________________________________________________________
+[ 10179] By: jhi                                   on 2001/05/23  21:19:51
+        Log: Use the new use vars feature.
+     Branch: perl
+	   ! t/lib/b-stash.t
+____________________________________________________________________________
+[ 10178] By: jhi                                   on 2001/05/23  21:19:28
+        Log: Subject: [PATCH] vars.pm to support qualified variables (was Re: [ID 20010521.001])
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Sender: "M.J.T. Guy" <mjtg@cus.cam.ac.uk>
+             Date: Tue, 22 May 2001 13:11:39 +0100
+     Branch: perl
+	   + t/pragma/vars.t
+	   ! MANIFEST lib/vars.pm t/lib/1_compile.t
+____________________________________________________________________________
+[ 10177] By: jhi                                   on 2001/05/23  21:01:48
+        Log: -qlongdouble considered harmful by Merijn.
+     Branch: perl
+	   ! hints/aix.sh
+____________________________________________________________________________
+[ 10176] By: jhi                                   on 2001/05/21  13:21:21
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 10175] By: jhi                                   on 2001/05/21  13:17:28
         Log: Add a test of its very own for Fcntl.  Hopefully portable.
      Branch: perl
