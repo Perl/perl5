@@ -334,8 +334,8 @@ print "# '$_'.\nnot "
   unless /Can\'t return a temporary from lvalue subroutine/;
 print "ok 38\n";
 
-sub xxx () { 'xxx' } # Not lvalue
-sub lv1tmpr : lvalue { xxx }			# is it a TEMP?
+sub yyy () { 'yyy' } # Const, not lvalue
+sub lv1tmpr : lvalue { yyy }			# is it read-only?
 
 $_ = undef;
 eval <<'EOE' or $_ = $@;

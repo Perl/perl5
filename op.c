@@ -4406,6 +4406,8 @@ Perl_op_const_sv(pTHX_ OP *o, CV *cv)
 	    return sv;
 	if (type == OP_NEXTSTATE || type == OP_NULL || type == OP_PUSHMARK)
 	    continue;
+	if (type == OP_DBSTATE)
+	    continue;
 	if (type == OP_LEAVESUB || type == OP_RETURN)
 	    break;
 	if (sv)
@@ -6585,7 +6587,7 @@ Perl_peep(pTHX_ register OP *o)
 		PADOFFSET ix = pad_alloc(OP_CONST, SVs_PADTMP);
 		if (SvPADTMP(cSVOPo->op_sv)) {
 		    /* If op_sv is already a PADTMP then it is being used by
-		     * another pad, so make a copy. */
+		     * some pad, so make a copy. */
 		    sv_setsv(PL_curpad[ix],cSVOPo->op_sv);
 		    SvREADONLY_on(PL_curpad[ix]);
 		    SvREFCNT_dec(cSVOPo->op_sv);
@@ -6594,6 +6596,8 @@ Perl_peep(pTHX_ register OP *o)
 		    SvREFCNT_dec(PL_curpad[ix]);
 		    SvPADTMP_on(cSVOPo->op_sv);
 		    PL_curpad[ix] = cSVOPo->op_sv;
+		    /* XXX I don't know how this isn't readonly already. */
+		    SvREADONLY_on(PL_curpad[ix]);
 		}
 		cSVOPo->op_sv = Nullsv;
 		o->op_targ = ix;
@@ -6916,6 +6920,7 @@ static void
 const_sv_xsub(pTHXo_ CV* cv)
 {
     dXSARGS;
-    ST(0) = sv_2mortal(newSVsv((SV*)XSANY.any_ptr));
+    EXTEND(sp, 1);
+    ST(0) = sv_2mortal(SvREFCNT_inc((SV*)XSANY.any_ptr));
     XSRETURN(1);
 }
