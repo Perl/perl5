@@ -288,14 +288,8 @@ $(DYNALOADER).obj : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
 #------------------------------------------------------------
 
 $(GLOBEXE): perlglob.obj
-.IF "$(CCTYPE)" == "BORLAND"
-	$(CC) -c -w -v -tWM -I$(CCINCDIR) perlglob.c
-	$(LINK32) -Tpe -ap $(LINK_FLAGS) c0x32.obj perlglob.obj \
-	    $(CCLIBDIR)\32BIT\wildargs.obj,$@,,import32.lib cw32mt.lib,
-.ELSE
-	$(LINK32) $(LINK_FLAGS) $(LIBFILES) -out:$@ -subsystem:$(SUBSYS) \
-	    perlglob.obj setargv.obj 
-.ENDIF
+	$(LINK32) $(LINK_FLAGS) -o $@  \
+	    perlglob.obj $(LIBFILES) 
 
 $(GLOBBAT) : ..\lib\File\DosGlob.pm $(MINIPERL)
 	$(MINIPERL) $(PL2BAT) - < ..\lib\File\DosGlob.pm > $(GLOBBAT)
@@ -351,10 +345,17 @@ perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym makedef.pl
 	$(MINIPERL) -w makedef.pl $(DEFINES) $(CCTYPE) > perldll.def
 
 $(PERLDLL): perldll.def $(CORE_OBJ) $(WIN32_OBJ) $(DLL_OBJ)
-	$(LINK32) -dll -o $@ $(LINK_FLAGS) \
+	$(LINK32) -dll -o $@ -Wl,--base-file -Wl,perl.base $(LINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(CORE_OBJ:s,\,\\) \
 		$(WIN32_OBJ:s,\,\\) $(DLL_OBJ:s,\,\\) $(LIBFILES) $(LKPOST))
-	dlltool --output-lib $(PERLIMPLIB) --def perldll.def --dll perl.dll --base-file $(PERLDLL) 
+	dlltool --output-lib $(PERLIMPLIB) \
+                --dllname perl.dll \
+                --def perldll.def \
+                --base-file perl.base \
+                --output-exp perl.exp
+	$(LINK32) -dll -o $@ $(LINK_FLAGS) \
+	    $(mktmp $(LKPRE) $(CORE_OBJ:s,\,\\) \
+		$(WIN32_OBJ:s,\,\\) $(DLL_OBJ:s,\,\\) $(LIBFILES) perl.exp $(LKPOST))
 	$(XCOPY) $(PERLIMPLIB) ..\lib\CORE
 
 perl.def  : $(MINIPERL) makeperldef.pl
