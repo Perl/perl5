@@ -2134,6 +2134,14 @@
 #define Perl_sv_force_normal	pPerl->Perl_sv_force_normal
 #undef  sv_force_normal
 #define sv_force_normal		Perl_sv_force_normal
+#undef  Perl_sv_add_backref
+#define Perl_sv_add_backref	pPerl->Perl_sv_add_backref
+#undef  sv_add_backref
+#define sv_add_backref		Perl_sv_add_backref
+#undef  Perl_sv_del_backref
+#define Perl_sv_del_backref	pPerl->Perl_sv_del_backref
+#undef  sv_del_backref
+#define sv_del_backref		Perl_sv_del_backref
 #undef  Perl_tmps_grow
 #define Perl_tmps_grow		pPerl->Perl_tmps_grow
 #undef  tmps_grow

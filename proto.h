@@ -918,6 +918,8 @@ PERL_CALLCONV bool	Perl_sv_utf8_downgrade(pTHX_ SV *sv, bool fail_ok);
 PERL_CALLCONV void	Perl_sv_utf8_encode(pTHX_ SV *sv);
 PERL_CALLCONV bool	Perl_sv_utf8_decode(pTHX_ SV *sv);
 PERL_CALLCONV void	Perl_sv_force_normal(pTHX_ SV *sv);
+PERL_CALLCONV void	Perl_sv_add_backref(pTHX_ SV *tsv, SV *sv);
+PERL_CALLCONV void	Perl_sv_del_backref(pTHX_ SV *sv);
 PERL_CALLCONV void	Perl_tmps_grow(pTHX_ I32 n);
 PERL_CALLCONV SV*	Perl_sv_rvweaken(pTHX_ SV *sv);
 PERL_CALLCONV int	Perl_magic_killbackrefs(pTHX_ SV *sv, MAGIC *mg);
@@ -1199,8 +1201,6 @@ STATIC void	S_del_xrv(pTHX_ XRV* p);
 STATIC void	S_sv_unglob(pTHX_ SV* sv);
 STATIC void	S_not_a_number(pTHX_ SV *sv);
 STATIC void	S_visit(pTHX_ SVFUNC_t f);
-STATIC void	S_sv_add_backref(pTHX_ SV *tsv, SV *sv);
-STATIC void	S_sv_del_backref(pTHX_ SV *sv);
 #  if defined(DEBUGGING)
 STATIC void	S_del_sv(pTHX_ SV *p);
 #  endif

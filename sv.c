@@ -3540,8 +3540,8 @@ Perl_sv_rvweaken(pTHX_ SV *sv)
     return sv;
 }
 
-STATIC void
-S_sv_add_backref(pTHX_ SV *tsv, SV *sv)
+void
+Perl_sv_add_backref(pTHX_ SV *tsv, SV *sv)
 {
     AV *av;
     MAGIC *mg;
@@ -3555,8 +3555,8 @@ S_sv_add_backref(pTHX_ SV *tsv, SV *sv)
     av_push(av,sv);
 }
 
-STATIC void 
-S_sv_del_backref(pTHX_ SV *sv)
+void 
+Perl_sv_del_backref(pTHX_ SV *sv)
 {
     AV *av;
     SV **svp;

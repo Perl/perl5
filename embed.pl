@@ -2169,6 +2169,8 @@ ApdM      |bool   |sv_utf8_downgrade|SV *sv|bool fail_ok
 ApdM      |void   |sv_utf8_encode |SV *sv
 Ap      |bool   |sv_utf8_decode |SV *sv
 Ap	|void	|sv_force_normal|SV *sv
+Ap	|void	|sv_add_backref	|SV *tsv|SV *sv
+Ap	|void	|sv_del_backref	|SV *sv
 Ap	|void	|tmps_grow	|I32 n
 Apd	|SV*	|sv_rvweaken	|SV *sv
 p	|int	|magic_killbackrefs|SV *sv|MAGIC *mg
@@ -2459,8 +2461,6 @@ s	|void	|del_xrv	|XRV* p
 s	|void	|sv_unglob	|SV* sv
 s	|void	|not_a_number	|SV *sv
 s	|void	|visit		|SVFUNC_t f
-s	|void	|sv_add_backref	|SV *tsv|SV *sv
-s	|void	|sv_del_backref	|SV *sv
 #  if defined(DEBUGGING)
 s	|void	|del_sv	|SV *p
 #  endif

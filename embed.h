@@ -818,6 +818,8 @@
 #define sv_utf8_encode		Perl_sv_utf8_encode
 #define sv_utf8_decode		Perl_sv_utf8_decode
 #define sv_force_normal		Perl_sv_force_normal
+#define sv_add_backref		Perl_sv_add_backref
+#define sv_del_backref		Perl_sv_del_backref
 #define tmps_grow		Perl_tmps_grow
 #define sv_rvweaken		Perl_sv_rvweaken
 #define magic_killbackrefs	Perl_magic_killbackrefs
@@ -1080,8 +1082,6 @@
 #define sv_unglob		S_sv_unglob
 #define not_a_number		S_not_a_number
 #define visit			S_visit
-#define sv_add_backref		S_sv_add_backref
-#define sv_del_backref		S_sv_del_backref
 #  if defined(DEBUGGING)
 #define del_sv			S_del_sv
 #  endif
@@ -2275,6 +2275,8 @@
 #define sv_utf8_encode(a)	Perl_sv_utf8_encode(aTHX_ a)
 #define sv_utf8_decode(a)	Perl_sv_utf8_decode(aTHX_ a)
 #define sv_force_normal(a)	Perl_sv_force_normal(aTHX_ a)
+#define sv_add_backref(a,b)	Perl_sv_add_backref(aTHX_ a,b)
+#define sv_del_backref(a)	Perl_sv_del_backref(aTHX_ a)
 #define tmps_grow(a)		Perl_tmps_grow(aTHX_ a)
 #define sv_rvweaken(a)		Perl_sv_rvweaken(aTHX_ a)
 #define magic_killbackrefs(a,b)	Perl_magic_killbackrefs(aTHX_ a,b)
@@ -2536,8 +2538,6 @@
 #define sv_unglob(a)		S_sv_unglob(aTHX_ a)
 #define not_a_number(a)		S_not_a_number(aTHX_ a)
 #define visit(a)		S_visit(aTHX_ a)
-#define sv_add_backref(a,b)	S_sv_add_backref(aTHX_ a,b)
-#define sv_del_backref(a)	S_sv_del_backref(aTHX_ a)
 #  if defined(DEBUGGING)
 #define del_sv(a)		S_del_sv(aTHX_ a)
 #  endif
@@ -4461,6 +4461,10 @@
 #define sv_utf8_decode		Perl_sv_utf8_decode
 #define Perl_sv_force_normal	CPerlObj::Perl_sv_force_normal
 #define sv_force_normal		Perl_sv_force_normal
+#define Perl_sv_add_backref	CPerlObj::Perl_sv_add_backref
+#define sv_add_backref		Perl_sv_add_backref
+#define Perl_sv_del_backref	CPerlObj::Perl_sv_del_backref
+#define sv_del_backref		Perl_sv_del_backref
 #define Perl_tmps_grow		CPerlObj::Perl_tmps_grow
 #define tmps_grow		Perl_tmps_grow
 #define Perl_sv_rvweaken	CPerlObj::Perl_sv_rvweaken
@@ -4933,10 +4937,6 @@
 #define not_a_number		S_not_a_number
 #define S_visit			CPerlObj::S_visit
 #define visit			S_visit
-#define S_sv_add_backref	CPerlObj::S_sv_add_backref
-#define sv_add_backref		S_sv_add_backref
-#define S_sv_del_backref	CPerlObj::S_sv_del_backref
-#define sv_del_backref		S_sv_del_backref
 #  if defined(DEBUGGING)
 #define S_del_sv		CPerlObj::S_del_sv
 #define del_sv			S_del_sv

@@ -3861,6 +3861,20 @@ Perl_sv_force_normal(pTHXo_ SV *sv)
     ((CPerlObj*)pPerl)->Perl_sv_force_normal(sv);
 }
 
+#undef  Perl_sv_add_backref
+void
+Perl_sv_add_backref(pTHXo_ SV *tsv, SV *sv)
+{
+    ((CPerlObj*)pPerl)->Perl_sv_add_backref(tsv, sv);
+}
+
+#undef  Perl_sv_del_backref
+void
+Perl_sv_del_backref(pTHXo_ SV *sv)
+{
+    ((CPerlObj*)pPerl)->Perl_sv_del_backref(sv);
+}
+
 #undef  Perl_tmps_grow
 void
 Perl_tmps_grow(pTHXo_ I32 n)
