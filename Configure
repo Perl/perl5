@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Jun 28 18:02:13 EET DST 2001 [metaconfig 3.0 PL70]
+# Generated on Fri Jun 29 17:44:53 EET DST 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -10816,7 +10816,7 @@ EOCP
 		d_modfl="$undef"
 	fi
 	case "$osname:$gccversion" in
-	aix:)	$ccflags="$saveccflags" ;; # restore
+	aix:)	ccflags="$saveccflags" ;; # restore
 	esac
 	;;
 esac
