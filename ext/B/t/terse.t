@@ -82,8 +82,8 @@ sub bar {
 
 SKIP: {
     use Config;
-    skip("- printing RVs not working under threads", 1)
-	if $Config{usethreads};
+    skip("- B::Terse won't grok RVs under ithreads yet", 1)
+	if $Config{useithreads};
     # Schwern's example of finding an RV
     my $path = join " ", map { qq["-I$_"] } @INC;
     my $redir = $^O eq 'MacOS' ? '' : "2>&1";
