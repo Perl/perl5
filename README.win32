@@ -679,9 +679,9 @@ C<kill()> is implemented, but doesn't have the semantics of
 C<raise()>, i.e. it doesn't send a signal to the identified process
 like it does on Unix platforms.  Instead it immediately calls
 C<TerminateProcess(process,signal)>.  Thus the signal argument is
-used to set the exit-status of the terminated process.  In particular,
-C<kill(0,$pid)> will kill the process identified by C<$pid> (unlike
-on Unix).  This behavior may change in future.
+used to set the exit-status of the terminated process.  However,
+a signal of 0 can be used to safely check if the specified process
+exists, as on Unix.
 
 =item *
 

@@ -1287,6 +1287,9 @@ system(1,...) now returns true process IDs rather than process
 handles.  kill() accepts any real process id, rather than strictly
 return values from system(1,...).
 
+For better compatibility with Unix, C<kill(0, $pid)> can now be used to
+test whether a process exists.
+
 The C<Shell> module is supported.
 
 Rudimentary support for building under command.com in Windows 95

@@ -1091,6 +1091,7 @@ pod/perllol.pod		How to use lists of lists
 pod/perlmod.pod		Module mechanism info
 pod/perlmodinstall.pod	Installing CPAN Modules
 pod/perlmodlib.pod	Module policy info
+pod/perlnumber.pod	Semantics of numbers and numeric operations
 pod/perlobj.pod		Object info
 pod/perlop.pod		Operator info
 pod/perlopentut.pod	open() tutorial

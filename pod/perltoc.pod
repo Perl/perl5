@@ -1608,7 +1608,7 @@ y/SEARCHLIST/REPLACEMENTLIST/cdsUC
 
 Finding the end, Removal of backslashes before delimiters, Interpolation,
 C<<<'EOF'>, C<m''>, C<s'''>, C<tr///>, C<y///>, C<''>, C<q//>, C<"">,
-C<``>, C<qq//>, C<qx//>, C<<file*globE<gt>>, C<?RE?>, C</RE/>, C<m/RE/>,
+C<``>, C<qq//>, C<qx//>, C<< <file*glob> >>, C<?RE?>, C</RE/>, C<m/RE/>,
 C<s/RE/foo/>,, Interpolation of regular expressions, Optimization of
 regular expressions
 
@@ -2923,6 +2923,31 @@ C<anchored(TYPE)>
 
 =back
 
+=head2 perlnumber - semantics of numbers and numeric operations in Perl
+
+=over
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item Storing numbers
+
+=item Numeric operators and numeric conversions
+
+=item Flavors of Perl numeric operations
+
+Arithmetic operators except, C<no integer>, Arithmetic operators except,
+C<use integer>, Bitwise operators, C<no integer>, Bitwise operators, C<use
+integer>, Operators which expect an integer, Operators which expect a
+string
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
 =head2 perldiag - various Perl diagnostics
 
 =over
@@ -3617,9 +3642,9 @@ C<void save_hptr(HV **hptr)>
 
 An Error Handler, An Event Driven Program
 
-=item THE PERL_CALL FUNCTIONS
+=item THE CALL_ FUNCTIONS
 
-perl_call_sv, perl_call_pv, perl_call_method, perl_call_argv
+call_sv, call_pv, call_method, call_argv
 
 =item FLAG VALUES
 
@@ -3665,11 +3690,11 @@ perl_call_sv, perl_call_pv, perl_call_method, perl_call_argv
 
 =item Using G_KEEPERR
 
-=item Using perl_call_sv
+=item Using call_sv
 
-=item Using perl_call_argv
+=item Using call_argv
 
-=item Using perl_call_method
+=item Using call_method
 
 =item Using GIMME_V
 

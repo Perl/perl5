@@ -200,8 +200,25 @@ currently the Perforce program, see http://perforce.com/).  The
 pumpkings and a few others have access to the repository to check in
 changes.  Periodically the pumpking for the development version of Perl
 will release a new version, so the rest of the porters can see what's
-changed.  Plans are underway for a repository viewer, and for
-anonymous CVS access to the latest versions.
+changed.  The current state of the main trunk of repository, and patches
+that describe the individual changes that have happened since the last
+public release are available at this location:
+
+    ftp://ftp.linux.activestate.com/pub/staff/gsar/APC/
+
+Selective parts are also visible via the rsync protocol.  To get all
+the individual changes to the mainline since the last development
+release, use the following command:
+
+    rsync -avuz rsync://ftp.linux.activestate.com/perl-diffs perl-diffs
+
+Use this to get the latest source tree in full:
+
+    rsync -avuz rsync://ftp.linux.activestate.com/perl-current perl-current
+
+Needless to say, the source code in perl-current is usually in a perpetual
+state of evolution.  You should expect it to be very buggy.  Do B<not> use
+it for any purpose other than testing and development.
 
 Always submit patches to I<perl5-porters@perl.org>.  This lets other
 porters review your patch, which catches a surprising number of errors

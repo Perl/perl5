@@ -27,12 +27,6 @@
 #  define win32_get_sitelib PerlEnv_sitelib_path
 #endif
 
-#if defined(PERL_IMPLICIT_CONTEXT)
-/* compat */
-#  define GetPerlInterpreter	Perl_get_context
-#  define SetPerlInterpreter	Perl_set_context
-#endif
-
 #ifdef __GNUC__
 #  ifndef __int64		/* some versions seem to #define it already */
 #    define __int64 long long

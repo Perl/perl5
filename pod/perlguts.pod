@@ -1672,14 +1672,14 @@ Thus, something like:
 in your extesion will translate to this when PERL_IMPLICIT_CONTEXT is
 in effect:
 
-        Perl_sv_setsv(GetPerlInterpreter(), asv, bsv);
+        Perl_sv_setsv(Perl_get_context(), asv, bsv);
 
 or to this otherwise:
 
         Perl_sv_setsv(asv, bsv);
 
 You have to do nothing new in your extension to get this; since
-the Perl library provides GetPerlInterpreter(), it will all just
+the Perl library provides Perl_get_context(), it will all just
 work.
 
 The second, more efficient way is to use the following template for

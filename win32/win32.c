@@ -124,6 +124,30 @@ IsWinNT(void)
     return (win32_os_id() == VER_PLATFORM_WIN32_NT);
 }
 
+EXTERN_C void
+set_w32_module_name(void)
+{
+    char* ptr;
+    GetModuleFileName((HMODULE)((w32_perldll_handle == INVALID_HANDLE_VALUE)
+				? GetModuleHandle(NULL)
+				: w32_perldll_handle),
+		      w32_module_name, sizeof(w32_module_name));
+
+    /* try to get full path to binary (which may be mangled when perl is
+     * run from a 16-bit app) */
+    /*PerlIO_printf(Perl_debug_log, "Before %s\n", w32_module_name);*/
+    (void)win32_longpath(w32_module_name);
+    /*PerlIO_printf(Perl_debug_log, "After  %s\n", w32_module_name);*/
+
+    /* normalize to forward slashes */
+    ptr = w32_module_name;
+    while (*ptr) {
+	if (*ptr == '\\')
+	    *ptr = '/';
+	++ptr;
+    }
+}
+
 /* *svp (if non-NULL) is expected to be POK (valid allocated SvPVX(*svp)) */
 static char*
 get_regstr_from(HKEY hkey, const char *valuename, SV **svp)
@@ -186,24 +210,7 @@ get_emd_part(SV **prev_pathp, char *trailing_path, ...)
     baselen = strlen(base);
 
     if (!*w32_module_name) {
-	GetModuleFileName((HMODULE)((w32_perldll_handle == INVALID_HANDLE_VALUE)
-				    ? GetModuleHandle(NULL)
-				    : w32_perldll_handle),
-			  w32_module_name, sizeof(w32_module_name));
-
-	/* try to get full path to binary (which may be mangled when perl is
-	 * run from a 16-bit app) */
-	/*PerlIO_printf(Perl_debug_log, "Before %s\n", w32_module_name);*/
-	(void)win32_longpath(w32_module_name);
-	/*PerlIO_printf(Perl_debug_log, "After  %s\n", w32_module_name);*/
-
-	/* normalize to forward slashes */
-	ptr = w32_module_name;
-	while (*ptr) {
-	    if (*ptr == '\\')
-		*ptr = '/';
-	    ++ptr;
-	}
+	set_w32_module_name();
     }
     strcpy(mod_name, w32_module_name);
     ptr = strrchr(mod_name, '/');
@@ -989,6 +996,8 @@ win32_kill(int pid, int sig)
 	/* it is a pseudo-forked child */
 	long child = find_pseudo_pid(-pid);
 	if (child >= 0) {
+	    if (!sig)
+		return 0;
 	    hProcess = w32_pseudo_child_handles[child];
 	    if (TerminateThread(hProcess, sig)) {
 		remove_dead_pseudo_process(child);
@@ -1001,6 +1010,8 @@ win32_kill(int pid, int sig)
     {
 	long child = find_pid(pid);
 	if (child >= 0) {
+	    if (!sig)
+		return 0;
 	    hProcess = w32_child_handles[child];
 	    if (TerminateProcess(hProcess, sig)) {
 		remove_dead_process(child);
@@ -1009,9 +1020,13 @@ win32_kill(int pid, int sig)
 	}
 	else {
 	    hProcess = OpenProcess(PROCESS_ALL_ACCESS, TRUE, pid);
-	    if (hProcess && TerminateProcess(hProcess, sig)) {
-		CloseHandle(hProcess);
-		return 0;
+	    if (hProcess) {
+		if (!sig)
+		    return 0;
+		if (TerminateProcess(hProcess, sig)) {
+		    CloseHandle(hProcess);
+		    return 0;
+		}
 	    }
 	}
     }

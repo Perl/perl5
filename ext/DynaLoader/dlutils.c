@@ -3,6 +3,9 @@
  * Currently this file is simply #included into dl_*.xs/.c files.
  * It should really be split into a dlutils.h and dlutils.c
  *
+ * Modified:
+ * 29th Feburary 2000 - Alan Burlison: Added functionality to close dlopen'd
+ *                      files when the interpreter exits
  */
 
 
@@ -25,6 +28,31 @@ static int dl_debug = 0;	/* value copied from $DynaLoader::dl_error */
 #endif
 
 
+/* Close all dlopen'd files */
+static void
+dl_unload_all_files(pTHXo_ void *unused)
+{
+    CV *sub;
+    AV *dl_librefs;
+    SV *dl_libref;
+
+    if ((sub = get_cv("DynaLoader::dl_unload_file", FALSE)) != NULL) {
+        dl_librefs = get_av("DynaLoader::dl_librefs", FALSE);
+        while ((dl_libref = av_pop(dl_librefs)) != &PL_sv_undef) {
+           dSP;
+           ENTER;
+           SAVETMPS;
+           PUSHMARK(SP);
+           XPUSHs(sv_2mortal(dl_libref));
+           PUTBACK;
+           call_sv((SV*)sub, G_DISCARD);
+           FREETMPS;
+           LEAVE;
+        }
+    }
+}
+
+
 static void
 dl_generic_private_init(pTHXo)	/* called by dl_*.xs dl_private_init() */
 {
@@ -41,6 +69,7 @@ dl_generic_private_init(pTHXo)	/* called by dl_*.xs dl_private_init() */
     if (!dl_loaded_files)
 	dl_loaded_files = newHV(); /* provide cache for dl_*.xs if needed */
 #endif
+    call_atexit(&dl_unload_all_files, (void*)0);
 }
 
 
