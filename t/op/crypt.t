@@ -14,7 +14,7 @@ BEGIN {
         skip_all("crypt unimplemented");
     }
     else {
-        plan(tests => 2);
+        plan(tests => 4);
     }
 }
 
@@ -30,4 +30,14 @@ BEGIN {
 
 ok(substr(crypt("ab", "cd"), 2) ne substr(crypt("ab", "ce"), 2), "salt makes a difference");
 
-ok(crypt("HI", "HO") eq crypt(join("",map{chr($_+256)}unpack"C*","HI"), "HO"), "low eight bits of Unicode");
+$a = "a\xFF\x{100}";
+
+eval {$b = crypt($a, "cd")};
+like($@, qr/Wide character in crypt/, "wide characters ungood");
+
+chop $a; # throw away the wide character
+
+eval {$b = crypt($a, "cd")};
+is($@, '',                   "downgrade to eight bit characters");
+is($b, crypt("a\xFF", "cd"), "downgrade results agree");
+

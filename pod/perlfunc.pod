@@ -865,10 +865,12 @@ back.  Look at the F<by-module/Crypt> and F<by-module/PGP> directories
 on your favorite CPAN mirror for a slew of potentially useful
 modules.
 
-If using crypt() on a Unicode string (which potentially has
-characters with codepoints above 255), Perl tries to make sense of
-the situation by using only the low eight bits of the characters when
-calling crypt().
+If using crypt() on a Unicode string (which I<potentially> has
+characters with codepoints above 255), Perl tries to make sense
+of the situation by trying to downgrade (a copy of the string)
+the string back to an eight-bit byte string before calling crypt()
+(on that copy).  If that works, good.  If not, crypt() dies with
+C<Wide character in crypt>.
 
 =item dbmclose HASH
 
