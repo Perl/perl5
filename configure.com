@@ -2707,7 +2707,12 @@ $ make = F$EDIT(build,"UPCASE")
 $!
 $!: locate the preferred pager for this system
 $!pagers = "most|more|less|type/page"
-$ dflt = "type/page"
+$ IF osvers .GES. "V6.1"
+$ THEN
+$   dflt = "type/page=save=10"
+$ ELSE
+$   dflt = "type/page"
+$ ENDIF
 $! assume that the presence of a most symbol indicates the presence
 $! of the pager.
 $ IF F$TYPE(most) .EQS. "STRING" THEN dflt = "most"
@@ -4677,14 +4682,13 @@ $   d_truncate="define"
 $   d_wait4="define"
 $   d_index="define"
 $   pidtype="pid_t"
-$   sig_name="ZERO HUP INT QUIT ILL TRAP IOT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM ABRT USR1 USR2 SPARE18 SPARE19 CHLD CONT STOP TSTP TTIN TTOU DEBUG SPARE27 SPARE28 SPARE29 SPARE30 SPARE31 SPARE32 RTMIN RTMAX"",0"
+$   sig_name="ZERO HUP INT QUIT ILL TRAP IOT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM ABRT USR1 USR2 SPARE18 SPARE19 CHLD CONT STOP TSTP TTIN TTOU DEBUG SPARE27 SPARE28 SPARE29 SPARE30 SPARE31 SPARE32 RTMIN RTMAX"
 $   psnwc1="""ZERO"",""HUP"",""INT"",""QUIT"",""ILL"",""TRAP"",""IOT"",""EMT"",""FPE"",""KILL"",""BUS"",""SEGV"",""SYS"","
 $   psnwc2="""PIPE"",""ALRM"",""TERM"",""ABRT"",""USR1"",""USR2"",""SPARE18"",""SPARE19"",""CHLD"",""CONT"",""STOP"",""TSTP"","
 $   psnwc3="""TTIN"",""TTOU"",""DEBUG"",""SPARE27"",""SPARE28"",""SPARE29"",""SPARE30"",""SPARE31"",""SPARE32"",""RTMIN"",""RTMAX"",0"
 $   sig_name_init = psnwc1 + psnwc2 + psnwc3
-$   sig_num="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 6 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 64"",0"
+$   sig_num="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 6 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 64"
 $   sig_num_init="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,6,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,64,0"
-$!   perl_sig_num_with_commas=sig_num_init
 $   sig_size="36"
 $   uidtype="uid_t"
 $   d_pathconf="define"
@@ -4709,13 +4713,12 @@ $   d_sigprocmask="undef"
 $   d_truncate="undef"
 $   d_wait4="undef"
 $   d_index="undef"
-$   sig_name="ZERO HUP INT QUIT ILL TRAP IOT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM ABRT USR1 USR2"",0"
+$   sig_name="ZERO HUP INT QUIT ILL TRAP IOT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM ABRT USR1 USR2"
 $   psnwc1="""ZERO"",""HUP"",""INT"",""QUIT"",""ILL"",""TRAP"",""IOT"",""EMT"",""FPE"",""KILL"",""BUS"",""SEGV"",""SYS"","
 $   psnwc2="""PIPE"",""ALRM"",""TERM"",""ABRT"",""USR1"",""USR2"",0"
 $   sig_name_init = psnwc1 + psnwc2
-$   sig_num="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 6 16 17"",0"
+$   sig_num="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 6 16 17"
 $   sig_num_init="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,6,16,17,0"
-$!   perl_sig_num_with_commas=sig_num_init
 $   sig_size="19"
 $   uidtype="unsigned int"
 $   d_pathconf="undef"
@@ -5051,20 +5054,20 @@ $!      sigusr1 and sigusr2 show up in VMS6.2 and later
 $!
 $       if  vms_ver .GES. "6.2"
 $       then
-$           sig_name="ZERO HUP INT QUIT ILL TRAP IOT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM ABRT USR1 USR2"",0"
+$           sig_name="ZERO HUP INT QUIT ILL TRAP IOT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM ABRT USR1 USR2"
 $           psnwc1="""ZERO"",""HUP"",""INT"",""QUIT"",""ILL"",""TRAP"",""IOT"",""EMT"",""FPE"",""KILL"",""BUS"",""SEGV"",""SYS"","
 $           psnwc2="""PIPE"",""ALRM"",""TERM"",""ABRT"",""USR1"",""USR2"",0"
 $           sig_name_init = psnwc1 + psnwc2
-$           sig_num="0 1 2 3 4 5 6 7 8 9 10 10 12 13 14 15 6 16 17"",0"
-$           sig_num_init="0,1,2,3,4,5,6,7,8,9,10,10,12,13,14,15,6,16,17,0"
+$           sig_num="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 6 16 17"
+$           sig_num_init="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,6,16,17,0"
 $           sig_size="19"
 $       else
-$           sig_name="ZERO HUP INT QUIT ILL TRAP IOT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM ABRT"",0"
+$           sig_name="ZERO HUP INT QUIT ILL TRAP IOT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM ABRT"
 $           psnwc1="""ZERO"",""HUP"",""INT"",""QUIT"",""ILL"",""TRAP"",""IOT"",""EMT"",""FPE"",""KILL"",""BUS"",""SEGV"",""SYS"","
 $           psnwc2="""PIPE"",""ALRM"",""TERM"",""ABRT"",0"
 $           sig_name_init = psnwc1 + psnwc2
-$           sig_num="0 1 2 3 4 5 6 7 8 9 10 10 12 13 14 15 6"",0"
-$           sig_num_init="0,1,2,3,4,5,6,7,8,9,10,10,12,13,14,15,6,0"
+$           sig_num="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 6"
+$           sig_num_init="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,6,0"
 $           sig_size="17"
 $       endif
 $   ELSE
@@ -5861,14 +5864,6 @@ $   WC "d_asctime_r='undef'"
 $   WC "ctime_r_proto='0'"
 $   WC "d_ctime_r='undef'"
 $ ENDIF
-$ IF use_threads .AND. vms_ver .GES. "7.3-1"
-$ THEN
-$   WC "readdir_r_proto='REENTRANT_PROTO_I_TSR'"
-$   WC "d_readdir_r='define'"
-$ ELSE
-$   WC "readdir_r_proto='0'"
-$   WC "d_readdir_r='undef'"
-$ ENDIF
 $ WC "d_crypt_r='undef'"
 $ WC "d_ctermid_r='undef'"
 $ WC "d_drand48_r='undef'"
@@ -5901,6 +5896,7 @@ $ WC "d_getspnam_r='undef'"
 $ WC "d_gmtime_r='undef'"      ! leave undef'd; we use my_gmtime
 $ WC "d_localtime_r='undef'"   ! leave undef'd; we use my_localtime
 $ WC "d_random_r='undef'"
+$ WC "d_readdir_r='undef'"	! leave undef'd; we use Perl_readdir
 $ WC "d_readdir64_r='undef'"
 $ WC "d_setgrent_r='undef'"
 $ WC "d_sethostent_r='undef'"
@@ -5946,6 +5942,7 @@ $ WC "getspnam_r_proto='0'"
 $ WC "gmtime_r_proto='0'"
 $ WC "localtime_r_proto='0'"
 $ WC "random_r_proto='0'"
+$ WC "readdir_r_proto='0'"	! leave undef'd; we use Perl_readdir
 $ WC "readdir64_r_proto='0'"
 $ WC "setgrent_r_proto='0'"
 $ WC "sethostent_r_proto='0'"
