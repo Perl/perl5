@@ -345,10 +345,24 @@ case "$usethreads" in
 $define|true|[yY]*)
         ccflags="-D_REENTRANT $ccflags"
 
-	sched_yield='yield'
+	# -lpthread overrides some lib C functions, so put it before c.
         set `echo X "$libswanted "| sed -e "s/ c / pthread c /"`
         shift
         libswanted="$*"
+
+	# sched_yield is available in the -lrt library.  However,
+	# we can also pick up the equivalent yield() function in the
+	# normal C library.  To avoid pulling in unnecessary
+	# libraries, we'll normally avoid sched_yield()/-lrt and
+	# just use yield().  However, we'll honor a command-line
+	# override : "-Dsched_yield=sched_yield".
+	# If we end up using sched_yield, we're going to need -lrt.
+	sched_yield=${sched_yield:-yield}
+	if test "$sched_yield" = "sched_yield"; then
+	    set `echo X "$libswanted "| sed -e "s/ pthread / rt pthread /"`
+	    shift
+	    libswanted="$*"
+	fi
 
         # On Solaris 2.6 x86 there is a bug with sigsetjmp() and siglongjmp()
         # when linked with the threads library, such that whatever positive
