@@ -53,6 +53,11 @@
  */
 #define SH_PATH_INI SH_PATH  /**/
 
+#if defined(I_SYS_UN) && !defined(TCPIPV4)
+/* It is not working without TCPIPV4 defined. */
+# undef I_SYS_UN
+#endif 
+ 
 void Perl_OS2_init();
 
 #define PERL_SYS_INIT(argcp, argvp) STMT_START {	\
@@ -68,22 +73,32 @@ void Perl_OS2_init();
 #define dXSUB_SYS int fake = OS2_XS_init()
 
 #ifdef PERL_IS_AOUT
-#  define HAS_FORK
+/* #  define HAS_FORK */
 /* #  define HIDEMYMALLOC */
 /* #  define PERL_SBRK_VIA_MALLOC */ /* gets off-page sbrk... */
 #else /* !PERL_IS_AOUT */
 #  ifndef PERL_FOR_X2P
-#    define USE_PERL_SBRK
+#    ifdef EMX_BAD_SBRK
+#      define USE_PERL_SBRK
+#    endif 
+#  else
+#    define PerlIO FILE
 #  endif 
 #  define SYSTEM_ALLOC(a) sys_alloc(a)
 
 void *sys_alloc(int size);
 
 #endif /* !PERL_IS_AOUT */
+#if !defined(PERL_CORE) && !defined(PerlIO) /* a2p */
+#  define PerlIO FILE
+#endif 
 
 #define TMPPATH tmppath
 #define TMPPATH1 "plXXXXXX"
 extern char *tmppath;
+PerlIO *my_syspopen(char *cmd, char *mode);
+/* Cannot prototype with I32 at this point. */
+int my_syspclose(PerlIO *f);
 
 /*
  * fwrite1() should be a routine with the same calling sequence as fwrite(),
@@ -158,7 +173,7 @@ extern OS2_Perl_data_t OS2_Perl_data;
 #define set_Perl_HAB(h) (set_Perl_HAB_f, Perl_hab = h)
 #define OS2_XS_init() (*OS2_Perl_data.xs_init)()
 /* The expressions below return true on error. */
-/* INCL_DOSERRORS needed. */
+/* INCL_DOSERRORS needed. rc should be declared outside. */
 #define CheckOSError(expr) (!(rc = (expr)) ? 0 : (FillOSError(rc), 1))
 /* INCL_WINERRORS needed. */
 #define SaveWinError(expr) ((expr) ? : (FillWinError, 0))
