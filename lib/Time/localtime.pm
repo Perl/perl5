@@ -4,7 +4,7 @@ use Time::tm;
 
 BEGIN { 
     use Exporter   ();
-    use vars       qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+    use vars       qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $VERSION);
     @ISA         = qw(Exporter Time::tm);
     @EXPORT      = qw(localtime ctime);
     @EXPORT_OK   = qw(  
@@ -13,6 +13,7 @@ BEGIN {
 			$tm_isdst
 		    );
     %EXPORT_TAGS = ( FIELDS => [ @EXPORT_OK, @EXPORT ] );
+    $VERSION     = 1.01;
 }
 use vars      @EXPORT_OK;
 
@@ -27,8 +28,8 @@ sub populate (@) {
     return $tmob;
 } 
 
-sub localtime (;$) { populate CORE::localtime(shift||time)}
-sub ctime (;$)     { scalar   CORE::localtime(shift||time) } 
+sub localtime (;$) { populate CORE::localtime(@_ ? shift : time)}
+sub ctime (;$)     { scalar   CORE::localtime(@_ ? shift : time) } 
 
 1;
 

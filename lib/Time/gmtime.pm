@@ -4,7 +4,7 @@ use Time::tm;
 
 BEGIN { 
     use Exporter   ();
-    use vars       qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+    use vars       qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $VERSION);
     @ISA         = qw(Exporter Time::tm);
     @EXPORT      = qw(gmtime gmctime);
     @EXPORT_OK   = qw(  
@@ -13,6 +13,7 @@ BEGIN {
 			$tm_isdst
 		    );
     %EXPORT_TAGS = ( FIELDS => [ @EXPORT_OK, @EXPORT ] );
+    $VERSION     = 1.01;
 }
 use vars      @EXPORT_OK;
 
@@ -27,8 +28,8 @@ sub populate (@) {
     return $tmob;
 } 
 
-sub gmtime (;$)    { populate CORE::gmtime(shift||time)}
-sub gmctime (;$)   { scalar   CORE::gmtime(shift||time)} 
+sub gmtime (;$)    { populate CORE::gmtime(@_ ? shift : time)}
+sub gmctime (;$)   { scalar   CORE::gmtime(@_ ? shift : time)} 
 
 1;
 __END__
