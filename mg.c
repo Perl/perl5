@@ -12,6 +12,10 @@
  * come here, and I don't want to see no more magic,' he said, and fell silent."
  */
 
+/*
+=head1 Magical Functions
+*/
+
 #include "EXTERN.h"
 #define PERL_IN_MG_C
 #include "perl.h"

@@ -216,6 +216,8 @@ S_del_sv(pTHX_ SV *p)
 
 
 /*
+=head1 SV Manipulation Functions
+
 =for apidoc sv_add_arena
 
 Given a chunk of memory, link it to the head of the list of arenas,
@@ -10386,6 +10388,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #endif /* USE_ITHREADS */
 
 /*
+=head1 Unicode Support
+
 =for apidoc sv_recode_to_utf8
 
 The encoding is assumed to be an Encode object, on entry the PV

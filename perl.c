@@ -102,6 +102,8 @@ perl_alloc_using(struct IPerlMem* ipM, struct IPerlMem* ipMS,
 #else
 
 /*
+=head1 Embedding Functions
+
 =for apidoc perl_alloc
 
 Allocates a new Perl interpreter.  See L<perlembed>.
@@ -1622,6 +1624,8 @@ S_run_body(pTHX_ I32 oldscope)
 }
 
 /*
+=head1 SV Manipulation Functions
+
 =for apidoc p||get_sv
 
 Returns the SV of the specified Perl scalar.  If C<create> is set and the
@@ -1649,6 +1653,8 @@ Perl_get_sv(pTHX_ const char *name, I32 create)
 }
 
 /*
+=head1 Array Manipulation Functions
+
 =for apidoc p||get_av
 
 Returns the AV of the specified Perl array.  If C<create> is set and the
@@ -1670,6 +1676,8 @@ Perl_get_av(pTHX_ const char *name, I32 create)
 }
 
 /*
+=head1 Hash Manipulation Functions
+
 =for apidoc p||get_hv
 
 Returns the HV of the specified Perl hash.  If C<create> is set and the
@@ -1691,6 +1699,8 @@ Perl_get_hv(pTHX_ const char *name, I32 create)
 }
 
 /*
+=head1 CV Manipulation Functions
+
 =for apidoc p||get_cv
 
 Returns the CV of the specified Perl subroutine.  If C<create> is set and
@@ -1722,6 +1732,9 @@ Perl_get_cv(pTHX_ const char *name, I32 create)
 /* Be sure to refetch the stack pointer after calling these routines. */
 
 /*
+
+=head1 Callback Functions
+
 =for apidoc p||call_argv
 
 Performs a callback to the specified Perl sub.  See L<perlcall>.
@@ -2103,6 +2116,8 @@ Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
 /* Require a module. */
 
 /*
+=head1 Embedding Functions
+
 =for apidoc p||require_pv
 
 Tells Perl to C<require> the file named by the string argument.  It is

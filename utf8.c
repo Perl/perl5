@@ -24,9 +24,9 @@
 #define PERL_IN_UTF8_C
 #include "perl.h"
 
-/* Unicode support */
+/* 
+=head1 Unicode Support
 
-/*
 =for apidoc A|U8 *|uvuni_to_utf8_flags|U8 *d|UV uv|UV flags
 
 Adds the UTF8 representation of the Unicode codepoint C<uv> to the end

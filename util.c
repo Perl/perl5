@@ -488,6 +488,8 @@ Perl_rninstr(pTHX_ register const char *big, const char *bigend, const char *lit
    If FBMcf_TAIL, the table is created as if the string has a trailing \n. */
 
 /*
+=head1 Miscellaneous Functions
+
 =for apidoc fbm_compile
 
 Analyses the string in order to make fast searches on it using fbm_instr()
@@ -877,6 +879,8 @@ Perl_ibcmp_locale(pTHX_ const char *s1, const char *s2, register I32 len)
 /* copy a string to a safe spot */
 
 /*
+=head1 Memory Management
+
 =for apidoc savepv
 
 Copy a string to a safe spot.  This does not use an SV.
@@ -955,6 +959,7 @@ Perl_form_nocontext(const char* pat, ...)
 #endif /* PERL_IMPLICIT_CONTEXT */
 
 /*
+=head1 Miscellaneous Functions
 =for apidoc form
 
 Takes a sprintf-style format pattern and conventional
@@ -1285,6 +1290,8 @@ Perl_croak_nocontext(const char *pat, ...)
 #endif /* PERL_IMPLICIT_CONTEXT */
 
 /*
+=head1 Warning and Dieing
+
 =for apidoc croak
 
 This is the XSUB-writer's interface to Perl's C<die> function.
@@ -3759,6 +3766,8 @@ return FALSE
         (dp->d_name[1] == '.' && dp->d_name[2] == '\0')))
 
 /*
+=head1 Miscellaneous Functions
+
 =for apidoc getcwd_sv
 
 Fill the sv with current working directory
@@ -3921,6 +3930,8 @@ Perl_getcwd_sv(pTHX_ register SV *sv)
 }
 
 /*
+=head1 SV Manipulation Functions
+
 =for apidoc new_vstring
 
 Returns a pointer to the next character after the parsed

@@ -2106,6 +2106,8 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 #endif /* SYSV IPC */
 
 /*
+=head1 IO Functions
+
 =for apidoc start_glob
 
 Function called by C<do_readline> to spawn a glob (or do the glob inside
