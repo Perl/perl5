@@ -575,6 +575,18 @@ print qw(ab a\b a\\b);
 EXPECT
 aba\ba\b
 ########
+# lexicals declared after the myeval() definition should not be visible
+# within it
+sub myeval { eval $_[0] }
+my $foo = "ok 2\n";
+myeval('sub foo { local $foo = "ok 1\n"; print $foo; }');
+die $@ if $@;
+foo();
+print $foo;
+EXPECT
+ok 1
+ok 2
+########
 # This test is here instead of pragma/locale.t because
 # the bug depends on in the internal state of the locale
 # settings and pragma/locale messes up that state pretty badly.

@@ -1572,12 +1572,12 @@ case 1:
 #if defined(YYDEBUG) && defined(DEBUGGING)
 		    yydebug = (DEBUG_p_TEST);
 #endif
-		    PL_expect = XSTATE;
+		    PL_expect = XSTATE; yyval.ival = block_start(TRUE);
 		}
 break;
 case 2:
 #line 135 "perly.y"
-{ newPROG(yyvsp[0].opval); }
+{ newPROG(block_end(yyvsp[-1].ival,yyvsp[0].opval)); }
 break;
 case 3:
 #line 139 "perly.y"
