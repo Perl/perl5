@@ -1314,8 +1314,12 @@ byte-encoded.
 
 In Perl 5.8.0 the slowness was often quite spectacular; in Perl 5.8.1
 a caching scheme was introduced which will hopefully make the slowness
-somewhat less spectacular.  Operations with UTF-8 encoded strings are
-still slower, though.
+somewhat less spectacular, at least for some operations.  In general,
+operations with UTF-8 encoded strings are still slower. As an example,
+the Unicode properties (character classes) like C<\p{Nd}> are known to
+be quite a bit slower (5-20 times) than their simpler counterparts
+like C<\d> (then again, there 268 Unicode characters matching C<Nd>
+compared with the 10 ASCII characters matching C<d>).
 
 =head2 Porting code from perl-5.6.X
 
