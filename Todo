@@ -41,7 +41,6 @@ Optimizations
 	Cache hash value?  (Not a win, according to Guido)
 	Optimize away @_ where possible
 	"one pass" global destruction
-	Optimize sort by { $a <=> $b }
 	Rewrite regexp parser for better integrated optimization
 	LRU cache of regexp: foreach $pat (@pats) { foo() if /$pat/ }
 

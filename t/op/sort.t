@@ -1,6 +1,10 @@
 #!./perl
 
-print "1..29\n";
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+}
+print "1..37\n";
 
 # XXX known to leak scalars
 $ENV{PERL_DESTRUCT_LEVEL} = 0 unless $ENV{PERL_DESTRUCT_LEVEL} > 3;
@@ -157,3 +161,39 @@ print $@ ? "not ok 21\n# $@" : "ok 21\n";
   print ("@b" eq '4 3 2 1' ? "ok 29\n" : "not ok 29 |@b|\n");
 }
 
+## exercise sort builtins... ($a <=> $b already tested)
+@a = ( 5, 19, 1996, 255, 90 );
+@b = sort { $b <=> $a } @a;
+print ("@b" eq '1996 255 90 19 5' ? "ok 30\n" : "not ok 30\n");
+print "# x = '@b'\n";
+$x = join('', sort { $a cmp $b } @harry);
+$expected = $upperfirst ? 'AbelCaincatdogx' : 'catdogxAbelCain';
+print ($x eq $expected ? "ok 31\n" : "not ok 31\n");
+print "# x = '$x'; expected = '$expected'\n";
+$x = join('', sort { $b cmp $a } @harry);
+$expected = $upperfirst ? 'xdogcatCainAbel' : 'CainAbelxdogcat';
+print ($x eq $expected ? "ok 32\n" : "not ok 32\n");
+print "# x = '$x'; expected = '$expected'\n";
+{
+    use integer;
+    @b = sort { $a <=> $b } @a;
+    print ("@b" eq '5 19 90 255 1996' ? "ok 33\n" : "not ok 33\n");
+    print "# x = '@b'\n";
+    @b = sort { $b <=> $a } @a;
+    print ("@b" eq '1996 255 90 19 5' ? "ok 34\n" : "not ok 34\n");
+    print "# x = '@b'\n";
+    $x = join('', sort { $a cmp $b } @harry);
+    $expected = $upperfirst ? 'AbelCaincatdogx' : 'catdogxAbelCain';
+    print ($x eq $expected ? "ok 35\n" : "not ok 35\n");
+    print "# x = '$x'; expected = '$expected'\n";
+    $x = join('', sort { $b cmp $a } @harry);
+    $expected = $upperfirst ? 'xdogcatCainAbel' : 'CainAbelxdogcat';
+    print ($x eq $expected ? "ok 36\n" : "not ok 36\n");
+    print "# x = '$x'; expected = '$expected'\n";
+}
+# test sorting in non-main package
+package Foo;
+@a = ( 5, 19, 1996, 255, 90 );
+@b = sort { $b <=> $a } @a;
+print ("@b" eq '1996 255 90 19 5' ? "ok 37\n" : "not ok 37\n");
+print "# x = '@b'\n";

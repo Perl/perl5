@@ -146,6 +146,10 @@ typedef U32 PADOFFSET;
 /* Private for OP_SORT, OP_PRTF, OP_SPRINTF, string cmp'n, and case changers */
 #define OPpLOCALE		64	/* Use locale */
 
+/* Private for OP_SORT */
+#define OPpSORT_NUMERIC		1	/* Optimized away { $a <=> $b } */
+#define OPpSORT_INTEGER		2	/* Ditto while under "use integer" */
+#define OPpSORT_REVERSE		4	/* Descending sort */
 /* Private for OP_THREADSV */
 #define OPpDONE_SVREF		64	/* Been through newSVREF once */
 
