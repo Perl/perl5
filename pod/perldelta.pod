@@ -25,7 +25,7 @@ releases, and the development releases.
                                5.7.2        2001-Jul-13
                                5.7.3        2002-Mar-05
           5.8.0                             2002-Jul-18
-                  5.8.1                     2003-Sep-
+                  5.8.1                     2003-Sep-25
 
 =head1 Incompatible Changes
 
