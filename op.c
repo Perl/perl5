@@ -2168,7 +2168,7 @@ pmruntime(OP *o, OP *expr, OP *repl)
 #ifdef USE_THREADS
 		    if (curop->op_type == OP_THREADSV) {
 			repl_has_vars = 1;
-			if (strchr("&`'123456789+", curop->op_private)) {
+			if (strchr("&`'123456789+", curop->op_private))
 			    break;
 		    }
 #else
