@@ -2286,7 +2286,8 @@ SV is set to 1.
 =item newSVpv
 
 Creates a new SV and copies a string into it.  The reference count for the
-SV is set to 1.  If C<len> is zero then Perl will compute the length.
+SV is set to 1.  If C<len> is zero, Perl will compute the length using
+strlen().  For efficiency, consider using C<newSVpvn> instead.
 
 	SV*	newSVpv (const char* s, STRLEN len)
 
@@ -2295,13 +2296,14 @@ SV is set to 1.  If C<len> is zero then Perl will compute the length.
 Creates a new SV an initialize it with the string formatted like
 C<sprintf>.
 
-	SV*     newSVpvf(const char* pat, ...);
+	SV*     newSVpvf(const char* pat, ...)
 
 =item newSVpvn
 
 Creates a new SV and copies a string into it.  The reference count for the
-SV is set to 1.  If C<len> is zero then Perl will create a zero length 
-string.
+SV is set to 1.  Note that if C<len> is zero, Perl will create a zero length 
+string.  You are responsible for ensuring that the source string is at least
+C<len> bytes long.
 
 	SV*	newSVpvn (const char* s, STRLEN len)
 

@@ -388,7 +388,7 @@ PPCODE:
     char **op_desc = get_op_descs(); 
     /* copy args to a scratch area since we may push output values onto	*/
     /* the stack faster than we read values off it if masks are used.	*/
-    args = (SV**)SvPVX(sv_2mortal(newSVpv((char*)&ST(0), items*sizeof(SV*))));
+    args = (SV**)SvPVX(sv_2mortal(newSVpvn((char*)&ST(0), items*sizeof(SV*))));
     for (i = 0; i < items; i++) {
 	char *opname = SvPV(args[i], len);
 	SV *bitspec = get_op_bitspec(opname, len, 1);

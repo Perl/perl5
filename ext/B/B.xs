@@ -221,7 +221,7 @@ make_mg_object(SV *arg, MAGIC *mg)
 static SV *
 cstring(SV *sv)
 {
-    SV *sstr = newSVpv("", 0);
+    SV *sstr = newSVpvn("", 0);
     STRLEN len;
     char *s;
 
@@ -274,7 +274,7 @@ cstring(SV *sv)
 static SV *
 cchar(SV *sv)
 {
-    SV *sstr = newSVpv("'", 0);
+    SV *sstr = newSVpvn("'", 1);
     STRLEN n_a;
     char *s = SvPV(sv, n_a);
 
@@ -600,7 +600,7 @@ threadsv_names()
 
 	EXTEND(sp, len);
 	for (i = 0; i < len; i++)
-	    PUSHs(sv_2mortal(newSVpv(&PL_threadsv_names[i], 1)));
+	    PUSHs(sv_2mortal(newSVpvn(&PL_threadsv_names[i], 1)));
 #endif
 
 
@@ -879,10 +879,10 @@ packiv(sv)
 	     */
 	    wp[0] = htonl(((U32)iv) >> (sizeof(IV)*4));
 	    wp[1] = htonl(iv & 0xffffffff);
-	    ST(0) = sv_2mortal(newSVpv((char *)wp, 8));
+	    ST(0) = sv_2mortal(newSVpvn((char *)wp, 8));
 	} else {
 	    U32 w = htonl((U32)SvIVX(sv));
-	    ST(0) = sv_2mortal(newSVpv((char *)&w, 4));
+	    ST(0) = sv_2mortal(newSVpvn((char *)&w, 4));
 	}
 
 MODULE = B	PACKAGE = B::NV		PREFIX = Sv
@@ -1013,7 +1013,7 @@ BmTABLE(sv)
     CODE:
 	str = SvPV(sv, len);
 	/* Boyer-Moore table is just after string and its safety-margin \0 */
-	ST(0) = sv_2mortal(newSVpv(str + len + 1, 256));
+	ST(0) = sv_2mortal(newSVpvn(str + len + 1, 256));
 
 MODULE = B	PACKAGE = B::GV		PREFIX = Gv
 
@@ -1021,7 +1021,7 @@ void
 GvNAME(gv)
 	B::GV	gv
     CODE:
-	ST(0) = sv_2mortal(newSVpv(GvNAME(gv), GvNAMELEN(gv)));
+	ST(0) = sv_2mortal(newSVpvn(GvNAME(gv), GvNAMELEN(gv)));
 
 B::HV
 GvSTASH(gv)
@@ -1257,7 +1257,7 @@ HvARRAY(hv)
 	    (void)hv_iterinit(hv);
 	    EXTEND(sp, HvKEYS(hv) * 2);
 	    while (sv = hv_iternextsv(hv, &key, &len)) {
-		PUSHs(newSVpv(key, len));
+		PUSHs(newSVpvn(key, len));
 		PUSHs(make_sv_object(sv_newmortal(), sv));
 	    }
 	}

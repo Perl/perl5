@@ -135,6 +135,19 @@ savestack_grow(void)
 #undef GROW
 
 void
+tmps_grow(I32 n)
+{
+    dTHR;
+#ifndef STRESS_REALLOC
+    if (n < 128)
+	n = (PL_tmps_max < 512) ? 128 : 512;
+#endif
+    PL_tmps_max = PL_tmps_ix + n + 1;
+    Renew(PL_tmps_stack, PL_tmps_max, SV*);
+}
+
+
+void
 free_tmps(void)
 {
     dTHR;
@@ -742,12 +755,8 @@ leave_scope(I32 base)
 	    sv = *(SV**)ptr;
 	    /* Can clear pad variable in place? */
 	    if (SvREFCNT(sv) <= 1 && !SvOBJECT(sv)) {
-		if (SvTHINKFIRST(sv)) {
-		    if (SvREADONLY(sv))
-			croak("panic: leave_scope clearsv");
-		    if (SvROK(sv))
-			sv_unref(sv);
-		}
+		if (SvTHINKFIRST(sv))
+		    sv_force_normal(sv);
 		if (SvMAGICAL(sv))
 		    mg_free(sv);
 

@@ -2573,7 +2573,7 @@ XS(w32_LoginName)
     EXTEND(SP,1);
     if (GetUserName(name,&size)) {
 	/* size includes NULL */
-	ST(0) = sv_2mortal(newSVpv(name,size-1));
+	ST(0) = sv_2mortal(newSVpvn(name,size-1));
 	XSRETURN(1);
     }
     XSRETURN_UNDEF;
@@ -2588,7 +2588,7 @@ XS(w32_NodeName)
     EXTEND(SP,1);
     if (GetComputerName(name,&size)) {
 	/* size does NOT include NULL :-( */
-	ST(0) = sv_2mortal(newSVpv(name,size));
+	ST(0) = sv_2mortal(newSVpvn(name,size));
 	XSRETURN(1);
     }
     XSRETURN_UNDEF;
@@ -2648,7 +2648,7 @@ XS(w32_FsType)
     if (GetVolumeInformation(NULL, NULL, 0, NULL, &filecomplen,
 			 &flags, fsname, sizeof(fsname))) {
 	if (GIMME_V == G_ARRAY) {
-	    XPUSHs(sv_2mortal(newSVpv(fsname,0)));
+	    XPUSHs(sv_2mortal(newSVpvn(fsname,strlen(fsname))));
 	    XPUSHs(sv_2mortal(newSViv(flags)));
 	    XPUSHs(sv_2mortal(newSViv(filecomplen)));
 	    PUTBACK;
@@ -2668,7 +2668,7 @@ XS(w32_GetOSVersion)
 
     osver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
     if (GetVersionEx(&osver)) {
-	XPUSHs(newSVpv(osver.szCSDVersion, 0));
+	XPUSHs(newSVpvn(osver.szCSDVersion, strlen(osver.szCSDVersion)));
 	XPUSHs(newSViv(osver.dwMajorVersion));
 	XPUSHs(newSViv(osver.dwMinorVersion));
 	XPUSHs(newSViv(osver.dwBuildNumber));

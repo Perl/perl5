@@ -2518,7 +2518,7 @@ GetBooleanArrayElements(array)
 	    }
 	    else {
 		if (RETVAL_len_) {
-		    PUSHs(sv_2mortal(newSVpv((char*)RETVAL,
+		    PUSHs(sv_2mortal(newSVpvn((char*)RETVAL,
 			(STRLEN)RETVAL_len_ * sizeof(jboolean))));
 		}
 		else
@@ -2548,7 +2548,7 @@ GetByteArrayElements(array)
 	    }
 	    else {
 		if (RETVAL_len_) {
-		    PUSHs(sv_2mortal(newSVpv((char*)RETVAL,
+		    PUSHs(sv_2mortal(newSVpvn((char*)RETVAL,
 			(STRLEN)RETVAL_len_ * sizeof(jbyte))));
 		}
 		else
@@ -2578,7 +2578,7 @@ GetCharArrayElements(array)
 	    }
 	    else {
 		if (RETVAL_len_) {
-		    PUSHs(sv_2mortal(newSVpv((char*)RETVAL,
+		    PUSHs(sv_2mortal(newSVpvn((char*)RETVAL,
 			(STRLEN)RETVAL_len_ * sizeof(jchar))));
 		}
 		else
@@ -2608,7 +2608,7 @@ GetShortArrayElements(array)
 	    }
 	    else {
 		if (RETVAL_len_) {
-		    PUSHs(sv_2mortal(newSVpv((char*)RETVAL,
+		    PUSHs(sv_2mortal(newSVpvn((char*)RETVAL,
 			(STRLEN)RETVAL_len_ * sizeof(jshort))));
 		}
 		else
@@ -2638,7 +2638,7 @@ GetIntArrayElements(array)
 	    }
 	    else {
 		if (RETVAL_len_) {
-		    PUSHs(sv_2mortal(newSVpv((char*)RETVAL,
+		    PUSHs(sv_2mortal(newSVpvn((char*)RETVAL,
 			(STRLEN)RETVAL_len_ * sizeof(jint))));
 		}
 		else
@@ -2668,7 +2668,7 @@ GetLongArrayElements(array)
 	    }
 	    else {
 		if (RETVAL_len_) {
-		    PUSHs(sv_2mortal(newSVpv((char*)RETVAL,
+		    PUSHs(sv_2mortal(newSVpvn((char*)RETVAL,
 			(STRLEN)RETVAL_len_ * sizeof(jlong))));
 		}
 		else
@@ -2698,7 +2698,7 @@ GetFloatArrayElements(array)
 	    }
 	    else {
 		if (RETVAL_len_) {
-		    PUSHs(sv_2mortal(newSVpv((char*)RETVAL,
+		    PUSHs(sv_2mortal(newSVpvn((char*)RETVAL,
 			(STRLEN)RETVAL_len_ * sizeof(jfloat))));
 		}
 		else
@@ -2728,7 +2728,7 @@ GetDoubleArrayElements(array)
 	    }
 	    else {
 		if (RETVAL_len_) {
-		    PUSHs(sv_2mortal(newSVpv((char*)RETVAL,
+		    PUSHs(sv_2mortal(newSVpvn((char*)RETVAL,
 			(STRLEN)RETVAL_len_ * sizeof(jdouble))));
 		}
 		else

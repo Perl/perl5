@@ -370,7 +370,7 @@ PP(pp_glob)
     PL_last_in_gv = (GV*)*PL_stack_sp--;
 
     SAVESPTR(PL_rs);		/* This is not permanent, either. */
-    PL_rs = sv_2mortal(newSVpv("", 1));
+    PL_rs = sv_2mortal(newSVpvn("\000", 1));
 #ifndef DOSISH
 #ifndef CSH
     *SvPVX(PL_rs) = '\n';
@@ -1639,7 +1639,7 @@ PP(pp_sysseek)
 	Off_t n = do_sysseek(gv, offset, whence);
 	PUSHs((n < 0) ? &PL_sv_undef
 	      : sv_2mortal(n ? newSViv((IV)n)
-			   : newSVpv(zero_but_true, ZBTLEN)));
+			   : newSVpvn(zero_but_true, ZBTLEN)));
     }
     RETURN;
 }
@@ -2332,7 +2332,7 @@ PP(pp_stat)
 #ifdef USE_STAT_RDEV
 	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_rdev)));
 #else
-	PUSHs(sv_2mortal(newSVpv("", 0)));
+	PUSHs(sv_2mortal(newSVpvn("", 0)));
 #endif
 	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_size)));
 #ifdef BIG_TIME
@@ -2348,8 +2348,8 @@ PP(pp_stat)
 	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_blksize)));
 	PUSHs(sv_2mortal(newSViv((I32)PL_statcache.st_blocks)));
 #else
-	PUSHs(sv_2mortal(newSVpv("", 0)));
-	PUSHs(sv_2mortal(newSVpv("", 0)));
+	PUSHs(sv_2mortal(newSVpvn("", 0)));
+	PUSHs(sv_2mortal(newSVpvn("", 0)));
 #endif
     }
     RETURN;
@@ -3235,7 +3235,7 @@ PP(pp_readdir)
 	/*SUPPRESS 560*/
 	while (dp = (Direntry_t *)PerlDir_read(IoDIRP(io))) {
 #ifdef DIRNAMLEN
-	    sv = newSVpv(dp->d_name, dp->d_namlen);
+	    sv = newSVpvn(dp->d_name, dp->d_namlen);
 #else
 	    sv = newSVpv(dp->d_name, 0);
 #endif
@@ -3249,7 +3249,7 @@ PP(pp_readdir)
 	if (!(dp = (Direntry_t *)PerlDir_read(IoDIRP(io))))
 	    goto nope;
 #ifdef DIRNAMLEN
-	sv = newSVpv(dp->d_name, dp->d_namlen);
+	sv = newSVpvn(dp->d_name, dp->d_namlen);
 #else
 	sv = newSVpv(dp->d_name, 0);
 #endif

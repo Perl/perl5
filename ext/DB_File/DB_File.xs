@@ -382,7 +382,7 @@ const DBT * key2 ;
     
     data1 = key1->data ;
     data2 = key2->data ;
-
+#if 0
     /* As newSVpv will assume that the data pointer is a null terminated C 
        string if the size parameter is 0, make sure that data points to an 
        empty string if the length is 0
@@ -391,14 +391,14 @@ const DBT * key2 ;
         data1 = "" ; 
     if (key2->size == 0)
         data2 = "" ;
-
+#endif
     ENTER ;
     SAVETMPS;
 
     PUSHMARK(SP) ;
     EXTEND(SP,2) ;
-    PUSHs(sv_2mortal(newSVpv(data1,key1->size)));
-    PUSHs(sv_2mortal(newSVpv(data2,key2->size)));
+    PUSHs(sv_2mortal(newSVpvn(data1,key1->size)));
+    PUSHs(sv_2mortal(newSVpvn(data2,key2->size)));
     PUTBACK ;
 
     count = perl_call_sv(CurrentDB->compare, G_SCALAR); 
@@ -429,7 +429,7 @@ const DBT * key2 ;
     
     data1 = key1->data ;
     data2 = key2->data ;
-
+#if 0
     /* As newSVpv will assume that the data pointer is a null terminated C 
        string if the size parameter is 0, make sure that data points to an 
        empty string if the length is 0
@@ -438,14 +438,14 @@ const DBT * key2 ;
         data1 = "" ;
     if (key2->size == 0)
         data2 = "" ;
-
+#endif
     ENTER ;
     SAVETMPS;
 
     PUSHMARK(SP) ;
     EXTEND(SP,2) ;
-    PUSHs(sv_2mortal(newSVpv(data1,key1->size)));
-    PUSHs(sv_2mortal(newSVpv(data2,key2->size)));
+    PUSHs(sv_2mortal(newSVpvn(data1,key1->size)));
+    PUSHs(sv_2mortal(newSVpvn(data2,key2->size)));
     PUTBACK ;
 
     count = perl_call_sv(CurrentDB->prefix, G_SCALAR); 
@@ -472,17 +472,17 @@ size_t size ;
     dSP ;
     int retval ;
     int count ;
-
+#if 0
     if (size == 0)
         data = "" ;
-
+#endif
      /* DGH - Next two lines added to fix corrupted stack problem */
     ENTER ;
     SAVETMPS;
 
     PUSHMARK(SP) ;
 
-    XPUSHs(sv_2mortal(newSVpv((char*)data,size)));
+    XPUSHs(sv_2mortal(newSVpvn((char*)data,size)));
     PUTBACK ;
 
     count = perl_call_sv(CurrentDB->hash, G_SCALAR); 

@@ -29,6 +29,6 @@ sub doconst
  my $l = length($sym);
  print OUT <<"END";
  newCONSTSUB(stash,"$sym",newSViv($sym)); 
- av_push(export_ok,newSVpv("$sym",$l));
+ av_push(export_ok,newSVpvn("$sym",$l));
 END
 }

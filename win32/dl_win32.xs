@@ -42,7 +42,7 @@ OS_Error_String(CPERLarg)
  DWORD err = GetLastError();
  STRLEN len;
  if (!error_sv)
-  error_sv = newSVpv("",0);
+  error_sv = newSVpvn("",0);
  win32_str_os_error(error_sv,err);
  return SvPV(error_sv,len);
 }

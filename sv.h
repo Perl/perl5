@@ -137,7 +137,7 @@ struct io {
 #define SVf_BREAK	0x00400000	/* refcnt is artificially low */
 #define SVf_READONLY	0x00800000	/* may not be modified */
 
-#define SVf_THINKFIRST	(SVf_READONLY|SVf_ROK)
+#define SVf_THINKFIRST	(SVf_READONLY|SVf_ROK|SVf_FAKE)
 
 #define SVp_IOK		0x01000000	/* has valid non-public integer value */
 #define SVp_NOK		0x02000000	/* has valid non-public numeric value */

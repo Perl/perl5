@@ -879,7 +879,7 @@ inet_ntoa(ip_address_sv)
 	Copy( ip_address, &addr, sizeof addr, char );
 	addr_str = inet_ntoa(addr);
 
-	ST(0) = sv_2mortal(newSVpv(addr_str, strlen(addr_str)));
+	ST(0) = sv_2mortal(newSVpvn(addr_str, strlen(addr_str)));
 	}
 
 void
@@ -896,7 +896,7 @@ pack_sockaddr_un(pathname)
 	if (len > sizeof(sun_ad.sun_path))
 	    len = sizeof(sun_ad.sun_path);
 	Copy( pathname, sun_ad.sun_path, len, char );
-	ST(0) = sv_2mortal(newSVpv((char *)&sun_ad, sizeof sun_ad));
+	ST(0) = sv_2mortal(newSVpvn((char *)&sun_ad, sizeof sun_ad));
 #else
 	ST(0) = (SV *) not_here("pack_sockaddr_un");
 #endif
@@ -931,7 +931,7 @@ unpack_sockaddr_un(sun_sv)
 	e = addr.sun_path;
 	while (*e && e < addr.sun_path + sizeof addr.sun_path)
 	    ++e;
-	ST(0) = sv_2mortal(newSVpv(addr.sun_path, e - addr.sun_path));
+	ST(0) = sv_2mortal(newSVpvn(addr.sun_path, e - addr.sun_path));
 #else
 	ST(0) = (SV *) not_here("unpack_sockaddr_un");
 #endif
@@ -950,7 +950,7 @@ pack_sockaddr_in(port,ip_address)
 	sin.sin_port = htons(port);
 	Copy( ip_address, &sin.sin_addr, sizeof sin.sin_addr, char );
 
-	ST(0) = sv_2mortal(newSVpv((char *)&sin, sizeof sin));
+	ST(0) = sv_2mortal(newSVpvn((char *)&sin, sizeof sin));
 	}
 
 void
@@ -980,7 +980,7 @@ unpack_sockaddr_in(sin_sv)
 
 	EXTEND(SP, 2);
 	PUSHs(sv_2mortal(newSViv((IV) port)));
-	PUSHs(sv_2mortal(newSVpv((char *)&ip_address,sizeof ip_address)));
+	PUSHs(sv_2mortal(newSVpvn((char *)&ip_address,sizeof ip_address)));
 	}
 
 void
@@ -989,7 +989,7 @@ INADDR_ANY()
 	{
 	struct in_addr	ip_address;
 	ip_address.s_addr = htonl(INADDR_ANY);
-	ST(0) = sv_2mortal(newSVpv((char *)&ip_address,sizeof ip_address ));
+	ST(0) = sv_2mortal(newSVpvn((char *)&ip_address,sizeof ip_address ));
 	}
 
 void
@@ -998,7 +998,7 @@ INADDR_LOOPBACK()
 	{
 	struct in_addr	ip_address;
 	ip_address.s_addr = htonl(INADDR_LOOPBACK);
-	ST(0) = sv_2mortal(newSVpv((char *)&ip_address,sizeof ip_address));
+	ST(0) = sv_2mortal(newSVpvn((char *)&ip_address,sizeof ip_address));
 	}
 
 void
@@ -1007,7 +1007,7 @@ INADDR_NONE()
 	{
 	struct in_addr	ip_address;
 	ip_address.s_addr = htonl(INADDR_NONE);
-	ST(0) = sv_2mortal(newSVpv((char *)&ip_address,sizeof ip_address));
+	ST(0) = sv_2mortal(newSVpvn((char *)&ip_address,sizeof ip_address));
 	}
 
 void
@@ -1016,5 +1016,5 @@ INADDR_BROADCAST()
 	{
 	struct in_addr	ip_address;
 	ip_address.s_addr = htonl(INADDR_BROADCAST);
-	ST(0) = sv_2mortal(newSVpv((char *)&ip_address,sizeof ip_address));
+	ST(0) = sv_2mortal(newSVpvn((char *)&ip_address,sizeof ip_address));
 	}

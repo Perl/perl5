@@ -216,7 +216,7 @@ dl_expandspec(filespec)
           ST(0) = &PL_sv_undef;
         }
         else {
-          ST(0) = sv_2mortal(newSVpv(dlnam.nam$l_rsa,dlnam.nam$b_rsl));
+          ST(0) = sv_2mortal(newSVpvn(dlnam.nam$l_rsa,dlnam.nam$b_rsl));
           DLDEBUG(1,PerlIO_printf(PerlIO_stderr(), "\tresult = \\%.*s\\\n",
                             dlnam.nam$b_rsl,dlnam.nam$l_rsa));
         }

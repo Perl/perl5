@@ -69,7 +69,7 @@ PPCODE:
     sv = *av_fetch(list,1,TRUE); ds.msg_perm.gid = SvIV(sv);
     sv = *av_fetch(list,4,TRUE); ds.msg_perm.mode = SvIV(sv);
     sv = *av_fetch(list,6,TRUE); ds.msg_qbytes = SvIV(sv);
-    ST(0) = sv_2mortal(newSVpv((char *)&ds,sizeof(ds)));
+    ST(0) = sv_2mortal(newSVpvn((char *)&ds,sizeof(ds)));
     XSRETURN(1);
 #else
     croak("System V msgxxx is not implemented on this machine");
@@ -185,7 +185,7 @@ PPCODE:
 	ds.sem_otime = SvIV(*sv_ptr);
     if((sv_ptr = av_fetch(list,7,TRUE)) && (sv = *sv_ptr))
 	ds.sem_nsems = SvIV(*sv_ptr);
-    ST(0) = sv_2mortal(newSVpv((char *)&ds,sizeof(ds)));
+    ST(0) = sv_2mortal(newSVpvn((char *)&ds,sizeof(ds)));
     XSRETURN(1);
 #else
     croak("System V semxxx is not implemented on this machine");

@@ -2189,7 +2189,7 @@ pmtrans(OP *o, OP *expr, OP *repl)
     squash	= o->op_private & OPpTRANS_SQUASH;
 
     if (o->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF)) {
-	SV* listsv = newSVpv("# comment\n",0);
+	SV* listsv = newSVpvn("# comment\n",10);
 	SV* transv = 0;
 	U8* tend = t + tlen;
 	U8* rend = r + rlen;
@@ -2217,7 +2217,7 @@ pmtrans(OP *o, OP *expr, OP *repl)
 	    UV nextmin = 0;
 	    New(1109, cp, tlen, U8*);
 	    i = 0;
-	    transv = newSVpv("",0);
+	    transv = newSVpvn("",0);
 	    while (t < tend) {
 		cp[i++] = t;
 		t += UTF8SKIP(t);
@@ -2706,7 +2706,7 @@ utilize(int aver, I32 floor, OP *version, OP *id, OP *arg)
 	    pack = newSVOP(OP_CONST, 0, newSVsv(((SVOP*)id)->op_sv));
 
 	    /* Fake up a method call to VERSION */
-	    meth = newSVOP(OP_CONST, 0, newSVpv("VERSION", 7));
+	    meth = newSVOP(OP_CONST, 0, newSVpvn("VERSION", 7));
 	    veop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
 			    append_elem(OP_LIST,
 			    prepend_elem(OP_LIST, pack, list(version)),
@@ -2725,8 +2725,8 @@ utilize(int aver, I32 floor, OP *version, OP *id, OP *arg)
 	pack = newSVOP(OP_CONST, 0, newSVsv(((SVOP*)id)->op_sv));
 	meth = newSVOP(OP_CONST, 0,
 	    aver
-		? newSVpv("import", 6)
-		: newSVpv("unimport", 8)
+		? newSVpvn("import", 6)
+		: newSVpvn("unimport", 8)
 	    );
 	imop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
 		    append_elem(OP_LIST,
@@ -2752,7 +2752,7 @@ utilize(int aver, I32 floor, OP *version, OP *id, OP *arg)
 
     /* Fake up the BEGIN {}, which does its thing immediately. */
     newSUB(floor,
-	newSVOP(OP_CONST, 0, newSVpv("BEGIN", 5)),
+	newSVOP(OP_CONST, 0, newSVpvn("BEGIN", 5)),
 	Nullop,
 	append_elem(OP_LINESEQ,
 	    append_elem(OP_LINESEQ,
@@ -5235,7 +5235,7 @@ ck_split(OP *o)
     op_free(cLISTOPo->op_first);
     cLISTOPo->op_first = kid;
     if (!kid) {
-	cLISTOPo->op_first = kid = newSVOP(OP_CONST, 0, newSVpv(" ", 1));
+	cLISTOPo->op_first = kid = newSVOP(OP_CONST, 0, newSVpvn(" ", 1));
 	cLISTOPo->op_last = kid; /* There was only one element previously */
     }
 

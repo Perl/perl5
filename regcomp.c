@@ -616,7 +616,7 @@ study_chunk(regnode **scanp, I32 *deltap, regnode *last, scan_data_t *data, U32 
 			
 			l -= old;
 			/* Get the added string: */
-			last_str = newSVpv(s  + old, l);
+			last_str = newSVpvn(s  + old, l);
 			if (deltanext == 0 && pos_before == b) {
 			    /* What was added is a constant string */
 			    if (mincount > 1) {
@@ -977,9 +977,9 @@ pregcomp(char *exp, char *xend, PMOP *pm)
 	*/
 	minlen = 0;
 
-	data.longest_fixed = newSVpv("",0);
-	data.longest_float = newSVpv("",0);
-	data.last_found = newSVpv("",0);
+	data.longest_fixed = newSVpvn("",0);
+	data.longest_float = newSVpvn("",0);
+	data.last_found = newSVpvn("",0);
 	data.longest = &(data.longest_fixed);
 	first = scan;
 	
@@ -1166,9 +1166,9 @@ reg(I32 paren, I32 *flagp)
 		    AV *av;
 		    
 		    if (PL_regcomp_parse - 1 - s) 
-			sv = newSVpv(s, PL_regcomp_parse - 1 - s);
+			sv = newSVpvn(s, PL_regcomp_parse - 1 - s);
 		    else
-			sv = newSVpv("", 0);
+			sv = newSVpvn("", 0);
 
 		    rop = sv_compile_2op(sv, &sop, "re", &av);
 
@@ -2378,7 +2378,7 @@ regclassutf8(void)
 	    flags |= ANYOF_FOLD;
 	if (LOC)
 	    flags |= ANYOF_LOCALE;
-	listsv = newSVpv("# comment\n",0);
+	listsv = newSVpvn("# comment\n",10);
     }
 
     if (*PL_regcomp_parse == ']' || *PL_regcomp_parse == '-')

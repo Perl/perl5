@@ -715,9 +715,7 @@ void del_xiv _((XPVIV* p));
 void del_xnv _((XPVNV* p));
 void del_xpv _((XPV* p));
 void del_xrv _((XRV* p));
-void sv_mortalgrow _((void));
 void sv_unglob _((SV* sv));
-void sv_check_thinkfirst _((SV *sv));
 I32 avhv_index_sv _((SV* sv));
 
 void do_report_used _((SV *sv));
@@ -967,3 +965,6 @@ VIRTUAL void magic_dump _((MAGIC *mg));
 VIRTUAL void reginitcolors _((void));
 VIRTUAL char* sv_2pv_nolen _((SV* sv));
 VIRTUAL char* sv_pv _((SV *sv));
+VIRTUAL void sv_force_normal _((SV *sv));
+VIRTUAL void tmps_grow _((I32 n));
+

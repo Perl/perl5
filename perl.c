@@ -187,7 +187,7 @@ perl_construct(register PerlInterpreter *sv_interp)
 #endif
     }
 
-    PL_nrs = newSVpv("\n", 1);
+    PL_nrs = newSVpvn("\n", 1);
     PL_rs = SvREFCNT_inc(PL_nrs);
 
     init_stacks(ARGS);
@@ -716,7 +716,7 @@ setuid perl scripts securely.\n");
     }
 
     sv_setpvn(PL_linestr,"",0);
-    sv = newSVpv("",0);		/* first used for -I flags */
+    sv = newSVpvn("",0);		/* first used for -I flags */
     SAVEFREESV(sv);
     init_main_stash();
 
@@ -769,7 +769,7 @@ setuid perl scripts securely.\n");
 	    if (PL_euid != PL_uid || PL_egid != PL_gid)
 		croak("No -e allowed in setuid scripts");
 	    if (!PL_e_script) {
-		PL_e_script = newSVpv("",0);
+		PL_e_script = newSVpvn("",0);
 		filter_add(read_e_script, NULL);
 	    }
 	    if (*++s)
@@ -953,7 +953,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
     PL_min_intro_pending = 0;
     PL_padix = 0;
 #ifdef USE_THREADS
-    av_store(PL_comppad_name, 0, newSVpv("@_", 2));
+    av_store(PL_comppad_name, 0, newSVpvn("@_", 2));
     PL_curpad[0] = (SV*)newAV();
     SvPADMY_on(PL_curpad[0]);	/* XXX Needed? */
     CvOWNER(PL_compcv) = 0;
@@ -1555,10 +1555,10 @@ moreswitches(char *s)
 	if (rschar & ~((U8)~0))
 	    PL_nrs = &PL_sv_undef;
 	else if (!rschar && numlen >= 2)
-	    PL_nrs = newSVpv("", 0);
+	    PL_nrs = newSVpvn("", 0);
 	else {
 	    char ch = rschar;
-	    PL_nrs = newSVpv(&ch, 1);
+	    PL_nrs = newSVpvn(&ch, 1);
 	}
 	return s + numlen;
     }
@@ -1942,7 +1942,7 @@ init_main_stash(void)
     hv_ksplit(PL_strtab, 512);
     
     PL_curstash = PL_defstash = newHV();
-    PL_curstname = newSVpv("main",4);
+    PL_curstname = newSVpvn("main",4);
     gv = gv_fetchpv("main::",TRUE, SVt_PVHV);
     SvREFCNT_dec(GvHV(gv));
     GvHV(gv) = (HV*)SvREFCNT_inc(PL_defstash);
@@ -2008,7 +2008,7 @@ open_script(char *scriptname, bool dosearch, SV *sv, int *fdscript)
     }
     else if (PL_preprocess) {
 	char *cpp_cfg = CPPSTDIN;
-	SV *cpp = newSVpv("",0);
+	SV *cpp = newSVpvn("",0);
 	SV *cmd = NEWSV(0,0);
 
 	if (strEQ(cpp_cfg, "cppstdin"))
@@ -2596,7 +2596,7 @@ init_lexer(void)
     PL_rsfp = Nullfp;
     lex_start(PL_linestr);
     PL_rsfp = tmpfp;
-    PL_subname = newSVpv("main",4);
+    PL_subname = newSVpvn("main",4);
 }
 
 STATIC void
@@ -2825,7 +2825,7 @@ incpush(char *p, int addsubdirs)
 	/* skip any consecutive separators */
 	while ( *p == PERLLIB_SEP ) {
 	    /* Uncomment the next line for PATH semantics */
-	    /* av_push(GvAVn(PL_incgv), newSVpv(".", 1)); */
+	    /* av_push(GvAVn(PL_incgv), newSVpvn(".", 1)); */
 	    p++;
 	}
 
@@ -2865,7 +2865,7 @@ incpush(char *p, int addsubdirs)
 	    if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
 		  S_ISDIR(tmpstatbuf.st_mode))
 		av_push(GvAVn(PL_incgv),
-			newSVpv(SvPVX(subdir), SvCUR(subdir) - sizeof "auto"));
+			newSVpvn(SvPVX(subdir), SvCUR(subdir) - sizeof "auto"));
 
 	    /* .../archname if -d .../archname/auto */
 	    sv_insert(subdir, SvCUR(libdir) + sizeof(ARCHNAME),
@@ -2873,7 +2873,7 @@ incpush(char *p, int addsubdirs)
 	    if (PerlLIO_stat(SvPVX(subdir), &tmpstatbuf) >= 0 &&
 		  S_ISDIR(tmpstatbuf.st_mode))
 		av_push(GvAVn(PL_incgv),
-			newSVpv(SvPVX(subdir), SvCUR(subdir) - sizeof "auto"));
+			newSVpvn(SvPVX(subdir), SvCUR(subdir) - sizeof "auto"));
 	}
 
 	/* finally push this lib directory on the end of @INC */
@@ -2940,7 +2940,7 @@ init_main_thread()
     sv_upgrade(PL_bodytarget, SVt_PVFM);
     sv_setpvn(PL_bodytarget, "", 0);
     PL_formtarget = PL_bodytarget;
-    thr->errsv = newSVpv("", 0);
+    thr->errsv = newSVpvn("", 0);
     (void) find_threadsv("@");	/* Ensure $@ is initialised early */
 
     PL_maxscream = -1;

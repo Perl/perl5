@@ -55,7 +55,7 @@ SV *	sub
 	if (!sub)
 	    croak("invalid subroutine reference or name");
 	if (CvFLAGS(sub) & CVf_METHOD)
-	    XPUSHs(sv_2mortal(newSVpv("method", 0)));
+	    XPUSHs(sv_2mortal(newSVpvn("method", 6)));
 	if (CvFLAGS(sub) & CVf_LOCKED)
-	    XPUSHs(sv_2mortal(newSVpv("locked", 0)));
+	    XPUSHs(sv_2mortal(newSVpvn("locked", 6)));
 

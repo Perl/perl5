@@ -515,6 +515,7 @@ sv_dec
 sv_derived_from
 sv_dump
 sv_eq
+sv_force_normal
 sv_free
 sv_free_arenas
 sv_gets
@@ -577,6 +578,7 @@ swash_fetch
 swash_init
 taint_env
 taint_proper
+tmps_grow
 to_uni_lower
 to_uni_lower_lc
 to_uni_title

@@ -635,15 +635,15 @@ gv_fetchpv(const char *nambeg, I32 add, I32 sv_type)
 		&& AvFILLp(av) == -1)
 	    {
 		char *pname;
-		av_push(av, newSVpv(pname = "NDBM_File",0));
+		av_push(av, newSVpvn(pname = "NDBM_File",9));
 		gv_stashpvn(pname, 9, TRUE);
-		av_push(av, newSVpv(pname = "DB_File",0));
+		av_push(av, newSVpvn(pname = "DB_File",7));
 		gv_stashpvn(pname, 7, TRUE);
-		av_push(av, newSVpv(pname = "GDBM_File",0));
+		av_push(av, newSVpvn(pname = "GDBM_File",9));
 		gv_stashpvn(pname, 9, TRUE);
-		av_push(av, newSVpv(pname = "SDBM_File",0));
+		av_push(av, newSVpvn(pname = "SDBM_File",9));
 		gv_stashpvn(pname, 9, TRUE);
-		av_push(av, newSVpv(pname = "ODBM_File",0));
+		av_push(av, newSVpvn(pname = "ODBM_File",9));
 		gv_stashpvn(pname, 9, TRUE);
 	    }
 	}

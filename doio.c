@@ -1615,12 +1615,6 @@ do_msgrcv(SV **mark, SV **sp)
     msize = SvIVx(*++mark);
     mtype = (long)SvIVx(*++mark);
     flags = SvIVx(*++mark);
-    if (SvTHINKFIRST(mstr)) {
-	if (SvREADONLY(mstr))
-	    croak("Can't msgrcv to readonly var");
-	if (SvROK(mstr))
-	    sv_unref(mstr);
-    }
     SvPV_force(mstr, len);
     mbuf = SvGROW(mstr, sizeof(long)+msize+1);
     

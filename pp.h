@@ -155,18 +155,18 @@
 
 #define SWITCHSTACK(f,t) \
     STMT_START {							\
-	AvFILLp(f) = sp - PL_stack_base;					\
+	AvFILLp(f) = sp - PL_stack_base;				\
 	PL_stack_base = AvARRAY(t);					\
-	PL_stack_max = PL_stack_base + AvMAX(t);				\
+	PL_stack_max = PL_stack_base + AvMAX(t);			\
 	sp = PL_stack_sp = PL_stack_base + AvFILLp(t);			\
-	PL_curstack = t;							\
+	PL_curstack = t;						\
     } STMT_END
 
 #define EXTEND_MORTAL(n) \
-	STMT_START { \
-	    if (PL_tmps_ix + (n) >= PL_tmps_max) \
-		Renew(PL_tmps_stack, PL_tmps_max = PL_tmps_ix + (n) + 1, SV*); \
-	} STMT_END
+    STMT_START {							\
+	if (PL_tmps_ix + (n) >= PL_tmps_max)				\
+	    tmps_grow(n);						\
+    } STMT_END
 
 #define AMGf_noright	1
 #define AMGf_noleft	2

@@ -40,6 +40,7 @@
 #define XST_mIV(i,v)  (ST(i) = sv_2mortal(newSViv(v))  )
 #define XST_mNV(i,v)  (ST(i) = sv_2mortal(newSVnv(v))  )
 #define XST_mPV(i,v)  (ST(i) = sv_2mortal(newSVpv(v,0)))
+#define XST_mPVN(i,v,n)  (ST(i) = sv_2mortal(newSVpvn(v,n)))
 #define XST_mNO(i)    (ST(i) = &PL_sv_no   )
 #define XST_mYES(i)   (ST(i) = &PL_sv_yes  )
 #define XST_mUNDEF(i) (ST(i) = &PL_sv_undef)
@@ -47,6 +48,7 @@
 #define XSRETURN_IV(v) STMT_START { XST_mIV(0,v);  XSRETURN(1); } STMT_END
 #define XSRETURN_NV(v) STMT_START { XST_mNV(0,v);  XSRETURN(1); } STMT_END
 #define XSRETURN_PV(v) STMT_START { XST_mPV(0,v);  XSRETURN(1); } STMT_END
+#define XSRETURN_PVN(v) STMT_START { XST_mPVN(0,v,n);  XSRETURN(1); } STMT_END
 #define XSRETURN_NO    STMT_START { XST_mNO(0);    XSRETURN(1); } STMT_END
 #define XSRETURN_YES   STMT_START { XST_mYES(0);   XSRETURN(1); } STMT_END
 #define XSRETURN_UNDEF STMT_START { XST_mUNDEF(0); XSRETURN(1); } STMT_END
