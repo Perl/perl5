@@ -156,4 +156,5 @@ PERLVAR(Iofmt,		char *)		/* $# */
 
 #ifdef USE_THREADS
 PERLVAR(Ithrsv,		SV *)		/* holds struct perl_thread for main thread */
+PERLVARI(Ithreadnum,	U32,	0)	/* incremented each thread creation */
 #endif /* USE_THREADS */

@@ -547,7 +547,7 @@ PP(pp_grepstart)
     SAVETMPS;
 #ifdef USE_THREADS
     /* SAVE_DEFSV does *not* suffice here */
-    save_sptr(av_fetch(thr->threadsv, find_threadsv("_"), FALSE));
+    save_sptr(&THREADSV(0));
 #else
     SAVESPTR(GvSV(defgv));
 #endif /* USE_THREADS */

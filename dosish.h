@@ -28,7 +28,6 @@
        } STMT_END
 #    define pthread_mutexattr_default NULL
 #    define pthread_condattr_default NULL
-#    define pthread_attr_default NULL
 #    define pthread_addr_t any_t
 #  endif
 #else	/* DJGPP */

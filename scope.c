@@ -335,7 +335,7 @@ save_threadsv(PADOFFSET i)
 {
 #ifdef USE_THREADS
     dTHR;
-    SV **svp = av_fetch(thr->threadsv, i, FALSE);
+    SV **svp = &THREADSV(i);	/* XXX Change to save by offset */
     DEBUG_L(PerlIO_printf(PerlIO_stderr(), "save_threadsv %u: %p %p:%s\n",
 			  i, svp, *svp, SvPEEK(*svp)));
     save_svref(svp);
