@@ -12,7 +12,13 @@ my $bits_in_uv = int (0.001 + log (~0+1) / log 2);
 
 # 3**30 < 2**48, don't trust things outside that range on a Cray
 # Likewise other 3 should not overflow 48 bits if I did my sums right.
-my @pow = ([3,30,1e-14], [4,32,0], [5,20,1e-14], [2.5, 10,,1e-14], [-2, 69,0]);
+my @pow = ([3,30,1e-14],
+           [4,32,0],
+           [5,20,1e-14],
+           [2.5, 10,,1e-14],
+           [-2, 69,0],
+           [-3, 30,0],
+);
 my $tests;
 $tests += $_->[1] foreach @pow;
 
@@ -33,17 +39,17 @@ cmp_ok ($remainder, '==', 0, 'Sanity check bits in UV calculation')
 # perfect, forgetting that it's a call to floating point pow() which never
 # claims to deliver perfection.
 foreach my $n (0..$bits_in_uv - 1) {
-    my $exp = 2 ** $n;
+    my $pow = 2 ** $n;
     my $int = 1 << $n;
-    cmp_ok ($exp, '==', $int, "2 ** $n vs 1 << $n");
+    cmp_ok ($pow, '==', $int, "2 ** $n vs 1 << $n");
 }
 
 foreach my $pow (@pow) {
     my ($base, $max, $range) = @$pow;
-    my $fp = 1;
+    my $expect = 1;
     foreach my $n (0..$max-1) {
-        my $exp = $base ** $n;
-        within ($exp, $fp, $range, "$base ** $n [$exp] vs $base * $base * ...");
-        $fp *= $base;
+        my $got = $base ** $n;
+        within ($got, $expect, $range, "$base ** $n got[$got] expect[$expect]");
+        $expect *= $base;
     }
 }
