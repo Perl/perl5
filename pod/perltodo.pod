@@ -54,6 +54,9 @@ Possible options, controlled by the flags:
 - append a "..." to the produced string if the maximum length is exceeded
 - really fancy: print unicode characters as \N{...}
 
+NOTE: pv_display(), pv_uni_display(), sv_uni_display() are doing
+something like the above.
+
 =head2 Overloadable regex assertions
 
 This may or may not be possible with the current regular expression
@@ -507,6 +510,12 @@ Hugo van der Sanden plans to look at this.
 
 This has been done in places, but needs a thorough code review.
 Also fchdir is available in some platforms.
+
+=head2 Make vstrings overloaded objects
+
+Instead of having to guess whether a string is a vstring
+and thus needs to be displayed with %vd, make vstrings (readonly)
+overloaded objects.
 
 =head1 Vague ideas
 
