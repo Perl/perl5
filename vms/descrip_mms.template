@@ -1091,15 +1091,17 @@ clean : tidy
 	- If F$Search(F$Parse("Sys$Disk:[]","$(SOCKH)")).nes."" Then Delete/NoConfirm/Log $(SOCKH);*
 	- If F$Search(F$Parse("Sys$Disk:[]","$(SOCKC)")).nes."" Then Delete/NoConfirm/Log $(SOCKC);*
 	- If F$Search("perly.c").nes."" Then Delete/NoConfirm/Log perly.c;*
+	- Copy [.vms]perly_c.vms []perly.c
 	- If F$Search("perly.h").nes."" Then Delete/NoConfirm/Log perly.h;*
+	- Copy [.vms]perly_h.vms []perly.h
 	- If F$Search("VMSish.H").nes."" Then Delete/NoConfirm/Log VMSish.H;*
 	- If F$Search("VMS.C")   .nes."" Then Delete/NoConfirm/Log VMS.C;*
 	- If F$Search("Perlmain.C")   .nes."" Then Delete/NoConfirm/Log Perlmain.C;*
-	- If F$Search("byteperl.C")   .nes."" Then Delete/NoConfirm/Log byteperl.C;*
 	- If F$Search("Perlshr_Gbl*.Mar")   .nes."" Then Delete/NoConfirm/Log Perlshr_Gbl*.Mar;*
 	- If F$Search("*.TS").nes."" Then Delete/NoConfirm/Log *.TS;*
 	- If F$Search("[.Ext.DynaLoader]DL_VMS$(O)").nes."" Then Delete/NoConfirm/Log [.Ext.DynaLoader]DL_VMS$(O);*
 	- If F$Search("[.Ext.DynaLoader]DL_VMS.C").nes."" Then Delete/NoConfirm/Log [.Ext.DynaLoader]DL_VMS.C;*
+	- If F$Search("[.Ext.DynaLoader]DynaLoader.pm").nes."" Then Delete/NoConfirm/Log [.Ext.DynaLoader]DynaLoader.pm;*
 	- If F$Search("[.Ext.Socket]Socket$(O)").nes."" Then Delete/NoConfirm/Log [.Ext.Socket]Socket$(O);*
 	- If F$Search("[.Ext.Socket]Socket.C").nes."" Then Delete/NoConfirm/Log [.Ext.Socket]Socket.C;*
 	- If F$Search("[.VMS.Ext...]*.C").nes."" Then Delete/NoConfirm/Log [.VMS.Ext...]*.C;*
@@ -1112,6 +1114,7 @@ realclean : clean
 	- If F$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*
 	- If F$Search("Config.H").nes."" Then Delete/NoConfirm/Log Config.H;*
 	- If F$Search("Config.SH").nes."" Then Delete/NoConfirm/Log Config.SH;*
+	- $(MINIPERL) -e "use File::Path; rmtree(\@ARGV,1,0);" config
 	- If F$Search("Descrip.MMS").nes."" Then Delete/NoConfirm/Log Descrip.MMS;*
 	- If F$Search("Build_Ext.Com").nes."" Then Delete/NoConfirm/Log Build_Ext.Com;*
 	- $(MINIPERL) -e "use File::Path; rmtree(['lib/auto','lib/VMS','lib/$(ARCH)'],1,0);"
@@ -1119,6 +1122,7 @@ realclean : clean
 	- If F$Search("[.Lib]Socket.pm").nes."" Then Delete/NoConfirm/Log [.Lib]Socket.pm;*
 	- If F$Search("[.Lib]Config.pm").nes."" Then Delete/NoConfirm/Log [.Lib]Config.pm;*
 	- If F$Search("[.Lib]*.com").nes."" Then Delete/NoConfirm/Log [.Lib]*.com;*
+	- If F$Search("[.pod]*.com").nes."" Then Delete/NoConfirm/Log [.pod]*.com;*
 	- If F$Search("[.utils]*.com").nes."" Then Delete/NoConfirm/Log [.utils]*.com;*
 	- If F$Search("[.x2p]*.com").nes."" Then Delete/NoConfirm/Log [.x2p]*.com;*
 	- If F$Search("$(ARCHDIR)Config.pm").nes."" Then Delete/NoConfirm/Log $(ARCHDIR)Config.pm;*
@@ -1129,6 +1133,7 @@ realclean : clean
 	- If F$Search("[.lib.pod]pod2*.com").nes."" Then Delete/NoConfirm/Log [.lib.pod]pod2*.com;*
 	- If F$Search("[.t.lib]vms*.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vms*.t;*
 	- If F$Search("[...]*$(E)").nes."" Then Delete/NoConfirm/Log [...]*$(E);*
+	- If F$Search("[.vms]Perl_Setup.Com").nes."" Then Delete/NoConfirm/Log [.vms]Perl_Setup.Com;*
 
 cleansrc : clean
 !GROK!THIS!
