@@ -3483,17 +3483,23 @@ typedef struct am_table_short AMTS;
  * nice_chunk and nice_chunk size need to be set
  * and queried under the protection of sv_mutex
  */
-#define offer_nice_chunk(chunk, chunk_size) do {	\
+#define offer_nice_chunk(chunk, chunk_size) \
+    STMT_START {					\
 	LOCK_SV_MUTEX;					\
 	if (!PL_nice_chunk) {				\
 	    PL_nice_chunk = (char*)(chunk);		\
 	    PL_nice_chunk_size = (chunk_size);		\
 	}						\
+	else if (chunk_size > PL_nice_chunk_size) {	\
+	    Safefree(PL_nice_chunk);			\
+	    PL_nice_chunk = (char*)(chunk);		\
+	   PL_nice_chunk_size = (chunk_size);		\
+	}						\
 	else {						\
 	    Safefree(chunk);				\
 	}						\
 	UNLOCK_SV_MUTEX;				\
-    } while (0)
+    } STMT_END
 
 #ifdef HAS_SEM
 #   include <sys/ipc.h>
