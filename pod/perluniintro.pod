@@ -426,13 +426,13 @@ returns:
 
 Bit Complement Operator ~ And vec()
 
-The bit complement operator C<~> may produce surprising results if
-used on strings containing Unicode characters.  The results are
-consistent with the internal encoding of the characters, but not with
-much else.  So don't do that.  Similarly for vec(): you will be
-operating on the internally encoded bit patterns of the Unicode
-characters, not on the code point values, which is very probably not
-what you want.
+The bit complement operator C<~> may produce surprising results if used on
+strings containing characters with ordinal values above 255. In such a
+case, the results are consistent with the internal encoding of the
+characters, but not with much else. So don't do that. Similarly for vec():
+you will be operating on the internally encoded bit patterns of the Unicode
+characters, not on the code point values, which is very probably not what
+you want.
 
 =item *
 
