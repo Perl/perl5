@@ -45,6 +45,10 @@ HTML = $HTML
 
 TEX  = $TEX  
 
+# The following is used to include the current directory in
+# the dynamic loader path you are building a shared libperl.
+LDLIBPTH = $ldlibpth
+
 !GROK!THIS!
 
 ## In the following dollars and backticks do not need the extra backslash.
@@ -124,19 +128,19 @@ check:	checkpods
 
 # Dependencies.
 pod2latex:	pod2latex.PL ../lib/Config.pm
-	$(PERL) -I../lib pod2latex.PL
+	$(LDLIBPTH) $(PERL) -I../lib pod2latex.PL
 
 pod2html:	pod2html.PL ../lib/Config.pm
-	$(PERL) -I ../lib pod2html.PL
+	$(LDLIBPTH) $(PERL) -I ../lib pod2html.PL
 
 pod2man:	pod2man.PL ../lib/Config.pm
-	$(PERL) -I ../lib pod2man.PL
+	$(LDLIBPTH) $(PERL) -I ../lib pod2man.PL
 
 pod2text:	pod2text.PL ../lib/Config.pm
-	$(PERL) -I ../lib pod2text.PL
+	$(LDLIBPTH) $(PERL) -I ../lib pod2text.PL
 
 checkpods:	checkpods.PL ../lib/Config.pm
-	$(PERL) -I ../lib checkpods.PL
+	$(LDLIBPTH) $(PERL) -I ../lib checkpods.PL
 
 pod2usage:	pod2usage.PL ../lib/Config.pm
 	$(PERL) -I ../lib pod2usage.PL
