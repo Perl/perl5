@@ -20,7 +20,7 @@
 #
 # Modified to ensure we replace -lc with -lc_r, and
 # to put in place-holders for various specific hints.
-# Andy Dougherty <doughera@lafcol.lafayette.edu>
+# Andy Dougherty <doughera@lafayette.edu>
 # Date: Tue Mar 10 16:07:00 EST 1998
 #
 # Support for FreeBSD/ELF
@@ -67,7 +67,10 @@ case "$osvers" in
 #
 2.0.5*|2.0-built*|2.1*)
  	usevfork='true'
-	usemymalloc='n'
+	case "$usemymalloc" in
+	    "") usemymalloc='n'
+	        ;;
+	esac
 	d_setregid='define'
 	d_setreuid='define'
 	d_setegid='undef'
@@ -79,17 +82,25 @@ case "$osvers" in
 # don't use -lmalloc (maybe there's an old one from 1.1.5.1 floating around)
 2.2*)
  	usevfork='true'
-	usemymalloc='n'
+	case "$usemymalloc" in
+	    "") usemymalloc='n'
+	        ;;
+	esac
 	libswanted=`echo $libswanted | sed 's/ malloc / /'`
+	libswanted=`echo $libswanted | sed 's/ bind / /'`
+	# iconv gone in Perl 5.8.1, but if someone compiles 5.8.0 or earlier.
+	libswanted=`echo $libswanted | sed 's/ iconv / /'`
 	d_setregid='define'
 	d_setreuid='define'
-	d_setegid='undef'
-	d_seteuid='undef'
+	d_setegid='define'
+	d_seteuid='define'
+	# d_dosuid='define' # Obsolete.
 	;;
-#
-# Guesses at what will be needed after 2.2
 *)	usevfork='true'
-	usemymalloc='n'
+	case "$usemymalloc" in
+	    "") usemymalloc='n'
+	        ;;
+	esac
 	libswanted=`echo $libswanted | sed 's/ malloc / /'`
 	;;
 esac
@@ -99,7 +110,11 @@ esac
 case "$osvers" in
 0.*|1.0*) ;;
 
-3.*|4.0*)
+1*|2*)	cccdlflags='-DPIC -fpic'
+	lddlflags="-Bshareable $lddlflags"
+	;;
+
+*)
         objformat=`/usr/bin/objformat`
         if [ x$objformat = xelf ]; then
             libpth="/usr/lib /usr/local/lib"
@@ -108,17 +123,24 @@ case "$osvers" in
             lddlflags="-shared "
         else
             if [ -e /usr/lib/aout ]; then
-            libpth="/usr/lib/aout /usr/local/lib /usr/lib"
-            glibpth="/usr/lib/aout /usr/local/lib /usr/lib"
+                libpth="/usr/lib/aout /usr/local/lib /usr/lib"
+                glibpth="/usr/lib/aout /usr/local/lib /usr/lib"
+            fi
+            lddlflags='-Bshareable'
         fi
-        lddlflags='-Bshareable'
-        fi
-        cccdlflags='-DPIC -fpic'
+        cccdlflags='-DPIC -fPIC'
         ;;
+esac
 
-*)	cccdlflags='-DPIC -fpic'
-	lddlflags="-Bshareable $lddlflags"
-	;;
+case "$osvers" in
+0*|1*|2*|3*) ;;
+
+*)
+	ccflags="${ccflags} -DHAS_FPSETMASK -DHAS_FLOATINGPOINT_H"
+	if /usr/bin/file -L /usr/lib/libc.so | /usr/bin/grep -vq "not stripped" ; then
+	    usenm=false
+	fi
+        ;;
 esac
 
 cat <<'EOM' >&4
@@ -147,8 +169,8 @@ case "$osvers" in
     # the equivalent in the main Configure so we copy a little
     # from Configure XXX Configure should be fixed.
     if $test -r $src/patchlevel.h;then
-       patchlevel=`awk '/define[ 	]+PATCHLEVEL/ {print $3}' $src/patchlevel.h`
-       subversion=`awk '/define[ 	]+SUBVERSION/ {print $3}' $src/patchlevel.h`
+       patchlevel=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $src/patchlevel.h`
+       subversion=`awk '/define[ 	]+PERL_SUBVERSION/ {print $3}' $src/patchlevel.h`
     else
        patchlevel=0
        subversion=0
@@ -164,9 +186,32 @@ esac
 cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
-        lc_r=`/sbin/ldconfig -r|grep ':-lc_r'|awk '{print $NF}'`
+        lc_r=`/sbin/ldconfig -r|grep ':-lc_r'|awk '{print $NF}'|sed -n '$p'`
         case "$osvers" in  
-	2.2.8*|3.*|4.*)
+	0*|1*|2.0*|2.1*)   cat <<EOM >&4
+I did not know that FreeBSD $osvers supports POSIX threads.
+
+Feel free to tell perlbug@perl.org otherwise.
+EOM
+	      exit 1
+	      ;;
+
+        2.2.[0-7]*)
+              cat <<EOM >&4
+POSIX threads are not supported well by FreeBSD $osvers.
+
+Please consider upgrading to at least FreeBSD 2.2.8,
+or preferably to the most recent -RELEASE or -STABLE
+version (see http://www.freebsd.org/releases/).
+
+(While 2.2.7 does have pthreads, it has some problems
+ with the combination of threads and pipes and therefore
+ many Perl tests will either hang or fail.)
+EOM
+	      exit 1
+	      ;;
+
+	*)
 	      if [ ! -r "$lc_r" ]; then
 	      cat <<EOM >&4
 POSIX threads should be supported by FreeBSD $osvers --
@@ -177,28 +222,26 @@ Consider using the latest STABLE release.
 EOM
 		 exit 1
 	      fi
-	      ldflags="-pthread $ldflags"
+	      case "$osvers" in
+	      # 500016 is the first osreldate in which one could
+	      # just link against libc_r without disposing of libc
+	      # at the same time.  500016 ... up to whatever it was
+	      # on the 31st of August 2003 can still be used with -pthread,
+	      # but it is not necessary.
+	      5.*)	if [ `/sbin/sysctl -n kern.osreldate` -lt 500016 ]; then
+                                ldflags="-pthread $ldflags"
+                        fi
+			;;
+	      *)	ldflags="-pthread $ldflags"
+			;;
+	      esac
+	      # Both in 4.x and 5.x gethostbyaddr_r exists but
+	      # it is "Temporary function, not threadsafe"...
+	      # Presumably earlier it didn't even exist.
+	      d_gethostbyaddr_r="undef"
+	      d_gethostbyaddr_r_proto="0"
 	      ;;
-        2.2*)
-              cat <<EOM >&4
-POSIX threads are not supported well by FreeBSD $osvers.
 
-Please consider upgrading to at least FreeBSD 2.2.8,
-or preferably to 3.something.
-
-(While 2.2.7 does have pthreads, it has some problems
- with the combination of threads and pipes and therefore
- many Perl tests will either hang or fail.)
-EOM
-	      exit 1
-	      ;;
-	 *)   cat <<EOM >&4
-I did not know that FreeBSD $osvers supports POSIX threads.
-
-Feel free to tell perlbug@perl.com otherwise.
-EOM
-	      exit 1
-	      ;;
 	esac
 
 	set `echo X "$libswanted "| sed -e 's/ c / c_r /'`
@@ -217,5 +260,12 @@ EOM
         esac
 
         unset lc_r
+
+	# Even with the malloc mutexes the Perl malloc does not
+	# seem to be threadsafe in FreeBSD?
+	case "$usemymalloc" in
+	'') usemymalloc=n ;;
+	esac
 esac
 EOCBU
+
