@@ -79,6 +79,15 @@ Version 5.005_55        Development release working toward 5.006
 ----------------
 
 ____________________________________________________________________________
+[  2958] By: gsar                                  on 1999/02/16  06:18:27
+        Log: integrate change#2852 from maint-5.005; integrate cfgperl contents;
+             elide dups and non-dependents from Changes
+     Branch: perl
+           ! Changes pod/perlhist.pod
+	  !> Configure INSTALL README.threads doio.c ext/IPC/SysV/SysV.xs
+	  !> hints/ultrix_4.sh pod/perl.pod pod/perlfunc.pod
+          !> pod/perlport.pod pp.c t/op/pack.t
+____________________________________________________________________________
 [  2957] By: gsar                                  on 1999/02/16  04:09:47
         Log: propagate PERL_VERSION everywhere, add to pod
      Branch: perl
