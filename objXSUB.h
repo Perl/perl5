@@ -811,6 +811,14 @@
 #define Perl_looks_like_number	pPerl->Perl_looks_like_number
 #undef  looks_like_number
 #define looks_like_number	Perl_looks_like_number
+#undef  Perl_grok_number
+#define Perl_grok_number	pPerl->Perl_grok_number
+#undef  grok_number
+#define grok_number		Perl_grok_number
+#undef  Perl_grok_numeric_radix
+#define Perl_grok_numeric_radix	pPerl->Perl_grok_numeric_radix
+#undef  grok_numeric_radix
+#define grok_numeric_radix	Perl_grok_numeric_radix
 #if defined(USE_THREADS)
 #endif
 #if defined(USE_LOCALE_COLLATE)

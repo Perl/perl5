@@ -4018,6 +4018,8 @@ Perl_my_atof(pTHX_ const char* s)
     if (PL_numeric_local && IN_LOCALE) {
 	NV y;
 
+	/* Scan the number twice; once using locale and once without;
+	 * choose the larger result (in absolute value). */
 	Perl_atof2(aTHX_ s, &x);
 	SET_NUMERIC_STANDARD();
 	Perl_atof2(aTHX_ s, &y);
@@ -4057,14 +4059,210 @@ S_mulexp10(NV value, I32 exponent)
     return negative ? value / result : value * result;
 }
 
+/*
+=for apidoc grok_numeric_radix
+
+Scan and skip for a numeric decimal separator (radix).
+
+=cut
+ */
+bool
+Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
+{
+#ifdef USE_LOCALE_NUMERIC
+    if (PL_numeric_radix_sv && IN_LOCALE) { 
+        STRLEN len;
+        char* radix = SvPV(PL_numeric_radix_sv, len);
+        if (*sp + len <= send && memEQ(*sp, radix, len)) {
+            *sp += len;
+            return TRUE; 
+        }
+    }
+    /* always try "." if numeric radix didn't match because
+     * we may have data from different locales mixed */
+#endif
+    if (*sp < send && **sp == '.') {
+        ++*sp;
+        return TRUE;
+    }
+    return FALSE;
+}
+
+/*
+=for apidoc grok_number
+
+Recognise (or not) a number.  The type of the number is returned
+(0 if unrecognised), otherwise it is a bit-ORed combination of
+IS_NUMBER_IN_UV, IS_NUMBER_GREATER_THAN_UV_MAX, IS_NUMBER_NOT_INT,
+IS_NUMBER_NEG, IS_NUMBER_INFINITY (defined in perl.h).  If the value
+of the number can fit an in UV, it is returned in the *valuep.
+
+=cut
+ */
+int
+Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
+{
+    const char *s = pv;
+    const char *send = pv + len;
+    const UV max_div_10 = UV_MAX / 10;
+    const char max_mod_10 = UV_MAX % 10 + '0';
+    int numtype = 0;
+    int sawinf = 0;
+
+    while (isSPACE(*s))
+	s++;
+    if (*s == '-') {
+	s++;
+	numtype = IS_NUMBER_NEG;
+    }
+    else if (*s == '+')
+	s++;
+
+    /* next must be digit or the radix separator or beginning of infinity */
+    if (isDIGIT(*s)) {
+	/* UVs are at least 32 bits, so the first 9 decimal digits cannot
+	   overflow.  */
+	UV value = *s - '0';
+	/* This construction seems to be more optimiser friendly.
+	   (without it gcc does the isDIGIT test and the *s - '0' separately)
+	   With it gcc on arm is managing 6 instructions (6 cycles) per digit.
+	   In theory the optimiser could deduce how far to unroll the loop
+	   before checking for overflow.  */
+	int digit = *++s - '0';
+	if (digit >= 0 && digit <= 9) {
+	    value = value * 10 + digit;
+	    digit = *++s - '0';
+	    if (digit >= 0 && digit <= 9) {
+		value = value * 10 + digit;
+		digit = *++s - '0';
+		if (digit >= 0 && digit <= 9) {
+		    value = value * 10 + digit;
+		    digit = *++s - '0';
+		    if (digit >= 0 && digit <= 9) {
+			value = value * 10 + digit;
+			digit = *++s - '0';
+			if (digit >= 0 && digit <= 9) {
+			    value = value * 10 + digit;
+			    digit = *++s - '0';
+			    if (digit >= 0 && digit <= 9) {
+				value = value * 10 + digit;
+				digit = *++s - '0';
+				if (digit >= 0 && digit <= 9) {
+				    value = value * 10 + digit;
+				    digit = *++s - '0';
+				    if (digit >= 0 && digit <= 9) {
+					value = value * 10 + digit;
+					/* Now got 9 digits, so need to check
+					   each time for overflow.  */
+					digit = *++s - '0';
+					while (digit >= 0 && digit <= 9
+					       && (value < max_div_10
+						   || (value == max_div_10
+						       && *s <= max_mod_10))) {
+					    value = value * 10 + digit;
+					    digit = *++s - '0';
+					}
+					if (digit >= 0 && digit <= 9) {
+					    /* value overflowed.
+					       skip the remaining digits, don't
+					       worry about setting *valuep.  */
+					    do {
+						s++;
+					    } while (isDIGIT(*s));
+					    numtype |=
+						IS_NUMBER_GREATER_THAN_UV_MAX;
+					    goto skip_value;
+					}
+				    }
+				}
+			    }
+			}
+		    }
+		}
+	    }
+	}
+	numtype |= IS_NUMBER_IN_UV;
+	if (valuep)
+	    *valuep = value;
+
+      skip_value:
+	if (GROK_NUMERIC_RADIX(&s, send)) {
+	    numtype |= IS_NUMBER_NOT_INT;
+	    while (isDIGIT(*s))  /* optional digits after the radix */
+	        s++;
+	}
+    }
+    else if (GROK_NUMERIC_RADIX(&s, send)) {
+        numtype |= IS_NUMBER_NOT_INT;
+	/* no digits before the radix means we need digits after it */
+	if (isDIGIT(*s)) {
+	    do {
+	        s++;
+	    } while (isDIGIT(*s));
+	    numtype |= IS_NUMBER_IN_UV;
+	    if (valuep) {
+	        /* integer approximation is valid - it's 0.  */
+	        *valuep = 0;
+	    }
+	}
+	else
+	    return 0;
+    }
+    else if (*s == 'I' || *s == 'i') {
+        s++; if (*s != 'N' && *s != 'n') return 0;
+	s++; if (*s != 'F' && *s != 'f') return 0;
+	s++; if (*s == 'I' || *s == 'i') {
+	    s++; if (*s != 'N' && *s != 'n') return 0;
+	    s++; if (*s != 'I' && *s != 'i') return 0;
+	    s++; if (*s != 'T' && *s != 't') return 0;
+	    s++; if (*s != 'Y' && *s != 'y') return 0;
+	    s++;
+	}
+	sawinf = 1;
+    }
+    else /* Add test for NaN here.  */
+        return 0;
+
+    if (sawinf) {
+	numtype &= IS_NUMBER_NEG; /* Keep track of sign  */
+	numtype |= IS_NUMBER_INFINITY | IS_NUMBER_NOT_INT;
+    } else {
+	/* we can have an optional exponent part */
+	if (*s == 'e' || *s == 'E') {
+            /* The only flag we keep is sign.  Blow away any "it's UV"  */
+	    numtype &= IS_NUMBER_NEG;
+	    numtype |= IS_NUMBER_NOT_INT;
+	    s++;
+	    if (*s == '-' || *s == '+')
+		s++;
+	    if (isDIGIT(*s)) {
+		do {
+		    s++;
+		} while (isDIGIT(*s));
+	    }
+	    else
+		return 0;
+	}
+    }
+    while (isSPACE(*s))
+	s++;
+    if (s >= send)
+	return numtype;
+    if (len == 10 && memEQ(pv, "0 but true", 10)) {
+	if (valuep)
+	    *valuep = 0;
+	return IS_NUMBER_IN_UV;
+    }
+    return 0;
+}
+
 char*
 Perl_my_atof2(pTHX_ const char* orig, NV* value)
 {
     NV result = 0.0;
     bool negative = 0;
     char* s = (char*)orig;
-    char* point = ".";	/* locale-dependent decimal point equivalent */
-    STRLEN pointlen = 1;
+    char* send = s + strlen(orig) - 1;
     bool seendigit = 0;
     I32 expextra = 0;
     I32 exponent = 0;
@@ -4081,11 +4279,6 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 #endif
     I32 ipart = 0;	/* index into part[] */
     I32 offcount;	/* number of digits in least significant part */
-
-#ifdef USE_LOCALE_NUMERIC
-    if (PL_numeric_radix_sv && IN_LOCALE)
-	point = SvPV(PL_numeric_radix_sv, pointlen);
-#endif
 
     /* sign */
     switch (*s) {
@@ -4130,8 +4323,7 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
     }
 
     /* decimal point */
-    if (memEQ(s, point, pointlen)) {
-	s += pointlen;
+    if (GROK_NUMERIC_RADIX((const char **)&s, send)) {
 	if (isDIGIT(*s))
 	    seendigit = 1;	/* get this over with */
 
@@ -4893,3 +5085,4 @@ Perl_sv_realpath(pTHX_ SV *sv, char *path, STRLEN len)
     return FALSE;
 #endif
 }
+

@@ -211,6 +211,8 @@ Perl_op_null
 Perl_load_module
 Perl_vload_module
 Perl_looks_like_number
+Perl_grok_number
+Perl_grok_numeric_radix
 Perl_markstack_grow
 Perl_mess
 Perl_vmess

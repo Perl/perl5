@@ -343,6 +343,8 @@
 #define vload_module		Perl_vload_module
 #define localize		Perl_localize
 #define looks_like_number	Perl_looks_like_number
+#define grok_number		Perl_grok_number
+#define grok_numeric_radix	Perl_grok_numeric_radix
 #define magic_clearenv		Perl_magic_clearenv
 #define magic_clear_all_env	Perl_magic_clear_all_env
 #define magic_clearpack		Perl_magic_clearpack
@@ -1114,8 +1116,6 @@
 #  if defined(USE_ITHREADS)
 #define gv_share		S_gv_share
 #  endif
-#define grok_number		S_grok_number
-#define grok_numeric_radix	S_grok_numeric_radix
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #define check_uni		S_check_uni
@@ -1849,6 +1849,8 @@
 #define vload_module(a,b,c,d)	Perl_vload_module(aTHX_ a,b,c,d)
 #define localize(a,b)		Perl_localize(aTHX_ a,b)
 #define looks_like_number(a)	Perl_looks_like_number(aTHX_ a)
+#define grok_number(a,b,c)	Perl_grok_number(aTHX_ a,b,c)
+#define grok_numeric_radix(a,b)	Perl_grok_numeric_radix(aTHX_ a,b)
 #define magic_clearenv(a,b)	Perl_magic_clearenv(aTHX_ a,b)
 #define magic_clear_all_env(a,b)	Perl_magic_clear_all_env(aTHX_ a,b)
 #define magic_clearpack(a,b)	Perl_magic_clearpack(aTHX_ a,b)
@@ -2609,8 +2611,6 @@
 #  if defined(USE_ITHREADS)
 #define gv_share(a)		S_gv_share(aTHX_ a)
 #  endif
-#define grok_number(a,b,c)	S_grok_number(aTHX_ a,b,c)
-#define grok_numeric_radix(a,b)	S_grok_numeric_radix(aTHX_ a,b)
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #define check_uni()		S_check_uni(aTHX)
@@ -3630,6 +3630,10 @@
 #define localize		Perl_localize
 #define Perl_looks_like_number	CPerlObj::Perl_looks_like_number
 #define looks_like_number	Perl_looks_like_number
+#define Perl_grok_number	CPerlObj::Perl_grok_number
+#define grok_number		Perl_grok_number
+#define Perl_grok_numeric_radix	CPerlObj::Perl_grok_numeric_radix
+#define grok_numeric_radix	Perl_grok_numeric_radix
 #define Perl_magic_clearenv	CPerlObj::Perl_magic_clearenv
 #define magic_clearenv		Perl_magic_clearenv
 #define Perl_magic_clear_all_env	CPerlObj::Perl_magic_clear_all_env
@@ -5083,10 +5087,6 @@
 #define S_gv_share		CPerlObj::S_gv_share
 #define gv_share		S_gv_share
 #  endif
-#define S_grok_number		CPerlObj::S_grok_number
-#define grok_number		S_grok_number
-#define S_grok_numeric_radix	CPerlObj::S_grok_numeric_radix
-#define grok_numeric_radix	S_grok_numeric_radix
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #define S_check_uni		CPerlObj::S_check_uni

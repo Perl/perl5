@@ -519,6 +519,28 @@ respectively.
 =for hackers
 Found in file op.h
 
+=item grok_number
+
+Recognise (or not) a number.  The type of the number is returned
+(0 if unrecognised), otherwise it is a bit-ORed combination of
+IS_NUMBER_IN_UV, IS_NUMBER_GREATER_THAN_UV_MAX, IS_NUMBER_NOT_INT,
+IS_NUMBER_NEG, IS_NUMBER_INFINITY (defined in perl.h).  If the value
+of the number can fit an in UV, it is returned in the *valuep.
+
+	int	grok_number(const char *pv, STRLEN len, UV *valuep)
+
+=for hackers
+Found in file util.c
+
+=item grok_numeric_radix
+
+Scan and skip for a numeric decimal separator (radix).
+
+	bool	grok_numeric_radix(const char **sp, const char *send)
+
+=for hackers
+Found in file util.c
+
 =item GvSV
 
 Return the SV from the GV.
@@ -2408,19 +2430,19 @@ false, defined or undefined.  Does not handle 'get' magic.
 =for hackers
 Found in file sv.h
 
-=item svtype
-
-An enum of flags for Perl types.  These are found in the file B<sv.h> 
-in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
-
-=for hackers
-Found in file sv.h
-
 =item SvTYPE
 
 Returns the type of the SV.  See C<svtype>.
 
 	svtype	SvTYPE(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item svtype
+
+An enum of flags for Perl types.  These are found in the file B<sv.h> 
+in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
 =for hackers
 Found in file sv.h

@@ -1682,6 +1682,8 @@ Apd	|void	|load_module|U32 flags|SV* name|SV* ver|...
 Ap	|void	|vload_module|U32 flags|SV* name|SV* ver|va_list* args
 p	|OP*	|localize	|OP* arg|I32 lexical
 Apd	|I32	|looks_like_number|SV* sv
+Apd	|int	|grok_number	|const char *pv|STRLEN len|UV *valuep
+Apd	|bool	|grok_numeric_radix|const char **sp|const char *send
 p	|int	|magic_clearenv	|SV* sv|MAGIC* mg
 p	|int	|magic_clear_all_env|SV* sv|MAGIC* mg
 p	|int	|magic_clearpack|SV* sv|MAGIC* mg
@@ -2521,8 +2523,6 @@ s	|I32	|expect_number	|char** pattern
 #  if defined(USE_ITHREADS)
 s	|SV*	|gv_share	|SV *sv
 #  endif
-s	|int	|grok_number	|const char *pv|STRLEN len|UV *valuep
-s	|bool	|grok_numeric_radix|const char **sp|const char *send
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)

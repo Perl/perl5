@@ -3726,6 +3726,16 @@ int flock(int fd, int op);
 #define EXEC_ARGV_CAST(x) x
 #endif
 
+#define IS_NUMBER_IN_UV		      0x01 /* number within UV range (maybe not
+					      int).  value returned in pointed-
+					      to UV */
+#define IS_NUMBER_GREATER_THAN_UV_MAX 0x02 /* pointed to UV undefined */
+#define IS_NUMBER_NOT_INT	      0x04 /* saw . or E notation */
+#define IS_NUMBER_NEG		      0x08 /* leading minus sign */
+#define IS_NUMBER_INFINITY	      0x10 /* this is big */
+
+#define GROK_NUMERIC_RADIX(sp, send) grok_numeric_radix(sp, send)
+
 /* and finally... */
 #define PERL_PATCHLEVEL_H_IMPLICIT
 #include "patchlevel.h"
