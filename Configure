@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Mar 15 17:38:07 EET 2002 [metaconfig 3.0 PL70]
+# Generated on Sat Mar 16 20:51:19 EET 2002 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -9111,6 +9111,25 @@ EOSH
 chmod +x protochk
 $eunicefix protochk
 
+hasproto='varname=$1; func=$2; shift; shift;
+while $test $# -ge 2; do
+	case "$1" in
+	$define) echo "#include <$2>";;
+	esac ;
+    shift 2;
+done > try.c;
+$cppstdin $cppflags $cppminus < try.c > tryout.c 2>/dev/null;
+if $contains "$func.*(" tryout.c >/dev/null 2>&1; then
+	echo "$func() prototype found.";
+	val="$define";
+else
+	echo "$func() prototype NOT found.";
+	val="$undef";
+fi;
+set $varname;
+eval $setvar;
+$rm -f try.c tryout.c'
+
 : see if sys/types.h has to be included
 set sys/types.h i_systypes
 eval $inhdr
@@ -9261,6 +9280,14 @@ eval $inlibc
 case "$d_asctime_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_time time.h"
+	case "$d_asctime_r_proto" in
+	'')	d_asctime_r_proto=define
+		set d_asctime_r_proto asctime_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_asctime_r_proto" in
+	define)
 	case "$asctime_r_proto" in
 	''|0) try='char* asctime_r(const struct tm*, char*);'
 	./protochk "extern $try" $hdrs && asctime_r_proto=B_SB ;;
@@ -9280,12 +9307,15 @@ case "$d_asctime_r" in
 	case "$asctime_r_proto" in
 	'')	d_asctime_r=undef
  	        asctime_r_proto=0
-		echo "Disabling asctime_r, cannot determine prototype." ;;
+		echo "Disabling asctime_r, cannot determine prototype." >&4 ;;
 	* )	case "$asctime_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) asctime_r_proto="REENTRANT_PROTO_$asctime_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have asctime_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	asctime_r_proto=0
@@ -9903,6 +9933,14 @@ eval $inlibc
 case "$d_crypt_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_crypt crypt.h"
+	case "$d_crypt_r_proto" in
+	'')	d_crypt_r_proto=define
+		set d_crypt_r_proto crypt_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_crypt_r_proto" in
+	define)
 	case "$crypt_r_proto" in
 	''|0) try='char* crypt_r(const char*, const char*, struct crypt_data*);'
 	./protochk "extern $try" $hdrs && crypt_r_proto=B_CCS ;;
@@ -9910,12 +9948,15 @@ case "$d_crypt_r" in
 	case "$crypt_r_proto" in
 	'')	d_crypt_r=undef
  	        crypt_r_proto=0
-		echo "Disabling crypt_r, cannot determine prototype." ;;
+		echo "Disabling crypt_r, cannot determine prototype." >&4 ;;
 	* )	case "$crypt_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) crypt_r_proto="REENTRANT_PROTO_$crypt_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have crypt_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	crypt_r_proto=0
@@ -9940,6 +9981,14 @@ eval $inlibc
 case "$d_ctermid_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_stdio stdio.h"
+	case "$d_ctermid_r_proto" in
+	'')	d_ctermid_r_proto=define
+		set d_ctermid_r_proto ctermid_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_ctermid_r_proto" in
+	define)
 	case "$ctermid_r_proto" in
 	''|0) try='char* ctermid_r(char*);'
 	./protochk "extern $try" $hdrs && ctermid_r_proto=B_B ;;
@@ -9947,12 +9996,15 @@ case "$d_ctermid_r" in
 	case "$ctermid_r_proto" in
 	'')	d_ctermid_r=undef
  	        ctermid_r_proto=0
-		echo "Disabling ctermid_r, cannot determine prototype." ;;
+		echo "Disabling ctermid_r, cannot determine prototype." >&4 ;;
 	* )	case "$ctermid_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) ctermid_r_proto="REENTRANT_PROTO_$ctermid_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have ctermid_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	ctermid_r_proto=0
@@ -9965,6 +10017,14 @@ eval $inlibc
 case "$d_ctime_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_time time.h"
+	case "$d_ctime_r_proto" in
+	'')	d_ctime_r_proto=define
+		set d_ctime_r_proto ctime_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_ctime_r_proto" in
+	define)
 	case "$ctime_r_proto" in
 	''|0) try='char* ctime_r(const time_t*, char*);'
 	./protochk "extern $try" $hdrs && ctime_r_proto=B_SB ;;
@@ -9984,12 +10044,15 @@ case "$d_ctime_r" in
 	case "$ctime_r_proto" in
 	'')	d_ctime_r=undef
  	        ctime_r_proto=0
-		echo "Disabling ctime_r, cannot determine prototype." ;;
+		echo "Disabling ctime_r, cannot determine prototype." >&4 ;;
 	* )	case "$ctime_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) ctime_r_proto="REENTRANT_PROTO_$ctime_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have ctime_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	ctime_r_proto=0
@@ -10034,25 +10097,6 @@ fi
 $rm -f dbl_dig.?
 set d_dbl_dig
 eval $setvar
-
-hasproto='varname=$1; func=$2; shift; shift;
-while $test $# -ge 2; do
-	case "$1" in
-	$define) echo "#include <$2>";;
-	esac ;
-    shift 2;
-done > try.c;
-$cppstdin $cppflags $cppminus < try.c > tryout.c 2>/dev/null;
-if $contains "$func.*(" tryout.c >/dev/null 2>&1; then
-	echo "$func() prototype found.";
-	val="$define";
-else
-	echo "$func() prototype NOT found.";
-	val="$undef";
-fi;
-set $varname;
-eval $setvar;
-$rm -f try.c tryout.c'
 
 : see if dbm.h is available
 : see if dbmclose exists
@@ -10341,6 +10385,14 @@ eval $inlibc
 case "$d_drand48_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_stdlib stdlib.h"
+	case "$d_drand48_r_proto" in
+	'')	d_drand48_r_proto=define
+		set d_drand48_r_proto drand48_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_drand48_r_proto" in
+	define)
 	case "$drand48_r_proto" in
 	''|0) try='int drand48_r(struct drand48_data*, double*);'
 	./protochk "extern $try" $hdrs && drand48_r_proto=I_ST ;;
@@ -10348,12 +10400,15 @@ case "$d_drand48_r" in
 	case "$drand48_r_proto" in
 	'')	d_drand48_r=undef
  	        drand48_r_proto=0
-		echo "Disabling drand48_r, cannot determine prototype." ;;
+		echo "Disabling drand48_r, cannot determine prototype." >&4 ;;
 	* )	case "$drand48_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) drand48_r_proto="REENTRANT_PROTO_$drand48_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have drand48_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	drand48_r_proto=0
@@ -10408,6 +10463,14 @@ eval $inlibc
 case "$d_endgrent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_grp grp.h"
+	case "$d_endgrent_r_proto" in
+	'')	d_endgrent_r_proto=define
+		set d_endgrent_r_proto endgrent_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_endgrent_r_proto" in
+	define)
 	case "$endgrent_r_proto" in
 	''|0) try='int endgrent_r(FILE**);'
 	./protochk "extern $try" $hdrs && endgrent_r_proto=I_H ;;
@@ -10419,12 +10482,15 @@ case "$d_endgrent_r" in
 	case "$endgrent_r_proto" in
 	'')	d_endgrent_r=undef
  	        endgrent_r_proto=0
-		echo "Disabling endgrent_r, cannot determine prototype." ;;
+		echo "Disabling endgrent_r, cannot determine prototype." >&4 ;;
 	* )	case "$endgrent_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) endgrent_r_proto="REENTRANT_PROTO_$endgrent_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have endgrent_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	endgrent_r_proto=0
@@ -10445,6 +10511,14 @@ eval $inlibc
 case "$d_endhostent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "$d_endhostent_r_proto" in
+	'')	d_endhostent_r_proto=define
+		set d_endhostent_r_proto endhostent_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_endhostent_r_proto" in
+	define)
 	case "$endhostent_r_proto" in
 	''|0) try='int endhostent_r(struct hostent_data*);'
 	./protochk "extern $try" $hdrs && endhostent_r_proto=I_S ;;
@@ -10456,12 +10530,15 @@ case "$d_endhostent_r" in
 	case "$endhostent_r_proto" in
 	'')	d_endhostent_r=undef
  	        endhostent_r_proto=0
-		echo "Disabling endhostent_r, cannot determine prototype." ;;
+		echo "Disabling endhostent_r, cannot determine prototype." >&4 ;;
 	* )	case "$endhostent_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) endhostent_r_proto="REENTRANT_PROTO_$endhostent_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have endhostent_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	endhostent_r_proto=0
@@ -10478,6 +10555,14 @@ eval $inlibc
 case "$d_endnetent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "$d_endnetent_r_proto" in
+	'')	d_endnetent_r_proto=define
+		set d_endnetent_r_proto endnetent_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_endnetent_r_proto" in
+	define)
 	case "$endnetent_r_proto" in
 	''|0) try='int endnetent_r(struct netent_data*);'
 	./protochk "extern $try" $hdrs && endnetent_r_proto=I_S ;;
@@ -10489,12 +10574,15 @@ case "$d_endnetent_r" in
 	case "$endnetent_r_proto" in
 	'')	d_endnetent_r=undef
  	        endnetent_r_proto=0
-		echo "Disabling endnetent_r, cannot determine prototype." ;;
+		echo "Disabling endnetent_r, cannot determine prototype." >&4 ;;
 	* )	case "$endnetent_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) endnetent_r_proto="REENTRANT_PROTO_$endnetent_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have endnetent_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	endnetent_r_proto=0
@@ -10511,6 +10599,14 @@ eval $inlibc
 case "$d_endprotoent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "$d_endprotoent_r_proto" in
+	'')	d_endprotoent_r_proto=define
+		set d_endprotoent_r_proto endprotoent_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_endprotoent_r_proto" in
+	define)
 	case "$endprotoent_r_proto" in
 	''|0) try='int endprotoent_r(struct protoent_data*);'
 	./protochk "extern $try" $hdrs && endprotoent_r_proto=I_S ;;
@@ -10522,12 +10618,15 @@ case "$d_endprotoent_r" in
 	case "$endprotoent_r_proto" in
 	'')	d_endprotoent_r=undef
  	        endprotoent_r_proto=0
-		echo "Disabling endprotoent_r, cannot determine prototype." ;;
+		echo "Disabling endprotoent_r, cannot determine prototype." >&4 ;;
 	* )	case "$endprotoent_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) endprotoent_r_proto="REENTRANT_PROTO_$endprotoent_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have endprotoent_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	endprotoent_r_proto=0
@@ -10632,6 +10731,14 @@ eval $inlibc
 case "$d_endpwent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_pwd pwd.h"
+	case "$d_endpwent_r_proto" in
+	'')	d_endpwent_r_proto=define
+		set d_endpwent_r_proto endpwent_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_endpwent_r_proto" in
+	define)
 	case "$endpwent_r_proto" in
 	''|0) try='int endpwent_r(FILE**);'
 	./protochk "extern $try" $hdrs && endpwent_r_proto=I_H ;;
@@ -10643,12 +10750,15 @@ case "$d_endpwent_r" in
 	case "$endpwent_r_proto" in
 	'')	d_endpwent_r=undef
  	        endpwent_r_proto=0
-		echo "Disabling endpwent_r, cannot determine prototype." ;;
+		echo "Disabling endpwent_r, cannot determine prototype." >&4 ;;
 	* )	case "$endpwent_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) endpwent_r_proto="REENTRANT_PROTO_$endpwent_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have endpwent_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	endpwent_r_proto=0
@@ -10665,6 +10775,14 @@ eval $inlibc
 case "$d_endservent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "$d_endservent_r_proto" in
+	'')	d_endservent_r_proto=define
+		set d_endservent_r_proto endservent_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_endservent_r_proto" in
+	define)
 	case "$endservent_r_proto" in
 	''|0) try='int endservent_r(struct servent_data*);'
 	./protochk "extern $try" $hdrs && endservent_r_proto=I_S ;;
@@ -10676,12 +10794,15 @@ case "$d_endservent_r" in
 	case "$endservent_r_proto" in
 	'')	d_endservent_r=undef
  	        endservent_r_proto=0
-		echo "Disabling endservent_r, cannot determine prototype." ;;
+		echo "Disabling endservent_r, cannot determine prototype." >&4 ;;
 	* )	case "$endservent_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) endservent_r_proto="REENTRANT_PROTO_$endservent_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have endservent_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	endservent_r_proto=0
@@ -11325,6 +11446,14 @@ eval $inlibc
 case "$d_getgrent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_grp grp.h"
+	case "$d_getgrent_r_proto" in
+	'')	d_getgrent_r_proto=define
+		set d_getgrent_r_proto getgrent_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_getgrent_r_proto" in
+	define)
 	case "$getgrent_r_proto" in
 	''|0) try='int getgrent_r(struct group*, char*, size_t, struct group**);'
 	./protochk "extern $try" $hdrs && getgrent_r_proto=I_SBWR ;;
@@ -11352,12 +11481,15 @@ case "$d_getgrent_r" in
 	case "$getgrent_r_proto" in
 	'')	d_getgrent_r=undef
  	        getgrent_r_proto=0
-		echo "Disabling getgrent_r, cannot determine prototype." ;;
+		echo "Disabling getgrent_r, cannot determine prototype." >&4 ;;
 	* )	case "$getgrent_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) getgrent_r_proto="REENTRANT_PROTO_$getgrent_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have getgrent_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	getgrent_r_proto=0
@@ -11370,6 +11502,14 @@ eval $inlibc
 case "$d_getgrgid_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_grp grp.h"
+	case "$d_getgrgid_r_proto" in
+	'')	d_getgrgid_r_proto=define
+		set d_getgrgid_r_proto getgrgid_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_getgrgid_r_proto" in
+	define)
 	case "$getgrgid_r_proto" in
 	''|0) try='int getgrgid_r(gid_t, struct group*, char*, size_t, struct group**);'
 	./protochk "extern $try" $hdrs && getgrgid_r_proto=I_TSBWR ;;
@@ -11389,12 +11529,15 @@ case "$d_getgrgid_r" in
 	case "$getgrgid_r_proto" in
 	'')	d_getgrgid_r=undef
  	        getgrgid_r_proto=0
-		echo "Disabling getgrgid_r, cannot determine prototype." ;;
+		echo "Disabling getgrgid_r, cannot determine prototype." >&4 ;;
 	* )	case "$getgrgid_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) getgrgid_r_proto="REENTRANT_PROTO_$getgrgid_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have getgrgid_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	getgrgid_r_proto=0
@@ -11407,6 +11550,14 @@ eval $inlibc
 case "$d_getgrnam_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_grp grp.h"
+	case "$d_getgrnam_r_proto" in
+	'')	d_getgrnam_r_proto=define
+		set d_getgrnam_r_proto getgrnam_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_getgrnam_r_proto" in
+	define)
 	case "$getgrnam_r_proto" in
 	''|0) try='int getgrnam_r(const char*, struct group*, char*, size_t, struct group**);'
 	./protochk "extern $try" $hdrs && getgrnam_r_proto=I_CSBWR ;;
@@ -11430,12 +11581,15 @@ case "$d_getgrnam_r" in
 	case "$getgrnam_r_proto" in
 	'')	d_getgrnam_r=undef
  	        getgrnam_r_proto=0
-		echo "Disabling getgrnam_r, cannot determine prototype." ;;
+		echo "Disabling getgrnam_r, cannot determine prototype." >&4 ;;
 	* )	case "$getgrnam_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) getgrnam_r_proto="REENTRANT_PROTO_$getgrnam_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have getgrnam_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	getgrnam_r_proto=0
@@ -11545,6 +11699,14 @@ eval $inlibc
 case "$d_gethostbyaddr_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "$d_gethostbyaddr_r_proto" in
+	'')	d_gethostbyaddr_r_proto=define
+		set d_gethostbyaddr_r_proto gethostbyaddr_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_gethostbyaddr_r_proto" in
+	define)
 	case "$gethostbyaddr_r_proto" in
 	''|0) try='int gethostbyaddr_r(const char*, size_t, int, struct hostent*, char*, size_t, struct hostent**, int*);'
 	./protochk "extern $try" $hdrs && gethostbyaddr_r_proto=I_CWISBWRE ;;
@@ -11588,12 +11750,15 @@ case "$d_gethostbyaddr_r" in
 	case "$gethostbyaddr_r_proto" in
 	'')	d_gethostbyaddr_r=undef
  	        gethostbyaddr_r_proto=0
-		echo "Disabling gethostbyaddr_r, cannot determine prototype." ;;
+		echo "Disabling gethostbyaddr_r, cannot determine prototype." >&4 ;;
 	* )	case "$gethostbyaddr_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) gethostbyaddr_r_proto="REENTRANT_PROTO_$gethostbyaddr_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have gethostbyaddr_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	gethostbyaddr_r_proto=0
@@ -11606,6 +11771,14 @@ eval $inlibc
 case "$d_gethostbyname_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "$d_gethostbyname_r_proto" in
+	'')	d_gethostbyname_r_proto=define
+		set d_gethostbyname_r_proto gethostbyname_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_gethostbyname_r_proto" in
+	define)
 	case "$gethostbyname_r_proto" in
 	''|0) try='int gethostbyname_r(const char*, struct hostent*, char*, size_t, struct hostent**, int*);'
 	./protochk "extern $try" $hdrs && gethostbyname_r_proto=I_CSBWRE ;;
@@ -11621,12 +11794,15 @@ case "$d_gethostbyname_r" in
 	case "$gethostbyname_r_proto" in
 	'')	d_gethostbyname_r=undef
  	        gethostbyname_r_proto=0
-		echo "Disabling gethostbyname_r, cannot determine prototype." ;;
+		echo "Disabling gethostbyname_r, cannot determine prototype." >&4 ;;
 	* )	case "$gethostbyname_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) gethostbyname_r_proto="REENTRANT_PROTO_$gethostbyname_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have gethostbyname_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	gethostbyname_r_proto=0
@@ -11639,6 +11815,14 @@ eval $inlibc
 case "$d_gethostent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "$d_gethostent_r_proto" in
+	'')	d_gethostent_r_proto=define
+		set d_gethostent_r_proto gethostent_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_gethostent_r_proto" in
+	define)
 	case "$gethostent_r_proto" in
 	''|0) try='int gethostent_r(struct hostent*, char*, size_t, struct hostent**, int*);'
 	./protochk "extern $try" $hdrs && gethostent_r_proto=I_SBWRE ;;
@@ -11666,12 +11850,15 @@ case "$d_gethostent_r" in
 	case "$gethostent_r_proto" in
 	'')	d_gethostent_r=undef
  	        gethostent_r_proto=0
-		echo "Disabling gethostent_r, cannot determine prototype." ;;
+		echo "Disabling gethostent_r, cannot determine prototype." >&4 ;;
 	* )	case "$gethostent_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) gethostent_r_proto="REENTRANT_PROTO_$gethostent_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have gethostent_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	gethostent_r_proto=0
@@ -11697,6 +11884,14 @@ eval $inlibc
 case "$d_getlogin_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_unistd unistd.h"
+	case "$d_getlogin_r_proto" in
+	'')	d_getlogin_r_proto=define
+		set d_getlogin_r_proto getlogin_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_getlogin_r_proto" in
+	define)
 	case "$getlogin_r_proto" in
 	''|0) try='int getlogin_r(char*, size_t);'
 	./protochk "extern $try" $hdrs && getlogin_r_proto=I_BW ;;
@@ -11716,12 +11911,15 @@ case "$d_getlogin_r" in
 	case "$getlogin_r_proto" in
 	'')	d_getlogin_r=undef
  	        getlogin_r_proto=0
-		echo "Disabling getlogin_r, cannot determine prototype." ;;
+		echo "Disabling getlogin_r, cannot determine prototype." >&4 ;;
 	* )	case "$getlogin_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) getlogin_r_proto="REENTRANT_PROTO_$getlogin_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have getlogin_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	getlogin_r_proto=0
@@ -11754,6 +11952,14 @@ eval $inlibc
 case "$d_getnetbyaddr_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "$d_getnetbyaddr_r_proto" in
+	'')	d_getnetbyaddr_r_proto=define
+		set d_getnetbyaddr_r_proto getnetbyaddr_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_getnetbyaddr_r_proto" in
+	define)
 	case "$getnetbyaddr_r_proto" in
 	''|0) try='int getnetbyaddr_r(unsigned long, int, struct netent*, char*, size_t, struct netent**, int*);'
 	./protochk "extern $try" $hdrs && getnetbyaddr_r_proto=I_UISBWRE ;;
@@ -11785,12 +11991,15 @@ case "$d_getnetbyaddr_r" in
 	case "$getnetbyaddr_r_proto" in
 	'')	d_getnetbyaddr_r=undef
  	        getnetbyaddr_r_proto=0
-		echo "Disabling getnetbyaddr_r, cannot determine prototype." ;;
+		echo "Disabling getnetbyaddr_r, cannot determine prototype." >&4 ;;
 	* )	case "$getnetbyaddr_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) getnetbyaddr_r_proto="REENTRANT_PROTO_$getnetbyaddr_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have getnetbyaddr_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	getnetbyaddr_r_proto=0
@@ -11803,6 +12012,14 @@ eval $inlibc
 case "$d_getnetbyname_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "$d_getnetbyname_r_proto" in
+	'')	d_getnetbyname_r_proto=define
+		set d_getnetbyname_r_proto getnetbyname_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_getnetbyname_r_proto" in
+	define)
 	case "$getnetbyname_r_proto" in
 	''|0) try='int getnetbyname_r(const char*, struct netent*, char*, size_t, struct netent**, int*);'
 	./protochk "extern $try" $hdrs && getnetbyname_r_proto=I_CSBWRE ;;
@@ -11822,12 +12039,15 @@ case "$d_getnetbyname_r" in
 	case "$getnetbyname_r_proto" in
 	'')	d_getnetbyname_r=undef
  	        getnetbyname_r_proto=0
-		echo "Disabling getnetbyname_r, cannot determine prototype." ;;
+		echo "Disabling getnetbyname_r, cannot determine prototype." >&4 ;;
 	* )	case "$getnetbyname_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) getnetbyname_r_proto="REENTRANT_PROTO_$getnetbyname_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have getnetbyname_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	getnetbyname_r_proto=0
@@ -11840,6 +12060,14 @@ eval $inlibc
 case "$d_getnetent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "$d_getnetent_r_proto" in
+	'')	d_getnetent_r_proto=define
+		set d_getnetent_r_proto getnetent_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_getnetent_r_proto" in
+	define)
 	case "$getnetent_r_proto" in
 	''|0) try='int getnetent_r(struct netent*, char*, size_t, struct netent**, int*);'
 	./protochk "extern $try" $hdrs && getnetent_r_proto=I_SBWRE ;;
@@ -11867,12 +12095,15 @@ case "$d_getnetent_r" in
 	case "$getnetent_r_proto" in
 	'')	d_getnetent_r=undef
  	        getnetent_r_proto=0
-		echo "Disabling getnetent_r, cannot determine prototype." ;;
+		echo "Disabling getnetent_r, cannot determine prototype." >&4 ;;
 	* )	case "$getnetent_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) getnetent_r_proto="REENTRANT_PROTO_$getnetent_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have getnetent_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	getnetent_r_proto=0
@@ -11923,6 +12154,14 @@ eval $inlibc
 case "$d_getprotobyname_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "$d_getprotobyname_r_proto" in
+	'')	d_getprotobyname_r_proto=define
+		set d_getprotobyname_r_proto getprotobyname_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_getprotobyname_r_proto" in
+	define)
 	case "$getprotobyname_r_proto" in
 	''|0) try='int getprotobyname_r(const char*, struct protoent*, char*, size_t, struct protoent**);'
 	./protochk "extern $try" $hdrs && getprotobyname_r_proto=I_CSBWR ;;
@@ -11938,12 +12177,15 @@ case "$d_getprotobyname_r" in
 	case "$getprotobyname_r_proto" in
 	'')	d_getprotobyname_r=undef
  	        getprotobyname_r_proto=0
-		echo "Disabling getprotobyname_r, cannot determine prototype." ;;
+		echo "Disabling getprotobyname_r, cannot determine prototype." >&4 ;;
 	* )	case "$getprotobyname_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) getprotobyname_r_proto="REENTRANT_PROTO_$getprotobyname_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have getprotobyname_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	getprotobyname_r_proto=0
@@ -11956,6 +12198,14 @@ eval $inlibc
 case "$d_getprotobynumber_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "$d_getprotobynumber_r_proto" in
+	'')	d_getprotobynumber_r_proto=define
+		set d_getprotobynumber_r_proto getprotobynumber_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_getprotobynumber_r_proto" in
+	define)
 	case "$getprotobynumber_r_proto" in
 	''|0) try='int getprotobynumber_r(int, struct protoent*, char*, size_t, struct protoent**);'
 	./protochk "extern $try" $hdrs && getprotobynumber_r_proto=I_ISBWR ;;
@@ -11971,12 +12221,15 @@ case "$d_getprotobynumber_r" in
 	case "$getprotobynumber_r_proto" in
 	'')	d_getprotobynumber_r=undef
  	        getprotobynumber_r_proto=0
-		echo "Disabling getprotobynumber_r, cannot determine prototype." ;;
+		echo "Disabling getprotobynumber_r, cannot determine prototype." >&4 ;;
 	* )	case "$getprotobynumber_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) getprotobynumber_r_proto="REENTRANT_PROTO_$getprotobynumber_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have getprotobynumber_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	getprotobynumber_r_proto=0
@@ -11989,6 +12242,14 @@ eval $inlibc
 case "$d_getprotoent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "$d_getprotoent_r_proto" in
+	'')	d_getprotoent_r_proto=define
+		set d_getprotoent_r_proto getprotoent_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_getprotoent_r_proto" in
+	define)
 	case "$getprotoent_r_proto" in
 	''|0) try='int getprotoent_r(struct protoent*, char*, size_t, struct protoent**);'
 	./protochk "extern $try" $hdrs && getprotoent_r_proto=I_SBWR ;;
@@ -12008,12 +12269,15 @@ case "$d_getprotoent_r" in
 	case "$getprotoent_r_proto" in
 	'')	d_getprotoent_r=undef
  	        getprotoent_r_proto=0
-		echo "Disabling getprotoent_r, cannot determine prototype." ;;
+		echo "Disabling getprotoent_r, cannot determine prototype." >&4 ;;
 	* )	case "$getprotoent_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) getprotoent_r_proto="REENTRANT_PROTO_$getprotoent_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have getprotoent_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	getprotoent_r_proto=0
@@ -12039,6 +12303,14 @@ eval $inlibc
 case "$d_getpwent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_pwd pwd.h"
+	case "$d_getpwent_r_proto" in
+	'')	d_getpwent_r_proto=define
+		set d_getpwent_r_proto getpwent_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_getpwent_r_proto" in
+	define)
 	case "$getpwent_r_proto" in
 	''|0) try='int getpwent_r(struct passwd*, char*, size_t, struct passwd**);'
 	./protochk "extern $try" $hdrs && getpwent_r_proto=I_SBWR ;;
@@ -12066,12 +12338,15 @@ case "$d_getpwent_r" in
 	case "$getpwent_r_proto" in
 	'')	d_getpwent_r=undef
  	        getpwent_r_proto=0
-		echo "Disabling getpwent_r, cannot determine prototype." ;;
+		echo "Disabling getpwent_r, cannot determine prototype." >&4 ;;
 	* )	case "$getpwent_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) getpwent_r_proto="REENTRANT_PROTO_$getpwent_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have getpwent_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	getpwent_r_proto=0
@@ -12084,6 +12359,14 @@ eval $inlibc
 case "$d_getpwnam_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_pwd pwd.h"
+	case "$d_getpwnam_r_proto" in
+	'')	d_getpwnam_r_proto=define
+		set d_getpwnam_r_proto getpwnam_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_getpwnam_r_proto" in
+	define)
 	case "$getpwnam_r_proto" in
 	''|0) try='int getpwnam_r(const char*, struct passwd*, char*, size_t, struct passwd**);'
 	./protochk "extern $try" $hdrs && getpwnam_r_proto=I_CSBWR ;;
@@ -12103,12 +12386,15 @@ case "$d_getpwnam_r" in
 	case "$getpwnam_r_proto" in
 	'')	d_getpwnam_r=undef
  	        getpwnam_r_proto=0
-		echo "Disabling getpwnam_r, cannot determine prototype." ;;
+		echo "Disabling getpwnam_r, cannot determine prototype." >&4 ;;
 	* )	case "$getpwnam_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) getpwnam_r_proto="REENTRANT_PROTO_$getpwnam_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have getpwnam_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	getpwnam_r_proto=0
@@ -12121,6 +12407,14 @@ eval $inlibc
 case "$d_getpwuid_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_pwd pwd.h"
+	case "$d_getpwuid_r_proto" in
+	'')	d_getpwuid_r_proto=define
+		set d_getpwuid_r_proto getpwuid_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_getpwuid_r_proto" in
+	define)
 	case "$getpwuid_r_proto" in
 	''|0) try='int getpwuid_r(uid_t, struct passwd*, char*, size_t, struct passwd**);'
 	./protochk "extern $try" $hdrs && getpwuid_r_proto=I_TSBWR ;;
@@ -12140,12 +12434,15 @@ case "$d_getpwuid_r" in
 	case "$getpwuid_r_proto" in
 	'')	d_getpwuid_r=undef
  	        getpwuid_r_proto=0
-		echo "Disabling getpwuid_r, cannot determine prototype." ;;
+		echo "Disabling getpwuid_r, cannot determine prototype." >&4 ;;
 	* )	case "$getpwuid_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) getpwuid_r_proto="REENTRANT_PROTO_$getpwuid_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have getpwuid_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	getpwuid_r_proto=0
@@ -12171,6 +12468,14 @@ eval $inlibc
 case "$d_getservbyname_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "$d_getservbyname_r_proto" in
+	'')	d_getservbyname_r_proto=define
+		set d_getservbyname_r_proto getservbyname_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_getservbyname_r_proto" in
+	define)
 	case "$getservbyname_r_proto" in
 	''|0) try='int getservbyname_r(const char*, const char*, struct servent*, char*, size_t, struct servent**);'
 	./protochk "extern $try" $hdrs && getservbyname_r_proto=I_CCSBWR ;;
@@ -12186,12 +12491,15 @@ case "$d_getservbyname_r" in
 	case "$getservbyname_r_proto" in
 	'')	d_getservbyname_r=undef
  	        getservbyname_r_proto=0
-		echo "Disabling getservbyname_r, cannot determine prototype." ;;
+		echo "Disabling getservbyname_r, cannot determine prototype." >&4 ;;
 	* )	case "$getservbyname_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) getservbyname_r_proto="REENTRANT_PROTO_$getservbyname_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have getservbyname_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	getservbyname_r_proto=0
@@ -12204,6 +12512,14 @@ eval $inlibc
 case "$d_getservbyport_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "$d_getservbyport_r_proto" in
+	'')	d_getservbyport_r_proto=define
+		set d_getservbyport_r_proto getservbyport_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_getservbyport_r_proto" in
+	define)
 	case "$getservbyport_r_proto" in
 	''|0) try='int getservbyport_r(int, const char*, struct servent*, char*, size_t, struct servent**);'
 	./protochk "extern $try" $hdrs && getservbyport_r_proto=I_ICSBWR ;;
@@ -12219,12 +12535,15 @@ case "$d_getservbyport_r" in
 	case "$getservbyport_r_proto" in
 	'')	d_getservbyport_r=undef
  	        getservbyport_r_proto=0
-		echo "Disabling getservbyport_r, cannot determine prototype." ;;
+		echo "Disabling getservbyport_r, cannot determine prototype." >&4 ;;
 	* )	case "$getservbyport_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) getservbyport_r_proto="REENTRANT_PROTO_$getservbyport_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have getservbyport_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	getservbyport_r_proto=0
@@ -12237,6 +12556,14 @@ eval $inlibc
 case "$d_getservent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "$d_getservent_r_proto" in
+	'')	d_getservent_r_proto=define
+		set d_getservent_r_proto getservent_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_getservent_r_proto" in
+	define)
 	case "$getservent_r_proto" in
 	''|0) try='int getservent_r(struct servent*, char*, size_t, struct servent**);'
 	./protochk "extern $try" $hdrs && getservent_r_proto=I_SBWR ;;
@@ -12256,12 +12583,15 @@ case "$d_getservent_r" in
 	case "$getservent_r_proto" in
 	'')	d_getservent_r=undef
  	        getservent_r_proto=0
-		echo "Disabling getservent_r, cannot determine prototype." ;;
+		echo "Disabling getservent_r, cannot determine prototype." >&4 ;;
 	* )	case "$getservent_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) getservent_r_proto="REENTRANT_PROTO_$getservent_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have getservent_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	getservent_r_proto=0
@@ -12287,6 +12617,14 @@ eval $inlibc
 case "$d_getspnam_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_shadow shadow.h"
+	case "$d_getspnam_r_proto" in
+	'')	d_getspnam_r_proto=define
+		set d_getspnam_r_proto getspnam_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_getspnam_r_proto" in
+	define)
 	case "$getspnam_r_proto" in
 	''|0) try='int getspnam_r(const char*, struct spwd*, char*, size_t, struct spwd**);'
 	./protochk "extern $try" $hdrs && getspnam_r_proto=I_CSBWR ;;
@@ -12298,12 +12636,15 @@ case "$d_getspnam_r" in
 	case "$getspnam_r_proto" in
 	'')	d_getspnam_r=undef
  	        getspnam_r_proto=0
-		echo "Disabling getspnam_r, cannot determine prototype." ;;
+		echo "Disabling getspnam_r, cannot determine prototype." >&4 ;;
 	* )	case "$getspnam_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) getspnam_r_proto="REENTRANT_PROTO_$getspnam_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have getspnam_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	getspnam_r_proto=0
@@ -12335,6 +12676,14 @@ eval $inlibc
 case "$d_gmtime_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_time time.h"
+	case "$d_gmtime_r_proto" in
+	'')	d_gmtime_r_proto=define
+		set d_gmtime_r_proto gmtime_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_gmtime_r_proto" in
+	define)
 	case "$gmtime_r_proto" in
 	''|0) try='struct tm* gmtime_r(const time_t*, struct tm*);'
 	./protochk "extern $try" $hdrs && gmtime_r_proto=S_TS ;;
@@ -12346,12 +12695,15 @@ case "$d_gmtime_r" in
 	case "$gmtime_r_proto" in
 	'')	d_gmtime_r=undef
  	        gmtime_r_proto=0
-		echo "Disabling gmtime_r, cannot determine prototype." ;;
+		echo "Disabling gmtime_r, cannot determine prototype." >&4 ;;
 	* )	case "$gmtime_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) gmtime_r_proto="REENTRANT_PROTO_$gmtime_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have gmtime_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	gmtime_r_proto=0
@@ -12559,6 +12911,14 @@ eval $inlibc
 case "$d_localtime_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_time time.h"
+	case "$d_localtime_r_proto" in
+	'')	d_localtime_r_proto=define
+		set d_localtime_r_proto localtime_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_localtime_r_proto" in
+	define)
 	case "$localtime_r_proto" in
 	''|0) try='struct tm* localtime_r(const time_t*, struct tm*);'
 	./protochk "extern $try" $hdrs && localtime_r_proto=S_TS ;;
@@ -12570,12 +12930,15 @@ case "$d_localtime_r" in
 	case "$localtime_r_proto" in
 	'')	d_localtime_r=undef
  	        localtime_r_proto=0
-		echo "Disabling localtime_r, cannot determine prototype." ;;
+		echo "Disabling localtime_r, cannot determine prototype." >&4 ;;
 	* )	case "$localtime_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) localtime_r_proto="REENTRANT_PROTO_$localtime_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have localtime_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	localtime_r_proto=0
@@ -13310,6 +13673,14 @@ eval $inlibc
 case "$d_random_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_stdlib stdlib.h"
+	case "$d_random_r_proto" in
+	'')	d_random_r_proto=define
+		set d_random_r_proto random_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_random_r_proto" in
+	define)
 	case "$random_r_proto" in
 	''|0) try='int random_r(int*, struct random_data*);'
 	./protochk "extern $try" $hdrs && random_r_proto=I_TS ;;
@@ -13317,12 +13688,15 @@ case "$d_random_r" in
 	case "$random_r_proto" in
 	'')	d_random_r=undef
  	        random_r_proto=0
-		echo "Disabling random_r, cannot determine prototype." ;;
+		echo "Disabling random_r, cannot determine prototype." >&4 ;;
 	* )	case "$random_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) random_r_proto="REENTRANT_PROTO_$random_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have random_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	random_r_proto=0
@@ -13345,6 +13719,14 @@ eval $inlibc
 case "$d_readdir64_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_dirent dirent.h"
+	case "$d_readdir64_r_proto" in
+	'')	d_readdir64_r_proto=define
+		set d_readdir64_r_proto readdir64_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_readdir64_r_proto" in
+	define)
 	case "$readdir64_r_proto" in
 	''|0) try='int readdir64_r(DIR*, struct dirent64*, struct dirent64**);'
 	./protochk "extern $try" $hdrs && readdir64_r_proto=I_TSR ;;
@@ -13356,12 +13738,15 @@ case "$d_readdir64_r" in
 	case "$readdir64_r_proto" in
 	'')	d_readdir64_r=undef
  	        readdir64_r_proto=0
-		echo "Disabling readdir64_r, cannot determine prototype." ;;
+		echo "Disabling readdir64_r, cannot determine prototype." >&4 ;;
 	* )	case "$readdir64_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) readdir64_r_proto="REENTRANT_PROTO_$readdir64_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have readdir64_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	readdir64_r_proto=0
@@ -13374,6 +13759,14 @@ eval $inlibc
 case "$d_readdir_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_dirent dirent.h"
+	case "$d_readdir_r_proto" in
+	'')	d_readdir_r_proto=define
+		set d_readdir_r_proto readdir_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_readdir_r_proto" in
+	define)
 	case "$readdir_r_proto" in
 	''|0) try='int readdir_r(DIR*, struct dirent*, struct dirent**);'
 	./protochk "extern $try" $hdrs && readdir_r_proto=I_TSR ;;
@@ -13385,12 +13778,15 @@ case "$d_readdir_r" in
 	case "$readdir_r_proto" in
 	'')	d_readdir_r=undef
  	        readdir_r_proto=0
-		echo "Disabling readdir_r, cannot determine prototype." ;;
+		echo "Disabling readdir_r, cannot determine prototype." >&4 ;;
 	* )	case "$readdir_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) readdir_r_proto="REENTRANT_PROTO_$readdir_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have readdir_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	readdir_r_proto=0
@@ -13907,6 +14303,14 @@ eval $inlibc
 case "$d_setgrent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_grp grp.h"
+	case "$d_setgrent_r_proto" in
+	'')	d_setgrent_r_proto=define
+		set d_setgrent_r_proto setgrent_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_setgrent_r_proto" in
+	define)
 	case "$setgrent_r_proto" in
 	''|0) try='int setgrent_r(FILE**);'
 	./protochk "extern $try" $hdrs && setgrent_r_proto=I_H ;;
@@ -13918,12 +14322,15 @@ case "$d_setgrent_r" in
 	case "$setgrent_r_proto" in
 	'')	d_setgrent_r=undef
  	        setgrent_r_proto=0
-		echo "Disabling setgrent_r, cannot determine prototype." ;;
+		echo "Disabling setgrent_r, cannot determine prototype." >&4 ;;
 	* )	case "$setgrent_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) setgrent_r_proto="REENTRANT_PROTO_$setgrent_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have setgrent_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	setgrent_r_proto=0
@@ -13940,6 +14347,14 @@ eval $inlibc
 case "$d_sethostent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "$d_sethostent_r_proto" in
+	'')	d_sethostent_r_proto=define
+		set d_sethostent_r_proto sethostent_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_sethostent_r_proto" in
+	define)
 	case "$sethostent_r_proto" in
 	''|0) try='int sethostent_r(int, struct hostent_data*);'
 	./protochk "extern $try" $hdrs && sethostent_r_proto=I_ID ;;
@@ -13951,12 +14366,15 @@ case "$d_sethostent_r" in
 	case "$sethostent_r_proto" in
 	'')	d_sethostent_r=undef
  	        sethostent_r_proto=0
-		echo "Disabling sethostent_r, cannot determine prototype." ;;
+		echo "Disabling sethostent_r, cannot determine prototype." >&4 ;;
 	* )	case "$sethostent_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) sethostent_r_proto="REENTRANT_PROTO_$sethostent_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have sethostent_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	sethostent_r_proto=0
@@ -13985,6 +14403,14 @@ eval $inlibc
 case "$d_setlocale_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_locale locale.h"
+	case "$d_setlocale_r_proto" in
+	'')	d_setlocale_r_proto=define
+		set d_setlocale_r_proto setlocale_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_setlocale_r_proto" in
+	define)
 	case "$setlocale_r_proto" in
 	''|0) try='int setlocale_r(int, const char*, char*, int);'
 	./protochk "extern $try" $hdrs && setlocale_r_proto=I_ICBI ;;
@@ -13992,12 +14418,15 @@ case "$d_setlocale_r" in
 	case "$setlocale_r_proto" in
 	'')	d_setlocale_r=undef
  	        setlocale_r_proto=0
-		echo "Disabling setlocale_r, cannot determine prototype." ;;
+		echo "Disabling setlocale_r, cannot determine prototype." >&4 ;;
 	* )	case "$setlocale_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) setlocale_r_proto="REENTRANT_PROTO_$setlocale_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have setlocale_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	setlocale_r_proto=0
@@ -14014,6 +14443,14 @@ eval $inlibc
 case "$d_setnetent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "$d_setnetent_r_proto" in
+	'')	d_setnetent_r_proto=define
+		set d_setnetent_r_proto setnetent_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_setnetent_r_proto" in
+	define)
 	case "$setnetent_r_proto" in
 	''|0) try='int setnetent_r(int, struct netent_data*);'
 	./protochk "extern $try" $hdrs && setnetent_r_proto=I_ID ;;
@@ -14025,12 +14462,15 @@ case "$d_setnetent_r" in
 	case "$setnetent_r_proto" in
 	'')	d_setnetent_r=undef
  	        setnetent_r_proto=0
-		echo "Disabling setnetent_r, cannot determine prototype." ;;
+		echo "Disabling setnetent_r, cannot determine prototype." >&4 ;;
 	* )	case "$setnetent_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) setnetent_r_proto="REENTRANT_PROTO_$setnetent_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have setnetent_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	setnetent_r_proto=0
@@ -14063,6 +14503,14 @@ eval $inlibc
 case "$d_setprotoent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "$d_setprotoent_r_proto" in
+	'')	d_setprotoent_r_proto=define
+		set d_setprotoent_r_proto setprotoent_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_setprotoent_r_proto" in
+	define)
 	case "$setprotoent_r_proto" in
 	''|0) try='int setprotoent_r(int, struct protoent_data*);'
 	./protochk "extern $try" $hdrs && setprotoent_r_proto=I_ID ;;
@@ -14074,12 +14522,15 @@ case "$d_setprotoent_r" in
 	case "$setprotoent_r_proto" in
 	'')	d_setprotoent_r=undef
  	        setprotoent_r_proto=0
-		echo "Disabling setprotoent_r, cannot determine prototype." ;;
+		echo "Disabling setprotoent_r, cannot determine prototype." >&4 ;;
 	* )	case "$setprotoent_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) setprotoent_r_proto="REENTRANT_PROTO_$setprotoent_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have setprotoent_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	setprotoent_r_proto=0
@@ -14096,6 +14547,14 @@ eval $inlibc
 case "$d_setpwent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_pwd pwd.h"
+	case "$d_setpwent_r_proto" in
+	'')	d_setpwent_r_proto=define
+		set d_setpwent_r_proto setpwent_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_setpwent_r_proto" in
+	define)
 	case "$setpwent_r_proto" in
 	''|0) try='int setpwent_r(FILE**);'
 	./protochk "extern $try" $hdrs && setpwent_r_proto=I_H ;;
@@ -14107,12 +14566,15 @@ case "$d_setpwent_r" in
 	case "$setpwent_r_proto" in
 	'')	d_setpwent_r=undef
  	        setpwent_r_proto=0
-		echo "Disabling setpwent_r, cannot determine prototype." ;;
+		echo "Disabling setpwent_r, cannot determine prototype." >&4 ;;
 	* )	case "$setpwent_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) setpwent_r_proto="REENTRANT_PROTO_$setpwent_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have setpwent_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	setpwent_r_proto=0
@@ -14149,6 +14611,14 @@ eval $inlibc
 case "$d_setservent_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_netdb netdb.h"
+	case "$d_setservent_r_proto" in
+	'')	d_setservent_r_proto=define
+		set d_setservent_r_proto setservent_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_setservent_r_proto" in
+	define)
 	case "$setservent_r_proto" in
 	''|0) try='int setservent_r(int, struct servent_data*);'
 	./protochk "extern $try" $hdrs && setservent_r_proto=I_ID ;;
@@ -14160,12 +14630,15 @@ case "$d_setservent_r" in
 	case "$setservent_r_proto" in
 	'')	d_setservent_r=undef
  	        setservent_r_proto=0
-		echo "Disabling setservent_r, cannot determine prototype." ;;
+		echo "Disabling setservent_r, cannot determine prototype." >&4 ;;
 	* )	case "$setservent_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) setservent_r_proto="REENTRANT_PROTO_$setservent_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have setservent_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	setservent_r_proto=0
@@ -14433,6 +14906,14 @@ eval $inlibc
 case "$d_srand48_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_stdlib stdlib.h"
+	case "$d_srand48_r_proto" in
+	'')	d_srand48_r_proto=define
+		set d_srand48_r_proto srand48_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_srand48_r_proto" in
+	define)
 	case "$srand48_r_proto" in
 	''|0) try='int srand48_r(long, struct drand48_data*);'
 	./protochk "extern $try" $hdrs && srand48_r_proto=I_LS ;;
@@ -14440,12 +14921,15 @@ case "$d_srand48_r" in
 	case "$srand48_r_proto" in
 	'')	d_srand48_r=undef
  	        srand48_r_proto=0
-		echo "Disabling srand48_r, cannot determine prototype." ;;
+		echo "Disabling srand48_r, cannot determine prototype." >&4 ;;
 	* )	case "$srand48_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) srand48_r_proto="REENTRANT_PROTO_$srand48_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have srand48_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	srand48_r_proto=0
@@ -14458,6 +14942,14 @@ eval $inlibc
 case "$d_srandom_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_stdlib stdlib.h"
+	case "$d_srandom_r_proto" in
+	'')	d_srandom_r_proto=define
+		set d_srandom_r_proto srandom_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_srandom_r_proto" in
+	define)
 	case "$srandom_r_proto" in
 	''|0) try='int srandom_r(unsigned int, struct random_data*);'
 	./protochk "extern $try" $hdrs && srandom_r_proto=I_TS ;;
@@ -14465,12 +14957,15 @@ case "$d_srandom_r" in
 	case "$srandom_r_proto" in
 	'')	d_srandom_r=undef
  	        srandom_r_proto=0
-		echo "Disabling srandom_r, cannot determine prototype." ;;
+		echo "Disabling srandom_r, cannot determine prototype." >&4 ;;
 	* )	case "$srandom_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) srandom_r_proto="REENTRANT_PROTO_$srandom_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have srandom_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	srandom_r_proto=0
@@ -14882,6 +15377,14 @@ eval $inlibc
 case "$d_strerror_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_string string.h"
+	case "$d_strerror_r_proto" in
+	'')	d_strerror_r_proto=define
+		set d_strerror_r_proto strerror_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_strerror_r_proto" in
+	define)
 	case "$strerror_r_proto" in
 	''|0) try='int strerror_r(int, char*, size_t);'
 	./protochk "extern $try" $hdrs && strerror_r_proto=I_IBW ;;
@@ -14897,12 +15400,15 @@ case "$d_strerror_r" in
 	case "$strerror_r_proto" in
 	'')	d_strerror_r=undef
  	        strerror_r_proto=0
-		echo "Disabling strerror_r, cannot determine prototype." ;;
+		echo "Disabling strerror_r, cannot determine prototype." >&4 ;;
 	* )	case "$strerror_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) strerror_r_proto="REENTRANT_PROTO_$strerror_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have strerror_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	strerror_r_proto=0
@@ -15237,6 +15743,14 @@ eval $inlibc
 case "$d_tmpnam_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_stdio stdio.h"
+	case "$d_tmpnam_r_proto" in
+	'')	d_tmpnam_r_proto=define
+		set d_tmpnam_r_proto tmpnam_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_tmpnam_r_proto" in
+	define)
 	case "$tmpnam_r_proto" in
 	''|0) try='char* tmpnam_r(char*);'
 	./protochk "extern $try" $hdrs && tmpnam_r_proto=B_B ;;
@@ -15244,12 +15758,15 @@ case "$d_tmpnam_r" in
 	case "$tmpnam_r_proto" in
 	'')	d_tmpnam_r=undef
  	        tmpnam_r_proto=0
-		echo "Disabling tmpnam_r, cannot determine prototype." ;;
+		echo "Disabling tmpnam_r, cannot determine prototype." >&4 ;;
 	* )	case "$tmpnam_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) tmpnam_r_proto="REENTRANT_PROTO_$tmpnam_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have tmpnam_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	tmpnam_r_proto=0
@@ -15266,6 +15783,14 @@ eval $inlibc
 case "$d_ttyname_r" in
 "$define")
 	hdrs="$i_systypes sys/types.h define stdio.h $i_unistd unistd.h"
+	case "$d_ttyname_r_proto" in
+	'')	d_ttyname_r_proto=define
+		set d_ttyname_r_proto ttyname_r $hdrs
+		eval $hasproto ;;
+	*)	;;
+	esac
+	case "$d_ttyname_r_proto" in
+	define)
 	case "$ttyname_r_proto" in
 	''|0) try='int ttyname_r(int, char*, size_t);'
 	./protochk "extern $try" $hdrs && ttyname_r_proto=I_IBW ;;
@@ -15281,12 +15806,15 @@ case "$d_ttyname_r" in
 	case "$ttyname_r_proto" in
 	'')	d_ttyname_r=undef
  	        ttyname_r_proto=0
-		echo "Disabling ttyname_r, cannot determine prototype." ;;
+		echo "Disabling ttyname_r, cannot determine prototype." >&4 ;;
 	* )	case "$ttyname_r_proto" in
 		REENTRANT_PROTO*) ;;
 		*) ttyname_r_proto="REENTRANT_PROTO_$ttyname_r_proto" ;;
 		esac
 		echo "Prototype: $try" ;;
+	esac
+	;;
+	*)	echo "You have ttyname_r but no prototype, not using it." >&4 ;;
 	esac
 	;;
 *)	ttyname_r_proto=0

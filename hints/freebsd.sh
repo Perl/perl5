@@ -210,6 +210,7 @@ EOM
 		 exit 1
 	      fi
 	      ldflags="-pthread $ldflags"
+	      ccflags="-D_THREAD_SAFE $ccflags"
 	      ;;
 
 	esac
