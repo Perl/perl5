@@ -796,7 +796,7 @@ d_inetaton (d_inetaton.U):
 	indicates to the C program that the inet_aton() function is available
 	to parse IP address "dotted-quad" strings.
 
-d_int64t (d_int64t.U):
+d_int64_t (d_int64_t.U):
 	This symbol will be defined if the C compiler supports int64_t.
 
 d_isascii (d_isascii.U):
@@ -1358,6 +1358,9 @@ d_sigsetjmp (d_sigsetjmp.U):
 d_socket (d_socket.U):
 	This variable conditionally defines HAS_SOCKET, which indicates
 	that the BSD socket interface is supported.
+
+d_socklen_t (d_socklen_t.U):
+	This symbol will be defined if the C compiler supports socklen_t.
 
 d_sockpair (d_socket.U):
 	This variable conditionally defines the HAS_SOCKETPAIR symbol, which
@@ -2383,6 +2386,9 @@ libsfiles (libs.U):
 libsfound (libs.U):
 	This variable holds the full pathnames of the libraries
 	we found and accepted.
+
+libspath (libs.U):
+	This variable holds the directory names probed for libraries.
 
 libswanted (Myinit.U):
 	This variable holds a list of all the libraries we want to

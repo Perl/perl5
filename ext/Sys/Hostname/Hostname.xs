@@ -18,7 +18,7 @@
 #  endif
 #endif
 
-#ifdef I_SYS_UTSNAME
+#ifdef I_SYSUTSNAME
 #  include <sys/utsname.h>
 #endif
 

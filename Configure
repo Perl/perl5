@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Feb 22 16:38:07 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Tue Feb 22 23:55:00 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -402,7 +402,7 @@ d_hasmntopt=''
 d_htonl=''
 d_iconv=''
 d_inetaton=''
-d_int64t=''
+d_int64_t=''
 d_isascii=''
 d_killpg=''
 d_lchown=''
@@ -514,6 +514,7 @@ d_socket=''
 d_sockpair=''
 sockethdr=''
 socketlib=''
+d_socklen_t=''
 d_sqrtl=''
 d_statblks=''
 d_statfs_f_flags=''
@@ -711,6 +712,7 @@ libs=''
 libsdirs=''
 libsfiles=''
 libsfound=''
+libspath=''
 lns=''
 d_PRIEldbl=''
 d_PRIFldbl=''
@@ -3701,8 +3703,12 @@ esac
 libsfound=''
 libsfiles=''
 libsdirs=''
+libspath=''
+for thisdir in $libpth $xlibpth; do
+  test -d $thisdir && libspath="$libspath $thisdir"
+done
 for thislib in $libswanted; do
-	for thisdir in $libpth; do
+	for thisdir in $libspath; do
 	    xxx=''
 	    if $test ! -f "$xxx" -a "X$ignore_versioned_solibs" = "X"; then
 		xxx=`ls $thisdir/lib$thislib.$so.[0-9] 2>/dev/null|tail -1`
@@ -9310,7 +9316,7 @@ else
 	echo " No, it doesn't." >&4
 fi
 $rm -f try try.*
-set d_int64t
+set d_int64_t
 eval $setvar
 
 : Look for isascii
@@ -9648,7 +9654,7 @@ case "$intsize" in
         eval $setvar
         quadkind=3
         ;;
-      *) case "$d_int64t" in
+      *) case "$d_int64_t" in
          define)
            val=int64_t
            set quadtype
@@ -10936,6 +10942,29 @@ esac
 set d_sigsetjmp
 eval $setvar
 $rm -f try.c try
+
+: check for socklen_t
+echo " "
+$echo $n "Checking to see if your system supports socklen_t...$c" >&4
+$cat >try.c <<EOCP
+#include <sys/types.h>
+#$d_socket HAS_SOCKET
+#ifdef HAS_SOCKET
+#include <sys/socket.h>
+#endif
+int main() { socklen_t x = 16; }
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+	echo " Yes, it does." >&4
+else
+	val="$undef"
+	echo " No, it doesn't." >&4
+fi
+$rm -f try try.*
+set d_socklen_t
+eval $setvar
 
 : see if sys/stat.h is available
 set sys/stat.h i_sysstat
@@ -14696,7 +14725,7 @@ d_htonl='$d_htonl'
 d_iconv='$d_iconv'
 d_index='$d_index'
 d_inetaton='$d_inetaton'
-d_int64t='$d_int64t'
+d_int64_t='$d_int64_t'
 d_isascii='$d_isascii'
 d_killpg='$d_killpg'
 d_lchown='$d_lchown'
@@ -14811,6 +14840,7 @@ d_shmget='$d_shmget'
 d_sigaction='$d_sigaction'
 d_sigsetjmp='$d_sigsetjmp'
 d_socket='$d_socket'
+d_socklen_t='$d_socklen_t'
 d_sockpair='$d_sockpair'
 d_sqrtl='$d_sqrtl'
 d_statblks='$d_statblks'
@@ -15035,6 +15065,7 @@ libs='$libs'
 libsdirs='$libsdirs'
 libsfiles='$libsfiles'
 libsfound='$libsfound'
+libspath='$libspath'
 libswanted='$libswanted'
 line='$line'
 lint='$lint'
