@@ -1102,7 +1102,7 @@ BEGIN { map($globalnames{$_}++, "SIG", "STDIN", "STDOUT", "STDERR", "INC",
 sub gv_name {
     my $self = shift;
     my $gv = shift;
-Carp::confess() if $gv->isa("B::CV");
+Carp::confess() unless ref($gv) eq "B::GV";
     my $stash = $gv->STASH->NAME;
     my $name = $gv->SAFENAME;
     if (($stash eq 'main' && $globalnames{$name})
@@ -3725,12 +3725,22 @@ sub pp_split {
     my($op, $cx) = @_;
     my($kid, @exprs, $ary, $expr);
     $kid = $op->first;
-    # under ithreads pmreplroot is an integer, not an SV
+
+    # For our kid (an OP_PUSHRE), pmreplroot is never actually the
+    # root of a replacement; it's either empty, or abused to point to
+    # the GV for an array we split into (an optimization to save
+    # assignment overhead). Depending on whether we're using ithreads,
+    # this OP* holds either a GV* or a PADOFFSET. Luckily, B.xs
+    # figures out for us which it is.
     my $replroot = $kid->pmreplroot;
-    if ( ( ref($replroot) && $$replroot ) ||
-         ( !ref($replroot) && $replroot ) ) {
-	$ary = $self->stash_variable('@', $self->gv_name($kid->pmreplroot));
+    my $gv = 0;
+    if (ref($replroot) eq "B::GV") {
+	$gv = $replroot;
+    } elsif (!ref($replroot) and $replroot > 0) {
+	$gv = $self->padval($replroot);
     }
+    $ary = $self->stash_variable('@', $self->gv_name($gv)) if $gv;
+
     for (; !null($kid); $kid = $kid->sibling) {
 	push @exprs, $self->deparse($kid, 6);
     }

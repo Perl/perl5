@@ -275,9 +275,13 @@ sub walk_topdown {
 	    walk_topdown($kid, $sub, $level + 1);
 	}
     }
-    if (class($op) eq "PMOP" and $op->pmreplroot and $ {$op->pmreplroot}
-	and $op->pmreplroot->isa("B::OP")) {
-	walk_topdown($op->pmreplroot, $sub, $level + 1);
+    if (class($op) eq "PMOP") {
+	my $maybe_root = $op->pmreplroot;
+	if (ref($maybe_root) and $maybe_root->isa("B::OP")) {
+	    # It really is the root of the replacement, not something
+	    # else stored here for lack of space elsewhere
+	    walk_topdown($maybe_root, $sub, $level + 1);
+	}
     }
 }
 
@@ -520,10 +524,16 @@ sub concise_op {
 	}
 	my $pmreplroot = $op->pmreplroot;
 	my $pmreplstart;
-	if ($pmreplroot && $$pmreplroot && $pmreplroot->isa("B::GV")) {
+	if (ref($pmreplroot) eq "B::GV") {
 	    # with C<@stash_array = split(/pat/, str);>,
-	    #  *stash_array is stored in pmreplroot.
+	    #  *stash_array is stored in /pat/'s pmreplroot.
 	    $h{arg} = "($precomp => \@" . $pmreplroot->NAME . ")";
+	} elsif (!ref($pmreplroot) and $pmreplroot) {
+	    # same as the last case, except the value is actually a
+	    # pad offset for where the GV is kept (this happens under
+	    # ithreads)
+	    my $gv = (($curcv->PADLIST->ARRAY)[1]->ARRAY)[$pmreplroot];
+	    $h{arg} = "($precomp => \@" . $gv->NAME . ")";
 	} elsif ($ {$op->pmreplstart}) {
 	    undef $lastnext;
 	    $pmreplstart = "replstart->" . seq($op->pmreplstart);
