@@ -1,5 +1,5 @@
 package Cwd;
-require 5.000;
+require 5.6.0;
 
 =head1 NAME
 
@@ -73,13 +73,35 @@ environment variable will be kept up to date.  (See
 L<perlsub/Overriding Builtin Functions>.) Note that it will only be
 kept up to date if all packages which use chdir import it from Cwd.
 
+=head1 NOTES
+
+=over 4
+
+=item *
+
+On Mac OS (Classic), the path separator is ':', not '/', and the 
+current directory is denoted as ':', not '.'. To move up the directory 
+tree, you will use '::' to move up one level, but ':::' and so on to 
+move up the tree two or more levels (i.e. the equivalent to '../../..'
+is '::::'). Generally, you should be careful about specifying relative pathnames. 
+While a full path always begins with a volume name, a relative pathname 
+should always begin with a ':'.  If specifying a volume name only, a 
+trailing ':' is required.
+
+Actually, on Mac OS, the C<getcwd()>, C<fastgetcwd()> and C<fastcwd()>
+functions  are all aliases for the C<cwd()> function, which, on Mac OS,
+calls `pwd`. Likewise, the C<abs_path()> function is an alias for
+C<fast_abs_path()>.
+
+=back
+
 =cut
 
 use strict;
 
 use Carp;
 
-our $VERSION = '2.04';
+our $VERSION = '2.05';
 
 use base qw/ Exporter /;
 our @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
@@ -220,7 +242,8 @@ sub chdir {
 
 sub fast_abs_path {
     my $cwd = getcwd();
-    my $path = @_ ? shift : '.';
+    require File::Spec;
+    my $path = @_ ? shift : File::Spec->curdir;
     CORE::chdir($path) || croak "Cannot chdir to $path:$!";
     my $realpath = getcwd();
     CORE::chdir($cwd)  || croak "Cannot chdir back to $cwd:$!";
