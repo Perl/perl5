@@ -107,10 +107,23 @@ behavior of:
 
 remains unchanged.  See L<perlop>.
 
-=item Improved C<qw//> operator
+=head2 Improved C<qw//> operator
 
-The C<qw//> operator is now evaluated at compile time instead of being
-replaced with a run time call to C<split()>.
+The C<qw//> operator is now evaluated at compile time into a true list
+instead of being replaced with a run time call to C<split()>.  This
+removes the confusing behavior of C<qw//> in scalar context stemming from
+the older implementation, which inherited the behavior from split().  
+
+Thus:
+
+    $foo = ($bar) = qw(a b c); print "$foo|$bar\n";
+
+now correctly prints "3|a", instead of "2|a".
+
+=head2 pack() format 'Z' supported
+
+The new format type 'Z' is useful for packing and unpacking null-terminated
+strings.  See L<perlfunc/"pack">.
 
 =head1 Supported Platforms
 

@@ -4,7 +4,7 @@
 # test method calls and autoloading.
 #
 
-print "1..26\n";
+print "1..46\n";
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -18,6 +18,35 @@ sub test {
   # print "not " unless shift eq shift;
   print "ok ", ++$cnt, "\n"
 }
+
+# First, some basic checks of method-calling syntax:
+$obj = bless [], "Pack";
+sub Pack::method { shift; join(",", "method", @_) }
+$mname = "method";
+
+test(Pack->method("a","b","c"), "method,a,b,c");
+test(Pack->$mname("a","b","c"), "method,a,b,c");
+test(method Pack ("a","b","c"), "method,a,b,c");
+test((method Pack "a","b","c"), "method,a,b,c");
+
+test(Pack->method(), "method");
+test(Pack->$mname(), "method");
+test(method Pack (), "method");
+test(Pack->method, "method");
+test(Pack->$mname, "method");
+test(method Pack, "method");
+
+test($obj->method("a","b","c"), "method,a,b,c");
+test($obj->$mname("a","b","c"), "method,a,b,c");
+test((method $obj ("a","b","c")), "method,a,b,c");
+test((method $obj "a","b","c"), "method,a,b,c");
+
+test($obj->method(), "method");
+test($obj->$mname(), "method");
+test((method $obj ()), "method");
+test($obj->method, "method");
+test($obj->$mname, "method");
+test(method $obj, "method");
 
 test( A->d, "C::d");		# Update hash table;
 
