@@ -6153,6 +6153,7 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
     register I32 cnt;
     I32 i = 0;
     I32 rspara = 0;
+    I32 recsize;
 
     SV_CHECK_THINKFIRST_COW_DROP(sv);
     /* XXX. If you make this PVIV, then copy on write can copy scalars read
@@ -6163,6 +6164,7 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
     (void)SvUPGRADE(sv, SVt_PV);
 
     SvSCREAM_off(sv);
+    SvPOK_only(sv);    /* Validate pointer */
 
     if (PL_curcop == &PL_compiling) {
 	/* we always read code in line mode */
@@ -6170,17 +6172,22 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 	rslen = 1;
     }
     else if (RsSNARF(PL_rs)) {
+	Stat_t st;
+	if (!PerlLIO_fstat(PerlIO_fileno(fp), &st) && st.st_size
+		&& (recsize = st.st_size - PerlIO_tell(fp)))
+	    goto read_record;
 	rsptr = NULL;
 	rslen = 0;
     }
     else if (RsRECORD(PL_rs)) {
-      I32 recsize, bytesread;
+      I32 bytesread;
       char *buffer;
 
       /* Grab the size of the record we're getting */
       recsize = SvIV(SvRV(PL_rs));
-      (void)SvPOK_only(sv);    /* Validate pointer */
-      buffer = SvGROW(sv, (STRLEN)(recsize + 1));
+
+    read_record:
+      buffer = SvGROW(sv, (STRLEN)(recsize + append + 1)) + append;
       /* Go yank in */
 #ifdef VMS
       /* VMS wants read instead of fread, because fread doesn't respect */
@@ -6190,13 +6197,9 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 #else
       bytesread = PerlIO_read(fp, buffer, recsize);
 #endif
-      SvCUR_set(sv, bytesread);
+      SvCUR_set(sv, bytesread += append);
       buffer[bytesread] = '\0';
-      if (PerlIO_isutf8(fp))
-	SvUTF8_on(sv);
-      else
-	SvUTF8_off(sv);
-      return(SvCUR(sv) ? SvPVX(sv) : Nullch);
+      goto check_utf8_and_return;
     }
     else if (RsPARA(PL_rs)) {
 	rsptr = "\n\n";
@@ -6265,7 +6268,6 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
     /* Here is some breathtakingly efficient cheating */
 
     cnt = PerlIO_get_cnt(fp);			/* get count into register */
-    (void)SvPOK_only(sv);		/* validate pointer */
     if ((I32)(SvLEN(sv) - append) <= cnt + 1) { /* make sure we have the room */
 	if (cnt > 80 && (I32)SvLEN(sv) > append) {
 	    shortbuffered = cnt - SvLEN(sv) + append + 1;
@@ -6445,6 +6447,7 @@ screamer2:
 	}
     }
 
+check_utf8_and_return:
     if (PerlIO_isutf8(fp))
 	SvUTF8_on(sv);
     else
