@@ -80,6 +80,7 @@ my @pods = (<pod/*.pod>);
 # files under the archlib directory.
 my %archpms = (
     Config => 1, 
+    lib => 1, 
 );
 
 if ($^O eq 'dos') {
@@ -603,8 +604,8 @@ sub installlib {
     }
     
     # ignore patch backups, RCS files, emacs backup & temp files and the
-    # .exists files.
-    return if $name =~ m{\.orig$|~$|^#.+#$|,v$|^\.exists};
+    # .exists files, and .PL files.
+    return if $name =~ m{\.orig$|~$|^#.+#$|,v$|^\.exists|\.PL$};
 
     $name = "$dir/$name" if $dir ne '';
 
