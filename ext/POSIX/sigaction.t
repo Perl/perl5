@@ -117,7 +117,7 @@ eval {
 };
 print $@ ? "ok 17\n" : "not ok 17\n";
 
-if ($^O e 'VMS') {
+if ($^O eq 'VMS') {
     print "ok 18 # Skip: SIGCONT not trappable in $^O\n";
 } else {
     $newaction=POSIX::SigAction->new(sub { $ok10=1; });
