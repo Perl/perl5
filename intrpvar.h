@@ -31,8 +31,7 @@ PERLVAR(Isawstudy,	bool)		/* do fbm_instr on all strings */
 PERLVAR(Isawvec,	bool)		
 PERLVAR(Iunsafe,	bool)		
 PERLVAR(Iinplace,	char *)		
-PERLVAR(Ie_tmpname,	char *)		
-PERLVAR(Ie_fp,		PerlIO *)		
+PERLVAR(Ie_script,	SV *)		
 PERLVAR(Iperldb,	U32)		
 
 /* This value may be raised by extensions for testing purposes */
