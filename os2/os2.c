@@ -474,7 +474,6 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 	int trueflag = flag;
 	int rc, pass = 1;
 	char *tmps;
-	char buf[256], scrbuf[280];
 	char *args[4];
 	static char * fargs[4] 
 	    = { "/bin/sh", "-c", "\"$@\"", "spawn-via-shell", };
@@ -484,6 +483,8 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
  	int new_stderr = -1, nostderr = 0;
 	int fl_stderr = 0;
 	STRLEN n_a;
+	char *buf;
+	PerlIO *file;
 	
 	if (flag == P_WAIT)
 		flag = P_NOWAIT;
@@ -560,6 +561,8 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 	    case FAPPTYP_NOTSPEC: 
 		/* Let the shell handle this... */
 		force_shell = 1;
+		buf = "";		/* Pacify a warning */
+		file = 0;		/* Pacify a warning */
 		goto doshell_args;
 		break;
 	    }
@@ -609,59 +612,45 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 		char *scr = find_script(PL_Argv[0], TRUE, NULL, 0);
 
 		if (scr) {
-		    PerlIO *file;
-                    SSize_t rd;
-		    char *s = 0, *s1, *s2;
-		    int l;
+		    char *s = 0, *s1;
+		    SV *scrsv = sv_2mortal(newSVpv(scr, 0));
+		    SV *bufsv = sv_newmortal();
 
-                    l = strlen(scr);
-		
-                    if (l >= sizeof scrbuf) {
-                       Safefree(scr);
-                     longbuf:
-                       Perl_warner(aTHX_ WARN_EXEC, "Size of scriptname too big: %d", l);
-		       rc = -1;
-		       goto finish;
-                    }
-                    strcpy(scrbuf, scr);
                     Safefree(scr);
-                    scr = scrbuf;
+		    scr = SvPV(scrsv, n_a); /* free()ed later */
 
 		    file = PerlIO_open(scr, "r");
 		    PL_Argv[0] = scr;
 		    if (!file)
 			goto panic_file;
 
-		    rd = PerlIO_read(file, buf, sizeof buf-1);
-		    buf[rd]='\0';
-		    if ((s2 = strchr(buf, '\n')) != NULL) *++s2 = '\0';
-
-		    if (!rd) { /* Empty... */
-			buf[0] = 0;
+		    buf = sv_gets(bufsv, file, 0 /* No append */);
+		    if (!buf)
+			buf = "";	/* XXX Needed? */
+		    if (!buf[0]) {	/* Empty... */
 			PerlIO_close(file);
 			/* Special case: maybe from -Zexe build, so
 			   there is an executable around (contrary to
 			   documentation, DosQueryAppType sometimes (?)
 			   does not append ".exe", so we could have
 			   reached this place). */
-			if (l + 5 < sizeof scrbuf) {
-			    strcpy(scrbuf + l, ".exe");
-			    if (PerlLIO_stat(scrbuf,&PL_statbuf) >= 0
-				&& !S_ISDIR(PL_statbuf.st_mode)) {
-				/* Found */
+			sv_catpv(scrsv, ".exe");
+	                scr = SvPV(scrsv, n_a);	/* Reload */
+			if (PerlLIO_stat(scr,&PL_statbuf) >= 0
+			    && !S_ISDIR(PL_statbuf.st_mode)) {	/* Found */
 				tmps = scr;
 				pass++;
 				goto reread;
-			    } else
-				scrbuf[l] = 0;
-			} else
-			    goto longbuf;
+			} else {		/* Restore */
+				SvCUR_set(scrsv, SvCUR(scrsv) - 4);
+				*SvEND(scrsv) = 0;
+			}
 		    }
 		    if (PerlIO_close(file) != 0) { /* Failure */
 		      panic_file:
 			Perl_warner(aTHX_ WARN_EXEC, "Error reading \"%s\": %s", 
 			     scr, Strerror(errno));
-			buf[0] = 0;	/* Not #! */
+			buf = "";	/* Not #! */
 			goto doshell_args;
 		    }
 		    if (buf[0] == '#') {
@@ -677,7 +666,7 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 			    s = buf + 8;
 		    }
 		    if (!s) {
-			buf[0] = 0;	/* Not #! */
+			buf = "";	/* Not #! */
 			goto doshell_args;
 		    }
 		    
@@ -708,6 +697,7 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 			nargs = 4;
 			argsp = fargs;
 		    }
+		    /* Can jump from far, buf/file invalid if force_shell: */
 		  doshell_args:
 		    {
 			char **a = PL_Argv;
@@ -1278,7 +1268,9 @@ XS(XS_File__Copy_syscopy)
     XSRETURN(1);
 }
 
+#define PERL_PATCHLEVEL_H_IMPLICIT	/* Do not init local_patches. */
 #include "patchlevel.h"
+#undef PERL_PATCHLEVEL_H_IMPLICIT
 
 char *
 mod2fname(pTHX_ SV *sv)
