@@ -24,7 +24,7 @@
 d_suidsafe=${d_suidsafe:-define}
 
 # Be paranoid about nm failing to find symbols
-mistrustnm=run
+mistrustnm=${mistrustnm:-run}
 
 # Several people reported problems with perl's malloc, especially
 # when use64bitall is defined or when using gcc.
