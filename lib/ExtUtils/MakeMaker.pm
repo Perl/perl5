@@ -335,6 +335,7 @@ sub ExtUtils::MakeMaker::new {
 
     check_hints($self);
 
+    my %configure_att;         # record &{$self->{CONFIGURE}} attributes
     my(%initial_att) = %$self; # record initial attributes
 
     my($prereq);
@@ -374,7 +375,8 @@ sub ExtUtils::MakeMaker::new {
 
     if (defined $self->{CONFIGURE}) {
 	if (ref $self->{CONFIGURE} eq 'CODE') {
-	    $self = { %$self, %{&{$self->{CONFIGURE}}}};
+	    %configure_att = %{&{$self->{CONFIGURE}}};
+	    $self = { %$self, %configure_att };
 	} else {
 	    Carp::croak "Attribute 'CONFIGURE' to WriteMakefile() not a code reference\n";
 	}
@@ -479,6 +481,27 @@ END
 	$v =~ s/(CODE|HASH|ARRAY|SCALAR)\([\dxa-f]+\)/$1\(...\)/;
 	$v =~ tr/\n/ /s;
 	push @{$self->{RESULT}}, "#	$key => $v";
+    }
+    undef %initial_att;        # free memory
+
+    if (defined $self->{CONFIGURE}) {
+       push @{$self->{RESULT}}, <<END;
+
+#   MakeMaker 'CONFIGURE' Parameters:
+END
+        if (scalar(keys %configure_att) > 0) {
+            foreach $key (sort keys %configure_att){
+               my($v) = neatvalue($configure_att{$key});
+               $v =~ s/(CODE|HASH|ARRAY|SCALAR)\([\dxa-f]+\)/$1\(...\)/;
+               $v =~ tr/\n/ /s;
+               push @{$self->{RESULT}}, "#     $key => $v";
+            }
+        }
+        else
+        {
+           push @{$self->{RESULT}}, "# no values returned";
+        }
+        undef %configure_att;  # free memory
     }
 
     # turn the SKIP array into a SKIPHASH hash
