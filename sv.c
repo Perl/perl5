@@ -4462,8 +4462,7 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtable,
        avoid incrementing the object refcount.
 
        Note we cannot do this to avoid self-tie loops as intervening RV must
-       have its REFCNT incremented to keep it in existence - instead we could
-       special case them in sv_free() -- NI-S
+       have its REFCNT incremented to keep it in existence.
 
     */
     if (!obj || obj == sv ||
@@ -4480,6 +4479,21 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtable,
 	mg->mg_obj = SvREFCNT_inc(obj);
 	mg->mg_flags |= MGf_REFCOUNTED;
     }
+
+    /* Normal self-ties simply pass a null object, and instead of
+       using mg_obj directly, use the SvTIED_obj macro to produce a
+       new RV as needed.  For glob "self-ties", we are tieing the PVIO
+       with an RV obj pointing to the glob containing the PVIO.  In
+       this case, to avoid a reference loop, we need to weaken the
+       reference.
+    */
+
+    if (how == PERL_MAGIC_tiedscalar && SvTYPE(sv) == SVt_PVIO &&
+        obj && SvROK(obj) && GvIO(SvRV(obj)) == (IO*)sv)
+    {
+      sv_rvweaken(obj);
+    }
+
     mg->mg_type = how;
     mg->mg_len = namlen;
     if (name) {
