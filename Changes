@@ -31,6 +31,190 @@ or any other branch.
 Version v5.7.2		Development release working toward v5.8
 --------------
 ____________________________________________________________________________
+[ 13686] By: jhi                                   on 2001/12/14  16:07:02
+        Log: Reintroduce Attribute::Handlers with Spider's fixes.
+     Branch: perl
+	   + lib/Attribute/Handlers.pm lib/Attribute/Handlers/Changes
+	   + lib/Attribute/Handlers/README
+	   + lib/Attribute/Handlers/demo/Demo.pm
+	   + lib/Attribute/Handlers/demo/Descriptions.pm
+	   + lib/Attribute/Handlers/demo/MyClass.pm
+	   + lib/Attribute/Handlers/demo/demo.pl
+	   + lib/Attribute/Handlers/demo/demo_call.pl
+	   + lib/Attribute/Handlers/demo/demo_chain.pl
+	   + lib/Attribute/Handlers/demo/demo_cycle.pl
+	   + lib/Attribute/Handlers/demo/demo_hashdir.pl
+	   + lib/Attribute/Handlers/demo/demo_phases.pl
+	   + lib/Attribute/Handlers/demo/demo_range.pl
+	   + lib/Attribute/Handlers/demo/demo_rawdata.pl
+	   + lib/Attribute/Handlers/t/multi.t
+	   ! MANIFEST pod/perldelta.pod pod/perlmodlib.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 13684] By: jhi                                   on 2001/12/14  14:43:40
+        Log: Subject: [PATCH taint.c intrpvar.h perl.c ...] -t taint warnings
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Thu, 13 Dec 2001 19:27:08 -0500
+             Message-ID: <20011214002707.GA10532@blackrider>
+             
+             (reword the perlrun -t description a bit,
+             and move the Itaint_warn to the bottom of
+             the intrpvar.h for binary compatibility)
+     Branch: perl
+	   + t/run/switcht.t
+	   ! MANIFEST embedvar.h intrpvar.h lib/Test/Harness.pm perl.c
+	   ! perlapi.h pod/perlrun.pod t/TEST taint.c
+____________________________________________________________________________
+[ 13682] By: jhi                                   on 2001/12/14  04:10:37
+        Log: Detypo.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 13681] By: jhi                                   on 2001/12/14  04:07:08
+        Log: Buffer overflow checks.
+     Branch: perl
+	   ! utf8.c
+____________________________________________________________________________
+[ 13680] By: jhi                                   on 2001/12/13  21:30:14
+        Log: Subject: [ID 20011213.009] Not OK: perl v5.7.2 +DEVEL13660 on alpha-dec_osf-perlio-ld 5.1 (UNINSTALLED)
+             From: Spider Boardman <spider@leggy.zk3.dec.com>
+             Date: Thu, 13 Dec 2001 15:32:51 -0500
+             Message-Id: <200112132032.PAA203491@leggy.zk3.dec.com>
+     Branch: perl
+	   ! lib/ExtUtils/Embed.t
+____________________________________________________________________________
+[ 13679] By: jhi                                   on 2001/12/13  21:27:31
+        Log: More on the Unicode "line" definition.
+     Branch: perl
+	   ! pod/perlunicode.pod
+____________________________________________________________________________
+[ 13678] By: jhi                                   on 2001/12/13  21:18:47
+        Log: Open-ended VERSION?
+     Branch: perl
+	   ! lib/ExtUtils/Install.pm
+____________________________________________________________________________
+[ 13677] By: jhi                                   on 2001/12/13  19:13:13
+        Log: Subject: [PATCH] Better make distclean
+             From: "H.Merijn Brand" <h.m.brand@hccnet.nl>
+             Date: Thu, 13 Dec 2001 21:10:18 +0100
+             Message-Id: <20011213204542.0321.H.M.BRAND@hccnet.nl>
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 13676] By: jhi                                   on 2001/12/13  17:11:42
+        Log: Remove Memoize::Saves as requested by mjd.
+     Branch: perl
+	   - lib/Memoize/Saves.pm
+	   ! MANIFEST pod/perlmodlib.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 13675] By: jhi                                   on 2001/12/13  16:16:12
+        Log: Subject: [PATCH ExtUtils::Install] Old RCS $Date$ tag
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Tue, 11 Dec 2001 23:17:32 -0500
+             Message-ID: <20011212041732.GS17250@blackrider>
+     Branch: perl
+	   ! lib/ExtUtils/Install.pm
+____________________________________________________________________________
+[ 13674] By: jhi                                   on 2001/12/13  16:12:19
+        Log: Subject: [PATCH] Re: use utf8; with bad utf8
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Thu, 13 Dec 2001 17:09:39 +0000
+             Message-ID: <20011213170939.L21702@plum.flirble.org>
+     Branch: perl
+	   ! t/lib/1_compile.t
+____________________________________________________________________________
+[ 13673] By: jhi                                   on 2001/12/13  16:09:18
+        Log: Subject: (LONG!) Sort benchmarks and patch
+             From: "John P. Linderman" <jpl@research.att.com>
+             Date: Thu, 13 Dec 2001 09:50:58 -0500 (EST)
+             Message-Id: <200112131450.JAA84836@raptor.research.att.com>
+     Branch: perl
+	   ! pp_sort.c
+____________________________________________________________________________
+[ 13672] By: jhi                                   on 2001/12/13  14:19:28
+        Log: Unadorned numbers evil.
+     Branch: perl
+	   ! pp.c regcomp.c regexec.c utf8.c utf8.h
+____________________________________________________________________________
+[ 13671] By: jhi                                   on 2001/12/13  13:35:47
+        Log: "preprocessing directive not recognized within macro arg"
+     Branch: perl
+	   ! ext/Data/Dumper/Dumper.xs
+____________________________________________________________________________
+[ 13670] By: jhi                                   on 2001/12/13  13:32:37
+        Log: Subject: Clarifying the documentation of goto            
+             From: "Benjamin J. Tilly" <ben_tilly@operamail.com>      
+             Date: Thu, 13 Dec 2001 08:57:38 -0500
+             Message-ID: <3C18BD8B@operamail.com>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 13669] By: jhi                                   on 2001/12/13  04:38:19
+        Log: It could be possible for the case-insensitive
+             Unicode-aware string comparison to wander off
+             to the la-la land.
+     Branch: perl
+	   ! embed.h embed.pl pod/perlapi.pod pod/perlunicode.pod proto.h
+	   ! regexec.c utf8.c
+____________________________________________________________________________
+[ 13668] By: jhi                                   on 2001/12/13  02:48:14
+        Log: Subject: [PATCH] Re: [PATCH t/test.pl t/op/stat.t lib/Net/hostent.t] Unbail out
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Wed, 12 Dec 2001 21:53:46 -0500
+             Message-ID: <20011213025346.GH25129@blackrider>
+     Branch: perl
+	   ! lib/Net/hostent.t t/op/stat.t t/test.pl
+____________________________________________________________________________
+[ 13667] By: jhi                                   on 2001/12/13  02:47:27
+        Log: Subject: [PATCH t/io/fs.t] Proper skip tests and VMS unlink
+             From: Michael G Schwern <schwern@pobox.com> 
+             Date: Wed, 12 Dec 2001 20:33:42 -0500
+             Message-ID: <20011213013342.GX25129@blackrider>
+     Branch: perl
+	   ! t/io/fs.t
+____________________________________________________________________________
+[ 13666] By: jhi                                   on 2001/12/12  23:22:27
+        Log: Subject: Re: [PATCH] use utf8; tests
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Thu, 13 Dec 2001 00:16:58 +0000
+             Message-ID: <20011213001658.I21702@plum.flirble.org>
+     Branch: perl
+	   ! lib/utf8.t
+____________________________________________________________________________
+[ 13665] By: jhi                                   on 2001/12/12  21:45:49
+        Log: EPOC fixes from Olaf Flebbe.
+     Branch: perl
+	   ! README.epoc epoc/config.sh epoc/createpkg.pl
+	   ! ext/Data/Dumper/Dumper.xs ext/Errno/Errno_pm.PL
+____________________________________________________________________________
+[ 13664] By: jhi                                   on 2001/12/12  21:33:50
+        Log: Subject: [PATCH perl@13661] VMS test fix-ups
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Date: Wed, 12 Dec 2001 16:27:48 -0600
+             Message-Id: <5.1.0.14.2.20011212154350.01be3618@exchi01>
+     Branch: perl
+	   ! lib/Net/hostent.t t/io/fs.t
+____________________________________________________________________________
+[ 13663] By: jhi                                   on 2001/12/12  19:59:56
+        Log: Subject: Re: Next cygwin round.
+             From: "Gerrit P. Haase" <gp@familiehaase.de>
+             Date: Wed, 12 Dec 2001 21:59:00 +0100
+             Message-ID: <122343874595.20011212215900@familiehaase.de>
+     Branch: perl
+	   ! t/io/fs.t
+____________________________________________________________________________
+[ 13662] By: jhi                                   on 2001/12/12  19:12:36
+        Log: Subject: [PATCH] use utf8; tests
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Wed, 12 Dec 2001 20:07:04 +0000
+             Message-ID: <20011212200704.E21702@plum.flirble.org>
+     Branch: perl
+	   ! lib/utf8.t t/test.pl
+____________________________________________________________________________
+[ 13661] By: jhi                                   on 2001/12/12  15:24:42
+        Log: Update Changes.
+     Branch: perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 13660] By: jhi                                   on 2001/12/12  15:04:03
         Log: Subject: [PATCH] Passing in env to perl_parse did not work
              From: Gisle Aas <gisle@ActiveState.com>
