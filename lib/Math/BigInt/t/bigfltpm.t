@@ -8,11 +8,11 @@ BEGIN
   $| = 1;
   unshift @INC, '../lib'; # for running manually
   # chdir 't' if -d 't';
-  plan tests => 945;
+  plan tests => 1158;
   }
 
-use Math::BigFloat;
 use Math::BigInt;
+use Math::BigFloat;
 
 my ($x,$y,$f,@args,$ans,$try,$ans1,$ans1_str,$setup);
 while (<DATA>)
@@ -47,10 +47,21 @@ while (<DATA>)
         $try .= "\$x;";
       } elsif ($f eq "binf") {
         $try .= "\$x->binf('$args[1]');";
+      } elsif ($f eq "bnan") {
+        $try .= "\$x->bnan();";
+      } elsif ($f eq "numify") {
+        $try .= "\$x->numify();";
+      } elsif ($f eq "bone") {
+        $try .= "\$x->bone('$args[1]');";
+      } elsif ($f eq "bstr") {
+        $try .= "\$x->accuracy($args[1]); \$x->precision($args[2]);";
+        $try .= '$x->bstr();';
       } elsif ($f eq "bsstr") {
-        $try .= "\$x->bsstr();";
+        $try .= '$x->bsstr();';
+      } elsif ($f eq "parts") {
+        $try .= '($a,$b) = $x->parts(); "$a $b";';
       } elsif ($f eq "fneg") {
-        $try .= "-\$x;";
+        $try .= '$x->bneg();';
       } elsif ($f eq "bfloor") {
         $try .= "\$x->bfloor();";
       } elsif ($f eq "bceil") {
@@ -59,6 +70,10 @@ while (<DATA>)
         $try .= "\$x->is_zero()+0;";
       } elsif ($f eq "is_one") {
         $try .= "\$x->is_one()+0;";
+      } elsif ($f eq "is_positive") {
+        $try .= "\$x->is_positive()+0;";
+      } elsif ($f eq "is_negative") {
+        $try .= "\$x->is_negative()+0;";
       } elsif ($f eq "is_odd") {
         $try .= "\$x->is_odd()+0;";
       } elsif ($f eq "is_even") {
@@ -66,7 +81,11 @@ while (<DATA>)
       } elsif ($f eq "as_number") {
         $try .= "\$x->as_number();";
       } elsif ($f eq "fabs") {
-        $try .= "abs \$x;";
+        $try .= '$x->babs();';
+      } elsif ($f eq "finc") {
+        $try .= '++$x;';
+      } elsif ($f eq "fdec") {
+        $try .= '--$x;'; 
       }elsif ($f eq "fround") {
         $try .= "$setup; \$x->fround($args[1]);";
       } elsif ($f eq "ffround") {
@@ -153,15 +172,48 @@ __END__
 -123.456:-123
 -200:-200
 &binf
-1:+:+inf
+1:+:inf
 2:-:-inf
-3:abc:+inf
-&bsstr
-+inf:+inf
+3:abc:inf
+&numify
+0:0e+1
++1:1e+0
+1234:1234e+0
+NaN:NaN
++inf:inf
 -inf:-inf
+&bnan
 abc:NaN
+2:NaN
+-2:NaN
+0:NaN
+&bone
+2:+:1
+-2:-:-1
+-2:+:1
+2:-:-1
+0::1
+-2::1
+abc::1
+2:abc:1
+&bsstr
++inf:inf
+-inf:-inf
+abcbsstr:NaN
+1234.567:1234567e-3
+&bstr
++inf:::inf
+-inf:::-inf
+abcbsstr:::NaN
+1234.567:9::1234.56700
+1234.567::-6:1234.567000
+12345:5::12345
+0.001234:6::0.00123400
+0.001234::-8:0.00123400
+0:4::0
+0::-4:0.0000
 &fnorm
-+inf:+inf
++inf:inf
 -inf:-inf
 +infinity:NaN
 +-inf:NaN
@@ -201,6 +253,14 @@ abc:NaN
 -123456E-2:-1234.56
 1e1:10
 2e-11:0.00000000002
+# excercise _split
+  .02e-1:0.002
+   000001:1
+   -00001:-1
+   -1:-1
+  000.01:0.01
+   -000.0023:-0.0023
+  1.1e1:11
 -3e111:-3000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 -4e-1111:-0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004
 &fpow
@@ -215,12 +275,14 @@ abc:NaN
 128:-2:0.00006103515625
 abc:123.456:NaN
 123.456:abc:NaN
-+inf:123.45:+inf
++inf:123.45:inf
 -inf:123.45:-inf
-+inf:-123.45:+inf
++inf:-123.45:inf
 -inf:-123.45:-inf
 &fneg
-abc:NaN
+fnegNaN:NaN
++inf:-inf
+-inf:inf
 +0:0
 +1:-1
 -1:1
@@ -229,7 +291,9 @@ abc:NaN
 +123.456789:-123.456789
 -123456.789:123456.789
 &fabs
-abc:NaN
+fabsNaN:NaN
++inf:inf
+-inf:inf
 +0:0
 +1:1
 -1:1
@@ -239,6 +303,10 @@ abc:NaN
 -123456.789:123456.789
 &fround
 $rnd_mode = "trunc"
++inf:5:inf
+-inf:5:-inf
+0:5:0
+NaNfround:5:NaN
 +10123456789:5:10123000000
 -10123456789:5:-10123000000
 +10123456789.123:5:10123000000
@@ -294,6 +362,10 @@ $rnd_mode = "even"
 -60123456789.0123:5:-60123000000
 &ffround
 $rnd_mode = "trunc"
++inf:5:inf
+-inf:5:-inf
+0:5:0
+NaNffround:5:NaN
 +1.23:-1:1.2
 +1.234:-1:1.2
 +1.2345:-1:1.2
@@ -424,9 +496,9 @@ $rnd_mode = "even"
 0.01234567:-9:0.01234567
 0.01234567:-12:0.01234567
 &fcmp
-abc:abc:
-abc:+0:
-+0:abc:
+fcmpNaN:fcmpNaN:
+fcmpNaN:+0:
++0:fcmpNaN: 
 +0:+0:0
 -1:+0:-1
 +0:-1:1
@@ -482,15 +554,43 @@ abc:+0:
 +inf:-54321.12345:1
 +inf:+inf:0
 -inf:-inf:0
++inf:-inf:1
+-inf:+inf:-1
 # return undef
 +inf:NaN:
-NaN:+inf:
+NaN:inf:
 -inf:NaN:
 NaN:-inf:
+&fdec
+fdecNaN:NaN
++inf:inf
+-inf:-inf
++0:-1
++1:0
+-1:-2
+1.23:0.23
+-1.23:-2.23
+&finc
+fincNaN:NaN
++inf:inf
+-inf:-inf
++0:1
++1:2
+-1:0
+1.23:2.23
+-1.23:-0.23
 &fadd
 abc:abc:NaN
 abc:+0:NaN
 +0:abc:NaN
++inf:-inf:0
+-inf:+inf:0
++inf:+inf:inf
+-inf:-inf:-inf
+baddNaN:+inf:NaN
+baddNaN:+inf:NaN
++inf:baddNaN:NaN
+-inf:baddNaN:NaN
 +0:+0:0
 +1:+0:1
 +0:+1:1
@@ -530,6 +630,14 @@ abc:+0:NaN
 abc:abc:NaN
 abc:+0:NaN
 +0:abc:NaN
++inf:-inf:inf
+-inf:+inf:-inf
++inf:+inf:0
+-inf:-inf:0
+baddNaN:+inf:NaN
+baddNaN:+inf:NaN
++inf:baddNaN:NaN
+-inf:baddNaN:NaN
 +0:+0:0
 +1:+0:1
 +0:+1:-1
@@ -568,6 +676,22 @@ abc:+0:NaN
 abc:abc:NaN
 abc:+0:NaN
 +0:abc:NaN
++inf:NaNmul:NaN
++inf:NaNmul:NaN
+NaNmul:+inf:NaN
+NaNmul:-inf:NaN
++inf:+inf:inf
++inf:-inf:-inf
++inf:-inf:-inf
++inf:+inf:inf
++inf:123.34:inf
++inf:-123.34:-inf
+-inf:123.34:-inf
+-inf:-123.34:inf
+123.34:+inf:inf
+-123.34:+inf:-inf
+123.34:-inf:-inf
+-123.34:-inf:inf
 +0:+0:0
 +0:+1:0
 +1:+0:0
@@ -604,17 +728,23 @@ $div_scale = 40; $Math::BigFloat::rnd_mode = 'even'
 abc:abc:NaN
 abc:+1:abc:NaN
 +1:abc:NaN
+-1:abc:NaN
+0:abc:NaN
 +0:+0:NaN
 +0:+1:0
-+1:+0:NaN
++1:+0:inf
++3214:+0:inf
 +0:-1:0
--1:+0:NaN
+-1:+0:-inf
+-3214:+0:-inf
 +1:+1:1
 -1:-1:1
 +1:-1:-1
 -1:+1:-1
 +1:+2:0.5
 +2:+1:2
+123:+inf:0
+123:-inf:0
 +10:+5:2
 +100:+4:25
 +1000:+8:125
@@ -683,7 +813,7 @@ $div_scale = 40
 -16:NaN
 -123.45:NaN
 nanfsqrt:NaN
-+inf:+inf
++inf:inf
 -inf:NaN
 +1:1
 +2:1.41421356237309504880168872420969807857
@@ -721,12 +851,39 @@ abc:0
 -inf:0
 123.456:0
 -123.456:0
+&is_positive
+0:1
+1:1
+-1:0
+-123:0
+NaN:0
+-inf:0
++inf:1
+&is_negative
+0:0
+1:0
+-1:1
+-123:1
+NaN:0
+-inf:1
++inf:0
+&parts
+0:0 1
+1:1 0
+123:123 0
+-123:-123 0
+-1200:-12 2
 &is_zero
 NaNzero:0
++inf:0
+-inf:0
 0:1
 -1:0
 1:0
 &is_one
+NaNone:0
++inf:0
+-inf:0
 0:0
 2:0
 1:1
@@ -735,7 +892,7 @@ NaNzero:0
 &bfloor
 0:0
 abc:NaN
-+inf:+inf
++inf:inf
 -inf:-inf
 1:1
 -51:-51
@@ -744,7 +901,7 @@ abc:NaN
 &bceil
 0:0
 abc:NaN
-+inf:+inf
++inf:inf
 -inf:-inf
 1:1
 -51:-51
