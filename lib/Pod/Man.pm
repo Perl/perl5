@@ -462,7 +462,18 @@ sub command {
     return if $command eq 'pod';
     return if ($$self{EXCLUDE} && $command ne 'end');
     $command = 'cmd_' . $command;
-    $self->$command (@_);
+    unless ($self -> can ($command)) {
+        my $com = substr $command => 4;
+        my ($file, $line) = $_ [2] -> file_line;
+       (my $text = $_ [0]) =~ s/\n+\z//g;
+        $text = " $text" if $text =~ /^\S/;
+        warn qq {$file: Unknown command paragraph "=$com${text}"},
+             qq { on line $line.\n};
+        return;
+    }
+    else {
+        $self->$command (@_);
+    }
 }
 
 # Called for a verbatim paragraph.  Gets the paragraph, the line number, and
@@ -1161,6 +1172,11 @@ know about.  C<EE<lt>%sE<gt>> was printed verbatim in the output.
 
 (W) The POD source contained a non-standard interior sequence (something of
 the form C<XE<lt>E<gt>>) that Pod::Man didn't know about.  It was ignored.
+
+=item %s: Unknown command paragraph "%s" on line %d.
+
+(W) The POD source contained a non-standard command paragraph (something of
+the form C<=command args>) that Pod::Man didn't know about. It was ignored.
 
 =item Unmatched =back
 
