@@ -2962,13 +2962,12 @@ sub uninterp {
     return $str;
 }
 
-# the same, but treat $|, $), $( and $ at the end of the string differently
-sub re_uninterp {
-    my($str) = @_;
-
+{
+my $bal;
+BEGIN {
     use re "eval";
     # Matches any string which is balanced with respect to {braces}
-    my $bal = qr(
+    $bal = qr(
       (?:
 	[^\\{}]
       | \\\\
@@ -2976,6 +2975,11 @@ sub re_uninterp {
       | \{(??{$bal})\}
       )*
     )x;
+}
+
+# the same, but treat $|, $), $( and $ at the end of the string differently
+sub re_uninterp {
+    my($str) = @_;
 
     $str =~ s/
 	  ( ^|\G                  # $1
@@ -2998,10 +3002,33 @@ sub re_uninterp {
     return $str;
 }
 
+# This is for regular expressions with the /x modifier
+# We have to leave comments unmangled.
 sub re_uninterp_extended {
-    my ($str) = @_;
-    $str =~ s/^([^#]*)/re_uninterp($1)/emg;
+    my($str) = @_;
+
+    $str =~ s/
+	  ( ^|\G                  # $1
+          | [^\\]
+          )
+
+          (                       # $2
+            (?:\\\\)*
+          )
+
+          (                       # $3
+            ( \(\?\??\{$bal\}\)   # $4  (skip over (?{}) and (??{}) blocks)
+            | \#[^\n]*            #     (skip over comments)
+            )
+          | [\$\@]
+            (?!\||\)|\(|$)
+          | \\[uUlLQE]
+          )
+
+	/length($4) ? "$1$2$4" : "$1$2\\$3"/xeg;
+
     return $str;
+}
 }
 
 # character escapes, but not delimiters that might need to be escaped
@@ -3020,6 +3047,8 @@ sub escape_str { # ASCII, UTF8
     return $str;
 }
 
+# For regexes with the /x modifier.
+# Leave whitespace unmangled.
 sub escape_extended_re {
     my($str) = @_;
     $str =~ s/(.)/ord($1)>255 ? sprintf("\\x{%x}", ord($1)) : $1/eg;
@@ -3153,7 +3182,7 @@ sub dq {
 	my $first = $self->dq($op->first);
 	my $last  = $self->dq($op->last);
 
-  	# Disambiguate "${foo}bar", "${foo}{bar}", "${foo}[1]"
+	# Disambiguate "${foo}bar", "${foo}{bar}", "${foo}[1]"
 	($last =~ /^[A-Z\\\^\[\]_?]/ &&
 	    $first =~ s/([\$@])\^$/${1}{^}/)  # "${^}W" etc
 	    || ($last =~ /^[{\[\w_]/ &&
@@ -3655,10 +3684,17 @@ sub pp_subst {
 	    $repl = $self->dq($repl);	
 	}
     }
+    my $extended = ($op->pmflags & PMf_EXTENDED);
     if (null $kid) {
-	$re = re_uninterp(escape_str(re_unback($op->precomp)));
+	my $unbacked = re_unback($op->precomp);
+	if ($extended) {
+	    $re = re_uninterp_extended(escape_extended_re($unbacked));
+	}
+	else {
+	    $re = re_uninterp(escape_str($unbacked));
+	}
     } else {
-	$re = $self->deparse($kid, 1);
+	($re) = $self->regcomp($kid, 1, $extended);
     }
     $flags .= "e" if $op->pmflags & PMf_EVAL;
     $flags .= "g" if $op->pmflags & PMf_GLOBAL;
@@ -3666,7 +3702,7 @@ sub pp_subst {
     $flags .= "m" if $op->pmflags & PMf_MULTILINE;
     $flags .= "o" if $op->pmflags & PMf_KEEP;
     $flags .= "s" if $op->pmflags & PMf_SINGLELINE;
-    $flags .= "x" if $op->pmflags & PMf_EXTENDED;
+    $flags .= "x" if $extended;
     $flags = $substwords{$flags} if $substwords{$flags};
     if ($binop) {
 	return $self->maybe_parens("$var =~ s"
@@ -4081,10 +4117,15 @@ The obvious fix doesn't work, because these are different:
 =item *
 
 Constants (other than simple strings or numbers) don't work properly.
-Examples that fail include:
+Pathological examples that fail (and probably always will) include:
 
     use constant E2BIG => ($!=7);
     use constant x=>\$x; print x
+
+The following could (and should) be made to work:
+
+    use constant regex => qr/blah/;
+    print regex;
 
 =item *
 
