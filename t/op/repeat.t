@@ -6,7 +6,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan(tests => 24);
+plan(tests => 25);
 
 # compile time
 
@@ -118,7 +118,18 @@ is(77, scalar ((1,7)x2),    'stack truncation');
 
 # perlbug 20011113.110 works in 5.6.1, broken in 5.7.2
 {
-    local $TODO = 'list repeat in anon array ref broken [ID 20011113.110]';
-    my $x= [("foo") x 1];
-    is( join('', @$x), 'foofoo' );
+    my $x= [("foo") x 2];
+    is( join('', @$x), 'foofoo', 'list repeat in anon array ref broken [ID 20011113.110]' );
 }
+
+# [ID 20010809.028] x operator not copying elements in 'for' list?
+{
+    local $TODO = "x operator not copying elements in 'for' list? [ID 20010809.028]";
+    my $x = 'abcd';
+    my $y = '';
+    for (($x =~ /./g) x 2) {
+	$y .= chop;
+    }
+    is($y, 'abcdabcd');
+}
+

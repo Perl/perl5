@@ -1256,10 +1256,33 @@ PP(pp_repeat)
 	MEXTEND(MARK, max);
 	if (count > 1) {
 	    while (SP > MARK) {
+#if 0
+	      /* This code was intended to fix 20010809.028:
+
+	         $x = 'abcd';
+		 for (($x =~ /./g) x 2) {
+		     print chop; # "abcdabcd" expected as output.
+		 }
+
+	       * but that change (#11635) broke this code:
+
+	       $x = [("foo")x2]; # only one "foo" ended up in the anonlist.
+
+	       * I can't think of a better fix that doesn't introduce
+	       * an efficiency hit by copying the SVs. The stack isn't
+	       * refcounted, and mortalisation obviously doesn't
+	       * Do The Right Thing when the stack has more than
+	       * one pointer to the same mortal value.
+	       * .robin.
+	       */
 		if (*SP) {
 		    *SP = sv_2mortal(newSVsv(*SP));
 		    SvREADONLY_on(*SP);
 		}
+#else
+               if (*SP)
+		   SvTEMP_off((*SP));
+#endif
 		SP--;
 	    }
 	    MARK++;
