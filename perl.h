@@ -2392,9 +2392,9 @@ typedef pthread_key_t	perl_key;
 
 #ifndef SVf
 #  ifdef CHECK_FORMAT
-#    define SVf "p"
+#    define SVf "-p"
 #    ifndef SVf256
-#      define SVf256 SVf
+#      define SVf256 "-256p" 
 #    endif
 #  else
 #    define SVf "_"
@@ -2415,17 +2415,17 @@ typedef pthread_key_t	perl_key;
 
 #ifndef VDf
 #  ifdef CHECK_FORMAT
-#    define VDf "p"
+#    define VDf "-1p"
 #  else
 #    define VDf "vd"
 #  endif
 #endif
 
-#ifndef Nullformat
+#ifndef DieNull
 #  ifdef CHECK_FORMAT
-#    define Nullformat "%s",""
+#    define DieNull vdie(aTHX_ Nullch, Null(va_list *))
 #  else
-#    define Nullformat Nullch
+#    define DieNull Perl_die(aTHX_ Nullch)
 #  endif
 #endif
 

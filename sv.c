@@ -9392,6 +9392,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		fill = *q++;
 	    EXPECT_NUMBER(q, width);
 
+#ifdef CHECK_FORMAT
+	if ((*q == 'p') && left) {
+	     vectorize = (width == 1);
+	}
+#endif
 	if (vectorize) {
 	    if (vectorarg) {
 		if (args)
@@ -9583,6 +9588,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    goto string;
 
 	case '_':
+#ifdef CHECK_FORMAT
+	format_sv:
+#endif
 	    /*
 	     * The "%_" hack might have to be changed someday,
 	     * if ISO or ANSI decide to use '_' for something.
@@ -9604,6 +9612,19 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    /* INTEGERS */
 
 	case 'p':
+#ifdef CHECK_FORMAT
+	    if (left) {
+		left = FALSE;
+		if (width > 0) {
+		    width = 0;
+		    if (vectorize) 
+			goto format_d;
+		    precis = width;
+		    has_precis = TRUE;
+		}
+		goto format_sv;
+	    }
+#endif
 	    if (alt || vectorize)
 		goto unknown;
 	    uv = PTR2UV(args ? va_arg(*args, void*) : argsv);
@@ -9615,6 +9636,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    intsize = 'q';
 #else
 	    intsize = 'l';
+#endif
+#ifdef CHECK_FORMAT
+	format_d:
 #endif
 	    /* FALL THROUGH */
 	case 'd':

@@ -2616,7 +2616,7 @@ Perl_sighandler(int sig)
 	(void)rsignal(sig, PL_csighandlerp);
 #endif
 #endif /* !PERL_MICRO */
-	Perl_die(aTHX_ Nullformat);
+	DieNull;
     }
 cleanup:
     if (flags & 1)
