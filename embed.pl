@@ -376,6 +376,7 @@ my @staticfuncs = qw(
     bset_obj_store
     new_logop
     simplify_sort
+    is_handle_constructor
     do_trans_CC_simple
     do_trans_CC_count
     do_trans_CC_complex

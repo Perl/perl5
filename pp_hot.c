@@ -468,10 +468,20 @@ PP(pp_rv2av)
 		    RETSETUNDEF;
 		}
 		sym = SvPV(sv,n_a);
-		if (PL_op->op_private & HINT_STRICT_REFS)
-		    DIE(PL_no_symref, sym, "an ARRAY");
-		gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PVAV);
-	    } else {
+		if ((PL_op->op_flags & OPf_SPECIAL) &&
+		    !(PL_op->op_flags & OPf_MOD))
+		{
+		    gv = (GV*)gv_fetchpv(sym, FALSE, SVt_PVAV);
+		    if (!gv)
+			RETSETUNDEF;
+		}
+		else {
+		    if (PL_op->op_private & HINT_STRICT_REFS)
+			DIE(PL_no_symref, sym, "an ARRAY");
+		    gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PVAV);
+		}
+	    }
+	    else {
 		gv = (GV*)sv;
 	    }
 	    av = GvAVn(gv);
@@ -558,10 +568,20 @@ PP(pp_rv2hv)
 		    RETSETUNDEF;
 		}
 		sym = SvPV(sv,n_a);
-		if (PL_op->op_private & HINT_STRICT_REFS)
-		    DIE(PL_no_symref, sym, "a HASH");
-		gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PVHV);
-	    } else {
+		if ((PL_op->op_flags & OPf_SPECIAL) &&
+		    !(PL_op->op_flags & OPf_MOD))
+		{
+		    gv = (GV*)gv_fetchpv(sym, FALSE, SVt_PVHV);
+		    if (!gv)
+			RETSETUNDEF;
+		}
+		else {
+		    if (PL_op->op_private & HINT_STRICT_REFS)
+			DIE(PL_no_symref, sym, "a HASH");
+		    gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PVHV);
+		}
+	    }
+	    else {
 		gv = (GV*)sv;
 	    }
 	    hv = GvHVn(gv);

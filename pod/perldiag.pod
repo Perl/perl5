@@ -2323,6 +2323,11 @@ was either never opened or has since been closed.
 
 (F) This machine doesn't implement the select() system call.
 
+=item select() on unopened file
+
+(W) You tried to use the select() function on a filehandle that
+was either never opened or has since been closed.
+
 =item sem%s not implemented
 
 (F) You don't have System V semaphore IPC on your system.

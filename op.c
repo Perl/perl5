@@ -52,6 +52,7 @@ static PADOFFSET pad_findlex _((char* name, PADOFFSET newoff, U32 seq,
 static OP *newDEFSVOP _((void));
 static OP *new_logop _((I32 type, I32 flags, OP **firstp, OP **otherp));
 static void simplify_sort _((OP *o));
+static bool is_handle_constructor _((OP *o, I32 argnum));
 #endif
 
 STATIC char*
@@ -1387,6 +1388,28 @@ scalar_mod_type(OP *o, I32 type)
     }
 }
 
+STATIC bool
+is_handle_constructor(OP *o, I32 argnum)
+{
+    switch (o->op_type) {
+    case OP_PIPE_OP:
+    case OP_SOCKPAIR:
+	if (argnum == 2)
+	    return TRUE;
+	/* FALL THROUGH */
+    case OP_SYSOPEN:
+    case OP_OPEN:
+    case OP_SOCKET:
+    case OP_OPEN_DIR:
+    case OP_ACCEPT:
+	if (argnum == 1)
+	    return TRUE;
+	/* FALL THROUGH */
+    default:
+	return FALSE;
+    }
+}
+
 OP *
 refkids(OP *o, I32 type)
 {
@@ -1423,6 +1446,8 @@ ref(OP *o, I32 type)
 	    ref(kid, type);
 	break;
     case OP_RV2SV:
+	if (type == OP_DEFINED)
+	    o->op_flags |= OPf_SPECIAL;		/* don't create GV */
 	ref(cUNOPo->op_first, o->op_type);
 	/* FALL THROUGH */
     case OP_PADSV:
@@ -1443,6 +1468,8 @@ ref(OP *o, I32 type)
 	o->op_flags |= OPf_REF;
 	/* FALL THROUGH */
     case OP_RV2GV:
+	if (type == OP_DEFINED)
+	    o->op_flags |= OPf_SPECIAL;		/* don't create GV */
 	ref(cUNOPo->op_first, o->op_type);
 	break;
 
@@ -4675,7 +4702,7 @@ ck_fun(OP *o)
 		    *tokid = kid;
 		}
 		else if (kid->op_type != OP_RV2AV && kid->op_type != OP_PADAV)
-		    bad_type(numargs, "array", PL_op_desc[o->op_type], kid);
+		    bad_type(numargs, "array", PL_op_desc[type], kid);
 		mod(kid, type);
 		break;
 	    case OA_HVREF:
@@ -4695,7 +4722,7 @@ ck_fun(OP *o)
 		    *tokid = kid;
 		}
 		else if (kid->op_type != OP_RV2HV && kid->op_type != OP_PADHV)
-		    bad_type(numargs, "hash", PL_op_desc[o->op_type], kid);
+		    bad_type(numargs, "hash", PL_op_desc[type], kid);
 		mod(kid, type);
 		break;
 	    case OA_CVREF:
@@ -4725,8 +4752,12 @@ ck_fun(OP *o)
 			bad_type(numargs, "HANDLE", PL_op_desc[o->op_type], kid);
 		    }
 		    else {
+			I32 flags = OPf_SPECIAL;
+			/* is this op a FH constructor? */
+			if (is_handle_constructor(o,numargs))
+			    flags = 0;
 			kid->op_sibling = 0;
-			kid = newUNOP(OP_RV2GV, 0, scalar(kid));
+			kid = newUNOP(OP_RV2GV, flags, scalar(kid));
 		    }
 		    kid->op_sibling = sibl;
 		    *tokid = kid;

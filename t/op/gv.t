@@ -4,7 +4,7 @@
 # various typeglob tests
 #
 
-print "1..23\n";
+print "1..29\n";
 
 # type coersion on assignment
 $foo = 'foo';
@@ -95,4 +95,29 @@ print *{*x{GLOB}} eq "*main::STDOUT" ? "ok 21\n" : "not ok 21\n";
 print {*x{IO}} "ok 22\n";
 print {*x{FILEHANDLE}} "ok 23\n";
 
+# test if defined() doesn't create any new symbols
+
+{
+    my $test = 23;
+
+    my $a = "SYM000";
+    print "not " if defined *{$a};
+    ++$test; print "ok $test\n";
+
+    print "not " if defined @{$a} or defined *{$a};
+    ++$test; print "ok $test\n";
+
+    print "not " if defined %{$a} or defined *{$a};
+    ++$test; print "ok $test\n";
+
+    print "not " if defined ${$a} or defined *{$a};
+    ++$test; print "ok $test\n";
+
+    print "not " if defined &{$a} or defined *{$a};
+    ++$test; print "ok $test\n";
+
+    *{$a} = sub { print "ok $test\n" };
+    print "not " unless defined &{$a} and defined *{$a};
+    ++$test; &{$a};
+}
 
