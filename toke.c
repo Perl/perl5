@@ -5669,19 +5669,23 @@ scan_inputsymbol(char *start)
     register char *s = start;		/* current position in buffer */
     register char *d;
     register char *e;
+    char *end;
     I32 len;
 
     d = PL_tokenbuf;			/* start of temp holding space */
     e = PL_tokenbuf + sizeof PL_tokenbuf;	/* end of temp holding space */
-    s = delimcpy(d, e, s + 1, PL_bufend, '>', &len);	/* extract until > */
+    end = strchr(s, '\n');
+    if (!end)
+	end = PL_bufend;
+    s = delimcpy(d, e, s + 1, end, '>', &len);	/* extract until > */
 
     /* die if we didn't have space for the contents of the <>,
-       or if it didn't end
+       or if it didn't end, or if we see a newline
     */
 
     if (len >= sizeof PL_tokenbuf)
 	croak("Excessively long <> operator");
-    if (s >= PL_bufend)
+    if (s >= end)
 	croak("Unterminated <> operator");
 
     s++;

@@ -611,7 +611,7 @@ contain fully qualified filenames, one per line.
 
 The item you want to look up.  Nested modules (such as C<File::Basename>)
 are specified either as C<File::Basename> or C<File/Basename>.  You may also
-give a descriptive name of a page, such as C<perlfunc>. You make also give a
+give a descriptive name of a page, such as C<perlfunc>. You may also give a
 partial or wrong-case name, such as "basename" for "File::Basename", but
 this will be slower, if there is more then one page with the same partial
 name, you will only get the first one.
