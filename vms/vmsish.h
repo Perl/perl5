@@ -198,6 +198,16 @@
  */
 #define ALTERNATE_SHEBANG "$"
 
+/* Lower case entry points for these are missing in some earlier RTLs 
+ * so we borrow the defines and declares from errno.h and upcase them.
+ */
+#if defined(VMS_WE_ARE_CASE_SENSITIVE) && (__DECC_VER < 50500000)
+#  define errno      (*CMA$TIS_ERRNO_GET_ADDR())
+#  define vaxc$errno (*CMA$TIS_VMSERRNO_GET_ADDR())
+   int *CMA$TIS_ERRNO_GET_ADDR     (void);   /* UNIX style error code        */
+   int *CMA$TIS_VMSERRNO_GET_ADDR  (void);   /* VMS error (errno == EVMSERR) */
+#endif
+
 /* Macros to set errno using the VAX thread-safe calls, if present */
 #if (defined(__DECC) || defined(__DECCXX)) && !defined(__ALPHA)
 #  define set_errno(v)      (cma$tis_errno_set_value(v))
@@ -537,6 +547,25 @@ struct mystat
 };
 typedef unsigned mydev_t;
 typedef unsigned myino_t;
+
+/*
+ * DEC C previous to 6.0 corrupts the behavior of the /prefix
+ * qualifier with the extern prefix pragma.  This provisional
+ * hack circumvents this prefix pragma problem in previous 
+ * precompilers.
+ */
+#if defined(__VMS_VER) && __VMS_VER >= 70000000
+#  if defined(VMS_WE_ARE_CASE_SENSITIVE) && (__DECC_VER < 60000000)
+#    pragma __extern_prefix save
+#    pragma __extern_prefix ""  /* set to empty to prevent prefixing */
+#    define geteuid decc$__unix_geteuid
+#    define getuid decc$__unix_getuid
+#    define stat(__p1,__p2)   decc$__utc_stat(__p1,__p2)
+#    define fstat(__p1,__p2)  decc$__utc_fstat(__p1,__p2)
+#    pragma __extern_prefix restore
+#  endif
+#endif
+
 #ifndef DONT_MASK_RTL_CALLS  /* defined for vms.c so we can see RTL calls */
 #  ifdef stat
 #    undef stat
@@ -555,6 +584,7 @@ typedef unsigned myino_t;
 #define S_IDUSR (S_IWUSR | S_IXUSR)
 #define S_IDGRP (S_IWGRP | S_IXGRP)
 #define S_IDOTH (S_IWOTH | S_IXOTH)
+
 
 /* Prototypes for functions unique to vms.c.  Don't include replacements
  * for routines in the mainline source files excluded by #ifndef VMS;

@@ -3971,6 +3971,27 @@ static long int utc_offset_secs;
 #  define RTL_USES_UTC 1
 #endif
 
+/*
+ * DEC C previous to 6.0 corrupts the behavior of the /prefix
+ * qualifier with the extern prefix pragma.  This provisional
+ * hack circumvents this prefix pragma problem in previous 
+ * precompilers.
+ */
+#if defined(__VMS_VER) && __VMS_VER >= 70000000 
+#  if defined(VMS_WE_ARE_CASE_SENSITIVE) && (__DECC_VER < 60000000)
+#    pragma __extern_prefix save
+#    pragma __extern_prefix ""  /* set to empty to prevent prefixing */
+#    define gmtime decc$__utctz_gmtime
+#    define localtime decc$__utctz_localtime
+#    define time decc$__utc_time
+#    pragma __extern_prefix restore
+
+     struct tm *gmtime(), *localtime();   
+
+#  endif
+#endif
+
+
 static time_t toutc_dst(time_t loc) {
   struct tm *rsltmp;
 
