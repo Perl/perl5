@@ -70,6 +70,10 @@ unless (eval { getgrgid(0); 1 }) {
     exit 0;
 }
 
+chomp($groups);
+
+print "# groups = $groups\n";
+
 # Remember that group names can contain whitespace, '-', et cetera.
 # That is: do not \w, do not \S.
 if ($groups =~ /groups=(.+)( [ug]id=|$)/) {
@@ -107,6 +111,8 @@ if ($^O eq 'cygwin') { # basegroup on Cygwin has id = 0.
 }
 $seen{$pwgid}++;
 
+print "# pwgid = $pwgid, pwgnam = $pwgnam\n";
+
 for (split(' ', $()) {
     next if $seen{$_}++;
     ($group) = getgrgid($_);
@@ -118,6 +124,8 @@ for (split(' ', $()) {
     }
 } 
 
+print "# gr = @gr\n";
+
 if ($^O =~ /^(?:uwin|solaris)$/) {
 	# Or anybody else who can have spaces in group names.
 	$gr1 = join(' ', grep(!$did{$_}++, sort split(' ', join(' ', @gr))));
@@ -127,7 +135,7 @@ if ($^O =~ /^(?:uwin|solaris)$/) {
 
 $gr2 = join(' ', grep(!$basegroup{$_}++, sort split(' ',$groups)));
 
-if ($gr1 eq $gr2) {
+if ($gr1 eq $gr2 || ($gr1 eq '' && $gr2 eq $pwgid)) {
     print "ok 1\n";
 }
 else {

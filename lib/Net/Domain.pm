@@ -224,13 +224,14 @@ sub domainname {
     # eleminate DNS lookups
 
     return $fqdn = $host . "." . $domain
-	if($host !~ /\./ && $domain =~ /\./);
+	if(defined $host && defined $domain &&
+	   $host !~ /\./ && $domain =~ /\./);
 
     # For hosts that have no name, just an IP address
-    return $fqdn = $host if $host =~ /^\d+(\.\d+){3}$/;
+    return $fqdn = $host if defined $host && $host =~ /^\d+(\.\d+){3}$/;
 
-    my @host   = split(/\./, $host);
-    my @domain = split(/\./, $domain);
+    my @host   = defined $host   ? split(/\./, $host)   : ('localhost');
+    my @domain = defined $domain ? split(/\./, $domain) : ();
     my @fqdn   = ();
 
     # Determine from @host & @domain the FQDN
