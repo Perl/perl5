@@ -6,7 +6,7 @@ use POSIX 'SEEK_SET';
 use Fcntl 'O_CREAT', 'O_RDWR', 'LOCK_EX', 'O_WRONLY', 'O_RDONLY';
 sub O_ACCMODE () { O_RDONLY | O_RDWR | O_WRONLY }
 
-$VERSION = "0.92";
+$VERSION = "0.93";
 my $DEFAULT_MEMORY_SIZE = 1<<21;    # 2 megabytes
 my $DEFAULT_AUTODEFER_THRESHHOLD = 3; # 3 records
 my $DEFAULT_AUTODEFER_FILELEN_THRESHHOLD = 65536; # 16 disk blocksful
@@ -1667,7 +1667,7 @@ Tie::File - Access the lines of a disk file via a Perl array
 
 =head1 SYNOPSIS
 
-	# This file documents Tie::File version 0.92
+	# This file documents Tie::File version 0.93
 
 	tie @array, 'Tie::File', filename or die ...;
 
@@ -2162,7 +2162,7 @@ any news of importance, will be available at
 
 =head1 LICENSE
 
-C<Tie::File> version 0.92 is copyright (C) 2002 Mark Jason Dominus.
+C<Tie::File> version 0.93 is copyright (C) 2002 Mark Jason Dominus.
 
 This library is free software; you may redistribute it and/or modify
 it under the same terms as Perl itself.
@@ -2190,7 +2190,7 @@ For licensing inquiries, contact the author at:
 
 =head1 WARRANTY
 
-C<Tie::File> version 0.92 comes with ABSOLUTELY NO WARRANTY.
+C<Tie::File> version 0.93 comes with ABSOLUTELY NO WARRANTY.
 For details, see the license.
 
 =head1 THANKS

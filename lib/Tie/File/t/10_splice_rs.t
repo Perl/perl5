@@ -156,12 +156,12 @@ check_contents("Iblahlikeblahpieblahpie pie pieblah");
 # This test ignored because it causes 5.6.1 and 5.7.3 to dump core
 # It also garbles the stack under 5.005_03 (20020401)
 # NOT MY FAULT
-if ($] > 5.008) {
+if ($] > 5.007003) {
   eval { splice(@a, -7, 0) };
   print $@ =~ /^Modification of non-creatable array value attempted, subscript -7/
       ? "ok $N\n" : "not ok $N \# \$\@ was '$@'\n";
 } else { 
-  print "ok $N \# skipped (5.6.0 through 5.8 dump core here.)\n";
+  print "ok $N \# skipped (versions through 5.7.3 dump core here.)\n";
 }
 $N++;
 
