@@ -11,7 +11,7 @@ BEGIN
   if ($ENV{PERL_CORE})
     {
     # testing with the core distribution
-    @INC = qw(../lib);
+    @INC = qw(../t/lib);
     }
   unshift @INC, '../lib';
   if (-d 't')

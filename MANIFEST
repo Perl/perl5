@@ -1059,8 +1059,6 @@ lib/Math/BigInt/t/bigintc.t	See if BigInt/Calc.pm works
 lib/Math/BigInt/t/bigintpm.inc	Shared tests for bigintpm.t and sub_mbi.t
 lib/Math/BigInt/t/bigintpm.t	See if BigInt.pm works
 lib/Math/BigInt/t/calling.t	Test calling conventions
-lib/Math/BigInt/t/Math/BigFloat/Subclass.pm	Empty subclass of BigFloat for test
-lib/Math/BigInt/t/Math/BigInt/Subclass.pm	Empty subclass of BigInt for test
 lib/Math/BigInt/t/mbimbf.t	BigInt/BigFloat accuracy, precicion and fallback, round_mode
 lib/Math/BigInt/t/sub_mbf.t	Empty subclass test of BigFloat
 lib/Math/BigInt/t/sub_mbi.t	Empty subclass test of BigInt
@@ -2088,6 +2086,8 @@ t/lib/h2ph.h			Test header file for h2ph
 t/lib/h2ph.pht			Generated output from h2ph.h by h2ph, for comparison
 t/lib/locale/latin1		Part of locale.t in Latin 1
 t/lib/locale/utf8		Part of locale.t in UTF8
+t/lib/Math/BigFloat/Subclass.pm	Empty subclass of BigFloat for test
+t/lib/Math/BigInt/Subclass.pm	Empty subclass of BigInt for test
 t/lib/sample-tests/bailout		Test data for Test::Harness
 t/lib/sample-tests/combined		Test data for Test::Harness
 t/lib/sample-tests/descriptive		Test data for Test::Harness
