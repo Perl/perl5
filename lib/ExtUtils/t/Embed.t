@@ -155,7 +155,11 @@ static char *cmds[] = { "perl","-e", "print qq[ok 5\\n]", NULL };
 
 int main(int argc, char **argv, char **env)
 {
-    PerlInterpreter *my_perl = perl_alloc();
+    PerlInterpreter *my_perl;
+
+    PERL_SYS_INIT3(&argc,&argv,&env);
+
+    my_perl = perl_alloc();
 
     my_puts("ok 2");
 
@@ -180,6 +184,8 @@ int main(int argc, char **argv, char **env)
     perl_free(my_perl);
 
     my_puts("ok 8");
+
+    PERL_SYS_TERM();
 
     return 0;
 }
