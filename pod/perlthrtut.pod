@@ -998,6 +998,11 @@ until the feeling passes-- but in case you really want to know,
 the semantics is that fork() duplicates all the threads.
 (In UNIX, at least, other platforms will do something different.)
 
+Similarly, mixing signals and threads should not be attempted.
+Implementations are platform-dependent, and even the POSIX
+semantics may not be what you expect (and Perl doesn't even
+give you the full POSIX API).
+
 =head1 Thread-Safety of System Libraries
 
 Whether various library calls are thread-safe is outside the control
@@ -1065,6 +1070,9 @@ Silberschatz, Abraham, and Peter B. Galvin. Operating System Concepts,
 
 Arnold, Ken and James Gosling. The Java Programming Language, 2nd
 ed. Addison-Wesley, 1998, ISBN 0-201-31006-6.
+
+comp.programming.threads FAQ,
+L<http://www.serpentine.com/~bos/threads-faq/>
 
 Le Sergent, T. and B. Berthomieu. "Incremental MultiThreaded Garbage
 Collection on Virtually Shared Memory Architectures" in Memory
