@@ -1413,6 +1413,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_getcwd HAS_GETCWD		/**/
 
+/* HAS_GETESPWNAM:
+ *	This symbol, if defined, indicates that the getespwnam system call is
+ *	available to retrieve enchanced (shadow) password entries by name.
+ */
+#$d_getespwnam HAS_GETESPWNAM		/**/
+
 /* HAS_GETFSSTAT:
  *	This symbol, if defined, indicates that the getfsstat routine is
  *	available to stat filesystems in bulk.
@@ -1542,6 +1548,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	them.  See netdbtype.U for probing for various Netdb_xxx_t types.
  */
 #$d_getprotoprotos	HAS_GETPROTO_PROTOS	/**/
+
+/* HAS_GETPRPWNAM:
+ *	This symbol, if defined, indicates that the getprpwnam system call is
+ *	available to retrieve protected (shadow) password entries by name.
+ */
+#$d_getprpwnam HAS_GETPRPWNAM		/**/
 
 /* HAS_GETPWENT:
  *	This symbol, if defined, indicates that the getpwent routine is
@@ -1744,6 +1756,13 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$d_mmap HAS_MMAP		/**/
 #define Mmap_t $mmaptype	/**/
+
+/* HAS_MODFL:
+ *	This symbol, if defined, indicates that the modfl routine is
+ *	available to split a long double x into a fractional part f and
+ *	an integer part i such that |f| < 1.0 and (f + i) = x.
+ */
+#$d_modfl HAS_MODFL		/**/
 
 /* HAS_MPROTECT:
  *	This symbol, if defined, indicates that the mprotect system call is
@@ -2337,6 +2356,12 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #$i_poll	I_POLL		/**/
 
+/* I_PROT:
+ *	This symbol, if defined, indicates that <prot.h> exists and
+ *	should be included.
+ */
+#$i_prot	I_PROT		/**/
+
 /* I_PTHREAD:
  *     This symbol, if defined, indicates to the C program that it should
  *     include <pthread.h>.
@@ -2668,6 +2693,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol, if defined, indicates that a variable of type NVTYPE
  *	can preserve all the bits of a variable of type UVTYPE.
  */
+/* NV_PRESERVES_UV_BITS:
+ *	This symbol contains the number of bits a variable of type NVTYPE
+ *	can preserve of a variable of type UVTYPE.
+ */
 #define	IVTYPE		$ivtype		/**/
 #define	UVTYPE		$uvtype		/**/
 #define	I8TYPE		$i8type		/**/
@@ -2695,6 +2724,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #endif
 #define	NVSIZE		$nvsize		/**/
 #$d_nv_preserves_uv	NV_PRESERVES_UV
+#define	NV_PRESERVES_UV_BITS	$d_nv_preserves_uv_bits
 
 /* IVdf:
  *	This symbol defines the format string used for printing a Perl IV
@@ -3113,13 +3143,6 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  */
 #define PERL_XS_APIVERSION "$xs_apiversion"
 #define PERL_PM_APIVERSION "$pm_apiversion"
-
-/* HAS_MODFL:
- *	This symbol, if defined, indicates that the modfl routine is
- *	available to split a long double x into a fractional part f and
- *	an integer part i such that |f| < 1.0 and (f + i) = x.
- */
-#$d_modfl HAS_MODFL		/**/
 
 #endif
 !GROK!THIS!

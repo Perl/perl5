@@ -1145,6 +1145,9 @@ typedef NVTYPE NV;
 #       include <sunmath.h>
 #   endif
 #   define NV_DIG LDBL_DIG
+#   ifdef LDBL_MANT_DIG
+#       define NV_MANT_DIG LDBL_MANT_DIG
+#   endif
 #   ifdef HAS_SQRTL
 #       define Perl_cos cosl
 #       define Perl_sin sinl
@@ -1178,6 +1181,9 @@ typedef NVTYPE NV;
 #   endif
 #else
 #   define NV_DIG DBL_DIG
+#   ifdef DBL_MANT_DIG
+#       define NV_MANT_DIG DBL_MANT_DIG
+#   endif
 #   define Perl_cos cos
 #   define Perl_sin sin
 #   define Perl_sqrt sqrt

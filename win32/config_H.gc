@@ -1546,6 +1546,24 @@
  */
 /*#define HAS_GETSPNAM		/**/
 
+/* HAS_GETESPWNAM:
+ *	This symbol, if defined, indicates that the getespwnam system call is
+ *	available to retrieve enchanced (shadow) password entries by name.
+ */
+/*#define HAS_GETESPWNAM		/**/
+
+/* HAS_GETPRPWNAM:
+ *	This symbol, if defined, indicates that the getprpwnam system call is
+ *	available to retrieve protected (shadow) password entries by name.
+ */
+/*#define HAS_GETPRPWNAM		/**/
+
+/* I_PROT:
+ *	This symbol, if defined, indicates that <prot.h> exists and
+ *	should be included.
+ */
+/*#define	I_PROT		/**/
+
 /* HAS_GETSERVBYNAME:
  *	This symbol, if defined, indicates that the getservbyname()
  *	routine is available to look up services by their name.
@@ -2629,7 +2647,11 @@
  */
 /* NV_PRESERVES_UV:
  *	This symbol, if defined, indicates that a variable of type NVTYPE
- *	can preserve all the bit of a variable of type UVSIZE.
+ *	can preserve all the bit of a variable of type UVTYPE.
+ */
+/* NV_PRESERVES_UV_BITS:
+ *	This symbol contains the number of bits a variable of type NVTYPE
+ *	can preserve of a variable of type UVTYPE.
  */
 #define	IVTYPE		long		/**/
 #define	UVTYPE		unsigned long		/**/
@@ -2657,6 +2679,7 @@
 #define	U64SIZE		8	/**/
 #endif
 #define	NV_PRESERVES_UV
+#define	NV_PRESERVES_UV_BITS	32
 
 /* IVdf:
  *	This symbol defines the format string used for printing a Perl IV

@@ -69,6 +69,9 @@ $ myname = myhostname
 $ IF myname .EQS. "" THEN myname = F$TRNLNM("SYS$NODE")
 $!
 $! ##ADD NEW CONSTANTS HERE##
+$ perl_i_prot="undef"
+$ perl_d_getespwnam="undef"
+$ perl_d_getprpwnam="undef"
 $ perl_d_isnan= = "define"
 $ perl_sizesize = "4"
 $ perl_shmattype = ""
@@ -4260,6 +4263,9 @@ $ WC "d_frexpl='" + perl_d_frexpl + "'"
 $ WC "d_isnan='" + perl_d_isnan + "'"
 $ WC "d_isnanl='" + perl_d_isnanl + "'"
 $ WC "d_modfl='" + perl_d_modfl + "'"
+$ WC "d_getprpwnam='" + perl_d_getprpwnam + "'"
+$ WC "d_getespwnam='" + perl_d_getespwnam + "'"
+$ WC "i_prot='" + perl_i_prot + "'"
 $!
 $! ##WRITE NEW CONSTANTS HERE##
 $!

@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue May 30 21:30:30 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Wed May 31 01:51:16 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -364,6 +364,7 @@ d_ftime=''
 d_gettimeod=''
 d_Gconvert=''
 d_getcwd=''
+d_getespwnam=''
 d_getfsstat=''
 d_getgrent=''
 d_getgrps=''
@@ -392,6 +393,7 @@ d_getprior=''
 d_getpbyname=''
 d_getpbynumber=''
 d_getprotoprotos=''
+d_getprpwnam=''
 d_getpwent=''
 d_getsent=''
 d_getservprotos=''
@@ -635,6 +637,7 @@ i_netinettcp=''
 i_niin=''
 i_sysin=''
 i_poll=''
+i_prot=''
 i_pthread=''
 d_pwage=''
 d_pwchange=''
@@ -792,8 +795,8 @@ version=''
 perl5=''
 perladmin=''
 perlpath=''
-d_nv_preserved_bits=''
 d_nv_preserves_uv=''
+d_nv_preserves_uv_bits=''
 i16size=''
 i16type=''
 i32size=''
@@ -9183,6 +9186,14 @@ esac
 set getcwd d_getcwd
 eval $inlibc
 
+: see if getespwnam exists
+set getespwnam d_getespwnam
+eval $inlibc
+
+: see if getespwnam exists
+set getespwnam d_getespwnam
+eval $inlibc
+
 
 : see if getfsstat exists
 set getfsstat d_getfsstat
@@ -9360,6 +9371,14 @@ eval $inlibc
 echo " "
 set d_getprotoprotos getprotoent $i_netdb netdb.h
 eval $hasproto
+
+: see if getprpwnam exists
+set getprpwnam d_getprpwnam
+eval $inlibc
+
+: see if getprpwnam exists
+set getprpwnam d_getprpwnam
+eval $inlibc
 
 : see if getpwent exists
 set getpwent d_getpwent
@@ -10193,7 +10212,7 @@ esac
 $rm -f try.* try
 
 case "$d_nv_preserves_uv" in
-"$define") d_nv_preserved_bits=`expr $uvsize \* 8` ;;
+"$define") d_nv_preserves_uv_bits=`expr $uvsize \* 8` ;;
 *)	$echo "Checking how many bits of your UVs your NVs can preserve..." >&4
 	$cat <<EOP >try.c
 #include <stdio.h>
@@ -10212,12 +10231,12 @@ int main() {
 EOP
 	set try
 	if eval $compile; then
-		d_nv_preserved_bits="`./try$exe_ext`"
+		d_nv_preserves_uv_bits="`./try$exe_ext`"
 	fi
-	case "$d_nv_preserved_bits" in
-	[1-9]*)	$echo "Your NVs can preserve $d_nv_preserved_bits bits of your NVs."  2>&1 ;;
+	case "$d_nv_preserves_uv_bits" in
+	[1-9]*)	$echo "Your NVs can preserve $d_nv_preserves_uv_bits bits of your UVs."  2>&1 ;;
 	*)	$echo "Can't figure out how many bits your NVs preserve." 2>&1
-		d_nv_preserved_bits="$undef"
+		d_nv_preserves_uv_bits="$undef"
 		;;
 	esac
 	$rm -f try.* try
@@ -14335,6 +14354,14 @@ eval $inhdr
 set poll.h i_poll
 eval $inhdr
 
+: see if this is a prot.h system
+set prot.h i_prot
+eval $inhdr
+
+: see if this is a prot.h system
+set prot.h i_prot
+eval $inhdr
+
 echo " "
 $echo "Guessing which symbols your C compiler and preprocessor define..." >&4 
 $cat <<'EOSH' > Cppsym.know
@@ -15266,6 +15293,7 @@ d_fstatvfs='$d_fstatvfs'
 d_ftello='$d_ftello'
 d_ftime='$d_ftime'
 d_getcwd='$d_getcwd'
+d_getespwnam='$d_getespwnam'
 d_getfsstat='$d_getfsstat'
 d_getgrent='$d_getgrent'
 d_getgrps='$d_getgrps'
@@ -15290,6 +15318,7 @@ d_getpgrp='$d_getpgrp'
 d_getppid='$d_getppid'
 d_getprior='$d_getprior'
 d_getprotoprotos='$d_getprotoprotos'
+d_getprpwnam='$d_getprpwnam'
 d_getpwent='$d_getpwent'
 d_getsbyname='$d_getsbyname'
 d_getsbyport='$d_getsbyport'
@@ -15350,8 +15379,8 @@ d_msync='$d_msync'
 d_munmap='$d_munmap'
 d_mymalloc='$d_mymalloc'
 d_nice='$d_nice'
-d_nv_preserved_bits='$d_nv_preserved_bits'
 d_nv_preserves_uv='$d_nv_preserves_uv'
+d_nv_preserves_uv_bits='$d_nv_preserves_uv_bits'
 d_off64_t='$d_off64_t'
 d_old_pthread_create_joinable='$d_old_pthread_create_joinable'
 d_oldpthreads='$d_oldpthreads'
@@ -15564,6 +15593,7 @@ i_neterrno='$i_neterrno'
 i_netinettcp='$i_netinettcp'
 i_niin='$i_niin'
 i_poll='$i_poll'
+i_prot='$i_prot'
 i_pthread='$i_pthread'
 i_pwd='$i_pwd'
 i_rpcsvcdbm='$i_rpcsvcdbm'
