@@ -211,29 +211,21 @@ PPCODE:
     dXSTARG;
     char *path;
     STRLEN len;
-    char *buf;
+    char buf[MAXPATHLEN];
 
-    New(0, buf, MAXPATHLEN, char);
-    if (buf) {
-        buf[MAXPATHLEN] = 0;
-        if (pathsv)
-	    path = SvPV(pathsv, len);
-	else {
-	    path = ".";
-	    len  = 1;
-	}
+    if (pathsv)
+      path = SvPV(pathsv, len);
+    else {
+        path = ".";
+        len  = 1;
+    }
 
-	if (bsd_realpath(path, buf)) {
-	    sv_setpvn(TARG, buf, strlen(buf));
-	    SvPOK_only(TARG);
-	}
-	else
-	    sv_setsv(TARG, &PL_sv_undef);
-
-	Safefree(buf);
+    if (bsd_realpath(path, buf)) {
+        sv_setpvn(TARG, buf, strlen(buf));
+        SvPOK_only(TARG);
     }
     else
-        sv_setsv(TARG, &PL_sv_undef);
+      sv_setsv(TARG, &PL_sv_undef);
 
     XSprePUSH; PUSHTARG;
 }
