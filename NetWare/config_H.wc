@@ -1042,7 +1042,7 @@
  *	This symbol contains the ~name expanded version of ARCHLIB, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define ARCHLIB "c:\\perl\\5.9.0\\lib\\NetWare-x86-multi-thread"		/**/
+#define ARCHLIB "c:\\perl\\5.9.1\\lib\\NetWare-x86-multi-thread"		/**/
 /*#define ARCHLIB_EXP ""	/**/
 
 /* ARCHNAME:
@@ -1073,8 +1073,8 @@
  *	This symbol is the filename expanded version of the BIN symbol, for
  *	programs that do not want to deal with that at run-time.
  */
-#define BIN "c:\\perl\\5.9.0\\bin\\NetWare-x86-multi-thread"	/**/
-#define BIN_EXP "c:\\perl\\5.9.0\\bin\\NetWare-x86-multi-thread"	/**/
+#define BIN "c:\\perl\\5.9.1\\bin\\NetWare-x86-multi-thread"	/**/
+#define BIN_EXP "c:\\perl\\5.9.1\\bin\\NetWare-x86-multi-thread"	/**/
 
 /* BYTEORDER:
  *	This symbol holds the hexadecimal constant defined in byteorder,
@@ -3031,7 +3031,7 @@
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "c:\\perl\\site\\5.9.0\\lib\\NetWare-x86-multi-thread"		/**/
+#define SITEARCH "c:\\perl\\site\\5.9.1\\lib\\NetWare-x86-multi-thread"		/**/
 /*#define SITEARCH_EXP ""	/**/
 
 /* SITELIB:
@@ -3054,8 +3054,8 @@
  *	removed.  The elements in inc_version_list (inc_version_list.U) can
  *	be tacked onto this variable to generate a list of directories to search.
  */
-#define SITELIB "c:\\perl\\site\\5.9.0\\lib"		/**/
-#define SITELIB_EXP (nw_get_sitelib("5.9.0"))	/**/
+#define SITELIB "c:\\perl\\site\\5.9.1\\lib"		/**/
+#define SITELIB_EXP (nw_get_sitelib("5.9.1"))	/**/
 #define SITELIB_STEM ""		/**/
 
 /* Size_t_size:
@@ -3293,7 +3293,7 @@
 /* PERL_XS_APIVERSION:
  *	This variable contains the version of the oldest perl binary
  *	compatible with the present perl.  perl.c:incpush() and
- *	lib/lib.pm will automatically search in c:\\perl\\site\\5.9.0\\lib\\NetWare-x86-multi-thread for older
+ *	lib/lib.pm will automatically search in c:\\perl\\site\\5.9.1\\lib\\NetWare-x86-multi-thread for older
  *	directories across major versions back to xs_apiversion.
  *	This is only useful if you have a perl library directory tree
  *	structured like the default one.
@@ -3312,7 +3312,7 @@
  *	compatible with the present perl.  (That is, pure perl modules
  *	written for pm_apiversion will still work for the current
  *	version).  perl.c:incpush() and lib/lib.pm will automatically
- *	search in c:\\perl\\site\\5.9.0\\lib for older directories across major versions
+ *	search in c:\\perl\\site\\5.9.1\\lib for older directories across major versions
  *	back to pm_apiversion.  This is only useful if you have a perl
  *	library directory tree structured like the default one.  The
  *	versioned site_perl library was introduced in 5.005, so that's
@@ -3322,7 +3322,7 @@
  *	(presumably) be similar.
  *	See the INSTALL file for how this works.
  */
-#define PERL_XS_APIVERSION "5.9.0"
+#define PERL_XS_APIVERSION "5.9.1"
 #define PERL_PM_APIVERSION "5.005"
 
 /* SETUID_SCRIPTS_ARE_SECURE_NOW:
