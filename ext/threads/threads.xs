@@ -439,6 +439,7 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 	known_threads++;
 	active_threads++;
 	MUTEX_UNLOCK(&create_destruct_mutex);
+	sv_2mortal(params);
 	return ithread_to_SV(aTHX_ obj, thread, classname, FALSE);
 }
 
@@ -541,7 +542,7 @@ CODE:
     if (items > 2) {
 	int i;
 	for(i = 2; i < items ; i++) {
-	    av_push(params, ST(i));
+	    av_push(params, SvREFCNT_inc(ST(i)));
 	}
     }
     ST(0) = sv_2mortal(Perl_ithread_create(aTHX_ Nullsv, classname, function_to_call, newRV_noinc((SV*) params)));
