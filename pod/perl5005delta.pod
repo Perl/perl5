@@ -884,6 +884,14 @@ a B<-e> switch.  Maybe your /tmp partition is full, or clobbered.
 (F) The create routine failed for some reason while trying to process
 a B<-e> switch.  Maybe your /tmp partition is full, or clobbered.
 
+=item regexp too big
+
+(F) The current implementation of regular expressions uses shorts as
+address offsets within a string.  Unfortunately this means that if
+the regular expression compiles to longer than 32767, it'll blow up.
+Usually when you want a regular expression this big, there is a better
+way to do it with multiple statements.  See L<perlre>.
+
 =back
 
 =head1 BUGS

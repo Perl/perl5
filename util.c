@@ -2459,7 +2459,7 @@ find_script(char *scriptname, bool dosearch, char **search_ext, I32 flags)
     dTHR;
     char *xfound = Nullch;
     char *xfailed = Nullch;
-    char tmpbuf[512];
+    char tmpbuf[MAXPATHLEN];
     register char *s;
     I32 len;
     int retval;

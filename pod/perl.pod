@@ -119,9 +119,9 @@ BASIC-PLUS.)  Expression syntax corresponds quite closely to C
 expression syntax.  Unlike most Unix utilities, Perl does not
 arbitrarily limit the size of your data--if you've got the memory,
 Perl can slurp in your whole file as a single string.  Recursion is of
-unlimited depth.  And the tables used by hashes (previously called
+unlimited depth.  And the tables used by hashes (sometimes called
 "associative arrays") grow as necessary to prevent degraded
-performance.  Perl uses sophisticated pattern matching techniques to
+performance.  Perl can use sophisticated pattern matching techniques to
 scan large amounts of data very quickly.  Although optimized for
 scanning text, Perl can also deal with binary data, and can make dbm
 files look like hashes.  Setuid Perl scripts are safer than C programs
@@ -298,9 +298,7 @@ and syswrite().)
 
 While none of the built-in data types have any arbitrary size limits
 (apart from memory size), there are still a few arbitrary limits:  a
-given variable name may not be longer than 255 characters, and no
-component of your PATH may be longer than 255 if you use B<-S>.  A regular
-expression may not compile to more than 32767 bytes internally.
+given variable name may not be longer than 251 characters.
 
 You may mail your bug reports (be sure to include full configuration
 information as output by the myconfig program in the perl source tree,

@@ -173,14 +173,6 @@ static int dooneliner _((char *cmd, char *filename));
 
 #endif /* no flock() */
 
-#ifndef MAXPATHLEN
-#  ifdef PATH_MAX
-#    define MAXPATHLEN PATH_MAX
-#  else
-#    define MAXPATHLEN 1024
-#  endif
-#endif
-
 #define ZBTLEN 10
 static char zero_but_true[ZBTLEN + 1] = "0 but true";
 
