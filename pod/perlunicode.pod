@@ -598,17 +598,8 @@ than one Unicode character.
 
 =back
 
-The following cases do not yet work:
-
-=over 8
-
-=item *
-
-the "final sigma" (Greek), and
-
-=item *
-
-anything to with locales (Lithuanian, Turkish, Azeri).
+Things to do with locales (Lithuanian, Turkish, Azeri) do B<not> work
+since Perl does not understand the concept of Unicode locales.
 
 =back
 
@@ -771,17 +762,19 @@ which will match assigned characters known to be part of the Greek script.
 
 Level 2 - Extended Unicode Support
 
-        3.1 Surrogates                          - MISSING
-        3.2 Canonical Equivalents               - MISSING       [11][12]
-        3.3 Locale-Independent Graphemes        - MISSING       [13]
-        3.4 Locale-Independent Words            - MISSING       [14]
-        3.5 Locale-Independent Loose Matches    - MISSING       [15]
+        3.1 Surrogates                          - MISSING	[11]
+        3.2 Canonical Equivalents               - MISSING       [12][13]
+        3.3 Locale-Independent Graphemes        - MISSING       [14]
+        3.4 Locale-Independent Words            - MISSING       [15]
+        3.5 Locale-Independent Loose Matches    - MISSING       [16]
 
-        [11] see UTR#15 Unicode Normalization
-        [12] have Unicode::Normalize but not integrated to regexes
-        [13] have \X but at this level . should equal that
-        [14] need three classes, not just \w and \W
-        [15] see UTR#21 Case Mappings
+        [11] Surrogates are solely a UTF-16 concept and Perl's internal
+             representation is UTF-8.  The Encode module does UTF-16, though.
+        [12] see UTR#15 Unicode Normalization
+        [13] have Unicode::Normalize but not integrated to regexes
+        [14] have \X but at this level . should equal that
+        [15] need three classes, not just \w and \W
+        [16] see UTR#21 Case Mappings
 
 =item *
 
