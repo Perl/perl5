@@ -1,7 +1,11 @@
+# Do not remove the following line; MakeMaker relies on it to identify
+# this file as a template for defsubs.h
+# Extracting defsubs.h (with variable substitutions)
 #!perl
 my ($out) = __FILE__ =~ /(^.*)[._]PL/i;
 if ($^O eq 'VMS') { $out =~ s/(^.*)[._](.*$)/$1.$2/;}
 open(OUT,">$out") || die "Cannot open $file:$!";
+print "Extracting $out . . .\n";
 foreach my $const (qw(AVf_REAL 
 		      HEf_SVKEY
                       SVf_IOK SVf_NOK SVf_POK SVf_ROK SVp_IOK SVp_POK ))
