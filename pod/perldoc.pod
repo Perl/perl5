@@ -213,7 +213,7 @@ Current maintainer: Sean M. Burke, <sburke@cpan.org>
 
 Past contributors are:
 Kenneth Albanowski <kjahds@kjahds.com>,
-Andy Dougherty <doughera@lafayette.edu>,
+Andy Dougherty  <doughera@lafcol.lafayette.edu>,
 and many others.
 
 =cut

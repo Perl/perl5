@@ -1,5 +1,5 @@
 
-# Time-stamp: "2003-07-20 07:44:42 ADT"
+# Time-stamp: "2003-10-10 17:43:04 ADT"
 # Sean M. Burke <sburke@cpan.org>
 
 require 5.000;
@@ -17,7 +17,7 @@ require Exporter;
                );
 %EXPORT_TAGS = ('ALL' => \@EXPORT_OK);
 
-$VERSION = "0.28";
+$VERSION = "0.29";
 
 =head1 NAME
 
@@ -333,7 +333,7 @@ More importantly, you assume I<at your peril> that superordinates of
 $lang1 are mutually intelligible with $lang1.  Consider this
 carefully.
 
-=cut 
+=cut
 
 sub super_languages {
   my $lang1 = $_[0];
@@ -388,7 +388,7 @@ tags.  Think REAL hard about how you use this.  YOU HAVE BEEN WARNED.
 The output is untainted.  If you don't know what tainting is,
 don't worry about it.
 
-=cut 
+=cut
 
 sub locale2language_tag {
   my $lang =
@@ -771,7 +771,7 @@ Character Sets and Languages".
 Value and Encoded Word Extensions: Character Sets, Languages, and
 Continuations".
 
-* RFC 2482, C<ftp://ftp.isi.edu/in-notes/rfc2482.txt>, 
+* RFC 2482, C<ftp://ftp.isi.edu/in-notes/rfc2482.txt>,
 "Language Tagging in Unicode Plain Text".
 
 * Locale::Codes, in
