@@ -208,8 +208,11 @@ sub viacode
 
     if ($txt =~ m/^$hex\t\t(.+)/m) {
         return $viacode{$hex} = $1;
+    } elsif ($hex eq 'FFFE') {
+        return $viacode{$hex} = "BYTE ORDER MARK";
     } else {
-        return;
+	carp "Unknown charcode '$hex'";
+        return "\x{FFFD}";
     }
 }
 
@@ -254,8 +257,8 @@ charnames - define character names for C<\N{named}> string literal escapes.
   use charnames qw(cyrillic greek);
   print "\N{sigma} is Greek sigma, and \N{be} is Cyrillic b.\n";
 
-  print charname::viacode(0x1234); # prints "ETHIOPIC SYLLABLE SEE"
-  printf "%04X", charname::vianame("GOTHIC LETTER AHSA"); # prints "10330"
+  print charnames::viacode(0x1234); # prints "ETHIOPIC SYLLABLE SEE"
+  printf "%04X", charnames::vianame("GOTHIC LETTER AHSA"); # prints "10330"
 
 =head1 DESCRIPTION
 
@@ -397,9 +400,8 @@ will also give a warning about being deprecated.
 
 =head1 ILLEGAL CHARACTERS
 
-If you ask for a character that is illegal (like the byte order mark
-U+FFFE, or the U+FFFF) does not exist, a warning is given and the
-special Unicode I<replacement character> "\x{FFFD}" is returned.
+If you ask for a character that does not exist, a warning is given
+and the Unicode I<replacement character> "\x{FFFD}" is returned.
 
 =head1 BUGS
 
