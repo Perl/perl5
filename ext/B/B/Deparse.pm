@@ -3089,8 +3089,7 @@ sub escape_str { # ASCII, UTF8
     $str =~ s/\e/\\e/g;
     $str =~ s/\f/\\f/g;
     $str =~ s/\r/\\r/g;
-    # The funny gaps are for the benefit of EBCDIC.
-    $str =~ s/([\cA-\cI\cJ-\cR\cS-\cZ])/$unctrl{$1}/ge;
+    $str =~ s/([\cA-\cZ])/$unctrl{$1}/ge;
     $str =~ s/([[:^print:]])/sprintf("\\%03o", ord($1))/ge;
     return $str;
 }
