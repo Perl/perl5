@@ -228,8 +228,7 @@ This can be used to see the effect of/bugs in the various layers e.g.
 
 The following returns the B<names> of the PerlIO layers on a filehandle.
 
-   my @layers = PerlIO::get_layers($fh);
-   # You can use also FH or *FH, the bare FH doesn't pass 'use strict'.
+   my @layers = PerlIO::get_layers($fh); # Or FH, *FH, "FH".
 
 The layers are returned in the order an open() or binmode() call would
 use them.  Note that the stack begins (normally) from C<stdio> or from

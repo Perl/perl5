@@ -219,7 +219,8 @@ Perl_boot_core_UNIVERSAL(pTHX)
     newXSproto("Internals::SvREFCNT",XS_Internals_SvREFCNT, file, "\\[$%@];$");
     newXSproto("Internals::hv_clear_placeholders",
                XS_Internals_hv_clear_placehold, file, "\\%");
-    newXS("PerlIO::get_layers", XS_PerlIO_get_layers, file);
+    newXSproto("PerlIO::get_layers",
+               XS_PerlIO_get_layers, file, "*;@");
 }
 
 
