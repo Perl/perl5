@@ -146,6 +146,7 @@ while (defined (my $file = next_file())) {
 		    s/^\s+//;
 		    expr();
 		    $new =~ s/(["\\])/\\$1/g;       #"]);
+		  EMIT:
 		    $new = reindent($new);
 		    $args = reindent($args);
 		    if ($t ne '') {
@@ -300,7 +301,7 @@ while (defined (my $file = next_file())) {
 			       "unless defined(\&$enum_name);\n");
 		}
 	    }
-	} elsif (/^(?:__extension__\s+)?extern\s+__inline(?:__)?\s+/) { # { for vi
+	} elsif (/^(?:__extension__\s+)?(?:extern|static)\s+(?:__)?inline(?:__)?\s+/) { # { for vi
 	    # This is a hack to parse the inline functions in the glibc headers.
 	    # Warning: massive kludge ahead. We suppose inline functions are mainly
 	    # constructed like macros.
@@ -313,7 +314,10 @@ while (defined (my $file = next_file())) {
 		last if $next =~ /^}|^{.*}\s*$/;
 	    }
 	    next if not defined; # because it's only a prototype
-	    s/\b(__extension__|extern|__inline(?:__)?)\b//g;
+	    s/\b(__extension__|extern|static|(?:__)?inline(?:__)?)\b//g;
+	    # violently drop #ifdefs
+	    s/#\s*if.*?#\s*endif//g
+		and print OUT "# some #ifdef were dropped here -- fill in the blanks\n";
 	    if (s/^(?:\w|\s|\*)*\s(\w+)\s*//) {
 		$name = $1;
 	    } else {
@@ -337,23 +341,28 @@ while (defined (my $file = next_file())) {
 	    $new = '';
 	    s/\breturn\b//g; # "return" doesn't occur in macros usually...
 	    expr();
+	    # try to find and perlify local C variables
+	    our @local_variables = (); # needs to be a our(): (?{...}) bug workaround
+	    $new =~ s['
+	      (?:(?:un)?signed\s+)?
+	      (?:long\s+)?
+	      (?:long|int|float|double|char|\w+_t)\s+
+	      (\w+)
+	      (?{ push @local_variables, $1 })
+	      ']
+	     [my \$$1]gx;
+	    $new =~ s['
+	      (?:(?:un)?signed\s+)?
+	      (?:long\s+)?
+	      (?:long|int|float|double|char|\w+_t)
+	      ' \s+ &(\w+) \s* ;
+	      (?{ push @local_variables, $1 })
+	      ]
+	     [my \$$1;]gx;
+	    $new =~ s/&$_\b/\$$_/g for @local_variables;
 	    $new =~ s/(["\\])/\\$1/g;       #"]);
-	    $new = reindent($new);
-	    $args = reindent($args);
-	    if ($t ne '') {
-		$new =~ s/(['\\])/\\$1/g;   #']);
-		if ($opt_h) {
-		    print OUT $t,
-		    "eval \"\\n#line $eval_index $outfile\\n\" . 'sub $name $proto\{\n$t    ${args}eval q($new);\n$t}' unless defined(\&$name);\n";
-		    $eval_index++;
-		} else {
-		    print OUT $t,
-		    "eval 'sub $name $proto\{\n$t    ${args}eval q($new);\n$t}' unless defined(\&$name);\n";
-		}
-	    } else {
-		print OUT "unless(defined(\&$name)) {\n    sub $name $proto\{\n\t${args}eval q($new);\n    }\n}\n";
-	    }
-	    %curargs = ();
+	    # now that's almost like a macro (we hope)
+	    goto EMIT;
 	}
     }
     $Is_converted{$file} = 1;
