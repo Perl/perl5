@@ -3,6 +3,8 @@
 # r	- top level READMEs to be copied/symlinked
 # a	- for auxiliary documentation
 # number - indent by
+# D	- this version's perldelta
+# d	- copied to this name
 
 h Overview
 
@@ -117,7 +119,8 @@ h Miscellaneous
   perldoc		Look up Perl documentation in Pod format
 
   perlhist		Perl history records
-  perldelta		Perl changes since previous version
+d perldelta		Perl changes since previous version
+D perl583delta		Perl changes in version 5.8.3
   perl582delta		Perl changes in version 5.8.2
   perl581delta		Perl changes in version 5.8.1
   perl58delta		Perl changes in version 5.8.0

@@ -5526,6 +5526,50 @@ Unicode::Normalize, Test::Harness, threads::shared
 
 =back
 
+=head2 perl583delta, perldelta - what is new for perl v5.8.3
+
+=over 4
+
+=item DESCRIPTION
+
+=item Incompatible Changes
+
+=item Core Enhancements
+
+=item Modules and Pragmata
+
+CGI, Cwd, Digest, Digest::MD5, Encode, File::Spec, FindBin, List::Util,
+Math::BigInt, PodParser, Pod::Perldoc, POSIX, Unicode::Collate,
+Unicode::Normalize, Test::Harness, threads::shared
+
+=item Utility Changes
+
+=item New Documentation
+
+=item Performance Enhancements
+
+=item Installation and Configuration Improvements
+
+=item Selected Bug Fixes
+
+=item New or Changed Diagnostics
+
+=item Changed Internals
+
+=item Configuration and Building
+
+=item New Tests
+
+=item Known Problems
+
+=item Platform Specific Problems
+
+=item Reporting Bugs
+
+=item SEE ALSO
+
+=back
+
 =head2 perl582delta, perldelta - what is new for perl v5.8.2
 
 =over 4
