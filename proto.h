@@ -994,6 +994,7 @@ STATIC I32	S_do_trans_complex_utf8(pTHX_ SV *sv);
 
 #if defined(PERL_IN_GV_C) || defined(PERL_DECL_PROT)
 STATIC void	S_gv_init_sv(pTHX_ GV *gv, I32 sv_type);
+STATIC void	S_require_errno(pTHX_ GV *gv);
 #endif
 
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)

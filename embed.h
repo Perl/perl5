@@ -883,6 +883,7 @@
 #endif
 #if defined(PERL_IN_GV_C) || defined(PERL_DECL_PROT)
 #define gv_init_sv		S_gv_init_sv
+#define require_errno		S_require_errno
 #endif
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
 #define hsplit			S_hsplit
@@ -2366,6 +2367,7 @@
 #endif
 #if defined(PERL_IN_GV_C) || defined(PERL_DECL_PROT)
 #define gv_init_sv(a,b)		S_gv_init_sv(aTHX_ a,b)
+#define require_errno(a)	S_require_errno(aTHX_ a)
 #endif
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
 #define hsplit(a)		S_hsplit(aTHX_ a)
@@ -4633,6 +4635,8 @@
 #if defined(PERL_IN_GV_C) || defined(PERL_DECL_PROT)
 #define S_gv_init_sv		CPerlObj::S_gv_init_sv
 #define gv_init_sv		S_gv_init_sv
+#define S_require_errno		CPerlObj::S_require_errno
+#define require_errno		S_require_errno
 #endif
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
 #define S_hsplit		CPerlObj::S_hsplit
