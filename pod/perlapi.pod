@@ -2024,7 +2024,7 @@ Found in file sharedsv.c
 =item sortsv
 
    
-Sort an array in place. Here is an example:
+Sort an array. Here is an example:
 
     sortsv(AvARRAY(av), av_len(av)+1, Perl_sv_cmp_locale); 
 
