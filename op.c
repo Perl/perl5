@@ -4454,7 +4454,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		goto withattrs;
 	    if ((const_sv = cv_const_sv(cv)))
 		const_changed = sv_cmp(const_sv, op_const_sv(block, Nullcv));
-	    if ((const_sv || const_changed) && ckWARN(WARN_REDEFINE))
+            if ((const_sv && const_changed) || ckWARN(WARN_REDEFINE))
 	    {
 		line_t oldline = CopLINE(PL_curcop);
 		CopLINE_set(PL_curcop, PL_copline);
