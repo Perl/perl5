@@ -9301,7 +9301,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, clone_params* param)
     GP *gp;
     IV iv;
     I32 i;
-    char *c;
+    char *c = NULL;
     void (*dptr) (void*);
     void (*dxptr) (pTHXo_ void*);
     OP *o;

@@ -3220,7 +3220,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
     OP *imop;
     OP *veop;
     char *packname = Nullch;
-    STRLEN packlen;
+    STRLEN packlen = 0;
     SV *packsv;
 
     if (id->op_type != OP_CONST)
