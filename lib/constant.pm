@@ -106,6 +106,15 @@ name as a constant. This is probably a Good Thing.
 Unlike constants in some languages, these cannot be overridden
 on the command line or via environment variables.
 
+You can get into trouble if you use constants in a context which
+automatically quotes barewords (as is true for any subroutine call).
+For example, you can't say C<$hash{CONSTANT}> because C<CONSTANT> will
+be interpreted as a string.  Use C<$hash{CONSTANT()}> or
+C<$hash{+CONSTANT}> to prevent the bareword quoting mechanism from
+kicking in.  Similarly, since the C<=E<gt>> operator quotes a bareword
+immediately to its left you have to say C<CONSTANT() =E<gt> 'value'>
+instead of C<CONSTANT =E<gt> 'value'>.
+
 =head1 AUTHOR
 
 Tom Phoenix, E<lt>F<rootbeer@teleport.com>E<gt>, with help from
