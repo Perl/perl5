@@ -138,7 +138,6 @@ ENDOFBEG
 
 
 my @non_v    = ();
-my @v_fast   = ();
 my @v_others = ();
 my $in_v     = 0;
 my %Data     = ();
@@ -234,12 +233,7 @@ die if $@;
     $val =~ s/$quote\n?\z//;
 
     my $line = "$name=$quote$val$quote\n";
-    if (!$Common{$name}){
-        push(@v_others, $line);
-    }
-    else {
-        push(@v_fast, $line);
-    }
+    push(@v_others, $line);
   }
   close CONFIG_SH;
 }
@@ -247,7 +241,7 @@ die if $@;
 
 # Calculation for the keys for byteorder
 # This is somewhat grim, but I need to run fetch_string here.
-our $Config_SH_expanded = join "\n", '', @v_fast, @v_others;
+our $Config_SH_expanded = join "\n", '', @v_others;
 
 my $t = fetch_string ({}, 'ivtype');
 my $s = fetch_string ({}, 'ivsize');
@@ -301,7 +295,7 @@ local *_ = \my $a;
 $_ = <<'!END!';
 EOT
 
-print CONFIG_HEAVY join('', @v_fast, sort @v_others), "!END!\n";
+print CONFIG_HEAVY join('', sort @v_others), "!END!\n";
 
 # Only need the dynamic byteorder code in Config.pm if 'byteorder' is one of
 # the precached keys
