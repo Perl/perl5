@@ -11,11 +11,19 @@ use Digest::MD5 qw(md5 md5_hex);
 #
 # This is the output of: 'md5sum MD5.pm MD5.xs'
 #
-my $EXPECT = <<EOT;
+my $EXPECT;
+
+if (ord('A' == 193) { # EBCDIC
+$EXPECT = <<EOT;
 9e1d1183ff41717c91a563c41e08d672  ext/Digest/MD5/MD5.pm
 61debd0ec12e131e1ba220e2f3ad2d26  ext/Digest/MD5/MD5.xs
 EOT
-
+} else { # ASCII
+$EXPECT = <<EOT;
+9e1d1183ff41717c91a563c41e08d672  ext/Digest/MD5/MD5.pm
+61debd0ec12e131e1ba220e2f3ad2d26  ext/Digest/MD5/MD5.xs
+EOT
+}
 my $testno = 0;
 
 use File::Spec;
