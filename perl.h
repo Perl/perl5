@@ -2192,10 +2192,31 @@ Gid_t getegid (void);
 #endif
 
 struct ufuncs {
-    I32 (*uf_val)(IV, SV*);
-    I32 (*uf_set)(IV, SV*);
+    I32 (*uf_val)(pTHX_ IV, SV*);
+    I32 (*uf_set)(pTHX_ IV, SV*);
     IV uf_index;
 };
+
+/* In pre-5.7-Perls the 'U' magic didn't get the thread context.
+ * XS code wanting to be backward compatible can do something
+ * like the following:
+ 
+#ifndef PERL_MG_UFUNC
+/* the old way, without pTHX_ */
+#define PERL_MG_UFUNC(name,ix,sv) I32 name(IV ix, SV *sv)
+#endif
+
+static PERL_MG_UFUNC(foo_get, index, val)
+{
+    sv_setsv(val, ...);
+    return TRUE;
+}
+
+-- Doug MacEachern
+
+*/
+
+#define PERL_MG_UFUNC(name,ix,sv) I32 name(pTHX_ IV ix, SV *sv)
 
 /* Fix these up for __STDC__ */
 #ifndef DONT_DECLARE_STD

@@ -796,7 +796,7 @@ Perl_magic_getuvar(pTHX_ SV *sv, MAGIC *mg)
     struct ufuncs *uf = (struct ufuncs *)mg->mg_ptr;
 
     if (uf && uf->uf_val)
-	(*uf->uf_val)(uf->uf_index, sv);
+	(*uf->uf_val)(aTHX_ uf->uf_index, sv);
     return 0;
 }
 
@@ -1667,7 +1667,7 @@ Perl_magic_setuvar(pTHX_ SV *sv, MAGIC *mg)
     struct ufuncs *uf = (struct ufuncs *)mg->mg_ptr;
 
     if (uf && uf->uf_set)
-	(*uf->uf_set)(uf->uf_index, sv);
+	(*uf->uf_set)(aTHX_ uf->uf_index, sv);
     return 0;
 }
 
