@@ -40,6 +40,7 @@ $Quotekeys = 1 unless defined $Quotekeys;
 $Bless = "bless" unless defined $Bless;
 #$Expdepth = 0 unless defined $Expdepth;
 $Maxdepth = 0 unless defined $Maxdepth;
+$Pair = ' => ' unless defined $Pair;
 $Useperl = 0 unless defined $Useperl;
 $Sortkeys = 0 unless defined $Sortkeys;
 $Deparse = 0 unless defined $Deparse;
@@ -64,6 +65,7 @@ sub new {
 	     xpad       => "",          # padding-per-level
 	     apad       => "",          # added padding for hash keys n such
 	     sep        => "",          # list separator
+	     pair	=> $Pair,	# hash key/value separator: defaults to ' => '
 	     seen       => {},          # local (nested) refs (id => [name, val])
 	     todump     => $v,          # values to dump []
 	     names      => $n,          # optional names for values []
@@ -332,10 +334,11 @@ sub _dump {
       $out .= ($name =~ /^\@/) ? ')' : ']';
     }
     elsif ($realtype eq 'HASH') {
-      my($k, $v, $pad, $lpad, $mname);
+      my($k, $v, $pad, $lpad, $mname, $pair);
       $out .= ($name =~ /^\%/) ? '(' : '{';
       $pad = $s->{sep} . $s->{pad} . $s->{apad};
       $lpad = $s->{apad};
+      $pair = $s->{pair};
       ($name =~ /^\%(.*)$/) ? ($mname = "\$" . $1) :
 	# omit -> if $foo->[0]->{bar}, but not ${$foo->[0]}->{bar}
 	($name =~ /^\\?[\%\@\*\$][^{].*[]}]$/) ? ($mname = $name) :
@@ -361,7 +364,7 @@ sub _dump {
 	my $nk = $s->_dump($k, "");
 	$nk = $1 if !$s->{quotekeys} and $nk =~ /^[\"\']([A-Za-z_]\w*)[\"\']$/;
 	$sname = $mname . '{' . $nk . '}';
-	$out .= $pad . $ipad . $nk . " => ";
+	$out .= $pad . $ipad . $nk . $pair;
 
 	# temporarily alter apad
 	$s->{apad} .= (" " x (length($nk) + 4)) if $s->{indent} >= 2;
@@ -515,6 +518,11 @@ sub Indent {
   else {
     return $s->{indent};
   }
+}
+
+sub Pair {
+    my($s, $v) = @_;
+    defined($v) ? (($s->{pair} = $v), return $s) : $s->{pair};
 }
 
 sub Pad {
@@ -914,6 +922,19 @@ Default is C<bless>.
 
 =item *
 
+$Data::Dumper::Pair  I<or>  $I<OBJ>->Pair(I<[NEWVAL]>)
+
+Can be set to a string that specifies the separator between hash keys
+and values. To dump nested hash, array and scalar values to JavaScript,
+use: C<$Data::Dumper::Pair = ' : ';>. Implementing C<bless> in JavaScript
+is left as an exercise for the reader.
+A function with the specified name exists, and accepts the same arguments
+as the builtin.
+
+Default is: C< =E<gt> >.
+
+=item *
+
 $Data::Dumper::Maxdepth  I<or>  $I<OBJ>->Maxdepth(I<[NEWVAL]>)
 
 Can be set to a positive integer that specifies the depth beyond which
@@ -1017,6 +1038,9 @@ distribution for more examples.)
     print Dumper($boo);
 
     $Data::Dumper::Useqq = 1;          # print strings in double quotes
+    print Dumper($boo);
+
+    $Data::Dumper::Pair = " : ";       # specify hash key/value separator
     print Dumper($boo);
 
 
