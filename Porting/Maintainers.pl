@@ -81,6 +81,13 @@ package Maintainers;
 		'CPAN'		=> 0,
 		},
 
+	'base' =>
+		{
+		'MAINTAINER'	=> 'mschwern',
+		'FILES'		=> q[lib/base.pm lib/fields.pm lib/base],
+		'CPAN'		=> 1,
+		},
+
 	'bignum' =>
 		{
 		'MAINTAINER'	=> 'tels',
@@ -140,7 +147,7 @@ package Maintainers;
 	'Digest' =>
 		{
 		'MAINTAINER'	=> 'gaas',
-		'FILES'		=> q[lib/Digest.pm lib/Digest/base.pm lib/Digest],
+		'FILES'		=> q[lib/Digest.pm lib/Digest],
 		'CPAN'		=> 1,
 		},
 
