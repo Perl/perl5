@@ -58,6 +58,13 @@
 		'CPAN'		=> 0,
 		},
 
+	'B::Deparse' =>
+		{
+		'MAINTAINER'	=> 'smcc',
+		'FILES'		=> q[ext/B/B/Deparse.pm ext/B/t/deparse.t],
+		'CPAN'		=> 0,
+		},
+
 	'bignum' =>
 		{
 		'MAINTAINER'	=> 'tels',
