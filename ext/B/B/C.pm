@@ -696,7 +696,7 @@ sub B::GV::save {
 	}
 	my $gvfilegv = $gv->FILEGV;
 	if ($$gvfilegv) {
-	    $init->add(sprintf("GvFILEGV($sym) = s\\_%x;",$$gvfilegv));
+	    $init->add(sprintf("GvFILEGV($sym) = (GV*)s\\_%x;",$$gvfilegv));
 #	    warn "GV::save GvFILEGV(*$name)\n"; # debug
 	    $gvfilegv->save;
 	}
@@ -1070,6 +1070,11 @@ sub B::GV::savecv {
       }
 	$gv->save;
     }
+    elsif ($name eq 'ISA')
+     {
+      $gv->save;
+     }
+
 }
 
 sub save_unused_subs {
@@ -1080,6 +1085,7 @@ sub save_unused_subs {
     walksymtable(\%{"main::"}, "savecv", sub {
 	my $package = shift;
 	$package =~ s/::$//;
+	return 0 if ($package =~ /::::/);  # skip ::::ISA::CACHE etc.
 	#warn "Considering $package\n";#debug
 	return 1 if exists $search_pack{$package};
       #sub try for a partial match
@@ -1095,8 +1101,18 @@ sub save_unused_subs {
 	    || $package eq "SelectSaver") {
 	    return 0;
 	}
-	my $m;
-	foreach $m (qw(new DESTROY TIESCALAR TIEARRAY TIEHASH)) {
+	foreach my $u (keys %search_pack) {
+	    if ($package =~ /^${u}::/) {
+		warn "$package starts with $u\n";
+		return 1
+	    }
+	    if ($package->isa($u)) {
+		warn "$package isa $u\n";
+		return 1
+	    }
+	    return 1 if $package->isa($u);
+	}
+	foreach my $m (qw(new DESTROY TIESCALAR TIEARRAY TIEHASH)) {
 	    if (defined(&{$package."::$m"})) {
 		warn "$package has method $m: -u$package assumed\n";#debug
               push @unused_sub_package, $package;
@@ -1120,6 +1136,7 @@ sub save_main {
                "av_store(CvPADLIST(PL_main_cv),0,SvREFCNT_inc($curpad_nam));",
                "av_store(CvPADLIST(PL_main_cv),1,SvREFCNT_inc($curpad_sym));");
 
+    warn "Writing output\n";
     output_boilerplate();
     print "\n";
     output_all("perl_init");
