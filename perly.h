@@ -164,7 +164,7 @@
 
 #endif /* PERL_CORE */
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 21 "perly.y"
+#line 30 "perly.y"
 typedef union YYSTYPE {
     I32	ival;
     char *pval;

@@ -15,6 +15,12 @@
 
 /*
 =head1 Numeric functions
+
+This file contains all the stuff needed by perl for manipulating numeric
+values, including such things as replacements for the OS's atof() function
+
+=cut
+
 */
 
 #include "EXTERN.h"

@@ -5,6 +5,11 @@
  * "A fair jaw-cracker dwarf-language must be."  --Samwise Gamgee
  */
 
+/* This file contains functions for compiling a regular expresssion.  See
+ * also regexec.c which funnnily enough, contains functions for executing
+ * a regular expression.
+ */
+
 /* NOTE: this is derived from Henry Spencer's regexp code, and should not
  * confused with the original package (see point 3 below).  Thanks, Henry!
  */

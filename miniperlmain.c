@@ -12,6 +12,15 @@
  * "The Road goes ever on and on, down from the door where it began."
  */
 
+/* This file contains the main() function for the perl interpreter.
+ * Note that miniperlmain.c contains main() for the 'miniperl' binary,
+ * while perlmain.c contains main() for the 'perl' binary.
+ *
+ * Miniperl is like perl except that does not support dynamic loading,
+ * and in fact is used to build the dynamic modules need for the 'real'
+ * perl execuable.
+ */
+
 #ifdef OEMVS
 #ifdef MYMALLOC
 /* sbrk is limited to first heap segement so make it big */

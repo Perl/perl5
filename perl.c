@@ -12,6 +12,12 @@
  * "A ship then new they built for him/of mithril and of elven glass" --Bilbo
  */
 
+/* This file contains the top-level functions that are used to create, use
+ * and destroy a perl interpreter, plus the functions used by XS code to
+ * call back into perl. Note that it does not contain the actual main()
+ * function of the interpreter; that can be found perlmain.c
+ */
+
 /* PSz 12 Nov 03
  * 
  * Be proud that perl(1) may proclaim:

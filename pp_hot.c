@@ -16,6 +16,19 @@
  *                     Fire, Foes!  Awake!
  */
 
+/* This file contains 'hot' pp ("push/pop") functions that
+ * execute the opcodes that make up a perl program. A typical pp function
+ * expects to find its arguments on the stack, and usually pushes its
+ * results onto the stack, hence the 'pp' terminology. Each OP structure
+ * contains a pointer to the relevant pp_foo() function.
+ *
+ * By 'hot', we mean common ops whose execution speed is critical.
+ * By gathering them together into a single file, we encourage
+ * CPU cache hits on hot code. Also it could be taken as a warning not to
+ * change any code in this file unless you're sure it won't affect
+ * performance.
+ */
+
 #include "EXTERN.h"
 #define PERL_IN_PP_HOT_C
 #include "perl.h"

@@ -13,6 +13,17 @@
  *   rear!'  the slave-driver shouted. 'Three files up. And stay there...
  */
 
+/* This file contains pp ("push/pop") functions that
+ * execute the opcodes that make up a perl program. A typical pp function
+ * expects to find its arguments on the stack, and usually pushes its
+ * results onto the stack, hence the 'pp' terminology. Each OP structure
+ * contains a pointer to the relevant pp_foo() function.
+ *
+ * This particular file just contains pp_sort(), which is complex
+ * enough to merit its own file! See the other pp*.c files for the rest of
+ * the pp_ functions.
+ */
+
 #include "EXTERN.h"
 #define PERL_IN_PP_SORT_C
 #include "perl.h"

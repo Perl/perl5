@@ -15,6 +15,15 @@
  * a rumour and a trouble as of great engines throbbing and labouring.
  */
 
+/* This file contains system pp ("push/pop") functions that
+ * execute the opcodes that make up a perl program. A typical pp function
+ * expects to find its arguments on the stack, and usually pushes its
+ * results onto the stack, hence the 'pp' terminology. Each OP structure
+ * contains a pointer to the relevant pp_foo() function.
+ *
+ * By 'system', we mean ops which interact with the OS, such as pp_open().
+ */
+
 #include "EXTERN.h"
 #define PERL_IN_PP_SYS_C
 #include "perl.h"

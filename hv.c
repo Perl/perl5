@@ -14,6 +14,16 @@
 
 /* 
 =head1 Hash Manipulation Functions
+
+A HV structure represents a Perl hash. It consists mainly of an array
+of pointers, each of which points to a linked list of HE structures. The
+array is indexed by the hash function of the key, so each linked list
+represents all the hash entries with the same hash value. Each HE contains
+a pointer to the actual value, plus a pointer to a HEK structure which
+holds the key and hash value.
+
+=cut
+
 */
 
 #include "EXTERN.h"

@@ -16,6 +16,30 @@
  * either way, as the saying is, if you follow me."  --the Gaffer
  */
 
+/* This file contains the functions that create, manipulate and optimize
+ * the OP structures that hold a compiled perl program.
+ *
+ * A Perl program is compiled into a tree of OPs. Each op contains
+ * structural pointers (eg to its siblings and the next op in the
+ * execution sequence), a pointer to the function that would execute the
+ * op, plus any data specific to that op. For example, an OP_CONST op
+ * points to the pp_const() function and to an SV containing the constant
+ * value. When pp_const() is executed, its job is to push that SV onto the
+ * stack.
+ *
+ * OPs are mainly created by the newFOO() functions, which are mainly
+ * called from the parser (in perly.y) as the code is parsed. For example
+ * the Perl code $a + $b * $c would cause the equivalent of the following
+ * to be called (oversimplifying a bit):
+ *
+ *  newBINOP(OP_ADD, flags,
+ *	newSVREF($a),
+ *	newBINOP(OP_MULTIPLY, flags, newSVREF($b), newSVREF($c))
+ *  )
+ *
+ * Note that during the build of miniperl, a temporary copy of this file
+ * is made, called opmini.c.
+ */
 
 #include "EXTERN.h"
 #define PERL_IN_OP_C
