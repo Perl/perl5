@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Jun 27 04:45:48 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Wed Jul 12 00:20:11 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -3090,7 +3090,7 @@ EOM
 if $cc -o try try.c; then
    :
 else
-   echo "Uh-oh, the C compiler "$cc" doesn't seem to be working..." >&4
+   echo "Uh-oh, the C compiler '$cc' doesn't seem to be working..." >&4
    despair=yes
    trygcc=yes
    case "$cc" in
@@ -3102,7 +3102,7 @@ else
    if $test X"$trygcc" = Xyes; then
       if gcc -o try try.c; then
         echo " "
-        echo "You seem to have a working gcc, though."
+        echo "You seem to have a working gcc, though." >&4
         rp="Do you want to use it?"
         dflt=y
         . ./myread
