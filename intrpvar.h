@@ -560,6 +560,10 @@ PERLVARI(Ihash_seed, UV, 0)		/* Hash initializer */
 
 PERLVARI(Ihash_seed_set, bool, FALSE)		/* Hash initialized? */
 
+PERLVARI(Inew_hash_seed, UV, 0)		/* 582 hash initializer */
+
+PERLVARI(Inew_hash_seed_set, bool, FALSE)	/* 582 hash initialized? */
+
 /* New variables must be added to the very end, before this comment,
  * for binary compatibility (the offsets of the old members must not change).
  * (Don't forget to add your variable also to perl_clone()!)

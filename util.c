@@ -4410,7 +4410,7 @@ Perl_get_hash_seed(pTHX)
 		  Perl_croak(aTHX_ "Your random numbers are not that random");
 	  }
      }
-     PL_hash_seed_set = TRUE;
+     PL_new_hash_seed_set = TRUE;
 
      return myseed;
 }
