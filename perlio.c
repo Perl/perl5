@@ -176,10 +176,14 @@ PerlIO_set_ptrcnt(PerlIO *f, STDCHAR *ptr, int cnt)
 #else
   Perl_croak(aTHX_ "Cannot set 'ptr' of FILE * on this system");
 #endif
-#if defined(USE_STDIO_PTR) && defined(STDIO_CNT_LVALUE)
+#if defined(USE_STDIO_PTR) && defined(STDIO_CNT_LVALUE) && defined (STDIO_PTR_LVAL_NOCHANGE_CNT)
   FILE_cnt(f) = cnt;
 #else
-  Perl_croak(aTHX_ "Cannot set 'cnt' of FILE * on this system");
+#if defined(STDIO_PTR_LVAL_SETS_CNT)
+  assert (FILE_cnt(f) == cnt);
+#else
+  Perl_croak(aTHX_ "Cannot set 'cnt' of FILE * on this system when setting 'ptr'");
+#endif
 #endif
 }
 

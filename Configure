@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Oct 19 22:28:50 EET DST 2000 [metaconfig 3.0 PL70]
+# Generated on Tue Oct 24 21:00:34 EET DST 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >/tmp/c1$$ <<EOF
@@ -536,6 +536,8 @@ d_fstatvfs=''
 d_statvfs=''
 d_stdio_cnt_lval=''
 d_stdio_ptr_lval=''
+d_stdio_ptr_lval_nochange_cnt=''
+d_stdio_ptr_lval_sets_cnt=''
 d_stdiobase=''
 d_stdstdio=''
 stdio_base=''
@@ -11479,6 +11481,82 @@ esac
 set d_stdio_cnt_lval
 eval $setvar
 
+
+: test whether setting _ptr sets _cnt as a side effect
+d_stdio_ptr_lval_sets_cnt="$undef"
+d_stdio_ptr_lval_nochange_cnt="$undef"
+case "$d_stdio_ptr_lval$d_stdstdio" in
+$define$define)
+	echo "Checking to see what happens if we set the stdio ptr..." >&4
+$cat >try.c <<EOP
+#include <stdio.h>
+/* Can we scream? */
+/* Eat dust sed :-) */
+#define FILE_ptr(fp)	$stdio_ptr
+#define FILE_cnt(fp)	$stdio_cnt
+int main() {
+	FILE *fp = fopen("try.c", "r");
+	char c = getc(fp);
+	char *ptr;
+	size_t cnt;
+	if (!(
+		18 <= FILE_cnt(fp) &&
+		strncmp(FILE_ptr(fp), "include <stdio.h>\n", 18) == 0
+	)) {
+		puts("Fail even to read");
+		exit (1);
+	}
+	ptr = FILE_ptr(fp);
+	cnt = FILE_cnt(fp);
+
+	FILE_ptr(fp)+= 42;
+
+	if (FILE_ptr(fp) != (ptr + 42)) {
+		printf("Fail ptr check %p != %p", FILE_ptr(fp), (ptr + 42));
+		exit (1);
+	}
+	if (FILE_cnt(fp) <= 20) {
+		printf ("Fail (<20 chars to test)");
+		exit (1);
+	}
+	if (strncmp(FILE_ptr(fp), "Eat dust sed :-) */\n", 20) != 0) {
+		puts("Fail compare");
+		exit (1);
+	}
+	if (cnt == FILE_cnt(fp)) {
+		puts("Pass_unchanged");
+		exit (0);
+	}	
+	if (FILE_cnt(fp) == (cnt - 42)) {
+		puts("Pass_changed");
+		exit (0);
+	}
+	printf("Fail count was %d now %d\n", cnt, FILE_cnt(fp));
+	return 1;
+
+}
+EOP
+	set try
+	if eval $compile; then
+ 		case `./try$exe_ext` in
+		Pass_changed)
+			echo "Increasing ptr in your stdio decreases cnt by the same amount. Good." >&4
+			d_stdio_ptr_lval_sets_cnt="$define" ;;
+		Pass_unchanged)
+			echo "Increasing ptr in your stdio leaves cnt unchanged.  Good." >&4
+			d_stdio_ptr_lval_nochange_cnt="$define" ;;
+		Fail*)
+			echo "Increasing ptr in your stdio didn't do exactly what I expected.  We'll not be doing that then." >&4 ;;
+		*)
+			echo "It appears attempting to set ptr in your stdio is a bad plan." >&4 ;;
+	esac
+	else
+		echo "It seems we can't set ptr in your stdio.  Nevermind." >&4
+	fi
+	$rm -f try.c try
+	;;
+esac
+
 : see if _base is also standard
 val="$undef"
 case "$d_stdstdio" in
@@ -15580,6 +15658,8 @@ d_statfs_s='$d_statfs_s'
 d_statvfs='$d_statvfs'
 d_stdio_cnt_lval='$d_stdio_cnt_lval'
 d_stdio_ptr_lval='$d_stdio_ptr_lval'
+d_stdio_ptr_lval_nochange_cnt='$d_stdio_ptr_lval_nochange_cnt'
+d_stdio_ptr_lval_sets_cnt='$d_stdio_ptr_lval_sets_cnt'
 d_stdio_stream_array='$d_stdio_stream_array'
 d_stdiobase='$d_stdiobase'
 d_stdstdio='$d_stdstdio'
