@@ -54,7 +54,7 @@ extern "C" {
 #    define PERL_SUBVERSION     SUBVERSION
 #endif
 
-#if PATCHLEVEL <= 4 && !defined(PL_dowarn)
+#if PERL_VERSION <= 4 && !defined(PL_dowarn)
    #define PL_dowarn dowarn
 #endif
 

@@ -873,6 +873,8 @@ space occupied by the original C<$0>.
 
 In some platforms there may be arbitrary amount of padding, for
 example space characters, after the modified name as shown by C<ps>.
+In some platforms this padding may extend all the way to the original
+length of the argument area, no matter what you do.
 
 Note for BSD users: setting C<$0> does not completely remove "perl"
 from the ps(1) output.  For example, setting C<$0> to C<"foobar"> may
