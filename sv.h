@@ -878,13 +878,13 @@ Returns a boolean indicating whether Perl would evaluate the SV as true or
 false, defined or undefined.  Does not handle 'get' magic.
 
 =for apidoc Am|char*|SvPVutf8_force|SV* sv|STRLEN len
-Like C<SvPV_force>, but converts sv to uft8 first if necessary.
+Like C<SvPV_force>, but converts sv to utf8 first if necessary.
 
 =for apidoc Am|char*|SvPVutf8|SV* sv|STRLEN len
-Like C<SvPV>, but converts sv to uft8 first if necessary.
+Like C<SvPV>, but converts sv to utf8 first if necessary.
 
-=for apidoc Am|char*|SvPVutf8_nolen|SV* sv|STRLEN len
-Like C<SvPV_nolen>, but converts sv to uft8 first if necessary.
+=for apidoc Am|char*|SvPVutf8_nolen|SV* sv
+Like C<SvPV_nolen>, but converts sv to utf8 first if necessary.
 
 =for apidoc Am|char*|SvPVbyte_force|SV* sv|STRLEN len
 Like C<SvPV_force>, but converts sv to byte representation first if necessary.
@@ -892,16 +892,16 @@ Like C<SvPV_force>, but converts sv to byte representation first if necessary.
 =for apidoc Am|char*|SvPVbyte|SV* sv|STRLEN len
 Like C<SvPV>, but converts sv to byte representation first if necessary.
 
-=for apidoc Am|char*|SvPVbyte_nolen|SV* sv|STRLEN len
+=for apidoc Am|char*|SvPVbyte_nolen|SV* sv
 Like C<SvPV_nolen>, but converts sv to byte representation first if necessary.
 
 =for apidoc Am|char*|SvPVutf8x_force|SV* sv|STRLEN len
-Like C<SvPV_force>, but converts sv to uft8 first if necessary.
+Like C<SvPV_force>, but converts sv to utf8 first if necessary.
 Guarantees to evalute sv only once; use the more efficient C<SvPVutf8_force>
 otherwise.
 
 =for apidoc Am|char*|SvPVutf8x|SV* sv|STRLEN len
-Like C<SvPV>, but converts sv to uft8 first if necessary.
+Like C<SvPV>, but converts sv to utf8 first if necessary.
 Guarantees to evalute sv only once; use the more efficient C<SvPVutf8>
 otherwise.
 
