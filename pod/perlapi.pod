@@ -1035,9 +1035,10 @@ Found in file handy.h
 
 =item is_utf8_char
 
-Tests if some arbitrary number of bytes begins in a valid UTF-8 character.
-The actual number of bytes in the UTF-8 character will be returned if it
-is valid, otherwise 0. 
+Tests if some arbitrary number of bytes begins in a valid UTF-8
+character.  Note that an ASCII character is a valid UTF-8 character.
+The actual number of bytes in the UTF-8 character will be returned if
+it is valid, otherwise 0.
  
 	STRLEN	is_utf8_char(U8 *p)
 
@@ -1046,8 +1047,10 @@ Found in file utf8.c
 
 =item is_utf8_string
 
-Returns true if first C<len> bytes of the given string form valid a UTF8
-string, false otherwise.
+Returns true if first C<len> bytes of the given string form a valid UTF8
+string, false otherwise.  Note that 'a valid UTF8 string' does not mean
+'a string that contains UTF8' because a valid ASCII string is a valid
+UTF8 string.
 
 	bool	is_utf8_string(U8 *s, STRLEN len)
 
