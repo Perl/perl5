@@ -3925,6 +3925,7 @@ is_null_device(name)
 I32
 cando(I32 bit, I32 effective, Stat_t *statbufp)
 {
+  dTHR;
   if (statbufp == &statcache) return cando_by_name(bit,effective,namecache);
   else {
     char fname[NAM$C_MAXRSS+1];
