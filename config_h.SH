@@ -2693,6 +2693,10 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
  *	This symbol, if defined, indicates that a variable of type NVTYPE
  *	can preserve all the bits of a variable of type UVTYPE.
  */
+/* NV_PRESERVES_UV_BITS:
+ *	This symbol contains the number of bits a variable of type NVTYPE
+ *	can preserve of a variable of type UVTYPE.
+ */
 #define	IVTYPE		$ivtype		/**/
 #define	UVTYPE		$uvtype		/**/
 #define	I8TYPE		$i8type		/**/
@@ -2720,6 +2724,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-
 #endif
 #define	NVSIZE		$nvsize		/**/
 #$d_nv_preserves_uv	NV_PRESERVES_UV
+#define	NV_PRESERVES_UV_BITS	$d_nv_preserves_uv_bits
 
 /* IVdf:
  *	This symbol defines the format string used for printing a Perl IV

@@ -1015,13 +1015,13 @@ d_nice (d_nice.U):
 	This variable conditionally defines the HAS_NICE symbol, which
 	indicates to the C program that the nice() routine is available.
 
-d_nv_preserved_bits (perlxv.U):
-	This variable indicates how many of bits type uvtype
-	a variable nvtype can preserve.
-
 d_nv_preserves_uv (perlxv.U):
 	This variable indicates whether a variable of type nvtype
 	can preserve all the bits a variable of type uvtype.
+
+d_nv_preserves_uv_bits (perlxv.U):
+	This variable indicates how many of bits type uvtype
+	a variable nvtype can preserve.
 
 d_off64_t (d_off64_t.U):
 	This symbol will be defined if the C compiler supports off64_t.

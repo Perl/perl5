@@ -2647,7 +2647,11 @@
  */
 /* NV_PRESERVES_UV:
  *	This symbol, if defined, indicates that a variable of type NVTYPE
- *	can preserve all the bit of a variable of type UVSIZE.
+ *	can preserve all the bit of a variable of type UVTYPE.
+ */
+/* NV_PRESERVES_UV_BITS:
+ *	This symbol contains the number of bits a variable of type NVTYPE
+ *	can preserve of a variable of type UVTYPE.
  */
 #define	IVTYPE		long		/**/
 #define	UVTYPE		unsigned long		/**/
@@ -2675,6 +2679,7 @@
 #define	U64SIZE		8	/**/
 #endif
 #define	NV_PRESERVES_UV
+#define	NV_PRESERVES_UV_BITS	32
 
 /* IVdf:
  *	This symbol defines the format string used for printing a Perl IV

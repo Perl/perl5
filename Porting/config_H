@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Wed May 31 00:52:02 EET DST 2000
+ * Configuration time: Wed May 31 01:48:08 EET DST 2000
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -1403,7 +1403,7 @@
  *	This symbol, if defined, indicates that the getespwnam system call is
  *	available to retrieve enchanced (shadow) password entries by name.
  */
-#define HAS_GETESPWNAM		/**/
+/*#define HAS_GETESPWNAM		/ **/
 
 /* HAS_GETFSSTAT:
  *	This symbol, if defined, indicates that the getfsstat routine is
@@ -1539,7 +1539,7 @@
  *	This symbol, if defined, indicates that the getprpwnam system call is
  *	available to retrieve protected (shadow) password entries by name.
  */
-#define HAS_GETPRPWNAM		/**/
+/*#define HAS_GETPRPWNAM		/ **/
 
 /* HAS_GETPWENT:
  *	This symbol, if defined, indicates that the getpwent routine is
@@ -2679,6 +2679,10 @@
  *	This symbol, if defined, indicates that a variable of type NVTYPE
  *	can preserve all the bits of a variable of type UVTYPE.
  */
+/* NV_PRESERVES_UV_BITS:
+ *	This symbol contains the number of bits a variable of type NVTYPE
+ *	can preserve of a variable of type UVTYPE.
+ */
 #define	IVTYPE		long		/**/
 #define	UVTYPE		unsigned long		/**/
 #define	I8TYPE		char		/**/
@@ -2706,6 +2710,7 @@
 #endif
 #define	NVSIZE		8		/**/
 #undef	NV_PRESERVES_UV
+#define	NV_PRESERVES_UV_BITS	53
 
 /* IVdf:
  *	This symbol defines the format string used for printing a Perl IV
