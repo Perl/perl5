@@ -1,6 +1,6 @@
---- Configure.dist	Fri Jan 24 10:22:24 1997
-+++ Configure	Fri Jan 24 10:22:27 1997
-@@ -1465,7 +1465,7 @@
+--- Configure.dist	Tue Feb 11 09:45:57 1997
++++ Configure	Tue Feb 11 09:46:04 1997
+@@ -1467,7 +1467,7 @@
  	*)
  		echo "I don't know where '$file' is, and my life depends on it." >&4
  		echo "Go find a public domain implementation or fix your PATH setting!" >&4
@@ -9,7 +9,7 @@
  		;;
  	esac
  done
-@@ -1474,7 +1474,9 @@
+@@ -1476,7 +1476,9 @@
  say=offhand
  for file in $trylist; do
  	xxx=`./loc $file $file $pth`
@@ -20,7 +20,7 @@
  	eval _$file=$xxx
  	case "$xxx" in
  	/*)
-@@ -3161,7 +3163,7 @@
+@@ -3164,7 +3166,7 @@
  	exit(0);
  }
  EOM
@@ -29,7 +29,7 @@
  	gccversion=`./gccvers`
  	case "$gccversion" in
  	'') echo "You are not using GNU cc." ;;
-@@ -3364,6 +3366,12 @@
+@@ -3367,6 +3369,12 @@
  		*"-l$thislib "*);;
  		*) dflt="$dflt -l$thislib";;
  		esac
@@ -42,7 +42,7 @@
  	else
  		echo "No -l$thislib."
  	fi
-@@ -3912,7 +3920,7 @@
+@@ -3914,7 +3922,7 @@
  	esac
  	;;
  esac
@@ -51,7 +51,7 @@
  case "$libs" in
  '') ;;
  *)  for thislib in $libs; do
-@@ -4114,6 +4122,10 @@
+@@ -4116,6 +4124,10 @@
  	eval $xscan;\
  	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
  		eval $xrun
@@ -62,7 +62,7 @@
  else
  	nm -p $* 2>/dev/null >libc.tmp
  	$grep fprintf libc.tmp > libc.ptf
-@@ -4124,23 +4136,33 @@
+@@ -4126,23 +4138,33 @@
  		eval $xrun
  	else
  		echo " "
@@ -103,16 +103,7 @@
  				done
  				echo "Ok." >&4
  			else
-@@ -5738,7 +5760,7 @@
- 	exit(0);
- }
- EOCP
--	if $cc $ccflags try.c -o try >/dev/null 2>&1 && ./try > /dev/null; then
-+	if $cc $ccflags $ldflags try.c -o try >/dev/null 2>&1 && ./try > /dev/null; then
- 		intsize=`./try`
- 		echo "Your integers are $intsize bytes long."
- 	else
-@@ -5818,7 +5840,7 @@
+@@ -5845,7 +5867,7 @@
  	exit(result);
  }
  EOCP
@@ -121,7 +112,7 @@
  	./try
  	yyy=$?
  else
-@@ -5899,7 +5921,7 @@
+@@ -5926,7 +5948,7 @@
  
  }
  EOCP
@@ -130,7 +121,7 @@
  	./try
  	castflags=$?
  else
-@@ -5938,7 +5960,7 @@
+@@ -5965,7 +5987,7 @@
  	exit((unsigned long)vsprintf(buf,"%s",args) > 10L);
  }
  EOF
@@ -139,7 +130,7 @@
  		echo "Your vsprintf() returns (int)." >&4
  		val2="$undef"
  	else
-@@ -6283,7 +6305,7 @@
+@@ -6310,7 +6332,7 @@
  EOCP
  : check sys/file.h first to get FREAD on Sun
  if $test `./findhdr sys/file.h` && \
@@ -148,7 +139,7 @@
  	h_sysfile=true;
  	echo "<sys/file.h> defines the O_* constants..." >&4
  	if ./open3; then
-@@ -6294,7 +6316,7 @@
+@@ -6321,7 +6343,7 @@
  		val="$undef"
  	fi
  elif $test `./findhdr fcntl.h` && \
@@ -157,7 +148,7 @@
  	h_fcntl=true;
  	echo "<fcntl.h> defines the O_* constants..." >&4
  	if ./open3; then
-@@ -6800,7 +6822,7 @@
+@@ -6827,7 +6849,7 @@
  y*|true)
  	usemymalloc='y'
  	mallocsrc='malloc.c'
@@ -166,7 +157,7 @@
  	d_mymalloc="$define"
  	case "$libs" in
  	*-lmalloc*)
-@@ -8053,7 +8075,7 @@
+@@ -8080,7 +8102,7 @@
  	printf("%d\n", (char *)&try.bar - (char *)&try.foo);
  }
  EOCP
@@ -175,7 +166,7 @@
  		dflt=`./try`
  	else
  		dflt='8'
-@@ -8101,7 +8123,7 @@
+@@ -8128,7 +8150,7 @@
  }
  EOCP
  	xxx_prompt=y
@@ -184,7 +175,7 @@
  		dflt=`./try`
  		case "$dflt" in
  		[1-4][1-4][1-4][1-4]|12345678|87654321)
-@@ -8523,7 +8545,7 @@
+@@ -8550,7 +8572,7 @@
  	printf("%d\n",i);
  }
  EOCP
@@ -193,7 +184,7 @@
  		dflt=`try`
  	else
  		dflt='?'
-@@ -8633,7 +8655,7 @@
+@@ -8660,7 +8682,7 @@
  	'') $echo $n ".$c"
  		if $cc $ccflags \
  		$i_time $i_systime $i_systimek $sysselect $s_timeval $s_timezone \
@@ -202,7 +193,7 @@
  			set X $i_time $i_systime $i_systimek $sysselect $s_timeval
  			shift
  			flags="$*"
-@@ -8702,7 +8724,7 @@
+@@ -8729,7 +8751,7 @@
  #endif
  }
  EOCP
@@ -211,7 +202,7 @@
  	d_fds_bits="$define"
  	d_fd_set="$define"
  	echo "Well, your system knows about the normal fd_set typedef..." >&4
-@@ -8719,7 +8741,7 @@
+@@ -8746,7 +8768,7 @@
  	$cat <<'EOM'
  Hmm, your compiler has some difficulty with fd_set.  Checking further...
  EOM
@@ -220,7 +211,7 @@
  		d_fds_bits="$undef"
  		d_fd_set="$define"
  		echo "Well, your system has some sort of fd_set available..." >&4
-@@ -9458,7 +9480,7 @@
+@@ -9493,7 +9515,7 @@
  else
  	echo "false"
  fi
@@ -229,7 +220,7 @@
  EOP
  chmod +x varargs
  
-@@ -9785,7 +9807,7 @@
+@@ -9820,7 +9842,7 @@
  	echo " "
  	echo "Stripping down executable paths..." >&4
  	for file in $loclist $trylist; do
