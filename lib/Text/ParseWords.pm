@@ -50,6 +50,7 @@ sub nested_quotewords {
 sub parse_line {
 	# We will be testing undef strings
 	no warnings;
+	use re 'taint'; # if it's tainted, leave it as such
 
     my($delimiter, $keep, $line) = @_;
     my($quote, $quoted, $unquoted, $delim, $word, @pieces);
