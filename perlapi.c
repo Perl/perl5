@@ -3492,14 +3492,14 @@ Perl_scalarvoid(pTHXo_ OP* o)
 }
 
 #undef  Perl_scan_bin
-UV
+NV
 Perl_scan_bin(pTHXo_ char* start, I32 len, I32* retlen)
 {
     return ((CPerlObj*)pPerl)->Perl_scan_bin(start, len, retlen);
 }
 
 #undef  Perl_scan_hex
-UV
+NV
 Perl_scan_hex(pTHXo_ char* start, I32 len, I32* retlen)
 {
     return ((CPerlObj*)pPerl)->Perl_scan_hex(start, len, retlen);
@@ -3513,7 +3513,7 @@ Perl_scan_num(pTHXo_ char* s)
 }
 
 #undef  Perl_scan_oct
-UV
+NV
 Perl_scan_oct(pTHXo_ char* start, I32 len, I32* retlen)
 {
     return ((CPerlObj*)pPerl)->Perl_scan_oct(start, len, retlen);
