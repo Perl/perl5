@@ -766,13 +766,13 @@ PerlIO_default_layers(pTHX)
    const char *s  = (PL_tainting) ? Nullch : PerlEnv_getenv("PERLIO");
    PerlIO_funcs *osLayer = &PerlIO_unix;
    PerlIO_def_layerlist  = PerlIO_list_alloc();
-#ifdef WIN32
-   osLayer = &PerlIO_win32;
    PerlIO_define_layer(aTHX_ &PerlIO_unix);
-#else
-   osLayer = &PerlIO_unix;
+#ifdef WIN32
+   PerlIO_define_layer(aTHX_ &PerlIO_win32);
+#if 0
+   osLayer = &PerlIO_win32;
 #endif
-   PerlIO_define_layer(aTHX_ osLayer);
+#endif
    PerlIO_define_layer(aTHX_ &PerlIO_raw);
    PerlIO_define_layer(aTHX_ &PerlIO_perlio);
    PerlIO_define_layer(aTHX_ &PerlIO_stdio);
