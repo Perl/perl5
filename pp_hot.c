@@ -297,7 +297,7 @@ PP(pp_print)
 	gv = defoutgv;
     if (SvMAGICAL(gv) && (mg = mg_find((SV*)gv, 'q'))) {
 	if (MARK == ORIGMARK) {
-	    EXTEND(SP, 1);
+	    MEXTEND(SP, 1);
 	    ++MARK;
 	    Move(MARK, MARK + 1, (SP - MARK) + 1, SV*);
 	    ++SP;
