@@ -3005,7 +3005,7 @@ S_init_main_stash(pTHX)
     SvREFCNT_dec(GvHV(gv));
     GvHV(gv) = (HV*)SvREFCNT_inc(PL_defstash);
     SvREADONLY_on(gv);
-    HvNAME(PL_defstash) = savepv("main");
+    HvNAME(PL_defstash) = savepvn("main", 4);
     PL_incgv = gv_HVadd(gv_AVadd(gv_fetchpv("INC",TRUE, SVt_PVAV)));
     GvMULTI_on(PL_incgv);
     PL_hintgv = gv_fetchpv("\010",TRUE, SVt_PV); /* ^H */
@@ -3041,7 +3041,7 @@ S_open_script(pTHX_ char *scriptname, bool dosearch, SV *sv)
     PL_suidscript = -1;
 
     if (PL_e_script) {
-	PL_origfilename = savepv("-e");
+	PL_origfilename = savepvn("-e", 2);
     }
     else {
 	/* if find_script() returns, it returns a malloc()-ed value */
