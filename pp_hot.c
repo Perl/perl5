@@ -252,7 +252,7 @@ PP(pp_preinc)
 {
     dSP;
     if (SvIOK(TOPs)) {
-    	if (SvIVX(TOPs) == PERL_LONG_MAX) {
+    	if (SvIVX(TOPs) == IV_MAX) {
     	    sv_setnv(TOPs, (double)(SvIVX(TOPs)) + 1.0 );
     	}
     	else {
@@ -344,7 +344,7 @@ PP(pp_print)
     if (!(io = GvIO(gv))) {
 	if (dowarn) {
 	    SV* sv = sv_newmortal();
-            gv_fullname(sv,gv);
+            gv_fullname(sv, gv, Nullch);
             warn("Filehandle %s never opened", SvPV(sv,na));
         }
 
@@ -354,7 +354,7 @@ PP(pp_print)
     else if (!(fp = IoOFP(io))) {
 	if (dowarn)  {
 	    SV* sv = sv_newmortal();
-            gv_fullname(sv,gv);
+            gv_fullname(sv, gv, Nullch);
 	    if (IoIFP(io))
 		warn("Filehandle %s opened only for input", SvPV(sv,na));
 	    else
@@ -1735,7 +1735,7 @@ PP(pp_entersub)
 		goto retry;
 	    }
 	    tmpstr = sv_newmortal();
-	    gv_efullname(tmpstr, gv);
+	    gv_efullname(tmpstr, gv, Nullch);
 	    ngv = gv_fetchmethod(GvESTASH(gv), "AUTOLOAD");
 	    if (ngv && ngv != gv && (cv = GvCV(ngv))) {	/* One more chance... */
 		gv = ngv;
@@ -1761,7 +1761,7 @@ PP(pp_entersub)
 	    sv_setsv(sv, newRV((SV*)cv));
 	}
 	else {
-	    gv_efullname(sv,gv);
+	    gv_efullname(sv, gv, Nullch);
 	}
 	cv = GvCV(DBsub);
 	if (CvXSUB(cv)) curcopdb = curcop;
