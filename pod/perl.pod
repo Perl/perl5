@@ -55,6 +55,7 @@ sections:
     perlcompile		Perl compiler suite intro
     perldebug		Perl debugging
     perldiag		Perl diagnostic messages
+    perlnumber		Perl number semantics
     perlsec		Perl security
     perltrap		Perl traps for the unwary
     perlport		Perl portability guide
