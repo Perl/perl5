@@ -406,12 +406,20 @@ sub ExtUtils::MakeMaker::new {
 	for $key (keys %Prepend_dot_dot) {
 	    next unless defined $self->{PARENT}{$key};
 	    $self->{$key} = $self->{PARENT}{$key};
-		# PERL and FULLPERL may be command verbs instead of full
-		# file specifications under VMS.  If so, don't turn them
-		# into a filespec.
-	    $self->{$key} = $self->catdir("..",$self->{$key})
-		unless $self->file_name_is_absolute($self->{$key})
-		|| ($^O eq 'VMS' and ($key =~ /PERL$/ && $self->{$key} =~ /^[\w\-\$]+$/));
+	    unless ($^O eq 'VMS' && $key =~ /PERL$/) {
+	        $self->{$key} = $self->catdir("..",$self->{$key})
+		    unless $self->file_name_is_absolute($self->{$key});
+	    } else {
+		# PERL or FULLPERL will be a command verb or even a command with 
+		# an argument instead of a full file specification under VMS.  So, 
+		# don't turn the command into a filespec, but do add a level to the 
+		# path of the argument if not already absolute.
+
+		my @cmd = split /\s+/, $self->{$key};
+		$cmd[1] = $self->catfile('[-]',$cmd[1])
+		    unless (scalar(@cmd) < 2 || $self->file_name_is_absolute($cmd[1]));
+		$self->{$key} = join(' ', @cmd);
+	    }
 	}
 	if ($self->{PARENT}) {
 	    $self->{PARENT}->{CHILDREN}->{$newclass} = $self;
