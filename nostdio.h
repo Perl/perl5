@@ -28,6 +28,7 @@ struct _FILE;
 #undef fgetpos
 #undef fgets
 #undef fileno
+#undef flockfile
 #undef fopen
 #undef fprintf
 #undef fputc
@@ -38,6 +39,8 @@ struct _FILE;
 #undef fseek
 #undef fsetpos
 #undef ftell
+#undef ftrylockfile
+#undef funlockfile
 #undef fwrite
 #undef getc
 #undef getc_unlocked
