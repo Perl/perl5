@@ -9670,7 +9670,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
      * their pointers copied. */
 
     IV i;
-    CLONE_PARAMS* param = (CLONE_PARAMS*) malloc(sizeof(CLONE_PARAMS));
+    CLONE_PARAMS clone_params;
+    CLONE_PARAMS* param = &clone_params;
 
     PerlInterpreter *my_perl = (PerlInterpreter*)(*ipM->pMalloc)(ipM, sizeof(PerlInterpreter));
     PERL_SET_THX(my_perl);
@@ -9699,7 +9700,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_Proc		= ipP;
 #else		/* !PERL_IMPLICIT_SYS */
     IV i;
-    CLONE_PARAMS* param = (CLONE_PARAMS*) malloc(sizeof(CLONE_PARAMS));
+    CLONE_PARAMS clone_params;
+    CLONE_PARAMS* param = &clone_params;
     PerlInterpreter *my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
     PERL_SET_THX(my_perl);
 
@@ -10381,7 +10383,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     }
 
     SvREFCNT_dec(param->stashes);
-    Safefree(param);
 
     return my_perl;
 }
