@@ -26,7 +26,7 @@ foreach my $dir (sort keys %ext)
     my $mmod = -M 'Makefile';
     if (!(-f 'Makefile') || $mmod > $dmod)
      {
-      print "\nMakefile.PL in $dir ($mmod > $dmod)\n";
+      print "\nRunning Makefile.PL in $dir\n";
       my $code = system($perl,"-I$here\\..\lib",'Makefile.PL','INSTALLDIRS=perl');
       warn "$code from $dir's Makefile.PL" if $code;
       $mmod = -M 'Makefile';
@@ -47,7 +47,7 @@ foreach my $dir (sort keys %ext)
 
 sub find_xs
 {
- if (/^(.*)\.pm$/i)
+ if (/^(.*)\.pm$/i || /^(.*)_pm.PL$/i)
   {
    my $name = $1;
    return if $name =~ $no; 
