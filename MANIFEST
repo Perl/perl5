@@ -512,6 +512,7 @@ lib/CPAN/Nox.pm		Runs CPAN while avoiding compiled extensions
 lib/Carp.pm		Error message base class
 lib/Class/Struct.pm	Declare struct-like datatypes as Perl classes
 lib/Cwd.pm		Various cwd routines (getcwd, fastcwd, chdir)
+lib/DB.pm		Debugger API (draft)
 lib/Devel/SelfStubber.pm Generate stubs for SelfLoader.pm
 lib/DirHandle.pm	like FileHandle only for directories
 lib/Dumpvalue.pm	Screen dump of perl values
