@@ -17,6 +17,11 @@
 #include "EXTERN.h"
 #include "perl.h"
 
+#ifdef HAS_GETSPENT
+/* Shadow password support for solaris - pdo@cs.umd.edu*/
+#include <shadow.h>
+#endif
+
 /* XXX If this causes problems, set i_unistd=undef in the hint file.  */
 #ifdef I_UNISTD
 # include <unistd.h>
@@ -4548,6 +4553,9 @@ PP(pp_gpwent)
     register SV *sv;
     struct passwd *pwent;
     STRLEN n_a;
+#ifdef HAS_GETSPENT
+    struct spwd *spwent;
+#endif
 
     if (which == OP_GPWNAM)
 	pwent = getpwnam(POPpx);
@@ -4555,6 +4563,15 @@ PP(pp_gpwent)
 	pwent = getpwuid(POPi);
     else
 	pwent = (struct passwd *)getpwent();
+
+#ifdef HAS_GETSPENT
+   if (which == OP_GPWNAM)
+      spwent = getspnam(pwent->pw_name);
+   else if (which == OP_GPWUID)
+      spwent = getspnam(pwent->pw_name);
+   else
+      spwent = (struct spwd *)getspent();
+#endif
 
     EXTEND(SP, 10);
     if (GIMME != G_ARRAY) {
@@ -4574,7 +4591,14 @@ PP(pp_gpwent)
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #ifdef PWPASSWD
+#ifdef HAS_GETSPENT
+      if (spwent)
+              sv_setpv(sv, spwent->sp_pwdp);
+      else
+              sv_setpv(sv, pwent->pw_passwd);
+#else
 	sv_setpv(sv, pwent->pw_passwd);
+#endif
 #endif
 
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
@@ -4638,6 +4662,9 @@ PP(pp_spwent)
     djSP;
 #if defined(HAS_PASSWD) && defined(HAS_SETPWENT) && !defined(CYGWIN32)
     setpwent();
+#ifdef HAS_GETSPENT
+    setspent();
+#endif
     RETPUSHYES;
 #else
     DIE(PL_no_func, "setpwent");
@@ -4649,6 +4676,9 @@ PP(pp_epwent)
     djSP;
 #if defined(HAS_PASSWD) && defined(HAS_ENDPWENT)
     endpwent();
+#ifdef HAS_GETSPENT
+    endspent();
+#endif
     RETPUSHYES;
 #else
     DIE(PL_no_func, "endpwent");
