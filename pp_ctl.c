@@ -1001,7 +1001,7 @@ I32 cxix;
     while (cxstack_ix > cxix) {
 	cx = &cxstack[cxstack_ix];
 	DEBUG_l(PerlIO_printf(Perl_debug_log, "Unwinding block %ld, type %s\n",
-			      (long) cxstack_ix+1, block_type[cx->cx_type]));
+			      (long) cxstack_ix, block_type[cx->cx_type]));
 	/* Note: we don't need to restore the base context info till the end. */
 	switch (cx->cx_type) {
 	case CXt_SUBST:
@@ -1361,12 +1361,15 @@ PP(pp_enteriter)
     ENTER;
     SAVETMPS;
 
-    if (op->op_targ)
+    if (op->op_targ) {
 	svp = &curpad[op->op_targ];		/* "my" variable */
-    else
-	svp = &GvSV((GV*)POPs);			/* symbol table variable */
-
-    SAVESPTR(*svp);
+        SAVESPTR(*svp);
+    }
+    else {
+	GV *gv = (GV*)POPs;
+	(void)save_scalar(gv);
+	svp = &GvSV(gv);			/* symbol table variable */
+    }
 
     ENTER;
 

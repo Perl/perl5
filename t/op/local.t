@@ -2,7 +2,7 @@
 
 # $RCSfile: local.t,v $$Revision: 4.1 $$Date: 92/08/07 18:28:04 $
 
-print "1..35\n";
+print "1..36\n";
 
 sub foo {
     local($a, $b) = @_;
@@ -91,3 +91,13 @@ print +($h{'c'} == 3) ? "" : "not ", "ok 34\n";
 $a = 'outer';
 if (1) { local $a = 'inner' }
 print +($a eq 'outer') ? "" : "not ", "ok 35\n";
+
+# see if localization works when scope unwinds
+local $m = 5;
+eval {
+    for $m (6) {
+	local $m = 7;
+	die "bye";
+    }
+};
+print $m == 5 ? "" : "not ", "ok 36\n";
