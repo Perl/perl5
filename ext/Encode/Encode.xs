@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 1.52 2002/11/18 17:28:49 dankogai Exp $
+ $Id: Encode.xs,v 1.53 2003/02/06 01:52:11 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -59,7 +59,7 @@ call_failure(SV * routine, U8 * done, U8 * dest, U8 * orig)
 
 static SV *
 encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
-	      int check)
+	      int check, STRLEN * offset, SV * term, int * retcode)
 {
     STRLEN slen;
     U8 *s = (U8 *) SvPV(src, slen);
@@ -72,20 +72,30 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
     SV *dst = sv_2mortal(newSV(slen+1));
     U8 *d = (U8 *)SvPVX(dst);
     STRLEN dlen = SvLEN(dst)-1;
-    int code;
+    int code = 0;
+    STRLEN trmlen = 0;
+    U8 *trm = term ? SvPV(term, trmlen) : NULL;
 
-    if (!slen){
+    if (offset) {
+      s += *offset;
+      slen -= *offset;
+      tlen = slen;
+    }
+
+    if (slen <= 0){
 	SvCUR_set(dst, 0);
 	SvPOK_only(dst);
 	goto ENCODE_END;
     }
 
-    while( (code = do_encode(dir, s, &slen, d, dlen, &dlen, !check)) ) 
+    while( (code = do_encode(dir, s, &slen, d, dlen, &dlen, !check,
+			     trm, trmlen)) ) 
     {
 	SvCUR_set(dst, dlen+ddone);
 	SvPOK_only(dst);
 	
-	if (code == ENCODE_FALLBACK || code == ENCODE_PARTIAL){
+	if (code == ENCODE_FALLBACK || code == ENCODE_PARTIAL ||
+	    code == ENCODE_FOUND_TERM) {
 	    break;
 	}
 	switch (code) {
@@ -233,8 +243,12 @@ encode_method(pTHX_ encode_t * enc, encpage_t * dir, SV * src,
     }
 #endif
 
+    if (offset) 
+      *offset += sdone + slen;
+
  ENCODE_END:
     *SvEND(dst) = '\0';
+    if (retcode) *retcode = code;
     return dst;
 }
 
@@ -381,6 +395,33 @@ CODE:
 }
 
 void
+Method_cat_decode(obj, dst, src, off, term, check = 0)
+SV *	obj
+SV *	dst
+SV *	src
+SV *	off
+SV *	term
+int	check
+CODE:
+{
+    encode_t *enc = INT2PTR(encode_t *, SvIV(SvRV(obj)));
+    STRLEN offset = (STRLEN)SvIV(off);
+    int code = 0;
+    if (SvUTF8(src)) {
+    	sv_utf8_downgrade(src, FALSE);
+    }
+    sv_catsv(dst, encode_method(aTHX_ enc, enc->t_utf8, src, check,
+				&offset, term, &code));
+    SvIVX(off) = (IV)offset;
+    if (code == ENCODE_FOUND_TERM) {
+	ST(0) = &PL_sv_yes;
+    }else{
+	ST(0) = &PL_sv_no;
+    }
+    XSRETURN(1);
+}
+
+void
 Method_decode(obj,src,check = 0)
 SV *	obj
 SV *	src
@@ -391,7 +432,8 @@ CODE:
     if (SvUTF8(src)) {
     	sv_utf8_downgrade(src, FALSE);
     }
-    ST(0) = encode_method(aTHX_ enc, enc->t_utf8, src, check);
+    ST(0) = encode_method(aTHX_ enc, enc->t_utf8, src, check,
+			  NULL, Nullsv, NULL);
     SvUTF8_on(ST(0));
     XSRETURN(1);
 }
@@ -405,7 +447,8 @@ CODE:
 {
     encode_t *enc = INT2PTR(encode_t *, SvIV(SvRV(obj)));
     sv_utf8_upgrade(src);
-    ST(0) = encode_method(aTHX_ enc, enc->f_utf8, src, check);
+    ST(0) = encode_method(aTHX_ enc, enc->f_utf8, src, check,
+			  NULL, Nullsv, NULL);
     XSRETURN(1);
 }
 

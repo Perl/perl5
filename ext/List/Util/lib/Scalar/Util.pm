@@ -10,7 +10,7 @@ require Exporter;
 require List::Util; # List::Util loads the XS
 
 our @ISA       = qw(Exporter);
-our @EXPORT_OK = qw(blessed dualvar reftype weaken isweak tainted readonly openhandle refaddr isvstring);
+our @EXPORT_OK = qw(blessed dualvar reftype weaken isweak tainted readonly openhandle refaddr isvstring looks_like_number);
 our $VERSION   = $List::Util::VERSION;
 
 sub openhandle ($) {
@@ -41,7 +41,7 @@ Scalar::Util - A selection of general-utility scalar subroutines
 
 =head1 SYNOPSIS
 
-    use Scalar::Util qw(blessed dualvar isweak readonly refaddr reftype tainted weaken);
+    use Scalar::Util qw(blessed dualvar isweak readonly refaddr reftype tainted weaken isvstring looks_like_number);
 
 =head1 DESCRIPTION
 
@@ -94,6 +94,11 @@ If EXPR is a scalar which is a weak reference the result is true.
     $weak = isweak($ref);               # false
     weaken($ref);
     $weak = isweak($ref);               # true
+
+=item looks_like_number EXPR
+
+Returns true if perl thinks EXPR is a number. See
+L<perlapi/looks_like_number>.
 
 =item openhandle FH
 

@@ -1,12 +1,8 @@
-# $Id: enc_eucjp.t,v 1.1 2003/01/21 22:19:14 dankogai Exp $
+# $Id: enc_eucjp.t,v 1.2 2003/02/06 01:52:11 dankogai Exp dankogai $
 # This is the twin of enc_utf8.t, the only difference is that
 # this has "use encoding 'euc-jp'".
 
 BEGIN {
-    if ($] <= 5.008){
-	print "1..0 # Skip: Perl 5.8.1 or later required\n";
-	exit 0;
-    }
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bEncode\b/) {
       print "1..0 # Skip: Encode was not built\n";
@@ -19,6 +15,10 @@ BEGIN {
     if (ord("A") == 193) {
 	print "1..0 # encoding pragma does not support EBCDIC platforms\n";
 	exit(0);
+    }
+    if ($] <= 5.008 and !$Config{perl_patchlevel}){
+	print "1..0 # Skip: Perl 5.8.1 or later required\n";
+	exit 0;
     }
 }
 

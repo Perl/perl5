@@ -4657,6 +4657,23 @@ The pointer to the PV of the dsv is returned.
 =for hackers
 Found in file utf8.c
 
+=item sv_cat_decode
+
+The encoding is assumed to be an Encode object, the PV of the ssv is
+assumed to be octets in that encoding and decoding the input starts
+from the position which (PV + *offset) pointed to.  The dsv will be
+concatenated the decoded UTF-8 string from ssv.  Decoding will terminate
+when the string tstr appears in decoding output or the input ends on
+the PV of the ssv. The value which the offset points will be modified
+to the last input position on the ssv.
+
+Returns TRUE if the terminator was found, else returns FALSE.
+
+	bool	sv_cat_decode(SV* dsv, SV *encoding, SV *ssv, int *offset, char* tstr, int tlen)
+
+=for hackers
+Found in file sv.c
+
 =item sv_recode_to_utf8
 
 The encoding is assumed to be an Encode object, on entry the PV

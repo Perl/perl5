@@ -480,6 +480,7 @@ ext/List/Util/t/blessed.t	Scalar::Util
 ext/List/Util/t/dualvar.t	Scalar::Util
 ext/List/Util/t/first.t		List::Util
 ext/List/Util/t/isvstring.t	Scalar::Util
+ext/List/Util/t/lln.t		Scalar::Util
 ext/List/Util/t/max.t		List::Util
 ext/List/Util/t/maxstr.t	List::Util
 ext/List/Util/t/min.t		List::Util

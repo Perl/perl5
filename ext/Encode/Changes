@@ -1,9 +1,32 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 1.86 2003/01/22 03:29:07 dankogai Exp $
+# $Id: Changes,v 1.87 2003/02/06 01:52:11 dankogai Exp dankogai $
 #
 
-$Revision: 1.86 $ $Date: 2003/01/22 03:29:07 $
+$Revision: 1.87 $ $Date: 2003/02/06 01:52:11 $
+! AUTHORS
+  * Inaba "Sensei" Hirohito added (I thought I have done so a long 
+  ago but apparently I did not).
+  * SUZUKI Norio added for verious and useful bug reports.
+! Byte/Byte.pm KR/KR.pm Unicode/Unicode.pm
+  lib/Encode/Encoder.pm lib/Encode/CJKConstants.pm
+  podchecked so all warnings are gone except for L<http://>.
+! encoding.pm t/enc_eucjp.t
+  * t/uni/tr_utf8.t now t ok on maintperl (sorry, jhi)
+  * Filter option overhaul
+  * POD revision	   
+! Encode.pm Encode.xs encengine.c Encode/encode.h 
+  lib/Encode/Encoding.pm lib/Encode/JP/JIS7.pm
+  Merged inaba-san's patch that fixes "use encoding 'shiftjis'"
+  without filter.  podchecked by Dan Kogai.
+  Message-Id: <3E3BC46B.6C687CFD@st.rim.or.jp>
+! lib/Encode/Alias.pm
+  decode('alias', $1) went wild because of local $_ in find_alias()
+  the evil local $_ is eradicated but that changes find_alias()
+  format for coderef aliasing.  See Encode::Alias for details
+  Message-Id: <200302051704.AA00042@kipp0.nifty.com>
+
+1.86 2003/01/22 03:29:07
 ! encoding.pm
   * Don't forget to canonize when you attempt an exact match!
   Message-Id: <73E7F801-2DAA-11D7-BF9A-000393AE4244@dan.co.jp>

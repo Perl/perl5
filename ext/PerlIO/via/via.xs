@@ -346,7 +346,7 @@ PerlIOVia_binmode(pTHX_ PerlIO * f)
     return SvIV(result);
 }
 
-Off_t
+IV
 PerlIOVia_seek(pTHX_ PerlIO * f, Off_t offset, int whence)
 {
     PerlIOVia *s = PerlIOSelf(f, PerlIOVia);

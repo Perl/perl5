@@ -8,10 +8,7 @@
 #include <XSUB.h>
 
 #ifndef PERL_VERSION
-#    include <patchlevel.h>
-#    ifndef PERL_VERSION
-#        include <could_not_find_Perl_patchlevel.h>
-#    endif
+#    include "patchlevel.h"
 #    define PERL_REVISION	5
 #    define PERL_VERSION	PATCHLEVEL
 #    define PERL_SUBVERSION	SUBVERSION
@@ -99,8 +96,8 @@ sv_tainted(SV *sv)
 #  endif
 #endif
 
-#ifndef PTR2IV
-#  define PTR2IV(ptr) (IV)(ptr)
+#ifndef PTR2UV
+#  define PTR2UV(ptr) (UV)(ptr)
 #endif
 
 MODULE=List::Util	PACKAGE=List::Util
@@ -467,6 +464,15 @@ CODE:
 #else
 	croak("vstrings are not implemented in this release of perl");
 #endif
+
+int
+looks_like_number(sv)
+	SV *sv
+PROTOTYPE: $
+CODE:
+  RETVAL = looks_like_number(sv);
+OUTPUT:
+  RETVAL
 
 
 BOOT:
