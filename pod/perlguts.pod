@@ -1317,6 +1317,20 @@ destination starting points.  Perl will move, copy, or zero out C<number>
 instances of the size of the C<type> data structure (using the C<sizeof>
 function).
 
+Here is a handy table of equivalents between ordinary C and Perl's
+memory abstraction layer:
+
+ Instead Of:                Use:
+ malloc                     New
+ calloc                     Newz
+ realloc                    Renew
+ memcopy                    Copy
+ memmove                    Move
+ free                       Safefree
+ strdup                     savepv
+ strndup                    savepvn (Hey, strndup doesn't exist!)
+ memcopy/*(struct foo *)    StructCopy
+
 =head2 PerlIO
 
 The most recent development releases of Perl has been experimenting with
