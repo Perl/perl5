@@ -12,16 +12,11 @@ $VERSION = "1.30";
 our($VERSION, @ISA, @EXPORT, %EXPORT_TAGS, $Inf);
 
 BEGIN {
-    eval { require POSIX; import POSIX 'HUGE_VAL' };
-    if (defined &HUGE_VAL) {
-	$Inf = sprintf "%g", &HUGE_VAL;
-    } else {	
-	my $e = $!;
-	$Inf = CORE::exp(CORE::exp(30));
-	$! = $e; # Clear ERANGE.
-	undef $Inf unless $Inf =~ /^inf$/; # Inf INF inf
-    }
-    $Inf = "Inf" if !defined $Inf || !($Inf > 0);
+    my $e = $!;
+    $Inf = CORE::exp(CORE::exp(30)); # We do want an arithmetic overflow.
+    $! = $e; # Clear ERANGE.
+    undef $Inf unless $Inf =~ /^inf(?:inity)?$/i; # Inf INF inf Infinity
+    $Inf = "Inf" if !defined $Inf || !($Inf > 0); # Desperation.
 }
 
 use strict;
@@ -879,7 +874,8 @@ sub acos {
 	my $z = $_[0];
 	return CORE::atan2(CORE::sqrt(1-$z*$z), $z)
 	    if (! ref $z) && CORE::abs($z) <= 1;
-	my ($x, $y) = ref $z ? @{$z->cartesian} : ($z, 0);
+	$z = cplx($z, 0) unless ref $z;
+	my ($x, $y) = @{$z->cartesian};
 	return 0 if $x == 1 && $y == 0;
 	my $t1 = CORE::sqrt(($x+1)*($x+1) + $y*$y);
 	my $t2 = CORE::sqrt(($x-1)*($x-1) + $y*$y);
@@ -891,7 +887,7 @@ sub acos {
 	my $u = CORE::atan2(CORE::sqrt(1-$beta*$beta), $beta);
 	my $v = CORE::log($alpha + CORE::sqrt($alpha*$alpha-1));
 	$v = -$v if $y > 0 || ($y == 0 && $x < -1);
-	return __PACKAGE__->make($u, $v);
+	return (ref $z)->make($u, $v);
 }
 
 #
@@ -903,7 +899,8 @@ sub asin {
 	my $z = $_[0];
 	return CORE::atan2($z, CORE::sqrt(1-$z*$z))
 	    if (! ref $z) && CORE::abs($z) <= 1;
-	my ($x, $y) = ref $z ? @{$z->cartesian} : ($z, 0);
+	$z = cplx($z, 0) unless ref $z;
+	my ($x, $y) = @{$z->cartesian};
 	return 0 if $x == 0 && $y == 0;
 	my $t1 = CORE::sqrt(($x+1)*($x+1) + $y*$y);
 	my $t2 = CORE::sqrt(($x-1)*($x-1) + $y*$y);
@@ -915,7 +912,7 @@ sub asin {
 	my $u =  CORE::atan2($beta, CORE::sqrt(1-$beta*$beta));
 	my $v = -CORE::log($alpha + CORE::sqrt($alpha*$alpha-1));
 	$v = -$v if $y > 0 || ($y == 0 && $x < -1);
-	return __PACKAGE__->make($u, $v);
+	return (ref $z)->make($u, $v);
 }
 
 #
@@ -998,8 +995,6 @@ sub cosh {
 	    return $ex ? ($ex + 1/$ex)/2 : $Inf;
 	}
 	my ($x, $y) = @{$z->cartesian};
-	my $cy = CORE::cos($y);
-	my $sy = CORE::cos($y);
 	$ex = CORE::exp($x);
 	my $ex_1 = $ex ? 1 / $ex : $Inf;
 	return (ref $z)->make(CORE::cos($y) * ($ex + $ex_1)/2,
@@ -1024,8 +1019,8 @@ sub sinh {
 	my $sy = CORE::sin($y);
 	$ex = CORE::exp($x);
 	my $ex_1 = $ex ? 1 / $ex : $Inf;
-	return (ref $z)->make($cy * ($ex - $ex_1)/2,
-			      $sy * ($ex + $ex_1)/2);
+	return (ref $z)->make(CORE::cos($y) * ($ex - $ex_1)/2,
+			      CORE::sin($y) * ($ex + $ex_1)/2);
 }
 
 #
@@ -1107,10 +1102,15 @@ sub acosh {
 	    return cplx(0, CORE::atan2(CORE::sqrt(1 - $re*$re), $re))
 		if CORE::abs($re) < 1;
 	}
-	my $s = &sqrt($z*$z - 1);
-	my $t = $z + $s;
-	$t = 1/(2*$s) if $t == 0 || $t && &abs(cosh(&log($t)) - $z) > $eps;
-	return &log($t);
+	my $t = &sqrt($z * $z - 1) + $z;
+	# Try Taylor if looking bad (this usually means that
+	# $z was large negative, therefore the sqrt is really
+	# close to abs(z), summing that with z...)
+	$t = 1/(2 * $z) - 1/(8 * $z**3) + 1/(16 * $z**5) - 5/(128 * $z**7)
+	    if $t == 0;
+	my $u = &log($t);
+	$u->Im(-$u->Im) if $re < 0 && $im == 0;
+	return $re < 0 ? -$u : $u;
 }
 
 #
@@ -1124,10 +1124,12 @@ sub asinh {
 	    my $t = $z + CORE::sqrt($z*$z + 1);
 	    return CORE::log($t) if $t;
 	}
-	my $s = &sqrt($z*$z + 1);
-	my $t = $z + $s;
-	# Try Taylor series if looking bad.
-	$t = 1/(2*$s) if $t == 0 || $t && &abs(sinh(&log($t)) - $z) > $eps;
+	my $t = &sqrt($z * $z + 1) + $z;
+	# Try Taylor if looking bad (this usually means that
+	# $z was large negative, therefore the sqrt is really
+	# close to abs(z), summing that with z...)
+	$t = 1/(2 * $z) - 1/(8 * $z**3) + 1/(16 * $z**5) - 5/(128 * $z**7)
+	    if $t == 0;
 	return &log($t);
 }
 
@@ -1328,15 +1330,16 @@ sub stringify_cartesian {
 	}
 
 	if ($y) {
-	    if ($y == 1)     { $im = ""  }
-	    elsif ($y == -1) { $im = "-" }
-	    elsif ($y =~ /^(NaN[QS]?)$/i) {
+	    if ($y =~ /^(NaN[QS]?)$/i) {
 		$im = $y;
 	    } else {
 		if ($y =~ /^-?$Inf$/oi) {
 		    $im = $y;
 		} else {
-		    $im = defined $format ? sprintf($format, $y) : $y;
+		    $im =
+			defined $format ?
+			    sprintf($format, $y) :
+			    ($y == 1 ? "" : ($y == -1 ? "-" : $y));
 		}
 	    }
 	    $im .= "i";
@@ -1392,7 +1395,7 @@ sub stringify_polar {
 
 	if ($format{polar_pretty_print}) {
 	    my ($a, $b);
-	    for $a (2, 3, 4, 6, 8, 12, 16, 24, 30, 32, 36, 48, 60, 64, 72) {
+	    for $a (2..9) {
 		$b = $t * $a / pi;
 		if (int($b) == $b) {
 		    $b = $b < 0 ? "-" : "" if CORE::abs($b) == 1;
@@ -1736,7 +1739,7 @@ For instance:
 	print "j = $j\n";		# Prints "j = -0.5+0.866025403784439i"
 
 The polar style attempts to emphasize arguments like I<k*pi/n>
-(where I<n> is a positive integer and I<k> an integer within [-9,+9]),
+(where I<n> is a positive integer and I<k> an integer within [-9, +9]),
 this is called I<polar pretty-printing>.
 
 =head2 CHANGED IN PERL 5.6
@@ -1746,29 +1749,33 @@ C<display_format> object method can now be called using
 a parameter hash instead of just a one parameter.
 
 The old display format style, which can have values C<"cartesian"> or
-C<"polar">, can be changed using the C<"style"> parameter.  (The one
-parameter calling convention also still works.)
+C<"polar">, can be changed using the C<"style"> parameter.
+
+	$j->display_format(style => "polar");
+
+The one parameter calling convention also still works.
+
+	$j->display_format("polar");
 
 There are two new display parameters.
 
-The first one is C<"format">, which is a sprintf()-style format
-string to be used for both parts of the complex number(s).  The
-default is C<undef>, which corresponds usually (this is somewhat
-system-dependent) to C<"%.15g">.  You can revert to the default by
-setting the format string to C<undef>.
+The first one is C<"format">, which is a sprintf()-style format string
+to be used for both numeric parts of the complex number(s).  The is
+somewhat system-dependent but most often it corresponds to C<"%.15g">.
+You can revert to the default by setting the C<format> to C<undef>.
 
 	# the $j from the above example
 
 	$j->display_format('format' => '%.5f');
 	print "j = $j\n";		# Prints "j = -0.50000+0.86603i"
-	$j->display_format('format' => '%.6f');
+	$j->display_format('format' => undef);
 	print "j = $j\n";		# Prints "j = -0.5+0.86603i"
 
 Notice that this affects also the return values of the
 C<display_format> methods: in list context the whole parameter hash
-will be returned, as opposed to only the style parameter value.  If
-you want to know the whole truth for a complex number, you must call
-both the class method and the object method:
+will be returned, as opposed to only the style parameter value.
+This is a potential incompatibility with earlier versions if you
+have been calling the C<display_format> method in list context.
 
 The second new display parameter is C<"polar_pretty_print">, which can
 be set to true or false, the default being true.  See the previous
@@ -1832,8 +1839,7 @@ is any integer.
 
 Note that because we are operating on approximations of real numbers,
 these errors can happen when merely `too close' to the singularities
-listed above.  For example C<tan(2*atan2(1,1)+1e-15)> will die of
-division by zero.
+listed above.
 
 =head1 ERRORS DUE TO INDIGESTIBLE ARGUMENTS
 
