@@ -720,6 +720,7 @@ lib/Env.pm		Map environment into ordinary variables
 lib/Exporter.pm		Exporter base class
 lib/Exporter/Heavy.pm	Complicated routines for Exporter
 lib/ExtUtils/Command.pm	Utilities for Make on non-UNIX platforms
+lib/ExtUtils/Constant.pm	generate XS code to import C header constants
 lib/ExtUtils/Embed.pm	Utilities for embedding Perl in C programs
 lib/ExtUtils/Install.pm	Handles 'make install' on extensions
 lib/ExtUtils/Installed.pm	Information on installed extensions
@@ -1504,6 +1505,7 @@ t/lib/env-array.t	See if Env works for arrays
 t/lib/env.t		See if Env works
 t/lib/errno.t		See if Errno works
 t/lib/exporter.t        See if Exporter works
+t/lib/extutils.t	See if extutils work
 t/lib/fatal.t           See if Fatal works
 t/lib/fcntl.t           See if Fcntl works
 t/lib/fields.t          See if base/fields works

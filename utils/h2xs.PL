@@ -116,6 +116,18 @@ two methods are constructed for the structure type itself, C<_to_ptr>
 which returns a Ptr type pointing to the same structure, and a C<new>
 method to construct and return a new structure, initialised to zeroes.
 
+=item B<-b> I<version>
+
+Generates a .pm file which is backwards compatible with the specified
+perl version.
+
+For versions < 5.6.0, the changes are.
+    - no use of 'our' (uses 'use vars' instead)
+    - no 'use warnings'
+
+Specifying a compatibility version higher than the version of perl you
+are using to run h2xs will have no effect.
+
 =item B<-c>
 
 Omit C<constant()> from the .xs file and corresponding specialised
@@ -178,6 +190,13 @@ with the constant() subroutine.  These macros are assumed to have a
 return type of B<char *>, e.g.,
 S<-s sec_rgy_wildcard_name,sec_rgy_wildcard_sid>.
 
+=item B<-t> I<type>
+
+Specify the internal type that the constant() mechanism uses for macros.
+The default is IV (signed integer).  Currently all macros found during the
+header scanning process will be assumed to have this type.  Future versions
+of C<h2xs> may gain the ability to make educated guesses.
+
 =item B<-v> I<version>
 
 Specify a version number for this extension.  This version number is added
@@ -197,18 +216,6 @@ result in XSUB-declarations/typemap-entries which need
 hand-editing. Such may be objects which cannot be converted from/to a
 pointer (like C<long long>), pointers to functions, or arrays.  See
 also the section on L<LIMITATIONS of B<-x>>.
-
-=item B<-b> I<version>
-
-Generates a .pm file which is backwards compatible with the specified
-perl version.
-
-For versions < 5.6.0, the changes are.
-    - no use of 'our' (uses 'use vars' instead)
-    - no 'use warnings'
-
-Specifying a compatibility version higher than the version of perl you
-are using to run h2xs will have no effect.
 
 =back
 
@@ -417,6 +424,10 @@ my $compat_version = $];
 
 use Getopt::Std;
 use Config;
+use Text::Wrap;
+$Text::Wrap::huge = 'overflow';
+$Text::Wrap::columns = 80;
+use ExtUtils::Constant qw (constant_types C_constant XS_constant autoload);
 
 sub usage {
     warn "@_\n" if @_;
@@ -444,6 +455,7 @@ version: $H2XS_VERSION
     -v   Specify a version number for this extension.
     -x   Autogenerate XSUBs using C::Scan.
     -b   Specify a perl version to be backwards compatibile with
+    -t   Default type for autoloaded constants
 extra_libraries
          are any libraries that might be needed for loading the
          extension, e.g. -lm would try to link in the math library.
@@ -451,10 +463,10 @@ EOFUSAGE
 }
 
 
-getopts("ACF:M:OPXacdfhkmn:o:p:s:v:xb:") || usage;
-use vars qw($opt_A $opt_C $opt_F $opt_M $opt_O $opt_P $opt_X $opt_a $opt_c $opt_d
-	    $opt_f $opt_h $opt_k $opt_m $opt_n $opt_o $opt_p $opt_s $opt_v $opt_x 
-	    $opt_b);
+getopts("ACF:M:OPXacdfhkmn:o:p:s:v:xb:t:") || usage;
+use vars qw($opt_A $opt_C $opt_F $opt_M $opt_O $opt_P $opt_X $opt_a $opt_c
+            $opt_d $opt_f $opt_h $opt_k $opt_m $opt_n $opt_o $opt_p $opt_s
+            $opt_v $opt_x $opt_b $opt_t);
 
 usage if $opt_h;
 
@@ -896,41 +908,7 @@ if (@vdecls) {
 }
 
 
-$tmp = ( $compat_version < 5.006 ?  "" : "our \$AUTOLOAD;" );
-print PM <<"END" unless $opt_c or $opt_X;
-sub AUTOLOAD {
-    # This AUTOLOAD is used to 'autoload' constants from the constant()
-    # XS function.  If a constant is not found then control is passed
-    # to the AUTOLOAD in AutoLoader.
-
-    my \$constname;
-    $tmp
-    (\$constname = \$AUTOLOAD) =~ s/.*:://;
-    croak "&${module}::constant not defined" if \$constname eq 'constant';
-    my \$val = constant(\$constname, \@_ ? \$_[0] : 0);
-    if (\$! != 0) {
-	if (\$! =~ /Invalid/ || \$!{EINVAL}) {
-	    \$AutoLoader::AUTOLOAD = \$AUTOLOAD;
-	    goto &AutoLoader::AUTOLOAD;
-	}
-	else {
-	    croak "Your vendor has not defined $module macro \$constname";
-	}
-    }
-    {
-	no strict 'refs';
-	# Fixed between 5.005_53 and 5.005_61
-	if (\$] >= 5.00561) {
-	    *\$AUTOLOAD = sub () { \$val };
-	}
-	else {
-	    *\$AUTOLOAD = sub { \$val };
-	}
-    }
-    goto &\$AUTOLOAD;
-}
-
-END
+print PM autoload ($module, $compat_version) unless $opt_c or $opt_X;
 
 if( ! $opt_X ){ # print bootstrap, unless XS is disabled
 	print PM <<"END";
@@ -1152,186 +1130,15 @@ sub td_is_struct {
   return ($struct_typedefs{$otype} = $out);
 }
 
-# Some macros will bomb if you try to return them from a double-returning func.
-# Say, ((char *)0), or strlen (if somebody #define STRLEN strlen).
-# Fortunately, we can detect both these cases...
-sub protect_convert_to_double {
-  my $in = shift;
-  my $val;
-  return '' unless defined ($val = $seen_define{$in});
-  return '(IV)' if $known_fnames{$val};
-  # OUT_t of ((OUT_t)-1):
-  return '' unless $val =~ /^\s*(\(\s*)?\(\s*([^()]*?)\s*\)/;
-  td_is_pointer($2) ? '(IV)' : '';
-}
-
-# For each of the generated functions, length($pref) leading
-# letters are already checked.  Moreover, it is recommended that
-# the generated functions uses switch on letter at offset at least
-# $off + length($pref).
-#
-# The given list has length($pref) chars removed at front, it is
-# guarantied that $off leading chars in the rest are the same for all
-# elts of the list.
-#
-# Returns: how at which offset it was decided to make a switch, or -1 if none.
-
-sub write_const;
-
-sub write_const {
-  my ($fh, $pref, $off, $list) = (shift,shift,shift,shift);
-  my %leading;
-  my $offarg = length $pref;
-
-  if (@$list == 0) {		# Can happen on the initial iteration only
-    print $fh <<"END";
-static NV
-constant(char *name, int len, int arg)
-{
-    errno = EINVAL;
-    return 0;
-}
-END
-    return -1;
-  }
-
-  if (@$list == 1) {		# Can happen on the initial iteration only
-    my $protect = protect_convert_to_double("$pref$list->[0]");
-
-    print $fh <<"END";
-static NV
-constant(char *name, int len, int arg)
-{
-    errno = 0;
-    if (strEQ(name + $offarg, "$list->[0]")) {	/* \"$pref\" removed */
-#ifdef $pref$list->[0]
-	return $protect$pref$list->[0];
-#else
-	errno = ENOENT;
-	return 0;
-#endif
-    }
-    errno = EINVAL;
-    return 0;
-}
-END
-    return -1;
-  }
-
-  for my $n (@$list) {
-    my $c = substr $n, $off, 1;
-    $leading{$c} = [] unless exists $leading{$c};
-    push @{$leading{$c}}, $off < length $n ? substr $n,  $off + 1 : $n
-  }
-
-  if (keys(%leading) == 1) {
-    return 1 + write_const $fh, $pref, $off + 1, $list;
-  }
-
-  my $leader = substr $list->[0], 0, $off;
-  foreach my $letter (keys %leading) {
-    write_const $fh, "$pref$leader$letter", 0, $leading{$letter}
-      if @{$leading{$letter}} > 1;
-  }
-
-  my $npref = "_$pref";
-  $npref = '' if $pref eq '';
-
-  print $fh <<"END";
-static NV
-constant$npref(char *name, int len, int arg)
-{
-END
-
-  print $fh <<"END" if $npref eq '';
-    errno = 0;
-END
-
-  if ($off) {
-      my $null = 0;
-
-      foreach my $letter (keys %leading) {
-	  if ($letter eq '') {
-	      $null = 1;
-	      last;
-	  }
-      }
-
-      my $cmp = $null ? '>' : '>=';
-
-      print $fh <<"END"
-    if ($offarg + $off $cmp len ) {
-	errno = EINVAL;
-	return 0;
-    }
-END
-  }
-
-  print $fh <<"END";
-    switch (name[$offarg + $off]) {
-END
-
-  foreach my $letter (sort keys %leading) {
-    my $let = $letter;
-    $let = '\0' if $letter eq '';
-
-    print $fh <<EOP;
-    case '$let':
-EOP
-    if (@{$leading{$letter}} > 1) {
-      # It makes sense to call a function
-      if ($off) {
-	print $fh <<EOP;
-	if (!strnEQ(name + $offarg,"$leader", $off))
-	    break;
-EOP
-      }
-      print $fh <<EOP;
-	return constant_$pref$leader$letter(name, len, arg);
-EOP
-    }
-    else {
-      # Do it ourselves
-      my $protect
-	= protect_convert_to_double("$pref$leader$letter$leading{$letter}[0]");
-
-      print $fh <<EOP;
-	if (strEQ(name + $offarg, "$leader$letter$leading{$letter}[0]")) {	/* \"$pref\" removed */
-#ifdef $pref$leader$letter$leading{$letter}[0]
-	    return $protect$pref$leader$letter$leading{$letter}[0];
-#else
-	    goto not_there;
-#endif
-	}
-EOP
-    }
-  }
-  print $fh <<"END";
-    }
-    errno = EINVAL;
-    return 0;
-
-not_there:
-    errno = ENOENT;
-    return 0;
-}
-
-END
-
-}
+my $types = {};
+# Important. Passing an undef scalar doesn't cause the
+# autovivified hashref to appear back out in this scope.
 
 if( ! $opt_c ) {
-  print XS <<"END";
-static int
-not_here(char *s)
-{
-    croak("${module}::%s not implemented on this architecture", s);
-    return -1;
-}
-
-END
-
-  write_const(\*XS, '', 0, \@const_names);
+  print XS constant_types(), "\n";
+  foreach (C_constant (undef, $opt_t, $types, undef, undef, @const_names)) {
+    print XS $_, "\n";
+  }
 }
 
 print_tievar_subs(\*XS, $_, $vdecl_hash{$_}) for @vdecls;
@@ -1365,22 +1172,8 @@ END
 
 # If a constant() function was written then output a corresponding
 # XS declaration:
-print XS <<"END" unless $opt_c;
-
-NV
-constant(sv,arg)
-    PREINIT:
-	STRLEN		len;
-    INPUT:
-	SV *		sv
-	char *		s = SvPV(sv, len);
-	int		arg
-    CODE:
-	RETVAL = constant(s,len,arg);
-    OUTPUT:
-	RETVAL
-
-END
+# XXX IVs
+print XS XS_constant ($module, $types) unless $opt_c;
 
 my %seen_decl;
 my %typemap;
@@ -1872,10 +1665,14 @@ ok(1); # If we made it this far, we're ok.
 _END_
 if (@const_names) {
   my $const_names = join " ", @const_names;
-  print EX <<_END_;
+  print EX <<'_END_';
 
-my \$fail;
-foreach my \$constname qw($const_names) {
+my $fail;
+foreach my $constname (qw(
+_END_
+  print EX wrap ("\t", "\t", $const_names);
+  print EX (")) {\n");
+  print EX <<_END_;
   next if (eval "my \\\$a = \$constname; 1");
   if (\$\@ =~ /^Your vendor has not defined $module macro \$constname/) {
     print "# pass: \$\@";
