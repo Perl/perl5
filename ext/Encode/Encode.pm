@@ -161,7 +161,7 @@ define_alias( qr/^koi8u$/i => 'koi8-u' );
 # TODO: Hebrew encoding ISO-8859-8-1
 # TODO: Thai encoding TCVN
 # TODO: Korean encoding Johab
-# TODO: Vietnamese encodings VISCII VPS
+# TODO: Vietnamese encodings VPS
 # TODO: Japanese encoding JIS (not the same as SJIS)
 # TODO: Mac Asian+African encodings: Arabic Armenian Bengali Burmese
 #       ChineseSimp ChineseTrad Devanagari Ethiopic ExtArabic
@@ -623,7 +623,7 @@ The ISO 8859 and KOI:
 
   ISO 8859-1  ISO 8859-6   ISO 8859-11         KOI8-F
   ISO 8859-2  ISO 8859-7   (12 doesn't exist)  KOI8-R
-  ISO 8859-3  ISO 8859-8   ISO 8859-13	       KOI8-U
+  ISO 8859-3  ISO 8859-8   ISO 8859-13         KOI8-U
   ISO 8859-4  ISO 8859-9   ISO 8859-14
   ISO 8859-5  ISO 8859-10  ISO 8859-15
                            ISO 8859-16
@@ -644,9 +644,9 @@ The ISO 8859 and KOI:
 The CJKV: Chinese, Japanese, Korean, Vietnamese:
 
   ISO 2022     ISO 2022 JP-1  JIS 0201  GB 1988   Big5       EUC-CN       
-  ISO 2022 CN  ISO 2022 JP-2  JIS 0208  GB 2312   HZ	     EUC-JP     
+  ISO 2022 CN  ISO 2022 JP-2  JIS 0208  GB 2312   HZ         EUC-JP     
   ISO 2022 JP  ISO 2022 KR    JIS 0210  GB 12345  CNS 11643  EUC-JP-0212
-  Shift-JIS                            			     EUC-KR     
+  Shift-JIS                                                  EUC-KR     
   VISCII
 
 The PC codepages:
@@ -672,12 +672,12 @@ The PC codepages:
 The Mac codepages:
 
   MacCentralEuropean   MacJapanese        
-  MacCroatian	       MacRoman           
-  MacCyrillic 	       MacRumanian        
-  MacDingbats	       MacSami            
-  MacGreek	       MacThai            
-  MacIcelandic	       MacTurkish         
-		       MacUkraine         
+  MacCroatian          MacRoman           
+  MacCyrillic          MacRumanian        
+  MacDingbats          MacSami            
+  MacGreek             MacThai            
+  MacIcelandic         MacTurkish         
+                       MacUkraine         
 
 Miscellaneous:
 
