@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Feb  4 21:57:24 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Wed Feb  9 04:05:32 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -423,13 +423,21 @@ d_memcpy=''
 d_memmove=''
 d_memset=''
 d_mkdir=''
+d_mkdtemp=''
 d_mkfifo=''
+d_mkstemp=''
+d_mkstemps=''
 d_mktime=''
+d_mmap=''
+mmaptype=''
+d_mprotect=''
 d_msg=''
 d_msgctl=''
 d_msgget=''
 d_msgrcv=''
 d_msgsnd=''
+d_msync=''
+d_munmap=''
 d_nice=''
 d_open3=''
 d_fpathconf=''
@@ -642,6 +650,7 @@ i_bsdioctl=''
 i_sysfilio=''
 i_sysioctl=''
 i_syssockio=''
+i_sysmman=''
 i_sysmount=''
 i_sysndir=''
 i_sysparam=''
@@ -895,6 +904,8 @@ vendorprefix=''
 vendorprefixexp=''
 defvoidused=''
 voidflags=''
+pm_apiversion=''
+xs_apiversion=''
 CONFIG=''
 
 define='define'
@@ -3686,9 +3697,12 @@ esac
 for thislib in $libswanted; do
 	
 	libname="$thislib"
-	if xxx=`./loc lib$thislib.$so.[0-9]'*' X $libpth`;
-		$test -f "$xxx" -a "X$ignore_versioned_solibs" = "X"; then
-		libstyle=shared
+	if xxx=`./loc lib$thislib.$so.[0-9]'*' X $libpth`; $test -f "$xxx"; then
+		if $test "X$ignore_versioned_solibs" = "X"; then
+			xxx=/ignored$xxx
+		else
+			libstyle=shared
+		fi
 	elif xxx=`./loc lib$thislib.$so X $libpth` ; $test -f "$xxx"; then
 		libstyle=shared
 	elif xxx=`./loc lib$thislib$_a X $libpth`; $test -f "$xxx"; then
@@ -5366,9 +5380,9 @@ case "$ans" in
 esac
 case "$inc_version_list" in
 ''|' ') 
-	inc_version_list_init='0';;
+	inc_version_list_init='""';;
 *)	inc_version_list_init=`echo $inc_version_list |
-		$sed -e 's/^/"/' -e 's/ /","/g' -e 's/$/",0/'`
+		$sed -e 's/^/"/' -e 's/ /","/g' -e 's/$/"/'`
 	;;
 esac
 $rm -f getverlist
@@ -9268,6 +9282,51 @@ set d_index; eval $setvar
 set inet_aton d_inetaton
 eval $inlibc
 
+: see if inttypes.h is available
+: we want a real compile instead of Inhdr because some systems
+: have an inttypes.h which includes non-existent headers
+echo " "
+$cat >try.c <<EOCP
+#include <inttypes.h>
+int main() {
+	static int32_t foo32 = 0x12345678;
+}
+EOCP
+set try
+if eval $compile; then
+	echo "<inttypes.h> found." >&4
+	val="$define"
+else
+	echo "<inttypes.h> NOT found." >&4
+	val="$undef"
+fi
+$rm -f try.c try
+set i_inttypes
+eval $setvar
+
+: check for int64_t
+echo " "
+$echo $n "Checking to see if your system supports int64_t...$c" >&4
+$cat >try.c <<EOCP
+#include <sys/types.h>
+#$i_inttypes I_INTTYPES
+#ifdef I_INTTYPES
+#include <inttypes.h>
+#endif
+int main() { int64_t x = 7; }
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+	echo " Yes, it does." >&4
+else
+	val="$undef"
+	echo " No, it doesn't." >&4
+fi
+$rm -f try try.*
+set d_int64t
+eval $setvar
+
 : Look for isascii
 echo " "
 $cat >isascii.c <<'EOCP'
@@ -9456,12 +9515,28 @@ eval $inlibc
 set mkdir d_mkdir
 eval $inlibc
 
+: see if mkdtemp exists
+set mkdtemp d_mkdtemp
+eval $inlibc
+
 : see if mkfifo exists
 set mkfifo d_mkfifo
 eval $inlibc
 
+: see if mkstemp exists
+set mkstemp d_mkstemp
+eval $inlibc
+
+: see if mkstemps exists
+set mkstemps d_mkstemps
+eval $inlibc
+
 : see if mktime exists
 set mktime d_mktime
+eval $inlibc
+
+: see if mprotect exists
+set mprotect d_mprotect
 eval $inlibc
 
 : see if msgctl exists
@@ -9516,54 +9591,17 @@ fi
 set d_msg
 eval $setvar
 
+: see if msync exists
+set msync d_msync
+eval $inlibc
+
+: see if munmap exists
+set munmap d_munmap
+eval $inlibc
+
 : see if nice exists
 set nice d_nice
 eval $inlibc
-
-: see if inttypes.h is available
-: we want a real compile instead of Inhdr because some systems
-: have an inttypes.h which includes non-existent headers
-echo " "
-$cat >try.c <<EOCP
-#include <inttypes.h>
-int main() {
-	static int32_t foo32 = 0x12345678;
-}
-EOCP
-set try
-if eval $compile; then
-	echo "<inttypes.h> found." >&4
-	val="$define"
-else
-	echo "<inttypes.h> NOT found." >&4
-	val="$undef"
-fi
-$rm -f try.c try
-set i_inttypes
-eval $setvar
-
-: check for int64_t
-echo " "
-$echo $n "Checking to see if your system supports int64_t...$c" >&4
-$cat >try.c <<EOCP
-#include <sys/types.h>
-#$i_inttypes I_INTTYPES
-#ifdef I_INTTYPES
-#include <inttypes.h>
-#endif
-int main() { int64_t x = 7; }
-EOCP
-set try
-if eval $compile; then
-	val="$define"
-	echo " Yes, it does." >&4
-else
-	val="$undef"
-	echo " No, it doesn't." >&4
-fi
-$rm -f try try.*
-set d_int64t
-eval $setvar
 
 
 echo " "
@@ -12606,6 +12644,33 @@ case "$make_set_make" in
 *) echo "Nope, it doesn't.";;
 esac
 
+: see if this is a sys/mman.h system
+set sys/mman.h i_sysmman
+eval $inhdr
+
+: see if mmap exists
+set mmap d_mmap
+eval $inlibc
+: see what shmat returns
+: default to something harmless
+mmaptype='void *'
+case "$i_sysmman$d_mmap" in
+"$define$define")
+	$cat >mmap.c <<'END'
+#include <sys/mman.h>
+void *mmap();
+END
+	if $cc $ccflags -c mmap.c >/dev/null 2>&1; then
+		mmaptype='void *'
+	else
+		mmaptype='caddr_t'
+	fi
+	echo "and it returns ($mmaptype)." >&4
+	;;
+esac
+
+
+
 : see what type is used for mode_t
 rp="What is the type used for file modes for system calls (e.g. fchmod())?"
 set mode_t modetype int stdio.h sys/types.h
@@ -12813,6 +12878,15 @@ pager="$ans"
 rp="What is the type of process ids on this system?"
 set pid_t pidtype int stdio.h sys/types.h
 eval $typedef_ask
+
+: Find earliest binary compatible site_perl subdirectory perl can use.
+case "$bincompat5005" in
+"$define") xs_apiversion='5.005' ;;
+*) xs_apiversion=$version ;;   # The current site_perl version.
+esac
+: Find earliest pure perl site_perl subdirectory perl can use.
+: The versioned directories started at 5.005.
+pm_apiversion='5.005'
 
 : check for length of pointer
 echo " "
@@ -14617,8 +14691,13 @@ d_memcpy='$d_memcpy'
 d_memmove='$d_memmove'
 d_memset='$d_memset'
 d_mkdir='$d_mkdir'
+d_mkdtemp='$d_mkdtemp'
 d_mkfifo='$d_mkfifo'
+d_mkstemp='$d_mkstemp'
+d_mkstemps='$d_mkstemps'
 d_mktime='$d_mktime'
+d_mmap='$d_mmap'
+d_mprotect='$d_mprotect'
 d_msg='$d_msg'
 d_msg_ctrunc='$d_msg_ctrunc'
 d_msg_dontroute='$d_msg_dontroute'
@@ -14629,6 +14708,8 @@ d_msgctl='$d_msgctl'
 d_msgget='$d_msgget'
 d_msgrcv='$d_msgrcv'
 d_msgsnd='$d_msgsnd'
+d_msync='$d_msync'
+d_munmap='$d_munmap'
 d_mymalloc='$d_mymalloc'
 d_nice='$d_nice'
 d_nv_preserves_uv='$d_nv_preserves_uv'
@@ -14857,6 +14938,7 @@ i_sysfile='$i_sysfile'
 i_sysfilio='$i_sysfilio'
 i_sysin='$i_sysin'
 i_sysioctl='$i_sysioctl'
+i_sysmman='$i_sysmman'
 i_sysmount='$i_sysmount'
 i_sysndir='$i_sysndir'
 i_sysparam='$i_sysparam'
@@ -14957,6 +15039,7 @@ man3ext='$man3ext'
 medium='$medium'
 mips_type='$mips_type'
 mkdir='$mkdir'
+mmaptype='$mmaptype'
 models='$models'
 modetype='$modetype'
 more='$more'
@@ -14997,6 +15080,7 @@ pg='$pg'
 phostname='$phostname'
 pidtype='$pidtype'
 plibpth='$plibpth'
+pm_apiversion='$pm_apiversion'
 pmake='$pmake'
 pr='$pr'
 prefix='$prefix'
@@ -15146,6 +15230,7 @@ version='$version'
 vi='$vi'
 voidflags='$voidflags'
 xlibpth='$xlibpth'
+xs_apiversion='$xs_apiversion'
 zcat='$zcat'
 zip='$zip'
 EOT

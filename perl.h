@@ -3171,8 +3171,21 @@ typedef struct am_table_short AMTS;
 /* Mention
    
    NV_PRESERVES_UV
+
    HAS_ICONV
    I_ICONV
+
+   HAS_MKSTEMP
+   HAS_MKSTEMPS
+   HAS_MKDTEMP
+
+   HAS-MMAP
+   HAS_MPROTECT
+   HAS_MSYNC
+   HAS_MADVSISE
+   HAS_MUNMAP
+   I_SYSMMAN
+   Mmap_t
 
    so that Configure picks them up. */
 
