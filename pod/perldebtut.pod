@@ -71,7 +71,7 @@ We then do (always a good idea) a syntax check before we try to run it again:
 	hello syntax OK 
 
 And now when we run it, we get "\n" still, but at least we know why.  Just
-getting this script to compile has exposed the '$varl' (with the letter 'l)
+getting this script to compile has exposed the '$varl' (with the letter 'l')
 variable, and simply changing $varl to $var1 solves the problem.
 
 
