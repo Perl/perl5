@@ -2897,16 +2897,13 @@ competing threads can corrupt shared global state.)
 
 =head2 UNICOS
 
- ../ext/Socket/socketpair.t       1   256    45    1   2.22%  12
- ../ext/Storable/t/downgrade.t   92 23552    59    6  10.17%  144-147
-                                                              150-151
  ../lib/Math/Trig.t                          26    1   3.85%  25
  ../lib/warnings.t                          470    1   0.21%  429
 
-The Trig and numconvert failures are caused by the slighly differing
-(from IEEE) floating point implementation of UNICOS.  The warnings
-failure is also related: the test assumes a certain floating point
-output format, this assumption fails in UNICOS.
+The Trig.t failure is caused by the slighly differing (from IEEE)
+floating point implementation of UNICOS.  The warnings.t failure is
+also related: the test assumes a certain floating point output format,
+this assumption fails in UNICOS.
 
 =head2 UNICOS/mk
 
