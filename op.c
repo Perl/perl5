@@ -843,29 +843,6 @@ S_op_clear(pTHX_ OP *o)
     case OP_MATCH:
     case OP_QR:
 clear_pmop:
-	{
-	    HV *pmstash = PmopSTASH(cPMOPo);
-	    if (pmstash) {
-		PMOP *pmop = HvPMROOT(pmstash);
-		PMOP *lastpmop = NULL;
-		while (pmop) {
-		    if (cPMOPo == pmop) {
-			if (lastpmop)
-			    lastpmop->op_pmnext = pmop->op_pmnext;
-			else
-			    HvPMROOT(pmstash) = pmop->op_pmnext;
-			break;
-		    }
-		    lastpmop = pmop;
-		    pmop = pmop->op_pmnext;
-		}
-#ifdef USE_ITHREADS
-		Safefree(PmopSTASHPV(cPMOPo));
-#else
-		/* NOTE: PMOP.op_pmstash is not refcounted */
-#endif
-	    }
-	}
 	cPMOPo->op_pmreplroot = Nullop;
 	ReREFCNT_dec(cPMOPo->op_pmregexp);
 	cPMOPo->op_pmregexp = (REGEXP*)NULL;
@@ -2957,7 +2934,6 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
     if (type != OP_TRANS && PL_curstash) {
 	pmop->op_pmnext = HvPMROOT(PL_curstash);
 	HvPMROOT(PL_curstash) = pmop;
-	PmopSTASH_set(pmop,PL_curstash);
     }
 
     return (OP*)pmop;
