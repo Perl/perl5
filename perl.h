@@ -3868,11 +3868,9 @@ typedef struct am_table_short AMTS;
  */
 
 #ifndef PERL_MICRO
-#   ifndef PERL_OLD_SIGNALS
-#		ifndef PERL_ASYNC_CHECK
-#			define PERL_ASYNC_CHECK() if (PL_sig_pending) despatch_signals()
-#		endif
-#   endif
+#	ifndef PERL_ASYNC_CHECK
+#		define PERL_ASYNC_CHECK() if (PL_sig_pending) despatch_signals()
+#	endif
 #endif
 
 #ifndef PERL_ASYNC_CHECK
@@ -4200,6 +4198,8 @@ extern void moncontrol(int);
 #define PERL_UNICODE_ARGV			'A'
 #define PERL_UNICODE_LOCALE			'L'
 #define PERL_UNICODE_WIDESYSCALLS		'W'
+
+#define PERL_SIGNALS_UNSAFE_FLAG	0x0001
 
 /* and finally... */
 #define PERL_PATCHLEVEL_H_IMPLICIT

@@ -3427,6 +3427,10 @@ superfluous.
 (W signal) The signal handler named in %SIG doesn't, in fact, exist.
 Perhaps you put it into the wrong package?
 
+=item PERL_SIGNALS illegal: "%s"
+
+See L<perlrun/PERL_SIGNALS> for legal values.
+
 =item sort is now a reserved word
 
 (F) An ancient error message that almost nobody ever runs into anymore.

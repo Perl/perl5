@@ -640,7 +640,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	sv_setiv(sv, (IV)PL_perldb);
 	break;
     case '\023':		/* ^S */
-	{
+        if (*(mg->mg_ptr+1) == '\0') {
 	    if (PL_lex_state != LEX_NOTPARSING)
 		(void)SvOK_off(sv);
 	    else if (PL_in_eval)
@@ -1122,13 +1122,12 @@ Perl_csighandler(int sig)
             exit(1);
 #endif
 #endif
-
-#ifdef PERL_OLD_SIGNALS
-    /* Call the perl level handler now with risk we may be in malloc() etc. */
-    (*PL_sighandlerp)(sig);
-#else
-    Perl_raise_signal(aTHX_ sig);
-#endif
+   if (PL_signals & PERL_SIGNALS_UNSAFE_FLAG)
+	/* Call the perl level handler now--
+	 * with risk we may be in malloc() etc. */
+	(*PL_sighandlerp)(sig);
+   else
+	Perl_raise_signal(aTHX_ sig);
 }
 
 #if defined(FAKE_PERSISTENT_SIGNAL_HANDLERS) || defined(FAKE_DEFAULT_SIGNAL_HANDLERS)

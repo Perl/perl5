@@ -1091,6 +1091,12 @@ affect perl on VMS include PERLSHR, PERL_ENV_TABLES, and
 SYS$TIMEZONE_DIFFERENTIAL but are optional and discussed further in
 L<perlvms> and in F<README.vms> in the Perl source distribution.
 
+=item PERL_SIGNALS
+
+In Perls 5.8.1 and later.  If set to C<unsafe> the pre-Perl-5.8.0
+signals behaviour (immediate but unsafe) is restored.  If set to
+C<safe> the safe signals are used.
+
 =item PERL_UNICODE
 
 Equivalent to the B<-C> command-line switch.

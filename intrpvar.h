@@ -498,6 +498,8 @@ PERLVARI(Iin_load_module, int, 0)	/* to prevent recursions in PerlIO_find_layer 
 
 PERLVAR(Iunicode, U32)	/* Unicode features: $ENV{PERL_UNICODE} or -C */
 
+PERLVAR(Isignals, U32)	/* Using which pre-5.8 signals */
+
 /* New variables must be added to the very end, before this comment,
  * for binary compatibility (the offsets of the old members must not change).
  * XSUB.h provides wrapper functions via perlapi.h that make this
