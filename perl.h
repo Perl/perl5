@@ -1866,22 +1866,27 @@ typedef I32 CHECKPOINT;
 
 /* These do not care about the fractional part, only about the range. */
 #define NV_WITHIN_IV(nv) (I_V(nv) >= IV_MIN && I_V(nv) <= IV_MAX)
-#define NV_WITHIN_UV(nv) ((nv)>=0.0&&U_V(nv) >= UV_MIN&&U_V(nv) <= UV_MAX)
+#define NV_WITHIN_UV(nv) ((nv)>=0.0 && U_V(nv) >= UV_MIN && U_V(nv) <= UV_MAX)
 
+/* Believe. */
 #define IV_FITS_IN_NV
-/* Is this strictly correct? */
-#if IVSIZE >= NVSIZE
+/* Doubt. */
+#if defined(USE_LONG_DOUBLE) && \
+	defined(LDBL_MANT_DIG) && IVSIZE*8 >= LDBL_MANT_DIG
 #   undef IV_FITS_IN_NV
 #else
-    /* Greater-than-or-EQUAL because L?DBL_DIG doesn't necessarily
-     * mean that all the powers of two that are L?DBL_DIG digits long
-     * can be represented by the (long)? doubles sized L?DBL_DIG digits. */
-#   if IV_DIG >= NV_DIG
+#   if defined(DBL_MANT_DIG) && IVSIZE*8 >= DBL_MANT_DIG
 #       undef IV_FITS_IN_NV
+#   else
+#       if IV_DIG >= NV_DIG
+#           undef IV_FITS_IN_NV
+#       else
+#           if IVSIZE >= NVSIZE
+#               undef IV_FITS_IN_NV
+#           endif
+#       endif
 #   endif
-#endif
-/* Often there are DBL_MANT_DIG and LDBL_MANT_DIG
- * that would give more precise results. */
+#else
 
 /* Used with UV/IV arguments: */
 					/* XXXX: need to speed it up */
