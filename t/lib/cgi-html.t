@@ -45,13 +45,6 @@ test(7,h1({-align=>'CENTER'},['fred','agnes']) eq
     local($") = '-'; 
     test(8,h1('fred','agnes','maura') eq '<h1>fred-agnes-maura</h1>',"open/close tag \$\" interpolation");
 }
-my $CRLF = "\015\012";
-if ($^O eq 'VMS') { 
-    $CRLF = "\n"; # only on a webserver does a \r get inserted
-}
-if (ord("\t") != 9) { 
-    $CRLF = "\r\n"; # EBCDIC CRLF
-}
 test(9,header() eq "Content-Type: text/html; charset=ISO-8859-1${CRLF}${CRLF}","header()");
 test(10,header(-type=>'image/gif') eq "Content-Type: image/gif${CRLF}${CRLF}","header()");
 test(11,header(-type=>'image/gif',-status=>'500 Sucks') eq "Status: 500 Sucks${CRLF}Content-Type: image/gif${CRLF}${CRLF}","header()");
