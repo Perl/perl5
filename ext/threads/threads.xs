@@ -12,10 +12,10 @@
 
 #ifdef WIN32
 THREAD_RET_TYPE Perl_thread_run(LPVOID arg) {
-	ithread* thread = (ithread*) arg;
 #else
-void Perl_thread_run(ithread* thread) {
+void Perl_thread_run(void * arg) {
 #endif
+	ithread* thread = (ithread*) arg;
 	SV* thread_tid_ptr;
 	SV* thread_ptr;
 	dTHXa(thread->interp);
