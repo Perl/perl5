@@ -300,7 +300,7 @@ utilities:	miniperl lib/Config.pm $(plextract) lib/lib.pm FORCE
 FORCE:
 	@sh -c true
 
-opmini$(OBJ_EXT): op.c
+opmini$(OBJ_EXT): op.c config.h
 	$(RMS) opmini.c
 	$(LNS) op.c opmini.c
 	$(CCCMD) $(PLDLFLAGS) -DPERL_EXTERNAL_GLOB opmini.c
