@@ -276,7 +276,7 @@ PP(pp_formline)
     bool chopspace = (strchr(PL_chopset, ' ') != Nullch);
     char *chophere;
     char *linemark;
-    double value;
+    NV value;
     bool gotsome;
     STRLEN len;
     STRLEN fudge = SvCUR(tmpForm) * (IN_UTF8 ? 3 : 1) + 1;
@@ -569,6 +569,14 @@ PP(pp_formline)
 	    /* Formats aren't yet marked for locales, so assume "yes". */
 	    {
 		RESTORE_NUMERIC_LOCAL();
+#if defined(USE_LONG_DOUBLE)
+		if (arg & 256) {
+		    sprintf(t, "%#*.*Lf",
+			    (int) fieldsize, (int) arg & 255, value);
+		} else {
+		    sprintf(t, "%*.0Lf", (int) fieldsize, value);
+		}
+#else
 		if (arg & 256) {
 		    sprintf(t, "%#*.*f",
 			    (int) fieldsize, (int) arg & 255, value);
@@ -576,6 +584,7 @@ PP(pp_formline)
 		    sprintf(t, "%*.0f",
 			    (int) fieldsize, value);
 		}
+#endif
 		RESTORE_NUMERIC_STANDARD();
 	    }
 	    t += fieldsize;
@@ -749,8 +758,8 @@ PP(pp_mapwhile)
 STATIC I32
 S_sv_ncmp(pTHX_ SV *a, SV *b)
 {
-    double nv1 = SvNV(a);
-    double nv2 = SvNV(b);
+    NV nv1 = SvNV(a);
+    NV nv2 = SvNV(b);
     return nv1 < nv2 ? -1 : nv1 > nv2 ? 1 : 0;
 }
 
@@ -778,7 +787,7 @@ S_amagic_ncmp(pTHX_ register SV *a, register SV *b)
     SV *tmpsv;
     tryCALL_AMAGICbin(a,b,ncmp,&tmpsv);
     if (tmpsv) {
-    	double d;
+    	NV d;
     	
         if (SvIOK(tmpsv)) {
             I32 i = SvIVX(tmpsv);
@@ -800,7 +809,7 @@ S_amagic_i_ncmp(pTHX_ register SV *a, register SV *b)
     SV *tmpsv;
     tryCALL_AMAGICbin(a,b,ncmp,&tmpsv);
     if (tmpsv) {
-    	double d;
+    	NV d;
     	
         if (SvIOK(tmpsv)) {
             I32 i = SvIVX(tmpsv);
@@ -822,7 +831,7 @@ S_amagic_cmp(pTHX_ register SV *str1, register SV *str2)
     SV *tmpsv;
     tryCALL_AMAGICbin(str1,str2,scmp,&tmpsv);
     if (tmpsv) {
-    	double d;
+    	NV d;
     	
         if (SvIOK(tmpsv)) {
             I32 i = SvIVX(tmpsv);
@@ -844,7 +853,7 @@ S_amagic_cmp_locale(pTHX_ register SV *str1, register SV *str2)
     SV *tmpsv;
     tryCALL_AMAGICbin(str1,str2,scmp,&tmpsv);
     if (tmpsv) {
-    	double d;
+    	NV d;
     	
         if (SvIOK(tmpsv)) {
             I32 i = SvIVX(tmpsv);
@@ -2464,11 +2473,11 @@ PP(pp_exit)
 PP(pp_nswitch)
 {
     djSP;
-    double value = SvNVx(GvSV(cCOP->cop_gv));
+    NV value = SvNVx(GvSV(cCOP->cop_gv));
     register I32 match = I_32(value);
 
     if (value < 0.0) {
-	if (((double)match) > value)
+	if (((NV)match) > value)
 	    --match;		/* was fractional--truncate other way */
     }
     match -= cCOP->uop.scop.scop_offset;

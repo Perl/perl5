@@ -943,15 +943,15 @@ PP(pp_divide)
     djSP; dATARGET; tryAMAGICbin(div,opASSIGN);
     {
       dPOPPOPnnrl;
-      double value;
+      NV value;
       if (right == 0.0)
 	DIE(aTHX_ "Illegal division by zero");
 #ifdef SLOPPYDIVIDE
       /* insure that 20./5. == 4. */
       {
 	IV k;
-	if ((double)I_V(left)  == left &&
-	    (double)I_V(right) == right &&
+	if ((NV)I_V(left)  == left &&
+	    (NV)I_V(right) == right &&
 	    (k = I_V(left)/I_V(right))*I_V(right) == I_V(left)) {
 	    value = k;
 	}
@@ -976,8 +976,8 @@ PP(pp_modulo)
 	bool left_neg;
 	bool right_neg;
 	bool use_double = 0;
-	double dright;
-	double dleft;
+	NV dright;
+	NV dleft;
 
 	if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)) {
 	    IV i = SvIVX(POPs);
@@ -1007,7 +1007,7 @@ PP(pp_modulo)
 	}
 
 	if (use_double) {
-	    double dans;
+	    NV dans;
 
 #if 1
 /* Somehow U_V is pessimized even if CASTFLAGS is 0 */
@@ -1034,7 +1034,7 @@ PP(pp_modulo)
 	    if (!dright)
 		DIE(aTHX_ "Illegal modulus zero");
 
-	    dans = fmod(dleft, dright);
+	    dans = Perl_fmod(dleft, dright);
 	    if ((left_neg != right_neg) && dans)
 		dans = dright - dans;
 	    if (right_neg)
@@ -1057,7 +1057,7 @@ PP(pp_modulo)
 		if (ans <= ~((UV)IV_MAX)+1)
 		    sv_setiv(TARG, ~ans+1);
 		else
-		    sv_setnv(TARG, -(double)ans);
+		    sv_setnv(TARG, -(NV)ans);
 	    }
 	    else
 		sv_setuv(TARG, ans);
@@ -1624,7 +1624,7 @@ PP(pp_atan2)
     djSP; dTARGET; tryAMAGICbin(atan2,0);
     {
       dPOPTOPnnrl;
-      SETn(atan2(left, right));
+      SETn(Perl_atan2(left, right));
       RETURN;
     }
 }
@@ -1633,9 +1633,9 @@ PP(pp_sin)
 {
     djSP; dTARGET; tryAMAGICun(sin);
     {
-      double value;
+      NV value;
       value = POPn;
-      value = sin(value);
+      value = Perl_sin(value);
       XPUSHn(value);
       RETURN;
     }
@@ -1645,9 +1645,9 @@ PP(pp_cos)
 {
     djSP; dTARGET; tryAMAGICun(cos);
     {
-      double value;
+      NV value;
       value = POPn;
-      value = cos(value);
+      value = Perl_cos(value);
       XPUSHn(value);
       RETURN;
     }
@@ -1671,7 +1671,7 @@ extern double drand48 (void);
 PP(pp_rand)
 {
     djSP; dTARGET;
-    double value;
+    NV value;
     if (MAXARG < 1)
 	value = 1.0;
     else
@@ -1787,9 +1787,9 @@ PP(pp_exp)
 {
     djSP; dTARGET; tryAMAGICun(exp);
     {
-      double value;
+      NV value;
       value = POPn;
-      value = exp(value);
+      value = Perl_exp(value);
       XPUSHn(value);
       RETURN;
     }
@@ -1799,13 +1799,13 @@ PP(pp_log)
 {
     djSP; dTARGET; tryAMAGICun(log);
     {
-      double value;
+      NV value;
       value = POPn;
       if (value <= 0.0) {
 	RESTORE_NUMERIC_STANDARD();
 	DIE(aTHX_ "Can't take log of %g", value);
       }
-      value = log(value);
+      value = Perl_log(value);
       XPUSHn(value);
       RETURN;
     }
@@ -1815,13 +1815,13 @@ PP(pp_sqrt)
 {
     djSP; dTARGET; tryAMAGICun(sqrt);
     {
-      double value;
+      NV value;
       value = POPn;
       if (value < 0.0) {
 	RESTORE_NUMERIC_STANDARD();
 	DIE(aTHX_ "Can't take sqrt of %g", value);
       }
-      value = sqrt(value);
+      value = Perl_sqrt(value);
       XPUSHn(value);
       RETURN;
     }
@@ -1831,7 +1831,7 @@ PP(pp_int)
 {
     djSP; dTARGET;
     {
-      double value = TOPn;
+      NV value = TOPn;
       IV iv;
 
       if (SvIOKp(TOPs) && !SvNOKp(TOPs) && !SvPOKp(TOPs)) {
@@ -1840,9 +1840,9 @@ PP(pp_int)
       }
       else {
 	if (value >= 0.0)
-	  (void)modf(value, &value);
+	  (void)Perl_modf(value, &value);
 	else {
-	  (void)modf(-value, &value);
+	  (void)Perl_modf(-value, &value);
 	  value = -value;
 	}
 	iv = I_V(value);
@@ -1859,7 +1859,7 @@ PP(pp_abs)
 {
     djSP; dTARGET; tryAMAGICun(abs);
     {
-      double value = TOPn;
+      NV value = TOPn;
       IV iv;
 
       if (SvIOKp(TOPs) && !SvNOKp(TOPs) && !SvPOKp(TOPs) &&
@@ -3301,7 +3301,7 @@ PP(pp_unpack)
     double adouble;
     I32 checksum = 0;
     register U32 culong;
-    double cdouble;
+    NV cdouble;
     int commas = 0;
 #ifdef PERL_NATINT_PACK
     int natint;		/* native integer */
@@ -3565,7 +3565,7 @@ PP(pp_unpack)
 		    auint = utf8_to_uv((U8*)s, &along);
 		    s += along;
 		    if (checksum > 32)
-			cdouble += (double)auint;
+			cdouble += (NV)auint;
 		    else
 			culong += auint;
 		}
@@ -3725,7 +3725,7 @@ PP(pp_unpack)
 		    Copy(s, &aint, 1, int);
 		    s += sizeof(int);
 		    if (checksum > 32)
-			cdouble += (double)aint;
+			cdouble += (NV)aint;
 		    else
 			culong += aint;
 		}
@@ -3776,7 +3776,7 @@ PP(pp_unpack)
 		    Copy(s, &auint, 1, unsigned int);
 		    s += sizeof(unsigned int);
 		    if (checksum > 32)
-			cdouble += (double)auint;
+			cdouble += (NV)auint;
 		    else
 			culong += auint;
 		}
@@ -3815,7 +3815,7 @@ PP(pp_unpack)
 			COPYNN(s, &along, sizeof(long));
 			s += sizeof(long);
 			if (checksum > 32)
-			    cdouble += (double)along;
+			    cdouble += (NV)along;
 			else
 			    culong += along;
 		    }
@@ -3831,7 +3831,7 @@ PP(pp_unpack)
 #endif
 			s += SIZE32;
 			if (checksum > 32)
-			    cdouble += (double)along;
+			    cdouble += (NV)along;
 			else
 			    culong += along;
 		    }
@@ -3885,7 +3885,7 @@ PP(pp_unpack)
 			COPYNN(s, &aulong, sizeof(unsigned long));
 			s += sizeof(unsigned long);
 			if (checksum > 32)
-			    cdouble += (double)aulong;
+			    cdouble += (NV)aulong;
 			else
 			    culong += aulong;
 		    }
@@ -3905,7 +3905,7 @@ PP(pp_unpack)
 			    aulong = vtohl(aulong);
 #endif
 			if (checksum > 32)
-			    cdouble += (double)aulong;
+			    cdouble += (NV)aulong;
 			else
 			    culong += aulong;
 		    }
@@ -4037,7 +4037,7 @@ PP(pp_unpack)
 		if (aquad >= IV_MIN && aquad <= IV_MAX)
 		    sv_setiv(sv, (IV)aquad);
 		else
-		    sv_setnv(sv, (double)aquad);
+		    sv_setnv(sv, (NV)aquad);
 		PUSHs(sv_2mortal(sv));
 	    }
 	    break;
@@ -4058,7 +4058,7 @@ PP(pp_unpack)
 		if (auquad <= UV_MAX)
 		    sv_setuv(sv, (UV)auquad);
 		else
-		    sv_setnv(sv, (double)auquad);
+		    sv_setnv(sv, (NV)auquad);
 		PUSHs(sv_2mortal(sv));
 	    }
 	    break;
@@ -4083,7 +4083,7 @@ PP(pp_unpack)
 		    Copy(s, &afloat, 1, float);
 		    s += sizeof(float);
 		    sv = NEWSV(47, 0);
-		    sv_setnv(sv, (double)afloat);
+		    sv_setnv(sv, (NV)afloat);
 		    PUSHs(sv_2mortal(sv));
 		}
 	    }
@@ -4107,7 +4107,7 @@ PP(pp_unpack)
 		    Copy(s, &adouble, 1, double);
 		    s += sizeof(double);
 		    sv = NEWSV(48, 0);
-		    sv_setnv(sv, (double)adouble);
+		    sv_setnv(sv, (NV)adouble);
 		    PUSHs(sv_2mortal(sv));
 		}
 	    }
@@ -4175,7 +4175,7 @@ PP(pp_unpack)
 	    sv = NEWSV(42, 0);
 	    if (strchr("fFdD", datumtype) ||
 	      (checksum > 32 && strchr("iIlLNU", datumtype)) ) {
-		double trouble;
+		NV trouble;
 
 		adouble = 1.0;
 		while (checksum >= 16) {
@@ -4191,7 +4191,7 @@ PP(pp_unpack)
 		along = (1 << checksum) - 1;
 		while (cdouble < 0.0)
 		    cdouble += adouble;
-		cdouble = modf(cdouble / adouble, &trouble) * adouble;
+		cdouble = Perl_modf(cdouble / adouble, &trouble) * adouble;
 		sv_setnv(sv, cdouble);
 	    }
 	    else {
@@ -4668,7 +4668,7 @@ PP(pp_pack)
 	case 'w':
             while (len-- > 0) {
 		fromstr = NEXTFROM;
-		adouble = floor(SvNV(fromstr));
+		adouble = Perl_floor(SvNV(fromstr));
 
 		if (adouble < 0)
 		    Perl_croak(aTHX_ "Cannot compress negative numbers");

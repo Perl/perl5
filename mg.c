@@ -498,7 +498,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 #	    include <starlet.h>
 	    char msg[255];
 	    $DESCRIPTOR(msgdsc,msg);
-	    sv_setnv(sv,(double) vaxc$errno);
+	    sv_setnv(sv,(NV) vaxc$errno);
 	    if (sys$getmsg(vaxc$errno,&msgdsc.dsc$w_length,&msgdsc,0,0) & 1)
 		sv_setpvn(sv,msgdsc.dsc$a_pointer,msgdsc.dsc$w_length);
 	    else
@@ -507,7 +507,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 #else
 #ifdef OS2
 	if (!(_emx_env & 0x200)) {	/* Under DOS */
-	    sv_setnv(sv, (double)errno);
+	    sv_setnv(sv, (NV)errno);
 	    sv_setpv(sv, errno ? Strerror(errno) : "");
 	} else {
 	    if (errno != errno_isOS2) {
@@ -515,14 +515,14 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		if (tmp)	/* 2nd call to _syserrno() makes it 0 */
 		    Perl_rc = tmp;
 	    }
-	    sv_setnv(sv, (double)Perl_rc);
+	    sv_setnv(sv, (NV)Perl_rc);
 	    sv_setpv(sv, os2error(Perl_rc));
 	}
 #else
 #ifdef WIN32
 	{
 	    DWORD dwErr = GetLastError();
-	    sv_setnv(sv, (double)dwErr);
+	    sv_setnv(sv, (NV)dwErr);
 	    if (dwErr)
 	    {
 		PerlProc_GetOSError(sv, dwErr);
@@ -532,7 +532,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    SetLastError(dwErr);
 	}
 #else
-	sv_setnv(sv, (double)errno);
+	sv_setnv(sv, (NV)errno);
 	sv_setpv(sv, errno ? Strerror(errno) : "");
 #endif
 #endif
@@ -701,12 +701,12 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '!':
 #ifdef VMS
-	sv_setnv(sv, (double)((errno == EVMSERR) ? vaxc$errno : errno));
+	sv_setnv(sv, (NV)((errno == EVMSERR) ? vaxc$errno : errno));
 	sv_setpv(sv, errno ? Strerror(errno) : "");
 #else
 	{
 	int saveerrno = errno;
-	sv_setnv(sv, (double)errno);
+	sv_setnv(sv, (NV)errno);
 #ifdef OS2
 	if (errno == errno_isOS2) sv_setpv(sv, os2error(Perl_rc));
 	else

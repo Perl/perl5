@@ -28,7 +28,7 @@ struct xpvhv {
     STRLEN	xhv_fill;	/* how full xhv_array currently is */
     STRLEN	xhv_max;	/* subscript of last element of xhv_array */
     IV		xhv_keys;	/* how many elements in the array */
-    double	xnv_nv;		/* numeric value, if any */
+    NV		xnv_nv;		/* numeric value, if any */
     MAGIC*	xmg_magic;	/* magic for scalar array */
     HV*		xmg_stash;	/* class package */
 

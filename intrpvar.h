@@ -219,7 +219,7 @@ PERLVAR(Isighandlerp,	Sighandler_t)
 
 PERLVAR(Ixiv_arenaroot,	XPV*)		/* list of allocated xiv areas */
 PERLVAR(Ixiv_root,	IV *)		/* free xiv list--shared by interpreters */
-PERLVAR(Ixnv_root,	double *)	/* free xnv list--shared by interpreters */
+PERLVAR(Ixnv_root,	NV *)		/* free xnv list--shared by interpreters */
 PERLVAR(Ixrv_root,	XRV *)		/* free xrv list--shared by interpreters */
 PERLVAR(Ixpv_root,	XPV *)		/* free xpv list--shared by interpreters */
 PERLVAR(Ihe_root,	HE *)		/* free he list--shared by interpreters */

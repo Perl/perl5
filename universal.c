@@ -183,7 +183,7 @@ XS(XS_UNIVERSAL_VERSION)
     GV *gv;
     SV *sv;
     char *undef;
-    double req;
+    NV req;
 
     if(SvROK(ST(0))) {
         sv = (SV*)SvRV(ST(0));

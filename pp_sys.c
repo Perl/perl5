@@ -906,7 +906,7 @@ PP(pp_sselect)
     register I32 j;
     register char *s;
     register SV *sv;
-    double value;
+    NV value;
     I32 maxlen = 0;
     I32 nfound;
     struct timeval timebuf;
@@ -969,7 +969,7 @@ PP(pp_sselect)
 	if (value < 0.0)
 	    value = 0.0;
 	timebuf.tv_sec = (long)value;
-	value -= (double)timebuf.tv_sec;
+	value -= (NV)timebuf.tv_sec;
 	timebuf.tv_usec = (long)(value * 1000000.0);
     }
     else
@@ -1028,8 +1028,8 @@ PP(pp_sselect)
 
     PUSHi(nfound);
     if (GIMME == G_ARRAY && tbuf) {
-	value = (double)(timebuf.tv_sec) +
-		(double)(timebuf.tv_usec) / 1000000.0;
+	value = (NV)(timebuf.tv_sec) +
+		(NV)(timebuf.tv_usec) / 1000000.0;
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setnv(sv, value);
     }
@@ -3826,11 +3826,11 @@ PP(pp_tms)
                                                    /* is returned.                   */
 #endif
 
-    PUSHs(sv_2mortal(newSVnv(((double)PL_timesbuf.tms_utime)/HZ)));
+    PUSHs(sv_2mortal(newSVnv(((NV)PL_timesbuf.tms_utime)/HZ)));
     if (GIMME == G_ARRAY) {
-	PUSHs(sv_2mortal(newSVnv(((double)PL_timesbuf.tms_stime)/HZ)));
-	PUSHs(sv_2mortal(newSVnv(((double)PL_timesbuf.tms_cutime)/HZ)));
-	PUSHs(sv_2mortal(newSVnv(((double)PL_timesbuf.tms_cstime)/HZ)));
+	PUSHs(sv_2mortal(newSVnv(((NV)PL_timesbuf.tms_stime)/HZ)));
+	PUSHs(sv_2mortal(newSVnv(((NV)PL_timesbuf.tms_cutime)/HZ)));
+	PUSHs(sv_2mortal(newSVnv(((NV)PL_timesbuf.tms_cstime)/HZ)));
     }
     RETURN;
 #endif /* HAS_TIMES */

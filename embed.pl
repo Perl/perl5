@@ -781,10 +781,10 @@ p	|int	|block_start	|int full
 p	|void	|boot_core_UNIVERSAL
 p	|void	|call_list	|I32 oldscope|AV* av_list
 p	|I32	|cando		|I32 bit|I32 effective|Stat_t* statbufp
-p	|U32	|cast_ulong	|double f
-p	|I32	|cast_i32	|double f
-p	|IV	|cast_iv	|double f
-p	|UV	|cast_uv	|double f
+p	|U32	|cast_ulong	|NV f
+p	|I32	|cast_i32	|NV f
+p	|IV	|cast_iv	|NV f
+p	|UV	|cast_uv	|NV f
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
 p	|I32	|my_chsize	|int fd|Off_t length
 #endif
@@ -1058,7 +1058,7 @@ p	|I32	|mg_size	|SV* sv
 p	|OP*	|mod		|OP* o|I32 type
 p	|char*	|moreswitches	|char* s
 p	|OP*	|my		|OP* o
-p	|double	|my_atof	|const char *s
+p	|NV	|my_atof	|const char *s
 #if !defined(HAS_BCOPY) || !defined(HAS_SAFE_BCOPY)
 p	|char*	|my_bcopy	|const char* from|char* to|I32 len
 #endif
@@ -1127,7 +1127,7 @@ p	|SV*	|newSV		|STRLEN len
 p	|OP*	|newSVREF	|OP* o
 p	|OP*	|newSVOP	|I32 type|I32 flags|SV* sv
 p	|SV*	|newSViv	|IV i
-p	|SV*	|newSVnv	|double n
+p	|SV*	|newSVnv	|NV n
 p	|SV*	|newSVpv	|const char* s|STRLEN len
 p	|SV*	|newSVpvn	|const char* s|STRLEN len
 p	|SV*	|newSVpvf	|const char* pat|...
@@ -1289,12 +1289,12 @@ p	|CV*	|sv_2cv		|SV* sv|HV** st|GV** gvp|I32 lref
 p	|IO*	|sv_2io		|SV* sv
 p	|IV	|sv_2iv		|SV* sv
 p	|SV*	|sv_2mortal	|SV* sv
-p	|double	|sv_2nv		|SV* sv
+p	|NV	|sv_2nv		|SV* sv
 p	|char*	|sv_2pv		|SV* sv|STRLEN* lp
 p	|UV	|sv_2uv		|SV* sv
 p	|IV	|sv_iv		|SV* sv
 p	|UV	|sv_uv		|SV* sv
-p	|double	|sv_nv		|SV* sv
+p	|NV	|sv_nv		|SV* sv
 p	|char*	|sv_pvn		|SV *sv|STRLEN *len
 p	|I32	|sv_true	|SV *sv
 p	|void	|sv_add_arena	|char* ptr|U32 size|U32 flags
@@ -1346,9 +1346,9 @@ p	|void	|sv_setpvf	|SV* sv|const char* pat|...
 p	|void	|sv_setiv	|SV* sv|IV num
 p	|void	|sv_setpviv	|SV* sv|IV num
 p	|void	|sv_setuv	|SV* sv|UV num
-p	|void	|sv_setnv	|SV* sv|double num
+p	|void	|sv_setnv	|SV* sv|NV num
 p	|SV*	|sv_setref_iv	|SV* rv|const char* classname|IV iv
-p	|SV*	|sv_setref_nv	|SV* rv|const char* classname|double nv
+p	|SV*	|sv_setref_nv	|SV* rv|const char* classname|NV nv
 p	|SV*	|sv_setref_pv	|SV* rv|const char* classname|void* pv
 p	|SV*	|sv_setref_pvn	|SV* rv|const char* classname|char* pv \
 				|STRLEN n
@@ -1445,7 +1445,7 @@ p	|void	|sv_setpvf_mg	|SV *sv|const char* pat|...
 p	|void	|sv_setiv_mg	|SV *sv|IV i
 p	|void	|sv_setpviv_mg	|SV *sv|IV iv
 p	|void	|sv_setuv_mg	|SV *sv|UV u
-p	|void	|sv_setnv_mg	|SV *sv|double num
+p	|void	|sv_setnv_mg	|SV *sv|NV num
 p	|void	|sv_setpv_mg	|SV *sv|const char *ptr
 p	|void	|sv_setpvn_mg	|SV *sv|const char *ptr|STRLEN len
 p	|void	|sv_setsv_mg	|SV *dstr|SV *sstr

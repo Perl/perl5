@@ -972,7 +972,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    int i;
 	    int max = 0;
 	    U32 pow2 = 2, keys = HvKEYS(sv);
-	    double theoret, sum = 0;
+	    NV theoret, sum = 0;
 
 	    PerlIO_printf(file, "  (");
 	    Zero(freq, FREQ_MAX + 1, int);

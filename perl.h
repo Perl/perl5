@@ -997,6 +997,43 @@ Free_t   Perl_mfree (Malloc_t where);
 #  endif
 #endif
 
+#ifdef USE_LONG_DOUBLE
+#  if defined(HAS_LONG_DOUBLE) && (LONG_DOUBLESIZE > DOUBLESIZE)
+#    define LDoub_t long double
+#  endif
+#endif
+
+#ifdef USE_LONG_DOUBLE
+#   define HAS_LDOUB
+    typedef LDoub_t NV;
+#   define Perl_modf modfl
+#   define Perl_frexp frexpl
+#   define Perl_cos cosl
+#   define Perl_sin sinl
+#   define Perl_sqrt sqrtl
+#   define Perl_exp expl
+#   define Perl_log logl
+#   define Perl_atan2 atan2l
+#   define Perl_pow powl
+#   define Perl_floor floorl
+#   define Perl_atof atof
+#   define Perl_fmod fmodl
+#else
+    typedef double NV;
+#   define Perl_modf modf
+#   define Perl_frexp frexp
+#   define Perl_cos cos
+#   define Perl_sin sin
+#   define Perl_sqrt sqrt
+#   define Perl_exp exp
+#   define Perl_log log
+#   define Perl_atan2 atan2
+#   define Perl_pow pow
+#   define Perl_floor floor
+#   define Perl_atof atof		/* At some point there may be an atolf */
+#   define Perl_fmod fmod
+#endif
+
 /* Previously these definitions used hardcoded figures. 
  * It is hoped these formula are more portable, although
  * no data one way or another is presently known to me.
@@ -1728,9 +1765,9 @@ typedef I32 CHECKPOINT;
 #define U_I(what) ((unsigned int)(what))
 #define U_L(what) ((U32)(what))
 #else
-#define U_S(what) ((U16)cast_ulong((double)(what)))
-#define U_I(what) ((unsigned int)cast_ulong((double)(what)))
-#define U_L(what) (cast_ulong((double)(what)))
+#define U_S(what) ((U16)cast_ulong((NV)(what)))
+#define U_I(what) ((unsigned int)cast_ulong((NV)(what)))
+#define U_L(what) (cast_ulong((NV)(what)))
 #endif
 
 #ifdef CASTI32
@@ -1738,9 +1775,9 @@ typedef I32 CHECKPOINT;
 #define I_V(what) ((IV)(what))
 #define U_V(what) ((UV)(what))
 #else
-#define I_32(what) (cast_i32((double)(what)))
-#define I_V(what) (cast_iv((double)(what)))
-#define U_V(what) (cast_uv((double)(what)))
+#define I_32(what) (cast_i32((NV)(what)))
+#define I_V(what) (cast_iv((NV)(what)))
+#define U_V(what) (cast_uv((NV)(what)))
 #endif
 
 /* Used with UV/IV arguments: */
@@ -2879,7 +2916,7 @@ typedef struct am_table_short AMTS;
 #define IS_NUMERIC_RADIX(c)		(0)
 #define RESTORE_NUMERIC_LOCAL()		/**/
 #define RESTORE_NUMERIC_STANDARD()	/**/
-#define Atof				atof
+#define Atof				Perl_atof
 
 #endif /* !USE_LOCALE_NUMERIC */
 
