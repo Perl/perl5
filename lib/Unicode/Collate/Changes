@@ -1,8 +1,21 @@
 Revision history for Perl module Unicode::Collate.
 
+0.27  Sun Aug 31 22:23:17 2003
+      some improvements:
+    - The maximum length of contracted CE was not checked.
+      Collation of a large string including a first letter of a contraction
+      that is not a part of that contraction (say, 'c' of 'ca'
+      where 'ch' is defined) was too slow, inefficient.
+    - A form name for 'normalize', no longer restricted to /^(?:NF)?K?[CD]\z/,
+      will be allowed as long as Unicode::Normalize::normalize() accepts it.
+      since Unicode::Normalize or UAX #15 may be changed/enhanced in future.
+    - When Hangul syllables are decomposed under <normalization => undef>,
+      contraction among jamo (LV, VT, LVT) derived from the same
+      Hangul syllable is allowed.  Added hangul.t.
+
 0.26  Sun Aug 03 22:23:17 2003
     - fix: an expansion in which a CE is level 3 ignorable and others are not
-	was wrongly made level 3 ignorable as a whole entry.
+      was wrongly made level 3 ignorable as a whole entry.
       (In DUCET, some precomposites in Musical Symbols are so)
 
 0.25  Mon Jun 06 23:20:17 2003
