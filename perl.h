@@ -3926,4 +3926,23 @@ extern void moncontrol(int);
 #include "wince.h"
 #endif
 
+/* These definitions are sneaky.
+ * Their only purpose is to avoid warnings on strict ANSI (non-VMS)
+ * compilers which get huffy about dollars in identifiers,
+ * which is common practise in VMS.  The definitions in the
+ * non-VMS branch are not used -- but their only point is to
+ * be something non-dollared. */
+#ifdef VMS
+#define VMS_SS_NORMAL SS$_NORMAL
+#define VMS_SS_IVCHAN SS$_IVCHAN
+#define VMS_RMS_IFI   RMS$_FAC
+#define VMS_RMS_IFI   RMS$_IFI
+#else
+#define VMS_LIB_INVARG EINVAL
+#define VMS_SS_NORMAL  0
+#define VMS_SS_IVCHAN  EBADF
+#define VMS_RMS_FAC    0
+#define VMS_RMS_IFI    EBADF
+#endif
+
 #endif /* Include guard */

@@ -1965,7 +1965,10 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '!':
 	SETERRNO(SvIOK(sv) ? SvIVX(sv) : SvOK(sv) ? sv_2iv(sv) : 0,
-		 (SvIV(sv) == EVMSERR) ? 4 : vaxc$errno);
+#ifdef VMS
+		 (SvIV(sv) == EVMSERR) ? 4 : vaxc$errno
+#else
+		 0);
 	break;
     case '<':
 	PL_uid = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);

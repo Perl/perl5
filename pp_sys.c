@@ -1422,7 +1422,7 @@ PP(pp_prtf)
     if (!(io = GvIO(gv))) {
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
-	SETERRNO(EBADF,RMS$_IFI);
+	SETERRNO(EBADF,VMS_RMS_IFI);
 	goto just_say_no;
     }
     else if (!(fp = IoOFP(io))) {
@@ -1444,7 +1444,7 @@ PP(pp_prtf)
 	    else if (ckWARN(WARN_CLOSED))
 		report_evil_fh(gv, io, PL_op->op_type);
 	}
-	SETERRNO(EBADF,IoIFP(io)?RMS$_FAC:RMS$_IFI);
+	SETERRNO(EBADF,IoIFP(io)?VMS_RMS_FAC:VMS_RMS_IFI);
 	goto just_say_no;
     }
     else {
@@ -2080,7 +2080,7 @@ PP(pp_truncate)
 	if (result)
 	    RETPUSHYES;
 	if (!errno)
-	    SETERRNO(EBADF,RMS$_IFI);
+	    SETERRNO(EBADF,VMS_RMS_IFI);
 	RETPUSHUNDEF;
     }
 #else
@@ -2107,7 +2107,7 @@ PP(pp_ioctl)
     if (!io || !argsv || !IoIFP(io)) {
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
-	SETERRNO(EBADF,RMS$_IFI);	/* well, sort of... */
+	SETERRNO(EBADF,VMS_RMS_IFI);	/* well, sort of... */
 	RETPUSHUNDEF;
     }
 
@@ -2195,7 +2195,7 @@ PP(pp_flock)
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
 	value = 0;
-	SETERRNO(EBADF,RMS$_IFI);
+	SETERRNO(EBADF,VMS_RMS_IFI);
     }
     PUSHi(value);
     RETURN;
@@ -2225,7 +2225,7 @@ PP(pp_socket)
 	    report_evil_fh(gv, io, PL_op->op_type);
 	if (IoIFP(io))
 	    do_close(gv, FALSE);
-	SETERRNO(EBADF,LIB$_INVARG);
+	SETERRNO(EBADF,VMS_LIB_INVARG);
 	RETPUSHUNDEF;
     }
 
@@ -2376,7 +2376,7 @@ PP(pp_bind)
 nuts:
     if (ckWARN(WARN_CLOSED))
 	report_evil_fh(gv, io, PL_op->op_type);
-    SETERRNO(EBADF,SS$_IVCHAN);
+    SETERRNO(EBADF,VMS_SS_IVCHAN);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_sock_func, "bind");
@@ -2406,7 +2406,7 @@ PP(pp_connect)
 nuts:
     if (ckWARN(WARN_CLOSED))
 	report_evil_fh(gv, io, PL_op->op_type);
-    SETERRNO(EBADF,SS$_IVCHAN);
+    SETERRNO(EBADF,VMS_SS_IVCHAN);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_sock_func, "connect");
@@ -2432,7 +2432,7 @@ PP(pp_listen)
 nuts:
     if (ckWARN(WARN_CLOSED))
 	report_evil_fh(gv, io, PL_op->op_type);
-    SETERRNO(EBADF,SS$_IVCHAN);
+    SETERRNO(EBADF,VMS_SS_IVCHAN);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_sock_func, "listen");
@@ -2494,7 +2494,7 @@ PP(pp_accept)
 nuts:
     if (ckWARN(WARN_CLOSED))
 	report_evil_fh(ggv, ggv ? GvIO(ggv) : 0, PL_op->op_type);
-    SETERRNO(EBADF,SS$_IVCHAN);
+    SETERRNO(EBADF,VMS_SS_IVCHAN);
 
 badexit:
     RETPUSHUNDEF;
@@ -2521,7 +2521,7 @@ PP(pp_shutdown)
 nuts:
     if (ckWARN(WARN_CLOSED))
 	report_evil_fh(gv, io, PL_op->op_type);
-    SETERRNO(EBADF,SS$_IVCHAN);
+    SETERRNO(EBADF,VMS_SS_IVCHAN);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_sock_func, "shutdown");
@@ -2600,7 +2600,7 @@ PP(pp_ssockopt)
 nuts:
     if (ckWARN(WARN_CLOSED))
 	report_evil_fh(gv, io, optype);
-    SETERRNO(EBADF,SS$_IVCHAN);
+    SETERRNO(EBADF,VMS_SS_IVCHAN);
 nuts2:
     RETPUSHUNDEF;
 
@@ -2673,7 +2673,7 @@ PP(pp_getpeername)
 nuts:
     if (ckWARN(WARN_CLOSED))
 	report_evil_fh(gv, io, optype);
-    SETERRNO(EBADF,SS$_IVCHAN);
+    SETERRNO(EBADF,VMS_SS_IVCHAN);
 nuts2:
     RETPUSHUNDEF;
 
@@ -3276,7 +3276,7 @@ PP(pp_fttext)
 		gv = cGVOP_gv;
 		report_evil_fh(gv, GvIO(gv), PL_op->op_type);
 	    }
-	    SETERRNO(EBADF,RMS$_IFI);
+	    SETERRNO(EBADF,VMS_RMS_IFI);
 	    RETPUSHUNDEF;
 	}
     }
@@ -3882,7 +3882,7 @@ PP(pp_closedir)
     RETPUSHYES;
 nope:
     if (!errno)
-	SETERRNO(EBADF,RMS$_IFI);
+	SETERRNO(EBADF,VMS_RMS_IFI);
     RETPUSHUNDEF;
 #else
     DIE(aTHX_ PL_no_dir_func, "closedir");
