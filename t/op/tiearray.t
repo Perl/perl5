@@ -174,9 +174,7 @@ print "ok ", $test++,"\n";
 print "not " unless join(':',@ary) eq '1:2:3';
 print "ok ", $test++,"\n";         
 
-untie @ary;   
-
-exit;
+# untie @ary;   
 
 }
 

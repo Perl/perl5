@@ -565,7 +565,13 @@ PP(pp_tie)
     sv = TOPs;
     if (sv_isobject(sv)) {
 	if (SvTYPE(varsv) == SVt_PVHV || SvTYPE(varsv) == SVt_PVAV) {
-	    sv_unmagic(varsv, 'P');
+	    sv_unmagic(varsv, 'P');            
+#ifdef DEBUGGING
+	if (SvTYPE(varsv) == SVt_PVAV) {
+	    AV *av = (AV *) varsv; 
+	    av_undef(av);
+	}
+#endif
 	    sv_magic(varsv, sv, 'P', Nullch, 0);
 	}
 	else {
