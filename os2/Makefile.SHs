@@ -15,11 +15,18 @@ AOUT_LIB_EXT	= $aout_lib_ext
 AOUT_LIBPERL	= libperl$aout_lib_ext
 AOUT_CLDFLAGS	= $aout_ldflags
 
+AOUT_LIBPERL_DLL	= libperl_dll$aout_lib_ext
+AOUT_CCCMD_DLL	= \$(CC) -DDOSISH -DOS2=2 -DEMBED -I. -DPACK_MALLOC -DDEBUGGING_MSTATS -g
+AOUT_CLDFLAGS_DLL	= -Zexe -Zmt -Zcrtdll
+
 !GROK!THIS!
 
 $spitshell >>Makefile <<'!NO!SUBS!'
 $(LIBPERL): perl.imp perl.dll perl5.def
 	emximp -o $(LIBPERL) perl.imp
+
+$(AOUT_LIBPERL_DLL): perl.imp perl.dll perl5.def
+	emximp -o $(AOUT_LIBPERL_DLL) perl.imp
 
 perl.imp: perl5.def
 	emximp -o perl.imp perl5.def
@@ -91,6 +98,16 @@ os2ish.h: os2/os2ish.h
 dlfcn.h: os2/dlfcn.h
 	cp $< $@
 
+# We link miniperl statically, since .DLL depends on $(DYNALOADER) 
+
+miniperl: $& miniperlmain$(OBJ_EXT) perl$(OBJ_EXT) $(obj) 
+	$(CC) $(LARGE) $(CLDFLAGS) -o miniperl miniperlmain$(OBJ_EXT) perl$(OBJ_EXT) $(obj) $(libs)
+	@./miniperl -w -Ilib -MExporter -e 0 || $(MAKE) minitest
+
+# This one is compiled OMF, so cannot fork():
+
+perl___: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
+	$(SHRPENV) $(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o perl___ perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LIBPERL) `cat ext.libs` $(libs)
 
 installcmd : 
 	perl -e 'die qq{Give the option INSTALLCMDDIR=... to make!} if $$ARGV[0] eq ""' $(INSTALLCMDDIR)
@@ -103,12 +120,26 @@ AOUT_DYNALOADER = $(addsuffix $(AOUT_LIB_EXT),$(basename $(DYNALOADER)))
 aout_static_ext = $(addsuffix $(AOUT_LIB_EXT),$(basename $(dynamic_ext)))
 aout_static_lib = $(addsuffix $(LIB_EXT),$(basename $(dynamic_ext)))
 
+aout_static_ext_dll = $(addsuffix $(AOUT_LIB_EXT),$(basename $(static_ext)))
+DYNALOADER_OBJ = ext/DynaLoader/DynaLoader$(OBJ_EXT)
+aout_static_ext_dll = $(addsuffix $(AOUT_LIB_EXT),$(basename $(static_ext)))
+AOUT_DYNALOADER_OBJ = $(addsuffix $(AOUT_OBJ_EXT),$(basename $(DYNALOADER_OBJ)))
+
+$(AOUT_DYNALOADER_OBJ) : $(DYNALOADER_OBJ)
+	emxaout -o $@ $<
+
+$(DYNALOADER_OBJ) : $(DYNALOADER)
+	@sh -c true
+
 $(AOUT_LIBPERL) : $(aout_obj) perl$(AOUT_OBJ_EXT)
-	rm -f $(AOUT_LIBPERL)
-	$(AOUT_AR) rcu $(AOUT_LIBPERL) perl$(AOUT_OBJ_EXT) $(aout_obj)
+	rm -f $@
+	$(AOUT_AR) rcu $@ perl$(AOUT_OBJ_EXT) $(aout_obj)
 
 .c$(AOUT_OBJ_EXT):
 	$(AOUT_CCCMD) $(PLDLFLAGS) -c $*.c
+
+perlmain(AOUT_OBJ_EXT): perlmain.c
+	$(AOUT_CCCMD_DLL) $(PLDLFLAGS) -c perlmain.c
 
 aout_perlmain.c: miniperlmain.c config.sh makefile $(static_ext_autoinit)
 	sh writemain $(DYNALOADER) $(aout_static_lib) > tmp
@@ -120,10 +151,17 @@ miniperl_: $& miniperlmain$(AOUT_OBJ_EXT) $(AOUT_LIBPERL) ext.libs
 perl_: $& aout_perlmain$(AOUT_OBJ_EXT) $(AOUT_LIBPERL) $(AOUT_DYNALOADER) $(aout_static_ext) ext.libs
 	$(CC) $(LARGE) $(AOUT_CLDFLAGS) $(CCDLFLAGS) -o perl_ aout_perlmain$(AOUT_OBJ_EXT) $(AOUT_DYNALOADER) $(aout_static_ext) $(AOUT_LIBPERL) `cat ext.libs` $(libs)
 
-perl : perl__
+perl : perl__ perl___
 
 perl__: $& perlmain$(OBJ_EXT) $(LIBPERL) $(DYNALOADER) $(static_ext) ext.libs
 	$(CC) $(LARGE) $(CLDFLAGS) $(CCDLFLAGS) -o perl__ perlmain$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(LIBPERL) `cat ext.libs` $(libs) -Zlinker /PM:PM
+
+# Forking dynamically loaded perl:
+
+perl: $& perlmain$(AOUT_OBJ_EXT) $(AOUT_DYNALOADER_OBJ) $(aout_static_ext_dll) $(AOUT_LIBPERL_DLL) ext.libs
+	$(CC) $(LARGE) $(AOUT_CLDFLAGS_DLL) $(CCDLFLAGS) -o perl perlmain$(AOUT_OBJ_EXT) $(AOUT_DYNALOADER_OBJ) $(aout_static_ext_dll) $(AOUT_LIBPERL_DLL) `cat ext.libs` $(libs)
+
+clean: aout_clean
 
 aout_clean:
 	-rm *perl_.* *.o *.a lib/auto/*/*.a ext/*/Makefile.aout
