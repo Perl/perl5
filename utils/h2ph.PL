@@ -58,13 +58,14 @@ my $Dest_dir = $opt_d || $Config{installsitearch};
 die "Destination directory $Dest_dir doesn't exist or isn't a directory\n"
     unless -d $Dest_dir;
 
-my @isatype = split(' ',<<END);
+my @isatype = qw(
 	char	uchar	u_char
 	short	ushort	u_short
 	int	uint	u_int
 	long	ulong	u_long
 	FILE	key_t	caddr_t
-END
+	float	double	size_t
+);
 
 my %isatype;
 @isatype{@isatype} = (1) x @isatype;
@@ -343,22 +344,26 @@ while (defined (my $file = next_file())) {
 	    expr();
 	    # try to find and perlify local C variables
 	    our @local_variables = (); # needs to be a our(): (?{...}) bug workaround
-	    $new =~ s['
-	      (?:(?:un)?signed\s+)?
-	      (?:long\s+)?
-	      (?:long|int|float|double|char|\w+_t)\s+
-	      (\w+)
-	      (?{ push @local_variables, $1 })
-	      ']
-	     [my \$$1]gx;
-	    $new =~ s['
-	      (?:(?:un)?signed\s+)?
-	      (?:long\s+)?
-	      (?:long|int|float|double|char|\w+_t)
-	      ' \s+ &(\w+) \s* ;
-	      (?{ push @local_variables, $1 })
-	      ]
-	     [my \$$1;]gx;
+	    {
+		use re "eval";
+		my $typelist = join '|', keys %isatype;
+		$new =~ s['
+		  (?:(?:un)?signed\s+)?
+		  (?:long\s+)?
+		  (?:$typelist)\s+
+		  (\w+)
+		  (?{ push @local_variables, $1 })
+		  ']
+		 [my \$$1]gx;
+		$new =~ s['
+		  (?:(?:un)?signed\s+)?
+		  (?:long\s+)?
+		  (?:$typelist)\s+
+		  ' \s+ &(\w+) \s* ;
+		  (?{ push @local_variables, $1 })
+		  ]
+		 [my \$$1;]gx;
+	     }
 	    $new =~ s/&$_\b/\$$_/g for @local_variables;
 	    $new =~ s/(["\\])/\\$1/g;       #"]);
 	    # now that's almost like a macro (we hope)
