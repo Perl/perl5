@@ -2238,6 +2238,10 @@ EXT bool	numeric_local INIT(TRUE);    /* Assume local numerics */
 
 /* provide some backwards compatibility for XS source from 5.005 */
 #define dTHR typedef int _thr_dummy
+#define ERRSV GvSV(errgv)
+#define ERRHV GvHV(errgv)
+#define DEFSV GvSV(defgv)
+#define SAVE_DEFSV SAVESPTR(GvSV(defgv))
 
 #endif /* Include guard */
 
