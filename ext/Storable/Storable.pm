@@ -843,11 +843,11 @@ reference that was used for the key originally to record the value into
 the hash table), it will work because both references stringify to the
 same string.
 
-It won't work across a C<store> and C<retrieve> operations, however,
-because the addresses in the retrieved objects, which are part of
-the stringified references, will probably differ from the original
-addresses. The topology of your structure is preserved, but not hidden
-semantics like those.
+It won't work across a sequence of C<store> and C<retrieve> operations,
+however, because the addresses in the retrieved objects, which are
+part of the stringified references, will probably differ from the
+original addresses. The topology of your structure is preserved,
+but not hidden semantics like those.
 
 On platforms where it matters, be sure to call C<binmode()> on the
 descriptors that you pass to Storable functions.
