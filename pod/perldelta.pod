@@ -390,6 +390,11 @@ Perl, and the installation directories in general are more standard.
 (In other words, the default installation no longer breaks the
 Apple-provided Perl.)
 
+Mac OS X now builds Perl statically by default.  This change was done
+mainly for faster startup times.  The Apple-provided Perl is still
+dynamically linked and shared, and you can enable the sharedness for
+your own Perl builds by C<Configure -Duseshrplib>.
+
 Perl has been ported to IBM's OS/400 PASE environment.  The best way
 to build a Perl for PASE is to use an AIX host as a cross-compilation
 environment.  See README.os400.
