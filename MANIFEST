@@ -772,6 +772,9 @@ lib/Locale/Constants.pm	Locale::Codes
 lib/Locale/Country.pm	Locale::Codes
 lib/Locale/Currency.pm	Locale::Codes
 lib/Locale/Language.pm	Locale::Codes
+lib/Locale/Maketext.pm	Locale::Maketext
+lib/Locale/Maketext.pod	Locale::Maketext documentation
+lib/Locale/Maketext/TPJ13.pod	Locale::Maketext documentation article
 lib/Math/BigFloat.pm	An arbitrary precision floating-point arithmetic package
 lib/Math/BigInt.pm	An arbitrary precision integer arithmetic package
 lib/Math/Complex.pm	A Complex package
@@ -1562,6 +1565,7 @@ t/lib/lc-constants.t	See if Locale::Codes work
 t/lib/lc-country.t	See if Locale::Codes work
 t/lib/lc-currency.t	See if Locale::Codes work
 t/lib/lc-language.t	See if Locale::Codes work
+t/lib/lc-maketext.t	See if Locale::Maketext works
 t/lib/lc-uk.t	See if Locale::Codes work
 t/lib/md5-aaa.t	See if Digest::MD5 extension works
 t/lib/md5-align.t	See if Digest::MD5 extension works
