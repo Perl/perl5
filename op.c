@@ -3279,7 +3279,10 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *id, OP *arg)
 				   newSVOP(OP_METHOD_NAMED, 0, meth)));
     }
 
-    if (ckWARN(WARN_MISC) && imop && SvPOK(packsv = ((SVOP*)id)->op_sv)) {
+    if (ckWARN(WARN_MISC) &&
+        imop && (imop != arg) && /* no warning on use 5.0; or explicit () */
+        SvPOK(packsv = ((SVOP*)id)->op_sv))
+    {
         /* BEGIN will free the ops, so we need to make a copy */
         packlen = SvCUR(packsv);
         packname = savepvn(SvPVX(packsv), packlen);
