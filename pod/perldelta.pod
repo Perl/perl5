@@ -2972,11 +2972,26 @@ In case you are still using Solaris 2.5 (aka SunOS 5.5), you may
 experience failures (the test core dumping) in lib/locale.t.
 The suggested cure is to upgrade your Solaris.
 
-=head2 Stratus VOS
+=head2 SUPER-UX (NEC SX)
 
-When Perl is built using the native build process on VOS Release
-14.5.0 and GNU C++/GNU Tools 2.0.1, all attempted tests either
-pass or result in TODO (ignored) failures.
+The following tests are known to fail on SUPER-UX:
+
+ op/64bitint...........................FAILED tests 29-30, 32-33, 35-36
+ op/arith..............................FAILED tests 128-130
+ op/pack...............................FAILED tests 25-5625
+ op/pow................................
+ op/taint..............................# msgsnd failed
+ ../ext/IO/lib/IO/t/io_poll............FAILED tests 3-4
+ ../ext/IPC/SysV/ipcsysv...............FAILED tests 2, 5-6
+ ../ext/IPC/SysV/t/msg.................FAILED tests 2, 4-6
+ ../ext/Socket/socketpair..............FAILED tests 12
+ ../lib/IPC/SysV.......................FAILED tests 2, 5-6
+ ../lib/warnings.......................FAILED tests 115-116, 118-119
+
+The op/pack failure ("Cannot compress negative numbers at op/pack.t line 126")
+is serious but as of yet unsolved.  It points at some problems with the
+signedness handling of the C compiler, as do the 64bitint, arith, and pow
+failures.  Most of the rest point at problems with SysV IPC.
 
 =head2 Term::ReadKey not working on Win32
 
@@ -3033,6 +3048,12 @@ also related: the test assumes a certain floating point output format;
 this assumption fails in UNICOS.
 
 =head2 UNICOS/mk
+
+=head2 VOS (Stratus)
+
+When Perl is built using the native build process on VOS Release
+14.5.0 and GNU C++/GNU Tools 2.0.1, all attempted tests either
+pass or result in TODO (ignored) failures.
 
 =over 4
 
