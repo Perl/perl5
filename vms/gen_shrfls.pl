@@ -76,6 +76,7 @@ if ($docc) {
     $use_mymalloc++ if /define\s+MYMALLOC/;
     $hide_mymalloc++ if /define\s+EMBEDMYMALLOC/;
     $use_threads++ if /define\s+USE_THREADS/;
+    $care_about_case++ if /define\s+VMS_WE_ARE_CASE_SENSITIVE/;
   }
   
   # put quotes back onto defines - they were removed by DCL on the way in
@@ -195,16 +196,16 @@ sub scan_func {
     if ($1 eq 'main' || $1 eq 'perl_init_ext') {
       print "\tskipped\n" if $debug > 1;
     }
-    else { $fcns{uc($1)}++ }
+    else { $fcns{$1}++ }
   }
 }
 
 # Go add some right up front if we need 'em
 if ($use_mymalloc) {
-  $fcns{uc('Perl_malloc')}++;
-  $fcns{uc('Perl_calloc')}++;
-  $fcns{uc('Perl_realloc')}++;
-  $fcns{uc('Perl_mfree')}++;
+  $fcns{'Perl_malloc'}++;
+  $fcns{'Perl_calloc'}++;
+  $fcns{'Perl_realloc'}++;
+  $fcns{'Perl_mfree'}++;
 }
 
 $used_expectation_enum = $used_opcode_enum = 0; # avoid warnings
@@ -313,6 +314,7 @@ unless ($isgcc) {
   print OPTBLD "PSECT_ATTR=\$GLOBAL_RO_VARS,PIC,NOEXE,RD,NOWRT,SHR\n";
   print OPTBLD "PSECT_ATTR=\$GLOBAL_RW_VARS,PIC,NOEXE,RD,WRT,NOSHR\n";
 }
+print OPTBLD "case_sensitive=yes\n" if $care_about_case;
 foreach $var (sort (keys %vars,keys %cvars)) {
   if ($isvax) { print OPTBLD "UNIVERSAL=$var\n"; }
   else { print OPTBLD "SYMBOL_VECTOR=($var=DATA)\n"; }
@@ -364,7 +366,7 @@ else {
 }
 close OPTATTR;
 
-$incstr = 'perl,globals';
+$incstr = 'PERL,GLOBALS';
 if ($isvax) {
   $drvrname = "Compile_shrmars.tmp_".time;
   open (DRVR,">$drvrname") or die "$0: Can't write to $drvrname: $!\n";

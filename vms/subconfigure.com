@@ -44,7 +44,13 @@ $   Checkcc := "''Mcc'/prefix=all"
 $ ELSE
 $   Checkcc := "''Mcc'"
 $ ENDIF
-$! cc_flags = ""
+$ cc_flags = cc_flags + extra_flags
+$ if be_case_sensitive
+$ then
+$ d_vms_be_case_sensitive = "define"
+$ else
+$ d_vms_be_case_sensitive = "undef"
+$ endif
 $ if use_multiplicity .eqs. "Y"
 $ THEN
 $   perl_usemultiplicity = "define"
@@ -492,17 +498,28 @@ $ perl_alignbytes="8"
 $ ENDIF
 $ if ("''Use_Threads'".eqs."T")
 $ THEN
-$ perl_arch = "''perl_arch'-thread"
-$ perl_archname = "''perl_archname'-thread"
-$ perl_d_old_pthread_create_joinable = "undef"
-$ perl_old_pthread_create_joinable = " "
-$ perl_use5005threads = "define"
+$   if use_5005_threads
+$   THEN
+$     perl_arch = "''perl_arch'-thread"
+$     perl_archname = "''perl_archname'-thread"
+$     perl_d_old_pthread_create_joinable = "undef"
+$     perl_old_pthread_create_joinable = " "
+$     perl_use5005threads = "define"
+$     perl_useithreads = "undef"
+$   ELSE
+$     perl_arch = "''perl_arch'-ithread"
+$     perl_archname = "''perl_archname'-ithread"
+$     perl_d_old_pthread_create_joinable = "undef"
+$     perl_old_pthread_create_joinable = " "
+$     perl_use5005threads = "undef"
+$     perl_useithreads = "define"
+$   ENDIF
 $ ELSE
-$ perl_d_old_pthread_create_joinable = "undef"
-$ perl_old_pthread_create_joinable = " "
-$ perl_use5005threads = "undef"
+$   perl_d_old_pthread_create_joinable = "undef"
+$   perl_old_pthread_create_joinable = " "
+$   perl_use5005threads = "undef"
+$   perl_useithreads = "undef"
 $ ENDIF
-$ perl_useithreads = "undef"
 $ perl_osvers=f$edit(osvers, "TRIM")
 $ if (perl_subversion + 0).eq.0
 $ THEN
@@ -2189,7 +2206,7 @@ $ WS "#include <stdio.h>
 $ WS "#include <iconv.h>
 $ WS "int main()
 $ WS "{"
-$ WS "  iconv_t cd;"
+$ WS "  iconv_t cd = (iconv_t)0;"
 $ WS "  char *inbuf, *outbuf;"
 $ WS "  size_t inleft, outleft;"
 $ WS "  iconv(cd, &inbuf, &inleft, &outbuf, &outleft);"
@@ -4131,6 +4148,7 @@ $ WC "ivdformat='" + perl_ivdformat + "'"
 $ WC "uvuformat='" + perl_uvuformat + "'"
 $ WC "uvoformat='" + perl_uvoformat + "'"
 $ WC "uvxformat='" + perl_uvxformat + "'"
+$ WC "d_vms_case_sensitive_symbols='" + d_vms_be_case_sensitive + "'"
 $!
 $! ##WRITE NEW CONSTANTS HERE##
 $!
@@ -4219,6 +4237,10 @@ $ if use_64bitall.eqs."Y"
 $ THEN
 $    WRITE CONFIG "#define USE_64_BIT_ALL"
 $ ENDIF
+$ if be_case_sensitive
+$ then
+$    write config "#define VMS_WE_ARE_CASE_SENSITIVE"
+$ endif
 $ WRITE CONFIG "#define HAS_ENVGETENV"
 $ WRITE CONFIG "#define PERL_EXTERNAL_GLOB"
 $ CLOSE CONFIG
@@ -4282,7 +4304,8 @@ $ ENDIF
 $ echo "Writing DESCRIP.MMS"
 $!set ver
 $ define/user sys$output [-]descrip.mms
-$ mcr []munchconfig [-]config.sh descrip_mms.template "''DECC_REPLACE'" "''ARCH_TYPE'" "''GNUC_REPLACE'" "''SOCKET_REPLACE'" "''THREAD_REPLACE'" "''C_Compiler_Replace'" "''MALLOC_REPLACE'" "''Thread_Live_Dangerously'" "PV=''LocalPerlVer'"
+$ mcr []munchconfig [-]config.sh descrip_mms.template "''DECC_REPLACE'" "''ARCH_TYPE'" "''GNUC_REPLACE'" "''SOCKET_REPLACE'" "''THREAD_REPLACE'" -
+"''C_Compiler_Replace'" "''MALLOC_REPLACE'" "''Thread_Live_Dangerously'" "PV=''LocalPerlVer'" "FLAGS=FLAGS=''extra_flags'"
 $ echo "Extracting Build_Ext.Com"
 $ Create Sys$Disk:[-]Build_Ext.Com
 $ Deck/Dollar="$EndOfTpl$"

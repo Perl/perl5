@@ -8,7 +8,7 @@ use strict;
 use vars qw($VERSION $Is_Mac $Is_OS2 $Is_VMS $Is_Win32 $Is_Dos $Is_PERL_OBJECT
 	    $Verbose %pm %static $Xsubpp_Version);
 
-$VERSION = substr q$Revision: 1.12602 $, 10;
+$VERSION = substr q$Revision: 1.12603 $, 10;
 # $Id: MM_Unix.pm,v 1.126 1998/06/28 21:32:49 k Exp k $
 
 Exporter::import('ExtUtils::MakeMaker', qw($Verbose &neatvalue));
@@ -459,7 +459,7 @@ EOT
 			 *perl.core so_locations pm_to_blib
 			 *~ */*~ */*/*~ *$(OBJ_EXT) *$(LIB_EXT) perl.exe
 			 $(BOOTSTRAP) $(BASEEXT).bso $(BASEEXT).def
-			 $(BASEEXT).exp .nfs* .*.c
+			 $(BASEEXT).exp
 			]);
     push @m, "\t-$self->{RM_RF} @otherfiles\n";
     # See realclean and ext/utils/make_ext for usage of Makefile.old
