@@ -866,9 +866,11 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, MAGIC *mg, I32 nest, I32 maxne
         if (mg->mg_ptr) {
 	    Perl_dump_indent(aTHX_ level, file, "    MG_PTR = 0x%"UVxf, PTR2UV(mg->mg_ptr));
 	    if (mg->mg_len >= 0) {
-		SV *sv = newSVpvn("", 0);
-                PerlIO_printf(file, " %s", pv_display(sv, mg->mg_ptr, mg->mg_len, 0, pvlim));
-		SvREFCNT_dec(sv);
+		 if (mg->mg_type != PERL_MAGIC_utf8) {
+		      SV *sv = newSVpvn("", 0);
+		      PerlIO_printf(file, " %s", pv_display(sv, mg->mg_ptr, mg->mg_len, 0, pvlim));
+		      SvREFCNT_dec(sv);
+		 }
             }
 	    else if (mg->mg_len == HEf_SVKEY) {
 		PerlIO_puts(file, " => HEf_SVKEY\n");
