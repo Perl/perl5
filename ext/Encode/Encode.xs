@@ -8,7 +8,7 @@
 UNIMPLEMENTED(_encoded_utf8_to_bytes, I32)
 UNIMPLEMENTED(_encoded_bytes_to_utf8, I32)
 
-void call_failure (SV *routine, U8* done, U8* dest, U8* orig);
+void call_failure (SV *routine, U8* done, U8* dest, U8* orig) {}
 
 MODULE = Encode         PACKAGE = Encode
 
@@ -25,11 +25,11 @@ _bytes_to_utf8(sv, ...)
             RETVAL = _encoded_bytes_to_utf8(sv, SvPV_nolen(encoding));
           else {
             STRLEN len;
-            U8*    s = SvPV(sv, len);
+            U8*    s = (U8*)SvPV(sv, len);
             U8*    converted;
 
             converted = bytes_to_utf8(s, &len); /* This allocs */
-            sv_setpvn(sv, converted, len);
+            sv_setpvn(sv, (char *)converted, len);
             SvUTF8_on(sv); /* XXX Should we? */
             Safefree(converted);                /* ... so free it */
             RETVAL = len;
@@ -51,12 +51,12 @@ _utf8_to_bytes(sv, ...)
           else {
             U8 *s;
             STRLEN len;
-            s = SvPV(sv, len);
+            s = (U8*)SvPV(sv, len);
 
             if (SvTRUE(check)) {
               /* Must do things the slow way */
               U8 *dest;
-              U8 *src  = savepv(s); /* We need a copy to pass to check() */ 
+              U8 *src  = (U8*)savepv((char *)s); /* We need a copy to pass to check() */ 
               U8 *send = s + len;
 
               New(83, dest, len, U8); /* I think */
