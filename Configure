@@ -9460,8 +9460,7 @@ known_extensions=''
 : to be built.
 for xxx in * ; do
 	case "$xxx" in
-	DynaLoader)
-		known_extensions="$known_extensions $xxx" ;;
+	DynaLoader) ;;
 	*)
 		if $test -f $xxx/$xxx.xs; then
 			known_extensions="$known_extensions $xxx"
