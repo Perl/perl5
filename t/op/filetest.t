@@ -24,8 +24,15 @@ print "ok 4\n";
 print "not " unless -r 'TEST';
 print "ok 5\n";
 
-print "not " if -w 'TEST';
-print "ok 6\n";
+# make sure TEST is r-x
+eval { chmod 0555, 'TEST' };
+if ($@) {
+  print "#[$@]\nok 6 # skipped\n";
+}
+else {
+  print "not " if -w 'TEST';
+  print "ok 6\n";
+}
 
 # Scripts are not -x everywhere.
 

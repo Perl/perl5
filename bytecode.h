@@ -151,7 +151,7 @@ typedef IV IV64;
 	o->op_type = arg;			\
 	if (arg == OP_MAPSTART)			\
 	    arg = OP_GREPSTART;			\
-	o->op_ppaddr = ppaddr[arg];		\
+	o->op_ppaddr = PL_ppaddr[arg];		\
     } STMT_END
 #define BSET_op_ppaddr(o, arg) croak("op_ppaddr not yet implemented")
 #define BSET_curpad(pad, arg) pad = AvARRAY(arg)

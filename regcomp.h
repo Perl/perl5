@@ -150,7 +150,7 @@ struct regnode_2 {
 #define FILL_ADVANCE_NODE_ARG(ptr, op, arg) STMT_START { \
     ARG_SET(ptr, arg);  FILL_ADVANCE_NODE(ptr, op); (ptr) += 1; } STMT_END
 
-#define MAGIC 0234
+#define REG_MAGIC 0234
 
 #define SIZE_ONLY (PL_regcode == &PL_regdummy)
 
@@ -200,9 +200,9 @@ struct regnode_2 {
 
 /* The following have no fixed length. char* since we do strchr on it. */
 #ifndef DOINIT
-EXTCONST char varies[];
+EXTCONST char PL_varies[];
 #else
-EXTCONST char varies[] = {
+EXTCONST char PL_varies[] = {
     BRANCH, BACK, STAR, PLUS, CURLY, CURLYX, REF, REFF, REFFL, 
     WHILEM, CURLYM, CURLYN, BRANCHJ, IFTHEN, SUSPEND, CLUMP, 0
 };
@@ -211,10 +211,10 @@ EXTCONST char varies[] = {
 /* The following always have a length of 1. char* since we do strchr on it. */
 /* (Note that lenght 1 means "one character" under UTF8, not "one octet".) */
 #ifndef DOINIT
-EXTCONST char simple[];
+EXTCONST char PL_simple[];
 #else
-EXTCONST char simple[] = {
-    ANY, ANYUTF8, SANY, SANYUTF8, ANYOF, ANYOFUTF8,
+EXTCONST char PL_simple[] = {
+    REG_ANY, ANYUTF8, SANY, SANYUTF8, ANYOF, ANYOFUTF8,
     ALNUM, ALNUMUTF8, ALNUML, ALNUMLUTF8,
     NALNUM, NALNUMUTF8, NALNUML, NALNUMLUTF8,
     SPACE, SPACEUTF8, SPACEL, SPACELUTF8,

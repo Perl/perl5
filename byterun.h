@@ -17,7 +17,9 @@ struct bytestream {
 };
 #endif /* INDIRECT_BGET_MACROS */
 
+#ifndef PERL_OBJECT
 void *bset_obj_store _((void *, I32));
+#endif
 
 enum {
     INSN_RET,			/* 0 */

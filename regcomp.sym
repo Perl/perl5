@@ -26,10 +26,10 @@ NBOUNDLUTF8	NBOUND, no	Match "" at any word non-boundary
 GPOS		GPOS,   no	Matches where last m//g left off.
 
 # [Special] alternatives
-ANY		ANY,    no	Match any one character (except newline).
-ANYUTF8		ANY,    no	Match any one Unicode character (except newline).
-SANY		ANY,    no	Match any one character.
-SANYUTF8	ANY,    no	Match any one Unicode character.
+REG_ANY		REG_ANY,    no	Match any one character (except newline).
+ANYUTF8		REG_ANY,    no	Match any one Unicode character (except newline).
+SANY		REG_ANY,    no	Match any one character.
+SANYUTF8	REG_ANY,    no	Match any one Unicode character.
 ANYOF		ANYOF,  sv	Match character in (or not in) this class.
 ANYOFUTF8	ANYOF,  sv 1	Match character in (or not in) this class.
 ALNUM		ALNUM,  no	Match any alphanumeric character

@@ -661,7 +661,7 @@ $(DLL_OBJ)	: $(CORE_H)
 $(PERL95_OBJ)	: $(CORE_H)
 $(X2P_OBJ)	: $(CORE_H)
 
-perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym makedef.pl
+perldll.def : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\pp.sym makedef.pl
 	$(MINIPERL) -w makedef.pl $(OPTIMIZE) $(DEFINES) $(OBJECT) \
 	    CCTYPE=$(CCTYPE) > perldll.def
 
@@ -881,7 +881,7 @@ distclean: clean
 	-del /f perl95.c
 	-del /f bin\*.bat
 	cd $(EXTDIR)
-	-del /s *.lib *.def *.map *.bs Makefile *$(o) pm_to_blib
+	-del /s *.lib *.def *.map *.pdb *.bs Makefile *$(o) pm_to_blib
 	cd ..\win32
 	-rmdir /s /q $(AUTODIR) || rmdir /s $(AUTODIR)
 	-rmdir /s /q $(COREDIR) || rmdir /s $(COREDIR)

@@ -56,14 +56,14 @@ VIRTUAL int	block_start _((int full));
 VIRTUAL void	boot_core_UNIVERSAL _((void));
 VIRTUAL void	call_list _((I32 oldscope, AV* av_list));
 VIRTUAL I32	cando _((I32 bit, I32 effective, Stat_t* statbufp));
-#ifndef CASTNEGFLOAT
 VIRTUAL U32	cast_ulong _((double f));
-#endif
+VIRTUAL I32	cast_i32 _((double f));
+VIRTUAL IV	cast_iv _((double f));
+VIRTUAL UV	cast_uv _((double f));
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
 VIRTUAL I32	my_chsize _((int fd, Off_t length));
 #endif
-VIRTUAL OP*	ck_gvconst _((OP*  o));
-VIRTUAL OP*	ck_retarget _((OP* o));
+
 #ifdef USE_THREADS
 VIRTUAL MAGIC *	condpair_magic _((SV *sv));
 #endif
@@ -593,11 +593,7 @@ VIRTUAL I32	sv_eq _((SV* sv1, SV* sv2));
 VIRTUAL void	sv_free _((SV* sv));
 VIRTUAL void	sv_free_arenas _((void));
 VIRTUAL char*	sv_gets _((SV* sv, PerlIO* fp, I32 append));
-#ifndef DOSISH
-VIRTUAL char*	sv_grow _((SV* sv, I32 newlen));
-#else
-VIRTUAL char*	sv_grow _((SV* sv, unsigned long newlen));
-#endif
+VIRTUAL char*	sv_grow _((SV* sv, STRLEN newlen));
 VIRTUAL void	sv_inc _((SV* sv));
 VIRTUAL void	sv_insert _((SV* bigsv, STRLEN offset, STRLEN len, char* little, STRLEN littlelen));
 VIRTUAL int	sv_isa _((SV* sv, char* name));
@@ -674,7 +670,7 @@ VIRTUAL int	yyerror _((char* s));
 #ifdef USE_PURE_BISON
 # define PERL_YYLEX_PARAM_DECL YYSTYPE *, int *
 #else
-# define PERL_YYLEX_PARAM_DECL
+# define PERL_YYLEX_PARAM_DECL void
 #endif
 VIRTUAL int	yylex _((PERL_YYLEX_PARAM_DECL));
 VIRTUAL int	yyparse _((void));
@@ -903,43 +899,14 @@ I32 do_trans_CU_simple _((SV *sv));
 I32 do_trans_UC_trivial _((SV *sv));
 I32 do_trans_CU_trivial _((SV *sv));
 
-#define PPDEF(s) OP* CPerlObj::s _((ARGSproto));
+#undef PERL_CKDEF
+#undef PERL_PPDEF
+#define PERL_CKDEF(s) OP* s _((OP *o));
+#define PERL_PPDEF(s) OP* s _((ARGSproto));
 public:
 
 #include "pp_proto.h"
 
-OP * ck_ftst _((OP *o));
-OP *ck_anoncode _((OP *o));
-OP *ck_bitop _((OP *o));
-OP *ck_concat _((OP *o));
-OP *ck_spair _((OP *o));
-OP *ck_delete _((OP *o));
-OP *ck_eof _((OP *o));
-OP *ck_eval _((OP *o));
-OP *ck_exec _((OP *o));
-OP *ck_exists _((OP *o));
-OP *ck_rvconst _((OP *o));
-OP *ck_fun _((OP *o));
-OP *ck_glob _((OP *o));
-OP *ck_grep _((OP *o));
-OP *ck_index _((OP *o));
-OP *ck_lengthconst _((OP *o));
-OP *ck_lfun _((OP *o));
-OP *ck_rfun _((OP *o));
-OP *ck_listiob _((OP *o));
-OP *ck_fun_locale _((OP *o));
-OP *ck_scmp _((OP *o));
-OP *ck_match _((OP *o));
-OP *ck_null _((OP *o));
-OP *ck_repeat _((OP *o));
-OP *ck_require _((OP *o));
-OP *ck_select _((OP *o));
-OP *ck_shift _((OP *o));
-OP *ck_sort _((OP *o));
-OP *ck_split _((OP *o));
-OP *ck_subr _((OP *o));
-OP *ck_svconst _((OP *o));
-OP *ck_trunc _((OP *o));
 void unwind_handler_stack _((void *p));
 void restore_magic _((void *p));
 void restore_rsfp _((void *f));

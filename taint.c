@@ -17,6 +17,8 @@ taint_proper(const char *f, char *s)
             "%s %d %d %d\n", s, PL_tainted, PL_uid, PL_euid));
 
     if (PL_tainted) {
+	if (!f)
+	    f = PL_no_security;
 	if (PL_euid != PL_uid)
 	    ug = " while running setuid";
 	else if (PL_egid != PL_gid)

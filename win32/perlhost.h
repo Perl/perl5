@@ -861,13 +861,13 @@ public:
 	    {
 		try
 		{
-		    pPerl->perl_construct();
+		    perl_construct();
 		}
 		catch(...)
 		{
 		    win32_fprintf(stderr, "%s\n",
 				  "Error: Unable to construct data structures");
-		    pPerl->perl_free();
+		    perl_free();
 		    pPerl = NULL;
 		}
 	    }
@@ -884,7 +884,7 @@ public:
 	int retVal;
 	try
 	{
-	    retVal = pPerl->perl_parse(xs_init, argc, argv, env);
+	    retVal = perl_parse(xs_init, argc, argv, env);
 	}
 	catch(int x)
 	{
@@ -904,7 +904,7 @@ public:
 	int retVal;
 	try
 	{
-	    retVal = pPerl->perl_run();
+	    retVal = perl_run();
 	}
 	catch(int x)
 	{
@@ -922,8 +922,8 @@ public:
     {
 	try
 	{
-	    pPerl->perl_destruct();
-	    pPerl->perl_free();
+	    perl_destruct();
+	    perl_free();
 	}
 	catch(...)
 	{

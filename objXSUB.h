@@ -962,7 +962,7 @@
 #undef  fold_constants
 #define fold_constants      pPerl->Perl_fold_constants
 #undef  fprintf
-#define fprintf             pPerl->fprintf
+#define fprintf             pPerl->Perl_fprintf
 #undef  free_tmps
 #define free_tmps           pPerl->Perl_free_tmps
 #undef  gen_constant_list
@@ -1494,6 +1494,16 @@
 #define peep                pPerl->Perl_peep
 #undef  perl_atexit
 #define perl_atexit         pPerl->perl_atexit
+#undef  perl_free
+#define perl_free         pPerl->perl_free
+#undef  perl_construct
+#define perl_construct         pPerl->perl_construct
+#undef  perl_destruct
+#define perl_destruct         pPerl->perl_destruct
+#undef  perl_parse
+#define perl_parse         pPerl->perl_parse
+#undef  perl_run
+#define perl_run         pPerl->perl_run
 #undef  perl_call_argv
 #define perl_call_argv      pPerl->perl_call_argv
 #undef  perl_call_method

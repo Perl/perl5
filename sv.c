@@ -1088,11 +1088,7 @@ sv_backoff(register SV *sv)
 }
 
 char *
-#ifndef DOSISH
-sv_grow(register SV *sv, register I32 newlen)
-#else
-sv_grow(SV* sv, unsigned long newlen)
-#endif
+sv_grow(register SV *sv, register STRLEN newlen)
 {
     register char *s;
 
@@ -1169,7 +1165,7 @@ sv_setiv(register SV *sv, IV i)
 	{
 	    dTHR;
 	    croak("Can't coerce %s to integer in %s", sv_reftype(sv,0),
-		  op_desc[PL_op->op_type]);
+		  PL_op_desc[PL_op->op_type]);
 	}
     }
     (void)SvIOK_only(sv);			/* validate number */
@@ -1229,7 +1225,7 @@ sv_setnv(register SV *sv, double num)
 	{
 	    dTHR;
 	    croak("Can't coerce %s to number in %s", sv_reftype(sv,0),
-		  op_name[PL_op->op_type]);
+		  PL_op_name[PL_op->op_type]);
 	}
     }
     SvNVX(sv) = num;
@@ -1294,7 +1290,7 @@ not_a_number(SV *sv)
 
     if (PL_op)
 	warner(WARN_NUMERIC, "Argument \"%s\" isn't numeric in %s", tmpbuf,
-		op_name[PL_op->op_type]);
+		PL_op_name[PL_op->op_type]);
     else
 	warner(WARN_NUMERIC, "Argument \"%s\" isn't numeric", tmpbuf);
 }
@@ -1320,7 +1316,7 @@ sv_2iv(register SV *sv)
 	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
 		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
-		    warner(WARN_UNINITIALIZED, warn_uninit);
+		    warner(WARN_UNINITIALIZED, PL_warn_uninit);
 	    }
 	    return 0;
 	}
@@ -1346,7 +1342,7 @@ sv_2iv(register SV *sv)
 	    {
 		dTHR;
 		if (ckWARN(WARN_UNINITIALIZED))
-		    warner(WARN_UNINITIALIZED, warn_uninit);
+		    warner(WARN_UNINITIALIZED, PL_warn_uninit);
 	    }
 	    return 0;
 	}
@@ -1376,7 +1372,7 @@ sv_2iv(register SV *sv)
     else  {
 	dTHR;
 	if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
-	    warner(WARN_UNINITIALIZED, warn_uninit);
+	    warner(WARN_UNINITIALIZED, PL_warn_uninit);
 	return 0;
     }
     DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%lx 2iv(%ld)\n",
@@ -1401,7 +1397,7 @@ sv_2uv(register SV *sv)
 	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
 		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
-		    warner(WARN_UNINITIALIZED, warn_uninit);
+		    warner(WARN_UNINITIALIZED, PL_warn_uninit);
 	    }
 	    return 0;
 	}
@@ -1424,7 +1420,7 @@ sv_2uv(register SV *sv)
 	    {
 		dTHR;
 		if (ckWARN(WARN_UNINITIALIZED))
-		    warner(WARN_UNINITIALIZED, warn_uninit);
+		    warner(WARN_UNINITIALIZED, PL_warn_uninit);
 	    }
 	    return 0;
 	}
@@ -1452,7 +1448,7 @@ sv_2uv(register SV *sv)
 	if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 	    dTHR;
 	    if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
-		warner(WARN_UNINITIALIZED, warn_uninit);
+		warner(WARN_UNINITIALIZED, PL_warn_uninit);
 	}
 	return 0;
     }
@@ -1483,7 +1479,7 @@ sv_2nv(register SV *sv)
 	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
 		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
-		    warner(WARN_UNINITIALIZED, warn_uninit);
+		    warner(WARN_UNINITIALIZED, PL_warn_uninit);
 	    }
             return 0;
         }
@@ -1508,7 +1504,7 @@ sv_2nv(register SV *sv)
 	    if (SvIOKp(sv))
 		return (double)SvIVX(sv);
 	    if (ckWARN(WARN_UNINITIALIZED))
-		warner(WARN_UNINITIALIZED, warn_uninit);
+		warner(WARN_UNINITIALIZED, PL_warn_uninit);
 	    return 0.0;
 	}
     }
@@ -1538,7 +1534,7 @@ sv_2nv(register SV *sv)
     else  {
 	dTHR;
 	if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
-	    warner(WARN_UNINITIALIZED, warn_uninit);
+	    warner(WARN_UNINITIALIZED, PL_warn_uninit);
 	return 0.0;
     }
     SvNOK_on(sv);
@@ -1699,7 +1695,7 @@ sv_2pv(register SV *sv, STRLEN *lp)
 	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 		dTHR;
 		if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing)
-		    warner(WARN_UNINITIALIZED, warn_uninit);
+		    warner(WARN_UNINITIALIZED, PL_warn_uninit);
 	    }
             *lp = 0;
             return "";
@@ -1807,7 +1803,7 @@ sv_2pv(register SV *sv, STRLEN *lp)
 	    {
 		dTHR;
 		if (ckWARN(WARN_UNINITIALIZED))
-		    warner(WARN_UNINITIALIZED, warn_uninit);
+		    warner(WARN_UNINITIALIZED, PL_warn_uninit);
 	    }
 	    *lp = 0;
 	    return "";
@@ -1856,7 +1852,7 @@ sv_2pv(register SV *sv, STRLEN *lp)
     else {
 	dTHR;
 	if (ckWARN(WARN_UNINITIALIZED) && !PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP))
-	    warner(WARN_UNINITIALIZED, warn_uninit);
+	    warner(WARN_UNINITIALIZED, PL_warn_uninit);
 	*lp = 0;
 	return "";
     }
@@ -2064,7 +2060,7 @@ sv_setsv(SV *dstr, register SV *sstr)
     case SVt_PVIO:
 	if (PL_op)
 	    croak("Bizarre copy of %s in %s", sv_reftype(sstr, 0),
-		op_name[PL_op->op_type]);
+		PL_op_name[PL_op->op_type]);
 	else
 	    croak("Bizarre copy of %s", sv_reftype(sstr, 0));
 	break;
@@ -2434,7 +2430,7 @@ sv_check_thinkfirst(register SV *sv)
     if (SvREADONLY(sv)) {
 	dTHR;
 	if (PL_curcop != &PL_compiling)
-	    croak(no_modify);
+	    croak(PL_no_modify);
     }
     if (SvROK(sv))
 	sv_unref(sv);
@@ -2560,7 +2556,7 @@ sv_magic(register SV *sv, SV *obj, int how, char *name, I32 namlen)
     if (SvREADONLY(sv)) {
 	dTHR;
 	if (PL_curcop != &PL_compiling && !strchr("gBf", how))
-	    croak(no_modify);
+	    croak(PL_no_modify);
     }
     if (SvMAGICAL(sv) || (how == 't' && SvTYPE(sv) >= SVt_PVMG)) {
 	if (SvMAGIC(sv) && (mg = mg_find(sv, how))) {
@@ -2593,106 +2589,106 @@ sv_magic(register SV *sv, SV *obj, int how, char *name, I32 namlen)
     
     switch (how) {
     case 0:
-	mg->mg_virtual = &vtbl_sv;
+	mg->mg_virtual = &PL_vtbl_sv;
 	break;
 #ifdef OVERLOAD
     case 'A':
-        mg->mg_virtual = &vtbl_amagic;
+        mg->mg_virtual = &PL_vtbl_amagic;
         break;
     case 'a':
-        mg->mg_virtual = &vtbl_amagicelem;
+        mg->mg_virtual = &PL_vtbl_amagicelem;
         break;
     case 'c':
         mg->mg_virtual = 0;
         break;
 #endif /* OVERLOAD */
     case 'B':
-	mg->mg_virtual = &vtbl_bm;
+	mg->mg_virtual = &PL_vtbl_bm;
 	break;
     case 'D':
-	mg->mg_virtual = &vtbl_regdata;
+	mg->mg_virtual = &PL_vtbl_regdata;
 	break;
     case 'd':
-	mg->mg_virtual = &vtbl_regdatum;
+	mg->mg_virtual = &PL_vtbl_regdatum;
 	break;
     case 'E':
-	mg->mg_virtual = &vtbl_env;
+	mg->mg_virtual = &PL_vtbl_env;
 	break;
     case 'f':
-	mg->mg_virtual = &vtbl_fm;
+	mg->mg_virtual = &PL_vtbl_fm;
 	break;
     case 'e':
-	mg->mg_virtual = &vtbl_envelem;
+	mg->mg_virtual = &PL_vtbl_envelem;
 	break;
     case 'g':
-	mg->mg_virtual = &vtbl_mglob;
+	mg->mg_virtual = &PL_vtbl_mglob;
 	break;
     case 'I':
-	mg->mg_virtual = &vtbl_isa;
+	mg->mg_virtual = &PL_vtbl_isa;
 	break;
     case 'i':
-	mg->mg_virtual = &vtbl_isaelem;
+	mg->mg_virtual = &PL_vtbl_isaelem;
 	break;
     case 'k':
-	mg->mg_virtual = &vtbl_nkeys;
+	mg->mg_virtual = &PL_vtbl_nkeys;
 	break;
     case 'L':
 	SvRMAGICAL_on(sv);
 	mg->mg_virtual = 0;
 	break;
     case 'l':
-	mg->mg_virtual = &vtbl_dbline;
+	mg->mg_virtual = &PL_vtbl_dbline;
 	break;
 #ifdef USE_THREADS
     case 'm':
-	mg->mg_virtual = &vtbl_mutex;
+	mg->mg_virtual = &PL_vtbl_mutex;
 	break;
 #endif /* USE_THREADS */
 #ifdef USE_LOCALE_COLLATE
     case 'o':
-        mg->mg_virtual = &vtbl_collxfrm;
+        mg->mg_virtual = &PL_vtbl_collxfrm;
         break;
 #endif /* USE_LOCALE_COLLATE */
     case 'P':
-	mg->mg_virtual = &vtbl_pack;
+	mg->mg_virtual = &PL_vtbl_pack;
 	break;
     case 'p':
     case 'q':
-	mg->mg_virtual = &vtbl_packelem;
+	mg->mg_virtual = &PL_vtbl_packelem;
 	break;
     case 'r':
-	mg->mg_virtual = &vtbl_regexp;
+	mg->mg_virtual = &PL_vtbl_regexp;
 	break;
     case 'S':
-	mg->mg_virtual = &vtbl_sig;
+	mg->mg_virtual = &PL_vtbl_sig;
 	break;
     case 's':
-	mg->mg_virtual = &vtbl_sigelem;
+	mg->mg_virtual = &PL_vtbl_sigelem;
 	break;
     case 't':
-	mg->mg_virtual = &vtbl_taint;
+	mg->mg_virtual = &PL_vtbl_taint;
 	mg->mg_len = 1;
 	break;
     case 'U':
-	mg->mg_virtual = &vtbl_uvar;
+	mg->mg_virtual = &PL_vtbl_uvar;
 	break;
     case 'v':
-	mg->mg_virtual = &vtbl_vec;
+	mg->mg_virtual = &PL_vtbl_vec;
 	break;
     case 'x':
-	mg->mg_virtual = &vtbl_substr;
+	mg->mg_virtual = &PL_vtbl_substr;
 	break;
     case 'y':
-	mg->mg_virtual = &vtbl_defelem;
+	mg->mg_virtual = &PL_vtbl_defelem;
 	break;
     case '*':
-	mg->mg_virtual = &vtbl_glob;
+	mg->mg_virtual = &PL_vtbl_glob;
 	break;
     case '#':
-	mg->mg_virtual = &vtbl_arylen;
+	mg->mg_virtual = &PL_vtbl_arylen;
 	break;
     case '.':
-	mg->mg_virtual = &vtbl_pos;
+	mg->mg_virtual = &PL_vtbl_pos;
 	break;
     case '~':	/* Reserved for use by extensions not perl internals.	*/
 	/* Useful for attaching extension internal data to perl vars.	*/
@@ -3602,7 +3598,7 @@ sv_inc(register SV *sv)
 	if (SvREADONLY(sv)) {
 	    dTHR;
 	    if (PL_curcop != &PL_compiling)
-		croak(no_modify);
+		croak(PL_no_modify);
 	}
 	if (SvROK(sv)) {
 	    IV i;
@@ -3696,7 +3692,7 @@ sv_dec(register SV *sv)
 	if (SvREADONLY(sv)) {
 	    dTHR;
 	    if (PL_curcop != &PL_compiling)
-		croak(no_modify);
+		croak(PL_no_modify);
 	}
 	if (SvROK(sv)) {
 	    IV i;
@@ -4009,7 +4005,7 @@ sv_2io(SV *sv)
 	break;
     default:
 	if (!SvOK(sv))
-	    croak(no_usym, "filehandle");
+	    croak(PL_no_usym, "filehandle");
 	if (SvROK(sv))
 	    return sv_2io(SvRV(sv));
 	gv = gv_fetchpv(SvPV(sv,PL_na), FALSE, SVt_PVIO);
@@ -4154,7 +4150,7 @@ sv_pvn_force(SV *sv, STRLEN *lp)
     if (SvREADONLY(sv)) {
 	dTHR;
 	if (PL_curcop != &PL_compiling)
-	    croak(no_modify);
+	    croak(PL_no_modify);
     }
     
     if (SvPOK(sv)) {
@@ -4170,7 +4166,7 @@ sv_pvn_force(SV *sv, STRLEN *lp)
 	    else {
 		dTHR;
 		croak("Can't coerce %s to string in %s", sv_reftype(sv,0),
-		    op_name[PL_op->op_type]);
+		    PL_op_name[PL_op->op_type]);
 	    }
 	}
 	else
@@ -4331,7 +4327,7 @@ sv_bless(SV *sv, HV *stash)
     tmpRef = SvRV(sv);
     if (SvFLAGS(tmpRef) & (SVs_OBJECT|SVf_READONLY)) {
 	if (SvREADONLY(tmpRef))
-	    croak(no_modify);
+	    croak(PL_no_modify);
 	if (SvOBJECT(tmpRef)) {
 	    if (SvTYPE(tmpRef) != SVt_PVIO)
 		--PL_sv_objcount;

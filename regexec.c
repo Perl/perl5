@@ -73,7 +73,6 @@
  */
 #include "EXTERN.h"
 #include "perl.h"
-typedef MAGIC *my_magic;
 
 #include "regcomp.h"
 
@@ -315,7 +314,7 @@ regexec_flags(register regexp *prog, char *stringarg, register char *strend,
     }
 
     /* Check validity of program. */
-    if (UCHARAT(prog->program) != MAGIC) {
+    if (UCHARAT(prog->program) != REG_MAGIC) {
 	FAIL("corrupted regexp program");
     }
 
@@ -1213,7 +1212,7 @@ regmatch(regnode *prog)
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
 	    break;
-	case ANY:
+	case REG_ANY:
 	    if (!nextchr && locinput >= PL_regeol || nextchr == '\n')
 		sayNO;
 	    nextchr = UCHARAT(++locinput);
@@ -1262,7 +1261,7 @@ regmatch(regnode *prog)
 	    /* Inline the first character, for speed. */
 	    if (UCHARAT(s) != nextchr &&
 		UCHARAT(s) != ((OP(scan) == EXACTF)
-			       ? fold : fold_locale)[nextchr])
+			       ? PL_fold : PL_fold_locale)[nextchr])
 		sayNO;
 	    if (PL_regeol - locinput < ln)
 		sayNO;
@@ -1560,7 +1559,7 @@ regmatch(regnode *prog)
 	    if (UCHARAT(s) != nextchr &&
 		(OP(scan) == REF ||
 		 (UCHARAT(s) != ((OP(scan) == REFF
-				  ? fold : fold_locale)[nextchr]))))
+				  ? PL_fold : PL_fold_locale)[nextchr]))))
 		sayNO;
 	    ln = PL_regendp[n] - s;
 	    if (locinput + ln > PL_regeol)
@@ -1604,7 +1603,7 @@ regmatch(regnode *prog)
 	    if (logical) {
 		if (logical == 2) {	/* Postponed subexpression. */
 		    regexp *re;
-		    my_magic mg = Null(my_magic);
+		    MAGIC *mg = Null(MAGIC*);
 		    re_cc_state state;
 		    CURCUR cctmp;
 		    CHECKPOINT cp, lastcp;
@@ -1977,12 +1976,12 @@ regmatch(regnode *prog)
 		    && !(paren && ln == 0))
 		    ln = n;
 		locinput = PL_reginput;
-		if (regkind[(U8)OP(next)] == EXACT) {
+		if (PL_regkind[(U8)OP(next)] == EXACT) {
 		    c1 = UCHARAT(OPERAND(next) + 1);
 		    if (OP(next) == EXACTF)
-			c2 = fold[c1];
+			c2 = PL_fold[c1];
 		    else if (OP(next) == EXACTFL)
-			c2 = fold_locale[c1];
+			c2 = PL_fold_locale[c1];
 		    else
 			c2 = c1;
 		}
@@ -2033,12 +2032,12 @@ regmatch(regnode *prog)
 				  REPORT_CODE_OFF+PL_regindent*2, "", n, l)
 		    );
 		if (n >= ln) {
-		    if (regkind[(U8)OP(next)] == EXACT) {
+		    if (PL_regkind[(U8)OP(next)] == EXACT) {
 			c1 = UCHARAT(OPERAND(next) + 1);
 			if (OP(next) == EXACTF)
-			    c2 = fold[c1];
+			    c2 = PL_fold[c1];
 			else if (OP(next) == EXACTFL)
-			    c2 = fold_locale[c1];
+			    c2 = PL_fold_locale[c1];
 			else
 			    c2 = c1;
 		    }
@@ -2110,12 +2109,12 @@ regmatch(regnode *prog)
 	    * Lookahead to avoid useless match attempts
 	    * when we know what character comes next.
 	    */
-	    if (regkind[(U8)OP(next)] == EXACT) {
+	    if (PL_regkind[(U8)OP(next)] == EXACT) {
 		c1 = UCHARAT(OPERAND(next) + 1);
 		if (OP(next) == EXACTF)
-		    c2 = fold[c1];
+		    c2 = PL_fold[c1];
 		else if (OP(next) == EXACTFL)
-		    c2 = fold_locale[c1];
+		    c2 = PL_fold_locale[c1];
 		else
 		    c2 = c1;
 	    }
@@ -2161,7 +2160,7 @@ regmatch(regnode *prog)
 		CHECKPOINT lastcp;
 		n = regrepeat(scan, n);
 		locinput = PL_reginput;
-		if (ln < n && regkind[(U8)OP(next)] == EOL &&
+		if (ln < n && PL_regkind[(U8)OP(next)] == EOL &&
 		    (!PL_multiline  || OP(next) == SEOL))
 		    ln = n;			/* why back off? */
 		REGCP_SET;
@@ -2355,7 +2354,7 @@ regrepeat(regnode *p, I32 max)
       loceol = scan + max;
     opnd = (char *) OPERAND(p);
     switch (OP(p)) {
-    case ANY:
+    case REG_ANY:
 	while (scan < loceol && *scan != '\n')
 	    scan++;
 	break;
@@ -2384,14 +2383,14 @@ regrepeat(regnode *p, I32 max)
     case EXACTF:	/* length of string is 1 */
 	c = UCHARAT(++opnd);
 	while (scan < loceol &&
-	       (UCHARAT(scan) == c || UCHARAT(scan) == fold[c]))
+	       (UCHARAT(scan) == c || UCHARAT(scan) == PL_fold[c]))
 	    scan++;
 	break;
     case EXACTFL:	/* length of string is 1 */
 	PL_reg_flags |= RF_tainted;
 	c = UCHARAT(++opnd);
 	while (scan < loceol &&
-	       (UCHARAT(scan) == c || UCHARAT(scan) == fold_locale[c]))
+	       (UCHARAT(scan) == c || UCHARAT(scan) == PL_fold_locale[c]))
 	    scan++;
 	break;
     case ANYOFUTF8:
@@ -2619,10 +2618,10 @@ reginclass(register char *p, register I32 c)
 	I32 cf;
 	if (flags & ANYOF_LOCALE) {
 	    PL_reg_flags |= RF_tainted;
-	    cf = fold_locale[c];
+	    cf = PL_fold_locale[c];
 	}
 	else
-	    cf = fold[c];
+	    cf = PL_fold[c];
 	if (ANYOF_TEST(p, cf))
 	    match = TRUE;
     }

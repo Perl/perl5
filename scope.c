@@ -863,7 +863,7 @@ cx_dump(PERL_CONTEXT *cx)
 {
 #ifdef DEBUGGING
     dTHR;
-    PerlIO_printf(Perl_debug_log, "CX %ld = %s\n", (long)(cx - cxstack), block_type[CxTYPE(cx)]);
+    PerlIO_printf(Perl_debug_log, "CX %ld = %s\n", (long)(cx - cxstack), PL_block_type[CxTYPE(cx)]);
     if (CxTYPE(cx) != CXt_SUBST) {
 	PerlIO_printf(Perl_debug_log, "BLK_OLDSP = %ld\n", (long)cx->blk_oldsp);
 	PerlIO_printf(Perl_debug_log, "BLK_OLDCOP = 0x%lx\n", (long)cx->blk_oldcop);
@@ -893,8 +893,8 @@ cx_dump(PERL_CONTEXT *cx)
 	PerlIO_printf(Perl_debug_log, "BLK_EVAL.OLD_IN_EVAL = %ld\n",
 		(long)cx->blk_eval.old_in_eval);
 	PerlIO_printf(Perl_debug_log, "BLK_EVAL.OLD_OP_TYPE = %s (%s)\n",
-		op_name[cx->blk_eval.old_op_type],
-		op_desc[cx->blk_eval.old_op_type]);
+		PL_op_name[cx->blk_eval.old_op_type],
+		PL_op_desc[cx->blk_eval.old_op_type]);
 	PerlIO_printf(Perl_debug_log, "BLK_EVAL.OLD_NAME = %s\n",
 		cx->blk_eval.old_name);
 	PerlIO_printf(Perl_debug_log, "BLK_EVAL.OLD_EVAL_ROOT = 0x%lx\n",

@@ -612,7 +612,7 @@ await_signal()
 	    croak("panic: await_signal");
 	ST(0) = sv_newmortal();
 	if (ret)
-	    sv_setsv(ST(0), c ? psig_ptr[c] : &PL_sv_no);
+	    sv_setsv(ST(0), c ? PL_psig_ptr[c] : &PL_sv_no);
 	DEBUG_S(PerlIO_printf(PerlIO_stderr(),
 			      "await_signal returning %s\n", SvPEEK(ST(0))););
 

@@ -92,7 +92,7 @@ perl_alloc(void)
 
 void
 #ifdef PERL_OBJECT
-CPerlObj::perl_construct(void)
+perl_construct(void)
 #else
 perl_construct(register PerlInterpreter *sv_interp)
 #endif
@@ -235,7 +235,7 @@ perl_construct(register PerlInterpreter *sv_interp)
 
 void
 #ifdef PERL_OBJECT
-CPerlObj::perl_destruct(void)
+perl_destruct(void)
 #else
 perl_destruct(register PerlInterpreter *sv_interp)
 #endif
@@ -593,7 +593,7 @@ perl_destruct(register PerlInterpreter *sv_interp)
 
 void
 #ifdef PERL_OBJECT
-CPerlObj::perl_free(void)
+perl_free(void)
 #else
 perl_free(PerlInterpreter *sv_interp)
 #endif
@@ -609,7 +609,7 @@ perl_free(PerlInterpreter *sv_interp)
 
 void
 #ifdef PERL_OBJECT
-CPerlObj::perl_atexit(void (*fn) (CPerlObj*,void *), void *ptr)
+perl_atexit(void (*fn) (CPerlObj*,void *), void *ptr)
 #else
 perl_atexit(void (*fn) (void *), void *ptr)
 #endif
@@ -622,7 +622,7 @@ perl_atexit(void (*fn) (void *), void *ptr)
 
 int
 #ifdef PERL_OBJECT
-CPerlObj::perl_parse(void (*xsinit) (CPerlObj*), int argc, char **argv, char **env)
+perl_parse(void (*xsinit) (CPerlObj*), int argc, char **argv, char **env)
 #else
 perl_parse(PerlInterpreter *sv_interp, void (*xsinit) (void), int argc, char **argv, char **env)
 #endif
@@ -813,13 +813,10 @@ setuid perl scripts securely.\n");
 #else
 		sv_catpv(PL_Sv,"print \"\\nCharacteristics of this binary (from libperl): \\n\",");
 #endif
-#if defined(DEBUGGING) || defined(NO_EMBED) || defined(MULTIPLICITY)
+#if defined(DEBUGGING) || defined(MULTIPLICITY)
 		sv_catpv(PL_Sv,"\"  Compile-time options:");
 #  ifdef DEBUGGING
 		sv_catpv(PL_Sv," DEBUGGING");
-#  endif
-#  ifdef NO_EMBED
-		sv_catpv(PL_Sv," NO_EMBED");
 #  endif
 #  ifdef MULTIPLICITY
 		sv_catpv(PL_Sv," MULTIPLICITY");
@@ -1018,7 +1015,7 @@ print \"  \\@INC:\\n    @INC\\n\";");
 
 int
 #ifdef PERL_OBJECT
-CPerlObj::perl_run(void)
+perl_run(void)
 #else
 perl_run(PerlInterpreter *sv_interp)
 #endif

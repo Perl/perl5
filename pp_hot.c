@@ -220,7 +220,7 @@ PP(pp_preinc)
 {
     djSP;
     if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
-	croak(no_modify);
+	croak(PL_no_modify);
     if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
     	SvIVX(TOPs) != IV_MAX)
     {
@@ -438,16 +438,16 @@ PP(pp_rv2av)
 		if (!SvOK(sv)) {
 		    if (PL_op->op_flags & OPf_REF ||
 		      PL_op->op_private & HINT_STRICT_REFS)
-			DIE(no_usym, "an ARRAY");
+			DIE(PL_no_usym, "an ARRAY");
 		    if (ckWARN(WARN_UNINITIALIZED))
-			warner(WARN_UNINITIALIZED, warn_uninit);
+			warner(WARN_UNINITIALIZED, PL_warn_uninit);
 		    if (GIMME == G_ARRAY)
 			RETURN;
 		    RETPUSHUNDEF;
 		}
 		sym = SvPV(sv,PL_na);
 		if (PL_op->op_private & HINT_STRICT_REFS)
-		    DIE(no_symref, sym, "an ARRAY");
+		    DIE(PL_no_symref, sym, "an ARRAY");
 		gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PVAV);
 	    } else {
 		gv = (GV*)sv;
@@ -522,9 +522,9 @@ PP(pp_rv2hv)
 		if (!SvOK(sv)) {
 		    if (PL_op->op_flags & OPf_REF ||
 		      PL_op->op_private & HINT_STRICT_REFS)
-			DIE(no_usym, "a HASH");
+			DIE(PL_no_usym, "a HASH");
 		    if (ckWARN(WARN_UNINITIALIZED))
-			warner(WARN_UNINITIALIZED, warn_uninit);
+			warner(WARN_UNINITIALIZED, PL_warn_uninit);
 		    if (GIMME == G_ARRAY) {
 			SP--;
 			RETURN;
@@ -533,7 +533,7 @@ PP(pp_rv2hv)
 		}
 		sym = SvPV(sv,PL_na);
 		if (PL_op->op_private & HINT_STRICT_REFS)
-		    DIE(no_symref, sym, "a HASH");
+		    DIE(PL_no_symref, sym, "a HASH");
 		gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PVHV);
 	    } else {
 		gv = (GV*)sv;
@@ -690,7 +690,7 @@ PP(pp_aassign)
 	    if (SvTHINKFIRST(sv)) {
 		if (SvREADONLY(sv) && PL_curcop != &PL_compiling) {
 		    if (!SvIMMORTAL(sv))
-			DIE(no_modify);
+			DIE(PL_no_modify);
 		    if (relem <= lastrelem)
 			relem++;
 		    break;
@@ -1368,7 +1368,7 @@ PP(pp_helem)
 	    SV* lv;
 	    SV* key2;
 	    if (!defer)
-		DIE(no_helem, SvPV(keysv, PL_na));
+		DIE(PL_no_helem, SvPV(keysv, PL_na));
 	    lv = sv_newmortal();
 	    sv_upgrade(lv, SVt_PVLV);
 	    LvTYPE(lv) = 'y';
@@ -1598,7 +1598,7 @@ PP(pp_subst)
     if (SvREADONLY(TARG)
 	|| (SvTYPE(TARG) > SVt_PVLV
 	    && !(SvTYPE(TARG) == SVt_PVGV && SvFAKE(TARG))))
-	croak(no_modify);
+	croak(PL_no_modify);
     PUTBACK;
 
     s = SvPV(TARG, len);
@@ -2010,9 +2010,9 @@ PP(pp_entersub)
 	    else
 		sym = SvPV(sv, PL_na);
 	    if (!sym)
-		DIE(no_usym, "a subroutine");
+		DIE(PL_no_usym, "a subroutine");
 	    if (PL_op->op_private & HINT_STRICT_REFS)
-		DIE(no_symref, sym, "a subroutine");
+		DIE(PL_no_symref, sym, "a subroutine");
 	    cv = perl_get_cv(sym, TRUE);
 	    break;
 	}
@@ -2427,7 +2427,7 @@ PP(pp_aelem)
 	if (!svp || *svp == &PL_sv_undef) {
 	    SV* lv;
 	    if (!defer)
-		DIE(no_aelem, elem);
+		DIE(PL_no_aelem, elem);
 	    lv = sv_newmortal();
 	    sv_upgrade(lv, SVt_PVLV);
 	    LvTYPE(lv) = 'y';
@@ -2457,7 +2457,7 @@ vivify_ref(SV *sv, U32 to_what)
 	mg_get(sv);
     if (!SvOK(sv)) {
 	if (SvREADONLY(sv))
-	    croak(no_modify);
+	    croak(PL_no_modify);
 	if (SvTYPE(sv) < SVt_RV)
 	    sv_upgrade(sv, SVt_RV);
 	else if (SvTYPE(sv) >= SVt_PV) {

@@ -34,10 +34,6 @@ runops_standard(void)
 }
 
 #ifdef DEBUGGING
-
-dEXT char **watchaddr = 0;
-dEXT char *watchok;
-
 #ifndef PERL_OBJECT
 static void debprof _((OP*o));
 #endif
@@ -56,9 +52,9 @@ runops_debug(void)
 
     do {
 	if (PL_debug) {
-	    if (watchaddr != 0 && *watchaddr != watchok)
+	    if (PL_watchaddr != 0 && *PL_watchaddr != PL_watchok)
 		PerlIO_printf(Perl_debug_log, "WARNING: %lx changed from %lx to %lx\n",
-		    (long)watchaddr, (long)watchok, (long)*watchaddr);
+		    (long)PL_watchaddr, (long)PL_watchok, (long)*PL_watchaddr);
 	    DEBUG_s(debstack());
 	    DEBUG_t(debop(PL_op));
 	    DEBUG_P(debprof(PL_op));
@@ -77,7 +73,7 @@ debop(OP *o)
 {
 #ifdef DEBUGGING
     SV *sv;
-    deb("%s", op_name[o->op_type]);
+    deb("%s", PL_op_name[o->op_type]);
     switch (o->op_type) {
     case OP_CONST:
 	PerlIO_printf(Perl_debug_log, "(%s)", SvPEEK(cSVOPo->op_sv));
@@ -105,10 +101,11 @@ void
 watch(char **addr)
 {
 #ifdef DEBUGGING
-    watchaddr = addr;
-    watchok = *addr;
+    dTHR;
+    PL_watchaddr = addr;
+    PL_watchok = *addr;
     PerlIO_printf(Perl_debug_log, "WATCHING, %lx is currently %lx\n",
-	(long)watchaddr, (long)watchok);
+	(long)PL_watchaddr, (long)PL_watchok);
 #endif	/* DEBUGGING */
 }
 
@@ -133,7 +130,7 @@ debprofdump(void)
 	if (PL_profiledata[i])
 	    PerlIO_printf(Perl_debug_log,
 			  "%5lu %s\n", (unsigned long)PL_profiledata[i],
-                                       op_name[i]);
+                                       PL_op_name[i]);
     }
 #endif	/* DEBUGGING */
 }

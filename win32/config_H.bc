@@ -1851,7 +1851,7 @@
  *	the sig_name list.
  */
 #define SIG_NAME "ZERO", "NUM01", "INT", "QUIT", "ILL", "NUM05", "NUM06", "NUM07", "FPE", "KILL", "NUM10", "SEGV", "NUM12", "PIPE", "ALRM", "TERM", "USR1", "USR2", "CHLD", "NUM19", "USR3", "BREAK", "ABRT", "STOP", "NUM24", "CONT", "CLD", 0		/**/
-#define SIG_NUM  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 18, 0			/**/
+#define SIG_NUM  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 18, 0		/**/
 
 /* VOIDFLAGS:
  *	This symbol indicates how much support of the void type is given by this
@@ -2268,11 +2268,11 @@
 #define SCHED_YIELD		/**/
 /*#define HAS_SCHED_YIELD	/**/
 
-/* PTHREADS_CREATED_JOINABLE:
- *	This symbol, if defined, indicates that pthreads are created
- *	in the joinable (aka undetached) state.
+/* I_MACH_CTHREADS:
+ *     This symbol, if defined, indicates to the C program that it should
+ *     include <mach/cthreads.h>.
  */
-/*#define PTHREADS_CREATED_JOINABLE /**/
+/*#define   I_MACH_CTHREADS	/**/
 
 /* MULTIPLICITY:
  *	This symbol, if defined, indicates that Perl should

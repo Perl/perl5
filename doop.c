@@ -597,7 +597,7 @@ do_trans(SV *sv)
     STRLEN len;
 
     if (SvREADONLY(sv) && !(PL_op->op_private & OPpTRANS_IDENTICAL))
-	croak(no_modify);
+	croak(PL_no_modify);
 
     (void)SvPV(sv, len);
     if (!len)

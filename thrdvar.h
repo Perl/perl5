@@ -162,7 +162,10 @@ PERLVARI(Tregexecp,	regexec_t, FUNC_NAME_TO_PTR(regexec_flags))
 					/* Pointer to RE executer */
 PERLVARI(Treginterp_cnt,int,	    0)	/* Whether `Regexp'
 						   was interpolated. */
-
+#ifdef DEBUGGING
+PERLVARI(Twatchaddr,	char **,    0)
+PERLVAR(Twatchok,	char *)
+#endif
 
 /* Note that the variables below are all explicitly referenced in the code
  * as thr->whatever and therefore don't need the 'T' prefix. */

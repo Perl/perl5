@@ -47,9 +47,9 @@ print "\n#define MAXO ", scalar @ops, "\n\n";
 
 print <<END;
 #ifndef DOINIT
-EXT char *op_name[];
+EXT char *PL_op_name[];
 #else
-EXT char *op_name[] = {
+EXT char *PL_op_name[] = {
 END
 
 for (@ops) {
@@ -64,9 +64,9 @@ END
 
 print <<END;
 #ifndef DOINIT
-EXT char *op_desc[];
+EXT char *PL_op_desc[];
 #else
-EXT char *op_desc[] = {
+EXT char *PL_op_desc[] = {
 END
 
 for (@ops) {
@@ -80,19 +80,26 @@ print <<END;
 #ifndef PERL_OBJECT
 START_EXTERN_C
 
+#undef PERL_CKDEF
+#undef PERL_PPDEF
+#define PERL_CKDEF(s) OP *s _((OP *o));
+#define PERL_PPDEF(s) OP *s _((ARGSproto));
+
+#include "pp_proto.h"
+
 END
 
 # Emit function declarations.
 
-for (sort keys %ckname) {
-    print "OP *\t", &tab(3,$_),"_((OP* o));\n";
-}
-
-print "\n";
-
-for (@ops) {
-    print "OP *\t", &tab(3, "pp_$_"), "_((ARGSproto));\n";
-}
+#for (sort keys %ckname) {
+#    print "OP *\t", &tab(3,$_),"_((OP* o));\n";
+#}
+#
+#print "\n";
+#
+#for (@ops) {
+#    print "OP *\t", &tab(3, "pp_$_"), "_((ARGSproto));\n";
+#}
 
 # Emit ppcode switch array.
 
@@ -102,10 +109,9 @@ END_EXTERN_C
 #endif	/* PERL_OBJECT */
 
 #ifndef DOINIT
-EXT OP * (CPERLscope(*ppaddr)[])(ARGSproto);
+EXT OP * (CPERLscope(*PL_ppaddr)[])(ARGSproto);
 #else
-#ifndef PERL_OBJECT
-EXT OP * (CPERLscope(*ppaddr)[])(ARGSproto) = {
+EXT OP * (CPERLscope(*PL_ppaddr)[])(ARGSproto) = {
 END
 
 for (@ops) {
@@ -114,7 +120,6 @@ for (@ops) {
 
 print <<END;
 };
-#endif	/* PERL_OBJECT */
 #endif
 
 END
@@ -123,10 +128,9 @@ END
 
 print <<END;
 #ifndef DOINIT
-EXT OP * (CPERLscope(*check)[]) _((OP *op));
+EXT OP * (CPERLscope(*PL_check)[]) _((OP *op));
 #else
-#ifndef PERL_OBJECT
-EXT OP * (CPERLscope(*check)[]) _((OP *op)) = {
+EXT OP * (CPERLscope(*PL_check)[]) _((OP *op)) = {
 END
 
 for (@ops) {
@@ -135,7 +139,6 @@ for (@ops) {
 
 print <<END;
 };
-#endif	/* PERL_OBJECT */
 #endif
 
 END
@@ -144,9 +147,9 @@ END
 
 print <<END;
 #ifndef DOINIT
-EXT U32 opargs[];
+EXT U32 PL_opargs[];
 #else
-EXT U32 opargs[] = {
+EXT U32 PL_opargs[] = {
 END
 
 %argnum = (
@@ -210,13 +213,25 @@ END
 close OC or die "Error closing opcode.h: $!";
 
 unlink "pp_proto.h";
+unlink "pp.sym";
 open PP, '>pp_proto.h' or die "Error creating pp_proto.h: $!";
+open PPSYM, '>pp.sym' or die "Error creating pp.sym: $!";
+
+for (sort keys %ckname) {
+    print PP "PERL_CKDEF($_)\n";
+#OP *\t", &tab(3,$_),"_((OP* o));\n";
+}
+
+print PP "\n\n";
+
 for (@ops) {
     next if /^i_(pre|post)(inc|dec)$/;
-    print PP "PPDEF(pp_$_)\n";
+    print PP "PERL_PPDEF(pp_$_)\n";
+    print PPSYM "pp_$_\n";
 }
 
 close PP or die "Error closing pp_proto.h: $!";
+close PPSYM or die "Error closing pp.sym: $!";
 
 ###########################################################################
 sub tab {

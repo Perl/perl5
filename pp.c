@@ -233,14 +233,14 @@ PP(pp_rv2gv)
 	    if (!SvOK(sv)) {
 		if (PL_op->op_flags & OPf_REF ||
 		    PL_op->op_private & HINT_STRICT_REFS)
-		    DIE(no_usym, "a symbol");
+		    DIE(PL_no_usym, "a symbol");
 		if (ckWARN(WARN_UNINITIALIZED))
-		    warner(WARN_UNINITIALIZED, warn_uninit);
+		    warner(WARN_UNINITIALIZED, PL_warn_uninit);
 		RETSETUNDEF;
 	    }
 	    sym = SvPV(sv, PL_na);
 	    if (PL_op->op_private & HINT_STRICT_REFS)
-		DIE(no_symref, sym, "a symbol");
+		DIE(PL_no_symref, sym, "a symbol");
 	    sv = (SV*)gv_fetchpv(sym, TRUE, SVt_PVGV);
 	}
     }
@@ -277,14 +277,14 @@ PP(pp_rv2sv)
 	    if (!SvOK(sv)) {
 		if (PL_op->op_flags & OPf_REF ||
 		    PL_op->op_private & HINT_STRICT_REFS)
-		    DIE(no_usym, "a SCALAR");
+		    DIE(PL_no_usym, "a SCALAR");
 		if (ckWARN(WARN_UNINITIALIZED))
-		    warner(WARN_UNINITIALIZED, warn_uninit);
+		    warner(WARN_UNINITIALIZED, PL_warn_uninit);
 		RETSETUNDEF;
 	    }
 	    sym = SvPV(sv, PL_na);
 	    if (PL_op->op_private & HINT_STRICT_REFS)
-		DIE(no_symref, sym, "a SCALAR");
+		DIE(PL_no_symref, sym, "a SCALAR");
 	    gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PV);
 	}
 	sv = GvSV(gv);
@@ -390,13 +390,16 @@ PP(pp_prototype)
 		char str[ MAX_ARGS_OP * 2 + 2 ]; /* One ';', one '\0' */
 
 		while (i < MAXO) {	/* The slow way. */
-		    if (strEQ(s + 6, op_name[i]) || strEQ(s + 6, op_desc[i]))
+		    if (strEQ(s + 6, PL_op_name[i])
+			|| strEQ(s + 6, PL_op_desc[i]))
+		    {
 			goto found;
+		    }
 		    i++;
 		}
 		goto nonesuch;		/* Should not happen... */
 	      found:
-		oa = opargs[i] >> OASHIFT;
+		oa = PL_opargs[i] >> OASHIFT;
 		while (oa) {
 		    if (oa & OA_OPTIONAL) {
 			seen_question = 1;
@@ -812,7 +815,7 @@ PP(pp_predec)
 {
     djSP;
     if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
-	croak(no_modify);
+	croak(PL_no_modify);
     if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
     	SvIVX(TOPs) != IV_MIN)
     {
@@ -829,7 +832,7 @@ PP(pp_postinc)
 {
     djSP; dTARGET;
     if (SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
-	croak(no_modify);
+	croak(PL_no_modify);
     sv_setsv(TARG, TOPs);
     if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
     	SvIVX(TOPs) != IV_MAX)
@@ -850,7 +853,7 @@ PP(pp_postdec)
 {
     djSP; dTARGET;
     if(SvREADONLY(TOPs) || SvTYPE(TOPs) > SVt_PVLV)
-	croak(no_modify);
+	croak(PL_no_modify);
     sv_setsv(TARG, TOPs);
     if (SvIOK(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs) &&
     	SvIVX(TOPs) != IV_MIN)
@@ -2509,7 +2512,7 @@ PP(pp_aslice)
 	    svp = av_fetch(av, elem, lval);
 	    if (lval) {
 		if (!svp || *svp == &PL_sv_undef)
-		    DIE(no_aelem, elem);
+		    DIE(PL_no_aelem, elem);
 		if (PL_op->op_private & OPpLVAL_INTRO)
 		    save_aelem(av, elem, svp);
 	    }
@@ -2649,7 +2652,7 @@ PP(pp_hslice)
 	    }
 	    if (lval) {
 		if (!svp || *svp == &PL_sv_undef)
-		    DIE(no_helem, SvPV(keysv, PL_na));
+		    DIE(PL_no_helem, SvPV(keysv, PL_na));
 		if (PL_op->op_private & OPpLVAL_INTRO)
 		    save_helem(hv, keysv, svp);
 	    }
@@ -2801,7 +2804,7 @@ PP(pp_splice)
 	else
 	    offset -= PL_curcop->cop_arybase;
 	if (offset < 0)
-	    DIE(no_aelem, i);
+	    DIE(PL_no_aelem, i);
 	if (++MARK < SP) {
 	    length = SvIVx(*MARK++);
 	    if (length < 0) {

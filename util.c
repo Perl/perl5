@@ -97,7 +97,7 @@ safemalloc(MEM_SIZE size)
     else if (PL_nomemok)
 	return Nullch;
     else {
-	PerlIO_puts(PerlIO_stderr(),no_mem) FLUSH;
+	PerlIO_puts(PerlIO_stderr(),PL_no_mem) FLUSH;
 	my_exit(1);
         return Nullch;
     }
@@ -151,7 +151,7 @@ saferealloc(Malloc_t where,MEM_SIZE size)
     else if (PL_nomemok)
 	return Nullch;
     else {
-	PerlIO_puts(PerlIO_stderr(),no_mem) FLUSH;
+	PerlIO_puts(PerlIO_stderr(),PL_no_mem) FLUSH;
 	my_exit(1);
 	return Nullch;
     }
@@ -206,7 +206,7 @@ safecalloc(MEM_SIZE count, MEM_SIZE size)
     else if (PL_nomemok)
 	return Nullch;
     else {
-	PerlIO_puts(PerlIO_stderr(),no_mem) FLUSH;
+	PerlIO_puts(PerlIO_stderr(),PL_no_mem) FLUSH;
 	my_exit(1);
 	return Nullch;
     }
@@ -486,11 +486,11 @@ perl_new_ctype(char *newctype)
 
     for (i = 0; i < 256; i++) {
 	if (isUPPER_LC(i))
-	    fold_locale[i] = toLOWER_LC(i);
+	    PL_fold_locale[i] = toLOWER_LC(i);
 	else if (isLOWER_LC(i))
-	    fold_locale[i] = toUPPER_LC(i);
+	    PL_fold_locale[i] = toUPPER_LC(i);
 	else
-	    fold_locale[i] = i;
+	    PL_fold_locale[i] = i;
     }
 
 #endif /* USE_LOCALE_CTYPE */
@@ -928,9 +928,9 @@ fbm_compile(SV *sv, U32 flags /* not used yet */)
 
     s = (unsigned char*)(SvPVX(sv));		/* deeper magic */
     for (i = 0; i < len; i++) {
-	if (freq[s[i]] < frequency) {
+	if (PL_freq[s[i]] < frequency) {
 	    rarest = i;
-	    frequency = freq[s[i]];
+	    frequency = PL_freq[s[i]];
 	}
     }
     BmRARE(sv) = s[rarest];
@@ -1137,7 +1137,7 @@ ibcmp(char *s1, char *s2, register I32 len)
     register U8 *a = (U8 *)s1;
     register U8 *b = (U8 *)s2;
     while (len--) {
-	if (*a != *b && *a != fold[*b])
+	if (*a != *b && *a != PL_fold[*b])
 	    return 1;
 	a++,b++;
     }
@@ -1150,7 +1150,7 @@ ibcmp_locale(char *s1, char *s2, register I32 len)
     register U8 *a = (U8 *)s1;
     register U8 *b = (U8 *)s2;
     while (len--) {
-	if (*a != *b && *a != fold_locale[*b])
+	if (*a != *b && *a != PL_fold_locale[*b])
 	    return 1;
 	a++,b++;
     }
@@ -2300,10 +2300,8 @@ repeatcpy(register char *to, register char *from, I32 len, register I32 count)
     }
 }
 
-#ifndef CASTNEGFLOAT
 U32
-cast_ulong(f)
-double f;
+cast_ulong(double f)
 {
     long along;
 
@@ -2318,9 +2316,6 @@ double f;
     return (unsigned long)along;
 }
 # undef BIGDOUBLE
-#endif
-
-#ifndef CASTI32
 
 /* Unfortunately, on some systems the cast_uv() function doesn't
    work with the system-supplied definition of ULONG_MAX.  The
@@ -2343,8 +2338,7 @@ double f;
 #endif
 
 I32
-cast_i32(f)
-double f;
+cast_i32(double f)
 {
     if (f >= I32_MAX)
 	return (I32) I32_MAX;
@@ -2354,8 +2348,7 @@ double f;
 }
 
 IV
-cast_iv(f)
-double f;
+cast_iv(double f)
 {
     if (f >= IV_MAX)
 	return (IV) IV_MAX;
@@ -2365,21 +2358,16 @@ double f;
 }
 
 UV
-cast_uv(f)
-double f;
+cast_uv(double f)
 {
     if (f >= MY_UV_MAX)
 	return (UV) MY_UV_MAX;
     return (UV) f;
 }
 
-#endif
-
 #ifndef HAS_RENAME
 I32
-same_dirent(a,b)
-char *a;
-char *b;
+same_dirent(char *a, char *b)
 {
     char *fa = strrchr(a,'/');
     char *fb = strrchr(b,'/');
@@ -2698,15 +2686,13 @@ schedule(void)
 }
 
 void
-perl_cond_init(cp)
-perl_cond *cp;
+perl_cond_init(perl_cond *cp)
 {
     *cp = 0;
 }
 
 void
-perl_cond_signal(cp)
-perl_cond *cp;
+perl_cond_signal(perl_cond *cp)
 {
     perl_os_thread t;
     perl_cond cond = *cp;
@@ -2726,8 +2712,7 @@ perl_cond *cp;
 }
 
 void
-perl_cond_broadcast(cp)
-perl_cond *cp;
+perl_cond_broadcast(perl_cond *cp)
 {
     perl_os_thread t;
     perl_cond cond, cond_next;
@@ -2748,8 +2733,7 @@ perl_cond *cp;
 }
 
 void
-perl_cond_wait(cp)
-perl_cond *cp;
+perl_cond_wait(perl_cond *cp)
 {
     perl_cond cond;
 
@@ -2960,27 +2944,26 @@ Perl_GetVars(void)
 char **
 get_op_names(void)
 {
- return op_name;
+ return PL_op_name;
 }
 
 char **
 get_op_descs(void)
 {
- return op_desc;
+ return PL_op_desc;
 }
 
 char *
 get_no_modify(void)
 {
- return (char*)no_modify;
+ return (char*)PL_no_modify;
 }
 
 U32 *
 get_opargs(void)
 {
- return opargs;
+ return PL_opargs;
 }
-
 
 SV **
 get_specialsv_list(void)
