@@ -3,7 +3,7 @@
  */
 
 /*
- * $Id: Storable.xs,v 1.0.1.7 2001/02/17 12:25:26 ram Exp $
+ * $Id: Storable.xs,v 1.0.1.8 2001/03/15 00:20:55 ram Exp $
  *
  *  Copyright (c) 1995-2000, Raphael Manfredi
  *  
@@ -11,6 +11,9 @@
  *  in the README file that comes with the distribution.
  *
  * $Log: Storable.xs,v $
+ * Revision 1.0.1.8  2001/03/15 00:20:55  ram
+ * patch11: last version was wrongly compiling with assertions on
+ *
  * Revision 1.0.1.7  2001/02/17 12:25:26  ram
  * patch8: now bless objects ASAP at retrieve time
  * patch8: added support for blessed ref to tied structures
@@ -29,7 +32,14 @@
  * Revision 1.0.1.3  2000/09/29 19:49:57  ram
  * patch3: avoid using "tainted" and "dirty" since Perl remaps them via cpp
  *
- * $Log: Storable.xs,v $
+ * Revision 1.0.1.2  2000/09/28 21:43:10  ram
+ * patch2: perls before 5.004_04 lack newSVpvn
+ *
+ * Revision 1.0.1.1  2000/09/17 16:47:49  ram
+ * patch1: now only taint retrieved data when source was tainted
+ * patch1: added support for UTF-8 strings
+ * patch1: fixed store hook bug: was allocating class id too soon
+ *
  * Revision 1.0  2000/09/01 19:40:41  ram
  * Baseline for first official release.
  *
@@ -106,6 +116,11 @@ typedef double NV;			/* Older perls lack the NV type */
 #endif
 
 #ifdef DEBUGME
+
+#ifndef DASSERT
+#define DASSERT
+#endif
+
 /*
  * TRACEME() will only output things when the $Storable::DEBUGME is true.
  */
@@ -116,11 +131,8 @@ typedef double NV;			/* Older perls lack the NV type */
 } while (0)
 #else
 #define TRACEME(x)
-#endif
+#endif	/* DEBUGME */
 
-#ifndef DASSERT
-#define DASSERT
-#endif
 #ifdef DASSERT
 #define ASSERT(x,y)	do {									\
 	if (!(x)) {												\
@@ -3074,7 +3086,7 @@ static SV *retrieve_idx_blessed(stcxt_t *cxt, char *cname)
 
 	sva = av_fetch(cxt->aclass, idx, FALSE);
 	if (!sva)
-		CROAK(("Class name #%d should have been seen already", (int)idx));
+		CROAK(("Class name #%d should have been seen already", idx));
 
 	class = SvPVX(*sva);	/* We know it's a PV, by construction */
 
@@ -3269,7 +3281,7 @@ static SV *retrieve_hook(stcxt_t *cxt, char *cname)
 
 		sva = av_fetch(cxt->aclass, idx, FALSE);
 		if (!sva)
-			CROAK(("Class name #%d should have been seen already", (int)idx));
+			CROAK(("Class name #%d should have been seen already", idx));
 
 		class = SvPVX(*sva);	/* We know it's a PV, by construction */
 		TRACEME(("class ID %d => %s", idx, class));
@@ -3370,7 +3382,7 @@ static SV *retrieve_hook(stcxt_t *cxt, char *cname)
 			tag = ntohl(tag);
 			svh = av_fetch(cxt->aseen, tag, FALSE);
 			if (!svh)
-				CROAK(("Object #%d should have been retrieved already", (int)tag));
+				CROAK(("Object #%d should have been retrieved already", tag));
 			xsv = *svh;
 			ary[i] = SvREFCNT_inc(xsv);
 		}
@@ -3994,18 +4006,15 @@ static SV *retrieve_byte(stcxt_t *cxt, char *cname)
 {
 	SV *sv;
 	int siv;
-      signed char tmp;
 
 	TRACEME(("retrieve_byte (#%d)", cxt->tagnum));
 
 	GETMARK(siv);
 	TRACEME(("small integer read as %d", (unsigned char) siv));
-      tmp = ((unsigned char)siv) - 128;
-      sv = newSViv (tmp);
-
+	sv = newSViv((unsigned char) siv - 128);
 	SEEN(sv, cname);	/* Associate this new scalar with tag "tagnum" */
 
-      TRACEME(("byte %d", tmp));
+	TRACEME(("byte %d", (unsigned char) siv - 128));
 	TRACEME(("ok (retrieve_byte at 0x%"UVxf")", PTR2UV(sv)));
 
 	return sv;
@@ -4519,7 +4528,7 @@ static SV *retrieve(stcxt_t *cxt, char *cname)
 			I32 tagn;
 			svh = hv_fetch(cxt->hseen, (char *) &tag, sizeof(tag), FALSE);
 			if (!svh)
-				CROAK(("Old tag 0x%x should have been mapped already", (unsigned)tag));
+				CROAK(("Old tag 0x%x should have been mapped already", tag));
 			tagn = SvIV(*svh);	/* Mapped tag number computed earlier below */
 
 			/*
@@ -4528,7 +4537,7 @@ static SV *retrieve(stcxt_t *cxt, char *cname)
 
 			svh = av_fetch(cxt->aseen, tagn, FALSE);
 			if (!svh)
-				CROAK(("Object #%d should have been retrieved already", (int)tagn));
+				CROAK(("Object #%d should have been retrieved already", tagn));
 			sv = *svh;
 			TRACEME(("has retrieved #%d at 0x%"UVxf, tagn, PTR2UV(sv)));
 			SvREFCNT_inc(sv);	/* One more reference to this same sv */
@@ -4569,7 +4578,7 @@ again:
 		tag = ntohl(tag);
 		svh = av_fetch(cxt->aseen, tag, FALSE);
 		if (!svh)
-			CROAK(("Object #%d should have been retrieved already", (int)tag));
+			CROAK(("Object #%d should have been retrieved already", tag));
 		sv = *svh;
 		TRACEME(("had retrieved #%d at 0x%"UVxf, tag, PTR2UV(sv)));
 		SvREFCNT_inc(sv);	/* One more reference to this same sv */

@@ -1,4 +1,4 @@
-;# $Id: Storable.pm,v 1.0.1.8 2001/02/17 12:24:37 ram Exp $
+;# $Id: Storable.pm,v 1.0.1.10 2001/03/15 00:20:25 ram Exp $
 ;#
 ;#  Copyright (c) 1995-2000, Raphael Manfredi
 ;#  
@@ -6,6 +6,12 @@
 ;#  in the README file that comes with the distribution.
 ;#
 ;# $Log: Storable.pm,v $
+;# Revision 1.0.1.10  2001/03/15 00:20:25  ram
+;# patch11: updated version number
+;#
+;# Revision 1.0.1.9  2001/02/17 12:37:32  ram
+;# patch10: forgot to increase version number at previous patch
+;#
 ;# Revision 1.0.1.8  2001/02/17 12:24:37  ram
 ;# patch8: fixed incorrect error message
 ;#
@@ -23,7 +29,16 @@
 ;# patch4: protected calls to flock() for dos platform
 ;# patch4: added logcarp emulation if they don't have Log::Agent
 ;#
-;# $Log: Storable.pm,v $
+;# Revision 1.0.1.3  2000/09/29 19:49:01  ram
+;# patch3: updated version number
+;#
+;# Revision 1.0.1.2  2000/09/28 21:42:51  ram
+;# patch2: added lock_store lock_nstore lock_retrieve
+;#
+;# Revision 1.0.1.1  2000/09/17 16:46:21  ram
+;# patch1: documented that doubles are stringified by nstore()
+;# patch1: added Salvador Ortiz Garcia in CREDITS section
+;#
 ;# Revision 1.0  2000/09/01 19:40:41  ram
 ;# Baseline for first official release.
 ;#
@@ -44,7 +59,7 @@ package Storable; @ISA = qw(Exporter DynaLoader);
 use AutoLoader;
 use vars qw($forgive_me $VERSION);
 
-$VERSION = '1.007';
+$VERSION = '1.011';
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;		# Grrr...
 
 #
@@ -277,11 +292,10 @@ sub _retrieve {
 	my $da = $@;							# Could be from exception handler
 	if ($use_locking) {
 		unless (&CAN_FLOCK) {
-			logcarp "Storable::lock_retrieve: fcntl/flock emulation broken on $^O";
+			logcarp "Storable::lock_store: fcntl/flock emulation broken on $^O";
 			return undef;
 		}
-		flock(FILE, LOCK_SH) ||
-			logcroak "can't get shared lock on $file: $!";
+		flock(FILE, LOCK_SH) || logcroak "can't get shared lock on $file: $!";
 		# Unlocking will happen when FILE is closed
 	}
 	eval { $self = pretrieve(*FILE) };		# Call C routine
