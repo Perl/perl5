@@ -234,3 +234,29 @@ foreach my $pain ($first, @virtual) {
 	"which is the expected result for $pain");
 }
 
+# Check that config entries appear correctly in @INC
+# TestInit.pm has probably already messed with our @INC
+my ($path, $ver, @orig_inc)
+  = split /\n/, runperl (nolib=>1, prog=>'print qq{$_\n} for $^X, $], @INC');
+
+die "This perl is $] at $^X; other perl is $ver (at $path) "
+  . '- failed to find this perl' unless $] eq $ver;
+
+my %orig_inc;
+@orig_inc{@orig_inc} = ();
+
+my $failed;
+# This is the order that directories are pushed onto @INC in perl.c:
+foreach my $lib (qw(applibexp archlibexp privlibexp sitearchexp sitelibexp
+		     vendorarchexp vendorlibexp vendorlib_stem)) {
+  my $dir = $Config{$lib};
+  SKIP: {
+    skip "lib $lib not defined" unless defined $dir;
+    skip "lib $lib not set" unless length $dir;
+    # So we expect to find it in @INC
+
+    ok (exists $orig_inc{$dir}, "Expect $lib '$dir' to be in \@INC")
+      or $failed++;
+  }
+}
+_diag ('@INC is:', @orig_inc) if $failed;
