@@ -960,7 +960,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	    c1 = *(U8*)m;
 	    c2 = PL_fold_locale[c1];
 	  do_exactf:
-	    e = do_utf8 ? s + ln - 1 : strend - ln;
+	    e = do_utf8 ? s + ln : strend - ln;
 
 	    if (norun && e < s)
 		e = s;			/* Due to minlen logic of intuit() */
@@ -980,16 +980,14 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 	        U8 tmpbuf [UTF8_MAXLEN+1];
 		U8 foldbuf[UTF8_MAXLEN_FOLD+1];
 		STRLEN len, foldlen;
-		char* se;
 		
 		if (c1 == c2) {
 		    while (s <= e) {
 		        c = utf8_to_uvchr((U8*)s, &len);
 			if ( c == c1
 			     && (ln == len ||
-				 ((se = e + 1) &&
-				  !ibcmp_utf8(s, &se, 0,  do_utf8,
-					      m, 0  , ln, UTF)))
+				 ibcmp_utf8(s, 0 , 0,  do_utf8,
+					    m, 0 , ln, UTF))
 			     && (norun || regtry(prog, s)) )
 			    goto got_it;
 			else {
@@ -1025,9 +1023,8 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, char *strend, char *sta
 
 			if ( (c == c1 || c == c2)
 			     && (ln == len ||
-				 ((se = e + 1) &&
-				  !ibcmp_utf8(s, &se, 0,  do_utf8,
-					      m, 0,   ln, UTF)))
+				 ibcmp_utf8(s, 0, 0,  do_utf8,
+					    m, 0, ln, UTF))
 			     && (norun || regtry(prog, s)) )
 			    goto got_it;
 			else {
