@@ -2332,17 +2332,17 @@ Perl_moreswitches(pTHX_ char *s)
 	return s;
     case 'A':
 	forbid_setid("-A");
+	if (!PL_preambleav)
+	    PL_preambleav = newAV();
 	if (*++s) {
-	    SV *sv=newSVpv("use assertions::activate split(/,/,q{",0);
+	    SV *sv = newSVpvn("use assertions::activate split(/,/,q{",37);
 	    sv_catpv(sv,s);
 	    sv_catpv(sv,"})");
 	    s+=strlen(s);
-	    if(!PL_preambleav)
-		PL_preambleav = newAV();
 	    av_push(PL_preambleav, sv);
 	}
 	else
-	    Perl_croak(aTHX_ "No space allowed after -A");
+	    av_push(PL_preambleav, newSVpvn("use assertions::activate",24));
 	return s;
     case 'M':
 	forbid_setid("-M");	/* XXX ? */

@@ -7,7 +7,7 @@ BEGIN {
 }
 
 BEGIN {
-    plan(4);
+    plan(5);
 }
 
 #1
@@ -29,3 +29,8 @@ fresh_perl_is('sub cm : assertion { "ok" }; use assertions Bye; print cm()',
 fresh_perl_is('sub cm : assertion { "ok" }; use assertions Hello; print cm()',
 	      '0',
 	      { switches => ['-ANoH..o'] }, '-ANoH..o');
+
+#5
+fresh_perl_is('sub cm : assertion { "ok" }; use assertions Hello; print cm()',
+             'ok',
+             { switches => ['-A'] }, '-A');
