@@ -43,8 +43,8 @@ usenm='true';
 # Optimize.
 optimize='-O3';
 
-# We have a prototype for telldir.
-ccflags="${ccflags} -pipe -fno-common -DHAS_TELLDIR_PROTOTYPE";
+# XXX Unclear why we require -pipe and -fno-common here.
+ccflags="${ccflags} -pipe -fno-common"
 
 # At least on Darwin 1.3.x:
 #
