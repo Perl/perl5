@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Jan 12 22:28:01 EET 2001 [metaconfig 3.0 PL70]
+# Generated on Sun Jan 14 06:37:36 EET 2001 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -631,6 +631,7 @@ i_dirent=''
 i_dld=''
 i_dlfcn=''
 i_fcntl=''
+i_features=''
 i_float=''
 i_gdbm=''
 d_grpasswd=''
@@ -9303,11 +9304,19 @@ eval $inlibc
 set fpathconf d_fpathconf
 eval $inlibc
 
+: see if this is a features.h system
+set features.h i_features
+eval $inhdr
+
 
 : check for fpos64_t
 echo " "
 echo "Checking to see if you have fpos64_t..." >&4
 $cat >try.c <<EOCP
+#$i_features I_FEATURES
+#ifdef I_FEATURES
+#include <features.h>
+#endif
 #include <stdio.h>
 int main() { fpos64_t x = 7; }
 EOCP
@@ -10501,6 +10510,10 @@ $rm -f try.* try
 echo " "
 echo "Checking to see if you have off64_t..." >&4
 $cat >try.c <<EOCP
+#$i_features I_FEATURES
+#ifdef I_FEATURES
+#include <features.h>
+#endif
 #include <sys/types.h>
 #include <unistd.h>
 int main() { off64_t x = 7; }
@@ -16211,6 +16224,7 @@ i_dirent='$i_dirent'
 i_dld='$i_dld'
 i_dlfcn='$i_dlfcn'
 i_fcntl='$i_fcntl'
+i_features='$i_features'
 i_float='$i_float'
 i_gdbm='$i_gdbm'
 i_grp='$i_grp'

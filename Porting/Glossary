@@ -2013,6 +2013,10 @@ i_fcntl (i_fcntl.U):
 	This variable controls the value of I_FCNTL (which tells
 	the C program to include <fcntl.h>).
 
+i_features (i_features.U):
+	This variable conditionally defines the I_FEATURES symbol,
+	and indicates whether a C program should include <features.h>.
+
 i_float (i_float.U):
 	This variable conditionally defines the I_FLOAT symbol, and indicates
 	whether a C program may include <float.h> to get symbols like DBL_MAX

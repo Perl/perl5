@@ -747,6 +747,12 @@
  */
 #define I_FCNTL	/**/
 
+/* I_FEATURES:
+ *	This symbol, if defined, indicates that <features.h> exists and should
+ *	be included.
+ */
+/*#define I_FEATURES		/**/
+
 /* I_FLOAT:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <float.h> to get definition of symbols like DBL_MAX or

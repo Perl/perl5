@@ -17,7 +17,7 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Fri Jan 12 22:32:53 EET 2001
+ * Configuration time: Sun Jan 14 06:47:38 EET 2001
  * Configured by     : jhi
  * Target system     : osf1 alpha.hut.fi v4.0 878 alpha 
  */
@@ -3248,5 +3248,11 @@
  *	of the calling process.
  */
 #define HAS_SIGPROCMASK		/**/
+
+/* I_FEATURES:
+ *	This symbol, if defined, indicates that <features.h> exists and
+ *	should be included.
+ */
+/*#define	I_FEATURES		/ **/
 
 #endif
