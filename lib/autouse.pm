@@ -119,7 +119,7 @@ will work and is the equivalent to:
 
    use Module qw(func3);
 
-Its not a very useful feature and has been deprecated.
+It is not a very useful feature and has been deprecated.
 
 =end _deprecated
 
