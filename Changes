@@ -28,6 +28,188 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.1		Maintenance release working toward v5.8.1
 --------------
 ____________________________________________________________________________
+[ 20802] By: jhi                                   on 2003/08/21  15:07:17
+        Log: Integrate:
+             [ 20801]
+             No more public cwd(), use private _cwd().
+     Branch: maint-5.8/perl
+	  !> lib/File/Spec/t/Spec.t
+____________________________________________________________________________
+[ 20800] By: jhi                                   on 2003/08/21  14:35:19
+        Log: Integrate:
+             [ 20797]
+             Subject: Re: [PATCH: perl@20760] clean up quotation issue for use with MMS on VMS
+             From: PPrymmer@factset.com
+             Message-ID: <OF261B78F0.19FBE242-ON85256D88.00091B48-85256D88.000A179D@factset.com>
+             Date: Tue, 19 Aug 2003 21:50:12 -0400
+             
+             [ 20798]
+             Rename the internal cwd() to _cwd() (it's not curdir).
+             
+             [ 20799]
+             Underline the fact that abs2rel() makes no sense
+             if it spans multiple roots.
+     Branch: maint-5.8/perl
+	  !> lib/ExtUtils/MM_Unix.pm lib/File/Spec.pm
+	  !> lib/File/Spec/Cygwin.pm lib/File/Spec/Epoc.pm
+	  !> lib/File/Spec/Functions.pm lib/File/Spec/Mac.pm
+	  !> lib/File/Spec/OS2.pm lib/File/Spec/Unix.pm
+	  !> lib/File/Spec/VMS.pm lib/File/Spec/Win32.pm
+____________________________________________________________________________
+[ 20796] By: jhi                                   on 2003/08/21  04:51:00
+        Log: Integrate:
+             [ 20785]
+             Manifest.t.ation of Schwern.
+             
+             [ 20786]
+             t/TEST fails to fail when it can't find tests.
+             
+             [ 20789]
+             Patch from Enache for the crashing of bytecode.t in Tru64.
+             
+             [ 20790]
+             Upgrade to Encode 1.98.
+             
+             [ 20791]
+             Subject: [PATCH perl@20760] Remove redundant targets from Win32 Makefile
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Date: Wed, 20 Aug 2003 10:54:46 +0100
+             Message-ID: <3F434566.3030602@uk.radan.com>
+             
+             [ 20793]
+             Subject: Re: untieing your victim during the act
+             From: Dave Mitchell <davem@fdgroup.com>
+             Date: Wed, 20 Aug 2003 20:44:53 +0100
+             Message-ID: <20030820194453.GD27719@fdgroup.com>
+             
+             [ 20794]
+             MPE/iX does not have nanosleep() (the test makes
+             a wrong conclusion of the linking succeeding)
+             
+             [ 20795]
+             Retract #19064, broke mod_perl flushing (localisation of $|).
+             http://public.activestate.com/cgi-bin/perlbrowse?patch=19064
+             http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2003-08/msg01466.html
+     Branch: maint-5.8/perl
+	  !> (integrate 26 files)
+____________________________________________________________________________
+[ 20784] By: jhi                                   on 2003/08/19  19:26:43
+        Log: Integrate:
+             [ 20783]
+             Nick's podulator was right, I just hadn't read the manual...
+             the vms\perlvms.pod lines needed to be moved.
+     Branch: maint-5.8/perl
+	  !> win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 20782] By: jhi                                   on 2003/08/19  17:24:25
+        Log: Integrate:
+             [ 20761]
+             Use the base class cwd() method.
+             
+             [ 20762]
+             Subject: [PATCH: perl@20760] clean up quotation issue for use with MMS on VMS
+             From: PPrymmer@factset.com
+             Date: Mon, 18 Aug 2003 14:28:22 -0400
+             Message-ID: <OFAF7796C8.7F204EDE-ON85256D86.0063976D-85256D86.006578B0@factset.com>
+             
+             [ 20763]
+             Subject: [PATCH: perl@20760] VMS specific fix for lib/ExtUtils/t/Manifest.t
+             From: PPrymmer@factset.com
+             Date: Mon, 18 Aug 2003 15:57:12 -0400
+             Message-ID: <OF314202D4.49371ADF-ON85256D86.006CEBE2-85256D86.006D9AA7@factset.com>
+             
+             [ 20764]
+             Typo tweaks from Gerrit P. Haase.  Fcntl, fcntl, fcntl.
+             
+             [ 20765]
+             Pod tweaks for NEXT from Alan Ferrency.
+             
+             [ 20766]
+             Nick Clark's podulator.  The win32 makefile
+             generation doesn't seem to be working yet.
+             
+             [ 20767]
+             Try to unify the MANIFEST sorting.
+             
+             [ 20768]
+             Still trying to unify MANIFEST sorting.
+             
+             [ 20769]
+             Update the history records.
+             
+             [ 20770]
+             Subject: [PATCH] maintperl - File::Spec cwd() stuff
+             From: Ken Williams <ken@mathforum.org>
+             Date: Mon, 18 Aug 2003 17:07:43 -0500
+             Message-Id: <645E5A7D-D1C8-11D7-84BF-003065F6D85A@mathforum.org>
+             
+             [ 20771]
+             Subject: [PATCH] Re: [PATCH] maintperl - File::Spec cwd() stuff
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 18 Aug 2003 18:02:08 -0700
+             Message-ID: <20030819010208.GI14782@windhund.schwern.org>
+             
+             [ 20772]
+             Replace #20763 with
+             
+             Subject: Re: [PATCH: perl@20760] VMS specific fix for lib/ExtUtils/t/Manifest.t
+             From: Michael G Schwern <schwern@pobox.com>
+             Date: Mon, 18 Aug 2003 17:07:30 -0700
+             Message-ID: <20030819000729.GG14782@windhund.schwern.org>
+             
+             [ 20773]
+             These are kind of important.
+             
+             [ 20774]
+             's buildtoc now.
+             
+             [ 20776]
+             Replace #20772 with
+             
+             Subject: Re: [PATCH: perl@20760] VMS specific fix for lib/ExtUtils/t/Manifest.t
+             From: PPrymmer@factset.com
+             Message-ID: <OFE22C35CE.D5CB1A7F-ON85256D87.004E3BCA-85256D87.004F9EF2@factset.com>
+             Date: Tue, 19 Aug 2003 10:29:44 -0400
+             
+             [ 20777]
+             One less failure.
+             
+             [ 20778]
+             Unnecessary whitespace diff.
+             
+             [ 20779]
+             Subject: Re: [PATCH] Re: [PATCH] maintperl - File::Spec cwd() stuff
+             From: Ilya Zakharevich <ilya@Math.Berkeley.EDU>
+             Date: Tue, 19 Aug 2003 08:28:14 -0700
+             Message-ID: <20030819152814.GA15441@math.berkeley.edu>
+             
+             [ 20780]
+             Subject: [PATCH] Can't build thread on openbsd sparc64 => B.c:5078: virtual memory exhausted
+             From: alian <alian@cpan.org>
+             Date: Tue, 19 Aug 2003 18:18:03 +0200
+             Message-ID: <20030819161650.65754.qmail@onion.perl.org>
+             
+             [ 20781]
+             Subject: Re: [perl #23304] Installing perl breaks redhat-config scripts[was: New (well  known) printer won't install in RH-9]
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Tue, 19 Aug 2003 10:45:24 -0400 (EDT)
+             Message-ID: <Pine.SOL.4.53.0308191027250.6665@maxwell.phys.lafayette.edu>
+     Branch: maint-5.8/perl
+	  +> ext/B/hints/openbsd.pl pod.lst pod/buildtoc
+	   - pod/buildtoc.PL
+	   ! MANIFEST pod/perl.pod pod/perltoc.pod vms/descrip_mms.template
+	   ! win32/pod.mak
+	  !> INSTALL Makefile.SH README.cygwin ext/Fcntl/Fcntl.pm
+	  !> lib/ExtUtils/MakeMaker.pm lib/ExtUtils/t/Manifest.t
+	  !> lib/File/Spec/OS2.pm lib/File/Spec/Unix.pm
+	  !> lib/File/Spec/VMS.pm lib/File/Spec/t/Spec.t lib/NEXT.pm
+	  !> pod/Makefile.SH pod/perlfunc.pod pod/perlhist.pod t/io/utf8.t
+____________________________________________________________________________
+[ 20760] By: jhi                                   on 2003/08/18  10:03:40
+        Log: Update Changes.
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 20759] By: jhi                                   on 2003/08/18  09:53:18
         Log: Integrate:
              [ 20758]
