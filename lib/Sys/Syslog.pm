@@ -9,33 +9,86 @@ use Carp;
 use Socket;
 use Sys::Hostname;
 
+# adapted from syslog.pl
 #
-# syslog.pl
-#
-# $Log:	syslog.pl,v $
-# 
-# tom christiansen <tchrist@convex.com>
+# Tom Christiansen <tchrist@convex.com>
 # modified to use sockets by Larry Wall <lwall@jpl-devvax.jpl.nasa.gov>
 # NOTE: openlog now takes three arguments, just like openlog(3)
-#
-# call syslog() with a string priority and a list of printf() args
-# like syslog(3)
-#
-#  usage: use Syslog;
-#
-#  then (put these all in a script to test function)
-#		
-#	openlog($program,'cons,pid','user');
-#	syslog('info','this is another test');
-#	syslog('mail|warning','this is a better test: %d', time);
-#	closelog();
-#	
-#	syslog('debug','this is the last test');
-#	openlog("$program $$",'ndelay','user');
-#	syslog('notice','fooprogram: this is really done');
-#
-#	$! = 55;
-#	syslog('info','problem was %m'); # %m == $! in syslog(3)
+
+=head1 NAME
+
+Sys::Syslog, openlog, closelog, setlogmask, syslog - Perl interface to the UNIX syslog(3) calls
+
+=head1 SYNOPSIS
+
+    use Sys::Syslog;
+
+    openlog $ident, $logopt, $facility;
+    syslog $priority, $mask, $format, @args;
+    $oldmask = setlogmask $mask_priority;
+    closelog;
+
+=head1 DESCRIPTION
+
+Sys::Syslog is an interface to the UNIX C<syslog(3)> program.
+Call C<syslog()> with a string priority and a list of C<printf()> args
+just like C<syslog(3)>.
+
+Syslog provides the functions:
+
+=over
+
+=item openlog $ident, $logopt, $facility
+
+I<$ident> is prepended to every message.
+I<$logopt> contains one or more of the words I<pid>, I<ndelay>, I<cons>, I<nowait>.
+I<$facility> specifies the part of the system
+
+=item syslog $priority, $mask, $format, @args
+
+If I<$priority> and I<$mask> permit, logs I<($format, @args)>
+printed as by C<printf(3V)>, with the addition that I<%m>
+is replaced with C<"$!"> (the latest error message).
+
+=item setlogmask $mask_priority
+
+Sets log mask I<$mask_priority> and returns the old mask.
+
+=item closelog
+
+Closes the log file.
+
+=back
+
+Note that C<openlog> now takes three arguments, just like C<openlog(3)>.
+
+=head1 EXAMPLES
+
+    openlog($program, 'cons,pid', 'user');
+    syslog('info', 'this is another test');
+    syslog('mail|warning', 'this is a better test: %d', time);
+    closelog();
+
+    syslog('debug', 'this is the last test');
+    openlog("$program $$", 'ndelay', 'user');
+    syslog('notice', 'fooprogram: this is really done');
+
+    $! = 55;
+    syslog('info', 'problem was %m'); # %m == $! in syslog(3)
+
+=head1 DEPENDENCIES
+
+B<Sys::Syslog> needs F<syslog.ph>, which can be created with C<h2ph>.
+
+=head1 SEE ALSO
+
+L<syslog(3)>
+
+=head1 AUTHOR
+
+Tom Christiansen E<lt>F<tchrist@perl.com>E<gt> and Larry Wall E<lt>F<lwall@sems.com>E<gt>
+
+=cut
 
 $host = hostname() unless $host;	# set $Syslog::host to change
 
@@ -163,4 +216,3 @@ sub disconnect {
 }
 
 1;
-

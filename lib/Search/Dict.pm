@@ -5,29 +5,50 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(look);
 
-# Usage: look(*FILEHANDLE,$key,$dict,$fold)
+=head1 NAME
 
-# Sets file position in FILEHANDLE to be first line greater than or equal
-# (stringwise) to $key.  Pass flags for dictionary order and case folding.
+Search::Dict, look - search for key in dictionary file
+
+=head1 SYNOPSIS
+
+    use Search::Dict;
+    look *FILEHANDLE, $key, $dict, $fold;
+
+=head1 DESCRIPTION
+
+Sets file position in FILEHANDLE to be first line greater than or equal
+(stringwise) to I<$key>.  Returns the new file position, or -1 if an error
+occurs.
+
+The flags specify dictionary order and case folding:
+
+If I<$dict> is true, search by dictionary order (ignore anything but word
+characters and whitespace).
+
+If I<$fold> is true, ignore case.
+
+=cut
 
 sub look {
     local(*FH,$key,$dict,$fold) = @_;
-    local($max,$min,$mid,$_);
-    local($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
-       $blksize,$blocks) = stat(FH);
-    $blksize = 8192 unless $blksize;
+    local($_);
+    my(@stat) = stat(FH)
+	or return -1;
+    my($size, $blksize) = @stat[7,11];
+    $blksize ||= 8192;
     $key =~ s/[^\w\s]//g if $dict;
     $key =~ tr/A-Z/a-z/ if $fold;
-    $max = int($size / $blksize);
+    my($min, $max, $mid) = (0, int($size / $blksize));
     while ($max - $min > 1) {
 	$mid = int(($max + $min) / 2);
-	seek(FH,$mid * $blksize,0);
-	$_ = <FH> if $mid;		# probably a partial line
+	seek(FH, $mid * $blksize, 0)
+	    or return -1;
+	<FH> if $mid;			# probably a partial line
 	$_ = <FH>;
 	chop;
 	s/[^\w\s]//g if $dict;
 	tr/A-Z/a-z/ if $fold;
-	if ($_ lt $key) {
+	if (defined($_) && $_ lt $key) {
 	    $min = $mid;
 	}
 	else {
@@ -35,18 +56,20 @@ sub look {
 	}
     }
     $min *= $blksize;
-    seek(FH,$min,0);
+    seek(FH,$min,0)
+	or return -1;
     <FH> if $min;
-    while (<FH>) {
+    for (;;) {
+	$min = tell(FH);
+	$_ = <FH>
+	    or last;
 	chop;
 	s/[^\w\s]//g if $dict;
 	y/A-Z/a-z/ if $fold;
 	last if $_ ge $key;
-	$min = tell(FH);
     }
     seek(FH,$min,0);
     $min;
 }
 
 1;
-
