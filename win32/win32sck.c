@@ -269,6 +269,7 @@ win32_select(int nfds, Perl_fd_set* rd, Perl_fd_set* wr, Perl_fd_set* ex, const 
     int i, fd, bit, offset;
     FD_SET nrd, nwr, nex, *prd, *pwr, *pex;
 
+    StartSockets();
     PERL_FD_ZERO(&dummy);
     if (!rd)
 	rd = &dummy, prd = NULL;
