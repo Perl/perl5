@@ -797,11 +797,14 @@ lib/CGI/Fast.pm			Support for FastCGI (persistent server process)
 lib/CGI/Pretty.pm		Output nicely formatted HTML
 lib/CGI/Push.pm			Support for server push
 lib/CGI/Switch.pm		Simple interface for multiple server types
+lib/CGI/t/apache.t              See if CGI::Apache still loads
+lib/CGI/t/cookie.t              See if CGI::Cookie works
 lib/CGI/t/form.t		See if CGI.pm works
 lib/CGI/t/function.t		See if CGI.pm works
 lib/CGI/t/html.t		See if CGI.pm works
 lib/CGI/t/pretty.t		See if CGI.pm works
 lib/CGI/t/request.t		See if CGI.pm works
+lib/CGI/t/switch.t              See if CGI::Switch still loads
 lib/CGI/t/util.t		See if CGI.pm works
 lib/CGI/Util.pm			Utility functions
 lib/charnames.pm		Character names
