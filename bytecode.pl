@@ -207,7 +207,6 @@ struct bytestream {
 enum {
 EOT
 
-my $i = 0;
 my $add_enum_value = 0;
 my $max_insn;
 for ($i = 0; $i < @insn_name; $i++) {
