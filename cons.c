@@ -1,11 +1,15 @@
-/* $Header: cons.c,v 4.0 91/03/20 01:05:51 lwall Locked $
+/* $RCSfile: cons.c,v $$Revision: 4.0.1.1 $$Date: 91/06/07 10:31:15 $
  *
- *    Copyright (c) 1989, Larry Wall
+ *    Copyright (c) 1991, Larry Wall
  *
- *    You may distribute under the terms of the GNU General Public License
- *    as specified in the README file that comes with the perl 3.0 kit.
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	cons.c,v $
+ * Revision 4.0.1.1  91/06/07  10:31:15  lwall
+ * patch4: new copyright notice
+ * patch4: added global modifier for pattern matches
+ * 
  * Revision 4.0  91/03/20  01:05:51  lwall
  * 4.0 baseline.
  * 
@@ -676,7 +680,9 @@ int acmd;
 	     arg->arg_type == O_NMATCH || arg->arg_type == O_NSUBST) {
 	if ((arg[1].arg_type == A_STAB || arg[1].arg_type == A_LVAL) &&
 		(arg[2].arg_type & A_MASK) == A_SPAT &&
-		arg[2].arg_ptr.arg_spat->spat_short ) {
+		arg[2].arg_ptr.arg_spat->spat_short &&
+		(arg->arg_type == O_SUBST || arg->arg_type == O_NSUBST ||
+		 (arg[2].arg_ptr.arg_spat->spat_flags & SPAT_GLOBAL) == 0 )) {
 	    cmd->c_stab  = arg[1].arg_ptr.arg_stab;
 	    cmd->c_short = str_smake(arg[2].arg_ptr.arg_spat->spat_short);
 	    cmd->c_slen  = arg[2].arg_ptr.arg_spat->spat_slen;

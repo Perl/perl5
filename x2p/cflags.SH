@@ -57,55 +57,19 @@ for file do
     *) echo $n "    $file.c	$c" ;;
     esac
 
-    : allow variables like toke_cflags to be evaluated
+    : allow variables like str_cflags to be evaluated
 
     eval 'eval ${'"${file}_cflags"'-""}'
 
     : or customize here
 
     case "$file" in
-    array) ;;
-    cmd) ;;
-    cons) ;;
-    consarg) ;;
-    doarg) ;;
-    doio) ;;
-    dolist) ;;
-    dump) ;;
-    eval) ;;
-    form) ;;
+    a2p) ;;
+    a2py) ;;
     hash) ;;
-    malloc) ;;
-    perl) ;;
-    perly) ;;
-    regcomp) ;;
-    regexec) ;;
-    stab) ;;
     str) ;;
-    toke) ;;
-    usersub) ;;
     util) ;;
-    tarray) ;;
-    tcmd) ;;
-    tcons) ;;
-    tconsarg) ;;
-    tdoarg) ;;
-    tdoio) ;;
-    tdolist) ;;
-    tdump) ;;
-    teval) ;;
-    tform) ;;
-    thash) ;;
-    tmalloc) ;;
-    tperl) ;;
-    tperly) ;;
-    tregcomp) ;;
-    tregexec) ;;
-    tstab) ;;
-    tstr) ;;
-    ttoke) ;;
-    tusersub) ;;
-    tutil) ;;
+    walk) ;;
     *) ;;
     esac
 

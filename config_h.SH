@@ -454,7 +454,13 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
  *	This symbol, if defined, indicates that the shmat() routine is
  *	available to stat symbolic links.
  */
+/* VOID_SHMAT
+ *	This symbol, if defined, indicates that the shmat() routine
+ *	returns a pointer of type void*.
+ */
 #$d_shmat	HAS_SHMAT		/**/
+
+#$d_voidshmat	VOIDSHMAT		/**/
 
 /* HAS_SHMCTL
  *	This symbol, if defined, indicates that the shmctl() routine is
@@ -760,7 +766,7 @@ sed <<!GROK!THIS! >config.h -e 's!^#undef!/\*#undef!'
 
 /* SCRIPTDIR
  *	This symbol holds the name of the directory in which the user wants
- *	to put publicly executable scripts for the package in question.  It
+ *	to keep publicly executable scripts for the package in question.  It
  *	is often a directory that is mounted across diverse architectures.
  */
 #define SCRIPTDIR "$scriptdir"             /**/

@@ -1,11 +1,15 @@
-/* $RCSfile: cmd.c,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:36:16 $
+/* $RCSfile: cmd.c,v $$Revision: 4.0.1.2 $$Date: 91/06/07 10:26:45 $
  *
- *    Copyright (c) 1989, Larry Wall
+ *    Copyright (c) 1991, Larry Wall
  *
- *    You may distribute under the terms of the GNU General Public License
- *    as specified in the README file that comes with the perl 3.0 kit.
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	cmd.c,v $
+ * Revision 4.0.1.2  91/06/07  10:26:45  lwall
+ * patch4: new copyright notice
+ * patch4: made some allowances for "semi-standard" C
+ * 
  * Revision 4.0.1.1  91/04/11  17:36:16  lwall
  * patch1: you may now use "die" and "caller" in a signal handler
  * 
@@ -27,7 +31,7 @@ void grow_dlevel();
 
 /* do longjmps() clobber register variables? */
 
-#if defined(cray) || defined(__STDC__)
+#if defined(cray) || defined(STANDARD_C)
 #define JMPCLOBBER
 #endif
 

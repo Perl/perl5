@@ -43,7 +43,7 @@
 
 /* BIN
  *	This symbol holds the name of the directory in which the user wants
- *	to put publicly executable images for the package in question.  It
+ *	to keep publicly executable images for the package in question.  It
  *	is most often a local directory such as /usr/local/bin.
  */
 #define BIN "/usr/local/bin"             /**/
@@ -590,10 +590,22 @@
  */
 #define GIDTYPE int		/**/
 
+/* GROUPSTYPE
+ *	This symbol has a value like gid_t, int, ushort, or whatever type is
+ *	used in the return value of getgroups().
+ */
+#define GROUPSTYPE int		/**/
+
 /* I_FCNTL
  *	This manifest constant tells the C program to include <fcntl.h>.
  */
 #define	I_FCNTL	/**/
+
+/* I_GDBM
+ *	This symbol, if defined, indicates that gdbm.h exists and should
+ *	be included.
+ */
+/*#undef	I_GDBM		/**/
 
 /* I_GRP
  *	This symbol, if defined, indicates to the C program that it should
@@ -733,6 +745,10 @@
 /*#undef	I_MY_DIR	/**/
 /*#undef	DIRNAMLEN	/**/
 
+/* MALLOCPTRTYPE
+ *	This symbol defines the kind of ptr returned by malloc and realloc.
+ */
+#define MALLOCPTRTYPE void         /**/
 
 /* RANDBITS
  *	This symbol contains the number of bits of random number the rand()

@@ -29,7 +29,7 @@
  *	This symbol contains the number of bytes required to align a double.
  *	Usual values are 2, 4, and 8.
  */
-#define ALIGNBYTES 4		/**/
+#define ALIGNBYTES 2		/**/
 
 /* BIN
  *	This symbol holds the name of the directory in which the user wants
@@ -42,7 +42,7 @@
  *	This symbol contains an encoding of the order of bytes in a long.
  *	Usual values (in octal) are 01234, 04321, 02143, 03412...
  */
-#define BYTEORDER 0x1234		/**/
+#define BYTEORDER 0x4321		/**/
 
 /* CPPSTDIN
  *	This symbol contains the first part of the string which will invoke
@@ -55,8 +55,8 @@
  *	output.  This symbol will have the value "-" if CPPSTDIN needs a minus
  *	to specify standard input, otherwise the value is "".
  */
-#define CPPSTDIN "cc -E"
-#define CPPMINUS "-"
+#define CPPSTDIN "/usr/lib/cpp"
+#define CPPMINUS ""
 
 /* HAS_BCMP
  *	This symbol, if defined, indicates that the bcmp routine is available
@@ -89,8 +89,8 @@
  *		1 = couldn't cast < 0
  *		2 = couldn't cast >= 0x80000000
  */
-#define	CASTNEGFLOAT	/**/
-#define	CASTFLAGS 0	/**/
+/*#undef	CASTNEGFLOAT	/**/
+#define	CASTFLAGS 1	/**/
 
 /* CHARSPRINTF
  *	This symbol is defined if this system declares "char *sprintf()" in
@@ -180,7 +180,7 @@
  *	This symbol, if defined, indicates that the gethostent() routine is
  *	available to lookup host names in some data base or other.
  */
-#define	HAS_GETHOSTENT		/**/
+/*#undef	HAS_GETHOSTENT		/**/
 
 /* HAS_GETPGRP
  *	This symbol, if defined, indicates that the getpgrp() routine is
@@ -439,7 +439,13 @@
  *	This symbol, if defined, indicates that the shmat() routine is
  *	available to stat symbolic links.
  */
+/* VOID_SHMAT
+ *	This symbol, if defined, indicates that the shmat() routine
+ *	returns a pointer of type void*.
+ */
 #define	HAS_SHMAT		/**/
+
+/*#undef	VOIDSHMAT		/**/
 
 /* HAS_SHMCTL
  *	This symbol, if defined, indicates that the shmctl() routine is
@@ -537,8 +543,8 @@
  *	a signal handler using "TO_SIGNAL (*handler())()", and define the
  *	handler using "TO_SIGNAL handler(sig)".
  */
-/*#undef	VOIDSIG 	/**/
-#define	TO_SIGNAL	 	/**/
+#define	VOIDSIG 	/**/
+#define	TO_SIGNAL	int 	/**/
 
 /* HASVOLATILE
  *	This symbol, if defined, indicates that this C compiler knows about
@@ -557,8 +563,8 @@
  *	is up to the package author to declare vsprintf correctly based on the
  *	symbol.
  */
-/*#undef	HAS_VPRINTF	/**/
-/*#undef	CHARVSPRINTF 	/**/
+#define	HAS_VPRINTF	/**/
+#define	CHARVSPRINTF 	/**/
 
 /* HAS_WAIT4
  *	This symbol, if defined, indicates that wait4() exists.
@@ -568,13 +574,19 @@
 /* HAS_WAITPID
  *	This symbol, if defined, indicates that waitpid() exists.
  */
-/*#undef	HAS_WAITPID	/**/
+#define	HAS_WAITPID	/**/
 
 /* GIDTYPE
  *	This symbol has a value like gid_t, int, ushort, or whatever type is
  *	used to declare group ids in the kernel.
  */
-#define GIDTYPE int		/**/
+#define GIDTYPE gid_t		/**/
+
+/* GROUPSTYPE
+ *	This symbol has a value like gid_t, int, ushort, or whatever type is
+ *	used in the return value of getgroups().
+ */
+#define GROUPSTYPE int		/**/
 
 /* I_FCNTL
  *	This manifest constant tells the C program to include <fcntl.h>.
@@ -634,11 +646,11 @@
  */
 #define	I_PWD		/**/
 /*#undef	PWQUOTA		/**/
-/*#undef	PWAGE		/**/
+#define	PWAGE		/**/
 /*#undef	PWCHANGE	/**/
 /*#undef	PWCLASS		/**/
 /*#undef	PWEXPIRE	/**/
-/*#undef	PWCOMMENT	/**/
+#define	PWCOMMENT	/**/
 
 /* I_SYS_FILE
  *	This manifest constant tells the C program to include <sys/file.h>.
@@ -673,7 +685,7 @@
  *	This symbol, if defined, indicates to the C program that it should
  *	include utime.h.
  */
-/*#undef	I_UTIME		/**/
+#define	I_UTIME		/**/
 
 /* I_VARARGS
  *	This symbol, if defined, indicates to the C program that it should
@@ -685,7 +697,7 @@
  *	This symbol, if defined, indicates to the C program that it should
  *	include vfork.h.
  */
-/*#undef	I_VFORK		/**/
+#define	I_VFORK		/**/
 
 /* INTSIZE
  *	This symbol contains the size of an int, so that the C preprocessor
@@ -725,6 +737,11 @@
 /*#undef	I_MY_DIR	/**/
 /*#undef	DIRNAMLEN	/**/
 
+/* MALLOCPTRTYPE
+ *	This symbol defines the kind of ptr returned by malloc and realloc.
+ */
+#define MALLOCPTRTYPE char         /**/
+
 
 /* RANDBITS
  *	This symbol contains the number of bits of random number the rand()
@@ -734,7 +751,7 @@
 
 /* SCRIPTDIR
  *	This symbol holds the name of the directory in which the user wants
- *	to put publicly executable scripts for the package in question.  It
+ *	to keep publicly executable scripts for the package in question.  It
  *	is often a directory that is mounted across diverse architectures.
  */
 #define SCRIPTDIR "/usr/local/bin"             /**/
@@ -742,13 +759,13 @@
 /* SIG_NAME
  *	This symbol contains an list of signal names in order.
  */
-#define SIG_NAME "ZERO","HUP","INT","QUIT","ILL","TRAP","IOT","EMT","FPE","KILL","BUS","SEGV","SYS","PIPE","ALRM","TERM","URG","STOP","TSTP","CONT","CHLD","TTIN","TTOU","IO","XCPU","XFSZ","VTALRM","PROF","WINCH","LOST","USR1","USR2"		/**/
+#define SIG_NAME "ZERO","HUP","INT","QUIT","ILL","TRAP","ABRT","EMT","FPE","KILL","BUS","SEGV","SYS","PIPE","ALRM","TERM","URG","STOP","TSTP","CONT","CLD","TTIN","TTOU","IO","XCPU","XFSZ","VTALRM","PROF","WINCH","LOST","USR1","USR2"		/**/
 
 /* STDCHAR
  *	This symbol is defined to be the type of char used in stdio.h.
  *	It has the values "unsigned char" or "char".
  */
-#define STDCHAR char	/**/
+#define STDCHAR unsigned char	/**/
 
 /* UIDTYPE
  *	This symbol has a value like uid_t, int, ushort, or whatever type is
@@ -788,9 +805,9 @@
  *	its value is "char *".
  */
 #ifndef VOIDWANT
-#define VOIDWANT 1
+#define VOIDWANT 7
 #endif
-#define VOIDHAVE 1
+#define VOIDHAVE 7
 #if (VOIDHAVE & VOIDWANT) != VOIDWANT
 #define void int		/* is void to be avoided? */
 #define VOID

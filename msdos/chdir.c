@@ -1,8 +1,8 @@
 /*
  *    (C) Copyright 1990, 1991 Tom Dinger
  *
- *    You may distribute under the terms of the GNU General Public License
- *    as specified in the README file that comes with the perl 4.0 kit.
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
  *
  */
 

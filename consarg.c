@@ -1,11 +1,15 @@
-/* $RCSfile: consarg.c,v $$Revision: 4.0.1.1 $$Date: 91/04/11 17:38:34 $
+/* $RCSfile: consarg.c,v $$Revision: 4.0.1.2 $$Date: 91/06/07 10:33:12 $
  *
- *    Copyright (c) 1989, Larry Wall
+ *    Copyright (c) 1991, Larry Wall
  *
- *    You may distribute under the terms of the GNU General Public License
- *    as specified in the README file that comes with the perl 3.0 kit.
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	consarg.c,v $
+ * Revision 4.0.1.2  91/06/07  10:33:12  lwall
+ * patch4: new copyright notice
+ * patch4: length($`), length($&), length($') now optimized to avoid string copy
+ * 
  * Revision 4.0.1.1  91/04/11  17:38:34  lwall
  * patch1: fixed "Bad free" error
  * 
@@ -254,15 +258,15 @@ ARG *arg3;
 	fprintf(stderr,")\n");
     }
 #endif
-    evalstatic(arg);		/* see if we can consolidate anything */
+    arg = evalstatic(arg);	/* see if we can consolidate anything */
     return arg;
 }
 
-void
+ARG *
 evalstatic(arg)
 register ARG *arg;
 {
-    register STR *str;
+    static STR *str = Nullstr;
     register STR *s1;
     register STR *s2;
     double value;		/* must not be register */
@@ -275,297 +279,347 @@ register ARG *arg;
     double sin(), cos(), atan2(), pow();
 
     if (!arg || !arg->arg_len)
-	return;
+	return arg;
 
-    if ((arg[1].arg_type == A_SINGLE || arg->arg_type == O_AELEM) &&
-	(arg->arg_len == 1 || arg[2].arg_type == A_SINGLE) ) {
+    if (!str)
 	str = Str_new(20,0);
-	s1 = arg[1].arg_ptr.arg_str;
-	if (arg->arg_len > 1)
-	    s2 = arg[2].arg_ptr.arg_str;
-	else
-	    s2 = Nullstr;
-	switch (arg->arg_type) {
-	case O_AELEM:
-	    i = (int)str_gnum(s2);
-	    if (i < 32767 && i >= 0) {
-		arg->arg_type = O_ITEM;
-		arg->arg_len = 1;
-		arg[1].arg_type = A_ARYSTAB;	/* $abc[123] is hoistable now */
-		arg[1].arg_len = i;
-		str_free(s2);
-		arg[2].arg_type = A_NULL;
-		arg[2].arg_ptr.arg_str = Nullstr;
-	    }
-	    /* FALL THROUGH */
-	default:
-	    str_free(str);
-	    str = Nullstr;		/* can't be evaluated yet */
-	    break;
-	case O_CONCAT:
-	    str_sset(str,s1);
-	    str_scat(str,s2);
-	    break;
-	case O_REPEAT:
-	    i = (int)str_gnum(s2);
-	    tmps = str_get(s1);
-	    str_nset(str,"",0);
-	    STR_GROW(str, i * s1->str_cur + 1);
-	    repeatcpy(str->str_ptr, tmps, s1->str_cur, i);
-	    str->str_cur = i * s1->str_cur;
-	    str->str_ptr[str->str_cur] = '\0';
-	    break;
-	case O_MULTIPLY:
-	    value = str_gnum(s1);
-	    str_numset(str,value * str_gnum(s2));
-	    break;
-	case O_DIVIDE:
-	    value = str_gnum(s2);
-	    if (value == 0.0)
-		yyerror("Illegal division by constant zero");
-	    else
-#ifdef cray
-	    /* insure that 20./5. == 4. */
-	    {
-		double x;
-		int    k;
-		x =  str_gnum(s1);
-		if ((double)(int)x     == x &&
-		    (double)(int)value == value &&
-		    (k = (int)x/(int)value)*(int)value == (int)x) {
-		    value = k;
-		} else {
-		    value = x/value;
-		}
-		str_numset(str,value);
-	    }
-#else
-	    str_numset(str,str_gnum(s1) / value);
-#endif
-	    break;
-	case O_MODULO:
-	    tmplong = (unsigned long)str_gnum(s2);
-	    if (tmplong == 0L) {
-		yyerror("Illegal modulus of constant zero");
-		break;
-	    }
-	    tmp2 = (long)str_gnum(s1);
-#ifndef lint
-	    if (tmp2 >= 0)
-		str_numset(str,(double)(tmp2 % tmplong));
-	    else
-		str_numset(str,(double)((tmplong-((-tmp2 - 1) % tmplong)) - 1));
-#else
-	    tmp2 = tmp2;
-#endif
-	    break;
-	case O_ADD:
-	    value = str_gnum(s1);
-	    str_numset(str,value + str_gnum(s2));
-	    break;
-	case O_SUBTRACT:
-	    value = str_gnum(s1);
-	    str_numset(str,value - str_gnum(s2));
-	    break;
-	case O_LEFT_SHIFT:
-	    value = str_gnum(s1);
-	    i = (int)str_gnum(s2);
-#ifndef lint
-	    str_numset(str,(double)(((long)value) << i));
-#endif
-	    break;
-	case O_RIGHT_SHIFT:
-	    value = str_gnum(s1);
-	    i = (int)str_gnum(s2);
-#ifndef lint
-	    str_numset(str,(double)(((long)value) >> i));
-#endif
-	    break;
-	case O_LT:
-	    value = str_gnum(s1);
-	    str_numset(str,(value < str_gnum(s2)) ? 1.0 : 0.0);
-	    break;
-	case O_GT:
-	    value = str_gnum(s1);
-	    str_numset(str,(value > str_gnum(s2)) ? 1.0 : 0.0);
-	    break;
-	case O_LE:
-	    value = str_gnum(s1);
-	    str_numset(str,(value <= str_gnum(s2)) ? 1.0 : 0.0);
-	    break;
-	case O_GE:
-	    value = str_gnum(s1);
-	    str_numset(str,(value >= str_gnum(s2)) ? 1.0 : 0.0);
-	    break;
-	case O_EQ:
-	    if (dowarn) {
-		if ((!s1->str_nok && !looks_like_number(s1)) ||
-		    (!s2->str_nok && !looks_like_number(s2)) )
-		    warn("Possible use of == on string value");
-	    }
-	    value = str_gnum(s1);
-	    str_numset(str,(value == str_gnum(s2)) ? 1.0 : 0.0);
-	    break;
-	case O_NE:
-	    value = str_gnum(s1);
-	    str_numset(str,(value != str_gnum(s2)) ? 1.0 : 0.0);
-	    break;
-	case O_NCMP:
-	    value = str_gnum(s1);
-	    value -= str_gnum(s2);
-	    if (value > 0.0)
-		value = 1.0;
-	    else if (value < 0.0)
-		value = -1.0;
-	    str_numset(str,value);
-	    break;
-	case O_BIT_AND:
-	    value = str_gnum(s1);
-#ifndef lint
-	    str_numset(str,(double)(U_L(value) & U_L(str_gnum(s2))));
-#endif
-	    break;
-	case O_XOR:
-	    value = str_gnum(s1);
-#ifndef lint
-	    str_numset(str,(double)(U_L(value) ^ U_L(str_gnum(s2))));
-#endif
-	    break;
-	case O_BIT_OR:
-	    value = str_gnum(s1);
-#ifndef lint
-	    str_numset(str,(double)(U_L(value) | U_L(str_gnum(s2))));
-#endif
-	    break;
-	case O_AND:
-	    if (str_true(s1))
-		str_sset(str,s2);
-	    else
-		str_sset(str,s1);
-	    break;
-	case O_OR:
-	    if (str_true(s1))
-		str_sset(str,s1);
-	    else
-		str_sset(str,s2);
-	    break;
-	case O_COND_EXPR:
-	    if ((arg[3].arg_type & A_MASK) != A_SINGLE) {
-		str_free(str);
-		str = Nullstr;
-	    }
-	    else {
-		if (str_true(s1))
-		    str_sset(str,s2);
-		else
-		    str_sset(str,arg[3].arg_ptr.arg_str);
-		str_free(arg[3].arg_ptr.arg_str);
-		arg[3].arg_ptr.arg_str = Nullstr;
-	    }
-	    break;
-	case O_NEGATE:
-	    str_numset(str,(double)(-str_gnum(s1)));
-	    break;
-	case O_NOT:
-	    str_numset(str,(double)(!str_true(s1)));
-	    break;
-	case O_COMPLEMENT:
-#ifndef lint
-	    str_numset(str,(double)(~U_L(str_gnum(s1))));
-#endif
-	    break;
-	case O_SIN:
-	    str_numset(str,sin(str_gnum(s1)));
-	    break;
-	case O_COS:
-	    str_numset(str,cos(str_gnum(s1)));
-	    break;
-	case O_ATAN2:
-	    value = str_gnum(s1);
-	    str_numset(str,atan2(value, str_gnum(s2)));
-	    break;
-	case O_POW:
-	    value = str_gnum(s1);
-	    str_numset(str,pow(value, str_gnum(s2)));
-	    break;
-	case O_LENGTH:
-	    str_numset(str, (double)str_len(s1));
-	    break;
-	case O_SLT:
-	    str_numset(str,(double)(str_cmp(s1,s2) < 0));
-	    break;
-	case O_SGT:
-	    str_numset(str,(double)(str_cmp(s1,s2) > 0));
-	    break;
-	case O_SLE:
-	    str_numset(str,(double)(str_cmp(s1,s2) <= 0));
-	    break;
-	case O_SGE:
-	    str_numset(str,(double)(str_cmp(s1,s2) >= 0));
-	    break;
-	case O_SEQ:
-	    str_numset(str,(double)(str_eq(s1,s2)));
-	    break;
-	case O_SNE:
-	    str_numset(str,(double)(!str_eq(s1,s2)));
-	    break;
-	case O_SCMP:
-	    str_numset(str,(double)(str_cmp(s1,s2)));
-	    break;
-	case O_CRYPT:
-#ifdef HAS_CRYPT
-	    tmps = str_get(s1);
-	    str_set(str,crypt(tmps,str_get(s2)));
-#else
-	    yyerror(
-	    "The crypt() function is unimplemented due to excessive paranoia.");
-#endif
-	    break;
-	case O_EXP:
-	    str_numset(str,exp(str_gnum(s1)));
-	    break;
-	case O_LOG:
-	    str_numset(str,log(str_gnum(s1)));
-	    break;
-	case O_SQRT:
-	    str_numset(str,sqrt(str_gnum(s1)));
-	    break;
-	case O_INT:
-	    value = str_gnum(s1);
-	    if (value >= 0.0)
-		(void)modf(value,&value);
-	    else {
-		(void)modf(-value,&value);
-		value = -value;
-	    }
-	    str_numset(str,value);
-	    break;
-	case O_ORD:
-#ifndef I286
-	    str_numset(str,(double)(*str_get(s1)));
-#else
-	    {
-		int  zapc;
-		char *zaps;
 
-		zaps = str_get(s1);
-		zapc = (int) *zaps;
-		str_numset(str,(double)(zapc));
+    if (arg[1].arg_type == A_SINGLE)
+	s1 = arg[1].arg_ptr.arg_str;
+    else
+	s1 = Nullstr;
+    if (arg->arg_len >= 2 && arg[2].arg_type == A_SINGLE)
+	s2 = arg[2].arg_ptr.arg_str;
+    else
+	s2 = Nullstr;
+
+#define CHECK1 if (!s1) return arg
+#define CHECK2 if (!s2) return arg
+#define CHECK12 if (!s1 || !s2) return arg
+
+    switch (arg->arg_type) {
+    default:
+	return arg;
+    case O_AELEM:
+	CHECK2;
+	i = (int)str_gnum(s2);
+	if (i < 32767 && i >= 0) {
+	    arg->arg_type = O_ITEM;
+	    arg->arg_len = 1;
+	    arg[1].arg_type = A_ARYSTAB;	/* $abc[123] is hoistable now */
+	    arg[1].arg_len = i;
+	    str_free(s2);
+	    Renew(arg, 2, ARG);
+	}
+	return arg;
+    case O_CONCAT:
+	CHECK12;
+	str_sset(str,s1);
+	str_scat(str,s2);
+	break;
+    case O_REPEAT:
+	CHECK12;
+	i = (int)str_gnum(s2);
+	tmps = str_get(s1);
+	str_nset(str,"",0);
+	STR_GROW(str, i * s1->str_cur + 1);
+	repeatcpy(str->str_ptr, tmps, s1->str_cur, i);
+	str->str_cur = i * s1->str_cur;
+	str->str_ptr[str->str_cur] = '\0';
+	break;
+    case O_MULTIPLY:
+	CHECK12;
+	value = str_gnum(s1);
+	str_numset(str,value * str_gnum(s2));
+	break;
+    case O_DIVIDE:
+	CHECK12;
+	value = str_gnum(s2);
+	if (value == 0.0)
+	    yyerror("Illegal division by constant zero");
+	else
+#ifdef cray
+	/* insure that 20./5. == 4. */
+	{
+	    double x;
+	    int    k;
+	    x =  str_gnum(s1);
+	    if ((double)(int)x     == x &&
+		(double)(int)value == value &&
+		(k = (int)x/(int)value)*(int)value == (int)x) {
+		value = k;
+	    } else {
+		value = x/value;
 	    }
+	    str_numset(str,value);
+	}
+#else
+	str_numset(str,str_gnum(s1) / value);
 #endif
-	    break;
+	break;
+    case O_MODULO:
+	CHECK12;
+	tmplong = (unsigned long)str_gnum(s2);
+	if (tmplong == 0L) {
+	    yyerror("Illegal modulus of constant zero");
+	    return arg;
 	}
-	if (str) {
-	    arg->arg_type = O_ITEM;	/* note arg1 type is already SINGLE */
-	    str_free(s1);
-	    arg[1].arg_ptr.arg_str = str;
-	    if (s2) {
-		str_free(s2);
-		arg[2].arg_ptr.arg_str = Nullstr;
-		arg[2].arg_type = A_NULL;
-	    }
+	tmp2 = (long)str_gnum(s1);
+#ifndef lint
+	if (tmp2 >= 0)
+	    str_numset(str,(double)(tmp2 % tmplong));
+	else
+	    str_numset(str,(double)((tmplong-((-tmp2 - 1) % tmplong)) - 1));
+#else
+	tmp2 = tmp2;
+#endif
+	break;
+    case O_ADD:
+	CHECK12;
+	value = str_gnum(s1);
+	str_numset(str,value + str_gnum(s2));
+	break;
+    case O_SUBTRACT:
+	CHECK12;
+	value = str_gnum(s1);
+	str_numset(str,value - str_gnum(s2));
+	break;
+    case O_LEFT_SHIFT:
+	CHECK12;
+	value = str_gnum(s1);
+	i = (int)str_gnum(s2);
+#ifndef lint
+	str_numset(str,(double)(((long)value) << i));
+#endif
+	break;
+    case O_RIGHT_SHIFT:
+	CHECK12;
+	value = str_gnum(s1);
+	i = (int)str_gnum(s2);
+#ifndef lint
+	str_numset(str,(double)(((long)value) >> i));
+#endif
+	break;
+    case O_LT:
+	CHECK12;
+	value = str_gnum(s1);
+	str_numset(str,(value < str_gnum(s2)) ? 1.0 : 0.0);
+	break;
+    case O_GT:
+	CHECK12;
+	value = str_gnum(s1);
+	str_numset(str,(value > str_gnum(s2)) ? 1.0 : 0.0);
+	break;
+    case O_LE:
+	CHECK12;
+	value = str_gnum(s1);
+	str_numset(str,(value <= str_gnum(s2)) ? 1.0 : 0.0);
+	break;
+    case O_GE:
+	CHECK12;
+	value = str_gnum(s1);
+	str_numset(str,(value >= str_gnum(s2)) ? 1.0 : 0.0);
+	break;
+    case O_EQ:
+	CHECK12;
+	if (dowarn) {
+	    if ((!s1->str_nok && !looks_like_number(s1)) ||
+		(!s2->str_nok && !looks_like_number(s2)) )
+		warn("Possible use of == on string value");
 	}
+	value = str_gnum(s1);
+	str_numset(str,(value == str_gnum(s2)) ? 1.0 : 0.0);
+	break;
+    case O_NE:
+	CHECK12;
+	value = str_gnum(s1);
+	str_numset(str,(value != str_gnum(s2)) ? 1.0 : 0.0);
+	break;
+    case O_NCMP:
+	CHECK12;
+	value = str_gnum(s1);
+	value -= str_gnum(s2);
+	if (value > 0.0)
+	    value = 1.0;
+	else if (value < 0.0)
+	    value = -1.0;
+	str_numset(str,value);
+	break;
+    case O_BIT_AND:
+	CHECK12;
+	value = str_gnum(s1);
+#ifndef lint
+	str_numset(str,(double)(U_L(value) & U_L(str_gnum(s2))));
+#endif
+	break;
+    case O_XOR:
+	CHECK12;
+	value = str_gnum(s1);
+#ifndef lint
+	str_numset(str,(double)(U_L(value) ^ U_L(str_gnum(s2))));
+#endif
+	break;
+    case O_BIT_OR:
+	CHECK12;
+	value = str_gnum(s1);
+#ifndef lint
+	str_numset(str,(double)(U_L(value) | U_L(str_gnum(s2))));
+#endif
+	break;
+    case O_AND:
+	CHECK12;
+	if (str_true(s1))
+	    str_sset(str,s2);
+	else
+	    str_sset(str,s1);
+	break;
+    case O_OR:
+	CHECK12;
+	if (str_true(s1))
+	    str_sset(str,s1);
+	else
+	    str_sset(str,s2);
+	break;
+    case O_COND_EXPR:
+	CHECK12;
+	if ((arg[3].arg_type & A_MASK) != A_SINGLE)
+	    return arg;
+	if (str_true(s1))
+	    str_sset(str,s2);
+	else
+	    str_sset(str,arg[3].arg_ptr.arg_str);
+	str_free(arg[3].arg_ptr.arg_str);
+	Renew(arg, 3, ARG);
+	break;
+    case O_NEGATE:
+	CHECK1;
+	str_numset(str,(double)(-str_gnum(s1)));
+	break;
+    case O_NOT:
+	CHECK1;
+	str_numset(str,(double)(!str_true(s1)));
+	break;
+    case O_COMPLEMENT:
+	CHECK1;
+#ifndef lint
+	str_numset(str,(double)(~U_L(str_gnum(s1))));
+#endif
+	break;
+    case O_SIN:
+	CHECK1;
+	str_numset(str,sin(str_gnum(s1)));
+	break;
+    case O_COS:
+	CHECK1;
+	str_numset(str,cos(str_gnum(s1)));
+	break;
+    case O_ATAN2:
+	CHECK12;
+	value = str_gnum(s1);
+	str_numset(str,atan2(value, str_gnum(s2)));
+	break;
+    case O_POW:
+	CHECK12;
+	value = str_gnum(s1);
+	str_numset(str,pow(value, str_gnum(s2)));
+	break;
+    case O_LENGTH:
+	if (arg[1].arg_type == A_STAB) {
+	    arg->arg_type = O_ITEM;
+	    arg[1].arg_type = A_LENSTAB;
+	    return arg;
+	}
+	CHECK1;
+	str_numset(str, (double)str_len(s1));
+	break;
+    case O_SLT:
+	CHECK12;
+	str_numset(str,(double)(str_cmp(s1,s2) < 0));
+	break;
+    case O_SGT:
+	CHECK12;
+	str_numset(str,(double)(str_cmp(s1,s2) > 0));
+	break;
+    case O_SLE:
+	CHECK12;
+	str_numset(str,(double)(str_cmp(s1,s2) <= 0));
+	break;
+    case O_SGE:
+	CHECK12;
+	str_numset(str,(double)(str_cmp(s1,s2) >= 0));
+	break;
+    case O_SEQ:
+	CHECK12;
+	str_numset(str,(double)(str_eq(s1,s2)));
+	break;
+    case O_SNE:
+	CHECK12;
+	str_numset(str,(double)(!str_eq(s1,s2)));
+	break;
+    case O_SCMP:
+	CHECK12;
+	str_numset(str,(double)(str_cmp(s1,s2)));
+	break;
+    case O_CRYPT:
+	CHECK12;
+#ifdef HAS_CRYPT
+	tmps = str_get(s1);
+	str_set(str,crypt(tmps,str_get(s2)));
+#else
+	yyerror(
+	"The crypt() function is unimplemented due to excessive paranoia.");
+#endif
+	break;
+    case O_EXP:
+	CHECK1;
+	str_numset(str,exp(str_gnum(s1)));
+	break;
+    case O_LOG:
+	CHECK1;
+	str_numset(str,log(str_gnum(s1)));
+	break;
+    case O_SQRT:
+	CHECK1;
+	str_numset(str,sqrt(str_gnum(s1)));
+	break;
+    case O_INT:
+	CHECK1;
+	value = str_gnum(s1);
+	if (value >= 0.0)
+	    (void)modf(value,&value);
+	else {
+	    (void)modf(-value,&value);
+	    value = -value;
+	}
+	str_numset(str,value);
+	break;
+    case O_ORD:
+	CHECK1;
+#ifndef I286
+	str_numset(str,(double)(*str_get(s1)));
+#else
+	{
+	    int  zapc;
+	    char *zaps;
+
+	    zaps = str_get(s1);
+	    zapc = (int) *zaps;
+	    str_numset(str,(double)(zapc));
+	}
+#endif
+	break;
     }
+    arg->arg_type = O_ITEM;	/* note arg1 type is already SINGLE */
+    str_free(s1);
+    arg[1].arg_ptr.arg_str = str;
+    if (s2) {
+	str_free(s2);
+	arg[2].arg_ptr.arg_str = Nullstr;
+	arg[2].arg_type = A_NULL;
+    }
+    str = Nullstr;
+
+    return arg;
 }
 
 ARG *

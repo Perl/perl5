@@ -1,11 +1,16 @@
-/* $Header: arg.h,v 4.0 91/03/20 01:03:09 lwall Locked $
+/* $RCSfile: arg.h,v $$Revision: 4.0.1.1 $$Date: 91/06/07 10:18:30 $
  *
- *    Copyright (c) 1989, Larry Wall
+ *    Copyright (c) 1991, Larry Wall
  *
- *    You may distribute under the terms of the GNU General Public License
- *    as specified in the README file that comes with the perl 3.0 kit.
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
  *
  * $Log:	arg.h,v $
+ * Revision 4.0.1.1  91/06/07  10:18:30  lwall
+ * patch4: length($`), length($&), length($') now optimized to avoid string copy
+ * patch4: new copyright notice
+ * patch4: many, many itty-bitty portability fixes
+ * 
  * Revision 4.0  91/03/20  01:03:09  lwall
  * 4.0 baseline.
  * 
@@ -270,7 +275,7 @@
 #define O_SGRENT 256
 #define O_EGRENT 257
 #define O_GETLOGIN 258
-#define O_OPENDIR 259
+#define O_OPEN_DIR 259
 #define O_READDIR 260
 #define O_TELLDIR 261
 #define O_SEEKDIR 262
@@ -576,6 +581,7 @@ char *opname[] = {
 #define A_STAR 18
 #define A_LSTAR 19
 #define A_WANTARRAY 20
+#define A_LENSTAB 21
 
 #define A_MASK 31
 #define A_DONT 32		/* or this into type to suppress evaluation */
@@ -605,7 +611,8 @@ char *argname[] = {
     "STAR",
     "LSTAR",
     "WANTARRAY",
-    "21"
+    "LENSTAB",
+    "22"
 };
 #endif
 
@@ -634,6 +641,7 @@ bool hoistable[] =
    1,	/* STAR */
    1,	/* LSTAR */
    1,	/* WANTARRAY */
+   0,	/* LENSTAB */
    0,	/* 21 */
 };
 #endif

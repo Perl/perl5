@@ -1,6 +1,6 @@
 #!./perl
 
-# $Header: TEST,v 4.0 91/03/20 01:40:22 lwall Locked $
+# $RCSfile: TEST,v $$Revision: 4.0.1.1 $$Date: 91/06/07 11:59:30 $
 
 # This is written in a peculiar style, since we're trying to avoid
 # most of the constructs we'll be testing for.
@@ -56,6 +56,8 @@ while ($test = shift) {
 	unless (/^#/) {
 	    if (/^1\.\.([0-9]+)/) {
 		$max = $1;
+		$totmax += $max;
+		$files += 1;
 		$next = 1;
 		$ok = 1;
 	    } else {
@@ -96,4 +98,5 @@ if ($bad == 0) {
     }
 }
 ($user,$sys,$cuser,$csys) = times;
-print sprintf("u=%g  s=%g  cu=%g  cs=%g\n",$user,$sys,$cuser,$csys);
+print sprintf("u=%g  s=%g  cu=%g  cs=%g  files=%d  tests=%d\n",
+    $user,$sys,$cuser,$csys,$files,$totmax);
