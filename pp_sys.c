@@ -1703,10 +1703,28 @@ PP(pp_eof)
     GV *gv;
     MAGIC *mg;
 
-    if (MAXARG <= 0)
-	gv = PL_last_in_gv;
+    if (MAXARG <= 0) {
+	if (PL_op->op_flags & OPf_SPECIAL) {	/* eof() */
+	    IO *io;
+	    gv = PL_last_in_gv = PL_argvgv;
+	    io = GvIO(gv);
+	    if (io && !IoIFP(io)) {
+		if ((IoFLAGS(io) & IOf_START) && av_len(GvAVn(gv)) < 0) {
+		    IoLINES(io) = 0;
+		    IoFLAGS(io) &= ~IOf_START;
+		    do_open(gv, "-", 1, FALSE, O_RDONLY, 0, Nullfp);
+		    sv_setpvn(GvSV(gv), "-", 1);
+		    SvSETMAGIC(GvSV(gv));
+		}
+		else if (!nextargv(gv))
+		    RETPUSHYES;
+	    }
+	}
+	else
+	    gv = PL_last_in_gv;			/* eof */
+    }
     else
-	gv = PL_last_in_gv = (GV*)POPs;
+	gv = PL_last_in_gv = (GV*)POPs;		/* eof(FH) */
 
     if (gv && (mg = SvTIED_mg((SV*)gv, 'q'))) {
 	PUSHMARK(SP);
