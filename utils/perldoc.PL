@@ -385,18 +385,6 @@ sub page {
     }
 }
 
-sub cleanup {
-    my @files = @_;
-    for (@files) {
-	next unless defined;
-	if ($Is_VMS) { 
-	    1 while unlink($_);    # XXX: expect failure
-	} else {
-	    unlink($_);		   # or die "Can't unlink $_: $!";
-	} 
-    }
-}
-
 my @found;
 foreach (@pages) {
     if ($podidx && open(PODIDX, $podidx)) {
@@ -585,34 +573,14 @@ EOD
     }
 }
 
-# until here we could simply exit or die
-# now we create temporary files that we have to clean up
-# namely $tmp, $buffer
-# that's because you did it wrong, should be descriptor based --tchrist
-
-my $tmp;
-my $tmpfd;
-my $buffer;
-
 require File::Temp;
 
-($tmpfd, $tmp) = File::Temp::tempfile();
-
-# make sure cleanup called
-eval q{
-    sub END { cleanup($tmp, $buffer) } 
-    1;
-} || die;
-
-# exit/die in a windows sighandler is dangerous, so let it do the
-# default thing, which is to exit
-eval q{ use sigtrap qw(die INT TERM HUP QUIT) } unless $^O eq 'MSWin32';
+my ($tmpfd, $tmp) = File::Temp::tempfile(UNLINK => 1);
 
 my $filter;
 
 if (@pod) {
-    my $buffd;
-    ($buffd, $buffer) = File::Temp::tempfile();
+    my ($buffd, $buffer) = File::Temp::tempfile(UNLINK => 1);
     print $buffd "=over 8\n\n";
     print $buffd @pod	or die "Can't print $buffer: $!";
     print $buffd "=back\n";
