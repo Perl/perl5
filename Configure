@@ -20,7 +20,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Jan 26 09:59:39 EET 2000 [metaconfig 3.0 PL70]
+# Generated on Wed Jan 26 12:23:57 EET 2000 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.com)
 
 cat >/tmp/c1$$ <<EOF
@@ -13706,6 +13706,7 @@ $sed 's/\(.*\)/__\1__/' < Cppsym.know > Cppsym.c
 $cat Cppsym.know Cppsym.a Cppsym.b Cppsym.c | sort | uniq > Cppsym.d
 mv Cppsym.d Cppsym.know
 rm Cppsym.?
+al=`cat Cppsym.know`
 $cat <<EOSS >Cppsym
 $startsh
 case "\$1" in
