@@ -1,4 +1,4 @@
-/* $Id: MD5.xs,v 1.35 2003/01/05 00:54:17 gisle Exp $ */
+/* $Id: MD5.xs,v 1.37 2003/03/09 15:20:43 gisle Exp $ */
 
 /* 
  * This library is free software; you can redistribute it and/or
@@ -44,15 +44,24 @@ extern "C" {
 }
 #endif
 
-#ifndef PATCHLEVEL
+#ifndef PERL_VERSION
 #    include <patchlevel.h>
 #    if !(defined(PERL_VERSION) || (SUBVERSION > 0 && defined(PATCHLEVEL)))
 #        include <could_not_find_Perl_patchlevel.h>
 #    endif
+#    define PERL_REVISION       5
+#    define PERL_VERSION        PATCHLEVEL
+#    define PERL_SUBVERSION     SUBVERSION
 #endif
 
 #if PATCHLEVEL <= 4 && !defined(PL_dowarn)
    #define PL_dowarn dowarn
+#endif
+
+#ifdef G_WARN_ON
+   #define DOWARN (PL_dowarn & G_WARN_ON)
+#else
+   #define DOWARN PL_dowarn
 #endif
 
 #ifdef SvPVbyte
@@ -664,7 +673,7 @@ md5(...)
     PPCODE:
 	MD5Init(&ctx);
 
-	if (PL_dowarn) {
+	if (DOWARN) {
             char *msg = 0;
 	    if (items == 1) {
 		if (SvROK(ST(0))) {

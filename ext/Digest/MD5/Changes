@@ -1,3 +1,13 @@
+2003-03-09   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.24
+
+   Don't let the $^W test get confused by lexical warnings.
+
+   Sync up with bleadperl; safer patchlevel include.
+
+
+
 2003-01-18   Gisle Aas <gisle@ActiveState.com>
 
    Release 2.23
