@@ -768,6 +768,12 @@ the hash is inside an iteration. If this isn't the case, FIRSTKEY is
 called, and the result will be a false value if FIRSTKEY returns the empty
 list, true otherwise.
 
+However, you should B<not> blindly rely on perl always doing the right 
+thing. Particularly, perl will mistakenly return true when you clear the 
+hash by repeatedly calling DELETE until it is empty. You are therefore 
+advised to supply your own SCALAR method when you want to be absolutely 
+sure that your hash behaves nicely in scalar context.
+
 In our example we can just call C<scalar> on the underlying hash
 referenced by C<$self-E<gt>{LIST}>:
 
