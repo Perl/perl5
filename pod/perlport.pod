@@ -194,7 +194,7 @@ LPT:).
 
 S<Mac OS> uses C<:> as a path separator instead of C</>.
 
-The filesystem may not support neither hard links (C<link()>) nor
+The filesystem may support neither hard links (C<link()>) nor
 symbolic links (C<symlink()>, C<readlink()>, C<lstat()>).
 
 The filesystem may not support neither access timestamp nor change
@@ -840,7 +840,7 @@ an effect on what happens with some perl functions (such as C<chr>,
 C<pack>, C<print>, C<printf>, C<ord>, C<sort>, C<sprintf>, C<unpack>), as
 well as bit-fiddling with ASCII constants using operators like C<^>, C<&>
 and C<|>, not to mention dealing with socket interfaces to ASCII computers
-(see L<"NEWLINES">).
+(see L<Newlines>).
 
 Fortunately, most web servers for the mainframe will correctly translate
 the C<\n> in the following statement to its ASCII equivalent (note that
@@ -1462,8 +1462,8 @@ of a child Unix program will exists.  Mileage B<will> vary.  (S<RISC OS>)
 
 Far from being POSIX compliant.  Because there may be no underlying
 /bin/sh tries to work around the problem by forking and execing the
-first token in its argument string.  Handles basic redirection ("<" or
-">") on its own behalf. (MiNT)
+first token in its argument string.  Handles basic redirection
+("E<lt>" or "E<gt>") on its own behalf. (MiNT)
 
 =item times
 
@@ -1494,8 +1494,8 @@ should not be held open elsewhere. (Win32)
 
 Returns undef where unavailable, as of version 5.005.
 
-C<umask()> works but the correct permissions are only set when the file is
-finally close()d.
+C<umask()> works but the correct permissions are only set when the file
+is finally close()d. (AmigaOS)
 
 =item utime LIST
 
@@ -1523,6 +1523,10 @@ Not useful. (S<RISC OS>)
 =head1 CHANGES
 
 =over 4
+
+=item v1.38, 31 December 1998
+
+More changes from Jarkko.
 
 =item v1.37, 19 December 1998
 
@@ -1592,5 +1596,4 @@ E<lt>pudge@pobox.comE<gt>.
 
 =head1 VERSION
 
-Version 1.37, last modified 19 December 1998
-
+Version 1.38, last modified 31 December 1998
